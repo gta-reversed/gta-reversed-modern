@@ -16,13 +16,23 @@
 #include "CLoadedCarGroup.h"
 #include "CDirectory.h"
 
-enum eStreamStatus
+enum eStreamFlags
 {
-  STREAM_STATUS_IDLE ,
-  STREAM_STATUS_READING ,
-  STREAM_STATUS_FINISHING_BIGFILE
+    //STREAM_DONT_REMOVE = ,
+    //STREAM_SCRIPTOWNED = ,
+    //STREAM_DEPENDENCY = ,
+    STREAM_PRIORITY = 0x10,
+    //STREAM_NOFADE = ,
 };
 
+enum eStreamStatus
+{
+    STREAM_NOTLOADED = 0,
+    STREAM_LOADED = 1,
+    STREAM_INQUEUE = 2,
+    STREAM_READING = 3,	// what is this?
+    STREAM_BIGFILE = 4,
+};
 
 struct tStreamingFileDesc
 {
@@ -189,7 +199,7 @@ public:
      static void RequestFile(int index, int offset, int size, int imgId, int streamingFlags);
     //! unused
      static void RequestFilesInChannel(int channelId);
-     static void RequestModel(int dwModelId, int Streamingflags);
+     static void RequestModel(int dwModelId, char Streamingflags);
      static void RequestModelStream(int streamNum);
     //! unused
      static void RequestPlayerSection(int modelIndex, char const *string, int streamingFlags);

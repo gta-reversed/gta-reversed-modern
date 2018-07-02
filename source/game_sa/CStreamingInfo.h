@@ -39,7 +39,7 @@ private:
 public:
      static CStreamingInfo *&ms_pArrayBase;
 
-     void AddToList(CStreamingInfo *listStart);
+     int AddToList(CStreamingInfo *listStart);
     //! unused
      unsigned int GetCdPosn();
      bool GetCdPosnAndSize(unsigned int *CdPosn, unsigned int *CdSize);

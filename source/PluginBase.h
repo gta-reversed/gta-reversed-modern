@@ -10,14 +10,24 @@
 #include <cstdint>
 #include "Base.h"
 
+
 namespace plugin {
 
-namespace Core {
 
-// Gets the SDK version
-PLUGIN_API unsigned int GetVersion();
 
-}
+    namespace Core {
+
+    // Gets the SDK version
+    PLUGIN_API unsigned int GetVersion();
+
+    }
+
+
+    int GetBaseAddress();
+
+    int GetGlobalAddress(int address);
+
+
 
 // helpers for constructor overloading (deprecated)
 
@@ -124,6 +134,8 @@ using custom_event_t = std::conditional_t<std::is_same<typename Meta::calling_co
     CdeclEvent<Refs, Priority, Args, Def>
 >;
 */
+
+
 
 // multi-version address list
 template<int... Addresses>
