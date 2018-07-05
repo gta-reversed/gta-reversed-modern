@@ -60,4 +60,6 @@ public:
 	static void GameShutdown();
 	// load txd from file
 	static bool LoadTxd(int index, char  const* filename);
+    // plugin-sdk has named it to getTXDEntryParentIndex
+    static int GetParentTxdSlot(int index);
 };
