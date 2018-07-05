@@ -16,24 +16,6 @@
 #include "CLoadedCarGroup.h"
 #include "CDirectory.h"
 
-enum eStreamFlags
-{
-    //STREAM_DONT_REMOVE = ,
-    //STREAM_SCRIPTOWNED = ,
-    //STREAM_DEPENDENCY = ,
-    STREAM_PRIORITY = 0x10,
-    //STREAM_NOFADE = ,
-};
-
-enum eStreamStatus
-{
-    STREAM_NOTLOADED = 0,
-    STREAM_LOADED = 1,
-    STREAM_INQUEUE = 2,
-    STREAM_READING = 3,	// what is this?
-    STREAM_BIGFILE = 4,
-};
-
 struct tStreamingFileDesc
 {
   char m_szName[40];
@@ -44,16 +26,17 @@ struct tStreamingFileDesc
 
 struct tStreamingChannel
 {
-  int modelIds[16];
-  int field_40[16];
-  eStreamStatus m_nStreamStatus;
-  int field_84;
-  int field_88;
-  int field_8C;
-  int field_90;
-  int m_nCdStreamStatus;
+    int modelIds[16];
+    int modelStreamingBufferPositions[16];
+    eStreamingLoadState LoadStatus;
+    int iLoadingLevel;
+    int iBlockOffset;
+    int iBlockCount;
+    int OnBeginRead; // not sure if this one is correct, the rest are okay.
+    int m_nCdStreamStatus;
 };
 
+VALIDATE_SIZE(tStreamingChannel, 0x98);
 
 class  CStreaming {
 public:
@@ -106,6 +89,7 @@ public:
      static bool &m_bCopBikeLoaded;
      static bool &m_bDisableCopBikes;
      static CLinkList<CEntity*> &ms_rwObjectInstances;
+     static bool &m_bLoadingAllRequestedModels;
 
      static void *AddEntity(CEntity *a2);
     //! return StreamingFile Index in CStreaming::ms_files
