@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "HookSystem.h"
-
+#include "game_sa\CdStreamInfo.h"
 #include "game_sa\C2dEffect.h"
 #include "game_sa\C3dMarker.h"
 #include "game_sa\C3dMarkers.h"
