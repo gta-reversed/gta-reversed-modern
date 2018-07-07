@@ -27,7 +27,7 @@ struct tStreamingFileDesc
 struct tStreamingChannel
 {
     int modelIds[16];
-    int modelStreamingBufferPositions[16];
+    int modelStreamingBufferOffsets[16];
     eStreamingLoadState LoadStatus;
     int iLoadingLevel;
     int iBlockOffset;
@@ -55,6 +55,7 @@ public:
      static CDirectory *&ms_pExtraObjectsDir;
      static tStreamingFileDesc *ms_files; // static tStreamingFileDesc ms_files[8]
      static bool &ms_bLoadingBigModel;
+     // There are only two channels within CStreaming::ms_channel
      static tStreamingChannel *ms_channel; // static tStreamingChannel ms_channel[2]
      static signed int &ms_channelError;
      static bool &m_bHarvesterModelsRequested;
@@ -102,7 +103,7 @@ public:
      static void ClearFlagForAll(unsigned int eStreamingFlag);
      static void ClearSlots(int NumOfSlots);
     //! ChanndelIndex is unused
-     static char ConvertBufferToObject(char *pFileContect, int index, int ChannelIndex);
+     static char ConvertBufferToObject(char * pFileBuffer, int ChannelIndex);
      static void DeleteAllRwObjects();
      static bool DeleteLeastUsedEntityRwObject(bool bNotOnScreen, unsigned int StreamingFlags);
      static void DeleteRwObjectsAfterDeath(CVector const *PlayerPosn);
@@ -114,7 +115,7 @@ public:
      static void DisableCopBikes(bool bDisable);
     //! RandFactor : random number between 1-7
      static int FindMIPedSlotForInterior(int RandFactor);
-     static bool FinishLoadingLargeFile(char *FileName, int modelIndex);
+     static bool FinishLoadingLargeFile(char * pFileBuffer, int modelIndex);
      static bool FlushChannels();
      static bool FlushRequestList();
      static void ForceLayerToRead(int arg1);
@@ -176,6 +177,7 @@ public:
      static bool RemoveLoadedVehicle();
      static bool RemoveLoadedZoneModel();
      static void RemoveModel(int Modelindex);
+     static void RemoveTxdModel(int Modelindex);
     //! does nothing (NOP)
      static unsigned int RemoveUnusedModelsInLoadedList();
      static void RenderEntity(CLink<CEntity*> *streamingLink);
