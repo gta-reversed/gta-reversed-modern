@@ -91,6 +91,9 @@ public:
      static bool &m_bDisableCopBikes;
      static CLinkList<CEntity*> &ms_rwObjectInstances;
      static bool &m_bLoadingAllRequestedModels;
+     static bool &m_bModelStreamNotLoaded;
+     static unsigned int &ms_numberOfBytesRead;
+
 
      static void *AddEntity(CEntity *a2);
     //! return StreamingFile Index in CStreaming::ms_files
@@ -151,7 +154,7 @@ public:
     //! does nothing (NOP)
      static void LoadInitialVehicles();
      static void LoadInitialWeapons();
-     static void LoadRequestedModels();
+     static DWORD LoadRequestedModels();
      static void LoadScene(CVector const *Posn);
      static void LoadSceneCollision(CVector const *Posn);
     //! unused

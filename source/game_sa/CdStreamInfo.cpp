@@ -13,3 +13,17 @@ int __cdecl CdStreamGetStatus(int streamNum)
     hCdStreamGetStatus _CdStreamGetStatus = (hCdStreamGetStatus)0x1563850;
     return _CdStreamGetStatus(streamNum);
 }
+
+bool __cdecl CdStreamRead(DWORD streamNum, int lpBuffer, int streamIndex, int sectorCount)
+{
+    typedef int(__cdecl* hCdStreamRead)(DWORD streamNum, int lpBuffer, int streamIndex, int sectorCount);
+    hCdStreamRead _CdStreamRead = (hCdStreamRead)0x406A20;
+    return _CdStreamRead( streamNum,  lpBuffer,  streamIndex, sectorCount);
+}
+
+int __cdecl CdStreamGetLastPosn()
+{
+    typedef int(__cdecl* hCdStreamGetLastPosn)();
+    hCdStreamGetLastPosn _CdStreamGetLastPosn = (hCdStreamGetLastPosn)0x406450;
+    return _CdStreamGetLastPosn();
+}
