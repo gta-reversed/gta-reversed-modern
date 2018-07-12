@@ -15,22 +15,38 @@ class CAnimBlendNode;
 class CAnimBlendHierarchy;
 class CAnimBlendStaticAssociation;
 
-class  CAnimBlendAssociation : public AnimAssociationData {
-    PLUGIN_NO_DEFAULT_CONSTRUCTION_VIRTUALBASE(CAnimBlendAssociation)
+class  CAnimBlendAssociation  {
+    DWORD * m_vTable;
+    //virtual ~CAnimBlendAssociation() = delete; //PLUGIN_NO_DEFAULT_CONSTRUCTION_VIRTUALBASE(CAnimBlendAssociation)
 
 public:
+    RwLLLink m_link;
+    unsigned short m_nNumBlendNodes;
+    unsigned short m_nAnimGroup;
+    CAnimBlendNode *m_pNodeArray;
+    CAnimBlendHierarchy *m_pHierarchy;
+    float m_fBlendAmount;
+    float m_fBlendDelta;
+    float m_fCurrentTime;
+    float m_fSpeed;
+    float m_fTimeStep;
+    short m_nAnimId;
+    unsigned short m_nFlags;
+
     eAnimBlendCallbackType m_nCallbackType;
+
     void(*m_pCallbackFunc)(CAnimBlendAssociation *, void *);
     void *m_pCallbackData;
 
     // vtable function #0 (destructor)
-
+    static void InjectHooks();
+    CAnimBlendAssociation* Constructor1(RpClump *pClump, CAnimBlendHierarchy * pAnimHierarchy);
      void AllocateAnimBlendNodeArray(int count);
      void FreeAnimBlendNodeArray();
      CAnimBlendNode *GetNode(int nodeIndex);
-     void Init(RpClump *clump, CAnimBlendHierarchy *hierarchy);
+     void Init1(RpClump *clump, CAnimBlendHierarchy *hierarchy);
      void Init(CAnimBlendAssociation &source);
-     void Init(CAnimBlendStaticAssociation &source);
+     //void Init(CAnimBlendStaticAssociation &source);
      void ReferenceAnimBlock();
      void SetBlend(float blendAmount, float blendDelta);
      void SetBlendTo(float blendAmount, float blendDelta);
@@ -44,7 +60,7 @@ public:
      void UpdateTimeStep(float speedMult, float timeMult);
 };
 
-VTABLE_DESC(CAnimBlendAssociation, 0x85C6D0, 1);
+//VTABLE_DESC(CAnimBlendAssociation, 0x85C6D0, 1);
 VALIDATE_SIZE(CAnimBlendAssociation, 0x3C);
 
 //#include "meta/meta.CAnimBlendAssociation.h"
