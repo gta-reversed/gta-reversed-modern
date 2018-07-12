@@ -17,7 +17,7 @@ int CStreamingInfo::AddToList(CStreamingInfo *listStart)
 {
     m_nNextIndex = listStart->m_nNextIndex;
     m_nPrevIndex = GetIndexFromBase (listStart, ms_pArrayBase);
-    listStart->m_nNextIndex = GetIndexFromBase (this, ms_pArrayBase);
+    listStart->m_nNextIndex = static_cast<short>((reinterpret_cast<DWORD>(this) - reinterpret_cast<DWORD>(ms_pArrayBase)) / 20);
     ms_pArrayBase[m_nNextIndex].m_nPrevIndex = listStart->m_nNextIndex;
     return m_nNextIndex;
 }
