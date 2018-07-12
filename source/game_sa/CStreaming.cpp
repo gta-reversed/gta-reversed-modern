@@ -52,6 +52,17 @@ bool &CStreaming::m_bLoadingAllRequestedModels = *reinterpret_cast<bool *>(0x965
 bool &CStreaming::m_bModelStreamNotLoaded = *reinterpret_cast<bool *>(0x9654C4);
 unsigned int &CStreaming::ms_numberOfBytesRead = *reinterpret_cast<unsigned int *>(0x965534);
 
+void CStreaming::InjectHooks()
+{
+    CStreamingInfo::InjectHooks();
+
+    InjectHook(0x40A45E, &CStreaming::LoadAllRequestedModels, PATCH_JUMP);
+    InjectHook(0x4087E0, &CStreaming::RequestModel, PATCH_JUMP);
+    InjectHook(0x40E170, &CStreaming::ProcessLoadingChannel, PATCH_JUMP);
+    InjectHook(0x40E460, &CStreaming::FlushChannels, PATCH_JUMP);
+    InjectHook(0x40CBA0, &CStreaming::RequestModelStream, PATCH_JUMP);
+    InjectHook(0x40E3A0, &CStreaming::LoadRequestedModels, PATCH_JUMP);
+}
 
 bool CStreaming::AreAnimsUsedByRequestedModels(int AnimFileIndex) {
     return plugin::CallAndReturnDynGlobal<bool, int>(0x407AD0, AnimFileIndex);

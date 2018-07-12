@@ -39,6 +39,8 @@ private:
 public:
      static CStreamingInfo *&ms_pArrayBase;
 
+     static void InjectHooks();
+     int GetIndexFromBase(CStreamingInfo * pThis, CStreamingInfo * ArrayBase);
      int AddToList(CStreamingInfo *listStart);
     //! unused
      unsigned int GetCdPosn();

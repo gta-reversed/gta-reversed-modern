@@ -2,19 +2,23 @@
 
 CStreamingInfo *&CStreamingInfo::ms_pArrayBase = *reinterpret_cast<CStreamingInfo **>(0x9654B4);
 
-
-template < class T >
-int GET_INDEX_FROM_BASE(T pThis, T ArrayBase)
+void CStreamingInfo::InjectHooks()
 {
-    unsigned __int64 indexToCalculate = (1717986919i64 * (reinterpret_cast<signed int>(pThis) - reinterpret_cast<signed int>(ArrayBase))) >> 32;
+    InjectHook(0x15674C0, &CStreamingInfo::AddToList, PATCH_JUMP);;
+}
+
+inline int CStreamingInfo::GetIndexFromBase(CStreamingInfo * pThis, CStreamingInfo * ArrayBase)
+{
+    unsigned __int64 indexToCalculate = (1717986919i64 * (reinterpret_cast<DWORD>(pThis) - reinterpret_cast<DWORD>(ArrayBase))) >> 32;
     return static_cast < int > ((indexToCalculate >> 3) + (indexToCalculate >> 31));
 }
 
-int CStreamingInfo::AddToList(CStreamingInfo *listStart) {
+int CStreamingInfo::AddToList(CStreamingInfo *listStart) 
+{
     m_nNextIndex = listStart->m_nNextIndex;
-    m_nPrevIndex = GET_INDEX_FROM_BASE < CStreamingInfo * >(listStart, CStreamingInfo::ms_pArrayBase);
-    listStart->m_nNextIndex = GET_INDEX_FROM_BASE < CStreamingInfo * >(this, CStreamingInfo::ms_pArrayBase);
-    CStreamingInfo::ms_pArrayBase[m_nNextIndex].m_nPrevIndex = listStart->m_nNextIndex;
+    m_nPrevIndex = GetIndexFromBase (listStart, ms_pArrayBase);
+    listStart->m_nNextIndex = GetIndexFromBase (this, ms_pArrayBase);
+    ms_pArrayBase[m_nNextIndex].m_nPrevIndex = listStart->m_nNextIndex;
     return m_nNextIndex;
 }
 
@@ -25,8 +29,8 @@ bool CStreamingInfo::InList()
 
 void CStreamingInfo::RemoveFromList()
 {
-    CStreamingInfo::ms_pArrayBase[m_nNextIndex].m_nPrevIndex = m_nPrevIndex;
-    CStreamingInfo::ms_pArrayBase[m_nPrevIndex].m_nNextIndex = m_nNextIndex;
+    ms_pArrayBase[m_nNextIndex].m_nPrevIndex = m_nPrevIndex;
+    ms_pArrayBase[m_nPrevIndex].m_nNextIndex = m_nNextIndex;
     m_nNextIndex = -1;
     m_nPrevIndex = -1;
 }

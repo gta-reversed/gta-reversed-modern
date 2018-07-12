@@ -15,6 +15,7 @@
 
 class  CAnimManager {
 public:
+    static void CAnimManager::InjectHooks();
 	static CAnimBlock* GetAnimationBlock(char const* name);
 	static int GetAnimationBlockIndex(char const* name);
 	static int GetFirstAssocGroup(char const* basename);

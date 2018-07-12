@@ -10,7 +10,10 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <functional>
+#include <iostream>
 
+#include "game_sa\InlineFunctions.h"
 #include "HookSystem.h"
 #include "game_sa\CdStreamInfo.h"
 #include "game_sa\C2dEffect.h"

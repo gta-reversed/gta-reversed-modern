@@ -10,7 +10,11 @@
 
 class  CAnimBlendSequence {
 public:
-    unsigned int m_nHash;
+    union
+    {
+        uint16_t m_boneId; // IF m_hasBoneIdSet == TRUE
+        uint32_t m_nHash;   // IF m_hasBoneIdSet == FALSE
+    };
     unsigned short m_nFlags;
     unsigned short m_nFrameCount;
     void *m_pFrames;

@@ -11,12 +11,22 @@
 
 class  CAnimBlendNode {
 public:
+    /*
+    by Github.com/jte
+    float m_theta0; // angle between two quaternions
+    float m_theta1; // 1 / sin(m_theta0), used in slerp calculation
+    int16_t m_endKeyFrameId;
+    int16_t m_startKeyFrameId;
+    float m_timeDelta;
+    CAnimBlendSequence* m_sequence;
+    CAnimBlendAssociation* m_assoc;
+    */
     float field_0;
     float field_4;
     short field_8;
     short field_A;
     float field_C;
-    int field_10;
+    CAnimBlendSequence* m_pAnimSequence;
     void *m_pAnimBlendAssociation;
 
     //funcs

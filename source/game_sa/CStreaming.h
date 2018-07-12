@@ -94,7 +94,7 @@ public:
      static bool &m_bModelStreamNotLoaded;
      static unsigned int &ms_numberOfBytesRead;
 
-
+     static void InjectHooks();
      static void *AddEntity(CEntity *a2);
     //! return StreamingFile Index in CStreaming::ms_files
      static int AddImageToList(char const *lpFileName, bool bNotPlayerImg);
