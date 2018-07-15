@@ -3,44 +3,29 @@
 
 #pragma comment(lib, "detours.lib")
     
-typedef void(__cdecl*  hCStreaming__RequestModelStream)
+typedef void(__thiscall*  hCTaskSimpleSwim__ProcessSwimAnims)
 (
-    DWORD channelIndex
+    CTaskSimpleSwim * pThis, CPed *pPed
 );
+auto OLD_CTaskSimpleSwim__ProcessSwimAnims = (hCTaskSimpleSwim__ProcessSwimAnims)0x6899F0;
 
-auto OLD_CStreaming__RequestModelStream = (hCStreaming__RequestModelStream)0x40CBA0;
-//void __cdecl CStreaming__RequestModelStream(int32_t channelIndex);
-
-void __cdecl CStreaming__RequestModelStream(DWORD channelIndex);
+void __fastcall CTaskSimpleSwim__ProcessSwimAnims(CTaskSimpleSwim * pThis, void* padding, CPed *pPed);
 
 
 
 void InjectHooksMain(void)
 {
     CAnimManager::InjectHooks();
+    CTaskManager::InjectHooks();
     CStreaming::InjectHooks();
 
-    
-
-    //////////////
-    // NOT TESTED
-    //////////////
-    //InjectHook(0x40E4E0, &CStreaming::FlushRequestList, PATCH_JUMP);
-   
-
-    /*DetourRestoreAfterWith();
+   /* DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CStreaming__RequestModelStream, CStreaming__RequestModelStream);
-  
-    //DetourAttach(&(PVOID&)_CdStreamRead, CdStreamReadHook);
-    
+    DetourAttach(&(PVOID&)OLD_CTaskSimpleSwim__ProcessSwimAnims, CTaskSimpleSwim__ProcessSwimAnims);
 
     DetourTransactionCommit(); */
    
 }
-
-
-

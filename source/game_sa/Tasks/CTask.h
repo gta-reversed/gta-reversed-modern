@@ -21,6 +21,7 @@ class  CTask {
 protected:
     CTask(plugin::dummy_func_t) {}
 public:
+//    DWORD * vTable;
 	class CTask *m_pParentTask;
 
 	void *operator new(unsigned int size);

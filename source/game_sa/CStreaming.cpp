@@ -62,6 +62,11 @@ void CStreaming::InjectHooks()
     InjectHook(0x40E460, &CStreaming::FlushChannels, PATCH_JUMP);
     InjectHook(0x40CBA0, &CStreaming::RequestModelStream, PATCH_JUMP);
     InjectHook(0x40E3A0, &CStreaming::LoadRequestedModels, PATCH_JUMP);
+    //////////////
+    // NOT TESTED
+    //////////////
+    //InjectHook(0x40E4E0, &CStreaming::FlushRequestList, PATCH_JUMP);
+
 }
 
 bool CStreaming::AreAnimsUsedByRequestedModels(int AnimFileIndex) {

@@ -4,7 +4,7 @@ CStreamingInfo *&CStreamingInfo::ms_pArrayBase = *reinterpret_cast<CStreamingInf
 
 void CStreamingInfo::InjectHooks()
 {
-    InjectHook(0x15674C0, &CStreamingInfo::AddToList, PATCH_JUMP);;
+    InjectHook(0x15674C0, &CStreamingInfo::AddToList, PATCH_JUMP);
 }
 
 inline int CStreamingInfo::GetIndexFromBase(CStreamingInfo * pThis, CStreamingInfo * ArrayBase)

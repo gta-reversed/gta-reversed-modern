@@ -60,6 +60,10 @@ void CAnimBlendAssociation::Init1(RpClump *pClump, CAnimBlendHierarchy * pAnimHi
     }
 }
 
+void CAnimBlendAssociation::Start(float currentTime) {
+    plugin::CallMethodDynGlobal<CAnimBlendAssociation *, float>(0x4CEB70, this, currentTime);
+}
+
 void CAnimBlendAssociation::AllocateAnimBlendNodeArray(int count) {
     plugin::CallMethodDynGlobal<CAnimBlendAssociation *, int>(0x4CE9F0, this, count);
 }

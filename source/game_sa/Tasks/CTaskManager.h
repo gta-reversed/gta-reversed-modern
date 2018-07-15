@@ -56,6 +56,7 @@ public:
     void SetTaskSecondary(CTask* task, int taskIndex);
     void ClearTaskEventResponse();
     void ManageTasks();
+    static void InjectHooks();
 };
 
 VALIDATE_SIZE(CTaskManager, 0x30);

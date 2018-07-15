@@ -42,6 +42,7 @@ public:
     CAnimBlendAssociation* m_pAnim;
 
     CTaskSimpleClimb(CEntity *pClimbEnt, const CVector &vecTarget, float fHeading, unsigned char nSurfaceType, eClimbHeights nHeight, bool bForceClimb);
+    static CEntity * TestForClimb(CPed* pPed, CVector& climbPos, float& fAngle, unsigned char& nSurfaceType, bool theBool);
 };
 
 VALIDATE_SIZE(CTaskSimpleClimb, 0x30);

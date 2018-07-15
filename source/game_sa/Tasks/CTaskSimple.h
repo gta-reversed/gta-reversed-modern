@@ -16,6 +16,7 @@ protected:
 public:
 	virtual bool ProcessPed(class CPed *ped);//=0
 	virtual bool SetPedPosition(class CPed *ped);
+    static void InjectHooks();
 };
 
 VALIDATE_SIZE(CTaskSimple, 8);
