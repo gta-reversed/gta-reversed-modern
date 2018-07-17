@@ -12,7 +12,7 @@ class  CAnimBlock {
 public:
 
  	char szName[16];
- 	char bLoaded;
+ 	bool bLoaded;
  	char pad;
  	short usRefs;
  	int startAnimation;
