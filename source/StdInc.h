@@ -14,6 +14,7 @@
 #include <iostream>
 #include <cassert>
 
+#include "game_sa\Animation\AnimationEnums.h"
 #include "game_sa\CWaterLevel.h"
 #include "game_sa\InlineFunctions.h"
 #include "HookSystem.h"
