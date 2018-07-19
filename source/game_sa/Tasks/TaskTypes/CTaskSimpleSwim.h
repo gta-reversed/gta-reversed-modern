@@ -1,8 +1,8 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
-    Authors: GTA Community. See more here
-    https://github.com/DK22Pac/plugin-sdk
-    Do not delete this comment block. Respect others' work!
+Plugin-SDK (Grand Theft Auto San Andreas) header file
+Authors: GTA Community. See more here
+https://github.com/DK22Pac/plugin-sdk
+Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
@@ -22,6 +22,7 @@ enum eSwimState : unsigned short
 };
 
 class CPed;
+class CPlayerPed;
 
 class  CTaskSimpleSwim : public CTaskSimple {
 protected:
@@ -46,17 +47,39 @@ public:
 private:
     char _pad[3]; // 77
 public:
-    float flt_50; // initialized with 0.0f  |  pThis+80
-    float flt_54; // and used  for internal calculations | pThis+84
-    int m_nProcessTimeCounter; // 88
+    CVector m_vecMoveBlendRatio;
     FxSystem_c *m_pFxSystem; // 92
     bool m_bTriggerWaterSplash; // 96
     char pad2[3]; // 97
-    // 100 = 0x64
+                  // 100 = 0x64
 
-    static bool &CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE;
+    static bool &SWIM_DIVE_UNDER_ANGLE;
+    static float &SWIM_STOP_TIME;
+
     CTaskSimpleSwim(CVector const* pPosn, CPed* pPed);
+
+    bool ProcessPed(CPed *pPed);
     void ProcessSwimAnims(CPed *pPed);
+    void ProcessSwimmingResistance(CPed*pPed);
+    void ProcessEffects(CPed*pPed);
+    void ProcessControlAI(CPed*pPed);
+    void ProcessControlInput(CPlayerPed* pPlayerPed);
+    FxSystemBP_c * DestroyFxSystem();
+    /*ApplyRollAndPitch(CPed*)
+    * CTaskSimpleSwim(CVector const*, CPed*)
+    * Clone() const
+    * CreateFxSystem(CPed*, RwMatrixTag*)
+    * DestroyFxSystem()
+    * GetTaskType() const
+    * MakeAbortable(CPed*, int, CEvent const*)
+    * ProcessControlAI(CPed*)
+    * ProcessControlInput(CPlayerPed*)
+    * ProcessEffects(CPed*)
+    * ProcessPed(CPed*)
+    * ProcessSwimAnims(CPed*)
+    * ProcessSwimmingResistance(CPed*)
+    * Serialize()
+    * ~CTaskSimpleSwim()*/
 };
 
 VALIDATE_SIZE(CTaskSimpleSwim, 0x64);

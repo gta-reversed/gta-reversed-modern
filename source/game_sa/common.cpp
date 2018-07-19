@@ -66,9 +66,9 @@ bool InTwoPlayersMode()
     return ((bool(__cdecl *)())0x441390)();
 }
 
-CVector VectorSub(CVector const& from, CVector const& what)
+CVector * VectorSub(CVector * out, CVector * from, CVector * what)
 {
-    return ((CVector(__cdecl *)(CVector const&, CVector const&))0x40FE60)(from, what);
+    return ((CVector *(__cdecl *)(CVector *, CVector *, CVector *))0x40FE60)(out, from, what);
 }
 
 CVector Multiply3x3(CMatrix  const& matrix, CVector  const& vec)

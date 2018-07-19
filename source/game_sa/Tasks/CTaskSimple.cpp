@@ -9,10 +9,11 @@ Do not delete this comment block. Respect others' work!
 
 void CTaskSimple::InjectHooks()
 {
+    InjectHook(0x68B1C0, &CTaskSimpleSwim::ProcessPed, PATCH_JUMP);
     InjectHook(0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims, PATCH_JUMP);
 }
 
-bool CTaskSimple::ProcessPed(class CPed *ped)
+/*bool CTaskSimple::ProcessPed(class CPed *ped)
 {
     return ((bool(__thiscall *)(CTaskSimple *, class CPed *))plugin::GetVMT(this, 7))(this, ped);
 }
@@ -20,4 +21,4 @@ bool CTaskSimple::ProcessPed(class CPed *ped)
 bool CTaskSimple::SetPedPosition(class CPed *ped)
 {
     return ((bool(__thiscall *)(CTaskSimple *, class CPed *))plugin::GetVMT(this, 8))(this, ped);
-}
+}*/

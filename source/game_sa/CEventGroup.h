@@ -15,6 +15,8 @@ public:
     class CPed   *m_pPed;
     unsigned int  m_dwCount;
     void         *m_apEvents[16];
+
+    CEvent * Add(CEvent& event, bool bValid);
 };
 
 VALIDATE_SIZE(CEventGroup, 0x4C);

@@ -1,11 +1,14 @@
-/*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
-    Authors: GTA Community. See more here
-    https://github.com/DK22Pac/plugin-sdk
-    Do not delete this comment block. Respect others' work!
-*/
 #pragma once
 
 enum ePedPieceTypes {
+    PED_PIECE_UNKNOWN = 0,
 
+    PED_PIECE_TORSO = 3,
+    PED_PIECE_ASS = 4,
+    PED_PIECE_LEFT_ARM = 5,
+    PED_PIECE_RIGHT_ARM = 6,
+    PED_PIECE_LEFT_LEG = 7,
+    PED_PIECE_RIGHT_LEG = 8,
+    PED_PIECE_HEAD = 9
 };
+

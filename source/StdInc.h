@@ -14,7 +14,10 @@
 #include <iostream>
 #include <cassert>
 
-#include "game_sa\Animation\AnimationEnums.h"
+#include "game_sa\CPedDamageResponseCalculator.h"
+#include "game_sa\CPedDamageResponse.h"
+#include "game_sa\CEventDamage.h"
+#include "game_sa\Enums\AnimationEnums.h"
 #include "game_sa\CWaterLevel.h"
 #include "game_sa\InlineFunctions.h"
 #include "HookSystem.h"

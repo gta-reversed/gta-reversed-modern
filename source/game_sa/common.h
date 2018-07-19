@@ -1,8 +1,8 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
-    Authors: GTA Community. See more here
-    https://github.com/DK22Pac/plugin-sdk
-    Do not delete this comment block. Respect others' work!
+Plugin-SDK (Grand Theft Auto San Andreas) header file
+Authors: GTA Community. See more here
+https://github.com/DK22Pac/plugin-sdk
+Do not delete this comment block. Respect others' work!
 */
 #pragma once
 #include "PluginBase.h"
@@ -18,7 +18,7 @@ extern char *gString; // char gString[200]
 
 extern float &GAME_GRAVITY; // default 0.0080000004
 
-// returns player coors
+                            // returns player coors
 CVector FindPlayerCoors(int playerId);
 // returns player speed
 CVector const& FindPlayerSpeed(int playerId);
@@ -41,7 +41,7 @@ CVehicle * FindPlayerVehicle(int playerId, bool bIncludeRemote);
 // 2 players are playing
 bool InTwoPlayersMode();
 // vectorsub
-CVector VectorSub(CVector const& from, CVector const& what);
+CVector * VectorSub(CVector * out, CVector * from, CVector * what);
 // matrix mul
 CVector Multiply3x3(CMatrix  const& matrix, CVector  const& vec);
 // returns player wanted
@@ -169,6 +169,6 @@ bool RpAnimBlendPluginAttach();
 void AsciiToGxtChar(char const *src, char *dst);
 
 /**
- * Writes given raster to PNG file using RtPNGImageWrite
- */
+* Writes given raster to PNG file using RtPNGImageWrite
+*/
 void WriteRaster(RwRaster * pRaster, char const * pszPath);
