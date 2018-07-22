@@ -44,7 +44,7 @@ public:
 	static void RemoveFromUncompressedCache(CAnimBlendHierarchy* pAnimBlendHier);
 	static CAnimBlendAssociation* BlendAnimation(RpClump* clump, CAnimBlendHierarchy* pAnimBlendHier, int flags, float clumpAssocBlendData);
 	static CAnimBlendAssociation* BlendAnimation(RpClump* clump, int AssocGroupId, int AnimationId, float clumpAssocBlendData);
-	static void LoadAnimFile(RwStream* stream, bool arg1, char const(*string)[32]);
+	static void LoadAnimFile(RwStream* stream, bool loadCompressed, char const(*uncompressedAnimations)[32]);
 	static void LoadAnimFiles();
 	static void ReadAnimAssociationDefinitions();
 	static void Initialise();

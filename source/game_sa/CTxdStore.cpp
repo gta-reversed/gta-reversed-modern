@@ -137,3 +137,8 @@ int CTxdStore::GetParentTxdSlot(int index)
     hGetParentTxdSlot _GetParentTxdSlot = (hGetParentTxdSlot)0x00408370;
     return _GetParentTxdSlot(index);
 }
+
+size_t CTxdStore::GetTxd(int index)
+{
+    return plugin::CallAndReturn<size_t, 0x408340, int>(index);
+}

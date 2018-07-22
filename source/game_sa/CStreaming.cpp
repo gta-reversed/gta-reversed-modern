@@ -67,6 +67,9 @@ void CStreaming::InjectHooks()
     //////////////
     //InjectHook(0x40E4E0, &CStreaming::FlushRequestList, PATCH_JUMP);
 
+    InjectHook(0x40C6B0, &CStreaming::ConvertBufferToObject, PATCH_JUMP);
+    
+
 }
 
 bool CStreaming::AreAnimsUsedByRequestedModels(int AnimFileIndex) {
@@ -81,10 +84,235 @@ int CStreaming::GetNextFileOnCd(int pos, bool bNotPriority) {
     return plugin::CallAndReturnDynGlobal<int, int, bool>(0x408E20, pos, bNotPriority);
 }
 
-char CStreaming::ConvertBufferToObject(char * pFileBuffer, int ChannelIndex)
+bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
 {
-    return plugin::CallAndReturnDynGlobal<char, char*, int>(0x40C6B0, pFileBuffer, ChannelIndex);
+    std::printf("ConvertBufferToObject called! modelId: %d | pFileBuffer: %s\n", modelId, pFileBuffer);
+
+    CStreamingInfo *pStartLoadedListStreamingInfo = ms_startLoadedList;;
+    CBaseModelInfo *pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
+    CStreamingInfo *pModelStreamingInfo = &ms_aInfoForModel[modelId];
+
+    unsigned int bufferSize = pModelStreamingInfo->m_nCdSize * 2048;
+    tRwStreamInitializeData rwStreamInitializationData = { pFileBuffer, bufferSize };
+
+    RwStream* pRwStream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitializationData);
+    if (modelId >= 20000)
+    {
+        if (modelId >= 25000)
+        {
+            if (modelId >= 25255)
+            {
+                if (modelId >= 25511)
+                {
+                    if (modelId >= 25575)
+                    {
+                        if (modelId >= 25755)
+                        {
+                            if (modelId >= 26230)
+                            {
+                                CStreamedScripts & pStreamedScripts = CTheScripts::StreamedScripts;
+                                pStreamedScripts.LoadStreamedScript(pRwStream, modelId - 26230);
+                            }
+                            else
+                            {
+                                CVehicleRecording::Load(pRwStream, modelId - 25755, bufferSize);
+                            }
+                        }
+                        else
+                        {
+                            if (!(pModelStreamingInfo->m_nFlags & 0xE)
+                                && !AreAnimsUsedByRequestedModels(modelId - 25575))
+                            {
+                                RemoveModel(modelId);
+                                RwStreamClose(pRwStream, &rwStreamInitializationData);
+                                return false;
+                            }
+                            CAnimManager::LoadAnimFile(pRwStream, true, 0);
+                            CAnimManager::CreateAnimAssocGroups();
+                        }
+                    }
+                    else
+                    {
+                        ThePaths.LoadPathFindData(pRwStream, modelId - 25511);
+                    }
+                }
+                else if (!CIplStore::LoadIpl(modelId - 25255, pFileBuffer, bufferSize))
+                {
+                    RemoveModel(modelId);
+                    RequestModel(modelId, pModelStreamingInfo->m_nFlags);
+                    RwStreamClose(pRwStream, &rwStreamInitializationData);
+                    return false;
+                }
+            }
+            else if (!CColStore::LoadCol(modelId - 25000, pFileBuffer, bufferSize))
+            {
+                RemoveModel(modelId);
+                RequestModel(modelId, pModelStreamingInfo->m_nFlags);
+                RwStreamClose(pRwStream, &rwStreamInitializationData);
+                return false;
+            }
+        }
+        else
+        {
+            int modelTxdIndex = modelId - 20000;
+            TxdDef *pTxdDef0 = nullptr;
+            if ((CTxdStore::ms_pTxdPool->m_byteMap[modelTxdIndex].IntValue() & 0x80u) == 0)
+            {
+                pTxdDef0 = &CTxdStore::ms_pTxdPool->m_pObjects[modelTxdIndex];
+                if (pTxdDef0)
+                {
+                    int txdIndex = pTxdDef0->m_wParentIndex;
+                    if (txdIndex != -1 && !CTxdStore::GetTxd(txdIndex))
+                    {
+                        RemoveModel(modelId);
+                        RequestModel(modelId, pModelStreamingInfo->m_nFlags);
+                        RwStreamClose(pRwStream, &rwStreamInitializationData);
+                        return false;
+                    }
+                }
+            }
+
+            if (!(pModelStreamingInfo->m_nFlags & 0xE)
+                && !AreTexturesUsedByRequestedModels(modelTxdIndex))
+            {
+                RemoveModel(modelId);
+                RwStreamClose(pRwStream, &rwStreamInitializationData);
+                return false;
+            }
+
+            bool bTxdLoaded = false;
+            if (ms_bLoadingBigModel)
+            {
+                bTxdLoaded = CTxdStore::StartLoadTxd(modelTxdIndex, pRwStream);
+                if (bTxdLoaded)
+                {
+                    pModelStreamingInfo->m_nLoadState = LOADSTATE_Finishing;
+                }
+            }
+            else
+            {
+                bTxdLoaded = CTxdStore::LoadTxd(modelTxdIndex, pRwStream);
+            }
+            if (!bTxdLoaded)
+            {
+                RemoveModel(modelId);
+                RequestModel(modelId, pModelStreamingInfo->m_nFlags);
+                RwStreamClose(pRwStream, &rwStreamInitializationData);
+                return false;
+            }
+        }
+    }
+    else
+    {
+        int animFileIndex = pBaseModelInfo->GetAnimFileIndex();
+        short wTxdIndex = pBaseModelInfo->m_nTxdIndex;
+
+
+        TxdDef* pTxdDef1 = nullptr;
+        if ((CTxdStore::ms_pTxdPool->m_byteMap[wTxdIndex].IntValue() & 0x80u) == 0)
+            pTxdDef1 = &CTxdStore::ms_pTxdPool->m_pObjects[wTxdIndex];
+
+        CAnimBlock& AnimBlock = CAnimManager::ms_aAnimBlocks[animFileIndex];
+        if ((pTxdDef1 && !pTxdDef1->m_pRwDictionary) || animFileIndex != -1 && !AnimBlock.bLoaded)
+        {
+            RemoveModel(modelId);
+            RequestModel(modelId, pModelStreamingInfo->m_nFlags);
+            RwStreamClose(pRwStream, &rwStreamInitializationData);
+            return false;
+        }
+
+        CTxdStore::AddRef(wTxdIndex);
+        if (animFileIndex != -1)
+        {
+            CAnimManager::AddAnimBlockRef(animFileIndex);
+        }
+
+        CTxdStore::SetCurrentTxd(pBaseModelInfo->m_nTxdIndex);
+
+        bool bFileLoaded = false;
+        if (pBaseModelInfo->GetRwModelType() == RWMODEL_INFO_ATOMIC)
+        {
+            RtDict* pRtDictionary = nullptr;
+            RwChunkHeaderInfo chunkHeaderInfo;
+            RwStreamReadChunkHeaderInfo(pRwStream, &chunkHeaderInfo);
+            if (chunkHeaderInfo.type == rwID_UVANIMDICT)
+            {
+                pRtDictionary = RtDictSchemaStreamReadDict(&RpUVAnimDictSchema, pRwStream);
+                RtDictSchemaSetCurrentDict(&RpUVAnimDictSchema, pRtDictionary);
+            }
+            RwStreamClose(pRwStream, &rwStreamInitializationData);
+            RwStream* pRwStream2 = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitializationData);
+            bFileLoaded = CFileLoader::LoadAtomicFile(pRwStream2, modelId);
+            if (pRtDictionary)
+            {
+                RtDictDestroy(pRtDictionary);
+            }
+        }
+        else
+        {
+            bFileLoaded = CFileLoader::LoadClumpFile(pRwStream, modelId);
+        }
+        if (pModelStreamingInfo->m_nLoadState != LOADSTATE_Finishing)
+        {
+            CTxdStore::RemoveRefWithoutDelete(pBaseModelInfo->m_nTxdIndex);
+            if (animFileIndex != -1)
+            {
+                CAnimManager::RemoveAnimBlockRefWithoutDelete(animFileIndex);
+            }
+
+            if (bFileLoaded && pBaseModelInfo->GetModelType() == MODEL_INFO_VEHICLE)
+            {
+                if (!AddToLoadedVehiclesList(modelId))
+                {
+                    RemoveModel(modelId);
+                    RequestModel(modelId, pModelStreamingInfo->m_nFlags);
+                    RwStreamClose(pRwStream, &rwStreamInitializationData);
+                    return false;
+                }
+            }
+        }
+        if (!bFileLoaded)
+        {
+            RemoveModel(modelId);
+            RequestModel(modelId, pModelStreamingInfo->m_nFlags);
+            RwStreamClose(pRwStream, &rwStreamInitializationData);
+            return false;
+        }
+    }
+
+    RwStreamClose(pRwStream, &rwStreamInitializationData);
+    if (modelId >= 20000)
+    {
+        if (!(modelId >= 25000 && (modelId < 25575 || modelId >= 25755) && modelId < 26230 || pModelStreamingInfo->m_nFlags & 6))
+        {
+            pModelStreamingInfo->AddToList(pStartLoadedListStreamingInfo);
+        }
+    }
+    else
+    {
+        if (pBaseModelInfo->GetModelType() != MODEL_INFO_VEHICLE && pBaseModelInfo->GetModelType() != MODEL_INFO_PED)
+        {
+            CBaseModelInfo * pAsAtomicModelInfo = pBaseModelInfo->AsAtomicModelInfoPtr();
+            if (pAsAtomicModelInfo)
+            {
+                pAsAtomicModelInfo->m_nAlpha = -((pModelStreamingInfo->m_nFlags & 0x24) != 0);
+            }
+            if (!(pModelStreamingInfo->m_nFlags & 6))
+            {
+                pModelStreamingInfo->AddToList(pStartLoadedListStreamingInfo);
+            }
+        }
+    }
+
+    if (pModelStreamingInfo->m_nLoadState != LOADSTATE_Finishing)
+    {
+        pModelStreamingInfo->m_nLoadState = LOADSTATE_LOADED;
+        ms_memoryUsed += bufferSize;
+    }
+    return true;
 }
+
+
 
 bool CStreaming::IsVeryBusy() {
     std::printf("Streaming::IsVeryBusy called\n");
@@ -524,7 +752,7 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
                         MakeSpaceFor(nCdSize << 11); // MakeSpaceFor(nCdSize * (2^11))
 
                     int bufferOffset = streamingChannel.modelStreamingBufferOffsets[modelIndex];
-                    char * pFileBuffer = &(&ms_pStreamingBuffer)[channelIndex][2048 * bufferOffset];
+                    unsigned char * pFileBuffer = reinterpret_cast <unsigned char*> (&(&ms_pStreamingBuffer)[channelIndex][2048 * bufferOffset]);
 
                     ConvertBufferToObject(pFileBuffer, modelId);
 
@@ -670,4 +898,8 @@ bool CStreaming::FlushRequestList()
         } while (nextStreamingInfo != ms_pEndRequestedList);
     }
     return FlushChannels();
+}
+
+bool CStreaming::AddToLoadedVehiclesList(int modelIndex) {
+    return plugin::CallAndReturnDynGlobal<bool, int>(0x408000, modelIndex);
 }

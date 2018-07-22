@@ -11,6 +11,12 @@
 #include "C2dEffect.h"
 #include "eModelID.h"
 
+enum RwModelInfoType
+{
+    RWMODEL_INFO_ATOMIC = 1,
+    RWMODEL_INFO_CLUMP = 2
+};
+
 enum ModelInfoType : unsigned char
 {
 	MODEL_INFO_ATOMIC = 1,

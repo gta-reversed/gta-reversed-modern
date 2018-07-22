@@ -27,6 +27,8 @@ extern RsGlobalType &RsGlobal;
 
 extern RwPluginRegistry &geometryTKList;
 
+extern RtDictSchema &RpUVAnimDictSchema;
+
 struct IDirect3DDevice9 *GetD3DDevice();
 
 #ifndef D3DMATRIX_DEFINED

@@ -162,8 +162,8 @@ CAnimBlendAssociation* CAnimManager::BlendAnimation(RpClump* clump, int AssocGro
 }
 
 // Converted from cdecl void CAnimManager::LoadAnimFile(RwStream * stream,bool arg1,char const* string) 0x4D47F0
-void CAnimManager::LoadAnimFile(RwStream* stream, bool arg1, char const(*string)[32]) {
-    plugin::Call<0x4D47F0, RwStream*, bool, char const(*)[32]>(stream, arg1, string);
+void CAnimManager::LoadAnimFile(RwStream* stream, bool loadCompressed, char const(*uncompressedAnimations)[32]) {
+    plugin::Call<0x4D47F0, RwStream*, bool, char const(*)[32]>(stream, loadCompressed, uncompressedAnimations);
 }
 
 // Converted from cdecl void CAnimManager::LoadAnimFiles(void) 0x4D5620

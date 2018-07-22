@@ -62,4 +62,6 @@ public:
 	static bool LoadTxd(int index, char  const* filename);
     // plugin-sdk has named it to getTXDEntryParentIndex
     static int GetParentTxdSlot(int index);
+    // plugin-sdk has named it to getTexDictionary
+    static size_t GetTxd(int index);
 };

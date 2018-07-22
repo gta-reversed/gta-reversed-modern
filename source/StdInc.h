@@ -14,6 +14,8 @@
 #include <iostream>
 #include <cassert>
 
+#include "game_sa\CVehicleRecording.h"
+#include "game_sa\Collision\CColStore.h"
 #include "game_sa\CPedDamageResponseCalculator.h"
 #include "game_sa\CPedDamageResponse.h"
 #include "game_sa\CEventDamage.h"

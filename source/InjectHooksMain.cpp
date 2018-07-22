@@ -3,30 +3,27 @@
 
 #pragma comment(lib, "detours.lib")
 
-typedef void(__thiscall*  hCTaskSimpleSwim__ProcessPed)
+typedef char(__cdecl *hCStreaming__ConvertBufferToObject)
 (
-    CTaskSimpleSwim * pThis, CPed *pPed
+    unsigned char * pBuffer, int modelId
 );
-auto OLD_CTaskSimpleSwim__ProcessPed = (hCTaskSimpleSwim__ProcessPed)0x68B1C0;
+auto OLD_CStreaming__ConvertBufferToObject = (hCStreaming__ConvertBufferToObject)0x40C6B0;
 
-bool __fastcall CTaskSimpleSwim__ProcessPed(CTaskSimpleSwim * pThis, void* padding, CPed *pPed);
-
+char __cdecl CStreaming__ConvertBufferToObject(unsigned char * pBuffer, int modelId);
 
 
 void InjectHooksMain(void)
 {
    CAnimManager::InjectHooks();
    CTaskManager::InjectHooks();
-   //CStreaming::InjectHooks();
+   CStreaming::InjectHooks();
 
-
-    
     /*DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CTaskSimpleSwim__ProcessPed, CTaskSimpleSwim__ProcessPed);
+    DetourAttach(&(PVOID&)OLD_CStreaming__ConvertBufferToObject, CStreaming__ConvertBufferToObject);
 
     DetourTransactionCommit(); */
     

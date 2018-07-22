@@ -146,6 +146,7 @@ public:
 		CNodeAddress forbiddenNodeAddr, bool includeNodesWithoutLinks, bool waterPath);
 
 	CPathNode *GetPathNode(CNodeAddress address);
+    int LoadPathFindData(RwStream *stream, int index);
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);

@@ -16,6 +16,14 @@
 #include "CLoadedCarGroup.h"
 #include "CDirectory.h"
 
+struct tRwStreamInitializeData
+{
+    unsigned char * m_pBuffer;
+    unsigned int m_uiBufferSize;
+};
+
+VALIDATE_SIZE(tRwStreamInitializeData, 0x8);
+
 struct tStreamingFileDesc
 {
   char m_szName[40];
@@ -23,6 +31,8 @@ struct tStreamingFileDesc
   char __pad[3];
   int m_StreamHandle;
 };
+
+VALIDATE_SIZE(tStreamingFileDesc, 0x30);
 
 struct tStreamingChannel
 {
@@ -100,13 +110,13 @@ public:
      static int AddImageToList(char const *lpFileName, bool bNotPlayerImg);
      static void AddLodsToRequestList(CVector const *Posn, unsigned int Streamingflags);
      static void AddModelsToRequestList(CVector const *posn, unsigned int StreamingFlags);
-     static bool AddToLoadedVehiclesList();
+     static bool AddToLoadedVehiclesList(int modelIndex);
      static bool AreAnimsUsedByRequestedModels(int AnimFileIndex);
      static bool AreTexturesUsedByRequestedModels(int txdIndex);
      static void ClearFlagForAll(unsigned int eStreamingFlag);
      static void ClearSlots(int NumOfSlots);
     //! ChanndelIndex is unused
-     static char ConvertBufferToObject(char * pFileBuffer, int ChannelIndex);
+     static bool ConvertBufferToObject(unsigned char* pFileBuffer, int ChannelIndex);
      static void DeleteAllRwObjects();
      static bool DeleteLeastUsedEntityRwObject(bool bNotOnScreen, unsigned int StreamingFlags);
      static void DeleteRwObjectsAfterDeath(CVector const *PlayerPosn);
