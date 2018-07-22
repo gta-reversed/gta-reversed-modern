@@ -86,8 +86,6 @@ int CStreaming::GetNextFileOnCd(int pos, bool bNotPriority) {
 
 bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
 {
-    std::printf("ConvertBufferToObject called! modelId: %d | pFileBuffer: %s\n", modelId, pFileBuffer);
-
     CStreamingInfo *pStartLoadedListStreamingInfo = ms_startLoadedList;;
     CBaseModelInfo *pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CStreamingInfo *pModelStreamingInfo = &ms_aInfoForModel[modelId];
@@ -845,7 +843,8 @@ DWORD CStreaming::LoadRequestedModels()
     }
     if (!ms_bLoadingBigModel)
     {
-        if (!ms_channel[-channelIndex + 1].LoadStatus)
+        int otherChannelIndex = 1 - channelIndex;
+        if (!ms_channel[otherChannelIndex].LoadStatus)
         {
             RequestModelStream(1 - channelIndex);
             channelIndex = ms_numberOfBytesRead;
