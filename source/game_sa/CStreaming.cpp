@@ -68,8 +68,8 @@ void CStreaming::InjectHooks()
     //InjectHook(0x40E4E0, &CStreaming::FlushRequestList, PATCH_JUMP);
 
     InjectHook(0x40C6B0, &CStreaming::ConvertBufferToObject, PATCH_JUMP);
-    
-
+    InjectHook(0x40E120, &CStreaming::MakeSpaceFor, PATCH_JUMP);
+    //InjectHook(0x408CB0, &CStreaming::FinishLoadingLargeFile, PATCH_JUMP);
 }
 
 bool CStreaming::AreAnimsUsedByRequestedModels(int AnimFileIndex) {
@@ -479,14 +479,76 @@ void CStreaming::RequestTxdModel(int txdModelID, int streamingFlags) {
     RequestModel(txdModelID + 20000, streamingFlags);
 }
 
-bool CStreaming::FinishLoadingLargeFile(char * pFileBuffer, int modelIndex) 
+bool CStreaming::FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelId)
 {
-    return plugin::CallAndReturnDynGlobal<bool, char *, int>(0x408CB0, pFileBuffer, modelIndex);
+    std::printf("FinishLoadingLargeFile called\n");
+    bool bFinishedLoadingLargeFile = 0;
+    CBaseModelInfo *pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
+    CStreamingInfo& streamingInfo = CStreaming::ms_aInfoForModel[modelId];
+    if (streamingInfo.m_nLoadState == 4)
+    {
+
+        unsigned int bufferSize = streamingInfo.m_nCdSize << 11;
+        tRwStreamInitializeData rwStreamInitializationData = { pFileBuffer, bufferSize };
+        RwStream * pRwStream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitializationData);
+        bool bLoaded = false;
+        if (modelId >= 20000)
+        {
+            if (modelId >= 25000)
+            {
+                bLoaded = modelId;
+            }
+            else
+            {
+                CTxdStore::AddRef(modelId - 20000);
+                bLoaded = CTxdStore::FinishLoadTxd(modelId - 20000, pRwStream);
+                CTxdStore::RemoveRefWithoutDelete(modelId - 20000);
+            }
+        }
+        else
+        {
+            CTxdStore::SetCurrentTxd(pBaseModelInfo->m_nTxdIndex);
+            bLoaded = CFileLoader::FinishLoadClumpFile(pRwStream, modelId);
+            if (bLoaded)
+            {
+                bLoaded = CStreaming::AddToLoadedVehiclesList(modelId);
+            }
+            pBaseModelInfo->RemoveRef();
+            CTxdStore::RemoveRefWithoutDelete(pBaseModelInfo->m_nTxdIndex);
+            int animFileIndex = pBaseModelInfo->GetAnimFileIndex();
+            if (animFileIndex != -1)
+            {
+                CAnimManager::RemoveAnimBlockRefWithoutDelete(animFileIndex);
+            }
+        }
+        RwStreamClose(pRwStream, &pFileBuffer);
+        streamingInfo.m_nLoadState = LOADSTATE_LOADED;
+        CStreaming::ms_memoryUsed += bufferSize;
+        if (bLoaded)
+        {
+            bFinishedLoadingLargeFile = true;
+        }
+        else
+        {
+            CStreaming::RemoveModel(modelId);
+            CStreaming::RequestModel(modelId, streamingInfo.m_nFlags);
+            bFinishedLoadingLargeFile = false;
+        }
+    }
+    else
+    {
+        if (modelId < 20000)
+        {
+            pBaseModelInfo->RemoveRef();
+        }
+        bFinishedLoadingLargeFile = false;
+    }
+    return bFinishedLoadingLargeFile;
 }
 
 bool CStreaming::FlushChannels()
 {
-    char channelsFlushed = false; 
+    char channelsFlushed = false;
     if (ms_channel[1].LoadStatus == LOADSTATE_Requested)
         channelsFlushed = ProcessLoadingChannel(1);
     if (ms_channel[0].LoadStatus == LOADSTATE_LOADED)
@@ -783,10 +845,8 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
     else
     {
         int bufferOffset = streamingChannel.modelStreamingBufferOffsets[0];
-        char * pFileContents = &(&ms_pStreamingBuffer)[channelIndex][2048 * bufferOffset];
-
+        unsigned char * pFileContents = reinterpret_cast<unsigned char*>(&(&ms_pStreamingBuffer)[channelIndex][2048 * bufferOffset]);
         FinishLoadingLargeFile(pFileContents, streamingChannel.modelIds[0]);
-
         streamingChannel.modelIds[0] = -1;
     }
 
@@ -801,7 +861,8 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
     return true;
 }
 
-void CStreaming::RemoveModel(int Modelindex) {
+void CStreaming::RemoveModel(int Modelindex)
+{
     plugin::CallDynGlobal<int>(0x4089A0, Modelindex);
 }
 
@@ -810,8 +871,17 @@ void CStreaming::RemoveTxdModel(int Modelindex)
     RemoveModel(Modelindex + 20000);
 }
 
-void CStreaming::MakeSpaceFor(int memoryToCleanInBytes) {
-    plugin::CallDynGlobal<int>(0x4037EB, memoryToCleanInBytes);
+void CStreaming::MakeSpaceFor(int memoryToCleanInBytes)
+{
+    if (ms_memoryUsed >= (ms_memoryAvailable - memoryToCleanInBytes))
+    {
+        while (RemoveLeastUsedModel(0x20u))
+        {
+            if (ms_memoryUsed < (ms_memoryAvailable - memoryToCleanInBytes))
+                return;
+        }
+        DeleteRwObjectsBehindCamera(ms_memoryAvailable - memoryToCleanInBytes);
+    }
 }
 
 bool CStreaming::RemoveLoadedVehicle() {
@@ -869,7 +939,7 @@ bool CStreaming::FlushRequestList()
 {
     std::printf(" CStreaming::FlushRequestList called\n");
 
-    CStreamingInfo *streamingInfo = nullptr; 
+    CStreamingInfo *streamingInfo = nullptr;
     CStreamingInfo *nextStreamingInfo = nullptr;
 
     if (ms_pStartRequestedList->m_nNextIndex == -1)
@@ -901,4 +971,12 @@ bool CStreaming::FlushRequestList()
 
 bool CStreaming::AddToLoadedVehiclesList(int modelIndex) {
     return plugin::CallAndReturnDynGlobal<bool, int>(0x408000, modelIndex);
+}
+
+void CStreaming::DeleteRwObjectsBehindCamera(int memoryToCleanInBytes) {
+    plugin::CallDynGlobal<int>(0x40D7C0, memoryToCleanInBytes);
+}
+
+bool CStreaming::RemoveLeastUsedModel(unsigned int StreamingFlags) {
+    return plugin::CallAndReturnDynGlobal<bool, unsigned int>(0x40CFD0, StreamingFlags);
 }

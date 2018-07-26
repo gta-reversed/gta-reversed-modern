@@ -3,14 +3,13 @@
 
 #pragma comment(lib, "detours.lib")
 
-typedef char(__cdecl *hCStreaming__ConvertBufferToObject)
+typedef char(__cdecl *hCStreaming__FinishLoadingLargeFile)
 (
-    unsigned char * pBuffer, int modelId
+    unsigned char * pFileBuffer, int modelId
 );
-auto OLD_CStreaming__ConvertBufferToObject = (hCStreaming__ConvertBufferToObject)0x40C6B0;
+auto OLD_CStreaming__FinishLoadingLargeFile = (hCStreaming__FinishLoadingLargeFile)0x408CB0;
 
-char __cdecl CStreaming__ConvertBufferToObject(unsigned char * pBuffer, int modelId);
-
+char __cdecl CStreaming__FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelId);
 
 void InjectHooksMain(void)
 {
@@ -18,13 +17,14 @@ void InjectHooksMain(void)
    CTaskManager::InjectHooks();
    CStreaming::InjectHooks();
 
-    /*DetourRestoreAfterWith();
+   /* DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CStreaming__ConvertBufferToObject, CStreaming__ConvertBufferToObject);
+    DetourAttach(&(PVOID&)OLD_CStreaming__FinishLoadingLargeFile, CStreaming__FinishLoadingLargeFile);
 
     DetourTransactionCommit(); */
     
 }
+
