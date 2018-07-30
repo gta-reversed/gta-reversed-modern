@@ -55,6 +55,7 @@ public:
     static float &ms_lodDistScale; // default 1.2
     static float &ms_lowLodDistScale; // default 1.0
 
+    static void InjectHooks();
     // dummy function
     static void Init();
     // dummy function

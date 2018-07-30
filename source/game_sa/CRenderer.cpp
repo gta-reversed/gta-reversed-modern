@@ -27,3 +27,37 @@ float &CRenderer::ms_lowLodDistScale = *(float *)0x8CD804;
 unsigned int &gnRendererModelRequestFlags = *(unsigned int *)0xB745C4;
 CEntity **&gpOutEntitiesForGetObjectsInFrustum = *(CEntity ***)0xB76854;
 
+void CRenderer::InjectHooks()
+{
+    InjectHook(0x05534B0, &CRenderer::AddEntityToRenderList, PATCH_JUMP);
+}
+
+void CRenderer::AddEntityToRenderList(CEntity *pEntity, float fDistance)
+{
+    CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[pEntity->m_nModelIndex];
+    pBaseModelInfo->m_nFlags &= 0xFEu; // set first 7 bits to true, and 8th bit (bIsLod) to false
+
+    if (!pEntity->m_bDistanceFade)
+    {
+        if (pEntity->m_bDrawLast && CVisibilityPlugins::InsertEntityIntoSortedList(pEntity, fDistance))
+        {
+            pEntity->m_nFlags &= 0xFFFF7FFF; // bDistanceFade
+            return;
+        }
+    }
+    else if (CVisibilityPlugins::InsertEntityIntoSortedList(pEntity, fDistance))
+    {
+        return;
+    }
+
+    if (!pEntity->m_nNumLodChildren || pEntity->m_bUnderwater)
+    {
+        ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities] = pEntity;
+        ms_nNoOfVisibleEntities++;
+    }
+    else
+    {
+        ms_aVisibleLodPtrs[ms_nNoOfVisibleLods] = pEntity;
+        ms_nNoOfVisibleLods++;
+    }
+}

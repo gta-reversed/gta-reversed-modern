@@ -23,42 +23,47 @@ public:
         struct RpClump *m_pRwClump;
         struct RpAtomic *m_pRwAtomic;
     };
-    /* https://code.google.com/p/mtasa-blue/source/browse/trunk/MTA10/game_sa/CEntitySA.h */
-    unsigned int m_bUsesCollision : 1;           // does entity use collision
-    unsigned int m_bCollisionProcessed : 1;  // has object been processed by a ProcessEntityCollision function
-    unsigned int m_bIsStatic : 1;                // is entity static
-    unsigned int m_bHasContacted : 1;            // has entity processed some contact forces
-    unsigned int m_bIsStuck : 1;             // is entity stuck
-    unsigned int m_bIsInSafePosition : 1;        // is entity in a collision free safe position
-    unsigned int m_bWasPostponed : 1;            // was entity control processing postponed
-    unsigned int m_bIsVisible : 1;               //is the entity visible
- 
-    unsigned int m_bIsBIGBuilding : 1;           // Set if this entity is a big building
-    unsigned int m_bRenderDamaged : 1;           // use damaged LOD models for objects with applicable damage
-    unsigned int m_bStreamingDontDelete : 1; // Dont let the streaming remove this 
-    unsigned int m_bRemoveFromWorld : 1;     // remove this entity next time it should be processed
-    unsigned int m_bHasHitWall : 1;              // has collided with a building (changes subsequent collisions)
-    unsigned int m_bImBeingRendered : 1;     // don't delete me because I'm being rendered
-    unsigned int m_bDrawLast :1;             // draw object last
-    unsigned int m_bDistanceFade :1;         // Fade entity because it is far away
- 
-    unsigned int m_bDontCastShadowsOn : 1;       // Dont cast shadows on this object
-    unsigned int m_bOffscreen : 1;               // offscreen flag. This can only be trusted when it is set to true
-    unsigned int m_bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
-    unsigned int m_bDontStream : 1;              // tell the streaming not to stream me
-    unsigned int m_bUnderwater : 1;              // this object is underwater change drawing order
-    unsigned int m_bHasPreRenderEffects : 1; // Object has a prerender effects attached to it
-    unsigned int m_bIsTempBuilding : 1;          // whether or not the building is temporary (i.e. can be created and deleted more than once)
-    unsigned int m_bDontUpdateHierarchy : 1; // Don't update the aniamtion hierarchy this frame
- 
-    unsigned int m_bHasRoadsignText : 1;     // entity is roadsign and has some 2deffect text stuff to be rendered
-    unsigned int m_bDisplayedSuperLowLOD : 1;
-    unsigned int m_bIsProcObject : 1;            // set object has been generate by procedural object generator
-    unsigned int m_bBackfaceCulled : 1;          // has backface culling on
-    unsigned int m_bLightObject : 1;         // light object with directional lights
-    unsigned int m_bUnimportantStream : 1;       // set that this object is unimportant, if streaming is having problems
-    unsigned int m_bTunnel : 1;          // Is this model part of a tunnel
-    unsigned int m_bTunnelTransition : 1;        // This model should be rendered from within and outside of the tunnel
+    union {
+        struct {
+            /* https://code.google.com/p/mtasa-blue/source/browse/trunk/MTA10/game_sa/CEntitySA.h */
+            unsigned int m_bUsesCollision : 1;           // does entity use collision
+            unsigned int m_bCollisionProcessed : 1;  // has object been processed by a ProcessEntityCollision function
+            unsigned int m_bIsStatic : 1;                // is entity static
+            unsigned int m_bHasContacted : 1;            // has entity processed some contact forces
+            unsigned int m_bIsStuck : 1;             // is entity stuck
+            unsigned int m_bIsInSafePosition : 1;        // is entity in a collision free safe position
+            unsigned int m_bWasPostponed : 1;            // was entity control processing postponed
+            unsigned int m_bIsVisible : 1;               //is the entity visible
+
+            unsigned int m_bIsBIGBuilding : 1;           // Set if this entity is a big building
+            unsigned int m_bRenderDamaged : 1;           // use damaged LOD models for objects with applicable damage
+            unsigned int m_bStreamingDontDelete : 1; // Dont let the streaming remove this 
+            unsigned int m_bRemoveFromWorld : 1;     // remove this entity next time it should be processed
+            unsigned int m_bHasHitWall : 1;              // has collided with a building (changes subsequent collisions)
+            unsigned int m_bImBeingRendered : 1;     // don't delete me because I'm being rendered
+            unsigned int m_bDrawLast : 1;             // draw object last
+            unsigned int m_bDistanceFade : 1;         // Fade entity because it is far away
+
+            unsigned int m_bDontCastShadowsOn : 1;       // Dont cast shadows on this object
+            unsigned int m_bOffscreen : 1;               // offscreen flag. This can only be trusted when it is set to true
+            unsigned int m_bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
+            unsigned int m_bDontStream : 1;              // tell the streaming not to stream me
+            unsigned int m_bUnderwater : 1;              // this object is underwater change drawing order
+            unsigned int m_bHasPreRenderEffects : 1; // Object has a prerender effects attached to it
+            unsigned int m_bIsTempBuilding : 1;          // whether or not the building is temporary (i.e. can be created and deleted more than once)
+            unsigned int m_bDontUpdateHierarchy : 1; // Don't update the aniamtion hierarchy this frame
+
+            unsigned int m_bHasRoadsignText : 1;     // entity is roadsign and has some 2deffect text stuff to be rendered
+            unsigned int m_bDisplayedSuperLowLOD : 1;
+            unsigned int m_bIsProcObject : 1;            // set object has been generate by procedural object generator
+            unsigned int m_bBackfaceCulled : 1;          // has backface culling on
+            unsigned int m_bLightObject : 1;         // light object with directional lights
+            unsigned int m_bUnimportantStream : 1;       // set that this object is unimportant, if streaming is having problems
+            unsigned int m_bTunnel : 1;          // Is this model part of a tunnel
+            unsigned int m_bTunnelTransition : 1;        // This model should be rendered from within and outside of the tunnel
+        };
+        unsigned int m_nFlags;
+    };
     /* */
     unsigned short m_nRandomSeed;
     unsigned short m_nModelIndex;
