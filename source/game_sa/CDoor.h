@@ -29,7 +29,14 @@ public:
     eDoorState m_nDoorState;
     float         m_fAngle;
     float         m_fPrevAngle;
-    float         m_fAngVel;
+    union 
+    {
+        struct 
+        {
+            unsigned char m_nDoorFlags;
+        };
+        float         m_fAngVel;
+    };
 
     static float &DOOR_SPEED_MAX_CAPPED; // 0.5
 

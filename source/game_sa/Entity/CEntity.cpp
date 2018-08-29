@@ -365,3 +365,8 @@ bool CEntity::IsEntityOccluded()
 {
     return ((bool(__thiscall *)(CEntity*))0x71FAE0)(this);
 }
+
+bool CEntity::IsCurrentAreaOrBarberShopInterior()
+{
+    return m_nAreaCode == CGame::currArea || m_nAreaCode == 13;
+}

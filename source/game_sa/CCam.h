@@ -16,6 +16,8 @@ class CEntity;
 class CPed;
 class CVehicle;
 
+extern bool &gbFirstPersonRunThisFrame;
+
 class  CCam {
 public:
     bool          m_bBelowMinDist;

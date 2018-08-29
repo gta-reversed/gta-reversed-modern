@@ -27,6 +27,7 @@ CAnimBlendAssociation* CAnimBlendAssociation::Constructor1(RpClump *pClump, CAni
 
 void CAnimBlendAssociation::Init1(RpClump *pClump, CAnimBlendHierarchy * pAnimHierarchy)
 {
+    std::printf("\nCAnimBlendAssociation::Init1: called! pClump: %p | m_nSeqCount: %d\n\n", pClump, pAnimHierarchy->m_nSeqCount);
     CAnimBlendClumpData * pAnimClumpData = GetAnimClumpData(pClump); 
     m_nNumBlendNodes = pAnimClumpData->m_nNumFrames;
     AllocateAnimBlendNodeArray(m_nNumBlendNodes);
@@ -54,7 +55,7 @@ void CAnimBlendAssociation::Init1(RpClump *pClump, CAnimBlendHierarchy * pAnimHi
         {
             auto v11 = ((715827883i64 * ((DWORD)pAnimFrameData - (DWORD)pAnimClumpData->m_pFrames)) >> 32) >> 2;
             auto frameIndex = (v11 >> 31) + v11;
-            //std::cout << "i: " << i  <<" | frameIndex: " << frameIndex << " | boneid: " << sequence.m_boneId << "\n"; 
+            std::cout << "i: " << i  <<" | frameIndex: " << frameIndex << " | boneid: " << sequence.m_boneId << "\n"; 
             m_pNodeArray[frameIndex].m_pAnimSequence = &sequence;
         }
     }

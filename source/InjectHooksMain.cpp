@@ -3,15 +3,17 @@
 
 #pragma comment(lib, "detours.lib")
 
-typedef void(__cdecl *hCRenderer_AddEntityToRenderList)( CEntity *pEntity, float fDistance );
-auto OLD_CRenderer_AddEntityToRenderList = (hCRenderer_AddEntityToRenderList)0x05534B0;
-void __cdecl CRenderer_AddEntityToRenderList(CEntity *pEntity, float fDistance);
+typedef signed int(__cdecl *hCRenderer_SetupEntityVisibility)(CEntity *pEntity, float *outDistance);
+auto OLD_CRenderer_SetupEntityVisibility = (hCRenderer_SetupEntityVisibility)0x554230;
+signed int __cdecl CRenderer_SetupEntityVisibility(CEntity *pEntity, float *outDistance);
+
 
 void InjectHooksMain(void)
 {
-    CAnimManager::InjectHooks();
-    CTaskManager::InjectHooks();
-    CStreaming::InjectHooks();
+    //CAnimManager::InjectHooks();
+   // CTaskManager::InjectHooks();
+    //std::printf("okay, only CAnimManager and CTaskManager hooks\n ");
+    //CStreaming::InjectHooks();
     CRenderer::InjectHooks();
 
     /*DetourRestoreAfterWith();
@@ -19,8 +21,6 @@ void InjectHooksMain(void)
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CRenderer_AddEntityToRenderList, CRenderer_AddEntityToRenderList);
-
-    DetourTransactionCommit(); */
-    
+    DetourAttach(&(PVOID&)OLD_CRenderer_SetupEntityVisibility, CRenderer_SetupEntityVisibility);
+    DetourTransactionCommit();*/  
 }

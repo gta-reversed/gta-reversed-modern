@@ -146,6 +146,7 @@ public:
     void ProcessLightsForEntity();
     void RemoveEscalatorsForEntity();
     bool IsEntityOccluded();
+    bool IsCurrentAreaOrBarberShopInterior();
 };
 
 VALIDATE_SIZE(CEntity, 0x38);

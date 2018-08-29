@@ -1,4 +1,4 @@
-/*
+﻿/*
     Plugin-SDK (Grand Theft Auto San Andreas) header file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
@@ -48,7 +48,7 @@ protected:
     CAutomobile(plugin::dummy_func_t) : CVehicle(plugin::dummy) {}
 public:
     CDamageManager m_damageManager;
-    CDoor m_doors[6];
+    CDoor m_doors[6]; // pThis + 1464‬
     RwFrame *m_aCarNodes[CAR_NUM_NODES];
     CBouncingPanel m_panels[3];
     CDoor m_swingingChassis;

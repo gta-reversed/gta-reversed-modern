@@ -37,7 +37,7 @@ float FindPlayerHeight();
 // returns player ped
 CPlayerPed * FindPlayerPed(int playerId = -1);
 // returns player vehicle
-CVehicle * FindPlayerVehicle(int playerId, bool bIncludeRemote);
+CAutomobile * FindPlayerVehicle(int playerId, bool bIncludeRemote);
 // 2 players are playing
 bool InTwoPlayersMode();
 // vectorsub

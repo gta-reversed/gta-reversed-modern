@@ -80,7 +80,7 @@ public:
     static void RenderFirstPersonVehicle();
     static bool SetupLightingForEntity(CEntity* entity);
     static int SetupMapEntityVisibility(CEntity* entity, CBaseModelInfo* modelInfo, float distance, bool arg3);
-    static int SetupEntityVisibility(CEntity* entity, float& outDistance);
+    static int SetupEntityVisibility(CEntity* entity, float* outDistance);
     static int SetupBigBuildingVisibility(CEntity* entity, float& outDistance);
     static void ScanSectorList(int sector_x, int sector_y);
     static void ScanBigBuildingList(int sector_x, int sector_y);
