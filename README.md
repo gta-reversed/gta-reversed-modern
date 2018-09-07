@@ -18,7 +18,7 @@ A project to reverse Grand Theft Auto San Andreas completely, and to rewrite and
 6) You'll find GTASA.sln in Bin folder.
 
 
-#### What exactly is this project?
+#### What exactly is this project? 
 Building this project will result in a DLL file, that DLL file can be injected into GTA:SA using any ASI loader out there. After the DLL file has been injected, it will hook these reversed functions, if your game crashes, then it means there's some problem with the code and it has to be fixed, otherwise if the game runs smoothly, our code works, and we can focus on reversing more functions and classes, that's pretty much it. 
 
 #### Motivation
