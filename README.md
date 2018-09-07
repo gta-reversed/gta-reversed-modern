@@ -4,7 +4,7 @@ A project to reverse Grand Theft Auto San Andreas completely, and to rewrite and
 #### Build Instructions
 1) Download and install latest CMake for windows from [HERE](https://cmake.org/download/).
 
-2) Open CMake GUI ![Capture](/uploads/9409c1da6c25fbe4423f750d45f29000/Capture.PNG)
+2) Open CMake GUI ![Capture](/uploads/9409c1da6c25fbe4423f750d45f29000/Capture.PNG) 
 
 3) Set the Source and Build directories (Don't forget to append "Bin" after the path for build), like this: 
 
