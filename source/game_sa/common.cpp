@@ -11,6 +11,8 @@ char *gString = (char *)0xB71670;
 
 float &GAME_GRAVITY = *(float *)0x863984;
 
+char *&PC_Scratch = *reinterpret_cast<char **>(0xC8E0C8);
+
 CVector FindPlayerCoors(int playerId)
 {
     return ((CVector(__cdecl *)(int))0x56E010)(playerId);

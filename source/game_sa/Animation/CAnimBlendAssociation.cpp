@@ -7,6 +7,9 @@ void CAnimBlendAssociation::InjectHooks()
 
 CAnimBlendAssociation* CAnimBlendAssociation::Constructor1(RpClump *pClump, CAnimBlendHierarchy * pAnimHierarchy)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<CAnimBlendAssociation*, 0x4CEFC0, CAnimBlendAssociation*, RpClump *, CAnimBlendHierarchy *>(this, pClump, pAnimHierarchy);
+#else
     m_fBlendAmount = 1.0;
     m_fSpeed = 1.0;
     m_pNodeArray = 0;
@@ -23,10 +26,14 @@ CAnimBlendAssociation* CAnimBlendAssociation::Constructor1(RpClump *pClump, CAni
 
     Init1(pClump, pAnimHierarchy);
     return this;
+#endif
 }
 
 void CAnimBlendAssociation::Init1(RpClump *pClump, CAnimBlendHierarchy * pAnimHierarchy)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallMethodDynGlobal<CAnimBlendAssociation *, RpClump *, CAnimBlendHierarchy *>(0x4CED50, this, pClump, pAnimHierarchy);
+#else
     std::printf("\nCAnimBlendAssociation::Init1: called! pClump: %p | m_nSeqCount: %d\n\n", pClump, pAnimHierarchy->m_nSeqCount);
     CAnimBlendClumpData * pAnimClumpData = GetAnimClumpData(pClump); 
     m_nNumBlendNodes = pAnimClumpData->m_nNumFrames;
@@ -59,6 +66,7 @@ void CAnimBlendAssociation::Init1(RpClump *pClump, CAnimBlendHierarchy * pAnimHi
             m_pNodeArray[frameIndex].m_pAnimSequence = &sequence;
         }
     }
+#endif
 }
 
 void CAnimBlendAssociation::Start(float currentTime) {

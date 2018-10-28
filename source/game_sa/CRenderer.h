@@ -10,6 +10,14 @@
 #include "CBaseModelInfo.h"
 #include "CPtrListDoubleLink.h"
 
+enum eRendererVisiblity
+{
+    RENDERER_INVISIBLE = 0,
+    RENDERER_VISIBLE,
+    RENDERER_CULLED,
+    RENDERER_STREAMME
+};
+
 struct tScanLists {
     CPtrListDoubleLink *buildingsList;
     CPtrListDoubleLink *objectsList;
@@ -82,7 +90,7 @@ public:
     static int SetupMapEntityVisibility(CEntity* entity, CBaseModelInfo* modelInfo, float distance, bool arg3);
     static int SetupEntityVisibility(CEntity* entity, float* outDistance);
     static int SetupBigBuildingVisibility(CEntity* entity, float& outDistance);
-    static void ScanSectorList(int sector_x, int sector_y);
+    static void ScanSectorList(unsigned int uiSector_x, unsigned int uiSector_y);
     static void ScanBigBuildingList(int sector_x, int sector_y);
     // returns objects count
     static int GetObjectsInFrustum(CEntity** outEntities, float distance, RwMatrixTag* transformMat);
@@ -93,7 +101,7 @@ public:
     static void ScanSectorList_RequestModels(int sector_x, int sector_y);
     static void RequestObjectsInFrustum(RwMatrixTag* transformMat, int modelRequesFlags);
     static void RequestObjectsInDirection(CVector const& posn, float angle, int modelRequesFlags);
-    static void SetupScanLists(int sector_x, int sector_y);
+    static void SetupScanLists(uint32_t uiSector_x, uint32_t uiSector_y);
 };
 
 extern unsigned int &gnRendererModelRequestFlags;

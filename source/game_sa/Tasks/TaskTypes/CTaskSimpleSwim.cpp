@@ -10,6 +10,9 @@ CTaskSimpleSwim::CTaskSimpleSwim(CVector const* pPosn, CPed* pPed) : CTaskSimple
 
 bool CTaskSimpleSwim::ProcessPed(CPed *pPed)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x68B1C0, CTaskSimpleSwim*, CPed *>(this, pPed);
+#else
     if (m_pEntity)
     {
         CAnimManager::BlendAnimation(pPed->m_pRwClump, pPed->m_nAnimGroup, DEFAULT_IDLE_STANCE, 8.0);
@@ -171,10 +174,14 @@ bool CTaskSimpleSwim::ProcessPed(CPed *pPed)
     ProcessSwimmingResistance(pPed);
     ProcessEffects(pPed);
     return false;
+#endif
 }
 
 void CTaskSimpleSwim::ProcessSwimAnims(CPed *pPed)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallMethod<0x6899F0, CTaskSimpleSwim*, CPed *>(this, pPed);
+#else
     CPlayerPed * pPlayerPed = (CPlayerPed *)pPed;
     CAnimBlendAssociation * pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, DEFAULT_SWIM_TREAD);
     if (m_bFinishedBlending)
@@ -472,6 +479,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed *pPed)
         return;
 
     }
+#endif
 }
 
 void CTaskSimpleSwim::ProcessSwimmingResistance(CPed* pPed)

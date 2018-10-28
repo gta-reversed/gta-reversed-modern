@@ -63,6 +63,7 @@ public:
 			unsigned char bDoWeOwnTheColModel : 1;
 			unsigned char bIsBackfaceCulled : 1;
 			unsigned char bIsLod : 1;
+
 			union{
 				struct{
 					unsigned char bIsRoad: 1;

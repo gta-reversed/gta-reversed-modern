@@ -12,7 +12,7 @@
 class CAnimBlendNode;
 class CAnimBlendHierarchy;
 
-class  AnimAssociationData {
+class AnimAssociationData {
 public:
     RwLLLink m_link;
     unsigned short m_nNumBlendNodes;

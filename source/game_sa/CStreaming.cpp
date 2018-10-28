@@ -86,6 +86,9 @@ int CStreaming::GetNextFileOnCd(int pos, bool bNotPriority) {
 
 bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<bool, unsigned char*, int >(0x40C6B0, pFileBuffer, modelId);
+#else
     CStreamingInfo *pStartLoadedListStreamingInfo = ms_startLoadedList;;
     CBaseModelInfo *pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CStreamingInfo *pModelStreamingInfo = &ms_aInfoForModel[modelId];
@@ -308,13 +311,18 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
         ms_memoryUsed += bufferSize;
     }
     return true;
+#endif
 }
 
 
 
 bool CStreaming::IsVeryBusy() {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<bool>(0x4076A0);
+#else
     std::printf("Streaming::IsVeryBusy called\n");
     return CRenderer::m_loadingPriority || ms_numModelsRequested > 5;
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -326,6 +334,9 @@ bool CStreaming::IsVeryBusy() {
 //////////////////////////////////////////////////////////////////////////////////////////
 void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal<bool>(0x40EA10, bOnlyPriorityRequests);
+#else
     if (!m_bLoadingAllRequestedModels)
     {
         m_bLoadingAllRequestedModels = true;
@@ -401,11 +412,14 @@ void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests)
         FlushChannels();
         m_bLoadingAllRequestedModels = false;
     }
-
+#endif
 }
 
 void CStreaming::RequestModel(int modelId, char streamingFlags)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal<int, int>(0x4087E0, modelId, streamingFlags);
+#else
     int flags = streamingFlags;
     CStreamingInfo & modelStreamingInfo = ms_aInfoForModel[modelId];
     char loadState = modelStreamingInfo.m_nLoadState;
@@ -473,14 +487,22 @@ void CStreaming::RequestModel(int modelId, char streamingFlags)
         modelStreamingInfo.m_nFlags = flags;
         modelStreamingInfo.m_nLoadState = LOADSTATE_Requested;// requested, loading
     }
+#endif
 }
 
 void CStreaming::RequestTxdModel(int txdModelID, int streamingFlags) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal<int, int>(0x407100, txdModelID, streamingFlags);
+#else
     RequestModel(txdModelID + 20000, streamingFlags);
+#endif
 }
 
 bool CStreaming::FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelId)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<bool, unsigned char *, int>(0x408CB0, pFileBuffer, modelId);
+#else
     std::printf("FinishLoadingLargeFile called\n");
     bool bFinishedLoadingLargeFile = 0;
     CBaseModelInfo *pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
@@ -544,10 +566,14 @@ bool CStreaming::FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelId
         bFinishedLoadingLargeFile = false;
     }
     return bFinishedLoadingLargeFile;
+#endif
 }
 
 bool CStreaming::FlushChannels()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<bool>(0x40E460);
+#else
     char channelsFlushed = false;
     if (ms_channel[1].LoadStatus == LOADSTATE_Requested)
         channelsFlushed = ProcessLoadingChannel(1);
@@ -568,10 +594,14 @@ bool CStreaming::FlushChannels()
     if (ms_channel[1].LoadStatus == LOADSTATE_Requested)
         channelsFlushed = ProcessLoadingChannel(1);
     return channelsFlushed;
+#endif
 }
 
 void CStreaming::RequestModelStream(int channelIndex)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal<int>(0x40CBA0, channelIndex);
+#else
     int CdStreamLastPosn = CdStreamGetLastPosn();
     int modelId = GetNextFileOnCd(CdStreamLastPosn, 1);
     if (modelId == -1)
@@ -765,10 +795,14 @@ void CStreaming::RequestModelStream(int channelIndex)
 
     if (m_bModelStreamNotLoaded)
         m_bModelStreamNotLoaded = false;
+#endif
 }
 
 bool CStreaming::ProcessLoadingChannel(int channelIndex)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<bool, int>(0x40E170, channelIndex);
+#else
     tStreamingChannel& streamingChannel = ms_channel[channelIndex];
     int streamStatus = CdStreamGetStatus(channelIndex);
     if (streamStatus)
@@ -859,6 +893,7 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
         }
     }
     return true;
+#endif
 }
 
 void CStreaming::RemoveModel(int Modelindex)
@@ -868,11 +903,18 @@ void CStreaming::RemoveModel(int Modelindex)
 
 void CStreaming::RemoveTxdModel(int Modelindex)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal<int>(0x40C180, Modelindex);
+#else
     RemoveModel(Modelindex + 20000);
+#endif
 }
 
 void CStreaming::MakeSpaceFor(int memoryToCleanInBytes)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal<int>(0x40E120, memoryToCleanInBytes);
+#else
     if (ms_memoryUsed >= (ms_memoryAvailable - memoryToCleanInBytes))
     {
         while (RemoveLeastUsedModel(0x20u))
@@ -882,6 +924,7 @@ void CStreaming::MakeSpaceFor(int memoryToCleanInBytes)
         }
         DeleteRwObjectsBehindCamera(ms_memoryAvailable - memoryToCleanInBytes);
     }
+#endif
 }
 
 bool CStreaming::RemoveLoadedVehicle() {
@@ -895,6 +938,9 @@ void CStreaming::RetryLoadFile(int streamNum) {
 
 DWORD CStreaming::LoadRequestedModels()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<DWORD>(0x40E3A0);
+#else
     DWORD channelIndex = 0;
 
     if (ms_bLoadingBigModel)
@@ -930,6 +976,7 @@ DWORD CStreaming::LoadRequestedModels()
         ms_numberOfBytesRead = 1 - channelIndex;
     }
     return channelIndex;
+#endif
 }
 
 //////////////
@@ -937,6 +984,9 @@ DWORD CStreaming::LoadRequestedModels()
 //////////////
 bool CStreaming::FlushRequestList()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<bool>(0x40E4E0);
+#else
     std::printf(" CStreaming::FlushRequestList called\n");
 
     CStreamingInfo *streamingInfo = nullptr;
@@ -967,6 +1017,7 @@ bool CStreaming::FlushRequestList()
         } while (nextStreamingInfo != ms_pEndRequestedList);
     }
     return FlushChannels();
+#endif
 }
 
 bool CStreaming::AddToLoadedVehiclesList(int modelIndex) {

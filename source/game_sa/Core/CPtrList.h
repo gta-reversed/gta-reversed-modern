@@ -10,7 +10,7 @@
 
 class  CPtrList {
 protected:
-    CPtrNode *pNode;
+    CPtrNode * pNode;
 public:
     inline CPtrNode *GetNode() {
         return pNode;
