@@ -3,9 +3,9 @@
 
 #pragma comment(lib, "detours.lib")
 
-typedef int (__cdecl *hCRenderer_ScanSectorList)(unsigned int uiSector_x, unsigned int uiSector_y);
-auto OLD_CRenderer_ScanSectorList = (hCRenderer_ScanSectorList)0x554840;
-void __cdecl CRenderer_ScanSectorList(unsigned int uiSector_x, unsigned int uiSector_y);
+typedef signed int (__cdecl *hCRenderer_SetupMapEntityVisibility)(CEntity *pEntity, CBaseModelInfo *pBaseModelInfo, float fDistance, bool bIsTimeInRange);
+auto OLD_CRenderer_SetupMapEntityVisibility = (hCRenderer_SetupMapEntityVisibility)0x553F60;
+signed int __cdecl CRenderer_SetupMapEntityVisibility(CEntity *pEntity, CBaseModelInfo *pBaseModelInfo, float fDistance, bool bIsTimeInRange);
 
 void InjectHooksMain(void)
 {
@@ -16,6 +16,7 @@ void InjectHooksMain(void)
     CRenderer::InjectHooks();*/
 
 
+    //InjectHook(0x553F71, &HOOK_CRenderer_SetupMapEntityVisibility_1, PATCH_JUMP);
 
     /*
     DetourRestoreAfterWith();
@@ -23,6 +24,8 @@ void InjectHooksMain(void)
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CRenderer_ScanSectorList, CRenderer_ScanSectorList);
-    DetourTransactionCommit();*/
+    DetourAttach(&(PVOID&)OLD_CRenderer_SetupMapEntityVisibility, CRenderer_SetupMapEntityVisibility);
+    DetourTransactionCommit();
+    */
 }
+

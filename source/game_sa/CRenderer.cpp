@@ -38,6 +38,7 @@ void CRenderer::InjectHooks()
 {
     InjectHook(0x05534B0, &CRenderer::AddEntityToRenderList, PATCH_JUMP);
     InjectHook(0x554230, &CRenderer::SetupEntityVisibility, PATCH_JUMP);
+    InjectHook(0x553F60, &CRenderer::SetupMapEntityVisibility, PATCH_JUMP);
     InjectHook(0x553540, &CRenderer::SetupScanLists, PATCH_JUMP); 
     InjectHook(0x554840, &CRenderer::ScanSectorList, PATCH_JUMP);
 }
@@ -180,8 +181,164 @@ bool CRenderer::SetupLightingForEntity(CEntity* entity) {
 }
 
 // Converted from cdecl int CRenderer::SetupMapEntityVisibility(CEntity *entity,CBaseModelInfo *modelInfo,float distance,bool) 0x553F60
-int CRenderer::SetupMapEntityVisibility(CEntity* entity, CBaseModelInfo* modelInfo, float distance, bool arg3) {
-    return plugin::CallAndReturn<int, 0x553F60, CEntity*, CBaseModelInfo*, float, bool>(entity, modelInfo, distance, arg3);
+int CRenderer::SetupMapEntityVisibility(CEntity *pEntity, CBaseModelInfo *pBaseModelInfo, float fDistance, bool bIsTimeInRange) {
+
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<int, 0x553F60, CEntity*, CBaseModelInfo*, float, bool>(pEntity, pBaseModelInfo, fDistance, bIsTimeInRange);
+#else
+    CEntity * pEntityLod = pEntity->m_pLod;
+    RpClump * pClump = reinterpret_cast<RpClump *>(pBaseModelInfo->m_pRwObject);
+    float fFarClipDistance = pBaseModelInfo->m_pColModel->m_boundSphere.m_fRadius + CRenderer::ms_fFarClipPlane;
+
+    float fLodDistMultipliedWithDrawDist = TheCamera.m_fLODDistMultiplier * pBaseModelInfo->m_fDrawDistance;
+    float fMinimumDrawDistance = fLodDistMultipliedWithDrawDist;
+    if (fLodDistMultipliedWithDrawDist >= fFarClipDistance)
+    {
+        fMinimumDrawDistance = fFarClipDistance;
+    }
+
+    if ((signed int)pEntity->m_nFlags >= 0
+        && ((!CRenderer::ms_bRenderTunnels && pEntity->m_bTunnel) || (!CRenderer::ms_bRenderOutsideTunnels && !pEntity->m_bTunnel)))
+    {
+        return RENDERER_INVISIBLE;
+    }
+
+    float fDrawDistanceMultiplied = 20.0;
+    if (!pEntityLod)
+    {
+        float fDrawDistanceMultiplier = pBaseModelInfo->m_fDrawDistance;
+        if (fDrawDistanceMultiplier >= fMinimumDrawDistance)
+        {
+            fDrawDistanceMultiplier = fMinimumDrawDistance;
+        }
+        if (fDrawDistanceMultiplier > 150.0f)
+        {
+            fDrawDistanceMultiplied = fDrawDistanceMultiplier * 0.06666667f + 10.0f;
+        }
+
+        if (pEntity->m_bIsBIGBuilding)
+        {
+            fMinimumDrawDistance = CRenderer::ms_lowLodDistScale * fMinimumDrawDistance;
+        }
+    }
+
+    if (!pClump)
+    {
+        if (pEntityLod
+            && pEntityLod->m_nNumLodChildren > 1u
+            && fDrawDistanceMultiplied + fDistance - 20.0 < fMinimumDrawDistance)
+        {
+            CRenderer::AddToLodRenderList(pEntity, fDistance);
+            return RENDERER_STREAMME;
+        }
+    }
+
+    if (!pClump || (fDrawDistanceMultiplied + fDistance - 20.0 >= fMinimumDrawDistance))
+    {
+        signed int result = 0;
+        if (pEntity->m_bDontStream)
+        {
+            return RENDERER_INVISIBLE;
+        }
+        if (pClump && fDistance - 20.0 < fMinimumDrawDistance)
+        {
+            if (!pEntity->m_pRwObject
+                && (pEntity->CreateRwObject(), !pEntity->m_pRwObject))
+            {
+                return RENDERER_INVISIBLE;
+            }
+
+            if ((int)pEntity->m_nFlagsUpperByte >= 0)
+            {
+                return RENDERER_INVISIBLE;
+            }
+
+            if (!pEntity->GetIsOnScreen() || pEntity->IsEntityOccluded())
+            {
+                unsigned __int16 baseModelInfoFlags1 = pBaseModelInfo->m_nFlags;
+                if (!(baseModelInfoFlags1 & 1))
+                {
+                    pBaseModelInfo->m_nAlpha = -1;
+                }
+                pBaseModelInfo->m_nFlags = baseModelInfoFlags1 & 0xFFFE;
+                result = RENDERER_INVISIBLE;
+            }
+            else
+            {
+                CEntity* pEntityLod1 = pEntity->m_pLod;
+                pEntity->m_bDistanceFade = true;
+                if (pEntityLod1 && pEntityLod1->m_nNumLodChildren > 1u)
+                {
+                    CRenderer::AddToLodRenderList(pEntity, fDistance);
+                    result = RENDERER_INVISIBLE;
+                }
+                else
+                {
+                    CRenderer::AddEntityToRenderList(pEntity, fDistance);
+                    result = RENDERER_INVISIBLE;
+                }
+            }
+            return result;
+        }
+        if (fDistance - 50.0 >= fMinimumDrawDistance || !bIsTimeInRange || pEntity->m_bIsVisible == false)
+        {
+            return RENDERER_INVISIBLE;
+        }
+        if (!pEntity->m_pRwObject)
+        {
+            pEntity->CreateRwObject();
+        }
+        return RENDERER_STREAMME;
+    }
+
+    if (!pEntity->m_pRwObject)
+    {
+        pEntity->CreateRwObject();
+        if (!pEntity->m_pRwObject)
+        {
+            return RENDERER_INVISIBLE;
+        }
+    }
+
+    if (static_cast<char>(pEntity->m_nFlagsUpperByte) >= 0)
+    {
+        return RENDERER_INVISIBLE;
+    }
+
+    if (pEntity->GetIsOnScreen() && !pEntity->IsEntityOccluded())
+    {
+        unsigned int entityNewFlags = pEntity->m_nFlags | 0x8000;
+        if (pBaseModelInfo->m_nAlpha == -1)
+        {
+            entityNewFlags = pEntity->m_nFlags & 0xFFFF7FFF;
+        }
+
+        pEntity->m_nFlags = entityNewFlags;
+
+        if (!pEntityLod)
+        {
+            return RENDERER_VISIBLE;
+        }
+
+        if (pBaseModelInfo->m_nAlpha == -1)
+        {
+            ++pEntityLod->m_nNumLodChildrenRendered;
+        }
+        if (pEntityLod->m_nNumLodChildren <= 1u)
+        {
+            return RENDERER_VISIBLE;
+        }
+        CRenderer::AddToLodRenderList(pEntity, fDistance);
+        return RENDERER_INVISIBLE;
+    }
+
+    if (!pBaseModelInfo->bHasBeenPreRendered)
+    {
+        pBaseModelInfo->m_nAlpha = 0xFFu;
+    }
+    pBaseModelInfo->m_nFlags &= 0xFFFE;
+    return RENDERER_CULLED;
+#endif
 }
 
 // Converted from cdecl int CRenderer::SetupEntityVisibility(CEntity *entity,float &outDistance) 0x554230
