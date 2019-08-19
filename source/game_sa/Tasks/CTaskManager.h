@@ -30,6 +30,8 @@ enum eSecondaryTasks //array indexes
     TASK_SECONDARY_MAX
 };
 
+class CTaskComplex;
+
 class  CTaskManager {
 public:
     CTask *m_aPrimaryTasks[5];
@@ -45,13 +47,13 @@ public:
     bool HasTaskSecondary(CTask const* task);
     void Flush();
     void FlushImmediately();
-    void SetNextSubTask(CTask* task);
+    void SetNextSubTask(CTaskComplex* pTask);
     static CTask* GetSimplestTask(CTask* task);
-    void StopTimers(CEvent const* _event);
+    void StopTimers(CEvent* _event);
     CTask* GetSimplestActiveTask();
     CTask* GetSimplestTask(int taskIndex);
-    void AddSubTasks(CTask* task);
-    void ParentsControlChildren(CTask* task);
+    void AddSubTasks(CTaskComplex* task);
+    void ParentsControlChildren(CTaskComplex* pTask);
     void SetTask(CTask* task, int taskIndex, bool arg2);
     void SetTaskSecondary(CTask* task, int taskIndex);
     void ClearTaskEventResponse();
