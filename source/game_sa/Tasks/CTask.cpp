@@ -17,6 +17,11 @@ void CTask::operator delete(void *object)
     ((void(__cdecl *)(void *))0x61A5B0)(object);
 }
 
+CTask* CTask::DeletingDestructor(uint8_t deletingFlags)
+{
+    return((CTask * (__thiscall*)(CTask*, uint8_t))plugin::GetVMT(this, 0))(this, deletingFlags);
+}
+
 CTask *CTask::Clone()
 {
     return ((CTask *(__thiscall *)(CTask *))plugin::GetVMT(this, 1))(this);

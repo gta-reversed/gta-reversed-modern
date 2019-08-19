@@ -13,7 +13,7 @@ void CTaskSimple::InjectHooks()
     InjectHook(0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims, PATCH_JUMP);
 }
 
-/*bool CTaskSimple::ProcessPed(class CPed *ped)
+bool CTaskSimple::ProcessPed(class CPed *ped)
 {
     return ((bool(__thiscall *)(CTaskSimple *, class CPed *))plugin::GetVMT(this, 7))(this, ped);
 }
@@ -21,4 +21,4 @@ void CTaskSimple::InjectHooks()
 bool CTaskSimple::SetPedPosition(class CPed *ped)
 {
     return ((bool(__thiscall *)(CTaskSimple *, class CPed *))plugin::GetVMT(this, 8))(this, ped);
-}*/
+}

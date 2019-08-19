@@ -27,7 +27,7 @@ public:
 	void *operator new(unsigned int size);
 	void operator delete(void *object);
 
-    virtual ~CTask() {}
+    virtual class CTask* DeletingDestructor(uint8_t deletingFlags);
 	virtual class CTask *Clone();//=0
 	virtual class CTask *GetSubTask();//=0
 	virtual bool IsSimple();//=0
