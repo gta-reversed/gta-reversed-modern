@@ -10,7 +10,7 @@ Do not delete this comment block. Respect others' work!
 #include "CTaskSimple.h"
 #include "CAnimBlendAssociation.h"
 
-
+class CPed;
 class  CTaskSimplePlayerOnFoot : public CTaskSimple {
 protected:
     CTaskSimplePlayerOnFoot(plugin::dummy_func_t a) : CTaskSimple(a) {}
@@ -21,7 +21,15 @@ public:
     int dword_14; // always 0
     int dword_18; // always 0
 
-    CTaskSimplePlayerOnFoot();
+    CTaskSimplePlayerOnFoot* Constructor();
+    CTaskSimplePlayerOnFoot* Destructor();
+    bool ProcessPed(CPed* pPed);
+    bool ProcessPlayerWeapon(CPlayerPed* pPlayerPed);
+    void PlayIdleAnimations(CPed* pPed);
+    void PlayerControlFighter(CPlayerPed* pPlayerPed);
+    bool PlayerControlZeldaWeapon(CPed* pPed);
+    void PlayerControlDucked(CPed* pPed);
+    int  PlayerControlZelda(CPed* pPed, bool a3);
 
 };
 
