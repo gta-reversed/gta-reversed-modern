@@ -1031,3 +1031,12 @@ void CStreaming::DeleteRwObjectsBehindCamera(int memoryToCleanInBytes) {
 bool CStreaming::RemoveLeastUsedModel(unsigned int StreamingFlags) {
     return plugin::CallAndReturnDynGlobal<bool, unsigned int>(0x40CFD0, StreamingFlags);
 }
+
+
+void CStreaming::SetModelIsDeletable(int modelIndex) {
+    plugin::CallDynGlobal<int>(0x409C10, modelIndex);
+}
+
+void CStreaming::SetModelTxdIsDeletable(int modelIndex) {
+    plugin::CallDynGlobal<int>(0x409C70, modelIndex);
+}

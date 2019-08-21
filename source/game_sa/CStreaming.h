@@ -29,6 +29,19 @@ enum eResourceMaxIDs
     RESOURCE_MAX_ID_SCM = 26311, // 26230-26311 (streamed scripts)
 };
 
+enum eResourceFirstID
+{
+    // First ID of the resource
+    RESOURCE_FIRST_ID_DFF = 0,
+    RESOURCE_FIRST_ID_TXD = 20000,
+    RESOURCE_FIRST_ID_COL = 25000,
+    RESOURCE_FIRST_ID_IPL = 25256,
+    RESOURCE_FIRST_ID_DAT = 25511,
+    RESOURCE_FIRST_ID_IFP = 25575,
+    RESOURCE_FIRST_ID_RRR = 25755, // (vechicle recordings)
+    RESOURCE_FIRST_ID_SCM = 26230, // (streamed scripts)
+};
+
 struct tRwStreamInitializeData
 {
     unsigned char * m_pBuffer;

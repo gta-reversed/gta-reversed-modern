@@ -3,11 +3,11 @@
 
 #pragma comment(lib, "detours.lib")
 
-//auto OLD_CTaskManager_ManageTasks = (void (__thiscall*)(CTaskManager*pThis))0x681C10;
-//bool CTaskSimplePlayerOnFoot::ProcessPed(CPed* pPed)
-auto OLD_CTaskSimplePlayerOnFoot_ProcessPed = (bool(__thiscall*)(CTaskSimplePlayerOnFoot* pThis, CPed * pPed))0x688810;
 
-bool __fastcall CTaskSimplePlayerOnFoot_ProcessPed(CTaskSimplePlayerOnFoot* pThis, void* padding, CPed* pPed);
+//void PlayIdleAnimations(CPed* pPed)
+auto OLD_CTaskSimplePlayerOnFoot_PlayIdleAnimations = (void(__thiscall*)(CTaskSimplePlayerOnFoot * pThis, CPed * pPed))0x6872C0;
+
+void __fastcall CTaskSimplePlayerOnFoot_PlayIdleAnimations(CTaskSimplePlayerOnFoot* pThis, void* padding, CPed* pPed);
 
 //CTask* __cdecl CTaskManager__GetSimplestTask(CTask* pTask);
 void __cdecl HOOK_THEFUNCTION();
@@ -29,7 +29,7 @@ void InjectHooksMain(void)
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CTaskSimplePlayerOnFoot_ProcessPed, CTaskSimplePlayerOnFoot_ProcessPed);
+    DetourAttach(&(PVOID&)OLD_CTaskSimplePlayerOnFoot_PlayIdleAnimations, CTaskSimplePlayerOnFoot_PlayIdleAnimations);
     DetourTransactionCommit();
     */
 }
@@ -47,10 +47,10 @@ dwReturnLocation:
 2 means continue the function and it is outside of the "if" condition
 */
 
-bool __fastcall CTaskSimplePlayerOnFoot_ProcessPed(CTaskSimplePlayerOnFoot* pThis, void* padding, CPed* pPed)
+void __fastcall CTaskSimplePlayerOnFoot_PlayIdleAnimations(CTaskSimplePlayerOnFoot* pThis, void* padding, CPed* pPed)
 //CTask* __cdecl CTaskManager__GetSimplestTask(CTask* pTask)
 {
-    printf("CTaskSimplePlayerOnFoot_ProcessPed called\n");
+    //printf("CTaskSimplePlayerOnFoot_PlayIdleAnimations called\n");
 
 
 

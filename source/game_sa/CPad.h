@@ -183,6 +183,8 @@ public:
     
     // Functions list : Not finished
 
+    void SetTouched();
+    unsigned int GetTouchedTimeDelta();
     void UpdateMouse();
     void ReconcileTwoControllersInput(CControllerState const& controllerA, CControllerState const& controllerB);
     void SetDrunkInputDelay(int delay);

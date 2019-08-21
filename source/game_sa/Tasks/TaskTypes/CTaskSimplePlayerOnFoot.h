@@ -10,6 +10,9 @@ Do not delete this comment block. Respect others' work!
 #include "CTaskSimple.h"
 #include "CAnimBlendAssociation.h"
 
+extern int& gLastRandomNumberForIdleAnimationID;
+extern unsigned int& gLastTouchTimeDelta;
+
 class CPed;
 class  CTaskSimplePlayerOnFoot : public CTaskSimple {
 protected:
