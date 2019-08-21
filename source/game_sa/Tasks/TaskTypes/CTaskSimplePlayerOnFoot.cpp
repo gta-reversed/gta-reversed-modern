@@ -123,7 +123,11 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
                 {
                     while (1)
                     {
-                        int animHierarchyIndex = pAnimAssoc1->m_pHierarchy - CAnimManager::ms_aAnimations;
+
+                        unsigned int animHierarchyIndex = (uint32_t)pAnimAssoc1->m_pHierarchy - (uint32_t)CAnimManager::ms_aAnimations;
+                        animHierarchyIndex = animHierarchyIndex / 6 + (animHierarchyIndex >> 0x1f) >> 2;
+                        animHierarchyIndex = animHierarchyIndex + (animHierarchyIndex >> 0x1f);
+
                         int animBlockFirstAnimIndex = pAnimBlock->startAnimation;
                         if (animHierarchyIndex >= animBlockFirstAnimIndex
                             && animHierarchyIndex < animBlockFirstAnimIndex + pAnimBlock->animationCount)
@@ -165,7 +169,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
                             pPlayerPed->Say(336, 0, 0.2, 0, 0, 0);
                         }
                     }
-                }
+}
             }
         }
     }
