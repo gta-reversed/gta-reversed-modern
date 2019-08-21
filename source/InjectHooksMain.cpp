@@ -5,9 +5,9 @@
 
 
 //void PlayIdleAnimations(CPed* pPed)
-auto OLD_CTaskSimplePlayerOnFoot_PlayIdleAnimations = (void(__thiscall*)(CTaskSimplePlayerOnFoot * pThis, CPed * pPed))0x6872C0;
+auto OLD_CTaskSimplePlayerOnFoot_PlayerControlDucked = (void(__thiscall*)(CTaskSimplePlayerOnFoot * pThis, CPed * pPed))0x687F30;
 
-void __fastcall CTaskSimplePlayerOnFoot_PlayIdleAnimations(CTaskSimplePlayerOnFoot* pThis, void* padding, CPed* pPed);
+void __fastcall CTaskSimplePlayerOnFoot_PlayerControlDucked(CTaskSimplePlayerOnFoot* pThis, void* padding, CPed* pPed);
 
 //CTask* __cdecl CTaskManager__GetSimplestTask(CTask* pTask);
 void __cdecl HOOK_THEFUNCTION();
@@ -23,15 +23,15 @@ void InjectHooksMain(void)
 
     //InjectHook(0x0681C10, &HOOK_THEFUNCTION, PATCH_JUMP);
 
-   /*
+   // /*
     DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CTaskSimplePlayerOnFoot_PlayIdleAnimations, CTaskSimplePlayerOnFoot_PlayIdleAnimations);
+    DetourAttach(&(PVOID&)OLD_CTaskSimplePlayerOnFoot_PlayerControlDucked, CTaskSimplePlayerOnFoot_PlayerControlDucked);
     DetourTransactionCommit();
-    */
+    //*/
 }
 
 enum eFunctionReturnValue 
@@ -47,11 +47,9 @@ dwReturnLocation:
 2 means continue the function and it is outside of the "if" condition
 */
 
-void __fastcall CTaskSimplePlayerOnFoot_PlayIdleAnimations(CTaskSimplePlayerOnFoot* pThis, void* padding, CPed* pPed)
+void __fastcall CTaskSimplePlayerOnFoot_PlayerControlDucked(CTaskSimplePlayerOnFoot* pThis, void* padding, CPed* pPed)
 //CTask* __cdecl CTaskManager__GetSimplestTask(CTask* pTask)
 {
-    //printf("CTaskSimplePlayerOnFoot_PlayIdleAnimations called\n");
-
 
 
 }

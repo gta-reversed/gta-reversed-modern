@@ -29,18 +29,20 @@ public:
     short m_nShotWhizzingCounter;
     CAnimBlendAssociation *m_pDuckAnim; 
     CAnimBlendAssociation *m_pMoveAnim;
-
+  
     bool m_bIsFinished;
+
     bool m_bIsAborting;
     bool m_bNeedToSetDuckFlag; // incase bIsDucking flag gets cleared elsewhere, so we know to stop duck task
     bool m_bIsInControl;	// if duck task is being controlled by another task then it requires continuous control
-
-    CVector2D m_vecMoveCommand;
+  
+    CVector2D m_vecMoveCommand; 
     unsigned char m_nDuckControlType;
-
     unsigned char m_nCountDownFrames;
 
     CTaskSimpleDuck(eDuckControlTypes DuckControlType, unsigned short nLengthOfDuck, short nUseShotsWhizzingEvents = -1);
+    static bool CanPedDuck(CPed* pPed);
+    bool ControlDuckMove(float moveSpeedX, float moveSpeedY);
     
 };
 

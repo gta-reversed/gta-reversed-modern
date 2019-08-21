@@ -57,6 +57,7 @@ public:
     bool m_bAimImmediate;
 
     CTaskSimpleUseGun(CEntity *pTargetEntity, CVector vecTarget, unsigned char nCommand, unsigned short nBurstLength = 1, bool bAimImmediate = false);
+    bool ControlGunMove(CVector2D* moveSpeed);
 };
 
 VALIDATE_SIZE(CTaskSimpleUseGun, 0x3C);

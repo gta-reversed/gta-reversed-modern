@@ -2,6 +2,7 @@
 
 int& gLastRandomNumberForIdleAnimationID = *reinterpret_cast<int*>(0x8D2FEC);
 unsigned int& gLastTouchTimeDelta = *reinterpret_cast<unsigned int*>(0xC19664);
+float& gDuckAnimBlendData = *reinterpret_cast<float*>(0x8D2FF0);
 
 CTaskSimplePlayerOnFoot* CTaskSimplePlayerOnFoot::Constructor()
 {
@@ -183,7 +184,139 @@ bool CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPed* pPed)
 
 void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x687F30, CTaskSimplePlayerOnFoot*, CPed*>(this, pPed);
+#else
+    CTaskSimpleDuck* pSimpleDuckTask = static_cast<CTaskSimpleDuck*>(pPed->m_pIntelligence->m_TaskMgr.GetTaskSecondary(1));
+    if (pSimpleDuckTask)
+    {
+        CPlayerPed* pPlayerPed = static_cast<CPlayerPed*> (pPed);
+        CPad* pPad = pPlayerPed->GetPadFromPlayer();
+        CVector2D moveSpeed;
+        moveSpeed.x = pPad->GetPedWalkLeftRight() * 0.0078125;
+        moveSpeed.y = pPad->GetPedWalkUpDown() * 0.0078125;
+        float pedMoveBlendRatio = sqrt(moveSpeed.x * moveSpeed.x + moveSpeed.y * moveSpeed.y);
+        if (pPlayerPed->m_pAttachedTo)
+        {
+            pedMoveBlendRatio = 0.0;
+        }
+        else if (pedMoveBlendRatio > 1.0)
+        {
+            pedMoveBlendRatio = 1.0;
+        }
+        if (!pSimpleDuckTask->m_bIsFinished && !pSimpleDuckTask->m_bIsAborting)
+        {
+            if (pPad->DuckJustDown()
+                || pPad->GetSprint()
+                || pPad->JumpJustDown()
+                || pPad->ExitVehicleJustDown()
+                || !CTaskSimpleDuck::CanPedDuck(pPlayerPed))
+            {
+                pPlayerPed->m_pIntelligence->ClearTaskDuckSecondary();
+                if (!pPlayerPed->m_pIntelligence->GetTaskUseGun()
+                    || pPlayerPed->m_pIntelligence->GetTaskUseGun()->m_pWeaponInfo->m_nFlags.bAimWithArm)
+                {
+                    int pedMoveState = PEDMOVE_NONE;
+                    if (pPad->GetSprint())
+                    {
+                        if (pedMoveBlendRatio <= 0.5)
+                        {
+                            return;
+                        }
+                        auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pPlayerPed->m_nAnimGroup, 1u, gDuckAnimBlendData);
+                        pNewAnimation->m_bPlaying = 1;
+                        pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.5;
+                        pedMoveState = PEDMOVE_RUN;
+                    }
+                    else
+                    {
+                        if (pedMoveBlendRatio <= 0.5)
+                        {
+                            return;
+                        }
+                        auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pPlayerPed->m_nAnimGroup, 0, gDuckAnimBlendData);
+                        pNewAnimation->m_bPlaying = 1;
+                        pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.5;
+                        pedMoveState = PEDMOVE_WALK;
+                    }
+                    pPlayerPed->m_nMoveState = pedMoveState;
+                    pPlayerPed->field_538 = pedMoveState;
+                }
+                else if (pedMoveBlendRatio > 0.5)
+                {
+                    auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_DEFAULT, DEFAULT_GUNMOVE_FWD, gDuckAnimBlendData);
+                    pNewAnimation->m_bPlaying = 1;
+                    pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.0;
+                    moveSpeed.x = 1.0;
+                    moveSpeed.y = 0.0;
+                    CTaskSimpleUseGun* pTaskSimpleUseGun = pPlayerPed->m_pIntelligence->GetTaskUseGun();
+                    pTaskSimpleUseGun->ControlGunMove(&moveSpeed);
+                }
+            }
+            else if (!pPad->GetTarget() || pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].IsTypeMelee())
+            {
+                if (pedMoveBlendRatio > 0.0)
+                {
+                    float radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0, 0.0, -moveSpeed.x, moveSpeed.y)
+                        - TheCamera.m_fOrientation;
+                    float limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
+                    pPlayerPed->m_fAimingRotation = limitedRadianAngle;
+                    CVector moveDirection(0.0, -sin(limitedRadianAngle), cos(limitedRadianAngle));
+                    if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(pPlayerPed, moveDirection.x, moveDirection.y, 0.0, 0.0))
+                    {
+                        pedMoveBlendRatio = 0.0;
+                    }
+                }
+                moveSpeed.y = -pedMoveBlendRatio;
+
+                pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = pedMoveBlendRatio;
+                moveSpeed.x = 0.0;
+                pSimpleDuckTask->ControlDuckMove(0.0, moveSpeed.y);
+            }
+            else
+            {
+                if (CGameLogic::IsPlayerUse2PlayerControls(pPlayerPed))
+                {
+                    float radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0, 0.0, -moveSpeed.x, moveSpeed.y) - TheCamera.m_fOrientation;
+                    float limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
+                    CVector moveDirection(0.0, -sin(limitedRadianAngle), cos(limitedRadianAngle));
+                    if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(pPlayerPed, moveDirection.x, moveDirection.y, 0.0, 0.0))
+                    {
+                        pedMoveBlendRatio = 0.0;
+                    }
+                    CMatrix* pMatrix = pPlayerPed->m_matrix;
+                    CEntity* pTargetedObject = pPlayerPed->m_pTargetedObject;
+                    moveSpeed.x = (moveDirection.y * pMatrix->right.y + moveDirection.x * pMatrix->right.x + pMatrix->right.z * 0.0)
+                        * pedMoveBlendRatio;
+                    moveSpeed.y = -((moveDirection.y * pMatrix->up.y + pMatrix->up.z * 0.0 + moveDirection.x * pMatrix->up.x)
+                        * pedMoveBlendRatio);
+                    if (pTargetedObject)
+                    {
+                        CVector* pedPosition = &pMatrix->pos;
+                        if (!pMatrix)
+                        {
+                            pedPosition = &pPlayerPed->m_placement.m_vPosn;
+                        }
+                        CMatrixLink* targetedObjectMatrix = pTargetedObject->m_matrix;
+                        CVector* targetedObjectPos = &pTargetedObject->m_placement.m_vPosn;
+                        if (targetedObjectMatrix)
+                        {
+                            targetedObjectPos = &targetedObjectMatrix->pos;
+                        }
+                        VectorSub(&moveDirection, targetedObjectPos, pedPosition);
+                        pPlayerPed->m_fAimingRotation = atan2(-moveDirection.x, moveDirection.y);
+                    }
+                    else
+                    {
+                        pPlayerPed->m_fAimingRotation = limitedRadianAngle;
+                    }
+                }
+                pSimpleDuckTask->ControlDuckMove(moveSpeed.x, moveSpeed.y);
+                pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 0.0;
+            }
+        }
+    }
+#endif
 }
 
 int CTaskSimplePlayerOnFoot::PlayerControlZelda(CPed* pPed, bool a3)

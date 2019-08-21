@@ -12,6 +12,7 @@ Do not delete this comment block. Respect others' work!
 
 extern int& gLastRandomNumberForIdleAnimationID;
 extern unsigned int& gLastTouchTimeDelta;
+extern float& gDuckAnimBlendData;
 
 class CPed;
 class  CTaskSimplePlayerOnFoot : public CTaskSimple {
