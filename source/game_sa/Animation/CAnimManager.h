@@ -51,7 +51,7 @@ public:
 
 
 	static CAnimationStyleDescriptor* ms_aAnimAssocDefinitions;		 // CAnimationStyleDescriptor CAnimManager__ms_aAnimAssocDefinitions[118];
-	static CAnimBlendAssocGroup* ms_aAnimAssocGroups;				 
+	static CAnimBlendAssocGroup*& ms_aAnimAssocGroups;
 	static CAnimBlendHierarchy* ms_aAnimations;							// CAnimBlendHierarchy CAnimManager__ms_aAnimations[2500];	
 	static CAnimBlock* ms_aAnimBlocks;				                       // CAnimBlock CAnimManager__ms_aAnimBlocks[180];			
 	static CAnimBlendHierarchy* ms_animCache;                        

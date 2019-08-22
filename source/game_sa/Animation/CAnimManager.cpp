@@ -13,7 +13,7 @@ void CAnimManager::InjectHooks()
 }
 
 CAnimationStyleDescriptor* CAnimManager::ms_aAnimAssocDefinitions = (CAnimationStyleDescriptor*)0x8AA5A8;
-CAnimBlendAssocGroup* CAnimManager::ms_aAnimAssocGroups = (CAnimBlendAssocGroup*)0xB4EA34;
+CAnimBlendAssocGroup*& CAnimManager::ms_aAnimAssocGroups = *(CAnimBlendAssocGroup**)0xB4EA34;
 CAnimBlendHierarchy* CAnimManager::ms_aAnimations = (CAnimBlendHierarchy*)0xB4EA40;
 CAnimBlock* CAnimManager::ms_aAnimBlocks = (CAnimBlock*)0xB5D4A0;
 CAnimBlendHierarchy* CAnimManager::ms_animCache = (CAnimBlendHierarchy*)0xB5EB20;
