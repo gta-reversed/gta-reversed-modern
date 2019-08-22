@@ -33,7 +33,7 @@ public:
     void PlayerControlFighter(CPlayerPed* pPlayerPed);
     bool PlayerControlZeldaWeapon(CPed* pPed);
     void PlayerControlDucked(CPed* pPed);
-    int  PlayerControlZelda(CPed* pPed, bool a3);
+    int  PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAndDucking);
 
 };
 

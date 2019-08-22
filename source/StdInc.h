@@ -14,6 +14,7 @@
 #include <iostream>
 #include <cassert>
 
+#include "game_sa\CSurfaceTable.h"
 #include "game_sa\CReplay.h"
 #include "game_sa\CVehicleRecording.h"
 #include "game_sa\Collision\CColStore.h"
@@ -428,3 +429,4 @@
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleTriggerLookAt.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleUseGun.h"
 #include "game_sa\Tasks\TaskTypes\CTaskUtilityLineUpPedWithCar.h"
+#include "game_sa\Tasks\TaskTypes\CTaskComplexJump.h"
