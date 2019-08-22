@@ -29,8 +29,8 @@ public:
 	void CreateAssociations(char const* AnimName, RpClump* pClump, char** arg3, int NumAnimations);
 	void CreateAssociations(char const* AnimName, char const* arg2, char const* arg3, int arg4);
 	void DestroyAssociations();
-	CAnimBlendAssociation* GetAnimation(char const* AnimName);
-	CAnimBlendAssociation* GetAnimation(unsigned int ID);
+    CAnimBlendStaticAssociation* GetAnimation(char const* AnimName);
+    CAnimBlendStaticAssociation* GetAnimation(unsigned int ID);
 	unsigned int GetAnimationId(char const* AnimName);
 	void InitEmptyAssociations(RpClump* pClump);
 	~CAnimBlendAssocGroup();	
