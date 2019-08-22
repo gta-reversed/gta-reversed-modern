@@ -5,9 +5,9 @@
 
 
 //void PlayIdleAnimations(CPed* pPed)
-auto OLD_CTaskSimplePlayerOnFoot__PlayerControlZelda = (void(__thiscall*)(CTaskSimplePlayerOnFoot * pThis, CPed * pPed, bool bAvoidJumpingAndDucking))0x6883D0;
+auto OLD_CTaskSimplePlayerOnFoot__PlayerControlZeldaWeapon = (void(__thiscall*)(CTaskSimplePlayerOnFoot * pThis, CPed * pPed))0x687C20;
 
-void __fastcall CTaskSimplePlayerOnFoot__PlayerControlZelda(CTaskSimplePlayerOnFoot* pThis, void* padding, CPed* pPed, bool bAvoidJumpingAndDucking);
+void __fastcall CTaskSimplePlayerOnFoot__PlayerControlZeldaWeapon(CTaskSimplePlayerOnFoot* pThis, void* padding, CPlayerPed* pPlayerPed);
 
 //CTask* __cdecl CTaskManager__GetSimplestTask(CTask* pTask);
 void __cdecl HOOK_THEFUNCTION();
@@ -20,21 +20,20 @@ void InjectHooksMain(void)
     CStreaming::InjectHooks();
     CRenderer::InjectHooks();*/
 
-
     //InjectHook(0x0681C10, &HOOK_THEFUNCTION, PATCH_JUMP);
 
-   // /*
+    /*
     DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CTaskSimplePlayerOnFoot__PlayerControlZelda, CTaskSimplePlayerOnFoot__PlayerControlZelda);
+    DetourAttach(&(PVOID&)OLD_CTaskSimplePlayerOnFoot__PlayerControlZeldaWeapon, CTaskSimplePlayerOnFoot__PlayerControlZeldaWeapon);
     DetourTransactionCommit();
-    //*/
+   */
 }
 
-enum eFunctionReturnValue 
+enum eFunctionReturnValue
 {
     FUNCTION_RETURN = 0,
     FUNCTION_INSIDE_IF = 1,
@@ -48,10 +47,8 @@ dwReturnLocation:
 */
 
 
-void __fastcall CTaskSimplePlayerOnFoot__PlayerControlZelda(CTaskSimplePlayerOnFoot* pThis, void* padding, CPed* pPed, bool bAvoidJumpingAndDucking)
+void __fastcall CTaskSimplePlayerOnFoot__PlayerControlZeldaWeapon(CTaskSimplePlayerOnFoot* pThis, void* padding, CPlayerPed* pPlayerPed)
 //CTask* __cdecl CTaskManager__GetSimplestTask(CTask* pTask)
 {
-    printf(" calling CTaskSimplePlayerOnFoot__PlayerControlZelda\n");
-
-   
+    printf(" calling CTaskSimplePlayerOnFoot__PlayerControlZeldaWeapon\n");
 }

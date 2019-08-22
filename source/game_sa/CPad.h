@@ -199,6 +199,8 @@ public:
     short GetSteeringUpDown();
     short GetPedWalkLeftRight();
     short GetPedWalkUpDown();
+    short GetPedWalkLeftRight(CPed* pPed);
+    short GetPedWalkUpDown(CPed* pPed);
     bool GetLookLeft();
     bool GetLookRight();
     bool GetLookBehindForCar();

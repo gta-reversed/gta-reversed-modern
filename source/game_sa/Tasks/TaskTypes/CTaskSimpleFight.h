@@ -44,6 +44,7 @@ public:
    unsigned char m_nLastCommand;
     
    CTaskSimpleFight(CEntity *pTargetEntity, int nCommand, unsigned int nIdlePeriod = 10000);
+   bool ControlFight(CEntity* pEntity, unsigned char command);
 };
 
 VALIDATE_SIZE(CTaskSimpleFight, 0x28);

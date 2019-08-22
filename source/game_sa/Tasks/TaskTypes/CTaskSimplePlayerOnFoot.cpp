@@ -67,6 +67,7 @@ bool CTaskSimplePlayerOnFoot::ProcessPed(CPed* pPed)
 #endif
 }
 
+
 bool CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
 {
     return plugin::CallMethodAndReturn<bool, 0x6859A0, CTaskSimplePlayerOnFoot*, CPlayerPed*>(this, pPlayerPed);
@@ -181,9 +182,105 @@ void CTaskSimplePlayerOnFoot::PlayerControlFighter(CPlayerPed* pPlayerPed)
     plugin::CallMethod<0x687530, CTaskSimplePlayerOnFoot*, CPlayerPed*>(this, pPlayerPed);
 }
 
-bool CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPed* pPed) 
+void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed)
 {
-    return plugin::CallMethodAndReturn<bool, 0x687C20, CTaskSimplePlayerOnFoot*, CPed*>(this, pPed);
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallMethod<0x687C20, CTaskSimplePlayerOnFoot*, CPlayerPed*>(this, pPlayerPed);
+#else
+    CTaskSimpleUseGun* pTaskUseGun = pPlayerPed->m_pIntelligence->GetTaskUseGun();
+    if (pTaskUseGun)
+    {
+        if (!pPlayerPed->m_pAttachedTo)
+        {
+            CVector2D moveSpeed(0.0, 0.0);
+            CPad* pPad = pPlayerPed->GetPadFromPlayer();
+            double pedWalkUpDown = moveSpeed.y;
+            double pedWalkLeftRight = moveSpeed.x;
+            if (!pTaskUseGun->m_pWeaponInfo->m_nFlags.b1stPerson || CGameLogic::IsPlayerUse2PlayerControls(pPlayerPed))
+            {
+                pedWalkUpDown = pPad->GetPedWalkUpDown();
+                pedWalkLeftRight = pPad->GetPedWalkLeftRight();
+            }
+            else if (TheCamera.Using1stPersonWeaponMode())
+            {
+                pedWalkUpDown = pPad->GetPedWalkUpDown(pPlayerPed);
+                pedWalkLeftRight = pPad->GetPedWalkLeftRight(pPlayerPed);
+            }
+            moveSpeed.x = pedWalkLeftRight * 0.0078125;
+            moveSpeed.y = pedWalkUpDown * 0.0078125;
+            CEntity* pTargetedObject = pPlayerPed->m_pTargetedObject;
+            if (CGameLogic::IsPlayerUse2PlayerControls(pPlayerPed))
+            {
+                float moveBlendRatio = sqrt(moveSpeed.x * moveSpeed.x + moveSpeed.y * moveSpeed.y);
+                if (moveBlendRatio > 0.0)
+                {
+
+                    float radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0, 0.0, -moveSpeed.x, moveSpeed.y)
+                        - TheCamera.m_fOrientation;
+                    float limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
+                    double negativeSinRadian = -sin(limitedRadianAngle);
+                    double cosRadian = cos(limitedRadianAngle);
+                    if (pTargetedObject)
+                    {
+                        if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(pPlayerPed, negativeSinRadian, cosRadian, 0.0, 0.0))
+                        {
+                            moveBlendRatio = 0.0;
+                        }
+                        CMatrixLink* pPedMatrix = pPlayerPed->m_matrix;
+                        moveSpeed.x = (cosRadian * pPedMatrix->right.y + negativeSinRadian * pPedMatrix->right.x + pPedMatrix->right.z * 0.0)
+                            * moveBlendRatio;
+                        moveSpeed.y = -((cosRadian * pPedMatrix->up.y + negativeSinRadian * pPedMatrix->up.x + pPedMatrix->up.z * 0.0)
+                            * moveBlendRatio);
+                    }
+                    else
+                    {
+                        pPlayerPed->m_fAimingRotation = limitedRadianAngle;
+                        double moveSpeedY = 0.0;
+                        if (CGameLogic::IsPlayerAllowedToGoInThisDirection(pPlayerPed, negativeSinRadian, cosRadian, 0.0, 0.0))
+                        {
+                            moveSpeedY = moveBlendRatio;
+                        }
+                        moveSpeed.x = 0.0;
+                        moveSpeed.y = -moveSpeedY;
+                    }
+                }
+
+                if (pTargetedObject)
+                {
+                    CMatrixLink* pPedMatrix = pPlayerPed->m_matrix;
+                    CVector* pPedPos = &pPedMatrix->pos;
+                    if (!pPedMatrix)
+                    {
+                        pPedPos = &pPlayerPed->m_placement.m_vPosn;
+                    }
+                    CMatrix* pTargetedObjectMatrix = pTargetedObject->m_matrix;
+                    CVector* pTargetedObjectPos = &pTargetedObject->m_placement.m_vPosn;;
+                    if (pTargetedObjectMatrix)
+                    {
+                        pTargetedObjectPos = &pTargetedObjectMatrix->pos;
+                    }
+                    pPlayerPed->m_fAimingRotation = atan2(-(pTargetedObjectPos->x - pPedPos->x), pTargetedObjectPos->y - pPedPos->y);
+                }
+            }
+
+            float moveBlendRatio = sqrt(moveSpeed.x * moveSpeed.x + moveSpeed.y * moveSpeed.y);
+            if (moveBlendRatio > 1.0)
+            {
+                float moveSpeedMultiplier = 1.0 / moveBlendRatio;
+                moveSpeed.x = moveSpeed.x * moveSpeedMultiplier;
+                moveSpeed.y = moveSpeedMultiplier * moveSpeed.y;
+            }
+            pTaskUseGun->ControlGunMove(&moveSpeed);
+            if (pPad->DuckJustDown())
+            {
+                if (CTaskSimpleDuck::CanPedDuck(pPlayerPed))
+                {
+                    pPlayerPed->m_pIntelligence->SetTaskDuckSecondary(0);
+                }
+            }
+        }
+    }
+#endif
 }
 
 void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)

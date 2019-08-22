@@ -69,6 +69,14 @@ short CPad::GetSteeringUpDown() {
     return plugin::CallMethodAndReturn<short, 0x53FBD0, CPad*>(this);
 }
 
+short CPad::GetPedWalkLeftRight(CPed* pPed) {
+    return plugin::CallMethodAndReturn<short, 0x540DC0, CPad*, CPed*>(this, pPed);
+}
+
+short CPad::GetPedWalkUpDown(CPed* pPed) {
+    return plugin::CallMethodAndReturn<short, 0x540E20, CPad*, CPed*>(this, pPed);
+}
+
 // Converted from thiscall short CPad::GetPedWalkLeftRight(void) 0x53FC90
 short CPad::GetPedWalkLeftRight() {
     return plugin::CallMethodAndReturn<short, 0x53FC90, CPad*>(this);

@@ -31,7 +31,7 @@ public:
     bool ProcessPlayerWeapon(CPlayerPed* pPlayerPed);
     void PlayIdleAnimations(CPed* pPed);
     void PlayerControlFighter(CPlayerPed* pPlayerPed);
-    bool PlayerControlZeldaWeapon(CPed* pPed);
+    void PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed);
     void PlayerControlDucked(CPed* pPed);
     int  PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAndDucking);
 
