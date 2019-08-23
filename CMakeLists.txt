@@ -28,6 +28,8 @@ add_library(gta_reversed SHARED ${_headerfiles_list} ${_sourcefiles_list})
 target_link_libraries(gta_reversed debug "${_src_root_path}/source/detours.lib")
 target_link_libraries(gta_reversed optimized "${_src_root_path}/source/detours.lib")
 
+target_compile_definitions(gta_reversed PRIVATE USE_DEFAULT_FUNCTIONS=1)
+
 foreach(_header IN ITEMS ${_headerfiles_list})
 	get_filename_component(_header_path "${_header}" PATH)
 	string(REPLACE "/" "\\" _header_path_msvc "${_header_path}")
