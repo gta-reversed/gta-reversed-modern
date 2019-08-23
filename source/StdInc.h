@@ -430,3 +430,4 @@
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleUseGun.h"
 #include "game_sa\Tasks\TaskTypes\CTaskUtilityLineUpPedWithCar.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexJump.h"
+#include "game_sa\Tasks\TaskTypes\CTaskComplexUseGoggles.h"

@@ -4,7 +4,7 @@ Authors: GTA Community. See more here
 https://github.com/DK22Pac/plugin-sdk
 Do not delete this comment block. Respect others' work!
 */
-#include "CWorld.h"
+#include "StdInc.h"
 
 unsigned int MAX_PLAYERS = 2;
 unsigned int MAX_SECTORS = 14400;

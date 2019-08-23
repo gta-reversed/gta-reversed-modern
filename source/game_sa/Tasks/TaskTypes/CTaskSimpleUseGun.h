@@ -56,8 +56,11 @@ public:
     bool m_LookIKInUse;
     bool m_bAimImmediate;
 
-    CTaskSimpleUseGun(CEntity *pTargetEntity, CVector vecTarget, unsigned char nCommand, unsigned short nBurstLength = 1, bool bAimImmediate = false);
+    CTaskSimpleUseGun* Constructor(CEntity *pTargetEntity, CVector vecTarget, unsigned char nCommand, unsigned short nBurstLength = 1, bool bAimImmediate = false);
     bool ControlGunMove(CVector2D* moveSpeed);
+    bool PlayerPassiveControlGun();
+    static bool RequirePistolWhip(CPed* pPed, CEntity* pTargetEntity);
+    bool ControlGun(CPed* pPed, CEntity* target, char nCount);
 };
 
 VALIDATE_SIZE(CTaskSimpleUseGun, 0x3C);

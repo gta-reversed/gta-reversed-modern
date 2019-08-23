@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 project(GTASA C CXX)
 
@@ -44,4 +44,11 @@ foreach(_source IN ITEMS ${_sourcefiles_list})
 endforeach()
 
 
- 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /YuStdInc.h")
+
+set_source_files_properties(source/StdInc.cpp
+    PROPERTIES
+    COMPILE_FLAGS "/YcStdInc.h"
+    )
+
+list(APPEND _sourcefiles_list StdInc.cpp)

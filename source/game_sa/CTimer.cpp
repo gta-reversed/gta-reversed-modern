@@ -4,7 +4,7 @@ Authors: GTA Community. See more here
 https://github.com/DK22Pac/plugin-sdk
 Do not delete this comment block. Respect others' work!
 */
-#include "CTimer.h"
+#include "StdInc.h"
 
 bool& CTimer::bSkipProcessThisFrame = *(bool*)0xB7CB89;
 bool& CTimer::bSlowMotionActive = *(bool*)0xB7CB88;

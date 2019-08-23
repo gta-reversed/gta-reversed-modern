@@ -17,7 +17,7 @@ class CPlayerInfo;
 
 class CPlayerPed : public CPed {
 public:
-	CPed *m_pPlayerTargettedPed;
+	CPed * m_p3rdPersonMouseTarget;
 	int field_7A0;
 
     // did we display "JCK_HLP" message

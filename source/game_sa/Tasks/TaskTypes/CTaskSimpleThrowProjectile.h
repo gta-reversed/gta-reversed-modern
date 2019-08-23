@@ -11,7 +11,7 @@
 #include "CAnimBlendAssociation.h"
 #include "CEntity.h"
 
-class  CTaskSimpleThrowProjectile : public CTaskSimple {
+class CTaskSimpleThrowProjectile : public CTaskSimple {
 protected:
     CTaskSimpleThrowProjectile(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
@@ -27,6 +27,7 @@ public:
     unsigned int m_nStartTime;
 
     CTaskSimpleThrowProjectile(CEntity* pTarget, CVector Posn);
+    bool ControlThrow(bool bUpdateStartTime, CEntity* pEntity, CEntity* pEntity2);
 };
 
 VALIDATE_SIZE(CTaskSimpleThrowProjectile, 0x24);

@@ -311,3 +311,18 @@ unsigned int CPad::GetTouchedTimeDelta()
 {
     return plugin::CallMethodAndReturn<unsigned int, 0x53F210, CPad*>(this);
 }
+
+bool CPad::WeaponJustDown(CPed* pPed)
+{
+    return plugin::CallMethodAndReturn<bool, 0x540250, CPad*, CPed*>(this, pPed);
+}
+
+bool CPad::GetEnterTargeting()
+{
+    return plugin::CallMethodAndReturn<bool, 0x5406B0, CPad*>(this);
+}
+
+int CPad::GetWeapon(CPed* pPed)
+{
+    return plugin::CallMethodAndReturn<int, 0x540180, CPad*, CPed*>(this, pPed);
+}

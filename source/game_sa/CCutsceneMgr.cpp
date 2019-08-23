@@ -4,7 +4,7 @@ Authors: GTA Community. See more here
 https://github.com/DK22Pac/plugin-sdk
 Do not delete this comment block. Respect others' work!
 */
-#include "CCutsceneMgr.h"
+#include "StdInc.h"
 
 unsigned int MAX_NUM_CUTSCENE_OBJECTS = 50;
 unsigned int MAX_NUM_CUTSCENE_PARTICLE_EFFECTS = 8;

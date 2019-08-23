@@ -10,3 +10,11 @@ CCamera &TheCamera = *reinterpret_cast<CCamera *>(0xB6F028);
 bool CCamera::Using1stPersonWeaponMode() {
     return plugin::CallMethodAndReturnDynGlobal<bool, CCamera*>(0x50BFF0, this);
 }
+
+void CCamera::ClearPlayerWeaponMode() {
+    plugin::CallMethodDynGlobal<CCamera*>(0x50AB10, this);
+}
+
+void CCamera::SetNewPlayerWeaponMode(short mode, short maxZoom, short minZoom) {
+    plugin::CallMethodDynGlobal<CCamera*, short, short, short>(0x50BFB0, this, mode, maxZoom, minZoom);
+}

@@ -35,19 +35,26 @@ public:
     unsigned int m_nHitAnimDelayTimer;
     float m_fAttackButtonCounter;
     void *m_pDangerCar;
-    unsigned int m_bStoppedMoving : 1;
-    unsigned int m_bAdrenaline : 1;
-    unsigned int m_bHaveTargetSelected : 1;             // Needed to work out whether we lost target this frame
-    unsigned int m_bFreeAiming : 1;
-    unsigned int m_bCanBeDamaged : 1;
-    unsigned int m_bAllMeleeAttackPtsBlocked : 1;       // if all of m_pMeleeAttackers[] is blocked by collision, just attack straight ahead
-    unsigned int m_bJustBeenSnacking : 1;               // If this bit is true we have just bought something from a vending machine
-    unsigned int m_bRequireHandleBreath : 1;
-    unsigned int m_bGroupStuffDisabled : 1;             // if this is true the player can't recrout or give his group commands.
-    unsigned int m_bGroupAlwaysFollow : 1;              // The group is told to always follow the player (used for girlfriend missions)
-    unsigned int m_bGroupNeverFollow : 1;               // The group is told to always follow the player (used for girlfriend missions)
-    unsigned int m_bInVehicleDontAllowWeaponChange : 1; // stop weapon change once driveby weapon has been given
-    unsigned int m_bRenderWeapon : 1;                   // set to false during cutscenes so that knuckledusters are not rendered
+    union 
+    {
+        struct 
+        {
+            unsigned int m_bStoppedMoving : 1;
+            unsigned int m_bAdrenaline : 1;
+            unsigned int m_bHaveTargetSelected : 1;             // Needed to work out whether we lost target this frame
+            unsigned int m_bFreeAiming : 1;
+            unsigned int m_bCanBeDamaged : 1;
+            unsigned int m_bAllMeleeAttackPtsBlocked : 1;       // if all of m_pMeleeAttackers[] is blocked by collision, just attack straight ahead
+            unsigned int m_bJustBeenSnacking : 1;               // If this bit is true we have just bought something from a vending machine
+            unsigned int m_bRequireHandleBreath : 1;
+            unsigned int m_bGroupStuffDisabled : 1;             // if this is true the player can't recrout or give his group commands.
+            unsigned int m_bGroupAlwaysFollow : 1;              // The group is told to always follow the player (used for girlfriend missions)
+            unsigned int m_bGroupNeverFollow : 1;               // The group is told to always follow the player (used for girlfriend missions)
+            unsigned int m_bInVehicleDontAllowWeaponChange : 1; // stop weapon change once driveby weapon has been given
+            unsigned int m_bRenderWeapon : 1;                   // set to false during cutscenes so that knuckledusters are not rendered
+        };
+        unsigned int m_dwPlayerFlags;
+    };
     unsigned int m_nPlayerGroup;
     unsigned int m_nAdrenalineEndTime;
     unsigned char m_nDrunkenness;

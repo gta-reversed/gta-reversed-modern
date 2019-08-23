@@ -244,6 +244,9 @@ public:
     bool GroupControlBackJustDown();
     void Clear(bool enablePlayerControls, bool resetPhase);
     void UpdatePads();
+    bool WeaponJustDown(CPed* pPed);
+    bool GetEnterTargeting();
+    int GetWeapon(CPed* pPed);
 };
 
 VALIDATE_SIZE(CPad, 0x134);
