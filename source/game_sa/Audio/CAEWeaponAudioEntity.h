@@ -51,6 +51,7 @@ public:
 	void PlayChainsawStopSound(CPhysical* entity);
 	void PlayCameraSound(CPhysical* entity, int AudioEventId, float audability);
 	void Initialise();
+    void AddAudioEvent(int audioEventId);
 
 };
 

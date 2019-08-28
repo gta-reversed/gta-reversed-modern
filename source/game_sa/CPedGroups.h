@@ -23,7 +23,7 @@ public:
      static bool AreInSameGroup(CPed *ped1, CPed *ped2);
      static void CleanUpForShutDown();
      static signed int GetGroupId(CPedGroup *pedgrp);
-     static char *GetPedsGroup(CPed *ped);
+     static CPedGroup* GetPedsGroup(CPed *ped);
      static void Init();
      static bool IsGroupLeader(CPed *ped);
      static char IsInPlayersGroup(CPed *a1);

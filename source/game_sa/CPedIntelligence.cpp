@@ -38,8 +38,8 @@ bool CPedIntelligence::IsInHearingRange(CVector const& posn) {
 }
 
 // Converted from thiscall bool CPedIntelligence::IsInSeeingRange(CVector const& posn) 0x600C60 
-bool CPedIntelligence::IsInSeeingRange(CVector const& posn) {
-    return plugin::CallMethodAndReturn<bool, 0x600C60, CPedIntelligence*, CVector const&>(this, posn);
+bool CPedIntelligence::IsInSeeingRange(CVector* posn) {
+    return plugin::CallMethodAndReturn<bool, 0x600C60, CPedIntelligence*, CVector*>(this, posn);
 }
 
 // Converted from thiscall bool CPedIntelligence::FindRespectedFriendInInformRange(void) 0x600CF0 
@@ -265,6 +265,11 @@ void CPedIntelligence::ProcessFirst() {
 // Converted from thiscall void CPedIntelligence::Process(void) 0x608260 
 void CPedIntelligence::Process() {
     plugin::CallMethod<0x608260, CPedIntelligence*>(this);
+}
+
+CTask* CPedIntelligence::GetActivePrimaryTask()
+{
+    return plugin::CallMethodAndReturn<CTask*, 0x4B85B0, CPedIntelligence*>(this);
 }
 
 // Converted from cdecl void CPedIntelligence::operator delete(void * arg1) 0x6074E0 

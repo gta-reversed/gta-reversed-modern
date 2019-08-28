@@ -9,7 +9,7 @@
 /* https://code.google.com/p/mtasa-blue/source/browse/trunk/MTA10/sdk/game/CEntity.h */
 enum eEntityType
 {
-	ENTITY_TYPE_NOTHING,
+	ENTITY_TYPE_NOTHING = 0,
 	ENTITY_TYPE_BUILDING,
 	ENTITY_TYPE_VEHICLE,
 	ENTITY_TYPE_PED,

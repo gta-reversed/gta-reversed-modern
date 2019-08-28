@@ -23,9 +23,9 @@ public:
     static void ShutdownMatrixArray();
     static void InitMatrixArray();
     
-    CVector GetRightDirection();
-    CVector GetTopDirection();
-    CVector GetAtDirection();
+    CVector* GetRightDirection(CVector* pOut);
+    CVector* GetTopDirection(CVector* pOut);
+    CVector* GetAtDirection(CVector* pOut);
     
     void FreeStaticMatrix();
     void SetPosn(float x, float y, float z);

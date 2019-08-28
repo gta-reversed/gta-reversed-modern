@@ -214,8 +214,8 @@ public:
     short GetBrake();
     bool GetExitVehicle();
     bool ExitVehicleJustDown();
-    unsigned char GetMeleeAttack();
-    unsigned char MeleeAttackJustDown();
+    unsigned char GetMeleeAttack(bool bCheckButtonCircleStateOnly);
+    unsigned char MeleeAttackJustDown(bool bCheckButtonCircleStateOnly);
     short GetAccelerate();
     bool GetAccelerateJustDown();
     bool NextStationJustUp();
@@ -247,6 +247,8 @@ public:
     bool WeaponJustDown(CPed* pPed);
     bool GetEnterTargeting();
     int GetWeapon(CPed* pPed);
+    short AimWeaponLeftRight(CPed* pPed);
+    short AimWeaponUpDown(CPed* pPed);
 };
 
 VALIDATE_SIZE(CPad, 0x134);

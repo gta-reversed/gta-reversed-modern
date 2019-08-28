@@ -7,6 +7,7 @@
 #pragma once
 
 #include "PluginBase.h"
+#include "CEvent.h"
 
 class  CEventGroup {
 protected:

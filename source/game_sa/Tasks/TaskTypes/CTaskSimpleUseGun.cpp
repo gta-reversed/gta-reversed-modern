@@ -25,3 +25,8 @@ bool CTaskSimpleUseGun::ControlGun(CPed* pPed, CEntity* target, char nCount)
 {
     return plugin::CallMethodAndReturn<bool, 0x61E040, CTaskSimpleUseGun*, CPed*, CEntity*, char>(this, pPed, target, nCount);
 }
+
+int CTaskSimpleUseGun::SkipAim(CPed* pPed)
+{
+    return plugin::CallMethodAndReturn<int, 0x61DFA0, CTaskSimpleUseGun*, CPed*>(this, pPed);
+}

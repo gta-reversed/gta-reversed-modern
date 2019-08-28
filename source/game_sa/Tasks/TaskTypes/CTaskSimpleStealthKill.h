@@ -30,7 +30,7 @@ public:
     CAnimBlendAssociation *m_pAnim;
     unsigned int m_nTime;
 
-    CTaskSimpleStealthKill(bool bKeepTargetAlive,CPed *pTarget,int nAssocGroupId);
+    CTaskSimpleStealthKill* Constructor(bool bKeepTargetAlive,CPed *pTarget,int nAssocGroupId);
 };
 
 VALIDATE_SIZE(CTaskSimpleStealthKill, 0x20);

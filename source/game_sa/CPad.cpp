@@ -153,13 +153,13 @@ bool CPad::ExitVehicleJustDown() {
 }
 
 // Converted from thiscall uchar CPad::GetMeleeAttack(void) 0x540340
-unsigned char CPad::GetMeleeAttack() {
-    return plugin::CallMethodAndReturn<unsigned char, 0x540340, CPad*>(this);
+unsigned char CPad::GetMeleeAttack(bool bCheckButtonCircleStateOnly) {
+    return plugin::CallMethodAndReturn<unsigned char, 0x540340, CPad*, bool>(this, bCheckButtonCircleStateOnly);
 }
 
 // Converted from thiscall uchar CPad::MeleeAttackJustDown(void) 0x540390
-unsigned char CPad::MeleeAttackJustDown() {
-    return plugin::CallMethodAndReturn<unsigned char, 0x540390, CPad*>(this);
+unsigned char CPad::MeleeAttackJustDown(bool bCheckButtonCircleStateOnly) {
+    return plugin::CallMethodAndReturn<unsigned char, 0x540390, CPad*, bool>(this, bCheckButtonCircleStateOnly);
 }
 
 // Converted from thiscall short CPad::GetAccelerate(void) 0x5403F0
@@ -325,4 +325,14 @@ bool CPad::GetEnterTargeting()
 int CPad::GetWeapon(CPed* pPed)
 {
     return plugin::CallMethodAndReturn<int, 0x540180, CPad*, CPed*>(this, pPed);
+}
+
+short CPad::AimWeaponLeftRight(CPed* pPed)
+{
+    return plugin::CallMethodAndReturn<short, 0x541040, CPad*, CPed*>(this, pPed);
+}
+
+short CPad::AimWeaponUpDown(CPed* pPed)
+{
+    return plugin::CallMethodAndReturn<short, 0x5410C0, CPad*, CPed*>(this, pPed);
 }

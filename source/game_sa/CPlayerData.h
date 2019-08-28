@@ -53,6 +53,14 @@ public:
             unsigned int m_bInVehicleDontAllowWeaponChange : 1; // stop weapon change once driveby weapon has been given
             unsigned int m_bRenderWeapon : 1;                   // set to false during cutscenes so that knuckledusters are not rendered
         };
+
+        struct 
+        {
+            unsigned char m_bPlayerFlagsByte1;
+            unsigned char m_bPlayerFlagsByte2;
+            unsigned char m_bPlayerFlagsByte3;
+            unsigned char m_bPlayerFlagsByte4;
+        };
         unsigned int m_dwPlayerFlags;
     };
     unsigned int m_nPlayerGroup;

@@ -18,3 +18,7 @@ void CCamera::ClearPlayerWeaponMode() {
 void CCamera::SetNewPlayerWeaponMode(short mode, short maxZoom, short minZoom) {
     plugin::CallMethodDynGlobal<CCamera*, short, short, short>(0x50BFB0, this, mode, maxZoom, minZoom);
 }
+
+void CCamera::UpdateAimingCoors(CVector const* AimingTargetCoors) {
+    plugin::CallMethodDynGlobal<CCamera*, CVector const*>(0x50CB10, this, AimingTargetCoors);
+}

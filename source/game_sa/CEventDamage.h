@@ -3,11 +3,11 @@
 #include "Entity\CEntity.h"
 #include "Enums\eWeaponType.h"
 #include "Enums\ePedPieceTypes.h"
+#include "CEvent.h"
 
-class CEventDamage
+class CEventDamage : CEvent
 {
 public:
-    DWORD vmt;                                              // 0
     DWORD ticks;                                            // 4
     BYTE unk8;                                              // 8
     BYTE unk9;                                              // 9

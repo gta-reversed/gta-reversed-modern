@@ -35,6 +35,8 @@ public:
     int            m_nModelId1; // modelinfo id
     int            m_nModelId2; // second modelinfo id
     unsigned int   m_nSlot;
+    union 
+    {
     struct {
         unsigned int bCanAim : 1;
         unsigned int bAimWithArm : 1;
@@ -55,7 +57,9 @@ public:
         unsigned int bSlowdown : 1;
         unsigned int bRandSpeed : 1;
         unsigned int bExpands : 1;
-    }              m_nFlags;
+    }   m_nFlags;
+        unsigned int m_nFlags4Bytes;
+    };
 	unsigned int   m_dwAnimGroup; // instead of storing pointers directly to anims, use anim association groups
 	unsigned short m_nAmmoClip; // ammo in one clip
 	unsigned short m_nDamage; // damage inflicted per hit
@@ -87,6 +91,8 @@ public:
 
 	// weapon names array. Count: MAX_WEAPON_NAMES(50)
 	static char **ms_aWeaponNames;
+
+    int GetCrouchReloadAnimationID();
 
 	// static functions
 

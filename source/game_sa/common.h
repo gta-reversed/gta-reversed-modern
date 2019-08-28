@@ -14,6 +14,8 @@ Do not delete this comment block. Respect others' work!
 #include "CAnimBlendAssociation.h"
 #include "CAnimBlendClumpData.h"
 
+extern int gDefaultTaskTime;
+
 extern char *gString; // char gString[200]
 
 extern float &GAME_GRAVITY; // default 0.0080000004
@@ -43,6 +45,7 @@ CAutomobile * FindPlayerVehicle(int playerId, bool bIncludeRemote);
 bool InTwoPlayersMode();
 // vectorsub
 CVector * VectorSub(CVector * out, CVector * from, CVector * what);
+CVector* MultiplyMatrixWithVector(CVector* outPoint, CMatrix* m, CVector* point);
 // matrix mul
 CVector Multiply3x3(CMatrix  const& matrix, CVector  const& vec);
 // returns player wanted

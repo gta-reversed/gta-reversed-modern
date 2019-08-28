@@ -19,6 +19,11 @@ CWeaponInfo::~CWeaponInfo()
     ((void(__thiscall*)(CWeaponInfo*))0x743C40)(this);
 }
 
+int CWeaponInfo::GetCrouchReloadAnimationID()
+{
+    return plugin::CallMethodAndReturn<int, 0x685700, CWeaponInfo*>(this);
+}
+
 char** CWeaponInfo::ms_aWeaponNames = (char**)0x8D6150;
 
 void CWeaponInfo::LoadWeaponData()

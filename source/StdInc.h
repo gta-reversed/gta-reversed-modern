@@ -14,6 +14,11 @@
 #include <iostream>
 #include <cassert>
 
+#include "game_sa\IKChainManager_c.h"
+#include "game_sa\CEventGroupEvent.h"
+#include "game_sa\CEventGunAimedAt.h"
+#include "game_sa\CCrime.h"
+#include "game_sa\CEvent.h"
 #include "game_sa\CSurfaceTable.h"
 #include "game_sa\CReplay.h"
 #include "game_sa\CVehicleRecording.h"

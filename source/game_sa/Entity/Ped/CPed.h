@@ -201,6 +201,8 @@ public:
             unsigned int bUsedForReplay : 1; // This ped is controlled by replay and should be removed when replay is done.
         };
         unsigned int m_nPedFlags;
+        unsigned int m_nSecondPedFlags;
+        unsigned int m_nThirdPedFlags;
     };
     CPedIntelligence   *m_pIntelligence;
     CPlayerData        *m_pPlayerData;

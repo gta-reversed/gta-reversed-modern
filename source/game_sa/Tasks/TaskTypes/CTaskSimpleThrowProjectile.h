@@ -26,7 +26,7 @@ public:
     CVector m_vecPosition;
     unsigned int m_nStartTime;
 
-    CTaskSimpleThrowProjectile(CEntity* pTarget, CVector Posn);
+    CTaskSimpleThrowProjectile* Constructor(CEntity* pTarget, CVector Posn);
     bool ControlThrow(bool bUpdateStartTime, CEntity* pEntity, CEntity* pEntity2);
 };
 

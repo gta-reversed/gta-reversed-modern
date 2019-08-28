@@ -9,3 +9,8 @@ bool CGameLogic::IsPlayerUse2PlayerControls(CPed* pPed)
 {
     return plugin::CallAndReturn<bool, 0x442020, CPed*>(pPed);
 }
+
+bool CGameLogic::IsCoopGameGoingOn()
+{
+    return plugin::CallAndReturn<bool, 0x441390>();
+}

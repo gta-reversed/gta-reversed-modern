@@ -64,7 +64,7 @@ public:
 	void SetHearingRange(float range);
 	void SetSeeingRange(float range);
 	bool IsInHearingRange(CVector const& posn);
-	bool IsInSeeingRange(CVector const& posn);
+	bool IsInSeeingRange(CVector* posn);
 	bool FindRespectedFriendInInformRange();
 	bool IsRespondingToEvent(int event);
 	void AddTaskPhysResponse(CTask* task, bool arg2);
@@ -110,6 +110,7 @@ public:
 	void ProcessStaticCounter();
 	void ProcessFirst();
 	void Process();
+    CTask* GetActivePrimaryTask();
 	static void operator delete(void* arg1);
 };
 

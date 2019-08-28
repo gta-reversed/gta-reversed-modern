@@ -43,7 +43,7 @@ public:
     CTaskSimpleDuck(eDuckControlTypes DuckControlType, unsigned short nLengthOfDuck, short nUseShotsWhizzingEvents = -1);
     static bool CanPedDuck(CPed* pPed);
     bool ControlDuckMove(float moveSpeedX, float moveSpeedY);
-    
+    bool IsTaskInUseByOtherTasks(); 
 };
 
 VALIDATE_SIZE(CTaskSimpleDuck, 0x28);

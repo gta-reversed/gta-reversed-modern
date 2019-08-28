@@ -13,6 +13,7 @@ Do not delete this comment block. Respect others' work!
 extern int& gLastRandomNumberForIdleAnimationID;
 extern unsigned int& gLastTouchTimeDelta;
 extern float& gDuckAnimBlendData;
+extern bool& gbUnknown_8D2FE8;
 
 class CPed;
 class  CTaskSimplePlayerOnFoot : public CTaskSimple {
@@ -23,12 +24,12 @@ public:
     unsigned int m_nFrameCounter;
     int m_nTimer;
     int dword_14; // always 0
-    int dword_18; // always 0
+    CEntity* m_pLookingAtEntity; // always 0
 
     CTaskSimplePlayerOnFoot* Constructor();
     CTaskSimplePlayerOnFoot* Destructor();
     bool ProcessPed(CPed* pPed);
-    bool ProcessPlayerWeapon(CPlayerPed* pPlayerPed);
+    void ProcessPlayerWeapon(CPlayerPed* pPlayerPed);
     void PlayIdleAnimations(CPed* pPed);
     void PlayerControlFighter(CPlayerPed* pPlayerPed);
     void PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed);
