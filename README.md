@@ -2,7 +2,7 @@
 A project to reverse Grand Theft Auto San Andreas completely, and to rewrite and document every function. 
 
 ### Discord
-[Join our discord server](https://discordapp.com/invite/YhpEpu). You can request us to decompile a function for you. If you wish to contribute, then we'll be happy to assist you.
+[Join our discord server](https://discord.gg/P5zVn6C). You can request us to decompile a function for you. If you wish to contribute, then we'll be happy to assist you.
 
 #### Build Instructions
 1) Download and install latest CMake for windows from [HERE](https://cmake.org/download/).
