@@ -4,15 +4,28 @@
 #pragma comment(lib, "detours.lib")
 
 
-//void PlayIdleAnimations(CPed* pPed)
-auto OLD_CTaskSimplePlayerOnFoot_ProcessPlayerWeapon = (void(__thiscall*)(CTaskSimplePlayerOnFoot * pThis, CPed * pPed))0x6859A0;
+auto OLD_CPedIntelligence_FlushImmediately = (void (__thiscall*)(CPedIntelligence *pThis, char bSetPrimaryDefaultTask))0x601640;
+//auto OLD_CPedIntelligence_FlushIntelligence = (void (__thiscall*)(CPedIntelligence *pThis))0x0;
+//auto OLD_CPedIntelligence_GetEffectInUse = (int (__thiscall*)(CPedIntelligence *pThis))0x0;
+//auto OLD_CPedIntelligence_GetMoveStateFromGoToTask = (int (__thiscall*)(CPedIntelligence *pThis))0x0;
+//auto OLD_CPedIntelligence_GetTaskClimb = (CTask *(__thiscall*)(CPedIntelligence *pThis);
+//auto OLD_CPedIntelligence_GetTaskDuck = (CTask *(__thiscall*)(CPedIntelligence *pThis, char IgnoreCheckingForSimplestActiveTask))0x0;
+//auto OLD_CPedIntelligence_GetTaskFighting = (CTaskSimpleFight *(__thiscall*)(CPedIntelligence *pThis))0x0;
+//auto OLD_CPedIntelligence_GetTaskHold = (CTaskSimpleHoldEntity *(__thiscall*)(CPedIntelligence *pThis, char IgnoreCheckingForSimplestActiveTask))0x0;
+//auto OLD_CPedIntelligence_GetTaskInAir = (CTask *(__thiscall*)(CPedIntelligence *pThis))0x0;
+//auto OLD_CPedIntelligence_GetTaskJetPack = (CTask *(__thiscall*)(CPedIntelligence *pThis))0x0;
+//auto OLD_CPedIntelligence_GetTaskSwim = (CTask *(__thiscall*)(CPedIntelligence *pThis))0x0;
+//auto OLD_CPedIntelligence_GetTaskThrow = (CTask *(__thiscall*)(CPedIntelligence *pThis))0x0;
+//auto OLD_CPedIntelligence_GetTaskUseGun = (CTaskSimpleUseGun *(__thiscall*)(CPedIntelligence *pThis))0x0;
+//auto OLD_CPedIntelligence_GetUsingParachute = (bool (__thiscall*)(CPedIntelligence *pThis))0x0;
+//auto OLD_CPedIntelligence_IsFriendlyWith = (bool (__thiscall*)(CPedIntelligence *pThis, CPed *pPed))0x0;
+//auto OLD_CPedIntelligence_IsInSeeingRange = (bool (__thiscall*)(CPedIntelligence *pThis, CVector *pPosition))0x0;
+//auto OLD_CPedIntelligence_IsInterestingEntity = (bool (__thiscall*)(CPedIntelligence *pThis, CEntity *pEntity))0x0;
 
-void __fastcall CTaskSimplePlayerOnFoot_ProcessPlayerWeapon(CTaskSimplePlayerOnFoot* pThis, void* padding, CPlayerPed* pPlayerPed);
+void __fastcall CPedIntelligence_FlushImmediately(CPedIntelligence* pThis, void* padding, bool bSetPrimaryDefaultTask);
 
-//CTask* __cdecl CTaskManager__GetSimplestTask(CTask* pTask);
 void __cdecl HOOK_THEFUNCTION();
 
-#include <ctime>
 void InjectHooksMain(void)
 {
     /*CAnimManager::InjectHooks();
@@ -24,16 +37,15 @@ void InjectHooksMain(void)
     //InjectHook(0x0681C10, &HOOK_THEFUNCTION, PATCH_JUMP);
 
 
-        /*
+    /*
     DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CTaskSimplePlayerOnFoot_ProcessPlayerWeapon, CTaskSimplePlayerOnFoot_ProcessPlayerWeapon);
+    DetourAttach(&(PVOID&)OLD_CPedIntelligence_FlushImmediately, CPedIntelligence_FlushImmediately);
     DetourTransactionCommit();
-     */
-    /**/
+    */
 }
 /*
 enum eFunctionReturnValue
@@ -59,9 +71,10 @@ enum eFunctionReturnValue
     FUNCTION_SOMELABEL = 4
 };
 
-void __fastcall CTaskSimplePlayerOnFoot_ProcessPlayerWeapon(CTaskSimplePlayerOnFoot* pThis, void* padding, CPlayerPed* pPlayerPed)
-{
-    printf(" calling CTaskSimplePlayerOnFoot__ProcessPlayerWeapon\n");
 
-  
+void __fastcall CPedIntelligence_FlushImmediately(CPedIntelligence* pThis, void* padding, bool bSetPrimaryDefaultTask)
+{
+    printf(" calling CPedIntelligence_FlushImmediately\n");
+
+ 
 }

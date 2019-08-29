@@ -9,7 +9,7 @@
 #include "PluginBase.h"
 #include "CEvent.h"
 
-class  CEventGroup {
+class CEventGroup {
 protected:
     void *vtable;
 public:
@@ -17,7 +17,9 @@ public:
     unsigned int  m_dwCount;
     void         *m_apEvents[16];
 
-    CEvent * Add(CEvent& event, bool bValid);
+    CEvent * Add(CEvent* event, bool bValid);
+    bool HasScriptCommandOfTaskType(eTaskType taskType);
+    void Flush(bool bAvoidFlushingTaskComplexBeInGroup);
 };
 
 VALIDATE_SIZE(CEventGroup, 0x4C);

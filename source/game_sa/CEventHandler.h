@@ -8,7 +8,7 @@
 
 #include "PluginBase.h"
 
-class  CEventHandler {
+class CEventHandler {
 public:
     class CPed *m_pPed;
     int field_4;
@@ -25,6 +25,9 @@ public:
     int field_28;
     int field_2C;
     int field_30;
+
+    void HandleEvents();
+    void FlushImmediately();
 };
 
 VALIDATE_SIZE(CEventHandler, 0x34);

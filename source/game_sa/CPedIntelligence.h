@@ -58,6 +58,10 @@ public:
     char gap_27C[12];
     class CEntity *m_apInterestingEntities[3];
     
+    static float& LIGHT_AI_LEVEL_MAX;
+    static float& flt_8D2384;
+    static float& flt_8D2388;
+
 	void SetPedDecisionMakerType(int newtype);
 	void SetPedDecisionMakerTypeInGroup(int newtype);
 	void RestorePedDecisionMakerType();
@@ -67,11 +71,11 @@ public:
 	bool IsInSeeingRange(CVector* posn);
 	bool FindRespectedFriendInInformRange();
 	bool IsRespondingToEvent(int event);
-	void AddTaskPhysResponse(CTask* task, bool arg2);
-	void AddTaskEventResponseTemp(CTask* task, bool arg2);
-	void AddTaskEventResponseNonTemp(CTask* task, bool arg2);
-	void AddTaskPrimaryMaybeInGroup(CTask* task, bool arg2);
-	CTask* FindTaskByType(int type);
+	void AddTaskPhysResponse(CTask* pTask, int unUsed);
+	void AddTaskEventResponseTemp(CTask* pTask, int unUsed);
+	void AddTaskEventResponseNonTemp(CTask* pTask, int unUsed);
+	void AddTaskPrimaryMaybeInGroup(CTask* pTask, bool bUnknown);
+	CTask* FindTaskByType(int taskId);
 	CTaskSimpleFight* GetTaskFighting();
 	CTaskSimpleUseGun* GetTaskUseGun();
 	CTaskSimpleThrowProjectile* GetTaskThrow();
@@ -85,7 +89,7 @@ public:
 	void SetTaskDuckSecondary(unsigned short arg1);
 	void ClearTaskDuckSecondary();
 	void ClearTasks(bool arg1, bool arg2);
-	void FlushImmediately(bool arg1);
+	void FlushImmediately(bool bSetPrimaryDefaultTask);
 	C2dEffect* GetEffectInUse();
 	void SetEffectInUse(C2dEffect* arg1);
 	void ProcessAfterProcCol();
@@ -106,7 +110,7 @@ public:
 	void LookAtInterestingEntities();
 	void RemoveAllInterestingEntities();
 	bool IsPedGoingForCarDoor();
-	float CanSeeEntityWithLights(CEntity const* pEntity, bool arg2);
+	double CanSeeEntityWithLights(CEntity* pEntity, int unUsed);
 	void ProcessStaticCounter();
 	void ProcessFirst();
 	void Process();

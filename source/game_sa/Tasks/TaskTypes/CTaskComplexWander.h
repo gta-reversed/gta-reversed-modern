@@ -22,6 +22,8 @@ enum eWanderType
     WANDER_TYPE_PROSTITUTE
 };
 
+class CPed;
+
 class  CTaskComplexWander : public CTaskComplex {
 protected:
     CTaskComplexWander(plugin::dummy_func_t a) : CTaskComplex(a) {}
@@ -51,6 +53,7 @@ public:
 
     CTaskComplexWander(int MoveState, unsigned char Dir, bool bWanderSensibly, float TargetRadius = 0.5f);
     
+    static CTaskComplexWander* GetWanderTaskByPedType(CPed* pPed);
 };
 
 VALIDATE_SIZE(CTaskComplexWander, 0x28);

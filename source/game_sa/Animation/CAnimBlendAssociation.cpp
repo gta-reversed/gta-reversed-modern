@@ -56,7 +56,7 @@ void CAnimBlendAssociation::Init1(RpClump *pClump, CAnimBlendHierarchy * pAnimHi
         }
         else 
         {
-            pAnimFrameData = RpAnimBlendClumpFindFrameFromHashKey(pClump, sequence.m_nHash);
+            pAnimFrameData = RpAnimBlendClumpFindFrameFromHashKey(pClump, sequence.m_hash);
         }
         if (pAnimFrameData && sequence.m_nFrameCount > 0)
         {

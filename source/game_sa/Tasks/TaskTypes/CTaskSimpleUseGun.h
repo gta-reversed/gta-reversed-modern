@@ -62,6 +62,7 @@ public:
     static bool RequirePistolWhip(CPed* pPed, CEntity* pTargetEntity);
     bool ControlGun(CPed* pPed, CEntity* target, char nCount);
     int SkipAim(CPed* pPed);
+    int ClearAnim(CPed* pPed);
 };
 
 VALIDATE_SIZE(CTaskSimpleUseGun, 0x3C);

@@ -257,7 +257,7 @@ void CTaskManager::SetNextSubTask(CTaskComplex* pTask) {
             }
         }
         pTask->SetSubTask(nextSubTask);
-        AddSubTasks(nextSubTask);
+        AddSubTasks((CTaskComplex*)nextSubTask);
     }
 #endif
 }
@@ -513,7 +513,7 @@ void CTaskManager::ManageTasks()
 #else
     int iTaskIndex = 0;
 
-    while (!pThis->m_aPrimaryTasks[iTaskIndex])
+    while (!m_aPrimaryTasks[iTaskIndex])
     {
         iTaskIndex = iTaskIndex + 1;
         if (iTaskIndex >= 5)
@@ -524,7 +524,7 @@ void CTaskManager::ManageTasks()
 
     if (iTaskIndex > -1)
     {
-        CTask* pTask = pThis->m_aPrimaryTasks[iTaskIndex];
+        CTask* pTask = m_aPrimaryTasks[iTaskIndex];
         CTask* i = nullptr;
         for (i = 0; pTask; pTask = pTask->GetSubTask())
         {
@@ -533,19 +533,19 @@ void CTaskManager::ManageTasks()
 
         if (!i->IsSimple())
         {
-            CTask* pPrimaryTask = pThis->m_aPrimaryTasks[iTaskIndex];
+            CTask* pPrimaryTask = m_aPrimaryTasks[iTaskIndex];
             if (pPrimaryTask)
             {
                 pPrimaryTask->DeletingDestructor(1);
             }
-            pThis->m_aPrimaryTasks[iTaskIndex] = 0;
+            m_aPrimaryTasks[iTaskIndex] = 0;
             return;
         }
         int loopCounter = 0;
         while (1)
         {
-            pThis->ParentsControlChildren(pThis->m_aPrimaryTasks[iTaskIndex]);
-            CTask* pTask2 = (CTask*)pThis->m_aPrimaryTasks[iTaskIndex];
+            ParentsControlChildren((CTaskComplex*)m_aPrimaryTasks[iTaskIndex]);
+            CTask* pTask2 = (CTask*)m_aPrimaryTasks[iTaskIndex];
             CTask* j = nullptr;
             for (j = 0; pTask2; pTask2 = pTask2->GetSubTask())
             {
@@ -553,8 +553,8 @@ void CTaskManager::ManageTasks()
             }
             if (!j->IsSimple())
             {
-                pThis->SetNextSubTask(j->m_pParentTask);
-                CTask* pTask3 = pThis->m_aPrimaryTasks[iTaskIndex];
+                SetNextSubTask((CTaskComplex*)j->m_pParentTask);
+                CTask* pTask3 = m_aPrimaryTasks[iTaskIndex];
                 CTask* k = nullptr;
                 for (k = 0; pTask3; pTask3 = pTask3->GetSubTask())
                 {
@@ -565,20 +565,20 @@ void CTaskManager::ManageTasks()
                     break;
                 }
             }
-            CTask* v13 = pThis->m_aPrimaryTasks[iTaskIndex];
+            CTask* v13 = m_aPrimaryTasks[iTaskIndex];
             CTaskSimple* pSimpleTask = nullptr;
             for (pSimpleTask = 0; v13; v13 = v13->GetSubTask())
             {
                 pSimpleTask = static_cast<CTaskSimple*>(v13);
             }
-            if (!pSimpleTask->ProcessPed(pThis->m_pPed))
+            if (!pSimpleTask->ProcessPed(m_pPed))
             {
                 goto PROCESS_SECONDARY_TASKS;
             }
-            pThis->SetNextSubTask(pSimpleTask->m_pParentTask);
-            if (!pThis->m_aPrimaryTasks[iTaskIndex]->GetSubTask())
+            SetNextSubTask((CTaskComplex*)pSimpleTask->m_pParentTask);
+            if (!m_aPrimaryTasks[iTaskIndex]->GetSubTask())
             {
-                CTask* pTheTask = pThis->m_aPrimaryTasks[iTaskIndex];
+                CTask* pTheTask = m_aPrimaryTasks[iTaskIndex];
                 if (pTheTask)
                 {
                     pTheTask->DeletingDestructor(1);
@@ -593,18 +593,18 @@ void CTaskManager::ManageTasks()
             }
         }
 
-        CTask* pTheTask = pThis->m_aPrimaryTasks[iTaskIndex];
+        CTask* pTheTask = m_aPrimaryTasks[iTaskIndex];
         if (pTheTask)
         {
             pTheTask->DeletingDestructor(1);
         }
     LABEL_32:
-        pThis->m_aPrimaryTasks[iTaskIndex] = 0;
+        m_aPrimaryTasks[iTaskIndex] = 0;
     }
 
 PROCESS_SECONDARY_TASKS:
     // process secondary tasks
-    CTask** pSecondaryTasks = (CTask * *)pThis->m_aSecondaryTasks;
+    CTask** pSecondaryTasks = (CTask * *)m_aSecondaryTasks;
     int totalSecondaryTasks = 6;
     do
     {
@@ -613,7 +613,7 @@ PROCESS_SECONDARY_TASKS:
         {
             while (1)
             {
-                pThis->ParentsControlChildren(pTheSecondaryTask);
+                ParentsControlChildren((CTaskComplex*)pTheSecondaryTask);
                 CTask* pTheSecondaryTask3 = nullptr;
                 CTask* pTheSecondaryTask2 = pTheSecondaryTask;
                 do
@@ -635,11 +635,11 @@ PROCESS_SECONDARY_TASKS:
                 } while (pTheSecondaryTask4);
 
 
-                if (!pTheSecondaryTask5->ProcessPed(pThis->m_pPed))
+                if (!pTheSecondaryTask5->ProcessPed(m_pPed))
                 {
                     goto LABEL_44;
                 }
-                pThis->SetNextSubTask(pTheSecondaryTask5->m_pParentTask);
+                SetNextSubTask((CTaskComplex*)pTheSecondaryTask5->m_pParentTask);
                 if (!pTheSecondaryTask->GetSubTask())
                 {
                     pTheSecondaryTask->DeletingDestructor(1);

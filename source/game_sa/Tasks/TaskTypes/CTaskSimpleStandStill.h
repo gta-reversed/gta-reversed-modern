@@ -23,8 +23,7 @@ private:
 public:
     float m_fBlendData;
 
-
-	CTaskSimpleStandStill(int nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
+	CTaskSimpleStandStill* Constructor(int nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
 };
 
 VALIDATE_SIZE(CTaskSimpleStandStill, 0x20);

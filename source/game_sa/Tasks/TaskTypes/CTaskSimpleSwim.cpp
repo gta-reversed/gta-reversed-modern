@@ -165,7 +165,7 @@ bool CTaskSimpleSwim::ProcessPed(CPed *pPed)
             {
                 damageResponseInfo.bDamageCalculated = true;
             }
-            pPed->m_pIntelligence->m_eventGroup.Add(reinterpret_cast <CEvent&>(eventDamage), false);
+            pPed->m_pIntelligence->m_eventGroup.Add((CEvent*)&eventDamage, false);
             eventDamage.Destructor1();
             pedDamageResponseCalculator.Destructor1();
         }
