@@ -14,6 +14,7 @@
 #include <iostream>
 #include <cassert>
 
+#include "game_sa\CEventHandlerHistory.h"
 #include "game_sa\CPedType.h"
 #include "game_sa\CPedScriptedTaskRecord.h"
 #include "game_sa\CEventScriptCommand.h"
@@ -441,3 +442,5 @@
 #include "game_sa\Tasks\TaskTypes\CTaskComplexUseGoggles.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleCarDrive.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleCarDriveTimed.h"
+#include "game_sa\Tasks\TaskTypes\CTaskSimpleGoToPoint.h"
+#include "game_sa\Tasks\TaskTypes\CTaskSimpleGoTo.h"

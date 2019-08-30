@@ -16,6 +16,8 @@ public:
     unsigned int   m_nCount;
     class CEntity *m_apEntities[16];
     int field_4C;
+
+    void Clear();
 };
 
 VALIDATE_SIZE(CEntityScanner, 0x50);

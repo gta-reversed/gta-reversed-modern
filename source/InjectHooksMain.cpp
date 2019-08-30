@@ -3,26 +3,9 @@
 
 #pragma comment(lib, "detours.lib")
 
+auto OLD_CPedIntelligence_IsInterestingEntity = (bool (__thiscall*)(CPedIntelligence *pThis, CEntity *pEntity))0x6020A0;
 
-auto OLD_CPedIntelligence_FlushImmediately = (void (__thiscall*)(CPedIntelligence *pThis, char bSetPrimaryDefaultTask))0x601640;
-//auto OLD_CPedIntelligence_FlushIntelligence = (void (__thiscall*)(CPedIntelligence *pThis))0x0;
-//auto OLD_CPedIntelligence_GetEffectInUse = (int (__thiscall*)(CPedIntelligence *pThis))0x0;
-//auto OLD_CPedIntelligence_GetMoveStateFromGoToTask = (int (__thiscall*)(CPedIntelligence *pThis))0x0;
-//auto OLD_CPedIntelligence_GetTaskClimb = (CTask *(__thiscall*)(CPedIntelligence *pThis);
-//auto OLD_CPedIntelligence_GetTaskDuck = (CTask *(__thiscall*)(CPedIntelligence *pThis, char IgnoreCheckingForSimplestActiveTask))0x0;
-//auto OLD_CPedIntelligence_GetTaskFighting = (CTaskSimpleFight *(__thiscall*)(CPedIntelligence *pThis))0x0;
-//auto OLD_CPedIntelligence_GetTaskHold = (CTaskSimpleHoldEntity *(__thiscall*)(CPedIntelligence *pThis, char IgnoreCheckingForSimplestActiveTask))0x0;
-//auto OLD_CPedIntelligence_GetTaskInAir = (CTask *(__thiscall*)(CPedIntelligence *pThis))0x0;
-//auto OLD_CPedIntelligence_GetTaskJetPack = (CTask *(__thiscall*)(CPedIntelligence *pThis))0x0;
-//auto OLD_CPedIntelligence_GetTaskSwim = (CTask *(__thiscall*)(CPedIntelligence *pThis))0x0;
-//auto OLD_CPedIntelligence_GetTaskThrow = (CTask *(__thiscall*)(CPedIntelligence *pThis))0x0;
-//auto OLD_CPedIntelligence_GetTaskUseGun = (CTaskSimpleUseGun *(__thiscall*)(CPedIntelligence *pThis))0x0;
-//auto OLD_CPedIntelligence_GetUsingParachute = (bool (__thiscall*)(CPedIntelligence *pThis))0x0;
-//auto OLD_CPedIntelligence_IsFriendlyWith = (bool (__thiscall*)(CPedIntelligence *pThis, CPed *pPed))0x0;
-//auto OLD_CPedIntelligence_IsInSeeingRange = (bool (__thiscall*)(CPedIntelligence *pThis, CVector *pPosition))0x0;
-//auto OLD_CPedIntelligence_IsInterestingEntity = (bool (__thiscall*)(CPedIntelligence *pThis, CEntity *pEntity))0x0;
-
-void __fastcall CPedIntelligence_FlushImmediately(CPedIntelligence* pThis, void* padding, bool bSetPrimaryDefaultTask);
+bool __fastcall CPedIntelligence_IsInterestingEntity (CPedIntelligence* pThis, void* padding, CEntity* pEntity);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -43,7 +26,7 @@ void InjectHooksMain(void)
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CPedIntelligence_FlushImmediately, CPedIntelligence_FlushImmediately);
+    DetourAttach(&(PVOID&)OLD_CPedIntelligence_IsInterestingEntity, CPedIntelligence_IsInterestingEntity );
     DetourTransactionCommit();
     */
 }
@@ -72,9 +55,8 @@ enum eFunctionReturnValue
 };
 
 
-void __fastcall CPedIntelligence_FlushImmediately(CPedIntelligence* pThis, void* padding, bool bSetPrimaryDefaultTask)
+bool __fastcall CPedIntelligence_IsInterestingEntity (CPedIntelligence* pThis, void* padding, CEntity* pEntity)
 {
-    printf(" calling CPedIntelligence_FlushImmediately\n");
-
- 
+    printf(" calling CPedIntelligence_IsInterestingEntity \n");
+    return true;
 }

@@ -34,6 +34,8 @@ public:
 	virtual eTaskType GetId();//=0
 	virtual void StopTimer(class CEvent *_event);
 	virtual bool MakeAbortable(class CPed *ped, eAbortPriority priority, class CEvent *_event);//=0
+
+    static bool IsGoToTask(CTask* pTask);
 };
 
 VALIDATE_SIZE(CTask, 8);

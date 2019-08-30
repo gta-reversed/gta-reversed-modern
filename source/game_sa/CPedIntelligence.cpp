@@ -42,8 +42,31 @@ bool CPedIntelligence::IsInHearingRange(CVector const& posn) {
 }
 
 // Converted from thiscall bool CPedIntelligence::IsInSeeingRange(CVector const& posn) 0x600C60 
-bool CPedIntelligence::IsInSeeingRange(CVector* posn) {
-    return plugin::CallMethodAndReturn<bool, 0x600C60, CPedIntelligence*, CVector*>(this, posn);
+bool CPedIntelligence::IsInSeeingRange(CVector* pPosition) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x600C60, CPedIntelligence*, CVector*>(this, pPosition);
+#else
+    CPed* pPed = m_pPed;
+    CVector* pPedPos = &pPed->m_placement.m_vPosn;
+    CMatrixLink* pPedMatrix = m_pPed->m_matrix;
+    if (pPedMatrix)
+    {
+        pPedPos = &pPedMatrix->pos;
+    }
+
+    float fX = pPosition->x - pPedPos->x;
+    float fY = pPosition->y - pPedPos->y;
+    float fZ = pPosition->z - pPedPos->z;
+
+    if (m_fSeeingRange * m_fSeeingRange > fZ * fZ + fY * fY + fX * fX)
+    {
+        if (fZ * pPed->m_matrix->up.z + fY * pPed->m_matrix->up.y + fX * pPed->m_matrix->up.x > 0.0)
+        {
+            return true;
+        }
+    }
+    return false;
+#endif
 }
 
 bool CPedIntelligence::FindRespectedFriendInInformRange() {
@@ -167,52 +190,201 @@ CTask* CPedIntelligence::FindTaskByType(int taskId) {
 
 // Converted from thiscall CTaskSimpleFight* CPedIntelligence::GetTaskFighting(void) 0x600F30 
 CTaskSimpleFight* CPedIntelligence::GetTaskFighting() {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CTaskSimpleFight*, 0x600F30, CPedIntelligence*>(this);
+#else
+    CTaskManager* pTaskManager = &m_TaskMgr;
+    CTask* pTaskSecondary = pTaskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
+    if (pTaskSecondary && pTaskSecondary->GetId() == TASK_SIMPLE_FIGHT)
+    {
+        return (CTaskSimpleFight*)pTaskSecondary;
+    }
+    return nullptr;
+#endif
 }
 
 // Converted from thiscall CTaskSimpleUseGun* CPedIntelligence::GetTaskUseGun(void) 0x600F70 
 CTaskSimpleUseGun* CPedIntelligence::GetTaskUseGun() {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CTaskSimpleUseGun*, 0x600F70, CPedIntelligence*>(this);
+#else
+    CTask* pTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
+    if (pTask && pTask->GetId() == TASK_SIMPLE_USE_GUN)
+    {
+        return (CTaskSimpleUseGun*)pTask;
+    }
+    return nullptr;
+#endif
 }
 
 // Converted from thiscall CTaskSimpleThrowProjectile* CPedIntelligence::GetTaskThrow(void) 0x600FB0 
 CTaskSimpleThrowProjectile* CPedIntelligence::GetTaskThrow() {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CTaskSimpleThrowProjectile*, 0x600FB0, CPedIntelligence*>(this);
+#else
+    CTask* pTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
+    if (pTask && pTask->GetId() == TASK_SIMPLE_THROW)
+    {
+        return (CTaskSimpleThrowProjectile*)pTask;
+    }
+    return nullptr;
+#endif
 }
 
-// Converted from thiscall CTaskSimpleHoldEntity* CPedIntelligence::GetTaskHold(bool arg1) 0x600FF0 
-CTaskSimpleHoldEntity* CPedIntelligence::GetTaskHold(bool arg1) {
-    return plugin::CallMethodAndReturn<CTaskSimpleHoldEntity*, 0x600FF0, CPedIntelligence*, bool>(this, arg1);
+CTask* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<CTaskSimpleHoldEntity*, 0x600FF0, CPedIntelligence*, bool>(this, bIgnoreCheckingForSimplestActiveTask);
+#else
+    CTaskManager* pTaskManager = &m_TaskMgr;
+    CTask* pTaskSecondary = pTaskManager->GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
+    if (pTaskSecondary)
+    {
+        if (pTaskSecondary->GetId() == TASK_SIMPLE_HOLD_ENTITY)
+        {
+            return pTaskSecondary;
+        }
+    }
+    if (bIgnoreCheckingForSimplestActiveTask)
+    {
+        return nullptr;
+    }
+
+    CTask* pActiveSimplestTask = pTaskManager->GetSimplestActiveTask();
+    if (!pActiveSimplestTask
+        || pActiveSimplestTask->GetId() != TASK_SIMPLE_PICKUP_ENTITY
+        && pActiveSimplestTask->GetId() != TASK_SIMPLE_PUTDOWN_ENTITY)
+    {
+        return nullptr;
+    }
+    return pActiveSimplestTask;
+#endif
 }
 
 // Converted from thiscall CTaskSimpleSwim* CPedIntelligence::GetTaskSwim(void) 0x601070 
 CTaskSimpleSwim* CPedIntelligence::GetTaskSwim() {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CTaskSimpleSwim*, 0x601070, CPedIntelligence*>(this);
+#else
+    CTask* pTask = m_TaskMgr.GetSimplestActiveTask();
+    if (pTask && pTask->GetId() == TASK_SIMPLE_SWIM)
+    {
+        return (CTaskSimpleSwim*)pTask;
+    }
+    return nullptr;
+#endif
 }
 
 // Converted from thiscall CTaskSimpleDuck* CPedIntelligence::GetTaskDuck(bool arg1) 0x6010A0 
-CTaskSimpleDuck* CPedIntelligence::GetTaskDuck(bool arg1) {
-    return plugin::CallMethodAndReturn<CTaskSimpleDuck*, 0x6010A0, CPedIntelligence*, bool>(this, arg1);
+CTaskSimpleDuck* CPedIntelligence::GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<CTaskSimpleDuck*, 0x6010A0, CPedIntelligence*, bool>(this, bIgnoreCheckingForSimplestActiveTask);
+#else
+    CTaskManager* pTaskManager = &m_TaskMgr;
+    CTask* pSecondaryTask = (CTask*)pTaskManager->GetTaskSecondary(TASK_SECONDARY_DUCK);
+    if (pSecondaryTask && pSecondaryTask->GetId() == TASK_SIMPLE_DUCK)
+    {
+        return (CTaskSimpleDuck*)pSecondaryTask;
+    }
+
+    if (bIgnoreCheckingForSimplestActiveTask)
+    {
+        return nullptr;
+    }
+
+    CTask* pActiveSimplestTask = pTaskManager->GetSimplestActiveTask();
+    if (!pActiveSimplestTask || pActiveSimplestTask->GetId() != TASK_SIMPLE_DUCK)
+    {
+        return nullptr;
+    }
+    return (CTaskSimpleDuck*)pActiveSimplestTask;
+#endif
 }
 
-// Converted from thiscall CTaskSimpleJetPack* CPedIntelligence::GetTaskJetPack(void) 0x601110 
 CTaskSimpleJetPack* CPedIntelligence::GetTaskJetPack() {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CTaskSimpleJetPack*, 0x601110, CPedIntelligence*>(this);
+#else
+    if (m_pPed->IsPlayer())
+    {
+        CTask* pTask = m_TaskMgr.GetSimplestActiveTask();
+        if (pTask && pTask->GetId() == TASK_SIMPLE_JETPACK)
+        {
+            return (CTaskSimpleJetPack*)pTask;
+        }
+    }
+    return nullptr;
+#endif
 }
 
-// Converted from thiscall CTaskSimpleInAir* CPedIntelligence::GetTaskInAir(void) 0x601150 
 CTaskSimpleInAir* CPedIntelligence::GetTaskInAir() {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CTaskSimpleInAir*, 0x601150, CPedIntelligence*>(this);
+#else
+    CTask* pTask = m_TaskMgr.GetSimplestActiveTask();
+    if (pTask && pTask->GetId() == TASK_SIMPLE_IN_AIR)
+    {
+        return (CTaskSimpleInAir*)pTask;
+    }
+    return nullptr;
+#endif
 }
 
 // Converted from thiscall CTaskSimpleClimb* CPedIntelligence::GetTaskClimb(void) 0x601180 
 CTaskSimpleClimb* CPedIntelligence::GetTaskClimb() {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CTaskSimpleClimb*, 0x601180, CPedIntelligence*>(this);
+#else
+    auto pTask = (CTaskSimpleClimb*)m_TaskMgr.GetSimplestActiveTask();
+    if (pTask && pTask->GetId() == TASK_SIMPLE_CLIMB)
+    {
+        return pTask;
+    }
+    return nullptr;
+#endif
 }
 
 // Converted from thiscall bool CPedIntelligence::GetUsingParachute(void) 0x6011B0 
 bool CPedIntelligence::GetUsingParachute() {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x6011B0, CPedIntelligence*>(this);
+#else
+    CWeapon* pActiveWeapon = &m_pPed->m_aWeapons[m_pPed->m_nActiveWeaponSlot];
+    if (pActiveWeapon->m_nType != WEAPON_PARACHUTE)
+    {
+        return false;
+    }
+
+    CPed* pPed = m_pPed;
+    if (pPed->bIsStanding)
+    {
+        return false;
+    }
+
+    if (pPed->m_nPhysicalFlags.bSubmergedInWater)
+    {
+        return false;
+    }
+
+    auto pAnimAssoc = RpAnimBlendClumpGetFirstAssociation(pPed->m_pRwClump, ANIMATION_PARTIAL);
+    if (!pAnimAssoc)
+    {
+        return false;
+    }
+
+    int blockID = pAnimAssoc->m_pHierarchy->m_nAnimBlockId;
+    if (stricmp(CAnimManager::ms_aAnimBlocks[blockID].szName, "parachute"))
+    {
+        while (true)
+        {
+            pAnimAssoc = RpAnimBlendGetNextAssociation(pAnimAssoc);
+            if (!pAnimAssoc)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::SetTaskDuckSecondary(ushort arg1) 0x601230 
@@ -463,7 +635,11 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
 
 // Converted from thiscall C2dEffect* CPedIntelligence::GetEffectInUse(void) 0x6018D0 
 C2dEffect* CPedIntelligence::GetEffectInUse() {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<C2dEffect*, 0x6018D0, CPedIntelligence*>(this);
+#else
+    return m_eventScanner.m_attractorScanner.m_pEffectInUse;
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::SetEffectInUse(C2dEffect *arg1) 0x6018E0 
@@ -487,8 +663,16 @@ void CPedIntelligence::ProcessEventHandler() {
 }
 
 // Converted from thiscall bool CPedIntelligence::IsFriendlyWith(CPed const& ped) 0x601BC0 
-bool CPedIntelligence::IsFriendlyWith(CPed const& ped) {
-    return plugin::CallMethodAndReturn<bool, 0x601BC0, CPedIntelligence*, CPed const&>(this, ped);
+bool CPedIntelligence::IsFriendlyWith(CPed* pPed) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x601BC0, CPedIntelligence*, CPed*>(this, pPed);
+#else
+    unsigned int AcquaintancesID0 = m_pPed->m_acquaintance.GetAcquaintances(0);
+    unsigned int AcquaintancesID1 = m_pPed->m_acquaintance.GetAcquaintances(1);
+    unsigned int pedFlag = CPedType::GetPedFlag((ePedType)pPed->m_nPedType);
+
+    return m_pPed->m_nPedType == pPed->m_nPedType || pedFlag & AcquaintancesID0 || pedFlag & AcquaintancesID1;
+#endif
 }
 
 // Converted from thiscall bool CPedIntelligence::IsThreatenedBy(CPed const& ped) 0x601C30 
@@ -521,13 +705,36 @@ bool CPedIntelligence::IsPedGoingSomewhereOnFoot() {
 }
 
 // Converted from thiscall int* CPedIntelligence::GetMoveStateFromGoToTask(void) 0x601D70 
-int* CPedIntelligence::GetMoveStateFromGoToTask() {
-    return plugin::CallMethodAndReturn<int*, 0x601D70, CPedIntelligence*>(this);
+int CPedIntelligence::GetMoveStateFromGoToTask() {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<int, 0x601D70, CPedIntelligence*>(this);
+#else
+    auto pTask = (CTaskSimpleGoTo*)m_TaskMgr.GetSimplestActiveTask();
+    if (pTask && CTask::IsGoToTask((CTask*)pTask))
+    {
+        return pTask->m_moveState;
+    }
+    return PEDMOVE_STILL;
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::FlushIntelligence(void) 0x601DA0 
 void CPedIntelligence::FlushIntelligence() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x601DA0, CPedIntelligence*>(this);
+#else
+    m_TaskMgr.Flush();
+    m_eventHandler.field_20 = 0;
+    m_eventHandler.m_pResponseTask = 0;
+    m_eventHandler.field_28 = 0;
+    m_eventHandler.field_2C = 0;
+    m_eventHandler.field_30 = 0;
+    m_eventHandler.m_history.ClearAllEvents();
+    m_eventGroup.Flush(0);
+    m_vehicleScanner.Clear();
+    m_pedScanner.Clear();
+    m_eventScanner.m_attractorScanner.Clear();
+#endif
 }
 
 // Converted from thiscall bool CPedIntelligence::TestForStealthKill(CPed *pPed,bool arg2) 0x601E00 
@@ -547,7 +754,18 @@ bool CPedIntelligence::HasInterestingEntites() {
 
 // Converted from thiscall bool CPedIntelligence::IsInterestingEntity(CEntity *pEntity) 0x6020A0 
 bool CPedIntelligence::IsInterestingEntity(CEntity* pEntity) {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x6020A0, CPedIntelligence*, CEntity*>(this, pEntity);
+#else
+    for (unsigned int i = 0; i < 3; i++)
+    {
+        if (m_apInterestingEntities[i] == pEntity)
+        {
+            return true;
+        }
+    }
+    return false;
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::LookAtInterestingEntities(void) 0x6020D0 

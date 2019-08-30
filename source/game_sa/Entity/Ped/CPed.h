@@ -24,11 +24,11 @@
 #include "CAnimBlendAssociation.h"
 #include "CFire.h"
 
-enum  ePedStats {
+enum ePedStats {
 
 };
 
-enum  eMoveState {
+enum eMoveState {
     PEDMOVE_NONE = 0,
     PEDMOVE_STILL,
     PEDMOVE_TURN_L,

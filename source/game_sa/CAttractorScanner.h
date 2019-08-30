@@ -20,6 +20,8 @@ public:
     int field_18[10];
     int field_40[10];
     int field_68[10];
+
+    void Clear();
 };
 
 VALIDATE_SIZE(CAttractorScanner, 0x90);

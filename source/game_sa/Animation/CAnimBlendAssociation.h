@@ -15,6 +15,26 @@ class CAnimBlendNode;
 class CAnimBlendHierarchy;
 class CAnimBlendStaticAssociation;
 
+enum eAnimationFlags
+{
+    ANIMATION_STARTED = 0x1,
+    ANIMATION_LOOPED = 0x2,
+    ANIMATION_FREEZE_LAST_FRAME = 0x4,
+    ANIMATION_UNLOCK_LAST_FRAME = 0x8, // Animation will be stuck on last frame, if not set
+    ANIMATION_PARTIAL = 0x10,
+    ANIMATION_MOVEMENT = 0x20,
+    ANIMATION_TRANLSATE_X = 0x40,
+    ANIMATION_TRANLSATE_Y = 0x80,
+    ANIMATION_UNUSED_1 = 0x100,
+    ANIMATION_UNUSED_2 = 0x200,
+    ANIMATION_ADD_TO_BLEND = 0x400,
+    ANIMATION_UNUSED_3 = 0x800,
+    ANIMATION_UNUSED_4 = 0x1000,
+    ANIMATION_FREEZE_TRANSLATION = 0x2000,
+    ANIMATION_BLOCK_REFERENCED = 0x4000,
+    ANIMATION_INDESTRUCTIBLE = 0x8000
+};
+
 class  CAnimBlendAssociation  {
     DWORD * m_vTable;
     //virtual ~CAnimBlendAssociation() = delete; //PLUGIN_NO_DEFAULT_CONSTRUCTION_VIRTUALBASE(CAnimBlendAssociation)
