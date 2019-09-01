@@ -68,6 +68,7 @@ public:
     union {
         /* https://code.google.com/p/mtasa-blue/source/browse/tags/1.3.4/MTA10/game_sa/CPedSA.h */
         struct {
+            // 1st byte starts here (m_nPedFlags)
             unsigned int bIsStanding : 1; // is ped standing on something
             unsigned int bWasStanding : 1; // was ped standing on something
             unsigned int bIsLooking : 1; // is ped looking at something or in a direction
@@ -104,6 +105,7 @@ public:
             unsigned int bStillOnValidPoly : 1; // set if the polygon the ped is on is still valid for collision
             unsigned int bAllowMedicsToReviveMe : 1;
 
+            // 5th byte starts here (m_nSecondPedFlags)
             unsigned int bResetWalkAnims : 1;
             unsigned int bOnBoat : 1; // flee but only using nodes
             unsigned int bBusJacked : 1; // flee but only using nodes
@@ -140,6 +142,7 @@ public:
             unsigned int bCrouchWhenScared : 1;
             unsigned int bKnockedOffBike : 1;
 
+            // 9th byte starts here (m_nThirdPedFlags)
             unsigned int bDonePositionOutOfCollision : 1;
             unsigned int bDontRender : 1;
             unsigned int bHasBeenAddedToPopulation : 1;
@@ -175,6 +178,7 @@ public:
             unsigned int bIsCached : 1;
             unsigned int bPushOtherPeds : 1; // GETS RESET EVERY FRAME - SET IN TASK: want to push other peds around (eg. leader of a group or ped trying to get in a car)
 
+            // 13th byte starts here (m_nFourthPedFlags)
             unsigned int bHasBulletProofVest : 1;
             unsigned int bUsingMobilePhone : 1;
             unsigned int bUpperBodyDamageAnimsOnly : 1;
@@ -203,6 +207,7 @@ public:
         unsigned int m_nPedFlags;
         unsigned int m_nSecondPedFlags;
         unsigned int m_nThirdPedFlags;
+        unsigned int m_nFourthPedFlags;
     };
     CPedIntelligence   *m_pIntelligence;
     CPlayerData        *m_pPlayerData;

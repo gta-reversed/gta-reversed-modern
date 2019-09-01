@@ -3,9 +3,9 @@
 
 #pragma comment(lib, "detours.lib")
 
-auto OLD_CPedIntelligence_IsInterestingEntity = (bool (__thiscall*)(CPedIntelligence *pThis, CEntity *pEntity))0x6020A0;
+auto OLD_CPedIntelligence_IsPedGoingForCarDoor = (bool (__thiscall*)(CPedIntelligence *pThis))0x602350;
 
-bool __fastcall CPedIntelligence_IsInterestingEntity (CPedIntelligence* pThis, void* padding, CEntity* pEntity);
+bool __fastcall CPedIntelligence_IsPedGoingForCarDoor (CPedIntelligence* pThis, void* padding);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -26,7 +26,7 @@ void InjectHooksMain(void)
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CPedIntelligence_IsInterestingEntity, CPedIntelligence_IsInterestingEntity );
+    DetourAttach(&(PVOID&)OLD_CPedIntelligence_IsPedGoingForCarDoor, CPedIntelligence_IsPedGoingForCarDoor);
     DetourTransactionCommit();
     */
 }
@@ -54,9 +54,10 @@ enum eFunctionReturnValue
     FUNCTION_SOMELABEL = 4
 };
 
-
-bool __fastcall CPedIntelligence_IsInterestingEntity (CPedIntelligence* pThis, void* padding, CEntity* pEntity)
+/*
+bool __fastcall CPedIntelligence_IsPedGoingForCarDoor(CPedIntelligence* pThis, void* padding)
 {
-    printf(" calling CPedIntelligence_IsInterestingEntity \n");
+    printf(" calling CPedIntelligence_IsPedGoingForCarDoor \n");
     return true;
 }
+*/

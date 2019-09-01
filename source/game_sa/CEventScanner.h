@@ -10,6 +10,8 @@
 #include "CTaskTimer.h"
 #include "CAttractorScanner.h"
 
+class CPed;
+
 class  CEventScanner {
 public:
     int field_0;
@@ -23,6 +25,8 @@ public:
     char field_BB;
     CTaskTimer field_BC;
     CTaskTimer field_C8;
+
+    void ScanForEvents(CPed* pPed);
 };
 
 VALIDATE_SIZE(CEventScanner, 0xD4);

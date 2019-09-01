@@ -7,33 +7,79 @@
 
 #include "StdInc.h"
 
+float& CPedIntelligence::STEALTH_KILL_RANGE = *reinterpret_cast<float*>(0x8D2398);
 float& CPedIntelligence::LIGHT_AI_LEVEL_MAX = *reinterpret_cast<float*>(0x8D2380);
 float& CPedIntelligence::flt_8D2384 = *reinterpret_cast<float*>(0x8D2384);
 float& CPedIntelligence::flt_8D2388 = *reinterpret_cast<float*>(0x8D2388);
 
+CEntity** CPedIntelligence::GetPedEntities()
+{
+    return m_entityScanner.m_apEntities;
+}
+
 // Converted from thiscall void CPedIntelligence::SetPedDecisionMakerType(int newtype) 0x600B50
-void CPedIntelligence::SetPedDecisionMakerType(int newtype) {
-    plugin::CallMethod<0x600B50, CPedIntelligence*, int>(this, newtype);
+void CPedIntelligence::SetPedDecisionMakerType(int newType) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallMethod<0x600B50, CPedIntelligence*, int>(this, newType);
+#else
+    int oldType = m_nDecisionMakerType;
+    if (oldType)
+    {
+        if (!newType)
+        {
+            m_nDecisionMakerTypeInGroup = oldType;
+        }
+        m_nDecisionMakerType = newType;
+    }
+    else
+    {
+        m_nDecisionMakerTypeInGroup = newType;
+    }
+    if (m_nDecisionMakerType == DM_EVENT_PED_ENTERED_MY_VEHICLE)
+    {
+        m_fDmRadius = 5.0;
+        m_nDmNumPedsToScan = 15;
+    }
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::SetPedDecisionMakerTypeInGroup(int newtype) 0x600BB0 
-void CPedIntelligence::SetPedDecisionMakerTypeInGroup(int newtype) {
-    plugin::CallMethod<0x600BB0, CPedIntelligence*, int>(this, newtype);
+void CPedIntelligence::SetPedDecisionMakerTypeInGroup(int newType) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallMethod<0x600BB0, CPedIntelligence*, int>(this, newType);
+#else
+    m_nDecisionMakerTypeInGroup = newType;
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::RestorePedDecisionMakerType(void) 0x600BC0 
 void CPedIntelligence::RestorePedDecisionMakerType() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x600BC0, CPedIntelligence*>(this);
+#else
+    if (!m_nDecisionMakerType)
+    {
+        m_nDecisionMakerType = m_nDecisionMakerTypeInGroup;
+    }
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::SetHearingRange(float range) 0x600BE0 
 void CPedIntelligence::SetHearingRange(float range) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x600BE0, CPedIntelligence*, float>(this, range);
+#else
+    m_fHearingRange = range;
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::SetSeeingRange(float range) 0x600BF0 
 void CPedIntelligence::SetSeeingRange(float range) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x600BF0, CPedIntelligence*, float>(this, range);
+#else
+    m_fSeeingRange = range;
+#endif
 }
 
 // Converted from thiscall bool CPedIntelligence::IsInHearingRange(CVector const& posn) 0x600C00 
@@ -81,7 +127,7 @@ bool CPedIntelligence::FindRespectedFriendInInformRange() {
         {
             return 0;
         }
-        CPed* pPedEntity = (CPed*)m_pedScanner.m_apEntities[pedScanIndex];
+        CPed* pPedEntity = (CPed*)m_entityScanner.m_apEntities[pedScanIndex];
         if (pPedEntity)
         {
             if (CPedType::GetPedFlag((ePedType)pPedEntity->m_nPedType) & acquaintances)
@@ -110,8 +156,12 @@ bool CPedIntelligence::FindRespectedFriendInInformRange() {
 }
 
 // Converted from thiscall bool CPedIntelligence::IsRespondingToEvent(int event) 0x600DB0 
-bool CPedIntelligence::IsRespondingToEvent(int event) {
-    return plugin::CallMethodAndReturn<bool, 0x600DB0, CPedIntelligence*, int>(this, event);
+bool CPedIntelligence::IsRespondingToEvent(int eventType) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x600DB0, CPedIntelligence*, int>(this, eventType);
+#else
+    return m_eventHandler.m_history.IsRespondingToEvent(eventType);
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::AddTaskPhysResponse(CTask *task,bool arg2) 0x600DC0 
@@ -388,8 +438,43 @@ bool CPedIntelligence::GetUsingParachute() {
 }
 
 // Converted from thiscall void CPedIntelligence::SetTaskDuckSecondary(ushort arg1) 0x601230 
-void CPedIntelligence::SetTaskDuckSecondary(unsigned short arg1) {
-    plugin::CallMethod<0x601230, CPedIntelligence*, unsigned short>(this, arg1);
+void CPedIntelligence::SetTaskDuckSecondary(unsigned short nLengthOfDuck) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallMethod<0x601230, CPedIntelligence*, unsigned short>(this, nLengthOfDuck);
+#else
+    CTaskManager* pTaskManager = &m_TaskMgr;
+    CTask* pSecondaryTask = pTaskManager->GetTaskSecondary(TASK_SECONDARY_DUCK);
+
+    if (pSecondaryTask)
+    {
+        if (pSecondaryTask->GetId() == TASK_SIMPLE_DUCK)
+        {
+            auto pDuckTask = (CTaskSimpleDuck*)pSecondaryTask;
+            if (pDuckTask->m_nDuckControlType == DUCK_SCRIPT_CONTROLLED)
+            {
+                return;
+            }
+        }
+    }
+
+    auto pTaskSimpleDuck = (CTaskSimpleDuck*)CTask::operator new(40);
+    if (pTaskSimpleDuck)
+    {
+        pTaskSimpleDuck->Constructor(DUCK_TASK_CONTROLLED, nLengthOfDuck, -1);
+    }
+
+    pTaskManager->SetTaskSecondary(pTaskSimpleDuck, TASK_SECONDARY_DUCK);
+
+    CTask* pSecondaryAttackTask = pTaskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
+    if (pSecondaryAttackTask && pSecondaryAttackTask->GetId() == TASK_SIMPLE_USE_GUN)
+    {
+        auto pTaskUseGun = (CTaskSimpleUseGun*)pSecondaryAttackTask;
+        pTaskUseGun->ClearAnim(m_pPed);
+    }
+
+    auto pDuckTask = (CTaskSimpleDuck*)pTaskManager->GetTaskSecondary(TASK_SECONDARY_DUCK);
+    pDuckTask->ProcessPed(m_pPed);
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::ClearTaskDuckSecondary(void) 0x601390 
@@ -649,17 +734,126 @@ void CPedIntelligence::SetEffectInUse(C2dEffect* arg1) {
 
 // Converted from thiscall void CPedIntelligence::ProcessAfterProcCol(void) 0x6018F0 
 void CPedIntelligence::ProcessAfterProcCol() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x6018F0, CPedIntelligence*>(this);
+#else
+    g_LoadMonitor->StartTimer(0);
+
+    CTaskSimple* pActiveSimplestTask = (CTaskSimple*)m_TaskMgr.GetSimplestActiveTask();
+    if (pActiveSimplestTask && pActiveSimplestTask->IsSimple())
+    {
+        bool bPositionSet = pActiveSimplestTask->SetPedPosition(m_pPed);
+        if (!bPositionSet)
+        {
+            CTaskSimple* pSimplestTask = (CTaskSimple*)m_TaskMgr.GetSimplestTask(TASK_PRIMARY_DEFAULT);
+            if (pSimplestTask && pSimplestTask->IsSimple())
+            {
+                bPositionSet = pSimplestTask->SetPedPosition(m_pPed);
+            }
+        }
+
+        if (bPositionSet)
+        {
+            RwObject* pRwObject = m_pPed->m_pRwObject;
+            if (pRwObject)
+            {
+                RwMatrix* pRwMatrix = &((RwFrame*)pRwObject->parent)->modelling;
+                if (m_pPed->m_matrix)
+                {
+                    m_pPed->m_matrix->UpdateRwMatrix(pRwMatrix);
+                }
+                else
+                {
+                    m_pPed->m_placement.UpdateRwMatrix(pRwMatrix);
+                }
+            }
+            m_pPed->UpdateRwFrame();
+        }
+    }
+
+    m_pPed->bCalledPreRender = 0;
+    g_LoadMonitor->EndTimer(0);
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::ProcessAfterPreRender(void) 0x6019B0 
 void CPedIntelligence::ProcessAfterPreRender() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x6019B0, CPedIntelligence*>(this);
+#else
+    g_LoadMonitor->StartTimer(0);
+
+    CTask* pSecondaryTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
+    if (pSecondaryTask && pSecondaryTask->IsSimple())
+    {
+        CTaskSimple* pSimpleTask = (CTaskSimple*)pSecondaryTask;
+        if (pSimpleTask->SetPedPosition(m_pPed))
+        {
+            CTask* pSecondaryAttackTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
+            if (pSecondaryAttackTask && pSecondaryAttackTask->GetId() == TASK_SIMPLE_HOLD_ENTITY)
+            {
+                CTaskSimpleHoldEntity* pTaskSimpleHoldEntity = (CTaskSimpleHoldEntity*)pSecondaryAttackTask;
+                pTaskSimpleHoldEntity->SetPedPosition(m_pPed);
+            }
+        }
+    }
+
+    CTask* pSecondaryAttackTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
+    if (pSecondaryAttackTask && pSecondaryAttackTask->GetId() == TASK_SIMPLE_USE_GUN)
+    {
+        CTaskSimpleUseGun* pTaskUseGun = (CTaskSimpleUseGun*)pSecondaryAttackTask;
+        pTaskUseGun->SetPedPosition(m_pPed);
+    }
+
+    CWeapon* pActiveWeapon = &m_pPed->m_aWeapons[m_pPed->m_nActiveWeaponSlot];
+    if (pActiveWeapon->m_nType == WEAPON_MOLOTOV && pActiveWeapon->m_pFxSystem)
+    {
+        RpHAnimHierarchy* pRpAnimHierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
+        int animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, 24); // 24 = BONE_R_HAND?
+        RwMatrix* pMatrixArray = RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy);
+
+        RwV3d pointIn = { 0.050000001f, 0.050000001f,  0.14f };
+        RwV3d pointOut;
+        RwV3dTransformPoint(&pointOut, &pointIn, &pMatrixArray[animIDIndex]);
+
+        RwMatrix* pRwMatrix = nullptr;
+        RwObject* pRwObject = m_pPed->m_pRwObject;
+        if (pRwObject)
+        {
+            pRwMatrix = &((RwFrame*)pRwObject->parent)->modelling;
+        }
+
+        RwMatrix matrix;
+        memcpy(&matrix, pRwMatrix, sizeof(matrix));
+        matrix.pos = pointOut;
+        RwMatrixUpdate(&matrix);
+        pActiveWeapon->m_pFxSystem->SetMatrix(&matrix);
+    }
+
+    if (m_pPed->bInVehicle)
+    {
+        CVehicle* pVehicle = m_pPed->m_pVehicle;
+        if (pVehicle)
+        {
+            if (pVehicle->m_nVehicleClass == CLASS_LEISUREBOAT)
+            {
+                CBike* pBike = (CBike*)pVehicle;
+                pBike->FixHandsToBars(m_pPed);
+            }
+        }
+    }
+
+    g_LoadMonitor->EndTimer(0);
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::ProcessEventHandler(void) 0x601BB0 
 void CPedIntelligence::ProcessEventHandler() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x601BB0, CPedIntelligence*>(this);
+#else
+    m_eventHandler.HandleEvents();
+#endif
 }
 
 // Converted from thiscall bool CPedIntelligence::IsFriendlyWith(CPed const& ped) 0x601BC0 
@@ -681,8 +875,14 @@ bool CPedIntelligence::IsThreatenedBy(CPed const& ped) {
 }
 
 // Converted from thiscall bool CPedIntelligence::Respects(CPed const& ped) 0x601C90 
-bool CPedIntelligence::Respects(CPed const& ped) {
-    return plugin::CallMethodAndReturn<bool, 0x601C90, CPedIntelligence*, CPed const&>(this, ped);
+bool CPedIntelligence::Respects(CPed* pPed) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x601C90, CPedIntelligence*, CPed*>(this, pPed);
+#else
+    unsigned int acquaintancesID0 = m_pPed->m_acquaintance.GetAcquaintances(0);
+    unsigned int pedFlag = CPedType::GetPedFlag((ePedType)pPed->m_nPedType);
+    return (pedFlag & acquaintancesID0) != 0;
+#endif
 }
 
 // Converted from thiscall bool CPedIntelligence::IsInACarOrEnteringOne(void) 0x601CC0 
@@ -691,11 +891,11 @@ bool CPedIntelligence::IsInACarOrEnteringOne() {
 }
 
 // Converted from cdecl bool CPedIntelligence::AreFriends(CPed const& ped1,CPed const& ped2) 0x601D10 
-bool CPedIntelligence::AreFriends(CPed const& ped1, CPed const& ped2) {
+bool CPedIntelligence::AreFriends(CPed* ped1, CPed* ped2) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<bool, 0x601D10, CPed const&, CPed const&>(ped1, ped2);
+    return plugin::CallAndReturn<bool, 0x601D10, CPed*, CPed*>(ped1, ped2);
 #else
-    return ped1.m_pIntelligence->IsFriendlyWith(ped2) || ped2.m_pIntelligence->IsFriendlyWith(ped1);
+    return ped1->m_pIntelligence->IsFriendlyWith(ped2) || ped2->m_pIntelligence->IsFriendlyWith(ped1);
 #endif
 }
 
@@ -732,19 +932,119 @@ void CPedIntelligence::FlushIntelligence() {
     m_eventHandler.m_history.ClearAllEvents();
     m_eventGroup.Flush(0);
     m_vehicleScanner.Clear();
-    m_pedScanner.Clear();
+    m_entityScanner.Clear();
     m_eventScanner.m_attractorScanner.Clear();
 #endif
 }
 
 // Converted from thiscall bool CPedIntelligence::TestForStealthKill(CPed *pPed,bool arg2) 0x601E00 
-bool CPedIntelligence::TestForStealthKill(CPed* pPed, bool arg2) {
-    return plugin::CallMethodAndReturn<bool, 0x601E00, CPedIntelligence*, CPed*, bool>(this, pPed, arg2);
+bool CPedIntelligence::TestForStealthKill(CPed* pTarget, bool bFullTest) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x601E00, CPedIntelligence*, CPed*, bool>(this, pTarget, bFullTest);
+#else
+    if (pTarget->bInVehicle)
+    {
+        return false;
+    }
+
+    CVector bonePosition(0.0f, 0.0f, 0.0f);
+
+    pTarget->GetBonePosition((RwV3d&)bonePosition, BONE_HEAD, 0);
+
+    if (pTarget->bIsDucking || pTarget->m_fHealth < 1.0)
+    {
+        return false;
+    }
+
+    CMatrixLink* pTargetMatrix = pTarget->m_matrix;
+    CVector* pTargetPos = &pTarget->m_placement.m_vPosn;
+    if (pTargetMatrix)
+    {
+        pTargetPos = &pTargetMatrix->pos;
+    }
+    if (bonePosition.z < pTargetPos->z)
+    {
+        return false;
+    }
+    if (bFullTest)
+    {
+        return true;
+    }
+
+    if (pTarget->m_nMoveState >= PEDMOVE_RUN)
+    {
+        return false;
+    }
+
+    CVector* pPedPos = &m_pPed->m_placement.m_vPosn;
+    CMatrixLink* pPedMatrix = m_pPed->m_matrix;
+    if (pPedMatrix)
+    {
+        pPedPos = &pPedMatrix->pos;
+    }
+
+    CVector vecOutput;
+    VectorSub(&vecOutput, pTargetPos, pPedPos);
+    if (CPedIntelligence::STEALTH_KILL_RANGE * CPedIntelligence::STEALTH_KILL_RANGE < vecOutput.Dot())
+    {
+        return false;
+    }
+    if (vecOutput.y * pTargetMatrix->up.y
+        + vecOutput.z * pTargetMatrix->up.z
+        + vecOutput.x * pTargetMatrix->up.x <= 0.0)
+    {
+        return false;
+    }
+
+    CTask* pActiveTask = pTarget->m_pIntelligence->m_TaskMgr.GetActiveTask();
+    if (pActiveTask)
+    {
+        if (pActiveTask->GetId() == TASK_COMPLEX_KILL_PED_ON_FOOT)
+        {
+            auto pTaskComplexKillPedOnFoot = (CTaskComplexKillPedOnFoot*)pActiveTask;
+            if (pTaskComplexKillPedOnFoot->m_pTarget == m_pPed)
+            {
+                return false;
+            }
+        }
+    }
+
+    CEvent* pCurrentEvent = pTarget->m_pIntelligence->m_eventHandler.m_history.GetCurrentEvent();
+    if (pCurrentEvent && pCurrentEvent->GetSourceEntity() == (CEntity*)m_pPed)
+    {
+        int acquaintancesID4 = pTarget->m_acquaintance.GetAcquaintances(4);
+        int acquaintancesID3 = pTarget->m_acquaintance.GetAcquaintances(3);
+        unsigned int pedFlag = CPedType::GetPedFlag((ePedType)m_pPed->m_nPedType);
+
+        bool bAcquaintancesFlagSet = ((acquaintancesID4 && (pedFlag & acquaintancesID4))
+            || (acquaintancesID3 && (pedFlag & acquaintancesID3))
+            );
+
+        CPedGroup* pPedGroup = CPedGroups::GetPedsGroup(pTarget);
+        if (bAcquaintancesFlagSet && pPedGroup)
+        {
+            auto pGroupEventHandler = pPedGroup->m_groupIntelligence.m_pGroupEventHandler;
+            if (pGroupEventHandler && pGroupEventHandler->GetSourceEntity() == (CEntity*)m_pPed && bAcquaintancesFlagSet)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::RecordEventForScript(int EventID,int EventPriority) 0x602050 
 void CPedIntelligence::RecordEventForScript(int EventID, int EventPriority) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x602050, CPedIntelligence*, int, int>(this, EventID, EventPriority);
+#else
+    if ( EventID != EVENT_SCRIPT_COMMAND && (! EventID || EventPriority > m_nEventPriority))
+    {
+        m_nEventId =  EventID;
+        m_nEventPriority = EventPriority;
+    }
+#endif
 }
 
 // Converted from thiscall bool CPedIntelligence::HasInterestingEntites(void) 0x602080 
@@ -770,7 +1070,60 @@ bool CPedIntelligence::IsInterestingEntity(CEntity* pEntity) {
 
 // Converted from thiscall void CPedIntelligence::LookAtInterestingEntities(void) 0x6020D0 
 void CPedIntelligence::LookAtInterestingEntities() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x6020D0, CPedIntelligence*>(this);
+#else
+    if (!m_pPed->bDontAcceptIKLookAts)
+    {
+        bool bInterestingEntityExists = false;
+        for (unsigned int i = 0; i < 3; i++)
+        {
+            if (m_apInterestingEntities[i])
+            {
+                bInterestingEntityExists = true;
+                break;
+            }
+        }
+
+        if (!bInterestingEntityExists)
+        {
+            return;
+        }
+
+        if (!g_ikChainMan->IsLooking(m_pPed) && m_pPed->GetIsOnScreen() && CGeneral::GetRandomNumberInRange(0, 100) == 50)
+        {
+            CEntity* outEntities[1024];
+            short outCount = -1;
+            CMatrixLink* pPedMatrix = m_pPed->m_matrix;
+            CVector* pPedPos = pPedMatrix ? &pPedMatrix->pos : &m_pPed->m_placement.m_vPosn;
+            CWorld::FindObjectsInRange(*pPedPos, 15.0, 0, &outCount, 1024, outEntities, 0, 1, 1, 1, 0);
+
+            if (outCount > 0)
+            {
+                int interestingEntityCount = 0;
+                for (int i = 0; i < outCount; i++)
+                {
+                    CEntity* pEntity = outEntities[i];
+                    if (IsInterestingEntity(pEntity))
+                    {
+                        outEntities[interestingEntityCount] = pEntity;
+                        interestingEntityCount++;
+                    }
+                }
+                if (interestingEntityCount)
+                {
+                    unsigned int randomInterestingEntityIndex = CGeneral::GetRandomNumberInRange(0, interestingEntityCount);
+                    unsigned int randomTime = CGeneral::GetRandomNumberInRange(3000, 5000);
+                    CPed* pInterestingEntity = (CPed*)outEntities[randomInterestingEntityIndex];
+
+                    RwV3d position = { 0.0f, 0.0f, 0.0f };
+                    g_ikChainMan->LookAt("InterestingEntities", m_pPed, pInterestingEntity, randomTime, BONE_UNKNOWN,
+                        &position, 0, 0.25, 500, 3, 0);
+                }
+            }
+        }
+    }
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::RemoveAllInterestingEntities(void) 0x602320 
@@ -780,7 +1133,35 @@ void CPedIntelligence::RemoveAllInterestingEntities() {
 
 // Converted from thiscall bool CPedIntelligence::IsPedGoingForCarDoor(void) 0x602350 
 bool CPedIntelligence::IsPedGoingForCarDoor() {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x602350, CPedIntelligence*>(this);
+#else
+    CTaskSimple* pActiveSimplestTask = (CTaskSimple*)m_TaskMgr.GetSimplestActiveTask();
+    if (pActiveSimplestTask)
+    {
+        if (pActiveSimplestTask->GetId() == TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL)
+        {
+            return true;
+        }
+
+        CTask* pParentTask = pActiveSimplestTask->m_pParentTask;
+        if (pParentTask)
+        {
+            if (pParentTask->GetId() == TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL)
+            {
+                return true;
+            }
+
+            CTask* pGrandParentTask = pParentTask->m_pParentTask;
+            if (pGrandParentTask && pGrandParentTask->GetId() == TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL)
+            {
+                return true;
+            }
+        }
+
+    }
+    return false;
+#endif
 }
 
 // Converted from thiscall float CPedIntelligence::CanSeeEntityWithLights(CEntity const*pEntity,bool arg2) 0x605550 
@@ -839,22 +1220,188 @@ double CPedIntelligence::CanSeeEntityWithLights(CEntity * pEntity, int unUsed) {
 
 // Converted from thiscall void CPedIntelligence::ProcessStaticCounter(void) 0x605650 
 void CPedIntelligence::ProcessStaticCounter() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x605650, CPedIntelligence*>(this);
+#else
+    CTask* pActiveSimplestTask = m_TaskMgr.GetSimplestActiveTask();
+    if (!pActiveSimplestTask || !CTask::IsGoToTask(pActiveSimplestTask))
+    {
+        if (m_StaticCounter == -2)
+        {
+            m_StaticCounter = 4;
+        }
+        else
+        {
+            m_StaticCounter++;
+        }
+        m_AnotherStaticCounter = 0;
+        return;
+    }
+
+    auto pGotoTask = (CTaskSimpleGoTo*)pActiveSimplestTask;
+    int moveState = pGotoTask->m_moveState;
+    if (moveState != PEDMOVE_WALK && moveState != PEDMOVE_RUN && moveState != PEDMOVE_SPRINT)
+    {
+        if (m_StaticCounter == -2)
+        {
+            m_StaticCounter = 4;
+        }
+        else
+        {
+            m_StaticCounter++;
+        }
+        m_AnotherStaticCounter = 0;
+        return;
+    }
+
+    CPed* pPed = m_pPed;
+
+    CVector* pPedPos = &pPed->m_placement.m_vPosn;
+    CMatrixLink* pPedMatrix = pPed->m_matrix;
+    if (pPedMatrix)
+    {
+        pPedPos = &pPedMatrix->pos;
+    }
+
+    if (m_pPed->m_pDamageEntity)
+    {
+        if (m_StaticCounter > 4u)
+        {
+            m_vecLastPedPosDuringDamageEntity = *pPedPos;
+        }
+        m_StaticCounter = 0;
+    }
+    else
+    {
+        if (m_StaticCounter == -2)
+        {
+            m_StaticCounter = 4;
+        }
+        else
+        {
+            m_StaticCounter++;
+        }
+    }
+
+    if (m_StaticCounter > 4u)
+    {
+        m_AnotherStaticCounter = 0;
+        return;
+    }
+
+    float fX = pPedPos->x - m_vecLastPedPosDuringDamageEntity.x;
+    float fY = pPedPos->y - m_vecLastPedPosDuringDamageEntity.y;
+    float fZ = pPedPos->z - m_vecLastPedPosDuringDamageEntity.z;
+
+    if ((fX * fX) + (fY * fY) + (fZ * fZ) < 0.0625)
+    {
+        m_AnotherStaticCounter++;
+    }
+    else
+    {
+        m_AnotherStaticCounter = 0;
+        m_vecLastPedPosDuringDamageEntity = *pPedPos;
+    }
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::ProcessFirst(void) 0x6073A0 
 void CPedIntelligence::ProcessFirst() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x6073A0, CPedIntelligence*>(this);
+#else
+    g_LoadMonitor->StartTimer(0);
+    ProcessStaticCounter();
+    if (!m_pedStuckChecker.TestPedStuck(m_pPed, &m_eventGroup))
+    {
+        // Yes, this is very awkward. field_260 is just a boolean, and we are passing its address as a class instance,.
+        // ScanForCollisionEvents might set it to false. The calling convention of the function was probably __cdecl,
+        // but the compiler messed up and used ecx for it. The code works though. Just remember that 
+        // CPedIntelligence::field_260 is just a boolean, not a class instance. Let's keep it this way for now.
+        CCollisionEventScanner* ppCollisionEventScanner = (CCollisionEventScanner*)& field_260;
+        ppCollisionEventScanner->ScanForCollisionEvents(m_pPed, &m_eventGroup);
+    }
+
+    CPed* pPed = m_pPed;
+    if (m_pPed->m_fDamageIntensity > 0.0)
+    {
+        CEntity* pDamageEntity = pPed->m_pDamageEntity;
+        if (pDamageEntity)
+        {
+            if (pDamageEntity->m_nType != ENTITY_TYPE_PED)
+            {
+                CMatrixLink* pPedMatrix = pPed->m_matrix;
+                CVector* pImpactVelocity = &pPed->m_vecLastCollisionImpactVelocity;
+                if (pImpactVelocity->z * pPedMatrix->up.z
+                    + pImpactVelocity->y * pPedMatrix->up.y
+                    + pImpactVelocity->x * pPedMatrix->up.x < -0.5)
+                {
+                    pPed->bPedHitWallLastFrame = 1;
+                }
+            }
+        }
+    }
+
+    if (m_pPed->bInVehicle)
+    {
+        CVehicle* pVehicle = m_pPed->m_pVehicle;
+        if (pVehicle)
+        {
+            if (pVehicle->m_nVehicleClass == CLASS_LEISUREBOAT)
+            {
+                CBike* pBike = (CBike*)pVehicle;
+                pBike->m_bPedLeftHandFixed = 0;
+                pBike->m_bPedRightHandFixed = 0;
+            }
+        }
+    }
+    m_pPed->bMoveAnimSpeedHasBeenSetByTask = 0;
+    g_LoadMonitor->EndTimer(0);
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::Process(void) 0x608260 
 void CPedIntelligence::Process() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x608260, CPedIntelligence*>(this);
+#else
+    g_LoadMonitor->StartTimer(0);
+
+    m_vehicleScanner.ScanForVehiclesInRange(m_pPed);
+
+    if (m_pPed->IsAlive())
+    {
+        m_entityScanner.ScanForEntitiesInRange(1, m_pPed);
+    }
+
+    m_eventScanner.ScanForEvents(m_pPed);
+    m_eventHandler.HandleEvents();
+    m_TaskMgr.ManageTasks();
+
+    auto pRecorder = CPlayerRelationshipRecorder::GetPlayerRelationshipRecorder();
+    pRecorder->RecordRelationshipWithPlayer(m_pPed);
+    LookAtInterestingEntities();
+
+    g_LoadMonitor->EndTimer(0);
+#endif
 }
 
 CTask* CPedIntelligence::GetActivePrimaryTask()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CTask*, 0x4B85B0, CPedIntelligence*>(this);
+#else
+    CTask* pTask = m_TaskMgr.m_aPrimaryTasks[TASK_PRIMARY_PHYSICAL_RESPONSE];
+    if (!pTask)
+    {
+        pTask = m_TaskMgr.m_aPrimaryTasks[TASK_PRIMARY_EVENT_RESPONSE_TEMP];
+        if (!pTask)
+        {
+            pTask = m_TaskMgr.m_aPrimaryTasks[TASK_PRIMARY_EVENT_RESPONSE_NONTEMP];
+        }
+    }
+    return pTask;
+#endif
 }
 
 // Converted from cdecl void CPedIntelligence::operator delete(void * arg1) 0x6074E0 

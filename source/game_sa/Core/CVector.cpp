@@ -46,6 +46,11 @@ void CVector::Cross(const CVector& left, const CVector &right)
     ((void(__thiscall*)(CVector*, const CVector& left, const CVector &right)) 0x70F890)(this, left, right);
 }
 
+float CVector::Dot()
+{
+    return ((float(__thiscall*)(CVector*)) 0x406DA0)(this);
+}
+
 // Adds left + right and stores result
 void CVector::Sum(const CVector& left, const CVector &right)
 {

@@ -8,6 +8,8 @@
 
 #include "PluginBase.h"
 
+class CPed;
+
 class  CEntityScanner {
 protected:
     void *vtable;
@@ -18,6 +20,7 @@ public:
     int field_4C;
 
     void Clear();
+    void ScanForEntitiesInRange(int arg2, CPed* pPed);
 };
 
 VALIDATE_SIZE(CEntityScanner, 0x50);

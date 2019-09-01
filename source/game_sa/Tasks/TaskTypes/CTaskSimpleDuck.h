@@ -40,7 +40,7 @@ public:
     unsigned char m_nDuckControlType;
     unsigned char m_nCountDownFrames;
 
-    CTaskSimpleDuck(eDuckControlTypes DuckControlType, unsigned short nLengthOfDuck, short nUseShotsWhizzingEvents = -1);
+    CTaskSimpleDuck * Constructor (eDuckControlTypes DuckControlType, unsigned short nLengthOfDuck, short nUseShotsWhizzingEvents = -1);
     static bool CanPedDuck(CPed* pPed);
     bool ControlDuckMove(float moveSpeedX, float moveSpeedY);
     bool IsTaskInUseByOtherTasks(); 

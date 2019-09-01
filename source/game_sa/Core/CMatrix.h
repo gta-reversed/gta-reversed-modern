@@ -39,7 +39,7 @@ public:
 	void Update(); // update RwMatrix with attaching matrix. This doesn't check if attaching matrix is present, so use it only if you know it is present.
 	               // Using UpdateRW() is more safe since it perform this check.
 	void UpdateRW(); // update RwMatrix with attaching matrix.
-	void UpdateRW(RwMatrix *matrix); // update RwMatrix with this matrix
+	void UpdateRwMatrix(RwMatrix *matrix); // update RwMatrix with this matrix
 	void SetUnity();
 	void ResetOrientation();
 	void SetScale(float scale); // set (scaled)

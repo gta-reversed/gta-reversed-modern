@@ -14,6 +14,11 @@
 #include <iostream>
 #include <cassert>
 
+#include "game_sa\CVehicleScanner.h"
+#include "game_sa\CPlayerRelationshipRecorder.h"
+#include "game_sa\CLoadMonitor.h"
+#include "game_sa\CPedStuckChecker.h"
+#include "game_sa\CGroupEventHandler.h"
 #include "game_sa\CEventHandlerHistory.h"
 #include "game_sa\CPedType.h"
 #include "game_sa\CPedScriptedTaskRecord.h"
@@ -244,6 +249,7 @@
 #include "game_sa\Audio\CAEVehicleAudioEntity.h"
 #include "game_sa\Audio\CAEWeaponAudioEntity.h"
 #include "game_sa\Audio\CAEWeatherAudioEntity.h"
+#include "game_sa\Collision\CCollisionEventScanner.h"
 #include "game_sa\Collision\CBoundingBox.h"
 #include "game_sa\Collision\CBox.h"
 #include "game_sa\Collision\CColBox.h"

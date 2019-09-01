@@ -7,7 +7,7 @@
 #pragma once
 
 enum eDecisionMakerEvents {
-    DM_EVENT_DRAGGED_OUT_CAR,
+    DM_EVENT_DRAGGED_OUT_CAR = 0,
     DM_EVENT_KNOCK_OFF_BIKE,
     DM_EVENT_DAMAGE,
     DM_EVENT_DEAD_PED,

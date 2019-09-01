@@ -30,6 +30,8 @@ public:
     // Performs cross calculation
     void Cross(const CVector& left, const CVector &right);
 
+    float Dot();
+ 
     // Adds left + right and stores result
     void Sum(const CVector& left, const CVector &right);
 

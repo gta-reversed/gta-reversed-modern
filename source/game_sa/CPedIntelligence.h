@@ -23,6 +23,8 @@
 #include "CTaskSimpleClimb.h"
 #include "CTaskSimpleJetpack.h"
 #include "CTaskSimpleInAir.h"
+#include "CPedStuckChecker.h"
+#include "CVehicleScanner.h"
 
 class  CPedIntelligence {
 public:
@@ -30,8 +32,8 @@ public:
     CTaskManager   m_TaskMgr;
     CEventHandler  m_eventHandler;
     CEventGroup    m_eventGroup;
-    unsigned int   m_nDecisionMakerType;
-    unsigned int   m_nDecisionMakerTypeInGroup;
+    int            m_nDecisionMakerType;
+    int            m_nDecisionMakerTypeInGroup;
     float          m_fHearingRange;
     float          m_fSeeingRange;
     unsigned int   m_nDmNumPedsToScan;
@@ -41,8 +43,8 @@ public:
     unsigned char  m_nEventId;
     unsigned char  m_nEventPriority;
     char field_D3;
-    CEntityScanner m_vehicleScanner;
-    CEntityScanner m_pedScanner;
+    CVehicleScanner m_vehicleScanner;
+    CEntityScanner m_entityScanner;
     char field_174;
     char gap_175[3];
     CTaskTimer field_178;
@@ -50,27 +52,29 @@ public:
     char field_188;
     char gap_189[3];
     CEventScanner  m_eventScanner;
-    char field_260;
-    char gap_261[3];
-    char field_264[16];
-    int field_274;
-    int field_278;
-    char gap_27C[12];
+    bool field_260;
+    char field_261[3];
+    CPedStuckChecker m_pedStuckChecker;
+    int m_AnotherStaticCounter;
+    int m_StaticCounter;
+    CVector m_vecLastPedPosDuringDamageEntity;
     class CEntity *m_apInterestingEntities[3];
     
+    static float& STEALTH_KILL_RANGE;
     static float& LIGHT_AI_LEVEL_MAX;
     static float& flt_8D2384;
     static float& flt_8D2388;
 
-	void SetPedDecisionMakerType(int newtype);
-	void SetPedDecisionMakerTypeInGroup(int newtype);
+    CEntity** GetPedEntities();
+	void SetPedDecisionMakerType(int newType);
+	void SetPedDecisionMakerTypeInGroup(int newType);
 	void RestorePedDecisionMakerType();
 	void SetHearingRange(float range);
 	void SetSeeingRange(float range);
 	bool IsInHearingRange(CVector const& posn);
 	bool IsInSeeingRange(CVector* pPosition);
 	bool FindRespectedFriendInInformRange();
-	bool IsRespondingToEvent(int event);
+	bool IsRespondingToEvent(int eventType);
 	void AddTaskPhysResponse(CTask* pTask, int unUsed);
 	void AddTaskEventResponseTemp(CTask* pTask, int unUsed);
 	void AddTaskEventResponseNonTemp(CTask* pTask, int unUsed);
@@ -86,7 +90,7 @@ public:
 	CTaskSimpleInAir* GetTaskInAir();
 	CTaskSimpleClimb* GetTaskClimb();
 	bool GetUsingParachute();
-	void SetTaskDuckSecondary(unsigned short arg1);
+	void SetTaskDuckSecondary(unsigned short nLengthOfDuck);
 	void ClearTaskDuckSecondary();
 	void ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryTasks);
 	void FlushImmediately(bool bSetPrimaryDefaultTask);
@@ -97,13 +101,13 @@ public:
 	void ProcessEventHandler();
 	bool IsFriendlyWith(CPed* pPed);
 	bool IsThreatenedBy(CPed const& ped);
-	bool Respects(CPed const& ped);
+	bool Respects(CPed* pPed);
 	bool IsInACarOrEnteringOne();
-	static bool AreFriends(CPed const& ped1, CPed const& ped2);
+	static bool AreFriends(CPed* ped1, CPed* ped2);
 	bool IsPedGoingSomewhereOnFoot();
 	int GetMoveStateFromGoToTask();
 	void FlushIntelligence();
-	bool TestForStealthKill(CPed* pPed, bool arg2);
+	bool TestForStealthKill(CPed* pTarget, bool bFullTest);
 	void RecordEventForScript(int EventID, int EventPriority);
 	bool HasInterestingEntites();
 	bool IsInterestingEntity(CEntity* pEntity);

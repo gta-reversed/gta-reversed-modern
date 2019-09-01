@@ -10,7 +10,7 @@
 
 enum eVehicleClass
 {  
-    CLASS_NORMAL,
+    CLASS_NORMAL = 0,
     CLASS_POORFAMILY,
     CLASS_RICHFAMILY,
     CLASS_EXECUTIVE,

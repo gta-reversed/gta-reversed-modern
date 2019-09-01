@@ -1119,8 +1119,8 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed)
                 pedWalkUpDown = pPad->GetPedWalkUpDown(pPlayerPed);
                 pedWalkLeftRight = pPad->GetPedWalkLeftRight(pPlayerPed);
             }
-            moveSpeed.x = pedWalkLeftRight * 0.0078125;
-            moveSpeed.y = pedWalkUpDown * 0.0078125;
+            moveSpeed.x = pedWalkLeftRight * 0.0078125f;
+            moveSpeed.y = pedWalkUpDown * 0.0078125f;
             CEntity* pTargetedObject = pPlayerPed->m_pTargetedObject;
             if (CGameLogic::IsPlayerUse2PlayerControls(pPlayerPed))
             {
@@ -1388,7 +1388,7 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
         if (!pedField_568 || (unknownFlags = *(unsigned int*)(pedField_568 + 64), (unknownFlags & 4) == 0) || ((unknownFlags & 8) != 0))
         {
             if (!pPlayerPed->m_pIntelligence->GetTaskHold(0)
-                || !pPlayerPed->m_pIntelligence->GetTaskHold(0)->m_pAnimBlendAssociation)
+                || !((CTaskSimpleHoldEntity*)pPlayerPed->m_pIntelligence->GetTaskHold(0))->m_pAnimBlendAssociation)
             {
                 CAnimBlendHierarchy* pAnimHierarchy = nullptr;
                 CAnimBlendAssocGroup* pAnimGroup = &CAnimManager::ms_aAnimAssocGroups[pPlayerPed->m_nAnimGroup];
