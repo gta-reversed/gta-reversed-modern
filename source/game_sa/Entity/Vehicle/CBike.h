@@ -28,14 +28,14 @@ class CBike : public CVehicle {
 protected:
     CBike(plugin::dummy_func_t) : CVehicle(plugin::dummy), m_mLeanMatrix(plugin::dummy) {}
 public:
-    RwFrame       *m_aBikeNodes[BIKE_NUM_NODES];
+    RwFrame* m_aBikeNodes[BIKE_NUM_NODES];
     bool           m_bLeanMatrixCalculated;
     char _pad0[3];
     CMatrix        m_mLeanMatrix;
     unsigned char  m_nDamageFlags;
     char field_615[27];
     CVector field_630;
-    void          *m_pBikeHandlingData;
+    void* m_pBikeHandlingData;
     CRideAnimData  m_rideAnimData;
     unsigned char  m_anWheelDamageState[2];
     char field_65E;
@@ -71,9 +71,9 @@ public:
     char field_7B6[2];
     int field_7B8;
     int field_7BC;
-    CEntity       *m_apWheelCollisionEntity[4];
+    CEntity* m_apWheelCollisionEntity[4];
     CVector        m_avTouchPointsLocalSpace[4];
-    CEntity       *m_pDamager;
+    CEntity* m_pDamager;
     unsigned char  m_nNumContactWheels;
     unsigned char  m_nNumWheelsOnGround;
     char field_806;
