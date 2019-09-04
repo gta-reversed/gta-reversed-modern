@@ -14,6 +14,8 @@
 #include <iostream>
 #include <cassert>
 
+#include "game_sa\CEventPedToFlee.h"
+#include "game_sa\CEventPedToChase.h"
 #include "game_sa\CVehicleScanner.h"
 #include "game_sa\CPlayerRelationshipRecorder.h"
 #include "game_sa\CLoadMonitor.h"
@@ -450,3 +452,6 @@
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleCarDriveTimed.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleGoToPoint.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleGoTo.h"
+#include "game_sa\Tasks\TaskTypes\CTaskComplexBeCop.h"
+#include "game_sa\Tasks\TaskTypes\CTaskComplexWanderCop.h"
+#include "game_sa\Tasks\TaskTypes\CTaskComplexPolicePursuit.h"

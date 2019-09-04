@@ -13,7 +13,7 @@
 
 class  CCopPed : public CPed {
 public:
-	char field_79C;
+	bool m_bDontPursuit;
 	char field_79D;
 private:
 	char padding[2];

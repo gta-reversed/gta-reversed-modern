@@ -3,9 +3,9 @@
 
 #pragma comment(lib, "detours.lib")
 
-auto OLD_CPedIntelligence_IsPedGoingForCarDoor = (bool (__thiscall*)(CPedIntelligence *pThis))0x602350;
+auto OLD_CTaskComplexWanderCop_LookForCriminals = (CTask * (__thiscall*)(CTaskComplexWanderCop* pThis, CCopPed * pPed))0x66B300;
 
-bool __fastcall CPedIntelligence_IsPedGoingForCarDoor (CPedIntelligence* pThis, void* padding);
+void __fastcall CTaskComplexWanderCop_LookForCriminals (CTaskComplexWanderCop* pThis, void* padding, CCopPed* pPed);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -20,15 +20,15 @@ void InjectHooksMain(void)
     //InjectHook(0x0681C10, &HOOK_THEFUNCTION, PATCH_JUMP);
 
 
-    /*
+    ///*
     DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CPedIntelligence_IsPedGoingForCarDoor, CPedIntelligence_IsPedGoingForCarDoor);
+    DetourAttach(&(PVOID&)OLD_CTaskComplexWanderCop_LookForCriminals, CTaskComplexWanderCop_LookForCriminals);
     DetourTransactionCommit();
-    */
+   // */
 }
 /*
 enum eFunctionReturnValue
@@ -54,10 +54,9 @@ enum eFunctionReturnValue
     FUNCTION_SOMELABEL = 4
 };
 
-/*
-bool __fastcall CPedIntelligence_IsPedGoingForCarDoor(CPedIntelligence* pThis, void* padding)
+
+void __fastcall CTaskComplexWanderCop_LookForCriminals(CTaskComplexWanderCop* pThis, void* padding, CCopPed* pPed)
 {
-    printf(" calling CPedIntelligence_IsPedGoingForCarDoor \n");
-    return true;
+    printf(" calling CTaskComplexWanderCop_LookForCriminals \n");
+
 }
-*/

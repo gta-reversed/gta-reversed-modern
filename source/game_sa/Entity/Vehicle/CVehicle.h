@@ -233,7 +233,7 @@ public:
     char   m_anExtras[2];
     short  m_anUpgrades[15];
     float    m_fWheelScale;
-    unsigned short m_nAlarmState;
+    short m_nAlarmState;
     short  m_nForcedRandomRouteSeed; // if this is non-zero the random wander gets deterministic
     CPed *m_pDriver;
     CPed *m_apPassengers[8];
