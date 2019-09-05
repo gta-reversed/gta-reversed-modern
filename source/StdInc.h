@@ -404,6 +404,8 @@
 #include "game_sa\Tasks\CTaskManager.h"
 #include "game_sa\Tasks\CTaskSimple.h"
 #include "game_sa\Tasks\CTaskTimer.h"
+#include "game_sa\Tasks\CTaskComplexSequence.h"
+#include "game_sa\Tasks\CTaskComplexUseSequence.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexCopInCar.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexDie.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexEnterBoatAsDriver.h"
