@@ -24,6 +24,7 @@ enum eWanderType
 
 class CPed;
 class CNodeAddress;
+class CVector;
 
 class CTaskComplexWander : public CTaskComplex {
 protected:
@@ -52,6 +53,7 @@ public:
         };
     };
 
+    eTaskType GetId() override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
@@ -61,7 +63,15 @@ public:
     virtual void UpdatePathNodes(CPed* pPed, int8_t dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8_t* outDir);
 
     CTaskComplexWander(int MoveState, unsigned char Dir, bool bWanderSensibly, float TargetRadius = 0.5f);
-    
+
+    CTask* CreateSubTask(CPed* ped, int taskId);
+    void ComputeTargetPos(CPed* pPed, CVector* pOutTargetPos, CNodeAddress* pTargetNodeAddress);
+    float ComputeTargetHeading(CPed* ped);
+    bool ValidNodes();
+    void ScanForBlockedNodes(CPed* pPed);
+    bool ScanForBlockedNode(CPed* pPed, CNodeAddress* targetNodeAddress);
+    bool ScanForBlockedNode(CVector* position, class CEntity* pEntity);
+
     static CTaskComplexWander* GetWanderTaskByPedType(CPed* pPed);
 };
 

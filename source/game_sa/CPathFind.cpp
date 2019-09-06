@@ -16,6 +16,31 @@ CVector CPathNode::GetNodeCoors()
     return result;
 }
 
+bool CPathFind::TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress)
+{
+    return plugin::CallMethodAndReturn<bool, 0x44D790, CPathFind*, CNodeAddress, CNodeAddress>
+        (this, startNodeAddress, targetNodeAddress);
+}
+
+bool CPathFind::TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress)
+{
+    return plugin::CallMethodAndReturn<bool, 0x44D480, CPathFind*, CNodeAddress, CNodeAddress>
+        (this, startNodeAddress, targetNodeAddress);
+}
+
+CVector* CPathFind::TakeWidthIntoAccountForWandering(CVector* outPosition, CNodeAddress nodeAddress, unsigned short randomSeed)
+{
+    return plugin::CallMethodAndReturn<CVector*, 0x4509A0, CPathFind*, CVector*, CNodeAddress, unsigned short>
+        (this, outPosition, nodeAddress, randomSeed);
+}
+
+void CPathFind::FindNextNodeWandering(int pathType, float x, float y, float z, CNodeAddress* startNodeAddress, 
+                                      CNodeAddress* targetNodeAddress, unsigned int dir, int8_t* outDir)
+{
+    plugin::CallMethod <0x451B70, CPathFind*, int, float, float, float, CNodeAddress*, CNodeAddress*, unsigned int, int8_t*>
+        (this, pathType, x, y, z, startNodeAddress, targetNodeAddress, dir, outDir);
+}
+
 void CPathFind::DoPathSearch(unsigned char pathType, CVector origin, CNodeAddress originAddr,
     CVector target, CNodeAddress *pResultNodes, short *pNodesCount, int maxNodesToFind, float *pDistance,
     float maxSearchDistance, CNodeAddress *targetAddr, float maxUnkLimit, bool oneSideOnly,

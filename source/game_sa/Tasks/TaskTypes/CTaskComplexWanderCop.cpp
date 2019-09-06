@@ -138,7 +138,7 @@ CTask* CTaskComplexWanderCop::ControlSubTask(CPed* ped)
 void CTaskComplexWanderCop::ScanForStuff(CPed* ped)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return ((void(__thiscall*)(CTaskComplex*, CPed*))plugin::GetVMT(this, 12))(this, pPed);
+    return ((void(__thiscall*)(CTaskComplex*, CPed*))plugin::GetVMT(this, 12))(this, ped);
 #else
     CCopPed* pPed = (CCopPed*)ped;
     if (!m_nScanForStuffTimer.m_bStarted)

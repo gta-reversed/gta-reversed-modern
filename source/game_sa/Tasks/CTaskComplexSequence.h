@@ -17,6 +17,9 @@ public:
     char field_3A;
     char field_3B;
     unsigned char m_nReferenceCount; // count of how many CTaskComplexUseSequence instances are using this sequence
+
+    CTaskComplexSequence* Constructor();
+    void AddTask(CTask* pTask);
 };
 
 VALIDATE_SIZE(CTaskComplexSequence, 0x40);

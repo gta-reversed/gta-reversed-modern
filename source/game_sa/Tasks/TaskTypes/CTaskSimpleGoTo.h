@@ -2,7 +2,7 @@
 #include "CTaskSimple.h"
 #include "CVector.h"
 
-class CTaskSimpleGoTo : CTaskSimple
+class CTaskSimpleGoTo : public CTaskSimple
 {
     CTaskSimpleGoTo() = delete;
 protected:

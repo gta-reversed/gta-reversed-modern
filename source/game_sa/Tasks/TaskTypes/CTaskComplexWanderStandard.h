@@ -17,7 +17,7 @@ public:
     CTaskTimer m_TaskTimer;
     int m_nMinNextScanTime;
 
-    CTaskComplexWanderStandard(int MoveState, unsigned char Dir, bool bWanderSensibly = true);
+    CTaskComplexWanderStandard* Constructor(int MoveState, unsigned char Dir, bool bWanderSensibly = true);
 };
 
 VALIDATE_SIZE(CTaskComplexWanderStandard, 0x38);

@@ -23,7 +23,7 @@ private:
     short __pad;
 public:
 
-    CTaskSimpleRunAnim(unsigned int animGroup, unsigned int animID, float fBlendDelta, bool bHoldLastFrame);
+    CTaskSimpleRunAnim* Constructor (unsigned int animGroup, unsigned int animID, float fBlendDelta, bool bHoldLastFrame);
     CTaskSimpleRunAnim(unsigned int animGroup, unsigned int animID, float fBlendDelta, unsigned int nTaskType,
         char* pTaskName _IGNORED_, bool bHoldLastFrame);
 

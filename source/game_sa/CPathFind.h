@@ -138,8 +138,10 @@ public:
 	float m_fForbiddenForScrCarsY1;
 	float m_fForbiddenForScrCarsY2;
 
-	//
-
+    bool TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
+    bool TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
+    CVector* TakeWidthIntoAccountForWandering(CVector* outPosition, CNodeAddress nodeAddress, unsigned short randomSeed);
+    void FindNextNodeWandering(int pathType, float x, float y, float z, CNodeAddress* startNodeAddress, CNodeAddress* targetNodeAddress, unsigned int dir, int8_t* outDir);
 	void DoPathSearch(unsigned char pathType, CVector origin, CNodeAddress originAddr, 
 		CVector target, CNodeAddress *pResultNodes, short *pNodesCount, int maxNodesToFind, float *pDistance, 
 		float maxSearchDistance, CNodeAddress *targetAddr, float maxUnkLimit, bool oneSideOnly, 
