@@ -18,8 +18,16 @@ public:
     char field_3B;
     unsigned char m_nReferenceCount; // count of how many CTaskComplexUseSequence instances are using this sequence
 
+    CTask* Clone() override;
+    eTaskType GetId() override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
+    CTask* CreateNextSubTask(CPed* ped) override;
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed* ped) override;
+
     CTaskComplexSequence* Constructor();
     void AddTask(CTask* pTask);
+    CTask* CreateNextSubTask(CPed* pPed, int* pTaskIndex, int* pRepeatCount);
 };
 
 VALIDATE_SIZE(CTaskComplexSequence, 0x40);

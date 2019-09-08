@@ -3,9 +3,8 @@
 
 #pragma comment(lib, "detours.lib")
 
-
-auto OLD_CTaskComplexWander_ComputeTargetPos = (float (__thiscall*)(CTaskComplexWander* pThis, CPed * pPed, CVector * pOutTargetPos, CNodeAddress * pTargetNodeAddress))0x669F60;
-void __fastcall CTaskComplexWander_ComputeTargetPos(CTaskComplexWander* pThis, void* padding, CPed* pPed, CVector* pOutTargetPos, CNodeAddress* pTargetNodeAddress);
+auto OLD_CTaskComplexSequence_AddTask = (CTask* (__thiscall*)(CTaskComplexSequence * pThis, CTask * pTask))0x632D10;
+void __fastcall CTaskComplexSequence_AddTask(CTaskComplexSequence* pThis, void* padding, CTask* pTask);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -20,13 +19,13 @@ void InjectHooksMain(void)
     //InjectHook(0x0681C10, &HOOK_THEFUNCTION, PATCH_JUMP);
 
 
-    /*
+   /*
     DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CTaskComplexWander_ComputeTargetPos, CTaskComplexWander_ComputeTargetPos);
+    DetourAttach(&(PVOID&)OLD_CTaskComplexSequence_AddTask, CTaskComplexSequence_AddTask);
     DetourTransactionCommit();
     */
 }
@@ -54,11 +53,9 @@ enum eFunctionReturnValue
     FUNCTION_SOMELABEL = 4
 };
 
-/*
-void __fastcall CTaskComplexWander_ComputeTargetPos(CTaskComplexWander* pThis, void* padding, CPed* pPed, CVector* pOutTargetPos, CNodeAddress* pTargetNodeAddress)
-{
-    printf(" calling CTaskComplexWander_ComputeTargetPos \n");
 
-    return;
+void __fastcall CTaskComplexSequence_AddTask(CTaskComplexSequence* pThis, void* padding, CTask* pTask)
+{
+    printf(" calling CTaskComplexSequence_AddTask \n");
+
 }
-*/
