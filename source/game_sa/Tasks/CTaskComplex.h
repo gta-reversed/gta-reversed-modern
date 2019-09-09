@@ -23,6 +23,9 @@ public:
 	virtual CTask *CreateNextSubTask(CPed *ped);//=0
 	virtual CTask *CreateFirstSubTask(CPed *ped);
 	virtual CTask *ControlSubTask(CPed *ped);//=0
+
+    CTaskComplex* Constructor ();
+    CTaskComplex* Destructor();
 };
 
 VALIDATE_SIZE(CTaskComplex, 0xC);

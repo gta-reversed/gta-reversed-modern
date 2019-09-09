@@ -28,6 +28,7 @@ public:
     CTaskComplexSequence* Constructor();
     void AddTask(CTask* pTask);
     CTask* CreateNextSubTask(CPed* pPed, int* pTaskIndex, int* pRepeatCount);
+    void Flush();
 };
 
 VALIDATE_SIZE(CTaskComplexSequence, 0x40);

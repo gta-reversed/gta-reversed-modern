@@ -3,8 +3,8 @@
 
 #pragma comment(lib, "detours.lib")
 
-auto OLD_CTaskComplexSequence_AddTask = (CTask* (__thiscall*)(CTaskComplexSequence * pThis, CTask * pTask))0x632D10;
-void __fastcall CTaskComplexSequence_AddTask(CTaskComplexSequence* pThis, void* padding, CTask* pTask);
+auto OLD_CTaskComplexUseSequence_CreateFirstSubTask = (CTask* (__thiscall*)(CTaskComplexSequence * pThis, class CPed* ped))0x6354A0;
+CTask* __fastcall CTaskComplexUseSequence_CreateFirstSubTask(CTaskComplexSequence* pThis, void* padding, class CPed* ped);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -19,13 +19,13 @@ void InjectHooksMain(void)
     //InjectHook(0x0681C10, &HOOK_THEFUNCTION, PATCH_JUMP);
 
 
-   /*
+    /*
     DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CTaskComplexSequence_AddTask, CTaskComplexSequence_AddTask);
+    DetourAttach(&(PVOID&)OLD_CTaskComplexUseSequence_CreateFirstSubTask, CTaskComplexUseSequence_CreateFirstSubTask);
     DetourTransactionCommit();
     */
 }
@@ -54,8 +54,8 @@ enum eFunctionReturnValue
 };
 
 
-void __fastcall CTaskComplexSequence_AddTask(CTaskComplexSequence* pThis, void* padding, CTask* pTask)
+CTask* __fastcall CTaskComplexUseSequence_CreateFirstSubTask(CTaskComplexSequence* pThis, void* padding, class CPed* ped)
 {
-    printf(" calling CTaskComplexSequence_AddTask \n");
-
+    printf(" calling CTaskComplexUseSequence_CreateFirstSubTask \n");
+    return 0;
 }

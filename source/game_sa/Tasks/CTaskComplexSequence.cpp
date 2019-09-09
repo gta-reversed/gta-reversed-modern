@@ -143,3 +143,8 @@ CTask* CTaskComplexSequence::CreateNextSubTask(CPed* pPed, int* pTaskIndex, int*
     return pNextSubTask;
 #endif
 }
+
+void CTaskComplexSequence::Flush()
+{
+    plugin::CallMethod<0x632C10, CTask*>(this);
+}

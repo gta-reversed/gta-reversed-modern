@@ -31,3 +31,13 @@ CTask* CTaskComplex::ControlSubTask(CPed* ped)
 {
     return ((CTask * (__thiscall*)(CTaskComplex*, CPed*))plugin::GetVMT(this, 10))(this, ped);
 }
+
+CTaskComplex* CTaskComplex::Constructor()
+{
+    return plugin::CallMethodAndReturn<CTaskComplex*, 0x61A3B0, CTaskComplex*>(this);
+}
+
+CTaskComplex* CTaskComplex::Destructor()
+{
+    return plugin::CallMethodAndReturn<CTaskComplex*, 0x61A3D0, CTaskComplex*>(this);
+}

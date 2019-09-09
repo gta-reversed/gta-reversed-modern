@@ -10,9 +10,9 @@ CEvent* CEvent::DeletingDestructor(uint8_t deletingFlags)
     return ((CEvent * (__thiscall*)(CEvent*, uint8_t))plugin::GetVMT(this, 0))(this, deletingFlags);
 }
 
-CEvent* CEvent::GetEventType()
+eEventType CEvent::GetEventType()
 {
-    return ((CEvent * (__thiscall*)(CEvent*))plugin::GetVMT(this, 1))(this);
+    return ((eEventType (__thiscall*)(CEvent*))plugin::GetVMT(this, 1))(this);
 }
 
 int CEvent::GetEventPriority()

@@ -4,6 +4,7 @@
 class CPed;
 class CPedGroup;
 class CEntity;
+enum eEventType;
 
 class CEvent 
 {
@@ -11,7 +12,7 @@ public:
     static void* operator_new();
 
     virtual CEvent* DeletingDestructor(uint8_t deletingFlags);
-    virtual CEvent* GetEventType();
+    virtual eEventType GetEventType();
     virtual int GetEventPriority();
     virtual int GetLifeTime();
     virtual CEvent* Clone();
