@@ -146,5 +146,22 @@ CTask* CTaskComplexSequence::CreateNextSubTask(CPed* pPed, int* pTaskIndex, int*
 
 void CTaskComplexSequence::Flush()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x632C10, CTask*>(this);
+#else
+    for (unsigned int taskIndex = 0; taskIndex < 8; taskIndex++)
+    {
+        CTask* pTask = m_aTasks[taskIndex];
+        if (pTask)
+        {
+            pTask->DeletingDestructor(1);
+        }
+
+        m_aTasks[taskIndex] = 0;
+    }
+
+    m_nCurrentTaskIndex = 0;
+    m_bRepeatSequence = 0;
+    m_nSequenceRepeatedCount = 0;
+#endif
 }
