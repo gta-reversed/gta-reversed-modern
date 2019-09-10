@@ -436,6 +436,8 @@
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleGangDriveBy.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleHoldEntity.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimplePutDownEntity.h"
+#include "game_sa\Tasks\TaskTypes\CTaskSimplePickUpEntity.h"
+#include "game_sa\Tasks\TaskTypes\CTaskComplexGoPickUpEntity.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleIKChain.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleIKLookAt.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleIKManager.h"
