@@ -2,7 +2,8 @@
 #include "PluginBase.h"
 #include "CTaskSimple.h"
 
-class  CTaskSimpleHoldEntity : public CTaskSimple {
+class CTaskSimpleHoldEntity : public CTaskSimple {
+    CTaskSimpleHoldEntity() = delete;
 protected:
     CTaskSimpleHoldEntity(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
