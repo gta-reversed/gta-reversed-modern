@@ -257,7 +257,7 @@ void CTaskSimpleHoldEntity::StartAnim(CPed* pPed)
 void CTaskSimpleHoldEntity::DropEntity(CPed* pPed, bool bAddEventSoundQuiet)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x6930F0, CTaskSimpleHoldEntity*, CPed*, bool>(this, pPed, bDropSlowly);
+    plugin::CallMethod<0x6930F0, CTaskSimpleHoldEntity*, CPed*, bool>(this, pPed, bAddEventSoundQuiet);
 #else
     bool bUpdateEntityPosition = true;
     CObject* pObjectToHold = nullptr;
