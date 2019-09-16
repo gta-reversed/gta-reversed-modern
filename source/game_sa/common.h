@@ -59,6 +59,7 @@ AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, char *name);
 
 char *MakeUpperCase(char *dest, char *src);
 
+class CEventGroup* GetEventGlobalGroup();
 // dummy function
 void CreateDebugFont();
 // dummy function

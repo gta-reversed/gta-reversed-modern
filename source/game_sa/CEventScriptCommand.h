@@ -4,7 +4,7 @@
 
 class CTask;
 
-class CEventScriptCommand : CEvent
+class CEventScriptCommand : public CEvent
 {
 public:
     unsigned char padding[64];

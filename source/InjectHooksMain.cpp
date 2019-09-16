@@ -3,8 +3,9 @@
 
 #pragma comment(lib, "detours.lib")
 
-auto OLD_CTaskComplexSequence_Flush = (CTask* (__thiscall*)(CTaskComplexSequence * pThis))0x632C10;
-void __fastcall CTaskComplexSequence_Flush(CTaskComplexSequence* pThis, void* padding);
+//bool __thiscall CTaskSimpleHoldEntity_DropEntity(CTaskSimpleHoldEntity *this, struct CPed *ped)
+auto OLD_CTaskSimpleHoldEntity_DropEntity = (bool(__thiscall*)(CTaskSimpleHoldEntity * pThis, CPed * pPed, bool bAddEventSoundQuiet))0x6930F0;
+void __fastcall CTaskSimpleHoldEntity_DropEntity(CTaskSimpleHoldEntity* pThis, void* padding, CPed* pPed, bool bAddEventSoundQuiet);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -19,15 +20,15 @@ void InjectHooksMain(void)
     //InjectHook(0x0681C10, &HOOK_THEFUNCTION, PATCH_JUMP);
 
 
-    /*
+   // /*
     DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CTaskComplexSequence_Flush, CTaskComplexSequence_Flush);
+    DetourAttach(&(PVOID&)OLD_CTaskSimpleHoldEntity_DropEntity, CTaskSimpleHoldEntity_DropEntity);
     DetourTransactionCommit();
-    */
+    //*/
 }
 /*
 enum eFunctionReturnValue
@@ -54,7 +55,7 @@ enum eFunctionReturnValue
 };
 
 
-void __fastcall CTaskComplexSequence_Flush(CTaskComplexSequence* pThis, void* padding)
+void __fastcall CTaskSimpleHoldEntity_DropEntity(CTaskSimpleHoldEntity* pThis, void* padding, CPed* pPed, bool bAddEventSoundQuiet)
 {
-    printf(" calling CTaskComplexSequence_Flush \n");
+    printf(" calling CTaskSimpleHoldEntity_DropEntity \n");
 }

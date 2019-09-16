@@ -618,7 +618,7 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
     {
         if (pTaskSimpleHoldEntity->GetId() == TASK_SIMPLE_HOLD_ENTITY)
         {
-            pObjectToHold = pTaskSimpleHoldEntity->m_pObjectToHold;
+            pObjectToHold = (CObject*)pTaskSimpleHoldEntity->m_pEntityToHold;
             if (pObjectToHold)
             {
                 if (pObjectToHold->m_nType == ENTITY_TYPE_OBJECT)
@@ -670,10 +670,11 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
     {
         if (objectType != -1)
         {
-            pTaskSimpleHoldEntityCloned->m_pObjectToHold->m_nObjectType = objectType;
+            CObject* pObjectToHold = (CObject*)pTaskSimpleHoldEntityCloned->m_pEntityToHold;
+            pObjectToHold->m_nObjectType = objectType;
             if (bIsEntityVisible)
             {
-                pTaskSimpleHoldEntityCloned->m_pObjectToHold->m_bIsVisible = 1;
+                pObjectToHold->m_bIsVisible = 1;
             }
         }
         pTaskManager->SetTaskSecondary(pTaskSimpleHoldEntityCloned, TASK_SECONDARY_PARTIAL_ANIM);

@@ -9,6 +9,8 @@
 #include "PluginBase.h"
 #include "CEvent.h"
 
+enum eTaskType;
+
 class CEventGroup {
 protected:
     void *vtable;

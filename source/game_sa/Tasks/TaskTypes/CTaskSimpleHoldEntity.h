@@ -2,15 +2,20 @@
 #include "PluginBase.h"
 #include "CTaskSimple.h"
 
+enum eHoldEntityBoneFlags 
+{
+    HOLD_ENTITY_UPDATE_BONE_TRANSLATION_ONLY = 0x16
+};
+
 class CTaskSimpleHoldEntity : public CTaskSimple {
     CTaskSimpleHoldEntity() = delete;
 protected:
     CTaskSimpleHoldEntity(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
-    class CObject* m_pObjectToHold;
+    class CEntity* m_pEntityToHold;
     CVector m_vecPosition;
-    bool m_bBoneFrameId;
-    bool m_bBoneFlags;
+    char m_bBoneFrameId;
+    unsigned char m_bBoneFlags;
     bool field_1A [2];
     float m_fRotation;
     int m_nAnimId;
@@ -23,6 +28,29 @@ public:
     bool m_bDisallowDroppingOnAnimEnd;
     bool field_37;
     class CAnimBlendAssociation* m_pAnimBlendAssociation; 
+
+    CTask* DeletingDestructor(uint8_t deletingFlags) override;
+    CTask* Clone() override;
+    eTaskType GetId() override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
+    bool ProcessPed(class CPed* ped) override;
+    bool SetPedPosition(class CPed* ped) override;
+
+    CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags, 
+                                       int animId, int groupId, bool bDisAllowDroppingOnAnimEnd);
+    CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags, 
+                                      char* pAnimName, int animBlockId, int animFlags);
+    CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags,
+                                       CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int animFlags);
+
+    CTaskSimpleHoldEntity* Destructor();
+    void ReleaseEntity();
+    bool CanThrowEntity();
+    void PlayAnim(int groupId, int animId);
+    static void FinishAnimHoldEntityCB(CAnimBlendAssociation* pAnimAssoc, CTaskSimpleHoldEntity* pTaskHoldEntity);
+    void StartAnim(CPed* pPed);
+    void DropEntity(CPed* pPed, bool bAddEventSoundQuiet);
+    void ChoosePutDownHeight(CPed* pPed);
 };
 
 VALIDATE_SIZE(CTaskSimpleHoldEntity, 0x3C);

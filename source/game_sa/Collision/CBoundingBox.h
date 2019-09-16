@@ -12,7 +12,6 @@
 class CBoundingBox : public CBox {
 public:
    // CBoundingBox();
-
     //CBoundingBox(plugin::dummy_func_t) {}
 };
 

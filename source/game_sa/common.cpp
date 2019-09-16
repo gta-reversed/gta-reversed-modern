@@ -112,6 +112,11 @@ void CreateDebugFont() {
     ((void(__cdecl *)())0x734610)();
 }
 
+CEventGroup* GetEventGlobalGroup()
+{
+    return plugin::CallAndReturn<CEventGroup*, 0x4ABA50>();
+}
+
 // Converted from cdecl void DestroyDebugFont(void) 0x734620
 void DestroyDebugFont() {
     ((void(__cdecl *)())0x734620)();

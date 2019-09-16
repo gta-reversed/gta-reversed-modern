@@ -83,6 +83,8 @@ public:
     int             m_dwBurnTime; // time when particles must be stopped
     float           m_fBurnDamage;
 
+    static unsigned short& nNoTempObjects;
+
     // class functions
 
     void ProcessGarageDoorBehaviour();
