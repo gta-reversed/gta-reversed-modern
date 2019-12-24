@@ -36,11 +36,11 @@ CEntity **&gpOutEntitiesForGetObjectsInFrustum = *(CEntity ***)0xB76854;
 
 void CRenderer::InjectHooks()
 {
-    InjectHook(0x05534B0, &CRenderer::AddEntityToRenderList, PATCH_JUMP);
+   /* InjectHook(0x05534B0, &CRenderer::AddEntityToRenderList, PATCH_JUMP);
     InjectHook(0x554230, &CRenderer::SetupEntityVisibility, PATCH_JUMP);
     InjectHook(0x553F60, &CRenderer::SetupMapEntityVisibility, PATCH_JUMP);
     InjectHook(0x553540, &CRenderer::SetupScanLists, PATCH_JUMP); 
-    InjectHook(0x554840, &CRenderer::ScanSectorList, PATCH_JUMP);
+    InjectHook(0x554840, &CRenderer::ScanSectorList, PATCH_JUMP); */
 }
 
 // Converted from cdecl void CRenderer::Init(void) 0x5531C0

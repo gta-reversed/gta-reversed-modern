@@ -55,7 +55,7 @@ unsigned int &CStreaming::ms_numberOfBytesRead = *reinterpret_cast<unsigned int 
 void CStreaming::InjectHooks()
 {
     CStreamingInfo::InjectHooks();
-
+    /*
     InjectHook(0x40A45E, &CStreaming::LoadAllRequestedModels, PATCH_JUMP);
     InjectHook(0x4087E0, &CStreaming::RequestModel, PATCH_JUMP);
     InjectHook(0x40E170, &CStreaming::ProcessLoadingChannel, PATCH_JUMP);
@@ -69,7 +69,7 @@ void CStreaming::InjectHooks()
 
     InjectHook(0x40C6B0, &CStreaming::ConvertBufferToObject, PATCH_JUMP);
     InjectHook(0x40E120, &CStreaming::MakeSpaceFor, PATCH_JUMP);
-    //InjectHook(0x408CB0, &CStreaming::FinishLoadingLargeFile, PATCH_JUMP);
+    //InjectHook(0x408CB0, &CStreaming::FinishLoadingLargeFile, PATCH_JUMP); */
 }
 
 bool CStreaming::AreAnimsUsedByRequestedModels(int AnimFileIndex) {

@@ -2,7 +2,7 @@
 
 void CAnimBlendAssociation::InjectHooks()
 {
-    InjectHook(0x4CEFC0, &CAnimBlendAssociation::Constructor1, PATCH_JUMP);
+   // InjectHook(0x4CEFC0, &CAnimBlendAssociation::Constructor1, PATCH_JUMP);
 }
 
 CAnimBlendAssociation* CAnimBlendAssociation::Constructor1(RpClump *pClump, CAnimBlendHierarchy * pAnimHierarchy)

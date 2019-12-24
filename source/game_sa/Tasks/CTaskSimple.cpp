@@ -9,8 +9,8 @@ Do not delete this comment block. Respect others' work!
 
 void CTaskSimple::InjectHooks()
 {
-    InjectHook(0x68B1C0, &CTaskSimpleSwim::ProcessPed, PATCH_JUMP);
-    InjectHook(0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims, PATCH_JUMP);
+    //InjectHook(0x68B1C0, &CTaskSimpleSwim::ProcessPed, PATCH_JUMP);
+   //InjectHook(0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims, PATCH_JUMP);
 }
 
 bool CTaskSimple::ProcessPed(class CPed *ped)
