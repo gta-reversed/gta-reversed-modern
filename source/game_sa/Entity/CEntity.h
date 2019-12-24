@@ -88,27 +88,27 @@ public:
     unsigned char m_nStatus : 5; // see eEntityStatus
     
     // originally virtual functions
-    void Add(CRect &rect);
-    void Add(); // similar to previous, but with entity bound rect
-    void Remove();
-    void SetIsStatic(bool isStatic);
-    void SetModelIndex(unsigned int index);
-    void SetModelIndexNoCreate(unsigned int index);
-    void CreateRwObject();
-    void DeleteRwObject();
-    CRect GetBoundRect();
-    void ProcessControl();
-    void ProcessCollision();
-    void ProcessShift();
-    bool TestCollision();
-    void Teleport(CVector destination, bool resetRotation);
-    void SpecialEntityPreCollisionStuff(class CEntity *colEntity, bool unk1, unsigned char *unk2, unsigned char *unk3, unsigned char *unk4, unsigned char *unk5);
-    void SpecialEntityCalcCollisionSteps(unsigned char *unk1, unsigned char *unk2);
-    void PreRender();
-    void Render();
-    bool SetupLighting();
-    void RemoveLighting();
-    void FlagToDestroyWhenNextProcessed();
+    virtual void Add(CRect &rect);
+    virtual void Add(); // similar to previous, but with entity bound rect
+    virtual void Remove();
+    virtual void SetIsStatic(bool isStatic);
+    virtual void SetModelIndex(unsigned int index);
+    virtual void SetModelIndexNoCreate(unsigned int index);
+    virtual void CreateRwObject();
+    virtual void DeleteRwObject();
+    virtual CRect* GetBoundRect(CRect* pRect);
+    virtual void ProcessControl();
+    virtual void ProcessCollision();
+    virtual void ProcessShift();
+    virtual bool TestCollision();
+    virtual void Teleport(CVector destination, bool resetRotation);
+    virtual void SpecialEntityPreCollisionStuff(class CEntity *colEntity, bool unk1, unsigned char *unk2, unsigned char *unk3, unsigned char *unk4, unsigned char *unk5);
+    virtual void SpecialEntityCalcCollisionSteps(unsigned char *unk1, unsigned char *unk2);
+    virtual void PreRender();
+    virtual void Render();
+    virtual bool SetupLighting();
+    virtual void RemoveLighting();
+    virtual void FlagToDestroyWhenNextProcessed();
     
     // funcs
     void UpdateRwFrame();

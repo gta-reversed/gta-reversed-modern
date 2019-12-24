@@ -16,7 +16,7 @@ public:
     CSimpleTransform m_placement;
     CMatrixLink *m_matrix;
 
-    virtual ~CPlaceable() {};
+    virtual unsigned int DeletingDestructor(uint8_t deletingFlags);
     
     CMatrixLink *GetMatrix();
     

@@ -3,9 +3,9 @@
 
 #pragma comment(lib, "detours.lib")
 
-//bool __thiscall CTaskSimpleHoldEntity_DropEntity(CTaskSimpleHoldEntity *this, struct CPed *ped)
-auto OLD_CTaskSimpleHoldEntity_DropEntity = (bool(__thiscall*)(CTaskSimpleHoldEntity * pThis, CPed * pPed, bool bAddEventSoundQuiet))0x6930F0;
-void __fastcall CTaskSimpleHoldEntity_DropEntity(CTaskSimpleHoldEntity* pThis, void* padding, CPed* pPed, bool bAddEventSoundQuiet);
+//bool __thiscall CPhysical_ProcessShift(CPhysical* pThis)
+auto OLD_CPhysical_ProcessShift = (void(__thiscall*) (CPhysical * pThis, void* padding))0x54DB10;
+void __fastcall CPhysical_ProcessShift(CPhysical* pThis, void* padding);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -17,18 +17,17 @@ void InjectHooksMain(void)
     CStreaming::InjectHooks();
     CRenderer::InjectHooks();*/
 
-    //InjectHook(0x0681C10, &HOOK_THEFUNCTION, PATCH_JUMP);
+    //HookInstall(0x54DB10, &CPhysical::ProcessShift_Reversed, 6);
 
-
-   // /*
+    /*
     DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CTaskSimpleHoldEntity_DropEntity, CTaskSimpleHoldEntity_DropEntity);
+    DetourAttach(&(PVOID&)OLD_CPhysical_ProcessShift, CPhysical_ProcessShift);
     DetourTransactionCommit();
-    //*/
+    */
 }
 /*
 enum eFunctionReturnValue
@@ -55,7 +54,9 @@ enum eFunctionReturnValue
 };
 
 
-void __fastcall CTaskSimpleHoldEntity_DropEntity(CTaskSimpleHoldEntity* pThis, void* padding, CPed* pPed, bool bAddEventSoundQuiet)
+void __fastcall CPhysical_ProcessShift(CPhysical* pThis, void* padding)
 {
-    printf(" calling CTaskSimpleHoldEntity_DropEntity \n");
+    printf(" calling CPhysical_ProcessShift \n");
+
+   
 }

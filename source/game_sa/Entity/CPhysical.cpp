@@ -6,6 +6,156 @@
 */
 #include "StdInc.h"
 
+float& CPhysical::PHYSICAL_SHIFT_SPEED_DAMP = *(float*)0x8CD788;
+
+CRect* CPhysical::GetBoundRect(CRect* pRect)
+{
+    return ((CRect*(__thiscall*)(CEntity*, CRect*))(*(void***)this)[9])(this, pRect);
+}
+
+void CPhysical::ProcessShift()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__thiscall*)(CPhysical*))(*(void***)this)[12])(this);
+#else
+    ProcessShift_Reversed();
+#endif
+}
+
+void CPhysical::ProcessShift_Reversed()
+{
+    CRect boundingBox;
+    CPhysical::GetBoundRect(&boundingBox);
+    m_fMovingSpeed = 0.0f;
+
+    bool bPhysicalFlagsSet = m_nPhysicalFlags & (PHYSICAL_DISABLE_MOVE_FORCE | PHYSICAL_INFINITE_MASS | PHYSICAL_DISABLE_Z);
+    if (m_nStatus == STATUS_SIMPLE || bPhysicalFlagsSet)
+    {
+        if (bPhysicalFlagsSet)
+        {
+            m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+        }
+        m_bIsStuck = false;
+        m_bIsInSafePosition = true;
+        RemoveAndAdd();
+    }
+    else
+    {
+        if (m_bHasHitWall)
+        {
+            CPed* pPed = static_cast<CPed*>(this);
+            bool bSomeSpecificFlagsSet = false;
+            if (m_nType == ENTITY_TYPE_PED && pPed->somePedStruct)
+            {
+                if (!pPed->somePedStruct->flags.b03 || pPed->somePedStruct->flags.b04)
+                {
+                    bSomeSpecificFlagsSet = true;
+                }
+            }
+            if ((m_nType == ENTITY_TYPE_PED && bSomeSpecificFlagsSet) || CWorld::bSecondShift)
+            {
+                float fMoveSpeedShift = pow(CPhysical::PHYSICAL_SHIFT_SPEED_DAMP, CTimer::ms_fTimeStep);
+                m_vecMoveSpeed *= fMoveSpeedShift;
+                float fTurnSpeedShift = pow(CPhysical::PHYSICAL_SHIFT_SPEED_DAMP, CTimer::ms_fTimeStep);
+                m_vecTurnSpeed *= fTurnSpeedShift;
+            }
+        }
+
+        CMatrix oldEntityMatrix(*m_matrix);
+        ApplySpeed();
+        m_matrix->Reorthogonalise();
+        SetNextScanCode();
+
+        bool bShifted = false;
+        if (m_nType == ENTITY_TYPE_VEHICLE)
+        {
+            physicalFlags.b16 = true;
+        }
+
+        int startSectorX = static_cast<int>(floor(boundingBox.left * 0.02 + 60.0));
+        int startSectorY = static_cast<int>(floor(boundingBox.top * 0.02 + 60.0));
+        int endSectorX = static_cast<int>(floor(boundingBox.right * 0.02 + 60.0));
+        int endSectorY = static_cast<int>(floor(boundingBox.bottom * 0.02 + 60.0));
+        for (int sectorY = startSectorY; sectorY <= endSectorY; ++sectorY)
+        {
+            int sectorX = startSectorX;
+            if (startSectorX <= endSectorX)
+            {
+                do
+                {
+                    if (ProcessShiftSectorList(sectorX, sectorY))
+                    {
+                        bShifted = true;
+                    }
+                    ++sectorX;
+                } while (sectorX <= endSectorX);
+            }
+        }
+
+        physicalFlags.b16 = false;
+
+        if (bShifted || m_nType == ENTITY_TYPE_VEHICLE)
+        {
+            if (CWorld::ms_nCurrentScanCode >= 65535u)
+            {
+                CWorld::ClearScanCodes();
+                CWorld::ms_nCurrentScanCode = 1;
+            }
+            else
+            {
+                CWorld::ms_nCurrentScanCode++;
+            }
+            bool bShifted2 = false;
+            startSectorX = static_cast<int>(floor(boundingBox.left * 0.02 + 60.0));
+            startSectorY = static_cast<int>(floor(boundingBox.top * 0.02 + 60.0));
+            endSectorX = static_cast<int>(floor(boundingBox.right * 0.02 + 60.0));
+            endSectorY = static_cast<int>(floor(boundingBox.bottom * 0.02 + 60.0));
+            int sectorY = startSectorY;
+            if (startSectorY <= endSectorY)
+            {
+                do
+                {
+                    int sectorX = startSectorX;
+                    if (startSectorX <= endSectorX)
+                    {
+                        while (1)
+                        {
+                            if (ProcessCollisionSectorList(sectorX, sectorY))
+                            {
+                                if (!CWorld::bSecondShift)
+                                {
+                                    *(CMatrix*)m_matrix = oldEntityMatrix;
+                                    return;
+                                }
+                                bShifted2 = true;
+                            }
+                            if (++sectorX > endSectorX)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    ++sectorY;
+                } while (sectorY <= endSectorY);
+                if (bShifted2)
+                {
+                    *(CMatrix*)m_matrix = oldEntityMatrix;
+                    return;
+                }
+            }
+        }
+
+        m_bIsStuck = false;
+        m_bIsInSafePosition = true;
+
+        float fZ = m_matrix->pos.z - oldEntityMatrix.pos.z;
+        float fY = m_matrix->pos.y - oldEntityMatrix.pos.y;
+        float fX = m_matrix->pos.x - oldEntityMatrix.pos.x;
+        m_fMovingSpeed = sqrt(fX * fX + fY * fY + fZ * fZ);
+        RemoveAndAdd();
+    }
+}
+
 void CPhysical::ProcessEntityCollision(CEntity* entity, CColPoint* point)
 {
     ((void(__thiscall*)(CPhysical*, CEntity*, CColPoint*))(*(void***)this)[23])(this, entity, point);

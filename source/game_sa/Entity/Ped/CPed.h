@@ -50,6 +50,27 @@ enum eFightingStyle
     STYLE_ELBOWS = 16,
 };
 
+// unknown struct used in CPhysical::ProcessShift.
+struct struc_693
+{
+    char field_0 [64];
+    union
+    {
+        struct 
+        {
+            unsigned int b01 : 1;
+            unsigned int b02 : 1;
+            unsigned int b03 : 1;
+            unsigned int b04 : 1;
+            unsigned int b05 : 1;
+            unsigned int b06 : 1;
+            unsigned int b07 : 1;
+            unsigned int b08 : 1;
+        } flags;
+        unsigned int m_nFlags;
+    };
+};
+
 class CObject;
 class CVehicle;
 
@@ -238,8 +259,8 @@ public:
     float               m_fCurrentRotation;
     float               m_fAimingRotation;
     float               m_fHeadingChangeRate;
-    int field_564;
-    int field_568;
+    float               m_fMoveAnim; // not sure about the name here
+    struc_693*          somePedStruct; // not sure about the name here
     CVector field_56C;
     CVector field_578;
     CEntity            *m_pContactEntity;

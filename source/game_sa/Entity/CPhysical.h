@@ -14,49 +14,75 @@
 #include "CRepeatSector.h"
 #include "eWeaponType.h"
 
+enum ePhysicalFlags
+{
+    PHYSICAL_b01 = 0x1,
+    PHYSICAL_APPLY_GRAVITY = 0x2,
+    PHYSICAL_DISABLE_COLLISION_FORCE = 0x4,
+    PHYSICAL_COLLIDABLE = 0x8, 
+    PHYSICAL_DISABLE_TURN_FORCE = 0x10,
+    PHYSICAL_DISABLE_MOVE_FORCE = 0x20,
+    PHYSICAL_INFINITE_MASS = 0x40,
+    PHYSICAL_DISABLE_Z = 0x80,
+
+    PHYSICAL_SUBMERGED_IN_WATER = 0x100,
+    PHYSICAL_ON_SOLID_SURFACE = 0x200,
+    PHYSICAL_BROKEN = 0x400,
+    PHYSICAL_b12 = 0x800,
+    PHYSICAL_b13 = 0x1000,
+    PHYSICAL_DONT_APPLY_SPEED = 0x2000,
+    PHYSICAL_b15 = 0x4000,
+    PHYSICAL_b16 = 0x8000
+};
+
 class CPhysical : public CEntity {
 protected:
     CPhysical(plugin::dummy_func_t) : CEntity(plugin::dummy) {}
 public:
     int field_38;
     unsigned int m_nLastCollisionTime;
-    struct {
-        unsigned int b01 : 1;
-        unsigned int bApplyGravity : 1;
-        unsigned int bDisableCollisionForce : 1;
-        unsigned int bCollidable : 1;
-        unsigned int bDisableTurnForce : 1;
-        unsigned int bDisableMoveForce : 1;
-        unsigned int bInfiniteMass : 1;
-        unsigned int bDisableZ : 1;
+    union
+    {
+        struct 
+        {
+            unsigned int b01 : 1;
+            unsigned int bApplyGravity : 1;
+            unsigned int bDisableCollisionForce : 1;
+            unsigned int bCollidable : 1;
+            unsigned int bDisableTurnForce : 1;
+            unsigned int bDisableMoveForce : 1;
+            unsigned int bInfiniteMass : 1;
+            unsigned int bDisableZ : 1;
 
-        unsigned int bSubmergedInWater : 1;
-        unsigned int bOnSolidSurface : 1;
-        unsigned int bBroken : 1;
-        unsigned int b12 : 1; // ref @ 0x6F5CF0
-        unsigned int b13 : 1;
-        unsigned int bDontApplySpeed : 1;
-        unsigned int b15 : 1;
-        unsigned int b16 : 1;
+            unsigned int bSubmergedInWater : 1;
+            unsigned int bOnSolidSurface : 1;
+            unsigned int bBroken : 1;
+            unsigned int b12 : 1; // ref @ 0x6F5CF0
+            unsigned int b13 : 1;
+            unsigned int bDontApplySpeed : 1;
+            unsigned int b15 : 1;
+            unsigned int b16 : 1;
 
-        unsigned int b17 : 1;
-        unsigned int b18 : 1; // ref @ CPhysical::ProcessCollision
-        unsigned int bBulletProof : 1;
-        unsigned int bFireProof : 1;
-        unsigned int bCollisionProof : 1;
-        unsigned int bMeeleProof : 1;
-        unsigned int bInvulnerable : 1;
-        unsigned int bExplosionProof : 1;
+            unsigned int b17 : 1;
+            unsigned int b18 : 1; // ref @ CPhysical::ProcessCollision
+            unsigned int bBulletProof : 1;
+            unsigned int bFireProof : 1;
+            unsigned int bCollisionProof : 1;
+            unsigned int bMeeleProof : 1;
+            unsigned int bInvulnerable : 1;
+            unsigned int bExplosionProof : 1;
 
-        unsigned int b25 : 1;
-        unsigned int bAttachedToEntity : 1;
-        unsigned int b27 : 1;
-        unsigned int bTouchingWater : 1;
-        unsigned int bCanBeCollidedWith : 1;
-        unsigned int bDestroyed : 1;
-        unsigned int b31 : 1;
-        unsigned int b32 : 1;
-    } m_nPhysicalFlags;
+            unsigned int b25 : 1;
+            unsigned int bAttachedToEntity : 1;
+            unsigned int b27 : 1;
+            unsigned int bTouchingWater : 1;
+            unsigned int bCanBeCollidedWith : 1;
+            unsigned int bDestroyed : 1;
+            unsigned int b31 : 1;
+            unsigned int b32 : 1;
+        } physicalFlags;
+        unsigned int m_nPhysicalFlags;
+    };
     CVector          m_vecMoveSpeed;
     CVector          m_vecTurnSpeed;
     CVector          m_vecFrictionMoveSpeed;
@@ -93,9 +119,16 @@ public:
     float            m_fDynamicLighting;
     CRealTimeShadow *m_pShadowData;
     
+    static float& PHYSICAL_SHIFT_SPEED_DAMP;
+
     // originally virtual functions
-    void ProcessEntityCollision(CEntity *entity, CColPoint *point);
-    
+    CRect* GetBoundRect(CRect* pRect) override;
+    void ProcessShift() override;
+    virtual void ProcessEntityCollision(CEntity *entity, CColPoint *point);
+
+    // reversed virtual functions
+    void ProcessShift_Reversed();
+
     // functions
     void RemoveAndAdd();
     void AddToMovingList();

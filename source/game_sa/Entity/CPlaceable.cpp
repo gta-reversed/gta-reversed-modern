@@ -7,6 +7,11 @@
 
 #include "StdInc.h"
 
+unsigned int CPlaceable::DeletingDestructor(uint8_t deletingFlags)
+{
+    return((unsigned int (__thiscall*)(CPlaceable*, uint8_t))plugin::GetVMT(this, 0))(this, deletingFlags);
+}
+
 CVector* CPlaceable::GetRightDirection(CVector* pOut)
 {
     return ((CVector*(__thiscall*)(CPlaceable*, CVector*))0x41CC70)(this, pOut);
