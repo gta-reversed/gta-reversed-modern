@@ -370,8 +370,9 @@ bool CPhysical::ApplyFriction(CPhysical* physical, float arg1, CColPoint& colPoi
 // Converted from thiscall bool CPhysical::ProcessShiftSectorList(int sectorX,int sectorY) 0x546670
 bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
 {
-    //return ((bool(__thiscall*)(CPhysical*, int, int))0x546670)(this, sectorX, sectorY);
-
+#ifdef USE_DEFAULT_FUNCTIONS
+    return ((bool(__thiscall*)(CPhysical*, int, int))0x546670)(this, sectorX, sectorY);
+#else
     CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[m_nModelIndex];
     float fBoundingSphereRadius = pModelInfo->m_pColModel->m_boundSphere.m_fRadius;
     float fMaxColPointDepth = 0.0f;
@@ -586,6 +587,7 @@ bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
 
     m_vecMoveSpeed += vecShift * 0.0080000004f * CTimer::ms_fTimeStep;
     return true;
+#endif
 }
 
 // Converted from stdcall void CPhysical::PlacePhysicalRelativeToOtherPhysical(CPhysical* physical1,CPhysical* physical2,CVector offset) 0x546DB0
