@@ -3,9 +3,9 @@
 
 #pragma comment(lib, "detours.lib")
 
-//bool __thiscall CPhysical_ProcessShift(CPhysical* pThis)
-auto OLD_CPhysical_ProcessShift = (void(__thiscall*) (CPhysical * pThis, void* padding))0x54DB10;
-void __fastcall CPhysical_ProcessShift(CPhysical* pThis, void* padding);
+//bool __thiscall CPhysical_ProcessShiftSectorList(CPhysical* pThis)
+auto OLD_CPhysical_ProcessShiftSectorList = (bool(__thiscall*) (CPhysical * pThis, void* padding, int sectorX, int sectorY))0x0546670;
+bool __fastcall CPhysical_ProcessShiftSectorList(CPhysical* pThis, void* padding, int sectorX, int sectorY);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -17,7 +17,7 @@ void InjectHooksMain(void)
     CStreaming::InjectHooks();
     CRenderer::InjectHooks();*/
 
-    //HookInstall(0x54DB10, &CPhysical::ProcessShift_Reversed, 6);
+    //HookInstall(0x0546670, &CPhysical::ProcessShiftSectorList, 6);
 
     /*
     DetourRestoreAfterWith();
@@ -25,7 +25,7 @@ void InjectHooksMain(void)
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CPhysical_ProcessShift, CPhysical_ProcessShift);
+    DetourAttach(&(PVOID&)OLD_CPhysical_ProcessShiftSectorList, CPhysical_ProcessShiftSectorList);
     DetourTransactionCommit();
     */
 }
@@ -54,9 +54,8 @@ enum eFunctionReturnValue
 };
 
 
-void __fastcall CPhysical_ProcessShift(CPhysical* pThis, void* padding)
+bool __fastcall CPhysical_ProcessShiftSectorList(CPhysical* pThis, void* padding, int sectorX, int sectorY)
 {
-    printf(" calling CPhysical_ProcessShift \n");
-
-   
+    printf(" calling CPhysical_ProcessShiftSectorList \n");
+    return true;
 }

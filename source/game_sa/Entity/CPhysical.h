@@ -124,7 +124,7 @@ public:
     // originally virtual functions
     CRect* GetBoundRect(CRect* pRect) override;
     void ProcessShift() override;
-    virtual void ProcessEntityCollision(CEntity *entity, CColPoint *point);
+    virtual int ProcessEntityCollision(CEntity *entity, CColPoint *point);
 
     // reversed virtual functions
     void ProcessShift_Reversed();

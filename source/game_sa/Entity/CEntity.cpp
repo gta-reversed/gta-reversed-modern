@@ -79,9 +79,9 @@ void CEntity::Teleport(CVector destination, bool resetRotation)
     ((void(__thiscall *)(CEntity *, CVector, bool))(*(void ***)this)[14])(this, destination, resetRotation);
 }
 
-void CEntity::SpecialEntityPreCollisionStuff(CEntity *colEntity, bool unk1, unsigned char *unk2, unsigned char *unk3, unsigned char *unk4, unsigned char *unk5)
+void CEntity::SpecialEntityPreCollisionStuff(CEntity *colEntity, bool unk1, bool *unk2, bool *unk3, bool *unk4, bool *unk5)
 {
-    ((void(__thiscall *)(CEntity *, CEntity *, bool, unsigned char *, unsigned char *, unsigned char *, unsigned char *))(*(void ***)this)[15])(this, colEntity, unk1, unk2, unk3, unk4, unk5);
+    ((void(__thiscall *)(CEntity *, CEntity *, bool, bool *, bool *, bool *, bool *))(*(void ***)this)[15])(this, colEntity, unk1, unk2, unk3, unk4, unk5);
 }
 
 void CEntity::SpecialEntityCalcCollisionSteps(unsigned char *unk1, unsigned char *unk2)
@@ -239,11 +239,9 @@ void CEntity::DetachFromRwObject()
 }
 
 // Converted from thiscall CVector CEntity::GetBoundCentre(void) 0x534250
-CVector CEntity::GetBoundCentre()
+CVector* CEntity::GetBoundCentre(CVector* pOutCentre)
 {
-    CVector result;
-    ((void(__thiscall *)(CEntity*, CVector*))0x534250)(this, &result);
-    return result;
+    return ((CVector * (__thiscall *)(CEntity*, CVector*))0x534250)(this, pOutCentre);
 }
 
 // Converted from thiscall void CEntity::GetBoundCentre(CVector &outCentre) 0x534290
@@ -265,9 +263,9 @@ bool CEntity::GetIsTouching(CEntity* entity)
 }
 
 // Converted from thiscall bool CEntity::GetIsTouching(CVector const &centre,float radius) 0x5344B0
-bool CEntity::GetIsTouching(CVector const& centre, float radius)
+bool CEntity::GetIsTouching(CVector* centre, float radius)
 {
-    return ((bool(__thiscall *)(CEntity*, CVector const&, float))0x5344B0)(this, centre, radius);
+    return ((bool(__thiscall *)(CEntity*, CVector *, float))0x5344B0)(this, centre, radius);
 }
 
 // Converted from thiscall bool CEntity::GetIsOnScreen(void) 0x534540

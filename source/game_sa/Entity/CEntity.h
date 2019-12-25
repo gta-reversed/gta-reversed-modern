@@ -102,7 +102,7 @@ public:
     virtual void ProcessShift();
     virtual bool TestCollision();
     virtual void Teleport(CVector destination, bool resetRotation);
-    virtual void SpecialEntityPreCollisionStuff(class CEntity *colEntity, bool unk1, unsigned char *unk2, unsigned char *unk3, unsigned char *unk4, unsigned char *unk5);
+    virtual void SpecialEntityPreCollisionStuff(class CEntity* colEntity, bool unk1, bool* unk2, bool* unk3, bool* unk4, bool* unk5);
     virtual void SpecialEntityCalcCollisionSteps(unsigned char *unk1, unsigned char *unk2);
     virtual void PreRender();
     virtual void Render();
@@ -129,13 +129,13 @@ public:
     void DestroyEffects();
     void AttachToRwObject(RwObject* object, bool updateEntityMatrix);
     void DetachFromRwObject();
-    CVector GetBoundCentre();
+    CVector* GetBoundCentre(CVector* pOutCentre);
     void GetBoundCentre(CVector& outCentre);
     void RenderEffects();
     // is entity touching entity
     bool GetIsTouching(CEntity* entity);
     // is entity touching sphere
-    bool GetIsTouching(CVector const& , float radius);
+    bool GetIsTouching(CVector* centre, float radius);
     bool GetIsOnScreen();
     bool GetIsBoundingBoxOnScreen();
     void ModifyMatrixForTreeInWind();
