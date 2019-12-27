@@ -413,6 +413,8 @@ bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
                 CPhysical* pEntity = reinterpret_cast<CPhysical*>(pNode->pItem);
                 CPed* pPedEntity = static_cast<CPed*>(pEntity);
                 CVehicle* pVehicleEntity = static_cast<CVehicle*>(pEntity);
+                CObject* pObjectEntity = static_cast<CObject*>(pEntity);
+
                 pNode = pNode->pNext;
 
                 bool bCollisionDisabled = false;
@@ -420,9 +422,9 @@ bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
                 if (pEntity->m_nType != ENTITY_TYPE_BUILDING
                     && (pEntity->m_nType != ENTITY_TYPE_OBJECT || !pEntity->physicalFlags.bDisableCollisionForce))
                 {
-                    if (m_nType != ENTITY_TYPE_PED || m_nType != ENTITY_TYPE_OBJECT
+                    if (m_nType != ENTITY_TYPE_PED || pEntity->m_nType != ENTITY_TYPE_OBJECT
                         || (!pEntity->m_bIsStatic && !pEntity->m_bIsStaticWaitingForCollision)
-                        || pPedEntity->m_pedAudio.m_tempSound.m_nBankSlotId & 0x40)
+                        || pObjectEntity->m_nObjectFlags.bIsExploded)
                     {
                         bProcessEntityCollision = false;
                     }
@@ -494,7 +496,7 @@ bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
                             int totalColPointsToProcess = ProcessEntityCollision(pEntity, colPoints);
                             if (totalColPointsToProcess > 0)
                             {
-                                for (int colpointIndex = totalColPointsToProcess; colpointIndex > 0; --colpointIndex)
+                                for (int colpointIndex = 0; colpointIndex < totalColPointsToProcess; colpointIndex++)
                                 {
                                     CColPoint* pColPoint = &colPoints[colpointIndex];
                                     if (pColPoint->m_fDepth > 0.0f)
