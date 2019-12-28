@@ -24,43 +24,47 @@ public:
     unsigned char   m_nObjectType; // see enum eObjectType
     unsigned char   m_nBonusValue;
     unsigned short  m_wCostValue;
-    struct {
-        unsigned int b01 : 1;
-        unsigned int b02 : 1;
-        unsigned int bPickupPropertyForSale : 1;
-        unsigned int bPickupInShopOutOfStock : 1;
-        unsigned int bGlassBroken : 1;
-        unsigned int b06 : 1;
-        unsigned int bIsExploded : 1;
-        unsigned int b08 : 1;
+    union {
+        struct 
+        {
+            unsigned int b01 : 1;
+            unsigned int b02 : 1;
+            unsigned int bPickupPropertyForSale : 1;
+            unsigned int bPickupInShopOutOfStock : 1;
+            unsigned int bGlassBroken : 1;
+            unsigned int b06 : 1;
+            unsigned int bIsExploded : 1;
+            unsigned int b08 : 1;
 
-        unsigned int bIsLampPost : 1;
-        unsigned int bIsTargatable : 1;
-        unsigned int bIsBroken : 1;
-        unsigned int bTrainCrossEnabled : 1;
-        unsigned int bIsPhotographed : 1;
-        unsigned int bIsLiftable : 1;
-        unsigned int bIsDoorMoving : 1;
-        unsigned int bbIsDoorOpen : 1;
+            unsigned int bIsLampPost : 1;
+            unsigned int bIsTargatable : 1;
+            unsigned int bIsBroken : 1;
+            unsigned int bTrainCrossEnabled : 1;
+            unsigned int bIsPhotographed : 1;
+            unsigned int bIsLiftable : 1;
+            unsigned int bIsDoorMoving : 1;
+            unsigned int bbIsDoorOpen : 1;
 
-        unsigned int bHasNoModel : 1;
-        unsigned int bIsScaled : 1;
-        unsigned int bCanBeAttachedToMagnet : 1;
-        unsigned int b20 : 1;
-        unsigned int b21 : 1;
-        unsigned int b22 : 1;
-        unsigned int bFadingIn : 1; // works only for objects with type 2 (OBJECT_MISSION)
-        unsigned int bAffectedByColBrightness : 1;
+            unsigned int bHasNoModel : 1;
+            unsigned int bIsScaled : 1;
+            unsigned int bCanBeAttachedToMagnet : 1;
+            unsigned int b20 : 1;
+            unsigned int b21 : 1;
+            unsigned int b22 : 1;
+            unsigned int bFadingIn : 1; // works only for objects with type 2 (OBJECT_MISSION)
+            unsigned int bAffectedByColBrightness : 1;
 
-        unsigned int b25 : 1;
-        unsigned int bDoNotRender : 1;
-        unsigned int bFadingIn2 : 1;
-        unsigned int b28 : 1;
-        unsigned int b29 : 1;
-        unsigned int b30 : 1;
-        unsigned int b31 : 1;
-        unsigned int b32 : 1;
-    } m_nObjectFlags;
+            unsigned int b25 : 1;
+            unsigned int bDoNotRender : 1;
+            unsigned int bFadingIn2 : 1;
+            unsigned int b28 : 1;
+            unsigned int b29 : 1;
+            unsigned int b30 : 1;
+            unsigned int b31 : 1;
+            unsigned int b32 : 1;
+        } objectFlags;
+        unsigned int m_nObjectFlags;
+    };
     unsigned char   m_nColDamageEffect;
     unsigned char   m_nStoredColDamageEffect;
     char field_146;

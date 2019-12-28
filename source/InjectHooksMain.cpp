@@ -3,9 +3,9 @@
 
 #pragma comment(lib, "detours.lib")
 
-//bool __thiscall CPhysical_ProcessShiftSectorList(CPhysical* pThis)
-auto OLD_CPhysical_ProcessShiftSectorList = (bool(__thiscall*) (CPhysical * pThis, void* padding, int sectorX, int sectorY))0x0546670;
-bool __fastcall CPhysical_ProcessShiftSectorList(CPhysical* pThis, void* padding, int sectorX, int sectorY);
+//bool __thiscall CPhysical_ProcessCollisionSectorList_SimpleCar(CPhysical* pThis)
+auto OLD_CPhysical_ProcessCollisionSectorList_SimpleCar = (bool(__thiscall*) (CPhysical * pThis, void* padding, CPtrNodeDoubleLink * pNode))0x54CFF0;
+bool __fastcall CPhysical_ProcessCollisionSectorList_SimpleCar(CPhysical* pThis, void* padding, CPtrNodeDoubleLink* pNode);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -17,7 +17,7 @@ void InjectHooksMain(void)
     CStreaming::InjectHooks();
     CRenderer::InjectHooks();*/
 
-    //HookInstall(0x0546670, &CPhysical::ProcessShiftSectorList, 6);
+    //HookInstall(0x54CFF0, &CPhysical::ProcessCollisionSectorList_SimpleCar, 5);
 
     /*
     DetourRestoreAfterWith();
@@ -25,7 +25,7 @@ void InjectHooksMain(void)
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CPhysical_ProcessShiftSectorList, CPhysical_ProcessShiftSectorList);
+    DetourAttach(&(PVOID&)OLD_CPhysical_ProcessCollisionSectorList_SimpleCar, CPhysical_ProcessCollisionSectorList_SimpleCar);
     DetourTransactionCommit();
     */
 }
@@ -38,7 +38,7 @@ enum eFunctionReturnValue
 }; 
 */
 /*
-dwReturnLocation:
+dwReturnLocation:                                                                                                                    
 0 means that the function should return.
 1 means continue the function and it is inside of the "if" condition
 2 means continue the function and it is outside of the "if" condition
@@ -54,8 +54,8 @@ enum eFunctionReturnValue
 };
 
 
-bool __fastcall CPhysical_ProcessShiftSectorList(CPhysical* pThis, void* padding, int sectorX, int sectorY)
+bool __fastcall CPhysical_ProcessCollisionSectorList_SimpleCar(CPhysical* pThis, void* padding, CPtrNodeDoubleLink* pNode)
 {
-    printf(" calling CPhysical_ProcessShiftSectorList \n");
+    printf(" calling CPhysical_ProcessCollisionSectorList_SimpleCar \n");
     return true;
 }

@@ -180,9 +180,9 @@ void CPhysical::RemoveFromMovingList()
 }
 
 // Converted from thiscall void CPhysical::SetDamagedPieceRecord(float damageIntensity,CEntity *damagingEntity,CColPoint &colPoint,float distanceMult) 0x5428C0
-void CPhysical::SetDamagedPieceRecord(float damageIntensity, CEntity* damagingEntity, CColPoint& colPoint, float distanceMult)
+void CPhysical::SetDamagedPieceRecord(float damageIntensity, CEntity* damagingEntity, CColPoint* colPoint, float distanceMult)
 {
-    ((void(__thiscall*)(CPhysical*, float, CEntity*, CColPoint&, float))0x5428C0)(this, damageIntensity, damagingEntity, colPoint, distanceMult);
+    ((void(__thiscall*)(CPhysical*, float, CEntity*, CColPoint*, float))0x5428C0)(this, damageIntensity, damagingEntity, colPoint, distanceMult);
 }
 
 // Converted from thiscall void CPhysical::ApplyMoveForce(CVector force) 0x5429F0
@@ -272,9 +272,9 @@ bool CPhysical::GetHasCollidedWithAnyObject()
 }
 
 // Converted from thiscall bool CPhysical::ApplyCollision(CEntity *entity,CColPoint &colPoint,float &) 0x5435C0
-bool CPhysical::ApplyCollision(CEntity* entity, CColPoint& colPoint, float& arg2)
+bool CPhysical::ApplyCollision(CEntity* entity, CColPoint& colPoint, float& fDamageIntensity)
 {
-    return ((bool(__thiscall*)(CPhysical*, CEntity*, CColPoint&, float&))0x5435C0)(this, entity, colPoint, arg2);
+    return ((bool(__thiscall*)(CPhysical*, CEntity*, CColPoint&, float&))0x5435C0)(this, entity, colPoint, fDamageIntensity);
 }
 
 // Converted from thiscall bool CPhysical::ApplySoftCollision(CEntity *entity,CColPoint &colPoint,float &) 0x543890
@@ -356,15 +356,15 @@ bool CPhysical::ApplyCollisionAlt(CEntity* entity, CColPoint& colPoint, float& a
 }
 
 // Converted from thiscall bool CPhysical::ApplyFriction(float,CColPoint &colPoint) 0x5454C0
-bool CPhysical::ApplyFriction(float arg0, CColPoint& colPoint)
+bool CPhysical::ApplyFriction(float fFriction, CColPoint* colPoint)
 {
-    return ((bool(__thiscall*)(CPhysical*, float, CColPoint&))0x5454C0)(this, arg0, colPoint);
+    return ((bool(__thiscall*)(CPhysical*, float, CColPoint*))0x5454C0)(this, fFriction, colPoint);
 }
 
 // Converted from thiscall bool CPhysical::ApplyFriction(CPhysical* physical,float,CColPoint &colPoint) 0x545980
-bool CPhysical::ApplyFriction(CPhysical* physical, float arg1, CColPoint& colPoint)
+bool CPhysical::ApplyFriction(CPhysical* physical, float fFriction, CColPoint* colPoint)
 {
-    return ((bool(__thiscall*)(CPhysical*, CPhysical*, float, CColPoint&))0x545980)(this, physical, arg1, colPoint);
+    return ((bool(__thiscall*)(CPhysical*, CPhysical*, float, CColPoint*))0x545980)(this, physical, fFriction, colPoint);
 }
 
 // Converted from thiscall bool CPhysical::ProcessShiftSectorList(int sectorX,int sectorY) 0x546670
@@ -628,16 +628,16 @@ void CPhysical::ApplyFriction()
     ((void(__thiscall*)(CPhysical*))0x5483D0)(this);
 }
 
-// Converted from thiscall bool CPhysical::ApplyCollision(CPhysical* physical,CColPoint &colPoint,float &,float &) 0x548680
-bool CPhysical::ApplyCollision(CPhysical* physical, CColPoint& colPoint, float& arg2, float& arg3)
+// 0x548680
+bool CPhysical::ApplyCollision(CEntity* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity)
 {
-    return ((bool(__thiscall*)(CPhysical*, CPhysical*, CColPoint&, float&, float&))0x548680)(this, physical, colPoint, arg2, arg3);
+    return ((bool(__thiscall*)(CPhysical*, CEntity*, CColPoint*, float*, float*))0x548680)(this, pEntity, pColPoint, pThisDamageIntensity, pEntityDamageIntensity);
 }
 
 // Converted from thiscall bool CPhysical::ApplySoftCollision(CPhysical* physical,CColPoint &colPoint,float &,float &) 0x54A2C0
-bool CPhysical::ApplySoftCollision(CPhysical* physical, CColPoint& colPoint, float& arg2, float& arg3)
+bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity)
 {
-    return ((bool(__thiscall*)(CPhysical*, CPhysical*, CColPoint&, float&, float&))0x54A2C0)(this, physical, colPoint, arg2, arg3);
+    return ((bool(__thiscall*)(CPhysical*, CPhysical*, CColPoint*, float*, float*))0x54A2C0)(this, pEntity, pColPoint, pThisDamageIntensity, pEntityDamageIntensity);
 }
 
 // Converted from thiscall bool CPhysical::ProcessCollisionSectorList(int sectorX,int sectorY) 0x54BA60
@@ -647,9 +647,225 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
 }
 
 // Converted from thiscall bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector *sector) 0x54CFF0
-bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* sector)
+bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSector)
 {
-    return ((bool(__thiscall*)(CPhysical*, CRepeatSector*))0x54CFF0)(this, sector);
+#ifdef USE_DEFAULT_FUNCTIONS
+    return ((bool(__thiscall*)(CPhysical*, CRepeatSector*))0x54CFF0)(this, pRepeatSector);
+#else
+    CColPoint colPoints[32];
+    float fThisDamageIntensity = -1.0;
+    float fEntityDamageIntensity = -1.0;
+
+    if (!m_bUsesCollision)
+    {
+        return false;
+    }
+  
+    CVector vecBoundingCentre;
+    GetBoundCentre(&vecBoundingCentre);
+
+    float fBoundingRadius = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->m_pColModel->m_boundSphere.m_fRadius;
+    CPtrListDoubleLink* pDoubleLinkList = nullptr;
+  
+    int scanListIndex = 2;
+    while (1)
+    {
+        switch (--scanListIndex)
+        {
+        case 0:
+            pDoubleLinkList = &pRepeatSector->m_lists[0];
+            break;
+        case 1:
+            pDoubleLinkList = &pRepeatSector->m_lists[2];
+            break;
+        }
+
+        if (pDoubleLinkList->GetNode())
+        {
+            break;
+        }
+
+        if (!scanListIndex)
+        {
+            return false;
+        } 
+    }
+ 
+    CEntity* pEntity = nullptr;
+    CPhysical* pPhysicalEntity = nullptr;
+
+    int totalColPointsToProcess = 0;
+
+    CPtrNodeDoubleLink* pNode = pDoubleLinkList->GetNode();
+    while (pNode)
+    {
+        pEntity = reinterpret_cast<CEntity*>(pNode->pItem);
+        pPhysicalEntity = static_cast<CPhysical*>(pEntity);
+        pNode = pNode->pNext;
+
+        CObject* pObjectEntity = static_cast<CObject*>(pEntity);
+        CPed* pPedEntity = static_cast<CPed*>(pEntity);
+        bool bLampPostForwardZLess = false; // Rename this later (probably never going to happen)
+        if (pEntity->m_nType == ENTITY_TYPE_OBJECT)
+        {
+            if (pObjectEntity->objectFlags.bIsLampPost)
+            {
+                if (!pEntity->m_matrix)
+                {
+                    pEntity->AllocateMatrix();
+                    pEntity->m_placement.UpdateMatrix(pEntity->m_matrix);
+                }
+                if (pEntity->m_matrix->at.z < 0.66000003)
+                {
+                    bLampPostForwardZLess = true;
+                }
+            }
+        }
+
+        if (pEntity != this
+            && !bLampPostForwardZLess
+            && pEntity->m_nScanCode != CWorld::ms_nCurrentScanCode)
+        {
+            if (pEntity->m_bUsesCollision)
+            {
+                if (pEntity->GetIsTouching(&vecBoundingCentre, fBoundingRadius))
+                {
+                    pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                    totalColPointsToProcess = ProcessEntityCollision(pEntity, &colPoints[0]);
+                    if (totalColPointsToProcess > 0)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (!pNode)
+    {
+        if (!scanListIndex)
+        {
+            return false;
+        }
+    }
+
+    if (m_bHasContacted && pEntity->m_bHasContacted)
+    {
+        if (totalColPointsToProcess > 0)
+        {
+            for( int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+            {
+                CColPoint* pColPoint = &colPoints[colPointIndex];
+                if (ApplyCollision(pEntity, pColPoint, &fThisDamageIntensity, &fEntityDamageIntensity))
+                {
+                    SetDamagedPieceRecord(fThisDamageIntensity, pEntity, pColPoint, 1.0);
+                    pPhysicalEntity->SetDamagedPieceRecord(fEntityDamageIntensity, this, pColPoint, -1.0);
+                }
+            }
+        }
+    }
+    else if (m_bHasContacted)
+    {
+        CVector vecOldFrictionMoveSpeed = m_vecFrictionMoveSpeed;
+        CVector vecOldFrictionTurnSpeed = m_vecFrictionTurnSpeed;
+        m_vecFrictionTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+        m_vecFrictionMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+        m_bHasContacted = false;
+
+        if (totalColPointsToProcess > 0)
+        {
+            for (int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+            {
+                CColPoint* pColPoint = &colPoints[colPointIndex];
+                if (ApplyCollision(pEntity, pColPoint, &fThisDamageIntensity, &fEntityDamageIntensity))
+                {
+                    SetDamagedPieceRecord(fThisDamageIntensity, pEntity, pColPoint, 1.0);
+                    pPhysicalEntity->SetDamagedPieceRecord(fEntityDamageIntensity, this, pColPoint, -1.0);
+                    float fSurfaceFriction = g_surfaceInfos->GetFriction(pColPoint);
+                    float fFriction = fSurfaceFriction / totalColPointsToProcess;
+                    if (ApplyFriction(pPhysicalEntity, fFriction, pColPoint))
+                    {
+                        m_bHasContacted = true;
+                        pEntity->m_bHasContacted = true;
+                    }
+                }
+            } 
+        }
+
+        if (!m_bHasContacted)
+        {
+            m_vecFrictionMoveSpeed = vecOldFrictionMoveSpeed;
+            m_vecFrictionTurnSpeed = vecOldFrictionTurnSpeed;
+            m_bHasContacted = true;
+        }
+    }
+    else
+    {
+        if (pEntity->m_bHasContacted)
+        {
+            CVector vecOldFrictionMoveSpeed = pPhysicalEntity->m_vecFrictionMoveSpeed;
+            CVector vecOldFrictionTurnSpeed = pPhysicalEntity->m_vecFrictionTurnSpeed;
+            pPhysicalEntity->m_vecFrictionTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+            pPhysicalEntity->m_vecFrictionMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+            pEntity->m_bHasContacted = false;
+
+            if (totalColPointsToProcess > 0)
+            {
+                for (int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+                {
+                    CColPoint* pColPoint = &colPoints[colPointIndex];
+                    if (ApplyCollision(pEntity, pColPoint, &fThisDamageIntensity, &fEntityDamageIntensity))
+                    {
+                        SetDamagedPieceRecord(fThisDamageIntensity, pEntity, pColPoint, 1.0);
+                        pPhysicalEntity->SetDamagedPieceRecord(fEntityDamageIntensity, this, pColPoint, -1.0);
+                        float fSurfaceFriction = g_surfaceInfos->GetFriction(pColPoint);
+                        float fFriction = fSurfaceFriction / totalColPointsToProcess;
+                        if (ApplyFriction(pPhysicalEntity, fFriction, pColPoint))
+                        {
+                            m_bHasContacted = true;
+                            pEntity->m_bHasContacted = true;
+                        }
+                    }
+                }
+            }
+            if (!pEntity->m_bHasContacted)
+            {
+                pPhysicalEntity->m_vecFrictionMoveSpeed = vecOldFrictionMoveSpeed;
+                pPhysicalEntity->m_vecFrictionTurnSpeed = vecOldFrictionTurnSpeed;
+                pEntity->m_bHasContacted = true;
+            }
+        }
+        else if (totalColPointsToProcess > 0)
+        {
+            for (int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+            {
+                CColPoint* pColPoint = &colPoints[colPointIndex];
+                if (ApplyCollision(pEntity, pColPoint, &fThisDamageIntensity, &fEntityDamageIntensity))
+                {
+                    SetDamagedPieceRecord(fThisDamageIntensity, pEntity, pColPoint, 1.0);
+                    pPhysicalEntity->SetDamagedPieceRecord(fEntityDamageIntensity, this, pColPoint, -1.0);
+                    float fSurfaceFriction = g_surfaceInfos->GetFriction(pColPoint);
+                    float fFriction = fSurfaceFriction / totalColPointsToProcess;
+                    if (ApplyFriction(pPhysicalEntity, fFriction, pColPoint))
+                    {
+                        m_bHasContacted = true;
+                        pEntity->m_bHasContacted = true;
+                    }
+                }
+            }
+        }
+    }
+  
+    if (pEntity->m_nStatus == STATUS_SIMPLE)
+    {
+        pEntity->m_nStatus = STATUS_PHYSICS;
+        if (pEntity->m_nType == ENTITY_TYPE_VEHICLE)
+        {
+            CCarCtrl::SwitchVehicleToRealPhysics(static_cast<CVehicle*>(pEntity));
+        }
+    }
+    return true; 
+#endif
 }
 
 // Converted from thiscall void CPhysical::AttachEntityToEntity(CEntity *entity,CVector offset,CVector rotation) 0x54D570

@@ -133,7 +133,7 @@ public:
     void RemoveAndAdd();
     void AddToMovingList();
     void RemoveFromMovingList();
-    void SetDamagedPieceRecord(float damageIntensity, CEntity* damagingEntity, CColPoint& colPoint, float distanceMult);
+    void SetDamagedPieceRecord(float damageIntensity, CEntity* damagingEntity, CColPoint* colPoint, float distanceMult);
     void ApplyMoveForce(CVector force);
     void ApplyTurnForce(CVector dir, CVector velocity);
     void ApplyForce(CVector dir, CVector velocity, bool flag);
@@ -148,7 +148,7 @@ public:
     void AddCollisionRecord(CEntity* collidedEntity);
     bool GetHasCollidedWith(CEntity* entity);
     bool GetHasCollidedWithAnyObject();
-    bool ApplyCollision(CEntity* entity, CColPoint& colPoint, float& arg2);
+    bool ApplyCollision(CEntity* entity, CColPoint& colPoint, float& fDamageIntensity);
     bool ApplySoftCollision(CEntity* entity, CColPoint& colPoint, float& arg2);
     bool ApplySpringCollision(float arg0, CVector& arg1, CVector& arg2, float arg3, float arg4, float& arg5);
     bool ApplySpringCollisionAlt(float arg0, CVector& arg1, CVector& arg2, float arg3, float arg4, CVector& arg5, float& arg6);
@@ -162,8 +162,8 @@ public:
     bool CanPhysicalBeDamaged(eWeaponType weapon, unsigned char* arg1);
     void ApplyAirResistance();
     bool ApplyCollisionAlt(CEntity* entity, CColPoint& colPoint, float& arg2, CVector& arg3, CVector& arg4);
-    bool ApplyFriction(float arg0, CColPoint& colPoint);
-    bool ApplyFriction(CPhysical* physical, float arg1, CColPoint& colPoint);
+    bool ApplyFriction(float fFriction, CColPoint* colPoint);
+    bool ApplyFriction(CPhysical* physical, float fFriction, CColPoint* colPoint);
     bool ProcessShiftSectorList(int sectorX, int sectorY);
     static void PlacePhysicalRelativeToOtherPhysical(CPhysical* physical1, CPhysical* physical2, CVector offset);
     float ApplyScriptCollision(CVector arg0, float arg1, float arg2, CVector* arg3);
@@ -171,10 +171,10 @@ public:
     void ApplySpeed();
     void UnsetIsInSafePosition();
     void ApplyFriction();
-    bool ApplyCollision(CPhysical* physical, CColPoint& colPoint, float& arg2, float& arg3);
-    bool ApplySoftCollision(CPhysical* physical, CColPoint& colPoint, float& arg2, float& arg3);
+    bool ApplyCollision(CEntity* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity);
+    bool ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity);
     bool ProcessCollisionSectorList(int sectorX, int sectorY);
-    bool ProcessCollisionSectorList_SimpleCar(CRepeatSector* sector);
+    bool ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSector);
     void AttachEntityToEntity(CEntity* entity, CVector offset, CVector rotation);
     void AttachEntityToEntity(CEntity* entity, CVector* , RtQuat* rotation);
     bool CheckCollision();
