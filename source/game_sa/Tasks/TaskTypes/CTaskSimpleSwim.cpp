@@ -13,6 +13,12 @@ bool CTaskSimpleSwim::ProcessPed(CPed *pPed)
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x68B1C0, CTaskSimpleSwim*, CPed *>(this, pPed);
 #else
+    return ProcessPed_Reversed(pPed);
+#endif
+}
+
+bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
+{
     if (m_pEntity)
     {
         CAnimManager::BlendAnimation(pPed->m_pRwClump, pPed->m_nAnimGroup, DEFAULT_IDLE_STANCE, 8.0);
@@ -28,11 +34,10 @@ bool CTaskSimpleSwim::ProcessPed(CPed *pPed)
         return true;
     }
 
-    if (m_vecMoveBlendRatio.z > CTaskSimpleSwim::SWIM_STOP_TIME || (pPed->m_nPedFlags & 1))
+    if (m_fSwimStopTime > CTaskSimpleSwim::SWIM_STOP_TIME || pPed->bIsStanding)
     {
         CAnimBlendAssociation * pAnimAssociation = nullptr;
-        // I still haven't figured out what the hell is animation ID 191
-        if (m_AnimID != 191)
+        if (m_AnimID != NO_ANIMATION_SET)
         {
             pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, m_AnimID);
         }
@@ -58,7 +63,7 @@ bool CTaskSimpleSwim::ProcessPed(CPed *pPed)
                 pPed->m_nMoveState = PEDMOVE_RUN;
             }
         }
-        CAnimManager::BlendAnimation(pPed->m_pRwClump, pPed->m_nAnimGroup, animId, 4.0);
+        CAnimManager::BlendAnimation(pPed->m_pRwClump, pPed->m_nAnimGroup, animId, 4.0f);
         pPed->RestoreHeadingRate();
         FxSystem_c * pFxSystem = m_pFxSystem;
         if (pFxSystem)
@@ -68,50 +73,43 @@ bool CTaskSimpleSwim::ProcessPed(CPed *pPed)
         }
         return true;
     }
-
-    pPed->m_nPedFlags &= 0xFFFFFDFF;
+    
+    pPed->bIsInTheAir = false;
 
     if (pPed->IsPlayer())
     {
-        // m_vecMoveBlendRatio.z seems to remain 0.0f for some reason, so this code seems not to run at all
-        // or it might be for cutscenes or mission? but which one? :D
-        if (m_vecMoveBlendRatio.z && m_nSwimState != SWIM_UNDERWATER_SPRINTING)
+        if (m_nTimeStep && m_nSwimState != SWIM_UNDERWATER_SPRINTING)
         {
             ProcessControlAI(pPed);
-            float fSwimmingTimeStep = static_cast <float>((CTimer::ms_fTimeStep / 50.0) * 1000.0);
-            if (m_vecMoveBlendRatio.z <= fSwimmingTimeStep)
+            unsigned int swimmingTimeStep = static_cast<unsigned int>((CTimer::ms_fTimeStep / 50.0f) * 1000.0f);
+            if (m_nTimeStep <= swimmingTimeStep)
             {
-                m_vecMoveBlendRatio.z = 0.0f;
+                m_nTimeStep = 0;
             }
             else
             {
-                m_vecMoveBlendRatio.z -= fSwimmingTimeStep;
+                m_nTimeStep -= swimmingTimeStep;
             }
 
-            CVector *pVecPosition = &pPed->m_placement.m_vPosn;
-            if (pPed->m_matrix)
-            {
-                pVecPosition = &pPed->m_matrix->pos;
-            }
-            CVector pVecOut;
-            VectorSub(&pVecOut, &m_vecMoveBlendRatio, pVecPosition);
-            pPed->m_pPlayerData->m_fMoveBlendRatio = sqrt(pVecOut.x * pVecOut.x + pVecOut.y * pVecOut.y);
+            CVector vecOut;
+            VectorSub(&vecOut, &m_vecPos, &pPed->GetPosition());
+            pPed->m_pPlayerData->m_fMoveBlendRatio = vecOut.Magnitude();
             CPlayerData * pPlayerData = pPed->m_pPlayerData;
-            if (pPlayerData->m_fMoveBlendRatio < 0.5)
+            if (pPlayerData->m_fMoveBlendRatio < 0.5f)
             {
-                pPlayerData->m_fMoveBlendRatio = 0.0;
-                CAnimManager::BlendAnimation(pPed->m_pRwClump, pPed->m_nAnimGroup, DEFAULT_IDLE_STANCE, 4.0);
+                pPlayerData->m_fMoveBlendRatio = 0.0f;
+                CAnimManager::BlendAnimation(pPed->m_pRwClump, pPed->m_nAnimGroup, DEFAULT_IDLE_STANCE, 4.0f);
                 pPed->RestoreHeadingRate();
                 DestroyFxSystem();
                 return 1;
             }
-            if (pPlayerData->m_fMoveBlendRatio > 1.0)
-                pPlayerData->m_fMoveBlendRatio = 1.0;
+            if (pPlayerData->m_fMoveBlendRatio > 1.0f)
+                pPlayerData->m_fMoveBlendRatio = 1.0f;
         }
         else
         {
             ProcessControlInput(reinterpret_cast<CPlayerPed*>(pPed));
-            m_vecMoveBlendRatio.z = 0.0f;
+            m_nTimeStep = 0;
         }
         bool bDecreaseAir = false;
         float fDecreaseAirMultiplicator = 1.0;
@@ -142,9 +140,6 @@ bool CTaskSimpleSwim::ProcessPed(CPed *pPed)
     {
         ProcessControlAI(pPed);
 
-        // I didn't really get a chance to this this part of code, if someone knows how to make 
-        // other peds swim, then let me know because this code will be needed. I did try spawning peds in the
-        // sea but they die lol. Looks like this code will run on some missions.
         if (m_nSwimState == SWIM_UNDERWATER_SPRINTING)
         {
             eWeaponType weaponType = static_cast<eWeaponType>(WEAPON_ARMOUR | WEAPON_BASEBALLBAT);
@@ -152,10 +147,8 @@ bool CTaskSimpleSwim::ProcessPed(CPed *pPed)
             CPedDamageResponseCalculator pedDamageResponseCalculator;
             pedDamageResponseCalculator.Constructor1(0, CTimer::ms_fTimeStep, weaponType, PED_PIECE_TORSO, false);
 
-            unsigned char pedFlags = (pPed->m_nPedFlags >> 8) & 1;
-
             CEventDamage eventDamage;
-            eventDamage.Constructor1(0, CTimer::m_snTimeInMilliseconds, weaponType, PED_PIECE_TORSO, 0, 0, pedFlags);
+            eventDamage.Constructor1(0, CTimer::m_snTimeInMilliseconds, weaponType, PED_PIECE_TORSO, 0, 0, pPed->bInVehicle);
             CPedDamageResponse damageResponseInfo;
             if (eventDamage.AffectsPed(pPed))
             {
@@ -174,7 +167,6 @@ bool CTaskSimpleSwim::ProcessPed(CPed *pPed)
     ProcessSwimmingResistance(pPed);
     ProcessEffects(pPed);
     return false;
-#endif
 }
 
 void CTaskSimpleSwim::ProcessSwimAnims(CPed *pPed)
@@ -406,7 +398,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed *pPed)
                 {
                     CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_SWIM, SWIM_SWIM_UNDER, 1000.0);
                     int animID = m_AnimID;
-                    if (animID == DEFAULT_SWIM_TREAD || animID == 191) // 191? Lmao, this animation id does not even exist
+                    if (animID == DEFAULT_SWIM_TREAD || animID == NO_ANIMATION_SET)
                     {
                         m_fSpeed = -2.0f;
                         m_AnimID = SWIM_SWIM_UNDER;
@@ -501,12 +493,12 @@ void CTaskSimpleSwim::ProcessControlAI(CPed*pPed)
     {
         CVector vecPosition(m_pPed->GetPosition() - pPed->GetPosition());
         vecPosition.Normalise();
-        if (m_vecMoveBlendRatio.x == 0.0f)
+        if (m_fRandomMoveBlendRatio == 0.0f)
         {
-            m_vecMoveBlendRatio.x = (rand() & 3) * 0.5f + 1.5f;
+            m_fRandomMoveBlendRatio = (rand() & 3) * 0.5f + 1.5f;
         }
 
-        vecPosition *= m_vecMoveBlendRatio.x;
+        vecPosition *= m_fRandomMoveBlendRatio;
         m_vecPos = m_pPed->GetPosition() - vecPosition;
     }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#define NO_ANIMATION_SET 191
+
 enum eAnimGroup
 {
     ANIM_GROUP_DEFAULT = 0,

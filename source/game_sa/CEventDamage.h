@@ -33,7 +33,7 @@ public:
     CPedDamageResponse              damageResponseData;     // 38h
 
     static void InjectHooks();
-    CEventDamage* Constructor1(CEntity * pEntity, unsigned int i_1, eWeaponType weaponType, ePedPieceTypes hitZone, unsigned char uc_2, bool b_3, bool b_4);
+    CEventDamage* Constructor1(CEntity * pEntity, unsigned int i_1, eWeaponType weaponType, ePedPieceTypes hitZone, unsigned char uc_2, bool b_3, bool bPedInVehicle);
     void Destructor1();
 
     bool AffectsPed(CPed * pPed);

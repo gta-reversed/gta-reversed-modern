@@ -47,7 +47,9 @@ public:
 private:
     char _pad[3]; // 77
 public:
-    CVector m_vecMoveBlendRatio;
+    float m_fRandomMoveBlendRatio; // Used in CTaskSimpleSwim::ProcessControlAI
+    float m_fSwimStopTime;
+    unsigned int m_nTimeStep;
     FxSystem_c *m_pFxSystem; // 92
     bool m_bTriggerWaterSplash; // 96
     char pad2[3]; // 97
@@ -58,7 +60,12 @@ public:
 
     CTaskSimpleSwim(CVector const* pPosn, CPed* pPed);
 
-    bool ProcessPed(CPed *pPed);
+    // original virutal functions
+    bool ProcessPed(CPed *pPed) override;
+
+    // reversed virtual functions
+    bool ProcessPed_Reversed(CPed* pPed);
+
     void ProcessSwimAnims(CPed *pPed);
     void ProcessSwimmingResistance(CPed*pPed);
     void ProcessEffects(CPed*pPed);
