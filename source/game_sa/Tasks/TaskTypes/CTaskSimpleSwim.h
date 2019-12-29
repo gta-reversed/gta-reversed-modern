@@ -35,11 +35,11 @@ public:
     float m_fAnimSpeed;// 16
     CVector m_vecPos; // 20
     CPed *m_pPed; // 32
-    float flt_24; // initialized with 0.0f 36
+    float m_fDiveUnderAngle; // initialized with 0.0f 36
     float flt_28; // and used 40
     float flt_2C; // for 44
     float flt_30; // internal 48
-    float flt_34; //calculations 52
+    float m_fSpeed; //calculations 52
     CEntity *m_pEntity; // pThis + 56
     CVector m_pClimbPos;// pThis + 60
     float m_fAngle; // 72

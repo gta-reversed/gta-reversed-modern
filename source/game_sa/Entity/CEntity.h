@@ -71,7 +71,16 @@ public:
         unsigned int m_nFlags;
     };
     /* */
-    unsigned short m_nRandomSeed;
+    union 
+    {
+        struct 
+        {
+            unsigned short m_nRandomSeedUpperByte : 8;
+            unsigned short m_nRandomSeedSecondByte : 8;
+        };
+        unsigned short m_nRandomSeed;
+
+    };
     unsigned short m_nModelIndex;
     CReference *m_pReferences;
     void *m_pStreamingLink;

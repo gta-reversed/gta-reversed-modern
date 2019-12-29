@@ -3,9 +3,9 @@
 
 #pragma comment(lib, "detours.lib")
 
-//bool __thiscall CPhysical_ProcessCollisionSectorList_SimpleCar(CPhysical* pThis)
-auto OLD_CPhysical_ProcessCollisionSectorList_SimpleCar = (bool(__thiscall*) (CPhysical * pThis, void* padding, CPtrNodeDoubleLink * pNode))0x54CFF0;
-bool __fastcall CPhysical_ProcessCollisionSectorList_SimpleCar(CPhysical* pThis, void* padding, CPtrNodeDoubleLink* pNode);
+//bool __thiscall CTaskSimpleSwim_ProcessControlAI(CPhysical* pThis)
+auto OLD_CTaskSimpleSwim_ProcessControlAI = (bool(__thiscall*) (CTaskSimpleSwim * pThis, void* padding, CPed * pPed))0x689640;
+bool __fastcall CTaskSimpleSwim_ProcessControlAI(CTaskSimpleSwim* pThis, void* padding, CPed* pPed);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -25,9 +25,9 @@ void InjectHooksMain(void)
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CPhysical_ProcessCollisionSectorList_SimpleCar, CPhysical_ProcessCollisionSectorList_SimpleCar);
+    DetourAttach(&(PVOID&)OLD_CTaskSimpleSwim_ProcessControlAI, CTaskSimpleSwim_ProcessControlAI);
     DetourTransactionCommit();
-    */
+   */
 }
 /*
 enum eFunctionReturnValue
@@ -54,8 +54,10 @@ enum eFunctionReturnValue
 };
 
 
-bool __fastcall CPhysical_ProcessCollisionSectorList_SimpleCar(CPhysical* pThis, void* padding, CPtrNodeDoubleLink* pNode)
+bool __fastcall CTaskSimpleSwim_ProcessControlAI(CTaskSimpleSwim* pThis, void* padding, CPed* pPed)
 {
-    printf(" calling CPhysical_ProcessCollisionSectorList_SimpleCar \n");
+    printf(" calling CTaskSimpleSwim_ProcessControlAI \n");
+
+    
     return true;
 }

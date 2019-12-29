@@ -249,7 +249,7 @@ public:
     int field_52C;
     ePedState           m_nPedState; // see ePedState
     int                 m_nMoveState;
-    int field_538; // type is eMoveState and used for swimming in CTaskSimpleSwim::ProcessPed
+    int m_nSwimmingMoveState; // type is eMoveState and used for swimming in CTaskSimpleSwim::ProcessPed
     int field_53C;
     float               m_fHealth;
     float               m_fMaxHealth;
