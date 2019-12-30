@@ -28,32 +28,31 @@ class  CTaskSimpleSwim : public CTaskSimple {
 protected:
     CTaskSimpleSwim(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
-    bool m_bFinishedBlending; // 8
-    bool m_bAnimBlockRefAdded; // 9
-    eSwimState m_nSwimState; // 10
-    int m_AnimID; // pThis + 12
-    float m_fAnimSpeed;// 16
-    CVector m_vecPos; // 20
-    CPed *m_pPed; // 32
-    float m_fDiveUnderAngle; // initialized with 0.0f 36
-    float flt_28; // and used 40
-    float flt_2C; // for 44
-    float flt_30; // internal 48
-    float m_fSpeed; //calculations 52
-    CEntity *m_pEntity; // pThis + 56
-    CVector m_pClimbPos;// pThis + 60
-    float m_fAngle; // 72
-    unsigned char m_nSurfaceType; // 76
+    bool m_bFinishedBlending;
+    bool m_bAnimBlockRefAdded;
+    eSwimState m_nSwimState;
+    int m_AnimID; 
+    float m_fAnimSpeed;
+    CVector m_vecPos;
+    CPed *m_pPed; 
+    float m_fRotationX;  // updated all the time. 
+    float m_fTurningRotationY; // updated when ped is turning.
+    float m_fUpperTorsoRotationX; //  updated when ped diving or coming back to surface
+    float m_fAimingRotation; // The direction that the ped is facing. Updated all the time.
+    float m_fStateChanger; // It is is normally 0, but updated when changing swimming states. 
+    CEntity *m_pEntity;
+    CVector m_pClimbPos;
+    float m_fAngle;
+    unsigned char m_nSurfaceType;
 private:
-    char _pad[3]; // 77
+    char _pad[3]; 
 public:
     float m_fRandomMoveBlendRatio; // Used in CTaskSimpleSwim::ProcessControlAI
     float m_fSwimStopTime;
     unsigned int m_nTimeStep;
-    FxSystem_c *m_pFxSystem; // 92
-    bool m_bTriggerWaterSplash; // 96
-    char pad2[3]; // 97
-                  // 100 = 0x64
+    FxSystem_c *m_pFxSystem; 
+    bool m_bTriggerWaterSplash;
+    char pad2[3];
 
     static bool &SWIM_DIVE_UNDER_ANGLE;
     static float &SWIM_STOP_TIME;

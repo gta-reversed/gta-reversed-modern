@@ -344,7 +344,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed *pPed)
         case SWIM_UNDERWATER_SPRINTING:
         {
             int animID = m_AnimID;
-            if ((animID == SWIM_SWIM_UNDER || animID == SWIM_SWIM_GLIDE) && m_fSpeed >= 0.0)
+            if ((animID == SWIM_SWIM_UNDER || animID == SWIM_SWIM_GLIDE) && m_fStateChanger >= 0.0)
             {
                 if (pPlayerPed->m_pPlayerData && pPlayerPed->GetButtonSprintResults((eSprintType)3) >= 1.0)
                 {
@@ -380,17 +380,17 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed *pPed)
                 CAnimBlendAssociation * pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, SWIM_SWIM_UNDER);
                 if (pAnimAssociation)
                 {
-                    if (m_fSpeed < 0.0 && pAnimAssociation->m_fBlendAmount >= 0.99000001)
+                    if (m_fStateChanger < 0.0 && pAnimAssociation->m_fBlendAmount >= 0.99000001)
                     {
-                        if (m_fSpeed > -2.0)
+                        if (m_fStateChanger > -2.0)
                         {
-                            m_fSpeed = 0.0f;
-                            m_fDiveUnderAngle = static_cast < float > ((CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE * 3.1416) / 180.0); //v28 * 0.017453292;
+                            m_fStateChanger = 0.0f;
+                            m_fRotationX = static_cast < float > ((CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE * 3.1416) / 180.0); //v28 * 0.017453292;
                         }
                         else
                         {
-                            m_fDiveUnderAngle = static_cast < float > (1.39626f);
-                            m_fSpeed = 0.0f;
+                            m_fRotationX = static_cast < float > (1.39626f);
+                            m_fStateChanger = 0.0f;
                         }
                     }
                 }
@@ -400,12 +400,12 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed *pPed)
                     int animID = m_AnimID;
                     if (animID == DEFAULT_SWIM_TREAD || animID == NO_ANIMATION_SET)
                     {
-                        m_fSpeed = -2.0f;
+                        m_fStateChanger = -2.0f;
                         m_AnimID = SWIM_SWIM_UNDER;
                     }
                     else
                     {
-                        m_fSpeed = -1.0f;
+                        m_fStateChanger = -1.0f;
                         m_AnimID = SWIM_SWIM_UNDER;
                     }
                 }
@@ -558,8 +558,8 @@ void CTaskSimpleSwim::ProcessControlAI(CPed*pPed)
             }
         }
     }
-    flt_30 = 0.0;
-    flt_2C = 0.0;
+    m_fAimingRotation = 0.0;
+    m_fUpperTorsoRotationX = 0.0;
 
     if (!bPedGroupSet && !pPed->IsPlayer() && m_fAnimSpeed < 0.0f)
     {
