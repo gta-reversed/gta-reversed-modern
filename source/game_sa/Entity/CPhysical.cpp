@@ -185,6 +185,15 @@ void CPhysical::SetDamagedPieceRecord(float damageIntensity, CEntity* damagingEn
     ((void(__thiscall*)(CPhysical*, float, CEntity*, CColPoint*, float))0x5428C0)(this, damageIntensity, damagingEntity, colPoint, distanceMult);
 }
 
+void CPhysical::ApplyMoveForce(float x, float y, float z)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallMethod<0x4ABBA0, CPhysical*, float, float, float>(this, x, y, z);
+#else
+    return ApplyMoveForce(CVector(x, y ,z));
+#endif
+}
+
 // Converted from thiscall void CPhysical::ApplyMoveForce(CVector force) 0x5429F0
 void CPhysical::ApplyMoveForce(CVector force)
 {

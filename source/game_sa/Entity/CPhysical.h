@@ -134,6 +134,7 @@ public:
     void AddToMovingList();
     void RemoveFromMovingList();
     void SetDamagedPieceRecord(float damageIntensity, CEntity* damagingEntity, CColPoint* colPoint, float distanceMult);
+    void ApplyMoveForce(float x, float y, float z);
     void ApplyMoveForce(CVector force);
     void ApplyTurnForce(CVector dir, CVector velocity);
     void ApplyForce(CVector dir, CVector velocity, bool flag);

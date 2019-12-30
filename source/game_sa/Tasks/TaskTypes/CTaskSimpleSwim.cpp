@@ -475,7 +475,219 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed *pPed)
 
 void CTaskSimpleSwim::ProcessSwimmingResistance(CPed* pPed)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x68A1D0, CTaskSimpleSwim*, CPed*>(this, pPed);
+#else
+    float fSubmergeZ = -1.0f;
+    CVector vecPedMoveSpeed;
+
+    switch (m_nSwimState)
+    {
+    case SWIM_TREAD:
+    case SWIM_SPRINT:
+    case SWIM_SPRINTING:
+    {
+        CAnimBlendAssociation* pAnimSwimBreast = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, SWIM_SWIM_BREAST);
+        CAnimBlendAssociation* pAnimSwimCrawl = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, SWIM_SWIM_CRAWL);
+
+        float fAnimBlendSum = 0.0f;
+        float fAnimBlendDifference = 1.0f;
+        if (pAnimSwimBreast)
+        {
+            fAnimBlendSum = 0.40000001f * pAnimSwimBreast->m_fBlendAmount;
+            fAnimBlendDifference = 1.0f - pAnimSwimBreast->m_fBlendAmount;
+        }
+
+        if (pAnimSwimCrawl)
+        {
+            fAnimBlendSum += 0.2f * pAnimSwimCrawl->m_fBlendAmount;
+            fAnimBlendDifference -= pAnimSwimCrawl->m_fBlendAmount;
+        }
+
+        if (fAnimBlendDifference < 0.0f)
+        {
+            fAnimBlendDifference = 0.0f;
+        }
+
+        fSubmergeZ = fAnimBlendDifference * 0.55000001f + fAnimBlendSum;
+
+        vecPedMoveSpeed = pPed->m_vecAnimMovingShiftLocal.x * pPed->m_matrix->right;
+        vecPedMoveSpeed += pPed->m_vecAnimMovingShiftLocal.y * pPed->m_matrix->up;
+        break;
+    }
+    case SWIM_DIVE_UNDERWATER:
+    {
+        vecPedMoveSpeed = pPed->m_vecAnimMovingShiftLocal.x * pPed->m_matrix->right;
+        vecPedMoveSpeed += pPed->m_vecAnimMovingShiftLocal.y * pPed->m_matrix->up;
+
+        auto pAnimSwimDiveUnder = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, SWIM_SWIM_DIVE_UNDER);
+        if (pAnimSwimDiveUnder)
+        {
+            vecPedMoveSpeed.z = pAnimSwimDiveUnder->m_fCurrentTime / pAnimSwimDiveUnder->m_pHierarchy->m_fTotalTime * -0.1f;
+        }
+        break;
+    }
+    case SWIM_UNDERWATER_SPRINTING:
+    {
+        vecPedMoveSpeed = pPed->m_vecAnimMovingShiftLocal.x * pPed->m_matrix->right;
+        vecPedMoveSpeed += cos(m_fRotationX) * pPed->m_vecAnimMovingShiftLocal.y * pPed->m_matrix->up;
+        vecPedMoveSpeed.z += sin(m_fRotationX) * pPed->m_vecAnimMovingShiftLocal.y + 0.0099999998f;
+        break;
+    }
+    case SWIM_BACK_TO_SURFACE:
+    {
+        auto pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, 128);
+        if (!pAnimAssociation)
+        {
+            pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, SWIM_SWIM_JUMPOUT);
+        }
+
+        if (pAnimAssociation)
+        {
+            if (pAnimAssociation->m_pHierarchy->m_fTotalTime > pAnimAssociation->m_fCurrentTime
+                && (pAnimAssociation->m_fBlendAmount >= 1.0f || pAnimAssociation->m_fBlendDelta > 0.0f))
+            {
+                float fMoveForceZ = CTimer::ms_fTimeStep * pPed->m_fMass * 0.30000001f * 0.0080000004f;
+                pPed->ApplyMoveForce(0.0f, 0.0f, fMoveForceZ);
+            }
+        }
+        return;
+    }
+    default:
+    {
+        return;
+    }
+    }
+
+    float fTheTimeStep = pow(0.89999998f, CTimer::ms_fTimeStep);
+    vecPedMoveSpeed *= (1.0f - fTheTimeStep);
+    pPed->m_vecMoveSpeed *= fTheTimeStep;
+    pPed->m_vecMoveSpeed += vecPedMoveSpeed;
+
+    bool bUpdateRotationX = true;
+    const CVector& vecPedPosition = pPed->GetPosition();
+    CVector vecCheckWaterLevelPos = CTimer::ms_fTimeStep * pPed->m_vecMoveSpeed + pPed->GetPosition();
+    float fWaterLevel = 0.0;
+    if (!CWaterLevel::GetWaterLevel(vecCheckWaterLevelPos.x, vecCheckWaterLevelPos.y, vecPedPosition.z, &fWaterLevel, true, 0))
+    {
+        fSubmergeZ = -1.0f;
+        bUpdateRotationX = false;
+    }
+    else
+    {
+        if (m_nSwimState != SWIM_UNDERWATER_SPRINTING || m_fStateChanger < 0.0)
+        {
+            bUpdateRotationX = false;
+        }
+        else
+        {
+            if (vecPedPosition.z + 0.64999998f > fWaterLevel && m_fRotationX > 0.78539819f)
+            {
+                m_nSwimState = SWIM_TREAD;
+                m_fStateChanger = 0.0;
+                bUpdateRotationX = false;
+            }
+        }
+    }
+
+    if (bUpdateRotationX)
+    {
+        if (m_fRotationX >= 0.0)
+        {
+            if (vecPedPosition.z + 0.64999998f <= fWaterLevel)
+            {
+                if (m_fStateChanger <= 0.001f)
+                {
+                    m_fStateChanger = 0.0;
+                }
+                else
+                {
+                    m_fStateChanger *= 0.94999999f;
+                }
+            }
+            else
+            {
+                float fMinimumSpeed = 0.050000001f * 0.5f;
+                if (m_fStateChanger > fMinimumSpeed)
+                {
+                    m_fStateChanger *= 0.94999999f;
+                }
+                if (m_fStateChanger < fMinimumSpeed)
+                {
+                    m_fStateChanger += CTimer::ms_fTimeStep * 0.0020000001f;
+                    m_fStateChanger = std::min(fMinimumSpeed, m_fStateChanger);
+                }
+                m_fRotationX += CTimer::ms_fTimeStep * m_fStateChanger;
+                fSubmergeZ = (0.55000001f - 0.2f) * (m_fRotationX * 1.2732395f) * 0.75f + 0.2f;
+            }
+        }
+        else
+        {
+            if (vecPedPosition.z - sin(m_fRotationX) + 0.64999998f <= fWaterLevel)
+            {
+                if (m_fStateChanger > 0.001f)
+                {
+                    m_fStateChanger *= 0.94999999f;
+                }
+                else
+                {
+                    m_fStateChanger = 0.0;
+                }
+            }
+            else
+            {
+                m_fStateChanger += CTimer::ms_fTimeStep * 0.0020000001f;
+                if (m_fStateChanger > 0.050000001f)
+                {
+                    m_fStateChanger = 0.050000001f;
+                }
+            }
+            m_fRotationX += CTimer::ms_fTimeStep * m_fStateChanger;
+        }
+    }
+
+    if (fSubmergeZ > 0.0)
+    {
+        fWaterLevel -= (fSubmergeZ + vecPedPosition.z);
+        float fTimeStepMoveSpeedZ = fWaterLevel / CTimer::ms_fTimeStep;
+        float fTimeStep = CTimer::ms_fTimeStep * 0.1f;
+        if (fTimeStepMoveSpeedZ > fTimeStep)
+        {
+            fTimeStepMoveSpeedZ = fTimeStep;
+        }
+
+        if (-fTimeStep > fTimeStepMoveSpeedZ)
+        {
+            fTimeStepMoveSpeedZ = -fTimeStep;
+        }
+
+        fTimeStepMoveSpeedZ -= pPed->m_vecMoveSpeed.z;
+
+        fTimeStep = CTimer::ms_fTimeStep * 0.02f;
+        if (fTimeStepMoveSpeedZ > fTimeStep)
+        {
+            fTimeStepMoveSpeedZ = fTimeStep;
+        }
+
+        if (-fTimeStep > fTimeStepMoveSpeedZ)
+        {
+            fTimeStepMoveSpeedZ = -fTimeStep;
+        }
+
+        pPed->m_vecMoveSpeed.z += fTimeStepMoveSpeedZ;
+    }
+
+    CVector* pPedPosition = &pPed->GetPosition();
+    if (pPedPosition->z < -69.0f)
+    {
+        pPedPosition->z = -69.0f;
+        if (pPed->m_vecMoveSpeed.z < 0.0f)
+        {
+            pPed->m_vecMoveSpeed.z = 0.0f;
+        }
+    }
+    return;
+#endif
 }
 
 void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
