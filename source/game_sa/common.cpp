@@ -68,6 +68,12 @@ bool InTwoPlayersMode()
     return ((bool(__cdecl *)())0x441390)();
 }
 
+CVector* VectorAdd(CVector* out, CVector* from, CVector* what)
+{
+    return ((CVector * (__cdecl*)(CVector*, CVector*, CVector*))0x40FE30)(out, from, what);
+}
+
+
 CVector * VectorSub(CVector * out, CVector * from, CVector * what)
 {
     return ((CVector *(__cdecl *)(CVector *, CVector *, CVector *))0x40FE60)(out, from, what);

@@ -22,3 +22,7 @@ void CCamera::SetNewPlayerWeaponMode(short mode, short maxZoom, short minZoom) {
 void CCamera::UpdateAimingCoors(CVector const* AimingTargetCoors) {
     plugin::CallMethodDynGlobal<CCamera*, CVector const*>(0x50CB10, this, AimingTargetCoors);
 }
+
+signed int CCamera::GetLookDirection() {
+    return plugin::CallMethodAndReturnDynGlobal<signed int, CCamera*>(0x50AE90, this);
+}

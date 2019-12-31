@@ -69,7 +69,7 @@ public:
     void ProcessSwimmingResistance(CPed*pPed);
     void ProcessEffects(CPed*pPed);
     void ProcessControlAI(CPed*pPed);
-    void ProcessControlInput(CPlayerPed* pPlayerPed);
+    void ProcessControlInput(CPlayerPed* pPed);
     FxSystemBP_c * DestroyFxSystem();
     /*ApplyRollAndPitch(CPed*)
     * CTaskSimpleSwim(CVector const*, CPed*)

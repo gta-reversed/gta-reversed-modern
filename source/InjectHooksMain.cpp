@@ -3,9 +3,9 @@
 
 #pragma comment(lib, "detours.lib")
 
-//bool __thiscall CTaskSimpleSwim_ProcessSwimmingResistance(CPhysical* pThis)
-auto OLD_CTaskSimpleSwim_ProcessSwimmingResistance = (void(__thiscall*) (CTaskSimpleSwim * pThis, CPed * pPed))0x68A1D0;
-void __fastcall CTaskSimpleSwim_ProcessSwimmingResistance(CTaskSimpleSwim* pThis, void* padding, CPed* pPed);
+//bool __thiscall CTaskSimpleSwim_ProcessControlInput(CPhysical* pThis)
+auto OLD_CTaskSimpleSwim_ProcessControlInput = (void(__thiscall*) (CTaskSimpleSwim * pThis, CPlayerPed * pPed))0x688A90;
+void __fastcall CTaskSimpleSwim_ProcessControlInput(CTaskSimpleSwim* pThis, void* padding, CPlayerPed* pPed);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -17,7 +17,7 @@ void InjectHooksMain(void)
     CStreaming::InjectHooks();
     CRenderer::InjectHooks();*/
 
-   // HookInstall(0x68A1D0, &CTaskSimpleSwim::ProcessSwimmingResistance, 7);
+    //HookInstall(0x688A90, &CTaskSimpleSwim::ProcessControlInput, 7);
 
   /*
     DetourRestoreAfterWith();
@@ -25,9 +25,9 @@ void InjectHooksMain(void)
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CTaskSimpleSwim_ProcessSwimmingResistance, CTaskSimpleSwim_ProcessSwimmingResistance);
+    DetourAttach(&(PVOID&)OLD_CTaskSimpleSwim_ProcessControlInput, CTaskSimpleSwim_ProcessControlInput);
     DetourTransactionCommit();
-     */
+     /*/
 }
 /*
 enum eFunctionReturnValue
@@ -53,9 +53,9 @@ enum eFunctionReturnValue
     FUNCTION_SOMELABEL = 4
 };
 
-void __fastcall CTaskSimpleSwim_ProcessSwimmingResistance(CTaskSimpleSwim* pThis, void* padding, CPed* pPed)
+void __fastcall CTaskSimpleSwim_ProcessControlInput(CTaskSimpleSwim* pThis, void* padding, CPlayerPed* pPed)
 {
-    printf(" calling CTaskSimpleSwim_ProcessSwimmingResistance \n");
+    printf(" calling CTaskSimpleSwim_ProcessControlInput \n");
 
   
 }
