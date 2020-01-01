@@ -96,4 +96,4 @@ void RenderEnd();
 void RotateVecIntoVec(RwV3d* vectorsOut, RwV3d* vectorsIn, RwV3d* dir);
 void RotateVecAboutVec(RwV3d* out, RwV3d* arg1, RwV3d* arg2, float angle);
 
-extern  Fx_c &g_fx;
+extern Fx_c &g_fx;

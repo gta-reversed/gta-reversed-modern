@@ -42,9 +42,9 @@ void FxSystem_c::AttachToBone(CEntity* entity, int boneId) {
     ((void(__thiscall *)(FxSystem_c*, CEntity*, int))0x4AA400)(this, entity, boneId);
 }
 
-// Converted from thiscall void FxSystem_c::AddParticle(RwV3d *position,RwV3d *velocity,float,FxPrtMult_c *prtMult,float,float brightness,float,uchar) 0x4AA440
-void FxSystem_c::AddParticle(RwV3d* position, RwV3d* velocity, float arg2, FxPrtMult_c* prtMult, float arg4, float brightness, float arg6, unsigned char arg7) {
-    ((void(__thiscall *)(FxSystem_c*, RwV3d*, RwV3d*, float, FxPrtMult_c*, float, float, float, unsigned char))0x4AA440)(this, position, velocity, arg2, prtMult, arg4, brightness, arg6, arg7);
+//  0x4AA440
+void FxSystem_c::AddParticle(RwV3d* position, RwV3d* velocity, float arg2, FxPrtMult_c* prtMult, float arg4, float brightness, float arg6, unsigned char arg8) {
+    ((void(__thiscall *)(FxSystem_c*, RwV3d*, RwV3d*, float, FxPrtMult_c*, float, float, float, unsigned char))0x4AA440)(this, position, velocity, arg2, prtMult, arg4, brightness, arg6, arg8);
 }
 
 // Converted from thiscall void FxSystem_c::AddParticle(RwMatrixTag *transform,RwV3d *position,float,FxPrtMult_c *prtMult,float,float,float,uchar) 0x4AA540
