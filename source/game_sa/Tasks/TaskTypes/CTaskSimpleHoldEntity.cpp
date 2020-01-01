@@ -91,7 +91,7 @@ bool CTaskSimpleHoldEntity::ProcessPed(class CPed* ped)
         return true;
     }
 
-    if (m_nAnimId != 191 || m_pAnimBlendHierarchy)
+    if (m_nAnimId != NO_ANIMATION_SET || m_pAnimBlendHierarchy)
     {
         auto pAnimBlendAssoc = m_pAnimBlendAssociation;
         if (pAnimBlendAssoc)
