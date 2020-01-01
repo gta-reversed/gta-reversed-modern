@@ -57,20 +57,25 @@ public:
     static bool &SWIM_DIVE_UNDER_ANGLE;
     static float &SWIM_STOP_TIME;
 
+    static void InjectHooks();
     CTaskSimpleSwim(CVector const* pPosn, CPed* pPed);
 
     // original virutal functions
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
     bool ProcessPed(CPed *pPed) override;
 
     // reversed virtual functions
     bool ProcessPed_Reversed(CPed* pPed);
+    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
 
+    void ApplyRollAndPitch(CPed* pPed);
     void ProcessSwimAnims(CPed *pPed);
     void ProcessSwimmingResistance(CPed*pPed);
     void ProcessEffects(CPed*pPed);
     void ProcessControlAI(CPed*pPed);
     void ProcessControlInput(CPlayerPed* pPed);
-    FxSystemBP_c * DestroyFxSystem();
+    void CreateFxSystem(CPed* pPed, RwMatrixTag* pRwMatrix);
+    void DestroyFxSystem();
     /*ApplyRollAndPitch(CPed*)
     * CTaskSimpleSwim(CVector const*, CPed*)
     * Clone() const

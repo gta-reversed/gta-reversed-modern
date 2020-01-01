@@ -32,6 +32,8 @@ public:
     CAESound *field_150;
     float field_154;
     float field_158;
+
+    void AddAudioEvent(int audioEventVolumeIndex, float a3, float a4, int argC, int a5, int a7, int a8);
 };
 
 VALIDATE_SIZE(CAEPedAudioEntity, 0x15C);

@@ -3,9 +3,32 @@
 bool &CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE = *reinterpret_cast<bool *>(0x8D2FC4);
 float &CTaskSimpleSwim::SWIM_STOP_TIME = *reinterpret_cast<float *>(0x8D2FC0);
 
+void CTaskSimpleSwim::InjectHooks()
+{
+    HookInstall(0x68B1C0, &CTaskSimpleSwim::ProcessPed_Reversed, 7);
+    HookInstall(0x68B100, &CTaskSimpleSwim::MakeAbortable_Reversed, 7);
+    HookInstall(0x68A8E0, &CTaskSimpleSwim::ApplyRollAndPitch, 7);
+    HookInstall(0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims, 7);
+    HookInstall(0x68A1D0, &CTaskSimpleSwim::ProcessSwimmingResistance, 7);
+    HookInstall(0x68AA70, &CTaskSimpleSwim::ProcessEffects, 7);
+    HookInstall(0x689640, &CTaskSimpleSwim::ProcessControlAI, 7);
+    HookInstall(0x688A90, &CTaskSimpleSwim::ProcessControlInput, 7);
+    HookInstall(0x68A9F0, &CTaskSimpleSwim::CreateFxSystem, 7);
+    HookInstall(0x68AA50, &CTaskSimpleSwim::DestroyFxSystem, 7);
+}
+
 CTaskSimpleSwim::CTaskSimpleSwim(CVector const* pPosn, CPed* pPed) : CTaskSimple(plugin::dummy)
 {
     plugin::CallMethod<0x688930, CTaskSimpleSwim*, CVector const*, CPed*>(this, pPosn, pPed);
+}
+
+bool CTaskSimpleSwim::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return ((bool(__thiscall*)(CTask*, CPed*, int, class CEvent*))plugin::GetVMT(this, 6))(this, ped, priority, _event);
+#else
+    return MakeAbortable_Reversed(ped, priority, _event);
+#endif
 }
 
 bool CTaskSimpleSwim::ProcessPed(CPed *pPed)
@@ -15,6 +38,41 @@ bool CTaskSimpleSwim::ProcessPed(CPed *pPed)
 #else
     return ProcessPed_Reversed(pPed);
 #endif
+}
+
+bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event)
+{
+    CEventDamage* pDamageEvent = reinterpret_cast<CEventDamage*>(_event);
+
+    if (priority == ABORT_PRIORITY_IMMEDIATE)
+    {
+        CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIMATION_STARTED | ANIMATION_LOOPED, 1000.0f);
+        ped->m_nMoveState = PEDMOVE_STILL;
+        ped->m_nSwimmingMoveState = PEDMOVE_STILL;
+
+        if (m_AnimID != NO_ANIMATION_SET)
+        {
+            auto pAnimAssociation = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, m_AnimID);
+            if (pAnimAssociation)
+            {
+                pAnimAssociation->m_fBlendDelta = -1000.0f;
+            }
+        }
+
+        ped->RestoreHeadingRate();
+    }
+    else if (!_event || _event->GetEventPriority() < 71
+            && (_event->GetEventType() != EVENT_DAMAGE || !pDamageEvent->damageResponseData.bUnk || !pDamageEvent->unkC))
+    {
+        return false;
+    }
+
+    if (m_pFxSystem)
+    {
+        m_pFxSystem->Kill();
+        m_pFxSystem = 0;
+    }
+    return true;
 }
 
 bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
@@ -167,6 +225,39 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
     ProcessSwimmingResistance(pPed);
     ProcessEffects(pPed);
     return false;
+}
+
+void CTaskSimpleSwim::ApplyRollAndPitch(CPed* pPed)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallMethod<0x68A8E0, CTaskSimpleSwim*, CPed*>(this, pPed);
+#else
+    CMatrix rotationMatrix; 
+    CMatrix outMatrix;
+
+    LimbOrientation theLimbOrientation;
+    theLimbOrientation.m_fYaw = m_fAimingRotation;
+    theLimbOrientation.m_fPitch = m_fUpperTorsoRotationX;
+
+    pPed->m_pedIK.RotateTorso(pPed->m_apBones[1], theLimbOrientation, false);
+
+    RwObject* pRwObject = pPed->m_pRwObject;
+    if (pRwObject)
+    {
+        RwMatrix* pRwMatrix = &((RwFrame*)pRwObject->parent)->modelling;
+        CMatrix pedMatrix (pRwMatrix, 0);
+        rotationMatrix.m_pAttachMatrix = 0;
+        rotationMatrix.m_bOwnsAttachedMatrix = 0;
+
+        rotationMatrix.SetTranslate(0.0f, 0.0f, 0.0f);
+        rotationMatrix.RotateY(m_fTurningRotationY);
+        rotationMatrix.RotateX(m_fRotationX);
+
+        pedMatrix *= rotationMatrix;
+        pedMatrix.UpdateRW();
+        pPed->UpdateRwFrame();
+    }
+#endif
 }
 
 void CTaskSimpleSwim::ProcessSwimAnims(CPed *pPed)
@@ -692,7 +783,164 @@ void CTaskSimpleSwim::ProcessSwimmingResistance(CPed* pPed)
 
 void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x68AA70, CTaskSimpleSwim*, CPed*>(this, pPed);
+#else
+    CVector vecParticlePosition;
+    if (pPed->m_matrix)
+    {
+        vecParticlePosition = pPed->m_matrix->up;
+    }
+    else
+    {
+        float fHeading = pPed->m_placement.m_fHeading;
+        vecParticlePosition.x = -sin(fHeading);
+        vecParticlePosition.y = cos(fHeading);
+        vecParticlePosition.z = 0.0f;
+    }
+
+    vecParticlePosition *= 0.40000001f;
+    vecParticlePosition += pPed->GetPosition();
+
+    CPlayerData* pPlayerData = pPed->m_pPlayerData;
+
+    if (pPlayerData)
+    {
+        vecParticlePosition.z = pPlayerData->m_fWaterHeight;
+    }
+    else
+    {
+        vecParticlePosition.z += 0.5f;
+    }
+
+    if (m_nSwimState != SWIM_TREAD)
+    {
+        if (m_pFxSystem)
+        {
+            m_pFxSystem->Kill();
+            m_pFxSystem = 0;
+        }
+    }
+    else
+    {
+        RwMatrix* pNewMatrix = RwMatrixCreate();
+        pNewMatrix->pos = *((RwV3d*)& vecParticlePosition);
+        RwMatrixUpdate(pNewMatrix);
+        if (!m_pFxSystem)
+        {
+            CreateFxSystem(pPed, pNewMatrix);
+        }
+
+        if (m_pFxSystem)
+        {
+            m_pFxSystem->SetMatrix(pNewMatrix);
+            m_pFxSystem->SetLocalParticles(1);
+        }
+        RwMatrixDestroy(pNewMatrix);
+    }
+
+    if (m_nSwimState != SWIM_DIVE_UNDERWATER)
+    {
+        m_bTriggerWaterSplash = false;
+    }
+
+    switch (m_nSwimState)
+    {
+        case SWIM_SPRINT:
+        case SWIM_SPRINTING:
+        {
+            const CVector& vecPedUp = pPed->m_matrix->up;
+
+            float fRadianAngle = CGeneral::GetAngleBetweenPoints(vecPedUp.x, vecPedUp.y, 0.0f, 0.0f);
+            float fLimitedRadianAngle = CGeneral::LimitAngle(fRadianAngle) + 180.0f;
+
+            FxPrtMult_c fxPrtMult(1.0f, 1.0f, 1.0f, 0.2f, 0.40000001f, 0.0f, 0.5f);
+            CVector vecParticleVelocity;
+            g_fx.m_pPrtWake->AddParticle((RwV3d*)& vecParticlePosition, (RwV3d*)& vecParticleVelocity, 0.0f, (FxPrtMult_c*)& fxPrtMult, fLimitedRadianAngle, 1.2f, 0.60000002f, 0);
+            pPed->m_pedAudio.AddAudioEvent(76, 0.0, 1.0f, 0, 0, 0, 0);
+
+            if (m_nSwimState == SWIM_SPRINTING)
+            {
+                RpHAnimHierarchy* pAnimHierarchy = GetAnimHierarchyFromSkinClump(pPed->m_pRwClump);
+                int boneRHandIndex = RpHAnimIDGetIndex(pAnimHierarchy, BONE_R_HAND);
+                RwV3d* pBoneRHandPos = &RpHAnimHierarchyGetMatrixArray(pAnimHierarchy)[boneRHandIndex].pos;
+                int boneLHandIndex = RpHAnimIDGetIndex(pAnimHierarchy, BONE_L_HAND);
+                RwV3d* pBoneLHandPos = &RpHAnimHierarchyGetMatrixArray(pAnimHierarchy)[boneLHandIndex].pos;
+                int boneRFootIndex = RpHAnimIDGetIndex(pAnimHierarchy, BONE_R_FOOT);
+                RwV3d* pBoneRFootPos = &RpHAnimHierarchyGetMatrixArray(pAnimHierarchy)[boneRFootIndex].pos;
+                int boneLFootIndex = RpHAnimIDGetIndex(pAnimHierarchy, BONE_L_FOOT);
+                RwV3d* pBoneLFootPos = &RpHAnimHierarchyGetMatrixArray(pAnimHierarchy)[boneLFootIndex].pos;
+
+                float fPedPosZ = pPed->GetPosition().z;
+                if (fabs(pBoneRHandPos->z - fPedPosZ) < 0.050000001f)
+                {
+                    auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneRHandPos, 0, 0);
+                    pFxSystem->PlayAndKill();
+                    pPed->m_pedAudio.AddAudioEvent(74, 0.0, 1.0f, 0, 0, 0, 0);
+                }
+
+                if (fabs(pBoneLHandPos->z - fPedPosZ) < 0.050000001f)
+                {
+                    auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneLHandPos, 0, 0);
+                    if (pFxSystem)
+                    {
+                        pFxSystem->PlayAndKill();
+                        pPed->m_pedAudio.AddAudioEvent(74, 0.0, 1.0f, 0, 0, 0, 0);
+                    }
+                }
+                if (fabs(pBoneRFootPos->z - fPedPosZ) < 0.050000001f)
+                {
+                    auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneRFootPos, 0, 0);
+                    if (pFxSystem)
+                    {
+                        pFxSystem->PlayAndKill();
+                        pPed->m_pedAudio.AddAudioEvent(74, 0.0, 1.0f, 0, 0, 0, 0);
+                    }
+                }
+                if (fabs(pBoneLFootPos->z - fPedPosZ) < 0.050000001f)
+                {
+                    auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneLFootPos, 0, 0);
+                    if (pFxSystem)
+                    {
+                        pFxSystem->PlayAndKill();
+                        pPed->m_pedAudio.AddAudioEvent(74, 0.0, 1.0f, 0, 0, 0, 0);
+                        return;
+                    }
+                }
+            }
+            break;
+        }
+        case SWIM_DIVE_UNDERWATER:
+        {
+            if (m_bTriggerWaterSplash)
+            {
+                return;
+            }
+            g_fx.TriggerWaterSplash(vecParticlePosition);
+            m_bTriggerWaterSplash = true;
+            pPed->m_pedAudio.AddAudioEvent(75, 0.0, 1.0, 0, 0, 0, 0);
+            return;
+        }
+        case SWIM_UNDERWATER_SPRINTING:
+        {
+            unsigned int oxygen = 5;
+            if (pPed->IsPlayer())
+            {
+                oxygen = static_cast<unsigned int>(
+                    ((100.0f - pPlayerData->m_fBreath / CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 100.0f) * 0.33333334f));
+            }
+            if (CGeneral::GetRandomNumberInRange(0, 100) < oxygen)
+            {
+                RpHAnimHierarchy* pRwAnimHierarchy = GetAnimHierarchyFromSkinClump(pPed->m_pRwClump);
+                RwV3d* pBoneSpine1Pos = &RpHAnimHierarchyGetMatrixArray(pRwAnimHierarchy)[BONE_SPINE1].pos;
+                static FxPrtMult_c fxPrtMult(1.0f, 1.0f, 1.0f, 0.25f, 0.30000001f, 0.0f, 0.5f);
+                RwV3d vecParticleVelocity = { 0.0f, 0.0f, 2.0f };
+                g_fx.m_pPrtBubble->AddParticle(pBoneSpine1Pos, &vecParticleVelocity, 0.0f, &fxPrtMult, -1.0f, 1.2f, 0.60000002f, 0);
+            }
+            break;
+        }
+    }
+#endif
 }
 
 void CTaskSimpleSwim::ProcessControlAI(CPed*pPed)
@@ -1264,7 +1512,30 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
 #endif
 }
 
-FxSystemBP_c * CTaskSimpleSwim::DestroyFxSystem()
+void CTaskSimpleSwim::CreateFxSystem(CPed* pPed, RwMatrixTag* pRwMatrix)
 {
-    return plugin::CallMethodAndReturn<FxSystemBP_c *, 0x68AA50, CTaskSimpleSwim*>(this);
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethod<0x68A9F0, CTaskSimpleSwim*, CPed*, RwMatrixTag* >(this, pPed, pRwMatrix);
+#else
+    RwV3d point = { 0.0f, 0.0f, 0.0f };
+    m_pFxSystem = g_fxMan.CreateFxSystem("water_ripples", &point, pRwMatrix, 0);
+    if (m_pFxSystem)
+    {
+        m_pFxSystem->CopyParentMatrix();
+        m_pFxSystem->Play();
+    }
+#endif
+}
+
+void CTaskSimpleSwim::DestroyFxSystem()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethod<0x68AA50, CTaskSimpleSwim*>(this);
+#else
+    if (m_pFxSystem)
+    {
+        m_pFxSystem->Kill();
+        m_pFxSystem = 0;
+    }
+#endif
 }
