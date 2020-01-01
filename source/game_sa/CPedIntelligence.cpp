@@ -410,7 +410,7 @@ bool CPedIntelligence::GetUsingParachute() {
         return false;
     }
 
-    if (pPed->m_nPhysicalFlags.bSubmergedInWater)
+    if (pPed->physicalFlags.bSubmergedInWater)
     {
         return false;
     }

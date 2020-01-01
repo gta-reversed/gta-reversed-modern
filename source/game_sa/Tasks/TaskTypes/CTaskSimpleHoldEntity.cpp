@@ -71,7 +71,7 @@ bool CTaskSimpleHoldEntity::ProcessPed(class CPed* ped)
                     pObjecToHold->AddToMovingList();
                 }
 
-                pObjecToHold->m_nPhysicalFlags.bAttachedToEntity = 1;
+                pObjecToHold->physicalFlags.bAttachedToEntity = 1;
                 pObjecToHold->m_bFakePhysics = 0;
             }
 
@@ -274,9 +274,9 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* pPed, bool bAddEventSoundQuiet)
         pObjectToHold = (CObject*)m_pEntityToHold;
         CVector* pVecMoveSpeed = &pObjectToHold->m_vecMoveSpeed;
         pObjectToHold->m_pEntityIgnoredCollision = pPed;
-        if (pObjectToHold->m_nPhysicalFlags.bDisableCollisionForce && bAddEventSoundQuiet)
+        if (pObjectToHold->physicalFlags.bDisableCollisionForce && bAddEventSoundQuiet)
         {
-            if (!pObjectToHold->m_nObjectFlags.bIsLiftable)
+            if (!pObjectToHold->objectFlags.bIsLiftable)
             {
                 unsigned char objectType = pObjectToHold->m_nObjectType;
                 if (objectType != OBJECT_MISSION && objectType != OBJECT_MISSION2)
@@ -294,7 +294,7 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* pPed, bool bAddEventSoundQuiet)
         }
         else
         {
-            pObjectToHold->m_nPhysicalFlags.bAttachedToEntity = 0;
+            pObjectToHold->physicalFlags.bAttachedToEntity = 0;
             if (!bAddEventSoundQuiet)
             {
                 bUpdateEntityPosition = false;
@@ -328,7 +328,7 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* pPed, bool bAddEventSoundQuiet)
         }
 
         CVector objectToHoldPosition(0.0f, 0.0f, 0.0f);
-        if (pObjectToHold->m_nObjectFlags.bIsLiftable && pPed->m_pPlayerData && bAddEventSoundQuiet)
+        if (pObjectToHold->objectFlags.bIsLiftable && pPed->m_pPlayerData && bAddEventSoundQuiet)
         {
             CEventSoundQuiet eventSoundQuiet;
             eventSoundQuiet.Constructor(pPed, 60.0f, -1, &objectToHoldPosition);

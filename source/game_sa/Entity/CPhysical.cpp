@@ -433,7 +433,7 @@ bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
                 {
                     if (m_nType != ENTITY_TYPE_PED || pEntity->m_nType != ENTITY_TYPE_OBJECT
                         || (!pEntity->m_bIsStatic && !pEntity->m_bIsStaticWaitingForCollision)
-                        || pObjectEntity->m_nObjectFlags.bIsExploded)
+                        || pObjectEntity->objectFlags.bIsExploded)
                     {
                         bProcessEntityCollision = false;
                     }

@@ -1254,7 +1254,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
                         pedMoveState = PEDMOVE_WALK;
                     }
                     pPlayerPed->m_nMoveState = pedMoveState;
-                    pPlayerPed->field_538 = pedMoveState;
+                    pPlayerPed->m_nSwimmingMoveState = pedMoveState;
                 }
                 else if (pedMoveBlendRatio > 0.5)
                 {
@@ -1383,9 +1383,7 @@ int CTaskSimplePlayerOnFoot::PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAn
 DONT_MODIFY_MOVE_BLEND_RATIO:
     if (!(CWeaponInfo::GetWeaponInfo(pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType, 1)->m_nFlags.bHeavy))
     {
-        unsigned int pedField_568 = pPlayerPed->field_568;
-        unsigned int unknownFlags = 0;
-        if (!pedField_568 || (unknownFlags = *(unsigned int*)(pedField_568 + 64), (unknownFlags & 4) == 0) || ((unknownFlags & 8) != 0))
+        if (!pPed->somePedStruct || !pPed->somePedStruct->flags.b03 || pPed->somePedStruct->flags.b04)
         {
             if (!pPlayerPed->m_pIntelligence->GetTaskHold(0)
                 || !((CTaskSimpleHoldEntity*)pPlayerPed->m_pIntelligence->GetTaskHold(0))->m_pAnimBlendAssociation)
