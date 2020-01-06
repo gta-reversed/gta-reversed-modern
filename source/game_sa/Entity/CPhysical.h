@@ -98,7 +98,7 @@ public:
     CVector          m_vecCentreOfMass;
     void            *m_pCollisionList;
     void            *m_pMovingList;
-    char             m_bFakePhysics;
+    unsigned char    m_bFakePhysics;
     unsigned char    m_nNumEntitiesCollided;
     unsigned char    m_nContactSurface;
     char field_BB;

@@ -591,7 +591,7 @@ void CRenderer::ScanSectorList(unsigned int uiSector_x, unsigned int uiSector_y)
                             if (pLodEntity->m_nType == ENTITY_TYPE_VEHICLE)
                             {
                                 CVehicle * pVehicle = static_cast<CVehicle*>(pLodEntity);
-                                if (pVehicle->m_nFlags.bAlwaysSkidMarks)
+                                if (pVehicle->vehicleFlags.bAlwaysSkidMarks)
                                 {
                                     fDrawDistance = 200.0;
                                 }

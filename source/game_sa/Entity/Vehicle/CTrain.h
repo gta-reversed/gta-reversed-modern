@@ -52,19 +52,25 @@ public:
     float             m_fLength;
     float             m_fTrainGas; // gas pedal pressed: 255.0, moving forward: 0.0, moving back: -255.0
     float             m_fTrainBrake; // 255.0 - braking
-    struct {
-        unsigned char b01 : 1; // initialised with 1
-        unsigned char bStoppedAtStation : 1;
-        unsigned char bPassengersCanEnterAndLeave : 1;
-        unsigned char bIsFrontCarriage : 1;
-        unsigned char bIsLastCarriage : 1;
-        unsigned char bMissionTrain : 1;
-        unsigned char bClockwiseDirection : 1;
-        unsigned char bStopsAtStations : 1;
-        unsigned char bNotOnARailRoad : 1;
-        unsigned char bForceSlowDown : 1;
-        unsigned char bIsStreakModel : 1;
-    } m_nTrainFlags;
+    union
+    {
+        struct 
+        {
+             unsigned short b01 : 1; // initialised with 1
+             unsigned short bStoppedAtStation : 1;
+             unsigned short bPassengersCanEnterAndLeave : 1;
+             unsigned short bIsFrontCarriage : 1;
+             unsigned short bIsLastCarriage : 1;
+             unsigned short bMissionTrain : 1;
+             unsigned short bClockwiseDirection : 1;
+             unsigned short bStopsAtStations : 1;
+
+             unsigned short bNotOnARailRoad : 1;
+             unsigned short bForceSlowDown : 1;
+             unsigned short bIsStreakModel : 1;
+        } trainFlags;
+        unsigned short m_nTrainFlags;
+    };
 private:
     char _pad5BA[2];
 public:
@@ -98,6 +104,12 @@ public:
                                    //   2783.0, 1758.0, 12.0
                                    //   2865.0, 1281.0, 12.0 }
 
+    // virtual functions
+    void ProcessControl() override;
+
+    // reversed virtual functions
+    void ProcessControl_Reversed();
+
     CTrain(int modelIndex, unsigned char createdBy);
 
     bool FindMaximumSpeedToStopAtStations(float* speed);
@@ -110,7 +122,7 @@ public:
     void RemoveRandomPassenger();
     void FindPositionOnTrackFromCoors();
     void AddNearbyPedAsRandomPassenger();
-    
+
     static void ReadAndInterpretTrackFile(char* filename, CTrainNode** nodes, int* lineCount, float* totalDist, int skipStations);
     static void Shutdown();
     static void UpdateTrains(); // dummy function
@@ -140,10 +152,11 @@ public:
 VALIDATE_SIZE(CTrain, 0x6AC);
 
 extern unsigned int *NumTrackNodes; // unsigned int NumTrackNodes[4]
+extern float* arrTotalTrackLength; // float arrTotalTrackLength[4]
 extern CTrainNode **pTrackNodes; // CTrainNode *pTrackNodes[4]
 extern float *StationDist; // float StationDist[6]
 
 void ProcessTrainAnnouncements(); // dummy function
 void PlayAnnouncement(unsigned char arg0, unsigned char arg1);
 void TrainHitStuff(CPtrList& ptrList, CEntity* entity);
-void MarkSurroundingEntitiesForCollisionWithTrain(CVector arg0, float arg1, CEntity* arg2, bool arg3);
+void MarkSurroundingEntitiesForCollisionWithTrain(CVector arg0, float arg1, CEntity* arg2, bool bOnlyVehicles);

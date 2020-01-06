@@ -104,8 +104,12 @@ VALIDATE_SIZE(tVehicleAudioSettings, 0x24);
 
 class CPed;
 
-class  CAEVehicleAudioEntity : public CAEAudioEntity {
+class CAEVehicleAudioEntity : public CAEAudioEntity {
 public:
+
+    void AddAudioEvent(int audioEvent, float fVolume);
+    void Service();
+
     short field_7C;
     char field_7E[2];
     tVehicleAudioSettings   m_settings;

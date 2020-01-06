@@ -59,6 +59,11 @@ public:
     inline void FromRwV3d(RwV3d &rwvec) {
         x = rwvec.x; y = rwvec.y; z = rwvec.z;
     }
+
+    inline float SquaredMagnitude()
+    {
+        return x*x + y*y + z*z;
+    }
 };
 
 inline CVector operator-(const CVector& vecOne, const CVector& vecTwo) {
@@ -82,4 +87,5 @@ inline float DistanceBetweenPoints(const CVector &pointOne, const CVector &point
     return diff.Magnitude();
 }
 
+CVector* CrossProduct(CVector* out, CVector* a, CVector* b);
 VALIDATE_SIZE(CVector, 0xC);

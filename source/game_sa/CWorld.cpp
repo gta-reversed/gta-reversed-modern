@@ -471,3 +471,8 @@ CPtrListSingleLink* GetLodPtrList(int x, int y) {
 void SetNextScanCode() {
     plugin::Call<0x4072E0>();
 }
+
+double ScaleLighting(unsigned char lighting, float fScale)
+{
+    return plugin::CallAndReturn<double, 0x59F0C0, unsigned char, float> (lighting, fScale);
+}

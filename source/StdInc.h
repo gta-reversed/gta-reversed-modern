@@ -14,6 +14,7 @@
 #include <iostream>
 #include <cassert>
 
+#include "game_sa\CBuoyancy.h"
 #include "game_sa\CEventPedToFlee.h"
 #include "game_sa\CEventPedToChase.h"
 #include "game_sa\CVehicleScanner.h"

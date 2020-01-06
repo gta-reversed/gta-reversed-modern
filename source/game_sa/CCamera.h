@@ -481,5 +481,6 @@ VTABLE_DESC(CCamera, 0x8630E8, 1);
 VALIDATE_SIZE(CCamera, 0xD78);
 
  extern CCamera &TheCamera;
+ extern bool& gbModelViewer;
 
 //#include "meta/meta.CCamera.h"

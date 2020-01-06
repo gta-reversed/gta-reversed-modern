@@ -48,7 +48,7 @@ public:
     char field_36[2];
     float field_38;
     float                m_fMaxTrafficSpeed;
-    char m_nCruiseSpeed;
+    unsigned char m_nCruiseSpeed;
     char field_41;
     char field_42[2];
     float field_44;

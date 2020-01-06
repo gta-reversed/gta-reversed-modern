@@ -101,3 +101,8 @@ void CVector::FromMultiply3x3(CMatrix  const& matrix, CVector const& vector)
 {
     ((void(__thiscall *)(CVector *, CMatrix  const&, CVector const&))0x59C6D0)(this, matrix, vector);
 }
+
+CVector* CrossProduct(CVector* out, CVector* a, CVector* b)
+{
+    return plugin::CallAndReturn <CVector*, 0x59C730, CVector*, CVector*, CVector*> (out, a, b);
+}

@@ -155,3 +155,5 @@ CSector* GetSector(int x, int y);
 CRepeatSector* GetRepeatSector(int x, int y);
 CPtrListSingleLink* GetLodPtrList(int x, int y);
 void SetNextScanCode();
+
+double ScaleLighting(unsigned char lighting, float fScale);
