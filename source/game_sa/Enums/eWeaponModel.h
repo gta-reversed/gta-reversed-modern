@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-
+/*
 enum eWeaponModel : unsigned int
 {
 	MODEL_UNARMED		= 0,
@@ -59,3 +59,4 @@ enum eWeaponModel : unsigned int
 	MODEL_GUN_PARA,
 	MODEL_TEC9,
 };
+*/
