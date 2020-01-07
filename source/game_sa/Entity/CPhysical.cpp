@@ -13,6 +13,11 @@ CRect* CPhysical::GetBoundRect(CRect* pRect)
     return ((CRect*(__thiscall*)(CEntity*, CRect*))(*(void***)this)[9])(this, pRect);
 }
 
+void CPhysical::ProcessControl()
+{
+    plugin::CallMethod<0x5485E0, CPhysical*>(this);
+}
+
 void CPhysical::ProcessShift()
 {
 #ifdef USE_DEFAULT_FUNCTIONS

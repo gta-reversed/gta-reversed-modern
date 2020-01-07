@@ -789,7 +789,7 @@ void CTrain::ProcessControl_Reversed()
             m_vecMoveSpeed *= -1.0f;
             m_vecTurnSpeed *= -1.0f;
 
-            ProcessControl();
+            CPhysical::ProcessControl();
         }
         else
         {

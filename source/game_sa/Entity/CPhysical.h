@@ -123,6 +123,7 @@ public:
 
     // originally virtual functions
     CRect* GetBoundRect(CRect* pRect) override;
+    void ProcessControl() override;
     void ProcessShift() override;
     virtual int ProcessEntityCollision(CEntity *entity, CColPoint *point);
 
