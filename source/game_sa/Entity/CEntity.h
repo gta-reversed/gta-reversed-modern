@@ -111,7 +111,7 @@ public:
     virtual void ProcessShift();
     virtual bool TestCollision();
     virtual void Teleport(CVector destination, bool resetRotation);
-    virtual void SpecialEntityPreCollisionStuff(class CEntity* colEntity, bool unk1, bool* unk2, bool* unk3, bool* unk4, bool* unk5);
+    virtual void SpecialEntityPreCollisionStuff(class CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck);
     virtual void SpecialEntityCalcCollisionSteps(unsigned char *unk1, unsigned char *unk2);
     virtual void PreRender();
     virtual void Render();

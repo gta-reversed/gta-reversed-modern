@@ -79,9 +79,9 @@ void CEntity::Teleport(CVector destination, bool resetRotation)
     ((void(__thiscall *)(CEntity *, CVector, bool))(*(void ***)this)[14])(this, destination, resetRotation);
 }
 
-void CEntity::SpecialEntityPreCollisionStuff(CEntity *colEntity, bool unk1, bool *unk2, bool *unk3, bool *unk4, bool *unk5)
+void CEntity::SpecialEntityPreCollisionStuff(CEntity *colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck)
 {
-    ((void(__thiscall *)(CEntity *, CEntity *, bool, bool *, bool *, bool *, bool *))(*(void ***)this)[15])(this, colEntity, unk1, unk2, unk3, unk4, unk5);
+    ((void(__thiscall *)(CEntity *, CEntity *, bool, bool *, bool *, bool *, bool *))(*(void ***)this)[15])(this, colEntity, bIgnoreStuckCheck, bCollisionDisabled, bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck);
 }
 
 void CEntity::SpecialEntityCalcCollisionSteps(unsigned char *unk1, unsigned char *unk2)
