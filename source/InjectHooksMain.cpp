@@ -1,11 +1,11 @@
-#include "StdInc.h"
+﻿#include "StdInc.h"
 #include "detours.h"
 
 #pragma comment(lib, "detours.lib")
 
-//bool __thiscall CTrain_ProcessControl(CPhysical* pThis)
-auto OLD_CTrain_ProcessControl = (void(__thiscall*) (CTrain * pThis))0x6F86A0;
-void __fastcall CTrain_ProcessControl(CTrain* pThis, void* padding);
+//bool __thiscall CPhysical_ProcessCollisionSectorList(CPhysical* pThis)
+auto OLD_CPhysical_ProcessCollisionSectorList = (bool(__thiscall*) (CPhysical * pThis, int sectorX, int sectorY))0x54BA60;
+bool __fastcall CPhysical_ProcessCollisionSectorList(CPhysical* pThis, void* padding, int sectorX, int sectorY);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -17,15 +17,13 @@ void InjectHooksMain(void)
     CStreaming::InjectHooks();
     CRenderer::InjectHooks();*/
 
-    HookInstall(0x6F86A0, &CTrain::ProcessControl_Reversed, 7);
-
     /*
     DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CTrain_ProcessControl, CTrain_ProcessControl);
+    DetourAttach(&(PVOID&)OLD_CPhysical_ProcessCollisionSectorList, CPhysical_ProcessCollisionSectorList);
     DetourTransactionCommit();
     */
 }
@@ -53,8 +51,8 @@ enum eFunctionReturnValue
     FUNCTION_SOMELABEL = 4
 };
 
-void __fastcall CTrain_ProcessControl(CTrain* pThis, void* padding)
+bool __fastcall CPhysical_ProcessCollisionSectorList(CPhysical* pThis, void* padding, int sectorX, int sectorY)
 {
-    //printf(" calling CTrain_ProcessControl \n");
-
+    printf(" calling CPhysical_ProcessCollisionSectorList \n");
+    return true;
 }

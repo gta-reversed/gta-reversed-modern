@@ -457,7 +457,7 @@ public:
     bool DoesLOSBulletHitPed(CColPoint& colPoint);
     void RemoveWeaponAnims(int likeUnused, float blendDelta);
     bool IsPedHeadAbovePos(float zPos);
-    void KillPedWithCar(CVehicle* car, float arg1, bool arg2);
+    void KillPedWithCar(CVehicle* car, float fDamageIntensity, bool bPlayDeadAnimation);
     void MakeTyresMuddySectorList(CPtrList& ptrList);
     void DeadPedMakesTyresBloody();
 	void SetModelIndex(unsigned int modelIndex);

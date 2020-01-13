@@ -72,3 +72,8 @@ VALIDATE_SIZE(CMatrix, 0x48);
 CMatrix operator*(CMatrix const&a, CMatrix const&b);
 CVector operator*(CMatrix const&a, CVector const&b);
 CMatrix operator+(CMatrix const&a, CMatrix const&b);
+
+CMatrix* Invert(CMatrix* a1, CMatrix* out);
+
+// It's also called Invert, but renamed it as we cannot have 2 functions with same names and prototype
+CMatrix* InvertMatrix(CMatrix* out, CMatrix* a2); 

@@ -805,9 +805,9 @@ bool CPed::IsPedHeadAbovePos(float zPos)
 }
 
 // Converted from thiscall void CPed::KillPedWithCar(CVehicle *car,float,bool) 0x5F0360
-void CPed::KillPedWithCar(CVehicle* car, float arg1, bool arg2)
+void CPed::KillPedWithCar(CVehicle* car, float fDamageIntensity, bool bPlayDeadAnimation)
 {
-    ((void(__thiscall *)(CPed*, CVehicle*, float, bool))0x5F0360)(this, car, arg1, arg2);
+    ((void(__thiscall *)(CPed*, CVehicle*, float, bool))0x5F0360)(this, car, fDamageIntensity, bPlayDeadAnimation);
 }
 
 // Converted from thiscall void CPed::MakeTyresMuddySectorList(CPtrList &ptrList) 0x6AE0D0

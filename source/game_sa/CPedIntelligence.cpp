@@ -1040,9 +1040,9 @@ void CPedIntelligence::RecordEventForScript(int EventID, int EventPriority) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x602050, CPedIntelligence*, int, int>(this, EventID, EventPriority);
 #else
-    if ( EventID != EVENT_SCRIPT_COMMAND && (! EventID || EventPriority > m_nEventPriority))
+    if (EventID != EVENT_SCRIPT_COMMAND && (!EventID || EventPriority > m_nEventPriority))
     {
-        m_nEventId =  EventID;
+        m_nEventId = EventID;
         m_nEventPriority = EventPriority;
     }
 #endif
@@ -1166,7 +1166,7 @@ bool CPedIntelligence::IsPedGoingForCarDoor() {
 }
 
 // Converted from thiscall float CPedIntelligence::CanSeeEntityWithLights(CEntity const*pEntity,bool arg2) 0x605550 
-double CPedIntelligence::CanSeeEntityWithLights(CEntity * pEntity, int unUsed) {
+double CPedIntelligence::CanSeeEntityWithLights(CEntity* pEntity, int unUsed) {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<double, 0x605550, CPedIntelligence*, CEntity const*, bool>(this, pEntity, unUsed);
 #else

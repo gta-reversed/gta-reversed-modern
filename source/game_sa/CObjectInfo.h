@@ -10,6 +10,30 @@
 #include "CVector.h"
 #include "FxSystem_c.h"
 
+enum eObjectColDamageEffect : unsigned char
+{
+    COL_DAMAGE_EFFECT_NONE = 0,
+    COL_DAMAGE_EFFECT_CHANGE_MODEL = 1,
+    COL_DAMAGE_EFFECT_SMASH_COMPLETELY = 20,
+    COL_DAMAGE_EFFECT_CHANGE_THEN_SMASH = 21,
+    COL_DAMAGE_EFFECT_BREAKABLE = 200,
+    COL_DAMAGE_EFFECT_BREAKABLE_REMOVED = 202 // (ie.never regenerated after destroyed)
+};
+
+enum eObjectSpecialColResponseCases : unsigned char
+{
+    COL_SPECIAL_RESPONSE_NONE = 0,
+    COL_SPECIAL_RESPONSE_LAMPOST,
+    COL_SPECIAL_RESPONSE_SMALLBOX,
+    COL_SPECIAL_RESPONSE_BIGBOX,
+    COL_SPECIAL_RESPONSE_FENCEPART,
+    COL_SPECIAL_RESPONSE_GRENADE,
+    COL_SPECIAL_RESPONSE_SWINGDOOR,
+    COL_SPECIAL_RESPONSE_LOCKDOOR,
+    COL_SPECIAL_RESPONSE_HANGING,
+    COL_SPECIAL_RESPONSE_OB_COL_POOLBALL,
+};
+
 class  CObjectInfo {
 public:
 	float          m_fMass;
@@ -19,8 +43,8 @@ public:
 	float          m_fBuoyancyConstant;
 	float          m_fUprootLimit;
 	float          m_fColDamageMultiplier;
-	unsigned char  m_nColDamageEffect;
-	unsigned char  m_nSpecialColResponseCase;
+	unsigned char  m_nColDamageEffect; // see eObjectColDamageEffect
+	unsigned char  m_nSpecialColResponseCase; // see eObjectSpecialColResponseCases
 	unsigned char  m_nCameraAvoidObject;
 	unsigned char  m_bCausesExplosion;
 	unsigned char  m_nFxType;

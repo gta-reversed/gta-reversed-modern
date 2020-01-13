@@ -204,3 +204,13 @@ CMatrix operator+(CMatrix const& a, CMatrix const& b) {
     ((void(__cdecl*)(CMatrix*, CMatrix const&, CMatrix const&))0x59BFA0)(&result, a, b);
     return result;
 }
+
+CMatrix* Invert(CMatrix* a1, CMatrix* out)
+{
+    return plugin::CallAndReturn<CMatrix*, 0x59B920, CMatrix*, CMatrix*>(a1, out);
+}
+
+CMatrix* InvertMatrix(CMatrix* out, CMatrix* a2)
+{
+    return plugin::CallAndReturn<CMatrix*, 0x59BDD0, CMatrix*, CMatrix*>(out, a2);
+}

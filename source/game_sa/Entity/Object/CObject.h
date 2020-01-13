@@ -65,8 +65,8 @@ public:
         } objectFlags;
         unsigned int m_nObjectFlags;
     };
-    unsigned char   m_nColDamageEffect;
-    unsigned char   m_nStoredColDamageEffect;
+    unsigned char   m_nColDamageEffect; // see eObjectColDamageEffect
+    unsigned char   m_nStoredColDamageEffect; // see eObjectSpecialColResponseCases
     char field_146;
     char            m_nGarageDoorGarageIndex;
     unsigned char   m_nLastWeaponDamage;

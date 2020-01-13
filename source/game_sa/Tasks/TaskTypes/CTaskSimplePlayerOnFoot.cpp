@@ -309,7 +309,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 if (eventDamage.AffectsPed(pTargetEntity))
                 {
                     pedDamageResponseCalculator.ComputeDamageResponse(pTargetEntity, &damageResponseInfo, 0);
-                    pIntelligence->m_eventGroup.Add((CEvent*)&eventDamage, 0);
+                    pIntelligence->m_eventGroup.Add((CEvent*)& eventDamage, 0);
                     CCrime::ReportCrime(18, pTargetEntity, pPlayerPed);
                     pPlayerPed->m_weaponAudio.AddAudioEvent(156);
                 }
@@ -829,7 +829,7 @@ PED_WEAPON_AIMING_CODE:
                                 {
                                     CEventGunAimedAt eventGunAimedAt;
                                     eventGunAimedAt.Constructor(pPlayerPed);
-                                    pIntelligence->m_eventGroup.Add((CEvent*)&eventGunAimedAt, 0);
+                                    pIntelligence->m_eventGroup.Add((CEvent*)& eventGunAimedAt, 0);
                                     eventGunAimedAt.Destructor();
                                 }
                             }
@@ -1083,7 +1083,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
                             pPlayerPed->Say(336, 0, 0.2, 0, 0, 0);
                         }
                     }
-}
+                }
             }
         }
     }

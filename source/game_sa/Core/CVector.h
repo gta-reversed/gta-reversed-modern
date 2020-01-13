@@ -78,6 +78,10 @@ inline CVector operator*(const CVector& vec, float multiplier) {
     return CVector(vec.x * multiplier, vec.y * multiplier, vec.z * multiplier);
 }
 
+inline CVector operator/(const CVector& vec, float dividend) {
+    return CVector(vec.x / dividend, vec.y / dividend, vec.z / dividend);
+}
+
 inline CVector operator*(float multiplier, const CVector& vec) {
     return CVector(vec.x * multiplier, vec.y * multiplier, vec.z * multiplier);
 }
@@ -88,4 +92,5 @@ inline float DistanceBetweenPoints(const CVector &pointOne, const CVector &point
 }
 
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b);
+float DotProduct(CVector* v1, CVector* v2);
 VALIDATE_SIZE(CVector, 0xC);
