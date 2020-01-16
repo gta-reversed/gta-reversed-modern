@@ -15,7 +15,7 @@ eTaskType CTaskSimpleHoldEntity::GetId()
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<eTaskType, 0x691460, CTaskSimpleHoldEntity*>(this);
 #else
-    return TASK_SIMPLE_HOLD_ENTITY;
+    return GetId_Reversed();
 #endif
 }
 
@@ -29,6 +29,22 @@ bool CTaskSimpleHoldEntity::ProcessPed(class CPed* ped)
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x693C40, CTaskSimpleHoldEntity*, CPed*>(this, ped);
 #else
+    return ProcessPed_Reversed(ped);
+#endif
+}
+
+bool CTaskSimpleHoldEntity::SetPedPosition(class CPed* ped)
+{
+    return plugin::CallMethodAndReturn<bool, 0x6940A0, CTaskSimpleHoldEntity*, CPed*>(this, ped);
+}
+
+eTaskType CTaskSimpleHoldEntity::GetId_Reversed()
+{
+    return TASK_SIMPLE_HOLD_ENTITY;
+}
+
+bool CTaskSimpleHoldEntity::ProcessPed_Reversed(class CPed* ped)
+{
     CTaskManager* pTaskManager = &ped->m_pIntelligence->m_TaskMgr;
     if (m_bEntityRequiresProcessing)
     {
@@ -191,12 +207,6 @@ bool CTaskSimpleHoldEntity::ProcessPed(class CPed* ped)
         }
     }
     return false;
-#endif
-}
-
-bool CTaskSimpleHoldEntity::SetPedPosition(class CPed* ped)
-{
-    return plugin::CallMethodAndReturn<bool, 0x6940A0, CTaskSimpleHoldEntity*, CPed*>(this, ped);
 }
 
 CTaskSimpleHoldEntity* CTaskSimpleHoldEntity::Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags,

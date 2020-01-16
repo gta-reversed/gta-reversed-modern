@@ -1,8 +1,16 @@
 #include "StdInc.h"
 
-CTaskComplexWanderCop* CTaskComplexWanderCop::Constructor(int moveState, unsigned char dir)
+void CTaskComplexWanderCop::InjectHooks()
 {
-    return plugin::CallMethodAndReturn<CTaskComplexWanderCop*, 0x460C80, CTaskComplexWanderCop*, int, unsigned char>(this, moveState, dir);
+    HookInstall(0x674860, &CTaskComplexWanderCop::CreateNextSubTask_Reversed, 7);
+    HookInstall(0x674750, &CTaskComplexWanderCop::CreateFirstSubTask_Reversed, 7);
+    HookInstall(0x674D80, &CTaskComplexWanderCop::ControlSubTask_Reversed, 7);
+    HookInstall(0x6702B0, &CTaskComplexWanderCop::ScanForStuff_Reversed, 7);
+    HookInstall(0x460C80, &CTaskComplexWanderCop::Constructor, 7);;
+    HookInstall(0x66B1B0, &CTaskComplexWanderCop::LookForCarAlarms, 7);
+    HookInstall(0x66B290, &CTaskComplexWanderCop::LookForStolenCopCars, 7);
+    HookInstall(0x66B300, &CTaskComplexWanderCop::LookForCriminals, 7);
+    HookInstall(0x66B160, &CTaskComplexWanderCop::ShouldPursuePlayer, 7);
 }
 
 CTask* CTaskComplexWanderCop::CreateNextSubTask(CPed* ped)
@@ -10,6 +18,39 @@ CTask* CTaskComplexWanderCop::CreateNextSubTask(CPed* ped)
 #ifdef USE_DEFAULT_FUNCTIONS 
     return plugin::CallMethodAndReturn<CTask*, 0x674860, CTaskComplexWander*, CPed*>(this, ped);
 #else
+    return CreateNextSubTask_Reversed(ped);
+#endif
+}
+
+CTask* CTaskComplexWanderCop::CreateFirstSubTask(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return plugin::CallMethodAndReturn<CTask*, 0x674750, CTaskComplexWander*, CPed*>(this, ped);
+#else
+    return CreateFirstSubTask_Reversed(ped);
+#endif
+}
+
+CTask* CTaskComplexWanderCop::ControlSubTask(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return plugin::CallMethodAndReturn<CTask*, 0x674D80, CTaskComplexWander*, CPed*>(this, ped);
+#else
+    return ControlSubTask_Reversed(ped);
+#endif
+}
+
+void CTaskComplexWanderCop::ScanForStuff(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return ((void(__thiscall*)(CTaskComplex*, CPed*))plugin::GetVMT(this, 12))(this, ped);
+#else
+    return ScanForStuff_Reversed(ped);
+#endif
+}
+
+CTask* CTaskComplexWanderCop::CreateNextSubTask_Reversed(CPed* ped)
+{
     CCopPed* pPed = (CCopPed*)ped;
     if (pPed->m_nPedType != PED_TYPE_COP)
     {
@@ -34,7 +75,7 @@ CTask* CTaskComplexWanderCop::CreateNextSubTask(CPed* ped)
         {
             return CTaskComplexWander::CreateFirstSubTask(pPed);
         }
-    }
+}
     else
     {
         CTask* pTaskGotoStandStill = (CTask*)m_pTaskComplexMoveGoToPointAndStandStill;
@@ -55,14 +96,10 @@ CTask* CTaskComplexWanderCop::CreateNextSubTask(CPed* ped)
         }
     }
     return nullptr;
-#endif
 }
 
-CTask* CTaskComplexWanderCop::CreateFirstSubTask(CPed* ped)
+CTask* CTaskComplexWanderCop::CreateFirstSubTask_Reversed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTask*, 0x674750, CTaskComplexWander*, CPed*>(this, ped);
-#else
     CCopPed* pPed = (CCopPed*)ped;
     if (pPed->m_nPedType != PED_TYPE_COP)
     {
@@ -93,14 +130,10 @@ CTask* CTaskComplexWanderCop::CreateFirstSubTask(CPed* ped)
     }
     pTaskComplexPolicePursuit->Constructor();
     return (CTask*)pTaskComplexPolicePursuit;
-#endif
 }
 
-CTask* CTaskComplexWanderCop::ControlSubTask(CPed* ped)
+CTask* CTaskComplexWanderCop::ControlSubTask_Reversed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTask*, 0x674D80, CTaskComplexWander*, CPed*>(this, ped);
-#else
     CCopPed* pPed = (CCopPed*)ped;
     if (pPed->m_nPedType != PED_TYPE_COP)
     {
@@ -132,14 +165,10 @@ CTask* CTaskComplexWanderCop::ControlSubTask(CPed* ped)
         return pTaskComplexPolicePursuit;
     }
     return nullptr;
-#endif
 }
 
-void CTaskComplexWanderCop::ScanForStuff(CPed* ped)
+void CTaskComplexWanderCop::ScanForStuff_Reversed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return ((void(__thiscall*)(CTaskComplex*, CPed*))plugin::GetVMT(this, 12))(this, ped);
-#else
     CCopPed* pPed = (CCopPed*)ped;
     if (!m_nScanForStuffTimer.m_bStarted)
     {
@@ -173,6 +202,28 @@ void CTaskComplexWanderCop::ScanForStuff(CPed* ped)
             }
         }
     }
+}
+
+CTaskComplexWanderCop* CTaskComplexWanderCop::Constructor(int moveState, unsigned char dir)
+{
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return plugin::CallMethodAndReturn<CTaskComplexWanderCop*, 0x460C80, CTaskComplexWanderCop*, int, unsigned char>(this, moveState, dir);
+#else
+    CTaskComplexWander::Constructor(moveState, dir, true, 0.5);
+    m_pTaskComplexMoveGoToPointAndStandStill = 0;
+    *(unsigned int*)this = CTaskComplexWanderCop_VTable;
+    m_nScanForStuffTimer.m_nStartTime = 0;
+    m_nScanForStuffTimer.m_nInterval = 0;
+    m_nScanForStuffTimer.m_bStarted = 0;
+    m_nScanForStuffTimer.m_bStopped = 0;
+    m_nTimePassedSinceLastLookedForCriminals = 0;
+    m_nTimePassedSinceLastLookedForCarAlarmsAndStolenCopCars = 0;
+    m_pLastCriminalPedLookedFor = 0;
+    m_nSubTaskCreatedTimer.m_nStartTime = 0;
+    m_nSubTaskCreatedTimer.m_nInterval = 0;
+    m_nSubTaskCreatedTimer.m_bStarted = 0;
+    m_nSubTaskCreatedTimer.m_bStopped = 0;
+    return this;
 #endif
 }
 
@@ -265,19 +316,14 @@ void CTaskComplexWanderCop::LookForCriminals(CCopPed* pPed)
                 CTask* pActiveTask = pCriminalPed->m_pIntelligence->m_TaskMgr.GetActiveTask();
                 if (pActiveTask && pActiveTask->GetId() == GetId())
                 {
-                    CVector* pCriminalPos = &pCriminalPed->m_placement.m_vPosn;
-                    CMatrixLink* pCriminalMatrix = pCriminalPed->m_matrix;
-                    if (pCriminalMatrix)
+                    const CVector& vecCriminalPos = pCriminalPed->GetPosition();
+                    CVector vecDifference = (vecCriminalPos - *pPedPos);
+                    if (10.0f * 10.0f > vecDifference.SquaredMagnitude())
                     {
-                        pCriminalPos = &pCriminalMatrix->pos;
-                    }
-                    float fX = pCriminalPos->x - pPedPos->x;
-                    float fY = pCriminalPos->y - pPedPos->y;
-                    float fZ = pCriminalPos->z - pPedPos->z;
-                    if (10.0 * 10.0 > fZ * fZ + fY * fY + fX * fX)
-                    {
-                        if (fZ * pPedPos->z + fY * pPedPos->y + fX * pPedPos->x > 0.0
-                            && CWorld::GetIsLineOfSightClear(*pPedPos, *pCriminalPos, 1, 0, 0, 1, 0, 0, 0))
+                        float fResult = vecDifference.x * pPedMatrix->up.x + 
+                                        vecDifference.y * pPedMatrix->up.y + 
+                                        vecDifference.z * pPedMatrix->up.z;
+                        if (fResult > 0.0f && CWorld::GetIsLineOfSightClear(*pPedPos, vecCriminalPos, 1, 0, 0, 1, 0, 0, 0))
                         {
                             break;
                         }

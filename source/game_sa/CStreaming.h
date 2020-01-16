@@ -224,7 +224,7 @@ public:
      static void RequestFile(int index, int offset, int size, int imgId, int streamingFlags);
     //! unused
      static void RequestFilesInChannel(int channelId);
-     static void RequestModel(int dwModelId, char Streamingflags);
+     static void RequestModel(int dwModelId, unsigned int Streamingflags);
      static void RequestModelStream(int streamNum);
     //! unused
      static void RequestPlayerSection(int modelIndex, char const *string, int streamingFlags);

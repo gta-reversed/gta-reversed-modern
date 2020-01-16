@@ -43,7 +43,7 @@ public:
 	unsigned int   m_nKey;
 	unsigned short m_nRefCount;
 	short          m_nTxdIndex;
-	char           m_nAlpha; 
+	unsigned char  m_nAlpha; 
 	unsigned char  m_nNum2dEffects;
     short          m_n2dEffectIndex;
     short          m_nObjectInfoIndex;

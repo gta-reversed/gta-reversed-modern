@@ -86,7 +86,7 @@ public:
     void *m_pStreamingLink;
     short m_nScanCode;
     char m_nIplIndex;
-    unsigned char m_nAreaCode;
+    unsigned char m_nAreaCode; // interior
     union {
         int m_nLodIndex; // -1 - without LOD model
         CEntity *m_pLod;

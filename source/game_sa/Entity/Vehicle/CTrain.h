@@ -104,6 +104,8 @@ public:
                                    //   2783.0, 1758.0, 12.0
                                    //   2865.0, 1281.0, 12.0 }
 
+    static void InjectHooks();
+
     // virtual functions
     void ProcessControl() override;
 

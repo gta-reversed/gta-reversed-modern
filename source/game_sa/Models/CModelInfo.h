@@ -23,12 +23,6 @@ enum eModelInfoType : unsigned char
     MODEL_INFO_TYPE_LOD_ATOMIC = 8,
 };
 
-enum eModelInfoFlags
-{
-    MODELINFO_FLAGS_LOD = 0x1,
-    MODELINFO_FLAGS_DISTANCE_FADE = 0x8000
-};
-
 class  CModelInfo
 {
 public:

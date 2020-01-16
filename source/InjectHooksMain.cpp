@@ -11,11 +11,20 @@ void __cdecl HOOK_THEFUNCTION();
 
 void InjectHooksMain(void)
 {
-    /*CAnimManager::InjectHooks();
-    pTaskManager->InjectHooks();
-    std::printf("okay, only CAnimManager and CTaskManager hooks\n ");
-    CStreaming::InjectHooks();
-    CRenderer::InjectHooks();*/
+    // CStreaming is unstable for now.
+    //CStreaming::InjectHooks();
+    CPhysical::InjectHooks();
+    CRenderer::InjectHooks();
+    CTaskManager::InjectHooks();
+    CPedIntelligence::InjectHooks();
+    CTrain::InjectHooks();
+
+    CTaskComplexUseSequence::InjectHooks();
+    CTaskComplexSequence::InjectHooks();
+    CTaskComplexWander::InjectHooks();
+    CTaskComplexWanderCop::InjectHooks();
+    CTaskSimplePlayerOnFoot::InjectHooks();
+    CTaskSimpleSwim::InjectHooks();
 
     /*
     DetourRestoreAfterWith();

@@ -38,8 +38,10 @@ public:
     CTask *m_aSecondaryTasks[6];
     class CPed *m_pPed;
     
-    CTaskManager(CPed* ped);
-    ~CTaskManager();
+    static void InjectHooks();
+
+    CTaskManager* Constructor(CPed* ped);
+    void Destructor();
     CTask* GetActiveTask();
     CTask* FindActiveTaskByType(int taskType);
     CTask* FindTaskByType(int taskIndex, int taskType);
@@ -48,17 +50,16 @@ public:
     void Flush();
     void FlushImmediately();
     void SetNextSubTask(CTaskComplex* pTask);
-    static CTask* GetSimplestTask(CTask* task);
+    static class CTaskSimple* GetSimplestTask(CTask* task);
     void StopTimers(CEvent* _event);
     CTask* GetSimplestActiveTask();
-    CTask* GetSimplestTask(int taskIndex);
+    CTaskSimple* GetSimplestTask(int taskIndex);
     void AddSubTasks(CTaskComplex* task);
     void ParentsControlChildren(CTaskComplex* pTask);
     void SetTask(CTask* task, int taskIndex, bool arg2);
     void SetTaskSecondary(CTask* task, int taskIndex);
     void ClearTaskEventResponse();
     void ManageTasks();
-    static void InjectHooks();
 };
 
 VALIDATE_SIZE(CTaskManager, 0x30);

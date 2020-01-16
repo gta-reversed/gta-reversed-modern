@@ -8,18 +8,18 @@
 
 #include "PluginBase.h"
 
-class  CTaskTimer 
+class CTaskTimer 
 {
 public:
-    int  m_nStartTime;
-    int  m_nInterval;
+    unsigned int m_nStartTime;
+    unsigned int m_nInterval;
     bool m_bStarted;
     bool m_bStopped;
 private:
     char _pad[2];
 public:
     
-    inline CTaskTimer(int start, int interval) { // @420E10
+    inline CTaskTimer(unsigned int start, unsigned int interval) { // @420E10
         m_nStartTime = start;
         m_nInterval = interval;
         m_bStarted = true;

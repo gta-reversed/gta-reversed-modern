@@ -26,9 +26,14 @@ public:
     int dword_14; // always 0
     CEntity* m_pLookingAtEntity; // always 0
 
+    static void InjectHooks();
+
+    bool ProcessPed(class CPed* ped) override;
+
+    bool ProcessPed_Reversed(class CPed* ped);
+
     CTaskSimplePlayerOnFoot* Constructor();
     CTaskSimplePlayerOnFoot* Destructor();
-    bool ProcessPed(CPed* pPed);
     void ProcessPlayerWeapon(CPlayerPed* pPlayerPed);
     void PlayIdleAnimations(CPed* pPed);
     void PlayerControlFighter(CPlayerPed* pPlayerPed);

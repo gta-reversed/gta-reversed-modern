@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+// CStreaming class is unstable. Requires some testing, so let's use the default functions for now.
+#define USE_DEFAULT_FUNCTIONS
+
+
 unsigned int &CStreaming::ms_memoryAvailable = *reinterpret_cast<unsigned int *>(0x8A5A80);
 unsigned int &CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<unsigned int *>(0x8A5A84);
 bool &CStreaming::ms_bLoadVehiclesInLoadScene = *reinterpret_cast<bool *>(0x8A5A88);
@@ -415,10 +419,10 @@ void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests)
 #endif
 }
 
-void CStreaming::RequestModel(int modelId, char streamingFlags)
+void CStreaming::RequestModel(int modelId, unsigned int streamingFlags)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallDynGlobal<int, int>(0x4087E0, modelId, streamingFlags);
+    plugin::CallDynGlobal<int, unsigned int>(0x4087E0, modelId, streamingFlags);
 #else
     int flags = streamingFlags;
     CStreamingInfo & modelStreamingInfo = ms_aInfoForModel[modelId];

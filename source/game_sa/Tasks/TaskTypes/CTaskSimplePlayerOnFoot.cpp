@@ -5,22 +5,29 @@ unsigned int& gLastTouchTimeDelta = *reinterpret_cast<unsigned int*>(0xC19664);
 float& gDuckAnimBlendData = *reinterpret_cast<float*>(0x8D2FF0);
 bool& gbUnknown_8D2FE8 = *reinterpret_cast<bool*>(0x8D2FE8);
 
-CTaskSimplePlayerOnFoot* CTaskSimplePlayerOnFoot::Constructor()
+void CTaskSimplePlayerOnFoot::InjectHooks()
 {
-    return plugin::CallMethodAndReturn<CTaskSimplePlayerOnFoot*, 0x685750, CTaskSimplePlayerOnFoot*>(this);
+    HookInstall(0x688810, &CTaskSimplePlayerOnFoot::ProcessPed_Reversed, 7);
+    HookInstall(0x6859A0, &CTaskSimplePlayerOnFoot::ProcessPlayerWeapon, 7);
+    HookInstall(0x6872C0, &CTaskSimplePlayerOnFoot::PlayIdleAnimations, 7);
+    HookInstall(0x687C20, &CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon, 7);
+    HookInstall(0x687F30, &CTaskSimplePlayerOnFoot::PlayerControlDucked, 7);
+    HookInstall(0x6883D0, &CTaskSimplePlayerOnFoot::PlayerControlZelda, 7);
 }
 
-CTaskSimplePlayerOnFoot* CTaskSimplePlayerOnFoot::Destructor()
-{
-    return plugin::CallMethodAndReturn<CTaskSimplePlayerOnFoot*, 0x68B0C0, CTaskSimplePlayerOnFoot*>(this);
-}
-
-bool CTaskSimplePlayerOnFoot::ProcessPed(CPed* pPed)
+bool CTaskSimplePlayerOnFoot::ProcessPed(class CPed* ped)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x688810, CTaskSimplePlayerOnFoot*, CPed*>(this, pPed);
+    return plugin::CallMethodAndReturn<bool, 0x688810, CTaskSimplePlayerOnFoot*, CPed*>(this, ped);
 #else
+    return ProcessPed_Reversed(ped);
+#endif
+}
+
+bool CTaskSimplePlayerOnFoot::ProcessPed_Reversed(class CPed* ped)
+{
     bool result = false;
+    CPed* pPed = ped;
     CPlayerPed* pPlayerPed = static_cast<CPlayerPed*>(pPed);
     if (pPlayerPed->GetPadFromPlayer())
     {
@@ -48,13 +55,14 @@ bool CTaskSimplePlayerOnFoot::ProcessPed(CPed* pPed)
             }
             else
             {
-                PlayerControlZelda(pPlayerPed, 0);
+                PlayerControlZelda(pPlayerPed, false);
             }
         }
         else
         {
             PlayerControlFighter(pPlayerPed);
         }
+
         ProcessPlayerWeapon(pPlayerPed);
         m_nFrameCounter = CTimer::m_FrameCounter;
         result = 0;
@@ -65,8 +73,18 @@ bool CTaskSimplePlayerOnFoot::ProcessPed(CPed* pPed)
         result = 0;
     }
     return result;
-#endif
 }
+
+CTaskSimplePlayerOnFoot* CTaskSimplePlayerOnFoot::Constructor()
+{
+    return plugin::CallMethodAndReturn<CTaskSimplePlayerOnFoot*, 0x685750, CTaskSimplePlayerOnFoot*>(this);
+}
+
+CTaskSimplePlayerOnFoot* CTaskSimplePlayerOnFoot::Destructor()
+{
+    return plugin::CallMethodAndReturn<CTaskSimplePlayerOnFoot*, 0x68B0C0, CTaskSimplePlayerOnFoot*>(this);
+}
+
 
 /*
     Everything works for this function except stealth kill. It should be
@@ -1179,7 +1197,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed)
             float moveBlendRatio = sqrt(moveSpeed.x * moveSpeed.x + moveSpeed.y * moveSpeed.y);
             if (moveBlendRatio > 1.0)
             {
-                float moveSpeedMultiplier = 1.0 / moveBlendRatio;
+                float moveSpeedMultiplier = 1.0f / moveBlendRatio;
                 moveSpeed.x = moveSpeed.x * moveSpeedMultiplier;
                 moveSpeed.y = moveSpeedMultiplier * moveSpeed.y;
             }
@@ -1207,8 +1225,8 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
         CPlayerPed* pPlayerPed = static_cast<CPlayerPed*> (pPed);
         CPad* pPad = pPlayerPed->GetPadFromPlayer();
         CVector2D moveSpeed;
-        moveSpeed.x = pPad->GetPedWalkLeftRight() * 0.0078125;
-        moveSpeed.y = pPad->GetPedWalkUpDown() * 0.0078125;
+        moveSpeed.x = pPad->GetPedWalkLeftRight() * 0.0078125f;
+        moveSpeed.y = pPad->GetPedWalkUpDown() * 0.0078125f;
         float pedMoveBlendRatio = sqrt(moveSpeed.x * moveSpeed.x + moveSpeed.y * moveSpeed.y);
         if (pPlayerPed->m_pAttachedTo)
         {
@@ -1239,18 +1257,18 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
                         }
                         auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pPlayerPed->m_nAnimGroup, 1u, gDuckAnimBlendData);
                         pNewAnimation->m_bPlaying = 1;
-                        pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.5;
+                        pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                         pedMoveState = PEDMOVE_RUN;
                     }
                     else
                     {
-                        if (pedMoveBlendRatio <= 0.5)
+                        if (pedMoveBlendRatio <= 0.5f)
                         {
                             return;
                         }
                         auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pPlayerPed->m_nAnimGroup, 0, gDuckAnimBlendData);
                         pNewAnimation->m_bPlaying = 1;
-                        pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.5;
+                        pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                         pedMoveState = PEDMOVE_WALK;
                     }
                     pPlayerPed->m_nMoveState = pedMoveState;
@@ -1300,9 +1318,9 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
                     }
                     CMatrix* pMatrix = pPlayerPed->m_matrix;
                     CEntity* pTargetedObject = pPlayerPed->m_pTargetedObject;
-                    moveSpeed.x = (moveDirection.y * pMatrix->right.y + moveDirection.x * pMatrix->right.x + pMatrix->right.z * 0.0)
+                    moveSpeed.x = (moveDirection.y * pMatrix->right.y + moveDirection.x * pMatrix->right.x + pMatrix->right.z * 0.0f)
                         * pedMoveBlendRatio;
-                    moveSpeed.y = -((moveDirection.y * pMatrix->up.y + pMatrix->up.z * 0.0 + moveDirection.x * pMatrix->up.x)
+                    moveSpeed.y = -((moveDirection.y * pMatrix->up.y + pMatrix->up.z * 0.0f + moveDirection.x * pMatrix->up.x)
                         * pedMoveBlendRatio);
                     if (pTargetedObject)
                     {
@@ -1344,7 +1362,7 @@ int CTaskSimplePlayerOnFoot::PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAn
     CPad* pPad = pPlayerPed->GetPadFromPlayer();
     float pedWalkLeftRight = pPad->GetPedWalkLeftRight();
     float pedWalkUpDown = pPad->GetPedWalkUpDown();
-    float pedMoveBlendRatio = sqrt(pedWalkUpDown * pedWalkUpDown + pedWalkLeftRight * pedWalkLeftRight) * 0.016666668;
+    float pedMoveBlendRatio = sqrt(pedWalkUpDown * pedWalkUpDown + pedWalkLeftRight * pedWalkLeftRight) * 0.016666668f;
     if (pPlayerPed->m_pAttachedTo)
     {
         pedMoveBlendRatio = 0.0;
@@ -1366,7 +1384,7 @@ int CTaskSimplePlayerOnFoot::PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAn
     if (CGameLogic::IsPlayerAllowedToGoInThisDirection(pPlayerPed, -sin(limitedRadianAngle), cos(limitedRadianAngle), 0.0, 0.0))
     {
 
-        float fMaximumMoveBlendRatio = CTimer::ms_fTimeStep * 0.07;
+        float fMaximumMoveBlendRatio = CTimer::ms_fTimeStep * 0.07f;
         if (pedMoveBlendRatio - pPlayerData->m_fMoveBlendRatio <= fMaximumMoveBlendRatio)
         {
             if (-fMaximumMoveBlendRatio <= pedMoveBlendRatio - pPlayerData->m_fMoveBlendRatio)

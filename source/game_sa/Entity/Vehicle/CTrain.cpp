@@ -19,6 +19,11 @@ float* arrTotalTrackLength = (float*)0xC37FEC;
 CTrainNode** pTrackNodes = (CTrainNode * *)0xC38024;
 float* StationDist = (float*)0xC38034;
 
+void CTrain::InjectHooks()
+{
+    HookInstall(0x6F86A0, &CTrain::ProcessControl_Reversed, 7);
+}
+
 // Converted from thiscall void CTrain::CTrain(int modelIndex,uchar createdBy) 0x6F6030
 CTrain::CTrain(int modelIndex, unsigned char createdBy) : CVehicle(plugin::dummy) {
     ((void(__thiscall*)(CTrain*, int, unsigned char))0x6F6030)(this, modelIndex, createdBy);

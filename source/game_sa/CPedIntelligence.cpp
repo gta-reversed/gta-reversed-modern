@@ -12,9 +12,67 @@ float& CPedIntelligence::LIGHT_AI_LEVEL_MAX = *reinterpret_cast<float*>(0x8D2380
 float& CPedIntelligence::flt_8D2384 = *reinterpret_cast<float*>(0x8D2384);
 float& CPedIntelligence::flt_8D2388 = *reinterpret_cast<float*>(0x8D2388);
 
+void CPedIntelligence::InjectHooks()
+{
+    HookInstall(0x4893E0, &CPedIntelligence::GetPedEntities, 7);
+    HookInstall(0x600B50, &CPedIntelligence::SetPedDecisionMakerType, 7);
+    HookInstall(0x600BB0, &CPedIntelligence::SetPedDecisionMakerTypeInGroup, 7);
+    HookInstall(0x600BC0, &CPedIntelligence::RestorePedDecisionMakerType, 7);
+    HookInstall(0x600BE0, &CPedIntelligence::SetHearingRange, 7);
+    HookInstall(0x600BF0, &CPedIntelligence::SetSeeingRange, 7);
+    HookInstall(0x600C60, &CPedIntelligence::IsInSeeingRange, 7);
+    HookInstall(0x600CF0, &CPedIntelligence::FindRespectedFriendInInformRange, 7);
+    HookInstall(0x600DB0, &CPedIntelligence::IsRespondingToEvent, 7);
+    HookInstall(0x600DC0, &CPedIntelligence::AddTaskPhysResponse, 7);
+    HookInstall(0x600DE0, &CPedIntelligence::AddTaskEventResponseTemp, 7);
+    HookInstall(0x600E00, &CPedIntelligence::AddTaskEventResponseNonTemp, 7);;
+    HookInstall(0x600E20, &CPedIntelligence::AddTaskPrimaryMaybeInGroup, 7);
+    HookInstall(0x600EE0, &CPedIntelligence::FindTaskByType, 7);
+    HookInstall(0x600F30, &CPedIntelligence::GetTaskFighting, 7);
+    HookInstall(0x600F70, &CPedIntelligence::GetTaskUseGun, 7);
+    HookInstall(0x600FB0, &CPedIntelligence::GetTaskThrow, 7);
+    HookInstall(0x600FF0, &CPedIntelligence::GetTaskHold, 7);
+    HookInstall(0x601070, &CPedIntelligence::GetTaskSwim, 7);
+    HookInstall(0x6010A0, &CPedIntelligence::GetTaskDuck, 7);
+    HookInstall(0x601110, &CPedIntelligence::GetTaskJetPack, 7);
+    HookInstall(0x601150, &CPedIntelligence::GetTaskInAir, 7);
+    HookInstall(0x601180, &CPedIntelligence::GetTaskClimb, 7);
+    HookInstall(0x6011B0, &CPedIntelligence::GetUsingParachute, 7);
+    HookInstall(0x601230, &CPedIntelligence::SetTaskDuckSecondary, 7);
+    HookInstall(0x601390, &CPedIntelligence::ClearTaskDuckSecondary, 7);
+    HookInstall(0x601420, &CPedIntelligence::ClearTasks, 7);
+    HookInstall(0x601640, &CPedIntelligence::FlushImmediately, 7);
+    HookInstall(0x6018D0, &CPedIntelligence::GetEffectInUse, 7);
+    HookInstall(0x6018E0, &CPedIntelligence::SetEffectInUse, 7);
+    HookInstall(0x6018F0, &CPedIntelligence::ProcessAfterProcCol, 7);
+    HookInstall(0x6019B0, &CPedIntelligence::ProcessAfterPreRender, 7);
+    HookInstall(0x601BB0, &CPedIntelligence::ProcessEventHandler, 7);
+    HookInstall(0x601BC0, &CPedIntelligence::IsFriendlyWith, 7);
+    HookInstall(0x601C30, &CPedIntelligence::IsThreatenedBy, 7);
+    HookInstall(0x601C90, &CPedIntelligence::Respects, 7);
+    HookInstall(0x601CC0, &CPedIntelligence::IsInACarOrEnteringOne, 7);
+    HookInstall(0x601D10, &CPedIntelligence::AreFriends, 7);
+    HookInstall(0x601D70, &CPedIntelligence::GetMoveStateFromGoToTask, 7);
+    HookInstall(0x601DA0, &CPedIntelligence::FlushIntelligence, 7);
+    HookInstall(0x601E00, &CPedIntelligence::TestForStealthKill, 7);
+    HookInstall(0x602050, &CPedIntelligence::RecordEventForScript, 7);
+    HookInstall(0x6020A0, &CPedIntelligence::IsInterestingEntity, 7);
+    HookInstall(0x6020D0, &CPedIntelligence::LookAtInterestingEntities, 7);
+    HookInstall(0x602350, &CPedIntelligence::IsPedGoingForCarDoor, 7);
+    HookInstall(0x605550, &CPedIntelligence::CanSeeEntityWithLights, 7);
+    HookInstall(0x605650, &CPedIntelligence::ProcessStaticCounter, 7);
+    HookInstall(0x6073A0, &CPedIntelligence::ProcessFirst, 7);
+    HookInstall(0x608260, &CPedIntelligence::Process, 7);
+    HookInstall(0x4B85B0, &CPedIntelligence::GetActivePrimaryTask, 7);
+}
+
 CEntity** CPedIntelligence::GetPedEntities()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<CEntity**, 0x4893E0, CPedIntelligence*>(this);
+#else
     return m_entityScanner.m_apEntities;
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::SetPedDecisionMakerType(int newtype) 0x600B50
@@ -82,7 +140,7 @@ void CPedIntelligence::SetSeeingRange(float range) {
 #endif
 }
 
-// Converted from thiscall bool CPedIntelligence::IsInHearingRange(CVector const& posn) 0x600C00 
+// Unused
 bool CPedIntelligence::IsInHearingRange(CVector const& posn) {
     return plugin::CallMethodAndReturn<bool, 0x600C00, CPedIntelligence*, CVector const&>(this, posn);
 }
@@ -730,7 +788,11 @@ C2dEffect* CPedIntelligence::GetEffectInUse() {
 
 // Converted from thiscall void CPedIntelligence::SetEffectInUse(C2dEffect *arg1) 0x6018E0 
 void CPedIntelligence::SetEffectInUse(C2dEffect* arg1) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x6018E0, CPedIntelligence*, C2dEffect*>(this, arg1);
+#else
+    m_eventScanner.m_attractorScanner.m_pEffectInUse = arg1;
+#endif
 }
 
 // Converted from thiscall void CPedIntelligence::ProcessAfterProcCol(void) 0x6018F0 
@@ -862,17 +924,23 @@ bool CPedIntelligence::IsFriendlyWith(CPed* pPed) {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x601BC0, CPedIntelligence*, CPed*>(this, pPed);
 #else
-    unsigned int AcquaintancesID0 = m_pPed->m_acquaintance.GetAcquaintances(0);
-    unsigned int AcquaintancesID1 = m_pPed->m_acquaintance.GetAcquaintances(1);
+    unsigned int respect = m_pPed->m_acquaintance.m_nRespect;
+    unsigned int like = m_pPed->m_acquaintance.m_nLike;
     unsigned int pedFlag = CPedType::GetPedFlag((ePedType)pPed->m_nPedType);
-
-    return m_pPed->m_nPedType == pPed->m_nPedType || pedFlag & AcquaintancesID0 || pedFlag & AcquaintancesID1;
+    return m_pPed->m_nPedType == pPed->m_nPedType || pedFlag & respect || pedFlag & like;
 #endif
 }
 
 // Converted from thiscall bool CPedIntelligence::IsThreatenedBy(CPed const& ped) 0x601C30 
 bool CPedIntelligence::IsThreatenedBy(CPed const& ped) {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x601C30, CPedIntelligence*, CPed const&>(this, ped);
+#else
+    unsigned int dislike = m_pPed->m_acquaintance.m_nDislike;
+    unsigned int hate = m_pPed->m_acquaintance.m_nHate;
+    unsigned int pedTypeFlag = CPedType::GetPedFlag((ePedType)ped.m_nPedType);
+    return pedTypeFlag & dislike || pedTypeFlag & hate;
+#endif
 }
 
 // Converted from thiscall bool CPedIntelligence::Respects(CPed const& ped) 0x601C90 
@@ -880,15 +948,36 @@ bool CPedIntelligence::Respects(CPed* pPed) {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x601C90, CPedIntelligence*, CPed*>(this, pPed);
 #else
-    unsigned int acquaintancesID0 = m_pPed->m_acquaintance.GetAcquaintances(0);
+    unsigned int respect = m_pPed->m_acquaintance.m_nRespect;
     unsigned int pedFlag = CPedType::GetPedFlag((ePedType)pPed->m_nPedType);
-    return (pedFlag & acquaintancesID0) != 0;
+    return pedFlag & respect;
 #endif
 }
 
 // Converted from thiscall bool CPedIntelligence::IsInACarOrEnteringOne(void) 0x601CC0 
 bool CPedIntelligence::IsInACarOrEnteringOne() {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x601CC0, CPedIntelligence*>(this);
+#else
+    auto pTaskComplexEnterCar = static_cast<CTaskComplexEnterCar*>(m_TaskMgr.FindActiveTaskByType(TASK_COMPLEX_ENTER_CAR_AS_DRIVER));
+    if (pTaskComplexEnterCar)
+    {
+        return pTaskComplexEnterCar->m_pTargetVehicle;
+    }
+
+    pTaskComplexEnterCar = static_cast<CTaskComplexEnterCar*>(m_TaskMgr.FindActiveTaskByType(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER));
+    if (pTaskComplexEnterCar)
+    {
+        return pTaskComplexEnterCar->m_pTargetVehicle;
+    }
+
+    auto pTakSimpleCarDrive = static_cast<CTaskSimpleCarDrive*>(m_TaskMgr.FindActiveTaskByType(TASK_SIMPLE_CAR_DRIVE));
+    if (pTakSimpleCarDrive)
+    {
+        return pTakSimpleCarDrive->m_pVehicle;
+    }
+    return nullptr;
+#endif
 }
 
 // Converted from cdecl bool CPedIntelligence::AreFriends(CPed const& ped1,CPed const& ped2) 0x601D10 
@@ -900,7 +989,7 @@ bool CPedIntelligence::AreFriends(CPed* ped1, CPed* ped2) {
 #endif
 }
 
-// Converted from thiscall bool CPedIntelligence::IsPedGoingSomewhereOnFoot(void) 0x601D50 
+// unused
 bool CPedIntelligence::IsPedGoingSomewhereOnFoot() {
     return plugin::CallMethodAndReturn<bool, 0x601D50, CPedIntelligence*>(this);
 }
@@ -1048,7 +1137,7 @@ void CPedIntelligence::RecordEventForScript(int EventID, int EventPriority) {
 #endif
 }
 
-// Converted from thiscall bool CPedIntelligence::HasInterestingEntites(void) 0x602080 
+// Unused
 bool CPedIntelligence::HasInterestingEntites() {
     return plugin::CallMethodAndReturn<bool, 0x602080, CPedIntelligence*>(this);
 }
@@ -1127,7 +1216,7 @@ void CPedIntelligence::LookAtInterestingEntities() {
 #endif
 }
 
-// Converted from thiscall void CPedIntelligence::RemoveAllInterestingEntities(void) 0x602320 
+// Unused 
 void CPedIntelligence::RemoveAllInterestingEntities() {
     plugin::CallMethod<0x602320, CPedIntelligence*>(this);
 }

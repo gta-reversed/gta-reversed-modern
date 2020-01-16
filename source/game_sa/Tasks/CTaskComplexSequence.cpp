@@ -1,10 +1,75 @@
 #include "StdInc.h"
 
+void CTaskComplexSequence::InjectHooks()
+{
+    HookInstall(0x5F6710, &CTaskComplexSequence::Clone_Reversed, 7);
+    HookInstall(0x632C60, &CTaskComplexSequence::GetId_Reversed, 7);
+    HookInstall(0x632C00, &CTaskComplexSequence::MakeAbortable_Reversed, 7);
+    HookInstall(0x638A40, &CTaskComplexSequence::CreateNextSubTask_Reversed, 7);
+    HookInstall(0x638A60, &CTaskComplexSequence::CreateFirstSubTask_Reversed, 7);
+    HookInstall(0x632D00, &CTaskComplexSequence::ControlSubTask_Reversed, 7);
+    HookInstall(0x632BD0, &CTaskComplexSequence::Constructor, 7);
+    HookInstall(0x632D10, &CTaskComplexSequence::AddTask, 7);
+    HookInstall(0x632C70, (CTask*(CTaskComplexSequence::*)(CPed*, int*, int*))&CTaskComplexSequence::CreateNextSubTask, 7);
+    HookInstall(0x632C10, &CTaskComplexSequence::Flush, 7);
+}
+
 CTask* CTaskComplexSequence::Clone()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CTask*, 0x5F6710, CTask*>(this);
 #else
+    return Clone_Reversed();
+#endif
+}
+
+eTaskType CTaskComplexSequence::GetId()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn <eTaskType, 0x632C60, CTask*>(this);
+#else
+    return GetId_Reversed();
+#endif
+}
+
+bool CTaskComplexSequence::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn <bool, 0x632C00, CTask*, class CPed*, eAbortPriority, class CEvent*>(this, ped, priority, _event);
+#else
+    return MakeAbortable_Reversed(ped, priority, _event);
+#endif
+}
+
+CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn <CTask*, 0x638A40, CTask*, CPed*>(this, ped);
+#else
+    return CreateNextSubTask_Reversed(ped);
+#endif
+}
+
+CTask* CTaskComplexSequence::CreateFirstSubTask(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn <CTask*, 0x638A60, CTask*, CPed*>(this, ped);
+#else
+    return CreateFirstSubTask_Reversed(ped);
+#endif
+}
+
+CTask* CTaskComplexSequence::ControlSubTask(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn <CTask*, 0x632D00, CTask*, CPed*>(this, ped);
+#else
+    return ControlSubTask_Reversed(ped);
+#endif
+}
+
+CTask* CTaskComplexSequence::Clone_Reversed()
+{
     auto pClonedComplexSequence = (CTaskComplexSequence*)CTask::operator new(0x40);
     if (pClonedComplexSequence)
     {
@@ -21,68 +86,59 @@ CTask* CTaskComplexSequence::Clone()
             {
                 pClonedComplexSequence->m_aTasks[taskIndex] = 0;
             }
-        }
+            }
 
         pClonedComplexSequence->m_bRepeatSequence = m_bRepeatSequence;
         pClonedComplexSequence->m_nCurrentTaskIndex = m_nCurrentTaskIndex;
-    }
+}
     return pClonedComplexSequence;
-#endif
 }
 
-eTaskType CTaskComplexSequence::GetId()
+eTaskType CTaskComplexSequence::GetId_Reversed()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn <eTaskType, 0x632C60, CTask*>(this);
-#else
     return TASK_COMPLEX_SEQUENCE;
-#endif
 }
 
-bool CTaskComplexSequence::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event)
+bool CTaskComplexSequence::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn <bool, 0x632C00, CTask*, class CPed*, eAbortPriority, class CEvent*>(this, ped, priority, _event);
-#else
     return m_pSubTask->MakeAbortable(ped, priority, _event);
-#endif
 }
 
-CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped)
+CTask* CTaskComplexSequence::CreateNextSubTask_Reversed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn <CTask*, 0x638A40, CTask*, CPed*>(this, ped);
-#else
     return CreateNextSubTask(ped, &m_nCurrentTaskIndex, &m_nSequenceRepeatedCount);
-#endif
 }
 
-CTask* CTaskComplexSequence::CreateFirstSubTask(CPed* ped)
+CTask* CTaskComplexSequence::CreateFirstSubTask_Reversed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn <CTask*, 0x638A60, CTask*, CPed*>(this, ped);
-#else
     CTask* pCurrentTask = m_aTasks[m_nCurrentTaskIndex];
     if (pCurrentTask)
     {
         return pCurrentTask->Clone();
     }
     return nullptr;
-#endif
 }
 
-CTask* CTaskComplexSequence::ControlSubTask(CPed* ped)
+CTask* CTaskComplexSequence::ControlSubTask_Reversed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn <CTask*, 0x632D00, CTask*, CPed*>(this, ped);
-#else
     return m_pSubTask;
-#endif
 }
 
 CTaskComplexSequence* CTaskComplexSequence::Constructor()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CTaskComplexSequence*, 0x632BD0, CTaskComplexSequence*>(this);
+#else
+    CTaskComplex::Constructor();
+    m_nCurrentTaskIndex = 0;
+    m_bRepeatSequence = 0;
+    m_nSequenceRepeatedCount = 0;
+    m_bFlushTasks = 0;
+    m_nReferenceCount = 0;
+    *(unsigned int*)this = CTaskComplexSequence_VTable;
+    memset(m_aTasks, 0, sizeof(CTaskComplexSequence::m_aTasks));
+    return this;
+#endif
 }
 
 void CTaskComplexSequence::AddTask(CTask* pTask)

@@ -9,8 +9,6 @@
 float& CPhysical::PHYSICAL_SHIFT_SPEED_DAMP = *(float*)0x8CD788;
 CVector& CPhysical::fxDirection = *(CVector*)0xB73720;
 
-#undef USE_DEFAULT_FUNCTIONS
-
 void CPhysical::InjectHooks()
 {
     HookInstall(0x54DB10, &CPhysical::ProcessShift_Reversed, 7);

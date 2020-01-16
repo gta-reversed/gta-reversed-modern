@@ -18,6 +18,9 @@ public:
     char field_3B;
     unsigned char m_nReferenceCount; // count of how many CTaskComplexUseSequence instances are using this sequence
 
+    static void InjectHooks();
+
+    // original virtual functions
     CTask* Clone() override;
     eTaskType GetId() override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
@@ -25,10 +28,20 @@ public:
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
 
+    // reversed virtual functions
+    CTask* Clone_Reversed();
+    eTaskType GetId_Reversed();
+    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
+    CTask* CreateNextSubTask_Reversed(CPed* ped);
+    CTask* CreateFirstSubTask_Reversed(CPed* ped);
+    CTask* ControlSubTask_Reversed(CPed* ped);
+
     CTaskComplexSequence* Constructor();
     void AddTask(CTask* pTask);
     CTask* CreateNextSubTask(CPed* pPed, int* pTaskIndex, int* pRepeatCount);
     void Flush();
+
+    static const unsigned int CTaskComplexSequence_VTable = 0x86e200;
 };
 
 VALIDATE_SIZE(CTaskComplexSequence, 0x40);

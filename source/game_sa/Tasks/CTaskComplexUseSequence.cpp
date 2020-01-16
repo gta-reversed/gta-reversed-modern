@@ -1,18 +1,79 @@
 #include "StdInc.h"
 
+void CTaskComplexUseSequence::InjectHooks()
+{
+    HookInstall(0x637100, &CTaskComplexUseSequence::Clone_Reversed, 7);
+    HookInstall(0x635490, &CTaskComplexUseSequence::GetId_Reversed, 7);
+    HookInstall(0x639730, &CTaskComplexUseSequence::MakeAbortable_Reversed, 7);
+    HookInstall(0x6354A0, &CTaskComplexUseSequence::CreateNextSubTask_Reversed, 7);
+    HookInstall(0x6354D0, &CTaskComplexUseSequence::CreateFirstSubTask_Reversed, 7);
+    HookInstall(0x635530, &CTaskComplexUseSequence::ControlSubTask_Reversed, 7);
+    HookInstall(0x635450, &CTaskComplexUseSequence::Constructor, 7);
+    HookInstall(0x6396C0, &CTaskComplexUseSequence::Destructor, 7);
+}
+
 CTask* CTaskComplexUseSequence::Clone()
 {
-//#ifdef USE_DEFAULT_FUNCTIONS
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CTask*, 0x637100, CTask*>(this);
-//#else
-    /*
-    // NOT TESTED. Somebody should find a way to test this.
+#else
+    return Clone_Reversed();
+#endif
+}
+
+eTaskType CTaskComplexUseSequence::GetId()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn <eTaskType, 0x635490, CTask*>(this);
+#else
+    return GetId_Reversed();
+#endif
+}
+
+bool CTaskComplexUseSequence::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn <bool, 0x639730, CTask*, class CPed*, eAbortPriority, class CEvent*>(this, ped, priority, _event);
+#else     
+    return MakeAbortable_Reversed(ped, priority, _event);
+#endif
+}
+
+CTask* CTaskComplexUseSequence::CreateNextSubTask(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn <CTask*, 0x6354A0, CTask*, CPed*>(this, ped);
+#else
+    return CreateNextSubTask_Reversed(ped);
+#endif
+}
+
+CTask* CTaskComplexUseSequence::CreateFirstSubTask(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn <CTask*, 0x6354D0, CTask*, CPed*>(this, ped);
+#else
+    return CreateFirstSubTask_Reversed(ped);
+#endif
+}
+
+CTask* CTaskComplexUseSequence::ControlSubTask(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn <CTask*, 0x635530, CTask*, CPed*>(this, ped);
+#else
+    return ControlSubTask_Reversed(ped);
+#endif
+}
+
+CTask* CTaskComplexUseSequence::Clone_Reversed()
+{
     auto pClonedComplexUseSequence = (CTaskComplexUseSequence*)CTask::operator new(28);
     if (pClonedComplexUseSequence)
     {
         pClonedComplexUseSequence->CTaskComplex::Constructor();
         pClonedComplexUseSequence->m_nSequenceIndex = m_nSequenceIndex;
-        *(unsigned int*)pClonedComplexUseSequence = 0x86e518; //`vtable for'CTaskComplexUseSequence
+        *(unsigned int*)pClonedComplexUseSequence = CTaskComplexUseSequence_VTable;
         pClonedComplexUseSequence->m_nCurrentTaskIndex = 0;
         pClonedComplexUseSequence->m_nEndTaskIndex = -1;
         pClonedComplexUseSequence->m_nSequenceRepeatedCount = 0;
@@ -23,25 +84,15 @@ CTask* CTaskComplexUseSequence::Clone()
         pClonedComplexUseSequence->m_nEndTaskIndex = m_nEndTaskIndex;
     }
     return pClonedComplexUseSequence;
-    */
-//#endif
 }
 
-eTaskType CTaskComplexUseSequence::GetId()
+eTaskType CTaskComplexUseSequence::GetId_Reversed()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn <eTaskType, 0x635490, CTask*>(this);
-#else
     return TASK_COMPLEX_USE_SEQUENCE;
-#endif
 }
 
-bool CTaskComplexUseSequence::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event)
+bool CTaskComplexUseSequence::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event)
 {
-//#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn <bool, 0x639730, CTask*, class CPed*, eAbortPriority, class CEvent*>(this, ped, priority, _event);
-/*
-    // NOT TESTED. Somebody should find a way to test this.
     bool bMakeAbortable = m_pSubTask->MakeAbortable(ped, priority, _event);
     if (bMakeAbortable && _event && _event->GetEventType() == EVENT_DAMAGE)
     {
@@ -60,16 +111,10 @@ bool CTaskComplexUseSequence::MakeAbortable(class CPed* ped, eAbortPriority prio
         }
     }
     return bMakeAbortable;
-*/
-//#endif
 }
 
-CTask* CTaskComplexUseSequence::CreateNextSubTask(CPed* ped)
+CTask* CTaskComplexUseSequence::CreateNextSubTask_Reversed(CPed* ped)
 {
-//#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn <CTask*, 0x6354A0, CTask*, CPed*>(this, ped);
-    /*
-    // NOT TESTED. Somebody should find a way to test this.
     if (m_nSequenceIndex == -1)
     {
         return nullptr;
@@ -79,16 +124,11 @@ CTask* CTaskComplexUseSequence::CreateNextSubTask(CPed* ped)
         auto pTaskComplexSequence = &CTaskSequences::ms_taskSequence[m_nSequenceIndex];
         return pTaskComplexSequence->CreateNextSubTask(ped, &m_nCurrentTaskIndex, &m_nSequenceRepeatedCount);
     }
-    */
-//#endif
+    return nullptr;
 }
 
-CTask* CTaskComplexUseSequence::CreateFirstSubTask(CPed* ped)
+CTask* CTaskComplexUseSequence::CreateFirstSubTask_Reversed(CPed* ped)
 {
-//#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn <CTask*, 0x6354D0, CTask*, CPed*>(this, ped);
-    /*
-    // NOT TESTED. Somebody should find a way to test this.
     if (m_nSequenceIndex == -1)
     {
         return nullptr;
@@ -111,44 +151,35 @@ CTask* CTaskComplexUseSequence::CreateFirstSubTask(CPed* ped)
         }
     }
     return pFirstSubTask;
-    */
-//#endif
 }
 
-CTask* CTaskComplexUseSequence::ControlSubTask(CPed* ped)
+CTask* CTaskComplexUseSequence::ControlSubTask_Reversed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn <CTask*, 0x635530, CTask*, CPed*>(this, ped);
-#else
     return m_pSubTask;
-#endif
 }
 
 CTaskComplexUseSequence* CTaskComplexUseSequence::Constructor(int sequenceIndex)
 {
-//#ifdef USE_DEFAULT_FUNCTIONS
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CTaskComplexUseSequence*, 0x635450, CTaskComplexUseSequence*, int>(this, sequenceIndex);
-
-   /*
-    // NOT TESTED. Somebody should find a way to test this.
+#else
     CTaskComplex::Constructor();
     m_nSequenceIndex = sequenceIndex;
     m_nCurrentTaskIndex = 0;
     m_nSequenceRepeatedCount = 0;
-    *(unsigned int*)this = 0x86e518; // `vtable for'CTaskComplexUseSequence;
+    *(unsigned int*)this = CTaskComplexUseSequence_VTable;
     m_nEndTaskIndex = -1;
     CTaskSequences::ms_taskSequence[m_nSequenceIndex].m_nReferenceCount++;
-    */
-//#endif
+    return this;
+#endif
 }
 
 CTaskComplexUseSequence* CTaskComplexUseSequence::Destructor()
 {
-//#ifdef USE_DEFAULT_FUNCTIONS
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CTaskComplexUseSequence*, 0x6396C0, CTaskComplexUseSequence*>(this);
-    /*
-    // NOT TESTED. Somebody should find a way to test this.
-    *(unsigned int*)this = 0x86e518; // `vtable for'CTaskComplexUseSequence;
+#else
+    *(unsigned int*)this = CTaskComplexUseSequence_VTable;
 
     if (m_nSequenceIndex != -1)
     {
@@ -165,6 +196,5 @@ CTaskComplexUseSequence* CTaskComplexUseSequence::Destructor()
         }
     }
     return (CTaskComplexUseSequence*)CTaskComplex::Destructor();
-    */
-//#endif
+#endif
 }

@@ -58,6 +58,7 @@ struct  tHandlingData {
             unsigned int m_bHangingBoot : 1;
             unsigned int m_bTailgateBoot : 1;
             unsigned int m_bNoswingBoot : 1;
+
             unsigned int m_bNoDoors : 1;
             unsigned int m_bTandemSeats : 1;
             unsigned int m_bSitInBoat : 1;
@@ -66,6 +67,7 @@ struct  tHandlingData {
             unsigned int m_bDoubleExhaust : 1;
             unsigned int m_bNo1fpsLookBehind : 1;
             unsigned int m_bForceDoorCheck : 1;
+
             unsigned int m_bAxleFNotlit : 1;
             unsigned int m_bAxleFSolid : 1;
             unsigned int m_bAxleFMcpherson : 1;
@@ -74,6 +76,7 @@ struct  tHandlingData {
             unsigned int m_bAxleRSolid : 1;
             unsigned int m_bAxleRMcpherson : 1;
             unsigned int m_bAxleRReverse : 1;
+
             unsigned int m_bIsBike : 1;
             unsigned int m_bIsHeli : 1;
             unsigned int m_bIsPlane : 1;

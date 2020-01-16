@@ -65,6 +65,8 @@ public:
     static float& flt_8D2384;
     static float& flt_8D2388;
 
+    static void InjectHooks();
+
     CEntity** GetPedEntities();
 	void SetPedDecisionMakerType(int newType);
 	void SetPedDecisionMakerTypeInGroup(int newType);

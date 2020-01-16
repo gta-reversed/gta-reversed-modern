@@ -53,17 +53,29 @@ public:
         };
     };
 
+    static void InjectHooks();
+
+    // original virtual functions
     eTaskType GetId() override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
+
     virtual int GetWanderType();
     virtual void ScanForStuff(CPed* ped);
     virtual void UpdateDir(CPed* pPed);
     virtual void UpdatePathNodes(CPed* pPed, int8_t dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8_t* outDir);
 
-    CTaskComplexWander(int MoveState, unsigned char Dir, bool bWanderSensibly, float TargetRadius = 0.5f);
+    // reversed virtual functions
+    eTaskType GetId_Reversed();
+    CTask* CreateNextSubTask_Reversed(CPed* ped);
+    CTask* CreateFirstSubTask_Reversed(CPed* ped);
+    CTask* ControlSubTask_Reversed(CPed* ped);
 
+    void UpdateDir_Reversed(CPed* pPed);
+    void UpdatePathNodes_Reversed(CPed* pPed, int8_t dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8_t* outDir);
+
+    CTaskComplexWander* Constructor(int moveState, unsigned char dir, bool bWanderSensibly, float fTargetRadius = 0.5f);
     CTask* CreateSubTask(CPed* ped, int taskId);
     void ComputeTargetPos(CPed* pPed, CVector* pOutTargetPos, CNodeAddress* pTargetNodeAddress);
     float ComputeTargetHeading(CPed* ped);

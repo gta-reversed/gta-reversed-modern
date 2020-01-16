@@ -29,12 +29,17 @@ public:
     bool field_37;
     class CAnimBlendAssociation* m_pAnimBlendAssociation; 
 
+    // original virtual functions
     CTask* DeletingDestructor(uint8_t deletingFlags) override;
     CTask* Clone() override;
     eTaskType GetId() override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
     bool ProcessPed(class CPed* ped) override;
     bool SetPedPosition(class CPed* ped) override;
+
+    // reversed virtual functions
+    eTaskType GetId_Reversed();
+    bool ProcessPed_Reversed(class CPed* ped);
 
     CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags, 
                                        int animId, int groupId, bool bDisAllowDroppingOnAnimEnd);
