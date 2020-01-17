@@ -40,7 +40,7 @@ void CRenderer::InjectHooks()
     HookInstall(0x554230, &CRenderer::SetupEntityVisibility, 7);
     HookInstall(0x553F60, &CRenderer::SetupMapEntityVisibility, 7);
     HookInstall(0x553540, &CRenderer::SetupScanLists, 7);
-    HookInstall(0x554840, &CRenderer::ScanSectorList, 7);
+    //HookInstall(0x554840, &CRenderer::ScanSectorList, 7);
 }
 
 // Converted from cdecl void CRenderer::Init(void) 0x5531C0
@@ -513,145 +513,145 @@ int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float& outDistance) {
     return plugin::CallAndReturn<int, 0x554650, CEntity*, float&>(entity, outDistance);
 }
 
-// Converted from cdecl void CRenderer::ScanSectorList(int sector_x,int sector_y) 0x554840
-void CRenderer::ScanSectorList(unsigned int uiSector_x, unsigned int uiSector_y) {
-
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x554840, unsigned int, unsigned int>(uiSector_x, uiSector_y);
-#else
-    bool bRequestModel = false;
-    float fCameraAndSectorX = ((uiSector_x - 60) * 50.0 + 25.0) - CRenderer::ms_vecCameraPosition.x;
-    float fCameraAndSectorY = ((uiSector_y - 60) * 50.0 + 25.0) - CRenderer::ms_vecCameraPosition.y;
-    float fAngleInRadians = atan2(-fCameraAndSectorX, fCameraAndSectorY) - CRenderer::ms_fCameraHeading;
-    float fCameraAndSectorDistance = fCameraAndSectorY * fCameraAndSectorY + fCameraAndSectorX * fCameraAndSectorX;
-    if (fCameraAndSectorDistance < 10000.0f || fabs(CGeneral::LimitRadianAngle(fAngleInRadians)) < 0.36f)
-    {
-        bRequestModel = true;
-    }
-
-    CRenderer::SetupScanLists(uiSector_x, uiSector_y);
-    CPtrListDoubleLink** pScanLists = reinterpret_cast<CPtrListDoubleLink * *>(&PC_Scratch);
-    const int kiMaxScanLists = 5;
-    for (int scanListIndex = 0; scanListIndex < kiMaxScanLists; scanListIndex++)
-    {
-        CPtrListDoubleLink* pDoubleLinkList = pScanLists[scanListIndex];
-        if (pDoubleLinkList)
-        {
-            CPtrNodeDoubleLink* pDoubleLinkNode = pDoubleLinkList->GetNode();
-            while (pDoubleLinkNode)
-            {
-                CEntity* pLodEntity = reinterpret_cast<CEntity*>(pDoubleLinkNode->pItem);
-                pDoubleLinkNode = pDoubleLinkNode->pNext;
-                if (pLodEntity->m_nScanCode != CWorld::ms_nCurrentScanCode)
-                {
-                    pLodEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
-                    pLodEntity->m_bOffscreen = false;
-
-                    bool bInvisibleEntity = false;
-                    float outDistance = 0.0f;
-                    switch (CRenderer::SetupEntityVisibility(pLodEntity, &outDistance))
-                    {
-                    case RENDERER_INVISIBLE:
-                    {
-                        if (pLodEntity->m_nType == ENTITY_TYPE_OBJECT)
-                        {
-                            CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[pLodEntity->m_nModelIndex]->AsAtomicModelInfoPtr();
-                            if (pBaseModelInfo)
-                            {
-                                if (pBaseModelInfo->nSpecialType == 4 || pBaseModelInfo->nSpecialType == 5)
-                                {
-                                    bInvisibleEntity = true;
-                                    break;
-                                }
-                            }
-                        }
-                        break;
-                    }
-                    case RENDERER_VISIBLE:
-                    {
-                        CRenderer::AddEntityToRenderList(pLodEntity, outDistance);
-                        break;
-                    }
-                    case RENDERER_CULLED:
-                    {
-                        bInvisibleEntity = true;
-                        break;
-                    }
-                    case RENDERER_STREAMME:
-                    {
-                        if (CStreaming::ms_disableStreaming || !pLodEntity->GetIsOnScreen() || CRenderer::ms_bInTheSky)
-                        {
-                            break;
-                        }
-
-                        if (bRequestModel)
-                        {
-                            auto pStreamingInfo = &CStreaming::ms_aInfoForModel[pLodEntity->m_nModelIndex];
-                            if (pStreamingInfo->m_nLoadState == LOADSTATE_LOADED)
-                            {
-                                CStreaming::RequestModel(pLodEntity->m_nModelIndex, 0);
-                                break;
-                            }
-                            else
-                            {
-                                if (!pLodEntity->IsEntityOccluded())
-                                {
-                                    CRenderer::m_loadingPriority = 1;
-                                    CStreaming::RequestModel(pLodEntity->m_nModelIndex, 0);
-                                    break;
-                                }
-                            }
-                        }
-                        if (!CRenderer::m_loadingPriority || CStreaming::ms_numModelsRequested < 1)
-                        {
-                            CStreaming::RequestModel(pLodEntity->m_nModelIndex, 0);
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                    }
-
-                    if (!bInvisibleEntity)
-                    {
-                        continue;
-                    }
-
-                    pLodEntity->m_bOffscreen = true;
-                    if (pLodEntity->m_bHasPreRenderEffects)
-                    {
-                        CVector* vecEntityPosition = &pLodEntity->GetPosition();
-                        float fDrawDistance = 30.0;
-                        float fCameraAndEntityX = CRenderer::ms_vecCameraPosition.x - vecEntityPosition->x;
-
-                        if (pLodEntity->m_nType == ENTITY_TYPE_VEHICLE)
-                        {
-                            CVehicle* pVehicle = static_cast<CVehicle*>(pLodEntity);
-                            if (pVehicle->vehicleFlags.bAlwaysSkidMarks)
-                            {
-                                fDrawDistance = 200.0;
-                            }
-                        }
-
-                        float fNegativeDrawDistance = -fDrawDistance;
-                        if (fCameraAndEntityX > fNegativeDrawDistance && fCameraAndEntityX < fDrawDistance)
-                        {
-                            float fCameraAndEntityY = CRenderer::ms_vecCameraPosition.y - vecEntityPosition->y;
-                            if (fCameraAndEntityY > fNegativeDrawDistance && fCameraAndEntityY < fDrawDistance)
-                            {
-                                if (CRenderer::ms_nNoOfInVisibleEntities < 149)
-                                {
-                                    CRenderer::ms_aInVisibleEntityPtrs[CRenderer::ms_nNoOfInVisibleEntities] = pLodEntity;
-                                    CRenderer::ms_nNoOfInVisibleEntities++;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-#endif
+// This function is a little buggy when rendering skidmarks on roads. 
+void CRenderer::ScanSectorList(int sectorX, int sectorY) {
+    return plugin::Call<0x554840, int, int>(sectorX, sectorY);
+//#ifdef USE_DEFAULT_FUNCTIONS
+//    plugin::Call<0x554840, int, int>(sectorX, sectorY);
+//#else
+//    bool bRequestModel = false;
+//    float fCameraAndSectorX = ((sectorX - 60) * 50.0 + 25.0) - CRenderer::ms_vecCameraPosition.x;
+//    float fCameraAndSectorY = ((sectorY - 60) * 50.0 + 25.0) - CRenderer::ms_vecCameraPosition.y;
+//    float fAngleInRadians = atan2(-fCameraAndSectorX, fCameraAndSectorY) - CRenderer::ms_fCameraHeading;
+//    float fCameraAndSectorDistance = fCameraAndSectorY * fCameraAndSectorY + fCameraAndSectorX * fCameraAndSectorX;
+//    if (fCameraAndSectorDistance < 10000.0f || fabs(CGeneral::LimitRadianAngle(fAngleInRadians)) < 0.36f)
+//    {
+//        bRequestModel = true;
+//    }
+//
+//    CRenderer::SetupScanLists(sectorX, sectorY);
+//    CPtrListDoubleLink** pScanLists = reinterpret_cast<CPtrListDoubleLink * *>(&PC_Scratch);
+//    const int kiMaxScanLists = 5;
+//    for (int scanListIndex = 0; scanListIndex < kiMaxScanLists; scanListIndex++)
+//    {
+//        CPtrListDoubleLink* pDoubleLinkList = pScanLists[scanListIndex];
+//        if (pDoubleLinkList)
+//        {
+//            CPtrNodeDoubleLink* pDoubleLinkNode = pDoubleLinkList->GetNode();
+//            while (pDoubleLinkNode)
+//            {
+//                CEntity* pLodEntity = reinterpret_cast<CEntity*>(pDoubleLinkNode->pItem);
+//                pDoubleLinkNode = pDoubleLinkNode->pNext;
+//                if (pLodEntity->m_nScanCode != CWorld::ms_nCurrentScanCode)
+//                {
+//                    pLodEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+//                    pLodEntity->m_bOffscreen = false;
+//
+//                    bool bInvisibleEntity = false;
+//                    float outDistance = 0.0f;
+//                    switch (CRenderer::SetupEntityVisibility(pLodEntity, &outDistance))
+//                    {
+//                    case RENDERER_INVISIBLE:
+//                    {
+//                        if (pLodEntity->m_nType == ENTITY_TYPE_OBJECT)
+//                        {
+//                            CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[pLodEntity->m_nModelIndex]->AsAtomicModelInfoPtr();
+//                            if (pBaseModelInfo)
+//                            {
+//                                if (pBaseModelInfo->nSpecialType == 4 || pBaseModelInfo->nSpecialType == 5)
+//                                {
+//                                    bInvisibleEntity = true;
+//                                    break;
+//                                }
+//                            }
+//                        }
+//                        break;
+//                    }
+//                    case RENDERER_VISIBLE:
+//                    {
+//                        CRenderer::AddEntityToRenderList(pLodEntity, outDistance);
+//                        break;
+//                    }
+//                    case RENDERER_CULLED:
+//                    {
+//                        bInvisibleEntity = true;
+//                        break;
+//                    }
+//                    case RENDERER_STREAMME:
+//                    {
+//                        if (CStreaming::ms_disableStreaming || !pLodEntity->GetIsOnScreen() || CRenderer::ms_bInTheSky)
+//                        {
+//                            break;
+//                        }
+//
+//                        if (bRequestModel)
+//                        {
+//                            auto pStreamingInfo = &CStreaming::ms_aInfoForModel[pLodEntity->m_nModelIndex];
+//                            if (pStreamingInfo->m_nLoadState == LOADSTATE_LOADED)
+//                            {
+//                                CStreaming::RequestModel(pLodEntity->m_nModelIndex, 0);
+//                                break;
+//                            }
+//                            else
+//                            {
+//                                if (!pLodEntity->IsEntityOccluded())
+//                                {
+//                                    CRenderer::m_loadingPriority = 1;
+//                                    CStreaming::RequestModel(pLodEntity->m_nModelIndex, 0);
+//                                    break;
+//                                }
+//                            }
+//                        }
+//                        if (!CRenderer::m_loadingPriority || CStreaming::ms_numModelsRequested < 1)
+//                        {
+//                            CStreaming::RequestModel(pLodEntity->m_nModelIndex, 0);
+//                        }
+//                        break;
+//                    }
+//                    default:
+//                        break;
+//                    }
+//
+//                    if (!bInvisibleEntity)
+//                    {
+//                        continue;
+//                    }
+//
+//                    pLodEntity->m_bOffscreen = true;
+//                    if (pLodEntity->m_bHasPreRenderEffects)
+//                    {
+//                        CVector* vecEntityPosition = &pLodEntity->GetPosition();
+//                        float fDrawDistance = 30.0;
+//                        float fCameraAndEntityX = CRenderer::ms_vecCameraPosition.x - vecEntityPosition->x;
+//
+//                        if (pLodEntity->m_nType == ENTITY_TYPE_VEHICLE)
+//                        {
+//                            CVehicle* pVehicle = static_cast<CVehicle*>(pLodEntity);
+//                            if (pVehicle->vehicleFlags.bAlwaysSkidMarks)
+//                            {
+//                                fDrawDistance = 200.0;
+//                            }
+//                        }
+//
+//                        float fNegativeDrawDistance = -fDrawDistance;
+//                        if (fCameraAndEntityX > fNegativeDrawDistance && fCameraAndEntityX < fDrawDistance)
+//                        {
+//                            float fCameraAndEntityY = CRenderer::ms_vecCameraPosition.y - vecEntityPosition->y;
+//                            if (fCameraAndEntityY > fNegativeDrawDistance && fCameraAndEntityY < fDrawDistance)
+//                            {
+//                                if (CRenderer::ms_nNoOfInVisibleEntities < 149)
+//                                {
+//                                    CRenderer::ms_aInVisibleEntityPtrs[CRenderer::ms_nNoOfInVisibleEntities] = pLodEntity;
+//                                    CRenderer::ms_nNoOfInVisibleEntities++;
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//#endif
 }
 
 // Converted from cdecl void CRenderer::ScanBigBuildingList(int sector_x,int sector_y) 0x554B10
@@ -699,15 +699,14 @@ void CRenderer::RequestObjectsInDirection(CVector const& posn, float angle, int 
     plugin::Call<0x555CB0, CVector const&, float, int>(posn, angle, modelRequesFlags);
 }
 
-void CRenderer::SetupScanLists(uint32_t uiSector_x, uint32_t uiSector_y)
+void CRenderer::SetupScanLists(int sectorX, int sectorY)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553540, uint32_t, uint32_t>(uiSector_x, uiSector_y);
+    plugin::Call<0x553540, int, int>(sectorX, sectorY);
 #else
-    uint32_t uiRepeatSectorIndex = ((uiSector_y & 15) << 4) + (uiSector_x & 15);
-    CRepeatSector* pRepeatSector = &CWorld::ms_aRepeatSectors[uiRepeatSectorIndex];
+    CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
     tScanLists* pScanLists = reinterpret_cast<tScanLists*>(&PC_Scratch);
-    if (uiSector_x < 0 || (uiSector_y < 0 || (uiSector_x >= 0x78 || uiSector_y >= 0x78)))
+    if (sectorX < 0 || (sectorY < 0 || (sectorX >= 0x78 || sectorY >= 0x78)))
     {
         pScanLists->buildingsList = nullptr;
         pScanLists->objectsList = &pRepeatSector->m_lists[0];
@@ -718,7 +717,7 @@ void CRenderer::SetupScanLists(uint32_t uiSector_x, uint32_t uiSector_y)
         return;
     }
     else {
-        CSector* pSector = GetSector(uiSector_x, uiSector_y);
+        CSector* pSector = GetSector(sectorX, sectorY);
         pScanLists->buildingsList = &pSector->m_buildings;
         pScanLists->objectsList = &pRepeatSector->m_lists[2];
         pScanLists->vehiclesList = &pRepeatSector->m_lists[0];
