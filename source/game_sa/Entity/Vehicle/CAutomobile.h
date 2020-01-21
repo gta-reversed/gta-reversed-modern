@@ -141,11 +141,13 @@ public:
     static CMatrix *matW2B;
 
     //vtable
-    bool ProcessAI(unsigned int& arg0);
-    void ResetSuspension();
-    void ProcessFlyingCarStuff();
-    void DoHoverSuspensionRatios();
-    void ProcessSuspension();
+    CVector* AddMovingCollisionSpeed(CVector* out, CVector& vecSpeed) override;
+
+    virtual bool ProcessAI(unsigned int& arg0);
+    virtual void ResetSuspension();
+    virtual void ProcessFlyingCarStuff();
+    virtual void DoHoverSuspensionRatios();
+    virtual void ProcessSuspension();
 
     //funcs
     CAutomobile(int modelIndex, unsigned char createdBy, bool setupSuspensionLines);

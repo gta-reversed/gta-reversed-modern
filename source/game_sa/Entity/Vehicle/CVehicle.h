@@ -103,7 +103,7 @@ class CPed;
 typedef int tWheelState;
 
 
-class   CVehicle : public CPhysical {
+class CVehicle : public CPhysical {
 protected:
     CVehicle(plugin::dummy_func_t) : CPhysical(plugin::dummy) {}
 public:
@@ -338,58 +338,58 @@ public:
 
     // originally vtable functions
 
-    void ProcessControlCollisionCheck();
-    void ProcessControlInputs(unsigned char playerNum);
+    virtual void ProcessControlCollisionCheck();
+    virtual void ProcessControlInputs(unsigned char playerNum);
     // component index in m_apModelNodes array
-    void GetComponentWorldPosition(int componentId, CVector& posnOut);
+    virtual void GetComponentWorldPosition(int componentId, CVector& posnOut);
     // component index in m_apModelNodes array
-    bool IsComponentPresent(int componentId);
-    void OpenDoor(CPed* ped, int componentId, eDoors door, float doorOpenRatio, bool playSound);
-    void ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int arg2, unsigned int arg3, float arg4);
-    float GetDooorAngleOpenRatio(unsigned int door);
-    float GetDooorAngleOpenRatio(eDoors door);
-    bool IsDoorReady(unsigned int door);
-    bool IsDoorReady(eDoors door);
-    bool IsDoorFullyOpen(unsigned int door);
-    bool IsDoorFullyOpen(eDoors door);
-    bool IsDoorClosed(unsigned int door);
-    bool IsDoorClosed(eDoors door);
-    bool IsDoorMissing(unsigned int door);
-    bool IsDoorMissing(eDoors door);
+    virtual bool IsComponentPresent(int componentId);
+    virtual void OpenDoor(CPed* ped, int componentId, eDoors door, float doorOpenRatio, bool playSound);
+    virtual void ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int arg2, unsigned int arg3, float arg4);
+    virtual float GetDooorAngleOpenRatio(unsigned int door);
+    virtual float GetDooorAngleOpenRatio(eDoors door);
+    virtual bool IsDoorReady(unsigned int door);
+    virtual bool IsDoorReady(eDoors door);
+    virtual bool IsDoorFullyOpen(unsigned int door);
+    virtual bool IsDoorFullyOpen(eDoors door);
+    virtual bool IsDoorClosed(unsigned int door);
+    virtual bool IsDoorClosed(eDoors door);
+    virtual bool IsDoorMissing(unsigned int door);
+    virtual bool IsDoorMissing(eDoors door);
     // check if car has roof as extra
-    bool IsOpenTopCar();
+    virtual bool IsOpenTopCar();
     // remove ref to this entity
-    void RemoveRefsToVehicle(CEntity* entity);
-    void BlowUpCar(CEntity* damager, unsigned char bHideExplosion);
-    void BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound);
-    bool SetUpWheelColModel(CColModel* wheelCol);
+    virtual void RemoveRefsToVehicle(CEntity* entity);
+    virtual void BlowUpCar(CEntity* damager, unsigned char bHideExplosion);
+    virtual void BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound);
+    virtual bool SetUpWheelColModel(CColModel* wheelCol);
     // returns false if it's not possible to burst vehicle's tyre or it is already damaged. bPhysicalEffect=true applies random moving force to vehicle
-    bool BurstTyre(unsigned char tyreComponentId, bool bPhysicalEffect);
-    bool IsRoomForPedToLeaveCar(unsigned int arg0, CVector* arg1);
-    void ProcessDrivingAnims(CPed* driver, unsigned char arg1);
+    virtual bool BurstTyre(unsigned char tyreComponentId, bool bPhysicalEffect);
+    virtual bool IsRoomForPedToLeaveCar(unsigned int arg0, CVector* arg1);
+    virtual void ProcessDrivingAnims(CPed* driver, unsigned char arg1);
     // get special ride anim data for bile or quad
-    CRideAnimData* GetRideAnimData();
-    void SetupSuspensionLines();
-    CVector AddMovingCollisionSpeed(CVector& arg0);
-    void Fix();
-    void SetupDamageAfterLoad();
-    void DoBurstAndSoftGroundRatios();
-    float GetHeightAboveRoad();
-    void PlayCarHorn();
-    int GetNumContactWheels();
-    void VehicleDamage(float damageIntensity, unsigned short collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon);
-    bool CanPedStepOutCar(bool arg0);
-    bool CanPedJumpOutCar(CPed* ped);
-    bool GetTowHitchPos(CVector& posnOut, bool arg1, CVehicle* arg2);
-    bool GetTowBarPos(CVector& posnOut, bool arg1, CVehicle* arg2);
+    virtual CRideAnimData* GetRideAnimData();
+    virtual void SetupSuspensionLines();
+    virtual CVector* AddMovingCollisionSpeed(CVector* out, CVector& vecSpeed);
+    virtual void Fix();
+    virtual void SetupDamageAfterLoad();
+    virtual void DoBurstAndSoftGroundRatios();
+    virtual float GetHeightAboveRoad();
+    virtual void PlayCarHorn();
+    virtual int GetNumContactWheels();
+    virtual void VehicleDamage(float damageIntensity, unsigned short collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon);
+    virtual bool CanPedStepOutCar(bool arg0);
+    virtual bool CanPedJumpOutCar(CPed* ped);
+    virtual bool GetTowHitchPos(CVector& posnOut, bool arg1, CVehicle* arg2);
+    virtual bool GetTowBarPos(CVector& posnOut, bool arg1, CVehicle* arg2);
     // always return true
-    bool SetTowLink(CVehicle* arg0, bool arg1);
-    bool BreakTowLink();
-    float FindWheelWidth(bool bRear);
+    virtual bool SetTowLink(CVehicle* arg0, bool arg1);
+    virtual bool BreakTowLink();
+    virtual float FindWheelWidth(bool bRear);
     // always return true
-    bool Save();
+    virtual bool Save();
     // always return true
-    bool Load();
+    virtual bool Load();
 
     //funcs
 
