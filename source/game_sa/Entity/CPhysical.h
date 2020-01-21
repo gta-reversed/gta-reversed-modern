@@ -32,7 +32,25 @@ enum ePhysicalFlags
     PHYSICAL_b13 = 0x1000,
     PHYSICAL_DONT_APPLY_SPEED = 0x2000,
     PHYSICAL_b15 = 0x4000,
-    PHYSICAL_b16 = 0x8000
+    PHYSICAL_b16 = 0x8000,
+
+    PHYSICAL_17 = 0x10000,
+    PHYSICAL_18 = 0x20000,
+    PHYSICAL_BULLETPROOF = 0x40000,
+    PHYSICAL_FIREPROOF = 0x80000,
+    PHYSICAL_COLLISIONPROOF = 0x100000,
+    PHYSICAL_MEELEPROOF = 0x200000,
+    PHYSICAL_INVULNERABLE = 0x400000,
+    PHYSICAL_EXPLOSIONPROOF = 0x800000,
+
+    PHYSICAL_25 = 0x1000000,
+    PHYSICAL_ATTACHEDTOENTITY = 0x2000000,
+    PHYSICAL_27 = 0x4000000,
+    PHYSICAL_TOUCHINGWATER = 0x8000000,
+    PHYSICAL_CANBECOLLIDEDWITH = 0x10000000,
+    PHYSICAL_DESTROYED = 0x20000000,
+    PHYSICAL_31 = 0x40000000,
+    PHYSICAL_32 = 0x80000000,
 };
 
 class CPhysical : public CEntity {
@@ -141,8 +159,8 @@ public:
     void ApplyMoveForce(float x, float y, float z);
     void ApplyMoveForce(CVector force);
     void ApplyTurnForce(CVector dir, CVector velocity);
-    void ApplyForce(CVector dir, CVector velocity, bool flag);
-    CVector GetSpeed(CVector direction);
+    void ApplyForce(CVector vecMoveSpeed, CVector vecDirection, bool bUpdateTurnSpeed);
+    CVector* GetSpeed(CVector* outSpeed, CVector direction);
     void ApplyMoveSpeed();
     void ApplyTurnSpeed();
     void ApplyGravity();

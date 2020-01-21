@@ -3,9 +3,9 @@
 
 #pragma comment(lib, "detours.lib")
 
-//bool __thiscall CPhysical_ProcessCollisionSectorList(CPhysical* pThis)
-auto OLD_CPhysical_ProcessCollisionSectorList = (bool(__thiscall*) (CPhysical * pThis, int sectorX, int sectorY))0x54BA60;
-bool __fastcall CPhysical_ProcessCollisionSectorList(CPhysical* pThis, void* padding, int sectorX, int sectorY);
+//bool __thiscall CPhysical_ApplySoftCollision(CPhysical* pThis)
+auto OLD_CPhysical_ApplySoftCollision = (bool(__thiscall*) (CPhysical * pThis, CPhysical * pEntity, CColPoint * pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity))0x54A2C0;
+bool __fastcall CPhysical_ApplySoftCollision(CPhysical* pThis, void* padding, CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -13,26 +13,26 @@ void InjectHooksMain(void)
 {
     // CStreaming is unstable for now.
     //CStreaming::InjectHooks();
+   // /*
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();
-    CTaskManager::InjectHooks();
     CPedIntelligence::InjectHooks();
     CTrain::InjectHooks();
-
+    CTaskManager::InjectHooks();
     CTaskComplexUseSequence::InjectHooks();
     CTaskComplexSequence::InjectHooks();
     CTaskComplexWander::InjectHooks();
     CTaskComplexWanderCop::InjectHooks();
     CTaskSimplePlayerOnFoot::InjectHooks();
     CTaskSimpleSwim::InjectHooks();
-
-    /*
+    //*/
+   /*
     DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CPhysical_ProcessCollisionSectorList, CPhysical_ProcessCollisionSectorList);
+    DetourAttach(&(PVOID&)OLD_CPhysical_ApplySoftCollision, CPhysical_ApplySoftCollision);
     DetourTransactionCommit();
     */
 }
@@ -60,8 +60,8 @@ enum eFunctionReturnValue
     FUNCTION_SOMELABEL = 4
 };
 
-bool __fastcall CPhysical_ProcessCollisionSectorList(CPhysical* pThis, void* padding, int sectorX, int sectorY)
+bool __fastcall CPhysical_ApplySoftCollision(CPhysical* pThis, void* padding, CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity)
 {
-    printf(" calling CPhysical_ProcessCollisionSectorList \n");
+    printf(" calling CPhysical_ApplySoftCollision \n");
     return true;
 }

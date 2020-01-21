@@ -91,9 +91,9 @@ CVector* MultiplyMatrixWithVector(CVector* outPoint, CMatrix* m, CVector* point)
 #endif
 }
 
-CVector Multiply3x3(CMatrix  const& matrix, CVector  const& vec)
+CVector* Multiply3x3(CVector* out, CMatrix* m, CVector* in)
 {
-    return ((CVector(__cdecl *)(CMatrix  const&, CVector  const&))0x59C790)(matrix, vec);
+    return plugin::CallAndReturn<CVector*, 0x59C790, CVector*, CMatrix*, CVector*>(out, m, in);
 }
 
 CWanted * FindPlayerWanted(int playerId)
@@ -423,6 +423,10 @@ void RemoveRefsForAtomic(RpClump* clump) {
     plugin::Call<0x7226F0, RpClump*>(clump);
 }
 
+bool IsGlassModel(CEntity* pEntity)
+{
+    return plugin::CallAndReturn<bool, 0x46A760, CEntity*>(pEntity);
+}
 
 // Converted from cdecl CAnimBlendClumpData* RpAnimBlendAllocateData(RpClump *clump) 0x4D5F50
 CAnimBlendClumpData* RpAnimBlendAllocateData(RpClump* clump) {

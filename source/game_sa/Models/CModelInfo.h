@@ -23,7 +23,11 @@ enum eModelInfoType : unsigned char
     MODEL_INFO_TYPE_LOD_ATOMIC = 8,
 };
 
-class  CModelInfo
+extern short& MI_FIRE_HYDRANT;
+extern short& MI_PARKINGMETER;
+extern short& MI_PARKINGMETER2;
+
+class CModelInfo
 {
 public:
 	// variables

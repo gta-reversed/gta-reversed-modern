@@ -14,6 +14,7 @@
 #include <iostream>
 #include <cassert>
 
+#include "game_sa\CGlass.h"
 #include "game_sa\CBuoyancy.h"
 #include "game_sa\CEventPedToFlee.h"
 #include "game_sa\CEventPedToChase.h"
@@ -243,6 +244,7 @@
 #include "game_sa\Animation\CAnimBlendStaticAssociation.h"
 #include "game_sa\Animation\CAnimBlock.h"
 #include "game_sa\Animation\CAnimManager.h"
+#include "game_sa\Audio\CAudioEngine.h"
 #include "game_sa\Audio\CAEAudioEntity.h"
 #include "game_sa\Audio\CAEExplosionAudioEntity.h"
 #include "game_sa\Audio\CAEFireAudioEntity.h"

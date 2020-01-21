@@ -7,6 +7,10 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
+short& MI_FIRE_HYDRANT = *(short*)0x8CD594;
+short& MI_PARKINGMETER = *(short*)0x8CD548;
+short& MI_PARKINGMETER2 = *(short*)0x8CD54C;
+
 CBaseModelInfo **CModelInfo::ms_modelInfoPtrs = (CBaseModelInfo**)0xA9B0C8;
 
 // Converted from stdcall void CModelInfo::ReInit2dEffects(void) 0x4C63B0

@@ -47,7 +47,7 @@ CVector* VectorAdd(CVector* out, CVector* from, CVector* what);
 CVector * VectorSub(CVector * out, CVector * from, CVector * what);
 CVector* MultiplyMatrixWithVector(CVector* outPoint, CMatrix* m, CVector* point);
 // matrix mul
-CVector Multiply3x3(CMatrix  const& matrix, CVector  const& vec);
+CVector* Multiply3x3(CVector* out, CMatrix* m, CVector* in);
 // returns player wanted
 CWanted * FindPlayerWanted(int playerId);
 
@@ -134,6 +134,8 @@ void SetLightsForNightVision();
 // 'data' is unused
 RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data);
 void RemoveRefsForAtomic(RpClump* clump);
+
+bool IsGlassModel(CEntity* pEntity);
 
 CAnimBlendClumpData* RpAnimBlendAllocateData(RpClump* clump);
 CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump* clump, CAnimBlendAssociation* association, unsigned int flags, float startTime, float blendAmount);
