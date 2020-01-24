@@ -3,9 +3,9 @@
 
 #pragma comment(lib, "detours.lib")
 
-//bool __thiscall CPhysical_ApplySoftCollision(CPhysical* pThis)
-auto OLD_CPhysical_ApplySoftCollision = (bool(__thiscall*) (CPhysical * pThis, CPhysical * pEntity, CColPoint * pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity))0x54A2C0;
-bool __fastcall CPhysical_ApplySoftCollision(CPhysical* pThis, void* padding, CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity);
+//bool __thiscall CPhysical_ApplyCollision(CPhysical* pThis)
+auto OLD_CPhysical_ApplyCollision = (bool(__thiscall*) (CPhysical * pThis, CPhysical * pEntity, CColPoint * pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity))0x548680;
+bool __fastcall CPhysical_ApplyCollision(CPhysical* pThis, void* padding, CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -13,7 +13,7 @@ void InjectHooksMain(void)
 {
     // CStreaming is unstable for now.
     //CStreaming::InjectHooks();
-   // /*
+    ///*
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();
     CPedIntelligence::InjectHooks();
@@ -26,15 +26,15 @@ void InjectHooksMain(void)
     CTaskSimplePlayerOnFoot::InjectHooks();
     CTaskSimpleSwim::InjectHooks();
     //*/
-   /*
+    /*
     DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CPhysical_ApplySoftCollision, CPhysical_ApplySoftCollision);
+    DetourAttach(&(PVOID&)OLD_CPhysical_ApplyCollision, CPhysical_ApplyCollision);
     DetourTransactionCommit();
-    */
+     */
 }
 /*
 enum eFunctionReturnValue
@@ -60,8 +60,9 @@ enum eFunctionReturnValue
     FUNCTION_SOMELABEL = 4
 };
 
-bool __fastcall CPhysical_ApplySoftCollision(CPhysical* pThis, void* padding, CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity)
+bool __fastcall CPhysical_ApplyCollision(CPhysical* pThis, void* padding, CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity)
 {
-    printf(" calling CPhysical_ApplySoftCollision \n");
+    printf(" calling CPhysical_ApplyCollision \n");
+
     return true;
 }

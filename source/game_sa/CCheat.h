@@ -9,9 +9,7 @@
 #include "PluginBase.h"
 #include "CVehicle.h"
 
-
-
-class  CCheat {
+class CCheat {
 public:
 
      static void(*(&m_aCheatFunctions)[92])();

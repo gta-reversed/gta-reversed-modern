@@ -177,6 +177,7 @@ public:
             unsigned int bHasBeenRendered : 1;
             unsigned int bIsCached : 1;
             unsigned int bPushOtherPeds : 1; // GETS RESET EVERY FRAME - SET IN TASK: want to push other peds around (eg. leader of a group or ped trying to get in a car)
+            unsigned int bPedThirdFlags32 : 1; // unknown
 
             // 13th byte starts here (m_nFourthPedFlags)
             unsigned int bHasBulletProofVest : 1;
@@ -203,6 +204,8 @@ public:
             unsigned int bDeathPickupsPersist : 1;
             unsigned int bTestForShotInVehicle : 1;
             unsigned int bUsedForReplay : 1; // This ped is controlled by replay and should be removed when replay is done.
+            unsigned int bPedFourthFlags31 : 1; // unknown
+            unsigned int bPedFourthFlags32 : 1; // unknown
         };
         unsigned int m_nPedFlags;
         unsigned int m_nSecondPedFlags;

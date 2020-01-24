@@ -194,7 +194,7 @@ public:
     void ApplySpeed();
     void UnsetIsInSafePosition();
     void ApplyFriction();
-    bool ApplyCollision(CEntity* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity);
+    bool ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity);
     bool ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity);
     bool ProcessCollisionSectorList(int sectorX, int sectorY);
     bool ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSector);
