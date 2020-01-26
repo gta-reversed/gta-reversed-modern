@@ -29,8 +29,6 @@ public:
 
     // Performs cross calculation
     void Cross(const CVector& left, const CVector &right);
-
-    float Dot();
  
     // Adds left + right and stores result
     void Sum(const CVector& left, const CVector &right);
@@ -62,6 +60,7 @@ public:
 
     inline float SquaredMagnitude()
     {
+        // return ((float(__thiscall*)(CVector*)) 0x406DA0)(this);
         return x*x + y*y + z*z;
     }
 };

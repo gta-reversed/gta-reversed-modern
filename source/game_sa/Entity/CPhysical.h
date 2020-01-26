@@ -166,7 +166,7 @@ public:
     void ApplyGravity();
     void ApplyFrictionMoveForce(CVector moveForce);
     void ApplyFrictionTurnForce(CVector posn, CVector velocity);
-    void ApplyFrictionForce(CVector posn, CVector velocity);
+    void ApplyFrictionForce(CVector moveSpeed, CVector turnSpeed);
     void SkipPhysics();
     void AddCollisionRecord(CEntity* collidedEntity);
     bool GetHasCollidedWith(CEntity* entity);
@@ -186,7 +186,7 @@ public:
     void ApplyAirResistance();
     bool ApplyCollisionAlt(CEntity* entity, CColPoint& colPoint, float& fDamageIntensity, CVector& vecMoveSpeed, CVector& vecTurnSpeed);
     bool ApplyFriction(float fFriction, CColPoint* colPoint);
-    bool ApplyFriction(CPhysical* physical, float fFriction, CColPoint* colPoint);
+    bool ApplyFriction(CPhysical* pEntity, float fFriction, CColPoint* pColPoint);
     bool ProcessShiftSectorList(int sectorX, int sectorY);
     static void PlacePhysicalRelativeToOtherPhysical(CPhysical* physical1, CPhysical* physical2, CVector offset);
     float ApplyScriptCollision(CVector arg0, float arg1, float arg2, CVector* arg3);

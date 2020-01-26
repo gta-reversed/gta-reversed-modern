@@ -1078,7 +1078,7 @@ bool CPedIntelligence::TestForStealthKill(CPed* pTarget, bool bFullTest) {
 
     CVector vecOutput;
     VectorSub(&vecOutput, pTargetPos, pPedPos);
-    if (CPedIntelligence::STEALTH_KILL_RANGE * CPedIntelligence::STEALTH_KILL_RANGE < vecOutput.Dot())
+    if (CPedIntelligence::STEALTH_KILL_RANGE * CPedIntelligence::STEALTH_KILL_RANGE < vecOutput.SquaredMagnitude())
     {
         return false;
     }
@@ -1293,7 +1293,7 @@ double CPedIntelligence::CanSeeEntityWithLights(CEntity* pEntity, int unUsed) {
     double fX = pEntityPos->x - pPedPos->x;
     double fY = pEntityPos->y - pPedPos->y;
     double fZ = pEntityPos->z - pPedPos->z;
-    float entitya = sqrt(fZ * fZ + fX * fX + fY * fY) - 0.69999999;
+    float entitya = sqrt(fZ * fZ + fX * fX + fY * fY) - 0.69999999f;
     double result = fLightingTotal * fLightingTotal - entitya / flt_8D2384 * LIGHT_AI_LEVEL_MAX * LIGHT_AI_LEVEL_MAX;
     if (result <= 0.0)
     {

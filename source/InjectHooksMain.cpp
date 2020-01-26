@@ -3,9 +3,9 @@
 
 #pragma comment(lib, "detours.lib")
 
-//bool __thiscall CPhysical_ApplyCollision(CPhysical* pThis)
-auto OLD_CPhysical_ApplyCollision = (bool(__thiscall*) (CPhysical * pThis, CPhysical * pEntity, CColPoint * pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity))0x548680;
-bool __fastcall CPhysical_ApplyCollision(CPhysical* pThis, void* padding, CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity);
+//bool __thiscall CPhysical_ApplyFriction(CPhysical* pThis)
+auto OLD_CPhysical_ApplyFriction = (bool(__thiscall*) (CPhysical * pThis, CPhysical * pEntity, float fFriction, CColPoint * pColPoint))0x0545980;
+bool __fastcall CPhysical_ApplyFriction(CPhysical* pThis, void* padding, CPhysical* pEntity, float fFriction, CColPoint* pColPoint);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -32,7 +32,7 @@ void InjectHooksMain(void)
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CPhysical_ApplyCollision, CPhysical_ApplyCollision);
+    DetourAttach(&(PVOID&)OLD_CPhysical_ApplyFriction, CPhysical_ApplyFriction);
     DetourTransactionCommit();
      */
 }
@@ -60,9 +60,9 @@ enum eFunctionReturnValue
     FUNCTION_SOMELABEL = 4
 };
 
-bool __fastcall CPhysical_ApplyCollision(CPhysical* pThis, void* padding, CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity)
+bool __fastcall CPhysical_ApplyFriction(CPhysical* pThis, void* padding, CPhysical* pEntity, float fFriction, CColPoint* pColPoint)
 {
-    printf(" calling CPhysical_ApplyCollision \n");
+    printf(" calling CPhysical_ApplyFriction \n");
 
-    return true;
+   return true;
 }
