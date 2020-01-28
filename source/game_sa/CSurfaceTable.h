@@ -13,6 +13,13 @@ enum eAdhesionGroup
     ADHESION_GROUP_WET,
 };
 
+enum eFrictionEffect
+{
+    FRICTION_EFFECT_NONE = 0,
+    FRICTION_EFFECT_SPARKS,
+    FRICTION_EFFECT_MORE // not sure what this is, but it's probably not used
+};
+
 class CSurfaceTable 
 {
 public:

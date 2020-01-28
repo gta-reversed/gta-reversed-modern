@@ -12,11 +12,15 @@ CVector& CPhysical::fxDirection = *(CVector*)0xB73720;
 void CPhysical::InjectHooks()
 {
     HookInstall(0x54DB10, &CPhysical::ProcessShift_Reversed, 7);
+    HookInstall(0x5430A0, &CPhysical::ApplyFrictionMoveForce, 7);
+    HookInstall(0x543220, &CPhysical::ApplyFrictionForce, 7);
+    HookInstall(0x5454C0, (bool(CPhysical::*)(float, CColPoint*)) & CPhysical::ApplyFriction, 7);
     HookInstall(0x545980, (bool(CPhysical::*)(CPhysical*, float, CColPoint*)) &CPhysical::ApplyFriction, 7);
     HookInstall(0x546670, &CPhysical::ProcessShiftSectorList, 7);
+    HookInstall(0x5483D0, (void(CPhysical::*)()) & CPhysical::ApplyFriction, 7);
+    HookInstall(0x548680, (bool(CPhysical::*)(CEntity*, CColPoint*, float*, float*)) & CPhysical::ApplyCollision, 7);
     HookInstall(0x40974F, (bool(CPhysical::*)(CPhysical*, CColPoint*, float*, float*))&CPhysical::ApplySoftCollision, 5);
     HookInstall(0x54BA60, &CPhysical::ProcessCollisionSectorList, 7);
-    HookInstall(0x548680, (bool(CPhysical::*)(CEntity*, CColPoint*, float*, float*)) &CPhysical::ApplyCollision, 7);
     HookInstall(0x54CFF0, &CPhysical::ProcessCollisionSectorList_SimpleCar, 7);
 }
 
@@ -256,7 +260,18 @@ void CPhysical::ApplyGravity()
 // Converted from thiscall void CPhysical::ApplyFrictionMoveForce(CVector moveForce) 0x5430A0
 void CPhysical::ApplyFrictionMoveForce(CVector moveForce)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*, CVector))0x5430A0)(this, moveForce);
+#else
+    if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce)
+    {
+        if (physicalFlags.bDisableZ)
+        {
+            moveForce.z = 0.0f;
+        }
+        m_vecFrictionMoveSpeed += moveForce * (1.0f / m_fMass);
+    }
+#endif
 }
 
 // Unused
@@ -266,9 +281,49 @@ void CPhysical::ApplyFrictionTurnForce(CVector posn, CVector velocity)
 }
 
 // 0x543220
-void CPhysical::ApplyFrictionForce(CVector moveSpeed, CVector turnSpeed)
+void CPhysical::ApplyFrictionForce(CVector vecMoveForce, CVector vecDirection)
 {
-    ((void(__thiscall*)(CPhysical*, CVector, CVector))0x543220)(this, moveSpeed, turnSpeed);
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__thiscall*)(CPhysical*, CVector, CVector))0x543220)(this, vecMoveForce, vecDirection);
+#else
+    CVector vecTheMoveForce = vecMoveForce;
+
+    if (physicalFlags.bDisableZ)
+    {
+        vecTheMoveForce.z = 0.0f;
+    }
+
+    if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce)
+    {
+        m_vecFrictionMoveSpeed += vecTheMoveForce * (1.0f / m_fMass);
+    }
+
+    CVector vecCentreOfMassMultiplied;
+    if (!physicalFlags.bDisableTurnForce)
+    {
+        float fTurnMass = m_fTurnMass;
+        if (physicalFlags.bInfiniteMass)
+        {
+            fTurnMass += m_vecCentreOfMass.z * m_fMass * m_vecCentreOfMass.z * 0.5f;
+        }
+        else
+        {
+            Multiply3x3(&vecCentreOfMassMultiplied, m_matrix, &m_vecCentreOfMass);
+        }
+
+        if (physicalFlags.bDisableMoveForce)
+        {
+            vecDirection.z = 0.0f;
+            vecMoveForce.z = 0.0f;
+        }
+
+        CVector vecDifference = vecDirection - vecCentreOfMassMultiplied;
+        CVector vecMoveForceCrossProduct;
+        vecMoveForceCrossProduct.Cross(vecDifference, vecMoveForce);
+
+        m_vecFrictionTurnSpeed += vecMoveForceCrossProduct * (1.0f / fTurnMass);
+    }
+#endif
 }
 
 // Converted from thiscall void CPhysical::SkipPhysics(void) 0x5433B0
@@ -380,9 +435,94 @@ bool CPhysical::ApplyCollisionAlt(CEntity* entity, CColPoint& colPoint, float& a
 }
 
 // Converted from thiscall bool CPhysical::ApplyFriction(float,CColPoint &colPoint) 0x5454C0
-bool CPhysical::ApplyFriction(float fFriction, CColPoint* colPoint)
+bool CPhysical::ApplyFriction(float fFriction, CColPoint* pColPoint)
 {
-    return ((bool(__thiscall*)(CPhysical*, float, CColPoint*))0x5454C0)(this, fFriction, colPoint);
+#ifdef USE_DEFAULT_FUNCTIONS
+    return ((bool(__thiscall*)(CPhysical*, float, CColPoint*))0x5454C0)(this, fFriction, pColPoint);
+#else
+    if (physicalFlags.bDisableCollisionForce)
+    {
+        return false;
+    }
+
+    if (physicalFlags.bDisableTurnForce)
+    {
+        float fMoveSpeedDotProduct = DotProduct(&m_vecMoveSpeed, &pColPoint->m_vecNormal);
+        CVector vecSpeedDifference = m_vecMoveSpeed - (fMoveSpeedDotProduct * pColPoint->m_vecNormal);
+        float fMoveSpeedMagnitude = vecSpeedDifference.Magnitude();
+        if (fMoveSpeedMagnitude > 0.0f)
+        {
+            CVector vecMoveDirection = vecSpeedDifference * (1.0f / fMoveSpeedMagnitude);
+
+            float fSpeed = -fMoveSpeedMagnitude;
+            float fForce = -(CTimer::ms_fTimeStep / m_fMass * fFriction);
+            if (fSpeed < fForce)
+            {
+                fSpeed = fForce;
+            }
+
+            m_vecFrictionMoveSpeed.x += vecMoveDirection.x * fSpeed;
+            m_vecFrictionMoveSpeed.y += vecMoveDirection.y * fSpeed;
+            return true;
+        }
+        return false;
+    }
+
+    CVector vecMovingDirection = pColPoint->m_vecPoint - m_matrix->pos;
+    CVector vecSpeed;
+    GetSpeed(&vecSpeed, vecMovingDirection);
+
+    float fMoveSpeedDotProduct = DotProduct(&vecSpeed, &pColPoint->m_vecNormal);
+    CVector vecSpeedDifference = vecSpeed - (fMoveSpeedDotProduct * pColPoint->m_vecNormal);
+
+    float fMoveSpeedMagnitude = vecSpeedDifference.Magnitude();
+    if (fMoveSpeedMagnitude <= 0.0f)
+    {
+        return false;
+    }
+
+    CVector vecMoveDirection = vecSpeedDifference * (1.0f / fMoveSpeedMagnitude);
+
+    CVector vecCentreOfMassMultiplied;
+    Multiply3x3(&vecCentreOfMassMultiplied, m_matrix, &m_vecCentreOfMass);
+
+    CVector vecDifference = vecMovingDirection - vecCentreOfMassMultiplied;
+    CVector vecSpeedCrossProduct;
+    vecSpeedCrossProduct.Cross(vecDifference, vecMoveDirection);
+    float squaredMagnitude = vecSpeedCrossProduct.SquaredMagnitude();
+    float fCollisionMass = -(1.0f / (squaredMagnitude / m_fTurnMass + 1.0f / m_fMass) * fMoveSpeedMagnitude);
+    float fNegativeFriction = -fFriction;
+    if (fCollisionMass < fNegativeFriction)
+    {
+        fCollisionMass = fNegativeFriction;
+    }
+
+    ApplyFrictionForce(vecMoveDirection * fCollisionMass, vecMovingDirection);
+
+    CVehicle* pVehicle = static_cast<CVehicle*>(this);
+    if (fMoveSpeedMagnitude > 0.1f
+        && g_surfaceInfos->GetFrictionEffect(pColPoint->m_nSurfaceTypeB)
+        && (g_surfaceInfos->GetFrictionEffect(pColPoint->m_nSurfaceTypeA) == FRICTION_EFFECT_SPARKS || m_nType == ENTITY_TYPE_VEHICLE)
+        && (m_nType != ENTITY_TYPE_VEHICLE || pVehicle->m_nVehicleSubClass != VEHICLE_BMX || !pVehicle->m_pDriver
+            || fabs(DotProduct(&pColPoint->m_vecNormal, &m_matrix->right)) >= 0.86669999f))
+    {
+
+        CVector across = vecMoveDirection * (fMoveSpeedMagnitude * 0.25f);
+        CVector direction = vecMoveDirection + (pColPoint->m_vecNormal * 0.1f);
+        CVector vecSpeedCrossProduct;
+        vecSpeedCrossProduct.Cross(pColPoint->m_vecNormal, m_vecMoveSpeed);
+        vecSpeedCrossProduct.Normalise();
+
+        for (int i = 0; i < 8; i++)
+        {
+            float fRandom = rand() * 0.000030518509f * 0.4f - 0.2f;
+            CVector origin = pColPoint->m_vecPoint + (vecSpeedCrossProduct * fRandom);
+            float force = fMoveSpeedMagnitude * 12.5f;
+            g_fx.AddSparks(origin, direction, force, 1, across, SPARK_PARTICLE_SPARK2, 0.1f, 1.0f);
+        }
+    }
+    return true;
+#endif
 }
 
 // Converted from thiscall bool CPhysical::ApplyFriction(CPhysical* physical,float,CColPoint &colPoint) 0x545980
@@ -881,7 +1021,37 @@ void CPhysical::UnsetIsInSafePosition()
 // Converted from thiscall void CPhysical::ApplyFriction(void) 0x5483D0
 void CPhysical::ApplyFriction()
 {
-    ((void(__thiscall*)(CPhysical*))0x5483D0)(this);
+#ifdef USE_DEFAULT_FUNCTIONS
+    return ((void(__thiscall*)(CPhysical*))0x5483D0)(this);
+#else
+    if (physicalFlags.bDisableZ)
+    {
+        const CVector& vecPosition = GetPosition();
+        float fSphereRadius = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->m_pColModel->m_boundSphere.m_fRadius;
+        CColPoint colPoint;
+        colPoint.m_vecPoint.x = vecPosition.x - (0.0f * fSphereRadius);
+        colPoint.m_vecPoint.y = vecPosition.y - (0.0f * fSphereRadius);
+        colPoint.m_vecPoint.z = vecPosition.z - fSphereRadius;
+        colPoint.m_vecNormal = CVector (0.0f, 0.0f, 1.0f);
+
+        ApplyFriction(CTimer::ms_fTimeStep * 0.001f, &colPoint);
+        m_vecTurnSpeed.z = pow(0.98f, CTimer::ms_fTimeStep) * m_vecTurnSpeed.z;
+    }
+
+    m_vecMoveSpeed += m_vecFrictionMoveSpeed;
+    m_vecTurnSpeed += m_vecFrictionTurnSpeed;
+    m_vecFrictionMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+    m_vecFrictionTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+
+    CVehicle* pVehicle = static_cast<CVehicle*>(this);
+    if (m_nType == ENTITY_TYPE_VEHICLE && pVehicle->m_nVehicleClass == VEHICLE_BIKE
+        && !physicalFlags.b32 && m_nStatus == STATUS_ABANDONED 
+        && fabs(m_matrix->at.z) < 0.707f
+        && 0.05f * 0.05f > m_vecMoveSpeed.SquaredMagnitude() && 0.01f * 0.01f > m_vecTurnSpeed.SquaredMagnitude())
+    {                                    
+        m_vecMoveSpeed *= pow(0.5f, CTimer::ms_fTimeStep);
+    }
+#endif
 }
 
 // 0x548680

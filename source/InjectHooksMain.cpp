@@ -4,8 +4,8 @@
 #pragma comment(lib, "detours.lib")
 
 //bool __thiscall CPhysical_ApplyFriction(CPhysical* pThis)
-auto OLD_CPhysical_ApplyFriction = (bool(__thiscall*) (CPhysical * pThis, CPhysical * pEntity, float fFriction, CColPoint * pColPoint))0x0545980;
-bool __fastcall CPhysical_ApplyFriction(CPhysical* pThis, void* padding, CPhysical* pEntity, float fFriction, CColPoint* pColPoint);
+auto OLD_CPhysical_ApplyFriction = (bool(__thiscall*) (CPhysical * pThis, float fFriction, CColPoint * pColPoint))0x5454C0;
+bool __fastcall CPhysical_ApplyFriction(CPhysical* pThis, void* padding, float fFriction, CColPoint* pColPoint);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -64,5 +64,5 @@ bool __fastcall CPhysical_ApplyFriction(CPhysical* pThis, void* padding, CPhysic
 {
     printf(" calling CPhysical_ApplyFriction \n");
 
-   return true;
+    return true;
 }

@@ -18,6 +18,12 @@ enum FxQuality_e : unsigned int
 	FXQUALITY_VERY_HIGH
 };
 
+enum eSparkType
+{
+    SPARK_PARTICLE_SPARK2 = 0,
+    SPARK_PARTICLE_SPARK = 1
+};
+
 class CVehicle;
 
 class Fx_c {

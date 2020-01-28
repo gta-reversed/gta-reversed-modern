@@ -6,3 +6,8 @@ int SurfaceInfos_c::GetAdhesionGroup(int surfaceId)
 {
     return plugin::CallMethodAndReturn<int, 0x55E5C0, SurfaceInfos_c*, int> (this, surfaceId);
 }
+
+int SurfaceInfos_c::GetFrictionEffect(int surfaceId)
+{
+    return plugin::CallMethodAndReturn<int, 0x55E650, SurfaceInfos_c*, int>(this, surfaceId);
+}
