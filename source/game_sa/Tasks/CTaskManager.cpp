@@ -422,9 +422,9 @@ void CTaskManager::ParentsControlChildren(CTaskComplex* pTask) {
 }
 
 // Converted from thiscall void CTaskManager::SetTask(CTask *task,int taskIndex,bool) 0x681AF0
-void CTaskManager::SetTask(CTask* pTask, int taskIndex, bool arg2) {
+void CTaskManager::SetTask(CTask* pTask, int taskIndex, int arg2) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall *)(CTaskManager*, CTask*, int, bool))0x681AF0)(this, pTask, taskIndex, arg2);
+    ((void(__thiscall *)(CTaskManager*, CTask*, int, int))0x681AF0)(this, pTask, taskIndex, arg2);
 #else
     CTask* pPrimaryTask = nullptr;
     if (!pTask)
@@ -486,11 +486,12 @@ void CTaskManager::SetTaskSecondary(CTask* pTask, int taskIndex) {
         if (pTheTask)
         {
             CTask* pSimpleTask = nullptr;
-            while (pTheTask)
+            do
             {
                 pSimpleTask = pTheTask;
                 pTheTask = pTheTask->GetSubTask();
-            }
+            } while (pTheTask);
+
             if (!pSimpleTask->IsSimple())
             {
                 pTheTask = m_aSecondaryTasks[taskIndex];

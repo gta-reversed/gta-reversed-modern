@@ -214,7 +214,8 @@ public:
     };
     CPedIntelligence   *m_pIntelligence;
     CPlayerData        *m_pPlayerData;
-    unsigned int        m_nCreatedBy;
+    unsigned char       m_nCreatedBy;
+    char                field_485[3];
     AnimBlendFrameData *m_apBones[19];
     unsigned int        m_nAnimGroup;
     CVector2D           m_vecAnimMovingShiftLocal;

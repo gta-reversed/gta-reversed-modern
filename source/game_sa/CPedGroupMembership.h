@@ -17,7 +17,6 @@ class  CPedGroupMembership {
 public:
     CPedGroup *m_pPedGroup;
     CPed *m_apMembers[8]; //!< m_apMembers[7] is a leader
-    float m_fMaxSeparation;
 
      static float const &ms_fMaxSeparation;
      static float const &ms_fPlayerGroupMaxSeparation;
@@ -44,6 +43,6 @@ public:
      static signed int GetObjectForPedToHold();
 };
 
-VALIDATE_SIZE(CPedGroupMembership, 0x28);
+VALIDATE_SIZE(CPedGroupMembership, 0x24);
 
 //#include "meta/meta.CPedGroupMembership.h"

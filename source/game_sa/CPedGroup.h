@@ -13,7 +13,7 @@
 #include "CPed.h"
 #include "CVehicle.h"
 
-class  CPedGroup {
+class CPedGroup {
     PLUGIN_NO_DEFAULT_CONSTRUCTION(CPedGroup)
 
 public:
@@ -25,6 +25,8 @@ public:
     CPedGroupMembership m_groupMembership;
     float m_fSeparationRange;
     CPedGroupIntelligence m_groupIntelligence;
+    bool m_bIsMissionGroup;
+    char field_2D1[3];
 
      float FindDistanceToFurthestMember();
      float FindDistanceToNearestMember(CPed **ppOutNearestMember);

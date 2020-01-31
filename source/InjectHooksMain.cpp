@@ -3,9 +3,8 @@
 
 #pragma comment(lib, "detours.lib")
 
-//bool __thiscall CPhysical_ApplyFriction(CPhysical* pThis)
-auto OLD_CPhysical_ApplyFriction = (bool(__thiscall*) (CPhysical * pThis, float fFriction, CColPoint * pColPoint))0x5454C0;
-bool __fastcall CPhysical_ApplyFriction(CPhysical* pThis, void* padding, float fFriction, CColPoint* pColPoint);
+auto OLD_CPedIntelligence_FlushImmediately = (void(__thiscall*) (CPedIntelligence * pThis, bool bSetPrimaryDefaultTask))0x601640;
+void __fastcall CPedIntelligence_FlushImmediately(CPedIntelligence* pThis, void* padding, bool bSetPrimaryDefaultTask);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -13,6 +12,7 @@ void InjectHooksMain(void)
 {
     // CStreaming is unstable for now.
     //CStreaming::InjectHooks();
+
     ///*
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();
@@ -26,24 +26,22 @@ void InjectHooksMain(void)
     CTaskSimplePlayerOnFoot::InjectHooks();
     CTaskSimpleSwim::InjectHooks();
     //*/
-    /*
+   /*
     DetourRestoreAfterWith();
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
 
     std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CPhysical_ApplyFriction, CPhysical_ApplyFriction);
+    DetourAttach(&(PVOID&)OLD_CPedIntelligence_FlushImmediately, CPedIntelligence_FlushImmediately);
     DetourTransactionCommit();
      */
 }
-/*
-enum eFunctionReturnValue
+
+void __fastcall CPedIntelligence_FlushImmediately(CPedIntelligence* pThis, void* padding, bool bSetPrimaryDefaultTask)
 {
-    FUNCTION_RETURN = 0,
-    FUNCTION_INSIDE_IF = 1,
-    FUNCTION_OUTSIDE_IF = 2
-};
-*/
+}
+
+
 /*
 dwReturnLocation:
 0 means that the function should return.
@@ -56,13 +54,17 @@ enum eFunctionReturnValue
     FUNCTION_RETURN = 0,
     FUNCTION_INSIDE_IF = 1,
     FUNCTION_OUTSIDE_IF = 2,
-    FUNCTION_SWITCH_CASE_2 = 3,
-    FUNCTION_SOMELABEL = 4
+    //FUNCTION_SWITCH_CASE_2 = 3,
+    //FUNCTION_SOMELABEL = 4
 };
 
-bool __fastcall CPhysical_ApplyFriction(CPhysical* pThis, void* padding, CPhysical* pEntity, float fFriction, CColPoint* pColPoint)
+DWORD RETURN_HOOK_INSIDE_IF = 0x060185A;
+DWORD RETURN_HOOK_OUTSIDE_IF = 0x6018B1; //0x601748;
+DWORD RETURN_HOOK_EXIT_WITH_GRACE = 0x601668;
+void _declspec(naked) HOOK_THEFUNCTION()
 {
-    printf(" calling CPhysical_ApplyFriction \n");
+    _asm
+    {
 
-    return true;
+    }
 }
