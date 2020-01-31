@@ -84,7 +84,7 @@ public:
     unsigned short m_nModelIndex;
     CReference *m_pReferences;
     void *m_pStreamingLink;
-    short m_nScanCode;
+    unsigned short m_nScanCode;
     char m_nIplIndex;
     unsigned char m_nAreaCode; // interior
     union {

@@ -43,7 +43,7 @@ public:
     static bool &bDoingCarCollisions;
     // Current player
     static char &PlayerInFocus;
-    static int  &ms_nCurrentScanCode;
+    static unsigned short &ms_nCurrentScanCode;
     // Player data array for 2 players
     static CPlayerInfo *Players; // static CPlayerInfo Players[MAX_PLAYERS]
     // Use GetSector() to access this array

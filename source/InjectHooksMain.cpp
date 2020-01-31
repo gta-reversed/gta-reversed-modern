@@ -3,8 +3,8 @@
 
 #pragma comment(lib, "detours.lib")
 
-auto OLD_CPedIntelligence_FlushImmediately = (void(__thiscall*) (CPedIntelligence * pThis, bool bSetPrimaryDefaultTask))0x601640;
-void __fastcall CPedIntelligence_FlushImmediately(CPedIntelligence* pThis, void* padding, bool bSetPrimaryDefaultTask);
+auto OLD_CRenderer_ScanSectorList = (void(__thiscall*) (CPedIntelligence * pThis, bool bSetPrimaryDefaultTask))0x601640;
+void __fastcall CRenderer_ScanSectorList(CPedIntelligence* pThis, void* padding, bool bSetPrimaryDefaultTask);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -26,21 +26,17 @@ void InjectHooksMain(void)
     CTaskSimplePlayerOnFoot::InjectHooks();
     CTaskSimpleSwim::InjectHooks();
     //*/
-   /*
-    DetourRestoreAfterWith();
-    DetourTransactionBegin();
-    DetourUpdateThread(GetCurrentThread());
 
-    std::printf("GOING TO HOOK FUNC NOW\n");
-    DetourAttach(&(PVOID&)OLD_CPedIntelligence_FlushImmediately, CPedIntelligence_FlushImmediately);
-    DetourTransactionCommit();
-     */
+    /*
+     DetourRestoreAfterWith();
+     DetourTransactionBegin();
+     DetourUpdateThread(GetCurrentThread());
+
+     std::printf("GOING TO HOOK FUNC NOW\n");
+     DetourAttach(&(PVOID&)OLD_CRenderer_ScanSectorList, CRenderer_ScanSectorList);
+     DetourTransactionCommit();
+      */
 }
-
-void __fastcall CPedIntelligence_FlushImmediately(CPedIntelligence* pThis, void* padding, bool bSetPrimaryDefaultTask)
-{
-}
-
 
 /*
 dwReturnLocation:
@@ -58,13 +54,12 @@ enum eFunctionReturnValue
     //FUNCTION_SOMELABEL = 4
 };
 
-DWORD RETURN_HOOK_INSIDE_IF = 0x060185A;
-DWORD RETURN_HOOK_OUTSIDE_IF = 0x6018B1; //0x601748;
-DWORD RETURN_HOOK_EXIT_WITH_GRACE = 0x601668;
+DWORD RETURN_HOOK_INSIDE_IF = 0x0;
+DWORD RETURN_HOOK_OUTSIDE_IF = 0x0554ADD;
+DWORD RETURN_HOOK_EXIT_WITH_GRACE = 0x0;
 void _declspec(naked) HOOK_THEFUNCTION()
 {
     _asm
     {
-
     }
 }
