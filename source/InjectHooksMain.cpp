@@ -3,8 +3,8 @@
 
 #pragma comment(lib, "detours.lib")
 
-auto OLD_CRenderer_ScanSectorList = (void(__thiscall*) (CPedIntelligence * pThis, bool bSetPrimaryDefaultTask))0x601640;
-void __fastcall CRenderer_ScanSectorList(CPedIntelligence* pThis, void* padding, bool bSetPrimaryDefaultTask);
+auto OLD_CPhysical_ApplyCollisionAlt = (bool(__thiscall*) (CPhysical* pThis, CPhysical * pEntity, CColPoint * pColPoint, float* pDamageIntensity, CVector * pVecMoveSpeed, CVector * pVecTurnSpeed))0x544D50;
+bool __fastcall CPhysical_ApplyCollisionAlt(CPhysical* pThis, void* padding, CPhysical* pEntity, CColPoint* pColPoint, float* pDamageIntensity, CVector* pVecMoveSpeed, CVector* pVecTurnSpeed);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -33,9 +33,16 @@ void InjectHooksMain(void)
      DetourUpdateThread(GetCurrentThread());
 
      std::printf("GOING TO HOOK FUNC NOW\n");
-     DetourAttach(&(PVOID&)OLD_CRenderer_ScanSectorList, CRenderer_ScanSectorList);
+     DetourAttach(&(PVOID&)OLD_CPhysical_ApplyCollisionAlt, CPhysical_ApplyCollisionAlt);
      DetourTransactionCommit();
-      */
+     */
+}
+
+bool __fastcall CPhysical_ApplyCollisionAlt(CPhysical* pThis, void* padding, CPhysical* pEntity, CColPoint* pColPoint, float* pDamageIntensity, CVector* pVecMoveSpeed, CVector* pVecTurnSpeed)
+{
+    printf("CPhysical_ApplyCollisionAlt called!\n");
+
+    return true;
 }
 
 /*
