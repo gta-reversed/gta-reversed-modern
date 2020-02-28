@@ -7,6 +7,14 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
+char(&CFileLoader::ms_line)[512] = *reinterpret_cast<char(*)[512]>(0xB71848);
+unsigned int& gAtomicModelId = *reinterpret_cast<unsigned int*>(0xB71840);
+
+void CFileLoader::InjectHooks()
+{
+    HookInstall(0x537150, &CFileLoader::SetRelatedModelInfoCB, 7);
+}
+
 bool CFileLoader::LoadAtomicFile(RwStream *stream, unsigned int modelIndex) {
     return plugin::CallAndReturnDynGlobal<bool, RwStream *, unsigned int>(0x5371F0, stream, modelIndex);
 }
@@ -41,4 +49,34 @@ bool CFileLoader::LoadCollisionFile(unsigned char *data, unsigned int dataSize, 
 
 bool CFileLoader::FinishLoadClumpFile(RwStream *stream, unsigned int modelIndex) {
     return plugin::CallAndReturnDynGlobal<bool, RwStream *, unsigned int>(0x537450, stream, modelIndex);
+}
+
+void GetNameAndDamage(char const* nodeName, char* outName, bool& outDamage) {
+    plugin::CallDynGlobal<char const*, char*, bool&>(0x5370A0, nodeName, outName, outDamage);
+}
+
+
+RpAtomic* CFileLoader::SetRelatedModelInfoCB(RpAtomic* atomic, RpClump* clump)
+{
+    char name[24];
+    auto pAtomicModelInfo = CModelInfo::ms_modelInfoPtrs[gAtomicModelId]->AsAtomicModelInfoPtr();
+    char* frameNodeName = GetFrameNodeName(GetFrameFromAtomic(atomic));
+
+    bool bDamage = false;
+    GetNameAndDamage(frameNodeName, (char*)&name, bDamage);
+    CVisibilityPlugins::SetAtomicRenderCallback(atomic, 0);
+    if (bDamage)
+    {
+        auto pDamagableModelInfo = pAtomicModelInfo->AsDamageAtomicModelInfoPtr();
+        pDamagableModelInfo->SetDamagedAtomic(atomic);
+    }
+    else
+    {
+        pAtomicModelInfo->SetAtomic(atomic);
+    }
+    RpClumpRemoveAtomic(clump, atomic);
+    RwFrame* newFrame = RwFrameCreate();
+    RpAtomicSetFrame(atomic, newFrame);
+    CVisibilityPlugins::SetAtomicId(atomic, gAtomicModelId);
+    return atomic;
 }

@@ -6,14 +6,14 @@ Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
-CBaseModelInfo *CBaseModelInfo::AsAtomicModelInfoPtr()
+CAtomicModelInfo* CBaseModelInfo::AsAtomicModelInfoPtr()
 {
-    return ((CBaseModelInfo *(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 1))(this);
+    return ((CAtomicModelInfo * (__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 1))(this);
 }
 
-CBaseModelInfo *CBaseModelInfo::AsDamageAtomicModelInfoPtr()
+CDamagableModelInfo* CBaseModelInfo::AsDamageAtomicModelInfoPtr()
 {
-    return ((CBaseModelInfo *(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 2))(this);
+    return ((CDamagableModelInfo *(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 2))(this);
 }
 
 CBaseModelInfo *CBaseModelInfo::AsLodAtomicModelInfoPtr()

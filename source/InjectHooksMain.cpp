@@ -13,7 +13,6 @@ void InjectHooksMain(void)
     // CStreaming is unstable for now.
     //CStreaming::InjectHooks();
 
-    ///*
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();
     CPedIntelligence::InjectHooks();
@@ -25,7 +24,6 @@ void InjectHooksMain(void)
     CTaskComplexWanderCop::InjectHooks();
     CTaskSimplePlayerOnFoot::InjectHooks();
     CTaskSimpleSwim::InjectHooks();
-    //*/
 
     /*
      DetourRestoreAfterWith();

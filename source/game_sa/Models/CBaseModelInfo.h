@@ -87,8 +87,8 @@ public:
 
 	// vtable
 
-	class CBaseModelInfo *AsAtomicModelInfoPtr();
-	class CBaseModelInfo *AsDamageAtomicModelInfoPtr();
+	class CAtomicModelInfo*AsAtomicModelInfoPtr();
+	class CDamagableModelInfo*AsDamageAtomicModelInfoPtr();
 	class CBaseModelInfo *AsLodAtomicModelInfoPtr();
 	ModelInfoType GetModelType();//=0
 	tTimeInfo *GetTimeInfo();

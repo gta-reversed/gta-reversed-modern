@@ -19,6 +19,8 @@ class  CFileLoader {
 public:
      static char(&ms_line)[512]; // static char ms_line[512]
 
+     static void InjectHooks();
+
     //! copy textures from dictionary to baseDictionary
      static void AddTexDictionaries(RwTexDictionary *dictionary, RwTexDictionary *baseDictionary);
      static RpAtomic *FindRelatedModelInfoCB(RpAtomic *atomic, void *data);
@@ -72,7 +74,7 @@ public:
      static void ReloadPaths(char const *filename);
     //! save txd to file
      static void SaveTexDictionary(RwTexDictionary *dictionary, char const *filename);
-     static RpAtomic *SetRelatedModelInfoCB(RpAtomic *atomic, void *data);
+     static RpAtomic *SetRelatedModelInfoCB(RpAtomic *atomic, RpClump* clump);
      static bool StartLoadClumpFile(RwStream *stream, unsigned int modelIndex);
 };
 

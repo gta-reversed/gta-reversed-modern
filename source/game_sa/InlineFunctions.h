@@ -5,6 +5,7 @@
 // can then why not inline functions? ;)
 //////////////////////////////////////////////////////////////////////////////////////
 
+#include "RenderWare.h"
 #include "Animation\CAnimBlendClumpData.h"
 
 inline CAnimBlendClumpData * GetAnimClumpData(RpClump * pClump)
@@ -12,4 +13,9 @@ inline CAnimBlendClumpData * GetAnimClumpData(RpClump * pClump)
     const DWORD clumpOffset = (*(DWORD*)0xB5F878);
     //return reinterpret_cast <CAnimBlendClumpData *> (*(&pClump->object.type + clumpOffset));
     return reinterpret_cast <CAnimBlendClumpData *> (*(DWORD *)(clumpOffset + ((int)pClump)  ));
+}
+
+inline RwFrame* GetFrameFromAtomic(RpAtomic* atomic)
+{
+    return reinterpret_cast<RwFrame*>(atomic->object.object.parent);
 }
