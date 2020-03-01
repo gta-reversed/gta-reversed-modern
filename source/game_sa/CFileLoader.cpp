@@ -12,11 +12,51 @@ unsigned int& gAtomicModelId = *reinterpret_cast<unsigned int*>(0xB71840);
 
 void CFileLoader::InjectHooks()
 {
+    HookInstall(0x5371F0, (bool(*)(RwStream*, unsigned int))&CFileLoader::LoadAtomicFile, 7);
     HookInstall(0x537150, &CFileLoader::SetRelatedModelInfoCB, 7);
 }
 
-bool CFileLoader::LoadAtomicFile(RwStream *stream, unsigned int modelIndex) {
-    return plugin::CallAndReturnDynGlobal<bool, RwStream *, unsigned int>(0x5371F0, stream, modelIndex);
+bool CFileLoader::LoadAtomicFile(RwStream *stream, unsigned int modelId) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<bool, RwStream *, unsigned int>(0x5371F0, stream, modelId);
+#else
+    auto pAtomicModelInfo = CModelInfo::ms_modelInfoPtrs[modelId]->AsAtomicModelInfoPtr();
+
+
+    bool bUseCommonVehicleTexDictionary = false; 
+    if (pAtomicModelInfo && pAtomicModelInfo->bUnknownBit)
+    {
+        bUseCommonVehicleTexDictionary = true;
+        CVehicleModelInfo::UseCommonVehicleTexDicationary();
+    }
+
+    if (RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr))
+    {
+        RpClump* pReadClump = RpClumpStreamRead(stream);
+        if (!pReadClump)
+        {
+            if (bUseCommonVehicleTexDictionary)
+            {
+                CVehicleModelInfo::StopUsingCommonVehicleTexDicationary();
+            }
+            return false;
+        }
+        gAtomicModelId = modelId;
+        RpClumpForAllAtomics(pReadClump, (RpAtomicCallBack)CFileLoader::SetRelatedModelInfoCB, pReadClump);
+        RpClumpDestroy(pReadClump);
+    }
+
+    if (!pAtomicModelInfo->m_pRwObject)
+    {
+        return false;
+    }
+
+    if (bUseCommonVehicleTexDictionary)
+    {
+        CVehicleModelInfo::StopUsingCommonVehicleTexDicationary();
+    }
+    return true;
+#endif
 }
 
 void CFileLoader::LoadAtomicFile(char const *filename) {
@@ -58,6 +98,9 @@ void GetNameAndDamage(char const* nodeName, char* outName, bool& outDamage) {
 
 RpAtomic* CFileLoader::SetRelatedModelInfoCB(RpAtomic* atomic, RpClump* clump)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<RpAtomic*, 0x537150, RpAtomic*, RpClump*>(atomic, clump);
+#else
     char name[24];
     auto pAtomicModelInfo = CModelInfo::ms_modelInfoPtrs[gAtomicModelId]->AsAtomicModelInfoPtr();
     char* frameNodeName = GetFrameNodeName(GetFrameFromAtomic(atomic));
@@ -79,4 +122,5 @@ RpAtomic* CFileLoader::SetRelatedModelInfoCB(RpAtomic* atomic, RpClump* clump)
     RpAtomicSetFrame(atomic, newFrame);
     CVisibilityPlugins::SetAtomicId(atomic, gAtomicModelId);
     return atomic;
+#endif
 }

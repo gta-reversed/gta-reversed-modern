@@ -12,7 +12,7 @@ void InjectHooksMain(void)
 {
     // CStreaming is unstable for now.
     //CStreaming::InjectHooks();
-
+    CFileLoader::InjectHooks();
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();
     CPedIntelligence::InjectHooks();

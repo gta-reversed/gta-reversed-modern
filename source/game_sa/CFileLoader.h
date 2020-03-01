@@ -26,7 +26,7 @@ public:
      static RpAtomic *FindRelatedModelInfoCB(RpAtomic *atomic, void *data);
      static bool FinishLoadClumpFile(RwStream *stream, unsigned int modelIndex);
      static void LoadAnimatedClumpObject(char const *line);
-     static bool LoadAtomicFile(RwStream *stream, unsigned int modelIndex);
+     static bool LoadAtomicFile(RwStream *stream, unsigned int modelId);
      static void LoadAtomicFile(char const *filename);
      static RpClump *LoadAtomicFile2Return(char const *filename);
      static void LoadAudioZone(char const *line);
