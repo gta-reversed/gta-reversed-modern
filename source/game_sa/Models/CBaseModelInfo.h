@@ -70,7 +70,7 @@ public:
 					unsigned char bHasComplexHierarchy : 1;
 					unsigned char bDontCollideWithFlyer : 1;
 					unsigned char nSpecialType : 4;
-					unsigned char bUnknownBit: 1;
+					unsigned char bWetRoadReflection : 1;
 				};
 				struct{
 					unsigned char : 2;

@@ -21,10 +21,8 @@ bool CFileLoader::LoadAtomicFile(RwStream *stream, unsigned int modelId) {
     return plugin::CallAndReturnDynGlobal<bool, RwStream *, unsigned int>(0x5371F0, stream, modelId);
 #else
     auto pAtomicModelInfo = CModelInfo::ms_modelInfoPtrs[modelId]->AsAtomicModelInfoPtr();
-
-
     bool bUseCommonVehicleTexDictionary = false; 
-    if (pAtomicModelInfo && pAtomicModelInfo->bUnknownBit)
+    if (pAtomicModelInfo && pAtomicModelInfo->bWetRoadReflection)
     {
         bUseCommonVehicleTexDictionary = true;
         CVehicleModelInfo::UseCommonVehicleTexDicationary();
