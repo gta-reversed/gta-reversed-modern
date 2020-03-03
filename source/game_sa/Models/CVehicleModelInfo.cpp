@@ -14,6 +14,52 @@ CRGBA* CVehicleModelInfo::ms_vehicleColourTable = (CRGBA*)0xB4E480;
 char* CVehicleModelInfo::ms_compsUsed = (char*)0xB4E478;
 char* CVehicleModelInfo::ms_compsToUse = (char*)0x8A6458;
 
+typedef CVehicleModelInfo::CVehicleStructure CVehicleStructure;
+CPool<CVehicleStructure>*& CVehicleStructure::m_pInfoPool = *(CPool<CVehicleStructure> * *)0xB4E680;
+RwObjectNameIdAssocation** CVehicleModelInfo::ms_vehicleDescs = (RwObjectNameIdAssocation * *)0x8A7740;
+
+void CVehicleModelInfo::InjectHooks()
+{
+    HookInstall(0x4C95C0, &CVehicleModelInfo::SetClump_Reversed, 7);
+}
+
+CVehicleStructure* CVehicleStructure::Constructor()
+{
+    return plugin::CallMethodAndReturn<CVehicleStructure*, 0x4C8D60, CVehicleStructure*>(this);
+}
+
+void CVehicleModelInfo::SetClump(RpClump* clump)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__thiscall*)(CClumpModelInfo*, RpClump*))plugin::GetVMT(this, 16))(this, clump);
+#else
+    SetClump_Reversed(clump);
+#endif
+}
+
+void CVehicleModelInfo::SetClump_Reversed(RpClump* clump)
+{
+    auto pVehicleStructure = (CVehicleStructure*)CVehicleStructure::m_pInfoPool->New();
+    if (pVehicleStructure)
+    {
+        pVehicleStructure->Constructor();
+    }
+
+    m_pVehicleStruct = pVehicleStructure;
+    CClumpModelInfo::SetClump(clump);
+    SetAtomicRenderCallbacks();
+    SetFrameIds(ms_vehicleDescs[m_nVehicleType]);
+    SetRenderPipelines();
+    PreprocessHierarchy();
+    ReduceMaterialsInVehicle();
+    m_nCurrentPrimaryColor = 255;
+    m_nCurrentSecondaryColor = 255;
+    m_nCurrentTertiaryColor = 255;
+    m_nCurrentQuaternaryColor = 255;
+    SetCarCustomPlate();
+}
+
+
 void CVehicleModelInfo::ShutdownLightTexture()
 {
     ((void(__cdecl*)())0x4C7470)();

@@ -23,8 +23,8 @@ public:
 
 	// vtable
 
-	CBox *GetBoundingBox();
-	void SetClump(RpClump *clump);
+    virtual CBox *GetBoundingBox();
+    virtual void SetClump(RpClump *clump);
 
 	// static functions
 

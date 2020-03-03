@@ -85,7 +85,9 @@ public:
 		RpAtomic *m_apExtras[6];
 		unsigned char m_nNumExtras;
 		unsigned int m_nMaskComponentsDamagable;
-		static CPool<CVehicleModelInfo> *&m_pInfoPool;
+		static CPool<CVehicleStructure> *&m_pInfoPool;
+
+        CVehicleStructure* Constructor();
 	} *m_pVehicleStruct;
 
 	char field_60[464];
@@ -121,7 +123,7 @@ public:
 
 	// vehicle components description tables
 	// static RwObjectNameIdAssocation ms_vehicleDescs[12];
-	static RwObjectNameIdAssocation *ms_vehicleDescs;
+	static RwObjectNameIdAssocation** ms_vehicleDescs;
 
 	// remap texture
 	static RwTexture *ms_pRemapTexture;
@@ -154,6 +156,12 @@ public:
 	// vehicle colours from carcols.dat
 	// static CRGBA ms_vehicleColourTable[128];
 	static CRGBA *ms_vehicleColourTable;
+
+    static void InjectHooks();
+
+    virtual void SetClump(RpClump* clump) override;
+
+    void SetClump_Reversed(RpClump* clump);
 
 	// destroying vehiclelights textures
 	static void ShutdownLightTexture();

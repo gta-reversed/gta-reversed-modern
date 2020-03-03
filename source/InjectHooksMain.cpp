@@ -12,6 +12,8 @@ void InjectHooksMain(void)
 {
     // CStreaming is unstable for now.
     //CStreaming::InjectHooks();
+
+    CVehicleModelInfo::InjectHooks();
     CFileLoader::InjectHooks();
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();

@@ -87,20 +87,20 @@ public:
 
 	// vtable
 
-	class CAtomicModelInfo*AsAtomicModelInfoPtr();
-	class CDamagableModelInfo*AsDamageAtomicModelInfoPtr();
-	class CBaseModelInfo *AsLodAtomicModelInfoPtr();
-	ModelInfoType GetModelType();//=0
-	tTimeInfo *GetTimeInfo();
-	void Init();
-	void Shutdown();
-	void DeleteRwObject();//=0
-	unsigned int GetRwModelType();//=0
-	struct RwObject *CreateInstance(RwMatrix *matrix);//=0
-	struct RwObject *CreateInstance();//=0
-	void SetAnimFile(char *filename);
-	void ConvertAnimFileIndex();
-	signed int GetAnimFileIndex();
+	virtual class CAtomicModelInfo*AsAtomicModelInfoPtr();
+    virtual class CDamagableModelInfo*AsDamageAtomicModelInfoPtr();
+    virtual class CBaseModelInfo *AsLodAtomicModelInfoPtr();
+    virtual ModelInfoType GetModelType();//=0
+    virtual tTimeInfo *GetTimeInfo();
+    virtual void Init();
+    virtual void Shutdown();
+    virtual void DeleteRwObject();//=0
+    virtual unsigned int GetRwModelType();//=0
+    virtual struct RwObject *CreateInstance(RwMatrix *matrix);//=0
+    virtual struct RwObject *CreateInstance();//=0
+    virtual void SetAnimFile(char *filename);
+    virtual void ConvertAnimFileIndex();
+    virtual signed int GetAnimFileIndex();
 
 	//
 	void SetTexDictionary(char *txdName);
