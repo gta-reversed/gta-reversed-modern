@@ -3,30 +3,43 @@
 #include "CMatrix.h"
 
 class CEntity;
+class CPhysical;
 
 class cBuoyancy
 {
 public:
-
-    bool ProcessBuoyancy(CEntity* pEntity, float fBuoyancy, CVector* pOutVecMoveForce, CVector* pOutVecTurnForce);
-
-    CVector         vecPos;                     // 0
-    CMatrix         EntityMatrix;               // 12
-    unsigned int    pad1[4];                    // 84
-    float           fWaterLevel;                // 100
-    unsigned int    pad2;                       // 104
-    float           fBuoyancy;                  // 108
-    CVector         vecUnk1;                    // 112
-    CVector         vecUnk2;                    // 124
-    unsigned int    pad3[4];                    // 136
-    unsigned char   pad4[4];                    // 152
-    unsigned int    pad5[7];                    // 156
-    unsigned char   pad6[2];                    // 184
-    unsigned char   bProcessingBoat;            // 186
-    unsigned char   pad7;                       // 187
+    CVector         m_vecPos;                     // 0
+    CMatrix         m_EntityMatrix;               // 12
+    CVector         field_54;
+    float           field_60;
+    float           m_fWaterLevel;                // 100
+    unsigned int    field_68;                   // 104
+    float           m_fBuoyancy;                  // 108
+    CVector         field_70;                   // 112
+    CVector         field_7C;                   // 124
+    unsigned int    field_88;
+    unsigned int    field_8C;
+    unsigned int    field_90;
+    unsigned int    field_94;
+    unsigned char   field_98;
+    unsigned char   field_99;
+    unsigned char   field_9A;
+    unsigned char   field_9B;
+    unsigned int    field_9C;
+    unsigned int    field_A0;
+    unsigned int    field_A4;
+    CVector         field_A8;
+    unsigned int    field_B4;
+    unsigned char   field_B8[2];                // 184
+    unsigned char   m_bProcessingBoat;            // 186
+    unsigned char   field_BB;                   // 187
     float           fTurnForceZ;                // 188
-    CVector         vecMoveForce;               // 192
-    unsigned int    pad8;                       // 204
+    CVector         m_vecMoveForce;               // 192
+    unsigned int    field_CC;                   // 204
+
+    static void InjectHooks();
+    bool ProcessBuoyancy(CEntity* pEntity, float fBuoyancy, CVector* pOutVecMoveForce, CVector* pOutVecTurnForce);
+    bool CalcBuoyancyForce(CPhysical* pEntity, CVector* pVecTurnSpeed, CVector* pBuoyancy);
 };
 
 VALIDATE_SIZE(cBuoyancy, 0xD0);

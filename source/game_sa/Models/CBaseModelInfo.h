@@ -86,7 +86,7 @@ public:
 	struct RwObject  *m_pRwObject; // 28
 
 	// vtable
-
+	virtual CBaseModelInfo* DeletingDestructor(uint8_t deletingFlags);
 	virtual class CAtomicModelInfo*AsAtomicModelInfoPtr();
     virtual class CDamagableModelInfo*AsDamageAtomicModelInfoPtr();
     virtual class CBaseModelInfo *AsLodAtomicModelInfoPtr();
