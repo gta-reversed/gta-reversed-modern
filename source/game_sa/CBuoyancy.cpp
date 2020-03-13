@@ -29,7 +29,7 @@ bool cBuoyancy::CalcBuoyancyForce(CPhysical* pEntity, CVector* pVecTurnSpeed, CV
     const float fCurrentBuoyancy = fTurnForceZ * m_fBuoyancy * CTimer::ms_fTimeStep;
     *pBuoyancy = CVector(0.0f, 0.0f, fCurrentBuoyancy);
 
-    float fSubmerge = (CTimer::ms_fTimeStep / pEntity->m_fMass) * pEntity->m_vecMoveSpeed.z;
+    float fSubmerge = pEntity->m_fMass * pEntity->m_vecMoveSpeed.z;
     if (fSubmerge <= fCurrentBuoyancy * 4.0f)
     {
         return true;
