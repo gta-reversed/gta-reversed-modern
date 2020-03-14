@@ -33,13 +33,16 @@ public:
     unsigned char   field_B8[2];                // 184
     unsigned char   m_bProcessingBoat;            // 186
     unsigned char   field_BB;                   // 187
-    float           fTurnForceZ;                // 188
+    float           m_fDistanceToWaterSurfaceZ;  // distance in Z-axis between entity and water surface
     CVector         m_vecMoveForce;               // 192
     unsigned int    field_CC;                   // 204
 
     static void InjectHooks();
-    bool ProcessBuoyancy(CEntity* pEntity, float fBuoyancy, CVector* pOutVecMoveForce, CVector* pOutVecTurnForce);
+    bool ProcessBuoyancy(CPhysical* pEntity, float fBuoyancy, CVector* pVecTurnSpeed, CVector* pBuoyancy);
     bool CalcBuoyancyForce(CPhysical* pEntity, CVector* pVecTurnSpeed, CVector* pBuoyancy);
+    float PreCalcSetup(CPhysical* pEntity, float fBuoyancy);
+    void AddSplashParticles(CPhysical* pEntity, CVector a3, CVector a4, CVector a5, bool bUnknown);
+    void SimpleCalcBuoyancy(CPhysical* pEntity);
 };
 
 VALIDATE_SIZE(cBuoyancy, 0xD0);
