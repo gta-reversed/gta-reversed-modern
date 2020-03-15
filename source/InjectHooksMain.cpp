@@ -17,6 +17,7 @@ void InjectHooksMain(void)
     CFileLoader::InjectHooks();
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();
+    CPed::InjectHooks();
     CPedIntelligence::InjectHooks();
     CTrain::InjectHooks();
     CTaskManager::InjectHooks();

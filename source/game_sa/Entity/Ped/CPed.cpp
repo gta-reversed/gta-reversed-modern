@@ -7,6 +7,11 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
+void CPed::InjectHooks()
+{
+    HookInstall(0x5E3960, &CPed::IsPedInControl, 7);
+}
+
 CPed::CPed(ePedType pedtype) : CPhysical(plugin::dummy), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
 plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy,
 plugin::dummy, plugin::dummy, plugin::dummy }
@@ -453,7 +458,19 @@ void CPed::ProcessBuoyancy()
 // Converted from thiscall bool CPed::IsPedInControl(void) 0x5E3960
 bool CPed::IsPedInControl()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     return ((bool(__thiscall *)(CPed*))0x5E3960)(this);
+#else
+    bool result; // al
+
+    result = false;
+    if (!bIsLanding && !bIsInTheAir)
+    {
+        if (m_nPedState != PEDSTATE_DIE && m_nPedState != PEDSTATE_DEAD && m_nPedState != PEDSTATE_ARRESTED)
+            result = true;
+    }
+    return result;
+#endif
 }
 
 // Converted from thiscall void CPed::RemoveWeaponModel(int modelIndex) 0x5E3990
