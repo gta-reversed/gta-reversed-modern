@@ -17,6 +17,7 @@ void InjectHooksMain(void)
     CFileLoader::InjectHooks();
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();
+    CPed::InjectHooks();
     CPedIntelligence::InjectHooks();
     CTrain::InjectHooks();
     CTaskManager::InjectHooks();
@@ -27,6 +28,7 @@ void InjectHooksMain(void)
     CTaskSimplePlayerOnFoot::InjectHooks();
     CTaskSimpleSwim::InjectHooks();
     cBuoyancy::InjectHooks();
+    CWanted::InjectHooks();
     
     /*
      DetourRestoreAfterWith();

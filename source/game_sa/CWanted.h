@@ -27,6 +27,7 @@ public:
 	unsigned char   m_nMaxCopCarsInPursuit;
 	unsigned char   m_nCopsBeatingSuspect;
 	unsigned short  m_nChanceOnRoadBlock;
+
 	unsigned char   m_bPoliceBackOff : 1;       // If this is set the police will leave player alone (for cut-scenes)
     unsigned char   m_bPoliceBackOffGarage : 1; // If this is set the police will leave player alone (for garages)
     unsigned char   m_bEverybodyBackOff : 1;    // If this is set then everybody (including police) will leave the player alone (for cut-scenes)
@@ -51,7 +52,8 @@ public:
 
     static unsigned int &MaximumWantedLevel; // default 6
     static unsigned int &nMaximumWantedLevel; // default 9200
-    static bool &bUseNewsHeliInAdditionToPolice;
+    static bool &bUseNewsHeliInAdditionToPolice; 
+    static void InjectHooks();
 
     static void InitialiseStaticVariables();
     void UpdateWantedLevel();

@@ -10,9 +10,27 @@ unsigned int& CWanted::MaximumWantedLevel = *(unsigned int*)0x8CDEE4;
 unsigned int& CWanted::nMaximumWantedLevel = *(unsigned int*)0x8CDEE8;
 bool& CWanted::bUseNewsHeliInAdditionToPolice = *(bool*)0xB7CB8C;
 
+void CWanted::InjectHooks()
+{
+    HookInstall(0x561F40, &CWanted::AreSwatRequired, 7);
+    HookInstall(0x561F60, &CWanted::AreFbiRequired, 7);
+    HookInstall(0x561F80, &CWanted::AreArmyRequired, 7);
+    HookInstall(0x561C70, &CWanted::InitialiseStaticVariables, 7);
+    HookInstall(0x561E70, &CWanted::SetMaximumWantedLevel, 7);
+}
+
 // Converted from cdecl void CWanted::InitialiseStaticVariables(void) 0x561C70
-void CWanted::InitialiseStaticVariables() {
+// Initialize Static Variables
+void CWanted::InitialiseStaticVariables() 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x561C70>();
+#else
+    MaximumWantedLevel = 6;
+    nMaximumWantedLevel = 9200;
+    bUseNewsHeliInAdditionToPolice = 0;
+#endif // USE_DEFAULT_FUNCTIONS
+
 }
 
 // Converted from thiscall void CWanted::UpdateWantedLevel(void) 0x561C90
@@ -21,8 +39,48 @@ void CWanted::UpdateWantedLevel() {
 }
 
 // Converted from cdecl void CWanted::SetMaximumWantedLevel(int level) 0x561E70
-void CWanted::SetMaximumWantedLevel(int level) {
+// Set Maximum Wanted Level
+void CWanted::SetMaximumWantedLevel(int level) 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+
     plugin::Call<0x561E70, int>(level);
+#else
+    switch (level)
+    {
+    case 0:
+        CWanted::MaximumWantedLevel = 0;
+        CWanted::nMaximumWantedLevel = 0;
+        break;
+    case 1:
+        CWanted::MaximumWantedLevel = 1;
+        CWanted::nMaximumWantedLevel = 115;
+        break;
+    case 2:
+        CWanted::MaximumWantedLevel = 2;
+        CWanted::nMaximumWantedLevel = 365;
+        break;
+    case 3:
+        CWanted::MaximumWantedLevel = 3;
+        CWanted::nMaximumWantedLevel = 875;
+        break;
+    case 4:
+        CWanted::MaximumWantedLevel = 4;
+        CWanted::nMaximumWantedLevel = 1800;
+        break;
+    case 5:
+        CWanted::MaximumWantedLevel = 5;
+        CWanted::nMaximumWantedLevel = 3500;
+        break;
+    case 6:
+        CWanted::MaximumWantedLevel = 6;
+        CWanted::nMaximumWantedLevel = 6900;
+        break;
+    default:
+        return;
+    }
+
+#endif
 }
 
 // Converted from thiscall bool CWanted::AreMiamiViceRequired(void) 0x561F30
@@ -31,18 +89,36 @@ bool CWanted::AreMiamiViceRequired() {
 }
 
 // Converted from thiscall bool CWanted::AreSwatRequired(void) 0x561F40
-bool CWanted::AreSwatRequired() {
+// Checks if SWAT is needed after four wanted level stars
+bool CWanted::AreSwatRequired() 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x561F40, CWanted*>(this);
+#else
+    return this->m_nWantedLevel == 4 || m_bSwatRequired;
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall bool CWanted::AreFbiRequired(void) 0x561F60
-bool CWanted::AreFbiRequired() {
+// Checks if FBI is needed after five wanted level stars
+bool CWanted::AreFbiRequired() 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x561F60, CWanted*>(this);
+#else
+    return this->m_nWantedLevel == 5 || m_bFbiRequired;
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall bool CWanted::AreArmyRequired(void) 0x561F80
-bool CWanted::AreArmyRequired() {
+// Checks if Army is needed after six wanted level stars
+bool CWanted::AreArmyRequired() 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x561F80, CWanted*>(this);
+#else
+    return this->m_nWantedLevel == 6 || m_bArmyRequired;
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall int CWanted::NumOfHelisRequired(void) 0x561FA0

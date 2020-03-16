@@ -7,6 +7,14 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
+void CPed::InjectHooks()
+{
+    HookInstall(0x5E3960, &CPed::IsPedInControl, 7);
+    HookInstall(0x5E0170, &CPed::IsAlive, 7);
+    HookInstall(0x5E6320, &CPed::ClearWeapons, 7);
+    
+}
+
 CPed::CPed(ePedType pedtype) : CPhysical(plugin::dummy), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
 plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy,
 plugin::dummy, plugin::dummy, plugin::dummy }
@@ -319,9 +327,15 @@ void CPed::Dress()
 }
 
 // Converted from thiscall bool CPed::IsAlive(void) 0x5E0170
+// Checks if the Pedestrian is still alive.
 bool CPed::IsAlive()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+
     return ((bool(__thiscall *)(CPed*))0x5E0170)(this);
+#else
+    return m_nPedState != PEDSTATE_DIE && m_nPedState != PEDSTATE_DEAD;
+#endif
 }
 
 // Converted from thiscall void CPed::UpdateStatEnteringVehicle(void) 0x5E01A0
@@ -451,9 +465,19 @@ void CPed::ProcessBuoyancy()
 }
 
 // Converted from thiscall bool CPed::IsPedInControl(void) 0x5E3960
+// Can Pedestrains be moved or not? Like in air or being dead.
 bool CPed::IsPedInControl()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     return ((bool(__thiscall *)(CPed*))0x5E3960)(this);
+#else
+    if (!bIsLanding && !bIsInTheAir)
+    {
+        if (m_nPedState != PEDSTATE_DIE && m_nPedState != PEDSTATE_DEAD && m_nPedState != PEDSTATE_ARRESTED)
+            return true;
+    }
+    return false;
+#endif
 }
 
 // Converted from thiscall void CPed::RemoveWeaponModel(int modelIndex) 0x5E3990
@@ -591,13 +615,25 @@ void CPed::SetCurrentWeapon(eWeaponType weaponType)
 // Converted from thiscall void CPed::ClearWeapon(eWeaponType weaponType) 0x5E62B0
 void CPed::ClearWeapon(eWeaponType weaponType)
 {
-    ((void(__thiscall *)(CPed*, eWeaponType))0x5E62B0)(this, weaponType);
+    ((void(__thiscall*)(CPed*, eWeaponType))0x5E62B0)(this, weaponType);
 }
 
 // Converted from thiscall void CPed::ClearWeapons(void) 0x5E6320
+// Clears every weapon from the pedestrian.
 void CPed::ClearWeapons()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall *)(CPed*))0x5E6320)(this);
+#else
+    CPed::RemoveWeaponModel(-1);
+    CPed::RemoveGogglesModel();
+    for each (auto weapon in m_aWeapons)
+    {
+        weapon.Shutdown();
+    }
+    CWeaponInfo* getWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_UNARMED, 1);
+    CPed::SetCurrentWeapon(getWeaponInfo->m_nSlot);
+#endif
 }
 
 // Converted from thiscall void CPed::RemoveWeaponWhenEnteringVehicle(int) 0x5E6370

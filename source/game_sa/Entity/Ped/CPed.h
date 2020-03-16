@@ -307,7 +307,7 @@ public:
     bool Load();
 
     // class functions
-
+    static void InjectHooks();
 
 	CPed(ePedType);
     bool PedIsInvolvedInConversation();
