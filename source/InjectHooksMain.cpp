@@ -28,6 +28,7 @@ void InjectHooksMain(void)
     CTaskSimplePlayerOnFoot::InjectHooks();
     CTaskSimpleSwim::InjectHooks();
     cBuoyancy::InjectHooks();
+    CWanted::InjectHooks();
     
     /*
      DetourRestoreAfterWith();
