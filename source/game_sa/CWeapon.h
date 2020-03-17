@@ -44,6 +44,8 @@ public:
     static bool &ms_bTakePhoto;
     static CColModel &ms_PelletTestCol;
 
+    static void InjectHooks();
+
     CWeapon(eWeaponType weaponType, int ammo);
     void Shutdown();
     void AddGunshell(CEntity* creator, CVector const& position, CVector2D const& direction, float size);

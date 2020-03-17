@@ -29,6 +29,7 @@ void InjectHooksMain(void)
     CTaskSimpleSwim::InjectHooks();
     cBuoyancy::InjectHooks();
     CWanted::InjectHooks();
+    CWeapon::InjectHooks();
     
     /*
      DetourRestoreAfterWith();
