@@ -1,0 +1,52 @@
+# editor-specific files
+\#*
+.#*
+*~
+.*.swp
+/CMakeLists.txt.user
+
+# ELF files
+*.o
+*.a
+*.so
+
+# python bytecode
+*.pyc
+*.pyo
+__pycache__
+*.pyd
+
+# MSVC files
+*.pdb
+*.dll
+*.exe
+
+# workflow
+*.orig
+/TODO.org
+
+# build system
+/bin
+/.bin
+/build
+/deps
+
+# debugging
+callgrind.out.*
+perf.data*
+.gdb_history
+
+# code search
+/.agignore
+/.globalrc
+/GPATH
+/GRTAGS
+/GTAGS
+
+# IDEs
+.vs
+.vscode
+.idea
+
+# macOS
+.DS_Store
