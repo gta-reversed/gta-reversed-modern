@@ -18,7 +18,26 @@ CPlayerPed::CPlayerPed(int playerId, bool bGroupCreated) : CPed(plugin::dummy) {
 
 // Converted from cdecl void CPlayerPed::RemovePlayerPed(int playerId) 0x6094A0
 void CPlayerPed::RemovePlayerPed(int playerId) {
+//#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x6094A0, int>(playerId);
+//#else
+//    auto playerPed = CWorld::Players[playerId].m_pPed;
+//    CEntity** playerEntity = (CEntity**)&CWorld::Players[playerId];
+//    if (playerPed)
+//    {
+//        CVehicle* playerVehicle = playerPed->m_pVehicle;
+//        if (playerVehicle && playerVehicle->m_pDriver == playerPed)
+//        {
+//            playerVehicle->m_pEntityWeAreOn->m_nType = playerVehicle->m_pEntityWeAreOn.m_nType & EVENT_DRAGGED_OUT_CAR | eEventType:: 0x18;
+//            playerPed->m_pVehicle->m_fGasPedal = 0.0;
+//            playerPed->m_pVehicle->m_fBreakPedal = 0.1;
+//        }
+//        CWorld::Remove(*playerEntity);
+//        if (*playerEntity)
+//            ((void(__stdcall*)(signed int))(*playerEntity)->placeable.vtbl->Destructor)(1);
+//        *playerEntity = 0;
+//    }
+//#endif
 }
 
 // Converted from cdecl void CPlayerPed::DeactivatePlayerPed(int playerId) 0x609520
