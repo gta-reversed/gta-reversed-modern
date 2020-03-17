@@ -471,15 +471,12 @@ bool CPed::IsPedInControl()
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((bool(__thiscall *)(CPed*))0x5E3960)(this);
 #else
-    bool result; // al
-
-    result = false;
     if (!bIsLanding && !bIsInTheAir)
     {
         if (m_nPedState != PEDSTATE_DIE && m_nPedState != PEDSTATE_DEAD && m_nPedState != PEDSTATE_ARRESTED)
-            result = true;
+            return true;
     }
-    return result;
+    return false;
 #endif
 }
 
