@@ -12,7 +12,11 @@ void CPed::InjectHooks()
     HookInstall(0x5E3960, &CPed::IsPedInControl, 7);
     HookInstall(0x5E0170, &CPed::IsAlive, 7);
     HookInstall(0x5E6320, &CPed::ClearWeapons, 7);
-    
+    HookInstall(0x5DF200, &CPed::GetWeaponSlot, 7);
+    HookInstall(0x5DF060, &CPed::CanBeArrested, 7);
+    HookInstall(0x5DF090, &CPed::CanStrafeOrMouseControl, 7);
+    HookInstall(0x5DF000, &CPed::CanPedReturnToState, 7); 
+    HookInstall(0x5E8BE0, &CPed::GiveWeaponWhenJoiningGang, 7);
 }
 
 CPed::CPed(ePedType pedtype) : CPhysical(plugin::dummy), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
@@ -179,7 +183,18 @@ bool CPed::UseGroundColModel()
 // Converted from thiscall bool CPed::CanPedReturnToState(void) 0x5DF000
 bool CPed::CanPedReturnToState()
 {
-    return ((bool(__thiscall *)(CPed*))0x5DF000)(this);
+#ifdef USE_DEFAULT_FUNCTIONS
+    return ((bool(__thiscall*)(CPed*))0x5DF000)(this);
+#else
+    return 
+        m_nPedState <= PEDSTATE_STATES_NO_AI &&
+        m_nPedState != PEDSTATE_AIMGUN &&
+        m_nPedState != PEDSTATE_ATTACK &&
+        m_nPedState != PEDSTATE_FIGHT &&
+        m_nPedState != PEDSTATE_EVADE_STEP &&
+        m_nPedState != PEDSTATE_SNIPER_MODE &&
+        m_nPedState != PEDSTATE_LOOK_ENTITY;
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall bool CPed::CanSetPedState(void) 0x5DF030
@@ -191,13 +206,35 @@ bool CPed::CanSetPedState()
 // Converted from thiscall bool CPed::CanBeArrested(void) 0x5DF060
 bool CPed::CanBeArrested()
 {
-    return ((bool(__thiscall *)(CPed*))0x5DF060)(this);
+#ifdef USE_DEFAULT_FUNCTIONS
+    return ((bool(__thiscall*)(CPed*))0x5DF060)(this);
+#else
+    return 
+        m_nPedState != PEDSTATE_DIE &&
+        m_nPedState != PEDSTATE_DEAD &&
+        m_nPedState != PEDSTATE_ARRESTED && 
+        m_nPedState != PEDSTATE_ENTER_CAR &&
+        m_nPedState != PEDSTATE_EXIT_CAR;
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall bool CPed::CanStrafeOrMouseControl(void) 0x5DF090
 bool CPed::CanStrafeOrMouseControl()
 {
-    return ((bool(__thiscall *)(CPed*))0x5DF090)(this);
+#ifdef USE_DEFAULT_FUNCTIONS
+    return ((bool(__thiscall*)(CPed*))0x5DF090)(this);
+#else
+    return 
+        m_nPedState == PEDSTATE_IDLE ||
+        m_nPedState == PEDSTATE_FLEE_ENTITY ||
+        m_nPedState == PEDSTATE_FLEE_POSITION ||
+        m_nPedState == PEDSTATE_NONE || 
+        m_nPedState == PEDSTATE_AIMGUN ||
+        m_nPedState == PEDSTATE_ATTACK ||
+        m_nPedState == PEDSTATE_FIGHT ||
+        m_nPedState == PEDSTATE_JUMP ||
+        m_nPedState == PEDSTATE_ANSWER_MOBILE;
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall bool CPed::CanBeDeleted(void) 0x5DF100
@@ -221,7 +258,11 @@ void CPed::RemoveGogglesModel()
 // Converted from thiscall int CPed::GetWeaponSlot(eWeaponType weaponType) 0x5DF200
 int CPed::GetWeaponSlot(eWeaponType weaponType)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     return ((int(__thiscall *)(CPed*, eWeaponType))0x5DF200)(this, weaponType);
+#else
+    return CWeaponInfo::GetWeaponInfo(weaponType, 1)->m_nSlot;
+#endif
 }
 
 // Converted from thiscall void CPed::GrantAmmo(eWeaponType weaponType,uint ammo) 0x5DF220
@@ -305,7 +346,7 @@ void CPed::RestoreHeadingRateCB(CAnimBlendAssociation* association, void* data)
 // Converted from thiscall void CPed::SetRadioStation(void) 0x5DFD90
 void CPed::SetRadioStation()
 {
-    ((void(__thiscall *)(CPed*))0x5DFD90)(this);
+    ((void(__thiscall*)(CPed*))0x5DFD90)(this);
 }
 
 // Converted from thiscall void CPed::PositionAttachedPed(void) 0x5DFDF0
@@ -753,7 +794,37 @@ void CPed::GiveWeaponAtStartOfFight()
 // Converted from thiscall void CPed::GiveWeaponWhenJoiningGang(void) 0x5E8BE0
 void CPed::GiveWeaponWhenJoiningGang()
 {
-    ((void(__thiscall *)(CPed*))0x5E8BE0)(this);
+#ifdef USE_DEFAULT_FUNCTIONS
+
+    ((void(__thiscall*)(CPed*))0x5E8BE0)(this);
+#else
+    if (m_aWeapons[m_nActiveWeaponSlot].m_nType == WEAPON_UNARMED && m_nDelayedWeapon == WEAPON_UNIDENTIFIED)
+    {
+        CWeaponInfo* weaponA;
+        CWeaponInfo* weaponB;
+
+        if (CCheat::m_aCheatsActive[eCheats::CHEAT_NO_ONE_CAN_STOP_US])
+        {
+            GiveDelayedWeapon(WEAPON_AK47, 200);
+            weaponA = CWeaponInfo::GetWeaponInfo(WEAPON_AK47, 1);
+            SetCurrentWeapon(weaponA->m_nSlot);
+        }
+        else
+        {
+            if (CCheat::m_aCheatsActive[eCheats::CHEAT_ROCKET_MAYHEM])
+            {
+                GiveDelayedWeapon(WEAPON_RLAUNCHER, 200);
+                weaponB = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, 1);
+            }
+            else
+            {
+                CPed::GiveDelayedWeapon(WEAPON_PISTOL, 200);
+                weaponB = CWeaponInfo::GetWeaponInfo(WEAPON_PISTOL, 1);
+            }
+            CPed::SetCurrentWeapon(weaponB->m_nSlot);
+        }
+    }
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall bool CPed::GetPedTalking(void) 0x5EFF50
