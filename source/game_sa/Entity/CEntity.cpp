@@ -16,7 +16,7 @@ void CEntity::Add(CRect &rect)
 
 void CEntity::Add()
 {
-    ((void(__thiscall *)(CEntity *))(*(void ***)this)[2])(this);
+    ((void(__thiscall *)(CEntity *))0x533020)(this);
 }
 
 void CEntity::Remove()

@@ -10,6 +10,7 @@ Do not delete this comment block. Respect others' work!
 short& MI_FIRE_HYDRANT = *(short*)0x8CD594;
 short& MI_PARKINGMETER = *(short*)0x8CD548;
 short& MI_PARKINGMETER2 = *(short*)0x8CD54C;
+short& MI_POOL_CUE_BALL = *(short*)0x8CD778;
 
 CBaseModelInfo **CModelInfo::ms_modelInfoPtrs = (CBaseModelInfo**)0xA9B0C8;
 

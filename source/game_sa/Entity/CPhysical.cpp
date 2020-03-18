@@ -16,6 +16,10 @@ CVector& CPhysical::fxDirection = *(CVector*)0xB73720;
 
 void CPhysical::InjectHooks()
 {
+    HookInstall(0x5428C0, &CPhysical::SetDamagedPieceRecord, 7);
+    HookInstall(0x542860, &CPhysical::RemoveFromMovingList, 7);
+    HookInstall(0x542800, &CPhysical::AddToMovingList, 7);
+    HookInstall(0x544A30, &CPhysical::Add_Reversed, 7);
     HookInstall(0x54DB10, &CPhysical::ProcessShift_Reversed, 7);
     HookInstall(0x5430A0, &CPhysical::ApplyFrictionMoveForce, 7);
     HookInstall(0x543220, &CPhysical::ApplyFrictionForce, 7);
@@ -30,6 +34,90 @@ void CPhysical::InjectHooks()
     HookInstall(0x40974F, (bool(CPhysical::*)(CPhysical*, CColPoint*, float*, float*))&CPhysical::ApplySoftCollision, 5);
     HookInstall(0x54BA60, &CPhysical::ProcessCollisionSectorList, 7);
     HookInstall(0x54CFF0, &CPhysical::ProcessCollisionSectorList_SimpleCar, 7);
+}
+
+void CPhysical::Add()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallMethod<0x544A30, CPhysical*>(this);
+#else
+    CPhysical::Add_Reversed();
+#endif
+}
+
+void CPhysical::Add_Reversed()
+{
+    if (m_bIsBIGBuilding)
+    {
+        CEntity::Add();
+    }
+    else
+    {
+        CRect boundRect;
+        GetBoundRect(&boundRect);
+        int startX = floor(boundRect.left * 0.02f + 60.0f);
+        int sectorX = startX;
+        int startX0 = startX;
+        int startY = floor(boundRect.top * 0.02f + 60.0f);
+        int endX = floor(boundRect.right * 0.02f + 60.0f);
+        int endY = floor(boundRect.bottom * 0.02f + 60.0f);
+        int endY0 = endY;
+        int startSectorY = startY;
+        int endY1 = endY0;
+
+        do
+        {
+            int sectorX0 = sectorX;
+            if (sectorX <= endX)
+            {
+                do
+                {
+                    CPtrListDoubleLink* pDoubleLinkList = nullptr;
+                    CRepeatSector* pRepeatSector = GetRepeatSector(sectorX0, startSectorY);
+                    switch (m_nType)
+                    {
+                    case ENTITY_TYPE_VEHICLE:
+                        pDoubleLinkList = &pRepeatSector->m_lists[0]; 
+                        break;
+                    case ENTITY_TYPE_PED:
+                        pDoubleLinkList = &pRepeatSector->m_lists[1];
+                        break;
+                    case ENTITY_TYPE_OBJECT:
+                        pDoubleLinkList = &pRepeatSector->m_lists[2];
+                        break;
+                    }
+
+                    auto pNewEntityInfoNode = CPools::ms_pEntryInfoNodePool->New();
+                    if (pNewEntityInfoNode)
+                    {
+                        auto pNewDoubleLink = (CPtrNodeDoubleLink*)CPtrNodeDoubleLink::operator_new();
+                        if (pNewDoubleLink)
+                            pNewDoubleLink->pItem = this;
+           
+                        pNewDoubleLink->pPrev = nullptr;
+                        pNewDoubleLink->pNext = (CPtrNodeDoubleLink*)pDoubleLinkList->pNode;
+                        if (pDoubleLinkList->GetNode())
+                            pDoubleLinkList->GetNode()->pPrev = pNewDoubleLink;
+                        pDoubleLinkList->pNode = (CPtrNode * )pNewDoubleLink;
+                        pNewEntityInfoNode->m_pDoubleLink = pNewDoubleLink;
+                        pNewEntityInfoNode->m_pRepeatSector = pRepeatSector;
+                        pNewEntityInfoNode->m_pDoubleLinkList = pDoubleLinkList;
+                    }
+                    pNewEntityInfoNode->m_pPrevious = nullptr;
+                    pNewEntityInfoNode->m_pNext = m_pCollisionList;
+                    auto pEntityCollisionList = m_pCollisionList;
+                    if (pEntityCollisionList)
+                        pEntityCollisionList->m_pPrevious = pNewEntityInfoNode;
+
+                    m_pCollisionList = pNewEntityInfoNode;
+                    ++sectorX0;
+                } while (sectorX0 <= endX);
+                sectorX = startX0;
+                endY0 = endY1;
+            }
+            ++startSectorY;
+        } while (startSectorY <= endY0);
+    }
 }
 
 CRect* CPhysical::GetBoundRect(CRect* pRect)
@@ -199,19 +287,90 @@ void CPhysical::RemoveAndAdd()
 // Converted from thiscall void CPhysical::AddToMovingList(void) 0x542800
 void CPhysical::AddToMovingList()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*))0x542800)(this);
+#else
+    if (!m_pMovingList && !m_bIsStaticWaitingForCollision)
+    {
+        auto pNewDoubleLink = (CPtrNodeDoubleLink*)CPtrNodeDoubleLink::operator_new();
+        if (pNewDoubleLink)
+            pNewDoubleLink->pItem = this;
+
+        auto pNodeDoubleLink = (CPtrNodeDoubleLink*)CWorld::ms_listMovingEntityPtrs.pNode;
+        m_pMovingList = pNewDoubleLink;
+        pNewDoubleLink->pPrev = nullptr;
+        pNewDoubleLink->pNext = pNodeDoubleLink;
+        if (pNodeDoubleLink)
+        {
+            pNodeDoubleLink->pPrev = pNewDoubleLink;
+        }
+        CWorld::ms_listMovingEntityPtrs.pNode = (CPtrNode*)pNewDoubleLink;
+    }
+#endif
 }
 
 // Converted from thiscall void CPhysical::RemoveFromMovingList(void) 0x542860
 void CPhysical::RemoveFromMovingList()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*))0x542860)(this);
+#else
+   auto pMovingList = m_pMovingList;
+    if (pMovingList)
+    {
+        if (CWorld::ms_listMovingEntityPtrs.pNode == (CPtrNode*)pMovingList)
+            CWorld::ms_listMovingEntityPtrs.pNode = (CPtrNode*)pMovingList->pNext;
+        CPtrNodeDoubleLink* pPrevious = pMovingList->pPrev;
+        if (pPrevious)
+            pPrevious->pNext = pMovingList->pNext;
+        CPtrNodeDoubleLink* pNext = pMovingList->pNext;
+        if (pNext)
+            pNext->pPrev = pMovingList->pPrev;
+        CPtrNodeDoubleLink::operator delete(m_pMovingList);
+        m_pMovingList = nullptr;
+    }
+#endif
 }
 
 // Converted from thiscall void CPhysical::SetDamagedPieceRecord(float damageIntensity,CEntity *damagingEntity,CColPoint &colPoint,float distanceMult) 0x5428C0
-void CPhysical::SetDamagedPieceRecord(float damageIntensity, CEntity* damagingEntity, CColPoint* colPoint, float distanceMult)
+void CPhysical::SetDamagedPieceRecord(float fDamageIntensity, CEntity* entity, CColPoint* colPoint, float fDistanceMult)
 {
-    ((void(__thiscall*)(CPhysical*, float, CEntity*, CColPoint*, float))0x5428C0)(this, damageIntensity, damagingEntity, colPoint, distanceMult);
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__thiscall*)(CPhysical*, float, CEntity*, CColPoint*, float))0x5428C0)(this,fDamageIntensity, entity, colPoint, fDistanceMult);
+#else
+    CObject* pObject = static_cast<CObject*>(this);
+    if (fDamageIntensity > m_fDamageIntensity)
+    {
+        m_fDamageIntensity = fDamageIntensity;
+        m_nPieceType = colPoint->m_nPieceTypeA;
+        if (m_pDamageEntity)
+            m_pDamageEntity->CleanUpOldReference(&m_pDamageEntity);
+        m_pDamageEntity = entity;
+        entity->RegisterReference(&m_pDamageEntity);
+        m_vecLastCollisionPosn = colPoint->m_vecPoint;
+        m_vecLastCollisionImpactVelocity = fDistanceMult * colPoint->m_vecNormal;
+        if (m_nType != ENTITY_TYPE_OBJECT || colPoint->m_nSurfaceTypeB != SURFACE_CAR_MOVINGCOMPONENT)
+        {
+            if (m_nType == ENTITY_TYPE_OBJECT && colPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
+            {
+            
+                pObject->objectFlags.b20 = 1;
+            }
+        }
+        else
+        {
+            pObject->objectFlags.b20 = 1;
+        }
+    }
+
+    if (physicalFlags.bDisableZ)
+    {
+        if (entity->m_nModelIndex == MI_POOL_CUE_BALL && m_nType == ENTITY_TYPE_OBJECT)
+        {
+            pObject->m_nLastWeaponDamage = pObject->m_nLastWeaponDamage != -1 ? WEAPON_RUNOVERBYCAR : WEAPON_DROWNING;
+        }
+    }
+#endif
 }
 
 void CPhysical::ApplyMoveForce(float x, float y, float z)
