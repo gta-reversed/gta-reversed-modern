@@ -55,68 +55,54 @@ void CPhysical::Add_Reversed()
     {
         CRect boundRect;
         GetBoundRect(&boundRect);
-        int startX = floor(boundRect.left * 0.02f + 60.0f);
-        int sectorX = startX;
-        int startX0 = startX;
-        int startY = floor(boundRect.top * 0.02f + 60.0f);
-        int endX = floor(boundRect.right * 0.02f + 60.0f);
-        int endY = floor(boundRect.bottom * 0.02f + 60.0f);
-        int endY0 = endY;
-        int startSectorY = startY;
-        int endY1 = endY0;
-
-        do
+        int startSectorX = static_cast<int>(floor(boundRect.left * 0.02f + 60.0f));
+        int startSectorY = static_cast<int>(floor(boundRect.top * 0.02f + 60.0f));
+        int endSectorX = static_cast<int>(floor(boundRect.right * 0.02f + 60.0f));
+        int endSectorY = static_cast<int>(floor(boundRect.bottom * 0.02f + 60.0f));
+        for (int sectorY = startSectorY; sectorY <= endSectorY; ++sectorY)
         {
-            int sectorX0 = sectorX;
-            if (sectorX <= endX)
+            for (int sectorX = startSectorX; sectorX <= endSectorX; ++sectorX)
             {
-                do
+                CPtrListDoubleLink* pDoubleLinkList = nullptr;
+                CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
+                switch (m_nType)
                 {
-                    CPtrListDoubleLink* pDoubleLinkList = nullptr;
-                    CRepeatSector* pRepeatSector = GetRepeatSector(sectorX0, startSectorY);
-                    switch (m_nType)
-                    {
-                    case ENTITY_TYPE_VEHICLE:
-                        pDoubleLinkList = &pRepeatSector->m_lists[0]; 
-                        break;
-                    case ENTITY_TYPE_PED:
-                        pDoubleLinkList = &pRepeatSector->m_lists[1];
-                        break;
-                    case ENTITY_TYPE_OBJECT:
-                        pDoubleLinkList = &pRepeatSector->m_lists[2];
-                        break;
-                    }
+                case ENTITY_TYPE_VEHICLE:
+                    pDoubleLinkList = &pRepeatSector->m_lists[0]; 
+                    break;
+                case ENTITY_TYPE_PED:
+                    pDoubleLinkList = &pRepeatSector->m_lists[1];
+                    break;
+                case ENTITY_TYPE_OBJECT:
+                    pDoubleLinkList = &pRepeatSector->m_lists[2];
+                    break;
+                }
 
-                    auto pNewEntityInfoNode = CPools::ms_pEntryInfoNodePool->New();
-                    if (pNewEntityInfoNode)
-                    {
-                        auto pNewDoubleLink = (CPtrNodeDoubleLink*)CPtrNodeDoubleLink::operator_new();
-                        if (pNewDoubleLink)
-                            pNewDoubleLink->pItem = this;
+                auto pNewEntityInfoNode = CPools::ms_pEntryInfoNodePool->New();
+                if (pNewEntityInfoNode)
+                {
+                    auto pNewDoubleLink = CPools::ms_pPtrNodeDoubleLinkPool->New();;
+                    if (pNewDoubleLink)
+                        pNewDoubleLink->pItem = this;
            
-                        pNewDoubleLink->pPrev = nullptr;
-                        pNewDoubleLink->pNext = (CPtrNodeDoubleLink*)pDoubleLinkList->pNode;
-                        if (pDoubleLinkList->GetNode())
-                            pDoubleLinkList->GetNode()->pPrev = pNewDoubleLink;
-                        pDoubleLinkList->pNode = (CPtrNode * )pNewDoubleLink;
-                        pNewEntityInfoNode->m_pDoubleLink = pNewDoubleLink;
-                        pNewEntityInfoNode->m_pRepeatSector = pRepeatSector;
-                        pNewEntityInfoNode->m_pDoubleLinkList = pDoubleLinkList;
-                    }
-                    pNewEntityInfoNode->m_pPrevious = nullptr;
-                    pNewEntityInfoNode->m_pNext = m_pCollisionList;
-                    auto pEntityCollisionList = m_pCollisionList;
-                    if (pEntityCollisionList)
-                        pEntityCollisionList->m_pPrevious = pNewEntityInfoNode;
+                    pNewDoubleLink->pPrev = nullptr;
+                    pNewDoubleLink->pNext = (CPtrNodeDoubleLink*)pDoubleLinkList->pNode;
+                    if (pDoubleLinkList->GetNode())
+                        pDoubleLinkList->GetNode()->pPrev = pNewDoubleLink;
+                    pDoubleLinkList->pNode = (CPtrNode * )pNewDoubleLink;
+                    pNewEntityInfoNode->m_pDoubleLink = pNewDoubleLink;
+                    pNewEntityInfoNode->m_pRepeatSector = pRepeatSector;
+                    pNewEntityInfoNode->m_pDoubleLinkList = pDoubleLinkList;
+                }
+                pNewEntityInfoNode->m_pPrevious = nullptr;
+                pNewEntityInfoNode->m_pNext = m_pCollisionList;
+                auto pEntityCollisionList = m_pCollisionList;
+                if (pEntityCollisionList)
+                    pEntityCollisionList->m_pPrevious = pNewEntityInfoNode;
 
-                    m_pCollisionList = pNewEntityInfoNode;
-                    ++sectorX0;
-                } while (sectorX0 <= endX);
-                sectorX = startX0;
-                endY0 = endY1;
+                m_pCollisionList = pNewEntityInfoNode;
             }
-            ++startSectorY;
-        } while (startSectorY <= endY0);
+        }
     }
 }
 
@@ -292,7 +278,7 @@ void CPhysical::AddToMovingList()
 #else
     if (!m_pMovingList && !m_bIsStaticWaitingForCollision)
     {
-        auto pNewDoubleLink = (CPtrNodeDoubleLink*)CPtrNodeDoubleLink::operator_new();
+        auto pNewDoubleLink = CPools::ms_pPtrNodeDoubleLinkPool->New();
         if (pNewDoubleLink)
             pNewDoubleLink->pItem = this;
 
@@ -326,7 +312,7 @@ void CPhysical::RemoveFromMovingList()
         CPtrNodeDoubleLink* pNext = pMovingList->pNext;
         if (pNext)
             pNext->pPrev = pMovingList->pPrev;
-        CPtrNodeDoubleLink::operator delete(m_pMovingList);
+        CPools::ms_pPtrNodeDoubleLinkPool->Delete(m_pMovingList);
         m_pMovingList = nullptr;
     }
 #endif
