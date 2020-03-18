@@ -10,12 +10,6 @@
 *.a
 *.so
 
-# python bytecode
-*.pyc
-*.pyo
-__pycache__
-*.pyd
-
 # MSVC files
 *.pdb
 *.dll
@@ -27,9 +21,12 @@ __pycache__
 
 # build system
 /bin
+/Bin
 /.bin
+/.Bin
 /build
 /deps
+/out
 
 # debugging
 callgrind.out.*

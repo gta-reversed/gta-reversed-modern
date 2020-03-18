@@ -336,6 +336,8 @@ public:
     static bool &s_bPlaneGunsEjectShellCasings;
     static CColModel *m_aSpecialColModel; // static CColModel m_aSpecialColModel[4]
 
+    static void InjectHooks();
+
     // originally vtable functions
 
     virtual void ProcessControlCollisionCheck();
