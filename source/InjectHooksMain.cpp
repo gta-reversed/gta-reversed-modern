@@ -30,7 +30,6 @@ void InjectHooksMain(void)
     cBuoyancy::InjectHooks();
     CWanted::InjectHooks();
     CWeapon::InjectHooks();
-    
     /*
      DetourRestoreAfterWith();
      DetourTransactionBegin();

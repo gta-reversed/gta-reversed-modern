@@ -26,6 +26,7 @@ enum eModelInfoType : unsigned char
 extern short& MI_FIRE_HYDRANT;
 extern short& MI_PARKINGMETER;
 extern short& MI_PARKINGMETER2;
+extern short& MI_POOL_CUE_BALL;
 
 class CModelInfo
 {

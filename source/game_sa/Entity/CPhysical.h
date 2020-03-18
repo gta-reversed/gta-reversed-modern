@@ -13,6 +13,7 @@
 #include "CRealTimeShadow.h"
 #include "CRepeatSector.h"
 #include "eWeaponType.h"
+#include "CEntryInfoNode.h"
 
 enum ePhysicalFlags
 {
@@ -123,8 +124,8 @@ public:
     float            m_fElasticity;
     float            m_fBuoyancyConstant;
     CVector          m_vecCentreOfMass;
-    void            *m_pCollisionList;
-    void            *m_pMovingList;
+    CEntryInfoNode*  m_pCollisionList;
+    CPtrNodeDoubleLink* m_pMovingList;
     unsigned char    m_bFakePhysics;
     unsigned char    m_nNumEntitiesCollided;
     unsigned char    m_nContactSurface;
@@ -157,19 +158,21 @@ public:
     static void InjectHooks();
 
     // originally virtual functions
+    void Add() override;
     CRect* GetBoundRect(CRect* pRect) override;
     void ProcessControl() override;
     void ProcessShift() override;
     virtual int ProcessEntityCollision(CEntity *entity, CColPoint *point);
 
     // reversed virtual functions
+    void Add_Reversed();
     void ProcessShift_Reversed();
 
     // functions
     void RemoveAndAdd();
     void AddToMovingList();
     void RemoveFromMovingList();
-    void SetDamagedPieceRecord(float damageIntensity, CEntity* damagingEntity, CColPoint* colPoint, float distanceMult);
+    void SetDamagedPieceRecord(float fDamageIntensity, CEntity* entity, CColPoint* colPoint, float fDistanceMult);
     void ApplyMoveForce(float x, float y, float z);
     void ApplyMoveForce(CVector force);
     void ApplyTurnForce(CVector dir, CVector velocity);
