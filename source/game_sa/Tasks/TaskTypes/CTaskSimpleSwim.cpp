@@ -875,8 +875,11 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
             if (fabs(pBoneRHandPos->z - fPedPosZ) < 0.050000001f)
             {
                 auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneRHandPos, 0, 0);
-                pFxSystem->PlayAndKill();
-                pPed->m_pedAudio.AddAudioEvent(74, 0.0, 1.0f, 0, 0, 0, 0);
+                if (pFxSystem)
+                {
+                    pFxSystem->PlayAndKill();
+                    pPed->m_pedAudio.AddAudioEvent(74, 0.0, 1.0f, 0, 0, 0, 0);
+                }
             }
 
             if (fabs(pBoneLHandPos->z - fPedPosZ) < 0.050000001f)
