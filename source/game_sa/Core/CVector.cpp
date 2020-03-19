@@ -75,6 +75,11 @@ void CVector::operator-=(const CVector& right)
     ((void(__thiscall *)(CVector *, const CVector& right))0x406D70)(this, right);
 }
 
+void CVector::operator*=(const CVector& right)
+{
+    x *= right.x;  y *= right.y;  z *= right.z;
+}
+
 // Multiplies vector by a floating point value
 void CVector::operator *= (float multiplier)
 {

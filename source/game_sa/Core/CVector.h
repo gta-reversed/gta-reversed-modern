@@ -39,6 +39,7 @@ public:
     void operator=(const CVector& right);
     void operator+=(const CVector& right);
     void operator-=(const CVector& right);
+    void operator*=(const CVector& right);
     void operator *= (float multiplier);
     void operator /= (float divisor);
 

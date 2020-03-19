@@ -175,7 +175,7 @@ public:
     void SetDamagedPieceRecord(float fDamageIntensity, CEntity* entity, CColPoint* colPoint, float fDistanceMult);
     void ApplyMoveForce(float x, float y, float z);
     void ApplyMoveForce(CVector force);
-    void ApplyTurnForce(CVector dir, CVector velocity);
+    void ApplyTurnForce(CVector force, CVector direction);
     void ApplyForce(CVector vecMoveSpeed, CVector vecDirection, bool bUpdateTurnSpeed);
     CVector* GetSpeed(CVector* outSpeed, CVector direction);
     void ApplyMoveSpeed();
