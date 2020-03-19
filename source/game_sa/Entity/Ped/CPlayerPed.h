@@ -30,6 +30,8 @@ public:
         return m_pPlayerData ? m_pPlayerData->m_pWanted : nullptr;
     }
 
+    static void InjectHooks();
+
     CPad* GetPadFromPlayer();
     bool CanPlayerStartMission();
     bool IsHidden();

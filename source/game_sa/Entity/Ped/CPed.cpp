@@ -17,6 +17,7 @@ void CPed::InjectHooks()
     HookInstall(0x5DF090, &CPed::CanStrafeOrMouseControl, 7);
     HookInstall(0x5DF000, &CPed::CanPedReturnToState, 7); 
     HookInstall(0x5E8BE0, &CPed::GiveWeaponWhenJoiningGang, 7);
+    HookInstall(0x5E6580, (char(CPed::*)()) &CPed::GetWeaponSkill, 7);
 }
 
 CPed::CPed(ePedType pedtype) : CPhysical(plugin::dummy), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
@@ -542,7 +543,33 @@ void CPed::PutOnGoggles()
 // Converted from thiscall char CPed::GetWeaponSkill(eWeaponType weaponType) 0x5E3B60
 char CPed::GetWeaponSkill(eWeaponType weaponType)
 {
-    return ((char(__thiscall *)(CPed*, eWeaponType))0x5E3B60)(this, weaponType);
+//#ifdef USE_DEFAULT_FUNCTIONS
+    return ((char(__thiscall*)(CPed*, eWeaponType))0x5E3B60)(this, weaponType);
+//#else
+//    int v4; // edi
+//    char result; // al
+//    int weaponTypea; // [esp+Ch] [ebp+4h]
+//    int weaponTypeb; // [esp+Ch] [ebp+4h]
+//
+//    if ((signed int)weaponType < 22 || (signed int)weaponType > 32)
+//        return 1;
+//    if (!m_nPedType || m_nPedType == 1)
+//    {
+//        v4 = CWeaponInfo::GetSkillStatIndex((CWeaponInfo*)weaponType);
+//        weaponTypea = CWeaponInfo::GetWeaponInfo(weaponType, 2)->m_nReqStatLevel;
+//        if ((double)weaponTypea <= CStats::GetStatValue(v4))
+//            return 2;
+//        weaponTypeb = CWeaponInfo::GetWeaponInfo(weaponType, 1)->m_nReqStatLevel;
+//        if ((double)weaponTypeb > CStats::GetStatValue(v4))
+//            return 0;
+//        return 1;
+//    }
+//    if (weaponType != 22 || m_nPedType != 6)
+//        result = m_nWeaponSkill;
+//    else
+//        result = 3;
+//    return result;
+//#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall void CPed::SetWeaponSkill(eWeaponType weaponType,char skill) 0x5E3C10
@@ -704,7 +731,11 @@ void CPed::RemoveWeaponForScriptedCutscene()
 // Converted from thiscall void CPed::GetWeaponSkill(void) 0x5E6580
 char CPed::GetWeaponSkill()
 {
-    return ((char(__thiscall *)(CPed*))0x5E6580)(this);
+#ifdef USE_DEFAULT_FUNCTIONS
+    return ((char(__thiscall*)(CPed*))0x5E6580)(this);
+#else
+    return CPed::GetWeaponSkill(m_aWeapons[m_nActiveWeaponSlot].m_nType);
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall void CPed::PreRenderAfterTest(void) 0x5E65A0

@@ -35,6 +35,11 @@ unsigned int &CStats::m_MaxHealthCounter = *(unsigned int*)0xB7950C;
 unsigned int &CStats::m_AddToHealthCounter = *(unsigned int*)0xB79510;
 unsigned int &CStats::m_LastWeaponTypeFired = *(unsigned int*)0xB79514;
 
+void CStats::InjectHooks()
+{
+
+}
+
 // Converted from cdecl char* CStats::GetStatID(ushort stat) 0x558DE0
 char* CStats::GetStatID(unsigned short stat) {
     return plugin::CallAndReturn<char*, 0x558DE0, unsigned short>(stat);

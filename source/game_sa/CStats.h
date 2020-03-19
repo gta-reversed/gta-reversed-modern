@@ -65,6 +65,8 @@ public:
     static unsigned int &m_AddToHealthCounter;
     static unsigned int &m_LastWeaponTypeFired;
 
+    static void InjectHooks();
+
     static char* GetStatID(unsigned short stat);
     static bool GetStatType(unsigned short stat);
     static float GetStatValue(unsigned short stat);

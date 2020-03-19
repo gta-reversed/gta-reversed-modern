@@ -31,6 +31,8 @@ void InjectHooksMain(void)
     CWanted::InjectHooks();
     CWeapon::InjectHooks();
     CVehicle::InjectHooks();
+    CPlayerPed::InjectHooks();
+    CStats::InjectHooks();
     /*
      DetourRestoreAfterWith();
      DetourTransactionBegin();
