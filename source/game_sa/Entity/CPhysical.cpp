@@ -16,6 +16,8 @@ CVector& CPhysical::fxDirection = *(CVector*)0xB73720;
 
 void CPhysical::InjectHooks()
 {
+    HookInstall(0x542A50, &CPhysical::ApplyTurnForce, 7);
+    HookInstall(0x5429F0, (void(CPhysical::*)(CVector force)) & CPhysical::ApplyMoveForce, 7);
     HookInstall(0x5428C0, &CPhysical::SetDamagedPieceRecord, 7);
     HookInstall(0x542860, &CPhysical::RemoveFromMovingList, 7);
     HookInstall(0x542800, &CPhysical::AddToMovingList, 7);
@@ -25,7 +27,7 @@ void CPhysical::InjectHooks()
     HookInstall(0x543220, &CPhysical::ApplyFrictionForce, 7);
     HookInstall(0x5435C0, (bool(CPhysical::*)(CEntity*, CColPoint*, float*)) & CPhysical::ApplyCollision, 7);
     HookInstall(0x543890, (bool(CPhysical::*)(CEntity*, CColPoint*, float*)) & CPhysical::ApplySoftCollision, 7);
-    HookInstall(0x544D50, &CPhysical::ApplyCollisionAlt, 7);
+    //HookInstall(0x544D50, &CPhysical::ApplyCollisionAlt, 7);
     HookInstall(0x5454C0, (bool(CPhysical::*)(float, CColPoint*)) & CPhysical::ApplyFriction, 7);
     HookInstall(0x545980, (bool(CPhysical::*)(CPhysical*, float, CColPoint*)) &CPhysical::ApplyFriction, 7);
     HookInstall(0x546670, &CPhysical::ProcessShiftSectorList, 7);
@@ -368,18 +370,44 @@ void CPhysical::ApplyMoveForce(float x, float y, float z)
 #endif
 }
 
-// Converted from thiscall void CPhysical::ApplyMoveForce(CVector force) 0x5429F0
 void CPhysical::ApplyMoveForce(CVector force)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*, CVector))0x5429F0)(this, force);
+#else
+    if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce)
+    {
+        if (physicalFlags.bDisableZ)
+            force.z = 0.0f;
+
+        m_vecMoveSpeed += force * (1.0f / m_fMass);
+    }
+#endif
 }
 
-// Converted from thiscall void CPhysical::ApplyTurnForce(CVector dir,CVector velocity) 0x542A50
-void CPhysical::ApplyTurnForce(CVector dir, CVector velocity)
+void CPhysical::ApplyTurnForce(CVector force, CVector direction)
 {
-    ((void(__thiscall*)(CPhysical*, CVector, CVector))0x542A50)(this, dir, velocity);
-}
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__thiscall*)(CPhysical*, CVector, CVector))0x542A50)(this, force, direction);
+#else
+    if (!physicalFlags.bDisableTurnForce)
+    {
+        CVector vecCentreOfMassMultiplied;
+        if (!physicalFlags.bInfiniteMass)
+            Multiply3x3(&vecCentreOfMassMultiplied, m_matrix, &m_vecCentreOfMass);
 
+        if (physicalFlags.bDisableMoveForce)
+        {
+            direction.z = 0.0f;
+            force.z = 0.0f;
+        }
+        CVector vecDifference = direction - vecCentreOfMassMultiplied;
+        CVector velocity;
+        CrossProduct(&velocity, &vecDifference, &force);
+        m_vecTurnSpeed += (1.0f / m_fTurnMass) * velocity;
+    }
+#endif
+}
 
 void CPhysical::ApplyForce(CVector vecMoveSpeed, CVector vecDirection, bool bUpdateTurnSpeed)
 {
@@ -729,12 +757,13 @@ void CPhysical::ApplyAirResistance()
     ((void(__thiscall*)(CPhysical*))0x544C40)(this);
 }
 
-//  0x544D50
+// BUG: When a vehicle is upside down, it gets stuck or keeps glitching.
 bool CPhysical::ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, float* pDamageIntensity, CVector* pVecMoveSpeed, CVector* pVecTurnSpeed)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
+
+//#ifdef USE_DEFAULT_FUNCTIONS
     return ((bool(__thiscall*)(CPhysical*, CPhysical*, CColPoint*, float*, CVector*, CVector*))0x544D50)(this, pEntity, pColPoint, pDamageIntensity, pVecMoveSpeed, pVecTurnSpeed);
-#else
+#if 0
     if (m_pAttachedTo)
     {
         if (m_pAttachedTo->m_nType > ENTITY_TYPE_BUILDING && m_pAttachedTo->m_nType < ENTITY_TYPE_DUMMY
