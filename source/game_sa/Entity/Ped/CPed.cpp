@@ -188,12 +188,12 @@ bool CPed::CanPedReturnToState()
     return ((bool(__thiscall*)(CPed*))0x5DF000)(this);
 #else
     return 
-        m_nPedState <= PEDSTATE_STATES_NO_AI &&
+        m_nPedState <= PEDSTATE_STATES_NO_AI && 
         m_nPedState != PEDSTATE_AIMGUN &&
-        m_nPedState != PEDSTATE_ATTACK &&
-        m_nPedState != PEDSTATE_FIGHT &&
+        m_nPedState != PEDSTATE_ATTACK && 
+        m_nPedState != PEDSTATE_FIGHT && 
         m_nPedState != PEDSTATE_EVADE_STEP &&
-        m_nPedState != PEDSTATE_SNIPER_MODE &&
+        m_nPedState != PEDSTATE_SNIPER_MODE && 
         m_nPedState != PEDSTATE_LOOK_ENTITY;
 #endif // USE_DEFAULT_FUNCTIONS
 }
@@ -212,9 +212,9 @@ bool CPed::CanBeArrested()
 #else
     return 
         m_nPedState != PEDSTATE_DIE &&
-        m_nPedState != PEDSTATE_DEAD &&
+        m_nPedState != PEDSTATE_DEAD && 
         m_nPedState != PEDSTATE_ARRESTED && 
-        m_nPedState != PEDSTATE_ENTER_CAR &&
+        m_nPedState != PEDSTATE_ENTER_CAR && 
         m_nPedState != PEDSTATE_EXIT_CAR;
 #endif // USE_DEFAULT_FUNCTIONS
 }
@@ -226,13 +226,13 @@ bool CPed::CanStrafeOrMouseControl()
     return ((bool(__thiscall*)(CPed*))0x5DF090)(this);
 #else
     return 
-        m_nPedState == PEDSTATE_IDLE ||
+        m_nPedState == PEDSTATE_IDLE || 
         m_nPedState == PEDSTATE_FLEE_ENTITY ||
-        m_nPedState == PEDSTATE_FLEE_POSITION ||
+        m_nPedState == PEDSTATE_FLEE_POSITION || 
         m_nPedState == PEDSTATE_NONE || 
-        m_nPedState == PEDSTATE_AIMGUN ||
-        m_nPedState == PEDSTATE_ATTACK ||
-        m_nPedState == PEDSTATE_FIGHT ||
+        m_nPedState == PEDSTATE_AIMGUN || 
+        m_nPedState == PEDSTATE_ATTACK || 
+        m_nPedState == PEDSTATE_FIGHT || 
         m_nPedState == PEDSTATE_JUMP ||
         m_nPedState == PEDSTATE_ANSWER_MOBILE;
 #endif // USE_DEFAULT_FUNCTIONS
@@ -540,36 +540,30 @@ void CPed::PutOnGoggles()
     ((void(__thiscall *)(CPed*))0x5E3AE0)(this);
 }
 
-// Converted from thiscall char CPed::GetWeaponSkill(eWeaponType weaponType) 0x5E3B60
 char CPed::GetWeaponSkill(eWeaponType weaponType)
 {
-//#ifdef USE_DEFAULT_FUNCTIONS
-    return ((char(__thiscall*)(CPed*, eWeaponType))0x5E3B60)(this, weaponType);
-//#else
-//    int v4; // edi
-//    char result; // al
-//    int weaponTypea; // [esp+Ch] [ebp+4h]
-//    int weaponTypeb; // [esp+Ch] [ebp+4h]
-//
-//    if ((signed int)weaponType < 22 || (signed int)weaponType > 32)
-//        return 1;
-//    if (!m_nPedType || m_nPedType == 1)
-//    {
-//        v4 = CWeaponInfo::GetSkillStatIndex((CWeaponInfo*)weaponType);
-//        weaponTypea = CWeaponInfo::GetWeaponInfo(weaponType, 2)->m_nReqStatLevel;
-//        if ((double)weaponTypea <= CStats::GetStatValue(v4))
-//            return 2;
-//        weaponTypeb = CWeaponInfo::GetWeaponInfo(weaponType, 1)->m_nReqStatLevel;
-//        if ((double)weaponTypeb > CStats::GetStatValue(v4))
-//            return 0;
-//        return 1;
-//    }
-//    if (weaponType != 22 || m_nPedType != 6)
-//        result = m_nWeaponSkill;
-//    else
-//        result = 3;
-//    return result;
-//#endif // USE_DEFAULT_FUNCTIONS
+#ifdef USE_DEFAULT_FUNCTIONS
+  return ((char(__thiscall*)(CPed*, eWeaponType))0x5E3B60)(this, weaponType);
+#else
+    if ( weaponType < WEAPON_PISTOL || weaponType > WEAPON_TEC9 )
+        return 1;
+    if (!m_nPedType || m_nPedType == PED_TYPE_PLAYER2)
+    {
+        int skillStat = CWeaponInfo::GetSkillStatIndex(weaponType);
+        CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, WEAPON_GOLFCLUB);
+        float golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_nReqStatLevel);
+        if (golfClubStatLevel <= CStats::GetStatValue(skillStat))
+            return 2;
+        CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, WEAPON_BRASSKNUCKLE);
+        float brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_nReqStatLevel);
+        if (brassKnuckleStatLevel > CStats::GetStatValue(skillStat))
+            return 0;
+        return 1;
+    }
+    if (weaponType != WEAPON_PISTOL || m_nPedType != PED_TYPE_COP)
+        return m_nWeaponSkill;
+    return 3;
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall void CPed::SetWeaponSkill(eWeaponType weaponType,char skill) 0x5E3C10
