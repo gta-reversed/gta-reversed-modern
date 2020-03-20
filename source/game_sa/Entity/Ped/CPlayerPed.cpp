@@ -15,6 +15,7 @@ void CPlayerPed::InjectHooks()
 {
     HookInstall(0x60A530, &CPlayerPed::ResetSprintEnergy, 7); 
     HookInstall(0x60A8A0, &CPlayerPed::ResetPlayerBreath, 7);
+    HookInstall(0x6094A0, &CPlayerPed::RemovePlayerPed, 7);
 }
 
 // Converted from thiscall void CPlayerPed::CPlayerPed(int playerId,bool bGroupCreated) 0x60D5B0
@@ -24,26 +25,26 @@ CPlayerPed::CPlayerPed(int playerId, bool bGroupCreated) : CPed(plugin::dummy) {
 
 // Converted from cdecl void CPlayerPed::RemovePlayerPed(int playerId) 0x6094A0
 void CPlayerPed::RemovePlayerPed(int playerId) {
-//#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x6094A0, int>(playerId);
-//#else
-//    auto playerPed = CWorld::Players[playerId].m_pPed;
-//    CEntity** playerEntity = (CEntity**)&CWorld::Players[playerId];
-//    if (playerPed)
-//    {
-//        CVehicle* playerVehicle = playerPed->m_pVehicle;
-//        if (playerVehicle && playerVehicle->m_pDriver == playerPed)
-//        {
-//            playerVehicle->m_pEntityWeAreOn->m_nType = playerVehicle->m_pEntityWeAreOn.m_nType & EVENT_DRAGGED_OUT_CAR | eEventType:: 0x18;
-//            playerPed->m_pVehicle->m_fGasPedal = 0.0;
-//            playerPed->m_pVehicle->m_fBreakPedal = 0.1;
-//        }
-//        CWorld::Remove(*playerEntity);
-//        if (*playerEntity)
-//            ((void(__stdcall*)(signed int))(*playerEntity)->placeable.vtbl->Destructor)(1);
-//        *playerEntity = 0;
-//    }
-//#endif
+#ifdef USE_DEFAULT_FUNCTIONS
+  plugin::Call<0x6094A0, int>(playerId);
+#else
+    CPed* playerPed = CWorld::Players[playerId].m_pPed;
+    CPlayerInfo* pPlayerInfo = &CWorld::Players[playerId];
+    if (playerPed)
+    {
+        CVehicle* playerVehicle = playerPed->m_pVehicle;
+        if (playerVehicle && playerVehicle->m_pDriver == playerPed)
+        {
+            playerVehicle->m_nStatus = STATUS_PHYSICS;
+            playerVehicle->m_fGasPedal = 0.0f;
+            playerVehicle->m_fBreakPedal = 0.1f;
+        }
+        CWorld::Remove(static_cast<CEntity*>(playerPed));
+        if (playerPed)
+            playerPed->DeletingDestructor(1);
+        pPlayerInfo->m_pPed = nullptr;
+    }
+#endif
 }
 
 // Converted from cdecl void CPlayerPed::DeactivatePlayerPed(int playerId) 0x609520
