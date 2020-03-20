@@ -102,7 +102,7 @@ void CWeapon::Reload(CPed* owner)
     {
         pedWeaponInfo = CWeaponInfo::GetWeaponInfo(m_nType, 1);
     }
-    int ammo = pedWeaponInfo->m_nAmmoClip;
+    unsigned short ammo = pedWeaponInfo->m_nAmmoClip;
     if (m_nTotalAmmo >= ammo)
         m_nAmmoInClip = ammo;
     else
