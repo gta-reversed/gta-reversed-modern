@@ -14,7 +14,7 @@ void CWeapon::InjectHooks()
     HookInstall(0x73B1E0, &CWeapon::IsType2Handed, 7);
     HookInstall(0x73B210, &CWeapon::IsTypeProjectile, 7);
     HookInstall(0x73B2A0, &CWeapon::HasWeaponAmmoToBeUsed, 7);
-    // HookInstall(0x73B240, &CWeapon::CanBeUsedFor2Player, 7); Facing some issue need a check
+    HookInstall(0x73B240, (bool(*)(eWeaponType weaponType))&CWeapon::CanBeUsedFor2Player, 7);
 }
 
 float& CWeapon::ms_fExtinguisherAimAngle = *(float*)0x8D610C;
@@ -103,7 +103,7 @@ void CWeapon::Reload(CPed* owner)
         pedWeaponInfo = CWeaponInfo::GetWeaponInfo(m_nType, 1);
     }
     int ammo = pedWeaponInfo->m_nAmmoClip;
-    if ((signed int)m_nTotalAmmo >= ammo)
+    if (m_nTotalAmmo >= ammo)
         m_nAmmoInClip = ammo;
     else
         m_nAmmoInClip = m_nTotalAmmo;
@@ -162,25 +162,25 @@ bool CWeapon::IsTypeProjectile()
 // Converted from cdecl bool CWeapon::CanBeUsedFor2Player(eWeaponType weaponType) 0x73B240
 // Check this function. Has errors
 bool CWeapon::CanBeUsedFor2Player(eWeaponType weaponType) {
-//#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<bool, 0x73B240, eWeaponType>(weaponType);
-//#else
-//    bool result = true;
-//    switch (weaponType)
-//    {
-//    case 9:
-//    case 34:
-//    case 35:
-//    case 46:
-//        result = false;
-//        break;
-//    default:
-//        result = true;
-//        break;
-//    }
-//
-//    return result;
-//#endif // USE_DEFAULT_FUNCTIONS
+#ifdef USE_DEFAULT_FUNCTIONS
+  return plugin::CallAndReturn<bool, 0x73B240, eWeaponType>(weaponType);
+#else
+    bool result = true;
+    switch (weaponType)
+    {
+    case WEAPON_CHAINSAW:
+    case WEAPON_SNIPERRIFLE:
+    case WEAPON_RLAUNCHER:
+    case WEAPON_PARACHUTE:
+        result = false;
+        break;
+    default:
+        result = true;
+        break;
+    }
+
+    return result;
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall bool CWeapon::HasWeaponAmmoToBeUsed(void) 0x73B2A0
@@ -189,24 +189,24 @@ bool CWeapon::HasWeaponAmmoToBeUsed()
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x73B2A0, CWeapon*>(this);
 #else
-    bool result;
+    bool result = 0;
 
     switch (m_nType)
     {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 8:
-    case 9:
-    case 0xA:
-    case 0xB:
-    case 0xC:
-    case 0xD:
-    case 0xE:
-    case 0x2E:
+    case WEAPON_UNARMED:
+    case WEAPON_BRASSKNUCKLE:
+    case WEAPON_GOLFCLUB:
+    case WEAPON_NIGHTSTICK:
+    case WEAPON_KNIFE:
+    case WEAPON_BASEBALLBAT:
+    case WEAPON_KATANA:
+    case WEAPON_CHAINSAW:
+    case WEAPON_DILDO1:
+    case WEAPON_DILDO2:
+    case WEAPON_VIBE1:
+    case WEAPON_VIBE2:
+    case WEAPON_FLOWERS:
+    case WEAPON_PARACHUTE:
         result = 1;
         break;
     default:
