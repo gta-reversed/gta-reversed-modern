@@ -228,7 +228,7 @@ void CPlayerPed::ResetPlayerBreath() {
     plugin::CallMethod<0x60A8A0, CPlayerPed *>(this);
 #else
     m_pPlayerData->m_fBreath = CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG);
-    m_pPlayerData->m_dwPlayerFlags &= 0xFFFFFF7F;
+    m_pPlayerData->m_bRequireHandleBreath = 0;
 #endif // USE_DEFAULT_FUNCTIONS
 
 }

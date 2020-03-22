@@ -60,8 +60,8 @@ char(*VehicleNames)[14] = (char(*)[14])0x8D3978;
 
 void CVehicle::InjectHooks()
 {
-    HookInstall(0x6D1C40, (bool(CVehicle::*)(CPed*))(CVehicle::IsDriver), 7);
-    HookInstall(0x6D1C60, (bool(CVehicle::*)(int))(CVehicle::IsDriver), 7);
+    HookInstall(0x6D1C40, (bool(CVehicle::*)(CPed*))(&CVehicle::IsDriver), 7);
+    HookInstall(0x6D1C60, (bool(CVehicle::*)(int))(&CVehicle::IsDriver), 7);
 }
 
 void* CVehicle::operator new(unsigned int size) {
