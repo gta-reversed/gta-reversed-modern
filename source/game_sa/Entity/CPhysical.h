@@ -159,6 +159,7 @@ public:
 
     // originally virtual functions
     void Add() override;
+    void Remove() override;
     CRect* GetBoundRect(CRect* pRect) override;
     void ProcessControl() override;
     void ProcessShift() override;
@@ -166,6 +167,7 @@ public:
 
     // reversed virtual functions
     void Add_Reversed();
+    void Remove_Reversed();
     void ProcessShift_Reversed();
 
     // functions
