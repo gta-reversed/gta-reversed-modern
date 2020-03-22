@@ -12,7 +12,7 @@ bool cBuoyancy::ProcessBuoyancy(CPhysical* pEntity, float fBuoyancy, CVector* pV
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x6C3EF0, cBuoyancy*, CEntity*, float, CVector*, CVector*> 
-        (this, pEntity, fBuoyancy, pOutVecMoveForce, pOutVecTurnForce);
+        (this, pEntity, fBuoyancy, pVecTurnSpeed, pBuoyancy);
 #else
     CVector& entityPosition = pEntity->GetPosition();
     if (CWaterLevel::GetWaterLevel(entityPosition.x, entityPosition.y, entityPosition.z,
