@@ -16,12 +16,14 @@ CVector& CPhysical::fxDirection = *(CVector*)0xB73720;
 
 void CPhysical::InjectHooks()
 {
+    HookInstall(0x542560, &CPhysical::RemoveAndAdd, 7);
     HookInstall(0x542A50, &CPhysical::ApplyTurnForce, 7);
     HookInstall(0x5429F0, (void(CPhysical::*)(CVector force)) & CPhysical::ApplyMoveForce, 7);
     HookInstall(0x5428C0, &CPhysical::SetDamagedPieceRecord, 7);
     HookInstall(0x542860, &CPhysical::RemoveFromMovingList, 7);
     HookInstall(0x542800, &CPhysical::AddToMovingList, 7);
     HookInstall(0x544A30, &CPhysical::Add_Reversed, 7);
+    HookInstall(0x5424C0, &CPhysical::Remove_Reversed, 7);
     HookInstall(0x54DB10, &CPhysical::ProcessShift_Reversed, 7);
     HookInstall(0x5430A0, &CPhysical::ApplyFrictionMoveForce, 7);
     HookInstall(0x543220, &CPhysical::ApplyFrictionForce, 7);
@@ -104,6 +106,54 @@ void CPhysical::Add_Reversed()
 
                 m_pCollisionList = pNewEntityInfoNode;
             }
+        }
+    }
+}
+
+void CPhysical::Remove()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__thiscall*)(CEntity*))(0x5424C0))(this);
+#else
+    Remove_Reversed();
+#endif
+}
+
+void CPhysical::Remove_Reversed()
+{
+    if (m_bIsBIGBuilding)
+    {
+        CEntity::Remove();
+    }
+    else
+    {
+        CEntryInfoNode* pEntryInfoNode = m_pCollisionList;
+        while (pEntryInfoNode)
+        {
+            CPtrNodeDoubleLink* pDoubleLink = pEntryInfoNode->m_pDoubleLink;
+            if (pEntryInfoNode->m_pDoubleLinkList->pNode == (CPtrNode*)pDoubleLink)
+                pEntryInfoNode->m_pDoubleLinkList->pNode = (CPtrNode*)pDoubleLink->pNext;
+            CPtrNodeDoubleLink* pDoubleLinkPrevious = pDoubleLink->pPrev;
+            if (pDoubleLinkPrevious)
+                pDoubleLinkPrevious->pNext = pDoubleLink->pNext;
+            CPtrNodeDoubleLink* pDoubleLinkNext = pDoubleLink->pNext;
+            if (pDoubleLinkNext)
+                pDoubleLinkNext->pPrev = pDoubleLink->pPrev;
+
+            CPools::ms_pPtrNodeDoubleLinkPool->Delete(pDoubleLink);
+
+            CEntryInfoNode* pEntryInfoNodeNext = pEntryInfoNode->m_pNext;
+            if (m_pCollisionList == pEntryInfoNode)
+                m_pCollisionList = pEntryInfoNodeNext;
+            CEntryInfoNode* pEntryInfoNodePrevious = pEntryInfoNode->m_pPrevious;
+            if (pEntryInfoNodePrevious)
+                pEntryInfoNodePrevious->m_pNext = pEntryInfoNodeNext;
+            if (pEntryInfoNodeNext)
+                pEntryInfoNodeNext->m_pPrevious = pEntryInfoNode->m_pPrevious;
+
+            CEntryInfoNode* pNextEntryInfoNode = pEntryInfoNode->m_pNext;
+            CPools::ms_pEntryInfoNodePool->Delete(pEntryInfoNode);
+            pEntryInfoNode = pNextEntryInfoNode;
         }
     }
 }
@@ -269,7 +319,119 @@ int CPhysical::ProcessEntityCollision(CEntity* entity, CColPoint* point)
 // Converted from thiscall void CPhysical::RemoveAndAdd(void) 0x542560
 void CPhysical::RemoveAndAdd()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*))0x542560)(this);
+#else
+    if (m_bIsBIGBuilding)
+    {
+        CEntity::Remove();
+        CEntity::Add();
+    }
+    else
+    {
+        CEntryInfoNode* pEntryInfoNode = m_pCollisionList;
+        CRect boundRect;
+        GetBoundRect(&boundRect);
+        int startSectorX = static_cast<int>(floor(boundRect.left * 0.02f + 60.0f));
+        int startSectorY = static_cast<int>(floor(boundRect.top * 0.02f + 60.0f));
+        int endSectorX = static_cast<int>(floor(boundRect.right * 0.02f + 60.0f));
+        int endSectorY = static_cast<int>(floor(boundRect.bottom * 0.02f + 60.0f));
+        for (int sectorY = startSectorY; sectorY <= endSectorY; ++sectorY)
+        {
+            for (int sectorX = startSectorX; sectorX <= endSectorX; ++sectorX)
+            {
+                CPtrListDoubleLink* pDoubleLinkList = nullptr;
+                CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
+                switch (m_nType)
+                {
+                case ENTITY_TYPE_VEHICLE:
+                    pDoubleLinkList = &pRepeatSector->m_lists[0];
+                    break;
+                case ENTITY_TYPE_PED:
+                    pDoubleLinkList = &pRepeatSector->m_lists[1];
+                    break;
+                case ENTITY_TYPE_OBJECT:
+                    pDoubleLinkList = &pRepeatSector->m_lists[2];
+                    break;
+                }
+
+                if (pEntryInfoNode)
+                {
+                    CPtrNodeDoubleLink* pDoubleLink = pEntryInfoNode->m_pDoubleLink;
+                    if (pEntryInfoNode->m_pDoubleLinkList->pNode == (CPtrNode*)pDoubleLink)
+                        pEntryInfoNode->m_pDoubleLinkList->pNode = (CPtrNode*)pDoubleLink->pNext;
+                    CPtrNodeDoubleLink* pDoubleLinkPrevious = pDoubleLink->pPrev;
+                    if (pDoubleLinkPrevious)
+                        pDoubleLinkPrevious->pNext = pDoubleLink->pNext;
+                    CPtrNodeDoubleLink* pDoubleLinkNext = pDoubleLink->pNext;
+                    if (pDoubleLinkNext)
+                        pDoubleLinkNext->pPrev = pDoubleLink->pPrev;
+                    pDoubleLink->pPrev = nullptr;
+                    pDoubleLink->pNext = (CPtrNodeDoubleLink*)pDoubleLinkList->pNode;
+                    if (pDoubleLink->pNext)
+                        pDoubleLink->pNext->pPrev = pDoubleLink;
+                    pDoubleLinkList->pNode = (CPtrNode*)pDoubleLink;
+                    pEntryInfoNode->m_pRepeatSector = pRepeatSector;
+                    pEntryInfoNode->m_pDoubleLinkList = pDoubleLinkList;
+                    pEntryInfoNode = pEntryInfoNode->m_pNext;
+                }
+                else
+                {
+                    auto pNewDoubleLink = CPools::ms_pPtrNodeDoubleLinkPool->New();
+                    if (pNewDoubleLink)
+                    {
+                        pNewDoubleLink->pItem = this;
+                    }
+
+                    pNewDoubleLink->pPrev = nullptr;
+                    pNewDoubleLink->pNext = (CPtrNodeDoubleLink*)pDoubleLinkList->pNode;
+                    if (pNewDoubleLink->pNext)
+                        pNewDoubleLink->pNext->pPrev = pNewDoubleLink;
+                    pDoubleLinkList->pNode = (CPtrNode*)pNewDoubleLink;
+                    auto pNewEntryInfoNode = CPools::ms_pEntryInfoNodePool->New();
+                    if (pNewEntryInfoNode)
+                    {
+                        pNewEntryInfoNode->m_pRepeatSector = pRepeatSector;
+                        pNewEntryInfoNode->m_pDoubleLinkList = pDoubleLinkList;
+                        pNewEntryInfoNode->m_pDoubleLink = pNewDoubleLink;
+                    }
+                    pNewEntryInfoNode->m_pPrevious = nullptr;
+                    pNewEntryInfoNode->m_pNext = m_pCollisionList;
+                    CEntryInfoNode* pCurrentEntryInfoNode = m_pCollisionList;
+                    if (pCurrentEntryInfoNode)
+                        pCurrentEntryInfoNode->m_pPrevious = pNewEntryInfoNode;
+                    m_pCollisionList = pNewEntryInfoNode;
+                }
+            }
+        }
+
+        while (pEntryInfoNode)
+        {
+            CPtrNodeDoubleLink* pDoubleLink = pEntryInfoNode->m_pDoubleLink;
+            if (pEntryInfoNode->m_pDoubleLinkList->pNode == (CPtrNode*)pDoubleLink)
+                pEntryInfoNode->m_pDoubleLinkList->pNode = (CPtrNode*)pDoubleLink->pNext;
+            CPtrNodeDoubleLink* pDoubleLinkPrevious = pDoubleLink->pPrev;
+            if (pDoubleLinkPrevious)
+                pDoubleLinkPrevious->pNext = pDoubleLink->pNext;
+            CPtrNodeDoubleLink* pDoubleLinkNext = pDoubleLink->pNext;
+            if (pDoubleLinkNext)
+                pDoubleLinkNext->pPrev = pDoubleLink->pPrev;
+
+            CPools::ms_pPtrNodeDoubleLinkPool->Delete(pDoubleLink);
+
+            if (m_pCollisionList == pEntryInfoNode)
+                m_pCollisionList = pEntryInfoNode->m_pNext;
+            if (pEntryInfoNode->m_pPrevious)
+                pEntryInfoNode->m_pPrevious->m_pNext = pEntryInfoNode->m_pNext;
+            if (pEntryInfoNode->m_pNext)
+                pEntryInfoNode->m_pNext->m_pPrevious = pEntryInfoNode->m_pPrevious;
+
+            CEntryInfoNode* pNextEntryInfoNode = pEntryInfoNode->m_pNext;
+            CPools::ms_pEntryInfoNodePool->Delete(pEntryInfoNode);
+            pEntryInfoNode = pNextEntryInfoNode;
+        }
+    }
+#endif
 }
 
 // Converted from thiscall void CPhysical::AddToMovingList(void) 0x542800

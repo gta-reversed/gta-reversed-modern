@@ -21,7 +21,7 @@ void CEntity::Add()
 
 void CEntity::Remove()
 {
-    ((void(__thiscall *)(CEntity *))(*(void ***)this)[3])(this);
+    ((void(__thiscall *)(CEntity *))(0x534AE0))(this);
 }
 
 void CEntity::SetIsStatic(bool isStatic)

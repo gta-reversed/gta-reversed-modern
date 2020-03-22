@@ -689,12 +689,12 @@ void CPed::ClearWeapons()
 #else
     CPed::RemoveWeaponModel(-1);
     CPed::RemoveGogglesModel();
-    for each (auto weapon in m_aWeapons)
+    for(unsigned int i = 0; i < 13; i++)
     {
-        weapon.Shutdown();
+        m_aWeapons[i].Shutdown();
     }
     CWeaponInfo* getWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_UNARMED, 1);
-    CPed::SetCurrentWeapon(getWeaponInfo->m_nSlot);
+    SetCurrentWeapon(getWeaponInfo->m_nSlot);
 #endif
 }
 
