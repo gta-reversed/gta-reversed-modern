@@ -24,11 +24,18 @@ void CPhysical::InjectHooks()
     HookInstall(0x542800, &CPhysical::AddToMovingList, 7);
     HookInstall(0x544A30, &CPhysical::Add_Reversed, 7);
     HookInstall(0x5424C0, &CPhysical::Remove_Reversed, 7);
+    HookInstall(0x5485E0, &CPhysical::ProcessControl_Reversed, 7);
     HookInstall(0x54DB10, &CPhysical::ProcessShift_Reversed, 7);
+    HookInstall(0x542FE0, &CPhysical::ApplyGravity, 7);
     HookInstall(0x5430A0, &CPhysical::ApplyFrictionMoveForce, 7);
     HookInstall(0x543220, &CPhysical::ApplyFrictionForce, 7);
+    HookInstall(0x5433B0, &CPhysical::SkipPhysics, 7);
+    HookInstall(0x543490, &CPhysical::AddCollisionRecord, 7);
+    HookInstall(0x543540, &CPhysical::GetHasCollidedWith, 7);
+    HookInstall(0x543580, &CPhysical::GetHasCollidedWithAnyObject, 7);
     HookInstall(0x5435C0, (bool(CPhysical::*)(CEntity*, CColPoint*, float*)) & CPhysical::ApplyCollision, 7);
     HookInstall(0x543890, (bool(CPhysical::*)(CEntity*, CColPoint*, float*)) & CPhysical::ApplySoftCollision, 7);
+    HookInstall(0x544C40, &CPhysical::ApplyAirResistance, 7);
     //HookInstall(0x544D50, &CPhysical::ApplyCollisionAlt, 7);
     HookInstall(0x5454C0, (bool(CPhysical::*)(float, CColPoint*)) & CPhysical::ApplyFriction, 7);
     HookInstall(0x545980, (bool(CPhysical::*)(CPhysical*, float, CColPoint*)) &CPhysical::ApplyFriction, 7);
@@ -115,7 +122,7 @@ void CPhysical::Remove()
 #ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CEntity*))(0x5424C0))(this);
 #else
-    Remove_Reversed();
+    CPhysical::Remove_Reversed();
 #endif
 }
 
@@ -165,7 +172,40 @@ CRect* CPhysical::GetBoundRect(CRect* pRect)
 
 void CPhysical::ProcessControl()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x5485E0, CPhysical*>(this);
+#else
+    CPhysical::ProcessControl_Reversed();
+#endif
+}
+
+void CPhysical::ProcessControl_Reversed()
+{
+    if (m_nType != ENTITY_TYPE_PED)
+        physicalFlags.bSubmergedInWater = false;
+
+    m_bHasHitWall = false;
+    m_bWasPostponed = false;
+    m_bIsInSafePosition = false;
+    m_bHasContacted = false;
+
+    if (m_nStatus != STATUS_SIMPLE)
+    {
+        physicalFlags.b31 = false;
+        physicalFlags.bOnSolidSurface = false;
+        m_nNumEntitiesCollided = 0;
+        m_nPieceType = 0;
+        m_fDamageIntensity = 0.0f;
+        if (m_pDamageEntity)
+            m_pDamageEntity->CleanUpOldReference(&m_pDamageEntity);
+        m_pDamageEntity = nullptr;
+        ApplyFriction();
+        if (!m_pAttachedTo || physicalFlags.bInfiniteMass)
+        {
+            ApplyGravity();
+            ApplyAirResistance();
+        }
+    }
 }
 
 void CPhysical::ProcessShift()
@@ -173,7 +213,7 @@ void CPhysical::ProcessShift()
 #ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*))(*(void***)this)[12])(this);
 #else
-    ProcessShift_Reversed();
+    CPhysical::ProcessShift_Reversed();
 #endif
 }
 
@@ -594,10 +634,24 @@ void CPhysical::ApplyTurnSpeed()
     ((void(__thiscall*)(CPhysical*))0x542E20)(this);
 }
 
-// Converted from thiscall void CPhysical::ApplyGravity(void) 0x542FE0
 void CPhysical::ApplyGravity()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*))0x542FE0)(this);
+#else
+    if (physicalFlags.bApplyGravity && !physicalFlags.bDisableMoveForce) {
+        if (physicalFlags.bInfiniteMass) {
+            float fMassTimeStep = CTimer::ms_fTimeStep * m_fMass;
+            CVector direction;
+            Multiply3x3(&direction, m_matrix, &m_vecCentreOfMass);
+            CVector force (0.0f, 0.0f, fMassTimeStep * -0.008f);
+            ApplyForce(force, direction, true);
+        }
+        else if (m_bUsesCollision) {
+            m_vecMoveSpeed.z -= CTimer::ms_fTimeStep * 0.008f;
+        }
+    }
+#endif
 }
 
 // Converted from thiscall void CPhysical::ApplyFrictionMoveForce(CVector moveForce) 0x5430A0
@@ -669,31 +723,105 @@ void CPhysical::ApplyFrictionForce(CVector vecMoveForce, CVector vecDirection)
 #endif
 }
 
-// Converted from thiscall void CPhysical::SkipPhysics(void) 0x5433B0
 void CPhysical::SkipPhysics()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*))0x5433B0)(this);
+#else
+    if (m_nType != ENTITY_TYPE_PED && m_nType != ENTITY_TYPE_VEHICLE)
+        physicalFlags.bSubmergedInWater = false;
+
+    m_bHasHitWall = false;
+    m_bWasPostponed = false;
+    m_bIsInSafePosition = false;
+    m_bHasContacted = false;
+
+    if (m_nStatus != STATUS_SIMPLE)
+    {
+        physicalFlags.bOnSolidSurface = false;
+        m_nNumEntitiesCollided = 0;
+        m_nPieceType = 0;
+        m_fDamageIntensity = 0.0f;
+        if (m_pDamageEntity)
+            m_pDamageEntity->CleanUpOldReference(&m_pDamageEntity);
+        m_pDamageEntity = nullptr;
+        m_vecFrictionTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+        m_vecFrictionMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+    }
+#endif
 }
 
-// Converted from thiscall void CPhysical::AddCollisionRecord(CEntity *collidedEntity) 0x543490
 void CPhysical::AddCollisionRecord(CEntity* collidedEntity)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*, CEntity*))0x543490)(this, collidedEntity);
+#else
+    physicalFlags.bOnSolidSurface = true;
+    m_nLastCollisionTime = CTimer::m_snTimeInMilliseconds;
+    if (m_nType == ENTITY_TYPE_VEHICLE)
+    {
+        CVehicle* pVehicle = static_cast<CVehicle*>(this);
+        if (collidedEntity->m_nType == ENTITY_TYPE_VEHICLE)
+        {
+            CVehicle* pCollidedVehicle = static_cast<CVehicle*>(collidedEntity);
+            if (pVehicle->m_nAlarmState == -1)
+                pVehicle->m_nAlarmState = 15000;
+            if (pCollidedVehicle->m_nAlarmState == -1)
+                pCollidedVehicle->m_nAlarmState = 15000;
+        }
+    }
+
+    if (physicalFlags.bCanBeCollidedWith)
+    {
+        for (unsigned int i = 0; i < m_nNumEntitiesCollided; i++)
+        {
+            if (m_apCollidedEntities[i] == collidedEntity)
+                return;
+        }
+
+        if (m_nNumEntitiesCollided < 6) {
+            m_apCollidedEntities[m_nNumEntitiesCollided] = collidedEntity;
+            m_nNumEntitiesCollided++;
+        }
+    }
+#endif
 }
 
-// Converted from thiscall bool CPhysical::GetHasCollidedWith(CEntity *entity) 0x543540
 bool CPhysical::GetHasCollidedWith(CEntity* entity)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     return ((bool(__thiscall*)(CPhysical*, CEntity*))0x543540)(this, entity);
+#else
+    if (!physicalFlags.bCanBeCollidedWith || m_nNumEntitiesCollided <= 0)
+        return false;
+
+    for (unsigned int i = 0; i < m_nNumEntitiesCollided; i++)
+    {
+        if (m_apCollidedEntities[i] == entity)
+            return true;
+    }
+    return false;
+#endif
 }
 
-// Converted from thiscall bool CPhysical::GetHasCollidedWithAnyObject(void) 0x543580
 bool CPhysical::GetHasCollidedWithAnyObject()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     return ((bool(__thiscall*)(CPhysical*))0x543580)(this);
+#else
+    if (!physicalFlags.bCanBeCollidedWith || m_nNumEntitiesCollided <= 0)
+        return false;
+
+    for (unsigned int i = 0; i < m_nNumEntitiesCollided; i++)
+    {
+        CEntity* pCollidedEntity = m_apCollidedEntities[i];
+        if (pCollidedEntity && pCollidedEntity->m_nType == ENTITY_TYPE_OBJECT)
+            return true;
+    }
+    return false;
+#endif
 }
 
-// 0x5435C0
 bool CPhysical::ApplyCollision(CEntity* pEntity, CColPoint* pColPoint, float* pDamageIntensity)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -913,10 +1041,34 @@ bool CPhysical::CanPhysicalBeDamaged(eWeaponType weapon, unsigned char* arg1)
     return ((bool(__thiscall*)(CPhysical*, eWeaponType, unsigned char*))0x5448B0)(this, weapon, arg1);
 }
 
-// Converted from thiscall void CPhysical::ApplyAirResistance(void) 0x544C40
 void CPhysical::ApplyAirResistance()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*))0x544C40)(this);
+#else
+    if (m_fAirResistance <= 0.1f || m_nType  == ENTITY_TYPE_VEHICLE)
+    {
+        float fSpeedMagnitude = m_vecMoveSpeed.Magnitude() * m_fAirResistance;
+        if (CCullZones::DoExtraAirResistanceForPlayer())
+        {
+            if (m_nType == ENTITY_TYPE_VEHICLE)
+            {
+                CVehicle* pVehicle = static_cast<CVehicle*>(this);
+                if (!pVehicle->m_nVehicleSubClass || pVehicle->m_nVehicleSubClass == VEHICLE_BIKE)
+                    fSpeedMagnitude = CVehicle::m_fAirResistanceMult * fSpeedMagnitude;
+            }
+        }
+
+        m_vecMoveSpeed *= pow(1.0f - fSpeedMagnitude, CTimer::ms_fTimeStep);
+        m_vecTurnSpeed *= 0.99f;
+    }
+    else
+    {
+        float fAirResistanceTimeStep = pow(m_fAirResistance, CTimer::ms_fTimeStep);
+        m_vecMoveSpeed *= fAirResistanceTimeStep;
+        m_vecTurnSpeed *= fAirResistanceTimeStep;
+    }
+#endif
 }
 
 // BUG: When a vehicle is upside down, it gets stuck or keeps glitching.
