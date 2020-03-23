@@ -168,6 +168,7 @@ public:
     // reversed virtual functions
     void Add_Reversed();
     void Remove_Reversed();
+    void ProcessControl_Reversed();
     void ProcessShift_Reversed();
 
     // functions
