@@ -1,0 +1,49 @@
+# editor-specific files
+\#*
+.#*
+*~
+.*.swp
+/CMakeLists.txt.user
+
+# ELF files
+*.o
+*.a
+*.so
+
+# MSVC files
+*.pdb
+*.dll
+*.exe
+
+# workflow
+*.orig
+/TODO.org
+
+# build system
+/bin
+/Bin
+/.bin
+/.Bin
+/build
+/deps
+/out
+
+# debugging
+callgrind.out.*
+perf.data*
+.gdb_history
+
+# code search
+/.agignore
+/.globalrc
+/GPATH
+/GRTAGS
+/GTAGS
+
+# IDEs
+.vs
+.vscode
+.idea
+
+# macOS
+.DS_Store

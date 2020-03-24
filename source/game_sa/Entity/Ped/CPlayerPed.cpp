@@ -11,6 +11,13 @@ char *abTempNeverLeavesGroup = (char *)0xC0BC08;
 int &gPlayIdlesAnimBlockIndex = *(int *)0xC0BC10;
 bool &CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = *(bool *)0xC0BC15;
 
+void CPlayerPed::InjectHooks()
+{
+    HookInstall(0x60A530, &CPlayerPed::ResetSprintEnergy, 7); 
+    HookInstall(0x60A8A0, &CPlayerPed::ResetPlayerBreath, 7);
+    HookInstall(0x6094A0, &CPlayerPed::RemovePlayerPed, 7);
+}
+
 // Converted from thiscall void CPlayerPed::CPlayerPed(int playerId,bool bGroupCreated) 0x60D5B0
 CPlayerPed::CPlayerPed(int playerId, bool bGroupCreated) : CPed(plugin::dummy) {
     plugin::CallMethod<0x60D5B0, CPlayerPed *, int, bool>(this, playerId, bGroupCreated);
@@ -18,7 +25,26 @@ CPlayerPed::CPlayerPed(int playerId, bool bGroupCreated) : CPed(plugin::dummy) {
 
 // Converted from cdecl void CPlayerPed::RemovePlayerPed(int playerId) 0x6094A0
 void CPlayerPed::RemovePlayerPed(int playerId) {
-    plugin::Call<0x6094A0, int>(playerId);
+#ifdef USE_DEFAULT_FUNCTIONS
+  plugin::Call<0x6094A0, int>(playerId);
+#else
+    CPed* playerPed = CWorld::Players[playerId].m_pPed;
+    CPlayerInfo* pPlayerInfo = &CWorld::Players[playerId];
+    if (playerPed)
+    {
+        CVehicle* playerVehicle = playerPed->m_pVehicle;
+        if (playerVehicle && playerVehicle->m_pDriver == playerPed)
+        {
+            playerVehicle->m_nStatus = STATUS_PHYSICS;
+            playerVehicle->m_fGasPedal = 0.0f;
+            playerVehicle->m_fBreakPedal = 0.1f;
+        }
+        CWorld::Remove(static_cast<CEntity*>(playerPed));
+        if (playerPed)
+            playerPed->DeletingDestructor(1);
+        pPlayerInfo->m_pPed = nullptr;
+    }
+#endif
 }
 
 // Converted from cdecl void CPlayerPed::DeactivatePlayerPed(int playerId) 0x609520
@@ -172,8 +198,13 @@ void CPlayerPed::MakePlayerGroupReappear() {
 }
 
 // Converted from thiscall void CPlayerPed::ResetSprintEnergy(void) 0x60A530
-void CPlayerPed::ResetSprintEnergy() {
+void CPlayerPed::ResetSprintEnergy() 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x60A530, CPlayerPed *>(this);
+#else
+    m_pPlayerData->m_fTimeCanRun = CStats::GetFatAndMuscleModifier(STAT_MOD_TIME_CAN_RUN);
+#endif
 }
 
 // Converted from thiscall bool CPlayerPed::HandleSprintEnergy(bool, float) 0x60A550
@@ -193,7 +224,13 @@ float CPlayerPed::GetButtonSprintResults(eSprintType sprintType) {
 
 // Converted from thiscall void CPlayerPed::ResetPlayerBreath(void) 0x60A8A0
 void CPlayerPed::ResetPlayerBreath() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x60A8A0, CPlayerPed *>(this);
+#else
+    m_pPlayerData->m_fBreath = CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG);
+    m_pPlayerData->m_bRequireHandleBreath = 0;
+#endif // USE_DEFAULT_FUNCTIONS
+
 }
 
 // Converted from thiscall void CPlayerPed::HandlePlayerBreath(bool, float) 0x60A8D0

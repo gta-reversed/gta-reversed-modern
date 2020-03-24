@@ -6,6 +6,17 @@
 */
 #include "StdInc.h"
 
+void CWeapon::InjectHooks()
+{
+    HookInstall(0x73A380, &CWeapon::Shutdown, 7);
+    HookInstall(0x73AEB0, &CWeapon::Reload, 7);
+    HookInstall(0x73B1C0, &CWeapon::IsTypeMelee, 7);
+    HookInstall(0x73B1E0, &CWeapon::IsType2Handed, 7);
+    HookInstall(0x73B210, &CWeapon::IsTypeProjectile, 7);
+    HookInstall(0x73B2A0, &CWeapon::HasWeaponAmmoToBeUsed, 7);
+    HookInstall(0x73B240, (bool(*)(eWeaponType weaponType))&CWeapon::CanBeUsedFor2Player, 7);
+}
+
 float& CWeapon::ms_fExtinguisherAimAngle = *(float*)0x8D610C;
 bool& CWeapon::bPhotographHasBeenTaken = *(bool*)0xC8A7C0;
 bool& CWeapon::ms_bTakePhoto = *(bool*)0xC8A7C1;
@@ -35,8 +46,23 @@ void CWeapon::UpdateWeapons() {
 }
 
 // Converted from thiscall void CWeapon::Shutdown(void) 0x73A380
-void CWeapon::Shutdown() {
+void CWeapon::Shutdown() 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x73A380, CWeapon*>(this);
+#else
+    auto weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nModelId1;
+    if (weaponModelID1 != -1)
+        CModelInfo::ms_modelInfoPtrs[weaponModelID1]->RemoveRef();
+    auto weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nModelId2;
+    if (weaponModelID2 != -1)
+        CModelInfo::ms_modelInfoPtrs[weaponModelID2]->RemoveRef();
+    m_nType = WEAPON_UNARMED;
+    m_nState = WEAPONSTATE_READY;
+    m_nTotalAmmo = 0;
+    m_nAmmoInClip = 0;
+    m_nTimeForNextShot = 0;
+#endif
 }
 
 // Converted from thiscall void CWeapon::AddGunshell(CEntity *creator,CVector const&position,CVector2D const&direction,float size) 0x73A3E0
@@ -60,8 +86,29 @@ bool CWeapon::FireSniper(CPed* creator, CEntity* victim, CVector* target) {
 }
 
 // Converted from thiscall void CWeapon::Reload(CPed *owner) 0x73AEB0
-void CWeapon::Reload(CPed* owner) {
+void CWeapon::Reload(CPed* owner) 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x73AEB0, CWeapon*, CPed*>(this, owner);
+#else
+    CWeaponInfo* pedWeaponInfo;
+
+    if (owner)
+    {
+        auto skill = owner->GetWeaponSkill(m_nType);
+        pedWeaponInfo = CWeaponInfo::GetWeaponInfo(m_nType, skill);
+    }
+    else
+    {
+        pedWeaponInfo = CWeaponInfo::GetWeaponInfo(m_nType, 1);
+    }
+    unsigned short ammo = pedWeaponInfo->m_nAmmoClip;
+    if (m_nTotalAmmo >= ammo)
+        m_nAmmoInClip = ammo;
+    else
+        m_nAmmoInClip = m_nTotalAmmo;
+#endif
+
 }
 
 // Converted from cdecl void FireOneInstantHitRound(CVector *startPoint,CVector *endPoint,int intensity) 0x73AF00
@@ -71,27 +118,103 @@ void FireOneInstantHitRound(CVector* startPoint, CVector* endPoint, int intensit
 
 // Converted from thiscall bool CWeapon::IsTypeMelee(void) 0x73B1C0
 bool CWeapon::IsTypeMelee() {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x73B1C0, CWeapon*>(this);
+#else
+    return CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nWeaponFire == 0;
+#endif
 }
 
 // Converted from thiscall bool CWeapon::IsType2Handed(void) 0x73B1E0
-bool CWeapon::IsType2Handed() {
+bool CWeapon::IsType2Handed() 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x73B1E0, CWeapon*>(this);
+#else
+    // Use switch?
+    return 
+        m_nType == WEAPON_M4 || 
+        m_nType == WEAPON_AK47 ||
+        m_nType == WEAPON_SPAS12_SHOTGUN || 
+        m_nType == WEAPON_SHOTGUN ||
+        m_nType == WEAPON_SNIPERRIFLE ||
+        m_nType == WEAPON_FLAMETHROWER ||
+        m_nType == WEAPON_COUNTRYRIFLE;
+#endif
 }
 
 // Converted from thiscall bool CWeapon::IsTypeProjectile(void) 0x73B210
-bool CWeapon::IsTypeProjectile() {
+bool CWeapon::IsTypeProjectile() 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x73B210, CWeapon*>(this);
+#else
+    // Use switch?
+    return
+        m_nType == WEAPON_GRENADE ||
+        m_nType == WEAPON_REMOTE_SATCHEL_CHARGE ||
+        m_nType == WEAPON_TEARGAS ||
+        m_nType == WEAPON_MOLOTOV ||
+        m_nType == WEAPON_FREEFALL_BOMB;
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from cdecl bool CWeapon::CanBeUsedFor2Player(eWeaponType weaponType) 0x73B240
+// Check this function. Has errors
 bool CWeapon::CanBeUsedFor2Player(eWeaponType weaponType) {
-    return plugin::CallAndReturn<bool, 0x73B240, eWeaponType>(weaponType);
+#ifdef USE_DEFAULT_FUNCTIONS
+  return plugin::CallAndReturn<bool, 0x73B240, eWeaponType>(weaponType);
+#else
+    bool result = true;
+    switch (weaponType)
+    {
+    case WEAPON_CHAINSAW:
+    case WEAPON_SNIPERRIFLE:
+    case WEAPON_RLAUNCHER:
+    case WEAPON_PARACHUTE:
+        result = false;
+        break;
+    default:
+        result = true;
+        break;
+    }
+
+    return result;
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall bool CWeapon::HasWeaponAmmoToBeUsed(void) 0x73B2A0
-bool CWeapon::HasWeaponAmmoToBeUsed() {
+bool CWeapon::HasWeaponAmmoToBeUsed() 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x73B2A0, CWeapon*>(this);
+#else
+    bool result = 0;
+
+    switch (m_nType)
+    {
+    case WEAPON_UNARMED:
+    case WEAPON_BRASSKNUCKLE:
+    case WEAPON_GOLFCLUB:
+    case WEAPON_NIGHTSTICK:
+    case WEAPON_KNIFE:
+    case WEAPON_BASEBALLBAT:
+    case WEAPON_KATANA:
+    case WEAPON_CHAINSAW:
+    case WEAPON_DILDO1:
+    case WEAPON_DILDO2:
+    case WEAPON_VIBE1:
+    case WEAPON_VIBE2:
+    case WEAPON_FLOWERS:
+    case WEAPON_PARACHUTE:
+        result = 1;
+        break;
+    default:
+        result = m_nTotalAmmo != 0;
+        break;
+    }
+    return result;
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from cdecl bool CWeapon::ProcessLineOfSight(CVector const&startPoint,CVector const&endPoint,CColPoint &outColPoint,CEntity *&outEntity,eWeaponType weaponType,CEntity *,bool buildings,bool vehicles,bool peds,bool objects,bool dummies,bool,bool doIgnoreCameraCheck) 0x73B300

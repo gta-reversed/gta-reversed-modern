@@ -58,7 +58,8 @@ void CWorld::Add(CEntity* entity) {
 }
 
 // Converted from cdecl void CWorld::Remove(CEntity *entity) 0x563280
-void CWorld::Remove(CEntity* entity) {
+void CWorld::Remove(CEntity* entity) 
+{
     plugin::Call<0x563280, CEntity*>(entity);
 }
 

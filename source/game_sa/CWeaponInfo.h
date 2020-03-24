@@ -108,6 +108,8 @@ public:
 	static void Initialise();
 	// closing
 	static void Shutdown();
+
+	static int GetSkillStatIndex(int weaponType);
 };
 
 VALIDATE_SIZE(CWeaponInfo, 0x70);
