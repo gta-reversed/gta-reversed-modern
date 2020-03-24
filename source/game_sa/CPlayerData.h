@@ -47,6 +47,7 @@ public:
             unsigned int m_bAllMeleeAttackPtsBlocked : 1;       // if all of m_pMeleeAttackers[] is blocked by collision, just attack straight ahead
             unsigned int m_bJustBeenSnacking : 1;               // If this bit is true we have just bought something from a vending machine
             unsigned int m_bRequireHandleBreath : 1;
+
             unsigned int m_bGroupStuffDisabled : 1;             // if this is true the player can't recrout or give his group commands.
             unsigned int m_bGroupAlwaysFollow : 1;              // The group is told to always follow the player (used for girlfriend missions)
             unsigned int m_bGroupNeverFollow : 1;               // The group is told to always follow the player (used for girlfriend missions)

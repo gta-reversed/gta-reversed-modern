@@ -83,6 +83,8 @@ public:
 	unsigned char  m_nBaseCombo; // base combo for this melee weapon
 	unsigned char  m_nNumCombos; // how many further combos are available
 
+	static void InjectHooks();
+
 	// functions
 	CWeaponInfo();
 	~CWeaponInfo();

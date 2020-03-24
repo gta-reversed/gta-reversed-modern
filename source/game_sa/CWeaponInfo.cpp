@@ -9,6 +9,10 @@
 
 CWeaponInfo* aWeaponInfo = (CWeaponInfo*)0xC8AAB8;
 
+void CWeaponInfo::InjectHooks() {
+    HookInstall(0x00743CD0, &CWeaponInfo::GetSkillStatIndex, 7);
+}
+
 CWeaponInfo::CWeaponInfo()
 {
     ((void(__thiscall*)(CWeaponInfo*))0x743C30)(this);
@@ -31,8 +35,7 @@ void CWeaponInfo::LoadWeaponData()
     ((void(__cdecl*)())0x5BE670)();
 }
 
-int CWeaponInfo::GetSkillStatIndex(int weaponType)
-{
+int CWeaponInfo::GetSkillStatIndex(int weaponType) {
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((eWeaponType(__cdecl*)(int))0x00743CD0)(weaponType);
 #else

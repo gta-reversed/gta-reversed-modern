@@ -51,10 +51,10 @@ void CWeapon::Shutdown()
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x73A380, CWeapon*>(this);
 #else
-    auto weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nModelId1;
+    int weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nModelId1;
     if (weaponModelID1 != -1)
         CModelInfo::ms_modelInfoPtrs[weaponModelID1]->RemoveRef();
-    auto weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nModelId2;
+    int weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nModelId2;
     if (weaponModelID2 != -1)
         CModelInfo::ms_modelInfoPtrs[weaponModelID2]->RemoveRef();
     m_nType = WEAPON_UNARMED;
@@ -116,16 +116,14 @@ void FireOneInstantHitRound(CVector* startPoint, CVector* endPoint, int intensit
     plugin::Call<0x73AF00, CVector*, CVector*, int>(startPoint, endPoint, intensity);
 }
 
-// Converted from thiscall bool CWeapon::IsTypeMelee(void) 0x73B1C0
 bool CWeapon::IsTypeMelee() {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x73B1C0, CWeapon*>(this);
 #else
-    return CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nWeaponFire == 0;
+    return CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nWeaponFire == WEAPON_FIRE_MELEE;
 #endif
 }
 
-// Converted from thiscall bool CWeapon::IsType2Handed(void) 0x73B1E0
 bool CWeapon::IsType2Handed() 
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -143,7 +141,6 @@ bool CWeapon::IsType2Handed()
 #endif
 }
 
-// Converted from thiscall bool CWeapon::IsTypeProjectile(void) 0x73B210
 bool CWeapon::IsTypeProjectile() 
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -156,41 +153,32 @@ bool CWeapon::IsTypeProjectile()
         m_nType == WEAPON_TEARGAS ||
         m_nType == WEAPON_MOLOTOV ||
         m_nType == WEAPON_FREEFALL_BOMB;
-#endif // USE_DEFAULT_FUNCTIONS
+#endif 
 }
 
-// Converted from cdecl bool CWeapon::CanBeUsedFor2Player(eWeaponType weaponType) 0x73B240
-// Check this function. Has errors
 bool CWeapon::CanBeUsedFor2Player(eWeaponType weaponType) {
 #ifdef USE_DEFAULT_FUNCTIONS
   return plugin::CallAndReturn<bool, 0x73B240, eWeaponType>(weaponType);
 #else
-    bool result = true;
     switch (weaponType)
     {
     case WEAPON_CHAINSAW:
     case WEAPON_SNIPERRIFLE:
     case WEAPON_RLAUNCHER:
     case WEAPON_PARACHUTE:
-        result = false;
-        break;
+        return false;
     default:
-        result = true;
-        break;
+        return true;
     }
-
-    return result;
-#endif // USE_DEFAULT_FUNCTIONS
+    return true;
+#endif 
 }
 
-// Converted from thiscall bool CWeapon::HasWeaponAmmoToBeUsed(void) 0x73B2A0
 bool CWeapon::HasWeaponAmmoToBeUsed() 
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x73B2A0, CWeapon*>(this);
 #else
-    bool result = 0;
-
     switch (m_nType)
     {
     case WEAPON_UNARMED:
@@ -207,14 +195,12 @@ bool CWeapon::HasWeaponAmmoToBeUsed()
     case WEAPON_VIBE2:
     case WEAPON_FLOWERS:
     case WEAPON_PARACHUTE:
-        result = 1;
-        break;
+        return true;
     default:
-        result = m_nTotalAmmo != 0;
-        break;
+        return m_nTotalAmmo != 0;
     }
-    return result;
-#endif // USE_DEFAULT_FUNCTIONS
+    return false;
+#endif
 }
 
 // Converted from cdecl bool CWeapon::ProcessLineOfSight(CVector const&startPoint,CVector const&endPoint,CColPoint &outColPoint,CEntity *&outEntity,eWeaponType weaponType,CEntity *,bool buildings,bool vehicles,bool peds,bool objects,bool dummies,bool,bool doIgnoreCameraCheck) 0x73B300

@@ -197,7 +197,6 @@ void CPlayerPed::MakePlayerGroupReappear() {
     plugin::CallMethod<0x60A4B0, CPlayerPed *>(this);
 }
 
-// Converted from thiscall void CPlayerPed::ResetSprintEnergy(void) 0x60A530
 void CPlayerPed::ResetSprintEnergy() 
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -222,15 +221,13 @@ float CPlayerPed::GetButtonSprintResults(eSprintType sprintType) {
     return plugin::CallMethodAndReturn<float, 0x60A820, CPlayerPed *, eSprintType>(this, sprintType);
 }
 
-// Converted from thiscall void CPlayerPed::ResetPlayerBreath(void) 0x60A8A0
 void CPlayerPed::ResetPlayerBreath() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x60A8A0, CPlayerPed *>(this);
 #else
     m_pPlayerData->m_fBreath = CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG);
-    m_pPlayerData->m_bRequireHandleBreath = 0;
-#endif // USE_DEFAULT_FUNCTIONS
-
+    m_pPlayerData->m_bRequireHandleBreath = false;
+#endif
 }
 
 // Converted from thiscall void CPlayerPed::HandlePlayerBreath(bool, float) 0x60A8D0

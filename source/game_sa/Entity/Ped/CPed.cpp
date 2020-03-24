@@ -181,7 +181,6 @@ bool CPed::UseGroundColModel()
     return ((bool(__thiscall *)(CPed*))0x5DEFE0)(this);
 }
 
-// Converted from thiscall bool CPed::CanPedReturnToState(void) 0x5DF000
 bool CPed::CanPedReturnToState()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -195,7 +194,7 @@ bool CPed::CanPedReturnToState()
         m_nPedState != PEDSTATE_EVADE_STEP &&
         m_nPedState != PEDSTATE_SNIPER_MODE && 
         m_nPedState != PEDSTATE_LOOK_ENTITY;
-#endif // USE_DEFAULT_FUNCTIONS
+#endif 
 }
 
 // Converted from thiscall bool CPed::CanSetPedState(void) 0x5DF030
@@ -204,7 +203,6 @@ bool CPed::CanSetPedState()
     return ((bool(__thiscall *)(CPed*))0x5DF030)(this);
 }
 
-// Converted from thiscall bool CPed::CanBeArrested(void) 0x5DF060
 bool CPed::CanBeArrested()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -216,10 +214,9 @@ bool CPed::CanBeArrested()
         m_nPedState != PEDSTATE_ARRESTED && 
         m_nPedState != PEDSTATE_ENTER_CAR && 
         m_nPedState != PEDSTATE_EXIT_CAR;
-#endif // USE_DEFAULT_FUNCTIONS
+#endif
 }
 
-// Converted from thiscall bool CPed::CanStrafeOrMouseControl(void) 0x5DF090
 bool CPed::CanStrafeOrMouseControl()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -235,7 +232,7 @@ bool CPed::CanStrafeOrMouseControl()
         m_nPedState == PEDSTATE_FIGHT || 
         m_nPedState == PEDSTATE_JUMP ||
         m_nPedState == PEDSTATE_ANSWER_MOBILE;
-#endif // USE_DEFAULT_FUNCTIONS
+#endif
 }
 
 // Converted from thiscall bool CPed::CanBeDeleted(void) 0x5DF100
@@ -256,7 +253,6 @@ void CPed::RemoveGogglesModel()
     ((void(__thiscall *)(CPed*))0x5DF170)(this);
 }
 
-// Converted from thiscall int CPed::GetWeaponSlot(eWeaponType weaponType) 0x5DF200
 int CPed::GetWeaponSlot(eWeaponType weaponType)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -722,14 +718,13 @@ void CPed::RemoveWeaponForScriptedCutscene()
     ((void(__thiscall *)(CPed*))0x5E6550)(this);
 }
 
-// Converted from thiscall void CPed::GetWeaponSkill(void) 0x5E6580
 char CPed::GetWeaponSkill()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((char(__thiscall*)(CPed*))0x5E6580)(this);
 #else
     return CPed::GetWeaponSkill(m_aWeapons[m_nActiveWeaponSlot].m_nType);
-#endif // USE_DEFAULT_FUNCTIONS
+#endif
 }
 
 // Converted from thiscall void CPed::PreRenderAfterTest(void) 0x5E65A0
@@ -816,40 +811,30 @@ void CPed::GiveWeaponAtStartOfFight()
     ((void(__thiscall *)(CPed*))0x5E8AB0)(this);
 }
 
-// Converted from thiscall void CPed::GiveWeaponWhenJoiningGang(void) 0x5E8BE0
 void CPed::GiveWeaponWhenJoiningGang()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-
     ((void(__thiscall*)(CPed*))0x5E8BE0)(this);
 #else
-    if (m_aWeapons[m_nActiveWeaponSlot].m_nType == WEAPON_UNARMED && m_nDelayedWeapon == WEAPON_UNIDENTIFIED)
-    {
-        CWeaponInfo* weaponA;
-        CWeaponInfo* weaponB;
-
-        if (CCheat::m_aCheatsActive[eCheats::CHEAT_NO_ONE_CAN_STOP_US])
-        {
+    if (m_aWeapons[m_nActiveWeaponSlot].m_nType == WEAPON_UNARMED && m_nDelayedWeapon == WEAPON_UNIDENTIFIED) {
+        if (CCheat::m_aCheatsActive[eCheats::CHEAT_NO_ONE_CAN_STOP_US]) {
             GiveDelayedWeapon(WEAPON_AK47, 200);
-            weaponA = CWeaponInfo::GetWeaponInfo(WEAPON_AK47, 1);
-            SetCurrentWeapon(weaponA->m_nSlot);
+            SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(WEAPON_AK47, 1)->m_nSlot);
         }
-        else
-        {
-            if (CCheat::m_aCheatsActive[eCheats::CHEAT_ROCKET_MAYHEM])
-            {
+        else {
+            CWeaponInfo* pWeaponInfo = nullptr;
+            if (CCheat::m_aCheatsActive[eCheats::CHEAT_ROCKET_MAYHEM]) {
                 GiveDelayedWeapon(WEAPON_RLAUNCHER, 200);
-                weaponB = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, 1);
+                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, 1);
             }
-            else
-            {
+            else {
                 CPed::GiveDelayedWeapon(WEAPON_PISTOL, 200);
-                weaponB = CWeaponInfo::GetWeaponInfo(WEAPON_PISTOL, 1);
+                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_PISTOL, 1);
             }
-            CPed::SetCurrentWeapon(weaponB->m_nSlot);
+            CPed::SetCurrentWeapon(pWeaponInfo->m_nSlot);
         }
     }
-#endif // USE_DEFAULT_FUNCTIONS
+#endif
 }
 
 // Converted from thiscall bool CPed::GetPedTalking(void) 0x5EFF50

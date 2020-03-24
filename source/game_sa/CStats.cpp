@@ -43,7 +43,7 @@ void CStats::InjectHooks()
     HookInstall(0x558EA0, &CStats::RegisterMissionPassed, 7);
 }
 
-// Converted from cdecl char* CStats::GetStatID(ushort stat) 0x558DE0
+// Unused
 char* CStats::GetStatID(unsigned short stat) 
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -54,10 +54,10 @@ char* CStats::GetStatID(unsigned short stat)
     else
         sprintf(gString, "stat_f_%d", stat);
     return gString;
-#endif // USE_DEFAULT_FUNCTIONS
+#endif 
 }
 
-// Converted from cdecl bool CStats::GetStatType(ushort stat) 0x558E30
+// Unused
 bool CStats::GetStatType(unsigned short stat) 
 {
 //#ifdef USE_DEFAULT_FUNCTIONS
@@ -72,36 +72,36 @@ float CStats::GetStatValue(unsigned short stat) {
     return plugin::CallAndReturn<float, 0x558E40, unsigned short>(stat);
 }
 
-// Converted from cdecl char CStats::GetTimesMissionAttempted(uchar missionId) 0x558E70
+// Unused
 char CStats::GetTimesMissionAttempted(unsigned char missionId) 
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<char, 0x558E70, unsigned char>(missionId);
 #else
     return CStats::TimesMissionAttempted[missionId];
-#endif // USE_DEFAULT_FUNCTIONS
+#endif
 }
 
-// Converted from cdecl void CStats::RegisterMissionAttempted(uchar missionId) 0x558E80
+// Unused
 void CStats::RegisterMissionAttempted(unsigned char missionId) 
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x558E80, unsigned char>(missionId);
 #else
-    int getTimesMissionAttempted = CStats::TimesMissionAttempted[missionId];
-    if (getTimesMissionAttempted != -1)
-        CStats::TimesMissionAttempted[missionId] = getTimesMissionAttempted + 1;
-#endif // USE_DEFAULT_FUNCTIONS
+    int timesMissionAttempted = CStats::TimesMissionAttempted[missionId];
+    if (timesMissionAttempted != -1)
+        CStats::TimesMissionAttempted[missionId] = timesMissionAttempted + 1;
+#endif
 }
 
-// Converted from cdecl void CStats::RegisterMissionPassed(uchar missionId) 0x558EA0
+// Unused
 void CStats::RegisterMissionPassed(unsigned char missionId) 
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x558EA0, unsigned char>(missionId);
 #else
     CStats::TimesMissionAttempted[missionId] = -1;
-#endif // USE_DEFAULT_FUNCTIONS
+#endif
 }
 
 // Converted from cdecl bool CStats::PopulateFavoriteRadioStationList(void) 0x558EC0

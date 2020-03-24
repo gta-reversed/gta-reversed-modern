@@ -474,30 +474,24 @@ bool CVehicle::IsPassenger(int modelIndex)
     return ((bool(__thiscall*)(CVehicle*, int))0x6D1C00)(this, modelIndex);
 }
 
-// Converted from thiscall bool CVehicle::IsDriver(CPed *ped) 0x6D1C40
 bool CVehicle::IsDriver(CPed* ped)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
   return ((bool(__thiscall*)(CVehicle*, CPed*))0x6D1C40)(this, ped);
 #else
-    char result;
-
     if (ped)
-        result = (ped == m_pDriver);
-    else
-        result = false;
-    return result;
-#endif // USE_DEFAULT_FUNCTIONS
+        return ped == m_pDriver;
+    return false;
+#endif
 }
 
-// Converted from thiscall bool CVehicle::IsDriver(int modelIndex) 0x6D1C60
 bool CVehicle::IsDriver(int modelIndex)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
   return ((bool(__thiscall*)(CVehicle*, int))0x6D1C60)(this, modelIndex);
 #else
     return m_pDriver && m_pDriver->m_nModelIndex == modelIndex;
-#endif // USE_DEFAULT_FUNCTIONS
+#endif
 }
 
 // Converted from thiscall void CVehicle::KillPedsInVehicle(void) 0x6D1C80
