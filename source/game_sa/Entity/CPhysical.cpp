@@ -32,6 +32,7 @@ void CPhysical::InjectHooks()
     HookInstall(0x5449B0, &CPhysical::GetBoundRect_Reversed, 7);
     HookInstall(0x5485E0, &CPhysical::ProcessControl_Reversed, 7);
     HookInstall(0x54DB10, &CPhysical::ProcessShift_Reversed, 7);
+    HookInstall(0x54DEC0, &CPhysical::TestCollision_Reversed, 7);
     HookInstall(0x542FE0, &CPhysical::ApplyGravity, 7);
     HookInstall(0x5430A0, &CPhysical::ApplyFrictionMoveForce, 7);
     HookInstall(0x543220, &CPhysical::ApplyFrictionForce, 7);
@@ -62,6 +63,7 @@ void CPhysical::InjectHooks()
     HookInstall(0x54D690, (void(CPhysical::*)(CPhysical*, CVector*, CQuaternion*))&CPhysical::AttachEntityToEntity, 7);
     HookInstall(0x54D920, &CPhysical::CheckCollision, 7);
     HookInstall(0x54DAB0, &CPhysical::CheckCollision_SimpleCar, 7);
+    HookInstall(0x546DB0, &CPhysical::PlacePhysicalRelativeToOtherPhysical, 7);
 }
 
 void CPhysical::Add()
@@ -245,6 +247,38 @@ void CPhysical::ProcessShift()
 #else
     CPhysical::ProcessShift_Reversed();
 #endif
+}
+
+bool CPhysical::TestCollision(bool bApplySpeed) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return ((bool(__thiscall*)(CEntity*, bool))(0x54DEC0))(this, bApplySpeed);
+#else
+   return CPhysical::TestCollision_Reversed(bApplySpeed);
+#endif
+}
+
+bool CPhysical::TestCollision_Reversed(bool bApplySpeed) {
+    CMatrix entityMatrix(*m_matrix);
+    physicalFlags.b17 = true;
+    physicalFlags.b13 = true;
+    bool bOldUsescollision = m_bUsesCollision;
+    m_bUsesCollision = false;
+    bool bTestForBlockedPositions = false;
+    CPed* pPed = static_cast<CPed*>(this);
+    if (m_nType == ENTITY_TYPE_PED && pPed->bTestForBlockedPositions) {
+        bTestForBlockedPositions = true;
+        pPed->bTestForBlockedPositions = false;
+    }
+    if (bApplySpeed)
+        ApplySpeed();
+    bool bCheckCollision = CheckCollision();
+    m_bUsesCollision = bOldUsescollision;
+    physicalFlags.b17 = false;
+    physicalFlags.b13 = false;
+    *(CMatrix*)m_matrix = entityMatrix;
+    if (bTestForBlockedPositions)
+        pPed->bTestForBlockedPositions = true;
+    return bCheckCollision;
 }
 
 void CPhysical::ProcessShift_Reversed()
@@ -2172,10 +2206,30 @@ bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
 #endif
 }
 
-// Converted from stdcall void CPhysical::PlacePhysicalRelativeToOtherPhysical(CPhysical* physical1,CPhysical* physical2,CVector offset) 0x546DB0
-void CPhysical::PlacePhysicalRelativeToOtherPhysical(CPhysical* physical1, CPhysical* physical2, CVector offset)
+// Used in driving school mission
+void CPhysical::PlacePhysicalRelativeToOtherPhysical(CPhysical* relativeToPhysical, CPhysical* physicalToPlace, CVector offset)
 {
-    ((void(__cdecl*)(CPhysical*, CPhysical*, CVector))0x546DB0)(physical1, physical2, offset);
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__cdecl*)(CPhysical*, CPhysical*, CVector))0x546DB0)(relativeToPhysical, physicalToPlace, offset);
+#else
+    CVector vecRelativePosition;
+    MultiplyMatrixWithVector(&vecRelativePosition, relativeToPhysical->m_matrix, &offset);
+    vecRelativePosition += (CTimer::ms_fTimeStep * 0.9f) * relativeToPhysical->m_vecMoveSpeed;
+    CWorld::Remove(physicalToPlace);
+    *(CMatrix*)physicalToPlace->m_matrix = *relativeToPhysical->m_matrix;
+    physicalToPlace->GetPosition() = vecRelativePosition;
+    physicalToPlace->m_vecMoveSpeed = relativeToPhysical->m_vecMoveSpeed;
+    RwObject* pRwObject = physicalToPlace->m_pRwObject;
+    if (pRwObject) {
+        RwMatrix* pRwMatrix = &((RwFrame*)pRwObject->parent)->modelling;
+        if (physicalToPlace->m_matrix)
+            physicalToPlace->m_matrix->UpdateRwMatrix(pRwMatrix);
+        else
+            physicalToPlace->m_placement.UpdateRwMatrix(pRwMatrix);
+    }
+    physicalToPlace->UpdateRwFrame();
+    CWorld::Add(physicalToPlace);
+#endif
 }
 
 // Converted from thiscall float CPhysical::ApplyScriptCollision(CVector,float,float,CVector*) 0x546ED0

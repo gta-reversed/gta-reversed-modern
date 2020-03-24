@@ -109,7 +109,7 @@ public:
     virtual void ProcessControl();
     virtual void ProcessCollision();
     virtual void ProcessShift();
-    virtual bool TestCollision();
+    virtual bool TestCollision(bool bApplySpeed);
     virtual void Teleport(CVector destination, bool resetRotation);
     virtual void SpecialEntityPreCollisionStuff(class CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck);
     virtual void SpecialEntityCalcCollisionSteps(unsigned char *unk1, unsigned char *unk2);

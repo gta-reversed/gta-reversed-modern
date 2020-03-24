@@ -69,9 +69,9 @@ void CEntity::ProcessShift()
     ((void(__thiscall *)(CEntity *))(*(void ***)this)[12])(this);
 }
 
-bool CEntity::TestCollision()
+bool CEntity::TestCollision(bool bApplySpeed)
 {
-    return ((bool(__thiscall *)(CEntity *))(*(void ***)this)[13])(this);
+    return ((bool(__thiscall *)(CEntity *, bool))(*(void ***)this)[13])(this, bApplySpeed);
 }
 
 void CEntity::Teleport(CVector destination, bool resetRotation)

@@ -164,6 +164,7 @@ public:
     CRect* GetBoundRect(CRect* pRect) override;
     void ProcessControl() override;
     void ProcessShift() override;
+    bool TestCollision(bool bApplySpeed) override;
     virtual int ProcessEntityCollision(CEntity *entity, CColPoint *point);
 
     // reversed virtual functions
@@ -172,6 +173,7 @@ public:
     CRect* GetBoundRect_Reversed(CRect* pRect);
     void ProcessControl_Reversed();
     void ProcessShift_Reversed();
+    bool TestCollision_Reversed(bool bApplySpeed);
 
     // functions
     void RemoveAndAdd();
@@ -210,7 +212,7 @@ public:
     bool ApplyFriction(float fFriction, CColPoint* pColPoint);
     bool ApplyFriction(CPhysical* pEntity, float fFriction, CColPoint* pColPoint);
     bool ProcessShiftSectorList(int sectorX, int sectorY);
-    static void PlacePhysicalRelativeToOtherPhysical(CPhysical* physical1, CPhysical* physical2, CVector offset);
+    static void PlacePhysicalRelativeToOtherPhysical(CPhysical* relativeToPhysical, CPhysical* physicalToPlace, CVector offset);
     float ApplyScriptCollision(CVector arg0, float arg1, float arg2, CVector* arg3);
     void PositionAttachedEntity();
     void ApplySpeed();

@@ -330,7 +330,7 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* pPed, bool bAddEventSoundQuiet)
                 pVecMoveSpeed->x = pPedMatrix->at.x * 0.01f;
                 pVecMoveSpeed->y += pPedMatrix->at.y * 0.01f;
                 pVecMoveSpeed->z += pPedMatrix->at.z * 0.01f;
-                if (!pObjectToHold->TestCollision())
+                if (!pObjectToHold->TestCollision(false))
                 {
                     bUpdateEntityPosition = false;
                 }
