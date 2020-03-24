@@ -59,6 +59,11 @@ void CMatrix::UpdateRwMatrix(RwMatrix* matrix)
     ((void(__thiscall*)(CMatrix*, RwMatrix*))0x59AD70)(this, matrix);
 }
 
+void CMatrix::UpdateMatrix(RwMatrixTag* rwMatrix)
+{
+    ((void(__thiscall*)(CMatrix*, RwMatrixTag*))0x59AD20)(this, rwMatrix);
+}
+
 void CMatrix::SetUnity()
 {
     ((void(__thiscall*)(CMatrix*))0x59AE70)(this);

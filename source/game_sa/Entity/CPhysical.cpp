@@ -12,18 +12,24 @@ float& CPhysical::SOFTCOL_SPEED_MULT2 = *(float*)0x8CD798;
 float& CPhysical::SOFTCOL_DEPTH_MIN = *(float*)0x8CD78C;
 float& CPhysical::SOFTCOL_DEPTH_MULT = *(float*)0x8CD790;
 float& CPhysical::SOFTCOL_CARLINE_SPEED_MULT = *(float*)0x8CD79C;
+float& CPhysical::TEST_ADD_AMBIENT_LIGHT_FRAC = *(float*)0x8CD7B8;
 CVector& CPhysical::fxDirection = *(CVector*)0xB73720;
 
 void CPhysical::InjectHooks()
 {
     HookInstall(0x542560, &CPhysical::RemoveAndAdd, 7);
     HookInstall(0x542A50, &CPhysical::ApplyTurnForce, 7);
+    HookInstall(0x542B50, &CPhysical::ApplyForce, 7);
+    HookInstall(0x542CE0, &CPhysical::GetSpeed, 7);
+    //HookInstall(0x542DD0, &CPhysical::ApplyMoveSpeed, 7); // Go to the function definition and see why this is commented
+    HookInstall(0x542E20, &CPhysical::ApplyTurnSpeed, 7);
     HookInstall(0x5429F0, (void(CPhysical::*)(CVector force)) & CPhysical::ApplyMoveForce, 7);
     HookInstall(0x5428C0, &CPhysical::SetDamagedPieceRecord, 7);
     HookInstall(0x542860, &CPhysical::RemoveFromMovingList, 7);
     HookInstall(0x542800, &CPhysical::AddToMovingList, 7);
     HookInstall(0x544A30, &CPhysical::Add_Reversed, 7);
     HookInstall(0x5424C0, &CPhysical::Remove_Reversed, 7);
+    HookInstall(0x5449B0, &CPhysical::GetBoundRect_Reversed, 7);
     HookInstall(0x5485E0, &CPhysical::ProcessControl_Reversed, 7);
     HookInstall(0x54DB10, &CPhysical::ProcessShift_Reversed, 7);
     HookInstall(0x542FE0, &CPhysical::ApplyGravity, 7);
@@ -35,16 +41,27 @@ void CPhysical::InjectHooks()
     HookInstall(0x543580, &CPhysical::GetHasCollidedWithAnyObject, 7);
     HookInstall(0x5435C0, (bool(CPhysical::*)(CEntity*, CColPoint*, float*)) & CPhysical::ApplyCollision, 7);
     HookInstall(0x543890, (bool(CPhysical::*)(CEntity*, CColPoint*, float*)) & CPhysical::ApplySoftCollision, 7);
+    HookInstall(0x544280, &CPhysical::RemoveRefsToEntity, 7);
+    HookInstall(0x5442F0, &CPhysical::DettachEntityFromEntity, 7);
+    HookInstall(0x5446A0, &CPhysical::DettachAutoAttachedEntity, 7);
+    HookInstall(0x5447B0, &CPhysical::GetLightingFromCol, 7);
+    HookInstall(0x544850, &CPhysical::GetLightingTotal, 7);
+    HookInstall(0x5448B0, &CPhysical::CanPhysicalBeDamaged, 7);
     HookInstall(0x544C40, &CPhysical::ApplyAirResistance, 7);
     //HookInstall(0x544D50, &CPhysical::ApplyCollisionAlt, 7);
     HookInstall(0x5454C0, (bool(CPhysical::*)(float, CColPoint*)) & CPhysical::ApplyFriction, 7);
     HookInstall(0x545980, (bool(CPhysical::*)(CPhysical*, float, CColPoint*)) &CPhysical::ApplyFriction, 7);
     HookInstall(0x546670, &CPhysical::ProcessShiftSectorList, 7);
+    HookInstall(0x548320, &CPhysical::UnsetIsInSafePosition, 7);
     HookInstall(0x5483D0, (void(CPhysical::*)()) & CPhysical::ApplyFriction, 7);
     HookInstall(0x548680, (bool(CPhysical::*)(CEntity*, CColPoint*, float*, float*)) & CPhysical::ApplyCollision, 7);
     HookInstall(0x40974F, (bool(CPhysical::*)(CPhysical*, CColPoint*, float*, float*))&CPhysical::ApplySoftCollision, 5);
     HookInstall(0x54BA60, &CPhysical::ProcessCollisionSectorList, 7);
     HookInstall(0x54CFF0, &CPhysical::ProcessCollisionSectorList_SimpleCar, 7);
+    HookInstall(0x54D570, (void(CPhysical::*)(CPhysical*, CVector, CVector))&CPhysical::AttachEntityToEntity, 7);
+    HookInstall(0x54D690, (void(CPhysical::*)(CPhysical*, CVector*, CQuaternion*))&CPhysical::AttachEntityToEntity, 7);
+    HookInstall(0x54D920, &CPhysical::CheckCollision, 7);
+    HookInstall(0x54DAB0, &CPhysical::CheckCollision_SimpleCar, 7);
 }
 
 void CPhysical::Add()
@@ -167,7 +184,20 @@ void CPhysical::Remove_Reversed()
 
 CRect* CPhysical::GetBoundRect(CRect* pRect)
 {
-    return ((CRect*(__thiscall*)(CEntity*, CRect*))(*(void***)this)[9])(this, pRect);
+#ifdef USE_DEFAULT_FUNCTIONS
+    return ((CRect*(__thiscall*)(CEntity*, CRect*))(0x5449B0))(this, pRect);
+#else
+    return CPhysical::GetBoundRect_Reversed(pRect);
+#endif
+}
+
+CRect* CPhysical::GetBoundRect_Reversed(CRect* pRect)
+{
+    CVector boundCentre;
+    CEntity::GetBoundCentre(&boundCentre);
+    float fRadius = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->m_pColModel->m_boundSphere.m_fRadius;
+    *pRect = CRect(boundCentre.x - fRadius, boundCentre.y - fRadius, boundCentre.x + fRadius, boundCentre.y + fRadius);
+    return pRect;
 }
 
 void CPhysical::ProcessControl()
@@ -577,11 +607,9 @@ void CPhysical::ApplyMoveForce(CVector force)
 #ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*, CVector))0x5429F0)(this, force);
 #else
-    if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce)
-    {
+    if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce) {
         if (physicalFlags.bDisableZ)
             force.z = 0.0f;
-
         m_vecMoveSpeed += force * (1.0f / m_fMass);
     }
 #endif
@@ -598,8 +626,7 @@ void CPhysical::ApplyTurnForce(CVector force, CVector direction)
         if (!physicalFlags.bInfiniteMass)
             Multiply3x3(&vecCentreOfMassMultiplied, m_matrix, &m_vecCentreOfMass);
 
-        if (physicalFlags.bDisableMoveForce)
-        {
+        if (physicalFlags.bDisableMoveForce) {
             direction.z = 0.0f;
             force.z = 0.0f;
         }
@@ -611,27 +638,106 @@ void CPhysical::ApplyTurnForce(CVector force, CVector direction)
 #endif
 }
 
-void CPhysical::ApplyForce(CVector vecMoveSpeed, CVector vecDirection, bool bUpdateTurnSpeed)
+void CPhysical::ApplyForce(CVector vecForce, CVector vecDirection, bool bUpdateTurnSpeed)
 {
-    ((void(__thiscall*)(CPhysical*, CVector, CVector, bool))0x542B50)(this, vecMoveSpeed, vecDirection, bUpdateTurnSpeed);
+
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__thiscall*)(CPhysical*, CVector, CVector, bool))0x542B50)(this, vecForce, vecDirection, bUpdateTurnSpeed);
+#else
+    CVector vecMoveSpeedForce = vecForce;
+    if (physicalFlags.bDisableZ)
+        vecMoveSpeedForce.z = 0.0f;
+    if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce) 
+        m_vecMoveSpeed += vecMoveSpeedForce * (1.0f / m_fMass);
+
+    if (!physicalFlags.bDisableTurnForce && bUpdateTurnSpeed) {
+        CVector vecCentreOfMassMultiplied;
+        float fTurnMass = m_fTurnMass;
+        if (physicalFlags.bInfiniteMass)
+            fTurnMass += m_vecCentreOfMass.z * m_fMass * m_vecCentreOfMass.z * 0.5f;
+        else
+            Multiply3x3(&vecCentreOfMassMultiplied, m_matrix, &m_vecCentreOfMass);
+
+        if (physicalFlags.bDisableMoveForce) {
+            vecDirection.z = 0.0f;
+            vecForce.z = 0.0f;
+        }
+
+        CVector vecDifference = vecDirection - vecCentreOfMassMultiplied;
+        CVector velocity;
+        CrossProduct(&velocity, &vecDifference, &vecForce);
+        m_vecTurnSpeed += (1.0f / fTurnMass) * velocity;
+    }
+#endif
 }
 
-// Converted from thiscall CVector CPhysical::GetSpeed(CVector direction) 0x542CE0
 CVector* CPhysical::GetSpeed(CVector* outSpeed, CVector direction)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     return ((CVector * (__thiscall*)(CPhysical*, CVector*, CVector))0x542CE0)(this, outSpeed, direction);
+#else
+    CVector vecCentreOfMassMultiplied;
+    if (!physicalFlags.bInfiniteMass)
+        Multiply3x3(&vecCentreOfMassMultiplied, m_matrix, &m_vecCentreOfMass);
+
+    CVector vecDifference = direction - vecCentreOfMassMultiplied;
+    CVector vecTurnSpeed = m_vecTurnSpeed + m_vecFrictionTurnSpeed;
+    CrossProduct(outSpeed, &vecTurnSpeed, &vecDifference);
+    *outSpeed += m_vecMoveSpeed + m_vecFrictionMoveSpeed;
+    return outSpeed;
+#endif
 }
 
-// Converted from thiscall void CPhysical::ApplyMoveSpeed(void) 0x542DD0
+/*
+    The code for this function is fine, but it will crash if we hook it. This function should be
+    only hooked after reversing all references to this function: 
+    CPhysical::ApplySpeed
+    CWorld::Process
+    CAutoMobile::ProcessControlCollisionCheck
+    CBike::ProcessControlCollisionCheck
+    CTrain::ProcessControl (Done)
+*/
 void CPhysical::ApplyMoveSpeed()
 {
+
+//#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*))0x542DD0)(this);
+#if 0
+    if (physicalFlags.bDontApplySpeed || physicalFlags.bDisableMoveForce)
+        m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+  
+    else
+        m_matrix->pos += CTimer::ms_fTimeStep * m_vecMoveSpeed;
+#endif
 }
 
-// Converted from thiscall void CPhysical::ApplyTurnSpeed(void) 0x542E20
 void CPhysical::ApplyTurnSpeed()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*))0x542E20)(this);
+#else
+    if (physicalFlags.bDontApplySpeed) {
+        m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+    }
+    else
+    {
+        CVector vecTurnSpeedTimeStep = CTimer::ms_fTimeStep * m_vecTurnSpeed;
+        CVector vecCrossProduct;
+        CrossProduct(&vecCrossProduct, &vecTurnSpeedTimeStep, &m_matrix->right);
+        m_matrix->right += vecCrossProduct;
+        CrossProduct(&vecCrossProduct, &vecTurnSpeedTimeStep, &m_matrix->up);
+        m_matrix->up += vecCrossProduct;
+        CrossProduct(&vecCrossProduct, &vecTurnSpeedTimeStep, &m_matrix->at);
+        m_matrix->at += vecCrossProduct;
+        if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce) {
+            CVector vecNegativeCentreOfMass = m_vecCentreOfMass * -1.0f;
+            CVector vecCentreOfMassMultiplied;
+            Multiply3x3(&vecCentreOfMassMultiplied, m_matrix, &vecNegativeCentreOfMass);
+            CrossProduct(&vecCrossProduct, &vecTurnSpeedTimeStep, &vecCentreOfMassMultiplied);
+            m_matrix->pos += vecCrossProduct;
+        }
+    }
+#endif
 }
 
 void CPhysical::ApplyGravity()
@@ -1005,40 +1111,260 @@ bool CPhysical::ApplySpringDampeningOld(float arg0, float arg1, CVector& arg2, C
     return ((bool(__thiscall*)(CPhysical*, float, float, CVector&, CVector&, CVector&))0x544100)(this, arg0, arg1, arg2, arg3, arg4);
 }
 
-// Converted from thiscall void CPhysical::RemoveRefsToEntity(CEntity *entity) 0x544280
 void CPhysical::RemoveRefsToEntity(CEntity* entity)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*, CEntity*))0x544280)(this, entity);
+#else
+    unsigned char collidedEntityIndex = m_nNumEntitiesCollided;
+    while (collidedEntityIndex < m_nNumEntitiesCollided); {
+        if (m_apCollidedEntities[collidedEntityIndex] == entity) {
+            for (unsigned short i = collidedEntityIndex; i < m_nNumEntitiesCollided - 1; ++i) {
+                m_apCollidedEntities[i] = m_apCollidedEntities[i + 1];
+            }
+            m_nNumEntitiesCollided--;
+        }
+        else {
+            collidedEntityIndex++;
+        }
+    }
+#endif
 }
 
-// Converted from thiscall void CPhysical::DettachEntityFromEntity(float x,float y,float z,bool useCollision) 0x5442F0
-void CPhysical::DettachEntityFromEntity(float x, float y, float z, bool useCollision)
+void CPhysical::DettachEntityFromEntity(float x, float y, float z, bool bApplyTurnForce)
 {
-    ((void(__thiscall*)(CPhysical*, float, float, float, bool))0x5442F0)(this, x, y, z, useCollision);
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__thiscall*)(CPhysical*, float, float, float, bool))0x5442F0)(this, x, y, z, bApplyTurnForce);
+#else
+    CMatrix vecDetachOffsetMatrix;
+    if (m_nType == ENTITY_TYPE_VEHICLE && m_pAttachedTo && m_pAttachedTo->m_nType == ENTITY_TYPE_VEHICLE) {
+        CColModel* pColModel = CEntity::GetColModel();
+        CCollisionData* pColData = pColModel->m_pColData;
+        if (pColData) {
+            unsigned char nNumLines = pColData->m_nNumLines;
+            pColData->m_nNumLines = 0;
+            CColModel* pAttachedToColModel = m_pAttachedTo->GetColModel();
+            CMatrix* pAttachedToMatrix = m_pAttachedTo->GetMatrix();
+            if (CCollision::ProcessColModels(*m_matrix, *pColModel, *pAttachedToMatrix, *pAttachedToColModel, CWorld::m_aTempColPts, nullptr, nullptr, false))
+                m_pEntityIgnoredCollision = m_pAttachedTo;
+            else if (m_pEntityIgnoredCollision == m_pAttachedTo)
+                m_pEntityIgnoredCollision = 0;
+            pColData->m_nNumLines = nNumLines;
+        }
+        else if (m_pEntityIgnoredCollision == m_pAttachedTo) {
+            m_pEntityIgnoredCollision = 0;
+        }
+    }
+    else {
+        m_pEntityIgnoredCollision = m_pAttachedTo;
+    }
+
+    vecDetachOffsetMatrix.ResetOrientation();
+    vecDetachOffsetMatrix.RotateZ(y);
+    vecDetachOffsetMatrix.RotateX(x);
+    if (!m_pAttachedTo->m_matrix) {
+        m_pAttachedTo->AllocateMatrix();
+        m_pAttachedTo->m_placement.UpdateMatrix(m_pAttachedTo->m_matrix);
+    }
+
+    vecDetachOffsetMatrix *= *m_pAttachedTo->m_matrix;
+    CVector vecForce = vecDetachOffsetMatrix.up * z;
+    CWorld::Remove(this);
+    SetIsStatic(false);
+    physicalFlags.bAttachedToEntity = false;
+    CWorld::Add(this);
+    if (physicalFlags.bDisableCollisionForce) {
+        CObject* pThisObject = static_cast<CObject*>(this);
+        CObjectInfo* pThisObjectInfo = pThisObject->m_pObjectInfo;
+        if (m_nType != ENTITY_TYPE_OBJECT || pThisObjectInfo->m_fMass >= 99998.0f)
+        {
+            physicalFlags.bCollidable = true;
+            m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+            m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+            bApplyTurnForce = false;
+        }
+        else
+        {
+            physicalFlags.bDisableCollisionForce = false;
+            m_fMass = pThisObjectInfo->m_fMass;
+            m_fTurnMass = pThisObjectInfo->m_fTurnMass;
+        }
+    }
+
+    if (!physicalFlags.bDisableCollisionForce) {
+        if (m_pAttachedTo->m_nType > ENTITY_TYPE_BUILDING && m_pAttachedTo->m_nType < ENTITY_TYPE_DUMMY) {
+            m_vecMoveSpeed = m_pAttachedTo->m_vecMoveSpeed;
+            m_vecMoveSpeed += vecForce;
+        }
+    }
+
+    if (bApplyTurnForce)
+        ApplyTurnForce(vecForce, vecForce * 0.5f);
+
+    m_pAttachedTo = nullptr;
+    m_qAttachedEntityRotation.real = 0.0;
+    m_qAttachedEntityRotation.imag = CVector(0.0f, 0.0f, 0.0f);
+    m_vecAttachOffset = CVector(0.0f, 0.0f, 0.0f);
+#endif
 }
 
-// Converted from thiscall void CPhysical::DettachAutoAttachedEntity(void) 0x5446A0
 void CPhysical::DettachAutoAttachedEntity()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*))0x5446A0)(this);
+#else
+    SetIsStatic(false);
+    physicalFlags.bAttachedToEntity = false;
+    m_bFakePhysics = false;
+    if (!physicalFlags.bDisableCollisionForce) {
+        if (m_pAttachedTo->m_nType == ENTITY_TYPE_VEHICLE) {
+            m_vecMoveSpeed = m_pAttachedTo->m_vecMoveSpeed;
+            m_vecTurnSpeed = m_pAttachedTo->m_vecTurnSpeed;
+        }
+    }
+    else
+    {
+        physicalFlags.bCollidable = true;
+        m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+        m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+    }
+    m_vecAttachOffset = CVector(0.0f, 0.0f, 0.0f);
+    m_pEntityIgnoredCollision = nullptr;
+    m_pAttachedTo = nullptr;
+    m_qAttachedEntityRotation.real = 0.0f;
+    m_qAttachedEntityRotation.imag = CVector(0.0f, 0.0f, 0.0f);
+    if (m_nType == ENTITY_TYPE_OBJECT) {
+        CObject* pObject = static_cast<CObject*>(this);
+        m_fElasticity = pObject->m_pObjectInfo->m_fElasticity;
+    }
+#endif
 }
 
-// Converted from thiscall float CPhysical::GetLightingFromCol(bool flag) 0x5447B0
-float CPhysical::GetLightingFromCol(bool flag)
+float CPhysical::GetLightingFromCol(bool bInteriorLighting)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     return ((float(__thiscall*)(CPhysical*, bool))0x5447B0)(this, flag);
+#else
+    float fAmbientRedBlue = CTimeCycle::GetAmbientRed_BeforeBrightness() + CTimeCycle::GetAmbientBlue_BeforeBrightness();
+    float fLighting = (CTimeCycle::GetAmbientGreen_BeforeBrightness() + fAmbientRedBlue) * 0.33333f + m_fContactSurfaceBrightness;
+    if (!bInteriorLighting) {
+        fLighting *= ((CTimeCycle::m_fCurrentRGB1Blue + CTimeCycle::m_fCurrentRGB1Green + CTimeCycle::m_fCurrentRGB1Red)
+            * (1.0f / 765.0f) * TEST_ADD_AMBIENT_LIGHT_FRAC + 1.0f - TEST_ADD_AMBIENT_LIGHT_FRAC)
+        + (CTimeCycle::m_fCurrentRGB2Blue + CTimeCycle::m_fCurrentRGB2Green + CTimeCycle::m_fCurrentRGB2Red)
+        * (1.0f / 765.0f)  * TEST_ADD_AMBIENT_LIGHT_FRAC;
+    }
+    return fLighting;
+#endif
 }
 
-// Converted from thiscall float CPhysical::GetLightingTotal(void) 0x544850
 float CPhysical::GetLightingTotal()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     return ((float(__thiscall*)(CPhysical*))0x544850)(this);
+#else
+    bool bInteriorLighting = false;
+    if (m_nAreaCode)
+        bInteriorLighting = true;
+
+    if (m_nType  == ENTITY_TYPE_PED) {
+        CPed* pPed = static_cast<CPed*>(this);
+        if (pPed->m_pPlayerData && (CGame::currArea || pPed->m_pPlayerData->m_bForceInteriorLighting))
+            bInteriorLighting = true;
+    }
+    return GetLightingFromCol(bInteriorLighting) + m_fDynamicLighting;
+#endif
 }
 
-// Converted from thiscall bool CPhysical::CanPhysicalBeDamaged(eWeaponType weapon,uchar *) 0x5448B0
-bool CPhysical::CanPhysicalBeDamaged(eWeaponType weapon, unsigned char* arg1)
+bool CPhysical::CanPhysicalBeDamaged(eWeaponType weapon, bool* bDamagedDueToFireOrExplosionOrBullet)
 {
-    return ((bool(__thiscall*)(CPhysical*, eWeaponType, unsigned char*))0x5448B0)(this, weapon, arg1);
+#ifdef USE_DEFAULT_FUNCTIONS
+    return ((bool(__thiscall*)(CPhysical*, eWeaponType, bool*))0x5448B0)(this, weapon, bDamagedDueToFireOrExplosionOrBullet);
+#else
+    if (bDamagedDueToFireOrExplosionOrBullet)
+        *bDamagedDueToFireOrExplosionOrBullet = 0;
+    switch (weapon)
+    {
+    case WEAPON_UNARMED:
+    case WEAPON_BRASSKNUCKLE:
+    case WEAPON_GOLFCLUB:
+    case WEAPON_NIGHTSTICK:
+    case WEAPON_KNIFE:
+    case WEAPON_BASEBALLBAT:
+    case WEAPON_SHOVEL:
+    case WEAPON_POOL_CUE:
+    case WEAPON_KATANA:
+    case WEAPON_CHAINSAW:
+    case WEAPON_DILDO1:
+    case WEAPON_DILDO2:
+    case WEAPON_VIBE1:
+    case WEAPON_VIBE2:
+    case WEAPON_FLOWERS:
+    case WEAPON_CANE:
+        if (!physicalFlags.bMeeleProof)
+            return true;
+        return false;
+    case WEAPON_GRENADE:
+    case WEAPON_ROCKET:
+    case WEAPON_ROCKET_HS:
+    case WEAPON_FREEFALL_BOMB:
+    case WEAPON_RLAUNCHER:
+    case WEAPON_RLAUNCHER_HS:
+    case WEAPON_REMOTE_SATCHEL_CHARGE:
+    case WEAPON_DETONATOR:
+    case WEAPON_ARMOUR | WEAPON_NIGHTSTICK:
+        if (!physicalFlags.bExplosionProof)
+            break;
+        return false;
+    case WEAPON_TEARGAS:
+    case WEAPON_SPRAYCAN:
+    case WEAPON_EXTINGUISHER:
+    case WEAPON_CAMERA:
+    case WEAPON_NIGHTVISION:
+    case WEAPON_INFRARED:
+    case WEAPON_PARACHUTE:
+    case WEAPON_LAST_WEAPON:
+    case WEAPON_ARMOUR:
+    case WEAPON_ARMOUR | WEAPON_BASEBALLBAT:
+        return true;
+    case WEAPON_MOLOTOV:
+        if (!physicalFlags.bFireProof)
+            break;
+        return false;
+    case WEAPON_PISTOL:
+    case WEAPON_PISTOL_SILENCED:
+    case WEAPON_DESERT_EAGLE:
+    case WEAPON_SHOTGUN:
+    case WEAPON_SAWNOFF_SHOTGUN:
+    case WEAPON_SPAS12_SHOTGUN:
+    case WEAPON_MICRO_UZI:
+    case WEAPON_MP5:
+    case WEAPON_AK47:
+    case WEAPON_M4:
+    case WEAPON_TEC9:
+    case WEAPON_COUNTRYRIFLE:
+    case WEAPON_SNIPERRIFLE:
+    case WEAPON_MINIGUN:
+    case WEAPON_ARMOUR | WEAPON_KNIFE:
+        if (physicalFlags.bBulletProof)
+            return false;
+        break;
+    case WEAPON_FLAMETHROWER:
+        if (!physicalFlags.bFireProof)
+            return true;
+        return false;
+    case WEAPON_ARMOUR | WEAPON_BRASSKNUCKLE:
+    case WEAPON_ARMOUR | WEAPON_GOLFCLUB:
+    case WEAPON_ARMOUR | WEAPON_SHOVEL:
+        if (physicalFlags.bCollisionProof)
+            return false;
+        return true;
+    }
+
+    if (!bDamagedDueToFireOrExplosionOrBullet)
+        return true;
+    *bDamagedDueToFireOrExplosionOrBullet = true;
+    return true;
+#endif
 }
 
 void CPhysical::ApplyAirResistance()
@@ -1870,13 +2196,20 @@ void CPhysical::ApplySpeed()
     ((void(__thiscall*)(CPhysical*))0x547B80)(this);
 }
 
-// Converted from thiscall void CPhysical::UnsetIsInSafePosition(void) 0x548320
 void CPhysical::UnsetIsInSafePosition()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*))0x548320)(this);
+#else
+    m_vecMoveSpeed *= -1.0f;
+    m_vecTurnSpeed *= -1.0f;
+    ApplySpeed();
+    m_vecMoveSpeed *= -1.0f;
+    m_vecTurnSpeed *= -1.0f;
+    m_bIsInSafePosition = false;
+#endif
 }
 
-// Converted from thiscall void CPhysical::ApplyFriction(void) 0x5483D0
 void CPhysical::ApplyFriction()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -4378,26 +4711,189 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSecto
 #endif
 }
 
-// Converted from thiscall void CPhysical::AttachEntityToEntity(CEntity *entity,CVector offset,CVector rotation) 0x54D570
-void CPhysical::AttachEntityToEntity(CEntity* entity, CVector offset, CVector rotation)
+
+void CPhysical::AttachEntityToEntity(CPhysical* pEntityAttachTo, CVector vecAttachOffset, CVector vecAttachRotation)
 {
-    ((void(__thiscall*)(CPhysical*, CEntity*, CVector, CVector))0x54D570)(this, entity, offset, rotation);
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__thiscall*)(CPhysical*, CPhysical*, CVector, CVector))0x54D570)(this, pEntityAttachTo, vecAttachOffset, vecAttachRotation);
+#else
+    if (!pEntityAttachTo)
+        return;
+
+    CEntity* pOldEntityAttachedTo = m_pAttachedTo;
+    m_pAttachedTo = pEntityAttachTo;
+    m_pAttachedTo->RegisterReference(reinterpret_cast<CEntity**>(&m_pAttachedTo));
+    m_vecAttachOffset = vecAttachOffset;
+    if (physicalFlags.bInfiniteMass) 
+        m_vecAttachedEntityRotation = GetPosition();
+    else 
+        m_vecAttachedEntityRotation = vecAttachRotation;
+    m_qAttachedEntityRotation.real = 0.0f;
+    m_qAttachedEntityRotation.imag = CVector(0.0f, 0.0f, 0.0f);
+    m_pEntityIgnoredCollision = pOldEntityAttachedTo;
+    if (physicalFlags.bDisableCollisionForce) {
+        physicalFlags.bCollidable = false;
+        PositionAttachedEntity();
+    }
+    else {
+        if (m_pAttachedTo->m_nType > ENTITY_TYPE_BUILDING && m_pAttachedTo->m_nType < ENTITY_TYPE_DUMMY
+            && m_pAttachedTo->physicalFlags.bDisableCollisionForce 
+            && m_nType == ENTITY_TYPE_OBJECT && !physicalFlags.bInfiniteMass) 
+        {
+            physicalFlags.bDisableCollisionForce = true;
+            m_fMass = 99999.9f;
+            m_fTurnMass = 99999.9f;
+        }
+        PositionAttachedEntity();
+    }
+#endif
 }
 
-// Converted from thiscall void CPhysical::AttachEntityToEntity(CEntity *entity,CVector *offset,RtQuat *rotation) 0x54D690
-void CPhysical::AttachEntityToEntity(CEntity* entity, CVector* offset, RtQuat* rotation)
+void CPhysical::AttachEntityToEntity(CPhysical* pEntityAttachTo, CVector* vecAttachOffset, CQuaternion* attachRotation)
 {
-    ((void(__thiscall*)(CPhysical*, CEntity*, CVector*, RtQuat*))0x54D690)(this, entity, offset, rotation);
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__thiscall*)(CPhysical*, CPhysical*, CVector*, CQuaternion*))0x54D690)(this, pEntityAttachTo, vecAttachOffset, attachRotation);
+#else
+    if (!pEntityAttachTo)
+        return;
+
+    CPhysical* pOldEntityAttachedTo = m_pAttachedTo;
+    m_pAttachedTo = pEntityAttachTo;
+    m_pAttachedTo->RegisterReference(reinterpret_cast<CEntity**>(&m_pAttachedTo));
+    if (!m_pAttachedTo->m_matrix) {
+        m_pAttachedTo->AllocateMatrix();
+        m_pAttachedTo->m_placement.UpdateMatrix(m_pAttachedTo->m_matrix);
+    }
+
+    CMatrix entityAttachedtoMatrix(*m_pAttachedTo->m_matrix);
+    CAutomobile* pAttachedToAutoMobile = static_cast<CAutomobile*>(m_pAttachedTo);
+    if (m_nType == ENTITY_TYPE_OBJECT && m_pAttachedTo->m_nModelIndex == MODEL_FORKLIFT) {
+        RwFrame* pCarMiscAFrame = pAttachedToAutoMobile->m_aCarNodes[CAR_MISC_A];
+        if (pCarMiscAFrame) 
+            entityAttachedtoMatrix.UpdateMatrix(RwFrameGetLTM(pCarMiscAFrame));
+    }
+
+    if (vecAttachOffset) {
+        m_vecAttachOffset = *vecAttachOffset;
+    }
+    else {
+        CVector direction = GetPosition() - entityAttachedtoMatrix.pos;
+        m_vecAttachOffset.x = DotProduct(&entityAttachedtoMatrix.right, &direction);
+        m_vecAttachOffset.y = DotProduct(&entityAttachedtoMatrix.up, &direction);
+        m_vecAttachOffset.z = DotProduct(&entityAttachedtoMatrix.at, &direction);
+    }
+
+    if (attachRotation) {
+        m_qAttachedEntityRotation = *attachRotation;
+    }
+    else {
+        CMatrix entityAttachedToMatrixInverted;
+        Invert(&entityAttachedtoMatrix, &entityAttachedToMatrixInverted);
+        entityAttachedToMatrixInverted *= *m_matrix;
+        RwMatrixTag rwMatrix;
+        entityAttachedToMatrixInverted.CopyToRwMatrix(&rwMatrix);
+        RtQuatConvertFromMatrix((RtQuat*)&m_qAttachedEntityRotation, &rwMatrix);
+    }
+
+    if (physicalFlags.bDisableCollisionForce) {
+        physicalFlags.bCollidable = false;
+    }
+    else {
+        if (m_pAttachedTo->m_nType > ENTITY_TYPE_BUILDING && m_pAttachedTo->m_nType < ENTITY_TYPE_DUMMY
+            && m_pAttachedTo->physicalFlags.bDisableCollisionForce
+            && m_nType == ENTITY_TYPE_OBJECT && !physicalFlags.bInfiniteMass) 
+        {
+            physicalFlags.bDisableCollisionForce = true;
+            m_fMass = 99999.9f;
+            m_fTurnMass = 99999.9f;
+        }
+    }
+
+    if (physicalFlags.bInfiniteMass)
+        m_vecAttachedEntityRotation = GetPosition();
+
+    m_pEntityIgnoredCollision = pOldEntityAttachedTo;
+    PositionAttachedEntity();
+#endif
 }
 
-// Converted from thiscall bool CPhysical::CheckCollision(void) 0x54D920
 bool CPhysical::CheckCollision()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     return ((bool(__thiscall*)(CPhysical*))0x54D920)(this);
+#else
+    m_bCollisionProcessed = false;
+    if (m_nType == ENTITY_TYPE_PED)
+    {
+        CPed* pPed = static_cast<CPed*>(this);
+        if (!m_pAttachedTo && !physicalFlags.b17 && !physicalFlags.b16 && !physicalFlags.b13) {
+            pPed->m_pSomePed = 0;
+            if (pPed->bIsStanding) {
+                pPed->bIsStanding = false;
+                pPed->bWasStanding = true;
+            }
+        }
+
+        if (pPed->IsPlayer()) {
+            CTaskSimpleClimb* pTaskClimb = pPed->m_pIntelligence->GetTaskClimb();
+            if (pTaskClimb) {
+                char nHeightForPos = pTaskClimb->m_nHeightForPos;
+                if (nHeightForPos == CLIMB_GRAB || nHeightForPos == CLIMB_PULLUP 
+                    || nHeightForPos == CLIMB_STANDUP || nHeightForPos == CLIMB_VAULT) {
+                    physicalFlags.b13 = true;
+                }
+            }
+        }
+    }
+
+    if (CWorld::ms_nCurrentScanCode >= 65535u) {
+        CWorld::ClearScanCodes();
+        CWorld::ms_nCurrentScanCode = 1;
+    }
+    else {
+        CWorld::ms_nCurrentScanCode++;
+    }
+
+    CRect boundRect;
+    GetBoundRect(&boundRect);
+    int startSectorX = static_cast<int>(floor(boundRect.left * 0.02f + 60.0f));
+    int startSectorY = static_cast<int>(floor(boundRect.top * 0.02f + 60.0f));
+    int endSectorX = static_cast<int>(floor(boundRect.right * 0.02f + 60.0f));
+    int endSectorY = static_cast<int>(floor(boundRect.bottom * 0.02f + 60.0f));
+    for (int sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            if (ProcessCollisionSectorList(sectorX, sectorY))
+                return true;
+        }
+    }
+    return false;  
+#endif
 }
 
-// Converted from thiscall bool CPhysical::CheckCollision_SimpleCar(void) 0x54DAB0
 bool CPhysical::CheckCollision_SimpleCar()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     return ((bool(__thiscall*)(CPhysical*))0x54DAB0)(this);
+#else
+    m_bCollisionProcessed = false;
+    if (CWorld::ms_nCurrentScanCode >= 65535u) {
+        CWorld::ClearScanCodes();
+        CWorld::ms_nCurrentScanCode = 1;
+    }
+    else {
+        ++CWorld::ms_nCurrentScanCode;
+    }
+
+    CEntryInfoNode* pEntryInfoNode = m_pCollisionList;
+    if (!pEntryInfoNode)
+        return false;
+
+    while (!ProcessCollisionSectorList_SimpleCar(pEntryInfoNode->m_pRepeatSector))
+    {
+        pEntryInfoNode = pEntryInfoNode->m_pNext;
+        if (!pEntryInfoNode)
+            return false;
+    }
+    return true;
+#endif
 }

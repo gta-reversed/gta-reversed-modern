@@ -140,7 +140,7 @@ public:
     short field_FA;
     class CPhysical *m_pAttachedTo;
     CVector          m_vecAttachOffset;
-    CVector          m_vecAttachedEntityPosn;
+    CVector          m_vecAttachedEntityRotation;
     CQuaternion      m_qAttachedEntityRotation;
     CEntity         *m_pEntityIgnoredCollision;
     float            m_fContactSurfaceBrightness;
@@ -153,6 +153,7 @@ public:
     static float& SOFTCOL_DEPTH_MIN;
     static float& SOFTCOL_DEPTH_MULT;
     static float& SOFTCOL_CARLINE_SPEED_MULT;
+    static float& TEST_ADD_AMBIENT_LIGHT_FRAC;
     static CVector& fxDirection;
 
     static void InjectHooks();
@@ -168,6 +169,7 @@ public:
     // reversed virtual functions
     void Add_Reversed();
     void Remove_Reversed();
+    CRect* GetBoundRect_Reversed(CRect* pRect);
     void ProcessControl_Reversed();
     void ProcessShift_Reversed();
 
@@ -198,11 +200,11 @@ public:
     bool ApplySpringDampening(float arg0, float arg1, CVector& arg2, CVector& arg3, CVector& arg4);
     bool ApplySpringDampeningOld(float arg0, float arg1, CVector& arg2, CVector& arg3, CVector& arg4);
     void RemoveRefsToEntity(CEntity* entity);
-    void DettachEntityFromEntity(float x, float y, float z, bool useCollision);
+    void DettachEntityFromEntity(float x, float y, float z, bool bApplyTurnForce);
     void DettachAutoAttachedEntity();
-    float GetLightingFromCol(bool flag);
+    float GetLightingFromCol(bool bInteriorLighting);
     float GetLightingTotal();
-    bool CanPhysicalBeDamaged(eWeaponType weapon, unsigned char* arg1);
+    bool CanPhysicalBeDamaged(eWeaponType weapon, bool* bDamagedDueToFireOrExplosionOrBullet);
     void ApplyAirResistance();
     bool ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, float* pDamageIntensity, CVector* pVecMoveSpeed, CVector* pVecTurnSpeed);
     bool ApplyFriction(float fFriction, CColPoint* pColPoint);
@@ -218,8 +220,8 @@ public:
     bool ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity);
     bool ProcessCollisionSectorList(int sectorX, int sectorY);
     bool ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSector);
-    void AttachEntityToEntity(CEntity* entity, CVector offset, CVector rotation);
-    void AttachEntityToEntity(CEntity* entity, CVector* , RtQuat* rotation);
+    void AttachEntityToEntity(CPhysical* entity, CVector offset, CVector rotation);
+    void AttachEntityToEntity(CPhysical* pEntityAttachTo, CVector* vecAttachOffset, CQuaternion* attachRotation);
     bool CheckCollision();
     bool CheckCollision_SimpleCar();
 };
