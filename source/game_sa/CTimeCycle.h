@@ -147,6 +147,13 @@ public:
 
 	static CColourSet& m_CurrentColours;
 
+	static float& m_fCurrentRGB1Red;
+	static float& m_fCurrentRGB1Green;
+	static float& m_fCurrentRGB1Blue;
+	static float& m_fCurrentRGB2Red;
+	static float& m_fCurrentRGB2Green;
+	static float& m_fCurrentRGB2Blue;
+
 	static CTimeCycleBox* m_aBoxes;  //m_aBoxes[20]
 
 	static CVector* m_VectorToSun;   //m_VectorToSun[16]
