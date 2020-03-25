@@ -147,6 +147,8 @@ public:
     float            m_fDynamicLighting;
     CRealTimeShadow *m_pShadowData;
     
+    static float& DAMPING_LIMIT_IN_FRAME;
+    static float& DAMPING_LIMIT_OF_SPRING_FORCE;
     static float& PHYSICAL_SHIFT_SPEED_DAMP;
     static float& SOFTCOL_SPEED_MULT;
     static float& SOFTCOL_SPEED_MULT2;
@@ -197,9 +199,9 @@ public:
     bool GetHasCollidedWithAnyObject();
     bool ApplyCollision(CEntity* pEntity, CColPoint* pColPoint, float* pDamageIntensity);
     bool ApplySoftCollision(CEntity* pEntity, CColPoint* pColPoint, float* pDamageIntensity);
-    bool ApplySpringCollision(float arg0, CVector& arg1, CVector& arg2, float arg3, float arg4, float& arg5);
-    bool ApplySpringCollisionAlt(float arg0, CVector& arg1, CVector& arg2, float arg3, float arg4, CVector& arg5, float& arg6);
-    bool ApplySpringDampening(float arg0, float arg1, CVector& arg2, CVector& arg3, CVector& arg4);
+    bool ApplySpringCollision(float fSuspensionForceLevel, CVector* direction, CVector* collisionPoint, float fSpringLength, float fSuspensionBias, float* fSpringForceDampingLimit);
+    bool ApplySpringCollisionAlt(float fSuspensionForceLevel, CVector* direction, CVector* collisionPoint, float fSpringLength, float fSuspensionBias, CVector* collisionPointDirection, float* fSpringForceDampingLimit);
+    bool ApplySpringDampening(float fDampingForce, float fSpringForceDampingLimit, CVector* direction, CVector* collisionPoint, CVector* collisionPos);
     bool ApplySpringDampeningOld(float arg0, float arg1, CVector& arg2, CVector& arg3, CVector& arg4);
     void RemoveRefsToEntity(CEntity* entity);
     void DettachEntityFromEntity(float x, float y, float z, bool bApplyTurnForce);
