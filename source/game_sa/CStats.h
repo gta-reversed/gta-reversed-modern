@@ -84,7 +84,7 @@ public:
     static int ConvertToSecs(int value);
     static bool SafeToShowThisStat(unsigned char stat);
     static bool CheckForThreshold(float* pValue, float range);
-    static bool IsStatCapped(unsigned short stat);
+    static bool IsStatCapped(eStats stat);
     static void ProcessReactionStatsOnDecrement(unsigned char stat);
     static void CheckForStatsMessage();
     static void LoadStatUpdateConditions();

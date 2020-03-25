@@ -40,7 +40,12 @@ void CStats::InjectHooks()
     HookInstall(0x558DE0, &CStats::GetStatID, 7);
     HookInstall(0x558E70, &CStats::GetTimesMissionAttempted, 7);
     HookInstall(0x558E80, &CStats::RegisterMissionAttempted, 7);
-    HookInstall(0x558EA0, &CStats::RegisterMissionPassed, 7);
+    HookInstall(0x558EA0, &CStats::RegisterMissionPassed, 7);  
+    HookInstall(0x558F90, &CStats::GetFullFavoriteRadioStationList, 7);
+    HookInstall(0x559540, &CStats::ConvertToMins, 7);
+    HookInstall(0x559560, &CStats::ConvertToSecs, 7);
+    HookInstall(0x5595F0, &CStats::CheckForThreshold, 7);
+    HookInstall(0x559630, &CStats::IsStatCapped, 7);
 }
 
 // Unused
@@ -78,7 +83,7 @@ char CStats::GetTimesMissionAttempted(unsigned char missionId)
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<char, 0x558E70, unsigned char>(missionId);
 #else
-    return CStats::TimesMissionAttempted[missionId];
+    return TimesMissionAttempted[missionId];
 #endif
 }
 
@@ -110,8 +115,13 @@ bool CStats::PopulateFavoriteRadioStationList() {
 }
 
 // Converted from cdecl int* CStats::GetFullFavoriteRadioStationList(void) 0x558F90
-int *CStats::GetFullFavoriteRadioStationList() {
+int *CStats::GetFullFavoriteRadioStationList() 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<int*, 0x558F90>();
+#else
+    return FavoriteRadioStationList;
+#endif
 }
 
 // Converted from cdecl int CStats::FindMostFavoriteRadioStation(void) 0x558FA0
@@ -140,28 +150,95 @@ void CStats::BuildStatLine(char* line, void* pValue1, int metrics, void* pValue2
 }
 
 // Converted from cdecl int CStats::ConvertToMins(int value) 0x559540
-int CStats::ConvertToMins(int value) {
+int CStats::ConvertToMins(int statValue){
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<int, 0x559540, int>(value);
+#else
+    unsigned int minutes = 0;
+    if (statValue >= 60)
+        minutes = (statValue - 60) / 60 + 1;
+    return minutes;
+#endif
 }
 
 // Converted from cdecl int CStats::ConvertToSecs(int value) 0x559560
-int CStats::ConvertToSecs(int value) {
+int CStats::ConvertToSecs(int statValue){
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<int, 0x559560, int>(value);
+#else
+    int seconds;
+
+    seconds = statValue;
+    if (statValue >= 60)
+        seconds = -60 - 60 * ((statValue - 60) / 60) + statValue;
+    if (seconds < 0)
+        seconds = -seconds;
+    return seconds;
+#endif
 }
 
+// Getting errors on IDA.
 // Converted from cdecl bool CStats::SafeToShowThisStat(uchar stat) 0x559590
 bool CStats::SafeToShowThisStat(unsigned char stat) {
     return plugin::CallAndReturn<bool, 0x559590, unsigned char>(stat);
 }
 
 // Converted from cdecl bool CStats::CheckForThreshold(float *pValue, float range) 0x5595F0
-bool CStats::CheckForThreshold(float* pValue, float range) {
+bool CStats::CheckForThreshold(float* pValue, float range) 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<bool, 0x5595F0, float*, float>(pValue, range);
+#else
+    bool hasThreshold; // al
+
+    if (*pValue + 40.0 >= range && *pValue - 40.0 <= range)
+        return 0;
+    hasThreshold = 1;
+    *pValue = range;
+    return hasThreshold;
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from cdecl bool CStats::IsStatCapped(ushort stat) 0x559630
-bool CStats::IsStatCapped(unsigned short stat) {
-    return plugin::CallAndReturn<bool, 0x559630, unsigned short>(stat);
+bool CStats::IsStatCapped(eStats stat)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<bool, 0x559630, eStats>(stat);
+#else
+    return 
+        stat == STAT_GIRLFRIEND_RESPECT || 
+        stat == STAT_CLOTHES_RESPECT || 
+        stat == STAT_FITNESS_RESPECT || 
+        stat == STAT_FAT || 
+        stat == STAT_STAMINA ||
+        stat == STAT_MUSCLE || 
+        stat == STAT_MAX_HEALTH ||
+        stat == STAT_SEX_APPEAL || 
+        stat == STAT_PISTOL_SKILL || 
+        stat == STAT_SILENCED_PISTOL_SKILL || 
+        stat == STAT_DESERT_EAGLE_SKILL || 
+        stat == STAT_SHOTGUN_SKILL || 
+        stat == STAT_SAWN_OFF_SHOTGUN_SKILL ||
+        stat == STAT_COMBAT_SHOTGUN_SKILL ||
+        stat == STAT_MACHINE_PISTOL_SKILL || 
+        stat == STAT_SMG_SKILL ||
+        stat == STAT_AK_47_SKILL || 
+        stat == STAT_M4_SKILL || 
+        stat == STAT_RIFLE_SKILL ||
+        stat == STAT_APPEARANCE ||
+        stat == STAT_ARMOR || 
+        stat == STAT_ENERGY || 
+        stat == STAT_DRIVING_SKILL ||
+        stat == STAT_FLYING_SKILL ||
+        stat == STAT_LUNG_CAPACITY || 
+        stat == STAT_BIKE_SKILL || 
+        stat == STAT_LUCK || 
+        stat == STAT_HORSESHOES_COLLECTED ||
+        stat == STAT_TOTAL_HORSESHOES || 
+        stat == STAT_OYSTERS_COLLECTED ||
+        stat == STAT_TOTAL_OYSTERS || 
+        stat == STAT_CYCLING_SKILL;
+#endif
 }
 
 // Converted from cdecl void CStats::ProcessReactionStatsOnDecrement(uchar stat) 0x559730
@@ -182,6 +259,7 @@ void CStats::LoadStatUpdateConditions() {
 // Converted from cdecl void CStats::LoadActionReactionStats(void) 0x5599B0
 void CStats::LoadActionReactionStats() {
     plugin::Call<0x5599B0>();
+
 }
 
 // Converted from cdecl int CStats::FindMaxNumberOfGroupMembers(void) 0x559A50
