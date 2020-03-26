@@ -167,7 +167,7 @@ public:
     void ProcessControl() override;
     void ProcessShift() override;
     bool TestCollision(bool bApplySpeed) override;
-    virtual int ProcessEntityCollision(CEntity *entity, CColPoint *point);
+    virtual int ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint);
 
     // reversed virtual functions
     void Add_Reversed();
@@ -176,6 +176,7 @@ public:
     void ProcessControl_Reversed();
     void ProcessShift_Reversed();
     bool TestCollision_Reversed(bool bApplySpeed);
+    int ProcessEntityCollision_Reversed(CPhysical* entity, CColPoint* colpoint);
 
     // functions
     void RemoveAndAdd();

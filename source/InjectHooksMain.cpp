@@ -3,8 +3,8 @@
 
 #pragma comment(lib, "detours.lib")
 
-auto OLD_CPhysical_ApplyCollisionAlt = (bool(__thiscall*) (CPhysical* pThis, CPhysical * pEntity, CColPoint * pColPoint, float* pDamageIntensity, CVector * pVecMoveSpeed, CVector * pVecTurnSpeed))0x544D50;
-bool __fastcall CPhysical_ApplyCollisionAlt(CPhysical* pThis, void* padding, CPhysical* pEntity, CColPoint* pColPoint, float* pDamageIntensity, CVector* pVecMoveSpeed, CVector* pVecTurnSpeed);
+auto OLD_CPhysical_ProcessEntityCollision = (int(__thiscall*) (CPhysical * pThis, CPhysical * entity, CColPoint * colpoint))0x546D00;
+int __fastcall CPhysical_ProcessEntityCollision(CPhysical* pThis, void* padding, CPhysical* entity, CColPoint* colpoint);
 
 void __cdecl HOOK_THEFUNCTION();
 
@@ -33,22 +33,22 @@ void InjectHooksMain(void)
     CVehicle::InjectHooks();
     CPlayerPed::InjectHooks();
     CStats::InjectHooks();
+
     /*
      DetourRestoreAfterWith();
      DetourTransactionBegin();
      DetourUpdateThread(GetCurrentThread());
 
      std::printf("GOING TO HOOK FUNC NOW\n");
-     DetourAttach(&(PVOID&)OLD_CPhysical_ApplyCollisionAlt, CPhysical_ApplyCollisionAlt);
+     DetourAttach(&(PVOID&)OLD_CPhysical_ProcessEntityCollision, CPhysical_ProcessEntityCollision);
      DetourTransactionCommit();
      */
 }
 
-bool __fastcall CPhysical_ApplyCollisionAlt(CPhysical* pThis, void* padding, CPhysical* pEntity, CColPoint* pColPoint, float* pDamageIntensity, CVector* pVecMoveSpeed, CVector* pVecTurnSpeed)
+int __fastcall CPhysical_ProcessEntityCollision(CPhysical* pThis, void* padding, CPhysical* entity, CColPoint* colpoint)
 {
-    printf("CPhysical_ApplyCollisionAlt called!\n");
-
-    return true;
+    printf("CPhysical_ProcessEntityCollision called!n");
+    return 0;
 }
 
 /*
