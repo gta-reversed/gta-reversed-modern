@@ -177,6 +177,10 @@ void CMatrix::Scale(float x, float y, float z) {
     plugin::CallMethod<0x459350, CMatrix*, float, float, float>(this, x, y, z);
 }
 
+void CMatrix::ForceUpVector(float x, float y, float z) {
+    plugin::CallMethod<0x59B7E0, CMatrix*, float, float, float>(this, x, y, z);
+}
+
 void CMatrix::operator=(CMatrix const& rvalue)
 {
     ((void(__thiscall*)(CMatrix*, CMatrix const&))0x59BBC0)(this, rvalue);

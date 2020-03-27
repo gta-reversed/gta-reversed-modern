@@ -15,6 +15,7 @@ float& CPhysical::SOFTCOL_DEPTH_MIN = *(float*)0x8CD78C;
 float& CPhysical::SOFTCOL_DEPTH_MULT = *(float*)0x8CD790;
 float& CPhysical::SOFTCOL_CARLINE_SPEED_MULT = *(float*)0x8CD79C;
 float& CPhysical::TEST_ADD_AMBIENT_LIGHT_FRAC = *(float*)0x8CD7B8;
+float& CPhysical::HIGHSPEED_ELASTICITY_MULT_COPCAR = *(float*)0x8CD784;
 CVector& CPhysical::fxDirection = *(CVector*)0xB73720;
 
 void CPhysical::InjectHooks()
@@ -33,6 +34,7 @@ void CPhysical::InjectHooks()
     HookInstall(0x5424C0, &CPhysical::Remove_Reversed, 7);
     HookInstall(0x5449B0, &CPhysical::GetBoundRect_Reversed, 7);
     HookInstall(0x5485E0, &CPhysical::ProcessControl_Reversed, 7);
+    HookInstall(0x54DFB0, &CPhysical::ProcessCollision_Reversed, 7);
     HookInstall(0x54DB10, &CPhysical::ProcessShift_Reversed, 7);
     HookInstall(0x54DEC0, &CPhysical::TestCollision_Reversed, 7);
     HookInstall(0x546D00, &CPhysical::ProcessEntityCollision_Reversed, 7);
@@ -246,10 +248,231 @@ void CPhysical::ProcessControl_Reversed()
     }
 }
 
+void CPhysical::ProcessCollision()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallMethod<0x54DFB0, CPhysical*>(this);
+#else
+    ProcessCollision_Reversed();
+#endif
+}
+
+void CPhysical::ProcessCollision_Reversed()
+{
+    m_fMovingSpeed = 0.0f;
+    physicalFlags.b16 = false;
+    physicalFlags.b13 = false;
+    if (m_bUsesCollision && !physicalFlags.b18)  {
+        if (m_nStatus == STATUS_SIMPLE) {
+            if (CheckCollision_SimpleCar() && m_nStatus == STATUS_SIMPLE) {
+                m_nStatus = STATUS_PHYSICS;
+                if (m_nType == ENTITY_TYPE_VEHICLE)
+                    CCarCtrl::SwitchVehicleToRealPhysics(static_cast<CVehicle*>(this));
+            }
+            m_bIsStuck = false;
+            m_bIsInSafePosition = true;
+            RemoveAndAdd();
+            return;
+        }
+        CVehicle* pVehicle = static_cast<CVehicle*>(this);
+        CAutomobile* pAutomobile = static_cast<CAutomobile*>(this);
+        CBike* pBike = static_cast<CBike*>(this);
+        if (m_nStatus == STATUS_TRAILER) {
+            CColPoint* pWheelsColPoints = nullptr;
+            float* wheelsDistancesToGround1 = nullptr;
+            CVector* pWheelsCollisionPositions = nullptr;
+            if (pVehicle->m_nVehicleSubClass) {
+                pBike->m_apWheelCollisionEntity[0] = nullptr;
+                pBike->m_apWheelCollisionEntity[1] = nullptr;
+                pBike->m_apWheelCollisionEntity[2] = nullptr;
+                pBike->m_apWheelCollisionEntity[3] = nullptr;
+                pWheelsColPoints = pBike->m_anWheelColPoint;
+                wheelsDistancesToGround1 = pBike->m_wheelsDistancesToGround1;
+                pWheelsCollisionPositions = pBike->m_avTouchPointsLocalSpace;
+            }
+            else {
+                pAutomobile->m_pWheelCollisionEntity[0] = nullptr;
+                pAutomobile->m_pWheelCollisionEntity[1] = nullptr;
+                pAutomobile->m_pWheelCollisionEntity[2] = nullptr;
+                pAutomobile->m_pWheelCollisionEntity[3] = nullptr;
+                pWheelsColPoints = pAutomobile->m_wheelColPoint;
+                wheelsDistancesToGround1 = pAutomobile->m_wheelsDistancesToGround1;
+                pWheelsCollisionPositions = pAutomobile->m_vWheelCollisionPos;
+            }
+            CCollisionData* pColData = GetColModel()->m_pColData;
+            int collisionIndex = 0;
+            while (true) {
+                int colLinesCount = pColData->m_nNumLines;
+                if (pColData->bUsesDisks)
+                    colLinesCount = 0;
+                if (collisionIndex >= colLinesCount) {
+                    m_bIsStuck = false;
+                    m_bIsInSafePosition = true;
+                    m_vecMoveSpeed.z = 0.0f;
+                    m_vecTurnSpeed.y = 0.0f;
+                    m_vecTurnSpeed.x = 0.0f;
+                    m_matrix->ForceUpVector(0.0f, 0.0f, 1.0f);
+                    m_matrix->pos.z = CCarCtrl::FindGhostRoadHeight(pVehicle) + pVehicle->GetHeightAboveRoad();
+                    ApplySpeed();
+                    m_matrix->Reorthogonalise();
+                    RemoveAndAdd();
+                    pVehicle->vehicleFlags.bVehicleColProcessed = true;
+                    return;
+                }
+
+                CColPoint* pWheelColPoint = &pWheelsColPoints[collisionIndex];
+                CColLine* pColLine = &pColData->m_pLines[collisionIndex];
+                CVector vecColLinePosStart;
+                CVector vecColLinePosEnd;
+                MultiplyMatrixWithVector(&vecColLinePosStart, m_matrix, &pColLine->m_vecStart);
+                MultiplyMatrixWithVector(&vecColLinePosEnd, m_matrix, &pColLine->m_vecEnd);
+                pWheelColPoint->m_vecNormal = CVector(0.0f, 0.0f, 1.0f);
+                pWheelColPoint->m_nSurfaceTypeA = SURFACE_WHEELBASE;
+                pWheelColPoint->m_nSurfaceTypeB = SURFACE_TARMAC;
+                pWheelColPoint->m_fDepth = 0.0f;
+                float fGhostRoadHeight = CCarCtrl::FindGhostRoadHeight(pVehicle);
+                if (fGhostRoadHeight <= vecColLinePosStart.z) {
+                    if (fGhostRoadHeight > vecColLinePosEnd.z) {
+                        float fWheelDistancesToGround1 = (vecColLinePosStart.z - fGhostRoadHeight) / (vecColLinePosStart.z - vecColLinePosEnd.z);
+                        wheelsDistancesToGround1[collisionIndex] = fWheelDistancesToGround1;
+                        pWheelColPoint->m_vecPoint = (vecColLinePosEnd - vecColLinePosStart) * fWheelDistancesToGround1 + vecColLinePosStart;
+                    }
+                    else {
+                        wheelsDistancesToGround1[collisionIndex] = 1.0f;
+                        pWheelColPoint->m_vecPoint = vecColLinePosEnd;
+                    }
+                }
+                else {
+                    wheelsDistancesToGround1[collisionIndex] = 0.0f;
+                    pWheelColPoint->m_vecPoint = vecColLinePosStart;
+                }
+                pWheelsCollisionPositions[collisionIndex] = pWheelColPoint->m_vecPoint - GetPosition();
+                collisionIndex++;
+            }
+        }
+        CVector vecOldMoveSpeed = m_vecMoveSpeed;
+        float fOldTimeStep = CTimer::ms_fTimeStep;
+        float fOldElasticity = m_fElasticity;
+        CMatrix oldEntityMatrix(*m_matrix);
+        bool bProcessCollisionBeforeSettingTimeStep = false;
+        bool bUnknown = false;
+        unsigned char collisionSteps = SpecialEntityCalcCollisionSteps(&bProcessCollisionBeforeSettingTimeStep, &bUnknown);
+        float fStep = fOldTimeStep / collisionSteps;
+        if (bProcessCollisionBeforeSettingTimeStep)
+        {
+            ApplySpeed();
+            m_matrix->Reorthogonalise();
+            physicalFlags.b16 = false;
+            physicalFlags.b13 = false;
+            physicalFlags.b17 = true;
+            bool bOldUsesCollision = m_bUsesCollision;
+            m_bUsesCollision = false;
+            if (!CheckCollision())
+            {
+                physicalFlags.b17 = false;
+                m_bUsesCollision = bOldUsesCollision;
+                if (m_nType == ENTITY_TYPE_VEHICLE)
+                    pVehicle->vehicleFlags.bVehicleColProcessed = true;
+                m_bIsStuck = false;
+                m_bIsInSafePosition = true;
+                physicalFlags.b12 = false;
+                physicalFlags.b13 = false;
+                m_fElasticity = fOldElasticity;
+                m_fMovingSpeed = DistanceBetweenPoints(oldEntityMatrix.pos, m_matrix->pos);
+                RemoveAndAdd();
+                return;
+            }
+            m_bUsesCollision = bOldUsesCollision;
+            physicalFlags.b17 = false;
+            *static_cast<CMatrix*>(m_matrix) = oldEntityMatrix;
+            m_vecMoveSpeed = vecOldMoveSpeed;
+            if (m_nType == ENTITY_TYPE_VEHICLE && pVehicle->vehicleFlags.bIsLawEnforcer)
+                m_fElasticity *= HIGHSPEED_ELASTICITY_MULT_COPCAR;
+        }
+
+        CPed* pPed = static_cast<CPed*>(this);
+        if (collisionSteps > 1u)
+        {
+            for (unsigned char stepIndex = 1; stepIndex < collisionSteps; stepIndex++)
+            {
+                CTimer::UpdateTimeStep(stepIndex * fStep);
+                ApplySpeed();
+                bool bCheckCollision = CheckCollision();
+                if (m_nType == ENTITY_TYPE_PED && m_vecMoveSpeed.z == 0.0f && !pPed->bWasStanding && pPed->bIsStanding)
+                    oldEntityMatrix.pos.z = m_matrix->pos.z;
+                *static_cast<CMatrix*>(m_matrix) = oldEntityMatrix;
+                CTimer::UpdateTimeStep(fOldTimeStep);
+                if (bCheckCollision) {
+                    m_fElasticity = fOldElasticity;
+                    return;
+                }
+                if (m_nType == ENTITY_TYPE_VEHICLE) {
+                    if (pVehicle->m_nVehicleClass) {
+                        if (pVehicle->m_nVehicleClass == VEHICLE_BIKE) {
+                            pBike->m_wheelsDistancesToGround1[0] = 1.0f;
+                            pBike->m_wheelsDistancesToGround1[1] = 1.0f;
+                            pBike->m_wheelsDistancesToGround1[2] = 1.0f;
+                            pBike->m_wheelsDistancesToGround1[3] = 1.0f;
+                        }
+                        else if (pVehicle->m_nVehicleClass == VEHICLE_TRAILER) {
+                            pAutomobile->m_wheelsDistancesToGround1[0] = 1.0f;
+                            pAutomobile->m_wheelsDistancesToGround1[1] = 1.0f;
+                            pAutomobile->m_wheelsDistancesToGround1[2] = 1.0f;
+                        }
+                    }
+                    else {
+                        pAutomobile->m_wheelsDistancesToGround1[0] = 1.0f;
+                        pAutomobile->m_wheelsDistancesToGround1[1] = 1.0f;
+                        pAutomobile->m_wheelsDistancesToGround1[2] = 1.0f;
+                        pAutomobile->m_wheelsDistancesToGround1[3] = 1.0f;
+                    }
+                }
+            }
+        }
+        ApplySpeed();
+        m_matrix->Reorthogonalise();
+        physicalFlags.b16 = false;
+        physicalFlags.b13 = false;
+        if (m_vecMoveSpeed.x != 0.0f
+            || m_vecMoveSpeed.y != 0.0f
+            || m_vecMoveSpeed.z != 0.0f
+            || m_vecTurnSpeed.x != 0.0f
+            || m_vecTurnSpeed.y != 0.0f
+            || m_vecTurnSpeed.z != 0.0f
+            || physicalFlags.b12
+            || !m_nStatus
+            || m_nType == ENTITY_TYPE_VEHICLE && pVehicle->vehicleFlags.bIsCarParkVehicle
+            || m_nType == ENTITY_TYPE_PED && (pPed->IsPlayer() || pPed->bTestForBlockedPositions|| !pPed->bIsStanding)) 
+        {
+            if (m_nType == ENTITY_TYPE_VEHICLE)
+                pVehicle->vehicleFlags.bVehicleColProcessed = true;
+            if (CheckCollision()) {
+                *static_cast<CMatrix*>(m_matrix) = oldEntityMatrix;
+                m_fElasticity = fOldElasticity;
+                return;
+            }
+        }
+        else if (m_nType == ENTITY_TYPE_PED) {
+            pPed->bIsStanding = true;
+        }
+        m_bIsStuck = false;
+        m_bIsInSafePosition = true;
+        physicalFlags.b12 = false;
+        physicalFlags.b13 = false;
+        m_fElasticity = fOldElasticity;
+        m_fMovingSpeed = DistanceBetweenPoints(oldEntityMatrix.pos, m_matrix->pos);
+        RemoveAndAdd();
+        return;
+    }
+    m_bIsStuck = false;
+    m_bIsInSafePosition = true;
+    RemoveAndAdd();
+}
+
 void CPhysical::ProcessShift()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CPhysical*))(*(void***)this)[12])(this);
+    ((void(__thiscall*)(CPhysical*))0x54DB10)(this);
 #else
     CPhysical::ProcessShift_Reversed();
 #endif

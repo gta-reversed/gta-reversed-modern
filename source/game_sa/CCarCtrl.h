@@ -37,6 +37,7 @@ public:
 	static int FindSequenceElement(int arg1);
 	static float FindSpeedMultiplier(float arg1, float arg2, float arg3, float arg4);
 	static float FindSpeedMultiplierWithSpeedFromNodes(char arg1);
+	static float FindGhostRoadHeight(CVehicle* pVehicle);
 	static void FireHeliRocketsAtTarget(CAutomobile* pEntityLauncher, CEntity* pEntity);
 	static void FlyAIHeliInCertainDirection(CHeli* pHeli, float arg2, float arg3, bool arg4);
 	static void FlyAIHeliToTarget_FixedOrientation(CHeli* pHeli, float Orientation, CVector posn);

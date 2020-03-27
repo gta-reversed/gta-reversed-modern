@@ -117,6 +117,10 @@ float CCarCtrl::FindSpeedMultiplierWithSpeedFromNodes(char arg1) {
     return plugin::CallAndReturn<float, 0x424130, char>(arg1);
 }
 
+float CCarCtrl::FindGhostRoadHeight(CVehicle* pVehicle) {
+    return plugin::CallAndReturn<float, 0x422370, CVehicle*>(pVehicle);
+}
+
 // Converted from cdecl void CCarCtrl::FireHeliRocketsAtTarget(CAutomobile *pEntityLauncher,CEntity *pEntity) 0x42B270
 void CCarCtrl::FireHeliRocketsAtTarget(CAutomobile* pEntityLauncher, CEntity* pEntity) {
     plugin::Call<0x42B270, CAutomobile*, CEntity*>(pEntityLauncher, pEntity);

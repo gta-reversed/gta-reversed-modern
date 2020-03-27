@@ -84,9 +84,9 @@ void CEntity::SpecialEntityPreCollisionStuff(CEntity *colEntity, bool bIgnoreStu
     ((void(__thiscall *)(CEntity *, CEntity *, bool, bool *, bool *, bool *, bool *))(*(void ***)this)[15])(this, colEntity, bIgnoreStuckCheck, bCollisionDisabled, bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck);
 }
 
-void CEntity::SpecialEntityCalcCollisionSteps(unsigned char *unk1, unsigned char *unk2)
+unsigned char CEntity::SpecialEntityCalcCollisionSteps(bool * bProcessCollisionBeforeSettingTimeStep, bool* unk2)
 {
-    ((void(__thiscall *)(CEntity *, unsigned char *, unsigned char *))(*(void ***)this)[16])(this, unk1, unk2);
+    return ((unsigned char(__thiscall *)(CEntity *, bool*, bool*))(*(void ***)this)[16])(this, bProcessCollisionBeforeSettingTimeStep, unk2);
 }
 
 void CEntity::PreRender()

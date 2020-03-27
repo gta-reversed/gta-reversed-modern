@@ -87,8 +87,7 @@ inline CVector operator*(float multiplier, const CVector& vec) {
 }
 
 inline float DistanceBetweenPoints(const CVector &pointOne, const CVector &pointTwo) {
-    CVector diff = pointTwo - pointOne;
-    return diff.Magnitude();
+    return (pointTwo - pointOne).Magnitude();
 }
 
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b);
