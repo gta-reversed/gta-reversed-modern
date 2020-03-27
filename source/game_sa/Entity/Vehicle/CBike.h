@@ -41,7 +41,7 @@ public:
     char field_65E;
     char field_65F;
     CColPoint      m_anWheelColPoint[4];
-    float field_710[4];
+    float m_wheelsDistancesToGround1[4];
     float field_720[4];
     float field_730[4];
     float field_740;
@@ -72,7 +72,7 @@ public:
     int field_7B8;
     int field_7BC;
     CEntity* m_apWheelCollisionEntity[4];
-    CVector        m_avTouchPointsLocalSpace[4];
+    CVector  m_avTouchPointsLocalSpace[4];
     CEntity* m_pDamager;
     unsigned char  m_nNumContactWheels;
     unsigned char  m_nNumWheelsOnGround;

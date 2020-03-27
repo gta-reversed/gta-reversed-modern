@@ -156,6 +156,7 @@ public:
     static float& SOFTCOL_DEPTH_MULT;
     static float& SOFTCOL_CARLINE_SPEED_MULT;
     static float& TEST_ADD_AMBIENT_LIGHT_FRAC;
+    static float& HIGHSPEED_ELASTICITY_MULT_COPCAR;
     static CVector& fxDirection;
 
     static void InjectHooks();
@@ -165,6 +166,7 @@ public:
     void Remove() override;
     CRect* GetBoundRect(CRect* pRect) override;
     void ProcessControl() override;
+    void ProcessCollision() override;
     void ProcessShift() override;
     bool TestCollision(bool bApplySpeed) override;
     virtual int ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint);
@@ -174,6 +176,7 @@ public:
     void Remove_Reversed();
     CRect* GetBoundRect_Reversed(CRect* pRect);
     void ProcessControl_Reversed();
+    void ProcessCollision_Reversed();
     void ProcessShift_Reversed();
     bool TestCollision_Reversed(bool bApplySpeed);
     int ProcessEntityCollision_Reversed(CPhysical* entity, CColPoint* colpoint);

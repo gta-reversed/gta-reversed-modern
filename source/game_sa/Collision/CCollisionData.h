@@ -28,7 +28,7 @@ public:
         unsigned char b03 : 1;
         unsigned char   bHasFaceGroups : 1;
         unsigned char   bHasShadow : 1;
-    }                  m_nFlags;
+    } ;
     CColSphere        *m_pSpheres;
     CColBox           *m_pBoxes;
     union {

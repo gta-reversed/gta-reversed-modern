@@ -53,8 +53,8 @@ public:
     CBouncingPanel m_panels[3];
     CDoor m_swingingChassis;
     CColPoint m_wheelColPoint[4];
-    float wheelsDistancesToGround1[4];
-    float wheelsDistancesToGround2[4];
+    float m_wheelsDistancesToGround1[4];
+    float m_wheelsDistancesToGround2[4];
     float field_7F4[4];
     float field_800;
     float field_804;

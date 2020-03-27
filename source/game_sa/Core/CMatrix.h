@@ -63,6 +63,7 @@ public:
 	void SetRotate(CQuaternion  const& quat);
     void Scale(float scale);
     void Scale(float x, float y, float z);
+	void ForceUpVector(float x, float y, float z);
 	void operator=(CMatrix const& right);
 	void operator+=(CMatrix const& right);
 	void operator*=(CMatrix const& right);

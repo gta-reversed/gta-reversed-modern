@@ -52,4 +52,5 @@ public:
     static void StartUserPause();
     static void EndUserPause();
     static void Update();
+    static void UpdateTimeStep(float fTimeStep);
 };

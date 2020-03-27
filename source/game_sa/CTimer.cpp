@@ -92,3 +92,12 @@ void CTimer::Update()
 {
     ((void(__cdecl *)()) 0x561B10)();
 }
+
+
+void CTimer::UpdateTimeStep(float fTimeStep)
+{
+    if (fTimeStep > 0.00001f)
+        CTimer::ms_fTimeStep = fTimeStep;
+    else
+        CTimer::ms_fTimeStep = 0.00001f;
+}
