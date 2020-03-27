@@ -97,7 +97,7 @@ public:
     static void RegisterBestPosition(int stat, int position);
     static char* FindCriminalRatingString();
     static int ConstructStatLine(int arg0, unsigned char arg1);
-    static void ProcessReactionStatsOnIncrement(unsigned char stat);
+    static void ProcessReactionStatsOnIncrement(eStats stat);
     static void DisplayScriptStatUpdateMessage(unsigned char state, unsigned int stat, float value);
     static void UpdateRespectStat(unsigned char arg0);
     static void UpdateSexAppealStat();

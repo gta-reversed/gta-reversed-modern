@@ -13,7 +13,7 @@ int *CStats::TimesMissionAttempted = (int*)0xB78CC8;
 int *CStats::FavoriteRadioStationList = (int*)0xB78E58;
 int *CStats::PedsKilledOfThisType = (int*)0xB78E90;
 float *CStats::StatReactionValue = (float*)0xB78F10;
-int *CStats::StatTypesInt = (int*)0xB79000;
+int *CStats::StatTypesInt = (int*)0xB79034;
 float *CStats::StatTypesFloat = (float*)0xB79380;
 short &CStats::m_ThisStatIsABarChart = *(short*)0xB794CC;
 unsigned int &CStats::TotalNumStatMessages = *(unsigned int*)0xB794D0;
@@ -303,8 +303,41 @@ int CStats::ConstructStatLine(int arg0, unsigned char arg1) {
 }
 
 // Converted from cdecl void CStats::ProcessReactionStatsOnIncrement(uchar stat) 0x55B900
-void CStats::ProcessReactionStatsOnIncrement(unsigned char stat) {
+void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55B900, unsigned char>(stat);
+#else
+    double fatValue; // st7
+    double longestExerciseBikeTime; // st7
+    float finalLongestExerciseBikeTime; // ST04_4
+
+    if (stat == STAT_STAMINA)
+    {
+    CheckFat:
+        if ((double)CStats::StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME] < 0.0)
+        {
+            fatValue = CStats::StatTypesFloat[STAT_FAT] - 23.0;
+            if (fatValue <= 0.0)
+                fatValue = 0.0;
+            CStats::StatTypesFloat[STAT_FAT] = fatValue;
+            CStats::CheckForStatsMessage();
+        }
+        return;
+    }
+    if (stat != STAT_ENERGY)
+    {
+        if (stat != STAT_LUNG_CAPACITY)
+            return;
+        goto CheckFat;
+    }
+    longestExerciseBikeTime = (double)CStats::StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME];
+    if (longestExerciseBikeTime > 1000.0)
+    {
+        finalLongestExerciseBikeTime = longestExerciseBikeTime - 1000.0;
+        CStats::IncrementStat(STAT_FAT, finalLongestExerciseBikeTime);
+    }
+#endif
+
 }
 
 // Converted from cdecl void CStats::DisplayScriptStatUpdateMessage(uchar state, uint stat, float value) 0x55B980
