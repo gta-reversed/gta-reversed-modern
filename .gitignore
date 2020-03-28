@@ -13,6 +13,7 @@
 # MSVC files
 *.pdb
 *.dll
+*.lnk
 
 
 # workflow
