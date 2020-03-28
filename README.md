@@ -6,12 +6,12 @@ A project to reverse Grand Theft Auto San Andreas completely, and to rewrite and
 
 #### Build Instructions
 
-#### Premake5
+##### Premake5
 1) Execute `premake5.bat` (Visual Studio 2019 is required)
 
 2) gta_reversed.sln shortcut will be created.
 
-#### CMake
+##### CMake
 1) Download and install latest CMake for windows from [HERE](https://cmake.org/download/).
 
 2) Open CMake GUI ![Capture](https://gitlab.com/gtahackers/gta-reversed/uploads/9409c1da6c25fbe4423f750d45f29000/Capture.PNG) 
