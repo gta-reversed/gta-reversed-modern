@@ -256,6 +256,12 @@ RwReal _rwMatrixIdentityError(const RwMatrix* matrix) {
     return ((RwReal(__cdecl *)(const RwMatrix*))0x7F1590)(matrix);
 }
 
+void RwV3dScale(RwV3d* out, const RwV3d* in, RwReal scalar) {
+    out->x = in->x * scalar;
+    out->y = in->y * scalar;
+    out->z = in->z * scalar;
+}
+
 RwReal RwV3dNormalize(RwV3d* out, const RwV3d* in) {
     return ((RwReal(__cdecl *)(RwV3d*, const RwV3d*))0x7ED9B0)(out, in);
 }
@@ -2793,6 +2799,50 @@ RpWorldChunkInfo* _rpWorldChunkInfoRead(RwStream* stream, RpWorldChunkInfo* worl
 }
 
 /* rtquat.h */
+
+void RtQuatConvertToMatrix(const RtQuat* const qpQuat, RwMatrix* const mpMatrix) {
+    RwReal              rS;
+    RwV3d               rV;
+    RwV3d               rW;
+    RwV3d               square;
+    RwV3d               cross;
+
+    rS = ((RwReal)2) / (qpQuat->imag.x * qpQuat->imag.x
+        + qpQuat->imag.y * qpQuat->imag.y
+        + qpQuat->imag.z * qpQuat->imag.z
+        + qpQuat->real * qpQuat->real);
+
+    RwV3dScale(&rV, &(qpQuat)->imag, rS);
+    RwV3dScale(&rW, &rV, (qpQuat)->real);
+
+    square.x = (qpQuat)->imag.x * rV.x;
+    square.y = (qpQuat)->imag.y * rV.y;
+    square.z = (qpQuat)->imag.z * rV.z;
+
+    cross.x = (qpQuat)->imag.y * rV.z;
+    cross.y = (qpQuat)->imag.z * rV.x;
+    cross.z = (qpQuat)->imag.x * rV.y;
+
+    (mpMatrix)->right.x = ((RwReal)1) - (square.y + square.z);
+    (mpMatrix)->right.y = cross.z + rW.z;
+    (mpMatrix)->right.z = cross.y - rW.y;
+
+    (mpMatrix)->up.x = cross.z - rW.z;
+    (mpMatrix)->up.y = ((RwReal)1) - (square.z + square.x);
+    (mpMatrix)->up.z = cross.x + rW.x;
+
+    (mpMatrix)->at.x = cross.y + rW.y;
+    (mpMatrix)->at.y = cross.x - rW.x;
+    (mpMatrix)->at.z = ((RwReal)1) - (square.x + square.y);
+
+    /* Set position */
+    (mpMatrix)->pos.x = ((RwReal)0);
+    (mpMatrix)->pos.y = ((RwReal)0);
+    (mpMatrix)->pos.z = ((RwReal)0);
+
+    /* Matrix is orthogonal */
+    mpMatrix->flags = rwMATRIXTYPEORTHONORMAL & ~rwMATRIXINTERNALIDENTITY;
+}
 
 RwBool RtQuatConvertFromMatrix(RtQuat * const qpQuat, const RwMatrix * const mpMatrix) {
     return ((RwBool(__cdecl *)(RtQuat * const, const RwMatrix * const))0x7EB5C0)(qpQuat, mpMatrix);

@@ -97,6 +97,7 @@ RwReal _rwMatrixDeterminant(const RwMatrix* matrix); // 0x7F1450
 RwReal _rwMatrixNormalError(const RwMatrix* matrix); // 0x7F1500
 RwReal _rwMatrixOrthogonalError(const RwMatrix* matrix); // 0x7F14A0
 RwReal _rwMatrixIdentityError(const RwMatrix* matrix); // 0x7F1590
+void RwV3dScale(RwV3d* out, const RwV3d* in, RwReal scalar);
 RwReal RwV3dNormalize(RwV3d* out, const RwV3d* in); // 0x7ED9B0
 RwReal RwV3dLength(const RwV3d* in); // 0x7EDAC0
 RwReal RwV2dLength(const RwV2d* in); // 0x7EDBF0
@@ -739,6 +740,7 @@ RpWorldChunkInfo* _rpWorldChunkInfoRead(RwStream* stream, RpWorldChunkInfo* worl
 
 /* rtquat.h */
 
+void RtQuatConvertToMatrix(const RtQuat* const qpQuat, RwMatrix* const mpMatrix);
 RwBool RtQuatConvertFromMatrix(RtQuat * const qpQuat, const RwMatrix * const mpMatrix); // 0x7EB5C0
 RtQuat* RtQuatRotate(RtQuat* quat, const RwV3d* axis, RwReal angle, RwOpCombineType combineOp); // 0x7EB7C0
 const RtQuat* RtQuatQueryRotate(const RtQuat* quat, RwV3d* unitAxis, RwReal* angle); // 0x7EBA80
