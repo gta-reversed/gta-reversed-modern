@@ -13,7 +13,8 @@
 # MSVC files
 *.pdb
 *.dll
-*.exe
+*.lnk
+
 
 # workflow
 *.orig
