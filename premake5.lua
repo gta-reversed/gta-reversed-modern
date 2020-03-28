@@ -72,7 +72,7 @@ solution "gta_reversed"
         language "C++"
         kind "SharedLib"
         targetname "gta_reversed"
-        targetextension ".dll"
+        targetextension ".asi"
         pchheader "StdInc.h"
     pchsource "source/StdInc.cpp"           
         flags { }

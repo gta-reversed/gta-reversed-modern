@@ -24,6 +24,7 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT gta_reversed)
 
 add_library(gta_reversed SHARED ${_headerfiles_list} ${_sourcefiles_list})
+set_target_properties(gta_reversed PROPERTIES SUFFIX ".asi")
 
 target_link_libraries(gta_reversed debug "${_src_root_path}/source/detours.lib")
 target_link_libraries(gta_reversed optimized "${_src_root_path}/source/detours.lib")
