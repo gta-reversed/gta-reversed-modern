@@ -45,8 +45,8 @@ public:
 	void ResetOrientation();
 	void SetScale(float scale); // set (scaled)
 	void SetScale(float x, float y, float z); // set (scaled)
-	void SetTranslateOnly(float x, float y, float z);
-	void SetTranslate(float x, float y, float z); // like previous + reset orientation
+	void SetTranslateOnly(CVector translation);
+	void SetTranslate(CVector translation); // like previous + reset orientation
 	void SetRotateXOnly(float angle);
 	void SetRotateYOnly(float angle);
 	void SetRotateZOnly(float angle);
@@ -57,7 +57,7 @@ public:
 	void RotateX(float angle);
 	void RotateY(float angle);
 	void RotateZ(float angle);
-	void Rotate(float x, float y, float z); // rotate on 3 axes
+	void Rotate(CVector rotation); // rotate on 3 axes
 	void Reorthogonalise();
 	void CopyToRwMatrix(RwMatrix *matrix); // similar to UpdateRW(RwMatrixTag *)
 	void SetRotate(CQuaternion  const& quat);
