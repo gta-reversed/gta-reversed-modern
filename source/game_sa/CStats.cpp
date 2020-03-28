@@ -46,6 +46,8 @@ void CStats::InjectHooks()
     HookInstall(0x559560, &CStats::ConvertToSecs, 7);
     HookInstall(0x5595F0, &CStats::CheckForThreshold, 7);
     HookInstall(0x559630, &CStats::IsStatCapped, 7);
+    HookInstall(0x55B900, &CStats::ProcessReactionStatsOnIncrement, 7); 
+    HookInstall(0x55C6F0, &CStats::UpdateStatsWhenRunning, 7);
 }
 
 // Unused
@@ -307,20 +309,22 @@ void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55B900, unsigned char>(stat);
 #else
-    double fatValue; // st7
-    double longestExerciseBikeTime; // st7
+    float fatValue; // st7
+    float longestExerciseBikeTime; // st7
     float finalLongestExerciseBikeTime; // ST04_4
 
     if (stat == STAT_STAMINA)
     {
     CheckFat:
-        if ((double)CStats::StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME] < 0.0)
+        if ((double)StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME] < 0.0)
         {
-            fatValue = CStats::StatTypesFloat[STAT_FAT] - 23.0;
+            printf("Longest Exercise Bike Time (int to double): %lf\n", (double)StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME]);
+            fatValue = StatTypesFloat[STAT_FAT] - 23.0f;
             if (fatValue <= 0.0)
                 fatValue = 0.0;
-            CStats::StatTypesFloat[STAT_FAT] = fatValue;
-            CStats::CheckForStatsMessage();
+            printf("fatValue: %lf\n", fatValue);
+            StatTypesFloat[STAT_FAT] = fatValue;
+            CheckForStatsMessage();
         }
         return;
     }
@@ -330,11 +334,13 @@ void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
             return;
         goto CheckFat;
     }
-    longestExerciseBikeTime = (double)CStats::StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME];
-    if (longestExerciseBikeTime > 1000.0)
+
+    longestExerciseBikeTime = (float)StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME];
+    if (longestExerciseBikeTime > 1000.0f)
     {
-        finalLongestExerciseBikeTime = longestExerciseBikeTime - 1000.0;
-        CStats::IncrementStat(STAT_FAT, finalLongestExerciseBikeTime);
+        finalLongestExerciseBikeTime = longestExerciseBikeTime - 1000.0f;
+        printf("longestExerciseBikeTime: %lf\n", finalLongestExerciseBikeTime);
+        IncrementStat(STAT_FAT, finalLongestExerciseBikeTime);
     }
 #endif
 
@@ -381,8 +387,23 @@ void CStats::UpdateStatsWhenSprinting() {
 }
 
 // Converted from cdecl void CStats::UpdateStatsWhenRunning(void) 0x55C6F0
-void CStats::UpdateStatsWhenRunning() {
+void CStats::UpdateStatsWhenRunning() 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55C6F0>();
+#else
+    UpdateFatAndMuscleStats((unsigned __int64)StatReactionValue[31]);
+    if (StatReactionValue[36] * 1000.0 >= (double)(unsigned int)m_RunningCounter)
+    {
+        m_RunningCounter += (unsigned __int64)(CTimer::ms_fTimeStep * 0.02 * 1000.0);
+    }
+    else
+    {
+        m_RunningCounter = 0;
+        IncrementStat(22, StatReactionValue[3]);
+        DisplayScriptStatUpdateMessage(1, STAT_STAMINA, StatReactionValue[3]);
+    }
+#endif
 }
 
 // Converted from cdecl void CStats::UpdateStatsWhenCycling(bool, CBmx *bmx) 0x55C780

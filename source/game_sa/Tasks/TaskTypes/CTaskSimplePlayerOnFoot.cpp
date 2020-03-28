@@ -592,9 +592,9 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                         CWeapon* pActiveWeapon = &pPlayerPed->m_aWeapons[activeWeaponSlot];
                         if (TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nMode == MODE_CAMERA && CTimer::m_snTimeInMilliseconds > pActiveWeapon->m_nTimeForNextShot)
                         {
-                            CVector firingPoint(0.0, 0.0, 0.60000002);
+                            CVector firingPoint(0.0f, 0.0f, 0.60000002f);
 
-                            CVector outputFiringPoint(0.0, 0.0, 0.0);
+                            CVector outputFiringPoint(0.0f, 0.0f, 0.0f);
                             MultiplyMatrixWithVector(&outputFiringPoint, pPlayerPed->m_matrix, &firingPoint);
                             pActiveWeapon->Fire(pPlayerPed, &outputFiringPoint, 0, 0, 0, 0);
                         }
@@ -910,8 +910,8 @@ PED_WEAPON_AIMING_CODE:
         firingPoint.x = pPlayerMatrix->up.x;
         firingPoint.y = pPlayerMatrix->up.y;
         firingPoint.z = pPlayerMatrix->up.z;
-        firingPoint.x = firingPoint.x * 5.0;
-        firingPoint.y = firingPoint.y * 5.0;
+        firingPoint.x = firingPoint.x * 5.0f;
+        firingPoint.y = firingPoint.y * 5.0f;
         firingPoint.z = (sin(pPlayerPed->m_pPlayerData->m_fLookPitch) + firingPoint.z) * 5.0;
         CVector* pPlayerPos = &pPlayerPed->m_placement.m_vPosn;
         if (pPlayerMatrix)
