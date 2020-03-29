@@ -249,7 +249,7 @@ void CTaskSimpleSwim::ApplyRollAndPitch(CPed* pPed)
         rotationMatrix.m_pAttachMatrix = 0;
         rotationMatrix.m_bOwnsAttachedMatrix = 0;
 
-        rotationMatrix.SetTranslate(0.0f, 0.0f, 0.0f);
+        rotationMatrix.SetTranslate(CVector(0.0f, 0.0f, 0.0f));
         rotationMatrix.RotateY(m_fTurningRotationY);
         rotationMatrix.RotateX(m_fRotationX);
 

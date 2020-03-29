@@ -72,6 +72,7 @@ void CPhysical::InjectHooks()
     HookInstall(0x54D920, &CPhysical::CheckCollision, 7);
     HookInstall(0x54DAB0, &CPhysical::CheckCollision_SimpleCar, 7);
     HookInstall(0x546DB0, &CPhysical::PlacePhysicalRelativeToOtherPhysical, 7);
+    HookInstall(0x546FF0, &CPhysical::PositionAttachedEntity, 7);
 }
 
 void CPhysical::Add()
@@ -2556,10 +2557,187 @@ float CPhysical::ApplyScriptCollision(CVector arg0, float arg1, float arg2, CVec
     return ((float(__thiscall*)(CPhysical*, CVector, float, float, CVector*))0x546ED0)(this, arg0, arg1, arg2, arg3);
 }
 
-// Converted from thiscall void CPhysical::PositionAttachedEntity(void) 0x546FF0
 void CPhysical::PositionAttachedEntity()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*))0x546FF0)(this);
+#else
+    if (m_pAttachedTo) {
+        CVehicle* pAttachedToVehicle = static_cast<CVehicle*>(m_pAttachedTo);
+        CAutomobile* pAttachedToAutmobile = static_cast<CAutomobile*>(m_pAttachedTo);
+        CBike* pAttachedToBike = static_cast<CBike*>(m_pAttachedTo);
+
+        CMatrix attachedEntityMatrix;
+        CMatrix attachedEntityRotationMatrix;
+        if (!m_pAttachedTo->m_matrix) {
+            m_pAttachedTo->AllocateMatrix();
+            m_pAttachedTo->m_placement.UpdateMatrix(m_pAttachedTo->m_matrix);
+        }
+        CMatrix attachedToEntityMatrix (*m_pAttachedTo->m_matrix);
+        if (m_pAttachedTo->m_nType != ENTITY_TYPE_VEHICLE || pAttachedToVehicle->m_nVehicleClass != VEHICLE_BIKE) {
+            if (m_nType == ENTITY_TYPE_OBJECT && m_pAttachedTo->m_nModelIndex == MODEL_FORKLIFT) {
+                RwFrame* carPart = pAttachedToAutmobile->m_aCarNodes[CAR_MISC_A];
+                if (carPart)
+                    attachedToEntityMatrix.UpdateMatrix(RwFrameGetLTM(carPart));
+            }
+        }
+        else {
+            pAttachedToBike->CalculateLeanMatrix();
+            attachedToEntityMatrix = pAttachedToBike->m_mLeanMatrix;
+        }
+
+        if (m_qAttachedEntityRotation.imag.x != 0.0f || m_qAttachedEntityRotation.imag.y != 0.0f || m_qAttachedEntityRotation.imag.z != 0.0f) {
+            RwMatrix rotationMatrix;
+            RtQuatConvertToMatrix((RtQuat*)&m_qAttachedEntityRotation, &rotationMatrix);
+            attachedEntityMatrix.UpdateMatrix(&rotationMatrix);
+            attachedEntityMatrix = attachedToEntityMatrix * attachedEntityMatrix;
+            CVector vecTranslation;
+            MultiplyMatrixWithVector(&vecTranslation, &attachedToEntityMatrix, &m_vecAttachOffset);
+            attachedEntityMatrix.SetTranslateOnly(vecTranslation);
+        }
+        else {
+            if (physicalFlags.bInfiniteMass) {
+                attachedEntityMatrix = *m_matrix;
+            }
+            else {
+                attachedEntityRotationMatrix.ResetOrientation();
+                attachedEntityRotationMatrix.Rotate(m_vecAttachedEntityRotation);
+                attachedEntityMatrix = attachedToEntityMatrix;
+                attachedEntityMatrix *= attachedEntityRotationMatrix;
+            }
+            CVector position;
+            Multiply3x3(&position, &attachedToEntityMatrix, &m_vecAttachOffset);
+            attachedEntityMatrix.pos += position;
+        }
+        SetMatrix(attachedEntityMatrix);
+
+        if (m_nType == ENTITY_TYPE_OBJECT) {
+            if (m_bIsStatic || m_bIsStaticWaitingForCollision)
+                SetIsStatic(false);
+            physicalFlags.bAttachedToEntity = true;
+            m_bFakePhysics = false;
+        }
+
+        bool bUpdateSpeed = false;
+        if (m_pAttachedTo->m_nType != ENTITY_TYPE_VEHICLE || m_nType != ENTITY_TYPE_OBJECT && m_nType != ENTITY_TYPE_VEHICLE) {
+            if (m_nModelIndex == MODEL_SATCHEL && m_pAttachedTo->m_nType == ENTITY_TYPE_OBJECT && !m_pAttachedTo->m_bUsesCollision) {
+                DettachAutoAttachedEntity();
+                m_bUsesCollision = true;
+                return;
+            }
+            bUpdateSpeed = true;
+        }
+
+        bool bDettachEntity = false;
+        if (!bUpdateSpeed)
+        {
+            if (m_pAttachedTo->m_nModelIndex == MODEL_DUMPER) {
+                short wMiscComponentAngle = pAttachedToAutmobile->m_wMiscComponentAngle;
+                if (wMiscComponentAngle && wMiscComponentAngle != pAttachedToAutmobile->m_wVoodooSuspension) {
+                    bDettachEntity = true;
+                }
+                else if (m_fDamageIntensity > 0.0f) {
+                    if (m_pDamageEntity) {
+                        if (m_pDamageEntity->m_nType  == ENTITY_TYPE_BUILDING)
+                            bDettachEntity = true;
+                    }
+                }
+            }
+            else {
+                if (m_pAttachedTo->m_nModelIndex != MODEL_FORKLIFT) {
+                    if (m_nType == ENTITY_TYPE_VEHICLE) {
+                        CMatrix* pAttachedToEntityMatrix = m_pAttachedTo->GetMatrix();
+                        if (fabs(pAttachedToEntityMatrix->right.z) > 0.707f || fabs(pAttachedToEntityMatrix->up.z) > 0.707f) {
+                            DettachEntityFromEntity(0.0f, 0.0f, 1.0f, false);
+                            return;
+                        }
+                    }
+                    bUpdateSpeed = true;
+                }
+                else if (!pAttachedToAutmobile->m_wMiscComponentAngle && pAttachedToAutmobile->m_wVoodooSuspension
+                    || m_fDamageIntensity > 0.1f * m_fMass && m_pDamageEntity && m_pDamageEntity->m_nType  == ENTITY_TYPE_BUILDING) {
+                    bDettachEntity = true;
+                }
+            }
+            if (!bUpdateSpeed)
+            {
+                if (bDettachEntity) {
+                    DettachAutoAttachedEntity();
+                    if (!physicalFlags.bDisableCollisionForce) {
+                        float randomNumber = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
+                        CMatrix* pAttachedToEntityMatrix = m_pAttachedTo->GetMatrix();
+                        CVector randomRight = pAttachedToEntityMatrix->right * randomNumber;
+                        CVector randomUp = pAttachedToEntityMatrix->up * randomNumber;
+                        CVector force = (randomRight + randomUp) * (m_fMass * 0.02f);
+                        ApplyMoveForce(force);
+                        if (pAttachedToAutmobile->m_wMiscComponentAngle > pAttachedToAutmobile->m_wVoodooSuspension)
+                            ApplyMoveForce(m_pAttachedTo->GetMatrix()->at * m_fMass * 0.02f);
+                    }
+                }
+                else {
+                    float fDamagedIntensity = m_pAttachedTo->m_fDamageIntensity;
+                    CMatrix* pMatrix = m_pAttachedTo->m_matrix;
+                    if ((fDamagedIntensity <= 0.0f || pMatrix->at.z >= 0.1f) && (fDamagedIntensity <= 1.0f || pMatrix->up.z <= 0.87f)) {
+                        float fDotProduct = DotProduct(&m_pAttachedTo->m_vecLastCollisionImpactVelocity, &pMatrix->at);
+                        if ((fDamagedIntensity <= 500.0f || fDotProduct >= 0.7f || 0.3f * 0.3f <= m_pAttachedTo->m_vecMoveSpeed.SquaredMagnitude())) {
+                            bUpdateSpeed = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (physicalFlags.bInfiniteMass) {
+            CVector vecMoveSpeed = GetPosition() - m_vecAttachedEntityRotation;
+            float fSquaredMagnitude = vecMoveSpeed.SquaredMagnitude();
+            m_vecAttachedEntityRotation = GetPosition();
+            if (fSquaredMagnitude > 4.0f)
+                vecMoveSpeed *= 2.0f / sqrt(fSquaredMagnitude);
+
+            float fTimeStep = 1.0f;
+            if (CTimer::ms_fTimeStep >= 1.0f)
+                fTimeStep = CTimer::ms_fTimeStep;
+
+            vecMoveSpeed *= 1.0f / fTimeStep;
+            CVector vecMoveSpeedDifference = vecMoveSpeed - m_vecMoveSpeed;
+            m_vecMoveSpeed = vecMoveSpeed;
+            CVector vecForce = vecMoveSpeedDifference * m_fMass * -1.0f;
+            CVector vecCenterOfMassMultiplied;
+            Multiply3x3(&vecCenterOfMassMultiplied, m_matrix, &m_vecCentreOfMass);
+            ApplyForce(vecForce, vecCenterOfMassMultiplied, true);
+            if (m_pAttachedTo->m_nType == ENTITY_TYPE_VEHICLE || m_pAttachedTo->m_nType == ENTITY_TYPE_OBJECT) {
+                if (m_pAttachedTo->m_bUsesCollision && !m_pAttachedTo->physicalFlags.bDisableCollisionForce) {
+                    CVector direction = (vecCenterOfMassMultiplied + GetPosition()) - m_pAttachedTo->GetPosition();
+                    m_pAttachedTo->ApplyForce(vecForce * -1.0f, direction, true);
+                }
+                float fRotationInRadians = m_pAttachedTo->GetHeading() - GetHeading();
+                if (fRotationInRadians <= DegreesToRadians(180.0f)) {
+                    if (fRotationInRadians < -DegreesToRadians(180.0f))
+                        fRotationInRadians += DegreesToRadians(360.0f);
+                }
+                else {
+                    fRotationInRadians -= DegreesToRadians(360.0f);
+                }
+                if (fRotationInRadians <= 0.5f) {
+                    if (fRotationInRadians < -0.5f)
+                        fRotationInRadians = -0.5f;
+                }
+                else {
+                    fRotationInRadians = 0.5f;
+                }
+                m_vecTurnSpeed.z += fRotationInRadians * 0.00001f * m_fMass;
+            }
+        }
+        else {
+            if (m_pAttachedTo->m_nType == ENTITY_TYPE_VEHICLE || m_pAttachedTo->m_nType == ENTITY_TYPE_OBJECT) {
+                CVector outSpeed;
+                m_pAttachedTo->GetSpeed(&outSpeed, GetPosition() - m_pAttachedTo->GetPosition());
+                m_vecMoveSpeed = outSpeed;
+                m_vecTurnSpeed = m_pAttachedTo->m_vecTurnSpeed;
+            }
+        }
+    }
+#endif
 }
 
 // Converted from thiscall void CPhysical::ApplySpeed(void) 0x547B80

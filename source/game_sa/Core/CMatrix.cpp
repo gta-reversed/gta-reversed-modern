@@ -85,15 +85,15 @@ void CMatrix::SetScale(float x, float y, float z)
     ((void(__thiscall*)(CMatrix*, float, float, float))0x59AF00)(this, x, y, z);
 }
 
-void CMatrix::SetTranslateOnly(float x, float y, float z)
+void CMatrix::SetTranslateOnly(CVector translation)
 {
-    ((void(__thiscall*)(CMatrix*, float, float, float))0x59AF80)(this, x, y, z);
+    ((void(__thiscall*)(CMatrix*, CVector))0x59AF80)(this, translation);
 }
 
 // like previous + reset orientation
-void CMatrix::SetTranslate(float x, float y, float z)
+void CMatrix::SetTranslate(CVector translation)
 {
-    ((void(__thiscall*)(CMatrix*, float, float, float))0x59AF40)(this, x, y, z);
+    ((void(__thiscall*)(CMatrix*, CVector))0x59AF40)(this, translation);
 }
 
 void CMatrix::SetRotateXOnly(float angle)
@@ -148,9 +148,9 @@ void CMatrix::RotateZ(float angle)
 }
 
 // rotate on 3 axes
-void CMatrix::Rotate(float x, float y, float z)
+void CMatrix::Rotate(CVector rotation)
 {
-    ((void(__thiscall*)(CMatrix*, float, float, float))0x59B460)(this, x, y, z);
+    ((void(__thiscall*)(CMatrix*, CVector))0x59B460)(this, rotation);
 }
 
 void CMatrix::Reorthogonalise()
