@@ -55,6 +55,10 @@ extern unsigned int &ClumpOffset;
 
 #define RpClumpGetAnimBlendClumpData(clump) (*(CAnimBlendClumpData **)(((unsigned int)(clump) + ClumpOffset)))
 
+constexpr float DegreesToRadians(float angleInDegrees) {
+    return angleInDegrees * static_cast<float>(M_PI) / 180.0f;
+}
+
 AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, char *name);
 
 char *MakeUpperCase(char *dest, char *src);
