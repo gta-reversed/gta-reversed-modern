@@ -48,6 +48,9 @@ void CStats::InjectHooks()
     HookInstall(0x559630, &CStats::IsStatCapped, 7);
     HookInstall(0x55B900, &CStats::ProcessReactionStatsOnIncrement, 7); 
     HookInstall(0x55C6F0, &CStats::UpdateStatsWhenRunning, 7);
+    HookInstall(0x55CD60, &CStats::UpdateStatsWhenOnMotorBike, 7);
+    HookInstall(0x55C6F0, &CStats::UpdateStatsWhenRunning, 7);
+    HookInstall(0x55CFA0, &CStats::UpdateStatsWhenFighting, 7);
 }
 
 // Unused
@@ -275,23 +278,23 @@ float CStats::GetFatAndMuscleModifier(eStatModAbilities statMod) {
 }
 
 // Converted from cdecl void CStats::DecrementStat(ushort stat, float value) 0x559FA0
-void CStats::DecrementStat(unsigned short stat, float value) {
-    plugin::Call<0x559FA0, unsigned short, float>(stat, value);
+void CStats::DecrementStat(eStats stat, float value) {
+    plugin::Call<0x559FA0, eStats, float>(stat, value);
 }
 
 // Converted from cdecl void CStats::SetStatValue(ushort stat, float value) 0x55A070
-void CStats::SetStatValue(unsigned short stat, float value) {
-    plugin::Call<0x55A070, unsigned short, float>(stat, value);
+void CStats::SetStatValue(eStats stat, float value) {
+    plugin::Call<0x55A070, eStats, float>(stat, value);
 }
 
 // Converted from cdecl void CStats::RegisterFastestTime(int stat, int time) 0x55A0B0
-void CStats::RegisterFastestTime(int stat, int time) {
-    plugin::Call<0x55A0B0, int, int>(stat, time);
+void CStats::RegisterFastestTime(eStats stat, int time) {
+    plugin::Call<0x55A0B0, eStats, int>(stat, time);
 }
 
 // Converted from cdecl void CStats::RegisterBestPosition(int stat, int position) 0x55A160
-void CStats::RegisterBestPosition(int stat, int position) {
-    plugin::Call<0x55A160, int, int>(stat, position);
+void CStats::RegisterBestPosition(eStats stat, int position) {
+    plugin::Call<0x55A160, eStats, int>(stat, position);
 }
 
 // Converted from cdecl char* CStats::FindCriminalRatingString(void) 0x55A210
@@ -318,11 +321,9 @@ void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
     CheckFat:
         if ((double)StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME] < 0.0)
         {
-            printf("Longest Exercise Bike Time (int to double): %lf\n", (double)StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME]);
             fatValue = StatTypesFloat[STAT_FAT] - 23.0f;
             if (fatValue <= 0.0)
                 fatValue = 0.0;
-            printf("fatValue: %lf\n", fatValue);
             StatTypesFloat[STAT_FAT] = fatValue;
             CheckForStatsMessage();
         }
@@ -339,7 +340,6 @@ void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
     if (longestExerciseBikeTime > 1000.0f)
     {
         finalLongestExerciseBikeTime = longestExerciseBikeTime - 1000.0f;
-        printf("longestExerciseBikeTime: %lf\n", finalLongestExerciseBikeTime);
         IncrementStat(STAT_FAT, finalLongestExerciseBikeTime);
     }
 #endif
@@ -347,8 +347,8 @@ void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
 }
 
 // Converted from cdecl void CStats::DisplayScriptStatUpdateMessage(uchar state, uint stat, float value) 0x55B980
-void CStats::DisplayScriptStatUpdateMessage(unsigned char state, unsigned int stat, float value) {
-    plugin::Call<0x55B980, unsigned char, unsigned int, float>(state, stat, value);
+void CStats::DisplayScriptStatUpdateMessage(unsigned char state, eStats stat, float value) {
+    plugin::Call<0x55B980, unsigned char, eStats, float>(state, stat, value);
 }
 
 // Converted from cdecl void CStats::UpdateRespectStat(uchar) 0x55BC50
@@ -367,8 +367,8 @@ void CStats::Init() {
 }
 
 // Converted from cdecl void CStats::IncrementStat(ushort stat, float value) 0x55C180
-void CStats::IncrementStat(unsigned short stat, float value) {
-    plugin::Call<0x55C180, unsigned short, float>(stat, value);
+void CStats::IncrementStat(eStats stat, float value) {
+    plugin::Call<0x55C180, eStats, float>(stat, value);
 }
 
 // Converted from cdecl void CStats::SetNewRecordStat(ushort stat, float value) 0x55C410
@@ -383,7 +383,21 @@ void CStats::UpdateFatAndMuscleStats(unsigned int value) {
 
 // Converted from cdecl void CStats::UpdateStatsWhenSprinting(void) 0x55C660
 void CStats::UpdateStatsWhenSprinting() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55C660>();
+#else
+    UpdateFatAndMuscleStats((unsigned int)CStats::StatReactionValue[30]);
+    if (StatReactionValue[35] * 1000.0 >= (double)m_SprintStaminaCounter)
+    {
+        m_SprintStaminaCounter += (unsigned int)(CTimer::ms_fTimeStep * 0.02 * 1000.0);
+    }
+    else
+    {
+        m_SprintStaminaCounter = 0;
+        IncrementStat(STAT_STAMINA, StatReactionValue[2]);
+        DisplayScriptStatUpdateMessage(1, STAT_STAMINA, StatReactionValue[2]);
+    }
+#endif
 }
 
 // Converted from cdecl void CStats::UpdateStatsWhenRunning(void) 0x55C6F0
@@ -392,15 +406,15 @@ void CStats::UpdateStatsWhenRunning()
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55C6F0>();
 #else
-    UpdateFatAndMuscleStats((unsigned __int64)StatReactionValue[31]);
-    if (StatReactionValue[36] * 1000.0 >= (double)(unsigned int)m_RunningCounter)
+    UpdateFatAndMuscleStats((unsigned int)StatReactionValue[31]);
+    if (StatReactionValue[36] * 1000.0 >= (double)m_RunningCounter)
     {
-        m_RunningCounter += (unsigned __int64)(CTimer::ms_fTimeStep * 0.02 * 1000.0);
+        m_RunningCounter += (unsigned int)(CTimer::ms_fTimeStep * 0.02 * 1000.0);
     }
     else
     {
         m_RunningCounter = 0;
-        IncrementStat(22, StatReactionValue[3]);
+        IncrementStat(STAT_STAMINA, StatReactionValue[3]);
         DisplayScriptStatUpdateMessage(1, STAT_STAMINA, StatReactionValue[3]);
     }
 #endif
@@ -428,17 +442,43 @@ void CStats::UpdateStatsWhenFlying(CVehicle* vehicle) {
 
 // Converted from cdecl void CStats::UpdateStatsWhenOnMotorBike(CBike *bike) 0x55CD60
 void CStats::UpdateStatsWhenOnMotorBike(CBike* bike) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55CD60, CBike*>(bike);
+#else
+    float bikeCounter = (float)m_BikeCounter;
+    if (StatReactionValue[40] * 1000.0 >= bikeCounter)
+    {
+        float bikeMoveSpeed = bike->m_vecMoveSpeed.Magnitude();
+        if (bikeMoveSpeed > 0.60000002 || bike->m_nNumContactWheels < 3u && bikeMoveSpeed > 0.1)
+        {
+            m_BikeCounter = (unsigned int)((CTimer::ms_fTimeStep * 0.02 * 1000.0) * 1.5 + bikeCounter);
+        }
+        else if (bikeMoveSpeed > 0.2)
+        {
+            m_BikeCounter = (unsigned int)((CTimer::ms_fTimeStep * 0.02 * 1000.0) * 0.5 + bikeCounter);
+        }
+    }
+    else
+    {
+        m_BikeCounter = 0;
+        IncrementStat(STAT_BIKE_SKILL, StatReactionValue[7]);
+        DisplayScriptStatUpdateMessage(1, STAT_BIKE_SKILL, StatReactionValue[7]);
+    }
+#endif
 }
 
 // Converted from cdecl void CStats::UpdateStatsWhenWeaponHit(int weaponType) 0x55CEB0
-void CStats::UpdateStatsWhenWeaponHit(int weaponType) {
-    plugin::Call<0x55CEB0, int>(weaponType);
+void CStats::UpdateStatsWhenWeaponHit(eWeaponType weaponType) {
+    plugin::Call<0x55CEB0, eWeaponType>(weaponType);
 }
 
 // Converted from cdecl void CStats::UpdateStatsWhenFighting(void) 0x55CFA0
 void CStats::UpdateStatsWhenFighting() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55CFA0>();
+#else
+    CStats::UpdateFatAndMuscleStats((unsigned int)CStats::StatReactionValue[32]);
+#endif
 }
 
 // Converted from cdecl void CStats::UpdateStatsOnRespawn(void) 0x55CFC0
@@ -452,8 +492,19 @@ void CStats::UpdateStatsAddToHealth(unsigned int addToHealth) {
 }
 
 // Converted from cdecl void CStats::ModifyStat(ushort stat, float value) 0x55D090
-void CStats::ModifyStat(unsigned short stat, float value) {
-    plugin::Call<0x55D090, unsigned short, float>(stat, value);
+void CStats::ModifyStat(eStats stat, float value) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x55D090, eStats, float>(stat, value);
+#else
+    if (value < 0.0)
+    {
+        CStats::DecrementStat(stat, -value);
+    }
+    else
+    {
+        CStats::IncrementStat(stat, value);
+    }
+#endif
 }
 
 // Converted from cdecl bool CStats::Save(void) 0x5D3B40
