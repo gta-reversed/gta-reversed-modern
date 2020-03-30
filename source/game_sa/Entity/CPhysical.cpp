@@ -61,6 +61,7 @@ void CPhysical::InjectHooks()
     HookInstall(0x5454C0, (bool(CPhysical::*)(float, CColPoint*)) & CPhysical::ApplyFriction, 7);
     HookInstall(0x545980, (bool(CPhysical::*)(CPhysical*, float, CColPoint*)) &CPhysical::ApplyFriction, 7);
     HookInstall(0x546670, &CPhysical::ProcessShiftSectorList, 7);
+    HookInstall(0x547B80, &CPhysical::ApplySpeed, 7);
     HookInstall(0x548320, &CPhysical::UnsetIsInSafePosition, 7);
     HookInstall(0x5483D0, (void(CPhysical::*)()) & CPhysical::ApplyFriction, 7);
     HookInstall(0x548680, (bool(CPhysical::*)(CEntity*, CColPoint*, float*, float*)) & CPhysical::ApplyCollision, 7);
@@ -2740,11 +2741,210 @@ void CPhysical::PositionAttachedEntity()
 #endif
 }
 
-// Converted from thiscall void CPhysical::ApplySpeed(void) 0x547B80
 void CPhysical::ApplySpeed()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*))0x547B80)(this);
+#else
+    CObject* pObject = static_cast<CObject*>(this);
+    float fOldTimeStep = CTimer::ms_fTimeStep;
+    if (physicalFlags.bDisableZ) {
+        if (physicalFlags.bApplyGravity) {
+            if (fOldTimeStep * m_vecMoveSpeed.z + m_matrix->pos.z < CWorld::SnookerTableMin.z) {
+                m_matrix->pos.z = CWorld::SnookerTableMin.z;
+                m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
+                m_vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
+            }
+            ApplyMoveSpeed();
+            ApplyTurnSpeed();
+            CTimer::UpdateTimeStep(fOldTimeStep);
+            return;
+        }
+
+        float fTimeStepX = 1000.0f;
+        float fTimeStepY = 1000.0f;
+        float fNewPositionX = fOldTimeStep * m_vecMoveSpeed.x + m_matrix->pos.x;
+        if (fNewPositionX <= CWorld::SnookerTableMax.x || m_vecMoveSpeed.x <= 0.0f)
+        {
+            if (fNewPositionX >= CWorld::SnookerTableMin.x || m_vecMoveSpeed.x >= 0.0f) {
+                // nothing
+            }
+            else{
+             fTimeStepX = (CWorld::SnookerTableMin.x - m_matrix->pos.x) / m_vecMoveSpeed.x;
+            }
+        }
+        else {
+            fTimeStepX = (CWorld::SnookerTableMax.x - m_matrix->pos.x) / m_vecMoveSpeed.x;
+        }
+        
+        float fNewPositionY = CTimer::ms_fTimeStep * m_vecMoveSpeed.y + m_matrix->pos.y;
+        if (fNewPositionY <= CWorld::SnookerTableMax.y || m_vecMoveSpeed.y <= 0.0f) {
+            if (fNewPositionY >= CWorld::SnookerTableMin.y || m_vecMoveSpeed.y >= 0.0f) {
+                // nothing
+            }
+            else {
+                fTimeStepY = (CWorld::SnookerTableMin.y - m_matrix->pos.y) / m_vecMoveSpeed.y;
+            }
+        }
+        else {
+            fTimeStepY = (CWorld::SnookerTableMax.y - m_matrix->pos.y) / m_vecMoveSpeed.y;
+        }
+
+        bool bTableWidthIsLessThanHeight = true;
+        if (CWorld::SnookerTableMax.x - CWorld::SnookerTableMin.x < CWorld::SnookerTableMax.y - CWorld::SnookerTableMin.y)
+            bTableWidthIsLessThanHeight = false;
+        bool bApplyFriction = false;
+        float fNormalX = 0.0f;
+        float fNormalY = 0.0f;
+        float fAbsoluteMoveSpeed = 0.0f;
+        float fNewTimeStep = 0.0f;
+        if (fTimeStepX < fTimeStepY && fTimeStepX < 1000.0f) {
+            fNormalX = -1.0;
+            fAbsoluteMoveSpeed = fabs(m_vecMoveSpeed.x);
+            if (m_vecMoveSpeed.x <= 0.0)
+                fNormalX = 1.0;
+            CTimer::UpdateTimeStep(fTimeStepX);
+            ApplyMoveSpeed();
+            ApplyTurnSpeed();
+            float fTableY = (CWorld::SnookerTableMin.y + CWorld::SnookerTableMax.y) * 0.5f;
+            if (CWorld::SnookerTableMax.y - 0.06f >= m_matrix->pos.y
+                && CWorld::SnookerTableMin.y + 0.06f <= m_matrix->pos.y
+                && (bTableWidthIsLessThanHeight || fTableY - 0.06f >= m_matrix->pos.y || m_matrix->pos.y >= fTableY + 0.06f)) {
+                m_vecMoveSpeed.x = m_vecMoveSpeed.x * -1.0f;
+                fNewTimeStep = fOldTimeStep - fTimeStepX;
+            }
+            else
+            {
+                physicalFlags.bApplyGravity = true;
+                float fTimeStepMoveSpeedX = fOldTimeStep * m_vecMoveSpeed.x;
+                if (fTimeStepMoveSpeedX <= 0.03f) {
+                    if (fTimeStepMoveSpeedX < -0.03f)
+                        m_vecMoveSpeed.x = -(0.03f / fOldTimeStep);
+                    fNewTimeStep = fOldTimeStep - fTimeStepX;
+                }
+                else {
+                    m_vecMoveSpeed.x = 0.03f / fOldTimeStep;
+                    fNewTimeStep = fOldTimeStep - fTimeStepX;
+                }
+            }
+            bApplyFriction = true;
+        }
+        if (!bApplyFriction && fTimeStepY < 1000.0f) {
+            fNormalY = -1.0f;
+            fAbsoluteMoveSpeed = fabs(m_vecMoveSpeed.y);
+            if (m_vecMoveSpeed.y <= 0.0f)
+                fNormalY = 1.0f;
+            CTimer::UpdateTimeStep(fTimeStepY);
+            ApplyMoveSpeed();
+            ApplyTurnSpeed();
+            float fTableX = (CWorld::SnookerTableMin.x + CWorld::SnookerTableMax.x) * 0.5f;
+            if (CWorld::SnookerTableMax.x - 0.06f < m_matrix->pos.x
+                || CWorld::SnookerTableMin.x + 0.06f > m_matrix->pos.x
+                || bTableWidthIsLessThanHeight &&  fTableX - 0.06f < m_matrix->pos.x && m_matrix->pos.x < fTableX + 0.06f) {
+                physicalFlags.bApplyGravity = true;
+                float fTimeStepMoveSpeedY = fOldTimeStep * m_vecMoveSpeed.y;
+                if (fTimeStepMoveSpeedY <= 0.03f) {
+                    if (fTimeStepMoveSpeedY < -0.03f) {
+                        m_vecMoveSpeed.y = -(0.03f / fOldTimeStep);
+                    }
+                }
+                else
+                {
+                    m_vecMoveSpeed.y = 0.03f / fOldTimeStep;
+                }
+            }
+            else {
+                m_vecMoveSpeed.y = m_vecMoveSpeed.y * -1.0f;
+            }
+            fNewTimeStep = fOldTimeStep - fTimeStepY;
+            bApplyFriction = true;
+        }
+
+        if (bApplyFriction) {
+            CTimer::UpdateTimeStep(fNewTimeStep);
+            if (fAbsoluteMoveSpeed > 0.0f) {
+                float fRadius = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->m_pColModel->m_boundSphere.m_fRadius;
+                CVector thePosition = CVector(fNormalX * fRadius, fNormalY * fRadius, 0.0f);
+                CColPoint colPoint;
+                colPoint.m_vecPoint = GetPosition() - thePosition;
+                colPoint.m_vecNormal = CVector(fNormalX, fNormalY, 0.0f);
+                ApplyFriction(10.0f * fAbsoluteMoveSpeed, &colPoint);
+                if (m_nType == ENTITY_TYPE_OBJECT)
+                {
+                    AudioEngine.ReportMissionAudioEvent(AE_CAS4_FE, pObject);
+                    pObject->m_nLastWeaponDamage = 4 * (pObject->m_nLastWeaponDamage == -1) + 50;
+                }
+            }
+        }
+        ApplyMoveSpeed();
+        ApplyTurnSpeed();
+        CTimer::UpdateTimeStep(fOldTimeStep);
+        return;
+    }
+
+    if (!physicalFlags.bDisableMoveForce || m_nType != ENTITY_TYPE_OBJECT || pObject->m_fDoorStartAngle <= -1000.0f) {
+        ApplyMoveSpeed();
+        ApplyTurnSpeed();
+        CTimer::UpdateTimeStep(fOldTimeStep);
+        return;
+    }
+
+    float fDoorStartAngle = pObject->m_fDoorStartAngle;
+    float fHeading = GetHeading();
+    if (fDoorStartAngle + DegreesToRadians(180.0f) >= fHeading) {
+        if (fDoorStartAngle - DegreesToRadians(180.0f) > fHeading)
+            fHeading += DegreesToRadians(360.0f);
+    }
+    else {
+        fHeading -= DegreesToRadians(360.0f);
+    }
+
+    float fNewTimeStep = -1000.0f;
+    float fTheDoorAngle  = DegreesToRadians(108.0f) + fDoorStartAngle;
+    float fHeadingTimeStep = CTimer::ms_fTimeStep * m_vecTurnSpeed.z + fHeading;
+    if (m_vecTurnSpeed.z <= 0.0f || fHeadingTimeStep <= DegreesToRadians(108.0f) + fDoorStartAngle) {
+        if (m_vecTurnSpeed.z < 0.0f) {
+            float fTheDoorAngle = fDoorStartAngle - DegreesToRadians(108.0f);
+            if (fHeadingTimeStep < fTheDoorAngle)
+                fNewTimeStep = (fTheDoorAngle - fHeading) / m_vecTurnSpeed.z;
+        }
+    }
+    else
+    {
+        fNewTimeStep = (fTheDoorAngle - fHeading) / m_vecTurnSpeed.z;
+    }
+    if (-CTimer::ms_fTimeStep <= fNewTimeStep) {
+        CTimer::UpdateTimeStep(fNewTimeStep);
+        ApplyTurnSpeed();
+        m_vecTurnSpeed.z = -0.2f * m_vecTurnSpeed.z;
+        CTimer::UpdateTimeStep(fOldTimeStep - fNewTimeStep);
+        physicalFlags.b31 = true;
+    }
+    ApplyMoveSpeed();
+    ApplyTurnSpeed();
+    CTimer::UpdateTimeStep(fOldTimeStep);
+    if (pObject->objectFlags.bIsDoorMoving) {
+        float fNewHeading = GetHeading();
+        if (fNewHeading + DegreesToRadians(180.0f) >= fDoorStartAngle) {
+            if (fNewHeading - DegreesToRadians(180.0f) > fDoorStartAngle)
+                fNewHeading -= DegreesToRadians(360.0f);
+        }
+        else {
+            fNewHeading += DegreesToRadians(360.0f);
+        }
+
+        fHeading -= fDoorStartAngle;
+        fNewHeading -= fDoorStartAngle;
+        if (fabs(fHeading) < 0.001f)
+            fHeading = 0.0f;
+        if (fabs(fNewHeading) < 0.001f)
+            fNewHeading = 0.0f;
+        if (fHeading * fNewHeading < 0.0f)
+            m_vecTurnSpeed.z = 0.0f;
+    }
+#endif
 }
+
 
 void CPhysical::UnsetIsInSafePosition()
 {
