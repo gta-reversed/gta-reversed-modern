@@ -171,9 +171,7 @@ int CStats::ConvertToSecs(int statValue){
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<int, 0x559560, int>(value);
 #else
-    int seconds;
-
-    seconds = statValue;
+    int seconds = statValue;
     if (statValue >= 60)
         seconds = -60 - 60 * ((statValue - 60) / 60) + statValue;
     if (seconds < 0)
@@ -194,13 +192,10 @@ bool CStats::CheckForThreshold(float* pValue, float range)
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<bool, 0x5595F0, float*, float>(pValue, range);
 #else
-    bool hasThreshold; // al
-
-    if (*pValue + 40.0 >= range && *pValue - 40.0 <= range)
-        return 0;
-    hasThreshold = 1;
+    if (*pValue + 40.0f >= range && *pValue - 40.0f <= range)
+        return false;
     *pValue = range;
-    return hasThreshold;
+    return true;
 #endif // USE_DEFAULT_FUNCTIONS
 }
 
@@ -312,28 +307,26 @@ void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55B900, unsigned char>(stat);
 #else
-    float fatValue; // st7
-    float longestExerciseBikeTime; // st7
-    float finalLongestExerciseBikeTime; // ST04_4
+    float longestExerciseBikeTime = 0.0f;
+    float finalLongestExerciseBikeTime = 0.0f;
 
-    if (stat == STAT_STAMINA)
+    if (stat != STAT_STAMINA && stat != STAT_ENERGY)
     {
-    CheckFat:
-        if ((double)StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME] < 0.0)
+        if (stat != STAT_LUNG_CAPACITY)
+            return;
+    }
+
+    if (stat == STAT_STAMINA || stat != STAT_ENERGY) {
+        float fLongestExerciseBikeTime = static_cast<float>(StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME]);
+        if (fLongestExerciseBikeTime < 0.0f)
         {
-            fatValue = StatTypesFloat[STAT_FAT] - 23.0f;
-            if (fatValue <= 0.0)
-                fatValue = 0.0;
+            float fatValue = StatTypesFloat[STAT_FAT] - 23.0f;
+            if (fatValue <= 0.0f)
+                fatValue = 0.0f;
             StatTypesFloat[STAT_FAT] = fatValue;
             CheckForStatsMessage();
         }
         return;
-    }
-    if (stat != STAT_ENERGY)
-    {
-        if (stat != STAT_LUNG_CAPACITY)
-            return;
-        goto CheckFat;
     }
 
     longestExerciseBikeTime = (float)StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME];
@@ -446,14 +439,14 @@ void CStats::UpdateStatsWhenOnMotorBike(CBike* bike) {
     plugin::Call<0x55CD60, CBike*>(bike);
 #else
     float bikeCounter = (float)m_BikeCounter;
-    if (StatReactionValue[40] * 1000.0 >= bikeCounter)
+    if (StatReactionValue[40] * 1000.0f >= bikeCounter)
     {
         float bikeMoveSpeed = bike->m_vecMoveSpeed.Magnitude();
-        if (bikeMoveSpeed > 0.60000002 || bike->m_nNumContactWheels < 3u && bikeMoveSpeed > 0.1)
+        if (bikeMoveSpeed > 0.60000002f || bike->m_nNumContactWheels < 3u && bikeMoveSpeed > 0.1f)
         {
             m_BikeCounter = (unsigned int)((CTimer::ms_fTimeStep * 0.02 * 1000.0) * 1.5 + bikeCounter);
         }
-        else if (bikeMoveSpeed > 0.2)
+        else if (bikeMoveSpeed > 0.2f)
         {
             m_BikeCounter = (unsigned int)((CTimer::ms_fTimeStep * 0.02 * 1000.0) * 0.5 + bikeCounter);
         }
@@ -496,7 +489,7 @@ void CStats::ModifyStat(eStats stat, float value) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55D090, eStats, float>(stat, value);
 #else
-    if (value < 0.0)
+    if (value < 0.0f)
     {
         CStats::DecrementStat(stat, -value);
     }

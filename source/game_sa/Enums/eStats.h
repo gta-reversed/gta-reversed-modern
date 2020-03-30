@@ -10,7 +10,7 @@
     https://www.gtamodding.com/wiki/List_of_statistics_(SA)
 */
 
-enum eStats {
+enum eStats : unsigned short {
     STAT_PROGRESS_MADE = 0,
     STAT_TOTAL_PROGRESS = 1,
     STAT_FURTHEST_HOOP = 2,
