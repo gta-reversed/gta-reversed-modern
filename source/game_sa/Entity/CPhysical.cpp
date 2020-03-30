@@ -2085,8 +2085,7 @@ bool CPhysical::ApplyFriction(CPhysical* pEntity, float fFriction, CColPoint* pC
 
         CVector vecMoveDirection = vecThisSpeedDifference * (1.0f / fThisSpeedMagnitude);
         float fSpeed = (fEntityMass * fEntitySpeedMagnitude + fThisMass * fThisSpeedMagnitude) / (fEntityMass + fThisMass);
-        if (fThisSpeedMagnitude - fSpeed > 0.0f)
-        {
+        if (fThisSpeedMagnitude > fSpeed) {
             float fThisSpeed = fThisMass * (fSpeed - fThisSpeedMagnitude);
             float fEntitySpeed = fEntityMass * (fSpeed - fEntitySpeedMagnitude);
             float fFrictionTimeStep = -(CTimer::ms_fTimeStep * fFriction);
@@ -2139,32 +2138,30 @@ bool CPhysical::ApplyFriction(CPhysical* pEntity, float fFriction, CColPoint* pC
         float fEntityCollisionMass = 1.0f / ((squaredMagnitude) / pEntity->m_fTurnMass + 1.0f / pEntity->m_fMass);
         float fThisMass = m_fMass;
         float fSpeed = (fEntitySpeedMagnitude * fEntityCollisionMass + fThisMass * fThisSpeedMagnitude) / (fEntityCollisionMass + fThisMass);
-        if (fThisSpeedMagnitude - fSpeed <= 0.0f)
-        {
-            return false;
-        }
+        if (fThisSpeedMagnitude > fSpeed) {
+            float fThisSpeed = fThisMass * (fSpeed - fThisSpeedMagnitude);
+            float fEntitySpeed = fEntityCollisionMass * (fSpeed - fEntitySpeedMagnitude);
+            float fFrictionTimeStep = CTimer::ms_fTimeStep * fFriction;
+            float fFrictionTimeStepNegative = -fFrictionTimeStep;
+            if (fThisSpeed < fFrictionTimeStepNegative)
+            {
+                fThisSpeed = fFrictionTimeStepNegative;
+            }
 
-        float fThisSpeed = fThisMass * (fSpeed - fThisSpeedMagnitude);
-        float fEntitySpeed = fEntityCollisionMass * (fSpeed - fEntitySpeedMagnitude);
-        float fFrictionTimeStep = CTimer::ms_fTimeStep * fFriction;
-        float fFrictionTimeStepNegative = -fFrictionTimeStep;
-        if (fThisSpeed < fFrictionTimeStepNegative)
-        {
-            fThisSpeed = fFrictionTimeStepNegative;
-        }
+            if (fEntitySpeed > fFrictionTimeStep)
+            {
+                fEntitySpeed = fFrictionTimeStep;
+            }
 
-        if (fEntitySpeed > fFrictionTimeStep)
-        {
-            fEntitySpeed = fFrictionTimeStep;
-        }
-
-        ApplyFrictionMoveForce(vecMoveDirection * fThisSpeed);
-        if (!pEntity->physicalFlags.bDisableCollisionForce)
-        {
-            pEntity->ApplyFrictionForce(vecMoveDirection * fEntitySpeed, vecEntityMovingDirection);
+            ApplyFrictionMoveForce(vecMoveDirection * fThisSpeed);
+            if (!pEntity->physicalFlags.bDisableCollisionForce)
+            {
+                pEntity->ApplyFrictionForce(vecMoveDirection * fEntitySpeed, vecEntityMovingDirection);
+                return true;
+            }
             return true;
         }
-        return true;
+        return false;
     }
 
     if (!pEntity->physicalFlags.bDisableTurnForce)
@@ -2210,34 +2207,32 @@ bool CPhysical::ApplyFriction(CPhysical* pEntity, float fFriction, CColPoint* pC
         squaredMagnitude = vecEntitySpeedCrossProduct.SquaredMagnitude();
         float fEntityCollisionMass = 1.0f / (squaredMagnitude / pEntity->m_fTurnMass + 1.0f / pEntity->m_fMass);
         float fSpeed = (fEntitySpeedMagnitude * fEntityCollisionMass + fThisCollisionMass * fThisSpeedMagnitude) / (fEntityCollisionMass + fThisCollisionMass);
-        if (fThisSpeedMagnitude - fSpeed <= 0.0f)
-        {
-            return false;
-        }
+        if (fThisSpeedMagnitude > fSpeed) {
+            float fThisSpeed = fThisCollisionMass * (fSpeed - fThisSpeedMagnitude);
+            float fEntitySpeed = fEntityCollisionMass * (fSpeed - fEntitySpeedMagnitude);
+            float fNegativeFriction = -fFriction;
+            if (fThisSpeed < fNegativeFriction)
+            {
+                fThisSpeed = fNegativeFriction;
+            }
 
-        float fThisSpeed = fThisCollisionMass * (fSpeed - fThisSpeedMagnitude);
-        float fEntitySpeed = fEntityCollisionMass * (fSpeed - fEntitySpeedMagnitude);
-        float fNegativeFriction = -fFriction;
-        if (fThisSpeed < fNegativeFriction)
-        {
-            fThisSpeed = fNegativeFriction;
-        }
+            if (fEntitySpeed > fFriction)
+            {
+                fEntitySpeed = fFriction;
+            }
 
-        if (fEntitySpeed > fFriction)
-        {
-            fEntitySpeed = fFriction;
-        }
+            if (!physicalFlags.bDisableCollisionForce)
+            {
+                ApplyFrictionForce(vecMoveDirection * fThisSpeed, vecThisMovingDirection);
+            }
 
-        if (!physicalFlags.bDisableCollisionForce)
-        {
-            ApplyFrictionForce(vecMoveDirection * fThisSpeed, vecThisMovingDirection);
+            if (!pEntity->physicalFlags.bDisableCollisionForce)
+            {
+                pEntity->ApplyFrictionForce(vecMoveDirection * fEntitySpeed, vecEntityMovingDirection);
+            }
+            return true;
         }
-
-        if (!pEntity->physicalFlags.bDisableCollisionForce)
-        {
-            pEntity->ApplyFrictionForce(vecMoveDirection * fEntitySpeed, vecEntityMovingDirection);
-        }
-        return true;
+        return false;
     }
 
     if (m_nType == ENTITY_TYPE_VEHICLE)
@@ -2270,32 +2265,30 @@ bool CPhysical::ApplyFriction(CPhysical* pEntity, float fFriction, CColPoint* pC
     float fEntityMass = pEntity->m_fMass;
     float fThisCollisionMass = 1.0f / (squaredMagnitude / m_fTurnMass + 1.0f / m_fMass);
     float fSpeed = (fEntityMass * fEntitySpeedMagnitude + fThisCollisionMass * fThisSpeedMagnitude) / (fEntityMass + fThisCollisionMass);
-    if (fThisSpeedMagnitude - fSpeed <= 0.0f)
-    {
-        return false;
-    }
+    if (fThisSpeedMagnitude > fSpeed) {
+        float fThisSpeed = (fSpeed - fThisSpeedMagnitude) * fThisCollisionMass;
+        float fEntitySpeed = (fSpeed - fEntitySpeedMagnitude) * fEntityMass;
+        float fFrictionTimeStep = CTimer::ms_fTimeStep * fFriction;
+        float fNegativeFrictionTimeStep = -fFrictionTimeStep;
+        if (fThisSpeed < fNegativeFrictionTimeStep)
+        {
+            fThisSpeed = fNegativeFrictionTimeStep;
+        }
 
-    float fThisSpeed = (fSpeed - fThisSpeedMagnitude) * fThisCollisionMass;
-    float fEntitySpeed = (fSpeed - fEntitySpeedMagnitude) * fEntityMass;
-    float fFrictionTimeStep = CTimer::ms_fTimeStep * fFriction;
-    float fNegativeFrictionTimeStep = -fFrictionTimeStep;
-    if (fThisSpeed < fNegativeFrictionTimeStep)
-    {
-        fThisSpeed = fNegativeFrictionTimeStep;
-    }
+        if (fEntitySpeed > fFrictionTimeStep)
+        {
+            fEntitySpeed = fFrictionTimeStep;
+        }
 
-    if (fEntitySpeed > fFrictionTimeStep)
-    {
-        fEntitySpeed = fFrictionTimeStep;
-    }
+        if (!physicalFlags.bDisableCollisionForce)
+        {
+            ApplyFrictionForce(vecMoveDirection * fThisSpeed, vecThisMovingDirection);
+        }
 
-    if (!physicalFlags.bDisableCollisionForce)
-    {
-        ApplyFrictionForce(vecMoveDirection * fThisSpeed, vecThisMovingDirection);
+        pEntity->ApplyFrictionMoveForce(vecMoveDirection * fEntitySpeed);
+        return true;
     }
-
-    pEntity->ApplyFrictionMoveForce(vecMoveDirection * fEntitySpeed);
-    return true;
+    return false;
 #endif
 }
 
