@@ -7,6 +7,10 @@
 
 #include "StdInc.h"
 
+void CCarCtrl::InjectHooks()
+{
+}
+
 // Converted from cdecl int CCarCtrl::ChooseBoatModel(void) 0x421970
 int CCarCtrl::ChooseBoatModel() {
     return plugin::CallAndReturn<int, 0x421970>();

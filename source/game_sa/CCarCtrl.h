@@ -15,6 +15,8 @@
 class  CCarCtrl
 {
 public:
+	static void InjectHooks();
+
 	static int ChooseBoatModel();
 	static int ChooseCarModelToLoad(int arg1);
 	static int ChooseGangCarModel(int arg1);
