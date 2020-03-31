@@ -1817,12 +1817,10 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, floa
 
     unsigned short entityAltCol = ALT_ENITY_COL_DEFAULT;
     float fMoveSpeedLimit = CTimer::ms_fTimeStep * 0.008f;
-    float fMoveSpeedLimitMultiplier = 1.3f;
     if (m_nType == ENTITY_TYPE_OBJECT)
     {
-        fMoveSpeedLimitMultiplier = 1.3f;
         entityAltCol = ALT_ENITY_COL_OBJECT;
-        fMoveSpeedLimit = fMoveSpeedLimitMultiplier * fMoveSpeedLimit;
+        fMoveSpeedLimit *= 1.3f;
     }
     else
     {
@@ -1830,6 +1828,7 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, floa
         {
             if (!physicalFlags.bSubmergedInWater)
             {
+                float fMoveSpeedLimitMultiplier = 0.0f;
                 unsigned int vehicleClass = pVehicle->m_nVehicleClass;
                 if (vehicleClass != VEHICLE_BIKE || (m_nStatus != STATUS_ABANDONED) && m_nStatus != STATUS_WRECKED)
                 {
@@ -1844,16 +1843,15 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, floa
                         {
                             fMoveSpeedLimitMultiplier = 1.4f;
                             entityAltCol = ALT_ENITY_COL_VEHICLE;
-                            fMoveSpeedLimit = fMoveSpeedLimitMultiplier * fMoveSpeedLimit;
                         }
                     }
-                } 
+                }
                 else
                 {
                     fMoveSpeedLimitMultiplier = 1.7f;
                     entityAltCol = ALT_ENITY_COL_BIKE_WRECKED;
-                    fMoveSpeedLimit = fMoveSpeedLimitMultiplier * fMoveSpeedLimit;
                 }
+                fMoveSpeedLimit *= fMoveSpeedLimitMultiplier;
             }
         }
     }
