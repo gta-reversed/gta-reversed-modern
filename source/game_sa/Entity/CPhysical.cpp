@@ -57,7 +57,7 @@ void CPhysical::InjectHooks()
     HookInstall(0x544850, &CPhysical::GetLightingTotal, 7);
     HookInstall(0x5448B0, &CPhysical::CanPhysicalBeDamaged, 7);
     HookInstall(0x544C40, &CPhysical::ApplyAirResistance, 7);
-    //HookInstall(0x544D50, &CPhysical::ApplyCollisionAlt, 7);
+    HookInstall(0x544D50, &CPhysical::ApplyCollisionAlt, 7);
     HookInstall(0x5454C0, (bool(CPhysical::*)(float, CColPoint*)) & CPhysical::ApplyFriction, 7);
     HookInstall(0x545980, (bool(CPhysical::*)(CPhysical*, float, CColPoint*)) &CPhysical::ApplyFriction, 7);
     HookInstall(0x546670, &CPhysical::ProcessShiftSectorList, 7);
@@ -1751,13 +1751,12 @@ void CPhysical::ApplyAirResistance()
 #endif
 }
 
-// BUG: When a vehicle is upside down, it gets stuck or keeps glitching.
 bool CPhysical::ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, float* pDamageIntensity, CVector* pVecMoveSpeed, CVector* pVecTurnSpeed)
 {
 
-//#ifdef USE_DEFAULT_FUNCTIONS
+#ifdef USE_DEFAULT_FUNCTIONS
     return ((bool(__thiscall*)(CPhysical*, CPhysical*, CColPoint*, float*, CVector*, CVector*))0x544D50)(this, pEntity, pColPoint, pDamageIntensity, pVecMoveSpeed, pVecTurnSpeed);
-#if 0
+#else
     if (m_pAttachedTo)
     {
         if (m_pAttachedTo->m_nType > ENTITY_TYPE_BUILDING && m_pAttachedTo->m_nType < ENTITY_TYPE_DUMMY
@@ -1886,6 +1885,10 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, floa
                     pDamageIntensity = pDamageIntensity;
                     fCollisionImpact2 = 0.0f;
                     *pDamageIntensity = -0.95f * fCollisionMass * fSpeedDotProduct;
+                }
+                else
+                {
+                    bUseElasticity = true;
                 }
             }
             else if (entityAltCol == ALT_ENITY_COL_BOAT
