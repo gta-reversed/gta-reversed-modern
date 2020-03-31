@@ -33,7 +33,6 @@ void InjectHooksMain(void)
     CVehicle::InjectHooks();
     CPlayerPed::InjectHooks();
     CStats::InjectHooks();
-    CCarCtrl::InjectHooks();
 
     /*
      DetourRestoreAfterWith();
