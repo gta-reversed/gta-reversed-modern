@@ -13,7 +13,7 @@ int *CStats::TimesMissionAttempted = (int*)0xB78CC8;
 int *CStats::FavoriteRadioStationList = (int*)0xB78E58;
 int *CStats::PedsKilledOfThisType = (int*)0xB78E90;
 float *CStats::StatReactionValue = (float*)0xB78F10;
-int *CStats::StatTypesInt = (int*)0xB79000;
+int* CStats::StatTypesInt = (int*)0xB79000;
 float *CStats::StatTypesFloat = (float*)0xB79380;
 short &CStats::m_ThisStatIsABarChart = *(short*)0xB794CC;
 unsigned int &CStats::TotalNumStatMessages = *(unsigned int*)0xB794D0;
@@ -40,7 +40,17 @@ void CStats::InjectHooks()
     HookInstall(0x558DE0, &CStats::GetStatID, 7);
     HookInstall(0x558E70, &CStats::GetTimesMissionAttempted, 7);
     HookInstall(0x558E80, &CStats::RegisterMissionAttempted, 7);
-    HookInstall(0x558EA0, &CStats::RegisterMissionPassed, 7);
+    HookInstall(0x558EA0, &CStats::RegisterMissionPassed, 7);  
+    HookInstall(0x558F90, &CStats::GetFullFavoriteRadioStationList, 7);
+    HookInstall(0x559540, &CStats::ConvertToMins, 7);
+    HookInstall(0x559560, &CStats::ConvertToSecs, 7);
+    HookInstall(0x5595F0, &CStats::CheckForThreshold, 7);
+    HookInstall(0x559630, &CStats::IsStatCapped, 7);
+    HookInstall(0x55B900, &CStats::ProcessReactionStatsOnIncrement, 7); 
+    HookInstall(0x55C6F0, &CStats::UpdateStatsWhenRunning, 7);
+    HookInstall(0x55CD60, &CStats::UpdateStatsWhenOnMotorBike, 7);
+    HookInstall(0x55C6F0, &CStats::UpdateStatsWhenRunning, 7);
+    HookInstall(0x55CFA0, &CStats::UpdateStatsWhenFighting, 7);
 }
 
 // Unused
@@ -78,7 +88,7 @@ char CStats::GetTimesMissionAttempted(unsigned char missionId)
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<char, 0x558E70, unsigned char>(missionId);
 #else
-    return CStats::TimesMissionAttempted[missionId];
+    return TimesMissionAttempted[missionId];
 #endif
 }
 
@@ -110,8 +120,13 @@ bool CStats::PopulateFavoriteRadioStationList() {
 }
 
 // Converted from cdecl int* CStats::GetFullFavoriteRadioStationList(void) 0x558F90
-int *CStats::GetFullFavoriteRadioStationList() {
+int *CStats::GetFullFavoriteRadioStationList() 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<int*, 0x558F90>();
+#else
+    return FavoriteRadioStationList;
+#endif
 }
 
 // Converted from cdecl int CStats::FindMostFavoriteRadioStation(void) 0x558FA0
@@ -140,28 +155,90 @@ void CStats::BuildStatLine(char* line, void* pValue1, int metrics, void* pValue2
 }
 
 // Converted from cdecl int CStats::ConvertToMins(int value) 0x559540
-int CStats::ConvertToMins(int value) {
-    return plugin::CallAndReturn<int, 0x559540, int>(value);
+int CStats::ConvertToMins(int statValue){
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<int, 0x559540, int>(statValue);
+#else
+    unsigned int minutes = 0;
+    if (statValue > 59)
+        minutes = (statValue - 60) / 60 + 1;
+    return minutes;
+#endif
 }
 
 // Converted from cdecl int CStats::ConvertToSecs(int value) 0x559560
-int CStats::ConvertToSecs(int value) {
-    return plugin::CallAndReturn<int, 0x559560, int>(value);
+int CStats::ConvertToSecs(int statValue){
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<int, 0x559560, int>(statValue);
+#else
+    int seconds = statValue;
+    if (statValue > 59)
+        seconds = -60 - 60 * ((statValue - 60) / 60) + statValue;
+    if (seconds < 0)
+        seconds = -seconds;
+    return seconds;
+#endif
 }
 
+// Getting errors on IDA.
 // Converted from cdecl bool CStats::SafeToShowThisStat(uchar stat) 0x559590
 bool CStats::SafeToShowThisStat(unsigned char stat) {
     return plugin::CallAndReturn<bool, 0x559590, unsigned char>(stat);
 }
 
 // Converted from cdecl bool CStats::CheckForThreshold(float *pValue, float range) 0x5595F0
-bool CStats::CheckForThreshold(float* pValue, float range) {
+bool CStats::CheckForThreshold(float* pValue, float range) 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<bool, 0x5595F0, float*, float>(pValue, range);
+#else
+    if (*pValue + 40.0f >= range && *pValue - 40.0f <= range)
+        return false;
+    *pValue = range;
+    return true;
+#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from cdecl bool CStats::IsStatCapped(ushort stat) 0x559630
-bool CStats::IsStatCapped(unsigned short stat) {
-    return plugin::CallAndReturn<bool, 0x559630, unsigned short>(stat);
+bool CStats::IsStatCapped(eStats stat)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<bool, 0x559630, eStats>(stat);
+#else
+    return 
+        stat == STAT_GIRLFRIEND_RESPECT || 
+        stat == STAT_CLOTHES_RESPECT || 
+        stat == STAT_FITNESS_RESPECT || 
+        stat == STAT_FAT || 
+        stat == STAT_STAMINA ||
+        stat == STAT_MUSCLE || 
+        stat == STAT_MAX_HEALTH ||
+        stat == STAT_SEX_APPEAL || 
+        stat == STAT_PISTOL_SKILL || 
+        stat == STAT_SILENCED_PISTOL_SKILL || 
+        stat == STAT_DESERT_EAGLE_SKILL || 
+        stat == STAT_SHOTGUN_SKILL || 
+        stat == STAT_SAWN_OFF_SHOTGUN_SKILL ||
+        stat == STAT_COMBAT_SHOTGUN_SKILL ||
+        stat == STAT_MACHINE_PISTOL_SKILL || 
+        stat == STAT_SMG_SKILL ||
+        stat == STAT_AK_47_SKILL || 
+        stat == STAT_M4_SKILL || 
+        stat == STAT_RIFLE_SKILL ||
+        stat == STAT_APPEARANCE ||
+        stat == STAT_ARMOR || 
+        stat == STAT_ENERGY || 
+        stat == STAT_DRIVING_SKILL ||
+        stat == STAT_FLYING_SKILL ||
+        stat == STAT_LUNG_CAPACITY || 
+        stat == STAT_BIKE_SKILL || 
+        stat == STAT_LUCK || 
+        stat == STAT_HORSESHOES_COLLECTED ||
+        stat == STAT_TOTAL_HORSESHOES || 
+        stat == STAT_OYSTERS_COLLECTED ||
+        stat == STAT_TOTAL_OYSTERS || 
+        stat == STAT_CYCLING_SKILL;
+#endif
 }
 
 // Converted from cdecl void CStats::ProcessReactionStatsOnDecrement(uchar stat) 0x559730
@@ -182,6 +259,7 @@ void CStats::LoadStatUpdateConditions() {
 // Converted from cdecl void CStats::LoadActionReactionStats(void) 0x5599B0
 void CStats::LoadActionReactionStats() {
     plugin::Call<0x5599B0>();
+
 }
 
 // Converted from cdecl int CStats::FindMaxNumberOfGroupMembers(void) 0x559A50
@@ -195,23 +273,23 @@ float CStats::GetFatAndMuscleModifier(eStatModAbilities statMod) {
 }
 
 // Converted from cdecl void CStats::DecrementStat(ushort stat, float value) 0x559FA0
-void CStats::DecrementStat(unsigned short stat, float value) {
-    plugin::Call<0x559FA0, unsigned short, float>(stat, value);
+void CStats::DecrementStat(eStats stat, float value) {
+    plugin::Call<0x559FA0, eStats, float>(stat, value);
 }
 
 // Converted from cdecl void CStats::SetStatValue(ushort stat, float value) 0x55A070
-void CStats::SetStatValue(unsigned short stat, float value) {
-    plugin::Call<0x55A070, unsigned short, float>(stat, value);
+void CStats::SetStatValue(eStats stat, float value) {
+    plugin::Call<0x55A070, eStats, float>(stat, value);
 }
 
 // Converted from cdecl void CStats::RegisterFastestTime(int stat, int time) 0x55A0B0
-void CStats::RegisterFastestTime(int stat, int time) {
-    plugin::Call<0x55A0B0, int, int>(stat, time);
+void CStats::RegisterFastestTime(eStats stat, int time) {
+    plugin::Call<0x55A0B0, eStats, int>(stat, time);
 }
 
 // Converted from cdecl void CStats::RegisterBestPosition(int stat, int position) 0x55A160
-void CStats::RegisterBestPosition(int stat, int position) {
-    plugin::Call<0x55A160, int, int>(stat, position);
+void CStats::RegisterBestPosition(eStats stat, int position) {
+    plugin::Call<0x55A160, eStats, int>(stat, position);
 }
 
 // Converted from cdecl char* CStats::FindCriminalRatingString(void) 0x55A210
@@ -225,13 +303,40 @@ int CStats::ConstructStatLine(int arg0, unsigned char arg1) {
 }
 
 // Converted from cdecl void CStats::ProcessReactionStatsOnIncrement(uchar stat) 0x55B900
-void CStats::ProcessReactionStatsOnIncrement(unsigned char stat) {
+void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55B900, unsigned char>(stat);
+#else
+
+    if (stat != STAT_STAMINA && stat != STAT_ENERGY)
+    {
+        if (stat != STAT_LUNG_CAPACITY)
+            return;
+    }
+
+    if (stat == STAT_STAMINA || stat != STAT_ENERGY) {
+        float fLongestExerciseBikeTime = static_cast<float>(StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME]);
+        if (fLongestExerciseBikeTime < 0.0f) {
+            float fatValue = StatTypesFloat[STAT_FAT] - 23.0f;
+            if (fatValue <= 0.0f)
+                fatValue = 0.0f;
+            StatTypesFloat[STAT_FAT] = fatValue;
+            CheckForStatsMessage();
+        }
+        return;
+    }
+
+    float longestExerciseBikeTime = (float)StatTypesInt[STAT_LONGEST_EXERCISE_BIKE_TIME];
+    if (longestExerciseBikeTime > 1000.0f) {
+        IncrementStat(STAT_FAT, longestExerciseBikeTime - 1000.0f);
+    }
+#endif
+
 }
 
 // Converted from cdecl void CStats::DisplayScriptStatUpdateMessage(uchar state, uint stat, float value) 0x55B980
-void CStats::DisplayScriptStatUpdateMessage(unsigned char state, unsigned int stat, float value) {
-    plugin::Call<0x55B980, unsigned char, unsigned int, float>(state, stat, value);
+void CStats::DisplayScriptStatUpdateMessage(unsigned char state, eStats stat, float value) {
+    plugin::Call<0x55B980, unsigned char, eStats, float>(state, stat, value);
 }
 
 // Converted from cdecl void CStats::UpdateRespectStat(uchar) 0x55BC50
@@ -250,8 +355,8 @@ void CStats::Init() {
 }
 
 // Converted from cdecl void CStats::IncrementStat(ushort stat, float value) 0x55C180
-void CStats::IncrementStat(unsigned short stat, float value) {
-    plugin::Call<0x55C180, unsigned short, float>(stat, value);
+void CStats::IncrementStat(eStats stat, float value) {
+    plugin::Call<0x55C180, eStats, float>(stat, value);
 }
 
 // Converted from cdecl void CStats::SetNewRecordStat(ushort stat, float value) 0x55C410
@@ -266,12 +371,37 @@ void CStats::UpdateFatAndMuscleStats(unsigned int value) {
 
 // Converted from cdecl void CStats::UpdateStatsWhenSprinting(void) 0x55C660
 void CStats::UpdateStatsWhenSprinting() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55C660>();
+#else
+    UpdateFatAndMuscleStats(static_cast<unsigned int>(CStats::StatReactionValue[30]));
+    if (StatReactionValue[35] * 1000.0f >= static_cast<float>(m_SprintStaminaCounter)) {
+        m_SprintStaminaCounter += static_cast<unsigned int>(CTimer::ms_fTimeStep * 0.02f * 1000.0f);
+    }
+    else {
+        m_SprintStaminaCounter = 0;
+        IncrementStat(STAT_STAMINA, StatReactionValue[2]);
+        DisplayScriptStatUpdateMessage(1, STAT_STAMINA, StatReactionValue[2]);
+    }
+#endif
 }
 
 // Converted from cdecl void CStats::UpdateStatsWhenRunning(void) 0x55C6F0
-void CStats::UpdateStatsWhenRunning() {
+void CStats::UpdateStatsWhenRunning() 
+{
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55C6F0>();
+#else
+    UpdateFatAndMuscleStats((unsigned int)StatReactionValue[31]);
+    if (StatReactionValue[36] * 1000.0f >= static_cast<float>(m_RunningCounter)) {
+        m_RunningCounter += static_cast<unsigned int>(CTimer::ms_fTimeStep * 0.02f * 1000.0f);
+    }
+    else {
+        m_RunningCounter = 0;
+        IncrementStat(STAT_STAMINA, StatReactionValue[3]);
+        DisplayScriptStatUpdateMessage(1, STAT_STAMINA, StatReactionValue[3]);
+    }
+#endif
 }
 
 // Converted from cdecl void CStats::UpdateStatsWhenCycling(bool, CBmx *bmx) 0x55C780
@@ -296,17 +426,38 @@ void CStats::UpdateStatsWhenFlying(CVehicle* vehicle) {
 
 // Converted from cdecl void CStats::UpdateStatsWhenOnMotorBike(CBike *bike) 0x55CD60
 void CStats::UpdateStatsWhenOnMotorBike(CBike* bike) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55CD60, CBike*>(bike);
+#else
+    float bikeCounter = static_cast<float>(m_BikeCounter);
+    if (StatReactionValue[40] * 1000.0f >= bikeCounter) {
+        float bikeMoveSpeed = bike->m_vecMoveSpeed.Magnitude();
+        float fTimeStep = (CTimer::ms_fTimeStep * 0.02f * 1000.0f);
+        if (bikeMoveSpeed > 0.6f || bike->m_nNumContactWheels < 3u && bikeMoveSpeed > 0.1f)
+            m_BikeCounter = static_cast<unsigned int>(fTimeStep * 1.5f + bikeCounter);
+        else if (bikeMoveSpeed > 0.2f)
+            m_BikeCounter = static_cast<unsigned int>(fTimeStep * 0.5f + bikeCounter);
+    }
+    else {
+        m_BikeCounter = 0;
+        IncrementStat(STAT_BIKE_SKILL, StatReactionValue[7]);
+        DisplayScriptStatUpdateMessage(1, STAT_BIKE_SKILL, StatReactionValue[7]);
+    }
+#endif
 }
 
 // Converted from cdecl void CStats::UpdateStatsWhenWeaponHit(int weaponType) 0x55CEB0
-void CStats::UpdateStatsWhenWeaponHit(int weaponType) {
-    plugin::Call<0x55CEB0, int>(weaponType);
+void CStats::UpdateStatsWhenWeaponHit(eWeaponType weaponType) {
+    plugin::Call<0x55CEB0, eWeaponType>(weaponType);
 }
 
 // Converted from cdecl void CStats::UpdateStatsWhenFighting(void) 0x55CFA0
 void CStats::UpdateStatsWhenFighting() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x55CFA0>();
+#else
+    CStats::UpdateFatAndMuscleStats(static_cast<unsigned int>(CStats::StatReactionValue[32]));
+#endif
 }
 
 // Converted from cdecl void CStats::UpdateStatsOnRespawn(void) 0x55CFC0
@@ -320,8 +471,17 @@ void CStats::UpdateStatsAddToHealth(unsigned int addToHealth) {
 }
 
 // Converted from cdecl void CStats::ModifyStat(ushort stat, float value) 0x55D090
-void CStats::ModifyStat(unsigned short stat, float value) {
-    plugin::Call<0x55D090, unsigned short, float>(stat, value);
+void CStats::ModifyStat(eStats stat, float value) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x55D090, eStats, float>(stat, value);
+#else
+    if (value < 0.0f) {
+        CStats::DecrementStat(stat, -value);
+    }
+    else {
+        CStats::IncrementStat(stat, value);
+    }
+#endif
 }
 
 // Converted from cdecl bool CStats::Save(void) 0x5D3B40
