@@ -1031,7 +1031,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
         {
             if (pAnimBlock->bLoaded)
             {
-                CStreaming::SetModelIsDeletable(m_nAnimationBlockIndex + RESOURCE_FIRST_ID_IFP);
+                CStreaming::SetModelIsDeletable(m_nAnimationBlockIndex + RESOURCE_ID_IFP);
                 CAnimBlendAssociation* pAnimAssoc = nullptr;
                 for (pAnimAssoc = RpAnimBlendClumpGetFirstAssociation(pPlayerPed->m_pRwClump);
                     pAnimAssoc;
@@ -1047,7 +1047,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
         }
         else
         {
-            CStreaming::RequestModel(m_nAnimationBlockIndex + RESOURCE_FIRST_ID_IFP, LOADSTATE_Requested);
+            CStreaming::RequestModel(m_nAnimationBlockIndex + RESOURCE_ID_IFP, LOADSTATE_Requested);
             if (pAnimBlock->bLoaded)
             {
                 CAnimBlendAssociation* pAnimAssoc1 = RpAnimBlendClumpGetFirstAssociation(pPlayerPed->m_pRwClump);

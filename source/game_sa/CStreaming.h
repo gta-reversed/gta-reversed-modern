@@ -21,8 +21,8 @@ enum eResourceMaxIDs
                              // Model ID Range
     RESOURCE_MAX_ID_DFF = 19999, // 0-19999
     RESOURCE_MAX_ID_TXD = 24999, // 20000-24999
-    RESOURCE_MAX_ID_COL = 25255, // 25000-25255
-    RESOURCE_MAX_ID_IPL = 25510, // 25256-25510
+    RESOURCE_MAX_ID_COL = 25255, // 25000-25254
+    RESOURCE_MAX_ID_IPL = 25510, // 25255-25510
     RESOURCE_MAX_ID_DAT = 25574, // 25511-25574 
     RESOURCE_MAX_ID_IFP = 25754, // 25575-25754
     RESOURCE_MAX_ID_RRR = 26229, // 25755-26229 (vechicle recordings)
@@ -32,14 +32,14 @@ enum eResourceMaxIDs
 enum eResourceFirstID
 {
     // First ID of the resource
-    RESOURCE_FIRST_ID_DFF = 0,
-    RESOURCE_FIRST_ID_TXD = 20000,
-    RESOURCE_FIRST_ID_COL = 25000,
-    RESOURCE_FIRST_ID_IPL = 25256,
-    RESOURCE_FIRST_ID_DAT = 25511,
-    RESOURCE_FIRST_ID_IFP = 25575,
-    RESOURCE_FIRST_ID_RRR = 25755, // (vechicle recordings)
-    RESOURCE_FIRST_ID_SCM = 26230, // (streamed scripts)
+    RESOURCE_ID_DFF = 0,
+    RESOURCE_ID_TXD = 20000,
+    RESOURCE_ID_COL = 25000,
+    RESOURCE_ID_IPL = 25255,
+    RESOURCE_ID_DAT = 25511,
+    RESOURCE_ID_IFP = 25575,
+    RESOURCE_ID_RRR = 25755, // (vechicle recordings)
+    RESOURCE_ID_SCM = 26230, // (streamed scripts)
 };
 
 struct tRwStreamInitializeData
