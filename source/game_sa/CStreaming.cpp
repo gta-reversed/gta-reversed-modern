@@ -446,17 +446,17 @@ void CStreaming::RequestModel(int modelId, unsigned int streamingFlags)
         if (modelStreamingInfo.InList())
         {
             modelStreamingInfo.RemoveFromList();
-            if ((modelId < 20000))
+            if (modelId < 20000)
             {
                 CBaseModelInfo* modelInfo = CModelInfo::GetModelInfo(modelId);
                 size_t modelType = modelInfo->GetModelType();
-                if (modelType == MODEL_INFO_TYPE_PED && modelType == MODEL_INFO_TYPE_VEHICLE)
+                if (modelType == MODEL_INFO_TYPE_PED || modelType == MODEL_INFO_TYPE_VEHICLE)
                 {
                     return;
                 }
             }
 
-            if (!(modelStreamingInfo.m_nFlags & (GAME_REQUIRED || MISSION_REQUIRED)))
+            if (!(modelStreamingInfo.m_nFlags & (GAME_REQUIRED | MISSION_REQUIRED)))
             {
                 modelStreamingInfo.AddToList(ms_startLoadedList);
             }
