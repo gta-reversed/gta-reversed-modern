@@ -1,9 +1,5 @@
 #include "StdInc.h"
 
-// CStreaming class is unstable. Requires some testing, so let's use the default functions for now.
-#define USE_DEFAULT_FUNCTIONS
-
-
 unsigned int &CStreaming::ms_memoryAvailable = *reinterpret_cast<unsigned int *>(0x8A5A80);
 unsigned int &CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<unsigned int *>(0x8A5A84);
 bool &CStreaming::ms_bLoadVehiclesInLoadScene = *reinterpret_cast<bool *>(0x8A5A88);
@@ -40,7 +36,7 @@ int &CStreaming::ms_lastImageRead = *reinterpret_cast<int *>(0x8E4C64);
 signed int *CStreaming::ms_imageOffsets = reinterpret_cast<signed int *>(0x8E4C8C);
 bool &CStreaming::ms_bEnableRequestListPurge = *reinterpret_cast<bool *>(0x8E4CA4);
 unsigned int &CStreaming::ms_streamingBufferSize = *reinterpret_cast<unsigned int *>(0x8E4CA8);
-char *&CStreaming::ms_pStreamingBuffer = *reinterpret_cast<char **>(0x8E4CAC);
+char **CStreaming::ms_pStreamingBuffer = reinterpret_cast<char **>(0x8E4CAC);
 unsigned int &CStreaming::ms_memoryUsed = *reinterpret_cast<unsigned int *>(0x8E4CB4);
 unsigned int &CStreaming::ms_numModelsRequested = *reinterpret_cast<unsigned int *>(0x8E4CB8);
 CStreamingInfo *CStreaming::ms_aInfoForModel = reinterpret_cast<CStreamingInfo *>(0x8E4CC0);
@@ -58,22 +54,17 @@ unsigned int &CStreaming::ms_numberOfBytesRead = *reinterpret_cast<unsigned int 
 
 void CStreaming::InjectHooks()
 {
-    CStreamingInfo::InjectHooks();
-    /*
-    InjectHook(0x40A45E, &CStreaming::LoadAllRequestedModels, PATCH_JUMP);
-    InjectHook(0x4087E0, &CStreaming::RequestModel, PATCH_JUMP);
-    InjectHook(0x40E170, &CStreaming::ProcessLoadingChannel, PATCH_JUMP);
-    InjectHook(0x40E460, &CStreaming::FlushChannels, PATCH_JUMP);
-    InjectHook(0x40CBA0, &CStreaming::RequestModelStream, PATCH_JUMP);
-    InjectHook(0x40E3A0, &CStreaming::LoadRequestedModels, PATCH_JUMP);
-    //////////////
-    // NOT TESTED
-    //////////////
-    //InjectHook(0x40E4E0, &CStreaming::FlushRequestList, PATCH_JUMP);
-
-    InjectHook(0x40C6B0, &CStreaming::ConvertBufferToObject, PATCH_JUMP);
-    InjectHook(0x40E120, &CStreaming::MakeSpaceFor, PATCH_JUMP);
-    //InjectHook(0x408CB0, &CStreaming::FinishLoadingLargeFile, PATCH_JUMP); */
+    //CStreamingInfo::InjectHooks(); 
+    HookInstall(0x40C6B0, &CStreaming::ConvertBufferToObject, 7);
+    HookInstall(0x40A45E, &CStreaming::LoadAllRequestedModels, 7);
+    HookInstall(0x4087E0, &CStreaming::RequestModel, 7);
+    HookInstall(0x408CB0, &CStreaming::FinishLoadingLargeFile, 7);
+    HookInstall(0x40E460, &CStreaming::FlushChannels, 7);
+    HookInstall(0x40CBA0, &CStreaming::RequestModelStream, 7);
+    HookInstall(0x40E170, &CStreaming::ProcessLoadingChannel, 7);
+    HookInstall(0x40E120, &CStreaming::MakeSpaceFor, 7);
+    HookInstall(0x40E3A0, &CStreaming::LoadRequestedModels, 7);
+    HookInstall(0x40E4E0, &CStreaming::FlushRequestList, 7);
 }
 
 bool CStreaming::AreAnimsUsedByRequestedModels(int AnimFileIndex) {
@@ -318,13 +309,10 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
 #endif
 }
 
-
-
 bool CStreaming::IsVeryBusy() {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<bool>(0x4076A0);
 #else
-    std::printf("Streaming::IsVeryBusy called\n");
     return CRenderer::m_loadingPriority || ms_numModelsRequested > 5;
 #endif
 }
@@ -502,12 +490,11 @@ void CStreaming::RequestTxdModel(int txdModelID, int streamingFlags) {
 #endif
 }
 
-bool CStreaming::FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelId)
+void CStreaming::FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelId)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<bool, unsigned char *, int>(0x408CB0, pFileBuffer, modelId);
 #else
-    std::printf("FinishLoadingLargeFile called\n");
     bool bFinishedLoadingLargeFile = 0;
     CBaseModelInfo *pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CStreamingInfo& streamingInfo = CStreaming::ms_aInfoForModel[modelId];
@@ -518,10 +505,8 @@ bool CStreaming::FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelId
         tRwStreamInitializeData rwStreamInitializationData = { pFileBuffer, bufferSize };
         RwStream * pRwStream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitializationData);
         bool bLoaded = false;
-        if (modelId >= 20000)
-        {
-            if (modelId >= 25000)
-            {
+        if (modelId >= 20000) {
+            if (modelId >= 25000) {
                 bLoaded = modelId;
             }
             else
@@ -531,73 +516,56 @@ bool CStreaming::FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelId
                 CTxdStore::RemoveRefWithoutDelete(modelId - 20000);
             }
         }
-        else
-        {
+        else {
             CTxdStore::SetCurrentTxd(pBaseModelInfo->m_nTxdIndex);
             bLoaded = CFileLoader::FinishLoadClumpFile(pRwStream, modelId);
             if (bLoaded)
-            {
                 bLoaded = CStreaming::AddToLoadedVehiclesList(modelId);
-            }
             pBaseModelInfo->RemoveRef();
             CTxdStore::RemoveRefWithoutDelete(pBaseModelInfo->m_nTxdIndex);
             int animFileIndex = pBaseModelInfo->GetAnimFileIndex();
-            if (animFileIndex != -1)
-            {
+            if (animFileIndex != -1) {
                 CAnimManager::RemoveAnimBlockRefWithoutDelete(animFileIndex);
             }
         }
         RwStreamClose(pRwStream, &pFileBuffer);
         streamingInfo.m_nLoadState = LOADSTATE_LOADED;
         CStreaming::ms_memoryUsed += bufferSize;
-        if (bLoaded)
-        {
-            bFinishedLoadingLargeFile = true;
-        }
-        else
-        {
+        if (!bLoaded) {
             CStreaming::RemoveModel(modelId);
             CStreaming::RequestModel(modelId, streamingInfo.m_nFlags);
-            bFinishedLoadingLargeFile = false;
         }
     }
-    else
-    {
+    else {
         if (modelId < 20000)
-        {
             pBaseModelInfo->RemoveRef();
-        }
-        bFinishedLoadingLargeFile = false;
     }
-    return bFinishedLoadingLargeFile;
 #endif
 }
 
-bool CStreaming::FlushChannels()
+void CStreaming::FlushChannels()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<bool>(0x40E460);
 #else
-    char channelsFlushed = false;
     if (ms_channel[1].LoadStatus == LOADSTATE_Requested)
-        channelsFlushed = ProcessLoadingChannel(1);
+        ProcessLoadingChannel(1);
     if (ms_channel[0].LoadStatus == LOADSTATE_LOADED)
     {
         CdStreamSync(0);
         ms_channel[0].iLoadingLevel = 100;
-        channelsFlushed = ProcessLoadingChannel(0);
+        ProcessLoadingChannel(0);
     }
     if (ms_channel[0].LoadStatus == LOADSTATE_Requested)
-        channelsFlushed = ProcessLoadingChannel(0);
+        ProcessLoadingChannel(0);
     if (ms_channel[1].LoadStatus == LOADSTATE_LOADED)
     {
         CdStreamSync(1u);
         ms_channel[1].iLoadingLevel = 100;
-        channelsFlushed = ProcessLoadingChannel(1);
+        ProcessLoadingChannel(1);
     }
     if (ms_channel[1].LoadStatus == LOADSTATE_Requested)
-        channelsFlushed = ProcessLoadingChannel(1);
-    return channelsFlushed;
+        ProcessLoadingChannel(1);;
 #endif
 }
 
@@ -650,7 +618,7 @@ void CStreaming::RequestModelStream(int channelIndex)
 
             streamingInfo = &ms_aInfoForModel[modelId];
 
-        } while (!(streamingInfo->m_nFlags & 14));
+        } while (!(streamingInfo->m_nFlags & (KEEP_IN_MEMORY | MISSION_REQUIRED | GAME_REQUIRED)));
     }
 
 
@@ -678,7 +646,7 @@ void CStreaming::RequestModelStream(int channelIndex)
     bool isModelTypePed = false;
 
     int modelIndex = 0;
-    int numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
+    const int numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
     while (modelIndex < numberOfModelIds)
     {
         streamingInfo = &ms_aInfoForModel[modelId];
@@ -728,8 +696,8 @@ void CStreaming::RequestModelStream(int channelIndex)
             int animFileIndex = pBaseModelInfo->GetAnimFileIndex();
             if (animFileIndex != -1)
             {
-                unsigned char loadState2 = ms_aInfoForModel[animFileIndex + 25575].m_nLoadState;
-                if (loadState2 != LOADSTATE_LOADED && loadState2 != LOADSTATE_Channeled)
+                unsigned char loadState = ms_aInfoForModel[animFileIndex + 25575].m_nLoadState;
+                if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_Channeled)
                     break;
             }
         }
@@ -773,7 +741,7 @@ void CStreaming::RequestModelStream(int channelIndex)
         if (streamingInfo->m_nFlags & PRIORITY_REQUEST)
         {
             int numPriorityRequests = ms_numPriorityRequests - 1;
-            streamingInfo->m_nFlags &= 0xEFu;
+            streamingInfo->m_nFlags &= ~PRIORITY_REQUEST;
             ms_numPriorityRequests = numPriorityRequests;
         }
 
@@ -787,7 +755,7 @@ void CStreaming::RequestModelStream(int channelIndex)
         memset(&streamingChannel.modelIds[modelIndex], 0xFFu, 4 * (numberOfModelIds - modelIndex)); // 0xFFu = -1
     }
 
-    CdStreamRead(channelIndex, (int)((&ms_pStreamingBuffer)[channelIndex * 4]), blockOffsetMimg, sectorCount);
+    CdStreamRead(channelIndex, ms_pStreamingBuffer[channelIndex], blockOffsetMimg, sectorCount);
 
     tStreamingChannel & streamingChannel = ms_channel[channelIndex];
     streamingChannel.LoadStatus = LOADSTATE_LOADED;
@@ -795,7 +763,6 @@ void CStreaming::RequestModelStream(int channelIndex)
     streamingChannel.iBlockCount = sectorCount;
     streamingChannel.iBlockOffset = blockOffsetMimg;
     streamingChannel.OnBeginRead = 0;
-
 
     if (m_bModelStreamNotLoaded)
         m_bModelStreamNotLoaded = false;
@@ -850,7 +817,7 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
                         MakeSpaceFor(nCdSize << 11); // MakeSpaceFor(nCdSize * (2^11))
 
                     int bufferOffset = streamingChannel.modelStreamingBufferOffsets[modelIndex];
-                    unsigned char * pFileBuffer = reinterpret_cast <unsigned char*> (&(&ms_pStreamingBuffer)[channelIndex][2048 * bufferOffset]);
+                    unsigned char * pFileBuffer = reinterpret_cast <unsigned char*> (&ms_pStreamingBuffer[channelIndex][2048 * bufferOffset]);
 
                     ConvertBufferToObject(pFileBuffer, modelId);
 
@@ -883,7 +850,7 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
     else
     {
         int bufferOffset = streamingChannel.modelStreamingBufferOffsets[0];
-        unsigned char * pFileContents = reinterpret_cast<unsigned char*>(&(&ms_pStreamingBuffer)[channelIndex][2048 * bufferOffset]);
+        unsigned char * pFileContents = reinterpret_cast<unsigned char*>(&ms_pStreamingBuffer[channelIndex][2048 * bufferOffset]);
         FinishLoadingLargeFile(pFileContents, streamingChannel.modelIds[0]);
         streamingChannel.modelIds[0] = -1;
     }
@@ -940,12 +907,12 @@ void CStreaming::RetryLoadFile(int streamNum) {
 }
 
 
-DWORD CStreaming::LoadRequestedModels()
+void CStreaming::LoadRequestedModels()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturnDynGlobal<DWORD>(0x40E3A0);
+    return plugin::Call<0x40E3A0>();
 #else
-    DWORD channelIndex = 0;
+    unsigned channelIndex = 0;
 
     if (ms_bLoadingBigModel)
     {
@@ -979,20 +946,14 @@ DWORD CStreaming::LoadRequestedModels()
     {
         ms_numberOfBytesRead = 1 - channelIndex;
     }
-    return channelIndex;
 #endif
 }
 
-//////////////
-// NOT TESTED
-//////////////
-bool CStreaming::FlushRequestList()
+void CStreaming::FlushRequestList()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<bool>(0x40E4E0);
 #else
-    std::printf(" CStreaming::FlushRequestList called\n");
-
     CStreamingInfo *streamingInfo = nullptr;
     CStreamingInfo *nextStreamingInfo = nullptr;
 
@@ -1020,7 +981,7 @@ bool CStreaming::FlushRequestList()
             streamingInfo = nextStreamingInfo;
         } while (nextStreamingInfo != ms_pEndRequestedList);
     }
-    return FlushChannels();
+    FlushChannels();
 #endif
 }
 

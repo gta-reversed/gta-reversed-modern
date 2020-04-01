@@ -115,7 +115,7 @@ public:
      static signed int *ms_imageOffsets; // static signed int ms_imageOffsets[6]
      static bool &ms_bEnableRequestListPurge;
      static unsigned int &ms_streamingBufferSize;
-     static char *&ms_pStreamingBuffer;
+     static char **ms_pStreamingBuffer;
      static unsigned int &ms_memoryUsed;
      static unsigned int &ms_numModelsRequested;
      static CStreamingInfo *ms_aInfoForModel; // static CStreamingInfo ms_aInfoForModel[26316]
@@ -154,9 +154,9 @@ public:
      static void DisableCopBikes(bool bDisable);
     //! RandFactor : random number between 1-7
      static int FindMIPedSlotForInterior(int RandFactor);
-     static bool FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelIndex);
-     static bool FlushChannels();
-     static bool FlushRequestList();
+     static void FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelIndex);
+     static void FlushChannels();
+     static void FlushRequestList();
      static void ForceLayerToRead(int arg1);
      static int GetDefaultCabDriverModel();
      static int GetDefaultCopCarModel(unsigned int bIncludeCopBike);
@@ -190,7 +190,7 @@ public:
     //! does nothing (NOP)
      static void LoadInitialVehicles();
      static void LoadInitialWeapons();
-     static DWORD LoadRequestedModels();
+     static void LoadRequestedModels();
      static void LoadScene(CVector const *Posn);
      static void LoadSceneCollision(CVector const *Posn);
     //! unused
