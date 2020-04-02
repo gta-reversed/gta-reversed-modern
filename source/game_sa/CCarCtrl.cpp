@@ -9,6 +9,7 @@
 
 void CCarCtrl::InjectHooks()
 {
+
 }
 
 // Converted from cdecl int CCarCtrl::ChooseBoatModel(void) 0x421970
@@ -22,8 +23,12 @@ int CCarCtrl::ChooseCarModelToLoad(int arg1) {
 }
 
 // Converted from cdecl int CCarCtrl::ChooseGangCarModel(int arg1) 0x421A40
-int CCarCtrl::ChooseGangCarModel(int arg1) {
-    return plugin::CallAndReturn<int, 0x421A40, int>(arg1);
+int CCarCtrl::ChooseGangCarModel(eGangID id) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<int, 0x421A40, eGangID>(id);
+#else
+    return CPopulation::PickGangCar(id);
+#endif
 }
 
 // Converted from cdecl int CCarCtrl::ChooseModel(int *arg1) 0x424CE0

@@ -19,7 +19,7 @@ public:
 
 	static int ChooseBoatModel();
 	static int ChooseCarModelToLoad(int arg1);
-	static int ChooseGangCarModel(int arg1);
+	static int ChooseGangCarModel(eGangID id);
 	static int ChooseModel(int* arg1);
 	static int ChoosePoliceCarModel(unsigned int arg0);
 	static void ClearInterestingVehicleList();
