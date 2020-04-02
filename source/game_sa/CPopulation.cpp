@@ -1,3 +1,10 @@
+/*
+    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
+*/
+
 #include "StdInc.h"
 
 float& CPopulation::PedDensityMultiplier = *(float*)0x8D2530;
@@ -285,8 +292,8 @@ float CPopulation::FindDistanceToNearestPedOfType(ePedType pedType, CVector posn
 }
 
 // Converted from cdecl int CPopulation::PickGangCar(int gangId) 0x614490
-int CPopulation::PickGangCar(int gangId) {
-    return ((int(__cdecl*)(int))0x614490)(gangId);
+int CPopulation::PickGangCar(int carGroupID) {
+    return ((int(__cdecl*)(int))0x614490)(carGroupID);
 }
 
 // Converted from cdecl int CPopulation::PickRiotRoadBlockCar(void) 0x6144B0

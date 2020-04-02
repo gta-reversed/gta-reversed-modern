@@ -9,7 +9,8 @@
 
 void CCarCtrl::InjectHooks()
 {
-
+    HookInstall(0x421A40, &CCarCtrl::ChooseGangCarModel, 7);
+    HookInstall(0x421980, &CCarCtrl::ChoosePoliceCarModel, 7);
 }
 
 // Converted from cdecl int CCarCtrl::ChooseBoatModel(void) 0x421970
@@ -22,12 +23,12 @@ int CCarCtrl::ChooseCarModelToLoad(int arg1) {
     return plugin::CallAndReturn<int, 0x421900, int>(arg1);
 }
 
-// Converted from cdecl int CCarCtrl::ChooseGangCarModel(int arg1) 0x421A40
-int CCarCtrl::ChooseGangCarModel(eGangID id) {
+int CCarCtrl::ChooseGangCarModel(int loadedCarGroupId)
+{
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<int, 0x421A40, eGangID>(id);
+    return plugin::CallAndReturn<int, 0x421A40, int, int>(loadedCarGroupId, unused);
 #else
-    return CPopulation::PickGangCar(id);
+    return CPopulation::PickGangCar(loadedCarGroupId);
 #endif
 }
 
@@ -36,9 +37,25 @@ int CCarCtrl::ChooseModel(int* arg1) {
     return plugin::CallAndReturn<int, 0x424CE0, int*>(arg1);
 }
 
-// Converted from cdecl int CCarCtrl::ChoosePoliceCarModel(uint) 0x421980
-int CCarCtrl::ChoosePoliceCarModel(unsigned int arg0) {
-    return plugin::CallAndReturn<int, 0x421980, unsigned int>(arg0);
+int CCarCtrl::ChoosePoliceCarModel(unsigned int ignoreLvpd1Model) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<int, 0x421980, unsigned int>(ignoreLvpd1Model);
+#else
+    CWanted* playerWanted = FindPlayerWanted(-1);
+    if (playerWanted->AreSwatRequired() && CStreaming::byte_8E6E2C && CStreaming::byte_8E6314)
+    {
+        if (CGeneral::GetRandomNumberInRange(0, 3) == 2)
+            return MODEL_ENFORCER; 
+    }
+    else
+    {
+        if (playerWanted->AreFbiRequired() && CStreaming::byte_8E7318 && CStreaming::byte_8E6328)
+            return MODEL_FBIRANCH; 
+        if (playerWanted->AreArmyRequired() && CStreaming::byte_8E6E90 && CStreaming::byte_8E6EA4 && CStreaming::byte_8E633C)
+            return (rand() < 0x3FFF) + MODEL_RHINO;
+    }
+    return CStreaming::GetDefaultCopCarModel(ignoreLvpd1Model);
+#endif
 }
 
 // Converted from cdecl void CCarCtrl::ClearInterestingVehicleList(void) 0x423F00

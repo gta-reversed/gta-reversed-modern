@@ -50,7 +50,16 @@ CLinkList<CEntity*> &CStreaming::ms_rwObjectInstances = *reinterpret_cast<CLinkL
 RwStream &gRwStream = *reinterpret_cast<RwStream *>(0x8E48AC);
 bool &CStreaming::m_bLoadingAllRequestedModels = *reinterpret_cast<bool *>(0x965538);
 bool &CStreaming::m_bModelStreamNotLoaded = *reinterpret_cast<bool *>(0x9654C4);
-unsigned int &CStreaming::ms_numberOfBytesRead = *reinterpret_cast<unsigned int *>(0x965534);
+unsigned int &CStreaming::ms_numberOfBytesRead = *reinterpret_cast<unsigned int *>(0x965534); 
+
+// Unknown for now. All of them are probably just boolean.
+bool& CStreaming::byte_8E6E2C = *reinterpret_cast<bool*>(0x8E6E2C);
+bool& CStreaming::byte_8E6314 = *reinterpret_cast<bool*>(0x8E6314);
+bool& CStreaming::byte_8E7318 = *reinterpret_cast<bool*>(0x8E7318);
+bool& CStreaming::byte_8E6328 = *reinterpret_cast<bool*>(0x8E6328);
+bool& CStreaming::byte_8E6E90 = *reinterpret_cast<bool*>(0x8E6E90);
+bool& CStreaming::byte_8E6EA4 = *reinterpret_cast<bool*>(0x8E6EA4);
+bool& CStreaming::byte_8E633C = *reinterpret_cast<bool*>(0x8E633C);
 
 void CStreaming::InjectHooks()
 {
@@ -65,6 +74,22 @@ void CStreaming::InjectHooks()
     HookInstall(0x40E120, &CStreaming::MakeSpaceFor, 7);
     HookInstall(0x40E3A0, &CStreaming::LoadRequestedModels, 7);
     HookInstall(0x40E4E0, &CStreaming::FlushRequestList, 7);
+}
+
+void* CStreaming::AddEntity(CEntity* a2) {
+    return plugin::CallAndReturnDynGlobal<void*, CEntity*>(0x409650, a2);
+}
+
+int CStreaming::AddImageToList(char const *lpFileName, bool bNotPlayerImg) {
+    return plugin::CallAndReturnDynGlobal<int, char const *, bool>(0x407610, lpFileName, bNotPlayerImg);
+}
+
+void CStreaming::AddLodsToRequestList(CVector const *Posn, unsigned int Streamingflags) {
+    plugin::CallDynGlobal<CVector const *, unsigned int>(0x40C520, Posn, Streamingflags);
+}
+
+void CStreaming::AddModelsToRequestList(CVector const *posn, unsigned int StreamingFlags) {
+    plugin::CallDynGlobal<CVector const *, unsigned int>(0x40D3F0, posn, StreamingFlags);
 }
 
 bool CStreaming::AreAnimsUsedByRequestedModels(int AnimFileIndex) {
@@ -950,3 +975,8 @@ void CStreaming::SetModelIsDeletable(int modelIndex) {
 void CStreaming::SetModelTxdIsDeletable(int modelIndex) {
     plugin::CallDynGlobal<int>(0x409C70, modelIndex);
 }
+
+int CStreaming::GetDefaultCopCarModel(int ignoreLvpd1Model) {
+    return plugin::CallAndReturnDynGlobal<int, unsigned int>(0x407C50, ignoreLvpd1Model);
+}
+

@@ -19,9 +19,9 @@ public:
 
 	static int ChooseBoatModel();
 	static int ChooseCarModelToLoad(int arg1);
-	static int ChooseGangCarModel(eGangID id);
 	static int ChooseModel(int* arg1);
 	static int ChoosePoliceCarModel(unsigned int arg0);
+	static int ChooseGangCarModel(int loadedCarGroupId);
 	static void ClearInterestingVehicleList();
 	static void ClipTargetOrientationToLink(CVehicle* pVehicle, CCarPathLinkAddress arg2, char arg3, float* arg4, float arg5, float arg6);
 	static CVehicle* CreateCarForScript(int modelid, CVector posn, unsigned char MissionCleanUpFlag);

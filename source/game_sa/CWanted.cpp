@@ -49,32 +49,32 @@ void CWanted::SetMaximumWantedLevel(int level)
     switch (level)
     {
     case 0:
-        CWanted::MaximumWantedLevel = 0;
-        CWanted::nMaximumWantedLevel = 0;
+        MaximumWantedLevel = 0;
+        nMaximumWantedLevel = 0;
         break;
     case 1:
-        CWanted::MaximumWantedLevel = 1;
-        CWanted::nMaximumWantedLevel = 115;
+        MaximumWantedLevel = 1;
+        nMaximumWantedLevel = 115;
         break;
     case 2:
-        CWanted::MaximumWantedLevel = 2;
-        CWanted::nMaximumWantedLevel = 365;
+        MaximumWantedLevel = 2;
+        nMaximumWantedLevel = 365;
         break;
     case 3:
-        CWanted::MaximumWantedLevel = 3;
-        CWanted::nMaximumWantedLevel = 875;
+        MaximumWantedLevel = 3;
+        nMaximumWantedLevel = 875;
         break;
     case 4:
-        CWanted::MaximumWantedLevel = 4;
-        CWanted::nMaximumWantedLevel = 1800;
+        MaximumWantedLevel = 4;
+        nMaximumWantedLevel = 1800;
         break;
     case 5:
-        CWanted::MaximumWantedLevel = 5;
-        CWanted::nMaximumWantedLevel = 3500;
+        MaximumWantedLevel = 5;
+        nMaximumWantedLevel = 3500;
         break;
     case 6:
-        CWanted::MaximumWantedLevel = 6;
-        CWanted::nMaximumWantedLevel = 6900;
+        MaximumWantedLevel = 6;
+        nMaximumWantedLevel = 6900;
         break;
     default:
         return;
@@ -95,7 +95,7 @@ bool CWanted::AreSwatRequired()
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x561F40, CWanted*>(this);
 #else
-    return this->m_nWantedLevel == 4 || m_bSwatRequired;
+    return m_nWantedLevel == 4 || m_bSwatRequired;
 #endif // USE_DEFAULT_FUNCTIONS
 }
 
@@ -106,7 +106,7 @@ bool CWanted::AreFbiRequired()
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x561F60, CWanted*>(this);
 #else
-    return this->m_nWantedLevel == 5 || m_bFbiRequired;
+    return m_nWantedLevel == 5 || m_bFbiRequired;
 #endif // USE_DEFAULT_FUNCTIONS
 }
 
@@ -117,7 +117,7 @@ bool CWanted::AreArmyRequired()
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x561F80, CWanted*>(this);
 #else
-    return this->m_nWantedLevel == 6 || m_bArmyRequired;
+    return m_nWantedLevel == 6 || m_bArmyRequired;
 #endif // USE_DEFAULT_FUNCTIONS
 }
 

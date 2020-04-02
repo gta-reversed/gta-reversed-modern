@@ -1,3 +1,4 @@
+// Working?
 /*
     Plugin-SDK (Grand Theft Auto San Andreas) header file
     Authors: GTA Community. See more here
@@ -128,9 +129,20 @@ public:
      static CLinkList<CEntity*> &ms_rwObjectInstances;
      static bool &m_bLoadingAllRequestedModels;
      static bool &m_bModelStreamNotLoaded;
-     static unsigned int &ms_numberOfBytesRead;
+     static unsigned int &ms_numberOfBytesRead; 
+     
+     // Unknown for now
+     static bool& byte_8E6E2C;
+     static bool& byte_8E6314;
+     static bool& byte_8E7318;
+     static bool& byte_8E6328;
+     static bool& byte_8E6E90;
+     static bool& byte_8E6EA4;
+     static bool& byte_8E633C;
 
      static void InjectHooks();
+
+
      static void *AddEntity(CEntity *a2);
     //! return StreamingFile Index in CStreaming::ms_files
      static int AddImageToList(char const *lpFileName, bool bNotPlayerImg);
@@ -159,7 +171,7 @@ public:
      static void FlushRequestList();
      static void ForceLayerToRead(int arg1);
      static int GetDefaultCabDriverModel();
-     static int GetDefaultCopCarModel(unsigned int bIncludeCopBike);
+     static int GetDefaultCopCarModel(int ignoreLvpd1Model);
      static int GetDefaultCopModel();
      static int GetDefaultFiremanModel();
      static int GetDefaultMedicModel();
