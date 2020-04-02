@@ -21,8 +21,8 @@ enum eResourceMaxIDs
                              // Model ID Range
     RESOURCE_MAX_ID_DFF = 19999, // 0-19999
     RESOURCE_MAX_ID_TXD = 24999, // 20000-24999
-    RESOURCE_MAX_ID_COL = 25255, // 25000-25255
-    RESOURCE_MAX_ID_IPL = 25510, // 25256-25510
+    RESOURCE_MAX_ID_COL = 25255, // 25000-25254
+    RESOURCE_MAX_ID_IPL = 25510, // 25255-25510
     RESOURCE_MAX_ID_DAT = 25574, // 25511-25574 
     RESOURCE_MAX_ID_IFP = 25754, // 25575-25754
     RESOURCE_MAX_ID_RRR = 26229, // 25755-26229 (vechicle recordings)
@@ -32,14 +32,14 @@ enum eResourceMaxIDs
 enum eResourceFirstID
 {
     // First ID of the resource
-    RESOURCE_FIRST_ID_DFF = 0,
-    RESOURCE_FIRST_ID_TXD = 20000,
-    RESOURCE_FIRST_ID_COL = 25000,
-    RESOURCE_FIRST_ID_IPL = 25256,
-    RESOURCE_FIRST_ID_DAT = 25511,
-    RESOURCE_FIRST_ID_IFP = 25575,
-    RESOURCE_FIRST_ID_RRR = 25755, // (vechicle recordings)
-    RESOURCE_FIRST_ID_SCM = 26230, // (streamed scripts)
+    RESOURCE_ID_DFF = 0,
+    RESOURCE_ID_TXD = 20000,
+    RESOURCE_ID_COL = 25000,
+    RESOURCE_ID_IPL = 25255,
+    RESOURCE_ID_DAT = 25511,
+    RESOURCE_ID_IFP = 25575,
+    RESOURCE_ID_RRR = 25755, // (vechicle recordings)
+    RESOURCE_ID_SCM = 26230, // (streamed scripts)
 };
 
 struct tRwStreamInitializeData
@@ -115,7 +115,7 @@ public:
      static signed int *ms_imageOffsets; // static signed int ms_imageOffsets[6]
      static bool &ms_bEnableRequestListPurge;
      static unsigned int &ms_streamingBufferSize;
-     static char *&ms_pStreamingBuffer;
+     static char **ms_pStreamingBuffer;
      static unsigned int &ms_memoryUsed;
      static unsigned int &ms_numModelsRequested;
      static CStreamingInfo *ms_aInfoForModel; // static CStreamingInfo ms_aInfoForModel[26316]
@@ -154,9 +154,9 @@ public:
      static void DisableCopBikes(bool bDisable);
     //! RandFactor : random number between 1-7
      static int FindMIPedSlotForInterior(int RandFactor);
-     static bool FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelIndex);
-     static bool FlushChannels();
-     static bool FlushRequestList();
+     static void FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelIndex);
+     static void FlushChannels();
+     static void FlushRequestList();
      static void ForceLayerToRead(int arg1);
      static int GetDefaultCabDriverModel();
      static int GetDefaultCopCarModel(unsigned int bIncludeCopBike);
@@ -190,7 +190,7 @@ public:
     //! does nothing (NOP)
      static void LoadInitialVehicles();
      static void LoadInitialWeapons();
-     static DWORD LoadRequestedModels();
+     static void LoadRequestedModels();
      static void LoadScene(CVector const *Posn);
      static void LoadSceneCollision(CVector const *Posn);
     //! unused

@@ -10,9 +10,7 @@ void __cdecl HOOK_THEFUNCTION();
 
 void InjectHooksMain(void)
 {
-    // CStreaming is unstable for now.
-    //CStreaming::InjectHooks();
-
+    CStreaming::InjectHooks();
     CVehicleModelInfo::InjectHooks();
     CFileLoader::InjectHooks();
     CPhysical::InjectHooks();
