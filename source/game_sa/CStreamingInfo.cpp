@@ -15,9 +15,9 @@ inline int CStreamingInfo::GetIndexFromBase(CStreamingInfo * pThis, CStreamingIn
 
 int CStreamingInfo::AddToList(CStreamingInfo *listStart) 
 {
-#ifdef USE_DEFAULT_FUNCTIONS
+//#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturnDynGlobal<int,CStreamingInfo *, CStreamingInfo *>(0x407480, this, listStart);
-#else
+#if 0
     m_nNextIndex = listStart->m_nNextIndex;
     m_nPrevIndex = GetIndexFromBase (listStart, ms_pArrayBase);
     listStart->m_nNextIndex = static_cast<short>((reinterpret_cast<DWORD>(this) - reinterpret_cast<DWORD>(ms_pArrayBase)) / 20);

@@ -1,9 +1,5 @@
 #include "StdInc.h"
 
-// CStreaming class is unstable. Requires some testing, so let's use the default functions for now.
-#define USE_DEFAULT_FUNCTIONS
-
-
 unsigned int &CStreaming::ms_memoryAvailable = *reinterpret_cast<unsigned int *>(0x8A5A80);
 unsigned int &CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<unsigned int *>(0x8A5A84);
 bool &CStreaming::ms_bLoadVehiclesInLoadScene = *reinterpret_cast<bool *>(0x8A5A88);
@@ -40,7 +36,7 @@ int &CStreaming::ms_lastImageRead = *reinterpret_cast<int *>(0x8E4C64);
 signed int *CStreaming::ms_imageOffsets = reinterpret_cast<signed int *>(0x8E4C8C);
 bool &CStreaming::ms_bEnableRequestListPurge = *reinterpret_cast<bool *>(0x8E4CA4);
 unsigned int &CStreaming::ms_streamingBufferSize = *reinterpret_cast<unsigned int *>(0x8E4CA8);
-char *&CStreaming::ms_pStreamingBuffer = *reinterpret_cast<char **>(0x8E4CAC);
+char **CStreaming::ms_pStreamingBuffer = reinterpret_cast<char **>(0x8E4CAC);
 unsigned int &CStreaming::ms_memoryUsed = *reinterpret_cast<unsigned int *>(0x8E4CB4);
 unsigned int &CStreaming::ms_numModelsRequested = *reinterpret_cast<unsigned int *>(0x8E4CB8);
 CStreamingInfo *CStreaming::ms_aInfoForModel = reinterpret_cast<CStreamingInfo *>(0x8E4CC0);
@@ -58,22 +54,17 @@ unsigned int &CStreaming::ms_numberOfBytesRead = *reinterpret_cast<unsigned int 
 
 void CStreaming::InjectHooks()
 {
-    CStreamingInfo::InjectHooks();
-    /*
-    InjectHook(0x40A45E, &CStreaming::LoadAllRequestedModels, PATCH_JUMP);
-    InjectHook(0x4087E0, &CStreaming::RequestModel, PATCH_JUMP);
-    InjectHook(0x40E170, &CStreaming::ProcessLoadingChannel, PATCH_JUMP);
-    InjectHook(0x40E460, &CStreaming::FlushChannels, PATCH_JUMP);
-    InjectHook(0x40CBA0, &CStreaming::RequestModelStream, PATCH_JUMP);
-    InjectHook(0x40E3A0, &CStreaming::LoadRequestedModels, PATCH_JUMP);
-    //////////////
-    // NOT TESTED
-    //////////////
-    //InjectHook(0x40E4E0, &CStreaming::FlushRequestList, PATCH_JUMP);
-
-    InjectHook(0x40C6B0, &CStreaming::ConvertBufferToObject, PATCH_JUMP);
-    InjectHook(0x40E120, &CStreaming::MakeSpaceFor, PATCH_JUMP);
-    //InjectHook(0x408CB0, &CStreaming::FinishLoadingLargeFile, PATCH_JUMP); */
+    //CStreamingInfo::InjectHooks(); 
+    HookInstall(0x40C6B0, &CStreaming::ConvertBufferToObject, 7);
+    HookInstall(0x40A45E, &CStreaming::LoadAllRequestedModels, 7);
+    HookInstall(0x4087E0, &CStreaming::RequestModel, 7);
+    HookInstall(0x408CB0, &CStreaming::FinishLoadingLargeFile, 7);
+    HookInstall(0x40E460, &CStreaming::FlushChannels, 7);
+    HookInstall(0x40CBA0, &CStreaming::RequestModelStream, 7);
+    HookInstall(0x40E170, &CStreaming::ProcessLoadingChannel, 7);
+    HookInstall(0x40E120, &CStreaming::MakeSpaceFor, 7);
+    HookInstall(0x40E3A0, &CStreaming::LoadRequestedModels, 7);
+    HookInstall(0x40E4E0, &CStreaming::FlushRequestList, 7);
 }
 
 bool CStreaming::AreAnimsUsedByRequestedModels(int AnimFileIndex) {
@@ -101,33 +92,29 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
     tRwStreamInitializeData rwStreamInitializationData = { pFileBuffer, bufferSize };
 
     RwStream* pRwStream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitializationData);
-    if (modelId >= 20000)
+    if (modelId >= RESOURCE_ID_TXD)
     {
-        if (modelId >= 25000)
+        if (modelId >= RESOURCE_ID_COL)
         {
-            if (modelId >= 25255)
+            if (modelId >= RESOURCE_ID_IPL)
             {
-                if (modelId >= 25511)
+                if (modelId >= RESOURCE_ID_DAT)
                 {
-                    if (modelId >= 25575)
+                    if (modelId >= RESOURCE_ID_IFP)
                     {
-                        if (modelId >= 25755)
+                        if (modelId >= RESOURCE_ID_RRR)
                         {
-                            if (modelId >= 26230)
-                            {
+                            if (modelId >= RESOURCE_ID_SCM) {
                                 CStreamedScripts & pStreamedScripts = CTheScripts::StreamedScripts;
-                                pStreamedScripts.LoadStreamedScript(pRwStream, modelId - 26230);
+                                pStreamedScripts.LoadStreamedScript(pRwStream, modelId - RESOURCE_ID_SCM);
                             }
-                            else
-                            {
-                                CVehicleRecording::Load(pRwStream, modelId - 25755, bufferSize);
+                            else {
+                                CVehicleRecording::Load(pRwStream, modelId - RESOURCE_ID_RRR, bufferSize);
                             }
                         }
-                        else
-                        {
-                            if (!(pModelStreamingInfo->m_nFlags & 0xE)
-                                && !AreAnimsUsedByRequestedModels(modelId - 25575))
-                            {
+                        else {
+                            if (!(pModelStreamingInfo->m_nFlags & (KEEP_IN_MEMORY | MISSION_REQUIRED | GAME_REQUIRED))
+                                && !AreAnimsUsedByRequestedModels(modelId - RESOURCE_ID_IFP))  {
                                 RemoveModel(modelId);
                                 RwStreamClose(pRwStream, &rwStreamInitializationData);
                                 return false;
@@ -138,10 +125,10 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
                     }
                     else
                     {
-                        ThePaths.LoadPathFindData(pRwStream, modelId - 25511);
+                        ThePaths.LoadPathFindData(pRwStream, modelId - RESOURCE_ID_DAT);
                     }
                 }
-                else if (!CIplStore::LoadIpl(modelId - 25255, pFileBuffer, bufferSize))
+                else if (!CIplStore::LoadIpl(modelId - RESOURCE_ID_IPL, pFileBuffer, bufferSize))
                 {
                     RemoveModel(modelId);
                     RequestModel(modelId, pModelStreamingInfo->m_nFlags);
@@ -149,7 +136,7 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
                     return false;
                 }
             }
-            else if (!CColStore::LoadCol(modelId - 25000, pFileBuffer, bufferSize))
+            else if (!CColStore::LoadCol(modelId - RESOURCE_ID_COL, pFileBuffer, bufferSize))
             {
                 RemoveModel(modelId);
                 RequestModel(modelId, pModelStreamingInfo->m_nFlags);
@@ -157,27 +144,20 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
                 return false;
             }
         }
-        else
-        {
-            int modelTxdIndex = modelId - 20000;
-            TxdDef *pTxdDef0 = nullptr;
-            if ((CTxdStore::ms_pTxdPool->m_byteMap[modelTxdIndex].IntValue() & 0x80u) == 0)
-            {
-                pTxdDef0 = &CTxdStore::ms_pTxdPool->m_pObjects[modelTxdIndex];
-                if (pTxdDef0)
-                {
-                    int txdIndex = pTxdDef0->m_wParentIndex;
-                    if (txdIndex != -1 && !CTxdStore::GetTxd(txdIndex))
-                    {
-                        RemoveModel(modelId);
-                        RequestModel(modelId, pModelStreamingInfo->m_nFlags);
-                        RwStreamClose(pRwStream, &rwStreamInitializationData);
-                        return false;
-                    }
+        else {
+            int modelTxdIndex = modelId - RESOURCE_ID_TXD;
+            TxdDef *pTxdDef = CTxdStore::ms_pTxdPool->GetAt(modelTxdIndex);
+            if (pTxdDef) {
+                int txdIndex = pTxdDef->m_wParentIndex;
+                if (txdIndex != -1 && !CTxdStore::GetTxd(txdIndex)) {
+                    RemoveModel(modelId);
+                    RequestModel(modelId, pModelStreamingInfo->m_nFlags);
+                    RwStreamClose(pRwStream, &rwStreamInitializationData);
+                    return false;
                 }
             }
 
-            if (!(pModelStreamingInfo->m_nFlags & 0xE)
+            if (!(pModelStreamingInfo->m_nFlags & (KEEP_IN_MEMORY | MISSION_REQUIRED | GAME_REQUIRED))
                 && !AreTexturesUsedByRequestedModels(modelTxdIndex))
             {
                 RemoveModel(modelId);
@@ -186,20 +166,15 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
             }
 
             bool bTxdLoaded = false;
-            if (ms_bLoadingBigModel)
-            {
+            if (ms_bLoadingBigModel) {
                 bTxdLoaded = CTxdStore::StartLoadTxd(modelTxdIndex, pRwStream);
                 if (bTxdLoaded)
-                {
                     pModelStreamingInfo->m_nLoadState = LOADSTATE_Finishing;
-                }
             }
-            else
-            {
+            else {
                 bTxdLoaded = CTxdStore::LoadTxd(modelTxdIndex, pRwStream);
             }
-            if (!bTxdLoaded)
-            {
+            if (!bTxdLoaded) {
                 RemoveModel(modelId);
                 RequestModel(modelId, pModelStreamingInfo->m_nFlags);
                 RwStreamClose(pRwStream, &rwStreamInitializationData);
@@ -207,18 +182,12 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
             }
         }
     }
-    else
-    {
+    else {
         int animFileIndex = pBaseModelInfo->GetAnimFileIndex();
         short wTxdIndex = pBaseModelInfo->m_nTxdIndex;
-
-
-        TxdDef* pTxdDef1 = nullptr;
-        if ((CTxdStore::ms_pTxdPool->m_byteMap[wTxdIndex].IntValue() & 0x80u) == 0)
-            pTxdDef1 = &CTxdStore::ms_pTxdPool->m_pObjects[wTxdIndex];
-
+        TxdDef* pTxdDef = CTxdStore::ms_pTxdPool->GetAt(wTxdIndex);
         CAnimBlock& AnimBlock = CAnimManager::ms_aAnimBlocks[animFileIndex];
-        if ((pTxdDef1 && !pTxdDef1->m_pRwDictionary) || animFileIndex != -1 && !AnimBlock.bLoaded)
+        if ((pTxdDef && !pTxdDef->m_pRwDictionary) || animFileIndex != -1 && !AnimBlock.bLoaded)
         {
             RemoveModel(modelId);
             RequestModel(modelId, pModelStreamingInfo->m_nFlags);
@@ -228,20 +197,15 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
 
         CTxdStore::AddRef(wTxdIndex);
         if (animFileIndex != -1)
-        {
             CAnimManager::AddAnimBlockRef(animFileIndex);
-        }
-
         CTxdStore::SetCurrentTxd(pBaseModelInfo->m_nTxdIndex);
 
         bool bFileLoaded = false;
-        if (pBaseModelInfo->GetRwModelType() == RWMODEL_INFO_ATOMIC)
-        {
+        if (pBaseModelInfo->GetRwModelType() == RWMODEL_INFO_ATOMIC) {
             RtDict* pRtDictionary = nullptr;
             RwChunkHeaderInfo chunkHeaderInfo;
             RwStreamReadChunkHeaderInfo(pRwStream, &chunkHeaderInfo);
-            if (chunkHeaderInfo.type == rwID_UVANIMDICT)
-            {
+            if (chunkHeaderInfo.type == rwID_UVANIMDICT) {
                 pRtDictionary = RtDictSchemaStreamReadDict(&RpUVAnimDictSchema, pRwStream);
                 RtDictSchemaSetCurrentDict(&RpUVAnimDictSchema, pRtDictionary);
             }
@@ -286,31 +250,23 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
     }
 
     RwStreamClose(pRwStream, &rwStreamInitializationData);
-    if (modelId >= 20000)
-    {
-        if (!(modelId >= 25000 && (modelId < 25575 || modelId >= 25755) && modelId < 26230 || pModelStreamingInfo->m_nFlags & 6))
-        {
+    if (modelId >= RESOURCE_ID_TXD) {
+        if (!(modelId >= RESOURCE_ID_COL && (modelId < RESOURCE_ID_IFP || modelId >= RESOURCE_ID_RRR) 
+            && modelId < RESOURCE_ID_SCM || pModelStreamingInfo->m_nFlags & (MISSION_REQUIRED | GAME_REQUIRED))) {
             pModelStreamingInfo->AddToList(pStartLoadedListStreamingInfo);
         }
     }
-    else
-    {
-        if (pBaseModelInfo->GetModelType() != MODEL_INFO_VEHICLE && pBaseModelInfo->GetModelType() != MODEL_INFO_PED)
-        {
+    else {
+        if (pBaseModelInfo->GetModelType() != MODEL_INFO_VEHICLE && pBaseModelInfo->GetModelType() != MODEL_INFO_PED) {
             CBaseModelInfo * pAsAtomicModelInfo = pBaseModelInfo->AsAtomicModelInfoPtr();
             if (pAsAtomicModelInfo)
-            {
                 pAsAtomicModelInfo->m_nAlpha = -((pModelStreamingInfo->m_nFlags & 0x24) != 0);
-            }
-            if (!(pModelStreamingInfo->m_nFlags & 6))
-            {
+            if (!(pModelStreamingInfo->m_nFlags & (MISSION_REQUIRED | GAME_REQUIRED)))
                 pModelStreamingInfo->AddToList(pStartLoadedListStreamingInfo);
-            }
         }
     }
 
-    if (pModelStreamingInfo->m_nLoadState != LOADSTATE_Finishing)
-    {
+    if (pModelStreamingInfo->m_nLoadState != LOADSTATE_Finishing) {
         pModelStreamingInfo->m_nLoadState = LOADSTATE_LOADED;
         ms_memoryUsed += bufferSize;
     }
@@ -318,13 +274,10 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
 #endif
 }
 
-
-
 bool CStreaming::IsVeryBusy() {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<bool>(0x4076A0);
 #else
-    std::printf("Streaming::IsVeryBusy called\n");
     return CRenderer::m_loadingPriority || ms_numModelsRequested > 5;
 #endif
 }
@@ -424,7 +377,6 @@ void CStreaming::RequestModel(int modelId, unsigned int streamingFlags)
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<int, unsigned int>(0x4087E0, modelId, streamingFlags);
 #else
-    int flags = streamingFlags;
     CStreamingInfo & modelStreamingInfo = ms_aInfoForModel[modelId];
     char loadState = modelStreamingInfo.m_nLoadState;
     if (loadState == LOADSTATE_Requested)
@@ -437,58 +389,49 @@ void CStreaming::RequestModel(int modelId, unsigned int streamingFlags)
     }
     else if (loadState)
     {
-        flags = streamingFlags & 0xEF;
+        streamingFlags &= ~PRIORITY_REQUEST;
     }
 
-    modelStreamingInfo.m_nFlags |= flags;
-    if (loadState == LOADSTATE_LOADED)
-    {
-        if (modelStreamingInfo.InList())
-        {
+    modelStreamingInfo.m_nFlags |= streamingFlags;
+    if (loadState == LOADSTATE_LOADED) {
+        if (modelStreamingInfo.InList()) {
             modelStreamingInfo.RemoveFromList();
-            if ((modelId < 20000))
-            {
+            if (modelId < RESOURCE_ID_TXD) {
                 CBaseModelInfo* modelInfo = CModelInfo::GetModelInfo(modelId);
                 size_t modelType = modelInfo->GetModelType();
-                if (modelType == MODEL_INFO_TYPE_PED && modelType == MODEL_INFO_TYPE_VEHICLE)
+                if (modelType == MODEL_INFO_TYPE_PED || modelType == MODEL_INFO_TYPE_VEHICLE)
                 {
                     return;
                 }
             }
 
-            if (!(modelStreamingInfo.m_nFlags & (GAME_REQUIRED || MISSION_REQUIRED)))
-            {
+            if (!(modelStreamingInfo.m_nFlags & (GAME_REQUIRED | MISSION_REQUIRED)))
                 modelStreamingInfo.AddToList(ms_startLoadedList);
-            }
         }
     }
-    else if (loadState != LOADSTATE_Channeled && loadState != LOADSTATE_Requested && loadState != LOADSTATE_Finishing)
-    {
-        if (loadState == LOADSTATE_NOT_LOADED)
-        {
-            if (modelId >= 20000)
-            {
-                if (modelId < 25000)                // txd
-                {
-                    int txdEntryParentIndex = CTxdStore::GetParentTxdSlot(modelId - 20000);
+    else if (loadState != LOADSTATE_Channeled && loadState != LOADSTATE_Requested && loadState != LOADSTATE_Finishing) {
+        if (loadState == LOADSTATE_NOT_LOADED) {
+            if (modelId >= RESOURCE_ID_TXD) {
+                if (modelId < RESOURCE_ID_COL) {
+                    int txdEntryParentIndex = CTxdStore::GetParentTxdSlot(modelId - RESOURCE_ID_TXD);
                     if (txdEntryParentIndex != -1)
-                        RequestTxdModel(txdEntryParentIndex, flags);
+                        RequestTxdModel(txdEntryParentIndex, streamingFlags);
                 }
             }
             else
             {
                 CBaseModelInfo* modelInfo = CModelInfo::GetModelInfo(modelId);
-                RequestTxdModel(modelInfo->m_nTxdIndex, flags);
+                RequestTxdModel(modelInfo->m_nTxdIndex, streamingFlags);
                 int animFileIndex = modelInfo->GetAnimFileIndex();
                 if (animFileIndex != -1)
-                    RequestModel(animFileIndex + 25575, KEEP_IN_MEMORY);
+                    RequestModel(animFileIndex + RESOURCE_ID_IFP, KEEP_IN_MEMORY);
             }
             modelStreamingInfo.AddToList(ms_pStartRequestedList);
             ++ms_numModelsRequested;
-            if (flags & PRIORITY_REQUEST)
+            if (streamingFlags & PRIORITY_REQUEST)
                 ++ms_numPriorityRequests;
         }
-        modelStreamingInfo.m_nFlags = flags;
+        modelStreamingInfo.m_nFlags = streamingFlags;
         modelStreamingInfo.m_nLoadState = LOADSTATE_Requested;// requested, loading
     }
 #endif
@@ -498,106 +441,86 @@ void CStreaming::RequestTxdModel(int txdModelID, int streamingFlags) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<int, int>(0x407100, txdModelID, streamingFlags);
 #else
-    RequestModel(txdModelID + 20000, streamingFlags);
+    RequestModel(txdModelID + RESOURCE_ID_TXD, streamingFlags);
 #endif
 }
 
-bool CStreaming::FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelId)
+void CStreaming::FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelId)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<bool, unsigned char *, int>(0x408CB0, pFileBuffer, modelId);
 #else
-    std::printf("FinishLoadingLargeFile called\n");
     bool bFinishedLoadingLargeFile = 0;
     CBaseModelInfo *pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CStreamingInfo& streamingInfo = CStreaming::ms_aInfoForModel[modelId];
-    if (streamingInfo.m_nLoadState == 4)
+    if (streamingInfo.m_nLoadState == LOADSTATE_Finishing)
     {
 
         unsigned int bufferSize = streamingInfo.m_nCdSize << 11;
         tRwStreamInitializeData rwStreamInitializationData = { pFileBuffer, bufferSize };
         RwStream * pRwStream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitializationData);
         bool bLoaded = false;
-        if (modelId >= 20000)
-        {
-            if (modelId >= 25000)
-            {
+        if (modelId >= RESOURCE_ID_TXD) {
+            if (modelId >= RESOURCE_ID_COL) {
                 bLoaded = modelId;
             }
             else
             {
-                CTxdStore::AddRef(modelId - 20000);
-                bLoaded = CTxdStore::FinishLoadTxd(modelId - 20000, pRwStream);
-                CTxdStore::RemoveRefWithoutDelete(modelId - 20000);
+                CTxdStore::AddRef(modelId - RESOURCE_ID_TXD);
+                bLoaded = CTxdStore::FinishLoadTxd(modelId - RESOURCE_ID_TXD, pRwStream);
+                CTxdStore::RemoveRefWithoutDelete(modelId - RESOURCE_ID_TXD);
             }
         }
-        else
-        {
+        else {
             CTxdStore::SetCurrentTxd(pBaseModelInfo->m_nTxdIndex);
             bLoaded = CFileLoader::FinishLoadClumpFile(pRwStream, modelId);
             if (bLoaded)
-            {
                 bLoaded = CStreaming::AddToLoadedVehiclesList(modelId);
-            }
             pBaseModelInfo->RemoveRef();
             CTxdStore::RemoveRefWithoutDelete(pBaseModelInfo->m_nTxdIndex);
             int animFileIndex = pBaseModelInfo->GetAnimFileIndex();
-            if (animFileIndex != -1)
-            {
+            if (animFileIndex != -1) {
                 CAnimManager::RemoveAnimBlockRefWithoutDelete(animFileIndex);
             }
         }
         RwStreamClose(pRwStream, &pFileBuffer);
         streamingInfo.m_nLoadState = LOADSTATE_LOADED;
         CStreaming::ms_memoryUsed += bufferSize;
-        if (bLoaded)
-        {
-            bFinishedLoadingLargeFile = true;
-        }
-        else
-        {
+        if (!bLoaded) {
             CStreaming::RemoveModel(modelId);
             CStreaming::RequestModel(modelId, streamingInfo.m_nFlags);
-            bFinishedLoadingLargeFile = false;
         }
     }
-    else
-    {
-        if (modelId < 20000)
-        {
+    else {
+        if (modelId < RESOURCE_ID_TXD)
             pBaseModelInfo->RemoveRef();
-        }
-        bFinishedLoadingLargeFile = false;
     }
-    return bFinishedLoadingLargeFile;
 #endif
 }
 
-bool CStreaming::FlushChannels()
+void CStreaming::FlushChannels()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<bool>(0x40E460);
 #else
-    char channelsFlushed = false;
     if (ms_channel[1].LoadStatus == LOADSTATE_Requested)
-        channelsFlushed = ProcessLoadingChannel(1);
+        ProcessLoadingChannel(1);
     if (ms_channel[0].LoadStatus == LOADSTATE_LOADED)
     {
         CdStreamSync(0);
         ms_channel[0].iLoadingLevel = 100;
-        channelsFlushed = ProcessLoadingChannel(0);
+        ProcessLoadingChannel(0);
     }
     if (ms_channel[0].LoadStatus == LOADSTATE_Requested)
-        channelsFlushed = ProcessLoadingChannel(0);
+        ProcessLoadingChannel(0);
     if (ms_channel[1].LoadStatus == LOADSTATE_LOADED)
     {
         CdStreamSync(1u);
         ms_channel[1].iLoadingLevel = 100;
-        channelsFlushed = ProcessLoadingChannel(1);
+        ProcessLoadingChannel(1);
     }
     if (ms_channel[1].LoadStatus == LOADSTATE_Requested)
-        channelsFlushed = ProcessLoadingChannel(1);
-    return channelsFlushed;
+        ProcessLoadingChannel(1);;
 #endif
 }
 
@@ -623,15 +546,15 @@ void CStreaming::RequestModelStream(int channelIndex)
         do
         {
             bool areTexturesUsedByRequestedModels = false;
-            if (modelId < 20000 || modelId >= 25000
-                || (areTexturesUsedByRequestedModels = AreTexturesUsedByRequestedModels(modelId - 20000), modelId))
+            if (modelId < RESOURCE_ID_TXD || modelId >= RESOURCE_ID_COL
+                || (areTexturesUsedByRequestedModels = AreTexturesUsedByRequestedModels(modelId - RESOURCE_ID_TXD), modelId))
             {
-                if (modelId < 25575)
+                if (modelId < RESOURCE_ID_IFP)
                     break;
-                if (modelId >= 25755)
+                if (modelId >= RESOURCE_ID_RRR)
                     break;
 
-                bool areAnimsUsedByRequestedModels = AreAnimsUsedByRequestedModels(modelId - 25575);
+                bool areAnimsUsedByRequestedModels = AreAnimsUsedByRequestedModels(modelId - RESOURCE_ID_IFP);
                 if (areAnimsUsedByRequestedModels)
                     break;
             }
@@ -650,7 +573,7 @@ void CStreaming::RequestModelStream(int channelIndex)
 
             streamingInfo = &ms_aInfoForModel[modelId];
 
-        } while (!(streamingInfo->m_nFlags & 14));
+        } while (!(streamingInfo->m_nFlags & (KEEP_IN_MEMORY | MISSION_REQUIRED | GAME_REQUIRED)));
     }
 
 
@@ -678,7 +601,7 @@ void CStreaming::RequestModelStream(int channelIndex)
     bool isModelTypePed = false;
 
     int modelIndex = 0;
-    int numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
+    const int numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
     while (modelIndex < numberOfModelIds)
     {
         streamingInfo = &ms_aInfoForModel[modelId];
@@ -694,9 +617,9 @@ void CStreaming::RequestModelStream(int channelIndex)
         {
             break;
         }
-        if (modelId >= 20000)
+        if (modelId >= RESOURCE_ID_TXD)
         {
-            if (modelId < 25575 || modelId >= 25755)
+            if (modelId < RESOURCE_ID_IFP || modelId >= RESOURCE_ID_RRR)
             {
                 if (isVehcileModelORBlockCountGreaterThan200 && blockCount > 200)
                 {
@@ -720,7 +643,7 @@ void CStreaming::RequestModelStream(int channelIndex)
             {
                 break;
             }
-            unsigned char loadState = ms_aInfoForModel[pBaseModelInfo->m_nTxdIndex + 20000].m_nLoadState;
+            unsigned char loadState = ms_aInfoForModel[pBaseModelInfo->m_nTxdIndex + RESOURCE_ID_TXD].m_nLoadState;
             if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_Channeled)
             {
                 break;
@@ -728,8 +651,8 @@ void CStreaming::RequestModelStream(int channelIndex)
             int animFileIndex = pBaseModelInfo->GetAnimFileIndex();
             if (animFileIndex != -1)
             {
-                unsigned char loadState2 = ms_aInfoForModel[animFileIndex + 25575].m_nLoadState;
-                if (loadState2 != LOADSTATE_LOADED && loadState2 != LOADSTATE_Channeled)
+                unsigned char loadState = ms_aInfoForModel[animFileIndex + RESOURCE_ID_IFP].m_nLoadState;
+                if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_Channeled)
                     break;
             }
         }
@@ -747,7 +670,7 @@ void CStreaming::RequestModelStream(int channelIndex)
 
 
         CBaseModelInfo *  pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
-        if (modelId >= 20000)
+        if (modelId >= RESOURCE_ID_TXD)
         {
             if (blockCount > 200)
             {
@@ -773,7 +696,7 @@ void CStreaming::RequestModelStream(int channelIndex)
         if (streamingInfo->m_nFlags & PRIORITY_REQUEST)
         {
             int numPriorityRequests = ms_numPriorityRequests - 1;
-            streamingInfo->m_nFlags &= 0xEFu;
+            streamingInfo->m_nFlags &= ~PRIORITY_REQUEST;
             ms_numPriorityRequests = numPriorityRequests;
         }
 
@@ -787,7 +710,7 @@ void CStreaming::RequestModelStream(int channelIndex)
         memset(&streamingChannel.modelIds[modelIndex], 0xFFu, 4 * (numberOfModelIds - modelIndex)); // 0xFFu = -1
     }
 
-    CdStreamRead(channelIndex, (int)((&ms_pStreamingBuffer)[channelIndex * 4]), blockOffsetMimg, sectorCount);
+    CdStreamRead(channelIndex, ms_pStreamingBuffer[channelIndex], blockOffsetMimg, sectorCount);
 
     tStreamingChannel & streamingChannel = ms_channel[channelIndex];
     streamingChannel.LoadStatus = LOADSTATE_LOADED;
@@ -795,7 +718,6 @@ void CStreaming::RequestModelStream(int channelIndex)
     streamingChannel.iBlockCount = sectorCount;
     streamingChannel.iBlockOffset = blockOffsetMimg;
     streamingChannel.OnBeginRead = 0;
-
 
     if (m_bModelStreamNotLoaded)
         m_bModelStreamNotLoaded = false;
@@ -809,8 +731,7 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
 #else
     tStreamingChannel& streamingChannel = ms_channel[channelIndex];
     int streamStatus = CdStreamGetStatus(channelIndex);
-    if (streamStatus)
-    {
+    if (streamStatus) {
         if (streamStatus == 255)
             return false;
         if (streamStatus == 250)
@@ -828,29 +749,26 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
 
     bool isRequested = streamingChannel.LoadStatus == LOADSTATE_Requested;
     streamingChannel.LoadStatus = LOADSTATE_NOT_LOADED; // 0;
-    if (!isRequested)
-    {
+    if (!isRequested) {
         int numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
-        for (int modelIndex = 0; modelIndex < numberOfModelIds; modelIndex++)
-        {
+        for (int modelIndex = 0; modelIndex < numberOfModelIds; modelIndex++) {
             int modelId = streamingChannel.modelIds[modelIndex];
-            if (modelId != -1)
-            {
+            if (modelId != -1) {
                 CBaseModelInfo* baseModelInfo = CModelInfo::GetModelInfo(modelId);
                 CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
                 int nCdSize = streamingInfo.m_nCdSize;
 
-                if (modelId >= 20000
+                if (modelId >= RESOURCE_ID_TXD
                     || baseModelInfo->GetModelType() != MODEL_INFO_VEHICLE
                     || ms_vehiclesLoaded.CountMembers() < desiredNumVehiclesLoaded
                     || RemoveLoadedVehicle()
-                    || streamingInfo.m_nFlags & 6)
+                    || streamingInfo.m_nFlags & (MISSION_REQUIRED | GAME_REQUIRED))
                 {
-                    if (modelId < 25255 || modelId >= 25511)
+                    if (modelId < RESOURCE_ID_IPL || modelId >= RESOURCE_ID_DAT)
                         MakeSpaceFor(nCdSize << 11); // MakeSpaceFor(nCdSize * (2^11))
 
                     int bufferOffset = streamingChannel.modelStreamingBufferOffsets[modelIndex];
-                    unsigned char * pFileBuffer = reinterpret_cast <unsigned char*> (&(&ms_pStreamingBuffer)[channelIndex][2048 * bufferOffset]);
+                    unsigned char * pFileBuffer = reinterpret_cast <unsigned char*> (&ms_pStreamingBuffer[channelIndex][2048 * bufferOffset]);
 
                     ConvertBufferToObject(pFileBuffer, modelId);
 
@@ -863,19 +781,13 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
                         streamingChannel.modelIds[modelIndex] = -1;
                     }
                 }
-                else
-                {
+                else {
                     int modelTxdIndex = baseModelInfo->m_nTxdIndex;
                     RemoveModel(modelId);
-
-                    if (streamingInfo.m_nFlags & 6)
-                    {
+                    if (streamingInfo.m_nFlags & (MISSION_REQUIRED | GAME_REQUIRED))
                         RequestModel(modelId, streamingInfo.m_nFlags);
-                    }
                     else if (!CTxdStore::GetNumRefs(modelTxdIndex))
-                    {
                         RemoveTxdModel(modelTxdIndex);
-                    }
                 }
             }
         }
@@ -883,7 +795,7 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
     else
     {
         int bufferOffset = streamingChannel.modelStreamingBufferOffsets[0];
-        unsigned char * pFileContents = reinterpret_cast<unsigned char*>(&(&ms_pStreamingBuffer)[channelIndex][2048 * bufferOffset]);
+        unsigned char * pFileContents = reinterpret_cast<unsigned char*>(&ms_pStreamingBuffer[channelIndex][2048 * bufferOffset]);
         FinishLoadingLargeFile(pFileContents, streamingChannel.modelIds[0]);
         streamingChannel.modelIds[0] = -1;
     }
@@ -910,7 +822,7 @@ void CStreaming::RemoveTxdModel(int Modelindex)
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<int>(0x40C180, Modelindex);
 #else
-    RemoveModel(Modelindex + 20000);
+    RemoveModel(Modelindex + RESOURCE_ID_TXD);
 #endif
 }
 
@@ -940,12 +852,12 @@ void CStreaming::RetryLoadFile(int streamNum) {
 }
 
 
-DWORD CStreaming::LoadRequestedModels()
+void CStreaming::LoadRequestedModels()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturnDynGlobal<DWORD>(0x40E3A0);
+    return plugin::Call<0x40E3A0>();
 #else
-    DWORD channelIndex = 0;
+    unsigned channelIndex = 0;
 
     if (ms_bLoadingBigModel)
     {
@@ -979,20 +891,14 @@ DWORD CStreaming::LoadRequestedModels()
     {
         ms_numberOfBytesRead = 1 - channelIndex;
     }
-    return channelIndex;
 #endif
 }
 
-//////////////
-// NOT TESTED
-//////////////
-bool CStreaming::FlushRequestList()
+void CStreaming::FlushRequestList()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<bool>(0x40E4E0);
 #else
-    std::printf(" CStreaming::FlushRequestList called\n");
-
     CStreamingInfo *streamingInfo = nullptr;
     CStreamingInfo *nextStreamingInfo = nullptr;
 
@@ -1020,7 +926,7 @@ bool CStreaming::FlushRequestList()
             streamingInfo = nextStreamingInfo;
         } while (nextStreamingInfo != ms_pEndRequestedList);
     }
-    return FlushChannels();
+    FlushChannels();
 #endif
 }
 
