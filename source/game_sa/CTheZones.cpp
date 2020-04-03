@@ -38,6 +38,12 @@
 #define FUNC_CTheZones__Save 0x5D2E60 
 #define FUNC_CTheZones__Load 0x5D2F40
 
+void CTheZones::InjectHooks()
+{
+	HookInstall(FUNC_CTheZones__ResetZonesRevealed, &CTheZones::ResetZonesRevealed, 7);
+	HookInstall(FUNC_CTheZones__GetCurrentZoneLockedOrUnlocked, &CTheZones::GetCurrentZoneLockedOrUnlocked, 7);
+}
+
 // Variables
 eLevelName& CTheZones::m_CurrLevel = *(eLevelName*)VAR_CTheZones__m_CurrLevel;
 
@@ -58,12 +64,21 @@ void CTheZones::InitZonesPopulationSettings()
 
 void CTheZones::ResetZonesRevealed()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
 	((void(__cdecl*)()) FUNC_CTheZones__ResetZonesRevealed) ();
+#else
+	memset(CTheZones::ExploredTerritoriesArray, 0, sizeof(CTheZones::ExploredTerritoriesArray));
+	CTheZones::TotalNumberExploredTerritories = 0;
+#endif
 }
 
 bool CTheZones::GetCurrentZoneLockedOrUnlocked(float posx, float posy)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
 	return ((bool(__cdecl*)(float, float)) FUNC_CTheZones__GetCurrentZoneLockedOrUnlocked) (posx, posy);
+#else
+	return CTheZones::ExploredTerritoriesArray[(unsigned int)(10 * ((posx + 3000.0) * 0.0016666667) - ((posy + 3000.0) * 0.0016666667) + 9)] != 0;
+#endif
 }
 
 

@@ -36,6 +36,8 @@ public:
 
 	// Functions
 	
+	static void InjectHooks();
+
 	static void InitZonesPopulationSettings();
 	
 	static void ResetZonesRevealed();
