@@ -986,12 +986,12 @@ int CStreaming::GetDefaultCopCarModel(int ignoreLvpd1Model) {
 
     if (!m_bCopBikeLoaded || 
         ignoreLvpd1Model || 
-        ms_aInfoForModel[ms_DefaultCopBikerModel].m_nLoadState != 1 || 
-        (result = ms_DefaultCopBikeModel, ms_aInfoForModel[ms_DefaultCopBikeModel].m_nLoadState != 1))
+        ms_aInfoForModel[ms_DefaultCopBikerModel].m_nLoadState != LOADSTATE_LOADED ||
+        (result = ms_DefaultCopBikeModel, ms_aInfoForModel[ms_DefaultCopBikeModel].m_nLoadState != LOADSTATE_LOADED))
     {
         result = ms_aDefaultCopCarModel[CTheZones::m_CurrLevel];
-        if (ms_aInfoForModel[ms_aDefaultCopModel[CTheZones::m_CurrLevel]].m_nLoadState != 1
-            || ms_aInfoForModel[result].m_nLoadState != 1)
+        if (ms_aInfoForModel[ms_aDefaultCopModel[CTheZones::m_CurrLevel]].m_nLoadState != LOADSTATE_LOADED
+            || ms_aInfoForModel[result].m_nLoadState != LOADSTATE_LOADED)
         {
             int elementCount = 5;
             if (ignoreLvpd1Model)
@@ -1003,11 +1003,11 @@ int CStreaming::GetDefaultCopCarModel(int ignoreLvpd1Model) {
             }
             else
             {
-                while (ms_aInfoForModel[ms_aDefaultCopModel[iterator]].m_nLoadState != 1
-                    || ms_aInfoForModel[ms_aDefaultCopCarModel[iterator]].m_nLoadState != 1)
+                while (ms_aInfoForModel[ms_aDefaultCopModel[iterator]].m_nLoadState != LOADSTATE_LOADED
+                    || ms_aInfoForModel[ms_aDefaultCopCarModel[iterator]].m_nLoadState != LOADSTATE_LOADED)
                 {
                     if (++iterator >= elementCount)
-                        result = -1;
+                        return -1;
                 }
                 result = ms_aDefaultCopCarModel[iterator];
             }
