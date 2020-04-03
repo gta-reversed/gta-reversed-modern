@@ -73,7 +73,9 @@ void CStreaming::InjectHooks()
     HookInstall(0x40E170, &CStreaming::ProcessLoadingChannel, 7);
     HookInstall(0x40E120, &CStreaming::MakeSpaceFor, 7);
     HookInstall(0x40E3A0, &CStreaming::LoadRequestedModels, 7);
-    HookInstall(0x40E4E0, &CStreaming::FlushRequestList, 7);
+    HookInstall(0x40E4E0, &CStreaming::FlushRequestList, 7); 
+    HookInstall(0x407D40, &CStreaming::GetDefaultFiremanModel, 7);
+    HookInstall(0x407D20, &CStreaming::GetDefaultMedicModel, 7);
 }
 
 void* CStreaming::AddEntity(CEntity* a2) {
@@ -977,6 +979,57 @@ void CStreaming::SetModelTxdIsDeletable(int modelIndex) {
 }
 
 int CStreaming::GetDefaultCopCarModel(int ignoreLvpd1Model) {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<int, unsigned int>(0x407C50, ignoreLvpd1Model);
+#else
+    signed int result;
+
+    if (!m_bCopBikeLoaded || 
+        ignoreLvpd1Model || 
+        ms_aInfoForModel[ms_DefaultCopBikerModel].m_nLoadState != 1 || 
+        (result = ms_DefaultCopBikeModel, ms_aInfoForModel[ms_DefaultCopBikeModel].m_nLoadState != 1))
+    {
+        result = ms_aDefaultCopCarModel[CTheZones::m_CurrLevel];
+        if (ms_aInfoForModel[ms_aDefaultCopModel[CTheZones::m_CurrLevel]].m_nLoadState != 1
+            || ms_aInfoForModel[result].m_nLoadState != 1)
+        {
+            int elementCount = 5;
+            if (ignoreLvpd1Model)
+                elementCount = 4;
+            int iterator = 0;
+            if (elementCount <= 0)
+            {
+                result = -1;
+            }
+            else
+            {
+                while (ms_aInfoForModel[ms_aDefaultCopModel[iterator]].m_nLoadState != 1
+                    || ms_aInfoForModel[ms_aDefaultCopCarModel[iterator]].m_nLoadState != 1)
+                {
+                    if (++iterator >= elementCount)
+                        result = -1;
+                }
+                result = ms_aDefaultCopCarModel[iterator];
+            }
+        }
+    }
+    return result;
+#endif
 }
 
+
+int CStreaming::GetDefaultFiremanModel() {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<int>(0x407D40);
+#else
+    return ms_aDefaultFiremanModel[CTheZones::m_CurrLevel];
+#endif
+}
+
+int CStreaming::GetDefaultMedicModel() {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<int>(0x407D20);
+#else
+    return ms_aDefaultMedicModel[CTheZones::m_CurrLevel];
+#endif
+}
