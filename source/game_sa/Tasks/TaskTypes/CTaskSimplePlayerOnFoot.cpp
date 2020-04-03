@@ -322,7 +322,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 bool bPedVehicle = pTargetEntity->m_nPedFlags >> 8 & 0xFFFFFF01;
 
                 CEventDamage eventDamage;
-                eventDamage.Constructor1(pPlayerPed, CTimer::m_snTimeInMilliseconds, activeWeaponType, PED_PIECE_TORSO, 0, 0, bPedVehicle);
+                eventDamage.Constructor(pPlayerPed, CTimer::m_snTimeInMilliseconds, activeWeaponType, PED_PIECE_TORSO, 0, 0, bPedVehicle);
                 CPedDamageResponse damageResponseInfo;
                 if (eventDamage.AffectsPed(pTargetEntity))
                 {
@@ -332,7 +332,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                     pPlayerPed->m_weaponAudio.AddAudioEvent(156);
                 }
                 pPlayerPed->ClearWeaponTarget();
-                eventDamage.Destructor1();
+                eventDamage.Destructor();
                 pedDamageResponseCalculator.Destructor1();
             }
             else
