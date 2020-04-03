@@ -54,7 +54,7 @@ public:
     bool m_bTriggerWaterSplash;
     char pad2[3];
 
-    static bool &SWIM_DIVE_UNDER_ANGLE;
+    static float &SWIM_DIVE_UNDER_ANGLE;
     static float &SWIM_STOP_TIME;
 
     static void InjectHooks();
