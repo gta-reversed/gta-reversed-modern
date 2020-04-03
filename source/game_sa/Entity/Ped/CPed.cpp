@@ -18,6 +18,8 @@ void CPed::InjectHooks()
     HookInstall(0x5DF000, &CPed::CanPedReturnToState, 7); 
     HookInstall(0x5E8BE0, &CPed::GiveWeaponWhenJoiningGang, 7);
     HookInstall(0x5E6580, (char(CPed::*)()) &CPed::GetWeaponSkill, 7);
+    HookInstall(0x5E6530, &CPed::ReplaceWeaponForScriptedCutscene, 7);
+    HookInstall(0x5E6550, &CPed::RemoveWeaponForScriptedCutscene, 7);
 }
 
 CPed::CPed(ePedType pedtype) : CPhysical(plugin::dummy), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
@@ -709,13 +711,27 @@ void CPed::ReplaceWeaponWhenExitingVehicle()
 // Converted from thiscall void CPed::ReplaceWeaponForScriptedCutscene(void) 0x5E6530
 void CPed::ReplaceWeaponForScriptedCutscene()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall *)(CPed*))0x5E6530)(this);
+#else
+    m_nSavedWeapon = m_aWeapons[m_nActiveWeaponSlot].m_nType;
+    SetCurrentWeapon(0);
+#endif
 }
 
 // Converted from thiscall void CPed::RemoveWeaponForScriptedCutscene(void) 0x5E6550
 void CPed::RemoveWeaponForScriptedCutscene()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall *)(CPed*))0x5E6550)(this);
+#else
+    if (m_nSavedWeapon != WEAPON_UNIDENTIFIED)
+    {
+        CWeaponInfo* weaponInfo = CWeaponInfo::GetWeaponInfo(m_nSavedWeapon, 1);
+        CPed::SetCurrentWeapon(weaponInfo->m_nSlot);
+        m_nSavedWeapon = WEAPON_UNIDENTIFIED;
+    }
+#endif
 }
 
 char CPed::GetWeaponSkill()
