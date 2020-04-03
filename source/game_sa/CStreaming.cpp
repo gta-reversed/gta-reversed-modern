@@ -982,38 +982,32 @@ int CStreaming::GetDefaultCopCarModel(int ignoreLvpd1Model) {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<int, unsigned int>(0x407C50, ignoreLvpd1Model);
 #else
-    signed int result;
-
-    if (!m_bCopBikeLoaded || 
-        ignoreLvpd1Model || 
+    int carModelId = ms_DefaultCopBikeModel;
+    if (!m_bCopBikeLoaded || ignoreLvpd1Model ||
         ms_aInfoForModel[ms_DefaultCopBikerModel].m_nLoadState != LOADSTATE_LOADED ||
-        (result = ms_DefaultCopBikeModel, ms_aInfoForModel[ms_DefaultCopBikeModel].m_nLoadState != LOADSTATE_LOADED))
+        ms_aInfoForModel[ms_DefaultCopBikeModel].m_nLoadState != LOADSTATE_LOADED)
     {
-        result = ms_aDefaultCopCarModel[CTheZones::m_CurrLevel];
+        carModelId = ms_aDefaultCopCarModel[CTheZones::m_CurrLevel];
         if (ms_aInfoForModel[ms_aDefaultCopModel[CTheZones::m_CurrLevel]].m_nLoadState != LOADSTATE_LOADED
-            || ms_aInfoForModel[result].m_nLoadState != LOADSTATE_LOADED)
+            || ms_aInfoForModel[carModelId].m_nLoadState != LOADSTATE_LOADED)
         {
-            int elementCount = 5;
+            int elementCount = 4;
             if (ignoreLvpd1Model)
-                elementCount = 4;
-            int iterator = 0;
-            if (elementCount <= 0)
-            {
-                result = -1;
-            }
-            else
-            {
-                while (ms_aInfoForModel[ms_aDefaultCopModel[iterator]].m_nLoadState != LOADSTATE_LOADED
-                    || ms_aInfoForModel[ms_aDefaultCopCarModel[iterator]].m_nLoadState != LOADSTATE_LOADED)
-                {
-                    if (++iterator >= elementCount)
-                        return -1;
+                elementCount = 3;
+            for (int i = 0; i < elementCount; i++) {
+                unsigned char copModelLoadState = ms_aInfoForModel[ms_aDefaultCopModel[i]].m_nLoadState;
+                unsigned char copCarModelLoadState = ms_aInfoForModel[ms_aDefaultCopCarModel[i]].m_nLoadState;
+                if (copModelLoadState != LOADSTATE_LOADED || copCarModelLoadState != LOADSTATE_LOADED) {
+                    return -1;
                 }
-                result = ms_aDefaultCopCarModel[iterator];
+                else {
+                    return ms_aDefaultCopCarModel[i];
+                }
             }
+            return -1;
         }
     }
-    return result;
+    return carModelId;
 #endif
 }
 
