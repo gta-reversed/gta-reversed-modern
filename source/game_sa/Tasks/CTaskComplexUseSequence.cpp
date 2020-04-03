@@ -97,7 +97,7 @@ bool CTaskComplexUseSequence::MakeAbortable_Reversed(class CPed* ped, eAbortPrio
     if (bMakeAbortable && _event && _event->GetEventType() == EVENT_DAMAGE)
     {
         CEventDamage* pEventDamage = (CEventDamage*)_event;
-        if (pEventDamage->damageResponseData.bHealthZero && pEventDamage->unkC)
+        if (pEventDamage->m_damageResponse.m_bHealthZero && pEventDamage->m_bAddToEventGroup)
         {
             CTaskComplexSequence* pTaskComplexSequence = &CTaskSequences::ms_taskSequence[m_nSequenceIndex];
             bool bFinalReference = pTaskComplexSequence->m_nReferenceCount == 1;
