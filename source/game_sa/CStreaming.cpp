@@ -997,10 +997,7 @@ int CStreaming::GetDefaultCopCarModel(int ignoreLvpd1Model) {
             for (int i = 0; i < elementCount; i++) {
                 unsigned char copModelLoadState = ms_aInfoForModel[ms_aDefaultCopModel[i]].m_nLoadState;
                 unsigned char copCarModelLoadState = ms_aInfoForModel[ms_aDefaultCopCarModel[i]].m_nLoadState;
-                if (copModelLoadState != LOADSTATE_LOADED || copCarModelLoadState != LOADSTATE_LOADED) {
-                    return -1;
-                }
-                else {
+                if (copModelLoadState == LOADSTATE_LOADED && copCarModelLoadState == LOADSTATE_LOADED) {
                     return ms_aDefaultCopCarModel[i];
                 }
             }
