@@ -11,8 +11,6 @@
 #include "CPed.h"
 
 class  CTaskComplexKillPedFromBoat : public CTaskComplex {
-protected:
-	CTaskComplexKillPedFromBoat(plugin::dummy_func_t a) : CTaskComplex(a) {}
 public:
 	CPed *pPed;
 

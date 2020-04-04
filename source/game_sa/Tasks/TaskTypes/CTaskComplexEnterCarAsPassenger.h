@@ -10,8 +10,6 @@ Do not delete this comment block. Respect others' work!
 #include "CTaskComplexEnterCar.h"
 
 class  CTaskComplexEnterCarAsPassenger : public CTaskComplexEnterCar {
-protected:
-    CTaskComplexEnterCarAsPassenger(plugin::dummy_func_t a) : CTaskComplexEnterCar(a) {}
 public:
 
     CTaskComplexEnterCarAsPassenger(CVehicle* pTargetVehicle, int nTargetSeat, bool bCarryOnAfterFallingOff);

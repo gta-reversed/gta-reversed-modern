@@ -11,8 +11,6 @@ Do not delete this comment block. Respect others' work!
 #include "CVehicle.h"
 
 class  CTaskComplexEnterBoatAsDriver : public CTaskComplex {
-protected:
-    CTaskComplexEnterBoatAsDriver(plugin::dummy_func_t a) : CTaskComplex(a) {}
 public:
     CVehicle* m_pTargetVehicle;
 

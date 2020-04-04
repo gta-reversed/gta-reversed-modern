@@ -12,8 +12,6 @@ Do not delete this comment block. Respect others' work!
 
 class CTaskComplexUseGoggles : public CTaskComplex
 {
-protected:
-    CTaskComplexUseGoggles(plugin::dummy_func_t a) : CTaskComplex(a) {}
 public:
   
     CTaskComplexUseGoggles* Constructor();

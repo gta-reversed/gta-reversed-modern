@@ -1,10 +1,5 @@
 #include "StdInc.h"
 
-CTask* CTaskSimpleHoldEntity::DeletingDestructor(uint8_t deletingFlags)
-{
-    return plugin::CallMethodAndReturn<CTaskSimpleHoldEntity*, 0x692FD0, CTaskSimpleHoldEntity*, uint8_t>(this, deletingFlags);
-}
-
 CTask* CTaskSimpleHoldEntity::Clone()
 {
     return plugin::CallMethodAndReturn<CTaskSimpleHoldEntity*, 0x6929B0, CTaskSimpleHoldEntity*>(this);

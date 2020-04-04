@@ -11,8 +11,6 @@ Do not delete this comment block. Respect others' work!
 #include "CTaskSimpleFacial.h"
 
 class  CTaskComplexFacial : public CTaskComplex {
-protected:
-    CTaskComplexFacial(plugin::dummy_func_t a) : CTaskComplex(a) {}
 public:
     bool m_bNotPlayer;
     bool m_bStarted;

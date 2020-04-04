@@ -13,6 +13,12 @@ public:
 
     static void InjectHooks();
 
+    CTaskComplexUseSequence() {} // blame R* for this
+    CTaskComplexUseSequence(int sequenceIndex);
+    ~CTaskComplexUseSequence();
+private:
+    CTaskComplexUseSequence* Constructor(int sequenceIndex);
+public:
     CTask* Clone() override;
     eTaskType GetId() override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
@@ -26,11 +32,6 @@ public:
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);
-
-    CTaskComplexUseSequence* Constructor(int sequenceIndex);
-    CTaskComplexUseSequence* Destructor();
-
-    static const unsigned int CTaskComplexUseSequence_VTable = 0x86e518;
 };
 
 VALIDATE_SIZE(CTaskComplexUseSequence, 0x1C);

@@ -17,10 +17,12 @@ void CTaskSimpleSwim::InjectHooks()
     HookInstall(0x68AA50, &CTaskSimpleSwim::DestroyFxSystem, 7);
 }
 
+/*
 CTaskSimpleSwim::CTaskSimpleSwim(CVector const* pPosn, CPed* pPed) : CTaskSimple(plugin::dummy)
 {
     plugin::CallMethod<0x688930, CTaskSimpleSwim*, CVector const*, CPed*>(this, pPosn, pPed);
 }
+*/
 
 bool CTaskSimpleSwim::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event)
 {

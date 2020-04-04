@@ -11,8 +11,6 @@
 #include "CPed.h"
 
 class CTaskComplexProstituteSolicit : public CTaskComplex {
-protected:
-    CTaskComplexProstituteSolicit(plugin::dummy_func_t a) : CTaskComplex(a) {}
 public:
     CPed *m_pClient; // player only
     CVector m_vecVehiclePosn;

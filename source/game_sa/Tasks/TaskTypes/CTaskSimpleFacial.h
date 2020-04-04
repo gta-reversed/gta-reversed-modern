@@ -21,8 +21,6 @@ enum eFacialExpression
 };
 
 class  CTaskSimpleFacial : public CTaskSimple {
-protected:
-    CTaskSimpleFacial(plugin::dummy_func_t a) : CTaskSimple(a), m_Timer(a) {}
 public:
     CTaskTimer m_Timer;
     eFacialExpression m_nFacialExpression;

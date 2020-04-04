@@ -21,8 +21,6 @@ enum eDuckControlTypes : unsigned char
 };
 
 class  CTaskSimpleDuck : public CTaskSimple {
-protected:
-    CTaskSimpleDuck(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     unsigned int m_nStartTime;
     unsigned short m_nLengthOfDuck;

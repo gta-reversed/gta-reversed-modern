@@ -11,8 +11,6 @@
 #include "CTaskTimer.h"
 
 class  CTaskComplexWanderStandard : public CTaskComplexWander {
-protected:
-    CTaskComplexWanderStandard(plugin::dummy_func_t a) : CTaskComplexWander(a) , m_TaskTimer(a) {}
 public:
     CTaskTimer m_TaskTimer;
     int m_nMinNextScanTime;

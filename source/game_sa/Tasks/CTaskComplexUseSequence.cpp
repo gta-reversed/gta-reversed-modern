@@ -2,14 +2,49 @@
 
 void CTaskComplexUseSequence::InjectHooks()
 {
+    HookInstall(0x635450, &CTaskComplexUseSequence::Constructor, 7);
     HookInstall(0x637100, &CTaskComplexUseSequence::Clone_Reversed, 7);
     HookInstall(0x635490, &CTaskComplexUseSequence::GetId_Reversed, 7);
     HookInstall(0x639730, &CTaskComplexUseSequence::MakeAbortable_Reversed, 7);
     HookInstall(0x6354A0, &CTaskComplexUseSequence::CreateNextSubTask_Reversed, 7);
     HookInstall(0x6354D0, &CTaskComplexUseSequence::CreateFirstSubTask_Reversed, 7);
     HookInstall(0x635530, &CTaskComplexUseSequence::ControlSubTask_Reversed, 7);
-    HookInstall(0x635450, &CTaskComplexUseSequence::Constructor, 7);
-    HookInstall(0x6396C0, &CTaskComplexUseSequence::Destructor, 7);
+}
+
+CTaskComplexUseSequence::CTaskComplexUseSequence(int sequenceIndex) {
+    m_nSequenceIndex = sequenceIndex;
+    m_nCurrentTaskIndex = 0;
+    m_nSequenceRepeatedCount = 0;
+    m_nEndTaskIndex = -1;
+    CTaskSequences::ms_taskSequence[m_nSequenceIndex].m_nReferenceCount++;
+}
+
+CTaskComplexUseSequence::~CTaskComplexUseSequence()
+{
+    if (m_nSequenceIndex != -1)
+    {
+        auto pComplexSequence = &CTaskSequences::ms_taskSequence[m_nSequenceIndex];
+        bool bFinalReference = pComplexSequence->m_nReferenceCount == 1;
+        pComplexSequence->m_nReferenceCount--;
+        if (bFinalReference)
+        {
+            if (pComplexSequence->m_bFlushTasks)
+            {
+                pComplexSequence->m_bFlushTasks = 0;
+                pComplexSequence->Flush();
+            }
+        }
+    }
+}
+
+CTaskComplexUseSequence* CTaskComplexUseSequence::Constructor(int sequenceIndex)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<CTaskComplexUseSequence*, 0x635450, CTaskComplexUseSequence*, int>(this, sequenceIndex);
+#else
+    this->CTaskComplexUseSequence::CTaskComplexUseSequence(sequenceIndex);
+    return this;
+#endif
 }
 
 CTask* CTaskComplexUseSequence::Clone()
@@ -68,12 +103,10 @@ CTask* CTaskComplexUseSequence::ControlSubTask(CPed* ped)
 
 CTask* CTaskComplexUseSequence::Clone_Reversed()
 {
-    auto pClonedComplexUseSequence = (CTaskComplexUseSequence*)CTask::operator new(28);
+    auto pClonedComplexUseSequence = new CTaskComplexUseSequence;
     if (pClonedComplexUseSequence)
     {
-        pClonedComplexUseSequence->CTaskComplex::Constructor();
         pClonedComplexUseSequence->m_nSequenceIndex = m_nSequenceIndex;
-        *(unsigned int*)pClonedComplexUseSequence = CTaskComplexUseSequence_VTable;
         pClonedComplexUseSequence->m_nCurrentTaskIndex = 0;
         pClonedComplexUseSequence->m_nEndTaskIndex = -1;
         pClonedComplexUseSequence->m_nSequenceRepeatedCount = 0;
@@ -156,45 +189,4 @@ CTask* CTaskComplexUseSequence::CreateFirstSubTask_Reversed(CPed* ped)
 CTask* CTaskComplexUseSequence::ControlSubTask_Reversed(CPed* ped)
 {
     return m_pSubTask;
-}
-
-CTaskComplexUseSequence* CTaskComplexUseSequence::Constructor(int sequenceIndex)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CTaskComplexUseSequence*, 0x635450, CTaskComplexUseSequence*, int>(this, sequenceIndex);
-#else
-    CTaskComplex::Constructor();
-    m_nSequenceIndex = sequenceIndex;
-    m_nCurrentTaskIndex = 0;
-    m_nSequenceRepeatedCount = 0;
-    *(unsigned int*)this = CTaskComplexUseSequence_VTable;
-    m_nEndTaskIndex = -1;
-    CTaskSequences::ms_taskSequence[m_nSequenceIndex].m_nReferenceCount++;
-    return this;
-#endif
-}
-
-CTaskComplexUseSequence* CTaskComplexUseSequence::Destructor()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CTaskComplexUseSequence*, 0x6396C0, CTaskComplexUseSequence*>(this);
-#else
-    *(unsigned int*)this = CTaskComplexUseSequence_VTable;
-
-    if (m_nSequenceIndex != -1)
-    {
-        auto pComplexSequence = &CTaskSequences::ms_taskSequence[m_nSequenceIndex];
-        bool bFinalReference = pComplexSequence->m_nReferenceCount == 1;
-        pComplexSequence->m_nReferenceCount--;
-        if (bFinalReference)
-        {
-            if (pComplexSequence->m_bFlushTasks)
-            {
-                pComplexSequence->m_bFlushTasks = 0;
-                pComplexSequence->Flush();
-            }
-        }
-    }
-    return (CTaskComplexUseSequence*)CTaskComplex::Destructor();
-#endif
 }

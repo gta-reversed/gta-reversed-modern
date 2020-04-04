@@ -11,8 +11,6 @@ Do not delete this comment block. Respect others' work!
 #include "CTaskTimer.h"
 
 class  CTaskComplexUseMobilePhone : public CTaskComplex {
-protected:
-    CTaskComplexUseMobilePhone(plugin::dummy_func_t a) : CTaskComplex(a) , m_timer(a) {}
 public:
     int m_nDuration;
     CTaskTimer m_timer;

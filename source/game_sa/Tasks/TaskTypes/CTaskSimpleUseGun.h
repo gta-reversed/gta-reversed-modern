@@ -16,8 +16,6 @@
 
 class CTaskSimpleUseGun : public CTaskSimple
 {
-protected:
-    CTaskSimpleUseGun(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     bool m_bIsFinished;
     bool m_bIsInControl;

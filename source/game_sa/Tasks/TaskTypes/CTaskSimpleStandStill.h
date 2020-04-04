@@ -11,8 +11,6 @@
 #include "CTaskTimer.h"
 
 class  CTaskSimpleStandStill : public CTaskSimple {
-protected:
-    CTaskSimpleStandStill(plugin::dummy_func_t a) : CTaskSimple(a),m_timer(a) {}
 public:
     int m_nTime;
     CTaskTimer m_timer;

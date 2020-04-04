@@ -9,8 +9,6 @@ enum eHoldEntityBoneFlags
 
 class CTaskSimpleHoldEntity : public CTaskSimple {
     CTaskSimpleHoldEntity() = delete;
-protected:
-    CTaskSimpleHoldEntity(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     class CEntity* m_pEntityToHold;
     CVector m_vecPosition;
@@ -30,7 +28,6 @@ public:
     class CAnimBlendAssociation* m_pAnimBlendAssociation; 
 
     // original virtual functions
-    CTask* DeletingDestructor(uint8_t deletingFlags) override;
     CTask* Clone() override;
     eTaskType GetId() override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;

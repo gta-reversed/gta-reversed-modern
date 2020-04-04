@@ -13,8 +13,6 @@ Do not delete this comment block. Respect others' work!
 
 
 class  CTaskSimpleIKLookAt : public CTaskSimpleIKChain {
-protected:
-    CTaskSimpleIKLookAt(plugin::dummy_func_t a) : CTaskSimpleIKChain(a) {}
 public:
     bool    m_bUseTorso;
     char     m_priority;

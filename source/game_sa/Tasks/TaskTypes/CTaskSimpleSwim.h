@@ -25,8 +25,6 @@ class CPed;
 class CPlayerPed;
 
 class  CTaskSimpleSwim : public CTaskSimple {
-protected:
-    CTaskSimpleSwim(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     bool m_bFinishedBlending;
     bool m_bAnimBlockRefAdded;

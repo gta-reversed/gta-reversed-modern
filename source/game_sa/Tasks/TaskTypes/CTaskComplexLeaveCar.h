@@ -12,8 +12,6 @@ Do not delete this comment block. Respect others' work!
 #include "CTaskUtilityLineUpPedWithCar.h"
 
 class  CTaskComplexLeaveCar : public CTaskComplex {
-protected:
-    CTaskComplexLeaveCar(plugin::dummy_func_t a) : CTaskComplex(a) {}
 public:
     CVehicle* m_pTargetVehicle;
     int m_nTargetDoor;

@@ -20,6 +20,12 @@ public:
 
     static void InjectHooks();
 
+    CTaskComplexSequence();
+    ~CTaskComplexSequence();
+private:
+    CTaskComplexSequence* Constructor();
+public:
+
     // original virtual functions
     CTask* Clone() override;
     eTaskType GetId() override;
@@ -30,18 +36,15 @@ public:
 
     // reversed virtual functions
     CTask* Clone_Reversed();
-    eTaskType GetId_Reversed();
+    eTaskType GetId_Reversed() { return TASK_COMPLEX_SEQUENCE; }
     bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);
 
-    CTaskComplexSequence* Constructor();
     void AddTask(CTask* pTask);
     CTask* CreateNextSubTask(CPed* pPed, int* pTaskIndex, int* pRepeatCount);
     void Flush();
-
-    static const unsigned int CTaskComplexSequence_VTable = 0x86e200;
 };
 
 VALIDATE_SIZE(CTaskComplexSequence, 0x40);

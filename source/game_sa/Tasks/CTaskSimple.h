@@ -11,8 +11,6 @@
 
 class  CTaskSimple : public CTask {
     CTaskSimple() = delete;
-protected:
-    CTaskSimple(plugin::dummy_func_t a) : CTask(a) {}
 public:
     static void InjectHooks();
 

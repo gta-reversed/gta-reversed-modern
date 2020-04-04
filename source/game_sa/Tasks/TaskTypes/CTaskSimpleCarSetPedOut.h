@@ -11,8 +11,6 @@
 #include "CVehicle.h"
 
 class  CTaskSimpleCarSetPedOut : public CTaskSimple {
-protected:
-	CTaskSimpleCarSetPedOut(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     CVehicle* m_pTargetVehicle;
     int m_nTargetDoor; 

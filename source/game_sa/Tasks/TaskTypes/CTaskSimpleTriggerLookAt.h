@@ -13,8 +13,6 @@ Do not delete this comment block. Respect others' work!
 
 
 class  CTaskSimpleTriggerLookAt : public CTaskSimple {
-protected:
-    CTaskSimpleTriggerLookAt(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     CEntity*	m_pEntity;
     int		m_time;

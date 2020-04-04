@@ -7,8 +7,6 @@ class CVehicle;
 class CTaskSimpleCarDrive : public CTaskSimple
 {
     CTaskSimpleCarDrive() = delete;
-protected:
-    CTaskSimpleCarDrive(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     CVehicle* m_pVehicle;
 

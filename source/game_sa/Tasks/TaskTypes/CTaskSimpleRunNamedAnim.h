@@ -13,8 +13,6 @@
 #include "CVector.h"
 
 class  CTaskSimpleRunNamedAnim : public CTaskSimpleAnim {
-protected:
-    CTaskSimpleRunNamedAnim(plugin::dummy_func_t a) : CTaskSimpleAnim(a), m_timer(a) {}
 public:
     char                 m_animName[24];
     char                 m_animGroupName[16];

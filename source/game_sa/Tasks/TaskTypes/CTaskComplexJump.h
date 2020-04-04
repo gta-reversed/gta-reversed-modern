@@ -18,8 +18,6 @@ enum eComplexJumpType
 };
 
 class CTaskComplexJump : public CTaskComplex {
-protected:
-    CTaskComplexJump(plugin::dummy_func_t a) : CTaskComplex(a) {}
 public:
     unsigned int m_nType; // 0 - jump , 1 - climb
     bool bUnkFlag;

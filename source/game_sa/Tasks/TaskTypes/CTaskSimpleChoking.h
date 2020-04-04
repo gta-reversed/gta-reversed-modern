@@ -12,8 +12,6 @@ Do not delete this comment block. Respect others' work!
 
 
 class  CTaskSimpleChoking : public CTaskSimple {
-protected:
-    CTaskSimpleChoking(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     CPed*      m_pAttacker;
     CAnimBlendAssociation*                      m_pAnim;
