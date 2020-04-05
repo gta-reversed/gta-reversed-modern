@@ -11,8 +11,6 @@ Do not delete this comment block. Respect others' work!
 
 
 class  CTaskSimpleIKManager : public CTaskSimple {
-protected:
-    CTaskSimpleIKManager(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     CTaskSimpleIKChain * m_pIKChainTasks[4];
     bool m_bAborting;

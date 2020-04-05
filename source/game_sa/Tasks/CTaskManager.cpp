@@ -59,7 +59,7 @@ void CTaskManager::Destructor() {
         CTask* task = m_aPrimaryTasks[primaryTaskIndex];
         if (task)
         {
-            task->DeletingDestructor(1);
+            delete task;
         }
         m_aPrimaryTasks[primaryTaskIndex] = 0;
     }
@@ -70,7 +70,7 @@ void CTaskManager::Destructor() {
         CTask* pSecondaryTask = m_aSecondaryTasks[secondaryTaskIndex];
         if (pSecondaryTask)
         {
-            pSecondaryTask->DeletingDestructor(1);
+            delete pSecondaryTask;
         }
         m_aSecondaryTasks[secondaryTaskIndex] = 0;
     }
@@ -211,7 +211,7 @@ void CTaskManager::Flush() {
         CTask* task = m_aPrimaryTasks[primaryTaskIndex];
         if (task)
         {
-            task->DeletingDestructor(1);
+            delete task;
         }
 
         m_aPrimaryTasks[primaryTaskIndex] = 0;
@@ -222,7 +222,7 @@ void CTaskManager::Flush() {
         CTask* pSecondaryTask = m_aSecondaryTasks[secondaryTaskIndex];
         if (pSecondaryTask)
         {
-            pSecondaryTask->DeletingDestructor(1);
+            delete pSecondaryTask;
         }
 
         m_aSecondaryTasks[secondaryTaskIndex] = 0;
@@ -240,7 +240,7 @@ void CTaskManager::FlushImmediately() {
         CTask* task = m_aPrimaryTasks[primaryTaskIndex];
         if (task && task->MakeAbortable(m_pPed, ABORT_PRIORITY_IMMEDIATE, 0))
         {
-            task->DeletingDestructor(1);
+            delete task;
         }
 
         m_aPrimaryTasks[primaryTaskIndex] = 0;
@@ -251,7 +251,7 @@ void CTaskManager::FlushImmediately() {
         CTask* pSecondaryTask = m_aSecondaryTasks[secondaryTaskIndex];
         if (pSecondaryTask && pSecondaryTask->MakeAbortable(m_pPed, ABORT_PRIORITY_IMMEDIATE, 0))
         {
-            pSecondaryTask->DeletingDestructor(1);
+            delete pSecondaryTask;
         }
 
         m_aSecondaryTasks[secondaryTaskIndex] = 0;
@@ -432,7 +432,7 @@ void CTaskManager::SetTask(CTask* pTask, int taskIndex, int arg2) {
         pPrimaryTask = m_aPrimaryTasks[taskIndex];
         if (pPrimaryTask)
         {
-            pPrimaryTask->DeletingDestructor(1);
+            delete pPrimaryTask;
             m_aPrimaryTasks[taskIndex] = 0;
             return;
         }
@@ -443,7 +443,7 @@ void CTaskManager::SetTask(CTask* pTask, int taskIndex, int arg2) {
     {
         if (pPrimaryTask)
         {
-            pPrimaryTask->DeletingDestructor(1);
+            delete pPrimaryTask;
         }
         m_aPrimaryTasks[taskIndex] = pTask;
         AddSubTasks(static_cast<CTaskComplex*>(pTask));
@@ -458,7 +458,7 @@ void CTaskManager::SetTask(CTask* pTask, int taskIndex, int arg2) {
                     m_aPrimaryTasks[taskIndex] = 0;
                     return;
                 }
-                pPrimaryTask->DeletingDestructor(1);
+                delete pPrimaryTask;
                 m_aPrimaryTasks[taskIndex] = 0;
                 return;
             }
@@ -477,7 +477,7 @@ void CTaskManager::SetTaskSecondary(CTask* pTask, int taskIndex) {
     {
         if (pCurrentSecondaryTask)
         {
-            pCurrentSecondaryTask->DeletingDestructor(1);
+            delete pCurrentSecondaryTask;
             pCurrentSecondaryTask = nullptr;
         }
         m_aSecondaryTasks[taskIndex] = pTask;
@@ -497,7 +497,7 @@ void CTaskManager::SetTaskSecondary(CTask* pTask, int taskIndex) {
                 pTheTask = m_aSecondaryTasks[taskIndex];
                 if (pTheTask)
                 {
-                    pTheTask->DeletingDestructor(1);
+                    delete pTheTask;
                 }
                 m_aSecondaryTasks[taskIndex] = 0;
             }
@@ -516,7 +516,7 @@ void CTaskManager::ClearTaskEventResponse() {
     {
         if (pTask)
         {
-            pTask = pTask->DeletingDestructor(1);
+            delete pTask;
             m_aPrimaryTasks[TASK_PRIMARY_EVENT_RESPONSE_TEMP] = 0;
         }
     }
@@ -525,7 +525,7 @@ void CTaskManager::ClearTaskEventResponse() {
         pTask = m_aPrimaryTasks[TASK_PRIMARY_EVENT_RESPONSE_NONTEMP];
         if (pTask)
         {
-            pTask = pTask->DeletingDestructor(1);
+            delete pTask;
             m_aPrimaryTasks[TASK_PRIMARY_EVENT_RESPONSE_NONTEMP] = 0;
         }
     }
@@ -557,7 +557,7 @@ void CTaskManager::ManageTasks()
             CTask* pPrimaryTask = m_aPrimaryTasks[iTaskIndex];
             if (pPrimaryTask)
             {
-                pPrimaryTask->DeletingDestructor(1);
+                delete pPrimaryTask;
             }
             m_aPrimaryTasks[iTaskIndex] = 0;
             return;
@@ -576,7 +576,7 @@ void CTaskManager::ManageTasks()
                     CTask* pTheTask = m_aPrimaryTasks[iTaskIndex];
                     if (pTheTask)
                     {
-                        pTheTask->DeletingDestructor(1);
+                        delete pTheTask;
                     }
                     m_aPrimaryTasks[iTaskIndex] = 0;
                     break;
@@ -595,7 +595,7 @@ void CTaskManager::ManageTasks()
                     CTask* pTheTask = m_aPrimaryTasks[iTaskIndex];
                     if (pTheTask)
                     {
-                        pTheTask->DeletingDestructor(1);
+                        delete pTheTask;
                     }
                     m_aPrimaryTasks[iTaskIndex] = 0;
                     break;
@@ -637,7 +637,7 @@ void CTaskManager::ManageTasks()
             {
                 continue;
             }
-            pTheSecondaryTask->DeletingDestructor(1);
+            delete pTheSecondaryTask;
             m_aSecondaryTasks[secondaryTaskIndex] = 0;
         }
     }

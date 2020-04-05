@@ -22,8 +22,6 @@ enum eSunbatherType : unsigned int
 };
 
 class  CTaskComplexSunbathe : public CTaskComplex {
-protected:
-    CTaskComplexSunbathe(plugin::dummy_func_t a) : CTaskComplex(a), m_BathingTimer(a) {}
 public:
     bool                m_bStartStanding;
     bool                m_bBathing;

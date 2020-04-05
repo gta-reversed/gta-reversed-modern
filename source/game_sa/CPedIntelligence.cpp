@@ -268,7 +268,7 @@ void CPedIntelligence::AddTaskPrimaryMaybeInGroup(CTask* pTask, bool bUnknown) {
         pPegGroup->m_groupIntelligence.SetScriptCommandTask(m_pPed, pTask);
         if (pTask)
         {
-            pTask->DeletingDestructor(1);
+            delete pTask;
         }
     }
 #endif

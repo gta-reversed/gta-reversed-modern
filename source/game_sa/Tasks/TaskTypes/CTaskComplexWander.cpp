@@ -2,6 +2,7 @@
 
 void CTaskComplexWander::InjectHooks()
 {
+    HookInstall(0x66F450, &CTaskComplexWander::Constructor, 7);
     HookInstall(0x460CD0, &CTaskComplexWander::GetId_Reversed, 7);
     HookInstall(0x674140, &CTaskComplexWander::CreateNextSubTask_Reversed, 7);
     HookInstall(0x6740E0, &CTaskComplexWander::CreateFirstSubTask_Reversed, 7);
@@ -18,11 +19,30 @@ void CTaskComplexWander::InjectHooks()
     HookInstall(0x673D00, CTaskComplexWander::GetWanderTaskByPedType, 7);
 }
 
+CTaskComplexWander::CTaskComplexWander(int moveState, unsigned char dir, bool bWanderSensibly, float fTargetRadius) {
+    m_nMoveState = moveState;
+    m_nDir = dir;
+    m_fTargetRadius = fTargetRadius;
+    m_LastNode.m_wAreaId = -1;
+    m_NextNode.m_wAreaId = -1;
+    m_nFlags = 0xF0;
+    m_bWanderSensibly = bWanderSensibly;
+    m_nLastUpdateDirFrameCount = 0;
+}
+
+CTaskComplexWander::~CTaskComplexWander() {
+    // nothing here
+}
+
+CTaskComplexWander* CTaskComplexWander::Constructor(int moveState, unsigned char dir, bool bWanderSensibly, float fTargetRadius) {
+    this->CTaskComplexWander::CTaskComplexWander(moveState, dir, bWanderSensibly, 0.5f);
+    return this;
+}
 
 eTaskType CTaskComplexWander::GetId()
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return ((eTaskType(__thiscall*)(CTask*))plugin::GetVMT(this, 4))(this);
+    return ((eTaskType(__thiscall*)(CTask*))0x460CD0)(this);
 #else
     return GetId_Reversed();
 #endif
@@ -55,20 +75,10 @@ CTask* CTaskComplexWander::ControlSubTask(CPed* ped)
 #endif
 }
 
-int CTaskComplexWander::GetWanderType()
-{
-    return ((int(__thiscall*)(CTaskComplex*))plugin::GetVMT(this, 11))(this);
-}
-
-void CTaskComplexWander::ScanForStuff(CPed* ped)
-{
-    return ((void(__thiscall*)(CTaskComplex*, CPed*))plugin::GetVMT(this, 12))(this, ped);
-}
-
 void CTaskComplexWander::UpdateDir(CPed* pPed)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return ((void(__thiscall*)(CTaskComplex*, CPed*))plugin::GetVMT(this, 13))(this, pPed);
+    return ((void(__thiscall*)(CTaskComplex*, CPed*))0x669DA0)(this, pPed);
 #else
     return UpdateDir_Reversed(pPed);
 #endif
@@ -77,17 +87,11 @@ void CTaskComplexWander::UpdateDir(CPed* pPed)
 void CTaskComplexWander::UpdatePathNodes(CPed* pPed, int8_t dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8_t* outDir)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((void(__thiscall*)(CTaskComplex*, CPed*, int8_t, CNodeAddress*, CNodeAddress*, int8_t*))plugin::GetVMT(this, 14))
+    return ((void(__thiscall*)(CTaskComplex*, CPed*, int8_t, CNodeAddress*, CNodeAddress*, int8_t*))0x669ED0)
         (this, pPed, dir, originNode, targetNode, outDir);
 #else
     return UpdatePathNodes_Reversed(pPed, dir, originNode, targetNode, outDir);
 #endif
-}
-
-
-eTaskType CTaskComplexWander::GetId_Reversed()
-{
-    return TASK_COMPLEX_WANDER;
 }
 
 CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
@@ -221,12 +225,7 @@ CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
         return nullptr;
     }
 
-    auto pTaskComplexSequence = (CTaskComplexSequence*)CTask::operator new(64);
-    if (pTaskComplexSequence)
-    {
-        pTaskComplexSequence->Constructor();
-    }
-
+    CTaskComplexSequence* pTaskComplexSequence = new CTaskComplexSequence();
     auto pTaskSimpleStandStill = (CTaskSimpleStandStill*)CTask::operator new(32);
     if (pTaskSimpleStandStill)
     {
@@ -391,12 +390,6 @@ void CTaskComplexWander::UpdatePathNodes_Reversed(CPed* pPed, int8_t dir, CNodeA
     }
 
     ThePaths.FindNextNodeWandering(PATH_TYPE_BOATS, pPedPos->x, pPedPos->y, pPedPos->z, originNode, targetNode, dir, outDir);
-}
-
-CTaskComplexWander* CTaskComplexWander::Constructor(int moveState, unsigned char dir, bool bWanderSensibly, float fTargetRadius)
-{
-    return plugin::CallMethodAndReturn<CTaskComplexWander*, 0x66F450, CTaskComplexWander*, int, unsigned char, bool, float>
-        (this, moveState, dir, bWanderSensibly, fTargetRadius);
 }
 
 CTask* CTaskComplexWander::CreateSubTask(CPed* ped, int taskId)

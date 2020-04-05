@@ -11,8 +11,6 @@
 #include "CAnimBlendAssociation.h"
 
 class  CTaskSimpleAnim : public CTaskSimple {
-protected:
-    CTaskSimpleAnim(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
 	CAnimBlendAssociation *m_pAnim;
     union

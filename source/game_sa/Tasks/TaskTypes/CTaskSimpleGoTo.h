@@ -5,8 +5,6 @@
 class CTaskSimpleGoTo : public CTaskSimple
 {
     CTaskSimpleGoTo() = delete;
-protected:
-    CTaskSimpleGoTo(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     int     m_moveState;
     CVector m_targetPoint;

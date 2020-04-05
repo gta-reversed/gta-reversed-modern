@@ -12,20 +12,27 @@
 class CPed;
 
 class CTaskComplex : public CTask {
-    CTaskComplex() = delete;
-protected:
-    CTaskComplex(plugin::dummy_func_t a) : CTask(a) {}
 public:
 	CTask *m_pSubTask;
 
-	// vtable
-	virtual void SetSubTask(CTask *subTask);
-	virtual CTask *CreateNextSubTask(CPed *ped);//=0
-	virtual CTask *CreateFirstSubTask(CPed *ped);
-	virtual CTask *ControlSubTask(CPed *ped);//=0
+    CTaskComplex();
+    ~CTaskComplex();
+private:
+    CTaskComplex* Constructor();
+public:
+	CTask* GetSubTask() override;
+	bool IsSimple() override;
+	bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
 
-    CTaskComplex* Constructor ();
-    CTaskComplex* Destructor();
+	virtual void SetSubTask(CTask *subTask);
+	virtual CTask *CreateNextSubTask(CPed *ped) = 0;
+	virtual CTask *CreateFirstSubTask(CPed *ped) = 0;
+	virtual CTask *ControlSubTask(CPed *ped) = 0;
+
+	CTask* GetSubTask_Reversed() { return m_pSubTask; }
+	bool IsSimple_Reversed() { return false; }
+	bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
+
 };
 
 VALIDATE_SIZE(CTaskComplex, 0xC);

@@ -25,8 +25,6 @@ class CPed;
 class CPlayerPed;
 
 class  CTaskSimpleSwim : public CTaskSimple {
-protected:
-    CTaskSimpleSwim(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     bool m_bFinishedBlending;
     bool m_bAnimBlockRefAdded;
@@ -54,7 +52,7 @@ public:
     bool m_bTriggerWaterSplash;
     char pad2[3];
 
-    static bool &SWIM_DIVE_UNDER_ANGLE;
+    static float &SWIM_DIVE_UNDER_ANGLE;
     static float &SWIM_STOP_TIME;
 
     static void InjectHooks();

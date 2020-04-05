@@ -14,8 +14,6 @@
 #include "CEntity.h"
 
 class  CTaskSimpleInAir : public CTaskSimple {
-protected:
-    CTaskSimpleInAir(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     CVector m_vecPosn;
     float m_fAngle;

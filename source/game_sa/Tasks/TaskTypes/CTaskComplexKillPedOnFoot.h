@@ -12,8 +12,6 @@
 #include "CPed.h"
 
 class  CTaskComplexKillPedOnFoot : public CTaskComplex {
-protected:
-    CTaskComplexKillPedOnFoot(plugin::dummy_func_t a) : CTaskComplex(a) , m_taskTimer(a) {}
 public:
     unsigned char  m_nFlags;
     CPed    *m_pTarget;

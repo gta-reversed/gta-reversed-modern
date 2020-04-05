@@ -12,8 +12,6 @@
 #include "CPed.h"
 
 class  CTaskComplexCopInCar : public CTaskComplex {
-protected:
-    CTaskComplexCopInCar(plugin::dummy_func_t a) : CTaskComplex(a), m_timer1(a), m_timer2(a) {}
 public:
     CVehicle *m_pVehicle;
     CPed *m_pCop1;

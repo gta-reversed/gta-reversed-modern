@@ -12,8 +12,6 @@
 #include "CTaskUtilityLineUpPedWithCar.h"
 
 class  CTaskSimpleCarSetPedInAsPassenger : public CTaskSimple {
-protected:
-    CTaskSimpleCarSetPedInAsPassenger(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     bool m_bIsFinished;
 private:

@@ -13,8 +13,6 @@ Do not delete this comment block. Respect others' work!
 
 
 class  CTaskSimpleIKChain : public CTaskSimple {
-protected:
-    CTaskSimpleIKChain(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     int		m_time;
     int		m_blendTime;

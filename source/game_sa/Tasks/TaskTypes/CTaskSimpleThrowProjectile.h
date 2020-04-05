@@ -12,8 +12,6 @@
 #include "CEntity.h"
 
 class CTaskSimpleThrowProjectile : public CTaskSimple {
-protected:
-    CTaskSimpleThrowProjectile(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     bool m_bIsAborting;
     bool m_bFinished;

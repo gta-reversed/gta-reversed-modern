@@ -17,8 +17,6 @@ extern bool& gbUnknown_8D2FE8;
 
 class CPed;
 class  CTaskSimplePlayerOnFoot : public CTaskSimple {
-protected:
-    CTaskSimplePlayerOnFoot(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     int m_nAnimationBlockIndex;
     unsigned int m_nFrameCounter;

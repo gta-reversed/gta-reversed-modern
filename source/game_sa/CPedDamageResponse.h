@@ -5,12 +5,12 @@ class CPedDamageResponse
 {
 public:
     
-    float       fDamageHealth;
-    float       fDamageArmor;
-    bool        bUnk;
-    bool        bForceDeath;
-    bool        bDamageCalculated;
-    bool        bUnk3;
+    float       m_fDamageHealth;
+    float       m_fDamageArmor;
+    bool        m_bHealthZero;
+    bool        m_bForceDeath;
+    bool        m_bDamageCalculated;
+    bool        m_bCheckIfAffectsPed;
 };
 
 VALIDATE_SIZE(CPedDamageResponse, 0xC);

@@ -2,15 +2,55 @@
 
 void CTaskComplexWanderCop::InjectHooks()
 {
+    HookInstall(0x460C80, &CTaskComplexWanderCop::Constructor, 7);
+    HookInstall(0x460CE0, &CTaskComplexWanderCop::Clone_Reversed, 7);
     HookInstall(0x674860, &CTaskComplexWanderCop::CreateNextSubTask_Reversed, 7);
     HookInstall(0x674750, &CTaskComplexWanderCop::CreateFirstSubTask_Reversed, 7);
     HookInstall(0x674D80, &CTaskComplexWanderCop::ControlSubTask_Reversed, 7);
     HookInstall(0x6702B0, &CTaskComplexWanderCop::ScanForStuff_Reversed, 7);
-    HookInstall(0x460C80, &CTaskComplexWanderCop::Constructor, 7);;
     HookInstall(0x66B1B0, &CTaskComplexWanderCop::LookForCarAlarms, 7);
     HookInstall(0x66B290, &CTaskComplexWanderCop::LookForStolenCopCars, 7);
     HookInstall(0x66B300, &CTaskComplexWanderCop::LookForCriminals, 7);
     HookInstall(0x66B160, &CTaskComplexWanderCop::ShouldPursuePlayer, 7);
+}
+
+CTaskComplexWanderCop::CTaskComplexWanderCop(int moveState, unsigned char dir) : CTaskComplexWander(moveState, dir, true, 0.5) {
+    m_pTaskComplexMoveGoToPointAndStandStill = 0;
+    m_nScanForStuffTimer.m_nStartTime = 0;
+    m_nScanForStuffTimer.m_nInterval = 0;
+    m_nScanForStuffTimer.m_bStarted = 0;
+    m_nScanForStuffTimer.m_bStopped = 0;
+    m_nTimePassedSinceLastLookedForCriminals = 0;
+    m_nTimePassedSinceLastLookedForCarAlarmsAndStolenCopCars = 0;
+    m_pLastCriminalPedLookedFor = 0;
+    m_nSubTaskCreatedTimer.m_nStartTime = 0;
+    m_nSubTaskCreatedTimer.m_nInterval = 0;
+    m_nSubTaskCreatedTimer.m_bStarted = 0;
+    m_nSubTaskCreatedTimer.m_bStopped = 0;
+}
+
+CTaskComplexWanderCop::~CTaskComplexWanderCop() { 
+    CTask* pTask = (CTask*)m_pTaskComplexMoveGoToPointAndStandStill;
+    if (pTask)
+        delete pTask;
+}
+
+CTaskComplexWanderCop* CTaskComplexWanderCop::Constructor(int moveState, unsigned char dir) {
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return plugin::CallMethodAndReturn<CTaskComplexWanderCop*, 0x460C80, CTaskComplexWanderCop*, int, unsigned char>(this, moveState, dir);
+#else
+    this->CTaskComplexWanderCop::CTaskComplexWanderCop(moveState, dir);
+    return this;
+#endif
+}
+
+
+CTask* CTaskComplexWanderCop::Clone() {
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return plugin::CallMethodAndReturn<CTask*, 0x460CE0, CTaskComplexWander*>(this);
+#else
+    return new CTaskComplexWanderCop(m_nMoveState, m_nDir);
+#endif
 }
 
 CTask* CTaskComplexWanderCop::CreateNextSubTask(CPed* ped)
@@ -40,13 +80,27 @@ CTask* CTaskComplexWanderCop::ControlSubTask(CPed* ped)
 #endif
 }
 
+int CTaskComplexWanderCop::GetWanderType()
+{
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return ((int(__thiscall*)(CTaskComplex*))0x460D50)(this);
+#else
+    return CTaskComplexWanderCop::GetWanderType_Reversed();
+#endif
+}
+
+
 void CTaskComplexWanderCop::ScanForStuff(CPed* ped)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return ((void(__thiscall*)(CTaskComplex*, CPed*))plugin::GetVMT(this, 12))(this, ped);
+    return ((void(__thiscall*)(CTaskComplex*, CPed*))0x6702B0)(this, ped);
 #else
     return ScanForStuff_Reversed(ped);
 #endif
+}
+
+CTask* CTaskComplexWanderCop::Clone_Reversed() {
+    return new CTaskComplexWanderCop(m_nMoveState, m_nDir);
 }
 
 CTask* CTaskComplexWanderCop::CreateNextSubTask_Reversed(CPed* ped)
@@ -202,29 +256,6 @@ void CTaskComplexWanderCop::ScanForStuff_Reversed(CPed* ped)
             }
         }
     }
-}
-
-CTaskComplexWanderCop* CTaskComplexWanderCop::Constructor(int moveState, unsigned char dir)
-{
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTaskComplexWanderCop*, 0x460C80, CTaskComplexWanderCop*, int, unsigned char>(this, moveState, dir);
-#else
-    CTaskComplexWander::Constructor(moveState, dir, true, 0.5);
-    m_pTaskComplexMoveGoToPointAndStandStill = 0;
-    *(unsigned int*)this = CTaskComplexWanderCop_VTable;
-    m_nScanForStuffTimer.m_nStartTime = 0;
-    m_nScanForStuffTimer.m_nInterval = 0;
-    m_nScanForStuffTimer.m_bStarted = 0;
-    m_nScanForStuffTimer.m_bStopped = 0;
-    m_nTimePassedSinceLastLookedForCriminals = 0;
-    m_nTimePassedSinceLastLookedForCarAlarmsAndStolenCopCars = 0;
-    m_pLastCriminalPedLookedFor = 0;
-    m_nSubTaskCreatedTimer.m_nStartTime = 0;
-    m_nSubTaskCreatedTimer.m_nInterval = 0;
-    m_nSubTaskCreatedTimer.m_bStarted = 0;
-    m_nSubTaskCreatedTimer.m_bStopped = 0;
-    return this;
-#endif
 }
 
 void CTaskComplexWanderCop::LookForCarAlarms(CCopPed* pPed)

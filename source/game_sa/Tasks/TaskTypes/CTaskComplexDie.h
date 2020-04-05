@@ -12,8 +12,6 @@ Do not delete this comment block. Respect others' work!
 #include "CVehicle.h"
 
 class  CTaskComplexDie : public CTaskComplex {
-protected:
-    CTaskComplexDie(plugin::dummy_func_t a) : CTaskComplex(a) {}
 public:
     eWeaponType m_nWeaponType; // Means Of Death
     int m_animGroup;

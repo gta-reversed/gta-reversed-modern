@@ -6,30 +6,14 @@
 */
 #include "StdInc.h"
 
-/*
-CTaskComplex::CTaskComplex() : CTask(plugin::dummy)
-{
-    plugin::CallMethod<0x61A3B0, CTaskComplex*>(this);
-}
-*/
-void CTaskComplex::SetSubTask(CTask* subTask)
-{
-    ((void(__thiscall*)(CTaskComplex*, CTask*))plugin::GetVMT(this, 7))(this, subTask);
+CTaskComplex::CTaskComplex() {
+    m_pSubTask = nullptr;
 }
 
-CTask* CTaskComplex::CreateNextSubTask(CPed* ped)
-{
-    return ((CTask * (__thiscall*)(CTaskComplex*, CPed*))plugin::GetVMT(this, 8))(this, ped);
-}
-
-CTask* CTaskComplex::CreateFirstSubTask(CPed* ped)
-{
-    return ((CTask * (__thiscall*)(CTaskComplex*, CPed*))plugin::GetVMT(this, 9))(this, ped);
-}
-
-CTask* CTaskComplex::ControlSubTask(CPed* ped)
-{
-    return ((CTask * (__thiscall*)(CTaskComplex*, CPed*))plugin::GetVMT(this, 10))(this, ped);
+CTaskComplex::~CTaskComplex() {
+    if (m_pSubTask)
+        delete m_pSubTask;
+    m_pSubTask = nullptr;
 }
 
 CTaskComplex* CTaskComplex::Constructor()
@@ -37,7 +21,30 @@ CTaskComplex* CTaskComplex::Constructor()
     return plugin::CallMethodAndReturn<CTaskComplex*, 0x61A3B0, CTaskComplex*>(this);
 }
 
-CTaskComplex* CTaskComplex::Destructor()
-{
-    return plugin::CallMethodAndReturn<CTaskComplex*, 0x61A3D0, CTaskComplex*>(this);
+CTask* CTaskComplex::GetSubTask() {
+    return ((CTask * (__thiscall*)(CTask*))0x421190)(this);
+}
+
+bool CTaskComplex::IsSimple() {
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return ((bool(__thiscall*)(CTask*))0x4211A0)(this);
+#else
+    return CTaskComplex::IsSimple_Reversed();
+#endif
+}
+
+bool CTaskComplex::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) {
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return ((bool(__thiscall*)(CTask*, CPed*, int, class CEvent*))0x4211B0)(this, ped, priority, _event);
+#else
+    return CTaskComplex::MakeAbortable_Reversed(ped, priority, _event);
+#endif
+}
+
+void CTaskComplex::SetSubTask(CTask* subTask){
+    ((void(__thiscall*)(CTaskComplex*, CTask*))0x61A430)(this, subTask);
+}
+
+bool CTaskComplex::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event) {
+    return m_pSubTask->MakeAbortable(ped, priority, _event);
 }

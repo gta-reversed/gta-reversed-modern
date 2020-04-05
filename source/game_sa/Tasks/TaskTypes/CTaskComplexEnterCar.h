@@ -20,8 +20,6 @@ Do not delete this comment block. Respect others' work!
 };*/
 
 class  CTaskComplexEnterCar : public CTaskComplex {
-protected:
-    CTaskComplexEnterCar(plugin::dummy_func_t a) : CTaskComplex(a) {}
 public:
     CVehicle* m_pTargetVehicle;
     union

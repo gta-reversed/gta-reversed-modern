@@ -27,8 +27,6 @@ class CNodeAddress;
 class CVector;
 
 class CTaskComplexWander : public CTaskComplex {
-protected:
-    CTaskComplexWander(plugin::dummy_func_t a) : CTaskComplex(a) {}
 public:
     int m_nMoveState; // see eMoveState
     unsigned char m_nDir;
@@ -54,28 +52,28 @@ public:
     };
 
     static void InjectHooks();
+    CTaskComplexWander(int moveState, unsigned char dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
+    ~CTaskComplexWander();
+    CTaskComplexWander* Constructor(int moveState, unsigned char dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
 
     // original virtual functions
     eTaskType GetId() override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
-
-    virtual int GetWanderType();
-    virtual void ScanForStuff(CPed* ped);
+    virtual int GetWanderType() = 0;
+    virtual void ScanForStuff(CPed* ped) = 0;
     virtual void UpdateDir(CPed* pPed);
     virtual void UpdatePathNodes(CPed* pPed, int8_t dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8_t* outDir);
 
     // reversed virtual functions
-    eTaskType GetId_Reversed();
+    eTaskType GetId_Reversed() { return TASK_COMPLEX_WANDER; };
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);
-
     void UpdateDir_Reversed(CPed* pPed);
     void UpdatePathNodes_Reversed(CPed* pPed, int8_t dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8_t* outDir);
 
-    CTaskComplexWander* Constructor(int moveState, unsigned char dir, bool bWanderSensibly, float fTargetRadius = 0.5f);
     CTask* CreateSubTask(CPed* ped, int taskId);
     void ComputeTargetPos(CPed* pPed, CVector* pOutTargetPos, CNodeAddress* pTargetNodeAddress);
     float ComputeTargetHeading(CPed* ped);

@@ -13,8 +13,6 @@ Do not delete this comment block. Respect others' work!
 
 class CTaskSimpleStealthKill : public CTaskSimple
 {
-protected:
-    CTaskSimpleStealthKill(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     bool m_bKeepTargetAlive;
 private:

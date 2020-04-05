@@ -23,8 +23,6 @@ enum eClimbHeights : char
 };
 
 class  CTaskSimpleClimb : public CTaskSimple {
-protected:
-    CTaskSimpleClimb(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     bool m_bIsFinished;
     bool m_bChangeAnimation;

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-bool& CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE = *reinterpret_cast<bool*>(0x8D2FC4);
+float& CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE = *reinterpret_cast<float*>(0x8D2FC4);
 float& CTaskSimpleSwim::SWIM_STOP_TIME = *reinterpret_cast<float*>(0x8D2FC0);
 
 void CTaskSimpleSwim::InjectHooks()
@@ -17,10 +17,12 @@ void CTaskSimpleSwim::InjectHooks()
     HookInstall(0x68AA50, &CTaskSimpleSwim::DestroyFxSystem, 7);
 }
 
+/*
 CTaskSimpleSwim::CTaskSimpleSwim(CVector const* pPosn, CPed* pPed) : CTaskSimple(plugin::dummy)
 {
     plugin::CallMethod<0x688930, CTaskSimpleSwim*, CVector const*, CPed*>(this, pPosn, pPed);
 }
+*/
 
 bool CTaskSimpleSwim::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event)
 {
@@ -62,7 +64,7 @@ bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority pri
         ped->RestoreHeadingRate();
     }
     else if (!_event || _event->GetEventPriority() < 71
-        && (_event->GetEventType() != EVENT_DAMAGE || !pDamageEvent->damageResponseData.bUnk || !pDamageEvent->unkC))
+        && (_event->GetEventType() != EVENT_DAMAGE || !pDamageEvent->m_damageResponse.m_bHealthZero || !pDamageEvent->m_bAddToEventGroup))
     {
         return false;
     }
@@ -206,7 +208,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
             pedDamageResponseCalculator.Constructor1(0, CTimer::ms_fTimeStep, weaponType, PED_PIECE_TORSO, false);
 
             CEventDamage eventDamage;
-            eventDamage.Constructor1(0, CTimer::m_snTimeInMilliseconds, weaponType, PED_PIECE_TORSO, 0, 0, pPed->bInVehicle);
+            eventDamage.Constructor(0, CTimer::m_snTimeInMilliseconds, weaponType, PED_PIECE_TORSO, 0, 0, pPed->bInVehicle);
             CPedDamageResponse damageResponseInfo;
             if (eventDamage.AffectsPed(pPed))
             {
@@ -214,10 +216,10 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
             }
             else
             {
-                damageResponseInfo.bDamageCalculated = true;
+                damageResponseInfo.m_bDamageCalculated = true;
             }
             pPed->m_pIntelligence->m_eventGroup.Add((CEvent*)& eventDamage, false);
-            eventDamage.Destructor1();
+            eventDamage.Destructor();
             pedDamageResponseCalculator.Destructor1();
         }
     }

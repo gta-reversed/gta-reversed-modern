@@ -11,8 +11,6 @@ Do not delete this comment block. Respect others' work!
 #include "CAnimBlendAssociation.h"
 
 class  CTaskSimpleRunAnim : public CTaskSimpleAnim {
-protected:
-    CTaskSimpleRunAnim(plugin::dummy_func_t a) : CTaskSimpleAnim(a) {}
 public:
 
     unsigned int m_nAnimGroup;

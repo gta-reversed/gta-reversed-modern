@@ -13,8 +13,6 @@
 
 
 class  CTaskSimpleFight : public CTaskSimple {
-protected:
-    CTaskSimpleFight(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
 
    bool m_bIsFinished;

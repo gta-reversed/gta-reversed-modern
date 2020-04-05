@@ -2,16 +2,39 @@
 
 void CTaskComplexSequence::InjectHooks()
 {
+    HookInstall(0x632BD0, &CTaskComplexSequence::Constructor, 7);
     HookInstall(0x5F6710, &CTaskComplexSequence::Clone_Reversed, 7);
     HookInstall(0x632C60, &CTaskComplexSequence::GetId_Reversed, 7);
     HookInstall(0x632C00, &CTaskComplexSequence::MakeAbortable_Reversed, 7);
     HookInstall(0x638A40, &CTaskComplexSequence::CreateNextSubTask_Reversed, 7);
     HookInstall(0x638A60, &CTaskComplexSequence::CreateFirstSubTask_Reversed, 7);
     HookInstall(0x632D00, &CTaskComplexSequence::ControlSubTask_Reversed, 7);
-    HookInstall(0x632BD0, &CTaskComplexSequence::Constructor, 7);
     HookInstall(0x632D10, &CTaskComplexSequence::AddTask, 7);
     HookInstall(0x632C70, (CTask*(CTaskComplexSequence::*)(CPed*, int*, int*))&CTaskComplexSequence::CreateNextSubTask, 7);
     HookInstall(0x632C10, &CTaskComplexSequence::Flush, 7);
+}
+
+CTaskComplexSequence::CTaskComplexSequence() {
+    m_nCurrentTaskIndex = 0;
+    m_bRepeatSequence = 0;
+    m_nSequenceRepeatedCount = 0;
+    m_bFlushTasks = 0;
+    m_nReferenceCount = 0;
+    memset(m_aTasks, 0, sizeof(CTaskComplexSequence::m_aTasks));
+}
+
+CTaskComplexSequence::~CTaskComplexSequence() {
+    Flush();
+}
+
+CTaskComplexSequence* CTaskComplexSequence::Constructor()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<CTaskComplexSequence*, 0x632BD0, CTaskComplexSequence*>(this);
+#else
+    this->CTaskComplexSequence::CTaskComplexSequence();
+    return this;
+#endif
 }
 
 CTask* CTaskComplexSequence::Clone()
@@ -70,11 +93,8 @@ CTask* CTaskComplexSequence::ControlSubTask(CPed* ped)
 
 CTask* CTaskComplexSequence::Clone_Reversed()
 {
-    auto pClonedComplexSequence = (CTaskComplexSequence*)CTask::operator new(0x40);
-    if (pClonedComplexSequence)
-    {
-        pClonedComplexSequence->Constructor();
-
+    auto pClonedComplexSequence = new CTaskComplexSequence();
+    if (pClonedComplexSequence) {
         for (unsigned int taskIndex = 0; taskIndex < 8; taskIndex++)
         {
             CTask* pTask = m_aTasks[taskIndex];
@@ -86,17 +106,12 @@ CTask* CTaskComplexSequence::Clone_Reversed()
             {
                 pClonedComplexSequence->m_aTasks[taskIndex] = 0;
             }
-            }
+        }
 
         pClonedComplexSequence->m_bRepeatSequence = m_bRepeatSequence;
         pClonedComplexSequence->m_nCurrentTaskIndex = m_nCurrentTaskIndex;
-}
+    }
     return pClonedComplexSequence;
-}
-
-eTaskType CTaskComplexSequence::GetId_Reversed()
-{
-    return TASK_COMPLEX_SEQUENCE;
 }
 
 bool CTaskComplexSequence::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event)
@@ -124,23 +139,6 @@ CTask* CTaskComplexSequence::ControlSubTask_Reversed(CPed* ped)
     return m_pSubTask;
 }
 
-CTaskComplexSequence* CTaskComplexSequence::Constructor()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CTaskComplexSequence*, 0x632BD0, CTaskComplexSequence*>(this);
-#else
-    CTaskComplex::Constructor();
-    m_nCurrentTaskIndex = 0;
-    m_bRepeatSequence = 0;
-    m_nSequenceRepeatedCount = 0;
-    m_bFlushTasks = 0;
-    m_nReferenceCount = 0;
-    *(unsigned int*)this = CTaskComplexSequence_VTable;
-    memset(m_aTasks, 0, sizeof(CTaskComplexSequence::m_aTasks));
-    return this;
-#endif
-}
-
 void CTaskComplexSequence::AddTask(CTask* pTask)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -157,7 +155,7 @@ void CTaskComplexSequence::AddTask(CTask* pTask)
 
     if (pTask)
     {
-        pTask->DeletingDestructor(1);
+        delete pTask;
     }
 #endif
 }
@@ -210,7 +208,7 @@ void CTaskComplexSequence::Flush()
         CTask* pTask = m_aTasks[taskIndex];
         if (pTask)
         {
-            pTask->DeletingDestructor(1);
+            delete pTask;
         }
 
         m_aTasks[taskIndex] = 0;

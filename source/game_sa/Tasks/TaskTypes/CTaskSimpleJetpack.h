@@ -14,8 +14,6 @@
 
 class  CTaskSimpleJetPack : public CTaskSimple
 {
-protected:
-    CTaskSimpleJetPack(plugin::dummy_func_t a) : CTaskSimple(a) {}
 public:
     bool m_bIsFinished;
     bool m_bAddedIdleAnim;

@@ -213,8 +213,7 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
         int animFileIndex = pBaseModelInfo->GetAnimFileIndex();
         short wTxdIndex = pBaseModelInfo->m_nTxdIndex;
         TxdDef* pTxdDef = CTxdStore::ms_pTxdPool->GetAt(wTxdIndex);
-        CAnimBlock& AnimBlock = CAnimManager::ms_aAnimBlocks[animFileIndex];
-        if ((pTxdDef && !pTxdDef->m_pRwDictionary) || animFileIndex != -1 && !AnimBlock.bLoaded)
+        if ((pTxdDef && !pTxdDef->m_pRwDictionary) || animFileIndex != -1 && !CAnimManager::ms_aAnimBlocks[animFileIndex].bLoaded)
         {
             RemoveModel(modelId);
             RequestModel(modelId, pModelStreamingInfo->m_nFlags);
