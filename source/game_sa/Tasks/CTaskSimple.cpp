@@ -9,16 +9,37 @@ Do not delete this comment block. Respect others' work!
 
 void CTaskSimple::InjectHooks()
 {
-    //InjectHook(0x68B1C0, &CTaskSimpleSwim::ProcessPed, PATCH_JUMP);
-   //InjectHook(0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims, PATCH_JUMP);
+
 }
 
-bool CTaskSimple::ProcessPed(class CPed *ped)
-{
-    return ((bool(__thiscall *)(CTaskSimple *, class CPed *))plugin::GetVMT(this, 7))(this, ped);
+CTaskSimple::CTaskSimple() {
+    m_pParentTask = nullptr;
 }
 
-bool CTaskSimple::SetPedPosition(class CPed *ped)
-{
-    return ((bool(__thiscall *)(CTaskSimple *, class CPed *))plugin::GetVMT(this, 8))(this, ped);
+CTaskSimple::~CTaskSimple() {
+    // nothing here
+}
+
+CTask* CTaskSimple::GetSubTask() {
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return ((CTask * (__thiscall*)(CTaskSimple*))0x43E300)(this);
+#else
+    return CTaskSimple::GetSubTask_Reversed();
+#endif
+}
+
+bool CTaskSimple::IsSimple() {
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return ((bool(__thiscall*)(CTaskSimple*))0x43E310)(this);
+#else
+    return CTaskSimple::IsSimple_Reversed();
+#endif
+}
+
+bool CTaskSimple::SetPedPosition(class CPed *ped) {
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return ((bool(__thiscall *)(CTaskSimple *, class CPed *))0x43E320)(this, ped);
+#else
+    return CTaskSimple::SetPedPosition_Reversed(ped);
+#endif
 }

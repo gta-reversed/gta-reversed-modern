@@ -4,11 +4,10 @@
 
 enum eHoldEntityBoneFlags 
 {
-    HOLD_ENTITY_UPDATE_BONE_TRANSLATION_ONLY = 0x16
+    HOLD_ENTITY_UPDATE_TRANSLATION_ONLY = 0x10
 };
 
 class CTaskSimpleHoldEntity : public CTaskSimple {
-    CTaskSimpleHoldEntity() = delete;
 public:
     class CEntity* m_pEntityToHold;
     CVector m_vecPosition;
@@ -27,6 +26,24 @@ public:
     bool field_37;
     class CAnimBlendAssociation* m_pAnimBlendAssociation; 
 
+    static void InjectHooks();
+    
+public:
+    CTaskSimpleHoldEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags,
+        int animId, int groupId, bool bDisAllowDroppingOnAnimEnd);
+    CTaskSimpleHoldEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags,
+        char* pAnimName, char* pAnimBlockName, int animFlags);
+    CTaskSimpleHoldEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags,
+        CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int animFlags);
+    ~CTaskSimpleHoldEntity();
+private:
+    CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags,
+        int animId, int groupId, bool bDisAllowDroppingOnAnimEnd);
+    CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags,
+        char* pAnimName, char* pAnimBlockName, int animFlags);
+    CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags,
+        CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int animFlags);
+public:
     // original virtual functions
     CTask* Clone() override;
     eTaskType GetId() override;
@@ -35,21 +52,16 @@ public:
     bool SetPedPosition(class CPed* ped) override;
 
     // reversed virtual functions
-    eTaskType GetId_Reversed();
+    CTask* Clone_Reversed();
+    eTaskType GetId_Reversed() { return TASK_SIMPLE_HOLD_ENTITY; };
+    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
     bool ProcessPed_Reversed(class CPed* ped);
+    bool SetPedPosition_Reversed(class CPed* ped);
 
-    CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags, 
-                                       int animId, int groupId, bool bDisAllowDroppingOnAnimEnd);
-    CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags, 
-                                      char* pAnimName, int animBlockId, int animFlags);
-    CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags,
-                                       CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int animFlags);
-
-    CTaskSimpleHoldEntity* Destructor();
     void ReleaseEntity();
     bool CanThrowEntity();
     void PlayAnim(int groupId, int animId);
-    static void FinishAnimHoldEntityCB(CAnimBlendAssociation* pAnimAssoc, CTaskSimpleHoldEntity* pTaskHoldEntity);
+    static void FinishAnimHoldEntityCB(CAnimBlendAssociation* pAnimAssoc, void* pData);
     void StartAnim(CPed* pPed);
     void DropEntity(CPed* pPed, bool bAddEventSoundQuiet);
     void ChoosePutDownHeight(CPed* pPed);

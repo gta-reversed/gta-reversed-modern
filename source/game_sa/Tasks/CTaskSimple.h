@@ -9,13 +9,20 @@
 #include "PluginBase.h"
 #include "CTask.h"
 
-class  CTaskSimple : public CTask {
-    CTaskSimple() = delete;
+class CTaskSimple : public CTask {
 public:
     static void InjectHooks();
+    CTaskSimple();
+    ~CTaskSimple();
 
-	virtual bool ProcessPed(class CPed *ped);//=0
+    CTask* GetSubTask() override;
+    bool IsSimple() override;
+	virtual bool ProcessPed(class CPed *ped) = 0;
 	virtual bool SetPedPosition(class CPed *ped);
+
+    CTask* GetSubTask_Reversed() { return nullptr; }
+    bool IsSimple_Reversed() { return true; }
+    bool SetPedPosition_Reversed(class CPed* ped) { return false; };
 };
 
 VALIDATE_SIZE(CTaskSimple, 8);

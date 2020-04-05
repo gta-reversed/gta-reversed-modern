@@ -368,3 +368,17 @@ bool CEntity::IsCurrentAreaOrBarberShopInterior()
 {
     return m_nAreaCode == CGame::currArea || m_nAreaCode == 13;
 }
+
+void CEntity::UpdateRW() {
+#ifdef USE_DEFAULT_FUNCTIONS 
+    plugin::CallMethod<0x446F90, CEntity*>(this);
+#else
+    if (m_pRwObject) {
+        RwMatrix* pRwMatrix = &((RwFrame*)m_pRwObject->parent)->modelling;
+        if (m_matrix)
+            m_matrix->UpdateRwMatrix(pRwMatrix);
+        else
+            m_placement.UpdateRwMatrix(pRwMatrix);
+    }
+#endif
+}
