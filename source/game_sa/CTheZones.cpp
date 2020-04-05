@@ -42,6 +42,7 @@ void CTheZones::InjectHooks()
 {
 	HookInstall(FUNC_CTheZones__ResetZonesRevealed, &CTheZones::ResetZonesRevealed, 7);
 	HookInstall(FUNC_CTheZones__GetCurrentZoneLockedOrUnlocked, &CTheZones::GetCurrentZoneLockedOrUnlocked, 7);
+	HookInstall(FUNC_CTheZones__PointLiesWithinZone, &CTheZones::PointLiesWithinZone, 7);
 }
 
 // Variables
@@ -94,7 +95,17 @@ bool CTheZones::ZoneIsEntirelyContainedWithinOtherZone(CZone* pZone1, CZone* pZo
 // Returns true if point lies within zone
 bool CTheZones::PointLiesWithinZone(CVector const* pPoint, CZone* pZone)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
 	return ((bool(__cdecl*)(CVector const*, CZone*)) FUNC_CTheZones__PointLiesWithinZone)(pPoint, pZone);
+#else
+	return 
+		pZone->m_fX1 <= pPoint->x &&
+		pZone->m_fX2 >= pPoint->x && 
+		pZone->m_fY1 <= pPoint->y && 
+		pZone->m_fY2 >= pPoint->y && 
+		pZone->m_fZ1 <= pPoint->z && 
+		pZone->m_fZ2 >= pPoint->z;
+#endif
 }
 
 // Returns eLevelName from position
