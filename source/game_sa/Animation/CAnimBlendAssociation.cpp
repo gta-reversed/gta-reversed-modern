@@ -76,3 +76,11 @@ void CAnimBlendAssociation::Start(float currentTime) {
 void CAnimBlendAssociation::AllocateAnimBlendNodeArray(int count) {
     plugin::CallMethodDynGlobal<CAnimBlendAssociation *, int>(0x4CE9F0, this, count);
 }
+
+void CAnimBlendAssociation::SetDeleteCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data) {
+    plugin::CallMethodDynGlobal<CAnimBlendAssociation*, void(*)(CAnimBlendAssociation*, void*), void*>(0x4CEBC0, this, callback, data);
+}
+
+void CAnimBlendAssociation::SetFinishCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data) {
+    plugin::CallMethodDynGlobal<CAnimBlendAssociation*, void(*)(CAnimBlendAssociation*, void*), void*>(0x4CEBE0, this, callback, data);
+}

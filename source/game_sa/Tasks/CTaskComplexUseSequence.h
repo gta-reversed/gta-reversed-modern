@@ -27,7 +27,7 @@ public:
     CTask* ControlSubTask(CPed* ped) override;
 
     CTask* Clone_Reversed();
-    eTaskType GetId_Reversed();
+    eTaskType GetId_Reversed() { return TASK_COMPLEX_USE_SEQUENCE; };
     bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);

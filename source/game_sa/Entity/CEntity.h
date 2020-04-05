@@ -162,6 +162,7 @@ public:
     void RemoveEscalatorsForEntity();
     bool IsEntityOccluded();
     bool IsCurrentAreaOrBarberShopInterior();
+    void UpdateRW();
 };
 
 VALIDATE_SIZE(CEntity, 0x38);

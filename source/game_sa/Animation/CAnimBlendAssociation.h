@@ -35,7 +35,14 @@ enum eAnimationFlags
     ANIMATION_INDESTRUCTIBLE = 0x8000
 };
 
-class  CAnimBlendAssociation  {
+class CDefaultAnimCallback {
+public:
+    static void DefaultAnimCB(class CAnimBlendAssociation* pAnimAssoc, void* something) {
+        // nothing here
+    }
+};
+
+class CAnimBlendAssociation {
     DWORD * m_vTable;
     //virtual ~CAnimBlendAssociation() = delete; //PLUGIN_NO_DEFAULT_CONSTRUCTION_VIRTUALBASE(CAnimBlendAssociation)
 

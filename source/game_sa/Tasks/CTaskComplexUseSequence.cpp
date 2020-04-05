@@ -119,11 +119,6 @@ CTask* CTaskComplexUseSequence::Clone_Reversed()
     return pClonedComplexUseSequence;
 }
 
-eTaskType CTaskComplexUseSequence::GetId_Reversed()
-{
-    return TASK_COMPLEX_USE_SEQUENCE;
-}
-
 bool CTaskComplexUseSequence::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event)
 {
     bool bMakeAbortable = m_pSubTask->MakeAbortable(ped, priority, _event);
