@@ -2654,32 +2654,31 @@ void CPhysical::PositionAttachedEntity()
                     bDettachEntity = true;
                 }
             }
-            if (!bUpdateSpeed)
-            {
-                if (bDettachEntity) {
-                    DettachAutoAttachedEntity();
-                    if (!physicalFlags.bDisableCollisionForce) {
-                        float randomNumber = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
-                        CMatrix* pAttachedToEntityMatrix = m_pAttachedTo->GetMatrix();
-                        CVector randomRight = pAttachedToEntityMatrix->right * randomNumber;
-                        CVector randomUp = pAttachedToEntityMatrix->up * randomNumber;
-                        CVector force = (randomRight + randomUp) * (m_fMass * 0.02f);
-                        ApplyMoveForce(force);
-                        if (pAttachedToAutmobile->m_wMiscComponentAngle > pAttachedToAutmobile->m_wVoodooSuspension)
-                            ApplyMoveForce(m_pAttachedTo->GetMatrix()->at * m_fMass * 0.02f);
-                    }
-                }
-                else {
-                    float fDamagedIntensity = m_pAttachedTo->m_fDamageIntensity;
-                    CMatrix* pMatrix = m_pAttachedTo->m_matrix;
-                    if ((fDamagedIntensity <= 0.0f || pMatrix->at.z >= 0.1f) && (fDamagedIntensity <= 1.0f || pMatrix->up.z <= 0.87f)) {
-                        float fDotProduct = DotProduct(&m_pAttachedTo->m_vecLastCollisionImpactVelocity, &pMatrix->at);
-                        if ((fDamagedIntensity <= 500.0f || fDotProduct >= 0.7f || 0.3f * 0.3f <= m_pAttachedTo->m_vecMoveSpeed.SquaredMagnitude())) {
-                            bUpdateSpeed = true;
-                        }
+            if (!bUpdateSpeed && !bDettachEntity) {
+                float fDamagedIntensity = m_pAttachedTo->m_fDamageIntensity;
+                CMatrix* pMatrix = m_pAttachedTo->m_matrix;
+                if ((fDamagedIntensity <= 0.0f || pMatrix->at.z >= 0.1f) && (fDamagedIntensity <= 1.0f || pMatrix->up.z <= 0.87f)) {
+                    float fDotProduct = DotProduct(&m_pAttachedTo->m_vecLastCollisionImpactVelocity, &pMatrix->at);
+                    if ((fDamagedIntensity <= 500.0f || fDotProduct >= 0.7f || 0.3f * 0.3f <= m_pAttachedTo->m_vecMoveSpeed.SquaredMagnitude())) {
+                        bUpdateSpeed = true;
                     }
                 }
             }
+        }
+
+        if (!bUpdateSpeed) {
+            DettachAutoAttachedEntity();
+            if (!physicalFlags.bDisableCollisionForce) {
+                float randomNumber = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
+                CMatrix* pAttachedToEntityMatrix = m_pAttachedTo->GetMatrix();
+                CVector randomRight = pAttachedToEntityMatrix->right * randomNumber;
+                CVector randomUp = pAttachedToEntityMatrix->up * randomNumber;
+                CVector force = (randomRight + randomUp) * (m_fMass * 0.02f);
+                ApplyMoveForce(force);
+                if (pAttachedToAutmobile->m_wMiscComponentAngle > pAttachedToAutmobile->m_wVoodooSuspension)
+                    ApplyMoveForce(m_pAttachedTo->GetMatrix()->at * m_fMass * 0.02f);
+            }
+            return;
         }
 
         if (physicalFlags.bInfiniteMass) {
