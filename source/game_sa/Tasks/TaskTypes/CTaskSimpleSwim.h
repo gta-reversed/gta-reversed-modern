@@ -56,13 +56,20 @@ public:
     static float &SWIM_STOP_TIME;
 
     static void InjectHooks();
-    CTaskSimpleSwim(CVector const* pPosn, CPed* pPed);
-
+    CTaskSimpleSwim(CVector* pPosition, CPed* pPed);
+    ~CTaskSimpleSwim();
+private:
+    CTaskSimpleSwim* Constructor(CVector* pPosition, CPed* pPed);
+public:
     // original virutal functions
+    CTask* Clone() override;
+    eTaskType GetId() override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
     bool ProcessPed(CPed *pPed) override;
 
     // reversed virtual functions
+    CTask* Clone_Reversed();
+    eTaskType GetId_Reversed() { return TASK_SIMPLE_SWIM; };
     bool ProcessPed_Reversed(CPed* pPed);
     bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
 
@@ -74,21 +81,6 @@ public:
     void ProcessControlInput(CPlayerPed* pPed);
     void CreateFxSystem(CPed* pPed, RwMatrixTag* pRwMatrix);
     void DestroyFxSystem();
-    /*ApplyRollAndPitch(CPed*)
-    * CTaskSimpleSwim(CVector const*, CPed*)
-    * Clone() const
-    * CreateFxSystem(CPed*, RwMatrixTag*)
-    * DestroyFxSystem()
-    * GetTaskType() const
-    * MakeAbortable(CPed*, int, CEvent const*)
-    * ProcessControlAI(CPed*)
-    * ProcessControlInput(CPlayerPed*)
-    * ProcessEffects(CPed*)
-    * ProcessPed(CPed*)
-    * ProcessSwimAnims(CPed*)
-    * ProcessSwimmingResistance(CPed*)
-    * Serialize()
-    * ~CTaskSimpleSwim()*/
 };
 
 VALIDATE_SIZE(CTaskSimpleSwim, 0x64);
