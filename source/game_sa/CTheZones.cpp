@@ -68,7 +68,7 @@ void CTheZones::ResetZonesRevealed()
 #ifdef USE_DEFAULT_FUNCTIONS
 	((void(__cdecl*)()) FUNC_CTheZones__ResetZonesRevealed) ();
 #else
-	memset(CTheZones::ExploredTerritoriesArray, 0, sizeof(CTheZones::ExploredTerritoriesArray));
+	memset(CTheZones::ExploredTerritoriesArray, 0, 100); // TODO: sizeof(CTheZones::ExploredTerritoriesArray)
 	CTheZones::TotalNumberExploredTerritories = 0;
 #endif
 }
@@ -78,7 +78,7 @@ bool CTheZones::GetCurrentZoneLockedOrUnlocked(float posx, float posy)
 #ifdef USE_DEFAULT_FUNCTIONS
 	return ((bool(__cdecl*)(float, float)) FUNC_CTheZones__GetCurrentZoneLockedOrUnlocked) (posx, posy);
 #else
-	return CTheZones::ExploredTerritoriesArray[10 * (unsigned int)((posx + 3000.0) * 0.0016666667) - (unsigned int)((posy + 3000.0) * 0.0016666667) + 9] != 0;
+	return CTheZones::ExploredTerritoriesArray[10 * (unsigned int)((posx + 3000.0f) * 0.0016666667f) - (unsigned int)((posy + 3000.0f) * 0.0016666667f) + 9] != 0;
 #endif
 }
 
