@@ -474,7 +474,7 @@ void CStreaming::RequestTxdModel(int txdModelID, int streamingFlags) {
 void CStreaming::FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelId)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturnDynGlobal<bool, unsigned char *, int>(0x408CB0, pFileBuffer, modelId);
+    plugin::Call<0x408CB0, unsigned char *, int>(pFileBuffer, modelId);
 #else
     bool bFinishedLoadingLargeFile = 0;
     CBaseModelInfo *pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
@@ -527,7 +527,7 @@ void CStreaming::FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelId
 void CStreaming::FlushChannels()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturnDynGlobal<bool>(0x40E460);
+    plugin::Call<0x40E460>();
 #else
     if (ms_channel[1].LoadStatus == LOADSTATE_Requested)
         ProcessLoadingChannel(1);
@@ -923,7 +923,7 @@ void CStreaming::LoadRequestedModels()
 void CStreaming::FlushRequestList()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturnDynGlobal<bool>(0x40E4E0);
+    plugin::Call<0x40E4E0>();
 #else
     CStreamingInfo *streamingInfo = nullptr;
     CStreamingInfo *nextStreamingInfo = nullptr;

@@ -26,7 +26,7 @@ int CCarCtrl::ChooseCarModelToLoad(int arg1) {
 int CCarCtrl::ChooseGangCarModel(int loadedCarGroupId)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<int, 0x421A40, int, int>(loadedCarGroupId, unused);
+    return plugin::CallAndReturn<int, 0x421A40, int>(loadedCarGroupId);
 #else
     return CPopulation::PickGangCar(loadedCarGroupId);
 #endif
