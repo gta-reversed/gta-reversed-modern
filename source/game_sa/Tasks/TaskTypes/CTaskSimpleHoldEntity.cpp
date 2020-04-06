@@ -304,9 +304,7 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(class CPed* ped) {
                 CPlayerPed* pPlayer = (CPlayerPed*)ped;
                 CPad* pPad = pPlayer->GetPadFromPlayer();
                 if (pPad->ExitVehicleJustDown()) {
-                    auto pTaskSimplePutDownEntity = (CTaskSimplePutDownEntity*)CTask::operator new(64);
-                    if (pTaskSimplePutDownEntity)
-                        pTaskSimplePutDownEntity->Constructor();
+                    auto pTaskSimplePutDownEntity = new CTaskSimplePutDownEntity();
                     CEventScriptCommand eventScriptCommand;
                     eventScriptCommand.Constructor(3, pTaskSimplePutDownEntity, 0);
                     CEventGroup* pEventGroup = &ped->m_pIntelligence->m_eventGroup;
