@@ -73,7 +73,7 @@ void CPhysical::InjectHooks()
     HookInstall(0x54D920, &CPhysical::CheckCollision, 7);
     HookInstall(0x54DAB0, &CPhysical::CheckCollision_SimpleCar, 7);
     HookInstall(0x546DB0, &CPhysical::PlacePhysicalRelativeToOtherPhysical, 7);
-    HookInstall(0x546FF0, &CPhysical::PositionAttachedEntity, 7);
+    HookInstall(0x4067D8, &CPhysical::PositionAttachedEntity, 6);
 }
 
 void CPhysical::Add()
