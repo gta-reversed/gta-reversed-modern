@@ -12,11 +12,11 @@ CEntity* IKChainManager_c::GetLookAtEntity(CPed* pPed)
     return plugin::CallMethodAndReturn<CEntity*, 0x6181D0, IKChainManager_c*, CPed*>(this, pPed);
 }
 
-bool IKChainManager_c::LookAt(char* strPurpose, CPed* pPed, CPed* pTargetPed, int time, int pedBoneID, RwV3d* pPosition, bool bArg7,
+bool IKChainManager_c::LookAt(char* strPurpose, CPed* pPed, CEntity* pTargetEntity, int time, int pedBoneID, RwV3d* pPosition, bool bArg7,
     float fSpeed, int blendTime, int a10, bool bForceLooking)
 {
-    return plugin::CallMethodAndReturn<CEntity*, 0x618970, IKChainManager_c*, char*, CPed*, CPed*, int, int, RwV3d*, bool, float, int, int, bool>
-        (this, strPurpose, pPed, pTargetPed, time, pedBoneID, pPosition, bArg7, fSpeed, blendTime, a10, bForceLooking);
+    return plugin::CallMethodAndReturn<CEntity*, 0x618970, IKChainManager_c*, char*, CPed*, CEntity*, int, int, RwV3d*, bool, float, int, int, bool>
+        (this, strPurpose, pPed, pTargetEntity, time, pedBoneID, pPosition, bArg7, fSpeed, blendTime, a10, bForceLooking);
 }
 
 int IKChainManager_c::AbortLookAt(CPed* pPed, int blendOutTime)
