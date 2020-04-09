@@ -172,13 +172,13 @@ void CWanted::Reset() {
 }
 
 // Converted from thiscall void CWanted::RegisterCrime(eCrimeType crimeType,CVector const&posn,uint crimeId,bool bPoliceDontReallyCare) 0x562410
-void CWanted::RegisterCrime(eCrimeType crimeType, CVector const& posn, unsigned int crimeId, bool bPoliceDontReallyCare) {
-    plugin::CallMethod<0x562410, CWanted*, eCrimeType, CVector const&, unsigned int, bool>(this, crimeType, posn, crimeId, bPoliceDontReallyCare);
+void CWanted::RegisterCrime(eCrimeType crimeType, CVector const& posn, CPed* ped, bool bPoliceDontReallyCare) {
+    plugin::CallMethod<0x562410, CWanted*, eCrimeType, CVector const&, CPed*, bool>(this, crimeType, posn, ped, bPoliceDontReallyCare);
 }
 
 // Converted from thiscall void CWanted::RegisterCrime_Immediately(eCrimeType crimeType,CVector const&posn,uint crimeId,bool bPoliceDontReallyCare) 0x562430
-void CWanted::RegisterCrime_Immediately(eCrimeType crimeType, CVector const& posn, unsigned int crimeId, bool bPoliceDontReallyCare) {
-    plugin::CallMethod<0x562430, CWanted*, eCrimeType, CVector const&, unsigned int, bool>(this, crimeType, posn, crimeId, bPoliceDontReallyCare);
+void CWanted::RegisterCrime_Immediately(eCrimeType crimeType, CVector const& posn, CPed* ped, bool bPoliceDontReallyCare) {
+    plugin::CallMethod<0x562430, CWanted*, eCrimeType, CVector const&, CPed*, bool>(this, crimeType, posn, ped, bPoliceDontReallyCare);
 }
 
 // Converted from thiscall void CWanted::SetWantedLevel(int level) 0x562470

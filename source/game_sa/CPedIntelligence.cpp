@@ -1084,7 +1084,7 @@ bool CPedIntelligence::TestForStealthKill(CPed* pTarget, bool bFullTest) {
         CPedGroup* pPedGroup = CPedGroups::GetPedsGroup(pTarget);
         if (bAcquaintancesFlagSet && pPedGroup)
         {
-            auto pGroupEventHandler = pPedGroup->m_groupIntelligence.m_pGroupEventHandler;
+            CEventGroupEvent* pGroupEventHandler = pPedGroup->m_groupIntelligence.m_pGroupEventHandler;
             if (pGroupEventHandler && pGroupEventHandler->GetSourceEntity() == (CEntity*)m_pPed && bAcquaintancesFlagSet)
             {
                 return false;

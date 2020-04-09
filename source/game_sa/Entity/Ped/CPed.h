@@ -251,7 +251,7 @@ public:
     CVehicle           *m_pVehicle;
     int field_590;
     int field_594;
-    int                 m_nPedType;
+    ePedType            m_nPedType;
     void               *m_pStats; // CPedStat *
     CWeapon             m_aWeapons[13];
     eWeaponType         m_nSavedWeapon; // when we need to hide ped weapon, we save it temporary here

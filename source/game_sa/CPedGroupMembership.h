@@ -11,7 +11,7 @@
 
 class CPedGroup;
 
-class  CPedGroupMembership {
+class CPedGroupMembership {
     PLUGIN_NO_DEFAULT_CONSTRUCTION(CPedGroupMembership)
 
 public:

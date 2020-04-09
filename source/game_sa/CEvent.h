@@ -6,16 +6,23 @@ class CPedGroup;
 class CEntity;
 enum eEventType;
 
-class CEvent 
-{
+class CEvent {
 public:
-    static void* operator_new();
+    int m_nTimeActive;
+    bool m_bValid;
+    bool field_9;
+    bool field_A;
+    bool field_B;
 
-    virtual CEvent* DeletingDestructor(uint8_t deletingFlags);
-    virtual eEventType GetEventType();
-    virtual int GetEventPriority();
-    virtual int GetLifeTime();
-    virtual CEvent* Clone();
+    static void* operator new(unsigned int size);
+    static void operator delete(void* object);
+
+    CEvent();
+    virtual ~CEvent();
+    virtual eEventType GetEventType() = 0;
+    virtual int GetEventPriority() = 0;
+    virtual int GetLifeTime() = 0;
+    virtual CEvent* Clone() = 0;
     virtual bool AffectsPed(CPed* ped);
     virtual bool AffectsPedGroup(CPedGroup* pedGroup);
     virtual bool IsCriminalEvent();
@@ -27,10 +34,18 @@ public:
     virtual bool DoInformVehicleOccupants(CPed* ped);
     virtual bool IsValid(CPed* ped);
     virtual bool CanBeInterruptedBySameEvent();
-    virtual CEvent* CloneEditable();
-    // We don't know the last one. TODO..
-    // virtual field_40;
 
+    bool AffectsPed_Reversed(CPed* ped) { return true; };
+    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup) { return true; };
+    bool IsCriminalEvent_Reversed() { return false; }
+    void ReportCriminalEvent_Reversed(CPed* ped) { }; // empty
+    bool HasEditableResponse_Reversed() { return false; }
+    CEntity* GetSourceEntity_Reversed() { return nullptr; }
+    bool TakesPriorityOver_Reversed(CEvent* refEvent) { return GetEventPriority() >= refEvent->GetEventPriority(); }
+    float GetLocalSoundLevel_Reversed() { return 0.0f; }
+    bool DoInformVehicleOccupants_Reversed(CPed* ped) { return false; }
+    bool IsValid_Reversed(CPed* ped) { return m_bValid || m_nTimeActive <= GetLifeTime(); }
+    bool CanBeInterruptedBySameEvent_Reversed() { return false; };
 };
 
-VALIDATE_SIZE(CEvent, 0x4);
+VALIDATE_SIZE(CEvent, 0xC);

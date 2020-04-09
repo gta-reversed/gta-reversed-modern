@@ -22,8 +22,8 @@ class  CPedGroupIntelligence {
 
 public:
     CPedGroup *m_pPedGroup;
-    CGroupEventHandler *m_pGroupEventHandler;
-    int m_pEventGroupEvent;
+    CEventGroupEvent*m_pGroupEventHandler; // TODO: member name is incorrect. It needs to be fixed.
+    CEventGroupEvent* m_pEventGroupEvent;
     CPedTaskPair m_groupTasks[53];
     unsigned char gap288[4];
     CPedGroupDefaultTaskAllocator *m_pPedGroupDefaultTaskAllocator;

@@ -6,10 +6,10 @@
 */
 #pragma once
 
-enum eCrimeType {
+enum class eCrimeType {
     CRIME_FIRE_WEAPON = 1,
     CRIME_DAMAGED_PED = 2,
-    CRIME_FIRE_WEAPON_HIT_PED = 3,
+    CRIME_DAMAGED_COP = 3,
     CRIME_DAMAGE_CAR = 4,
     CRIME_DAMAGE_COP_CAR = 5,
     CRIME_CAR_STEAL = 6,

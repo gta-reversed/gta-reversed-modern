@@ -141,6 +141,7 @@
 #include "game_sa\CPad.h"
 #include "game_sa\CPathFind.h"
 #include "game_sa\CPedAcquaintance.h"
+#include "game_sa\CPedAcquaintanceScanner.h"
 #include "game_sa\CPedClothesDesc.h"
 #include "game_sa\CPedGroup.h"
 #include "game_sa\CPedGroupIntelligence.h"

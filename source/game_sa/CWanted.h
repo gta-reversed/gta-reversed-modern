@@ -66,15 +66,15 @@ public:
     // dummy function
     static void ResetPolicePursuit();
     void ClearQdCrimes();
-    bool AddCrimeToQ(eCrimeType crimeType, int crimeId, CVector const& posn, bool bAlreadyReported, bool bPoliceDontReallyCare);
-    void ReportCrimeNow(eCrimeType crimeType, CVector const& posn, bool bPoliceDontReallyCare);
+    bool AddCrimeToQ(enum eCrimeType crimeType, int crimeId, CVector const& posn, bool bAlreadyReported, bool bPoliceDontReallyCare);
+    void ReportCrimeNow(enum eCrimeType crimeType, CVector const& posn, bool bPoliceDontReallyCare);
     static void RemovePursuitCop(CCopPed* cop, CCopPed** copsArray, unsigned char& copsCounter);
     bool IsInPursuit(CCopPed* cop);
     static void UpdateEachFrame();
     void Initialise();
     void Reset();
-    void RegisterCrime(eCrimeType crimeType, CVector const& posn, unsigned int crimeId, bool bPoliceDontReallyCare);
-    void RegisterCrime_Immediately(eCrimeType crimeType, CVector const& posn, unsigned int crimeId, bool bPoliceDontReallyCare);
+    void RegisterCrime(enum eCrimeType crimeType, CVector const& posn, CPed* ped, bool bPoliceDontReallyCare);
+    void RegisterCrime_Immediately(enum eCrimeType crimeType, CVector const& posn, CPed* ped, bool bPoliceDontReallyCare);
     void SetWantedLevel(int level);
     void CheatWantedLevel(int level);
     void SetWantedLevelNoDrop(int level);

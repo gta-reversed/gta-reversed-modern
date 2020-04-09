@@ -660,6 +660,20 @@ enum egogglesAnimGroup
 {
     GOGGLES_GOGGLES_PUT_ON = 224,
 };
+
+enum eFightAnim {
+    ANIM_FIGHT_FIGHT_1 = 214,
+    ANIM_FIGHT_FIGHT_2 = 215,
+    ANIM_FIGHT_FIGHT_3 = 216,
+    ANIM_FIGHT_FIGHT_G = 217,
+    ANIM_FIGHT_FIGHT_M = 218,
+    ANIM_FIGHT_HIT_1 = 219,
+    ANIM_FIGHT_HIT_2 = 220,
+    ANIM_FIGHT_HIT_3 = 221,
+    ANIM_FIGHT_FIGHT_BLOCK = 222,
+    ANIM_FIGHT_FIGHT_IDLE = 223,
+};
+
 // [GROUP] i = 33 | GroupName : melee_1 | Group ID: 33 | Total Animations: 10
 enum emelee_1AnimGroup
 {

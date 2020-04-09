@@ -8,7 +8,7 @@
 
 #include "PluginBase.h"
 
-enum  ePedType : unsigned int {
+enum ePedType : unsigned int {
     PED_TYPE_PLAYER1 = 0,
     PED_TYPE_PLAYER2,
     PED_TYPE_PLAYER_NETWORK,

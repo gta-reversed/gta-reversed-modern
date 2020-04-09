@@ -262,8 +262,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
             CPedDamageResponseCalculator pedDamageResponseCalculator;
             pedDamageResponseCalculator.Constructor1(0, CTimer::ms_fTimeStep, weaponType, PED_PIECE_TORSO, false);
 
-            CEventDamage eventDamage;
-            eventDamage.Constructor(0, CTimer::m_snTimeInMilliseconds, weaponType, PED_PIECE_TORSO, 0, 0, pPed->bInVehicle);
+            CEventDamage eventDamage(0, CTimer::m_snTimeInMilliseconds, weaponType, PED_PIECE_TORSO, 0, 0, pPed->bInVehicle);
             CPedDamageResponse damageResponseInfo;
             if (eventDamage.AffectsPed(pPed))
             {
@@ -274,7 +273,6 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
                 damageResponseInfo.m_bDamageCalculated = true;
             }
             pPed->m_pIntelligence->m_eventGroup.Add((CEvent*)& eventDamage, false);
-            eventDamage.Destructor();
             pedDamageResponseCalculator.Destructor1();
         }
     }

@@ -7,6 +7,16 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
+void* CTask::operator new(unsigned int size)
+{
+    return ((CTask * (__cdecl*)(unsigned int))0x61A5A0)(size);
+}
+
+void CTask::operator delete(void* object)
+{
+    ((void(__cdecl*)(void*))0x61A5B0)(object);
+}
+
 CTask::CTask() {
     m_pParentTask = nullptr;
 }
@@ -14,16 +24,6 @@ CTask::CTask() {
 
 CTask::~CTask() {
     // nothing here
-}
-
-void *CTask::operator new(unsigned int size)
-{
-    return ((CTask *(__cdecl *)(unsigned int))0x61A5A0)(size);
-}
-
-void CTask::operator delete(void *object)
-{
-    ((void(__cdecl *)(void *))0x61A5B0)(object);
 }
 
 void CTask::StopTimer(class CEvent *_event)

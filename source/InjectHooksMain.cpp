@@ -18,6 +18,7 @@ void InjectHooksMain(void)
     CPed::InjectHooks();
     CPedIntelligence::InjectHooks();
     CTrain::InjectHooks();
+    CEventDamage::InjectHooks();
     CTaskManager::InjectHooks();
     CTaskComplexUseSequence::InjectHooks();
     CTaskComplexSequence::InjectHooks();
@@ -36,7 +37,6 @@ void InjectHooksMain(void)
     CStats::InjectHooks();
     CCarCtrl::InjectHooks();
     CTheZones::InjectHooks();
-    
     /*
      DetourRestoreAfterWith();
      DetourTransactionBegin();
