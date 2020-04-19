@@ -27,6 +27,7 @@ void InjectHooksMain(void)
     CTaskComplexWanderCop::InjectHooks();
     CTaskSimplePlayerOnFoot::InjectHooks();
     CTaskSimpleSwim::InjectHooks();
+    CTaskSimpleGoTo::InjectHooks();
     CTaskSimpleHoldEntity::InjectHooks();
     CTaskSimplePutDownEntity::InjectHooks();
     CTaskSimplePickUpEntity::InjectHooks();
