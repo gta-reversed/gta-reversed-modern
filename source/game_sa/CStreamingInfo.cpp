@@ -4,7 +4,6 @@ CStreamingInfo *&CStreamingInfo::ms_pArrayBase = *reinterpret_cast<CStreamingInf
 
 void CStreamingInfo::InjectHooks()
 {
-  //  InjectHook(0x15674C0, &CStreamingInfo::AddToList, PATCH_JUMP);
 }
 
 inline int CStreamingInfo::GetIndexFromBase(CStreamingInfo * pThis, CStreamingInfo * ArrayBase)
@@ -24,6 +23,11 @@ int CStreamingInfo::AddToList(CStreamingInfo *listStart)
     ms_pArrayBase[m_nNextIndex].m_nPrevIndex = listStart->m_nNextIndex;
     return m_nNextIndex;
 #endif
+}
+
+bool CStreamingInfo::GetCdPosnAndSize(unsigned int* CdPosn, unsigned int* CdSize)
+{
+    return plugin::CallMethodAndReturn<bool, 0x1560E50, CStreamingInfo*, unsigned int*, unsigned int*>(this, CdPosn, CdSize);
 }
 
 bool CStreamingInfo::InList()

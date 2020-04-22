@@ -62,6 +62,8 @@ public:
         Flush();
     }
 
+    int GetSize () { return m_nSize; }
+
     // Initialises a pool with preallocated
     // To be called one-time-only for statically allocated pools.
     void Init(int nSize, void* pObjects, void* pInfos) {
@@ -184,7 +186,7 @@ public:
     unsigned int GetNoOfUsedSpaces() {
         unsigned int counter = 0;
         for (int i = 0; i < m_nSize; ++i) {
-            if (IsFreeSlotAtIndex(i))
+            if (!IsFreeSlotAtIndex(i))
                 ++counter;
         }
         return counter;

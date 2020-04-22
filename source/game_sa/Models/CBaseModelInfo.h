@@ -103,7 +103,7 @@ public:
     virtual signed int GetAnimFileIndex();
 
 	//
-	void SetTexDictionary(char *txdName);
+	void SetTexDictionary(const char* txdName);
 	void ClearTexDictionary();
 	void AddTexDictionaryRef();
 	void RemoveTexDictionaryRef();

@@ -240,10 +240,10 @@ public:
      static void RequestModelStream(int streamNum);
     //! unused
      static void RequestPlayerSection(int modelIndex, char const *string, int streamingFlags);
-     static void RequestSpecialChar(int slot, char const *Name, int streamingFlags);
-     static void RequestSpecialModel(int slot, char *name, int StreamingFlags);
-     static void RequestTxdModel(int TxdModelID, int Streamingflags);
-     static void RequestVehicleUpgrade(int modelIndex, int StreamingFlags);
+     static void RequestSpecialChar(int modelId, char const *name, int flags);
+     static void RequestSpecialModel(int modelId, char const* name, int flags);
+     static void RequestTxdModel(int TxdModelID, int flags);
+     static void RequestVehicleUpgrade(int modelIndex, int flags);
      static void RetryLoadFile(int streamNum);
      static void Save();
      static void SetLoadVehiclesInLoadScene(bool bEnable);

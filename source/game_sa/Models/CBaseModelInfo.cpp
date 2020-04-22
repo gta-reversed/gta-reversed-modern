@@ -81,9 +81,9 @@ signed int CBaseModelInfo::GetAnimFileIndex()
     return ((signed int(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 14))(this);
 }
 
-void CBaseModelInfo::SetTexDictionary(char *txdName)
+void CBaseModelInfo::SetTexDictionary(const char *txdName)
 {
-    ((void(__thiscall *)(CBaseModelInfo *, char *))0x4C4B40)(this, txdName);
+    ((void(__thiscall *)(CBaseModelInfo *, const char*))0x4C4B40)(this, txdName);
 }
 
 void CBaseModelInfo::ClearTexDictionary()

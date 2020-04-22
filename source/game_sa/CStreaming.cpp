@@ -70,6 +70,8 @@ void CStreaming::InjectHooks()
     HookInstall(0x408CB0, &CStreaming::FinishLoadingLargeFile, 7);
     HookInstall(0x40E460, &CStreaming::FlushChannels, 7);
     HookInstall(0x40CBA0, &CStreaming::RequestModelStream, 7);
+    HookInstall(0x40B450, &CStreaming::RequestSpecialChar, 7);
+    HookInstall(0x409D10, &CStreaming::RequestSpecialModel, 7);
     HookInstall(0x40E170, &CStreaming::ProcessLoadingChannel, 7);
     HookInstall(0x40E120, &CStreaming::MakeSpaceFor, 7);
     HookInstall(0x40E3A0, &CStreaming::LoadRequestedModels, 7);
@@ -747,6 +749,83 @@ void CStreaming::RequestModelStream(int channelIndex)
 
     if (m_bModelStreamNotLoaded)
         m_bModelStreamNotLoaded = false;
+#endif
+}
+
+void CStreaming::RequestSpecialChar(int modelId, char const* name, int flags)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal<int, char const*, int>(0x40B450, modelId, name, flags);
+#else
+    return CStreaming::RequestSpecialModel(modelId + 290, name, flags);
+#endif
+}
+
+void CStreaming::RequestSpecialModel(int modelId, char const* name, int flags)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal<int, char*, int>(0x409D10, modelId, name, flags);
+#else
+    CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
+    CStreamingInfo& streamingInfo = CStreaming::ms_aInfoForModel[modelId];
+    unsigned int CdPosn, CdSize;
+    if (CKeyGen::GetUppercaseKey(name) == pModelInfo->m_nKey && streamingInfo.GetCdPosnAndSize(&CdPosn, &CdSize)) {
+        RequestModel(modelId, flags);
+        return;
+    }
+    if (pModelInfo->m_nRefCount > 0) {
+        for (int i = CPools::ms_pPedPool->GetSize() - 1; i >= 0; i--) {
+            if (pModelInfo->m_nRefCount <= 0)
+                break;
+            CPed* pPed = CPools::ms_pPedPool->GetAt(i);
+            if (pPed && pPed->m_nModelIndex == modelId && !pPed->IsPlayer() && pPed->CanBeDeletedEvenInVehicle()) {
+                CTheScripts::RemoveThisPed(pPed);
+            }
+        }
+        for (int i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
+            if (pModelInfo->m_nRefCount <= 0)
+                break;
+            CObject* pObject = CPools::ms_pObjectPool->GetAt(i);
+            if (pObject && pObject->m_nModelIndex == modelId &&  pObject->CanBeDeleted()) {
+                CWorld::Remove(pObject);
+                CWorld::RemoveReferencesToDeletedObject(pObject);
+                pObject->DeletingDestructor(1); // TODO: Use delete
+            }
+        }
+    }
+    const unsigned int modelNameKey = pModelInfo->m_nKey;
+    pModelInfo->m_nKey = CKeyGen::GetUppercaseKey(name);
+    CBaseModelInfo* pFoundModelInfo = nullptr;
+    for (int i = 0; i < 1001; i++) {
+        CBaseModelInfo* pTheModelInfo = CModelInfo::ms_modelInfoPtrs[i];
+        if (pTheModelInfo && modelNameKey == pTheModelInfo->m_nKey) {
+            pFoundModelInfo = pTheModelInfo;
+        }
+    }
+    if (pFoundModelInfo && pFoundModelInfo->m_nTxdIndex != -1 && CTxdStore::ms_pTxdPool->GetAt(pFoundModelInfo->m_nTxdIndex)) {
+        CTxdStore::AddRef(pFoundModelInfo->m_nTxdIndex);
+        RemoveModel(modelId);
+        CTxdStore::RemoveRefWithoutDelete(pFoundModelInfo->m_nTxdIndex);
+    }
+    else {
+        RemoveModel(modelId);
+    }
+    unsigned int outOffset, outStreamingSize;
+    CStreaming::ms_pExtraObjectsDir->FindItem(name, outOffset, outStreamingSize);
+    pModelInfo->ClearTexDictionary();
+    if (CTxdStore::FindTxdSlot(name) == -1)
+        pModelInfo->SetTexDictionary("generic");
+    else
+        pModelInfo->SetTexDictionary(name);
+    // The first 3 bytes of outOffset is used for m_nCdPosn and 
+    // the remaining 1 byte is used for m_nImgId
+    // outOffset & 0xFFFFF = returns the first 3 bytes and ignores the last one
+    // outOffset >> 24 = Ignores the first 3 bytes and returns the last byte
+    streamingInfo.m_nCdPosn = outOffset & 0xFFFFFF;
+    streamingInfo.m_nCdSize = outStreamingSize;
+    streamingInfo.m_nImgId = outOffset >> 24;
+    streamingInfo.m_nNextIndexOnCd = -1;
+    RequestModel(modelId, flags);
 #endif
 }
 
