@@ -37,28 +37,30 @@ public:
     unsigned int   m_nSlot;
     union 
     {
-    struct {
-        unsigned int bCanAim : 1;
-        unsigned int bAimWithArm : 1;
-        unsigned int b1stPerson : 1;
-        unsigned int bOnlyFreeAim : 1;
-        unsigned int bMoveAim : 1; // can move when aiming
-        unsigned int bMoveFire : 1; // can move when firing
-        unsigned int b06 : 1; // this bitfield is not used
-        unsigned int b07 : 1; // this bitfield is not used
-        unsigned int bThrow : 1;
-        unsigned int bHeavy : 1; // can't run fast with this weapon
-        unsigned int bContinuosFire : 1;
-        unsigned int bTwinPistol : 1;
-        unsigned int bReload : 1; // this weapon can be reloaded
-        unsigned int bCrouchFire : 1; // can reload when crouching
-        unsigned int bReload2Start : 1; // reload directly after firing
-        unsigned int bLongReload : 1;
-        unsigned int bSlowdown : 1;
-        unsigned int bRandSpeed : 1;
-        unsigned int bExpands : 1;
-    }   m_nFlags;
-        unsigned int m_nFlags4Bytes;
+		struct {
+			unsigned int bCanAim : 1;
+			unsigned int bAimWithArm : 1;
+			unsigned int b1stPerson : 1;
+			unsigned int bOnlyFreeAim : 1;
+			unsigned int bMoveAim : 1; // can move when aiming
+			unsigned int bMoveFire : 1; // can move when firing
+			unsigned int b07 : 1; // this bitfield is not used
+			unsigned int b08 : 1; // this bitfield is not used
+
+			unsigned int bThrow : 1;
+			unsigned int bHeavy : 1; // can't run fast with this weapon
+			unsigned int bContinuosFire : 1;
+			unsigned int bTwinPistol : 1;
+			unsigned int bReload : 1; // this weapon can be reloaded
+			unsigned int bCrouchFire : 1; // can reload when crouching
+			unsigned int bReload2Start : 1; // reload directly after firing
+			unsigned int bLongReload : 1;
+
+			unsigned int bSlowdown : 1;
+			unsigned int bRandSpeed : 1;
+			unsigned int bExpands : 1;
+		} flags;
+        unsigned int m_nFlags;
     };
 	unsigned int   m_dwAnimGroup; // instead of storing pointers directly to anims, use anim association groups
 	unsigned short m_nAmmoClip; // ammo in one clip

@@ -49,7 +49,7 @@ bool CTaskSimplePlayerOnFoot::ProcessPed_Reversed(class CPed* ped)
             CTaskSimpleUseGun* pSimpleTaskUseGun = pIntelligence->GetTaskUseGun();
             if (pSimpleTaskUseGun
                 && pSimpleTaskUseGun->m_pWeaponInfo
-                && !pSimpleTaskUseGun->m_pWeaponInfo->m_nFlags.bAimWithArm)
+                && !pSimpleTaskUseGun->m_pWeaponInfo->flags.bAimWithArm)
             {
                 PlayerControlZeldaWeapon(pPlayerPed);
             }
@@ -109,13 +109,13 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
         TheCamera.ClearPlayerWeaponMode();
         CWeaponEffects::ClearCrossHair(pPlayerPed->m_nPedType);
     }
-    pPlayerPed->m_nWeaponAccuracy = pWeaponInfo->m_nFlags.bCanAim ? 95 : 100;
+    pPlayerPed->m_nWeaponAccuracy = pWeaponInfo->flags.bCanAim ? 95 : 100;
     if (pPad->WeaponJustDown(pPlayerPed)
         && (pPlayerPed->m_pTargetedObject || CCamera::m_bUseMouse3rdPerson && pPlayerPed->m_p3rdPersonMouseTarget))
     {
         pPlayerPed->PlayerHasJustAttackedSomeone();
     }
-    if (pPlayerPed->m_pFire || !pWeaponInfo->m_nFlags.b1stPerson)
+    if (pPlayerPed->m_pFire || !pWeaponInfo->flags.b1stPerson)
     {
         if (!pPad->GetTarget() && weaponType == WEAPON_RLAUNCHER_HS)
         {
@@ -346,7 +346,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 }
                 case 4:
                 {
-                    if (!CWeaponInfo::GetWeaponInfo(pActiveWeapon->m_nType, 1)->m_nFlags.bHeavy)
+                    if (!CWeaponInfo::GetWeaponInfo(pActiveWeapon->m_nType, 1)->flags.bHeavy)
                     {
                         fightCommand = 12;
                         gunCommand[0] = 12;
@@ -610,12 +610,12 @@ PED_WEAPON_AIMING_CODE:
     CVector upVector(0.0, 0.0, 0.0);
 
 
-    if (pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nState == WEAPONSTATE_RELOADING && pWeaponInfo->m_nFlags.bReload)
+    if (pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nState == WEAPONSTATE_RELOADING && pWeaponInfo->flags.bReload)
     {
         if (!pIntelligence->GetTaskUseGun())
         {
             int animGroupId = pWeaponInfo->m_dwAnimGroup;
-            int crouchReloadAnimID = (pWeaponInfo->m_nFlags4Bytes >> 12 & 1) != 0 ? 226 : 0;
+            int crouchReloadAnimID = pWeaponInfo->flags.bReload ? 226 : 0;
             if (!pPlayerPed->bIsDucking)
             {
                 if (!RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, crouchReloadAnimID))
@@ -689,7 +689,7 @@ PED_WEAPON_AIMING_CODE:
                     pTaskUseGun->ControlGun(pPlayerPed, pPlayerPed->m_pTargetedObject, 7);
                 }
                 CCam* pCam = &TheCamera.m_aCams[TheCamera.m_nActiveCam];
-                if (!pWeaponInfo->m_nFlags.bAimWithArm && pCam->m_nMode == MODE_FOLLOWPED)
+                if (!pWeaponInfo->flags.bAimWithArm && pCam->m_nMode == MODE_FOLLOWPED)
                 {
                     pPlayerPed->m_fAimingRotation = atan2(-pCam->m_vecFront.x, pCam->m_vecFront.y);
                 }
@@ -728,9 +728,9 @@ PED_WEAPON_AIMING_CODE:
         }
         goto MAKE_PLAYER_LOOK_AT_ENTITY;
     }
-    if (!pWeaponInfo->m_nFlags.bCanAim || pPlayerData->m_bFreeAiming)
+    if (!pWeaponInfo->flags.bCanAim || pPlayerData->m_bFreeAiming)
     {
-        if (pPlayerData->m_bFreeAiming && pWeaponInfo->m_nFlags.bCanAim
+        if (pPlayerData->m_bFreeAiming && pWeaponInfo->flags.bCanAim
             && (pPad->ShiftTargetLeftJustDown() || pPad->ShiftTargetRightJustDown())
             && !CCamera::m_bUseMouse3rdPerson)
         {
@@ -751,7 +751,7 @@ PED_WEAPON_AIMING_CODE:
                 pPlayerPed->FindNextWeaponLockOnTarget(0, shiftTargetLeftJustDown);
             }
         }
-        else if (!pWeaponInfo->m_nFlags.bOnlyFreeAim || pPlayerPed->m_pTargetedObject || pPlayerData->m_bFreeAiming)
+        else if (!pWeaponInfo->flags.bOnlyFreeAim || pPlayerPed->m_pTargetedObject || pPlayerData->m_bFreeAiming)
         {
             if (CCamera::m_bUseMouse3rdPerson && pPlayerData->m_bFreeAiming)
             {
@@ -789,7 +789,7 @@ PED_WEAPON_AIMING_CODE:
                 || pPlayerPed->DoesTargetHaveToBeBroken(pPlayerPed->m_pTargetedObject, pActiveWeapon)
                 || !pPlayerPed->bCanPointGunAtTarget
                 && (pActiveWeapon->m_nType, weaponSkill = pPlayerPed->GetWeaponSkill(),
-                    !(CWeaponInfo::GetWeaponInfo(pActiveWeapon->m_nType, weaponSkill)->m_nFlags.bCanAim))
+                    !(CWeaponInfo::GetWeaponInfo(pActiveWeapon->m_nType, weaponSkill)->flags.bCanAim))
                 )
             {
                 pPlayerPed->ClearWeaponTarget();
@@ -960,7 +960,7 @@ MAKE_PLAYER_LOOK_AT_ENTITY:
     }
 
     if ((pWeaponInfo->m_nWeaponFire || pIntelligence->GetTaskFighting() && !bTargetedPedDead)
-        && (pPlayerPed->bIsDucking || !pWeaponInfo->m_nFlags.bAimWithArm))
+        && (pPlayerPed->bIsDucking || !pWeaponInfo->flags.bAimWithArm))
     {
         goto ABORT_LOOKING_IF_POSSIBLE;
     }
@@ -1125,7 +1125,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed)
             CPad* pPad = pPlayerPed->GetPadFromPlayer();
             double pedWalkUpDown = moveSpeed.y;
             double pedWalkLeftRight = moveSpeed.x;
-            if (!pTaskUseGun->m_pWeaponInfo->m_nFlags.b1stPerson || CGameLogic::IsPlayerUse2PlayerControls(pPlayerPed))
+            if (!pTaskUseGun->m_pWeaponInfo->flags.b1stPerson || CGameLogic::IsPlayerUse2PlayerControls(pPlayerPed))
             {
                 pedWalkUpDown = pPad->GetPedWalkUpDown();
                 pedWalkLeftRight = pPad->GetPedWalkLeftRight();
@@ -1244,7 +1244,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
             {
                 pPlayerPed->m_pIntelligence->ClearTaskDuckSecondary();
                 if (!pPlayerPed->m_pIntelligence->GetTaskUseGun()
-                    || pPlayerPed->m_pIntelligence->GetTaskUseGun()->m_pWeaponInfo->m_nFlags.bAimWithArm)
+                    || pPlayerPed->m_pIntelligence->GetTaskUseGun()->m_pWeaponInfo->flags.bAimWithArm)
                 {
                     int pedMoveState = PEDMOVE_NONE;
                     if (pPad->GetSprint())
@@ -1397,7 +1397,7 @@ int CTaskSimplePlayerOnFoot::PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAn
     }
 
 DONT_MODIFY_MOVE_BLEND_RATIO:
-    if (!(CWeaponInfo::GetWeaponInfo(pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType, 1)->m_nFlags.bHeavy))
+    if (!(CWeaponInfo::GetWeaponInfo(pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType, 1)->flags.bHeavy))
     {
         if (!pPed->m_pSomePed || !pPed->m_pSomePed->m_bIsStatic || pPed->m_pSomePed->m_bHasContacted)
         {
@@ -1443,7 +1443,7 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
         pPlayerPed->m_pIntelligence->SetTaskDuckSecondary(0);
     }
 
-    if (!pPlayerPed->bIsInTheAir && !(CWeaponInfo::GetWeaponInfo(pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType, 1)->m_nFlags.bHeavy))
+    if (!pPlayerPed->bIsInTheAir && !(CWeaponInfo::GetWeaponInfo(pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType, 1)->flags.bHeavy))
     {
         if (pPad->JumpJustDown())
         {

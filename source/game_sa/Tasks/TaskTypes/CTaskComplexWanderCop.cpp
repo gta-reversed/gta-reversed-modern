@@ -161,12 +161,9 @@ CTask* CTaskComplexWanderCop::CreateFirstSubTask_Reversed(CPed* ped)
     }
     if (pPed->m_bDontPursuit)
     {
-        auto pTaskSimpleStandStill = (CTaskSimpleStandStill*)CTask::operator new(32);
-        if (pTaskSimpleStandStill)
-        {
-            pTaskSimpleStandStill->Constructor(100000, 1, 0, 8.0);
+        auto pTaskSimpleStandStill = new CTaskSimpleStandStill(100000, 1, 0, 8.0);
+        if (pTaskSimpleStandStill) 
             return pTaskSimpleStandStill;
-        }
         return nullptr;
     }
     if (!ShouldPursuePlayer(pPed))

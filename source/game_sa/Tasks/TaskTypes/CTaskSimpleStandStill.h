@@ -21,7 +21,15 @@ private:
 public:
     float m_fBlendData;
 
+    CTaskSimpleStandStill(int nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
+    ~CTaskSimpleStandStill();
+private:
 	CTaskSimpleStandStill* Constructor(int nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
+public:
+    CTask* Clone()  override;
+    eTaskType GetId() override { return TASK_SIMPLE_STAND_STILL; };
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
+    bool ProcessPed(CPed* ped) override;
 };
 
 VALIDATE_SIZE(CTaskSimpleStandStill, 0x20);

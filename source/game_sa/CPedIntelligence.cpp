@@ -609,12 +609,7 @@ void CPedIntelligence::ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryT
         }
         else if (!m_eventGroup.HasScriptCommandOfTaskType(TASK_SIMPLE_STAND_STILL))
         {
-            auto pTaskSimpleStandStill = (CTaskSimpleStandStill*)CTask::operator new(32);
-            if (pTaskSimpleStandStill)
-            {
-                pTaskSimpleStandStill = pTaskSimpleStandStill->Constructor(0, 0, 0, 8.0);
-            }
-
+            auto pTaskSimpleStandStill = new CTaskSimpleStandStill(0, 0, 0, 8.0);
             eventScriptCommand.Constructor(3, (CTask*)pTaskSimpleStandStill, 0);
             m_eventGroup.Add((CEvent*)& eventScriptCommand, 0);
             eventScriptCommand.Destructor();
@@ -734,10 +729,8 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
                 return;
             }
 
-            auto pTaskSimpleStandStill = (CTaskSimpleStandStill*)CTask::operator new(32);
-            if (pTaskSimpleStandStill)
-            {
-                pTaskSimpleStandStill->Constructor(0, true, false, 8.0);
+            auto pTaskSimpleStandStill = new CTaskSimpleStandStill(0, true, false, 8.0f);
+            if (pTaskSimpleStandStill) {
                 m_TaskMgr.SetTask(pTaskSimpleStandStill, TASK_PRIMARY_DEFAULT, 0);
                 return;
             }
@@ -1226,54 +1219,27 @@ bool CPedIntelligence::IsPedGoingForCarDoor() {
 }
 
 // Converted from thiscall float CPedIntelligence::CanSeeEntityWithLights(CEntity const*pEntity,bool arg2) 0x605550 
-double CPedIntelligence::CanSeeEntityWithLights(CEntity* pEntity, int unUsed) {
+float CPedIntelligence::CanSeeEntityWithLights(CEntity* pEntity, int unUsed) {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<double, 0x605550, CPedIntelligence*, CEntity const*, bool>(this, pEntity, unUsed);
 #else
     if (pEntity->m_nType != ENTITY_TYPE_PED)
-    {
         return LIGHT_AI_LEVEL_MAX;
-    }
     CPed* pPedEntity = static_cast<CPed*>(pEntity);
     if (!pPedEntity->IsPlayer())
-    {
         return LIGHT_AI_LEVEL_MAX;
-    }
-    double fLightingTotal = pPedEntity->GetLightingTotal();
+    float fLightingTotal = pPedEntity->GetLightingTotal();
     if (fLightingTotal > LIGHT_AI_LEVEL_MAX)
-    {
         return LIGHT_AI_LEVEL_MAX;
-    }
-
-    CVector* pPedPos = &m_pPed->m_placement.m_vPosn;
-    CMatrixLink* pPedMatrix = m_pPed->m_matrix;
-    if (pPedMatrix)
-    {
-        pPedPos = &pPedMatrix->pos;
-    }
-
-    CMatrixLink* pEntityMatrix = pPedEntity->m_matrix;
-    CVector* pEntityPos = &pPedEntity->m_placement.m_vPosn;
-    if (pEntityMatrix)
-    {
-        pEntityPos = &pEntityMatrix->pos;
-    }
-    double fX = pEntityPos->x - pPedPos->x;
-    double fY = pEntityPos->y - pPedPos->y;
-    double fZ = pEntityPos->z - pPedPos->z;
-    float entitya = sqrt(fZ * fZ + fX * fX + fY * fY) - 0.69999999f;
-    double result = fLightingTotal * fLightingTotal - entitya / flt_8D2384 * LIGHT_AI_LEVEL_MAX * LIGHT_AI_LEVEL_MAX;
-    if (result <= 0.0)
-    {
-        result = result * result - entitya / flt_8D2388 * LIGHT_AI_LEVEL_MAX * LIGHT_AI_LEVEL_MAX;
-        if (result <= 0.0)
-        {
-            result = 0.0;
-        }
+    const float fLightLevelSquared = LIGHT_AI_LEVEL_MAX * LIGHT_AI_LEVEL_MAX;
+    float fMagnitude = (pPedEntity->GetPosition() - m_pPed->GetPosition()).Magnitude() - 0.7f;
+    float result = fLightingTotal * fLightingTotal - fMagnitude / 30.0f * fLightLevelSquared;
+    if (result <= 0.0f) {
+        result = result * result - fMagnitude / 50.0f * fLightLevelSquared;
+        if (result <= 0.0f)
+            result = 0.0f;
         else
-        {
-            result = result * -1.0;
-        }
+            result *= -1.0f;
     }
     return result;
 #endif
@@ -1315,20 +1281,11 @@ void CPedIntelligence::ProcessStaticCounter() {
         return;
     }
 
-    CPed* pPed = m_pPed;
-
-    CVector* pPedPos = &pPed->m_placement.m_vPosn;
-    CMatrixLink* pPedMatrix = pPed->m_matrix;
-    if (pPedMatrix)
-    {
-        pPedPos = &pPedMatrix->pos;
-    }
-
     if (m_pPed->m_pDamageEntity)
     {
         if (m_StaticCounter > 4u)
         {
-            m_vecLastPedPosDuringDamageEntity = *pPedPos;
+            m_vecLastPedPosDuringDamageEntity = m_pPed->GetPosition();
         }
         m_StaticCounter = 0;
     }
@@ -1349,19 +1306,14 @@ void CPedIntelligence::ProcessStaticCounter() {
         m_AnotherStaticCounter = 0;
         return;
     }
-
-    float fX = pPedPos->x - m_vecLastPedPosDuringDamageEntity.x;
-    float fY = pPedPos->y - m_vecLastPedPosDuringDamageEntity.y;
-    float fZ = pPedPos->z - m_vecLastPedPosDuringDamageEntity.z;
-
-    if ((fX * fX) + (fY * fY) + (fZ * fZ) < 0.0625)
+    if ((m_pPed->GetPosition() - m_vecLastPedPosDuringDamageEntity).SquaredMagnitude() < 0.0625f)
     {
         m_AnotherStaticCounter++;
     }
     else
     {
         m_AnotherStaticCounter = 0;
-        m_vecLastPedPosDuringDamageEntity = *pPedPos;
+        m_vecLastPedPosDuringDamageEntity = m_pPed->GetPosition();
     }
 #endif
 }

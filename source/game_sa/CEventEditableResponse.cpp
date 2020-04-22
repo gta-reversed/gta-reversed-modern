@@ -230,7 +230,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
 
 bool CEventEditableResponse::ComputeResponseTaskOfType(CPed* ped, int taskId) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethodAndReturn<bool, 0x4B5730, CEventEditableResponse*, CPed*, int>(this, ped, taskId);
+    return plugin::CallMethodAndReturn<bool, 0x4B5730, CEventEditableResponse*, CPed*, int>(this, ped, taskId);
 #else
     short outTaskId = -1;
     short unknownId = -1;

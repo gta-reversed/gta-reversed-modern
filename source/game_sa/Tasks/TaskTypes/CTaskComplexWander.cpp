@@ -226,11 +226,7 @@ CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
     }
 
     CTaskComplexSequence* pTaskComplexSequence = new CTaskComplexSequence();
-    auto pTaskSimpleStandStill = (CTaskSimpleStandStill*)CTask::operator new(32);
-    if (pTaskSimpleStandStill)
-    {
-        pTaskSimpleStandStill->Constructor(500, 0, 0, 8.0f);
-    }
+    auto pTaskSimpleStandStill = new CTaskSimpleStandStill(500, 0, 0, 8.0f);
     pTaskComplexSequence->AddTask(pTaskSimpleStandStill);
 
     auto pTaskSimpleRunAnim = (CTaskSimpleRunAnim*)CTask::operator new(32);
@@ -249,11 +245,7 @@ CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
 
     CVector outTargetPos;
     ComputeTargetPos(ped, &outTargetPos, &m_NextNode);
-    auto pTaskSimpleGoToPoint = (CTaskSimpleGoToPoint*)CTask::operator new(48);
-    if (pTaskSimpleGoToPoint)
-    {
-        pTaskSimpleGoToPoint->Constructor(m_nMoveState, &outTargetPos, m_fTargetRadius, 0, 0);
-    }
+    auto pTaskSimpleGoToPoint = new CTaskSimpleGoToPoint(m_nMoveState, outTargetPos, m_fTargetRadius, false, false);
     pTaskComplexSequence->AddTask(pTaskSimpleGoToPoint);
     return pTaskComplexSequence;
 }
@@ -293,7 +285,7 @@ CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped)
             CVector outTargetPos;
             ComputeTargetPos(ped, &outTargetPos, &m_NextNode);
             auto pTaskSimpleGoToPoint = (CTaskSimpleGoToPoint*)m_pSubTask;
-            pTaskSimpleGoToPoint->UpdatePoint(&outTargetPos, 0.5, 0);
+            pTaskSimpleGoToPoint->UpdatePoint(outTargetPos, 0.5, 0);
         }
         else
         {
@@ -415,12 +407,9 @@ CTask* CTaskComplexWander::CreateSubTask(CPed* ped, int taskId)
         {
             CVector outTargetPos;
             ComputeTargetPos(ped, &outTargetPos, &m_NextNode);
-            auto pTaskGotoPoint = (CTaskSimpleGoToPoint*)CTask::operator new(48);
+            auto pTaskGotoPoint = new CTaskSimpleGoToPoint(m_nMoveState, outTargetPos, m_fTargetRadius, false, false);
             if (pTaskGotoPoint)
-            {
-                pTaskGotoPoint->Constructor(m_nMoveState, &outTargetPos, m_fTargetRadius, 0, 0);
                 return (CTask*)pTaskGotoPoint;
-            }
             break;
         }
         case TASK_FINISHED:

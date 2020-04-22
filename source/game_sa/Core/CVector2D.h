@@ -26,6 +26,11 @@ public:
 
 	// Returns length of vector
 	float Magnitude();
+    void Normalise();
+    inline float SquaredMagnitude()
+    {
+        return x * x + y * y ;
+    }
 
 	void operator=(const CVector2D& right);
 
@@ -71,4 +76,9 @@ inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
 inline float DistanceBetweenPoints(const CVector2D &pointOne, const CVector2D &pointTwo) {
     CVector2D diff = pointTwo - pointOne;
     return diff.Magnitude();
+}
+
+inline float DotProduct2D(const CVector2D& v1, const CVector2D& v2)
+{
+    return v1.y * v2.y + v1.x * v2.x;
 }

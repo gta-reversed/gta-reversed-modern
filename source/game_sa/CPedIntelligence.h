@@ -116,7 +116,7 @@ public:
 	void LookAtInterestingEntities();
 	void RemoveAllInterestingEntities();
 	bool IsPedGoingForCarDoor();
-	double CanSeeEntityWithLights(CEntity* pEntity, int unUsed);
+	float CanSeeEntityWithLights(CEntity* pEntity, int unUsed);
 	void ProcessStaticCounter();
 	void ProcessFirst();
 	void Process();

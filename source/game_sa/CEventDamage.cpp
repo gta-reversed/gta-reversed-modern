@@ -179,7 +179,7 @@ bool CEventDamage::CanBeInterruptedBySameEvent() {
 
 CEventEditableResponse* CEventDamage::CloneEditable() {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((CEvent * (__thiscall*)(CEvent*))0x4B5D40)(this);
+    return ((CEventEditableResponse * (__thiscall*)(CEvent*))0x4B5D40)(this);
 #else
     return CEventDamage::CloneEditable_Reversed();
 #endif

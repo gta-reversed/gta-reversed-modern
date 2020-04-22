@@ -12,7 +12,7 @@
 
 class CPed;
 
-class  CEventScanner {
+class CEventScanner {
 public:
     int field_0;
     CTaskTimer field_4;
@@ -27,6 +27,7 @@ public:
     CTaskTimer field_C8;
 
     void ScanForEvents(CPed* pPed);
+    void ScanForEventsNow(CPed* ped, bool bDontScan);
 };
 
 VALIDATE_SIZE(CEventScanner, 0xD4);
