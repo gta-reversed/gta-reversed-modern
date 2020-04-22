@@ -90,3 +90,7 @@ tScriptText *CTheScripts::IntroTextLines = reinterpret_cast<tScriptText *>(0xA91
 tScriptRectangle *CTheScripts::IntroRectangles = reinterpret_cast<tScriptRectangle *>(0xA92D68);
 CSprite2d *CTheScripts::ScriptSprites = reinterpret_cast<CSprite2d *>(0xA94B68);
 tScriptSearchlight *CTheScripts::ScriptSearchLightArray = reinterpret_cast<tScriptSearchlight *>(0xA94D68);
+
+void CTheScripts::RemoveThisPed(CPed* ped) {
+    plugin::CallDynGlobal<CPed*>(0x486240, ped);
+}
