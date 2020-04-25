@@ -15,6 +15,7 @@
 #include <iostream>
 #include <cassert>
 
+#include "game_sa\CMemoryMgr.h"
 #include "game_sa\CCullZones.h"
 #include "game_sa\CGlass.h"
 #include "game_sa\CBuoyancy.h"
@@ -473,6 +474,7 @@
 #include "game_sa\Tasks\TaskTypes\CTaskComplexUseGoggles.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleCarDrive.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleCarDriveTimed.h"
+#include "game_sa\Tasks\TaskTypes\CTaskSimpleGoToPointFine.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleGoToPoint.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleGoTo.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexBeCop.h"

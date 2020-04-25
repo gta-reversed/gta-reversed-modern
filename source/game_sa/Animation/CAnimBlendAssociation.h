@@ -42,16 +42,14 @@ public:
     }
 };
 
-class CAnimBlendAssociation {
-    DWORD * m_vTable;
-    //virtual ~CAnimBlendAssociation() = delete; //PLUGIN_NO_DEFAULT_CONSTRUCTION_VIRTUALBASE(CAnimBlendAssociation)
-
-public:
-    RwLLLink m_link;
+struct SClumpAnimAssoc
+{
+    SClumpAnimAssoc* m_pNext;
+    SClumpAnimAssoc* m_pPrevious;
     unsigned short m_nNumBlendNodes;
-    unsigned short m_nAnimGroup;
-    CAnimBlendNode *m_pNodeArray;
-    CAnimBlendHierarchy *m_pHierarchy;
+    short m_nAnimGroup;
+    CAnimBlendNode* m_pNodeArray;
+    CAnimBlendHierarchy* m_pHierarchy;
     float m_fBlendAmount;
     float m_fBlendDelta;
     float m_fCurrentTime;
@@ -66,12 +64,12 @@ public:
             unsigned short m_bLockLastFrame : 1;             // When this flag is Set, IF m_bLooped == false, m_bPlaying == true, and anim progress >= total anim time
                                                              // THEN m_bFreezeLastFrame is set to TRUE and m_fBlendDelta is set to -4.0.
                                                              // Result: https://i.imgur.com/idw0jsX.png
-                                                      
+
             unsigned short m_bPartial : 1;                   // Partial animations run along other animations, like 
             unsigned short m_bEnableMovement : 1;            // blends all playing animations together if set
 
             // Camera will not move with ped, and ped will go back to the initial position when animation is over 
-            unsigned short m_bLockLastX : 1;                          
+            unsigned short m_bLockLastX : 1;
             unsigned short m_bLockLastY : 1;                 // only applies if m_bLockLastX is set             
 
             unsigned short m_bf9 : 1;                        // doesn't seem to be used  
@@ -90,31 +88,42 @@ public:
         unsigned short m_nFlags;
     };
 
+};
+
+class CAnimBlendAssociation : public SClumpAnimAssoc
+{
+public:
     eAnimBlendCallbackType m_nCallbackType;
 
     void(*m_pCallbackFunc)(CAnimBlendAssociation *, void *);
     void *m_pCallbackData;
 
-    // vtable function #0 (destructor)
+    void* operator new(unsigned int size);
+    void operator delete(void* object);
+
     static void InjectHooks();
-    CAnimBlendAssociation* Constructor1(RpClump *pClump, CAnimBlendHierarchy * pAnimHierarchy);
-     void AllocateAnimBlendNodeArray(int count);
-     void FreeAnimBlendNodeArray();
-     CAnimBlendNode *GetNode(int nodeIndex);
-     void Init1(RpClump *clump, CAnimBlendHierarchy *hierarchy);
-     void Init(CAnimBlendAssociation &source);
-     //void Init(CAnimBlendStaticAssociation &source);
-     void ReferenceAnimBlock();
-     void SetBlend(float blendAmount, float blendDelta);
-     void SetBlendTo(float blendAmount, float blendDelta);
-     void SetCurrentTime(float currentTime);
-     void SetDeleteCallback(void(*callback)(CAnimBlendAssociation *, void *), void *data);
-     void SetFinishCallback(void(*callback)(CAnimBlendAssociation *, void *), void *data);
-     void Start(float currentTime);
-     void SyncAnimation(CAnimBlendAssociation *syncWith);
-     bool UpdateBlend(float blendDeltaMult);
-     bool UpdateTime(float unused1, float unused2);
-     void UpdateTimeStep(float speedMult, float timeMult);
+    CAnimBlendAssociation(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy);
+    virtual ~CAnimBlendAssociation();
+private:
+    CAnimBlendAssociation* Constructor(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy);
+public:
+    void AllocateAnimBlendNodeArray(int count);
+    void FreeAnimBlendNodeArray();
+    CAnimBlendNode* GetNode(int nodeIndex);
+    void Init(RpClump* clump, CAnimBlendHierarchy* hierarchy);
+    void Init(CAnimBlendAssociation& source);
+    //void Init(CAnimBlendStaticAssociation &source);
+    void ReferenceAnimBlock();
+    void SetBlend(float blendAmount, float blendDelta);
+    void SetBlendTo(float blendAmount, float blendDelta);
+    void SetCurrentTime(float currentTime);
+    void SetDeleteCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data);
+    void SetFinishCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data);
+    void Start(float currentTime);
+    void SyncAnimation(CAnimBlendAssociation* syncWith);
+    bool UpdateBlend(float blendDeltaMult);
+    bool UpdateTime(float unused1, float unused2);
+    void UpdateTimeStep(float speedMult, float timeMult);
 };
 
 //VTABLE_DESC(CAnimBlendAssociation, 0x85C6D0, 1);

@@ -317,16 +317,12 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 eWeaponType activeWeaponType = pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType;
                 CPedDamageResponseCalculator pedDamageResponseCalculator;
                 pedDamageResponseCalculator.Constructor1(pPlayerPed, 0.0, activeWeaponType, PED_PIECE_TORSO, 0);
-
-
-                bool bPedVehicle = pTargetEntity->m_nPedFlags >> 8 & 0xFFFFFF01;
-
-                CEventDamage eventDamage(pPlayerPed, CTimer::m_snTimeInMilliseconds, activeWeaponType, PED_PIECE_TORSO, 0, 0, bPedVehicle);
+                CEventDamage eventDamage(pPlayerPed, CTimer::m_snTimeInMilliseconds, activeWeaponType, PED_PIECE_TORSO, 0, 0, pTargetEntity->bInVehicle);
                 CPedDamageResponse damageResponseInfo;
                 if (eventDamage.AffectsPed(pTargetEntity))
                 {
                     pedDamageResponseCalculator.ComputeDamageResponse(pTargetEntity, &damageResponseInfo, 0);
-                    pIntelligence->m_eventGroup.Add((CEvent*)& eventDamage, 0);
+                    pIntelligence->m_eventGroup.Add((CEvent*)&eventDamage, 0);
                     CCrime::ReportCrime(18, pTargetEntity, pPlayerPed);
                     pPlayerPed->m_weaponAudio.AddAudioEvent(156);
                 }
@@ -424,7 +420,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                         pPlayerWeapon->Fire(pPlayerPed, &pPlayerPed->m_placement.m_vPosn, &pPlayerPed->m_placement.m_vPosn, 0, 0, 0);
                     }
                 }
-                else if (weaponType > WEAPON_CAMERA && weaponType <= WEAPON_INFRARED && !pTaskManager->m_aPrimaryTasks[3])
+                else if (weaponType > WEAPON_CAMERA&& weaponType <= WEAPON_INFRARED && !pTaskManager->m_aPrimaryTasks[3])
                 {
                     CTaskComplexUseGoggles* pCTaskComplexUseGoggles = nullptr;
                     CTask* pNewTask = static_cast<CTask*>(CTask::operator new(12));
@@ -837,7 +833,7 @@ PED_WEAPON_AIMING_CODE:
                                         }
                                         CEventGroupEvent eventGroupEvent;
                                         eventGroupEvent.Constructor(pTargetedEntity, pEvent);
-                                        pPedGroup->m_groupIntelligence.AddEvent((CEvent*)& eventGroupEvent);
+                                        pPedGroup->m_groupIntelligence.AddEvent((CEvent*)&eventGroupEvent);
                                         eventGroupEvent.Destructor();
                                     }
                                 }
@@ -845,7 +841,7 @@ PED_WEAPON_AIMING_CODE:
                                 {
                                     CEventGunAimedAt eventGunAimedAt;
                                     eventGunAimedAt.Constructor(pPlayerPed);
-                                    pIntelligence->m_eventGroup.Add((CEvent*)& eventGunAimedAt, 0);
+                                    pIntelligence->m_eventGroup.Add((CEvent*)&eventGunAimedAt, 0);
                                     eventGunAimedAt.Destructor();
                                 }
                             }
@@ -943,11 +939,7 @@ PED_WEAPON_AIMING_CODE:
     }
 
 MAKE_PLAYER_LOOK_AT_ENTITY:
-    if (pPlayerPed->m_pTargetedObject)
-    {
-        pPlayerData->m_bHaveTargetSelected = 1;
-    }
-
+    pPlayerData->m_bHaveTargetSelected = pPlayerPed->m_pTargetedObject ? true : false;
     CPed* pTargetedObject = (CPed*)pPlayerPed->m_pTargetedObject;
     bool bTargetedPedDead = 0;
     if (!pTargetedObject)

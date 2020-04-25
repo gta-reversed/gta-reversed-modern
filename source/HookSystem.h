@@ -25,7 +25,7 @@ void HookInstall(DWORD installAddress, T addressToJumpTo, int iJmpCodeSize)
     DWORD dwAddressToJumpTo;
     _asm
     {
-        mov		eax, addressToJumpTo
+        mov		eax, dword ptr addressToJumpTo
         mov		dwAddressToJumpTo, eax
     }
 

@@ -215,7 +215,7 @@ public:
     unsigned char       m_nCreatedBy;
     char                field_485[3];
     AnimBlendFrameData *m_apBones[19];
-    unsigned int        m_nAnimGroup;
+    int        m_nAnimGroup;
     CVector2D           m_vecAnimMovingShiftLocal;
     CPedAcquaintance    m_acquaintance;
     RwObject           *m_pWeaponObject;

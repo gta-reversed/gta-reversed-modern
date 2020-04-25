@@ -9,6 +9,7 @@
 #include "PluginBase.h"
 
 enum  eAnimBlendCallbackType : unsigned int {
+    ANIMBLENDCALLBACK_NONE = 0,
     ANIMBLENDCALLBACK_FINISH = 1,
     ANIMBLENDCALLBACK_DELETE = 2
 };

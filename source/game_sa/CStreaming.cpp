@@ -764,7 +764,7 @@ void CStreaming::RequestSpecialChar(int modelId, char const* name, int flags)
 void CStreaming::RequestSpecialModel(int modelId, char const* name, int flags)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallDynGlobal<int, char*, int>(0x409D10, modelId, name, flags);
+    plugin::CallDynGlobal<int, char const*, int>(0x409D10, modelId, name, flags);
 #else
     CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CStreamingInfo& streamingInfo = CStreaming::ms_aInfoForModel[modelId];

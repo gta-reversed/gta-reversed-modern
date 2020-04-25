@@ -18,6 +18,7 @@ void InjectHooksMain(void)
     CPed::InjectHooks();
     CPedIntelligence::InjectHooks();
     CTrain::InjectHooks();
+    CAnimBlendAssociation::InjectHooks();
     CEventEditableResponse::InjectHooks();
     CEventDamage::InjectHooks();
     CTaskManager::InjectHooks();
@@ -29,6 +30,7 @@ void InjectHooksMain(void)
     CTaskSimpleSwim::InjectHooks();
     CTaskSimpleGoTo::InjectHooks();
     CTaskSimpleGoToPoint::InjectHooks();
+    CTaskSimpleGoToPointFine::InjectHooks();
     CTaskSimpleHoldEntity::InjectHooks();
     CTaskSimplePutDownEntity::InjectHooks();
     CTaskSimplePickUpEntity::InjectHooks();
@@ -40,6 +42,7 @@ void InjectHooksMain(void)
     CStats::InjectHooks();
     CCarCtrl::InjectHooks();
     CTheZones::InjectHooks();
+
     /*
      DetourRestoreAfterWith();
      DetourTransactionBegin();
