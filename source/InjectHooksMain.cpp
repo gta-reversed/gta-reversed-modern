@@ -13,6 +13,7 @@ void InjectHooksMain(void)
     CStreaming::InjectHooks();
     CVehicleModelInfo::InjectHooks();
     CFileLoader::InjectHooks();
+    CFileMgr::InjectHooks();
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();
     CPed::InjectHooks();
