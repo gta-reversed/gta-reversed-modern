@@ -21,6 +21,8 @@ private:
 public:
     float m_fBlendData;
 
+    static void InjectHooks();
+
     CTaskSimpleStandStill(int nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
     ~CTaskSimpleStandStill();
 private:
@@ -30,6 +32,10 @@ public:
     eTaskType GetId() override { return TASK_SIMPLE_STAND_STILL; };
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
     bool ProcessPed(CPed* ped) override;
+
+    CTask* Clone_Reversed();
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event);
+    bool ProcessPed_Reversed(CPed* ped);
 };
 
 VALIDATE_SIZE(CTaskSimpleStandStill, 0x20);
