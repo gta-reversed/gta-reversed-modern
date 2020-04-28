@@ -89,7 +89,7 @@ public:
     static bool SetupLightingForEntity(CEntity* entity);
     static int SetupMapEntityVisibility(CEntity* entity, CBaseModelInfo* modelInfo, float distance, bool arg3);
     static int SetupEntityVisibility(CEntity* entity, float* outDistance);
-    static int SetupBigBuildingVisibility(CEntity* entity, float& outDistance);
+    static int SetupBigBuildingVisibility(CEntity* entity, float* outDistance);
     static void ScanSectorList(int sectorX, int sectorY);
     static void ScanBigBuildingList(int sector_x, int sector_y);
     // returns objects count

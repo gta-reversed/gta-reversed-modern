@@ -36,9 +36,14 @@ CEntity**& gpOutEntitiesForGetObjectsInFrustum = *(CEntity * **)0xB76854;
 
 void CRenderer::InjectHooks()
 {
-    HookInstall(0x05534B0, &CRenderer::AddEntityToRenderList, 7);
+    HookInstall(0x5531E0, &CRenderer::RenderFadingInEntities, 7);
+    HookInstall(0x553220, &CRenderer::RenderFadingInUnderwaterEntities, 7);
+    HookInstall(0x5534B0, &CRenderer::AddEntityToRenderList, 7);
+    HookInstall(0x5536F0, &CRenderer::ResetLodRenderLists, 7);
+    HookInstall(0x553710, &CRenderer::AddToLodRenderList, 7);
     HookInstall(0x554230, &CRenderer::SetupEntityVisibility, 7);
     HookInstall(0x553F60, &CRenderer::SetupMapEntityVisibility, 7);
+    HookInstall(0x554650, &CRenderer::SetupBigBuildingVisibility, 7);
     HookInstall(0x553540, &CRenderer::SetupScanLists, 7);
     HookInstall(0x554840, &CRenderer::ScanSectorList, 7);
 }
@@ -55,12 +60,27 @@ void CRenderer::Shutdown() {
 
 // Converted from cdecl void CRenderer::RenderFadingInEntities(void) 0x5531E0
 void CRenderer::RenderFadingInEntities() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x5531E0>();
+#else
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+    DeActivateDirectional();
+    SetAmbientColours();
+    CVisibilityPlugins::RenderFadingEntities();
+#endif
 }
 
 // Converted from cdecl void CRenderer::RenderFadingInUnderwaterEntities(void) 0x553220
 void CRenderer::RenderFadingInUnderwaterEntities() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x553220>();
+#else
+    DeActivateDirectional();
+    SetAmbientColours();
+    CVisibilityPlugins::RenderFadingUnderwaterEntities();
+#endif
 }
 
 // Converted from cdecl void CRenderer::RenderOneRoad(CEntity *entity) 0x553230
@@ -137,12 +157,23 @@ tRenderListEntry* CRenderer::GetLodDontRenderListBase() {
 
 // Converted from cdecl void CRenderer::ResetLodRenderLists(void) 0x5536F0
 void CRenderer::ResetLodRenderLists() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x5536F0>();
+#else
+    ms_pLodRenderList = GetLodRenderListBase();
+    ms_pLodDontRenderList = GetLodDontRenderListBase();
+#endif
 }
 
 // Converted from cdecl void CRenderer::AddToLodRenderList(CEntity *entity,float distance) 0x553710
 void CRenderer::AddToLodRenderList(CEntity* entity, float distance) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x553710, CEntity*, float>(entity, distance);
+#else
+    ms_pLodRenderList->pEntity = entity;
+    ms_pLodRenderList->distance = distance;
+    ++ms_pLodRenderList;
+#endif
 }
 
 // Converted from cdecl void CRenderer::AddToLodDontRenderList(CEntity *entity,float distance) 0x553740
@@ -508,9 +539,77 @@ int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
 #endif
 }
 
-// Converted from cdecl int CRenderer::SetupBigBuildingVisibility(CEntity *entity,float &outDistance) 0x554650
-int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float& outDistance) {
-    return plugin::CallAndReturn<int, 0x554650, CEntity*, float&>(entity, outDistance);
+// Converted from cdecl int CRenderer::SetupBigBuildingVisibility(CEntity *entity,float *outDistance) 0x554650
+int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<int, 0x554650, CEntity*, float*>(entity, outDistance);
+#else
+    CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex];
+    bool bIsTimeInRange = true;
+    if (entity->m_nAreaCode != CGame::currArea && entity->m_nAreaCode != 13)
+        return  RENDERER_INVISIBLE;
+    if (pBaseModelInfo->GetModelType() == MODEL_INFO_TIME)
+    {
+        tTimeInfo* pModelTimeInfo = pBaseModelInfo->GetTimeInfo();
+        int wOtherTimeModel = pModelTimeInfo->m_wOtherTimeModel;
+        if (CClock::GetIsTimeInRange(pModelTimeInfo->m_nTimeOn, pModelTimeInfo->m_nTimeOff))
+        {
+            if (wOtherTimeModel != -1 && CModelInfo::ms_modelInfoPtrs[wOtherTimeModel]->m_pRwObject)
+            {
+                pBaseModelInfo->m_nAlpha = 255;
+            }
+        }
+        else
+        {
+            if (wOtherTimeModel == -1 || CModelInfo::ms_modelInfoPtrs[wOtherTimeModel]->m_pRwObject)
+            {
+                entity->DeleteRwObject();
+                return RENDERER_INVISIBLE;
+            }
+            bIsTimeInRange = false;
+        }
+        
+    }
+    else if (pBaseModelInfo->GetModelType() == MODEL_INFO_VEHICLE)
+    {
+        return entity->IsVisible() && !entity->IsEntityOccluded() ?
+            RENDERER_VISIBLE : RENDERER_INVISIBLE;
+    }
+
+    CVector entityPos = entity->GetPosition();
+    if (entity->m_pLod)
+    {
+        entityPos = entity->m_pLod->GetPosition();
+    }
+	CVector distance = entityPos - ms_vecCameraPosition;
+	*outDistance = distance.Magnitude();
+    if (entity->m_nNumLodChildrenRendered <= 0)
+    {
+        bool result = SetupMapEntityVisibility(entity, pBaseModelInfo, *outDistance, bIsTimeInRange);
+        if (result != RENDERER_VISIBLE || entity->m_nNumLodChildren <= 1u)
+            return result;
+        if (entity->m_pLod && pBaseModelInfo->m_nAlpha == 0xFFu)
+            ++entity->m_pLod->m_nNumLodChildrenRendered;
+        AddToLodRenderList(entity, *outDistance);
+        return RENDERER_INVISIBLE;
+    }
+
+    if (entity->m_pLod)
+        ++entity->m_pLod->m_nNumLodChildrenRendered;
+    if (entity->m_nNumLodChildren <= 1u)
+    {
+        entity->m_nNumLodChildrenRendered = 0;
+    }
+    else
+    {
+        ms_pLodRenderList->pEntity = entity;
+        ms_pLodRenderList->distance = *outDistance;
+        ms_pLodRenderList++;
+    }
+    if (!entity->m_pRwObject)
+        entity->CreateRwObject();
+    return RENDERER_STREAMME;
+#endif
 }
 
 void CRenderer::ScanSectorList(int sectorX, int sectorY) {
@@ -518,8 +617,8 @@ void CRenderer::ScanSectorList(int sectorX, int sectorY) {
     plugin::Call<0x554840, int, int>(sectorX, sectorY);
 #else
     bool bRequestModel = false;
-    float fCameraAndSectorX = ((sectorX - 60) * 50.0 + 25.0) - CRenderer::ms_vecCameraPosition.x;
-    float fCameraAndSectorY = ((sectorY - 60) * 50.0 + 25.0) - CRenderer::ms_vecCameraPosition.y;
+    float fCameraAndSectorX = ((sectorX - 60) * 50.0f + 25.0f) - CRenderer::ms_vecCameraPosition.x;
+    float fCameraAndSectorY = ((sectorY - 60) * 50.0f + 25.0f) - CRenderer::ms_vecCameraPosition.y;
     float fAngleInRadians = atan2(-fCameraAndSectorX, fCameraAndSectorY) - CRenderer::ms_fCameraHeading;
     float fCameraAndSectorDistance = fCameraAndSectorY * fCameraAndSectorY + fCameraAndSectorX * fCameraAndSectorX;
     if (fCameraAndSectorDistance < 10000.0f || fabs(CGeneral::LimitRadianAngle(fAngleInRadians)) < 0.36f)
