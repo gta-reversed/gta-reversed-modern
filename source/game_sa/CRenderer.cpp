@@ -585,10 +585,10 @@ int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
 	*outDistance = distance.Magnitude();
     if (entity->m_nNumLodChildrenRendered <= 0)
     {
-        bool result = SetupMapEntityVisibility(entity, pBaseModelInfo, *outDistance, bIsTimeInRange);
-        if (result != RENDERER_VISIBLE || entity->m_nNumLodChildren <= 1u)
-            return result;
-        if (entity->m_pLod && pBaseModelInfo->m_nAlpha == 0xFFu)
+        int visbility = SetupMapEntityVisibility(entity, pBaseModelInfo, *outDistance, bIsTimeInRange);
+        if (visbility != RENDERER_VISIBLE || entity->m_nNumLodChildren <= 1u)
+            return visbility;
+        if (entity->m_pLod && pBaseModelInfo->m_nAlpha == 255)
             ++entity->m_pLod->m_nNumLodChildrenRendered;
         AddToLodRenderList(entity, *outDistance);
         return RENDERER_INVISIBLE;

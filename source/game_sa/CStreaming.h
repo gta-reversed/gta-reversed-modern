@@ -118,7 +118,7 @@ public:
      static unsigned int &ms_streamingBufferSize;
      static char **ms_pStreamingBuffer;
      static unsigned int &ms_memoryUsed;
-     static unsigned int &ms_numModelsRequested;
+     static int &ms_numModelsRequested;
      static CStreamingInfo *ms_aInfoForModel; // static CStreamingInfo ms_aInfoForModel[26316]
      static bool &ms_disableStreaming;
      static int &ms_bIsInitialised;
