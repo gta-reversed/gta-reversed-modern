@@ -23,7 +23,7 @@ private:
     char _pad1;
 public:
 
-    CTaskUtilityLineUpPedWithCar *m_pTaskUtilityLineUpPedWithCa;
+    CTaskUtilityLineUpPedWithCar *m_pTaskUtilityLineUpPedWithCar;
     unsigned char m_nDoorFlagsSet;
     unsigned char m_nNumGettingInSet;
 private:

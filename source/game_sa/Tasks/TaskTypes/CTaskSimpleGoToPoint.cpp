@@ -9,7 +9,7 @@ void CTaskSimpleGoToPoint::InjectHooks()
     HookInstall(0x645700, &CTaskSimpleGoToPoint::UpdatePoint, 7);
 }
 
-CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(int moveState, const CVector& targetPoint, float fRadius, char bMoveTowardsTargetPoint, char a6) :
+CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(int moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) :
     CTaskSimpleGoTo(moveState, targetPoint, fRadius)
 {
     m_GoToPointFlags = 0;
@@ -22,10 +22,10 @@ CTaskSimpleGoToPoint::~CTaskSimpleGoToPoint()
     // nothing here
 }
 
-CTaskSimpleGoToPoint* CTaskSimpleGoToPoint::Constructor(int moveState, const CVector& targetPoint, float fRadius, char bMoveTowardsTargetPoint, char a6)
+CTaskSimpleGoToPoint* CTaskSimpleGoToPoint::Constructor(int moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTaskSimpleGoToPoint*, 0x667CD0, CTaskSimpleGoToPoint*, int, const CVector&, float, char, char>
+    return plugin::CallMethodAndReturn<CTaskSimpleGoToPoint*, 0x667CD0, CTaskSimpleGoToPoint*, int, const CVector&, float, bool, bool>
         (this, moveState, targetPoint, fRadius, bMoveTowardsTargetPoint, a6);
 #else
     this->CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(moveState, targetPoint, fRadius, bMoveTowardsTargetPoint, a6);

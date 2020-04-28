@@ -32,6 +32,9 @@ void InjectHooksMain(void)
     CTaskSimpleGoTo::InjectHooks();
     CTaskSimpleGoToPoint::InjectHooks();
     CTaskSimpleGoToPointFine::InjectHooks();
+    CTaskSimpleStandStill::InjectHooks();
+    CTaskComplexGoToPointAndStandStill::InjectHooks();
+    CTaskSimplePause::InjectHooks();
     CTaskSimpleHoldEntity::InjectHooks();
     CTaskSimplePutDownEntity::InjectHooks();
     CTaskSimplePickUpEntity::InjectHooks();

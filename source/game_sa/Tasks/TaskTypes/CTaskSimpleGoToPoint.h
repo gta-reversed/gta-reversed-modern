@@ -23,10 +23,10 @@ public:
 
     static void InjectHooks();
 
-    CTaskSimpleGoToPoint(int moveState, const CVector& targetPoint, float fRadius, char bMoveTowardsTargetPoint, char a6);
+    CTaskSimpleGoToPoint(int moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6);
     ~CTaskSimpleGoToPoint();
 private:
-    CTaskSimpleGoToPoint* Constructor(int moveState, const CVector& targetPoint, float fRadius, char bMoveTowardsTargetPoint, char a6);
+    CTaskSimpleGoToPoint* Constructor(int moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6);
 public:
     CTask* Clone();
     eTaskType GetId() override { return TASK_SIMPLE_GO_TO_POINT; }
