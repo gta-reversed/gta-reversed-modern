@@ -69,16 +69,18 @@ static char *InitUserDirectories()
             strcpy(user_gallery_dir_path, gta_user_dir_path);
             strcpy(user_tracks_dir_path, gta_user_dir_path);
 
-            if ((strlen(gta_user_dir_path) + strlen(GALLERY + 1)) >= 256)
+            size_t userDirLen = strlen(gta_user_dir_path);
+
+            if ((userDirLen + strlen(GALLERY + 1)) >= 256)
                 memcpy(user_gallery_dir_path, GALLERY, strlen(GALLERY) + 1);
             else
-                strcpy(user_gallery_dir_path, GALLERY + 1);
+                strcpy(user_gallery_dir_path + userDirLen, GALLERY + 1);
             createDirectory(user_gallery_dir_path);
 
-            if ((strlen(gta_user_dir_path) + strlen(USERTRACKS + 1)) >= 256)
+            if ((userDirLen + strlen(USERTRACKS + 1)) >= 256)
                 memcpy(user_tracks_dir_path, USERTRACKS, strlen(USERTRACKS) + 1);
             else
-                strcpy(user_tracks_dir_path, USERTRACKS + 1);
+                strcpy(user_tracks_dir_path + userDirLen, USERTRACKS + 1);
             createDirectory(user_tracks_dir_path);
         }
         else
