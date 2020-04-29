@@ -74,7 +74,7 @@ public:
     void Clear() 
     {
         for (CLink<T>* link = usedListHead.next; link != &usedListTail; link = usedListHead.next) {
-            Remove(link)
+            Remove(link);
         }
     }
 
