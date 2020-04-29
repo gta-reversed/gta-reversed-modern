@@ -12,7 +12,7 @@
 #include "CVehicle.h"
 #include "CPed.h"
 
-class  CPedPlacement {
+class CPedPlacement {
 public:
      static bool FindZCoorForPed(CVector *pos);
      static bool IsPositionClearForPed(CVector const *pos, float radius, int maxNumObjects, CEntity **pObjectList, unsigned char bCheckVehicles, unsigned char bCheckPeds, unsigned char bCheckObjects);

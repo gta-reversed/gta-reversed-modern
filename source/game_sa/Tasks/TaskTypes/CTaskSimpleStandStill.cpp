@@ -11,10 +11,6 @@ void CTaskSimpleStandStill::InjectHooks()
 CTaskSimpleStandStill::CTaskSimpleStandStill(int nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData)
 {
     m_nTime = nTime;
-    m_timer.m_nStartTime = 0;
-    m_timer.m_nInterval = 0;
-    m_timer.m_bStarted = false;
-    m_timer.m_bStopped = false;
     m_fBlendData = fBlendData;
     m_bLooped = Looped;
     m_bUseAnimIdleStance = bUseAnimIdleStance;
@@ -75,16 +71,13 @@ bool CTaskSimpleStandStill::MakeAbortable_Reversed(CPed* ped, eAbortPriority pri
         return true;
     m_timer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
     m_timer.m_nInterval = -1;
-    m_timer.m_bStarted = 1;
+    m_timer.m_bStarted = true;
     return true;
 }
 
 bool CTaskSimpleStandStill::ProcessPed_Reversed(CPed* ped)
 {
-    if (!m_timer.m_bStarted && m_nTime >= 0) {
-        m_timer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
-        m_timer.m_nInterval = m_nTime;
-        m_timer.m_bStarted = true;
+    if (!m_timer.m_bStarted && m_timer.Start(m_nTime)) {
         if (!ped->bInVehicle) {
             ped->SetMoveState(PEDMOVE_STILL);
             ped->m_nSwimmingMoveState = PEDMOVE_STILL;
@@ -111,13 +104,7 @@ bool CTaskSimpleStandStill::ProcessPed_Reversed(CPed* ped)
         if (pIdleAnimAssoc && pIdleAnimAssoc->m_fBlendAmount > 0.99f) 
             return true;
     }
-    if (m_bLooped || !m_timer.m_bStarted)
+    if (m_bLooped || !m_timer.Reset())
         return false;
-    if (m_timer.m_bStopped) {
-        m_timer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
-        m_timer.m_bStopped = false;
-    }
-    if (CTimer::m_snTimeInMilliseconds < m_timer.m_nStartTime + m_timer.m_nInterval)
-        return false;
-    return true;
+    return m_timer.IsOutOfTime();
 }

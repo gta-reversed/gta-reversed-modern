@@ -180,7 +180,7 @@ void CTaskComplexGoToPointAndStandStill::SelectMoveState(CTaskSimpleGoToPoint* p
 CTask* CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(int taskId, CPed* ped)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    plugin::CallMethod <0x6682D0, CTask*, int, CPed *>(this, taskId, ped);
+    return plugin::CallMethodAndReturn <CTask*, 0x6682D0, CTask*, int, CPed *>(this, taskId, ped);
 #else
     if (taskId > TASK_COMPLEX_LEAVE_CAR) {
         if (taskId != TASK_SIMPLE_GO_TO_POINT)

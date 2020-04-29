@@ -34,6 +34,7 @@ void InjectHooksMain(void)
     CTaskSimpleGoToPointFine::InjectHooks();
     CTaskSimpleStandStill::InjectHooks();
     CTaskComplexGoToPointAndStandStill::InjectHooks();
+    CTaskComplexGoToPointAndStandStillTimed::InjectHooks();
     CTaskSimplePause::InjectHooks();
     CTaskSimpleHoldEntity::InjectHooks();
     CTaskSimplePutDownEntity::InjectHooks();
@@ -46,7 +47,6 @@ void InjectHooksMain(void)
     CStats::InjectHooks();
     CCarCtrl::InjectHooks();
     CTheZones::InjectHooks();
-
     /*
      DetourRestoreAfterWith();
      DetourTransactionBegin();

@@ -442,6 +442,7 @@
 #include "game_sa\Tasks\TaskTypes\CTaskComplexWander.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexWanderStandard.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexGoToPointAndStandStill.h"
+#include "game_sa\Tasks\TaskTypes\CTaskComplexGoToPointAndStandStillTimed.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleAnim.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleCarSetPedInAsDriver.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleCarSetPedInAsPassenger.h"

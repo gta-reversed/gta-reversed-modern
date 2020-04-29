@@ -10,6 +10,7 @@
 #include "CEventHandlerHistory.h"
 
 class CTask;
+class CEvent;
 
 class CEventHandler {
 public:
@@ -23,6 +24,7 @@ public:
 
     void HandleEvents();
     void FlushImmediately();
+    static bool IsTemporaryEvent(CEvent* _event);
 };
 
 VALIDATE_SIZE(CEventHandler, 0x34);

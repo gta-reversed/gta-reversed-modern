@@ -7,12 +7,13 @@
 #pragma once
 
 #include "PluginBase.h"
+#include "CTimer.h"
 
 class CTaskTimer 
 {
 public:
     unsigned int m_nStartTime;
-    unsigned int m_nInterval;
+    int m_nInterval;
     bool m_bStarted;
     bool m_bStopped;
 private:
@@ -32,7 +33,35 @@ public:
         m_bStopped = false;
     }   
     
-    CTaskTimer(plugin::dummy_func_t) {}
+    inline bool Start (int time) {
+        if (time >= 0) {
+            m_nStartTime = CTimer::m_snTimeInMilliseconds;
+            m_nInterval = time;
+            m_bStarted = true;
+            return true;
+        }
+        return false;
+    }
+
+    inline bool Stop() {
+        if(m_bStarted) {
+            m_bStopped = true;
+            m_nInterval -= CTimer::m_snTimeInMilliseconds - m_nStartTime;
+            return true;
+        }
+        return false;
+    }
+
+    inline bool Reset() {
+        if (m_bStarted) {
+            if (m_bStopped) {
+                m_nStartTime = CTimer::m_snTimeInMilliseconds;
+                m_bStopped = false;
+            }
+            return true;
+        }
+        return false;
+    }
 
     bool IsOutOfTime();
 };
