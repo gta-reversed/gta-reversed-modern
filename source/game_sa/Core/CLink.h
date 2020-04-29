@@ -14,6 +14,20 @@ public:
     T data;
     CLink<T>* prev;
     CLink<T>* next;
+
+    void Remove () 
+    {
+        next->prev = prev;
+        prev->next = next;
+    }
+
+    void Insert(CLink<T>* link) 
+    {
+        link->next = next;
+        next->prev = link;
+        link->prev = this;
+        next = link;
+    }
 };
 
 VALIDATE_SIZE(CLink<void *>, 0xC);

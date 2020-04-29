@@ -30,7 +30,7 @@ public:
     {
         void *m_pAtomic;
         void *m_pCallback;
-        float m_fAlpha;   
+        float m_distance; // alpha   
     };
 
     static void AtomicConstructor(void* object);
