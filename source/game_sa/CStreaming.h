@@ -131,15 +131,6 @@ public:
      static bool &m_bModelStreamNotLoaded;
      static unsigned int &ms_numberOfBytesRead; 
      
-     // Unknown for now
-     static bool& byte_8E6E2C;
-     static bool& byte_8E6314;
-     static bool& byte_8E7318;
-     static bool& byte_8E6328;
-     static bool& byte_8E6E90;
-     static bool& byte_8E6EA4;
-     static bool& byte_8E633C;
-
      static void InjectHooks();
 
 

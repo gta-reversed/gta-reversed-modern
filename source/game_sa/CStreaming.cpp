@@ -52,15 +52,6 @@ bool &CStreaming::m_bLoadingAllRequestedModels = *reinterpret_cast<bool *>(0x965
 bool &CStreaming::m_bModelStreamNotLoaded = *reinterpret_cast<bool *>(0x9654C4);
 unsigned int &CStreaming::ms_numberOfBytesRead = *reinterpret_cast<unsigned int *>(0x965534); 
 
-// Unknown for now. All of them are probably just boolean.
-bool& CStreaming::byte_8E6E2C = *reinterpret_cast<bool*>(0x8E6E2C);
-bool& CStreaming::byte_8E6314 = *reinterpret_cast<bool*>(0x8E6314);
-bool& CStreaming::byte_8E7318 = *reinterpret_cast<bool*>(0x8E7318);
-bool& CStreaming::byte_8E6328 = *reinterpret_cast<bool*>(0x8E6328);
-bool& CStreaming::byte_8E6E90 = *reinterpret_cast<bool*>(0x8E6E90);
-bool& CStreaming::byte_8E6EA4 = *reinterpret_cast<bool*>(0x8E6EA4);
-bool& CStreaming::byte_8E633C = *reinterpret_cast<bool*>(0x8E633C);
-
 void CStreaming::InjectHooks()
 {
     //CStreamingInfo::InjectHooks(); 
