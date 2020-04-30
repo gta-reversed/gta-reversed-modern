@@ -20,7 +20,7 @@ public:
 
     void* operator new(unsigned int size)
     {
-        return ((CTask * (__cdecl*)(unsigned int))0x821195)(size);
+        return ((void* (__cdecl*)(unsigned int))0x821195)(size);
     }
 
     void operator delete(void* object)

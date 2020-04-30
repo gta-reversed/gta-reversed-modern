@@ -64,9 +64,13 @@ bool& CStreaming::byte_8E633C = *reinterpret_cast<bool*>(0x8E633C);
 void CStreaming::InjectHooks()
 {
     //CStreamingInfo::InjectHooks(); 
+    HookInstall(0x409650, &CStreaming::AddEntity, 7);
+    HookInstall(0x4019B9, &CStreaming::AreAnimsUsedByRequestedModels, 7);
+    HookInstall(0x15664B0, &CStreaming::AreTexturesUsedByRequestedModels, 7);
     HookInstall(0x408E20, &CStreaming::GetNextFileOnCd, 7);
     HookInstall(0x40C6B0, &CStreaming::ConvertBufferToObject, 7);
     HookInstall(0x40A45E, &CStreaming::LoadAllRequestedModels, 7);
+    HookInstall(0x15663B0, &CStreaming::RequestFile, 7);
     HookInstall(0x409050, &CStreaming::RequestFilesInChannel, 7);
     HookInstall(0x4087E0, &CStreaming::RequestModel, 7);
     HookInstall(0x408CB0, &CStreaming::FinishLoadingLargeFile, 7);
@@ -78,14 +82,35 @@ void CStreaming::InjectHooks()
     HookInstall(0x5BCCD0, &CStreaming::ReadIniFile, 7);
     HookInstall(0x4089A0, &CStreaming::RemoveModel, 7);
     HookInstall(0x40E120, &CStreaming::MakeSpaceFor, 7);
+    HookInstall(0x4076C0, &CStreaming::RetryLoadFile, 7);
     HookInstall(0x40E3A0, &CStreaming::LoadRequestedModels, 7);
     HookInstall(0x40E4E0, &CStreaming::FlushRequestList, 7); 
-    HookInstall(0x407D40, &CStreaming::GetDefaultFiremanModel, 7);
-    HookInstall(0x407D20, &CStreaming::GetDefaultMedicModel, 7);
+    HookInstall(0x156CD70, &CStreaming::GetDefaultFiremanModel, 7);
+    HookInstall(0x1563A50, &CStreaming::GetDefaultMedicModel, 7);
 }
 
-void* CStreaming::AddEntity(CEntity* a2) {
-    return plugin::CallAndReturnDynGlobal<void*, CEntity*>(0x409650, a2);
+void* CStreaming::AddEntity(CEntity* pEntity) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<void*, CEntity*>(0x409650, pEntity);
+#else
+    if (pEntity->m_nType == ENTITY_TYPE_PED || pEntity->m_nType == ENTITY_TYPE_VEHICLE)
+        return nullptr;
+    CLink<CEntity*>* link = ms_rwObjectInstances.Insert(pEntity);
+    if (!link)
+    {
+        CLink<CEntity*>* previousLink = ms_rwObjectInstances.usedListTail.prev;
+        for (; previousLink != &ms_rwObjectInstances.usedListHead; previousLink = previousLink->prev) {
+            CEntity* entity = previousLink->data;
+            if (!entity->m_bImBeingRendered && !entity->m_bStreamingDontDelete)
+                break;
+        }
+        if (previousLink == &ms_rwObjectInstances.usedListHead)
+            return ms_rwObjectInstances.Insert(pEntity);
+        previousLink->data->DeleteRwObject();
+        link = ms_rwObjectInstances.Insert(pEntity);
+    }
+    return link;
+#endif
 }
 
 int CStreaming::AddImageToList(char const *lpFileName, bool bNotPlayerImg) {
@@ -100,12 +125,67 @@ void CStreaming::AddModelsToRequestList(CVector const *posn, unsigned int Stream
     plugin::CallDynGlobal<CVector const *, unsigned int>(0x40D3F0, posn, StreamingFlags);
 }
 
-bool CStreaming::AreAnimsUsedByRequestedModels(int AnimFileIndex) {
-    return plugin::CallAndReturnDynGlobal<bool, int>(0x407AD0, AnimFileIndex);
+bool CStreaming::AreAnimsUsedByRequestedModels(int animModelId) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<bool, int>(0x407AD0, animModelId);
+#else
+    auto pStreamingInfo = CStreaming::ms_pStartRequestedList->GetNext();
+    for (; pStreamingInfo != CStreaming::ms_pEndRequestedList; pStreamingInfo = pStreamingInfo->GetNext()) {
+        int modelId = pStreamingInfo - CStreaming::ms_aInfoForModel;
+        if (modelId < RESOURCE_ID_TXD && CModelInfo::ms_modelInfoPtrs[modelId]->GetAnimFileIndex() == animModelId)
+            return true;
+    }
+    if (pStreamingInfo == CStreaming::ms_pEndRequestedList) {
+        for (int i = 0; i < 16; i++) {
+            for (int channelId = 0; channelId < 2; channelId++) {
+                int modelId = CStreaming::ms_channel[channelId].modelIds[i];
+                if (modelId != -1 && modelId < RESOURCE_ID_TXD  && 
+                    CModelInfo::ms_modelInfoPtrs[modelId]->GetAnimFileIndex() == animModelId)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+#endif
 }
 
-bool CStreaming::AreTexturesUsedByRequestedModels(int txdIndex) {
-    return plugin::CallAndReturnDynGlobal<bool, int>(0x409A90, txdIndex);
+bool CStreaming::AreTexturesUsedByRequestedModels(int txdModelId) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<bool, int>(0x409A90, txdModelId);
+#else
+    auto pStreamingInfo = ms_pStartRequestedList->GetNext();
+    for (; pStreamingInfo != CStreaming::ms_pEndRequestedList; pStreamingInfo = pStreamingInfo->GetNext()) {
+        int modelId = pStreamingInfo - CStreaming::ms_aInfoForModel;
+        if (modelId < RESOURCE_ID_TXD) {
+            if (CModelInfo::ms_modelInfoPtrs[modelId]->m_nTxdIndex == txdModelId)
+                return true;
+        }
+        else if (modelId < RESOURCE_ID_COL) {
+            if (CTxdStore::GetParentTxdSlot(modelId - RESOURCE_ID_TXD) == txdModelId)
+                return true;
+        }
+    }
+    if (pStreamingInfo == CStreaming::ms_pEndRequestedList) {
+        for (int i = 0; i < 16; i++) {
+            for (int channelId = 0; channelId < 2; channelId++) {
+                int modelId = CStreaming::ms_channel[channelId].modelIds[i];
+                if (modelId != -1) {
+                    if (modelId < RESOURCE_ID_TXD) {
+                        if (CModelInfo::ms_modelInfoPtrs[modelId]->m_nTxdIndex == txdModelId)
+                            return true;
+                    }
+                    else if (modelId < RESOURCE_ID_COL) {
+                        if (CTxdStore::GetParentTxdSlot(modelId - RESOURCE_ID_TXD) == txdModelId)
+                            return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+#endif
 }
 
 int CStreaming::GetNextFileOnCd(unsigned int streamLastPosn, bool bNotPriority) {
@@ -469,6 +549,26 @@ void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests)
 #endif
 }
 
+void CStreaming::RequestFile(int modelId, int posn, int size, int imgId, int streamingFlags)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x40A080, int, int, int, int, int>(modelId, posn, size, imgId, streamingFlags);
+#else
+    auto& streamingInfo = ms_aInfoForModel[modelId];
+    const unsigned int blockOffset = (imgId << 24) | posn;
+    if (streamingInfo.m_nCdSize && streamingInfo.GetCdPosn() == blockOffset && streamingInfo.m_nCdSize == size) {
+        RequestModel(modelId, streamingFlags);
+    }
+    else {
+        RemoveModel(modelId);
+        streamingInfo.m_nCdPosn = blockOffset & 0xFFFFFF;
+        streamingInfo.m_nCdSize = size;
+        streamingInfo.m_nImgId = imgId;
+        RequestModel(modelId, streamingFlags);
+    }
+#endif
+}
+
 void CStreaming::RequestFilesInChannel(int channelId) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<int>(0x409050, channelId);
@@ -813,7 +913,7 @@ void CStreaming::RequestModelStream(int channelIndex)
     streamingChannel.iLoadingLevel = 0;
     streamingChannel.iBlockCount = sectorCount;
     streamingChannel.iBlockOffset = blockOffsetMimg;
-    streamingChannel.OnBeginRead = 0;
+    streamingChannel.totalTries = 0;
 
     if (m_bModelStreamNotLoaded)
         m_bModelStreamNotLoaded = false;
@@ -1112,10 +1212,10 @@ void CStreaming::RemoveModel(int modelId)
     if (streamingInfo.m_nNextIndex == -1) {
         if (streamingInfo.m_nLoadState == LOADSTATE_Channeled) {
             for (int i = 0; i < 16; i++) {
-                if (ms_channel[0].modelIds[i] == modelId)
-                    ms_channel[0].modelIds[i] = -1;
-                if (ms_channel[1].modelIds[i] == modelId)
-                    ms_channel[1].modelIds[i] = -1;
+                for (int channelId = 0; channelId < 2; channelId++) {
+                    if (ms_channel[channelId].modelIds[i] == modelId)
+                        ms_channel[channelId].modelIds[i] = -1;
+                }
             }
         }
     }
@@ -1177,8 +1277,48 @@ bool CStreaming::RemoveLoadedVehicle() {
     return plugin::CallAndReturnDynGlobal<bool>(0x40C020);
 }
 
-void CStreaming::RetryLoadFile(int streamNum) {
-    plugin::CallDynGlobal<int>(0x4076C0, streamNum);
+void CStreaming::RetryLoadFile(int channelId) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal<int>(0x4076C0, channelId);
+#else
+    if (CStreaming::ms_channelError == -1) 
+        return CLoadingScreen::Continue();
+    // CLoadingScreen::Pause(); // empty function
+    if (CStreaming::ms_channelError == -1)
+        return;
+    tStreamingChannel& streamingChannel = CStreaming::ms_channel[channelId];
+    while (true) {
+        bool bStreamRead = false;
+        eStreamingLoadState loadState = streamingChannel.LoadStatus;
+        if (loadState == LOADSTATE_NOT_LOADED) {
+            bStreamRead = true;
+        }
+        else if (loadState == LOADSTATE_LOADED) {
+            if (CStreaming::ProcessLoadingChannel(channelId)) {
+                if (streamingChannel.LoadStatus == LOADSTATE_Requested)
+                    CStreaming::ProcessLoadingChannel(channelId);
+                CStreaming::ms_channelError = -1;
+                return CLoadingScreen::Continue();
+            }
+        }
+        else if (loadState == LOADSTATE_Channeled) {
+            streamingChannel.totalTries++;
+            int streamStatus = CdStreamGetStatus(channelId);
+            if (streamStatus != 255 && streamStatus != 250)
+                bStreamRead = true;
+            else if (streamStatus == 255 && CdStreamGetStatus(channelId) != 255)
+                bStreamRead = true;
+        }
+        if (bStreamRead) {
+            char* pBuffer = CStreaming::ms_pStreamingBuffer[channelId];
+            CdStreamRead(channelId, pBuffer, streamingChannel.iBlockOffset, streamingChannel.iBlockCount);
+            streamingChannel.LoadStatus = LOADSTATE_LOADED;
+            streamingChannel.iLoadingLevel = -600;
+        }
+        if (CStreaming::ms_channelError == -1)
+            return CLoadingScreen::Continue();
+    }
+#endif
 }
 
 

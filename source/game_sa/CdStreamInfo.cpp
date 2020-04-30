@@ -21,7 +21,7 @@ bool __cdecl CdStreamRead(DWORD streamNum, char* lpBuffer, int streamIndex, int 
     return _CdStreamRead( streamNum,  lpBuffer,  streamIndex, sectorCount);
 }
 
-int __cdecl CdStreamGetLastPosn()
+unsigned int __cdecl CdStreamGetLastPosn()
 {
     typedef int(__cdecl* hCdStreamGetLastPosn)();
     hCdStreamGetLastPosn _CdStreamGetLastPosn = (hCdStreamGetLastPosn)0x406450;

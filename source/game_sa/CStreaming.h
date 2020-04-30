@@ -69,7 +69,7 @@ struct tStreamingChannel
     int iLoadingLevel;
     int iBlockOffset;
     int iBlockCount;
-    int OnBeginRead; // not sure if this one is correct, the rest are okay.
+    int totalTries;
     int m_nCdStreamStatus;
 };
 
@@ -143,14 +143,14 @@ public:
      static void InjectHooks();
 
 
-     static void *AddEntity(CEntity *a2);
+     static void *AddEntity(CEntity * pEntity);
     //! return StreamingFile Index in CStreaming::ms_files
      static int AddImageToList(char const *lpFileName, bool bNotPlayerImg);
      static void AddLodsToRequestList(CVector const *Posn, unsigned int Streamingflags);
      static void AddModelsToRequestList(CVector const *posn, unsigned int StreamingFlags);
      static bool AddToLoadedVehiclesList(int modelIndex);
-     static bool AreAnimsUsedByRequestedModels(int AnimFileIndex);
-     static bool AreTexturesUsedByRequestedModels(int txdIndex);
+     static bool AreAnimsUsedByRequestedModels(int animModelId);
+     static bool AreTexturesUsedByRequestedModels(int txdModelId);
      static void ClearFlagForAll(unsigned int eStreamingFlag);
      static void ClearSlots(int NumOfSlots);
     //! ChanndelIndex is unused
@@ -233,7 +233,7 @@ public:
      static unsigned int RemoveUnusedModelsInLoadedList();
      static void RenderEntity(CLink<CEntity*> *streamingLink);
      static void RequestBigBuildings(CVector const *posn);
-     static void RequestFile(int index, int offset, int size, int imgId, int streamingFlags);
+     static void RequestFile(int modelId, int posn, int size, int imgId, int streamingFlags);
     //! unused
      static void RequestFilesInChannel(int channelId);
      static void RequestModel(int dwModelId, unsigned int Streamingflags);
@@ -244,7 +244,7 @@ public:
      static void RequestSpecialModel(int modelId, char const* name, int flags);
      static void RequestTxdModel(int TxdModelID, int flags);
      static void RequestVehicleUpgrade(int modelIndex, int flags);
-     static void RetryLoadFile(int streamNum);
+     static void RetryLoadFile(int channelId);
      static void Save();
      static void SetLoadVehiclesInLoadScene(bool bEnable);
      static void SetMissionDoesntRequireAnim(int slot);

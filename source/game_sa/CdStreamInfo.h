@@ -48,7 +48,7 @@ struct CdStreamInfoSA	// sizeof = 0x8CC
 int __cdecl CdStreamSync(DWORD streamNum);
 int __cdecl CdStreamGetStatus(int streamNum);
 bool __cdecl CdStreamRead(DWORD streamNum, char* lpBuffer, int streamIndex, int sectorCount);
-int __cdecl CdStreamGetLastPosn();
+unsigned int __cdecl CdStreamGetLastPosn();
 
 static_assert(sizeof(SyncObj) == sizeof(HANDLE), "Incorrect struct size: SyncObj");
 static_assert(sizeof(CdStreamInfoSA) == 0x8CC, "Incorrect struct size: CdStreamInfoSA");
