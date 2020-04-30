@@ -17,14 +17,14 @@
 struct tAtomicVisibilityPlugin
 {
 public:
-	short          m_wModelId;
-	unsigned short m_wFlags;
+   short          m_wModelId;
+   unsigned short m_wFlags;
 };
 
 class  CVisibilityPlugins
 {
 public:
-	static int& ms_atomicPluginOffset;
+   static int& ms_atomicPluginOffset;
 
     struct AlphaObjectInfo
     {
@@ -32,6 +32,7 @@ public:
         void *m_pCallback;
         float m_distance; // alpha   
     };
+    static void InjectHooks();
 
     static void AtomicConstructor(void* object);
     static void AtomicCopyConstructor(void* object, void const* originalObject);

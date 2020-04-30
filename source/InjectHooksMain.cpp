@@ -47,6 +47,7 @@ void InjectHooksMain(void)
     CStats::InjectHooks();
     CCarCtrl::InjectHooks();
     CTheZones::InjectHooks();
+    CVisibilityPlugins::InjectHooks();
     /*
      DetourRestoreAfterWith();
      DetourTransactionBegin();
