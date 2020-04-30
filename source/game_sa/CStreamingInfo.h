@@ -42,13 +42,11 @@ public:
      static void InjectHooks();
      int GetIndexFromBase(CStreamingInfo * pThis, CStreamingInfo * ArrayBase);
      int AddToList(CStreamingInfo *listStart);
-    //! unused
      unsigned int GetCdPosn();
      bool GetCdPosnAndSize(unsigned int *CdPosn, unsigned int *CdSize);
     //! unused
      unsigned int GetCdSize();
-    //! unused
-     CStreamingInfo *GetNext();
+     CStreamingInfo* GetNext() { return m_nNextIndex == -1 ? nullptr : &ms_pArrayBase[m_nNextIndex]; }
     //! unused
      CStreamingInfo *GetPrev();
     //! unused

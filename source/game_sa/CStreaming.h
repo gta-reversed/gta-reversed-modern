@@ -54,7 +54,7 @@ VALIDATE_SIZE(tRwStreamInitializeData, 0x8);
 struct tStreamingFileDesc
 {
   char m_szName[40];
-  bool bNotPlayerImg;
+  bool m_bNotPlayerImg;
   char __pad[3];
   int m_StreamHandle;
 };
@@ -102,8 +102,8 @@ public:
      static int &ms_lastCullZone;
      static unsigned short &ms_loadedGangCars;
      static unsigned short &ms_loadedGangs;
-     static unsigned int &ms_numPedsLoaded;
-     static unsigned int **ms_pedsLoaded; // static unsigned int* ms_pedsLoaded[8]
+     static int &ms_numPedsLoaded;
+     static int *ms_pedsLoaded; // static unsigned int* ms_pedsLoaded[8]
      static int &ms_currentZoneType;
      static CLoadedCarGroup &ms_vehiclesLoaded;
      static CStreamingInfo *&ms_pEndRequestedList;
@@ -178,7 +178,7 @@ public:
     //! unused
      static signed int GetDiscInDrive();
     //! return modelIndex
-     static int GetNextFileOnCd(int pos, bool bNotPriority);
+     static int GetNextFileOnCd(unsigned int streamLastPosn, bool bNotPriority);
      static bool HasSpecialCharLoaded(int slot);
      static bool HasVehicleUpgradeLoaded(int ModelIndex);
     //! does nothing (NOP)
@@ -227,8 +227,8 @@ public:
      static bool RemoveLeastUsedModel(unsigned int StreamingFlags);
      static bool RemoveLoadedVehicle();
      static bool RemoveLoadedZoneModel();
-     static void RemoveModel(int Modelindex);
-     static void RemoveTxdModel(int Modelindex);
+     static void RemoveModel(int modelId);
+     static void RemoveTxdModel(int modelId);
     //! does nothing (NOP)
      static unsigned int RemoveUnusedModelsInLoadedList();
      static void RenderEntity(CLink<CEntity*> *streamingLink);

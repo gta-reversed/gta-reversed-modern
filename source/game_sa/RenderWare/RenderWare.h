@@ -600,6 +600,7 @@ void RpClumpSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPreall
 RpAtomic* AtomicDefaultRenderCallBack(RpAtomic* atomic); // 0x7491C0
 void _rpAtomicResyncInterpolatedSphere(RpAtomic* atomic); // 0x7491F0
 const RwSphere* RpAtomicGetWorldBoundingSphere(RpAtomic* atomic); // 0x749330
+void RpClumpGtaCancelStream();
 RpClump* RpClumpForAllAtomics(RpClump* clump, RpAtomicCallBack callback, void* pData); // 0x749B70
 RpClump* RpClumpForAllLights(RpClump* clump, RpLightCallBack callback, void* pData); // 0x749C00
 RpClump* RpClumpForAllCameras(RpClump* clump, RwCameraCallBack callback, void* pData); // 0x749BB0

@@ -122,3 +122,7 @@ RpAtomic* CFileLoader::SetRelatedModelInfoCB(RpAtomic* atomic, RpClump* clump)
     return atomic;
 #endif
 }
+
+char* CFileLoader::LoadLine(FILESTREAM file) {
+    return plugin::CallAndReturnDynGlobal<char*, FILESTREAM>(0x536F80, file);
+}

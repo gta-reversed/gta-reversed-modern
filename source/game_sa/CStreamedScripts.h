@@ -10,7 +10,7 @@
 #include "RenderWare.h"
 #include "CRunningScript.h"
 
-class  CStreamedScripts {
+class CStreamedScripts {
 public:
     struct
     {

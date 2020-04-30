@@ -62,3 +62,8 @@ int CPathFind::LoadPathFindData(RwStream *stream, int index)
 {
     return plugin::CallMethodAndReturn<int, 0x4529F0, CPathFind*, RwStream *, int>(this, stream, index);
 }
+
+void CPathFind::UnLoadPathFindData(int index)
+{
+    return plugin::CallMethod<0x44D0F0, CPathFind*, int>(this, index);
+}

@@ -149,6 +149,7 @@ public:
 
 	CPathNode *GetPathNode(CNodeAddress address);
     int LoadPathFindData(RwStream *stream, int index);
+    void UnLoadPathFindData(int index);
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);

@@ -2250,6 +2250,10 @@ const RwSphere* RpAtomicGetWorldBoundingSphere(RpAtomic* atomic) {
     return ((const RwSphere*(__cdecl *)(RpAtomic*))0x749330)(atomic);
 }
 
+void RpClumpGtaCancelStream() {
+    plugin::Call<0x72E700>();
+}
+
 RpClump* RpClumpForAllAtomics(RpClump* clump, RpAtomicCallBack callback, void* pData) {
     return ((RpClump*(__cdecl *)(RpClump*, RpAtomicCallBack, void*))0x749B70)(clump, callback, pData);
 }

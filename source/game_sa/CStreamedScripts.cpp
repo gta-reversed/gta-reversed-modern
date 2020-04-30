@@ -7,3 +7,7 @@ void CStreamedScripts::Initialise() {
 void CStreamedScripts::LoadStreamedScript(RwStream *stream, int index) {
     plugin::CallMethodDynGlobal<CStreamedScripts *, RwStream *, int>(0x470840, this, stream, index);
 }
+
+void CStreamedScripts::RemoveStreamedScriptFromMemory(int index) {
+    plugin::CallMethodDynGlobal<CStreamedScripts*, int>(0x4708E0, this, index);
+}
