@@ -18,7 +18,7 @@ class  CSprite2d
 {
 private:
 	CSprite2d* Constructor();
-	CSprite2d* DeConstructor();
+	CSprite2d* Destructor();
 public:
 	// class variables
 	struct RwTexture *m_pTexture;

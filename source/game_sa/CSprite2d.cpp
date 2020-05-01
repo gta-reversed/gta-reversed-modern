@@ -16,7 +16,7 @@ RwD3D9Vertex* CSprite2d::maVertices = (RwD3D9Vertex*)0xC80468;
 void CSprite2d::InjectHooks()
 {
     HookInstall(0x727230, &CSprite2d::Constructor, 7);
-    HookInstall(0x7281E0, &CSprite2d::DeConstructor, 7);
+    HookInstall(0x7281E0, &CSprite2d::Destructor, 7);
 }
 
 CSprite2d* CSprite2d::Constructor()
@@ -30,7 +30,7 @@ CSprite2d* CSprite2d::Constructor()
 #endif
 }
 
-CSprite2d* CSprite2d::DeConstructor()
+CSprite2d* CSprite2d::Destructor()
 {
 
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -41,15 +41,17 @@ CSprite2d* CSprite2d::DeConstructor()
 #endif
 }
 
-// class functions
 CSprite2d::CSprite2d()
 {
-    m_pTexture = 0;
+    m_pTexture = nullptr;
 }
 
 CSprite2d::~CSprite2d()
 {
-    RwTextureDestroy(m_pTexture);
+    if (m_pTexture) {
+        RwTextureDestroy(m_pTexture);
+        m_pTexture = nullptr;
+    }
 }
 
 // delete this sprite (similar to destructor)
