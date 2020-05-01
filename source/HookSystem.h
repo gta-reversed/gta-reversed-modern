@@ -20,14 +20,20 @@ struct SHook
 static_assert(sizeof(SHook) == 0x34, "Incorrect struct size: SHook");
 
 template<typename T>
+void *FunctionPointerToVoidP(T func)
+{
+    union
+    {
+        T a;
+        void *b;
+    } c = {func};
+    return c.b;
+}
+
+template<typename T>
 void HookInstall(DWORD installAddress, T addressToJumpTo, int iJmpCodeSize)
 {
-    DWORD dwAddressToJumpTo;
-    _asm
-    {
-        mov		eax, dword ptr addressToJumpTo
-        mov		dwAddressToJumpTo, eax
-    }
+    DWORD dwAddressToJumpTo = (DWORD) FunctionPointerToVoidP(addressToJumpTo);
 
     const DWORD x86FixedJumpSize = 5;
     SHook theHook;
