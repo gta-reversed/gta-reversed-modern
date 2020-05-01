@@ -72,7 +72,7 @@ void CStreaming::InjectHooks()
     HookInstall(0x40E170, &CStreaming::ProcessLoadingChannel, 7);
     HookInstall(0x5BCCD0, &CStreaming::ReadIniFile, 7);
     HookInstall(0x4089A0, &CStreaming::RemoveModel, 7);
-    HookInstall(0x40E120, &CStreaming::MakeSpaceFor, 7);
+    HookInstall(0x4037EB, &CStreaming::MakeSpaceFor, 7);
     HookInstall(0x4076C0, &CStreaming::RetryLoadFile, 7);
     HookInstall(0x40E3A0, &CStreaming::LoadRequestedModels, 7);
     HookInstall(0x40E4E0, &CStreaming::FlushRequestList, 7); 
@@ -784,8 +784,8 @@ void CStreaming::RequestModelStream(int channelIndex)
     }
 
     unsigned int sectorCount = 0;
-    bool isVehcileModelORBlockCountGreaterThan200 = false;
-    bool isModelTypePed = false;
+    bool isPreviousModelBig = false;
+    bool isPreviousModelPed = false;
 
     int modelIndex = 0;
     const int numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
@@ -793,25 +793,15 @@ void CStreaming::RequestModelStream(int channelIndex)
     {
         streamingInfo = &ms_aInfoForModel[modelId];
         if (streamingInfo->m_nLoadState != LOADSTATE_Requested)
-        {
             break;
-        }
         if (streamingInfo->m_nCdSize)
-        {
             blockCount = streamingInfo->m_nCdSize;
-        }
         if (ms_numPriorityRequests && !(streamingInfo->m_nFlags & PRIORITY_REQUEST))
-        {
             break;
-        }
-        if (modelId >= RESOURCE_ID_TXD)
-        {
-            if (modelId < RESOURCE_ID_IFP || modelId >= RESOURCE_ID_RRR)
-            {
-                if (isVehcileModelORBlockCountGreaterThan200 && blockCount > 200)
-                {
+        if (modelId >= RESOURCE_ID_TXD) {
+            if (modelId < RESOURCE_ID_IFP || modelId >= RESOURCE_ID_RRR) {
+                if (isPreviousModelBig && blockCount > 200)
                     break;
-                }
             }
             else if (CCutsceneMgr::ms_cutsceneProcessing || ms_aInfoForModel[7].m_nLoadState != LOADSTATE_LOADED)
             {
@@ -822,14 +812,10 @@ void CStreaming::RequestModelStream(int channelIndex)
         {
             CBaseModelInfo * pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
             ModelInfoType modelType = pBaseModelInfo->GetModelType();
-            if (isModelTypePed && modelType == MODEL_INFO_PED)
-            {
+            if (isPreviousModelPed && modelType == MODEL_INFO_PED)
                 break;
-            }
-            if (isVehcileModelORBlockCountGreaterThan200 && modelType == MODEL_INFO_VEHICLE)
-            {
+            if (isPreviousModelBig && modelType == MODEL_INFO_VEHICLE)
                 break;
-            }
             unsigned char loadState = ms_aInfoForModel[pBaseModelInfo->m_nTxdIndex + RESOURCE_ID_TXD].m_nLoadState;
             if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_Channeled)
             {
@@ -857,23 +843,15 @@ void CStreaming::RequestModelStream(int channelIndex)
 
 
         CBaseModelInfo *  pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
-        if (modelId >= RESOURCE_ID_TXD)
-        {
+        if (modelId >= RESOURCE_ID_TXD) {
             if (blockCount > 200)
-            {
-                isVehcileModelORBlockCountGreaterThan200 = true;
-            }
+                isPreviousModelBig = true;
         }
-        else
-        {
+        else {
             if (pBaseModelInfo->GetModelType() == MODEL_INFO_PED)
-            {
-                isModelTypePed = true;
-            }
+                isPreviousModelPed = true;
             if (pBaseModelInfo->GetModelType() == MODEL_INFO_VEHICLE)
-            {
-                isVehcileModelORBlockCountGreaterThan200 = true;
-            }
+                isPreviousModelBig = true;
         }
 
         streamingInfo->m_nLoadState = LOADSTATE_Channeled;
@@ -1036,14 +1014,14 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
 
                     ConvertBufferToObject(pFileBuffer, modelId);
 
-                    if (streamingInfo.m_nLoadState != LOADSTATE_Finishing
-                        || (streamingChannel.LoadStatus = LOADSTATE_Requested,
-                            streamingChannel.modelStreamingBufferOffsets[modelIndex] = bufferOffset,
-                            streamingChannel.modelIds[modelIndex] = modelId,
-                            modelIndex))
-                    {
-                        streamingChannel.modelIds[modelIndex] = -1;
+                    if (streamingInfo.m_nLoadState == LOADSTATE_Finishing) {
+                        streamingChannel.LoadStatus = LOADSTATE_Requested;
+                        streamingChannel.modelStreamingBufferOffsets[modelIndex] = bufferOffset;
+                        streamingChannel.modelIds[modelIndex] = modelId;
+                        if (modelIndex == 0)
+                            continue;
                     }
+                    streamingChannel.modelIds[modelIndex] = -1;
                 }
                 else {
                     int modelTxdIndex = baseModelInfo->m_nTxdIndex;
@@ -1056,20 +1034,18 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
             }
         }
     }
-    else
-    {
+    else {
         int bufferOffset = streamingChannel.modelStreamingBufferOffsets[0];
         unsigned char * pFileContents = reinterpret_cast<unsigned char*>(&ms_pStreamingBuffer[channelIndex][2048 * bufferOffset]);
         FinishLoadingLargeFile(pFileContents, streamingChannel.modelIds[0]);
         streamingChannel.modelIds[0] = -1;
     }
-
-    if (ms_bLoadingBigModel)
-    {
-        if (streamingChannel.LoadStatus != LOADSTATE_Requested)
-        {
+    if (ms_bLoadingBigModel) {
+        if (streamingChannel.LoadStatus != LOADSTATE_Requested) {
             ms_bLoadingBigModel = false;
-            memset(&ms_channel[1], 0xFFu, 64u);
+            for (int i = 0; i < 16; i++) {
+                ms_channel[1].modelIds[i] = -1;
+            }
         }
     }
     return true;
