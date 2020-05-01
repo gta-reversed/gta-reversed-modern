@@ -27,9 +27,15 @@ int CStreamingInfo::AddToList(CStreamingInfo *listStart)
 
 unsigned int CStreamingInfo::GetCdPosn() { return m_nCdPosn + CStreaming::ms_files[m_nImgId].m_StreamHandle; }
 
+void CStreamingInfo::SetCdPosnAndSize(unsigned int CdPosn, unsigned int CdSize)
+{
+    m_nCdPosn = CdPosn;
+    m_nCdSize = CdSize;
+}
+
 bool CStreamingInfo::GetCdPosnAndSize(unsigned int* CdPosn, unsigned int* CdSize)
 {
-    return plugin::CallMethodAndReturn<bool, 0x1560E50, CStreamingInfo*, unsigned int*, unsigned int*>(this, CdPosn, CdSize);
+    return plugin::CallMethodAndReturn<bool, 0x4075A0, CStreamingInfo*, unsigned int*, unsigned int*>(this, CdPosn, CdSize);
 }
 
 bool CStreamingInfo::InList()

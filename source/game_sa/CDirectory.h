@@ -11,7 +11,7 @@
     http://www.gtamodding.com/wiki/IMG_archive
 */
 
-class  CDirectory {
+class CDirectory {
 public:
     struct DirectoryInfo {
         unsigned int m_nOffset;
@@ -19,7 +19,6 @@ public:
         unsigned short m_nSizeInArchive;
         char m_szName[24];
     };
-
     DirectoryInfo *m_pEntries;
     unsigned int m_nCapacity;
     unsigned int m_nNumEntries;

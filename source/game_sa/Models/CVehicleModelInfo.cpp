@@ -348,3 +348,8 @@ int CVehicleModelInfo::GetNumDoors()
 {
     return ((int(__thiscall*)(CVehicleModelInfo*))0x4C73C0)(this);
 }
+
+void CVehicleModelInfo::AssignRemapTxd(const char* name, std::int16_t txdSlot)
+{
+    plugin::Call<0x4C9360, const char*, std::int16_t>(name, txdSlot);
+}

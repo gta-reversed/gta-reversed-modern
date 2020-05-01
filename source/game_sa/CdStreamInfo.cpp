@@ -1,5 +1,10 @@
 #include "StdInc.h"
 
+int CdStreamOpen(const char* lpFileName)
+{
+    return plugin::CallAndReturn<int, 0x4067B0, const char*>(lpFileName);
+}
+
 int __cdecl CdStreamSync(DWORD streamNum)
 {
     typedef int (__cdecl* hCdStreamSync)( DWORD streamNum );

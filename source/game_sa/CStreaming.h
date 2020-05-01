@@ -136,7 +136,7 @@ public:
 
      static void *AddEntity(CEntity * pEntity);
     //! return StreamingFile Index in CStreaming::ms_files
-     static int AddImageToList(char const *lpFileName, bool bNotPlayerImg);
+     static int AddImageToList(char const * pFileName, bool bNotPlayerImg);
      static void AddLodsToRequestList(CVector const *Posn, unsigned int Streamingflags);
      static void AddModelsToRequestList(CVector const *posn, unsigned int StreamingFlags);
      static bool AddToLoadedVehiclesList(int modelIndex);
@@ -187,7 +187,7 @@ public:
      static bool IsVeryBusy();
      static void Load();
      static void LoadAllRequestedModels(bool bOnlyPriorityRequests);
-     static void LoadCdDirectory(char const *ArchiveName, int archiveID);
+     static void LoadCdDirectory(const char* filename, std::int32_t archiveId);
      static void LoadCdDirectory();
      static void LoadInitialPeds();
     //! does nothing (NOP)

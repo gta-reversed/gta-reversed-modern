@@ -56,11 +56,14 @@ void CStreaming::InjectHooks()
 {
     //CStreamingInfo::InjectHooks(); 
     HookInstall(0x409650, &CStreaming::AddEntity, 7);
+    HookInstall(0x1567B90, &CStreaming::AddImageToList, 7);
     HookInstall(0x4019B9, &CStreaming::AreAnimsUsedByRequestedModels, 7);
     HookInstall(0x15664B0, &CStreaming::AreTexturesUsedByRequestedModels, 7);
     HookInstall(0x408E20, &CStreaming::GetNextFileOnCd, 7);
     HookInstall(0x40C6B0, &CStreaming::ConvertBufferToObject, 7);
     HookInstall(0x40A45E, &CStreaming::LoadAllRequestedModels, 7);
+    HookInstall(0x5B6170, (void(*)(const char*, std::int32_t))&CStreaming::LoadCdDirectory, 7);
+    HookInstall(0x5B82C0, (void(*)()) & CStreaming::LoadCdDirectory, 7);
     HookInstall(0x15663B0, &CStreaming::RequestFile, 7);
     HookInstall(0x409050, &CStreaming::RequestFilesInChannel, 7);
     HookInstall(0x4087E0, &CStreaming::RequestModel, 7);
@@ -78,6 +81,7 @@ void CStreaming::InjectHooks()
     HookInstall(0x40E4E0, &CStreaming::FlushRequestList, 7); 
     HookInstall(0x156CD70, &CStreaming::GetDefaultFiremanModel, 7);
     HookInstall(0x1563A50, &CStreaming::GetDefaultMedicModel, 7);
+    HookInstall(0x4083C0, &CStreaming::InitImageList, 7);
 }
 
 void* CStreaming::AddEntity(CEntity* pEntity) {
@@ -104,8 +108,24 @@ void* CStreaming::AddEntity(CEntity* pEntity) {
 #endif
 }
 
-int CStreaming::AddImageToList(char const *lpFileName, bool bNotPlayerImg) {
-    return plugin::CallAndReturnDynGlobal<int, char const *, bool>(0x407610, lpFileName, bNotPlayerImg);
+int CStreaming::AddImageToList(char const *pFileName, bool bNotPlayerImg) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturnDynGlobal<int, char const *, bool>(0x407610, pFileName, bNotPlayerImg);
+#else
+    // find a free slot
+    std::int32_t fileIndex = 0;
+    for (; fileIndex < 8; fileIndex++) {
+        if (!ms_files[fileIndex].m_szName[0])
+            break;
+    }
+    if (fileIndex == 8)
+        return 0;
+    // free slot found, load the IMG file
+    strcpy(ms_files[fileIndex].m_szName, pFileName);
+    ms_files[fileIndex].m_StreamHandle = CdStreamOpen(pFileName);
+    ms_files[fileIndex].m_bNotPlayerImg = bNotPlayerImg;
+    return fileIndex;
+#endif
 }
 
 void CStreaming::AddLodsToRequestList(CVector const *Posn, unsigned int Streamingflags) {
@@ -537,6 +557,121 @@ void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests)
         FlushChannels();
         m_bLoadingAllRequestedModels = false;
     }
+#endif
+}
+
+void CStreaming::LoadCdDirectory(const char* filename, std::int32_t archiveId)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal<char const*, int>(0x5B6170, filename, archiveId);
+#else
+    FILE* file = CFileMgr::OpenFile(filename, "rb");
+    if (!file) 
+        return;
+    std::int32_t previousModelId = -1;
+    char version[4];
+    std::int32_t entryCount;
+    CFileMgr::Read(file, &version, 4u);
+    CFileMgr::Read(file, &entryCount, 4u);
+    for (std::int32_t i = 0; i < entryCount; i++) {
+        CDirectory::DirectoryInfo entryInfo;
+        CFileMgr::Read(file, &entryInfo, sizeof(CDirectory::DirectoryInfo));
+        if (entryInfo.m_nStreamingSize > ms_streamingBufferSize)
+            ms_streamingBufferSize = entryInfo.m_nStreamingSize;
+        const std::int32_t nameSize = sizeof(CDirectory::DirectoryInfo::m_szName);
+        entryInfo.m_szName[nameSize-1] = 0;
+        char* pExtension = strchr(entryInfo.m_szName, '.');
+        if (!pExtension || pExtension - entryInfo.m_szName > 20) {
+            entryInfo.m_szName[nameSize-1] = 0;
+            previousModelId = -1;
+            continue;
+        }
+        *pExtension = 0;
+        std::int32_t modelId = -1;
+        if (!memicmp(pExtension + 1, "DFF", 3u)) {
+            if (!CModelInfo::GetModelInfo(entryInfo.m_szName, &modelId)) {
+                entryInfo.m_nOffset |= archiveId << 24;
+                CStreaming::ms_pExtraObjectsDir->AddItem(entryInfo);
+                previousModelId = -1;
+                continue;
+            }
+        }
+        else if (!memicmp(pExtension + 1, "TXD", 3u)) {
+            std::int32_t txdSlot = CTxdStore::FindTxdSlot(entryInfo.m_szName);
+            if (txdSlot == -1) {
+                txdSlot = CTxdStore::AddTxdSlot(entryInfo.m_szName);
+                CVehicleModelInfo::AssignRemapTxd(entryInfo.m_szName, txdSlot);
+            }
+            modelId = txdSlot + RESOURCE_ID_TXD;
+        }
+        else if (!memicmp(pExtension + 1, "COL", 3u)) {
+            std::int32_t colSlot = CColStore::FindColSlot();
+            if (colSlot == -1)
+                colSlot = CColStore::AddColSlot(entryInfo.m_szName);
+            modelId = colSlot + RESOURCE_ID_COL;
+        }
+        else if (!memicmp(pExtension + 1, "IPL", 3u)) {
+            std::int32_t iplSlot = CIplStore::FindIplSlot(entryInfo.m_szName);
+            if (iplSlot == -1)
+                iplSlot = CIplStore::AddIplSlot(entryInfo.m_szName);
+            modelId = iplSlot + RESOURCE_ID_IPL;
+        }
+        else if (!memicmp(pExtension + 1, "DAT", 3u)) {
+            sscanf(&entryInfo.m_szName[5], "%d", &modelId);
+            modelId += RESOURCE_ID_DAT;
+        }
+        else if (!memicmp(pExtension + 1, "IFP", 3u)) {
+            modelId = CAnimManager::RegisterAnimBlock(entryInfo.m_szName) + RESOURCE_ID_IFP;
+        }
+        else if (!memicmp(pExtension + 1, "RRR", 3u)) {
+            modelId = CVehicleRecording::RegisterRecordingFile(entryInfo.m_szName) + RESOURCE_ID_RRR;
+        }
+        else if (!memicmp(pExtension + 1, "SCM", 3u)) {
+            modelId = CTheScripts::StreamedScripts.RegisterScript(entryInfo.m_szName) + RESOURCE_ID_SCM;
+        }
+        else {
+            *pExtension = '.';
+            previousModelId = -1;
+            continue;
+        }
+        std::uint32_t cdPos, cdSize;
+        CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
+        if (!streamingInfo.GetCdPosnAndSize(&cdPos, &cdSize)) {
+            streamingInfo.m_nImgId = archiveId;
+            if (entryInfo.m_nSizeInArchive)
+                entryInfo.m_nStreamingSize = entryInfo.m_nSizeInArchive;
+            streamingInfo.SetCdPosnAndSize(entryInfo.m_nOffset, entryInfo.m_nStreamingSize);
+            streamingInfo.m_nFlags = 0;
+            if (previousModelId != -1)
+                ms_aInfoForModel[previousModelId].m_nNextIndexOnCd = modelId;
+            previousModelId = modelId;
+        }
+    }
+    CFileMgr::CloseFile(file);
+#endif
+}
+
+void CStreaming::LoadCdDirectory()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal(0x5B82C0);
+#else
+    ////////////// unused///////////////
+    CStreaming::ms_imageOffsets[0] = 0;
+    CStreaming::ms_imageOffsets[1] = -1;
+    CStreaming::ms_imageOffsets[2] = -1;
+    CStreaming::ms_imageOffsets[3] = -1;
+    CStreaming::ms_imageOffsets[4] = -1;
+    CStreaming::ms_imageOffsets[5] = -1;
+    ////////////////////////////////////
+    for (std::int32_t archiveId = 0; archiveId < 8; archiveId++) {
+        tStreamingFileDesc& streamingFile = ms_files[archiveId];
+        if (!streamingFile.m_szName[0])
+            break;
+        if (streamingFile.m_bNotPlayerImg)
+            LoadCdDirectory(streamingFile.m_szName, archiveId);
+    }
+    // more unused code, so let's stop here
 #endif
 }
 
@@ -1432,5 +1567,18 @@ int CStreaming::GetDefaultMedicModel() {
     return plugin::CallAndReturnDynGlobal<int>(0x407D20);
 #else
     return ms_aDefaultMedicModel[CTheZones::m_CurrLevel];
+#endif
+}
+
+void CStreaming::InitImageList() {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal(0x4083C0);
+#else
+    for (std::int32_t i = 0; i < 8; i++) {
+        ms_files[i].m_szName[0] = 0;
+        ms_files[i].m_StreamHandle = 0;
+    }
+    CStreaming::AddImageToList("MODELS\\GTA3.IMG", true);
+    CStreaming::AddImageToList("MODELS\\GTA_INT.IMG", true);
 #endif
 }

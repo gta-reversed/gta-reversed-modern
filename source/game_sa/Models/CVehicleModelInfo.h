@@ -282,6 +282,7 @@ public:
 	void SetEnvMapCoeff(float coeff);
     // get num doors in this model
     int GetNumDoors();
+	static void AssignRemapTxd(const char* name, std::int16_t txdSlot);
 };
 
 VALIDATE_SIZE(CVehicleModelInfo::CVehicleStructure, 0x314);

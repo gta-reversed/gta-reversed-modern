@@ -55,9 +55,9 @@ public:
     * IsPlaybackPausedForCar(CVehicle*)
     */
     static CVehicleStateEachFrame* Load(RwStream *stream, int resourceId, int totalSize);
+    static std::int32_t RegisterRecordingFile(char const* name);
     /*
     * PausePlaybackRecordedCar(CVehicle*)
-    * RegisterRecordingFile(char const*)
     * RemoveAllRecordingsThatArentUsed()
     * RemoveRecordingFile(int)
     * Render()
