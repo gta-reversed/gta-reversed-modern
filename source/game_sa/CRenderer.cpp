@@ -581,8 +581,8 @@ int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
     {
         entityPos = entity->m_pLod->GetPosition();
     }
-	CVector distance = entityPos - ms_vecCameraPosition;
-	*outDistance = distance.Magnitude();
+    CVector distance = entityPos - ms_vecCameraPosition;
+    *outDistance = distance.Magnitude();
     if (entity->m_nNumLodChildrenRendered <= 0)
     {
         int visbility = SetupMapEntityVisibility(entity, pBaseModelInfo, *outDistance, bIsTimeInRange);

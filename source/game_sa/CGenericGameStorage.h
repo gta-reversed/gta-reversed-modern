@@ -98,8 +98,8 @@ public:
     //! does nothing (return 0)
      static char RestoreForStartLoad();
      static bool SaveWorkBuffer(bool a1);
-     static bool _LoadDataFromWorkBuffer(void *pData, int size);
-     static bool _SaveDataToWorkBuffer(void *pData, int Size);
+     static bool LoadDataFromWorkBuffer(void *pData, int size);
+     static bool SaveDataToWorkBuffer(void *pData, int Size);
 };
 
 

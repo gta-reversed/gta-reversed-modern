@@ -190,7 +190,7 @@ public:
     char field_58;
     char drawRadarOrMap;
     char field_5A;
-    char field_5B;
+    char        m_bAllStreamingStuffLoaded;
     bool                m_bMenuActive;
     char doGameReload;
     char field_5E;
@@ -351,9 +351,15 @@ public:
     static bool& bInvertMouseY;
 
 public:
+    static void InjectHooks();
     CMenuManager();
     ~CMenuManager();
 
+    void CheckForMenuClosing();
+    void ProcessFileActions();
+    void ProcessStreaming(char bImmediately);
+    void UserInput();
+    void Process();
     void DrawWindow(const CRect& coords, const char* pKey, unsigned char nColour, CRGBA backColor, bool Unused, bool bBackground);
     char SwitchToNewScreen(char page);
     void SaveSettings();

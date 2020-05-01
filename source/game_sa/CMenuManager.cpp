@@ -13,6 +13,11 @@ bool& CMenuManager::bInvertMouseY = *(bool*)0xBA6745;
 
 int& CMenuManager::nLastMenuPage = *(int*)0x8CDFF0;
 
+void CMenuManager::InjectHooks()
+{
+    HookInstall(0x57B440, &CMenuManager::Process, 7);
+}
+
 // class functions
 CMenuManager::CMenuManager()
 {
@@ -22,6 +27,47 @@ CMenuManager::CMenuManager()
 CMenuManager::~CMenuManager()
 {
     ((void(__thiscall*)(CMenuManager*))0x579440)(this);
+}
+
+void CMenuManager::Process()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__thiscall*)(CMenuManager*))0x57B440)(this);
+#else
+    if (m_bMenuActive)
+    {
+        ProcessStreaming(m_bAllStreamingStuffLoaded);
+        UserInput();
+        ProcessFileActions();
+        D3DResourceSystem::TidyUpD3DIndexBuffers(1);
+        D3DResourceSystem::TidyUpD3DTextures(1);
+    }
+    CheckForMenuClosing();
+#endif
+}
+
+//573CF0
+void CMenuManager::ProcessStreaming(char bImmediately)
+{
+    ((void(__thiscall*)(CMenuManager*, char))0x573CF0)(this, bImmediately);
+}
+
+//57FD70
+void CMenuManager::UserInput()
+{
+    ((void(__thiscall*)(CMenuManager*))0x57FD70)(this);
+}
+
+//576B70
+void CMenuManager::CheckForMenuClosing()
+{
+    ((void(__thiscall*)(CMenuManager*))0x576B70)(this);
+}
+
+//578D60
+void CMenuManager::ProcessFileActions()
+{
+    ((void(__thiscall*)(CMenuManager*))0x578D60)(this);
 }
 
 void CMenuManager::DrawWindow(const CRect& coords, const char* pKey, unsigned char nColour, CRGBA backColor, bool Unused, bool bBackground) {

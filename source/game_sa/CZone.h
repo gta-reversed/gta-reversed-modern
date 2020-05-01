@@ -13,7 +13,7 @@ enum eZoneType {
 	ZONE_TYPE_MAP = 3
 };
 
-enum eLevelName {
+enum eLevelName : int {
 	LEVEL_NAME_COUNTRY_SIDE,
 	LEVEL_NAME_LOS_SANTOS,
 	LEVEL_NAME_SAN_FIERRO,

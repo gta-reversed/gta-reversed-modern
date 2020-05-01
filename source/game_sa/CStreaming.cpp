@@ -81,6 +81,7 @@ void CStreaming::InjectHooks()
     HookInstall(0x40E4E0, &CStreaming::FlushRequestList, 7); 
     HookInstall(0x156CD70, &CStreaming::GetDefaultFiremanModel, 7);
     HookInstall(0x1563A50, &CStreaming::GetDefaultMedicModel, 7);
+    HookInstall(0x407C50, &CStreaming::GetDefaultCopCarModel, 7);
     HookInstall(0x4083C0, &CStreaming::InitImageList, 7);
 }
 

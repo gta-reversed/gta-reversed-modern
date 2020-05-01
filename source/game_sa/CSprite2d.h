@@ -16,6 +16,9 @@
 
 class  CSprite2d
 {
+private:
+	CSprite2d* Constructor();
+	CSprite2d* DeConstructor();
 public:
 	// class variables
 	struct RwTexture *m_pTexture;
@@ -27,6 +30,9 @@ public:
 	// count: 8
 	static struct RwD3D9Vertex *maVertices;
 	// class functions
+
+	static void InjectHooks();
+
 	CSprite2d();
 	~CSprite2d();
 	// delete this sprite (similar to destructor)

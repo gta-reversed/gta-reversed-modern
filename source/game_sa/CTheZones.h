@@ -20,19 +20,23 @@ public:
 	// Explored teritories
 
 	// Count: 100
-	static char* ExploredTerritoriesArray;
+	static char* ZonesVisited;
 	// Number of explored territories
-	static int& TotalNumberExploredTerritories;
+	static int& ZonesRevealed;
 
 	// Info zones
-	static short& TotalNumberOfInfoZones;
+	static short& TotalNumberOfNavigationZones;
 	// Count: 380
-	static CZone* ZoneInfoArray;
+	static CZone* NavigationZoneArray;
 
 	// Map zones
 	static short& TotalNumberOfMapZones;
 	// Count: 39
 	static CZone* MapZoneArray;
+
+	static short& TotalNumberOfZoneInfos;
+
+	static CZoneInfo* ZoneInfoArray;
 
 	// Functions
 	
@@ -62,10 +66,10 @@ public:
 	static void FillZonesWithGangColours(bool DisableRadarGangColors);
 	
 	// Returns pointer to zone by index
-	static CZone* GetInfoZone(short index);
+	static CZone* GetNavigationZone(unsigned short index);
 	
 	// Returns pointer to zone by index
-	static CZone* GetMapZone(short index);
+	static CZone* GetMapZone(unsigned short index);
 	
 	static long double Calc2DDistanceBetween2Zones(CZone *Zone1, CZone *Zone2);
 	
