@@ -14,7 +14,8 @@ public:
     float x, y;
     
     inline CVector2D() {
-
+        x = 0.0f;
+        y = 0.0f;
     }
 
     inline CVector2D(float X, float Y) {

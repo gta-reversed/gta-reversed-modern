@@ -6,16 +6,6 @@ Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
-unsigned int MAX_PLAYERS = 2;
-unsigned int MAX_SECTORS = 14400;
-unsigned int MAX_SECTORS_X = 120;
-unsigned int MAX_SECTORS_Y = 120;
-unsigned int MAX_REPEAT_SECTORS = 256;
-unsigned int MAX_REPEAT_SECTORS_X = 16;
-unsigned int MAX_REPEAT_SECTORS_Y = 16;
-unsigned int MAX_LOD_PTR_LISTS = 900;
-unsigned int MAX_LOD_PTR_LISTS_X = 30;
-unsigned int MAX_LOD_PTR_LISTS_Y = 30;
 int &CWorld::ms_iProcessLineNumCrossings = *(int *)0xB7CD60;
 float &CWorld::fWeaponSpreadRate = *(float *)0xB7CD64;
 CEntity *&CWorld::pIgnoreEntity = *(CEntity **)0xB7CD68;
@@ -32,7 +22,7 @@ unsigned short&CWorld::ms_nCurrentScanCode = *(unsigned short*)0xB7CD78;
 CPlayerInfo *CWorld::Players = (CPlayerInfo *)0xB7CD98;
 CSector *CWorld::ms_aSectors = (CSector *)0xB7D0B8;
 CRepeatSector *CWorld::ms_aRepeatSectors = (CRepeatSector *)0xB992B8;
-CPtrListSingleLink *CWorld::ms_aLodPtrLists = (CPtrListSingleLink *)0xB99EB8;
+CPtrListSingleLink(&CWorld::ms_aLodPtrLists)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X] = *(CPtrListSingleLink(*)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X])0xB99EB8;
 CPtrListDoubleLink &CWorld::ms_listMovingEntityPtrs = *(CPtrListDoubleLink *)0xB9ACC8;
 CPtrListDoubleLink &CWorld::ms_listObjectsWithControlCode = *(CPtrListDoubleLink *)0xB9ACCC;
 CColPoint *CWorld::m_aTempColPts = (CColPoint *)0xB9ACD0;
@@ -448,6 +438,19 @@ bool CWorld::ProcessLineOfSight(CVector const& origin, CVector const& target, CC
     return plugin::CallAndReturn<bool, 0x56BA00, CVector const&, CVector const&, CColPoint&, CEntity*&, bool, bool, bool, bool, bool, bool, bool, bool>(origin, target, outColPoint, outEntity, buildings, vehicles, peds, objects, dummies, doSeeThroughCheck, doCameraIgnoreCheck, doShootThroughCheck);
 }
 
+void CWorld::IncrementCurrentScanCode()
+{
+    if (CWorld::ms_nCurrentScanCode >= 65535u)
+    {
+        CWorld::ClearScanCodes();
+        CWorld::ms_nCurrentScanCode = 1;
+    }
+    else
+    {
+        ++CWorld::ms_nCurrentScanCode;
+    }
+}
+
 // Converted from cdecl short GetCurrentScanCode() 0x407250
 short GetCurrentScanCode() {
     return plugin::CallAndReturn<short, 0x407250>();
@@ -464,8 +467,11 @@ CRepeatSector* GetRepeatSector(int x, int y) {
 }
 
 // Converted from cdecl CPtrListSingleLink* GetLodPtrList(int x, int y) 0x4072C0
-CPtrListSingleLink* GetLodPtrList(int x, int y) {
-    return plugin::CallAndReturn<CPtrListSingleLink*, 0x4072C0, int, int>(x, y);
+CPtrListSingleLink& CWorld::GetLodPtrList(std::int32_t x, std::int32_t y) {
+    x = clamp<std::int32_t>(x, 0, MAX_LOD_PTR_LISTS_X - 1);
+    y = clamp<std::int32_t>(y, 0, MAX_LOD_PTR_LISTS_Y - 1);
+    return ms_aLodPtrLists[y][x];
+    //return plugin::CallAndReturn<CPtrListSingleLink*, 0x4072C0, std::int32_t, std::int32_t>(x, y);
 }
 
 // Converted from cdecl void SetNextScanCode() 0x4072E0

@@ -127,6 +127,7 @@ public:
      static bool &m_bCopBikeLoaded;
      static bool &m_bDisableCopBikes;
      static CLinkList<CEntity*> &ms_rwObjectInstances;
+     static CLink<CEntity*>*& ms_renderEntityLink;
      static bool &m_bLoadingAllRequestedModels;
      static bool &m_bModelStreamNotLoaded;
      static unsigned int &ms_numberOfBytesRead; 
@@ -137,8 +138,8 @@ public:
      static void *AddEntity(CEntity * pEntity);
     //! return StreamingFile Index in CStreaming::ms_files
      static int AddImageToList(char const * pFileName, bool bNotPlayerImg);
-     static void AddLodsToRequestList(CVector const *Posn, unsigned int Streamingflags);
-     static void AddModelsToRequestList(CVector const *posn, unsigned int StreamingFlags);
+     static void AddLodsToRequestList(CVector const& point, unsigned int streamingFlags);
+     static void AddModelsToRequestList(CVector const& point, unsigned int streamingFlags);
      static bool AddToLoadedVehiclesList(int modelIndex);
      static bool AreAnimsUsedByRequestedModels(int animModelId);
      static bool AreTexturesUsedByRequestedModels(int txdModelId);
@@ -156,7 +157,7 @@ public:
      static char DeleteRwObjectsNotInFrustumInSectorList(CPtrList *List, int memoryToCleanInBytes);
      static void DisableCopBikes(bool bDisable);
     //! RandFactor : random number between 1-7
-     static int FindMIPedSlotForInterior(int RandFactor);
+     static std::int32_t FindMIPedSlotForInterior(std::int32_t randFactor);
      static void FinishLoadingLargeFile(unsigned char * pFileBuffer, int modelIndex);
      static void FlushChannels();
      static void FlushRequestList();
@@ -200,8 +201,8 @@ public:
      static void LoadZoneVehicle(CVector const *posn);
      static void MakeSpaceFor(int memoryToCleanInBytes);
      static void PossiblyStreamCarOutAfterCreation(int modelId);
-     static void ProcessEntitiesInSectorList(CPtrList *list, float posn_x, float posn_y, float min_posn_x, float min_posn_y, float max_posn_x, float max_posn_y, float distance, unsigned int Streamingflags);
-     static void ProcessEntitiesInSectorList(CPtrList *list, unsigned int streamingFlags);
+     static void ProcessEntitiesInSectorList(CPtrList& list, float posX, float posY, float minX, float minY, float maxX, float maxY, float radius, std::int32_t streamingflags);
+     static void ProcessEntitiesInSectorList(CPtrList& list, std::int32_t streamingFlags);
      static bool ProcessLoadingChannel(int channelIndex);
      static void PurgeRequestList();
      static unsigned int ReInit();

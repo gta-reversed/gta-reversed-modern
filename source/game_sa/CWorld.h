@@ -16,16 +16,16 @@
 #include "CPed.h"
 #include "CVehicle.h"
 
-extern unsigned int MAX_PLAYERS; // default 2
-extern unsigned int MAX_SECTORS; // default 14400
-extern unsigned int MAX_SECTORS_X; // default 120
-extern unsigned int MAX_SECTORS_Y; // default 120
-extern unsigned int MAX_REPEAT_SECTORS; // default 256
-extern unsigned int MAX_REPEAT_SECTORS_X; // default 16
-extern unsigned int MAX_REPEAT_SECTORS_Y; // default 16
-extern unsigned int MAX_LOD_PTR_LISTS; // default 900
-extern unsigned int MAX_LOD_PTR_LISTS_X; // default 30
-extern unsigned int MAX_LOD_PTR_LISTS_Y; // default 30
+extern const std::int32_t MAX_PLAYERS = 2;
+extern const std::int32_t MAX_SECTORS_X = 120;
+extern const std::int32_t MAX_SECTORS_Y = 120;
+extern const std::int32_t MAX_SECTORS = MAX_SECTORS_X * MAX_SECTORS_Y;
+extern const std::int32_t MAX_REPEAT_SECTORS_X = 16;
+extern const std::int32_t MAX_REPEAT_SECTORS_Y = 16;
+extern const std::int32_t MAX_REPEAT_SECTORS = MAX_REPEAT_SECTORS_X * MAX_REPEAT_SECTORS_Y;
+extern const std::int32_t MAX_LOD_PTR_LISTS_X = 30; 
+extern const std::int32_t MAX_LOD_PTR_LISTS_Y = 30;
+extern const std::int32_t MAX_LOD_PTR_LISTS = MAX_LOD_PTR_LISTS_X * MAX_LOD_PTR_LISTS_Y;
 
 class  CWorld {
 public:
@@ -51,7 +51,8 @@ public:
     // Use GetRepeatSector() to access this array
     static CRepeatSector *ms_aRepeatSectors; // static CRepeatSector ms_aRepeatSectors[MAX_REPEAT_SECTORS] default 16x16
     // Use GetLodPtrList() to access this array
-    static CPtrListSingleLink *ms_aLodPtrLists; // static CPtrListSingleLink ms_aLodPtrLists[MAX_LOD_PTR_LISTS] default 30x30
+    
+    static CPtrListSingleLink(&ms_aLodPtrLists)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X];
     static CPtrListDoubleLink &ms_listMovingEntityPtrs;
     static CPtrListDoubleLink &ms_listObjectsWithControlCode;
     static CColPoint *m_aTempColPts; // static CColPoint m_aTempColPts[32]
@@ -144,6 +145,9 @@ public:
     static void SetWorldOnFire(float x, float y, float z, float radius, CEntity* fireCreator);
     static void RepositionCertainDynamicObjects();
     static bool ProcessLineOfSight(CVector const& origin, CVector const& target, CColPoint& outColPoint, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck, bool doShootThroughCheck);
+    static void IncrementCurrentScanCode();
+    static CPtrListSingleLink& GetLodPtrList(std::int32_t x, std::int32_t y);
+    static std::int32_t SectorFloor(float fSector) { return static_cast<std::int32_t>(floor(fSector)); }
 };
 
 extern unsigned int &FilledColPointIndex;
@@ -153,7 +157,6 @@ extern short &TAG_SPRAYING_INCREMENT_VAL; // default 8
 short GetCurrentScanCode();
 CSector* GetSector(int x, int y);
 CRepeatSector* GetRepeatSector(int x, int y);
-CPtrListSingleLink* GetLodPtrList(int x, int y);
 void SetNextScanCode();
 
 double ScaleLighting(unsigned char lighting, float fScale);

@@ -23,7 +23,7 @@ CSprite2d* CSprite2d::Constructor()
 {
 
 #ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CSprite2d*))0x727230)(this);
+    return ((CSprite2d * (__thiscall*)(CSprite2d*))0x727230)(this);
 #else
     this->CSprite2d::CSprite2d();
     return this;
@@ -34,7 +34,7 @@ CSprite2d* CSprite2d::Destructor()
 {
 
 #ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CSprite2d*))0x7281E0)(this);
+    return ((CSprite2d * (__thiscall*)(CSprite2d*))0x7281E0)(this);
 #else
     this->CSprite2d::~CSprite2d();
     return this;

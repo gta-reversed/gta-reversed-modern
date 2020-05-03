@@ -47,8 +47,7 @@ public:
     //! unused
      unsigned int GetCdSize();
      CStreamingInfo* GetNext() { return m_nNextIndex == -1 ? nullptr : &ms_pArrayBase[m_nNextIndex]; }
-    //! unused
-     CStreamingInfo *GetPrev();
+     CStreamingInfo *GetPrev() { return m_nPrevIndex == -1 ? nullptr : &ms_pArrayBase[m_nPrevIndex]; }
     //! unused
      bool InList();
      void Init();

@@ -803,7 +803,7 @@ void CRenderer::SetupScanLists(int sectorX, int sectorY)
 #else
     CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
     tScanLists* pScanLists = reinterpret_cast<tScanLists*>(&PC_Scratch);
-    if (sectorX < 0 || (sectorY < 0 || (sectorX >= 0x78 || sectorY >= 0x78)))
+    if (sectorX < 0 || (sectorY < 0 || (sectorX >= MAX_SECTORS_X || sectorY >= MAX_SECTORS_Y)))
     {
         pScanLists->buildingsList = nullptr;
         pScanLists->objectsList = &pRepeatSector->m_lists[0];
