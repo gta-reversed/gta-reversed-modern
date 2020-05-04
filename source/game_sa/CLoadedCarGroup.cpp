@@ -33,8 +33,8 @@ int CLoadedCarGroup::GetMember(int count) {
 }
 
 // Converted from thiscall int CLoadedCarGroup::CountMembers(void)	0x611C30
-unsigned int CLoadedCarGroup::CountMembers() {
-    return plugin::CallMethodAndReturn<unsigned int, 0x611C30, CLoadedCarGroup *>(this);
+int CLoadedCarGroup::CountMembers() {
+    return plugin::CallMethodAndReturn<int, 0x611C30, CLoadedCarGroup *>(this);
 }
 
 // Converted from thiscall void CLoadedCarGroup::Clear(void)	0x611B90

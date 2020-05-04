@@ -67,3 +67,8 @@ void CPathFind::UnLoadPathFindData(int index)
 {
     return plugin::CallMethod<0x44D0F0, CPathFind*, int>(this, index);
 }
+
+std::int32_t CPathFind::LoadSceneForPathNodes(CVector point)
+{
+    return plugin::CallMethodAndReturn<std::int32_t, 0x44DE00, CPathFind*, CVector>(this, point);
+}

@@ -125,8 +125,8 @@ public:
 	static float& m_fPercDealers;
 	static bool& m_bCurrentZoneIsGangArea;
 	static float& m_fCurrentZoneDodgyness;
-	static CZone* m_pCurrZone;
-	static CZoneInfo* m_pCurrZoneInfo;
+	static CZone*& m_pCurrZone;
+	static CZoneInfo*& m_pCurrZoneInfo;
 	static int& m_nCurrentZoneType;
 	static int& m_nCurrentTimeOfWeek;
 	static int& m_nCurrentTimeIndex;
@@ -153,5 +153,11 @@ public:
 	static void UpdateAreaDodgyness();
 	static void UpdateDealerStrengths();
 	static void UpdatePercentages();
+    static char GetCurrentPercTypeGroup(int a1, unsigned char zoneType)
+    {
+        return m_nPercTypeGroup[720 * m_nCurrentTimeIndex +
+                                360 * m_nCurrentTimeOfWeek +
+                                18 * zoneType + a1];
+    }
 
 };

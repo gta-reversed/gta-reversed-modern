@@ -37,7 +37,7 @@ public:
     static void LoadAllRemainingIpls();
     static bool LoadIpl(int iplSlotIndex, unsigned char* data, int dataSize);
     static bool LoadIplBoundingBox(int iplSlotIndex, unsigned char* data, int dataSize);
-    static void LoadIpls(CVector posn, bool arg1);
+    static void LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirection);
     static void RemoveAllIpls();
     static void RemoveIpl(int iplSlotIndex);
     static void RemoveIplAndIgnore(int iplSlotIndex);

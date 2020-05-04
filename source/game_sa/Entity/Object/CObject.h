@@ -11,6 +11,8 @@
 #include "CObjectInfo.h"
 
 enum eObjectType {
+    OBJECT_UNKNOWN = 0,
+    OBJECT_GAME = 1,
     OBJECT_MISSION = 2,
     OBJECT_TEMPORARY = 3,
     OBJECT_MISSION2 = 6

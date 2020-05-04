@@ -56,12 +56,12 @@ public:
 	static bool PointLiesWithinZone(CVector const* pPoint, CZone * pZone);
 	
 	// Returns eLevelName from position
-	static eLevelName GetLevelFromPosition(CVector const* pPoint);
+	static eLevelName GetLevelFromPosition(CVector const& point);
 	
 	// Returns pointer to zone by a point
 	static CZone* FindSmallestZoneForPosition(const CVector& point, bool FindOnlyZonesType0);
 	
-	static CZoneExtraInfo* GetZoneInfo(CVector *point, CZone **outzone);
+	static CZoneExtraInfo* GetZoneInfo(const CVector& point, CZone **outzone);
 	
 	static void FillZonesWithGangColours(bool DisableRadarGangColors);
 	

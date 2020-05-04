@@ -44,10 +44,8 @@ public:
     * LoadCol(int, char const*)
     */
     static bool LoadCol(int colId, unsigned char* data, int dataSize);
-    /*
-    * LoadCollision(CVector, bool)
-    * RemoveAllCollision()
-    */
+    static void LoadCollision(CVector point);
+    //RemoveAllCollision()
     static void RemoveCol(int colNum);
     /* RemoveColSlot(int)
     */

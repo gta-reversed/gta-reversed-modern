@@ -27,6 +27,16 @@ private:
     char _padD[3];
 public:
 
+    void* operator new(unsigned int size)
+    {
+        return ((void* (__cdecl*)(unsigned int))0x82119A)(size);
+    }
+
+    void operator delete(void* object)
+    {
+        ((void(__cdecl*)(void*))0x8214BD)(object);
+    }
+
     CDirectory();
     CDirectory(int capacity);
     ~CDirectory();

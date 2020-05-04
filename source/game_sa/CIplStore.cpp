@@ -107,8 +107,8 @@ bool CIplStore::LoadIplBoundingBox(int iplSlotIndex, unsigned char* data, int da
 }
 
 // Converted from cdecl void CIplStore::LoadIpls(CVector posn,bool) 0x405170
-void CIplStore::LoadIpls(CVector posn, bool arg1) {
-    plugin::Call<0x405170, CVector, bool>(posn, arg1);
+void CIplStore::LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirection) {
+    plugin::Call<0x405170, CVector, bool>(posn, bAvoidLoadInPlayerVehicleMovingDirection);
 }
 
 // Converted from cdecl void CIplStore::RemoveAllIpls(void) 0x405720

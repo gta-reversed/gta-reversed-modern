@@ -365,3 +365,8 @@ void CPopulation::PopulateInterior(int numPeds, CVector posn) {
 void CPopulation::Update(bool generatePeds) {
     ((void(__cdecl*)(bool))0x616650)(generatePeds);
 }
+
+bool CPopulation::DoesCarGroupHaveModelId(std::int32_t carGroupId, std::int32_t modelId)
+{
+    return plugin::CallAndReturn<bool, 0x406F50, std::int32_t, std::int32_t>(carGroupId, modelId);
+}

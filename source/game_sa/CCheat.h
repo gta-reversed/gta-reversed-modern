@@ -90,6 +90,7 @@ public:
      static void WeaponCheat2();
      static void WeaponCheat3();
      static void WeaponSkillsCheat();
+     static bool IsZoneStreamingAllowed();
 };
 
 //#include "meta/meta.CCheat.h"

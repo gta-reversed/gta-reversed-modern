@@ -14,7 +14,12 @@ public:
 	char GangDensity[10];
 	char DrugDealerCounter;
 	RwRGBA ZoneColor;
-	char Flags1;
+    union {
+        struct {
+            unsigned char zoneType : 5;
+        };
+	    unsigned char Flags1;
+    };
 	char Flags2;
 };
 

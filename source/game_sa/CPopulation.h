@@ -171,4 +171,5 @@ public:
     static void ConvertAllObjectsToDummyObjects();
     static void PopulateInterior(int numPeds, CVector posn);
     static void Update(bool generatePeds);
+    static bool DoesCarGroupHaveModelId(std::int32_t carGroupId, std::int32_t modelId);
 };

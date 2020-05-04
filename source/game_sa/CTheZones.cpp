@@ -109,9 +109,9 @@ bool CTheZones::PointLiesWithinZone(CVector const* pPoint, CZone* pZone)
 }
 
 // Returns eLevelName from position
-eLevelName CTheZones::GetLevelFromPosition(CVector const* pPoint)
+eLevelName CTheZones::GetLevelFromPosition(CVector const& point)
 {
-    return ((eLevelName(__cdecl*)(CVector const*)) FUNC_CTheZones__GetLevelFromPosition)(pPoint);
+    return ((eLevelName(__cdecl*)(CVector const&))0x572300)(point);
 }
 
 // Returns pointer to zone by a point
@@ -121,9 +121,9 @@ CZone* CTheZones::FindSmallestZoneForPosition(const CVector& point, bool FindOnl
 }
 
 // 572400
-CZoneExtraInfo* CTheZones::GetZoneInfo(CVector* point, CZone** outzone)
+CZoneExtraInfo* CTheZones::GetZoneInfo(const CVector& point, CZone** outzone)
 {
-    return ((CZoneExtraInfo * (__cdecl*)(CVector*, CZone**)) FUNC_CTheZones__GetZoneInfo) (point, outzone);
+    return ((CZoneExtraInfo * (__cdecl*)(const CVector&, CZone**)) FUNC_CTheZones__GetZoneInfo) (point, outzone);
 }
 
 void CTheZones::FillZonesWithGangColours(bool DisableRadarGangColors)
