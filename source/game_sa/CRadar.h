@@ -148,7 +148,7 @@ struct tRadarTrace {
     unsigned short m_nCounter;
     float          m_fSphereRadius;
     unsigned short m_nBlipSize;
-    class CEntryExit *m_pEntryExit;
+    class CEntryExit* m_pEntryExit;
     unsigned char  m_nBlipSprite; // see eRadarSprite
     unsigned char  m_bBright : 1; // It makes use of bright colors. Always set.
     unsigned char  m_bTrackingBlip : 1; // It is available.
@@ -168,26 +168,28 @@ extern unsigned int MAX_RADAR_TRACES;
 
 class CRadar {
 public:
+    static float& m_fRadarOrientation;
+
     // 2990.0 by default
-    static float &m_radarRange;
+    static float& m_radarRange;
     // static unsigned short MapLegendList[175];
-    static unsigned short *MapLegendList;
+    static unsigned short* MapLegendList;
     // num icons in legend
-    static unsigned short &MapLegendCounter;
+    static unsigned short& MapLegendCounter;
     // static CRGBA ArrowBlipColours[6];
-    static CRGBA *ArrowBlipColour;
+    static CRGBA* ArrowBlipColour;
     // static tRadarTrace ms_RadarTrace[175];
-    static tRadarTrace *ms_RadarTrace;
+    static tRadarTrace* ms_RadarTrace;
     // static CVector2D vec2DRadarOrigin;
-    static CVector2D &vec2DRadarOrigin;
+    static CVector2D& vec2DRadarOrigin;
     // static CSprite2d RadarBlipSprites[64];
-    static CSprite2d *RadarBlipSprites;
+    static CSprite2d* RadarBlipSprites;
     // 
-    static CRect &m_radarRect;
+    static CRect& m_radarRect;
     // current airstrip index in airstrip_table
-    static unsigned char &airstrip_location;
+    static unsigned char& airstrip_location;
     // blip handle
-    static int &airstrip_blip;
+    static int& airstrip_blip;
 
     static void LoadTextures();
     static int GetNewUniqueBlipIndex(int blipArrId);
@@ -201,7 +203,7 @@ public:
     static void TransformRadarPointToRealWorldSpace(CVector2D& out, CVector2D const& in);
     static void TransformRealWorldToTexCoordSpace(CVector2D& out, CVector2D const& in, int arg2, int arg3);
     static void CalculateCachedSinCos();
-    static int SetCoordBlip(eBlipType type, CVector posn, _IGNORED_ unsigned int arg2 , eBlipDisplay blipDisplay, _IGNORED_ char* scriptName );
+    static int SetCoordBlip(eBlipType type, CVector posn, _IGNORED_ unsigned int arg2, eBlipDisplay blipDisplay, _IGNORED_ char* scriptName);
     static int SetShortRangeCoordBlip(eBlipType type, CVector posn, unsigned int arg2, eBlipDisplay blipDisplay, char* scriptName);
     static int SetEntityBlip(eBlipType type, int entityHandle, unsigned int arg2, eBlipDisplay blipDisplay);
     static void ChangeBlipColour(int blipIndex, unsigned int color);
@@ -259,11 +261,11 @@ public:
     static void Save();
 };
 
-extern airstrip_info *airstrip_table; // airstrip_info airstrip_table[4]
+extern airstrip_info* airstrip_table; // airstrip_info airstrip_table[4]
 
 extern unsigned int MAX_AIRSTRIP_INFOS;
 
-extern int *gRadarTextures; // int gRadarTextures[12][12]
+extern int* gRadarTextures; // int gRadarTextures[12][12]
 
 extern unsigned int MAX_RADAR_WIDTH_TILES;
 extern unsigned int MAX_RADAR_HEIHGT_TILES;
