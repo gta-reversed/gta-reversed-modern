@@ -196,7 +196,7 @@ void CTaskSimpleGoToPoint::UpdatePoint(const CVector& targetPosition, float fRad
 #else
     if (bDontCheckRadius || m_vecTargetPoint != targetPosition || m_fRadius != fRadius)
     {
-        m_fRadius = fRadius;
+        m_vecTargetPoint = targetPosition;
         gotoFlags.m_b01 = false;
         gotoFlags.m_b02 = false;
         gotoFlags.m_b03 = false;
