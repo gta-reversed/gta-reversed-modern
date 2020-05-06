@@ -7,10 +7,14 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-short& MI_FIRE_HYDRANT = *(short*)0x8CD594;
-short& MI_PARKINGMETER = *(short*)0x8CD548;
-short& MI_PARKINGMETER2 = *(short*)0x8CD54C;
-short& MI_POOL_CUE_BALL = *(short*)0x8CD778;
+std::uint16_t& MI_FIRE_HYDRANT = *(std::uint16_t*)0x8CD594;
+std::uint16_t& MI_PARKINGMETER = *(std::uint16_t*)0x8CD548;
+std::uint16_t& MI_PARKINGMETER2 = *(std::uint16_t*)0x8CD54C;
+std::uint16_t& MI_POOL_CUE_BALL = *(std::uint16_t*)0x8CD778;
+std::uint16_t& MI_HARVESTERBODYPART1 = *(std::uint16_t*)0x8CD6E4;
+std::uint16_t& MI_HARVESTERBODYPART2 = *(std::uint16_t*)0x8CD6E8;
+std::uint16_t& MI_HARVESTERBODYPART3 = *(std::uint16_t*)0x8CD6EC;
+std::uint16_t& MI_HARVESTERBODYPART4 = *(std::uint16_t*)0x8CD6F0;
 
 CBaseModelInfo **CModelInfo::ms_modelInfoPtrs = (CBaseModelInfo**)0xA9B0C8;
 

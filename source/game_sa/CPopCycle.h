@@ -10,6 +10,69 @@
 #include "CZoneInfo.h"
 #include "CZone.h"
 
+// used in CPopCycle::m_nPercTypeGroup
+enum ePopcycleGroupPerc {
+    POPCYCLE_GROUP_PERC_WORKERS = 0,
+    POPCYCLE_GROUP_PERC_BUSINESS,
+    POPCYCLE_GROUP_PERC_CLUBBERS,
+    POPCYCLE_GROUP_PERC_FARMERS,
+    POPCYCLE_GROUP_PERC_BEACHFOLK,
+    POPCYCLE_GROUP_PERC_PARKFOLK,
+    POPCYCLE_GROUP_PERC_CASUAL_RICH,
+    POPCYCLE_GROUP_PERC_CASUAL_AVERAGE,
+    POPCYCLE_GROUP_PERC_CASUAL_POOR,
+    POPCYCLE_GROUP_PERC_PROZZIES,
+    POPCYCLE_GROUP_PERC_CRIMIMALS,
+    POPCYCLE_GROUP_PERC_GOLFERS,
+    POPCYCLE_GROUP_PERC_SERVANTS,
+    POPCYCLE_GROUP_PERC_AIRCREW,
+    POPCYCLE_GROUP_PERC_ENTERTAINERS,
+    POPCYCLE_GROUP_PERC_OOT_FACT, // means out of town factory
+    POPCYCLE_GROUP_PERC_DESERTFOLK,
+    POPCYCLE_GROUP_PERC_AIRCREW_RUNWAY,
+    POPCYCLE_TOTAL_GROUP_PERCS
+};
+
+// used in CPopulation::m_TranslationArray
+enum ePopcycleGroup
+{
+    POPCYCLE_GROUP_WORKERS = 0,
+    POPCYCLE_GROUP_BUSINESS,
+    POPCYCLE_GROUP_CLUBBERS,
+    POPCYCLE_GROUP_FARMERS,
+    POPCYCLE_GROUP_BEACHFOLK,
+    POPCYCLE_GROUP_PARKFOLK,
+    POPCYCLE_GROUP_CASUAL_RICH,
+    POPCYCLE_GROUP_CASUAL_AVERAGE,
+    POPCYCLE_GROUP_CASUAL_POOR,
+    POPCYCLE_GROUP_PROSTITUTES,
+    POPCYCLE_GROUP_CRIMINALS,
+    POPCYCLE_GROUP_GOLFERS,
+    POPCYCLE_GROUP_SERVANTS,
+    POPCYCLE_GROUP_AIRCREW,
+    POPCYCLE_GROUP_ENTERTAINERS,
+    POPCYCLE_GROUP_OUT_OF_TOWN_FACTORY_WORKERS,
+    POPCYCLE_GROUP_DESERT_FOLK,
+    POPCYCLE_GROUP_AIRCREW_RUNWAY,
+    POPCYCLE_GROUP_BALLAS,
+    POPCYCLE_GROUP_GROVE,
+    POPCYCLE_GROUP_VAGOS,
+    POPCYCLE_GROUP_SF_RIFA,
+    POPCYCLE_GROUP_DA_NANG_BOYS,
+    POPCYCLE_GROUP_ITALIAN_MAFIA,
+    POPCYCLE_GROUP_TRIADS,
+    POPCYCLE_GROUP_VARRIO_LOS_AZTECAZ,
+    POPCYCLE_GROUP_UNUSED_1,
+    POPCYCLE_GROUP_UNUSED_2,
+    POPCYCLE_GROUP_DEALERS,
+    POPCYCLE_GROUP_SHOPKEEPERS,
+    POPCYCLE_GROUP_OFFICE_WORKERS,
+    POPCYCLE_GROUP_HUSBANDS,
+    POPCYCLE_GROUP_WIVES,
+    POPCYCLE_TOTAL_GROUPS
+};
+
+// used in CPopulation::m_PedGroups
 enum ePopcyclePedGroup {
     POPCYCLE_PEDGROUP_WORKERS_LA,
     POPCYCLE_PEDGROUP_WORKERS_SF,
@@ -66,10 +129,10 @@ enum ePopcyclePedGroup {
     POPCYCLE_PEDGROUP_OFFICE_WORKERS,
     POPCYCLE_PEDGROUP_HUSBANDS,
     POPCYCLE_PEDGROUP_WIVES,
-
-    POPCYCLE_TOTAL_NUM_PEDGROUPS
+    POPCYCLE_TOTAL_PEDGROUPS
 };
 
+// used in CPopulation::m_nNumCarsInGroup and CPopulation::m_CarGroups
 enum ePopcycleCarGroup {
     POPCYCLE_CARGROUP_WORKERS,
     POPCYCLE_CARGROUP_BUSINESS,
@@ -103,12 +166,11 @@ enum ePopcycleCarGroup {
     POPCYCLE_CARGROUP_CHEAT2,
     POPCYCLE_CARGROUP_CHEAT3,
     POPCYCLE_CARGROUP_CHEAT4,
-
-    POPCYCLE_TOTAL_NUM_CARGROUPS
+    POPCYCLE_TOTAL_CARGROUPS
 };
 
 
-class  CPopCycle
+class CPopCycle
 {
 public:
 
@@ -130,7 +192,7 @@ public:
 	static int& m_nCurrentZoneType;
 	static int& m_nCurrentTimeOfWeek;
 	static int& m_nCurrentTimeIndex;
-	static char* m_nPercTypeGroup;				// char m_nPercTypeGroup[8640];
+	static char* m_nPercTypeGroup;				// char m_nPercTypeGroup[8640]; // see ePopcycleGroupPerc
 	static unsigned char* m_nPercOther;				// unsigned char m_nPercOther[480];
 	static unsigned char* m_nPercCops;			// unsigned char m_nPercCops[480];
 	static unsigned char* m_nPercGang;	// unsigned char m_nPercGang[480];
@@ -148,16 +210,17 @@ public:
 	static bool IsPedInGroup(int modelIndex, int PopCycle_Group);
 	static bool PedIsAcceptableInCurrentZone(int modelIndex);
 	static int PickARandomGroupOfOtherPeds();
+    static std::int32_t PickPedMIToStreamInForCurrentZone();
 	static void PlayerKilledADealer();
 	static void Update();
 	static void UpdateAreaDodgyness();
 	static void UpdateDealerStrengths();
 	static void UpdatePercentages();
-    static char GetCurrentPercTypeGroup(int a1, unsigned char zoneType)
+    static char GetCurrentPercTypeGroup(int groupId, unsigned char zonePopulationType)
     {
         return m_nPercTypeGroup[720 * m_nCurrentTimeIndex +
                                 360 * m_nCurrentTimeOfWeek +
-                                18 * zoneType + a1];
+                                18 * zonePopulationType + groupId];
     }
 
 };

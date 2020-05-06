@@ -52,7 +52,8 @@ CLink<CEntity*>*& CStreaming::ms_renderEntityLink = *reinterpret_cast<CLink<CEnt
 RwStream &gRwStream = *reinterpret_cast<RwStream *>(0x8E48AC);
 bool &CStreaming::m_bLoadingAllRequestedModels = *reinterpret_cast<bool *>(0x965538);
 bool &CStreaming::m_bModelStreamNotLoaded = *reinterpret_cast<bool *>(0x9654C4);
-unsigned int &CStreaming::ms_numberOfBytesRead = *reinterpret_cast<unsigned int *>(0x965534); 
+unsigned int &CStreaming::ms_numberOfBytesRead = *reinterpret_cast<unsigned int *>(0x965534);
+static std::int32_t& CurrentGangMemberToLoad = *(std::int32_t*)0x9654D4;
 
 void CStreaming::InjectHooks()
 {
@@ -119,7 +120,12 @@ void CStreaming::InjectHooks()
     HookInstall(0x156C100, &CStreaming::StreamCopModels, 7);
     HookInstall(0x1570230, &CStreaming::StreamFireEngineAndFireman, 7);
     HookInstall(0x1563B30, &CStreaming::StreamOneNewCar, 7);
+    HookInstall(0x40BBB0, &CStreaming::StreamPedsForInterior, 7);
     HookInstall(0x15703E0, &CStreaming::StreamPedsIntoRandomSlots, 7);
+    HookInstall(0x40B700, &CStreaming::StreamVehiclesAndPeds, 7);
+    HookInstall(0x40B650, &CStreaming::StreamVehiclesAndPeds_Always, 7); 
+    HookInstall(0x40A560, &CStreaming::StreamZoneModels, 7); 
+    HookInstall(0x40AA10, &CStreaming::StreamZoneModels_Gangs, 7);
 }
 
 void* CStreaming::AddEntity(CEntity* pEntity) {
@@ -202,12 +208,12 @@ void CStreaming::AddModelsToRequestList(CVector const& point, unsigned int strea
     const std::int32_t radius = static_cast<std::int32_t>(fRadius * 0.02f);
     const std::int32_t squaredRadius1 = (radius - 1) * (radius - 1);
     const std::int32_t squaredRadius2 = (radius + 2) * (radius + 2);
-    const std::int32_t pointX = static_cast<std::int32_t>(floor(point.x * 0.02f + 60.0f));
-    const std::int32_t pointY = static_cast<std::int32_t>(floor(point.y * 0.02f + 60.0f));
-    std::int32_t startSectorX = std::max(CWorld::SectorFloor(minX * 0.02f + 60.0f), 0);
-    std::int32_t startSectorY = std::max(CWorld::SectorFloor(minY * 0.02f + 60.0f), 0);
-    std::int32_t endSectorX = std::min(CWorld::SectorFloor(maxY * 0.02f + 60.0f), MAX_SECTORS_X - 1);
-    std::int32_t endSectorY = std::min(CWorld::SectorFloor(maxX * 0.02f + 60.0f), MAX_SECTORS_Y - 1);
+    const std::int32_t pointX = CWorld::SectorFloor((point.x / 50.0f) + 60.0f);
+    const std::int32_t pointY = CWorld::SectorFloor((point.y / 50.0f) + 60.0f);
+    std::int32_t startSectorX = std::max(CWorld::SectorFloor((minX / 50.0f) + 60.0f), 0);
+    std::int32_t startSectorY = std::max(CWorld::SectorFloor((minY / 50.0f) + 60.0f), 0);
+    std::int32_t endSectorX = std::min(CWorld::SectorFloor((maxY / 50.0f) + 60.0f), MAX_SECTORS_X - 1);
+    std::int32_t endSectorY = std::min(CWorld::SectorFloor((maxX / 50.0f) + 60.0f), MAX_SECTORS_Y - 1);
     for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         const std::int32_t distanceY = sectorY - pointY;
         const std::int32_t squaredDistanceY = distanceY * distanceY;
@@ -1692,11 +1698,12 @@ void CStreaming::RemoveCurrentZonesModels() {
     }
     ms_numPedsLoaded = 0;
     RequestModel(MODEL_MALE01, GAME_REQUIRED);
-    for (std::int32_t translationIndex = 18; translationIndex < 28; translationIndex++) {
-        auto pTranslationData = &CPopulation::m_TranslationArray[translationIndex];
+    for (std::int32_t groupId = 0; groupId < 10; groupId++) {
+        ePopcycleGroup popcycleGroup = static_cast<ePopcycleGroup>(groupId + POPCYCLE_GROUP_BALLAS);
+        ePopcyclePedGroup pedGroupId = CPopulation::GetPedGroupId(popcycleGroup, 0);
         for (std::int32_t i = 0; i < 5; i++) {
-            std::int32_t modelId = CPopulation::m_PedGroups[pTranslationData->pedGroupId][i];
-            if (modelId != 2000) {
+            std::int32_t modelId = CPopulation::GetPedGroupModelId(pedGroupId, i);
+            if (modelId != CPopulation::m_defaultCarGroupModelId) {
                 SetModelIsDeletable(modelId);
                 SetModelTxdIsDeletable(modelId);
             }
@@ -2265,19 +2272,19 @@ bool CStreaming::IsCarModelNeededInCurrentZone(int modelId) {
     if (!CPopCycle::m_pCurrZoneInfo)
         return false;
     if (CCheat::m_aCheatsActive[CHEAT_BEACH_PARTY])
-        return CPopulation::DoesCarGroupHaveModelId(4, modelId);
+        return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_BEACHFOLK, modelId);
     if (CCheat::m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC])
-        return CPopulation::DoesCarGroupHaveModelId(3, modelId);
+        return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_FARMERS, modelId);
     if (CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC])
-        return CPopulation::DoesCarGroupHaveModelId(30, modelId);
+        return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT1, modelId);
     if (CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC])
-        return CPopulation::DoesCarGroupHaveModelId(31, modelId);
+        return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT2, modelId);
     if (CCheat::m_aCheatsActive[CHEAT_NINJA_THEME])
-        return CPopulation::DoesCarGroupHaveModelId(32, modelId);
+        return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT3, modelId);
     if (CCheat::m_aCheatsActive[CHEAT_FUNHOUSE_THEME])
-        return CPopulation::DoesCarGroupHaveModelId(33, modelId);
-    for (std::int32_t groupId = 0; groupId < 18; groupId++) {
-        if (CPopCycle::GetCurrentPercTypeGroup(groupId, pCurrentZoneInfo->zoneType) &&
+        return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT4, modelId);
+    for (std::int32_t groupId = 0; groupId < POPCYCLE_TOTAL_GROUP_PERCS; groupId++) {
+        if (CPopCycle::GetCurrentPercTypeGroup(groupId, pCurrentZoneInfo->zonePopulationType) &&
             CPopulation::DoesCarGroupHaveModelId(groupId, modelId)) {
             return true;
         }
@@ -2540,7 +2547,7 @@ void CStreaming::StreamOneNewCar() {
     }
     if (m_bBoatsNeeded && (CPopulation::m_LoadedBoats.CountMembers() < 2 ||
         CPopulation::m_LoadedBoats.CountMembers() <= 2 && (rand() & 7) == 3)) {
-        std::int32_t carModelId = CCarCtrl::ChooseCarModelToLoad(29);
+        std::int32_t carModelId = CCarCtrl::ChooseCarModelToLoad(POPCYCLE_CARGROUP_BOATS);
         if (carModelId >= 0) {
             RequestModel(carModelId, KEEP_IN_MEMORY);
             CPopulation::LoadSpecificDriverModelsForCar(carModelId);
@@ -2583,7 +2590,51 @@ void CStreaming::StreamOneNewCar() {
 }
 
 void CStreaming::StreamPedsForInterior(int interiorType) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<int>(0x40BBB0, interiorType);
+#else
+    if (interiorType == 0) {
+        std::int32_t numHusbands = CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_HUSBANDS, 0);
+        std::int32_t randomHusband = rand() % numHusbands;
+        std::int32_t random = CGeneral::GetRandomNumberInRange(3, 9);
+        std::int32_t randomWife = std::max(0, randomHusband - random);
+        std::int32_t numWives = CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_WIVES, 0);
+        if (numWives - 1 < randomWife)
+            randomWife = numWives - 1;
+        ePopcyclePedGroup husbandGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_HUSBANDS, CPopulation::CurrentWorldZone);
+        std::int32_t husbandModelId = CPopulation::GetPedGroupModelId(husbandGroupId, randomHusband);
+        ePopcyclePedGroup wifeGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_WIVES, CPopulation::CurrentWorldZone);
+        std::int32_t wifeModelId = CPopulation::GetPedGroupModelId(wifeGroupId, randomWife);
+        ClearSlots(2);
+        RequestModel(husbandModelId, KEEP_IN_MEMORY);
+        ms_pedsLoaded[0] = husbandModelId;
+        ms_numPedsLoaded++;
+        RequestModel(wifeModelId, KEEP_IN_MEMORY);
+        ms_pedsLoaded[1] = wifeModelId;
+        ms_numPedsLoaded++;
+    }
+    else if (interiorType == 1) {
+        std::int32_t numPeds = CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_SHOPKEEPERS, 0);
+        ePopcyclePedGroup groupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_SHOPKEEPERS, CPopulation::CurrentWorldZone);
+        std::int32_t modelId = CPopulation::GetPedGroupModelId(groupId, rand() % numPeds);
+        ClearSlots(1);
+        RequestModel(modelId, KEEP_IN_MEMORY);
+        ms_pedsLoaded[0] = modelId;
+        ms_numPedsLoaded++;
+    }
+    else if (interiorType == 2) {
+        ClearSlots(8);
+        std::int32_t numPeds = CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_OFFICE_WORKERS, 0);
+        std::int32_t random = CGeneral::GetRandomNumberInRange(0, numPeds);
+        ePopcyclePedGroup groupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_OFFICE_WORKERS, CPopulation::CurrentWorldZone);
+        for (std::int32_t i = 0; i < 8; i++) {
+            std::int32_t modelId = CPopulation::GetPedGroupModelId(groupId, (i + random) % numPeds);
+            RequestModel(modelId, KEEP_IN_MEMORY);
+            ms_pedsLoaded[i] = modelId;
+            ms_numPedsLoaded++;
+        }
+    }
+#endif
 }
 
 void CStreaming::StreamPedsIntoRandomSlots(int* modelArray) {
@@ -2617,19 +2668,351 @@ void CStreaming::StreamPedsIntoRandomSlots(int* modelArray) {
 }
 
 void CStreaming::StreamVehiclesAndPeds() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal(0x40B700);
+#else
+    StreamCopModels(CTheZones::m_CurrLevel);
+    CWanted* pWanted = FindPlayerWanted(-1);
+    if (pWanted->AreSwatRequired()) {
+        RequestModel(MODEL_ENFORCER, GAME_REQUIRED);
+        RequestModel(MODEL_SWAT, GAME_REQUIRED);
+    }
+    else {
+        SetModelIsDeletable(MODEL_ENFORCER);
+        if (ms_aInfoForModel[MODEL_ENFORCER].m_nLoadState != LOADSTATE_LOADED)
+            SetModelIsDeletable(MODEL_SWAT);
+    }
+    pWanted = FindPlayerWanted(-1);
+    if (pWanted->AreFbiRequired()) {
+        RequestModel(MODEL_FBIRANCH, GAME_REQUIRED);
+        RequestModel(MODEL_FBI, GAME_REQUIRED);
+    }
+    else {
+        SetModelIsDeletable(MODEL_FBIRANCH);
+        if (ms_aInfoForModel[MODEL_FBIRANCH].m_nLoadState != LOADSTATE_LOADED)
+            SetModelIsDeletable(MODEL_FBI);
+    }
+    pWanted = FindPlayerWanted(-1);
+    if (pWanted->AreArmyRequired()) {
+        RequestModel(MODEL_RHINO, GAME_REQUIRED);
+        RequestModel(MODEL_BARRACKS, GAME_REQUIRED);
+        RequestModel(MODEL_ARMY, GAME_REQUIRED);
+    }
+    else {
+        SetModelIsDeletable(MODEL_BARRACKS);
+        SetModelIsDeletable(MODEL_RHINO);
+        if (ms_aInfoForModel[MODEL_BARRACKS].m_nLoadState != LOADSTATE_LOADED
+            && ms_aInfoForModel[MODEL_RHINO].m_nLoadState != LOADSTATE_LOADED)
+        {
+            SetModelIsDeletable(MODEL_ARMY);
+        }
+    }
+    pWanted = FindPlayerWanted(-1);
+    if (pWanted->NumOfHelisRequired() <= 0) {
+        SetModelIsDeletable(MODEL_VCNMAV);
+        SetModelIsDeletable(MODEL_POLMAV);
+    }
+    else {
+        RequestModel(MODEL_POLMAV, GAME_REQUIRED);
+        pWanted = FindPlayerWanted(-1);
+        if (pWanted->NumOfHelisRequired() > 1 && CWanted::bUseNewsHeliInAdditionToPolice)
+            RequestModel(MODEL_VCNMAV, GAME_REQUIRED);
+        else
+            SetModelIsDeletable(MODEL_VCNMAV);
+    }
+    std::int32_t pedGroupId = -1;
+    if (CPopCycle::m_NumDealers_Peds > 0.03f) {
+        if (CWeather::WeatherRegion == WEATHER_REGION_SF) {
+            pedGroupId = POPCYCLE_PEDGROUP_BUSINESS_LA;
+        }
+        else if (CPopCycle::m_pCurrZoneInfo)
+        {
+            std::uint8_t currenZoneFlags = CPopCycle::m_pCurrZoneInfo->Flags2;
+            if (currenZoneFlags & 1)
+                pedGroupId = 0;
+            else
+                pedGroupId = POPCYCLE_PEDGROUP_WORKERS_VG - ((currenZoneFlags & 2) != 0);
+        }
+    }
+    ePopcyclePedGroup dealerGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_DEALERS, 0);
+    for (std::int32_t i = 0; i < CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_DEALERS, 0); i++) {
+        if (i == pedGroupId) {
+            RequestModel(CPopulation::GetPedGroupModelId(dealerGroupId, i), GAME_REQUIRED);
+        }
+        else {
+            std::int32_t modelId = CPopulation::GetPedGroupModelId(dealerGroupId, i);
+            SetModelIsDeletable(modelId);
+        }
+        dealerGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_DEALERS, 0);
+    }
+    static std::int32_t framesBeforeStreamingNextNewCar = 0;
+    if (framesBeforeStreamingNextNewCar >= 0) {
+        --framesBeforeStreamingNextNewCar;
+    }
+    else if (ms_vehiclesLoaded.CountMembers() <= desiredNumVehiclesLoaded && CPopCycle::m_pCurrZoneInfo) {
+        StreamOneNewCar();
+        framesBeforeStreamingNextNewCar = 350;
+    }
+    if (m_bStreamHarvesterModelsThisFrame) {
+        RequestModel(MI_HARVESTERBODYPART1, GAME_REQUIRED);
+        RequestModel(MI_HARVESTERBODYPART2, GAME_REQUIRED);
+        RequestModel(MI_HARVESTERBODYPART3, GAME_REQUIRED);
+        RequestModel(MI_HARVESTERBODYPART4, GAME_REQUIRED);
+        m_bHarvesterModelsRequested = true;
+        m_bStreamHarvesterModelsThisFrame = 0;
+    }
+    else {
+        if (m_bHarvesterModelsRequested)  {
+            RemoveModel(MI_HARVESTERBODYPART1);
+            RemoveModel(MI_HARVESTERBODYPART2);
+            RemoveModel(MI_HARVESTERBODYPART3);
+            RemoveModel(MI_HARVESTERBODYPART4);
+            m_bHarvesterModelsRequested = false;
+        }
+        m_bStreamHarvesterModelsThisFrame = false;
+    }
+#endif
 }
 
-void CStreaming::StreamVehiclesAndPeds_Always(CVector const& point) {
-    plugin::CallDynGlobal<CVector const&>(0x40B650, point);
+void CStreaming::StreamVehiclesAndPeds_Always(CVector const& unused) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal<CVector const&>(0x40B650, unused);
+#else
+    bool bStream = false;
+    CVehicle* pVehicle = FindPlayerVehicle(-1, 0);
+    if (!pVehicle) {
+        bStream = true;
+    }
+    else if (pVehicle->m_nVehicleSubClass != VEHICLE_PLANE) {
+        if (pVehicle->m_nVehicleSubClass != VEHICLE_HELI || pVehicle->m_vecMoveSpeed.Magnitude2D() <= 0.1f) {
+            bStream = true;
+        }
+    }
+    if (bStream) {
+        if (!(CTimer::m_FrameCounter & 0x3F) && CPopulation::m_AppropriateLoadedCars.CountMembers() < 3) 
+            StreamOneNewCar();
+        StreamZoneModels_Gangs(CVector());
+        if (CPopCycle::m_pCurrZoneInfo) {
+            static std::int32_t lastZonePopulationType = 0;
+            if (CPopCycle::m_pCurrZoneInfo->zonePopulationType != lastZonePopulationType) {
+                ReclassifyLoadedCars();
+                lastZonePopulationType = CPopCycle::m_pCurrZoneInfo->zonePopulationType;
+            }
+        }
+    }
+#endif
 }
 
-void CStreaming::StreamZoneModels(CVector const& point) {
-    plugin::CallDynGlobal<CVector const&>(0x40A560, point);
+void CStreaming::StreamZoneModels(CVector const& unused) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallDynGlobal<CVector const&>(0x40A560, unused);
+#else
+    if (!CPopCycle::m_pCurrZoneInfo || CCheat::IsZoneStreamingAllowed())
+        return;
+    static std::int32_t timeBeforeNextLoad = 0;
+    if (CPopCycle::m_pCurrZoneInfo->zonePopulationType == ms_currentZoneType) {
+        if (timeBeforeNextLoad >= 0) {
+            timeBeforeNextLoad--;
+        }
+        else {
+            std::int32_t pedId = 0;
+            std::int32_t modelId = 0;
+            for (; pedId < 8; pedId++) {
+                modelId = ms_pedsLoaded[pedId];
+                if (modelId == -1)
+                    break;
+                if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount)
+                    break;
+            }
+            if (pedId != 8) {
+                std::int32_t pedModelId = CPopCycle::PickPedMIToStreamInForCurrentZone();
+                if (pedModelId != modelId && pedModelId >= 0) {
+                    RequestModel(pedModelId, KEEP_IN_MEMORY | GAME_REQUIRED);
+                    ms_aInfoForModel[pedModelId].m_nFlags &= ~GAME_REQUIRED;
+                    if (ms_numPedsLoaded == 8) {
+                        SetModelIsDeletable(modelId);
+                        SetModelTxdIsDeletable(modelId);
+                        ms_pedsLoaded[pedId] = -1;
+                    }
+                    else {
+                        ++ms_numPedsLoaded;
+                    }
+                    std::int32_t freeSlot = 0;
+                    for(; ms_pedsLoaded[freeSlot] >= 0; freeSlot++) {
+                    }
+                    ms_pedsLoaded[freeSlot] = pedModelId;
+                    timeBeforeNextLoad = 300;
+                }
+            }
+        }
+    }
+    else {
+        std::int32_t numPedsToLoad = ms_numPedsLoaded;
+        for (std::int32_t i = 0; i < 8; i++) {
+            std::int32_t modelId = ms_pedsLoaded[i];
+            if (modelId >= 0) {
+                SetModelIsDeletable(modelId);
+                SetModelTxdIsDeletable(modelId);
+                ms_pedsLoaded[i] = -1;
+            }
+        }
+        ms_numPedsLoaded = 0;
+        ms_currentZoneType = CPopCycle::m_pCurrZoneInfo->zonePopulationType;
+        if (numPedsToLoad < 4)
+            numPedsToLoad = 4;
+        if (numPedsToLoad > 0) {
+            for (std::int32_t i = 0; i < numPedsToLoad; i++) {
+                std::int32_t pedModelId = CPopCycle::PickPedMIToStreamInForCurrentZone();
+                if (pedModelId < 0) {
+                    ms_pedsLoaded[i] = -1;
+                }
+                else {
+                    RequestModel(pedModelId, KEEP_IN_MEMORY | GAME_REQUIRED);
+                    ms_aInfoForModel[pedModelId].m_nFlags &= ~GAME_REQUIRED;
+                    ms_pedsLoaded[i] = pedModelId;
+                    ms_numPedsLoaded++;
+                }
+            }
+        }
+        timeBeforeNextLoad = 300;
+    }
+    static std::int32_t timeBeforeNextGangLoad = 0;
+    if (timeBeforeNextGangLoad >= 0) {
+        timeBeforeNextGangLoad--;
+    }
+    else if (timeBeforeNextGangLoad < 0) {
+        timeBeforeNextGangLoad = 550;
+        const std::int32_t currentGangMemberToLoadSlot = CurrentGangMemberToLoad;
+        const std::int32_t nextGangMemberToLoadSlot = CurrentGangMemberToLoad + 1;
+        const std::int32_t nextGangMemberToLoadAnySlot = (CurrentGangMemberToLoad + 1) % 21;
+        CurrentGangMemberToLoad = nextGangMemberToLoadAnySlot;
+        for (std::int32_t groupId = 0; groupId < 10; groupId++) {
+            const ePopcycleGroup popcycleGroup = static_cast<ePopcycleGroup>(groupId + POPCYCLE_GROUP_BALLAS);
+            const ePopcyclePedGroup pedGroupId = CPopulation::GetPedGroupId(popcycleGroup, 0);
+            const std::uint16_t gang = 1 << groupId;
+            if (gang & ms_loadedGangs) {
+                const std::int32_t numPedsInGroup = CPopulation::GetNumPedsInGroup(pedGroupId);
+                const std::int32_t currentGangMemberSlot = currentGangMemberToLoadSlot % numPedsInGroup;
+                const std::int32_t nextGangMemberSlot = nextGangMemberToLoadSlot % numPedsInGroup;
+                const std::int32_t nextGangMemberSlot1 = nextGangMemberToLoadAnySlot % numPedsInGroup;
+                const std::int32_t nextGangMemberSlot2 = (nextGangMemberToLoadAnySlot + 1) % numPedsInGroup;
+                for (std::int32_t slot = 0; slot < numPedsInGroup; slot++) {
+                    bool bRequestModel = false;
+                    if (slot == currentGangMemberSlot || slot == nextGangMemberSlot) {
+                        if (slot == nextGangMemberSlot1) {
+                            if (slot != currentGangMemberSlot && slot != nextGangMemberSlot) {
+                                const std::int32_t modelId = CPopulation::GetPedGroupModelId(pedGroupId, slot);
+                                RequestModel(modelId, GAME_REQUIRED);
+                            }
+                        }
+                        else if (slot == nextGangMemberSlot2) {
+                            bRequestModel = true;
+                        }
+                        else {
+                            const std::int32_t modelId = CPopulation::GetPedGroupModelId(pedGroupId, slot);
+                            SetModelIsDeletable(modelId);
+                            SetModelTxdIsDeletable(modelId);
+                        }
+                    }
+                    else {
+                        bRequestModel = true;
+                    }
+                    if (bRequestModel) {
+                        if (slot == nextGangMemberSlot1 || slot == nextGangMemberSlot2) {
+                            if (slot != currentGangMemberSlot && slot != nextGangMemberSlot) {
+                                const std::int32_t modelId = CPopulation::GetPedGroupModelId(pedGroupId, slot);
+                                RequestModel(modelId, GAME_REQUIRED);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+#endif
 }
 
 void CStreaming::StreamZoneModels_Gangs(CVector const& unused) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<CVector const&>(0x40AA10, unused);
+#else
+    if (!CPopCycle::m_pCurrZoneInfo)
+        return;
+    std::int32_t gangsNeeded = 0;
+    for (std::int32_t i = 0; i < 10; i ++) {
+        if (CPopCycle::m_pCurrZoneInfo->GangDensity[i])
+            gangsNeeded |= (1 << i);
+    }
+    if (CCheat::m_aCheatsActive[CHEAT_GANGS_CONTROLS_THE_STREETS])
+        gangsNeeded |= 0xFF;
+    CGangWars::TellStreamingWhichGangsAreNeeded(&gangsNeeded);
+    if (gangsNeeded == ms_loadedGangs && gangsNeeded == ms_loadedGangCars)
+        return;
+    for (std::int32_t groupId = 0; groupId < 10; groupId++) {
+        const ePopcycleGroup popcycleGroup = static_cast<ePopcycleGroup>(groupId + POPCYCLE_GROUP_BALLAS);
+        const ePopcyclePedGroup pedGroupId = CPopulation::GetPedGroupId(popcycleGroup, 0);
+        const std::uint16_t gang = 1 << groupId;
+        if (!(gangsNeeded & gang) || ms_loadedGangs & gang) {
+            if (!(gangsNeeded & gang) && ms_loadedGangs & gang) {
+                for (int32_t i = 0; i < CPopulation::GetNumPedsInGroup(pedGroupId); ++i) {
+                    std::int32_t modelId = CPopulation::GetPedGroupModelId(pedGroupId, i);
+                    SetModelIsDeletable(modelId);
+                    SetModelTxdIsDeletable(modelId);
+                }
+                ms_loadedGangs &= ~gang;
+            }
+        }
+        else {
+            std::int32_t slot1 = CurrentGangMemberToLoad % CPopulation::GetNumPedsInGroup(pedGroupId);
+            std::int32_t modelId1 = CPopulation::GetPedGroupModelId(pedGroupId, slot1);
+            std::int32_t slot2 = (CurrentGangMemberToLoad + 1) % CPopulation::GetNumPedsInGroup(pedGroupId);
+            std::int32_t modelId2 = CPopulation::GetPedGroupModelId(pedGroupId, slot2);
+            RequestModel(modelId1, KEEP_IN_MEMORY);
+            RequestModel(modelId2, KEEP_IN_MEMORY);
+            ms_loadedGangs |= gang;
+        }
+        CLoadedCarGroup& loadedGangCarGroup = CPopulation::m_LoadedGangCars[groupId];
+        if (loadedGangCarGroup.CountMembers() < 1) {
+            if (!(gangsNeeded & gang) || ms_loadedGangCars & gang) {
+                if (!(gangsNeeded & gang) && (ms_loadedGangCars & gang)) {
+                    CLoadedCarGroup loadedCarGroup;
+                    memcpy(&loadedCarGroup, &loadedGangCarGroup, sizeof(loadedCarGroup));
+                    for (std::int32_t memberId = 0; memberId < loadedCarGroup.CountMembers(); memberId++) {
+                        std::int32_t gangCarModelId = loadedCarGroup.GetMember(memberId);
+                        bool bGangHasModelId = false;
+                        for (std::int32_t i = 0; i < CPopulation::m_AppropriateLoadedCars.CountMembers(); ++i) {
+                            if (gangCarModelId == CPopulation::m_AppropriateLoadedCars.GetMember(i))
+                                bGangHasModelId = true;
+                        }
+                        for (std::int32_t index = 0; index < 10; index++) {
+                            const std::int32_t carGroupId = index + POPCYCLE_CARGROUP_BALLAS;
+                            const std::uint16_t theGang = (1 << index);
+                            if (index != groupId && (theGang & ms_loadedGangs)) {
+                                for (std::int32_t i = 0; i < 23; i++) {
+                                    std::int32_t modelId = CPopulation::m_CarGroups[carGroupId][i];
+                                    if (modelId != CPopulation::m_defaultCarGroupModelId && modelId == gangCarModelId)
+                                        bGangHasModelId = true;
+                                } 
+                            }
+                        }
+                        if (!bGangHasModelId) {
+                            SetModelIsDeletable(gangCarModelId);
+                            SetModelTxdIsDeletable(gangCarModelId);
+                        }
+                    }
+                }
+            }
+            else {
+                const std::int32_t carGroupId = groupId + POPCYCLE_CARGROUP_BALLAS;
+                const std::uint16_t numCars = CPopulation::m_nNumCarsInGroup[carGroupId];
+                const std::int32_t modelId = CPopulation::m_CarGroups[carGroupId][rand() % numCars];
+                if (ms_aInfoForModel[modelId].m_nLoadState != LOADSTATE_LOADED)
+                    RequestModel(modelId, KEEP_IN_MEMORY);
+            }
+        }
+    }
+    ms_loadedGangCars = gangsNeeded;
+#endif
 }
 
 void CStreaming::Update() {

@@ -23,10 +23,14 @@ enum eModelInfoType : unsigned char
     MODEL_INFO_TYPE_LOD_ATOMIC = 8,
 };
 
-extern short& MI_FIRE_HYDRANT;
-extern short& MI_PARKINGMETER;
-extern short& MI_PARKINGMETER2;
-extern short& MI_POOL_CUE_BALL;
+extern std::uint16_t& MI_FIRE_HYDRANT;
+extern std::uint16_t& MI_PARKINGMETER;
+extern std::uint16_t& MI_PARKINGMETER2;
+extern std::uint16_t& MI_POOL_CUE_BALL;
+extern std::uint16_t& MI_HARVESTERBODYPART1;
+extern std::uint16_t& MI_HARVESTERBODYPART2;
+extern std::uint16_t& MI_HARVESTERBODYPART3;
+extern std::uint16_t& MI_HARVESTERBODYPART4;
 
 class CModelInfo
 {

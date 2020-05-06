@@ -257,8 +257,8 @@ public:
      static void StreamPedsForInterior(int interiorType);
      static void StreamPedsIntoRandomSlots(int * modelArray);
      static void StreamVehiclesAndPeds();
-     static void StreamVehiclesAndPeds_Always(CVector const& posn);
-     static void StreamZoneModels(CVector const& posn);
+     static void StreamVehiclesAndPeds_Always(CVector const& unused);
+     static void StreamZoneModels(CVector const& unused);
      static void StreamZoneModels_Gangs(CVector const& unused);
      static void Update();
     //! unused

@@ -25,13 +25,15 @@ enum eUpdatePedCounterState {
     UPDATE_PED_COUNTER_DECREASE = 1
 };
 
+// for the most part, pedGroupIds[0] is used, but in some cases
+// it's used like this: pedGroupIds[CPopulation::CurrentWorldZone]
 struct tPedGroupTranslationData {
-    unsigned int pedGroupId;
-    int field_4;
-    int field_8;
+   std::int32_t pedGroupIds[3]; // see ePopcyclePedGroup
 };
 
-class  CPopulation {
+VALIDATE_SIZE(tPedGroupTranslationData, 0xC);
+
+class CPopulation {
 public:
     // static variables
 
@@ -40,7 +42,7 @@ public:
     static unsigned int              & MaxNumberOfPedsInUse;
     static unsigned int              & NumberOfPedsInUseInterior;
     // static tPedGroupTranslationData m_TranslationArray[33]
-    static tPedGroupTranslationData  * m_TranslationArray;
+    static tPedGroupTranslationData  * m_TranslationArray; // see ePopcycleGroup
     static CLoadedCarGroup           & m_LoadedBoats;
     static CLoadedCarGroup           & m_InAppropriateLoadedCars;
     static CLoadedCarGroup           & m_AppropriateLoadedCars;
@@ -66,8 +68,9 @@ public:
     static unsigned short            * m_nNumPedsInGroup;
     // static short m_CarGroups[POPCYCLE_TOTAL_NUM_CARGROUPS][23] (34)
     static short                     (* m_CarGroups )[23];
+    static const std::uint16_t       m_defaultCarGroupModelId = 2000; // means not loaded
     // static short m_PedGroups[POPCYCLE_TOTAL_NUM_PEDGROUPS][21] (57)
-    static short                     (* m_PedGroups )[21];
+    static short                     (* m_PedGroups )[21]; // see ePopcyclePedGroup
     static bool                      & m_bDontCreateRandomGangMembers;
     static bool                      & m_bOnlyCreateRandomGangMembers;
     static bool                      & m_bDontCreateRandomCops;
@@ -172,4 +175,8 @@ public:
     static void PopulateInterior(int numPeds, CVector posn);
     static void Update(bool generatePeds);
     static bool DoesCarGroupHaveModelId(std::int32_t carGroupId, std::int32_t modelId);
+    static ePopcyclePedGroup GetPedGroupId(ePopcycleGroup popcycleGroup, std::int32_t worldZone) { return static_cast<ePopcyclePedGroup>(m_TranslationArray[popcycleGroup].pedGroupIds[worldZone]); }
+    static std::int32_t GetNumPedsInGroup(ePopcycleGroup popcycleGroup, std::int32_t worldZone) { return m_nNumPedsInGroup[GetPedGroupId(popcycleGroup, worldZone)]; }
+    static std::int32_t GetNumPedsInGroup(ePopcyclePedGroup pedGroup) { return m_nNumPedsInGroup[pedGroup]; }
+    static std::int32_t GetPedGroupModelId(ePopcyclePedGroup pedGroup, std::int32_t slot) { return m_PedGroups[pedGroup][slot]; }
 };

@@ -8,19 +8,19 @@ Do not delete this comment block. Respect others' work!
 #include "PluginBase.h"
 #include "RenderWare.h"
 
-class  CZoneInfo
+class CZoneInfo
 {
 public:
-	char GangDensity[10];
-	char DrugDealerCounter;
+    std::uint8_t GangDensity[10];
+    std::uint8_t DrugDealerCounter;
 	RwRGBA ZoneColor;
     union {
         struct {
-            unsigned char zoneType : 5;
+            std::uint8_t zonePopulationType : 5;
         };
-	    unsigned char Flags1;
+        std::uint8_t Flags1;
     };
-	char Flags2;
+	std::uint8_t Flags2;
 };
 
 VALIDATE_SIZE(CZoneInfo, 0x11);

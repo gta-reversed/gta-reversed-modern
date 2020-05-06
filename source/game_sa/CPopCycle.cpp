@@ -69,6 +69,11 @@ int CPopCycle::PickARandomGroupOfOtherPeds() {
     return plugin::CallAndReturn<int, 0x610420>();
 }
 
+std::int32_t CPopCycle::PickPedMIToStreamInForCurrentZone()
+{
+    return plugin::CallAndReturn<std::int32_t, 0x60FFD0>();
+}
+
 // Converted from cdecl void CPopCycle::PlayerKilledADealer(void)	0x610490
 void CPopCycle::PlayerKilledADealer() {
     plugin::Call<0x610490>();
