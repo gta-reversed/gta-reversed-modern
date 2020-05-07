@@ -1,9 +1,4 @@
-﻿#include "StdInc.h"
-
-auto OLD_CPhysical_ProcessEntityCollision = (int(__thiscall*) (CPhysical * pThis, CPhysical * entity, CColPoint * colpoint))0x546D00;
-int __fastcall CPhysical_ProcessEntityCollision(CPhysical* pThis, void* padding, CPhysical* entity, CColPoint* colpoint);
-
-void __cdecl HOOK_THEFUNCTION();
+#include "StdInc.h"
 
 void InjectHooksMain(void)
 {
@@ -47,36 +42,4 @@ void InjectHooksMain(void)
     CMenuManager::InjectHooks();
     CSprite2d::InjectHooks();
     CVisibilityPlugins::InjectHooks();
-}
-
-int __fastcall CPhysical_ProcessEntityCollision(CPhysical* pThis, void* padding, CPhysical* entity, CColPoint* colpoint)
-{
-    printf("CPhysical_ProcessEntityCollision called!n");
-    return 0;
-}
-
-/*
-dwReturnLocation:
-0 means that the function should return.
-1 means continue the function and it is inside of the "if" condition
-2 means continue the function and it is outside of the "if" condition
-*/
-
-enum eFunctionReturnValue
-{
-    FUNCTION_RETURN = 0,
-    FUNCTION_INSIDE_IF = 1,
-    FUNCTION_OUTSIDE_IF = 2,
-    //FUNCTION_SWITCH_CASE_2 = 3,
-    //FUNCTION_SOMELABEL = 4
-};
-
-DWORD RETURN_HOOK_INSIDE_IF = 0x0;
-DWORD RETURN_HOOK_OUTSIDE_IF = 0x0554ADD;
-DWORD RETURN_HOOK_EXIT_WITH_GRACE = 0x0;
-void _declspec(naked) HOOK_THEFUNCTION()
-{
-    _asm
-    {
-    }
 }
