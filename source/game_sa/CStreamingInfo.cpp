@@ -12,6 +12,21 @@ inline int CStreamingInfo::GetIndexFromBase(CStreamingInfo * pThis, CStreamingIn
     return static_cast < int > ((indexToCalculate >> 3) + (indexToCalculate >> 31));
 }
 
+void CStreamingInfo::Init()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallMethod<0x407460, CStreamingInfo*>(this);
+#else
+    m_nLoadState = LOADSTATE_NOT_LOADED;
+    m_nNextIndex = -1;
+    m_nPrevIndex = -1;
+    m_nNextIndexOnCd = -1;
+    m_nImgId = 0;
+    m_nCdSize = 0;
+    m_nCdPosn = 0;
+#endif
+}
+
 int CStreamingInfo::AddToList(CStreamingInfo *listStart) 
 {
 //#ifdef USE_DEFAULT_FUNCTIONS

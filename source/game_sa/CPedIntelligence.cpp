@@ -764,7 +764,7 @@ void CPedIntelligence::ProcessAfterProcCol() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x6018F0, CPedIntelligence*>(this);
 #else
-    g_LoadMonitor->StartTimer(0);
+    g_LoadMonitor.StartTimer(0);
 
     CTaskSimple* pActiveSimplestTask = (CTaskSimple*)m_TaskMgr.GetSimplestActiveTask();
     if (pActiveSimplestTask && pActiveSimplestTask->IsSimple())
@@ -799,7 +799,7 @@ void CPedIntelligence::ProcessAfterProcCol() {
     }
 
     m_pPed->bCalledPreRender = 0;
-    g_LoadMonitor->EndTimer(0);
+    g_LoadMonitor.EndTimer(0);
 #endif
 }
 
@@ -808,7 +808,7 @@ void CPedIntelligence::ProcessAfterPreRender() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x6019B0, CPedIntelligence*>(this);
 #else
-    g_LoadMonitor->StartTimer(0);
+    g_LoadMonitor.StartTimer(0);
 
     CTask* pSecondaryTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
     if (pSecondaryTask && pSecondaryTask->IsSimple())
@@ -870,7 +870,7 @@ void CPedIntelligence::ProcessAfterPreRender() {
         }
     }
 
-    g_LoadMonitor->EndTimer(0);
+    g_LoadMonitor.EndTimer(0);
 #endif
 }
 
@@ -1323,7 +1323,7 @@ void CPedIntelligence::ProcessFirst() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x6073A0, CPedIntelligence*>(this);
 #else
-    g_LoadMonitor->StartTimer(0);
+    g_LoadMonitor.StartTimer(0);
     ProcessStaticCounter();
     if (!m_pedStuckChecker.TestPedStuck(m_pPed, &m_eventGroup))
     {
@@ -1369,7 +1369,7 @@ void CPedIntelligence::ProcessFirst() {
         }
     }
     m_pPed->bMoveAnimSpeedHasBeenSetByTask = 0;
-    g_LoadMonitor->EndTimer(0);
+    g_LoadMonitor.EndTimer(0);
 #endif
 }
 
@@ -1378,7 +1378,7 @@ void CPedIntelligence::Process() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x608260, CPedIntelligence*>(this);
 #else
-    g_LoadMonitor->StartTimer(0);
+    g_LoadMonitor.StartTimer(0);
 
     m_vehicleScanner.ScanForVehiclesInRange(m_pPed);
 
@@ -1395,7 +1395,7 @@ void CPedIntelligence::Process() {
     pRecorder->RecordRelationshipWithPlayer(m_pPed);
     LookAtInterestingEntities();
 
-    g_LoadMonitor->EndTimer(0);
+    g_LoadMonitor.EndTimer(0);
 #endif
 }
 

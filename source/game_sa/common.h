@@ -14,6 +14,7 @@ Do not delete this comment block. Respect others' work!
 #include "CAnimBlendAssociation.h"
 #include "CAnimBlendClumpData.h"
 
+const char gta_empty_string[4] = {0, 0, 0, 0};
 extern int gDefaultTaskTime;
 
 extern char *gString; // char gString[200]
