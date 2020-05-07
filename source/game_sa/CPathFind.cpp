@@ -72,3 +72,8 @@ std::int32_t CPathFind::LoadSceneForPathNodes(CVector point)
 {
     return plugin::CallMethodAndReturn<std::int32_t, 0x44DE00, CPathFind*, CVector>(this, point);
 }
+
+bool CPathFind::IsWaterNodeNearby(CVector position, float radius)
+{
+    return plugin::CallMethodAndReturn<bool, 0x450DE0, CPathFind*, CVector, float>(this, position, radius);
+}

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-CLoadMonitor* g_LoadMonitor = reinterpret_cast<CLoadMonitor*> (0xB72978);
+CLoadMonitor& g_LoadMonitor = *reinterpret_cast<CLoadMonitor*> (0xB72978);
  
 void CLoadMonitor::StartTimer(unsigned int timerIndex)
 {

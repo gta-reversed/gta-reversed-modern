@@ -151,6 +151,7 @@ public:
     int LoadPathFindData(RwStream *stream, int index);
     void UnLoadPathFindData(int index);
     std::int32_t LoadSceneForPathNodes(CVector point);
+    bool IsWaterNodeNearby(CVector position, float radius);
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);

@@ -57,7 +57,7 @@ public:
     static unsigned int &ms_nNoOfVisibleEntities;
     static float &ms_fFarClipPlane;
     static float &ms_fCameraHeading;
-    static unsigned char &m_loadingPriority;
+    static bool &m_loadingPriority;
     static bool &ms_bInTheSky;
     static CVector &ms_vecCameraPosition;
     static float &ms_lodDistScale; // default 1.2

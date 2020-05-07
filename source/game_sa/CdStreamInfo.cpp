@@ -19,9 +19,9 @@ int __cdecl CdStreamGetStatus(int streamNum)
     return _CdStreamGetStatus(streamNum);
 }
 
-bool __cdecl CdStreamRead(DWORD streamNum, char* lpBuffer, int streamIndex, int sectorCount)
+bool __cdecl CdStreamRead(DWORD streamNum, std::uint8_t* lpBuffer, int streamIndex, int sectorCount)
 {
-    typedef int(__cdecl* hCdStreamRead)(DWORD streamNum, char* lpBuffer, int streamIndex, int sectorCount);
+    typedef int(__cdecl* hCdStreamRead)(DWORD streamNum, std::uint8_t* lpBuffer, int streamIndex, int sectorCount);
     hCdStreamRead _CdStreamRead = (hCdStreamRead)0x406A20;
     return _CdStreamRead( streamNum,  lpBuffer,  streamIndex, sectorCount);
 }
