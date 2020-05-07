@@ -1,4 +1,4 @@
-## gtasa-reversed
+## gtasa-reversed ![Build](https://github.com/saml1er/gta-reversed/workflows/Build/badge.svg?event=push&branch=master)
 A project to reverse Grand Theft Auto San Andreas completely, and to rewrite and document every function. 
 
 ### Discord
