@@ -1,0 +1,30 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Clone Submodules
+      shell: cmd
+      run: git submodule sync --recursive && git submodule update --init --force --recursive
+    - name: Configure
+      shell: cmd
+      run: cmake -Bbuild -H. -A Win32
+    - name: Build Debug
+      shell: cmd
+      run: cmake --build build --config Debug
+    - name: Artifact Debug
+      uses: actions/upload-artifact@v1
+      with:
+        name: gta_reversed-debug
+        path: build/Debug
+    - name: Build Release
+      run: cmake --build build --config Release
+    - name: Artifact Release
+      uses: actions/upload-artifact@v1
+      with:
+        name: gta_reversed-release
+        path: build/Release
