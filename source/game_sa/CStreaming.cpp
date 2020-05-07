@@ -182,8 +182,8 @@ void CStreaming::AddLodsToRequestList(CVector const& point, unsigned int streami
     float maxY = point.y + CRenderer::ms_fFarClipPlane;
     std::int32_t startSectorX = std::max(CWorld::SectorFloor((minX / 200.0f) + 15.0f), 0);
     std::int32_t startSectorY = std::max(CWorld::SectorFloor((minY / 200.0f) + 15.0f), 0);
-    std::int32_t endSectorX = std::min(CWorld::SectorFloor((maxY / 200.0f) + 15.0f), MAX_LOD_PTR_LISTS_X - 1);
-    std::int32_t endSectorY = std::min(CWorld::SectorFloor((maxX / 200.0f) + 15.0f), MAX_LOD_PTR_LISTS_Y - 1);
+    std::int32_t endSectorX = std::min(CWorld::SectorFloor((maxX / 200.0f) + 15.0f), MAX_LOD_PTR_LISTS_X - 1);
+    std::int32_t endSectorY = std::min(CWorld::SectorFloor((maxY / 200.0f) + 15.0f), MAX_LOD_PTR_LISTS_Y - 1);
     for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (std::int32_t sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             CPtrList& lodList = CWorld::GetLodPtrList(sectorX, sectorY);
@@ -202,9 +202,9 @@ void CStreaming::AddModelsToRequestList(CVector const& point, unsigned int strea
         fRadius = 40.0f;
     CWorld::IncrementCurrentScanCode();
     const float minX = point.x - fRadius;
-    const float maxY = point.x + fRadius;
+    const float maxX = point.x + fRadius;
     const float minY = point.y - fRadius;
-    const float maxX = point.y + fRadius;
+    const float maxY = point.y + fRadius;
     const std::int32_t radius = static_cast<std::int32_t>(fRadius * 0.02f);
     const std::int32_t squaredRadius1 = (radius - 1) * (radius - 1);
     const std::int32_t squaredRadius2 = (radius + 2) * (radius + 2);
@@ -212,8 +212,8 @@ void CStreaming::AddModelsToRequestList(CVector const& point, unsigned int strea
     const std::int32_t pointY = CWorld::SectorFloor((point.y / 50.0f) + 60.0f);
     std::int32_t startSectorX = std::max(CWorld::SectorFloor((minX / 50.0f) + 60.0f), 0);
     std::int32_t startSectorY = std::max(CWorld::SectorFloor((minY / 50.0f) + 60.0f), 0);
-    std::int32_t endSectorX = std::min(CWorld::SectorFloor((maxY / 50.0f) + 60.0f), MAX_SECTORS_X - 1);
-    std::int32_t endSectorY = std::min(CWorld::SectorFloor((maxX / 50.0f) + 60.0f), MAX_SECTORS_Y - 1);
+    std::int32_t endSectorX = std::min(CWorld::SectorFloor((maxX / 50.0f) + 60.0f), MAX_SECTORS_X - 1);
+    std::int32_t endSectorY = std::min(CWorld::SectorFloor((maxY / 50.0f) + 60.0f), MAX_SECTORS_Y - 1);
     for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         const std::int32_t distanceY = sectorY - pointY;
         const std::int32_t squaredDistanceY = distanceY * distanceY;
