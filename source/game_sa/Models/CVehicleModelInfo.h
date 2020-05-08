@@ -41,7 +41,7 @@ struct  UpgradePosnDesc {
 
 VALIDATE_SIZE(UpgradePosnDesc, 0x20);
 
-class  CVehicleModelInfo : public CClumpModelInfo {
+class CVehicleModelInfo : public CClumpModelInfo {
 public:
 	RpMaterial *m_pPlateMaterial;
 	char m_szPlateText[8];
@@ -115,10 +115,10 @@ public:
 		short m_anUpgrade2[30];
 		unsigned int m_nLinksCount;
 		// add upgrade with components upgrade1 and upgrade2
-		void AddUpgradeLink(short upgrade1, short upgrade2);
+		void AddUpgradeLink(std::int16_t upgrade1, std::int16_t upgrade2);
 		// find linked upgrade for this upgrade. In this case upgrade param could be upgrade1 or 
 		// upgrade2
-		short FindOtherUpgrade(short upgrade);
+        std::int16_t FindOtherUpgrade(std::int16_t upgrade);
 	} &ms_linkedUpgrades;
 
 	// vehicle components description tables

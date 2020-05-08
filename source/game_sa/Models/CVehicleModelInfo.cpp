@@ -6,6 +6,7 @@
 */
 #include "StdInc.h"
 
+CVehicleModelInfo::CLinkedUpgradeList& CVehicleModelInfo::ms_linkedUpgrades = *(CVehicleModelInfo::CLinkedUpgradeList*)0xB4E6D8;
 RwTexture* CVehicleModelInfo::ms_pRemapTexture = (RwTexture*)0xB4E47C;
 RwTexture* CVehicleModelInfo::ms_pLightsTexture = (RwTexture*)0xB4E68C;
 RwTexture* CVehicleModelInfo::ms_pLightsOnTexture = (RwTexture*)0xB4E690;
@@ -21,6 +22,16 @@ RwObjectNameIdAssocation** CVehicleModelInfo::ms_vehicleDescs = (RwObjectNameIdA
 void CVehicleModelInfo::InjectHooks()
 {
     HookInstall(0x4C95C0, &CVehicleModelInfo::SetClump_Reversed, 7);
+}
+
+void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(std::int16_t upgrade1, std::int16_t upgrade2)
+{
+    plugin::CallMethod<0x4C74B0, CVehicleModelInfo::CLinkedUpgradeList*, std::int16_t, std::int16_t>(this, upgrade1, upgrade2);
+}
+
+std::int16_t CVehicleModelInfo::CLinkedUpgradeList::FindOtherUpgrade(std::int16_t upgrade)
+{
+    return plugin::CallMethodAndReturn<std::int16_t, 0x4C74D0, CVehicleModelInfo::CLinkedUpgradeList*, std::int16_t>(this, upgrade);
 }
 
 CVehicleStructure* CVehicleStructure::Constructor()

@@ -46,7 +46,7 @@ public:
     static CLoadedCarGroup           & m_LoadedBoats;
     static CLoadedCarGroup           & m_InAppropriateLoadedCars;
     static CLoadedCarGroup           & m_AppropriateLoadedCars;
-    // static CLoadedCarGroup m_LoadedGangCars[11]
+    // static CLoadedCarGroup m_LoadedGangCars[10]
     static CLoadedCarGroup           * m_LoadedGangCars;
     static bool                      & bZoneChangeHasHappened;
     static unsigned char             & m_CountDownToPedsAtStart;
