@@ -8,10 +8,8 @@ Do not delete this comment block. Respect others' work!
 #include "PluginBase.h"
 #include "RenderWare.h"
 
-class CVector {
+class CVector : public RwV3d {
 public:
-    float x, y, z;
-
     CVector();
     CVector(float X, float Y, float Z);
 
@@ -78,6 +76,14 @@ inline bool operator!=(const CVector& vecOne, const CVector& vecTwo) {
     return vecOne.x != vecTwo.x || vecOne.y != vecTwo.y || vecOne.z != vecTwo.z;
 }
 
+inline bool operator!=(const CVector& vec, float notEqualTo) {
+    return vec.x != notEqualTo || vec.y != notEqualTo || vec.z != notEqualTo;
+}
+
+inline bool operator==(const CVector& vec, float equalTo) {
+    return vec.x == equalTo && vec.y == equalTo && vec.z == equalTo;
+}
+
 inline CVector operator*(const CVector& vec, float multiplier) {
     return CVector(vec.x * multiplier, vec.y * multiplier, vec.z * multiplier);
 }
@@ -96,4 +102,6 @@ inline float DistanceBetweenPoints(const CVector &pointOne, const CVector &point
 
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b);
 float DotProduct(CVector* v1, CVector* v2);
+CVector CrossProduct(const CVector& a, const CVector& b);
+float DotProduct(const CVector& v1, const CVector& v2);
 VALIDATE_SIZE(CVector, 0xC);

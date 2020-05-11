@@ -107,8 +107,20 @@ CVector* CrossProduct(CVector* out, CVector* a, CVector* b)
     return plugin::CallAndReturn <CVector*, 0x59C730, CVector*, CVector*, CVector*> (out, a, b);
 }
 
+CVector CrossProduct(const CVector& a, const CVector& b)
+{
+    CVector result;
+    plugin::Call<0x59C730, CVector*, const CVector&, const CVector&>(&result, a, b);
+    return result;
+}
+
 float DotProduct(CVector* v1, CVector* v2)
 {
     return plugin::CallAndReturn <float, 0x40FDB0, CVector*, CVector*>(v1, v2);
     //return v1->z * v2->z + v1->y * v2->y + v1->x * v2->x;
+}
+
+float DotProduct(const CVector& v1, const CVector& v2)
+{
+    return v1.z * v2.z + v1.y * v2.y + v1.x * v2.x;
 }

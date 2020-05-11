@@ -14,6 +14,25 @@
 #include "CRGBA.h"
 #include "CPool.h"
 
+// enum by forkerer (https://github.com/forkerer/)
+enum eVehicleDummies
+{
+    DUMMY_LIGHT_FRONT_MAIN = 0x0,
+    DUMMY_LIGHT_REAR_MAIN = 0x1,
+    DUMMY_LIGHT_FRONT_SECONDARY = 0x2,
+    DUMMY_LIGHT_REAR_SECONDARY = 0x3,
+    DUMMY_SEAT_FRONT = 0x4,
+    DUMMY_SEAT_REAR = 0x5,
+    DUMMY_EXHAUST = 0x6,
+    DUMMY_ENGINE = 0x7,
+    DUMMY_GAS_CAP = 0x8,
+    DUMMY_TRAILER_ATTACH = 0x9,
+    DUMMY_HAND_REST = 0xA,
+    DUMMY_EXHAUST_SECONDARY = 0xB,
+    DUMMY_WING_AIRTRAIL = 0xC,
+    DUMMY_VEH_GUN = 0xD,
+};
+
 enum VehicleUpgradePosn {
 	UPGRADE_BONNET,
 	UPGRADE_BONNET_LEFT,
