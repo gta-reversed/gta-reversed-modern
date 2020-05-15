@@ -56,8 +56,17 @@ extern unsigned int &ClumpOffset;
 
 #define RpClumpGetAnimBlendClumpData(clump) (*(CAnimBlendClumpData **)(((unsigned int)(clump) + ClumpOffset)))
 
+constexpr float PI = 3.14159265358979323846f;
+constexpr float PI_2 = PI / 2.0f;
+
 constexpr float DegreesToRadians(float angleInDegrees) {
-    return angleInDegrees * static_cast<float>(M_PI) / 180.0f;
+    return angleInDegrees * PI / 180.0f;
+}
+
+template <typename T>
+T clamp(T value, T low, T high)
+{
+    return std::min(std::max(value, low), high);
 }
 
 AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, char *name);

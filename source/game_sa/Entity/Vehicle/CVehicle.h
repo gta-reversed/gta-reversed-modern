@@ -372,7 +372,7 @@ public:
     // get special ride anim data for bile or quad
     virtual CRideAnimData* GetRideAnimData();
     virtual void SetupSuspensionLines();
-    virtual CVector* AddMovingCollisionSpeed(CVector* out, CVector& vecSpeed);
+    virtual CVector* AddMovingCollisionSpeed(CVector* out, CVector& vecDistance);
     virtual void Fix();
     virtual void SetupDamageAfterLoad();
     virtual void DoBurstAndSoftGroundRatios();

@@ -3,7 +3,6 @@
 
 #include <windows.h>
 #include <cstdio>
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <algorithm>
 #include <list>
@@ -15,7 +14,6 @@
 #include <iostream>
 #include <cassert>
 
-#include "utils\common.h"
 #include "game_sa\CPostEffects.h"
 #include "game_sa\CMemoryMgr.h"
 #include "game_sa\CCullZones.h"

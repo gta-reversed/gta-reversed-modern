@@ -230,9 +230,9 @@ void CVehicle::SetupSuspensionLines()
 }
 
 // Converted from CVector CVehicle::AddMovingCollisionSpeed(CVector &) 0x871F44
-CVector* CVehicle::AddMovingCollisionSpeed(CVector* out, CVector& vecSpeed)
+CVector* CVehicle::AddMovingCollisionSpeed(CVector* out, CVector& vecDistance)
 {
-    return ((CVector * (__thiscall*)(CVehicle*, CVector*, CVector&))(*(void***)this)[49])(this, out, vecSpeed);
+    return ((CVector * (__thiscall*)(CVehicle*, CVector*, CVector&))(*(void***)this)[49])(this, out, vecDistance);
 }
 
 // Converted from void CVehicle::Fix(void) 0x871F48
