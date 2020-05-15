@@ -16,16 +16,7 @@
 #include "CLinkList.h"
 #include "CLoadedCarGroup.h"
 #include "CDirectory.h"
-
-const std::uint32_t TOTAL_DFF_MODEL_IDS = 20000;
-const std::uint32_t TOTAL_TXD_MODEL_IDS = 5000;
-const std::uint32_t TOTAL_COL_MODEL_IDS = 255;
-const std::uint32_t TOTAL_IPL_MODEL_IDS = 256;
-const std::uint32_t TOTAL_DAT_MODEL_IDS = 64;
-const std::uint32_t TOTAL_IFP_MODEL_IDS = 180;
-const std::uint32_t TOTAL_RRR_MODEL_IDS = 475;
-const std::uint32_t TOTAL_SCM_MODEL_IDS = 82;
-const std::uint32_t TOTAL_INTERNAL_MODEL_IDS = 4; // internal use?
+#include "constants.h"
 
 enum eResourceFirstID
 {

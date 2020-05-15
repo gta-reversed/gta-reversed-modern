@@ -449,7 +449,7 @@ void CTaskSimpleHoldEntity::StartAnim(CPed* pPed) {
             if (!pAnimBlock)
                 pAnimBlock = CAnimManager::GetAnimationBlock(CAnimManager::GetAnimBlockName(m_nAnimGroupId));
             if (!pAnimBlock->bLoaded) {
-                CStreaming::RequestModel(pAnimBlock - CAnimManager::ms_aAnimBlocks + RESOURCE_ID_IFP, KEEP_IN_MEMORY);
+                CStreaming::RequestModel(pAnimBlock - CAnimManager::ms_aAnimBlocks + RESOURCE_ID_IFP, STREAMING_KEEP_IN_MEMORY);
                 return;
             }
             CAnimManager::AddAnimBlockRef(pAnimBlock - CAnimManager::ms_aAnimBlocks);

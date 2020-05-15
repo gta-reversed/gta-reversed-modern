@@ -360,7 +360,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* pPed)
             m_bAnimBlockRefAdded = true;
         }
         else {
-            CStreaming::RequestModel(pAnimBlock - CAnimManager::ms_aAnimBlocks + RESOURCE_ID_IFP, KEEP_IN_MEMORY);
+            CStreaming::RequestModel(pAnimBlock - CAnimManager::ms_aAnimBlocks + RESOURCE_ID_IFP, STREAMING_KEEP_IN_MEMORY);
         }
     }
 

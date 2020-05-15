@@ -10,12 +10,12 @@
 
 enum eStreamingFlags {
     STREAMING_UNKNOWN_1 = 0x1,
-    GAME_REQUIRED = 0x2,
-    MISSION_REQUIRED = 0x4,
-    KEEP_IN_MEMORY = 0x8,
-    PRIORITY_REQUEST = 0x10,
-    STREAMING_UNKNOWN_2 = 0x20,
-    STREAMING_DONTREMOVE_IN_LOADSCENE = STREAMING_UNKNOWN_2 | PRIORITY_REQUEST | KEEP_IN_MEMORY | MISSION_REQUIRED | GAME_REQUIRED,
+    STREAMING_GAME_REQUIRED = 0x2,
+    STREAMING_MISSION_REQUIRED = 0x4,
+    STREAMING_KEEP_IN_MEMORY = 0x8,
+    STREAMING_PRIORITY_REQUEST = 0x10,
+    STREAMING_IN_REQUEST_LIST = 0x20,
+    STREAMING_DONTREMOVE_IN_LOADSCENE = STREAMING_IN_REQUEST_LIST | STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED,
 };
 
 enum eStreamingLoadState {
@@ -26,7 +26,9 @@ enum eStreamingLoadState {
     LOADSTATE_Finishing = 4
 };
 
-class  CStreamingInfo {
+const std::uint32_t STREAMING_BLOCK_SIZE = 2048;
+
+class CStreamingInfo {
 public:
     short m_nNextIndex; // ms_pArrayBase array index
     short m_nPrevIndex; // ms_pArrayBase array index
@@ -34,7 +36,7 @@ public:
     unsigned char m_nFlags; // see eStreamingFlags
     unsigned char m_nImgId;
     unsigned int m_nCdPosn;
-    unsigned int m_nCdSize;
+    unsigned int m_nCdSize; // number of blocks/sectors; m_nCdSize * STREAMING_BLOCK_SIZE = actual size in bytes
     unsigned char m_nLoadState; // see eStreamingLoadState
 private:
     char  __pad[3];
