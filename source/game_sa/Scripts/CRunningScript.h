@@ -91,8 +91,9 @@ public:
     bool            m_bUseMissionCleanup;
     bool            m_bIsExternal;
     bool            m_bTextBlockOverride;
+    std::int8_t     m_externalType;
 private:
-    char _padC9[3];
+    char field_CA[2];
 public:
     int             m_nWakeTime;
     unsigned short  m_nLogicalOp;
@@ -109,6 +110,8 @@ private:
 public:
 
      static unsigned char(__thiscall **CommandHandlerTable)(CRunningScript *_this,unsigned short commandID); // static unsigned char(__thiscall *CommandHandlerTable[27])(CRunningScript *,unsigned short )
+
+     static void InjectHooks();
 
     //! Adds script to list
      void AddScriptToList(CRunningScript **queuelist);
@@ -130,7 +133,7 @@ public:
      void *GetPointerToLocalVariable(int varId);
     //! Returns pointer to script variable of any type.
      tScriptParam *GetPointerToScriptVariable(unsigned char variableType);
-     void GivePedScriptedTask(int pedHandle, CTask *task, int commandID);
+     void GivePedScriptedTask(std::int32_t pedHandle, CTask* task, std::int32_t opcode);
      void Init();
      bool IsPedDead(CPed *pPed);
      void LocateCarCommand(int commandID);
