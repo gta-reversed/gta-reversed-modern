@@ -15,3 +15,6 @@ const std::uint32_t TOTAL_INTERNAL_MODEL_IDS = 4; // internal use?
 const std::uint32_t TOTAL_IMG_ARCHIVES = 8;
 const std::uint32_t TOTAL_LOADED_PEDS = 8;
 const std::uint32_t TOTAL_GANGS = 10;
+
+const std::uint32_t TOTAL_SCRIPTED_TASKS = 128;
+const std::uint32_t TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES = 48;

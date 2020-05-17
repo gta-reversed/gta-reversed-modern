@@ -38,6 +38,8 @@ public:
      void Process();
      void RemoveAllFollowers();
      void Teleport(CVector const *Pos);
+
+     inline CPedGroupIntelligence& GetIntelligence() { return m_groupIntelligence; }
 };
 
 VALIDATE_SIZE(CPedGroup, 0x2D4);

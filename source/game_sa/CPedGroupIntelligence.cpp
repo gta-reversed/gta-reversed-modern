@@ -11,3 +11,7 @@ void CPedGroupIntelligence::SetScriptCommandTask(CPed* ped, CTask const* task) {
 void CPedGroupIntelligence::ComputeDefaultTasks(CPed* ped) {
     plugin::CallMethodDynGlobal<CPedGroupIntelligence*, CPed*>(0x5F88D0, this, ped);
 }
+
+CTask* CPedGroupIntelligence::GetTaskScriptCommand(CPed* ped) {
+    return plugin::CallMethodAndReturnDynGlobal<CTask*, CPedGroupIntelligence*, CPed*>(0x5F8690, this, ped);
+}

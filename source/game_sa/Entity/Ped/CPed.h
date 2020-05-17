@@ -443,6 +443,10 @@ public:
     void DeadPedMakesTyresBloody();
 	void SetModelIndex(unsigned int modelIndex);
 
+    inline CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
+    inline CTaskManager& GetTaskManager() { return m_pIntelligence->m_TaskMgr; }
+    inline CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup;}
+
     static void* operator new(unsigned int size);
     static void operator delete(void* data);
 };

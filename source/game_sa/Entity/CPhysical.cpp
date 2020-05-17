@@ -903,7 +903,7 @@ void CPhysical::ApplyMoveForce(CVector force)
 void CPhysical::ApplyTurnForce(CVector force, CVector point)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CPhysical*, CVector, CVector))0x542A50)(this, force, direction);
+    ((void(__thiscall*)(CPhysical*, CVector, CVector))0x542A50)(this, force, point);
 #else
     if (!physicalFlags.bDisableTurnForce)
     {
@@ -925,7 +925,7 @@ void CPhysical::ApplyForce(CVector vecForce, CVector point, bool bUpdateTurnSpee
 {
 
 #ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CPhysical*, CVector, CVector, bool))0x542B50)(this, vecForce, vecDirection, bUpdateTurnSpeed);
+    ((void(__thiscall*)(CPhysical*, CVector, CVector, bool))0x542B50)(this, vecForce, point, bUpdateTurnSpeed);
 #else
     CVector vecMoveSpeedForce = vecForce;
     if (physicalFlags.bDisableZ)
@@ -1067,7 +1067,7 @@ void CPhysical::ApplyFrictionTurnForce(CVector posn, CVector velocity)
 void CPhysical::ApplyFrictionForce(CVector vecMoveForce, CVector point)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CPhysical*, CVector, CVector))0x543220)(this, vecMoveForce, vecDirection);
+    ((void(__thiscall*)(CPhysical*, CVector, CVector))0x543220)(this, vecMoveForce, point);
 #else
     CVector vecTheMoveForce = vecMoveForce;
 

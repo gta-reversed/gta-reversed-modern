@@ -1416,7 +1416,7 @@ void CStreaming::RequestModel(int modelId, unsigned int streamingFlags)
 
 void CStreaming::RequestTxdModel(int slot, int streamingFlags) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallDynGlobal<int, int>(0x407100, txdModelID, streamingFlags);
+    plugin::CallDynGlobal<int, int>(0x407100, slot, streamingFlags);
 #else
     RequestModel(slot + RESOURCE_ID_TXD, streamingFlags);
 #endif
@@ -1865,7 +1865,7 @@ void CStreaming::PurgeRequestList() {
 
 void CStreaming::ReInit() {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturnDynGlobal<unsigned int>(0x40E560);
+    return plugin::Call<0x40E560>();
 #else
     CTheScripts::StreamedScripts.ReInitialise();
     FlushRequestList();

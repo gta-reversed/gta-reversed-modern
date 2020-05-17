@@ -21,6 +21,7 @@ public:
 
     CEvent * Add(CEvent* event, bool bValid);
     bool HasScriptCommandOfTaskType(eTaskType taskType);
+    bool HasEvent(CEvent* event);
     void Flush(bool bAvoidFlushingTaskComplexBeInGroup);
 };
 

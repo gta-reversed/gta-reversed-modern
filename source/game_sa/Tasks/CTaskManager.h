@@ -34,8 +34,8 @@ class CTaskComplex;
 
 class  CTaskManager {
 public:
-    CTask *m_aPrimaryTasks[5];
-    CTask *m_aSecondaryTasks[6];
+    CTask *m_aPrimaryTasks[TASK_PRIMARY_MAX];
+    CTask *m_aSecondaryTasks[TASK_SECONDARY_MAX];
     class CPed *m_pPed;
     
     static void InjectHooks();
@@ -60,6 +60,8 @@ public:
     void SetTaskSecondary(CTask* task, int taskIndex);
     void ClearTaskEventResponse();
     void ManageTasks();
+    bool HasPrimaryTask(CTask const* task);
+    CTask* GetPrimaryTask(std::int32_t taskIndex) { return m_aPrimaryTasks[taskIndex]; }
 };
 
 VALIDATE_SIZE(CTaskManager, 0x30);

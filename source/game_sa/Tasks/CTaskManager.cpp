@@ -82,7 +82,7 @@ CTask* CTaskManager::GetActiveTask() {
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((CTask* (__thiscall *)(CTaskManager*))0x681720)(this);
 #else
-    for (int primaryTaskIndex = 0; primaryTaskIndex < 5; primaryTaskIndex++)
+    for (int primaryTaskIndex = 0; primaryTaskIndex < TASK_PRIMARY_MAX; primaryTaskIndex++)
     {
         CTask* task = m_aPrimaryTasks[primaryTaskIndex];
         if (task)
@@ -189,13 +189,10 @@ bool CTaskManager::HasTaskSecondary(CTask const* task) {
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((bool(__thiscall *)(CTaskManager*, CTask const*))0x681820)(this, task);
 #else
-    for (int secondaryTaskIndex = 0; secondaryTaskIndex < 6; secondaryTaskIndex++)
-    {
-        CTask* pSecondaryTask = m_aSecondaryTasks[secondaryTaskIndex];
-        if (pSecondaryTask == task)
-        {
+    for (int i = 0; i < TASK_SECONDARY_MAX; i++) {
+        CTask* secondaryTask = m_aSecondaryTasks[i];
+        if (secondaryTask && secondaryTask == task)
             return true;
-        }
     }
     return false;
 #endif
@@ -643,4 +640,14 @@ void CTaskManager::ManageTasks()
     }
 
 #endif
+}
+
+bool CTaskManager::HasPrimaryTask(CTask const* task)
+{
+    for (std::int32_t i = 0; i < TASK_PRIMARY_MAX; i++) {
+        CTask* primaryTask = m_aPrimaryTasks[i];
+        if (primaryTask && primaryTask == task)
+            return true;
+    }
+    return false;
 }
