@@ -124,8 +124,7 @@ public:
      static CLinkList<CEntity*> &ms_rwObjectInstances;
      static CLink<CEntity*>*& ms_renderEntityLink;
      static bool &m_bLoadingAllRequestedModels;
-     static bool &m_bModelStreamNotLoaded;
-     static unsigned int &ms_numberOfBytesRead; 
+     static bool &m_bModelStreamNotLoaded; 
      
      static void InjectHooks();
 

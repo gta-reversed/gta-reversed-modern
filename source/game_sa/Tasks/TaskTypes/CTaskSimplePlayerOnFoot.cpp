@@ -1037,7 +1037,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
         }
         else
         {
-            CStreaming::RequestModel(m_nAnimationBlockIndex + RESOURCE_ID_IFP, LOADSTATE_Requested);
+            CStreaming::RequestModel(m_nAnimationBlockIndex + RESOURCE_ID_IFP, LOADSTATE_REQUESTED);
             if (pAnimBlock->bLoaded)
             {
                 CAnimBlendAssociation* pAnimAssoc1 = RpAnimBlendClumpGetFirstAssociation(pPlayerPed->m_pRwClump);
