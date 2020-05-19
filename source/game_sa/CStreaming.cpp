@@ -454,7 +454,7 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
     CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
 
-    unsigned int bufferSize = streamingInfo.m_nCdSize * STREAMING_BLOCK_SIZE;
+    unsigned int bufferSize = streamingInfo.m_nCdSize * STREAMING_SECTOR_SIZE;
     tRwStreamInitializeData rwStreamInitializationData = { pFileBuffer, bufferSize };
 
     RwStream* pRwStream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitializationData);
@@ -1442,7 +1442,7 @@ void CStreaming::FinishLoadingLargeFile(unsigned char* pFileBuffer, int modelId)
     CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
     if (streamingInfo.m_nLoadState == LOADSTATE_FINISHING) {
-        unsigned int bufferSize = streamingInfo.m_nCdSize * STREAMING_BLOCK_SIZE;
+        unsigned int bufferSize = streamingInfo.m_nCdSize * STREAMING_SECTOR_SIZE;
         tRwStreamInitializeData rwStreamInitializationData = { pFileBuffer, bufferSize };
         RwStream* pRwStream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitializationData);
         bool bLoaded = false;
@@ -1750,11 +1750,11 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
     return plugin::CallAndReturnDynGlobal<bool, int>(0x40E170, channelIndex);
 #else
     tStreamingChannel& streamingChannel = ms_channel[channelIndex];
-    int streamStatus = CdStreamGetStatus(channelIndex);
-    if (streamStatus) {
-        if (streamStatus == 255)
+    const eCdStreamStatus streamStatus = CdStreamGetStatus(channelIndex);
+    if (streamStatus != eCdStreamStatus::READING_SUCCESS) {
+        if (streamStatus == eCdStreamStatus::READING)
             return false;
-        if (streamStatus == 250)
+        if (streamStatus == eCdStreamStatus::WAITING_TO_READ)
             return false;
         streamingChannel.m_nCdStreamStatus = streamStatus;
         streamingChannel.LoadStatus = LOADSTATE_CHANNELED;
@@ -1785,10 +1785,10 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
                     || streamingInfo.m_nFlags & (STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED))
                 {
                     if (modelId < RESOURCE_ID_IPL || modelId >= RESOURCE_ID_DAT)
-                        MakeSpaceFor(nCdSize * STREAMING_BLOCK_SIZE);
+                        MakeSpaceFor(nCdSize * STREAMING_SECTOR_SIZE);
 
                     int bufferOffset = streamingChannel.modelStreamingBufferOffsets[modelIndex];
-                    unsigned char* pFileBuffer = reinterpret_cast <unsigned char*> (&ms_pStreamingBuffer[channelIndex][STREAMING_BLOCK_SIZE * bufferOffset]);
+                    unsigned char* pFileBuffer = reinterpret_cast <unsigned char*> (&ms_pStreamingBuffer[channelIndex][STREAMING_SECTOR_SIZE * bufferOffset]);
 
                     ConvertBufferToObject(pFileBuffer, modelId);
 
@@ -1814,7 +1814,7 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
     }
     else {
         int bufferOffset = streamingChannel.modelStreamingBufferOffsets[0];
-        unsigned char* pFileContents = reinterpret_cast<unsigned char*>(&ms_pStreamingBuffer[channelIndex][STREAMING_BLOCK_SIZE * bufferOffset]);
+        unsigned char* pFileContents = reinterpret_cast<unsigned char*>(&ms_pStreamingBuffer[channelIndex][STREAMING_SECTOR_SIZE * bufferOffset]);
         FinishLoadingLargeFile(pFileContents, streamingChannel.modelIds[0]);
         streamingChannel.modelIds[0] = -1;
     }
@@ -2338,7 +2338,7 @@ void CStreaming::RemoveModel(int modelId)
         else if (modelId >= RESOURCE_ID_SCM) {
             CTheScripts::StreamedScripts.RemoveStreamedScriptFromMemory(modelId - RESOURCE_ID_SCM);
         }
-        ms_memoryUsed -= STREAMING_BLOCK_SIZE * streamingInfo.m_nCdSize;
+        ms_memoryUsed -= STREAMING_SECTOR_SIZE * streamingInfo.m_nCdSize;
     }
     if (streamingInfo.m_nNextIndex == -1) {
         if (streamingInfo.m_nLoadState == LOADSTATE_CHANNELED) {
@@ -2481,6 +2481,7 @@ void CStreaming::RetryLoadFile(int channelId) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<int>(0x4076C0, channelId);
 #else
+    printf("CStreaming::RetryLoadFile called!\n");
     if (CStreaming::ms_channelError == -1)
         return CLoadingScreen::Continue();
     // CLoadingScreen::Pause(); // empty function
@@ -2489,7 +2490,7 @@ void CStreaming::RetryLoadFile(int channelId) {
     tStreamingChannel& streamingChannel = CStreaming::ms_channel[channelId];
     while (true) {
         bool bStreamRead = false;
-        eStreamingLoadState loadState = streamingChannel.LoadStatus;
+        const eStreamingLoadState loadState = streamingChannel.LoadStatus;
         if (loadState == LOADSTATE_NOT_LOADED) {
             bStreamRead = true;
         }
@@ -2503,10 +2504,10 @@ void CStreaming::RetryLoadFile(int channelId) {
         }
         else if (loadState == LOADSTATE_CHANNELED) {
             streamingChannel.totalTries++;
-            int streamStatus = CdStreamGetStatus(channelId);
-            if (streamStatus != 255 && streamStatus != 250)
+            eCdStreamStatus streamStatus = CdStreamGetStatus(channelId);
+            if (streamStatus != eCdStreamStatus::READING && streamStatus != eCdStreamStatus::WAITING_TO_READ)
                 bStreamRead = true;
-            else if (streamStatus == 255 && CdStreamGetStatus(channelId) != 255)
+            else if (streamStatus == eCdStreamStatus::READING && CdStreamGetStatus(channelId) != eCdStreamStatus::READING)
                 bStreamRead = true;
         }
         if (bStreamRead) {
@@ -2789,10 +2790,10 @@ void CStreaming::Init2()
     // and the model is loaded alone.
 
     // Here, ms_streamingBufferSize * STREAMING_BLOCK_SIZE = maximum size in bytes that a streaming model can possibly have.
-    const std::uint32_t maximumModelSizeInBytes = ms_streamingBufferSize * STREAMING_BLOCK_SIZE;
-    ms_pStreamingBuffer[0] = CMemoryMgr::MallocAlign(maximumModelSizeInBytes, STREAMING_BLOCK_SIZE);
+    const std::uint32_t maximumModelSizeInBytes = ms_streamingBufferSize * STREAMING_SECTOR_SIZE;
+    ms_pStreamingBuffer[0] = CMemoryMgr::MallocAlign(maximumModelSizeInBytes, STREAMING_SECTOR_SIZE);
     ms_streamingBufferSize /= 2;
-    ms_pStreamingBuffer[1] = &ms_pStreamingBuffer[0][STREAMING_BLOCK_SIZE * ms_streamingBufferSize];
+    ms_pStreamingBuffer[1] = &ms_pStreamingBuffer[0][STREAMING_SECTOR_SIZE * ms_streamingBufferSize];
     ms_memoryAvailable = 52428800;
     desiredNumVehiclesLoaded = 22;
     ms_rwObjectInstances.Init(12000);

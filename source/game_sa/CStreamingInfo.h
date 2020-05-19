@@ -26,7 +26,7 @@ enum eStreamingLoadState {
     LOADSTATE_FINISHING = 4
 };
 
-const std::uint32_t STREAMING_BLOCK_SIZE = 2048;
+const std::uint32_t STREAMING_SECTOR_SIZE = 2048;
 
 class CStreamingInfo {
 public:

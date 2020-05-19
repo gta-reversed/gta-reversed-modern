@@ -64,7 +64,7 @@ struct tStreamingChannel
     int iBlockOffset;
     int iBlockCount;
     int totalTries;
-    int m_nCdStreamStatus;
+    eCdStreamStatus m_nCdStreamStatus;
 };
 
 VALIDATE_SIZE(tStreamingChannel, 0x98);

@@ -4,6 +4,7 @@ void InjectHooksMain(void)
 {
     CRunningScript::InjectHooks();
     CStreaming::InjectHooks();
+    InjectCdStreamHooks();
     CVehicleModelInfo::InjectHooks();
     CFileLoader::InjectHooks();
     CFileMgr::InjectHooks();

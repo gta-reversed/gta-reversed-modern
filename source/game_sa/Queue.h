@@ -15,49 +15,42 @@
 */
 #pragma once
 
-#pragma pack(push, 1)
 struct Queue
 {
-    int *queue;
-    int head;
-    int tail;
-    int size;
+    std::int32_t *m_queue;
+    std::int32_t m_head;
+    std::int32_t m_tail;
+    std::int32_t m_size;
 };
-#pragma pack(pop)
-
 static_assert(sizeof(Queue) == 0x10, "Incorrect struct size: Queue");
 
-
-
-inline Queue* InitialiseQueue(Queue* q, int size)
+inline Queue* InitialiseQueue(Queue* q, std::int32_t size)
 {
-    q->queue = new int[size];
-    q->size = size;
-    q->head = q->tail = 0;
+    q->m_queue = (std::int32_t*)LocalAlloc(LPTR, sizeof(std::int32_t) * size);
+    q->m_size = size;
+    q->m_head = q->m_tail = 0;
     return q;
 }
 
 inline void FinalizeQueue(Queue* q)
 {
-    delete[] q->queue;
-    q->size = q->head = q->tail = 0;
+    LocalFree(q->m_queue);
+    q->m_size = q->m_head = q->m_tail = 0;
 }
 
-
-
-inline void AddToQueue(Queue* q, int i)
+inline void AddToQueue(Queue* q, std::int32_t i)
 {
-    q->queue[q->tail] = i;
-    q->tail = (q->tail + 1) % q->size;
+    q->m_queue[q->m_tail] = i;
+    q->m_tail = (q->m_tail + 1) % q->m_size;
 }
 
 inline int GetFirstInQueue(Queue* q)
 {
-    return (q->head == q->tail ? -1 : q->queue[q->head]);
+    return (q->m_head == q->m_tail ? -1 : q->m_queue[q->m_head]);
 }
 
 inline void RemoveFirstInQueue(Queue* q)
 {
-    if (q->head != q->tail)
-        q->head = (q->head + 1) % q->size;
+    if (q->m_head != q->m_tail)
+        q->m_head = (q->m_head + 1) % q->m_size;
 }
