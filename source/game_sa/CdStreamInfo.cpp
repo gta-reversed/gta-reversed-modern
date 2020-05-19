@@ -158,15 +158,15 @@ eCdStreamStatus __cdecl CdStreamGetStatus(std::int32_t streamId)
 // for the channel, then it will return false.
 // When CdStreamThread is done reading the model, then CdStreamThread will set `stream.nSectorsToRead` and `stream.bInUse` to 0,
 // so the main thread can call CdStreamRead again to read more models.
-bool __cdecl CdStreamRead(std::int32_t streamId, std::uint8_t* lpBuffer, std::uint32_t streamHandle, std::int32_t sectorCount)
+bool __cdecl CdStreamRead(std::int32_t streamId, std::uint8_t* lpBuffer, std::uint32_t offsetAndHandle, std::int32_t sectorCount)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<bool, 0x406A20, std::int32_t, std::uint8_t*, std::uint32_t, std::int32_t>(streamId, lpBuffer, streamHandle, sectorCount);
+    return plugin::CallAndReturn<bool, 0x406A20, std::int32_t, std::uint8_t*, std::uint32_t, std::int32_t>(streamId, lpBuffer, offsetAndHandle, sectorCount);
 #else
     CdStream& stream = gCdStreams[streamId];
-    gLastCdStreamPosn = sectorCount + streamHandle;
-    const std::uint32_t sectorOffset = streamHandle & 0xFFFFFF;
-    stream.hFile = gStreamFileHandles[streamHandle >> 24];
+    gLastCdStreamPosn = sectorCount + offsetAndHandle;
+    const std::uint32_t sectorOffset = offsetAndHandle & 0xFFFFFF;
+    stream.hFile = gStreamFileHandles[offsetAndHandle >> 24];
     SetLastError(NO_ERROR);
     if (gStreamingInitialized) {
         if (stream.nSectorsToRead || stream.bInUse)

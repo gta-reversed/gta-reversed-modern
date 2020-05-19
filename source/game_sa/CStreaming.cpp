@@ -1506,21 +1506,19 @@ void CStreaming::FlushChannels()
 #endif
 }
 
-void CStreaming::RequestModelStream(int channelIndex)
+void CStreaming::RequestModelStream(int channelId)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallDynGlobal<int>(0x40CBA0, channelIndex);
+    plugin::CallDynGlobal<int>(0x40CBA0, channelId);
 #else
     int CdStreamLastPosn = CdStreamGetLastPosn();
     int modelId = GetNextFileOnCd(CdStreamLastPosn, 1);
     if (modelId == -1)
-    {
         return;
-    }
 
-    int32_t blockOffsetMimg = 0;
-    unsigned int blockCount = 0;
-
+    tStreamingChannel& channel = ms_channel[channelId];
+    int32_t offsetAndHandle = 0;
+    unsigned int sectorcount = 0;
     CStreamingInfo* streamingInfo = &ms_aInfoForModel[modelId];
     while (!(streamingInfo->m_nFlags & (STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED)))
     {
@@ -1532,11 +1530,11 @@ void CStreaming::RequestModelStream(int channelIndex)
         RemoveModel(modelId);
         if (streamingInfo->m_nCdSize)
         {
-            blockOffsetMimg = streamingInfo->m_nCdPosn + ms_files[streamingInfo->m_nImgId].m_StreamHandle;
-            blockCount = streamingInfo->m_nCdSize;
+            offsetAndHandle = streamingInfo->m_nCdPosn + ms_files[streamingInfo->m_nImgId].m_StreamHandle;
+            sectorcount = streamingInfo->m_nCdSize;
         }
 
-        modelId = GetNextFileOnCd(blockCount + blockOffsetMimg, 1);
+        modelId = GetNextFileOnCd(sectorcount + offsetAndHandle, 1);
         if (modelId == -1)
         {
             return;
@@ -1549,36 +1547,34 @@ void CStreaming::RequestModelStream(int channelIndex)
     }
     if (streamingInfo->m_nCdSize)
     {
-        blockOffsetMimg = streamingInfo->m_nCdPosn + ms_files[streamingInfo->m_nImgId].m_StreamHandle;
-        blockCount = streamingInfo->m_nCdSize;
+        offsetAndHandle = streamingInfo->m_nCdPosn + ms_files[streamingInfo->m_nImgId].m_StreamHandle;
+        sectorcount = streamingInfo->m_nCdSize;
     }
-    if (blockCount > ms_streamingBufferSize)
+    if (sectorcount > ms_streamingBufferSize)
     {
-        if (channelIndex == 1 || ms_channel[1].LoadStatus)
+        if (channelId == 1 || ms_channel[1].LoadStatus)
         {
             return;
         }
         ms_bLoadingBigModel = 1;
     }
 
-    unsigned int sectorCount = 0;
+    unsigned int sectorCountSum = 0;
     bool isPreviousModelBig = false;
     bool isPreviousModelPed = false;
-
-    int modelIndex = 0;
     const int numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
-    while (modelIndex < numberOfModelIds)
-    {
+    std::int32_t modelIndex = 0;
+    for (; modelIndex < numberOfModelIds; modelIndex++) {
         streamingInfo = &ms_aInfoForModel[modelId];
         if (streamingInfo->m_nLoadState != LOADSTATE_REQUESTED)
             break;
         if (streamingInfo->m_nCdSize)
-            blockCount = streamingInfo->m_nCdSize;
+            sectorcount = streamingInfo->m_nCdSize;
         if (ms_numPriorityRequests && !(streamingInfo->m_nFlags & STREAMING_PRIORITY_REQUEST))
             break;
         if (modelId >= RESOURCE_ID_TXD) {
             if (modelId < RESOURCE_ID_IFP || modelId >= RESOURCE_ID_RRR) {
-                if (isPreviousModelBig && blockCount > 200)
+                if (isPreviousModelBig && sectorcount > 200)
                     break;
             }
             else if (CCutsceneMgr::ms_cutsceneProcessing || ms_aInfoForModel[MODEL_MALE01].m_nLoadState != LOADSTATE_LOADED)
@@ -1607,22 +1603,17 @@ void CStreaming::RequestModelStream(int channelIndex)
                     break;
             }
         }
+        channel.modelStreamingBufferOffsets[modelIndex] = sectorCountSum;
+        channel.modelIds[modelIndex] = modelId;
 
-        tStreamingChannel& streamingChannel = ms_channel[channelIndex];
-        streamingChannel.modelStreamingBufferOffsets[modelIndex] = sectorCount;
-        streamingChannel.modelIds[modelIndex] = modelId;
-
-        sectorCount += blockCount;
-        if (sectorCount > ms_streamingBufferSize&& modelIndex > 0)
-        {
-            sectorCount = sectorCount - blockCount;
+        sectorCountSum += sectorcount;
+        if (sectorCountSum > ms_streamingBufferSize&& modelIndex > 0) {
+            sectorCountSum -= sectorcount;
             break;
         }
-
-
         CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
         if (modelId >= RESOURCE_ID_TXD) {
-            if (blockCount > 200)
+            if (sectorcount > 200)
                 isPreviousModelBig = true;
         }
         else {
@@ -1631,37 +1622,24 @@ void CStreaming::RequestModelStream(int channelIndex)
             if (pBaseModelInfo->GetModelType() == MODEL_INFO_VEHICLE)
                 isPreviousModelBig = true;
         }
-
         streamingInfo->m_nLoadState = LOADSTATE_CHANNELED;
         streamingInfo->RemoveFromList();
-        --ms_numModelsRequested;
-
-        if (streamingInfo->m_nFlags & STREAMING_PRIORITY_REQUEST)
-        {
-            int numPriorityRequests = ms_numPriorityRequests - 1;
+        ms_numModelsRequested--;
+        if (streamingInfo->m_nFlags & STREAMING_PRIORITY_REQUEST) {
             streamingInfo->m_nFlags &= ~STREAMING_PRIORITY_REQUEST;
-            ms_numPriorityRequests = numPriorityRequests;
+            ms_numPriorityRequests--;
         }
-
         modelId = streamingInfo->m_nNextIndexOnCd;
-        modelIndex++;
     }
-
-    if (modelIndex < numberOfModelIds)
-    {
-        tStreamingChannel& streamingChannel = ms_channel[channelIndex];
-        memset(&streamingChannel.modelIds[modelIndex], 0xFFu, 4 * (numberOfModelIds - modelIndex)); // 0xFFu = -1
+    for (std::int32_t i = modelIndex; i < numberOfModelIds; i++) {
+        channel.modelIds[i] = -1;
     }
-
-    CdStreamRead(channelIndex, ms_pStreamingBuffer[channelIndex], blockOffsetMimg, sectorCount);
-
-    tStreamingChannel& streamingChannel = ms_channel[channelIndex];
-    streamingChannel.LoadStatus = LOADSTATE_LOADED;
-    streamingChannel.iLoadingLevel = 0;
-    streamingChannel.iBlockCount = sectorCount;
-    streamingChannel.iBlockOffset = blockOffsetMimg;
-    streamingChannel.totalTries = 0;
-
+    CdStreamRead(channelId, ms_pStreamingBuffer[channelId], offsetAndHandle, sectorCountSum);
+    channel.LoadStatus = LOADSTATE_LOADED;
+    channel.iLoadingLevel = 0;
+    channel.sectorCount = sectorCountSum;
+    channel.offsetAndHandle = offsetAndHandle;
+    channel.totalTries = 0;
     if (m_bModelStreamNotLoaded)
         m_bModelStreamNotLoaded = false;
 #endif
@@ -2512,7 +2490,7 @@ void CStreaming::RetryLoadFile(int channelId) {
         }
         if (bStreamRead) {
             std::uint8_t* pBuffer = CStreaming::ms_pStreamingBuffer[channelId];
-            CdStreamRead(channelId, pBuffer, streamingChannel.iBlockOffset, streamingChannel.iBlockCount);
+            CdStreamRead(channelId, pBuffer, streamingChannel.offsetAndHandle, streamingChannel.sectorCount);
             streamingChannel.LoadStatus = LOADSTATE_LOADED;
             streamingChannel.iLoadingLevel = -600;
         }

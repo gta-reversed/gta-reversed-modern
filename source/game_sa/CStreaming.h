@@ -61,8 +61,8 @@ struct tStreamingChannel
     int modelStreamingBufferOffsets[16];
     eStreamingLoadState LoadStatus;
     int iLoadingLevel;
-    int iBlockOffset;
-    int iBlockCount;
+    int offsetAndHandle;
+    int sectorCount;
     int totalTries;
     eCdStreamStatus m_nCdStreamStatus;
 };
@@ -226,7 +226,7 @@ public:
     //! unused
      static void RequestFilesInChannel(int channelId);
      static void RequestModel(int dwModelId, unsigned int Streamingflags);
-     static void RequestModelStream(int streamNum);
+     static void RequestModelStream(int channelId);
     //! unused
      static void RequestPlayerSection(int modelId, char const *string, int streamingFlags);
      static void RequestSpecialChar(int modelId, char const *name, int flags);
