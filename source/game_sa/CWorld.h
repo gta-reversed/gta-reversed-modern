@@ -17,6 +17,7 @@
 #include "CVehicle.h"
 
 extern const std::int32_t MAX_PLAYERS = 2;
+extern const std::int32_t MAX_WORLD_UNITS = 6000;
 extern const std::int32_t MAX_SECTORS_X = 120;
 extern const std::int32_t MAX_SECTORS_Y = 120;
 extern const std::int32_t MAX_SECTORS = MAX_SECTORS_X * MAX_SECTORS_Y;
@@ -147,7 +148,32 @@ public:
     static bool ProcessLineOfSight(CVector const& origin, CVector const& target, CColPoint& outColPoint, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck, bool doShootThroughCheck);
     static void IncrementCurrentScanCode();
     static CPtrListSingleLink& GetLodPtrList(std::int32_t x, std::int32_t y);
-    static std::int32_t SectorFloor(float fSector) { return static_cast<std::int32_t>(floor(fSector)); }
+
+    // returns sector index in range 0 to 60 (covers half of the map) 
+    static float GetHalfMapSectorX(float fSector) { return fSector / (MAX_WORLD_UNITS / MAX_SECTORS_X); }
+    static float GetHalfMapSectorY(float fSector) { return fSector / (MAX_WORLD_UNITS / MAX_SECTORS_Y); }
+    // returns sector index in range 0 to 120 (covers full map) 
+    static std::int32_t GetSectorX(float fSector)
+    {
+        return static_cast<std::int32_t>(std::floor(GetHalfMapSectorX(fSector) + (MAX_SECTORS_X / 2)));
+    }
+    static std::int32_t GetSectorY(float fSector)
+    {
+        return static_cast<std::int32_t>(std::floor(GetHalfMapSectorY(fSector) + (MAX_SECTORS_Y / 2)));
+    }
+
+    // returns sector index in range 0 to 15 (covers half of the map) 
+    static float GetHalfMapLodSectorX(float fSector) { return fSector / (MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_X); }
+    static float GetHalfMapLodSectorY(float fSector) { return fSector / (MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_Y); }
+    // returns sector index in range 0 to 30 (covers full map) 
+    static std::int32_t GetLodSectorX(float fSector)
+    {
+        return static_cast<std::int32_t>(std::floor(GetHalfMapLodSectorX(fSector) + (MAX_LOD_PTR_LISTS_X / 2)));
+    }
+    static std::int32_t GetLodSectorY(float fSector)
+    {
+        return static_cast<std::int32_t>(std::floor(GetHalfMapLodSectorY(fSector) + (MAX_LOD_PTR_LISTS_Y / 2)));
+    }
 };
 
 extern unsigned int &FilledColPointIndex;

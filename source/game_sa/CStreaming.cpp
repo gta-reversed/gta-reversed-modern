@@ -204,10 +204,10 @@ void CStreaming::AddLodsToRequestList(CVector const& point, unsigned int streami
     float maxX = point.x + CRenderer::ms_fFarClipPlane;
     float minY = point.y - CRenderer::ms_fFarClipPlane;
     float maxY = point.y + CRenderer::ms_fFarClipPlane;
-    std::int32_t startSectorX = std::max(CWorld::SectorFloor((minX / 200.0f) + 15.0f), 0);
-    std::int32_t startSectorY = std::max(CWorld::SectorFloor((minY / 200.0f) + 15.0f), 0);
-    std::int32_t endSectorX = std::min(CWorld::SectorFloor((maxX / 200.0f) + 15.0f), MAX_LOD_PTR_LISTS_X - 1);
-    std::int32_t endSectorY = std::min(CWorld::SectorFloor((maxY / 200.0f) + 15.0f), MAX_LOD_PTR_LISTS_Y - 1);
+    std::int32_t startSectorX = std::max(CWorld::GetLodSectorX(minX), 0);
+    std::int32_t startSectorY = std::max(CWorld::GetLodSectorY(minY), 0);
+    std::int32_t endSectorX = std::min(CWorld::GetLodSectorX(maxX), MAX_LOD_PTR_LISTS_X - 1);
+    std::int32_t endSectorY = std::min(CWorld::GetLodSectorY(maxY), MAX_LOD_PTR_LISTS_Y - 1);
     for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (std::int32_t sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             CPtrList& lodList = CWorld::GetLodPtrList(sectorX, sectorY);
@@ -229,15 +229,15 @@ void CStreaming::AddModelsToRequestList(CVector const& point, unsigned int strea
     const float maxX = point.x + fRadius;
     const float minY = point.y - fRadius;
     const float maxY = point.y + fRadius;
-    const std::int32_t radius = static_cast<std::int32_t>(fRadius * 0.02f);
+    const std::int32_t radius = static_cast<std::int32_t>(CWorld::GetHalfMapSectorX(fRadius));
     const std::int32_t squaredRadius1 = (radius - 1) * (radius - 1);
     const std::int32_t squaredRadius2 = (radius + 2) * (radius + 2);
-    const std::int32_t pointX = CWorld::SectorFloor((point.x / 50.0f) + 60.0f);
-    const std::int32_t pointY = CWorld::SectorFloor((point.y / 50.0f) + 60.0f);
-    std::int32_t startSectorX = std::max(CWorld::SectorFloor((minX / 50.0f) + 60.0f), 0);
-    std::int32_t startSectorY = std::max(CWorld::SectorFloor((minY / 50.0f) + 60.0f), 0);
-    std::int32_t endSectorX = std::min(CWorld::SectorFloor((maxX / 50.0f) + 60.0f), MAX_SECTORS_X - 1);
-    std::int32_t endSectorY = std::min(CWorld::SectorFloor((maxY / 50.0f) + 60.0f), MAX_SECTORS_Y - 1);
+    const std::int32_t pointX = CWorld::GetSectorX(point.x);
+    const std::int32_t pointY = CWorld::GetSectorY(point.y);
+    std::int32_t startSectorX = std::max(CWorld::GetSectorX(minX), 0);
+    std::int32_t startSectorY = std::max(CWorld::GetSectorY(minY), 0);
+    std::int32_t endSectorX = std::min(CWorld::GetSectorX(maxX), MAX_SECTORS_X - 1);
+    std::int32_t endSectorY = std::min(CWorld::GetSectorY(maxY), MAX_SECTORS_Y - 1);
     for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         const std::int32_t distanceY = sectorY - pointY;
         const std::int32_t squaredDistanceY = distanceY * distanceY;
@@ -692,8 +692,8 @@ void CStreaming::DeleteRwObjectsAfterDeath(CVector const& point) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<CVector const&>(0x409210, point);
 #else
-    std::int32_t pointX = CWorld::SectorFloor((point.x / 50.0f) + 60.0f);
-    std::int32_t pointY = CWorld::SectorFloor((point.y / 50.0f) + 60.0f);
+    std::int32_t pointX = CWorld::GetSectorX(point.x);
+    std::int32_t pointY = CWorld::GetSectorY(point.y);
     for (std::int32_t sectorX = 0; sectorX < MAX_SECTORS_X; ++sectorX) {
         if (fabs(pointX - sectorX) > 3.0f) {
             for (std::int32_t sectorY = 0; sectorY < MAX_SECTORS_Y; ++sectorY) {
@@ -717,8 +717,8 @@ void CStreaming::DeleteRwObjectsBehindCamera(std::int32_t memoryToCleanInBytes) 
     if (static_cast<std::int32_t>(CStreaming::ms_memoryUsed) < memoryToCleanInBytes)
         return;
     const CVector& cameraPos = TheCamera.GetPosition();
-    std::int32_t pointX = CWorld::SectorFloor(cameraPos.x / 50.0f + 60.0f);
-    std::int32_t pointY = CWorld::SectorFloor(cameraPos.y / 50.0f + 60.0f);
+    std::int32_t pointX = CWorld::GetSectorX(cameraPos.x);
+    std::int32_t pointY = CWorld::GetSectorY(cameraPos.y);
     const CVector2D& cameraUp = TheCamera.GetMatrix()->up;
     if (fabs(cameraUp.y) < fabs(cameraUp.x)) {
         std::int32_t sectorStartY = std::max(pointY - 10, 0);
@@ -2803,10 +2803,10 @@ void CStreaming::InstanceLoadedModels(CVector const& point) {
     const float maxX = point.x + fRadius;
     const float minY = point.y - fRadius;
     const float maxY = point.y + fRadius;
-    std::int32_t startSectorX = std::max(CWorld::SectorFloor((minX / 50.0f) + 60.0f), 0);
-    std::int32_t startSectorY = std::max(CWorld::SectorFloor((minY / 50.0f) + 60.0f), 0);
-    std::int32_t endSectorX = std::min(CWorld::SectorFloor((maxX / 50.0f) + 60.0f), MAX_SECTORS_X - 1);
-    std::int32_t endSectorY = std::min(CWorld::SectorFloor((maxY / 50.0f) + 60.0f), MAX_SECTORS_Y - 1);
+    std::int32_t startSectorX = std::max(CWorld::GetSectorX(minX), 0);
+    std::int32_t startSectorY = std::max(CWorld::GetSectorY(minY), 0);
+    std::int32_t endSectorX = std::min(CWorld::GetSectorX(maxX), MAX_SECTORS_X - 1);
+    std::int32_t endSectorY = std::min(CWorld::GetSectorY(maxY), MAX_SECTORS_Y - 1);
     for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (std::int32_t sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
