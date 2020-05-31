@@ -1221,7 +1221,7 @@ bool CPedIntelligence::IsPedGoingForCarDoor() {
 // Converted from thiscall float CPedIntelligence::CanSeeEntityWithLights(CEntity const*pEntity,bool arg2) 0x605550 
 float CPedIntelligence::CanSeeEntityWithLights(CEntity* pEntity, int unUsed) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<double, 0x605550, CPedIntelligence*, CEntity const*, bool>(this, pEntity, unUsed);
+    return plugin::CallMethodAndReturn<float, 0x605550, CPedIntelligence*, CEntity const*, bool>(this, pEntity, unUsed);
 #else
     if (pEntity->m_nType != ENTITY_TYPE_PED)
         return LIGHT_AI_LEVEL_MAX;

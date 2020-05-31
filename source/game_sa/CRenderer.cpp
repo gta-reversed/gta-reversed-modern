@@ -57,12 +57,29 @@ void CRenderer::InjectHooks()
     HookInstall(0x553F60, &CRenderer::SetupMapEntityVisibility, 7);
     HookInstall(0x554650, &CRenderer::SetupBigBuildingVisibility, 7);
     HookInstall(0x553540, &CRenderer::SetupScanLists, 7);
+    HookInstall(0x5535D0, &CRenderer::ScanSectorList_ListModels, 5);
+    HookInstall(0x553650, &ScanSectorList_ListModelsVisible, 5);
     HookInstall(0x554840, &CRenderer::ScanSectorList, 7);
     HookInstall(0x554B10, &CRenderer::ScanBigBuildingList, 5);
     HookInstall(0x554EB0, &CRenderer::ShouldModelBeStreamed, 5);
     HookInstall(0x555680, &CRenderer::ScanPtrList_RequestModels, 5);
     HookInstall(0x5556E0, &CRenderer::ConstructRenderList, 5);
     HookInstall(0x555900, &CRenderer::ScanSectorList_RequestModels, 5);
+    HookInstall(0x554FE0, &CRenderer::ScanWorld, 5);
+    HookInstall(0x554C60, &CRenderer::GetObjectsInFrustum, 5);
+    HookInstall(0x555960, &CRenderer::RequestObjectsInFrustum, 5);
+    HookInstall(0x555CB0, &CRenderer::RequestObjectsInDirection, 5);
+
+}
+
+void CWorldScan::ScanWorld(CVector2D *points, std::int32_t pointsCount, tScanFunction scanFunction)
+{
+    plugin::Call<0x72CAE0,CVector2D*, std::int32_t, tScanFunction>(points,pointsCount, scanFunction);
+}
+
+void CWorldScan::SetExtraRectangleToScan(float minX, float maxX, float minY, float maxY)
+{
+    plugin::Call<0x72D5E0, float, float, float, float>(minX, maxX, minY, maxY);
 }
 
 void CRenderer::Init() {
@@ -189,14 +206,6 @@ void CRenderer::AddEntityToRenderList(CEntity* pEntity, float fDistance)
         ms_nNoOfVisibleEntities++;
     }
 #endif
-}
-
-void CRenderer::ScanSectorList_ListModels(int sector_x, int sector_y) {
-    plugin::Call<0x5535D0, int, int>(sector_x, sector_y);
-}
-
-void CRenderer::ScanSectorList_ListModelsVisible(int sector_x, int sector_y) {
-    plugin::Call<0x553650, int, int>(sector_x, sector_y);
 }
 
 tRenderListEntry* CRenderer::GetLodRenderListBase() {
@@ -749,6 +758,57 @@ int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
 #endif
 }
 
+void CRenderer::ScanSectorList_ListModels(std::int32_t sectorX, std::int32_t sectorY) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x5535D0, std::int32_t, std::int32_t>(sectorX, sectorY);
+#else
+    SetupScanLists(sectorX, sectorY);
+    CPtrListDoubleLink** pScanLists = reinterpret_cast<CPtrListDoubleLink**>(&PC_Scratch);
+    for (std::int32_t scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
+        CPtrListDoubleLink* pDoubleLinkList = pScanLists[scanListIndex];
+        if (pDoubleLinkList) {
+            for (auto pDoubleLinkNode = pDoubleLinkList->GetNode(); pDoubleLinkNode; pDoubleLinkNode = pDoubleLinkNode->pNext) {
+                CEntity* entity = reinterpret_cast<CEntity*>(pDoubleLinkNode->pItem);
+                if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
+                    entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                    if (entity->m_nAreaCode == CGame::currArea || entity->m_nAreaCode == 13) {
+                        *gpOutEntitiesForGetObjectsInFrustum = entity;
+                        gpOutEntitiesForGetObjectsInFrustum++;
+                    }
+                }
+            }
+        }
+    }
+#endif
+}
+
+void CRenderer::ScanSectorList_ListModelsVisible(std::int32_t sectorX, std::int32_t sectorY) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x553650, std::int32_t, std::int32_t>(sectorX, sectorY);
+#else
+    SetupScanLists(sectorX, sectorY);
+    CEntity** pEntity = gpOutEntitiesForGetObjectsInFrustum;
+    CPtrListDoubleLink** pScanLists = reinterpret_cast<CPtrListDoubleLink**>(&PC_Scratch);
+    for (std::int32_t scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
+        CPtrListDoubleLink* pDoubleLinkList = pScanLists[scanListIndex];
+        if (pDoubleLinkList) {
+            for (auto pDoubleLinkNode = pDoubleLinkList->GetNode(); pDoubleLinkNode; pDoubleLinkNode = pDoubleLinkNode->pNext) {
+                CEntity* entity = reinterpret_cast<CEntity*>(pDoubleLinkNode->pItem);
+                if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
+                    entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                    if (entity->m_nAreaCode == CGame::currArea || entity->m_nAreaCode == 13) {
+                        if (entity->IsVisible()) {
+                            *gpOutEntitiesForGetObjectsInFrustum = entity;
+                            gpOutEntitiesForGetObjectsInFrustum++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+#endif
+}
+
 void CRenderer::ScanSectorList(std::int32_t sectorX, std::int32_t sectorY) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x554840, std::int32_t, std::int32_t >(sectorX, sectorY);
@@ -764,8 +824,7 @@ void CRenderer::ScanSectorList(std::int32_t sectorX, std::int32_t sectorY) {
     }
     SetupScanLists(sectorX, sectorY);
     CPtrListDoubleLink** pScanLists = reinterpret_cast<CPtrListDoubleLink **>(&PC_Scratch);
-    const int kiMaxScanLists = 5;
-    for (int scanListIndex = 0; scanListIndex < kiMaxScanLists; scanListIndex++) {
+    for (std::int32_t scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
         CPtrListDoubleLink* pDoubleLinkList = pScanLists[scanListIndex];
         if (pDoubleLinkList) {
             CPtrNodeDoubleLink* pDoubleLinkNode = pDoubleLinkList->GetNode();
@@ -888,11 +947,6 @@ void CRenderer::ScanBigBuildingList(std::int32_t sectorX, std::int32_t sectorY) 
 #endif
 }
 
-// Converted from cdecl int CRenderer::GetObjectsInFrustum(CEntity **outEntities,float distance,RwMatrixTag *transformMat) 0x554C60
-int CRenderer::GetObjectsInFrustum(CEntity** outEntities, float distance, RwMatrixTag* transformMat) {
-    return plugin::CallAndReturn<int, 0x554C60, CEntity**, float, RwMatrixTag*>(outEntities, distance, transformMat);
-}
-
 bool CRenderer::ShouldModelBeStreamed(CEntity* entity, CVector const& point, float farClip) {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<bool, 0x554EB0, CEntity*, CVector const&, float>(entity, point, farClip);
@@ -909,11 +963,6 @@ bool CRenderer::ShouldModelBeStreamed(CEntity* entity, CVector const& point, flo
         return true;
     return false;
 #endif
-}
-
-// Converted from cdecl void CRenderer::ScanWorld(void) 0x554FE0
-void CRenderer::ScanWorld() {
-    plugin::Call<0x554FE0>();
 }
 
 void CRenderer::ScanPtrList_RequestModels(CPtrList& list) {
@@ -959,7 +1008,7 @@ void CRenderer::ConstructRenderList() {
             ms_lowLodDistScale = fScale * (2.2f - 1.0f) + 1.0f;
         }
     }
-    ms_lowLodDistScale *= CTimeCycle::m_CurrentColours.m_fAmbientRed;
+    ms_lowLodDistScale *= CTimeCycle::m_CurrentColours.m_fLodDistMult;
     CMirrors::BeforeConstructRenderList();
     COcclusion::ProcessBeforeRendering();
     ms_nNoOfVisibleEntities = 0;
@@ -988,17 +1037,190 @@ void CRenderer::ScanSectorList_RequestModels(std::int32_t sectorX, std::int32_t 
 #endif
 }
 
-// Converted from cdecl void CRenderer::RequestObjectsInFrustum(RwMatrixTag *transformMat,int modelRequesFlags) 0x555960
-void CRenderer::RequestObjectsInFrustum(RwMatrixTag* transformMat, int modelRequesFlags) {
-    plugin::Call<0x555960, RwMatrixTag*, int>(transformMat, modelRequesFlags);
+void CRenderer::ScanWorld() {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x554FE0>();
+#else
+    CVector frustumPoints[13];
+    const float farPlane = TheCamera.m_pRwCamera->farPlane;
+    const float width = TheCamera.m_pRwCamera->viewWindow.x;
+    const float height = TheCamera.m_pRwCamera->viewWindow.y;
+    frustumPoints[0] = CVector(0.0f, 0.0f, 0.0f);
+    frustumPoints[1].x = frustumPoints[4].x = -(farPlane * width);
+    frustumPoints[1].y = frustumPoints[2].y = farPlane * height;
+    frustumPoints[2].x = frustumPoints[3].x = farPlane * width;
+    frustumPoints[3].y = frustumPoints[4].y = -(farPlane * height);
+    frustumPoints[1].z = frustumPoints[2].z = frustumPoints[3].z = frustumPoints[4].z = farPlane;
+    for (std::int32_t i = 5; i < 13; i++) {
+        frustumPoints[i] = CVector(0.0f, 0.0f, 0.0f);
+    }
+    CRenderer::m_pFirstPersonVehicle = 0;
+    CVisibilityPlugins::InitAlphaEntityList();
+    CWorld::IncrementCurrentScanCode();
+    static CVector lastCameraPosition;
+    static CVector lastCameraMatrixUp;
+    CVector distance = TheCamera.GetPosition() - lastCameraPosition;
+    static bool bUnusedBool = false;
+    if (DotProduct(distance, lastCameraMatrixUp) >= 16.0f || DotProduct(TheCamera.m_mCameraMatrix.up, lastCameraMatrixUp) <= 0.98f)
+        bUnusedBool = 0;
+    else
+        bUnusedBool = 1;
+    lastCameraPosition = TheCamera.GetPosition();
+    lastCameraMatrixUp = TheCamera.m_mCameraMatrix.up;
+    frustumPoints[5] = (frustumPoints[1] * MAX_LOD_DISTANCE) / farPlane;
+    frustumPoints[7].x = frustumPoints[5].x / 5;
+    frustumPoints[7].y = frustumPoints[5].y / 5;
+    frustumPoints[7].z = frustumPoints[5].z;
+
+    frustumPoints[6] = (frustumPoints[2] * MAX_LOD_DISTANCE) / farPlane;
+    frustumPoints[8].x = frustumPoints[6].x / 5;
+    frustumPoints[8].y = frustumPoints[6].y / 5;
+    frustumPoints[8].z = frustumPoints[6].z;
+
+    frustumPoints[9] = (frustumPoints[3] * MAX_LOD_DISTANCE) / farPlane;
+    frustumPoints[11].x = frustumPoints[9].x / 5;
+    frustumPoints[11].y = frustumPoints[9].y / 5;
+    frustumPoints[11].z = frustumPoints[9].z;
+
+    frustumPoints[10] = (frustumPoints[4] * MAX_LOD_DISTANCE) / farPlane;
+    frustumPoints[12].x = frustumPoints[10].x / 5;
+    frustumPoints[12].y = frustumPoints[10].y / 5;
+    frustumPoints[12].z = frustumPoints[10].z;
+    RwV3dTransformPoints(frustumPoints, frustumPoints, 13, TheCamera.GetRwMatrix());
+    CRenderer::m_loadingPriority = 0;
+    CVector2D points[5];
+    points[0].x = CWorld::GetSectorfX(frustumPoints[0].x);
+    points[0].y = CWorld::GetSectorfY(frustumPoints[0].y);
+    points[1].x = CWorld::GetSectorfX(frustumPoints[5].x);
+    points[1].y = CWorld::GetSectorfY(frustumPoints[5].y);
+    points[2].x = CWorld::GetSectorfX(frustumPoints[6].x);
+    points[2].y = CWorld::GetSectorfY(frustumPoints[6].y);
+    points[3].x = CWorld::GetSectorfX(frustumPoints[9].x);
+    points[3].y = CWorld::GetSectorfY(frustumPoints[9].y);
+    points[4].x = CWorld::GetSectorfX(frustumPoints[10].x);
+    points[4].y = CWorld::GetSectorfY(frustumPoints[10].y);
+    CWorldScan::ScanWorld(points, 5, CRenderer::ScanSectorList);
+    points[0].x = CWorld::GetLodSectorfX(frustumPoints[0].x);
+    points[0].y = CWorld::GetLodSectorfY(frustumPoints[0].y);
+    points[1].x = CWorld::GetLodSectorfX(frustumPoints[1].x);
+    points[1].y = CWorld::GetLodSectorfY(frustumPoints[1].y);
+    points[2].x = CWorld::GetLodSectorfX(frustumPoints[2].x);
+    points[2].y = CWorld::GetLodSectorfY(frustumPoints[2].y);
+    points[3].x = CWorld::GetLodSectorfX(frustumPoints[3].x);
+    points[3].y = CWorld::GetLodSectorfY(frustumPoints[3].y);
+    points[4].x = CWorld::GetLodSectorfX(frustumPoints[4].x);
+    points[4].y = CWorld::GetLodSectorfY(frustumPoints[4].y );
+    CWorldScan::ScanWorld(points, 5, CRenderer::ScanBigBuildingList);
+#endif
 }
 
-// Converted from cdecl void CRenderer::RequestObjectsInDirection(CVector const&posn,float angle,int modelRequesFlags) 0x555CB0
-void CRenderer::RequestObjectsInDirection(CVector const& posn, float angle, int modelRequesFlags) {
-    plugin::Call<0x555CB0, CVector const&, float, int>(posn, angle, modelRequesFlags);
+std::int32_t CRenderer::GetObjectsInFrustum(CEntity** outEntities, float farPlane, RwMatrix* transformMatrix)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<std::int32_t, 0x554C60, CEntity**, float, RwMatrixTag*>(outEntities, farPlane, transformMatrix);
+#else
+    CVector frustumPoints[13];
+    const float width = TheCamera.m_pRwCamera->viewWindow.x;
+    const float height = TheCamera.m_pRwCamera->viewWindow.y;
+    frustumPoints[0] = CVector(0.0f, 0.0f, 0.0f);
+    frustumPoints[1].x = frustumPoints[4].x = -(farPlane * width);
+    frustumPoints[1].y = frustumPoints[2].y = farPlane * height;
+    frustumPoints[2].x = frustumPoints[3].x = farPlane * width; 
+    frustumPoints[3].y = frustumPoints[4].y = -(farPlane * height);
+    frustumPoints[1].z = frustumPoints[2].z = frustumPoints[3].z = frustumPoints[4].z = farPlane;
+    for (std::int32_t i = 5; i < 13; i++) {
+        frustumPoints[i] = CVector(0.0f, 0.0f, 0.0f);
+    }
+    CWorld::IncrementCurrentScanCode();
+    RwMatrix* theTransformMatrix = transformMatrix;
+    if (!theTransformMatrix)
+        theTransformMatrix = TheCamera.GetRwMatrix();
+    CRenderer::ms_vecCameraPosition = TheCamera.GetPosition();
+    CRenderer::ms_fFarClipPlane = MAX_LOD_DISTANCE;
+    if (theTransformMatrix->at.z > 0.0f) {
+        frustumPoints[1] = frustumPoints[4];
+        frustumPoints[2] = frustumPoints[3];
+    }
+    RwV3dTransformPoints(frustumPoints, frustumPoints, 13, theTransformMatrix);
+    gpOutEntitiesForGetObjectsInFrustum = outEntities;
+    CVector2D points[3];
+    for (std::int32_t i = 0; i < 3; i++) {
+        points[i].x = CWorld::GetSectorfX(frustumPoints[i].x);
+        points[i].y = CWorld::GetSectorfY(frustumPoints[i].y);
+    }
+    if (transformMatrix)
+        CWorldScan::ScanWorld(points, 3, CRenderer::ScanSectorList_ListModels);
+    else
+        CWorldScan::ScanWorld(points, 3, CRenderer::ScanSectorList_ListModelsVisible);
+    return gpOutEntitiesForGetObjectsInFrustum - outEntities;
+#endif
 }
 
-void CRenderer::SetupScanLists(int sectorX, int sectorY)
+void CRenderer::RequestObjectsInFrustum(RwMatrix* transformMatrix, std::int32_t modelRequestFlags) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x555960, RwMatrixTag*, std::int32_t>(transformMatrix, modelRequestFlags);
+#else
+    const float farPlane = TheCamera.m_pRwCamera->farPlane;
+    const float width = TheCamera.m_pRwCamera->viewWindow.x;
+    const float height = TheCamera.m_pRwCamera->viewWindow.y;
+    CVector frustumPoints[13];
+    frustumPoints[0] = CVector(0.0f, 0.0f, 0.0f);
+    frustumPoints[1].x = frustumPoints[4].x = -(farPlane * width);
+    frustumPoints[1].y = frustumPoints[2].y = farPlane * height;
+    frustumPoints[2].x = frustumPoints[3].x = farPlane * width;
+    frustumPoints[3].y = frustumPoints[4].y = -(farPlane * height);
+    frustumPoints[1].z = frustumPoints[2].z = frustumPoints[3].z = frustumPoints[4].z = farPlane;
+    for (std::int32_t i = 5; i < 13; i++ ) {
+        frustumPoints[i] = CVector(0.0f, 0.0f, 0.0f);
+    }
+    CWorld::IncrementCurrentScanCode();
+    if (!transformMatrix)
+        transformMatrix = TheCamera.GetRwMatrix();
+    ms_vecCameraPosition = transformMatrix->pos;
+    ms_fFarClipPlane = MAX_LOD_DISTANCE;
+    gnRendererModelRequestFlags = modelRequestFlags;
+    if (transformMatrix->at.z > 0.0f) {
+        frustumPoints[5] = (frustumPoints[4] * MAX_LOD_DISTANCE) / farPlane;
+        frustumPoints[6] = (frustumPoints[3] * MAX_LOD_DISTANCE) / farPlane;
+    }
+    else {
+        frustumPoints[5] = (frustumPoints[1] * MAX_LOD_DISTANCE) / farPlane;
+        frustumPoints[6] = (frustumPoints[2] * MAX_LOD_DISTANCE) / farPlane;
+    }
+    RwV3dTransformPoints(frustumPoints, frustumPoints, 13, transformMatrix);
+    CVector2D points[3];
+    points[0].x = CWorld::GetSectorfX(frustumPoints[0].x);
+    points[0].y = CWorld::GetSectorfY(frustumPoints[0].y);
+    points[1].x = CWorld::GetSectorfX(frustumPoints[5].x);
+    points[1].y = CWorld::GetSectorfY(frustumPoints[5].y);
+    points[2].x = CWorld::GetSectorfX(frustumPoints[6].x);
+    points[2].y = CWorld::GetSectorfY(frustumPoints[6].y);
+    CWorldScan::ScanWorld(points, 3, ScanSectorList_RequestModels);
+#endif
+}
+
+// modelRequesFlags is always set to `STREAMING_LOADING_SCENE` when this function is called
+void CRenderer::RequestObjectsInDirection(CVector const& posn, float angle, std::int32_t modelRequesFlags) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x555CB0, CVector const&, float, std::int32_t>(posn, angle, modelRequesFlags);
+#else
+    RwMatrix matrix; 
+    matrix.at = { 0.0f, 0.0f, 1.0f };
+    matrix.up = { 0.0f, 1.0f, 0.0f };
+    matrix.right = { 1.0f, 0.0f, 0.0f };
+    matrix.pos = { 0.0f, 0.0f, 0.0f };
+    matrix.flags = rwMATRIXINTERNALIDENTITY | rwMATRIXTYPEORTHONORMAL;
+    RwV3d axis = { 1.0f, 0.0f, 0.0f };
+    RwMatrixRotate(&matrix, &axis, 90.0f, rwCOMBINEREPLACE);
+    angle = ((angle * 180.0f) / PI) + 180.0f;
+    axis = { 0.0f, 0.0f, 1.0f };
+    RwMatrixRotate(&matrix, &axis, angle, rwCOMBINEPOSTCONCAT);
+    RwMatrixTranslate(&matrix, &posn, rwCOMBINEPOSTCONCAT);
+    RequestObjectsInFrustum(&matrix, modelRequesFlags);
+#endif
+}
+
+void CRenderer::SetupScanLists(std::int32_t sectorX, std::int32_t sectorY)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x553540, int, int>(sectorX, sectorY);

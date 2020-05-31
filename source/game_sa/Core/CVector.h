@@ -34,6 +34,11 @@ public:
     // Subtracts left - right and stores result
     void Difference(const CVector& left, const CVector &right);
 
+    void operator=(const RwV3d& right)
+    {
+        x = right.x; y = right.y; z = right.z;
+    }
+
     void operator=(const CVector& right);
     void operator+=(const CVector& right);
     void operator-=(const CVector& right);

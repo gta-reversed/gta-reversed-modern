@@ -20,6 +20,7 @@ const std::uint32_t TOTAL_SCRIPTED_TASKS = 128;
 const std::uint32_t TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES = 48;
 
 // used in CRenderer
+const std::int32_t TOTAL_ENTITY_SCAN_LISTS = 5;
 const float MAX_LOD_DISTANCE = 300.0f;
 const float MAX_LOWLOD_DISTANCE = 150.0f;
 const float MAX_FADING_DISTANCE = 20.0f;

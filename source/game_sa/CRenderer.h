@@ -40,7 +40,15 @@ extern std::int32_t MAX_VISIBLE_ENTITY_PTRS; // default 1000
 extern std::int32_t MAX_VISIBLE_LOD_PTRS; // default 1000
 extern std::int32_t MAX_VISIBLE_SUPERLOD_PTRS; // default 50
 
-class  CRenderer {
+class CWorldScan
+{
+public:
+    using tScanFunction = void(__cdecl*)(std::int32_t, std::int32_t);
+    static void ScanWorld(CVector2D* points, std::int32_t pointsCount, tScanFunction scanFunction);
+    static void SetExtraRectangleToScan(float minX, float maxX, float minY, float maxY);
+};
+
+class CRenderer {
 public:
     static bool &ms_bRenderTunnels;
     static bool &ms_bRenderOutsideTunnels;
@@ -74,8 +82,6 @@ public:
     static void RenderOneNonRoad(CEntity* entity);
     static void RemoveVehiclePedLights(CPhysical* entity);
     static void AddEntityToRenderList(CEntity* entity, float distance);
-    static void ScanSectorList_ListModels(int sector_x, int sector_y);
-    static void ScanSectorList_ListModelsVisible(int sector_x, int sector_y);
     static tRenderListEntry* GetLodRenderListBase();
     static tRenderListEntry* GetLodDontRenderListBase();
     static void ResetLodRenderLists();
@@ -91,18 +97,20 @@ public:
     static int SetupMapEntityVisibility(CEntity* entity, CBaseModelInfo* modelInfo, float distance, bool bIsTimeInRange);
     static int SetupEntityVisibility(CEntity* entity, float* outDistance);
     static int SetupBigBuildingVisibility(CEntity* entity, float* outDistance);
+    static void ScanSectorList_ListModels(std::int32_t sectorX, std::int32_t sectorY);
+    static void ScanSectorList_ListModelsVisible(std::int32_t sectorX, std::int32_t sectorY);
     static void ScanSectorList(std::int32_t sectorX, std::int32_t sectorY);
     static void ScanBigBuildingList(std::int32_t sectorX, std::int32_t sectorY);
-    // returns objects count
-    static int GetObjectsInFrustum(CEntity** outEntities, float distance, RwMatrixTag* transformMat);
     static bool ShouldModelBeStreamed(CEntity* entity, CVector const& origin, float farClip);
-    static void ScanWorld();
     static void ScanPtrList_RequestModels(CPtrList& list);
     static void ConstructRenderList();
     static void ScanSectorList_RequestModels(std::int32_t sectorX, std::int32_t sectorY);
-    static void RequestObjectsInFrustum(RwMatrixTag* transformMat, int modelRequesFlags);
-    static void RequestObjectsInDirection(CVector const& posn, float angle, int modelRequesFlags);
-    static void SetupScanLists(int sectorX, int sectorY);
+    static void ScanWorld();
+    // returns objects count
+    static std::int32_t GetObjectsInFrustum(CEntity** outEntities, float farPlane, RwMatrix* transformMatrix);
+    static void RequestObjectsInFrustum(RwMatrix* transformMatrix, std::int32_t modelRequestFlags);
+    static void RequestObjectsInDirection(CVector const& posn, float angle, std::int32_t modelRequesFlags);
+    static void SetupScanLists(std::int32_t sectorX, std::int32_t sectorY);
 };
 
 extern unsigned int &gnRendererModelRequestFlags;

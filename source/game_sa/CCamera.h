@@ -482,6 +482,7 @@ public:
      bool VectorMoveRunning();
      void VectorTrackLinear(CVector *TrackLinearStartPoint, CVector *TrackLinearEndPoint, float duration, bool bEase);
      bool VectorTrackRunning();
+     inline RwMatrix* GetRwMatrix() { return &((RwFrame*)m_pRwCamera->object.object.parent)->modelling; }
 
     //! unused
      static void DontProcessObbeCinemaCamera();
