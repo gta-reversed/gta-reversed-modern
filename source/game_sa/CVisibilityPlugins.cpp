@@ -8,17 +8,19 @@ Do not delete this comment block. Respect others' work!
 #include "StdInc.h"
 
 int& CVisibilityPlugins::ms_atomicPluginOffset = *(int *)0x8D608C;
-
-CLinkList<CVisibilityPlugins::AlphaObjectInfo>& AlphaEntityList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC88120;
-CLinkList<CVisibilityPlugins::AlphaObjectInfo>& AlphaList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC88070;
-CLinkList<CVisibilityPlugins::AlphaObjectInfo>& AlphaBoatAtomicList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC880C8;
-CLinkList<CVisibilityPlugins::AlphaObjectInfo>& AlphaUnderwaterEntityList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC88178;
-CLinkList<CVisibilityPlugins::AlphaObjectInfo>& AlphaReallyDrawLastList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC881D0;
-
+CLinkList<CVisibilityPlugins::AlphaObjectInfo>& CVisibilityPlugins::m_alphaEntityList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC88120;
+CLinkList<CVisibilityPlugins::AlphaObjectInfo>& CVisibilityPlugins::m_alphaList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC88070;
+CLinkList<CVisibilityPlugins::AlphaObjectInfo>& CVisibilityPlugins::m_alphaBoatAtomicList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC880C8;
+CLinkList<CVisibilityPlugins::AlphaObjectInfo>& CVisibilityPlugins::m_alphaUnderwaterEntityList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC88178;
+CLinkList<CVisibilityPlugins::AlphaObjectInfo>& CVisibilityPlugins::m_alphaReallyDrawLastList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC881D0;
 
 void CVisibilityPlugins::InjectHooks() {
    HookInstall(0x734530, &CVisibilityPlugins::InitAlphaAtomicList, 7);
    HookInstall(0x734540, &CVisibilityPlugins::InitAlphaEntityList, 7);
+   HookInstall(0x733DD0, &CVisibilityPlugins::InsertEntityIntoEntityList, 5);
+   HookInstall(0x733D90, &CVisibilityPlugins::InsertEntityIntoUnderwaterEntities, 5);
+   HookInstall(0x734570, &CVisibilityPlugins::InsertEntityIntoSortedList, 5);
+   HookInstall(0x732B40, &CVisibilityPlugins::RenderEntity, 5);
    HookInstall(0x733E90, &CVisibilityPlugins::RenderAlphaAtomics, 7);
    HookInstall(0x733EC0, &CVisibilityPlugins::RenderBoatAlphaAtomics, 7);
    HookInstall(0x733F10, &CVisibilityPlugins::RenderFadingEntities, 7);
@@ -155,7 +157,7 @@ void CVisibilityPlugins::InitAlphaAtomicList() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x734530>();
 #else
-    AlphaList.Clear();
+    m_alphaList.Clear();
 #endif
 }
 
@@ -165,15 +167,41 @@ void CVisibilityPlugins::InitAlphaEntityList() {
     plugin::Call<0x734540>();
 
 #else
-    AlphaEntityList.Clear();
-    AlphaBoatAtomicList.Clear();
-    AlphaUnderwaterEntityList.Clear();
-    AlphaReallyDrawLastList.Clear();
+    m_alphaEntityList.Clear();
+    m_alphaBoatAtomicList.Clear();
+    m_alphaUnderwaterEntityList.Clear();
+    m_alphaReallyDrawLastList.Clear();
 #endif
 }
 // Converted from cdecl void CVisibilityPlugins::Initialise(void)	0x733A20
 void CVisibilityPlugins::Initialise() {
     plugin::Call<0x733A20>();
+}
+
+bool CVisibilityPlugins::InsertEntityIntoEntityList(CEntity* entity, float distance, void* callback)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<bool, 0x733DD0, CEntity*, float, void*>(entity, distance, callback);
+#else
+    AlphaObjectInfo info;
+    info.m_entity = entity;
+    info.m_pCallback = callback;
+    info.m_distance = distance;
+    return m_alphaEntityList.InsertSorted(info);
+#endif
+}
+
+bool CVisibilityPlugins::InsertEntityIntoUnderwaterEntities(CEntity* entity, float distance)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<bool, 0x733D90, CEntity*, float>(entity, distance);
+#else
+    AlphaObjectInfo entityAlphaObjectInfo;
+    entityAlphaObjectInfo.m_distance = distance;
+    entityAlphaObjectInfo.m_entity = entity;
+    entityAlphaObjectInfo.m_pCallback = CVisibilityPlugins::RenderEntity;
+    return m_alphaUnderwaterEntityList.InsertSorted(entityAlphaObjectInfo);
+#endif
 }
 
 // Converted from cdecl bool CVisibilityPlugins::InsertAtomicIntoReallyDrawLastList(RpAtomic *pRpAtomic,float arg2)	0x733E10
@@ -187,8 +215,16 @@ bool CVisibilityPlugins::InsertEntityIntoReallyDrawLastList(CEntity* pEntity, fl
 }
 
 // Converted from cdecl bool CVisibilityPlugins::InsertEntityIntoSortedList(CEntity * pEntity,float distance)	0x734570
-bool CVisibilityPlugins::InsertEntityIntoSortedList(CEntity* pEntity, float distance) {
-    return plugin::CallAndReturn<bool, 0x734570, CEntity*, float>(pEntity, distance);
+bool CVisibilityPlugins::InsertEntityIntoSortedList(CEntity* entity, float distance) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<bool, 0x734570, CEntity*, float>(entity, distance);
+#else
+    if (entity->m_nModelIndex == MI_GRASSHOUSE && InsertEntityIntoReallyDrawLastList(entity, distance))
+        return true;
+    if (entity->m_bUnderwater)
+        return InsertEntityIntoUnderwaterEntities(entity, distance);
+    return InsertEntityIntoEntityList(entity, distance, CVisibilityPlugins::RenderEntity);
+#endif
 }
 
 // Converted from cdecl bool CVisibilityPlugins::IsAtomicVisible(RpAtomic *pRpAtomic)	0x732990
@@ -216,7 +252,7 @@ void CVisibilityPlugins::RenderAlphaAtomics() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x733E90>();
 #else
-    RenderOrderedList(AlphaList);
+    RenderOrderedList(m_alphaList);
 #endif
 }
 
@@ -225,20 +261,51 @@ void CVisibilityPlugins::RenderAtomicWithAlphaCB(RpAtomic* pRpAtomic, void* pDat
     plugin::Call<0x732660, RpAtomic*, void*>(pRpAtomic, pData);
 }
 
-// Converted from cdecl void CVisibilityPlugins::RenderBoatAlphaAtomics(void)	0x733EC0
 void CVisibilityPlugins::RenderBoatAlphaAtomics() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x733EC0>();
 #else
     RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
-    RenderOrderedList(AlphaBoatAtomicList);
+    RenderOrderedList(m_alphaBoatAtomicList);
     RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
 #endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::RenderEntity(void *entity,bool unused,float arg3)	0x732B40
-void CVisibilityPlugins::RenderEntity(void* entity, bool unused, float arg3) {
-    plugin::Call<0x732B40, void*, bool, float>(entity, unused, arg3);
+void CVisibilityPlugins::RenderEntity(CEntity* entity, int unused, float distance) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x732B40, CEntity*, int, float>(entity, unused, distance);
+#else
+    if (!entity->m_pRwObject)
+        return;
+    CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex];
+    if (pModelInfo->bDontWriteZBuffer)  
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, 0);
+    if (!entity->m_bDistanceFade) {
+        if (CGame::currArea || pModelInfo->bDontWriteZBuffer)
+            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)0);
+        else
+            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)100u);
+        CRenderer::RenderOneNonRoad(entity);
+    }
+    else {
+        RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)0);
+        float alpha = CalculateFadingAtomicAlpha(pModelInfo, entity, distance);
+        entity->m_bImBeingRendered = true;
+        if (!entity->m_bBackfaceCulled)
+            RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+        bool bLightingSetup = entity->SetupLighting();
+        if (entity->m_pRwObject->type == 1)
+            RenderFadingAtomic(pModelInfo, entity->m_pRwAtomic, alpha);
+        else
+            RenderFadingClump(pModelInfo, entity->m_pRwClump, alpha);
+        entity->RemoveLighting(bLightingSetup);
+        entity->m_bImBeingRendered = false;
+        if (!entity->m_bBackfaceCulled)
+            RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+    }
+    if (pModelInfo->bDontWriteZBuffer)
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+#endif
 }
 
 // Converted from cdecl void CVisibilityPlugins::RenderFadingAtomic(CBaseModelInfo *pBaseModelInfo,RpAtomic *pRpAtomic,int dwAlpha)	0x732610
@@ -261,7 +328,7 @@ void CVisibilityPlugins::RenderFadingEntities() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x733F10>();
 #else
-    RenderOrderedList(AlphaEntityList);
+    RenderOrderedList(m_alphaEntityList);
     RenderBoatAlphaAtomics();
 #endif
 }
@@ -270,7 +337,7 @@ void CVisibilityPlugins::RenderFadingUnderwaterEntities() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x7337D0>();
 #else
-    RenderOrderedList(AlphaUnderwaterEntityList);
+    RenderOrderedList(m_alphaUnderwaterEntityList);
 #endif
 }
 
@@ -310,17 +377,17 @@ void CVisibilityPlugins::RenderReallyDrawLastObjects() {
     plugin::Call<0x733800>();
 #else
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, 0);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)1);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)1);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)1);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
     RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)1);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
     SetAmbientColours();
     DeActivateDirectional();
-    RenderOrderedList(AlphaReallyDrawLastList);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, 0);
+    RenderOrderedList(m_alphaReallyDrawLastList);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE, FALSE);
 #endif
 }
 

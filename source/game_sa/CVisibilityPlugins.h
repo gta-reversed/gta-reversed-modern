@@ -21,17 +21,23 @@ public:
    unsigned short m_wFlags;
 };
 
-class  CVisibilityPlugins
+class CVisibilityPlugins
 {
 public:
-   static int& ms_atomicPluginOffset;
-
     struct AlphaObjectInfo
     {
-        void *m_pAtomic;
-        void *m_pCallback;
+        CEntity* m_entity;
+        void* m_pCallback;
         float m_distance; // alpha   
     };
+
+    static int& ms_atomicPluginOffset;
+    static CLinkList<AlphaObjectInfo>& m_alphaEntityList;
+    static CLinkList<AlphaObjectInfo>& m_alphaList;
+    static  CLinkList<AlphaObjectInfo>& m_alphaBoatAtomicList;
+    static CLinkList<AlphaObjectInfo>& m_alphaUnderwaterEntityList;
+    static CLinkList<AlphaObjectInfo>& m_alphaReallyDrawLastList;
+
     static void InjectHooks();
 
     static void AtomicConstructor(void* object);
@@ -62,6 +68,8 @@ public:
     static void InitAlphaAtomicList();
     static void InitAlphaEntityList();
     static void Initialise();
+    static bool InsertEntityIntoEntityList(CEntity* entity, float distance, void* callback);
+    static bool InsertEntityIntoUnderwaterEntities(CEntity* entity, float distance);
     static bool InsertAtomicIntoReallyDrawLastList(RpAtomic* pRpAtomic, float arg2);
     static bool InsertEntityIntoReallyDrawLastList(CEntity* pEntity, float arg2);
     static bool InsertEntityIntoSortedList(CEntity* pEntity, float distance);
@@ -72,7 +80,7 @@ public:
     static void RenderAlphaAtomics();
     static void RenderAtomicWithAlphaCB(RpAtomic* pRpAtomic, void* pData);
     static void RenderBoatAlphaAtomics();
-    static void RenderEntity(void* entity, bool unused, float arg3);
+    static void RenderEntity(CEntity* entity, int unused, float distance);
     static void RenderFadingAtomic(CBaseModelInfo* pBaseModelInfo, RpAtomic* pRpAtomic, int dwAlpha);
     static void RenderFadingClump(CBaseModelInfo* pBaseModelInfo, RpClump* pRpClump, int dwAlpha);
     static void RenderFadingClumpCB(RpAtomic* pRpAtomic);

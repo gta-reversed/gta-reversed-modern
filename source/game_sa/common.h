@@ -21,7 +21,7 @@ extern char *gString; // char gString[200]
 
 extern float &GAME_GRAVITY; // default 0.0080000004
 
-extern char *&PC_Scratch;
+extern char(&PC_Scratch)[16384];
                             // returns player coors
 CVector FindPlayerCoors(int playerId);
 // returns player speed

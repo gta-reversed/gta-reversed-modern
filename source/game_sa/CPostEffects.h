@@ -11,4 +11,13 @@ public:
     static int& CPostEffects::m_colourTopVOffset;
     static int& CPostEffects::m_colourBottomVOffset;
     static bool& CPostEffects::m_bRadiosity;
+    static bool& CPostEffects::m_bInCutscene;
+    static bool& CPostEffects::m_bNightVision;
+    static bool& CPostEffects::m_bInfraredVision;
+
+    static bool IsVisionFXActive ();
+    static bool NightVisionSetLights();
+    static bool InfraredVisionSetLightsForDefaultObjects();
+    static bool FilterFX_StoreAndSetDayNightBalance();
+    static bool FilterFX_RestoreDayNightBalance();
 };

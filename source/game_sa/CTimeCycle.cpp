@@ -137,7 +137,7 @@ unsigned int& CTimeCycle::m_NumBoxes{ *(unsigned int*)0xB7C480 };
 
 unsigned int& CTimeCycle::m_bExtraColourOn{ *(unsigned int*)0xB7C484 };
 
-CColourSet& CTimeCycle::m_CurrentColours{ *(CColourSet*)0xB7C4A0 };
+CColourSet& CTimeCycle::m_CurrentColours = *(CColourSet*)0xB7C548;
 
 float& CTimeCycle::m_fCurrentRGB1Red = *(float*)0xB7C518;
 float& CTimeCycle::m_fCurrentRGB1Green = *(float*)0xB7C51C;

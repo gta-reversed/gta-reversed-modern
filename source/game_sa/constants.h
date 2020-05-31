@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-// used in CStreaming class
+// used in CStreaming
 const std::uint32_t TOTAL_DFF_MODEL_IDS = 20000;
 const std::uint32_t TOTAL_TXD_MODEL_IDS = 5000;
 const std::uint32_t TOTAL_COL_MODEL_IDS = 255;
@@ -18,3 +18,16 @@ const std::uint32_t TOTAL_GANGS = 10;
 
 const std::uint32_t TOTAL_SCRIPTED_TASKS = 128;
 const std::uint32_t TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES = 48;
+
+// used in CRenderer
+const float MAX_LOD_DISTANCE = 300.0f;
+const float MAX_LOWLOD_DISTANCE = 150.0f;
+const float MAX_FADING_DISTANCE = 20.0f;
+const float MAX_STREAMING_DISTANCE = 50.0f;
+const float MAX_INVISIBLE_ENTITY_DISTANCE = 30.0f;
+const float MAX_INVISIBLE_VEHICLE_DISTANCE = 200.0f;
+const float MAX_STREAMING_RADIUS = 10000.0f;
+const float STREAMING_ANGLE_THRESHOLD = 20.62648f;
+const float MAX_BIGBUILDING_STREAMING_RADIUS = 80000.0f;
+const float BIGBUILDING_STREAMING_ANGLE_THRESHOLD = 40.107f;
+const float LOWLOD_CAMERA_HEIGHT_THRESHOLD = 80.0f;

@@ -104,9 +104,9 @@ bool CEntity::SetupLighting()
     return ((bool(__thiscall *)(CEntity *))(*(void ***)this)[19])(this);
 }
 
-void CEntity::RemoveLighting()
+void CEntity::RemoveLighting(bool bRemove)
 {
-    ((void(__thiscall *)(CEntity *))(*(void ***)this)[20])(this);
+    ((void(__thiscall *)(CEntity *, bool))(*(void ***)this)[20])(this, bRemove);
 }
 
 void CEntity::FlagToDestroyWhenNextProcessed()

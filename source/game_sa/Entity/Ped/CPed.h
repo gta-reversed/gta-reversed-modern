@@ -445,7 +445,8 @@ public:
 
     inline CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
     inline CTaskManager& GetTaskManager() { return m_pIntelligence->m_TaskMgr; }
-    inline CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup;}
+    inline CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
+    inline CWeapon& GetActiveWeapon() { return m_aWeapons[m_nActiveWeaponSlot]; }
 
     static void* operator new(unsigned int size);
     static void operator delete(void* data);

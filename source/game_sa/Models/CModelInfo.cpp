@@ -7,6 +7,7 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
+std::uint16_t& MI_GRASSHOUSE = *(std::uint16_t*)0x8CD6F4;
 std::uint16_t& MI_FIRE_HYDRANT = *(std::uint16_t*)0x8CD594;
 std::uint16_t& MI_PARKINGMETER = *(std::uint16_t*)0x8CD548;
 std::uint16_t& MI_PARKINGMETER2 = *(std::uint16_t*)0x8CD54C;

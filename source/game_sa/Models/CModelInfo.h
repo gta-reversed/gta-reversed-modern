@@ -23,6 +23,7 @@ enum eModelInfoType : unsigned char
     MODEL_INFO_TYPE_LOD_ATOMIC = 8,
 };
 
+extern std::uint16_t& MI_GRASSHOUSE;
 extern std::uint16_t& MI_FIRE_HYDRANT;
 extern std::uint16_t& MI_PARKINGMETER;
 extern std::uint16_t& MI_PARKINGMETER2;

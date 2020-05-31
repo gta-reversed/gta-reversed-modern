@@ -91,8 +91,8 @@ public:
         int m_nLodIndex; // -1 - without LOD model
         CEntity *m_pLod;
     };
-    char m_nNumLodChildren;
-    unsigned char m_nNumLodChildrenRendered;
+    std::int8_t m_nNumLodChildren;
+    std::uint8_t m_nNumLodChildrenRendered;
     unsigned char m_nType : 3; // see eEntityType
     unsigned char m_nStatus : 5; // see eEntityStatus
     
@@ -116,7 +116,7 @@ public:
     virtual void PreRender();
     virtual void Render();
     virtual bool SetupLighting();
-    virtual void RemoveLighting();
+    virtual void RemoveLighting(bool bRemove);
     virtual void FlagToDestroyWhenNextProcessed();
     
     // funcs

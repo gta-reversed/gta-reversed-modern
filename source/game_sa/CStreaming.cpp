@@ -2179,7 +2179,7 @@ bool CStreaming::RemoveLeastUsedModel(unsigned int streamingFlags) {
             }
         }
     }
-    if (TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(0) > 50.0f
+    if (TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM) > 50.0f
         && (ms_numPedsLoaded > 4 && RemoveLoadedZoneModel() || ms_vehiclesLoaded.CountMembers() > 4 && RemoveLoadedVehicle())
         || !ms_bLoadingScene
         && (DeleteLeastUsedEntityRwObject(false, streamingFlags)
@@ -3586,7 +3586,7 @@ void CStreaming::Update() {
     g_LoadMonitor.m_numModelsRequest = ms_numModelsRequested;
     if (CTimer::m_UserPause || CTimer::m_CodePause)
         return;
-    float fDistanceZ = TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(0);
+    float fDistanceZ = TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
     if (!ms_disableStreaming && !CRenderer::m_loadingPriority) {
         if (fDistanceZ >= 50.0) {
             if (!CGame::currArea)

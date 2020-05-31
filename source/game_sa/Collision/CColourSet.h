@@ -8,7 +8,7 @@ Do not delete this comment block. Respect others' work!
 
 #include "PluginBase.h"
 
-class  CColourSet {
+class CColourSet {
 public:
     float          m_fAmbientRed;
     float          m_fAmbientGreen;

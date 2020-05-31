@@ -133,6 +133,8 @@ public:
 	void SetIsLod(int bIsLod);
 	void SetOwnsColModel(int bOwns);
 	void IncreaseAlpha();
+
+    inline float GetBoundingRadius() { return m_pColModel->m_boundSphere.m_fRadius; }
 };
 
 VALIDATE_SIZE(CBaseModelInfo, 0x20);

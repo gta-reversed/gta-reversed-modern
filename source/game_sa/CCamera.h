@@ -27,7 +27,22 @@ enum eSwitchType : unsigned short
     SWITCHTYPE_JUMPCUT
 };
 
-class  CCamera : public CPlaceable {
+enum eLookingDirection
+{
+    LOOKING_DIRECTION_UNKNOWN_1 = 0,
+    LOOKING_DIRECTION_UNKNOWN_2,
+    LOOKING_DIRECTION_UNKNOWN_3,
+    LOOKING_DIRECTION_FORWARD,
+};
+
+enum class eGroundHeightType : std::int32_t
+{
+    ENTITY_BOUNDINGBOX_BOTTOM = 0, // ground height + boundingBoxMin.z of colliding entity
+    EXACT_GROUND_HEIGHT = 1, // ignores height of colliding entity at position
+    ENTITY_BOUNDINGBOX_TOP = 2 // ground height + boundingBoxMax.z of colliding entity
+};
+
+class CCamera : public CPlaceable {
     //PLUGIN_NO_DEFAULT_CONSTRUCTION(CCamera)
 public:
     bool m_bAboveGroundTrainNodesLoaded;
@@ -338,7 +353,7 @@ public:
      void AvoidTheGeometry(CVector const *arg2, CVector const *arg3, CVector *arg4, float FOV);
      void CalculateDerivedValues(bool bForMirror, bool bOriented);
      void CalculateFrustumPlanes(bool bForMirror);
-     float CalculateGroundHeight(unsigned int type);
+     float CalculateGroundHeight(eGroundHeightType type);
      void CalculateMirroredMatrix(CVector posn, float MirrorV, CMatrix *CamMat, CMatrix *MirrorMat);
      void CamControl();
      void CamShake(float arg2, float x, float y, float z);

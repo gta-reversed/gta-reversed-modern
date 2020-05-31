@@ -35,10 +35,10 @@ struct tRenderListEntry {
 
 VALIDATE_SIZE(tRenderListEntry, 8);
 
-extern unsigned int MAX_INVISIBLE_ENTITY_PTRS; // default 150
-extern unsigned int MAX_VISIBLE_ENTITY_PTRS; // default 1000
-extern unsigned int MAX_VISIBLE_LOD_PTRS; // default 1000
-extern unsigned int MAX_VISIBLE_SUPERLOD_PTRS; // default 50
+extern std::int32_t MAX_INVISIBLE_ENTITY_PTRS; // default 150
+extern std::int32_t MAX_VISIBLE_ENTITY_PTRS; // default 1000
+extern std::int32_t MAX_VISIBLE_LOD_PTRS; // default 1000
+extern std::int32_t MAX_VISIBLE_SUPERLOD_PTRS; // default 50
 
 class  CRenderer {
 public:
@@ -51,10 +51,10 @@ public:
     static CEntity **ms_aVisibleSuperLodPtrs; // static CEntity *ms_aVisibleSuperLodPtrs[MAX_VISIBLE_SUPERLOD_PTRS];
     static CEntity **ms_aVisibleLodPtrs; // static CEntity *ms_aVisibleLodPtrs[MAX_VISIBLE_LOD_PTRS];     
     static CEntity **ms_aVisibleEntityPtrs; // static CEntity *ms_aVisibleEntityPtrs[MAX_VISIBLE_ENTITY_PTRS];  
-    static unsigned int &ms_nNoOfVisibleSuperLods;
-    static unsigned int &ms_nNoOfInVisibleEntities;
-    static unsigned int &ms_nNoOfVisibleLods;
-    static unsigned int &ms_nNoOfVisibleEntities;
+    static int &ms_nNoOfVisibleSuperLods;
+    static int &ms_nNoOfInVisibleEntities;
+    static int &ms_nNoOfVisibleLods;
+    static int &ms_nNoOfVisibleEntities;
     static float &ms_fFarClipPlane;
     static float &ms_fCameraHeading;
     static bool &m_loadingPriority;
@@ -80,25 +80,26 @@ public:
     static tRenderListEntry* GetLodDontRenderListBase();
     static void ResetLodRenderLists();
     static void AddToLodRenderList(CEntity* entity, float distance);
+    // unused
     static void AddToLodDontRenderList(CEntity* entity, float distance);
     static void ProcessLodRenderLists();
     static void PreRender();
     static void RenderRoads();
     static void RenderEverythingBarRoads();
     static void RenderFirstPersonVehicle();
-    static bool SetupLightingForEntity(CEntity* entity);
-    static int SetupMapEntityVisibility(CEntity* entity, CBaseModelInfo* modelInfo, float distance, bool arg3);
+    static bool SetupLightingForEntity(CPhysical* entity);
+    static int SetupMapEntityVisibility(CEntity* entity, CBaseModelInfo* modelInfo, float distance, bool bIsTimeInRange);
     static int SetupEntityVisibility(CEntity* entity, float* outDistance);
     static int SetupBigBuildingVisibility(CEntity* entity, float* outDistance);
-    static void ScanSectorList(int sectorX, int sectorY);
-    static void ScanBigBuildingList(int sector_x, int sector_y);
+    static void ScanSectorList(std::int32_t sectorX, std::int32_t sectorY);
+    static void ScanBigBuildingList(std::int32_t sectorX, std::int32_t sectorY);
     // returns objects count
     static int GetObjectsInFrustum(CEntity** outEntities, float distance, RwMatrixTag* transformMat);
     static bool ShouldModelBeStreamed(CEntity* entity, CVector const& origin, float farClip);
     static void ScanWorld();
-    static void ScanPtrList_RequestModels(CPtrList& ptrList);
+    static void ScanPtrList_RequestModels(CPtrList& list);
     static void ConstructRenderList();
-    static void ScanSectorList_RequestModels(int sector_x, int sector_y);
+    static void ScanSectorList_RequestModels(std::int32_t sectorX, std::int32_t sectorY);
     static void RequestObjectsInFrustum(RwMatrixTag* transformMat, int modelRequesFlags);
     static void RequestObjectsInDirection(CVector const& posn, float angle, int modelRequesFlags);
     static void SetupScanLists(int sectorX, int sectorY);
