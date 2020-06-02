@@ -5,6 +5,9 @@ https://github.com/DK22Pac/plugin-sdk
 Do not delete this comment block. Respect others' work!
 */
 #pragma once
+
+#include <string>
+
 #include "PluginBase.h"
 #include "CVector.h"
 #include "CEntity.h"
@@ -193,3 +196,10 @@ void AsciiToGxtChar(char const *src, char *dst);
 * Writes given raster to PNG file using RtPNGImageWrite
 */
 void WriteRaster(RwRaster * pRaster, char const * pszPath);
+
+/* Convert UTF-8 string to Windows Unicode. Free pointer using delete[] */
+std::wstring UTF8ToUnicode(const std::string &str);
+/* Convert Windows Unicode to UTF-8. Free pointer using delete[] */
+std::string UnicodeToUTF8(const std::wstring &str);
+
+extern int WindowsCharset;

@@ -6,6 +6,9 @@ Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
+#include <algorithm>
+#include <vector>
+
 int gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
 char *gString = (char *)0xB71670;
 
@@ -614,3 +617,45 @@ void WriteRaster(RwRaster * pRaster, char const * pszPath) {
     assert(pszPath && pszPath[0]);
     plugin::Call<0x005A4150>(pRaster, pszPath);
 }
+
+std::wstring UTF8ToUnicode(const std::string &str)
+{
+    std::wstring out;
+
+    int size = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str.data(), str.length(), nullptr, 0);
+    if (size)
+    {
+        std::vector<wchar_t> temp;
+        temp.resize(size, 0);
+
+        if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str.data(), str.length(), temp.data(), size))
+        {
+            out.resize(size);
+            std::copy(temp.begin(), temp.end(), out.begin());
+        }
+    }
+
+    return out;
+}
+
+std::string UnicodeToUTF8(const std::wstring &str)
+{
+    std::string out;
+
+    int size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, str.data(), str.length(), nullptr, 0, nullptr, nullptr);
+    if (size)
+    {
+        std::vector<char> temp;
+        temp.resize(size, 0);
+
+        if (WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, str.data(), str.length(), temp.data(), size, nullptr, nullptr))
+        {
+            out.resize(size);
+            std::copy(temp.begin(), temp.end(), out.begin());
+        }
+    }
+
+    return out;
+}
+
+int WindowsCharset = static_cast<int>(GetACP());

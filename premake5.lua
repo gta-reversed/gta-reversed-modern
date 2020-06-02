@@ -47,7 +47,8 @@ solution "gta_reversed"
     }
     defines {
         "_CRT_SECURE_NO_WARNINGS",
-    "_SCL_SECURE_NO_WARNINGS",
+        "_SCL_SECURE_NO_WARNINGS",
+        "USE_GTASA_ALLOCATOR"
     }
 
     includedirs {
@@ -58,7 +59,7 @@ solution "gta_reversed"
     
     configuration "Debug*"
         flags { symbols ("On") }
-        buildoptions {"/MDd"}  		
+        buildoptions {"/MDd"}          
     configuration "Release*"
         defines { "NDEBUG" }
         buildoptions {"/MD"}

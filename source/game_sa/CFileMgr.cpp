@@ -1,5 +1,7 @@
 #include "StdInc.h" // TODO remove
 
+#include <array>
+
 #include <cerrno>
 #include <cstring>
 #include <direct.h>
@@ -9,7 +11,6 @@
 #include <ShlObj.h>
 
 #include "CFileMgr.h"
-//#include "RenderWare.h"
 
 #include "HookSystem.h"
 
@@ -27,9 +28,11 @@ char
     *user_gallery_dir_path = (char *) 0xc92268,
     *gta_user_dir_path = (char *) 0xc92368;
 
-inline void createDirectory(const char *path)
+constexpr size_t PATH_SIZE = 256;
+
+inline void createDirectory(const wchar_t *path)
 {
-    HANDLE folderHandle = CreateFileA(
+    HANDLE folderHandle = CreateFileW(
         path,
         GENERIC_READ,
         FILE_SHARE_READ,
@@ -39,7 +42,7 @@ inline void createDirectory(const char *path)
         nullptr
     );
     if (folderHandle == INVALID_HANDLE_VALUE)
-        CreateDirectoryA(path, nullptr);
+        CreateDirectoryW(path, nullptr);
     else
         CloseHandle(folderHandle);
 }
@@ -51,40 +54,64 @@ static char *InitUserDirectories()
 #else
     if (*gta_user_dir_path == 0)
     {
-        if (SHGetFolderPathA(nullptr, CSIDL_PERSONAL, nullptr, SHGFP_TYPE_CURRENT, gta_user_dir_path) == S_OK)
+        // MikuAuahDark: Let's improve the function
+        // to use wide char
+
+        static std::array<wchar_t, MAX_PATH> gtaUserDirWide;
+
+        if (SHGetFolderPathW(nullptr, CSIDL_PERSONAL, nullptr, SHGFP_TYPE_CURRENT, gtaUserDirWide.data()) == S_OK)
         {
-            constexpr const char *USERFILES = "\\GTA San Andreas User Files";
-            constexpr const char *GALLERY = ".\\Gallery";
-            constexpr const char *USERTRACKS = ".\\User Tracks";
+            constexpr const wchar_t *USERFILES = L"\\GTA San Andreas User Files";
+            constexpr const wchar_t *GALLERY = L".\\Gallery";
+            constexpr const wchar_t *USERTRACKS = L".\\User Tracks";
+            static std::array<wchar_t, MAX_PATH> userGalleryDirWide;
+            static std::array<wchar_t, MAX_PATH> userTracksDirWide;
 
-            memset(user_gallery_dir_path, 0, 256);
-            memset(user_tracks_dir_path, 0, 256);
-
-            if ((strlen(gta_user_dir_path) + strlen(USERFILES)) >= 256)
-                memcpy(gta_user_dir_path, ".", 2);
+            // Base GTASA User Files
+            if ((wcslen(gtaUserDirWide.data()) + wcslen(USERFILES)) >= MAX_PATH)
+                wcscpy(gtaUserDirWide.data(), L".");
             else
-                strcat(gta_user_dir_path, USERFILES);
+                wcscat(gtaUserDirWide.data(), USERFILES);
+            createDirectory(gtaUserDirWide.data());
+            
+            size_t userDirLen = wcslen(gtaUserDirWide.data());
+            wcscpy(userGalleryDirWide.data(), gtaUserDirWide.data());
+            wcscpy(userTracksDirWide.data(), gtaUserDirWide.data());
 
-            createDirectory(gta_user_dir_path);
-            strcpy(user_gallery_dir_path, gta_user_dir_path);
-            strcpy(user_tracks_dir_path, gta_user_dir_path);
-
-            size_t userDirLen = strlen(gta_user_dir_path);
-
-            if ((userDirLen + strlen(GALLERY + 1)) >= 256)
-                memcpy(user_gallery_dir_path, GALLERY, strlen(GALLERY) + 1);
+            // Gallery
+            if ((userDirLen + wcslen(GALLERY + 1)) >= PATH_SIZE)
+                wcscpy(userGalleryDirWide.data(), GALLERY);
             else
-                strcpy(user_gallery_dir_path + userDirLen, GALLERY + 1);
-            createDirectory(user_gallery_dir_path);
+                wcscat(userGalleryDirWide.data(), GALLERY + 1);
+            createDirectory(userGalleryDirWide.data());
 
-            if ((userDirLen + strlen(USERTRACKS + 1)) >= 256)
-                memcpy(user_tracks_dir_path, USERTRACKS, strlen(USERTRACKS) + 1);
+            // User Tracks
+            if ((userDirLen + wcslen(USERTRACKS + 1)) >= PATH_SIZE)
+                wcscpy(userTracksDirWide.data(), USERTRACKS);
             else
-                strcpy(user_tracks_dir_path + userDirLen, USERTRACKS + 1);
-            createDirectory(user_tracks_dir_path);
+                wcscat(userTracksDirWide.data(), USERTRACKS + 1);
+            createDirectory(userTracksDirWide.data());
+
+            std::string temp = UnicodeToUTF8(gtaUserDirWide.data());
+            if (temp.length() >= PATH_SIZE)
+                strcpy(gta_user_dir_path, ".");
+            else
+                strcpy(gta_user_dir_path, temp.c_str());
+
+            temp = UnicodeToUTF8(userGalleryDirWide.data());
+            if (temp.length() >= PATH_SIZE)
+                strcpy(user_gallery_dir_path, ".\\Gallery");
+            else
+                strcpy(user_gallery_dir_path, temp.c_str());
+
+            temp = UnicodeToUTF8(userTracksDirWide.data());
+            if (temp.length() >= PATH_SIZE)
+                strcpy(user_tracks_dir_path, ".\\User Tracks");
+            else
+                strcpy(user_tracks_dir_path, temp.c_str());
         }
         else
-            memcpy(gta_user_dir_path, "data", 5); // strlen("data") + 1
+            strcpy(gta_user_dir_path, "data");
     }
 
     return gta_user_dir_path;
@@ -97,7 +124,28 @@ void CFileMgr::Initialise()
     ((void(*)()) 0x5386f0)();
 #else
     memset(ms_rootDirName, 0, DIRNAMELENGTH);
-    _getcwd(ms_rootDirName, DIRNAMELENGTH);
+
+    if (WindowsCharset != CP_UTF8)
+    {
+        // MikuAuahDark: Improve the function to use wide char
+        wchar_t rootDirTemp[DIRNAMELENGTH];
+        _wgetcwd(rootDirTemp, DIRNAMELENGTH);
+
+        // Just in case
+        if (errno == ERANGE)
+            _getcwd(ms_rootDirName, DIRNAMELENGTH);
+        else
+        {
+            std::string rootDirUTF8 = UnicodeToUTF8(rootDirTemp);
+            if (rootDirUTF8.length() >= (DIRNAMELENGTH - 2))
+                _getcwd(ms_rootDirName, DIRNAMELENGTH);
+            else
+                strcpy(ms_rootDirName, rootDirUTF8.c_str());
+        }
+    }
+    else
+        _getcwd(ms_rootDirName, DIRNAMELENGTH);
+
     ms_rootDirName[strlen(ms_rootDirName)] = '\\';
 #endif
 }
@@ -129,7 +177,16 @@ int CFileMgr::ChangeDir(const char *path)
             lastPos[1] = '\\';
     }
 
-    return _chdir(ms_dirName);
+    int r;
+    if (WindowsCharset != CP_UTF8)
+    {
+        std::wstring pathWide = UTF8ToUnicode(ms_dirName);
+        r = _wchdir(pathWide.c_str());
+    }
+    else
+        r = _chdir(ms_dirName);
+
+    return r;
 #endif
 }
 
@@ -154,8 +211,17 @@ int CFileMgr::SetDir(const char *path)
         if (*lastPos != '\\')
             lastPos[1] = '\\';
     }
+    
+    int r;
+    if (WindowsCharset != CP_UTF8)
+    {
+        std::wstring pathWide = UTF8ToUnicode(ms_dirName);
+        r = _wchdir(pathWide.c_str());
+    }
+    else
+        r = _chdir(ms_dirName);
 
-    return _chdir(ms_dirName);
+    return r;
 #endif
 }
 
@@ -172,7 +238,17 @@ int CFileMgr::SetDirMyDocuments()
     }
 
     strcpy(ms_dirName, userDir);
-    return _chdir(ms_dirName);
+
+    int r;
+    if (WindowsCharset != CP_UTF8)
+    {
+        std::wstring pathWide = UTF8ToUnicode(ms_dirName);
+        r = _wchdir(pathWide.c_str());
+    }
+    else
+        r = _chdir(ms_dirName);
+
+    return r;
 #endif
 }
 
@@ -181,7 +257,7 @@ size_t CFileMgr::LoadFile(const char *path, unsigned char *buf, size_t size, con
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((int(*)(const char*, unsigned char*, int, const char*)) 0x538890)(path, buf, size, mode);
 #else
-    FILE *f = fopen(path, mode);
+    FILE *f = CFileMgr::OpenFile(path, mode);
     if (f == nullptr)
         return -1;
     
@@ -200,7 +276,14 @@ FILE* CFileMgr::OpenFile(const char *path, const char *mode)
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((FILE*(*)(const char*, const char*)) 0x538900)(path, mode);
 #else
-    return fopen(path, mode);
+    if (WindowsCharset == CP_UTF8)
+        return fopen(path, mode);
+    
+    // MikuAuahDark: Let's improve it to allow opening non-ANSI names
+    // Convert to wide char
+    std::wstring pathWide = UTF8ToUnicode(path);
+    std::wstring modeWide = UTF8ToUnicode(mode);
+    return _wfopen(pathWide.c_str(), modeWide.c_str());
 #endif
 }
 
@@ -209,7 +292,7 @@ FILE* CFileMgr::OpenFileForWriting(const char *path)
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((FILE*(*)(const char*)) 0x538910)(path);
 #else
-    return fopen(path, "wb");
+    return CFileMgr::OpenFile(path, "wb");
 #endif
 }
 
@@ -218,7 +301,7 @@ FILE* CFileMgr::OpenFileForAppending(const char *path)
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((FILE*(*)(const char*)) 0x538930)(path);
 #else
-    return fopen(path, "a");
+    return CFileMgr::OpenFile(path, "a");
 #endif
 }
 

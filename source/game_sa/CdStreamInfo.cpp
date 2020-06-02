@@ -294,7 +294,7 @@ void __cdecl CdStreamInit(std::int32_t streamCount)
     DWORD totalNumberOfClusters = 0;
     DWORD numberOfFreeClusters = 0;
     DWORD sectorsPerCluster = 0;
-    GetDiskFreeSpaceA(0, &sectorsPerCluster, &bytesPerSector, &numberOfFreeClusters, &totalNumberOfClusters);
+    GetDiskFreeSpaceA(nullptr, &sectorsPerCluster, &bytesPerSector, &numberOfFreeClusters, &totalNumberOfClusters);
     gStreamFileCreateFlags = FILE_FLAG_OVERLAPPED;
     if (bytesPerSector <= STREAMING_SECTOR_SIZE)
         gStreamFileCreateFlags |= FILE_FLAG_NO_BUFFERING;
