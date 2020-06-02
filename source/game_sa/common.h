@@ -55,6 +55,7 @@ CVector* Multiply3x3(CVector* out, CMatrix* m, CVector* in);
 // returns player wanted
 CWanted * FindPlayerWanted(int playerId);
 
+const unsigned int rwVENDORID_ROCKSTAR = 0x0253F2;
 extern unsigned int &ClumpOffset;
 
 #define RpClumpGetAnimBlendClumpData(clump) (*(CAnimBlendClumpData **)(((unsigned int)(clump) + ClumpOffset)))

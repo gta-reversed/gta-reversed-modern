@@ -7,12 +7,26 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-int& CVisibilityPlugins::ms_atomicPluginOffset = *(int *)0x8D608C;
+std::int32_t& CVisibilityPlugins::ms_atomicPluginOffset = *(std::int32_t*)0x8D608C;
+std::int32_t& CVisibilityPlugins::ms_clumpPluginOffset = *(std::int32_t*)0x8D6094;
+std::int32_t& CVisibilityPlugins::ms_framePluginOffset = *(std::int32_t*)0x8D6090;
+
 CLinkList<CVisibilityPlugins::AlphaObjectInfo>& CVisibilityPlugins::m_alphaEntityList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC88120;
 CLinkList<CVisibilityPlugins::AlphaObjectInfo>& CVisibilityPlugins::m_alphaList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC88070;
 CLinkList<CVisibilityPlugins::AlphaObjectInfo>& CVisibilityPlugins::m_alphaBoatAtomicList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC880C8;
 CLinkList<CVisibilityPlugins::AlphaObjectInfo>& CVisibilityPlugins::m_alphaUnderwaterEntityList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC88178;
 CLinkList<CVisibilityPlugins::AlphaObjectInfo>& CVisibilityPlugins::m_alphaReallyDrawLastList = *(CLinkList<CVisibilityPlugins::AlphaObjectInfo>*)0xC881D0;
+CLinkList<CPed*>& CVisibilityPlugins::ms_weaponPedsForPC = *(CLinkList<CPed*>*)0xC88224;
+RwCamera*& CVisibilityPlugins::ms_pCamera = *(RwCamera**)0xC8804C;
+RwV3d*& CVisibilityPlugins::ms_pCameraPosn = *(RwV3d**)0xC88050;
+float& CVisibilityPlugins::ms_cullCompsDist = *(float*)0x0C8802C;
+float& CVisibilityPlugins::ms_cullBigCompsDist = *(float*)0x0C88028;
+float& CVisibilityPlugins::ms_vehicleLod0RenderMultiPassDist = *(float*)0xC88044;
+float& CVisibilityPlugins::ms_vehicleLod0Dist = *(float*)0xC88040;
+float& CVisibilityPlugins::ms_vehicleLod1Dist = *(float*)0xC8803C;
+float& CVisibilityPlugins::ms_bigVehicleLod0Dist = *(float*)0xC88038;
+float& CVisibilityPlugins::ms_pedLodDist = *(float*)0xC88034;
+float& CVisibilityPlugins::ms_pedFadeDist = *(float*)0xC88030;
 
 void CVisibilityPlugins::InjectHooks() {
    HookInstall(0x734530, &CVisibilityPlugins::InitAlphaAtomicList, 7);
@@ -28,83 +42,324 @@ void CVisibilityPlugins::InjectHooks() {
    HookInstall(0x733800, &CVisibilityPlugins::RenderReallyDrawLastObjects, 7);
 }
 
-void CVisibilityPlugins::AtomicConstructor(void* object) {
-    plugin::Call<0x732150, void*>(object);
+
+void CVisibilityPlugins::Initialise() {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x733A20>();
+#else
+    m_alphaList.Init(TOTAL_ALPHA_LISTS);
+    m_alphaList.usedListHead.data.m_distance = 0.0f;
+    m_alphaList.usedListTail.data.m_distance = 100000000.0f;
+    m_alphaBoatAtomicList.Init(TOTAL_ALPHA_BOAT_ATOMIC_LISTS);
+    m_alphaBoatAtomicList.usedListHead.data.m_distance = 0.0f;
+    m_alphaBoatAtomicList.usedListTail.data.m_distance = 100000000.0f;
+    m_alphaEntityList.Init(TOTAL_ALPHA_ENTITY_LISTS);
+    m_alphaEntityList.usedListHead.data.m_distance = 0.0f;
+    m_alphaEntityList.usedListTail.data.m_distance = 100000000.0f;
+    m_alphaUnderwaterEntityList.Init(TOTAL_ALPHA_UNDERWATER_ENTITY_LISTS);
+    m_alphaUnderwaterEntityList.usedListHead.data.m_distance = 0.0f;
+    m_alphaUnderwaterEntityList.usedListTail.data.m_distance = 100000000.0f;
+    m_alphaReallyDrawLastList.Init(TOTAL_ALPHA_DRAW_LAST_LISTS);
+    m_alphaReallyDrawLastList.usedListHead.data.m_distance = 0.0f;
+    m_alphaReallyDrawLastList.usedListTail.data.m_distance = 100000000.0f;
+    ms_weaponPedsForPC.Init(TOTAL_WEAPON_PEDS_FOR_PC);
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::AtomicCopyConstructor(void *object,void const*originalObject)	0x732170
-void CVisibilityPlugins::AtomicCopyConstructor(void* object, void const* originalObject) {
-    plugin::Call<0x732170, void*, void const*>(object, originalObject);
+void CVisibilityPlugins::Shutdown() {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x732EB0>();
+#else
+    m_alphaList.Shutdown();
+    m_alphaBoatAtomicList.Shutdown();
+    m_alphaEntityList.Shutdown();
+    m_alphaUnderwaterEntityList.Shutdown();
+    m_alphaReallyDrawLastList.Shutdown();
+    ms_weaponPedsForPC.Shutdown();
+#endif
 }
 
-// Converted from cdecl void* CVisibilityPlugins::AtomicDestructor(void *object)	0x7321A0
-void* CVisibilityPlugins::AtomicDestructor(void* object) {
-    return plugin::CallAndReturn<void*, 0x7321A0, void*>(object);
+void CVisibilityPlugins::InitAlphaAtomicList() {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x734530>();
+#else
+    m_alphaList.Clear();
+#endif
 }
 
-// Converted from cdecl int CVisibilityPlugins::CalculateFadingAtomicAlpha(CBaseModelInfo *pBaseModelInfo,CEntity *pEntity,float arg3)	0x732500
-int CVisibilityPlugins::CalculateFadingAtomicAlpha(CBaseModelInfo* pBaseModelInfo, CEntity* pEntity, float arg3) {
-    return plugin::CallAndReturn<int, 0x732500, CBaseModelInfo*, CEntity*, float>(pBaseModelInfo, pEntity, arg3);
+void CVisibilityPlugins::InitAlphaEntityList() {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x734540>();
+
+#else
+    m_alphaEntityList.Clear();
+    m_alphaBoatAtomicList.Clear();
+    m_alphaUnderwaterEntityList.Clear();
+    m_alphaReallyDrawLastList.Clear();
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::ClearAtomicFlag(RpAtomic *pRpAtomic,int flag)	0x732310
-void CVisibilityPlugins::ClearAtomicFlag(RpAtomic* pRpAtomic, int flag) {
+bool CVisibilityPlugins::InsertEntityIntoEntityList(CEntity* entity, float distance, void* callback)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<bool, 0x733DD0, CEntity*, float, void*>(entity, distance, callback);
+#else
+    AlphaObjectInfo info;
+    info.m_entity = entity;
+    info.m_pCallback = callback;
+    info.m_distance = distance;
+    return m_alphaEntityList.InsertSorted(info);
+#endif
+}
+
+bool CVisibilityPlugins::InsertEntityIntoUnderwaterEntities(CEntity* entity, float distance)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<bool, 0x733D90, CEntity*, float>(entity, distance);
+#else
+    AlphaObjectInfo entityAlphaObjectInfo;
+    entityAlphaObjectInfo.m_distance = distance;
+    entityAlphaObjectInfo.m_entity = entity;
+    entityAlphaObjectInfo.m_pCallback = CVisibilityPlugins::RenderEntity;
+    return m_alphaUnderwaterEntityList.InsertSorted(entityAlphaObjectInfo);
+#endif
+}
+
+bool CVisibilityPlugins::InsertAtomicIntoReallyDrawLastList(RpAtomic* pRpAtomic, float distance) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<bool, 0x733E10, RpAtomic*, float>(pRpAtomic, distance);
+#else
+    AlphaObjectInfo objectInfo;
+    objectInfo.m_distance = distance;
+    objectInfo.m_atomic = pRpAtomic;
+    objectInfo.m_pCallback = gtaDefaultAtomicRenderCallback;
+    m_alphaReallyDrawLastList.InsertSorted(objectInfo);
+#endif
+}
+
+bool CVisibilityPlugins::InsertEntityIntoReallyDrawLastList(CEntity* pEntity, float distance) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<bool, 0x733E50, CEntity*, float>(pEntity, distance);
+#else
+    AlphaObjectInfo objectInfo; 
+    objectInfo.m_distance = distance;
+    objectInfo.m_entity = pEntity;
+    objectInfo.m_pCallback = CVisibilityPlugins::RenderEntity;
+    m_alphaReallyDrawLastList.InsertSorted(objectInfo);
+#endif
+}
+
+bool CVisibilityPlugins::InsertEntityIntoSortedList(CEntity* entity, float distance) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<bool, 0x734570, CEntity*, float>(entity, distance);
+#else
+    if (entity->m_nModelIndex == MI_GRASSHOUSE && InsertEntityIntoReallyDrawLastList(entity, distance))
+        return true;
+    if (entity->m_bUnderwater)
+        return InsertEntityIntoUnderwaterEntities(entity, distance);
+    return InsertEntityIntoEntityList(entity, distance, CVisibilityPlugins::RenderEntity);
+#endif
+}
+
+#define ATOMICPLG(atomic, var) \
+    (RWPLUGINOFFSET(tAtomicVisibilityPlugin, atomic, ms_atomicPluginOffset)->var)
+
+#define ATOMICPLGCONST(atomic, var) \
+    (RWPLUGINOFFSETCONST(tAtomicVisibilityPlugin, atomic, ms_atomicPluginOffset)->var)
+
+#define FRAMEPLG(frame, var) \
+    (RWPLUGINOFFSET(tFrameVisibilityPlugin, frame, ms_framePluginOffset)->var)
+
+#define FRAMEPLGCONST(frame, var) \
+    (RWPLUGINOFFSETCONST(tFrameVisibilityPlugin, frame, ms_framePluginOffset)->var)
+
+#define CLUMPPLG(clump, var) \
+    (RWPLUGINOFFSET(tClumpVisibilityPlugin, clump, ms_clumpPluginOffset)->var)
+
+#define CLUMPPLGCONST(clump, var) \
+    (RWPLUGINOFFSETCONST(tClumpVisibilityPlugin, clump, ms_clumpPluginOffset)->var)
+
+bool CVisibilityPlugins::PluginAttach() {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<bool, 0x732E30>();
+#else
+    ms_atomicPluginOffset = RpAtomicRegisterPlugin(
+        sizeof(tAtomicVisibilityPlugin),
+        MAKECHUNKID(rwVENDORID_ROCKSTAR, 0x00),
+        AtomicConstructor,
+        AtomicDestructor,
+        AtomicCopyConstructor);
+    ms_clumpPluginOffset = RpClumpRegisterPlugin(
+        sizeof(tClumpVisibilityPlugin),
+        MAKECHUNKID(rwVENDORID_ROCKSTAR, 0x01),
+        ClumpConstructor,
+        ClumpDestructor,
+        ClumpCopyConstructor);
+    ms_framePluginOffset = RwFrameRegisterPlugin(
+        sizeof(tFrameVisibilityPlugin),
+        MAKECHUNKID(rwVENDORID_ROCKSTAR, 0x02),
+        FrameConstructor,
+        FrameDestructor,
+        FrameCopyConstructor);
+    return CVisibilityPlugins::ms_atomicPluginOffset != -1 && ms_clumpPluginOffset != -1;
+#endif
+}
+static RpAtomic* gtaDefaultAtomicRenderCallback(RpAtomic* atomic)
+{
+    return AtomicDefaultRenderCallBack(atomic);
+}
+
+void* CVisibilityPlugins::AtomicConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallAndReturn<void*, 0x732150, void*, RwInt32, RwInt32>(object, offsetInObject, sizeInObject);
+#else
+    SetAtomicId(object, 0xFFFF);
+    SetAtomicFlag(object, 0);
+#endif
+}
+
+void* CVisibilityPlugins::AtomicCopyConstructor(void* dstObject, const void* srcObject, RwInt32 offsetInObject, RwInt32 sizeInObject)
+ {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallAndReturn<void*, 0x732170, void*, const void*, RwInt32, RwInt32>(dstObject, srcObject, offsetInObject, sizeInObject);
+
+#else
+    ATOMICPLG(dstObject, m_id) = ATOMICPLGCONST(srcObject, m_id);
+    ATOMICPLG(dstObject, m_flags) = ATOMICPLGCONST(srcObject, m_flags);
+    return dstObject;
+#endif
+}
+
+void* CVisibilityPlugins::AtomicDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<void*, 0x7321A0, void*, RwInt32, RwInt32>(object, offsetInObject, sizeInObject);
+#else
+    return object;
+#endif
+}
+
+int CVisibilityPlugins::CalculateFadingAtomicAlpha(CBaseModelInfo* modelInfo, CEntity* entity, float distance) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<int, 0x732500, CBaseModelInfo*, CEntity*, float>(modelInfo, entity, distance);
+#else
+    float fFadingDistance = MAX_FADING_DISTANCE;
+    float fDrawDistanceRadius = modelInfo->m_pColModel->m_boundSphere.m_fRadius + CRenderer::ms_fFarClipPlane;
+    fDrawDistanceRadius = std::min(fDrawDistanceRadius, TheCamera.m_fLODDistMultiplier * modelInfo->m_fDrawDistance);
+    if (!entity->m_pLod) {
+        const float fDrawDistance = std::min(modelInfo->m_fDrawDistance, fDrawDistanceRadius);
+        if (fDrawDistance > MAX_LOWLOD_DISTANCE)
+            fFadingDistance = fDrawDistance / 15.0f + 10.0f;
+        if (entity->m_bIsBIGBuilding)
+            fDrawDistanceRadius *= CRenderer::ms_lowLodDistScale;
+    }
+    float fFade = std::min((fDrawDistanceRadius + MAX_FADING_DISTANCE - distance) / fFadingDistance, 1.0f);
+    return modelInfo->m_nAlpha * fFade;
+#endif
+}
+
+void CVisibilityPlugins::ClearAtomicFlag(RpAtomic* pRpAtomic, std::uint16_t flag) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x732310, RpAtomic*, int>(pRpAtomic, flag);
+#else
+    ATOMICPLG(pRpAtomic, m_flags) &= ~flag;
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::ClearAtomicFlag(RpAtomic *pRpAtomic,ushort flag)	0x732330
-void CVisibilityPlugins::ClearAtomicFlag(RpAtomic* pRpAtomic, unsigned short flag) {
+RpAtomic* CVisibilityPlugins::ClearAtomicFlag(RpAtomic* atomic, void* data) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x732330, RpAtomic*, unsigned short>(pRpAtomic, flag);
+#else
+    std::uint16_t flag = reinterpret_cast<std::uint16_t>(data);
+    ATOMICPLG(atomic, m_flags) &= ~flag;
+    return atomic;
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::ClearClumpForAllAtomicsFlag(RpClump *pRpClump,int flag)	0x732350
-void CVisibilityPlugins::ClearClumpForAllAtomicsFlag(RpClump* pRpClump, int flag) {
+void CVisibilityPlugins::ClearClumpForAllAtomicsFlag(RpClump* pRpClump, std::uint16_t flag) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x732350, RpClump*, int>(pRpClump, flag);
+#else
+    RpClumpForAllAtomics(pRpClump, CVisibilityPlugins::ClearAtomicFlag, (void*)flag);
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::ClumpConstructor(void *object)	0x732E10
-void CVisibilityPlugins::ClumpConstructor(void* object) {
-    plugin::Call<0x732E10, void*>(object);
+void* CVisibilityPlugins::ClumpConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallAndReturn<void*, 0x732E10, void*, RwInt32, RwInt32>(object, offsetInObject, sizeInObject);
+#else
+    CLUMPPLG(object, m_visibilityCallBack) = CVisibilityPlugins::DefaultVisibilityCB;
+    CLUMPPLG(object, m_alpha) = 255;
+    return object;
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::ClumpCopyConstructor(void *object,void const*originalObject)	0x732200
-void CVisibilityPlugins::ClumpCopyConstructor(void* object, void const* originalObject) {
-    plugin::Call<0x732200, void*, void const*>(object, originalObject);
+void* CVisibilityPlugins::ClumpCopyConstructor(void* dstObject, const void* srcObject, RwInt32 offsetInObject, RwInt32 sizeInObject) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallAndReturn<void*, 0x732200, void*, void const*>(dstObject, srcObject, offsetInObject, sizeInObject);
+#else
+    CLUMPPLG(dstObject, m_visibilityCallBack) = CLUMPPLGCONST(srcObject, m_visibilityCallBack);
+    return dstObject;
+#endif
 }
 
-// Converted from cdecl void* CVisibilityPlugins::ClumpDestructor(void *object)	0x732220
-void* CVisibilityPlugins::ClumpDestructor(void* object) {
-    return plugin::CallAndReturn<void*, 0x732220, void*>(object);
+void* CVisibilityPlugins::ClumpDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<void*, 0x732220, void*, RwInt32, RwInt32>(object, offsetInObject, sizeInObject);
+#else
+    return object;
+#endif
 }
 
-// Converted from cdecl int CVisibilityPlugins::DefaultVisibilityCB()	0x732A30
 int CVisibilityPlugins::DefaultVisibilityCB() {
-    return plugin::CallAndReturn<int, 0x732A30>();
+    return 1;
 }
 
-// Converted from cdecl void CVisibilityPlugins::FrameConstructor(void *object)	0x7321B0
-void CVisibilityPlugins::FrameConstructor(void* object) {
-    plugin::Call<0x7321B0, void*>(object);
+void* CVisibilityPlugins::FrameConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallAndReturn<void*, 0x7321B0, void*, RwInt32, RwInt32>(object, offsetInObject, sizeInObject);
+#else
+    FRAMEPLG(object, m_hierarchyId) = 0;
+    return object;
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::FrameCopyConstructor(void *object,void const*originalObject)	0x7321D0
-void CVisibilityPlugins::FrameCopyConstructor(void* object, void const* originalObject) {
-    plugin::Call<0x7321D0, void*, void const*>(object, originalObject);
+void* CVisibilityPlugins::FrameCopyConstructor(void* dstObject, const void* srcObject, RwInt32 offsetInObject, RwInt32 sizeInObject) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::CallAndReturn<void*, 0x7321D0, void*, const void*, RwInt32, RwInt32>(dstObject, srcObject, offsetInObject, sizeInObject);
+#else
+    FRAMEPLG(dstObject, m_hierarchyId) = FRAMEPLGCONST(srcObject, m_hierarchyId);
+    return dstObject;
+#endif
 }
 
-// Converted from cdecl void* CVisibilityPlugins::FrameDestructor(void *,int,int)	0x7321F0
-void* CVisibilityPlugins::FrameDestructor(void* arg0, int arg1, int arg2) {
-    return plugin::CallAndReturn<void*, 0x7321F0, void*, int, int>(arg0, arg1, arg2);
+void* CVisibilityPlugins::FrameDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<void*, 0x7321F0, void*, RwInt32, RwInt32>(object, offsetInObject, sizeInObject);
+#else
+    return object;
+#endif
 }
 
-// Converted from cdecl bool CVisibilityPlugins::FrustumSphereCB(RpClump *pRpClump)	0x732A40
 bool CVisibilityPlugins::FrustumSphereCB(RpClump* pRpClump) {
+#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<bool, 0x732A40, RpClump*>(pRpClump);
+#else
+    RwSphere sphere;
+    RwFrame* frame = RpClumpGetFrame(pRpClump);
+    CBaseModelInfo* modelInfo = FRAMEPLG(frame, m_modelInfo); 
+    sphere.radius = modelInfo->GetBoundingRadius();
+    sphere.center = modelInfo->GetBoundingCenter();
+    RwMatrixTag* transformMatrix = RwFrameGetLTM(frame);
+    RwV3dTransformPoints(&sphere.center, &sphere.center, 1, transformMatrix);
+    return RwCameraFrustumTestSphere(ms_pCamera, &sphere) != rwSPHEREOUTSIDE;
+#endif
 }
 
 // Converted from cdecl short CVisibilityPlugins::GetAtomicId(RpAtomic *pRpAtomic)	0x732370
-short CVisibilityPlugins::GetAtomicId(RpAtomic* pRpAtomic) {
+std::uint16_t CVisibilityPlugins::GetAtomicId(RpAtomic* pRpAtomic) {
     return plugin::CallAndReturn<short, 0x732370, RpAtomic*>(pRpAtomic);
+
+
 }
 
 // Converted from cdecl CAtomicModelInfo* CVisibilityPlugins::GetAtomicModelInfo(RpAtomic *pRpAtomic)	0x732260
@@ -152,81 +407,6 @@ short CVisibilityPlugins::GetUserValue(RpAtomic* pRpAtomic) {
     return plugin::CallAndReturn<short, 0x7323A0, RpAtomic*>(pRpAtomic);
 }
 
-// Converted from cdecl void CVisibilityPlugins::InitAlphaAtomicList(void)	0x734530
-void CVisibilityPlugins::InitAlphaAtomicList() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x734530>();
-#else
-    m_alphaList.Clear();
-#endif
-}
-
-// Converted from cdecl void CVisibilityPlugins::InitAlphaEntityList(void)	0x734540
-void CVisibilityPlugins::InitAlphaEntityList() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x734540>();
-
-#else
-    m_alphaEntityList.Clear();
-    m_alphaBoatAtomicList.Clear();
-    m_alphaUnderwaterEntityList.Clear();
-    m_alphaReallyDrawLastList.Clear();
-#endif
-}
-// Converted from cdecl void CVisibilityPlugins::Initialise(void)	0x733A20
-void CVisibilityPlugins::Initialise() {
-    plugin::Call<0x733A20>();
-}
-
-bool CVisibilityPlugins::InsertEntityIntoEntityList(CEntity* entity, float distance, void* callback)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<bool, 0x733DD0, CEntity*, float, void*>(entity, distance, callback);
-#else
-    AlphaObjectInfo info;
-    info.m_entity = entity;
-    info.m_pCallback = callback;
-    info.m_distance = distance;
-    return m_alphaEntityList.InsertSorted(info);
-#endif
-}
-
-bool CVisibilityPlugins::InsertEntityIntoUnderwaterEntities(CEntity* entity, float distance)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<bool, 0x733D90, CEntity*, float>(entity, distance);
-#else
-    AlphaObjectInfo entityAlphaObjectInfo;
-    entityAlphaObjectInfo.m_distance = distance;
-    entityAlphaObjectInfo.m_entity = entity;
-    entityAlphaObjectInfo.m_pCallback = CVisibilityPlugins::RenderEntity;
-    return m_alphaUnderwaterEntityList.InsertSorted(entityAlphaObjectInfo);
-#endif
-}
-
-// Converted from cdecl bool CVisibilityPlugins::InsertAtomicIntoReallyDrawLastList(RpAtomic *pRpAtomic,float arg2)	0x733E10
-bool CVisibilityPlugins::InsertAtomicIntoReallyDrawLastList(RpAtomic* pRpAtomic, float arg2) {
-    return plugin::CallAndReturn<bool, 0x733E10, RpAtomic*, float>(pRpAtomic, arg2);
-}
-
-// Converted from cdecl bool CVisibilityPlugins::InsertEntityIntoReallyDrawLastList(CEntity *pEntity,float arg2)	0x733E50
-bool CVisibilityPlugins::InsertEntityIntoReallyDrawLastList(CEntity* pEntity, float arg2) {
-    return plugin::CallAndReturn<bool, 0x733E50, CEntity*, float>(pEntity, arg2);
-}
-
-// Converted from cdecl bool CVisibilityPlugins::InsertEntityIntoSortedList(CEntity * pEntity,float distance)	0x734570
-bool CVisibilityPlugins::InsertEntityIntoSortedList(CEntity* entity, float distance) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<bool, 0x734570, CEntity*, float>(entity, distance);
-#else
-    if (entity->m_nModelIndex == MI_GRASSHOUSE && InsertEntityIntoReallyDrawLastList(entity, distance))
-        return true;
-    if (entity->m_bUnderwater)
-        return InsertEntityIntoUnderwaterEntities(entity, distance);
-    return InsertEntityIntoEntityList(entity, distance, CVisibilityPlugins::RenderEntity);
-#endif
-}
-
 // Converted from cdecl bool CVisibilityPlugins::IsAtomicVisible(RpAtomic *pRpAtomic)	0x732990
 bool CVisibilityPlugins::IsAtomicVisible(RpAtomic* pRpAtomic) {
     return plugin::CallAndReturn<bool, 0x732990, RpAtomic*>(pRpAtomic);
@@ -235,11 +415,6 @@ bool CVisibilityPlugins::IsAtomicVisible(RpAtomic* pRpAtomic) {
 // Converted from cdecl bool CVisibilityPlugins::IsClumpVisible(RpClump *pRpClump)	0x732AE0
 bool CVisibilityPlugins::IsClumpVisible(RpClump* pRpClump) {
     return plugin::CallAndReturn<bool, 0x732AE0, RpClump*>(pRpClump);
-}
-
-// Converted from cdecl bool CVisibilityPlugins::PluginAttach(void)	0x732E30
-bool CVisibilityPlugins::PluginAttach() {
-    return plugin::CallAndReturn<bool, 0x732E30>();
 }
 
 // Converted from cdecl void CVisibilityPlugins::RenderAlphaAtomic(RpAtomic *pRpAtomic, int dwAlpha)	0x732480
@@ -456,59 +631,107 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
     plugin::Call<0x732F30>();
 }
 
-// Converted from cdecl void CVisibilityPlugins::SetAtomicFlag(RpAtomic *pRpAtomic,int flag)	0x7322D0
-void CVisibilityPlugins::SetAtomicFlag(RpAtomic* pRpAtomic, int flag) {
-    plugin::Call<0x7322D0, RpAtomic*, int>(pRpAtomic, flag);
+void CVisibilityPlugins::SetAtomicFlag(void* pRpAtomic, std::uint16_t flag) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x7322D0, void*, int>(pRpAtomic, flag);
+#else
+    ATOMICPLG(pRpAtomic, m_flags) = flag;
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::SetAtomicFlag(RpAtomic *pRpAtomic,ushort flag)	0x7322B0
-void CVisibilityPlugins::SetAtomicFlag(RpAtomic* pRpAtomic, unsigned short flag) {
-    plugin::Call<0x7322B0, RpAtomic*, unsigned short>(pRpAtomic, flag);
+void CVisibilityPlugins::SetAtomicFlag(void* pRpAtomic, std::uint16_t flag) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x7322B0, void*, unsigned short>(pRpAtomic, flag);
+#else
+    ATOMICPLG(pRpAtomic, m_flags) = flag;
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::SetAtomicId(RpAtomic *pRpAtomic,int id)	0x732230
-void CVisibilityPlugins::SetAtomicId(RpAtomic* pRpAtomic, int id) {
-    plugin::Call<0x732230, RpAtomic*, int>(pRpAtomic, id);
+void CVisibilityPlugins::SetAtomicId(void* pRpAtomic, std::uint16_t id) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x732230, void*, std::uint16_t>(pRpAtomic, id);
+#else
+    ATOMICPLG(pRpAtomic, m_id) = id;
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::SetAtomicRenderCallback(RpAtomic *pRpAtomic, RpAtomic * (*renderCB)(RpAtomic *))	0x7328A0
-void CVisibilityPlugins::SetAtomicRenderCallback(RpAtomic *pRpAtomic, RpAtomic * (*renderCB)(RpAtomic *)) {
+void CVisibilityPlugins::SetAtomicRenderCallback(RpAtomic *atomic, RpAtomic * (*renderCB)(RpAtomic *)) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x7328A0, RpAtomic*, RpAtomic * (*)(RpAtomic *)>(pRpAtomic, renderCB);
+#else
+    if (!renderCB)
+        renderCB = AtomicDefaultRenderCallBack;
+    atomic->renderCallBack = renderCB;
+    if (!renderCB)
+        atomic->renderCallBack = AtomicDefaultRenderCallBack;
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::SetClumpAlpha(RpClump *pRpClump,int dwAlpha)	0x732B00
 void CVisibilityPlugins::SetClumpAlpha(RpClump* pRpClump, int dwAlpha) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x732B00, RpClump*, int>(pRpClump, dwAlpha);
+#else
+    CLUMPPLG(pRpClump, m_alpha) = dwAlpha;
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::SetClumpModelInfo(RpClump *pRpClump,CClumpModelInfo *pClumpModelInfo)	0x733750
 void CVisibilityPlugins::SetClumpModelInfo(RpClump* pRpClump, CClumpModelInfo* pClumpModelInfo) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x733750, RpClump*, CClumpModelInfo*>(pRpClump, pClumpModelInfo);
+#else
+    FRAMEPLG(RpClumpGetFrame(pRpClump), m_modelInfo) = pClumpModelInfo;
+    if (pClumpModelInfo->GetModelType() != MODEL_INFO_VEHICLE)
+        return;
+    auto pVehicleModelInfo = reinterpret_cast<CVehicleModelInfo*>(pClumpModelInfo);
+    if (pVehicleModelInfo->m_nVehicleType == VEHICLE_TRAIN || pVehicleModelInfo->m_nVehicleType == VEHICLE_FPLANE)
+        CLUMPPLG(pRpClump, m_visibilityCallBack) = VehicleVisibilityCB_BigVehicle;
+    else
+        CLUMPPLG(pRpClump, m_visibilityCallBack) = VehicleVisibilityCB;
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::SetFrameHierarchyId(RwFrame *pRwFrame,int id)	0x732A00
-void CVisibilityPlugins::SetFrameHierarchyId(RwFrame* pRwFrame, int id) {
-    plugin::Call<0x732A00, RwFrame*, int>(pRwFrame, id);
+void CVisibilityPlugins::SetFrameHierarchyId(RwFrame* pRwFrame, std::int32_t id) {
+#ifdef USE_DEFAULT_FUNCTIONS
+    plugin::Call<0x732A00, RwFrame*, std::int32_t>(pRwFrame, id);
+#else
+    FRAMEPLG(pRwFrame, m_hierarchyId) = id;
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::SetRenderWareCamera(RwCamera *pRwCamera)	0x7328C0
 void CVisibilityPlugins::SetRenderWareCamera(RwCamera* pRwCamera) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x7328C0, RwCamera*>(pRwCamera);
+#else
+    ms_pCamera = pRwCamera;
+    ms_pCameraPosn = RwMatrixGetPos(RwFrameGetMatrix(RwCameraGetFrame(pRwCamera)));
+    ms_cullCompsDist = std::powf(TheCamera.m_fLODDistMultiplier * 20.0f, 2.0f);
+    ms_cullBigCompsDist = std::powf(TheCamera.m_fLODDistMultiplier * 50.0f, 2.0f);
+    ms_vehicleLod0RenderMultiPassDist = std::powf(TheCamera.m_fGenerationDistMultiplier * 45.0f, 2.0f);
+    ms_vehicleLod0RenderMultiPassDist += ms_vehicleLod0RenderMultiPassDist;
+    ms_vehicleLod0Dist = std::powf(TheCamera.m_fGenerationDistMultiplier * 70.0f, 2.0f);
+    ms_vehicleLod0Dist += ms_vehicleLod0Dist;
+    float vehicleLodDistance = std::powf(TheCamera.m_fGenerationDistMultiplier * 150.0f, 2.0f);
+    vehicleLodDistance += vehicleLodDistance;
+    ms_vehicleLod1Dist = vehicleLodDistance;
+    ms_bigVehicleLod0Dist = vehicleLodDistance;
+    ms_pedLodDist = std::powf(TheCamera.m_fLODDistMultiplier * 60.0f, 2.0f);
+    ms_pedLodDist += ms_pedLodDist;
+    ms_pedFadeDist = std::powf(TheCamera.m_fLODDistMultiplier * 70.0f, 2.0f);
+    ms_pedFadeDist += ms_pedFadeDist;
+#endif
 }
 
-// Converted from cdecl void CVisibilityPlugins::SetUserValue(RpAtomic *pRpAtomic,ushort value)	0x732380
 void CVisibilityPlugins::SetUserValue(RpAtomic* pRpAtomic, unsigned short value) {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x732380, RpAtomic*, unsigned short>(pRpAtomic, value);
+#else
+    ATOMICPLG(pRpAtomic, m_flags) = value;
+#endif
 }
 
 // Converted from cdecl void CVisibilityPlugins::SetupVehicleVariables(RpClump *pRpClump)	0x733160
 void CVisibilityPlugins::SetupVehicleVariables(RpClump* pRpClump) {
     plugin::Call<0x733160, RpClump*>(pRpClump);
-}
-
-// Converted from cdecl void CVisibilityPlugins::Shutdown(void)	0x732EB0
-void CVisibilityPlugins::Shutdown() {
-    plugin::Call<0x732EB0>();
 }
 
 // Converted from cdecl bool CVisibilityPlugins::VehicleVisibilityCB(RpClump *pRpClump)	0x7336F0

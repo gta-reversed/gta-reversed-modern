@@ -625,6 +625,7 @@ RpClumpCallBack RpClumpGetCallBack(const RpClump* clump); // 0x74A270
 RwInt32 RpClumpGetNumAtomics(RpClump* clump); // 0x7498E0
 RwInt32 RpClumpGetNumLights(RpClump* clump); // 0x749910
 RwInt32 RpClumpGetNumCameras(RpClump* clump); // 0x749940
+RwFrame* RpClumpGetFrame(RpClump* clump){ return (RwFrame*)rwObjectGetParent(clump);}
 RpClump* RpLightGetClump(const RpLight* light); // 0x749E40
 RpClump* RwCameraGetClump(const RwCamera* camera); // 0x749E50
 RwUInt32 RpAtomicStreamGetSize(RpAtomic* atomic); // 0x74A5B0
@@ -715,6 +716,7 @@ void RpLightTieSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPre
 RpWorld* RpWorldRemoveCamera(RpWorld* world, RwCamera* camera); // 0x750F50
 RpWorld* RpWorldAddCamera(RpWorld* world, RwCamera* camera); // 0x750F20
 RpWorld* RwCameraGetWorld(const RwCamera* camera); // 0x750F80
+RwFrame* RwCameraGetFrame(const RwCamera* camera) { return (RwFrame*)rwObjectGetParent(camera); }
 RpWorld* RpWorldRemoveAtomic(RpWorld* world, RpAtomic* atomic); // 0x750FC0
 RpWorld* RpWorldAddAtomic(RpWorld* world, RpAtomic* atomic); // 0x750F90
 RpWorld* RpAtomicGetWorld(const RpAtomic* atomic); // 0x751050
