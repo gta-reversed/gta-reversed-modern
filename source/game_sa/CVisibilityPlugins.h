@@ -13,11 +13,34 @@
 #include "CAtomicModelInfo.h"
 #include "CLinkList.h"
 
+enum eAtomicComponentFlag
+{
+    ATOMIC_IS_OK_STATE = 0x1,
+    ATOMIC_IS_DAM_STATE = 0x2,
+    ATOMIC_IS_LEFT = 0x4,
+    ATOMIC_IS_RIGHT = 0x8,
+    ATOMIC_IS_FRONT = 0x10,
+    ATOMIC_IS_REAR = 0x20,
+    ATOMIC_HAS_ALPHA = 0x40,
+    ATOMIC_CULL = 0x80,
+    ATOMIC_IS_REAR_DOOR = 0x100,
+    ATOMIC_IS_FRONT_DOOR = 0x200,
+    ATOMIC_RENDER_ALWAYS = 0x400, // enabled for opened components (doors)
+    ATOMIC_IS_REPLACEMENT_UPGRADE = 0x800,
+    ATOMIC_IS_DOOR_WINDOW_OPENED = 0x1000,
+    ATOMIC_DISABLE_REFLECTIONS = 0x2000,
+    //ATOMIC_HAS_DYNAMIC_TEXTURES  = 0x2000, // TODO: WTF is this?
+    ATOMIC_IS_BLOWN_UP = 0x4000,
+    ATOMIC_VEHCOMP_15 = 0x8000
+};
 
 struct tAtomicVisibilityPlugin
 {
-   std::uint16_t m_id; // `m_id` is actually used for flags..
-   std::uint16_t m_flags;
+   std::int16_t m_modelId;
+   union {
+       std::uint16_t m_flags; // eAtomicComponentFlag
+       std::int16_t m_userValue;
+   };
 };
 VALIDATE_SIZE(tAtomicVisibilityPlugin, 0x4);
 
@@ -46,6 +69,7 @@ public:
     static const std::int32_t TOTAL_ALPHA_UNDERWATER_ENTITY_LISTS = 100;
     static const std::int32_t TOTAL_ALPHA_DRAW_LAST_LISTS = 50;
     static const std::int32_t TOTAL_WEAPON_PEDS_FOR_PC = 100;
+    using tAlphaRenderOrderedListCB = void(__cdecl*)(CEntity* entity, float distance);
     struct AlphaObjectInfo
     {
         union {
@@ -75,6 +99,8 @@ public:
     static float& ms_bigVehicleLod0Dist;
     static float& ms_pedLodDist;
     static float& ms_pedFadeDist;
+    static float& gVehicleDistanceFromCamera;
+    static float& gVehicleAngleToCamera;
 
     static void InjectHooks();
 
@@ -88,12 +114,13 @@ public:
     static bool InsertEntityIntoReallyDrawLastList(CEntity* pEntity, float distance);
     static bool InsertEntityIntoSortedList(CEntity* pEntity, float distance);
     static bool PluginAttach();
+    static RpAtomic* DefaultAtomicRenderCallback(RpAtomic* atomic);
     static void* AtomicConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
     static void* AtomicCopyConstructor(void* dstObject, const void* srcObject, RwInt32 offsetInObject, RwInt32 sizeInObject);
     static void* AtomicDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
-    static int CalculateFadingAtomicAlpha(CBaseModelInfo* modelInfo, CEntity* entity, float distance);
+    static std::int32_t CalculateFadingAtomicAlpha(CBaseModelInfo* modelInfo, CEntity* entity, float distance);
     static void ClearAtomicFlag(RpAtomic* pRpAtomic, std::uint16_t flag);
-    static RpAtomic* ClearAtomicFlag(RpAtomic* atomic, void* data);
+    static RpAtomic* ClearAtomicFlagCB(RpAtomic* atomic, void* data);
     static void ClearClumpForAllAtomicsFlag(RpClump* pRpClump, std::uint16_t flag);
     static void* ClumpConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
     static void* ClumpCopyConstructor(void* dstObject, const void* srcObject, RwInt32 offsetInObject, RwInt32 sizeInObject);
@@ -105,49 +132,50 @@ public:
     static bool FrustumSphereCB(RpClump* pRpClump);
     static std::uint16_t GetAtomicId(RpAtomic* pRpAtomic);
     static CAtomicModelInfo* GetAtomicModelInfo(RpAtomic* pRpAtomic);
-    static int GetClumpAlpha(RpClump* pRpClump);
+    static std::int32_t GetClumpAlpha(RpClump* pRpClump);
     static CClumpModelInfo* GetClumpModelInfo(RpClump* pRpClump);
     static float GetDistanceSquaredFromCamera(RwFrame* pRwFrame);
-    static float GetDistanceSquaredFromCamera(RwV3d* pRwV3d);
-    static float GetDotProductWithCameraVector(RwMatrixTag* atomicMat, RwMatrixTag* rootMat, unsigned int flags);
-    static int GetFrameHierarchyId(RwFrame* pRwFrame);
-    static short GetModelInfoIndex(RpAtomic* pRpAtomic);
-    static short GetUserValue(RpAtomic* pRpAtomic);
+    static float GetDistanceSquaredFromCamera(CVector* pPos);
+    static float GetDotProductWithCameraVector(RwMatrixTag* atomicMatrix, RwMatrixTag* clumpMatrix, std::uint16_t flags);
+    static std::int32_t GetFrameHierarchyId(RwFrame* pRwFrame);
+    static std::int16_t GetModelInfoIndex(RpAtomic* pRpAtomic);
+    static std::int16_t GetUserValue(RpAtomic* pRpAtomic);
     static bool IsAtomicVisible(RpAtomic* pRpAtomic);
     static bool IsClumpVisible(RpClump* pRpClump);
-    static void RenderAlphaAtomic(RpAtomic* pRpAtomic, int dwAlpha);
+    static void RenderAlphaAtomic(RpAtomic* atomic, std::int32_t alpha);
     static void RenderAlphaAtomics();
-    static void RenderAtomicWithAlphaCB(RpAtomic* pRpAtomic, void* pData);
+    static RpAtomic* RenderAtomicWithAlphaCB(RpAtomic* pRpAtomic, void* pData);
     static void RenderBoatAlphaAtomics();
     static void RenderEntity(CEntity* entity, int unused, float distance);
-    static void RenderFadingAtomic(CBaseModelInfo* pBaseModelInfo, RpAtomic* pRpAtomic, int dwAlpha);
-    static void RenderFadingClump(CBaseModelInfo* pBaseModelInfo, RpClump* pRpClump, int dwAlpha);
-    static void RenderFadingClumpCB(RpAtomic* pRpAtomic);
+    static void RenderFadingAtomic(CBaseModelInfo* modelInfo, RpAtomic* atomic, std::int32_t alpha);
+    static void RenderFadingClump(CBaseModelInfo* modelInfo, RpClump* clump, std::int32_t alpha);
+    static RpAtomic* RenderFadingClumpCB(RpAtomic* pRpAtomic);
     static void RenderFadingEntities();
     static void RenderFadingUnderwaterEntities();
-    static void RenderHeliRotorAlphaCB(RpAtomic* pRpAtomic);
-    static void RenderHeliTailRotorAlphaCB(RpAtomic* pRpAtomic);
-    static void RenderObjNormalAtomic(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderHeliRotorAlphaCB(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderHeliTailRotorAlphaCB(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderObjNormalAtomic(RpAtomic* pRpAtomic);
     static void RenderOrderedList(CLinkList<CVisibilityPlugins::AlphaObjectInfo>& AlphaObjectInfoList);
-    static void RenderPedCB(RpAtomic* pRpAtomic);
-    static void RenderPlayerCB(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderPedCB(RpAtomic* pRpAtomic);
+    static RpMaterial* SetTextureCB(RpMaterial* material, void* texture);
+    static RpAtomic* RenderPlayerCB(RpAtomic* pRpAtomic);
     static void RenderReallyDrawLastObjects();
-    static void RenderTrainHiDetailAlphaCB(RpAtomic* pRpAtomic);
-    static void RenderTrainHiDetailCB(RpAtomic* pRpAtomic);
-    static void RenderVehicleHiDetailAlphaCB(RpAtomic* pRpAtomic);
-    static void RenderVehicleHiDetailAlphaCB_BigVehicle(RpAtomic* pRpAtomic);
-    static void RenderVehicleHiDetailAlphaCB_Boat(RpAtomic* pRpAtomic);
-    static void RenderVehicleHiDetailCB(RpAtomic* pRpAtomic);
-    static void RenderVehicleHiDetailCB_BigVehicle(RpAtomic* pRpAtomic);
-    static void RenderVehicleHiDetailCB_Boat(RpAtomic* pRpAtomic);
-    static void RenderVehicleLoDetailCB_Boat(RpAtomic* pRpAtomic);
-    static void RenderVehicleReallyLowDetailCB(RpAtomic* pRpAtomic);
-    static void RenderVehicleReallyLowDetailCB_BigVehicle(RpAtomic* pRpAtomic);
-    static void RenderWeaponCB(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderTrainHiDetailAlphaCB(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderTrainHiDetailCB(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderVehicleHiDetailAlphaCB(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderVehicleHiDetailAlphaCB_BigVehicle(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderVehicleHiDetailAlphaCB_Boat(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderVehicleHiDetailCB(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderVehicleHiDetailCB_BigVehicle(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderVehicleHiDetailCB_Boat(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderVehicleLoDetailCB_Boat(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderVehicleReallyLowDetailCB(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderVehicleReallyLowDetailCB_BigVehicle(RpAtomic* pRpAtomic);
+    static RpAtomic* RenderWeaponCB(RpAtomic* pRpAtomic);
     static void RenderWeaponPedsForPC();
-    static void SetAtomicFlag(void* pRpAtomic, std::uint16_t flag);
-    static void SetAtomicFlag(void* pRpAtomic, std::uint16_t flag);
-    static void SetAtomicId(void* pRpAtomic, std::uint16_t id);
+    static void SetAtomicFlagCB(void* pRpAtomic, std::uint16_t flag);
+    static void SetAtomicFlag(RpAtomic* pRpAtomic, std::uint16_t flag);
+    static void SetAtomicId(void* pRpAtomic, std::int16_t id);
     static void SetAtomicRenderCallback(RpAtomic *pRpAtomic, RpAtomic * (*renderCB)(RpAtomic *));
     static void SetClumpAlpha(RpClump* pRpClump, int dwAlpha);
     static void SetClumpModelInfo(RpClump* pRpClump, CClumpModelInfo* pClumpModelInfo);

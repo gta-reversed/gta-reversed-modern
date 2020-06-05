@@ -959,7 +959,7 @@ bool CRenderer::ShouldModelBeStreamed(CEntity* entity, CVector const& point, flo
         return false;
     const float fMagnitude = (entity->GetPosition() - point).Magnitude();
     const float fDrawDistanceRadius = TheCamera.m_fLODDistMultiplier * pModelInfo->m_fDrawDistance;
-    if (fMagnitude <= pModelInfo->GetBoundingRadius() + farClip && fDrawDistanceRadius > fMagnitude)
+    if (fMagnitude <= pModelInfo->GetColModel()->GetBoundRadius() + farClip && fDrawDistanceRadius > fMagnitude)
         return true;
     return false;
 #endif

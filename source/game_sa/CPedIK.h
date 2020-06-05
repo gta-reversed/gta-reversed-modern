@@ -60,6 +60,10 @@ public:
         };
     };
 
+    static RwV3d& XaxisIK;
+    static RwV3d& YaxisIK;
+    static RwV3d& ZaxisIK;
+
     //funcs
     void RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool flag);
     bool PointGunInDirection(float Z_angle, float arg2, bool flag, float arg4);
