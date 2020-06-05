@@ -256,12 +256,6 @@ RwReal _rwMatrixIdentityError(const RwMatrix* matrix) {
     return ((RwReal(__cdecl *)(const RwMatrix*))0x7F1590)(matrix);
 }
 
-void RwV3dScale(RwV3d* out, const RwV3d* in, RwReal scalar) {
-    out->x = in->x * scalar;
-    out->y = in->y * scalar;
-    out->z = in->z * scalar;
-}
-
 RwReal RwV3dNormalize(RwV3d* out, const RwV3d* in) {
     return ((RwReal(__cdecl *)(RwV3d*, const RwV3d*))0x7ED9B0)(out, in);
 }
@@ -2239,7 +2233,7 @@ void RpClumpSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPreall
 }
 
 RpAtomic* AtomicDefaultRenderCallBack(RpAtomic* atomic) {
-    return ((RpAtomic*(__cdecl *)(RpAtomic*))0x7491C0)(atomic);
+    return ((RpAtomic * (__cdecl *)(RpAtomic*))0x7491C0)(atomic);
 }
 
 void _rpAtomicResyncInterpolatedSphere(RpAtomic* atomic) {

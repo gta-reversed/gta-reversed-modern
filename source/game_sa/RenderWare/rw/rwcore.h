@@ -2273,6 +2273,151 @@ struct RwBBox
 /* Type ID */
 #define rwCAMERA 4
 
+/* RWPUBLICEND */
+
+/* Used by some drivers for overdraw frustums */
+
+#if defined(__GNUC__) \
+    && ((__GNUC__ > 2 ) || (__GNUC__ == 2) && (__GNUC_MINOR__ == 96))
+
+#define RWPLANESETCLOSEST(p)                            \
+    (p).closestX = (((p).plane.normal.x)>=((RwReal)0)); \
+    (p).closestY = (((p).plane.normal.y)>=((RwReal)0)); \
+    (p).closestZ = (((p).plane.normal.z)>=((RwReal)0))
+
+#else
+/* This version is not -fstrict-alias safe */
+/* 1 Bll 0 Fur */
+
+#define RWPLANESETCLOSEST(p)                                                 \
+    (p).closestX = (RwUInt8)(((*(RwInt32 *)(&(p).plane.normal.x))>>31) +1);  \
+    (p).closestY = (RwUInt8)(((*(RwInt32 *)(&(p).plane.normal.y))>>31) +1);  \
+    (p).closestZ = (RwUInt8)(((*(RwInt32 *)(&(p).plane.normal.z))>>31) +1)
+
+#endif
+
+/* RWPUBLIC */
+
+
+/****************************************************************************
+ <macro/inline functionality
+ */
+
+#define RwCameraGetViewOffsetMacro(_camera)                     \
+    (&((_camera)->viewOffset))
+
+#define RwCameraSetRasterMacro(_camera, _raster)                \
+    (((_camera)->frameBuffer = (_raster)), (_camera))
+
+#define RwCameraSetRasterVoidMacro(_camera, _raster)            \
+MACRO_START                                                     \
+{                                                               \
+    (_camera)->frameBuffer = (_raster);                         \
+}                                                               \
+MACRO_STOP
+
+#define RwCameraGetRasterMacro(_camera)                         \
+    ((_camera)->frameBuffer)
+
+#define RwCameraSetZRasterMacro(_camera, _raster)               \
+    (((_camera)->zBuffer = (_raster)), (_camera))
+
+#define RwCameraSetZRasterVoidMacro(_camera, _raster)           \
+MACRO_START                                                     \
+{                                                               \
+    (_camera)->zBuffer = (_raster);                             \
+}                                                               \
+MACRO_STOP
+
+#define RwCameraGetZRasterMacro(_camera)                        \
+    ((_camera)->zBuffer)
+
+#define RwCameraGetNearClipPlaneMacro(_camera)                  \
+    ((_camera)->nearPlane)
+
+#define RwCameraGetFarClipPlaneMacro(_camera)                   \
+    ((_camera)->farPlane)
+
+#define RwCameraSetFogDistanceMacro(_camera, _distance)         \
+    (((_camera)->fogPlane = (_distance)), (_camera))
+
+#define RwCameraGetFogDistanceMacro(_camera)                    \
+    ((_camera)->fogPlane)
+
+#define RwCameraGetCurrentCameraMacro()                         \
+    ((RwCamera *)RWSRCGLOBAL(curCamera))
+
+#define RwCameraGetProjectionMacro(_camera)                     \
+    ((_camera)->projectionType)
+
+#define RwCameraGetViewWindowMacro(_camera)                     \
+    (&((_camera)->viewWindow))
+
+#define RwCameraGetViewMatrixMacro(_camera)                     \
+    (&((_camera)->viewMatrix))
+
+#define RwCameraSetFrameMacro(_camera, _frame)                  \
+    (_rwObjectHasFrameSetFrame((_camera), (_frame)), (_camera))
+
+#define RwCameraSetFrameVoidMacro(_camera, _frame)      \
+MACRO_START                                             \
+{                                                       \
+    _rwObjectHasFrameSetFrame((_camera), (_frame));     \
+}                                                       \
+MACRO_STOP
+
+
+#define RwCameraGetFrameMacro(_camera)                          \
+    ((RwFrame *)rwObjectGetParent((_camera)))
+
+#if !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE))
+
+#define RwCameraGetViewOffset(_camera)                          \
+    RwCameraGetViewOffsetMacro(_camera)
+
+#define RwCameraSetRaster(_camera, _raster)                     \
+    RwCameraSetRasterMacro(_camera, _raster)
+
+#define RwCameraGetRaster(_camera)                              \
+    RwCameraGetRasterMacro(_camera)
+
+#define RwCameraSetZRaster(_camera, _raster)                    \
+    RwCameraSetZRasterMacro(_camera, _raster)
+
+#define RwCameraGetZRaster(_camera)                             \
+    RwCameraGetZRasterMacro(_camera)
+
+#define RwCameraGetNearClipPlane(_camera)                       \
+    RwCameraGetNearClipPlaneMacro(_camera)
+
+#define RwCameraGetFarClipPlane(_camera)                        \
+    RwCameraGetFarClipPlaneMacro(_camera)
+
+#define RwCameraSetFogDistance(_camera, _distance)              \
+    RwCameraSetFogDistanceMacro(_camera, _distance)
+
+#define RwCameraGetFogDistance(_camera)                         \
+    RwCameraGetFogDistanceMacro(_camera)
+
+#define RwCameraGetCurrentCamera()                              \
+    RwCameraGetCurrentCameraMacro()
+
+#define RwCameraGetProjection(_camera)                          \
+    RwCameraGetProjectionMacro(_camera)
+
+#define RwCameraGetViewWindow(_camera)                          \
+    RwCameraGetViewWindowMacro(_camera)
+
+#define RwCameraGetViewMatrix(_camera)                          \
+    RwCameraGetViewMatrixMacro(_camera)
+
+#define RwCameraSetFrame(_camera, _frame)                       \
+    RwCameraSetFrameMacro(_camera, _frame)
+
+#define RwCameraGetFrame(_camera)                               \
+    RwCameraGetFrameMacro(_camera)
+
+#endif /* !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE)) */
 
 /****************************************************************************
  Global Types
