@@ -71,6 +71,12 @@ VALIDATE_SIZE(tStreamingChannel, 0x98);
 
 class  CStreaming {
 public:
+     static const std::int32_t TOTAL_SPECIAL_MODELS = 10;
+     static const std::int32_t TOTAL_CLOTHES_MODELS = 10;
+     static const std::int32_t TOTAL_CUTSCENE_MODELS = 20;
+     static const std::int32_t SPECIAL_MODELS_RESOURCE_ID = 290;
+     static const std::int32_t CLOTHES_MODELS_RESOURCE_ID = 384;
+     static const std::int32_t CUTSCENE_MODELS_RESOURCE_ID = 300;
      static unsigned int &ms_memoryAvailable;
      static int &desiredNumVehiclesLoaded;
      static bool &ms_bLoadVehiclesInLoadScene;

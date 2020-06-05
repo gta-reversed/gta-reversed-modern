@@ -427,7 +427,7 @@ bool CStreaming::HasSpecialCharLoaded(std::int32_t slot)
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<bool, std::int32_t>(0x407F00, slot);
 #else
-    return ms_aInfoForModel[slot + 290].m_nLoadState == LOADSTATE_LOADED;
+    return ms_aInfoForModel[slot + SPECIAL_MODELS_RESOURCE_ID].m_nLoadState == LOADSTATE_LOADED;
 #endif
 }
 
@@ -1650,7 +1650,7 @@ void CStreaming::RequestSpecialChar(int modelId, char const* name, int flags)
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<int, char const*, int>(0x40B450, modelId, name, flags);
 #else
-    return RequestSpecialModel(modelId + 290, name, flags);
+    return RequestSpecialModel(modelId + SPECIAL_MODELS_RESOURCE_ID, name, flags);
 #endif
 }
 
@@ -1846,18 +1846,18 @@ void CStreaming::ReInit() {
     m_bCopBikeLoaded = false;
     m_bDisableCopBikes = false;
     ms_nTimePassedSinceLastCopBikeStreamedIn = 0;
-    for (std::int32_t i = 0; i < 10; i++) {
-        const std::int32_t modelId = i + 290;
+    for (std::int32_t i = 0; i < TOTAL_SPECIAL_MODELS; i++) {
+        const std::int32_t modelId = i + SPECIAL_MODELS_RESOURCE_ID;
         RemoveModel(modelId);
         CModelInfo::ms_modelInfoPtrs[modelId]->m_nKey = CKeyGen::GetUppercaseKey(gta_empty_string);
     }
-    for (std::int32_t i = 0; i < 10; i++) {
-        const std::int32_t modelId = i + 384;
+    for (std::int32_t i = 0; i < TOTAL_CLOTHES_MODELS; i++) {
+        const std::int32_t modelId = i + CLOTHES_MODELS_RESOURCE_ID;
         RemoveModel(modelId);
         CModelInfo::ms_modelInfoPtrs[modelId]->m_nKey = CKeyGen::GetUppercaseKey(gta_empty_string);
     }
-    for (std::int32_t i = 0; i < 20; i++) {
-        const std::int32_t modelId = i + 300;
+    for (std::int32_t i = 0; i < TOTAL_CUTSCENE_MODELS; i++) {
+        const std::int32_t modelId = i + CUTSCENE_MODELS_RESOURCE_ID;
         RemoveModel(modelId);
         CModelInfo::ms_modelInfoPtrs[modelId]->m_nKey = CKeyGen::GetUppercaseKey(gta_empty_string);
     }
@@ -2923,7 +2923,7 @@ void CStreaming::SetMissionDoesntRequireSpecialChar(int slot) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<int>(0x40B490, slot);
 #else
-    SetMissionDoesntRequireModel(slot + 290);
+    SetMissionDoesntRequireModel(slot + SPECIAL_MODELS_RESOURCE_ID);
 #endif
 }
 
@@ -2957,7 +2957,7 @@ void CStreaming::SetSpecialCharIsDeletable(int slot) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<int>(0x40B470, slot);
 #else
-    SetModelIsDeletable(slot + 290);
+    SetModelIsDeletable(slot + SPECIAL_MODELS_RESOURCE_ID);
 #endif
 }
 
