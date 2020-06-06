@@ -49,7 +49,6 @@ void CStats::InjectHooks()
     HookInstall(0x55B900, &CStats::ProcessReactionStatsOnIncrement, 7); 
     HookInstall(0x55C6F0, &CStats::UpdateStatsWhenRunning, 7);
     HookInstall(0x55CD60, &CStats::UpdateStatsWhenOnMotorBike, 7);
-    HookInstall(0x55C6F0, &CStats::UpdateStatsWhenRunning, 7);
     HookInstall(0x55CFA0, &CStats::UpdateStatsWhenFighting, 7);
 }
 
