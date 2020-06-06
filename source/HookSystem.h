@@ -57,8 +57,9 @@ void HookInstall(DWORD installAddress, T addressToJumpTo, int iJmpCodeSize = 5)
     theHook.jumpLocation =  (DWORD)dwAddressToJumpTo - (DWORD)installAddress - (DWORD)x86FixedJumpSize;
     memset(theHook.possibleNops, NOP_OPCODE, iJmpCodeSize - x86FixedJumpSize);
 
+    const int maxBytesToProtect = std::max(iJmpCodeSize, 8);
     DWORD dwProtect[2];
-    VirtualProtect((void*)installAddress, 8, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
+    VirtualProtect((void*)installAddress, maxBytesToProtect, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
     
     // workaround for hoodlum crashes due to securom protection.
     if (*(std::uint8_t*)installAddress == NOP_OPCODE) {
@@ -83,5 +84,5 @@ void HookInstall(DWORD installAddress, T addressToJumpTo, int iJmpCodeSize = 5)
     else {
         memcpy((void*)installAddress, &theHook, iJmpCodeSize);
     }
-    VirtualProtect((void*)installAddress, 8, dwProtect[0], &dwProtect[1]);
+    VirtualProtect((void*)installAddress, maxBytesToProtect, dwProtect[0], &dwProtect[1]);
 }
