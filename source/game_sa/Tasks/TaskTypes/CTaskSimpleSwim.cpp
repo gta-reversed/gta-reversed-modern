@@ -246,7 +246,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
             {
                 CPlayerData* pPlayerData = pPed->m_pPlayerData;
                 if (CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 0.5f > pPlayerData->m_fBreath)
-                    pPed->Say(356, 0, 1.0, 0, 0, 0);
+                    pPed->Say(356, 0, 1.0f, 0, 0, 0);
             }
         }
         pPed->SetMoveState(PEDMOVE_NONE);
@@ -255,25 +255,14 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
     {
         ProcessControlAI(pPed);
 
-        if (m_nSwimState == SWIM_UNDERWATER_SPRINTING)
-        {
-            eWeaponType weaponType = static_cast<eWeaponType>(WEAPON_ARMOUR | WEAPON_BASEBALLBAT);
-
-            CPedDamageResponseCalculator pedDamageResponseCalculator;
-            pedDamageResponseCalculator.Constructor1(0, CTimer::ms_fTimeStep, weaponType, PED_PIECE_TORSO, false);
-
-            CEventDamage eventDamage(0, CTimer::m_snTimeInMilliseconds, weaponType, PED_PIECE_TORSO, 0, 0, pPed->bInVehicle);
-            CPedDamageResponse damageResponseInfo;
+        if (m_nSwimState == SWIM_UNDERWATER_SPRINTING) {
+            CPedDamageResponseCalculator damageCalculator(0, CTimer::ms_fTimeStep, WEAPON_DROWNING, PED_PIECE_TORSO, false);
+            CEventDamage eventDamage(0, CTimer::m_snTimeInMilliseconds, WEAPON_DROWNING, PED_PIECE_TORSO, 0, 0, pPed->bInVehicle);
             if (eventDamage.AffectsPed(pPed))
-            {
-                pedDamageResponseCalculator.ComputeDamageResponse(pPed, &damageResponseInfo, true);
-            }
+                damageCalculator.ComputeDamageResponse(pPed, &eventDamage.m_damageResponse, true);
             else
-            {
-                damageResponseInfo.m_bDamageCalculated = true;
-            }
-            pPed->m_pIntelligence->m_eventGroup.Add((CEvent*)& eventDamage, false);
-            pedDamageResponseCalculator.Destructor1();
+                eventDamage.m_damageResponse.m_bDamageCalculated = true;
+            pPed->m_pIntelligence->m_eventGroup.Add(&eventDamage, false);
         }
     }
     ProcessSwimAnims(pPed);

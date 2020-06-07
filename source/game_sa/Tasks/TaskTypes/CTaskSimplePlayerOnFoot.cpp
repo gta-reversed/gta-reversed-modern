@@ -85,11 +85,6 @@ CTaskSimplePlayerOnFoot* CTaskSimplePlayerOnFoot::Destructor()
     return plugin::CallMethodAndReturn<CTaskSimplePlayerOnFoot*, 0x68B0C0, CTaskSimplePlayerOnFoot*>(this);
 }
 
-
-/*
-    Everything works for this function except stealth kill. It should be
-    fixed later.
-*/
 void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -315,19 +310,16 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 pTaskManager->SetTask(pTaskSimpleStealthKill, 3, 0);
 
                 eWeaponType activeWeaponType = pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType;
-                CPedDamageResponseCalculator pedDamageResponseCalculator;
-                pedDamageResponseCalculator.Constructor1(pPlayerPed, 0.0, activeWeaponType, PED_PIECE_TORSO, 0);
+                CPedDamageResponseCalculator damageCalculator(pPlayerPed, 0.0, activeWeaponType, PED_PIECE_TORSO, 0);
                 CEventDamage eventDamage(pPlayerPed, CTimer::m_snTimeInMilliseconds, activeWeaponType, PED_PIECE_TORSO, 0, 0, pTargetEntity->bInVehicle);
-                CPedDamageResponse damageResponseInfo;
                 if (eventDamage.AffectsPed(pTargetEntity))
                 {
-                    pedDamageResponseCalculator.ComputeDamageResponse(pTargetEntity, &damageResponseInfo, 0);
-                    pIntelligence->m_eventGroup.Add((CEvent*)&eventDamage, 0);
+                    damageCalculator.ComputeDamageResponse(pTargetEntity, &eventDamage.m_damageResponse, 0);
+                    pTargetEntity->GetEventGroup().Add(&eventDamage, 0);
                     CCrime::ReportCrime(18, pTargetEntity, pPlayerPed);
                     pPlayerPed->m_weaponAudio.AddAudioEvent(156);
                 }
                 pPlayerPed->ClearWeaponTarget();
-                pedDamageResponseCalculator.Destructor1();
             }
             else
             {

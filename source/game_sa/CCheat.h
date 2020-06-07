@@ -18,6 +18,7 @@ public:
      static bool(&m_aCheatsActive)[92]; // static bool m_aCheatsActive[92]
      static bool &m_bHasPlayerCheated;
 
+     static void InjectHooks();
      static void AddToCheatString(char LastPressedKey);
      static void AdrenalineCheat();
      static void AllCarsAreGreatCheat();
