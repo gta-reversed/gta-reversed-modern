@@ -261,35 +261,13 @@ void CTaskComplexWanderCop::LookForCarAlarms(CCopPed* pPed)
     plugin::CallMethod<0x66B1B0, CTaskComplexWanderCop*, CPed*>(this, pPed);
 #else
     CVehicle* pPlayerVehicle = FindPlayerVehicle(-1, 0);
-    if (pPlayerVehicle && !pPlayerVehicle->m_nVehicleClass)
-    {
+    if (pPlayerVehicle && !pPlayerVehicle->m_nVehicleClass) {
         short alaramState = pPlayerVehicle->m_nAlarmState;
-        if (alaramState)
-        {
-            if (alaramState != -1 && pPlayerVehicle->m_nStatus != STATUS_WRECKED)
-            {
-                CVector* pPedPos = &pPed->m_placement.m_vPosn;
-                CMatrixLink* pPedMatrix = pPed->m_matrix;
-                if (pPedMatrix)
-                {
-                    pPedPos = &pPedMatrix->pos;
-                }
-
-                CVector* pVehiclePos = &pPlayerVehicle->m_placement.m_vPosn;
-                CMatrixLink* pVehicleMatrix = pPlayerVehicle->m_matrix;
-                if (pVehicleMatrix)
-                {
-                    pVehiclePos = &pVehicleMatrix->pos;
-                }
-
-                float fX = pVehiclePos->x - pPedPos->x;
-                float fY = pVehiclePos->y - pPedPos->y;
-                float fZ = pVehiclePos->z - pPedPos->z;
-                float result = fY * fY + fX * fX + fZ * fZ;
-                if (result > 400.0f)
-                {
+        if (alaramState) {
+            if (alaramState != -1 && pPlayerVehicle->m_nStatus != STATUS_WRECKED) {
+                CVector distance = pPlayerVehicle->GetPosition() - pPed->GetPosition();
+                if (distance.SquaredMagnitude() < 400.0f)
                     FindPlayerPed(-1)->SetWantedLevelNoDrop(1);
-                }
             }
         }
     }
@@ -324,13 +302,6 @@ void CTaskComplexWanderCop::LookForCriminals(CCopPed* pPed)
 #ifdef USE_DEFAULT_FUNCTIONS 
     plugin::CallMethod<0x66B300, CTaskComplexWanderCop*, CPed*>(this, pPed);
 #else
-    CVector* pPedPos = &pPed->m_placement.m_vPosn;
-    CMatrixLink* pPedMatrix = pPed->m_matrix;
-    if (pPedMatrix)
-    {
-        pPedPos = &pPedMatrix->pos;
-    }
-
     CPed* pCriminalPed = nullptr;
     for (int entityIndex = 0; entityIndex < 16; entityIndex++)
     {
@@ -344,17 +315,12 @@ void CTaskComplexWanderCop::LookForCriminals(CCopPed* pPed)
                 CTask* pActiveTask = pCriminalPed->m_pIntelligence->m_TaskMgr.GetActiveTask();
                 if (pActiveTask && pActiveTask->GetId() == GetId())
                 {
-                    const CVector& vecCriminalPos = pCriminalPed->GetPosition();
-                    CVector vecDifference = (vecCriminalPos - *pPedPos);
-                    if (10.0f * 10.0f > vecDifference.SquaredMagnitude())
+                    CVector distance = (pCriminalPed->GetPosition() - pPed->GetPosition());
+                    if (10.0f * 10.0f > distance.SquaredMagnitude())
                     {
-                        float fResult = vecDifference.x * pPedMatrix->up.x + 
-                                        vecDifference.y * pPedMatrix->up.y + 
-                                        vecDifference.z * pPedMatrix->up.z;
-                        if (fResult > 0.0f && CWorld::GetIsLineOfSightClear(*pPedPos, vecCriminalPos, 1, 0, 0, 1, 0, 0, 0))
-                        {
+                        const float dot = DotProduct(distance, pPed->GetForward());
+                        if (dot > 0.0f && CWorld::GetIsLineOfSightClear(pPed->GetPosition(), pCriminalPed->GetPosition(), 1, 0, 0, 1, 0, 0, 0))
                             break;
-                        }
                     }
                 }
             }

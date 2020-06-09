@@ -207,7 +207,7 @@ CTask* CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(int taskId, CPed* 
     case TASK_SIMPLE_STAND_STILL: {
         if (m_bGoToPoint && m_pSubTask && m_pSubTask->GetId() == TASK_SIMPLE_GO_TO_POINT) {
             CVector vecDistance = m_vecTargetPoint - ped->GetPosition(); 
-            float fDotProduct = DotProduct(&vecDistance, &ped->m_matrix->up);
+            float fDotProduct = DotProduct(&vecDistance, &ped->GetForward());
             float fBlendDelta = 8.0f;
             if (ped->m_vecAnimMovingShiftLocal.y >= 0.01f) {
                 fBlendDelta = 50.0f / ((fDotProduct / (ped->m_vecAnimMovingShiftLocal.y * 0.5f) - 1.0f) * CTimer::ms_fTimeStep);

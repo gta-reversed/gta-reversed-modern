@@ -72,7 +72,7 @@ void CTaskSimpleGoTo::SetUpIK(CPed* pPed)
             if (vecDistance.SquaredMagnitude() > 9.0f) {
                 CVector direction(vecDistance);
                 direction.Normalise();
-                if (DotProduct(&direction, &pPed->m_matrix->up) < ms_fLookAtThresholdDotProduct) {
+                if (DotProduct(&direction, &pPed->GetForward()) < ms_fLookAtThresholdDotProduct) {
                     CVector position = direction + direction;
                     position.x += m_vecTargetPoint.x;
                     position.y += m_vecTargetPoint.y;

@@ -74,7 +74,7 @@ public:
 	void SetHearingRange(float range);
 	void SetSeeingRange(float range);
 	bool IsInHearingRange(CVector const& posn);
-	bool IsInSeeingRange(CVector* pPosition);
+	bool IsInSeeingRange(CVector const& posn);
 	bool FindRespectedFriendInInformRange();
 	bool IsRespondingToEvent(int eventType);
 	void AddTaskPhysResponse(CTask* pTask, int unUsed);

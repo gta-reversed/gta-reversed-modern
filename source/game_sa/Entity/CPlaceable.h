@@ -22,11 +22,11 @@ public:
     
     static void ShutdownMatrixArray();
     static void InitMatrixArray();
-    
-    CVector* GetRightDirection(CVector* pOut);
-    CVector* GetTopDirection(CVector* pOut);
-    CVector* GetAtDirection(CVector* pOut);
-    
+
+    CVector GetRightVector();
+    CVector GetForwardVector();
+    CVector GetUpVector();
+
     void FreeStaticMatrix();
     void SetPosn(float x, float y, float z);
     void SetPosn(CVector const& posn);
@@ -41,9 +41,10 @@ public:
     void AllocateMatrix();
     void SetMatrix(CMatrix  const& matrix);
     
-    inline CVector &GetPosition() {
-        return m_matrix ? m_matrix->pos : m_placement.m_vPosn;
-    }
+    inline CVector& GetRight() { return m_matrix->GetRight(); }
+    inline CVector& GetForward() { return m_matrix->GetForward(); }
+    inline CVector& GetUp() { return m_matrix->GetUp(); }
+    inline CVector& GetPosition() { return m_matrix ? m_matrix->GetPosition() : m_placement.m_vPosn; }
 };
 
 VALIDATE_SIZE(CPlaceable, 0x18);

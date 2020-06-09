@@ -71,29 +71,6 @@ bool InTwoPlayersMode()
     return ((bool(__cdecl *)())0x441390)();
 }
 
-CVector* VectorAdd(CVector* out, CVector* from, CVector* what)
-{
-    return ((CVector * (__cdecl*)(CVector*, CVector*, CVector*))0x40FE30)(out, from, what);
-}
-
-
-CVector * VectorSub(CVector * out, CVector * from, CVector * what)
-{
-    return ((CVector *(__cdecl *)(CVector *, CVector *, CVector *))0x40FE60)(out, from, what);
-}
-
-CVector* MultiplyMatrixWithVector(CVector* outPoint, CMatrix* m, CVector* point)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<CVector*, 0x59C890, CVector*, CMatrix*, CVector*> (outPoint, m, point);
-#else
-    outPoint->x = m->at.x * point->z + m->up.x * point->y + m->right.x * point->x + m->pos.x;
-    outPoint->y = m->at.y * point->z + m->right.y * point->x + m->up.y * point->y + m->pos.y;
-    outPoint->z = m->at.z * point->z + m->right.z * point->x + m->up.z * point->y + m->pos.z;
-    return outPoint;
-#endif
-}
-
 CVector* Multiply3x3(CVector* out, CMatrix* m, CVector* in)
 {
     return plugin::CallAndReturn<CVector*, 0x59C790, CVector*, CMatrix*, CVector*>(out, m, in);

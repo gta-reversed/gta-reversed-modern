@@ -42,12 +42,11 @@ bool cBuoyancy::ProcessBuoyancy(CPhysical* pEntity, float fBuoyancy, CVector* pV
             if (m_fDistanceToWaterSurfaceZ > 0.0f && m_fDistanceToWaterSurfaceZ < 1.0f)
             {
                 float fDistanceZ = m_fWaterLevel - entityPosition.z;
-                CVector topDirection;
-                CVector* pTopDirection = pEntity->GetTopDirection(&topDirection);
+                CVector forward = pEntity->GetForwardVector();
                 cBuoyancy::AddSplashParticles
                     (pEntity, CVector(0.0f, 0.0f, fDistanceZ), 
                         CVector(0.0f, 0.0f, fDistanceZ), 
-                        CVector(-pTopDirection->x, -pTopDirection->y,-pTopDirection->z), true);
+                        CVector(-forward.x, -forward.y,-forward.z), true);
             }
         }
         else 

@@ -719,14 +719,14 @@ void CStreaming::DeleteRwObjectsBehindCamera(std::int32_t memoryToCleanInBytes) 
     const CVector& cameraPos = TheCamera.GetPosition();
     std::int32_t pointX = CWorld::GetSectorX(cameraPos.x);
     std::int32_t pointY = CWorld::GetSectorY(cameraPos.y);
-    const CVector2D& cameraUp = TheCamera.GetMatrix()->up;
-    if (fabs(cameraUp.y) < fabs(cameraUp.x)) {
+    const CVector2D& cameraForward = TheCamera.GetForward();
+    if (fabs(cameraForward.y) < fabs(cameraForward.x)) {
         std::int32_t sectorStartY = std::max(pointY - 10, 0);
         std::int32_t sectorEndY = std::min(pointY + 10, MAX_SECTORS_Y - 1);
         std::int32_t sectorStartX = 0;
         std::int32_t sectorEndX = 0;
         std::int32_t factorX = 0;
-        if (cameraUp.x <= 0.0f) {
+        if (cameraForward.x <= 0.0f) {
             sectorStartX = std::min(pointX + 10, MAX_SECTORS_X - 1);
             sectorEndX = std::min(pointX + 2, MAX_SECTORS_X - 1);
             factorX = -1;
@@ -749,7 +749,7 @@ void CStreaming::DeleteRwObjectsBehindCamera(std::int32_t memoryToCleanInBytes) 
                 }
             }
         }
-        if (cameraUp.x <= 0.0f) {
+        if (cameraForward.x <= 0.0f) {
             sectorEndX = std::min(pointX + 2, MAX_SECTORS_X - 1);
             sectorStartX = std::max(pointX - 10, 0);
             factorX = -1;
@@ -792,7 +792,7 @@ void CStreaming::DeleteRwObjectsBehindCamera(std::int32_t memoryToCleanInBytes) 
         std::int32_t sectorStartY = 0;
         std::int32_t sectorEndY = 0;
         std::int32_t factorY = 0;
-        if (cameraUp.y <= 0.0f) {
+        if (cameraForward.y <= 0.0f) {
             sectorEndY = std::min(pointY + 2, MAX_SECTORS_Y - 1);
             sectorStartY = std::min(pointY + 10, MAX_SECTORS_Y - 1);
             factorY = -1;
@@ -815,7 +815,7 @@ void CStreaming::DeleteRwObjectsBehindCamera(std::int32_t memoryToCleanInBytes) 
                 }
             }
         }
-        if (cameraUp.y <= 0.0f) {
+        if (cameraForward.y <= 0.0f) {
             sectorEndY = std::min(pointY + 2, MAX_SECTORS_Y - 1);
             sectorStartY = std::max(pointY - 10, 0);
             factorY = -1;

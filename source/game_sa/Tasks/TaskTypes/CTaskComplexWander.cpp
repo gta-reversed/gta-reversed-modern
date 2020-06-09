@@ -373,15 +373,8 @@ void CTaskComplexWander::UpdatePathNodes_Reversed(CPed* pPed, int8_t dir, CNodeA
 {
     *originNode = *targetNode;
     targetNode->m_wAreaId = -1;
-
-    CVector* pPedPos = &pPed->m_placement.m_vPosn;
-    CMatrixLink* pPedMatrix = pPed->m_matrix;
-    if (pPedMatrix)
-    {
-        pPedPos = &pPedMatrix->pos;
-    }
-
-    ThePaths.FindNextNodeWandering(PATH_TYPE_BOATS, pPedPos->x, pPedPos->y, pPedPos->z, originNode, targetNode, dir, outDir);
+    const CVector& pos = pPed->GetPosition();
+    ThePaths.FindNextNodeWandering(PATH_TYPE_BOATS, pos.x, pos.y, pos.z, originNode, targetNode, dir, outDir);
 }
 
 CTask* CTaskComplexWander::CreateSubTask(CPed* ped, int taskId)
@@ -483,19 +476,10 @@ float CTaskComplexWander::ComputeTargetHeading(CPed* ped)
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<float, 0x66F530, CTaskComplexWander*, CPed*>(this, ped);
 #else
-    CVector outPosition;
-    ThePaths.TakeWidthIntoAccountForWandering(&outPosition, m_NextNode, ped->m_nRandomSeed);
-
-    CVector* pPedPos = &ped->m_placement.m_vPosn;
-    CMatrixLink* pPedMatrix = ped->m_matrix;
-    if (pPedMatrix)
-    {
-        pPedPos = &pPedMatrix->pos;
-    }
-
-    outPosition.x -= pPedPos->x;
-    outPosition.y -= pPedPos->y;
-    float radianAngle = CGeneral::GetRadianAngleBetweenPoints(outPosition.x, outPosition.y, 0.0f, 0.0f);
+    CVector position;
+    ThePaths.TakeWidthIntoAccountForWandering(&position, m_NextNode, ped->m_nRandomSeed);
+    position -= ped->GetPosition();
+    float radianAngle = CGeneral::GetRadianAngleBetweenPoints(position.x, position.y, 0.0f, 0.0f);
     return CGeneral::LimitRadianAngle(radianAngle);
 #endif
 }
@@ -557,18 +541,8 @@ bool CTaskComplexWander::ScanForBlockedNode(CPed* pPed, CNodeAddress* targetNode
 #else
     CVector outVec;
     CVector* pNewNodePos = ThePaths.TakeWidthIntoAccountForWandering(&outVec, *targetNodeAddress, pPed->m_nRandomSeed);
-
-    CMatrixLink* pPedMatrix = pPed->m_matrix;
-    CVector* pPedPos = &pPed->m_placement.m_vPosn;
-    if (pPedMatrix)
-    {
-        pPedPos = &pPedMatrix->pos;
-    }
-
-    float fX = pNewNodePos->x - pPedPos->x;
-    float fY = pNewNodePos->y - pPedPos->y;
-    if (3.0f * 3.0f >= fY * fY + fX * fX)
-    {
+    CVector2D distance = *pNewNodePos - pPed->GetPosition();
+    if (3.0f * 3.0f >= distance.SquaredMagnitude()) {
         CPed* pClosestPed = (CPed*)pPed->m_pIntelligence->m_entityScanner.m_pClosestEntityInRange;
         if (ScanForBlockedNode(pNewNodePos, pClosestPed))
         {
@@ -591,25 +565,11 @@ bool CTaskComplexWander::ScanForBlockedNode(CVector* position, CEntity* pEntity)
     return plugin::CallMethodAndReturn<bool, 0x66F4C0, CTaskComplexWander*, CVector*, CEntity*>(this, position, pEntity);
 #else
     if (!pEntity)
-    {
         return false;
-    }
-
-    CVector* pEntityPos = &pEntity->m_placement.m_vPosn;
-    CMatrixLink* pEntityMatrix = pEntity->m_matrix;
-    if (pEntityMatrix)
-    {
-        pEntityPos = &pEntityMatrix->pos;
-    }
-
-    float fX = position->x - pEntityPos->x;
-    float fY = position->y - pEntityPos->y;
-    float fRadius = CModelInfo::ms_modelInfoPtrs[pEntity->m_nModelIndex]->m_pColModel->m_boundSphere.m_fRadius + 1.0f;
-
-    if (fRadius * fRadius > (fX * fX + fY * fY))
-    {
+    CVector2D distance = *position - pEntity->GetPosition();
+    float fRadius = CModelInfo::GetModelInfo(pEntity->m_nModelIndex)->GetColModel()->GetBoundRadius() + 1.0f;
+    if (fRadius * fRadius > distance.SquaredMagnitude())
         return true;
-    }
     return false;
 #endif
 }

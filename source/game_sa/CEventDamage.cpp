@@ -240,7 +240,7 @@ bool CEventDamage::AffectsPed_Reversed(CPed* ped) {
                     CVector vecDirection = m_pSourceEntity->GetPosition() - ped->GetPosition();
                     vecDirection.Normalise();
                     if (ped->m_pIntelligence->CanSeeEntityWithLights(m_pSourceEntity, 0) <= 0.0f
-                        || DotProduct(&vecDirection, &ped->m_matrix->up) < CPedAcquaintanceScanner::ms_fThresholdDotProduct) 
+                        || DotProduct(&vecDirection, &ped->GetForward()) < CPedAcquaintanceScanner::ms_fThresholdDotProduct) 
                     {
                         return false;
                     }
@@ -282,7 +282,7 @@ bool CEventDamage::AffectsPedGroup_Reversed(CPedGroup* pedGroup) {
             CVector vecDirection = m_pSourceEntity->GetPosition() - pGroupMember->GetPosition();
             vecDirection.Normalise();
             if (pGroupMember->m_pIntelligence->CanSeeEntityWithLights(m_pSourceEntity, 0) > 0.0f) {
-                if (DotProduct(&vecDirection, &pGroupMember->m_matrix->up) > CPedAcquaintanceScanner::ms_fThresholdDotProduct)
+                if (DotProduct(&vecDirection, &pGroupMember->GetForward()) > CPedAcquaintanceScanner::ms_fThresholdDotProduct)
                     return true;
             }
         }

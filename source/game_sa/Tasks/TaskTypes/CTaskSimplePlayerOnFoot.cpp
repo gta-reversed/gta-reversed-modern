@@ -402,15 +402,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 CWeapon* pPlayerWeapon = &pPlayerPed->m_aWeapons[activeWeaponSlot];
                 if (weaponType == WEAPON_DETONATOR)
                 {
-                    CMatrixLink* pPlayerMatrix = pPlayerPed->m_matrix;
-                    if (pPlayerMatrix)
-                    {
-                        pPlayerWeapon->Fire(pPlayerPed, &pPlayerMatrix->pos, &pPlayerMatrix->pos, 0, 0, 0);
-                    }
-                    else
-                    {
-                        pPlayerWeapon->Fire(pPlayerPed, &pPlayerPed->m_placement.m_vPosn, &pPlayerPed->m_placement.m_vPosn, 0, 0, 0);
-                    }
+                    pPlayerWeapon->Fire(pPlayerPed, &pPlayerPed->GetPosition(), &pPlayerPed->GetPosition(), 0, 0, 0);
                 }
                 else if (weaponType > WEAPON_CAMERA&& weaponType <= WEAPON_INFRARED && !pTaskManager->m_aPrimaryTasks[3])
                 {
@@ -578,10 +570,8 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                         CWeapon* pActiveWeapon = &pPlayerPed->m_aWeapons[activeWeaponSlot];
                         if (TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nMode == MODE_CAMERA && CTimer::m_snTimeInMilliseconds > pActiveWeapon->m_nTimeForNextShot)
                         {
-                            CVector firingPoint(0.0f, 0.0f, 0.60000002f);
-
-                            CVector outputFiringPoint(0.0f, 0.0f, 0.0f);
-                            MultiplyMatrixWithVector(&outputFiringPoint, pPlayerPed->m_matrix, &firingPoint);
+                            CVector firingPoint(0.0f, 0.0f, 0.6f);
+                            CVector outputFiringPoint = *pPlayerPed->m_matrix * firingPoint;
                             pActiveWeapon->Fire(pPlayerPed, &outputFiringPoint, 0, 0, 0, 0);
                         }
                         break;
@@ -801,16 +791,14 @@ PED_WEAPON_AIMING_CODE:
                 {
                     if (pTargetedEntity->m_nType == ENTITY_TYPE_PED)
                     {
-                        CMatrix* pPlayerMatrix = pPlayerPed->m_matrix;
-                        CVector* pPlayerPos = pPlayerMatrix ? &pPlayerMatrix->pos : &pPlayerPed->m_placement.m_vPosn;
-                        if (pIntelligence->IsInSeeingRange(pPlayerPos))
+                        if (pIntelligence->IsInSeeingRange(pPlayerPed->GetPosition()))
                         {
                             CTask* pActivePrimaryTask = pIntelligence->GetActivePrimaryTask();
                             if (!pActivePrimaryTask || pActivePrimaryTask->GetId() != TASK_COMPLEX_REACT_TO_GUN_AIMED_AT)
                             {
                                 if (pActiveWeapon->m_nType != WEAPON_PISTOL_SILENCED)
                                 {
-                                    pPlayerPed->Say(176, 0, 1.0, 0, 0, 0);
+                                    pPlayerPed->Say(176, 0, 1.0f, 0, 0, 0);
                                 }
                                 CPedGroup* pPedGroup = CPedGroups::GetPedsGroup(pTargetedEntity);
                                 if (pPedGroup)
@@ -825,7 +813,7 @@ PED_WEAPON_AIMING_CODE:
                                         }
                                         CEventGroupEvent eventGroupEvent;
                                         eventGroupEvent.Constructor(pTargetedEntity, pEvent);
-                                        pPedGroup->m_groupIntelligence.AddEvent((CEvent*)&eventGroupEvent);
+                                        pPedGroup->m_groupIntelligence.AddEvent(&eventGroupEvent);
                                         eventGroupEvent.Destructor();
                                     }
                                 }
@@ -833,7 +821,7 @@ PED_WEAPON_AIMING_CODE:
                                 {
                                     CEventGunAimedAt eventGunAimedAt;
                                     eventGunAimedAt.Constructor(pPlayerPed);
-                                    pIntelligence->m_eventGroup.Add((CEvent*)&eventGunAimedAt, 0);
+                                    pIntelligence->m_eventGroup.Add(&eventGunAimedAt, 0);
                                     eventGunAimedAt.Destructor();
                                 }
                             }
@@ -877,34 +865,20 @@ PED_WEAPON_AIMING_CODE:
     TheCamera.SetNewPlayerWeaponMode(MODE_AIMWEAPON, 0, 0);
 
     CVector* pTargetedObjectPos = nullptr;
-    CEntity* pTargetedEntity = pPlayerPed->m_pTargetedObject;
-    if (pTargetedEntity)
+    if (pPlayerPed->m_pTargetedObject)
     {
-        CMatrix* pTargetedObjectMatrix = pTargetedEntity->m_matrix;
-        if (pTargetedObjectMatrix)
-        {
-            pTargetedObjectPos = &pTargetedObjectMatrix->pos;
-        }
-        else
-        {
-            pTargetedObjectPos = &pTargetedEntity->m_placement.m_vPosn;
-        }
+        pTargetedObjectPos = &pPlayerPed->m_pTargetedObject->GetPosition();
     }
     else
     {
         CMatrix* pPlayerMatrix = pPlayerPed->m_matrix;
-        firingPoint.x = pPlayerMatrix->up.x;
-        firingPoint.y = pPlayerMatrix->up.y;
-        firingPoint.z = pPlayerMatrix->up.z;
+        firingPoint.x = pPlayerMatrix->GetForward().x;
+        firingPoint.y = pPlayerMatrix->GetForward().y;
+        firingPoint.z = pPlayerMatrix->GetForward().z;
         firingPoint.x = firingPoint.x * 5.0f;
         firingPoint.y = firingPoint.y * 5.0f;
-        firingPoint.z = (sin(pPlayerPed->m_pPlayerData->m_fLookPitch) + firingPoint.z) * 5.0;
-        CVector* pPlayerPos = &pPlayerPed->m_placement.m_vPosn;
-        if (pPlayerMatrix)
-        {
-            pPlayerPos = &pPlayerMatrix->pos;
-        }
-        firingPoint += *pPlayerPos;
+        firingPoint.z = (sin(pPlayerPed->m_pPlayerData->m_fLookPitch) + firingPoint.z) * 5.0f;
+        firingPoint += pPlayerPed->GetPosition();
         pTargetedObjectPos = &firingPoint;
     }
 
@@ -948,19 +922,8 @@ MAKE_PLAYER_LOOK_AT_ENTITY:
     {
         goto ABORT_LOOKING_IF_POSSIBLE;
     }
-    CMatrix* pPlayerMatrix = pPlayerPed->m_matrix;
-    CVector* pPlayerPos = &pPlayerMatrix->pos;
-    if (!pPlayerMatrix)
-    {
-        pPlayerPos = &pPlayerPed->m_placement.m_vPosn;
-    }
-    CMatrix* pTargetedObjectMatrix = pTargetedObject->m_matrix;
-    pTargetedObjectPos = pTargetedObjectMatrix ? &pTargetedObjectMatrix->pos : &pTargetedObject->m_placement.m_vPosn;
-    firingPoint.x = pTargetedObjectPos->x - pPlayerPos->x;
-    firingPoint.y = pTargetedObjectPos->y - pPlayerPos->y;
-    firingPoint.z = pTargetedObjectPos->z - pPlayerPos->z;
-    CVector* pUpVector = pPlayerPed->GetTopDirection(&upVector);
-    if ((firingPoint.z * pUpVector->z + firingPoint.y * pUpVector->y + firingPoint.x * pUpVector->x) <= 0.0)
+    CVector distance = pTargetedObject->GetPosition() - pPlayerPed->GetPosition();
+    if (DotProduct(distance, pPlayerPed->GetForwardVector()) <= 0.0f)
     {
     ABORT_LOOKING_IF_POSSIBLE:
         if (m_pLookingAtEntity
@@ -1140,9 +1103,9 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed)
                             moveBlendRatio = 0.0;
                         }
                         CMatrixLink* pPedMatrix = pPlayerPed->m_matrix;
-                        moveSpeed.x = (cosRadian * pPedMatrix->right.y + negativeSinRadian * pPedMatrix->right.x + pPedMatrix->right.z * 0.0)
+                        moveSpeed.x = (cosRadian * pPedMatrix->GetRight().y + negativeSinRadian * pPedMatrix->GetRight().x + pPedMatrix->GetRight().z * 0.0)
                             * moveBlendRatio;
-                        moveSpeed.y = -((cosRadian * pPedMatrix->up.y + negativeSinRadian * pPedMatrix->up.x + pPedMatrix->up.z * 0.0)
+                        moveSpeed.y = -((cosRadian * pPedMatrix->GetForward().y + negativeSinRadian * pPedMatrix->GetForward().x + pPedMatrix->GetForward().z * 0.0)
                             * moveBlendRatio);
                     }
                     else
@@ -1160,19 +1123,8 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed)
 
                 if (pTargetedObject)
                 {
-                    CMatrixLink* pPedMatrix = pPlayerPed->m_matrix;
-                    CVector* pPedPos = &pPedMatrix->pos;
-                    if (!pPedMatrix)
-                    {
-                        pPedPos = &pPlayerPed->m_placement.m_vPosn;
-                    }
-                    CMatrix* pTargetedObjectMatrix = pTargetedObject->m_matrix;
-                    CVector* pTargetedObjectPos = &pTargetedObject->m_placement.m_vPosn;;
-                    if (pTargetedObjectMatrix)
-                    {
-                        pTargetedObjectPos = &pTargetedObjectMatrix->pos;
-                    }
-                    pPlayerPed->m_fAimingRotation = atan2(-(pTargetedObjectPos->x - pPedPos->x), pTargetedObjectPos->y - pPedPos->y);
+                    CVector2D distance = pTargetedObject->GetPosition() - pPlayerPed->GetPosition();
+                    pPlayerPed->m_fAimingRotation = atan2(-distance.x, distance.y);
                 }
             }
 
@@ -1300,25 +1252,14 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
                     }
                     CMatrix* pMatrix = pPlayerPed->m_matrix;
                     CEntity* pTargetedObject = pPlayerPed->m_pTargetedObject;
-                    moveSpeed.x = (moveDirection.y * pMatrix->right.y + moveDirection.x * pMatrix->right.x + pMatrix->right.z * 0.0f)
+                    moveSpeed.x = (moveDirection.y * pMatrix->GetRight().y + moveDirection.x * pMatrix->GetRight().x + pMatrix->GetRight().z * 0.0f)
                         * pedMoveBlendRatio;
-                    moveSpeed.y = -((moveDirection.y * pMatrix->up.y + pMatrix->up.z * 0.0f + moveDirection.x * pMatrix->up.x)
+                    moveSpeed.y = -((moveDirection.y * pMatrix->GetForward().y + pMatrix->GetForward().z * 0.0f + moveDirection.x * pMatrix->GetForward().x)
                         * pedMoveBlendRatio);
                     if (pTargetedObject)
                     {
-                        CVector* pedPosition = &pMatrix->pos;
-                        if (!pMatrix)
-                        {
-                            pedPosition = &pPlayerPed->m_placement.m_vPosn;
-                        }
-                        CMatrixLink* targetedObjectMatrix = pTargetedObject->m_matrix;
-                        CVector* targetedObjectPos = &pTargetedObject->m_placement.m_vPosn;
-                        if (targetedObjectMatrix)
-                        {
-                            targetedObjectPos = &targetedObjectMatrix->pos;
-                        }
-                        VectorSub(&moveDirection, targetedObjectPos, pedPosition);
-                        pPlayerPed->m_fAimingRotation = atan2(-moveDirection.x, moveDirection.y);
+                        CVector distance = pTargetedObject->GetPosition() - pPlayerPed->GetPosition();
+                        pPlayerPed->m_fAimingRotation = atan2(-distance.x, distance.y);
                     }
                     else
                     {
@@ -1326,7 +1267,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
                     }
                 }
                 pSimpleDuckTask->ControlDuckMove(moveSpeed.x, moveSpeed.y);
-                pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 0.0;
+                pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
             }
         }
     }

@@ -12,19 +12,25 @@ unsigned int CPlaceable::DeletingDestructor(uint8_t deletingFlags)
     return((unsigned int (__thiscall*)(CPlaceable*, uint8_t))plugin::GetVMT(this, 0))(this, deletingFlags);
 }
 
-CVector* CPlaceable::GetRightDirection(CVector* pOut)
+CVector CPlaceable::GetRightVector()
 {
-    return ((CVector*(__thiscall*)(CPlaceable*, CVector*))0x41CC70)(this, pOut);
+    if (m_matrix)
+        m_matrix->GetRight();
+    return CVector(cos(m_placement.m_fHeading), sin(m_placement.m_fHeading), 0.0f);
 }
 
-CVector* CPlaceable::GetTopDirection(CVector* pOut)
+CVector CPlaceable::GetForwardVector()
 {
-    return ((CVector*(__thiscall*)(CPlaceable*, CVector*))0x41CCB0)(this, pOut);
+    if (m_matrix)
+        return m_matrix->GetForward();
+    return CVector(-sin(m_placement.m_fHeading), cos(m_placement.m_fHeading), 0.0f);
 }
 
-CVector* CPlaceable::GetAtDirection(CVector* pOut)
+CVector CPlaceable::GetUpVector()
 {
-    return ((CVector*(__thiscall*)(CPlaceable*, CVector*))0x50E420)(this, pOut);
+    if (m_matrix)
+        m_matrix->GetUp();
+    return CVector(0.0f, 0.0f, 1.0f);
 }
 
 void CPlaceable::SetPosn(float x, float y, float z)
@@ -102,12 +108,12 @@ void CPlaceable::GetOrientation(float& x, float& y, float& z)
 {
     if (this->m_matrix)
     {
-        x = asinf(this->m_matrix->up.z);
+        x = asinf(this->GetForward().z);
 
         float cosx = cosf(x);
-        float cosy = this->m_matrix->at.z / cosx;
+        float cosy = this->GetUp().z / cosx;
         y = acosf(cosy);
-        float cosz = this->m_matrix->up.y / cosx;
+        float cosz = this->GetForward().y / cosx;
         z = acosf(cosz);
     }
     else

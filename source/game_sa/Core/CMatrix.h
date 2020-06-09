@@ -10,17 +10,17 @@
 #include "CQuaternion.h"
 
 class CMatrix {
-public:
+private:
     // RwV3d-like:
-    CVector      right;
+    CVector      m_right;
     unsigned int flags;
-    CVector      up;
+    CVector      m_forward;
     unsigned int pad1;
-    CVector      at;
+    CVector      m_up;
     unsigned int pad2;
-    CVector      pos;
+    CVector      m_pos;
     unsigned int pad3;
-    
+public:
 	RwMatrix *m_pAttachMatrix;
 	bool m_bOwnsAttachedMatrix; // do we need to delete attaching matrix at detaching
 
@@ -32,7 +32,12 @@ public:
     CMatrix(plugin::dummy_func_t) {}
 	CMatrix(CMatrix const& matrix);
 	CMatrix(RwMatrix *matrix, bool temporary); // like previous + attach
-	~CMatrix(); // destructor detaches matrix if attached 
+	~CMatrix(); // destructor detaches matrix if attached
+
+    inline CVector& GetRight() { return m_right; }
+    inline CVector& GetForward() { return m_forward; }
+    inline CVector& GetUp() { return m_up; }
+    inline CVector& GetPosition() { return m_pos; }
 	void Attach(RwMatrix *matrix, bool temporary);
 	void Detach();
 	void CopyOnlyMatrix(CMatrix const& matrix); // copy base RwMatrix to another matrix

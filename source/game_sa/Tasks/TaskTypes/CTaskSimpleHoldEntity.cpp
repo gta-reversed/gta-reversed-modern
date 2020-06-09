@@ -254,7 +254,7 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(class CPed* ped) {
             float fRotation = pEntitToHold->m_placement.m_fHeading - ped->m_fCurrentRotation;;
             CMatrixLink* pEntityToHoldMatrix = pEntitToHold->m_matrix;
             if (pEntityToHoldMatrix)
-                fRotation = atan2(-pEntityToHoldMatrix->up.x, pEntityToHoldMatrix->up.y) - ped->m_fCurrentRotation;
+                fRotation = atan2(-pEntityToHoldMatrix->GetForward().x, pEntityToHoldMatrix->GetForward().y) - ped->m_fCurrentRotation;
             m_fRotation = fRotation;
         }
     }
@@ -289,11 +289,10 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(class CPed* ped) {
                 if ((!pAnimAssoc || pTaskPickUpEntity->m_fMovePedUntilAnimProgress > pAnimAssoc->m_fCurrentTime)
                     && (pTaskPickUpEntity->m_vecPickupPosition.x != 0.0f || pTaskPickUpEntity->m_vecPickupPosition.y != 0.0f))
                 {
-                    CVector outPoint;
-                    MultiplyMatrixWithVector(&outPoint, pEntityToHold->GetMatrix(), &pTaskPickUpEntity->m_vecPickupPosition);
+                    CVector outPoint = *pEntityToHold->GetMatrix() * pTaskPickUpEntity->m_vecPickupPosition;
                     outPoint -= ped->GetPosition();
-                    ped->m_vecAnimMovingShiftLocal.x += DotProduct(&outPoint, &ped->m_matrix->right) / CTimer::ms_fTimeStep * 0.1f;
-                    ped->m_vecAnimMovingShiftLocal.y += DotProduct(&outPoint, &ped->m_matrix->up) / CTimer::ms_fTimeStep * 0.1f ;
+                    ped->m_vecAnimMovingShiftLocal.x += DotProduct(&outPoint, &ped->GetRight()) / CTimer::ms_fTimeStep * 0.1f;
+                    ped->m_vecAnimMovingShiftLocal.y += DotProduct(&outPoint, &ped->GetForward()) / CTimer::ms_fTimeStep * 0.1f ;
                     CVector direction = pEntityToHold->GetPosition() - ped->GetPosition();
                     ped->m_fAimingRotation = atan2(-direction.x, direction.y);
                 }
@@ -363,7 +362,7 @@ bool CTaskSimpleHoldEntity::SetPedPosition_Reversed(class CPed* ped) {
             }
             else {
                 if (ped->m_matrix)
-                    m_pEntityToHold->SetPosn(ped->m_matrix->pos);
+                    m_pEntityToHold->SetPosn(ped->GetPosition());
                 else
                     m_pEntityToHold->SetPosn(ped->m_placement.m_vPosn);
             }
@@ -509,9 +508,9 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* pPed, bool bAddEventSoundQuiet) {
                 CPhysical* pPhysicalEntity = static_cast<CPhysical*>(m_pEntityToHold);
                 float randomSpeedUp = rand() * 4.6566e-10f * 0.03f + 0.03f;
                 float randomSpeedRight = rand() * 4.6566e-10f * 0.06f - 0.03f;
-                pPhysicalEntity->m_vecMoveSpeed += randomSpeedUp * pPed->m_matrix->up;
-                pPhysicalEntity->m_vecMoveSpeed += randomSpeedRight * pPed->m_matrix->right;
-                pPhysicalEntity->m_vecMoveSpeed += 0.01f * pPed->m_matrix->at;
+                pPhysicalEntity->m_vecMoveSpeed += randomSpeedUp * pPed->GetForward();
+                pPhysicalEntity->m_vecMoveSpeed += randomSpeedRight * pPed->GetRight();
+                pPhysicalEntity->m_vecMoveSpeed += 0.01f * pPed->GetUp();
                 if (!pObjectToHold->TestCollision(false))
                     bUpdateEntityPosition = false;
             }
@@ -556,7 +555,7 @@ void CTaskSimpleHoldEntity::ChoosePutDownHeight(CPed* pPed) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x693440, CTaskSimpleHoldEntity*, CPed*>(this, pPed);
 #else
-    CVector origin = (pPed->m_matrix->up * 0.65f) + pPed->GetPosition();
+    CVector origin = (pPed->GetForward() * 0.65f) + pPed->GetPosition();
     origin.z += 0.2f;
     float distance = origin.z - 1.5f;
     CEntity* outEntity = nullptr;

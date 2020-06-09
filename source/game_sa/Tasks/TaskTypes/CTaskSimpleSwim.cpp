@@ -207,8 +207,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
             else
                 m_nTimeStep -= swimmingTimeStep;
 
-            CVector vecOut;
-            VectorSub(&vecOut, &m_vecPos, &pPed->GetPosition());
+            CVector vecOut = m_vecPos - pPed->GetPosition();
             pPed->m_pPlayerData->m_fMoveBlendRatio = vecOut.Magnitude();
             CPlayerData* pPlayerData = pPed->m_pPlayerData;
             if (pPlayerData->m_fMoveBlendRatio < 0.5f) {
@@ -327,12 +326,11 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* pPed)
 
         if (pPlayerPed->IsPlayer() && !m_nSwimState)
         {
-            CMatrixLink* pPlayerMatrix = pPlayerPed->m_matrix;
-            CVector* pVecPosition = (pPlayerMatrix ? &pPlayerMatrix->pos : &pPlayerPed->m_placement.m_vPosn);
+            CVector& vecPos = pPlayerPed->GetPosition();
             float waterLevel = 0.0f;
-            if (CWaterLevel::GetWaterLevel(pVecPosition->x, pVecPosition->y, pVecPosition->z, &waterLevel, 1, 0))
+            if (CWaterLevel::GetWaterLevel(vecPos.x, vecPos.y, vecPos.z, &waterLevel, 1, 0))
             {
-                if (waterLevel - 2.0f > pVecPosition->z)
+                if (waterLevel - 2.0f > vecPos.z)
                     m_nSwimState = SWIM_UNDERWATER_SPRINTING;
             }
         }
@@ -617,14 +615,14 @@ void CTaskSimpleSwim::ProcessSwimmingResistance(CPed* pPed)
 
         fSubmergeZ = fAnimBlendDifference * 0.55f + fAnimBlendSum;
 
-        vecPedMoveSpeed = pPed->m_vecAnimMovingShiftLocal.x * pPed->m_matrix->right;
-        vecPedMoveSpeed += pPed->m_vecAnimMovingShiftLocal.y * pPed->m_matrix->up;
+        vecPedMoveSpeed = pPed->m_vecAnimMovingShiftLocal.x * pPed->GetRight();
+        vecPedMoveSpeed += pPed->m_vecAnimMovingShiftLocal.y * pPed->GetForward();
         break;
     }
     case SWIM_DIVE_UNDERWATER:
     {
-        vecPedMoveSpeed = pPed->m_vecAnimMovingShiftLocal.x * pPed->m_matrix->right;
-        vecPedMoveSpeed += pPed->m_vecAnimMovingShiftLocal.y * pPed->m_matrix->up;
+        vecPedMoveSpeed = pPed->m_vecAnimMovingShiftLocal.x * pPed->GetRight();
+        vecPedMoveSpeed += pPed->m_vecAnimMovingShiftLocal.y * pPed->GetForward();
 
         auto pAnimSwimDiveUnder = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, SWIM_SWIM_DIVE_UNDER);
         if (pAnimSwimDiveUnder)
@@ -635,8 +633,8 @@ void CTaskSimpleSwim::ProcessSwimmingResistance(CPed* pPed)
     }
     case SWIM_UNDERWATER_SPRINTING:
     {
-        vecPedMoveSpeed = pPed->m_vecAnimMovingShiftLocal.x * pPed->m_matrix->right;
-        vecPedMoveSpeed += cos(m_fRotationX) * pPed->m_vecAnimMovingShiftLocal.y * pPed->m_matrix->up;
+        vecPedMoveSpeed = pPed->m_vecAnimMovingShiftLocal.x * pPed->GetRight();
+        vecPedMoveSpeed += cos(m_fRotationX) * pPed->m_vecAnimMovingShiftLocal.y * pPed->GetForward();
         vecPedMoveSpeed.z += sin(m_fRotationX) * pPed->m_vecAnimMovingShiftLocal.y + 0.01f;
         break;
     }
@@ -761,7 +759,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
 #else
     CVector vecParticlePosition;
     if (pPed->m_matrix) {
-        vecParticlePosition = pPed->m_matrix->up;
+        vecParticlePosition = pPed->GetForward();
     }
     else
     {
@@ -809,7 +807,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
     case SWIM_SPRINT:
     case SWIM_SPRINTING:
     {
-        const CVector& vecPedUp = pPed->m_matrix->up;
+        const CVector& vecPedUp = pPed->GetForward();
 
         float fRadianAngle = CGeneral::GetAngleBetweenPoints(vecPedUp.x, vecPedUp.y, 0.0f, 0.0f);
         float fLimitedRadianAngle = CGeneral::LimitAngle(fRadianAngle) + 180.0f;
@@ -949,9 +947,8 @@ void CTaskSimpleSwim::ProcessControlAI(CPed* pPed)
                     auto pSwimTask = m_pPed->m_pIntelligence->GetTaskSwim();
                     if (pSwimTask && pSwimTask->m_nSwimState == SWIM_SPRINTING)
                     {
-                        CVector out;
-                        CVector* pVecSub = VectorSub(&out, &m_vecPos, &pPed->GetPosition());
-                        if (pVecSub->Magnitude() > 5.0f)
+                        CVector distance = m_vecPos - pPed->GetPosition();
+                        if (distance.Magnitude() > 5.0f)
                         {
                             m_nSwimState = SWIM_SPRINTING;
                         }
@@ -1077,13 +1074,13 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
                 if (CGameLogic::IsPlayerAllowedToGoInThisDirection(pPed, vecPedWalkDirection.x, vecPedWalkDirection.y, vecPedWalkDirection.z, 0.0f))
                 {
                     CMatrixLink* pPedMatrix = pPed->m_matrix;
-                    pedWalkX = (vecPedWalkDirection.y * pPedMatrix->right.y
-                        + vecPedWalkDirection.x * pPedMatrix->right.x
-                        + pPedMatrix->right.z * 0.0f)
+                    pedWalkX = (vecPedWalkDirection.y * pPedMatrix->GetRight().y
+                        + vecPedWalkDirection.x * pPedMatrix->GetRight().x
+                        + pPedMatrix->GetRight().z * 0.0f)
                         * fWalkMagnitude;
-                    vecPedWalk.y = -((vecPedWalkDirection.y * pPedMatrix->up.y
-                        + pPedMatrix->up.z * 0.0f
-                        + vecPedWalkDirection.x * pPedMatrix->up.x)
+                    vecPedWalk.y = -((vecPedWalkDirection.y * pPedMatrix->GetForward().y
+                        + pPedMatrix->GetForward().z * 0.0f
+                        + vecPedWalkDirection.x * pPedMatrix->GetForward().x)
                         * fWalkMagnitude);
                 }
                 else
@@ -1224,23 +1221,15 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
 
         if (m_nSwimState == SWIM_SPRINTING)
         {
-            CVector vecPositionSum;
-            CVector vecPositionDifference;
-            CVector* pPedPosition = &pPed->GetPosition();
-
-            float fSumWaterLevel = 0.0f;
-            float fDifferenceWaterLevel = 0.0f;
-            VectorAdd(&vecPositionSum, pPedPosition, &pPed->m_matrix->up);
-            VectorSub(&vecPositionDifference, pPedPosition, &pPed->m_matrix->up);
-            if (CWaterLevel::GetWaterLevel(vecPositionSum.x, vecPositionSum.y, vecPositionSum.z, &fSumWaterLevel, 1, 0))
-            {
-                if (CWaterLevel::GetWaterLevel(vecPositionDifference.x, vecPositionDifference.y, vecPositionDifference.z, &fDifferenceWaterLevel, 1, 0))
-                {
-                    m_fRotationX = atan2(fSumWaterLevel - fDifferenceWaterLevel, 2.0f) * 1.0f;
-                }
+            float fWaterLevel1 = 0.0f;
+            float fWaterLevel2 = 0.0f;
+            CVector distance = pPed->GetPosition() - pPed->GetForward();
+            CVector position = pPed->GetPosition() + pPed->GetForward();
+            if (CWaterLevel::GetWaterLevel(position.x, position.y, position.z, &fWaterLevel1, 1, 0)) {
+                if (CWaterLevel::GetWaterLevel(distance.x, distance.y, distance.z, &fWaterLevel2, 1, 0))
+                    m_fRotationX = atan2(fWaterLevel1 - fWaterLevel2, 2.0f) * 1.0f;
             }
         }
-
         if (pPed->ControlButtonSprint(static_cast<eSprintType>(2)) < 1.0f)
         {
             m_nSwimState = static_cast<eSwimState>(pPed->m_pPlayerData->m_fMoveBlendRatio > 0.5f);

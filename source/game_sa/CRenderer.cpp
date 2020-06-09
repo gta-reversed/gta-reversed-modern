@@ -1058,15 +1058,15 @@ void CRenderer::ScanWorld() {
     CVisibilityPlugins::InitAlphaEntityList();
     CWorld::IncrementCurrentScanCode();
     static CVector lastCameraPosition;
-    static CVector lastCameraMatrixUp;
+    static CVector lastCameraForward;
     CVector distance = TheCamera.GetPosition() - lastCameraPosition;
     static bool bUnusedBool = false;
-    if (DotProduct(distance, lastCameraMatrixUp) >= 16.0f || DotProduct(TheCamera.m_mCameraMatrix.up, lastCameraMatrixUp) <= 0.98f)
+    if (DotProduct(distance, lastCameraForward) >= 16.0f || DotProduct(TheCamera.m_mCameraMatrix.GetForward(), lastCameraForward) <= 0.98f)
         bUnusedBool = 0;
     else
         bUnusedBool = 1;
     lastCameraPosition = TheCamera.GetPosition();
-    lastCameraMatrixUp = TheCamera.m_mCameraMatrix.up;
+    lastCameraForward = TheCamera.m_mCameraMatrix.GetForward();
     frustumPoints[5] = (frustumPoints[1] * MAX_LOD_DISTANCE) / farPlane;
     frustumPoints[7].x = frustumPoints[5].x / 5;
     frustumPoints[7].y = frustumPoints[5].y / 5;

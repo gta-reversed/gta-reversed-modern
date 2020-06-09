@@ -47,9 +47,7 @@ CPlayerPed * FindPlayerPed(int playerId = -1);
 CAutomobile * FindPlayerVehicle(int playerId, bool bIncludeRemote);
 // 2 players are playing
 bool InTwoPlayersMode();
-CVector* VectorAdd(CVector* out, CVector* from, CVector* what);
-CVector * VectorSub(CVector * out, CVector * from, CVector * what);
-CVector* MultiplyMatrixWithVector(CVector* outPoint, CMatrix* m, CVector* point);
+
 // matrix mul
 CVector* Multiply3x3(CVector* out, CMatrix* m, CVector* in);
 // returns player wanted

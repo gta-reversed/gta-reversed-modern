@@ -146,29 +146,14 @@ bool CPedIntelligence::IsInHearingRange(CVector const& posn) {
     return plugin::CallMethodAndReturn<bool, 0x600C00, CPedIntelligence*, CVector const&>(this, posn);
 }
 
-// Converted from thiscall bool CPedIntelligence::IsInSeeingRange(CVector const& posn) 0x600C60 
-bool CPedIntelligence::IsInSeeingRange(CVector* pPosition) {
+bool CPedIntelligence::IsInSeeingRange(CVector const& posn) {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x600C60, CPedIntelligence*, CVector*>(this, pPosition);
 #else
-    CPed* pPed = m_pPed;
-    CVector* pPedPos = &pPed->m_placement.m_vPosn;
-    CMatrixLink* pPedMatrix = m_pPed->m_matrix;
-    if (pPedMatrix)
-    {
-        pPedPos = &pPedMatrix->pos;
-    }
-
-    float fX = pPosition->x - pPedPos->x;
-    float fY = pPosition->y - pPedPos->y;
-    float fZ = pPosition->z - pPedPos->z;
-
-    if (m_fSeeingRange * m_fSeeingRange > fZ * fZ + fY * fY + fX * fX)
-    {
-        if (fZ * pPed->m_matrix->up.z + fY * pPed->m_matrix->up.y + fX * pPed->m_matrix->up.x > 0.0)
-        {
+    CVector distance = posn - m_pPed->GetPosition();
+    if (m_fSeeingRange * m_fSeeingRange > distance.SquaredMagnitude()) {
+        if (DotProduct(distance, m_pPed->GetForward()) > 0.0f)
             return true;
-        }
     }
     return false;
 #endif
@@ -178,39 +163,18 @@ bool CPedIntelligence::FindRespectedFriendInInformRange() {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x600CF0, CPedIntelligence*>(this);
 #else
-
     unsigned int acquaintances = m_pPed->m_acquaintance.GetAcquaintances(0);
-    for (unsigned int pedScanIndex = 0; pedScanIndex < 16; pedScanIndex++)
-    {
-        if (pedScanIndex >= m_nDmNumPedsToScan)
-        {
-            return 0;
-        }
+    for (unsigned int pedScanIndex = 0; pedScanIndex < m_nDmNumPedsToScan; pedScanIndex++) {
         CPed* pPedEntity = (CPed*)m_entityScanner.m_apEntities[pedScanIndex];
-        if (pPedEntity)
-        {
-            if (CPedType::GetPedFlag((ePedType)pPedEntity->m_nPedType) & acquaintances)
-            {
-                CVector* pPedEntityPos = &pPedEntity->m_placement.m_vPosn;
-                CMatrixLink* pPedEntityMatrix = pPedEntity->m_matrix;
-                if (pPedEntityMatrix)
-                {
-                    pPedEntityPos = &pPedEntityMatrix->pos;
-                }
-                CMatrixLink* pPedMatrix = m_pPed->m_matrix;
-                CVector* pPedPos = pPedMatrix ? &pPedMatrix->pos : &m_pPed->m_placement.m_vPosn;
-                double fX = pPedPos->x - pPedEntityPos->x;
-                double fY = pPedPos->y - pPedEntityPos->y;
-                double fZ = pPedPos->z - pPedEntityPos->z;
-                double result = fY * fY + fX * fX + fZ * fZ;
-                if ((m_fDmRadius * m_fDmRadius) > result)
-                {
-                    return 1;
-                }
+        if (pPedEntity) {
+            if (CPedType::GetPedFlag(pPedEntity->m_nPedType) & acquaintances) {
+                CVector distance = m_pPed->GetPosition() - pPedEntity->GetPosition();
+                if ((m_fDmRadius * m_fDmRadius) > distance.SquaredMagnitude())
+                    return true;
             }
         }
     }
-    return 0;
+    return false;
 #endif
 }
 
@@ -997,59 +961,22 @@ bool CPedIntelligence::TestForStealthKill(CPed* pTarget, bool bFullTest) {
     return plugin::CallMethodAndReturn<bool, 0x601E00, CPedIntelligence*, CPed*, bool>(this, pTarget, bFullTest);
 #else
     if (pTarget->bInVehicle)
-    {
         return false;
-    }
-
-    CVector bonePosition(0.0f, 0.0f, 0.0f);
-
-    pTarget->GetBonePosition((RwV3d&)bonePosition, BONE_HEAD, 0);
-
-    if (pTarget->bIsDucking || pTarget->m_fHealth < 1.0)
-    {
+    CVector bonePosition;
+    pTarget->GetBonePosition(bonePosition, BONE_HEAD, 0);
+    if (pTarget->bIsDucking || pTarget->m_fHealth < 1.0f)
         return false;
-    }
-
-    CMatrixLink* pTargetMatrix = pTarget->m_matrix;
-    CVector* pTargetPos = &pTarget->m_placement.m_vPosn;
-    if (pTargetMatrix)
-    {
-        pTargetPos = &pTargetMatrix->pos;
-    }
-    if (bonePosition.z < pTargetPos->z)
-    {
+    if (bonePosition.z < pTarget->GetPosition().z)
         return false;
-    }
     if (bFullTest)
-    {
         return true;
-    }
-
     if (pTarget->m_nMoveState >= PEDMOVE_RUN)
-    {
         return false;
-    }
-
-    CVector* pPedPos = &m_pPed->m_placement.m_vPosn;
-    CMatrixLink* pPedMatrix = m_pPed->m_matrix;
-    if (pPedMatrix)
-    {
-        pPedPos = &pPedMatrix->pos;
-    }
-
-    CVector vecOutput;
-    VectorSub(&vecOutput, pTargetPos, pPedPos);
-    if (CPedIntelligence::STEALTH_KILL_RANGE * CPedIntelligence::STEALTH_KILL_RANGE < vecOutput.SquaredMagnitude())
-    {
+    CVector distance = pTarget->GetPosition() - m_pPed->GetPosition();
+    if (CPedIntelligence::STEALTH_KILL_RANGE * CPedIntelligence::STEALTH_KILL_RANGE < distance.SquaredMagnitude())
         return false;
-    }
-    if (vecOutput.y * pTargetMatrix->up.y
-        + vecOutput.z * pTargetMatrix->up.z
-        + vecOutput.x * pTargetMatrix->up.x <= 0.0)
-    {
+    if (DotProduct(distance, pTarget->GetForward()) <= 0.0f)
         return false;
-    }
-
     CTask* pActiveTask = pTarget->m_pIntelligence->m_TaskMgr.GetActiveTask();
     if (pActiveTask)
     {
@@ -1148,10 +1075,7 @@ void CPedIntelligence::LookAtInterestingEntities() {
         {
             CEntity* outEntities[1024];
             short outCount = -1;
-            CMatrixLink* pPedMatrix = m_pPed->m_matrix;
-            CVector* pPedPos = pPedMatrix ? &pPedMatrix->pos : &m_pPed->m_placement.m_vPosn;
-            CWorld::FindObjectsInRange(*pPedPos, 15.0, 0, &outCount, 1024, outEntities, 0, 1, 1, 1, 0);
-
+            CWorld::FindObjectsInRange(m_pPed->GetPosition(), 15.0f, 0, &outCount, 1024, outEntities, 0, 1, 1, 1, 0);
             if (outCount > 0)
             {
                 int interestingEntityCount = 0;
@@ -1334,24 +1258,12 @@ void CPedIntelligence::ProcessFirst() {
         CCollisionEventScanner* ppCollisionEventScanner = (CCollisionEventScanner*)& field_260;
         ppCollisionEventScanner->ScanForCollisionEvents(m_pPed, &m_eventGroup);
     }
-
-    CPed* pPed = m_pPed;
-    if (m_pPed->m_fDamageIntensity > 0.0)
+    if (m_pPed->m_fDamageIntensity > 0.0f)
     {
-        CEntity* pDamageEntity = pPed->m_pDamageEntity;
-        if (pDamageEntity)
-        {
-            if (pDamageEntity->m_nType != ENTITY_TYPE_PED)
-            {
-                CMatrixLink* pPedMatrix = pPed->m_matrix;
-                CVector* pImpactVelocity = &pPed->m_vecLastCollisionImpactVelocity;
-                if (pImpactVelocity->z * pPedMatrix->up.z
-                    + pImpactVelocity->y * pPedMatrix->up.y
-                    + pImpactVelocity->x * pPedMatrix->up.x < -0.5)
-                {
-                    pPed->bPedHitWallLastFrame = 1;
-                }
-            }
+        CEntity* pDamageEntity = m_pPed->m_pDamageEntity;
+        if (pDamageEntity && pDamageEntity->m_nType != ENTITY_TYPE_PED) {
+            if (DotProduct(m_pPed->m_vecLastCollisionImpactVelocity, m_pPed->GetForward()) < -0.5f)
+                m_pPed->bPedHitWallLastFrame = 1;
         }
     }
 
@@ -1362,7 +1274,7 @@ void CPedIntelligence::ProcessFirst() {
         {
             if (pVehicle->m_nVehicleClass == CLASS_LEISUREBOAT)
             {
-                CBike* pBike = (CBike*)pVehicle;
+                CBike* pBike = static_cast<CBike*>(pVehicle);
                 pBike->m_bPedLeftHandFixed = 0;
                 pBike->m_bPedRightHandFixed = 0;
             }

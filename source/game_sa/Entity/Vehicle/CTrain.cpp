@@ -242,7 +242,7 @@ void CTrain::ProcessControl_Reversed()
     float fOldTrainHeading = m_placement.m_fHeading;
     if (m_matrix)
     {
-        fOldTrainHeading = atan2(-m_matrix->up.x, m_matrix->up.y);
+        fOldTrainHeading = atan2(-GetForward().x, GetForward().y);
     }
 
 
@@ -464,9 +464,7 @@ void CTrain::ProcessControl_Reversed()
                 CVector vecDistance;
                 if (CGameLogic::CalcDistanceToForbiddenTrainCrossing(vecPoint, m_vecMoveSpeed, true, &vecDistance) < 230.0f)
                 {
-                    CVector vecTopDirection;
-                    GetTopDirection(&vecTopDirection);
-                    if (vecDistance.z * vecTopDirection.z + vecDistance.y * vecTopDirection.y + vecDistance.x * vecTopDirection.x <= 0.0f)
+                    if (DotProduct(GetForwardVector(), vecDistance) <= 0.0f)
                     {
                         m_fTrainGas = std::max(0.0f, m_fTrainGas);
                     }
@@ -560,13 +558,8 @@ void CTrain::ProcessControl_Reversed()
                     CTrainNode* pPreviousTrainNode = &pTrainNodes[previousNodeIndex];
                     CTrainNode* pPreviousTrainNode2 = &pTrainNodes[previousNodeIndex2];
 
-                    CVector* currentNodePosition = &pCurrentTrainNode->GetPosn();
-                    CVector* previousNodePosition = &pPreviousTrainNode->GetPosn();
-                    CVector* previousNodePosition2 = &pPreviousTrainNode2->GetPosn();
-
-                    CVector vecDifference1, vecDifference2;
-                    VectorSub(&vecDifference1, currentNodePosition, previousNodePosition);
-                    VectorSub(&vecDifference2, previousNodePosition, previousNodePosition2);
+                    CVector vecDifference1 = pCurrentTrainNode->GetPosn() - pPreviousTrainNode->GetPosn();
+                    CVector vecDifference2 = pPreviousTrainNode->GetPosn() - pPreviousTrainNode2->GetPosn();
                     vecDifference1.Normalise();
                     vecDifference2.Normalise();
 
@@ -739,19 +732,19 @@ void CTrain::ProcessControl_Reversed()
             vecVehiclePosition.z += m_pHandlingData->m_fSuspensionLowerLimit - pBoundingBox->m_vecMin.z;
         }
 
-        m_matrix->up = vecPosition2 - vecPosition1;
-        m_matrix->up.Normalise();
+        GetForward() = vecPosition2 - vecPosition1;
+        GetForward().Normalise();
         if (!trainFlags.bClockwiseDirection)
         {
-            m_matrix->up *= -1.0f;
+            GetForward() *= -1.0f;
         }
 
         CVector vecTemp(0.0f, 0.0f, 1.0f);
 
-        CrossProduct(&m_matrix->right, &m_matrix->up, &vecTemp);
-        m_matrix->right.Normalise();
+        CrossProduct(&GetRight(), &GetForward(), &vecTemp);
+        GetRight().Normalise();
 
-        CrossProduct(&m_matrix->at, &m_matrix->right, &m_matrix->up);
+        CrossProduct(&GetUp(), &GetRight(), &GetForward());
 
         unsigned char trainNodeLighting = pTheTrainNode->GetLightingFromCollision();;
         unsigned char trainNextNodeLighting = pNextTrainNode->GetLightingFromCollision();
@@ -766,7 +759,7 @@ void CTrain::ProcessControl_Reversed()
         float fNewTrainHeading = m_placement.m_fHeading;
         if (m_matrix)
         {
-            fNewTrainHeading = atan2(-m_matrix->up.x, m_matrix->up.y);
+            fNewTrainHeading = atan2(-GetForward().x, GetForward().y);
         }
 
         float fHeading = fNewTrainHeading - fOldTrainHeading;
@@ -895,7 +888,7 @@ void CTrain::ProcessControl_Reversed()
 
         if (trainFlags.bIsFrontCarriage || trainFlags.bIsLastCarriage)
         {
-            CVector vecPoint = pBoundingBox->m_vecMax.y * m_matrix->up;
+            CVector vecPoint = pBoundingBox->m_vecMax.y * GetForward();
             vecPoint += GetPosition();
             vecPoint += CTimer::ms_fTimeStep * m_vecMoveSpeed;
 
