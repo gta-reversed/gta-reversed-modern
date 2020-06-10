@@ -533,15 +533,7 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* pPed, bool bAddEventSoundQuiet) {
             objectToHoldPosition = pPed->GetPosition();
             objectToHoldPosition.z = objectToHoldPosition.z - 1.0f - pEntityToHoldColModel->m_boundBox.m_vecMin.z;
             pObjectToHold->SetPosn(objectToHoldPosition);
-            RwObject* pRwObject = pObjectToHold->m_pRwObject;
-            if (pRwObject) {
-                RwMatrix* pRwMatrix = &((RwFrame*)pRwObject->parent)->modelling;
-                CMatrixLink* pEntityToHoldMatrix = pObjectToHold->m_matrix;
-                if (pEntityToHoldMatrix)
-                    pEntityToHoldMatrix->UpdateRwMatrix(pRwMatrix);
-                else
-                    pObjectToHold->m_placement.UpdateRwMatrix(pRwMatrix);
-            }
+            pObjectToHold->UpdateRW();
             pObjectToHold->UpdateRwFrame();
         }
         m_pEntityToHold->CleanUpOldReference(&m_pEntityToHold);

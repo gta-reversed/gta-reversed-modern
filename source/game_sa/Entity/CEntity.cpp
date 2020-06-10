@@ -374,7 +374,8 @@ void CEntity::UpdateRW() {
     plugin::CallMethod<0x446F90, CEntity*>(this);
 #else
     if (m_pRwObject) {
-        RwMatrix* pRwMatrix = &((RwFrame*)m_pRwObject->parent)->modelling;
+        RwFrame* frame = reinterpret_cast<RwFrame*>(rwObjectGetParent(m_pRwObject));
+        RwMatrix* pRwMatrix = RwFrameGetMatrix(frame);
         if (m_matrix)
             m_matrix->UpdateRwMatrix(pRwMatrix);
         else
