@@ -154,7 +154,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped)
                 pRunAnimAssoc->m_fBlendAmount = 0.0f;
                 pRunAnimAssoc->m_fSpeed = 1.0f;
             }
-            pRunAnimAssoc->m_nFlags |= ANIMATION_STARTED;
+            pRunAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
             pRunAnimAssoc->m_fBlendDelta = 0.0f;
             pRunAnimAssoc->m_fBlendAmount = 3.0f - m_fBlend;
             if (!pSprintAnimAssoc)
@@ -163,7 +163,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped)
                 pSprintAnimAssoc->m_fBlendAmount = 0.0f;
                 pSprintAnimAssoc->m_fSpeed = 1.0f;
             }
-            pSprintAnimAssoc->m_nFlags |= ANIMATION_STARTED;
+            pSprintAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
             pSprintAnimAssoc->m_fBlendDelta = 0.0f;
             moveState = PEDMOVE_SPRINT;
             pSprintAnimAssoc->m_fBlendAmount = m_fBlend - 2.0f;
@@ -174,7 +174,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped)
                 pWalkAnimAssoc->m_fBlendAmount = 0.0f;
                 pWalkAnimAssoc->m_fSpeed = 1.0f;
             }
-            pWalkAnimAssoc->m_nFlags |= ANIMATION_STARTED;
+            pWalkAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
             pWalkAnimAssoc->m_fBlendDelta = 0.0f;
             pWalkAnimAssoc->m_fBlendAmount = 2.0f - m_fBlend;
             if (!pRunAnimAssoc)
@@ -183,7 +183,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped)
                 pRunAnimAssoc->m_fBlendAmount = 0.0f;
                 pRunAnimAssoc->m_fSpeed = 1.0f;
             }
-            pRunAnimAssoc->m_nFlags |= ANIMATION_STARTED;
+            pRunAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
             pRunAnimAssoc->m_fBlendDelta = 0.0f;
             pRunAnimAssoc->m_fBlendAmount = m_fBlend - 1.0f;
             if (pSprintAnimAssoc)
@@ -197,7 +197,7 @@ void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped)
             pWalkAnimAssoc->m_fBlendAmount = 0.0f;
             pWalkAnimAssoc->m_fSpeed = 1.0f;
         }
-        pWalkAnimAssoc->m_nFlags |= ANIMATION_STARTED;
+        pWalkAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
         pWalkAnimAssoc->m_fBlendAmount = 1.0f;
         pWalkAnimAssoc->m_fBlendDelta = 0.0f;
         if (pRunAnimAssoc)

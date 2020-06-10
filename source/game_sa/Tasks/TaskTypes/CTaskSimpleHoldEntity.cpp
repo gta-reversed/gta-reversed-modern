@@ -439,7 +439,7 @@ void CTaskSimpleHoldEntity::StartAnim(CPed* pPed) {
     plugin::CallMethod<0x692FF0, CTaskSimpleHoldEntity*, CPed*>(this, pPed);
 #else
     if (m_pAnimBlendHierarchy) {
-        m_animFlags |= ANIMATION_ADD_TO_BLEND | ANIMATION_FREEZE_LAST_FRAME | ANIMATION_PARTIAL;
+        m_animFlags |= ANIM_FLAG_400 | ANIM_FLAG_FREEZE_LAST_FRAME | ANIM_FLAG_PARTIAL;
         m_pAnimBlendAssociation = CAnimManager::BlendAnimation(pPed->m_pRwClump, m_pAnimBlendHierarchy, m_animFlags, 4.0f);
     }
     else {
@@ -455,14 +455,14 @@ void CTaskSimpleHoldEntity::StartAnim(CPed* pPed) {
             m_pAnimBlock = pAnimBlock;
         }
         m_pAnimBlendAssociation = CAnimManager::BlendAnimation(pPed->m_pRwClump, m_nAnimGroupId, m_nAnimId, 4.0f);
-        m_pAnimBlendAssociation->m_bFreezeLastFrame = true;
+        m_pAnimBlendAssociation->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
         if (GetId() == TASK_SIMPLE_HOLD_ENTITY)
-            m_pAnimBlendAssociation->m_bAddAnimBlendToTotalBlend = true;
+            m_pAnimBlendAssociation->m_nFlags |= ANIM_FLAG_400;
     }
     if (GetId() == TASK_SIMPLE_PICKUP_ENTITY)
         m_pAnimBlendAssociation->SetFinishCallback(CTaskSimpleHoldEntity::FinishAnimHoldEntityCB, this);
     else
-        m_pAnimBlendAssociation->SetDeleteCallback( CTaskSimpleHoldEntity::FinishAnimHoldEntityCB, this);
+        m_pAnimBlendAssociation->SetDeleteCallback(CTaskSimpleHoldEntity::FinishAnimHoldEntityCB, this);
 #endif
 }
 
@@ -564,7 +564,7 @@ void CTaskSimpleHoldEntity::ChoosePutDownHeight(CPed* pPed) {
         m_nAnimGroupId = ANIM_GROUP_CARRY;
     }
     else {
-        if (pPed->GetPosition().z - 0.2 <= colPoint.m_vecPoint.z) {
+        if (pPed->GetPosition().z - 0.2f <= colPoint.m_vecPoint.z) {
             m_nAnimGroupId = ANIM_GROUP_CARRY105;
         }
         else {

@@ -982,9 +982,9 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
                     pAnimAssoc;
                     pAnimAssoc = RpAnimBlendGetNextAssociation(pAnimAssoc))
                 {
-                    if (pAnimAssoc->m_bf10)
+                    if (pAnimAssoc->m_nFlags & ANIM_FLAG_200)
                     {
-                        pAnimAssoc->m_fBlendDelta = -8.0;
+                        pAnimAssoc->m_fBlendDelta = -8.0f;
                     }
                 }
             }
@@ -1038,7 +1038,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
 
                         CAnimBlendAssociation* pAnimNewAssoc = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump,
                             groupAndAnimIDs[randomNumber * 2 + 1], groupAndAnimIDs[randomNumber * 2], 8.0);
-                        pAnimNewAssoc->m_bf10 = 1;
+                        pAnimNewAssoc->m_nFlags |= ANIM_FLAG_200;
                         gLastTouchTimeDelta = touchTimeDelta;
                         gLastRandomNumberForIdleAnimationID = randomNumber;
                         if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0 && CTimer::m_snTimeInMilliseconds > 1200000)
@@ -1190,7 +1190,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
                             return;
                         }
                         auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pPlayerPed->m_nAnimGroup, 1u, gDuckAnimBlendData);
-                        pNewAnimation->m_bPlaying = 1;
+                        pNewAnimation->m_nFlags |= ANIM_FLAG_STARTED;
                         pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                         pedMoveState = PEDMOVE_RUN;
                     }
@@ -1201,36 +1201,36 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
                             return;
                         }
                         auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pPlayerPed->m_nAnimGroup, 0, gDuckAnimBlendData);
-                        pNewAnimation->m_bPlaying = 1;
+                        pNewAnimation->m_nFlags |= ANIM_FLAG_STARTED;
                         pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                         pedMoveState = PEDMOVE_WALK;
                     }
                     pPlayerPed->m_nMoveState = pedMoveState;
                     pPlayerPed->m_nSwimmingMoveState = pedMoveState;
                 }
-                else if (pedMoveBlendRatio > 0.5)
+                else if (pedMoveBlendRatio > 0.5f)
                 {
                     auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_GUNMOVE_FWD, gDuckAnimBlendData);
-                    pNewAnimation->m_bPlaying = 1;
-                    pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.0;
-                    moveSpeed.x = 1.0;
-                    moveSpeed.y = 0.0;
+                    pNewAnimation->m_nFlags |= ANIM_FLAG_STARTED;
+                    pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.0f;
+                    moveSpeed.x = 1.0f;
+                    moveSpeed.y = 0.0f;
                     CTaskSimpleUseGun* pTaskSimpleUseGun = pPlayerPed->m_pIntelligence->GetTaskUseGun();
                     pTaskSimpleUseGun->ControlGunMove(&moveSpeed);
                 }
             }
             else if (!pPad->GetTarget() || pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].IsTypeMelee())
             {
-                if (pedMoveBlendRatio > 0.0)
+                if (pedMoveBlendRatio > 0.0f)
                 {
-                    float radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0, 0.0, -moveSpeed.x, moveSpeed.y)
+                    float radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -moveSpeed.x, moveSpeed.y)
                         - TheCamera.m_fOrientation;
                     float limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
                     pPlayerPed->m_fAimingRotation = limitedRadianAngle;
-                    CVector moveDirection(0.0, -sin(limitedRadianAngle), cos(limitedRadianAngle));
-                    if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(pPlayerPed, moveDirection.x, moveDirection.y, 0.0, 0.0))
+                    CVector moveDirection(0.0f, -sin(limitedRadianAngle), cos(limitedRadianAngle));
+                    if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(pPlayerPed, moveDirection.x, moveDirection.y, 0.0f, 0.0f))
                     {
-                        pedMoveBlendRatio = 0.0;
+                        pedMoveBlendRatio = 0.0f;
                     }
                 }
                 moveSpeed.y = -pedMoveBlendRatio;

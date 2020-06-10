@@ -109,7 +109,7 @@ bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority pri
 
     if (priority == ABORT_PRIORITY_IMMEDIATE)
     {
-        CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIMATION_STARTED | ANIMATION_LOOPED, 1000.0f);
+        CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_FLAG_STARTED | ANIM_FLAG_LOOPED, 1000.0f);
         ped->m_nMoveState = PEDMOVE_STILL;
         ped->m_nSwimmingMoveState = PEDMOVE_STILL;
 
@@ -168,7 +168,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
         if (pAnimAssociation)
         {
             if (pAnimAssociation->m_nAnimId == ANIM_ID_CLIMB_JUMP)
-                pAnimAssociation->m_nFlags |= ANIMATION_UNLOCK_LAST_FRAME;
+                pAnimAssociation->m_nFlags |= ANIM_FLAG_UNLOCK_LAST_FRAME;
             else
                 pAnimAssociation->m_fBlendDelta = -4.0f;
             if (m_AnimID == ANIM_ID_SWIM_BREAST)
@@ -537,7 +537,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* pPed)
                     if (pAnimAssociation->m_pHierarchy->m_fTotalTime * 0.25f <= pAnimAssociation->m_fTimeStep
                         + pAnimAssociation->m_fCurrentTime) {
                         pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_CLIMB_JUMP, 8.0f);
-                        pAnimAssociation->m_nFlags |= ANIMATION_UNLOCK_LAST_FRAME;
+                        pAnimAssociation->m_nFlags |= ANIM_FLAG_UNLOCK_LAST_FRAME;
                         m_AnimID = ANIM_ID_CLIMB_JUMP;
                     }
                     break;
