@@ -82,7 +82,7 @@ bool CTaskSimpleStandStill::ProcessPed_Reversed(CPed* ped)
             ped->SetMoveState(PEDMOVE_STILL);
             ped->m_nSwimmingMoveState = PEDMOVE_STILL;
             if (!ped->bIsDucking || !ped->m_pIntelligence->GetTaskDuck(false)) {
-                CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_MOVE_IDLE, m_fBlendData);
+                CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, m_fBlendData);
             }
             else {
                 CTaskSimpleDuck* pDuckTask = ped->m_pIntelligence->GetTaskDuck(false);
@@ -100,7 +100,7 @@ bool CTaskSimpleStandStill::ProcessPed_Reversed(CPed* ped)
         ped->SetMoveState(PEDMOVE_STILL);
     }
     if (m_bUseAnimIdleStance) {
-        auto pIdleAnimAssoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_MOVE_IDLE);
+        auto pIdleAnimAssoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_IDLE);
         if (pIdleAnimAssoc && pIdleAnimAssoc->m_fBlendAmount > 0.99f) 
             return true;
     }

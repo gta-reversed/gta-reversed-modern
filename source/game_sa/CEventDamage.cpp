@@ -43,7 +43,7 @@ CEventDamage::CEventDamage(CEntity* source, unsigned int startTime, eWeaponType 
     m_bPedInVehicle = bPedInVehicle;
     m_b01 = a7;
     m_nAnimGroup = 0;
-    m_nAnimID = NO_ANIMATION_SET;
+    m_nAnimID = ANIM_ID_NO_ANIMATION_SET;
     m_fAnimBlend = 8.0f;
     m_fAnimSpeed = 1.0f;
     m_damageResponse.m_fDamageHealth = 0.0f;
@@ -499,18 +499,18 @@ void CEventDamage::ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
     plugin::CallMethod<0x4B3A60, CEventDamage*, CPed*, bool>(this, ped, bMakeActiveTaskAbortable);
 #else
     m_nAnimGroup = ANIM_GROUP_DEFAULT;
-    m_nAnimID = DEFAULT_KO_SHOT_FRONT_0;
+    m_nAnimID = ANIM_ID_KO_SHOT_FRONT_0;
     m_fAnimBlend = 4.0f;
     m_fAnimSpeed = 1.0f;
     float fForceFactor = 0.0f;
     CTask* pActiveTask = ped->m_pIntelligence->m_TaskMgr.GetActiveTask();
     if (ped->bInVehicle || bMakeActiveTaskAbortable && pActiveTask && !pActiveTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, this))
     {
-        m_nAnimID = NO_ANIMATION_SET;
+        m_nAnimID = ANIM_ID_NO_ANIMATION_SET;
     }
     else if (m_weaponType == WEAPON_DROWNING || ped->physicalFlags.bSubmergedInWater && !ped->bIsStanding)
     {
-        m_nAnimID = DEFAULT_DROWN;
+        m_nAnimID = ANIM_ID_DROWN;
     }
     else
     {
@@ -525,7 +525,7 @@ void CEventDamage::ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
             && pSimplestActiveTask && (pSimplestActiveTask->GetId() == TASK_SIMPLE_FALL || pSimplestActiveTask->GetId() == TASK_SIMPLE_GET_UP))
         {
             m_bKnockOffPed = true;
-            m_nAnimID = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_UNUSED_3) ? DEFAULT_FLOOR_HIT_F : DEFAULT_FLOOR_HIT;
+            m_nAnimID = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_UNUSED_3) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT;
         }
         else
         {
@@ -533,7 +533,7 @@ void CEventDamage::ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                 && pTaskFight && pTaskFight->IsComboSet() && pTaskFight->m_nComboSet >= 4 && pTaskFight->m_nCurrentMove <= FIGHT_ATTACK_HIT_3)
             {
                 m_nAnimGroup = pTaskFight->GetComboAnimGroupID();
-                m_nAnimID = pTaskFight->m_nCurrentMove + ANIM_FIGHT_HIT_1;
+                m_nAnimID = pTaskFight->m_nCurrentMove + ANIM_ID_FIGHT_HIT_1;
                 m_fAnimBlend = 16.0f;
                 fForceFactor = 1.0f;
             }
@@ -581,7 +581,7 @@ void CEventDamage::ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                 case WEAPON_FLAMETHROWER:
                 case WEAPON_SPRAYCAN:
                 case WEAPON_EXTINGUISHER:
-                    m_nAnimID = DEFAULT_KO_SHOT_FRONT_0;
+                    m_nAnimID = ANIM_ID_KO_SHOT_FRONT_0;
                     break;
                 case WEAPON_ROCKET:
                 case WEAPON_ROCKET_HS:
@@ -625,35 +625,35 @@ void CEventDamage::ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                     {
                     case 0:
                         if (m_pedPieceType == PED_PIECE_LEFT_ARM)
-                            m_nAnimID = DEFAULT_KD_LEFT;
+                            m_nAnimID = ANIM_ID_KD_LEFT;
                         else
-                            m_nAnimID = m_pedPieceType ? DEFAULT_KO_SKID_BACK : DEFAULT_KD_RIGHT;
+                            m_nAnimID = m_pedPieceType ? ANIM_ID_KO_SKID_BACK : ANIM_ID_KD_RIGHT;
                         break;
                     case 1:
-                        m_nAnimID = DEFAULT_KO_SPIN_R;
+                        m_nAnimID = ANIM_ID_KO_SPIN_R;
                         break;
                     case 2:
                         if (m_pedPieceType == PED_PIECE_LEFT_ARM)
-                            m_nAnimID = DEFAULT_KD_LEFT;
+                            m_nAnimID = ANIM_ID_KD_LEFT;
                         else
-                            m_nAnimID = (m_pedPieceType != PED_PIECE_RIGHT_ARM) + DEFAULT_KD_RIGHT;
+                            m_nAnimID = (m_pedPieceType != PED_PIECE_RIGHT_ARM) + ANIM_ID_KD_RIGHT;
                         break;
                     case 3:
-                        m_nAnimID = DEFAULT_KO_SPIN_L;
+                        m_nAnimID = ANIM_ID_KO_SPIN_L;
                         break;
                     }
                     break;
                 case WEAPON_DROWNING:
-                    m_nAnimID = DEFAULT_DROWN;
+                    m_nAnimID = ANIM_ID_DROWN;
                     break;
                 case WEAPON_FALL:
-                    m_nAnimID = DEFAULT_KO_SHOT_FRONT_2;
+                    m_nAnimID = ANIM_ID_KO_SHOT_FRONT_2;
                     break;
                 }
 
                 if (bKnockOutShotFrontExtraForce) {
                     if (m_damageResponse.m_bForceDeath) {
-                        m_nAnimID = DEFAULT_KO_SHOT_FACE;
+                        m_nAnimID = ANIM_ID_KO_SHOT_FACE;
                         fForceFactor = 0.0f;
                     }
                     else {
@@ -670,11 +670,11 @@ void CEventDamage::ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                 }
                 if (bKnockOutShotFront) {
                     if (m_damageResponse.m_bForceDeath) {
-                        m_nAnimID = DEFAULT_KO_SHOT_FRONT_0;
+                        m_nAnimID = ANIM_ID_KO_SHOT_FRONT_0;
                         fForceFactor = 0.0f;
                     }
                     else if (fForceFactor <= 0.0f) {
-                        m_nAnimID = DEFAULT_KO_SHOT_FRONT_0;
+                        m_nAnimID = ANIM_ID_KO_SHOT_FRONT_0;
                     }
                     else {
                         bKnockOutAnim = true;
@@ -684,17 +684,17 @@ void CEventDamage::ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                     switch (m_ucDirection)
                     {
                     case 0:
-                        m_nAnimID = DEFAULT_KO_SKID_FRONT;
+                        m_nAnimID = ANIM_ID_KO_SKID_FRONT;
                         break;
                     case 1:
-                        m_nAnimID = DEFAULT_KO_SPIN_R;
+                        m_nAnimID = ANIM_ID_KO_SPIN_R;
                         break;
                     case 2:
-                        m_nAnimID = DEFAULT_KO_SKID_BACK;
+                        m_nAnimID = ANIM_ID_KO_SKID_BACK;
                         break;
                     case 3:
                     default:
-                        m_nAnimID = DEFAULT_KO_SPIN_L;
+                        m_nAnimID = ANIM_ID_KO_SPIN_L;
                         break;
                     }
                 }
@@ -732,7 +732,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
         {
             m_bKnockOffPed = true;
         }
-        m_nAnimID = NO_ANIMATION_SET;
+        m_nAnimID = ANIM_ID_NO_ANIMATION_SET;
         return;
     }
 
@@ -773,7 +773,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
         && (pSimplestActiveTask->GetId() == TASK_SIMPLE_FALL|| pSimplestActiveTask->GetId() == TASK_SIMPLE_GET_UP))
     {
         m_bKnockOffPed = true;
-        m_nAnimID = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_UNUSED_3) ? DEFAULT_FLOOR_HIT_F : DEFAULT_FLOOR_HIT;
+        m_nAnimID = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_UNUSED_3) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT;
     }
     else if(m_pedPieceType == PED_PIECE_TORSO) {
         bool bMultiplyForceWithPedStrength = false;
@@ -819,7 +819,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
         if (!m_ucDirection) {
             if (pSourceEntityTaskFight && pSourceEntityTaskFight->m_nComboSet >= 4 && pSourceEntityTaskFight->m_nCurrentMove <= FIGHT_ATTACK_HIT_3) {
                 m_nAnimGroup = pSourceEntityTaskFight->GetComboAnimGroupID();
-                m_nAnimID = pSourceEntityTaskFight->m_nCurrentMove + ANIM_FIGHT_HIT_1;
+                m_nAnimID = pSourceEntityTaskFight->m_nCurrentMove + ANIM_ID_FIGHT_HIT_1;
                 m_fAnimBlend = 16.0f;
                 if (pSourceEntityTaskFight->IsComboSet())
                     m_bKnockOffPed = true; 
@@ -827,7 +827,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
             }
             else if (pSourceEntityTaskUseGun && pSourceEntityTaskUseGun->m_nLastCommand == 5) {
                 m_nAnimGroup = CTaskSimpleFight::m_aComboData[0].m_dwAnimGroup;
-                m_nAnimID = ANIM_FIGHT_HIT_2;
+                m_nAnimID = ANIM_ID_FIGHT_HIT_2;
                 m_fAnimBlend = 16.0f;
                 bPlayHitAnim = false;
             }
@@ -842,7 +842,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
             if (ped->IsPlayer() && m_weaponType >= WEAPON_PISTOL) {
                 CPlayerData* pPlayerData = ped->m_pPlayerData;
                 if (CTimer::m_snTimeInMilliseconds <= pPlayerData->m_nHitAnimDelayTimer || ped->m_nPedState == PEDSTATE_DRIVING) {
-                    m_nAnimID = NO_ANIMATION_SET;
+                    m_nAnimID = ANIM_ID_NO_ANIMATION_SET;
                     bPlayBodyPartHitAnim = false;
                 }
                 else {
@@ -851,13 +851,13 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
             }
             if (bPlayBodyPartHitAnim) {
                 if (m_weaponType < WEAPON_PISTOL || m_weaponType > WEAPON_LAST_WEAPON) {
-                    m_nAnimID = m_ucDirection + DEFAULT_HIT_FRONT;
+                    m_nAnimID = m_ucDirection + ANIM_ID_HIT_FRONT;
                     if (m_ucDirection || m_damageResponse.m_fDamageArmor + m_damageResponse.m_fDamageHealth <= 20.0f) {
                         if (m_ucDirection == 2 && m_weaponType <= WEAPON_CANE)
-                            m_nAnimID = DEFAULT_HIT_BEHIND;
+                            m_nAnimID = ANIM_ID_HIT_BEHIND;
                     }
                     else {
-                        m_nAnimID = DEFAULT_HIT_WALK;
+                        m_nAnimID = ANIM_ID_HIT_WALK;
                     }
                 }
                 else {
@@ -869,53 +869,53 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                     {
                     case PED_PIECE_LEFT_ARM:
                         if (m_ucDirection == 2)
-                            m_nAnimID = DEFAULT_DAM_ARML_FRMBK;
+                            m_nAnimID = ANIM_ID_DAM_ARML_FRMBK;
                         else if (m_ucDirection == 1)
-                            m_nAnimID = DEFAULT_DAM_ARML_FRMLT;
+                            m_nAnimID = ANIM_ID_DAM_ARML_FRMLT;
                         else
-                            m_nAnimID = DEFAULT_DAM_ARML_FRMFT;
+                            m_nAnimID = ANIM_ID_DAM_ARML_FRMFT;
                         if (m_nAnimID == currentEventAnimId) {
                             do {
-                                m_nAnimID = DEFAULT_DAM_ARML_FRMBK - static_cast<unsigned int>((rand() * 0.000030517578f * -3.0f));
+                                m_nAnimID = ANIM_ID_DAM_ARML_FRMBK - static_cast<unsigned int>((rand() * 0.000030517578f * -3.0f));
                             } while (m_nAnimID == currentEventAnimId);
                         }
                         break;
                     case PED_PIECE_RIGHT_ARM:
                         if (m_ucDirection == 2)
-                            m_nAnimID = DEFAULT_DAM_ARMR_FRMBK;
+                            m_nAnimID = ANIM_ID_DAM_ARMR_FRMBK;
                         else if (m_ucDirection == 3)
-                            m_nAnimID = DEFAULT_DAM_ARMR_FRMRT;
+                            m_nAnimID = ANIM_ID_DAM_ARMR_FRMRT;
                         else
-                            m_nAnimID = DEFAULT_DAM_ARMR_FRMFT;
+                            m_nAnimID = ANIM_ID_DAM_ARMR_FRMFT;
                         if (m_nAnimID == currentEventAnimId) {
                             do {
-                                m_nAnimID = CGeneral::GetRandomNumberInRange(0, 3) + DEFAULT_DAM_ARMR_FRMBK;
+                                m_nAnimID = CGeneral::GetRandomNumberInRange(0, 3) + ANIM_ID_DAM_ARMR_FRMBK;
                             } while (m_nAnimID == currentEventAnimId);
                         }
                         break;
                     case PED_PIECE_LEFT_LEG:
                         if (m_ucDirection == 2)
-                            m_nAnimID = DEFAULT_DAM_LEGL_FRMBK;
+                            m_nAnimID = ANIM_ID_DAM_LEGL_FRMBK;
                         else if (m_ucDirection == 1)
-                            m_nAnimID = DEFAULT_DAM_LEGL_FRMLT;
+                            m_nAnimID = ANIM_ID_DAM_LEGL_FRMLT;
                         else
-                            m_nAnimID = DEFAULT_DAM_LEGL_FRMFT;
+                            m_nAnimID = ANIM_ID_DAM_LEGL_FRMFT;
                         if (m_nAnimID == currentEventAnimId) {
                             do {
-                                m_nAnimID = CGeneral::GetRandomNumberInRange(0, 3) + DEFAULT_DAM_LEGL_FRMBK;
+                                m_nAnimID = CGeneral::GetRandomNumberInRange(0, 3) + ANIM_ID_DAM_LEGL_FRMBK;
                             } while (m_nAnimID == currentEventAnimId);
                         }
                         break;
                     case PED_PIECE_RIGHT_LEG:
                         if (m_ucDirection == 2)
-                            m_nAnimID = DEFAULT_DAM_LEGR_FRMBK;
+                            m_nAnimID = ANIM_ID_DAM_LEGR_FRMBK;
                         else if (m_ucDirection == 3)
-                            m_nAnimID = DEFAULT_DAM_LEGR_FRMRT;
+                            m_nAnimID = ANIM_ID_DAM_LEGR_FRMRT;
                         else
-                            m_nAnimID = DEFAULT_DAM_LEGR_FRMFT;
+                            m_nAnimID = ANIM_ID_DAM_LEGR_FRMFT;
                         if (m_nAnimID == currentEventAnimId) {
                             do {
-                                m_nAnimID = CGeneral::GetRandomNumberInRange(0, 3) + DEFAULT_DAM_LEGR_FRMBK;
+                                m_nAnimID = CGeneral::GetRandomNumberInRange(0, 3) + ANIM_ID_DAM_LEGR_FRMBK;
                             } while (m_nAnimID == currentEventAnimId);
                         }
                         break;
@@ -925,27 +925,27 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                             switch (m_ucDirection)
                             {
                             case 1:
-                                m_nAnimID = DEFAULT_DAM_STOMACH_FRMLT;
+                                m_nAnimID = ANIM_ID_DAM_STOMACH_FRMLT;
                                 break;
                             case 2:
-                                m_nAnimID = DEFAULT_DAM_STOMACH_FRMBK;
+                                m_nAnimID = ANIM_ID_DAM_STOMACH_FRMBK;
                                 break;
                             case 3:
-                                m_nAnimID = DEFAULT_DAM_STOMACH_FRMRT;
+                                m_nAnimID = ANIM_ID_DAM_STOMACH_FRMRT;
                                 break;
                             }
                         }
                         else {
-                            m_nAnimID = DEFAULT_DAM_STOMACH_FRMFT;
+                            m_nAnimID = ANIM_ID_DAM_STOMACH_FRMFT;
                         }
                         if (m_nAnimID == currentEventAnimId) {
                             do {
-                                m_nAnimID = CGeneral::GetRandomNumberInRange(0, 4) + DEFAULT_DAM_STOMACH_FRMBK;
+                                m_nAnimID = CGeneral::GetRandomNumberInRange(0, 4) + ANIM_ID_DAM_STOMACH_FRMBK;
                             } while (m_nAnimID == currentEventAnimId);
                         }
                         break;
                     default:
-                        m_nAnimID = m_ucDirection + DEFAULT_HIT_FRONT;
+                        m_nAnimID = m_ucDirection + ANIM_ID_HIT_FRONT;
                         break;
                     }
                 }
@@ -955,7 +955,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
         {
             m_nAnimGroup = ANIM_GROUP_DEFAULT;
             m_fAnimBlend = 8.0f;
-            m_nAnimID = m_ucDirection + DEFAULT_SHOT_PARTIAL;
+            m_nAnimID = m_ucDirection + ANIM_ID_SHOT_PARTIAL;
             if (ped->IsPlayer()) {
                 CPlayerData* pPedPlayerData = ped->m_pPlayerData;
                 if (CTimer::m_snTimeInMilliseconds > pPedPlayerData->m_nHitAnimDelayTimer && ped->m_nPedState != PEDSTATE_DRIVING) {
@@ -965,7 +965,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                         pPedPlayerData->m_nHitAnimDelayTimer = static_cast<unsigned int>(CTimer::m_snTimeInMilliseconds + 1500.0f);
                 }
                 else {
-                    m_nAnimID = NO_ANIMATION_SET;
+                    m_nAnimID = ANIM_ID_NO_ANIMATION_SET;
                 }
             }
         }
@@ -980,7 +980,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
     }
 
     if (m_bKnockOffPed && bNoComboHit) {
-        m_nAnimID = m_ucDirection + DEFAULT_KO_SKID_FRONT;
+        m_nAnimID = m_ucDirection + ANIM_ID_KO_SKID_FRONT;
         if (fForceFactor > 0.0f) {
             ped->bWasStanding = false;
             ped->bIsStanding = false;

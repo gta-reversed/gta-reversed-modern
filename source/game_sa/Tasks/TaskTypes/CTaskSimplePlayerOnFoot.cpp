@@ -193,7 +193,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 gunCommand[0] = 11;
             }
 
-            CAnimBlendAssociation* pAnimAssoc = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, STEALTH_KN_KILL_PARTIAL);
+            CAnimBlendAssociation* pAnimAssoc = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_KILL_PARTIAL);
             if (pAnimAssoc)
             {
                 pAnimAssoc->m_fBlendAmount = -2.0;
@@ -273,17 +273,17 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                     }
                     else
                     {
-                        pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pWeaponInfo->m_dwAnimGroup, STEALTH_KN_KILL_PARTIAL, 8.0);
+                        pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pWeaponInfo->m_dwAnimGroup, ANIM_ID_KILL_PARTIAL, 8.0);
                     }
                 }
                 else
                 {
-                    pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pWeaponInfo->m_dwAnimGroup, STEALTH_KN_KILL_PARTIAL, 8.0);
+                    pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pWeaponInfo->m_dwAnimGroup, ANIM_ID_KILL_PARTIAL, 8.0);
                 }
             }
             else
             {
-                pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, STEALTH_KN_KILL_PARTIAL);
+                pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_KILL_PARTIAL);
                 if (pAnimAssociation)
                 {
                     pAnimAssociation->m_fBlendAmount = -2.0;
@@ -1031,10 +1031,10 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
                         } while (gLastRandomNumberForIdleAnimationID == randomNumber);
 
                         int groupAndAnimIDs[8] = {
-                            PLAYIDLES_STRETCH, ANIM_GROUP_PLAYIDLES,
-                            PLAYIDLES_TIME, ANIM_GROUP_PLAYIDLES,
-                            PLAYIDLES_SHLDR, ANIM_GROUP_PLAYIDLES,
-                            PLAYIDLES_STRLEG, ANIM_GROUP_PLAYIDLES };
+                            ANIM_ID_STRETCH, ANIM_GROUP_PLAYIDLES,
+                            ANIM_ID_TIME, ANIM_GROUP_PLAYIDLES,
+                            ANIM_ID_SHLDR, ANIM_GROUP_PLAYIDLES,
+                            ANIM_ID_STRLEG, ANIM_GROUP_PLAYIDLES };
 
                         CAnimBlendAssociation* pAnimNewAssoc = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump,
                             groupAndAnimIDs[randomNumber * 2 + 1], groupAndAnimIDs[randomNumber * 2], 8.0);
@@ -1210,7 +1210,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
                 }
                 else if (pedMoveBlendRatio > 0.5)
                 {
-                    auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_DEFAULT, DEFAULT_GUNMOVE_FWD, gDuckAnimBlendData);
+                    auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_GUNMOVE_FWD, gDuckAnimBlendData);
                     pNewAnimation->m_bPlaying = 1;
                     pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.0;
                     moveSpeed.x = 1.0;

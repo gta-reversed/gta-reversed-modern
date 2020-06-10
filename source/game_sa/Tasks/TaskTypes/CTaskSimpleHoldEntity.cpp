@@ -49,7 +49,7 @@ CTaskSimpleHoldEntity::CTaskSimpleHoldEntity(CEntity* pEntityToHold, CVector* pP
     m_vecPosition = CVector(0.0f, 0.0f, 0.0f);
     m_bBoneFrameId = boneFrameId;
     m_bBoneFlags = boneFlags;
-    m_nAnimId = NO_ANIMATION_SET;
+    m_nAnimId = ANIM_ID_NO_ANIMATION_SET;
     m_nAnimGroupId = 0;
     m_bEntityDropped = false;
     m_bEntityRequiresProcessing = true;
@@ -75,7 +75,7 @@ CTaskSimpleHoldEntity::CTaskSimpleHoldEntity(CEntity* pEntityToHold, CVector* pP
     m_bBoneFrameId = boneFrameId;
     m_bBoneFlags = boneFlags;
     m_fRotation = 0.0f;
-    m_nAnimId = NO_ANIMATION_SET;
+    m_nAnimId = ANIM_ID_NO_ANIMATION_SET;
     m_nAnimGroupId = 0;
     m_bEntityDropped = false;
     m_bEntityRequiresProcessing = true;
@@ -226,7 +226,7 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(class CPed* ped) {
                 pEntitToHold->RegisterReference(&m_pEntityToHold);
 
                 m_vecPosition = pHoldEntityTask->m_vecPosition;
-                m_nAnimId = CARRY_PUTDWN;
+                m_nAnimId = ANIM_ID_PUTDWN;
                 m_nAnimGroupId = pHoldEntityTask->m_nAnimGroupId;
                 ChoosePutDownHeight(ped);
                 pHoldEntityTask->ReleaseEntity();
@@ -262,7 +262,7 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(class CPed* ped) {
     if (m_bEntityDropped)
         return true;
 
-    if (m_nAnimId != NO_ANIMATION_SET || m_pAnimBlendHierarchy) {
+    if (m_nAnimId != ANIM_ID_NO_ANIMATION_SET || m_pAnimBlendHierarchy) {
         auto pAnimBlendAssoc = m_pAnimBlendAssociation;
         if (pAnimBlendAssoc) {
             if (pAnimBlendAssoc->m_fBlendDelta < 0.0f && !m_bDisallowDroppingOnAnimEnd)
@@ -415,7 +415,7 @@ void CTaskSimpleHoldEntity::FinishAnimHoldEntityCB(CAnimBlendAssociation* pAnimA
     plugin::Call<0x691740, CAnimBlendAssociation*, CTaskSimpleHoldEntity*>(pAnimAssoc, pTaskHoldEntity);
 #else
     if (pTaskHoldEntity->m_bDisallowDroppingOnAnimEnd) {
-        pTaskHoldEntity->m_nAnimId = NO_ANIMATION_SET;
+        pTaskHoldEntity->m_nAnimId = ANIM_ID_NO_ANIMATION_SET;
         pTaskHoldEntity->m_nAnimGroupId = 0;
         pTaskHoldEntity->m_pAnimBlendAssociation = nullptr;
     }
