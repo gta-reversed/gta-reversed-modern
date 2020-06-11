@@ -16,7 +16,6 @@ void CPedScriptedTaskRecordData::InjectHooks()
 
 void CPedScriptedTaskRecord::InjectHooks()
 {
-
     HookInstall(0x608580, &CPedScriptedTaskRecord::GetRecordAssociatedWithEvent, 5);
     HookInstall(0x608750, (eScriptedTaskStatus(*)(CPed*)) & CPedScriptedTaskRecord::GetStatus, 5);
     HookInstall(0x608710, (eScriptedTaskStatus(*)(CPed*, std::int32_t)) & CPedScriptedTaskRecord::GetStatus, 5);

@@ -65,7 +65,7 @@ void CPhysical::InjectHooks()
     HookInstall(0x548320, &CPhysical::UnsetIsInSafePosition, 7);
     HookInstall(0x5483D0, (void(CPhysical::*)()) & CPhysical::ApplyFriction, 7);
     HookInstall(0x548680, (bool(CPhysical::*)(CEntity*, CColPoint*, float*, float*)) & CPhysical::ApplyCollision, 7);
-    HookInstall(0x40974F, (bool(CPhysical::*)(CPhysical*, CColPoint*, float*, float*))&CPhysical::ApplySoftCollision, 5);
+    HookInstall(0x54A2C0, (bool(CPhysical::*)(CPhysical*, CColPoint*, float*, float*))&CPhysical::ApplySoftCollision, 5);
     HookInstall(0x54BA60, &CPhysical::ProcessCollisionSectorList, 7);
     HookInstall(0x54CFF0, &CPhysical::ProcessCollisionSectorList_SimpleCar, 7);
     HookInstall(0x54D570, (void(CPhysical::*)(CPhysical*, CVector, CVector))&CPhysical::AttachEntityToEntity, 7);
@@ -73,7 +73,7 @@ void CPhysical::InjectHooks()
     HookInstall(0x54D920, &CPhysical::CheckCollision, 7);
     HookInstall(0x54DAB0, &CPhysical::CheckCollision_SimpleCar, 7);
     HookInstall(0x546DB0, &CPhysical::PlacePhysicalRelativeToOtherPhysical, 7);
-    HookInstall(0x4067D8, &CPhysical::PositionAttachedEntity, 6);
+    HookInstall(0x546FF0, &CPhysical::PositionAttachedEntity, 6);
 }
 
 void CPhysical::Add()
@@ -1016,7 +1016,6 @@ void CPhysical::ApplyFrictionTurnForce(CVector posn, CVector velocity)
     ((void(__thiscall*)(CPhysical*, CVector, CVector))0x543100)(this, posn, velocity);
 }
 
-// 0x543220
 void CPhysical::ApplyFrictionForce(CVector vecMoveForce, CVector point)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -1223,7 +1222,6 @@ bool CPhysical::ApplyCollision(CEntity* pEntity, CColPoint* pColPoint, float* pD
 #endif
 }
 
-// 0x543890
 bool CPhysical::ApplySoftCollision(CEntity* pEntity, CColPoint* pColPoint, float* pDamageIntensity)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -1921,7 +1919,6 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, floa
 #endif
 }
 
-// Converted from thiscall bool CPhysical::ApplyFriction(float,CColPoint &colPoint) 0x5454C0
 bool CPhysical::ApplyFriction(float fFriction, CColPoint* pColPoint)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -2012,7 +2009,6 @@ bool CPhysical::ApplyFriction(float fFriction, CColPoint* pColPoint)
 #endif
 }
 
-// Converted from thiscall bool CPhysical::ApplyFriction(CPhysical* physical,float,CColPoint &colPoint) 0x545980
 bool CPhysical::ApplyFriction(CPhysical* pEntity, float fFriction, CColPoint* pColPoint)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -2241,7 +2237,6 @@ bool CPhysical::ApplyFriction(CPhysical* pEntity, float fFriction, CColPoint* pC
 #endif
 }
 
-// Converted from thiscall bool CPhysical::ProcessShiftSectorList(int sectorX,int sectorY) 0x546670
 bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -3753,7 +3748,6 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
 #endif
 }
 
-// Converted from thiscall bool CPhysical::ApplySoftCollision(CPhysical* physical,CColPoint &colPoint,float &,float &) 0x54A2C0
 bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, float* pThisDamageIntensity, float* pEntityDamageIntensity)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -4430,7 +4424,6 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
 #endif
 }
 
-// Converted from thiscall bool CPhysical::ProcessCollisionSectorList(int sectorX,int sectorY) 0x54BA60
 bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -5175,7 +5168,6 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
 #endif
 }
 
-// Converted from thiscall bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector *sector) 0x54CFF0
 bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSector)
 {
 #ifdef USE_DEFAULT_FUNCTIONS

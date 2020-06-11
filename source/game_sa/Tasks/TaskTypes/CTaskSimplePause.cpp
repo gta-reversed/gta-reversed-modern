@@ -2,7 +2,7 @@
 
 void CTaskSimplePause::InjectHooks()
 {
-    HookInstall(0x1562630, &CTaskSimplePause::Constructor, 7);
+    HookInstall(0x48E750, &CTaskSimplePause::Constructor, 7);
 }
 
 CTaskSimplePause::CTaskSimplePause(int time)
@@ -22,7 +22,7 @@ CTaskSimplePause::~CTaskSimplePause()
 CTaskSimplePause* CTaskSimplePause::Constructor(int time)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTaskSimplePause*, 0x1562630, CTask*, int>(this, time);
+    return plugin::CallMethodAndReturn<CTaskSimplePause*, 0x48E750, CTask*, int>(this, time);
 #else
     this->CTaskSimplePause::CTaskSimplePause(time);
     return this;
