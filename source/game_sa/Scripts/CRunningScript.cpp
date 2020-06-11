@@ -2,7 +2,7 @@
 
 void CRunningScript::InjectHooks()
 {
-    HookInstall(0x465C20, &CRunningScript::GivePedScriptedTask, 5);
+    HookInstall(0x465C20, &CRunningScript::GivePedScriptedTask);;
 }
 
 void* CRunningScript::GetPointerToLocalVariable(int varId) {

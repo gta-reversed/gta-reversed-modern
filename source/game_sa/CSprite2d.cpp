@@ -15,8 +15,8 @@ RwD3D9Vertex* CSprite2d::maVertices = (RwD3D9Vertex*)0xC80468;
 
 void CSprite2d::InjectHooks()
 {
-    HookInstall(0x727230, &CSprite2d::Constructor, 7);
-    HookInstall(0x7281E0, &CSprite2d::Destructor, 7);
+    HookInstall(0x727230, &CSprite2d::Constructor);
+    HookInstall(0x7281E0, &CSprite2d::Destructor);
 }
 
 CSprite2d* CSprite2d::Constructor()

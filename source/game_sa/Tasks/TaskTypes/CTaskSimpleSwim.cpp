@@ -4,19 +4,19 @@ float& CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE = *reinterpret_cast<float*>(0x8D2F
 float& CTaskSimpleSwim::SWIM_STOP_TIME = *reinterpret_cast<float*>(0x8D2FC0);
 
 void CTaskSimpleSwim::InjectHooks() {
-    HookInstall(0x688930, &CTaskSimpleSwim::Constructor, 7);
-    HookInstall(0x68B050, &CTaskSimpleSwim::Clone_Reversed, 7);
-    HookInstall(0x6889F0, &CTaskSimpleSwim::GetId_Reversed, 7);
-    HookInstall(0x68B1C0, &CTaskSimpleSwim::ProcessPed_Reversed, 7);
-    HookInstall(0x68B100, &CTaskSimpleSwim::MakeAbortable_Reversed, 7);
-    HookInstall(0x68A8E0, &CTaskSimpleSwim::ApplyRollAndPitch, 7);
-    HookInstall(0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims, 7);
-    HookInstall(0x68A1D0, &CTaskSimpleSwim::ProcessSwimmingResistance, 7);
-    HookInstall(0x68AA70, &CTaskSimpleSwim::ProcessEffects, 7);
-    HookInstall(0x689640, &CTaskSimpleSwim::ProcessControlAI, 7);
-    HookInstall(0x688A90, &CTaskSimpleSwim::ProcessControlInput, 7);
-    HookInstall(0x68A9F0, &CTaskSimpleSwim::CreateFxSystem, 7);
-    HookInstall(0x68AA50, &CTaskSimpleSwim::DestroyFxSystem, 7);
+    HookInstall(0x688930, &CTaskSimpleSwim::Constructor);
+    HookInstall(0x68B050, &CTaskSimpleSwim::Clone_Reversed);
+    HookInstall(0x6889F0, &CTaskSimpleSwim::GetId_Reversed);
+    HookInstall(0x68B1C0, &CTaskSimpleSwim::ProcessPed_Reversed);
+    HookInstall(0x68B100, &CTaskSimpleSwim::MakeAbortable_Reversed);
+    HookInstall(0x68A8E0, &CTaskSimpleSwim::ApplyRollAndPitch);
+    HookInstall(0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims);
+    HookInstall(0x68A1D0, &CTaskSimpleSwim::ProcessSwimmingResistance);
+    HookInstall(0x68AA70, &CTaskSimpleSwim::ProcessEffects);
+    HookInstall(0x689640, &CTaskSimpleSwim::ProcessControlAI);
+    HookInstall(0x688A90, &CTaskSimpleSwim::ProcessControlInput);
+    HookInstall(0x68A9F0, &CTaskSimpleSwim::CreateFxSystem);
+    HookInstall(0x68AA50, &CTaskSimpleSwim::DestroyFxSystem);
 }
 
 CTaskSimpleSwim::CTaskSimpleSwim(CVector* pPosition, CPed* pPed) {

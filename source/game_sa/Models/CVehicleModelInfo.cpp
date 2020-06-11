@@ -21,7 +21,7 @@ RwObjectNameIdAssocation** CVehicleModelInfo::ms_vehicleDescs = (RwObjectNameIdA
 
 void CVehicleModelInfo::InjectHooks()
 {
-    HookInstall(0x4C95C0, &CVehicleModelInfo::SetClump_Reversed, 7);
+    HookInstall(0x4C95C0, &CVehicleModelInfo::SetClump_Reversed);
 }
 
 void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(std::int16_t upgrade1, std::int16_t upgrade2)

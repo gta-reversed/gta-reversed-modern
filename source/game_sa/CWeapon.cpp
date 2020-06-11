@@ -8,13 +8,13 @@
 
 void CWeapon::InjectHooks()
 {
-    HookInstall(0x73A380, &CWeapon::Shutdown, 7);
-    HookInstall(0x73AEB0, &CWeapon::Reload, 7);
-    HookInstall(0x73B1C0, &CWeapon::IsTypeMelee, 7);
-    HookInstall(0x73B1E0, &CWeapon::IsType2Handed, 7);
-    HookInstall(0x73B210, &CWeapon::IsTypeProjectile, 7);
-    HookInstall(0x73B2A0, &CWeapon::HasWeaponAmmoToBeUsed, 7);
-    HookInstall(0x73B240, (bool(*)(eWeaponType weaponType))&CWeapon::CanBeUsedFor2Player, 7);
+    HookInstall(0x73A380, &CWeapon::Shutdown);
+    HookInstall(0x73AEB0, &CWeapon::Reload);
+    HookInstall(0x73B1C0, &CWeapon::IsTypeMelee);
+    HookInstall(0x73B1E0, &CWeapon::IsType2Handed);
+    HookInstall(0x73B210, &CWeapon::IsTypeProjectile);
+    HookInstall(0x73B2A0, &CWeapon::HasWeaponAmmoToBeUsed);
+    HookInstall(0x73B240, (bool(*)(eWeaponType weaponType))&CWeapon::CanBeUsedFor2Player);
 }
 
 float& CWeapon::ms_fExtinguisherAimAngle = *(float*)0x8D610C;

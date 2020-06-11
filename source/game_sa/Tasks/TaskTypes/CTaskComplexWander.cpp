@@ -2,21 +2,21 @@
 
 void CTaskComplexWander::InjectHooks()
 {
-    HookInstall(0x66F450, &CTaskComplexWander::Constructor, 7);
-    HookInstall(0x460CD0, &CTaskComplexWander::GetId_Reversed, 7);
-    HookInstall(0x674140, &CTaskComplexWander::CreateNextSubTask_Reversed, 7);
-    HookInstall(0x6740E0, &CTaskComplexWander::CreateFirstSubTask_Reversed, 7);
-    HookInstall(0x674C30, &CTaskComplexWander::ControlSubTask_Reversed, 7);
-    HookInstall(0x669DA0, &CTaskComplexWander::UpdateDir_Reversed, 7);
-    HookInstall(0x669ED0, &CTaskComplexWander::UpdatePathNodes_Reversed, 7);
-    HookInstall(0x671CB0, &CTaskComplexWander::CreateSubTask, 7);
-    HookInstall(0x669F60, &CTaskComplexWander::ComputeTargetPos, 7);
-    HookInstall(0x66F530, &CTaskComplexWander::ComputeTargetHeading, 7);
-    HookInstall(0x669F30, &CTaskComplexWander::ValidNodes, 7);
-    HookInstall(0x674560, &CTaskComplexWander::ScanForBlockedNodes, 7);
-    HookInstall(0x671EF0, (bool(CTaskComplexWander::*)(CPed*, CNodeAddress*))&CTaskComplexWander::ScanForBlockedNode, 7);
-    HookInstall(0x66F4C0, (bool(CTaskComplexWander::*)(CVector*, CEntity*))&CTaskComplexWander::ScanForBlockedNode, 7);
-    HookInstall(0x673D00, CTaskComplexWander::GetWanderTaskByPedType, 7);
+    HookInstall(0x66F450, &CTaskComplexWander::Constructor);
+    HookInstall(0x460CD0, &CTaskComplexWander::GetId_Reversed);
+    HookInstall(0x674140, &CTaskComplexWander::CreateNextSubTask_Reversed);
+    HookInstall(0x6740E0, &CTaskComplexWander::CreateFirstSubTask_Reversed);
+    HookInstall(0x674C30, &CTaskComplexWander::ControlSubTask_Reversed);
+    HookInstall(0x669DA0, &CTaskComplexWander::UpdateDir_Reversed);
+    HookInstall(0x669ED0, &CTaskComplexWander::UpdatePathNodes_Reversed);
+    HookInstall(0x671CB0, &CTaskComplexWander::CreateSubTask);
+    HookInstall(0x669F60, &CTaskComplexWander::ComputeTargetPos);
+    HookInstall(0x66F530, &CTaskComplexWander::ComputeTargetHeading);
+    HookInstall(0x669F30, &CTaskComplexWander::ValidNodes);
+    HookInstall(0x674560, &CTaskComplexWander::ScanForBlockedNodes);
+    HookInstall(0x671EF0, (bool(CTaskComplexWander::*)(CPed*, CNodeAddress*))&CTaskComplexWander::ScanForBlockedNode);
+    HookInstall(0x66F4C0, (bool(CTaskComplexWander::*)(CVector*, CEntity*))&CTaskComplexWander::ScanForBlockedNode);
+    HookInstall(0x673D00, CTaskComplexWander::GetWanderTaskByPedType);
 }
 
 CTaskComplexWander::CTaskComplexWander(int moveState, unsigned char dir, bool bWanderSensibly, float fTargetRadius) {

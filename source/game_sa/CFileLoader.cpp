@@ -12,8 +12,8 @@ unsigned int& gAtomicModelId = *reinterpret_cast<unsigned int*>(0xB71840);
 
 void CFileLoader::InjectHooks()
 {
-    HookInstall(0x5371F0, (bool(*)(RwStream*, unsigned int))&CFileLoader::LoadAtomicFile, 7);
-    HookInstall(0x537150, &CFileLoader::SetRelatedModelInfoCB, 7);
+    HookInstall(0x5371F0, (bool(*)(RwStream*, unsigned int))&CFileLoader::LoadAtomicFile);
+    HookInstall(0x537150, &CFileLoader::SetRelatedModelInfoCB);
 }
 
 bool CFileLoader::LoadAtomicFile(RwStream *stream, unsigned int modelId) {

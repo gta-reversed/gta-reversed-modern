@@ -9,17 +9,17 @@ Do not delete this comment block. Respect others' work!
 
 void CPed::InjectHooks()
 {
-    HookInstall(0x5E3960, &CPed::IsPedInControl, 7);
-    HookInstall(0x5E0170, &CPed::IsAlive, 7);
-    HookInstall(0x5E6320, &CPed::ClearWeapons, 7);
-    HookInstall(0x5DF200, &CPed::GetWeaponSlot, 7);
-    HookInstall(0x5DF060, &CPed::CanBeArrested, 7);
-    HookInstall(0x5DF090, &CPed::CanStrafeOrMouseControl, 7);
-    HookInstall(0x5DF000, &CPed::CanPedReturnToState, 7); 
-    HookInstall(0x5E8BE0, &CPed::GiveWeaponWhenJoiningGang, 7);
-    HookInstall(0x5E6580, (char(CPed::*)()) &CPed::GetWeaponSkill, 7);
-    HookInstall(0x5E6530, &CPed::ReplaceWeaponForScriptedCutscene, 7);
-    HookInstall(0x5E6550, &CPed::RemoveWeaponForScriptedCutscene, 7);
+    HookInstall(0x5E3960, &CPed::IsPedInControl);
+    HookInstall(0x5E0170, &CPed::IsAlive);
+    HookInstall(0x5E6320, &CPed::ClearWeapons);
+    HookInstall(0x5DF200, &CPed::GetWeaponSlot);
+    HookInstall(0x5DF060, &CPed::CanBeArrested);
+    HookInstall(0x5DF090, &CPed::CanStrafeOrMouseControl);
+    HookInstall(0x5DF000, &CPed::CanPedReturnToState); 
+    HookInstall(0x5E8BE0, &CPed::GiveWeaponWhenJoiningGang);
+    HookInstall(0x5E6580, (char(CPed::*)()) &CPed::GetWeaponSkill);
+    HookInstall(0x5E6530, &CPed::ReplaceWeaponForScriptedCutscene);
+    HookInstall(0x5E6550, &CPed::RemoveWeaponForScriptedCutscene);
 }
 
 CPed::CPed(ePedType pedtype) : CPhysical(plugin::dummy), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,

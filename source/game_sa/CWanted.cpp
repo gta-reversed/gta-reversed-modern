@@ -12,11 +12,11 @@ bool& CWanted::bUseNewsHeliInAdditionToPolice = *(bool*)0xB7CB8C;
 
 void CWanted::InjectHooks()
 {
-    HookInstall(0x561F40, &CWanted::AreSwatRequired, 7);
-    HookInstall(0x561F60, &CWanted::AreFbiRequired, 7);
-    HookInstall(0x561F80, &CWanted::AreArmyRequired, 7);
-    HookInstall(0x561C70, &CWanted::InitialiseStaticVariables, 7);
-    HookInstall(0x561E70, &CWanted::SetMaximumWantedLevel, 7);
+    HookInstall(0x561F40, &CWanted::AreSwatRequired);
+    HookInstall(0x561F60, &CWanted::AreFbiRequired);
+    HookInstall(0x561F80, &CWanted::AreArmyRequired);
+    HookInstall(0x561C70, &CWanted::InitialiseStaticVariables);
+    HookInstall(0x561E70, &CWanted::SetMaximumWantedLevel);
 }
 
 // Converted from cdecl void CWanted::InitialiseStaticVariables(void) 0x561C70

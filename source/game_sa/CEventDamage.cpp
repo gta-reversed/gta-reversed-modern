@@ -1,26 +1,26 @@
 #include "StdInc.h"
 
 void CEventDamage::InjectHooks() {
-    HookInstall(0x4B33B0, (CEventDamage*(CEventDamage::*)(CEventDamage*)) & CEventDamage::Constructor, 7);
-    HookInstall(0x4AD830, (CEventDamage * (CEventDamage::*)(CEntity*, unsigned int, eWeaponType, ePedPieceTypes, unsigned char, bool, bool)) & CEventDamage::Constructor, 7);
-    HookInstall(0x4AD910, &CEventDamage::GetEventType_Reversed, 7);
-    HookInstall(0x4AD950, &CEventDamage::GetEventPriority_Reversed, 7);
-    HookInstall(0x4AD920, &CEventDamage::GetLifeTime_Reversed, 7);
-    HookInstall(0x4B35A0, &CEventDamage::AffectsPed_Reversed, 7);
-    HookInstall(0x4B38D0, &CEventDamage::AffectsPedGroup_Reversed, 7);
-    HookInstall(0x4ADA90, &CEventDamage::IsCriminalEvent_Reversed, 7);
-    HookInstall(0x4B3440, &CEventDamage::ReportCriminalEvent_Reversed, 7);
-    HookInstall(0x4ADA70, &CEventDamage::GetSourceEntity_Reversed, 7);
-    HookInstall(0x4ADB00, &CEventDamage::TakesPriorityOver_Reversed, 7);
-    HookInstall(0x4AD930, &CEventDamage::GetLocalSoundLevel_Reversed, 7);
-    HookInstall(0x4ADAE0, &CEventDamage::DoInformVehicleOccupants_Reversed, 7);
-    HookInstall(0x4AD940, &CEventDamage::CanBeInterruptedBySameEvent_Reversed, 7);
-    HookInstall(0x4B5D40, &CEventDamage::CloneEditable_Reversed, 7);
-    HookInstall(0x4AD9C0, &CEventDamage::From, 7);
-    HookInstall(0x4B3A20, &CEventDamage::ProcessDamage, 7);
-    HookInstall(0x4ADC10, &CEventDamage::ComputeBodyPartToRemove, 7);
-    HookInstall(0x4B3A60, &CEventDamage::ComputeDeathAnim, 7);
-    HookInstall(0x4B3FC0, &CEventDamage::ComputeDamageAnim, 7);
+    HookInstall(0x4B33B0, (CEventDamage*(CEventDamage::*)(CEventDamage*)) & CEventDamage::Constructor);
+    HookInstall(0x4AD830, (CEventDamage * (CEventDamage::*)(CEntity*, unsigned int, eWeaponType, ePedPieceTypes, unsigned char, bool, bool)) & CEventDamage::Constructor);
+    HookInstall(0x4AD910, &CEventDamage::GetEventType_Reversed);
+    HookInstall(0x4AD950, &CEventDamage::GetEventPriority_Reversed);
+    HookInstall(0x4AD920, &CEventDamage::GetLifeTime_Reversed);
+    HookInstall(0x4B35A0, &CEventDamage::AffectsPed_Reversed);
+    HookInstall(0x4B38D0, &CEventDamage::AffectsPedGroup_Reversed);
+    HookInstall(0x4ADA90, &CEventDamage::IsCriminalEvent_Reversed);
+    HookInstall(0x4B3440, &CEventDamage::ReportCriminalEvent_Reversed);
+    HookInstall(0x4ADA70, &CEventDamage::GetSourceEntity_Reversed);
+    HookInstall(0x4ADB00, &CEventDamage::TakesPriorityOver_Reversed);
+    HookInstall(0x4AD930, &CEventDamage::GetLocalSoundLevel_Reversed);
+    HookInstall(0x4ADAE0, &CEventDamage::DoInformVehicleOccupants_Reversed);
+    HookInstall(0x4AD940, &CEventDamage::CanBeInterruptedBySameEvent_Reversed);
+    HookInstall(0x4B5D40, &CEventDamage::CloneEditable_Reversed);
+    HookInstall(0x4AD9C0, &CEventDamage::From);
+    HookInstall(0x4B3A20, &CEventDamage::ProcessDamage);
+    HookInstall(0x4ADC10, &CEventDamage::ComputeBodyPartToRemove);
+    HookInstall(0x4B3A60, &CEventDamage::ComputeDeathAnim);
+    HookInstall(0x4B3FC0, &CEventDamage::ComputeDamageAnim);
 }
 
 CEventDamage::CEventDamage(CEventDamage* pCopyFrom) {

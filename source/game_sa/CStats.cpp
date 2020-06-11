@@ -37,19 +37,19 @@ unsigned int &CStats::m_LastWeaponTypeFired = *(unsigned int*)0xB79514;
 
 void CStats::InjectHooks()
 {
-    HookInstall(0x558DE0, &CStats::GetStatID, 7);
-    HookInstall(0x558E70, &CStats::GetTimesMissionAttempted, 7);
-    HookInstall(0x558E80, &CStats::RegisterMissionAttempted, 7);
-    HookInstall(0x558EA0, &CStats::RegisterMissionPassed, 7);  
-    HookInstall(0x558F90, &CStats::GetFullFavoriteRadioStationList, 7);
-    HookInstall(0x559540, &CStats::ConvertToMins, 7);
-    HookInstall(0x559560, &CStats::ConvertToSecs, 7);
-    HookInstall(0x5595F0, &CStats::CheckForThreshold, 7);
-    HookInstall(0x559630, &CStats::IsStatCapped, 7);
-    HookInstall(0x55B900, &CStats::ProcessReactionStatsOnIncrement, 7); 
-    HookInstall(0x55C6F0, &CStats::UpdateStatsWhenRunning, 7);
-    HookInstall(0x55CD60, &CStats::UpdateStatsWhenOnMotorBike, 7);
-    HookInstall(0x55CFA0, &CStats::UpdateStatsWhenFighting, 7);
+    HookInstall(0x558DE0, &CStats::GetStatID);
+    HookInstall(0x558E70, &CStats::GetTimesMissionAttempted);
+    HookInstall(0x558E80, &CStats::RegisterMissionAttempted);
+    HookInstall(0x558EA0, &CStats::RegisterMissionPassed);  
+    HookInstall(0x558F90, &CStats::GetFullFavoriteRadioStationList);
+    HookInstall(0x559540, &CStats::ConvertToMins);
+    HookInstall(0x559560, &CStats::ConvertToSecs);
+    HookInstall(0x5595F0, &CStats::CheckForThreshold);
+    HookInstall(0x559630, &CStats::IsStatCapped);
+    HookInstall(0x55B900, &CStats::ProcessReactionStatsOnIncrement); 
+    HookInstall(0x55C6F0, &CStats::UpdateStatsWhenRunning);
+    HookInstall(0x55CD60, &CStats::UpdateStatsWhenOnMotorBike);
+    HookInstall(0x55CFA0, &CStats::UpdateStatsWhenFighting);
 }
 
 // Unused

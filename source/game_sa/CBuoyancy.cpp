@@ -4,8 +4,8 @@ cBuoyancy& mod_Buoyancy = *(cBuoyancy*)0xC1C890;
 
 void cBuoyancy::InjectHooks()
 {
-    HookInstall(0x6C2750, &cBuoyancy::CalcBuoyancyForce, 7);
-    HookInstall(0x6C3EF0, &cBuoyancy::ProcessBuoyancy, 7);
+    HookInstall(0x6C2750, &cBuoyancy::CalcBuoyancyForce);
+    HookInstall(0x6C3EF0, &cBuoyancy::ProcessBuoyancy);
 }
 
 bool cBuoyancy::ProcessBuoyancy(CPhysical* pEntity, float fBuoyancy, CVector* pVecTurnSpeed, CVector* pBuoyancy)

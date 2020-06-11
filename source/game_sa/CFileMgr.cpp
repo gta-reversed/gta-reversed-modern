@@ -404,22 +404,22 @@ bool CFileMgr::GetErrorReadWrite(FILE *file)
 void CFileMgr::InjectHooks()
 {
 #ifndef USE_DEFAULT_FUNCTIONS
-    HookInstall(0x5386f0, &CFileMgr::Initialise, 7);
-    HookInstall(0x538730, &CFileMgr::ChangeDir, 7);
-    HookInstall(0x5387D0, &CFileMgr::SetDir, 7);
-    HookInstall(0x538860, &CFileMgr::SetDirMyDocuments, 7);
-    HookInstall(0x538890, &CFileMgr::LoadFile, 7);
-    HookInstall(0x538900, &CFileMgr::OpenFile, 7);
-    HookInstall(0x538910, &CFileMgr::OpenFileForWriting, 7);
-    HookInstall(0x538930, &CFileMgr::OpenFileForAppending, 7);
-    HookInstall(0x538950, &CFileMgr::Read, 7);
-    HookInstall(0x538970, &CFileMgr::Write, 7);
-    HookInstall(0x538990, &CFileMgr::Seek, 7);
-    HookInstall(0x5389b0, &CFileMgr::ReadLine, 7);
-    HookInstall(0x5389d0, &CFileMgr::CloseFile, 7);
-    HookInstall(0x5389e0, &CFileMgr::GetFileLength, 7);
-    HookInstall(0x538a20, &CFileMgr::Tell, 7);
-    HookInstall(0x538a50, &CFileMgr::GetErrorReadWrite, 7);
-    HookInstall(0x744fb0, &InitUserDirectories, 7);
+    HookInstall(0x5386f0, &CFileMgr::Initialise);
+    HookInstall(0x538730, &CFileMgr::ChangeDir);
+    HookInstall(0x5387D0, &CFileMgr::SetDir);
+    HookInstall(0x538860, &CFileMgr::SetDirMyDocuments);
+    HookInstall(0x538890, &CFileMgr::LoadFile);
+    HookInstall(0x538900, &CFileMgr::OpenFile);
+    HookInstall(0x538910, &CFileMgr::OpenFileForWriting);
+    HookInstall(0x538930, &CFileMgr::OpenFileForAppending);
+    HookInstall(0x538950, &CFileMgr::Read);
+    HookInstall(0x538970, &CFileMgr::Write);
+    HookInstall(0x538990, &CFileMgr::Seek);
+    HookInstall(0x5389b0, &CFileMgr::ReadLine);
+    HookInstall(0x5389d0, &CFileMgr::CloseFile);
+    HookInstall(0x5389e0, &CFileMgr::GetFileLength);
+    HookInstall(0x538a20, &CFileMgr::Tell);
+    HookInstall(0x538a50, &CFileMgr::GetErrorReadWrite);
+    HookInstall(0x744fb0, &InitUserDirectories);
 #endif
 }

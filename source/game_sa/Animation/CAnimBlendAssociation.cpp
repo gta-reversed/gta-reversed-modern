@@ -2,7 +2,7 @@
 
 void CAnimBlendAssociation::InjectHooks()
 {
-    HookInstall(0x4CEFC0, &CAnimBlendAssociation::Constructor, 7);
+    HookInstall(0x4CEFC0, &CAnimBlendAssociation::Constructor);
 }
 
 void* CAnimBlendAssociation::operator new(unsigned int size)

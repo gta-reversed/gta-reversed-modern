@@ -2,13 +2,13 @@
 
 void CTaskComplexUseSequence::InjectHooks()
 {
-    HookInstall(0x635450, &CTaskComplexUseSequence::Constructor, 7);
-    HookInstall(0x637100, &CTaskComplexUseSequence::Clone_Reversed, 7);
-    HookInstall(0x635490, &CTaskComplexUseSequence::GetId_Reversed, 7);
-    HookInstall(0x639730, &CTaskComplexUseSequence::MakeAbortable_Reversed, 7);
-    HookInstall(0x6354A0, &CTaskComplexUseSequence::CreateNextSubTask_Reversed, 7);
-    HookInstall(0x6354D0, &CTaskComplexUseSequence::CreateFirstSubTask_Reversed, 7);
-    HookInstall(0x635530, &CTaskComplexUseSequence::ControlSubTask_Reversed, 7);
+    HookInstall(0x635450, &CTaskComplexUseSequence::Constructor);
+    HookInstall(0x637100, &CTaskComplexUseSequence::Clone_Reversed);
+    HookInstall(0x635490, &CTaskComplexUseSequence::GetId_Reversed);
+    HookInstall(0x639730, &CTaskComplexUseSequence::MakeAbortable_Reversed);
+    HookInstall(0x6354A0, &CTaskComplexUseSequence::CreateNextSubTask_Reversed);
+    HookInstall(0x6354D0, &CTaskComplexUseSequence::CreateFirstSubTask_Reversed);
+    HookInstall(0x635530, &CTaskComplexUseSequence::ControlSubTask_Reversed);
 }
 
 CTaskComplexUseSequence::CTaskComplexUseSequence(int sequenceIndex) {

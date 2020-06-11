@@ -7,12 +7,12 @@ bool& gbUnknown_8D2FE8 = *reinterpret_cast<bool*>(0x8D2FE8);
 
 void CTaskSimplePlayerOnFoot::InjectHooks()
 {
-    HookInstall(0x688810, &CTaskSimplePlayerOnFoot::ProcessPed_Reversed, 7);
-    HookInstall(0x6859A0, &CTaskSimplePlayerOnFoot::ProcessPlayerWeapon, 7);
-    HookInstall(0x6872C0, &CTaskSimplePlayerOnFoot::PlayIdleAnimations, 7);
-    HookInstall(0x687C20, &CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon, 7);
-    HookInstall(0x687F30, &CTaskSimplePlayerOnFoot::PlayerControlDucked, 7);
-    HookInstall(0x6883D0, &CTaskSimplePlayerOnFoot::PlayerControlZelda, 7);
+    HookInstall(0x688810, &CTaskSimplePlayerOnFoot::ProcessPed_Reversed);
+    HookInstall(0x6859A0, &CTaskSimplePlayerOnFoot::ProcessPlayerWeapon);
+    HookInstall(0x6872C0, &CTaskSimplePlayerOnFoot::PlayIdleAnimations);
+    HookInstall(0x687C20, &CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon);
+    HookInstall(0x687F30, &CTaskSimplePlayerOnFoot::PlayerControlDucked);
+    HookInstall(0x6883D0, &CTaskSimplePlayerOnFoot::PlayerControlZelda);
 }
 
 bool CTaskSimplePlayerOnFoot::ProcessPed(class CPed* ped)

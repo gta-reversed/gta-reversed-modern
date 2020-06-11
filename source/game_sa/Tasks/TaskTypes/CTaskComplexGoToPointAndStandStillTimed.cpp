@@ -2,12 +2,12 @@
 
 void CTaskComplexGoToPointAndStandStillTimed::InjectHooks()
 {
-    HookInstall(0x6685E0, &CTaskComplexGoToPointAndStandStillTimed::Constructor, 7);
-    HookInstall(0x66CF30, &CTaskComplexGoToPointAndStandStillTimed::Clone_Reversed, 7);
-    HookInstall(0x6686A0, &CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed, 7);
-    HookInstall(0x668640, &CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed, 7);
-    HookInstall(0x66DC90, &CTaskComplexGoToPointAndStandStillTimed::CreateFirstSubTask_Reversed, 7);
-    HookInstall(0x66DCE0, &CTaskComplexGoToPointAndStandStillTimed::ControlSubTask_Reversed, 7);
+    HookInstall(0x6685E0, &CTaskComplexGoToPointAndStandStillTimed::Constructor);
+    HookInstall(0x66CF30, &CTaskComplexGoToPointAndStandStillTimed::Clone_Reversed);
+    HookInstall(0x6686A0, &CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed);
+    HookInstall(0x668640, &CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed);
+    HookInstall(0x66DC90, &CTaskComplexGoToPointAndStandStillTimed::CreateFirstSubTask_Reversed);
+    HookInstall(0x66DCE0, &CTaskComplexGoToPointAndStandStillTimed::ControlSubTask_Reversed);
 }
 
 CTaskComplexGoToPointAndStandStillTimed::CTaskComplexGoToPointAndStandStillTimed(int moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int time)

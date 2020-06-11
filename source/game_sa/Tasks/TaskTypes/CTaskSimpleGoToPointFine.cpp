@@ -2,11 +2,11 @@
 
 void CTaskSimpleGoToPointFine::InjectHooks()
 {
-    HookInstall(0x65EEB0, &CTaskSimpleGoToPointFine::Constructor, 7);
-    HookInstall(0x662040, &CTaskSimpleGoToPointFine::Clone_Reversed, 7);
-    HookInstall(0x663500, &CTaskSimpleGoToPointFine::MakeAbortable_Reversed, 7);
-    HookInstall(0x663540, &CTaskSimpleGoToPointFine::ProcessPed_Reversed, 7);
-    HookInstall(0x65EF80, &CTaskSimpleGoToPointFine::SetBlendedMoveAnim, 7);
+    HookInstall(0x65EEB0, &CTaskSimpleGoToPointFine::Constructor);
+    HookInstall(0x662040, &CTaskSimpleGoToPointFine::Clone_Reversed);
+    HookInstall(0x663500, &CTaskSimpleGoToPointFine::MakeAbortable_Reversed);
+    HookInstall(0x663540, &CTaskSimpleGoToPointFine::ProcessPed_Reversed);
+    HookInstall(0x65EF80, &CTaskSimpleGoToPointFine::SetBlendedMoveAnim);
 }
 
 CTaskSimpleGoToPointFine::CTaskSimpleGoToPointFine(float fBlend, CVector targetPoint, float fRadius, int unused) :

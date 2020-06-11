@@ -2,7 +2,7 @@
 
 void CTaskSimplePause::InjectHooks()
 {
-    HookInstall(0x48E750, &CTaskSimplePause::Constructor, 7);
+    HookInstall(0x48E750, &CTaskSimplePause::Constructor);
 }
 
 CTaskSimplePause::CTaskSimplePause(int time)

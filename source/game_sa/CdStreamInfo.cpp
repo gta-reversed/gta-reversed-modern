@@ -49,15 +49,15 @@ static CSync cdStreamThreadSync;
 
 void InjectCdStreamHooks()
 {
-    HookInstall(0x4067B0, &CdStreamOpen, 5);
-    HookInstall(0x406460, &CdStreamSync, 5);
-    HookInstall(0x4063E0, &CdStreamGetStatus, 5);
-    HookInstall(0x406A20, &CdStreamRead, 5);
-    HookInstall(0x406560, &CdStreamThread, 5);
-    HookInstall(0x4068F0, &CdStreamInitThread, 5);
-    HookInstall(0x406B70, &CdStreamInit, 5);
-    HookInstall(0x406690, &CdStreamRemoveImages, 5);
-    HookInstall(0x406370, &CdStreamShutdown, 5);
+    HookInstall(0x4067B0, &CdStreamOpen);
+    HookInstall(0x406460, &CdStreamSync);
+    HookInstall(0x4063E0, &CdStreamGetStatus);
+    HookInstall(0x406A20, &CdStreamRead);
+    HookInstall(0x406560, &CdStreamThread);
+    HookInstall(0x4068F0, &CdStreamInitThread);
+    HookInstall(0x406B70, &CdStreamInit);
+    HookInstall(0x406690, &CdStreamRemoveImages);
+    HookInstall(0x406370, &CdStreamShutdown);
 }
 
 std::int32_t __cdecl CdStreamOpen(const char* lpFileName)

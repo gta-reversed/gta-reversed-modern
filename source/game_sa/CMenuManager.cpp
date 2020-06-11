@@ -15,7 +15,7 @@ int& CMenuManager::nLastMenuPage = *(int*)0x8CDFF0;
 
 void CMenuManager::InjectHooks()
 {
-    HookInstall(0x57B440, &CMenuManager::Process, 7);
+    HookInstall(0x57B440, &CMenuManager::Process);
 }
 
 // class functions

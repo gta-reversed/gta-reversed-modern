@@ -2,9 +2,9 @@
 
 
 void CTaskSimplePutDownEntity::InjectHooks() {
-    HookInstall(0x691990, &CTaskSimplePutDownEntity::Constructor, 7);
-    HookInstall(0x692B70, &CTaskSimplePutDownEntity::Clone_Reversed, 7);
-    HookInstall(0x691900, &CTaskSimplePutDownEntity::GetId_Reversed, 7);
+    HookInstall(0x691990, &CTaskSimplePutDownEntity::Constructor);
+    HookInstall(0x692B70, &CTaskSimplePutDownEntity::Clone_Reversed);
+    HookInstall(0x691900, &CTaskSimplePutDownEntity::GetId_Reversed);
 }
 
 CTaskSimplePutDownEntity::CTaskSimplePutDownEntity() : CTaskSimpleHoldEntity(nullptr, nullptr, 6, 1u, ANIM_ID_NO_ANIMATION_SET, 0, false) {

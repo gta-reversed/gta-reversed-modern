@@ -2,21 +2,21 @@
 
 void CTaskSimpleHoldEntity::InjectHooks() {
 
-    HookInstall(0x6913A0, (CTaskSimpleHoldEntity*(CPhysical::*)(CEntity*, CVector*, char, unsigned char, int, int, bool)) & CTaskSimpleHoldEntity::Constructor, 7);
-    HookInstall(0x691470, (CTaskSimpleHoldEntity * (CPhysical::*)(CEntity*, CVector*, char, unsigned char, char*, char*, int)) & CTaskSimpleHoldEntity::Constructor, 7);
-    HookInstall(0x691550, (CTaskSimpleHoldEntity * (CPhysical::*)(CEntity*, CVector*, char, unsigned char, CAnimBlock*, CAnimBlendHierarchy*, int)) & CTaskSimpleHoldEntity::Constructor, 7);
-    HookInstall(0x6929B0, &CTaskSimpleHoldEntity::Clone_Reversed, 7);
-    HookInstall(0x691460, &CTaskSimpleHoldEntity::GetId_Reversed, 7);
-    HookInstall(0x693BD0, &CTaskSimpleHoldEntity::MakeAbortable_Reversed, 7);
-    HookInstall(0x693C40, &CTaskSimpleHoldEntity::ProcessPed_Reversed, 7);
-    HookInstall(0x6940A0, &CTaskSimpleHoldEntity::SetPedPosition_Reversed, 7);
-    HookInstall(0x6916E0, &CTaskSimpleHoldEntity::ReleaseEntity, 7);
-    HookInstall(0x691700, &CTaskSimpleHoldEntity::CanThrowEntity, 7);
-    HookInstall(0x691720, &CTaskSimpleHoldEntity::PlayAnim, 7);
-    HookInstall(0x691740, &CTaskSimpleHoldEntity::FinishAnimHoldEntityCB, 7);
-    HookInstall(0x692FF0, &CTaskSimpleHoldEntity::StartAnim, 7);
-    HookInstall(0x6930F0, &CTaskSimpleHoldEntity::DropEntity, 7);
-    HookInstall(0x693440, &CTaskSimpleHoldEntity::ChoosePutDownHeight, 7);
+    HookInstall(0x6913A0, (CTaskSimpleHoldEntity*(CPhysical::*)(CEntity*, CVector*, char, unsigned char, int, int, bool)) & CTaskSimpleHoldEntity::Constructor);
+    HookInstall(0x691470, (CTaskSimpleHoldEntity * (CPhysical::*)(CEntity*, CVector*, char, unsigned char, char*, char*, int)) & CTaskSimpleHoldEntity::Constructor);
+    HookInstall(0x691550, (CTaskSimpleHoldEntity * (CPhysical::*)(CEntity*, CVector*, char, unsigned char, CAnimBlock*, CAnimBlendHierarchy*, int)) & CTaskSimpleHoldEntity::Constructor);
+    HookInstall(0x6929B0, &CTaskSimpleHoldEntity::Clone_Reversed);
+    HookInstall(0x691460, &CTaskSimpleHoldEntity::GetId_Reversed);
+    HookInstall(0x693BD0, &CTaskSimpleHoldEntity::MakeAbortable_Reversed);
+    HookInstall(0x693C40, &CTaskSimpleHoldEntity::ProcessPed_Reversed);
+    HookInstall(0x6940A0, &CTaskSimpleHoldEntity::SetPedPosition_Reversed);
+    HookInstall(0x6916E0, &CTaskSimpleHoldEntity::ReleaseEntity);
+    HookInstall(0x691700, &CTaskSimpleHoldEntity::CanThrowEntity);
+    HookInstall(0x691720, &CTaskSimpleHoldEntity::PlayAnim);
+    HookInstall(0x691740, &CTaskSimpleHoldEntity::FinishAnimHoldEntityCB);
+    HookInstall(0x692FF0, &CTaskSimpleHoldEntity::StartAnim);
+    HookInstall(0x6930F0, &CTaskSimpleHoldEntity::DropEntity);
+    HookInstall(0x693440, &CTaskSimpleHoldEntity::ChoosePutDownHeight);
 }
 
 CTaskSimpleHoldEntity::CTaskSimpleHoldEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags,

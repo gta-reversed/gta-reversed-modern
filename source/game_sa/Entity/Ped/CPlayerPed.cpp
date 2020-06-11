@@ -13,9 +13,9 @@ bool &CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = *(bool *)0xC0BC15;
 
 void CPlayerPed::InjectHooks()
 {
-    HookInstall(0x60A530, &CPlayerPed::ResetSprintEnergy, 7); 
-    HookInstall(0x60A8A0, &CPlayerPed::ResetPlayerBreath, 7);
-    HookInstall(0x6094A0, &CPlayerPed::RemovePlayerPed, 7);
+    HookInstall(0x60A530, &CPlayerPed::ResetSprintEnergy); 
+    HookInstall(0x60A8A0, &CPlayerPed::ResetPlayerBreath);
+    HookInstall(0x6094A0, &CPlayerPed::RemovePlayerPed);
 }
 
 // Converted from thiscall void CPlayerPed::CPlayerPed(int playerId,bool bGroupCreated) 0x60D5B0

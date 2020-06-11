@@ -48,13 +48,13 @@ CZoneInfo* CTheZones::ZoneInfoArray = (CZoneInfo*)0xBA1DF0;
 
 void CTheZones::InjectHooks()
 {
-    HookInstall(FUNC_CTheZones__ResetZonesRevealed, &CTheZones::ResetZonesRevealed, 7);
-    HookInstall(FUNC_CTheZones__GetCurrentZoneLockedOrUnlocked, &CTheZones::GetCurrentZoneLockedOrUnlocked, 7);
-    HookInstall(FUNC_CTheZones__PointLiesWithinZone, &CTheZones::PointLiesWithinZone, 7);
-    HookInstall(FUNC_CTheZones__GetInfoZone, &CTheZones::GetNavigationZone, 7);
-    HookInstall(FUNC_CTheZones__GetMapZone, &CTheZones::GetMapZone, 7);
-    HookInstall(FUNC_CTheZones__Save, &CTheZones::Save, 7);
-    HookInstall(FUNC_CTheZones__Load, &CTheZones::Load, 7);
+    HookInstall(FUNC_CTheZones__ResetZonesRevealed, &CTheZones::ResetZonesRevealed);
+    HookInstall(FUNC_CTheZones__GetCurrentZoneLockedOrUnlocked, &CTheZones::GetCurrentZoneLockedOrUnlocked);
+    HookInstall(FUNC_CTheZones__PointLiesWithinZone, &CTheZones::PointLiesWithinZone);
+    HookInstall(FUNC_CTheZones__GetInfoZone, &CTheZones::GetNavigationZone);
+    HookInstall(FUNC_CTheZones__GetMapZone, &CTheZones::GetMapZone);
+    HookInstall(FUNC_CTheZones__Save, &CTheZones::Save);
+    HookInstall(FUNC_CTheZones__Load, &CTheZones::Load);
 }
 // Functions
 void CTheZones::InitZonesPopulationSettings()

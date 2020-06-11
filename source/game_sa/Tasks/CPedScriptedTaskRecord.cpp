@@ -4,23 +4,23 @@ CPedScriptedTaskRecordData(&CPedScriptedTaskRecord::ms_scriptedTasks)[TOTAL_SCRI
 
 void CPedScriptedTaskRecordData::InjectHooks()
 {
-    HookInstall(0x608330, &CPedScriptedTaskRecordData::Constructor, 5);
-    HookInstall(0x608520, &CPedScriptedTaskRecordData::AssociateWithTask, 5);
-    HookInstall(0x608500, &CPedScriptedTaskRecordData::AssociateWithEvent, 5);
-    HookInstall(0x608390, (void(CPedScriptedTaskRecordData::*)(CPed*, std::int32_t, CEventScriptCommand*)) & CPedScriptedTaskRecordData::Set, 5);
-    HookInstall(0x6083E0, (void(CPedScriptedTaskRecordData::*)(CPed*, std::int32_t, CTask*)) & CPedScriptedTaskRecordData::Set, 5);
-    HookInstall(0x6084A0, &CPedScriptedTaskRecordData::SetAsGroupTask, 5);
-    HookInstall(0x608440, &CPedScriptedTaskRecordData::SetAsAttractorScriptTask, 5);
-    HookInstall(0x608350, &CPedScriptedTaskRecordData::Flush, 5);
+    HookInstall(0x608330, &CPedScriptedTaskRecordData::Constructor);
+    HookInstall(0x608520, &CPedScriptedTaskRecordData::AssociateWithTask);
+    HookInstall(0x608500, &CPedScriptedTaskRecordData::AssociateWithEvent);
+    HookInstall(0x608390, (void(CPedScriptedTaskRecordData::*)(CPed*, std::int32_t, CEventScriptCommand*)) & CPedScriptedTaskRecordData::Set);
+    HookInstall(0x6083E0, (void(CPedScriptedTaskRecordData::*)(CPed*, std::int32_t, CTask*)) & CPedScriptedTaskRecordData::Set);
+    HookInstall(0x6084A0, &CPedScriptedTaskRecordData::SetAsGroupTask);
+    HookInstall(0x608440, &CPedScriptedTaskRecordData::SetAsAttractorScriptTask);
+    HookInstall(0x608350, &CPedScriptedTaskRecordData::Flush);
 }
 
 void CPedScriptedTaskRecord::InjectHooks()
 {
-    HookInstall(0x608580, &CPedScriptedTaskRecord::GetRecordAssociatedWithEvent, 5);
-    HookInstall(0x608750, (eScriptedTaskStatus(*)(CPed*)) & CPedScriptedTaskRecord::GetStatus, 5);
-    HookInstall(0x608710, (eScriptedTaskStatus(*)(CPed*, std::int32_t)) & CPedScriptedTaskRecord::GetStatus, 5);
-    HookInstall(0x608540, &CPedScriptedTaskRecord::GetVacantSlot, 5);
-    HookInstall(0x6085E0, &CPedScriptedTaskRecord::Process, 5);
+    HookInstall(0x608580, &CPedScriptedTaskRecord::GetRecordAssociatedWithEvent);
+    HookInstall(0x608750, (eScriptedTaskStatus(*)(CPed*)) & CPedScriptedTaskRecord::GetStatus);
+    HookInstall(0x608710, (eScriptedTaskStatus(*)(CPed*, std::int32_t)) & CPedScriptedTaskRecord::GetStatus);
+    HookInstall(0x608540, &CPedScriptedTaskRecord::GetVacantSlot);
+    HookInstall(0x6085E0, &CPedScriptedTaskRecord::Process);
 }
 
 CPedScriptedTaskRecordData::CPedScriptedTaskRecordData()

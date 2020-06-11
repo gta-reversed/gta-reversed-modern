@@ -1,17 +1,17 @@
 #include "StdInc.h"
 
 void CEventEditableResponse::InjectHooks() {
-    HookInstall(0x4AC450, &CEventEditableResponse::Constructor, 7);
-    HookInstall(0x420ED0, &CEventEditableResponse::Clone_Reversed, 7);
-    HookInstall(0x420EF0, &CEventEditableResponse::HasEditableResponse_Reversed, 7);
-    HookInstall(0x4AC490, &CEventEditableResponse::WillRespond, 7);
-    HookInstall(0x4AC4A0, &CEventEditableResponse::InformVehicleOccupants, 7);
-    HookInstall(0x4B2B00, &CEventEditableResponse::InformRespectedFriends, 7);
-    HookInstall(0x4B7DF0, &CEventEditableResponse::InformGroup, 7);
-    HookInstall(0x4AC5A0, &CEventEditableResponse::TriggerLookAt, 7);
-    HookInstall(0x4B56C0, (void (CEventEditableResponse::*)(CPed * ped, bool))&CEventEditableResponse::ComputeResponseTaskType, 7);
-    HookInstall(0x4B57A0, (void (CEventEditableResponse::*)(CPedGroup*)) & CEventEditableResponse::ComputeResponseTaskType, 7);
-    HookInstall(0x4B5730, &CEventEditableResponse::ComputeResponseTaskOfType, 7);
+    HookInstall(0x4AC450, &CEventEditableResponse::Constructor);
+    HookInstall(0x420ED0, &CEventEditableResponse::Clone_Reversed);
+    HookInstall(0x420EF0, &CEventEditableResponse::HasEditableResponse_Reversed);
+    HookInstall(0x4AC490, &CEventEditableResponse::WillRespond);
+    HookInstall(0x4AC4A0, &CEventEditableResponse::InformVehicleOccupants);
+    HookInstall(0x4B2B00, &CEventEditableResponse::InformRespectedFriends);
+    HookInstall(0x4B7DF0, &CEventEditableResponse::InformGroup);
+    HookInstall(0x4AC5A0, &CEventEditableResponse::TriggerLookAt);
+    HookInstall(0x4B56C0, (void (CEventEditableResponse::*)(CPed * ped, bool))&CEventEditableResponse::ComputeResponseTaskType);
+    HookInstall(0x4B57A0, (void (CEventEditableResponse::*)(CPedGroup*)) & CEventEditableResponse::ComputeResponseTaskType);
+    HookInstall(0x4B5730, &CEventEditableResponse::ComputeResponseTaskOfType);
 }
 
 CEventEditableResponse::CEventEditableResponse() {

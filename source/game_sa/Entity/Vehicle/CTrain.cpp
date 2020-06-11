@@ -21,7 +21,7 @@ float* StationDist = (float*)0xC38034;
 
 void CTrain::InjectHooks()
 {
-    HookInstall(0x6F86A0, &CTrain::ProcessControl_Reversed, 7);
+    HookInstall(0x6F86A0, &CTrain::ProcessControl_Reversed);
 }
 
 // Converted from thiscall void CTrain::CTrain(int modelIndex,uchar createdBy) 0x6F6030
