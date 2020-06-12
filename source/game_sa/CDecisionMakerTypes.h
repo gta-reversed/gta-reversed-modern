@@ -1,5 +1,8 @@
 #pragma once
 
+class CPed;
+class CPedGroup;
+
 class CDecisionMakerTypes {
 public:
     static CDecisionMakerTypes* GetInstance();

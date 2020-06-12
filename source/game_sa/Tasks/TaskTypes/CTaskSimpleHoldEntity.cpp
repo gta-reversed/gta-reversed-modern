@@ -304,11 +304,8 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(class CPed* ped) {
                 CPad* pPad = pPlayer->GetPadFromPlayer();
                 if (pPad->ExitVehicleJustDown()) {
                     auto pTaskSimplePutDownEntity = new CTaskSimplePutDownEntity();
-                    CEventScriptCommand eventScriptCommand;
-                    eventScriptCommand.Constructor(3, pTaskSimplePutDownEntity, 0);
-                    CEventGroup* pEventGroup = &ped->m_pIntelligence->m_eventGroup;
-                    pEventGroup->Add(&eventScriptCommand, 0);
-                    eventScriptCommand.Destructor();
+                    CEventScriptCommand eventScriptCommand(TASK_PRIMARY_PRIMARY, pTaskSimplePutDownEntity, false);
+                    ped->GetEventGroup().Add(&eventScriptCommand, 0);
                 }
             }
         }
@@ -518,11 +515,9 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* pPed, bool bAddEventSoundQuiet) {
 
         CVector objectToHoldPosition(0.0f, 0.0f, 0.0f);
         if (pObjectToHold->objectFlags.bIsLiftable && pPed->m_pPlayerData && bAddEventSoundQuiet) {
-            CEventSoundQuiet eventSoundQuiet;
-            eventSoundQuiet.Constructor(pPed, 60.0f, -1, &objectToHoldPosition);
+            CEventSoundQuiet eventSoundQuiet(pPed, 60.0f, -1, objectToHoldPosition);
             CEventGroup* pEventGroup = GetEventGlobalGroup();
-            pEventGroup->Add(&eventSoundQuiet, 0);
-            eventSoundQuiet.Destructor();
+            pEventGroup->Add(&eventSoundQuiet, false);
         }
 
         if (bUpdateEntityPosition) {

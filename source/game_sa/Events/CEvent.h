@@ -1,5 +1,6 @@
 #pragma once
 #include "PluginBase.h"
+#include "eEventType.h"
 
 class CPed;
 class CPedGroup;
@@ -46,6 +47,8 @@ public:
     bool DoInformVehicleOccupants_Reversed(CPed* ped) { return false; }
     bool IsValid_Reversed(CPed* ped) { return m_bValid || m_nTimeActive <= GetLifeTime(); }
     bool CanBeInterruptedBySameEvent_Reversed() { return false; };
+
+    float GetSoundLevel(CEntity* entity, CVector& position);
 };
 
 VALIDATE_SIZE(CEvent, 0xC);

@@ -9,6 +9,7 @@
 #include "PluginBase.h"
 
 class CEntity;
+class CPed;
 
 class CEntityScanner {
 protected:

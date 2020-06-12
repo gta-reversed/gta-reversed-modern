@@ -108,3 +108,8 @@ bool CEvent::CanBeInterruptedBySameEvent() {
 return CEvent::CanBeInterruptedBySameEvent_Reversed();
 #endif
 }
+
+float CEvent::GetSoundLevel(CEntity* entity, CVector& position)
+{
+    return plugin::CallMethodAndReturn<float, 0x4B2850, CEvent*, CEntity*, CVector&>(this, entity, position);
+}

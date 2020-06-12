@@ -35,15 +35,13 @@ void CRunningScript::GivePedScriptedTask(std::int32_t pedHandle, CTask* task, st
         }
     }
     else if (!pPedGroup || ped->IsPlayer()) {
-        CEventScriptCommand eventScriptCommand;
-        eventScriptCommand.Constructor(3, task, 0);
+        CEventScriptCommand eventScriptCommand(TASK_PRIMARY_PRIMARY, task, 0);
         CEventScriptCommand* event = static_cast<CEventScriptCommand*>(ped->GetEventGroup().Add(&eventScriptCommand, 0));
         if (event)
         {
             const std::int32_t slot = CPedScriptedTaskRecord::GetVacantSlot();
             CPedScriptedTaskRecord::ms_scriptedTasks[slot].Set(ped, opcode, event);
         }
-        eventScriptCommand.Destructor();
     }
     else {
         pPedGroup->GetIntelligence().SetScriptCommandTask(ped, task);

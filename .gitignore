@@ -48,3 +48,4 @@ perf.data*
 
 # macOS
 .DS_Store
+*.ini

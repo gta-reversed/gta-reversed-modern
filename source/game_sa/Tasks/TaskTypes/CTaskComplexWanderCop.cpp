@@ -332,20 +332,15 @@ void CTaskComplexWanderCop::LookForCriminals(CCopPed* pPed)
         return;
     }
 
-    CEventPedToChase eventPedToChase;
-    eventPedToChase.Constructor(pCriminalPed);
-    pPed->m_pIntelligence->m_eventGroup.Add(&eventPedToChase, 0);
+    CEventPedToChase eventPedToChase(pCriminalPed);
+    pPed->GetEventGroup().Add(&eventPedToChase, false);
 
-    CEventPedToFlee eventPedToFlee;
-    eventPedToFlee.Constructor(pPed);
-    pCriminalPed->m_pIntelligence->m_eventGroup.Add(&eventPedToFlee, 0);
+    CEventPedToFlee eventPedToFlee(pPed);
+    pCriminalPed->GetEventGroup().Add(&eventPedToFlee, false);
 
     // 30 seconds wait for next check
     m_nTimePassedSinceLastLookedForCriminals = CTimer::m_snTimeInMilliseconds + 30000;
     m_pLastCriminalPedLookedFor = pCriminalPed;
-
-    eventPedToFlee.Destructor();
-    eventPedToChase.Destructor();
 #endif
 }
 

@@ -26,7 +26,7 @@
 #include "CPedStuckChecker.h"
 #include "CVehicleScanner.h"
 
-class  CPedIntelligence {
+class CPedIntelligence {
 public:
     class CPed    *m_pPed;
     CTaskManager   m_TaskMgr;
@@ -80,7 +80,7 @@ public:
 	void AddTaskPhysResponse(CTask* pTask, int unUsed);
 	void AddTaskEventResponseTemp(CTask* pTask, int unUsed);
 	void AddTaskEventResponseNonTemp(CTask* pTask, int unUsed);
-	void AddTaskPrimaryMaybeInGroup(CTask* pTask, bool bUnknown);
+	void AddTaskPrimaryMaybeInGroup(CTask* pTask, bool bAffectsPed);
 	CTask* FindTaskByType(int taskId);
 	CTaskSimpleFight* GetTaskFighting();
 	CTaskSimpleUseGun* GetTaskUseGun();

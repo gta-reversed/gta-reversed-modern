@@ -16,6 +16,7 @@ class CPedGroupDefaultTaskAllocator;
 class CTaskAllocator;
 class CEvent;
 class CPedGroup;
+class CEventGroupEvent;
 
 class  CPedGroupIntelligence {
     PLUGIN_NO_DEFAULT_CONSTRUCTION(CPedGroupIntelligence)

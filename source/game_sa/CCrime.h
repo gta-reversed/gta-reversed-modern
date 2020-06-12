@@ -1,9 +1,10 @@
 #pragma once
 
 class CPed;
+enum class eCrimeType;
 
 class CCrime
 {
 public:
-    static void ReportCrime(int crimeType, CPed* ped1, CPed* ped2);
+    static void ReportCrime(eCrimeType crimeType, CPed* ped1, CPed* ped2);
 };

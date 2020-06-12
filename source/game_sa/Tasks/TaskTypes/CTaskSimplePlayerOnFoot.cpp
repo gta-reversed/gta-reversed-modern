@@ -316,8 +316,8 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 {
                     damageCalculator.ComputeDamageResponse(pTargetEntity, &eventDamage.m_damageResponse, 0);
                     pTargetEntity->GetEventGroup().Add(&eventDamage, 0);
-                    CCrime::ReportCrime(18, pTargetEntity, pPlayerPed);
-                    pPlayerPed->m_weaponAudio.AddAudioEvent(156);
+                    CCrime::ReportCrime(eCrimeType::CRIME_SEALTH_KILL_PED_WITH_KNIFE, pTargetEntity, pPlayerPed);
+                    pPlayerPed->m_weaponAudio.AddAudioEvent(AE_WEAPON_STEALTH_KILL);
                 }
                 pPlayerPed->ClearWeaponTarget();
             }
@@ -805,24 +805,15 @@ PED_WEAPON_AIMING_CODE:
                                 {
                                     if (!CPedGroups::AreInSameGroup(pTargetedEntity, pPlayerPed))
                                     {
-                                        CEvent* pEvent = (CEvent*)CEvent::operator new(0);
-                                        CEventGunAimedAt* pEventGunAimedAt = (CEventGunAimedAt*)pEvent;
-                                        if (pEvent)
-                                        {
-                                            pEventGunAimedAt->Constructor(pPlayerPed);
-                                        }
-                                        CEventGroupEvent eventGroupEvent;
-                                        eventGroupEvent.Constructor(pTargetedEntity, pEvent);
+                                        CEventGunAimedAt* pEventGunAimedAt = new CEventGunAimedAt(pPlayerPed);
+                                        CEventGroupEvent eventGroupEvent(pTargetedEntity, pEventGunAimedAt);
                                         pPedGroup->m_groupIntelligence.AddEvent(&eventGroupEvent);
-                                        eventGroupEvent.Destructor();
                                     }
                                 }
                                 else
                                 {
-                                    CEventGunAimedAt eventGunAimedAt;
-                                    eventGunAimedAt.Constructor(pPlayerPed);
-                                    pIntelligence->m_eventGroup.Add(&eventGunAimedAt, 0);
-                                    eventGunAimedAt.Destructor();
+                                    CEventGunAimedAt eventGunAimedAt(pPlayerPed);
+                                    pIntelligence->m_eventGroup.Add(&eventGunAimedAt, false);
                                 }
                             }
                         }

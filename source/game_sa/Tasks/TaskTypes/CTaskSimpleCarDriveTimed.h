@@ -3,7 +3,7 @@
 
 class CVehicle;
 
-class CTaskSimpleCarDriveTimed : CTaskSimpleCarDrive
+class CTaskSimpleCarDriveTimed : public CTaskSimpleCarDrive
 {
     CTaskSimpleCarDriveTimed() = delete;
 public:

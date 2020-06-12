@@ -15,3 +15,7 @@ CPed* CPedGroupMembership::GetLeader() {
 CPed* CPedGroupMembership::GetMember(int memberId) {
     return plugin::CallMethodAndReturnDynGlobal<CPed*, CPedGroupMembership*, int>(0x5F69B0, this, memberId);
 }
+
+bool CPedGroupMembership::IsMember(CPed const* ped) {
+    return plugin::CallMethodAndReturnDynGlobal<bool, CPedGroupMembership*, CPed const*>(0x5F6A10, this, ped);
+}
