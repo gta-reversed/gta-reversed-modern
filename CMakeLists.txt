@@ -15,6 +15,7 @@ include_directories(
     source\\game_sa\\Entity\\Ped\\
     source\\game_sa\\Entity\\Vehicle\\
     source\\game_sa\\Enums\\
+    source\\game_sa\\Events\\
     source\\game_sa\\Fx\\
     source\\game_sa\\Models\\
     source\\game_sa\\Plugins\\
