@@ -101,4 +101,5 @@ public:
     static void Update();
     static void UpdateInTunnelness();
     static void UpdateWeatherRegion(CVector* posn);
+    static bool IsRainy();
 };

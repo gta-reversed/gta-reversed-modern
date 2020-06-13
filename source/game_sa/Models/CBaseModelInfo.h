@@ -44,7 +44,7 @@ public:
 	unsigned short m_nRefCount;
 	short          m_nTxdIndex;
 	unsigned char  m_nAlpha; 
-	unsigned char  m_nNum2dEffects;
+	unsigned char  m_n2dfxCount;
     short          m_n2dEffectIndex;
     short          m_nObjectInfoIndex;
 	union{

@@ -17,6 +17,10 @@ void InjectHooksMain(void)
     CAnimBlendAssociation::InjectHooks();
     CEventEditableResponse::InjectHooks();
     CEventDamage::InjectHooks();
+    CEventAttractor::InjectHooks();
+    CEventGunShot::InjectHooks();
+    CEventDeath::InjectHooks();
+    CEventDeadPed::InjectHooks();
     CEventScriptCommand::InjectHooks();
     CEventSoundQuiet::InjectHooks();
     CEventGroupEvent::InjectHooks();

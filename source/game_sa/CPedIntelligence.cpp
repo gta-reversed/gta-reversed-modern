@@ -1323,6 +1323,15 @@ CTask* CPedIntelligence::GetActivePrimaryTask()
 #endif
 }
 
+float CPedIntelligence::GetPedFOVRange()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<float, 0x4ABEA0, CPedIntelligence*>(this);
+#else
+    return std::max(m_fHearingRange, m_fSeeingRange);
+#endif
+}
+
 // Converted from cdecl void CPedIntelligence::operator delete(void * arg1) 0x6074E0 
 void CPedIntelligence::operator delete(void* arg1) {
     plugin::Call<0x6074E0, void*>(arg1);

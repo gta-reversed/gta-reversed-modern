@@ -121,6 +121,7 @@ public:
 	void ProcessFirst();
 	void Process();
     CTask* GetActivePrimaryTask();
+    float GetPedFOVRange();
 	static void operator delete(void* arg1);
 };
 

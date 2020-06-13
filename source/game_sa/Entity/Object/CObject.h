@@ -10,7 +10,7 @@
 #include "CPhysical.h"
 #include "CObjectInfo.h"
 
-enum eObjectType {
+enum eObjectCreatedBy {
     OBJECT_UNKNOWN = 0,
     OBJECT_GAME = 1,
     OBJECT_MISSION = 2,

@@ -78,12 +78,8 @@ CEntity* CEventVehicleDamage::GetSourceEntity()
 bool CEventVehicleDamage::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->IsAlive() && m_attacker) {
-        if (ped->bInVehicle) {
-            CVehicle* vehicle = ped->m_pVehicle;
-            if (vehicle && vehicle->IsPassenger(ped) && vehicle->m_pDriver)
-                return false;
-        }
-        return m_vehicle && ped->m_pVehicle == m_vehicle;
+        if (!ped->IsInVehicleThatHasADriver())
+            return m_vehicle && ped->m_pVehicle == m_vehicle;
     }
     return false;
 }

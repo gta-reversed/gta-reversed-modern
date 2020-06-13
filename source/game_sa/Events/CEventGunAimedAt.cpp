@@ -79,14 +79,11 @@ bool CEventGunAimedAt::AffectsPed_Reversed(CPed* ped)
     if (m_ped && ped->GetIntelligence()->IsInSeeingRange(m_ped->GetPosition()) && ped->IsAlive()) {
         if (CPedGroups::AreInSameGroup(ped, m_ped))
             return false;
-        if (ped->bInVehicle) {
-            CVehicle* vehicle = ped->m_pVehicle;
-            if (vehicle && vehicle->IsPassenger(ped) && vehicle->m_pDriver)
-                return false;
+        if (!ped->IsInVehicleThatHasADriver()) {
+            if (ped->m_nPedType == PED_TYPE_COP)
+                CCrime::ReportCrime(eCrimeType::CRIME_AIM_GUN, ped, FindPlayerPed(-1));
+            return true;
         }
-        if (ped->m_nPedType == PED_TYPE_COP)
-            CCrime::ReportCrime(eCrimeType::CRIME_AIM_GUN, ped, FindPlayerPed(-1));
-        return true;
     }
     return false;
 }

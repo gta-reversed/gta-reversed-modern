@@ -69,7 +69,7 @@ struct tEffectPedAttractor {
     RwV3d m_vecForwardDir;
     unsigned char m_nAttractorType; // see ePedAttractorType
     unsigned char m_nPedExistingProbability;
-    char field_36;
+    unsigned char field_36;
     unsigned char m_nFlags;
     char m_szScriptName[8];
 };
@@ -117,17 +117,18 @@ private:
 public:
 };
 
-class  C2dEffect {
+class C2dEffect {
 public:
 	CVector m_vecPosn;
-	unsigned int m_nType; // see e2dEffectType
-
+    unsigned char m_nType; // see e2dEffectType
+    char padding[3];
     union {
         tEffectLight light;
         tEffectParticle particle;
         tEffectPedAttractor pedAttractor;
         tEffectEnEx enEx;
         tEffectRoadsign roadsign;
+        std::int32_t iSlotMachineIndex;
         tEffectCoverPoint coverPoint;
         tEffectEscalator escalator;
     };

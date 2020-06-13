@@ -110,3 +110,8 @@ void CWeather::UpdateInTunnelness() {
 void CWeather::UpdateWeatherRegion(CVector* posn) {
     plugin::Call<0x72A640, CVector*>(posn);
 }
+
+bool CWeather::IsRainy()
+{
+    return plugin::CallAndReturn<bool, 0x4ABF50>();
+}

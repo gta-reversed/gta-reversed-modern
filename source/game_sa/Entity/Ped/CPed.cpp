@@ -959,3 +959,12 @@ void CPed::SetModelIndex(unsigned int modelIndex)
 {
     ((void(__thiscall *)(CPed*, unsigned int))0x5E4880)(this, modelIndex);
 }
+
+bool CPed::IsInVehicleThatHasADriver()
+{
+    if (bInVehicle) {
+        if (m_pVehicle && m_pVehicle->IsPassenger(this) && m_pVehicle->m_pDriver)
+            return true;
+    }
+    return false;
+}
