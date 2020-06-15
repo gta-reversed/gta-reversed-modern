@@ -1,0 +1,28 @@
+#include "CEventEditableResponse.h"
+#include "CVehicle.h"
+
+class CEventGotKnockedOverByCar : public CEventEditableResponse
+{
+public:
+    CVehicle* m_vehicle;
+
+    static void InjectHooks();
+
+    CEventGotKnockedOverByCar(CVehicle* vehicle);
+    ~CEventGotKnockedOverByCar();
+private:
+    CEventGotKnockedOverByCar* Constructor(CVehicle* vehicle);
+public:
+    eEventType GetEventType() override { return EVENT_GOT_KNOCKED_OVER_BY_CAR; }
+    int GetEventPriority() override { return 37; }
+    int GetLifeTime() override { return 0; }
+    bool AffectsPed(CPed* ped) override;
+    CEntity* GetSourceEntity() override { return m_vehicle ? m_vehicle->m_pDriver : nullptr; }
+    float GetLocalSoundLevel() override { return 55.0f; }
+    CEventEditableResponse* CloneEditable() override;
+
+    bool AffectsPed_Reversed(CPed* ped);
+    CEventEditableResponse* CloneEditable_Reversed();
+};
+
+VALIDATE_SIZE(CEventGotKnockedOverByCar, 0x18);

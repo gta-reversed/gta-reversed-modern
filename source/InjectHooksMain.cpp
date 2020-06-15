@@ -21,6 +21,8 @@ void InjectHooksMain(void)
     CEventGunShot::InjectHooks();
     CEventDeath::InjectHooks();
     CEventDeadPed::InjectHooks();
+    CEventDraggedOutCar::InjectHooks();
+    CEventGotKnockedOverByCar::InjectHooks();
     CEventScriptCommand::InjectHooks();
     CEventSoundQuiet::InjectHooks();
     CEventGroupEvent::InjectHooks();
@@ -28,6 +30,10 @@ void InjectHooksMain(void)
     CEventPedToChase::InjectHooks();
     CEventPedToFlee::InjectHooks();
     CEventVehicleDamage::InjectHooks();
+    CEventVehicleDamageWeapon::InjectHooks();
+    CEventVehicleDied::InjectHooks();
+    CEventVehicleOnFire::InjectHooks();
+    CEventVehicleHitAndRun::InjectHooks();
     CPedDamageResponseCalculator::InjectHooks();
     CPedScriptedTaskRecord::InjectHooks();
     CPedScriptedTaskRecordData::InjectHooks();

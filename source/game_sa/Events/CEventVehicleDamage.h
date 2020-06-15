@@ -1,3 +1,4 @@
+#pragma once 
 #include "CEventEditableResponse.h"
 
 class CEntity;

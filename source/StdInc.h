@@ -15,6 +15,8 @@
 #include <cassert>
 
 #include "game_sa\constants.h"
+#include "game_sa\CPedGeometryAnalyser.h"
+
 #include "game_sa\CPostEffects.h"
 #include "game_sa\CMemoryMgr.h"
 #include "game_sa\COcclusion.h"
@@ -30,6 +32,15 @@
 #include "game_sa\CInformFriendsEventQueue.h"
 #include "game_sa\Events\CGroupEventHandler.h"
 #include "game_sa\Events\CEventSource.h"
+#include "game_sa\Events\CEventVehicleCollision.h"
+#include "game_sa\Events\CEventVehicleThreat.h"
+#include "game_sa\Events\CEventVehicleToSteal.h"
+#include "game_sa\Events\CEventVehicleDamageWeapon.h"
+#include "game_sa\Events\CEventVehicleDied.h"
+#include "game_sa\Events\CEventVehicleOnFire.h"
+#include "game_sa\Events\CEventVehicleHitAndRun.h"
+#include "game_sa\Events\CEventDraggedOutCar.h"
+#include "game_sa\Events\CEventGotKnockedOverByCar.h"
 #include "game_sa\Events\CEventAttractor.h"
 #include "game_sa\Events\CEventGunShot.h"
 #include "game_sa\Events\CEventDeath.h"
