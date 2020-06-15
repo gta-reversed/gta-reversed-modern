@@ -1,0 +1,14 @@
+#pragma once
+
+enum eAudioFileType
+{
+    AUDIO_FILE_TYPE_UNKNOWN,
+    AUDIO_FILE_TYPE_VORBIS,
+    AUDIO_FILE_TYPE_WAV,
+    AUDIO_FILE_TYPE_WMA,
+    AUDIO_FILE_TYPE_QUICKTIME,
+#if 0
+    AUDIO_FILE_TYPE_FLAC, // SilentPatch-specific
+#endif
+    TOTAL_AUDIO_FILE_TYPE
+};

@@ -2,30 +2,14 @@ cmake_minimum_required(VERSION 3.0)
 
 project(GTASA C CXX)
 
-include_directories(
-    source\\
-    source\\game_sa\\
-    source\\game_sa\\Animation\\
-    source\\game_sa\\Audio\\
-    source\\game_sa\\Collision\\
-    source\\game_sa\\Core\\
-    source\\game_sa\\Entity\\
-    source\\game_sa\\Entity\\Dummy\\
-    source\\game_sa\\Entity\\Object\\
-    source\\game_sa\\Entity\\Ped\\
-    source\\game_sa\\Entity\\Vehicle\\
-    source\\game_sa\\Enums\\
-    source\\game_sa\\Events\\
-    source\\game_sa\\Fx\\
-    source\\game_sa\\Models\\
-    source\\game_sa\\Plugins\\
-    source\\game_sa\\RenderWare\\
-    source\\game_sa\\RenderWare\\rw\\
-    source\\game_sa\\Scripts\\
-    source\\game_sa\\Tasks\\
-    source\\game_sa\\Tasks\\TaskTypes\\
-) 
+add_subdirectory(libs/ogg)
+add_library(Ogg::ogg ALIAS ogg)
 
+set(OGG_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libs/ogg/include")
+set(OGG_LIBRARY ogg)
+set(OGG_FOUND 1)
+
+add_subdirectory(libs/vorbis)
 
 set(_src_root_path "${CMAKE_CURRENT_SOURCE_DIR}")
 file(
@@ -48,6 +32,30 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT g
 add_library(gta_reversed MODULE ${_headerfiles_list} ${_sourcefiles_list} .editorconfig)
 set_target_properties(gta_reversed PROPERTIES SUFFIX ".asi")
 
+target_include_directories(gta_reversed PRIVATE
+    source/
+    source/game_sa/
+    source/game_sa/Animation/
+    source/game_sa/Audio/
+    source/game_sa/Collision/
+    source/game_sa/Core/
+    source/game_sa/Entity/
+    source/game_sa/Entity/Dummy/
+    source/game_sa/Entity/Object/
+    source/game_sa/Entity/Ped/
+    source/game_sa/Entity/Vehicle/
+    source/game_sa/Enums/
+    source/game_sa/Events/
+    source/game_sa/Fx/
+    source/game_sa/Models/
+    source/game_sa/Plugins/
+    source/game_sa/RenderWare/
+    source/game_sa/RenderWare/rw/
+    source/game_sa/Scripts/
+    source/game_sa/Tasks/
+    source/game_sa/Tasks/TaskTypes/
+)
+target_link_libraries(gta_reversed ogg ${OGG_LIBRARY} vorbisfile)
 target_compile_definitions(gta_reversed PRIVATE NOMINMAX _CRT_SECURE_NO_WARNINGS USE_GTASA_ALLOCATOR)
 
 foreach(_header IN ITEMS ${_headerfiles_list})
@@ -71,6 +79,6 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /YuStdInc.h")
 set_source_files_properties(source/StdInc.cpp
     PROPERTIES
     COMPILE_FLAGS "/YcStdInc.h"
-    )
+)
 
 list(APPEND _sourcefiles_list StdInc.cpp)

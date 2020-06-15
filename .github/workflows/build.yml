@@ -6,10 +6,10 @@ jobs:
     runs-on: windows-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
-    - name: Clone Submodules
-      shell: cmd
-      run: git submodule sync --recursive && git submodule update --init --force --recursive
+      uses: actions/checkout@v2.1.1
+      with:
+        fetch-depth: 1
+        submodules: recursive
     - name: Configure
       shell: cmd
       run: cmake -Bbuild -H. -A Win32

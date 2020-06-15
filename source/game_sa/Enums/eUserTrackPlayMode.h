@@ -1,0 +1,9 @@
+#pragma once
+
+enum eUserTrackPlayMode
+{
+    USER_TRACK_PLAY_RADIO,
+    USER_TRACK_PLAY_RANDOM,
+    USER_TRACK_PLAY_SEQUENTAL,
+    TOTAL_USER_TRACK_PLAY_MODE
+};

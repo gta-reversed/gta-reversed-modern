@@ -1,5 +1,14 @@
 #include "StdInc.h"
 
+#include "CAEAudioUtility.h"
+#include "CAEDataStream.h"
+#include "CAEMFDecoder.h"
+#include "CAEVorbisDecoder.h"
+#include "CAEWaveDecoder.h"
+#include "CAEWMADecoder.h"
+#include "CAEStreamingDecoder.h"
+#include "CAEUserRadioTrackManager.h"
+
 void InjectHooksMain(void)
 {
     CRunningScript::InjectHooks();
@@ -66,4 +75,13 @@ void InjectHooksMain(void)
     CMenuManager::InjectHooks();
     CSprite2d::InjectHooks();
     CCheat::InjectHooks();
+
+    CAEAudioUtility::InjectHooks();
+    CAEDataStream::InjectHooks();
+    CAEStreamingDecoder::InjectHooks();
+    CAEMFDecoder::InjectHooks();
+    CAEUserRadioTrackManager::InjectHooks();
+    CAEVorbisDecoder::InjectHooks();
+    CAEWaveDecoder::InjectHooks();
+    CAEWMADecoder::InjectHooks();
 }
