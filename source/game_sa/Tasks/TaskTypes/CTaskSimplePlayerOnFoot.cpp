@@ -29,6 +29,7 @@ bool CTaskSimplePlayerOnFoot::ProcessPed_Reversed(class CPed* ped)
     bool result = false;
     CPed* pPed = ped;
     CPlayerPed* pPlayerPed = static_cast<CPlayerPed*>(pPed);
+
     if (pPlayerPed->GetPadFromPlayer())
     {
         CPedIntelligence* pIntelligence = pPlayerPed->m_pIntelligence;

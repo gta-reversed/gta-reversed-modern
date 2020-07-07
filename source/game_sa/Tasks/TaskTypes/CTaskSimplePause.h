@@ -18,7 +18,9 @@ public:
     CTask* Clone() override;
     eTaskType GetId() override { return TASK_SIMPLE_PAUSE; };
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event);
     bool ProcessPed(CPed* ped) override;
+    bool ProcessPed_Reversed(CPed* ped);
 };
 
 VALIDATE_SIZE(CTaskSimplePause, 0x18);

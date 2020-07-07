@@ -13,6 +13,8 @@ public:
     eWeaponType    m_weaponType;
     bool           m_bSpeak;     // refers to a CPed::Say call (the dying scream?)
 
+    static float& ms_damageFactor;
+
     static void InjectHooks();
     CPedDamageResponseCalculator(CEntity* pEntity, float fDamage, eWeaponType weaponType, ePedPieceTypes bodyPart, bool bSpeak);
     ~CPedDamageResponseCalculator();
