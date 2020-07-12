@@ -196,7 +196,7 @@ public:
      static unsigned short &NumberOfMissionScripts;
      static unsigned int &LargestMissionScriptSize;
      static unsigned int &MainScriptSize;
-     static char *MultiScriptArray; // static char MultiScriptArray[800]
+     static int *MultiScriptArray; // static char MultiScriptArray[800]
      static bool &bUsingAMultiScriptFile;
      static int &StoreVehicleIndex;
      static bool &StoreVehicleWasRandom;
@@ -225,7 +225,7 @@ public:
      static CUpsideDownCarCheck &UpsideDownCars;
      static tScriptParam *LocalVariablesForCurrentMission; // static ScriptVar LocalVariablesForCurrentMission[1024]
     //! Script space, where main.scm MAIN section is loaded.
-     static char *ScriptSpace; // static char ScriptSpace[200000]
+     static std::uint8_t* ScriptSpace; // static char ScriptSpace[200000]
      static char *MissionBlock; // static char MissionBlock[69000]
      static CRunningScript *&pIdleScripts;
      static CRunningScript *&pActiveScripts;
@@ -307,7 +307,7 @@ public:
      static bool ScriptAttachAnimGroupToCharModel(int modelId, char *ifpName);
      static void ScriptConnectLodsFunction(int objecthandle1, int objecthandle2);
      static void ScriptDebugCircle2D(float x, float y, float width, float height, CRGBA color);
-     static CRunningScript *StartNewScript(unsigned char *startIP);
+     static CRunningScript* StartNewScript(std::uint8_t* startIP);
      static int StartNewScript(unsigned char *startIP, unsigned short index);
      static void StartTestScript();
      static void UndoBuildingSwaps();

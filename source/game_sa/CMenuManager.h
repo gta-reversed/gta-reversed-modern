@@ -372,6 +372,7 @@ public:
     char PrintStats();
     char PrintBriefs();
     char DrawControllerSetupScreen();
+    bool CheckMissionPackValidMenu();
 };
 
 VALIDATE_SIZE(CMenuManager, 0x1B78);

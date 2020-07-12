@@ -121,3 +121,8 @@ char CMenuManager::DrawControllerSetupScreen()
 {
     return ((char(__thiscall*)(CMenuManager*))0x57F300)(this);
 }
+
+bool CMenuManager::CheckMissionPackValidMenu()
+{
+    return plugin::CallMethodAndReturn<bool, 0x57D720, CMenuManager*>(this);
+}

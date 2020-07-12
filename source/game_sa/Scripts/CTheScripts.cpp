@@ -43,12 +43,12 @@ bool &CTheScripts::bMiniGameInProgress = *reinterpret_cast<bool *>(0xA444A8);
 int &CTheScripts::ScriptPickupCycleIndex = *reinterpret_cast<int *>(0xA444AC);
 char &CTheScripts::FailCurrentMission = *reinterpret_cast<char *>(0xA444B0);
 bool &CTheScripts::bAlreadyRunningAMissionScript = *reinterpret_cast<bool *>(0xA444B1);
-unsigned int &CTheScripts::LargestNumberOfMissionScriptLocalVariables = *reinterpret_cast<unsigned int *>(0xA444B4);
-unsigned short &CTheScripts::NumberOfExclusiveMissionScripts = *reinterpret_cast<unsigned short *>(0xA444B8);
-unsigned short &CTheScripts::NumberOfMissionScripts = *reinterpret_cast<unsigned short *>(0xA444BC);
+unsigned int &CTheScripts::LargestNumberOfMissionScriptLocalVariables = *reinterpret_cast<unsigned int *>(0xA444BC);
+unsigned short &CTheScripts::NumberOfExclusiveMissionScripts = *reinterpret_cast<unsigned short *>(0xA444B4);
+unsigned short &CTheScripts::NumberOfMissionScripts = *reinterpret_cast<unsigned short *>(0xA444B8);
 unsigned int &CTheScripts::LargestMissionScriptSize = *reinterpret_cast<unsigned int *>(0xA444C0);
 unsigned int &CTheScripts::MainScriptSize = *reinterpret_cast<unsigned int *>(0xA444C4);
-char *CTheScripts::MultiScriptArray = reinterpret_cast<char *>(0xA444C8);
+int *CTheScripts::MultiScriptArray = reinterpret_cast<int*>(0xA444C8);
 bool &CTheScripts::bUsingAMultiScriptFile = *reinterpret_cast<bool *>(0xA447E8);
 int &CTheScripts::StoreVehicleIndex = *reinterpret_cast<int *>(0xA447EC);
 bool &CTheScripts::StoreVehicleWasRandom = *reinterpret_cast<bool *>(0xA447F0);
@@ -76,7 +76,7 @@ CStreamedScripts &CTheScripts::StreamedScripts = *reinterpret_cast<CStreamedScri
 CScriptResourceManager &CTheScripts::ScriptResourceManager = *reinterpret_cast<CScriptResourceManager *>(0xA485A8);
 CUpsideDownCarCheck &CTheScripts::UpsideDownCars = *reinterpret_cast<CUpsideDownCarCheck *>(0xA4892C);
 tScriptParam *CTheScripts::LocalVariablesForCurrentMission = reinterpret_cast<tScriptParam *>(0xA48960);
-char *CTheScripts::ScriptSpace = reinterpret_cast<char *>(0xA49960);
+std::uint8_t* CTheScripts::ScriptSpace = reinterpret_cast<std::uint8_t*>(0xA49960);
 char *CTheScripts::MissionBlock = reinterpret_cast<char *>(0xA7A6A0);
 CRunningScript *&CTheScripts::pIdleScripts = *reinterpret_cast<CRunningScript **>(0xA8B428);
 CRunningScript *&CTheScripts::pActiveScripts = *reinterpret_cast<CRunningScript **>(0xA8B42C);
@@ -93,4 +93,17 @@ tScriptSearchlight *CTheScripts::ScriptSearchLightArray = reinterpret_cast<tScri
 
 void CTheScripts::RemoveThisPed(CPed* ped) {
     plugin::CallDynGlobal<CPed*>(0x486240, ped);
+}
+
+CRunningScript* CTheScripts::StartNewScript(std::uint8_t* startIP)
+{
+    return plugin::CallAndReturn<CRunningScript*, 0x464C20, std::uint8_t*>(startIP);
+}
+
+bool CTheScripts::IsPlayerOnAMission() {
+    return plugin::CallAndReturnDynGlobal<bool>(0x464D50);
+}
+
+void CTheScripts::WipeLocalVariableMemoryForMissionScript() {
+    plugin::CallDynGlobal(0x464BB0);
 }

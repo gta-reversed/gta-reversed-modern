@@ -5,6 +5,10 @@ void CRunningScript::InjectHooks()
     HookInstall(0x465C20, &CRunningScript::GivePedScriptedTask);;
 }
 
+void CRunningScript::AddScriptToList(CRunningScript** queuelist) {
+    plugin::CallMethodDynGlobal<CRunningScript*, CRunningScript**>(0x464C00, this, queuelist);
+}
+
 void* CRunningScript::GetPointerToLocalVariable(int varId) {
     return plugin::CallMethodAndReturnDynGlobal<void*, CRunningScript*, int>(0x463CA0, this, varId);
 }
@@ -52,4 +56,12 @@ void CRunningScript::GivePedScriptedTask(std::int32_t pedHandle, CTask* task, st
             delete task;
     }
 #endif
+}
+
+void CRunningScript::RemoveScriptFromList(CRunningScript** queuelist) {
+    plugin::CallMethodDynGlobal<CRunningScript*, CRunningScript**>(0x464BD0, this, queuelist);
+}
+
+void CRunningScript::ShutdownThisScript() {
+    plugin::CallMethodDynGlobal<CRunningScript*>(0x465AA0, this);
 }

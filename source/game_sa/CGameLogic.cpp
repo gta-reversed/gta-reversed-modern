@@ -19,3 +19,8 @@ bool CGameLogic::IsCoopGameGoingOn()
 {
     return plugin::CallAndReturn<bool, 0x441390>();
 }
+
+void CGameLogic::ClearSkip(bool a1)
+{
+    return plugin::Call<0x441560, bool>(a1);
+}
