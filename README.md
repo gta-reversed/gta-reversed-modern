@@ -5,8 +5,14 @@ A project to reverse Grand Theft Auto San Andreas completely, and to rewrite and
 ### Discord
 [Join our discord server](https://discord.gg/P5zVn6C). You can request us to decompile a function for you. If you wish to contribute, then we'll be happy to assist you.
 
-#### Build Instructions
+### What exactly is this project? 
+Building this project will result in a DLL file, that DLL file can be injected into GTA:SA using any ASI loader out there. After the DLL file has been injected, the ingame functions will be replaced by the reversed code. The game will behave exactly the same. Now if we make any changes to the reversed code, it will take effect in the game. The goal is to keep reversing until we have the entire game reversed to compile a standalone executable.
 
+### Progress
+The progress of reversed functions can be tracked [here](docs/ReversedFunctions.MD).
+
+### Build Instructions
+You can either build with Premake5 or CMake, that's up to you.
 ##### Premake5
 1) Clone the project, including the submodules `git clone --recurse-submodules https://github.com/saml1er/gta-reversed.git`.
 
@@ -33,18 +39,7 @@ A project to reverse Grand Theft Auto San Andreas completely, and to rewrite and
 6) Once configuration is complete, click the Generate button.  
 7) You'll find GTASA.sln in Bin folder.
 
-
-#### What exactly is this project? 
-Building this project will result in a DLL file, that DLL file can be injected into GTA:SA using any ASI loader out there. After the DLL file has been injected, it will hook these reversed functions, if your game crashes, then it means there's some problem with the code and it has to be fixed, otherwise if the game runs smoothly, our code works, and we can focus on reversing more functions and classes, that's pretty much it. 
-
-#### Motivation
-I'm an active contributor for [Multi Theft Auto San Andreas](https://www.mtasa.com), which is a project that adds multiplayer functionality to GTA:SA. GTA:SA was reversed by MTA team and many other hackers on GTA related forum, they documented the addresses of GTA functions, but almost no one seems to rewrite the code in readable and compilable C++, that is the main reason why this project was created. Currently, MTA:SA has barely any active contributors because to add new features, you must know how to reverse GTA:SA, so to make it easier for new contributors, rewriting and documenting these functions in C++ will allow them to understand how GTA:SA works internally without the need of understanding ASM or any low level stuff.
-
-#### Advice
-The goal is to rewrite every GTA:SA function exactly as you see in the executable, so anyone who is trying to reverse GTA:SA should find this project helpful. 
-
-- It's okay to do minor improvements if deemed necessary.
-- Use naming convention of [plugin-sdk](https://github.com/DK22Pac/plugin-sdk) project.
-
-#### Credits
-TODO
+### Credits
+- All contributors of [plugin-sdk](https://github.com/DK22Pac/plugin-sdk) project.
+- Hundreds of great people on [gtaforums.com](https://gtaforums.com/topic/194199-documenting-gta-sa-memory-addresses).
+- And everyone who contributed to GTA:SA reversing.
