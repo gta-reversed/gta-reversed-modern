@@ -16,8 +16,10 @@
 class  CAnimManager {
 public:
     static void CAnimManager::InjectHooks();
+    static CAnimBlock* GetAnimationBlock(std::int32_t animGroup) { return ms_aAnimAssocGroups[animGroup].m_pAnimBlock; }
+    static std::uint32_t GetAnimationBlockIndex(std::uint32_t animGroup) { return GetAnimationBlock(animGroup) - ms_aAnimBlocks; }
 	static CAnimBlock* GetAnimationBlock(char const* name);
-	static int GetAnimationBlockIndex(char const* name);
+    static std::uint32_t GetAnimationBlockIndex(char const* name);
 	static int GetFirstAssocGroup(char const* basename);
 	static CAnimBlendHierarchy* GetAnimation(unsigned int hash, CAnimBlock const* ifp);
 	static CAnimBlendHierarchy* GetAnimation(char const* animName, CAnimBlock const* ifp);

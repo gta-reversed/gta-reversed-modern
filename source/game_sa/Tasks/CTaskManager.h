@@ -56,7 +56,7 @@ public:
     CTaskSimple* GetSimplestTask(int taskIndex);
     void AddSubTasks(CTaskComplex* task);
     void ParentsControlChildren(CTaskComplex* pTask);
-    void SetTask(CTask* task, int taskIndex,int arg2);
+    void SetTask(CTask* task, int taskIndex,int arg2 = 0);
     void SetTaskSecondary(CTask* task, int taskIndex);
     void ClearTaskEventResponse();
     void ManageTasks();

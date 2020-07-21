@@ -12,9 +12,7 @@ Do not delete this comment block. Respect others' work!
 #include "CEntity.h"
 #include "CWeaponInfo.h"
 
-
-
-class  CTaskSimpleGangDriveBy : public CTaskSimple {
+class CTaskSimpleGangDriveBy : public CTaskSimple {
 public:
     bool m_bIsFinished;
     bool m_bAnimsReferenced;
@@ -27,7 +25,7 @@ public:
     char m_nLastCommand;
     char m_nBurstShots;
     char m_nDrivebyStyle;
-    char m_nFrequencyPercentage;
+    std::int8_t m_nFrequencyPercentage;
     char m_nFakeShootDirn;
 private:
     char _pad;
@@ -40,14 +38,19 @@ private:
 public:
     float m_fAbortRange;
     int m_nRequiredAnimID;
-    int m_nRequiredAnimGroup;
-    CAnimBlendAssociation *m_pAnim;
+    std::int32_t m_nRequiredAnimGroup;
+    CAnimBlendAssociation *m_pAnimAssoc;
     CWeaponInfo *m_pWeaponInfo;
     CEntity *m_pTargetEntity;
     CVector m_vecCoords;
 
-    CTaskSimpleGangDriveBy(CEntity *pTargetEntity, const CVector *pVecTarget, float fAbortRange, 
-        char FrequencyPercentage, char nDrivebyStyle, bool bSeatRHS);
+    CTaskSimpleGangDriveBy(CEntity *target, const CVector *targetPos, float abortRange, 
+        std::int8_t frequencyPercentage, std::int8_t drivebyStyle, bool seatRHS);
+    ~CTaskSimpleGangDriveBy();
+    CTask* Clone() override;
+    eTaskType GetId() override { return TASK_SIMPLE_GANG_DRIVEBY; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
+    bool ProcessPed(CPed* ped) override;
 };
 
 VALIDATE_SIZE(CTaskSimpleGangDriveBy, 0x44);

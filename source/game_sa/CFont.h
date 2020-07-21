@@ -14,19 +14,24 @@
 #define MAX_FONT_SPRITES 2
 #define MAX_FONT_BUTTON_SPRITES 15
 
-enum  eFontAlignment : unsigned char {
+struct tFontData {
+    char m_propValues[208];
+    char m_spaceValue;
+    char m_unpropValue;
+};
+
+enum eFontAlignment : unsigned char {
     ALIGN_CENTER,
     ALIGN_LEFT,
     ALIGN_RIGHT
 };
 
-enum  eFontStyle : unsigned char {
+enum eFontStyle : unsigned char {
     FONT_GOTHIC,
     FONT_SUBTITLES,
     FONT_MENU,
     FONT_PRICEDOWN
 };
-
 class  CFont {
 public:
     // static variables

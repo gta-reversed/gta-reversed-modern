@@ -19,7 +19,7 @@ Do not delete this comment block. Respect others' work!
     DOOR_REAR_LEFT = 11
 };*/
 
-class  CTaskComplexEnterCar : public CTaskComplex {
+class CTaskComplexEnterCar : public CTaskComplex {
 public:
     CVehicle* m_pTargetVehicle;
     union
@@ -63,7 +63,14 @@ public:
 
     // Shouldn't be used directly, use CTaskComplexEnterCarAsDriver or CTaskComplexEnterCarAsPassenger instead
     CTaskComplexEnterCar(CVehicle* pTargetVehicle, bool bAsDriver, bool bQuitAfterOpeningDoor,
-        bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff = false); 
+        bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff = false);
+    ~CTaskComplexEnterCar();
+
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
+    CTask* CreateNextSubTask(CPed* ped) override;
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed* ped) override;
+    virtual CTask* CreateNextSubTask_AfterSimpleCarAlign(CPed* ped);
 
 };
 

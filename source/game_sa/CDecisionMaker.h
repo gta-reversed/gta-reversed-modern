@@ -9,7 +9,8 @@
 #include "CDecision.h"
 #include "eDecisionMakerEvents.h"
 
-class  CDecisionMaker {
+class CDecisionMaker
+{
 public:
     CDecision m_decision[DM_TOTAL_NUM_EVENTS];
 

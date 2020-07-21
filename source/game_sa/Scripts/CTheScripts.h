@@ -149,9 +149,20 @@ struct tScriptSphere
     int fRadius;
 };
 
+enum eScriptThingType : std::int32_t
+{
+    SCRIPT_THING_SPHERE = 0,
+    SCRIPT_THING_EFFECT_SYSTEM,
+    SCRIPT_THING_SEARCH_LIGHT,
+    SCRIPT_THING_CHECKPOINT,
+    SCRIPT_THING_SEQUENCE_TASK,
+    SCRIPT_THING_FIRE,
+    SCRIPT_THING_2D_EFFECT,
+    SCRIPT_THING_DECISION_MAKER,
+    SCRIPT_THING_PED_GROUP
+};
 
-
-class  CTheScripts
+class CTheScripts
 {
 public:
      static bool &DbgFlag;

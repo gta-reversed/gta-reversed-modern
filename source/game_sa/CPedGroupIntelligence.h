@@ -25,8 +25,7 @@ public:
     CPedGroup *m_pPedGroup;
     CEventGroupEvent*m_pGroupEventHandler; // TODO: member name is incorrect. It needs to be fixed.
     CEventGroupEvent* m_pEventGroupEvent;
-    CPedTaskPair m_groupTasks[53];
-    unsigned char gap288[4];
+    CPedTaskPair m_groupTasks[32];
     CPedGroupDefaultTaskAllocator *m_pPedGroupDefaultTaskAllocator;
     CTaskAllocator *m_pPrimaryTaskAllocator;
     CTaskAllocator *m_pEventResponseTaskAllocator;

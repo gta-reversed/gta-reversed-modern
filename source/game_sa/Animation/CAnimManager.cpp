@@ -27,7 +27,7 @@ CAnimBlock* CAnimManager::GetAnimationBlock(char const* name) {
 }
 
 // Converted from cdecl int CAnimManager::GetAnimationBlockIndex(char const* name) 0x4D3990
-int CAnimManager::GetAnimationBlockIndex(char const* name) {
+std::uint32_t CAnimManager::GetAnimationBlockIndex(char const* name) {
     return plugin::CallAndReturn<int, 0x4D3990, char const*>(name);
 }
 

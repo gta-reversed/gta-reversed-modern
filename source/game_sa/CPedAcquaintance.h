@@ -8,7 +8,13 @@
 
 #include "PluginBase.h"
 
-class CPedAcquaintance {
+class CAcquaintance
+{
+public:
+    void SetAsAcquaintance(std::int32_t acquaintanceID, std::int32_t pedFlag);
+};
+
+class CPedAcquaintance : public CAcquaintance {
 public:
     unsigned int m_nRespect;
     unsigned int m_nLike;
@@ -20,3 +26,4 @@ public:
 };
 
 VALIDATE_SIZE(CPedAcquaintance, 0x14);
+

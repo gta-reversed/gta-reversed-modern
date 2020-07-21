@@ -11,7 +11,7 @@
 #include "CVehicle.h"
 #include "CTaskUtilityLineUpPedWithCar.h"
 
-class  CTaskSimpleCarSetPedInAsDriver : public CTaskSimple {
+class CTaskSimpleCarSetPedInAsDriver : public CTaskSimple {
 public:
     bool m_bIsFinished;
 private:
@@ -28,7 +28,12 @@ private:
 public:
 
     CTaskSimpleCarSetPedInAsDriver(CVehicle *pTargetVehicle, CTaskUtilityLineUpPedWithCar *pUtility);
+    ~CTaskSimpleCarSetPedInAsDriver();
 
+    CTask* Clone() override;
+    eTaskType GetId() override { return TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override { return false; }
+    bool ProcessPed(CPed* ped) override;
 
 };
 

@@ -10,7 +10,7 @@
 #include "CPed.h"
 #include "CPedGroup.h"
 
-class  CPedGroups {
+class CPedGroups {
 public:
      static short(&ScriptReferenceIndex)[8]; // static short ScriptReferenceIndex[8]
      static char(&ms_activeGroups)[8]; // static char ms_activeGroups[8]
@@ -18,6 +18,7 @@ public:
      static unsigned int &ms_iNoOfPlayerKills;
      static CPedGroup(&ms_groups)[8]; // static CPedGroup ms_groups[8]
 
+     static CPedGroup& GetGroup(std::int32_t groupId) { return ms_groups[groupId]; }
     //! return the index of the added group , return -1 if failed.
      static signed int AddGroup();
      static bool AreInSameGroup(CPed *ped1, CPed *ped2);

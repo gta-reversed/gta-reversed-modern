@@ -91,6 +91,22 @@ tScriptRectangle *CTheScripts::IntroRectangles = reinterpret_cast<tScriptRectang
 CSprite2d *CTheScripts::ScriptSprites = reinterpret_cast<CSprite2d *>(0xA94B68);
 tScriptSearchlight *CTheScripts::ScriptSearchLightArray = reinterpret_cast<tScriptSearchlight *>(0xA94D68);
 
+void CTheScripts::CleanUpThisVehicle(CVehicle* pVehicle) {
+    plugin::CallDynGlobal<CVehicle*>(0x486670, pVehicle);
+}
+
+signed int CTheScripts::GetActualScriptThingIndex(int index, unsigned char type) {
+    return plugin::CallAndReturnDynGlobal<signed int, int, unsigned char>(0x4839A0, index, type);
+}
+
+unsigned int CTheScripts::GetNewUniqueScriptThingIndex(unsigned int index, char type) {
+    return plugin::CallAndReturnDynGlobal<unsigned int, unsigned int, char>(0x483720, index, type);
+}
+
+int CTheScripts::GetScriptIndexFromPointer(CRunningScript* thread) {
+    return plugin::CallAndReturnDynGlobal<int, CRunningScript*>(0x464D20, thread);
+}
+
 void CTheScripts::RemoveThisPed(CPed* ped) {
     plugin::CallDynGlobal<CPed*>(0x486240, ped);
 }
@@ -102,6 +118,10 @@ CRunningScript* CTheScripts::StartNewScript(std::uint8_t* startIP)
 
 bool CTheScripts::IsPlayerOnAMission() {
     return plugin::CallAndReturnDynGlobal<bool>(0x464D50);
+}
+
+bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle) {
+    return plugin::CallAndReturnDynGlobal<bool, CVehicle*>(0x4861F0, pVehicle);
 }
 
 void CTheScripts::WipeLocalVariableMemoryForMissionScript() {

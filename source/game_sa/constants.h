@@ -18,6 +18,8 @@ const std::uint32_t TOTAL_GANGS = 10;
 
 const std::uint32_t TOTAL_SCRIPTED_TASKS = 128;
 const std::uint32_t TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES = 48;
+const std::int32_t TOTAL_DECISION_MAKERS = 20;
+const std::int32_t TOTAL_PED_GROUPS = 8;
 
 // used in CRenderer
 const std::int32_t TOTAL_ENTITY_SCAN_LISTS = 5;

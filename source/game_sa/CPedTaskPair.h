@@ -11,15 +11,17 @@
 #include "CTask.h"
 
 
-class  CPedTaskPair {
+class CPedTaskPair {
 public:
     CPed *m_pPed;
     CTask *m_pTask;
-    int field_8;
+    std::int32_t m_taskSlot;
+    std::int32_t field_C;
+    std::int8_t field_10;
 
-     void Flush();
+    void Flush();
 };
 
-VALIDATE_SIZE(CPedTaskPair, 0xC);
+VALIDATE_SIZE(CPedTaskPair, 0x14);
 
 //#include "meta/meta.CPedTaskPair.h"

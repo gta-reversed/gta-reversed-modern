@@ -11,7 +11,7 @@ Do not delete this comment block. Respect others' work!
 #include "CVehicle.h"
 #include "CTaskUtilityLineUpPedWithCar.h"
 
-class  CTaskComplexLeaveCar : public CTaskComplex {
+class CTaskComplexLeaveCar : public CTaskComplex {
 public:
     CVehicle* m_pTargetVehicle;
     int m_nTargetDoor;
@@ -39,8 +39,17 @@ private:
     char _pad3[3];
 public:
 
+    CTaskComplexLeaveCar(CVehicle* pTargetVehicle, int nTargetDoor, int nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut);
+    ~CTaskComplexLeaveCar();
+
     CTaskComplexLeaveCar* Constructor(CVehicle* pTargetVehicle, int nTargetDoor, int nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut);
 
+    CTask* Clone() override;
+    eTaskType GetId() override { return TASK_COMPLEX_LEAVE_CAR; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
+    CTask* CreateNextSubTask(CPed* ped) override;
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed* ped) override;
 };
 
 VALIDATE_SIZE(CTaskComplexLeaveCar, 0x34);

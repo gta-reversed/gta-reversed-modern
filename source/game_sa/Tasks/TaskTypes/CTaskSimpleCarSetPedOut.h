@@ -10,7 +10,7 @@
 #include "CTaskSimple.h"
 #include "CVehicle.h"
 
-class  CTaskSimpleCarSetPedOut : public CTaskSimple {
+class CTaskSimpleCarSetPedOut : public CTaskSimple {
 public:
     CVehicle* m_pTargetVehicle;
     int m_nTargetDoor; 
@@ -25,6 +25,12 @@ private:
 public:
 
 	CTaskSimpleCarSetPedOut(CVehicle *pTargetVehicle, int nTargetDoor, bool bSwitchOffEngine);
+    ~CTaskSimpleCarSetPedOut();
+
+    CTask* Clone() override;
+    eTaskType GetId() override { return TASK_SIMPLE_CAR_SET_PED_OUT; };
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override { return false; }
+    bool ProcessPed(CPed* ped) override;
 
 };
 

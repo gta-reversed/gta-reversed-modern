@@ -9,11 +9,14 @@ Do not delete this comment block. Respect others' work!
 #include "PluginBase.h"
 #include "CTaskComplexEnterCar.h"
 
-class  CTaskComplexEnterCarAsPassenger : public CTaskComplexEnterCar {
+class CTaskComplexEnterCarAsPassenger : public CTaskComplexEnterCar {
 public:
 
     CTaskComplexEnterCarAsPassenger(CVehicle* pTargetVehicle, int nTargetSeat, bool bCarryOnAfterFallingOff);
+    ~CTaskComplexEnterCarAsPassenger() {}
 
+    CTask* Clone() override;
+    eTaskType GetId() override { return TASK_COMPLEX_ENTER_CAR_AS_PASSENGER; }
 };
 
 VALIDATE_SIZE(CTaskComplexEnterCarAsPassenger, 0x50);

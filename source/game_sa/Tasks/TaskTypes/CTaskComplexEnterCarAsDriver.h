@@ -9,10 +9,16 @@ Do not delete this comment block. Respect others' work!
 #include "PluginBase.h"
 #include "CTaskComplexEnterCar.h"
 
-class  CTaskComplexEnterCarAsDriver : public CTaskComplexEnterCar {
+class CTaskComplexEnterCarAsDriver : public CTaskComplexEnterCar {
 public:
 
     CTaskComplexEnterCarAsDriver(CVehicle* pTargetVehicle);
+    ~CTaskComplexEnterCarAsDriver() {}
+
+    CTask* Clone() override;
+    eTaskType GetId() override { return TASK_COMPLEX_ENTER_CAR_AS_DRIVER; }
+
+    CTask* Clone_Reversed();
 
 };
 
