@@ -12,3 +12,8 @@ void CAudioEngine::ReportMissionAudioEvent(int eventId, CObject* pObject)
 {
     return plugin::CallMethod <0x507350, CAudioEngine*, int, CObject*>(this, eventId, pObject);
 }
+
+void CAudioEngine::DisplayRadioStationName()
+{
+    ((void(__cdecl*)())0x507030)();
+}

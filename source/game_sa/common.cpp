@@ -5,9 +5,7 @@ https://github.com/DK22Pac/plugin-sdk
 Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-
-#include <algorithm>
-#include <vector>
+#include "CDebugMenu.h"
 
 int gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
 char *gString = (char *)0xB71670;
@@ -15,6 +13,11 @@ char *gString = (char *)0xB71670;
 float &GAME_GRAVITY = *(float *)0x863984;
 
 char(&PC_Scratch)[16384] = *(char(*)[16384])0xC8E0C8;
+
+void InjectCommonHooks()
+{
+    HookInstall(0x53E230, &Render2dStuff);
+}
 
 CVector FindPlayerCoors(int playerId)
 {
@@ -593,6 +596,66 @@ void WriteRaster(RwRaster * pRaster, char const * pszPath) {
     assert(pRaster);
     assert(pszPath && pszPath[0]);
     plugin::Call<0x005A4150>(pRaster, pszPath);
+}
+
+void Render2dStuff()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__cdecl*)())0x53E230)();
+#else
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)false);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)false);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)true);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)rwRENDERSTATENARENDERSTATE);
+    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+    CReplay::Display();
+    CPickups::RenderPickUpText();
+    if (TheCamera.m_bWideScreenOn && !FrontEndMenuManager.m_bWidescreenOn)
+        TheCamera.DrawBordersForWideScreen();
+    CPed* player = FindPlayerPed();
+    eWeaponType weaponType = WEAPON_UNARMED;
+    if (player)
+        weaponType = player->GetActiveWeapon().m_nType;
+    eCamMode camMode = CCamera::GetActiveCamera().m_nMode;
+    bool firstPersonWeapon = false;
+    if (camMode == MODE_SNIPER
+        || camMode == MODE_SNIPER_RUNABOUT
+        || camMode == MODE_ROCKETLAUNCHER
+        || camMode == MODE_ROCKETLAUNCHER_RUNABOUT
+        || camMode == MODE_CAMERA
+        || camMode == MODE_HELICANNON_1STPERSON)
+    {
+        firstPersonWeapon = true;
+    }
+    if ((weaponType == WEAPON_SNIPERRIFLE || weaponType == WEAPON_ROCKET) && firstPersonWeapon)
+    {
+        CRGBA black(0, 0, 0, 255);
+        if (weaponType == WEAPON_ROCKET)
+        {
+            CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(180)), black);
+            CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(170), SCREEN_WIDTH, SCREEN_HEIGHT), black);
+        }
+        else
+        {
+            CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(210)), black);
+            CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(210), SCREEN_WIDTH, SCREEN_HEIGHT), black);
+        }
+        CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH / 2 - SCREEN_SCALE_X(210), SCREEN_HEIGHT), black);
+        CSprite2d::DrawRect(CRect(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(210), 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), black);
+    }
+    CAudioEngine::DisplayRadioStationName();
+    CHud::Draw();
+    CSpecialFX::Render2DFXs();
+    CUserDisplay::OnscnTimer.ProcessForDisplay();
+    CMessages::Display(true);
+    CDarkel::DrawMessages();
+    CGarages::PrintMessages();
+    CFont::DrawFonts();
+    CDebugMenu::ImguiDrawLoop();
+    CDebugMenu::ImGuiDrawMouse();
+#endif
 }
 
 std::wstring UTF8ToUnicode(const std::string &str)

@@ -6,6 +6,7 @@ Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
+std::int32_t CWorld::TOTAL_PLAYERS = 2;
 int &CWorld::ms_iProcessLineNumCrossings = *(int *)0xB7CD60;
 float &CWorld::fWeaponSpreadRate = *(float *)0xB7CD64;
 CEntity *&CWorld::pIgnoreEntity = *(CEntity **)0xB7CD68;

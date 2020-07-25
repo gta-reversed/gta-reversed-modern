@@ -8,6 +8,11 @@ bool &CCamera::m_bUseMouse3rdPerson = *reinterpret_cast<bool *>(0xB6EC2E);
 CCamera &TheCamera = *reinterpret_cast<CCamera *>(0xB6F028);
 bool& gbModelViewer = *reinterpret_cast<bool*>(0xBA6728);
 
+CCam& CCamera::GetActiveCamera()
+{
+    return TheCamera.m_aCams[TheCamera.m_nActiveCam];
+}
+
 bool CCamera::Using1stPersonWeaponMode() {
     return plugin::CallMethodAndReturnDynGlobal<bool, CCamera*>(0x50BFF0, this);
 }
@@ -38,4 +43,9 @@ void CCamera::CamControl() {
 
 void CCamera::CamShake(float arg2, float x, float y, float z) {
     plugin::CallMethodDynGlobal<CCamera*, float, float, float, float>(0x50A9F0, this, arg2, x, y, z);
+}
+
+void CCamera::DrawBordersForWideScreen()
+{
+    ((void(__thiscall*)(CCamera*))0x514860)(this);
 }

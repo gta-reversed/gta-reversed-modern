@@ -1,18 +1,27 @@
-#include "StdInc.h"
-
 /*
     Plugin-SDK (Grand Theft Auto San Andreas) source file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
-#include "CPad.h"
+#include "StdInc.h"
+#include "CDebugMenu.h"
 
 // mouse states
 CMouseControllerState& CPad::PCTempMouseControllerState = *(CMouseControllerState*)0xB73404;
 CMouseControllerState& CPad::NewMouseControllerState = *(CMouseControllerState*)0xB73418;
 CMouseControllerState& CPad::OldMouseControllerState = *(CMouseControllerState*)0xB7342C;
 
+CKeyboardState& CPad::TempKeyState = *(CKeyboardState*)0xB72CB0;
+CKeyboardState& CPad::OldKeyState = *(CKeyboardState*)0xB72F20;
+CKeyboardState& CPad::NewKeyState = *(CKeyboardState*)0xB73190;
+
+CPad* CPad::Pads = (CPad*)0xB73458; // size is 2
+
+void CPad::InjectHooks()
+{
+    HookInstall(0x541DD0, CPad::UpdatePads);
+}
 
 // Converted from thiscall void CPad::UpdateMouse(void) 0x53F3C0
 void CPad::UpdateMouse() {
@@ -297,9 +306,38 @@ void CPad::Clear(bool enablePlayerControls, bool resetPhase) {
     plugin::CallMethod<0x541A70, CPad*, bool, bool>(this, enablePlayerControls, resetPhase);
 }
 
+CPad* GetPad(int padNumber)
+{
+    return &CPad::Pads[padNumber];
+}
+
+void CPad::ProcessPad(bool padNum)
+{
+    ((void(__cdecl*)(bool))0x746A10)(padNum);
+}
+
+void CPad::Update(int pad)
+{
+    ((void(__thiscall*)(CPad*, int))0x541C40)(this, pad);
+}
+
 // Converted from thiscall void CPad::UpdatePads(void) 0x541DD0
 void CPad::UpdatePads() {
-    plugin::CallMethod<0x541DD0, CPad*>(this);
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__cdecl*)())0x541DD0)();
+#else
+    GetPad(0)->UpdateMouse();
+    CPad::ProcessPad(0);
+    ControlsManager.ClearSimButtonPressCheckers();
+    ControlsManager.AffectPadFromKeyBoard();
+    ControlsManager.AffectPadFromMouse();
+    GetPad(0)->Update(0);
+    GetPad(1)->Update(0);
+    OldKeyState = NewKeyState;
+    NewKeyState = TempKeyState;
+    CDebugMenu::ImguiInitialise();
+    CDebugMenu::ImguiInputUpdate();
+#endif
 }
 
 void CPad::SetTouched()
@@ -335,4 +373,32 @@ short CPad::AimWeaponLeftRight(CPed* pPed)
 short CPad::AimWeaponUpDown(CPed* pPed)
 {
     return plugin::CallMethodAndReturn<short, 0x5410C0, CPad*, CPed*>(this, pPed);
+}
+
+bool CPad::IsStandardKeyJustDown(std::uint8_t key)
+{
+    return plugin::CallMethodAndReturn<bool, 0x4D59B0, CPad*, std::uint8_t>(this, key);
+}
+
+bool CPad::IsCtrlJustDown()
+{
+    if (NewKeyState.lctrl && !OldKeyState.lctrl)
+        return true;
+    if (NewKeyState.rctrl && !OldKeyState.rctrl)
+        return true;
+    return false;
+}
+
+bool CPad::IsStandardKeyPressed(std::uint8_t key)
+{
+    return NewKeyState.standardKeys[key] && OldKeyState.standardKeys[key];
+}
+
+bool CPad::IsCtrlPressed()
+{
+    if (NewKeyState.lctrl && OldKeyState.lctrl)
+        return true;
+    if (NewKeyState.rctrl && OldKeyState.rctrl)
+        return true;
+    return false;
 }

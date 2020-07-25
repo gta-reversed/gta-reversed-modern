@@ -20,4 +20,5 @@ public:
     static bool InfraredVisionSetLightsForDefaultObjects();
     static bool FilterFX_StoreAndSetDayNightBalance();
     static bool FilterFX_RestoreDayNightBalance();
+    static void Close();
 };

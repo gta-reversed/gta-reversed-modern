@@ -180,11 +180,20 @@ public:
     static CMouseControllerState &PCTempMouseControllerState;
     static CMouseControllerState &NewMouseControllerState;
     static CMouseControllerState &OldMouseControllerState;
+
+    static CKeyboardState &TempKeyState;
+    static CKeyboardState &OldKeyState;
+    static CKeyboardState &NewKeyState;
+
+    static CPad* Pads;
+
+    static void InjectHooks();
     
     // Functions list : Not finished
 
     void SetTouched();
     unsigned int GetTouchedTimeDelta();
+    void Update(int pad);
     void UpdateMouse();
     void ReconcileTwoControllersInput(CControllerState const& controllerA, CControllerState const& controllerB);
     void SetDrunkInputDelay(int delay);
@@ -243,12 +252,17 @@ public:
     bool GroupControlForwardJustDown();
     bool GroupControlBackJustDown();
     void Clear(bool enablePlayerControls, bool resetPhase);
-    void UpdatePads();
+    static void ProcessPad(bool numPad);
+    static void UpdatePads();
     bool WeaponJustDown(CPed* pPed);
     bool GetEnterTargeting();
     int GetWeapon(CPed* pPed);
     short AimWeaponLeftRight(CPed* pPed);
     short AimWeaponUpDown(CPed* pPed);
+    bool IsStandardKeyJustDown(std::uint8_t key);
+    bool IsCtrlJustDown();
+    bool IsStandardKeyPressed(std::uint8_t key);
+    bool IsCtrlPressed();
 };
 
 VALIDATE_SIZE(CPad, 0x134);

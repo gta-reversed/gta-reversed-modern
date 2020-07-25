@@ -13,4 +13,5 @@ class  CGarages
 public:
 	// static char MessageIDString[8];
 	static char *MessageIDString;
+    static void PrintMessages();
 };

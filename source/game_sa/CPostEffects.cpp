@@ -37,3 +37,8 @@ bool CPostEffects::FilterFX_RestoreDayNightBalance()
 {
     return plugin::CallAndReturn<bool, 0x7034D0>();
 }
+
+void CPostEffects::Close()
+{
+    plugin::Call<0x7010C0>();
+}

@@ -70,6 +70,17 @@ void CMenuManager::ProcessFileActions()
     ((void(__thiscall*)(CMenuManager*))0x578D60)(this);
 }
 
+//5733E0
+double CMenuManager::StretchX(float x)
+{
+    return ((double(__thiscall*)(float))0x5733E0)(x);
+}
+
+double CMenuManager::StretchY(float y)
+{
+    return ((double(__thiscall*)(float))0x573410)(y);
+}
+
 void CMenuManager::DrawWindow(const CRect& coords, const char* pKey, unsigned char nColour, CRGBA backColor, bool Unused, bool bBackground) {
     ((void(__thiscall*)(CMenuManager*, const CRect&, const char*, unsigned char, CRGBA, bool, bool))0x573EE0)(this, coords, pKey, nColour, backColor, Unused, bBackground);
 }

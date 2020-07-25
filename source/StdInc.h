@@ -14,9 +14,14 @@
 #include <iostream>
 #include <cassert>
 
+// DirectX
+#include <d3d9.h>
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
+
 #include "game_sa\constants.h"
 #include "game_sa\CPedGeometryAnalyser.h"
-
+#include "game_sa\CDebug.h"
 #include "game_sa\CPostEffects.h"
 #include "game_sa\CMemoryMgr.h"
 #include "game_sa\COcclusion.h"
@@ -335,6 +340,7 @@
 #include "game_sa\Entity\Ped\CCopPed.h"
 #include "game_sa\Entity\Ped\CEmergencyPed.h"
 #include "game_sa\Entity\Ped\CPed.h"
+#include "game_sa\Entity\Ped\CPlayerSkin.h"
 #include "game_sa\Entity\Ped\CPlayerPed.h"
 #include "game_sa\Entity\Vehicle\CAutomobile.h"
 #include "game_sa\Entity\Vehicle\CBike.h"

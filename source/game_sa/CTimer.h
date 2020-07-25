@@ -51,6 +51,7 @@ public:
     static bool GetIsSlowMotionActive();
     static void StartUserPause();
     static void EndUserPause();
+    static bool GetIsPaused() { return m_UserPause || m_CodePause; }
     static void Update();
     static void UpdateTimeStep(float fTimeStep);
 };

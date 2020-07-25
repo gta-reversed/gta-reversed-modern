@@ -27,16 +27,8 @@ public:
     static void Shutdown();
     static void TidyUpD3DIndexBuffers(unsigned int count);
     static void TidyUpD3DTextures(unsigned int count);
-
-#ifdef _D3D9_H_
-    static HRESULT CreateIndexBuffer(unsigned int numIndices, unsigned int format, IDirect3DIndexBuffer9** ppIndexBuffer);
-    static HRESULT CreateTexture(int width, int height, unsigned int format, IDirect3DTexture9** ppTexture);
-    static void DestroyIndexBuffer(IDirect3DIndexBuffer9* pIndexBuffer);
-    static void DestroyTexture(IDirect3DTexture9* pTexture);
-#else
     static int CreateIndexBuffer(unsigned int numIndices, unsigned int format, void** ppIndexBuffer);
     static int CreateTexture(int width, int height, unsigned int format, void** ppTexture);
     static void DestroyIndexBuffer(void* pIndexBuffer);
     static void DestroyTexture(void* pTexture);
-#endif
 };

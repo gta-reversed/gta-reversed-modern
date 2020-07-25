@@ -250,7 +250,7 @@ public:
     char field_F5[3];
     //union{
     //	struct{
-    CSprite2d           m_apTextures[25];
+    CSprite2d           m_aFrontEndSprites[25];
     //	};
     //	struct{
     //		CSprite2d m_apRadioSprites[13];
@@ -373,6 +373,8 @@ public:
     char PrintBriefs();
     char DrawControllerSetupScreen();
     bool CheckMissionPackValidMenu();
+    static double StretchX(float x);
+    static double StretchY(float y);
 };
 
 VALIDATE_SIZE(CMenuManager, 0x1B78);

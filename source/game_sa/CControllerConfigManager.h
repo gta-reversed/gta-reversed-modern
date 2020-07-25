@@ -9,39 +9,6 @@
 #include "PluginBase.h"
 #include "RenderWare.h"
 
-struct  DIJOYSTATE2 {
-    int lX;
-    int lY;
-    int lZ;
-    int lRx;
-    int lRy;
-    int lRz;
-    int rglSlider[2];
-    unsigned int rgdwPOV[4];
-    unsigned char rgbButtons[128];
-    int lVX;
-    int lVY;
-    int lVZ;
-    int lVRx;
-    int lVRy;
-    int lVRz;
-    int rglVSlider[2];
-    int lAX;
-    int lAY;
-    int lAZ;
-    int lARx;
-    int lARy;
-    int lARz;
-    int rglASlider[2];
-    int lFX;
-    int lFY;
-    int lFZ;
-    int lFRx;
-    int lFRy;
-    int lFRz;
-    int rglFSlider[2];
-};
-
 enum  e_ControllerAction {
     CA_PED_FIREWEAPON,
     CA_PED_FIREWEAPON_ALT,
@@ -136,6 +103,9 @@ public:
     bool LoadSettings(int file);
     bool GetIsKeyboardKeyDown(RsKeyCodes key);
     bool GetIsKeyboardKeyJustDown(RsKeyCodes key);
+    void ClearSimButtonPressCheckers();
+    void AffectPadFromKeyBoard();
+    void AffectPadFromMouse();
 };
 
 VALIDATE_SIZE(CControllerConfigManager, 0x12E4);

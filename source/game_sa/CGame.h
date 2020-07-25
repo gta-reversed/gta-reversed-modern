@@ -21,6 +21,7 @@ public:
      static RwMatrix *&m_pWorkingMatrix1;
      static RwMatrix *&m_pWorkingMatrix2;
 
+     static void InjectHooks();
      static bool CanSeeOutSideFromCurrArea();
      static bool CanSeeWaterFromCurrArea();
      static void DrasticTidyUpMemory(bool a1);

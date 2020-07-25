@@ -4,6 +4,8 @@ class CReplay
 {
 public:
     static int &Mode;
+
+    static void Display();
 };
 
 /*
@@ -85,7 +87,6 @@ Functions list :
 * CreatePlayerPed()
 * DealWithNewPedPacket(CPacketNewPed*, bool, CPacketPlayerClothes*)
 * DisableReplays()
-* Display()
 * EmptyPedsAndVehiclePools_NoDestructors()
 * EmptyReplayBuffer()
 * EnableReplays()

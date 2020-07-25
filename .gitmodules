@@ -4,3 +4,6 @@
 [submodule "libs/ogg"]
 	path = libs/ogg
 	url = https://github.com/xiph/ogg
+[submodule "libs/imgui"]
+	path = libs/imgui
+	url = ../../ocornut/imgui.git

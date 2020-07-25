@@ -28,8 +28,9 @@ extern const std::int32_t MAX_LOD_PTR_LISTS_X = 30;
 extern const std::int32_t MAX_LOD_PTR_LISTS_Y = 30;
 extern const std::int32_t MAX_LOD_PTR_LISTS = MAX_LOD_PTR_LISTS_X * MAX_LOD_PTR_LISTS_Y;
 
-class  CWorld {
+class CWorld {
 public:
+    static std::int32_t TOTAL_PLAYERS;
     static int &ms_iProcessLineNumCrossings;
     static float &fWeaponSpreadRate;
     // entity to ignore

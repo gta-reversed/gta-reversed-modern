@@ -1,5 +1,4 @@
 #include "StdInc.h"
-
 #include "CAEAudioUtility.h"
 #include "CAEDataStream.h"
 #include "CAEMFDecoder.h"
@@ -8,9 +7,13 @@
 #include "CAEWMADecoder.h"
 #include "CAEStreamingDecoder.h"
 #include "CAEUserRadioTrackManager.h"
+#include "CDebugMenu.h"
 
 void InjectHooksMain(void)
 {
+    InjectCommonHooks();
+    CGame::InjectHooks();
+    CPad::InjectHooks();
     CRunningScript::InjectHooks();
     CStreaming::InjectHooks();
     InjectCdStreamHooks();

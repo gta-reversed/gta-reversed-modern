@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.0)
 
 project(GTASA C CXX)
 
+#############################################################################################
+############# create the gta_reversed project
+#############################################################################################
+
 add_subdirectory(libs/ogg)
 add_library(Ogg::ogg ALIAS ogg)
 
@@ -34,7 +38,9 @@ set_target_properties(gta_reversed PROPERTIES SUFFIX ".asi")
 
 target_include_directories(gta_reversed PRIVATE
     source/
+    source/toolsmenu/
     source/game_sa/
+    source/game_sa/Debug/
     source/game_sa/Animation/
     source/game_sa/Audio/
     source/game_sa/Collision/
@@ -54,8 +60,10 @@ target_include_directories(gta_reversed PRIVATE
     source/game_sa/Scripts/
     source/game_sa/Tasks/
     source/game_sa/Tasks/TaskTypes/
+    libs/imgui/
+    libs/imgui/misc/cpp/
 )
-target_link_libraries(gta_reversed ogg ${OGG_LIBRARY} vorbisfile)
+target_link_libraries(gta_reversed ogg ${OGG_LIBRARY} imgui vorbisfile)
 target_compile_definitions(gta_reversed PRIVATE NOMINMAX _CRT_SECURE_NO_WARNINGS USE_GTASA_ALLOCATOR)
 
 foreach(_header IN ITEMS ${_headerfiles_list})
@@ -73,12 +81,33 @@ foreach(_source IN ITEMS ${_sourcefiles_list})
     source_group("${_source_path_strip_source_filter}" FILES "${_source}")
 endforeach()
 
-
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /YuStdInc.h")
-
-set_source_files_properties(source/StdInc.cpp
-    PROPERTIES
-    COMPILE_FLAGS "/YcStdInc.h"
-)
+if (MSVC)
+   set_target_properties(gta_reversed PROPERTIES COMPILE_FLAGS "/YuStdInc.h")
+   set_source_files_properties(source/StdInc.cpp PROPERTIES COMPILE_FLAGS "/YcStdInc.h")
+endif(MSVC)
 
 list(APPEND _sourcefiles_list StdInc.cpp)
+
+#############################################################################################
+############# create the imgui project
+#############################################################################################
+
+set(_src_root_path "${CMAKE_CURRENT_SOURCE_DIR}")
+
+set(IMGUI_FILES_1 imconfig.h imgui.cpp imgui.h imgui_demo.cpp imgui_draw.cpp imgui_internal.h imgui_widgets.cpp imstb_rectpack.h imstb_textedit.h imstb_truetype.h)
+set(IMGUI_FILES_2 imgui_stdlib.h imgui_stdlib.cpp)
+
+foreach(_file_name IN ITEMS ${IMGUI_FILES_1})
+    list(APPEND IMGUI_ALL_FILES "libs/imgui/${_file_name}")
+endforeach()
+
+foreach(_file_name IN ITEMS ${IMGUI_FILES_2})
+    list(APPEND IMGUI_ALL_FILES "libs/imgui/misc/cpp/${_file_name}")
+endforeach()
+
+add_library(imgui STATIC ${IMGUI_ALL_FILES} )
+target_include_directories(imgui PRIVATE
+    libs/imgui/
+    libs/imgui/misc/cpp/
+)
+target_compile_definitions(imgui PRIVATE _CRT_SECURE_NO_WARNINGS)

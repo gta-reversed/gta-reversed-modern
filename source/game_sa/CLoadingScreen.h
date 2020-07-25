@@ -20,8 +20,8 @@ public:
 	static char *m_LoadingGxtMsg2;      // m_LoadingGxtMsg2[80] 
 	static char *m_LoadingGxtMsg1;      // m_LoadingGxtMsg1[80] 
 	static bool &m_bActive;             // 0xBAB318
-	static bool &m_bPaused;             // 0xBAB319
-	static bool &m_bWantToPause;        // 0xBAB31A
+	static bool & m_bWantToPause;       // 0xBAB319
+	static bool & m_bPaused;            // 0xBAB31A
 	static bool &m_bFading;             // 0xBAB31C
 	static bool &m_bLegalScreen;        // 0xBAB31D
 	static bool &m_bFadeInNextSplashFromBlack; // 0xBAB31E

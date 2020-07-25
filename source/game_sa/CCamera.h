@@ -347,6 +347,8 @@ public:
 
     /* virtual functions - end */
 
+     static CCam& GetActiveCamera();
+
      void AddShakeSimple(float duration, int type, float intensity);
      void AllowShootingWith2PlayersInCar(bool bAllowShootingWith2PlayersInCar);
      void ApplyVehicleCameraTweaks(CVehicle *vehicle);

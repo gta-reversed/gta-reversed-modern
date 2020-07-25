@@ -112,6 +112,26 @@ group "Dependencies"
         targetname "vorbisfile"   
         files { "libs/vorbis/lib/vorbisfile.c", "/libs/vorbis/win32/vorbisfile.def" }
 
+    project "imgui"
+        vpaths {
+            ["Headers/*"] = {"libs/imgui/**.h",},
+            ["Sources/*"] = {"libs/imgui/**.c*",},
+            ["*"] = {"premake5.lua", "CMakeLists.txt"}
+        }
+        includedirs { "libs/imgui", "libs/imgui/misc/cpp" }
+        language "C++"
+        kind "StaticLib"
+        targetname "imgui" 
+
+        local filePaths = {
+            "imconfig.h", "imgui.h", "imgui_internal.h", "imstb_rectpack.h", "imstb_textedit.h", "imstb_truetype.h", 
+            "imgui.cpp", "imgui_draw.cpp",  "imgui_widgets.cpp"
+        }
+        for i, fileName in pairs(filePaths) do 
+            filePaths[i] = "libs/imgui/"..fileName
+        end 
+        files { "libs/imgui/misc/cpp/imgui_stdlib.h", "libs/imgui/misc/cpp/imgui_stdlib.cpp", table.unpack(filePaths) }      
+
 group ""
     project "gta_reversed"
         vpaths {
@@ -120,11 +140,11 @@ group ""
             ["*"] = {"premake5.lua", "CMakeLists.txt"}
         }
         defines { "NOMINMAX", "USE_GTASA_ALLOCATOR" }
-        includedirs { "source", "source/**", "libs/vorbis/include", "libs/ogg/include" }
-        links { "ogg", "vorbis", "vorbisenc", "vorbisfile" }
+        includedirs { "source", "source/**", "libs/vorbis/include", "libs/ogg/include", "libs/imgui", "libs/imgui/misc/cpp", "libs/dxsdk"}
+        links { "ogg", "vorbis", "vorbisenc", "vorbisfile", "imgui" }
         libdirs { 
-            "%{cfg.targetdir}/ogg.lib", "%{cfg.targetdir}/vorbis.lib", 
-            "%{cfg.targetdir}/vorbisfile.lib",  "%{cfg.targetdir}/vorbisenc.lib" 
+            "%{cfg.targetdir}/ogg.lib", "%{cfg.targetdir}/vorbis.lib", "%{cfg.targetdir}/vorbisfile.lib", 
+            "%{cfg.targetdir}/vorbisenc.lib",  "%{cfg.targetdir}/imgui.lib", "libs/dxsdk/d3d9.lib", "libs/dxsdk/dinput.lib"
         }
         language "C++"
         kind "SharedLib"
