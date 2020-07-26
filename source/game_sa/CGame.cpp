@@ -35,7 +35,7 @@ void CGame::ShutdownRenderWare() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal(0x53BB80);
 #else
-    CDebugMenu::ImguiDestroy();
+    CDebugMenu::Shutdown();
     RwMatrixDestroy(CGame::m_pWorkingMatrix1);
     RwMatrixDestroy(CGame::m_pWorkingMatrix2);
     CLoadingScreen::Shutdown();

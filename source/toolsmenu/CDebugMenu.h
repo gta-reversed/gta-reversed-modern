@@ -32,7 +32,7 @@ public:
     static void ImguiInputUpdate();
     static void ImguiDrawLoop();
     static void ImGuiDrawMouse();
-    static void ImguiDestroy();
+    static void Shutdown();
 
     static CDebugMenuToolInput::ToolMap m_vehiclesMap;
     static CDebugMenuToolInput::ToolMap m_pedsMap;

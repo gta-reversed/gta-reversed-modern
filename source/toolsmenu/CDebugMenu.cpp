@@ -697,13 +697,16 @@ void CDebugMenu::ImguiDrawLoop()
     ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
 }
 
-void CDebugMenu::ImguiDestroy()
+void CDebugMenu::Shutdown()
 {
-    printf("DestroyContext()\n");
+    printf("CDebugMenu::Shutdown\n");
     m_showMenu = false;
-    ImGui::DestroyContext();
+    if (m_imguiInitialised) 
+        ImGui::DestroyContext();
     m_mouseSprite.Delete();
-    CTxdStore::RemoveTxdSlot(CTxdStore::FindTxdSlot("imgui_mouse"));
+    std::int32_t slot = CTxdStore::FindTxdSlot("imgui_mouse");
+    if (slot != -1)
+        CTxdStore::RemoveTxdSlot(slot);
 }
 
 
