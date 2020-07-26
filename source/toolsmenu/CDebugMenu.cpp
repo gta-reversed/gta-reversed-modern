@@ -79,7 +79,7 @@ void CDebugMenu::ImguiInitialise() {
 }
 
 void CDebugMenu::ImguiInputUpdate() {
-    if (m_showMenu == false)
+    if (!m_showMenu)
         return;
 
     // Partially taken from https://github.com/Juarez12/re3/blob/f1a7aeaa0f574813ed3cec8a085e2f310aa3a366/src/imgui/ImGuiIII.cpp
@@ -631,11 +631,6 @@ void CDebugMenu::ProcessMissionTool()
 
 void CDebugMenu::ImguiDisplayPlayerInfo()
 {
-    CPad* pad = CPad::GetPad(0);
-    if (pad->IsCtrlPressed() && pad->IsStandardKeyJustDown(0x4D)) { // CTRL+M
-        m_showMenu = !m_showMenu;
-        pad->bPlayerSafe = m_showMenu;
-    }
     if (!CTimer::GetIsPaused()) {
         if (m_showMenu && FindPlayerPed()) {
             ImGui::SetNextWindowSize(ImVec2(484, 420), ImGuiCond_FirstUseEver);
@@ -682,6 +677,13 @@ void CDebugMenu::ImguiDisplayPlayerInfo()
 
 void CDebugMenu::ImguiDrawLoop()
 {
+    CPad* pad = CPad::GetPad(0);
+    if (pad->IsCtrlPressed() && pad->IsStandardKeyJustDown(0x4D)) { // CTRL+M
+        m_showMenu = !m_showMenu;
+        pad->bPlayerSafe = m_showMenu;
+    }
+    if (!m_showMenu)
+        return;
     io->DeltaTime = CTimer::ms_fTimeStep * 0.02f;
 
     ImGui_ImplRW_NewFrame();
@@ -698,9 +700,8 @@ void CDebugMenu::ImguiDrawLoop()
 void CDebugMenu::ImguiDestroy()
 {
     printf("DestroyContext()\n");
+    m_showMenu = false;
     ImGui::DestroyContext();
-    ImGui_ImplDX9_Shutdown();
-    //ImGui_ImplWin32_Shutdown();
     m_mouseSprite.Delete();
     CTxdStore::RemoveTxdSlot(CTxdStore::FindTxdSlot("imgui_mouse"));
 }
