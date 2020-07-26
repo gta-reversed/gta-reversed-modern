@@ -46,6 +46,7 @@ void InjectHooksMain(void)
     CEventVehicleDied::InjectHooks();
     CEventVehicleOnFire::InjectHooks();
     CEventVehicleHitAndRun::InjectHooks();
+    CEventVehicleCollision::InjectHooks();
     CPedDamageResponseCalculator::InjectHooks();
     CPedScriptedTaskRecord::InjectHooks();
     CPedScriptedTaskRecordData::InjectHooks();

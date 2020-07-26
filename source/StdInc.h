@@ -451,6 +451,8 @@
 #include "game_sa\Tasks\CPedScriptedTaskRecord.h"
 #include "game_sa\Tasks\CScriptedBrainTaskStore.h"
 #include "game_sa\Tasks\TaskTypes\CTaskUtilityLineUpPedWithCar.h"
+#include "game_sa\Tasks\TaskTypes\CTaskComplexHitPedWithCar.h"
+#include "game_sa\Tasks\TaskTypes\CTaskComplexWalkRoundCar.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexBeInGroup.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexWaitForPed.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexCopInCar.h"
