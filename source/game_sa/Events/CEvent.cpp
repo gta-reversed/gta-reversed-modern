@@ -113,3 +113,18 @@ float CEvent::GetSoundLevel(CEntity* entity, CVector& position)
 {
     return plugin::CallMethodAndReturn<float, 0x4B2850, CEvent*, CEntity*, CVector&>(this, entity, position);
 }
+
+float CEvent::CalcSoundLevelIncrement(float level1, float level2)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallAndReturn<float, 0x4AC050, float, float>(level1, level2);
+#else
+    if (level2 == 0.0f)
+        return 0.0f;
+    if (level1 == 0.0f)
+        return level2;
+    level1 = powf(10.0f, level1 * 0.1f);
+    level2 = powf(10.0f, level2 * 0.1f);
+    return log10f((level1 + level2) / level1) * 10.0f;
+#endif
+}

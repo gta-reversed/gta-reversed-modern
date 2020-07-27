@@ -10,18 +10,32 @@
 #include "CEvent.h"
 
 enum eTaskType;
+class CPed;
+
+const std::int32_t TOTAL_EVENTS_PER_EVENTGROUP = 16;
 
 class CEventGroup {
-protected:
-    void *vtable;
 public:
-    class CPed   *m_pPed;
-    unsigned int  m_dwCount;
-    void         *m_apEvents[16];
+    CPed *m_pPed;
+    std::int32_t m_count;
+    CEvent *m_events[TOTAL_EVENTS_PER_EVENTGROUP];
 
+    static void InjectHooks();
+
+    CEventGroup(CPed* ped);
+    virtual ~CEventGroup();
+private:
+    CEventGroup* Constructor(CPed* ped);
+public:
     CEvent * Add(CEvent* event, bool bValid);
-    bool HasScriptCommandOfTaskType(eTaskType taskType);
+    bool HasScriptCommandOfTaskType(eTaskType taskId);
+    bool HasEventOfType(CEvent* event);
     bool HasEvent(CEvent* event);
+    CEvent* GetHighestPriorityEvent();
+    void TickEvents();
+    void Remove(CEvent* event);
+    void RemoveInvalidEvents(bool bRemoveNonScriptCommandEvents);
+    void Reorganise();
     void Flush(bool bAvoidFlushingTaskComplexBeInGroup);
 };
 

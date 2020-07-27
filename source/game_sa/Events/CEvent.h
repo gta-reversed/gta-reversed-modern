@@ -49,6 +49,7 @@ public:
     bool CanBeInterruptedBySameEvent_Reversed() { return false; };
 
     float GetSoundLevel(CEntity* entity, CVector& position);
+    static float CalcSoundLevelIncrement(float level1, float level2);
 };
 
 VALIDATE_SIZE(CEvent, 0xC);
