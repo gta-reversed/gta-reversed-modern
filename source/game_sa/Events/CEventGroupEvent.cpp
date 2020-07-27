@@ -4,6 +4,7 @@ void CEventGroupEvent::InjectHooks()
 {
     HookInstall(0x4ADFD0, &CEventGroupEvent::Constructor);
     HookInstall(0x4B6EE0, &CEventGroupEvent::Clone_Reversed);
+    HookInstall(0x4AE100, &CEventGroupEvent::BaseEventTakesPriorityOverBaseEvent);
 }
 
 CEventGroupEvent::CEventGroupEvent(CPed* ped, CEvent* event)
@@ -44,4 +45,32 @@ CEvent* CEventGroupEvent::Clone()
 CEvent* CEventGroupEvent::Clone_Reversed()
 {
     return new CEventGroupEvent(m_ped, m_event->Clone());
+}
+
+bool CEventGroupEvent::IsPriorityEvent()
+{
+    switch (m_event->GetEventType()) {
+    case EVENT_LEADER_ENTERED_CAR_AS_DRIVER:
+    case EVENT_LEADER_EXITED_CAR_AS_DRIVER:
+    case EVENT_LEADER_QUIT_ENTERING_CAR_AS_DRIVER:
+    case EVENT_PLAYER_COMMAND_TO_GROUP:
+    case EVENT_PLAYER_COMMAND_TO_GROUP_GATHER:
+    case EVENT_DRAGGED_OUT_CAR:
+    case EVENT_LEADER_ENTRY_EXIT:
+        return true;
+    }
+    return false;
+}
+
+bool CEventGroupEvent::BaseEventTakesPriorityOverBaseEvent(CEventGroupEvent* other)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4AE100, CEvent*, CEvent*>(this, other);
+#else
+    if (IsPriorityEvent())
+        return true;
+    if (other->IsPriorityEvent())
+        return false;
+    return m_event->TakesPriorityOver(other->m_event);
+#endif
 }

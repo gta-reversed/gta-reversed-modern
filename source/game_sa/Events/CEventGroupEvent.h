@@ -26,6 +26,9 @@ public:
     float GetLocalSoundLevel() override { return 100.0f; }
 
     CEvent* Clone_Reversed();
+    bool BaseEventTakesPriorityOverBaseEvent(CEventGroupEvent* other);
+private:
+    bool IsPriorityEvent();
 };
 
 VALIDATE_SIZE(CEventGroupEvent, 0x14);

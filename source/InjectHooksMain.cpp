@@ -41,12 +41,14 @@ void InjectHooksMain(void)
     CEventGunAimedAt::InjectHooks();
     CEventPedToChase::InjectHooks();
     CEventPedToFlee::InjectHooks();
+    CEventVehicleToSteal::InjectHooks();
     CEventVehicleDamage::InjectHooks();
     CEventVehicleDamageWeapon::InjectHooks();
     CEventVehicleDied::InjectHooks();
     CEventVehicleOnFire::InjectHooks();
     CEventVehicleHitAndRun::InjectHooks();
     CEventVehicleCollision::InjectHooks();
+    CEventVehicleDamageCollision::InjectHooks();
     CEventGroup::InjectHooks();
     CEventGlobalGroup::InjectHooks();
     CPedDamageResponseCalculator::InjectHooks();
