@@ -1,3 +1,5 @@
+#pragma once
+
 #include "CEventEditableResponse.h"
 #include "CPed.h"
 
@@ -7,15 +9,15 @@ public:
     CEntity* m_entity;
     CVector m_startPoint;
     CVector m_endPoint;
-    bool m_bZeroLocalSoundLevel;
+    bool m_bHasNoSound;
 
     static float& ms_fGunShotSenseRangeForRiot2;
     static void InjectHooks();
 
-    CEventGunShot(CEntity* entity, CVector startPoint, CVector endPoint, bool bZeroLocalSoundLevel);
+    CEventGunShot(CEntity* entity, CVector startPoint, CVector endPoint, bool bHasNoSound);
     ~CEventGunShot();
 private:
-    CEventGunShot* Constructor(CEntity* entity, CVector startPoint, CVector endPoint, bool bZeroLocalSoundLevel);
+    CEventGunShot* Constructor(CEntity* entity, CVector startPoint, CVector endPoint, bool bHasNoSound);
 public:
     eEventType GetEventType() override { return EVENT_SHOT_FIRED; }
     int GetEventPriority() override { return 35; }
@@ -25,7 +27,7 @@ public:
     void ReportCriminalEvent(CPed* ped) override { } // empty
     CEntity* GetSourceEntity() override { return m_entity; }
     bool TakesPriorityOver(CEvent* refEvent) override;
-    float GetLocalSoundLevel() override { return m_bZeroLocalSoundLevel ? 0.0f : 160.0f; }
+    float GetLocalSoundLevel() override { return m_bHasNoSound ? 0.0f : 160.0f; }
     bool CanBeInterruptedBySameEvent() override { return true; }
     CEventEditableResponse* CloneEditable() override;
 

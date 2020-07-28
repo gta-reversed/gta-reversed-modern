@@ -19,7 +19,7 @@ CAEVorbisDecoder::CAEVorbisDecoder(CAEDataStream* dataStream, int userTrack)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     using Constructor = void(__thiscall *)(CAEVorbisDecoder*, CAEDataStream*, int);
-    ((Constructor) 0x5026b0)(this, dataStream, unknown);
+    ((Constructor) 0x5026b0)(this, dataStream, userTrack);
 #endif
 }
 
@@ -41,7 +41,7 @@ bool CAEVorbisDecoder::Initialise()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     using InitFunc = bool(__thiscall *)(CAEVorbisDecoder*);
-    ((InitFunc) 0x5024d0)(this);
+    return ((InitFunc) 0x5024d0)(this);
 #else
     vorbisFileHandle = new OggVorbis_File();
     if (ov_open_callbacks(dataStream, vorbisFileHandle, nullptr, 0, callbacks) != 0)

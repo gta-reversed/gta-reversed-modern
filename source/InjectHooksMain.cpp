@@ -31,6 +31,8 @@ void InjectHooksMain(void)
     CEventDamage::InjectHooks();
     CEventAttractor::InjectHooks();
     CEventGunShot::InjectHooks();
+    CEventGunShotWhizzedBy::InjectHooks();
+    CEventGunAimedAt::InjectHooks();
     CEventDeath::InjectHooks();
     CEventDeadPed::InjectHooks();
     CEventDraggedOutCar::InjectHooks();
@@ -38,7 +40,6 @@ void InjectHooksMain(void)
     CEventScriptCommand::InjectHooks();
     CEventSoundQuiet::InjectHooks();
     CEventGroupEvent::InjectHooks();
-    CEventGunAimedAt::InjectHooks();
     CEventPedToChase::InjectHooks();
     CEventPedToFlee::InjectHooks();
     CEventVehicleToSteal::InjectHooks();
@@ -49,6 +50,8 @@ void InjectHooksMain(void)
     CEventVehicleHitAndRun::InjectHooks();
     CEventVehicleCollision::InjectHooks();
     CEventVehicleDamageCollision::InjectHooks();
+    CEventHitByWaterCannon::InjectHooks();
+    CEventInWater::InjectHooks();
     CEventGroup::InjectHooks();
     CEventGlobalGroup::InjectHooks();
     CPedDamageResponseCalculator::InjectHooks();

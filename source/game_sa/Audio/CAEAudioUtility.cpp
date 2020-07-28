@@ -34,7 +34,7 @@ float CAEAudioUtility::GetRandomNumberInRange(float a, float b)
 bool CAEAudioUtility::ResolveProbability(float p)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallAndReturn<bool, 0x4d9c80, float>(p);
+    return plugin::CallAndReturn<bool, 0x4d9c80, float>(p);
 #else
     return p >= 1.0f || (rand() * RAND_MAX_RECIPROCAL) < p;
 #endif

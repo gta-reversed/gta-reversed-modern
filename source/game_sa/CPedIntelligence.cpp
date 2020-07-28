@@ -147,7 +147,7 @@ bool CPedIntelligence::IsInHearingRange(CVector const& posn) {
 
 bool CPedIntelligence::IsInSeeingRange(CVector const& posn) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x600C60, CPedIntelligence*, CVector*>(this, pPosition);
+    return plugin::CallMethodAndReturn<bool, 0x600C60, CPedIntelligence*, CVector const&>(this, posn);
 #else
     CVector distance = posn - m_pPed->GetPosition();
     if (m_fSeeingRange * m_fSeeingRange > distance.SquaredMagnitude()) {

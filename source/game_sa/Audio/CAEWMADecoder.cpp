@@ -311,7 +311,7 @@ HRESULT CAEWMADecoder::SelectStreamIndex(IWMProfile *profile)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     using SelectStreamFunc = HRESULT(__thiscall *)(CAEWMADecoder*, IWMProfile*);
-    return ((SelectStreamFunc) 0x502990)(this, IWMProfile);
+    return ((SelectStreamFunc) 0x502990)(this, profile);
 #else
     if (profile == nullptr)
         return E_INVALIDARG;

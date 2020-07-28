@@ -18,7 +18,7 @@ void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanes(float zPos, CEntity& e
 void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncached(float zPos, CVector const* corners, CVector* planes, float* planes_D)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x5F1670, float, CVector const*, CVector*, float*>(zPos, corners, planes, planesDot);
+    plugin::Call<0x5F1670, float, CVector const*, CVector*, float*>(zPos, corners, planes, planes_D);
 #else
     CVector const* corner2 = &corners[3];
     for (std::int32_t i = 0; i < 4; i++) {

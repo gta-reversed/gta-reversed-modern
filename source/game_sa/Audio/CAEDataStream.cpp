@@ -141,7 +141,7 @@ HRESULT CAEDataStream::CopyTo(IStream* target, ULARGE_INTEGER size, ULARGE_INTEG
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     using CopyToFunc = HRESULT(__stdcall *)(CAEDataStream*, IStream*, ULARGE_INTEGER, ULARGE_INTEGER*, ULARGE_INTEGER*);
-    return ((WriteFunc) 0x4dc4f0)(this, target, size, readed, written);
+    return ((CopyToFunc) 0x4dc4f0)(this, target, size, readed, written);
 #else
     return E_NOTIMPL;
 #endif

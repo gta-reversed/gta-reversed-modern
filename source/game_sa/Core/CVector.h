@@ -77,6 +77,10 @@ inline CVector operator+(const CVector& vecOne, const CVector& vecTwo) {
     return CVector(vecOne.x + vecTwo.x, vecOne.y + vecTwo.y, vecOne.z + vecTwo.z);
 }
 
+inline CVector operator*(const CVector& vecOne, const CVector& vecTwo) {
+    return CVector(vecOne.x * vecTwo.x, vecOne.y * vecTwo.y, vecOne.z * vecTwo.z);
+
+}
 inline bool operator!=(const CVector& vecOne, const CVector& vecTwo) {
     return vecOne.x != vecTwo.x || vecOne.y != vecTwo.y || vecOne.z != vecTwo.z;
 }

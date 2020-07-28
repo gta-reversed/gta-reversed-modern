@@ -11,12 +11,12 @@ void CEventGunShot::InjectHooks()
     HookInstall(0x4B6B20, &CEventGunShot::CloneEditable_Reversed);
 }
 
-CEventGunShot::CEventGunShot(CEntity* entity, CVector startPoint, CVector endPoint, bool bZeroLocalSoundLevel)
+CEventGunShot::CEventGunShot(CEntity* entity, CVector startPoint, CVector endPoint, bool bHasNoSound)
 {
     m_startPoint = startPoint;
     m_endPoint = endPoint;
     m_entity = entity;
-    m_bZeroLocalSoundLevel = bZeroLocalSoundLevel;
+    m_bHasNoSound = bHasNoSound;
     if (m_entity)
         m_entity->RegisterReference(&m_entity);
 }
@@ -27,13 +27,13 @@ CEventGunShot::~CEventGunShot()
         m_entity->CleanUpOldReference(&m_entity);
 }
 
-CEventGunShot* CEventGunShot::Constructor(CEntity* entity, CVector startPoint, CVector endPoint, bool bZeroLocalSoundLevel)
+CEventGunShot* CEventGunShot::Constructor(CEntity* entity, CVector startPoint, CVector endPoint, bool bHasNoSound)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<CEventGunShot*, 0x4AC610, CEvent*, CEntity*, CVector, CVector, bool>
-        (this, entity, startPoint, endPoint, bZeroLocalSoundLevel);
+        (this, entity, startPoint, endPoint, bHasNoSound);
 #else
-    this->CEventGunShot::CEventGunShot(entity, startPoint, endPoint, bZeroLocalSoundLevel);
+    this->CEventGunShot::CEventGunShot(entity, startPoint, endPoint, bHasNoSound);
     return this;
 #endif
 }
@@ -101,7 +101,7 @@ bool CEventGunShot::AffectsPed_Reversed(CPed* ped)
             }
             CVector distance = ped->GetPosition() - m_entity->GetPosition();
             if (distance .SquaredMagnitude() <= fGunShotRange * fGunShotRange) {
-                if (!m_bZeroLocalSoundLevel)
+                if (!m_bHasNoSound)
                     return true;
                 CVector distance = m_startPoint - ped->GetPosition();
                 if (DotProduct(distance, ped->GetForward()) > 0.0f) {
@@ -138,5 +138,5 @@ bool CEventGunShot::TakesPriorityOver_Reversed(CEvent* refEvent)
 
 CEventEditableResponse* CEventGunShot::CloneEditable_Reversed()
 {
-    return new CEventGunShot(m_entity, m_startPoint, m_endPoint, m_bZeroLocalSoundLevel);
+    return new CEventGunShot(m_entity, m_startPoint, m_endPoint, m_bHasNoSound);
 }

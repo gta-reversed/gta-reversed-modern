@@ -102,7 +102,7 @@ bool CAEMFDecoder::Initialise()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     using InitFunc = bool(__thiscall *)(CAEMFDecoder*);
-    ((InitFunc) 0x4e7cb0)(this);
+    return ((InitFunc) 0x4e7cb0)(this);
 #else
     if (CAEMFDecoder::quickTimeInitialized)
     {
