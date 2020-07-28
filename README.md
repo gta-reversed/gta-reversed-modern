@@ -9,7 +9,7 @@ A project to reverse Grand Theft Auto San Andreas completely, and to rewrite and
 Building this project will result in a DLL file, that DLL file can be injected into GTA:SA using any ASI loader out there. After the DLL file has been injected, the ingame functions will be replaced by the reversed code. The game will behave exactly the same. Now if we make any changes to the reversed code, it will take effect in the game. The goal is to keep reversing until we have the entire game reversed to compile a standalone executable.
 
 ### Progress
-The progress of reversed functions can be tracked [here](docs/ReversedFunctions.MD).
+The progress of reversed functions can be tracked [here](docs/ReversedClasses.MD).
 
 ### Build Instructions
 You can either build with Premake5 or CMake, that's up to you.
