@@ -177,10 +177,9 @@ bool CPedIntelligence::FindRespectedFriendInInformRange() {
 #endif
 }
 
-// Converted from thiscall bool CPedIntelligence::IsRespondingToEvent(int event) 0x600DB0 
-bool CPedIntelligence::IsRespondingToEvent(int eventType) {
+bool CPedIntelligence::IsRespondingToEvent(eEventType eventType) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x600DB0, CPedIntelligence*, int>(this, eventType);
+    return plugin::CallMethodAndReturn<bool, 0x600DB0, CPedIntelligence*, eEventType>(this, eventType);
 #else
     return m_eventHandler.m_history.IsRespondingToEvent(eventType);
 #endif
@@ -922,7 +921,7 @@ int CPedIntelligence::GetMoveStateFromGoToTask() {
     return plugin::CallMethodAndReturn<int, 0x601D70, CPedIntelligence*>(this);
 #else
     auto pTask = (CTaskSimpleGoTo*)m_TaskMgr.GetSimplestActiveTask();
-    if (pTask && CTask::IsGoToTask((CTask*)pTask))
+    if (pTask && CTask::IsGoToTask(pTask))
     {
         return pTask->m_moveState;
     }
@@ -930,19 +929,18 @@ int CPedIntelligence::GetMoveStateFromGoToTask() {
 #endif
 }
 
-// Converted from thiscall void CPedIntelligence::FlushIntelligence(void) 0x601DA0 
 void CPedIntelligence::FlushIntelligence() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x601DA0, CPedIntelligence*>(this);
 #else
     m_TaskMgr.Flush();
-    m_eventHandler.field_20 = 0;
-    m_eventHandler.m_pResponseTask = 0;
-    m_eventHandler.field_28 = 0;
-    m_eventHandler.field_2C = 0;
-    m_eventHandler.field_30 = 0;
+    m_eventHandler.m_physicalResponseTask = nullptr;
+    m_eventHandler.m_eventResponseTask = nullptr;
+    m_eventHandler.m_attackTask = nullptr;
+    m_eventHandler.m_sayTask = nullptr;
+    m_eventHandler.m_partialAnimTask = nullptr;
     m_eventHandler.m_history.ClearAllEvents();
-    m_eventGroup.Flush(0);
+    m_eventGroup.Flush(false);
     m_vehicleScanner.Clear();
     m_entityScanner.Clear();
     m_eventScanner.m_attractorScanner.Clear();

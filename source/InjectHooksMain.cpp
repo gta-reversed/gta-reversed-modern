@@ -27,6 +27,7 @@ void InjectHooksMain(void)
     CPedIntelligence::InjectHooks();
     CTrain::InjectHooks();
     CAnimBlendAssociation::InjectHooks();
+    CEventHandlerHistory::InjectHooks();
     CEventEditableResponse::InjectHooks();
     CEventDamage::InjectHooks();
     CEventAttractor::InjectHooks();

@@ -26,6 +26,8 @@
 #include "CPedStuckChecker.h"
 #include "CVehicleScanner.h"
 
+enum eEventType;
+
 class CPedIntelligence {
 public:
     class CPed    *m_pPed;
@@ -76,7 +78,7 @@ public:
 	bool IsInHearingRange(CVector const& posn);
 	bool IsInSeeingRange(CVector const& posn);
 	bool FindRespectedFriendInInformRange();
-	bool IsRespondingToEvent(int eventType);
+	bool IsRespondingToEvent(eEventType eventType);
 	void AddTaskPhysResponse(CTask* pTask, int unUsed);
 	void AddTaskEventResponseTemp(CTask* pTask, int unUsed);
 	void AddTaskEventResponseNonTemp(CTask* pTask, int unUsed);

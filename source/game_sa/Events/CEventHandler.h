@@ -11,16 +11,18 @@
 
 class CTask;
 class CEvent;
+class CPed;
 
-class CEventHandler {
+class CEventHandler
+{
 public:
-    class CPed *m_pPed;
+    CPed* m_ped;
     CEventHandlerHistory m_history;
-    int field_20;
-    CTask* m_pResponseTask;
-    int field_28;
-    int field_2C;
-    int field_30;
+    CTask* m_physicalResponseTask;
+    CTask* m_eventResponseTask;
+    CTask* m_attackTask;
+    CTask* m_sayTask;
+    CTask* m_partialAnimTask;
 
     void HandleEvents();
     void FlushImmediately();

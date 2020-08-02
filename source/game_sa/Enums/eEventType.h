@@ -7,6 +7,7 @@
 #pragma once
 
 enum eEventType {
+    EVENT_NONE = -1,
     EVENT_VEHICLE_COLLISION = 1,
     EVENT_PED_COLLISION_WITH_PED = 2,
     EVENT_PED_COLLISION_WITH_PLAYER = 3,
