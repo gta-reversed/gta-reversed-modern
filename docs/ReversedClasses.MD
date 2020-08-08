@@ -40,6 +40,7 @@
 - CEventVehicleOnFire
 - CEventVehicleHitAndRun
 - CEventVehicleToSteal
+- CEventCreatePartnerTask
 - CPedDamageResponseCalculator
 - CPedScriptedTaskRecord
 - CPedScriptedTaskRecordData

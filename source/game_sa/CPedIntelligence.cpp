@@ -969,7 +969,7 @@ bool CPedIntelligence::TestForStealthKill(CPed* pTarget, bool bFullTest) {
         return false;
     if (DotProduct(distance, pTarget->GetForward()) <= 0.0f)
         return false;
-    CTask* pActiveTask = pTarget->m_pIntelligence->m_TaskMgr.GetActiveTask();
+    CTask* pActiveTask = pTarget->GetTaskManager().GetActiveTask();
     if (pActiveTask)
     {
         if (pActiveTask->GetId() == TASK_COMPLEX_KILL_PED_ON_FOOT)
@@ -982,25 +982,22 @@ bool CPedIntelligence::TestForStealthKill(CPed* pTarget, bool bFullTest) {
         }
     }
 
-    CEvent* pCurrentEvent = pTarget->m_pIntelligence->m_eventHandler.m_history.GetCurrentEvent();
-    if (pCurrentEvent && pCurrentEvent->GetSourceEntity() == (CEntity*)m_pPed)
+    CEvent* pCurrentEvent = pTarget->GetEventHandlerHistory().GetCurrentEvent();
+    if (pCurrentEvent && pCurrentEvent->GetSourceEntity() == m_pPed)
     {
         int acquaintancesID4 = pTarget->m_acquaintance.GetAcquaintances(4);
         int acquaintancesID3 = pTarget->m_acquaintance.GetAcquaintances(3);
-        unsigned int pedFlag = CPedType::GetPedFlag((ePedType)m_pPed->m_nPedType);
+        unsigned int pedFlag = CPedType::GetPedFlag(m_pPed->m_nPedType);
 
         bool bAcquaintancesFlagSet = ((acquaintancesID4 && (pedFlag & acquaintancesID4))
             || (acquaintancesID3 && (pedFlag & acquaintancesID3))
             );
 
         CPedGroup* pPedGroup = CPedGroups::GetPedsGroup(pTarget);
-        if (bAcquaintancesFlagSet && pPedGroup)
-        {
-            CEventGroupEvent* pGroupEventHandler = pPedGroup->m_groupIntelligence.m_pGroupEventHandler;
-            if (pGroupEventHandler && pGroupEventHandler->GetSourceEntity() == (CEntity*)m_pPed && bAcquaintancesFlagSet)
-            {
+        if (bAcquaintancesFlagSet && pPedGroup) {
+            CEventGroupEvent* eventGroupEvent = pPedGroup->GetIntelligence().m_oldEventGroupEvent;
+            if (eventGroupEvent && eventGroupEvent->GetSourceEntity() == m_pPed && bAcquaintancesFlagSet)
                 return false;
-            }
         }
     }
     return true;

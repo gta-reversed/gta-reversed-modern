@@ -53,6 +53,7 @@ void InjectHooksMain(void)
     CEventVehicleDamageCollision::InjectHooks();
     CEventHitByWaterCannon::InjectHooks();
     CEventInWater::InjectHooks();
+    CEventCreatePartnerTask::InjectHooks();
     CEventGroup::InjectHooks();
     CEventGlobalGroup::InjectHooks();
     CPedDamageResponseCalculator::InjectHooks();
@@ -64,6 +65,11 @@ void InjectHooksMain(void)
     CTaskComplexSequence::InjectHooks();
     CTaskComplexWander::InjectHooks();
     CTaskComplexWanderCop::InjectHooks();
+    CTaskComplexPartner::InjectHooks();
+    CTaskComplexPartnerChat::InjectHooks();
+    CTaskComplexPartnerDeal::InjectHooks();
+    CTaskComplexPartnerGreet::InjectHooks();
+    CTaskComplexPartnerShove::InjectHooks();
     CTaskSimplePlayerOnFoot::InjectHooks();
     CTaskSimpleSwim::InjectHooks();
     CTaskSimpleGoTo::InjectHooks();

@@ -45,6 +45,9 @@ public:
 	short m_nCurrentPhraseId;
 	short field_B2;
 	int field_B4[19];
+
+    static bool RequestPedConversation(CPed* ped1, CPed* ped2);
+    static bool ReleasePedConversation();
 };
 
 VALIDATE_SIZE(CAEPedSpeechAudioEntity, 0x100);

@@ -1,0 +1,36 @@
+#include "StdInc.h"
+
+void CTaskComplexPartnerGreet::InjectHooks()
+{
+    HookInstall(0x684210, &CTaskComplexPartnerGreet::Constructor);
+}
+
+CTaskComplexPartnerGreet::CTaskComplexPartnerGreet(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, std::int32_t handShakeType, CVector point) :
+    CTaskComplexPartner(commandName, partner, leadSpeaker, distanceMultiplier, true, 1, point)
+{
+    m_handShakeType = handShakeType;
+    m_taskId = TASK_COMPLEX_PARTNER_GREET;
+    strcpy(m_animBlockName, "gangs");
+}
+
+CTaskComplexPartnerGreet* CTaskComplexPartnerGreet::Constructor(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, std::int32_t handShakeType, CVector point)
+{
+    this->CTaskComplexPartnerGreet::CTaskComplexPartnerGreet(commandName, partner, leadSpeaker, distanceMultiplier, handShakeType, point);
+    return this;
+}
+
+
+CTask* CTaskComplexPartnerGreet::CreateFirstSubTask(CPed* ped)
+{
+    return plugin::CallMethodAndReturn<CTask*, 0x6825A0, CTask*, CPed*>(this, ped);
+}
+
+void CTaskComplexPartnerGreet::StreamRequiredAnims()
+{
+    return plugin::CallMethod<0x6825B0, CTask*>(this);
+}
+
+CTaskComplexSequence* CTaskComplexPartnerGreet::GetPartnerSequence()
+{
+    return plugin::CallMethodAndReturn<CTaskComplexSequence*, 0x682630, CTask*>(this);
+}

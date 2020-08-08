@@ -18,19 +18,19 @@ class CEvent;
 class CPedGroup;
 class CEventGroupEvent;
 
-class  CPedGroupIntelligence {
+class CPedGroupIntelligence {
     PLUGIN_NO_DEFAULT_CONSTRUCTION(CPedGroupIntelligence)
 
 public:
     CPedGroup *m_pPedGroup;
-    CEventGroupEvent*m_pGroupEventHandler; // TODO: member name is incorrect. It needs to be fixed.
-    CEventGroupEvent* m_pEventGroupEvent;
+    CEventGroupEvent* m_oldEventGroupEvent;
+    CEventGroupEvent* m_eventGroupEvent;
     CPedTaskPair m_groupTasks[32];
     CPedGroupDefaultTaskAllocator *m_pPedGroupDefaultTaskAllocator;
     CTaskAllocator *m_pPrimaryTaskAllocator;
     CTaskAllocator *m_pEventResponseTaskAllocator;
-    int m_dwDecisionMakerType;
-    char field_29C;
+    std::int32_t m_dwDecisionMakerType;
+    std::int32_t m_taskSequenceId; // Used in CTaskSequences::ms_taskSequence
 
      bool AddEvent(CEvent *event);
      void ComputeDefaultTasks(CPed *ped);
