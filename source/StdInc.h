@@ -36,6 +36,8 @@
 #include "game_sa\CInformGroupEventQueue.h"
 #include "game_sa\CInformFriendsEventQueue.h"
 #include "game_sa\Events\CGroupEventHandler.h"
+#include "game_sa\Events\CEventInAir.h"
+#include "game_sa\Events\CEventAcquaintancePed.h"
 #include "game_sa\Events\CEventSource.h"
 #include "game_sa\Events\CEventVehicleDamageCollision.h"
 #include "game_sa\Events\CEventVehicleCollision.h"

@@ -54,6 +54,9 @@ void InjectHooksMain(void)
     CEventHitByWaterCannon::InjectHooks();
     CEventInWater::InjectHooks();
     CEventCreatePartnerTask::InjectHooks();
+    CEventInAir::InjectHooks();
+    CEventStuckInAir::InjectHooks();
+    CEventAcquaintancePed::InjectHooks();
     CEventGroup::InjectHooks();
     CEventGlobalGroup::InjectHooks();
     CPedDamageResponseCalculator::InjectHooks();

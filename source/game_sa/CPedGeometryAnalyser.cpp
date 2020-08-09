@@ -1,5 +1,10 @@
 #include "StdInc.h"
 
+bool CPedGeometryAnalyser::IsInAir(CPed* ped)
+{
+    return plugin::CallAndReturn<bool, 0x5F1CB0, CPed*>(ped);
+}
+
 std::int32_t CPedGeometryAnalyser::ComputeEntityHitSide(CVector const& point, CEntity const& entity)
 {
     return plugin::CallAndReturn<std::int32_t, 0x5F3AC0, CVector const&, CEntity const&>(point, entity);

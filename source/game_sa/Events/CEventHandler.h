@@ -26,6 +26,7 @@ public:
 
     void HandleEvents();
     void FlushImmediately();
+    eEventType GetCurrentEventType();
     static bool IsTemporaryEvent(CEvent* _event);
 };
 

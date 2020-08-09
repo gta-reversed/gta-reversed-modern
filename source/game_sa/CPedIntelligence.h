@@ -53,7 +53,7 @@ public:
     int field_184;
     char field_188;
     char gap_189[3];
-    CEventScanner  m_eventScanner;
+    CEventScanner m_eventScanner;
     bool field_260;
     char field_261[3];
     CPedStuckChecker m_pedStuckChecker;

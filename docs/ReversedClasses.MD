@@ -41,6 +41,14 @@
 - CEventVehicleHitAndRun
 - CEventVehicleToSteal
 - CEventCreatePartnerTask
+- CEventInAir
+- CEventStuckInAir
+- CEventAcquaintancePed
+- CEventAcquaintancePedHate
+- CEventAcquaintancePedHateBadlyLit
+- CEventAcquaintancePedRespect
+- CEventAcquaintancePedLike
+- CEventAcquaintancePedDislike
 - CPedDamageResponseCalculator
 - CPedScriptedTaskRecord
 - CPedScriptedTaskRecordData

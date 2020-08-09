@@ -17,7 +17,7 @@ class CPedGroup {
     PLUGIN_NO_DEFAULT_CONSTRUCTION(CPedGroup)
 
 public:
-    int field_0;
+    CPed* field_0;
     bool m_bMembersEnterLeadersVehicle;
 private:
     char _pad5[3];
