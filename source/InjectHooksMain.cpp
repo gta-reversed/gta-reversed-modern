@@ -20,6 +20,7 @@ void InjectHooksMain(void)
     CVehicleModelInfo::InjectHooks();
     CFileLoader::InjectHooks();
     CFileMgr::InjectHooks();
+    CEntity::InjectHooks();;
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();
     CVisibilityPlugins::InjectHooks();

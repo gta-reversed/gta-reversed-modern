@@ -536,7 +536,7 @@ int CPhysical::ProcessEntityCollision_Reversed(CPhysical* entity, CColPoint* col
 void CPhysical::ProcessShift_Reversed()
 {
     CRect boundingBox;
-    CPhysical::GetBoundRect(&boundingBox);
+    GetBoundRect(&boundingBox);
     m_fMovingSpeed = 0.0f;
 
     bool bPhysicalFlagsSet = m_nPhysicalFlags & (PHYSICAL_DISABLE_MOVE_FORCE | PHYSICAL_INFINITE_MASS | PHYSICAL_DISABLE_Z);

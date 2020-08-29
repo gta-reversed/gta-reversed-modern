@@ -7,7 +7,10 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-// vtable functions
+void CEntity::InjectHooks()
+{
+    HookInstall(0x534120, &CEntity::GetBoundRect_Reversed);
+}
 
 void CEntity::Add(CRect &rect)
 {
@@ -51,7 +54,33 @@ void CEntity::DeleteRwObject()
 
 CRect* CEntity::GetBoundRect(CRect* pRect)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
     return ((CRect*(__thiscall *)(CEntity *, CRect*))(*(void ***)this)[9])(this, pRect);
+#else
+    return CEntity::GetBoundRect_Reversed(pRect);
+#endif
+}
+
+CRect* CEntity::GetBoundRect_Reversed(CRect* pRect)
+{
+    CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->m_pColModel;
+    CVector vecMin = colModel->m_boundBox.m_vecMin;
+    CVector vecMax = colModel->m_boundBox.m_vecMax;
+    CRect rect;
+    CVector point;
+    TransformFromObjectSpace(point, vecMin);
+    rect.StretchToPoint(point.x, point.y);
+    TransformFromObjectSpace(point, vecMax);
+    rect.StretchToPoint(point.x, point.y);
+    float maxX = vecMax.x;
+    vecMax.x = vecMin.x;
+    vecMin.x = maxX;
+    TransformFromObjectSpace(point, vecMin);
+    rect.StretchToPoint(point.x, point.y);
+    TransformFromObjectSpace(point, vecMax);
+    rect.StretchToPoint(point.x, point.y);
+    *pRect = rect;
+    return pRect;
 }
 
 void CEntity::ProcessControl()

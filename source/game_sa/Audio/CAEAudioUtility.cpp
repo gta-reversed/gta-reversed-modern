@@ -6,7 +6,7 @@
 
 #include "CAEAudioUtility.h"
 
-constexpr float RAND_MAX_RECIPROCAL = 1.0 / double(RAND_MAX);
+constexpr float RAND_MAX_RECIPROCAL = 1.0f / static_cast<float>(RAND_MAX);
 
 std::int64_t &CAEAudioUtility::startTimeMs = *reinterpret_cast<std::int64_t *> (0xb610f8);
 float (&CAEAudioUtility::m_sfLogLookup)[50][2] = *reinterpret_cast<float(*)[50][2]> (0xb61100);

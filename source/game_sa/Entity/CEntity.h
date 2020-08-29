@@ -95,7 +95,9 @@ public:
     std::uint8_t m_nNumLodChildrenRendered;
     unsigned char m_nType : 3; // see eEntityType
     unsigned char m_nStatus : 5; // see eEntityStatus
-    
+
+    static void InjectHooks();
+
     // originally virtual functions
     virtual void Add(CRect &rect);
     virtual void Add(); // similar to previous, but with entity bound rect
@@ -118,7 +120,9 @@ public:
     virtual bool SetupLighting();
     virtual void RemoveLighting(bool bRemove);
     virtual void FlagToDestroyWhenNextProcessed();
-    
+
+    CRect* GetBoundRect_Reversed(CRect* pRect);
+
     // funcs
     void UpdateRwFrame();
     void UpdateRpHAnim();

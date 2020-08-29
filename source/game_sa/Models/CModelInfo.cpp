@@ -192,7 +192,3 @@ int CModelInfo::IsVehicleModelType(int index)
 {
     return ((int(__cdecl *)(int))0x4C5C80)(index);
 }
-
-CBaseModelInfo *CModelInfo::GetModelInfo(int index) {
-    return CModelInfo::ms_modelInfoPtrs[index];
-}

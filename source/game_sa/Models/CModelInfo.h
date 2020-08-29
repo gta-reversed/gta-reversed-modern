@@ -73,5 +73,6 @@ public:
 	// return -1 if model is not a vehicle model otherwise returns vehicle model type
 	static int IsVehicleModelType(int index);
 
-    static CBaseModelInfo *GetModelInfo(int index);
+    static CBaseModelInfo *GetModelInfo(int index) { return ms_modelInfoPtrs[index]; }
+
 };
