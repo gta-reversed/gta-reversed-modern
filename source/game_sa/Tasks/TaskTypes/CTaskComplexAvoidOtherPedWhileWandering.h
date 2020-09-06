@@ -16,7 +16,10 @@ public:
     CTaskTimer field_40;
     CTaskTimer field_4C;
     std::int32_t m_moveState; // see eMoveState
-    char m_flags;
+    std::int8_t m_flag1 : 1;
+    std::int8_t m_flag2 : 1;
+    std::int8_t m_flag3 : 1;
+    std::int8_t m_flag4 : 1;
     char field_5D[3];
 
     static void InjectHooks();

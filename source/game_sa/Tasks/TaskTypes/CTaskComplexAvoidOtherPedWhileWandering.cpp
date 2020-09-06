@@ -12,7 +12,10 @@ CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering
     field_28 = *targetPoint;
     m_moveState = moveState;
     m_ped = m_ped;
-    m_flags &= 0xF8;
+    m_flag1 = false;
+    m_flag2 = false;
+    m_flag3 = false;
+    m_flag4 = false;
     if (m_ped)
         m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
 }

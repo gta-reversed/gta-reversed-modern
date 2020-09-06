@@ -87,7 +87,7 @@ bool InTwoPlayersMode();
 // matrix mul
 CVector* Multiply3x3(CVector* out, CMatrix* m, CVector* in);
 // returns player wanted
-CWanted * FindPlayerWanted(int playerId);
+CWanted * FindPlayerWanted(int playerId = -1);
 
 const unsigned int rwVENDORID_ROCKSTAR = 0x0253F2;
 extern unsigned int &ClumpOffset;

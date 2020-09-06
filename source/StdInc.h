@@ -48,6 +48,7 @@
 #include "game_sa\Events\CEventVehicleOnFire.h"
 #include "game_sa\Events\CEventVehicleHitAndRun.h"
 #include "game_sa\Events\CEventDraggedOutCar.h"
+#include "game_sa\Events\CEventKnockOffBike.h"
 #include "game_sa\Events\CEventGotKnockedOverByCar.h"
 #include "game_sa\Events\CEventAttractor.h"
 #include "game_sa\Events\CEventGunShot.h"

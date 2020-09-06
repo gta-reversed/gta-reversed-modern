@@ -53,7 +53,7 @@ public:
      static void MakeUndraggedPassengerPedsLeaveCar(CVehicle const *targetVehicle, CPed const *draggedPed, CPed const *ped);
     //! unused
      static void QuitEnteringCar(CPed *ped, CVehicle *vehicle, int doorID, bool bCarWasBeingJacked);
-     static void RemoveCarSitAnim(CPed const *ped);
+     static void RemoveCarSitAnim(CPed* ped);
      static void RemoveGetInAnims(CPed const *ped);
      static void SetAnimOffsetForEnterOrExitVehicle();
      static void SetPedInCarDirect(CPed *ped, CVehicle *vehicle, int seatNumber, bool bAsDriver);

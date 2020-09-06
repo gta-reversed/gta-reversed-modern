@@ -457,9 +457,9 @@ bool CPed::CanSeeEntity(CEntity* entity, float limitAngle)
 }
 
 // Converted from thiscall bool CPed::PositionPedOutOfCollision(int,CVehicle *,bool) 0x5E0820
-bool CPed::PositionPedOutOfCollision(int arg0, CVehicle* arg1, bool arg2)
+bool CPed::PositionPedOutOfCollision(int exitDoor, CVehicle* vehicke, bool findClosestNode)
 {
-    return ((bool(__thiscall *)(CPed*, int, CVehicle*, bool))0x5E0820)(this, arg0, arg1, arg2);
+    return ((bool(__thiscall *)(CPed*, int, CVehicle*, bool))0x5E0820)(this, exitDoor, vehicke, findClosestNode);
 }
 
 // Converted from thiscall bool CPed::PositionAnyPedOutOfCollision(void) 0x5E13C0

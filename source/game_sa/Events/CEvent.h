@@ -35,7 +35,7 @@ public:
     virtual bool DoInformVehicleOccupants(CPed* ped);
     virtual bool IsValid(CPed* ped);
     virtual bool CanBeInterruptedBySameEvent();
-
+private:
     bool AffectsPed_Reversed(CPed* ped) { return true; };
     bool AffectsPedGroup_Reversed(CPedGroup* pedGroup) { return true; };
     bool IsCriminalEvent_Reversed() { return false; }
@@ -47,7 +47,7 @@ public:
     bool DoInformVehicleOccupants_Reversed(CPed* ped) { return false; }
     bool IsValid_Reversed(CPed* ped) { return m_bValid || m_nTimeActive <= GetLifeTime(); }
     bool CanBeInterruptedBySameEvent_Reversed() { return false; };
-
+public:
     float GetSoundLevel(CEntity* entity, CVector& position);
     static float CalcSoundLevelIncrement(float level1, float level2);
 };

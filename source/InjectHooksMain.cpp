@@ -39,6 +39,7 @@ void InjectHooksMain(void)
     CEventDeadPed::InjectHooks();
     CEventDraggedOutCar::InjectHooks();
     CEventGotKnockedOverByCar::InjectHooks();
+    CEventKnockOffBike::InjectHooks();
     CEventScriptCommand::InjectHooks();
     CEventSoundQuiet::InjectHooks();
     CEventGroupEvent::InjectHooks();

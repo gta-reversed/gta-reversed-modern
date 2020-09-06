@@ -380,7 +380,7 @@ public:
     void SetPedDefaultDecisionMaker();
     // limitAngle in radians
     bool CanSeeEntity(CEntity* entity, float limitAngle);
-    bool PositionPedOutOfCollision(int arg0, CVehicle* arg1, bool arg2);
+    bool PositionPedOutOfCollision(int exitDoor, CVehicle* vehicke, bool findClosestNode);
     bool PositionAnyPedOutOfCollision();
     bool OurPedCanSeeThisEntity(CEntity* entity, bool isSpotted);
     void SortPeds(CPed** pedList, int arg1, int arg2);

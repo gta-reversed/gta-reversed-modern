@@ -11,13 +11,14 @@ Do not delete this comment block. Respect others' work!
 #include "CPathFind.h"
 #include "CTaskUtilityLineUpPedWithCar.h"
 
-/*enum eTargetDoor
+enum eTargetDoor
 {
-    DOOR_FRONT_LEFT = 0,
-    DOOR_FRONT_RIGHT = 8,
-    DOOR_REAR_RIGHT = 9,
-    DOOR_REAR_LEFT = 11
-};*/
+    TARGET_DOOR_FRONT_LEFT = 0,
+    TARGET_DOOR_FRONT_RIGHT = 8,
+    TARGET_DOOR_REAR_RIGHT = 9,
+    TARGET_DOOR_DRIVER = 10,
+    TARGET_DOOR_REAR_LEFT = 11
+};
 
 class CTaskComplexEnterCar : public CTaskComplex {
 public:
