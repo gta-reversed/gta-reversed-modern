@@ -19,6 +19,7 @@ Do not delete this comment block. Respect others' work!
 #include "CPtrNodeSingleLink.h"
 #include "CPtrNodeDoubleLink.h"
 #include "CEntryInfoNode.h"
+#include "CPedGeometryAnalyser.h"
 
 #ifdef GetObject
 #undef GetObject
@@ -37,6 +38,7 @@ public:
     static CPool<CPtrNodeSingleLink>       *&ms_pPtrNodeSingleLinkPool;
     static CPool<CPtrNodeDoubleLink>       *&ms_pPtrNodeDoubleLinkPool;
     static CPool<CEntryInfoNode>           *&ms_pEntryInfoNodePool;
+    static CPool<CPointRoute>              *&ms_pPointRoutePool;
 
     // dummy function; returns "-1"
     static int CheckBuildingAtomics();

@@ -42,3 +42,18 @@ void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncached(float zPos, CV
     }
 #endif
 }
+
+std::int32_t CPedGeometryAnalyser::ComputeEntityHitSide(CVector* point, CEntity* entity)
+{
+    return plugin::CallAndReturn<std::int32_t, 0x5F3AC0, CVector*, CEntity*>(point, entity);
+}
+
+std::int8_t CPedGeometryAnalyser::ComputeClosestSurfacePoint(CPed* ped, CEntity* entity, CVector* point)
+{
+    return plugin::CallAndReturn<std::int8_t, 0x5F3B70, CPed*, CEntity*, CVector*>(ped, entity, point);
+}
+
+std::int32_t CPedGeometryAnalyser::ComputeEntityHitSide(CPed* ped, CEntity* entity)
+{
+    return plugin::CallAndReturn<std::int32_t, 0x5F3BC0, CPed*, CEntity*>(ped, entity);
+}

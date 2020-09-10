@@ -60,3 +60,10 @@ CTask* CTaskComplexEnterCar::CreateNextSubTask_AfterSimpleCarAlign(CPed* ped)
 {
     return plugin::CallMethodAndReturn<CTask*, 0x63F970, CTask*, CPed*>(this, ped);
 }
+
+CVector CTaskComplexEnterCar::GetTargetPos()
+{
+    CVector temp;
+    plugin::CallMethod<0x63A300, CTaskComplexEnterCar*, CVector&>(this, temp);
+    return temp;
+}

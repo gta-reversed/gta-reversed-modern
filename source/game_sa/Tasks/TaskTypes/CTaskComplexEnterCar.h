@@ -72,6 +72,7 @@ public:
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
     virtual CTask* CreateNextSubTask_AfterSimpleCarAlign(CPed* ped);
+    CVector GetTargetPos();
 
 };
 

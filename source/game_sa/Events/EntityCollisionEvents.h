@@ -61,3 +61,66 @@ public:
 };
 
 VALIDATE_SIZE(CEventPlayerCollisionWithPed, 0x34);
+
+class CEventObjectCollision : public CEvent {
+public:
+    std::int16_t m_pieceType;
+    std::int16_t m_moveState;
+    float m_damageIntensity;
+    CObject* m_object;
+    CVector m_collisionImpactVelocity;
+    CVector m_collisionPos;
+
+    static void InjectHooks();
+
+    CEventObjectCollision(std::int16_t pieceType, float damageIntensity, CObject* object, CVector* collisionImpactVelocity, CVector* collisionPos, std::int16_t moveState);
+    ~CEventObjectCollision();
+private:
+    CEventObjectCollision* Constructor(std::int16_t pieceType, float damageIntensity, CObject* object, CVector* collisionImpactVelocity, CVector* collisionPos, std::int16_t moveState);
+public:
+    eEventType GetEventType() override { return EVENT_OBJECT_COLLISION; }
+    bool TakesPriorityOver(CEvent* refEvent) override { return true; }
+    std::int32_t GetEventPriority() override { return 57; }
+    std::int32_t GetLifeTime() override { return 0; }
+    CEventObjectCollision* Clone() override { return new CEventObjectCollision(m_pieceType, m_damageIntensity, m_object, &m_collisionImpactVelocity, &m_collisionPos, m_moveState); }
+    bool AffectsPed(CPed* ped) override;
+private:
+    bool AffectsPed_Reversed(CPed* ped);
+public:
+
+};
+
+VALIDATE_SIZE(CEventObjectCollision, 0x30);
+
+class CBuilding;
+class CEventBuildingCollision : public CEvent {
+public:
+    std::int16_t m_pieceType;
+    std::int16_t m_moveState;
+    float m_damageIntensity;
+    CBuilding* m_building;
+    CVector m_collisionImpactVelocity;
+    CVector m_collisionPos;
+
+    static void InjectHooks();
+
+    CEventBuildingCollision(std::int16_t pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, std::int16_t moveState);
+    ~CEventBuildingCollision();
+private:
+    CEventBuildingCollision* Constructor(std::int16_t pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, std::int16_t moveState);
+public:
+    eEventType GetEventType() override { return EVENT_BUILDING_COLLISION; }
+    bool TakesPriorityOver(CEvent* refEvent) override { return refEvent->GetEventType() != GetEventType(); }
+    bool CanBeInterruptedBySameEvent() override { return true; }
+    std::int32_t GetEventPriority() override { return 59; }
+    std::int32_t GetLifeTime() override { return 0; }
+    CEventBuildingCollision* Clone() override { return new CEventBuildingCollision(m_pieceType, m_damageIntensity, m_building, &m_collisionImpactVelocity, &m_collisionPos, m_moveState); }
+    bool AffectsPed(CPed* ped) override;
+
+private:
+    bool AffectsPed_Reversed(CPed* ped);
+    bool IsHeadOnCollision(CPed* ped);
+    static bool CanTreatBuildingAsObject(CBuilding* building);
+};
+
+VALIDATE_SIZE(CEventBuildingCollision, 0x30);

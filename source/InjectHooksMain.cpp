@@ -32,6 +32,7 @@ void InjectHooksMain(void)
     CEventEditableResponse::InjectHooks();
     CEventDamage::InjectHooks();
     CEventAttractor::InjectHooks();
+    CEventScriptedAttractor::InjectHooks();
     CEventGunShot::InjectHooks();
     CEventGunShotWhizzedBy::InjectHooks();
     CEventGunAimedAt::InjectHooks();
@@ -45,9 +46,13 @@ void InjectHooksMain(void)
     CEventGroupEvent::InjectHooks();
     CEventPedToChase::InjectHooks();
     CEventPedToFlee::InjectHooks();
+    CEventPotentialWalkIntoVehicle::InjectHooks();
+    CEventPotentialWalkIntoObject::InjectHooks();
     CEventPedCollisionWithPed::InjectHooks();
     CEventPedCollisionWithPlayer::InjectHooks();
     CEventPlayerCollisionWithPed::InjectHooks();
+    CEventObjectCollision::InjectHooks();
+    CEventBuildingCollision::InjectHooks();
     CEventVehicleToSteal::InjectHooks();
     CEventVehicleDamage::InjectHooks();
     CEventVehicleDamageWeapon::InjectHooks();
@@ -87,6 +92,7 @@ void InjectHooksMain(void)
     CTaskComplexGoToPointAndStandStill::InjectHooks();
     CTaskComplexGoToPointAndStandStillTimed::InjectHooks();
     CTaskComplexAvoidOtherPedWhileWandering::InjectHooks();
+    CTaskComplexWalkRoundObject::InjectHooks();
     CTaskSimplePause::InjectHooks();
     CTaskSimpleHoldEntity::InjectHooks();
     CTaskSimplePutDownEntity::InjectHooks();

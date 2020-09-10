@@ -43,7 +43,8 @@ enum eCarLock {
 };
 
 enum eVehicleType {
-    VEHICLE_AUTOMOBILE,
+    VEHICLE_NONE = -1,
+    VEHICLE_AUTOMOBILE = 0,
     VEHICLE_MTRUCK,
     VEHICLE_QUAD,
     VEHICLE_HELI,
@@ -543,7 +544,9 @@ public:
     void SetupUpgradesAfterLoad();
     void GetPlaneWeaponFiringStatus(bool& status, eOrdnanceType& ordnanceType);
     void ProcessWeapons();
-
+    bool IsFakeAircraft() { return m_nVehicleSubClass == VEHICLE_FHELI || m_nVehicleSubClass == VEHICLE_FPLANE; }
+    bool IsPlane() { return m_nVehicleSubClass == VEHICLE_PLANE; }
+    bool IsVehicleTypeValid() { return m_nVehicleSubClass != VEHICLE_NONE; }
     static void* operator new(unsigned int size);
     static void operator delete(void* data);
 };

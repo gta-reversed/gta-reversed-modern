@@ -29,3 +29,20 @@ public:
 };
 
 VALIDATE_SIZE(CEventAttractor, 0x20);
+
+class CEventScriptedAttractor : public CEventAttractor {
+public:
+
+    static void InjectHooks();
+
+    CEventScriptedAttractor(C2dEffect* the2dEffect, CEntity* entity, bool bAvoidLookingAtAttractor);
+    ~CEventScriptedAttractor() {}
+private:
+    CEventScriptedAttractor* Constructor(C2dEffect* the2dEffect, CEntity* entity, bool bAvoidLookingAtAttractor);
+public:
+    eEventType GetEventType() override { return EVENT_SCRIPTED_ATTRACTOR; }
+    CEventScriptedAttractor* CloneEditable() override { return new CEventScriptedAttractor(m_2dEffect, m_entity, false); }
+
+};
+
+

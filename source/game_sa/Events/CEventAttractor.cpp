@@ -8,6 +8,11 @@ void CEventAttractor::InjectHooks()
     HookInstall(0x4AF460, &CEventAttractor::IsEffectActive);
 }
 
+void CEventScriptedAttractor::InjectHooks()
+{
+    HookInstall(0x5FEF40, &CEventScriptedAttractor::Constructor);
+}
+
 CEventAttractor::CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor)
 {
     m_2dEffect = effect;
@@ -105,4 +110,15 @@ bool CEventAttractor::IsEffectActive(CEntity* entity, C2dEffect const* effect)
     }
     return false;
 #endif
+}
+
+CEventScriptedAttractor::CEventScriptedAttractor(C2dEffect* the2dEffect, CEntity* entity, bool bAvoidLookingAtAttractor) :
+    CEventAttractor(the2dEffect, entity, false)
+{
+}
+
+CEventScriptedAttractor* CEventScriptedAttractor::Constructor(C2dEffect* the2dEffect, CEntity* entity, bool bAvoidLookingAtAttractor)
+{
+    this->CEventScriptedAttractor::CEventScriptedAttractor(the2dEffect, entity, bAvoidLookingAtAttractor);
+    return this;
 }
