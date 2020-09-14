@@ -109,7 +109,7 @@ bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped)
                     return false;
                 }
                 auto pTaskKillPedOnFoot = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT));
-                if (pTaskKillPedOnFoot && pTaskKillPedOnFoot->m_pTarget == m_victim
+                if (pTaskKillPedOnFoot && pTaskKillPedOnFoot->m_target == m_victim
                     && ped->GetTaskManager().FindActiveTaskByType(TASK_SIMPLE_FIGHT_CTRL)) {
                     return false;
                 }

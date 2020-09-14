@@ -1,6 +1,5 @@
 #include "StdInc.h"
 
-
 void CEventPotentialWalkIntoVehicle::InjectHooks()
 {
     HookInstall(0x4AE320, &CEventPotentialWalkIntoVehicle::Constructor);
@@ -11,6 +10,19 @@ void CEventPotentialWalkIntoObject::InjectHooks()
 {
     HookInstall(0x4AE5D0, &CEventPotentialWalkIntoObject::Constructor);
     HookInstall(0x4B4950, &CEventPotentialWalkIntoObject::AffectsPed_Reversed);
+}
+
+void CEventPotentialWalkIntoFire::InjectHooks()
+{
+    HookInstall(0x4B1E20, &CEventPotentialWalkIntoFire::Constructor);
+    HookInstall(0x4B6890, &CEventPotentialWalkIntoFire::AffectsPed_Reversed);
+}
+
+void CEventPotentialWalkIntoPed::InjectHooks()
+{
+    HookInstall(0x4AE6E0, &CEventPotentialWalkIntoPed::Constructor);
+    HookInstall(0x4AE800, &CEventPotentialWalkIntoPed::AffectsPed_Reversed);
+    HookInstall(0x4AE950, &CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed);
 }
 
 CEventPotentialWalkIntoVehicle::CEventPotentialWalkIntoVehicle(CVehicle* vehicle, std::int32_t moveState)
@@ -141,3 +153,127 @@ bool CEventPotentialWalkIntoObject::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
+CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(CVector* firePos, float fireSize, std::int32_t moveState)
+{
+    m_firePos = *firePos;
+    m_fireSize = fireSize;
+    m_moveState = moveState;
+    if (fireSize < 1.0f) {
+        m_radius = 0.7f + 0.35f;
+    }
+    else {
+        if (fireSize >= 2.0f)
+            m_radius = 1.5f;
+        else
+            m_radius = 1.0f;
+        m_radius += 0.35f;
+    }
+}
+
+CEventPotentialWalkIntoFire* CEventPotentialWalkIntoFire::Constructor(CVector* firePos, float fireSize, std::int32_t moveState)
+{
+    this->CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(firePos, fireSize, moveState);
+    return this;
+}
+
+bool CEventPotentialWalkIntoFire::AffectsPed(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4B6890, CEventPotentialWalkIntoFire*, CPed*>(this, ped);
+#else
+    return CEventPotentialWalkIntoFire::AffectsPed_Reversed(ped);
+#endif
+}
+
+bool CEventPotentialWalkIntoFire::AffectsPed_Reversed(CPed* ped)
+{
+    if (ped->IsAlive() && m_moveState != PEDMOVE_STILL) {
+        auto goToTask = static_cast<CTaskSimpleGoTo*>(ped->GetTaskManager().GetSimplestActiveTask());
+        if (goToTask && CTask::IsGoToTask(goToTask)) {
+            CColSphere colSphere;
+            colSphere.Set(m_radius, m_firePos, 0, 0, 255u);
+            CVector intersectPoint2;
+            CVector intersectPoint1;
+            return colSphere.IntersectEdge(ped->GetPosition(), goToTask->m_vecTargetPoint, intersectPoint1, intersectPoint2);
+        }
+    }
+    return false;
+}
+
+CEventPotentialWalkIntoPed::CEventPotentialWalkIntoPed(CPed* ped, CVector* targetPoint, std::int32_t moveState)
+{
+    m_targetPoint = *targetPoint;
+    m_ped = ped;
+    m_moveState = moveState;
+    ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+}
+
+CEventPotentialWalkIntoPed::~CEventPotentialWalkIntoPed()
+{
+    if (m_ped)
+        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+}
+
+CEventPotentialWalkIntoPed* CEventPotentialWalkIntoPed::Constructor(CPed* ped, CVector* targetPoint, std::int32_t moveState)
+{
+    this->CEventPotentialWalkIntoPed::CEventPotentialWalkIntoPed(ped, targetPoint, moveState);
+    return this;
+}
+
+bool CEventPotentialWalkIntoPed::AffectsPed(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4AE800, CEventPotentialWalkIntoPed*, CPed*>(this, ped);
+#else
+    return CEventPotentialWalkIntoPed::AffectsPed_Reversed(ped);
+#endif
+}
+
+bool CEventPotentialWalkIntoPed::TakesPriorityOver(CEvent* refEvent)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4AE950, CEventPotentialWalkIntoPed*, CEvent*>(this, refEvent);
+#else
+    return CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(refEvent);
+#endif
+}
+
+bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped)
+{
+    if (ped->IsAlive() && m_ped && m_moveState != PEDMOVE_STILL) {
+        CTask* partnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
+        if (!partnerTask)
+            partnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_BE_IN_COUPLE);
+        if (!partnerTask)
+            partnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
+        if (partnerTask) {
+            CTask* thisPedPartnerTask = m_ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
+            if (!thisPedPartnerTask)
+                thisPedPartnerTask = m_ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_BE_IN_COUPLE);
+            if (!thisPedPartnerTask)
+                thisPedPartnerTask = m_ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
+            if (thisPedPartnerTask) {
+                if (partnerTask->GetId() == thisPedPartnerTask->GetId())
+                    return false;
+            }
+        }
+        auto followFootstepsTask = reinterpret_cast<CTaskComplexFollowPedFootsteps*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_FOLLOW_PED_FOOTSTEPS));
+        if (followFootstepsTask && followFootstepsTask->m_targetPed == m_ped)
+            return false;
+        auto killPedOnFootTask = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetIntelligence()->FindTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT));
+        if (killPedOnFootTask && killPedOnFootTask->m_target == m_ped) 
+            return false;
+        CTask* activeTask = ped->GetTaskManager().GetSimplestActiveTask();
+        if (!activeTask || !CTask::IsGoToTask(activeTask))
+            return false;
+        return true;
+    }
+    return false;
+}
+
+bool CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(CEvent* refEvent)
+{
+    if (CEventHandler::IsTemporaryEvent(refEvent))
+        return true;
+    return CEvent::TakesPriorityOver(refEvent);
+}

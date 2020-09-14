@@ -10,6 +10,8 @@
 - CVisibilityPlugins
 - CPedIntelligence
 - CColSphere
+- CEvent
+- CEventRevived
 - CEventHandlerHistory
 - CEventEditableResponse
 - CEventDamage
@@ -30,6 +32,8 @@
 - CEventPedToFlee
 - CEventPotentialWalkIntoVehicle
 - CEventPotentialWalkIntoObject
+- CEventPotentialWalkIntoFire
+- CEventPotentialWalkIntoPed
 - CEventPedCollisionWithPed
 - CEventPedCollisionWithPlayer
 - CEventPlayerCollisionWithPed
@@ -59,6 +63,7 @@
 - CEventAcquaintancePedRespect
 - CEventAcquaintancePedLike
 - CEventAcquaintancePedDislike
+- CEventLeaderEnteredCarAsDriver
 - CPedDamageResponseCalculator
 - CPedScriptedTaskRecord
 - CPedScriptedTaskRecordData

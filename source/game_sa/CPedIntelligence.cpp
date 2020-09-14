@@ -975,7 +975,7 @@ bool CPedIntelligence::TestForStealthKill(CPed* pTarget, bool bFullTest) {
         if (pActiveTask->GetId() == TASK_COMPLEX_KILL_PED_ON_FOOT)
         {
             auto pTaskComplexKillPedOnFoot = (CTaskComplexKillPedOnFoot*)pActiveTask;
-            if (pTaskComplexKillPedOnFoot->m_pTarget == m_pPed)
+            if (pTaskComplexKillPedOnFoot->m_target == m_pPed)
             {
                 return false;
             }

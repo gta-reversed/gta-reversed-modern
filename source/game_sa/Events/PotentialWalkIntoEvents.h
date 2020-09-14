@@ -1,5 +1,6 @@
 #pragma once
 #include "CEventEditableResponse.h"
+#include "CVector.h"
 
 class CVehicle;
 class CEventPotentialWalkIntoVehicle : public CEventEditableResponse {
@@ -50,3 +51,57 @@ private:
 };
 
 VALIDATE_SIZE(CEventPotentialWalkIntoObject, 0x1C);
+
+class CEventPotentialWalkIntoFire : public CEventEditableResponse {
+public:
+    CVector m_firePos;
+    float m_fireSize;
+    float m_radius;
+    std::int32_t m_moveState;
+
+    static void InjectHooks();
+
+    CEventPotentialWalkIntoFire(CVector* firePos, float fireSize, std::int32_t moveState);
+    ~CEventPotentialWalkIntoFire() {}
+private:
+    CEventPotentialWalkIntoFire* Constructor(CVector* firePos, float fireSize, std::int32_t moveState);
+public:
+    eEventType GetEventType() override { return EVENT_POTENTIAL_WALK_INTO_FIRE; }
+    std::int32_t GetEventPriority() override { return 31; }
+    std::int32_t GetLifeTime() override { return 0; }
+    bool AffectsPed(CPed* ped) override;
+    CEventPotentialWalkIntoFire* CloneEditable() override { return new CEventPotentialWalkIntoFire(&m_firePos, m_fireSize, m_moveState); }
+private:
+    bool AffectsPed_Reversed(CPed* ped);
+};
+
+VALIDATE_SIZE(CEventPotentialWalkIntoFire, 0x2C);
+
+
+class CEventPotentialWalkIntoPed : public CEventEditableResponse {
+public:
+    CVector m_targetPoint;
+    CPed* m_ped;
+    std::int32_t m_moveState;
+
+    static void InjectHooks();
+
+    CEventPotentialWalkIntoPed(CPed* ped, CVector* targetPoint, std::int32_t moveState);
+    ~CEventPotentialWalkIntoPed();
+private:
+    CEventPotentialWalkIntoPed* Constructor(CPed* ped, CVector* targetPoint, std::int32_t moveState);
+public:
+    eEventType GetEventType() override { return EVENT_POTENTIAL_WALK_INTO_PED; }
+    std::int32_t GetEventPriority() override { return 28; }
+    std::int32_t GetLifeTime() override { return 0; }
+    bool AffectsPed(CPed* ped) override;
+    CEntity* GetSourceEntity() override { return m_ped; }
+    bool TakesPriorityOver(CEvent* refEvent) override;
+    CEventPotentialWalkIntoPed* CloneEditable() override { return new CEventPotentialWalkIntoPed(m_ped, &m_targetPoint, m_moveState); }
+private:
+    bool AffectsPed_Reversed(CPed* ped);
+    bool TakesPriorityOver_Reversed(CEvent* refEvent);
+};
+
+VALIDATE_SIZE(CEventPotentialWalkIntoPed, 0x28);
+

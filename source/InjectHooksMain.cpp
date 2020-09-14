@@ -27,7 +27,10 @@ void InjectHooksMain(void)
     CPed::InjectHooks();
     CPedIntelligence::InjectHooks();
     CTrain::InjectHooks();
+    CColSphere::InjectHooks();
     CAnimBlendAssociation::InjectHooks();
+    CEvent::InjectHooks();
+    CEventRevived::InjectHooks();
     CEventHandlerHistory::InjectHooks();
     CEventEditableResponse::InjectHooks();
     CEventDamage::InjectHooks();
@@ -48,6 +51,8 @@ void InjectHooksMain(void)
     CEventPedToFlee::InjectHooks();
     CEventPotentialWalkIntoVehicle::InjectHooks();
     CEventPotentialWalkIntoObject::InjectHooks();
+    CEventPotentialWalkIntoFire::InjectHooks();
+    CEventPotentialWalkIntoPed::InjectHooks();
     CEventPedCollisionWithPed::InjectHooks();
     CEventPedCollisionWithPlayer::InjectHooks();
     CEventPlayerCollisionWithPed::InjectHooks();
@@ -67,6 +72,7 @@ void InjectHooksMain(void)
     CEventInAir::InjectHooks();
     CEventStuckInAir::InjectHooks();
     CEventAcquaintancePed::InjectHooks();
+    CEventLeaderEnteredCarAsDriver::InjectHooks();
     CEventGroup::InjectHooks();
     CEventGlobalGroup::InjectHooks();
     CPedDamageResponseCalculator::InjectHooks();
@@ -93,6 +99,9 @@ void InjectHooksMain(void)
     CTaskComplexGoToPointAndStandStillTimed::InjectHooks();
     CTaskComplexAvoidOtherPedWhileWandering::InjectHooks();
     CTaskComplexWalkRoundObject::InjectHooks();
+    CTaskComplexFollowPedFootsteps::InjectHooks();
+    CTaskComplexKillPedOnFoot::InjectHooks();
+    CTaskComplexArrestPed::InjectHooks();
     CTaskSimplePause::InjectHooks();
     CTaskSimpleHoldEntity::InjectHooks();
     CTaskSimplePutDownEntity::InjectHooks();
