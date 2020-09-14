@@ -9,6 +9,7 @@
 - CRenderer
 - CVisibilityPlugins
 - CPedIntelligence
+- CColSphere
 - CEventHandlerHistory
 - CEventEditableResponse
 - CEventDamage

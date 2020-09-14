@@ -11,13 +11,18 @@
 
 class CColSphere : public CSphere {
 public:
-	unsigned char m_nMaterial;
-	unsigned char m_nFlags;
-	unsigned char m_nLighting;
-	unsigned char m_nLight;
+    unsigned char m_nMaterial;
+    unsigned char m_nFlags;
+    unsigned char m_nLighting;
+    unsigned char m_nLight;
 
-	void Set(float radius, CVector  const& center, unsigned char material , unsigned char flags, unsigned char lighting);
-	bool IntersectRay(CVector  const& rayStart, CVector  const& rayEnd, CVector& intPoint1, CVector& intPoint2);
+    static void InjectHooks();
+
+    void Set(float radius, CVector const& center, std::uint8_t material, std::uint8_t flags, std::uint8_t lighting);
+    bool IntersectRay(CVector const& rayOrigin, CVector const& direction, CVector& intersectPoint1, CVector& intersectPoint2);
+    bool IntersectEdge(CVector const& startPoint, CVector const& endPoint, CVector& intersectPoint1, CVector& intersectPoint2);
+    bool IntersectSphere(CColSphere const& right);
+    bool IntersectPoint(CVector const& point);
 };
 
 VALIDATE_SIZE(CColSphere, 0x14);
