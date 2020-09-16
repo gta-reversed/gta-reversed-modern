@@ -582,7 +582,7 @@ void CTrain::ProcessControl_Reversed()
                                     {
                                         trainFlags.bNotOnARailRoad = true;
                                         pTheTrainCarriage->physicalFlags.bDisableCollisionForce = false;
-                                        pTheTrainCarriage->physicalFlags.b18 = false;
+                                        pTheTrainCarriage->physicalFlags.bDisableSimpleCollision = false;
                                         pTheTrainCarriage->SetIsStatic(false);
                                         pTheTrainCarriage = pTheTrainCarriage->m_pNextCarriage;
                                     } while (pTheTrainCarriage);

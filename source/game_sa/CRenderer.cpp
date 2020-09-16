@@ -676,7 +676,7 @@ int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
             }
         }
     }
-    if (pEntity->m_nAreaCode == CGame::currArea || pEntity->m_nAreaCode == 13) {
+    if (pEntity->m_nAreaCode == CGame::currArea || pEntity->m_nAreaCode == AREA_CODE_13) {
         CVector* pPosition = &pEntity->GetPosition();
         if (pEntity->m_pLod)
             pPosition = &pEntity->m_pLod->GetPosition();
@@ -700,7 +700,7 @@ int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
 #else
     CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex];
     bool bIsTimeInRange = true;
-    if (entity->m_nAreaCode != CGame::currArea && entity->m_nAreaCode != 13)
+    if (entity->m_nAreaCode != CGame::currArea && entity->m_nAreaCode != AREA_CODE_13)
         return RENDERER_INVISIBLE;
     if (pBaseModelInfo->GetModelType() == MODEL_INFO_TIME)
     {
@@ -771,7 +771,7 @@ void CRenderer::ScanSectorList_ListModels(std::int32_t sectorX, std::int32_t sec
                 CEntity* entity = reinterpret_cast<CEntity*>(pDoubleLinkNode->pItem);
                 if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
                     entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
-                    if (entity->m_nAreaCode == CGame::currArea || entity->m_nAreaCode == 13) {
+                    if (entity->m_nAreaCode == CGame::currArea || entity->m_nAreaCode == AREA_CODE_13) {
                         *gpOutEntitiesForGetObjectsInFrustum = entity;
                         gpOutEntitiesForGetObjectsInFrustum++;
                     }
@@ -796,7 +796,7 @@ void CRenderer::ScanSectorList_ListModelsVisible(std::int32_t sectorX, std::int3
                 CEntity* entity = reinterpret_cast<CEntity*>(pDoubleLinkNode->pItem);
                 if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
                     entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
-                    if (entity->m_nAreaCode == CGame::currArea || entity->m_nAreaCode == 13) {
+                    if (entity->m_nAreaCode == CGame::currArea || entity->m_nAreaCode == AREA_CODE_13) {
                         if (entity->IsVisible()) {
                             *gpOutEntitiesForGetObjectsInFrustum = entity;
                             gpOutEntitiesForGetObjectsInFrustum++;
@@ -951,7 +951,7 @@ bool CRenderer::ShouldModelBeStreamed(CEntity* entity, CVector const& point, flo
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<bool, 0x554EB0, CEntity*, CVector const&, float>(entity, point, farClip);
 #else
-    if (entity->m_nAreaCode != CGame::currArea && entity->m_nAreaCode != 13)
+    if (entity->m_nAreaCode != CGame::currArea && entity->m_nAreaCode != AREA_CODE_13)
         return false;
     CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex];
     tTimeInfo* pTimeInfo = pModelInfo->GetTimeInfo();
@@ -993,7 +993,7 @@ void CRenderer::ConstructRenderList() {
     ms_lowLodDistScale = 1.0f;
     ms_bInTheSky = false;
     CPlayerPed* player = FindPlayerPed(-1);
-    if (player && player->m_nAreaCode == 0) {
+    if (player && player->m_nAreaCode == AREA_CODE_NORMAL_WORLD) {
         float fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
         if (player->GetPosition().z - fGroundHeightZ > 50.0f) {
             float fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_TOP);

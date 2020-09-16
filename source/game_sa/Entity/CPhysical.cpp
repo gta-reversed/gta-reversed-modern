@@ -260,9 +260,9 @@ void CPhysical::ProcessCollision()
 void CPhysical::ProcessCollision_Reversed()
 {
     m_fMovingSpeed = 0.0f;
-    physicalFlags.b16 = false;
+    physicalFlags.bProcessingShift = false;
     physicalFlags.b13 = false;
-    if (m_bUsesCollision && !physicalFlags.b18)  {
+    if (m_bUsesCollision && !physicalFlags.bDisableSimpleCollision)  {
         if (m_nStatus == STATUS_SIMPLE) {
             if (CheckCollision_SimpleCar() && m_nStatus == STATUS_SIMPLE) {
                 m_nStatus = STATUS_PHYSICS;
@@ -360,7 +360,7 @@ void CPhysical::ProcessCollision_Reversed()
         {
             ApplySpeed();
             m_matrix->Reorthogonalise();
-            physicalFlags.b16 = false;
+            physicalFlags.bProcessingShift = false;
             physicalFlags.b13 = false;
             physicalFlags.b17 = true;
             bool bOldUsesCollision = m_bUsesCollision;
@@ -373,7 +373,7 @@ void CPhysical::ProcessCollision_Reversed()
                     pVehicle->vehicleFlags.bVehicleColProcessed = true;
                 m_bIsStuck = false;
                 m_bIsInSafePosition = true;
-                physicalFlags.b12 = false;
+                physicalFlags.bProcessCollisionEvenIfStationary = false;
                 physicalFlags.b13 = false;
                 m_fElasticity = fOldElasticity;
                 m_fMovingSpeed = DistanceBetweenPoints(oldEntityMatrix.GetPosition(), GetPosition());
@@ -429,7 +429,7 @@ void CPhysical::ProcessCollision_Reversed()
         }
         ApplySpeed();
         m_matrix->Reorthogonalise();
-        physicalFlags.b16 = false;
+        physicalFlags.bProcessingShift = false;
         physicalFlags.b13 = false;
         if (m_vecMoveSpeed.x != 0.0f
             || m_vecMoveSpeed.y != 0.0f
@@ -437,8 +437,8 @@ void CPhysical::ProcessCollision_Reversed()
             || m_vecTurnSpeed.x != 0.0f
             || m_vecTurnSpeed.y != 0.0f
             || m_vecTurnSpeed.z != 0.0f
-            || physicalFlags.b12
-            || !m_nStatus
+            || physicalFlags.bProcessCollisionEvenIfStationary
+            || m_nStatus == STATUS_PLAYER
             || m_nType == ENTITY_TYPE_VEHICLE && pVehicle->vehicleFlags.bIsCarParkVehicle
             || m_nType == ENTITY_TYPE_PED && (pPed->IsPlayer() || pPed->bTestForBlockedPositions|| !pPed->bIsStanding)) 
         {
@@ -455,7 +455,7 @@ void CPhysical::ProcessCollision_Reversed()
         }
         m_bIsStuck = false;
         m_bIsInSafePosition = true;
-        physicalFlags.b12 = false;
+        physicalFlags.bProcessCollisionEvenIfStationary = false;
         physicalFlags.b13 = false;
         m_fElasticity = fOldElasticity;
         m_fMovingSpeed = DistanceBetweenPoints(oldEntityMatrix.GetPosition(), GetPosition());
@@ -556,9 +556,9 @@ void CPhysical::ProcessShift_Reversed()
         {
             CPed* pPed = static_cast<CPed*>(this);
             bool bSomeSpecificFlagsSet = false;
-            if (m_nType == ENTITY_TYPE_PED && pPed->m_pSomePed)
+            if (m_nType == ENTITY_TYPE_PED && pPed->m_standingOnEntity)
             {
-                if (!pPed->m_pSomePed->m_bIsStatic || pPed->m_pSomePed->m_bHasContacted)
+                if (!pPed->m_standingOnEntity->m_bIsStatic || pPed->m_standingOnEntity->m_bHasContacted)
                 {
                     bSomeSpecificFlagsSet = true;
                 }
@@ -580,7 +580,7 @@ void CPhysical::ProcessShift_Reversed()
         bool bShifted = false;
         if (m_nType == ENTITY_TYPE_VEHICLE)
         {
-            physicalFlags.b16 = true;
+            physicalFlags.bProcessingShift = true;
         }
 
         std::int32_t startSectorX = CWorld::GetSectorX(boundingBox.left);
@@ -593,7 +593,7 @@ void CPhysical::ProcessShift_Reversed()
                     bShifted = true;
             }
         }
-        physicalFlags.b16 = false;
+        physicalFlags.bProcessingShift = false;
 
         if (bShifted || m_nType == ENTITY_TYPE_VEHICLE) {
             CWorld::IncrementCurrentScanCode();
@@ -899,8 +899,8 @@ void CPhysical::ApplyForce(CVector vecForce, CVector point, bool bUpdateTurnSpee
             vecForce.z = 0.0f;
         }
 
-        CVector vecDifference = point - vecCentreOfMassMultiplied;
-        m_vecTurnSpeed += CrossProduct(vecDifference, vecForce) / fTurnMass;
+        CVector distance = point - vecCentreOfMassMultiplied;
+        m_vecTurnSpeed += CrossProduct(distance, vecForce) / fTurnMass;
     }
 #endif
 }
@@ -981,10 +981,10 @@ void CPhysical::ApplyGravity()
     if (physicalFlags.bApplyGravity && !physicalFlags.bDisableMoveForce) {
         if (physicalFlags.bInfiniteMass) {
             float fMassTimeStep = CTimer::ms_fTimeStep * m_fMass;
-            CVector direction;
-            Multiply3x3(&direction, m_matrix, &m_vecCentreOfMass);
+            CVector point;
+            Multiply3x3(&point, m_matrix, &m_vecCentreOfMass);
             CVector force (0.0f, 0.0f, fMassTimeStep * -0.008f);
-            ApplyForce(force, direction, true);
+            ApplyForce(force, point, true);
         }
         else if (m_bUsesCollision) {
             m_vecMoveSpeed.z -= CTimer::ms_fTimeStep * 0.008f;
@@ -1347,7 +1347,7 @@ bool CPhysical::ApplySpringCollisionAlt(float fSuspensionForceLevel, CVector* di
     if (CTimer::ms_fTimeStep >= 3.0f)
         fTimeStep = 3.0f;
     *fSpringForceDampingLimit = fSpringStress * (fTimeStep * m_fMass) * fSuspensionForceLevel * fSuspensionBias * 0.016f;
-    if (physicalFlags.b01)
+    if (physicalFlags.bMakeMassTwiceAsBig)
         *fSpringForceDampingLimit = *fSpringForceDampingLimit * 0.75f;
     ApplyForce(*fSpringForceDampingLimit * *collisionPointDirection, *collisionPoint, true);
     return true;
@@ -1366,7 +1366,7 @@ bool CPhysical::ApplySpringDampening(float fDampingForce, float fSpringForceDamp
     if (CTimer::ms_fTimeStep >= 3.0f)
         fTimeStep = 3.0f;
     float fDampingForceTimeStep = fTimeStep * fDampingForce;
-    if (physicalFlags.b01)
+    if (physicalFlags.bMakeMassTwiceAsBig)
         fDampingForceTimeStep = fDampingForceTimeStep + fDampingForceTimeStep;
     if (fDampingForceTimeStep <= DAMPING_LIMIT_IN_FRAME) {
         float fNegativeDampingLimitInFrame = -DAMPING_LIMIT_IN_FRAME;
@@ -1734,7 +1734,7 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, floa
     CVector vecSpeed;
     GetSpeed(&vecSpeed, vecDistanceToPointFromThis);
 
-    if (physicalFlags.b27 && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
+    if (physicalFlags.bAddMovingCollisionSpeed && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
     {
         CVector outSpeed;
         pVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPointFromThis);
@@ -2332,7 +2332,7 @@ bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
 
                                 else if (!physicalFlags.bDisableZ || physicalFlags.bApplyGravity)
                                 {
-                                    if (physicalFlags.b25)
+                                    if (physicalFlags.bDontCollideWithFlyers)
                                     {
                                         if (m_nStatus)
                                         {
@@ -2475,14 +2475,7 @@ void CPhysical::PlacePhysicalRelativeToOtherPhysical(CPhysical* relativeToPhysic
     *(CMatrix*)physicalToPlace->m_matrix = *relativeToPhysical->m_matrix;
     physicalToPlace->GetPosition() = vecRelativePosition;
     physicalToPlace->m_vecMoveSpeed = relativeToPhysical->m_vecMoveSpeed;
-    RwObject* pRwObject = physicalToPlace->m_pRwObject;
-    if (pRwObject) {
-        RwMatrix* pRwMatrix = &((RwFrame*)pRwObject->parent)->modelling;
-        if (physicalToPlace->m_matrix)
-            physicalToPlace->m_matrix->UpdateRwMatrix(pRwMatrix);
-        else
-            physicalToPlace->m_placement.UpdateRwMatrix(pRwMatrix);
-    }
+    physicalToPlace->UpdateRW();
     physicalToPlace->UpdateRwFrame();
     CWorld::Add(physicalToPlace);
 #endif
@@ -2944,8 +2937,8 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
     auto pThisPed = static_cast<CPed*>(this);
     auto pThisVehicle = static_cast<CVehicle*>(this);
 
-    bool bThisSomePedIsEntity = false;
-    bool bEntitySomePedIsThis = false;
+    bool bThisPedIsStandingOnEntity = false;
+    bool bEntityPedIsStandingOnThis = false;
     bool bEntityCollisionForceDisabled = false;
 
     float fThisMassFactor = 0.0;
@@ -2954,7 +2947,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
     if (!pEntity->physicalFlags.bDisableTurnForce || physicalFlags.bDisableMoveForce)
     {
         fThisMassFactor = 2.0f;
-        if (!physicalFlags.b01)
+        if (!physicalFlags.bMakeMassTwiceAsBig)
         {
             fThisMassFactor = 1.0f;
         }
@@ -2962,9 +2955,9 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
     else
     {
         fThisMassFactor = 10.0f;
-        if (pEntity->m_nType == ENTITY_TYPE_PED && pEntityPed->m_pSomePed == this)
+        if (pEntity->m_nType == ENTITY_TYPE_PED && pEntityPed->m_standingOnEntity == this)
         {
-            bEntitySomePedIsThis = true;
+            bEntityPedIsStandingOnThis = true;
         }
     }
 
@@ -2985,9 +2978,9 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
         {
             fEntityMassFactor = 10.0f;
         }
-        if (m_nType == ENTITY_TYPE_PED && pThisPed->m_pSomePed == pEntity)
+        if (m_nType == ENTITY_TYPE_PED && pThisPed->m_standingOnEntity == pEntity)
         {
-            bThisSomePedIsEntity = true;
+            bThisPedIsStandingOnEntity = true;
             fEntityMassFactor = 10.0f;
         }
     }
@@ -2998,7 +2991,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
     else
     {
         fEntityMassFactor = 2.0f;
-        if (!pEntity->physicalFlags.b01)
+        if (!pEntity->physicalFlags.bMakeMassTwiceAsBig)
         {
             fEntityMassFactor = 1.0f;
         }
@@ -3008,7 +3001,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
         || pEntity->m_pAttachedTo && !pEntity->physicalFlags.bInfiniteMass)
     {
         bEntityCollisionForceDisabled = true;
-        bThisSomePedIsEntity = false;
+        bThisPedIsStandingOnEntity = false;
     }
 
     CVector vecThisCentreOfMassMultiplied;
@@ -3091,7 +3084,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
             CVector vecThisSpeed;
             GetSpeed(&vecThisSpeed, vecDistanceToPointFromThis);
 
-            if (physicalFlags.b27 && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
+            if (physicalFlags.bAddMovingCollisionSpeed && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
             {
                 CVector outSpeed;
                 pThisVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPointFromThis);
@@ -3345,7 +3338,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
         CVector vecEntitySpeed;
         pEntity->GetSpeed(&vecEntitySpeed, vecDistanceToPoint);
 
-        if (!pEntity->physicalFlags.b27 || pEntity->m_nType != ENTITY_TYPE_VEHICLE || pColPoint->m_nSurfaceTypeB != SURFACE_CAR_MOVINGCOMPONENT)
+        if (!pEntity->physicalFlags.bAddMovingCollisionSpeed || pEntity->m_nType != ENTITY_TYPE_VEHICLE || pColPoint->m_nSurfaceTypeB != SURFACE_CAR_MOVINGCOMPONENT)
         {
             // nothing
         }
@@ -3428,7 +3421,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
                 {
                     vecThisMoveForce.z = 0.0f;
                 }
-                if (bThisSomePedIsEntity)
+                if (bThisPedIsStandingOnEntity)
                 {
                     vecThisMoveForce.x = vecThisMoveForce.x + vecThisMoveForce.x;
                     vecThisMoveForce.y = vecThisMoveForce.y + vecThisMoveForce.y;
@@ -3436,7 +3429,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
 
                 ApplyMoveForce(vecThisMoveForce);
             }
-            if (!pEntity->physicalFlags.bDisableCollisionForce && !bThisSomePedIsEntity)
+            if (!pEntity->physicalFlags.bDisableCollisionForce && !bThisPedIsStandingOnEntity)
             {
                 if (pEntity->m_bIsInSafePosition)
                 {
@@ -3463,7 +3456,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
         CVector vecThisSpeed;
         GetSpeed(&vecThisSpeed, vecDistanceToPointFromThis);
 
-        if (!physicalFlags.b27 && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
+        if (!physicalFlags.bAddMovingCollisionSpeed && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
         {
             CVector outSpeed;
             pThisVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPointFromThis);
@@ -3529,7 +3522,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
         CVector vecThisMoveForce = pColPoint->m_vecNormal * (*pThisDamageIntensity / fThisMassFactor);
         CVector vecEntityMoveForce = pColPoint->m_vecNormal * (*pEntityDamageIntensity / fEntityMassFactor) * -1.0f;
 
-        if (!physicalFlags.bDisableCollisionForce && !bEntitySomePedIsThis)
+        if (!physicalFlags.bDisableCollisionForce && !bEntityPedIsStandingOnThis)
         {
             if (vecThisMoveForce.z < 0.0f)
             {
@@ -3550,7 +3543,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
                     vecEntityMoveForce.y = vecEntityMoveForce.y * 0.5f;
                 }
             }
-            if (bEntitySomePedIsThis)
+            if (bEntityPedIsStandingOnThis)
             {
                 vecEntityMoveForce.x = vecEntityMoveForce.x + vecEntityMoveForce.x;
                 vecEntityMoveForce.y = vecEntityMoveForce.y + vecEntityMoveForce.y;
@@ -3577,7 +3570,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
         CVector vecThisSpeed;
         GetSpeed(&vecThisSpeed, vecDistanceToPointFromThis);
 
-        if (physicalFlags.b27 && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
+        if (physicalFlags.bAddMovingCollisionSpeed && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
         {
             CVector outSpeed;
             pThisVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPointFromThis);
@@ -3588,7 +3581,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
         CVector vecEntitySpeed;
         pEntity->GetSpeed(&vecEntitySpeed, vecDistanceToPoint);
 
-        if (pEntity->physicalFlags.b27 && pEntity->m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeB == SURFACE_CAR_MOVINGCOMPONENT)
+        if (pEntity->physicalFlags.bAddMovingCollisionSpeed && pEntity->m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeB == SURFACE_CAR_MOVINGCOMPONENT)
         {
             CVector outSpeed;
             pEntityVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPoint);
@@ -3761,8 +3754,8 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
     auto pThisPed = static_cast<CPed*>(this);
     auto pThisVehicle = static_cast<CVehicle*>(this);
 
-    bool bEntitySomePedIsThis = false;
-    bool bThisSomePedIsEntity = false;
+    bool bEntityPedIsStandingOnThis = false;
+    bool bThisPedIsStandingOnEntity = false;
     bool bEntityCollisionForceDisabled = false;
 
     float fThisMassFactor = 0.0;
@@ -3770,7 +3763,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
     if (!pEntity->physicalFlags.bDisableTurnForce || physicalFlags.bDisableMoveForce || physicalFlags.bInfiniteMass)
     {
         fThisMassFactor = 2.0f;
-        if (!physicalFlags.b01)
+        if (!physicalFlags.bMakeMassTwiceAsBig)
         {
             fThisMassFactor = 1.0f;
         }
@@ -3778,15 +3771,15 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
     else
     {
         fThisMassFactor = 10.0f;
-        if (pEntityPed->m_pSomePed == this) // BUG: Game should be checking if entity is ped or not.
+        if (pEntityPed->m_standingOnEntity == this) // BUG: Game should be checking if entity is ped or not.
         {
-            bEntitySomePedIsThis = true;
+            bEntityPedIsStandingOnThis = true;
         }
     }
     if (!physicalFlags.bDisableTurnForce || pEntity->physicalFlags.bDisableMoveForce || pEntity->physicalFlags.bInfiniteMass)
     {
         fEntityMassFactor = 2.0f;
-        if (!pEntity->physicalFlags.b01)
+        if (!pEntity->physicalFlags.bMakeMassTwiceAsBig)
         {
             fEntityMassFactor = 1.0f;
         }
@@ -3808,16 +3801,16 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
         {
             fEntityMassFactor = 10.0f;
         }
-        if (m_nType == ENTITY_TYPE_PED && pThisPed->m_pSomePed == pEntity)
+        if (m_nType == ENTITY_TYPE_PED && pThisPed->m_standingOnEntity == pEntity)
         {
-            bThisSomePedIsEntity = true;
+            bThisPedIsStandingOnEntity = true;
         }
     }
 
     if (pEntity->physicalFlags.bDisableCollisionForce && !pEntity->physicalFlags.bCollidable)
     {
         bEntityCollisionForceDisabled = true;
-        bThisSomePedIsEntity = false;
+        bThisPedIsStandingOnEntity = false;
     }
 
     CVector vecThisCentreOfMassMultiplied;
@@ -4070,7 +4063,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
             CVector vecEntitySpeed;
             pEntity->GetSpeed(&vecEntitySpeed, vecDistanceToPoint);
 
-            if (!pEntity->physicalFlags.b27 || pEntity->m_nType != ENTITY_TYPE_VEHICLE
+            if (!pEntity->physicalFlags.bAddMovingCollisionSpeed || pEntity->m_nType != ENTITY_TYPE_VEHICLE
                 || pColPoint->m_nSurfaceTypeB != SURFACE_CAR_MOVINGCOMPONENT)
             {
                 // nothing
@@ -4144,7 +4137,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
                         vecThisMoveForce.z = 0.0;
                     }
 
-                    if (bThisSomePedIsEntity)
+                    if (bThisPedIsStandingOnEntity)
                     {
                         vecThisMoveForce.x = vecThisMoveForce.x + vecThisMoveForce.x;
                         vecThisMoveForce.y = vecThisMoveForce.y + vecThisMoveForce.y;
@@ -4153,7 +4146,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
                     ApplyMoveForce(vecThisMoveForce);
                 }
 
-                if (pEntity->physicalFlags.bDisableCollisionForce || bThisSomePedIsEntity)
+                if (pEntity->physicalFlags.bDisableCollisionForce || bThisPedIsStandingOnEntity)
                 {
                     // nothing
                 }
@@ -4179,7 +4172,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
                 CVector vecThisSpeed;
                 GetSpeed(&vecThisSpeed, vecDistanceToPointFromThis);
 
-                if (physicalFlags.b27 && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
+                if (physicalFlags.bAddMovingCollisionSpeed && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
                 {
                     CVector outSpeed;
                     pThisVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPointFromThis);
@@ -4230,7 +4223,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
 
                     CVector vecThisMoveForce = pColPoint->m_vecNormal * (*pThisDamageIntensity / fThisMassFactor);
                     CVector vecEntityMoveForce = pColPoint->m_vecNormal * (*pEntityDamageIntensity / fEntityMassFactor) * -1.0f;
-                    if (!physicalFlags.bDisableCollisionForce && !bEntitySomePedIsThis)
+                    if (!physicalFlags.bDisableCollisionForce && !bEntityPedIsStandingOnThis)
                     {
                         if (vecThisMoveForce.z < 0.0f)
                         {
@@ -4251,7 +4244,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
                                 vecEntityMoveForce.y = vecEntityMoveForce.y * 0.5f;
                             }
                         }
-                        if (bEntitySomePedIsThis)
+                        if (bEntityPedIsStandingOnThis)
                         {
                             vecEntityMoveForce.x = vecEntityMoveForce.x + vecEntityMoveForce.x;
                             vecEntityMoveForce.y = vecEntityMoveForce.y + vecEntityMoveForce.y;
@@ -4276,7 +4269,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
                 CVector vecThisSpeed;
                 GetSpeed(&vecThisSpeed, vecDistanceToPointFromThis);
 
-                if (physicalFlags.b27 && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
+                if (physicalFlags.bAddMovingCollisionSpeed && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
                 {
                     CVector outSpeed;
                     pThisVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPointFromThis);
@@ -4287,7 +4280,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
                 CVector vecEntitySpeed;
                 pEntity->GetSpeed(&vecEntitySpeed, vecDistanceToPoint);
 
-                if (pEntity->physicalFlags.b27 && pEntity->m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeB == SURFACE_CAR_MOVINGCOMPONENT)
+                if (pEntity->physicalFlags.bAddMovingCollisionSpeed && pEntity->m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeB == SURFACE_CAR_MOVINGCOMPONENT)
                 {
                     CVector outSpeed;
                     pEntityVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPoint);
@@ -4555,7 +4548,7 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
                         }
                         else if (!physicalFlags.bDisableZ || physicalFlags.bApplyGravity)
                         {
-                            if (physicalFlags.b25)
+                            if (physicalFlags.bDontCollideWithFlyers)
                             {
                                 if (m_nStatus)
                                 {
@@ -5455,10 +5448,10 @@ void CPhysical::AttachEntityToEntity(CPhysical* pEntityAttachTo, CVector* vecAtt
         m_vecAttachOffset = *vecAttachOffset;
     }
     else {
-        CVector direction = GetPosition() - entityAttachedtoMatrix.GetPosition();
-        m_vecAttachOffset.x = DotProduct(&entityAttachedtoMatrix.GetRight(), &direction);
-        m_vecAttachOffset.y = DotProduct(&entityAttachedtoMatrix.GetForward(), &direction);
-        m_vecAttachOffset.z = DotProduct(&entityAttachedtoMatrix.GetUp(), &direction);
+        CVector distance = GetPosition() - entityAttachedtoMatrix.GetPosition();
+        m_vecAttachOffset.x = DotProduct(&entityAttachedtoMatrix.GetRight(), &distance);
+        m_vecAttachOffset.y = DotProduct(&entityAttachedtoMatrix.GetForward(), &distance);
+        m_vecAttachOffset.z = DotProduct(&entityAttachedtoMatrix.GetUp(), &distance);
     }
 
     if (attachRotation) {
@@ -5504,8 +5497,8 @@ bool CPhysical::CheckCollision()
     if (m_nType == ENTITY_TYPE_PED)
     {
         CPed* pPed = static_cast<CPed*>(this);
-        if (!m_pAttachedTo && !physicalFlags.b17 && !physicalFlags.b16 && !physicalFlags.b13) {
-            pPed->m_pSomePed = 0;
+        if (!m_pAttachedTo && !physicalFlags.b17 && !physicalFlags.bProcessingShift && !physicalFlags.b13) {
+            pPed->m_standingOnEntity = nullptr;
             if (pPed->bIsStanding) {
                 pPed->bIsStanding = false;
                 pPed->bWasStanding = true;

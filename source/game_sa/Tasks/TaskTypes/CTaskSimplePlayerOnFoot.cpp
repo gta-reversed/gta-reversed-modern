@@ -1316,7 +1316,7 @@ int CTaskSimplePlayerOnFoot::PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAn
 DONT_MODIFY_MOVE_BLEND_RATIO:
     if (!(CWeaponInfo::GetWeaponInfo(pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType, 1)->flags.bHeavy))
     {
-        if (!pPed->m_pSomePed || !pPed->m_pSomePed->m_bIsStatic || pPed->m_pSomePed->m_bHasContacted)
+        if (!pPed->m_standingOnEntity || !pPed->m_standingOnEntity->m_bIsStatic || pPed->m_standingOnEntity->m_bHasContacted)
         {
             if (!pPlayerPed->m_pIntelligence->GetTaskHold(0)
                 || !((CTaskSimpleHoldEntity*)pPlayerPed->m_pIntelligence->GetTaskHold(0))->m_pAnimBlendAssociation)

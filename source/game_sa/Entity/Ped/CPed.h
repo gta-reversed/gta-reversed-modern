@@ -249,7 +249,7 @@ public:
     float               m_fAimingRotation;
     float               m_fHeadingChangeRate;
     float               m_fMoveAnim; // not sure about the name here
-    CPed*               m_pSomePed; // not sure about the name here
+    CEntity*            m_standingOnEntity;
     CVector field_56C;
     CVector field_578;
     CEntity            *m_pContactEntity;

@@ -667,7 +667,7 @@ bool CStreaming::DeleteLeastUsedEntityRwObject(bool bNotOnScreen, unsigned int s
             float fModelRadius = pBaseModelInfo->m_pColModel->m_boundSphere.m_fRadius;
             if (ms_bLoadingScene
                 || bNotOnScreen && !pEntityLastLod->GetIsOnScreen()
-                || pEntity->m_nAreaCode != CGame::currArea && pEntity->m_nAreaCode != 13
+                || pEntity->m_nAreaCode != CGame::currArea && pEntity->m_nAreaCode != AREA_CODE_13
                 || drawDistanceRadius + 50.0f < fMagnitude
                 || fModelRadius + fCameraFarPlane < fMagnitude)
             {
@@ -2004,7 +2004,7 @@ void CStreaming::RemoveBuildingsNotInArea(int areaCode) {
     for (std::int32_t i = CPools::ms_pBuildingPool->GetSize() - 1; i >= 0; i--) {
         CBuilding* pBuilding = CPools::ms_pBuildingPool->GetAt(i);
         if (pBuilding && pBuilding->m_pRwObject) {
-            if (pBuilding->m_nAreaCode != areaCode && pBuilding->m_nAreaCode != 13) {
+            if (pBuilding->m_nAreaCode != areaCode && pBuilding->m_nAreaCode != AREA_CODE_13) {
                 if (!pBuilding->m_bImBeingRendered && !pBuilding->m_bIsBIGBuilding)
                     pBuilding->DeleteRwObject();
             }
@@ -2013,7 +2013,7 @@ void CStreaming::RemoveBuildingsNotInArea(int areaCode) {
     for (std::int32_t i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
         CObject* pObject = CPools::ms_pObjectPool->GetAt(i);
         if (pObject && pObject->m_pRwObject) {
-            if (pObject->m_nAreaCode != areaCode && pObject->m_nAreaCode != 13) {
+            if (pObject->m_nAreaCode != areaCode && pObject->m_nAreaCode != AREA_CODE_13) {
                 if (!pObject->m_bImBeingRendered && pObject->m_nObjectType == eObjectCreatedBy::OBJECT_GAME)
                     pObject->DeleteRwObject();
             }
@@ -2022,7 +2022,7 @@ void CStreaming::RemoveBuildingsNotInArea(int areaCode) {
     for (std::int32_t i = CPools::ms_pDummyPool->GetSize() - 1; i >= 0; i--) {
         CDummy* pDummy = CPools::ms_pDummyPool->GetAt(i);
         if (pDummy && pDummy->m_pRwObject) {
-            if (pDummy->m_nAreaCode != areaCode && pDummy->m_nAreaCode != 13) {
+            if (pDummy->m_nAreaCode != areaCode && pDummy->m_nAreaCode != AREA_CODE_13) {
                 if (!pDummy->m_bImBeingRendered)
                     pDummy->DeleteRwObject();
             }
@@ -2398,7 +2398,7 @@ void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, float posX, float p
             pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
             std::uint16_t modelId = pEntity->m_nModelIndex;
             if (ms_aInfoForModel[modelId].m_nLoadState != LOADSTATE_LOADED && !pEntity->m_bStreamingDontDelete) {
-                if ((pEntity->m_nAreaCode == CGame::currArea || pEntity->m_nAreaCode == 13)
+                if ((pEntity->m_nAreaCode == CGame::currArea || pEntity->m_nAreaCode == AREA_CODE_13)
                     && !pEntity->m_bDontStream && pEntity->m_bIsVisible)
                 {
                     CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
@@ -2436,7 +2436,7 @@ void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, std::int32_t stream
             pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
             std::uint16_t modelId = pEntity->m_nModelIndex;
             if (CStreaming::ms_aInfoForModel[modelId].m_nLoadState != LOADSTATE_LOADED && !pEntity->m_bStreamingDontDelete) {
-                if ((pEntity->m_nAreaCode == CGame::currArea || pEntity->m_nAreaCode == 13)
+                if ((pEntity->m_nAreaCode == CGame::currArea || pEntity->m_nAreaCode == AREA_CODE_13)
                     && !pEntity->m_bDontStream && pEntity->m_bIsVisible)
                 {
                     CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
@@ -2823,7 +2823,7 @@ void CStreaming::InstanceLoadedModelsInSectorList(CPtrList& list)
 {
     for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->pNext) {
         CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->pItem);
-        if ((pEntity->m_nAreaCode == CGame::currArea || pEntity->m_nAreaCode == 13) && !pEntity->m_pRwObject)
+        if ((pEntity->m_nAreaCode == CGame::currArea || pEntity->m_nAreaCode == AREA_CODE_13) && !pEntity->m_pRwObject)
             pEntity->CreateRwObject();
     }
 }

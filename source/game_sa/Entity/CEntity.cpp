@@ -395,7 +395,7 @@ bool CEntity::IsEntityOccluded()
 
 bool CEntity::IsCurrentAreaOrBarberShopInterior()
 {
-    return m_nAreaCode == CGame::currArea || m_nAreaCode == 13;
+    return m_nAreaCode == CGame::currArea || m_nAreaCode == AREA_CODE_13;
 }
 
 void CEntity::UpdateRW() {

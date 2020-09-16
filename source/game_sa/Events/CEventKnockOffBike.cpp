@@ -363,9 +363,9 @@ bool CEventKnockOffBike::SetPedSafePosition(CPed* ped)
     }
     if (knockPedOffBike) {
         ped->bKnockedOffBike = true;
-        if (ped->m_pSomePed) {
-            ped->m_pSomePed->CleanUpOldReference(reinterpret_cast<CEntity**>(&ped->m_pSomePed));
-            ped->m_pSomePed = nullptr;
+        if (ped->m_standingOnEntity) {
+            ped->m_standingOnEntity->CleanUpOldReference(reinterpret_cast<CEntity**>(&ped->m_standingOnEntity));
+            ped->m_standingOnEntity = nullptr;
         }
         ped->bWasStanding = false;
         ped->bIsStanding = false;

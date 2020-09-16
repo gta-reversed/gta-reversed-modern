@@ -13,7 +13,7 @@
 #include "CEntity.h"
 #include "CQuadTreeNode.h"
 
-class  CEntryExitManager {
+class CEntryExitManager {
 public:
      static CEntryExit *(&ms_entryExitStack)[4]; // static CEntryExit *ms_entryExitStack[4]
      static bool &ms_bBurglaryHousesEnabled;

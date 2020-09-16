@@ -516,7 +516,7 @@ bool CDebugMenu::StartMission(std::int32_t missionId, bool bDoMissionCleanUp)
     CTheScripts::bPlayerIsOffTheMap = false;
     CGame::currArea = 0;
     CPlayerPed* player = FindPlayerPed();
-    FindPlayerPed()->m_nAreaCode = 0;
+    FindPlayerPed()->m_nAreaCode = AREA_CODE_NORMAL_WORLD;
     if (!CGame::currArea) {
         player->m_pEnex = 0;
         CEntryExitManager::ms_entryExitStackPosn = 0;
