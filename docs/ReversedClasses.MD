@@ -64,6 +64,12 @@
 - CEventAcquaintancePedLike
 - CEventAcquaintancePedDislike
 - CEventLeaderEnteredCarAsDriver
+- CEventLeaderExitedCarAsDriver
+- CEventLeaderQuitEnteringCarAsDriver
+- CEventAreaCodes
+- CEventLeaderEntryExit
+- CEventSpecial
+- CEventFireNearby
 - CPedDamageResponseCalculator
 - CPedScriptedTaskRecord
 - CPedScriptedTaskRecordData

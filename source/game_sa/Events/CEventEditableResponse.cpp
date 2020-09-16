@@ -14,6 +14,17 @@ void CEventEditableResponse::InjectHooks() {
     HookInstall(0x4B5730, &CEventEditableResponse::ComputeResponseTaskOfType);
 }
 
+void CEventSpecial::InjectHooks()
+{
+    HookInstall(0x4B1AE0, &CEventSpecial::Constructor);
+}
+
+void CEventFireNearby::InjectHooks()
+{
+    HookInstall(0x4B1F10, &CEventFireNearby::Constructor);
+    HookInstall(0x4B1F90, &CEventFireNearby::AffectsPed_Reversed);
+}
+
 CEventEditableResponse::CEventEditableResponse() {
     m_bAddToEventGroup = true;
     m_taskId = TASK_NONE;
@@ -239,4 +250,37 @@ bool CEventEditableResponse::ComputeResponseTaskOfType(CPed* ped, int taskId) {
         -1, -1, -1, taskId, false, &outTaskId, &unknownId);
     return taskId == outTaskId;
 #endif
+}
+
+CEventSpecial* CEventSpecial::Constructor()
+{
+    this->CEventSpecial::CEventSpecial();
+    return this;
+}
+
+CEventFireNearby::CEventFireNearby(CVector const& position)
+{
+    m_position = position;
+}
+
+CEventFireNearby* CEventFireNearby::Constructor(CVector const& position)
+{
+    this->CEventFireNearby::CEventFireNearby(position);
+    return this;
+}
+
+bool CEventFireNearby::AffectsPed(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4B1F90, CEventFireNearby*, CPed*>(this, ped);
+#else
+    return CEventFireNearby::AffectsPed_Reversed(ped);
+#endif
+}
+
+bool CEventFireNearby::AffectsPed_Reversed(CPed* ped)
+{
+    if (ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_EXTINGUISH_FIRES))
+        return false;
+    return ped->IsAlive();
 }

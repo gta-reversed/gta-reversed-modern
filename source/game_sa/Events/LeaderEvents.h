@@ -1,5 +1,6 @@
 #pragma once
 #include "CEventEditableResponse.h"
+#include "CPedGroup.h"
 
 class CEventLeaderEnteredCarAsDriver : public CEventEditableResponse {
 public:
@@ -28,3 +29,91 @@ public:
 };
 
 VALIDATE_SIZE(CEventLeaderEnteredCarAsDriver, 0x18);
+
+class CEventLeaderExitedCarAsDriver : public CEventEditableResponse {
+public:
+    static void InjectHooks();
+
+    CEventLeaderExitedCarAsDriver() {}
+    ~CEventLeaderExitedCarAsDriver() {}
+private:
+    CEventLeaderExitedCarAsDriver* Constructor();
+public:
+    eEventType GetEventType() override { return EVENT_LEADER_EXITED_CAR_AS_DRIVER; }
+    std::int32_t GetEventPriority() override { return 47; }
+    std::int32_t GetLifeTime() override { return 0; }
+    bool AffectsPed(CPed* ped) override { return false; }
+    bool AffectsPedGroup(CPedGroup* pedGroup) override;
+    bool TakesPriorityOver(CEvent* refEvent) override { return true; }
+    CEventLeaderExitedCarAsDriver* CloneEditable() override { return new CEventLeaderExitedCarAsDriver(); }
+private:
+    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
+};
+
+VALIDATE_SIZE(CEventLeaderExitedCarAsDriver, 0x14);
+
+class CEventLeaderQuitEnteringCarAsDriver : public CEvent {
+public:
+    static void InjectHooks();
+
+    CEventLeaderQuitEnteringCarAsDriver() {}
+    ~CEventLeaderQuitEnteringCarAsDriver() {}
+private:
+    CEventLeaderQuitEnteringCarAsDriver* Constructor();
+public:
+    eEventType GetEventType() override { return EVENT_LEADER_QUIT_ENTERING_CAR_AS_DRIVER; }
+    std::int32_t GetEventPriority() override { return 48; }
+    std::int32_t GetLifeTime() override { return 0; }
+    CEventLeaderQuitEnteringCarAsDriver* Clone() override { return new CEventLeaderQuitEnteringCarAsDriver(); }
+    bool AffectsPed(CPed* ped) override { return false; }
+    bool AffectsPedGroup(CPedGroup* pedGroup) override;
+    bool TakesPriorityOver(CEvent* refEvent) override { return true; }
+
+private:
+    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
+};
+
+VALIDATE_SIZE(CEventLeaderQuitEnteringCarAsDriver, 0xC);
+
+class CEventAreaCodes : public CEvent {
+public:
+    CPed* m_ped;
+
+    static void InjectHooks();
+
+    CEventAreaCodes(CPed* ped);
+    ~CEventAreaCodes();
+private:
+    CEventAreaCodes* Constructor(CPed* ped);
+public:
+    eEventType GetEventType() override { return EVENT_AREA_CODES; }
+    std::int32_t GetEventPriority() override { return 55; }
+    std::int32_t GetLifeTime() override { return 0; }
+    CEventAreaCodes* Clone() override { return new CEventAreaCodes(m_ped); }
+    bool AffectsPed(CPed* ped) override;
+    bool TakesPriorityOver(CEvent* refEvent) override;
+private:
+    bool AffectsPed_Reversed(CPed* ped);
+    bool TakesPriorityOver_Reversed(CEvent* refEvent);
+};
+
+VALIDATE_SIZE(CEventAreaCodes, 0x10);
+
+class CEventLeaderEntryExit : public CEventAreaCodes {
+public:
+    static void InjectHooks();
+
+    CEventLeaderEntryExit(CPed* ped) : CEventAreaCodes(ped) {}
+    ~CEventLeaderEntryExit() {}
+private:
+    CEventLeaderEntryExit* Constructor(CPed* ped);
+public:
+    eEventType GetEventType() override { return EVENT_LEADER_ENTRY_EXIT; }
+    std::int32_t GetLifeTime() override { return 0; }
+    CEventLeaderEntryExit* Clone() override { return new CEventLeaderEntryExit(m_ped); }
+    bool AffectsPedGroup(CPedGroup* pedGroup) override { return m_ped && pedGroup->GetMembership().GetLeader() == m_ped; }
+    bool TakesPriorityOver(CEvent* refEvent) override { return true; }
+    bool CanBeInterruptedBySameEvent() override { return true; }
+};
+
+VALIDATE_SIZE(CEventLeaderEntryExit, 0x10);

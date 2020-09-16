@@ -73,6 +73,12 @@ void InjectHooksMain(void)
     CEventStuckInAir::InjectHooks();
     CEventAcquaintancePed::InjectHooks();
     CEventLeaderEnteredCarAsDriver::InjectHooks();
+    CEventLeaderExitedCarAsDriver::InjectHooks();
+    CEventLeaderQuitEnteringCarAsDriver::InjectHooks();
+    CEventAreaCodes::InjectHooks();
+    CEventLeaderEntryExit::InjectHooks();
+    CEventSpecial::InjectHooks();
+    CEventFireNearby::InjectHooks();
     CEventGroup::InjectHooks();
     CEventGlobalGroup::InjectHooks();
     CPedDamageResponseCalculator::InjectHooks();
