@@ -54,6 +54,7 @@
 #include "game_sa\Events\CEventGunShot.h"
 #include "game_sa\Events\CEventGunShotWhizzedBy.h"
 #include "game_sa\Events\LeaderEvents.h"
+#include "game_sa\Events\GroupEvents.h"
 #include "game_sa\Events\MentalStateEvents.h"
 #include "game_sa\Events\PotentialWalkIntoEvents.h"
 #include "game_sa\Events\CEventHitByWaterCannon.h"

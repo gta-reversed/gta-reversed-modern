@@ -46,7 +46,6 @@ void InjectHooksMain(void)
     CEventKnockOffBike::InjectHooks();
     CEventScriptCommand::InjectHooks();
     CEventSoundQuiet::InjectHooks();
-    CEventGroupEvent::InjectHooks();
     CEventPedToChase::InjectHooks();
     CEventPedToFlee::InjectHooks();
     CEventPotentialWalkIntoVehicle::InjectHooks();
@@ -79,8 +78,19 @@ void InjectHooksMain(void)
     CEventLeaderEntryExit::InjectHooks();
     CEventSpecial::InjectHooks();
     CEventFireNearby::InjectHooks();
+    CEventGroupEvent::InjectHooks();
     CEventGroup::InjectHooks();
     CEventGlobalGroup::InjectHooks();
+    CEventPlayerCommandToGroup::InjectHooks();
+    CEventPlayerCommandToGroupAttack::InjectHooks();
+    CEventPlayerCommandToGroupGather::InjectHooks();
+    CEventDontJoinPlayerGroup::InjectHooks();
+    CEventNewGangMember::InjectHooks();
+    CEventEscalator::InjectHooks();
+    CEventDanger::InjectHooks();
+    CEventSexyVehicle::InjectHooks();
+    CEventChatPartner::InjectHooks();
+    CEventCopCarBeingStolen::InjectHooks();
     CPedDamageResponseCalculator::InjectHooks();
     CPedScriptedTaskRecord::InjectHooks();
     CPedScriptedTaskRecordData::InjectHooks();

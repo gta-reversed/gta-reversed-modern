@@ -46,6 +46,11 @@
 - CEventHighAngerAtPlayer
 - CEventGroup
 - CEventGlobalGroup 
+- CEventPlayerCommandToGroup
+- CEventPlayerCommandToGroupAttack
+- CEventPlayerCommandToGroupGather
+- CEventDontJoinPlayerGroup
+- CEventNewGangMember
 - CEventVehicleDamage
 - CEventVehicleDamageWeapon
 - CEventVehicleDamageCollision
@@ -70,6 +75,11 @@
 - CEventLeaderEntryExit
 - CEventSpecial
 - CEventFireNearby
+- CEventEscalator
+- CEventDanger
+- CEventSexyVehicle
+- CEventChatPartner
+- CEventCopCarBeingStolen
 - CPedDamageResponseCalculator
 - CPedScriptedTaskRecord
 - CPedScriptedTaskRecordData

@@ -25,6 +25,14 @@ void CEventFireNearby::InjectHooks()
     HookInstall(0x4B1F90, &CEventFireNearby::AffectsPed_Reversed);
 }
 
+void CEventDanger::InjectHooks()
+{
+    HookInstall(0x4B2600, &CEventDanger::Constructor);
+    HookInstall(0x4B5470, &CEventDanger::AffectsPed_Reversed);
+    HookInstall(0x4B54E0, &CEventDanger::AffectsPedGroup_Reversed);
+    HookInstall(0x4B2700, &CEventDanger::GetSourceEntity_Reversed);
+}
+
 CEventEditableResponse::CEventEditableResponse() {
     m_bAddToEventGroup = true;
     m_taskId = TASK_NONE;
@@ -207,7 +215,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
         if (pGroupLeader && pGroupLeader->IsPlayer())
             pMember = nullptr;
         if (!pMember){
-            for (size_t memberId = 0; memberId < 7; memberId++) {
+            for (size_t memberId = 0; memberId < TOTAL_PED_GROUP_FOLLOWERS; memberId++) {
                 pMember = pedGroup->m_groupMembership.GetMember(memberId);
                 if (pMember)
                     break;
@@ -284,3 +292,85 @@ bool CEventFireNearby::AffectsPed_Reversed(CPed* ped)
         return false;
     return ped->IsAlive();
 }
+
+
+CEventDanger::CEventDanger(CEntity* dangerFrom, float dangerRadius)
+{
+    m_dangerFrom = dangerFrom;
+    if (dangerFrom)
+        dangerFrom->RegisterReference(reinterpret_cast<CEntity**>(&m_dangerFrom));
+    m_dangerRadius = dangerRadius;
+}
+
+CEventDanger::~CEventDanger()
+{
+    if (m_dangerFrom)
+        m_dangerFrom->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_dangerFrom));
+}
+
+CEventDanger* CEventDanger::Constructor(CEntity* dangerFrom, float dangerRadius)
+{
+    this->CEventDanger::CEventDanger(dangerFrom, dangerRadius);
+    return this;
+}
+
+bool CEventDanger::AffectsPed(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4B5470, CEventDanger*, CPed*>(this, ped);
+#else
+    return CEventDanger::AffectsPed_Reversed(ped);
+#endif
+}
+
+bool CEventDanger::AffectsPedGroup(CPedGroup* pedGroup)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4B54E0, CEventDanger*, CPedGroup*>(this, pedGroup);
+#else
+    return CEventDanger::AffectsPedGroup_Reversed(pedGroup);
+#endif
+}
+
+CEntity* CEventDanger::GetSourceEntity()
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<CEntity*, 0x4B2700, CEventDanger*>(this);
+#else
+    return CEventDanger::GetSourceEntity_Reversed();
+#endif
+}
+
+bool CEventDanger::AffectsPed_Reversed(CPed* ped)
+{
+    CVehicle* dangerFrom = static_cast<CVehicle*>(m_dangerFrom);
+    if (dangerFrom && dangerFrom != ped->m_pVehicle) {
+        CVector2D distance = ped->GetPosition() - dangerFrom->GetPosition();
+        if (m_dangerRadius * m_dangerRadius >= distance.SquaredMagnitude())
+            return ped->IsAlive();
+    }
+    return false;
+}
+
+bool CEventDanger::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
+{
+    if (GetSourceEntity() && GetSourceEntity()->m_nType == ENTITY_TYPE_PED) {
+        CPed* leader = pedGroup->GetMembership().GetLeader();
+        if (leader) {
+            CVector2D distance = leader->GetPosition() - m_dangerFrom->GetPosition();
+            return distance.SquaredMagnitude() <= m_dangerRadius * m_dangerRadius;
+        }
+    }
+    return false;
+}
+
+CEntity* CEventDanger::GetSourceEntity_Reversed()
+{
+    if (m_dangerFrom && m_dangerFrom->m_nType != ENTITY_TYPE_PED && m_dangerFrom->m_nType == ENTITY_TYPE_VEHICLE) {
+        CVehicle* vehicle = static_cast<CVehicle*>(m_dangerFrom);
+        if (vehicle->m_pDriver)
+            return vehicle->m_pDriver;
+    }
+    return m_dangerFrom;
+}
+

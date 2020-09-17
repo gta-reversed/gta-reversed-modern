@@ -16,6 +16,8 @@ std::uint16_t& MI_HARVESTERBODYPART1 = *(std::uint16_t*)0x8CD6E4;
 std::uint16_t& MI_HARVESTERBODYPART2 = *(std::uint16_t*)0x8CD6E8;
 std::uint16_t& MI_HARVESTERBODYPART3 = *(std::uint16_t*)0x8CD6EC;
 std::uint16_t& MI_HARVESTERBODYPART4 = *(std::uint16_t*)0x8CD6F0;
+std::uint16_t& MI_ESCALATORSTEP = *(std::uint16_t*)0x8CD674;
+std::uint16_t& MI_ESCALATORSTEP8 = *(std::uint16_t*)0x8CD678;
 
 CBaseModelInfo **CModelInfo::ms_modelInfoPtrs = (CBaseModelInfo**)0xA9B0C8;
 

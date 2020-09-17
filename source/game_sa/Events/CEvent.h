@@ -1,6 +1,7 @@
 #pragma once
 #include "PluginBase.h"
 #include "eEventType.h"
+#include "CPed.h"
 
 class CPed;
 class CPedGroup;
@@ -71,3 +72,90 @@ private:
 };
 
 VALIDATE_SIZE(CEventRevived, 0xC);
+
+class CEventEscalator : public CEvent {
+public:
+    static void InjectHooks();
+
+    CEventEscalator() {}
+    ~CEventEscalator() {}
+private:
+    CEventEscalator* Constructor();
+public:
+    eEventType GetEventType() override { return EVENT_ON_ESCALATOR; }
+    std::int32_t GetEventPriority() override { return 56; }
+    std::int32_t GetLifeTime() override { return 0; }
+    CEventEscalator* Clone() override { return new CEventEscalator(); }
+    bool AffectsPed(CPed* ped) override;
+    bool TakesPriorityOver(CEvent* refEvent) override { return GetEventType() != refEvent->GetEventType(); }
+private:
+    bool AffectsPed_Reversed(CPed* ped);
+};
+
+VALIDATE_SIZE(CEventEscalator, 0xC);
+
+class CEventSexyVehicle : public CEvent {
+public:
+    CVehicle* m_vehicle;
+
+    static void InjectHooks();
+
+    CEventSexyVehicle(CVehicle* vehicle);
+    ~CEventSexyVehicle();
+private:
+    CEventSexyVehicle* Constructor(CVehicle* vehicle);
+public:
+    eEventType GetEventType() override { return EVENT_SEXY_VEHICLE; }
+    std::int32_t GetEventPriority() override { return 3; }
+    std::int32_t GetLifeTime() override { return 0; }
+    CEventSexyVehicle* Clone() override { return new CEventSexyVehicle(m_vehicle); }
+    bool AffectsPed(CPed* ped) override { return ped->IsAlive() && m_vehicle; }
+};
+
+VALIDATE_SIZE(CEventSexyVehicle, 0x10);
+
+class CEventChatPartner : public CEvent {
+public:
+    bool m_leadSpeaker;
+    std::int8_t padding[3];
+    CPed* m_partner;
+
+    static void InjectHooks();
+
+    CEventChatPartner(bool leadSpeaker, CPed* partner);
+    ~CEventChatPartner();
+private:
+    CEventChatPartner* Constructor(bool leadSpeaker, CPed* partner);
+public:
+    eEventType GetEventType() override { return EVENT_CHAT_PARTNER; }
+    std::int32_t GetEventPriority() override { return 5; }
+    std::int32_t GetLifeTime() override { return 0; }
+    CEventChatPartner* Clone() override { return new CEventChatPartner(m_leadSpeaker, m_partner); }
+    bool AffectsPed(CPed* ped) override { return ped->IsAlive() && m_partner; }
+
+};
+
+VALIDATE_SIZE(CEventChatPartner, 0x14);
+
+class CEventCopCarBeingStolen : public CEvent {
+public:
+    CPed* m_hijacker;
+    CVehicle* m_vehicle;
+
+    static void InjectHooks();
+
+    CEventCopCarBeingStolen(CPed* hijacker, CVehicle* vehicle);
+    ~CEventCopCarBeingStolen();
+private:
+    CEventCopCarBeingStolen* Constructor(CPed* hijacker, CVehicle* vehicle);
+public:
+    eEventType GetEventType() override { return EVENT_COP_CAR_BEING_STOLEN; }
+    std::int32_t GetEventPriority() override { return 38; }
+    std::int32_t GetLifeTime() override { return 0; }
+    CEventCopCarBeingStolen* Clone() override { return new CEventCopCarBeingStolen(m_hijacker, m_vehicle); }
+    bool AffectsPed(CPed* ped) override;
+private:
+    bool AffectsPed_Reversed(CPed* ped);
+};
+
+VALIDATE_SIZE(CEventCopCarBeingStolen, 0x14);

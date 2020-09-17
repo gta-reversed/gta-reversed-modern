@@ -32,6 +32,8 @@ extern std::uint16_t& MI_HARVESTERBODYPART1;
 extern std::uint16_t& MI_HARVESTERBODYPART2;
 extern std::uint16_t& MI_HARVESTERBODYPART3;
 extern std::uint16_t& MI_HARVESTERBODYPART4;
+extern std::uint16_t& MI_ESCALATORSTEP;
+extern std::uint16_t& MI_ESCALATORSTEP8;
 
 class CModelInfo
 {

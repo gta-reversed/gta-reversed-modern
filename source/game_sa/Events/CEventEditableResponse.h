@@ -79,3 +79,30 @@ public:
 };
 
 VALIDATE_SIZE(CEventFireNearby, 0x20);
+
+class CEventDanger : public CEventEditableResponse {
+public:
+    CEntity* m_dangerFrom;
+    float m_dangerRadius;
+
+    static void InjectHooks();
+
+    CEventDanger(CEntity* dangerFrom, float dangerRadius);
+    ~CEventDanger();
+private:
+    CEventDanger* Constructor(CEntity* dangerFrom, float dangerRadius);
+public:
+    eEventType GetEventType() override { return EVENT_DANGER; }
+    std::int32_t GetEventPriority() override { return 20; }
+    std::int32_t GetLifeTime() override { return 0; }
+    bool AffectsPed(CPed* ped) override;
+    bool AffectsPedGroup(CPedGroup* pedGroup) override;
+    CEntity* GetSourceEntity() override;
+    CEventDanger* CloneEditable() override { return new CEventDanger(m_dangerFrom, m_dangerRadius); }
+private:
+    bool AffectsPed_Reversed(CPed* ped);
+    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
+    CEntity* GetSourceEntity_Reversed();
+};
+
+VALIDATE_SIZE(CEventDanger, 0x1C);

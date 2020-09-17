@@ -106,13 +106,13 @@ void CPhysical::Add_Reversed()
                 switch (m_nType)
                 {
                 case ENTITY_TYPE_VEHICLE:
-                    pDoubleLinkList = &pRepeatSector->m_lists[0]; 
+                    pDoubleLinkList = &pRepeatSector->m_lists[REPEATSECTOR_VEHICLES];
                     break;
                 case ENTITY_TYPE_PED:
-                    pDoubleLinkList = &pRepeatSector->m_lists[1];
+                    pDoubleLinkList = &pRepeatSector->m_lists[REPEATSECTOR_PEDS];
                     break;
                 case ENTITY_TYPE_OBJECT:
-                    pDoubleLinkList = &pRepeatSector->m_lists[2];
+                    pDoubleLinkList = &pRepeatSector->m_lists[REPEATSECTOR_OBJECTS];
                     break;
                 }
 
@@ -653,13 +653,13 @@ void CPhysical::RemoveAndAdd()
                 switch (m_nType)
                 {
                 case ENTITY_TYPE_VEHICLE:
-                    pDoubleLinkList = &pRepeatSector->m_lists[0];
+                    pDoubleLinkList = &pRepeatSector->m_lists[REPEATSECTOR_VEHICLES];
                     break;
                 case ENTITY_TYPE_PED:
-                    pDoubleLinkList = &pRepeatSector->m_lists[1];
+                    pDoubleLinkList = &pRepeatSector->m_lists[REPEATSECTOR_PEDS];
                     break;
                 case ENTITY_TYPE_OBJECT:
-                    pDoubleLinkList = &pRepeatSector->m_lists[2];
+                    pDoubleLinkList = &pRepeatSector->m_lists[REPEATSECTOR_OBJECTS];
                     break;
                 }
 
