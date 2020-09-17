@@ -64,9 +64,12 @@ bool CEventLeaderEnteredCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGrou
         for (std::int32_t i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
             CPed* member = pedGroup->GetMembership().GetMember(i);
             if (member) {
-                if (member->bInVehicle && member->m_pVehicle == m_vehicle &&
-                    !member->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR))
+                if (!member->bInVehicle
+                    || member->m_pVehicle != m_vehicle
+                    || member->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR))
+                {
                     return true;
+                }
             }
         }
     }
