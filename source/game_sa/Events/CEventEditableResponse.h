@@ -106,3 +106,26 @@ private:
 };
 
 VALIDATE_SIZE(CEventDanger, 0x1C);
+
+class CEventSeenPanickedPed : public CEventEditableResponse {
+public:
+    CPed* m_ped;
+
+    static void InjectHooks();
+
+    CEventSeenPanickedPed(CPed* ped);
+    ~CEventSeenPanickedPed();
+private:
+    CEventSeenPanickedPed* Constructor(CPed* ped);
+public:
+    eEventType GetEventType() override { return EVENT_SEEN_PANICKED_PED; }
+    std::int32_t GetEventPriority() override { return 13; }
+    std::int32_t GetLifeTime() override { return 0; }
+    bool AffectsPed(CPed* ped) override;
+    CEntity* GetSourceEntity() override { return m_ped;}
+    CEventSeenPanickedPed* CloneEditable() override { return new CEventSeenPanickedPed(m_ped); }
+private:
+    bool AffectsPed_Reversed(CPed* ped);
+};
+
+VALIDATE_SIZE(CEventSeenPanickedPed, 0x18);

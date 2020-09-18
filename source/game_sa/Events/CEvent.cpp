@@ -35,6 +35,30 @@ void CEventCopCarBeingStolen::InjectHooks()
     HookInstall(0x4B1860, &CEventCopCarBeingStolen::AffectsPed_Reversed);
 }
 
+void CEventCarUpsideDown::InjectHooks()
+{
+    HookInstall(0x4B1CC0, &CEventCarUpsideDown::Constructor);
+    HookInstall(0x4B1DB0, &CEventCarUpsideDown::AffectsPed_Reversed);
+}
+
+void CEventPassObject::InjectHooks()
+{
+    HookInstall(0x65DC70, &CEventPassObject::Constructor);
+    HookInstall(0x4B1700, &CEventPassObject::IsValid_Reversed);
+}
+
+void CEventLeanOnVehicle::InjectHooks()
+{
+    HookInstall(0x65DAF0, &CEventLeanOnVehicle::Constructor);
+    HookInstall(0x4B16C0, &CEventLeanOnVehicle::IsValid_Reversed);
+}
+
+void CEventOnFire::InjectHooks()
+{
+    HookInstall(0x5FF740, &CEventOnFire::Constructor);
+    HookInstall(0x4B1050, &CEventOnFire::AffectsPed_Reversed);
+}
+
 CEvent::CEvent() {
     m_nTimeActive = 0;
     m_bValid = false;
@@ -214,3 +238,148 @@ bool CEventCopCarBeingStolen::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
+CEventCarUpsideDown::CEventCarUpsideDown(CVehicle* vehicle)
+{
+    m_vehicle = vehicle;
+    if (vehicle)
+        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+}
+
+CEventCarUpsideDown::~CEventCarUpsideDown()
+{
+    if (m_vehicle) // BUG: This should be CEntity::CleanUpOldReference
+        m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+}
+
+CEventCarUpsideDown* CEventCarUpsideDown::Constructor(CVehicle* vehicle)
+{
+    this->CEventCarUpsideDown::CEventCarUpsideDown(vehicle);
+    return this;
+}
+
+bool CEventCarUpsideDown::AffectsPed(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4B1DB0, CEventCarUpsideDown*, CPed*>(this, ped);
+#else
+    return CEventCarUpsideDown::AffectsPed_Reversed(ped);
+#endif
+}
+
+bool CEventCarUpsideDown::AffectsPed_Reversed(CPed* ped)
+{
+    if (!ped->IsPlayer()
+        && ped->bGetOutUpsideDownCar
+        && ped->bInVehicle
+        && (ped->m_nCreatedBy != PED_MISSION || ped->m_pVehicle && !ped->m_pVehicle->IsBoat())
+        && !ped->m_pVehicle->IsBike() && !ped->m_pVehicle->IsQuad())
+    {
+        return ped->IsAlive();
+    }
+    return false;
+}
+
+CEventPassObject::CEventPassObject(CEntity* giver, bool dontPassObject)
+{
+    m_giver = giver;
+    if (giver)
+        giver->RegisterReference(&m_giver);
+    m_dontPassObject = dontPassObject;
+}
+
+CEventPassObject::~CEventPassObject()
+{
+    if (m_giver)
+        m_giver->CleanUpOldReference(&m_giver);
+}
+
+CEventPassObject* CEventPassObject::Constructor(CEntity* giver, bool dontPassObject)
+{
+    this->CEventPassObject::CEventPassObject(giver, dontPassObject);
+    return this;
+}
+
+bool CEventPassObject::IsValid(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4B1700, CEventPassObject*, CPed*>(this, ped);
+#else
+    return CEventPassObject::IsValid_Reversed(ped);
+#endif
+}
+
+bool CEventPassObject::IsValid_Reversed(CPed* ped)
+{
+    if (ped)
+        return ped->IsAlive();
+    if (CEvent::IsValid(ped))
+        return true;
+    return false;
+}
+
+CEventLeanOnVehicle::CEventLeanOnVehicle(CVehicle* vehicle, std::int32_t leanAnimDurationInMs)
+{
+    m_vehicle = vehicle;
+    m_leanAnimDurationInMs = leanAnimDurationInMs;
+    if (vehicle)
+        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+}
+
+CEventLeanOnVehicle::~CEventLeanOnVehicle()
+{
+    if (m_vehicle)
+        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+}
+
+CEventLeanOnVehicle* CEventLeanOnVehicle::Constructor(CVehicle* vehicle, std::int32_t leanAnimDurationInMs)
+{
+    this->CEventLeanOnVehicle::CEventLeanOnVehicle(vehicle, leanAnimDurationInMs);
+    return this;
+}
+
+bool CEventLeanOnVehicle::IsValid(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4B16C0, CEventLeanOnVehicle*, CPed*>(this, ped);
+#else
+    return CEventLeanOnVehicle::IsValid_Reversed(ped);
+#endif
+}
+
+bool CEventLeanOnVehicle::IsValid_Reversed(CPed* ped)
+{
+    if (ped)
+        return ped->IsAlive();
+    if (CEvent::IsValid(ped))
+        return true;
+    return false;
+}
+
+CEventOnFire* CEventOnFire::Constructor()
+{
+    this->CEventOnFire::CEventOnFire();
+    return this;
+}
+
+bool CEventOnFire::AffectsPed(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4B1050, CEventOnFire*, CPed*>(this, ped);
+#else
+    return CEventOnFire::AffectsPed_Reversed(ped);
+#endif
+}
+
+bool CEventOnFire::AffectsPed_Reversed(CPed* ped)
+{
+    if (ped->m_pFire && !ped->physicalFlags.bFireProof) {
+        CTask* activeTask = ped->GetTaskManager().GetActiveTask();
+        if (activeTask && activeTask->GetId() == TASK_COMPLEX_ON_FIRE)
+            return false;
+        CTask* partialAnimTask = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
+        if (partialAnimTask && partialAnimTask->GetId() == TASK_SIMPLE_PLAYER_ON_FIRE)
+            return false;
+        return ped->IsAlive(); 
+    }
+    return false;
+}

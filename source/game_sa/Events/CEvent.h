@@ -159,3 +159,104 @@ private:
 };
 
 VALIDATE_SIZE(CEventCopCarBeingStolen, 0x14);
+
+class CEventCarUpsideDown : public CEvent {
+public:
+    CVehicle* m_vehicle;
+
+    static void InjectHooks();
+
+    CEventCarUpsideDown(CVehicle* vehicle);
+    ~CEventCarUpsideDown();
+    CEventCarUpsideDown* Destructor();
+private:
+    CEventCarUpsideDown* Constructor(CVehicle* vehicle);
+public:
+    eEventType GetEventType() override { return EVENT_CAR_UPSIDE_DOWN; }
+    std::int32_t GetEventPriority() override { return 18; }
+    std::int32_t GetLifeTime() override { return 0; }
+    CEventCarUpsideDown* Clone() override { return new CEventCarUpsideDown(m_vehicle); }
+    bool AffectsPed(CPed* ped) override;
+private:
+    bool AffectsPed_Reversed(CPed* ped);
+public:
+
+};
+
+VALIDATE_SIZE(CEventCarUpsideDown, 0x10);
+
+class CEntity;
+class CEventPassObject : public CEvent {
+public:
+    CEntity* m_giver;
+    bool m_dontPassObject;
+
+    static void InjectHooks();
+
+    CEventPassObject(CEntity* giver, bool dontPassObject);
+    ~CEventPassObject();
+    CEventPassObject* Destructor();
+private:
+    CEventPassObject* Constructor(CEntity* giver, bool dontPassObject);
+public:
+    eEventType GetEventType() override { return EVENT_PASS_OBJECT; }
+    std::int32_t GetEventPriority() override { return 11; }
+    std::int32_t GetLifeTime() override { return 0; }
+    CEventPassObject* Clone() override { return new CEventPassObject(m_giver, m_dontPassObject); }
+    bool AffectsPed(CPed* ped) override { return true; }
+    bool IsValid(CPed* ped) override;
+private:
+    bool IsValid_Reversed(CPed* ped);
+};
+
+VALIDATE_SIZE(CEventPassObject, 0x14);
+
+class CEventLeanOnVehicle : public CEvent {
+public:
+    CVehicle* m_vehicle;
+    std::int32_t m_leanAnimDurationInMs;
+
+    static void InjectHooks();
+
+    CEventLeanOnVehicle(CVehicle* vehicle, std::int32_t leanAnimDurationInMs);
+    ~CEventLeanOnVehicle();
+private:
+    CEventLeanOnVehicle* Constructor(CVehicle* vehicle, std::int32_t leanAnimDurationInMs);
+public:
+    eEventType GetEventType() override { return EVENT_LEAN_ON_VEHICLE; }
+    std::int32_t GetEventPriority() override { return 12; }
+    std::int32_t GetLifeTime() override { return 0; }
+    CEventLeanOnVehicle* Clone() override { return new CEventLeanOnVehicle(m_vehicle, m_leanAnimDurationInMs); }
+    bool AffectsPed(CPed* ped) override { return true; }
+    bool IsValid(CPed* ped) override;
+private:
+    bool IsValid_Reversed(CPed* ped);
+public:
+
+};
+
+VALIDATE_SIZE(CEventLeanOnVehicle, 0x14);
+
+class CEventOnFire : public CEvent {
+public:
+    static void InjectHooks();
+
+    CEventOnFire() {}
+    ~CEventOnFire() {}
+private:
+    CEventOnFire* Constructor();
+public:
+    eEventType GetEventType() override { return EVENT_ON_FIRE; }
+    std::int32_t GetEventPriority() override { return 66; }
+    std::int32_t GetLifeTime() override { return 0; }
+    CEventOnFire* Clone() override { return new CEventOnFire(); }
+    bool AffectsPed(CPed* ped) override;
+    float GetLocalSoundLevel() override { return 60.0f; }
+private:
+    bool AffectsPed_Reversed(CPed* ped);
+};
+
+VALIDATE_SIZE(CEventOnFire, 0xC);
+
+
+

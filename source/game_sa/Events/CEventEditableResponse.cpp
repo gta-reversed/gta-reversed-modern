@@ -33,6 +33,12 @@ void CEventDanger::InjectHooks()
     HookInstall(0x4B2700, &CEventDanger::GetSourceEntity_Reversed);
 }
 
+void CEventSeenPanickedPed::InjectHooks()
+{
+    HookInstall(0x4B2080, &CEventSeenPanickedPed::Constructor);
+    HookInstall(0x4B53C0, &CEventSeenPanickedPed::AffectsPed_Reversed);
+}
+
 CEventEditableResponse::CEventEditableResponse() {
     m_bAddToEventGroup = true;
     m_taskId = TASK_NONE;
@@ -372,5 +378,45 @@ CEntity* CEventDanger::GetSourceEntity_Reversed()
             return vehicle->m_pDriver;
     }
     return m_dangerFrom;
+}
+
+CEventSeenPanickedPed::CEventSeenPanickedPed(CPed* ped)
+{
+    m_ped = ped;
+    if (ped)
+        ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+}
+
+CEventSeenPanickedPed::~CEventSeenPanickedPed()
+{
+    if (m_ped)
+        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+}
+
+CEventSeenPanickedPed* CEventSeenPanickedPed::Constructor(CPed* ped)
+{
+    this->CEventSeenPanickedPed::CEventSeenPanickedPed(ped);
+    return this;
+}
+
+bool CEventSeenPanickedPed::AffectsPed(CPed* ped)
+{
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4B53C0, CEventSeenPanickedPed*, CPed*>(this, ped);
+#else
+    return CEventSeenPanickedPed::AffectsPed_Reversed(ped);
+#endif
+}
+
+bool CEventSeenPanickedPed::AffectsPed_Reversed(CPed* ped)
+{
+    if (!ped->IsPlayer() && m_ped && m_ped != ped) {
+        CEvent* currentEvent = m_ped->GetEventHandlerHistory().GetCurrentEvent();
+        if (currentEvent && currentEvent->GetSourceEntity()) {
+            CVector distance = ped->GetPosition() - m_ped->GetPosition();
+            return distance.SquaredMagnitude() < 100.0f;
+        }
+    }
+    return false;
 }
 

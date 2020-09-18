@@ -8,14 +8,14 @@ class CEventScriptCommand : public CEvent
 public:
     std::int32_t m_primaryTaskIndex;
     CTask* m_task;
-    bool m_bAffectsPed;
+    bool m_affectsDeadPeds;
 
     static void InjectHooks();
 
-    CEventScriptCommand(std::int32_t primaryTaskIndex, CTask* task, bool bAffectsPed);
+    CEventScriptCommand(std::int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds);
     ~CEventScriptCommand();
 private:
-    CEventScriptCommand* Constructor(std::int32_t primaryTaskIndex, CTask* task, bool bAffectsPed);
+    CEventScriptCommand* Constructor(std::int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds);
 public:
     eEventType GetEventType() override { return EVENT_SCRIPT_COMMAND; }
     int GetEventPriority() override;

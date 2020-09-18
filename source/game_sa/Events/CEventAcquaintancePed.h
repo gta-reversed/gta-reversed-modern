@@ -20,7 +20,7 @@ public:
     CEntity* GetSourceEntity() override { return reinterpret_cast<CEntity*>(m_ped); }
     bool TakesPriorityOver(CEvent* refEvent) override;
     bool CanBeInterruptedBySameEvent() override { return true; }
-
+private:
     bool AffectsPed_Reversed(CPed* ped);
     bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
     bool TakesPriorityOver_Reversed(CEvent* refEvent);
@@ -92,6 +92,23 @@ public:
     bool AffectsPed(CPed* ped) override;
     bool CanBeInterruptedBySameEvent() override { return true; }
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedHateBadlyLit(m_ped, m_startTimeInMs, m_point); }
-
+private:
     bool AffectsPed_Reversed(CPed* ped);
 };
+
+class CEventSeenCop : public CEventAcquaintancePed {
+public:
+    static void InjectHooks();
+
+    CEventSeenCop(CPed* cop) : CEventAcquaintancePed(cop) {}
+    ~CEventSeenCop() {}
+private:
+    CEventSeenCop* Constructor(CPed* cop);
+public:
+    eEventType GetEventType() override { return EVENT_SEEN_COP; }
+    std::int32_t GetEventPriority() override { return 21; }
+    bool AffectsPed(CPed* ped) override { return CEventAcquaintancePed::AffectsPed(ped); }
+    CEventSeenCop* CloneEditable() override { return new CEventSeenCop(m_ped); }
+};
+
+VALIDATE_SIZE(CEventSeenCop, 0x18);

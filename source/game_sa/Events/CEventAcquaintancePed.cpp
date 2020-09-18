@@ -10,6 +10,11 @@ void CEventAcquaintancePed::InjectHooks()
     HookInstall(0x4AF8F0, &CEventAcquaintancePed::TakesPriorityOver_Reversed);
 }
 
+void CEventSeenCop::InjectHooks()
+{
+    HookInstall(0x5FF380, &CEventSeenCop::Constructor);
+}
+
 CEventAcquaintancePed::CEventAcquaintancePed(CPed* ped)
 {
     m_ped = ped;
@@ -152,4 +157,10 @@ bool CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed(CPed* ped)
         }
     }
     return false;
+}
+
+CEventSeenCop* CEventSeenCop::Constructor(CPed* cop)
+{
+    this->CEventSeenCop::CEventSeenCop(cop);
+    return this;
 }

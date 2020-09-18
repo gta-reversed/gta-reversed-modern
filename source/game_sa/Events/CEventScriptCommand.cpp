@@ -12,11 +12,11 @@ void CEventScriptCommand::InjectHooks()
     HookInstall(0x4B0AA0, &CEventScriptCommand::CloneScriptTask);
 }
 
-CEventScriptCommand::CEventScriptCommand(std::int32_t primaryTaskIndex, CTask* task, bool bAffectsPed)
+CEventScriptCommand::CEventScriptCommand(std::int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds)
 {
     m_primaryTaskIndex = primaryTaskIndex;
     m_task = task;
-    m_bAffectsPed = bAffectsPed;
+    m_affectsDeadPeds = affectsDeadPeds;
 }
 
 CEventScriptCommand::~CEventScriptCommand()
@@ -25,12 +25,12 @@ CEventScriptCommand::~CEventScriptCommand()
         delete m_task;
 }
 
-CEventScriptCommand* CEventScriptCommand::Constructor(std::int32_t primaryTaskIndex, CTask* task, bool bAffectsPed)
+CEventScriptCommand* CEventScriptCommand::Constructor(std::int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn< CEventScriptCommand*, 0x4B0A00, CEventScriptCommand*, std::int32_t, CTask*, char>(this, primaryTaskIndex, task, bAffectsPed);
+    return plugin::CallMethodAndReturn< CEventScriptCommand*, 0x4B0A00, CEventScriptCommand*, std::int32_t, CTask*, char>(this, primaryTaskIndex, task, affectsDeadPeds);
 #else
-    this->CEventScriptCommand::CEventScriptCommand(primaryTaskIndex, task, bAffectsPed);
+    this->CEventScriptCommand::CEventScriptCommand(primaryTaskIndex, task, affectsDeadPeds);
     return this;
 #endif
 }
@@ -91,7 +91,7 @@ CTask* CEventScriptCommand::CloneScriptTask()
 
 int CEventScriptCommand::GetEventPriority_Reversed()
 {
-    if (m_bAffectsPed)
+    if (m_affectsDeadPeds)
         return 75;
     if (!m_task)
         return 53;
@@ -111,18 +111,18 @@ int CEventScriptCommand::GetEventPriority_Reversed()
 
 CEvent*  CEventScriptCommand::Clone_Reversed()
 {
-    return new CEventScriptCommand(m_primaryTaskIndex, CloneScriptTask(), m_bAffectsPed);
+    return new CEventScriptCommand(m_primaryTaskIndex, CloneScriptTask(), m_affectsDeadPeds);
 }
 
 bool CEventScriptCommand::AffectsPed_Reversed(CPed* ped)
 {
-    return ped->IsAlive() || m_bAffectsPed;
+    return ped->IsAlive() || m_affectsDeadPeds;
 }
 
 bool CEventScriptCommand::TakesPriorityOver_Reversed(CEvent* refEvent)
 {
     eEventType refEventType = refEvent->GetEventType();
-    if (m_bAffectsPed && (refEventType == EVENT_DEATH || m_bAffectsPed && refEventType == EVENT_DAMAGE))
+    if (m_affectsDeadPeds && (refEventType == EVENT_DEATH || m_affectsDeadPeds && refEventType == EVENT_DAMAGE))
         return true;
     return GetEventPriority() >= refEvent->GetEventPriority();
 }

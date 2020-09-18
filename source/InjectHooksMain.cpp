@@ -30,6 +30,12 @@ void InjectHooksMain(void)
     CColSphere::InjectHooks();
     CAnimBlendAssociation::InjectHooks();
     CEvent::InjectHooks();
+    CEventSeenPanickedPed::InjectHooks();
+    CEventCarUpsideDown::InjectHooks();
+    CEventPassObject::InjectHooks();
+    CEventLeanOnVehicle::InjectHooks();
+    CEventSeenCop::InjectHooks();
+    CEventOnFire::InjectHooks();
     CEventRevived::InjectHooks();
     CEventHandlerHistory::InjectHooks();
     CEventEditableResponse::InjectHooks();

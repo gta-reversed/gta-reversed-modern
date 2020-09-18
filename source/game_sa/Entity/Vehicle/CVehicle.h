@@ -547,6 +547,9 @@ public:
     bool IsFakeAircraft() { return m_nVehicleSubClass == VEHICLE_FHELI || m_nVehicleSubClass == VEHICLE_FPLANE; }
     bool IsPlane() { return m_nVehicleSubClass == VEHICLE_PLANE; }
     bool IsVehicleTypeValid() { return m_nVehicleSubClass != VEHICLE_NONE; }
+    bool IsBoat() { return m_nVehicleClass == VEHICLE_BOAT; }
+    bool IsBike() { return m_nVehicleClass == VEHICLE_BIKE; }
+    bool IsQuad() { return m_nVehicleClass == VEHICLE_QUAD; }
     static void* operator new(unsigned int size);
     static void operator delete(void* data);
 };

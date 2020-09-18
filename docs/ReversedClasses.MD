@@ -11,6 +11,12 @@
 - CPedIntelligence
 - CColSphere
 - CEvent
+- CEventSeenPanickedPed
+- CEventCarUpsideDown
+- CEventPassObject
+- CEventLeanOnVehicle
+- CEventSeenCop
+- CEventOnFire
 - CEventRevived
 - CEventHandlerHistory
 - CEventEditableResponse
