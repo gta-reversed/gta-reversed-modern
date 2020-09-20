@@ -278,7 +278,7 @@ void CTaskSimpleSwim::ApplyRollAndPitch(CPed* pPed)
     LimbOrientation theLimbOrientation;
     theLimbOrientation.m_fYaw = m_fAimingRotation;
     theLimbOrientation.m_fPitch = m_fUpperTorsoRotationX;
-    pPed->m_pedIK.RotateTorso(pPed->m_apBones[1], theLimbOrientation, false);
+    pPed->m_pedIK.RotateTorso(pPed->m_apBones[PED_NODE_UPPER_TORSO], theLimbOrientation, rwCOMBINEREPLACE);
     RwObject* pRwObject = pPed->m_pRwObject;
     if (pRwObject)
     {

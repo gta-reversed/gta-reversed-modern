@@ -170,8 +170,7 @@ public:
     void ProcessShift() override;
     bool TestCollision(bool bApplySpeed) override;
     virtual int ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint);
-
-    // reversed virtual functions
+private:
     void Add_Reversed();
     void Remove_Reversed();
     CRect* GetBoundRect_Reversed(CRect* pRect);
@@ -180,8 +179,7 @@ public:
     void ProcessShift_Reversed();
     bool TestCollision_Reversed(bool bApplySpeed);
     int ProcessEntityCollision_Reversed(CPhysical* entity, CColPoint* colpoint);
-
-    // functions
+public:
     void RemoveAndAdd();
     void AddToMovingList();
     void RemoveFromMovingList();

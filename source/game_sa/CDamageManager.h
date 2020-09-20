@@ -48,11 +48,11 @@ enum  tComponentGroup {
     COMPGROUP_NA = 6
 };
 
-enum  eWheels {
-    WHEEL_FRONT_LEFT = 0,
-    WHEEL_REAR_LEFT = 1,
-    WHEEL_FRONT_RIGHT = 2,
-    WHEEL_REAR_RIGHT = 3
+enum eWheelStatus {
+    WHEEL_STATUS_FRONT_LEFT = 0,
+    WHEEL_STATUS_REAR_LEFT = 1,
+    WHEEL_STATUS_FRONT_RIGHT = 2,
+    WHEEL_STATUS_REAR_RIGHT = 3
 };
 
 enum  ePanels {
@@ -84,13 +84,7 @@ public:
     float m_fWheelDamageEffect;
     unsigned char m_nEngineStatus;
     union {
-        unsigned char m_anWheelsStatus[4];
-        struct {
-            unsigned char m_nRightRearWheelsStatus;
-            unsigned char m_nRightFrontWheelsStatus;
-            unsigned char m_nLeftRearWheelsStatus;
-            unsigned char m_nLeftFrontWheelsStatus;
-        };
+        unsigned char m_anWheelsStatus[4]; // see eWheelStatus
     };
     union {
         unsigned char m_anDoorsStatus[6];

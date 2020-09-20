@@ -76,7 +76,7 @@ CTaskSimpleHoldEntity::CTaskSimpleHoldEntity(CEntity* pEntityToHold, CVector* pP
     m_bBoneFlags = boneFlags;
     m_fRotation = 0.0f;
     m_nAnimId = ANIM_ID_NO_ANIMATION_SET;
-    m_nAnimGroupId = 0;
+    m_nAnimGroupId = ANIM_GROUP_DEFAULT;
     m_bEntityDropped = false;
     m_bEntityRequiresProcessing = true;
     m_bDisallowDroppingOnAnimEnd = false;
@@ -393,7 +393,7 @@ bool CTaskSimpleHoldEntity::CanThrowEntity() {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x691700, CTaskSimpleHoldEntity*>(this);
 #else
-    return m_pEntityToHold && m_bBoneFlags == HOLD_ENTITY_UPDATE_TRANSLATION_ONLY && m_bBoneFrameId == 6;
+    return m_pEntityToHold && m_bBoneFlags == HOLD_ENTITY_UPDATE_TRANSLATION_ONLY && m_bBoneFrameId == PED_NODE_RIGHT_HAND;
 #endif
 }
 

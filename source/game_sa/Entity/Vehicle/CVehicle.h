@@ -88,6 +88,28 @@ enum eBombState {
     BOMB_IGNITION_ACTIVATED = 5
 };
 
+enum eCarPiece
+{
+    CAR_PIECE_DEFAULT = 0,
+    CAR_PIECE_BONNET,
+    CAR_PIECE_BOOT,
+    CAR_PIECE_BUMP_FRONT,
+    CAR_PIECE_BUMP_REAR,
+    CAR_PIECE_DOOR_LF,
+    CAR_PIECE_DOOR_RF,
+    CAR_PIECE_DOOR_LR,
+    CAR_PIECE_DOOR_RR,
+    CAR_PIECE_WING_LF,
+    CAR_PIECE_WING_RF,
+    CAR_PIECE_WING_LR,
+    CAR_PIECE_WING_RR,
+    CAR_PIECE_WHEEL_LF, // front wheel for 2 wheel bike
+    CAR_PIECE_WHEEL_RF,
+    CAR_PIECE_WHEEL_RL, // rear wheel for 2 wheel bike
+    CAR_PIECE_WHEEL_RR,
+    CAR_PIECE_WINDSCREEN = 19,
+};
+
 #if 0
 enum eOrdnanceType;
 enum eFlightModel;

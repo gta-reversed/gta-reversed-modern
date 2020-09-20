@@ -11,7 +11,7 @@ class CTaskSimpleHoldEntity : public CTaskSimple {
 public:
     class CEntity* m_pEntityToHold;
     CVector m_vecPosition;
-    char m_bBoneFrameId;
+    char m_bBoneFrameId; // see ePedNode
     unsigned char m_bBoneFlags;
     bool field_1A [2];
     float m_fRotation;

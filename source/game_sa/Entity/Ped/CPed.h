@@ -59,6 +59,29 @@ enum ePedType : unsigned int {
     PED_TYPE_MISSION8
 };
 
+enum ePedNode
+{
+    PED_NODE_UPPER_TORSO = 1,
+    PED_NODE_HEAD,
+    PED_NODE_LEFT_ARM,
+    PED_NODE_RIGHT_ARM,
+    PED_NODE_LEFT_HAND,
+    PED_NODE_RIGHT_HAND,
+    PED_NODE_LEFT_LEG,
+    PED_NODE_RIGHT_LEG,
+    PED_NODE_LEFT_FOOT,
+    PED_NODE_RIGHT_FOOT,
+    PED_NODE_RIGHT_LOWER_LEG,
+    PED_NODE_LEFT_LOWER_LEG,
+    PED_NODE_LEFT_LOWER_ARM,
+    PED_NODE_RIGHT_LOWER_ARM,
+    PED_NODE_LEFT_CLAVICLE,
+    PED_NODE_RIGHT_CLAVICLE,
+    PED_NODE_NECK,
+    PED_NODE_JAW,
+    TOTAL_PED_NODES
+};
+
 enum ePedPieceTypes {
     PED_PIECE_UNKNOWN = 0,
     PED_PIECE_TORSO = 3,
@@ -267,7 +290,7 @@ public:
     CPlayerData        *m_pPlayerData;
     unsigned char       m_nCreatedBy; // see ePedCreatedBy
     char                field_485[3];
-    AnimBlendFrameData *m_apBones[19];
+    AnimBlendFrameData *m_apBones[TOTAL_PED_NODES]; // for Index, see ePedNode
     int        m_nAnimGroup;
     CVector2D           m_vecAnimMovingShiftLocal;
     CPedAcquaintance    m_acquaintance;
