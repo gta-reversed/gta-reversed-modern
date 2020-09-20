@@ -7,7 +7,6 @@
 #pragma once
 
 #include "PluginBase.h"
-#include "eCrimeType.h"
 #include "CVector.h"
 
 class  CCrimeBeingQd {

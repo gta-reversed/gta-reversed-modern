@@ -1,6 +1,6 @@
 #pragma once
 #include "PluginBase.h"
-#include "ePedType.h"
+enum ePedType : unsigned int;
 
 class CPedType
 {

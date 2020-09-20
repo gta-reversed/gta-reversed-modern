@@ -1,8 +1,7 @@
 #pragma once
 #include "CPedDamageResponse.h"
-#include "Enums\eWeaponType.h"
-#include "Enums\ePedPieceTypes.h"
-#include "Entity\Ped\CPed.h"
+#include "eWeaponType.h"
+#include "CPed.h"
 
 class CPedDamageResponseCalculator
 {

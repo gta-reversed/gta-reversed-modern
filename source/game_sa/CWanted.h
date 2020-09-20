@@ -9,8 +9,8 @@
 #include "PluginBase.h"
 #include "CCrimeBeingQd.h"
 #include "CAEPoliceScannerAudioEntity.h"
-#include "eCrimeType.h"
 
+enum class eCrimeType : std::int32_t;
 class CPed;
 class CCopPed;
 

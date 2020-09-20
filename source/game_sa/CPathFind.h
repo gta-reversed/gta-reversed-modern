@@ -14,6 +14,12 @@
 #define NUM_PATH_MAP_AREAS 64
 #define NUM_PATH_INTERIOR_AREAS 8
 
+enum ePathType
+{
+    PATH_TYPE_CARS = 0,
+    PATH_TYPE_BOATS
+};
+
 class  CForbiddenArea
 {
 public:

@@ -6,9 +6,10 @@
 */
 #pragma once
 #include "PluginBase.h"
-#include "ePedType.h"
 #include "CZoneInfo.h"
 #include "CZone.h"
+
+enum ePedType : unsigned int;
 
 // used in CPopCycle::m_nPercTypeGroup
 enum ePopcycleGroupPerc {

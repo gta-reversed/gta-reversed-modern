@@ -8,8 +8,17 @@
 
 #include "PluginBase.h"
 #include "CPed.h"
-#include "eCopType.h"
 
+enum eCopType : unsigned int
+{
+    COP_TYPE_CITYCOP,
+    COP_TYPE_LAPDM1,
+    COP_TYPE_SWAT1,
+    COP_TYPE_SWAT2,
+    COP_TYPE_FBI,
+    COP_TYPE_ARMY,
+    COP_TYPE_CSHER = 7
+};
 
 class  CCopPed : public CPed {
 public:

@@ -7,8 +7,9 @@
 #pragma once
 
 #include "PluginBase.h"
-#include "ePedType.h"
 #include "CVector.h"
+
+enum ePedType : unsigned int;
 
 enum  ePedGroupPlacerType {
     GROUP_PLACER_FORMATION1 = 0,

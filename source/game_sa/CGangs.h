@@ -7,8 +7,21 @@
 #pragma once
 
 #include "PluginBase.h"
-#include "ePedType.h"
+#include "CPed.h"
 #include "CGangInfo.h"
+
+enum  eGangID {
+    GANG_BALLAS = 0,
+    GANG_GROVE = 0x1,
+    GANG_VAGOS = 0x2,
+    GANG_RIFA = 0x3,
+    GANG_DANANGBOYS = 0x4,
+    GANG_MAFIA = 0x5,
+    GANG_TRIAD = 0x6,
+    GANG_AZTECAS = 0x7,
+    GANG_UNUSED1 = 0x8, //!< RUSSIAN_MAFIA
+    GANG_UNUSED2 = 0x9 //!< BIKERS
+};
 
 class  CGangs {
 public:

@@ -1,4 +1,4 @@
-﻿/*
+/*
     Plugin-SDK (Grand Theft Auto San Andreas) header file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
@@ -13,6 +13,9 @@
 #include "CColPoint.h"
 
 class CObject;
+
+enum eCarPieces {
+};
 
 enum eCarNodes {
     CAR_NODE_NONE = 0,

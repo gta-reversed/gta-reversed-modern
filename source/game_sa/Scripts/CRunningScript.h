@@ -6,10 +6,11 @@
 */
 #pragma once
 #include "PluginBase.h"
-#include "ePedType.h"
 #include "eScriptCommands.h"
 #include "eWeaponType.h"
 #include "CPed.h"
+
+enum ePedType : unsigned int;
 
 enum eScriptParameterType {
     SCRIPTPARAM_END_OF_ARGUMENTS,

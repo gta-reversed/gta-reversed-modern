@@ -2,10 +2,10 @@
 #include "CPedDamageResponse.h"
 #include "Entity\CEntity.h"
 #include "Enums\eWeaponType.h"
-#include "Enums\ePedPieceTypes.h"
 #include "Enums\eEventType.h"
 #include "CEvent.h"
 
+enum ePedPieceTypes;
 class CEventDamage : public CEventEditableResponse {
 public:
     CEntity* m_pSourceEntity;
