@@ -282,8 +282,8 @@ void CTaskSimpleSwim::ApplyRollAndPitch(CPed* pPed)
     RwObject* pRwObject = pPed->m_pRwObject;
     if (pRwObject)
     {
-        RwMatrix* pRwMatrix = &((RwFrame*)pRwObject->parent)->modelling;
-        CMatrix pedMatrix(pRwMatrix, 0);
+        RwFrame* frame = reinterpret_cast<RwFrame*>(rwObjectGetParent(pPed->m_pRwObject));
+        CMatrix pedMatrix(RwFrameGetMatrix(frame), 0);
         CMatrix rotationMatrix;
         rotationMatrix.SetTranslate(CVector(0.0f, 0.0f, 0.0f));
         rotationMatrix.RotateY(m_fTurningRotationY);

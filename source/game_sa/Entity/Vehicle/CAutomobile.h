@@ -190,7 +190,7 @@ public:
     // Some debug function
     void DebugCode();
     // Repair vehicle's tyre
-    void FixTyre(eWheels wheel);
+    void FixTyre(eWheelStatus wheel);
     // Repair vehicle's door. "nodeIndex" is an index of component in m_modelNodes array
     void FixDoor(int nodeIndex, eDoors door);
     // Repair vehicle's panel. "nodeIndex" is an index of component in m_modelNodes array

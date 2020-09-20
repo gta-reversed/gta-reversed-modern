@@ -159,9 +159,9 @@ void CAutomobile::DebugCode()
 }
 
 // Converted from thiscall void CAutomobile::FixTyre(eWheels wheel) 0x6A3580
-void CAutomobile::FixTyre(eWheels wheel)
+void CAutomobile::FixTyre(eWheelStatus wheel)
 {
-    ((void(__thiscall*)(CAutomobile*, eWheels))0x6A3580)(this, wheel);
+    ((void(__thiscall*)(CAutomobile*, eWheelStatus))0x6A3580)(this, wheel);
 }
 
 // Converted from thiscall void CAutomobile::FixDoor(int nodeIndex, eDoors door) 0x6A35A0
