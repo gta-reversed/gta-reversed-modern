@@ -8,11 +8,11 @@
 
 #include "PluginBase.h"
 
-struct  tTransmissionGear
+struct tTransmissionGear
 {
-	float m_fMaxVelocity;
-	float m_fChangeUpVelocity;
-	float m_fChangeDownVelocity;
+    float m_maxVelocity;
+    float m_changeUpVelocity; // max velocity needed to change the current gear to higher
+    float m_changeDownVelocity; // min velocity needed to change the current gear to lower
 };
 
 VALIDATE_SIZE(tTransmissionGear, 0xC);
