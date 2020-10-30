@@ -46,6 +46,8 @@ enum eCarNodes {
     CAR_NUM_NODES
 };
 
+class FxSystem_c;
+
 class CAutomobile : public CVehicle {
 protected:
     CAutomobile(plugin::dummy_func_t) : CVehicle(plugin::dummy) {}
@@ -131,7 +133,7 @@ public:
     char field_963;
     float field_964;
     int field_968[4];
-    void *pNitroParticle[2];
+    FxSystem_c* m_exhaustNitroFxSystem[2];
     char field_980;
     char field_981;
     short field_982;
@@ -205,7 +207,7 @@ public:
     // Make player vehicle jumps when pressing horn
     void BoostJumpControl();
     // Creates/updates nitro particle
-    void DoNitroEffect(float state);
+    void DoNitroEffect(float power);
     // Remove nitro particle
     void StopNitroEffect();
     void NitrousControl(signed char);

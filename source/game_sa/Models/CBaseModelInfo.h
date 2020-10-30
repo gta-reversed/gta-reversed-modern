@@ -37,6 +37,8 @@ struct tTimeInfo
 
 VALIDATE_SIZE(tTimeInfo, 4);
 
+class CVehicleModelInfo;
+
 // originally an abstract class
 class  CBaseModelInfo {
 public:
@@ -75,7 +77,7 @@ public:
 				struct{
 					unsigned char : 2;
 					unsigned char nCarmodId : 5;
-					unsigned char : 1;
+					unsigned char : 1; // bUseCommonVehicleDictionary
 				};
 			};
 			
@@ -133,6 +135,8 @@ public:
 	void SetIsLod(int bIsLod);
 	void SetOwnsColModel(int bOwns);
 	void IncreaseAlpha();
+
+    CVehicleModelInfo* AsVehicleModelInfoPtr() { return reinterpret_cast<CVehicleModelInfo*>(this); }
     inline CColModel* GetColModel() { return m_pColModel; }
 };
 

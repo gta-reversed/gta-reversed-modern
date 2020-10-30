@@ -113,8 +113,8 @@ void FxSystem_c::GetCompositeMatrix(RwMatrixTag* out) {
 }
 
 // Converted from thiscall void FxSystem_c::GetPlayStatus(void) 0x4AA900
-void FxSystem_c::GetPlayStatus() {
-    ((void(__thiscall *)(FxSystem_c*))0x4AA900)(this);
+eFxSystemPlayStatus FxSystem_c::GetPlayStatus() {
+    return ((eFxSystemPlayStatus(__thiscall *)(FxSystem_c*))0x4AA900)(this);
 }
 
 // Converted from thiscall void FxSystem_c::SetLocalParticles(uchar enable) 0x4AA910

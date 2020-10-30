@@ -13,7 +13,7 @@
  *
  * You should inherit this class to use it in List_c lists!
  */
-class  ListItem_c
+class ListItem_c
 {
 protected:
 	ListItem_c *next;

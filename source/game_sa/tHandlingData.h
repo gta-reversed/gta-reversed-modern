@@ -98,6 +98,7 @@ struct  tHandlingData {
             unsigned int m_bSteerRearwheels : 1;
             unsigned int m_bHbRearwheelSteer : 1;
             unsigned int m_bAltSteerOpt : 1;
+
             unsigned int m_bWheelFNarrow2 : 1;
             unsigned int m_bWheelFNarrow : 1;
             unsigned int m_bWheelFWide : 1;
@@ -106,6 +107,7 @@ struct  tHandlingData {
             unsigned int m_bWheelRNarrow : 1;
             unsigned int m_bWheelRWide : 1;
             unsigned int m_bWheelRWide2 : 1;
+
             unsigned int m_bHydraulicGeom : 1;
             unsigned int m_bHydraulicInst : 1;
             unsigned int m_bHydraulicNone : 1;

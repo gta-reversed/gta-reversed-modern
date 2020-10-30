@@ -43,7 +43,7 @@ public:
     CColPoint      m_anWheelColPoint[4];
     float m_wheelsDistancesToGround1[4];
     float field_720[4];
-    float field_730[4];
+    float m_wheelCollisionState[4];
     float field_740;
     int            m_anWheelSurfaceType[2];
     char field_74C[2];

@@ -20,7 +20,7 @@ enum eFxSystemKillStatus {
     FX_KILLED = 2
 };
 
-enum eFxSystemPlayStatus {
+enum class eFxSystemPlayStatus {
     FX_PLAYING = 0,
     FX_STOPPED = 1
 };
@@ -82,7 +82,7 @@ public:
     void Exit();
     void CopyParentMatrix();
     void GetCompositeMatrix(RwMatrixTag* out);
-    void GetPlayStatus();
+    eFxSystemPlayStatus GetPlayStatus();
     void SetLocalParticles(unsigned char enable);
     unsigned int ForAllParticles(void(*callback)(Particle_c *, int, void **), void* data);
     static void UpdateBoundingBoxCB(Particle_c* particle, int arg1, void** data);

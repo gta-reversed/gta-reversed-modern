@@ -212,10 +212,74 @@ void CAutomobile::BoostJumpControl()
     ((void(__thiscall*)(CAutomobile*))0x6A3A60)(this);
 }
 
-// Converted from thiscall void CAutomobile::DoNitroEffect(float state) 0x6A3BD0
-void CAutomobile::DoNitroEffect(float state)
+void CAutomobile::DoNitroEffect(float power)
 {
-    ((void(__thiscall*)(CAutomobile*, float))0x6A3BD0)(this, state);
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__thiscall*)(CAutomobile*, float))0x6A3BD0)(this, power);
+#else
+    auto modelInfo = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
+    CVector exhaustPosition = modelInfo->m_pVehicleStruct->m_avDummyPos[DUMMY_EXHAUST];
+    bool firstExhaustSubmergedInWater = false;
+    bool secondExhaustSubmergedInWater = false;
+    float level = 0.0f;
+    if (physicalFlags.bTouchingWater) {
+        CVector point = *m_matrix * exhaustPosition;
+        if (CWaterLevel::GetWaterLevel(point.x, point.y, point.z, &level, true, nullptr)) {
+            if (level >= point.z)
+                firstExhaustSubmergedInWater = true;
+        }
+    }
+    CVector secondExhaustPosition;
+    if (m_pHandlingData->m_bDoubleExhaust) {
+        secondExhaustPosition = exhaustPosition;
+        secondExhaustPosition.x *= -1.0f;
+        if (!physicalFlags.bTouchingWater) {
+            CVector point = *m_matrix * secondExhaustPosition;
+            if (CWaterLevel::GetWaterLevel(point.x, point.y, point.z, &level, true, nullptr)) {
+                if (level >= point.z)
+                    secondExhaustSubmergedInWater = true;
+            }
+        }
+    }
+    RwFrame* frame = reinterpret_cast<RwFrame*>(rwObjectGetParent(m_pRwObject));
+    RwMatrix* rwMatrix = RwFrameGetMatrix(frame);
+    FxSystem_c* firstExhaustFxSystem = m_exhaustNitroFxSystem[0];
+    if (firstExhaustFxSystem)
+    {
+        firstExhaustFxSystem->SetConstTime(1, fabs(power));
+        eFxSystemPlayStatus playStatus = firstExhaustFxSystem->GetPlayStatus();
+        if (playStatus == eFxSystemPlayStatus::FX_PLAYING && firstExhaustSubmergedInWater)
+            firstExhaustFxSystem->Stop();
+        else if (playStatus == eFxSystemPlayStatus::FX_STOPPED && !firstExhaustSubmergedInWater)
+            firstExhaustFxSystem->Play();
+    }
+    else if (!firstExhaustSubmergedInWater && rwMatrix) {
+        firstExhaustFxSystem = g_fxMan.CreateFxSystem("nitro", &exhaustPosition, rwMatrix, true);
+        m_exhaustNitroFxSystem[0] = firstExhaustFxSystem;
+        if (firstExhaustFxSystem) {
+            firstExhaustFxSystem->SetLocalParticles(true);
+            firstExhaustFxSystem->Play();
+        }
+    }
+    if (m_pHandlingData->m_bDoubleExhaust) {
+        FxSystem_c* secondExhaustFxSystem = m_exhaustNitroFxSystem[1];
+        if (secondExhaustFxSystem) {
+            secondExhaustFxSystem->SetConstTime(1, fabs(power));
+            if (secondExhaustFxSystem->GetPlayStatus() == eFxSystemPlayStatus::FX_PLAYING && secondExhaustSubmergedInWater)
+                secondExhaustFxSystem->Stop();
+            else if (secondExhaustFxSystem->GetPlayStatus() == eFxSystemPlayStatus::FX_STOPPED && !secondExhaustSubmergedInWater)
+                secondExhaustFxSystem->Play();
+        }
+        else if (!firstExhaustSubmergedInWater && rwMatrix) {
+            secondExhaustFxSystem = g_fxMan.CreateFxSystem("nitro", &secondExhaustPosition, rwMatrix, true);
+            m_exhaustNitroFxSystem[1] = secondExhaustFxSystem;
+            if (secondExhaustFxSystem) {
+                secondExhaustFxSystem->SetLocalParticles(1);// enable 'local positions' flag
+                secondExhaustFxSystem->Play();
+            }
+        }
+    }
+#endif
 }
 
 // Converted from thiscall void CAutomobile::StopNitroEffect(void) 0x6A3E60

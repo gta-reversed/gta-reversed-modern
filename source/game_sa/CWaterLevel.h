@@ -1,8 +1,5 @@
 #pragma once
-#include <Windows.h>
-#include <inttypes.h>
-#include "Core\CVector.h"
-
+class CVector;
 struct CRenPar
 {
     float z;
