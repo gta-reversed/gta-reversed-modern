@@ -322,7 +322,7 @@ void CWorld::RemoveFallenCars() {
                 if (!pVeh->IsCreatedBy(eVehicleCreatedBy::PARKED_VEHICLE))
                     continue;
 
-            //if (pVeh->m_nType > eEntityType::ENTITY_TYPE_BUILDING && pVeh->m_nType < eEntityType::ENTITY_TYPE_DUMMY)
+            if (pVeh->IsPhysical())
                 pVeh->RemoveFromMovingList();
 
             delete pVeh;

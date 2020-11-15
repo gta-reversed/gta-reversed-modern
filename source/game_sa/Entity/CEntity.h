@@ -161,6 +161,13 @@ public:
     bool IsEntityOccluded();
     bool IsCurrentAreaOrBarberShopInterior();
     void UpdateRW();
+
+    inline bool IsPhysical()
+    {
+        return m_nType == eEntityType::ENTITY_TYPE_VEHICLE ||
+               m_nType == eEntityType::ENTITY_TYPE_PED ||
+               m_nType == eEntityType::ENTITY_TYPE_OBJECT;
+    }
 };
 
 VALIDATE_SIZE(CEntity, 0x38);
