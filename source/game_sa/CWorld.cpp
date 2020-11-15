@@ -254,15 +254,11 @@ void CWorld::RemoveFallenPeds() {
         CPed* pPed = CPools::ms_pPedPool->GetAt(i - 1);
         if (!pPed)
             continue;
-
         const CVector& vecPedPos = pPed->GetPosition();
-
         if (vecPedPos.z > -100.0f)
             continue;
-
         if (!pPed->IsCreatedBy(ePedCreatedBy::PED_GAME) || pPed->IsPlayer())
         {
-            // Find the closest path node to the ped
             CNodeAddress pathNodeAddress;
             ThePaths.FindNodeClosestToCoors(&pathNodeAddress, vecPedPos.x, vecPedPos.y, vecPedPos.z, 1, 1000000.0f, 0, 0, 0, 0, 0);
             if (pathNodeAddress.m_wAreaId != -1)
@@ -272,9 +268,8 @@ void CWorld::RemoveFallenPeds() {
                 pathNodePos.z += 2.0f;
                 pPed->Teleport(pathNodePos, false); 
             }
-            else // Likely never gonna happen
+            else
                 pPed->SetPosn(vecPedPos.x, vecPedPos.y, -95);
-            
             pPed->ResetMoveSpeed();
         }
         else
