@@ -574,6 +574,9 @@ public:
     bool IsQuad() { return m_nVehicleClass == VEHICLE_QUAD; }
     static void* operator new(unsigned int size);
     static void operator delete(void* data);
+
+    inline unsigned char GetCreatedBy() { return m_nCreatedBy; }
+    inline bool IsCreatedBy(eVehicleCreatedBy v) { return v == m_nCreatedBy; }
 };
 
 VALIDATE_SIZE(CVehicle, 0x5A0);

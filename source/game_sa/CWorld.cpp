@@ -279,7 +279,56 @@ void CWorld::RemoveFallenPeds() {
 
 // Converted from cdecl void CWorld::RemoveFallenCars(void) 0x565E80
 void CWorld::RemoveFallenCars() {
+
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x565E80>();
+#else
+    for (int i = CPools::ms_pVehiclePool->GetSize(); i; i--)
+    {
+        CVehicle* pVeh = CPools::ms_pVehiclePool->GetAt(i - 1);
+        if (!pVeh)
+            continue;
+
+        const CVector& vecPos = pVeh->GetPosition();
+        if (vecPos.z > -100.0f)
+            continue;
+
+        const auto ShouldWeKeepIt = [pVeh]() {
+            if (pVeh->IsCreatedBy(eVehicleCreatedBy::MISSION_VEHICLE) && !pVeh->physicalFlags.bDestroyed)
+                return true;
+
+            if (pVeh == FindPlayerVehicle(-1, false))
+                return true;
+
+            return pVeh->m_pDriver && pVeh->m_pDriver->IsPlayer();
+        };
+
+        if (ShouldWeKeepIt())
+        {
+            CNodeAddress pathNodeAddress;
+            ThePaths.FindNodeClosestToCoors(&pathNodeAddress, vecPos.x, vecPos.y, vecPos.z, 1, 1000000.0f, 0, 0, 0, 0, 0);
+            if (pathNodeAddress.m_wAreaId != -1)
+            {
+                const auto pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
+                pVeh->Teleport(pathNodePos, false);
+            }
+            else
+                pVeh->Teleport(CVector(vecPos.x, vecPos.y, 0), false);
+            pVeh->ResetMoveSpeed();
+        }
+        else
+        {
+            if (!pVeh->IsCreatedBy(eVehicleCreatedBy::RANDOM_VEHICLE))
+                if (!pVeh->IsCreatedBy(eVehicleCreatedBy::PARKED_VEHICLE))
+                    continue;
+
+            //if (pVeh->m_nType > eEntityType::ENTITY_TYPE_BUILDING && pVeh->m_nType < eEntityType::ENTITY_TYPE_DUMMY)
+                pVeh->RemoveFromMovingList();
+
+            delete pVeh;
+        }
+    }
+#endif
 }
 
 // Converted from cdecl void CWorld::UseDetonator(CEntity *creator) 0x5660B0
