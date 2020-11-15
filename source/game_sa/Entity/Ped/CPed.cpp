@@ -841,7 +841,7 @@ void CPed::GiveWeaponAtStartOfFight()
             case ePedType::PED_TYPE_GANG8:
             case ePedType::PED_TYPE_GANG9:
             case ePedType::PED_TYPE_GANG10:
-                if ((m_nRandomSeed & 0x3FFu) < 400 && m_nDelayedWeapon == 55)
+                if ((m_nRandomSeed & 0x3FFu) < 400 && m_nDelayedWeapon == eWeaponType::WEAPON_UNIDENTIFIED)
                 {
                     GiveDelayedWeapon(eWeaponType::WEAPON_PISTOL, 50);
                     int slot = GetWeaponSlot(eWeaponType::WEAPON_PISTOL);
@@ -851,13 +851,13 @@ void CPed::GiveWeaponAtStartOfFight()
             case ePedType::PED_TYPE_DEALER:
             case ePedType::PED_TYPE_CRIMINAL:
             case ePedType::PED_TYPE_PROSTITUTE:
-                if ((m_nRandomSeed & 0x3FFu) < 200 && m_nDelayedWeapon == 55)
+                if ((m_nRandomSeed & 0x3FFu) < 200 && m_nDelayedWeapon == eWeaponType::WEAPON_UNIDENTIFIED)
                 {
                     GiveDelayedWeapon(eWeaponType::WEAPON_KNIFE, 50);
                     int slot = GetWeaponSlot(eWeaponType::WEAPON_KNIFE);
                     SetCurrentWeapon(slot);
                 }
-                if ((m_nRandomSeed & 0x3FFu) < 400 && m_nDelayedWeapon == 55)
+                if ((m_nRandomSeed & 0x3FFu) < 400 && m_nDelayedWeapon == eWeaponType::WEAPON_UNIDENTIFIED)
                 {
                     GiveDelayedWeapon(eWeaponType::WEAPON_PISTOL, 50);
                     int slot = GetWeaponSlot(eWeaponType::WEAPON_PISTOL);
