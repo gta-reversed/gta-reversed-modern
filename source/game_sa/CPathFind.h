@@ -92,7 +92,7 @@ public:
     unsigned char m_nFloodFill;
 
     unsigned int m_nNumLinks : 4;
-    unsigned int m_nTrafficLevel : 2;
+    unsigned int m_nTrafficLevel : 2; // TrafficLevel uses 4 steps: 0 = full 1 = high 2 = medium 3 = low
     unsigned int m_bRoadBlocks : 1;
     unsigned int m_bWaterNode : 1;
 
