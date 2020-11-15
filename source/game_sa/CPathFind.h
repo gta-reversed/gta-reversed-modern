@@ -92,7 +92,7 @@ public:
     unsigned char m_nFloodFill;
 
     unsigned int m_nNumLinks : 4;
-    unsigned int m_nTrafficLevel : 2;
+    unsigned int m_nTrafficLevel : 2; // TrafficLevel uses 4 steps: 0 = full 1 = high 2 = medium 3 = low
     unsigned int m_bRoadBlocks : 1;
     unsigned int m_bWaterNode : 1;
 
@@ -158,6 +158,12 @@ public:
     void UnLoadPathFindData(int index);
     std::int32_t LoadSceneForPathNodes(CVector point);
     bool IsWaterNodeNearby(CVector position, float radius);
+
+    // pathLink is the same as the returned pointer(at least on success)
+    // pathLink should be a pointer to CNodeAddress on the stack or somewhere, and
+    // the result is stored in it
+    CNodeAddress* FindNodeClosestToCoors(CNodeAddress* pathLink, float X, float Y, float Z, int _nodeType, float maxDistance,
+        unsigned short unk2, int unk3, unsigned short unk4, unsigned short bBoatsOnly, int unk6);
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);

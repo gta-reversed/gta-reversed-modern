@@ -246,7 +246,36 @@ bool CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool 
 
 // Converted from cdecl void CWorld::RemoveFallenPeds(void) 0x565CB0
 void CWorld::RemoveFallenPeds() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x565CB0>();
+#else
+    for (int i = CPools::ms_pPedPool->GetSize(); i; i--)
+    {
+        CPed* pPed = CPools::ms_pPedPool->GetAt(i - 1);
+        if (!pPed)
+            continue;
+        const CVector& vecPedPos = pPed->GetPosition();
+        if (vecPedPos.z > -100.0f)
+            continue;
+        if (!pPed->IsCreatedBy(ePedCreatedBy::PED_GAME) || pPed->IsPlayer())
+        {
+            CNodeAddress pathNodeAddress;
+            ThePaths.FindNodeClosestToCoors(&pathNodeAddress, vecPedPos.x, vecPedPos.y, vecPedPos.z, 1, 1000000.0f, 0, 0, 0, 0, 0);
+            if (pathNodeAddress.m_wAreaId != -1)
+            {
+                CVector pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
+                pathNodePos *= 0.125f;
+                pathNodePos.z += 2.0f;
+                pPed->Teleport(pathNodePos, false); 
+            }
+            else
+                pPed->SetPosn(vecPedPos.x, vecPedPos.y, -95);
+            pPed->ResetMoveSpeed();
+        }
+        else
+            CPopulation::RemovePed(pPed);
+    }
+#endif
 }
 
 // Converted from cdecl void CWorld::RemoveFallenCars(void) 0x565E80

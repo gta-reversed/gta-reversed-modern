@@ -230,6 +230,8 @@ public:
     void AttachEntityToEntity(CPhysical* pEntityAttachTo, CVector* vecAttachOffset, CQuaternion* attachRotation);
     bool CheckCollision();
     bool CheckCollision_SimpleCar();
+
+    void ResetMoveSpeed() { m_vecMoveSpeed = CVector(); }
 };
 
 VALIDATE_SIZE(CPhysical, 0x138);
