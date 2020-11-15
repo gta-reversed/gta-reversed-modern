@@ -266,14 +266,14 @@ void CWorld::RemoveFallenPeds() {
         {
             // Find the closest path node to the ped
             CNodeAddress pathNodeAddress;
-            ThePaths.FindNodeClosestToCoors(&pathNodeAddress, vecPedPos.x, vecPedPos.y, vecPedPos.z, 1, 1e6, 0, 0, 0, 0, 0);
-            if (pathNodeAddress.m_wAreaId != -1) // Found a path node?
+            ThePaths.FindNodeClosestToCoors(&pathNodeAddress, vecPedPos.x, vecPedPos.y, vecPedPos.z, 1, 1000000.0f, 0, 0, 0, 0, 0);
+            if (pathNodeAddress.m_wAreaId != -1)
             {
                 const auto pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
-                pPed->Teleport(pathNodePos, false); // Yes, teleport him to the node
+                pPed->Teleport(pathNodePos, false); 
             }
             else // Likely never gonna happen
-                pPed->SetPosn(vecPedPos.x, vecPedPos.y, -95); // Nope, teleport him to z = -95
+                pPed->SetPosn(vecPedPos.x, vecPedPos.y, -95);
             
             pPed->ResetMoveSpeed();
         }
