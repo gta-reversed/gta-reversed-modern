@@ -6,8 +6,6 @@ Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
-extern  CPathFind& ThePaths;
-
 std::int32_t CWorld::TOTAL_PLAYERS = 2;
 int &CWorld::ms_iProcessLineNumCrossings = *(int *)0xB7CD60;
 float &CWorld::fWeaponSpreadRate = *(float *)0xB7CD64;
