@@ -267,7 +267,9 @@ void CWorld::RemoveFallenPeds() {
             ThePaths.FindNodeClosestToCoors(&pathNodeAddress, vecPedPos.x, vecPedPos.y, vecPedPos.z, 1, 1000000.0f, 0, 0, 0, 0, 0);
             if (pathNodeAddress.m_wAreaId != -1)
             {
-                const auto pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
+                CVector pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
+                pathNodePos *= 0.125f;
+                pathNodePos.z += 2.0f;
                 pPed->Teleport(pathNodePos, false); 
             }
             else // Likely never gonna happen
