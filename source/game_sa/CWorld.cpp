@@ -6,6 +6,8 @@ Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
+extern  CPathFind& ThePaths;
+
 std::int32_t CWorld::TOTAL_PLAYERS = 2;
 int &CWorld::ms_iProcessLineNumCrossings = *(int *)0xB7CD60;
 float &CWorld::fWeaponSpreadRate = *(float *)0xB7CD64;
@@ -246,7 +248,39 @@ bool CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool 
 
 // Converted from cdecl void CWorld::RemoveFallenPeds(void) 0x565CB0
 void CWorld::RemoveFallenPeds() {
+#ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x565CB0>();
+#else
+    for (int i = CPools::ms_pPedPool->GetSize(); i; i--)
+    {
+        CPed* pPed = CPools::ms_pPedPool->GetAt(i - 1);
+        if (!pPed)
+            continue;
+
+        const CVector& vecPedPos = pPed->GetPosition();
+
+        if (vecPedPos.z > -100.0f)
+            continue;
+
+        if (!pPed->IsCreatedBy(ePedCreatedBy::PED_GAME) || pPed->IsPlayer())
+        {
+            // Find the closest path node to the ped
+            CNodeAddress pathNodeAddress;
+            ThePaths.FindNodeClosestToCoors(&pathNodeAddress, vecPedPos.x, vecPedPos.y, vecPedPos.z, 1, 1e6, 0, 0, 0, 0, 0);
+            if (pathNodeAddress.m_wAreaId != -1) // Found a path node?
+            {
+                const auto pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
+                pPed->Teleport(pathNodePos, false); // Yes, teleport him to the node
+            }
+            else // Likely never gonna happen
+                pPed->SetPosn(vecPedPos.x, vecPedPos.y, -95); // Nope, teleport him to z = -95
+            
+            pPed->ResetMoveSpeed();
+        }
+        else
+            CPopulation::RemovePed(pPed);
+    }
+#endif
 }
 
 // Converted from cdecl void CWorld::RemoveFallenCars(void) 0x565E80
