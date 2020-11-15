@@ -77,3 +77,11 @@ bool CPathFind::IsWaterNodeNearby(CVector position, float radius)
 {
     return plugin::CallMethodAndReturn<bool, 0x450DE0, CPathFind*, CVector, float>(this, position, radius);
 }
+
+CNodeAddress* CPathFind::FindNodeClosestToCoors(CNodeAddress* pathLink, float X, float Y, float Z, int _nodeType, float maxDistance,
+    unsigned short unk2, int unk3, unsigned short unk4, unsigned short bBoatsOnly, int unk6)
+{
+    return plugin::CallMethodAndReturn<CNodeAddress*, 0x44F460, CPathFind*, CNodeAddress*, float, float, float, int, float,
+        unsigned short, int, unsigned short, unsigned short, int>(this, pathLink, X, Y, Z, _nodeType, maxDistance, unk2, unk3, unk4, bBoatsOnly, unk6);
+}
+
