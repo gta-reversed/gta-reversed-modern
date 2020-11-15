@@ -264,7 +264,6 @@ void CWorld::RemoveFallenPeds() {
             if (pathNodeAddress.m_wAreaId != -1)
             {
                 CVector pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
-                pathNodePos *= 0.125f;
                 pathNodePos.z += 2.0f;
                 pPed->Teleport(pathNodePos, false); 
             }
