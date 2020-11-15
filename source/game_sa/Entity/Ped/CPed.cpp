@@ -829,6 +829,18 @@ void CPed::GiveWeaponAtStartOfFight()
 #else
     if (m_nCreatedBy != 2 && m_aWeapons[m_nActiveWeaponSlot].m_nType == eWeaponType::WEAPON_UNARMED)
     {
+        const auto GiveRandomWeaponByType = [this](eWeaponType type, auto maxRandom)
+        {
+            if ((m_nRandomSeed & 0x3FFu) >= maxRandom)
+                return;
+
+            if (m_nDelayedWeapon != eWeaponType::WEAPON_UNIDENTIFIED)
+                return;
+
+            GiveDelayedWeapon(type, 50);
+            SetCurrentWeapon(GetWeaponSlot(type));
+        };
+
         switch (m_nPedType)
         {
             case ePedType::PED_TYPE_GANG1:
@@ -841,28 +853,13 @@ void CPed::GiveWeaponAtStartOfFight()
             case ePedType::PED_TYPE_GANG8:
             case ePedType::PED_TYPE_GANG9:
             case ePedType::PED_TYPE_GANG10:
-                if ((m_nRandomSeed & 0x3FFu) < 400 && m_nDelayedWeapon == eWeaponType::WEAPON_UNIDENTIFIED)
-                {
-                    GiveDelayedWeapon(eWeaponType::WEAPON_PISTOL, 50);
-                    int slot = GetWeaponSlot(eWeaponType::WEAPON_PISTOL);
-                    SetCurrentWeapon(slot);
-                }
+                GiveRandomWeaponByType(eWeaponType::WEAPON_PISTOL, 400);
                 break;
             case ePedType::PED_TYPE_DEALER:
             case ePedType::PED_TYPE_CRIMINAL:
             case ePedType::PED_TYPE_PROSTITUTE:
-                if ((m_nRandomSeed & 0x3FFu) < 200 && m_nDelayedWeapon == eWeaponType::WEAPON_UNIDENTIFIED)
-                {
-                    GiveDelayedWeapon(eWeaponType::WEAPON_KNIFE, 50);
-                    int slot = GetWeaponSlot(eWeaponType::WEAPON_KNIFE);
-                    SetCurrentWeapon(slot);
-                }
-                if ((m_nRandomSeed & 0x3FFu) < 400 && m_nDelayedWeapon == eWeaponType::WEAPON_UNIDENTIFIED)
-                {
-                    GiveDelayedWeapon(eWeaponType::WEAPON_PISTOL, 50);
-                    int slot = GetWeaponSlot(eWeaponType::WEAPON_PISTOL);
-                    SetCurrentWeapon(slot);
-                }
+                GiveRandomWeaponByType(eWeaponType::WEAPON_KNIFE, 200);
+                GiveRandomWeaponByType(eWeaponType::WEAPON_PISTOL, 400);
                 break;
             default:
                 break;
