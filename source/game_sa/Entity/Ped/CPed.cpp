@@ -20,6 +20,7 @@ void CPed::InjectHooks()
     HookInstall(0x5E6580, (char(CPed::*)()) &CPed::GetWeaponSkill);
     HookInstall(0x5E6530, &CPed::ReplaceWeaponForScriptedCutscene);
     HookInstall(0x5E6550, &CPed::RemoveWeaponForScriptedCutscene);
+    HookInstall(0x5E8AB0, &CPed::GiveWeaponAtStartOfFight);
 }
 
 CPed::CPed(ePedType pedtype) : CPhysical(plugin::dummy), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
@@ -824,7 +825,48 @@ bool IsPedPointerValid(CPed* ped)
 // Converted from thiscall void CPed::GiveWeaponAtStartOfFight(void) 0x5E8AB0
 void CPed::GiveWeaponAtStartOfFight()
 {
-    ((void(__thiscall *)(CPed*))0x5E8AB0)(this);
+#ifdef USE_DEFAULT_FUNCTIONS
+    ((void(__thiscall*)(CPed*))0x5E8AB0)(this);
+#else
+    if (m_nCreatedBy != PED_MISSION && GetActiveWeapon().m_nType == eWeaponType::WEAPON_UNARMED)
+    {
+        const auto GiveRandomWeaponByType = [this](eWeaponType type, auto maxRandom)
+        {
+            if ((m_nRandomSeed & 0x3FFu) >= maxRandom)
+                return;
+
+            if (m_nDelayedWeapon != eWeaponType::WEAPON_UNIDENTIFIED)
+                return;
+
+            GiveDelayedWeapon(type, 50);
+            SetCurrentWeapon(GetWeaponSlot(type));
+        };
+
+        switch (m_nPedType)
+        {
+            case ePedType::PED_TYPE_GANG1:
+            case ePedType::PED_TYPE_GANG2:
+            case ePedType::PED_TYPE_GANG3:
+            case ePedType::PED_TYPE_GANG4:
+            case ePedType::PED_TYPE_GANG5:
+            case ePedType::PED_TYPE_GANG6:
+            case ePedType::PED_TYPE_GANG7:
+            case ePedType::PED_TYPE_GANG8:
+            case ePedType::PED_TYPE_GANG9:
+            case ePedType::PED_TYPE_GANG10:
+                GiveRandomWeaponByType(eWeaponType::WEAPON_PISTOL, 400);
+                break;
+            case ePedType::PED_TYPE_DEALER:
+            case ePedType::PED_TYPE_CRIMINAL:
+            case ePedType::PED_TYPE_PROSTITUTE:
+                GiveRandomWeaponByType(eWeaponType::WEAPON_KNIFE, 200);
+                GiveRandomWeaponByType(eWeaponType::WEAPON_PISTOL, 400);
+                break;
+            default:
+                break;
+        }
+    }
+#endif
 }
 
 void CPed::GiveWeaponWhenJoiningGang()
