@@ -827,7 +827,7 @@ void CPed::GiveWeaponAtStartOfFight()
 #ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPed*))0x5E8AB0)(this);
 #else
-    if (m_nCreatedBy != 2 && m_aWeapons[m_nActiveWeaponSlot].m_nType == eWeaponType::WEAPON_UNARMED)
+    if (m_nCreatedBy != PED_MISSION && GetActiveWeapon().m_nType == eWeaponType::WEAPON_UNARMED)
     {
         const auto GiveRandomWeaponByType = [this](eWeaponType type, auto maxRandom)
         {
