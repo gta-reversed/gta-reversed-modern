@@ -61,6 +61,8 @@ public:
     static CVector &SnookerTableMax; // default { 497.7925, -1670.3999, 13.19 }
     static CVector &SnookerTableMin; // default { 2495.8525, -1671.4099, 12.9 }
 
+    static void InjectHooks();
+
     static void ResetLineTestOptions();
     static void Initialise();
     static void Add(CEntity* entity);

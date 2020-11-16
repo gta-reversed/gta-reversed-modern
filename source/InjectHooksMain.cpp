@@ -132,6 +132,7 @@ void InjectHooksMain(void)
     cBuoyancy::InjectHooks();
     CWanted::InjectHooks();
     CWeapon::InjectHooks();
+    CWorld::InjectHooks();
     cTransmission::InjectHooks();
     CVehicle::InjectHooks();
     CPlayerPed::InjectHooks();
