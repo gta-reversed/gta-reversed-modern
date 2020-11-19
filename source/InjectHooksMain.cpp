@@ -129,6 +129,7 @@ void InjectHooksMain(void)
     CTaskSimplePutDownEntity::InjectHooks();
     CTaskSimplePickUpEntity::InjectHooks();
     CTaskSimpleStealthKill::InjectHooks();
+    CTimer::InjectHooks();
     cBuoyancy::InjectHooks();
     CWanted::InjectHooks();
     CWeapon::InjectHooks();

@@ -690,7 +690,7 @@ void CDebugMenu::ImguiDrawLoop()
     ImGui::NewFrame();
 
     ImguiDisplayPlayerInfo();
-    //ImguiDisplayFramePerSecond();
+    ImguiDisplayFramePerSecond();
 
     ImGui::EndFrame();
     ImGui::Render();
