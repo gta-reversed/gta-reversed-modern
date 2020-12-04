@@ -28,6 +28,7 @@ void InjectHooksMain(void)
     CPedIntelligence::InjectHooks();
     CTrain::InjectHooks();
     CColSphere::InjectHooks();
+    CColLine::InjectHooks();
     CAnimBlendAssociation::InjectHooks();
     CEvent::InjectHooks();
     CEventSeenPanickedPed::InjectHooks();
@@ -143,6 +144,7 @@ void InjectHooksMain(void)
     CMenuManager::InjectHooks();
     CSprite2d::InjectHooks();
     CCheat::InjectHooks();
+    CBirds::InjectHooks();
 
     CAEAudioUtility::InjectHooks();
     CAEDataStream::InjectHooks();

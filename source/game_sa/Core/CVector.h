@@ -109,6 +109,10 @@ inline float DistanceBetweenPoints(const CVector &pointOne, const CVector &point
     return (pointTwo - pointOne).Magnitude();
 }
 
+inline CVector Lerp(const CVector& vecOne, const CVector& vecTwo, float fProgress) {
+    return vecOne * (1.0F - fProgress) + vecTwo * fProgress;
+}
+
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b);
 float DotProduct(CVector* v1, CVector* v2);
 CVector CrossProduct(const CVector& a, const CVector& b);

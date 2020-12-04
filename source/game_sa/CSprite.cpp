@@ -9,3 +9,8 @@ void CSprite::RenderOneXLUSprite(float x, float y, float z, float halfWidth, flo
         short, float, unsigned char, unsigned char, unsigned char))0x70D000)(x, y, z, halfWidth, halfHeight,
             red, green, blue, alpha, rhw, intensity, udir, vdir);
 }
+
+bool CSprite::CalcScreenCoors(RwV3d const& posn, RwV3d* out, float* w, float* h, bool checkMaxVisible, bool checkMinVisible)
+{
+    return ((bool(__cdecl*)(RwV3d const&, RwV3d *, float*, float*, bool, bool))0x70CE30)(posn, out, w, h, checkMaxVisible, checkMinVisible);
+}

@@ -39,8 +39,8 @@ public:
     * GetWaterDepth(CVector const&, float*, float*, float*)
     */
     static bool GetWaterLevel(float x, float y, float z, float * pOutWaterLevel, char bUnderWater, CVector* pVector);
+    static bool GetWaterLevelNoWaves(float x, float y, float z, float* pOutWaterLevel, float* fUnkn1, float* fUnkn2);
     /*
-    * GetWaterLevelNoWaves(float, float, float, float*, float*, float*)
     * HandleBeachToysStuff()
     * IsLocationOutOfWorldBounds_WS(CVector const&, int)
     * MarkQuadsAndPolysToBeRendered(int, int, bool)

@@ -239,3 +239,8 @@ std::wstring UTF8ToUnicode(const std::string &str);
 std::string UnicodeToUTF8(const std::wstring &str);
 
 extern int WindowsCharset;
+
+extern unsigned short &uiTempBufferIndicesStored;
+extern unsigned short &uiTempBufferVerticesStored;
+extern unsigned short *aTempBufferIndices; // size 4096
+extern RxObjSpace3DVertex* aTempBufferVertices; // size 1024 - after this there are 2 more arrays like this, both sized 512
