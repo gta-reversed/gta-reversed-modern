@@ -10,6 +10,7 @@
 - CVisibilityPlugins
 - CPedIntelligence
 - CColSphere
+- CBirds
 - cTransmission
 - CEvent
 - CEventSeenPanickedPed
