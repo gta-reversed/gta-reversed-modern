@@ -29,10 +29,10 @@ unsigned int& CTimer::m_snTimeInMilliseconds = *(unsigned int*)0xB7CB84;
 unsigned int& CTimer::ms_nPreviousTimeInMillisecondsNonClipped = *(unsigned int*)0xB7CB68;
 std::uint64_t& CTimer::m_snRenderStartTime = *(std::uint64_t*)0xB7CB38;
 
-unsigned int& CTimer::m_snPPPPreviousTimeInMilliseconds = *(unsigned int*)0xB7CB78;
-unsigned int& CTimer::m_snPPPreviousTimeInMilliseconds = *(unsigned int*)0xB7CB74;
-unsigned int& CTimer::m_snPPreviousTimeInMilliseconds = *(unsigned int*)0xB7CB70;
-unsigned int& CTimer::m_snPreviousTimeInMilliseconds = *(unsigned int*)0xB7CB6C;
+unsigned int& CTimer::m_snPPPPreviousTimeInMilliseconds = *(unsigned int*)0xB7CB6C;
+unsigned int& CTimer::m_snPPPreviousTimeInMilliseconds = *(unsigned int*)0xB7CB70;
+unsigned int& CTimer::m_snPPreviousTimeInMilliseconds = *(unsigned int*)0xB7CB74;
+unsigned int& CTimer::m_snPreviousTimeInMilliseconds = *(unsigned int*)0xB7CB78;
 
 float& CTimer::ms_fOldTimeStep = *(float*)0xB7CB54;
 float& CTimer::ms_fSlowMotionScale = *(float*)0xB7CB60;
@@ -52,7 +52,6 @@ void CTimer::Shutdown()
     ((void(__cdecl *)()) 0x5618C0)();
 }
 
-// Also called GetRealTimeScale in some idbs
 void CTimer::UpdateVariables(float timeStep)
 {
     ((void(__cdecl *)(float)) 0x5618D0)(timeStep);
@@ -110,30 +109,25 @@ void CTimer::Update()
 #else
     if (!ms_fnTimerFunction)
         return;
-
     m_sbEnableTimeDebug = true;
-    game_FPS = float(1000.0 / (m_snTimeInMillisecondsNonClipped - ms_nPreviousTimeInMillisecondsNonClipped));
+    game_FPS = float(1000.0f / (m_snTimeInMillisecondsNonClipped - ms_nPreviousTimeInMillisecondsNonClipped));
 
     // Update history
     m_snPPPPreviousTimeInMilliseconds = m_snPPPreviousTimeInMilliseconds;
     m_snPPPreviousTimeInMilliseconds = m_snPPreviousTimeInMilliseconds;
     m_snPPreviousTimeInMilliseconds = m_snPreviousTimeInMilliseconds;
     m_snPreviousTimeInMilliseconds = m_snTimeInMilliseconds;
-
     ms_nPreviousTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped;
 
-    const auto nRenderTimeBefore = m_snRenderStartTime;
+    const uint64_t nRenderTimeBefore = m_snRenderStartTime;
     m_snRenderStartTime = ms_fnTimerFunction();
-
     auto fTimeDelta = float(m_snRenderStartTime - nRenderTimeBefore);
-
-    const bool bPaused = m_CodePause || m_UserPause;
-    if (!bPaused)
+    if (!GetIsPaused())
         fTimeDelta *= ms_fTimeScale;
-
     m_snTimeInMillisecondsPauseMode += unsigned int(fTimeDelta / m_snTimerDivider);
-
-    UpdateVariables(bPaused ? 0.0f : fTimeDelta);
+    if (GetIsPaused())
+        fTimeDelta = 0.0f;
+    UpdateVariables(fTimeDelta);
     m_FrameCounter++;
 #endif
 }
