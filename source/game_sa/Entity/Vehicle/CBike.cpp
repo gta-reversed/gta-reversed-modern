@@ -6,6 +6,12 @@
 */
 #include "StdInc.h"
 
+
+void CBike::InjectHooks()
+{
+    ReversibleHooks::Install("CBike", "ProcessBuoyancy", 0x6B5FB0, &CBike::ProcessBuoyancy);
+}
+
 // Converted from void CBike::ProcessAI(uint &) 0x0
 void CBike::ProcessAI(unsigned int& arg0) {
     ((void(__thiscall*)(CBike*, unsigned int&))(*(void***)this)[66])(this, arg0);
@@ -43,7 +49,93 @@ void CBike::ReduceHornCounter() {
 
 // Converted from thiscall void CBike::ProcessBuoyancy(void) 0x6B5FB0
 void CBike::ProcessBuoyancy() {
-    ((void(__thiscall*)(CBike*))0x6B5FB0)(this);
+    CVector vecBuoyancyTurnPoint;
+    CVector vecBuoyancyForce;
+    if (!mod_Buoyancy.ProcessBuoyancy(this, m_fBuoyancyConstant, &vecBuoyancyTurnPoint, &vecBuoyancyForce)) {
+        vehicleFlags.bIsDrowning = false;
+        physicalFlags.bSubmergedInWater = false;
+        physicalFlags.bTouchingWater = false;
+        return;
+    }
+
+    physicalFlags.bTouchingWater = true;
+    ApplyMoveForce(vecBuoyancyForce);
+    ApplyTurnForce(vecBuoyancyForce, vecBuoyancyTurnPoint);
+
+    auto fTimeStep = std::max(0.01F, CTimer::ms_fTimeStep);
+    auto fUsedMass = m_fMass / 125.0F;
+    auto fBuoyancyForceZ = vecBuoyancyForce.z / (fTimeStep * fUsedMass);
+
+    if (fUsedMass > m_fBuoyancyConstant)
+        fBuoyancyForceZ *= 1.05F * fUsedMass / m_fBuoyancyConstant;
+
+    if (physicalFlags.bMakeMassTwiceAsBig)
+        fBuoyancyForceZ *= 1.5F;
+
+    auto fBuoyancyForceMult = std::max(0.5F, 1.0F - fBuoyancyForceZ / 20.0F);
+    auto fSpeedMult = pow(fBuoyancyForceMult, CTimer::ms_fTimeStep);
+    m_vecMoveSpeed *= fSpeedMult;
+    m_vecTurnSpeed *= fSpeedMult;
+
+    if (fBuoyancyForceZ > 0.8F
+        || (fBuoyancyForceZ > 0.4F && IsAnyWheelNotMakingContactWithGround())) {
+
+        vehicleFlags.bIsDrowning = true;
+        physicalFlags.bSubmergedInWater = true;
+
+        m_vecMoveSpeed.z = std::max(-0.1F, m_vecMoveSpeed.z);
+
+        auto pDriver = static_cast<CPed*>(m_pDriver);
+        if (pDriver) {
+            ProcessPedInVehicleBuoyancy(pDriver, true);
+        }
+        else {
+            vehicleFlags.bEngineOn = false;
+        }
+
+        for (int iPassengerInd = 0; iPassengerInd < m_nMaxPassengers; ++iPassengerInd) {
+            auto pCurPassenger = m_apPassengers[iPassengerInd];
+            ProcessPedInVehicleBuoyancy(pCurPassenger, false);
+        }
+    }
+    else {
+        vehicleFlags.bIsDrowning = false;
+        physicalFlags.bSubmergedInWater = false;
+    }
+}
+
+inline void CBike::ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver)
+{
+    if (!pPed)
+        return;
+
+    pPed->physicalFlags.bTouchingWater = true;
+    if (!pPed->IsPlayer() && damageFlags.bIgnoreWater)
+        return;
+
+    if (pPed->IsPlayer())
+        static_cast<CPlayerPed*>(pPed)->HandlePlayerBreath(true, 1.0F);
+
+    if (IsAnyWheelMakingContactWithGround()) {
+        if (!pPed->IsPlayer()) {
+            auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::ms_fTimeStep, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, false);
+            auto damageEvent = CEventDamage(this, CTimer::m_snTimeInMilliseconds, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
+            if (damageEvent.AffectsPed(pPed))
+                pedDamageResponseCalc.ComputeDamageResponse(pPed, &damageEvent.m_damageResponse, true);
+            else
+                damageEvent.m_damageResponse.m_bDamageCalculated = true;
+
+            pPed->GetEventGroup().Add(&damageEvent, false);
+        }
+    }
+    else {
+        auto knockOffBikeEvent = CEventKnockOffBike(this, &m_vecMoveSpeed, &m_vecLastCollisionImpactVelocity, m_fDamageIntensity,
+            0.0F, eKnockOffType::KNOCK_OFF_TYPE_FALL, 0, 0, nullptr, bIsDriver, false);
+
+        pPed->GetEventGroup().Add(&knockOffBikeEvent, false);
+        if (bIsDriver)
+            vehicleFlags.bEngineOn = false;
+    }
 }
 
 // Converted from thiscall void CBike::ResetSuspension(void) 0x6B6740

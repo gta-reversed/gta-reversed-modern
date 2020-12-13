@@ -18,17 +18,20 @@ struct CWaterVertex
 class CWaterLevel
 {
 public:
+    static void InjectHooks();
     /*
     * AddToQuadsAndTrianglesList(int, int, int, unsigned int)
     * AddWaterLevelQuad(int, int, CRenPar, int, int, CRenPar, int, int, CRenPar, int, int, CRenPar, unsigned int)
     * AddWaterLevelTriangle(int, int, CRenPar, int, int, CRenPar, int, int, CRenPar, unsigned int)
     */
     static int AddWaterLevelVertex(int x, int y, CRenPar renPar);
-    /* AddWaveToResult(float, float, float*, float, float, CVector*)
+    static void AddWaveToResult(float x, float y, float* pfWaterLevel, float fUnkn1, float fUnkn2, CVector* pVecNormal);
+    static void CalculateWavesOnlyForCoordinate(int x, int y, float fUnkn1, float fUnkn2, float* fOutWave);
+    /*
+    * static void AddWaveToResult(float x, float y, float z, float* pLevel, unsigned char bTouchingWater, CVector* normalVec);
     * AddWaveToResult(int, int, float*, float, float)
     * BlockHit(int, int)
     * CalculateWavesForCoordinate(int, int, float, float, float*, float*, float*, CVector*)
-    * CalculateWavesOnlyForCoordinate(int, int, float, float, float*)
     * ChangeWaterConfiguration(int)
     * CreateBeachToy(CVector const&, eBeachToy)
     * FillQuadsAndTrianglesList()
@@ -38,7 +41,7 @@ public:
     * GetGroundLevel_WS(CVector const&, float*, ColData*, float)
     * GetWaterDepth(CVector const&, float*, float*, float*)
     */
-    static bool GetWaterLevel(float x, float y, float z, float * pOutWaterLevel, char bUnderWater, CVector* pVector);
+    static bool GetWaterLevel(float x, float y, float z, float * pOutWaterLevel, unsigned char bTouchingWater, CVector* pVecNormals);
     static bool GetWaterLevelNoWaves(float x, float y, float z, float* pOutWaterLevel, float* fUnkn1, float* fUnkn2);
     /*
     * HandleBeachToysStuff()
@@ -72,12 +75,12 @@ public:
     * SplitWaterRectangleAlongYLine(int, int, int, int, int, CRenPar, CRenPar, CRenPar, CRenPar)
     * SplitWaterTriangleAlongXLine(int, int, int, CRenPar, int, int, CRenPar, int, int, CRenPar)
     * SplitWaterTriangleAlongYLine(int, int, int, CRenPar, int, int, CRenPar, int, int, CRenPar)
-    * SyncWater()
     * TestLineAgainstWater(CVector, CVector, CVector*)
     * TestQuadToGetWaterLevel(CWaterQuad*, float, float, float, float*, float*, float*)
     * TestTriangleToGetWaterLevel(CWaterTriangle*, float, float, float, float*, float*, float*)
     * WaterLevelInitialise()
     */
+    static void SyncWater();
 private:
     /*
     * m_BlocksToBeRenderedOutsideWorldX
@@ -107,8 +110,10 @@ private:
     * m_nNumOfWaterTriangles
     */
     static uint32_t m_nNumOfWaterVertices;
+    static uint32_t& m_nWaterTimeOffset;
+    static float* faWaveMultipliersX;
+    static float* faWaveMultipliersY;
     /* m_nWaterConfiguration
-    * m_nWaterTimeOffset
     * ms_WaterFog
     */
 };

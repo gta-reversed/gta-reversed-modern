@@ -231,8 +231,8 @@ void CPlayerPed::ResetPlayerBreath() {
 }
 
 // Converted from thiscall void CPlayerPed::HandlePlayerBreath(bool, float) 0x60A8D0
-void CPlayerPed::HandlePlayerBreath(bool arg0, float arg1) {
-    plugin::CallMethod<0x60A8D0, CPlayerPed *, bool, float>(this, arg0, arg1);
+void CPlayerPed::HandlePlayerBreath(bool bDecreaseAir, float fMultiplier) {
+    plugin::CallMethod<0x60A8D0, CPlayerPed *, bool, float>(this, bDecreaseAir, fMultiplier);
 }
 
 // Converted from thiscall void CPlayerPed::SetRealMoveAnim(void) 0x60A9C0

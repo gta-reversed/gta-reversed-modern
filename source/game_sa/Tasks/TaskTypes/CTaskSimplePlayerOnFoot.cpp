@@ -1325,7 +1325,7 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
                 CAnimBlendAssocGroup* pAnimGroup = &CAnimManager::ms_aAnimAssocGroups[pPlayerPed->m_nAnimGroup];
 
                 if (pPlayerPed->m_pPlayerData->m_bPlayerSprintDisabled
-                    || g_surfaceInfos->IsSprint(pPlayerPed->m_nContactSurface)
+                    || g_surfaceInfos->CantSprintOn(pPlayerPed->m_nContactSurface)
                     || (pAnimHierarchy = pAnimGroup->GetAnimation(1)->m_pHeirarchy,
                         pAnimHierarchy == pAnimGroup->GetAnimation(2)->m_pHeirarchy))
                 {

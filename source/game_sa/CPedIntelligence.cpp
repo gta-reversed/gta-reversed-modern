@@ -817,13 +817,9 @@ void CPedIntelligence::ProcessAfterPreRender() {
     if (m_pPed->bInVehicle)
     {
         CVehicle* pVehicle = m_pPed->m_pVehicle;
-        if (pVehicle)
-        {
-            if (pVehicle->m_nVehicleClass == CLASS_LEISUREBOAT)
-            {
-                CBike* pBike = (CBike*)pVehicle;
-                pBike->FixHandsToBars(m_pPed);
-            }
+        if (pVehicle && pVehicle->IsBike()) {
+            CBike* pBike = (CBike*)pVehicle;
+            pBike->FixHandsToBars(m_pPed);
         }
     }
 
@@ -1259,17 +1255,13 @@ void CPedIntelligence::ProcessFirst() {
     if (m_pPed->bInVehicle)
     {
         CVehicle* pVehicle = m_pPed->m_pVehicle;
-        if (pVehicle)
-        {
-            if (pVehicle->m_nVehicleClass == CLASS_LEISUREBOAT)
-            {
-                CBike* pBike = static_cast<CBike*>(pVehicle);
-                pBike->m_bPedLeftHandFixed = 0;
-                pBike->m_bPedRightHandFixed = 0;
-            }
+        if (pVehicle && pVehicle->IsBike()) {
+            CBike* pBike = static_cast<CBike*>(pVehicle);
+            pBike->m_bPedLeftHandFixed = false;
+            pBike->m_bPedRightHandFixed = false;
         }
     }
-    m_pPed->bMoveAnimSpeedHasBeenSetByTask = 0;
+    m_pPed->bMoveAnimSpeedHasBeenSetByTask = false;
     g_LoadMonitor.EndTimer(0);
 #endif
 }

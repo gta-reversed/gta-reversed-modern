@@ -66,7 +66,7 @@ public:
     float ControlButtonSprint(eSprintType sprintType);
     float GetButtonSprintResults(eSprintType sprintType);
     void ResetPlayerBreath();
-    void HandlePlayerBreath(bool arg0, float arg1);
+    void HandlePlayerBreath(bool bDecreaseAir, float fMultiplier);
     void SetRealMoveAnim();
     void MakeChangesForNewWeapon(eWeaponType weaponType);
     void Compute3rdPersonMouseTarget(bool meleeWeapon);

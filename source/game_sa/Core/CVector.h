@@ -113,6 +113,10 @@ inline CVector Lerp(const CVector& vecOne, const CVector& vecTwo, float fProgres
     return vecOne * (1.0F - fProgress) + vecTwo * fProgress;
 }
 
+inline CVector Pow(const CVector& vec, float fPow) {
+    return CVector(pow(vec.x, fPow), pow(vec.y, fPow), pow(vec.z, fPow));
+}
+
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b);
 float DotProduct(CVector* v1, CVector* v2);
 CVector CrossProduct(const CVector& a, const CVector& b);

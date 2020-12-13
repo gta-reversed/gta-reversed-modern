@@ -126,6 +126,12 @@ void CDebugMenu::ImguiInputUpdate() {
     if (m_MousePos.y >= (float)RsGlobal.maximumHeight)
         m_MousePos.y = (float)RsGlobal.maximumHeight;
 
+    if (pad->NewMouseControllerState.wheelDown)
+        io->MouseWheel -= (20.0F * io->DeltaTime);
+
+    if (pad->NewMouseControllerState.wheelUp)
+        io->MouseWheel += (20.0F * io->DeltaTime);
+
     io->MousePos = ImVec2(m_MousePos.x, m_MousePos.y);
     io->MouseDown[0] = pad->NewMouseControllerState.lmb;
     io->MouseDown[1] = pad->NewMouseControllerState.mmb;
@@ -629,6 +635,47 @@ void CDebugMenu::ProcessMissionTool()
     }
 }
 
+void CDebugMenu::ProcessHooksTool()
+{
+    ImGui::SetNextItemOpen(true);
+    if (ImGui::TreeNode("Reversible Hooks"))
+    {
+        static std::string sHookIdentifier;
+        static std::string sHookFunctionName;
+
+        auto& allHooks = ReversibleHooks::GetAllHooks();
+        for (auto& classHooks : allHooks) {
+            ImGui::AlignTextToFramePadding();
+            bool treeOpen = ImGui::TreeNodeEx(classHooks.first.c_str(), ImGuiTreeNodeFlags_AllowItemOverlap);
+            ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 40);
+            if (ImGui::Button("-")) {
+                for (auto& hook : classHooks.second)
+                    hook.m_bImguiHooked = false;
+            }
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Disable all");
+
+            ImGui::SameLine();
+            if (ImGui::Button("+")) {
+                for (auto& hook : classHooks.second)
+                    hook.m_bImguiHooked = true;
+            }
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("Enable all");
+
+            for (auto& hook : classHooks.second)
+                if (hook.m_bIsHooked != hook.m_bImguiHooked)
+                    ReversibleHooks::Switch(hook);
+
+            if (treeOpen) {
+                for (auto& hook : classHooks.second) {
+                    ImGui::Checkbox(hook.m_sFunctionName.c_str(), &hook.m_bImguiHooked);
+                }
+                ImGui::TreePop();
+            }
+        }
+        ImGui::TreePop();
+    }
+}
+
 void CDebugMenu::ImguiDisplayPlayerInfo()
 {
     if (!CTimer::GetIsPaused()) {
@@ -667,6 +714,11 @@ void CDebugMenu::ImguiDisplayPlayerInfo()
                     ProcessMissionTool();
                     ImGui::EndTabItem();
                 }
+                if (ImGui::BeginTabItem("Hooks"))
+                {
+                    ProcessHooksTool();
+                    ImGui::EndTabItem();
+                }
                 ImGui::EndTabBar();
             }
             ImGui::End();
@@ -678,7 +730,8 @@ void CDebugMenu::ImguiDisplayPlayerInfo()
 void CDebugMenu::ImguiDrawLoop()
 {
     CPad* pad = CPad::GetPad(0);
-    if (pad->IsCtrlPressed() && pad->IsStandardKeyJustDown('M')) {
+    auto bF7JustPressed = (pad->NewKeyState.FKeys[6] && !pad->OldKeyState.FKeys[6]);
+    if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustDown('M')) || bF7JustPressed) {
         m_showMenu = !m_showMenu;
         pad->bPlayerSafe = m_showMenu;
     }

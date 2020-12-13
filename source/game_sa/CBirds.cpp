@@ -15,33 +15,26 @@ unsigned int* CBirds::auRenderIndices = (unsigned int*)0x8D52F8; // Size: 30
 
 void CBirds::InjectHooks()
 {
-    HookInstall(0x711EC0, &CBirds::Init);
-    HookInstall(0x712300, &CBirds::Shutdown);
-    HookInstall(0x712E40, &CBirds::HandleGunShot);
-    HookInstall(0x712330, &CBirds::Update);
-    HookInstall(0x711EF0, &CBirds::CreateNumberOfBirds);
-    HookInstall(0x712810, &CBirds::Render);
+    ReversibleHooks::Install("CBirds", "Init", 0x711EC0, &CBirds::Init);
+    ReversibleHooks::Install("CBirds", "Shutdown", 0x712300, &CBirds::Shutdown);
+    ReversibleHooks::Install("CBirds", "HandleGunShot", 0x712E40, &CBirds::HandleGunShot);
+    ReversibleHooks::Install("CBirds", "Update", 0x712330, &CBirds::Update);
+    ReversibleHooks::Install("CBirds", "CreateNumberOfBirds", 0x711EF0, &CBirds::CreateNumberOfBirds);
+    ReversibleHooks::Install("CBirds", "Render", 0x712810, &CBirds::Render);
 }
 
 void CBirds::Init()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x711EC0>();
-#else
     for (int32_t i = 0; i < MAX_BIRDS; ++i) {
         auto& pBird = aBirds[i];
         pBird.m_bCreated = false;
     }
     CBirds::uiNumberOfBirds = 0;
     CBirds::bHasBirdBeenShot = false;
-#endif
 }
 
 void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int iBirdCount, eBirdsBiome eBiome, bool bCheckObstacles)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x711EF0, CVector, CVector, int, eBirdsBiome, bool>(vecStartPos, vecTargetPos, iBirdCount, eBiome, bCheckObstacles);
-#else
     float fMaxDistance;
 
     switch (eBiome) {
@@ -131,28 +124,20 @@ void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int 
         pBird.m_vecTargetVelocity = vecBirdDirection * fSpeedMult;
         pBird.m_vecCurrentVelocity = pBird.m_vecTargetVelocity;
     }
-#endif
 }
 
 void CBirds::Shutdown()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x712300>();
-#else
     for (int32_t i = 0; i < MAX_BIRDS; ++i) {
         auto& pBird = aBirds[i];
         if (pBird.m_bCreated)
             pBird.m_bCreated = false;
     }
     CBirds::uiNumberOfBirds = 0;
-#endif
 }
 
 void CBirds::Update()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x712330>();
-#else
     auto const& vecCamPos = TheCamera.GetPosition();
 
     if (!CGame::currArea
@@ -266,14 +251,10 @@ void CBirds::Update()
         pBird.m_vecPosn += (fTimeStep * pBird.m_vecCurrentVelocity);
         pBird.m_fAngle = atan2(pBird.m_vecTargetVelocity.x, pBird.m_vecTargetVelocity.y);
     }
-#endif
 }
 
 void CBirds::Render()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x712810>();
-#else
     if (!CBirds::uiNumberOfBirds)
         return;
 
@@ -295,7 +276,7 @@ void CBirds::Render()
         if (pBird.m_eBirdMode == eBirdMode::BIRD_DRAW_NOUPDATE || pBird.m_eBirdMode == eBirdMode::BIRD_DRAW_UPDATE) {
             auto& vecPos = matBirdTransform.GetPosition();
             auto uiTime = CTimer::m_snTimeInMilliseconds + uiWingMoveTimeOffset;
-            vecPos.z += sin((double)(uiTime % pBird.m_nWingStillness) * (6.28F / (double)pBird.m_nWingStillness)) * 0.1F;
+            vecPos.z += sin((float)(uiTime % pBird.m_nWingStillness) * (TWO_PI / (float)pBird.m_nWingStillness)) * 0.1F;
         }
 
         auto vecScreenPos = RwV3d();
@@ -318,8 +299,8 @@ void CBirds::Render()
                 }
 
                 auto uiTime = CTimer::m_snTimeInMilliseconds + uiWingMoveTimeOffset;
-                auto fSin1 = -sin((double)((uiTime + pBird.m_nWingStillness / 6) % pBird.m_nWingStillness) * 6.28F / (double)pBird.m_nWingStillness);
-                auto fSin2 = -sin((double)((uiTime + pBird.m_nWingStillness) % pBird.m_nWingStillness) * 6.28F / (double)pBird.m_nWingStillness);
+                auto fSin1 = -sin((float)((uiTime + pBird.m_nWingStillness / 6) % pBird.m_nWingStillness) * TWO_PI / (float)pBird.m_nWingStillness);
+                auto fSin2 = -sin((float)((uiTime + pBird.m_nWingStillness) % pBird.m_nWingStillness) * TWO_PI / (float)pBird.m_nWingStillness);
 
                 auto fSizeUsed = std::max(1.0F, pBird.m_fSize);
                 auto fSin1Factor = fSin1 / fSizeUsed;
@@ -412,14 +393,10 @@ void CBirds::Render()
         RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)gpCloudTex[1]->raster);
         CBrightLights::RenderOutGeometryBuffer();
     }
-#endif
 }
 
 void CBirds::HandleGunShot(CVector const* pointA, CVector const* pointB)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x712E40, CVector const*, CVector const*>(pointA, pointB);
-#else
     CColLine colLine(*pointA, *pointB);
 
     for (int32_t i = 0; i < MAX_BIRDS; ++i) {
@@ -439,5 +416,4 @@ void CBirds::HandleGunShot(CVector const* pointA, CVector const* pointB)
             pBird.m_bCreated = false;
         }
     }
-#endif
 }

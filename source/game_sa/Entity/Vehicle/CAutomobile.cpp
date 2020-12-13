@@ -11,9 +11,15 @@ CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;
 CMatrix* CAutomobile::matW2B = (CMatrix*)0xC1C220;
 CColPoint* aAutomobileColPoints = (CColPoint*)0xC1BFF8;
 
+void CAutomobile::InjectHooks()
+{
+    ReversibleHooks::Install("CAutomobile", "ProcessBuoyancy", 0x6A8C00, &CAutomobile::ProcessBuoyancy);
+}
+
 CAutomobile::CAutomobile(int modelIndex, unsigned char createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy) {
     ((void(__thiscall*)(CAutomobile*, int, unsigned char, bool))0x6B0A90)(this, modelIndex, createdBy, setupSuspensionLines);
 }
+
 
 CVector* CAutomobile::AddMovingCollisionSpeed(CVector* out, CVector& vecSpeed)
 {
@@ -369,7 +375,169 @@ CObject* CAutomobile::SpawnFlyingComponent(int nodeIndex, unsigned int collision
 // Converted from thiscall void CAutomobile::ProcessBuoyancy(void) 0x6A8C00
 void CAutomobile::ProcessBuoyancy()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6A8C00)(this);
+    /* Unused code in sa function
+    CTimeCycle::GetAmbientRed_Obj();
+    CTimeCycle::GetAmbientGreen_Obj();
+    CTimeCycle::GetAmbientBlue_Obj();
+    rand();
+    */
+
+    CVector vecBuoyancyTurnPoint;
+    CVector vecBuoyancyForce;
+    if (!mod_Buoyancy.ProcessBuoyancy(this, m_fBuoyancyConstant, &vecBuoyancyTurnPoint, &vecBuoyancyForce)) {
+        vehicleFlags.bIsDrowning = false;
+        physicalFlags.bSubmergedInWater = false;
+        physicalFlags.bTouchingWater = false;
+
+        m_fBuoyancyConstant = m_pHandlingData->m_fBuoyancyConstant;
+        for (int32_t i = 0; i < 4; ++i) {
+            auto& pColPoint = m_wheelColPoint[i];
+            if (m_fWheelsSuspensionCompression[i] < 1.0F && g_surfaceInfos->IsWater(pColPoint.m_nSurfaceTypeB)) {
+                auto vecWaterImpactVelocity = (pColPoint.m_vecPoint + GetUp() * 0.3F) - GetPosition();
+                CVector vecSpeed;
+                GetSpeed(&vecSpeed, vecWaterImpactVelocity);
+            }
+        }
+        return; // The loop above is pretty much an overcomplicated NOP.
+    }
+
+    if (IsPlane() && m_vecMoveSpeed.z < -1.0F) {
+        BlowUpCar(this, false);
+    }
+
+    physicalFlags.bTouchingWater = true;
+    auto fTimeStep = std::max(0.01F, CTimer::ms_fTimeStep);
+    auto fUsedMass = m_fMass / 125.0F;
+    auto fBuoyancyForceZ = vecBuoyancyForce.z / (fTimeStep * fUsedMass);
+
+    if (fUsedMass > m_fBuoyancyConstant)
+        fBuoyancyForceZ *= 1.05F * fUsedMass / m_fBuoyancyConstant;
+
+    if (physicalFlags.bMakeMassTwiceAsBig)
+        fBuoyancyForceZ *= 1.5F;
+
+    auto fBuoyancyForceMult = std::max(0.5F, 1.0F - fBuoyancyForceZ / 20.0F);
+    auto fSpeedMult = pow(fBuoyancyForceMult, CTimer::ms_fTimeStep);
+
+    if (m_nModelIndex != eModelID::MODEL_VORTEX
+        || GetUp().z <= 0.3F
+        || vehicleFlags.bIsDrowning) {
+
+        m_vecMoveSpeed *= fSpeedMult;
+        m_vecTurnSpeed *= fSpeedMult;
+    }
+
+    bool bHeliRotorKilled = false;
+    if (m_pHandlingData->m_bIsHeli && m_fHeliRotorSpeed > 0.15F) {
+        bool bForceKillRotor = false;
+        if (m_nModelIndex != eModelID::MODEL_SEASPAR && m_nModelIndex != eModelID::MODEL_LEVIATHN) {
+            auto fUsedForce = std::max(1.0F, fBuoyancyForceZ * 8.0F);
+            auto vecMoveForceHeli = (vecBuoyancyForce * -2.0F) / fUsedForce;
+            ApplyMoveForce(vecMoveForceHeli);
+            m_vecTurnSpeed *= fSpeedMult;
+            if (fBuoyancyForceZ <= 0.9F)
+                return;
+
+            bForceKillRotor = true;
+        }
+
+        if (fBuoyancyForceZ > 3.0F || bForceKillRotor) {
+            m_fHeliRotorSpeed = 0.0F;
+            bHeliRotorKilled = true;
+        }
+    }
+
+    physicalFlags.bTouchingWater = true;
+    ApplyMoveForce(vecBuoyancyForce);
+    ApplyTurnForce(vecBuoyancyForce, vecBuoyancyTurnPoint);
+
+    if ((m_nModelIndex == eModelID::MODEL_SEASPAR || m_nModelIndex == eModelID::MODEL_LEVIATHN)
+        && fBuoyancyForceZ < 3.0F
+        && (GetUp().z > -0.5F || fBuoyancyForceZ < 0.6F)) {
+
+        vehicleFlags.bIsDrowning = false;
+        physicalFlags.bSubmergedInWater = false;
+        return;
+    }
+
+    if ((CCheat::m_aCheatsActive[eCheats::CHEAT_CARS_ON_WATER] || m_nModelIndex == eModelID::MODEL_VORTEX)
+        && m_nStatus == eEntityStatus::STATUS_PLAYER
+        && GetUp().z > 0.3F) {
+
+        if (!vehicleFlags.bIsDrowning) {
+            vehicleFlags.bIsDrowning = false;
+            physicalFlags.bSubmergedInWater = false;
+            return;
+        }
+    }
+
+    if (bHeliRotorKilled || fBuoyancyForceZ >= 1.0F
+        || (fBuoyancyForceZ > 0.6F && IsAnyWheelNotMakingContactWithGround())) {
+
+        vehicleFlags.bIsDrowning = true;
+        physicalFlags.bSubmergedInWater = true;
+
+        m_vecMoveSpeed.z = std::max(-0.1F, m_vecMoveSpeed.z);
+
+        if (m_fMass * 8.0F / 1250.0F < m_fBuoyancyConstant)
+            m_fBuoyancyConstant -= (m_fMass * 0.01F / 1250.0F);
+
+        if (m_fBuoyancyConstant < m_fMass / 125.0F)
+            vehicleFlags.bEngineOn = false;
+
+        auto pDriver = static_cast<CPed*>(m_pDriver);
+        ProcessPedInVehicleBuoyancy(pDriver, true);
+
+        for (int iPassengerInd = 0; iPassengerInd < m_nMaxPassengers; ++iPassengerInd) {
+            auto pCurPassenger = m_apPassengers[iPassengerInd];
+            ProcessPedInVehicleBuoyancy(pCurPassenger, false);
+        }
+    }
+    else {
+        vehicleFlags.bIsDrowning = false;
+        physicalFlags.bSubmergedInWater = false;
+    }
+}
+
+inline void CAutomobile::ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver)
+{
+    if (!pPed)
+        return;
+
+    pPed->physicalFlags.bTouchingWater = true;
+    if (!pPed->IsPlayer() && npcFlags.bIgnoreWater)
+        return;
+
+    if (!IsSubclassQuad() || IsAnyWheelMakingContactWithGround()) {
+        if (pPed->IsPlayer())
+            static_cast<CPlayerPed*>(pPed)->HandlePlayerBreath(true, 1.0F);
+        else {
+            auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::ms_fTimeStep, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, false);
+            auto damageEvent = CEventDamage(this, CTimer::m_snTimeInMilliseconds, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
+            if (damageEvent.AffectsPed(pPed))
+                pedDamageResponseCalc.ComputeDamageResponse(pPed, &damageEvent.m_damageResponse, true);
+            else
+                damageEvent.m_damageResponse.m_bDamageCalculated = true;
+
+            pPed->GetEventGroup().Add(&damageEvent, false);
+        }
+    }
+    else {
+        auto vecCollisionImpact = m_vecMoveSpeed * -1.0F;
+        vecCollisionImpact.Normalise();
+        auto fDamageIntensity = m_vecMoveSpeed.Magnitude() * m_fMass;
+
+        auto knockOffBikeEvent = CEventKnockOffBike(this, &m_vecMoveSpeed, &vecCollisionImpact, fDamageIntensity,
+            0.0F, eKnockOffType::KNOCK_OFF_TYPE_FALL, 0, 0, nullptr, false, false);
+
+        pPed->GetEventGroup().Add(&knockOffBikeEvent, false);
+
+        if (pPed->IsPlayer())
+            static_cast<CPlayerPed*>(pPed)->HandlePlayerBreath(true, 1.0F);
+
+        if (bIsDriver)
+            vehicleFlags.bEngineOn = false;
+    }
 }
 
 // Converted from thiscall void CAutomobile::ProcessHarvester(void) 0x6A9680

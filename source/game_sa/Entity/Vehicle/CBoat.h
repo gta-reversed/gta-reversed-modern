@@ -67,13 +67,16 @@ public:
     float              m_afWakePointLifeTime[32];
     unsigned char      m_anWakePointIntensity[32]; // m_anWakePointIntensity[i] = boat->m_vecMoveForce.Magnitude() * 100.0f;
 
-    static CBoat **apFrameWakeGeneratingBoats; // static CBoat *apFrameWakeGeneratingBoats[4]
-    static float &MAX_WAKE_LENGTH; // 50.0
-    static float &MIN_WAKE_INTERVAL; // 2.0
-    static float &WAKE_LIFETIME; // 150.0
+    static CBoat** apFrameWakeGeneratingBoats; // static CBoat *apFrameWakeGeneratingBoats[4]
+    static float& MAX_WAKE_LENGTH; // 50.0
+    static float& MIN_WAKE_INTERVAL; // 2.0
+    static float& WAKE_LIFETIME; // 150.0
+    static float& fShapeLength; // 0.4
+    static float& fShapeTime; // 0.05
+    static float& fRangeMult; // 0.6
 
+    static void InjectHooks();
     //funcs
-
     CBoat(int modelIndex, unsigned char createdBy);
 
     void SetupModelNodes(); // fill m_aBoatNodes array

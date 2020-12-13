@@ -60,9 +60,10 @@ char(*VehicleNames)[14] = (char(*)[14])0x8D3978;
 
 void CVehicle::InjectHooks()
 {
-    HookInstall(0x6D1C40, (bool(CVehicle::*)(CPed*))(&CVehicle::IsDriver));
-    HookInstall(0x6D1C60, (bool(CVehicle::*)(int))(&CVehicle::IsDriver));
-    HookInstall(0x6DE240, &CVehicle::AddExhaustParticles);
+    ReversibleHooks::Install("CVehicle", "IsDriver_Ped", 0x6D1C40, (bool(CVehicle::*)(CPed*))(&CVehicle::IsDriver));
+    ReversibleHooks::Install("CVehicle", "IsDriver_Int", 0x6D1C60, (bool(CVehicle::*)(int))(&CVehicle::IsDriver));
+    ReversibleHooks::Install("CVehicle", "AddExhaustParticles", 0x6DE240, &CVehicle::AddExhaustParticles);
+    ReversibleHooks::Install("CVehicle", "ApplyBoatWaterResistance", 0x6D2740, &CVehicle::ApplyBoatWaterResistance);
 }
 
 void* CVehicle::operator new(unsigned int size) {
@@ -477,22 +478,14 @@ bool CVehicle::IsPassenger(int modelIndex)
 
 bool CVehicle::IsDriver(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-  return ((bool(__thiscall*)(CVehicle*, CPed*))0x6D1C40)(this, ped);
-#else
     if (ped)
         return ped == m_pDriver;
     return false;
-#endif
 }
 
 bool CVehicle::IsDriver(int modelIndex)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-  return ((bool(__thiscall*)(CVehicle*, int))0x6D1C60)(this, modelIndex);
-#else
     return m_pDriver && m_pDriver->m_nModelIndex == modelIndex;
-#endif
 }
 
 // Converted from thiscall void CVehicle::KillPedsInVehicle(void) 0x6D1C80
@@ -616,9 +609,37 @@ void CVehicle::SetComponentVisibility(RwFrame* component, unsigned int visibilit
 }
 
 // Converted from thiscall void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData *boatHandling,float) 0x6D2740
-void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData* boatHandling, float arg1)
+void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData* boatHandling, float fImmersionDepth)
 {
-    ((void(__thiscall*)(CVehicle*, tBoatHandlingData*, float))0x6D2740)(this, boatHandling, arg1);
+    float fSpeedMult = pow(fImmersionDepth, 2) * m_pHandlingData->m_fSuspensionForceLevel * m_fMass / 1000.0F;
+    if (m_nModelIndex == eModelID::MODEL_SKIMMER)
+        fSpeedMult *= 30.0F;
+
+    auto fMoveDotProduct = DotProduct(m_vecMoveSpeed, GetForward());
+    fSpeedMult *= (pow(fMoveDotProduct, 2) + 0.05F);
+    fSpeedMult += 1.0F;
+    fSpeedMult = fabs(fSpeedMult);
+    fSpeedMult = 1.0F / fSpeedMult;
+
+    float fUsedTimeStep = CTimer::ms_fTimeStep * 0.5F;
+    auto vecSpeedMult = Pow(boatHandling->m_vecMoveRes * fSpeedMult, fUsedTimeStep);
+
+    CVector vecMoveSpeedMatrixDotProduct = Multiply3x3(m_vecMoveSpeed, *m_matrix);
+    m_vecMoveSpeed = vecMoveSpeedMatrixDotProduct * vecSpeedMult;
+
+    auto fMassMult = (vecSpeedMult.y - 1.0F) * m_vecMoveSpeed.y * m_fMass;
+    CVector vecTransformedMoveSpeed;
+    Multiply3x3(&vecTransformedMoveSpeed, m_matrix, &m_vecMoveSpeed);
+    m_vecMoveSpeed = vecTransformedMoveSpeed;
+
+    auto vecDown = GetUp() * -1.0F;
+    auto vecTurnForce = GetForward() * fMassMult;
+    ApplyTurnForce(vecTurnForce, vecDown);
+
+    if (m_vecMoveSpeed.z <= 0.0F)
+        m_vecMoveSpeed.z *= ((1.0F - vecSpeedMult.z) * 0.5F + vecSpeedMult.z);
+    else
+        m_vecMoveSpeed.z *= vecSpeedMult.z;
 }
 
 // Converted from stdcall RpMaterial* SetCompAlphaCB(RpMaterial *material,void *data) 0x6D2950
@@ -1084,9 +1105,6 @@ void CVehicle::AddWaterSplashParticles()
 // Converted from thiscall void CVehicle::AddExhaustParticles(void) 0x6DE240
 void CVehicle::AddExhaustParticles()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CVehicle*))0x6DE240)(this);
-#else
     if (m_bOffscreen)
         return;
     float fSquaredMagnitude = (TheCamera.GetPosition() - GetPosition()).SquaredMagnitude();
@@ -1201,7 +1219,6 @@ void CVehicle::AddExhaustParticles()
             }
         }
     }
-#endif
 }
 
 // Converted from thiscall bool CVehicle::AddSingleWheelParticles(tWheelState,uint,float,float,CColPoint *,CVector *,float,int,uint surfaceType,bool *bloodState,uint) 0x6DE880

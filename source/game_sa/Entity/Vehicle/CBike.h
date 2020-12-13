@@ -32,7 +32,19 @@ public:
     bool           m_bLeanMatrixCalculated;
     char _pad0[3];
     CMatrix        m_mLeanMatrix;
-    unsigned char  m_nDamageFlags;
+    union {
+        struct {
+            unsigned char bDamageFlag1 : 1;
+            unsigned char bDamageFlag2 : 1;
+            unsigned char bIgnoreWater : 1;
+            unsigned char bDamageFlag3 : 1;
+            unsigned char bDamageFlag4 : 1;
+            unsigned char bDamageFlag5 : 1;
+            unsigned char bDamageFlag7 : 1;
+            unsigned char bDamageFlag8 : 1;
+        } damageFlags;
+        unsigned char ucDamageFlags; 
+    };
     char field_615[27];
     CVector field_630;
     void* m_pBikeHandlingData;
@@ -41,7 +53,7 @@ public:
     char field_65E;
     char field_65F;
     CColPoint      m_anWheelColPoint[4];
-    float m_wheelsDistancesToGround1[4];
+    float m_fWheelsSuspensionCompression[4];
     float field_720[4];
     float m_wheelCollisionState[4];
     float field_740;
@@ -85,9 +97,25 @@ public:
 
     void ProcessAI(unsigned int& arg0);
 
+    static void InjectHooks();
     //funcs
-
     CBike(int modelIndex, unsigned char createdBy);
+
+    inline bool IsAnyWheelMakingContactWithGround() {
+        return m_fWheelsSuspensionCompression[0] != 1.0F
+            || m_fWheelsSuspensionCompression[1] != 1.0F
+            || m_fWheelsSuspensionCompression[2] != 1.0F
+            || m_fWheelsSuspensionCompression[3] != 1.0F;
+    };
+
+    inline bool IsAnyWheelNotMakingContactWithGround() {
+        return m_fWheelsSuspensionCompression[0] == 1.0F
+            || m_fWheelsSuspensionCompression[1] == 1.0F
+            || m_fWheelsSuspensionCompression[2] == 1.0F
+            || m_fWheelsSuspensionCompression[3] == 1.0F;
+    };
+
+
 
     void SetupModelNodes();
     void dmgDrawCarCollidingParticles(CVector const& position, float power, eWeaponType weaponType); // dummy function
@@ -96,6 +124,7 @@ public:
     void SetRemoveAnimFlags(CPed* ped);
     void ReduceHornCounter();
     void ProcessBuoyancy();
+    void inline ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver);
     void ResetSuspension();
     bool GetAllWheelsOffGround();
     void DebugCode(); // dummy function

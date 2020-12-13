@@ -127,7 +127,7 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
                         CTaskSimpleHoldEntity* pTask = static_cast<CTaskSimpleHoldEntity*>(ped->m_pIntelligence->GetTaskHold(false));
                         if (!pTask || !pTask->m_pAnimBlendAssociation) {
                             CAnimBlendAssocGroup* pAnimGroup = &CAnimManager::ms_aAnimAssocGroups[ped->m_nAnimGroup];
-                            if (!ped->m_pPlayerData->m_bPlayerSprintDisabled && !g_surfaceInfos->IsSprint(ped->m_nContactSurface)) {
+                            if (!ped->m_pPlayerData->m_bPlayerSprintDisabled && !g_surfaceInfos->CantSprintOn(ped->m_nContactSurface)) {
                                 auto pAnimStaticAssoc1 = pAnimGroup->GetAnimation(1);
                                 auto pAnimStaticAssoc2 = pAnimGroup->GetAnimation(2);
                                 if (pAnimStaticAssoc1->m_pHeirarchy != pAnimStaticAssoc2->m_pHeirarchy &&

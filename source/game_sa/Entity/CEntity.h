@@ -168,6 +168,11 @@ public:
                m_nType == eEntityType::ENTITY_TYPE_PED ||
                m_nType == eEntityType::ENTITY_TYPE_OBJECT;
     }
+    bool IsVehicle() { return m_nType == ENTITY_TYPE_VEHICLE; }
+    bool IsPed() { return m_nType == ENTITY_TYPE_PED; }
+    bool IsObject() { return m_nType == ENTITY_TYPE_OBJECT; }
+    bool IsBuilding() { return m_nType == ENTITY_TYPE_BUILDING; }
+    bool IsDummy() { return m_nType == ENTITY_TYPE_DUMMY; }
 };
 
 VALIDATE_SIZE(CEntity, 0x38);

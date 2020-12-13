@@ -592,7 +592,7 @@ int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
                         std::uint32_t dwDirectionWasLooking = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nDirectionWasLooking;
                         CAutomobile* pVehicle = FindPlayerVehicle(-1, 0);
                         CBike* pBike = reinterpret_cast<CBike*>(pVehicle);
-                        if (pVehicle->m_nVehicleClass != CLASS_LEISUREBOAT || !(pBike->m_nDamageFlags & 0x80))
+                        if (!pVehicle->IsBike() || !(pBike->damageFlags.bDamageFlag8))
                         {
                             if (dwDirectionWasLooking == 3)
                                 return RENDERER_CULLED;
@@ -604,7 +604,7 @@ int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
                             }
                             if (pVehicle->m_pHandlingData->m_bNo1fpsLookBehind)
                                 return RENDERER_CULLED;
-                            if (pVehicle->m_nVehicleClass != CLASS_BIG
+                            if (!pVehicle->IsBoat()
                                 || modelId == MODEL_REEFER || modelId == MODEL_TROPIC || modelId == MODEL_PREDATOR
                                 || modelId == MODEL_SKIMMER)
                             {

@@ -336,7 +336,7 @@ public:
     };
     RwTexture *m_pCustomCarPlate;
     CVehicle *field_58C;
-    unsigned int     m_nVehicleClass; // see enum eVehicleClass
+    unsigned int     m_nVehicleClass; // see enum eVehicleType
     unsigned int     m_nVehicleSubClass;
     short      m_nPreviousRemapTxd;
     short      m_nRemapTxd;
@@ -467,7 +467,7 @@ public:
     bool CarHasRoof();
     float HeightAboveCeiling(float arg0, eFlightModel arg1);
     void SetComponentVisibility(RwFrame* component, unsigned int visibilityState);
-    void ApplyBoatWaterResistance(tBoatHandlingData* boatHandling, float arg1);
+    void ApplyBoatWaterResistance(tBoatHandlingData* boatHandling, float fImmersionDepth);
     static void SetComponentAtomicAlpha(RpAtomic* atomic, int alpha);
     void UpdateClumpAlpha();
     void UpdatePassengerList();
@@ -566,12 +566,16 @@ public:
     void SetupUpgradesAfterLoad();
     void GetPlaneWeaponFiringStatus(bool& status, eOrdnanceType& ordnanceType);
     void ProcessWeapons();
+
     bool IsFakeAircraft() { return m_nVehicleSubClass == VEHICLE_FHELI || m_nVehicleSubClass == VEHICLE_FPLANE; }
     bool IsPlane() { return m_nVehicleSubClass == VEHICLE_PLANE; }
+    bool IsHeli() { return m_nVehicleSubClass == VEHICLE_HELI; }
     bool IsVehicleTypeValid() { return m_nVehicleSubClass != VEHICLE_NONE; }
     bool IsBoat() { return m_nVehicleClass == VEHICLE_BOAT; }
     bool IsBike() { return m_nVehicleClass == VEHICLE_BIKE; }
     bool IsQuad() { return m_nVehicleClass == VEHICLE_QUAD; }
+    bool IsSubclassQuad() { return m_nVehicleSubClass == VEHICLE_QUAD; };
+
     static void* operator new(unsigned int size);
     static void operator delete(void* data);
 

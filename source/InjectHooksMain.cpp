@@ -18,6 +18,7 @@ void InjectHooksMain(void)
     CStreaming::InjectHooks();
     InjectCdStreamHooks();
     CVehicleModelInfo::InjectHooks();
+    SurfaceInfos_c::InjectHooks();
     CFileLoader::InjectHooks();
     CFileMgr::InjectHooks();
     CEntity::InjectHooks();;
@@ -131,12 +132,15 @@ void InjectHooksMain(void)
     CTaskSimplePickUpEntity::InjectHooks();
     CTaskSimpleStealthKill::InjectHooks();
     CTimer::InjectHooks();
+    CWaterLevel::InjectHooks();
     cBuoyancy::InjectHooks();
     CWanted::InjectHooks();
     CWeapon::InjectHooks();
     CWorld::InjectHooks();
     cTransmission::InjectHooks();
     CVehicle::InjectHooks();
+    CAutomobile::InjectHooks();
+    CBike::InjectHooks();
     CPlayerPed::InjectHooks();
     CStats::InjectHooks();
     CCarCtrl::InjectHooks();
