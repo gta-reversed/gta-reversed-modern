@@ -45,28 +45,21 @@ float CAEAudioUtility::GetPiecewiseLinear(float x, short dataCount, float (*data
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<float, 0x4d9d90, float, short, float (*)[2]>(x, dataCount, data);
 #else
-    if (x <= data[0][0])
-        return data[0][1];
-    else if (x >= data[dataCount - 1][0])
+    if (x >= data[dataCount - 1][0])
         return data[dataCount - 1][1];
+    else if (x <= data[0][0])
+        return data[0][1];
     else
     {
-        int i = -1;
-
-        for (int j = 0; j < dataCount; j++)
+        int i = 0;
+        for (; i < dataCount; i++)
         {
-            if (x < data[j][0])
-            {
-                i = j - 1;
+            if (data[i][0] >= x)
                 break;
-            }
         }
-
-        assert(i >= 0);
-
         // Perform linear interpolation
-        float t = (x - data[i][0]) / (data[i + 1][0] - data[i][0]);
-        return data[i][1] * (1.0f - t) + data[i + 1][1] * t;
+        float t = (x - data[i - 1][0]) / (data[i][0] - data[i - 1][0]);
+        return t * (data[i][1] - data[i - 1][1]) + data[i - 1][1];
     }
 #endif
 }
