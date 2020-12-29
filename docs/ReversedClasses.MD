@@ -11,6 +11,7 @@
 - CPedIntelligence
 - CColSphere
 - CBirds
+- cBuoyancy
 - cTransmission
 - CEvent
 - CEventSeenPanickedPed
@@ -121,6 +122,7 @@
 
 ## Partially Reversed
 
+- CBoat
 - CPed
 - CWeapon
 - CMenuManager
