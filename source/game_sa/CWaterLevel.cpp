@@ -45,22 +45,22 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int x, int y, float fUnkn1, fl
     const auto fLowFreqOffsetMult = TWO_PI / 5000.0F;
     const auto fLowFreqMult = TWO_PI / 64.0F;
     auto fIndex = (static_cast<float>(iTimeOffset % 5000U) * fLowFreqOffsetMult + (fX + fY) * fLowFreqMult) * fTwoPiToChar;
-    auto uiIndex = static_cast<unsigned int>(fIndex) & 0xFF;
+    unsigned char uiIndex = static_cast<unsigned char>(fIndex) + 1;
     float fLowFreqWaves = CMaths::ms_SinTable[uiIndex] * 2.0F * fWaveMultiplier * fUnkn1;
     *fOutWave += fLowFreqWaves;
 
     const auto fMidFreqOffsetMult = TWO_PI / 3500.0F;
-    const auto fMidFreqXMult = TWO_PI / 52.0F;
-    const auto fMidFreqYMult = TWO_PI / 26.0F;
+    const auto fMidFreqXMult = TWO_PI / 26.0F;
+    const auto fMidFreqYMult = TWO_PI / 52.0F;
     fIndex = (static_cast<float>(iTimeOffset % 3500U) * fMidFreqOffsetMult + (fX * fMidFreqXMult) + (fY * fMidFreqYMult)) * fTwoPiToChar;
-    uiIndex = static_cast<unsigned int>(fIndex) & 0xFF;
+    uiIndex = static_cast<unsigned char>(fIndex) + 1;
     float fMidFreqWaves = CMaths::ms_SinTable[uiIndex] * 1.0F * fWaveMultiplier * fUnkn2;
     *fOutWave += fMidFreqWaves;
 
     const auto fHighFreqOffsetMult = TWO_PI / 3000.0F;
     const auto fHighFreqYMult = TWO_PI / 20.0F;
     fIndex = (static_cast<float>(iTimeOffset % 3000U) * fHighFreqOffsetMult + (fY * fHighFreqYMult)) * fTwoPiToChar;
-    uiIndex = static_cast<unsigned int>(fIndex) & 0xFF;
+    uiIndex = static_cast<unsigned char>(fIndex) + 1;
     float fHighFreqWaves = CMaths::ms_SinTable[uiIndex] * 0.5F * fWaveMultiplier * fUnkn2;
     *fOutWave += fHighFreqWaves;
 }

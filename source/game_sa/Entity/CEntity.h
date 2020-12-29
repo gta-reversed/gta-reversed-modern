@@ -115,8 +115,11 @@ public:
     virtual void RemoveLighting(bool bRemove);
     virtual void FlagToDestroyWhenNextProcessed();
 
+private:
     CRect* GetBoundRect_Reversed(CRect* pRect);
+    void SetModelIndexNoCreate_Reversed(unsigned int index);
 
+public:
     // funcs
     void UpdateRwFrame();
     void UpdateRpHAnim();
@@ -147,6 +150,7 @@ public:
     bool GetIsBoundingBoxOnScreen();
     void ModifyMatrixForTreeInWind();
     void ModifyMatrixForBannerInWind();
+    RwMatrix* GetModellingMatrix();
     CColModel* GetColModel();
     void CalculateBBProjection(CVector* arg0, CVector* arg1, CVector* arg2, CVector* arg3);
     void UpdateAnim();

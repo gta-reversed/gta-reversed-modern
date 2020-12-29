@@ -15,6 +15,8 @@
 class  CCarCtrl
 {
 public:
+    static unsigned int& NumLawEnforcerCars;
+
 	static void InjectHooks();
 
 	static int ChooseBoatModel();
@@ -126,5 +128,4 @@ public:
 	static void WeaveThroughCarsSectorList(CPtrList& PtrList, CVehicle* pVehicle, CPhysical* pPhysical, float arg4, float arg5, float arg6, float arg7, float* arg8, float* arg9);
 	static void WeaveThroughObjectsSectorList(CPtrList& PtrList, CVehicle* pVehicle, float arg3, float arg4, float arg5, float arg6, float* arg7, float* arg8);
 	static void WeaveThroughPedsSectorList(CPtrList& PtrList, CVehicle* pVehicle, CPhysical* pPhysical, float arg4, float arg5, float arg6, float arg7, float* arg8, float* arg9);
-
 };

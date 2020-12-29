@@ -68,6 +68,10 @@ public:
         this->x /= divisor;
         this->y /= divisor;
     }
+
+    inline void Set(float X, float Y) {
+        x = X; y = Y;
+    }
 };
 
 inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {

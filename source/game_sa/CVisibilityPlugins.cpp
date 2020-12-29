@@ -97,6 +97,7 @@ void CVisibilityPlugins::InjectHooks() {
     HookInstall(0x732F30, &CVisibilityPlugins::RenderWeaponPedsForPC);
     HookInstall(0x7322D0, &CVisibilityPlugins::SetAtomicFlag);
     HookInstall(0x7322B0, &CVisibilityPlugins::SetAtomicFlag);
+    ReversibleHooks::Install("CVisibilityPlugins", "SetClumpForAllAtomicsFlag", 0x732307, &CVisibilityPlugins::SetClumpForAllAtomicsFlag);
     HookInstall(0x732230, &CVisibilityPlugins::SetAtomicId);
     HookInstall(0x7328A0, &CVisibilityPlugins::SetAtomicRenderCallback);
     HookInstall(0x732B00, &CVisibilityPlugins::SetClumpAlpha);
@@ -1151,11 +1152,13 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
 #endif
 }
 
-void CVisibilityPlugins::SetAtomicFlagCB(void* pRpAtomic, std::uint16_t flag) {
+RpAtomic* CVisibilityPlugins::SetAtomicFlagCB(RpAtomic* pRpAtomic, void* data) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x7322D0, void*, int>(pRpAtomic, flag);
 #else
-    ATOMICPLG(pRpAtomic, m_flags) = flag;
+    std::uint16_t flag = *reinterpret_cast<std::uint16_t*>(&data);
+    ATOMICPLG(pRpAtomic, m_flags) |= flag;
+    return pRpAtomic;
 #endif
 }
 
@@ -1165,6 +1168,11 @@ void CVisibilityPlugins::SetAtomicFlag(RpAtomic* pRpAtomic, std::uint16_t flag) 
 #else
     ATOMICPLG(pRpAtomic, m_flags) |= flag;
 #endif
+}
+
+void CVisibilityPlugins::SetClumpForAllAtomicsFlag(RpClump* pRpClump, std::uint16_t flag)
+{
+    RpClumpForAllAtomics(pRpClump, SetAtomicFlagCB, (void*)flag);
 }
 
 void CVisibilityPlugins::SetAtomicId(void* pRpAtomic, std::int16_t id) {

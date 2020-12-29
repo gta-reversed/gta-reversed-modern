@@ -173,8 +173,9 @@ public:
     static RpAtomic* RenderVehicleReallyLowDetailCB_BigVehicle(RpAtomic* pRpAtomic);
     static RpAtomic* RenderWeaponCB(RpAtomic* pRpAtomic);
     static void RenderWeaponPedsForPC();
-    static void SetAtomicFlagCB(void* pRpAtomic, std::uint16_t flag);
+    static RpAtomic* SetAtomicFlagCB(RpAtomic* pRpAtomic, void* data);
     static void SetAtomicFlag(RpAtomic* pRpAtomic, std::uint16_t flag);
+    static void SetClumpForAllAtomicsFlag(RpClump* pRpClump, std::uint16_t flag);
     static void SetAtomicId(void* pRpAtomic, std::int16_t id);
     static void SetAtomicRenderCallback(RpAtomic *pRpAtomic, RpAtomic * (*renderCB)(RpAtomic *));
     static void SetClumpAlpha(RpClump* pRpClump, int dwAlpha);

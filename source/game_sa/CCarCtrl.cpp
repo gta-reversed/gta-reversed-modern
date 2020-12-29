@@ -7,6 +7,8 @@
 
 #include "StdInc.h"
 
+unsigned int& CCarCtrl::NumLawEnforcerCars = *(unsigned int*)0x969098;
+
 void CCarCtrl::InjectHooks()
 {
     HookInstall(0x421A40, &CCarCtrl::ChooseGangCarModel, 7);

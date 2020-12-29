@@ -15,6 +15,8 @@ enum eObjectCreatedBy {
     OBJECT_GAME = 1,
     OBJECT_MISSION = 2,
     OBJECT_TEMPORARY = 3,
+    OBJECT_TYPE_CUTSCENE = 4,
+    OBJECT_TYPE_HAND = 5,
     OBJECT_MISSION2 = 6
 };
 
@@ -23,13 +25,13 @@ class CDummyObject;
 class CObject : public CPhysical {
 public:
     void           *m_pControlCodeList;
-    unsigned char   m_nObjectType; // see enum eObjectType
+    unsigned char   m_nObjectType; // see enum eObjectCreatedBy
     unsigned char   m_nBonusValue;
     unsigned short  m_wCostValue;
     union {
         struct 
         {
-            unsigned int b01 : 1;
+            unsigned int bIsPickup : 1;
             unsigned int b02 : 1;
             unsigned int bPickupPropertyForSale : 1;
             unsigned int bPickupInShopOutOfStock : 1;
@@ -91,6 +93,8 @@ public:
 
     static unsigned short& nNoTempObjects;
 
+    CObject();
+    CObject* Constructor();
     // class functions
 
     void ProcessGarageDoorBehaviour();
@@ -125,6 +129,7 @@ public:
     void ProcessControlLogic();
 
     // static functions
+    static void* operator new(unsigned int size);
 
     static void SetMatrixForTrainCrossing(CMatrix* matrix, float arg1);
     static void TryToFreeUpTempObjects(int numObjects);

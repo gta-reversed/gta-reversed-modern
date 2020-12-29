@@ -8,6 +8,18 @@
 
 unsigned short& CObject::nNoTempObjects = *reinterpret_cast<unsigned short*>(0xBB4A70);
 
+CObject::CObject() : CPhysical(plugin::dummy)
+{
+    m_pDummyObject = nullptr;
+    Init();
+    m_nObjectType = eObjectCreatedBy::OBJECT_UNKNOWN;
+}
+
+CObject* CObject::Constructor()
+{
+    return plugin::CallMethodAndReturn<CObject*, 0x5A1D10, CObject*>(this);
+}
+
 // Converted from thiscall void CObject::ProcessGarageDoorBehaviour(void) 0x44A4D0
 void CObject::ProcessGarageDoorBehaviour() {
     ((void(__thiscall*)(CObject*))0x44A4D0)(this);
@@ -21,6 +33,11 @@ bool CObject::CanBeDeleted() {
 // Converted from thiscall void CObject::SetRelatedDummy(CDummyObject *relatedDummy) 0x59F160
 void CObject::SetRelatedDummy(CDummyObject* relatedDummy) {
     ((void(__thiscall*)(CObject*, CDummyObject*))0x59F160)(this, relatedDummy);
+}
+
+void* CObject::operator new(unsigned int size)
+{
+    return plugin::CallAndReturn<void*, 0x5A1EE0, unsigned int>(size);
 }
 
 // Converted from cdecl void CObject::SetMatrixForTrainCrossing(CMatrix *matrix,float) 0x59F200
@@ -45,7 +62,7 @@ bool CObject::CanBeTargetted() {
 
 // Converted from thiscall void CObject::RefModelInfo(int modelIndex) 0x59F330
 void CObject::RefModelInfo(int modelIndex) {
-    ((void(__thiscall*)(CObject*, int))0x59F330)(this, modelIndex);
+    plugin::CallMethod<0x59F330, CObject*, int>(this, modelIndex);
 }
 
 // Converted from thiscall void CObject::SetRemapTexture(RwTexture *remapTexture, short txdIndex) 0x59F350

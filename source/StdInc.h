@@ -91,7 +91,7 @@
 #include "game_sa\CWaterLevel.h"
 #include "game_sa\InlineFunctions.h"
 #include "HookSystem.h"
-#include "ReversibleHooks.h"
+#include "reversiblehooks\ReversibleHooks.h"
 #include "game_sa\CdStreamInfo.h"
 #include "game_sa\C2dEffect.h"
 #include "game_sa\C3dMarker.h"

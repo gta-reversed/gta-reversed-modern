@@ -9,7 +9,8 @@ Do not delete this comment block. Respect others' work!
 
 void CEntity::InjectHooks()
 {
-    HookInstall(0x534120, &CEntity::GetBoundRect_Reversed);
+    ReversibleHooks::Install("CEntity", "GetBoundRect", 0x534120, &CEntity::GetBoundRect_Reversed);
+    //ReversibleHooks::Install("CEntity", "SetModelIndexNoCreate", 0x533700, &CEntity::SetModelIndexNoCreate_Reversed);
 }
 
 void CEntity::Add(CRect &rect)
@@ -39,7 +40,7 @@ void CEntity::SetModelIndex(unsigned int index)
 
 void CEntity::SetModelIndexNoCreate(unsigned int index)
 {
-    ((void(__thiscall *)(CEntity *, unsigned int))(*(void ***)this)[6])(this, index);
+    return CEntity::SetModelIndexNoCreate_Reversed(index);
 }
 
 void CEntity::CreateRwObject()
@@ -81,6 +82,11 @@ CRect* CEntity::GetBoundRect_Reversed(CRect* pRect)
     rect.StretchToPoint(point.x, point.y);
     *pRect = rect;
     return pRect;
+}
+
+void CEntity::SetModelIndexNoCreate_Reversed(unsigned int index)
+{
+    plugin::CallMethod<0x533700, CEntity*, unsigned int>(this, index);
 }
 
 void CEntity::ProcessControl()
@@ -319,6 +325,11 @@ void CEntity::ModifyMatrixForTreeInWind()
 void CEntity::ModifyMatrixForBannerInWind()
 {
     ((void(__thiscall *)(CEntity*))0x535040)(this);
+}
+
+RwMatrix* CEntity::GetModellingMatrix()
+{
+    return plugin::CallMethodAndReturn<RwMatrix*, 0x46A2D0, CEntity*>(this);
 }
 
 // Converted from thiscall CColModel* CEntity::GetColModel(void) 0x535300

@@ -643,31 +643,36 @@ void CDebugMenu::ProcessHooksTool()
         static std::string sHookIdentifier;
         static std::string sHookFunctionName;
 
-        auto& allHooks = ReversibleHooks::GetAllHooks();
+        const auto& allHooks = ReversibleHooks::GetAllHooks();
         for (auto& classHooks : allHooks) {
             ImGui::AlignTextToFramePadding();
             bool treeOpen = ImGui::TreeNodeEx(classHooks.first.c_str(), ImGuiTreeNodeFlags_AllowItemOverlap);
             ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 40);
             if (ImGui::Button("-")) {
                 for (auto& hook : classHooks.second)
-                    hook.m_bImguiHooked = false;
+                    hook->m_bImguiHooked = false;
             }
             if (ImGui::IsItemHovered()) ImGui::SetTooltip("Disable all");
 
             ImGui::SameLine();
             if (ImGui::Button("+")) {
                 for (auto& hook : classHooks.second)
-                    hook.m_bImguiHooked = true;
+                    hook->m_bImguiHooked = true;
             }
             if (ImGui::IsItemHovered()) ImGui::SetTooltip("Enable all");
 
             for (auto& hook : classHooks.second)
-                if (hook.m_bIsHooked != hook.m_bImguiHooked)
+                if (hook->m_bIsHooked != hook->m_bImguiHooked)
                     ReversibleHooks::Switch(hook);
 
             if (treeOpen) {
                 for (auto& hook : classHooks.second) {
-                    ImGui::Checkbox(hook.m_sFunctionName.c_str(), &hook.m_bImguiHooked);
+                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::Text(hook->m_eHookType == eReversibleHookType::Simple ? "S" : "V");
+                    ImGui::PopStyleVar();
+                    ImGui::SameLine();
+                    ImGui::Checkbox(hook->m_sFunctionName.c_str(), &hook->m_bImguiHooked);
                 }
                 ImGui::TreePop();
             }

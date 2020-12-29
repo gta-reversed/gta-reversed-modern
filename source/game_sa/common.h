@@ -86,8 +86,9 @@ bool InTwoPlayersMode();
 
 // matrix mul
 CVector* Multiply3x3(CVector* out, CMatrix* m, CVector* in);
+CVector Multiply3x3(CMatrix* matrix, CVector* vector);
 // vector by matrix mult, resulting in a vector where each component is the dot product of the in vector and a matrix direction
-CVector Multiply3x3(CVector const& vector, CMatrix const& matrix);
+CVector Multiply3x3(CVector* vector, CMatrix* matrix);
 
 
 // returns player wanted

@@ -88,6 +88,12 @@ enum eBombState {
     BOMB_IGNITION_ACTIVATED = 5
 };
 
+enum eVehicleOverrideLightsState {
+    NO_CAR_LIGHT_OVERRIDE = 0,
+    FORCE_CAR_LIGHTS_OFF = 1,
+    FORCE_CAR_LIGHTS_ON = 2
+};
+
 enum eCarPiece
 {
     CAR_PIECE_DEFAULT = 0,
@@ -335,7 +341,7 @@ public:
         } m_renderLights;
     };
     RwTexture *m_pCustomCarPlate;
-    CVehicle *field_58C;
+    float field_58C;
     unsigned int     m_nVehicleClass; // see enum eVehicleType
     unsigned int     m_nVehicleSubClass;
     short      m_nPreviousRemapTxd;
@@ -458,7 +464,7 @@ public:
     bool CanPedEnterCar();
     void ProcessCarAlarm();
     bool IsVehicleNormal();
-    void ChangeLawEnforcerState(unsigned char state);
+    void ChangeLawEnforcerState(bool bIsEnforcer);
     bool IsLawEnforcementVehicle();
     bool ShufflePassengersToMakeSpace();
     void ExtinguishCarFire();
@@ -536,7 +542,7 @@ public:
     void BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatrix& matrix, short arg3, float arg4);
     void SetComponentRotation(RwFrame* component, int axis, float angle, bool bResetPosition);
     void SetTransmissionRotation(RwFrame* component, float arg1, float arg2, CVector posn, bool isFront);
-    void ProcessBoatControl(tBoatHandlingData* boatHandling, float& arg1, bool arg2, bool arg3);
+    void ProcessBoatControl(tBoatHandlingData* boatHandling, float* fWaterResistance, bool bCollidedWithWorld, bool bPostCollision);
     void DoBoatSplashes(float arg0);
     void DoSunGlare();
     void AddWaterSplashParticles();
@@ -566,6 +572,9 @@ public:
     void SetupUpgradesAfterLoad();
     void GetPlaneWeaponFiringStatus(bool& status, eOrdnanceType& ordnanceType);
     void ProcessWeapons();
+    void DoFixedMachineGuns();
+    void FireFixedMachineGuns();
+    void DoDriveByShooting();
 
     bool IsFakeAircraft() { return m_nVehicleSubClass == VEHICLE_FHELI || m_nVehicleSubClass == VEHICLE_FPLANE; }
     bool IsPlane() { return m_nVehicleSubClass == VEHICLE_PLANE; }

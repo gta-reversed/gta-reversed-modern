@@ -138,6 +138,7 @@ public:
 
     CVehicleModelInfo* AsVehicleModelInfoPtr() { return reinterpret_cast<CVehicleModelInfo*>(this); }
     inline CColModel* GetColModel() { return m_pColModel; }
+    inline bool IsCrane() { return nSpecialType == 9; }
 };
 
 VALIDATE_SIZE(CBaseModelInfo, 0x20);

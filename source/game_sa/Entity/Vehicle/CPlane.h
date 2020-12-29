@@ -88,24 +88,25 @@ public:
     static void FindPlaneCreationCoors(CVector* arg0, CVector* arg1, float* arg2, float* arg3, bool arg4);
     static void DoPlaneGenerationAndRemoval();
 
-    static bool& GenPlane_Active;
     static int& GenPlane_ModelIndex;
     static unsigned int& GenPlane_Status;
     static unsigned int& GenPlane_LastTimeGenerated;
-    static float& ANDROM_COL_ANGLE_MULT;
-    static float& HARRIER_NOZZLE_ROTATE_LIMIT;
-    static float& HARRIER_NOZZLE_SWITCH_LIMIT;
-    static float& PLANE_MIN_PROP_SPEED;
-    static float& PLANE_STD_PROP_SPEED;
-    static float& PLANE_MAX_PROP_SPEED;
-    static float& PLANE_ROC_PROP_SPEED;
+
+    static bool& GenPlane_Active;               // true
+    static float& ANDROM_COL_ANGLE_MULT;        // 0.00015
+    static float& HARRIER_NOZZLE_ROTATE_LIMIT;  // 5000.0
+    static float& HARRIER_NOZZLE_SWITCH_LIMIT;  // 3000.0
+    static float& PLANE_MIN_PROP_SPEED;         // 0.05
+    static float& PLANE_STD_PROP_SPEED;         // 0.18
+    static float& PLANE_MAX_PROP_SPEED;         // 0.34
+    static float& PLANE_ROC_PROP_SPEED;         // 0.01
 };
 
 VALIDATE_SIZE(CPlane, 0xA04);
 
-extern float &HARRIER_NOZZLE_ROTATERATE;
-extern float &PLANE_DAMAGE_WAVE_COUNTER_VAR;
-extern float &PLANE_DAMAGE_THRESHHOLD;
-extern float &PLANE_DAMAGE_SCALE_MASS;
-extern float &PLANE_DAMAGE_DESTROY_THRESHHOLD;
-extern CVector &vecRCBaronGunPos;
+extern float &HARRIER_NOZZLE_ROTATERATE;        // 25.0
+extern float& PLANE_DAMAGE_WAVE_COUNTER_VAR;    // 0.75
+extern float& PLANE_DAMAGE_THRESHHOLD;          // 500.0
+extern float& PLANE_DAMAGE_SCALE_MASS;          // 10000.0
+extern float& PLANE_DAMAGE_DESTROY_THRESHHOLD;  // 5000.0
+extern CVector& vecRCBaronGunPos;               // <0.0, 0.45, 0.0>
