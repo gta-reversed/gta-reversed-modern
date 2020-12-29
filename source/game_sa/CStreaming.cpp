@@ -440,7 +440,7 @@ bool CStreaming::HasVehicleUpgradeLoaded(std::int32_t modelId)
         return false;
     std::int16_t otherUpgradeModelId = CVehicleModelInfo::ms_linkedUpgrades.FindOtherUpgrade(modelId);
     if(otherUpgradeModelId == -1)
-        return false;
+        return true;
     return ms_aInfoForModel[otherUpgradeModelId].m_nLoadState == LOADSTATE_LOADED;
 #endif
 }
