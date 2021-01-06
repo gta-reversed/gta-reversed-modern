@@ -326,6 +326,7 @@
 #include "game_sa\Core\CLinkList.h"
 #include "game_sa\Core\CMatrix.h"
 #include "game_sa\Core\CMatrixLink.h"
+#include "game_sa\Core\CMatrixLinkList.h"
 #include "game_sa\Core\COctTree.h"
 #include "game_sa\Core\COctTreeBase.h"
 #include "game_sa\Core\CPool.h"

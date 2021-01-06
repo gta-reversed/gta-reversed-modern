@@ -12,9 +12,14 @@
 class  CPlaceable {
 protected:
     CPlaceable(plugin::dummy_func_t) {}
+    CPlaceable();
+    //virtual ~CPlaceable();
 public:
     CSimpleTransform m_placement;
     CMatrixLink *m_matrix;
+
+public:
+    static void InjectHooks();
 
     virtual unsigned int DeletingDestructor(uint8_t deletingFlags);
     
@@ -39,7 +44,10 @@ public:
     void RemoveMatrix();
     void AllocateStaticMatrix();
     void AllocateMatrix();
-    void SetMatrix(CMatrix  const& matrix);
+    void SetMatrix(CMatrix& matrix);
+
+public:
+    static constexpr uint32_t NUM_MATRICES_TO_CREATE = 900;
     
     inline CVector& GetRight() { return m_matrix->GetRight(); }
     inline CVector& GetForward() { return m_matrix->GetForward(); }

@@ -7,10 +7,30 @@
 
 #include "StdInc.h"
 
-// Quat to matrix
-void CQuaternion::Get(RwMatrix* out)
+void CQuaternion::InjectHooks()
 {
-	((void(__thiscall*)(CQuaternion*, RwMatrix*))0x59C080)(this, out);
+    ReversibleHooks::Install("CQuaternion", "Get", 0x59C080, (void(CQuaternion::*)(RwMatrixTag*))(&CQuaternion::Get));
+}
+
+// Quat to matrix
+void CQuaternion::Get(RwMatrixTag* out)
+{
+    auto vecImag2 = imag + imag;
+    auto x2x = vecImag2.x * imag.x;
+    auto y2x = vecImag2.y * imag.x;
+    auto z2x = vecImag2.z * imag.x;
+
+    auto y2y = vecImag2.y * imag.y;
+    auto z2y = vecImag2.z * imag.y;
+    auto z2z = vecImag2.z * imag.z;
+
+    auto x2r = vecImag2.x * real;
+    auto y2r = vecImag2.y * real;
+    auto z2r = vecImag2.z * real;
+
+    RwV3dAssign(RwMatrixGetRight(out), &CVector(1.0F-(z2z+y2y),   z2r+y2x,        z2x-y2r));
+    RwV3dAssign(RwMatrixGetUp(out),    &CVector(y2x-z2r,          1.0F-(z2z+x2x), x2r+z2y));
+    RwV3dAssign(RwMatrixGetAt(out),    &CVector(y2r+z2x,          z2y-x2r,        1.0F-(y2y+x2x)));
 }
 
 // Quat to euler angles

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-void ReversibleHooks::HookInstall(const std::string& sIdentifier, const std::string& sFuncName, unsigned int installAddress, void* addressToJumpTo, int iJmpCodeSize)
+void ReversibleHooks::HookInstall(const std::string& sIdentifier, const std::string& sFuncName, unsigned int installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault)
 {
     assert(!GetHook(sIdentifier, sFuncName));
     if (m_HooksMap.find(sIdentifier) == m_HooksMap.end())
@@ -13,6 +13,8 @@ void ReversibleHooks::HookInstall(const std::string& sIdentifier, const std::str
     pHook->m_eHookType = eReversibleHookType::Simple;
 
     usedVector.push_back(pHook);
+    if (bDisableByDefault)
+        pHook->Switch();
 }
 
 void ReversibleHooks::HookInstallVirtual(const std::string& sIdentifier, const std::string& sFuncName, void* libVTableAddress, const std::vector<uint32_t>& vecAddressesToHook)

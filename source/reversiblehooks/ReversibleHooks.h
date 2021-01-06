@@ -60,9 +60,9 @@ public:
     }
 
     template <typename T>
-    static void Install(const std::string& sIdentifier, const std::string& sFuncName, DWORD installAddress, T addressToJumpTo, int iJmpCodeSize = 5) {
+    static void Install(const std::string& sIdentifier, const std::string& sFuncName, DWORD installAddress, T addressToJumpTo, bool bDisableByDefault = false, int iJmpCodeSize = 5) {
         auto ptr = FunctionPointerToVoidP(addressToJumpTo);
-        ReversibleHooks::GetInstance().HookInstall(sIdentifier, sFuncName, installAddress, ptr, iJmpCodeSize);
+        ReversibleHooks::GetInstance().HookInstall(sIdentifier, sFuncName, installAddress, ptr, iJmpCodeSize, bDisableByDefault);
     }
 
     template <typename T>
@@ -79,7 +79,7 @@ public:
     }
 
 private:
-    void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, unsigned int installAddress, void* addressToJumpTo, int iJmpCodeSize = 5);
+    void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, unsigned int installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, bool bDisableByDefault = false);
     void HookInstallVirtual(const std::string& sIdentifier, const std::string& sFuncName, void* libVTableAddress, const std::vector<uint32_t>& vecAddressesToHook);
     void HookSwitch(std::shared_ptr<SReversibleHook> pHook) const;
     bool IsFunctionHooked(const std::string& sIdentifier, const std::string& sFuncName);

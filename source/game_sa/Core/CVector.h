@@ -105,6 +105,10 @@ inline CVector operator*(float multiplier, const CVector& vec) {
     return CVector(vec.x * multiplier, vec.y * multiplier, vec.z * multiplier);
 }
 
+inline CVector operator-(const CVector& vec) {
+    return CVector(-vec.x, -vec.y, -vec.z);
+}
+
 inline float DistanceBetweenPoints(const CVector &pointOne, const CVector &pointTwo) {
     return (pointTwo - pointOne).Magnitude();
 }

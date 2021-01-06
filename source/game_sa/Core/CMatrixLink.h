@@ -12,15 +12,20 @@
 class CPlaceable;
 
 class  CMatrixLink : public CMatrix {
-    PLUGIN_NO_DEFAULT_CONSTRUCTION(CMatrixLink)
+public:
+    CMatrixLink() : CMatrix() {}
+    CMatrixLink(float fScale) : CMatrix() { SetScale(fScale); }
 
 public:
     CPlaceable *m_pOwner;
     CMatrixLink *m_pPrev;
     CMatrixLink *m_pNext;
 
-     void Insert(CMatrixLink *where);
-     void Remove();
+public:
+    static void InjectHooks();
+
+    inline void Insert(CMatrixLink *pWhere);
+    inline void Remove();
 };
 
 VALIDATE_SIZE(CMatrixLink, 0x54);

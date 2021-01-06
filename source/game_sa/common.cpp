@@ -76,14 +76,21 @@ bool InTwoPlayersMode()
 
 CVector* Multiply3x3(CVector* out, CMatrix* m, CVector* in)
 {
-    return plugin::CallAndReturn<CVector*, 0x59C790, CVector*, CMatrix*, CVector*>(out, m, in);
+    CVector temp;
+    temp.x = m->GetRight().x * in->x + m->GetForward().x * in->y + m->GetUp().x * in->z;
+    temp.y = m->GetRight().y * in->x + m->GetForward().y * in->y + m->GetUp().y * in->z;
+    temp.z = m->GetRight().z * in->x + m->GetForward().z * in->y + m->GetUp().z * in->z;
+    *out = temp;
+    return out;
+    //return plugin::CallAndReturn<CVector*, 0x59C790, CVector*, CMatrix*, CVector*>(out, m, in);
 }
 
 CVector Multiply3x3(CMatrix* matrix, CVector* vector)
 {
     CVector result;
-    plugin::Call<0x59C790, CVector*, CMatrix*, CVector*>(&result, matrix, vector);
+    Multiply3x3(&result, matrix, vector);
     return result;
+    //plugin::Call<0x59C790, CVector*, CMatrix*, CVector*>(&result, matrix, vector);
 }
 
 // vector by matrix mult, resulting in a vector where each component is the dot product of the in vector and a matrix direction

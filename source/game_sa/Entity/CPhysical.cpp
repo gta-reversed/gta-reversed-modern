@@ -311,7 +311,7 @@ void CPhysical::ProcessCollision_Reversed()
                     m_vecMoveSpeed.z = 0.0f;
                     m_vecTurnSpeed.y = 0.0f;
                     m_vecTurnSpeed.x = 0.0f;
-                    m_matrix->ForceUpVector(0.0f, 0.0f, 1.0f);
+                    m_matrix->ForceUpVector(CVector(0.0f, 0.0f, 1.0f));
                     GetPosition().z = CCarCtrl::FindGhostRoadHeight(pVehicle) + pVehicle->GetHeightAboveRoad();
                     ApplySpeed();
                     m_matrix->Reorthogonalise();

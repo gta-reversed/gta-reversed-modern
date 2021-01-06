@@ -42,6 +42,9 @@ class CVehicleModelInfo;
 // originally an abstract class
 class  CBaseModelInfo {
 public:
+    CBaseModelInfo();  // constructor
+    //virtual ~CBaseModelInfo() {} //TODO: Replace DeletingDestructor with this once we have all derived classes reversed
+public:
 	unsigned int   m_nKey;
 	unsigned short m_nRefCount;
 	short          m_nTxdIndex;
@@ -123,9 +126,6 @@ public:
 	C2dEffect *Get2dEffect(int index);
 	void Add2dEffect(C2dEffect *effect);
 
-    	virtual ~CBaseModelInfo() {}
-	CBaseModelInfo();  // constructor
-	
 	bool GetIsDrawLast();
 	bool HasBeenPreRendered();
 	bool HasComplexHierarchy();
