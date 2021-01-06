@@ -206,9 +206,9 @@ void CTheZones::Save()
     ((void(__cdecl*)()) FUNC_CTheZones__Save) ();
 #else
     CGenericGameStorage::SaveDataToWorkBuffer(&m_CurrLevel, 4);
-    CGenericGameStorage::SaveDataToWorkBuffer(&TotalNumberOfMapZones, 2);
-    CGenericGameStorage::SaveDataToWorkBuffer(&TotalNumberOfZoneInfos, 2);
     CGenericGameStorage::SaveDataToWorkBuffer(&TotalNumberOfNavigationZones, 2);
+    CGenericGameStorage::SaveDataToWorkBuffer(&TotalNumberOfZoneInfos, 2);
+    CGenericGameStorage::SaveDataToWorkBuffer(&TotalNumberOfMapZones, 2);
 
     for (int i = 0; i < TotalNumberOfNavigationZones; i++)
     {
