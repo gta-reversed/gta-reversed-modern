@@ -225,7 +225,7 @@ void CTagManager::Save()
     if (!CTagManager::ms_numTags)
         return;
 
-    for (int32_t i = 0; i < CTagManager::ms_numTags; +i) {
+    for (int32_t i = 0; i < CTagManager::ms_numTags; ++i) {
         auto& pTagDesc = CTagManager::ms_tagDesc[i];
         CGenericGameStorage::SaveDataToWorkBuffer(&pTagDesc.m_nAlpha, 1);
     }
@@ -237,7 +237,7 @@ void CTagManager::Load()
     if (!CTagManager::ms_numTags)
         return;
 
-    for (int32_t i = 0; i < CTagManager::ms_numTags; +i) {
+    for (int32_t i = 0; i < CTagManager::ms_numTags; ++i) {
         auto& pTagDesc = CTagManager::ms_tagDesc[i];
         CGenericGameStorage::LoadDataFromWorkBuffer(&pTagDesc.m_nAlpha, 1);
     }
