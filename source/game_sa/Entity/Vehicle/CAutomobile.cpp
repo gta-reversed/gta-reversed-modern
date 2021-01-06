@@ -660,8 +660,11 @@ bool CAutomobile::HasCarStoppedBecauseOfLight()
     return ((bool(__thiscall*)(CAutomobile*))0x44D520)(this);
 }
 
-// Converted from cdecl RpAtomic* GetCurrentAtomicObjectCB(RwObject *object, void *data) 0x6A0750
-RpAtomic* GetCurrentAtomicObjectCB(RwObject* object, void* data)
+// Converted from cdecl RwObject* GetCurrentAtomicObjectCB(RwObject *object, void *data) 0x6A0750
+RwObject* GetCurrentAtomicObjectCB(RwObject* object, void* data)
 {
-    return ((RpAtomic * (__cdecl*)(RwObject*, void*))0x6A0750)(object, data);
+    if (RpAtomicGetFlags(object) & rpATOMICRENDER)
+        *reinterpret_cast<RpAtomic**>(data) = reinterpret_cast<RpAtomic*>(object);
+
+    return object;
 }

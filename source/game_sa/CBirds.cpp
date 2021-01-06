@@ -269,7 +269,6 @@ void CBirds::Render()
             continue;
         }
 
-        unsigned int uiUnkn = 0;
         auto matBirdTransform = CMatrix();
         matBirdTransform.SetTranslate(pBird.m_vecPosn);
 
@@ -293,7 +292,7 @@ void CBirds::Render()
 
             if (pBird.m_eBirdMode == eBirdMode::BIRD_DRAW_NOUPDATE || pBird.m_eBirdMode == eBirdMode::BIRD_DRAW_UPDATE) {
                 for (int32_t iIndice = 0; iIndice < 30; ++iIndice) {
-                    auto uiVertInd = static_cast<unsigned short>(uiTempBufferVerticesStored + CBirds::auRenderIndices[iIndice]);
+                    auto uiVertInd = static_cast<RxVertexIndex>(uiTempBufferVerticesStored + CBirds::auRenderIndices[iIndice]);
                     aTempBufferIndices[uiTempBufferIndicesStored + iIndice] = uiVertInd;
                     aTempBufferIndices[uiTempBufferIndicesStored + iIndice + 30] = uiVertInd + 8;
                 }
@@ -311,14 +310,14 @@ void CBirds::Render()
                 auto fOffX2 = cos(fSin2Factor) * 0.5F;
                 auto fOffZ2 = sin(fSin2Factor) * 0.5F;
 
-                unsigned char cAlpha = 255;
+                RwUInt8 cAlpha = 255;
                 const auto& vecCameraPos = TheCamera.GetPosition();
                 auto fCameraDist = DistanceBetweenPoints(vecCameraPos, pBird.m_vecPosn);
-                auto fMaxVisibleDist = pBird.m_fMaxBirdDistance * 0.7F;
-                if (fCameraDist > fMaxVisibleDist) {
-                    auto fTransparency = 1.0F - (fCameraDist - fMaxVisibleDist) / (pBird.m_fMaxBirdDistance * 0.3F);
-                    fTransparency = std::max(0.0F, fTransparency);
-                    cAlpha = static_cast<unsigned char>(fTransparency * 255.0F);
+                auto fAlphaCutoffDist = pBird.m_fMaxBirdDistance * 0.7F;
+                if (fCameraDist > fAlphaCutoffDist) {
+                    auto fTransparency = 1.0F - invLerp(fAlphaCutoffDist, pBird.m_fMaxBirdDistance, fCameraDist);
+                    fTransparency = clamp(0.0F, 1.0F, fTransparency);
+                    cAlpha = static_cast<RwUInt8>(fTransparency * 255.0F);
                 }
 
                 for (int32_t uiVertInd = 0; uiVertInd < 8; ++uiVertInd) {
@@ -356,31 +355,30 @@ void CBirds::Render()
                     auto vecWorldPos = matBirdTransform * vecPoint;
 
                     auto iBufferInd = uiTempBufferVerticesStored + uiVertInd;
-                    auto& pVert1 = aTempBufferVertices[iBufferInd];
-                    pVert1.color = (RwUInt32)CRGBA(vertColor.cRed, vertColor.cGreen, vertColor.cBlue, cAlpha).ToIntARGB();
-                    pVert1.objVertex = vecWorldPos.ToRwV3d();
-                    pVert1.u = CBirds::faRenderCoorsU[uiVertInd];
-                    pVert1.v = CBirds::faRenderCoorsV[uiVertInd];
+                    auto pVert1 = &aTempBufferVertices[iBufferInd];
+                    RwRGBA rwColor = CRGBA(vertColor.cRed, vertColor.cGreen, vertColor.cBlue, cAlpha).ToRwRGBA();
+                    RxObjSpace3DVertexSetPreLitColor(pVert1, &rwColor);
+                    RxObjSpace3DVertexSetPos(pVert1, &vecWorldPos);
+                    RxObjSpace3DVertexSetU(pVert1, CBirds::faRenderCoorsU[uiVertInd]);
+                    RxObjSpace3DVertexSetV(pVert1, CBirds::faRenderCoorsV[uiVertInd]);
 
                     // Mirror on the other side with slightly changed colors
                     vecPoint.x = -vecPoint.x;
                     vecWorldPos = matBirdTransform * vecPoint;
-                    vertColor.cRed = static_cast<unsigned char>(static_cast<float>(vertColor.cRed) * 0.8F);
-                    vertColor.cGreen = static_cast<unsigned char>(static_cast<float>(vertColor.cGreen) * 0.8F);
-                    vertColor.cBlue = static_cast<unsigned char>(static_cast<float>(vertColor.cBlue) * 0.8F);
+                    vertColor.Scale(0.8F);
+                    rwColor = CRGBA(vertColor.cRed, vertColor.cGreen, vertColor.cBlue, cAlpha).ToRwRGBA();
 
-                    auto& pVert2 = aTempBufferVertices[iBufferInd + 8];
-                    pVert2.color = (RwUInt32)CRGBA(vertColor.cRed, vertColor.cGreen, vertColor.cBlue, cAlpha).ToIntARGB();
-                    pVert2.objVertex = vecWorldPos.ToRwV3d();
-                    pVert2.u = CBirds::faRenderCoorsU[uiVertInd];
-                    pVert2.v = CBirds::faRenderCoorsV[uiVertInd];
+                    auto pVert2 = &aTempBufferVertices[iBufferInd + 8];
+                    RxObjSpace3DVertexSetPreLitColor(pVert2, &rwColor);
+                    RxObjSpace3DVertexSetPos(pVert2, &vecWorldPos);
+                    RxObjSpace3DVertexSetU(pVert2, CBirds::faRenderCoorsU[uiVertInd]);
+                    RxObjSpace3DVertexSetV(pVert2, CBirds::faRenderCoorsV[uiVertInd]);
                 }
 
                 uiTempBufferIndicesStored += 60;
                 uiTempBufferVerticesStored += 16;
             }
         }
-        uiUnkn = -1;
         uiWingMoveTimeOffset += 100;
     }
 

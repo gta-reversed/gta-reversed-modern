@@ -25,6 +25,8 @@ public:
 
     CVector2D(const class CVector& vec3d);
 
+    static void InjectHooks();
+
 	// Returns length of vector
 	float Magnitude();
     void Normalise();

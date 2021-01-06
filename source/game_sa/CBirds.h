@@ -18,20 +18,26 @@
 #pragma pack(push, 1)
 struct CBirdColor {
 public:
-    unsigned char cRed;
-    unsigned char cGreen;
-    unsigned char cBlue;
+    RwUInt8 cRed;
+    RwUInt8 cGreen;
+    RwUInt8 cBlue;
 
-    inline void Set(unsigned char cColor) {
+    inline void Set(RwUInt8 cColor) {
         cRed = cColor;
         cGreen = cColor;
         cBlue = cColor;
     }
 
-    inline void Set(unsigned char cR, unsigned char cG, unsigned char cB) {
+    inline void Set(RwUInt8 cR, RwUInt8 cG, RwUInt8 cB) {
         cRed = cR;
         cGreen = cG;
         cBlue = cB;
+    }
+
+    inline void Scale(RwReal fScale) {
+        cRed = static_cast<RwUInt8>(static_cast<RwReal>(cRed) * fScale);
+        cGreen = static_cast<RwUInt8>(static_cast<RwReal>(cGreen) * fScale);
+        cBlue = static_cast<RwUInt8>(static_cast<RwReal>(cBlue) * fScale);
     }
 
 };

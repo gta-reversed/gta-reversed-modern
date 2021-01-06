@@ -4,6 +4,13 @@ uint32_t& CWaterLevel::m_nWaterTimeOffset = *(uint32_t*)0xC228A4;
 float* CWaterLevel::faWaveMultipliersX = (float*)0x8D38C8;
 float* CWaterLevel::faWaveMultipliersY = (float*)0x8D38E8;
 
+RwRaster* CWaterLevel::waterclear256Raster = (RwRaster*)0xC228A8;
+RwTexture* CWaterLevel::texWaterclear256 = (RwTexture*)0xC228AC;
+RwRaster* CWaterLevel::seabd32Raster = (RwRaster*)0xC228B0;
+RwTexture* CWaterLevel::texSeabd32 = (RwTexture*)0xC228B4;
+RwRaster* CWaterLevel::waterwakeRaster = (RwRaster*)0xC228B8;
+RwTexture* CWaterLevel::texWaterwake = (RwTexture*)0xC228BC;
+
 void CWaterLevel::InjectHooks()
 {
     ReversibleHooks::Install("CWaterLevel", "GetWaterLevel", 0x6EB690, &CWaterLevel::GetWaterLevel);

@@ -113,6 +113,15 @@ T clamp(T value, T low, T high)
     return std::min(std::max(value, low), high);
 }
 
+
+inline const float lerp(float fMin, float fMax, float fProgress) {
+    return fMin * (1.0F - fProgress) + fMax * fProgress;
+}
+
+inline const float invLerp(float fMin, float fMax, float fVal) {
+    return (fVal - fMin) / (fMax - fMin);
+}
+
 AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, char *name);
 
 char *MakeUpperCase(char *dest, char *src);
@@ -248,5 +257,7 @@ extern int WindowsCharset;
 
 extern unsigned short &uiTempBufferIndicesStored;
 extern unsigned short &uiTempBufferVerticesStored;
-extern unsigned short *aTempBufferIndices; // size 4096
-extern RxObjSpace3DVertex* aTempBufferVertices; // size 1024 - after this there are 2 more arrays like this, both sized 512
+constexpr int32_t TOTAL_TEMP_BUFFER_INDICES = 4096;
+extern RxVertexIndex(&aTempBufferIndices)[TOTAL_TEMP_BUFFER_INDICES]; // size 4096
+constexpr int32_t TOTAL_TEMP_BUFFER_VERTICES = 1024;
+extern RxObjSpace3DVertex(&aTempBufferVertices)[TOTAL_TEMP_BUFFER_VERTICES]; // size 1024 - after this there are 2 more arrays like this, both sized 512

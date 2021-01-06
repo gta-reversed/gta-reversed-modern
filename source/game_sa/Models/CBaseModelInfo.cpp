@@ -61,9 +61,9 @@ RwObject *CBaseModelInfo::CreateInstance(RwMatrix *matrix)
     return ((RwObject *(__thiscall *)(CBaseModelInfo *, RwMatrix *))plugin::GetVMT(this, 10))(this, matrix);
 }
 
-RwObject *CBaseModelInfo::CreateInstance()
+RwObject *CBaseModelInfo::CreateInstance_()
 {
-    return ((RwObject *(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 11))(this);
+    return plugin::CallVirtualMethodAndReturn<RwObject*, 11, CBaseModelInfo*>(this);
 }
 
 void CBaseModelInfo::SetAnimFile(char *filename)
@@ -141,9 +141,9 @@ CBaseModelInfo::CBaseModelInfo()
     ((void(__thiscall *)(CBaseModelInfo *))0x4C4A60)(this);
 }
 
-// Converted from thiscall bool CBaseModelInfo::GetIsDrawLast(void) 0x5328C0
-bool CBaseModelInfo::GetIsDrawLast() {
-    return plugin::CallMethodAndReturn<bool, 0x5328C0, CBaseModelInfo *>(this);
+// Converted from thiscall bool CBaseModelInfo::IsBackfaceCulled(void) 0x5328F0
+bool CBaseModelInfo::IsBackfaceCulled() {
+    return plugin::CallMethodAndReturn<bool, 0x5328F0, CBaseModelInfo *>(this);
 }
 
 // Converted from thiscall bool CBaseModelInfo::HasBeenPreRendered(void) 0x5328B0
@@ -156,9 +156,9 @@ bool CBaseModelInfo::HasComplexHierarchy() {
     return plugin::CallMethodAndReturn<bool, 0x4C4E00, CBaseModelInfo *>(this);
 }
 
-// Converted from thiscall bool CBaseModelInfo::IsBackfaceCulled(void) 0x5328F0
-bool CBaseModelInfo::IsBackfaceCulled() {
-    return plugin::CallMethodAndReturn<bool, 0x5328F0, CBaseModelInfo *>(this);
+// Converted from thiscall bool CBaseModelInfo::GetIsDrawLast(void) 0x5328C0
+bool CBaseModelInfo::GetIsDrawLast() {
+    return plugin::CallMethodAndReturn<bool, 0x5328C0, CBaseModelInfo *>(this);
 }
 
 // Converted from thiscall bool CBaseModelInfo::IsBreakableStatuePart(void) 0x59F090

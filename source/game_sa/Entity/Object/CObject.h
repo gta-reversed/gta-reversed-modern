@@ -97,6 +97,10 @@ public:
     CObject* Constructor();
     // class functions
 
+    //Virtual
+    void SetIsStatic(bool isStatic) override;
+    void SetIsStatic_Reversed(bool isStatic);
+
     void ProcessGarageDoorBehaviour();
     bool CanBeDeleted();
     void SetRelatedDummy(CDummyObject* relatedDummy);

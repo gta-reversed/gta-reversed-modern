@@ -113,6 +113,15 @@ private:
     static uint32_t& m_nWaterTimeOffset;
     static float* faWaveMultipliersX;
     static float* faWaveMultipliersY;
+
+public:
+    static RwRaster* waterclear256Raster;
+    static RwTexture* texWaterclear256;
+    static RwRaster* seabd32Raster;
+    static RwTexture* texSeabd32;
+    static RwRaster* waterwakeRaster;
+    static RwTexture* texWaterwake;
+
     /* m_nWaterConfiguration
     * ms_WaterFog
     */

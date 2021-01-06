@@ -20,6 +20,16 @@ CObject* CObject::Constructor()
     return plugin::CallMethodAndReturn<CObject*, 0x5A1D10, CObject*>(this);
 }
 
+void CObject::SetIsStatic(bool isStatic)
+{
+    return SetIsStatic_Reversed(isStatic);
+}
+
+void CObject::SetIsStatic_Reversed(bool isStatic)
+{
+    plugin::CallMethod<0x5A0760, CObject*, bool>(this, isStatic);
+}
+
 // Converted from thiscall void CObject::ProcessGarageDoorBehaviour(void) 0x44A4D0
 void CObject::ProcessGarageDoorBehaviour() {
     ((void(__thiscall*)(CObject*))0x44A4D0)(this);

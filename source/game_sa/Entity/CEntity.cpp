@@ -10,7 +10,8 @@ Do not delete this comment block. Respect others' work!
 void CEntity::InjectHooks()
 {
     ReversibleHooks::Install("CEntity", "GetBoundRect", 0x534120, &CEntity::GetBoundRect_Reversed);
-    //ReversibleHooks::Install("CEntity", "SetModelIndexNoCreate", 0x533700, &CEntity::SetModelIndexNoCreate_Reversed);
+    ReversibleHooks::Install("CEntity", "SetModelIndexNoCreate", 0x533700, &CEntity::SetModelIndexNoCreate_Reversed);
+    ReversibleHooks::Install("CEntity", "CreateRwObject", 0x533D30, &CEntity::CreateRwObject_Reversed);
 }
 
 void CEntity::Add(CRect &rect)
@@ -35,7 +36,13 @@ void CEntity::SetIsStatic(bool isStatic)
 
 void CEntity::SetModelIndex(unsigned int index)
 {
-    ((void(__thiscall *)(CEntity *, unsigned int))(*(void ***)this)[5])(this, index);
+    return CEntity::SetModelIndex_Reversed(index);
+}
+
+void CEntity::SetModelIndex_Reversed(unsigned int index)
+{
+    CEntity::SetModelIndexNoCreate(index);
+    CEntity::CreateRwObject();
 }
 
 void CEntity::SetModelIndexNoCreate(unsigned int index)
@@ -43,10 +50,100 @@ void CEntity::SetModelIndexNoCreate(unsigned int index)
     return CEntity::SetModelIndexNoCreate_Reversed(index);
 }
 
+void CEntity::SetModelIndexNoCreate_Reversed(unsigned int index)
+{
+    auto pModelInfo = CModelInfo::GetModelInfo(index);
+    m_nModelIndex = index;
+    m_bHasPreRenderEffects = CEntity::HasPreRenderEffects();
+
+    if (pModelInfo->bDrawLast)
+        m_bDrawLast = true;
+
+    if (!pModelInfo->bIsBackfaceCulled)
+        m_bBackfaceCulled = false;
+
+    auto pAtomicInfo = pModelInfo->AsAtomicModelInfoPtr();
+    if (pAtomicInfo && !pAtomicInfo->bTagDisabled && pAtomicInfo->IsTagModel())
+        CTagManager::AddTag(this);
+}
+
 void CEntity::CreateRwObject()
 {
-    ((void(__thiscall *)(CEntity *))(*(void ***)this)[7])(this);
+    return CEntity::CreateRwObject_Reversed();
 }
+
+void CEntity::CreateRwObject_Reversed()
+{
+    if (!m_bIsVisible)
+        return;
+
+    auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
+    if (m_bRenderDamaged) {
+        CDamageAtomicModelInfo::ms_bCreateDamagedVersion = true;
+        m_pRwObject = pModelInfo->CreateInstance_();
+        CDamageAtomicModelInfo::ms_bCreateDamagedVersion = false;
+    }
+    else {
+        m_pRwObject = pModelInfo->CreateInstance_();
+    }
+
+    if (!m_pRwObject)
+        return;
+
+    if (IsBuilding())
+        ++gBuildings;
+
+    auto pRwMat = RwFrameGetMatrix((RwFrame*)rwObjectGetParent(m_pRwObject));
+    auto pMatrix = GetMatrix();
+    if (pMatrix)
+        pMatrix->UpdateRwMatrix(pRwMat);
+    else
+        m_placement.UpdateRwMatrix(pRwMat);
+
+    if (RwObjectGetType(m_pRwObject) == rpATOMIC) {
+        if (CTagManager::IsTag(this))
+            CTagManager::ResetAlpha(this);
+
+        CCustomBuildingDNPipeline::PreRenderUpdate(m_pRwAtomic, true);
+    }
+    else if (RwObjectGetType(m_pRwObject) == rpCLUMP && pModelInfo->bIsRoad) {
+        if (IsObject()) {
+            auto pObj = static_cast<CObject*>(this);
+            if (!pObj->m_pMovingList)
+                pObj->AddToMovingList();
+
+            pObj->SetIsStatic(false);
+        }
+        else {
+            auto pPtrList = reinterpret_cast<CPtrNodeDoubleLink*>(CPtrNodeDoubleLink::operator new(0xC));
+            if (pPtrList)
+                pPtrList->pItem = this;
+
+            pPtrList->AddToList(&CWorld::ms_listMovingEntityPtrs); //pPtrList can be nullptr when calling this method if the operator new failed
+        }
+
+        if (m_pLod && m_pLod->m_pRwObject && RwObjectGetType(m_pLod->m_pRwObject) == rpCLUMP) {
+            auto pLodAssoc = RpAnimBlendClumpGetFirstAssociation(m_pLod->m_pRwClump);
+            if (pLodAssoc) {
+                auto pAssoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump);
+                if (pAssoc)
+                    pAssoc->SetCurrentTime(pLodAssoc->m_fCurrentTime);
+            }
+        }
+    }
+
+    pModelInfo->AddRef();
+    m_pStreamingLink = CStreaming::AddEntity(this);
+    CEntity::CreateEffects();
+
+    auto pUsedAtomic = m_pRwAtomic;
+    if (RwObjectGetType(m_pRwObject) != rpATOMIC)
+        pUsedAtomic = GetFirstAtomic(m_pRwClump);
+
+    if (!CCustomBuildingRenderer::IsCBPCPipelineAttached(pUsedAtomic))
+        m_bLightObject = true;
+}
+
 
 void CEntity::DeleteRwObject()
 {
@@ -55,11 +152,7 @@ void CEntity::DeleteRwObject()
 
 CRect* CEntity::GetBoundRect(CRect* pRect)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((CRect*(__thiscall *)(CEntity *, CRect*))(*(void ***)this)[9])(this, pRect);
-#else
     return CEntity::GetBoundRect_Reversed(pRect);
-#endif
 }
 
 CRect* CEntity::GetBoundRect_Reversed(CRect* pRect)
@@ -82,11 +175,6 @@ CRect* CEntity::GetBoundRect_Reversed(CRect* pRect)
     rect.StretchToPoint(point.x, point.y);
     *pRect = rect;
     return pRect;
-}
-
-void CEntity::SetModelIndexNoCreate_Reversed(unsigned int index)
-{
-    plugin::CallMethod<0x533700, CEntity*, unsigned int>(this, index);
 }
 
 void CEntity::ProcessControl()

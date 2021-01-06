@@ -15,6 +15,9 @@ public:
     CPtrNodeDoubleLink *pPrev;
 
     inline CPtrNodeDoubleLink(void *item) : pItem(item) {}
+    static void* operator new(unsigned int size);
+
+    void AddToList(class CPtrListDoubleLink* list);
 };
 
 VALIDATE_SIZE(CPtrNodeDoubleLink, 0xC);

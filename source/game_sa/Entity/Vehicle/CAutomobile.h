@@ -295,4 +295,4 @@ extern CColPoint *aAutomobileColPoints;
 // Disable matfx (material effects) for material (callback), "data" parameter is unused
 RpMaterial *DisableMatFx(RpMaterial* material, void* data);
 // callback
-RpAtomic* GetCurrentAtomicObjectCB(RwObject* object, void* data);
+RwObject* GetCurrentAtomicObjectCB(RwObject* object, void* data);

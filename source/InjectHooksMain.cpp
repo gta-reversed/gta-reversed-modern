@@ -14,6 +14,7 @@ void InjectHooksMain(void)
     InjectCommonHooks();
     CGame::InjectHooks();
     CPad::InjectHooks();
+    CVector2D::InjectHooks();
     CRunningScript::InjectHooks();
     CStreaming::InjectHooks();
     InjectCdStreamHooks();
@@ -132,6 +133,7 @@ void InjectHooksMain(void)
     CTaskSimplePickUpEntity::InjectHooks();
     CTaskSimpleStealthKill::InjectHooks();
     CTimer::InjectHooks();
+    CTagManager::InjectHooks();
     CWaterLevel::InjectHooks();
     cBuoyancy::InjectHooks();
     CWanted::InjectHooks();

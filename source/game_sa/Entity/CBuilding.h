@@ -20,3 +20,5 @@ public:
 };
 
 VALIDATE_SIZE(CBuilding, 0x38);
+
+extern int32_t& gBuildings;
