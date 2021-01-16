@@ -1682,7 +1682,7 @@ void CStreaming::RequestSpecialModel(int modelId, char const* name, int flags)
             if (pObject && pObject->m_nModelIndex == modelId && pObject->CanBeDeleted()) {
                 CWorld::Remove(pObject);
                 CWorld::RemoveReferencesToDeletedObject(pObject);
-                pObject->DeletingDestructor(1); // TODO: Use delete
+                delete pObject;
             }
         }
     }

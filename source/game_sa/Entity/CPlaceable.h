@@ -13,15 +13,13 @@ class  CPlaceable {
 protected:
     CPlaceable(plugin::dummy_func_t) {}
     CPlaceable();
-    //virtual ~CPlaceable();
+    virtual ~CPlaceable() { assert(0); }
 public:
     CSimpleTransform m_placement;
     CMatrixLink *m_matrix;
 
 public:
     static void InjectHooks();
-
-    virtual unsigned int DeletingDestructor(uint8_t deletingFlags);
     
     CMatrixLink *GetMatrix();
     

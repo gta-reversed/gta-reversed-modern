@@ -43,7 +43,6 @@ class CVehicleModelInfo;
 class  CBaseModelInfo {
 public:
     CBaseModelInfo();  // constructor
-    //virtual ~CBaseModelInfo() {} //TODO: Replace DeletingDestructor with this once we have all derived classes reversed
 public:
 	unsigned int   m_nKey;
 	unsigned short m_nRefCount;
@@ -95,7 +94,7 @@ public:
 	struct RwObject  *m_pRwObject; // 28
 
 	// vtable
-	virtual CBaseModelInfo* DeletingDestructor(uint8_t deletingFlags);
+    virtual ~CBaseModelInfo() { assert(0); }
 	virtual class CAtomicModelInfo*AsAtomicModelInfoPtr();
     virtual class CDamagableModelInfo*AsDamageAtomicModelInfoPtr();
     virtual class CBaseModelInfo *AsLodAtomicModelInfoPtr();

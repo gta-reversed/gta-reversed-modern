@@ -41,7 +41,7 @@ void CPlayerPed::RemovePlayerPed(int playerId) {
         }
         CWorld::Remove(static_cast<CEntity*>(playerPed));
         if (playerPed)
-            playerPed->DeletingDestructor(1);
+            delete playerPed;
         pPlayerInfo->m_pPed = nullptr;
     }
 #endif

@@ -41,11 +41,6 @@ CPlaceable::CPlaceable() : m_placement()
 //    m_matrix = reinterpret_cast<CMatrixLink*>(&gDummyMatrix);
 //}
 
-unsigned int CPlaceable::DeletingDestructor(uint8_t deletingFlags)
-{
-    return plugin::CallVirtualMethodAndReturn<unsigned int, 0, CPlaceable*, uint8_t>(this, deletingFlags);
-}
-
 CVector CPlaceable::GetRightVector()
 {
     if (m_matrix)
