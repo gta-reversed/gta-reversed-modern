@@ -326,7 +326,7 @@ void CWorld::RemoveFallenCars() {
             if (!pVeh->IsCreatedBy(eVehicleCreatedBy::RANDOM_VEHICLE))
                 if (!pVeh->IsCreatedBy(eVehicleCreatedBy::PARKED_VEHICLE))
                     continue;
-
+            pVeh->Remove();
             if (pVeh->IsPhysical())
                 pVeh->RemoveFromMovingList();
 
