@@ -11,4 +11,5 @@ public:
     static bool IsPlayerUse2PlayerControls(CPed* pPed);
     static bool IsCoopGameGoingOn();
     static void ClearSkip(bool a1);
+    static bool LaRiotsActiveHere();
 };

@@ -49,3 +49,8 @@ void CCamera::DrawBordersForWideScreen()
 {
     ((void(__thiscall*)(CCamera*))0x514860)(this);
 }
+
+bool CCamera::IsSphereVisible(CVector const* origin, float radius, RwMatrixTag* transformMatrix)
+{
+	return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, CVector const*, float, RwMatrixTag*>(this, origin, radius, transformMatrix);
+}

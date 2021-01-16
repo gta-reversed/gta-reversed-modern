@@ -23,24 +23,13 @@ enum eModelInfoType : unsigned char
     MODEL_INFO_TYPE_LOD_ATOMIC = 8,
 };
 
-extern std::uint16_t& MI_GRASSHOUSE;
-extern std::uint16_t& MI_FIRE_HYDRANT;
-extern std::uint16_t& MI_PARKINGMETER;
-extern std::uint16_t& MI_PARKINGMETER2;
-extern std::uint16_t& MI_POOL_CUE_BALL;
-extern std::uint16_t& MI_HARVESTERBODYPART1;
-extern std::uint16_t& MI_HARVESTERBODYPART2;
-extern std::uint16_t& MI_HARVESTERBODYPART3;
-extern std::uint16_t& MI_HARVESTERBODYPART4;
-extern std::uint16_t& MI_ESCALATORSTEP;
-extern std::uint16_t& MI_ESCALATORSTEP8;
-
 class CModelInfo
 {
 public:
 	// variables
 	//static CBaseModelInfo *ms_modelInfoPtrs[20000]; Use GetModelInfo(int index) to get model info by id
-	static CBaseModelInfo **ms_modelInfoPtrs;
+    static constexpr int NUM_MODEL_INFOS = 20000;
+	static CBaseModelInfo* (&ms_modelInfoPtrs)[NUM_MODEL_INFOS];
 
 	// functions
 	static void ReInit2dEffects();

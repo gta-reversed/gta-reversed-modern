@@ -15,10 +15,10 @@ public:
     CRGBA   m_color;
     CVector m_avecLeftPoints[3];
     CVector m_avecRightPoints[3];
-    bool    m_bExists;
-    bool field_51;
-    char field_52;
-    char field_53;
+    bool    m_acRenderHistory[3];
+
+public:
+    static void InjectHooks();
 
     void Update();
     void Render();

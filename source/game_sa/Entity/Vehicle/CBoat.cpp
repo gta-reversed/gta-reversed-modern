@@ -707,9 +707,7 @@ void CBoat::PreRender_Reversed()
     constexpr eBoatNodes aCheckedNodes[2] = { eBoatNodes::BOAT_STATIC_PROP, eBoatNodes::BOAT_STATIC_PROP_2 };
     for (const auto eNode : aCheckedNodes) {
         auto pProp = m_aBoatNodes[eNode];
-        RwMatrix* pSplashMat = nullptr;
-        if (m_pRwClump) 
-            pSplashMat = RwFrameGetMatrix(RpClumpGetFrame(m_pRwClump));
+        RwMatrix* pSplashMat = CEntity::GetModellingMatrix();
 
         auto pSplashFx = m_apPropSplashFx[iCounter];
         if (!pSplashFx && pSplashMat && pProp) {
@@ -986,7 +984,7 @@ void CBoat::BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion)
     memcpy(RwFrameGetMatrix(pNewRwFrame), pMovingCompMatrix, sizeof(RwMatrix));
     RpAtomicSetFrame(pMovingCompAtomicClone, pNewRwFrame);
     CVisibilityPlugins::SetAtomicRenderCallback(pMovingCompAtomicClone, nullptr);
-    pObject->AttachToRwObject(&pMovingCompAtomicClone->object.object, true);
+    pObject->AttachToRwObject((RwObject*)pMovingCompAtomicClone, true);
 
     ++CObject::nNoTempObjects;
     pObject->m_bDontStream = true;

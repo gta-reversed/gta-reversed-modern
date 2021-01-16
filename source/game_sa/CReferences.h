@@ -14,9 +14,11 @@
 class  CReferences
 {
 public:
-	// count: MAX_NUM_REFERENCES (3000)
-	static CReference *aRefs;
-	static CReference **pEmptyList;
+	static CReference (&aRefs)[MAX_NUM_REFERENCES];
+	static CReference* (&pEmptyList);
+
+public:
+    static void InjectHooks();
 
 	static void Init();
 	static unsigned int ListSize(CReference *ref);

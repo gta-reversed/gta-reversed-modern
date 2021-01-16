@@ -648,18 +648,25 @@ void CDebugMenu::ProcessHooksTool()
             ImGui::AlignTextToFramePadding();
             bool treeOpen = ImGui::TreeNodeEx(classHooks.first.c_str(), ImGuiTreeNodeFlags_AllowItemOverlap);
             ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 40);
+
+            std::string disabledStr = classHooks.first + "_disabled";
+            ImGui::PushID(disabledStr.c_str());
             if (ImGui::Button("-")) {
                 for (auto& hook : classHooks.second)
                     hook->m_bImguiHooked = false;
             }
             if (ImGui::IsItemHovered()) ImGui::SetTooltip("Disable all");
+            ImGui::PopID();
 
             ImGui::SameLine();
+            std::string enableStr = classHooks.first + "_enabled";
+            ImGui::PushID(enableStr.c_str());
             if (ImGui::Button("+")) {
                 for (auto& hook : classHooks.second)
                     hook->m_bImguiHooked = true;
             }
             if (ImGui::IsItemHovered()) ImGui::SetTooltip("Enable all");
+            ImGui::PopID();
 
             for (auto& hook : classHooks.second)
                 if (hook->m_bIsHooked != hook->m_bImguiHooked)

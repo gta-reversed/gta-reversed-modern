@@ -7,7 +7,7 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-CPathFind &ThePaths = **(CPathFind **)(0x40CA27);
+CPathFind &ThePaths = *(CPathFind *)(0x96F050);
 
 CVector CPathNode::GetNodeCoors()
 {

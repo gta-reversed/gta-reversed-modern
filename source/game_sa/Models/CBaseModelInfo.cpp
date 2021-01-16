@@ -6,6 +6,19 @@ Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
+void CBaseModelInfo::InjectHooks()
+{
+    ReversibleHooks::Install("CBaseModelInfo", "IsBackfaceCulled", 0x5328F0, &CBaseModelInfo::IsBackfaceCulled);
+    ReversibleHooks::Install("CBaseModelInfo", "HasBeenPreRendered", 0x5328B0, &CBaseModelInfo::HasBeenPreRendered);
+    ReversibleHooks::Install("CBaseModelInfo", "HasComplexHierarchy", 0x4C4E00, &CBaseModelInfo::HasComplexHierarchy);
+    ReversibleHooks::Install("CBaseModelInfo", "GetIsDrawLast", 0x5328C0, &CBaseModelInfo::GetIsDrawLast);
+    ReversibleHooks::Install("CBaseModelInfo", "IsBreakableStatuePart", 0x59F090, &CBaseModelInfo::IsBreakableStatuePart);
+    ReversibleHooks::Install("CBaseModelInfo", "IsLod", 0x4C4A00, &CBaseModelInfo::IsLod);
+    ReversibleHooks::Install("CBaseModelInfo", "IsRoad", 0x4C4DF0, &CBaseModelInfo::IsRoad);
+    ReversibleHooks::Install("CBaseModelInfo", "IsTagModel", 0x49CC20, &CBaseModelInfo::IsTagModel);
+    ReversibleHooks::Install("CBaseModelInfo", "SwaysInWind", 0x4212C0, &CBaseModelInfo::SwaysInWind);
+}
+
 CAtomicModelInfo* CBaseModelInfo::AsAtomicModelInfoPtr()
 {
     return ((CAtomicModelInfo * (__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 1))(this);
@@ -56,7 +69,7 @@ RwObject *CBaseModelInfo::CreateInstance(RwMatrix *matrix)
     return ((RwObject *(__thiscall *)(CBaseModelInfo *, RwMatrix *))plugin::GetVMT(this, 10))(this, matrix);
 }
 
-RwObject *CBaseModelInfo::CreateInstance_()
+RwObject *CBaseModelInfo::CreateInstance()
 {
     return plugin::CallVirtualMethodAndReturn<RwObject*, 11, CBaseModelInfo*>(this);
 }
@@ -136,49 +149,47 @@ CBaseModelInfo::CBaseModelInfo()
     ((void(__thiscall *)(CBaseModelInfo *))0x4C4A60)(this);
 }
 
-// Converted from thiscall bool CBaseModelInfo::IsBackfaceCulled(void) 0x5328F0
 bool CBaseModelInfo::IsBackfaceCulled() {
-    return plugin::CallMethodAndReturn<bool, 0x5328F0, CBaseModelInfo *>(this);
+    return bIsBackfaceCulled;
 }
 
-// Converted from thiscall bool CBaseModelInfo::HasBeenPreRendered(void) 0x5328B0
 bool CBaseModelInfo::HasBeenPreRendered() {
-    return plugin::CallMethodAndReturn<bool, 0x5328B0, CBaseModelInfo *>(this);
+    return bHasBeenPreRendered;
 }
 
 // Converted from thiscall bool CBaseModelInfo::HasComplexHierarchy(void) 0x4C4E00
 bool CBaseModelInfo::HasComplexHierarchy() {
-    return plugin::CallMethodAndReturn<bool, 0x4C4E00, CBaseModelInfo *>(this);
+    return bHasComplexHierarchy;
 }
 
 // Converted from thiscall bool CBaseModelInfo::GetIsDrawLast(void) 0x5328C0
 bool CBaseModelInfo::GetIsDrawLast() {
-    return plugin::CallMethodAndReturn<bool, 0x5328C0, CBaseModelInfo *>(this);
+    return bDrawLast;
 }
 
 // Converted from thiscall bool CBaseModelInfo::IsBreakableStatuePart(void) 0x59F090
 bool CBaseModelInfo::IsBreakableStatuePart() {
-    return plugin::CallMethodAndReturn<bool, 0x59F090, CBaseModelInfo *>(this);
+    return nSpecialType == 11;
 }
 
 // Converted from thiscall bool CBaseModelInfo::IsLod(void) 0x4C4A00
 bool CBaseModelInfo::IsLod() {
-    return plugin::CallMethodAndReturn<bool, 0x4C4A00, CBaseModelInfo *>(this);
+    return bIsLod;
 }
 
 // Converted from thiscall bool CBaseModelInfo::IsRoad(void) 0x4C4DF0
 bool CBaseModelInfo::IsRoad() {
-    return plugin::CallMethodAndReturn<bool, 0x4C4DF0, CBaseModelInfo *>(this);
+    return bIsRoad;
 }
 
 // Converted from thiscall bool CBaseModelInfo::IsTagModel(void) 0x49CC20
 bool CBaseModelInfo::IsTagModel() {
-    return plugin::CallMethodAndReturn<bool, 0x49CC20, CBaseModelInfo *>(this);
+    return nSpecialType == 6;
 }
 
 // Converted from thiscall bool CBaseModelInfo::SwaysInWind(void) 0x4212C0	
 bool CBaseModelInfo::SwaysInWind() {
-    return plugin::CallMethodAndReturn<bool, 0x4212C0, CBaseModelInfo *>(this);
+    return IsSwayInWind1() || IsSwayInWind2();
 }
 
 // Converted from thiscall void CBaseModelInfo::SetHasBeenPreRendered(int bHasBeenPreRendered) 0x4C42F0

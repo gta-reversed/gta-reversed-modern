@@ -14,8 +14,3 @@ inline CAnimBlendClumpData * GetAnimClumpData(RpClump * pClump)
     //return reinterpret_cast <CAnimBlendClumpData *> (*(&pClump->object.type + clumpOffset));
     return reinterpret_cast <CAnimBlendClumpData *> (*(DWORD *)(clumpOffset + ((int)pClump)  ));
 }
-
-inline RwFrame* GetFrameFromAtomic(RpAtomic* atomic)
-{
-    return reinterpret_cast<RwFrame*>(atomic->object.object.parent);
-}

@@ -11,25 +11,29 @@
 #include "CObject.h"
 #include "CVector.h"
 
+struct tScriptForBrains
+{
+    short m_nIMGindex;
+    char m_nAttachType;
+    char m_nType;
+    char m_ucStatus;
+private:
+    char __pad[3];
+public:
+    float m_fRadius;
+    unsigned short m_nModelID;
+    unsigned short m_nPriority;
+    int field_10;
+};
+
 class  CScriptsForBrains {
     PLUGIN_NO_DEFAULT_CONSTRUCTION(CScriptsForBrains)
 public:
+    static constexpr int NUM_SCRIPTS = 70;
+public:
+    tScriptForBrains m_aScriptForBrains[NUM_SCRIPTS];
 
-    struct
-    {
-        short m_nIMGindex;
-        char m_nAttachType;
-        char m_nType;
-        char Status;
-    private:
-        char __pad[3];
-    public:
-        float Radius;
-        unsigned short m_nModelID;
-        unsigned short m_nPriority;
-        int field_10;
-    } m_aScriptForBrains[70];
-
+public:
      void AddNewScriptBrain(short ImgIndex, short Model, unsigned short Priority, signed char attachType, signed char Type, float Radius);
      void AddNewStreamedScriptBrainForCodeUse(short a2, char *a3, signed char attachtype);
      void CheckIfNewEntityNeedsScript(CEntity *pEntity, signed char attachType, void *unused);

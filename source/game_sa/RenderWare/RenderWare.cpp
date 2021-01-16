@@ -3188,6 +3188,11 @@ RpMaterial* RpMaterialUVAnimSubAnimTime(RpMaterial* material, RwReal deltaTime) 
     return ((RpMaterial*(__cdecl *)(RpMaterial*, RwReal))0x7CC4F0)(material, deltaTime);
 }
 
+RpMaterial* RpMaterialUVAnimApplyUpdate(RpMaterial* material)
+{
+    return plugin::CallAndReturn<RpMaterial*, 0x7CC110, RpMaterial*>(material);
+}
+
 RwBool RpMaterialUVAnimExists(const RpMaterial* material) {
     return ((RwBool(__cdecl *)(const RpMaterial*))0x7CC530)(material);
 }

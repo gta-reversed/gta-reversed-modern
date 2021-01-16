@@ -9,3 +9,8 @@ void CGlass::WindowRespondsToSoftCollision(CObject* pEntity, float fDamageIntens
 {
     return plugin::Call<0x71AF70, CObject*, float>(pEntity, fDamageIntensity);
 }
+
+void CGlass::AskForObjectToBeRenderedInGlass(CEntity* pEntity)
+{
+    plugin::Call<0x71ACD0, CEntity*>(pEntity);
+}

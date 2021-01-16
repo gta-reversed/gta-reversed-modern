@@ -864,19 +864,7 @@ void CTrain::ProcessControl_Reversed()
             m_vecTurnSpeed.z = fVehicleTurnSpeedZ;
         }
 
-        RwObject* pRwObject = m_pRwObject;
-        if (pRwObject)
-        {
-            RwMatrix* pRwMatrix = &((RwFrame*)pRwObject->parent)->modelling;
-            if (m_matrix)
-            {
-                m_matrix->UpdateRwMatrix(pRwMatrix);
-            }
-            else
-            {
-                m_placement.UpdateRwMatrix(pRwMatrix);
-            }
-        }
+        UpdateRW();
         UpdateRwFrame();
         RemoveAndAdd();
 

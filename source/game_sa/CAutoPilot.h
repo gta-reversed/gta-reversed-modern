@@ -24,7 +24,7 @@ class  CAutoPilot {
 public:
     CNodeAddress         m_currentAddress;
     CNodeAddress         m_startingRouteNode;
-    CNodeAddress field_8;
+    CNodeAddress         m_endingRouteNode;
     int field_C;
     unsigned int         m_nSpeedScaleFactor;
     CCarPathLinkAddress  m_nCurrentPathNodeInfo;
@@ -33,7 +33,7 @@ public:
     char field_1A[2];
     unsigned int         m_nTimeToStartMission;
     unsigned int         m_nTimeSwitchedToRealPhysics;
-    char field_24;
+    char _smthPrev;
     char _smthCurr;
     char _smthNext;
     char                 m_nCurrentLane;

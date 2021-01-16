@@ -19,9 +19,15 @@ void InjectHooksMain(void)
     CMatrix::InjectHooks();
     CMatrixLink::InjectHooks();
     CMatrixLinkList::InjectHooks();
+    CEntryInfoNode::InjectHooks();
+    CEntryInfoList::InjectHooks();
+    CPtrNodeDoubleLink::InjectHooks();
+    CPtrListDoubleLink::InjectHooks();
     CRunningScript::InjectHooks();
     CStreaming::InjectHooks();
     InjectCdStreamHooks();
+    CReferences::InjectHooks();
+    CBaseModelInfo::InjectHooks();
     CVehicleModelInfo::InjectHooks();
     SurfaceInfos_c::InjectHooks();
     CFileLoader::InjectHooks();
@@ -37,6 +43,9 @@ void InjectHooksMain(void)
     CColSphere::InjectHooks();
     CColLine::InjectHooks();
     CAnimBlendAssociation::InjectHooks();
+    CTrafficLights::InjectHooks();
+    CMotionBlurStreaks::InjectHooks();
+    CRegisteredMotionBlurStreak::InjectHooks();
     CEvent::InjectHooks();
     CEventSeenPanickedPed::InjectHooks();
     CEventCarUpsideDown::InjectHooks();
@@ -157,6 +166,8 @@ void InjectHooksMain(void)
     CSprite2d::InjectHooks();
     CCheat::InjectHooks();
     CBirds::InjectHooks();
+    C2dEffect::InjectHooks();
+    COcclusion::InjectHooks();
 
     CAEAudioUtility::InjectHooks();
     CAEDataStream::InjectHooks();

@@ -25,7 +25,10 @@ public:
 	// this is used to control moon size when you shooting it with sniper
 	static unsigned int& MoonSize;
 	// Coronas array. count: MAX_NUM_CORONAS (default: 64)
-	static CRegisteredCorona *aCoronas;
+    static constexpr int MAX_NUM_CORONAS = 64;
+	static CRegisteredCorona (&aCoronas)[MAX_NUM_CORONAS];
+
+    static unsigned short(&ms_aEntityLightsOffsets)[8];
 
 	// Initialises coronas
 	static void Init();
@@ -50,10 +53,11 @@ public:
         bool enableReflection, bool checkObstacles, int _param_not_used, float angle, bool longDistance, float nearClip, 
         unsigned char fadeState, float fadeSpeed, bool onlyFromBelow, bool reflectionDelay);
 
-	static void UpdateCoronaCoors(unsigned int id, CVector  const& posn, float farClip, float angle);
+	static void UpdateCoronaCoors(unsigned int id, CVector const& posn, float farClip, float angle);
 	// Draw sun (Moon went to CClouds since SA)
 	static void DoSunAndMoon();
 };
 
 extern unsigned int MAX_CORONAS;
-extern RwTexture **gpCoronaTexture;
+constexpr int CORONA_TEXTURES_COUNT = 10;
+extern RwTexture*(&gpCoronaTexture)[CORONA_TEXTURES_COUNT];

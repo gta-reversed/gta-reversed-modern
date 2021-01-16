@@ -35,14 +35,49 @@ enum ePedAttractorType {
     PED_ATTRACTOR_STEP           = 9  // Ped sits on steps
 };
 
+// From https://gtamods.com/wiki/2d_Effect_(RW_Section)
+enum e2dCoronaFlashType {
+    FLASH_DEFAULT         = 0,
+    FLASH_RANDOM          = 1,
+    FLASH_RANDOM_WHEN_WET = 2,
+    FLASH_ANIM_SPEED_4X   = 3,
+    FLASH_ANIM_SPEED_2X   = 4,
+    FLASH_ANIM_SPEED_1X   = 5,
+    FLASH_UNKN            = 6,
+    FLASH_TRAFFICLIGHT    = 7,
+    FLASH_TRAINCROSSING   = 8,
+    FLASH_UNUSED          = 9,
+    FLASH_ONLY_RAIN       = 10,
+    FLASH_5ON_5OFF        = 11,
+    FLASH_6ON_4OFF        = 12,
+    FLASH_4ON_6OFF        = 13,
+};
+
 struct tEffectLight {
     RwRGBA m_color;
     float m_fCoronaFarClip;
     float m_fPointlightRange;
     float m_fCoronaSize;
     float m_fShadowSize;
-    unsigned short m_nFlags;
-    unsigned char m_nCoronaFlashType;
+    union {
+        unsigned short m_nFlags;
+        struct {
+            unsigned short m_bCheckObstacles : 1;
+            unsigned short m_nFogType : 2;
+            unsigned short m_bWithoutCorona : 1;
+            unsigned short m_bOnlyLongDistance : 1;
+            unsigned short m_bAtDay : 1;
+            unsigned short m_bAtNight : 1;
+            unsigned short m_bBlinking1 : 1;
+
+            unsigned short m_bOnlyFromBelow : 1;
+            unsigned short m_bBlinking2 : 1;
+            unsigned short m_bUpdateHeightAboveGround : 1;
+            unsigned short m_bCheckDirection : 1;
+            unsigned short m_bBlinking3 : 1;
+        };
+    };
+    unsigned char m_nCoronaFlashType; // see e2dCoronaFlashType
     bool m_bCoronaEnableReflection;
     unsigned char m_nCoronaFlareType;
     unsigned char m_nShadowColorMultiplier;
@@ -76,11 +111,17 @@ struct tEffectPedAttractor {
 
 struct tEffectEnEx {
     float m_fEnterAngle;
-    RwV3d m_vecSize;
+    RwV2d m_vecRadius;
     RwV3d m_vecExitPosn;
     float m_fExitAngle;
     short m_nInteriorId;
-    unsigned char m_nFlags1;
+    union {
+        unsigned char m_nFlags1;
+        struct {
+            unsigned char bUnkn0 : 1;
+            unsigned char bTimedEffect : 1;
+        };
+    };
     unsigned char m_nSkyColor;
     char m_szInteriorName[8];
     unsigned char m_nTimeOn;
@@ -88,14 +129,22 @@ struct tEffectEnEx {
     unsigned char m_nFlags2;
 };
 
+struct CRoadsignAttrFlags {
+    unsigned short m_nNumOfLines : 2;
+    unsigned short m_nSymbolsPerLine : 2;
+    unsigned short m_nTextColor : 2;
+};
+VALIDATE_SIZE(CRoadsignAttrFlags, 0x2);
+
+
 struct tEffectRoadsign {
     RwV2d m_vecSize;
-    float m_afRotation[3];
-    unsigned short m_nFlags;
+    RwV3d m_vecRotation;
+    CRoadsignAttrFlags m_nFlags;
 private:
     char _pad26[2];
 public:
-    char *m_pText;
+    char (&m_pText)[64];
     RpAtomic *m_pAtomic;
 };
 
@@ -111,7 +160,7 @@ struct tEffectEscalator {
     RwV3d m_vecBottom;
     RwV3d m_vecTop;
     RwV3d m_vecEnd;
-    unsigned char m_nDirection;
+    unsigned char m_nDirection; // 0 - down, 1 - up
 private:
     char _pad35[3];
 public:
@@ -132,6 +181,14 @@ public:
         tEffectCoverPoint coverPoint;
         tEffectEscalator escalator;
     };
+
+public:
+    static void InjectHooks();
+
+public:
+    static int Roadsign_GetNumLinesFromFlags(CRoadsignAttrFlags flags);
+    static int Roadsign_GetNumLettersFromFlags(CRoadsignAttrFlags flags);
+    static int Roadsign_GetPaletteIDFromFlags(CRoadsignAttrFlags flags);
 };
 
 VALIDATE_SIZE(C2dEffect, 0x40);

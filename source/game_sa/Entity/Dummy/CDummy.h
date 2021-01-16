@@ -15,3 +15,5 @@ public:
 
 
 VALIDATE_SIZE(CDummy, 0x38);
+
+bool IsDummyPointerValid(CDummy* pDummy);

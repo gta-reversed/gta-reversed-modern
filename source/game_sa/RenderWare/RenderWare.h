@@ -835,6 +835,7 @@ RpMaterial* RpMaterialUVAnimSetInterpolator(RpMaterial* material, RpUVAnimInterp
 RpMaterial* RpMaterialUVAnimSetCurrentTime(RpMaterial* material, RwReal time); // 0x7CC470
 RpMaterial* RpMaterialUVAnimAddAnimTime(RpMaterial* material, RwReal deltaTime); // 0x7CC4B0
 RpMaterial* RpMaterialUVAnimSubAnimTime(RpMaterial* material, RwReal deltaTime); // 0x7CC4F0
+RpMaterial* RpMaterialUVAnimApplyUpdate(RpMaterial* material); // 0x7CC110  
 RwBool RpMaterialUVAnimExists(const RpMaterial* material); // 0x7CC530
 
 /* rpskin.h */

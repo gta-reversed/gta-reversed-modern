@@ -135,7 +135,7 @@ public:
      static void InjectHooks();
 
 
-     static void *AddEntity(CEntity * pEntity);
+     static CLink<CEntity*>* AddEntity(CEntity * pEntity);
     //! return StreamingFile Index in CStreaming::ms_files
      static int AddImageToList(char const * pFileName, bool bNotPlayerImg);
      static void AddLodsToRequestList(CVector const& point, unsigned int streamingFlags);

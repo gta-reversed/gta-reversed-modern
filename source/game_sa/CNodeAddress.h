@@ -17,6 +17,9 @@ public:
     CNodeAddress() : m_wAreaId(-1), m_wNodeId(-1) {}
 
     bool operatorEqual(CNodeAddress* rhs);
+
+    bool operator==(CNodeAddress const& rhs) const;
+    bool operator!=(CNodeAddress const& rhs) const;
 };
 
 VALIDATE_SIZE(CNodeAddress, 0x4);

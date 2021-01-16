@@ -28,7 +28,7 @@ public:
      static unsigned int &ms_numVisibleEntities;
 
      static void AddEntryExitToStack(CEntryExit *a1);
-     static int AddOne(float entranceX, float entranceY, float entranceZ, float entranceAngle, float entranceRangeX, float entranceRangeY, int unused, float exitX, float exitY, float exitZ, float exitAngle, int area, int flags, int skyColor, int timeOn, int timeOff, int numberOfPeds, char const *name);
+     static int AddOne(float entranceX, float entranceY, float entranceZ, float entranceAngle, float entranceRangeX, float entranceRangeY, float fUnused, float exitX, float exitY, float exitZ, float exitAngle, int area, int flags, int skyColor, int timeOn, int timeOff, int numberOfPeds, char const* name);
      static void DeleteOne(int index);
      static void EnableBurglaryHouses(bool enable);
      static CEntity *FindNearestDoor(CEntryExit const &entryExit, float range);

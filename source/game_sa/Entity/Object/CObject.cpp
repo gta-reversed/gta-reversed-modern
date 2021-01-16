@@ -6,7 +6,8 @@
 */
 #include "StdInc.h"
 
-unsigned short& CObject::nNoTempObjects = *reinterpret_cast<unsigned short*>(0xBB4A70);
+unsigned short& CObject::nNoTempObjects = *(unsigned short*)(0xBB4A70);
+float& CObject::fDistToNearestTree = *(float*)0x8D0A20;
 
 CObject::CObject() : CPhysical(plugin::dummy)
 {

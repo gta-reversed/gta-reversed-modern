@@ -221,7 +221,7 @@ bool CVisibilityPlugins::InsertEntityIntoSortedList(CEntity* entity, float dista
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturn<bool, 0x734570, CEntity*, float>(entity, distance);
 #else
-    if (entity->m_nModelIndex == MI_GRASSHOUSE && InsertEntityIntoReallyDrawLastList(entity, distance))
+    if (entity->m_nModelIndex == ModelIndices::MI_GRASSHOUSE && InsertEntityIntoReallyDrawLastList(entity, distance))
         return true;
     if (entity->m_bUnderwater)
         return InsertEntityIntoUnderwaterEntities(entity, distance);
@@ -620,7 +620,7 @@ void CVisibilityPlugins::RenderEntity(CEntity* entity, int unused, float distanc
 #else
     if (!entity->m_pRwObject)
         return;
-    CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex];
+    CBaseModelInfo* pModelInfo = CModelInfo::GetModelInfo(entity->m_nModelIndex);
     if (pModelInfo->bDontWriteZBuffer)
         RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, 0);
     if (!entity->m_bDistanceFade) {
@@ -1122,7 +1122,7 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
             std::int32_t animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, boneID);
             RwMatrixTag* pRightHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
             if (boneID == BONE_NORMAL)
-                pRightHandMatrix = ped->GetRwMatrix();
+                pRightHandMatrix = ped->GetModellingMatrix();
             RwFrame* weaponFrame = RpClumpGetFrame(ped->m_pWeaponObject);
             RwMatrixTag* weaponRwMatrix = RwFrameGetMatrix(weaponFrame);
             memcpy(weaponRwMatrix, pRightHandMatrix, sizeof(RwMatrixTag));
@@ -1269,8 +1269,8 @@ void CVisibilityPlugins::SetupVehicleVariables(RpClump* pRpClump) {
     RwV3dSub(&distance1, &transformMatrix->pos, ms_pCameraPosn);
     gVehicleDistanceFromCamera = distance1.SquaredMagnitude();
     CVector2D distance2;
-    RwV2dSub(&distance2, ms_pCameraPosn, &frame->modelling.pos);
-    gVehicleAngleToCamera = atan2(ms_pCameraPosn->z - frame->modelling.pos.z, distance2.Magnitude());
+    RwV2dSub(&distance2, ms_pCameraPosn, RwMatrixGetPos(RwFrameGetMatrix(frame)));
+    gVehicleAngleToCamera = atan2(ms_pCameraPosn->z - RwMatrixGetPos(RwFrameGetMatrix(frame))->z, distance2.Magnitude());
 #endif
 }
 

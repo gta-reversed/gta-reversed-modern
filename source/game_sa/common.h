@@ -90,6 +90,10 @@ CVector Multiply3x3(CMatrix* matrix, CVector* vector);
 // vector by matrix mult, resulting in a vector where each component is the dot product of the in vector and a matrix direction
 CVector Multiply3x3(CVector* vector, CMatrix* matrix);
 
+void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos);
+void TransformVectors(RwV3d* vecsOut, int numVectors, CMatrix const& matrix, RwV3d const* vecsin);
+void TransformVectors(RwV3d* vecsOut, int numVectors, CSimpleTransform const& transform, RwV3d const* vecsin);
+
 
 // returns player wanted
 CWanted * FindPlayerWanted(int playerId = -1);
@@ -104,7 +108,11 @@ constexpr float PI = 3.14159265358979323846f;
 constexpr float PI_2 = PI / 2.0f;
 
 constexpr float DegreesToRadians(float angleInDegrees) {
-    return angleInDegrees * PI / 180.0f;
+    return angleInDegrees * PI / 180.0F;
+}
+
+constexpr float RadiansToDegrees(float angleInRadians) {
+    return angleInRadians * 180.0F / PI;
 }
 
 template <typename T>
@@ -197,6 +205,7 @@ void StoreAndSetLightsForInfraredVisionHeatObjects();
 void RestoreLightsForInfraredVisionHeatObjects();
 void SetLightsForInfraredVisionDefaultObjects();
 void SetLightsForNightVision();
+float GetDayNightBalance();
 
 // 'data' is unused
 RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data);
@@ -247,6 +256,10 @@ void AsciiToGxtChar(char const *src, char *dst);
 */
 void Render2dStuff();
 void WriteRaster(RwRaster * pRaster, char const * pszPath);
+bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos, float* pScreenX, float* pScreenY);
+bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos);
+
+void LittleTest();
 
 /* Convert UTF-8 string to Windows Unicode. Free pointer using delete[] */
 std::wstring UTF8ToUnicode(const std::string &str);

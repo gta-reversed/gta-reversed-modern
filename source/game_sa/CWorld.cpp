@@ -22,7 +22,7 @@ char &CWorld::PlayerInFocus = *(char *)0xB7CD74;
 unsigned short&CWorld::ms_nCurrentScanCode = *(unsigned short*)0xB7CD78;
 CPlayerInfo *CWorld::Players = (CPlayerInfo *)0xB7CD98;
 CSector *CWorld::ms_aSectors = (CSector *)0xB7D0B8;
-CRepeatSector *CWorld::ms_aRepeatSectors = (CRepeatSector *)0xB992B8;
+CRepeatSector(&CWorld::ms_aRepeatSectors)[MAX_REPEAT_SECTORS] = *(CRepeatSector(*)[MAX_REPEAT_SECTORS])0xB992B8;
 CPtrListSingleLink(&CWorld::ms_aLodPtrLists)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X] = *(CPtrListSingleLink(*)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X])0xB99EB8;
 CPtrListDoubleLink &CWorld::ms_listMovingEntityPtrs = *(CPtrListDoubleLink *)0xB9ACC8;
 CPtrListDoubleLink &CWorld::ms_listObjectsWithControlCode = *(CPtrListDoubleLink *)0xB9ACCC;
@@ -36,6 +36,7 @@ short &TAG_SPRAYING_INCREMENT_VAL = *(short *)0x8CDEF0;
 void CWorld::InjectHooks() {
     HookInstall(0x565CB0, RemoveFallenPeds);
     HookInstall(0x565E80, RemoveFallenCars);
+    ReversibleHooks::Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
 }
 
 // Converted from cdecl void CWorld::ResetLineTestOptions(void) 0x5631C0
@@ -156,7 +157,42 @@ void CWorld::ShutDown() {
 
 // Converted from cdecl void CWorld::ClearForRestart(void) 0x564360
 void CWorld::ClearForRestart() {
-    plugin::Call<0x564360>();
+    if (CCutsceneMgr::ms_cutsceneLoadStatus == 2)
+        CCutsceneMgr::DeleteCutsceneData();
+
+    CProjectileInfo::RemoveAllProjectiles();
+    CObject::DeleteAllTempObjects();
+    CObject::DeleteAllMissionObjects();
+    for (auto& pSector : CWorld::ms_aRepeatSectors) {
+        auto pPedNode = pSector.m_lists[eRepeatSectorList::REPEATSECTOR_PEDS].pNode;
+        while (pPedNode) {
+            auto pPed = reinterpret_cast<CPed*>(pPedNode->pItem);
+            pPedNode = pPedNode->pNext;
+
+            pPed->Remove();
+            if (pPed->IsPhysical())
+                pPed->RemoveFromMovingList();
+
+            if (pPed)
+                delete pPed;
+        }
+
+        auto pVehNode = pSector.m_lists[eRepeatSectorList::REPEATSECTOR_VEHICLES].pNode;
+        while (pVehNode) {
+            auto pVeh = reinterpret_cast<CVehicle*>(pVehNode->pItem);
+            pVehNode = pVehNode->pNext;
+
+            pVeh->Remove();
+            if (pVeh->IsPhysical())
+                pVeh->RemoveFromMovingList();
+
+            if (pVeh)
+                delete pVeh;
+        }
+    }
+
+    CPickups::ReInit();
+    CPools::CheckPoolsEmpty();
 }
 
 // Converted from cdecl bool CWorld::ProcessVerticalLineSector_FillGlobeColPoints(CSector &sector,CRepeatSector &repeatSector,CColLine const&colLine,CEntity *&outEntity,bool buildings,bool vehicles,bool peds,bool objects,bool dummies,bool doSeeThroughCheck,CStoredCollPoly *outCollPoly) 0x564420

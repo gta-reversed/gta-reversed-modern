@@ -6,9 +6,21 @@
 */
 #include "StdInc.h"
 
+void CPtrNodeDoubleLink::InjectHooks()
+{
+    ReversibleHooks::Install("CPtrNodeDoubleLink", "operator new", 0x5523C0, &CPtrNodeDoubleLink::operator new);
+    ReversibleHooks::Install("CPtrNodeDoubleLink", "operator delete", 0x5523D0, &CPtrNodeDoubleLink::operator delete);
+    ReversibleHooks::Install("CPtrNodeDoubleLink", "AddToList", 0x5329A0, &CPtrNodeDoubleLink::AddToList);
+}
+
 void* CPtrNodeDoubleLink::operator new(unsigned int size)
 {
-    return plugin::CallAndReturn<void*, 0x5523C0, unsigned int>(size);
+    return CPools::ms_pPtrNodeDoubleLinkPool->New();
+}
+
+void CPtrNodeDoubleLink::operator delete(void* ptr, size_t sz)
+{
+    CPools::ms_pPtrNodeDoubleLinkPool->Delete(reinterpret_cast<CPtrNodeDoubleLink*>(ptr));
 }
 
 void CPtrNodeDoubleLink::AddToList(CPtrListDoubleLink* list)

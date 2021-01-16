@@ -16,7 +16,8 @@ char(&PC_Scratch)[16384] = *(char(*)[16384])0xC8E0C8;
 
 void InjectCommonHooks()
 {
-    HookInstall(0x53E230, &Render2dStuff);
+    HookInstall(0x53E230, &Render2dStuff); // This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without :D
+    ReversibleHooks::Install("common", "IsGlassModel", 0x46A760, &IsGlassModel);
 }
 
 CVector FindPlayerCoors(int playerId)
@@ -99,6 +100,21 @@ CVector Multiply3x3(CVector* vector, CMatrix* matrix)
     CVector result;
     plugin::Call<0x59C810, CVector*, CVector*, CMatrix*>(&result, vector, matrix);
     return result;
+}
+
+void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos)
+{
+    plugin::Call<0x54ECE0, RwV3d&, CSimpleTransform const&, RwV3d const&>(point, placement, vecPos);
+}
+
+void TransformVectors(RwV3d* vecsOut, int numVectors, CMatrix const& matrix, RwV3d const* vecsin)
+{
+    plugin::Call<0x54EEA0, RwV3d*, int, CMatrix const&, RwV3d const*>(vecsOut, numVectors, matrix, vecsin);
+}
+
+void TransformVectors(RwV3d* vecsOut, int numVectors, CSimpleTransform const& transform, RwV3d const* vecsin)
+{
+    plugin::Call<0x54EE30, RwV3d*, int, CSimpleTransform const&, RwV3d const*>(vecsOut, numVectors, transform, vecsin);
 }
 
 CWanted * FindPlayerWanted(int playerId)
@@ -360,7 +376,7 @@ void DeActivateDirectional() {
 
 // Converted from cdecl void ActivateDirectional(void) 0x735C80
 void ActivateDirectional() {
-    ((void(__cdecl *)())0x735C80)();
+    plugin::Call<0x735C80>();
 }
 
 // Converted from cdecl void SetAmbientColoursToIndicateRoadGroup(int) 0x735C90
@@ -418,6 +434,11 @@ void SetLightsForNightVision() {
     ((void(__cdecl *)())0x735F70)();
 }
 
+float GetDayNightBalance()
+{
+    return plugin::CallAndReturn<float, 0x6FAB30>();
+}
+
 // Converted from cdecl RpAtomic* RemoveRefsCB(RpAtomic *atomic, void *data) 0x7226D0
 RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data) {
     return plugin::CallAndReturn<RpAtomic*, 0x7226D0, RpAtomic*, void*>(atomic, data);
@@ -430,7 +451,14 @@ void RemoveRefsForAtomic(RpClump* clump) {
 
 bool IsGlassModel(CEntity* pEntity)
 {
-    return plugin::CallAndReturn<bool, 0x46A760, CEntity*>(pEntity);
+    if (!pEntity->IsObject())
+        return false;
+
+    auto pModelInfo = CModelInfo::GetModelInfo(pEntity->m_nModelIndex);
+    if (!pModelInfo->AsAtomicModelInfoPtr())
+        return false;
+
+    return pModelInfo->IsGlass();
 }
 
 // Converted from cdecl CAnimBlendClumpData* RpAnimBlendAllocateData(RpClump *clump) 0x4D5F50
@@ -618,6 +646,21 @@ void WriteRaster(RwRaster * pRaster, char const * pszPath) {
     assert(pRaster);
     assert(pszPath && pszPath[0]);
     plugin::Call<0x005A4150>(pRaster, pszPath);
+}
+
+bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos, float* pScreenX, float* pScreenY)
+{
+    return plugin::CallAndReturn<bool, 0x71DA00, CVector const&, CVector*, float*, float*>(vecPoint, pVecOutPos, pScreenX, pScreenY);
+}
+
+bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos)
+{
+    return plugin::CallAndReturn<bool, 0x71DAB0, CVector const&, CVector*>(vecPoint, pVecOutPos);
+}
+
+void LittleTest()
+{
+    plugin::Call<0x541330>();
 }
 
 void Render2dStuff()

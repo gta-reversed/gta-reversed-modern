@@ -87,7 +87,7 @@ void CVehicle::Render()
 
 void CVehicle::SetModelIndex(unsigned int index)
 {
-    return CVehicle::SetModelIndex(index);
+    return CVehicle::SetModelIndex_Reversed(index);
 }
 
 void* CVehicle::operator new(unsigned int size) {
@@ -643,12 +643,12 @@ void CVehicle::SetComponentVisibility(RwFrame* component, unsigned int visibilit
 // Converted from thiscall void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData *boatHandling,float) 0x6D2740
 void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData* boatHandling, float fImmersionDepth)
 {
-    float fSpeedMult = pow(fImmersionDepth, 2) * m_pHandlingData->m_fSuspensionForceLevel * m_fMass / 1000.0F;
+    float fSpeedMult = pow(fImmersionDepth, 2.0F) * m_pHandlingData->m_fSuspensionForceLevel * m_fMass / 1000.0F;
     if (m_nModelIndex == eModelID::MODEL_SKIMMER)
         fSpeedMult *= 30.0F;
 
     auto fMoveDotProduct = DotProduct(m_vecMoveSpeed, GetForward());
-    fSpeedMult *= (pow(fMoveDotProduct, 2) + 0.05F);
+    fSpeedMult *= (pow(fMoveDotProduct, 2.0F) + 0.05F);
     fSpeedMult += 1.0F;
     fSpeedMult = fabs(fSpeedMult);
     fSpeedMult = 1.0F / fSpeedMult;
@@ -1282,7 +1282,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
                     vecSteerMoveForce *= fThrustDepth * m_fGasPedal * 40.0F * m_pHandlingData->m_transmissionData.m_fEngineAcceleration * m_fMass;
 
                     if (vecSteerMoveForce.z > 0.2F)
-                        vecSteerMoveForce.z = pow(1.2F - vecSteerMoveForce.z, 2) + 0.2F;
+                        vecSteerMoveForce.z = pow(1.2F - vecSteerMoveForce.z, 2.0F) + 0.2F;
 
                     if (bPostCollision) {
                         if (m_fGasPedal < 0.0F)
@@ -1378,7 +1378,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         m_vecTurnSpeed.y *= vecTurnRes.y;
         m_vecTurnSpeed.z *= vecTurnRes.z;
 
-        float fMult = vecTurnRes.x / (pow(m_vecTurnSpeed.x, 2) * 1000.0F + 1.0F) * m_vecTurnSpeed.x - m_vecTurnSpeed.x;
+        float fMult = vecTurnRes.x / (pow(m_vecTurnSpeed.x, 2.0F) * 1000.0F + 1.0F) * m_vecTurnSpeed.x - m_vecTurnSpeed.x;
         fMult *= m_fTurnMass;
         auto vecTurnForce = GetUp() * fMult;
 

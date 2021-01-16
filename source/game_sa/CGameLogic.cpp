@@ -24,3 +24,8 @@ void CGameLogic::ClearSkip(bool a1)
 {
     return plugin::Call<0x441560, bool>(a1);
 }
+
+bool CGameLogic::LaRiotsActiveHere()
+{
+    return plugin::CallAndReturn<bool, 0x441C10>();
+}

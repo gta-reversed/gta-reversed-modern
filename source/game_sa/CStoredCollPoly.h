@@ -13,7 +13,10 @@ class  CStoredCollPoly {
 public:
     CVector      m_aMeshVertices[3]; // triangle vertices
     bool         m_bIsActual;
-    unsigned int m_nLighting;
+private:
+    unsigned char m_ucPad[3];
+public:
+    tColLighting m_nLighting;
 };
 
 VALIDATE_SIZE(CStoredCollPoly, 0x2C);

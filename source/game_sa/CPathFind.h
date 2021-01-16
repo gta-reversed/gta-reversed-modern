@@ -37,8 +37,12 @@ VALIDATE_SIZE(CForbiddenArea, 0x1C);
 class  CCarPathLinkAddress
 {
 public:
-    short m_wCarPathLinkId : 10;
-    short m_wAreaId : 6;
+    unsigned short m_wCarPathLinkId : 10;
+    unsigned short m_wAreaId : 6;
+
+    inline bool IsValid() {
+        return *reinterpret_cast<unsigned short*>(this) != 0xFFFF;
+    }
 };
 
 VALIDATE_SIZE(CCarPathLinkAddress, 0x2);
@@ -65,18 +69,16 @@ public:
     char m_nDirX;
     char m_nDirY;
     char m_nPathNodeWidth;
+    unsigned char m_nNumLeftLanes : 3;
+    unsigned char m_nNumRightLanes : 3;
+    unsigned char m_bTrafficLightDirection : 1; // 1 if the navi node has the same direction as the traffic light and 0 if the navi node points somewhere else
+    unsigned char unk1 : 1;
 
-    unsigned short m_nNumLeftLanes : 3;
-    unsigned short m_nNumRightLanes : 3;
-    unsigned short m_bTrafficLightDirection : 1; // 1 if the navi node has the same direction as the traffic light and 0 if the navi node points somewhere else
-    unsigned short unk1 : 1;
-
-    unsigned short m_nTrafficLightState : 2; // 1 - North-South, 2 - West-East cycle
+    unsigned short m_nTrafficLightState : 2; // 1 - North-South, 2 - West-East cycle, enum: eTrafficLightsDirection
     unsigned short m_bTrainCrossing : 1;
 };
 
 VALIDATE_SIZE(CCarPathLink, 0xE);
-
 
 class  CPathNode
 {
@@ -121,6 +123,7 @@ public:
 	CNodeAddress info;
 	CPathNode *m_apNodesSearchLists[512];
 	CPathNode *m_pPathNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
+    // Use CPathFind::GetCarPathLink to access
 	CCarPathLink *m_pNaviNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
 	CNodeAddress *m_pNodeLinks[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
 	unsigned char *m_pLinkLengths[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
@@ -164,6 +167,8 @@ public:
     // the result is stored in it
     CNodeAddress* FindNodeClosestToCoors(CNodeAddress* pathLink, float X, float Y, float Z, int _nodeType, float maxDistance,
         unsigned short unk2, int unk3, unsigned short unk4, unsigned short bBoatsOnly, int unk6);
+
+    inline CCarPathLink& GetCarPathLink(CCarPathLinkAddress const& address) { return m_pNaviNodes[address.m_wAreaId][address.m_wCarPathLinkId]; }
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);

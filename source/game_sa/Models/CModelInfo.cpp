@@ -7,19 +7,7 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-std::uint16_t& MI_GRASSHOUSE = *(std::uint16_t*)0x8CD6F4;
-std::uint16_t& MI_FIRE_HYDRANT = *(std::uint16_t*)0x8CD594;
-std::uint16_t& MI_PARKINGMETER = *(std::uint16_t*)0x8CD548;
-std::uint16_t& MI_PARKINGMETER2 = *(std::uint16_t*)0x8CD54C;
-std::uint16_t& MI_POOL_CUE_BALL = *(std::uint16_t*)0x8CD778;
-std::uint16_t& MI_HARVESTERBODYPART1 = *(std::uint16_t*)0x8CD6E4;
-std::uint16_t& MI_HARVESTERBODYPART2 = *(std::uint16_t*)0x8CD6E8;
-std::uint16_t& MI_HARVESTERBODYPART3 = *(std::uint16_t*)0x8CD6EC;
-std::uint16_t& MI_HARVESTERBODYPART4 = *(std::uint16_t*)0x8CD6F0;
-std::uint16_t& MI_ESCALATORSTEP = *(std::uint16_t*)0x8CD674;
-std::uint16_t& MI_ESCALATORSTEP8 = *(std::uint16_t*)0x8CD678;
-
-CBaseModelInfo **CModelInfo::ms_modelInfoPtrs = (CBaseModelInfo**)0xA9B0C8;
+CBaseModelInfo *(&CModelInfo::ms_modelInfoPtrs)[NUM_MODEL_INFOS] = *(CBaseModelInfo*(*)[NUM_MODEL_INFOS])0xA9B0C8;
 
 // Converted from stdcall void CModelInfo::ReInit2dEffects(void) 0x4C63B0
 void CModelInfo::ReInit2dEffects()

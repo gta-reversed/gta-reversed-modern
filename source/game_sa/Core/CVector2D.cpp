@@ -30,7 +30,7 @@ void CVector2D::Normalise()
     auto fMag = Magnitude();
     if (fMag > 0.0)
     {
-        auto fRecip = 1.0 / fMag;
+        auto fRecip = 1.0F / fMag;
         x *= fRecip;
         y *= fRecip;
     }

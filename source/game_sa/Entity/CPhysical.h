@@ -13,7 +13,7 @@
 #include "CRealTimeShadow.h"
 #include "CRepeatSector.h"
 #include "eWeaponType.h"
-#include "CEntryInfoNode.h"
+#include "CEntryInfoList.h"
 
 enum ePhysicalFlags
 {
@@ -124,7 +124,7 @@ public:
     float            m_fElasticity;
     float            m_fBuoyancyConstant;
     CVector          m_vecCentreOfMass;
-    CEntryInfoNode*  m_pCollisionList;
+    CEntryInfoList   m_pCollisionList;
     CPtrNodeDoubleLink* m_pMovingList;
     unsigned char    m_bFakePhysics;
     unsigned char    m_nNumEntitiesCollided;

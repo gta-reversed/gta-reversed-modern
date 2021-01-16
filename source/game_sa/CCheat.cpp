@@ -241,7 +241,7 @@ void CCheat::TrashmasterCheat() {
 }
 
 CVehicle* CCheat::VehicleCheat(int vehicleModelId) {
-    return plugin::CallAndReturnDynGlobal<CVehicle*, int>(0x43A0B0, vehicleModelId);
+    return plugin::CallAndReturnDynGlobal<CVehicle*, int>(0x43A0B0, vehicleModelId); //CAutomobile::PlaceOnRoadProperly Places skimmer incorrectly, it's placed at millions units underground
 }
 
 void CCheat::VehicleSkillsCheat() {

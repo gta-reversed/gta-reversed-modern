@@ -12,4 +12,5 @@ public:
 
 public:
     static void PreRenderUpdate(RpAtomic* pAtomic, bool ignoreDNBalanceParam);
+    static RpAtomic* PreRenderUpdateRpAtomicCB(RpAtomic* pAtomic, void* data);
 };

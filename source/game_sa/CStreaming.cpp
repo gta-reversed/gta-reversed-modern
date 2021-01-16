@@ -152,7 +152,7 @@ void CStreaming::InjectHooks()
     HookInstall(0x407F80, &CStreaming::WeAreTryingToPhaseVehicleOut);
 }
 
-void* CStreaming::AddEntity(CEntity* pEntity) {
+CLink<CEntity*>* CStreaming::AddEntity(CEntity* pEntity) {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<void*, CEntity*>(0x409650, pEntity);
 #else
@@ -3318,19 +3318,19 @@ void CStreaming::StreamVehiclesAndPeds() {
         framesBeforeStreamingNextNewCar = 350;
     }
     if (m_bStreamHarvesterModelsThisFrame) {
-        RequestModel(MI_HARVESTERBODYPART1, STREAMING_GAME_REQUIRED);
-        RequestModel(MI_HARVESTERBODYPART2, STREAMING_GAME_REQUIRED);
-        RequestModel(MI_HARVESTERBODYPART3, STREAMING_GAME_REQUIRED);
-        RequestModel(MI_HARVESTERBODYPART4, STREAMING_GAME_REQUIRED);
+        RequestModel(ModelIndices::MI_HARVESTERBODYPART1, STREAMING_GAME_REQUIRED);
+        RequestModel(ModelIndices::MI_HARVESTERBODYPART2, STREAMING_GAME_REQUIRED);
+        RequestModel(ModelIndices::MI_HARVESTERBODYPART3, STREAMING_GAME_REQUIRED);
+        RequestModel(ModelIndices::MI_HARVESTERBODYPART4, STREAMING_GAME_REQUIRED);
         m_bHarvesterModelsRequested = true;
         m_bStreamHarvesterModelsThisFrame = 0;
     }
     else {
         if (m_bHarvesterModelsRequested) {
-            RemoveModel(MI_HARVESTERBODYPART1);
-            RemoveModel(MI_HARVESTERBODYPART2);
-            RemoveModel(MI_HARVESTERBODYPART3);
-            RemoveModel(MI_HARVESTERBODYPART4);
+            RemoveModel(ModelIndices::MI_HARVESTERBODYPART1);
+            RemoveModel(ModelIndices::MI_HARVESTERBODYPART2);
+            RemoveModel(ModelIndices::MI_HARVESTERBODYPART3);
+            RemoveModel(ModelIndices::MI_HARVESTERBODYPART4);
             m_bHarvesterModelsRequested = false;
         }
         m_bStreamHarvesterModelsThisFrame = false;

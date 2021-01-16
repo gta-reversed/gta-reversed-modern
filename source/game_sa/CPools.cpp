@@ -12,3 +12,8 @@ CPool<CPtrNodeSingleLink>*& CPools::ms_pPtrNodeSingleLinkPool = *(CPool<CPtrNode
 CPool<CPtrNodeDoubleLink>*& CPools::ms_pPtrNodeDoubleLinkPool = *(CPool<CPtrNodeDoubleLink>**)0xB74488;
 CPool<CEntryInfoNode>*& CPools::ms_pEntryInfoNodePool = *(CPool<CEntryInfoNode>**)0xB7448C;
 CPool<CPointRoute>*& CPools::ms_pPointRoutePool = *(CPool<CPointRoute>**)0xB744B0;
+
+void CPools::CheckPoolsEmpty()
+{
+    plugin::Call<0x551950>();
+}

@@ -91,7 +91,9 @@ public:
     int             m_dwBurnTime; // time when particles must be stopped
     float           m_fBurnDamage;
 
+
     static unsigned short& nNoTempObjects;
+    static float& fDistToNearestTree;
 
     CObject();
     CObject* Constructor();

@@ -85,6 +85,9 @@ public:
     static short &OldWeatherType; // see eWeatherType
     static CAEWeatherAudioEntity &m_WeatherAudioEntity;
 
+    static float(&saTreeWindOffsets)[16];
+    static float(&saBannerWindOffsets)[32];
+
     static void AddRain();
     static void AddSandStormParticles();
     static unsigned char* FindWeatherTypesList();

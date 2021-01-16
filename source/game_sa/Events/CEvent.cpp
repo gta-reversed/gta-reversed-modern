@@ -151,7 +151,7 @@ bool CEventEscalator::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->IsAlive() && !ped->IsPlayer() && ped->m_pContactEntity) {
         std::int32_t modelId = ped->m_pContactEntity->m_nModelIndex;
-        if (modelId == MI_ESCALATORSTEP || modelId == MI_ESCALATORSTEP8)
+        if (modelId == ModelIndices::MI_ESCALATORSTEP || modelId == ModelIndices::MI_ESCALATORSTEP8)
             return true;
     }
     return false;

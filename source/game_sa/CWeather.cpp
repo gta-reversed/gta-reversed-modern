@@ -46,6 +46,9 @@ short& CWeather::NewWeatherType = *(short*)0xC8131C;
 short& CWeather::OldWeatherType = *(short*)0xC81320;
 CAEWeatherAudioEntity& CWeather::m_WeatherAudioEntity = *(CAEWeatherAudioEntity*)0xC81360;
 
+float(&CWeather::saTreeWindOffsets)[16] = *(float(*)[16])0x8CCF30;
+float(&CWeather::saBannerWindOffsets)[32] = *(float(*)[32])0x8CCF70;
+
 // Converted from cdecl void CWeather::AddRain(void) 0x72A9A0
 void CWeather::AddRain() {
     plugin::Call<0x72A9A0>();

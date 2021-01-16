@@ -430,7 +430,7 @@ float cBuoyancy::SimpleSumBuoyancyData(CVector* vecWaterOffset, eBuoyancyPointSt
         return 0.0F;
 
     if (m_bProcessingBoat)
-        cBuoyancy::calcStruct.fAddedDistToWaterSurface = pow(cBuoyancy::calcStruct.fAddedDistToWaterSurface * cBuoyancy::fPointVolMultiplier, 2);
+        cBuoyancy::calcStruct.fAddedDistToWaterSurface = pow(cBuoyancy::calcStruct.fAddedDistToWaterSurface * cBuoyancy::fPointVolMultiplier, 2.0F);
 
     m_fEntityWaterImmersion += cBuoyancy::calcStruct.fAddedDistToWaterSurface;
 
