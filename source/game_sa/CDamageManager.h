@@ -49,10 +49,9 @@ enum  tComponentGroup {
 };
 
 enum eWheelStatus {
-    WHEEL_STATUS_FRONT_LEFT = 0,
-    WHEEL_STATUS_REAR_LEFT = 1,
-    WHEEL_STATUS_FRONT_RIGHT = 2,
-    WHEEL_STATUS_REAR_RIGHT = 3
+    WHEEL_STATUS_OK = 0,
+    WHEEL_STATUS_BURST,
+    WHEEL_STATUS_MISSING
 };
 
 enum  ePanels {

@@ -16,7 +16,7 @@ class  cHandlingDataMgr
 {
 public:
 	float field_0;
-	float field_4;
+    float fWheelFriction;
 	float field_8;
 	float field_C;
 	float field_10;
@@ -32,8 +32,8 @@ public:
 	void LoadHandlingData();
 	// get vehicle number id in names table
 	int FindExactWord(char *line, char *nameTable, int entrySize, int entryCount);
-	bool IsNotRearDriveVehicle(unsigned char handlingId);
-	bool IsNotFrontDriveVehicle(unsigned char handlingId);
+    bool HasFrontWheelDrive(unsigned char handlingId);
+    bool HasRearWheelDrive(unsigned char handlingId);
 	// get handling id by name
 	int GetHandlingId(char *name);
 	// update some handling variables with some world-specific multipliers

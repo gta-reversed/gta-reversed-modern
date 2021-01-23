@@ -40,12 +40,12 @@ class CTrailer : public CAutomobile {
 protected:
     CTrailer(plugin::dummy_func_t) : CAutomobile(plugin::dummy) {}
 public:
-    CColPoint field_988[2];
-    float field_9E0;
-    float field_9E4;
-    char field_9E8[4];
-    float field_9EC;
-    float field_9F0;
+    CColPoint m_trailerColPoints[2];
+    float m_trailerColPointValue1;
+    float m_trailerColPointValue2;
+    uint8_t field_9E8[4];
+    float m_trailerTowedRatio;
+    float m_trailerTowedRatio2;
 
     static float& m_fTrailerSuspensionForce; // 1.5
     static float& m_fTrailerDampingForce; // 0.1

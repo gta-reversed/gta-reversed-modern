@@ -232,6 +232,10 @@ public:
     bool CheckCollision_SimpleCar();
 
     void ResetMoveSpeed() { m_vecMoveSpeed = CVector(); }
+    float GetMass(const CVector& pos, const CVector& dir) {
+        return 1.0f / (CrossProduct(pos, dir).SquaredMagnitude() / m_fTurnMass +
+            1.0f / m_fMass);
+    }
 };
 
 VALIDATE_SIZE(CPhysical, 0x138);

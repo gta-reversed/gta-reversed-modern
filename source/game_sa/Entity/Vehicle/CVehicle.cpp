@@ -22,6 +22,8 @@ CColModel** CVehicle::m_aSpecialColVehicle = (CColModel * *)0xC1CC08;
 bool& CVehicle::ms_forceVehicleLightsOff = *(bool*)0xC1CC18;
 bool& CVehicle::s_bPlaneGunsEjectShellCasings = *(bool*)0xC1CC19;
 CColModel* CVehicle::m_aSpecialColModel = (CColModel*)0xC1CC78;
+tHydrualicData(&CVehicle::m_aSpecialHydraulicData)[4] = *(tHydrualicData(*)[4])0xC1CB60;
+
 float& fBurstTyreMod = *(float*)0x8D34B4;
 float& fBurstSpeedMax = *(float*)0x8D34B8;
 float& CAR_NOS_EXTRA_SKID_LOSS = *(float*)0x8D34BC;
@@ -68,6 +70,7 @@ void CVehicle::InjectHooks()
     ReversibleHooks::Install("CVehicle", "ChangeLawEnforcerState", 0x6D2330, &CVehicle::ChangeLawEnforcerState);
 
     ReversibleHooks::Install("CVehicle", "SetModelIndex", 0x6D6A40, &CVehicle::SetModelIndex_Reversed);
+    ReversibleHooks::Install("CVehicle", "ProcessWheel", 0x6D6C00, &CVehicle::ProcessWheel);
 }
 
 CVehicle::CVehicle(unsigned char createdBy) : CPhysical(plugin::dummy)
@@ -1043,10 +1046,124 @@ void CVehicle::SetupRender()
     ((void(__thiscall*)(CVehicle*))0x6D64F0)(this);
 }
 
-// Converted from thiscall void CVehicle::ProcessWheel(CVector &,CVector &,CVector &,CVector &,int,float,float,float,char,float *,tWheelState *,ushort) 0x6D6C00
-void CVehicle::ProcessWheel(CVector& arg0, CVector& arg1, CVector& arg2, CVector& arg3, int arg4, float arg5, float arg6, float arg7, char arg8, float* arg9, tWheelState* arg10, unsigned short arg11)
+void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& wheelContactSpeed, CVector& wheelContactPoint,
+    int wheelsOnGround, float thrust, float brake, float adhesion, int8_t wheelId, float* wheelSpeed, tWheelState* wheelState, uint16_t wheelStatus)
 {
-    ((void(__thiscall*)(CVehicle*, CVector&, CVector&, CVector&, CVector&, int, float, float, float, char, float*, tWheelState*, unsigned short))0x6D6C00)(this, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+    static bool bBraking = false;
+    static bool bDriving = false;
+    static bool bAlreadySkidding = false;
+
+    float right = 0.0f;
+    float fwd = 0.0f;
+    float contactSpeedFwd = DotProduct(wheelFwd, wheelContactSpeed);
+    float contactSpeedRight = DotProduct(wheelRight, wheelContactSpeed);
+
+    bBraking = brake != 0.0f;
+    bDriving = !bBraking;
+    if (bDriving && thrust == 0.0f)
+        bDriving = false;
+
+    adhesion *= CTimer::ms_fTimeStep;
+    if (*wheelState != WHEEL_STATE_NORMAL) {
+        bAlreadySkidding = true;
+        adhesion *= m_pHandlingData->m_fTractionLoss;
+        if (*wheelState == WHEEL_STATE_SPINNING) {
+            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_HELI)
+                adhesion *= (1.0f - fabs(m_fGasPedal) * WS_ALREADY_SPINNING_LOSS);
+        }
+    }
+
+    *wheelState = WHEEL_STATE_NORMAL;
+    if (contactSpeedRight != 0.0f) {
+        right = -(contactSpeedRight / wheelsOnGround);
+        if (wheelStatus == WHEEL_STATUS_BURST) {
+            float fwdspeed = std::min(contactSpeedFwd, fBurstSpeedMax);
+            right += fwdspeed * CGeneral::GetRandomNumberInRange(-fBurstTyreMod, fBurstTyreMod) ;
+        }
+    }
+    if (bDriving) {
+        fwd = thrust;
+        right = clamp<float>(right, -adhesion, adhesion);
+    }
+    else if (contactSpeedFwd != 0.0f) {
+        fwd = -contactSpeedFwd / wheelsOnGround;
+        if (!bBraking && fabs(m_fGasPedal) < 0.01f) {
+            if (IsBike()) 
+                brake = gHandlingDataMgr.fWheelFriction * 0.6f / (m_pHandlingData->m_fMass + 200.0f);
+            else if (IsPlane())
+                brake = 0.0f;
+            else if (brake < 500.0f)
+                brake = 0.1f * gHandlingDataMgr.fWheelFriction / m_pHandlingData->m_fMass;
+            else if (m_nModelIndex == MODEL_RCBANDIT)
+                brake = 0.2f * gHandlingDataMgr.fWheelFriction / m_pHandlingData->m_fMass;
+            else
+                brake = gHandlingDataMgr.fWheelFriction / m_pHandlingData->m_fMass;
+        }
+        if (brake > adhesion) {
+            if (fabs(contactSpeedFwd) > 0.005f)
+                *wheelState = WHEEL_STATE_FIXED;
+        }
+        else {
+            fwd = clamp<float>(fwd, -brake, brake);
+        }
+    }
+
+    float speedSq = right * right + fwd * fwd;
+    if (speedSq > adhesion * adhesion) {
+        if (*wheelState != WHEEL_STATE_FIXED) {
+            float tractionLimit = WS_TRAC_FRAC_LIMIT;
+            if (contactSpeedFwd > 0.15f && (!wheelId || wheelId == CARWHEEL_FRONT_RIGHT))
+                tractionLimit += tractionLimit;
+            if (bDriving && tractionLimit * adhesion < fabs(fwd))
+                *wheelState = WHEEL_STATE_SPINNING;
+            else
+                *wheelState = WHEEL_STATE_SKIDDING;
+        }
+        float tractionLoss = m_pHandlingData->m_fTractionLoss;
+        if (bAlreadySkidding) {
+            tractionLoss = 1.0f;
+        }
+        else if (*wheelState == WHEEL_STATE_SPINNING) {
+            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_HELI)
+                tractionLoss = tractionLoss * (1.0f - fabs(m_fGasPedal) * WS_ALREADY_SPINNING_LOSS);
+        }
+        float l = sqrt(speedSq);
+        fwd *= adhesion * tractionLoss / l;
+        right *= adhesion * tractionLoss / l;
+    }
+
+    if (fwd != 0.0f || right != 0.0f) {
+        bool separateTurnForce = false;
+        CVector totalSpeed = fwd * wheelFwd + right * wheelRight;
+        CVector turnDirection  = totalSpeed;
+
+        if (m_pHandlingData->m_fSuspensionAntiDiveMultiplier > 0.0f) {
+            if (bBraking) {
+                separateTurnForce = true;
+                turnDirection -= (m_pHandlingData->m_fSuspensionAntiDiveMultiplier * wheelFwd * fwd);
+            }
+            else if (bDriving) {
+                separateTurnForce = true;
+                turnDirection -= (0.5f * m_pHandlingData->m_fSuspensionAntiDiveMultiplier * wheelFwd * fwd);
+            }
+        }
+
+        CVector direction = totalSpeed;
+        float speed = totalSpeed.Magnitude();
+        float turnSpeed = speed;
+        if (separateTurnForce)
+            turnSpeed = turnDirection.Magnitude();
+        direction.Normalise();
+        if (separateTurnForce)
+            turnDirection.Normalise();
+        else
+            turnDirection = direction;
+
+        float force = speed * m_fMass;
+        float turnForce = turnSpeed * GetMass(wheelContactPoint, turnDirection);
+        ApplyMoveForce(force * direction);
+        ApplyTurnForce(turnForce * turnDirection, wheelContactPoint);
+    }
 }
 
 // Converted from thiscall void CVehicle::ProcessBikeWheel(CVector &,CVector &,CVector &,CVector &,int,float,float,float,float,char,float *,tWheelState *,eBikeWheelSpecial,ushort) 0x6D73B0
