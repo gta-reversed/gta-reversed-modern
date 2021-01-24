@@ -261,7 +261,7 @@ void CTaskComplexWanderCop::LookForCarAlarms(CCopPed* pPed)
     plugin::CallMethod<0x66B1B0, CTaskComplexWanderCop*, CPed*>(this, pPed);
 #else
     CVehicle* pPlayerVehicle = FindPlayerVehicle(-1, 0);
-    if (pPlayerVehicle && !pPlayerVehicle->m_nVehicleClass) {
+    if (pPlayerVehicle && pPlayerVehicle->IsAutomobile()) {
         short alaramState = pPlayerVehicle->m_nAlarmState;
         if (alaramState) {
             if (alaramState != -1 && pPlayerVehicle->m_nStatus != STATUS_WRECKED) {

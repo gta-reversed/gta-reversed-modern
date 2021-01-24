@@ -148,7 +148,7 @@ void CEventKnockOffBike::SetPedOutCar(CPed* ped)
     m_exitDoor = TARGET_DOOR_DRIVER;
     if (m_vehicle->m_pDriver == ped)
         m_exitDoor = TARGET_DOOR_DRIVER;
-    else if (m_vehicle->m_nVehicleClass == VEHICLE_BIKE)
+    else if (m_vehicle->m_vehicleType == VEHICLE_BIKE)
         m_exitDoor = TARGET_DOOR_REAR_LEFT;
     else if (m_vehicle->m_apPassengers[0] == ped)
         m_exitDoor = TARGET_DOOR_FRONT_RIGHT;
@@ -171,9 +171,9 @@ std::int32_t CEventKnockOffBike::CalcForcesAndAnims(CPed* ped)
 #else
     std::uint8_t numContactWheels = 0;
     float massRatio = ped->m_fMass / m_vehicle->m_fMass;
-    if (m_vehicle->m_nVehicleClass == VEHICLE_BIKE)
+    if (m_vehicle->m_vehicleType == VEHICLE_BIKE)
         numContactWheels = static_cast<CBike*>(m_vehicle)->m_nNumContactWheels;
-    else if (m_vehicle->m_nVehicleClass == VEHICLE_AUTOMOBILE)
+    else if (m_vehicle->m_vehicleType == VEHICLE_AUTOMOBILE)
         numContactWheels = static_cast<CAutomobile*>(m_vehicle)->m_nNumContactWheels;
     switch (m_knockOffType)
     {
@@ -226,13 +226,13 @@ std::int32_t CEventKnockOffBike::CalcForcesAndAnims(CPed* ped)
     {
         ped->m_vecMoveSpeed = m_moveSpeed;
         float factor = -0.3f;
-        if (m_vehicle->m_nVehicleSubClass == VEHICLE_BMX)
+        if (m_vehicle->m_vehicleSubType == VEHICLE_BMX)
             factor = -0.2f;
         CVector force = factor * m_collisionImpactVelocity * massRatio * m_damageIntensity;
         force.z = 0.0f;
         ped->ApplyMoveForce(force);
         float randomNum = 5.0f;
-        if (m_vehicle->m_nVehicleSubClass == VEHICLE_BMX)
+        if (m_vehicle->m_vehicleSubType == VEHICLE_BMX)
             randomNum = 6.0f;
         ped->m_vecMoveSpeed.z += CGeneral::GetRandomNumberInRange(3.0f, randomNum) / 70.0f;
         ped->m_pEntityIgnoredCollision = m_vehicle;
@@ -301,7 +301,7 @@ bool CEventKnockOffBike::SetPedSafePosition(CPed* ped)
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x4B4AC0, CEventKnockOffBike*, CPed*>(this, ped);
 #else
-    if (m_vehicle->m_nVehicleClass == VEHICLE_BIKE) {
+    if (m_vehicle->m_vehicleType == VEHICLE_BIKE) {
         CBike* bike = static_cast<CBike*>(m_vehicle);
         bike->m_rideAnimData.m_fAnimLean = 0.0f;
         bike->m_bLeanMatrixCalculated = false;
@@ -313,7 +313,7 @@ bool CEventKnockOffBike::SetPedSafePosition(CPed* ped)
         ped->m_fAimingRotation = CGeneral::LimitRadianAngle(m_vehicle->GetHeading() + PI);
     ped->m_fCurrentRotation = ped->m_fAimingRotation;
     ped->SetHeading(ped->m_fAimingRotation);
-    if (m_vehicle->m_nVehicleClass == VEHICLE_BIKE && !m_isVictimDriver) {
+    if (m_vehicle->m_vehicleType == VEHICLE_BIKE && !m_isVictimDriver) {
         float forwardDistance = (1.0f - fabs(DotProduct(m_vehicle->GetForward(), ped->GetForward()))) * 0.8f;
         CVector distance = ped->GetPosition() - (forwardDistance * ped->GetForward());
         ped->SetPosn(distance);

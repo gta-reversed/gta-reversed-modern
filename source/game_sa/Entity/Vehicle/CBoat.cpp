@@ -48,8 +48,8 @@ CBoat::CBoat(int modelIndex, unsigned char createdBy) : CVehicle(createdBy)
     memset(&m_boatFlap, 0, sizeof(m_boatFlap));
     auto pModelInfo = reinterpret_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(modelIndex));
     auto iHandlingId = pModelInfo->m_nHandlingId;
-    m_nVehicleSubClass = eVehicleType::VEHICLE_BOAT;
-    m_nVehicleClass = eVehicleType::VEHICLE_BOAT;
+    m_vehicleSubType = eVehicleType::VEHICLE_BOAT;
+    m_vehicleType = eVehicleType::VEHICLE_BOAT;
     m_vecBoatMoveForce.Set(0.0F, 0.0F, 0.0F);
     m_vecBoatTurnForce.Set(0.0F, 0.0F, 0.0F);
     m_nPadNumber = 0;

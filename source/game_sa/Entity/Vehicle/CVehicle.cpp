@@ -1536,7 +1536,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         static_cast<CBoat*>(this)->m_vecWaterDamping = vecBuoyancyForce;
         static_cast<CBoat*>(this)->m_nBoatFlags.bOnWater = bOnWater;
     }
-    else if (m_nVehicleClass == eVehicleType::VEHICLE_AUTOMOBILE){
+    else if (m_vehicleType == eVehicleType::VEHICLE_AUTOMOBILE){
         static_cast<CAutomobile*>(this)->m_fDoomHorizontalRotation = vecBuoyancyForce.Magnitude();
     }
 }
@@ -1576,7 +1576,7 @@ void CVehicle::AddExhaustParticles()
     secondExhaustPos.x *= -1.0f;
     CMatrix entityMatrix (*m_matrix);
     bool bHasDoubleExhaust = m_pHandlingData->m_bDoubleExhaust;
-    if (m_nVehicleSubClass == VEHICLE_BIKE) {
+    if (m_vehicleSubType == VEHICLE_BIKE) {
         CBike* pBike = static_cast<CBike*>(this);
         pBike->CalculateLeanMatrix();
         entityMatrix = pBike->m_mLeanMatrix;

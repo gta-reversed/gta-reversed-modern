@@ -76,7 +76,7 @@ public:
 	short m_nWheelModelIndex;
 	unsigned short m_nHandlingId;
 	unsigned char m_nNumDoors;
-	unsigned char m_nVehicleClass; // see eVehicleClass
+	unsigned char m_vehicleType; // see eVehicleClass
 	unsigned char m_nFlags;
 	unsigned char m_nWheelUpgradeClass;
 	unsigned char m_nTimesUsed;

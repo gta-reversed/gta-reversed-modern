@@ -377,8 +377,8 @@ public:
     };
     RwTexture *m_pCustomCarPlate;
     float m_fRawSteerAngle;
-    unsigned int     m_nVehicleClass; // see enum eVehicleType
-    unsigned int     m_nVehicleSubClass;
+    unsigned int     m_vehicleType; // see enum eVehicleType
+    unsigned int     m_vehicleSubType;
     short      m_nPreviousRemapTxd;
     short      m_nRemapTxd;
     RwTexture *m_pRemapTexture;
@@ -624,24 +624,15 @@ private:
     void SetModelIndex_Reversed(unsigned int index);
 
 public:
-    bool IsFakeAircraft() { return m_nVehicleSubClass == VEHICLE_FHELI || m_nVehicleSubClass == VEHICLE_FPLANE; }
-    bool IsPlane() { return m_nVehicleSubClass == VEHICLE_PLANE; }
-    bool IsHeli() { return m_nVehicleSubClass == VEHICLE_HELI; }
-    bool IsVehicleTypeValid() { return m_nVehicleSubClass != VEHICLE_NONE; }
-    bool IsBoat() { return m_nVehicleClass == VEHICLE_BOAT; }
-    bool IsBike() { return m_nVehicleClass == VEHICLE_BIKE; }
-    bool IsQuad() { return m_nVehicleClass == VEHICLE_QUAD; }
-    bool IsSubclassQuad() { return m_nVehicleSubClass == VEHICLE_QUAD; };
-    bool IsAutomobile() { 
-        switch (m_nVehicleClass)
-        {
-        case VEHICLE_BIKE:
-        case VEHICLE_BOAT:
-        case VEHICLE_TRAIN:
-            return false;
-        }
-        return true;
-    }
+    bool IsFakeAircraft() { return m_vehicleSubType == VEHICLE_FHELI || m_vehicleSubType == VEHICLE_FPLANE; }
+    bool IsPlane() { return m_vehicleSubType == VEHICLE_PLANE; }
+    bool IsHeli() { return m_vehicleSubType == VEHICLE_HELI; }
+    bool IsVehicleTypeValid() { return m_vehicleSubType != VEHICLE_NONE; }
+    bool IsBoat() { return m_vehicleType == VEHICLE_BOAT; }
+    bool IsBike() { return m_vehicleType == VEHICLE_BIKE; }
+    bool IsQuad() { return m_vehicleType == VEHICLE_QUAD; }
+    bool IsSubclassQuad() { return m_vehicleSubType == VEHICLE_QUAD; };
+    bool IsAutomobile() { return m_vehicleType == VEHICLE_AUTOMOBILE; }
 
     static void* operator new(unsigned int size);
     static void operator delete(void* data);

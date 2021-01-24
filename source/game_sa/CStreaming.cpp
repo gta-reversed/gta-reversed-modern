@@ -3347,8 +3347,8 @@ void CStreaming::StreamVehiclesAndPeds_Always(CVector const& unused) {
     if (!pVehicle) {
         bStream = true;
     }
-    else if (pVehicle->m_nVehicleSubClass != VEHICLE_PLANE) {
-        if (pVehicle->m_nVehicleSubClass != VEHICLE_HELI || pVehicle->m_vecMoveSpeed.Magnitude2D() <= 0.1f) {
+    else if (pVehicle->m_vehicleSubType != VEHICLE_PLANE) {
+        if (pVehicle->m_vehicleSubType != VEHICLE_HELI || pVehicle->m_vecMoveSpeed.Magnitude2D() <= 0.1f) {
             bStream = true;
         }
     }

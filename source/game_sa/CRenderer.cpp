@@ -403,7 +403,7 @@ void CRenderer::RenderEverythingBarRoads() {
         if (entity->m_nType == ENTITY_TYPE_VEHICLE || (entity->m_nType == ENTITY_TYPE_PED && CVisibilityPlugins::GetClumpAlpha(entity->m_pRwClump) != 255)) {
             if (entity->m_nType == ENTITY_TYPE_VEHICLE) {
                 bool bInsertIntoSortedList = false;
-                if (pVehicle->m_nVehicleClass == VEHICLE_BOAT) {
+                if (pVehicle->m_vehicleType == VEHICLE_BOAT) {
                     eCamMode camMode = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nMode;
                     if (camMode == MODE_WHEELCAM || camMode == MODE_1STPERSON &&
                         TheCamera.GetLookDirection() != LOOKING_DIRECTION_FORWARD && TheCamera.GetLookDirection() ||

@@ -41,10 +41,10 @@ struct  tEngineDummySlot {
     short m_nUsageCount;
 };
 
-class  cVehicleParams {
+class cVehicleParams {
 public:
-    unsigned int    m_nVehicleSubclass;
-    unsigned int    m_nVehicleClass;
+    unsigned int    m_vehicleSubType;
+    unsigned int    m_vehicleType;
     char field_8;
     char pad1[3];
     int field_C;
