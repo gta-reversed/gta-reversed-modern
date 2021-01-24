@@ -9,8 +9,10 @@
 #include "PluginBase.h"
 #include "COnscreenTimer.h"
 
-class  CUserDisplay
+class CUserDisplay
 {
 public:
 	static COnscreenTimer &OnscnTimer;
+
+    static void Init();
 };

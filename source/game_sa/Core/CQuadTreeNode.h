@@ -53,7 +53,7 @@ public:
     void GetAllMatching(CRect const& rect, CPtrListSingleLink& list);
     void GetAllMatching(CVector2D const& posn, CPtrListSingleLink& list);
     bool InSector(CRect const& rect, int sector);
-    void InitPool();
+    static void InitPool();
     static void operator delete(void* data);
     static void* operator new(unsigned int size);
 

@@ -19,6 +19,7 @@ enum eZoneAttributes : std::uint16_t
 class CCullZones
 {
 public:
+    static void Init();
     static bool DoExtraAirResistanceForPlayer();
     static eZoneAttributes FindTunnelAttributesForCoors(CVector point);
 };

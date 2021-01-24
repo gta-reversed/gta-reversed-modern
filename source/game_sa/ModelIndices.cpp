@@ -166,3 +166,8 @@ namespace ModelIndices {
     unsigned short& MI_PUNCHBAG = *(unsigned short*)0x8CD77C;
     unsigned short& MI_IMY_GRAY_CRATE = *(unsigned short*)0x8CD780;
 }
+
+void InitModelIndices()
+{
+    plugin::Call<0x5BCA10>();
+}

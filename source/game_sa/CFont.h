@@ -124,6 +124,6 @@ public:
     static short GetNumberLines(float x, float y, char *text);
     static short ProcessStringToDisplay(float x, float y, char *text);
     static void GetTextRect(CRect *rect, float x, float y, char *text);
-    static void PrintString(float x, float y, char *text);
+    static void PrintString(float x, float y, const char *text);
     static void PrintStringFromBottom(float x, float y, char *text);
 };

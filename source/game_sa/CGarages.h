@@ -13,6 +13,8 @@ class  CGarages
 public:
 	// static char MessageIDString[8];
 	static char *MessageIDString;
+
+    static void Init();
     static void PrintMessages();
     static void TriggerMessage(char* cTagMsg, short wMsgMin, unsigned short ucTime, short wMsgMax);
 };

@@ -166,3 +166,5 @@ namespace ModelIndices {
     extern unsigned short& MI_PUNCHBAG;
     extern unsigned short& MI_IMY_GRAY_CRATE;
 }
+
+void InitModelIndices();

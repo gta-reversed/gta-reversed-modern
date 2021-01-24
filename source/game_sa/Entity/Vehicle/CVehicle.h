@@ -147,12 +147,22 @@ enum tWheelState : int32_t
 
 struct tHydrualicData
 {
-    float m_fSuspensionUpperLimit;
-    float m_fSuspensionLowerLimit;
+    // applied when the vehicle is moving
+    // or when hopping keys are pressed (numpad keys)
+    float m_fSuspensionNormalUpperLimit;
+    float m_fSuspensionNormalLowerLimit;
+
+    // applied when the suspension is extended, like when you press the horn button (caps lock on pc)
+    // or when numpad keys are pressed
     float m_fSuspensionExtendedUpperLimit;
     float m_fSuspensionExtendedLowerLimit;
-    float m_fSuspensionNormalUpperLimit; // The value is 15% greater than m_fSuspensionExtendedUpperLimit
-    float m_fSuspensionNormalLowerLimit; // The value is 15% greater than m_fSuspensionExtendedLowerLimit
+
+    // applied when the vehicle is at rest (idle/not moving)
+    // and does NOT apply if numpad keys are pressed (car hopping)
+    float m_fSuspensionNormalIdleUpperLimit; 
+    float m_fSuspensionNormalIdleLowerLimit;
+
+    // wheel suspension
     float m_lf_wheel;
     float m_lr_wheel;
     float m_rf_wheel;

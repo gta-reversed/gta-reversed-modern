@@ -22,3 +22,8 @@ bool CTaskSimpleFight::IsHitComboSet() {
 int CTaskSimpleFight::GetComboAnimGroupID() {
     return plugin::CallMethodAndReturn<int, 0x4ABDA0, CTaskSimpleFight*>(this);
 }
+
+void CTaskSimpleFight::LoadMeleeData()
+{
+    plugin::Call<0x5BEDC0>();
+}

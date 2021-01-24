@@ -37,3 +37,7 @@ CVector& CGangWars::PointOfAttack = *reinterpret_cast<CVector*>(0x96ABC8);
 void CGangWars::TellStreamingWhichGangsAreNeeded(int* GangsBitFlags) {
     plugin::CallDynGlobal<int*>(0x443D50, GangsBitFlags);
 }
+
+void CGangWars::InitAtStartOfGame() {
+    plugin::CallDynGlobal(0x443920);
+}

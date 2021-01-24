@@ -40,7 +40,6 @@ public:
      static void InitialiseWhenRestarting();
      static void Process();
      static void ReInitGameObjectVariables();
-     static void InitModelIndices();
     //! dummy function
      static void ReloadIPLs();
      static void ShutDownForRestart();

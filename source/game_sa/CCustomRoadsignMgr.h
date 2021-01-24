@@ -4,7 +4,7 @@
 class CCustomRoadsignMgr {
 
 public:
-    static void Initialise();
+    static bool Initialise();
     static void Shutdown();
     static void RenderTest(CVector const& vecUnused);
     static void DebugDrawInternalTexture();

@@ -80,6 +80,7 @@ public:
    bool IsComboSet();
    bool IsHitComboSet();
    int GetComboAnimGroupID();
+   static void LoadMeleeData();
 };
 
 VALIDATE_SIZE(CTaskSimpleFight, 0x28);

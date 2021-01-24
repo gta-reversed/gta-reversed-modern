@@ -291,6 +291,7 @@ public:
     bool IsCtrlJustDown();
     bool IsStandardKeyPressed(std::uint8_t key);
     bool IsCtrlPressed();
+    static bool ResetCheats();
 };
 
 VALIDATE_SIZE(CPad, 0x134);

@@ -20,6 +20,9 @@
 #include <dinput.h>
 
 #include "game_sa\constants.h"
+#include "game_sa\CConversations.h"
+#include "game_sa\CPlantMgr.h"
+#include "game_sa\CStuntJumpManager.h"
 #include "game_sa\ModelIndices.h"
 #include "game_sa\CPedGeometryAnalyser.h"
 #include "game_sa\CDebug.h"
@@ -312,6 +315,7 @@
 #include "game_sa\Audio\CAEWeaponAudioEntity.h"
 #include "game_sa\Audio\CAEWeatherAudioEntity.h"
 #include "game_sa\Audio\CAEPedSpeechAudioEntity.h"
+#include "game_sa\Audio\CAudioZones.h"
 #include "game_sa\Collision\CCollisionEventScanner.h"
 #include "game_sa\Collision\CBoundingBox.h"
 #include "game_sa\Collision\CBox.h"

@@ -402,3 +402,8 @@ bool CPad::IsCtrlPressed()
         return true;
     return false;
 }
+
+bool CPad::ResetCheats()
+{
+    return plugin::CallAndReturn<bool, 0x438450>();
+}

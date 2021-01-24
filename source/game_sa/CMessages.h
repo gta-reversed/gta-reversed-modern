@@ -90,9 +90,9 @@ public:
 	// Removes first big message in messages stack , see eMessageStyle
 	static void ClearThisPrintBigNow(unsigned short style);
 	// Initialises messages
-	static void Init(bool flag);
+	static void Init();
 	// Removes all displayed messages
-	static void ClearAllMessagesDisplayedByGame();
+	static void ClearAllMessagesDisplayedByGame(uint8_t unk);
 	// Processing messages. This is called from CWorld::Process
 	static void Process();
 	// Displays messages

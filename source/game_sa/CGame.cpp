@@ -11,7 +11,8 @@ int &gameTxdSlot = *reinterpret_cast<int *>(0xB728E8);
 
 void CGame::InjectHooks()
 {
-    HookInstall(0x53BB80, CGame::ShutdownRenderWare);
+    ReversibleHooks::Install("CGame", "ShutdownRenderWare", 0x53BB80, CGame::ShutdownRenderWare);
+    ReversibleHooks::Install("CGame", "Init1", 0x5BF840, CGame::Init1);
 }
 
 void CGame::ReloadIPLs() {
@@ -29,6 +30,68 @@ bool CGame::Shutdown() {
 static void CameraDestroy(RwCamera* pRwCamera)
 {
     plugin::Call<0x72FD90, RwCamera*>(pRwCamera);
+}
+
+bool CGame::Init1(char const* datFile)
+{
+    CMaths::InitMathsTables();
+    strcpy(CGame::aDatFile, datFile);
+    CPools::Initialise();
+    CPlaceable::InitMatrixArray();
+    CIniFile::LoadIniFile();
+    D3DResourceSystem::SetUseD3DResourceBuffering(false);
+    CGame::currLevel = LEVEL_NAME_COUNTRY_SIDE;
+    CGame::currArea = AREA_CODE_NORMAL_WORLD;
+    gameTxdSlot = CTxdStore::AddTxdSlot("generic");
+    CTxdStore::Create(gameTxdSlot);
+    CTxdStore::AddRef(gameTxdSlot);
+    int32_t slot = CTxdStore::AddTxdSlot("particle");
+    CTxdStore::LoadTxd(slot, "MODELS\\PARTICLE.TXD");
+    CTxdStore::AddRef(slot);
+    CTxdStore::SetCurrentTxd(gameTxdSlot);
+    CGameLogic::InitAtStartOfGame();
+    CGangWars::InitAtStartOfGame();
+    CConversations::Clear();
+    CPedToPlayerConversations::Clear();
+    CQuadTreeNode::InitPool();
+    if (!CPlantMgr::Initialise() || !CCustomRoadsignMgr::Initialise())
+        return false;
+    CReferences::Init();
+    CDebug::DebugInitTextBuffer();
+    CTagManager::Init();
+    CWeather::Init();
+    CCover::Init();
+    CCullZones::Init();
+    COcclusion::Init();
+    CCollision::Init();
+    CBirds::Init();
+    CEntryExitManager::Init();
+    CStuntJumpManager::Init();
+    CSetPieces::Init();
+    CTheZones::Init();
+    CUserDisplay::Init();
+    CMessages::Init();
+    CMessages::ClearAllMessagesDisplayedByGame(0);
+    CVehicleRecording::Init();
+    CRestart::Initialise();
+    CWorld::Initialise();
+    CAnimManager::Initialise();
+    CCutsceneMgr::Initialise();
+    CCarCtrl::Init();
+    InitModelIndices();
+    CModelInfo::Initialise();
+    CPickups::Init();
+    CTheCarGenerators::Init();
+    CGarages::Init();
+    CAudioZones::Init();
+    CStreaming::InitImageList();
+    CStreaming::ReadIniFile();
+    ThePaths.Init();
+    CPathFind::AllocatePathFindInfoMem();
+    CTaskSimpleFight::LoadMeleeData();
+    CPad::ResetCheats();
+    g_fx.Init();
+    return true;
 }
 
 void CGame::ShutdownRenderWare() {
@@ -51,8 +114,8 @@ void CGame::ShutdownRenderWare() {
     RpWorldRemoveCamera(Scene.m_pRpWorld, Scene.m_pRwCamera);
     RpWorldDestroy(Scene.m_pRpWorld);
     CameraDestroy(Scene.m_pRwCamera);
-    Scene.m_pRpWorld = 0;
-    Scene.m_pRwCamera = 0;
+    Scene.m_pRpWorld = nullptr;
+    Scene.m_pRwCamera = nullptr;
     D3DResourceSystem::CancelBuffering();
     CPostEffects::Close();
 #endif

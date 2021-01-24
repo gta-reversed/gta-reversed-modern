@@ -8,7 +8,7 @@
 
 #include "PluginBase.h"
 
-class  CIniFile {
+class CIniFile {
 public:
     static void LoadIniFile();
 

@@ -14,9 +14,6 @@
 
 class CObject;
 
-enum eCarPieces {
-};
-
 enum eCarNodes {
     CAR_NODE_NONE = 0,
     CAR_CHASSIS = 1,
@@ -68,9 +65,9 @@ public:
     float m_fWheelsSuspensionCompression[4]; // [0-1] with 0 being suspension fully compressed, and 1 being completely relaxed
     float m_wheelsDistancesToGround2[4];
     float m_aWheelTimer[4];
-    float field_800;
     float field_804;
-    float field_80C;
+    float m_intertiaValue1;
+    float m_intertiaValue2;
     int m_wheelSkidmarkType[4];
     bool m_wheelSkidmarkBloodState[4];
     bool m_wheelSkidmarkSomeBool[4];

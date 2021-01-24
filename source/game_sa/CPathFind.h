@@ -117,7 +117,7 @@ public:
 VALIDATE_SIZE(CPathNode, 0x1C);
 
 
-class  CPathFind
+class CPathFind
 {
 public:
 	CNodeAddress info;
@@ -147,6 +147,7 @@ public:
 	float m_fForbiddenForScrCarsY1;
 	float m_fForbiddenForScrCarsY2;
 
+    void Init();
     bool TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
     bool TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
     CVector* TakeWidthIntoAccountForWandering(CVector* outPosition, CNodeAddress nodeAddress, unsigned short randomSeed);
@@ -161,6 +162,7 @@ public:
     void UnLoadPathFindData(int index);
     std::int32_t LoadSceneForPathNodes(CVector point);
     bool IsWaterNodeNearby(CVector position, float radius);
+    static void AllocatePathFindInfoMem() {} // yes, it's empty
 
     // pathLink is the same as the returned pointer(at least on success)
     // pathLink should be a pointer to CNodeAddress on the stack or somewhere, and

@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-void CCustomRoadsignMgr::Initialise()
+bool CCustomRoadsignMgr::Initialise()
 {
-    plugin::Call<0x6FE120>();
+    return plugin::CallAndReturn<bool, 0x6FE120>();
 }
 
 void CCustomRoadsignMgr::Shutdown()

@@ -196,9 +196,9 @@ void CFont::GetTextRect(CRect* rect, float x, float y, char* text)
     ((void(__cdecl*)(CRect*, float, float, char*))0x71A620)(rect, x, y, text);
 }
 
-void CFont::PrintString(float x, float y, char* text)
+void CFont::PrintString(float x, float y, const char* text)
 {
-    ((void(__cdecl*)(float, float, char*))0x71A700)(x, y, text);
+    ((void(__cdecl*)(float, float, const char*))0x71A700)(x, y, text);
 }
 
 void CFont::PrintStringFromBottom(float x, float y, char* text)

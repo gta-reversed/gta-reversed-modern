@@ -27,3 +27,7 @@ int CEntryExitManager::FindNearestEntryExit(CVector2D const& position, float ran
 {
     return plugin::CallAndReturn<int, 0x43F4B0, CVector2D const&, float, int>(position, range, ignoreArea);
 }
+
+void CEntryExitManager::Init() {
+    plugin::CallDynGlobal(0x43F880);
+}

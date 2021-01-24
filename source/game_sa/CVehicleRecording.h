@@ -56,10 +56,10 @@ public:
     * pPlaybackBuffer
     * pVehicleForPlayback*/
 
+    static void Init();
     /*
     * ChangeCarPlaybackToUseAI(CVehicle*)
     * FindIndexWithFileNameNumber(int)
-    * Init()
     * InitAtStartOfGame()
     * InterpolateInfoForCar(CVehicle*, CVehicleStateEachFrame*, float)
     * IsPlaybackGoingOnForCar(CVehicle*)

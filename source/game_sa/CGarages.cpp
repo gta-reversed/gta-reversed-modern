@@ -1,5 +1,10 @@
 #include "StdInc.h"
 
+void CGarages::Init()
+{
+    ((void(__cdecl*)())0x447120)();
+}
+
 void CGarages::PrintMessages()
 {
     ((void(__cdecl*)())0x447790)();

@@ -1,8 +1,13 @@
 #include "StdInc.h"
 
-double CGameLogic::CalcDistanceToForbiddenTrainCrossing(CVector vecPoint, CVector vecMoveSpeed, bool somebool, CVector* pOutDistance)
+void CGameLogic::InitAtStartOfGame()
 {
-    return plugin::CallAndReturn<double, 0x4418E0, CVector, CVector, bool, CVector*>(vecPoint, vecMoveSpeed, somebool, pOutDistance);
+    plugin::Call<0x441210>();
+}
+
+float CGameLogic::CalcDistanceToForbiddenTrainCrossing(CVector vecPoint, CVector vecMoveSpeed, bool somebool, CVector* pOutDistance)
+{
+    return plugin::CallAndReturn<float, 0x4418E0, CVector, CVector, bool, CVector*>(vecPoint, vecMoveSpeed, somebool, pOutDistance);
 }
 
 bool CGameLogic::IsPlayerAllowedToGoInThisDirection(CPed* pPed, float moveDirectionX, float moveDirectionY, float moveDirectionZ, float distanceLimit)

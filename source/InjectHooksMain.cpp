@@ -11,6 +11,7 @@
 
 void InjectHooksMain(void)
 {
+    CDebug::InjectHooks();
     InjectCommonHooks();
     CGame::InjectHooks();
     CPad::InjectHooks();

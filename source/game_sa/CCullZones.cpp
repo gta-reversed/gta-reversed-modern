@@ -1,5 +1,10 @@
 #include "StdInc.h"
 
+void CCullZones::Init()
+{
+    plugin::Call<0x72D6B0>();
+}
+
 bool CCullZones::DoExtraAirResistanceForPlayer()
 {
     return plugin::CallAndReturn<bool, 0x72DDD0>();
