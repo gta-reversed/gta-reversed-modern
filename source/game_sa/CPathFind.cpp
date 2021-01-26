@@ -18,7 +18,7 @@ CVector CPathNode::GetNodeCoors()
 
 void CPathFind::Init()
 {
-    plugin::Call<0x44D080, CPathFind*>(this);
+    plugin::CallMethod<0x44D080, CPathFind*>(this);
 }
 
 bool CPathFind::TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress)
