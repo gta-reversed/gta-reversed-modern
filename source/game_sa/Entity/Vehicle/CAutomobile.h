@@ -63,7 +63,7 @@ public:
     CDoor m_swingingChassis;
     CColPoint m_wheelColPoint[4];
     float m_fWheelsSuspensionCompression[4]; // [0-1] with 0 being suspension fully compressed, and 1 being completely relaxed
-    float m_wheelsDistancesToGround2[4];
+    float m_fWheelsSuspensionCompressionPrev[4];
     float m_aWheelTimer[4];
     float field_804;
     float m_intertiaValue1;
@@ -98,8 +98,8 @@ public:
     };
     char field_869;
     short m_doingBurnout;
-    unsigned short m_wMiscComponentAngle;
-    unsigned short m_wVoodooSuspension;
+    uint16_t m_wMiscComponentAngle;
+    uint16_t m_wVoodooSuspension;
     int m_dwBusDoorTimerEnd;
     int m_dwBusDoorTimerStart;
     float m_aSuspensionSpringLength[4];

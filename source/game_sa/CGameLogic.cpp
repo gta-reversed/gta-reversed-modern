@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+int8_t& CGameLogic::GameState = *reinterpret_cast<int8_t*>(0x96A8B0);
+
 void CGameLogic::InitAtStartOfGame()
 {
     plugin::Call<0x441210>();

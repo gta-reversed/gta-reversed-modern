@@ -42,4 +42,5 @@ You can either build with Premake5 or CMake, that's up to you.
 ### Credits
 - All contributors of [plugin-sdk](https://github.com/DK22Pac/plugin-sdk) project.
 - Hundreds of great people on [gtaforums.com](https://gtaforums.com/topic/194199-documenting-gta-sa-memory-addresses).
+- [re3 team](https://github.com/GTAmodding/re3).
 - And everyone who contributed to GTA:SA reversing.

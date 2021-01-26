@@ -68,6 +68,16 @@ CPad* CPad::GetPad(int padNumber) {
     return plugin::CallAndReturn<CPad*, 0x53FB70, int>(padNumber);
 }
 
+int16_t CPad::GetCarGunLeftRight()
+{
+    return plugin::CallMethodAndReturn<int16_t, 0x53FC50, CPad*>(this);
+}
+
+int16_t CPad::GetCarGunUpDown()
+{
+    return plugin::CallMethodAndReturn<int16_t, 0x53FC10, CPad*>(this);
+}
+
 // Converted from thiscall short CPad::GetSteeringLeftRight(void) 0x53FB80
 short CPad::GetSteeringLeftRight() {
     return plugin::CallMethodAndReturn<short, 0x53FB80, CPad*>(this);

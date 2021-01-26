@@ -197,6 +197,7 @@ public:
     {
         return m_nType > eEntityType::ENTITY_TYPE_BUILDING && m_nType < eEntityType::ENTITY_TYPE_DUMMY;
     }
+    bool IsNothing() { return m_nType == ENTITY_TYPE_NOTHING; }
     bool IsVehicle() { return m_nType == ENTITY_TYPE_VEHICLE; }
     bool IsPed() { return m_nType == ENTITY_TYPE_PED; }
     bool IsObject() { return m_nType == ENTITY_TYPE_OBJECT; }

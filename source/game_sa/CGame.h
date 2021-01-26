@@ -11,7 +11,7 @@
 #include "CColModel.h"
 #include "CEntity.h"
 
-class  CGame {
+class CGame {
 public:
     //! Current number of area
      static char(&aDatFile)[32]; // static char aDatFile[32]

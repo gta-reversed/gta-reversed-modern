@@ -79,7 +79,7 @@ public:
 				struct{
 					unsigned char : 2;
 					unsigned char nCarmodId : 5;
-					unsigned char : 1; // bUseCommonVehicleDictionary
+					unsigned char bUseCommonVehicleDictionary : 1;
 				};
                 struct {
                     unsigned char : 7;

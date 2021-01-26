@@ -1567,8 +1567,8 @@ RwMatrix* CEntity::GetModellingMatrix()
 // Converted from thiscall CColModel* CEntity::GetColModel(void) 0x535300
 CColModel* CEntity::GetColModel()
 {
-    if (IsVehicle() && static_cast<CVehicle*>(this)->m_nSpecialColModel != 0xFF)
-        return &CVehicle::m_aSpecialColModel[static_cast<CVehicle*>(this)->m_nSpecialColModel];
+    if (IsVehicle() && static_cast<CVehicle*>(this)->m_vehicleSpecialColIndex > -1)
+        return &CVehicle::m_aSpecialColModel[static_cast<CVehicle*>(this)->m_vehicleSpecialColIndex];
     else
         return CModelInfo::GetModelInfo(m_nModelIndex)->m_pColModel;
 }

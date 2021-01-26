@@ -22,7 +22,7 @@ bool CFileLoader::LoadAtomicFile(RwStream *stream, unsigned int modelId) {
 #else
     auto pAtomicModelInfo = CModelInfo::ms_modelInfoPtrs[modelId]->AsAtomicModelInfoPtr();
     bool bUseCommonVehicleTexDictionary = false; 
-    if (pAtomicModelInfo && pAtomicModelInfo->bWetRoadReflection)
+    if (pAtomicModelInfo && pAtomicModelInfo->bUseCommonVehicleDictionary)
     {
         bUseCommonVehicleTexDictionary = true;
         CVehicleModelInfo::UseCommonVehicleTexDicationary();
@@ -105,7 +105,7 @@ RpAtomic* CFileLoader::SetRelatedModelInfoCB(RpAtomic* atomic, RpClump* clump)
 
     bool bDamage = false;
     GetNameAndDamage(frameNodeName, (char*)&name, bDamage);
-    CVisibilityPlugins::SetAtomicRenderCallback(atomic, 0);
+    CVisibilityPlugins::SetAtomicRenderCallback(atomic, nullptr);
     if (bDamage)
     {
         auto pDamagableModelInfo = pAtomicModelInfo->AsDamageAtomicModelInfoPtr();

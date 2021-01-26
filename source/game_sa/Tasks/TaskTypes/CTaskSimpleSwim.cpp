@@ -1365,7 +1365,7 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
                 }
                 else
                 {
-                    fUpperTorsoRotationX = 1.0;
+                    fUpperTorsoRotationX = 1.0f;
                 }
 
                 m_fUpperTorsoRotationX += CTimer::ms_fTimeStep * -0.079999998f * fUpperTorsoRotationX;
@@ -1373,23 +1373,10 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
         }
 
         m_fRotationX += CTimer::ms_fTimeStep * 0.001f;
-
-        if (m_fRotationX > DegreesToRadians(80.0f) || m_fRotationX >= -DegreesToRadians(80.0f))
-        {
-            if (m_fRotationX > DegreesToRadians(80.0f))
-            {
-                m_fRotationX = DegreesToRadians(80.0f);
-            }
-        }
-        else
-        {
-            m_fRotationX = -DegreesToRadians(80.0f);
-        }
-
+        m_fRotationX = clamp<float>(m_fRotationX, -DegreesToRadians(80.0f), DegreesToRadians(80.0f));
+        // BUG: it should be m_fTimeCanRun <= 0.1f
         if (pPed->m_pPlayerData->m_fTimeCanRun <= 0.0f)
-        {
             pPed->m_pPlayerData->m_fTimeCanRun = 0.1f;
-        }
         pPed->ControlButtonSprint(static_cast<eSprintType>(3));
         break;
     }
@@ -1471,7 +1458,7 @@ void CTaskSimpleSwim::DestroyFxSystem()
     if (m_pFxSystem)
     {
         m_pFxSystem->Kill();
-        m_pFxSystem = 0;
+        m_pFxSystem = nullptr;
     }
 #endif
 }

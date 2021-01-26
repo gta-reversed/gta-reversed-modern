@@ -138,10 +138,10 @@ class CPed;
 
 enum tWheelState : int32_t
 {
-    WHEEL_STATE_NORMAL,	// standing still or rolling normally
-    WHEEL_STATE_SPINNING,	// rotating but not moving
+    WHEEL_STATE_NORMAL,	  // standing still or rolling normally
+    WHEEL_STATE_SPINNING, // rotating but not moving
     WHEEL_STATE_SKIDDING,
-    WHEEL_STATE_FIXED,	// not rotating
+    WHEEL_STATE_FIXED,	  // not rotating
 };
 
 
@@ -161,12 +161,7 @@ struct tHydrualicData
     // and does NOT apply if numpad keys are pressed (car hopping)
     float m_fSuspensionNormalIdleUpperLimit; 
     float m_fSuspensionNormalIdleLowerLimit;
-
-    // wheel suspension
-    float m_lf_wheel;
-    float m_lr_wheel;
-    float m_rf_wheel;
-    float m_rr_wheel;
+    float m_wheelSuspension[4];
 };
 
 VALIDATE_SIZE(tHydrualicData, 0x28);
@@ -293,14 +288,14 @@ public:
     short  m_nForcedRandomRouteSeed; // if this is non-zero the random wander gets deterministic
     CPed *m_pDriver;
     CPed *m_apPassengers[8];
-    unsigned char  m_nNumPassengers;
-    unsigned char  m_nNumGettingIn;
-    unsigned char  m_nGettingInFlags;
-    unsigned char  m_nGettingOutFlags;
-    unsigned char  m_nMaxPassengers;
-    unsigned char  m_nWindowsOpenFlags; // initialised, but not used?
-    unsigned char  m_nNitroBoosts;
-    unsigned char  m_nSpecialColModel;
+    uint8_t  m_nNumPassengers;
+    uint8_t  m_nNumGettingIn;
+    uint8_t  m_nGettingInFlags;
+    uint8_t  m_nGettingOutFlags;
+    uint8_t  m_nMaxPassengers;
+    uint8_t  m_nWindowsOpenFlags; // initialised, but not used?
+    uint8_t  m_nNitroBoosts;
+    int8_t  m_vehicleSpecialColIndex;
     CEntity *m_pEntityWeAreOn; // we get it from CWorld::ProcessVerticalLine or ProcessEntityCollision, it's entity under us, 
                                //only static entities (buildings or roads)
     CFire *m_pFire;

@@ -61,13 +61,14 @@ enum eWeaponType : std::uint32_t
     WEAPON_CAMERA,
     WEAPON_NIGHTVISION,
     WEAPON_INFRARED,
-    WEAPON_PARACHUTE,
-    WEAPON_LAST_WEAPON,
+    WEAPON_PARACHUTE,   // 46 (0x2E)
+    WEAPON_LAST_WEAPON, // 47 (0x2F)
 
-    WEAPON_ARMOUR,
+    WEAPON_ARMOUR, // 48 (0x30)
+
     // these are possible ways to die
-    WEAPON_RAMMEDBYCAR,
-    WEAPON_RUNOVERBYCAR, // 50
+    WEAPON_RAMMEDBYCAR, // 49 (0x31)
+    WEAPON_RUNOVERBYCAR, // 50 (0x32)
     WEAPON_EXPLOSION,
     WEAPON_UZI_DRIVEBY,
     WEAPON_DROWNING,
@@ -76,8 +77,4 @@ enum eWeaponType : std::uint32_t
     WEAPON_ANYMELEE,
     WEAPON_ANYWEAPON,
     WEAPON_FLARE,
-
-    // Added by us
-    WEAPON_TANK_GRENADE,
-    WEAPON_INVALID = 255,
 };

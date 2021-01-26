@@ -52,7 +52,7 @@ public:
             unsigned int bHasNoModel : 1;
             unsigned int bIsScaled : 1;
             unsigned int bCanBeAttachedToMagnet : 1;
-            unsigned int b20 : 1;
+            unsigned int bDamaged : 1;
             unsigned int b21 : 1;
             unsigned int b22 : 1;
             unsigned int bFadingIn : 1; // works only for objects with type 2 (OBJECT_MISSION)

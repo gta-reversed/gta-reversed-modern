@@ -232,6 +232,8 @@ public:
     void ProcessPCSpecificStuff();
     void StopShaking(short arg0);
     static CPad* GetPad(int padNumber);
+    int16_t GetCarGunLeftRight();
+    int16_t GetCarGunUpDown();
     short GetSteeringLeftRight();
     short GetSteeringUpDown();
     short GetPedWalkLeftRight();
