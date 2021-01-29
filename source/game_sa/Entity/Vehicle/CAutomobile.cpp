@@ -310,12 +310,12 @@ void CAutomobile::ProcessControl()
             }
         }
 
-        float speedRightOld = DotProduct(m_vecMoveSpeed, GetRight());
+        float speedForward = DotProduct(m_vecMoveSpeed, GetForward());
 
         if (vehicleFlags.bAudioChangingGear
             && m_fGasPedal > 0.4f
             && m_fBreakPedal < 0.1f
-            && speedRightOld  > 0.15f
+            && speedForward  > 0.15f
             && this == FindPlayerVehicle(-1, false)
             && TheCamera.GetActiveCamera().m_nMode != MODE_1STPERSON)
         {
@@ -393,7 +393,7 @@ void CAutomobile::ProcessControl()
                     m_fGasPedal,
                     m_nCurrentGear,
                     m_fGearChangeCount,
-                    speedRightOld,
+                    speedForward,
                     &m_intertiaValue1,
                     &m_intertiaValue2,
                     m_nWheelsOnGround,
@@ -419,7 +419,7 @@ void CAutomobile::ProcessControl()
         }
 
         float steerAngle = 1.0f;
-        if (speedRightOld <= 0.01f || m_aWheelTimer[CARWHEEL_FRONT_LEFT] <= 0.0f && m_aWheelTimer[CARWHEEL_REAR_LEFT] <= 0.0f)
+        if (speedForward <= 0.01f || m_aWheelTimer[CARWHEEL_FRONT_LEFT] <= 0.0f && m_aWheelTimer[CARWHEEL_REAR_LEFT] <= 0.0f)
             steerAngle = 1.0f;
         else if (m_nStatus != STATUS_PLAYER)
             steerAngle = 1.0f;
@@ -429,7 +429,7 @@ void CAutomobile::ProcessControl()
             colPoint.m_nSurfaceTypeB = SURFACE_TARMAC;
             float speedRight = DotProduct(m_vecMoveSpeed, GetRight());
             float adhesive = g_surfaceInfos->GetAdhesiveLimit(&colPoint);
-            steerAngle = adhesive * traction * 4.0f * 4.0f / (speedRightOld * speedRightOld);
+            steerAngle = adhesive * traction * 4.0f * 4.0f / (speedForward * speedForward);
             steerAngle = std::min(steerAngle, 1.0f);
             steerAngle = asin(steerAngle) / DegreesToRadians(m_pHandlingData->m_fSteeringLock);
             if (m_fSteerAngle < 0.0f && speedRight > 0.05f
