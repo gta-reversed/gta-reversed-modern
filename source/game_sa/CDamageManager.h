@@ -51,7 +51,9 @@ enum  tComponentGroup {
 enum eWheelStatus {
     WHEEL_STATUS_OK = 0,
     WHEEL_STATUS_BURST,
-    WHEEL_STATUS_MISSING
+    WHEEL_STATUS_MISSING,
+    WHEEL_STATUS_3,
+    WHEEL_STATUS_4
 };
 
 enum  ePanels {
@@ -62,13 +64,13 @@ enum  ePanels {
     BUMP_REAR = 6
 };
 
-enum  eDoors {
-    BONNET = 0,
-    BOOT = 1,
-    DOOR_FRONT_LEFT = 2,
-    DOOR_FRONT_RIGHT = 3,
-    DOOR_REAR_LEFT = 4,
-    DOOR_REAR_RIGHT = 5
+enum eDoors {
+    DOOR_BONNET = 0,
+    DOOR_BOOT,
+    DOOR_LEFT_FRONT,
+    DOOR_RIGHT_FRONT,
+    DOOR_LEFT_REAR,
+    DOOR_RIGHT_REAR,
 };
 
 enum  eLights {

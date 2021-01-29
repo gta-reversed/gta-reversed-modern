@@ -82,10 +82,10 @@ void cTransmission::CalculateGearForSimpleCar(float speed, uchar& currentGear)
 #endif
 }
 
-float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uchar& currentGear, std::int32_t gearChangeCount, float& velocity, float* a6, float* a7, bool allWheelsOnGround, std::uint8_t handlingCheat)
+float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uchar& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8_t allWheelsOnGround, uint8_t handlingCheat)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<float, 0x6D05E0, cTransmission*, float const&, uchar&, std::int32_t, float&, float*, float*, bool, std::uint8_t>(this, gasPedal, currentGear, gearChangeCount, velocity, a6, a7, allWheelsOnGround, handlingCheat);
+    return plugin::CallMethodAndReturn<float, 0x6D05E0, cTransmission*, float const&, uchar&, float&, float&, float*, float*, uint8_t, uint8_t>(this, gasPedal, currentGear, gearChangeCount, velocity, a6, a7, allWheelsOnGround, handlingCheat);
 #else
     static float cheatMultiplier = 0.0f;
     static float driveAcceleration = 0.0f;
@@ -129,17 +129,11 @@ float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uchar& cu
                 float gearNumber = 1.0f - (static_cast<float>(currentGear) - 1.0f) / (static_cast<float>(m_nNumberOfGears) - 1.0f);
                 gearNumber *= gearNumber;
                 if (m_handlingFlags & VEHICLE_HANDLING_1G_BOOST)
-                {
                     speedMultiplier = gearNumber * 5.0f;
-                }
                 else if (m_handlingFlags & VEHICLE_HANDLING_2G_BOOST)
-                {
                     speedMultiplier = gearNumber * 4.0f;
-                }
                 else
-                {
                     speedMultiplier = gearNumber * 3.0f;
-                }
                 speedMultiplier += 1.0f;
                 nitrosMultiplier = 1.0f;
             }
@@ -149,14 +143,10 @@ float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uchar& cu
                 nitrosMultiplier = 1.0f;
             }
             cheatMultiplier = 1.0f;
-            if (handlingCheat == TRANSMISSION_CHEAT_1)
-            {
+            if (handlingCheat == CHEAT_HANDLING_PERFECT )
                 cheatMultiplier = TRANSMISSION_AI_CHEAT_MULT;
-            }
-            else if (handlingCheat == TRANSMISSION_CHEAT_2)
-            {
+            else if (handlingCheat == CHEAT_HANDLING_NITROS)
                 nitrosMultiplier = TRANSMISSION_NITROS_MULT;
-            }
             driveAcceleration = speedMultiplier * (cheatMultiplier * m_fEngineAcceleration)
                 * nitrosMultiplier * 0.4f * gasPedal * CTimer::ms_fTimeStep;
             if (a6 && a7)
@@ -191,11 +181,11 @@ float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uchar& cu
                     }
                     const float velocityDiffRatio = currentDownVelocityDiff / upDownVelocityDiff;
                     float inertiaMultiplier = velocityDiffRatio - *a6;
-                    if (handlingCheat == TRANSMISSION_CHEAT_1)
+                    if (handlingCheat == CHEAT_HANDLING_PERFECT )
                     {
                         inertiaMultiplier *= TRANSMISSION_AI_CHEAT_INERTIA_MULT;
                     }
-                    else if (handlingCheat == TRANSMISSION_CHEAT_2)
+                    else if (handlingCheat == CHEAT_HANDLING_NITROS)
                     {
                         inertiaMultiplier *= TRANSMISSION_NITROS_INERTIA_MULT;
                     }
@@ -235,7 +225,7 @@ float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uchar& cu
         a6 = nullptr;
         a7 = nullptr;
         allWheelsOnGround = false;
-        handlingCheat = TRANSMISSION_CHEAT_NONE;
+        handlingCheat = CHEAT_HANDLING_NONE;
         if (currentVelocity < m_maxReverseGearVelocity)
             return 0.0f;
     }

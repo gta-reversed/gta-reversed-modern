@@ -102,9 +102,9 @@ void CVehicle::operator delete(void* data) {
 }
 
 // Converted from void CVehicle::ProcessControlCollisionCheck(void) 0x871EDC
-void CVehicle::ProcessControlCollisionCheck()
+void CVehicle::ProcessControlCollisionCheck(bool applySpeed)
 {
-    ((void(__thiscall*)(CVehicle*))(*(void***)this)[23])(this);
+    ((void(__thiscall*)(CVehicle*, bool))(*(void***)this)[23])(this, applySpeed);
 }
 
 // Converted from void CVehicle::ProcessControlInputs(uchar playerNum) 0x871EE0

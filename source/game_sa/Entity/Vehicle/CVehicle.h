@@ -405,7 +405,7 @@ public:
     void SetModelIndex(unsigned int index) override;
     // originally vtable functions
 
-    virtual void ProcessControlCollisionCheck();
+    virtual void ProcessControlCollisionCheck(bool applySpeed);
     virtual void ProcessControlInputs(unsigned char playerNum);
     // component index in m_apModelNodes array
     virtual void GetComponentWorldPosition(int componentId, CVector& posnOut);
@@ -628,6 +628,9 @@ public:
     bool IsQuad() { return m_vehicleType == VEHICLE_QUAD; }
     bool IsSubclassQuad() { return m_vehicleSubType == VEHICLE_QUAD; };
     bool IsAutomobile() { return m_vehicleType == VEHICLE_AUTOMOBILE; }
+
+    bool IsTransportVehicle() { return m_nModelIndex == MODEL_TAXI || m_nModelIndex == MODEL_CABBIE; }
+    bool IsAmphibiousHeli() { return m_nModelIndex == MODEL_SEASPAR || m_nModelIndex == MODEL_LEVIATHN; }
 
     static void* operator new(unsigned int size);
     static void operator delete(void* data);

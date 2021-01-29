@@ -130,8 +130,7 @@ bool cBuoyancy::ProcessBuoyancyBoat(CVehicle* pVehicle, float fBuoyancy, CVector
             CVector vecTransformedPos;
             Multiply3x3(&vecTransformedPos, pVehicle->m_matrix, &vecOffset);
 
-            CVector vecSpeedAtPoint;
-            pVehicle->GetSpeed(&vecSpeedAtPoint, vecTransformedPos);
+            CVector vecSpeedAtPoint = pVehicle->GetSpeed(vecTransformedPos);
             auto pHandling = pVehicle->m_pHandlingData;
             auto fWavePower = 1.0F - DotProduct(vecSpeedAtPoint, vecWaveNormal) * pHandling->m_fSuspensionDampingLevel;
             fWavePower = std::max(fWavePower, 0.0F);
@@ -317,7 +316,7 @@ void cBuoyancy::AddSplashParticles(CPhysical* pEntity, CVector vecFrom, CVector 
 
     if (pEntity->IsPed()) {
         auto pPed = reinterpret_cast<CPed*>(pEntity);
-        auto pSwimTask = pPed->m_pIntelligence->GetTaskSwim();
+        auto pSwimTask = pPed->GetIntelligence()->GetTaskSwim();
         if (!pSwimTask) {
             auto& vecPedForward = pEntity->GetForwardVector();
             auto fPedAngle = CGeneral::GetAngleBetweenPoints(vecPedForward.x, vecPedForward.y, 0.0F, 0.0F);

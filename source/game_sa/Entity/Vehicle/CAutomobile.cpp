@@ -13,6 +13,7 @@ CColPoint* aAutomobileColPoints = (CColPoint*)0xC1BFF8;
 
 void CAutomobile::InjectHooks()
 {
+    ReversibleHooks::Install("CAutomobile", "ProcessControl", 0x6B1880, &CAutomobile::ProcessControl_Reversed);
     ReversibleHooks::Install("CAutomobile", "HydraulicControl", 0x6A07A0, &CAutomobile::HydraulicControl);
     ReversibleHooks::Install("CAutomobile", "ProcessBuoyancy", 0x6A8C00, &CAutomobile::ProcessBuoyancy);
     ReversibleHooks::Install("CAutomobile", "PlaceOnRoadProperly", 0x6AF420, &CAutomobile::PlaceOnRoadProperly);
@@ -23,6 +24,707 @@ CAutomobile::CAutomobile(int modelIndex, unsigned char createdBy, bool setupSusp
     ((void(__thiscall*)(CAutomobile*, int, unsigned char, bool))0x6B0A90)(this, modelIndex, createdBy, setupSuspensionLines);
 }
 
+void CAutomobile::ProcessControl()
+{
+    uint32_t extraHandlingFlags = 0;
+    if (vehicleFlags.bUseCarCheats)
+        extraHandlingFlags |= EXTRA_HANDLING_PERFECT;
+    CCollisionData* colData = GetColModel()->m_pColData;
+    m_doingBurnout = 0;
+    npcFlags.bLostTraction = false;
+    vehicleFlags.bWarnedPeds = false;
+    vehicleFlags.bRestingOnPhysical = false;
+    m_vehicleAudio.Service();
+    bool bExplodeImmediately = false;
+    if (IsPlane() || IsHeli()) {
+        eCarMission carMission = m_autoPilot.m_nCarMission;
+        if ((carMission == MISSION_39
+            || carMission == MISSION_3A
+            || m_nStatus == STATUS_PLAYER && m_fHealth < 250.0 && field_981 == 2)
+            && m_nStatus != STATUS_WRECKED
+            && (m_fDamageIntensity > 0.0f && m_vecLastCollisionImpactVelocity.z > 0.0f || !IsInAir())
+            && (m_vecMoveSpeed.z >= 0.0f || physicalFlags.bSubmergedInWater))
+        {
+            bExplodeImmediately = true;
+        }
+    }
+
+    if (CCheat::m_aCheatsActive[CHEAT_ALL_TAXIS_NITRO]) {
+        if (m_nStatus == STATUS_PLAYER && IsTransportVehicle())
+            extraHandlingFlags |= EXTRA_HANDLING_TAXI_BOOST;
+    }
+
+    bool bExtraHandlingTaxiBoost = !!(extraHandlingFlags & EXTRA_HANDLING_TAXI_BOOST);
+    if (CCheat::m_aCheatsActive[CHEAT_ALL_CARS_HAVE_NITRO] || bExtraHandlingTaxiBoost) {
+        handlingFlags.bNosInst = true;
+        m_nNitroBoosts = 101;
+    }
+    if (vehicleFlags.bIsBus)
+        ProcessAutoBusDoors();
+    ProcessCarAlarm();
+    UpdateClumpAlpha();
+    UpdatePassengerList();
+    if (m_pDriver) {
+        if (!vehicleFlags.bDriverLastFrame && m_nBombOnBoard == BOMB_IGNITION_ACTIVATED) {
+            m_wBombTimer = 1000;
+            m_pWhoDetonatedMe = m_pWhoInstalledBombOnMe;
+            if (m_pWhoInstalledBombOnMe)
+                CEntity::RegisterReference(reinterpret_cast<CEntity**>(&m_pWhoDetonatedMe));
+        }
+        vehicleFlags.bDriverLastFrame = true;
+    }
+    else {
+        vehicleFlags.bDriverLastFrame = false;
+    }
+
+    if (m_nNumPassengers && IsUpsideDown())
+        CanPedEnterCar();
+
+    if (ProcessAI(extraHandlingFlags))
+        return;
+
+    bool extraPerfectHandling = !!(extraHandlingFlags & EXTRA_HANDLING_PERFECT);
+    bool extraHandlingNitros = !!(extraHandlingFlags & EXTRA_HANDLING_NITROS);
+    bool extraHandlingWheelsTouchingPavement = !!(extraHandlingFlags & EXTRA_HANDLING_WHEELS_TOUCHING_PAVEMENT);
+    bool extraHandlingTaxiBoost = !!(extraHandlingFlags & EXTRA_HANDLING_TAXI_BOOST);
+
+    bool skipPhysics = false;
+    if (m_nStatus == STATUS_ABANDONED || m_nStatus == STATUS_WRECKED) {
+        bool isVehicleIdle = false;
+        if (!vehicleFlags.bVehicleColProcessed
+            && m_vecMoveSpeed == 0.0f
+            && m_fWheelsSuspensionCompressionPrev[CARWHEEL_REAR_RIGHT] != 1.0f)
+        {
+            isVehicleIdle = true;
+        }
+
+        float forceLimitRadius = 0.003f;
+        float torqueLimitRadius = 0.0009f;
+        float movingSpeedLimit = 0.005f;
+        if (IsPlane()) {
+            if (m_fDamageIntensity > 0.0f && m_pDamageEntity && m_pDamageEntity->IsVehicle())
+                forceLimitRadius = 0.003f;
+            else
+                forceLimitRadius = 0.009f;
+            torqueLimitRadius = 0.003f;
+            movingSpeedLimit = 0.1f;
+        }
+        else if (m_nStatus == STATUS_WRECKED) {
+            forceLimitRadius = 0.006f;
+            torqueLimitRadius = 0.0015f;
+            movingSpeedLimit = 0.015f;
+        }
+
+        m_vecForce = (m_vecForce + m_vecMoveSpeed) * 0.5f;
+        m_vecTorque = (m_vecTorque + m_vecTurnSpeed) * 0.5f;
+
+        bool resetSpeed = true;
+
+        forceLimitRadius *= CTimer::ms_fTimeStep;
+        torqueLimitRadius *= CTimer::ms_fTimeStep;
+        if (forceLimitRadius * forceLimitRadius < m_vecForce.SquaredMagnitude()
+            || torqueLimitRadius * torqueLimitRadius < m_vecTorque.SquaredMagnitude()
+            || movingSpeedLimit <= m_fMovingSpeed
+            || m_fDamageIntensity > 0.0f && m_pDamageEntity && m_pDamageEntity->IsPed())
+        {
+            resetSpeed = false;
+        }
+        else if (physicalFlags.bSubmergedInWater) {
+            CVector distance = GetPosition() - TheCamera.GetPosition();
+            if (distance.SquaredMagnitude() < 2500.0f)
+                resetSpeed = false;
+        }
+        if (!resetSpeed && !isVehicleIdle) {
+            m_bFakePhysics = 0;
+        }
+        else {
+            m_bFakePhysics++;
+            if (m_bFakePhysics > 10 || isVehicleIdle) {
+                if (!isVehicleIdle || m_bFakePhysics > 10)
+                    m_bFakePhysics = 10;
+                ResetMoveSpeed();
+                ResetTurnSpeed();
+                skipPhysics = true;
+            }
+        }
+
+        if (IsRealHeli()
+            && m_wheelSpeed[CARWHEEL_REAR_LEFT] > 0.0f || IsAmphibiousHeli()
+            && !m_nNumContactWheels
+            && m_fDamageIntensity <= 0.0f
+            || m_nModelIndex == MODEL_VORTEX
+            || CCheat::m_aCheatsActive[CHEAT_CARS_ON_WATER]
+            && IsAnyWheelTouchingShallowWaterGround())
+        {
+            skipPhysics = false;
+            m_bFakePhysics = 0;
+        }
+    }
+    for (int32_t i = 0; i < 4; i++) {
+        CEntity* collisionEntity = m_pWheelCollisionEntity[i];
+        if (collisionEntity) {
+            vehicleFlags.bRestingOnPhysical = true;
+            if (!CWorld::bForceProcessControl && collisionEntity->m_bIsInSafePosition) {
+                m_bWasPostponed = true;
+                return;
+            }
+        }
+    }
+
+    if (vehicleFlags.bRestingOnPhysical) {
+        skipPhysics = false;
+        m_bFakePhysics = 0;
+    }
+
+    VehicleDamage(0.0f, 0, nullptr, nullptr, nullptr, WEAPON_RAMMEDBYCAR);
+    if (m_nStatus == STATUS_PLAYER && (m_nModelIndex == MODEL_FIRETRUK || m_nModelIndex == MODEL_SWATVAN)) {
+        FireTruckControl(0.0f);
+    }
+    else {
+        switch (m_nModelIndex)
+        {
+        case MODEL_RHINO:
+        case MODEL_RCTIGER:
+            TankControl();
+            break;
+        case MODEL_PACKER:
+        case MODEL_DOZER:
+        case MODEL_DUMPER:
+        case MODEL_CEMENT:
+        case MODEL_ANDROM:
+        case MODEL_FORKLIFT:
+            if (UpdateMovingCollision(-1.0f))
+                skipPhysics = false;
+            break;
+        case MODEL_TOWTRUCK:
+        case MODEL_TRACTOR:
+            TowTruckControl();
+            break;
+        default:
+            if (handlingFlags.bHydraulicInst)
+                HydraulicControl();
+            else if ((CCheat::m_aCheatsActive[CHEAT_PERFECT_HANDLING] || (extraHandlingFlags & EXTRA_HANDLING_TAXI_BOOST))
+                && m_nStatus == STATUS_PLAYER
+                && m_vecMoveSpeed.SquaredMagnitude() > 0.04f)
+            {
+                BoostJumpControl();
+            }
+            break;
+        }
+    }
+    if (handlingFlags.bNosInst) {
+        NitrousControl(0);
+    }
+    else {
+        for (int32_t i = 0; i < 2; i++) {
+            FxSystem_c* fxSys = m_exhaustNitroFxSystem[i];
+            if (fxSys) {
+                fxSys->Kill();
+                m_exhaustNitroFxSystem[i] = nullptr;
+            }
+        }
+    }
+    if (FindPlayerVehicle(-1, false) == this && CPad::GetPad(0)->CarGunJustDown())
+        ActivateBomb();
+    if (skipPhysics) {
+        SkipPhysics();
+        vehicleFlags.bAudioChangingGear = false;
+        vehicleFlags.bVehicleColProcessed = false;
+        m_fNitroValue = 1.0f;
+    }
+    else {
+        if (!vehicleFlags.bVehicleColProcessed)
+            ProcessControlCollisionCheck(true);
+        bool oldSubmergedInWater = physicalFlags.bSubmergedInWater;
+        bool postCollision = false;
+        if (m_fDamageIntensity > 0.0f && m_vecLastCollisionImpactVelocity.z > 0.1f)
+            postCollision = true;
+        CPhysical::ProcessControl();
+
+        if (m_nModelIndex == MODEL_SKIMMER) {
+            auto skimmerModelInfo = CModelInfo::GetModelInfo(MODEL_SKIMMER)->AsVehicleModelInfoPtr();
+            auto skimmerHandling = gHandlingDataMgr.GetBoatPointer(static_cast<uint8_t>(skimmerModelInfo->m_nHandlingId));
+            ProcessBoatControl(skimmerHandling, &m_fDoomVerticalRotation, m_bHasHitWall, postCollision);
+            physicalFlags.bTouchingWater = physicalFlags.bSubmergedInWater;
+        }
+        else {
+            ProcessBuoyancy();
+        }
+
+        if (!oldSubmergedInWater && physicalFlags.bSubmergedInWater) {
+            if (m_pDriver && m_pDriver->IsPlayer()) {
+                static_cast<CPlayerPed*>(m_pDriver)->ResetPlayerBreath();
+            }
+            else {
+                for (uint8_t i = 0; i < m_nMaxPassengers; i++) {
+                    CPed* passenger = m_apPassengers[i];
+                    if (passenger && passenger->IsPlayer())
+                        static_cast<CPlayerPed*>(passenger)->ResetPlayerBreath();
+
+                }
+            }
+        }
+        if (m_nModelIndex == MODEL_RCBARON)
+            ProcessFlyingCarStuff();
+        if (!npcFlags.bSoftSuspension) {
+            for (int32_t i = 0; i < 4; i++) {
+                float wheelRadius = 1.0f - m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i];
+                m_fWheelsSuspensionCompression[i] = (m_fWheelsSuspensionCompression[i] - wheelRadius) / (1.0f - wheelRadius);
+            }
+        }
+
+        ProcessSuspension();
+
+        CVector contactPoints[4];
+        CVector contactSpeeds[4];
+
+        for (int32_t i = 0; i < 4; i++) {
+            if (m_fWheelsSuspensionCompression[i] >= 1.0f) {
+                CColLine& colLine = colData->m_pLines[i];
+                CColDisk& colDisk = colData->m_pDisks[i];
+                if (colData->bUsesDisks) {
+                    CVector& point = contactPoints[i];
+                    point = colDisk.m_vecStart;
+                    point.z -= colDisk.m_fStartRadius;
+                    point = Multiply3x3(GetMatrix(), &contactPoints[i]);
+                }
+                else {
+                    contactPoints[i] = Multiply3x3(GetMatrix(), &colLine.m_vecEnd);
+                }
+            }
+            else {
+                m_wheelSkidmarkMuddy[i] = false;
+                m_wheelSkidmarkType[i] = g_surfaceInfos->GetSkidmarkType(m_wheelColPoint[i].m_nSurfaceTypeB);
+                if (m_wheelSkidmarkType[i] == SKIDMARK_MUDDY)
+                    m_wheelSkidmarkMuddy[i] = true;
+                contactPoints[i] = m_wheelColPoint[i].m_vecPoint - GetPosition();
+            }
+        }
+
+        for (int32_t i = 0; i < 4; i++) {
+            CPhysical* collisionEntity = reinterpret_cast<CPhysical*>(m_pWheelCollisionEntity[i]);
+            contactSpeeds[i] = GetSpeed(contactPoints[i]);
+            if (collisionEntity) {
+                contactSpeeds[i] -= collisionEntity->GetSpeed(m_vWheelCollisionPos[i]);
+                m_pWheelCollisionEntity[i] = nullptr;
+            }
+        }
+
+        float speedRight = DotProduct(m_vecMoveSpeed, GetRight());
+
+        if (vehicleFlags.bAudioChangingGear
+            && m_fGasPedal > 0.4f
+            && m_fBreakPedal < 0.1f
+            && speedRight  > 0.15f
+            && this == FindPlayerVehicle(-1, false)
+            && TheCamera.GetActiveCamera().m_nMode != MODE_1STPERSON)
+        {
+            if (m_nStatus == STATUS_PLAYER && !m_pHandlingData->m_bIsBus)
+            {
+                if (m_dwBusDoorTimerEnd) {
+                    uint32_t timeStep = static_cast<uint32_t>(CTimer::ms_fTimeStep * 0.02f * 1000.0f);
+                    if (m_dwBusDoorTimerEnd <= timeStep)
+                        m_dwBusDoorTimerEnd = 0;
+                    else
+                        m_dwBusDoorTimerEnd -= timeStep;
+                }
+                else {
+                    m_dwBusDoorTimerEnd = 1000;
+                }
+            }
+
+            if (IsAnyFrontAndRearWheelTouchingGround()) {
+                CVector point = GetForward() * -1.0f;
+                CVector force = std::min(m_fTurnMass, 2500.0f) * -0.008f * GetUp();
+                ApplyTurnForce(force, point);
+            }
+        }
+
+
+
+        float brake = m_pHandlingData->m_fBrakeDeceleration * m_fBreakPedal * CTimer::ms_fTimeStep;
+
+        m_wheelsOnGrounPrev = m_nWheelsOnGround;
+        m_nNumContactWheels = 0;
+        m_nWheelsOnGround = 0;
+
+        for (int32_t i = 0; i < 4; i++) {
+            if (m_fWheelsSuspensionCompression[i] >= 1.0f) {
+                m_aWheelTimer[i] = std::max(m_aWheelTimer[i] - CTimer::ms_fTimeStep, 0.0f);
+                if (m_aWheelTimer[i] <= 0.0f)
+                    continue;
+            }
+            else {
+                m_aWheelTimer[i] = 4.0f;
+            }
+
+            m_nNumContactWheels++;
+
+            switch (m_pHandlingData->GetTransmission().m_nDriveType)
+            {
+            case '4':
+                m_nWheelsOnGround++;
+                break;
+            case 'F':
+                if (i == CARWHEEL_FRONT_LEFT || i == CARWHEEL_FRONT_RIGHT) {
+                    m_nWheelsOnGround++;
+                    break;
+                }
+                break;
+            case 'R':
+                if (i == CARWHEEL_REAR_LEFT || i == CARWHEEL_REAR_RIGHT) {
+                    m_nWheelsOnGround++;
+                    break;
+                }
+            }
+        }
+
+        uint8_t cheatType = CHEAT_HANDLING_NONE;
+        if (handlingFlags.bNosInst && m_fNitroValue < 0.0f)
+            cheatType = CHEAT_HANDLING_NITROS;
+        else if (extraPerfectHandling || CCheat::m_aCheatsActive[CHEAT_PERFECT_HANDLING])
+            cheatType = CHEAT_HANDLING_PERFECT;
+
+        float acceleration = 0.0f;
+        if (vehicleFlags.bEngineOn) {
+            cTransmission& transmission = m_pHandlingData->GetTransmission();
+            if (!m_pHandlingData->m_bIsPlane && !m_pHandlingData->m_bIsHeli)
+                acceleration = transmission.CalculateDriveAcceleration(
+                    m_fGasPedal,
+                    m_nCurrentGear,
+                    m_fGearChangeCount,
+                    speedRight,
+                    &m_intertiaValue1,
+                    &m_intertiaValue2,
+                    m_nWheelsOnGround,
+                    cheatType)
+                / m_fVelocityFrequency;
+        }
+
+        float traction = 0.004f * m_pHandlingData->m_fTractionMultiplier;
+        if (m_nStatus == STATUS_PHYSICS)
+            traction = 0.004f * m_fCarTraction * m_pHandlingData->m_fTractionMultiplier;
+        traction *= 0.25f / m_fVelocityFrequency;
+        CPlane* vortex = static_cast<CPlane*>(this);
+        if (CCheat::m_aCheatsActive[CHEAT_PERFECT_HANDLING] || m_nModelIndex == MODEL_VORTEX && vortex->m_propSpeedClamped == 0.0f)
+            traction *= 4.0f;
+
+        if (this != FindPlayerVehicle(-1, false) && (extraPerfectHandling || CCheat::m_aCheatsActive[CHEAT_PERFECT_HANDLING])) {
+            traction *= 1.2f;
+            acceleration *= 1.4f;
+            if (extraHandlingNitros || CCheat::m_aCheatsActive[CHEAT_PERFECT_HANDLING]) {
+                traction *= 1.3f;
+                acceleration *= 1.4f;
+            }
+        }
+
+        float steerAngle = 1.0f;
+        if (speedRight <= 0.01f || m_aWheelTimer[CARWHEEL_FRONT_LEFT] <= 0.0f && m_aWheelTimer[CARWHEEL_REAR_LEFT] <= 0.0f)
+            steerAngle = 1.0f;
+        else if (m_nStatus != STATUS_PLAYER)
+            steerAngle = 1.0f;
+        else {
+            CColPoint colPoint;
+            colPoint.m_nSurfaceTypeA = SURFACE_WHEELBASE;
+            colPoint.m_nSurfaceTypeB = SURFACE_TARMAC;
+            float speedRight = DotProduct(m_vecMoveSpeed, GetRight());
+            float adhesive = g_surfaceInfos->GetAdhesiveLimit(&colPoint);
+            steerAngle = adhesive * traction * 4.0f * 4.0f / (speedRight * speedRight);
+            steerAngle = std::min(steerAngle, 1.0f);
+            steerAngle = asin(steerAngle) / DegreesToRadians(m_pHandlingData->m_fSteeringLock);
+            if (m_fSteerAngle < 0.0f && speedRight > 0.05f
+                || m_fSteerAngle > 0.0f && speedRight < -0.05f
+                || vehicleFlags.bIsHandbrakeOn
+                || steerAngle > 1.0f)
+            {
+                steerAngle = 1.0f;
+            }
+        }
+        m_fSteerAngle *= steerAngle;
+
+        if (!handlingFlags.bProcRearwheelFirst) {
+            if (handlingFlags.bSteerRearwheels)
+                CAutomobile::ProcessCarWheelPair(
+                    CARWHEEL_FRONT_LEFT,
+                    CARWHEEL_FRONT_RIGHT,
+                    -999.0f,
+                    contactSpeeds,
+                    contactPoints,
+                    traction,
+                    acceleration,
+                    brake,
+                    true);
+            else
+                CAutomobile::ProcessCarWheelPair(
+                    CARWHEEL_FRONT_LEFT,
+                    CARWHEEL_FRONT_RIGHT,
+                    m_fSteerAngle,
+                    contactSpeeds,
+                    contactPoints,
+                    traction,
+                    acceleration,
+                    brake,
+                    true);
+        }
+
+        float rearWheelsSteerAngle = -999.0f;
+        if (handlingFlags.bSteerRearwheels)
+            rearWheelsSteerAngle = -m_fSteerAngle;
+        else if (handlingFlags.bHbRearwheelSteer)
+            rearWheelsSteerAngle = m_f2ndSteerAngle;
+
+        CAutomobile::ProcessCarWheelPair(
+            CARWHEEL_REAR_LEFT,
+            CARWHEEL_REAR_RIGHT,
+            rearWheelsSteerAngle,
+            contactSpeeds,
+            contactPoints,
+            traction,
+            acceleration,
+            brake,
+            false);
+        if (handlingFlags.bProcRearwheelFirst)
+        {
+            if (handlingFlags.bSteerRearwheels)
+                CAutomobile::ProcessCarWheelPair(
+                    CARWHEEL_FRONT_LEFT,
+                    CARWHEEL_FRONT_RIGHT,
+                    -999.0f,
+                    contactSpeeds,
+                    contactPoints,
+                    traction,
+                    acceleration,
+                    brake,
+                    true);
+            else
+                CAutomobile::ProcessCarWheelPair(
+                    CARWHEEL_FRONT_LEFT,
+                    CARWHEEL_FRONT_RIGHT,
+                    m_fSteerAngle,
+                    contactSpeeds,
+                    contactPoints,
+                    traction,
+                    acceleration,
+                    brake,
+                    true);
+        }
+
+        if (m_nStatus != STATUS_PLAYER) {
+            if (m_nAlarmState == 0 || m_nAlarmState == -1 || m_nStatus == STATUS_WRECKED) {
+                if (m_nHornCounter)
+                    m_nHornCounter--;
+            }
+        }
+        else if (handlingFlags.bHydraulicInst || CCheat::m_aCheatsActive[CHEAT_PERFECT_HANDLING] || extraHandlingTaxiBoost)
+            ProcessSirenAndHorn(false);
+        else
+            ProcessSirenAndHorn(true);
+
+        if (m_nModelIndex != MODEL_RCBARON)
+            ProcessFlyingCarStuff();
+    }
+    ProcessCarOnFireAndExplode(bExplodeImmediately);
+    if (vehicleFlags.bSirenOrAlarm
+        && (CTimer::m_FrameCounter & 7) == 5
+        && UsesSiren()
+        && m_nModelIndex != MODEL_MRWHOOP
+        && FindPlayerVehicle(-1, false) == this)
+    {
+        CCarAI::MakeWayForCarWithSiren(this);
+    }
+
+    float suspensionShake = 0.0f;
+    float roughnessShake = 0.0f;
+    float wheelSpinRate = 0.0f;
+    float speed = m_vecMoveSpeed.SquaredMagnitude();
+    for (int32_t i = 0; i < 4; i++) {
+        float suspensionChange = m_fWheelsSuspensionCompressionPrev[i] - m_fWheelsSuspensionCompression[i];
+        if (suspensionChange > 0.3f && !extraHandlingWheelsTouchingPavement && speed > 0.04f) {
+            //m_damageManager.GetWheelStatus(i); // return value is ignored
+            if (suspensionChange > suspensionShake)
+                suspensionShake = suspensionChange;
+        }
+
+        if (m_fWheelsSuspensionCompression[i] < 1.0f && m_nStatus == STATUS_PLAYER) {
+            float roughness = g_surfaceInfos->GetRoughness(m_wheelColPoint[i].m_nSurfaceTypeB) * 0.1f;
+            roughnessShake = std::max(roughnessShake, roughness);
+        }
+        uint32_t handlingId = m_pHandlingData->m_nVehicleId;
+        cTransmission& transmission = gHandlingDataMgr.GetVehiclePointer(handlingId)->GetTransmission();
+        if (m_aWheelTimer[i] <= 0.0f
+            && (m_fGasPedal > 0.5f || m_fGasPedal < -0.5f)
+            && ((i == CARWHEEL_FRONT_LEFT || i == CARWHEEL_FRONT_RIGHT) && transmission.m_nDriveType != 'R'
+                || (i == CARWHEEL_REAR_LEFT || i == CARWHEEL_REAR_RIGHT) && transmission.m_nDriveType != 'F'))
+        {
+            wheelSpinRate += CVehicle::WHEELSPIN_INAIR_TARGET_RATE;
+        }
+        else if (m_aWheelState[i] == WHEEL_STATE_SPINNING) {
+            wheelSpinRate += CVehicle::WHEELSPIN_TARGET_RATE;
+        }
+
+        m_fWheelsSuspensionCompressionPrev[i] = m_fWheelsSuspensionCompression[i];
+        m_fWheelsSuspensionCompression[i] = 1.0f;
+    }
+
+    if (m_pHandlingData->GetTransmission().m_nDriveType == '4')
+        wheelSpinRate *= 0.25f;
+    else
+        wheelSpinRate *= 0.5f;
+
+    float riseFallWheelSpinRate = CVehicle::WHEELSPIN_FALL_RATE;;
+    if (wheelSpinRate >= m_fWheelSpinForAudio)
+        riseFallWheelSpinRate = CVehicle::WHEELSPIN_RISE_RATE;
+
+    riseFallWheelSpinRate = pow(riseFallWheelSpinRate, CTimer::ms_fTimeStep);
+    m_fWheelSpinForAudio *= riseFallWheelSpinRate;
+    m_fWheelSpinForAudio += (1.0f - riseFallWheelSpinRate) * wheelSpinRate;
+
+    if ((CTimer::m_snTimeInMilliseconds & 0x7FF) > 800) {
+        if (roughnessShake >= 0.29f)
+            suspensionShake = 0.0f;
+        roughnessShake = 0.0f;
+    }
+
+    if (!extraHandlingWheelsTouchingPavement
+        && (suspensionShake > 0.0f || roughnessShake > 0.0f)
+        && m_nStatus == STATUS_PLAYER)
+    {
+        float speed = m_vecMoveSpeed.SquaredMagnitude();
+        if (speed > 0.01f) {
+            speed = sqrt(speed);
+            if (suspensionShake > 0.0f) {
+                float frequency = (200.0f * suspensionShake * speed * 2000.0f) / m_fMass + 100.0f;
+                frequency = std::min(frequency, 250.0f);
+                int16_t time = static_cast<int16_t>(CTimer::ms_fTimeStep * 20000.0f / frequency);
+                CPad::GetPad(0)->StartShake(time, static_cast<uint8_t>(frequency), 0);
+            }
+            else {
+                float frequency = (200.0f * roughnessShake * speed * 2000.0f) / m_fMass + 40.0f;
+                frequency = std::min(frequency, 150.0f);
+                int16_t time = static_cast<int16_t>(CTimer::ms_fTimeStep * 5000.0f / frequency);
+                CPad::GetPad(0)->StartShake(time, static_cast<uint8_t>(frequency), 0);
+            }
+        }
+    }
+
+    vehicleFlags.bAudioChangingGear = false;
+    vehicleFlags.bVehicleColProcessed = false;
+
+    if (!vehicleFlags.bWarnedPeds)
+        CCarCtrl::ScanForPedDanger(this);
+    if (handlingFlags.bHydraulicInst && m_vecMoveSpeed.Magnitude() < 0.2f) {
+        auto& hydraulicData = CVehicle::m_aSpecialHydraulicData[m_vehicleSpecialColIndex];
+        CPlayerPed* driver = static_cast<CPlayerPed*>(m_pDriver);
+        if (m_nStatus == STATUS_PHYSICS
+            && (hydraulicData.m_wheelSuspension[CARWHEEL_FRONT_LEFT] > 0.5f && hydraulicData.m_wheelSuspension[CARWHEEL_REAR_LEFT] > 0.5f
+                || hydraulicData.m_wheelSuspension[CARWHEEL_FRONT_RIGHT] > 0.5f && hydraulicData.m_wheelSuspension[CARWHEEL_REAR_RIGHT] > 0.5f)
+            || m_nStatus == STATUS_PLAYER
+            && m_pDriver
+            && m_pDriver->IsPlayer()
+            && fabs(driver->GetPadFromPlayer()->GetCarGunLeftRight()) > 50.0f
+            && fabs(driver->GetPadFromPlayer()->GetCarGunUpDown()) < 50.0f)
+        {
+            float turnSpeedForward = DotProduct(m_vecTurnSpeed, GetForward());
+            const float speedSquared = turnSpeedForward * turnSpeedForward;
+            float speedTimeStep = pow(0.985f, CTimer::ms_fTimeStep) / (speedSquared * 5.0f + 1.0f);
+            float speed = pow(speedTimeStep, CTimer::ms_fTimeStep);
+            speed *= turnSpeedForward;
+            speed -= turnSpeedForward;
+
+            CVector force = speed * GetUp() * -1.0f * m_fTurnMass;
+            CVector point = GetRight() + Multiply3x3(GetMatrix(), &m_vecCentreOfMass);
+            ApplyTurnForce(force, point);
+        }
+    }
+
+    if (m_pTractor) {
+        if (m_nStatus == STATUS_REMOTE_CONTROLLED) {
+            bool updateTractorLink = false; // TODO: rename this variable later
+            if (m_pTractor->m_vecMoveSpeed != 0.0f || m_vecMoveSpeed.SquaredMagnitude() > 0.01f) {
+                updateTractorLink = true;
+                m_pTractor->UpdateTractorLink(false, false);
+            }
+            CVehicle::UpdateTrailerLink(false, false);
+            if (m_pTractor && m_nStatus == STATUS_REMOTE_CONTROLLED) {
+                if (updateTractorLink)
+                    m_pTractor->UpdateTractorLink(false, true);
+                UpdateTrailerLink(false, true);
+            }
+        }
+        else {
+            BreakTowLink();
+        }
+    }
+    else if (m_pTrailer) {
+        if (m_pTrailer->m_nStatus == STATUS_REMOTE_CONTROLLED) {
+            if (m_pTrailer->m_pTractor == this) {
+                RemoveFromMovingList();
+                AddToMovingList();
+            }
+        }
+        else {
+            m_pTrailer->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pTrailer));
+            m_pTrailer = nullptr;
+        }
+    }
+
+    if (physicalFlags.bDisableCollisionForce && physicalFlags.bCollidable) {
+        ResetMoveSpeed();
+        ResetTurnSpeed();
+        ResetFrictionMoveSpeed();
+        ResetFrictionTurnSpeed();
+    }
+    else if (!skipPhysics
+        && (m_fGasPedal == 0.0f || m_nStatus == STATUS_WRECKED)
+        && fabs(m_vecMoveSpeed.x) < 0.0045f
+        && fabs(m_vecMoveSpeed.y) < 0.0045f
+        && fabs(m_vecMoveSpeed.z) < 0.0045f)
+    {
+        if (m_fDamageIntensity <= 0.0f || m_pDamageEntity != FindPlayerPed(-1)) {
+            if ((!IsPlane() || static_cast<CPlane*>(this)->m_propSpeedClamped == 0.0f) &&
+                (!IsHeli() || static_cast<CHeli*>(this)->m_fAccelerationBreakStatus == 0.0f))
+            {
+                if ((m_wMiscComponentAngle == 0.0f || m_wMiscComponentAngle == m_wVoodooSuspension)
+                    && !physicalFlags.bSubmergedInWater)
+                {
+                    if ((!m_pTractor || m_pTractor->m_vecMoveSpeed == 0.0f) && DidAnyWheelTouchGroundPrev()) {
+                        if (m_nModelIndex == MODEL_VORTEX || CCheat::m_aCheatsActive[CHEAT_CARS_ON_WATER]
+                            && DidAnyWheelTouchShallowWaterGroundPrev())
+                        {
+                            m_bFakePhysics = 0;
+                        }
+                        else {
+                            ResetMoveSpeed();
+                            m_vecTurnSpeed.z = 0.0f;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (CWeather::Earthquake > 0.0f) {
+        CVector& position = GetPosition();
+        position.z = CGeneral::GetRandomNumberInRange(0.0f, CWeather::Earthquake * 0.5f);
+    }
+    if (m_nModelIndex == MODEL_COMBINE)
+        CAutomobile::ProcessHarvester();
+    if (m_nModelIndex == MODEL_RHINO && (m_vecMoveSpeed != 0.0f || m_vecTurnSpeed != 0.0f)) {
+        m_doors[DOOR_LEFT_REAR].m_fOpenAngle = 1.0f;
+        m_doors[DOOR_LEFT_REAR].m_fClosedAngle = 1.0f;
+        m_doors[DOOR_LEFT_REAR].m_fAngle = 1.0f;
+        m_doors[DOOR_LEFT_REAR].m_fPrevAngle = 1.0f;
+        m_doors[DOOR_RIGHT_REAR].m_fOpenAngle = 1.0f;
+        m_doors[DOOR_RIGHT_REAR].m_fClosedAngle = 1.0f;
+        m_doors[DOOR_RIGHT_REAR].m_fAngle = 1.0f;
+        m_doors[DOOR_RIGHT_REAR].m_fPrevAngle = 1.0f;
+    }
+}
+
+void CAutomobile::ProcessControl_Reversed()
+{
+    return CAutomobile::ProcessControl();
+}
 
 CVector* CAutomobile::AddMovingCollisionSpeed(CVector* out, CVector& vecSpeed)
 {
@@ -30,9 +732,9 @@ CVector* CAutomobile::AddMovingCollisionSpeed(CVector* out, CVector& vecSpeed)
 }
 
 // Converted from void CAutomobile::ProcessAI(uint &) 0x0
-bool CAutomobile::ProcessAI(unsigned int& arg0)
+bool CAutomobile::ProcessAI(unsigned int& extraHandlingFlags)
 {
-    return ((bool(__thiscall*)(CAutomobile*, unsigned int&))(*(void***)this)[66])(this, arg0);
+    return ((bool(__thiscall*)(CAutomobile*, unsigned int&))(*(void***)this)[66])(this, extraHandlingFlags);
 }
 
 // Converted from void CAutomobile::ResetSuspension(void) 0x0
@@ -140,9 +842,9 @@ void CAutomobile::HydraulicControl()
         bool setPrevRatio = false;
         if (m_wMiscComponentAngle >= 20 || m_fMoveDirection <= 0.02f || m_fGasPedal == 0.0f) {
             if (m_wMiscComponentAngle && m_wMiscComponentAngle < 61 && m_fMoveDirection < 0.01f) {
-                    m_wMiscComponentAngle--;
-                    if (m_wMiscComponentAngle == 1)
-                        m_vehicleAudio.AddAudioEvent(AE_SUSPENSION_OFF, 0.0f);
+                m_wMiscComponentAngle--;
+                if (m_wMiscComponentAngle == 1)
+                    m_vehicleAudio.AddAudioEvent(AE_SUSPENSION_OFF, 0.0f);
             }
         }
         else if (m_wMiscComponentAngle) {
@@ -192,7 +894,7 @@ void CAutomobile::HydraulicControl()
                     pos.z -= lineLength;
                     line.m_vecEnd = pos;
                     m_aSuspensionSpringLength[i] = normalSpringLength;
-                    m_aSuspensionLineLength[i] = lineLength; 
+                    m_aSuspensionLineLength[i] = lineLength;
                     if (m_fWheelsSuspensionCompression[i] < 1.0f) {
                         float compressed = (line.m_vecStart.z - wheelPositions[i]) / lineLength;
                         m_fWheelsSuspensionCompression[i] = std::min(compressed, 1.0f);
@@ -287,7 +989,7 @@ void CAutomobile::HydraulicControl()
                     pos.z -= lineLength;
                     maxDelta = std::max(fabs(maxDelta), fabs(pos.z - line.m_vecEnd.z));
                     line.m_vecEnd = pos;
-                    m_aSuspensionLineLength[i] = lineLength;             
+                    m_aSuspensionLineLength[i] = lineLength;
                     m_aSuspensionSpringLength[i] = springLength;
                     if (m_fWheelsSuspensionCompression[i] < 1.0f) {
                         float compressed = (line.m_vecStart.z - wheelPositions[i]) / lineLength;
@@ -605,7 +1307,7 @@ void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steer
                 CVector point = std::min(1.0f, 3000.0f / m_fTurnMass) * -0.002f * m_fTurnMass * m_fSteerAngle * GetRight();
                 ApplyTurnForce(contactPoints[leftWheel], point);
             }
-            else if (!handlingFlags.bNosInst&& gHandlingDataMgr.HasRearWheelDrive(m_pHandlingData->m_nVehicleId))
+            else if (!handlingFlags.bNosInst && gHandlingDataMgr.HasRearWheelDrive(m_pHandlingData->m_nVehicleId))
             {
                 traction *= m_fNitroValue;
             }
@@ -657,7 +1359,7 @@ void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steer
                 wheelRight = sinSteerAngle * wheelFwd + cosSteerAngle * wheelRight;
                 wheelFwd = tmp;
             }
-            m_wheelColPoint[leftWheel].m_nSurfaceTypeA =  SURFACE_WHEELBASE;
+            m_wheelColPoint[leftWheel].m_nSurfaceTypeA = SURFACE_WHEELBASE;
             float adhesion = g_surfaceInfos->GetAdhesiveLimit(&m_wheelColPoint[leftWheel]) * traction;
             if (m_nStatus != STATUS_PLAYER)
             {
@@ -711,7 +1413,7 @@ void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steer
             float adhesion = g_surfaceInfos->GetAdhesiveLimit(&m_wheelColPoint[rightWheel]) * traction;
             if (m_nStatus == STATUS_PLAYER)
             {
-         
+
                 adhesion *= g_surfaceInfos->GetWetMultiplier(m_wheelColPoint[rightWheel].m_nSurfaceTypeB);
                 adhesion *= std::min(suspensionBias * m_pHandlingData->m_fSuspensionForceLevel * 4.0f * (1.0f - m_fWheelsSuspensionCompression[rightWheel]), 2.0f);
                 if (handlingFlags.bOffroadAbility2 && g_surfaceInfos->GetAdhesionGroup(m_wheelColPoint[rightWheel].m_nSurfaceTypeB) > ADHESION_GROUP_ROAD)
@@ -827,10 +1529,9 @@ void CAutomobile::dmgDrawCarCollidingParticles(CVector const& position, float fo
     ((void(__thiscall*)(CAutomobile*, CVector const&, float, eWeaponType))0x6A6DC0)(this, position, force, weapon);
 }
 
-// Converted from thiscall void CAutomobile::ProcessCarOnFireAndExplode(uchar) 0x6A7090
-void CAutomobile::ProcessCarOnFireAndExplode(unsigned char arg0)
+void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately)
 {
-    ((void(__thiscall*)(CAutomobile*, unsigned char))0x6A7090)(this, arg0);
+    ((void(__thiscall*)(CAutomobile*, unsigned char))0x6A7090)(this, bExplodeImmediately);
 }
 
 // Converted from thiscall CObject* CAutomobile::SpawnFlyingComponent(int nodeIndex, uint collisionType) 0x6A8580
@@ -861,8 +1562,7 @@ void CAutomobile::ProcessBuoyancy()
             auto& pColPoint = m_wheelColPoint[i];
             if (m_fWheelsSuspensionCompression[i] < 1.0F && g_surfaceInfos->IsWater(pColPoint.m_nSurfaceTypeB)) {
                 auto vecWaterImpactVelocity = (pColPoint.m_vecPoint + GetUp() * 0.3F) - GetPosition();
-                CVector vecSpeed;
-                GetSpeed(&vecSpeed, vecWaterImpactVelocity);
+                CVector vecSpeed = GetSpeed(vecWaterImpactVelocity);
             }
         }
         return; // The loop above is pretty much an overcomplicated NOP.

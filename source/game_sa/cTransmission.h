@@ -16,11 +16,12 @@ const float TRANSMISSION_NITROS_MULT = 2.0f;
 const float TRANSMISSION_AI_CHEAT_INERTIA_MULT = 0.75f;
 const float TRANSMISSION_NITROS_INERTIA_MULT = 0.5f;
 
+
 enum
 {
-    TRANSMISSION_CHEAT_NONE = 0,
-    TRANSMISSION_CHEAT_1 = 1,
-    TRANSMISSION_CHEAT_2 = 2
+    CHEAT_HANDLING_NONE = 0,
+    CHEAT_HANDLING_PERFECT = 1,
+    CHEAT_HANDLING_NITROS = 2
 };
 
 class cTransmission {
@@ -44,7 +45,7 @@ public:
     void DisplayGearRatios();
     void InitGearRatios();
     void CalculateGearForSimpleCar(float speed, uchar& currentGear);
-    float CalculateDriveAcceleration(float const& gasPedal, uchar& currentGear, std::int32_t gearChangeCount, float& velocity, float* a6, float* a7, bool allWheelsOnGround, std::uint8_t handlingType);
+    float CalculateDriveAcceleration(float const& gasPedal, uchar& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8_t allWheelsOnGround, uint8_t handlingType);
 };
 
 VALIDATE_SIZE(cTransmission, 0x68);

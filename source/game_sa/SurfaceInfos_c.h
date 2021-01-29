@@ -4,6 +4,13 @@
 
 class CColPoint;
 
+enum eSkidMarkType
+{
+    SKIDMARK_DEFAULT = 0,
+    SKIDMARK_SANDY,
+    SKIDMARK_MUDDY
+};
+
 class SurfaceInfos_c
 {
 public:

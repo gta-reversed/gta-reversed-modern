@@ -11,6 +11,7 @@
 #include "CBouncingPanel.h"
 #include "CDamageManager.h"
 #include "CColPoint.h"
+#include "eSurfaceType.h"
 
 class CObject;
 
@@ -50,6 +51,14 @@ enum eCarWheel {
     CARWHEEL_REAR_RIGHT = 3
 };
 
+enum eExtraHandlingFlags : uint32_t
+{
+    EXTRA_HANDLING_PERFECT = 0x1,
+    EXTRA_HANDLING_NITROS = 0x2,
+    EXTRA_HANDLING_WHEELS_TOUCHING_PAVEMENT = 0x8,
+    EXTRA_HANDLING_TAXI_BOOST = 0x10
+};
+
 class FxSystem_c;
 
 class CAutomobile : public CVehicle {
@@ -70,7 +79,7 @@ public:
     float m_intertiaValue2;
     int m_wheelSkidmarkType[4];
     bool m_wheelSkidmarkBloodState[4];
-    bool m_wheelSkidmarkSomeBool[4];
+    bool m_wheelSkidmarkMuddy[4];
     float m_wheelRotation[4];
     float m_wheelPosition[4];
     union {
@@ -100,7 +109,7 @@ public:
     short m_doingBurnout;
     uint16_t m_wMiscComponentAngle;
     uint16_t m_wVoodooSuspension;
-    int m_dwBusDoorTimerEnd;
+    uint32_t m_dwBusDoorTimerEnd;
     int m_dwBusDoorTimerStart;
     float m_aSuspensionSpringLength[4];
     float m_aSuspensionLineLength[4];
@@ -150,9 +159,9 @@ public:
     float m_fDoomHorizontalRotation;
     float m_fForcedOrientation;
     float m_fUpDownLightAngle[2];
-    unsigned char m_nNumContactWheels;
-    unsigned char m_nWheelsOnGround;
-    char field_962;
+    uint8_t m_nNumContactWheels;
+    uint8_t m_nWheelsOnGround;
+    uint8_t m_wheelsOnGrounPrev;
     char field_963;
     float field_964;
     tWheelState m_aWheelState[4];
@@ -168,13 +177,18 @@ public:
     static CMatrix *matW2B;
 
     //vtable
+    void ProcessControl() override;
     CVector* AddMovingCollisionSpeed(CVector* out, CVector& vecSpeed) override;
 
-    virtual bool ProcessAI(unsigned int& arg0);
+    virtual bool ProcessAI(unsigned int& extraHandlingFlags);
     virtual void ResetSuspension();
     virtual void ProcessFlyingCarStuff();
     virtual void DoHoverSuspensionRatios();
     virtual void ProcessSuspension();
+
+    private:
+        void ProcessControl_Reversed();
+    public:
 
     static void InjectHooks();
     //funcs
@@ -193,6 +207,38 @@ public:
             || m_fWheelsSuspensionCompression[2] == 1.0F
             || m_fWheelsSuspensionCompression[3] == 1.0F;
     };
+
+    inline bool IsAnyWheelTouchingShallowWaterGround() {
+        for (int32_t i = 0; i < 4; i++) {
+            if (m_fWheelsSuspensionCompression[i] < 1.0f && m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_WATER_SHALLOW)
+                return true;
+        }
+        return false;
+    }
+
+    inline bool IsAnyFrontAndRearWheelTouchingGround() {
+        if (m_fWheelsSuspensionCompression[CARWHEEL_FRONT_LEFT] < 1.0f  || m_fWheelsSuspensionCompression[CARWHEEL_FRONT_RIGHT] < 1.0f) {
+            if (m_fWheelsSuspensionCompression[CARWHEEL_REAR_LEFT] < 1.0f || m_fWheelsSuspensionCompression[CARWHEEL_REAR_RIGHT] < 1.0f)
+                return true;
+        }
+        return false;
+    }
+
+    // check the previous compression state using m_fWheelsSuspensionCompressionPrev
+    inline bool DidAnyWheelTouchShallowWaterGroundPrev() {
+        for (int32_t i = 0; i < 4; i++) {
+            if (m_fWheelsSuspensionCompressionPrev[i] < 1.0f && m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_WATER_SHALLOW)
+                return true;
+        }
+        return false;
+    }
+    inline bool DidAnyWheelTouchGroundPrev() {
+        for (int32_t i = 0; i < 4; i++) {
+            if (m_fWheelsSuspensionCompressionPrev[i] < 1.0f)
+                return true;
+        }
+        return false;
+    }
 
     bool IsRealHeli(void) { return !!(m_pHandlingData->m_nModelFlags & VEHICLE_HANDLING_MODEL_IS_HELI); }
 
@@ -264,7 +310,7 @@ public:
     bool IsInAir();
     // Create colliding particles
     void dmgDrawCarCollidingParticles(CVector const&, float force, eWeaponType weapon);
-    void ProcessCarOnFireAndExplode(unsigned char arg0);
+    void ProcessCarOnFireAndExplode(bool bExplodeImmediately);
     CObject* SpawnFlyingComponent(int nodeIndex, unsigned int collisionType);
     void ProcessBuoyancy();
     void inline ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver);

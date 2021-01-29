@@ -45,7 +45,7 @@ public:
     float field_988;
     int field_98C;
     int field_990;
-    int field_994;
+    float m_propSpeedClamped;
     float field_998;
     int field_99C;
     int field_9A0;
@@ -57,7 +57,7 @@ public:
     int field_9B8;
     int field_9BC;
     unsigned int m_nStartedFlyingTime;
-    int field_9C4;
+    float m_propSpeed;
     float field_9C8;
     float m_fLandingGearStatus;
     int field_9D0;

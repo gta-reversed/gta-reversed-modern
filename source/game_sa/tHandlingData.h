@@ -127,6 +127,8 @@ struct  tHandlingData {
     eVehicleLightsSize m_nFrontLights;
     eVehicleLightsSize m_nRearLights;
     unsigned char      m_nAnimGroup;
+
+    cTransmission& GetTransmission() { return m_transmissionData; }
 };
 
 VALIDATE_SIZE(tHandlingData, 0xE0);

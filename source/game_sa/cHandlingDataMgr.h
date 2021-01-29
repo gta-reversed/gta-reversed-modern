@@ -46,6 +46,7 @@ public:
 	tFlyingHandlingData *GetFlyingPointer(unsigned char handlingId);
 	// get boat handling by id
 	tBoatHandlingData *GetBoatPointer(unsigned char handlingId);
+    tHandlingData* GetVehiclePointer(uint32_t handlingId) { return &m_aVehicleHandling[handlingId]; };
 };
 
 VALIDATE_SIZE(cHandlingDataMgr, 0xC624);
