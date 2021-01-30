@@ -759,21 +759,17 @@ int CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(int modelId
         if (iDoorsNum)
             break;
 
-        if (pModelInfo->IsBike() || gHandlingDataMgr.m_aVehicleHandling[pModelInfo->m_nHandlingId].m_bTandemSeats) {
-            if (pModelInfo->m_pVehicleStruct->IsDummyActive(eVehicleDummies::DUMMY_SEAT_REAR))
-                return 1;
-
-            return 0;
+        if (pModelInfo->IsBike() || gHandlingDataMgr.GetVehiclePointer(pModelInfo->m_nHandlingId)->m_bTandemSeats) {
+            return pModelInfo->m_pVehicleStruct->IsDummyActive(eVehicleDummies::DUMMY_SEAT_REAR) ? 1 : 0;
         }
         else {
             if (modelId == eModelID::MODEL_RCBANDIT || modelId == eModelID::MODEL_RCTIGER)
                 return 0;
-
             return 1;
         }
     }
 
-    if (gHandlingDataMgr.m_aVehicleHandling[pModelInfo->m_nHandlingId].m_bTandemSeats)
+    if (gHandlingDataMgr.GetVehiclePointer(pModelInfo->m_nHandlingId)->m_bTandemSeats)
         return std::max(0, (iDoorsNum - 2) / 2);
 
     if (modelId == eModelID::MODEL_COACH || modelId == eModelID::MODEL_BUS)

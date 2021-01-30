@@ -841,16 +841,10 @@ CVector CPhysical::GetSpeed(CVector point)
 */
 void CPhysical::ApplyMoveSpeed()
 {
-
-//#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CPhysical*))0x542DD0)(this);
-#if 0
     if (physicalFlags.bDontApplySpeed || physicalFlags.bDisableMoveForce)
-        m_vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
-  
+        ResetMoveSpeed();
     else
         GetPosition() += CTimer::ms_fTimeStep * m_vecMoveSpeed;
-#endif
 }
 
 void CPhysical::ApplyTurnSpeed()
