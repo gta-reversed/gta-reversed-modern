@@ -11,7 +11,23 @@
 
 class  CWeaponModelInfo : public CClumpModelInfo {
 public:
+    CWeaponModelInfo() : CClumpModelInfo() {}
+public:
 	eWeaponType m_weaponInfo;
+
+public:
+    static void InjectHooks();
+
+public:
+// VTable
+    ModelInfoType GetModelType() override;
+    void Init() override;
+    void SetClump(RpClump* clump) override;
+
+// VTable implementations
+    ModelInfoType GetModelType_Reversed();
+    void Init_Reversed();
+    void SetClump_Reversed(RpClump* clump);
 };
 
 

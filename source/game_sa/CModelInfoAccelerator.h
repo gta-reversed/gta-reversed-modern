@@ -11,11 +11,21 @@ class CBaseModelInfo;
 
 class  CModelInfoAccelerator {
 public:
-    unsigned short *m_pIDs;
+    CModelInfoAccelerator() { CModelInfoAccelerator::Init(); }
+    ~CModelInfoAccelerator() {}
+
+public:
+    unsigned short* m_pIDs;
     unsigned short  m_nNumIDs;
     char            m_szFilePath[20];
     char field_1A;
     bool m_bFileRead;
+
+public:
+    static constexpr int BUFFER_SIZE = 41100;
+
+public:
+    static void InjectHooks();
 
     void Init();
     void AddModelInfoId(unsigned short modelId);
@@ -24,7 +34,6 @@ public:
     void FreeModelInfoIds();
     void GetEntry(CBaseModelInfo** arg0, int* arg1, char* arg2);
     void End(char* arg0);
-    CModelInfoAccelerator();
     bool GetModelInfoIdFile();
     void EndOfLoadPhase();
     bool Begin(char* filePath);

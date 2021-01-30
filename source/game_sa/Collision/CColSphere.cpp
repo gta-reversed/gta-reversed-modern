@@ -2,30 +2,30 @@
 
 void CColSphere::InjectHooks()
 {
-    HookInstall(0x40FD10, &CColSphere::Set);
-    HookInstall(0x40FF20, &CColSphere::IntersectRay);
-    HookInstall(0x4100E0, &CColSphere::IntersectEdge);
-    HookInstall(0x410040, &CColSphere::IntersectPoint);
+    ReversibleHooks::Install("CColSphere", "Set_1", 0x40FCF0, (void(CColSphere::*)(float, CVector const&))(&CColSphere::Set));
+    ReversibleHooks::Install("CColSphere", "Set_2", 0x40FD10, (void(CColSphere::*)(float, CVector const&, unsigned char, unsigned char, unsigned char))(&CColSphere::Set));
+    ReversibleHooks::Install("CColSphere", "IntersectRay", 0x40FF20, &CColSphere::IntersectRay);
+    ReversibleHooks::Install("CColSphere", "IntersectEdge", 0x4100E0, &CColSphere::IntersectEdge);
+    ReversibleHooks::Install("CColSphere", "IntersectPoint", 0x410040, &CColSphere::IntersectPoint);
+}
+
+void CColSphere::Set(float radius, CVector const& center)
+{
+    m_fRadius = radius;
+    m_vecCenter = center;
 }
 
 void CColSphere::Set(float radius, CVector const& center, std::uint8_t material, std::uint8_t flags, std::uint8_t lighting)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethod<0x40FD10, CColSphere*, float, CVector const&, std::uint8_t, std::uint8_t, std::uint8_t>(this, radius, center, material, flags, lighting);
-#else
     m_fRadius = radius;
     m_vecCenter = center;
     m_nMaterial = material;
     m_nFlags = flags;
     m_nLighting = lighting;
-#endif
 }
 
 bool CColSphere::IntersectRay(CVector const& rayOrigin, CVector const& direction, CVector& intersectPoint1, CVector& intersectPoint2)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x40FF20, CColSphere*, CVector const&, CVector const&, CVector&, CVector&>(this, rayOrigin, direction, intersectPoint1, intersectPoint2);
-#else
     CVector distance = rayOrigin - m_vecCenter;
     float b = 2.0f * DotProduct(direction, distance);
     float c = DotProduct(distance, distance) - m_fRadius * m_fRadius;
@@ -36,14 +36,10 @@ bool CColSphere::IntersectRay(CVector const& rayOrigin, CVector const& direction
         return true;
     }
     return false;
-#endif
 }
 
 bool CColSphere::IntersectEdge(CVector const& startPoint, CVector const& endPoint, CVector& intersectPoint1, CVector& intersectPoint2)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4100E0, CColSphere*, CVector const&, CVector const&, CVector&, CVector&>(this, startPoint, endPoint, intersectPoint1, intersectPoint2);
-#else
     CVector originCenterDistance = startPoint - m_vecCenter;
     CVector rayDirection = endPoint - startPoint;
     float rayLength = rayDirection.Magnitude();
@@ -68,7 +64,6 @@ bool CColSphere::IntersectEdge(CVector const& startPoint, CVector const& endPoin
     if (numerator1 > 0.0f)
         intersectPoint1 = (rayDirection * numerator1) + startPoint;
     return true;
-#endif
 }
 
 // used in CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere
@@ -80,11 +75,7 @@ bool CColSphere::IntersectSphere(CColSphere const& right)
 
 bool CColSphere::IntersectPoint(CVector const& point)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x410040, CColSphere*, CVector const&>(this, point);
-#else
     CVector distance = m_vecCenter - point;
     return m_fRadius * m_fRadius > distance.SquaredMagnitude();
-#endif
 }
 

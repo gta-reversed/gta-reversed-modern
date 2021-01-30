@@ -28,8 +28,17 @@ void InjectHooksMain(void)
     CStreaming::InjectHooks();
     InjectCdStreamHooks();
     CReferences::InjectHooks();
+    CModelInfo::InjectHooks();
+    CModelInfoAccelerator::InjectHooks();
     CBaseModelInfo::InjectHooks();
+    CAtomicModelInfo::InjectHooks();
+    CLodAtomicModelInfo::InjectHooks();
     CVehicleModelInfo::InjectHooks();
+    CClumpModelInfo::InjectHooks();
+    CTimeModelInfo::InjectHooks();
+    CDamageAtomicModelInfo::InjectHooks();
+    CWeaponModelInfo::InjectHooks();
+    CPedModelInfo::InjectHooks();
     SurfaceInfos_c::InjectHooks();
     CFileLoader::InjectHooks();
     CFileMgr::InjectHooks();
@@ -43,6 +52,8 @@ void InjectHooksMain(void)
     CTrain::InjectHooks();
     CColSphere::InjectHooks();
     CColLine::InjectHooks();
+    CBox::InjectHooks();
+    CColModel::InjectHooks();
     CAnimBlendAssociation::InjectHooks();
     CTrafficLights::InjectHooks();
     CMotionBlurStreaks::InjectHooks();

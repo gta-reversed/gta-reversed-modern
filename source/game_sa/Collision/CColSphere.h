@@ -12,12 +12,25 @@
 class CColSphere : public CSphere {
 public:
     unsigned char m_nMaterial;
-    unsigned char m_nFlags;
+    union {
+        unsigned char m_nFlags;
+        struct {
+            unsigned char m_bFlag0x01 : 1;
+            unsigned char m_bFlag0x02 : 1;
+            unsigned char m_bFlag0x04 : 1;
+            unsigned char m_bFlag0x08 : 1;
+            unsigned char m_bFlag0x10 : 1;
+            unsigned char m_bFlag0x20 : 1;
+            unsigned char m_bFlag0x40 : 1;
+            unsigned char m_bFlag0x80 : 1;
+        };
+    };
     unsigned char m_nLighting;
     unsigned char m_nLight;
 
     static void InjectHooks();
 
+    void Set(float radius, CVector const& center);
     void Set(float radius, CVector const& center, std::uint8_t material, std::uint8_t flags, std::uint8_t lighting);
     bool IntersectRay(CVector const& rayOrigin, CVector const& direction, CVector& intersectPoint1, CVector& intersectPoint2);
     bool IntersectEdge(CVector const& startPoint, CVector const& endPoint, CVector& intersectPoint1, CVector& intersectPoint2);

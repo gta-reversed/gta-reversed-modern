@@ -173,7 +173,7 @@ CRect* CPhysical::GetBoundRect_Reversed(CRect* pRect)
 {
     CVector boundCentre;
     CEntity::GetBoundCentre(&boundCentre);
-    float fRadius = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->m_pColModel->m_boundSphere.m_fRadius;
+    float fRadius = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->GetColModel()->GetBoundRadius();
     *pRect = CRect(boundCentre.x - fRadius, boundCentre.y - fRadius, boundCentre.x + fRadius, boundCentre.y + fRadius);
     return pRect;
 }
@@ -489,7 +489,7 @@ int CPhysical::ProcessEntityCollision_Reversed(CPhysical* entity, CColPoint* col
         entity->AllocateMatrix();
         entity->m_placement.UpdateMatrix(entity->m_matrix);
     }
-    CColModel* pColModel = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->m_pColModel;
+    CColModel* pColModel = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->GetColModel();
     int totalColPointsToProcess = CCollision::ProcessColModels(*m_matrix, *pColModel, *entity->m_matrix, *entity->GetColModel(), colpoint, nullptr, nullptr, false);
     if (totalColPointsToProcess > 0) {
         AddCollisionRecord(entity);
@@ -2142,7 +2142,7 @@ bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
     return ((bool(__thiscall*)(CPhysical*, int, int))0x546670)(this, sectorX, sectorY);
 #else
     CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[m_nModelIndex];
-    float fBoundingSphereRadius = pModelInfo->m_pColModel->m_boundSphere.m_fRadius;
+    float fBoundingSphereRadius = pModelInfo->GetColModel()->GetBoundRadius();
     float fMaxColPointDepth = 0.0f;
     CVector vecShift;
     CColPoint colPoints[32];
@@ -2687,7 +2687,7 @@ void CPhysical::ApplySpeed()
         if (bApplyFriction) {
             CTimer::UpdateTimeStep(fNewTimeStep);
             if (fAbsoluteMoveSpeed > 0.0f) {
-                float fRadius = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->m_pColModel->m_boundSphere.m_fRadius;
+                float fRadius = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->GetColModel()->GetBoundRadius();
                 CVector thePosition = CVector(fNormalX * fRadius, fNormalY * fRadius, 0.0f);
                 CColPoint colPoint;
                 colPoint.m_vecPoint = GetPosition() - thePosition;
@@ -2792,7 +2792,7 @@ void CPhysical::ApplyFriction()
     if (physicalFlags.bDisableZ)
     {
         const CVector& vecPosition = GetPosition();
-        float fSphereRadius = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->m_pColModel->m_boundSphere.m_fRadius;
+        float fSphereRadius = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->GetColModel()->GetBoundRadius();
         CColPoint colPoint;
         colPoint.m_vecPoint.x = vecPosition.x - (0.0f * fSphereRadius);
         colPoint.m_vecPoint.y = vecPosition.y - (0.0f * fSphereRadius);
@@ -4324,7 +4324,7 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
     float fEntityMaxDamageIntensity = 0.0;
 
     CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[m_nModelIndex];
-    float fBoundingSphereRadius = pModelInfo->m_pColModel->m_boundSphere.m_fRadius;
+    float fBoundingSphereRadius = pModelInfo->GetColModel()->GetBoundRadius();
 
     CVector vecBoundCentre;
     GetBoundCentre(&vecBoundCentre);
@@ -4953,7 +4953,7 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
                                 if (pEntityObject->m_nColDamageEffect >= COL_DAMAGE_EFFECT_SMASH_COMPLETELY)
                                 {
                                     CBaseModelInfo* pEntityModelInfo = CModelInfo::ms_modelInfoPtrs[pEntity->m_nModelIndex];
-                                    CColModel* pColModel = pEntityModelInfo->m_pColModel;
+                                    CColModel* pColModel = pEntityModelInfo->GetColModel();
                                     CVector vecResult = pColModel->m_boundBox.m_vecMax - pColModel->m_boundBox.m_vecMin;
                                     vecResult = (*pEntity->m_matrix) * vecResult;
 
@@ -4993,7 +4993,7 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
                                 if (pEntityObject->m_nColDamageEffect >= COL_DAMAGE_EFFECT_SMASH_COMPLETELY)
                                 {
                                     
-                                    CColModel* pColModel = pModelInfo->m_pColModel;
+                                    CColModel* pColModel = pModelInfo->GetColModel();
                                     CVector vecResult = pColModel->m_boundBox.m_vecMax - pColModel->m_boundBox.m_vecMin;
                                     vecResult = (*m_matrix) * vecResult;
 
@@ -5065,7 +5065,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSecto
     CVector vecBoundingCentre;
     GetBoundCentre(&vecBoundingCentre);
 
-    float fBoundingRadius = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->m_pColModel->m_boundSphere.m_fRadius;
+    float fBoundingRadius = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->GetColModel()->GetBoundRadius();
     CPtrListDoubleLink* pDoubleLinkList = nullptr;
   
     int scanListIndex = 2;

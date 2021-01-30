@@ -14,7 +14,10 @@ public:
 	CVector m_vecMin;
 	CVector m_vecMax;
 
-	void Set(CVector  const& vecMin, CVector  const& vecMax);
+public:
+    static void InjectHooks();
+
+	void Set(CVector const& vecMin, CVector const& vecMax);
 	// updates box corners, like (if left>right then swap(left, right))
 	void Recalc();
 };

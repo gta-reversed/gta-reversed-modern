@@ -21,6 +21,9 @@ public:
     ~CColModel();
     CColModel& operator=(CColModel const& colModel);
 
+public:
+    static void InjectHooks();
+
     void MakeMultipleAlloc();
     void AllocateData();
     void AllocateData(int numSpheres, int numBoxes, int numLines, int numVertices, int numTriangles, bool disks);

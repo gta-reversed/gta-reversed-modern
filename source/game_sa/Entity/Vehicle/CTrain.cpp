@@ -670,8 +670,8 @@ void CTrain::ProcessControl_Reversed()
         vecPosition1.z = pTheTrainNode->z * 0.125f * (1.0f - fTheDistance) + pNextTrainNode->z * 0.125f * fTheDistance;
 
 
-        CColModel* pVehicleColModel = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->m_pColModel;
-        CBoundingBox* pBoundingBox = &pVehicleColModel->m_boundBox;
+        CColModel* pVehicleColModel = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->GetColModel();
+        CBoundingBox* pBoundingBox = &pVehicleColModel->GetBoundingBox();
         float fTotalCurrentRailDistance = pBoundingBox->m_vecMax.y - pBoundingBox->m_vecMin.y + m_fCurrentRailDistance;
         if (fTotalCurrentRailDistance > fTotalTrackLength)
         {

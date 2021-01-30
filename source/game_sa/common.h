@@ -103,6 +103,8 @@ extern unsigned int &ClumpOffset;
 
 #define RpClumpGetAnimBlendClumpData(clump) (*(CAnimBlendClumpData **)(((unsigned int)(clump) + ClumpOffset)))
 
+#define RpGeometryGetMesh(_geometry, _index) (&((RpMesh*)(((char*)(_geometry)->mesh) + sizeof(RpMeshHeader) + ((_geometry)->mesh->firstMeshOffset)))[_index])
+
 constexpr float TWO_PI = 6.28318530718f;
 constexpr float PI = 3.14159265358979323846f;
 constexpr float PI_2 = PI / 2.0f;

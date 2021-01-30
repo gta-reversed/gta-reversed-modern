@@ -293,10 +293,10 @@ void CEntity::SetModelIndexNoCreate_Reversed(unsigned int index)
     m_nModelIndex = index;
     m_bHasPreRenderEffects = CEntity::HasPreRenderEffects();
 
-    if (pModelInfo->bDrawLast)
+    if (pModelInfo->GetIsDrawLast())
         m_bDrawLast = true;
 
-    if (!pModelInfo->bIsBackfaceCulled)
+    if (!pModelInfo->IsBackfaceCulled())
         m_bBackfaceCulled = false;
 
     auto pAtomicInfo = pModelInfo->AsAtomicModelInfoPtr();
@@ -401,7 +401,7 @@ void CEntity::DeleteRwObject_Reversed()
         --gBuildings;
 
     if (pModelInfo->GetModelType() == MODEL_INFO_CLUMP
-        && pModelInfo->bIsRoad
+        && pModelInfo->IsRoad()
         && !IsObject()) {
 
         CWorld::ms_listMovingEntityPtrs.DeleteItem(this);
@@ -417,7 +417,7 @@ CRect* CEntity::GetBoundRect(CRect* pRect)
 }
 CRect* CEntity::GetBoundRect_Reversed(CRect* pRect)
 {
-    CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->m_pColModel;
+    CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
     CVector vecMin = colModel->m_boundBox.m_vecMin;
     CVector vecMax = colModel->m_boundBox.m_vecMax;
     CRect rect;
@@ -512,8 +512,8 @@ void CEntity::PreRender_Reversed()
     if (pModelInfo->m_n2dfxCount)
         CEntity::ProcessLightsForEntity();
 
-    if (!pModelInfo->bHasBeenPreRendered) {
-        pModelInfo->bHasBeenPreRendered = true;
+    if (!pModelInfo->HasBeenPreRendered()) {
+        pModelInfo->SetHasBeenPreRendered(true);
 
         if (pAtomicInfo && pAtomicInfo->m_pRwObject) {
             if (RpMatFXAtomicQueryEffects(pAtomicInfo->m_pRwAtomic) && RpAtomicGetGeometry(pAtomicInfo->m_pRwAtomic)) {
@@ -521,10 +521,7 @@ void CEntity::PreRender_Reversed()
             }
         }
 
-        if (pModelInfo->m_nAlpha >= 239)
-            pModelInfo->m_nAlpha = 255;
-        else
-            pModelInfo->m_nAlpha += 16;
+        pModelInfo->IncreaseAlpha();
 
         if (pAtomicInfo) {
             CCustomBuildingDNPipeline::PreRenderUpdate(pAtomicInfo->m_pRwAtomic, false);
@@ -1232,10 +1229,10 @@ void CEntity::CreateEffects()
             auto pSignAtomic = CCustomRoadsignMgr::CreateRoadsignAtomic(pEffect->roadsign.m_vecSize.x,
                 pEffect->roadsign.m_vecSize.y,
                 uiNumLines,
-                &pEffect->roadsign.m_pText[0],
-                &pEffect->roadsign.m_pText[16],
-                &pEffect->roadsign.m_pText[32],
-                &pEffect->roadsign.m_pText[48],
+                pEffect->roadsign.m_pText[0],
+                pEffect->roadsign.m_pText[16],
+                pEffect->roadsign.m_pText[32],
+                pEffect->roadsign.m_pText[48],
                 uiLettersPerLine,
                 uiPalleteId);
 
@@ -1319,7 +1316,7 @@ void CEntity::AttachToRwObject(RwObject* object, bool updateEntityMatrix)
     }
 
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
-    if (RwObjectGetType(m_pRwObject) == rpCLUMP && pModelInfo->bIsRoad) {
+    if (RwObjectGetType(m_pRwObject) == rpCLUMP && pModelInfo->IsRoad()) {
         if (IsObject())
         {
             reinterpret_cast<CObject*>(this)->AddToMovingList();
@@ -1348,7 +1345,7 @@ void CEntity::DetachFromRwObject()
     m_pStreamingLink = nullptr;
 
     if (pModelInfo->GetModelType() == ModelInfoType::MODEL_INFO_CLUMP
-        && pModelInfo->bIsRoad
+        && pModelInfo->IsRoad()
         && !IsObject()) {
 
         CWorld::ms_listMovingEntityPtrs.DeleteItem(this);
@@ -1570,7 +1567,7 @@ CColModel* CEntity::GetColModel()
     if (IsVehicle() && static_cast<CVehicle*>(this)->m_vehicleSpecialColIndex > -1)
         return &CVehicle::m_aSpecialColModel[static_cast<CVehicle*>(this)->m_vehicleSpecialColIndex];
     else
-        return CModelInfo::GetModelInfo(m_nModelIndex)->m_pColModel;
+        return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
 }
 
 // Converted from thiscall void CEntity::CalculateBBProjection(CVector *,CVector *,CVector *,CVector *) 0x535340
@@ -1583,7 +1580,7 @@ void CEntity::CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, 
     auto fMagForward = CVector2D(pMat->GetForward()).Magnitude();
     auto fMagUp = CVector2D(pMat->GetUp()).Magnitude();
 
-    auto pColModel = CModelInfo::GetModelInfo(m_nModelIndex)->m_pColModel;
+    auto pColModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
     auto fMaxX = std::max(-pColModel->m_boundBox.m_vecMin.x, pColModel->m_boundBox.m_vecMax.x);
     auto fMaxY = std::max(-pColModel->m_boundBox.m_vecMin.y, pColModel->m_boundBox.m_vecMax.y);
     auto fMaxZ = std::max(-pColModel->m_boundBox.m_vecMin.z, pColModel->m_boundBox.m_vecMax.z);

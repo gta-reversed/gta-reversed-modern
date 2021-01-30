@@ -982,6 +982,10 @@ RwTexture* RwTextureCreate(RwRaster* raster) {
     return ((RwTexture*(__cdecl *)(RwRaster*))0x7F37C0)(raster);
 }
 
+RwTexture* RwTextureRead(char const* name, char const* maskName) {
+    return plugin::CallAndReturn<RwTexture*, 0x7F3AC0, char const*, char const*>(name, maskName);
+}
+
 RwBool RwTextureDestroy(RwTexture* texture) {
     return ((RwBool(__cdecl *)(RwTexture*))0x7F3820)(texture);
 }
@@ -3235,8 +3239,8 @@ RwUInt32 RpSkinGetNumBones(RpSkin* skin) {
     return ((RwUInt32(__cdecl *)(RpSkin*))0x7C77E0)(skin);
 }
 
-const RwMatrixWeights* RpSkinGetVertexBoneWeights(RpSkin* skin) {
-    return ((const RwMatrixWeights*(__cdecl *)(RpSkin*))0x7C77F0)(skin);
+RwMatrixWeights* RpSkinGetVertexBoneWeights(RpSkin* skin) {
+    return ((RwMatrixWeights*(__cdecl *)(RpSkin*))0x7C77F0)(skin);
 }
 
 const RwUInt32* RpSkinGetVertexBoneIndices(RpSkin* skin) {

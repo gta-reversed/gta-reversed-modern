@@ -6,4 +6,5 @@
 class CCustomBuildingRenderer {
 public:
     static bool IsCBPCPipelineAttached(RpAtomic* pAtomic);
+    static void AtomicSetup(RpAtomic* pAtomic);
 };

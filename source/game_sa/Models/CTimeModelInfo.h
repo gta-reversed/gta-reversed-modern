@@ -10,9 +10,20 @@
 
 class  CTimeModelInfo : public CAtomicModelInfo {
 public:
+    CTimeModelInfo();
+public:
 	tTimeInfo m_timeInfo;
 
-	void FindOtherTimeModel(char *modelName);
+public:
+    static void InjectHooks();
+
+// virtual
+    ModelInfoType GetModelType() override;
+    tTimeInfo* GetTimeInfo() override;
+
+// virtual implementations
+    ModelInfoType GetModelType_Reversed();
+    tTimeInfo* GetTimeInfo_Reversed();
 };
 
 VALIDATE_SIZE(CTimeModelInfo, 0x24);

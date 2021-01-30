@@ -11,12 +11,6 @@
 #include "C2dEffect.h"
 #include "eModelID.h"
 
-enum RwModelInfoType
-{
-    RWMODEL_INFO_ATOMIC = 1,
-    RWMODEL_INFO_CLUMP = 2
-};
-
 enum ModelInfoType : unsigned char
 {
 	MODEL_INFO_ATOMIC = 1,
@@ -26,6 +20,18 @@ enum ModelInfoType : unsigned char
 	MODEL_INFO_VEHICLE = 6,
 	MODEL_INFO_PED = 7,
 	MODEL_INFO_LOD = 8
+};
+
+enum eModelInfoSpecialType : unsigned char {
+    TREE = 1,
+    PALM = 2,
+    GLASS_TYPE_1 = 4,
+    GLASS_TYPE_2 = 5,
+    TAG = 6,
+    GARAGE_DOOR = 7,
+    CRANE = 9,
+    UNKNOWN = 10,
+    BREAKABLE_STATUE = 11,
 };
 
 struct tTimeInfo
@@ -69,20 +75,25 @@ public:
 			unsigned char bIsLod : 1;
 
 			union{
-				struct{
+				struct{ // Atomic flags
 					unsigned char bIsRoad: 1;
-					unsigned char bHasComplexHierarchy : 1;
+					unsigned char : 1;
 					unsigned char bDontCollideWithFlyer : 1;
 					unsigned char nSpecialType : 4;
 					unsigned char bWetRoadReflection : 1;
 				};
-				struct{
-					unsigned char : 2;
+				struct{ // Vehicle flags
+                    unsigned char bUsesVehDummy: 1;
+					unsigned char : 1;
 					unsigned char nCarmodId : 5;
 					unsigned char bUseCommonVehicleDictionary : 1;
 				};
-                struct {
-                    unsigned char : 7;
+                struct { // Clump flags
+                    unsigned char bHasAnimBlend : 1;
+                    unsigned char bHasComplexHierarchy : 1;
+                    unsigned char bAnimSomething : 1;
+                    unsigned char bOwnsCollisionModel : 1;
+                    unsigned char : 3;
                     unsigned char bTagDisabled : 1;
                 };
 			};
@@ -102,62 +113,78 @@ public:
 
 	// vtable
     virtual ~CBaseModelInfo() { assert(0); }
-	virtual class CAtomicModelInfo*AsAtomicModelInfoPtr();
-    virtual class CDamagableModelInfo*AsDamageAtomicModelInfoPtr();
-    virtual class CBaseModelInfo *AsLodAtomicModelInfoPtr();
-    virtual ModelInfoType GetModelType();//=0
+	virtual class CAtomicModelInfo *AsAtomicModelInfoPtr();
+    virtual class CDamageAtomicModelInfo *AsDamageAtomicModelInfoPtr();
+    virtual class CLodAtomicModelInfo *AsLodAtomicModelInfoPtr();
+    virtual ModelInfoType GetModelType() = 0;
     virtual tTimeInfo *GetTimeInfo();
     virtual void Init();
     virtual void Shutdown();
-    virtual void DeleteRwObject();//=0
-    virtual unsigned int GetRwModelType();//=0
-    virtual struct RwObject *CreateInstance();//=0
-    virtual struct RwObject *CreateInstance(RwMatrix *matrix);//=0
-    virtual void SetAnimFile(char *filename);
+    virtual void DeleteRwObject() = 0;
+    virtual unsigned int GetRwModelType() = 0;
+    virtual struct RwObject *CreateInstance() = 0;
+    virtual struct RwObject *CreateInstance(RwMatrix *matrix) = 0;
+    virtual void SetAnimFile(char const* filename);
     virtual void ConvertAnimFileIndex();
     virtual signed int GetAnimFileIndex();
 
+    // vtable methods implementations
+    class CAtomicModelInfo* AsAtomicModelInfoPtr_Reversed();
+    class CDamageAtomicModelInfo* AsDamageAtomicModelInfoPtr_Reversed();
+    class CLodAtomicModelInfo* AsLodAtomicModelInfoPtr_Reversed();
+    tTimeInfo* GetTimeInfo_Reversed();
+    void Init_Reversed();
+    void Shutdown_Reversed();
+    void SetAnimFile_Reversed(char const* filename);
+    void ConvertAnimFileIndex_Reversed();
+    signed int GetAnimFileIndex_Reversed();
+
 	//
-	void SetTexDictionary(const char* txdName);
+	void SetTexDictionary(char const* txdName);
 	void ClearTexDictionary();
 	void AddTexDictionaryRef();
 	void RemoveTexDictionaryRef();
 	void AddRef();
 	void RemoveRef();
 	// initPairedModel defines if we need to set col model for time model
-	void SetColModel(CColModel *colModel, bool initPairedModel);
+	void SetColModel(CColModel *colModel, bool bIsLodModel);
 	void Init2dEffects();
 	void DeleteCollisionModel();
 	// index is a number of effect (max number is (m_n2dfxCount - 1))
 	C2dEffect *Get2dEffect(int index);
 	void Add2dEffect(C2dEffect *effect);
 
-	bool GetIsDrawLast();
-	bool HasBeenPreRendered();
-	bool HasComplexHierarchy();
-	bool IsBackfaceCulled();
-	bool IsBreakableStatuePart();
-	bool IsLod();
-	bool IsRoad();
-	bool IsTagModel();
-	bool SwaysInWind();
-	void SetHasBeenPreRendered(int bHasBeenPreRendered);
-	void SetIsLod(int bIsLod);
-	void SetOwnsColModel(int bOwns);
-	void IncreaseAlpha();
-
-    CVehicleModelInfo* AsVehicleModelInfoPtr() { return reinterpret_cast<CVehicleModelInfo*>(this); }
+    // Those further ones are completely inlined in final version, not present at all in android version;
+    inline CVehicleModelInfo* AsVehicleModelInfoPtr() { return reinterpret_cast<CVehicleModelInfo*>(this); }
     inline CColModel* GetColModel() { return m_pColModel; }
-    inline bool IsSwayInWind1() { return nSpecialType == 1; }      //0x0800
-    inline bool IsSwayInWind2() { return nSpecialType == 2; }      //0x1000
-    //inline bool SwaysInWind() { return IsSwayInWind1() || IsSwayInWind2(); }
-    inline bool IsGlassType1() { return nSpecialType == 4; }       //0x2000
-    inline bool IsGlassType2() { return nSpecialType == 5; }       //0x2800
-    inline bool IsGlass() { return IsGlassType1() || IsGlassType2(); }
-    //inline bool IsTagModel() { return nSpecialType == 6; }         //0x3000
 
-    inline bool IsCrane() { return nSpecialType == 9; }            //0x4800
-    inline bool IsBreakableStatue() { return nSpecialType == 11; } //0x5800
+    inline bool GetIsDrawLast() { return bDrawLast; }
+    inline bool HasBeenPreRendered() { return bHasBeenPreRendered; }
+    inline bool HasComplexHierarchy() { return bHasComplexHierarchy; }
+    inline bool IsBackfaceCulled() { return bIsBackfaceCulled; }
+    inline bool IsLod() { return bIsLod; }
+    inline bool IsRoad() { return bIsRoad; }
+    inline void SetHasBeenPreRendered(int bPreRendered) { bHasBeenPreRendered = bPreRendered; }
+    inline void SetIsLod(int bLod) { bIsLod = bLod; }
+    inline void SetOwnsColModel(int bOwns) { bDoWeOwnTheColModel = bOwns; }
+    inline void IncreaseAlpha() {
+        if (m_nAlpha >= 239)
+            m_nAlpha = 255;
+        else
+            m_nAlpha += 16;
+    };
+
+    inline bool IsSwayInWind1() { return nSpecialType == eModelInfoSpecialType::TREE; }      //0x0800
+    inline bool IsSwayInWind2() { return nSpecialType == eModelInfoSpecialType::PALM; }      //0x1000
+    inline bool SwaysInWind() { return IsSwayInWind1() || IsSwayInWind2(); }
+    inline bool IsGlassType1() { return nSpecialType == eModelInfoSpecialType::GLASS_TYPE_1; }       //0x2000
+    inline bool IsGlassType2() { return nSpecialType == eModelInfoSpecialType::GLASS_TYPE_2; }       //0x2800
+    inline bool IsGlass() { return IsGlassType1() || IsGlassType2(); }        
+	inline bool IsTagModel() { return nSpecialType == eModelInfoSpecialType::TAG; } //0x3000
+    inline bool IsGarageDoor() { return nSpecialType == eModelInfoSpecialType::GARAGE_DOOR; } //0x3800
+    inline bool IsBreakableStatuePart() { return nSpecialType == eModelInfoSpecialType::BREAKABLE_STATUE; }
+    inline bool IsCrane() { return nSpecialType == eModelInfoSpecialType::CRANE; }            //0x4800
 };
-
 VALIDATE_SIZE(CBaseModelInfo, 0x20);
+
+void SetBaseModelInfoFlags(CBaseModelInfo* modelInfo, unsigned int dwFlags);

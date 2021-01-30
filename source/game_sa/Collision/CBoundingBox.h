@@ -11,8 +11,7 @@
 
 class CBoundingBox : public CBox {
 public:
-   // CBoundingBox();
-    //CBoundingBox(plugin::dummy_func_t) {}
+    CBoundingBox();
 };
 
 VALIDATE_SIZE(CBoundingBox, 0x18);

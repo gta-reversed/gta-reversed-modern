@@ -68,6 +68,7 @@ public:
 	static char RegisterPlugin();
 	static RpMaterial* CustomPipeMaterialSetup(RpMaterial* arg0, void* arg1);
 	static RpAtomic* CustomPipeAtomicSetup(RpAtomic* arg0);
+    static RpAtomic* CustomCarPipeAtomicSetupCB(RpAtomic* pAtomic, void* data);
 
 
 	static int& ms_envMapPluginOffset;

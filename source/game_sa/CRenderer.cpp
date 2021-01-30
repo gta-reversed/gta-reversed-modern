@@ -187,7 +187,7 @@ void CRenderer::AddEntityToRenderList(CEntity* pEntity, float fDistance)
     plugin::Call<0x05534B0, CEntity*, float>(pEntity, fDistance);
 #else
     CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[pEntity->m_nModelIndex];
-    pBaseModelInfo->bHasBeenPreRendered = false;
+    pBaseModelInfo->SetHasBeenPreRendered(false);
     if (!pEntity->m_bDistanceFade) {
         if (pEntity->m_bDrawLast && CVisibilityPlugins::InsertEntityIntoSortedList(pEntity, fDistance)) {
             pEntity->m_bDistanceFade = false;
@@ -370,7 +370,7 @@ void CRenderer::RenderRoads() {
     SetAmbientColours();
     for (std::int32_t i = 0; i < CRenderer::ms_nNoOfVisibleEntities; ++i) {
         CEntity* entity = CRenderer::ms_aVisibleEntityPtrs[i];
-        if (entity->m_nType == ENTITY_TYPE_BUILDING && CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex]->bIsRoad) {
+        if (entity->m_nType == ENTITY_TYPE_BUILDING && CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex]->IsRoad()) {
             if (CPostEffects::IsVisionFXActive()) {
                 CPostEffects::FilterFX_StoreAndSetDayNightBalance();
                 entity->Render();
@@ -397,7 +397,7 @@ void CRenderer::RenderEverythingBarRoads() {
         CEntity* entity = ms_aVisibleEntityPtrs[i];
         CVehicle* pVehicle = static_cast<CVehicle*>(entity);
         CPed* pPed = static_cast<CPed*>(entity);
-        if (entity->m_nType == ENTITY_TYPE_BUILDING && CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex]->bIsRoad)
+        if (entity->m_nType == ENTITY_TYPE_BUILDING && CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex]->IsRoad())
             continue;
         bool bInserted = false;
         if (entity->m_nType == ENTITY_TYPE_VEHICLE || (entity->m_nType == ENTITY_TYPE_PED && CVisibilityPlugins::GetClumpAlpha(entity->m_pRwClump) != 255)) {
@@ -490,7 +490,7 @@ int CRenderer::SetupMapEntityVisibility(CEntity* pEntity, CBaseModelInfo* pBaseM
     {
         return RENDERER_INVISIBLE;
     }
-    const float fFarClipRadius = pBaseModelInfo->m_pColModel->m_boundSphere.m_fRadius + CRenderer::ms_fFarClipPlane;
+    const float fFarClipRadius = pBaseModelInfo->GetColModel()->GetBoundRadius() + CRenderer::ms_fFarClipPlane;
     float fDrawDistanceRadius = std::min(TheCamera.m_fLODDistMultiplier * pBaseModelInfo->m_fDrawDistance, fFarClipRadius);
     float fFadingDistance = MAX_FADING_DISTANCE;
     if (!pEntity->m_pLod) {
@@ -521,9 +521,9 @@ int CRenderer::SetupMapEntityVisibility(CEntity* pEntity, CBaseModelInfo* pBaseM
                 return RENDERER_INVISIBLE;
             if (!pEntity->GetIsOnScreen() || pEntity->IsEntityOccluded()) {
 
-                if (!pBaseModelInfo->bHasBeenPreRendered)
+                if (!pBaseModelInfo->HasBeenPreRendered())
                     pBaseModelInfo->m_nAlpha = 255;
-                pBaseModelInfo->bHasBeenPreRendered = false;
+                pBaseModelInfo->SetHasBeenPreRendered(false);
                 return RENDERER_INVISIBLE;
             }
             pEntity->m_bDistanceFade = true;
@@ -560,9 +560,9 @@ int CRenderer::SetupMapEntityVisibility(CEntity* pEntity, CBaseModelInfo* pBaseM
         CRenderer::AddToLodRenderList(pEntity, fDistance);
         return RENDERER_INVISIBLE;
     }
-    if (!pBaseModelInfo->bHasBeenPreRendered)
+    if (!pBaseModelInfo->HasBeenPreRendered())
         pBaseModelInfo->m_nAlpha = 255;
-    pBaseModelInfo->bHasBeenPreRendered = false;
+    pBaseModelInfo->SetHasBeenPreRendered(false);
     return RENDERER_CULLED;
 #endif
 }
@@ -843,7 +843,7 @@ void CRenderer::ScanSectorList(std::int32_t sectorX, std::int32_t sectorY) {
                         if (entity->m_nType == ENTITY_TYPE_OBJECT) {
                             CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex]->AsAtomicModelInfoPtr();
                             if (pBaseModelInfo) {
-                                if (pBaseModelInfo->nSpecialType == 4 || pBaseModelInfo->nSpecialType == 5) {
+                                if (pBaseModelInfo->IsGlass()) {
                                     bInvisibleEntity = true;
                                     break;
                                 }

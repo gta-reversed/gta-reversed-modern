@@ -312,7 +312,7 @@ std::int32_t CVisibilityPlugins::CalculateFadingAtomicAlpha(CBaseModelInfo* mode
     return plugin::CallAndReturn<int, 0x732500, CBaseModelInfo*, CEntity*, float>(modelInfo, entity, distance);
 #else
     float fFadingDistance = MAX_FADING_DISTANCE;
-    float fDrawDistanceRadius = modelInfo->m_pColModel->m_boundSphere.m_fRadius + CRenderer::ms_fFarClipPlane;
+    float fDrawDistanceRadius = modelInfo->GetColModel()->GetBoundRadius() + CRenderer::ms_fFarClipPlane;
     fDrawDistanceRadius = std::min(fDrawDistanceRadius, TheCamera.m_fLODDistMultiplier * modelInfo->m_fDrawDistance);
     if (!entity->m_pLod) {
         const float fDrawDistance = std::min(modelInfo->m_fDrawDistance, fDrawDistanceRadius);
@@ -1183,7 +1183,7 @@ void CVisibilityPlugins::SetAtomicId(void* pRpAtomic, std::int16_t id) {
 #endif
 }
 
-void CVisibilityPlugins::SetAtomicRenderCallback(RpAtomic* atomic, RpAtomic* (*renderCB)(RpAtomic*)) {
+void CVisibilityPlugins::SetAtomicRenderCallback(RpAtomic* atomic, RpAtomicCallBackRender renderCB) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x7328A0, RpAtomic*, RpAtomic* (*)(RpAtomic*)>(atomic, renderCB);
 #else

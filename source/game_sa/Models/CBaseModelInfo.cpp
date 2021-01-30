@@ -8,206 +8,260 @@ Do not delete this comment block. Respect others' work!
 
 void CBaseModelInfo::InjectHooks()
 {
-    ReversibleHooks::Install("CBaseModelInfo", "IsBackfaceCulled", 0x5328F0, &CBaseModelInfo::IsBackfaceCulled);
+// Vtable
+    ReversibleHooks::Install("CBaseModelInfo", "AsAtomicModelInfoPtr", 0x4C4A80, &CBaseModelInfo::AsAtomicModelInfoPtr_Reversed);
+    ReversibleHooks::Install("CBaseModelInfo", "AsDamageAtomicModelInfoPtr", 0x4C4A90, &CBaseModelInfo::AsDamageAtomicModelInfoPtr_Reversed);
+    ReversibleHooks::Install("CBaseModelInfo", "AsLodAtomicModelInfoPtr", 0x4C4AA0, &CBaseModelInfo::AsLodAtomicModelInfoPtr_Reversed);
+    ReversibleHooks::Install("CBaseModelInfo", "GetTimeInfo", 0x4C4AB0, &CBaseModelInfo::GetTimeInfo_Reversed);
+    ReversibleHooks::Install("CBaseModelInfo", "Init", 0x4C4B10, &CBaseModelInfo::Init_Reversed);
+    ReversibleHooks::Install("CBaseModelInfo", "Shutdown", 0x4C4D50, &CBaseModelInfo::Shutdown_Reversed);
+    ReversibleHooks::Install("CBaseModelInfo", "SetAnimFile", 0x4C4AC0, &CBaseModelInfo::SetAnimFile_Reversed);
+    ReversibleHooks::Install("CBaseModelInfo", "ConvertAnimFileIndex", 0x4C4AD0, &CBaseModelInfo::ConvertAnimFileIndex_Reversed);
+    ReversibleHooks::Install("CBaseModelInfo", "GetAnimFileIndex", 0x4C4AE0, &CBaseModelInfo::GetAnimFileIndex_Reversed);
+
+// Class methods
+    ReversibleHooks::Install("CBaseModelInfo", "SetTexDictionary", 0x4C4B40, &CBaseModelInfo::SetTexDictionary);
+    ReversibleHooks::Install("CBaseModelInfo", "ClearTexDictionary", 0x4C4B70, &CBaseModelInfo::ClearTexDictionary);
+    ReversibleHooks::Install("CBaseModelInfo", "AddTexDictionaryRef", 0x4C4B80, &CBaseModelInfo::AddTexDictionaryRef);
+    ReversibleHooks::Install("CBaseModelInfo", "RemoveTexDictionaryRef", 0x4C4B90, &CBaseModelInfo::RemoveTexDictionaryRef);
+    ReversibleHooks::Install("CBaseModelInfo", "AddRef", 0x4C4BA0, &CBaseModelInfo::AddRef);
+    ReversibleHooks::Install("CBaseModelInfo", "RemoveRef", 0x4C4BB0, &CBaseModelInfo::RemoveRef);
+    ReversibleHooks::Install("CBaseModelInfo", "SetColModel", 0x4C4BC0, &CBaseModelInfo::SetColModel);
+    ReversibleHooks::Install("CBaseModelInfo", "Init2dEffects", 0x4C4C20, &CBaseModelInfo::Init2dEffects);
+    ReversibleHooks::Install("CBaseModelInfo", "DeleteCollisionModel", 0x4C4C40, &CBaseModelInfo::DeleteCollisionModel);
+    ReversibleHooks::Install("CBaseModelInfo", "Get2dEffect", 0x4C4C70, &CBaseModelInfo::Get2dEffect);
+    ReversibleHooks::Install("CBaseModelInfo", "Add2dEffect", 0x4C4D20, &CBaseModelInfo::Add2dEffect);
+
+// Helpers
+    ReversibleHooks::Install("CBaseModelInfo", "GetIsDrawLast", 0x5328C0, &CBaseModelInfo::GetIsDrawLast);
     ReversibleHooks::Install("CBaseModelInfo", "HasBeenPreRendered", 0x5328B0, &CBaseModelInfo::HasBeenPreRendered);
     ReversibleHooks::Install("CBaseModelInfo", "HasComplexHierarchy", 0x4C4E00, &CBaseModelInfo::HasComplexHierarchy);
-    ReversibleHooks::Install("CBaseModelInfo", "GetIsDrawLast", 0x5328C0, &CBaseModelInfo::GetIsDrawLast);
-    ReversibleHooks::Install("CBaseModelInfo", "IsBreakableStatuePart", 0x59F090, &CBaseModelInfo::IsBreakableStatuePart);
+    ReversibleHooks::Install("CBaseModelInfo", "IsBackfaceCulled", 0x5328F0, &CBaseModelInfo::IsBackfaceCulled);
     ReversibleHooks::Install("CBaseModelInfo", "IsLod", 0x4C4A00, &CBaseModelInfo::IsLod);
     ReversibleHooks::Install("CBaseModelInfo", "IsRoad", 0x4C4DF0, &CBaseModelInfo::IsRoad);
+    ReversibleHooks::Install("CBaseModelInfo", "SetHasBeenPreRendered", 0x4C42F0, &CBaseModelInfo::SetHasBeenPreRendered);
+    ReversibleHooks::Install("CBaseModelInfo", "SetIsLod", 0x4C4A10, &CBaseModelInfo::SetIsLod);
+    ReversibleHooks::Install("CBaseModelInfo", "SetOwnsColModel", 0x5328D0, &CBaseModelInfo::SetOwnsColModel);
+    ReversibleHooks::Install("CBaseModelInfo", "IncreaseAlpha", 0x532900, &CBaseModelInfo::IncreaseAlpha);
+
+    ReversibleHooks::Install("CBaseModelInfo", "IsBreakableStatuePart", 0x59F090, &CBaseModelInfo::IsBreakableStatuePart);
     ReversibleHooks::Install("CBaseModelInfo", "IsTagModel", 0x49CC20, &CBaseModelInfo::IsTagModel);
     ReversibleHooks::Install("CBaseModelInfo", "SwaysInWind", 0x4212C0, &CBaseModelInfo::SwaysInWind);
+
+// Other
+    ReversibleHooks::Install("CBaseModelInfo", "SetBaseModelInfoFlags", 0x5B3AD0, &SetBaseModelInfoFlags);
+}
+
+//0x4C4A80
+CBaseModelInfo::CBaseModelInfo()
+{
+    m_nRefCount = 0;
+    CBaseModelInfo::ClearTexDictionary();
 }
 
 CAtomicModelInfo* CBaseModelInfo::AsAtomicModelInfoPtr()
 {
-    return ((CAtomicModelInfo * (__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 1))(this);
+    return CBaseModelInfo::AsAtomicModelInfoPtr_Reversed();
+}
+CAtomicModelInfo* CBaseModelInfo::AsAtomicModelInfoPtr_Reversed()
+{
+    return nullptr;
 }
 
-CDamagableModelInfo* CBaseModelInfo::AsDamageAtomicModelInfoPtr()
+CDamageAtomicModelInfo* CBaseModelInfo::AsDamageAtomicModelInfoPtr()
 {
-    return ((CDamagableModelInfo *(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 2))(this);
+    return CBaseModelInfo::AsDamageAtomicModelInfoPtr_Reversed();
+}
+CDamageAtomicModelInfo* CBaseModelInfo::AsDamageAtomicModelInfoPtr_Reversed()
+{
+    return nullptr;
 }
 
-CBaseModelInfo *CBaseModelInfo::AsLodAtomicModelInfoPtr()
+CLodAtomicModelInfo *CBaseModelInfo::AsLodAtomicModelInfoPtr()
 {
-    return ((CBaseModelInfo *(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 3))(this);
+    return CBaseModelInfo::AsLodAtomicModelInfoPtr_Reversed();
+}
+CLodAtomicModelInfo* CBaseModelInfo::AsLodAtomicModelInfoPtr_Reversed()
+{
+    return nullptr;
 }
 
-ModelInfoType CBaseModelInfo::GetModelType()
+tTimeInfo *CBaseModelInfo::GetTimeInfo()
 {
-    return ((ModelInfoType(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 4))(this);
+    return CBaseModelInfo::GetTimeInfo_Reversed();
 }
-
-struct tTimeInfo *CBaseModelInfo::GetTimeInfo()
+tTimeInfo* CBaseModelInfo::GetTimeInfo_Reversed()
 {
-    return ((struct tTimeInfo *(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 5))(this);
+    return nullptr;
 }
 
 void CBaseModelInfo::Init()
 {
-    ((void(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 6))(this);
+    CBaseModelInfo::Init_Reversed();
+}
+void CBaseModelInfo::Init_Reversed()
+{
+    m_nRefCount = 0;
+    m_pColModel = nullptr;
+    CBaseModelInfo::ClearTexDictionary();
+    CBaseModelInfo::Init2dEffects();
+    m_nObjectInfoIndex = -1;
+    m_fDrawDistance = 2000.0F;
+    m_pRwObject = nullptr;
+
+    m_nFlags = 0;
+    bIsBackfaceCulled = true;
+    bIsLod = true;
 }
 
 void CBaseModelInfo::Shutdown()
 {
-    ((void(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 7))(this);
+    CBaseModelInfo::Shutdown_Reversed();
+}
+void CBaseModelInfo::Shutdown_Reversed()
+{
+    DeleteRwObject();
+    CBaseModelInfo::DeleteCollisionModel();
+
+    bIsLod = true;
+    m_nObjectInfoIndex = -1;
+    CBaseModelInfo::ClearTexDictionary();
+    CBaseModelInfo::Init2dEffects();
 }
 
-void CBaseModelInfo::DeleteRwObject()
+void CBaseModelInfo::SetAnimFile(char const* filename)
 {
-    ((void(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 8))(this);
+    CBaseModelInfo::SetAnimFile_Reversed(filename);
 }
-
-unsigned int CBaseModelInfo::GetRwModelType()
-{
-    return ((unsigned int(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 9))(this);
-}
-
-RwObject *CBaseModelInfo::CreateInstance(RwMatrix *matrix)
-{
-    return ((RwObject *(__thiscall *)(CBaseModelInfo *, RwMatrix *))plugin::GetVMT(this, 10))(this, matrix);
-}
-
-RwObject *CBaseModelInfo::CreateInstance()
-{
-    return plugin::CallVirtualMethodAndReturn<RwObject*, 11, CBaseModelInfo*>(this);
-}
-
-void CBaseModelInfo::SetAnimFile(char *filename)
-{
-    ((void(__thiscall *)(CBaseModelInfo *, char *))plugin::GetVMT(this, 12))(this, filename);
-}
+void CBaseModelInfo::SetAnimFile_Reversed(char const* filename)
+{}
 
 void CBaseModelInfo::ConvertAnimFileIndex()
 {
-    ((void(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 13))(this);
+    CBaseModelInfo::ConvertAnimFileIndex_Reversed();
 }
+void CBaseModelInfo::ConvertAnimFileIndex_Reversed()
+{}
 
 signed int CBaseModelInfo::GetAnimFileIndex()
 {
-    return ((signed int(__thiscall *)(CBaseModelInfo *))plugin::GetVMT(this, 14))(this);
+    return CBaseModelInfo::GetAnimFileIndex_Reversed();
+}
+signed int CBaseModelInfo::GetAnimFileIndex_Reversed()
+{
+    return -1;
 }
 
-void CBaseModelInfo::SetTexDictionary(const char *txdName)
+void CBaseModelInfo::SetTexDictionary(char const* txdName)
 {
-    ((void(__thiscall *)(CBaseModelInfo *, const char*))0x4C4B40)(this, txdName);
+    m_nTxdIndex = CTxdStore::FindTxdSlot(txdName);
+    if (m_nTxdIndex == -1)
+        m_nTxdIndex = CTxdStore::AddTxdSlot(txdName);
 }
 
 void CBaseModelInfo::ClearTexDictionary()
 {
-    ((void(__thiscall *)(CBaseModelInfo *))0x4C4B70)(this);
+    m_nTxdIndex = -1;
 }
 
 void CBaseModelInfo::AddTexDictionaryRef()
 {
-    ((void(__thiscall *)(CBaseModelInfo *))0x4C4B80)(this);
+    CTxdStore::AddRef(m_nTxdIndex);
 }
 
 void CBaseModelInfo::RemoveTexDictionaryRef()
 {
-    ((void(__thiscall *)(CBaseModelInfo *))0x4C4B90)(this);
+    CTxdStore::RemoveRef(m_nTxdIndex);
 }
 
 void CBaseModelInfo::AddRef()
 {
-    ((void(__thiscall *)(CBaseModelInfo *))0x4C4BA0)(this);
+    ++m_nRefCount;
+    CBaseModelInfo::AddTexDictionaryRef();
 }
 
 void CBaseModelInfo::RemoveRef()
 {
-    ((void(__thiscall *)(CBaseModelInfo *))0x4C4BB0)(this);
+    --m_nRefCount;
+    CBaseModelInfo::RemoveTexDictionaryRef();
 }
 
-void CBaseModelInfo::SetColModel(CColModel *colModel, bool initPairedModel)
+void CBaseModelInfo::SetColModel(CColModel *colModel, bool bIsLodModel)
 {
-    ((void(__thiscall *)(CBaseModelInfo *, CColModel *, bool))0x4C4BC0)(this, colModel, initPairedModel);
+    m_pColModel = colModel;
+    if (!bIsLodModel) {
+        bIsLod = false;
+        return;
+    }
+
+    bIsLod = true;
+    auto pTimeInfo = GetTimeInfo();
+    if (!pTimeInfo)
+        return;
+
+    if (pTimeInfo->m_wOtherTimeModel == -1)
+        return;
+
+    auto pLodInfo = CModelInfo::GetModelInfo(pTimeInfo->m_wOtherTimeModel);
+    pLodInfo->m_pColModel = colModel;
+    pLodInfo->bIsLod = false;
 }
 
 void CBaseModelInfo::Init2dEffects()
 {
-    ((void(__thiscall *)(CBaseModelInfo *))0x4C4C20)(this);
+    m_n2dEffectIndex = -1;
+    m_n2dfxCount = 0;
 }
 
 void CBaseModelInfo::DeleteCollisionModel()
 {
-    ((void(__thiscall *)(CBaseModelInfo *))0x4C4C40)(this);
+    if (m_pColModel && bIsLod)
+        delete m_pColModel;
+
+    m_pColModel = nullptr;
 }
 
 C2dEffect *CBaseModelInfo::Get2dEffect(int index)
 {
-    return ((C2dEffect *(__thiscall *)(CBaseModelInfo *, int))0x4C4C70)(this, index);
+    auto uiStoredEffectsCount = m_n2dfxCount;
+    RpGeometry* pGeometry = nullptr;
+    if (m_pRwObject) {
+        if (GetRwModelType() == rpATOMIC) {
+            pGeometry = RpAtomicGetGeometry(m_pRwAtomic);
+        }
+        else if (GetRwModelType() == rpCLUMP) {
+            auto pAtomic = Get2DEffectAtomic(m_pRwClump);
+            if (pAtomic) {
+                pGeometry = RpAtomicGetGeometry(pAtomic);
+            }
+        }
+
+        if (pGeometry)
+            uiStoredEffectsCount -= RpGeometryGet2dFxCount(pGeometry);
+    }
+
+    if (index < uiStoredEffectsCount)
+        return &CModelInfo::Get2dEffectStore()->GetItemAtIndex(index + m_n2dEffectIndex);
+    else
+        return RpGeometryGet2dFxAtIndex(pGeometry, index - uiStoredEffectsCount);
 }
 
 void CBaseModelInfo::Add2dEffect(C2dEffect *effect)
 {
-    ((void(__thiscall *)(CBaseModelInfo *, C2dEffect *))0x4C4D20)(this, effect);
+    if (m_n2dEffectIndex >= 0)
+        ++m_n2dfxCount;
+    else {
+        m_n2dEffectIndex = (effect - &CModelInfo::Get2dEffectStore()->m_aObjects[0]);
+        m_n2dfxCount = 1;
+    }
 }
 
-CBaseModelInfo::CBaseModelInfo()
+void SetBaseModelInfoFlags(CBaseModelInfo* modelInfo, unsigned int dwFlags)
 {
-    ((void(__thiscall *)(CBaseModelInfo *))0x4C4A60)(this);
-}
-
-bool CBaseModelInfo::IsBackfaceCulled() {
-    return bIsBackfaceCulled;
-}
-
-bool CBaseModelInfo::HasBeenPreRendered() {
-    return bHasBeenPreRendered;
-}
-
-// Converted from thiscall bool CBaseModelInfo::HasComplexHierarchy(void) 0x4C4E00
-bool CBaseModelInfo::HasComplexHierarchy() {
-    return bHasComplexHierarchy;
-}
-
-// Converted from thiscall bool CBaseModelInfo::GetIsDrawLast(void) 0x5328C0
-bool CBaseModelInfo::GetIsDrawLast() {
-    return bDrawLast;
-}
-
-// Converted from thiscall bool CBaseModelInfo::IsBreakableStatuePart(void) 0x59F090
-bool CBaseModelInfo::IsBreakableStatuePart() {
-    return nSpecialType == 11;
-}
-
-// Converted from thiscall bool CBaseModelInfo::IsLod(void) 0x4C4A00
-bool CBaseModelInfo::IsLod() {
-    return bIsLod;
-}
-
-// Converted from thiscall bool CBaseModelInfo::IsRoad(void) 0x4C4DF0
-bool CBaseModelInfo::IsRoad() {
-    return bIsRoad;
-}
-
-// Converted from thiscall bool CBaseModelInfo::IsTagModel(void) 0x49CC20
-bool CBaseModelInfo::IsTagModel() {
-    return nSpecialType == 6;
-}
-
-// Converted from thiscall bool CBaseModelInfo::SwaysInWind(void) 0x4212C0	
-bool CBaseModelInfo::SwaysInWind() {
-    return IsSwayInWind1() || IsSwayInWind2();
-}
-
-// Converted from thiscall void CBaseModelInfo::SetHasBeenPreRendered(int bHasBeenPreRendered) 0x4C42F0
-void CBaseModelInfo::SetHasBeenPreRendered(int bHasBeenPreRendered) {
-    plugin::CallMethod<0x4C42F0, CBaseModelInfo *, int>(this, bHasBeenPreRendered);
-}
-
-// Converted from thiscall void CBaseModelInfo::SetIsLod(int bIsLod) 0x4C4A10
-void CBaseModelInfo::SetIsLod(int bIsLod) {
-    plugin::CallMethod<0x4C4A10, CBaseModelInfo *, int>(this, bIsLod);
-}
-
-// Converted from thiscall void CBaseModelInfo::SetOwnsColModel(int bOwns) 0x5328D0
-void CBaseModelInfo::SetOwnsColModel(int bOwns) {
-    plugin::CallMethod<0x5328D0, CBaseModelInfo *, int>(this, bOwns);
-}
-
-// Converted from thiscall void CBaseModelInfo::IncreaseAlpha(void) 0x532900
-void CBaseModelInfo::IncreaseAlpha() {
-    plugin::CallMethod<0x532900, CBaseModelInfo *>(this);
+    auto flagsStruct = sItemDefinitionFlags(dwFlags);
+    modelInfo->bDrawLast = flagsStruct.bDrawLast | flagsStruct.bDrawLast;
+    modelInfo->bAdditiveRender = flagsStruct.bAdditive;
+    modelInfo->bDontWriteZBuffer = flagsStruct.bNoZBufferWrite;
+    modelInfo->bDontCastShadowsOn = flagsStruct.bDontReceiveShadows;
+    modelInfo->bIsBackfaceCulled = !flagsStruct.bDisableBackfaceCulling;
 }

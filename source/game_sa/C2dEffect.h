@@ -144,9 +144,10 @@ struct tEffectRoadsign {
 private:
     char _pad26[2];
 public:
-    char (&m_pText)[64];
+    char (*m_pText)[64];
     RpAtomic *m_pAtomic;
 };
+VALIDATE_SIZE(tEffectRoadsign, 0x20);
 
 struct tEffectCoverPoint {
     RwV2d m_vecDirection;
@@ -183,12 +184,49 @@ public:
     };
 
 public:
+    static unsigned int& g2dEffectPluginOffset;
+    static unsigned int& ms_nTxdSlot;
+
+public:
     static void InjectHooks();
+
+public:
+    void Shutdown();
 
 public:
     static int Roadsign_GetNumLinesFromFlags(CRoadsignAttrFlags flags);
     static int Roadsign_GetNumLettersFromFlags(CRoadsignAttrFlags flags);
     static int Roadsign_GetPaletteIDFromFlags(CRoadsignAttrFlags flags);
-};
 
+    static bool PluginAttach();
+    static void DestroyAtomic(RpAtomic* pAtomic);
+};
 VALIDATE_SIZE(C2dEffect, 0x40);
+
+//RW PLUGIN
+struct t2dEffectPluginEntry {
+    unsigned int m_nObjCount;
+    C2dEffect m_pObjects[16]; // Size not real, it's decided on runtime, 16 is written here only to see the objects in debugger without issues
+};
+struct t2dEffectPlugin {
+    t2dEffectPluginEntry* m_pEffectEntries;
+};
+VALIDATE_SIZE(t2dEffectPlugin, 0x4);
+
+#define C2DEFFECTPLG(geometry, var) \
+    (RWPLUGINOFFSET(t2dEffectPlugin, geometry, C2dEffect::g2dEffectPluginOffset)->var)
+
+#define C2DEFFECCONSTTPLG(geometry, var) \
+    (RWPLUGINOFFSETCONST(t2dEffectPlugin, geometry, C2dEffect::g2dEffectPluginOffset)->var)
+
+// Own function names, we don't seem to have symbols for those
+unsigned int RpGeometryGet2dFxCount(RpGeometry* pGeometry);
+C2dEffect* RpGeometryGet2dFxAtIndex(RpGeometry* pGeometry, int iEffectInd);
+
+void* t2dEffectPluginConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject); 
+void* t2dEffectPluginDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
+void* t2dEffectPluginCopyConstructor(void* dstObject, const void* srcObject, RwInt32 offsetInObject, RwInt32 sizeInObject);
+
+RwStream* Rwt2dEffectPluginDataChunkReadCallBack(RwStream* stream, RwInt32 binaryLength, void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
+RwStream* Rwt2dEffectPluginDataChunkWriteCallBack(RwStream* stream, RwInt32 binaryLength, const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
+RwInt32   Rwt2dEffectPluginDataChunkGetSizeCallBack(const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);

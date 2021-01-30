@@ -477,7 +477,7 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
         CTxdStore::SetCurrentTxd(pBaseModelInfo->m_nTxdIndex);
 
         bool bFileLoaded = false;
-        if (pBaseModelInfo->GetRwModelType() == RWMODEL_INFO_ATOMIC) {
+        if (pBaseModelInfo->GetRwModelType() == rpATOMIC) {
             RtDict* pRtDictionary = nullptr;
             RwChunkHeaderInfo chunkHeaderInfo;
             RwStreamReadChunkHeaderInfo(pRwStream, &chunkHeaderInfo);
@@ -664,7 +664,7 @@ bool CStreaming::DeleteLeastUsedEntityRwObject(bool bNotOnScreen, unsigned int s
             for (CEntity* pEntityLod = pEntity->m_pLod; pEntityLod; pEntityLod = pEntityLod->m_pLod) {
                 pEntityLastLod = pEntityLod;
             }
-            float fModelRadius = pBaseModelInfo->m_pColModel->m_boundSphere.m_fRadius;
+            float fModelRadius = pBaseModelInfo->GetColModel()->GetBoundRadius();
             if (ms_bLoadingScene
                 || bNotOnScreen && !pEntityLastLod->GetIsOnScreen()
                 || pEntity->m_nAreaCode != CGame::currArea && pEntity->m_nAreaCode != AREA_CODE_13
@@ -1585,10 +1585,9 @@ void CStreaming::RequestModelStream(int channelId)
         else
         {
             CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
-            ModelInfoType modelType = pBaseModelInfo->GetModelType();
-            if (isPreviousModelPed && modelType == MODEL_INFO_PED)
+            if (isPreviousModelPed && pBaseModelInfo->GetModelType() == MODEL_INFO_PED)
                 break;
-            if (isPreviousModelBig && modelType == MODEL_INFO_VEHICLE)
+            if (isPreviousModelBig && pBaseModelInfo->GetModelType() == MODEL_INFO_VEHICLE)
                 break;
             unsigned char loadState = ms_aInfoForModel[pBaseModelInfo->m_nTxdIndex + RESOURCE_ID_TXD].m_nLoadState;
             if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_CHANNELED)
@@ -1611,7 +1610,7 @@ void CStreaming::RequestModelStream(int channelId)
             sectorCountSum -= sectorcount;
             break;
         }
-        CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
+        CBaseModelInfo* pBaseModelInfo = CModelInfo::GetModelInfo(modelId);
         if (modelId >= RESOURCE_ID_TXD) {
             if (sectorcount > 200)
                 isPreviousModelBig = true;

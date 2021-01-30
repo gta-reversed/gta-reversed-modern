@@ -177,7 +177,7 @@ public:
     static void SetAtomicFlag(RpAtomic* pRpAtomic, std::uint16_t flag);
     static void SetClumpForAllAtomicsFlag(RpClump* pRpClump, std::uint16_t flag);
     static void SetAtomicId(void* pRpAtomic, std::int16_t id);
-    static void SetAtomicRenderCallback(RpAtomic *pRpAtomic, RpAtomic * (*renderCB)(RpAtomic *));
+    static void SetAtomicRenderCallback(RpAtomic *pRpAtomic, RpAtomicCallBackRender renderCB);
     static void SetClumpAlpha(RpClump* pRpClump, int dwAlpha);
     static void SetClumpModelInfo(RpClump* pRpClump, CClumpModelInfo* pClumpModelInfo);
     static void SetFrameHierarchyId(RwFrame* pRwFrame, std::int32_t id);
