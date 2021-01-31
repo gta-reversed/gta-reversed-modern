@@ -637,7 +637,7 @@ void CVisibilityPlugins::RenderEntity(CEntity* entity, int unused, float distanc
         if (!entity->m_bBackfaceCulled)
             RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
         bool bLightingSetup = entity->SetupLighting();
-        if (entity->m_pRwObject->type == rpATOMIC)
+        if (RwObjectGetType(entity->m_pRwObject) == rpATOMIC)
             RenderFadingAtomic(pModelInfo, entity->m_pRwAtomic, alpha);
         else
             RenderFadingClump(pModelInfo, entity->m_pRwClump, alpha);

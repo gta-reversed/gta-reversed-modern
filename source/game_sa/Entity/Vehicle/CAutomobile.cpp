@@ -1341,8 +1341,8 @@ void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steer
         }
         else
         {
-            brakeBias = neutralHandling ? 1.0f : 2.0f - 2.0f * m_pHandlingData->m_fBrakeBias;
-            tractionBias = neutralHandling ? 1.0f : 2.0f - 2.0f * m_pHandlingData->m_fTractionBias;
+            brakeBias = neutralHandling ? 1.0f : 2.0f - (2.0f * m_pHandlingData->m_fBrakeBias);
+            tractionBias = neutralHandling ? 1.0f : 2.0f - (2.0f * m_pHandlingData->m_fTractionBias);
         }
         if (m_aWheelTimer[leftWheel] > 0.0f)
         {
@@ -1361,7 +1361,7 @@ void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steer
             }
             m_wheelColPoint[leftWheel].m_nSurfaceTypeA = SURFACE_WHEELBASE;
             float adhesion = g_surfaceInfos->GetAdhesiveLimit(&m_wheelColPoint[leftWheel]) * traction;
-            if (m_nStatus != STATUS_PLAYER)
+            if (m_nStatus == STATUS_PLAYER)
             {
                 adhesion *= g_surfaceInfos->GetWetMultiplier(m_wheelColPoint[leftWheel].m_nSurfaceTypeB);
                 adhesion *= std::min(suspensionBias * m_pHandlingData->m_fSuspensionForceLevel * 4.0f * (1.0f - m_fWheelsSuspensionCompression[leftWheel]), 2.0f);
@@ -1376,19 +1376,19 @@ void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steer
                 }
             }
             tWheelState wheelState = m_aWheelState[leftWheel];
-            if (m_damageManager.GetWheelStatus(leftWheel) == WHEEL_STATUS_BURST)
-            {
-                adhesion *= m_damageManager.m_fWheelDamageEffect * tractionBias;
-                brake *= brakeBias;
+            if (m_damageManager.GetWheelStatus(leftWheel) == WHEEL_STATUS_BURST) {
                 CVehicle::ProcessWheel(wheelFwd, wheelRight, contactSpeeds[leftWheel], contactPoints[leftWheel], m_nNumContactWheels,
-                    thrust, brake, adhesion, leftWheel, &m_wheelRotationUnused[leftWheel], &wheelState, WHEEL_STATUS_BURST);
+                    thrust,
+                    brake * brakeBias,
+                    adhesion * m_damageManager.m_fWheelDamageEffect * tractionBias,
+                    leftWheel, &m_wheelRotationUnused[leftWheel], &wheelState, WHEEL_STATUS_BURST);
             }
-            else
-            {
-                adhesion *= tractionBias;
-                brake *= brakeBias;
+            else {
                 CVehicle::ProcessWheel(wheelFwd, wheelRight, contactSpeeds[leftWheel], contactPoints[leftWheel], m_nNumContactWheels,
-                    thrust, brake, adhesion, leftWheel, &m_wheelRotationUnused[leftWheel], &wheelState, WHEEL_STATUS_OK);
+                    thrust,
+                    brake * brakeBias,
+                    adhesion * tractionBias,
+                    leftWheel, &m_wheelRotationUnused[leftWheel], &wheelState, WHEEL_STATUS_OK);
             }
             if (driveWheels && m_fGasPedal < 0.0f && wheelState == WHEEL_STATE_SPINNING)
                 m_aWheelState[leftWheel] = WHEEL_STATE_NORMAL;
@@ -1413,7 +1413,6 @@ void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steer
             float adhesion = g_surfaceInfos->GetAdhesiveLimit(&m_wheelColPoint[rightWheel]) * traction;
             if (m_nStatus == STATUS_PLAYER)
             {
-
                 adhesion *= g_surfaceInfos->GetWetMultiplier(m_wheelColPoint[rightWheel].m_nSurfaceTypeB);
                 adhesion *= std::min(suspensionBias * m_pHandlingData->m_fSuspensionForceLevel * 4.0f * (1.0f - m_fWheelsSuspensionCompression[rightWheel]), 2.0f);
                 if (handlingFlags.bOffroadAbility2 && g_surfaceInfos->GetAdhesionGroup(m_wheelColPoint[rightWheel].m_nSurfaceTypeB) > ADHESION_GROUP_ROAD)
@@ -1427,19 +1426,19 @@ void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steer
                 }
             }
             tWheelState wheelState = m_aWheelState[rightWheel];
-            if (m_damageManager.GetWheelStatus(rightWheel) == WHEEL_STATUS_BURST)
-            {
-                adhesion *= m_damageManager.m_fWheelDamageEffect * tractionBias;
-                brake *= brakeBias;
+            if (m_damageManager.GetWheelStatus(rightWheel) == WHEEL_STATUS_BURST) {
                 CVehicle::ProcessWheel(wheelFwd, wheelRight, contactSpeeds[rightWheel], contactPoints[rightWheel], m_nNumContactWheels,
-                    thrust, brake, adhesion, rightWheel, &m_wheelRotationUnused[rightWheel], &wheelState, WHEEL_STATUS_BURST);
+                    thrust,
+                    brake * brakeBias,
+                    adhesion * m_damageManager.m_fWheelDamageEffect * tractionBias,
+                    rightWheel, &m_wheelRotationUnused[rightWheel], &wheelState, WHEEL_STATUS_BURST);
             }
-            else
-            {
-                adhesion *= tractionBias;
-                brake *= brakeBias;
+            else {
                 CVehicle::ProcessWheel(wheelFwd, wheelRight, contactSpeeds[rightWheel], contactPoints[rightWheel], m_nNumContactWheels,
-                    thrust, brake, adhesion, rightWheel, &m_wheelRotationUnused[rightWheel], &wheelState, WHEEL_STATUS_OK);
+                    thrust,
+                    brake * brakeBias,
+                    adhesion * tractionBias,
+                    rightWheel, &m_wheelRotationUnused[rightWheel], &wheelState, WHEEL_STATUS_OK);
             }
             if (driveWheels && m_fGasPedal < 0.0f && wheelState == WHEEL_STATE_SPINNING)
                 m_aWheelState[rightWheel] = WHEEL_STATE_NORMAL;
@@ -1447,15 +1446,16 @@ void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steer
                 m_aWheelState[rightWheel] = wheelState;
         }
     }
-    if (!bFront && !handlingFlags.bNosInst && m_doingBurnout && driveWheels) {
-        if (m_aWheelState[CARWHEEL_REAR_LEFT] == WHEEL_STATE_SPINNING ||
-            m_aWheelState[CARWHEEL_REAR_RIGHT] == WHEEL_STATE_SPINNING)
+    if (!bFront && !handlingFlags.bNosInst) {
+        if (m_doingBurnout && driveWheels &&
+            (m_aWheelState[CARWHEEL_REAR_LEFT] == WHEEL_STATE_SPINNING ||
+            m_aWheelState[CARWHEEL_REAR_RIGHT] == WHEEL_STATE_SPINNING))
         {
             m_fNitroValue += CTimer::ms_fTimeStep * 0.001f;
             m_fNitroValue = std::min(m_fNitroValue, 3.0f);
         }
         else if (m_fNitroValue > 1.0f) {
-            m_fNitroValue = std::powf(0.995f, CTimer::ms_fTimeStep) * m_fNitroValue - 1.0f + 1.0f;
+            m_fNitroValue = std::powf(0.995f, CTimer::ms_fTimeStep) * (m_fNitroValue - 1.0f) + 1.0f;
         }
     }
     if (!IsRealHeli())
