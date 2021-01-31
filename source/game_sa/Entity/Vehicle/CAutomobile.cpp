@@ -230,7 +230,7 @@ void CAutomobile::ProcessControl()
         SkipPhysics();
         vehicleFlags.bAudioChangingGear = false;
         vehicleFlags.bVehicleColProcessed = false;
-        m_fNitroValue = 1.0f;
+        m_fTireTemperature = 1.0f;
     }
     else {
         if (!vehicleFlags.bVehicleColProcessed)
@@ -380,7 +380,7 @@ void CAutomobile::ProcessControl()
         }
 
         uint8_t cheatType = CHEAT_HANDLING_NONE;
-        if (handlingFlags.bNosInst && m_fNitroValue < 0.0f)
+        if (handlingFlags.bNosInst && m_fTireTemperature < 0.0f)
             cheatType = CHEAT_HANDLING_NITROS;
         else if (extraPerfectHandling || CCheat::m_aCheatsActive[CHEAT_PERFECT_HANDLING])
             cheatType = CHEAT_HANDLING_PERFECT;
@@ -1309,7 +1309,7 @@ void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steer
             }
             else if (!handlingFlags.bNosInst && gHandlingDataMgr.HasRearWheelDrive(m_pHandlingData->m_nVehicleId))
             {
-                traction *= m_fNitroValue;
+                traction *= m_fTireTemperature;
             }
         }
         else
@@ -1451,11 +1451,11 @@ void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steer
             (m_aWheelState[CARWHEEL_REAR_LEFT] == WHEEL_STATE_SPINNING ||
             m_aWheelState[CARWHEEL_REAR_RIGHT] == WHEEL_STATE_SPINNING))
         {
-            m_fNitroValue += CTimer::ms_fTimeStep * 0.001f;
-            m_fNitroValue = std::min(m_fNitroValue, 3.0f);
+            m_fTireTemperature += CTimer::ms_fTimeStep * 0.001f;
+            m_fTireTemperature = std::min(m_fTireTemperature, 3.0f);
         }
-        else if (m_fNitroValue > 1.0f) {
-            m_fNitroValue = std::powf(0.995f, CTimer::ms_fTimeStep) * (m_fNitroValue - 1.0f) + 1.0f;
+        else if (m_fTireTemperature > 1.0f) {
+            m_fTireTemperature = std::powf(0.995f, CTimer::ms_fTimeStep) * (m_fTireTemperature - 1.0f) + 1.0f;
         }
     }
     if (!IsRealHeli())

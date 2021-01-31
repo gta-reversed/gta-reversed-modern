@@ -116,7 +116,7 @@ public:
     float m_fFrontHeightAboveRoad;
     float m_fRearHeightAboveRoad;
     float m_fCarTraction;
-    float m_fNitroValue;
+    float m_fTireTemperature;
     int field_8A4;
     int m_fRotationBalance; // used in CHeli::TestSniperCollision
     float m_fMoveDirection;
