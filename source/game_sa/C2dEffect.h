@@ -115,19 +115,21 @@ struct tEffectEnEx {
     RwV3d m_vecExitPosn;
     float m_fExitAngle;
     short m_nInteriorId;
-    union {
-        unsigned char m_nFlags1;
-        struct {
-            unsigned char bUnkn0 : 1;
-            unsigned char bTimedEffect : 1;
-        };
-    };
+    unsigned char m_nFlags1;
     unsigned char m_nSkyColor;
     char m_szInteriorName[8];
     unsigned char m_nTimeOn;
     unsigned char m_nTimeOff;
-    unsigned char m_nFlags2;
+    union {
+        unsigned char m_nFlags2;
+        struct {
+            unsigned char bUnkn0x1 : 1;
+            unsigned char bUnkn0x2 : 1;
+            unsigned char bTimedEffect : 1; // 0x4
+        };
+    };
 };
+VALIDATE_SIZE(tEffectEnEx, 0x2C);
 
 struct CRoadsignAttrFlags {
     unsigned short m_nNumOfLines : 2;
@@ -144,7 +146,7 @@ struct tEffectRoadsign {
 private:
     char _pad26[2];
 public:
-    char (*m_pText)[64];
+    char *m_pText; // size is 64
     RpAtomic *m_pAtomic;
 };
 VALIDATE_SIZE(tEffectRoadsign, 0x20);

@@ -78,7 +78,7 @@ void CEntity::InjectHooks()
     ReversibleHooks::Install("CEntity", "GetRandom2dEffect", 0x533410, &CEntity::GetRandom2dEffect);
     ReversibleHooks::Install("CEntity", "TransformFromObjectSpace_ref", 0x5334F0, (CVector(CEntity::*)(CVector const&)) (&CEntity::TransformFromObjectSpace));
     ReversibleHooks::Install("CEntity", "TransformFromObjectSpace_ptr", 0x533560, (CVector*(CEntity::*)(CVector&, CVector const&)) (&CEntity::TransformFromObjectSpace));
-    //ReversibleHooks::Install("CEntity", "CreateEffects", 0x533790, &CEntity::CreateEffects);
+    ReversibleHooks::Install("CEntity", "CreateEffects", 0x533790, &CEntity::CreateEffects);
     ReversibleHooks::Install("CEntity", "DestroyEffects", 0x533BF0, &CEntity::DestroyEffects);
     ReversibleHooks::Install("CEntity", "AttachToRwObject", 0x533ED0, &CEntity::AttachToRwObject);
     ReversibleHooks::Install("CEntity", "DetachFromRwObject", 0x533FB0, &CEntity::DetachFromRwObject);
@@ -1161,9 +1161,6 @@ CVector* CEntity::TransformFromObjectSpace(CVector& outPosn, CVector const& offs
 // Converted from thiscall void CEntity::CreateEffects(void) 0x533790
 void CEntity::CreateEffects()
 {
-    return plugin::Call<0x533790>();
-
-
     m_bHasRoadsignText = false;
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
     if (!pModelInfo->m_n2dfxCount)
@@ -1232,10 +1229,10 @@ void CEntity::CreateEffects()
             auto pSignAtomic = CCustomRoadsignMgr::CreateRoadsignAtomic(pEffect->roadsign.m_vecSize.x,
                 pEffect->roadsign.m_vecSize.y,
                 uiNumLines,
-                pEffect->roadsign.m_pText[0],
-                pEffect->roadsign.m_pText[16],
-                pEffect->roadsign.m_pText[32],
-                pEffect->roadsign.m_pText[48],
+                &pEffect->roadsign.m_pText[0],
+                &pEffect->roadsign.m_pText[16],
+                &pEffect->roadsign.m_pText[32],
+                &pEffect->roadsign.m_pText[48],
                 uiLettersPerLine,
                 uiPalleteId);
 
