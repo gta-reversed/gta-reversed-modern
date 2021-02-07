@@ -391,8 +391,8 @@ int CVehicleModelInfo::ChooseSecondComponent()
         return result;
     }
 
-    if (m_extraComps.nExtraARule && IsValidCompRule(m_extraComps.nExtraARule)) {
-        return ::ChooseComponent(m_extraComps.nExtraARule, m_extraComps.nExtraAComp);
+    if (m_extraComps.nExtraBRule && IsValidCompRule(m_extraComps.nExtraBRule)) {
+        return ::ChooseComponent(m_extraComps.nExtraBRule, m_extraComps.nExtraBComp);
     }
     else if (CGeneral::GetRandomNumberInRange(0, 3) < 2) {
         int anVariations[6];

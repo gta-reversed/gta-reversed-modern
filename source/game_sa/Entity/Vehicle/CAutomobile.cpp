@@ -135,13 +135,13 @@ void CAutomobile::ProcessControl()
                 resetSpeed = false;
         }
         if (!resetSpeed && !isVehicleIdle) {
-            m_bFakePhysics = 0;
+            m_nFakePhysics = 0;
         }
         else {
-            m_bFakePhysics++;
-            if (m_bFakePhysics > 10 || isVehicleIdle) {
-                if (!isVehicleIdle || m_bFakePhysics > 10)
-                    m_bFakePhysics = 10;
+            m_nFakePhysics++;
+            if (m_nFakePhysics > 10 || isVehicleIdle) {
+                if (!isVehicleIdle || m_nFakePhysics > 10)
+                    m_nFakePhysics = 10;
                 ResetMoveSpeed();
                 ResetTurnSpeed();
                 skipPhysics = true;
@@ -157,7 +157,7 @@ void CAutomobile::ProcessControl()
             && IsAnyWheelTouchingShallowWaterGround())
         {
             skipPhysics = false;
-            m_bFakePhysics = 0;
+            m_nFakePhysics = 0;
         }
     }
     for (int32_t i = 0; i < 4; i++) {
@@ -173,7 +173,7 @@ void CAutomobile::ProcessControl()
 
     if (vehicleFlags.bRestingOnPhysical) {
         skipPhysics = false;
-        m_bFakePhysics = 0;
+        m_nFakePhysics = 0;
     }
 
     VehicleDamage(0.0f, 0, nullptr, nullptr, nullptr, WEAPON_RAMMEDBYCAR);
@@ -691,7 +691,7 @@ void CAutomobile::ProcessControl()
                         if (m_nModelIndex == MODEL_VORTEX || CCheat::m_aCheatsActive[CHEAT_CARS_ON_WATER]
                             && DidAnyWheelTouchShallowWaterGroundPrev())
                         {
-                            m_bFakePhysics = 0;
+                            m_nFakePhysics = 0;
                         }
                         else {
                             ResetMoveSpeed();
@@ -1860,7 +1860,7 @@ void CAutomobile::PlaceOnRoadProperly()
     SetPosn(vecNewPos);
 
     if (IsPlane())
-        static_cast<CPlane*>(this)->field_9A4 = CGeneral::GetATanOfXY(GetForward().x, GetForward().y);
+        static_cast<CPlane*>(this)->m_fHeading = CGeneral::GetATanOfXY(GetForward().x, GetForward().y);
 }
 
 // Converted from thiscall void CAutomobile::PopBoot(void) 0x6AF910

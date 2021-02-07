@@ -64,10 +64,11 @@ enum eEntityAltCollision : unsigned short
 };
 
 class CPhysical : public CEntity {
-protected:
-    CPhysical(plugin::dummy_func_t) : CEntity(plugin::dummy) {}
 public:
-    int field_38;
+    CPhysical();
+    ~CPhysical() override;
+public:
+    float field_38;
     unsigned int m_nLastCollisionTime;
     union
     {
@@ -126,7 +127,7 @@ public:
     CVector          m_vecCentreOfMass;
     CEntryInfoList   m_pCollisionList;
     CPtrNodeDoubleLink* m_pMovingList;
-    unsigned char    m_bFakePhysics;
+    unsigned char    m_nFakePhysics;
     unsigned char    m_nNumEntitiesCollided;
     unsigned char    m_nContactSurface;
     char field_BB;

@@ -14,6 +14,7 @@ void InjectHooksMain(void)
     CDebug::InjectHooks();
     InjectCommonHooks();
     CGame::InjectHooks();
+    CPools::InjectHooks();
     CPad::InjectHooks();
     CVector2D::InjectHooks();
     CQuaternion::InjectHooks();
@@ -24,10 +25,13 @@ void InjectHooksMain(void)
     CEntryInfoList::InjectHooks();
     CPtrNodeDoubleLink::InjectHooks();
     CPtrListDoubleLink::InjectHooks();
+    List_c::InjectHooks();
     CRunningScript::InjectHooks();
+    CStreamingInfo::InjectHooks();
     CStreaming::InjectHooks();
     InjectCdStreamHooks();
     CReferences::InjectHooks();
+    CPopulation::InjectHooks();
     CModelInfo::InjectHooks();
     CModelInfoAccelerator::InjectHooks();
     CBaseModelInfo::InjectHooks();
@@ -46,6 +50,14 @@ void InjectHooksMain(void)
     CEntity::InjectHooks();;
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();
+    CDummy::InjectHooks();
+    CDummyObject::InjectHooks();
+    CObject::InjectHooks();
+    CObjectData::InjectHooks();
+    CObjectSaveStructure::InjectHooks();
+    CCutsceneObject::InjectHooks();
+    CHandObject::InjectHooks();
+    CCompressedMatrixNotAligned::InjectHooks();
     CVisibilityPlugins::InjectHooks();
     CPed::InjectHooks();
     CPedIntelligence::InjectHooks();
@@ -146,6 +158,8 @@ void InjectHooksMain(void)
     CTaskSimpleGoToPoint::InjectHooks();
     CTaskSimpleGoToPointFine::InjectHooks();
     CTaskSimpleStandStill::InjectHooks();
+    CTaskSimpleAnim::InjectHooks();
+    CTaskSimplePlayHandSignalAnim::InjectHooks();
     CTaskComplexGoToPointAndStandStill::InjectHooks();
     CTaskComplexGoToPointAndStandStillTimed::InjectHooks();
     CTaskComplexAvoidOtherPedWhileWandering::InjectHooks();
@@ -178,8 +192,12 @@ void InjectHooksMain(void)
     CSprite2d::InjectHooks();
     CCheat::InjectHooks();
     CBirds::InjectHooks();
+    WaterCreature_c::InjectHooks();
+    WaterCreatureManager_c::InjectHooks();
     C2dEffect::InjectHooks();
     COcclusion::InjectHooks();
+    CGarage::InjectHooks();
+    CGarages::InjectHooks();
 
     CAEAudioUtility::InjectHooks();
     CAEDataStream::InjectHooks();

@@ -81,8 +81,10 @@ inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
 }
 
 inline float DistanceBetweenPoints(const CVector2D &pointOne, const CVector2D &pointTwo) {
-    CVector2D diff = pointTwo - pointOne;
-    return diff.Magnitude();
+    return (pointTwo - pointOne).Magnitude();
+}
+inline float DistanceBetweenPointsSquared(const CVector2D& pointOne, const CVector2D& pointTwo) {
+    return (pointTwo - pointOne).SquaredMagnitude();
 }
 
 inline float DotProduct2D(const CVector2D& v1, const CVector2D& v2)

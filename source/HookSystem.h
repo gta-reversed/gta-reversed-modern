@@ -20,7 +20,7 @@ struct SHook
 };
 #pragma pack(pop)
 
-static_assert(sizeof(SHook) == 0x34, "Incorrect struct size: SHook");
+VALIDATE_SIZE(SHook, 0x34);
 
 template<typename T>
 void *FunctionPointerToVoidP(T func)

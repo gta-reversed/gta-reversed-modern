@@ -21,4 +21,5 @@ void CTempColModels::Initialise()
 
 void CTempColModels::Shutdown()
 {
+    plugin::Call<0x41B360>();
 }

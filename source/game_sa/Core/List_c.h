@@ -14,50 +14,61 @@
  * 
  * NOTE: You should not use this class directly, use TList_c template instead.
  */
-class  List_c
+class List_c
 {
 public:
-	ListItem_c *last;
-	ListItem_c *first;
-	unsigned int count;
+    List_c() : m_pHead(nullptr), m_pTail(nullptr), m_nCount(0) {}
+    ~List_c() {}
 
-	List_c(void);
-	~List_c(void);
+public:
+    ListItem_c* m_pHead;
+    ListItem_c* m_pTail;
+    uint32_t m_nCount;
 
-	/**
-	 * Add new item to the head
-	 */
-	void AddItem(ListItem_c * pItem);
+public:
+    static void InjectHooks();
 
-	/**
-	 * Remove given item from the list and decrease counter
-	 */
-	void RemoveItem(ListItem_c * pItem);
+    // Add new item to the head
+    void AddItem(ListItem_c* pItem);
 
-	/**
-	 * Get list head
-	 */
-	ListItem_c * GetHead(void);
+    // Remove given item from the list and decrease counter
+    void RemoveItem(ListItem_c* pItem);
 
-	/**
-	 * Remove heading item and return it's pointer
-	 */
-	ListItem_c * RemoveHead(void);
+    // Remove heading item and return it's pointer
+    ListItem_c* RemoveHead();
 
-	/**
-	 * Get next item in a list
-	 */
-	ListItem_c * GetNext(ListItem_c * pItem);
+    // Remove tail item and return it's pointer
+    ListItem_c* RemoveTail();
 
-	/**
-	 * Get previous item
-	 */
-	ListItem_c * GetPrev(ListItem_c * pItem);
+    // Remove all items
+    void RemoveAll();
 
-	/**
-	 * Get N-th item from list head/tail
-	 */
-	ListItem_c * GetItemOffset(bool bFromHead, int iOffset);
+    // Get number of items in the list
+    uint32_t GetNumItems();
+
+    // Append item to the list
+    void AppendItem(ListItem_c* pItem);
+
+    // Append item to the list
+    void InsertAfterItem(ListItem_c* pAddedItem, ListItem_c* pExistingItem);
+
+    // Append item to the list
+    void InsertBeforeItem(ListItem_c* pAddedItem, ListItem_c* pExistingItem);
+
+    // Get list head
+    ListItem_c* GetHead();
+
+    // Get list head
+    ListItem_c* GetTail();
+
+    // Get next item in a list
+    ListItem_c* GetNext(ListItem_c* pItem);
+
+    // Get previous item
+    ListItem_c* GetPrev(ListItem_c* pItem);
+
+    // Get N-th item from list head/tail
+    ListItem_c* GetItemOffset(bool bFromHead, int iOffset);
 };
 
 
@@ -66,30 +77,45 @@ public:
  * (not an original game class name)
  */
 template <
-	typename ItemType
+    typename ItemType
 >
 class TList_c : public List_c
 {
 public:
-	ItemType * GetHead(void) {
-		return static_cast<ItemType *>(List_c::GetHead());
-	}
+    ItemType* GetHead()
+    {
+        return static_cast<ItemType*>(List_c::GetHead());
+    }
 
-	ItemType * RemoveHead(void) {
-		return static_cast<ItemType *>(List_c::RemoveHead());
-	}
+    ItemType* GetTail()
+    {
+        return static_cast<ItemType*>(List_c::GetTail());
+    }
 
-	ItemType * GetNext(ItemType * pItem) {
-		return static_cast<ItemType *>(List_c::GetNext(pItem));
-	}
+    ItemType* RemoveHead()
+    {
+        return static_cast<ItemType*>(List_c::RemoveHead());
+    }
 
-	ItemType * GetPrev(ItemType * pItem) {
-		return static_cast<ItemType *>(List_c::GetPrev(pItem));
-	}
+    ItemType* RemoveTail()
+    {
+        return static_cast<ItemType*>(List_c::RemoveTail());
+    }
 
-	ItemType * GetItemOffset(bool bFromHead, int iOffset) {
-		return static_cast<ItemType *>(List_c::GetItemOffset(bFromHead, iOffset));
-	}
+    ItemType* GetNext(ItemType* pItem)
+    {
+        return static_cast<ItemType*>(List_c::GetNext(pItem));
+    }
+
+    ItemType* GetPrev(ItemType* pItem)
+    {
+        return static_cast<ItemType*>(List_c::GetPrev(pItem));
+    }
+
+    ItemType* GetItemOffset(bool bFromHead, int iOffset)
+    {
+        return static_cast<ItemType*>(List_c::GetItemOffset(bFromHead, iOffset));
+    }
 };
 
 

@@ -1326,8 +1326,8 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
 
                 if (pPlayerPed->m_pPlayerData->m_bPlayerSprintDisabled
                     || g_surfaceInfos->CantSprintOn(pPlayerPed->m_nContactSurface)
-                    || (pAnimHierarchy = pAnimGroup->GetAnimation(1)->m_pHeirarchy,
-                        pAnimHierarchy == pAnimGroup->GetAnimation(2)->m_pHeirarchy))
+                    || (pAnimHierarchy = pAnimGroup->GetAnimation(1)->m_pHierarchy,
+                        pAnimHierarchy == pAnimGroup->GetAnimation(2)->m_pHierarchy))
                 {
                     if (pPad->GetSprint())
                     {

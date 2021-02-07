@@ -2013,7 +2013,7 @@ void CStreaming::RemoveBuildingsNotInArea(int areaCode) {
         CObject* pObject = CPools::ms_pObjectPool->GetAt(i);
         if (pObject && pObject->m_pRwObject) {
             if (pObject->m_nAreaCode != areaCode && pObject->m_nAreaCode != AREA_CODE_13) {
-                if (!pObject->m_bImBeingRendered && pObject->m_nObjectType == eObjectCreatedBy::OBJECT_GAME)
+                if (!pObject->m_bImBeingRendered && pObject->m_nObjectType == eObjectType::OBJECT_GAME)
                     pObject->DeleteRwObject();
             }
         }

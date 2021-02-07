@@ -152,7 +152,7 @@ VALIDATE_SIZE(tHydrualicData, 0x28);
 
 class CVehicle : public CPhysical {
 protected:
-    CVehicle(plugin::dummy_func_t) : CPhysical(plugin::dummy) {}
+    CVehicle(plugin::dummy_func_t) : CPhysical() {}
 public:
     CAEVehicleAudioEntity      m_vehicleAudio;
     tHandlingData             *m_pHandlingData;

@@ -243,19 +243,15 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(class CPed* ped) {
             pEntitToHold->m_bUsesCollision = false;
             if (pEntitToHold->m_nType == ENTITY_TYPE_OBJECT) {
                 CObject* pObjecToHold = (CObject*)pEntitToHold;
-                if (pObjecToHold->m_bIsStatic || pObjecToHold->m_bIsStaticWaitingForCollision) {
+                if (pObjecToHold->IsStatic()) {
                     pObjecToHold->SetIsStatic(false);
                     pObjecToHold->AddToMovingList();
                 }
                 pObjecToHold->physicalFlags.bAttachedToEntity = true;
-                pObjecToHold->m_bFakePhysics = 0;
+                pObjecToHold->m_nFakePhysics = 0;
             }
 
-            float fRotation = pEntitToHold->m_placement.m_fHeading - ped->m_fCurrentRotation;;
-            CMatrixLink* pEntityToHoldMatrix = pEntitToHold->m_matrix;
-            if (pEntityToHoldMatrix)
-                fRotation = atan2(-pEntityToHoldMatrix->GetForward().x, pEntityToHoldMatrix->GetForward().y) - ped->m_fCurrentRotation;
-            m_fRotation = fRotation;
+            m_fRotation = pEntitToHold->GetHeading() - ped->m_fCurrentRotation;
         }
     }
 
@@ -498,7 +494,7 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* pPed, bool bAddEventSoundQuiet) {
                 bUpdateEntityPosition = false;
             }
             else {
-                if (pObjectToHold->m_bIsStatic || pObjectToHold->m_bIsStaticWaitingForCollision) {
+                if (pObjectToHold->IsStatic()) {
                     pObjectToHold->SetIsStatic(false);
                     pObjectToHold->AddToMovingList();
                 }

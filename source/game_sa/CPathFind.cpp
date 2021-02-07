@@ -58,6 +58,11 @@ void CPathFind::DoPathSearch(unsigned char pathType, CVector origin, CNodeAddres
             waterPath);
 }
 
+void CPathFind::SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool bTrainCrossing)
+{
+    return plugin::CallMethod<0x44D960, CPathFind*, float, float, float, float, bool>(this, fXMin, fXMax, fYMin, fYMax, bTrainCrossing);
+}
+
 CPathNode *CPathFind::GetPathNode(CNodeAddress address)
 {
     return ((CPathNode *(__thiscall *)(CPathFind *, CNodeAddress))0x420AC0)(this, address);

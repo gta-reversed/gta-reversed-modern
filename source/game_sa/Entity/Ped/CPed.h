@@ -131,7 +131,7 @@ class CVehicle;
 
 class  CPed : public CPhysical {
 protected:
-    CPed(plugin::dummy_func_t) : CPhysical(plugin::dummy), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
+    CPed(plugin::dummy_func_t) : CPhysical(), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
         plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy,
         plugin::dummy, plugin::dummy, plugin::dummy } {}
 public:
@@ -421,7 +421,7 @@ public:
     void SetGunFlashAlpha(bool rightHand);
     void ResetGunFlashAlpha();
     float GetBikeRidingSkill();
-    void ShoulderBoneRotation(RpClump* clump);
+    static void ShoulderBoneRotation(RpClump* clump);
     void SetLookTimer(unsigned int time);
     bool IsPlayer();
     void SetPedPositionInCar();

@@ -36,6 +36,7 @@ short &TAG_SPRAYING_INCREMENT_VAL = *(short *)0x8CDEF0;
 void CWorld::InjectHooks() {
     HookInstall(0x565CB0, RemoveFallenPeds);
     HookInstall(0x565E80, RemoveFallenCars);
+    ReversibleHooks::Install("CWorld", "Remove", 0x563280, &CWorld::Remove);
     ReversibleHooks::Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
 }
 
@@ -57,7 +58,9 @@ void CWorld::Add(CEntity* entity) {
 // Converted from cdecl void CWorld::Remove(CEntity *entity) 0x563280
 void CWorld::Remove(CEntity* entity) 
 {
-    plugin::Call<0x563280, CEntity*>(entity);
+    entity->Remove();
+    if (entity->IsPhysical())
+        static_cast<CPhysical*>(entity)->RemoveFromMovingList();
 }
 
 // Converted from cdecl bool CWorld::ProcessVerticalLineSectorList(CPtrList &ptrList,CColLine const&colLine,CColPoint &colPoint,float &maxTouchDistance,CEntity *&outEntity,bool doSeeThroughCheck,CStoredCollPoly *collPoly) 0x5632B0

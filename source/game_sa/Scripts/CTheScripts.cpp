@@ -107,6 +107,11 @@ int CTheScripts::GetScriptIndexFromPointer(CRunningScript* thread) {
     return plugin::CallAndReturnDynGlobal<int, CRunningScript*>(0x464D20, thread);
 }
 
+int CTheScripts::RemoveFromWaitingForScriptBrainArray(CEntity* a1, short modelIndex)
+{
+    return plugin::CallAndReturn<int, 0x46ABC0, CEntity*, short>(a1, modelIndex);
+}
+
 void CTheScripts::RemoveThisPed(CPed* ped) {
     plugin::CallDynGlobal<CPed*>(0x486240, ped);
 }

@@ -107,7 +107,7 @@ extern unsigned int &ClumpOffset;
 
 constexpr float TWO_PI = 6.28318530718f;
 constexpr float PI = 3.14159265358979323846f;
-constexpr float PI_2 = PI / 2.0f;
+constexpr float HALF_PI = PI / 2.0f;
 
 constexpr float DegreesToRadians(float angleInDegrees) {
     return angleInDegrees * PI / 180.0F;

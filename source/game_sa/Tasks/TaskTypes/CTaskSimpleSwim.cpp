@@ -756,18 +756,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x68AA70, CTaskSimpleSwim*, CPed*>(this, pPed);
 #else
-    CVector vecParticlePosition;
-    if (pPed->m_matrix) {
-        vecParticlePosition = pPed->GetForward();
-    }
-    else
-    {
-        float fHeading = pPed->m_placement.m_fHeading;
-        vecParticlePosition.x = -sin(fHeading);
-        vecParticlePosition.y = cos(fHeading);
-        vecParticlePosition.z = 0.0f;
-    }
-
+    CVector vecParticlePosition = pPed->GetForwardVector();
     vecParticlePosition *= 0.4f;
     vecParticlePosition += pPed->GetPosition();
 

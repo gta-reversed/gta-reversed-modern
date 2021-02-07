@@ -9,8 +9,9 @@
 #include "PluginBase.h"
 #include "CObject.h"
 
-class  CProjectile : public CObject {
+class CProjectile : public CObject {
 public:
+    CProjectile(int dwModelId);
 };
 
 VALIDATE_SIZE(CProjectile, 0x17C);

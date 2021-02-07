@@ -12,6 +12,8 @@
 
 class  CQuaternion {
 public:
+    CQuaternion();
+public:
     CVector imag;
     float real;
 

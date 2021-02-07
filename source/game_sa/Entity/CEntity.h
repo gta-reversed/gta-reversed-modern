@@ -13,12 +13,13 @@
 #include "CRect.h"
 #include "CColModel.h"
 #include "C2dEffect.h"
+#include "eModelID.h"
 
 class  CEntity : public CPlaceable {
 protected:
     CEntity(plugin::dummy_func_t) : CPlaceable(plugin::dummy) {}
     CEntity();
-    //~CEntity() override;
+    ~CEntity() override;
 public:
     union {
         struct RwObject *m_pRwObject;
@@ -81,7 +82,7 @@ public:
     CReference *m_pReferences;
     CLink<CEntity*> *m_pStreamingLink;
     unsigned short m_nScanCode;
-    char m_nIplIndex;
+    unsigned char m_nIplIndex;
     unsigned char m_nAreaCode; // see eAreaCodes
     union {
         int m_nLodIndex; // -1 - without LOD model
@@ -193,16 +194,21 @@ public:
     static RpMaterial* SetMaterialAlphaCB(RpMaterial* pMaterial, void* pData);
 
 
-    inline bool IsPhysical()
+    inline bool IsPhysical() const
     {
         return m_nType > eEntityType::ENTITY_TYPE_BUILDING && m_nType < eEntityType::ENTITY_TYPE_DUMMY;
     }
-    bool IsNothing() { return m_nType == ENTITY_TYPE_NOTHING; }
-    bool IsVehicle() { return m_nType == ENTITY_TYPE_VEHICLE; }
-    bool IsPed() { return m_nType == ENTITY_TYPE_PED; }
-    bool IsObject() { return m_nType == ENTITY_TYPE_OBJECT; }
-    bool IsBuilding() { return m_nType == ENTITY_TYPE_BUILDING; }
-    bool IsDummy() { return m_nType == ENTITY_TYPE_DUMMY; }
+    inline bool IsNothing() const { return m_nType == ENTITY_TYPE_NOTHING; }
+    inline bool IsVehicle() const { return m_nType == ENTITY_TYPE_VEHICLE; }
+    inline bool IsPed() const { return m_nType == ENTITY_TYPE_PED; }
+    inline bool IsObject() const { return m_nType == ENTITY_TYPE_OBJECT; }
+    inline bool IsBuilding() const { return m_nType == ENTITY_TYPE_BUILDING; }
+    inline bool IsDummy() const { return m_nType == ENTITY_TYPE_DUMMY; }
+    inline bool IsModelTempCollision() const
+    {
+        return m_nModelIndex >= eModelID::MODEL_TEMPCOL_DOOR1 && m_nModelIndex <= eModelID::MODEL_TEMPCOL_BODYPART2;
+    }
+    inline bool IsStatic() const { return m_bIsStatic || m_bIsStaticWaitingForCollision; }
 };
 
 VALIDATE_SIZE(CEntity, 0x38);

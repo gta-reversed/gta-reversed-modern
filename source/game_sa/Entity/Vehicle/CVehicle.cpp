@@ -73,7 +73,7 @@ void CVehicle::InjectHooks()
     ReversibleHooks::Install("CVehicle", "ProcessWheel", 0x6D6C00, &CVehicle::ProcessWheel);
 }
 
-CVehicle::CVehicle(unsigned char createdBy) : CPhysical(plugin::dummy)
+CVehicle::CVehicle(unsigned char createdBy) : CPhysical()
 {
     plugin::CallMethod<0x6D5F10, CVehicle*, unsigned char>(this, createdBy);
 }

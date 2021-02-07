@@ -12,7 +12,11 @@
 
 class  CTaskSimpleAnim : public CTaskSimple {
 public:
-	CAnimBlendAssociation *m_pAnim;
+    CTaskSimpleAnim(bool bHoldLastFrame);
+    ~CTaskSimpleAnim();
+
+public:
+    CAnimBlendAssociation *m_pAnim;
     union
     {
         unsigned char m_nFlags;
@@ -33,10 +37,16 @@ public:
     };
 private:
 	char _pad[3];
+
 public:
+    static void InjectHooks();
 
-    CTaskSimpleAnim(bool bHoldLastFrame);
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
+private:
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event);
 
+public:
+    static void FinishRunAnimCB(CAnimBlendAssociation* pBlendAssoc, void* data); //data is CTaskSimpleAnim
 };
 
 VALIDATE_SIZE(CTaskSimpleAnim, 0x10);

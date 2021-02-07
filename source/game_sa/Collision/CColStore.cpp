@@ -18,6 +18,11 @@ void CColStore::AddCollisionNeededAtPosn(const CVector& pos)
 #endif
 }
 
+void CColStore::AddRef(int colNum)
+{
+    plugin::Call<0x4107A0, int>(colNum);
+}
+
 std::int32_t CColStore::FindColSlot()
 {
     return plugin::CallAndReturn<std::int32_t, 0x410390>();
@@ -41,4 +46,9 @@ void CColStore::LoadCollision(CVector point)
 void CColStore::RemoveCol(int colNum)
 {
     return plugin::Call<0x410730, int>(colNum);
+}
+
+void CColStore::RemoveRef(int colNum)
+{
+    plugin::Call<0x4107D0, int>(colNum);
 }

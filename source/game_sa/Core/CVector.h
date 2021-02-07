@@ -12,7 +12,10 @@ class CVector : public RwV3d {
 public:
     CVector();
     CVector(float X, float Y, float Z);
-    inline CVector(RwV3d rwVec) { x = rwVec.x, y = rwVec.y, z = rwVec.z; }
+    CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
+
+public:
+    static void InjectHooks();
 
     // Returns length of vector
     float Magnitude();
@@ -94,6 +97,11 @@ inline bool operator==(const CVector& vec, float equalTo) {
     return vec.x == equalTo && vec.y == equalTo && vec.z == equalTo;
 }
 
+inline bool operator==(const CVector& vecLeft, const CVector& vecRight)
+{
+    return vecLeft.x == vecRight.x && vecLeft.y == vecRight.y && vecLeft.z == vecRight.z;
+}
+
 inline CVector operator*(const CVector& vec, float multiplier) {
     return CVector(vec.x * multiplier, vec.y * multiplier, vec.z * multiplier);
 }
@@ -112,6 +120,9 @@ inline CVector operator-(const CVector& vec) {
 
 inline float DistanceBetweenPoints(const CVector &pointOne, const CVector &pointTwo) {
     return (pointTwo - pointOne).Magnitude();
+}
+inline float DistanceBetweenPointsSquared(const CVector& pointOne, const CVector& pointTwo) {
+    return (pointTwo - pointOne).SquaredMagnitude();
 }
 
 inline CVector Lerp(const CVector& vecOne, const CVector& vecTwo, float fProgress) {

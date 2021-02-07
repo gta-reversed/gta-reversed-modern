@@ -7,17 +7,17 @@
     Do not delete this comment block. Respect others' work!
 */
 
-CRope* CRopes::ms_aRopes = (CRope*)0xB768B8;
-int& CRopes::ms_bPlayerControlsCrane = *(int*)0xB76898;
+CRope(&CRopes::aRopes)[MAX_NUM_ROPES] = *(CRope(*)[MAX_NUM_ROPES])0xB768B8;
+int& CRopes::PlayerControlsCrane = *(int*)0xB76898;
 
 
 void CRopes::CreateRopeForSwatPed(CVector const& startPos)
 {
     ((void(__cdecl*)(CVector const&))0x558D10)(startPos);
 }
-void CRopes::FindPickupHeight(CEntity* entity)
+float CRopes::FindPickupHeight(CEntity* entity)
 {
-    ((void(__cdecl*)(CEntity*))0x556760)(entity);
+    return plugin::CallAndReturn<float, 0x556760, CEntity*>(entity);
 }
 int CRopes::FindRope(unsigned int id)
 {

@@ -99,7 +99,8 @@ void CShadows::StoreShadowToBeRendered(unsigned char shadowTextureType, CVector*
 
 // Converted from cdecl void CShadows::StoreShadowForPedObject(CEntity *ped,float displacementX,float displacementY,float frontX,float frontY,float sideX,float sideY) 0x707B40
 void CShadows::StoreShadowForPedObject(CEntity* ped, float displacementX, float displacementY, float frontX, float frontY, float sideX, float sideY) {
-    ((void(__cdecl*)(CEntity*, float, float, float, float, float, float))0x707B40)(ped, displacementX, displacementY, frontX, frontY, sideX, sideY);
+    plugin::Call<0x707B40, CEntity*, float, float, float, float, float, float>
+        (ped, displacementX, displacementY, frontX, frontY, sideX, sideY);
 }
 
 // Converted from cdecl void CShadows::StoreRealTimeShadow(CPhysical *physical,float displacementX,float displacementY,float frontX,float frontY,float sideX,float sideY) 0x707CA0

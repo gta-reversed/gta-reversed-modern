@@ -51,6 +51,9 @@ public:
     static void SetIsInterior(int iplSlotIndex, bool isInterior);
     static int SetupRelatedIpls(char const* iplName, int entityArraysIndex, CEntity** instances);
     static void Shutdown();
+
+    // 0x59EB20
+    inline static bool HasDynamicStreamingDisabled(int iplSlotIndex) { return ms_pPool->GetAt(iplSlotIndex)->m_bDisableDynamicStreaming; }
 };
 
 extern unsigned int MAX_IPL_ENTITY_INDEX_ARRAYS; // default 40

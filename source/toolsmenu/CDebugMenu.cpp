@@ -82,6 +82,9 @@ void CDebugMenu::ImguiInputUpdate() {
     if (!m_showMenu)
         return;
 
+    // Update display size, in case of window resize after imgui was already initialized
+    io->DisplaySize = ImVec2((float)RsGlobal.maximumWidth, (float)RsGlobal.maximumHeight);
+
     // Partially taken from https://github.com/Juarez12/re3/blob/f1a7aeaa0f574813ed3cec8a085e2f310aa3a366/src/imgui/ImGuiIII.cpp
 
     static BYTE KeyStates[256];

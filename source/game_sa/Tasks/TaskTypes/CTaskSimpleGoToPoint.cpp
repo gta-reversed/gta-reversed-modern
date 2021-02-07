@@ -130,7 +130,7 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
                             if (!ped->m_pPlayerData->m_bPlayerSprintDisabled && !g_surfaceInfos->CantSprintOn(ped->m_nContactSurface)) {
                                 auto pAnimStaticAssoc1 = pAnimGroup->GetAnimation(1);
                                 auto pAnimStaticAssoc2 = pAnimGroup->GetAnimation(2);
-                                if (pAnimStaticAssoc1->m_pHeirarchy != pAnimStaticAssoc2->m_pHeirarchy &&
+                                if (pAnimStaticAssoc1->m_pHierarchy != pAnimStaticAssoc2->m_pHierarchy &&
                                     pPlayer->ControlButtonSprint((eSprintType)0) >= 1.0f) {
                                     ped->SetMoveState(PEDMOVE_SPRINT);
                                     bSprinting = true;

@@ -30,16 +30,15 @@ CPlaceable::CPlaceable() : m_placement()
     m_matrix = nullptr;
 }
 
-// Ready to be used once classes further down in hierarchy are made compatible with that
-//CPlaceable::~CPlaceable()
-//{
-//    if (m_matrix) {
-//        CPlaceable::RemoveMatrix();
-//        --numMatrices;
-//    }
-//
-//    m_matrix = reinterpret_cast<CMatrixLink*>(&gDummyMatrix);
-//}
+CPlaceable::~CPlaceable()
+{
+    if (m_matrix) {
+        CPlaceable::RemoveMatrix();
+        --numMatrices;
+    }
+
+    m_matrix = reinterpret_cast<CMatrixLink*>(&gDummyMatrix);
+}
 
 CVector CPlaceable::GetRightVector()
 {

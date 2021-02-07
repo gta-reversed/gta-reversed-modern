@@ -23,3 +23,8 @@ int IKChainManager_c::AbortLookAt(CPed* pPed, int blendOutTime)
 {
     return plugin::CallMethodAndReturn <int, 0x618280, IKChainManager_c*, CPed*, int>(this, pPed, blendOutTime);
 }
+
+bool IKChainManager_c::IsArmPointing(int nSlot, CPed* pPed)
+{
+    return plugin::CallMethodAndReturn<bool, 0x6182B0, IKChainManager_c*, int, CPed*>(this, nSlot, pPed);
+}

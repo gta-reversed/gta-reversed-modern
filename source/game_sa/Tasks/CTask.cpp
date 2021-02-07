@@ -9,12 +9,12 @@ Do not delete this comment block. Respect others' work!
 
 void* CTask::operator new(unsigned int size)
 {
-    return ((CTask * (__cdecl*)(unsigned int))0x61A5A0)(size);
+    return CPools::ms_pTaskPool->New();
 }
 
 void CTask::operator delete(void* object)
 {
-    ((void(__cdecl*)(void*))0x61A5B0)(object);
+    CPools::ms_pTaskPool->Delete(static_cast<CTask*>(object));
 }
 
 CTask::CTask() {

@@ -182,7 +182,7 @@ public:
         static CPool<CVehicleModelInfo::CVehicleStructure>*& m_pInfoPool;
 
     public: //Helpers
-        inline bool IsDummyActive(eVehicleDummies dummy) { return m_avDummyPos[dummy] != 0.0F; }
+        inline bool IsDummyActive(eVehicleDummies dummy) const { return m_avDummyPos[dummy] != 0.0F; }
 
     } *m_pVehicleStruct;
 

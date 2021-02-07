@@ -34,7 +34,7 @@ public:
     int               m_nSize;
     int               m_nFirstFree;
     bool              m_bOwnsAllocations;
-    bool field_11;
+    bool              m_bIsLocked; // Seemingly not used anywhere, only toggled on/off
 
     // Default constructor for statically allocated pools
     CPool() {
@@ -148,9 +148,9 @@ public:
 
     // Allocates object at a specific index from a SCM handle (ref) (0x59F610)
     void CreateAtRef(int nRef) {
-        nRef >>= 8;
-        m_byteMap[nRef].bEmpty = false;
-        ++m_byteMap[nRef].nId;
+        const auto nSlot = nRef >> 8;
+        m_byteMap[nSlot].bEmpty = false;
+        m_byteMap[nSlot].nId = nRef & 0x7F;
         m_nFirstFree = 0;
         while (!m_byteMap[m_nFirstFree].bEmpty)
             ++m_nFirstFree;
@@ -182,6 +182,12 @@ public:
         return nSlotIndex >= 0 && nSlotIndex < m_nSize && m_byteMap[nSlotIndex].IntValue() == (ref & 0xFF) ? reinterpret_cast<A*>(&m_pObjects[nSlotIndex]) : nullptr;
     }
 
+    A* GetAtRefNoChecks(int ref)
+    {
+        int nSlotIndex = ref >> 8;
+        return GetAt(nSlotIndex);
+    }
+
     // (0x54F6B0)
     unsigned int GetNoOfUsedSpaces() {
         unsigned int counter = 0;
@@ -205,6 +211,12 @@ public:
     bool IsObjectValid(A *obj) {
         int slot = GetIndex(obj);
         return slot >= 0 && slot < m_nSize && !IsFreeSlotAtIndex(slot);
+    }
+
+    // Helper so we don't write memcpy manually
+    void CopyItem(A* dest, A* src)
+    {
+        *reinterpret_cast<B*>(dest) = *reinterpret_cast<B*>(src);
     }
 };
 

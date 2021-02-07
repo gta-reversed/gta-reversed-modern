@@ -21,3 +21,13 @@ void CAudioEngine::DisplayRadioStationName()
 void CAudioEngine::ReportWaterSplash(CPhysical* pPhysical, float volume, bool forcePlaySplashSound) {
     return plugin::CallMethod<0x506F00, CAudioEngine*, CPhysical*, float, unsigned char>(this, pPhysical, volume, forcePlaySplashSound);
 }
+
+void CAudioEngine::ReportDoorMovement(CPhysical* pPhysical)
+{
+    plugin::CallMethod<0x506F50, CAudioEngine*, CPhysical*>(this, pPhysical);
+}
+
+void CAudioEngine::ReportObjectDestruction(CEntity* pEntity)
+{
+    plugin::CallMethod<0x506ED0, CAudioEngine*, CEntity*>(this, pEntity);
+}

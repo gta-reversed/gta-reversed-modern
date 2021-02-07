@@ -970,11 +970,10 @@ void CBoat::BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion)
     if (!pMovingCompAtomic)
         return;
 
-    auto pObject = reinterpret_cast<CObject*>(CObject::operator new(sizeof(CObject)));
+    auto pObject = new CObject();
     if (!pObject)
         return;
 
-    pObject->Constructor();
     pObject->SetModelIndexNoCreate(379);
     pObject->RefModelInfo(m_nModelIndex);
 
@@ -993,7 +992,7 @@ void CBoat::BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion)
     pObject->m_fAirResistance = 0.99F;
     pObject->m_fElasticity = 0.1F;
     pObject->m_fBuoyancyConstant = 8.0F / 75.0F;
-    pObject->m_nObjectType = eObjectCreatedBy::OBJECT_TEMPORARY;
+    pObject->m_nObjectType = eObjectType::OBJECT_TEMPORARY;
     pObject->SetIsStatic(false);
     pObject->objectFlags.bIsPickup = false;
     pObject->m_dwRemovalTime = CTimer::m_snTimeInMilliseconds + 20000;
@@ -1023,7 +1022,7 @@ void CBoat::BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion)
 RwObject* GetBoatAtomicObjectCB(RwObject* object, void* data)
 {
     if (RpAtomicGetFlags(object) & rpATOMICRENDER)
-        *reinterpret_cast<RpAtomic**>(data) = reinterpret_cast<RpAtomic*>(object);
+        *static_cast<RpAtomic**>(data) = reinterpret_cast<RpAtomic*>(object);
 
     return object;
 }

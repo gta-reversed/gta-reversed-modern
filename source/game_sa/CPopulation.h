@@ -79,6 +79,8 @@ public:
     static unsigned int              & NumMiamiViceCops;
     static unsigned int              & CurrentWorldZone;
 
+public:
+    static void InjectHooks();
     // static functions
 
     // returns ePedRace value

@@ -21,7 +21,7 @@ public:
     unsigned short m_nAnimGroup;
     unsigned short m_nFlags;
     CAnimBlendSequence **m_pSequenceArray;
-    CAnimBlendHierarchy *m_pHeirarchy;
+    CAnimBlendHierarchy *m_pHierarchy;
 
     // vtable function #0 (destructor)
 

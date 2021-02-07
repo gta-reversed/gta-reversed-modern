@@ -39,8 +39,9 @@ public:
     * FixVertexOnToLine(CWaterVertex*, CWaterVertex*, CWaterVertex*, float*)
     * GetGroundLevel(CVector const&, float*, ColData*, float)
     * GetGroundLevel_WS(CVector const&, float*, ColData*, float)
-    * GetWaterDepth(CVector const&, float*, float*, float*)
+    * 
     */
+    static bool GetWaterDepth(CVector const& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel);
     static bool GetWaterLevel(float x, float y, float z, float * pOutWaterLevel, unsigned char bTouchingWater, CVector* pVecNormals);
     static bool GetWaterLevelNoWaves(float x, float y, float z, float* pOutWaterLevel, float* fUnkn1, float* fUnkn2);
     /*

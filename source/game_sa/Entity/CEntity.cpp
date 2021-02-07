@@ -7,38 +7,6 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-CEntity::CEntity() : CPlaceable()
-{
-    m_nStatus = eEntityStatus::STATUS_PLAYER;
-    m_nType = eEntityType::ENTITY_TYPE_BUILDING;
-
-    m_nFlags = 0;
-    m_bIsVisible = true;
-    m_bBackfaceCulled = true;
-
-    m_nScanCode = 0;
-    m_nAreaCode = 0;
-    m_nModelIndex = 0xFFFF;
-    m_pRwObject = nullptr;
-    m_nIplIndex = 0;
-    m_nRandomSeed = rand();
-    m_pReferences = nullptr;
-    m_pStreamingLink = nullptr;
-    m_nNumLodChildren = 0;
-    m_nNumLodChildrenRendered = 0;
-    m_pLod = nullptr;
-}
-
-// Ready to be used once classes further down in hierarchy are made compatible with that
-//CEntity::~CEntity()
-//{
-//    if (m_pLod)
-//        m_pLod->m_nNumLodChildren--;
-//
-//    CEntity::DeleteRwObject();
-//    CEntity::ResolveReferences();
-//}
-
 void CEntity::InjectHooks()
 {
 //Virtual
@@ -111,6 +79,37 @@ void CEntity::InjectHooks()
 //Statics
     ReversibleHooks::Install("CEntity", "MaterialUpdateUVAnimCB", 0x532D70, &MaterialUpdateUVAnimCB);
     ReversibleHooks::Install("CEntity", "IsEntityPointerValid", 0x533310, &IsEntityPointerValid);
+}
+
+CEntity::CEntity() : CPlaceable()
+{
+    m_nStatus = eEntityStatus::STATUS_PLAYER;
+    m_nType = eEntityType::ENTITY_TYPE_BUILDING;
+
+    m_nFlags = 0;
+    m_bIsVisible = true;
+    m_bBackfaceCulled = true;
+
+    m_nScanCode = 0;
+    m_nAreaCode = 0;
+    m_nModelIndex = 0xFFFF;
+    m_pRwObject = nullptr;
+    m_nIplIndex = 0;
+    m_nRandomSeed = rand();
+    m_pReferences = nullptr;
+    m_pStreamingLink = nullptr;
+    m_nNumLodChildren = 0;
+    m_nNumLodChildrenRendered = 0;
+    m_pLod = nullptr;
+}
+
+CEntity::~CEntity()
+{
+    if (m_pLod)
+        m_pLod->m_nNumLodChildren--;
+
+    CEntity::DeleteRwObject();
+    CEntity::ResolveReferences();
 }
 
 void CEntity::Add()
@@ -898,18 +897,18 @@ void CEntity::UpdateRwFrame()
     if (!m_pRwObject)
         return;
 
-    RwFrameUpdateObjects((RwFrame*)rwObjectGetParent(m_pRwObject));
+    RwFrameUpdateObjects(static_cast<RwFrame*>(rwObjectGetParent(m_pRwObject)));
 }
 
 // Converted from thiscall void CEntity::UpdateRpHAnim(void) 0x532B20
 void CEntity::UpdateRpHAnim()
 {
-    auto pFirstAtomic = GetFirstAtomic(m_pRwClump);
+    auto* pFirstAtomic = GetFirstAtomic(m_pRwClump);
     if (!pFirstAtomic)
         return;
 
     if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(pFirstAtomic)) && !m_bDontUpdateHierarchy) {
-        auto pAnimHierarchy = GetAnimHierarchyFromClump(m_pRwClump);
+        auto* pAnimHierarchy = GetAnimHierarchyFromSkinClump(m_pRwClump);
         RpHAnimHierarchyUpdateMatrices(pAnimHierarchy);
     }
 }
@@ -1422,11 +1421,11 @@ bool CEntity::GetIsOnScreen()
     CEntity::GetBoundCentre(thisVec);
     auto fThisRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
 
-    if (TheCamera.IsSphereVisible(&thisVec, fThisRadius, reinterpret_cast<RwMatrixTag*>(&TheCamera.m_mMatInverse)))
+    if (TheCamera.IsSphereVisible(thisVec, fThisRadius, reinterpret_cast<RwMatrixTag*>(&TheCamera.m_mMatInverse)))
         return true;
 
     if (TheCamera.m_bMirrorActive)
-        return TheCamera.IsSphereVisible(&thisVec, fThisRadius, reinterpret_cast<RwMatrixTag*>(&TheCamera.m_mMatMirrorInverse));
+        return TheCamera.IsSphereVisible(thisVec, fThisRadius, reinterpret_cast<RwMatrixTag*>(&TheCamera.m_mMatMirrorInverse));
 
     return false;
 }
@@ -1700,7 +1699,7 @@ void CEntity::UpdateAnim()
 
     bool bOnScreen;
     float fStep;
-    if (IsObject() && static_cast<CObject*>(this)->m_nObjectType == eObjectCreatedBy::OBJECT_TYPE_CUTSCENE) {
+    if (IsObject() && static_cast<CObject*>(this)->m_nObjectType == eObjectType::OBJECT_TYPE_CUTSCENE) {
         bOnScreen = true;
         fStep = CTimer::ms_fTimeStepNonClipped / 50.0F;
     }

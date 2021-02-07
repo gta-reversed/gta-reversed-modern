@@ -12,12 +12,12 @@
 class  CRopes
 {
 public:
-	static CRope* ms_aRopes;	// array of 8
-	static int& ms_bPlayerControlsCrane;
-
+    static constexpr int MAX_NUM_ROPES = 8;
+	static CRope(&aRopes)[MAX_NUM_ROPES]; // Access using CRopes::GetRope()
+	static int& PlayerControlsCrane;
 
 	static void CreateRopeForSwatPed(CVector const& startPos);
-	static void FindPickupHeight(CEntity* entity);
+	static float FindPickupHeight(CEntity* entity);
 
 	// Returns id to array
 	static int FindRope(unsigned int id);
@@ -30,4 +30,7 @@ public:
 	static void SetSpeedOfTopNode(unsigned int ropeId, CVector dirSpeed);
 	static void Shutdown();
 	static void Update();
+
+public:
+    static inline CRope& GetRope(int index) { return aRopes[index]; }
 };

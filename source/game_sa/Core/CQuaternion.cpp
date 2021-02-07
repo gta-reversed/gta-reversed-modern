@@ -7,6 +7,11 @@
 
 #include "StdInc.h"
 
+CQuaternion::CQuaternion()
+{
+    real = 0.0F;
+}
+
 void CQuaternion::InjectHooks()
 {
     ReversibleHooks::Install("CQuaternion", "Get", 0x59C080, (void(CQuaternion::*)(RwMatrixTag*))(&CQuaternion::Get));

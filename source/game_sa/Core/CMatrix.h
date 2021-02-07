@@ -100,6 +100,8 @@ public:
 
 // operators and classes that aren't defined as part of class, but it's much easier to get them working with access to class private fields
 private:
+    friend class CVector; // So Vector methods have access to private fields of matrix whitout accessor methods, for more readable code
+    friend class CVector2D;
     friend CMatrix operator*(CMatrix const& a, CMatrix const& b);
     //static CMatrix* impl_operatorMul(CMatrix* pOut, CMatrix const& a, CMatrix const& b);
 

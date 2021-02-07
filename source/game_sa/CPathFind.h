@@ -157,6 +157,8 @@ public:
 		float maxSearchDistance, CNodeAddress *targetAddr, float maxUnkLimit, bool oneSideOnly, 
 		CNodeAddress forbiddenNodeAddr, bool includeNodesWithoutLinks, bool waterPath);
 
+    void SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool bTrainCrossing);
+
 	CPathNode *GetPathNode(CNodeAddress address);
     int LoadPathFindData(RwStream *stream, int index);
     void UnLoadPathFindData(int index);

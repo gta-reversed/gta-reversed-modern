@@ -13,7 +13,8 @@ class  CPlaceable {
 protected:
     CPlaceable(plugin::dummy_func_t) {}
     CPlaceable();
-    virtual ~CPlaceable() { assert(0); }
+    virtual ~CPlaceable();
+
 public:
     CSimpleTransform m_placement;
     CMatrixLink *m_matrix;

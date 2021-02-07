@@ -24,7 +24,7 @@ void CPed::InjectHooks()
     ReversibleHooks::Install("CPed", "ProcessBuoyancy", 0x5E1FA0, &CPed::ProcessBuoyancy);
 }
 
-CPed::CPed(ePedType pedtype) : CPhysical(plugin::dummy), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
+CPed::CPed(ePedType pedtype) : CPhysical(), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
 plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy,
 plugin::dummy, plugin::dummy, plugin::dummy }
 {
@@ -308,10 +308,10 @@ float CPed::GetBikeRidingSkill()
     return ((float(__thiscall *)(CPed*))0x5DF510)(this);
 }
 
-// Converted from thiscall void CPed::ShoulderBoneRotation(RpClump *clump) 0x5DF560
+// 0x5DF560
 void CPed::ShoulderBoneRotation(RpClump* clump)
 {
-    ((void(__thiscall *)(CPed*, RpClump*))0x5DF560)(this, clump);
+    plugin::Call<0x5DF560, RpClump*>(clump);
 }
 
 // Converted from thiscall void CPed::SetLookTimer(uint time) 0x5DF8D0
