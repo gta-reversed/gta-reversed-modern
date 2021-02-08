@@ -58,9 +58,8 @@ public:
     static void SetCollisionRequired(const CVector& pos, int areaCode);
     /* Shutdown()
     */
-private:
-    /* m_onlyBB
-    */
-    static CPool<ColDef>* ms_pColPool;
-    static class CQuadTreeNode* ms_pQuadTree;
+
+public:
+    static CPool<ColDef>* &ms_pColPool;
+    static class CQuadTreeNode* &ms_pQuadTree;
 };

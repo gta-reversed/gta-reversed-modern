@@ -9,14 +9,15 @@
 #include "CEntity.h"
 
 class CBuilding : public CEntity {
-protected:
-    CBuilding(plugin::dummy_func_t) : CEntity(plugin::dummy) {}
 public:
-	void ReplaceWithNewModel(int newModelIndex);
-
+    CBuilding();
     static void* operator new(unsigned int size);
     static void operator delete(void* data);
-    CBuilding();
+
+public:
+    static void InjectHooks();
+
+    void ReplaceWithNewModel(int newModelIndex);
 };
 
 VALIDATE_SIZE(CBuilding, 0x38);

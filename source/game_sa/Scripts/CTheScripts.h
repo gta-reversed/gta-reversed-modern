@@ -22,8 +22,8 @@
 struct tBuildingSwap
 {
     CBuilding *m_pCBuilding;
-    int m_nOldModelIndex;
     int m_nNewModelIndex;
+    int m_nOldModelIndex;
 };
 
 struct tScriptSwitchCase
@@ -218,7 +218,10 @@ public:
      static int *VehicleModelsBlockedByScript; // static int VehicleModelsBlockedByScript[20]
      static int *SuppressedVehicleModels; // static int SuppressedVehicleModels[40]
      static CEntity **InvisibilitySettingArray; // static CEntity *InvisibilitySettingArray[20]
-     static tBuildingSwap *BuildingSwapArray; // static tBuildingSwap BuildingSwapArray[25]
+
+     static constexpr int NUM_BUILDING_SWAPS = 25;
+     static tBuildingSwap (&BuildingSwapArray)[NUM_BUILDING_SWAPS]; // static tBuildingSwap BuildingSwapArray[25]
+
      static unsigned short &NumberOfIntroRectanglesThisFrame;
      static unsigned short &MessageWidth;
      static unsigned short &MessageCentre;
@@ -251,11 +254,14 @@ public:
      static CSprite2d *ScriptSprites; // static CSprite2d ScriptSprites[128]
      static tScriptSearchlight *ScriptSearchLightArray; // static tScriptSearchlight ScriptSearchLightArray[8]
 
+public:
+     static void InjectHooks();
+
      static int AddScriptCheckpoint(float at_X, float at_Y, float at_Z, float PointTo_X, float PointTo_Y, float PointTo_Z, float radius, int type);
      static int AddScriptEffectSystem(FxSystem_c *a1);
      static int AddScriptSearchLight(float startX, float startY, float startZ, CEntity *entity, float targetX, float targetY, float targetZ, float targetRadius, float baseRadius);
      static unsigned int AddScriptSphere(unsigned int id, CVector posn, float radius);
-     static void AddToBuildingSwapArray(CBuilding *a1, int newModelId, int oldModelId);
+     static void AddToBuildingSwapArray(CBuilding *pBuilding, int oldModelId, int newModelId);
      static void AddToInvisibilitySwapArray(CEntity *a2, bool bVisible);
      static void AddToListOfConnectedLodObjects(CObject *pObject1, CObject *pObject2);
      static void AddToListOfSpecialAnimGroupsAttachedToCharModels(int modelid, char *ifpName);

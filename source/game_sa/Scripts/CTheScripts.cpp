@@ -59,7 +59,7 @@ tScriptAttachedAnimGroup *CTheScripts::ScriptAttachedAnimGroups = reinterpret_ca
 int *CTheScripts::VehicleModelsBlockedByScript = reinterpret_cast<int *>(0xA448F0);
 int *CTheScripts::SuppressedVehicleModels = reinterpret_cast<int *>(0xA44940);
 CEntity **CTheScripts::InvisibilitySettingArray = reinterpret_cast<CEntity **>(0xA449E0);
-tBuildingSwap *CTheScripts::BuildingSwapArray = reinterpret_cast<tBuildingSwap *>(0xA44A30);
+tBuildingSwap(&CTheScripts::BuildingSwapArray)[NUM_BUILDING_SWAPS] = *reinterpret_cast<tBuildingSwap(*)[NUM_BUILDING_SWAPS]>(0xA44A30);
 unsigned short &CTheScripts::NumberOfIntroRectanglesThisFrame = *reinterpret_cast<unsigned short *>(0xA44B5C);
 unsigned short &CTheScripts::MessageWidth = *reinterpret_cast<unsigned short *>(0xA44B60);
 unsigned short &CTheScripts::MessageCentre = *reinterpret_cast<unsigned short *>(0xA44B64);
@@ -91,6 +91,49 @@ tScriptRectangle *CTheScripts::IntroRectangles = reinterpret_cast<tScriptRectang
 CSprite2d *CTheScripts::ScriptSprites = reinterpret_cast<CSprite2d *>(0xA94B68);
 tScriptSearchlight *CTheScripts::ScriptSearchLightArray = reinterpret_cast<tScriptSearchlight *>(0xA94D68);
 
+void CTheScripts::InjectHooks()
+{
+    ReversibleHooks::Install("CTheScripts", "AddToBuildingSwapArray", 0x481140, &CTheScripts::AddToBuildingSwapArray);
+    ReversibleHooks::Install("CTheScripts", "UndoBuildingSwaps", 0x481290, &CTheScripts::UndoBuildingSwaps);
+}
+
+void CTheScripts::AddToBuildingSwapArray(CBuilding* pBuilding, int oldModelId, int newModelId)
+{
+    if (pBuilding->m_nIplIndex)
+        return;
+
+    for (auto iInd = 0; iInd < NUM_BUILDING_SWAPS; ++iInd)
+    {
+        auto& pSwap = CTheScripts::BuildingSwapArray[iInd];
+        if (pSwap.m_pCBuilding == pBuilding)
+        {
+            if (newModelId == pSwap.m_nOldModelIndex)
+            {
+                pSwap.m_pCBuilding = nullptr;
+                pSwap.m_nOldModelIndex = -1;
+                pSwap.m_nNewModelIndex = -1;
+            }
+            else
+                pSwap.m_nNewModelIndex = newModelId;
+
+            return;
+        }
+    }
+
+
+    for (auto iNewInd = 0; iNewInd < NUM_BUILDING_SWAPS; ++iNewInd)
+    {
+        auto& pSwap = CTheScripts::BuildingSwapArray[iNewInd];
+        if (!pSwap.m_pCBuilding)
+        {
+            pSwap.m_pCBuilding = pBuilding;
+            pSwap.m_nOldModelIndex = oldModelId;
+            pSwap.m_nNewModelIndex = newModelId;
+            return;
+        }
+    }
+}
+
 void CTheScripts::CleanUpThisVehicle(CVehicle* pVehicle) {
     plugin::CallDynGlobal<CVehicle*>(0x486670, pVehicle);
 }
@@ -119,6 +162,21 @@ void CTheScripts::RemoveThisPed(CPed* ped) {
 CRunningScript* CTheScripts::StartNewScript(std::uint8_t* startIP)
 {
     return plugin::CallAndReturn<CRunningScript*, 0x464C20, std::uint8_t*>(startIP);
+}
+
+void CTheScripts::UndoBuildingSwaps()
+{
+    for (auto iInd = 0; iInd < NUM_BUILDING_SWAPS; ++iInd)
+    {
+        auto& pSwap = CTheScripts::BuildingSwapArray[iInd];
+        if (pSwap.m_pCBuilding)
+        {
+            pSwap.m_pCBuilding->ReplaceWithNewModel(pSwap.m_nOldModelIndex);
+            pSwap.m_pCBuilding = nullptr;
+            pSwap.m_nOldModelIndex = -1;
+            pSwap.m_nNewModelIndex = -1;
+        }
+    }
 }
 
 bool CTheScripts::IsPlayerOnAMission() {

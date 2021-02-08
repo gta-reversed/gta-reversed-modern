@@ -22,7 +22,7 @@ void InjectCommonHooks()
 
 CVector FindPlayerCoors(int playerId)
 {
-    return ((CVector(__cdecl *)(int))0x56E010)(playerId);
+    return plugin::CallAndReturn<CVector, 0x56E010, int>(playerId);
 }
 
 CVector const& FindPlayerSpeed(int playerId)

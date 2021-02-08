@@ -3,6 +3,9 @@
 CVector& CColStore::ms_vecCollisionNeeded = *(CVector*)0x965580;
 bool& CColStore::ms_bCollisionNeeded = *(bool*)0x965558;
 
+CPool<ColDef>* &CColStore::ms_pColPool = *(CPool<ColDef>**)0x965560;
+CQuadTreeNode* &CColStore::ms_pQuadTree = *(CQuadTreeNode**)0x96555C;
+
 std::int32_t CColStore::AddColSlot(const char* name)
 {
     return plugin::CallAndReturn<std::int32_t, 0x411140, const char*>(name);

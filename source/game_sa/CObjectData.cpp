@@ -171,7 +171,7 @@ void CObjectData::SetObjectData(int dwModelIndex, CObject& pObject)
         pObject.physicalFlags.bCollidable = true;
         pObject.physicalFlags.bDisableCollisionForce = true;
 
-        if (pObjInfo.m_nColDamageEffect == eObjectColDamageEffect::COL_DAMAGE_EFFECT_BREAKABLE)
+        if (pObjInfo.m_nColDamageEffect == eObjectColDamageEffect::COL_DAMAGE_EFFECT_NONE)
             pObject.physicalFlags.bExplosionProof = true;
     }
 
@@ -183,7 +183,7 @@ void CObjectData::SetObjectData(int dwModelIndex, CObject& pObject)
         pObject.objectFlags.bIsDoorMoving = false;
         break;
     case eObjectSpecialColResponseCases::COL_SPECIAL_RESPONSE_LOCKDOOR:
-        pObject.physicalFlags.bDisableMoveForce = false;
+        pObject.physicalFlags.bDisableMoveForce = true;
         pObject.physicalFlags.bCollidable = true;
         pObject.physicalFlags.bDisableCollisionForce = true;
         pObject.objectFlags.bIsDoorOpen = false;

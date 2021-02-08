@@ -1022,7 +1022,7 @@ void CObject::ProcessSamSiteBehaviour() {
             const auto fAngleDiff = CGeneral::LimitRadianAngle(fAngle - fHeading);
 
             float fNewAngle;
-            const auto fTimeStep = CTimer::ms_fTimeStep / 200.0F;
+            const auto fTimeStep = CTimer::ms_fTimeStep / 20.0F;
             if (abs(fAngleDiff) <= fTimeStep)
                 fNewAngle = fAngle;
             else if (fAngleDiff < 0.0F)

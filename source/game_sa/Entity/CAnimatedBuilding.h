@@ -9,10 +9,20 @@
 #include "CBuilding.h"
 
 class CAnimatedBuilding : public CBuilding {
-protected:
-    CAnimatedBuilding(plugin::dummy_func_t) : CBuilding(plugin::dummy) {}
 public:
-    CAnimatedBuilding();
+    CAnimatedBuilding() : CBuilding() {}
+
+public:
+    static void InjectHooks();
+
+    void ProcessControl() override;
+    void ProcessCollision() override;
+    void PreRender() override;
+
+private:
+    void ProcessControl_Reversed();
+    void ProcessCollision_Reversed();
+    void PreRender_Reversed();
 };
 
 VALIDATE_SIZE(CAnimatedBuilding, 0x38);

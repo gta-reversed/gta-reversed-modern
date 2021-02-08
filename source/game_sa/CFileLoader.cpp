@@ -12,14 +12,14 @@ unsigned int& gAtomicModelId = *reinterpret_cast<unsigned int*>(0xB71840);
 
 void CFileLoader::InjectHooks()
 {
-    HookInstall(0x5371F0, (bool(*)(RwStream*, unsigned int))&CFileLoader::LoadAtomicFile);
-    HookInstall(0x537150, &CFileLoader::SetRelatedModelInfoCB);
+    ReversibleHooks::Install("CFileLoader", "LoadAtomicFile",0x5371F0, static_cast<bool(*)(RwStream*, unsigned)>(&CFileLoader::LoadAtomicFile));
+    ReversibleHooks::Install("CFileLoader", "SetRelatedModelInfoCB", 0x537150, &CFileLoader::SetRelatedModelInfoCB);
+    ReversibleHooks::Install("CFileLoader", "LoadObjectInstance_inst", 0x538090, static_cast<CEntity*(*)(CFileObjectInstance*, char const*)>(&CFileLoader::LoadObjectInstance));
+    ReversibleHooks::Install("CFileLoader", "LoadObjectInstance_file", 0x538690, static_cast<CEntity * (*)(char const*)>(&CFileLoader::LoadObjectInstance));
+    ReversibleHooks::Install("CFileLoader", "LoadObject", 0x5B3C60, &CFileLoader::LoadObject);
 }
 
 bool CFileLoader::LoadAtomicFile(RwStream *stream, unsigned int modelId) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturnDynGlobal<bool, RwStream *, unsigned int>(0x5371F0, stream, modelId);
-#else
     auto pAtomicModelInfo = CModelInfo::ms_modelInfoPtrs[modelId]->AsAtomicModelInfoPtr();
     bool bUseCommonVehicleTexDictionary = false; 
     if (pAtomicModelInfo && pAtomicModelInfo->bUseCommonVehicleDictionary)
@@ -45,16 +45,12 @@ bool CFileLoader::LoadAtomicFile(RwStream *stream, unsigned int modelId) {
     }
 
     if (!pAtomicModelInfo->m_pRwObject)
-    {
         return false;
-    }
 
     if (bUseCommonVehicleTexDictionary)
-    {
         CVehicleModelInfo::StopUsingCommonVehicleTexDicationary();
-    }
+
     return true;
-#endif
 }
 
 void CFileLoader::LoadAtomicFile(char const *filename) {
@@ -96,15 +92,12 @@ void GetNameAndDamage(char const* nodeName, char* outName, bool& outDamage) {
 
 RpAtomic* CFileLoader::SetRelatedModelInfoCB(RpAtomic* atomic, RpClump* clump)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<RpAtomic*, 0x537150, RpAtomic*, RpClump*>(atomic, clump);
-#else
     char name[24];
     auto pAtomicModelInfo = CModelInfo::GetModelInfo(gAtomicModelId)->AsAtomicModelInfoPtr();
     char* frameNodeName = GetFrameNodeName(RpAtomicGetFrame(atomic));
 
     bool bDamage = false;
-    GetNameAndDamage(frameNodeName, (char*)&name, bDamage);
+    GetNameAndDamage(frameNodeName, name, bDamage);
     CVisibilityPlugins::SetAtomicRenderCallback(atomic, nullptr);
     if (bDamage)
     {
@@ -120,9 +113,184 @@ RpAtomic* CFileLoader::SetRelatedModelInfoCB(RpAtomic* atomic, RpClump* clump)
     RpAtomicSetFrame(atomic, newFrame);
     CVisibilityPlugins::SetAtomicId(atomic, gAtomicModelId);
     return atomic;
-#endif
 }
 
 char* CFileLoader::LoadLine(FILESTREAM file) {
     return plugin::CallAndReturnDynGlobal<char*, FILESTREAM>(0x536F80, file);
+}
+
+int CFileLoader::LoadObject(char const* line)
+{
+    int modelId;
+    char modelName[24], texName[24];
+    float fDrawDist;
+    uint32_t dwFlags;
+
+    auto iNumRead = sscanf(line, "%d %s %s %f %d", &modelId, modelName, texName, &fDrawDist, &dwFlags);
+    if (iNumRead != 5 || fDrawDist < 4.0F)
+    {
+        int objType;
+        float fDrawDist2_unused, fDrawDist3_unused;
+        iNumRead = sscanf((char*)line, "%d %s %s %d", &modelId, modelName, texName, &objType);
+        if (iNumRead != 4)
+            return -1;
+
+        switch (objType)
+        {
+        case 1:
+            sscanf(line, "%d %s %s %d %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &dwFlags);
+            break;
+
+        case 2:
+            sscanf(line,
+                   "%d %s %s %d %f %f %d",
+                   &modelId,
+                   modelName,
+                   texName,
+                   &objType,
+                   &fDrawDist,
+                   &fDrawDist2_unused,
+                   &dwFlags);
+            break;
+
+        case 3:
+            sscanf(line,
+                "%d %s %s %d %f %f %f %d",
+                &modelId,
+                modelName,
+                texName,
+                &objType,
+                &fDrawDist,
+                &fDrawDist2_unused,
+                &fDrawDist3_unused,
+                &dwFlags);
+            break;
+        }
+    }
+
+    sItemDefinitionFlags flags(dwFlags);
+    CAtomicModelInfo* pModelInfo;
+    if (flags.bIsDamageable)
+        pModelInfo = CModelInfo::AddDamageAtomicModel(modelId);
+    else
+        pModelInfo = CModelInfo::AddAtomicModel(modelId);
+
+    pModelInfo->m_fDrawDistance = fDrawDist;
+    pModelInfo->m_nKey = CKeyGen::GetUppercaseKey(modelName);
+    pModelInfo->SetTexDictionary(texName);
+    SetAtomicModelInfoFlags(pModelInfo, dwFlags);
+    return modelId;
+}
+
+CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, char const* modelname)
+{
+    auto* pInfo = CModelInfo::GetModelInfo(objInstance->m_nModelId);
+    if (!pInfo)
+        return nullptr;
+
+    CEntity* pNewEntity = nullptr;
+    if (pInfo->m_nObjectInfoIndex == -1)
+    {
+        if (pInfo->GetModelType() == ModelInfoType::MODEL_INFO_CLUMP && pInfo->bHasAnimBlend)
+            pNewEntity = new CAnimatedBuilding();
+        else
+            pNewEntity = new CBuilding();
+
+        pNewEntity->SetModelIndexNoCreate(objInstance->m_nModelId);
+        if (pInfo->bDontCastShadowsOn)
+            pNewEntity->m_bDontCastShadowsOn = true;
+
+        if (pInfo->m_fDrawDistance < 2.0F)
+            pNewEntity->m_bIsVisible = false;
+    }
+    else
+    {
+        pNewEntity = new CDummyObject();
+        pNewEntity->SetModelIndexNoCreate(objInstance->m_nModelId);
+        if (IsGlassModel(pNewEntity) && !CModelInfo::GetModelInfo(pNewEntity->m_nModelIndex)->IsGlassType2())
+            pNewEntity->m_bIsVisible = false;
+    }
+
+    if (fabs(objInstance->m_qRotation.imag.x) > 0.05F
+        || fabs(objInstance->m_qRotation.imag.y) > 0.05F
+        || (objInstance->m_bDontStream && objInstance->m_qRotation.imag.x != 0.0F && objInstance->m_qRotation.imag.y != 0.0F))
+    {
+        objInstance->m_qRotation.imag = -objInstance->m_qRotation.imag;
+        pNewEntity->AllocateStaticMatrix();
+
+        auto tempQuat = objInstance->m_qRotation;
+        pNewEntity->GetMatrix()->SetRotate(tempQuat);
+    }
+    else
+    {
+        const auto fMult = objInstance->m_qRotation.imag.z < 0.0F ? 2.0F : -2.0F;
+        const auto fHeading = acos(objInstance->m_qRotation.real) * fMult;
+        pNewEntity->SetHeading(fHeading);
+    }
+
+    pNewEntity->SetPosn(objInstance->m_vecPosition);
+
+    if (objInstance->m_bUnderwater)
+        pNewEntity->m_bUnderwater = true;
+
+    if (objInstance->m_bTunnel)
+        pNewEntity->m_bTunnel = true;
+
+    if (objInstance->m_bTunnelTransition)
+        pNewEntity->m_bTunnelTransition = true;
+
+    pNewEntity->m_nAreaCode = objInstance->m_nAreaCode;
+    pNewEntity->m_nLodIndex = objInstance->m_nLodInstanceIndex;
+
+    if (objInstance->m_nModelId == ModelIndices::MI_TRAINCROSSING)
+    {
+        pNewEntity->AllocateStaticMatrix();
+        CObject::SetMatrixForTrainCrossing(pNewEntity->GetMatrix(), PI * 0.43F);
+    }
+
+    auto* pColModel = pInfo->GetColModel();
+    if (pColModel)
+    {
+        if (pColModel->m_boundSphere.m_bFlag0x01)
+        {
+            if (pColModel->m_boundSphere.m_nMaterial)
+            {
+                CRect rect;
+                pNewEntity->GetBoundRect(&rect);
+                auto* pColDef = CColStore::ms_pColPool->GetAt(pColModel->m_boundSphere.m_nMaterial);
+                pColDef->area.Restrict(rect);
+            }
+        }
+        else
+        {
+            pNewEntity->m_bUsesCollision = false;
+        }
+
+        if (pColModel->GetBoundingBox().m_vecMin.z + pNewEntity->GetPosition().z < 0.0F)
+            pNewEntity->m_bUnderwater = true;
+    }
+
+    return pNewEntity;
+}
+
+CEntity* CFileLoader::LoadObjectInstance(char const* line)
+{
+    char modelName[24];
+    CFileObjectInstance objInstance;
+
+    sscanf(
+        line,
+        "%d %s %d %f %f %f %f %f %f %f %d",
+        &objInstance.m_nModelId,
+        modelName,
+        &objInstance.m_nInstanceType,
+        &objInstance.m_vecPosition.x,
+        &objInstance.m_vecPosition.y,
+        &objInstance.m_vecPosition.z,
+        &objInstance.m_qRotation.imag.x,
+        &objInstance.m_qRotation.imag.y,
+        &objInstance.m_qRotation.imag.z,
+        &objInstance.m_qRotation.real,
+        &objInstance.m_nLodInstanceIndex);
+    return CFileLoader::LoadObjectInstance(&objInstance, modelName);
 }
