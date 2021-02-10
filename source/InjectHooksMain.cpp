@@ -199,6 +199,7 @@ void InjectHooksMain(void)
     WaterCreature_c::InjectHooks();
     WaterCreatureManager_c::InjectHooks();
     C2dEffect::InjectHooks();
+    CCustomRoadsignMgr::InjectHooks();
     COcclusion::InjectHooks();
     CGarage::InjectHooks();
     CGarages::InjectHooks();

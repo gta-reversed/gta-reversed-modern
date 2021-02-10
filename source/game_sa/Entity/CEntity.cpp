@@ -1274,15 +1274,8 @@ void CEntity::DestroyEffects()
             g_fx.DestroyEntityFx(this);
         }
         else if (pEffect->m_nType == e2dEffectType::EFFECT_ROADSIGN) {
-            if (pEffect->roadsign.m_pAtomic) {
-                auto pFrame = RpAtomicGetFrame(pEffect->roadsign.m_pAtomic);
-                if (pFrame) {
-                    RpAtomicSetFrame(pEffect->roadsign.m_pAtomic, nullptr);
-                    RwFrameDestroy(pFrame);
-                }
-                RpAtomicDestroy(pEffect->roadsign.m_pAtomic);
-                pEffect->roadsign.m_pAtomic = nullptr;
-            }
+            C2dEffect::DestroyAtomic(pEffect->roadsign.m_pAtomic);
+            pEffect->roadsign.m_pAtomic = nullptr;
         }
         else if (pEffect->m_nType == e2dEffectType::EFFECT_ENEX) {
             auto vecWorld = CEntity::TransformFromObjectSpace(pEffect->m_vecPosn);

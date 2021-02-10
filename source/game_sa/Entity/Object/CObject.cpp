@@ -1198,6 +1198,7 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
                 physicalFlags.bExplosionProof = true;
                 m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
                 m_vecTurnSpeed.Set(0.0F, 0.0F, 0.0F);
+                objectFlags.bIsBroken = true;
                 this->DeleteRwObject();
                 bWasDestroyed = true;
                 break;
