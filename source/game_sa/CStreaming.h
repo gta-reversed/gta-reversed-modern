@@ -60,7 +60,7 @@ struct tStreamingChannel
     int modelIds[16];
     int modelStreamingBufferOffsets[16];
     eStreamingLoadState LoadStatus;
-    int iLoadingLevel;
+    int iLoadingLevel; // the value gets modified, but it's not used
     int offsetAndHandle;
     int sectorCount;
     int totalTries;

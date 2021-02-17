@@ -22,7 +22,7 @@ enum eStreamingLoadState {
     LOADSTATE_NOT_LOADED = 0,
     LOADSTATE_LOADED = 1,
     LOADSTATE_REQUESTED = 2,
-    LOADSTATE_CHANNELED = 3,
+    LOADSTATE_READING = 3,
     LOADSTATE_FINISHING = 4
 };
 
@@ -47,16 +47,14 @@ public:
      static void InjectHooks();
      void Init();
      void AddToList(CStreamingInfo* listStart);
-     unsigned int GetCdPosn();
-     bool GetCdPosnAndSize(unsigned int *CdPosn, unsigned int *CdSize);
-    //! unused
-     unsigned int GetCdSize();
+     uint32_t GetCdPosn();
+     void SetCdPosnAndSize(uint32_t CdPosn, uint32_t CdSize);
+     bool GetCdPosnAndSize(uint32_t& CdPosn, uint32_t& CdSize);
+     uint32_t GetCdSize() { return m_nCdSize; }
      CStreamingInfo* GetNext() { return m_nNextIndex == -1 ? nullptr : &ms_pArrayBase[m_nNextIndex]; }
      CStreamingInfo *GetPrev() { return m_nPrevIndex == -1 ? nullptr : &ms_pArrayBase[m_nPrevIndex]; }
-    //! unused
      bool InList();
      void RemoveFromList();
-     void SetCdPosnAndSize(unsigned int CdPosn, unsigned int CdSize);
 };
 
 VALIDATE_SIZE(CStreamingInfo, 0x14);

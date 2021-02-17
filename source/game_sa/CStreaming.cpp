@@ -357,10 +357,10 @@ int CStreaming::GetNextFileOnCd(unsigned int streamLastPosn, bool bNotPriority) 
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<int, int, bool>(0x408E20, streamLastPosn, bNotPriority);
 #else
-    unsigned int nextRequestModelPos = UINT_MAX;
-    unsigned int firstRequestModelPos = UINT_MAX;
-    int firstRequestModelId = -1;
-    int nextRequestModelId = -1;
+    uint32_t nextRequestModelPos = UINT32_MAX;
+    uint32_t firstRequestModelPos = UINT32_MAX;
+    int32_t firstRequestModelId = -1;
+    int32_t nextRequestModelId = -1;
     auto pStreamingInfo = ms_pStartRequestedList->GetNext();
     for (; pStreamingInfo != ms_pEndRequestedList; pStreamingInfo = pStreamingInfo->GetNext())
     {
@@ -370,7 +370,7 @@ int CStreaming::GetNextFileOnCd(unsigned int streamLastPosn, bool bNotPriority) 
                 CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
                 short txdIndex = pModelInfo->m_nTxdIndex;
                 unsigned char txdLoadState = ms_aInfoForModel[txdIndex + RESOURCE_ID_TXD].m_nLoadState;
-                if (txdLoadState != LOADSTATE_LOADED && txdLoadState != LOADSTATE_CHANNELED) {
+                if (txdLoadState != LOADSTATE_LOADED && txdLoadState != LOADSTATE_READING) {
                     RequestModel(txdIndex + RESOURCE_ID_TXD, ms_aInfoForModel[modelId].m_nFlags);
                     continue;
                 }
@@ -378,7 +378,7 @@ int CStreaming::GetNextFileOnCd(unsigned int streamLastPosn, bool bNotPriority) 
                 if (animFileIndex != -1) {
                     int animModelId = animFileIndex + RESOURCE_ID_IFP;
                     unsigned char animLoadState = ms_aInfoForModel[animModelId].m_nLoadState;
-                    if (animLoadState != LOADSTATE_LOADED && animLoadState != LOADSTATE_CHANNELED) {
+                    if (animLoadState != LOADSTATE_LOADED && animLoadState != LOADSTATE_READING) {
                         RequestModel(animModelId, STREAMING_KEEP_IN_MEMORY);
                         continue;
                     }
@@ -390,7 +390,7 @@ int CStreaming::GetNextFileOnCd(unsigned int streamLastPosn, bool bNotPriority) 
                 if (parentIndex != -1) {
                     int txdModelId = parentIndex + RESOURCE_ID_TXD;
                     unsigned char loadState = ms_aInfoForModel[txdModelId].m_nLoadState;
-                    if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_CHANNELED) {
+                    if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_READING) {
                         RequestModel(txdModelId, STREAMING_KEEP_IN_MEMORY);
                         continue;
                     }
@@ -454,7 +454,7 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
     CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
 
-    unsigned int bufferSize = streamingInfo.m_nCdSize * STREAMING_SECTOR_SIZE;
+    unsigned int bufferSize = streamingInfo.GetCdSize() * STREAMING_SECTOR_SIZE;
     tRwStreamInitializeData rwStreamInitializationData = { pFileBuffer, bufferSize };
 
     RwStream* pRwStream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitializationData);
@@ -1130,7 +1130,7 @@ void CStreaming::LoadCdDirectory(const char* filename, std::int32_t archiveId)
         }
         std::uint32_t cdPos, cdSize;
         CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
-        if (!streamingInfo.GetCdPosnAndSize(&cdPos, &cdSize)) {
+        if (!streamingInfo.GetCdPosnAndSize(cdPos, cdSize)) {
             streamingInfo.m_nImgId = archiveId;
             if (entryInfo.m_nSizeInArchive)
                 entryInfo.m_nStreamingSize = entryInfo.m_nSizeInArchive;
@@ -1305,13 +1305,12 @@ void CStreaming::RequestFile(int modelId, int posn, int size, int imgId, int str
 #else
     auto& streamingInfo = ms_aInfoForModel[modelId];
     const unsigned int blockOffset = (imgId << 24) | posn;
-    if (streamingInfo.m_nCdSize && streamingInfo.GetCdPosn() == blockOffset && streamingInfo.m_nCdSize == size) {
+    if (streamingInfo.GetCdSize() && streamingInfo.GetCdPosn() == blockOffset && streamingInfo.GetCdSize() == size) {
         RequestModel(modelId, streamingFlags);
     }
     else {
         RemoveModel(modelId);
-        streamingInfo.m_nCdPosn = blockOffset & 0xFFFFFF;
-        streamingInfo.m_nCdSize = size;
+        streamingInfo.SetCdPosnAndSize(blockOffset & 0xFFFFFF, size);
         streamingInfo.m_nImgId = imgId;
         RequestModel(modelId, streamingFlags);
     }
@@ -1371,7 +1370,7 @@ void CStreaming::RequestModel(int modelId, unsigned int streamingFlags)
                 modelStreamingInfo.AddToList(ms_startLoadedList);
         }
     }
-    else if (loadState != LOADSTATE_CHANNELED && loadState != LOADSTATE_REQUESTED && loadState != LOADSTATE_FINISHING) {
+    else if (loadState != LOADSTATE_READING && loadState != LOADSTATE_REQUESTED && loadState != LOADSTATE_FINISHING) {
         if (loadState == LOADSTATE_NOT_LOADED) {
             if (modelId >= RESOURCE_ID_TXD) {
                 if (modelId < RESOURCE_ID_COL) {
@@ -1442,7 +1441,7 @@ void CStreaming::FinishLoadingLargeFile(unsigned char* pFileBuffer, int modelId)
     CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
     if (streamingInfo.m_nLoadState == LOADSTATE_FINISHING) {
-        unsigned int bufferSize = streamingInfo.m_nCdSize * STREAMING_SECTOR_SIZE;
+        unsigned int bufferSize = streamingInfo.GetCdSize() * STREAMING_SECTOR_SIZE;
         tRwStreamInitializeData rwStreamInitializationData = { pFileBuffer, bufferSize };
         RwStream* pRwStream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitializationData);
         bool bLoaded = false;
@@ -1511,14 +1510,13 @@ void CStreaming::RequestModelStream(int channelId)
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<int>(0x40CBA0, channelId);
 #else
-    int CdStreamLastPosn = CdStreamGetLastPosn();
-    int modelId = GetNextFileOnCd(CdStreamLastPosn, 1);
+    uint32_t CdStreamLastPosn = CdStreamGetLastPosn();
+    int32_t modelId = GetNextFileOnCd(CdStreamLastPosn, 1);
     if (modelId == -1)
         return;
-
     tStreamingChannel& channel = ms_channel[channelId];
-    int32_t offsetAndHandle = 0;
-    unsigned int sectorcount = 0;
+    uint32_t posn = 0;
+    uint32_t size = 0;
     CStreamingInfo* streamingInfo = &ms_aInfoForModel[modelId];
     while (!(streamingInfo->m_nFlags & (STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED)))
     {
@@ -1528,53 +1526,37 @@ void CStreaming::RequestModelStream(int channelId)
                 break;
         }
         RemoveModel(modelId);
-        if (streamingInfo->m_nCdSize)
-        {
-            offsetAndHandle = streamingInfo->m_nCdPosn + ms_files[streamingInfo->m_nImgId].m_StreamHandle;
-            sectorcount = streamingInfo->m_nCdSize;
-        }
-
-        modelId = GetNextFileOnCd(sectorcount + offsetAndHandle, 1);
+        streamingInfo->GetCdPosnAndSize(posn, size);
+        modelId = GetNextFileOnCd(size + posn, true);
         if (modelId == -1)
-        {
             return;
-        }
         streamingInfo = &ms_aInfoForModel[modelId];
     }
     if (modelId == -1)
-    {
         return;
-    }
-    if (streamingInfo->m_nCdSize)
-    {
-        offsetAndHandle = streamingInfo->m_nCdPosn + ms_files[streamingInfo->m_nImgId].m_StreamHandle;
-        sectorcount = streamingInfo->m_nCdSize;
-    }
-    if (sectorcount > ms_streamingBufferSize)
-    {
+    streamingInfo->GetCdPosnAndSize(posn, size);
+    if (size > ms_streamingBufferSize) {
         if (channelId == 1 || ms_channel[1].LoadStatus)
-        {
             return;
-        }
-        ms_bLoadingBigModel = 1;
+        ms_bLoadingBigModel = true;
     }
 
-    unsigned int sectorCountSum = 0;
+    uint32_t sectorCount = 0;
     bool isPreviousModelBig = false;
     bool isPreviousModelPed = false;
-    const int numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
+    const int32_t numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
     std::int32_t modelIndex = 0;
     for (; modelIndex < numberOfModelIds; modelIndex++) {
         streamingInfo = &ms_aInfoForModel[modelId];
         if (streamingInfo->m_nLoadState != LOADSTATE_REQUESTED)
             break;
-        if (streamingInfo->m_nCdSize)
-            sectorcount = streamingInfo->m_nCdSize;
+        if (streamingInfo->GetCdSize())
+            size = streamingInfo->GetCdSize();
         if (ms_numPriorityRequests && !(streamingInfo->m_nFlags & STREAMING_PRIORITY_REQUEST))
             break;
         if (modelId >= RESOURCE_ID_TXD) {
             if (modelId < RESOURCE_ID_IFP || modelId >= RESOURCE_ID_RRR) {
-                if (isPreviousModelBig && sectorcount > 200)
+                if (isPreviousModelBig && size > 200)
                     break;
             }
             else if (CCutsceneMgr::ms_cutsceneProcessing || ms_aInfoForModel[MODEL_MALE01].m_nLoadState != LOADSTATE_LOADED)
@@ -1590,7 +1572,7 @@ void CStreaming::RequestModelStream(int channelId)
             if (isPreviousModelBig && pBaseModelInfo->GetModelType() == MODEL_INFO_VEHICLE)
                 break;
             unsigned char loadState = ms_aInfoForModel[pBaseModelInfo->m_nTxdIndex + RESOURCE_ID_TXD].m_nLoadState;
-            if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_CHANNELED)
+            if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_READING)
             {
                 break;
             }
@@ -1598,21 +1580,21 @@ void CStreaming::RequestModelStream(int channelId)
             if (animFileIndex != -1)
             {
                 unsigned char loadState = ms_aInfoForModel[animFileIndex + RESOURCE_ID_IFP].m_nLoadState;
-                if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_CHANNELED)
+                if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_READING)
                     break;
             }
         }
-        channel.modelStreamingBufferOffsets[modelIndex] = sectorCountSum;
+        channel.modelStreamingBufferOffsets[modelIndex] = sectorCount;
         channel.modelIds[modelIndex] = modelId;
 
-        sectorCountSum += sectorcount;
-        if (sectorCountSum > ms_streamingBufferSize&& modelIndex > 0) {
-            sectorCountSum -= sectorcount;
+        sectorCount += size;
+        if (sectorCount > ms_streamingBufferSize&& modelIndex > 0) {
+            sectorCount -= size;
             break;
         }
         CBaseModelInfo* pBaseModelInfo = CModelInfo::GetModelInfo(modelId);
         if (modelId >= RESOURCE_ID_TXD) {
-            if (sectorcount > 200)
+            if (size > 200)
                 isPreviousModelBig = true;
         }
         else {
@@ -1621,7 +1603,7 @@ void CStreaming::RequestModelStream(int channelId)
             if (pBaseModelInfo->GetModelType() == MODEL_INFO_VEHICLE)
                 isPreviousModelBig = true;
         }
-        streamingInfo->m_nLoadState = LOADSTATE_CHANNELED;
+        streamingInfo->m_nLoadState = LOADSTATE_READING;
         streamingInfo->RemoveFromList();
         ms_numModelsRequested--;
         if (streamingInfo->m_nFlags & STREAMING_PRIORITY_REQUEST) {
@@ -1633,11 +1615,11 @@ void CStreaming::RequestModelStream(int channelId)
     for (std::int32_t i = modelIndex; i < numberOfModelIds; i++) {
         channel.modelIds[i] = -1;
     }
-    CdStreamRead(channelId, ms_pStreamingBuffer[channelId], offsetAndHandle, sectorCountSum);
+    CdStreamRead(channelId, ms_pStreamingBuffer[channelId], posn, sectorCount);
     channel.LoadStatus = LOADSTATE_LOADED;
     channel.iLoadingLevel = 0;
-    channel.sectorCount = sectorCountSum;
-    channel.offsetAndHandle = offsetAndHandle;
+    channel.sectorCount = sectorCount;
+    channel.offsetAndHandle = posn;
     channel.totalTries = 0;
     if (m_bModelStreamNotLoaded)
         m_bModelStreamNotLoaded = false;
@@ -1661,7 +1643,7 @@ void CStreaming::RequestSpecialModel(int modelId, char const* name, int flags)
     CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CStreamingInfo& streamingInfo = CStreaming::ms_aInfoForModel[modelId];
     unsigned int CdPosn, CdSize;
-    if (CKeyGen::GetUppercaseKey(name) == pModelInfo->m_nKey && streamingInfo.GetCdPosnAndSize(&CdPosn, &CdSize)) {
+    if (CKeyGen::GetUppercaseKey(name) == pModelInfo->m_nKey && streamingInfo.GetCdPosnAndSize(CdPosn, CdSize)) {
         RequestModel(modelId, flags);
         return;
     }
@@ -1685,7 +1667,7 @@ void CStreaming::RequestSpecialModel(int modelId, char const* name, int flags)
             }
         }
     }
-    const unsigned int modelNameKey = pModelInfo->m_nKey;
+    const auto modelNameKey = pModelInfo->m_nKey;
     pModelInfo->m_nKey = CKeyGen::GetUppercaseKey(name);
     CBaseModelInfo* pFoundModelInfo = nullptr;
     for (int i = 0; i < 1001; i++) {
@@ -1702,7 +1684,7 @@ void CStreaming::RequestSpecialModel(int modelId, char const* name, int flags)
     else {
         RemoveModel(modelId);
     }
-    unsigned int outOffset, outStreamingSize;
+    uint32_t outOffset, outStreamingSize;
     CStreaming::ms_pExtraObjectsDir->FindItem(name, outOffset, outStreamingSize);
     pModelInfo->ClearTexDictionary();
     if (CTxdStore::FindTxdSlot(name) == -1)
@@ -1713,8 +1695,7 @@ void CStreaming::RequestSpecialModel(int modelId, char const* name, int flags)
     // the remaining 1 byte is used for m_nImgId
     // outOffset & 0xFFFFF = returns the first 3 bytes and ignores the last one
     // outOffset >> 24 = Ignores the first 3 bytes and returns the last byte
-    streamingInfo.m_nCdPosn = outOffset & 0xFFFFFF;
-    streamingInfo.m_nCdSize = outStreamingSize;
+    streamingInfo.SetCdPosnAndSize(outOffset & 0xFFFFFF, outStreamingSize);
     streamingInfo.m_nImgId = outOffset >> 24;
     streamingInfo.m_nNextIndexOnCd = -1;
     RequestModel(modelId, flags);
@@ -1734,7 +1715,7 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
         if (streamStatus == eCdStreamStatus::WAITING_TO_READ)
             return false;
         streamingChannel.m_nCdStreamStatus = streamStatus;
-        streamingChannel.LoadStatus = LOADSTATE_CHANNELED;
+        streamingChannel.LoadStatus = LOADSTATE_READING;
 
         bool isChannelErrorFree = ms_channelError == -1;
         if (!isChannelErrorFree)
@@ -1753,7 +1734,7 @@ bool CStreaming::ProcessLoadingChannel(int channelIndex)
             if (modelId != -1) {
                 CBaseModelInfo* baseModelInfo = CModelInfo::GetModelInfo(modelId);
                 CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
-                int nCdSize = streamingInfo.m_nCdSize;
+                int nCdSize = streamingInfo.GetCdSize();
 
                 if (modelId >= RESOURCE_ID_TXD
                     || baseModelInfo->GetModelType() != MODEL_INFO_VEHICLE
@@ -2315,10 +2296,10 @@ void CStreaming::RemoveModel(int modelId)
         else if (modelId >= RESOURCE_ID_SCM) {
             CTheScripts::StreamedScripts.RemoveStreamedScriptFromMemory(modelId - RESOURCE_ID_SCM);
         }
-        ms_memoryUsed -= STREAMING_SECTOR_SIZE * streamingInfo.m_nCdSize;
+        ms_memoryUsed -= STREAMING_SECTOR_SIZE * streamingInfo.GetCdSize();
     }
     if (streamingInfo.m_nNextIndex == -1) {
-        if (streamingInfo.m_nLoadState == LOADSTATE_CHANNELED) {
+        if (streamingInfo.m_nLoadState == LOADSTATE_READING) {
             for (int i = 0; i < 16; i++) {
                 for (int channelId = 0; channelId < 2; channelId++) {
                     if (ms_channel[channelId].modelIds[i] == modelId)
@@ -2373,13 +2354,11 @@ void CStreaming::MakeSpaceFor(int memoryToCleanInBytes)
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<int>(0x40E120, memoryToCleanInBytes);
 #else
-    if (ms_memoryUsed >= (ms_memoryAvailable - memoryToCleanInBytes)) {
-        while (RemoveLeastUsedModel(0x20u))
-        {
-            if (ms_memoryUsed < (ms_memoryAvailable - memoryToCleanInBytes))
-                return;
+    while (ms_memoryUsed >= ms_memoryAvailable - memoryToCleanInBytes) {
+        if (!RemoveLeastUsedModel(STREAMING_LOADING_SCENE)) {
+            DeleteRwObjectsBehindCamera(ms_memoryAvailable - memoryToCleanInBytes);
+            return;
         }
-        DeleteRwObjectsBehindCamera(ms_memoryAvailable - memoryToCleanInBytes);
     }
 #endif
 }
@@ -2479,7 +2458,7 @@ void CStreaming::RetryLoadFile(int channelId) {
                 return CLoadingScreen::Continue();
             }
         }
-        else if (loadState == LOADSTATE_CHANNELED) {
+        else if (loadState == LOADSTATE_READING) {
             streamingChannel.totalTries++;
             eCdStreamStatus streamStatus = CdStreamGetStatus(channelId);
             if (streamStatus != eCdStreamStatus::READING && streamStatus != eCdStreamStatus::WAITING_TO_READ)
@@ -2585,13 +2564,8 @@ std::int32_t CStreaming::GetDefaultCabDriverModel()
         MODEL_SWMOCD, MODEL_VBMOCD , MODEL_VWMYCD, -1 };
     const std::int32_t modelId = defaultCabDriverModels[randomIndex];
     if (!CStreaming::ms_aInfoForModel[modelId].m_nLoadState) {
-        if (CTheZones::m_CurrLevel) {
-            // Original code:
-            // randomIndex = CGeneral::GetRandomNumberInRange(0, 2 * CTheZones::m_CurrLevel);
-            // This can actually cause a crash since CStreaming::ms_aDefaultCabDriverModel[6] is always -1
-            // so, let's fix it 
-            randomIndex = CGeneral::GetRandomNumberInRange(0, std::min(5, 2 * CTheZones::m_CurrLevel));
-        }
+        if (CTheZones::m_CurrLevel)
+            randomIndex = CGeneral::GetRandomNumberInRange(0, 2 * CTheZones::m_CurrLevel);
         return defaultCabDriverModels[randomIndex];
     }
     return modelId;
@@ -2872,7 +2846,7 @@ bool CStreaming::IsObjectInCdImage(int modelId) {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallAndReturnDynGlobal<bool, int>(0x407800, modelId);
 #else
-    return ms_aInfoForModel[modelId].m_nCdSize != 0;
+    return ms_aInfoForModel[modelId].GetCdSize() != 0;
 #endif
 }
 
