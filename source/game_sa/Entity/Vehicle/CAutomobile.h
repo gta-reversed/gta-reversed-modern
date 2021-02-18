@@ -194,6 +194,14 @@ public:
     //funcs
     CAutomobile(int modelIndex, unsigned char createdBy, bool setupSuspensionLines);
 
+    void SetEngineState(bool state)
+    {
+        if (vehicleFlags.bEngineBroken)
+            vehicleFlags.bEngineOn = false;
+        else
+            vehicleFlags.bEngineOn = state;
+    }
+
     inline bool IsAnyWheelMakingContactWithGround() {
         return m_fWheelsSuspensionCompression[0] != 1.0F
             || m_fWheelsSuspensionCompression[1] != 1.0F

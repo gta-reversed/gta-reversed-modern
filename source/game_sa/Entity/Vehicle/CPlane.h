@@ -42,25 +42,25 @@ class CPlane : public CAutomobile {
 protected:
     CPlane(plugin::dummy_func_t) : CAutomobile(plugin::dummy) {}
 public:
-    float field_988;
-    int field_98C;
-    int field_990;
-    float m_propSpeedClamped;
-    float field_998;
-    int field_99C;
-    int field_9A0;
-    float m_fHeading;
-    float field_9A8;
-    float field_9AC;
-    float field_9B0;
-    float field_9B4;
-    int field_9B8;
-    int field_9BC;
+    float m_fLeftRightSkid;
+    float m_fSteeringUpDown;
+    float m_fSteeringLeftRight;
+    float m_fAccelerationBreakStatus;
+    float m_fAccelerationBreakStatusPrev;
+    float m_fSteeringFactor;
+    float field_9A0;
+    float m_planeCreationHeading; // The heading when plane is created or placed on road properly
+    float m_maxAltitude;
+    float m_altitude;
+    float m_minAltitude;
+    float m_planeHeading;
+    float m_planeHeadingPrev;
+    float m_forwardZ;
     unsigned int m_nStartedFlyingTime;
     float m_propSpeed;
     float field_9C8;
     float m_fLandingGearStatus;
-    int field_9D0;
+    int m_planeDamageWave;
     FxSystem_c **m_pGunParticles;
     unsigned char m_nFiringMultiplier;
     int field_9DC;

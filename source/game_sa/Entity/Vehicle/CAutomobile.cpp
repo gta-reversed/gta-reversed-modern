@@ -38,8 +38,8 @@ void CAutomobile::ProcessControl()
     bool bExplodeImmediately = false;
     if (IsPlane() || IsHeli()) {
         eCarMission carMission = m_autoPilot.m_nCarMission;
-        if ((carMission == MISSION_39
-            || carMission == MISSION_3A
+        if ((carMission == MISSION_CRASH_PLANE_AND_BURN
+            || carMission == MISSION_CRASH_HELI_AND_BURN
             || m_nStatus == STATUS_PLAYER && m_fHealth < 250.0 && field_981 == 2)
             && m_nStatus != STATUS_WRECKED
             && (m_fDamageIntensity > 0.0f && m_vecLastCollisionImpactVelocity.z > 0.0f || !IsInAir())
@@ -406,7 +406,7 @@ void CAutomobile::ProcessControl()
             traction = 0.004f * m_fCarTraction * m_pHandlingData->m_fTractionMultiplier;
         traction *= 0.25f / m_fVelocityFrequency;
         CPlane* vortex = static_cast<CPlane*>(this);
-        if (CCheat::m_aCheatsActive[CHEAT_PERFECT_HANDLING] || m_nModelIndex == MODEL_VORTEX && vortex->m_propSpeedClamped == 0.0f)
+        if (CCheat::m_aCheatsActive[CHEAT_PERFECT_HANDLING] || m_nModelIndex == MODEL_VORTEX && vortex->m_fAccelerationBreakStatus == 0.0f)
             traction *= 4.0f;
 
         if (this != FindPlayerVehicle(-1, false) && (extraPerfectHandling || CCheat::m_aCheatsActive[CHEAT_PERFECT_HANDLING])) {
@@ -681,7 +681,7 @@ void CAutomobile::ProcessControl()
         && fabs(m_vecMoveSpeed.z) < 0.0045f)
     {
         if (m_fDamageIntensity <= 0.0f || m_pDamageEntity != FindPlayerPed(-1)) {
-            if ((!IsPlane() || static_cast<CPlane*>(this)->m_propSpeedClamped == 0.0f) &&
+            if ((!IsPlane() || static_cast<CPlane*>(this)->m_fAccelerationBreakStatus == 0.0f) &&
                 (!IsHeli() || static_cast<CHeli*>(this)->m_fAccelerationBreakStatus == 0.0f))
             {
                 if ((m_wMiscComponentAngle == 0.0f || m_wMiscComponentAngle == m_wVoodooSuspension)
@@ -1860,7 +1860,7 @@ void CAutomobile::PlaceOnRoadProperly()
     SetPosn(vecNewPos);
 
     if (IsPlane())
-        static_cast<CPlane*>(this)->m_fHeading = CGeneral::GetATanOfXY(GetForward().x, GetForward().y);
+        static_cast<CPlane*>(this)->m_planeCreationHeading = CGeneral::GetATanOfXY(GetForward().x, GetForward().y);
 }
 
 // Converted from thiscall void CAutomobile::PopBoot(void) 0x6AF910
