@@ -3575,7 +3575,7 @@ void CStreaming::Update() {
             m_bBoatsNeeded = ThePaths.IsWaterNodeNearby(TheCamera.GetPosition(), 80.0f);
     }
     if (!ms_disableStreaming && !CCutsceneMgr::ms_cutsceneProcessing && !CGame::currArea
-        && CReplay::Mode != 1 && fDistanceZ < 50.0f)
+        && CReplay::Mode != REPLAY_MODE_1 && fDistanceZ < 50.0f)
     {
         StreamVehiclesAndPeds_Always(FindPlayerCoors(-1));
         if (!IsVeryBusy()) {

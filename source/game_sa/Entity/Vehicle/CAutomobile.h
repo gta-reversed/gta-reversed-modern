@@ -123,7 +123,7 @@ public:
     int field_8B4[6];
     int field_8C8[6];
     int m_dwBurnTimer;
-    CEntity *m_pWheelCollisionEntity[4];
+    CPhysical *m_pWheelCollisionEntity[4];
     CVector m_vWheelCollisionPos[4];
     char field_924;
     char field_925;
@@ -172,6 +172,7 @@ public:
     float field_984;
 
     // variables
+    static constexpr float ROLL_ONTO_WHEELS_FORCE = 0.0025f;
     static bool &m_sAllTaxiLights;
     static CVector &vecHunterGunPos; // { 0.0f, 4.8f, -1.3f }
     static CMatrix *matW2B;
@@ -186,9 +187,10 @@ public:
     virtual void DoHoverSuspensionRatios();
     virtual void ProcessSuspension();
 
-    private:
-        void ProcessControl_Reversed();
-    public:
+private:
+    void ProcessControl_Reversed();
+    void ProcessSuspension_Reversed();
+public:
 
     static void InjectHooks();
     //funcs

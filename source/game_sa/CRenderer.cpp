@@ -587,7 +587,7 @@ int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
             {
                 if (gbFirstPersonRunThisFrame)
                 {
-                    if (CReplay::Mode != 1)
+                    if (CReplay::Mode != REPLAY_MODE_1)
                     {
                         std::uint32_t dwDirectionWasLooking = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nDirectionWasLooking;
                         CAutomobile* pVehicle = FindPlayerVehicle(-1, 0);

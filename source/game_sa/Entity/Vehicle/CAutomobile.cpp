@@ -14,6 +14,7 @@ CColPoint* aAutomobileColPoints = (CColPoint*)0xC1BFF8;
 void CAutomobile::InjectHooks()
 {
     ReversibleHooks::Install("CAutomobile", "ProcessControl", 0x6B1880, &CAutomobile::ProcessControl_Reversed);
+    ReversibleHooks::Install("CAutomobile", "ProcessSuspension", 0x6AFB10, &CAutomobile::ProcessSuspension_Reversed);
     ReversibleHooks::Install("CAutomobile", "HydraulicControl", 0x6A07A0, &CAutomobile::HydraulicControl);
     ReversibleHooks::Install("CAutomobile", "ProcessBuoyancy", 0x6A8C00, &CAutomobile::ProcessBuoyancy);
     ReversibleHooks::Install("CAutomobile", "PlaceOnRoadProperly", 0x6AF420, &CAutomobile::PlaceOnRoadProperly);
@@ -302,7 +303,7 @@ void CAutomobile::ProcessControl()
         }
 
         for (int32_t i = 0; i < 4; i++) {
-            CPhysical* collisionEntity = reinterpret_cast<CPhysical*>(m_pWheelCollisionEntity[i]);
+            CPhysical* collisionEntity = m_pWheelCollisionEntity[i];
             contactSpeeds[i] = GetSpeed(contactPoints[i]);
             if (collisionEntity) {
                 contactSpeeds[i] -= collisionEntity->GetSpeed(m_vWheelCollisionPos[i]);
@@ -339,8 +340,6 @@ void CAutomobile::ProcessControl()
                 ApplyTurnForce(force, point);
             }
         }
-
-
 
         float brake = m_pHandlingData->m_fBrakeDeceleration * m_fBreakPedal * CTimer::ms_fTimeStep;
 
@@ -726,6 +725,11 @@ void CAutomobile::ProcessControl_Reversed()
     return CAutomobile::ProcessControl();
 }
 
+void CAutomobile::ProcessSuspension_Reversed()
+{
+    return CAutomobile::ProcessSuspension();
+}
+
 CVector* CAutomobile::AddMovingCollisionSpeed(CVector* out, CVector& vecSpeed)
 {
     return ((CVector * (__thiscall*)(CVehicle*, CVector*, CVector&))(*(void***)this)[49])(this, out, vecSpeed);
@@ -755,10 +759,166 @@ void CAutomobile::DoHoverSuspensionRatios()
     ((void(__thiscall*)(CAutomobile*))(*(void***)this)[69])(this);
 }
 
-// Converted from void CAutomobile::ProcessSuspension(void) 0x0
 void CAutomobile::ProcessSuspension()
 {
-    ((void(__thiscall*)(CAutomobile*))(*(void***)this)[70])(this);
+    float springLength[4];
+    CVector contactPoints[4]; 
+    float wheelSpringForceDampingLimits[4]; 
+    CVector directions[4];
+    CVector contactSpeeds[4];
+    int32_t wheelLineIndices[4];
+
+    for (int32_t i = 0; i < 4; i++) {
+        springLength[i] = m_fWheelsSuspensionCompression[i];
+        wheelSpringForceDampingLimits[i] = 0.0f;
+    }
+
+    float forwardSpeed = fabs(DotProduct(m_vecMoveSpeed, GetForward()));
+
+    int32_t numWheelLoops = 1;
+    if (ModelIndices::IsRhino(m_nModelIndex) && CReplay::Mode != REPLAY_MODE_1)
+        numWheelLoops = 3;
+    for (int32_t wheelLoopIndex = 0; wheelLoopIndex < numWheelLoops; wheelLoopIndex++) {
+        for (int32_t i = 0; i < 4; i++) {
+            directions[i] = GetUp() * -1.0f;
+            if (springLength[i] < 1.0f) 
+                contactPoints[i] = m_wheelColPoint[i].m_vecPoint - GetPosition();
+        }
+
+        for (int32_t i = 0; i < 4; i++) {
+            if (springLength[i] >= 1.0f)
+                continue;
+            float suspensionBias = m_pHandlingData->m_fSuspensionBiasBetweenFrontAndRear;
+            if (i == CARWHEEL_REAR_LEFT || i == CARWHEEL_REAR_RIGHT)
+                suspensionBias = 1.0f - suspensionBias;
+
+            float fSuspensionForceLevel = m_pHandlingData->m_fSuspensionForceLevel;
+            if (handlingFlags.bHydraulicGeom && handlingFlags.bHydraulicInst) {
+                if (handlingFlags.bNpcNeutralHandl && m_nStatus == STATUS_SIMPLE)
+                    suspensionBias = 0.5f;
+                if (fabs(forwardSpeed) < 0.15f)
+                        fSuspensionForceLevel *= 1.5f;
+            }
+            if (ModelIndices::IsVortex(m_nModelIndex))
+                fSuspensionForceLevel *= fabs(static_cast<CPlane*>(this)->m_fAccelerationBreakStatus) * 0.25f + 1.0f;
+            if (CCheat::m_aCheatsActive[CHEAT_CARS_ON_WATER] || ModelIndices::IsVortex(m_nModelIndex))
+                ApplySpringCollision(
+                    fSuspensionForceLevel,
+                    directions[i],
+                    contactPoints[i],
+                    springLength[i],
+                    suspensionBias,
+                    wheelSpringForceDampingLimits[i]);
+            else
+                ApplySpringCollisionAlt(
+                    fSuspensionForceLevel,
+                    directions[i],
+                    contactPoints[i],
+                    springLength[i],
+                    suspensionBias,
+                    m_wheelColPoint[i].m_vecNormal,
+                    wheelSpringForceDampingLimits[i]);
+        }
+
+        for (int32_t i = 0; i < 4; ++i) {
+            contactSpeeds[i] = CPhysical::GetSpeed(contactPoints[i]);
+            if (m_pWheelCollisionEntity[i])
+                contactSpeeds[i] -= m_pWheelCollisionEntity[i]->GetSpeed(m_vWheelCollisionPos[i]);
+            if (m_fWheelsSuspensionCompression[i] < 1.0f && m_wheelColPoint[i].m_vecNormal.z > 0.35f) {
+                directions[i] = -m_wheelColPoint[i].m_vecNormal;
+            }
+        }
+
+        for (int32_t i = 0; i < 4; ++i) {
+            float dampingForce = m_pHandlingData->m_fSuspensionDampingLevel;
+            if (handlingFlags.bHydraulicInst && dampingForce > 0.1f && fabs(forwardSpeed) < 0.15f)
+                dampingForce = 0.1f;
+            if (springLength[i] < 1.0f && !npcFlags.bSoftSuspension)
+                ApplySpringDampening(
+                    dampingForce,
+                    wheelSpringForceDampingLimits[i],
+                    directions[i],
+                    contactPoints[i],
+                    contactSpeeds[i]);
+        }
+        //--numWheelLoops;
+        if (!ModelIndices::IsRhino(m_nModelIndex))
+            continue;
+        if (numWheelLoops <= 1 || wheelLoopIndex > 1)
+            break;
+        if (wheelLoopIndex == 0) {
+            wheelLineIndices[CARWHEEL_FRONT_LEFT] = 4;
+            wheelLineIndices[CARWHEEL_REAR_LEFT] = 7;
+            wheelLineIndices[CARWHEEL_FRONT_RIGHT] = 8;
+            wheelLineIndices[CARWHEEL_REAR_RIGHT] = 11;
+
+            springLength[CARWHEEL_FRONT_LEFT] = m_doors[DOOR_LEFT_REAR].m_fOpenAngle;
+            springLength[CARWHEEL_REAR_LEFT] = m_doors[DOOR_LEFT_REAR].m_fPrevAngle;
+            springLength[CARWHEEL_FRONT_RIGHT] = m_doors[DOOR_RIGHT_REAR].m_fOpenAngle;
+            springLength[CARWHEEL_REAR_RIGHT] = m_doors[DOOR_RIGHT_REAR].m_fPrevAngle;
+        }
+        else if (wheelLoopIndex == 1) {
+            springLength[CARWHEEL_FRONT_LEFT] = m_doors[DOOR_LEFT_REAR].m_fClosedAngle;
+            springLength[CARWHEEL_REAR_LEFT] = m_doors[DOOR_LEFT_REAR].m_fAngle;
+            springLength[CARWHEEL_FRONT_RIGHT] = m_doors[DOOR_RIGHT_REAR].m_fClosedAngle;
+            springLength[CARWHEEL_REAR_RIGHT] = m_doors[DOOR_RIGHT_REAR].m_fAngle;
+
+            wheelLineIndices[CARWHEEL_FRONT_LEFT] = 5;
+            wheelLineIndices[CARWHEEL_REAR_LEFT] = 6;
+            wheelLineIndices[CARWHEEL_FRONT_RIGHT] = 9;
+            wheelLineIndices[CARWHEEL_REAR_RIGHT] = 10;
+        }
+
+        CCollisionData* colData = GetColModel()->m_pColData;
+        float wheelsSuspensionCompressionPrev[4];
+        for (int32_t i = 0; i < 4; i++) {
+            float wheelRadius = 1.0f - m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i];
+            wheelsSuspensionCompressionPrev[i] = (wheelsSuspensionCompressionPrev[i] - wheelRadius) / (1.0f - wheelRadius);
+            // yes, wheelsSuspensionCompressionPrev is unused here
+
+            CColLine& colLine = colData->m_pLines[wheelLineIndices[i]];
+            contactPoints[i] = colLine.m_vecStart;
+            contactPoints[i].z -= m_aSuspensionLineLength[i] * springLength[i];
+            contactPoints[i] = Multiply3x3(m_matrix, &contactPoints[i]);
+        }
+    }
+
+    float speedThreshold = 0.02f;
+    float rollOnToWheelsForce = ROLL_ONTO_WHEELS_FORCE;
+    if (m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_HELI) {
+        speedThreshold *= 2.0f;
+        rollOnToWheelsForce *= 2.0f;
+    }
+
+    if (forwardSpeed < speedThreshold) {
+        float fDir = 0.0f;
+        if (m_fWheelsSuspensionCompression[CARWHEEL_FRONT_LEFT] == 1.0f
+            && m_fWheelsSuspensionCompression[CARWHEEL_REAR_LEFT] == 1.0f
+            && (m_fWheelsSuspensionCompression[CARWHEEL_FRONT_RIGHT] < 1.0f
+                || m_fWheelsSuspensionCompression[CARWHEEL_REAR_RIGHT] < 1.0f))
+        {
+            fDir = 1.0f;
+        }
+        else if (forwardSpeed < speedThreshold
+            && m_fWheelsSuspensionCompression[CARWHEEL_FRONT_RIGHT] == 1.0f
+            && m_fWheelsSuspensionCompression[CARWHEEL_REAR_RIGHT] == 1.0f
+            && (m_fWheelsSuspensionCompression[CARWHEEL_FRONT_LEFT] < 1.0f
+                || m_fWheelsSuspensionCompression[CARWHEEL_REAR_LEFT] < 1.0f))
+        {
+            fDir = -1.0f;
+        }
+
+        if (fDir != 0.0f) {
+            CVector right = CrossProduct(GetForward(), CVector(0.0f, 0.0f, 1.0f));
+            if (fabs(DotProduct(right, GetRight())) < 0.6f) {
+                auto colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
+                CVector force = GetUp() * fDir * rollOnToWheelsForce * m_fTurnMass;
+                CVector point = GetRight() * colModel->GetBoundingBox().m_vecMax.x;
+                ApplyTurnForce(force, point);
+                ApplyMoveForce(-right * rollOnToWheelsForce * m_fMass * fDir);
+            }
+        }
+    }
 }
 
 // Converted from thiscall void CAutomobile::SetupModelNodes(void) 0x6A0770

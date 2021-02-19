@@ -1,5 +1,7 @@
 #pragma once
 
+#include "eModelID.h"
+
 namespace ModelIndices {
     extern unsigned short& MI_TRAFFICLIGHTS;
     extern unsigned short& MI_TRAFFICLIGHTS_VERTICAL;
@@ -165,6 +167,9 @@ namespace ModelIndices {
     extern unsigned short& MI_POOL_CUE_BALL;
     extern unsigned short& MI_PUNCHBAG;
     extern unsigned short& MI_IMY_GRAY_CRATE;
+
+    inline bool IsRhino(int32_t modelId) { return modelId == MODEL_RHINO; }
+    inline bool IsVortex(int32_t modelId) { return modelId == MODEL_VORTEX; }
 }
 
 void InitModelIndices();

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-int &CReplay::Mode = *reinterpret_cast<int *>(0xA43088);
+eReplayMode &CReplay::Mode = *reinterpret_cast<eReplayMode*>(0xA43088);
 
 void CReplay::Display()
 {

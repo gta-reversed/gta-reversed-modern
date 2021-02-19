@@ -1248,9 +1248,9 @@ bool CPhysical::ApplySoftCollision(CEntity* pEntity, CColPoint* pColPoint, float
 #endif
 }
 
-bool CPhysical::ApplySpringCollision(float fSuspensionForceLevel, CVector* direction, CVector* collisionPoint, float fSpringLength, float fSuspensionBias, float* fSpringForceDampingLimit) {
+bool CPhysical::ApplySpringCollision(float fSuspensionForceLevel, CVector& direction, CVector& collisionPoint, float fSpringLength, float fSuspensionBias, float& fSpringForceDampingLimit) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall*)(CPhysical*, float, CVector*, CVector*, float, float, float*))0x543C90)(this, fSuspensionForceLevel, direction, collisionPoint, fSpringLength, fSuspensionBias, fSpringForceDampingLimit);
+    return ((bool(__thiscall*)(CPhysical*, float, CVector&, CVector&, float, float, float&))0x543C90)(this, fSuspensionForceLevel, direction, collisionPoint, fSpringLength, fSuspensionBias, fSpringForceDampingLimit);
 #else
     float fSpringStress = 1.0f - fSpringLength;
     if (fSpringStress <= 0.0f)
@@ -1258,54 +1258,46 @@ bool CPhysical::ApplySpringCollision(float fSuspensionForceLevel, CVector* direc
     float fTimeStep = CTimer::ms_fTimeStep;
     if (CTimer::ms_fTimeStep >= 3.0f)
         fTimeStep = 3.0f;
-    *fSpringForceDampingLimit = fSpringStress * m_fMass * fSuspensionForceLevel * 0.016f * fTimeStep * fSuspensionBias;
-    ApplyForce((-1.0f * *fSpringForceDampingLimit) * *direction, *collisionPoint, true);
+    fSpringForceDampingLimit = fSpringStress * m_fMass * fSuspensionForceLevel * 0.016f * fTimeStep * fSuspensionBias;
+    ApplyForce((-1.0f * fSpringForceDampingLimit) * direction, collisionPoint, true);
     return true;
 #endif
 }
 
-bool CPhysical::ApplySpringCollisionAlt(float fSuspensionForceLevel, CVector* direction, CVector* collisionPoint, float fSpringLength, float fSuspensionBias, CVector* collisionPointDirection, float* fSpringForceDampingLimit) {
+bool CPhysical::ApplySpringCollisionAlt(float fSuspensionForceLevel, CVector& direction, CVector& collisionPoint, float fSpringLength, float fSuspensionBias, CVector& normal, float& fSpringForceDampingLimit) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall*)(CPhysical*, float, CVector*, CVector*, float, float, CVector*, float*))0x543D60)(this, fSuspensionForceLevel, direction, collisionPoint, fSpringLength, fSuspensionBias, collisionPointDirection, fSpringForceDampingLimit);
+    return ((bool(__thiscall*)(CPhysical*, float, CVector&, CVector&, float, float, CVector&, float&))0x543D60)(this, fSuspensionForceLevel, direction, collisionPoint, fSpringLength, fSuspensionBias, normal, fSpringForceDampingLimit);
 #else
     float fSpringStress = 1.0f - fSpringLength;
     if (fSpringStress <= 0.0f)
         return true;
-    if (DotProduct(direction, collisionPointDirection) > 0.0f)
-        *collisionPointDirection *= -1.0f;
+    if (DotProduct(direction, normal) > 0.0f)
+        normal *= -1.0f;
     float fTimeStep = CTimer::ms_fTimeStep;
     if (CTimer::ms_fTimeStep >= 3.0f)
         fTimeStep = 3.0f;
-    *fSpringForceDampingLimit = fSpringStress * (fTimeStep * m_fMass) * fSuspensionForceLevel * fSuspensionBias * 0.016f;
+    fSpringForceDampingLimit = fSpringStress * (fTimeStep * m_fMass) * fSuspensionForceLevel * fSuspensionBias * 0.016f;
     if (physicalFlags.bMakeMassTwiceAsBig)
-        *fSpringForceDampingLimit = *fSpringForceDampingLimit * 0.75f;
-    ApplyForce(*fSpringForceDampingLimit * *collisionPointDirection, *collisionPoint, true);
+        fSpringForceDampingLimit *= 0.75f;
+    ApplyForce(fSpringForceDampingLimit * normal, collisionPoint, true);
     return true;
 #endif
 }
 
-bool CPhysical::ApplySpringDampening(float fDampingForce, float fSpringForceDampingLimit, CVector* direction, CVector* collisionPoint, CVector* collisionPos) {
+bool CPhysical::ApplySpringDampening(float fDampingForce, float fSpringForceDampingLimit, CVector& direction, CVector& collisionPoint, CVector& collisionPos) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall*)(CPhysical*, float, float, CVector*, CVector*, CVector*))0x543E90)(this, fDampingForce, fSpringForceDampingLimit, direction, collisionPoint, collisionPos);
+    return ((bool(__thiscall*)(CPhysical*, float, float, CVector&, CVector&, CVector&))0x543E90)(this, fDampingForce, fSpringForceDampingLimit, direction, collisionPoint, collisionPos);
 #else
     float fCollisionPosDotProduct = DotProduct(collisionPos, direction);
-    CVector vecCollisionPointSpeed = GetSpeed(*collisionPoint);
-    float fCollisionPointSpeedDotProduct = DotProduct(&vecCollisionPointSpeed, direction);
+    CVector vecCollisionPointSpeed = GetSpeed(collisionPoint);
+    float fCollisionPointSpeedDotProduct = DotProduct(vecCollisionPointSpeed, direction);
     float fTimeStep = CTimer::ms_fTimeStep;
     if (CTimer::ms_fTimeStep >= 3.0f)
         fTimeStep = 3.0f;
     float fDampingForceTimeStep = fTimeStep * fDampingForce;
     if (physicalFlags.bMakeMassTwiceAsBig)
-        fDampingForceTimeStep = fDampingForceTimeStep + fDampingForceTimeStep;
-    if (fDampingForceTimeStep <= DAMPING_LIMIT_IN_FRAME) {
-        float fNegativeDampingLimitInFrame = -DAMPING_LIMIT_IN_FRAME;
-        if (fDampingForceTimeStep < fNegativeDampingLimitInFrame)
-            fDampingForceTimeStep = fNegativeDampingLimitInFrame;
-    }
-    else {
-        fDampingForceTimeStep = DAMPING_LIMIT_IN_FRAME;
-    }
-
+        fDampingForceTimeStep *= 2.0f;
+    fDampingForceTimeStep = clamp<float>(fDampingForceTimeStep, -DAMPING_LIMIT_IN_FRAME, DAMPING_LIMIT_IN_FRAME);
     float fDampingSpeed = -(fDampingForceTimeStep * fCollisionPosDotProduct);
     if (fDampingSpeed > 0.0 && fDampingSpeed + fCollisionPointSpeedDotProduct > 0.0f) {
         if (fCollisionPointSpeedDotProduct >= 0.0f)
@@ -1320,16 +1312,13 @@ bool CPhysical::ApplySpringDampening(float fDampingForce, float fSpringForceDamp
             fDampingSpeed = -fCollisionPointSpeedDotProduct;
     }
 
-    CVector vecCentreOfMassMultiplied;
-    Multiply3x3(&vecCentreOfMassMultiplied, m_matrix, &m_vecCentreOfMass);
-    CVector vecDifference = *collisionPoint - vecCentreOfMassMultiplied;
-    CVector vecCrossProduct;
-    CrossProduct(&vecCrossProduct, &vecDifference, direction);
-    float fSpringForceDamping = 1.0f / (vecCrossProduct.SquaredMagnitude() / m_fTurnMass + 1.0f / m_fMass) * fDampingSpeed;
+    CVector center = Multiply3x3(m_matrix, &m_vecCentreOfMass);
+    CVector distance = collisionPoint - center;
+    float fSpringForceDamping = GetMass(distance, direction) * fDampingSpeed;
     fSpringForceDampingLimit = fabs(fSpringForceDampingLimit) * DAMPING_LIMIT_OF_SPRING_FORCE;
     if (fSpringForceDamping > fSpringForceDampingLimit)
         fSpringForceDamping = fSpringForceDampingLimit;
-    ApplyForce(fSpringForceDamping * *direction, *collisionPoint, true);
+    ApplyForce(fSpringForceDamping * direction, collisionPoint, true);
     return true;
 #endif
 }

@@ -576,7 +576,7 @@ void CEntity::PreRender_Reversed()
             }
         }
         else if (m_nModelIndex == eModelID::MODEL_MISSILE) {
-            if (CReplay::Mode != 1) {
+            if (CReplay::Mode != REPLAY_MODE_1) {
                 auto vecPos = GetPosition();
                 auto fRand = static_cast<float>(rand() & 0xF) / 16.0F;
                 CShadows::StoreShadowToBeRendered(eShadowTextureType::SHADOWTEX_PED,

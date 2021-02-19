@@ -1,9 +1,15 @@
 #pragma once
 
+enum eReplayMode : int32_t
+{
+    REPLAY_MODE_0,
+    REPLAY_MODE_1
+};
+
 class CReplay
 {
 public:
-    static int &Mode;
+    static eReplayMode&Mode;
 
     static void Display();
 };
