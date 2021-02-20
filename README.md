@@ -1,4 +1,4 @@
-## gtasa-reversed [![Build Status](https://github.com/saml1er/gta-reversed/workflows/Build/badge.svg?event=push&branch=master)](https://github.com/saml1er/gta-reversed/actions?query=workflow%3ABuild)
+## gtasa-reversed [![Build Status](https://github.com/codenulls/gta-reversed/workflows/Build/badge.svg?event=push&branch=master)](https://github.com/codenulls/gta-reversed/actions?query=workflow%3ABuild)
 
 A project to reverse Grand Theft Auto San Andreas completely, and to rewrite and document every function. 
 
@@ -9,12 +9,12 @@ A project to reverse Grand Theft Auto San Andreas completely, and to rewrite and
 Building this project will result in a DLL file, that DLL file can be injected into GTA:SA using any ASI loader out there. After the DLL file has been injected, the ingame functions will be replaced by the reversed code. The game will behave exactly the same. Now if we make any changes to the reversed code, it will take effect in the game. The goal is to keep reversing until we have the entire game reversed to compile a standalone executable.
 
 ### Progress
-The progress of reversed functions can be tracked [here](docs/ReversedClasses.MD).
+The progress of reversed classes can be tracked [here](docs/ReversedClasses.MD).
 
 ### Build Instructions
 You can either build with Premake5 or CMake, that's up to you.
 ##### Premake5
-1) Clone the project, including the submodules `git clone --recurse-submodules https://github.com/saml1er/gta-reversed.git`.
+1) Clone the project, including the submodules `git clone --recurse-submodules https://github.com/codenulls/gta-reversed.git`.
 
 2) Execute `premake5.bat` (Visual Studio 2019 is required)
 
@@ -25,7 +25,7 @@ You can either build with Premake5 or CMake, that's up to you.
 
 2) Open CMake GUI ![Capture](https://gitlab.com/gtahackers/gta-reversed/uploads/9409c1da6c25fbe4423f750d45f29000/Capture.PNG) 
 
-3) Clone the project, including the submodules `git clone --recurse-submodules https://github.com/saml1er/gta-reversed.git`.
+3) Clone the project, including the submodules `git clone --recurse-submodules https://github.com/codenulls/gta-reversed.git`.
 
 4) Set the Source and Build directories (Don't forget to append "Bin" after the path for build), like this: 
 
