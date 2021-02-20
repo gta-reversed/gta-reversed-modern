@@ -16,8 +16,8 @@ public:
         unsigned char m_nFlags;
         struct {
             unsigned char m_bFlag0x01 : 1;
-            unsigned char m_bFlag0x02 : 1;
-            unsigned char m_bFlag0x04 : 1;
+            unsigned char m_bIsSingleColDataAlloc : 1;
+            unsigned char m_bIsActive : 1;
             unsigned char m_bFlag0x08 : 1;
             unsigned char m_bFlag0x10 : 1;
             unsigned char m_bFlag0x20 : 1;

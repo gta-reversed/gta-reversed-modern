@@ -241,6 +241,10 @@ public:
         return 1.0f / (CrossProduct(pos, dir).SquaredMagnitude() / m_fTurnMass +
             1.0f / m_fMass);
     }
+
+// HELPERS
+public:
+    inline bool IsImmovable()const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
 };
 
 VALIDATE_SIZE(CPhysical, 0x138);

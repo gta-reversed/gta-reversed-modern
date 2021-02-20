@@ -17,6 +17,10 @@ class CColCacheEntry;
 
 class CCollision {
 public:
+    static CLinkList<CCollisionData*> &ms_colModelCache;
+public:
+    static void InjectHooks();
+
     // dummy function
     static void Update();
     static void SortOutCollisionAfterLoad();

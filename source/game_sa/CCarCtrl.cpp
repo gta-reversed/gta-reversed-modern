@@ -8,11 +8,14 @@
 #include "StdInc.h"
 
 unsigned int& CCarCtrl::NumLawEnforcerCars = *(unsigned int*)0x969098;
+unsigned int& CCarCtrl::NumAmbulancesOnDuty = *(unsigned int*)0x9690A8;
+unsigned int& CCarCtrl::NumFireTrucksOnDuty = *(unsigned int*)0x9690AC;
 
 void CCarCtrl::InjectHooks()
 {
-    HookInstall(0x421A40, &CCarCtrl::ChooseGangCarModel, 7);
-    HookInstall(0x421980, &CCarCtrl::ChoosePoliceCarModel, 7);
+    ReversibleHooks::Install("CCarCtrl", "ChooseGangCarModel", 0x421A40, &CCarCtrl::ChooseGangCarModel, false, 7);
+    ReversibleHooks::Install("CCarCtrl", "ChoosePoliceCarModel", 0x421980, &CCarCtrl::ChoosePoliceCarModel, false, 7);
+    ReversibleHooks::Install("CCarCtrl", "CreateCarForScript", 0x431F80, &CCarCtrl::CreateCarForScript);
 }
 
 // Converted from cdecl int CCarCtrl::ChooseBoatModel(void) 0x421970
@@ -27,11 +30,7 @@ int CCarCtrl::ChooseCarModelToLoad(int arg1) {
 
 int CCarCtrl::ChooseGangCarModel(int loadedCarGroupId)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<int, 0x421A40, int>(loadedCarGroupId);
-#else
     return CPopulation::PickGangCar(loadedCarGroupId);
-#endif
 }
 
 // Converted from cdecl int CCarCtrl::ChooseModel(int *arg1) 0x424CE0
@@ -40,9 +39,6 @@ int CCarCtrl::ChooseModel(int* arg1) {
 }
 
 int CCarCtrl::ChoosePoliceCarModel(unsigned int ignoreLvpd1Model) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<int, 0x421980, unsigned int>(ignoreLvpd1Model);
-#else
     CWanted* playerWanted = FindPlayerWanted(-1);
     if (playerWanted->AreSwatRequired() 
         && CStreaming::ms_aInfoForModel[MODEL_ENFORCER].m_nLoadState == LOADSTATE_LOADED 
@@ -64,7 +60,6 @@ int CCarCtrl::ChoosePoliceCarModel(unsigned int ignoreLvpd1Model) {
             return (rand() < 0x3FFF) + MODEL_RHINO;
     }
     return CStreaming::GetDefaultCopCarModel(ignoreLvpd1Model);
-#endif
 }
 
 // Converted from cdecl void CCarCtrl::ClearInterestingVehicleList(void) 0x423F00
@@ -78,8 +73,83 @@ void CCarCtrl::ClipTargetOrientationToLink(CVehicle* pVehicle, CCarPathLinkAddre
 }
 
 // Converted from cdecl CVehicle* CCarCtrl::CreateCarForScript(int modelid,CVector posn,uchar MissionCleanUpFlag) 0x431F80
-CVehicle* CCarCtrl::CreateCarForScript(int modelid, CVector posn, unsigned char MissionCleanUpFlag) {
-    return plugin::CallAndReturn<CVehicle*, 0x431F80, int, CVector, unsigned char>(modelid, posn, MissionCleanUpFlag);
+CVehicle* CCarCtrl::CreateCarForScript(int modelid, CVector posn, unsigned char doMissionCleanup) {
+    if (CModelInfo::IsBoatModel(modelid))
+    {
+        auto* pBoat = new CBoat(modelid, eVehicleCreatedBy::MISSION_VEHICLE);
+        if (posn.z <= -100.0F)
+            posn.z = CWorld::FindGroundZForCoord(posn.x, posn.y);
+
+        posn.z += pBoat->GetDistanceFromCentreOfMassToBaseOfModel();
+        pBoat->SetPosn(posn);
+
+        CTheScripts::ClearSpaceForMissionEntity(posn, pBoat);
+        pBoat->vehicleFlags.bEngineOn = false;
+        pBoat->vehicleFlags.bIsLocked = true;
+        pBoat->m_nStatus = eEntityStatus::STATUS_ABANDONED;
+        CCarCtrl::JoinCarWithRoadSystem(pBoat);
+
+        pBoat->m_autoPilot.m_nCarMission = eCarMission::MISSION_NONE;
+        pBoat->m_autoPilot.m_nTempAction = 0;
+        pBoat->m_autoPilot.m_fSomeSpeed = 20.0F;
+        pBoat->m_autoPilot.m_nCruiseSpeed = 20;
+
+        if (doMissionCleanup)
+            pBoat->m_bIsStaticWaitingForCollision = true;
+
+        pBoat->m_autoPilot.movementFlags.bIsStopped = true;
+        CWorld::Add(pBoat);
+
+        if (doMissionCleanup)
+            CTheScripts::MissionCleanUp.AddEntityToList(CPools::ms_pVehiclePool->GetRef(pBoat), MissionCleanUpEntityType::MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
+
+        return pBoat;
+    }
+
+    auto* pVeh = CCarCtrl::GetNewVehicleDependingOnCarModel(modelid, eVehicleCreatedBy::MISSION_VEHICLE);
+    if (posn.z <= -100.0F)
+        posn.z = CWorld::FindGroundZForCoord(posn.x, posn.y);
+
+    posn.z += pVeh->GetDistanceFromCentreOfMassToBaseOfModel();
+    pVeh->SetPosn(posn);
+
+    if (!doMissionCleanup)
+    {
+        if (pVeh->IsAutomobile())
+            pVeh->AsAutomobile()->PlaceOnRoadProperly();
+        else if (pVeh->IsBike())
+            pVeh->AsBike()->PlaceOnRoadProperly();
+    }
+
+    if (pVeh->IsTrain())
+        pVeh->AsTrain()->trainFlags.bNotOnARailRoad = true;
+
+    CTheScripts::ClearSpaceForMissionEntity(posn, pVeh);
+    pVeh->vehicleFlags.bIsLocked = true;
+    pVeh->m_nStatus = eEntityStatus::STATUS_ABANDONED;
+    CCarCtrl::JoinCarWithRoadSystem(pVeh);
+    pVeh->vehicleFlags.bEngineOn = false;
+    pVeh->vehicleFlags.bHasBeenOwnedByPlayer = true;
+
+    pVeh->m_autoPilot.m_nCarMission = eCarMission::MISSION_NONE;
+    pVeh->m_autoPilot.m_nTempAction = 0;
+    pVeh->m_autoPilot.m_nCarDrivingStyle = eCarDrivingStyle::DRIVINGSTYLE_STOP_FOR_CARS;
+    pVeh->m_autoPilot.m_fSomeSpeed = 13.0F;
+    pVeh->m_autoPilot.m_nCruiseSpeed = 13;
+    pVeh->m_autoPilot.m_nCurrentLane = 0;
+    pVeh->m_autoPilot.m_nNextLane = 0;
+
+    if (doMissionCleanup)
+        pVeh->m_bIsStaticWaitingForCollision = true;
+
+    CWorld::Add(pVeh);
+    if (doMissionCleanup)
+        CTheScripts::MissionCleanUp.AddEntityToList(CPools::ms_pVehiclePool->GetRef(pVeh), MissionCleanUpEntityType::MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
+
+    if (pVeh->IsRoadVehicle())
+        pVeh->m_autoPilot.movementFlags.bIsStopped = true;
+
+    return pVeh;
 }
 
 // Converted from cdecl bool CCarCtrl::CreateConvoy(CVehicle *pVehicle,int arg2) 0x42C740

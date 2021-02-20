@@ -22,6 +22,9 @@ enum eCarDrivingStyle : char
 
 class  CAutoPilot {
 public:
+    CAutoPilot();
+
+public:
     CNodeAddress         m_currentAddress;
     CNodeAddress         m_startingRouteNode;
     CNodeAddress         m_endingRouteNode;
@@ -38,28 +41,48 @@ public:
     char _smthNext;
     char                 m_nCurrentLane;
     char                 m_nNextLane;
-    eCarDrivingStyle                 m_nCarDrivingStyle;
-    eCarMission                 m_nCarMission;
+    eCarDrivingStyle     m_nCarDrivingStyle;
+    eCarMission          m_nCarMission;
     char                 m_nTempAction;
     unsigned int         m_nTempActionTime;
-    unsigned int _someStartTime;
-    char field_34;
-    char field_35;
+    unsigned int        _someStartTime;
+    unsigned char        m_ucTempActionMode;
+    unsigned char        m_ucCarMissionModeCounter; 
     char field_36[2];
-    float field_38;
-    float                m_fMaxTrafficSpeed;
-    unsigned char m_nCruiseSpeed;
+    float               m_fSomeSpeed;
+    float               m_fMaxTrafficSpeed;
+    unsigned char       m_nCruiseSpeed;
     char field_41;
     char field_42[2];
     float field_44;
-    char field_48[1];
-    char field_49;
+    unsigned char m_ucHeliTargetDist;
+    unsigned char m_ucHeliSpeedMult;
     char field_4A;
-    unsigned char        m_nCarCtrlFlags;
-    char field_4C;
+    union {
+        unsigned char  m_nCarCtrlFlags;
+        struct carCtrlFlags {
+            unsigned char bHonkAtCar : 1;
+            unsigned char bHonkAtPed : 1;
+            unsigned char bAvoidLevelTransitions : 1;
+            unsigned char bStayInFastLane : 1;
+            unsigned char bStayInSlowLane : 1;
+            unsigned char bDoTargetCatchupCheck : 1;
+            unsigned char bCantGoAgainstTraffic : 1;
+            unsigned char bHeliFollowTarget : 1;
+        } carCtrlFlags;
+    };
+    union
+    {
+        unsigned char m_nMovementFlags;
+        struct movementFlags
+        {
+            unsigned char bIsStopped : 1;
+            unsigned char bIsParked : 1;
+        } movementFlags;
+    };
     char                 m_nStraightLineDistance;
-    char field_4E;
-    char field_4F;
+    unsigned char m_ucCarFollowDist;
+    unsigned char m_ucHeliTargetDist2;
     char field_50;
     char field_51;
     char field_52[10];
@@ -70,7 +93,7 @@ public:
     class CVehicle      *m_pTargetCar;
     class CEntity       *m_pCarWeMakingSlowDownFor;
     char field_94;
-    char field_95;
+    bool m_bPlaneDogfightSomething;
     short field_96;
 
     void SetCarMission(eCarMission carMission)

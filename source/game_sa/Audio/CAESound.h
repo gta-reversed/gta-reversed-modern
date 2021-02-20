@@ -8,6 +8,7 @@
 
 #include "PluginBase.h"
 #include "CVector.h"
+class CAEAudioEntity;
 /*
 enum  eSoundEnvironment : unsigned short {
     SOUND_FRONT_END = 1,
@@ -27,9 +28,16 @@ enum  eSoundEnvironment : unsigned short {
 */
 class  CAESound {
 public:
+    CAESound() { m_pPhysicalEntity = nullptr; }
+    CAESound(CAESound& sound);
+    CAESound(short bankSlotId, short sfxId, CAEAudioEntity* baseAudio, CVector posn, float volume,
+        float fDistance, float speed, float timeScale, unsigned char arg9,
+        unsigned short environmentFlags, float arg11);
+    ~CAESound();
+public:
     short                 m_nBankSlotId;
     short                 m_nSoundIdInSlot;
-    class CAEAudioEntity *m_pBaseAudio;
+    CAEAudioEntity       *m_pBaseAudio;
     class CEntity        *m_pPhysicalEntity;
     unsigned int          m_nEvent;
     float                 m_fMaxVolume;
@@ -77,12 +85,9 @@ public:
     short m_nSoundLength;
     short field_72;
 
-    CAESound();
-    CAESound(CAESound& sound);
-    CAESound(short bankSlotId, short sfxId, CAEAudioEntity *baseAudio, CVector posn, float volume,
-        float maxDistance, float speed, float timeScale, unsigned char arg9,
-        unsigned short environmentFlags, float arg11);
-    ~CAESound();
+public:
+    static void InjectHooks();
+    
     void operator=(CAESound& sound);
     void UnregisterWithPhysicalEntity();
     void StopSound();

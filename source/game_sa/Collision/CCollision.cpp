@@ -7,6 +7,14 @@
 
 #include "StdInc.h"
 
+CLinkList<CCollisionData*>& CCollision::ms_colModelCache = *(CLinkList<CCollisionData*>*)0x96592C;
+
+void CCollision::InjectHooks()
+{
+    ReversibleHooks::Install("CCollision", "CalculateTrianglePlanes_colData", 0x416330, static_cast<void(*)(CCollisionData*)>(&CCollision::CalculateTrianglePlanes));
+    ReversibleHooks::Install("CCollision", "RemoveTrianglePlanes_colData", 0x416400, static_cast<void(*)(CCollisionData*)>(&CCollision::RemoveTrianglePlanes));
+}
+
 // Converted from cdecl void CCollision::Update(void) 0x411E20
 void CCollision::Update() {
     plugin::Call<0x411E20>();
@@ -189,12 +197,39 @@ void CCollision::Shutdown() {
 
 // Converted from cdecl void CCollision::CalculateTrianglePlanes(CCollisionData *colData) 0x416330
 void CCollision::CalculateTrianglePlanes(CCollisionData* colData) {
-    plugin::Call<0x416330, CCollisionData*>(colData);
+    if (!colData->m_nNumTriangles)
+        return;
+
+    if (colData->m_pTrianglePlanes)
+    {
+        auto* pLink = colData->GetLinkPtr();
+        pLink->Remove();
+        CCollision::ms_colModelCache.usedListHead.Insert(pLink);
+    }
+    else
+    {
+        auto* pLink = CCollision::ms_colModelCache.Insert(colData);
+        if (!pLink)
+        {
+            auto* pToRemove = CCollision::ms_colModelCache.usedListTail.prev;
+            pToRemove->data->RemoveTrianglePlanes();
+            CCollision::ms_colModelCache.Remove(pToRemove);
+            pLink = CCollision::ms_colModelCache.Insert(colData);
+        }
+
+        colData->CalculateTrianglePlanes();
+        colData->SetLinkPtr(pLink);
+    }
 }
 
 // Converted from cdecl void CCollision::RemoveTrianglePlanes(CCollisionData *colData) 0x416400
 void CCollision::RemoveTrianglePlanes(CCollisionData* colData) {
-    plugin::Call<0x416400, CCollisionData*>(colData);
+    if (!colData->m_pTrianglePlanes)
+        return;
+
+    auto* pLink = colData->GetLinkPtr();
+    CCollision::ms_colModelCache.Remove(pLink);
+    colData->RemoveTrianglePlanes();
 }
 
 // Converted from cdecl bool CCollision::ProcessSphereSphere(CColSphere const&sphere1,CColSphere const&sphere2,CColPoint &colPoint,float &maxTouchDistance) 0x416450

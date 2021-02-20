@@ -27,10 +27,9 @@ enum eBoatNodes {
 };
 
 class CBoat : public CVehicle {
-protected:
-    CBoat(plugin::dummy_func_t) : CVehicle(plugin::dummy) {}
+public:
     CBoat(int modelIndex, unsigned char createdBy);
-    ~CBoat();
+    ~CBoat() override;
 public:
     float              m_fMovingHiRotation; // works as counter also
     float              m_fPropSpeed; // propeller speed

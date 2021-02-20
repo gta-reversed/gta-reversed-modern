@@ -12,10 +12,12 @@
 #include "CPathFind.h"
 
 
-class  CCarCtrl
+class CCarCtrl
 {
 public:
     static unsigned int& NumLawEnforcerCars;
+    static unsigned int& NumAmbulancesOnDuty;
+    static unsigned int& NumFireTrucksOnDuty;
 
 	static void InjectHooks();
 
@@ -26,7 +28,7 @@ public:
 	static int ChooseGangCarModel(int loadedCarGroupId);
 	static void ClearInterestingVehicleList();
 	static void ClipTargetOrientationToLink(CVehicle* pVehicle, CCarPathLinkAddress arg2, char arg3, float* arg4, float arg5, float arg6);
-	static CVehicle* CreateCarForScript(int modelid, CVector posn, unsigned char MissionCleanUpFlag);
+	static CVehicle* CreateCarForScript(int modelid, CVector posn, unsigned char doMissionCleanup);
 	static bool CreateConvoy(CVehicle* pVehicle, int arg2);
 	static bool CreatePoliceChase(CVehicle* pVehicle, int arg2, CNodeAddress NodeAddress);
 	static bool DealWithBend_Racing(CVehicle* pVehicle, CCarPathLinkAddress LinkAddress1, CCarPathLinkAddress LinkAddress2, CCarPathLinkAddress LinkAddress3, CCarPathLinkAddress LinkAddress4, char arg6, char arg7, char arg8, char arg9, float arg10, float* arg11, float* arg12, float* arg13, float* arg14, CVector* pVector);

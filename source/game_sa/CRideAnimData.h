@@ -11,10 +11,10 @@
 class  CRideAnimData {
 public:
     unsigned int m_nAnimGroup;
-    float m_fSteerAngle;
+    float        m_fSteerAngle;
     float        m_fAnimLean;
-    int dwordC;
-    float dword10;
+    int          dwordC;
+    float        dword10;
     float        m_fHandlebarsAngle;
     float        m_fAnimPercentageState;
 };

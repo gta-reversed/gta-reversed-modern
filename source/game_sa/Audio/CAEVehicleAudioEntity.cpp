@@ -1,5 +1,17 @@
 #include "StdInc.h"
 
+CAEVehicleAudioEntity::CAEVehicleAudioEntity() : CAEAudioEntity(), m_skidSound()
+{
+    m_bEnabled = false;
+    m_pEntity = nullptr;
+}
+
+CAEVehicleAudioEntity::~CAEVehicleAudioEntity()
+{
+    if (m_bEnabled)
+        CAEVehicleAudioEntity::Terminate();
+}
+
 void CAEVehicleAudioEntity::AddAudioEvent(int audioEvent, float fVolume)
 {
     plugin::CallMethod<0x4F6420, CAEVehicleAudioEntity*, int, float>(this, audioEvent, fVolume);

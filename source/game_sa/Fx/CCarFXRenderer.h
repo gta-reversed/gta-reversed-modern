@@ -3,6 +3,12 @@
 class CCarFXRenderer
 {
 public:
+    static constexpr int NUM_DIRT_TEXTURES = 16;
+    static RwTexture* (&ms_aDirtTextures)[NUM_DIRT_TEXTURES];
+
+public:
+    static void InjectHooks();
+
     static void Initialise();
     static void Shutdown();
     static void PreRenderUpdate();

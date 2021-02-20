@@ -47,7 +47,7 @@ CBoat::CBoat(int modelIndex, unsigned char createdBy) : CVehicle(createdBy)
 {
     memset(&m_boatFlap, 0, sizeof(m_boatFlap));
     auto pModelInfo = reinterpret_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(modelIndex));
-    auto iHandlingId = pModelInfo->m_nHandlingId;
+    const auto iHandlingId = pModelInfo->m_nHandlingId;
     m_vehicleSubType = eVehicleType::VEHICLE_BOAT;
     m_vehicleType = eVehicleType::VEHICLE_BOAT;
     m_vecBoatMoveForce.Set(0.0F, 0.0F, 0.0F);
@@ -94,7 +94,7 @@ CBoat::CBoat(int modelIndex, unsigned char createdBy) : CVehicle(createdBy)
 
     m_fAnchoredAngle = -9999.99F;
     m_fBurningTimer = 0.0;
-    m_pWhoDestroyedMe = 0;
+    m_pWhoDestroyedMe = nullptr;
     m_nNumWaterTrailPoints = 0;
     memset(m_afWakePointLifeTime, 0, sizeof(m_afWakePointLifeTime));
 
@@ -114,7 +114,7 @@ CBoat::CBoat(int modelIndex, unsigned char createdBy) : CVehicle(createdBy)
     }
 
     m_vehicleAudio.Initialise(this);
-    for (size_t i = 0; i <= 1; ++i)
+    for (size_t i = 0; i < 2; ++i)
         m_apPropSplashFx[i] = nullptr;
 }
 
@@ -464,7 +464,7 @@ void CBoat::ProcessControl_Reversed() {
         m_nBoatFlags.bAnchored = false;
         m_fAnchoredAngle = -9999.99F;
         if (m_pDriver)
-            CVehicle::ProcessControlInputs(m_pDriver->m_nPedType);
+            this->ProcessControlInputs(m_pDriver->m_nPedType);
 
         if (m_nModelIndex == eModelID::MODEL_PREDATOR)
             CVehicle::DoFixedMachineGuns();
@@ -593,7 +593,7 @@ void CBoat::ProcessControl_Reversed() {
 
                 m_fBurningTimer += (CTimer::ms_fTimeStep * 20.0F);
                 if (m_fBurningTimer > 5000.0F)
-                    BlowUpCar(m_pWhoDestroyedMe, false);
+                    this->BlowUpCar(m_pWhoDestroyedMe, false);
             }
         }
     }

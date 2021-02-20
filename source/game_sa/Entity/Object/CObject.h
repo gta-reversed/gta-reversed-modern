@@ -82,8 +82,7 @@ public:
     char field_146;
     char            m_nGarageDoorGarageIndex;
     unsigned char   m_nLastWeaponDamage;
-    unsigned char   m_nDayBrightness : 4;
-    unsigned char   m_nNightBrightness : 4;
+    tColLighting    m_nColLighting;
     short           m_nRefModelIndex;
     unsigned char   m_nCarColor[4]; // this is used for detached car parts
     int             m_dwRemovalTime; // time when this object must be deleted
@@ -187,6 +186,9 @@ public:
             || m_nModelIndex == ModelIndices::MI_MINI_MAGNET
             || m_nModelIndex == ModelIndices::MI_WRECKING_BALL;
     }
+    inline bool IsFallenLampPost() const { return objectFlags.bIsLampPost && m_matrix->GetUp().z < 0.66F; }
+    inline bool IsExploded() const { return objectFlags.bIsExploded; }
+    inline bool CanBeSmashed() const { return m_nColDamageEffect >= eObjectColDamageEffect::COL_DAMAGE_EFFECT_SMASH_COMPLETELY; }
 };
 VALIDATE_SIZE(CObject, 0x17C);
 

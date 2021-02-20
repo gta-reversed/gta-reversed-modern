@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+RwTexture* (&CCarFXRenderer::ms_aDirtTextures)[NUM_DIRT_TEXTURES] = *(RwTexture*(*)[NUM_DIRT_TEXTURES])0xC02BD0;
+
 bool CCarFXRenderer::IsCCPCPipelineAttached(RpAtomic* pAtomic)
 {
     return plugin::CallAndReturn<bool, 0x5D5B80, RpAtomic*>(pAtomic);

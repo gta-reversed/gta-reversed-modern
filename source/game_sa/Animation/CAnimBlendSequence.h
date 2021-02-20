@@ -6,9 +6,14 @@
 */
 #pragma once
 
+#include "AnimSequenceFrames.h"
 #include "PluginBase.h"
 
 class  CAnimBlendSequence {
+public:
+    CAnimBlendSequence();
+    ~CAnimBlendSequence();
+
 public:
     // thanks to jte for some info
     union
@@ -43,8 +48,10 @@ public:
     unsigned short m_nFrameCount;
     void *m_pFrames;
 
+public:
+    static void InjectHooks();
+
     //funcs
-    CAnimBlendSequence();
     void CompressKeyframes(unsigned char* arg1);
     int GetDataSize(bool arg1);
     bool MoveMemorY();
@@ -54,7 +61,9 @@ public:
     void SetName(char const* string);
     void SetNumFrames(int count, bool arg2, bool arg3, unsigned char* arg4);
     void Uncompress(unsigned char* arg1);
-    ~CAnimBlendSequence();
+
+    CAnimSequenceRootFrameUncompressed* GetUncompressedFrame(int iFrame); // Can return child frame casted as root frame, the translation shouldn't be accessed then
+    CAnimSequenceRootFrameCompressed* GetCompressedFrame(int iFrame); // Can return child frame casted as root frame, the translation shouldn't be accessed then
 
 };
 

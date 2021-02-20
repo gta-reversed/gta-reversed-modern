@@ -36,7 +36,11 @@ public:
     static void ImGuiDrawMouse();
     static void Shutdown();
 
+    static bool Visible() { return m_showMenu; }
+
     static CDebugMenuToolInput::ToolMap m_vehiclesMap;
     static CDebugMenuToolInput::ToolMap m_pedsMap;
     static CDebugMenuToolInput::ToolMap m_missionsMap;
 };
+
+bool findStringCaseInsensitive(const std::string& strHaystack, const std::string& strNeedle);

@@ -37,6 +37,11 @@ VALIDATE_SIZE(CForbiddenArea, 0x1C);
 class  CCarPathLinkAddress
 {
 public:
+	CCarPathLinkAddress() {
+        m_wCarPathLinkId = -1;
+        m_wAreaId = -1;
+    }
+public:
     unsigned short m_wCarPathLinkId : 10;
     unsigned short m_wAreaId : 6;
 

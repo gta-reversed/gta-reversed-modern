@@ -138,6 +138,11 @@ void CTheScripts::CleanUpThisVehicle(CVehicle* pVehicle) {
     plugin::CallDynGlobal<CVehicle*>(0x486670, pVehicle);
 }
 
+void CTheScripts::ClearSpaceForMissionEntity(CVector const& pos, CEntity* pEntity)
+{
+    plugin::Call<0x486B00, CVector const&, CEntity*>(pos, pEntity);
+}
+
 signed int CTheScripts::GetActualScriptThingIndex(int index, unsigned char type) {
     return plugin::CallAndReturnDynGlobal<signed int, int, unsigned char>(0x4839A0, index, type);
 }

@@ -8,16 +8,17 @@
 
 #include "PluginBase.h"
 #include "CBox.h"
+#include "CColPoint.h"
 
 class CColBox : public CBox {
 public:
 	unsigned char m_nMaterial;
 	unsigned char m_nFlags;
-	unsigned char m_nLighting;
-	unsigned char m_nLight;
+    tColLighting  m_nLighting;
+	unsigned char m_nBrightness;
 
 	void Set(CVector  const& sup, CVector  const& inf, unsigned char material , unsigned char flags, unsigned char lighting);
-	void operator=(CColBox const& right);
+    CColBox& operator=(CColBox const& right);
 };
 
 VALIDATE_SIZE(CColBox, 0x1C);

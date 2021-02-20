@@ -10,7 +10,7 @@ class CTaskSimpleCarDrive : public CTaskSimple
     CTaskSimpleCarDrive() = delete;
 public:
     CVehicle* m_pVehicle;
-    int field_C;
+    CAnimBlendAssociation* m_pAnimCloseDoorRolling;
     CTaskUtilityLineUpPedWithCar* m_pTaskUtilityLineUpPedWithCar;
     int field_14;
     int field_18;

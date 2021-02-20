@@ -334,7 +334,9 @@ public:
     void SetEnvMapCoeff(float coeff);
     // get num doors in this model
     int GetNumDoors();
-//Static methods
+
+
+// Static methods
     // setup lights states for currenly rendered vehicle
     static void SetupLightFlags(class CVehicle* vehicle);
 	// destroying vehiclelights textures
@@ -388,6 +390,8 @@ public:
 	static int GetNumWheelUpgrades(int wheelSetNumber);
 	// do nothing
 	static void DeleteVehicleColourTextures();
+    // Set vehicle dirt textures
+    static void SetDirtTextures(CVehicleModelInfo* info, int dirtLevel);
     // unloads 'white' texture
 	static void ShutdownEnvironmentMaps();
 	// gets mat effect of this material. Data is actually int *

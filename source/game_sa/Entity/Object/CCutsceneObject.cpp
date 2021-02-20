@@ -165,9 +165,7 @@ void CCutsceneObject::PreRender_Reversed()
                                     false, false, false,
                                     false, nullptr))
     {
-        const auto fDay = static_cast<float>(colPoint.m_nLightingB.day) / 30.0F;
-        const auto fNight = static_cast<float>(colPoint.m_nLightingB.night) / 30.0F;
-        const auto fDayNight = lerp(fDay, fNight, CCustomBuildingDNPipeline::m_fDNBalanceParam);
+        const auto fDayNight = colPoint.m_nLightingB.GetCurrentLighting();
         m_fContactSurfaceBrightness = lerp(m_fContactSurfaceBrightness, fDayNight, CTimer::ms_fTimeStep / 10.0F);
     }
 }

@@ -106,7 +106,10 @@ class CPed;
 
 class CAEVehicleAudioEntity : public CAEAudioEntity {
 public:
+    CAEVehicleAudioEntity();
+    ~CAEVehicleAudioEntity();
 
+public:
     void AddAudioEvent(int audioEvent, float fVolume);
     void Service();
     void Initialise(CVehicle* vehicle);

@@ -68,8 +68,12 @@ public:
 
     inline float SquaredMagnitude()
     {
-        // return ((float(__thiscall*)(CVector*)) 0x406DA0)(this);
         return x*x + y*y + z*z;
+    }
+
+    inline float SquaredMagnitude2D()
+    {
+        return x * x + y * y;
     }
 };
 

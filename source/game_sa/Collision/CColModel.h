@@ -13,30 +13,34 @@
 
 class CColModel {
 public:
-    CBoundingBox m_boundBox;
-	CColSphere m_boundSphere;
-    CCollisionData *m_pColData;
-
     CColModel();
     ~CColModel();
+    static void* operator new(unsigned int size);
+    static void operator delete(void* data);
     CColModel& operator=(CColModel const& colModel);
+
+public:
+    CBoundingBox m_boundBox;
+    CColSphere m_boundSphere;
+    CCollisionData *m_pColData;
 
 public:
     static void InjectHooks();
 
-    void MakeMultipleAlloc();
-    void AllocateData();
-    void AllocateData(int numSpheres, int numBoxes, int numLines, int numVertices, int numTriangles, bool disks);
+private:
     void AllocateData(int size);
+public:
+    void AllocateData();
+    void AllocateData(int numSpheres, int numBoxes, int numLines, int numVertices, int numTriangles, bool bUsesDisks);
+    void MakeMultipleAlloc();
     void RemoveCollisionVolumes();
     void CalculateTrianglePlanes();
     void RemoveTrianglePlanes();
-    inline float GetBoundRadius() { return m_boundSphere.m_fRadius; }
+
+// HELPERS
+    inline float GetBoundRadius() const { return m_boundSphere.m_fRadius; }
     inline CVector& GetBoundCenter() { return m_boundSphere.m_vecCenter; }
     inline CBoundingBox& GetBoundingBox() { return m_boundBox; }
-
-    static void* operator new(unsigned int size);
-    static void operator delete(void* data);
 };
 
 VALIDATE_SIZE(CColModel, 0x30);

@@ -98,6 +98,7 @@ void CVehicleModelInfo::InjectHooks()
     ReversibleHooks::Install("CVehicleModelInfo", "GetNumWheelUpgrades", 0x4C8740, &CVehicleModelInfo::GetNumWheelUpgrades);
     ReversibleHooks::Install("CVehicleModelInfo", "GetWheelUpgrade", 0x4C8750, &CVehicleModelInfo::GetWheelUpgrade);
     ReversibleHooks::Install("CVehicleModelInfo", "DeleteVehicleColourTextures", 0x4C8770, &CVehicleModelInfo::DeleteVehicleColourTextures);
+    ReversibleHooks::Install("CVehicleModelInfo", "SetDirtTextures", 0x5D5DB0, &CVehicleModelInfo::SetDirtTextures);
     ReversibleHooks::Install("CVehicleModelInfo", "ShutdownEnvironmentMaps", 0x4C87D0, &CVehicleModelInfo::ShutdownEnvironmentMaps);
     ReversibleHooks::Install("CVehicleModelInfo", "GetMatFXEffectMaterialCB", 0x4C8810, &CVehicleModelInfo::GetMatFXEffectMaterialCB);
     ReversibleHooks::Install("CVehicleModelInfo", "SetEnvironmentMapCB", 0x4C8840, &CVehicleModelInfo::SetEnvironmentMapCB);
@@ -1125,6 +1126,13 @@ int CVehicleModelInfo::GetNumWheelUpgrades(int wheelSetNumber)
 
 void CVehicleModelInfo::DeleteVehicleColourTextures()
 {}
+
+void CVehicleModelInfo::SetDirtTextures(CVehicleModelInfo* info, int dirtLevel)
+{
+    for (auto i = 0; i < CCarFXRenderer::NUM_DIRT_TEXTURES; ++i)
+        if (info->m_apDirtMaterials[i])
+            RpMaterialSetTexture(info->m_apDirtMaterials[i], CCarFXRenderer::ms_aDirtTextures[dirtLevel]);
+}
 
 void CVehicleModelInfo::ShutdownEnvironmentMaps()
 {

@@ -7,38 +7,137 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-CAESound::CAESound()
+void CAESound::InjectHooks()
 {
-
+    ReversibleHooks::Install("CAESound", "operator=", 0x4EF680, &CAESound::operator=);
+    ReversibleHooks::Install("CAESound", "UnregisterWithPhysicalEntity", 0x4EF1A0, &CAESound::UnregisterWithPhysicalEntity);
 }
 
 CAESound::CAESound(CAESound& sound)
 {
-    ((void(__thiscall *)(CAESound *, CAESound&))0x4EF0A0)(this, sound);
+    m_nBankSlotId = sound.m_nBankSlotId;
+    m_nSoundIdInSlot = sound.m_nSoundIdInSlot;
+    m_pBaseAudio = sound.m_pBaseAudio;
+    m_nEvent = sound.m_nEvent;
+    m_fMaxVolume = sound.m_fMaxVolume;
+    m_fVolume = sound.m_fVolume;
+    m_fSoundDistance = sound.m_fSoundDistance;
+    m_fSpeed = sound.m_fSpeed;
+    field_20 = sound.field_20;
+    m_vecCurrPosn = sound.m_vecCurrPosn;
+    m_vecPrevPosn = sound.m_vecPrevPosn;
+    m_nLastFrameUpdate = sound.m_nLastFrameUpdate;
+    m_nCurrTimeUpdate = sound.m_nCurrTimeUpdate;
+    m_nPrevTimeUpdate = sound.m_nPrevTimeUpdate;
+    m_fCurrCamDist = sound.m_fCurrCamDist;
+    m_fPrevCamDist = sound.m_fPrevCamDist;
+    m_fTimeScale = sound.m_fTimeScale;
+    field_54 = sound.field_54;
+    m_nEnvironmentFlags = sound.m_nEnvironmentFlags;
+    m_nIsUsed = sound.m_nIsUsed;
+    m_nCurrentPlayPosition = sound.m_nCurrentPlayPosition;
+    field_5E = sound.field_5E;
+    m_fFinalVolume = sound.m_fFinalVolume;
+    m_fFrequency = sound.m_fFrequency;
+    m_nPlayingState = sound.m_nPlayingState;
+    m_fSoundHeadRoom = sound.m_fSoundHeadRoom;
+    m_nSoundLength = sound.m_nSoundLength;
+    m_pPhysicalEntity = nullptr;
+
+    if (sound.m_pPhysicalEntity)
+    {
+        m_pPhysicalEntity = sound.m_pPhysicalEntity;
+        m_pPhysicalEntity->RegisterReference(&m_pPhysicalEntity);
+    }
 }
 
 CAESound::CAESound(short bankSlotId, short sfxId, CAEAudioEntity *baseAudio, CVector posn,
-    float volume, float maxDistance, float speed, float timeScale, unsigned char arg9,
+    float volume, float fDistance, float speed, float timeScale, unsigned char arg9,
     unsigned short environmentFlags, float arg11)
 {
-    ((void(__thiscall *)(CAESound *, short, short, CAEAudioEntity *, CVector, float, float, float,
-        float, unsigned char, unsigned short, float))0x4EFD80)(this, bankSlotId, sfxId, baseAudio,
-            posn, volume, maxDistance, speed, timeScale, arg9, environmentFlags, arg11);
+    m_nBankSlotId = bankSlotId;
+    m_nSoundIdInSlot = sfxId;
+    m_pBaseAudio = baseAudio;
+    m_vecPrevPosn.x = 0.0;
+    m_vecPrevPosn.y = 0.0;
+    m_vecPrevPosn.z = 0.0;
+    m_pPhysicalEntity = nullptr;
+    m_fMaxVolume = -1.0F;
+    m_nEvent = -1;
+    m_nLastFrameUpdate = 0;
+
+    CAESound::SetPosition(posn);
+
+    m_fVolume = volume;
+    m_fSoundDistance = fDistance;
+    m_fSpeed = speed;
+    m_fTimeScale = timeScale;
+    field_54 = arg9;
+    m_nEnvironmentFlags = environmentFlags;
+    field_5E = 0;
+    m_nCurrentPlayPosition = 0;
+    m_fSoundHeadRoom = 0.0F;
+    field_20 = arg11;
+    m_nIsUsed = 1;
+    m_fFinalVolume = -100.0F;
+    m_fFrequency = 1.0F;
+    m_nSoundLength = -1;
 }
 
 CAESound::~CAESound()
 {
-    ((void(__thiscall *)(CAESound *))0x4EF660)(this);
+    CAESound::UnregisterWithPhysicalEntity();
 }
 
 void CAESound::operator=(CAESound& sound)
 {
-    ((void(__thiscall *)(CAESound *, CAESound&))0x4EF680)(this, sound);
+    if (this == &sound)
+        return;
+
+    CAESound::UnregisterWithPhysicalEntity();
+    m_nBankSlotId = sound.m_nBankSlotId;
+    m_nSoundIdInSlot = sound.m_nSoundIdInSlot;
+    m_pBaseAudio = sound.m_pBaseAudio;
+    m_nEvent = sound.m_nEvent;
+    m_fMaxVolume = sound.m_fMaxVolume;
+    m_fVolume = sound.m_fVolume;
+    m_fSoundDistance = sound.m_fSoundDistance;
+    m_fSpeed = sound.m_fSpeed;
+    field_20 = sound.field_20;
+    m_vecCurrPosn = sound.m_vecCurrPosn;
+    m_vecPrevPosn = sound.m_vecPrevPosn;
+    m_nLastFrameUpdate = sound.m_nLastFrameUpdate;
+    m_nCurrTimeUpdate = sound.m_nCurrTimeUpdate;
+    m_nPrevTimeUpdate = sound.m_nPrevTimeUpdate;
+    m_fCurrCamDist = sound.m_fCurrCamDist;
+    m_fPrevCamDist = sound.m_fPrevCamDist;
+    m_fTimeScale = sound.m_fTimeScale;
+    field_54 = sound.field_54;
+    m_nEnvironmentFlags = sound.m_nEnvironmentFlags;
+    m_nIsUsed = sound.m_nIsUsed;
+    m_nCurrentPlayPosition = sound.m_nCurrentPlayPosition;
+    field_5E = sound.field_5E;
+    m_fFinalVolume = sound.m_fFinalVolume;
+    m_fFrequency = sound.m_fFrequency;
+    m_nPlayingState = sound.m_nPlayingState;
+    m_fSoundHeadRoom = sound.m_fSoundHeadRoom;
+    m_nSoundLength = sound.m_nSoundLength;
+    m_pPhysicalEntity = nullptr;
+
+    if (sound.m_pPhysicalEntity)
+    {
+        m_pPhysicalEntity = sound.m_pPhysicalEntity;
+        m_pPhysicalEntity->RegisterReference(&m_pPhysicalEntity);
+    }
 }
 
 void CAESound::UnregisterWithPhysicalEntity()
 {
-    ((void(__thiscall *)(CAESound *))0x4EF1A0)(this);
+    if (!m_pPhysicalEntity)
+        return;
+
+    m_pPhysicalEntity->CleanUpOldReference(&m_pPhysicalEntity);
+    m_pPhysicalEntity = nullptr;
 }
 
 void CAESound::StopSound()

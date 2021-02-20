@@ -18,6 +18,8 @@
 
 class CCollisionData {
 public:
+    CCollisionData();
+public:
     unsigned short     m_nNumSpheres;
     unsigned short     m_nNumBoxes;
     unsigned short     m_nNumTriangles;
@@ -25,10 +27,10 @@ public:
     struct {
         unsigned char   bUsesDisks : 1;
         unsigned char   bNotEmpty : 1;
-        unsigned char b03 : 1;
+        unsigned char   bHasShadowInfo : 1;
         unsigned char   bHasFaceGroups : 1;
         unsigned char   bHasShadow : 1;
-    } ;
+    };
     CColSphere        *m_pSpheres;
     CColBox           *m_pBoxes;
     union {
@@ -43,15 +45,27 @@ public:
     CompressedVector  *m_pShadowVertices;
     CColTriangle      *m_pShadowTriangles;
 
-    CCollisionData();
+public:
+    static void InjectHooks();
+    
     void RemoveCollisionVolumes();
-    void Copy(CCollisionData const& arg0);
+    void Copy(CCollisionData const& src);
     void CalculateTrianglePlanes();
+    void RemoveTrianglePlanes();
     void GetTrianglePoint(CVector& outVec, int vertId);
     void GetShadTrianglePoint(CVector& outVec, int vertId);
-    void RemoveTrianglePlanes();
     void SetLinkPtr(CLink<CCollisionData*> *link);
     CLink<CCollisionData*> *GetLinkPtr();
+
+private:
+    //HELPERS
+    template <typename T>
+    T* GetPointerToColArray(uint32_t byteOffset)
+    {
+        return reinterpret_cast<T*>(&reinterpret_cast<uint8_t*>(this)[byteOffset]);
+    }
+
+    friend class CColModel;
 };
 
 VALIDATE_SIZE(CCollisionData, 0x30);

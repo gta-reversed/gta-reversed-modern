@@ -339,10 +339,16 @@ void CPad::UpdatePads() {
     GetPad(0)->UpdateMouse();
     CPad::ProcessPad(0);
     ControlsManager.ClearSimButtonPressCheckers();
-    ControlsManager.AffectPadFromKeyBoard();
-    ControlsManager.AffectPadFromMouse();
-    GetPad(0)->Update(0);
-    GetPad(1)->Update(0);
+
+    //NOTSA: Don't handle updates if the menu is open, so we don't affect gameplay inputting text
+    if (!CDebugMenu::Visible())
+    {
+        ControlsManager.AffectPadFromKeyBoard();
+        ControlsManager.AffectPadFromMouse();
+        GetPad(0)->Update(0);
+        GetPad(1)->Update(0);
+    }
+
     OldKeyState = NewKeyState;
     NewKeyState = TempKeyState;
     CDebugMenu::ImguiInitialise();

@@ -841,7 +841,6 @@ void CAutomobile::ProcessSuspension()
                     contactPoints[i],
                     contactSpeeds[i]);
         }
-        //--numWheelLoops;
         if (!ModelIndices::IsRhino(m_nModelIndex))
             continue;
         if (numWheelLoops <= 1 || wheelLoopIndex > 1)

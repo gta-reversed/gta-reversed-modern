@@ -7,7 +7,15 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
+CAEAudioEntity::CAEAudioEntity() : m_tempSound()
+{}
+
 void CAEAudioEntity::UpdateParameters(CAESound *sound, short arg2)
 {
-    ((void(__thiscall *)(CAEAudioEntity *, CAESound *, short))vtable[0])(this, sound, arg2);
+    return CAEAudioEntity::UpdateParameters_Reversed(sound, arg2);
+}
+
+void CAEAudioEntity::UpdateParameters_Reversed(CAESound* sound, short arg2)
+{
+    return;
 }

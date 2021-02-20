@@ -5107,13 +5107,9 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSecto
         pPhysicalEntity = static_cast<CPhysical*>(pEntity);
         pNode = pNode->pNext;
 
-        CObject* pObjectEntity = static_cast<CObject*>(pEntity);
-        CPed* pPedEntity = static_cast<CPed*>(pEntity);
         bool isLampTouchingGround = false;
-        if (pEntity->IsObject() && pObjectEntity->objectFlags.bIsLampPost) {
-            if (pEntity->GetMatrix()->GetUp().z < 0.66f)
-                isLampTouchingGround = true;
-        }
+        if (pEntity->IsObject() && pEntity->AsObject()->IsFallenLampPost())
+            isLampTouchingGround = true;
 
         if (pEntity != this
             && !isLampTouchingGround

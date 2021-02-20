@@ -12,6 +12,7 @@ public:
     static eReplayMode&Mode;
 
     static void Display();
+    static void RecordVehicleDeleted(CVehicle* vehicle);
 };
 
 /*
