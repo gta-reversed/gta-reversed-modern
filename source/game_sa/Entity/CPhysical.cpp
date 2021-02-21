@@ -1648,11 +1648,7 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, floa
     CVector vecSpeed = GetSpeed(vecDistanceToPointFromThis);
 
     if (physicalFlags.bAddMovingCollisionSpeed && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
-    {
-        CVector outSpeed;
-        pVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPointFromThis);
-        vecSpeed += outSpeed;
-    }
+        vecSpeed += pVehicle->AddMovingCollisionSpeed(vecDistanceToPointFromThis);
 
     CVector vecMoveDirection = pColPoint->m_vecNormal;
     float fSpeedDotProduct = DotProduct(&vecMoveDirection, &vecSpeed);
@@ -2984,11 +2980,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
             CVector vecThisSpeed = GetSpeed(vecDistanceToPointFromThis);
 
             if (physicalFlags.bAddMovingCollisionSpeed && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
-            {
-                CVector outSpeed;
-                pThisVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPointFromThis);
-                vecThisSpeed += outSpeed;
-            }
+                vecThisSpeed += pThisVehicle->AddMovingCollisionSpeed(vecDistanceToPointFromThis);
 
             float fThisSpeedDotProduct = vecThisSpeed.y * pColPoint->m_vecNormal.y
                 + vecThisSpeed.z * pColPoint->m_vecNormal.z
@@ -3242,9 +3234,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
         }
         else
         {
-            CVector outSpeed;
-            pEntityVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPoint);
-            vecEntitySpeed += outSpeed;
+            vecEntitySpeed += pEntityVehicle->AddMovingCollisionSpeed(vecDistanceToPoint);
         }
 
         float fThisSpeedDotProduct = m_vecMoveSpeed.z * pColPoint->m_vecNormal.z
@@ -3354,11 +3344,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
         CVector vecThisSpeed = GetSpeed(vecDistanceToPointFromThis);
 
         if (!physicalFlags.bAddMovingCollisionSpeed && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
-        {
-            CVector outSpeed;
-            pThisVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPointFromThis);
-            vecThisSpeed += outSpeed;
-        }
+            vecThisSpeed += pThisVehicle->AddMovingCollisionSpeed(vecDistanceToPointFromThis);
 
         float fThisSpeedDotProduct = vecThisSpeed.z * pColPoint->m_vecNormal.z
             + vecThisSpeed.y * pColPoint->m_vecNormal.y
@@ -3467,21 +3453,13 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
         CVector vecThisSpeed = GetSpeed(vecDistanceToPointFromThis);
 
         if (physicalFlags.bAddMovingCollisionSpeed && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
-        {
-            CVector outSpeed;
-            pThisVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPointFromThis);
-            vecThisSpeed += outSpeed;
-        }
+            vecThisSpeed += pThisVehicle->AddMovingCollisionSpeed(vecDistanceToPointFromThis);
 
         CVector vecDistanceToPoint = pColPoint->m_vecPoint - pEntity->GetPosition();
         CVector vecEntitySpeed = pEntity->GetSpeed(vecDistanceToPoint);
 
         if (pEntity->physicalFlags.bAddMovingCollisionSpeed && pEntity->m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeB == SURFACE_CAR_MOVINGCOMPONENT)
-        {
-            CVector outSpeed;
-            pEntityVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPoint);
-            vecEntitySpeed += outSpeed;
-        }
+            vecEntitySpeed += pEntityVehicle->AddMovingCollisionSpeed(vecDistanceToPoint);
 
         float fThisSpeedDotProduct = vecThisSpeed.z * pColPoint->m_vecNormal.z
             + vecThisSpeed.y * pColPoint->m_vecNormal.y
@@ -3963,9 +3941,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
             }
             else
             {
-                CVector outSpeed;
-                pEntityVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPoint);
-                vecEntitySpeed += outSpeed;
+                vecEntitySpeed += pEntityVehicle->AddMovingCollisionSpeed(vecDistanceToPoint);
             }
 
             float fThisMass = fThisMassFactor * m_fMass;
@@ -4065,11 +4041,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
                 CVector vecThisSpeed = GetSpeed(vecDistanceToPointFromThis);
 
                 if (physicalFlags.bAddMovingCollisionSpeed && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
-                {
-                    CVector outSpeed;
-                    pThisVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPointFromThis);
-                    vecThisSpeed += outSpeed;
-                }
+                    vecThisSpeed += pThisVehicle->AddMovingCollisionSpeed(vecDistanceToPointFromThis);
 
                 float fThisSpeedDotProduct = vecThisSpeed.z * pColPoint->m_vecNormal.z
                     + vecThisSpeed.y * pColPoint->m_vecNormal.y
@@ -4161,21 +4133,13 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
                 CVector vecThisSpeed = GetSpeed(vecDistanceToPointFromThis);
 
                 if (physicalFlags.bAddMovingCollisionSpeed && m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeA == SURFACE_CAR_MOVINGCOMPONENT)
-                {
-                    CVector outSpeed;
-                    pThisVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPointFromThis);
-                    vecThisSpeed += outSpeed;
-                }
+                    vecThisSpeed += pThisVehicle->AddMovingCollisionSpeed(vecDistanceToPointFromThis);
 
                 CVector vecDistanceToPoint = pColPoint->m_vecPoint - pEntity->GetPosition();
                 CVector vecEntitySpeed = pEntity->GetSpeed(vecDistanceToPoint);
 
                 if (pEntity->physicalFlags.bAddMovingCollisionSpeed && pEntity->m_nType == ENTITY_TYPE_VEHICLE && pColPoint->m_nSurfaceTypeB == SURFACE_CAR_MOVINGCOMPONENT)
-                {
-                    CVector outSpeed;
-                    pEntityVehicle->AddMovingCollisionSpeed(&outSpeed, vecDistanceToPoint);
-                    vecEntitySpeed += outSpeed;
-                }
+                    vecEntitySpeed += pEntityVehicle->AddMovingCollisionSpeed(vecDistanceToPoint);
 
                 float fThisSpeedDotProduct = vecThisSpeed.z * pColPoint->m_vecNormal.z
                     + vecThisSpeed.y * pColPoint->m_vecNormal.y

@@ -179,7 +179,7 @@ public:
 
     //vtable
     void ProcessControl() override;
-    CVector* AddMovingCollisionSpeed(CVector* out, CVector& vecSpeed) override;
+    CVector AddMovingCollisionSpeed(CVector& point) override;
 
     virtual bool ProcessAI(unsigned int& extraHandlingFlags);
     virtual void ResetSuspension();
@@ -189,6 +189,10 @@ public:
 
 private:
     void ProcessControl_Reversed();
+    CVector AddMovingCollisionSpeed_Reversed(CVector& point);
+    void ResetSuspension_Reversed();
+    void ProcessFlyingCarStuff_Reversed();
+    void DoHoverSuspensionRatios_Reversed();
     void ProcessSuspension_Reversed();
 public:
 

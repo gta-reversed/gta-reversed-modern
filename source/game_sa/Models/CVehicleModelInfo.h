@@ -149,7 +149,7 @@ public:
 	float m_fWheelSizeFront;
 	float m_fWheelSizeRear;
 	short m_nWheelModelIndex;
-	uint8_t m_nHandlingId;
+    uint8_t m_nHandlingId;
     int8_t field_4B;
 	unsigned char m_nNumDoors;
 	unsigned char m_vehicleType; // see eVehicleClass

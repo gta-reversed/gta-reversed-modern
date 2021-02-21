@@ -170,6 +170,11 @@ namespace ModelIndices {
 
     inline bool IsRhino(int32_t modelId) { return modelId == MODEL_RHINO; }
     inline bool IsVortex(int32_t modelId) { return modelId == MODEL_VORTEX; }
+    inline bool IsDumper(int32_t modelId) { return modelId == MODEL_DUMPER; }
+    inline bool IsPacker(int32_t modelId) { return modelId == MODEL_PACKER; }
+    inline bool IsDozer(int32_t modelId) { return modelId == MODEL_DOZER; }
+    inline bool IsForklift(int32_t modelId) { return modelId == MODEL_FORKLIFT; }
+    inline bool IsAndrom(int32_t modelId) { return modelId == MODEL_ANDROM; }
 }
 
 void InitModelIndices();

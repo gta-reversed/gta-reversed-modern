@@ -2037,9 +2037,9 @@ bool CVehicle::IsSphereTouchingVehicle(float x, float y, float z, float radius)
 }
 
 // Converted from thiscall void CVehicle::FlyingControl(eFlightModel flightModel,float,float,float,float) 0x6D85F0
-void CVehicle::FlyingControl(eFlightModel flightModel, float arg1, float arg2, float arg3, float arg4)
+void CVehicle::FlyingControl(eFlightModel flightModel, float leftRightSkid, float steeringUpDown, float steeringLeftRight, float accelerationBreakStatus)
 {
-    ((void(__thiscall*)(CVehicle*, eFlightModel, float, float, float, float))0x6D85F0)(this, flightModel, arg1, arg2, arg3, arg4);
+    ((void(__thiscall*)(CVehicle*, eFlightModel, float, float, float, float))0x6D85F0)(this, flightModel, leftRightSkid, steeringUpDown, steeringLeftRight, accelerationBreakStatus);
 }
 
 // Converted from thiscall void CVehicle::BladeColSectorList(CPtrList &ptrList,CColModel &colModel,CMatrix &matrix,short,float) 0x6DAF00

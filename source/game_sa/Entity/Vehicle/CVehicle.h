@@ -106,16 +106,17 @@ enum eRotationAxis {
     AXIS_Z = 2
 };
 
-#if 0
-enum eOrdnanceType;
-enum eFlightModel;
-enum eDoors;
-enum eBikeWheelSpecial;
-#else
 typedef int eOrdnanceType;
-typedef int eFlightModel;
 typedef int eBikeWheelSpecial;
-#endif
+
+enum eFlightModel : int32_t
+{
+    FLIGHT_MODEL_BARON = 1,
+    FLIGHT_MODEL_RC = 2,
+    FLIGHT_MODEL_PLANE = 3, // also used for cars
+    FLIGHT_MODEL_BOAT = 5,
+    FLIGHT_MODEL_HELI = 6, // also used for hydra
+};
 
 class CWeapon;
 class CPed;
@@ -439,7 +440,7 @@ public:
     // get special ride anim data for bile or quad
     virtual CRideAnimData* GetRideAnimData() { return nullptr; }
     virtual void SetupSuspensionLines() { /* Do nothing */ }
-    virtual CVector* AddMovingCollisionSpeed(CVector* out, CVector& vecDistance) { out->Set(0.0F, 0.0F, 0.0F); return out; }
+    virtual CVector AddMovingCollisionSpeed(CVector& point) { return CVector(); }
     virtual void Fix() { /* Do nothing */ }
     virtual void SetupDamageAfterLoad() { /* Do nothing */ }
     virtual void DoBurstAndSoftGroundRatios() { /* Do nothing */ }
@@ -596,7 +597,7 @@ public:
     void KillPedsGettingInVehicle();
     bool UsesSiren();
     bool IsSphereTouchingVehicle(float x, float y, float z, float radius);
-    void FlyingControl(eFlightModel flightModel, float arg1, float arg2, float arg3, float arg4);
+    void FlyingControl(eFlightModel flightModel, float leftRightSkid, float steeringUpDown, float steeringLeftRight, float accelerationBreakStatus);
     // always return false?
     void BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatrix& matrix, short arg3, float arg4);
     void SetComponentRotation(RwFrame* component, int axis, float angle, bool bResetPosition); // rotation axis: eRotationAxis

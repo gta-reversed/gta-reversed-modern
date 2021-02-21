@@ -46,7 +46,7 @@ public:
     CDoor              m_boatFlap; // for marquis model
     tBoatHandlingData *m_pBoatHandling;
     float              m_fAnchoredAngle; // radians, initialised with -9999.99
-    int                m_nAttackPlayerTime;
+    uint32_t           m_nAttackPlayerTime;
     int field_604; // initialised with 0, not used
     float              m_fBurningTimer; // starts when vehicle health is lower than 250.0, boat blows up when it hits 5000.0
     CEntity           *m_pWhoDestroyedMe;

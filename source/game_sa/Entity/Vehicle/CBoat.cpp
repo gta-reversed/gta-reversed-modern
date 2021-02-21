@@ -92,7 +92,7 @@ CBoat::CBoat(int modelIndex, unsigned char createdBy) : CVehicle(createdBy)
     m_fLastWaterImmersionDepth = 7.0F;
     field_604 = 0;
 
-    m_fAnchoredAngle = -9999.99F;
+    m_fAnchoredAngle = -10000.0f;
     m_fBurningTimer = 0.0;
     m_pWhoDestroyedMe = nullptr;
     m_nNumWaterTrailPoints = 0;
@@ -451,7 +451,7 @@ void CBoat::ProcessControl_Reversed() {
             if (iCarMission == eCarMission::MISSION_ATTACKPLAYER
                 || (iCarMission >= eCarMission::MISSION_RAMPLAYER_FARAWAY && iCarMission <= eCarMission::MISSION_BLOCKPLAYER_CLOSE)) {
 
-                if (CTimer::m_snTimeInMilliseconds > m_nAttackPlayerTime)
+                if (static_cast<uint32_t>(CTimer::m_snTimeInMilliseconds) > m_nAttackPlayerTime)
                     m_nAttackPlayerTime = (rand() && 0xFFF) + CTimer::m_snTimeInMilliseconds + 4500;
             }
         }
@@ -462,7 +462,7 @@ void CBoat::ProcessControl_Reversed() {
     switch (m_nStatus) {
     case eEntityStatus::STATUS_PLAYER:
         m_nBoatFlags.bAnchored = false;
-        m_fAnchoredAngle = -9999.99F;
+        m_fAnchoredAngle = -10000.0f;
         if (m_pDriver)
             this->ProcessControlInputs(m_pDriver->m_nPedType);
 
@@ -473,7 +473,7 @@ void CBoat::ProcessControl_Reversed() {
         break;
     case eEntityStatus::STATUS_SIMPLE:
         m_nBoatFlags.bAnchored = false;
-        m_fAnchoredAngle = -9999.99F;
+        m_fAnchoredAngle = -10000.0f;
         CCarAI::UpdateCarAI(this);
         CPhysical::ProcessControl();
         physicalFlags.bSubmergedInWater = true;
@@ -482,7 +482,7 @@ void CBoat::ProcessControl_Reversed() {
         return;
     case eEntityStatus::STATUS_PHYSICS:
         m_nBoatFlags.bAnchored = false;
-        m_fAnchoredAngle = -9999.99F;
+        m_fAnchoredAngle = -10000.0f;
         CCarAI::UpdateCarAI(this);
         CCarCtrl::SteerAICarWithPhysics(this);
         break;
@@ -600,20 +600,20 @@ void CBoat::ProcessControl_Reversed() {
 
     auto bPostCollision = m_fDamageIntensity > 0.0F && m_vecLastCollisionImpactVelocity.z > 0.1F;
     CPhysical::ProcessControl();
-    CVehicle::ProcessBoatControl(m_pBoatHandling, &m_fLastWaterImmersionDepth, m_bHasHitWall, bPostCollision);
+    ProcessBoatControl(m_pBoatHandling, &m_fLastWaterImmersionDepth, m_bHasHitWall, bPostCollision);
 
     if (m_nModelIndex == eModelID::MODEL_SKIMMER
         && (m_fPropSpeed > CPlane::PLANE_MIN_PROP_SPEED || m_vecMoveSpeed.SquaredMagnitude() > CPlane::PLANE_MIN_PROP_SPEED)) {
-        CVehicle::FlyingControl(3, -9999.99F, -9999.99F, -9999.99F, -9999.99F);
+        FlyingControl(FLIGHT_MODEL_PLANE, -10000.0f, -10000.0f, -10000.0f, -10000.0f);
     }
     else if (CCheat::m_aCheatsActive[eCheats::CHEAT_BOATS_FLY])
-        CVehicle::FlyingControl(5, -9999.99F, -9999.99F, -9999.99F, -9999.99F);
+        FlyingControl(FLIGHT_MODEL_BOAT, -10000.0f, -10000.0f, -10000.0f, -10000.0f);
 
     if (m_nBoatFlags.bAnchored) {
         m_vecMoveSpeed.x = 0.0F;
         m_vecMoveSpeed.y = 0.0F;
 
-        auto bNoAnchorAngle = m_fAnchoredAngle == -9999.99F;
+        auto bNoAnchorAngle = m_fAnchoredAngle == -10000.0f;
         if (bNoAnchorAngle)
             m_fAnchoredAngle = GetHeading();
         else {

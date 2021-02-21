@@ -11,10 +11,17 @@ CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;
 CMatrix* CAutomobile::matW2B = (CMatrix*)0xC1C220;
 CColPoint* aAutomobileColPoints = (CColPoint*)0xC1BFF8;
 
+const CVector PACKER_COL_PIVOT = CVector(0.0, 0.0, 2.0);
+
 void CAutomobile::InjectHooks()
 {
     ReversibleHooks::Install("CAutomobile", "ProcessControl", 0x6B1880, &CAutomobile::ProcessControl_Reversed);
+    ReversibleHooks::Install("CAutomobile", "AddMovingCollisionSpeed", 0x6A1ED0, &CAutomobile::AddMovingCollisionSpeed_Reversed);
+    ReversibleHooks::Install("CAutomobile", "ResetSuspension", 0x6A2AE0, &CAutomobile::ResetSuspension_Reversed);
+    ReversibleHooks::Install("CAutomobile", "ProcessFlyingCarStuff", 0x6A8500, &CAutomobile::ProcessFlyingCarStuff_Reversed);
+    ReversibleHooks::Install("CAutomobile", "DoHoverSuspensionRatios", 0x6A45C0, &CAutomobile::DoHoverSuspensionRatios_Reversed);
     ReversibleHooks::Install("CAutomobile", "ProcessSuspension", 0x6AFB10, &CAutomobile::ProcessSuspension_Reversed);
+    ReversibleHooks::Install("CAutomobile", "SetupModelNodes", 0x6A0770, &CAutomobile::SetupModelNodes);
     ReversibleHooks::Install("CAutomobile", "HydraulicControl", 0x6A07A0, &CAutomobile::HydraulicControl);
     ReversibleHooks::Install("CAutomobile", "ProcessBuoyancy", 0x6A8C00, &CAutomobile::ProcessBuoyancy);
     ReversibleHooks::Install("CAutomobile", "PlaceOnRoadProperly", 0x6AF420, &CAutomobile::PlaceOnRoadProperly);
@@ -720,19 +727,51 @@ void CAutomobile::ProcessControl()
     }
 }
 
-void CAutomobile::ProcessControl_Reversed()
+CVector CAutomobile::AddMovingCollisionSpeed(CVector& point)
 {
-    return CAutomobile::ProcessControl();
-}
+    if (m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_PLANE) {
+        if (m_nCreatedBy != MISSION_VEHICLE || !m_wMiscComponentAngle && !m_wVoodooSuspension)
+            return CVector();
+    }
+    float colAngleMult = 0.0f;
+    uint16_t angleDiff = m_wMiscComponentAngle - m_wVoodooSuspension;
+    if (angleDiff <= 100 && angleDiff >= -100) {
+        CVector colPivot;
+        RwFrame* carNodeMisc = nullptr;
+        if (ModelIndices::IsDumper(m_nModelIndex)) {
+            carNodeMisc = m_aCarNodes[CAR_MISC_C];
+            colAngleMult = CMonsterTruck::DUMPER_COL_ANGLEMULT;
+        }
+        else if (ModelIndices::IsPacker(m_nModelIndex)) {
+            colAngleMult = -0.0001f;
+            colPivot = PACKER_COL_PIVOT;
+        }
+        else if (ModelIndices::IsDozer(m_nModelIndex)) {
+            carNodeMisc = m_aCarNodes[CAR_MISC_A];
+            if (carNodeMisc)
+                colAngleMult = 0.0002f;
+        }
+        else if (ModelIndices::IsAndrom(m_nModelIndex)) {
+            carNodeMisc = m_aCarNodes[CAR_MISC_E];
+            if (carNodeMisc)
+                colAngleMult = CPlane::ANDROM_COL_ANGLE_MULT;
+        }
+        else if (ModelIndices::IsForklift(m_nModelIndex)) {
+            float rot = angleDiff / CTimer::ms_fTimeStep * 0.0006f * 2.0f;
+            return rot * GetUp();
+        }
 
-void CAutomobile::ProcessSuspension_Reversed()
-{
-    return CAutomobile::ProcessSuspension();
-}
-
-CVector* CAutomobile::AddMovingCollisionSpeed(CVector* out, CVector& vecSpeed)
-{
-    return ((CVector * (__thiscall*)(CVehicle*, CVector*, CVector&))(*(void***)this)[49])(this, out, vecSpeed);
+        if (colAngleMult != 0.0f) {
+            if (carNodeMisc)
+                colPivot = RwFrameGetMatrix(carNodeMisc)->pos;
+            CVector rotation(angleDiff / CTimer::ms_fTimeStep * colAngleMult, 0.0f, 0.0f);
+            CVector pos = Multiply3x3(m_matrix, &rotation);
+            CVector pivotPos = Multiply3x3(m_matrix, &colPivot);
+            CVector distance = point - pivotPos;
+            return CrossProduct(pos, distance);
+        }
+    }
+    return CVector();
 }
 
 // Converted from void CAutomobile::ProcessAI(uint &) 0x0
@@ -741,22 +780,56 @@ bool CAutomobile::ProcessAI(unsigned int& extraHandlingFlags)
     return ((bool(__thiscall*)(CAutomobile*, unsigned int&))(*(void***)this)[66])(this, extraHandlingFlags);
 }
 
-// Converted from void CAutomobile::ResetSuspension(void) 0x0
 void CAutomobile::ResetSuspension()
 {
-    ((void(__thiscall*)(CAutomobile*))(*(void***)this)[67])(this);
+    for (int32_t i = 0; i < 4; i++) {
+        m_fWheelsSuspensionCompression[i] = 1.0f;
+        m_aWheelTimer[i] = 0.0f;
+        m_wheelRotation[i] = 0.0f;
+        m_aWheelState[i] = WHEEL_STATE_NORMAL;
+    }
 }
 
-// Converted from void CAutomobile::ProcessFlyingCarStuff(void) 0x0
 void CAutomobile::ProcessFlyingCarStuff()
 {
-    ((void(__thiscall*)(CAutomobile*))(*(void***)this)[68])(this);
+    if (m_nStatus != STATUS_PLAYER || m_nStatus == STATUS_HELI || m_nStatus == STATUS_PHYSICS) {
+        if (CCheat::m_aCheatsActive[CHEAT_CARS_FLY]
+            && m_vecMoveSpeed.Magnitude() > 0.0f
+            && CTimer::ms_fTimeStep > 0.0f) 
+                FlyingControl(FLIGHT_MODEL_PLANE, -10000.0f, -10000.0f, -10000.0f, -10000.0f);
+    }
 }
 
-// Converted from void CAutomobile::DoHoverSuspensionRatios(void) 0x0
 void CAutomobile::DoHoverSuspensionRatios()
 {
-    ((void(__thiscall*)(CAutomobile*))(*(void***)this)[69])(this);
+    if (GetUp().z >= 0.3f && !vehicleFlags.bIsDrowning) {
+        auto colData = GetColModel()->m_pColData;
+        for (int32_t i = 0; i < 4; i++)  {
+            CColLine& line = colData->m_pLines[i];
+            CVector start = *m_matrix * line.m_vecStart;
+            CVector end = *m_matrix * line.m_vecEnd;
+            float colPointZ = -100.0f;
+            if (m_fWheelsSuspensionCompression[i] < 1.0f)
+                colPointZ = m_wheelColPoint[i].m_vecPoint.z;
+            float waterLevel = 0.0f;
+            if (CWaterLevel::GetWaterLevel(end.x, end.y, end.z, &waterLevel, false, nullptr)
+                && waterLevel > colPointZ && end.z - 1.0f < waterLevel)
+            {
+                if (waterLevel <= end.z) 
+                    m_fWheelsSuspensionCompression[i] = 1.0f;
+                else if (waterLevel <= start.z)
+                    m_fWheelsSuspensionCompression[i] = (start.z - waterLevel) / (start.z - end.z);
+                else
+                    m_fWheelsSuspensionCompression[i] = 0.0f;
+
+                CVector point = (end - start) * m_fWheelsSuspensionCompression[i];
+                point += start;
+                point.z = waterLevel;
+                m_wheelColPoint[i].m_vecPoint = point;
+                m_wheelColPoint[i].m_vecNormal = CVector(0.0f, 0.0f, 1.0f);
+            }
+        }
+    }
 }
 
 void CAutomobile::ProcessSuspension()
@@ -920,10 +993,42 @@ void CAutomobile::ProcessSuspension()
     }
 }
 
-// Converted from thiscall void CAutomobile::SetupModelNodes(void) 0x6A0770
+void CAutomobile::ProcessControl_Reversed()
+{
+    return CAutomobile::ProcessControl();
+}
+
+CVector CAutomobile::AddMovingCollisionSpeed_Reversed(CVector& point)
+{
+    return CAutomobile::AddMovingCollisionSpeed(point);
+}
+
+void CAutomobile::ResetSuspension_Reversed()
+{
+    return CAutomobile::ResetSuspension();
+}
+
+void CAutomobile::ProcessFlyingCarStuff_Reversed()
+{
+    return CAutomobile::ProcessFlyingCarStuff();
+}
+
+void CAutomobile::DoHoverSuspensionRatios_Reversed()
+{
+    return CAutomobile::DoHoverSuspensionRatios();
+}
+
+void CAutomobile::ProcessSuspension_Reversed()
+{
+    return CAutomobile::ProcessSuspension();
+}
+
 void CAutomobile::SetupModelNodes()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6A0770)(this);
+    for (int32_t i = 0; i < CAR_NUM_NODES; i++) {
+        m_aCarNodes[i] = nullptr;
+    }
+    CClumpModelInfo::FillFrameArray(m_pRwClump, m_aCarNodes);
 }
 
 void CAutomobile::HydraulicControl()
