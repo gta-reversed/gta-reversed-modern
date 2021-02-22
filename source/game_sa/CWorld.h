@@ -152,6 +152,8 @@ public:
     static void IncrementCurrentScanCode();
     static CPtrListSingleLink& GetLodPtrList(std::int32_t x, std::int32_t y);
 
+    static CPlayerInfo& GetFocusedPlayerInfo() { return Players[PlayerInFocus]; }
+
     // returns sector index in range 0 to 60 (covers half of the map) 
     static float GetHalfMapSectorX(float x) { return x / (MAX_WORLD_UNITS / MAX_SECTORS_X); }
     static float GetHalfMapSectorY(float y) { return y / (MAX_WORLD_UNITS / MAX_SECTORS_Y); }

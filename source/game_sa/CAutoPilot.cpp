@@ -15,7 +15,7 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
     m_nCarMission = eCarMission::MISSION_NONE;
     m_nTempAction = 0;
     m_nCruiseSpeed = 10;
-    m_fSomeSpeed = 10.0F;
+    m_speed = 10.0F;
     m_nPathFindNodesCount = 0;
     m_pTargetCar = nullptr;
 
@@ -35,7 +35,7 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
     m_ucCarFollowDist = 10;
     m_ucHeliTargetDist2 = 10;
     field_50 = (rand() & 7) + 2;
-    field_94 = -1;
+    m_vehicleRecordingId = -1;
     m_bPlaneDogfightSomething = 0;
     m_pCarWeMakingSlowDownFor = nullptr;
     m_fMaxTrafficSpeed = 0.0F;

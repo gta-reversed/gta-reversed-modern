@@ -12,11 +12,13 @@ CMatrix* CAutomobile::matW2B = (CMatrix*)0xC1C220;
 CColPoint* aAutomobileColPoints = (CColPoint*)0xC1BFF8;
 
 const CVector PACKER_COL_PIVOT = CVector(0.0, 0.0, 2.0);
+const float CAR_BALANCE_MULT = 0.08f;
 
 void CAutomobile::InjectHooks()
 {
     ReversibleHooks::Install("CAutomobile", "ProcessControl", 0x6B1880, &CAutomobile::ProcessControl_Reversed);
     ReversibleHooks::Install("CAutomobile", "AddMovingCollisionSpeed", 0x6A1ED0, &CAutomobile::AddMovingCollisionSpeed_Reversed);
+    ReversibleHooks::Install("CAutomobile", "ProcessAI", 0x6B4800, &CAutomobile::ProcessAI_Reversed);
     ReversibleHooks::Install("CAutomobile", "ResetSuspension", 0x6A2AE0, &CAutomobile::ResetSuspension_Reversed);
     ReversibleHooks::Install("CAutomobile", "ProcessFlyingCarStuff", 0x6A8500, &CAutomobile::ProcessFlyingCarStuff_Reversed);
     ReversibleHooks::Install("CAutomobile", "DoHoverSuspensionRatios", 0x6A45C0, &CAutomobile::DoHoverSuspensionRatios_Reversed);
@@ -516,10 +518,8 @@ void CAutomobile::ProcessControl()
         }
 
         if (m_nStatus != STATUS_PLAYER) {
-            if (m_nAlarmState == 0 || m_nAlarmState == -1 || m_nStatus == STATUS_WRECKED) {
-                if (m_nHornCounter)
-                    m_nHornCounter--;
-            }
+            if (CanUpdateHornCounter() && m_nHornCounter)
+                m_nHornCounter--;
         }
         else if (handlingFlags.bHydraulicInst || CCheat::m_aCheatsActive[CHEAT_PERFECT_HANDLING] || extraHandlingTaxiBoost)
             ProcessSirenAndHorn(false);
@@ -774,10 +774,330 @@ CVector CAutomobile::AddMovingCollisionSpeed(CVector& point)
     return CVector();
 }
 
-// Converted from void CAutomobile::ProcessAI(uint &) 0x0
 bool CAutomobile::ProcessAI(unsigned int& extraHandlingFlags)
 {
-    return ((bool(__thiscall*)(CAutomobile*, unsigned int&))(*(void***)this)[66])(this, extraHandlingFlags);
+    CColModel* colModel = CEntity::GetColModel();
+    CCollisionData* colData = colModel->m_pColData;
+    int8_t recordingId = this->m_autoPilot.m_vehicleRecordingId;
+    m_autoPilot.carCtrlFlags.bHonkAtCar = false;
+    m_autoPilot.carCtrlFlags.bHonkAtPed = false;
+    if (recordingId >= 0 && !CVehicleRecording::bUseCarAI[recordingId])
+        return false;
+    eCarMission carMission = m_autoPilot.m_nCarMission;
+    CAutomobile* playerVehicle = FindPlayerVehicle(-1, false);
+    if (playerVehicle && playerVehicle != this && FindPlayerWanted()->m_nWantedLevel > 3
+        && (carMission == MISSION_RAMPLAYER_FARAWAY
+            || carMission == MISSION_BLOCKPLAYER_FARAWAY
+            || carMission == MISSION_RAMPLAYER_CLOSE
+            || carMission == MISSION_BLOCKPLAYER_CLOSE)
+        && FindPlayerSpeed().Magnitude() > 0.3f)
+    {
+        extraHandlingFlags |= EXTRA_HANDLING_PERFECT;
+        if (FindPlayerSpeed().Magnitude() > 0.4f && m_vecMoveSpeed.Magnitude() < 0.3f) {
+            extraHandlingFlags |= EXTRA_HANDLING_NITROS;
+        }
+        else {
+            CVector distance = GetPosition() - FindPlayerCoors(-1);
+            if (distance.Magnitude() > 50.0f)
+                extraHandlingFlags |= EXTRA_HANDLING_NITROS;
+        }
+    }
+    else if (m_nModelIndex == MODEL_RCBANDIT && m_nStatus != STATUS_HELI) {
+            extraHandlingFlags |= EXTRA_HANDLING_PERFECT;
+    }
+
+    bool extraPerfectHandling = !!(extraHandlingFlags & EXTRA_HANDLING_PERFECT);
+    if (extraPerfectHandling || CCheat::m_aCheatsActive[CHEAT_PERFECT_HANDLING]) {
+        m_vecCentreOfMass.z = m_aSuspensionSpringLength[CARWHEEL_FRONT_LEFT] * 0.3f - m_fFrontHeightAboveRoad;
+    }
+    else if (m_nStatus == STATUS_PHYSICS) {
+        if (handlingFlags.bHydraulicGeom) {
+            if (m_autoPilot.m_nCarMission != MISSION_NONE && colData && colData->m_nNumLines > 0) {
+                m_vecCentreOfMass.y = (colData->m_pLines[0].m_vecStart.y + colData->m_pLines[1].m_vecStart.y)  * 0.5f;
+                handlingFlags.bNpcNeutralHandl = true;
+            }
+            else {
+                m_vecCentreOfMass = m_pHandlingData->m_vecCentreOfMass;
+                handlingFlags.bNpcNeutralHandl = false;
+            }
+        }
+
+        if (handlingFlags.bNpcAntiRoll) {
+            m_pHandlingData->m_vecCentreOfMass.z += (colModel->m_boundBox.m_vecMin.z - m_pHandlingData->m_vecCentreOfMass.z) * 0.4f;
+        }
+    }
+    else {
+        m_vecCentreOfMass = m_pHandlingData->m_vecCentreOfMass;
+    }
+
+    if (m_nStatus != STATUS_ABANDONED && m_nStatus != STATUS_WRECKED
+        && m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_HELI
+        && m_nStatus != STATUS_PLANE && vehicleFlags.bIsLawEnforcer)
+    {
+        ScanForCrimes();
+    }
+
+    if (vehicleFlags.bCanPark
+        && !vehicleFlags.bParking
+        && m_nCreatedBy != MISSION_VEHICLE
+        && m_autoPilot.m_nCarMission == MISSION_CRUISE
+        && ((CTimer::m_FrameCounter + static_cast<uint8_t>(m_nRandomSeed)) & 0xF) == 0)
+    {
+        if (m_nModelIndex != MODEL_TAXI && m_nModelIndex != MODEL_CABBIE) {
+            CVector target = GetPosition();
+            target += GetRight() * 3.0f + GetForward() * 10.0f;
+            CColPoint outColPoint;
+            CEntity* outEntity = nullptr;
+            if (!CWorld::ProcessLineOfSight(GetPosition(), target, outColPoint, outEntity, true, true, true,
+                false, false, false, false, false)
+                || outEntity == this)
+            {
+                CCarAI::GetCarToParkAtCoors(this, &target);
+            }
+        }
+    }
+
+    bool isRemotelyControlledByPlayer = false;
+    const eEntityStatus status = static_cast<eEntityStatus>(m_nStatus);
+    switch (status)
+    {
+    case STATUS_SIMPLE:
+    {
+        CCarAI::UpdateCarAI(this);
+        CPhysical::ProcessControl();
+        CCarCtrl::UpdateCarOnRails(this);
+        m_nNumContactWheels = 4;
+        m_wheelsOnGrounPrev = m_nWheelsOnGround;
+        m_nWheelsOnGround = 4;
+        float speed = m_autoPilot.m_speed * 0.02f;
+        m_pHandlingData->GetTransmission().CalculateGearForSimpleCar(speed, m_nCurrentGear);
+        float wheelRot = CVehicle::ProcessWheelRotation(WHEEL_STATE_NORMAL, GetForward(), m_vecMoveSpeed, 0.35f);
+        for (int32_t i = 0; i < 4; i++) {
+            m_wheelRotation[i] += wheelRot;
+        }
+        PlayHornIfNecessary();
+        if (m_nHornCounter)
+            m_nHornCounter--;
+        vehicleFlags.bAudioChangingGear = false;
+        vehicleFlags.bVehicleColProcessed = false;
+        return true;
+    }
+    case STATUS_PHYSICS:
+    case STATUS_TRAILER:
+    {
+        CCarAI::UpdateCarAI(this);
+        CCarCtrl::SteerAICarWithPhysics(this);
+        CCarCtrl::ReconsiderRoute(this);
+        PlayHornIfNecessary();
+        if (vehicleFlags.bIsBeingCarJacked) {
+            m_fGasPedal = 0.0f;
+            m_fBreakPedal = 1.0f;
+            vehicleFlags.bIsHandbrakeOn = true;
+        }
+        if (!IsAnyWheelTouchingSand())
+            return false;
+        if (m_nModelIndex == MODEL_RCBANDIT || m_nModelIndex == MODEL_SANDKING || m_nModelIndex == MODEL_BFINJECT)
+            return false;
+        npcFlags.bLostTraction = true;
+        float force = m_fMass * CTimer::ms_fTimeStep * 0.005f;
+        if (CWeather::WetRoads > 0.0f)
+            force *= 1.0f - CWeather::WetRoads;
+        ApplyMoveForce(-force * m_vecMoveSpeed);
+        return false;
+    }
+    case STATUS_ABANDONED:
+        for (int32_t i = 0; i < 4; i++) {
+            if (m_pWheelCollisionEntity[i]) {
+                vehicleFlags.bRestingOnPhysical = true;
+                break;
+            }
+        }
+
+        if (IsHeli() || IsPlane() && m_vecMoveSpeed.SquaredMagnitude() < 0.1f)
+            m_fBreakPedal = 1.0f;
+        if (vehicleFlags.bRestingOnPhysical) 
+            m_fBreakPedal = 0.5f;
+        else if (m_vecMoveSpeed.SquaredMagnitude() < 0.01f)
+            m_fBreakPedal = 0.2f;
+        else
+            m_fBreakPedal = 0.0f;
+        vehicleFlags.bIsHandbrakeOn = false;
+        m_fSteerAngle = 0.0f;
+        m_fGasPedal = 0.0f;
+        if (CanUpdateHornCounter())
+            m_nHornCounter = 0;
+        if (!vehicleFlags.bIsBeingCarJacked)
+            return false;
+        vehicleFlags.bIsHandbrakeOn = true;
+        m_fGasPedal = 0.0f;
+        m_fBreakPedal = 1.0f;
+        return false;
+    case STATUS_WRECKED:
+        m_fBreakPedal = 0.05f;
+        vehicleFlags.bIsHandbrakeOn = true;
+        m_fSteerAngle = 0.0f;
+        m_fGasPedal = 0.0f;
+        if (!CanUpdateHornCounter())
+            return false;
+        m_nHornCounter = 0;
+        return false;
+    case STATUS_HELI:
+        if (CPad::GetPad(0)->CarGunJustDown() && !CVehicle::bDisableRemoteDetonation) {
+            BlowUpCar(FindPlayerPed(), false);
+            CRemote::TakeRemoteControlledCarFromPlayer(true);
+        }
+
+        if (m_nModelIndex == MODEL_RCBANDIT && !CVehicle::bDisableRemoteDetonationOnContact) {
+            //FindPlayerCoors(); // return value is ignored
+            if (RcbanditCheckHitWheels()|| physicalFlags.bSubmergedInWater) {
+                CRemote::TakeRemoteControlledCarFromPlayer(true);
+                BlowUpCar(FindPlayerPed(), false);
+            }
+        }
+        if (CWorld::GetFocusedPlayerInfo().m_pRemoteVehicle == this)
+            isRemotelyControlledByPlayer = true;
+        break;
+    case STATUS_PLANE:
+        if (m_vecMoveSpeed.SquaredMagnitude() < 0.01f
+            || m_pDriver
+            && m_pDriver->IsPlayer()
+            && (m_pDriver->m_nPedState == PEDSTATE_ARRESTED
+                || m_pDriver->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT)
+                || m_pDriver->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CAR_QUICK_BE_DRAGGED_OUT)
+                || m_pDriver->GetTaskManager().FindActiveTaskByType(TASK_SIMPLE_CAR_WAIT_TO_SLOW_DOWN)))
+        {
+            m_fBreakPedal = 1.0f;
+            m_fGasPedal = 0.0f;
+            vehicleFlags.bIsHandbrakeOn = true;
+        }
+        else
+        {
+            m_fBreakPedal = 0.0f;
+            vehicleFlags.bIsHandbrakeOn = false;
+        }
+
+        m_fSteerAngle = 0.0f;
+        m_fGasPedal = 0.0f;
+        if (!CanUpdateHornCounter())
+            return false;
+        m_nHornCounter = 0;
+        return false;
+    case STATUS_REMOTE_CONTROLLED:
+        vehicleFlags.bIsHandbrakeOn = false;
+        m_fBreakPedal = 0.0f;
+        m_fSteerAngle = 0.0f;
+        m_fGasPedal = 0.0f;
+        if (!m_pTractor)
+            BreakTowLink();
+        return false;
+    }
+
+    if (status != STATUS_PLAYER && status != STATUS_HELI)
+        return false;
+
+    bool processControlInput = isRemotelyControlledByPlayer;
+    if (!processControlInput && m_pDriver)
+    {
+        ePedState pedState = m_pDriver->m_nPedState;
+        if (pedState != PEDSTATE_EXIT_CAR && pedState != PEDSTATE_DRAGGED_FROM_CAR && pedState != PEDSTATE_ARRESTED)
+            processControlInput = true;
+    }
+    if (!processControlInput)
+        return false;
+
+    CPad* pad = nullptr;
+    if (m_pDriver)
+        pad = static_cast<CPlayerPed*>(m_pDriver)->GetPadFromPlayer();
+    PruneReferences();
+    if (isRemotelyControlledByPlayer) {
+        int32_t playerSlot = CWorld::FindPlayerSlotWithRemoteVehiclePointer(this);
+        if (playerSlot >= 0)
+            ProcessControlInputs(playerSlot);
+    }
+    else {
+        ePedType pedType = m_pDriver->m_nPedType;
+        if (pedType == PED_TYPE_PLAYER1 || pedType == PED_TYPE_PLAYER2)
+            ProcessControlInputs(static_cast<uint8_t>(pedType));
+    }
+
+    if (m_nStatus == STATUS_PLAYER) {
+        if (!IsHeli()) {
+            if ((m_nModelIndex == MODEL_VORTEX || !IsPlane())
+                && m_nModelIndex != MODEL_SWATVAN
+                && m_nModelIndex != MODEL_RHINO)
+                DoDriveByShootings();
+        }
+    }
+
+    uint32_t carLess3WheelCounter = CWorld::GetFocusedPlayerInfo().m_nCarLess3WheelCounter;
+    m_vecCentreOfMass.z = m_pHandlingData->m_vecCentreOfMass.z;
+    if (carLess3WheelCounter > 500 && !IsHeli() && !IsPlane()) {
+        carLess3WheelCounter = std::min(carLess3WheelCounter - 500u, 1000u);
+        float fCarLess3WheelCounter = static_cast<float>(carLess3WheelCounter) * 0.002f;
+        const float boundMaxZ = colModel->m_boundBox.m_vecMax.z;
+        if (GetUp().z > -0.4f && pad) {
+            if (GetRight().z <= 0.0f)
+                fCarLess3WheelCounter *= -1.0f;
+
+            float steerLeftRight = pad->GetSteeringLeftRight() / 128.0f;
+            m_vecCentreOfMass.z += steerLeftRight * CAR_BALANCE_MULT * boundMaxZ * fCarLess3WheelCounter;
+        }
+        else {
+            m_vecCentreOfMass.z -= CAR_BALANCE_MULT * boundMaxZ * 0.5f;
+        }
+    }
+
+    if (!pad || m_nNumContactWheels != 0 || IsHeli() || IsPlane()) {
+        DoSoftGroundResistance(extraHandlingFlags);
+        return false;
+    }
+
+    float carWeightMult = 0.0007f;
+    if (IsTruck())
+        carWeightMult = 0.0025f;
+    else
+        carWeightMult *= CStats::GetFatAndMuscleModifier(STAT_MOD_DRIVING_SKILL);
+    carWeightMult *= std::min(1.0f, 3000.0f / m_fTurnMass) * m_fTurnMass;
+    float steerLeftRight = pad->GetSteeringLeftRight() / 128.0f;
+    float steerUpDown = pad->GetSteeringUpDown() / 128.0f;
+    if (CCamera::m_bUseMouse3rdPerson && fabs(steerLeftRight) < 0.05f && fabs(steerUpDown) < 0.05f) {
+        float mouseSteerLeftRight = CPad::NewMouseControllerState.X * 0.02f;
+        steerLeftRight = clamp<float>(mouseSteerLeftRight, -1.5f, 1.5f);
+        float mouseSteerUpDown = CPad::NewMouseControllerState.Y * 0.02f;
+        steerUpDown = clamp<float>(mouseSteerUpDown, -1.5f, 1.5f);
+    }
+
+    if (pad->GetHandBrake()) {
+        float dotTurnUp = DotProduct(m_vecTurnSpeed, GetUp());;
+        if (dotTurnUp < 0.02f && steerLeftRight < 0.0f || dotTurnUp > -0.02f && steerLeftRight > 0.0f) {
+            CVector point = m_vecCentreOfMass + GetForward();
+            CVector force = GetRight() * steerLeftRight * carWeightMult * CTimer::ms_fTimeStep;
+            ApplyTurnForce(force, point);
+        }
+    }
+    else if (!pad->GetAccelerate()) {
+        float dotTurnForward = DotProduct(m_vecTurnSpeed, GetForward());
+        if (dotTurnForward < 0.02f && steerLeftRight < 0.0f
+            || dotTurnForward > -0.02f && steerLeftRight > 0.0f)
+        {
+            CVector point = m_vecCentreOfMass + GetUp();
+            CVector force = GetRight() * steerLeftRight * carWeightMult * CTimer::ms_fTimeStep;
+            ApplyTurnForce(force, point);
+        }
+    }
+
+    if (!pad->GetAccelerate()) {
+        float dotTurnRight = DotProduct(m_vecTurnSpeed, GetRight());
+        if (dotTurnRight < 0.02f && steerUpDown < 0.0f
+            || dotTurnRight > -0.02f && steerUpDown > 0.0f)
+        {
+            CVector point = m_vecCentreOfMass + GetForward();
+            CVector force = GetUp() * steerUpDown * carWeightMult * CTimer::ms_fTimeStep;
+            ApplyTurnForce(force, point);
+        }
+    }
+    DoSoftGroundResistance(extraHandlingFlags);
+    return false;
 }
 
 void CAutomobile::ResetSuspension()
@@ -1001,6 +1321,11 @@ void CAutomobile::ProcessControl_Reversed()
 CVector CAutomobile::AddMovingCollisionSpeed_Reversed(CVector& point)
 {
     return CAutomobile::AddMovingCollisionSpeed(point);
+}
+
+bool CAutomobile::ProcessAI_Reversed(unsigned int& extraHandlingFlags)
+{
+    return CAutomobile::ProcessAI(extraHandlingFlags);
 }
 
 void CAutomobile::ResetSuspension_Reversed()
@@ -1545,9 +1870,9 @@ void CAutomobile::CloseAllDoors()
 }
 
 // Converted from thiscall void CAutomobile::DoSoftGroundResistance(uint &) 0x6A4AF0
-void CAutomobile::DoSoftGroundResistance(unsigned int& arg0)
+void CAutomobile::DoSoftGroundResistance(unsigned int& extraHandlingFlags)
 {
-    ((void(__thiscall*)(CAutomobile*, unsigned int&))0x6A4AF0)(this, arg0);
+    ((void(__thiscall*)(CAutomobile*, unsigned int&))0x6A4AF0)(this, extraHandlingFlags);
 }
 
 void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront)

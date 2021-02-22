@@ -11,7 +11,7 @@
 #include "CPathFind.h"
 #include "eCarMission.h"
 
-enum eCarDrivingStyle : char
+enum eCarDrivingStyle : int8_t
 {
     DRIVINGSTYLE_STOP_FOR_CARS,
     DRIVINGSTYLE_SLOW_DOWN_FOR_CARS,
@@ -49,7 +49,7 @@ public:
     unsigned char        m_ucTempActionMode;
     unsigned char        m_ucCarMissionModeCounter; 
     char field_36[2];
-    float               m_fSomeSpeed;
+    float               m_speed;
     float               m_fMaxTrafficSpeed;
     unsigned char       m_nCruiseSpeed;
     char field_41;
@@ -92,7 +92,7 @@ public:
     char field_8A[2];
     class CVehicle      *m_pTargetCar;
     class CEntity       *m_pCarWeMakingSlowDownFor;
-    char field_94;
+    int8_t m_vehicleRecordingId;
     bool m_bPlaneDogfightSomething;
     short field_96;
 

@@ -204,7 +204,7 @@ bool CEventDamage::AffectsPed_Reversed(CPed* ped) {
         }
     }
     if (ped == FindPlayerPed(-1)) {
-        if (CWorld::Players[CWorld::PlayerInFocus].m_bFireProof) {
+        if (CWorld::GetFocusedPlayerInfo().m_bFireProof) {
             if (m_weaponType == WEAPON_MOLOTOV || m_weaponType == WEAPON_FLAMETHROWER)
                 return false;
         }

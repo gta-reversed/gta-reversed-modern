@@ -2,6 +2,7 @@
 
 std::int32_t& CVehicleRecording::NumPlayBackFiles = *(std::int32_t*)0x97F630;
 CPath(&CVehicleRecording::StreamingArray)[TOTAL_RRR_MODEL_IDS] = *(CPath(*)[TOTAL_RRR_MODEL_IDS])0x97D880;
+bool(&CVehicleRecording::bUseCarAI)[TOTAL_VEHICLE_RECORDS] = *(bool(*)[TOTAL_VEHICLE_RECORDS])0x97D6C0;
 
 void CVehicleRecording::Init()
 {

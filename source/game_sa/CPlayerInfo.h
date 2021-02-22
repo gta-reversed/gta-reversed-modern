@@ -54,7 +54,7 @@ public:
     unsigned int m_nTimesStuckInARow;       // Make car blow up if player cannot get out.
     unsigned int m_nCarTwoWheelCounter;     // how long has player's car been on two wheels
     float m_fCarTwoWheelDist;               // Make car blow up if player cannot get out.
-    unsigned int m_nCarLess3WheelCounter;   // how long has player's car been on less than 3 wheels
+    uint32_t m_nCarLess3WheelCounter;       // how long has player's car been on less than 3 wheels
     unsigned int m_nBikeRearWheelCounter;   // how long has player's bike been on rear wheel only
     float m_fBikeRearWheelDist;
     unsigned int m_nBikeFrontWheelCounter;  // how long has player's bike been on front wheel only

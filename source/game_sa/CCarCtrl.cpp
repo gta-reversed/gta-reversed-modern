@@ -91,7 +91,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int modelid, CVector posn, unsigned char 
 
         pBoat->m_autoPilot.m_nCarMission = eCarMission::MISSION_NONE;
         pBoat->m_autoPilot.m_nTempAction = 0;
-        pBoat->m_autoPilot.m_fSomeSpeed = 20.0F;
+        pBoat->m_autoPilot.m_speed = 20.0F;
         pBoat->m_autoPilot.m_nCruiseSpeed = 20;
 
         if (doMissionCleanup)
@@ -134,7 +134,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int modelid, CVector posn, unsigned char 
     pVeh->m_autoPilot.m_nCarMission = eCarMission::MISSION_NONE;
     pVeh->m_autoPilot.m_nTempAction = 0;
     pVeh->m_autoPilot.m_nCarDrivingStyle = eCarDrivingStyle::DRIVINGSTYLE_STOP_FOR_CARS;
-    pVeh->m_autoPilot.m_fSomeSpeed = 13.0F;
+    pVeh->m_autoPilot.m_speed = 13.0F;
     pVeh->m_autoPilot.m_nCruiseSpeed = 13;
     pVeh->m_autoPilot.m_nCurrentLane = 0;
     pVeh->m_autoPilot.m_nNextLane = 0;

@@ -469,7 +469,7 @@ void CBoat::ProcessControl_Reversed() {
         if (m_nModelIndex == eModelID::MODEL_PREDATOR)
             CVehicle::DoFixedMachineGuns();
 
-        CVehicle::DoDriveByShooting();
+        CVehicle::DoDriveByShootings();
         break;
     case eEntityStatus::STATUS_SIMPLE:
         m_nBoatFlags.bAnchored = false;

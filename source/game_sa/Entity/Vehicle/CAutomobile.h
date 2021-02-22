@@ -190,6 +190,7 @@ public:
 private:
     void ProcessControl_Reversed();
     CVector AddMovingCollisionSpeed_Reversed(CVector& point);
+    bool ProcessAI_Reversed(unsigned int& extraHandlingFlags);
     void ResetSuspension_Reversed();
     void ProcessFlyingCarStuff_Reversed();
     void DoHoverSuspensionRatios_Reversed();
@@ -221,6 +222,16 @@ public:
             || m_fWheelsSuspensionCompression[2] == 1.0F
             || m_fWheelsSuspensionCompression[3] == 1.0F;
     };
+
+    inline bool IsAnyWheelTouchingSand() {
+        for (int32_t i = 0; i < 4; i++) {
+            if (m_fWheelsSuspensionCompression[i] < 1.0f) {
+                if (g_surfaceInfos->GetAdhesionGroup(m_wheelColPoint[i].m_nSurfaceTypeB) == ADHESION_GROUP_SAND)
+                    return true;
+            }
+        }
+        return false;
+    }
 
     inline bool IsAnyWheelTouchingShallowWaterGround() {
         for (int32_t i = 0; i < 4; i++) {
@@ -317,7 +328,7 @@ public:
     void PopBootUsingPhysics();
     // Close all doors
     void CloseAllDoors();
-    void DoSoftGroundResistance(unsigned int& arg0);
+    void DoSoftGroundResistance(unsigned int& extraHandlingFlags);
     void ProcessCarWheelPair(int leftWheel, int rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront);
     float GetCarRoll();
     float GetCarPitch();

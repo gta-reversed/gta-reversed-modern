@@ -21,6 +21,6 @@ enum eStatModAbilities {
     STAT_MOD_11 = 11,
     STAT_MOD_12 = 12,
     STAT_MOD_13 = 13,
-    STAT_MOD_14 = 14,
+    STAT_MOD_DRIVING_SKILL = 14,
     STAT_MOD_15 = 15
 };

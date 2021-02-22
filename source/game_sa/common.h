@@ -62,19 +62,19 @@ extern char(&PC_Scratch)[16384];
 
 void InjectCommonHooks();
                             // returns player coors
-CVector FindPlayerCoors(int playerId);
+CVector FindPlayerCoors(int playerId = -1);
 // returns player speed
-CVector const& FindPlayerSpeed(int playerId);
+CVector& FindPlayerSpeed(int playerId = -1);
 // returns player ped or player vehicle if he's driving
-CEntity * FindPlayerEntity(int playerId);
+CEntity * FindPlayerEntity(int playerId = -1);
 // gets player coords
-CVector const& FindPlayerCentreOfWorld(int playerId);
+CVector const& FindPlayerCentreOfWorld(int playerId = -1);
 // gets player coords with skipping sniper shift
-CVector const& FindPlayerCentreOfWorld_NoSniperShift(int playerId);
+CVector const& FindPlayerCentreOfWorld_NoSniperShift(int playerId = -1);
 // returns player coords with skipping interior shift
-CVector FindPlayerCentreOfWorld_NoInteriorShift(int playerId);
+CVector FindPlayerCentreOfWorld_NoInteriorShift(int playerId = -1);
 // returns player angle in radians
-float FindPlayerHeading(int playerId);
+float FindPlayerHeading(int playerId = -1);
 // returns Z coord for active player
 float FindPlayerHeight();
 // returns player ped

@@ -634,7 +634,7 @@ public:
     void ProcessWeapons();
     void DoFixedMachineGuns();
     void FireFixedMachineGuns();
-    void DoDriveByShooting();
+    void DoDriveByShootings();
 
 // STATIC FUNCS
     static void Shutdown();
@@ -651,6 +651,7 @@ public:
     bool IsSubclassQuad() const { return m_vehicleSubType == VEHICLE_QUAD; }
     bool IsAutomobile() const { return m_vehicleType == VEHICLE_AUTOMOBILE; }
     bool IsTrain() const { return m_vehicleType == VEHICLE_TRAIN; }
+    bool IsTruck() const { return m_vehicleSubType == VEHICLE_MTRUCK; }
 
     bool IsTransportVehicle() const { return m_nModelIndex == MODEL_TAXI || m_nModelIndex == MODEL_CABBIE; }
     bool IsAmphibiousHeli() const { return m_nModelIndex == MODEL_SEASPAR || m_nModelIndex == MODEL_LEVIATHN; }
@@ -659,6 +660,8 @@ public:
 
     inline unsigned char GetCreatedBy() { return m_nCreatedBy; }
     inline bool IsCreatedBy(eVehicleCreatedBy v) { return v == m_nCreatedBy; }
+
+    bool CanUpdateHornCounter() { return m_nAlarmState == 0 || m_nAlarmState == -1 || m_nStatus == STATUS_WRECKED; }
 };
 
 VALIDATE_SIZE(CVehicle, 0x5A0);

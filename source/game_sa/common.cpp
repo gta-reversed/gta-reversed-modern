@@ -25,9 +25,9 @@ CVector FindPlayerCoors(int playerId)
     return plugin::CallAndReturn<CVector, 0x56E010, int>(playerId);
 }
 
-CVector const& FindPlayerSpeed(int playerId)
+CVector& FindPlayerSpeed(int playerId)
 {
-    return ((CVector const& (__cdecl *)(int))0x56E090)(playerId);
+    return ((CVector& (__cdecl *)(int))0x56E090)(playerId);
 }
 
 CEntity * FindPlayerEntity(int playerId)

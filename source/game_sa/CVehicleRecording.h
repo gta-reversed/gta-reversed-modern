@@ -35,12 +35,14 @@ VALIDATE_SIZE(CPath, 0x10);
 
 struct RwStream;
 
+const uint32_t TOTAL_VEHICLE_RECORDS = 16;
+
 class CVehicleRecording
 {
 public:
     static std::int32_t& NumPlayBackFiles;
     static CPath(&StreamingArray)[TOTAL_RRR_MODEL_IDS];
-    // seems like majority of them are static, like functions
+    static bool(&bUseCarAI)[TOTAL_VEHICLE_RECORDS];
     /*
     * DisplayMode
     * PlayBackStreamingIndex
@@ -52,7 +54,6 @@ public:
     * bPlaybackGoingOn
     * bPlaybackLooped
     * bPlaybackPaused
-    * bUseCarAI
     * pPlaybackBuffer
     * pVehicleForPlayback*/
 

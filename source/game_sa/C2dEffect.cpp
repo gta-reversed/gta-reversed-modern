@@ -157,7 +157,7 @@ void* t2dEffectPluginDestructor(void* object, RwInt32 offsetInObject, RwInt32 si
 
     // It's the same as CModelInfo::ms_2dFXInfoStore cleaning, maybe the plugin has CStore inside too?
     // Dunno how that would work, as the size is decided at runtime, easy with some manual memory tricks tho.
-    for (int32_t i = 0; i < plugin->m_nObjCount; ++i) {
+    for (uint32_t i = 0; i < plugin->m_nObjCount; ++i) {
         auto& pEffect = plugin->m_pObjects[i];
         pEffect.Shutdown();
     }

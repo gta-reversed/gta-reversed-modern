@@ -2666,7 +2666,7 @@ void CVehicle::FireFixedMachineGuns()
     plugin::CallMethod<0x73DF00, CVehicle*>(this);
 }
 
-void CVehicle::DoDriveByShooting()
+void CVehicle::DoDriveByShootings()
 {
     plugin::CallMethod<0x741FD0, CVehicle*>(this);
 }
