@@ -95,7 +95,7 @@ void CAutomobile::ProcessControl()
 
     bool extraPerfectHandling = !!(extraHandlingFlags & EXTRA_HANDLING_PERFECT);
     bool extraHandlingNitros = !!(extraHandlingFlags & EXTRA_HANDLING_NITROS);
-    bool extraHandlingWheelsTouchingPavement = !!(extraHandlingFlags & EXTRA_HANDLING_WHEELS_TOUCHING_PAVEMENT);
+    bool extraHandlingWheelsTouchingSand = !!(extraHandlingFlags & EXTRA_HANDLING_WHEELS_TOUCHING_SAND);
     bool extraHandlingTaxiBoost = !!(extraHandlingFlags & EXTRA_HANDLING_TAXI_BOOST);
 
     bool skipPhysics = false;
@@ -545,7 +545,7 @@ void CAutomobile::ProcessControl()
     float speed = m_vecMoveSpeed.SquaredMagnitude();
     for (int32_t i = 0; i < 4; i++) {
         float suspensionChange = m_fWheelsSuspensionCompressionPrev[i] - m_fWheelsSuspensionCompression[i];
-        if (suspensionChange > 0.3f && !extraHandlingWheelsTouchingPavement && speed > 0.04f) {
+        if (suspensionChange > 0.3f && !extraHandlingWheelsTouchingSand && speed > 0.04f) {
             //m_damageManager.GetWheelStatus(i); // return value is ignored
             if (suspensionChange > suspensionShake)
                 suspensionShake = suspensionChange;
@@ -591,7 +591,7 @@ void CAutomobile::ProcessControl()
         roughnessShake = 0.0f;
     }
 
-    if (!extraHandlingWheelsTouchingPavement
+    if (!extraHandlingWheelsTouchingSand
         && (suspensionShake > 0.0f || roughnessShake > 0.0f)
         && m_nStatus == STATUS_PLAYER)
     {
