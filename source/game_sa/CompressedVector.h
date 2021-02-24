@@ -8,22 +8,17 @@
 
 #include "PluginBase.h"
 
-class  CompressedVector {
+class CompressedVector {
 public:
-    signed short x;
-    signed short y;
-    signed short z;
+    int16_t x;
+    int16_t y;
+    int16_t z;
 };
 
-// 0x411590
-void UncompressVector(CVector* outVec, const CompressedVector* compressedVec);
-CVector UncompressVector(const CompressedVector* compressedVec);
-
-// 0x4115F0
-float UncompressUnitFloat(signed short val);
-void UncompressUnitVector(CVector* outVec, const CompressedVector* compressedVec);
-CVector UncompressUnitVector(const CompressedVector* compressedVec);
-
-CompressedVector CompressUnitVector(CVector const& vec);
-
 VALIDATE_SIZE(CompressedVector, 6);
+
+CVector UncompressVector(const CompressedVector& compressedVec);
+CompressedVector CompressVector(const CVector& vec);
+float UncompressUnitFloat(int16_t val);
+CVector UncompressUnitVector(const CompressedVector& compressedVec);
+CompressedVector CompressUnitVector(CVector const& vec);

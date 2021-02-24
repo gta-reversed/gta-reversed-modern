@@ -36,7 +36,7 @@ enum eVehicleDummies
 enum eVehicleType {
     VEHICLE_NONE = -1,
     VEHICLE_AUTOMOBILE = 0,
-    VEHICLE_MTRUCK,
+    VEHICLE_MTRUCK, // MONSTER TRUCK
     VEHICLE_QUAD,
     VEHICLE_HELI,
     VEHICLE_PLANE,

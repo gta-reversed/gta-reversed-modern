@@ -174,7 +174,18 @@ namespace ModelIndices {
     inline bool IsPacker(int32_t modelId) { return modelId == MODEL_PACKER; }
     inline bool IsDozer(int32_t modelId) { return modelId == MODEL_DOZER; }
     inline bool IsForklift(int32_t modelId) { return modelId == MODEL_FORKLIFT; }
-    inline bool IsAndrom(int32_t modelId) { return modelId == MODEL_ANDROM; }
+    inline bool IsAndromada(int32_t modelId) { return modelId == MODEL_ANDROM; }
+    inline bool IsFireTruck(int32_t modelId) { return modelId == MODEL_FIRELA; }
+    inline bool IsCementTruck(int32_t modelId) { return modelId == MODEL_CEMENT; }
+
+    inline bool HasMiscComponent(int32_t modelId) {
+        return modelId == MODEL_PACKER
+            || modelId == MODEL_DOZER
+            || modelId == MODEL_DUMPER
+            || modelId == MODEL_CEMENT
+            || modelId == MODEL_ANDROM
+            || modelId == MODEL_FORKLIFT;
+    }
 }
 
 void InitModelIndices();

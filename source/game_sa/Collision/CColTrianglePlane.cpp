@@ -8,14 +8,14 @@ void CColTrianglePlane::InjectHooks()
 
 void CColTrianglePlane::GetNormal(CVector& out)
 {
-    UncompressUnitVector(&out, &m_normal);
+    out = UncompressUnitVector(m_normal);
 }
 
 void CColTrianglePlane::Set(CompressedVector const* vertices, CColTriangle& triangle)
 {
-    const auto vecA = UncompressVector(&vertices[triangle.m_nVertA]);
-    const auto vecB = UncompressVector(&vertices[triangle.m_nVertB]);
-    const auto vecC = UncompressVector(&vertices[triangle.m_nVertC]);
+    const auto vecA = UncompressVector(vertices[triangle.m_nVertA]);
+    const auto vecB = UncompressVector(vertices[triangle.m_nVertB]);
+    const auto vecC = UncompressVector(vertices[triangle.m_nVertC]);
 
     const auto vecBsubA = vecB - vecA;
     const auto vecCsubA = vecC - vecA;

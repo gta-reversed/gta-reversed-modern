@@ -199,12 +199,12 @@ void CCollisionData::RemoveTrianglePlanes()
 
 void CCollisionData::GetTrianglePoint(CVector& outVec, int vertId)
 {
-    UncompressVector(&outVec, &m_pVertices[vertId]);
+    outVec = UncompressVector(m_pVertices[vertId]);
 }
 
 void CCollisionData::GetShadTrianglePoint(CVector& outVec, int vertId)
 {
-    UncompressVector(&outVec, &m_pShadowVertices[vertId]);
+    outVec = UncompressVector(m_pShadowVertices[vertId]);
 }
 
 void CCollisionData::SetLinkPtr(CLink<CCollisionData*>* link)

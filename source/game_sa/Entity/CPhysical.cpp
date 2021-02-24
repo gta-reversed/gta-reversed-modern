@@ -2461,7 +2461,7 @@ void CPhysical::PositionAttachedEntity()
     {
         if (m_pAttachedTo->m_nModelIndex == MODEL_DUMPER) {
             short wMiscComponentAngle = pAttachedToAutmobile->m_wMiscComponentAngle;
-            if (wMiscComponentAngle && wMiscComponentAngle != pAttachedToAutmobile->m_wVoodooSuspension) {
+            if (wMiscComponentAngle && wMiscComponentAngle != pAttachedToAutmobile->m_wMiscComponentAnglePrev) {
                 bDettachEntity = true;
             }
             else if (m_fDamageIntensity > 0.0f) {
@@ -2482,7 +2482,7 @@ void CPhysical::PositionAttachedEntity()
                 }
                 bUpdateSpeed = true;
             }
-            else if (!pAttachedToAutmobile->m_wMiscComponentAngle && pAttachedToAutmobile->m_wVoodooSuspension
+            else if (!pAttachedToAutmobile->m_wMiscComponentAngle && pAttachedToAutmobile->m_wMiscComponentAnglePrev
                 || m_fDamageIntensity > 0.1f * m_fMass && m_pDamageEntity && m_pDamageEntity->m_nType  == ENTITY_TYPE_BUILDING) {
                 bDettachEntity = true;
             }
@@ -2509,7 +2509,7 @@ void CPhysical::PositionAttachedEntity()
             CVector randomForward = pAttachedToEntityMatrix->GetForward() * randomNumber;
             CVector force = (randomRight + randomForward) * (m_fMass * 0.02f);
             ApplyMoveForce(force);
-            if (pAttachedToAutmobile->m_wMiscComponentAngle > pAttachedToAutmobile->m_wVoodooSuspension)
+            if (pAttachedToAutmobile->m_wMiscComponentAngle > pAttachedToAutmobile->m_wMiscComponentAnglePrev)
                 ApplyMoveForce(pAttachedTo->GetMatrix()->GetUp() * m_fMass * 0.02f);
         }
         return;
@@ -2539,20 +2539,11 @@ void CPhysical::PositionAttachedEntity()
                 m_pAttachedTo->ApplyForce(vecForce * -1.0f, vecDistance, true);
             }
             float fRotationInRadians = m_pAttachedTo->GetHeading() - GetHeading();
-            if (fRotationInRadians <= PI) {
-                if (fRotationInRadians < -PI)
-                    fRotationInRadians += PI * 2;
-            }
-            else {
+            if (fRotationInRadians > PI) 
                 fRotationInRadians -= PI * 2;
-            }
-            if (fRotationInRadians <= 0.5f) {
-                if (fRotationInRadians < -0.5f)
-                    fRotationInRadians = -0.5f;
-            }
-            else {
-                fRotationInRadians = 0.5f;
-            }
+            else if (fRotationInRadians < -PI)
+                fRotationInRadians += PI * 2;
+            fRotationInRadians = clamp<float>(fRotationInRadians, -0.5f, 0.5f);
             m_vecTurnSpeed.z += fRotationInRadians * 0.00001f * m_fMass;
         }
     }

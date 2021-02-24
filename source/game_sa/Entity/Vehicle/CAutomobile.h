@@ -108,7 +108,7 @@ public:
     char field_869;
     short m_doingBurnout;
     uint16_t m_wMiscComponentAngle;
-    uint16_t m_wVoodooSuspension;
+    uint16_t m_wMiscComponentAnglePrev;
     uint32_t m_dwBusDoorTimerEnd;
     int m_dwBusDoorTimerStart;
     float m_aSuspensionSpringLength[4];
@@ -117,8 +117,8 @@ public:
     float m_fRearHeightAboveRoad;
     float m_fCarTraction;
     float m_fTireTemperature;
-    int field_8A4;
-    int m_fRotationBalance; // used in CHeli::TestSniperCollision
+    float m_aircraftGoToHeading;
+    float m_fRotationBalance; // used in CHeli::TestSniperCollision
     float m_fMoveDirection;
     int field_8B4[6];
     int field_8C8[6];
@@ -172,6 +172,9 @@ public:
     float field_984;
 
     // variables
+    static constexpr float PACKER_COL_ANGLE_MULT = -0.0001f;
+    static constexpr float FORKLIFT_COL_ANGLE_MULT = 0.0006f;
+    static constexpr float DOZER_COL_ANGLE_MULT = 0.0002f;
     static constexpr float ROLL_ONTO_WHEELS_FORCE = 0.0025f;
     static bool &m_sAllTaxiLights;
     static CVector &vecHunterGunPos; // { 0.0f, 4.8f, -1.3f }

@@ -651,7 +651,7 @@ public:
     bool IsSubclassQuad() const { return m_vehicleSubType == VEHICLE_QUAD; }
     bool IsAutomobile() const { return m_vehicleType == VEHICLE_AUTOMOBILE; }
     bool IsTrain() const { return m_vehicleType == VEHICLE_TRAIN; }
-    bool IsTruck() const { return m_vehicleSubType == VEHICLE_MTRUCK; }
+    bool IsMonsterTruck() const { return m_vehicleSubType == VEHICLE_MTRUCK; }
 
     bool IsTransportVehicle() const { return m_nModelIndex == MODEL_TAXI || m_nModelIndex == MODEL_CABBIE; }
     bool IsAmphibiousHeli() const { return m_nModelIndex == MODEL_SEASPAR || m_nModelIndex == MODEL_LEVIATHN; }

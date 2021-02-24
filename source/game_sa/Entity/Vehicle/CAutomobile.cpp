@@ -25,6 +25,7 @@ void CAutomobile::InjectHooks()
     ReversibleHooks::Install("CAutomobile", "ProcessSuspension", 0x6AFB10, &CAutomobile::ProcessSuspension_Reversed);
     ReversibleHooks::Install("CAutomobile", "SetupModelNodes", 0x6A0770, &CAutomobile::SetupModelNodes);
     ReversibleHooks::Install("CAutomobile", "HydraulicControl", 0x6A07A0, &CAutomobile::HydraulicControl);
+    ReversibleHooks::Install("CAutomobile", "UpdateMovingCollision", 0x6A1460, &CAutomobile::UpdateMovingCollision);
     ReversibleHooks::Install("CAutomobile", "ProcessBuoyancy", 0x6A8C00, &CAutomobile::ProcessBuoyancy);
     ReversibleHooks::Install("CAutomobile", "PlaceOnRoadProperly", 0x6AF420, &CAutomobile::PlaceOnRoadProperly);
     ReversibleHooks::Install("CAutomobile", "ProcessCarWheelPair", 0x6A4EC0, &CAutomobile::ProcessCarWheelPair);
@@ -690,7 +691,7 @@ void CAutomobile::ProcessControl()
             if ((!IsPlane() || static_cast<CPlane*>(this)->m_fAccelerationBreakStatus == 0.0f) &&
                 (!IsHeli() || static_cast<CHeli*>(this)->m_fAccelerationBreakStatus == 0.0f))
             {
-                if ((m_wMiscComponentAngle == 0.0f || m_wMiscComponentAngle == m_wVoodooSuspension)
+                if ((m_wMiscComponentAngle == 0.0f || m_wMiscComponentAngle == m_wMiscComponentAnglePrev)
                     && !physicalFlags.bSubmergedInWater)
                 {
                     if ((!m_pTractor || m_pTractor->m_vecMoveSpeed == 0.0f) && DidAnyWheelTouchGroundPrev()) {
@@ -730,11 +731,11 @@ void CAutomobile::ProcessControl()
 CVector CAutomobile::AddMovingCollisionSpeed(CVector& point)
 {
     if (m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_PLANE) {
-        if (m_nCreatedBy != MISSION_VEHICLE || !m_wMiscComponentAngle && !m_wVoodooSuspension)
+        if (m_nCreatedBy != MISSION_VEHICLE || !m_wMiscComponentAngle && !m_wMiscComponentAnglePrev)
             return CVector();
     }
     float colAngleMult = 0.0f;
-    uint16_t angleDiff = m_wMiscComponentAngle - m_wVoodooSuspension;
+    uint16_t angleDiff = m_wMiscComponentAngle - m_wMiscComponentAnglePrev;
     if (angleDiff <= 100 && angleDiff >= -100) {
         CVector colPivot;
         RwFrame* carNodeMisc = nullptr;
@@ -743,21 +744,21 @@ CVector CAutomobile::AddMovingCollisionSpeed(CVector& point)
             colAngleMult = CMonsterTruck::DUMPER_COL_ANGLEMULT;
         }
         else if (ModelIndices::IsPacker(m_nModelIndex)) {
-            colAngleMult = -0.0001f;
+            colAngleMult = PACKER_COL_ANGLE_MULT;
             colPivot = PACKER_COL_PIVOT;
         }
         else if (ModelIndices::IsDozer(m_nModelIndex)) {
             carNodeMisc = m_aCarNodes[CAR_MISC_A];
             if (carNodeMisc)
-                colAngleMult = 0.0002f;
+                colAngleMult = DOZER_COL_ANGLE_MULT;
         }
-        else if (ModelIndices::IsAndrom(m_nModelIndex)) {
+        else if (ModelIndices::IsAndromada(m_nModelIndex)) {
             carNodeMisc = m_aCarNodes[CAR_MISC_E];
             if (carNodeMisc)
                 colAngleMult = CPlane::ANDROM_COL_ANGLE_MULT;
         }
         else if (ModelIndices::IsForklift(m_nModelIndex)) {
-            float rot = angleDiff / CTimer::ms_fTimeStep * 0.0006f * 2.0f;
+            float rot = angleDiff / CTimer::ms_fTimeStep * FORKLIFT_COL_ANGLE_MULT * 2.0f;
             return rot * GetUp();
         }
 
@@ -1053,7 +1054,7 @@ bool CAutomobile::ProcessAI(unsigned int& extraHandlingFlags)
     }
 
     float carWeightMult = 0.0007f;
-    if (IsTruck())
+    if (IsMonsterTruck())
         carWeightMult = 0.0025f;
     else
         carWeightMult *= CStats::GetFatAndMuscleModifier(STAT_MOD_DRIVING_SKILL);
@@ -1613,10 +1614,151 @@ void CAutomobile::HydraulicControl()
     }
 }
 
-// Converted from thiscall bool CAutomobile::UpdateMovingCollision(float angle) 0x6A1460
+const int16_t DEFAULT_COLLISION_EXTENDLIMIT = 2500;
+
 bool CAutomobile::UpdateMovingCollision(float angle)
 {
-    return ((bool(__thiscall*)(CAutomobile*, float))0x6A1460)(this, angle);
+    if (ModelIndices::HasMiscComponent(m_nModelIndex))
+        m_wMiscComponentAnglePrev = m_wMiscComponentAngle;
+
+    CPad* pad = nullptr;
+    if (m_nStatus == STATUS_PLAYER) {
+        CPlayerPed* driver = static_cast<CPlayerPed*>(m_pDriver);
+        if (!driver || !driver->IsPlayer() || CGameLogic::GameState)
+            return false;
+        pad = driver->GetPadFromPlayer();
+    }
+    else if (!IsCreatedBy(MISSION_VEHICLE) || angle < 0.0f
+        || !ModelIndices::HasMiscComponent(m_nModelIndex) && !ModelIndices::IsFireTruck(m_nModelIndex))
+    {
+        return false;
+    }
+
+    if (!ModelIndices::IsCementTruck(m_nModelIndex) && !ModelIndices::IsFireTruck(m_nModelIndex)) {
+        CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->m_pColModel;
+        CCollisionData* colData = colModel->m_pColData;
+        if (!GetSpecialColModel())
+            return false;
+        CColModel& specialColModel = m_aSpecialColModel[m_vehicleSpecialColIndex];
+        CCollisionData* specialColData = specialColModel.m_pColData;
+        m_wMiscComponentAnglePrev = m_wMiscComponentAngle;
+        if (angle < 0.0f) {
+            if (!pad || fabs(pad->GetCarGunUpDown()) <= 10.0f)
+                return false;
+        }
+        if (angle >= 0.0f) {
+            m_wMiscComponentAngle = static_cast<uint16_t>(angle * DEFAULT_COLLISION_EXTENDLIMIT);
+        }
+        else {
+            float colAngleMult = 10.0f;
+            if (ModelIndices::IsForklift(m_nModelIndex) ) {
+                if (pad->GetCarGunUpDown() >= 0.0f)
+                    colAngleMult *= -2;
+                else
+                    colAngleMult *= -1;
+            }
+
+            m_wMiscComponentAngle += static_cast<uint16_t>((pad->GetCarGunUpDown() / 128.0f) * colAngleMult * CTimer::ms_fTimeStep);
+            m_wMiscComponentAngle = clamp<int16_t>(m_wMiscComponentAngle, 0, DEFAULT_COLLISION_EXTENDLIMIT);
+        }
+
+        CMatrix rotMatrix;
+
+        RwFrame* carNodeMisc = nullptr;
+        if (ModelIndices::IsDozer(m_nModelIndex)) {
+            carNodeMisc = m_aCarNodes[CAR_MISC_A];
+            if (carNodeMisc)
+                rotMatrix.SetRotateX(m_wMiscComponentAngle * DOZER_COL_ANGLE_MULT);
+        }
+        else if (ModelIndices::IsDumper(m_nModelIndex) && IsMonsterTruck()) {
+            carNodeMisc = m_aCarNodes[CAR_MISC_C];
+            if (carNodeMisc)
+                rotMatrix.SetRotateX(m_wMiscComponentAngle * CMonsterTruck::DUMPER_COL_ANGLEMULT);
+        }
+        else if (ModelIndices::IsAndromada(m_nModelIndex)) {
+            carNodeMisc = m_aCarNodes[CAR_MISC_E];
+            if (carNodeMisc)
+                rotMatrix.SetRotateX(m_wMiscComponentAngle * CPlane::ANDROM_COL_ANGLE_MULT);
+        }
+        else if (ModelIndices::IsForklift(m_nModelIndex)) {
+            carNodeMisc = m_aCarNodes[CAR_MISC_A];
+            if (carNodeMisc)
+                rotMatrix.SetTranslate(CVector(0.0f, 0.0f, m_wMiscComponentAngle * FORKLIFT_COL_ANGLE_MULT));
+        }
+        else if (ModelIndices::IsPacker(m_nModelIndex)) {
+            carNodeMisc = m_aCarNodes[CAR_MISC_A];
+            if (carNodeMisc)
+                rotMatrix.SetRotateX(m_wMiscComponentAngle * PACKER_COL_ANGLE_MULT);
+        }
+
+        CVector componentPos;
+        if (carNodeMisc && !ModelIndices::IsForklift(m_nModelIndex))
+            componentPos = RwFrameGetMatrix(carNodeMisc)->pos;
+        float maxZ = -1000.0f;
+        float minZ = 1000.0f;
+        for (uint16_t triIndx = 0; triIndx < specialColData->m_nNumTriangles; triIndx++) {
+            CColTriangle& specialColTriangle = specialColData->m_pTriangles[triIndx];
+            if (specialColTriangle.m_nMaterial == SURFACE_CAR_MOVINGCOMPONENT) {
+                const CColTriangle& colTriangle = colData->m_pTriangles[triIndx];
+                for (int32_t i = 0; i < 3; i++) {
+                    CVector vertexPos = UncompressVector(colData->m_pVertices[colTriangle.m_vertIndices[i]]);
+                    CVector distance  = vertexPos - componentPos;
+                    vertexPos = (rotMatrix * distance) + componentPos;
+                    specialColData->m_pVertices[specialColTriangle.m_vertIndices[i]] = CompressVector(vertexPos);
+                    if (maxZ < vertexPos.z) 
+                        maxZ = vertexPos.z;
+                    else if (minZ > vertexPos.z)
+                        minZ = vertexPos.z;
+                }
+            }
+        }
+
+        if (specialColData->m_pTrianglePlanes) {
+            for (int32_t i = 0; i < specialColData->m_nNumTriangles; i++) {
+                CColTrianglePlane& trianglePlane = specialColData->m_pTrianglePlanes[i];
+                trianglePlane.Set(specialColData->m_pVertices, specialColData->m_pTriangles[i]);
+            }
+        }
+
+        for (uint16_t i = 0; i < specialColData->m_nNumSpheres; i++) {
+            CColSphere& specialColSphere = specialColData->m_pSpheres[i];
+            if (specialColSphere.m_nMaterial == SURFACE_CAR_MOVINGCOMPONENT) {
+                CColSphere& colSphere = colData->m_pSpheres[i];
+                CVector distance = colSphere.m_vecCenter - componentPos;
+                specialColSphere.m_vecCenter = (rotMatrix * distance) + componentPos;
+                const float newMaxZ = specialColSphere.m_fRadius + specialColSphere.m_vecCenter.z;
+                const float newMinZ = specialColSphere.m_vecCenter.z - specialColSphere.m_fRadius;;
+                if (maxZ < newMaxZ)
+                    maxZ = newMaxZ;
+                else if (minZ > newMinZ)
+                    minZ = newMinZ;
+            }
+        }
+        if (colModel->GetBoundingBox().m_vecMax.z < maxZ)
+            specialColModel.GetBoundingBox().m_vecMax.z = maxZ;
+        if (colModel->GetBoundingBox().m_vecMin.z > minZ)
+            specialColModel.GetBoundingBox().m_vecMin.z = minZ;
+        return true;
+    }
+
+    m_wMiscComponentAnglePrev = m_wMiscComponentAngle;
+    if (angle >= 0.0f) {
+        m_wMiscComponentAngle = static_cast<uint16_t>(angle * DEFAULT_COLLISION_EXTENDLIMIT);
+        return false;
+    }
+    if (!pad)
+        return false;
+    if (pad->GetCarGunUpDown() < -10.0f) {
+        m_wMiscComponentAngle -= static_cast<uint16_t>(2 * (pad->GetCarGunUpDown() / 128.0f) * 10.0f * CTimer::ms_fTimeStep);
+        m_wMiscComponentAngle = std::min(static_cast<int16_t>(m_wMiscComponentAngle), DEFAULT_COLLISION_EXTENDLIMIT);
+        return false;
+    }
+    if (!m_wMiscComponentAngle)
+        return false;
+    m_wMiscComponentAngle -= static_cast<uint16_t>(((pad->GetCarGunUpDown() + 100) * 10.0f * CTimer::ms_fTimeStep) / 128.0f);
+    if (static_cast<int16_t>(m_wMiscComponentAngle) < 0)
+        m_wMiscComponentAngle = 0;
+    return false;
 }
 
 // Converted from thiscall float CAutomobile::GetMovingCollisionOffset(void) 0x6A2150

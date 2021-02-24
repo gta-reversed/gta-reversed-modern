@@ -20,30 +20,30 @@ class CCollisionData {
 public:
     CCollisionData();
 public:
-    unsigned short     m_nNumSpheres;
-    unsigned short     m_nNumBoxes;
-    unsigned short     m_nNumTriangles;
-    unsigned char      m_nNumLines;
+    uint16_t     m_nNumSpheres;
+    uint16_t     m_nNumBoxes;
+    uint16_t     m_nNumTriangles;
+    uint8_t      m_nNumLines;
     struct {
-        unsigned char   bUsesDisks : 1;
-        unsigned char   bNotEmpty : 1;
-        unsigned char   bHasShadowInfo : 1;
-        unsigned char   bHasFaceGroups : 1;
-        unsigned char   bHasShadow : 1;
+        uint8_t   bUsesDisks : 1;
+        uint8_t   bNotEmpty : 1;
+        uint8_t   bHasShadowInfo : 1;
+        uint8_t   bHasFaceGroups : 1;
+        uint8_t   bHasShadow : 1;
     };
-    CColSphere        *m_pSpheres;
-    CColBox           *m_pBoxes;
+    CColSphere* m_pSpheres;
+    CColBox* m_pBoxes;
     union {
-        CColLine      *m_pLines;
-        CColDisk      *m_pDisks;
+        CColLine* m_pLines;
+        CColDisk* m_pDisks;
     };
-    CompressedVector  *m_pVertices;
-    CColTriangle      *m_pTriangles;
-    CColTrianglePlane *m_pTrianglePlanes;
+    CompressedVector* m_pVertices;
+    CColTriangle* m_pTriangles;
+    CColTrianglePlane* m_pTrianglePlanes;
     unsigned int       m_nNumShadowTriangles;
     unsigned int       m_nNumShadowVertices;
-    CompressedVector  *m_pShadowVertices;
-    CColTriangle      *m_pShadowTriangles;
+    CompressedVector* m_pShadowVertices;
+    CColTriangle* m_pShadowTriangles;
 
 public:
     static void InjectHooks();

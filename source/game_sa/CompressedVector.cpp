@@ -1,44 +1,42 @@
 #include "StdInc.h"
 
-// 0x411590
-void UncompressVector(CVector* outVec, const CompressedVector* compressedVec)
+CVector UncompressVector(const CompressedVector& compressedVec)
 {
-    outVec->x = static_cast<float>(compressedVec->x) / 128.0F;
-    outVec->y = static_cast<float>(compressedVec->y) / 128.0F;
-    outVec->z = static_cast<float>(compressedVec->z) / 128.0F;
+    CVector result;
+    result.x = static_cast<float>(compressedVec.x) / 128.0F;
+    result.y = static_cast<float>(compressedVec.y) / 128.0F;
+    result.z = static_cast<float>(compressedVec.z) / 128.0F;
+    return result;
 }
 
-CVector UncompressVector(const CompressedVector* compressedVec)
+CompressedVector CompressVector(const CVector& vec)
 {
-    CVector outVec;
-    UncompressVector(&outVec, compressedVec);
-    return outVec;
+    CompressedVector result;
+    result.x = static_cast<int16_t>(vec.x * 128.0f);
+    result.y = static_cast<int16_t>(vec.y * 128.0f);
+    result.z = static_cast<int16_t>(vec.z * 128.0f);
+    return result;
 }
 
-float UncompressUnitFloat(signed short val)
+float UncompressUnitFloat(int16_t val)
 {
     return static_cast<float>(val) / 4096.0F;
 }
 
-void UncompressUnitVector(CVector* outVec, const CompressedVector* compressedVec)
+CVector UncompressUnitVector(const CompressedVector& compressedVec)
 {
-    outVec->x = static_cast<float>(compressedVec->x) / 4096.0F;
-    outVec->y = static_cast<float>(compressedVec->y) / 4096.0F;
-    outVec->z = static_cast<float>(compressedVec->z) / 4096.0F;
-}
-
-CVector UncompressUnitVector(const CompressedVector* compressedVec)
-{
-    CVector outVec;
-    UncompressUnitVector(&outVec, compressedVec);
-    return outVec;
+    CVector result;
+    result.x = static_cast<float>(compressedVec.x) / 4096.0F;
+    result.y = static_cast<float>(compressedVec.y) / 4096.0F;
+    result.z = static_cast<float>(compressedVec.z) / 4096.0F;
+    return result;
 }
 
 CompressedVector CompressUnitVector(CVector const& vec)
 {
-    CompressedVector outVec;
-    outVec.x = static_cast<int16_t>(vec.x * 4096.0F);
-    outVec.y = static_cast<int16_t>(vec.y * 4096.0F);
-    outVec.z = static_cast<int16_t>(vec.z * 4096.0F);
-    return outVec;
+    CompressedVector result;
+    result.x = static_cast<int16_t>(vec.x * 4096.0F);
+    result.y = static_cast<int16_t>(vec.y * 4096.0F);
+    result.z = static_cast<int16_t>(vec.z * 4096.0F);
+    return  result;
 }
