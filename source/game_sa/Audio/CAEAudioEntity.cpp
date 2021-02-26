@@ -7,15 +7,7 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
+int8_t*& CAEAudioEntity::m_pAudioEventVolumes = *reinterpret_cast<int8_t**>(0xBD00F8);
+
 CAEAudioEntity::CAEAudioEntity() : m_tempSound()
 {}
-
-void CAEAudioEntity::UpdateParameters(CAESound *sound, short arg2)
-{
-    return CAEAudioEntity::UpdateParameters_Reversed(sound, arg2);
-}
-
-void CAEAudioEntity::UpdateParameters_Reversed(CAESound* sound, short arg2)
-{
-    return;
-}

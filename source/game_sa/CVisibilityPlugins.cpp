@@ -1261,7 +1261,7 @@ void CVisibilityPlugins::SetupVehicleVariables(RpClump* pRpClump) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x733160, RpClump*>(pRpClump);
 #else
-    if (pRpClump->object.type != rpCLUMP)
+    if (RwObjectGetType(pRpClump) != rpCLUMP)
         return;
     RwFrame* frame = RpClumpGetFrame(pRpClump);
     RwMatrixTag* transformMatrix = RwFrameGetLTM(frame);

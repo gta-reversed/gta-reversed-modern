@@ -10,6 +10,7 @@
 #include "CAEAudioEntity.h"
 #include "cTransmission.h"
 #include "CAETwinLoopSoundEntity.h"
+#include "eAudioEvents.h"
 #include "eRadioID.h"
 
 enum eVehicleSoundType : char
@@ -69,37 +70,43 @@ public:
     char field_47;
     int field_48;
 };
-
 VALIDATE_SIZE(cVehicleParams, 0x4C);
 
 struct  tVehicleSound {
     unsigned int  m_nIndex;
     CAESound     *m_pSound;
 };
-
 VALIDATE_SIZE(tVehicleSound, 0x8);
 
 struct  tVehicleAudioSettings {
     eVehicleSoundType  m_nVehicleSoundType;
-    char _pad;
-    short m_nEngineOnSoundBankId;
-    short m_nEngineOffSoundBankId;
-    char  m_nBassSetting;   // m_nStereo
-    char _pad1;
-    float m_fBassEq;
-    float field_C;
-    char  m_bHornTon;   // sfx id
-    char _pad2[3];
-    float m_fHornHigh;
-    char  m_nDoorSound;
-    char field_19;
-    eRadioID m_nRadioID;
-    eRadioType m_nRadioType;
-    char vehTypeForAudio;
-    char _pad4[3];
-    float m_fHornVolumeDelta;
-};
+    char              _pad;
+    short              m_nEngineOnSoundBankId;
+    short              m_nEngineOffSoundBankId;
+    char               m_nBassSetting;   // m_nStereo
+    char              _pad1;
+    float              m_fBassEq;
+    float              field_C;
+    char               m_bHornTon;   // sfx id
+    char              _pad2[3];
+    float              m_fHornHigh;
+    char               m_nDoorSound;
+    char               field_19;
+    eRadioID           m_nRadioID;
+    eRadioType         m_nRadioType;
+    char               vehTypeForAudio;
+    char              _pad4[3];
+    float              m_fHornVolumeDelta;
 
+public:
+    bool IsHeli() const { return m_nVehicleSoundType == eVehicleSoundType::VEHICLE_SOUND_HELI; }
+    bool IsPlane() const { return m_nVehicleSoundType == eVehicleSoundType::VEHICLE_SOUND_PLANE; }
+    bool IsFlyingVehicle() const { return IsPlane() || IsHeli(); }
+    bool IsNonVeh() const { return m_nVehicleSoundType == eVehicleSoundType::VEHICLE_SOUND_NON_VEH; }
+    bool IsCar() const { return m_nVehicleSoundType == eVehicleSoundType::VEHICLE_SOUND_CAR; }
+    bool IsMotorcycle() const { return m_nVehicleSoundType == eVehicleSoundType::VEHICLE_SOUND_MOTORCYCLE; }
+    bool IsBicycle() const { return m_nVehicleSoundType == eVehicleSoundType::VEHICLE_SOUND_BICYCLE; }
+};
 VALIDATE_SIZE(tVehicleAudioSettings, 0x24);
 
 class CPed;
@@ -110,11 +117,6 @@ public:
     ~CAEVehicleAudioEntity();
 
 public:
-    void AddAudioEvent(int audioEvent, float fVolume);
-    void Service();
-    void Initialise(CVehicle* vehicle);
-    void Terminate();
-
     short field_7C;
     char field_7E[2];
     tVehicleAudioSettings   m_settings;
@@ -152,14 +154,14 @@ public:
     short field_E2;
     tVehicleSound           m_aEngineSounds[12];
     int field_144;
-    short field_148;
-    short field_14A;
+    short m_nSomeCurPlayPos;
+    short m_nSomePrevPlayPos;
     short field_14C;
     short field_14E;
     int field_150;
     short field_154;
     short                   m_nSkidSoundType;
-    CAESound *field_158;
+    CAESound               *m_pSkidSoundMaybe;
     short                   m_nRoadNoiseSoundType;
     char gap_15E[2];
     CAESound               *m_pRoadNoiseSound;
@@ -173,7 +175,7 @@ public:
     CAESound               *m_pHornTonSound;
     CAESound               *m_pSirenSound;
     CAESound               *m_pPoliceSirenSound;
-    CAETwinLoopSoundEntity  m_skidSound;
+    CAETwinLoopSoundEntity  m_twinSkidSound;
     float field_22C;
     float field_230;
     float field_234;
@@ -184,15 +186,141 @@ public:
     char field_245[3];
     float field_248;
 
-     static CPed *&s_pPlayerAttachedForRadio;
-     static CPed *&s_pPlayerDriver;
-     static bool &s_HelicoptorsDisabled;
-     static short &s_NextDummyEngineSlot;
-     static tVehicleAudioSettings *&s_pVehicleAudioSettingsForRadio;
-     static tEngineDummySlot(&s_DummyEngineSlots)[10]; // static tEngineDummySlot s_DummyEngineSlots[10]
-};
+public:
+    static void InjectHooks();
 
+// VTABLE
+    void UpdateParameters(CAESound* sound, short curPlayPos) override;
+
+// CLASS
+    void AddAudioEvent(int audioEvent, float fVolume);
+    void Service();
+    void Initialise(CEntity* entity);
+    void Terminate();
+    void GetVehicleTypeForAudio();
+    void IsAccInhibited(cVehicleParams&);
+    void IsAccInhibitedBackwards(cVehicleParams&);
+    void IsAccInhibitedForLowSpeed(cVehicleParams&);
+    void IsAccInhibitedForTime();
+    void InhibitAccForTime(uint);
+    void IsCrzInhibitedForTime();
+    void InhibitCrzForTime(uint);
+    void GetAccelAndBrake(cVehicleParams&);
+    float GetVolumeForDummyIdle(float, float);
+    float GetFrequencyForDummyIdle(float, float);
+    float GetVolumeForDummyRev(float, float);
+    float GetFrequencyForDummyRev(float, float);
+    void CancelVehicleEngineSound(short);
+    void RequestNewPlayerCarEngineSound(short, float, float);
+    void UpdateVehicleEngineSound(short, float, float);
+    void StartVehicleEngineSound(short, float, float);
+    void ProcessDummyStateTransition(short, float, cVehicleParams&);
+    void ProcessDummyVehicleEngine(cVehicleParams&);
+    void JustGotInVehicleAsDriver();
+    void TurnOnRadioForVehicle();
+    void TurnOffRadioForVehicle();
+    void PlayerAboutToExitVehicleAsDriver();
+    void DisableHelicoptor();
+    void EnableHelicoptor();
+    void CopHeli();
+    float GetFreqForIdle(float);
+    float GetFreqForPlayerEngineSound(cVehicleParams&, short);
+    float GetVolForPlayerEngineSound(cVehicleParams&, short);
+    void JustFinishedAccelerationLoop();
+    void ProcessPlayerVehicleEngine(cVehicleParams&);
+    void PlaySkidSound(short soundType, float speed, float volume);
+    void JustWreckedVehicle();
+    void PlayRoadNoiseSound(short soundType, float speed, float volume);
+    void PlayFlatTyreSound(short soundType, float speed, float volume);
+    void PlayReverseSound(short soundType, float speed, float volume);
+    void UpdateGasPedalAudio(CVehicle* veh, int vehType);
+    void ProcessVehicleFlatTyre(cVehicleParams&);
+    void ProcessVehicleRoadNoise(cVehicleParams&);
+    void ProcessReverseGear(cVehicleParams&);
+    float GetVehicleDriveWheelSkidValue(CVehicle*, int, float, cTransmission*, float);
+    float GetVehicleNonDriveWheelSkidValue(CVehicle*, int, cTransmission*, float);
+    void ProcessVehicleSkidding(cVehicleParams&);
+    void ProcessRainOnVehicle(cVehicleParams&);
+    void PlayAircraftSound(short, short, short, float, float);
+    void ProcessGenericJet(uchar, cVehicleParams&, float, float, float, float, float);
+    void ProcessDummyJet(cVehicleParams&);
+    void ProcessPlayerJet(cVehicleParams&);
+    void ProcessDummySeaPlane(cVehicleParams&);
+    void ProcessPlayerSeaPlane(cVehicleParams&);
+    void ProcessAIHeli(cVehicleParams&);
+    void ProcessDummyHeli(cVehicleParams&);
+    void ProcessPlayerHeli(cVehicleParams&);
+    void ProcessAIProp(cVehicleParams&);
+    void ProcessDummyProp(cVehicleParams&);
+    void ProcessPlayerProp(cVehicleParams&);
+    void ProcessAircraft(cVehicleParams&);
+    CVector GetAircraftNearPosition();
+    void GetBaseVolumeForBicycleTyre(float);
+    void PlayBicycleSound(short, short, short, float, float);
+    void ProcessPlayerBicycle(cVehicleParams&);
+    void ProcessDummyBicycle(cVehicleParams&);
+    float GetFlyingMetalVolume(CPhysical*);
+    void AddAudioEvent(int, CEntity*);
+    void GetHornState(uchar*, cVehicleParams&);
+    void GetSirenState(uchar*, uchar*, cVehicleParams&);
+    void PlayHornOrSiren(uchar, uchar, uchar, cVehicleParams&);
+    void ProcessVehicleSirenAlarmHorn(cVehicleParams&);
+    void UpdateBoatSound(short, short, short, float, float);
+    void StopGenericEngineSound(short);
+    void ProcessBoatEngine(cVehicleParams&);
+    void ProcessBoatMovingOverWater(cVehicleParams&);
+    void UpdateTrainSound(short, short, short, float, float);
+    void ProcessDummyTrainEngine(cVehicleParams&);
+    void ProcessTrainTrackSound(cVehicleParams&);
+    void ProcessPlayerTrainEngine(cVehicleParams&);
+    void PlayTrainBrakeSound(short soundType, float speed, float volume);
+    void ProcessPlayerTrainBrakes(cVehicleParams&);
+    void JustGotOutOfVehicleAsDriver();
+    void ProcessDummyRCPlane(cVehicleParams&);
+    void ProcessPlayerRCPlane(cVehicleParams&);
+    void ProcessDummyRCHeli(cVehicleParams&);
+    void ProcessPlayerRCHeli(cVehicleParams&);
+    void ProcessPlayerRCCar(cVehicleParams&);
+    void ProcessPlayerHovercraft(cVehicleParams&);
+    void ProcessPlayerGolfCart(cVehicleParams&);
+    void UpdateGenericVehicleSound(short, short, short, short, float, float, float);
+    void ProcessDummyGolfCart(cVehicleParams&);
+    void ProcessDummyHovercraft(cVehicleParams&);
+    void ProcessDummyRCCar(cVehicleParams&);
+    void ProcessPlayerCombine(cVehicleParams&);
+    void ProcessEngineDamage(cVehicleParams&);
+    void ProcessSpecialVehicle(cVehicleParams&);
+    void ProcessNitro(cVehicleParams&);
+    void ProcessMovingParts(cVehicleParams&);
+    void ProcessVehicle(CPhysical*);
+
+public:
+    static void StaticInitialise();
+    static void StaticService() { /* Empty on purpose */ }
+    static tVehicleAudioSettings* StaticGetPlayerVehicleAudioSettingsForRadio();
+    static void EnableHelicoptors();
+    static void DisableHelicoptors();
+    static bool DoesBankSlotContainThisBank(short bankSlot, short bankId);
+    static short DemandBankSlot(short bankId);
+    static short RequestBankSlot(short bankId);
+    static void StoppedUsingBankSlot(short bankSlot);
+    static tVehicleAudioSettings GetVehicleAudioSettings(short vehId);
+
+private:
+    void UpdateParameters_Reversed(CAESound* sound, short curPlayPos);
+
+public:
+    static CPed*& s_pPlayerAttachedForRadio;
+    static CPed*& s_pPlayerDriver;
+    static bool& s_HelicoptorsDisabled;
+    static short& s_NextDummyEngineSlot;
+    static tVehicleAudioSettings*& s_pVehicleAudioSettingsForRadio;
+
+    static constexpr int NUM_DUMMY_ENGINE_SLOTS = 10;
+    static tEngineDummySlot(&s_DummyEngineSlots)[NUM_DUMMY_ENGINE_SLOTS];
+};
 VALIDATE_SIZE(CAEVehicleAudioEntity, 0x24C);
 
 // indexes = (Vehicles modelid - 400)
- extern tVehicleAudioSettings const(&gVehicleAudioSettings)[232]; // tVehicleAudioSettings gVehicleAudioSettings[232]
+static constexpr int NUM_VEH_AUDIO_SETTINGS = 232;
+extern tVehicleAudioSettings const(&gVehicleAudioSettings)[NUM_VEH_AUDIO_SETTINGS];

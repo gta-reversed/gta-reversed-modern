@@ -33,6 +33,11 @@ signed int CCamera::GetLookDirection() {
     return plugin::CallMethodAndReturnDynGlobal<signed int, CCamera*>(0x50AE90, this);
 }
 
+bool CCamera::Get_Just_Switched_Status()
+{
+    return plugin::CallMethodAndReturn<bool, 0x50AE10, CCamera*>(this);
+}
+
 float CCamera::CalculateGroundHeight(eGroundHeightType type) {
     return plugin::CallMethodAndReturnDynGlobal<float, CCamera*, eGroundHeightType>(0x514B80, this, type);
 }

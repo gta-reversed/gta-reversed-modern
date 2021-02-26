@@ -108,6 +108,7 @@ extern unsigned int &ClumpOffset;
 constexpr float TWO_PI = 6.28318530718f;
 constexpr float PI = 3.14159265358979323846f;
 constexpr float HALF_PI = PI / 2.0f;
+constexpr float LOG10_2 = 0.30102999566398119802f; // log10(2)
 
 constexpr float DegreesToRadians(float angleInDegrees) {
     return angleInDegrees * PI / 180.0F;
@@ -130,6 +131,18 @@ inline const float lerp(float fMin, float fMax, float fProgress) {
 
 inline const float invLerp(float fMin, float fMax, float fVal) {
     return (fVal - fMin) / (fMax - fMin);
+}
+
+// 0x4EEA80 - And inlined helluvalot
+inline bool approxEqual(float f1, float f2, float epsilon)
+{
+    return fabs(f1 - f2) < epsilon;
+}
+
+// Used in some audio functions, mostly CAESmoothFadeThread
+inline bool approxEqual2(float f1, float f2, float epsilon = 0.01F)
+{
+    return f1 == f2 || fabs(f1 - f2) < epsilon;
 }
 
 AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, char *name);

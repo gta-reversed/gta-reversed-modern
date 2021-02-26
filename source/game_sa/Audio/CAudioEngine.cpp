@@ -8,14 +8,14 @@ void CAudioEngine::ReportCollision(CEntity* pEntity1, CEntity* pEntity2, int sur
         pEntity1, pEntity2, surface1, surface2, pColPoint, normal, fCollisionImpact1, fCollisionImpact2, bOnlyPlayOneShotCollisionSound, bUnknown);
 }
 
-void CAudioEngine::ReportMissionAudioEvent(int eventId, CObject* pObject)
+void CAudioEngine::ReportMissionAudioEvent(ushort eventId, CObject* pObject)
 {
-    return plugin::CallMethod <0x507350, CAudioEngine*, int, CObject*>(this, eventId, pObject);
+    return plugin::CallMethod <0x507350, CAudioEngine*, ushort, CObject*>(this, eventId, pObject);
 }
 
 void CAudioEngine::DisplayRadioStationName()
 {
-    ((void(__cdecl*)())0x507030)();
+    plugin::CallMethod<0x507030, CAudioEngine*>(this);
 }
 
 void CAudioEngine::ReportWaterSplash(CPhysical* pPhysical, float volume, bool forcePlaySplashSound) {
@@ -30,4 +30,9 @@ void CAudioEngine::ReportDoorMovement(CPhysical* pPhysical)
 void CAudioEngine::ReportObjectDestruction(CEntity* pEntity)
 {
     plugin::CallMethod<0x506ED0, CAudioEngine*, CEntity*>(this, pEntity);
+}
+
+void CAudioEngine::StopRadio(tVehicleAudioSettings* audioSettings, unsigned char bDuringPause)
+{
+    plugin::CallMethod<0x506F70, CAudioEngine*, tVehicleAudioSettings*, unsigned char>(this, audioSettings, bDuringPause);
 }

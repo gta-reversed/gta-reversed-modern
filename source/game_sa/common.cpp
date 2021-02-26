@@ -710,7 +710,7 @@ void Render2dStuff()
         CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH / 2 - SCREEN_SCALE_X(210), SCREEN_HEIGHT), black);
         CSprite2d::DrawRect(CRect(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(210), 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), black);
     }
-    CAudioEngine::DisplayRadioStationName();
+    AudioEngine.DisplayRadioStationName();
     CHud::Draw();
     CSpecialFX::Render2DFXs();
     CUserDisplay::OnscnTimer.ProcessForDisplay();
@@ -718,6 +718,8 @@ void Render2dStuff()
     CDarkel::DrawMessages();
     CGarages::PrintMessages();
     CFont::DrawFonts();
+
+    //NOTSA: Imgui menu draw loop
     CDebugMenu::ImguiDrawLoop();
     CDebugMenu::ImGuiDrawMouse();
 #endif

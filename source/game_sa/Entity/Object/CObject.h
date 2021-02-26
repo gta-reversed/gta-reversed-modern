@@ -95,7 +95,7 @@ public:
     short           m_wRemapTxd; // this is used for detached car parts
     RwTexture      *m_pRemapTexture; // this is used for detached car parts
     CDummyObject   *m_pDummyObject; // used for dynamic objects like garage doors, train crossings etc.
-    int             m_dwBurnTime; // time when particles must be stopped
+    uint32_t        m_dwBurnTime; // time when particles must be stopped
     float           m_fBurnDamage;
 
 

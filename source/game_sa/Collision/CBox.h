@@ -22,7 +22,7 @@ public:
 	void Recalc();
 
 public:
-    inline CVector const& GetSize() const { return m_vecMax - m_vecMin; }
+    inline CVector GetSize() const { return m_vecMax - m_vecMin; }
     inline float GetWidth() const { return m_vecMax.x - m_vecMin.x; }
     inline float GetLength() const { return m_vecMax.y - m_vecMin.y; }
     inline float GetHeight() const { return m_vecMax.z - m_vecMin.z; }

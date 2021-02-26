@@ -663,7 +663,6 @@ public:
 
     bool CanUpdateHornCounter() { return m_nAlarmState == 0 || m_nAlarmState == -1 || m_nStatus == STATUS_WRECKED; }
 };
-
 VALIDATE_SIZE(CVehicle, 0x5A0);
 
 bool IsVehiclePointerValid(CVehicle* vehicle);

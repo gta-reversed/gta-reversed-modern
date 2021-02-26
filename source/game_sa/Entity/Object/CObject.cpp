@@ -156,7 +156,7 @@ void* CObject::operator new(unsigned int size)
     return CPools::ms_pObjectPool->New();
 }
 
-void* CObject::operator new(unsigned size, int iPoolRef)
+void* CObject::operator new(unsigned int size, int iPoolRef)
 {
     return CPools::ms_pObjectPool->New(iPoolRef);
 }

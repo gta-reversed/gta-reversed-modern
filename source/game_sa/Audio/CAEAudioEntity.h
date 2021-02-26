@@ -8,6 +8,7 @@
 
 #include "PluginBase.h"
 #include "CAESound.h"
+#include "eAudioEvents.h"
 
 class CEntity;
 
@@ -19,11 +20,15 @@ public:
     CEntity *m_pEntity;
     CAESound m_tempSound;
 
-    // vtable
-    virtual void UpdateParameters(CAESound *sound, short arg2);
+public:
+// VTABLE
+    virtual void UpdateParameters(CAESound* sound, short curPlayPos) { /* Empty on purpose */ };
 
-private:
-    void UpdateParameters_Reversed(CAESound* sound, short arg2);
+public:
+    static int8_t*& m_pAudioEventVolumes;
+
+public:
+    static float GetDefaultVolume(eAudioEvents audioEvent) { return static_cast<float>(CAEAudioEntity::m_pAudioEventVolumes[audioEvent]); }
 };
 
 VALIDATE_SIZE(CAEAudioEntity, 0x7C);

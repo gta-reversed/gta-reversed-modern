@@ -162,7 +162,7 @@ void CCollisionData::Copy(CCollisionData const& src)
         {
             // Get number of vertices
             unsigned short iHighestVertInd = 0;
-            for (auto i = 0; i < src.m_nNumShadowTriangles; ++i)
+            for (uint32_t i = 0; i < src.m_nNumShadowTriangles; ++i)
                 iHighestVertInd = std::max({ iHighestVertInd,
                                         src.m_pShadowTriangles[i].m_nVertA,
                                         src.m_pShadowTriangles[i].m_nVertB,
@@ -179,7 +179,7 @@ void CCollisionData::Copy(CCollisionData const& src)
             m_pShadowTriangles = static_cast<CColTriangle*>(CMemoryMgr::Malloc(m_nNumShadowTriangles * sizeof(CColTriangle)));
         }
     }
-    for (auto i = 0; i < m_nNumShadowTriangles; ++i)
+    for (uint32_t i = 0; i < m_nNumShadowTriangles; ++i)
         m_pShadowTriangles[i] = src.m_pShadowTriangles[i];
 }
 
