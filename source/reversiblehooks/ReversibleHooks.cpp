@@ -1,5 +1,36 @@
 #include "StdInc.h"
 
+void ReversibleHooks::UnHook(const std::string& className, const char* functionName)
+{
+    if (className.empty())
+        return;
+    const auto& allHooks = GetAllHooks();
+    if (functionName) {
+        for (auto& classHooks : allHooks) {
+            if (classHooks.first == className) {
+                for (auto& hook : classHooks.second) {
+                    if (hook->m_bIsHooked && strcmp(hook->m_sFunctionName.c_str(), functionName) == 0) {
+                        hook->Switch();
+                        printf("UnHooked %s::%s\n", className.c_str(), functionName);
+                        return;
+                    }
+                }
+            }
+        }
+    } else {
+        for (auto& classHooks : allHooks) {
+            if (classHooks.first == className) {
+                for (auto& hook : classHooks.second) {
+                    if (hook->m_bIsHooked)
+                        hook->Switch();
+                }
+                printf("UnHooked class %s\n", className.c_str());
+                return;
+            }
+        }
+    }
+}
+
 void ReversibleHooks::HookInstall(const std::string& sIdentifier, const std::string& sFuncName, unsigned int installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault)
 {
     assert(!GetHook(sIdentifier, sFuncName));

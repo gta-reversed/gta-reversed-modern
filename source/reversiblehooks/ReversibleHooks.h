@@ -78,6 +78,7 @@ public:
         return ReversibleHooks::GetInstance().m_HooksMap;
     }
 
+    static void UnHook(const std::string& className, const char* functionName = nullptr);
 private:
     void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, unsigned int installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, bool bDisableByDefault = false);
     void HookInstallVirtual(const std::string& sIdentifier, const std::string& sFuncName, void* libVTableAddress, const std::vector<uint32_t>& vecAddressesToHook);
