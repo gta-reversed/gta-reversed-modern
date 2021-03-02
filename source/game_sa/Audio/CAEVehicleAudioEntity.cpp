@@ -123,8 +123,10 @@ short CAEVehicleAudioEntity::RequestBankSlot(short bankId)
     for (auto i = 0; i < NUM_DUMMY_ENGINE_SLOTS; ++i)
     {
         auto& dummyEng = CAEVehicleAudioEntity::s_DummyEngineSlots[i];
-        if (dummyEng.m_nBankId == bankId)
+        if (dummyEng.m_nBankId == bankId) {
+            dummyEng.m_nUsageCount++;
             return i + 7;
+        }
 
         if (dummyEng.m_nUsageCount <= 0)
             freeSlot = i;
