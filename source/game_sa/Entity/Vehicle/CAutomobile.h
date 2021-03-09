@@ -166,7 +166,7 @@ public:
     float field_964;
     tWheelState m_aWheelState[4];
     FxSystem_c* m_exhaustNitroFxSystem[2];
-    char field_980;
+    uint8_t m_harvesterParticleCounter;
     char field_981;
     short field_982;
     float field_984;
@@ -230,6 +230,16 @@ public:
         for (int32_t i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompression[i] < 1.0f) {
                 if (g_surfaceInfos->GetAdhesionGroup(m_wheelColPoint[i].m_nSurfaceTypeB) == ADHESION_GROUP_SAND)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    inline bool IsAnyWheelTouchingRailTrack() {
+        for (int32_t i = 0; i < 4; i++) {
+            if (m_fWheelsSuspensionCompression[i] < 1.0f) {
+                if (m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_RAILTRACK)
                     return true;
             }
         }

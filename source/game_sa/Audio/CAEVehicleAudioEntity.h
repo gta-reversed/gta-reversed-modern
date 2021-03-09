@@ -193,7 +193,7 @@ public:
     void UpdateParameters(CAESound* sound, short curPlayPos) override;
 
 // CLASS
-    void AddAudioEvent(int audioEvent, float fVolume);
+    void AddAudioEvent(eAudioEvents audioEvent, float fVolume);
     void Service();
     void Initialise(CEntity* entity);
     void Terminate();

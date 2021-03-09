@@ -22,6 +22,11 @@ void CAudioEngine::ReportWaterSplash(CPhysical* pPhysical, float volume, bool fo
     return plugin::CallMethod<0x506F00, CAudioEngine*, CPhysical*, float, unsigned char>(this, pPhysical, volume, forcePlaySplashSound);
 }
 
+void CAudioEngine::ReportWeaponEvent(int32_t audioEvent, eWeaponType weaponType, CPhysical* physical)
+{
+    return plugin::CallMethod<0x506F40, CAudioEngine*, int32_t, eWeaponType, CPhysical*>(this, audioEvent, weaponType, physical);
+}
+
 void CAudioEngine::ReportDoorMovement(CPhysical* pPhysical)
 {
     plugin::CallMethod<0x506F50, CAudioEngine*, CPhysical*>(this, pPhysical);

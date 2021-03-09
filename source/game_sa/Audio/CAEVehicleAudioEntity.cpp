@@ -237,7 +237,7 @@ void CAEVehicleAudioEntity::UpdateParameters_Reversed(CAESound* sound, short cur
     }
 }
 
-void CAEVehicleAudioEntity::AddAudioEvent(int audioEvent, float fVolume)
+void CAEVehicleAudioEntity::AddAudioEvent(eAudioEvents audioEvent, float fVolume)
 {
     plugin::CallMethod<0x4F6420, CAEVehicleAudioEntity*, int, float>(this, audioEvent, fVolume);
 }

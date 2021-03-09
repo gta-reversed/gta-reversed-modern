@@ -54,7 +54,7 @@ public:
     void ReportGlassCollisionEvent(int, CVector&);
     void ReportWaterSplash(CPhysical* pPhysical, float volume, bool forcePlaySplashSound);
     void ReportWaterSplash(CVector, float);
-    void ReportWeaponEvent(int, eWeaponType, CPhysical*);
+    void ReportWeaponEvent(int32_t audioEvent, eWeaponType weaponType, CPhysical* physical);
     void ReportDoorMovement(CPhysical* pPhysical);
     void StopRadio(tVehicleAudioSettings* audioSettings, unsigned char bDuringPause);
     void SetRadioAutoRetuneOnOff(uchar);

@@ -886,6 +886,7 @@ void CEntity::FlagToDestroyWhenNextProcessed()
 {
     CEntity::FlagToDestroyWhenNextProcessed_Reversed();
 }
+
 void CEntity::FlagToDestroyWhenNextProcessed_Reversed()
 {
     return;

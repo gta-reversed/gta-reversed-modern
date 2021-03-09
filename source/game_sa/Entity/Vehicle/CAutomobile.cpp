@@ -14,6 +14,13 @@ CColPoint* aAutomobileColPoints = (CColPoint*)0xC1BFF8;
 const CVector PACKER_COL_PIVOT = CVector(0.0, 0.0, 2.0);
 const float CAR_BALANCE_MULT = 0.08f;
 
+static const CVector TANK_SHOT_DOOM_POS(0.0f, -1.394f, 2.296f);
+static const CVector TANK_SHOT_DOOM_DEFAULT_TARGET(0.0f, 2.95f, 2.97f);
+static const CVector TANK_SHOT_DOOM_DISTANCE_TO_DEFAULT_TARGET = TANK_SHOT_DOOM_DEFAULT_TARGET - TANK_SHOT_DOOM_POS;
+
+static const uint32_t TIGER_GUNFIRE_RATE = 60;
+static const CVector TIGER_GUN_POS(0.0f, 0.5f, 0.2f);
+
 void CAutomobile::InjectHooks()
 {
     ReversibleHooks::Install("CAutomobile", "ProcessControl", 0x6B1880, &CAutomobile::ProcessControl_Reversed);
@@ -27,7 +34,10 @@ void CAutomobile::InjectHooks()
     ReversibleHooks::Install("CAutomobile", "HydraulicControl", 0x6A07A0, &CAutomobile::HydraulicControl);
     ReversibleHooks::Install("CAutomobile", "UpdateMovingCollision", 0x6A1460, &CAutomobile::UpdateMovingCollision);
     ReversibleHooks::Install("CAutomobile", "ProcessBuoyancy", 0x6A8C00, &CAutomobile::ProcessBuoyancy);
+    ReversibleHooks::Install("CAutomobile", "ProcessHarvester", 0x6A9680, &CAutomobile::ProcessHarvester);
+    ReversibleHooks::Install("CAutomobile", "TankControl", 0x6AE850, &CAutomobile::TankControl);
     ReversibleHooks::Install("CAutomobile", "PlaceOnRoadProperly", 0x6AF420, &CAutomobile::PlaceOnRoadProperly);
+    ReversibleHooks::Install("CAutomobile", "DoSoftGroundResistance", 0x6A4AF0, &CAutomobile::DoSoftGroundResistance);
     ReversibleHooks::Install("CAutomobile", "ProcessCarWheelPair", 0x6A4EC0, &CAutomobile::ProcessCarWheelPair);
 }
 
@@ -715,7 +725,7 @@ void CAutomobile::ProcessControl()
         position.z = CGeneral::GetRandomNumberInRange(0.0f, CWeather::Earthquake * 0.5f);
     }
     if (m_nModelIndex == MODEL_COMBINE)
-        CAutomobile::ProcessHarvester();
+        ProcessHarvester();
     if (m_nModelIndex == MODEL_RHINO && (m_vecMoveSpeed != 0.0f || m_vecTurnSpeed != 0.0f)) {
         m_doors[DOOR_LEFT_REAR].m_fOpenAngle = 1.0f;
         m_doors[DOOR_LEFT_REAR].m_fClosedAngle = 1.0f;
@@ -2011,10 +2021,36 @@ void CAutomobile::CloseAllDoors()
     ((void(__thiscall*)(CAutomobile*))0x6A4520)(this);
 }
 
-// Converted from thiscall void CAutomobile::DoSoftGroundResistance(uint &) 0x6A4AF0
 void CAutomobile::DoSoftGroundResistance(unsigned int& extraHandlingFlags)
 {
-    ((void(__thiscall*)(CAutomobile*, unsigned int&))0x6A4AF0)(this, extraHandlingFlags);
+    if (IsAnyWheelTouchingSand() && m_nModelIndex != MODEL_RCBANDIT && m_nModelIndex != MODEL_RHINO) {
+        CVector speedUp = m_vecMoveSpeed - DotProduct(m_vecMoveSpeed, GetUp()) * GetUp();
+        float offroadAbility = 0.005f;
+        if (speedUp.SquaredMagnitude() <= 0.3f * 0.3f) {
+            npcFlags.bLostTraction = true;
+        }
+        else {
+            float magnitude = speedUp.NormaliseAndMag();
+            speedUp *= 0.3f;
+            offroadAbility *= std::max(0.2f, 1.0f - (magnitude + magnitude));
+        }
+        if (handlingFlags.bOffroadAbility2)
+            offroadAbility *= 0.3f;
+        else if (handlingFlags.bOffroadAbility)
+            offroadAbility *= 0.6f;
+        if (CWeather::WetRoads > 0.2f)
+            offroadAbility *= (1.2f - CWeather::WetRoads);
+        float direction = -(offroadAbility * (CTimer::ms_fTimeStep * m_fMass));
+        ApplyMoveForce(speedUp * direction);
+        extraHandlingFlags |= EXTRA_HANDLING_WHEELS_TOUCHING_SAND;
+    }
+    else if (IsAnyWheelTouchingRailTrack()) {
+        if (m_nModelIndex != MODEL_RCBANDIT && m_nModelIndex != MODEL_RHINO) {
+            CVector speedUp = m_vecMoveSpeed - DotProduct(m_vecMoveSpeed, GetUp()) * GetUp();
+            float direction = -(CTimer::ms_fTimeStep * m_fMass * CVehicle::ms_fRailTrackResistance);
+            ApplyMoveForce(speedUp * direction);
+        }
+    }
 }
 
 void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront)
@@ -2438,10 +2474,102 @@ inline void CAutomobile::ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver)
     }
 }
 
-// Converted from thiscall void CAutomobile::ProcessHarvester(void) 0x6A9680
 void CAutomobile::ProcessHarvester()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6A9680)(this);
+    if (m_nStatus == STATUS_PLAYER) {
+        CStreaming::m_bStreamHarvesterModelsThisFrame = true;
+        if (m_vecMoveSpeed.Magnitude2D() > 0.01f) {
+            if ((CTimer::m_FrameCounter & 1) != 0)
+            {
+                for (int32_t i = CPools::ms_pPedPool->GetSize() - 1; i >= 0; i--) {
+                    CPed* ped = CPools::ms_pPedPool->GetAt(i);
+                    if (ped && !ped->IsPlayer()) {
+                        CVector distance = ped->GetPosition() - GetPosition();
+                        float distanceForward = DotProduct(distance, GetForward());
+                        if (distanceForward > 4.0f && distanceForward < 5.0f) {
+                            float distanceRight = std::abs(DotProduct(distance, GetRight()));
+                            if (distanceRight < 4.0f) {
+                                float distanceUp = std::abs(DotProduct(distance, GetUp()));
+                                if (distanceUp < 4.0f) {
+                                    ped->FlagToDestroyWhenNextProcessed();
+                                    m_harvesterParticleCounter = 20;
+                                    m_vehicleAudio.AddAudioEvent(AE_BODY_HARVEST, 0.0f);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int32_t i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
+                    CObject* object = CPools::ms_pObjectPool->GetAt(i);
+                    if (object && (m_nModelIndex == ModelIndices::MI_GRASSHOUSE || m_nModelIndex == ModelIndices::MI_GRASSPLANT)) {
+                        CVector distance = object->GetPosition() - GetPosition();
+                        float distanceForward = DotProduct(distance, GetForward());
+                        if (distanceForward > 4.0f && distanceForward < 5.0f) {
+                            float distanceRight = std::abs(DotProduct(distance, GetRight()));
+                            if (distanceRight < 4.0f) {
+                                float distanceUp = std::abs(DotProduct(distance, GetUp()));
+                                if (distanceUp < 4.0f)
+                                    object->ObjectDamage(99999.0f, nullptr, nullptr, this, WEAPON_RUNOVERBYCAR);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!m_harvesterParticleCounter)
+            return;
+
+        CVector pos = *m_matrix * CVector(-1.2f, -3.8f, 1.5f);
+        CVector velocity = GetForward() * -0.1f;
+        velocity.x += CGeneral::GetRandomNumberInRange(0.05f, -0.05f);
+        velocity.y = CGeneral::GetRandomNumberInRange(0.05f, -0.05f);
+        int32_t bodyPartModelId = -1;
+        switch (m_harvesterParticleCounter - 1)
+        {
+        case 0:
+        case 6:
+            bodyPartModelId = ModelIndices::MI_HARVESTERBODYPART1;
+            break;
+        case 1:
+        case 3:
+            bodyPartModelId = ModelIndices::MI_HARVESTERBODYPART2;
+            break;
+        case 2:
+            bodyPartModelId = ModelIndices::MI_HARVESTERBODYPART3;
+            break;
+        case 5:
+            bodyPartModelId = ModelIndices::MI_HARVESTERBODYPART4;
+            break;
+        }
+
+        if (CLocalisation::ShootLimbs() && bodyPartModelId >= 0) {
+            CObject* limb = new CObject(bodyPartModelId, true);
+            CPlaceable::SetMatrix(*m_matrix);
+            limb->SetPosn(pos);
+            limb->m_vecMoveSpeed = velocity;
+            CVector turnSpeed(
+            CGeneral::GetRandomNumberInRange(0.12f, -0.04f),
+            CGeneral::GetRandomNumberInRange(0.12f, -0.04f),
+            CGeneral::GetRandomNumberInRange(0.12f, -0.04f));
+            limb->m_vecTurnSpeed = turnSpeed;
+            limb->m_nObjectType = OBJECT_TEMPORARY;
+            limb->UpdateRW();
+            limb->UpdateRwFrame();
+            limb->SetIsStatic(false);
+            CObject::nNoTempObjects++;
+            CWorld::Add(limb);
+        }
+        m_harvesterParticleCounter--;
+        if (CLocalisation::Blood() && m_harvesterParticleCounter % 3 == 0) {
+            FxPrtMult_c fxPrtMult;
+            fxPrtMult.SetUp(0.15f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f);
+            g_fx.m_pPrtSmokeII3expand->AddParticle(&pos, &velocity, 0.0f, &fxPrtMult, -1.0f, 1.2f, 0.6f, 0);
+        }
+    }
 }
 
 // Converted from thiscall void CAutomobile::ProcessSwingingDoor(int nodeIndex, eDoors door) 0x6A9D70
@@ -2480,10 +2608,143 @@ void CAutomobile::ScanForCrimes()
     ((void(__thiscall*)(CAutomobile*))0x6ADFF0)(this);
 }
 
-// Converted from thiscall void CAutomobile::TankControl(void) 0x6AE850
 void CAutomobile::TankControl()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6AE850)(this);
+    if (m_nModelIndex == MODEL_RCTIGER && m_nStatus  == STATUS_HELI) {
+        if (CPad::GetPad(0)->CarGunJustDown()) {
+            if (CTimer::m_snTimeInMilliseconds > m_nGunFiringTime + TIGER_GUNFIRE_RATE) {
+                CWeapon minigun(WEAPON_MINIGUN, 5000);
+                CVector point = *m_matrix * TIGER_GUN_POS + CTimer::ms_fTimeStep * m_vecMoveSpeed;
+                minigun.FireInstantHit(this, &point, &point, nullptr, nullptr, nullptr, false, true);
+                CVector2D direction(0.0f, 0.1f);
+                minigun.AddGunshell(this, point, direction, 0.025f);
+                AudioEngine.ReportWeaponEvent(AE_WEAPON_FIRE, WEAPON_MINIGUN, this);
+                m_nGunFiringTime = CTimer::m_snTimeInMilliseconds;
+            }
+        }
+        return;
+    }
+    if (m_nStatus != STATUS_PLAYER || m_nModelIndex != MODEL_RHINO)
+        return;
+    if (CGameLogic::GameState != GAME_STATE_0 || !m_pDriver || !m_pDriver->IsPlayer())
+        return;
+    CPad* pad = static_cast<CPlayerPed*>(m_pDriver)->GetPadFromPlayer();
+    if (!pad)
+        return;
+    CCam& activeCam = TheCamera.GetActiveCamera();
+    if (activeCam.m_nMode != MODE_CAM_ON_A_STRING) {
+        m_fDoomVerticalRotation -= (pad->GetCarGunLeftRight() * CTimer::ms_fTimeStep * 0.015f) / 128.0f;
+        m_fDoomHorizontalRotation += (pad->GetCarGunUpDown() * CTimer::ms_fTimeStep * 0.005f) / 128.0f;
+    }
+    else {
+        CVector frontDot = Multiply3x3(&activeCam.m_vecFront, m_matrix);
+        float doomVerticalRotation = atan2(-frontDot.x, frontDot.y);
+        float doomHorizontalRotation = atan2(frontDot.z, frontDot.Magnitude2D()) + DegreesToRadians(15);
+
+        if (doomVerticalRotation < m_fDoomVerticalRotation - PI)
+            doomVerticalRotation = doomVerticalRotation + TWO_PI;
+        else if (doomVerticalRotation > m_fDoomVerticalRotation + PI)
+            doomVerticalRotation = doomVerticalRotation - TWO_PI;
+
+        float doomVerticalRotDiff = doomVerticalRotation - m_fDoomVerticalRotation;
+        float timeStep = CTimer::ms_fTimeStep * 0.015f;
+        if (doomVerticalRotDiff < -timeStep)
+            m_fDoomVerticalRotation -= timeStep;
+        else if (doomVerticalRotDiff > timeStep)
+            m_fDoomVerticalRotation += timeStep;
+
+        float doomHorizontalRotDiff = doomHorizontalRotation - m_fDoomHorizontalRotation;
+        timeStep = CTimer::ms_fTimeStep * 0.005f;
+        if (doomHorizontalRotDiff > timeStep)
+            m_fDoomHorizontalRotation += timeStep;
+        else if (doomHorizontalRotDiff >= -timeStep)
+            m_fDoomHorizontalRotation = doomHorizontalRotation;
+        else
+            m_fDoomHorizontalRotation -= timeStep;
+    }
+
+    if (m_fDoomVerticalRotation > PI)
+        m_fDoomVerticalRotation -= TWO_PI;
+    else if (m_fDoomVerticalRotation < -PI)
+        m_fDoomVerticalRotation += TWO_PI;
+
+    constexpr float DOOM_HORIZONTAL_ROT_MAX = DegreesToRadians(35);
+    constexpr float DOOM_HORIZONTAL_ROT_MIN = -DegreesToRadians(7);
+
+    if (m_fDoomHorizontalRotation > DOOM_HORIZONTAL_ROT_MAX) {
+        m_fDoomHorizontalRotation = DOOM_HORIZONTAL_ROT_MAX;
+    }
+    else if (m_fDoomVerticalRotation > DegreesToRadians(90) || m_fDoomVerticalRotation < -DegreesToRadians(90)) {
+        float cosDoomVerticalRot = cosf(m_fDoomVerticalRotation) * 1.3f;
+        float doomHorizontalRot = -DegreesToRadians(3);
+        if (cosDoomVerticalRot >= -1.0f) 
+            doomHorizontalRot = DOOM_HORIZONTAL_ROT_MIN - cosDoomVerticalRot * (doomHorizontalRot - DOOM_HORIZONTAL_ROT_MIN);
+        if (doomHorizontalRot > m_fDoomHorizontalRotation)
+            m_fDoomHorizontalRotation = doomHorizontalRot;
+    }
+    else if (m_fDoomHorizontalRotation < DOOM_HORIZONTAL_ROT_MIN) {
+        m_fDoomHorizontalRotation = DOOM_HORIZONTAL_ROT_MIN;
+    }
+    
+    if (pad->CarGunJustDown()) {
+        CPlayerInfo& playerInfo = CWorld::GetFocusedPlayerInfo();
+        if (CTimer::m_snTimeInMilliseconds > playerInfo.m_nLastTimeBigGunFired + 800) {
+            playerInfo.m_nLastTimeBigGunFired = CTimer::m_snTimeInMilliseconds;
+            CVector point;
+            point.x = sin(-m_fDoomVerticalRotation);
+            point.y = cos(m_fDoomVerticalRotation);
+            point.z = sin(m_fDoomHorizontalRotation);
+            point = Multiply3x3(m_matrix, &point);
+
+            CVector newTurretPosition;
+            if (m_aCarNodes[CAR_MISC_C]) {
+                RwMatrix* carNodeMiscMatrix = RwFrameGetLTM(m_aCarNodes[CAR_MISC_C]);
+                newTurretPosition = carNodeMiscMatrix->pos;
+                newTurretPosition += GetSpeed(newTurretPosition - GetPosition()) * CTimer::ms_fTimeStep;
+            }
+            else {
+                // unused code
+                float sinVerticalDoomRot = sin(m_fDoomVerticalRotation);
+                float cosVerticalDoomRot = cos(m_fDoomVerticalRotation);
+
+                CVector doomOffset;
+
+                doomOffset.x = TANK_SHOT_DOOM_POS.x;
+                doomOffset.x += cosVerticalDoomRot * TANK_SHOT_DOOM_DISTANCE_TO_DEFAULT_TARGET.x;
+                doomOffset.x -= sinVerticalDoomRot * TANK_SHOT_DOOM_DISTANCE_TO_DEFAULT_TARGET.y;
+
+                doomOffset.y = TANK_SHOT_DOOM_POS.y;
+                doomOffset.y += cosVerticalDoomRot * TANK_SHOT_DOOM_DISTANCE_TO_DEFAULT_TARGET.y;
+                doomOffset.y += sinVerticalDoomRot * TANK_SHOT_DOOM_DISTANCE_TO_DEFAULT_TARGET.x;
+
+                doomOffset.z = TANK_SHOT_DOOM_POS.z;
+                doomOffset.z += TANK_SHOT_DOOM_DISTANCE_TO_DEFAULT_TARGET.z - 1.0f;
+
+                // BUG?: This statement is not assigned to any variable.
+                // It should be `newTurretPosition =  *m_matrix * doomOffset`
+                *m_matrix * doomOffset;
+            }
+
+            CVector distance = newTurretPosition - GetPosition();
+            CVector force = point * -0.1f * m_fMass;
+            ApplyForce(force, distance, true);
+            CVector endPoint = newTurretPosition + point * 60.0f;
+            CWeapon::DoTankDoomAiming(this, m_pDriver, &newTurretPosition, &endPoint);
+
+            CColPoint colPoint;
+            CEntity* entity = nullptr;
+            CWorld::pIgnoreEntity = this;
+            CWorld::ProcessLineOfSight(newTurretPosition, endPoint, colPoint, entity,
+                true, true, true, true, true, true, false, false);
+            CWorld::pIgnoreEntity = nullptr;
+            CVector explosionPos = endPoint;
+            if (entity) 
+                explosionPos = colPoint.m_vecPoint - (colPoint.m_vecPoint - newTurretPosition) * 0.04f;
+            CExplosion::AddExplosion(nullptr, FindPlayerPed(), EXPLOSION_TANK_FIRE, explosionPos, 0, true, -1.0f, false);
+            CVector target = explosionPos - newTurretPosition;
+            g_fx.TriggerTankFire(newTurretPosition, target);
+        }
+    }
 }
 
 // Converted from thiscall void CAutomobile::BlowUpCarsInPath(void) 0x6AF110
