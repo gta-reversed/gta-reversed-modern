@@ -23,11 +23,11 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building)
             continue;
 
         auto vecDir = CVector(pEffect->coverPoint.m_vecDirection.x, pEffect->coverPoint.m_vecDirection.y, 0.0F);
-        const auto vedTransformed = Multiply3x3(building->GetMatrix(), &vecDir);
+        const auto vedTransformed = Multiply3x3(building->GetMatrix(), vecDir);
 
         const auto fTwoPiToChar = 256.0F / TWO_PI;
         const auto ucAngle = static_cast<uint8_t>(atan2(vedTransformed.x, vedTransformed.y) * fTwoPiToChar);
-        auto vecPoint = *building->GetMatrix() * pEffect->m_vecPosn;
+        auto vecPoint = building->GetMatrix() * pEffect->m_vecPosn;
         CCover::AddCoverPoint(3, building, &vecPoint, pEffect->coverPoint.m_nType, ucAngle);
     }
 }

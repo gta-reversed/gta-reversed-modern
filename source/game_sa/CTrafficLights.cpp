@@ -151,7 +151,7 @@ int CTrafficLights::FindTrafficLightType(CEntity* pEntity)
 float CTrafficLights::FindOrientationForTrafficLightType(CEntity* pEntity)
 {
     auto pMat = pEntity->GetMatrix();
-    return RadiansToDegrees(CGeneral::GetATanOfXY(pMat->GetForward().x, pMat->GetForward().y));
+    return RadiansToDegrees(CGeneral::GetATanOfXY(pMat.GetForward().x, pMat.GetForward().y));
 }
 
 int CTrafficLights::FindTrafficLightTypeFromOrientation(float fOrientation)
@@ -167,7 +167,7 @@ int CTrafficLights::FindTrafficLightTypeFromOrientation(float fOrientation)
 void CTrafficLights::DisplayActualLight(CEntity* pEntity)
 {
     auto pEntMat = pEntity->GetMatrix();
-    if (pEntMat->GetUp().z < 0.96F || pEntity->m_bRenderDamaged)
+    if (pEntMat.GetUp().z < 0.96F || pEntity->m_bRenderDamaged)
         return;
 
     auto iLightColorBase = eBrightLightColor::BRIGHTLIGHT_GREEN_BIG;
@@ -187,7 +187,7 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
         iLightState = CTrafficLights::LightForCars2_Visual();
 
     auto pModelInfo = CModelInfo::GetModelInfo(pEntity->m_nModelIndex);
-    bool bSameDir = DotProduct(TheCamera.m_mCameraMatrix.GetForward(), pEntMat->GetForward()) > 0.0F;
+    bool bSameDir = DotProduct(TheCamera.m_mCameraMatrix.GetForward(), pEntMat.GetForward()) > 0.0F;
 
     CVector vecCenter(0.0F, 0.0F, 0.0F);
     for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
@@ -195,7 +195,7 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
         if (pEffect->m_nType != e2dEffectType::EFFECT_LIGHT)
             continue;
 
-        auto vecLightPos = *pEntity->GetMatrix() * pEffect->m_vecPosn;
+        auto vecLightPos = pEntity->GetMatrix() * pEffect->m_vecPosn;
         vecCenter += vecLightPos;
         int iColorState = eTrafficLightsState::LIGHT_GREEN;
         if (pEffect->light.m_color.red > 200) {
@@ -234,8 +234,8 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
                                  false);
 
         CBrightLights::RegisterOne(vecLightPos,
-                                   pEntity->GetMatrix()->GetUp(),
-                                   pEntity->GetMatrix()->GetRight(),
+                                   pEntity->GetMatrix().GetUp(),
+                                   pEntity->GetMatrix().GetRight(),
                                    CVector(0.0F, 0.0F, 0.0F),
                                    iLightState + iLightColorBase,
                                    0,
@@ -337,10 +337,10 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
         auto p3 = vecCorner2;
         auto p4 = CVector(vecMidPoint.x, vecMidPoint.y, vecCorner2.z);
 
-        CShinyTexts::RegisterOne(*pEntity->GetMatrix() * p1,
-                                 *pEntity->GetMatrix() * p2,
-                                 *pEntity->GetMatrix() * p3,
-                                 *pEntity->GetMatrix() * p4,
+        CShinyTexts::RegisterOne(pEntity->GetMatrix() * p1,
+                                 pEntity->GetMatrix() * p2,
+                                 pEntity->GetMatrix() * p3,
+                                 pEntity->GetMatrix() * p4,
                                  0.5F,
                                  0.0F,
                                  0.0F,
@@ -365,10 +365,10 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
         auto p3 = CVector(vecMidPoint.x, vecMidPoint.y, vecCorner2.z);
         auto p4 = CVector(vecCorner1.x, vecCorner1.y, vecCorner2.z);
 
-        CShinyTexts::RegisterOne(*pEntity->GetMatrix()* p1,
-            *pEntity->GetMatrix()* p2,
-            *pEntity->GetMatrix()* p3,
-            *pEntity->GetMatrix()* p4,
+        CShinyTexts::RegisterOne(pEntity->GetMatrix()* p1,
+            pEntity->GetMatrix()* p2,
+            pEntity->GetMatrix()* p3,
+            pEntity->GetMatrix()* p4,
             1.0F,
             0.0F,
             0.5F,

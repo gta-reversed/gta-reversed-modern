@@ -52,8 +52,8 @@ void CMatrix::InjectHooks()
     ReversibleHooks::Install("CMatrix", "operator*_Mat", 0x59BE30, (CMatrix(*)(CMatrix const&, CMatrix const&))(&::operator*));
     ReversibleHooks::Install("CMatrix", "operator*_Vec", 0x59C890, (CVector(*)(CMatrix const&, CVector const&))(&::operator*));
     ReversibleHooks::Install("CMatrix", "operator+", 0x59BFA0, (CMatrix(*)(CMatrix const&, CMatrix const&))(&::operator+));
-    ReversibleHooks::Install("CMatrix", "Invert", 0x59B920, &Invert);
-    ReversibleHooks::Install("CMatrix", "InvertMatrix", 0x59BDD0, &InvertMatrix);
+    ReversibleHooks::Install("CMatrix", "Invert_1", 0x59B920, (CMatrix&(*)(CMatrix&, CMatrix&)) &Invert);
+    ReversibleHooks::Install("CMatrix", "Invert_2", 0x59BDD0, (CMatrix(*)(CMatrix&)) &Invert);
 }
 
 CMatrix::CMatrix(CMatrix const& matrix)
@@ -538,7 +538,7 @@ CVector operator*(CMatrix const& a, CVector const& b)
 }
 CMatrix operator+(CMatrix const& a, CMatrix const& b)
 {
-    auto result = CMatrix();
+    CMatrix result;
     result.m_right =   a.m_right + b.m_right;
     result.m_forward = a.m_forward + b.m_forward;
     result.m_up =      a.m_up + b.m_up;
@@ -546,35 +546,25 @@ CMatrix operator+(CMatrix const& a, CMatrix const& b)
     return result;
 }
 
-CMatrix* Invert(CMatrix* in, CMatrix* out)
+CMatrix& Invert(CMatrix& in, CMatrix& out)
 {
-    out->m_pos.Set(0.0F, 0.0F, 0.0F);
+    out.GetPosition().Set(0.0F, 0.0F, 0.0F);
 
-    out->m_right.x = in->m_right.x;
-    out->m_right.y = in->m_forward.x;
-    out->m_right.z = in->m_up.x;
+    out.GetRight().Set(in.GetRight().x, in.GetForward().x, in.GetUp().x);
+    out.GetForward().Set(in.GetRight().y, in.GetForward().y, in.GetUp().y);
+    out.GetUp().Set(in.GetRight().z, in.GetForward().z, in.GetUp().z);
 
-    out->m_forward.x = in->m_right.y;
-    out->m_forward.y = in->m_forward.y;
-    out->m_forward.z = in->m_up.y;
-
-    out->m_up.x = in->m_right.z;
-    out->m_up.y = in->m_forward.z;
-    out->m_up.z = in->m_up.z;
-
-    out->m_pos += in->m_pos.x * out->m_right;
-    out->m_pos += in->m_pos.y * out->m_forward;
-    out->m_pos += in->m_pos.z * out->m_up;
-    out->m_pos *= -1.0F;
+    out.GetPosition() += in.GetPosition().x * out.GetRight();
+    out.GetPosition() += in.GetPosition().y * out.GetForward();
+    out.GetPosition() += in.GetPosition().z * out.GetUp();
+    out.GetPosition() *= -1.0F;
 
     return out;
 }
 
-CMatrix* InvertMatrix(CMatrix* out, CMatrix* in)
+CMatrix Invert(CMatrix& in)
 {
-    auto result = CMatrix();
-    Invert(in, &result);
-    out->Detach();
-    out->CopyOnlyMatrix(result);
-    return out;
+    CMatrix result;
+    Invert(in, result);
+    return result;
 }

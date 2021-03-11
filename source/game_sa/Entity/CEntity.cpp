@@ -577,7 +577,7 @@ void CEntity::PreRender_Reversed()
         }
         else if (m_nModelIndex == eModelID::MODEL_MISSILE) {
             if (CReplay::Mode != REPLAY_MODE_1) {
-                auto vecPos = GetPosition();
+                CVector vecPos = GetPosition();
                 auto fRand = static_cast<float>(rand() & 0xF) / 16.0F;
                 CShadows::StoreShadowToBeRendered(eShadowTextureType::SHADOWTEX_PED,
                                                   gpShadowExplosionTex,
@@ -631,7 +631,7 @@ void CEntity::PreRender_Reversed()
             }
         }
         else if (m_nModelIndex == ModelIndices::MI_FLARE) {
-            auto vecPos = GetPosition();
+            CVector vecPos = GetPosition();
             auto fRand = static_cast<float>(rand() & 0xF) / 16.0F;
             fRand = std::max(fRand, 0.5F);
             CShadows::StoreShadowToBeRendered(eShadowTextureType::SHADOWTEX_PED,
@@ -990,10 +990,10 @@ void CEntity::ModifyMatrixForPoleInWind()
     vecCross.Normalise();
     auto vecCross2 = CrossProduct(vecNormalisedDir, vecCross);
 
-    auto pMatrix = GetMatrix();
-    pMatrix->GetRight() = vecCross;
-    pMatrix->GetForward() = vecNormalisedDir;
-    pMatrix->GetUp() = vecCross2;
+    CMatrix& matrix = GetMatrix();
+    matrix.GetRight() = vecCross;
+    matrix.GetForward() = vecNormalisedDir;
+    matrix.GetUp() = vecCross2;
     CEntity::UpdateRW();
     CEntity::UpdateRwFrame();
 }
@@ -1100,7 +1100,7 @@ CVector* CEntity::FindTriggerPointCoors(CVector* pOutVec, int triggerIndex)
     for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
         if (pEffect->m_nType == e2dEffectType::EFFECT_SLOTMACHINE_WHEEL && pEffect->iSlotMachineIndex == triggerIndex) {
-            *pOutVec = *GetMatrix() * pEffect->m_vecPosn;
+            *pOutVec = GetMatrix() * pEffect->m_vecPosn;
             return pOutVec;
         }
     }
@@ -1303,9 +1303,9 @@ void CEntity::AttachToRwObject(RwObject* object, bool updateEntityMatrix)
         return;
 
     if (updateEntityMatrix) {
-        auto pMatrix = GetMatrix();
+        CMatrix& matrix = GetMatrix();
         auto pRwMatrix = CEntity::GetModellingMatrix();
-        pMatrix->UpdateMatrix(pRwMatrix);
+        matrix.UpdateMatrix(pRwMatrix);
     }
 
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -1433,7 +1433,7 @@ bool CEntity::GetIsBoundingBoxOnScreen()
     RwV3d vecNormals[2];
     if (m_matrix) {
         auto tempMat = CMatrix();
-        Invert(m_matrix, &tempMat);
+        Invert(*m_matrix, tempMat);
         TransformVectors(&vecNormals[0], 2, tempMat, &TheCamera.m_avecFrustumWorldNormals[0]);
     }
     else {
@@ -1530,16 +1530,16 @@ void CEntity::ModifyMatrixForBannerInWind()
 
     auto fZPos = sqrt(1.0F - pow(fWindOffset, 2.0F));
 
-    auto pMat = GetMatrix();
-    auto vecCross = CrossProduct(pMat->GetForward(), pMat->GetUp());
+    CMatrix& matrix = GetMatrix();
+    auto vecCross = CrossProduct(matrix.GetForward(), matrix.GetUp());
     vecCross.z = 0.0F;
     vecCross.Normalise();
 
     auto vecWind = CVector(vecCross.x * fWindOffset, vecCross.y * fWindOffset, fZPos);
-    auto vecCross2 = CrossProduct(pMat->GetForward(), vecWind);
+    auto vecCross2 = CrossProduct(matrix.GetForward(), vecWind);
 
-    pMat->GetRight() = vecCross2;
-    pMat->GetUp() = vecWind;
+    matrix.GetRight() = vecCross2;
+    matrix.GetUp() = vecWind;
 
     CEntity::UpdateRW();
     CEntity::UpdateRwFrame();
@@ -1568,10 +1568,10 @@ CColModel* CEntity::GetColModel()
 //https://gamedev.stackexchange.com/questions/153326/how-to-rotate-directional-billboard-particle-sprites-toward-the-direction-the-pa/153814#153814
 void CEntity::CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, CVector* pVecCorner3, CVector* pVecCorner4)
 {
-    auto pMat = GetMatrix();
-    auto fMagRight = CVector2D(pMat->GetRight()).Magnitude();
-    auto fMagForward = CVector2D(pMat->GetForward()).Magnitude();
-    auto fMagUp = CVector2D(pMat->GetUp()).Magnitude();
+    CMatrix& matrix = GetMatrix();
+    auto fMagRight = CVector2D(matrix.GetRight()).Magnitude();
+    auto fMagForward = CVector2D(matrix.GetForward()).Magnitude();
+    auto fMagUp = CVector2D(matrix.GetUp()).Magnitude();
 
     auto pColModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
     auto fMaxX = std::max(-pColModel->m_boundBox.m_vecMin.x, pColModel->m_boundBox.m_vecMax.x);
@@ -1585,7 +1585,7 @@ void CEntity::CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, 
     CVector vecDir, vecNormalized, vecTransformed;
     float fMult1, fMult2, fMult3, fMult4;
     if (fXSize > fYSize && fXSize > fZSize) {
-        vecDir = pMat->GetRight();
+        vecDir = matrix.GetRight();
         vecDir.z = 0.0F;
 
         vecNormalized = vecDir;
@@ -1597,13 +1597,13 @@ void CEntity::CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, 
         auto vecTemp = GetPosition() - vecScaled;
         vecDir = vecTemp;
 
-        fMult1 = (vecNormalized.x * pMat->GetForward().x + vecNormalized.y * pMat->GetForward().y) * fMaxY;
-        fMult2 = (vecNormalized.x * pMat->GetForward().y - vecNormalized.y * pMat->GetForward().x) * fMaxY;
-        fMult3 = (vecNormalized.x * pMat->GetUp().x + vecNormalized.y * pMat->GetUp().y) * fMaxZ;
-        fMult4 = (vecNormalized.x * pMat->GetUp().y - vecNormalized.y * pMat->GetUp().x) * fMaxZ;
+        fMult1 = (vecNormalized.x * matrix.GetForward().x + vecNormalized.y * matrix.GetForward().y) * fMaxY;
+        fMult2 = (vecNormalized.x * matrix.GetForward().y - vecNormalized.y * matrix.GetForward().x) * fMaxY;
+        fMult3 = (vecNormalized.x * matrix.GetUp().x + vecNormalized.y * matrix.GetUp().y) * fMaxZ;
+        fMult4 = (vecNormalized.x * matrix.GetUp().y - vecNormalized.y * matrix.GetUp().x) * fMaxZ;
     }
     else if (fYSize > fZSize) {
-        vecDir = pMat->GetForward();
+        vecDir = matrix.GetForward();
         vecDir.z = 0.0F;
 
         vecNormalized = vecDir;
@@ -1615,13 +1615,13 @@ void CEntity::CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, 
         auto vecTemp = GetPosition() - vecScaled;
         vecDir = vecTemp;
 
-        fMult1 = (vecNormalized.x * pMat->GetRight().x + vecNormalized.y * pMat->GetRight().y) * fMaxX;
-        fMult2 = (vecNormalized.x * pMat->GetRight().y - vecNormalized.y * pMat->GetRight().x) * fMaxX;
-        fMult3 = (vecNormalized.x * pMat->GetUp().x + vecNormalized.y * pMat->GetUp().y) * fMaxZ;
-        fMult4 = (vecNormalized.x * pMat->GetUp().y - vecNormalized.y * pMat->GetUp().x) * fMaxZ;
+        fMult1 = (vecNormalized.x * matrix.GetRight().x + vecNormalized.y * matrix.GetRight().y) * fMaxX;
+        fMult2 = (vecNormalized.x * matrix.GetRight().y - vecNormalized.y * matrix.GetRight().x) * fMaxX;
+        fMult3 = (vecNormalized.x * matrix.GetUp().x + vecNormalized.y * matrix.GetUp().y) * fMaxZ;
+        fMult4 = (vecNormalized.x * matrix.GetUp().y - vecNormalized.y * matrix.GetUp().x) * fMaxZ;
     }
     else {
-        vecDir = pMat->GetUp();
+        vecDir = matrix.GetUp();
         vecDir.z = 0.0F;
 
         vecNormalized = vecDir;
@@ -1633,10 +1633,10 @@ void CEntity::CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, 
         auto vecTemp = GetPosition() - vecScaled;
         vecDir = vecTemp;
 
-        fMult1 = (vecNormalized.x * pMat->GetRight().x + vecNormalized.y * pMat->GetRight().y) * fMaxX;
-        fMult2 = (vecNormalized.x * pMat->GetRight().y - vecNormalized.y * pMat->GetRight().x) * fMaxX;
-        fMult3 = (vecNormalized.x * pMat->GetForward().x + vecNormalized.y * pMat->GetForward().y) * fMaxY;
-        fMult4 = (vecNormalized.x * pMat->GetForward().y - vecNormalized.y * pMat->GetForward().x) * fMaxY;
+        fMult1 = (vecNormalized.x * matrix.GetRight().x + vecNormalized.y * matrix.GetRight().y) * fMaxX;
+        fMult2 = (vecNormalized.x * matrix.GetRight().y - vecNormalized.y * matrix.GetRight().x) * fMaxX;
+        fMult3 = (vecNormalized.x * matrix.GetForward().x + vecNormalized.y * matrix.GetForward().y) * fMaxY;
+        fMult4 = (vecNormalized.x * matrix.GetForward().y - vecNormalized.y * matrix.GetForward().x) * fMaxY;
     }
 
     auto fNegX = -vecNormalized.x;
@@ -2112,7 +2112,7 @@ void CEntity::ProcessLightsForEntity()
             auto bCanCreateLight = true;
             if (pEffect->light.m_bCheckDirection) {
                 const auto& camPos = TheCamera.GetPosition();
-                auto vecLightPos = Multiply3x3(GetMatrix(), &CVector(pEffect->light.offsetX, pEffect->light.offsetY, pEffect->light.offsetZ));
+                auto vecLightPos = Multiply3x3(GetMatrix(), CVector(pEffect->light.offsetX, pEffect->light.offsetY, pEffect->light.offsetZ));
 
                 auto fDot = DotProduct(vecLightPos, (camPos - vecEffPos));
                 bCanCreateLight = fDot >= 0.0F;
@@ -2372,7 +2372,7 @@ bool CEntity::IsEntityOccluded()
             const auto& pBounding = pModelInfo->GetColModel()->GetBoundingBox();
             CVector vecScreen;
 
-            auto vecMin = *CEntity::GetMatrix() * pBounding.m_vecMin;
+            auto vecMin = CEntity::GetMatrix() * pBounding.m_vecMin;
             if (!CalcScreenCoors(vecMin, &vecScreen)
                 || !pActiveOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                 || !pActiveOccluder.IsPointBehindOccluder(vecMin, 0.0F)) {
@@ -2380,7 +2380,7 @@ bool CEntity::IsEntityOccluded()
                 bInView = true;
             }
 
-            auto vecMax = *CEntity::GetMatrix() * pBounding.m_vecMax;
+            auto vecMax = CEntity::GetMatrix() * pBounding.m_vecMax;
             if (bInView
                 || !CalcScreenCoors(vecMax, &vecScreen)
                 || !pActiveOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
@@ -2389,7 +2389,7 @@ bool CEntity::IsEntityOccluded()
                 bInView = true;
             }
 
-            auto vecDiag1 = *CEntity::GetMatrix() * CVector(pBounding.m_vecMin.x, pBounding.m_vecMax.y, pBounding.m_vecMax.z);
+            auto vecDiag1 = CEntity::GetMatrix() * CVector(pBounding.m_vecMin.x, pBounding.m_vecMax.y, pBounding.m_vecMax.z);
             if (bInView
                 || !CalcScreenCoors(vecDiag1, &vecScreen)
                 || !pActiveOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
@@ -2398,7 +2398,7 @@ bool CEntity::IsEntityOccluded()
                 bInView = true;
             }
 
-            auto vecDiag2 = *CEntity::GetMatrix() * CVector(pBounding.m_vecMax.x, pBounding.m_vecMin.y, pBounding.m_vecMin.z);
+            auto vecDiag2 = CEntity::GetMatrix() * CVector(pBounding.m_vecMax.x, pBounding.m_vecMin.y, pBounding.m_vecMin.z);
             if (!bInView
                 && CalcScreenCoors(vecDiag2, &vecScreen)
                 && pActiveOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
@@ -2413,7 +2413,7 @@ bool CEntity::IsEntityOccluded()
                 if (pBounding.m_vecMax.z - pBounding.m_vecMin.z <= 30.0F)
                     return true;
 
-                auto vecDiag3 = *CEntity::GetMatrix() * CVector(pBounding.m_vecMin.x, pBounding.m_vecMin.y, pBounding.m_vecMax.z);
+                auto vecDiag3 = CEntity::GetMatrix() * CVector(pBounding.m_vecMin.x, pBounding.m_vecMin.y, pBounding.m_vecMax.z);
                 if (!CalcScreenCoors(vecDiag3, &vecScreen)
                     || !pActiveOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                     || !pActiveOccluder.IsPointBehindOccluder(vecDiag3, 0.0F)) {
@@ -2421,7 +2421,7 @@ bool CEntity::IsEntityOccluded()
                     bInView = true;
                 }
 
-                auto vecDiag4 = *CEntity::GetMatrix() * CVector(pBounding.m_vecMax.x, pBounding.m_vecMin.y, pBounding.m_vecMax.z);
+                auto vecDiag4 = CEntity::GetMatrix() * CVector(pBounding.m_vecMax.x, pBounding.m_vecMin.y, pBounding.m_vecMax.z);
                 if (!bInView
                     && CalcScreenCoors(vecDiag4, &vecScreen)
                     && pActiveOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)

@@ -84,7 +84,7 @@ bool CEventAttractor::AffectsPed_Reversed(CPed* ped)
                     return true;
                 if (!g_ikChainMan->IsLooking(ped)) {
                     std::uint32_t time = CGeneral::GetRandomNumberInRange(2000, 4000);
-                    CVector point = *m_entity->GetMatrix() * m_2dEffect->m_vecPosn;
+                    CVector point = m_entity->GetMatrix() * m_2dEffect->m_vecPosn;
                     g_ikChainMan->LookAt("CEventAttractor", ped, 0, time, BONE_UNKNOWN, &point, false, 0.25f, 500, 3, false);
                 }
             }     

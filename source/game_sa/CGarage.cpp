@@ -10,9 +10,9 @@ void CGarage::BuildRotatedDoorMatrix(CEntity* pEntity, float fDoorPosition)
     const auto fAngle = fDoorPosition * -HALF_PI;
     const auto fSin = sin(fAngle);
     const auto fCos = cos(fAngle);
-    auto* pMat = pEntity->GetMatrix();
+    CMatrix& matrix = pEntity->GetMatrix();
 
-    const auto& vecForward = pMat->GetForward();
-    pMat->GetUp() = CVector(-fSin * vecForward.y, fSin * vecForward.x, fCos);
-    pMat->GetRight() = CrossProduct(vecForward, pMat->GetUp());
+    const auto& vecForward = matrix.GetForward();
+    matrix.GetUp() = CVector(-fSin * vecForward.y, fSin * vecForward.x, fCos);
+    matrix.GetRight() = CrossProduct(vecForward, matrix.GetUp());
 }

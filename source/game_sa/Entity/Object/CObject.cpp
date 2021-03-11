@@ -90,7 +90,7 @@ CObject::CObject(CDummyObject* pDummyObj) : CPhysical()
     if (pDummyObj->m_pRwObject)
         CEntity::AttachToRwObject(pDummyObj->m_pRwObject, true);
     else
-        CPlaceable::SetMatrix(*pDummyObj->GetMatrix());
+        CPlaceable::SetMatrix(pDummyObj->GetMatrix());
 
     pDummyObj->DetachFromRwObject();
     CObject::Init();
@@ -433,7 +433,7 @@ void CObject::SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool b
                         }
                         else
                         {
-                            Invert(colEntity->GetMatrix(), &tempMat);
+                            Invert(colEntity->GetMatrix(), tempMat);
                             if ((tempMat * vecTransformed).z < 0.0F)
                             {
                                 *bCollidedEntityCollisionIgnored = true;
@@ -494,7 +494,7 @@ unsigned char CObject::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCo
         if (physicalFlags.bInfiniteMass)
         {
             auto pColModel = CEntity::GetColModel();
-            auto vecMin = Multiply3x3(m_matrix, &pColModel->GetBoundingBox().m_vecMin);
+            auto vecMin = Multiply3x3(GetMatrix(), pColModel->GetBoundingBox().m_vecMin);
             auto vecSpeed = CPhysical::GetSpeed(vecMin);
             const auto fMove = vecSpeed.SquaredMagnitude() * pow(CTimer::ms_fTimeStep, 2.0F);
             if (fMove >= 0.0225F) // pow(0.15F, 2.0F)
@@ -511,11 +511,11 @@ unsigned char CObject::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCo
             auto* pColModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
 
             auto vecMin = CVector(0.0F, 0.0F, pColModel->GetBoundingBox().m_vecMin.z);
-            vecMin = Multiply3x3(m_matrix, &vecMin);
+            vecMin = Multiply3x3(GetMatrix(), vecMin);
             vecMin = CPhysical::GetSpeed(vecMin);
 
             auto vecMax = CVector(0.0F, 0.0F, pColModel->GetBoundingBox().m_vecMax.z);
-            vecMax = Multiply3x3(m_matrix, &vecMax);
+            vecMax = Multiply3x3(GetMatrix(), vecMax);
             vecMax = CPhysical::GetSpeed(vecMax);
 
             auto& vecUsed = vecMin.SquaredMagnitude() >= vecMax.SquaredMagnitude() ? vecMin : vecMax;
@@ -1240,7 +1240,7 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
         }
 
         auto particleMat = CMatrix(*m_matrix);
-        auto vecPoint = Multiply3x3(&particleMat, &m_pObjectInfo->m_vFxOffset);
+        auto vecPoint = Multiply3x3(particleMat, m_pObjectInfo->m_vFxOffset);
         vecPoint += GetPosition();
         auto* pFxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &vecPoint, nullptr, false);
         if (pFxSystem)
@@ -1277,7 +1277,7 @@ void CObject::Explode() {
     if (m_pObjectInfo->m_nFxType == eObjectFxType::PLAY_ON_DESTROYED)
     {
         auto particleMat = CMatrix(*m_matrix);
-        auto vecPoint = Multiply3x3(&particleMat, &m_pObjectInfo->m_vFxOffset);
+        auto vecPoint = Multiply3x3(particleMat, m_pObjectInfo->m_vFxOffset);
         vecPoint += GetPosition();
         auto* pFxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &vecPoint, nullptr, false);
         if (pFxSystem)

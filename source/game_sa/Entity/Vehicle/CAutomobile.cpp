@@ -311,10 +311,10 @@ void CAutomobile::ProcessControl()
                     CVector& point = contactPoints[i];
                     point = colDisk.m_vecStart;
                     point.z -= colDisk.m_fStartRadius;
-                    point = Multiply3x3(GetMatrix(), &contactPoints[i]);
+                    point = Multiply3x3(GetMatrix(), contactPoints[i]);
                 }
                 else {
-                    contactPoints[i] = Multiply3x3(GetMatrix(), &colLine.m_vecEnd);
+                    contactPoints[i] = Multiply3x3(GetMatrix(), colLine.m_vecEnd);
                 }
             }
             else {
@@ -653,7 +653,7 @@ void CAutomobile::ProcessControl()
             speed -= turnSpeedForward;
 
             CVector force = speed * GetUp() * -1.0f * m_fTurnMass;
-            CVector point = GetRight() + Multiply3x3(GetMatrix(), &m_vecCentreOfMass);
+            CVector point = GetRight() + Multiply3x3(GetMatrix(), m_vecCentreOfMass);
             ApplyTurnForce(force, point);
         }
     }
@@ -780,8 +780,8 @@ CVector CAutomobile::AddMovingCollisionSpeed(CVector& point)
             if (carNodeMisc)
                 colPivot = RwFrameGetMatrix(carNodeMisc)->pos;
             CVector rotation(angleDiff / CTimer::ms_fTimeStep * colAngleMult, 0.0f, 0.0f);
-            CVector pos = Multiply3x3(m_matrix, &rotation);
-            CVector pivotPos = Multiply3x3(m_matrix, &colPivot);
+            CVector pos = Multiply3x3(GetMatrix(), rotation);
+            CVector pivotPos = Multiply3x3(GetMatrix(), colPivot);
             CVector distance = point - pivotPos;
             return CrossProduct(pos, distance);
         }
@@ -1286,7 +1286,7 @@ void CAutomobile::ProcessSuspension()
             CColLine& colLine = colData->m_pLines[wheelLineIndices[i]];
             contactPoints[i] = colLine.m_vecStart;
             contactPoints[i].z -= m_aSuspensionLineLength[i] * springLength[i];
-            contactPoints[i] = Multiply3x3(m_matrix, &contactPoints[i]);
+            contactPoints[i] = Multiply3x3(GetMatrix(), contactPoints[i]);
         }
     }
 
@@ -2641,7 +2641,7 @@ void CAutomobile::TankControl()
         m_fDoomHorizontalRotation += (pad->GetCarGunUpDown() * CTimer::ms_fTimeStep * 0.005f) / 128.0f;
     }
     else {
-        CVector frontDot = Multiply3x3(&activeCam.m_vecFront, m_matrix);
+        CVector frontDot = Multiply3x3(activeCam.m_vecFront, GetMatrix());
         float doomVerticalRotation = atan2(-frontDot.x, frontDot.y);
         float doomHorizontalRotation = atan2(frontDot.z, frontDot.Magnitude2D()) + DegreesToRadians(15);
 
@@ -2698,7 +2698,7 @@ void CAutomobile::TankControl()
             point.x = sin(-m_fDoomVerticalRotation);
             point.y = cos(m_fDoomVerticalRotation);
             point.z = sin(m_fDoomHorizontalRotation);
-            point = Multiply3x3(m_matrix, &point);
+            point = Multiply3x3(GetMatrix(), point);
 
             CVector newTurretPosition;
             if (m_aCarNodes[CAR_MISC_C]) {
@@ -2914,7 +2914,7 @@ bool CAutomobile::RcbanditCheck1CarWheels(CPtrList& ptrlist)
                         static CMatrix wheelMatrix;
                         CVector wheelPos;
                         modelInfo->GetWheelPosn(i, wheelPos, false);
-                        wheelMatrix = *Invert(m_matrix, &wheelMatrix);
+                        wheelMatrix = Invert(*m_matrix, wheelMatrix);
 
                         CColSphere sphere;
                         sphere.m_vecCenter = wheelMatrix * (*vehicle->m_matrix * wheelPos);
@@ -2990,7 +2990,7 @@ void CAutomobile::FireTruckControl(CFire* fire)
             m_fDoomHorizontalRotation += (pad->GetCarGunUpDown() * CTimer::ms_fTimeStep * 0.02f) / 128.0f;
         }
         else {
-            CVector frontDot = Multiply3x3(&activeCam.m_vecFront, m_matrix);
+            CVector frontDot = Multiply3x3(activeCam.m_vecFront, GetMatrix());
             float doomVerticalRotation = atan2(-frontDot.x, frontDot.y);
             float doomHorizontalRotation = atan2(frontDot.z, frontDot.Magnitude2D());
 
@@ -3046,7 +3046,7 @@ void CAutomobile::FireTruckControl(CFire* fire)
     point.x = -(sin(m_fDoomVerticalRotation) * cosHorizontalDoomRot);
     point.y = cos(m_fDoomVerticalRotation) * cosHorizontalDoomRot;
     point.z = sin(m_fDoomHorizontalRotation);
-    point = Multiply3x3(m_matrix, &point);
+    point = Multiply3x3(GetMatrix(), point);
 
     if (m_aCarNodes[CAR_MISC_A]) {
         if (ModelIndices::IsSwatVan(m_nModelIndex))

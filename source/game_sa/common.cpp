@@ -75,31 +75,21 @@ bool InTwoPlayersMode()
     return ((bool(__cdecl *)())0x441390)();
 }
 
-CVector* Multiply3x3(CVector* out, CMatrix* m, CVector* in)
-{
-    CVector temp;
-    temp.x = m->GetRight().x * in->x + m->GetForward().x * in->y + m->GetUp().x * in->z;
-    temp.y = m->GetRight().y * in->x + m->GetForward().y * in->y + m->GetUp().y * in->z;
-    temp.z = m->GetRight().z * in->x + m->GetForward().z * in->y + m->GetUp().z * in->z;
-    *out = temp;
-    return out;
-    //return plugin::CallAndReturn<CVector*, 0x59C790, CVector*, CMatrix*, CVector*>(out, m, in);
-}
-
-CVector Multiply3x3(CMatrix* matrix, CVector* vector)
+CVector Multiply3x3(CMatrix& const m, CVector& const v)
 {
     CVector result;
-    Multiply3x3(&result, matrix, vector);
+    result.x = m.GetRight().x * v.x + m.GetForward().x * v.y + m.GetUp().x * v.z;
+    result.y = m.GetRight().y * v.x + m.GetForward().y * v.y + m.GetUp().y * v.z;
+    result.z = m.GetRight().z * v.x + m.GetForward().z * v.y + m.GetUp().z * v.z;
     return result;
-    //plugin::Call<0x59C790, CVector*, CMatrix*, CVector*>(&result, matrix, vector);
 }
 
 // vector by matrix mult, resulting in a vector where each component is the dot product of the in vector and a matrix direction
-CVector Multiply3x3(CVector* vector, CMatrix* matrix)
+CVector Multiply3x3(CVector& const v, CMatrix& const m)
 {
-    CVector result;
-    plugin::Call<0x59C810, CVector*, CVector*, CMatrix*>(&result, vector, matrix);
-    return result;
+    return CVector(DotProduct(m.GetRight(), v),
+                   DotProduct(m.GetForward(), v),
+                   DotProduct(m.GetUp(), v));
 }
 
 void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos)

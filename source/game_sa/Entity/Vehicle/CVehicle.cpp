@@ -457,7 +457,7 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool 
                             *bCollidedEntityCollisionIgnored = true;
                         else
                         {
-                            Invert(m_matrix, &tempMat);
+                            Invert(*m_matrix, tempMat);
                             if ((tempMat * vecTransformed).z < 0.0F)
                                 *bCollidedEntityCollisionIgnored = true;
                         }
@@ -1493,11 +1493,11 @@ void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData* boatHandling, float f
     float fUsedTimeStep = CTimer::ms_fTimeStep * 0.5F;
     auto vecSpeedMult = Pow(boatHandling->m_vecMoveRes * fSpeedMult, fUsedTimeStep);
 
-    CVector vecMoveSpeedMatrixDotProduct = Multiply3x3(&m_vecMoveSpeed, GetMatrix());
+    CVector vecMoveSpeedMatrixDotProduct = Multiply3x3(m_vecMoveSpeed, GetMatrix());
     m_vecMoveSpeed = vecMoveSpeedMatrixDotProduct * vecSpeedMult;
 
     auto fMassMult = (vecSpeedMult.y - 1.0F) * m_vecMoveSpeed.y * m_fMass;
-    CVector vecTransformedMoveSpeed = Multiply3x3(m_matrix, &m_vecMoveSpeed);
+    CVector vecTransformedMoveSpeed = Multiply3x3(GetMatrix(), m_vecMoveSpeed);
     m_vecMoveSpeed = vecTransformedMoveSpeed;
 
     auto vecDown = GetUp() * -1.0F;
@@ -2202,7 +2202,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
             const auto& vecBoundingMin = CEntity::GetColModel()->m_boundBox.m_vecMin;
             CVector vecThrustPoint(0.0F, vecBoundingMin.y * boatHandling->m_fThrustY, vecBoundingMin.z * boatHandling->m_fThrustZ);
-            auto vecTransformedThrustPoint = Multiply3x3(GetMatrix(), &vecThrustPoint);
+            auto vecTransformedThrustPoint = Multiply3x3(GetMatrix(), vecThrustPoint);
 
             auto vecWorldThrustPos = GetPosition() + vecTransformedThrustPoint;
             float fWaterLevel;
@@ -2229,7 +2229,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
                     auto fSteerAngle = fabs(m_fSteerAngle);
                     CVector vecSteer(-fSteerAngleSin, fSteerAngleCos, -fSteerAngle);
-                    CVector vecSteerMoveForce = Multiply3x3(GetMatrix(), &vecSteer);
+                    CVector vecSteerMoveForce = Multiply3x3(GetMatrix(), vecSteer);
                     vecSteerMoveForce *= fThrustDepth * m_fGasPedal * 40.0F * m_pHandlingData->m_transmissionData.m_fEngineAcceleration * m_fMass;
 
                     if (vecSteerMoveForce.z > 0.2F)
@@ -2283,7 +2283,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
                     CVector vecTractionLoss(-fSteerAngleSin, 0.0F, 0.0F);
                     vecTractionLoss *= fTractionLoss;
-                    CVector vecTractionLossTransformed = Multiply3x3(GetMatrix(), &vecTractionLoss);
+                    CVector vecTractionLossTransformed = Multiply3x3(GetMatrix(), vecTractionLoss);
                     vecTractionLossTransformed *= fThrustDepth * CTimer::ms_fTimeStep;
 
                     CPhysical::ApplyMoveForce(vecTractionLossTransformed);
@@ -2325,7 +2325,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
     if ((m_nModelIndex != eModelID::MODEL_SKIMMER || m_f2ndSteerAngle == 0.0F) && !bCollidedWithWorld) {
         auto vecTurnRes = Pow(boatHandling->m_vecTurnRes, CTimer::ms_fTimeStep);
-        m_vecTurnSpeed = Multiply3x3(&m_vecTurnSpeed, GetMatrix());
+        m_vecTurnSpeed = Multiply3x3(m_vecTurnSpeed, GetMatrix());
         m_vecTurnSpeed.y *= vecTurnRes.y;
         m_vecTurnSpeed.z *= vecTurnRes.z;
 
@@ -2333,8 +2333,8 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         fMult *= m_fTurnMass;
         auto vecTurnForce = GetUp() * fMult;
 
-        m_vecTurnSpeed = Multiply3x3(GetMatrix(), &m_vecTurnSpeed);
-        auto vecCentreOfMass = Multiply3x3(GetMatrix(), &m_vecCentreOfMass);
+        m_vecTurnSpeed = Multiply3x3(GetMatrix(), m_vecTurnSpeed);
+        auto vecCentreOfMass = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
         auto vecTurnPoint = GetForward() + vecCentreOfMass;
         CPhysical::ApplyTurnForce(vecTurnForce, vecTurnPoint);
     }

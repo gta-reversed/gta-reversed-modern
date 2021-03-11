@@ -219,7 +219,7 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, char 
         pNewEntity->AllocateStaticMatrix();
 
         auto tempQuat = objInstance->m_qRotation;
-        pNewEntity->GetMatrix()->SetRotate(tempQuat);
+        pNewEntity->GetMatrix().SetRotate(tempQuat);
     }
     else
     {
@@ -245,7 +245,7 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, char 
     if (objInstance->m_nModelId == ModelIndices::MI_TRAINCROSSING)
     {
         pNewEntity->AllocateStaticMatrix();
-        CObject::SetMatrixForTrainCrossing(pNewEntity->GetMatrix(), PI * 0.43F);
+        CObject::SetMatrixForTrainCrossing(&pNewEntity->GetMatrix(), PI * 0.43F);
     }
 
     auto* pColModel = pInfo->GetColModel();

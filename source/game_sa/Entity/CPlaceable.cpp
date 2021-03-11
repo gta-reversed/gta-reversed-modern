@@ -87,12 +87,9 @@ void CPlaceable::SetOrientation(float x, float y, float z)
 
 void CPlaceable::SetHeading(float heading)
 {
-    if (!GetMatrix()) {
-        m_placement.m_fHeading = heading;
-        return;
-    }
-
-    GetMatrix()->SetRotateZOnly(heading);
+    if (m_matrix)
+        m_matrix->SetRotateZOnly(heading);
+    m_placement.m_fHeading = heading;
 }
 
 float CPlaceable::GetHeading()
@@ -193,13 +190,13 @@ void CPlaceable::SetMatrix(CMatrix& matrix)
     *static_cast<CMatrix*>(m_matrix) = matrix;
 }
 
-CMatrixLink* CPlaceable::GetMatrix() {
+CMatrixLink& CPlaceable::GetMatrix() {
     if (!m_matrix) {
         CPlaceable::AllocateMatrix();
         m_placement.UpdateMatrix(m_matrix);
     }
 
-    return m_matrix;
+    return *m_matrix;
 }
 
 void CPlaceable::ShutdownMatrixArray() {

@@ -84,11 +84,10 @@ CAutomobile * FindPlayerVehicle(int playerId, bool bIncludeRemote);
 // 2 players are playing
 bool InTwoPlayersMode();
 
-// matrix mul
-CVector* Multiply3x3(CVector* out, CMatrix* m, CVector* in);
-CVector Multiply3x3(CMatrix* matrix, CVector* vector);
-// vector by matrix mult, resulting in a vector where each component is the dot product of the in vector and a matrix direction
-CVector Multiply3x3(CVector* vector, CMatrix* matrix);
+CVector Multiply3x3(CMatrix& const m, CVector& const v);
+// vector by matrix mult, resulting in a vector where each component is
+// the dot product of the in vector and a matrix direction
+CVector Multiply3x3(CVector& const v, CMatrix& const m);
 
 void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos);
 void TransformVectors(RwV3d* vecsOut, int numVectors, CMatrix const& matrix, RwV3d const* vecsin);

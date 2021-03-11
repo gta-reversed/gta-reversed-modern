@@ -110,18 +110,14 @@ private:
 
     friend CMatrix operator+(CMatrix const& a, CMatrix const& b);
     //static CMatrix* impl_operatorAdd(CMatrix* pOut, CMatrix const& a, CMatrix const& b);
-
-    friend CMatrix* Invert(CMatrix* in, CMatrix* out);
-    friend CMatrix* InvertMatrix(CMatrix* out, CMatrix* in);
 };
 
 CMatrix operator*(CMatrix const& a, CMatrix const& b);
 CVector operator*(CMatrix const& a, CVector const& b);
 CMatrix operator+(CMatrix const& a, CMatrix const& b);
 
-CMatrix* Invert(CMatrix* in, CMatrix* out);
-// It's also called Invert, but renamed it as we cannot have 2 functions with same names and prototype
-CMatrix* InvertMatrix(CMatrix* out, CMatrix* in); 
+CMatrix& Invert(CMatrix& in, CMatrix& out);
+CMatrix Invert(CMatrix& in);
 
 VALIDATE_SIZE(CMatrix, 0x48);
 

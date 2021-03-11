@@ -548,7 +548,7 @@ void CPed::ProcessBuoyancy()
                 auto pColVehicle = reinterpret_cast<CVehicle*>(pColEntity);
                 if (pColVehicle->IsBoat()
                     && !pColVehicle->physicalFlags.bDestroyed
-                    && pColVehicle->GetMatrix()->GetUp().z > 0.0F) {
+                    && pColVehicle->GetMatrix().GetUp().z > 0.0F) {
 
                     physicalFlags.bSubmergedInWater = false;
                     return;

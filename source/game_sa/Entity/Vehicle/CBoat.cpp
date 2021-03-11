@@ -617,9 +617,9 @@ void CBoat::ProcessControl_Reversed() {
         if (bNoAnchorAngle)
             m_fAnchoredAngle = GetHeading();
         else {
-            CVector vecPos = GetMatrix()->GetPosition();
-            GetMatrix()->RotateZ(m_fAnchoredAngle - GetHeading());
-            GetMatrix()->SetTranslateOnly(vecPos);
+            CVector vecPos = GetMatrix().GetPosition();
+            GetMatrix().RotateZ(m_fAnchoredAngle - GetHeading());
+            GetMatrix().SetTranslateOnly(vecPos);
         }
     }
 }
@@ -666,7 +666,7 @@ void CBoat::PreRender_Reversed()
             auto tempMat = CMatrix();
             tempMat.Attach(RwFrameGetMatrix(pFlap), false);
             CVector posCopy = tempMat.GetPosition();
-            auto vecTransformed = Multiply3x3(GetMatrix(), &posCopy);
+            auto vecTransformed = Multiply3x3(GetMatrix(), posCopy);
 
             m_boatFlap.Process(this, m_vecBoatMoveForce, m_vecBoatTurnForce, vecTransformed);
             CVector vecAxis;
@@ -860,7 +860,7 @@ void CBoat::Render_Reversed()
     RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 
     RwMatrix tempMat;
-    GetMatrix()->UpdateRwMatrix(&tempMat);
+    GetMatrix().UpdateRwMatrix(&tempMat);
     if (RwIm3DTransform(CBoat::aRenderVertices, CBoat::uiNumVertices, &tempMat, rwMATRIXTYPENORMAL)) {
         RwIm3DRenderIndexedPrimitive(RwPrimitiveType::rwPRIMTYPETRILIST, CBoat::auRenderIndices, CBoat::uiNumIndices);
         RwIm3DEnd();
@@ -873,7 +873,7 @@ void CBoat::Render_Reversed()
         RwIm3DVertexSetPos(&CBoat::aRenderVertices[2], -1.097F, -2.977F, 0.381F);
         RwIm3DVertexSetPos(&CBoat::aRenderVertices[3],  1.097F, -2.977F, 0.381F);
 
-        GetMatrix()->UpdateRwMatrix(&tempMat);
+        GetMatrix().UpdateRwMatrix(&tempMat);
         if (RwIm3DTransform(CBoat::aRenderVertices, CBoat::uiNumVertices, &tempMat, rwMATRIXTYPENORMAL)) {
             RwIm3DRenderIndexedPrimitive(RwPrimitiveType::rwPRIMTYPETRILIST, CBoat::auRenderIndices, CBoat::uiNumIndices);
             RwIm3DEnd();

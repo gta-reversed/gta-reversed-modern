@@ -101,17 +101,17 @@ bool cBuoyancy::ProcessBuoyancyBoat(CVehicle* pVehicle, float fBuoyancy, CVector
             vecWaveNormal *= fThird;
 
             switch (pVehicle->m_nModelIndex) {
-            case eModelID::MODEL_SQUALO:  //446
-            case eModelID::MODEL_SPEEDER: //452
-            case eModelID::MODEL_JETMAX:  //493
-            case eModelID::MODEL_LAUNCH:  //595
+            case eModelID::MODEL_SQUALO:
+            case eModelID::MODEL_SPEEDER:
+            case eModelID::MODEL_JETMAX:
+            case eModelID::MODEL_LAUNCH:
                 cBuoyancy::fPointVolMultiplier = cBuoyancy::afBoatVolumeDistributionSpeed[iYMult][iXMult];
                 break;
-            case eModelID::MODEL_COASTG:  //472
-            case eModelID::MODEL_DINGHY:  //473
+            case eModelID::MODEL_COASTG:
+            case eModelID::MODEL_DINGHY:
                 cBuoyancy::fPointVolMultiplier = cBuoyancy::afBoatVolumeDistributionDinghy[iYMult][iXMult];
                 break;
-            case eModelID::MODEL_MARQUIS: //484
+            case eModelID::MODEL_MARQUIS:
                 cBuoyancy::fPointVolMultiplier = cBuoyancy::afBoatVolumeDistributionSail[iYMult][iXMult];
                 break;
             default:
@@ -127,8 +127,7 @@ bool cBuoyancy::ProcessBuoyancyBoat(CVehicle* pVehicle, float fBuoyancy, CVector
             auto fPointContribution = fCurBuoyancy * (fAddedDistToSurface * fBoatHeightRatio);
 
             CVector vecOffset(fCurrentX, fCurrentY, 0.0F);
-            CVector vecTransformedPos;
-            Multiply3x3(&vecTransformedPos, pVehicle->m_matrix, &vecOffset);
+            CVector vecTransformedPos = Multiply3x3(pVehicle->GetMatrix(), vecOffset);
 
             CVector vecSpeedAtPoint = pVehicle->GetSpeed(vecTransformedPos);
             auto pHandling = pVehicle->m_pHandlingData;
@@ -139,15 +138,14 @@ bool cBuoyancy::ProcessBuoyancyBoat(CVehicle* pVehicle, float fBuoyancy, CVector
 
             if (!bUnderwater) {
                 auto vecTurnForceAtPoint = vecWaveNormal * fWavePower;
-                CVector vecAppliedForcePoint;
-                Multiply3x3(&vecAppliedForcePoint, &m_EntityMatrix, &vecCurPoint);
+                CVector vecAppliedForcePoint = Multiply3x3(m_EntityMatrix, vecCurPoint);
                 pVehicle->ApplyTurnForce(vecTurnForceAtPoint, vecAppliedForcePoint);
             }
         }
     }
 
     m_fEntityWaterImmersion *= fBoatHeightRatio;
-    Multiply3x3(vecBuoyancyTurnPoint, &m_EntityMatrix, &m_vecTurnPoint);
+    *vecBuoyancyTurnPoint = Multiply3x3(m_EntityMatrix, m_vecTurnPoint);
 
     if (m_bProcessingBoat)
         return true;
@@ -158,11 +156,9 @@ bool cBuoyancy::ProcessBuoyancyBoat(CVehicle* pVehicle, float fBuoyancy, CVector
 bool cBuoyancy::CalcBuoyancyForce(CPhysical* pEntity, CVector* vecBuoyancyTurnPoint, CVector* vecBuoyancyForce)
 {
     if (!m_bInWater)
-    {
         return false;
-    }
 
-    Multiply3x3(vecBuoyancyTurnPoint, &m_EntityMatrix, &m_vecTurnPoint);
+    *vecBuoyancyTurnPoint = Multiply3x3(m_EntityMatrix, m_vecTurnPoint);
     auto fCurrentBuoyancy = m_fEntityWaterImmersion * m_fBuoyancy * CTimer::ms_fTimeStep;
     vecBuoyancyForce->Set(0.0F, 0.0F, fCurrentBuoyancy);
 
@@ -455,8 +451,7 @@ float cBuoyancy::SimpleSumBuoyancyData(CVector* vecWaterOffset, eBuoyancyPointSt
 
 void cBuoyancy::FindWaterLevel(CVector const& vecInitialZPos, CVector* outVecOffset, eBuoyancyPointState* outInWaterState)
 {
-    CVector transformedPos;
-    Multiply3x3(&transformedPos, &m_EntityMatrix, outVecOffset);
+    CVector transformedPos = Multiply3x3(m_EntityMatrix, *outVecOffset);
     auto vecWorldPos = transformedPos + m_vecPos;
     CWaterLevel::GetWaterLevel(vecWorldPos.x, vecWorldPos.y, m_vecPos.z, &outVecOffset->z, true, nullptr);
     outVecOffset->z -= (transformedPos.z + vecInitialZPos.z);
@@ -476,8 +471,7 @@ void cBuoyancy::FindWaterLevel(CVector const& vecInitialZPos, CVector* outVecOff
 
 void cBuoyancy::FindWaterLevelNorm(CVector const& vecInitialZPos, CVector* outVecOffset, eBuoyancyPointState* outInWaterState, CVector* outVecNormal)
 {
-    CVector transformedPos;
-    Multiply3x3(&transformedPos, &m_EntityMatrix, outVecOffset);
+    CVector transformedPos = Multiply3x3(m_EntityMatrix, *outVecOffset);
     auto vecWorldPos = transformedPos + m_vecPos;
     CWaterLevel::GetWaterLevel(vecWorldPos.x, vecWorldPos.y, m_vecPos.z, &outVecOffset->z, true, outVecNormal);
     outVecOffset->z -= (transformedPos.z + vecInitialZPos.z);

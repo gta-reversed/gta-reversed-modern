@@ -22,7 +22,7 @@ public:
 public:
     static void InjectHooks();
     
-    CMatrixLink *GetMatrix();
+    CMatrixLink& GetMatrix();
     
     static void ShutdownMatrixArray();
     static void InitMatrixArray();

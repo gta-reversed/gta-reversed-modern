@@ -285,7 +285,7 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(class CPed* ped) {
                 if ((!pAnimAssoc || pTaskPickUpEntity->m_fMovePedUntilAnimProgress > pAnimAssoc->m_fCurrentTime)
                     && (pTaskPickUpEntity->m_vecPickupPosition.x != 0.0f || pTaskPickUpEntity->m_vecPickupPosition.y != 0.0f))
                 {
-                    CVector outPoint = *pEntityToHold->GetMatrix() * pTaskPickUpEntity->m_vecPickupPosition;
+                    CVector outPoint = pEntityToHold->GetMatrix() * pTaskPickUpEntity->m_vecPickupPosition;
                     outPoint -= ped->GetPosition();
                     ped->m_vecAnimMovingShiftLocal.x += DotProduct(&outPoint, &ped->GetRight()) / CTimer::ms_fTimeStep * 0.1f;
                     ped->m_vecAnimMovingShiftLocal.y += DotProduct(&outPoint, &ped->GetForward()) / CTimer::ms_fTimeStep * 0.1f ;
@@ -337,19 +337,18 @@ bool CTaskSimpleHoldEntity::SetPedPosition_Reversed(class CPed* ped) {
                     int animIndex = RpHAnimIDGetIndex(pHAnimHierarchy, ped->m_apBones[m_bBoneFrameId]->m_nNodeId);
                     RwMatrix* pBoneMatrix = &RpHAnimHierarchyGetMatrixArray(pHAnimHierarchy)[animIndex];
                     RwV3dTransformPoints((RwV3d*)&entityToHoldPos, (RwV3d*)&entityToHoldPos, 1, pBoneMatrix);
-                    m_pEntityToHold->GetMatrix()->UpdateMatrix(pBoneMatrix);
+                    m_pEntityToHold->GetMatrix().UpdateMatrix(pBoneMatrix);
                     m_pEntityToHold->SetPosn(entityToHoldPos);
                 }
                 else {
-                    CVector entityToHoldPos;
-                    Multiply3x3(&entityToHoldPos, ped->m_matrix, &m_vecPosition);
+                    CVector entityToHoldPos = Multiply3x3(ped->GetMatrix(), m_vecPosition);
                     RpHAnimHierarchy* pHAnimHierarchy = GetAnimHierarchyFromSkinClump(ped->m_pRwClump);
                     int animIndex = RpHAnimIDGetIndex(pHAnimHierarchy, ped->m_apBones[m_bBoneFrameId]->m_nNodeId);
                     RwMatrix* pBoneMatrix = RpHAnimHierarchyGetMatrixArray(pHAnimHierarchy);
-                    entityToHoldPos += *(CVector*)&pBoneMatrix[animIndex].pos;
-                    CMatrix rotationMatrix(*ped->m_matrix);
+                    entityToHoldPos += *RwMatrixGetPos(&pBoneMatrix[animIndex]);
+                    CMatrix rotationMatrix(ped->GetMatrix());
                     rotationMatrix.RotateZ(m_fRotation);
-                    *static_cast<CMatrix*>(m_pEntityToHold->GetMatrix()) = rotationMatrix;
+                    *static_cast<CMatrix*>(&m_pEntityToHold->GetMatrix()) = rotationMatrix;
                     m_pEntityToHold->SetPosn(entityToHoldPos);
                 }
             }
