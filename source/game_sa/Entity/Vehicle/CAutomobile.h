@@ -373,7 +373,7 @@ public:
     void SetDoorDamage(eDoors door, bool withoutVisualEffect);
     bool RcbanditCheck1CarWheels(CPtrList& ptrlist);
     bool RcbanditCheckHitWheels();
-    void FireTruckControl(float arg0);
+    void FireTruckControl(CFire* fire);
     bool HasCarStoppedBecauseOfLight();
 };
 

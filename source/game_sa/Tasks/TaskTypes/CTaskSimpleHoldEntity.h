@@ -4,6 +4,7 @@
 
 enum eHoldEntityBoneFlags 
 {
+    HOLD_ENTITY_FLAG_1 = 0x1,
     HOLD_ENTITY_UPDATE_TRANSLATION_ONLY = 0x10
 };
 
@@ -50,14 +51,14 @@ public:
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
     bool ProcessPed(class CPed* ped) override;
     bool SetPedPosition(class CPed* ped) override;
-
+private:
     // reversed virtual functions
     CTask* Clone_Reversed();
     eTaskType GetId_Reversed() { return TASK_SIMPLE_HOLD_ENTITY; };
     bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
     bool ProcessPed_Reversed(class CPed* ped);
     bool SetPedPosition_Reversed(class CPed* ped);
-
+public:
     void ReleaseEntity();
     bool CanThrowEntity();
     void PlayAnim(int groupId, int animId);

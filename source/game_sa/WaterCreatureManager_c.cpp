@@ -149,7 +149,7 @@ void WaterCreatureManager_c::Update(float fTimestep)
                     iNumCreated = std::min(iNumCreated, m_freeList.GetNumItems());
 
                     WaterCreature_c* pGroupLeader = nullptr;
-                    for (int32_t i = 0; i < iNumCreated; ++i)
+                    for (uint32_t i = 0; i < iNumCreated; ++i)
                     {
                         auto* pNewCreature = m_freeList.RemoveHead();
                         if (pNewCreature->Init(nType, &vecCreationPos, pGroupLeader, fWaterLevel, fWaterDepth))

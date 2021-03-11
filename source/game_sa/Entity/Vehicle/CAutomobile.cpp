@@ -5,6 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+#include "CWaterCannons.h"
 
 bool& CAutomobile::m_sAllTaxiLights = *(bool*)0xC1BFD0;
 CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;
@@ -36,9 +37,12 @@ void CAutomobile::InjectHooks()
     ReversibleHooks::Install("CAutomobile", "ProcessBuoyancy", 0x6A8C00, &CAutomobile::ProcessBuoyancy);
     ReversibleHooks::Install("CAutomobile", "ProcessHarvester", 0x6A9680, &CAutomobile::ProcessHarvester);
     ReversibleHooks::Install("CAutomobile", "TankControl", 0x6AE850, &CAutomobile::TankControl);
-    ReversibleHooks::Install("CAutomobile", "PlaceOnRoadProperly", 0x6AF420, &CAutomobile::PlaceOnRoadProperly);
     ReversibleHooks::Install("CAutomobile", "DoSoftGroundResistance", 0x6A4AF0, &CAutomobile::DoSoftGroundResistance);
     ReversibleHooks::Install("CAutomobile", "ProcessCarWheelPair", 0x6A4EC0, &CAutomobile::ProcessCarWheelPair);
+    ReversibleHooks::Install("CAutomobile", "PlaceOnRoadProperly", 0x6AF420, &CAutomobile::PlaceOnRoadProperly);
+    ReversibleHooks::Install("CAutomobile", "RcbanditCheck1CarWheels", 0x6B3F70, &CAutomobile::RcbanditCheck1CarWheels);
+    ReversibleHooks::Install("CAutomobile", "RcbanditCheckHitWheels", 0x6B45E0, &CAutomobile::RcbanditCheckHitWheels);
+    ReversibleHooks::Install("CAutomobile", "FireTruckControl", 0x729B60, &CAutomobile::FireTruckControl);
 }
 
 CAutomobile::CAutomobile(int modelIndex, unsigned char createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy) {
@@ -198,8 +202,8 @@ void CAutomobile::ProcessControl()
     }
 
     VehicleDamage(0.0f, 0, nullptr, nullptr, nullptr, WEAPON_RAMMEDBYCAR);
-    if (m_nStatus == STATUS_PLAYER && (m_nModelIndex == MODEL_FIRETRUK || m_nModelIndex == MODEL_SWATVAN)) {
-        FireTruckControl(0.0f);
+    if (m_nStatus == STATUS_PLAYER && ModelIndices::HasWaterCannon(m_nModelIndex)) {
+        FireTruckControl(nullptr);
     }
     else {
         switch (m_nModelIndex)
@@ -1639,12 +1643,12 @@ bool CAutomobile::UpdateMovingCollision(float angle)
         pad = driver->GetPadFromPlayer();
     }
     else if (!IsCreatedBy(MISSION_VEHICLE) || angle < 0.0f
-        || !ModelIndices::HasMiscComponent(m_nModelIndex) && !ModelIndices::IsFireTruck(m_nModelIndex))
+        || !ModelIndices::HasMiscComponent(m_nModelIndex) && !ModelIndices::IsFireTruckLadder(m_nModelIndex))
     {
         return false;
     }
 
-    if (!ModelIndices::IsCementTruck(m_nModelIndex) && !ModelIndices::IsFireTruck(m_nModelIndex)) {
+    if (!ModelIndices::IsCementTruck(m_nModelIndex) && !ModelIndices::IsFireTruckLadder(m_nModelIndex)) {
         CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->m_pColModel;
         CCollisionData* colData = colModel->m_pColData;
         if (!GetSpecialColModel())
@@ -2385,7 +2389,7 @@ void CAutomobile::ProcessBuoyancy()
     ApplyMoveForce(vecBuoyancyForce);
     ApplyTurnForce(vecBuoyancyForce, vecBuoyancyTurnPoint);
 
-    if ((m_nModelIndex == eModelID::MODEL_SEASPAR || m_nModelIndex == eModelID::MODEL_LEVIATHN)
+    if (ModelIndices::IsAmphibiousHeli(m_nModelIndex)
         && fBuoyancyForceZ < 3.0F
         && (GetUp().z > -0.5F || fBuoyancyForceZ < 0.6F)) {
 
@@ -2699,7 +2703,7 @@ void CAutomobile::TankControl()
             CVector newTurretPosition;
             if (m_aCarNodes[CAR_MISC_C]) {
                 RwMatrix* carNodeMiscMatrix = RwFrameGetLTM(m_aCarNodes[CAR_MISC_C]);
-                newTurretPosition = carNodeMiscMatrix->pos;
+                newTurretPosition = *RwMatrixGetPos(carNodeMiscMatrix);
                 newTurretPosition += GetSpeed(newTurretPosition - GetPosition()) * CTimer::ms_fTimeStep;
             }
             else {
@@ -2891,22 +2895,175 @@ void CAutomobile::SetDoorDamage(eDoors door, bool withoutVisualEffect)
     ((void(__thiscall*)(CAutomobile*, eDoors, bool))0x6B1600)(this, door, withoutVisualEffect);
 }
 
-// Converted from thiscall bool CAutomobile::RcbanditCheck1CarWheels(CPtrList &ptrlist) 0x6B3F70
 bool CAutomobile::RcbanditCheck1CarWheels(CPtrList& ptrlist)
 {
-    return ((bool(__thiscall*)(CAutomobile*, CPtrList&))0x6B3F70)(this, ptrlist);
+    CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
+
+    CPtrNode* next = nullptr;
+    for (CPtrNode* node = ptrlist.pNode; node; node = next) {
+        next = node->pNext;
+        CAutomobile* vehicle = (CAutomobile*)node->pItem;
+        if (node->pItem != this && vehicle->IsAutomobile()) {
+            if (!ModelIndices::IsRCBandit(vehicle->m_nModelIndex) && vehicle->m_nScanCode != CWorld::ms_nCurrentScanCode)
+                continue;
+            CVector distance = GetPosition() - vehicle->GetPosition();
+            if (distance.x < 10.0f && distance.y < 10.0f) {
+                auto modelInfo = CModelInfo::GetModelInfo(vehicle->m_nModelIndex)->AsVehicleModelInfoPtr();
+                for (int32_t i = 0; i < 4; i++) {
+                    if (m_fWheelsSuspensionCompressionPrev[i] < 1.0f || m_nStatus == STATUS_SIMPLE) {
+                        static CMatrix wheelMatrix;
+                        CVector wheelPos;
+                        modelInfo->GetWheelPosn(i, wheelPos, false);
+                        wheelMatrix = *Invert(m_matrix, &wheelMatrix);
+
+                        CColSphere sphere;
+                        sphere.m_vecCenter = wheelMatrix * (*vehicle->m_matrix * wheelPos);
+                        sphere.m_fRadius = modelInfo->m_fWheelSizeFront * 0.25f;
+                        if (CCollision::TestSphereBox(sphere, colModel->m_boundBox))
+                            return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
 
-// Converted from thiscall bool CAutomobile::RcbanditCheckHitWheels(void) 0x6B45E0
 bool CAutomobile::RcbanditCheckHitWheels()
 {
-    return ((bool(__thiscall*)(CAutomobile*))0x6B45E0)(this);
+    const CVector point = GetPosition();
+    float fRadius = 2.0f;
+    const float minX = point.x - fRadius;
+    const float maxX = point.x + fRadius;
+    const float minY = point.y - fRadius;
+    const float maxY = point.y + fRadius;
+    std::int32_t startSectorX = std::max(CWorld::GetSectorX(minX), 0);
+    std::int32_t startSectorY = std::max(CWorld::GetSectorY(minY), 0);
+    std::int32_t endSectorX = std::min(CWorld::GetSectorX(maxX), MAX_SECTORS_X - 1);
+    std::int32_t endSectorY = std::min(CWorld::GetSectorY(maxY), MAX_SECTORS_Y - 1);
+    CWorld::IncrementCurrentScanCode();
+    for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (std::int32_t sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            CRepeatSector* repeatSector = GetRepeatSector(sectorX, sectorY);
+            if (RcbanditCheck1CarWheels(repeatSector->m_lists[REPEATSECTOR_VEHICLES]))
+                break;
+        }
+    }
+    return true;
 }
 
-// Converted from thiscall void CAutomobile::FireTruckControl(float) 0x729B60
-void CAutomobile::FireTruckControl(float arg0)
+void CAutomobile::FireTruckControl(CFire* fire)
 {
-    ((void(__thiscall*)(CAutomobile*, float))0x729B60)(this, arg0);
+    if (this != FindPlayerVehicle(-1, false)) {
+        if (m_nStatus != STATUS_PHYSICS || !fire)
+            return;
+        CVector2D distance = fire->m_vecPosition - GetPosition();
+        float shootDir = atan2(-distance.x, distance.y);
+        float heading = GetHeading();
+        if (shootDir > heading + PI)
+            shootDir -= TWO_PI;
+        else if (shootDir < heading - PI)   
+            shootDir += TWO_PI;
+
+        float doomVerticalRotation = shootDir - heading;
+        if (doomVerticalRotation > m_fDoomVerticalRotation + PI)
+            doomVerticalRotation -= TWO_PI;
+        else if (doomVerticalRotation < m_fDoomVerticalRotation - PI)
+            doomVerticalRotation += TWO_PI;
+
+        float doomVertialRotDiff = doomVerticalRotation - m_fDoomVerticalRotation;
+        float timeStep = CTimer::ms_fTimeStep * 0.01f;
+        if (fabs(doomVertialRotDiff) >= timeStep) {
+            if (doomVertialRotDiff <= 0.0f)
+                m_fDoomVerticalRotation -= timeStep;
+            else
+                m_fDoomVerticalRotation += timeStep;
+        }
+        m_fDoomHorizontalRotation = sin((CTimer::m_snTimeInMilliseconds & 0xFFF) * TWO_PI * 0.00024414f) * 0.15f;
+    }
+    else {
+        CCam& activeCam = TheCamera.GetActiveCamera();
+        if (activeCam.m_nMode != MODE_CAM_ON_A_STRING)
+        {
+            CPad* pad = CPad::GetPad(0);
+            m_fDoomVerticalRotation -= (pad->GetCarGunLeftRight() * CTimer::ms_fTimeStep * 0.05f) / 128.0f;
+            m_fDoomHorizontalRotation += (pad->GetCarGunUpDown() * CTimer::ms_fTimeStep * 0.02f) / 128.0f;
+        }
+        else {
+            CVector frontDot = Multiply3x3(&activeCam.m_vecFront, m_matrix);
+            float doomVerticalRotation = atan2(-frontDot.x, frontDot.y);
+            float doomHorizontalRotation = atan2(frontDot.z, frontDot.Magnitude2D());
+
+            if (ModelIndices::IsSwatVan(m_nModelIndex))
+                doomHorizontalRotation += DegreesToRadians(22);
+            else
+                doomHorizontalRotation += DegreesToRadians(15);
+
+            if (doomVerticalRotation > m_fDoomVerticalRotation + PI)
+                doomVerticalRotation -= TWO_PI;
+            else if (doomVerticalRotation < m_fDoomVerticalRotation - PI)
+                doomVerticalRotation += TWO_PI;
+
+            float doomVerticalRotDiff = doomVerticalRotation - m_fDoomVerticalRotation;
+            float timeStep = CTimer::ms_fTimeStep * 0.05f;
+            if (doomVerticalRotDiff > timeStep)
+                m_fDoomVerticalRotation += timeStep;
+            else if (doomVerticalRotDiff < -timeStep)
+                m_fDoomVerticalRotation -= timeStep;
+
+            float doomHorizontalRotDiff = doomHorizontalRotation - m_fDoomHorizontalRotation;
+            timeStep = CTimer::ms_fTimeStep * 0.02f;
+            if (doomHorizontalRotDiff > timeStep)
+                m_fDoomHorizontalRotation += timeStep;
+            else if (doomHorizontalRotDiff < -timeStep)
+                m_fDoomHorizontalRotation -= timeStep;
+        }
+
+        if (m_fDoomVerticalRotation > PI)
+            m_fDoomVerticalRotation -= TWO_PI;
+        else if (m_fDoomVerticalRotation < -PI)
+            m_fDoomVerticalRotation += TWO_PI;
+
+        if (ModelIndices::IsSwatVan(m_nModelIndex))
+            m_fDoomHorizontalRotation = clamp<float>(m_fDoomHorizontalRotation, -DegreesToRadians(10), DegreesToRadians(35));
+        else
+            m_fDoomHorizontalRotation = clamp<float>(m_fDoomHorizontalRotation, -DegreesToRadians(20), DegreesToRadians(20));
+        if (!CPad::GetPad(0)->GetCarGunFired())
+            return;
+    }
+
+    CVector newTurretPosition;
+    if (m_aCarNodes[CAR_MISC_A]) {
+        RwMatrix* carNodeMiscMatrix = RwFrameGetLTM(m_aCarNodes[CAR_MISC_A]);
+        newTurretPosition = *RwMatrixGetPos(carNodeMiscMatrix);
+    }
+    else {
+        newTurretPosition = *m_matrix * CVector(0.0f, 1.5f, 1.8f);
+    }
+
+    CVector point;
+    float cosHorizontalDoomRot = cos(m_fDoomHorizontalRotation);
+    point.x = -(sin(m_fDoomVerticalRotation) * cosHorizontalDoomRot);
+    point.y = cos(m_fDoomVerticalRotation) * cosHorizontalDoomRot;
+    point.z = sin(m_fDoomHorizontalRotation);
+    point = Multiply3x3(m_matrix, &point);
+
+    if (m_aCarNodes[CAR_MISC_A]) {
+        if (ModelIndices::IsSwatVan(m_nModelIndex))
+            newTurretPosition += point * 2.0f;
+        else
+            newTurretPosition += point * 1.2f;
+
+        newTurretPosition += GetSpeed(newTurretPosition - GetPosition()) * CTimer::ms_fTimeStep;
+    }
+
+    point.z += (rand() & 0xF) * 0.001f;
+    CVector endPoint = m_vecMoveSpeed * CVector(1.0f, 1.0f, 0.3f);
+    if (ModelIndices::IsSwatVan(m_nModelIndex))
+        endPoint += point * 0.4f;
+    else
+        endPoint += point * 0.5f;
+    CWaterCannons::UpdateOne((uint32_t)this, &newTurretPosition, &endPoint);
 }
 
 // Converted from thiscall bool CAutomobile::HasCarStoppedBecauseOfLight(void) 0x44D520

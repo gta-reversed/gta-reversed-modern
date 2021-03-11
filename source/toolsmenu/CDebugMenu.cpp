@@ -800,6 +800,34 @@ void CDebugMenu::ImguiDisplayPlayerInfo()
     }
 }
 
+static void DebugCode()
+{
+    /*
+    // spawn RC cars
+    auto player = FindPlayerPed();
+    if (player) {
+        int32_t vehicleId = -1;
+
+        if (pad->IsStandardKeyJustDown('1'))
+            vehicleId = MODEL_RCBANDIT;
+        else if (pad->IsStandardKeyJustDown('2'))
+            vehicleId = MODEL_RCTIGER;
+        else if (pad->IsStandardKeyJustDown('3'))
+            vehicleId = MODEL_RCBARON;
+
+        if (vehicleId != -1) {
+            CStreaming::RequestModel(vehicleId, STREAMING_GAME_REQUIRED);
+            CStreaming::LoadAllRequestedModels(false);
+            CVector pos = player->GetPosition() + CVector(2.0f, 1.0f, 1.0f);
+            CRemote::GivePlayerRemoteControlledCar(pos, player->GetHeading(), vehicleId);
+            CVehicle::bDisableRemoteDetonation = true;
+            CVehicle::bDisableRemoteDetonationOnContact = true;
+            printf("spawned rc car\n");
+        }
+    }
+*/
+}
+
 void CDebugMenu::ImguiDrawLoop()
 {
     CPad* pad = CPad::GetPad(0);
@@ -808,6 +836,9 @@ void CDebugMenu::ImguiDrawLoop()
         m_showMenu = !m_showMenu;
         pad->bPlayerSafe = m_showMenu;
     }
+
+    DebugCode();
+
     if (!m_showMenu)
         return;
     io->DeltaTime = CTimer::ms_fTimeStep * 0.02f;

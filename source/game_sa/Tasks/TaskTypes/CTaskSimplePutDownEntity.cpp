@@ -7,7 +7,7 @@ void CTaskSimplePutDownEntity::InjectHooks() {
     HookInstall(0x691900, &CTaskSimplePutDownEntity::GetId_Reversed);
 }
 
-CTaskSimplePutDownEntity::CTaskSimplePutDownEntity() : CTaskSimpleHoldEntity(nullptr, nullptr, 6, 1u, ANIM_ID_NO_ANIMATION_SET, 0, false) {
+CTaskSimplePutDownEntity::CTaskSimplePutDownEntity() : CTaskSimpleHoldEntity(nullptr, nullptr, PED_NODE_RIGHT_HAND, HOLD_ENTITY_FLAG_1, ANIM_ID_NO_ANIMATION_SET, 0, false) {
     m_fPutDownHeightZ = 0.6f;
 }
 

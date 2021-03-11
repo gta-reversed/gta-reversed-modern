@@ -630,7 +630,7 @@ void CTrain::ProcessControl_Reversed()
                 newNodeIndex = m_nNodeIndex + 1; // next node
             }
             m_nNodeIndex = newNodeIndex % numTrackNodes;
-            m_vehicleAudio.AddAudioEvent(AE_TRAIN_CLACK, 0.0f); eAudioEvents;
+            m_vehicleAudio.AddAudioEvent(AE_TRAIN_CLACK, 0.0f);
 
             pTheTrainNode = &pTrainNodes[m_nNodeIndex];
             fCurrentNodeTrackLength = pTheTrainNode->m_nDistanceFromStart / 3.0f;
