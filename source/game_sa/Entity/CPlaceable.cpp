@@ -89,7 +89,8 @@ void CPlaceable::SetHeading(float heading)
 {
     if (m_matrix)
         m_matrix->SetRotateZOnly(heading);
-    m_placement.m_fHeading = heading;
+    else
+        m_placement.m_fHeading = heading;
 }
 
 float CPlaceable::GetHeading()
