@@ -18,11 +18,11 @@ node level 2
  |  +--------+--------+ +
  |  |node    |node    | +
  |  |level 0 |level 0 | +
- |  |        |        | +
+ |  |index 0 |index 1 | +
  |  +--------+--------+ +
  |  |node    |node    | +
  |  |level 0 |level 0 | +
- |  |        |        | +
+ |  |index 2 |index 3 | +
  |  +--------+--------+ +
  +----------------------+--
  |                      |
@@ -30,33 +30,43 @@ node level 2
  Total rectangles = 4^startLevel
 */
 
+typedef void(*CQuadTreeNodeRectCallBack) (CRect const& rect, void* item);
+typedef void(*CQuadTreeNodeVec2DCallBack) (CVector2D const& rect, void* item);
+
 class  CQuadTreeNode {
 public:
-    CRect               rect;
-    CPtrListSingleLink  itemList;
-    CQuadTreeNode      *childrens[4];
-    unsigned int        level; // 0 - last level
+    CRect               m_Rect;
+    CPtrListSingleLink  m_ItemList;
+    CQuadTreeNode      *m_apChildren[4];
+    unsigned int        m_nLevel; // 0 - last level
 
     static CPool<CQuadTreeNode> *&ms_pQuadTreeNodePool;
 
-    CQuadTreeNode(CRect const& rect, int startLevel);
+    CQuadTreeNode(CRect const& size, int startLevel);
     ~CQuadTreeNode();
+    static void operator delete(void* data);
+    static void* operator new(unsigned int size);
+
+public:
+    static void InjectHooks();
+    static void InitPool();
 
     void AddItem(void* item, CRect const& rect);
     void DeleteItem(void* item);
     void DeleteItem(void* item, CRect const& rect);
     int FindSector(CRect const& rect); // -1 if not found
     int FindSector(CVector2D const& posn); // -1 if not found
-    void ForAllMatching(CRect const& rect, void(*callback)(CRect const&, void *));
-    void ForAllMatching(CVector2D const& posn, void(*callback)(CVector2D const&, void *));
+    void ForAllMatching(CRect const& rect, CQuadTreeNodeRectCallBack callback);
+    void ForAllMatching(CVector2D const& posn, CQuadTreeNodeVec2DCallBack callback);
     void GetAll(CPtrListSingleLink& list);
     void GetAllMatching(CRect const& rect, CPtrListSingleLink& list);
     void GetAllMatching(CVector2D const& posn, CPtrListSingleLink& list);
-    bool InSector(CRect const& rect, int sector);
-    static void InitPool();
-    static void operator delete(void* data);
-    static void* operator new(unsigned int size);
+    bool InSector(CRect const& rect, int sector) const;
 
+// Helpers
+public:
+    CRect GetSectorRect(int sector) const;
+    bool LiesInside(CRect const& rect) const;
 };
 
 VALIDATE_SIZE(CQuadTreeNode, 0x28);

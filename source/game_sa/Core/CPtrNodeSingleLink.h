@@ -15,6 +15,10 @@ public:
 
     inline CPtrNodeSingleLink(void *item) : pItem(item) {}
 
+public:
+    static void InjectHooks();
+    void AddToList(class CPtrListSingleLink* list);
+
     static void* operator new(unsigned int size);
     static void operator delete(void* data);
 };

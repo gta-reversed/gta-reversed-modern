@@ -11,12 +11,12 @@
 
 /* CRect class describes a rectangle.
 
-	A(left;top)_____________________
+	A(left;top)_____________________→
 	|                               |
 	|                               |
 	|                               |
 	|_________________B(right;bottom)
-	
+	↓
 */
 
 class  CRect
@@ -27,17 +27,20 @@ public:
 	float right;         // x2
 	float top;           // y2
 
-	CRect(float left, float top, float right, float bottom);
+	CRect(float fLeft, float fTop, float fRight, float fBottom);
 	CRect();
 
-	bool IsFlipped();
+    static void InjectHooks();
+	bool IsFlipped() const;
 	void Restrict(CRect const& restriction);
 	void Resize(float resizeX, float resizeY);
-	bool IsPointInside(CVector2D const& point);
-	bool IsCircleInside(CVector2D const& circleCenter, float circleRadius);
+	bool IsPointInside(CVector2D const& point) const;
+	bool IsPointInside(CVector2D const& point, float tolerance) const;
 	void SetFromCenter(float x, float y, float size);
-	void GetCenter(float *x, float *y);
+	void GetCenter(float *x, float *y) const;
 	void StretchToPoint(float x, float y);
+
+    inline CVector2D GetCenter() const { return CVector2D((right + left) * 0.5F, (top + bottom) * 0.5F); }
 };
 
 VALIDATE_SIZE(CRect, 0x10);

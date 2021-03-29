@@ -81,6 +81,11 @@ double CMenuManager::StretchY(float y)
     return ((double(__thiscall*)(float))0x573410)(y);
 }
 
+void CMenuManager::MessageScreen(const char* pKey, bool bRenderBig, bool bWithinFrame)
+{
+    return plugin::CallMethod<0x579330, CMenuManager*, const char*, bool, bool>(this, pKey, bRenderBig, bWithinFrame);
+}
+
 void CMenuManager::DrawWindow(const CRect& coords, const char* pKey, unsigned char nColour, CRGBA backColor, bool Unused, bool bBackground) {
     ((void(__thiscall*)(CMenuManager*, const CRect&, const char*, unsigned char, CRGBA, bool, bool))0x573EE0)(this, coords, pKey, nColour, backColor, Unused, bBackground);
 }

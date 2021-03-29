@@ -1239,7 +1239,7 @@ void CStreaming::LoadSceneCollision(CVector const& point) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallDynGlobal<CVector const&>(0x40ED80, point);
 #else
-    CColStore::LoadCollision(point);
+    CColStore::LoadCollision(point, true);
     CIplStore::LoadIpls(point, true);
     LoadAllRequestedModels(false);
 #endif
@@ -3588,14 +3588,14 @@ void CStreaming::Update() {
     CVehicle* pRemoveVehicle = CWorld::Players[0].m_pRemoteVehicle;
     if (pRemoveVehicle) {
         CColStore::AddCollisionNeededAtPosn(playerPos);
-        CColStore::LoadCollision(pRemoveVehicle->GetPosition());
+        CColStore::LoadCollision(pRemoveVehicle->GetPosition(), false);
         CColStore::EnsureCollisionIsInMemory(pRemoveVehicle->GetPosition());
         CIplStore::AddIplsNeededAtPosn(playerPos);
         CIplStore::LoadIpls(pRemoveVehicle->GetPosition(), false);
         CIplStore::EnsureIplsAreInMemory(pRemoveVehicle->GetPosition());
     }
     else {
-        CColStore::LoadCollision(playerPos);
+        CColStore::LoadCollision(playerPos, false);
         CColStore::EnsureCollisionIsInMemory(playerPos);
         CIplStore::LoadIpls(playerPos, false);
         CIplStore::EnsureIplsAreInMemory(playerPos);

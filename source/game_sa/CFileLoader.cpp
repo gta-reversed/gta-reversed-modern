@@ -78,7 +78,17 @@ int CFileLoader::LoadClumpObject(char const *line) {
 }
 
 bool CFileLoader::LoadCollisionFile(unsigned char *data, unsigned int dataSize, unsigned char colId) {
-    return plugin::CallAndReturnDynGlobal<bool, unsigned char *, unsigned int, unsigned char>(0x538440, data, dataSize, colId);
+    return plugin::CallAndReturn<bool, 0x538440, unsigned char *, unsigned int, unsigned char>(data, dataSize, colId);
+}
+
+bool CFileLoader::LoadCollisionFile(char const* filename, unsigned char colId)
+{
+    return plugin::CallAndReturn<bool, 0x5B4040, char const*, unsigned char>(filename, colId);
+}
+
+bool CFileLoader::LoadCollisionFileFirstTime(unsigned char* data, unsigned int dataSize, unsigned char colId)
+{
+    return plugin::CallAndReturn<bool, 0x5B5000, unsigned char*, unsigned int, unsigned char>(data, dataSize, colId);
 }
 
 bool CFileLoader::FinishLoadClumpFile(RwStream *stream, unsigned int modelIndex) {
@@ -253,12 +263,12 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, char 
     {
         if (pColModel->m_boundSphere.m_bFlag0x01)
         {
-            if (pColModel->m_boundSphere.m_nMaterial)
+            if (pColModel->m_boundSphere.m_nColSlot)
             {
                 CRect rect;
                 pNewEntity->GetBoundRect(&rect);
-                auto* pColDef = CColStore::ms_pColPool->GetAt(pColModel->m_boundSphere.m_nMaterial);
-                pColDef->area.Restrict(rect);
+                auto* pColDef = CColStore::ms_pColPool->GetAt(pColModel->m_boundSphere.m_nColSlot);
+                pColDef->m_Area.Restrict(rect);
             }
         }
         else

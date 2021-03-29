@@ -20,7 +20,7 @@ void* CPtrNodeDoubleLink::operator new(unsigned int size)
 
 void CPtrNodeDoubleLink::operator delete(void* ptr, size_t sz)
 {
-    CPools::ms_pPtrNodeDoubleLinkPool->Delete(reinterpret_cast<CPtrNodeDoubleLink*>(ptr));
+    CPools::ms_pPtrNodeDoubleLinkPool->Delete(static_cast<CPtrNodeDoubleLink*>(ptr));
 }
 
 void CPtrNodeDoubleLink::AddToList(CPtrListDoubleLink* list)

@@ -33,6 +33,11 @@ signed int CCamera::GetLookDirection() {
     return plugin::CallMethodAndReturnDynGlobal<signed int, CCamera*>(0x50AE90, this);
 }
 
+int CCamera::GetScreenFadeStatus()
+{
+    return plugin::CallMethodAndReturn<int, 0x50AE20, CCamera*>(this);
+}
+
 bool CCamera::Get_Just_Switched_Status()
 {
     return plugin::CallMethodAndReturn<bool, 0x50AE10, CCamera*>(this);

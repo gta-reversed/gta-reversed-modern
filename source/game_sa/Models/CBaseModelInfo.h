@@ -165,8 +165,8 @@ public:
     inline bool IsLod() { return bIsLod; }
     inline bool IsRoad() { return bIsRoad; }
     inline void SetHasBeenPreRendered(int bPreRendered) { bHasBeenPreRendered = bPreRendered; }
-    inline void SetIsLod(int bLod) { bIsLod = bLod; }
-    inline void SetOwnsColModel(int bOwns) { bDoWeOwnTheColModel = bOwns; }
+    inline void SetIsLod(bool bLod) { bIsLod = bLod; }
+    inline void SetOwnsColModel(bool bOwns) { bDoWeOwnTheColModel = bOwns; }
     inline void IncreaseAlpha() {
         if (m_nAlpha >= 239)
             m_nAlpha = 255;

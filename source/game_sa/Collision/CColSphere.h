@@ -11,7 +11,10 @@
 
 class CColSphere : public CSphere {
 public:
-    unsigned char m_nMaterial;
+    union {
+        unsigned char m_nMaterial;
+        unsigned char m_nColSlot;
+    };
     union {
         unsigned char m_nFlags;
         struct {

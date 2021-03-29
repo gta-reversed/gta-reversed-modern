@@ -38,7 +38,7 @@ public:
      static void LoadClumpFile(char const *filename);
      static int LoadClumpObject(char const *line);
      static bool LoadCollisionFile(unsigned char *data, unsigned int dataSize, unsigned char colId);
-     static void LoadCollisionFile(char const *filename, unsigned char colId);
+     static bool LoadCollisionFile(char const *filename, unsigned char colId);
      static bool LoadCollisionFileFirstTime(unsigned char *data, unsigned int dataSize, unsigned char colId);
      static void LoadCollisionModel(unsigned char *data, CColModel &outColModel);
      static void LoadCollisionModelVer2(unsigned char *data, unsigned int dataSize, CColModel &outColModel, char const *modelName);

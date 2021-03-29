@@ -19,9 +19,12 @@ public:
         Flush();
     }
 
+public:
+    static void InjectHooks();
     void Flush();
-    void AddItem(void* item);
+    CPtrNodeSingleLink* AddItem(void* item);
     void DeleteItem(void* item);
+    void DeleteNode(CPtrNodeSingleLink* node, CPtrNodeSingleLink* lastNode); //Most likely inlined in the final exe,
 };
 
 VALIDATE_SIZE(CPtrListSingleLink, 4);

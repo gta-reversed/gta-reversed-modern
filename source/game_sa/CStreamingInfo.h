@@ -33,7 +33,19 @@ public:
     short m_nNextIndex; // ms_pArrayBase array index
     short m_nPrevIndex; // ms_pArrayBase array index
     short m_nNextIndexOnCd;
-    unsigned char m_nFlags; // see eStreamingFlags
+    union
+    {
+        unsigned char m_nFlags; // see eStreamingFlags
+        struct
+        {
+            unsigned char bUnkn0x1 : 1;
+            unsigned char bGameRequired : 1;
+            unsigned char bMissionRequired : 1;
+            unsigned char bKeepInMemory : 1;
+            unsigned char bPriorityRequest : 1;
+            unsigned char bLoadingScene : 1;
+        };
+    };
     unsigned char m_nImgId;
     unsigned int m_nCdPosn;
     unsigned int m_nCdSize; // number of blocks/sectors; m_nCdSize * STREAMING_BLOCK_SIZE = actual size in bytes

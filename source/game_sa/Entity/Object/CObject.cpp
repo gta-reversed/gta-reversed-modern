@@ -126,7 +126,7 @@ CObject::~CObject()
     if (objectFlags.bHasNoModel)
     {
         auto* const colModel = CModelInfo::GetModelInfo((m_nModelIndex))->GetColModel();
-        CColStore::RemoveRef(colModel->m_boundSphere.m_nMaterial); //This seems weird, maybe BUG or Union field?
+        CColStore::RemoveRef(colModel->m_boundSphere.m_nColSlot);
     }
 
     CRadar::ClearBlipForEntity(eBlipType::BLIP_OBJECT, CPools::ms_pObjectPool->GetRef(this));
@@ -324,7 +324,7 @@ void CObject::ProcessControl_Reversed()
         static float fDoorSpeedMult = 0.002F;
         fDiff = clamp(fDiff, -fMaxDoorDiff, fMaxDoorDiff);
         if (fDiff > 0.0F && m_vecTurnSpeed.z < fDoorCutoffSpeed
-            || fDiff < 0.0F && m_vecTurnSpeed.z > fDoorCutoffSpeed)
+            || fDiff < 0.0F && m_vecTurnSpeed.z > -fDoorCutoffSpeed)
         {
             m_vecTurnSpeed.z += CTimer::ms_fTimeStep * fDoorSpeedMult * fDiff;
         }
@@ -852,7 +852,7 @@ void CObject::Init() {
         auto *pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
         if (pModelInfo->GetColModel()->m_boundSphere.m_bFlag0x01)
         {
-            CColStore::AddRef(pModelInfo->GetColModel()->m_boundSphere.m_nMaterial);
+            CColStore::AddRef(pModelInfo->GetColModel()->m_boundSphere.m_nColSlot);
             objectFlags.bHasNoModel = true;
 
             auto *pAtomicInfo = pModelInfo->AsAtomicModelInfoPtr();

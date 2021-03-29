@@ -13,8 +13,9 @@
 #define FUNC_CMissionCleanup__AddEntityToList 0x4637E0
 #define FUNC_CMissionCleanup__RemoveEntityFromList 0x4654B0
 #define FUNC_CMissionCleanup__CheckIfCollisionHasLoadedForMissionObjects 0x4652D0
+constexpr int NUM_MISSION_CLEANUP_OBJECTS = 75;
 
-enum MissionCleanUpEntityType
+enum MissionCleanUpEntityType : uint8_t
 {
 	MISSION_CLEANUP_ENTITY_TYPE_EMPTY = 0,	// free slot
 

@@ -24,6 +24,7 @@ void InjectHooksMain(void)
     CGame::InjectHooks();
     CPools::InjectHooks();
     CPad::InjectHooks();
+    CRect::InjectHooks();
     CVector2D::InjectHooks();
     CQuaternion::InjectHooks();
     CMatrix::InjectHooks();
@@ -33,6 +34,8 @@ void InjectHooksMain(void)
     CEntryInfoList::InjectHooks();
     CPtrNodeDoubleLink::InjectHooks();
     CPtrListDoubleLink::InjectHooks();
+    CPtrNodeSingleLink::InjectHooks();
+    CPtrListSingleLink::InjectHooks();
     List_c::InjectHooks();
     CRunningScript::InjectHooks();
     CTheScripts::InjectHooks();
@@ -80,6 +83,9 @@ void InjectHooksMain(void)
     CBox::InjectHooks();
     CColModel::InjectHooks();
     CCollisionData::InjectHooks();
+    CQuadTreeNode::InjectHooks();
+    CColStore::InjectHooks();
+    CColAccel::InjectHooks();
     CAnimBlendAssociation::InjectHooks();
     CAnimBlendSequence::InjectHooks();
     CTrafficLights::InjectHooks();

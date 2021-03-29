@@ -2,13 +2,19 @@
 
 void CPtrListDoubleLink::InjectHooks()
 {
+    ReversibleHooks::Install("CPtrListDoubleLink", "Flush", 0x552470, &CPtrListDoubleLink::Flush);
     ReversibleHooks::Install("CPtrListDoubleLink", "AddItem", 0x533670, &CPtrListDoubleLink::AddItem);
     ReversibleHooks::Install("CPtrListDoubleLink", "DeleteItem", 0x5336B0, &CPtrListDoubleLink::DeleteItem);
 }
 
 void CPtrListDoubleLink::Flush()
 {
-    plugin::CallMethod<0x552470, CPtrListDoubleLink*>(this);
+    if (!pNode)
+        return;
+
+    CPtrNodeDoubleLink* pCurNode;
+    while ((pCurNode = GetNode()))
+        CPtrListDoubleLink::DeleteNode(pCurNode);
 }
 
 CPtrNodeDoubleLink* CPtrListDoubleLink::AddItem(void* item)
@@ -24,7 +30,7 @@ void CPtrListDoubleLink::DeleteItem(void* item)
     if (!pNode)
         return;
 
-    auto pCurNode = GetNode();
+    auto* pCurNode = GetNode();
     while (pCurNode->pItem != item) {
         pCurNode = reinterpret_cast<CPtrNodeDoubleLink*>(pCurNode->pNext);
         if (!pCurNode)

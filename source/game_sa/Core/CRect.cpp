@@ -6,52 +6,99 @@
 */
 #include "StdInc.h"
 
-CRect::CRect(float x1, float y1, float x2, float y2)
+void CRect::InjectHooks()
 {
-    ((void(__thiscall*)(CRect*, float, float, float, float))0x4041C0)(this, x1, y1, x2, y2);
+    ReversibleHooks::Install("CRect", "IsFlipped", 0x404190, &CRect::IsFlipped);
+    ReversibleHooks::Install("CRect", "Restrict", 0x404200, &CRect::Restrict);
+    ReversibleHooks::Install("CRect", "Resize", 0x404260, &CRect::Resize);
+    ReversibleHooks::Install("CRect", "IsPointInside", 0x404290, (bool(CRect::*)(CVector2D const&) const)&CRect::IsPointInside);
+    ReversibleHooks::Install("CRect", "IsPointInside_tolerance", 0x4042D0, (bool(CRect::*)(CVector2D const&, float) const)&CRect::IsPointInside);
+    ReversibleHooks::Install("CRect", "SetFromCenter", 0x43E020, &CRect::SetFromCenter);
+    ReversibleHooks::Install("CRect", "GetCenter", 0x43E050, (void(CRect::*)(float*, float*) const)&CRect::GetCenter);
+    ReversibleHooks::Install("CRect", "StretchToPoint", 0x5327F0, &CRect::StretchToPoint);
+}
+
+CRect::CRect(float fLeft, float fTop, float fRight, float fBottom)
+{
+    left = fLeft;
+    top = fTop;
+    right = fRight;
+    bottom = fBottom;
 }
 
 CRect::CRect()
 {
-    ((void(__thiscall*)(CRect*))0x4041E0)(this);
+    left = 1000000.0F;
+    top = 1000000.0F;
+    right = -1000000.0F;
+    bottom = -1000000.0F;
 }
 
-bool CRect::IsFlipped()
+inline bool CRect::IsFlipped() const
 {
-    return ((bool(__thiscall*)(CRect*))0x404190)(this);
+    return left > right || top > bottom;
 }
 
-void CRect::Restrict(CRect const& restriction)
+inline void CRect::Restrict(CRect const& restriction)
 {
-    ((void(__thiscall*)(CRect*, CRect const&))0x404200)(this, restriction);
+    if (restriction.left < left)
+        left = restriction.left;
+
+    if (restriction.right > right)
+        right = restriction.right;
+
+    if (restriction.top < top)
+        top = restriction.top;
+
+    if (restriction.bottom > bottom)
+        bottom = restriction.bottom;
 }
 
-void CRect::Resize(float resizeX, float resizeY)
+inline void CRect::Resize(float resizeX, float resizeY)
 {
-    ((void(__thiscall*)(CRect*, float, float))0x404260)(this, resizeX, resizeY);
+    left -= resizeX;
+    right += resizeX;
+    top -= resizeY;
+    bottom += resizeY;
 }
 
-bool CRect::IsPointInside(CVector2D const& point)
+inline bool CRect::IsPointInside(CVector2D const& point) const
 {
-    return ((bool(__thiscall*)(CRect*, CVector2D const&))0x404290)(this, point);
+    return left <= point.x && right >= point.x
+        && top <= point.y && bottom >= point.y;
 }
 
-bool CRect::IsCircleInside(CVector2D const& circleCenter, float circleRadius)
+inline bool CRect::IsPointInside(CVector2D const& point, float tolerance) const
 {
-    return ((bool(__thiscall*)(CRect*, CVector2D const&, float))0x4042D0)(this, circleCenter, circleRadius);
+    return left - tolerance <= point.x && right + tolerance >= point.x
+        && top - tolerance <= point.y && bottom + tolerance >= point.y;
 }
 
-void CRect::SetFromCenter(float x, float y, float size)
+inline void CRect::SetFromCenter(float x, float y, float size)
 {
-    ((void(__thiscall*)(CRect*, float, float, float))0x43E020)(this, x, y, size);
+    left = x - size;
+    right = x + size;
+    top = y - size;
+    bottom = y + size;
 }
 
-void CRect::GetCenter(float* x, float* y)
+inline void CRect::GetCenter(float* x, float* y) const
 {
-    ((void(__thiscall*)(CRect*, float*, float*))0x43E050)(this, x, y);
+    *x = (right + left) * 0.5F;
+    *y = (top + bottom) * 0.5F;
 }
 
-void CRect::StretchToPoint(float x, float y)
+inline void CRect::StretchToPoint(float x, float y)
 {
-    ((void(__thiscall*)(CRect*, float, float))0x5327F0)(this, x, y);
+    if (x < left)
+        left = x;
+
+    if (x > right)
+        right = x;
+
+    if (y < top)
+        top = y;
+
+    if (y > bottom)
+        bottom = y;
 }

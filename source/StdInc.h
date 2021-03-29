@@ -91,6 +91,7 @@
 #include "game_sa\CVehicleRecording.h"
 #include "game_sa\CVehicleAnimGroupData.h"
 #include "game_sa\Collision\CColStore.h"
+#include "game_sa\Collision\CColAccel.h"
 #include "game_sa\CPedDamageResponseCalculator.h"
 #include "game_sa\CPedDamageResponse.h"
 #include "game_sa\CWaterLevel.h"

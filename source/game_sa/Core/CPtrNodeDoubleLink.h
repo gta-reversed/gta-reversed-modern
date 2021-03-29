@@ -14,13 +14,13 @@ public:
     CPtrNodeDoubleLink *pNext;
     CPtrNodeDoubleLink *pPrev;
 
+    inline CPtrNodeDoubleLink(void* item) { pItem = item; }
+
 public:
     static void InjectHooks();
 
     static void* operator new(unsigned int size);
     static void operator delete(void* ptr, size_t sz);
-    inline CPtrNodeDoubleLink(void* item) { pItem = item; }
-
 
     void AddToList(class CPtrListDoubleLink* list);
 };
