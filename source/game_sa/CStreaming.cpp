@@ -2176,7 +2176,7 @@ bool CStreaming::RemoveLeastUsedModel(unsigned int streamingFlags) {
 #endif
 }
 
-bool CStreaming::CarIsCandateForRemoval(std::int32_t modelId) {
+bool CStreaming::CarIsCandidateForRemoval(std::int32_t modelId) {
     CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
     if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount
         && !(streamingInfo.m_nFlags & (STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED))
@@ -2193,7 +2193,7 @@ bool CStreaming::RemoveLoadedVehicle() {
 #else
     for (std::int32_t i = 0; i < CPopulation::m_InAppropriateLoadedCars.CountMembers(); i++) {
         std::int32_t modelId = CPopulation::m_InAppropriateLoadedCars.GetMember(i);
-        if (CarIsCandateForRemoval(modelId)) {
+        if (CarIsCandidateForRemoval(modelId)) {
             RemoveModel(modelId);
             return true;
         }
@@ -2204,7 +2204,7 @@ bool CStreaming::RemoveLoadedVehicle() {
     if (numBoatsNeeded < CPopulation::m_LoadedBoats.CountMembers()) {
         for (std::int32_t i = 0; i < CPopulation::m_LoadedBoats.CountMembers(); i++) {
             std::int32_t modelId = CPopulation::m_LoadedBoats.GetMember(i);
-            if (CarIsCandateForRemoval(modelId)) {
+            if (CarIsCandidateForRemoval(modelId)) {
                 RemoveModel(modelId);
                 return true;
             }
@@ -2215,7 +2215,7 @@ bool CStreaming::RemoveLoadedVehicle() {
     appropriateLoadedCars.SortBasedOnUsage();
     for (std::int32_t i = 0; i < appropriateLoadedCars.CountMembers(); i++) {
         std::int32_t modelId = appropriateLoadedCars.GetMember(i);
-        if (CarIsCandateForRemoval(modelId)) {
+        if (CarIsCandidateForRemoval(modelId)) {
             RemoveModel(modelId);
             return true;
         }
@@ -2224,7 +2224,7 @@ bool CStreaming::RemoveLoadedVehicle() {
 #endif
 }
 
-bool CStreaming::ZoneModelIsCandateForRemoval(std::int32_t modelId) {
+bool CStreaming::ZoneModelIsCandidateForRemoval(std::int32_t modelId) {
     CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
     if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount
         && !(streamingInfo.m_nFlags & (STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED))
@@ -2243,7 +2243,7 @@ bool CStreaming::RemoveLoadedZoneModel() {
         return false;
     for (std::int32_t i = 0; i < TOTAL_LOADED_PEDS; i++) {
         std::int32_t modelId = ms_pedsLoaded[i];
-        if (modelId >= 0 && ZoneModelIsCandateForRemoval(modelId)) {
+        if (modelId >= 0 && ZoneModelIsCandidateForRemoval(modelId)) {
             RemoveModel(modelId);
             return true;
         }

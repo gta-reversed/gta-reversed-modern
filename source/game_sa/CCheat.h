@@ -8,6 +8,15 @@
 
 #include "PluginBase.h"
 #include "CVehicle.h"
+#include <eCheats.h>
+
+struct Cheat {
+    DWORD installAddress;
+    void* method;
+    const std::string methodName;
+    unsigned int hash;
+    eCheats type;
+};
 
 class CCheat {
 public:
@@ -43,8 +52,8 @@ public:
      static void GangLandCheat();
      static void GangsCheat();
      static void GolfcartCheat();
-    //! handles BeachParty, Funhouse, AllCarsAreGreat , AllCarsAreCheap cheats toggling
-     static void HandleSpecialCheats(int CheatID);
+     //! handles BeachParty, Funhouse, AllCarsAreGreat , AllCarsAreCheap cheats toggling
+     static void HandleSpecialCheats(eCheats cheatID);
      static void HealthCheat();
      static void HearseCheat();
      static void JetpackCheat();
@@ -59,8 +68,8 @@ public:
      static void NotWantedCheat();
      static void ParachuteCheat();
      static void PinkCarsCheat();
-    //! unused
-    //! does nothing (NOP)
+     //! unused
+     //! does nothing (NOP)
      static void PredatorCheat();
      static void QuadCheat();
      static void RainyWeatherCheat();
@@ -69,10 +78,10 @@ public:
      static void SkinnyCheat();
      static void SlowTimeCheat();
      static void StaminaCheat();
+     static void StockCarCheat();
      static void StockCar2Cheat();
      static void StockCar3Cheat();
      static void StockCar4Cheat();
-     static void StockCarCheat();
      static void StormCheat();
      static void StuntPlaneCheat();
      static void SuicideCheat();

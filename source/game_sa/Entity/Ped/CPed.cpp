@@ -794,6 +794,41 @@ void CPed::GiveWeapon(eWeaponType weaponType, unsigned int ammo, bool likeUnused
     ((void(__thiscall *)(CPed*, eWeaponType, unsigned int, bool))0x5E6080)(this, weaponType, ammo, likeUnused);
 }
 
+void CPed::GiveWeaponSet1() {
+    GiveWeapon(WEAPON_BRASSKNUCKLE, 1, true);
+    GiveWeapon(WEAPON_BASEBALLBAT, 1, true);
+    GiveWeapon(WEAPON_MOLOTOV, 10, true);
+    GiveWeapon(WEAPON_PISTOL, 100, true);
+    GiveWeapon(WEAPON_SHOTGUN, 50, true);
+    GiveWeapon(WEAPON_MICRO_UZI, 150, true);
+    GiveWeapon(WEAPON_AK47, 120, true);
+    GiveWeapon(WEAPON_COUNTRYRIFLE, 25, true);
+    GiveWeapon(WEAPON_RLAUNCHER, 200, true);
+    GiveWeapon(WEAPON_SPRAYCAN, 200, true);
+}
+
+void CPed::GiveWeaponSet2() {
+    GiveWeapon(WEAPON_KNIFE, 0, true);
+    GiveWeapon(WEAPON_GRENADE, 10, true);
+    GiveWeapon(WEAPON_DESERT_EAGLE, 40, true);
+    GiveWeapon(WEAPON_SAWNOFF_SHOTGUN, 40, true);
+    GiveWeapon(WEAPON_TEC9, 150, true);
+    GiveWeapon(WEAPON_M4, 150, true);
+    GiveWeapon(WEAPON_SNIPERRIFLE, 21, true);
+    GiveWeapon(WEAPON_FLAMETHROWER, 500, true);
+    GiveWeapon(WEAPON_EXTINGUISHER, 200, true);
+}
+
+void CPed::GiveWeaponSet3() {
+    GiveWeapon(WEAPON_CHAINSAW, 0, true);
+    GiveWeapon(WEAPON_REMOTE_SATCHEL_CHARGE, 5, true);
+    GiveWeapon(WEAPON_PISTOL_SILENCED, 40, true);
+    GiveWeapon(WEAPON_SPAS12_SHOTGUN, 30, true);
+    GiveWeapon(WEAPON_MP5, 100, true);
+    GiveWeapon(WEAPON_M4, 150, true);
+    GiveWeapon(WEAPON_RLAUNCHER_HS, 200, true);
+}
+
 // Converted from thiscall void CPed::SetCurrentWeapon(int slot) 0x5E61F0
 void CPed::SetCurrentWeapon(int slot)
 {

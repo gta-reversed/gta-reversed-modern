@@ -70,7 +70,7 @@ void CWeather::ForceWeather(short weatherType) {
 }
 
 // Converted from cdecl void CWeather::ForceWeatherNow(short weatherType) 0x72A4F0
-void CWeather::ForceWeatherNow(short weatherType) {
+void CWeather::ForceWeatherNow(eWeatherType weatherType) {
     plugin::Call<0x72A4F0, short>(weatherType);
 }
 

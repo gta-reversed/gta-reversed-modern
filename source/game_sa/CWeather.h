@@ -94,7 +94,7 @@ public:
     // for 'weatherType', see eWeatherType
     static void ForceWeather(short weatherType);
     // for 'weatherType', see eWeatherType
-    static void ForceWeatherNow(short weatherType);
+    static void ForceWeatherNow(eWeatherType weatherType);
     // for 'weatherType', see eWeatherType
     static bool ForecastWeather(int weatherType, int numSteps);
     static void Init();

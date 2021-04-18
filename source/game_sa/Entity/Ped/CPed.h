@@ -478,6 +478,9 @@ public:
     void AddWeaponModel(int modelIndex);
     void TakeOffGoggles();
     void GiveWeapon(eWeaponType weaponType, unsigned int ammo, bool likeUnused);
+    void GiveWeaponSet1();
+    void GiveWeaponSet2();
+    void GiveWeaponSet3();
     void SetCurrentWeapon(int slot);
     void SetCurrentWeapon(eWeaponType weaponType);
     void ClearWeapon(eWeaponType weaponType);

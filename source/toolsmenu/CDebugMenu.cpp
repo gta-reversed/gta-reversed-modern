@@ -30,63 +30,65 @@ bool findStringCaseInsensitive(const std::string& strHaystack, const std::string
 }
 
 void CDebugMenu::ImguiInitialise() {
-    if (!m_imguiInitialised) {
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        io = &ImGui::GetIO();
-        io->WantCaptureMouse = true;
-        io->WantCaptureKeyboard = true;
-        io->WantSetMousePos = true;
-        io->ConfigFlags = ImGuiConfigFlags_NavEnableSetMousePos;
-        io->DisplaySize = ImVec2((float)RsGlobal.maximumWidth, (float)RsGlobal.maximumHeight);
-        // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
-        //HWND& hwnd = *(HWND*)0xC97C1C;
-        //ImGui_ImplWin32_Init(hwnd);
-        ImGui_ImplRW_Init(GetD3DDevice());
-        printf("Imgui initialized\n");
-
-        // Mouse
-        int txd = CTxdStore::AddTxdSlot("imgui_mouse");
-        if (CTxdStore::LoadTxd(txd, "models\\fronten_pc.txd")) {
-            CTxdStore::AddRef(txd);
-            CTxdStore::PushCurrentTxd();
-            CTxdStore::SetCurrentTxd(txd);
-            m_mouseSprite.SetTexture("mouse", "mousea");
-        } else {
-            printf("Failed to load fronten_pc.txd\n");
-        }
-        CTxdStore::PopCurrentTxd();
-
-        // Keyboard section
-        io->KeyMap[ImGuiKey_Tab] = VK_TAB;
-        io->KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
-        io->KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
-        io->KeyMap[ImGuiKey_UpArrow] = VK_UP;
-        io->KeyMap[ImGuiKey_DownArrow] = VK_DOWN;
-        io->KeyMap[ImGuiKey_PageUp] = VK_PRIOR;
-        io->KeyMap[ImGuiKey_PageDown] = VK_NEXT;
-        io->KeyMap[ImGuiKey_Home] = VK_HOME;
-        io->KeyMap[ImGuiKey_End] = VK_END;
-        io->KeyMap[ImGuiKey_Insert] = VK_INSERT;
-        io->KeyMap[ImGuiKey_Delete] = VK_DELETE;
-        io->KeyMap[ImGuiKey_Backspace] = VK_BACK;
-        io->KeyMap[ImGuiKey_Space] = VK_SPACE;
-        io->KeyMap[ImGuiKey_Enter] = VK_RETURN;
-        io->KeyMap[ImGuiKey_Escape] = VK_ESCAPE;
-        io->KeyMap[ImGuiKey_KeyPadEnter] = VK_RETURN;
-        io->KeyMap[ImGuiKey_A] = 'A';
-        io->KeyMap[ImGuiKey_C] = 'C';
-        io->KeyMap[ImGuiKey_V] = 'V';
-        io->KeyMap[ImGuiKey_X] = 'X';
-        io->KeyMap[ImGuiKey_Y] = 'Y';
-        io->KeyMap[ImGuiKey_Z] = 'Z';
-
-        m_vehicleToolInput.Initialise(256, &m_vehiclesMap);
-        m_pedToolInput.Initialise(256, &m_pedsMap);
-        m_missionToolInput.Initialise(256, &m_missionsMap);
-        m_imguiInitialised = true;
+    if (m_imguiInitialised) {
+        return;
     }
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    io = &ImGui::GetIO();
+    io->WantCaptureMouse = true;
+    io->WantCaptureKeyboard = true;
+    io->WantSetMousePos = true;
+    io->ConfigFlags = ImGuiConfigFlags_NavEnableSetMousePos;
+    io->DisplaySize = ImVec2((float)RsGlobal.maximumWidth, (float)RsGlobal.maximumHeight);
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //HWND& hwnd = *(HWND*)0xC97C1C;
+    //ImGui_ImplWin32_Init(hwnd);
+    ImGui_ImplRW_Init(GetD3DDevice());
+    printf("Imgui initialized\n");
+
+    // Mouse
+    int txd = CTxdStore::AddTxdSlot("imgui_mouse");
+    if (CTxdStore::LoadTxd(txd, "models\\fronten_pc.txd")) {
+        CTxdStore::AddRef(txd);
+        CTxdStore::PushCurrentTxd();
+        CTxdStore::SetCurrentTxd(txd);
+        m_mouseSprite.SetTexture("mouse", "mousea");
+    } else {
+        printf("Failed to load fronten_pc.txd\n");
+    }
+    CTxdStore::PopCurrentTxd();
+
+    // Keyboard section
+    io->KeyMap[ImGuiKey_Tab] = VK_TAB;
+    io->KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
+    io->KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
+    io->KeyMap[ImGuiKey_UpArrow] = VK_UP;
+    io->KeyMap[ImGuiKey_DownArrow] = VK_DOWN;
+    io->KeyMap[ImGuiKey_PageUp] = VK_PRIOR;
+    io->KeyMap[ImGuiKey_PageDown] = VK_NEXT;
+    io->KeyMap[ImGuiKey_Home] = VK_HOME;
+    io->KeyMap[ImGuiKey_End] = VK_END;
+    io->KeyMap[ImGuiKey_Insert] = VK_INSERT;
+    io->KeyMap[ImGuiKey_Delete] = VK_DELETE;
+    io->KeyMap[ImGuiKey_Backspace] = VK_BACK;
+    io->KeyMap[ImGuiKey_Space] = VK_SPACE;
+    io->KeyMap[ImGuiKey_Enter] = VK_RETURN;
+    io->KeyMap[ImGuiKey_Escape] = VK_ESCAPE;
+    io->KeyMap[ImGuiKey_KeyPadEnter] = VK_RETURN;
+    io->KeyMap[ImGuiKey_A] = 'A';
+    io->KeyMap[ImGuiKey_C] = 'C';
+    io->KeyMap[ImGuiKey_V] = 'V';
+    io->KeyMap[ImGuiKey_X] = 'X';
+    io->KeyMap[ImGuiKey_Y] = 'Y';
+    io->KeyMap[ImGuiKey_Z] = 'Z';
+
+    m_vehicleToolInput.Initialise(256, &m_vehiclesMap);
+    m_pedToolInput.Initialise(256, &m_pedsMap);
+    m_missionToolInput.Initialise(256, &m_missionsMap);
+    m_imguiInitialised = true;
 }
 
 void CDebugMenu::ImguiInputUpdate() {
@@ -128,8 +130,8 @@ void CDebugMenu::ImguiInputUpdate() {
     CPad* pad = CPad::GetPad(0);
     pad->DisablePlayerControls = true;
 
-    m_MousePos.x += pad->NewMouseControllerState.X;
-    m_MousePos.y -= pad->NewMouseControllerState.Y;
+    m_MousePos.x += CPad::NewMouseControllerState.X;
+    m_MousePos.y -= CPad::NewMouseControllerState.Y;
 
     if (m_MousePos.x < 0.0f)
         m_MousePos.x = 0.0f;
@@ -140,19 +142,19 @@ void CDebugMenu::ImguiInputUpdate() {
     if (m_MousePos.y >= (float)RsGlobal.maximumHeight)
         m_MousePos.y = (float)RsGlobal.maximumHeight;
 
-    if (pad->NewMouseControllerState.wheelDown)
+    if (CPad::NewMouseControllerState.wheelDown)
         io->MouseWheel -= (20.0F * io->DeltaTime);
 
-    if (pad->NewMouseControllerState.wheelUp)
+    if (CPad::NewMouseControllerState.wheelUp)
         io->MouseWheel += (20.0F * io->DeltaTime);
 
     io->MousePos = ImVec2(m_MousePos.x, m_MousePos.y);
-    io->MouseDown[0] = pad->NewMouseControllerState.lmb;
-    io->MouseDown[1] = pad->NewMouseControllerState.mmb;
-    io->MouseDown[2] = pad->NewMouseControllerState.rmb;
+    io->MouseDown[0] = CPad::NewMouseControllerState.lmb;
+    io->MouseDown[1] = CPad::NewMouseControllerState.mmb;
+    io->MouseDown[2] = CPad::NewMouseControllerState.rmb;
 
-    pad->NewMouseControllerState.X = 0.0f;
-    pad->NewMouseControllerState.Y = 0.0f;
+    CPad::NewMouseControllerState.X = 0.0f;
+    CPad::NewMouseControllerState.Y = 0.0f;
 }
 
 void CDebugMenu::ImguiDisplayFramePerSecond() {
@@ -168,6 +170,7 @@ void CDebugMenu::ImGuiDrawMouse()
 {
     if (!m_showMenu || !m_mouseSprite.m_pTexture)
         return;
+
     CRect mouseRect = CRect(io->MousePos.x, io->MousePos.y, (float)CMenuManager::StretchX(18.0f) + io->MousePos.x, (float)CMenuManager::StretchX(18.0f) + io->MousePos.y);
     m_mouseSprite.Draw(mouseRect, CRGBA(255, 255, 255, 255));
 }
@@ -185,6 +188,9 @@ void CDebugMenu::ProcessCheatTool()
     }
     if (ImGui::RadioButton("Weapon 3 cheat", false)) {
         CCheat::WeaponCheat3();
+    }
+    if (ImGui::RadioButton("Weapon Skills cheat", false)) {
+        CCheat::WeaponSkillsCheat();
     }
     if (ImGui::RadioButton("Never wanted cheat", false)) {
         CCheat::NotWantedCheat();
@@ -219,6 +225,9 @@ void CDebugMenu::ProcessCheatTool()
     if (ImGui::RadioButton("All Cars Are Shit cheat", false)) {
         CCheat::AllCarsAreShitCheat();
     }
+    if (ImGui::RadioButton("Apache cheat", false)) {
+        CCheat::ApacheCheat();
+    }
     if (ImGui::RadioButton("Black Cars cheat", false)) {
         CCheat::BlackCarsCheat();
     }
@@ -249,7 +258,7 @@ void CDebugMenu::ProcessCheatTool()
     if (ImGui::RadioButton("Cloudy Weather cheat", false)) {
         CCheat::CloudyWeatherCheat();
     }
-    if (ImGui::RadioButton("Cloudy Weather cheat", false)) {
+    if (ImGui::RadioButton("Countryside Invasion cheat", false)) {
         CCheat::CountrysideInvasionCheat();
     }
     if (ImGui::RadioButton("Dusk cheat", false)) {
@@ -538,9 +547,9 @@ bool CDebugMenu::StartMission(std::int32_t missionId, bool bDoMissionCleanUp)
     CPlayerPed* player = FindPlayerPed();
     FindPlayerPed()->m_nAreaCode = AREA_CODE_NORMAL_WORLD;
     if (!CGame::currArea) {
-        player->m_pEnex = 0;
+        player->m_pEnex = nullptr;
         CEntryExitManager::ms_entryExitStackPosn = 0;
-        CTimeCycle::StopExtraColour(0);
+        CTimeCycle::StopExtraColour(false);
     }
 
     if (bDoMissionCleanUp)
@@ -649,6 +658,45 @@ void CDebugMenu::ProcessMissionTool()
     }
 }
 
+void PostFxTool() {
+    if (ImGui::Checkbox("Radiosity", &CPostEffects::m_bRadiosity)) {
+        CPostEffects::m_bRadiosity != CPostEffects::m_bRadiosity;
+    }
+    if (ImGui::Checkbox("In Cutscene", &CPostEffects::m_bInCutscene)) {
+        CPostEffects::m_bInCutscene != CPostEffects::m_bInCutscene;
+    }
+    if (ImGui::Checkbox("Night Vision", &CPostEffects::m_bNightVision)) {
+        CPostEffects::m_bNightVision != CPostEffects::m_bNightVision;
+    }
+    if (ImGui::Checkbox("Infrared Vision", &CPostEffects::m_bInfraredVision)) {
+        CPostEffects::m_bInfraredVision != CPostEffects::m_bInfraredVision;
+    }
+    if (ImGui::Checkbox("Grain", &CPostEffects::m_bGrainEnable)) {
+        CPostEffects::m_bGrainEnable != CPostEffects::m_bGrainEnable;
+    }
+    if (ImGui::Checkbox("Heat Haze FX", &CPostEffects::m_bHeatHazeFX)) {
+        CPostEffects::m_bHeatHazeFX != CPostEffects::m_bHeatHazeFX;
+    }
+    if (ImGui::Checkbox("Darkness Filter", &CPostEffects::m_bDarknessFilter)) {
+        CPostEffects::m_bDarknessFilter != CPostEffects::m_bDarknessFilter;
+    }
+    if (ImGui::Checkbox("CCTV", &CPostEffects::m_bCCTV)) {
+        CPostEffects::m_bCCTV != CPostEffects::m_bCCTV;
+    }
+    if (ImGui::Checkbox("Skip Post Process", &CPostEffects::m_bSkipPostProcess)) {
+        CPostEffects::m_bSkipPostProcess != CPostEffects::m_bSkipPostProcess;
+    }
+    if (ImGui::Checkbox("Save Photo From Script", &CPostEffects::m_bSavePhotoFromScript)) {
+        CPostEffects::m_bSavePhotoFromScript != CPostEffects::m_bSavePhotoFromScript;
+    }
+}
+
+void CDebugMenu::ProcessRenderTool() {
+    if (ImGui::CollapsingHeader("Post Processing")) {
+        PostFxTool();
+    }
+}
+
 //TODO: The code is a mess, clean it up
 void CDebugMenu::ProcessHooksTool()
 {
@@ -751,53 +799,60 @@ void CDebugMenu::ProcessHooksTool()
 
 void CDebugMenu::ImguiDisplayPlayerInfo()
 {
-    if (!CTimer::GetIsPaused()) {
-        if (m_showMenu && FindPlayerPed()) {
-            ImGui::SetNextWindowSize(ImVec2(484, 420), ImGuiCond_FirstUseEver);
-            ImGui::Begin("Debug Window", &m_showMenu, ImGuiWindowFlags_NoResize);
-            if (ImGui::BeginMenuBar())
-            {
-                if (ImGui::BeginMenu("File"))
-                {
-                    ImGui::EndMenu();
-                }
-                ImGui::EndMenuBar();
-            }
-
-            if (ImGui::BeginTabBar("Debug Tabs"))
-            {
-                if (ImGui::BeginTabItem("Peds"))
-                {
-                    //ImGui::Checkbox("Show Player Information", &showPlayerInfo);
-                    ProcessPedTool();
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Vehicles"))
-                {
-                    ProcessVehicleTool();
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Cheats"))
-                {
-                    ProcessCheatTool();
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Missions"))
-                {
-                    ProcessMissionTool();
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Hooks"))
-                {
-                    ProcessHooksTool();
-                    ImGui::EndTabItem();
-                }
-                ImGui::EndTabBar();
-            }
-            ImGui::End();
-        }
-        ShowPlayerInfo();
+    if (CTimer::GetIsPaused()) {
+        return;
     }
+
+    if (m_showMenu && FindPlayerPed()) {
+        ImGui::SetNextWindowSize(ImVec2(484, 420), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Debug Window", &m_showMenu, ImGuiWindowFlags_NoResize);
+        if (ImGui::BeginMenuBar())
+        {
+            if (ImGui::BeginMenu("File"))
+            {
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+        }
+
+        if (ImGui::BeginTabBar("Debug Tabs"))
+        {
+            if (ImGui::BeginTabItem("Peds"))
+            {
+                //ImGui::Checkbox("Show Player Information", &showPlayerInfo);
+                ProcessPedTool();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Vehicles"))
+            {
+                ProcessVehicleTool();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Cheats"))
+            {
+                ProcessCheatTool();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Missions"))
+            {
+                ProcessMissionTool();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Rendering"))
+            {
+                ProcessRenderTool();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Hooks"))
+            {
+                ProcessHooksTool();
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
+        ImGui::End();
+    }
+    ShowPlayerInfo();
 }
 
 static void DebugCode()
@@ -831,7 +886,7 @@ static void DebugCode()
 void CDebugMenu::ImguiDrawLoop()
 {
     CPad* pad = CPad::GetPad(0);
-    auto bF7JustPressed = (pad->NewKeyState.FKeys[6] && !pad->OldKeyState.FKeys[6]);
+    auto bF7JustPressed = (CPad::NewKeyState.FKeys[6] && !CPad::OldKeyState.FKeys[6]);
     if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustDown('M')) || bF7JustPressed) {
         m_showMenu = !m_showMenu;
         pad->bPlayerSafe = m_showMenu;
@@ -841,6 +896,7 @@ void CDebugMenu::ImguiDrawLoop()
 
     if (!m_showMenu)
         return;
+
     io->DeltaTime = CTimer::ms_fTimeStep * 0.02f;
 
     ImGui_ImplRW_NewFrame();
@@ -1081,6 +1137,7 @@ CDebugMenuToolInput::ToolMap CDebugMenu::m_vehiclesMap{
     { 610, "Farm Trailer" },
     { 611, "Street Clean Trailer" }
 };
+
 CDebugMenuToolInput::ToolMap CDebugMenu::m_pedsMap{
     {0, "CJ"},
     { 1,   "Truth" },
@@ -1352,17 +1409,18 @@ CDebugMenuToolInput::ToolMap CDebugMenu::m_pedsMap{
     { 287, "Army Officer" },
     { 288, "Desert Sheriff" },
     // These are cutscene specific 
-{ 290, "Special Actor 1" },
-{ 291, "Special Actor 2" },
-{ 292, "Special Actor 3" },
-{ 293, "Special Actor 4" },
-{ 294, "Special Actor 5" },
-{ 295, "Special Actor 6" },
-{ 296, "Special Actor 7" },
-{ 297, "Special Actor 8" },
-{ 298, "Special Actor 9" },
-{ 299, "Special Actor 10" }
+    { 290, "Special Actor 1" },
+    { 291, "Special Actor 2" },
+    { 292, "Special Actor 3" },
+    { 293, "Special Actor 4" },
+    { 294, "Special Actor 5" },
+    { 295, "Special Actor 6" },
+    { 296, "Special Actor 7" },
+    { 297, "Special Actor 8" },
+    { 298, "Special Actor 9" },
+    { 299, "Special Actor 10" }
 };
+
 CDebugMenuToolInput::ToolMap CDebugMenu::m_missionsMap{
     {0    ,"Initial 1"},
     {1    ,"Initial 2"},

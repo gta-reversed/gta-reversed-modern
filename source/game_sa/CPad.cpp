@@ -20,7 +20,8 @@ CPad* CPad::Pads = (CPad*)0xB73458; // size is 2
 
 void CPad::InjectHooks()
 {
-    HookInstall(0x541DD0, CPad::UpdatePads);
+    ReversibleHooks::Install("CPad", "UpdatePads", 0x541DD0, &CPad::UpdatePads);
+    ReversibleHooks::Install("CPad", "DoCheats", 0x439AF0, &CPad::DoCheats);
 }
 
 // Converted from thiscall void CPad::UpdateMouse(void) 0x53F3C0
@@ -333,14 +334,11 @@ void CPad::Update(int pad)
 
 // Converted from thiscall void CPad::UpdatePads(void) 0x541DD0
 void CPad::UpdatePads() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__cdecl*)())0x541DD0)();
-#else
     GetPad(0)->UpdateMouse();
-    CPad::ProcessPad(0);
+    CPad::ProcessPad(false);
     ControlsManager.ClearSimButtonPressCheckers();
 
-    //NOTSA: Don't handle updates if the menu is open, so we don't affect gameplay inputting text
+    // NOTSA: Don't handle updates if the menu is open, so we don't affect gameplay inputting text
     if (!CDebugMenu::Visible())
     {
         ControlsManager.AffectPadFromKeyBoard();
@@ -353,7 +351,6 @@ void CPad::UpdatePads() {
     NewKeyState = TempKeyState;
     CDebugMenu::ImguiInitialise();
     CDebugMenu::ImguiInputUpdate();
-#endif
 }
 
 void CPad::SetTouched()
@@ -422,4 +419,11 @@ bool CPad::IsCtrlPressed()
 bool CPad::ResetCheats()
 {
     return plugin::CallAndReturn<bool, 0x438450>();
+}
+
+void CPad::DoCheats() {
+    for (short i = 0; i < 256; ++i)
+        if (CPad::NewKeyState.standardKeys[i])
+            if (!CPad::OldKeyState.standardKeys[i])
+                CCheat::AddToCheatString(i);
 }

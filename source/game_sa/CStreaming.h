@@ -218,9 +218,9 @@ public:
      static void RemoveEntity(CLink<CEntity*> *streamingLink);
      static void RemoveInappropriatePedModels();
      static bool RemoveLeastUsedModel(unsigned int streamingFlags);
-     static bool CarIsCandateForRemoval(std::int32_t modelId);
+     static bool CarIsCandidateForRemoval(std::int32_t modelId);
      static bool RemoveLoadedVehicle();
-     static bool ZoneModelIsCandateForRemoval(std::int32_t modelId);
+     static bool ZoneModelIsCandidateForRemoval(std::int32_t modelId);
      static bool RemoveLoadedZoneModel();
      static void RemoveModel(int modelId);
      static void RemoveTxdModel(int modelId);
@@ -231,7 +231,7 @@ public:
      static void RequestFile(int modelId, int posn, int size, int imgId, int streamingFlags);
     //! unused
      static void RequestFilesInChannel(int channelId);
-     static void RequestModel(int dwModelId, unsigned int Streamingflags);
+     static void RequestModel(int dwModelId, unsigned int streamingFlags); // see eStreamingFlags
      static void RequestModelStream(int channelId);
     //! unused
      static void RequestPlayerSection(int modelId, char const *string, int streamingFlags);
