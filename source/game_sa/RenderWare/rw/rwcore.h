@@ -898,6 +898,26 @@ struct RwRaster
 #endif /* (!defined(DOXYGEN)) */
 
 /****************************************************************************
+ <macro/inline functionality
+ */
+
+#define RwRasterGetWidthMacro(_raster)               \
+    ((_raster)->width)
+
+#define RwRasterGetHeightMacro(_raster)              \
+    ((_raster)->height)
+
+#if !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE))
+
+#define RwRasterGetWidth(_raster)                    \
+    RwRasterGetWidthMacro(_raster)
+
+#define RwRasterGetHeight(_raster)                   \
+    RwRasterGetHeightMacro(_raster)
+
+#endif /* !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE)) */
+
+/****************************************************************************
  Global Defines
  */
 

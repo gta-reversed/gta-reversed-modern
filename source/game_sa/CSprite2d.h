@@ -23,8 +23,8 @@ public:
 	// class variables
 	struct RwTexture *m_pTexture;
 	// static variables
-	static unsigned int& nextBufferIndex;
-	static unsigned int& nextBufferVertex;
+	static int& nextBufferIndex;
+	static int& nextBufferVertex;
 	static float& NearScreenZ;
 	static float& RecipNearClip;
 	// count: 8
