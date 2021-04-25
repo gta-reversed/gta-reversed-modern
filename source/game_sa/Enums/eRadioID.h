@@ -5,13 +5,11 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
 
-enum  eRadioID : char
-{
-    RADIO_PLAYBACK_FM=1,
+enum eRadioID : char {
+    RADIO_PLAYBACK_FM = 1,
     RADIO_K_ROSE,
-    RADIO_K_DST,	 
+    RADIO_K_DST,
     RADIO_BOUNCE_FM,
     RADIO_SF_UR,
     RADIO_LOS_SANTOS,
@@ -21,5 +19,6 @@ enum  eRadioID : char
     RADIO_MASTER_SOUNDS_98_3,
     RADIO_WCTR,
     RADIO_USER_TRACKS,
-    RADIO_NONE
+    RADIO_NONE,
+    RADIO_COUNT
 };

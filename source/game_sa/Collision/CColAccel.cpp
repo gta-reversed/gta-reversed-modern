@@ -16,7 +16,7 @@ char const* CColAccel::mp_cCacheName = *(char const**)0x8D0F84; // MODELS\CINFO.
 void CColAccel::InjectHooks()
 {
     ReversibleHooks::Install("CColAccel", "isCacheLoading", 0x5B2AC0, &CColAccel::isCacheLoading);
-    ReversibleHooks::Install("CColAccel", "endCache", 0x5B2AD0, &CColAccel::endCache);
+    ReversibleHooks::Install("CColAccel", "EndCache", 0x5B2AD0, &CColAccel::EndCache);
     ReversibleHooks::Install("CColAccel", "addCacheCol", 0x5B2C20, &CColAccel::addCacheCol);
     ReversibleHooks::Install("CColAccel", "cacheLoadCol", 0x5B2CC0, &CColAccel::cacheLoadCol);
     ReversibleHooks::Install("CColAccel", "addColDef", 0x5B2DD0, &CColAccel::addColDef);
@@ -25,7 +25,7 @@ void CColAccel::InjectHooks()
     ReversibleHooks::Install("CColAccel", "getIplDef", 0x5B2EF0, &CColAccel::getIplDef);
     ReversibleHooks::Install("CColAccel", "cacheIPLSection", 0x5B2F10, &CColAccel::cacheIPLSection);
     ReversibleHooks::Install("CColAccel", "addIPLEntity", 0x5B3040, &CColAccel::addIPLEntity);
-    ReversibleHooks::Install("CColAccel", "startCache", 0x5B31A0, &CColAccel::startCache);
+    ReversibleHooks::Install("CColAccel", "StartCache", 0x5B31A0, &CColAccel::StartCache);
 }
 
 bool CColAccel::isCacheLoading()
@@ -33,7 +33,16 @@ bool CColAccel::isCacheLoading()
     return CColAccel::m_iCacheState == eColAccelState::COLACCEL_LOADING;
 }
 
-void CColAccel::endCache()
+
+void CColAccel::StartCache()
+{
+    CColAccel::m_iCachingColSize = CPools::ms_pColModelPool->GetSize();
+    CColAccel::m_iSectionSize = new int32_t[64];
+    CColAccel::m_iplDefs = new IplDef[TOTAL_IPL_MODEL_IDS]();
+    CColAccel::m_colBounds = new CColAccelColBound[TOTAL_IPL_MODEL_IDS]();
+}
+
+void CColAccel::EndCache()
 {
     if (CColAccel::m_iCacheState == eColAccelState::COLACCEL_STARTED) {
         auto* pFile = CFileMgr::OpenFileForWriting(CColAccel::mp_cCacheName);
@@ -220,12 +229,4 @@ void CColAccel::addIPLEntity(CEntity** ppEntities, int entitiesCount, int entity
         CColAccel::mp_caccIPLItems[CColAccel::m_iNumIPLItems] = iplEntry;
         ++CColAccel::m_iNumIPLItems;
     }
-}
-
-void CColAccel::startCache()
-{
-    CColAccel::m_iCachingColSize = CPools::ms_pColModelPool->GetSize();
-    CColAccel::m_iSectionSize = new int32_t[64];
-    CColAccel::m_iplDefs = new IplDef[TOTAL_IPL_MODEL_IDS]();
-    CColAccel::m_colBounds = new CColAccelColBound[TOTAL_IPL_MODEL_IDS]();
 }

@@ -18,6 +18,7 @@ public:
     static unsigned int& NumLawEnforcerCars;
     static unsigned int& NumAmbulancesOnDuty;
     static unsigned int& NumFireTrucksOnDuty;
+    static unsigned int& MaxNumberOfCarsInUse;
 
 	static void InjectHooks();
 

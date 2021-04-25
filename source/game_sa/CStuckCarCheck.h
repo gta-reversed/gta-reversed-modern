@@ -6,37 +6,41 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVehicle.h"
 #include "CVector.h"
 
-class  CStuckCarCheck {
+#define STUCK_CAR_CHECK_SIZE 16
+
+struct StuckCar {
+    int m_nCarHandle;
+    CVector m_vCarPos;
+    int m_nStartTime;
+    float m_fDistance;
+    int m_nStuckTime;
+    bool m_bCarStuck;
+    char field_1D;
+    bool m_bStuck;
+    bool m_bFlipped;
+    bool m_bbWarp;
+    char m_pathID;
+    char __pad[2];
+};
+
+class CStuckCarCheck {
 public:
+    StuckCar m_aStuckCars[STUCK_CAR_CHECK_SIZE];
 
-    struct {
-        int m_nCarHandle;
-        CVector m_vCarPos;
-        int m_nStartTime;
-        float m_fDistance;
-        int m_nTime;
-        bool m_bCarStuck;
-        char field_1D;
-        char m_bStuck;
-        char m_bFlipped;
-        char m_bbWarp;
-        char pathID;
-        char __pad[2];
-    } m_aStuckCars[16];
+    static void InjectHooks();
 
-     void AddCarToCheck(int carHandle, float distance, unsigned int time, unsigned char a5, unsigned char bStuck, unsigned char bFlipped, unsigned char bWarp, signed char pathID);
-     bool AttemptToWarpVehicle(CVehicle *vehicle, CVector *origin, float orientation);
-     void ClearStuckFlagForCar(int carHandle);
-     bool HasCarBeenStuckForAWhile(int carHandle);
-     void Init();
-     bool IsCarInStuckCarArray(int carHandle);
-     void Process();
-     void RemoveCarFromCheck(int carHandle);
-     void ResetArrayElement(unsigned short index);
+    void Init();
+    void AddCarToCheck(int carHandle, float distance, unsigned int time, unsigned char a5, bool bStuck, bool bFlipped, bool bWarp, signed char pathId);
+    bool AttemptToWarpVehicle(CVehicle* vehicle, CVector* origin, float orientation);
+    void ClearStuckFlagForCar(int carHandle);
+    bool HasCarBeenStuckForAWhile(int carHandle);
+    bool IsCarInStuckCarArray(int carHandle);
+    void Process();
+    void RemoveCarFromCheck(int carHandle);
+    void ResetArrayElement(StuckCar& car);
 };
 
 VALIDATE_SIZE(CStuckCarCheck, 0x240);

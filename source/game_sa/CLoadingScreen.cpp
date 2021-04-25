@@ -114,6 +114,10 @@ void CLoadingScreen::NewChunkLoaded() {
     plugin::Call<0x590D00>();
 }
 
-
-
-
+// 0x53DED0
+void LoadingScreen(char *msg1, char *msg2) {
+    if (msg1) {
+        CLoadingScreen::SetLoadingBarMsg(msg1, msg2);
+    }
+    CLoadingScreen::NewChunkLoaded();
+}

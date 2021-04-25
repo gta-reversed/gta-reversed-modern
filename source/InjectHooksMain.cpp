@@ -23,6 +23,9 @@ void InjectHooksMain()
     InjectCommonHooks();
     CGame::InjectHooks();
     CPools::InjectHooks();
+    CControllerState::InjectHooks();
+    CKeyboardState::InjectHooks();
+    CMouseControllerState::InjectHooks();
     CPad::InjectHooks();
     CRect::InjectHooks();
     CVector2D::InjectHooks();
@@ -226,6 +229,15 @@ void InjectHooksMain()
     CGarage::InjectHooks();
     CGarages::InjectHooks();
     CPostEffects::InjectHooks();
+    CIniFile::InjectHooks();
+    CStencilShadowObject::InjectHooks();
+    CStencilShadowObjects::InjectHooks();
+    CStencilShadows::InjectHooks();
+    CFont::InjectHooks();
+    CGameLogic::InjectHooks();
+    CStuckCarCheck::InjectHooks();
+    CUpsideDownCarCheck::InjectHooks();
+    CCamera::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

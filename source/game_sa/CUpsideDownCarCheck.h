@@ -6,28 +6,31 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVehicle.h"
 
-class  CUpsideDownCarCheck {
-public:
+#define UPSIDE_DOWN_CAR_CHECK_SIZE    6
 
-    struct {
-        int m_nCarHandle;
-        int field_4;
-    } m_aUpsideDownCars[6];
-
-     void AddCarToCheck(int carHandle);
-    //! never used
-     bool AreAnyCarsUpsideDown();
-     char HasCarBeenUpsideDownForAWhile(int carHandle);
-     void Init();
-     void RemoveCarFromCheck(int carHandle);
-     void UpdateTimers();
-
-     static bool IsCarUpsideDown(CVehicle *pVehicle);
-     static bool IsCarUpsideDown(int carhandle);
+struct UpsideDownCar {
+    int m_nCarHandle;
+    int m_nTime;
 };
+
+class CUpsideDownCarCheck {
+public:
+    UpsideDownCar m_aUpsideDownCars[UPSIDE_DOWN_CAR_CHECK_SIZE];
+
+public:
+    static void InjectHooks();
+
+    void Init();
+    static bool IsCarUpsideDown(CVehicle const* vehicle);
+    bool AreAnyCarsUpsideDown();
+    void UpdateTimers();
+    void AddCarToCheck(int carHandle);
+    void RemoveCarFromCheck(int carHandle);
+    bool HasCarBeenUpsideDownForAWhile(int carHandle);
+};
+
 VALIDATE_SIZE(CUpsideDownCarCheck, 0x30);
 
 //#include "meta/meta.CUpsideDownCarCheck.h"

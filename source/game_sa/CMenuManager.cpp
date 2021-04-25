@@ -15,7 +15,8 @@ int& CMenuManager::nLastMenuPage = *(int*)0x8CDFF0;
 
 void CMenuManager::InjectHooks()
 {
-    HookInstall(0x57B440, &CMenuManager::Process);
+    ReversibleHooks::Install("CMenuManager", "Process", 0x57B440, &CMenuManager::Process);
+    ReversibleHooks::Install("CMenuManager", "ScrollRadioStations", 0x573A00, &CMenuManager::ScrollRadioStations);
 }
 
 // class functions
@@ -31,9 +32,6 @@ CMenuManager::~CMenuManager()
 
 void CMenuManager::Process()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CMenuManager*))0x57B440)(this);
-#else
     if (m_bMenuActive)
     {
         ProcessStreaming(m_bAllStreamingStuffLoaded);
@@ -43,34 +41,33 @@ void CMenuManager::Process()
         D3DResourceSystem::TidyUpD3DTextures(1);
     }
     CheckForMenuClosing();
-#endif
 }
 
-//573CF0
+//0x573CF0
 void CMenuManager::ProcessStreaming(char bImmediately)
 {
     ((void(__thiscall*)(CMenuManager*, char))0x573CF0)(this, bImmediately);
 }
 
-//57FD70
+//0x57FD70
 void CMenuManager::UserInput()
 {
     ((void(__thiscall*)(CMenuManager*))0x57FD70)(this);
 }
 
-//576B70
+//0x576B70
 void CMenuManager::CheckForMenuClosing()
 {
     ((void(__thiscall*)(CMenuManager*))0x576B70)(this);
 }
 
-//578D60
+//0x578D60
 void CMenuManager::ProcessFileActions()
 {
     ((void(__thiscall*)(CMenuManager*))0x578D60)(this);
 }
 
-//5733E0
+//0x5733E0
 double CMenuManager::StretchX(float x)
 {
     return ((double(__thiscall*)(float))0x5733E0)(x);
@@ -103,7 +100,19 @@ char CMenuManager::InitialiseChangedLanguageSettings(char a2) {
 }
 
 void CMenuManager::ScrollRadioStations(char numStations) {
-    ((void(__thiscall*)(CMenuManager*, char))0x573A00)(this, numStations);
+    if (!m_nRadioStation || AudioEngine.IsCutsceneTrackActive()) {
+        return;
+    }
+
+    m_nRadioStation = numStations + m_nRadioStation;
+    if (m_nRadioStation <= 0) {
+        m_nRadioStation = RADIO_COUNT - 1;
+    }
+    if (m_nRadioStation >= RADIO_COUNT) {
+        m_nRadioStation = 1;
+    }
+    AudioEngine.RetuneRadio(m_nRadioStation);
+    CMenuManager::SaveSettings();
 }
 
 void CMenuManager::ProcessMissionPackNewGame() {

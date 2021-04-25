@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CRGBA.h"
 #include "CRect.h"
 #include "CSprite2d.h"
@@ -64,8 +63,10 @@ public:
     static CRGBA *m_FontDropColor;
     static unsigned char& m_nFontOutlineSize;
     static unsigned char& m_nFontOutline;
+    static unsigned char& m_nFontOutlineOrShadow;
 
     // static functions
+    static void InjectHooks();
 
     // CFont initialisation
     static void Initialise();
@@ -118,7 +119,6 @@ public:
     // draw text we have in buffer
     static void RenderFontBuffer();
     static float GetStringWidth(char *string, bool unk1, bool unk2);
-    // same as RenderFontBuffer()
     static void DrawFonts();
     static short ProcessCurrentString(bool print, float x, float y, char *text);
     static short GetNumberLines(float x, float y, char *text);

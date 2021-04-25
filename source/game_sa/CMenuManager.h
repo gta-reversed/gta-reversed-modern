@@ -13,13 +13,13 @@
 // Menu entries action to perform
 enum eMenuActions {   // There's many actions @0x57702E and @0x57CD88
     MENU_ACTION_NA = 0,
-    MENU_ACTION_TEXT = 1,       // Some static text at the top of the page (works only on first entry)
-    MENU_ACTION_BACK = 2,       // Back to previous menu
+    MENU_ACTION_TEXT = 1,      // Some static text at the top of the page (works only on first entry)
+    MENU_ACTION_BACK = 2,      // Back to previous menu
     MENU_ACTION_YES = 3,       // Used as YES in menus (also as NO, weird?)
-    MENU_ACTION_NO = 4,       // Used as NO in menus  (also as YES, weird?)
-    MENU_ACTION_SWITCH = 5,       // Switch to target menu
-    MENU_ACTION_SKIP = 20,      // Skip this entry (unselectable)
-    MENU_ACTION_BACK_PC = 55,      // Same as BACK without a extra checking (?)
+    MENU_ACTION_NO = 4,        // Used as NO in menus  (also as YES, weird?)
+    MENU_ACTION_SWITCH = 5,    // Switch to target menu
+    MENU_ACTION_SKIP = 20,     // Skip this entry (unselectable)
+    MENU_ACTION_BACK_PC = 55,  // Same as BACK without a extra checking (?)
 };
 
 // Type of menu entries
@@ -131,8 +131,10 @@ struct  CMenuPageButton {
     char m_szName[8];
     char m_nType;
     char m_nTargetMenu;
+
 private:
     char _padB;
+
 public:
     short m_nPosnX;
     short m_nPosnY;
@@ -352,6 +354,7 @@ public:
 
 public:
     static void InjectHooks();
+
     CMenuManager();
     ~CMenuManager();
 

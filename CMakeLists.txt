@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.16)
 
 project(GTASA C CXX)
 
@@ -81,10 +81,7 @@ foreach(_source IN ITEMS ${_sourcefiles_list})
     source_group("${_source_path_strip_source_filter}" FILES "${_source}")
 endforeach()
 
-if (MSVC)
-   set_target_properties(gta_reversed PROPERTIES COMPILE_FLAGS "/YuStdInc.h")
-   set_source_files_properties(source/StdInc.cpp PROPERTIES COMPILE_FLAGS "/YcStdInc.h")
-endif(MSVC)
+target_precompile_headers(gta_reversed PRIVATE source/StdInc.cpp)
 
 list(APPEND _sourcefiles_list StdInc.cpp)
 

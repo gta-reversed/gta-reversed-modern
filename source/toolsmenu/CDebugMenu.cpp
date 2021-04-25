@@ -658,36 +658,36 @@ void CDebugMenu::ProcessMissionTool()
     }
 }
 
-void PostFxTool() {
+void CDebugMenu::PostFxTool() {
     if (ImGui::Checkbox("Radiosity", &CPostEffects::m_bRadiosity)) {
-        CPostEffects::m_bRadiosity != CPostEffects::m_bRadiosity;
+        CPostEffects::m_bRadiosity ^= true;
     }
     if (ImGui::Checkbox("In Cutscene", &CPostEffects::m_bInCutscene)) {
-        CPostEffects::m_bInCutscene != CPostEffects::m_bInCutscene;
+        CPostEffects::m_bInCutscene ^= true;
     }
     if (ImGui::Checkbox("Night Vision", &CPostEffects::m_bNightVision)) {
-        CPostEffects::m_bNightVision != CPostEffects::m_bNightVision;
+        CPostEffects::m_bNightVision ^= true;
     }
     if (ImGui::Checkbox("Infrared Vision", &CPostEffects::m_bInfraredVision)) {
-        CPostEffects::m_bInfraredVision != CPostEffects::m_bInfraredVision;
+        CPostEffects::m_bInfraredVision ^= true;
     }
     if (ImGui::Checkbox("Grain", &CPostEffects::m_bGrainEnable)) {
-        CPostEffects::m_bGrainEnable != CPostEffects::m_bGrainEnable;
+        CPostEffects::m_bGrainEnable ^= true;
     }
     if (ImGui::Checkbox("Heat Haze FX", &CPostEffects::m_bHeatHazeFX)) {
-        CPostEffects::m_bHeatHazeFX != CPostEffects::m_bHeatHazeFX;
+        CPostEffects::m_bHeatHazeFX ^= true;
     }
     if (ImGui::Checkbox("Darkness Filter", &CPostEffects::m_bDarknessFilter)) {
-        CPostEffects::m_bDarknessFilter != CPostEffects::m_bDarknessFilter;
+        CPostEffects::m_bDarknessFilter ^= true;
     }
     if (ImGui::Checkbox("CCTV", &CPostEffects::m_bCCTV)) {
-        CPostEffects::m_bCCTV != CPostEffects::m_bCCTV;
+        CPostEffects::m_bCCTV ^= true;
     }
     if (ImGui::Checkbox("Skip Post Process", &CPostEffects::m_bSkipPostProcess)) {
-        CPostEffects::m_bSkipPostProcess != CPostEffects::m_bSkipPostProcess;
+        CPostEffects::m_bSkipPostProcess ^= true;
     }
     if (ImGui::Checkbox("Save Photo From Script", &CPostEffects::m_bSavePhotoFromScript)) {
-        CPostEffects::m_bSavePhotoFromScript != CPostEffects::m_bSavePhotoFromScript;
+        CPostEffects::m_bSavePhotoFromScript ^= true;
     }
 }
 

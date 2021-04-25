@@ -6,12 +6,13 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
 class CIniFile {
 public:
-    static void LoadIniFile();
-
     static float &PedNumberMultiplier;
     static float &CarNumberMultiplier;
+
+public:
+    static void InjectHooks();
+
+    static void LoadIniFile();
 };

@@ -72,7 +72,7 @@ public:
     static void InjectHooks();
 
     static bool isCacheLoading();
-    static void endCache();
+    static void EndCache();
     static void addCacheCol(PackedModelStartEnd startEnd, CColModel const& colModel);
     static void cacheLoadCol();
     static void addColDef(ColDef colDef);
@@ -81,5 +81,5 @@ public:
     static IplDef getIplDef(int iplIndex);
     static void cacheIPLSection(CEntity** ppEntities, int entitiesCount);
     static void addIPLEntity(CEntity** ppEntities, int entitiesCount, int entityIndex);
-    static void startCache();
+    static void StartCache();
 };
