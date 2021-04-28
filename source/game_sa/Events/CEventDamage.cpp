@@ -840,7 +840,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
         {
             bool bPlayBodyPartHitAnim = true;
             if (ped->IsPlayer() && m_weaponType >= WEAPON_PISTOL) {
-                CPlayerData* pPlayerData = ped->m_pPlayerData;
+              CPlayerPedData * pPlayerData = ped->m_pPlayerData;
                 if (CTimer::m_snTimeInMilliseconds <= pPlayerData->m_nHitAnimDelayTimer || ped->m_nPedState == PEDSTATE_DRIVING) {
                     m_nAnimID = ANIM_ID_NO_ANIMATION_SET;
                     bPlayBodyPartHitAnim = false;
@@ -957,7 +957,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
             m_fAnimBlend = 8.0f;
             m_nAnimID = m_ucDirection + ANIM_ID_SHOT_PARTIAL;
             if (ped->IsPlayer()) {
-                CPlayerData* pPedPlayerData = ped->m_pPlayerData;
+              CPlayerPedData * pPedPlayerData = ped->m_pPlayerData;
                 if (CTimer::m_snTimeInMilliseconds > pPedPlayerData->m_nHitAnimDelayTimer && ped->m_nPedState != PEDSTATE_DRIVING) {
                     if (m_weaponType == WEAPON_M4)
                         pPedPlayerData->m_nHitAnimDelayTimer = static_cast<unsigned int>(CTimer::m_snTimeInMilliseconds + 2500.0f);

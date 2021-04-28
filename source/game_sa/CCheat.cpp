@@ -181,7 +181,7 @@ void CCheat::AddToCheatString(char LastPressedKey) {
 }
 
 void CCheat::AdrenalineCheat() {
-    CPlayerData *playerData = FindPlayerPed(-1)->m_pPlayerData;
+  CPlayerPedData *playerData = FindPlayerPed(-1)->m_pPlayerData;
 
     CCheat::m_aCheatsActive[CHEAT_ADRENALINE_MODE] ^= true;
     if (CCheat::m_aCheatsActive[CHEAT_ADRENALINE_MODE]) {

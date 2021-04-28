@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 void CPedClothesDesc::InjectHooks() {
-//    ReversibleHooks::Install("CPedClothesDesc", "CPedClothesDesc", 0x5A8020, &CPedClothesDesc::Constructor);
+    ReversibleHooks::Install("CPedClothesDesc", "CPedClothesDesc", 0x5A8020, &CPedClothesDesc::Constructor);
 //    ReversibleHooks::Install("CPedClothesDesc", "Initialise", 0x5A78F0, &CPedClothesDesc::Initialise);
 //    ReversibleHooks::Install("CPedClothesDesc", "GetIsWearingBalaclava", 0x5A7950, &CPedClothesDesc::GetIsWearingBalaclava);
 //    ReversibleHooks::Install("CPedClothesDesc", "HasVisibleNewHairCut", 0x5A7970, &CPedClothesDesc::HasVisibleNewHairCut);
@@ -9,11 +9,14 @@ void CPedClothesDesc::InjectHooks() {
 }
 
 CPedClothesDesc::CPedClothesDesc() {
-
+    memset(m_anTextureKeys, 0, sizeof(m_anTextureKeys));
+    m_fFatStat = 0.0f;
+    m_fMuscleStat = 0.0f;
 }
 
 CPedClothesDesc* CPedClothesDesc::Constructor() {
-    return plugin::CallMethodAndReturn<CPedClothesDesc*, 0x5A8020, CPedClothesDesc*>(this);
+    this->CPedClothesDesc::CPedClothesDesc();
+    return this;
 }
 
 void CPedClothesDesc::Initialise() {

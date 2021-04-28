@@ -505,7 +505,7 @@ void CPedIntelligence::ClearTaskDuckSecondary() {
     if (pSecondaryDuck)
     {
         pSecondaryDuck->MakeAbortable(m_pPed, ABORT_PRIORITY_LEISURE, 0);
-        CPlayerData* pPlayerData = m_pPed->m_pPlayerData;
+        CPlayerPedData * pPlayerData = m_pPed->m_pPlayerData;
         if (pPlayerData)
         {
             pPlayerData->m_fMoveBlendRatio = 0.0;

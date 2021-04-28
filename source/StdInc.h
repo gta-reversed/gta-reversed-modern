@@ -216,7 +216,7 @@
 #include "game_sa\CPickups.h"
 #include "game_sa\CPlaneTrail.h"
 #include "game_sa\CPlaneTrails.h"
-#include "game_sa\CPlayerData.h"
+#include "game_sa\CPlayerPedData.h"
 #include "game_sa\CPlayerInfo.h"
 #include "game_sa\CPointLights.h"
 #include "game_sa\CPointList.h"
