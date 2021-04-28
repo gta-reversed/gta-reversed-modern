@@ -20,6 +20,7 @@ public:
     CStencilShadowObject();
     ~CStencilShadowObject();
 
+    static void Shutdown();
     static void Render(CRGBA* color);
     static void RenderForVehicle(CDummy* dummy);
     static void RenderForObject(CStencilShadowObject* object);

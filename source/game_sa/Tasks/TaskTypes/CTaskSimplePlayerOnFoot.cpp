@@ -91,7 +91,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethod<0x6859A0, CTaskSimplePlayerOnFoot*, CPlayerPed*>(this, pPlayerPed);
 #else
-    CPlayerData* pPlayerData = pPlayerPed->m_pPlayerData;
+  CPlayerPedData * pPlayerData = pPlayerPed->m_pPlayerData;
     CPedIntelligence* pIntelligence = pPlayerPed->m_pIntelligence;
     CTaskManager* pTaskManager = &pIntelligence->m_TaskMgr;
     CPad* pPad = pPlayerPed->GetPadFromPlayer();
@@ -1272,7 +1272,7 @@ int CTaskSimplePlayerOnFoot::PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAn
     return plugin::CallMethodAndReturn<int, 0x6883D0, CTaskSimplePlayerOnFoot*, CPed*, bool>(this, pPed, bAvoidJumpingAndDucking);
 #else
     CPlayerPed* pPlayerPed = static_cast<CPlayerPed*>(pPed);
-    CPlayerData* pPlayerData = pPed->m_pPlayerData;
+    CPlayerPedData * pPlayerData = pPed->m_pPlayerData;
     pPlayerData->m_vecFightMovement.x = 0.0; pPlayerData->m_vecFightMovement.y = 0.0;
     CPad* pPad = pPlayerPed->GetPadFromPlayer();
     float pedWalkLeftRight = pPad->GetPedWalkLeftRight();

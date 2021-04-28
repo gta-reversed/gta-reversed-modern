@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "RenderWare.h"
 #include "CWanted.h"
 #include "CPedClothesDesc.h"
@@ -17,28 +16,24 @@ class CEntity;
 class CPed;
 class CCopPed;
 
-class  CPlayerData {
+class CPlayerPedData {
 public:
-    CWanted * m_pWanted;
-    CPedClothesDesc *m_pPedClothesDesc;
-    CCopPed *m_pArrestingCop;
+    CWanted* m_pWanted;
+    CPedClothesDesc* m_pPedClothesDesc;
+    CCopPed* m_pArrestingCop;
     CVector2D m_vecFightMovement;
     float m_fMoveBlendRatio;
     float m_fTimeCanRun;
     float m_fMoveSpeed;
     unsigned char m_nChosenWeapon;
     unsigned char m_nCarDangerCounter;
-private:
     char _pad0[2];
-public:
     unsigned int m_nStandStillTimer;
     unsigned int m_nHitAnimDelayTimer;
     float m_fAttackButtonCounter;
-    void *m_pDangerCar;
-    union 
-    {
-        struct 
-        {
+    void* m_pDangerCar;
+    union {
+        struct {
             unsigned int m_bStoppedMoving : 1;
             unsigned int m_bAdrenaline : 1;
             unsigned int m_bHaveTargetSelected : 1;             // Needed to work out whether we lost target this frame
@@ -55,8 +50,7 @@ public:
             unsigned int m_bRenderWeapon : 1;                   // set to false during cutscenes so that knuckledusters are not rendered
         };
 
-        struct 
-        {
+        struct {
             unsigned char m_bPlayerFlagsByte1;
             unsigned char m_bPlayerFlagsByte2;
             unsigned char m_bPlayerFlagsByte3;
@@ -77,7 +71,7 @@ public:
     float m_fLookPitch;
     float m_fSkateBoardSpeed;
     float m_fSkateBoardLean;
-    RpAtomic *m_pSpecialAtomic;
+    RpAtomic* m_pSpecialAtomic;
     float m_fGunSpinSpeed;
     float m_fGunSpinAngle;
     unsigned int m_nLastTimeFiring;
@@ -87,25 +81,34 @@ public:
     bool m_bPlayerSprintDisabled;
     bool m_bDontAllowWeaponChange;
     bool m_bForceInteriorLighting;
-private:
     char _pad1;
-public:
     unsigned short m_nPadDownPressedInMilliseconds;
     unsigned short m_nPadUpPressedInMilliseconds;
     unsigned char m_nWetness;
     bool m_bPlayersGangActive;
     unsigned char m_nWaterCoverPerc;
-private:
     char _pad2;
-public:
     float m_fWaterHeight;
     unsigned int m_nFireHSMissilePressedTime;
-    CEntity *m_LastHSMissileTarget;
+    CEntity* m_LastHSMissileTarget;
     unsigned int m_nModelIndexOfLastBuildingShot;
     unsigned int m_nLastHSMissileLOSTime : 31;
     unsigned int m_bLastHSMissileLOS : 1;
-    CPed *m_pCurrentProstitutePed;
-    CPed *m_pLastProstituteShagged;
+    CPed* m_pCurrentProstitutePed;
+    CPed* m_pLastProstituteShagged;
+
+public:
+    static void InjectHooks();
+
+    CPlayerPedData();
+    CPlayerPedData * Constructor();
+
+    ~CPlayerPedData();
+    CPlayerPedData * Destructor();
+
+    void AllocateData();
+    void DeAllocateData();
+    void SetInitialState();
 };
 
-VALIDATE_SIZE(CPlayerData, 0xAC);
+VALIDATE_SIZE(CPlayerPedData, 0xAC);

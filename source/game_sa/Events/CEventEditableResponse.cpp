@@ -137,7 +137,7 @@ void CEventEditableResponse::InformRespectedFriends(CPed* ped) {
         if (pEntityPed->m_nPedType == PED_TYPE_COP) {
             if (pEntityPed->m_nPedType != PED_TYPE_COP)
                 continue;
-            CPlayerData* pPlayerData = FindPlayerPed(0)->m_pPlayerData;
+            CPlayerPedData * pPlayerData = FindPlayerPed(0)->m_pPlayerData;
             if (pPlayerData->m_pWanted && pPlayerData->m_pWanted->m_nWantedLevel)
                 continue;
         }

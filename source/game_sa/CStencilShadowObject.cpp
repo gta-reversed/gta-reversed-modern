@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 void CStencilShadowObject::InjectHooks() {
+//    ReversibleHooks::Install("CStencilShadowObject", "Shutdown", 0x711390, &CStencilShadowObject::Shutdown);
 //    ReversibleHooks::Install("CStencilShadowObject", "Render", 0x710D50, &CStencilShadowObject::Render);
 //    ReversibleHooks::Install("CStencilShadowObject", "RenderForVehicle", 0x70FAE0, &CStencilShadowObject::RenderForVehicle);
 //    ReversibleHooks::Install("CStencilShadowObject", "RenderForObject", 0x710310, &CStencilShadowObject::RenderForObject);
@@ -14,6 +15,11 @@ CStencilShadowObject::CStencilShadowObject() {
 // 0x711310
 CStencilShadowObject::~CStencilShadowObject() {
 
+}
+
+// 0x711390
+void CStencilShadowObject::Shutdown() {
+    plugin::Call<0x711390>();
 }
 
 // 0x710D50

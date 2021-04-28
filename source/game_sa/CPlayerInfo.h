@@ -6,9 +6,8 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "RenderWare.h"
-#include "CPlayerData.h"
+#include "CPlayerPedData.h"
 #include "CVector.h"
 #include "CPlayerPed.h"
 
@@ -26,7 +25,7 @@ class CVehicle;
 class  CPlayerInfo {
 public:
     CPlayerPed *m_pPed;                           // Pointer to the player ped (should always be set)
-    CPlayerData m_PlayerData;               // instance of player variables
+    CPlayerPedData m_PlayerData;               // instance of player variables
     CVehicle *m_pRemoteVehicle;             // Pointer to vehicle player is driving remotely at the moment.(NULL if on foot)
     CVehicle *m_pSpecCar;                   // which car is using the special collision model
     int m_nMoney;                           // Points for this player

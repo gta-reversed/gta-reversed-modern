@@ -238,6 +238,11 @@ void InjectHooksMain()
     CStuckCarCheck::InjectHooks();
     CUpsideDownCarCheck::InjectHooks();
     CCamera::InjectHooks();
+    CMessages::InjectHooks();
+    CGangWars::InjectHooks();
+    CPlayerPedData::InjectHooks();
+    CTimeCycle::InjectHooks();
+
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

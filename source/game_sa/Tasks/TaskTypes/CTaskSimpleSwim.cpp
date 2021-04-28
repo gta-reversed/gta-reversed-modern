@@ -209,7 +209,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
 
             CVector vecOut = m_vecPos - pPed->GetPosition();
             pPed->m_pPlayerData->m_fMoveBlendRatio = vecOut.Magnitude();
-            CPlayerData* pPlayerData = pPed->m_pPlayerData;
+            CPlayerPedData * pPlayerData = pPed->m_pPlayerData;
             if (pPlayerData->m_fMoveBlendRatio < 0.5f) {
                 pPlayerData->m_fMoveBlendRatio = 0.0f;
                 CAnimManager::BlendAnimation(pPed->m_pRwClump, pPed->m_nAnimGroup, ANIM_ID_IDLE, 4.0f);
@@ -243,7 +243,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
         {
             if (m_nSwimState != SWIM_UNDERWATER_SPRINTING)
             {
-                CPlayerData* pPlayerData = pPed->m_pPlayerData;
+              CPlayerPedData * pPlayerData = pPed->m_pPlayerData;
                 if (CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 0.5f > pPlayerData->m_fBreath)
                     pPed->Say(356, 0, 1.0f, 0, 0, 0);
             }
@@ -570,7 +570,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* pPed)
         }
         }
 
-        CPlayerData* pPlayerData = pPlayerPed->m_pPlayerData;
+        CPlayerPedData * pPlayerData = pPlayerPed->m_pPlayerData;
         if (pPlayerData && (pPlayerData->m_fMoveBlendRatio > 0.5 || m_nSwimState == SWIM_UNDERWATER_SPRINTING))
             CStats::UpdateStatsWhenSwimming(m_nSwimState == SWIM_UNDERWATER_SPRINTING, m_nSwimState == SWIM_SPRINTING);
         return;
@@ -760,7 +760,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
     vecParticlePosition *= 0.4f;
     vecParticlePosition += pPed->GetPosition();
 
-    CPlayerData* pPlayerData = pPed->m_pPlayerData;
+    CPlayerPedData * pPlayerData = pPed->m_pPlayerData;
 
     if (pPlayerData)
         vecParticlePosition.z = pPlayerData->m_fWaterHeight;
@@ -977,7 +977,7 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
     plugin::CallMethod<0x688A90, CTaskSimpleSwim*, CPlayerPed*>(this, pPed);
 #else
     CVector vecPedWalk;
-    CPlayerData* pPlayerData = pPed->m_pPlayerData;
+    CPlayerPedData * pPlayerData = pPed->m_pPlayerData;
     if (!m_bFinishedBlending || !m_bAnimBlockRefAdded)
     {
         pPlayerData->m_fMoveBlendRatio = 0.0f;
