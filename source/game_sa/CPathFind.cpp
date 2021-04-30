@@ -95,3 +95,8 @@ CNodeAddress* CPathFind::FindNodeClosestToCoors(CNodeAddress* pathLink, float X,
         unsigned short, int, unsigned short, unsigned short, int>(this, pathLink, X, Y, Z, _nodeType, maxDistance, unk2, unk3, unk4, bBoatsOnly, unk6);
 }
 
+// dummy function
+// 0x44D0E0
+void CPathFind::PreparePathData() {
+
+}

@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CRunningScript.h"
 #include "CPed.h"
 #include "CVehicle.h"
@@ -19,41 +19,35 @@
 #include "CUpsideDownCarCheck.h"
 #include "CScriptsForBrains.h"
 
-struct tBuildingSwap
-{
-    CBuilding *m_pCBuilding;
+struct tBuildingSwap {
+    CBuilding* m_pCBuilding;
     int m_nNewModelIndex;
     int m_nOldModelIndex;
 };
 
-struct tScriptSwitchCase
-{
+struct tScriptSwitchCase {
     int m_nSwitchValue;
     int m_nSwitchLabelAddress;
 };
 
-struct tScriptCheckpoint
-{
+struct tScriptCheckpoint {
     char bUsed;
     char field_1;
     short wUniqueID;
-    void *field_4;
+    void* field_4;
 };
-struct tScriptEffectSystem
-{
+struct tScriptEffectSystem {
     char bUsed;
     short wUniqueID;
-    void *m_pFxSystem;
+    void* m_pFxSystem;
 };
 
-struct tScriptSequence
-{
+struct tScriptSequence {
     char bUsed;
     short wUniqueID;
 };
 
-struct tScriptText
-{
+struct tScriptText {
     float letterWidth;
     int letterHeight;
     RwRGBA color;
@@ -81,8 +75,7 @@ struct tScriptText
     int param2;
 };
 
-struct tScriptRectangle
-{
+struct tScriptRectangle {
     int type;
     char m_bDrawBeforeFade;
     char field_5;
@@ -102,14 +95,12 @@ struct tScriptRectangle
     char field_39[3];
 };
 
-struct tScriptAttachedAnimGroup
-{
+struct tScriptAttachedAnimGroup {
     int m_nModelID;
     char m_IfpName[16];
 };
 
-struct tScriptSearchlight
-{
+struct tScriptSearchlight {
     char bUsed;
     char field_1;
     char bEnableShadow;
@@ -133,14 +124,12 @@ struct tScriptSearchlight
     RwV3d field_70;
 };
 
-struct tUsedObject
-{
+struct tUsedObject {
     char szModelName[24];
     int dwModelIndex;
 };
 
-struct tScriptSphere
-{
+struct tScriptSphere {
     char bUsed;
     char field_1;
     short wUniqueID;
@@ -149,8 +138,7 @@ struct tScriptSphere
     int fRadius;
 };
 
-enum eScriptThingType : std::int32_t
-{
+enum eScriptThingType : std::int32_t {
     SCRIPT_THING_SPHERE = 0,
     SCRIPT_THING_EFFECT_SYSTEM,
     SCRIPT_THING_SEARCH_LIGHT,
@@ -162,176 +150,175 @@ enum eScriptThingType : std::int32_t
     SCRIPT_THING_PED_GROUP
 };
 
-class CTheScripts
-{
+class CTheScripts {
 public:
-     static bool &DbgFlag;
-     static tScriptParam *ScriptParams; // static tScriptParam ScriptParams[10]
-     static tScriptSwitchCase *SwitchJumpTable; // static tScriptSwitchCase SwitchJumpTable[75]
-     static unsigned short &NumberOfEntriesInSwitchTable;
-     static void *&SwitchDefaultAddress;
-     static bool &SwitchDefaultExists;
-     static int &ValueToCheckInSwitchStatement;
-     static unsigned short &NumberOfEntriesStillToReadForSwitch;
-     static tScriptSequence *ScriptSequenceTaskArray; // static tScriptSequence ScriptSequenceTaskArray[64]
-     static unsigned short &NumberOfScriptCheckpoints;
-     static tScriptCheckpoint *ScriptCheckpointArray; // static tScriptCheckpoint ScriptCheckpointArray[20]
-     static tScriptEffectSystem *ScriptEffectSystemArray; // static tScriptEffectSystem ScriptEffectSystemArray[32]
-     static short &CardStackPosition;
-     static short *CardStack; // static short CardStack[312]
-     static bool &bDrawSubtitlesBeforeFade;
-     static bool &bDrawOddJobTitleBeforeFade;
-     static bool &bScriptHasFadedOut;
-     static bool &bAddNextMessageToPreviousBriefs;
-     static int &ForceRandomCarModel;
-     static bool &bDrawCrossHair;
-     static bool &bEnableCraneRelease;
-     static bool &bEnableCraneLower;
-     static bool &bEnableCraneRaise;
-     static float &fCameraHeadingStepWhenPlayerIsAttached;
-     static float &fCameraHeadingWhenPlayerIsAttached;
-     static bool &bDisplayHud;
-     static bool &HideAllFrontEndMapBlips;
-     static bool &RadarShowBlipOnAllLevels;
-     static unsigned char &RadarZoomValue;
-     static bool &bPlayerIsOffTheMap;
-     static char &RiotIntensity;
-     static bool &bPlayerHasMetDebbieHarry;
-     static bool &bDisplayNonMiniGameHelpMessages;
-     static bool &bMiniGameInProgress;
-     static int &ScriptPickupCycleIndex;
-     static char &FailCurrentMission;
-     static bool &bAlreadyRunningAMissionScript;
-     static unsigned int &LargestNumberOfMissionScriptLocalVariables;
-     static unsigned short &NumberOfExclusiveMissionScripts;
-     static unsigned short &NumberOfMissionScripts;
-     static unsigned int &LargestMissionScriptSize;
-     static unsigned int &MainScriptSize;
-     static int *MultiScriptArray; // static char MultiScriptArray[800]
-     static bool &bUsingAMultiScriptFile;
-     static int &StoreVehicleIndex;
-     static bool &StoreVehicleWasRandom;
-     static unsigned short &CommandsExecuted;
-     static unsigned short &ScriptsUpdated;
-     static int *ScriptConnectLodsObjects; // static int ScriptConnectLodsObjects[20]
-     static tScriptAttachedAnimGroup *ScriptAttachedAnimGroups; // static tScriptAttachedAnimGroup ScriptAttachedAnimGroups[8]
-     static int *VehicleModelsBlockedByScript; // static int VehicleModelsBlockedByScript[20]
-     static int *SuppressedVehicleModels; // static int SuppressedVehicleModels[40]
-     static CEntity **InvisibilitySettingArray; // static CEntity *InvisibilitySettingArray[20]
+    static bool& DbgFlag;
+    static tScriptParam* ScriptParams;         // static tScriptParam ScriptParams[10]
+    static tScriptSwitchCase* SwitchJumpTable; // static tScriptSwitchCase SwitchJumpTable[75]
+    static unsigned short& NumberOfEntriesInSwitchTable;
+    static void*& SwitchDefaultAddress;
+    static bool& SwitchDefaultExists;
+    static int& ValueToCheckInSwitchStatement;
+    static unsigned short& NumberOfEntriesStillToReadForSwitch;
+    static tScriptSequence* ScriptSequenceTaskArray; // static tScriptSequence ScriptSequenceTaskArray[64]
+    static unsigned short& NumberOfScriptCheckpoints;
+    static tScriptCheckpoint* ScriptCheckpointArray;     // static tScriptCheckpoint ScriptCheckpointArray[20]
+    static tScriptEffectSystem* ScriptEffectSystemArray; // static tScriptEffectSystem ScriptEffectSystemArray[32]
+    static short& CardStackPosition;
+    static short* CardStack; // static short CardStack[312]
+    static bool& bDrawSubtitlesBeforeFade;
+    static bool& bDrawOddJobTitleBeforeFade;
+    static bool& bScriptHasFadedOut;
+    static bool& bAddNextMessageToPreviousBriefs;
+    static int& ForceRandomCarModel;
+    static bool& bDrawCrossHair;
+    static bool& bEnableCraneRelease;
+    static bool& bEnableCraneLower;
+    static bool& bEnableCraneRaise;
+    static float& fCameraHeadingStepWhenPlayerIsAttached;
+    static float& fCameraHeadingWhenPlayerIsAttached;
+    static bool& bDisplayHud;
+    static bool& HideAllFrontEndMapBlips;
+    static bool& RadarShowBlipOnAllLevels;
+    static unsigned char& RadarZoomValue;
+    static bool& bPlayerIsOffTheMap;
+    static char& RiotIntensity;
+    static bool& bPlayerHasMetDebbieHarry;
+    static bool& bDisplayNonMiniGameHelpMessages;
+    static bool& bMiniGameInProgress;
+    static int& ScriptPickupCycleIndex;
+    static char& FailCurrentMission;
+    static bool& bAlreadyRunningAMissionScript;
+    static unsigned int& LargestNumberOfMissionScriptLocalVariables;
+    static unsigned short& NumberOfExclusiveMissionScripts;
+    static unsigned short& NumberOfMissionScripts;
+    static unsigned int& LargestMissionScriptSize;
+    static unsigned int& MainScriptSize;
+    static int* MultiScriptArray; // static char MultiScriptArray[800]
+    static bool& bUsingAMultiScriptFile;
+    static int& StoreVehicleIndex;
+    static bool& StoreVehicleWasRandom;
+    static unsigned short& CommandsExecuted;
+    static unsigned short& ScriptsUpdated;
+    static int* ScriptConnectLodsObjects;                      // static int ScriptConnectLodsObjects[20]
+    static tScriptAttachedAnimGroup* ScriptAttachedAnimGroups; // static tScriptAttachedAnimGroup ScriptAttachedAnimGroups[8]
+    static int* VehicleModelsBlockedByScript;                  // static int VehicleModelsBlockedByScript[20]
+    static int* SuppressedVehicleModels;                       // static int SuppressedVehicleModels[40]
+    static CEntity** InvisibilitySettingArray;                 // static CEntity *InvisibilitySettingArray[20]
 
-     static constexpr int NUM_BUILDING_SWAPS = 25;
-     static tBuildingSwap (&BuildingSwapArray)[NUM_BUILDING_SWAPS]; // static tBuildingSwap BuildingSwapArray[25]
+    static constexpr int NUM_BUILDING_SWAPS = 25;
+    static tBuildingSwap (&BuildingSwapArray)[NUM_BUILDING_SWAPS]; // static tBuildingSwap BuildingSwapArray[25]
 
-     static unsigned short &NumberOfIntroRectanglesThisFrame;
-     static unsigned short &MessageWidth;
-     static unsigned short &MessageCentre;
-     static bool &bUseMessageFormatting;
-     static bool &UseTextCommands;
-     static unsigned short &NumberOfIntroTextLinesThisFrame;
-     static unsigned short &NumberOfUsedObjects;
-     static tUsedObject *UsedObjectArray; // static tUsedObject UsedObjectArray[395]
-     static int &LastRandomPedId;
-     static unsigned int &LastMissionPassedTime;
-     static int &OnAMissionFlag;
-     static CEntity *&EntitiesWaitingForScriptBrain;
-     static CStreamedScripts &StreamedScripts;
-     static CScriptResourceManager &ScriptResourceManager;
-     static CUpsideDownCarCheck &UpsideDownCars;
-     static tScriptParam *LocalVariablesForCurrentMission; // static ScriptVar LocalVariablesForCurrentMission[1024]
-    //! Script space, where main.scm MAIN section is loaded.
-     static std::uint8_t* ScriptSpace; // static char ScriptSpace[200000]
-     static char *MissionBlock; // static char MissionBlock[69000]
-     static CRunningScript *&pIdleScripts;
-     static CRunningScript *&pActiveScripts;
-     static CRunningScript *ScriptsArray; // static CRunningScript ScriptsArray[96]
-     static unsigned short &NumberOfScriptSearchLights;
-     static CMissionCleanup &MissionCleanUp;
-     static CStuckCarCheck &StuckCars;
-     static CScriptsForBrains &ScriptsForBrains;
-     static tScriptSphere *ScriptSphereArray; // static CScriptSphere ScriptSphereArray[16]
-     static tScriptText *IntroTextLines; // static tScriptText IntroTextLines[96]
-     static tScriptRectangle *IntroRectangles; // static tScriptRectangle IntroRectangles[128]
-     static CSprite2d *ScriptSprites; // static CSprite2d ScriptSprites[128]
-     static tScriptSearchlight *ScriptSearchLightArray; // static tScriptSearchlight ScriptSearchLightArray[8]
+    static unsigned short& NumberOfIntroRectanglesThisFrame;
+    static unsigned short& MessageWidth;
+    static unsigned short& MessageCentre;
+    static bool& bUseMessageFormatting;
+    static bool& UseTextCommands;
+    static unsigned short& NumberOfIntroTextLinesThisFrame;
+    static unsigned short& NumberOfUsedObjects;
+    static tUsedObject* UsedObjectArray; // static tUsedObject UsedObjectArray[395]
+    static int& LastRandomPedId;
+    static unsigned int& LastMissionPassedTime;
+    static int& OnAMissionFlag;
+    static CEntity*& EntitiesWaitingForScriptBrain;
+    static CStreamedScripts& StreamedScripts;
+    static CScriptResourceManager& ScriptResourceManager;
+    static CUpsideDownCarCheck& UpsideDownCars;
+    static tScriptParam* LocalVariablesForCurrentMission; // static ScriptVar LocalVariablesForCurrentMission[1024]
+                                                          //! Script space, where main.scm MAIN section is loaded.
+    static std::uint8_t* ScriptSpace;                     // static char ScriptSpace[200000]
+    static char* MissionBlock;                            // static char MissionBlock[69000]
+    static CRunningScript*& pIdleScripts;
+    static CRunningScript*& pActiveScripts;
+    static CRunningScript* ScriptsArray; // static CRunningScript ScriptsArray[96]
+    static unsigned short& NumberOfScriptSearchLights;
+    static CMissionCleanup& MissionCleanUp;
+    static CStuckCarCheck& StuckCars;
+    static CScriptsForBrains& ScriptsForBrains;
+    static tScriptSphere* ScriptSphereArray;           // static CScriptSphere ScriptSphereArray[16]
+    static tScriptText* IntroTextLines;                // static tScriptText IntroTextLines[96]
+    static tScriptRectangle* IntroRectangles;          // static tScriptRectangle IntroRectangles[128]
+    static CSprite2d* ScriptSprites;                   // static CSprite2d ScriptSprites[128]
+    static tScriptSearchlight* ScriptSearchLightArray; // static tScriptSearchlight ScriptSearchLightArray[8]
 
 public:
-     static void InjectHooks();
+    static void InjectHooks();
 
-     static int AddScriptCheckpoint(float at_X, float at_Y, float at_Z, float PointTo_X, float PointTo_Y, float PointTo_Z, float radius, int type);
-     static int AddScriptEffectSystem(FxSystem_c *a1);
-     static int AddScriptSearchLight(float startX, float startY, float startZ, CEntity *entity, float targetX, float targetY, float targetZ, float targetRadius, float baseRadius);
-     static unsigned int AddScriptSphere(unsigned int id, CVector posn, float radius);
-     static void AddToBuildingSwapArray(CBuilding *pBuilding, int oldModelId, int newModelId);
-     static void AddToInvisibilitySwapArray(CEntity *a2, bool bVisible);
-     static void AddToListOfConnectedLodObjects(CObject *pObject1, CObject *pObject2);
-     static void AddToListOfSpecialAnimGroupsAttachedToCharModels(int modelid, char *ifpName);
-     static double AddToSwitchJumpTable(int switchValue, int switchLabelLocalAddress);
-     static void AddToVehicleModelsBlockedByScript(int modelindex);
-     static void AddToWaitingForScriptBrainArray(CEntity *pEntity, short arg2);
-     static void AttachSearchlightToSearchlightObject(int searchlightid, CObject *tower, CObject *housing, CObject *bulb, float offsetX, float offsetY, float offsetZ);
-     static char CheckStreamedScriptVersion(RwStream *arg1, char *arg2);
-     static void CleanUpThisObject(CObject *pObject);
-     static void CleanUpThisPed(CPed *ped);
-     static void CleanUpThisVehicle(CVehicle *pVehicle);
-     static void ClearAllSuppressedCarModels();
-     static void ClearAllVehicleModelsBlockedByScript();
-     static void ClearSpaceForMissionEntity(CVector const &pos, CEntity *pEntity);
-     static void DoScriptSetupAfterPoolsHaveLoaded();
-     static void DrawDebugAngledSquare(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
-     static void DrawDebugCube(float x1, float y1, float x2, float y2);
-     static void DrawScriptSpheres();
-     static void DrawScriptSpritesAndRectangles(char bDrawBeforeFade);
-     static signed int GetActualScriptThingIndex(int index, unsigned char type);
-     static unsigned int GetNewUniqueScriptThingIndex(unsigned int index, char type);
-     static int GetScriptIndexFromPointer(CRunningScript *thread);
+    static int AddScriptCheckpoint(float atX, float atY, float atZ, float PointToX, float PointToY, float PointToZ, float radius, int type);
+    static int AddScriptEffectSystem(FxSystem_c* a1);
+    static int AddScriptSearchLight(float startX, float startY, float startZ, CEntity* entity, float targetX, float targetY, float targetZ, float targetRadius, float baseRadius);
+    static unsigned int AddScriptSphere(unsigned int id, CVector posn, float radius);
+    static void AddToBuildingSwapArray(CBuilding* pBuilding, int oldModelId, int newModelId);
+    static void AddToInvisibilitySwapArray(CEntity* a2, bool bVisible);
+    static void AddToListOfConnectedLodObjects(CObject* pObject1, CObject* pObject2);
+    static void AddToListOfSpecialAnimGroupsAttachedToCharModels(int modelId, char* ifpName);
+    static double AddToSwitchJumpTable(int switchValue, int switchLabelLocalAddress);
+    static void AddToVehicleModelsBlockedByScript(int modelIndex);
+    static void AddToWaitingForScriptBrainArray(CEntity* pEntity, short arg2);
+    static void AttachSearchlightToSearchlightObject(int searchLightId, CObject* tower, CObject* housing, CObject* bulb, float offsetX, float offsetY, float offsetZ);
+    static char CheckStreamedScriptVersion(RwStream* arg1, char* arg2);
+    static void CleanUpThisObject(CObject* pObject);
+    static void CleanUpThisPed(CPed* ped);
+    static void CleanUpThisVehicle(CVehicle* pVehicle);
+    static void ClearAllSuppressedCarModels();
+    static void ClearAllVehicleModelsBlockedByScript();
+    static void ClearSpaceForMissionEntity(CVector const& pos, CEntity* pEntity);
+    static void DoScriptSetupAfterPoolsHaveLoaded();
+    static void DrawDebugAngledSquare(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
+    static void DrawDebugCube(float x1, float y1, float x2, float y2);
+    static void DrawScriptSpheres();
+    static void DrawScriptSpritesAndRectangles(char bDrawBeforeFade);
+    static signed int GetActualScriptThingIndex(int index, unsigned char type);
+    static unsigned int GetNewUniqueScriptThingIndex(unsigned int index, char type);
+    static int GetScriptIndexFromPointer(CRunningScript* thread);
     //! type is always 8 , which refers to PedGroups
-     static unsigned int GetUniqueScriptThingIndex(int playergroup, unsigned char type);
-     static bool HasVehicleModelBeenBlockedByScript(int modelindex);
-     static void HighlightImportantAngledArea(unsigned int markerid, float from_X, float from_Y, float to_X, float to_Y, float angledTo_X, float angledTo_Y, float angledFrom_X, float angledFrom_Y, float height);
-     static void HighlightImportantArea(int markerid, float from_X, float from_Y, float to_X, float to_Y, float height);
-     static void Init();
-     static void InitialiseAllConnectLodObjects();
-     static void InitialiseConnectLodObjects(unsigned short a1);
-     static void InitialiseSpecialAnimGroup(unsigned short a1);
-     static void InitialiseSpecialAnimGroupsAttachedToCharModels();
-     static bool IsEntityWithinAnySearchLight(CEntity *pEntity, int *pIndex);
-     static bool IsEntityWithinSearchLight(unsigned int index, CEntity *pEntity);
-     static bool IsPedStopped(CPed *ped);
-     static bool IsPlayerOnAMission();
-     static bool IsPointWithinSearchLight(CVector *pointPosn, int index);
-     static bool IsVehicleStopped(CVehicle *pVehicle);
-     static void Load();
-     static void MoveSearchLightBetweenTwoPoints(int index, float x1, float y1, float z1, float x2, float y2, float z2, float pathSpeed);
-     static void MoveSearchLightToEntity(int index, CEntity *pEntity, float pathSpeed);
-     static void MoveSearchLightToPointAndStop(int index, float x, float y, float z, float pathSpeed);
-     static void PrintListSizes();
-     static void Process();
-     static void ProcessAllSearchLights();
-     static void ProcessWaitingForScriptBrainArray();
-     static void ReadMultiScriptFileOffsetsFromScript();
-     static void ReadObjectNamesFromScript();
-     static void ReinitialiseSwitchStatementData();
-     static void RemoveFromVehicleModelsBlockedByScript(int modelindex);
-     static int RemoveFromWaitingForScriptBrainArray(CEntity *a1, short modelIndex);
-     static void RemoveScriptCheckpoint(int arg1);
-     static void RemoveScriptEffectSystem(int arg1);
-     static void RemoveScriptSearchLight(unsigned int index);
-     static void RemoveScriptSphere(int index);
-     static void RemoveScriptTextureDictionary();
-     static void RemoveThisPed(CPed *ped);
-     static void RenderAllSearchLights();
-     static void Save();
-     static bool ScriptAttachAnimGroupToCharModel(int modelId, char *ifpName);
-     static void ScriptConnectLodsFunction(int objecthandle1, int objecthandle2);
-     static void ScriptDebugCircle2D(float x, float y, float width, float height, CRGBA color);
-     static CRunningScript* StartNewScript(std::uint8_t* startIP);
-     static int StartNewScript(unsigned char *startIP, unsigned short index);
-     static void StartTestScript();
-     static void UndoBuildingSwaps();
-     static void UndoEntityInvisibilitySettings();
-     static void UpdateObjectIndices();
-     static void UseSwitchJumpTable(int *pSwitchLabelAddress);
-     static void WipeLocalVariableMemoryForMissionScript();
+    static unsigned int GetUniqueScriptThingIndex(int playerGroup, unsigned char type);
+    static bool HasVehicleModelBeenBlockedByScript(int modelIndex);
+    static void HighlightImportantAngledArea(unsigned int markerId, float fromX, float fromY, float toX, float toY, float angledToX, float angledToY, float angledFromX, float angledFromY, float height);
+    static void HighlightImportantArea(int markerId, float fromX, float fromY, float toX, float toY, float height);
+    static void Init(char const* datFile);
+    static void InitialiseAllConnectLodObjects();
+    static void InitialiseConnectLodObjects(unsigned short a1);
+    static void InitialiseSpecialAnimGroup(unsigned short a1);
+    static void InitialiseSpecialAnimGroupsAttachedToCharModels();
+    static bool IsEntityWithinAnySearchLight(CEntity* pEntity, int* pIndex);
+    static bool IsEntityWithinSearchLight(unsigned int index, CEntity* pEntity);
+    static bool IsPedStopped(CPed* ped);
+    static bool IsPlayerOnAMission();
+    static bool IsPointWithinSearchLight(CVector* pointPosn, int index);
+    static bool IsVehicleStopped(CVehicle* pVehicle);
+    static void Load();
+    static void MoveSearchLightBetweenTwoPoints(int index, float x1, float y1, float z1, float x2, float y2, float z2, float pathSpeed);
+    static void MoveSearchLightToEntity(int index, CEntity* pEntity, float pathSpeed);
+    static void MoveSearchLightToPointAndStop(int index, float x, float y, float z, float pathSpeed);
+    static void PrintListSizes();
+    static void Process();
+    static void ProcessAllSearchLights();
+    static void ProcessWaitingForScriptBrainArray();
+    static void ReadMultiScriptFileOffsetsFromScript();
+    static void ReadObjectNamesFromScript();
+    static void ReinitialiseSwitchStatementData();
+    static void RemoveFromVehicleModelsBlockedByScript(int modelIndex);
+    static int RemoveFromWaitingForScriptBrainArray(CEntity* a1, short modelIndex);
+    static void RemoveScriptCheckpoint(int arg1);
+    static void RemoveScriptEffectSystem(int arg1);
+    static void RemoveScriptSearchLight(unsigned int index);
+    static void RemoveScriptSphere(int index);
+    static void RemoveScriptTextureDictionary();
+    static void RemoveThisPed(CPed* ped);
+    static void RenderAllSearchLights();
+    static void Save();
+    static bool ScriptAttachAnimGroupToCharModel(int modelId, char* ifpName);
+    static void ScriptConnectLodsFunction(int objectHandle1, int objectHandle2);
+    static void ScriptDebugCircle2D(float x, float y, float width, float height, CRGBA color);
+    static CRunningScript* StartNewScript(std::uint8_t* startIP);
+    static int StartNewScript(unsigned char* startIP, unsigned short index);
+    static void StartTestScript();
+    static void UndoBuildingSwaps();
+    static void UndoEntityInvisibilitySettings();
+    static void UpdateObjectIndices();
+    static void UseSwitchJumpTable(int* pSwitchLabelAddress);
+    static void WipeLocalVariableMemoryForMissionScript();
 };
 
 //#include "meta/meta.CTheScripts.h"

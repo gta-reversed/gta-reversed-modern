@@ -1,11 +1,11 @@
-#include "StdInc.h"
-
 /*
     Plugin-SDK (Grand Theft Auto San Andreas) source file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
+
+#include "StdInc.h"
 
 #define FUNC_CTheZones__InitZonesPopulationSettings 0x5720D0
 #define FUNC_CTheZones__ResetZonesRevealed 0x572110
@@ -48,14 +48,16 @@ CZoneInfo* CTheZones::ZoneInfoArray = (CZoneInfo*)0xBA1DF0;
 
 void CTheZones::InjectHooks()
 {
-    HookInstall(FUNC_CTheZones__ResetZonesRevealed, &CTheZones::ResetZonesRevealed);
-    HookInstall(FUNC_CTheZones__GetCurrentZoneLockedOrUnlocked, &CTheZones::GetCurrentZoneLockedOrUnlocked);
-    HookInstall(FUNC_CTheZones__PointLiesWithinZone, &CTheZones::PointLiesWithinZone);
-    HookInstall(FUNC_CTheZones__GetInfoZone, &CTheZones::GetNavigationZone);
-    HookInstall(FUNC_CTheZones__GetMapZone, &CTheZones::GetMapZone);
-    HookInstall(FUNC_CTheZones__Save, &CTheZones::Save);
-    HookInstall(FUNC_CTheZones__Load, &CTheZones::Load);
+    ReversibleHooks::Install("CTheZones", "ResetZonesRevealed", FUNC_CTheZones__ResetZonesRevealed, &CTheZones::ResetZonesRevealed);
+    ReversibleHooks::Install("CTheZones", "GetCurrentZoneLockedOrUnlocked", FUNC_CTheZones__GetCurrentZoneLockedOrUnlocked, &CTheZones::GetCurrentZoneLockedOrUnlocked);
+    ReversibleHooks::Install("CTheZones", "PointLiesWithinZone", FUNC_CTheZones__PointLiesWithinZone, &CTheZones::PointLiesWithinZone);
+    ReversibleHooks::Install("CTheZones", "GetNavigationZone", FUNC_CTheZones__GetInfoZone, &CTheZones::GetNavigationZone);
+    ReversibleHooks::Install("CTheZones", "GetMapZone", FUNC_CTheZones__GetMapZone, &CTheZones::GetMapZone);
+    ReversibleHooks::Install("CTheZones", "Save", FUNC_CTheZones__Save, &CTheZones::Save);
+    ReversibleHooks::Install("CTheZones", "Load", FUNC_CTheZones__Load, &CTheZones::Load);
+    ReversibleHooks::Install("CTheZones", "PostZoneCreation", 0x572B70, &CTheZones::PostZoneCreation);
 }
+
 // Functions
 void CTheZones::InitZonesPopulationSettings()
 {
@@ -64,22 +66,14 @@ void CTheZones::InitZonesPopulationSettings()
 
 void CTheZones::ResetZonesRevealed()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__cdecl*)()) FUNC_CTheZones__ResetZonesRevealed) ();
-#else
     memset(ZonesVisited, 0, 100); // TODO: sizeof(CTheZones::ExploredTerritoriesArray)
     ZonesRevealed = 0;
-#endif
 }
 
 bool CTheZones::GetCurrentZoneLockedOrUnlocked(float posx, float posy)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__cdecl*)(float, float)) FUNC_CTheZones__GetCurrentZoneLockedOrUnlocked) (posx, posy);
-#else
     return CTheZones::ZonesVisited[10 *	(unsigned __int8)((posx + 3000.0) * 0.0016666667) -
                                         (unsigned __int8)((posy + 3000.0) * 0.0016666667) + 9] != 0;
-#endif
 }
 
 void CTheZones::AssignZoneInfoForThisZone(short index)
@@ -95,17 +89,13 @@ bool CTheZones::ZoneIsEntirelyContainedWithinOtherZone(CZone* pZone1, CZone* pZo
 // Returns true if point lies within zone
 bool CTheZones::PointLiesWithinZone(CVector const* pPoint, CZone* pZone)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__cdecl*)(CVector const*, CZone*)) FUNC_CTheZones__PointLiesWithinZone)(pPoint, pZone);
-#else
-    return 
+    return
         pZone->m_fX1 <= pPoint->x &&
         pZone->m_fX2 >= pPoint->x && 
         pZone->m_fY1 <= pPoint->y && 
         pZone->m_fY2 >= pPoint->y && 
         pZone->m_fZ1 <= pPoint->z && 
         pZone->m_fZ2 >= pPoint->z;
-#endif
 }
 
 // Returns eLevelName from position
@@ -135,21 +125,13 @@ void CTheZones::FillZonesWithGangColours(bool DisableRadarGangColors)
 // 572590
 CZone* CTheZones::GetNavigationZone(unsigned short index)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((CZone * (__cdecl*)(short)) FUNC_CTheZones__GetInfoZone)(index);
-#else
     return &CTheZones::NavigationZoneArray[index];
-#endif
 }
 
 // Returns pointer to zone by index
 CZone* CTheZones::GetMapZone(unsigned short index)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((CZone * (__cdecl*)(short)) FUNC_CTheZones__GetMapZone)(index);
-#else
     return &CTheZones::MapZoneArray[index];
-#endif
 }
 
 long double CTheZones::Calc2DDistanceBetween2Zones(CZone* Zone1, CZone* Zone2)
@@ -202,9 +184,6 @@ void CTheZones::Update()
 // Save CTheZones info
 void CTheZones::Save()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__cdecl*)()) FUNC_CTheZones__Save) ();
-#else
     CGenericGameStorage::SaveDataToWorkBuffer(&m_CurrLevel, 4);
     CGenericGameStorage::SaveDataToWorkBuffer(&TotalNumberOfNavigationZones, 2);
     CGenericGameStorage::SaveDataToWorkBuffer(&TotalNumberOfZoneInfos, 2);
@@ -227,17 +206,12 @@ void CTheZones::Save()
 
     CGenericGameStorage::SaveDataToWorkBuffer(ZonesVisited, 100);
     CGenericGameStorage::SaveDataToWorkBuffer(&ZonesRevealed, 4);
-
-#endif
 }
 
 // Load CTheZones info
 void CTheZones::Load()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__cdecl*)()) FUNC_CTheZones__Load)();
-#else
-    Init(); 
+    Init();
     CGenericGameStorage::LoadDataFromWorkBuffer(&m_CurrLevel, 4);
     CGenericGameStorage::LoadDataFromWorkBuffer(&TotalNumberOfNavigationZones, 2);
     CGenericGameStorage::LoadDataFromWorkBuffer(&TotalNumberOfZoneInfos, 2);
@@ -259,5 +233,10 @@ void CTheZones::Load()
     }
     CGenericGameStorage::LoadDataFromWorkBuffer(ZonesVisited, 100);
     CGenericGameStorage::LoadDataFromWorkBuffer(&ZonesRevealed, 4u);
-#endif
+}
+
+// dummy function
+// 0x572B70
+void CTheZones::PostZoneCreation() {
+    // NOP
 }

@@ -1,5 +1,7 @@
 #pragma once
+
 class CVector;
+
 struct CRenPar
 {
     float z;
@@ -15,8 +17,7 @@ struct CWaterVertex
     CRenPar renPar;
 };
 
-class CWaterLevel
-{
+class CWaterLevel {
 public:
     static void InjectHooks();
     /*
@@ -126,4 +127,5 @@ public:
     /* m_nWaterConfiguration
     * ms_WaterFog
     */
+    static void WaterLevelInitialise();
 };

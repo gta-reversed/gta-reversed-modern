@@ -6,10 +6,21 @@ bool& CPedGroups::ms_bIsPlayerOnAMission = *reinterpret_cast<bool*>(0xC098E8);
 unsigned int& CPedGroups::ms_iNoOfPlayerKills = *reinterpret_cast<unsigned int*>(0xC098EC);
 CPedGroup(&CPedGroups::ms_groups)[8] = *reinterpret_cast<CPedGroup(*)[8]>(0xC09920);
 
+void CPedGroups::InjectHooks() {
+
+}
+
+// 0x5FB8C0
+void CPedGroups::Init() {
+    plugin::CallDynGlobal<>(0x5FB8C0);
+}
+
+// 0x5F7F40
 bool CPedGroups::AreInSameGroup(CPed* ped1, CPed* ped2) {
     return plugin::CallAndReturnDynGlobal<bool, CPed*, CPed*>(0x5F7F40, ped1, ped2);
 }
 
+// 0x5F7E80
 CPedGroup* CPedGroups::GetPedsGroup(CPed* ped) {
     return plugin::CallAndReturnDynGlobal<CPedGroup*, CPed*>(0x5F7E80, ped);
 }

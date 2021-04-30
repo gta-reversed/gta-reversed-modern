@@ -20,6 +20,7 @@ public:
     static RwMatrix *&m_pWorkingMatrix1;
     static RwMatrix *&m_pWorkingMatrix2;
 
+public:
     static void InjectHooks();
 
     static bool CanSeeOutSideFromCurrArea();
@@ -30,7 +31,6 @@ public:
     static bool Init1(char const *datFile);
     static void Init2(char const *datFile);
     static void Init3(char const *datFile);
-    static void InitAfterLostFocus();
     static void Initialise(char const *datFile);
     static void InitialiseCoreDataAfterRW();
     static bool InitialiseEssentialsAfterRW();
@@ -39,7 +39,6 @@ public:
     static void InitialiseWhenRestarting();
     static void Process();
     static void ReInitGameObjectVariables();
-    //! dummy function
     static void ReloadIPLs();
 
     static void ShutDownForRestart();
