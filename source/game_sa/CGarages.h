@@ -6,8 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
 // Based on https://gtamods.com/wiki/Garage
 enum eGarageType : uint8_t {
     ONLY_TARGET_VEH = 1,
@@ -58,8 +56,7 @@ enum eGarageType : uint8_t {
     HANGAR_ABANDONED_AIRPORT = 45
 };
 
-enum eGarageDoorState : uint8_t
-{
+enum eGarageDoorState : uint8_t {
     GARAGE_DOOR_CLOSED = 0,
     GARAGE_DOOR_OPEN = 1,
     GARAGE_DOOR_CLOSING = 2,
@@ -68,21 +65,20 @@ enum eGarageDoorState : uint8_t
     GARAGE_DOOR_CLOSED_DROPPED_CAR = 5,
 };
 
-class  CGarages
-{
+class CGarages {
 public:
     static constexpr int MAX_NUM_SAFEHOUSES = 20;
     static constexpr int MAX_CARS_IN_SAFEHOUSE = 4;
-    static CStoredCar(&aCarsInSafeHouse)[MAX_NUM_SAFEHOUSES][MAX_CARS_IN_SAFEHOUSE]; // Access using GetStoredCar() or GetStoredCarsInSafehouse()
+    static CStoredCar (&aCarsInSafeHouse)[MAX_NUM_SAFEHOUSES][MAX_CARS_IN_SAFEHOUSE]; // Access using GetStoredCar() or GetStoredCarsInSafehouse()
 
     static constexpr int MAX_NUM_GARAGES = 50;
-    static CGarage(&aGarages)[MAX_NUM_GARAGES]; // Access using GetGarage()
+    static CGarage (&aGarages)[MAX_NUM_GARAGES]; // Access using GetGarage()
 
     static CGarage*& LastGaragePlayerWasIn;
     static uint32_t& LastTimeHelpMessage;
     static bool& bCamShouldBeOutside;
     static int32_t& CrushedCarId; // Unused in SA
-    static uint32_t(&CarTypesCollected)[4];
+    static uint32_t (&CarTypesCollected)[4];
     static uint32_t& PoliceCarsCollected;
     static uint32_t& BankVansCollected;
     static uint32_t& CarsCollected;
@@ -92,7 +88,7 @@ public:
     static bool& PlayerInGarage;
     static int32_t& MessageNumberInString;
     static int32_t& MessageNumberInString2;
-    static char(&MessageIDString)[8];
+    static char (&MessageIDString)[8];
     static uint32_t& MessageEndTime;
     static uint32_t& MessageStartTime;
     static int32_t& NumGarages;
@@ -101,9 +97,10 @@ public:
     static void InjectHooks();
 
     static void Init();
-    static void Shutdown();
     static void Init_AfterRestart();
     static void Update();
+    static void Shutdown();
+
     static void Save();
     static void Load();
     static void TriggerMessage(char* cTagMsg, short wMsgMin, unsigned short ucTime, short wMsgMax);

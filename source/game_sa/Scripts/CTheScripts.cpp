@@ -97,14 +97,18 @@ void CTheScripts::InjectHooks()
     ReversibleHooks::Install("CTheScripts", "UndoBuildingSwaps", 0x481290, &CTheScripts::UndoBuildingSwaps);
 }
 
+// 0x468D50
+void CTheScripts::Init(char const* datFile) {
+    plugin::CallDynGlobal<char const*>(0x468D50, datFile);
+}
+
 void CTheScripts::AddToBuildingSwapArray(CBuilding* pBuilding, int oldModelId, int newModelId)
 {
     if (pBuilding->m_nIplIndex)
         return;
 
-    for (auto iInd = 0; iInd < NUM_BUILDING_SWAPS; ++iInd)
+    for (auto& pSwap : CTheScripts::BuildingSwapArray)
     {
-        auto& pSwap = CTheScripts::BuildingSwapArray[iInd];
         if (pSwap.m_pCBuilding == pBuilding)
         {
             if (newModelId == pSwap.m_nOldModelIndex)
@@ -121,9 +125,8 @@ void CTheScripts::AddToBuildingSwapArray(CBuilding* pBuilding, int oldModelId, i
     }
 
 
-    for (auto iNewInd = 0; iNewInd < NUM_BUILDING_SWAPS; ++iNewInd)
+    for (auto& pSwap : CTheScripts::BuildingSwapArray)
     {
-        auto& pSwap = CTheScripts::BuildingSwapArray[iNewInd];
         if (!pSwap.m_pCBuilding)
         {
             pSwap.m_pCBuilding = pBuilding;
@@ -171,9 +174,8 @@ CRunningScript* CTheScripts::StartNewScript(std::uint8_t* startIP)
 
 void CTheScripts::UndoBuildingSwaps()
 {
-    for (auto iInd = 0; iInd < NUM_BUILDING_SWAPS; ++iInd)
+    for (auto& pSwap : CTheScripts::BuildingSwapArray)
     {
-        auto& pSwap = CTheScripts::BuildingSwapArray[iInd];
         if (pSwap.m_pCBuilding)
         {
             pSwap.m_pCBuilding->ReplaceWithNewModel(pSwap.m_nOldModelIndex);

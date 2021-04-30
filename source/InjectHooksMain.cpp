@@ -242,7 +242,30 @@ void InjectHooksMain()
     CGangWars::InjectHooks();
     CPlayerPedData::InjectHooks();
     CTimeCycle::InjectHooks();
-
+    CSkidmarks::InjectHooks();
+    CMovingThings::InjectHooks();
+    CRoadBlocks::InjectHooks();
+    CBridge::InjectHooks();
+    CCranes::InjectHooks();
+    CGridRef::InjectHooks();
+    CShopping::InjectHooks();
+    CInformFriendsEventQueue::InjectHooks();
+    C3dMarkers::InjectHooks();
+    CSpecialFX::InjectHooks();
+    CGlass::InjectHooks();
+    CPedGroups::InjectHooks();
+    CClock::InjectHooks();
+    CClouds::InjectHooks();
+    CCoronas::InjectHooks();
+    CCustomCarPlateMgr::InjectHooks();
+    CDraw::InjectHooks();
+    CEntryExitManager::InjectHooks();
+    CInformGroupEventQueue::InjectHooks();
+    CGangs::InjectHooks();
+    CPlayerInfo::InjectHooks();
+    CReplay::InjectHooks();
+    CDarkel::InjectHooks();
+    CGeneral::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

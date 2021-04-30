@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "RenderWare.h"
 
 enum eCarPlateType {
@@ -15,15 +14,18 @@ enum eCarPlateType {
     CARPLATE_LA = 2
 };
 
-class  CCustomCarPlateMgr {
+class CCustomCarPlateMgr {
 public:
-    static RwTexture *&pCharsetTex;
-    static RwTexture **pPlatebackTexTab; // static RwTexture *pPlatebackTexTab[3]
-    static void **pPalette1555Tab; // static void *pPalette1555Tab[3] - unused array
+    static RwTexture*& pCharsetTex;
+    static RwTexture** pPlatebackTexTab; // static RwTexture *pPlatebackTexTab[3]
+    static void** pPalette1555Tab;       // static void *pPalette1555Tab[3] - unused array
+
+public:
+    static void InjectHooks();
 
     static bool Initialise();
-    static bool GeneratePlateText(char* plateTextBuf, int length);
     static bool Shutdown();
+    static bool GeneratePlateText(char* plateTextBuf, int length);
     static unsigned char GetMapRegionPlateDesign();
     static bool LoadPlatecharsetDat(char const* filename, unsigned char* data, int arg2, int arg3);
     static RpMaterial* SetupMaterialPlatebackTexture(RpMaterial* material, unsigned char plateType);
@@ -33,9 +35,9 @@ public:
     static RpMaterial* SetupClump(RpClump* clump, char* plateText, unsigned char plateType);
 };
 
-extern unsigned char *&CharsetLockedData;
-extern RpMaterial *&CurrentLicensePlateMaterial;
-extern char &CurrentLicensePlateType;
+extern unsigned char*& CharsetLockedData;
+extern RpMaterial*& CurrentLicensePlateMaterial;
+extern char& CurrentLicensePlateType;
 
 #ifdef _MSC_VER
 void GetCharacterPositionInCharSet(char c, unsigned int& outColumn, unsigned int& outRow);

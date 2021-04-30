@@ -28,26 +28,37 @@ void CGarages::InjectHooks()
 {
 }
 
+// 0x447120
 void CGarages::Init()
 {
     plugin::Call<0x447120>();
 }
 
+// 0x448B60
+void CGarages::Init_AfterRestart()
+{
+    plugin::Call<0x448B60>();
+}
+
+// 0x447790
 void CGarages::PrintMessages()
 {
     plugin::Call<0x447790>();
 }
 
+// 0x447B80
 void CGarages::TriggerMessage(char* cTagMsg, short wMsgMin, unsigned short ucTime, short wMsgMax)
 {
     plugin::Call<0x447B80, char*, short, unsigned short, short>(cTagMsg, wMsgMin, ucTime, wMsgMax);
 }
 
+// 0x448AF0
 bool CGarages::IsModelIndexADoor(int nModelIndex)
 {
     return plugin::CallAndReturn<bool, 0x448AF0, int>(nModelIndex);
 }
 
+// 0x44A240
 int CGarages::FindGarageForObject(CObject* pObject)
 {
     return plugin::CallAndReturn<int, 0x44A240, CObject*>(pObject);

@@ -1,10 +1,24 @@
-#include "StdInc.h"/*
+/*
 Plugin-SDK (Grand Theft Auto San Andreas) source file
 Authors: GTA Community. See more here
 https://github.com/DK22Pac/plugin-sdk
 Do not delete this comment block. Respect others' work!
 */
 
+#include "StdInc.h"
+
+void CGeneral::InjectHooks() {
+//    ReversibleHooks::Install("CGeneral", "LimitAngle", 0x53CB00, &CGeneral::LimitAngle);
+//    ReversibleHooks::Install("CGeneral", "LimitRadianAngle", 0x53CB50, &CGeneral::LimitRadianAngle);
+//    ReversibleHooks::Install("CGeneral", "GetRadianAngleBetweenPoints", 0x53CBE0, &CGeneral::GetRadianAngleBetweenPoints);
+//    ReversibleHooks::Install("CGeneral", "GetATanOfXY", 0x53CC70, &CGeneral::GetATanOfXY);
+//    ReversibleHooks::Install("CGeneral", "GetNodeHeadingFromVector", 0x53CDC0, &CGeneral::GetNodeHeadingFromVector);
+//    ReversibleHooks::Install("CGeneral", "SolveQuadratic", 0x53CE30, &CGeneral::SolveQuadratic);
+//    ReversibleHooks::Install("CGeneral", "GetAngleBetweenPoints", 0x53CEA0, &CGeneral::GetAngleBetweenPoints);
+//    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, (unsigned int (*)(int, int)) & CGeneral::GetRandomNumberInRange);
+//    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_float", 0x41BD90, (float (*)(float, float)) & CGeneral::GetRandomNumberInRange);
+//    ReversibleHooks::Install("CGeneral", "CamShakeNoPos", 0x50A970, &CGeneral::CamShakeNoPos);
+}
 
 // Converted from cdecl float CGeneral::LimitAngle(float angle) 0x53CB00
 float CGeneral::LimitAngle(float angle) {
@@ -51,7 +65,7 @@ float CGeneral::GetRandomNumberInRange(float min, float max) {
     return ((float(__cdecl *)(float, float))0x41BD90)(min, max);
 }
 
-void CGeneral::CamShakeNoPos(CCamera *camera, float strength)
-{
+// 0x50A970
+void CGeneral::CamShakeNoPos(CCamera *camera, float strength) {
     ((void(__cdecl *)(CCamera*, float))0x50A970)(camera, strength);
 }

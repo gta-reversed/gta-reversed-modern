@@ -1975,7 +1975,7 @@ void CEntity::ProcessLightsForEntity()
                 if (((CTimer::m_snTimeInMilliseconds + iFxInd * 256) & 0x200) == 0)
                     bUpdateCoronaCoors = true;
                 else
-                    bDoColorLight = 1;
+                    bDoColorLight = true;
 
                 break;
 
@@ -1983,7 +1983,7 @@ void CEntity::ProcessLightsForEntity()
                 if (((CTimer::m_snTimeInMilliseconds + iFxInd * 512) & 0x400) == 0)
                     bUpdateCoronaCoors = true;
                 else
-                    bDoColorLight = 1;
+                    bDoColorLight = true;
 
                 break;
 
@@ -1991,7 +1991,7 @@ void CEntity::ProcessLightsForEntity()
                 if (((CTimer::m_snTimeInMilliseconds + iFxInd * 1024) & 0x800) == 0)
                     bUpdateCoronaCoors = true;
                 else
-                    bDoColorLight = 1;
+                    bDoColorLight = true;
 
                 break;
 
@@ -2026,7 +2026,7 @@ void CEntity::ProcessLightsForEntity()
                 break;
 
             case e2dCoronaFlashType::FLASH_UNUSED:
-                if (false && (CTimer::m_snTimeInMilliseconds & 0x1FF) < 0x3C)
+                if (CBridge::ShouldLightsBeFlashing() && (CTimer::m_snTimeInMilliseconds & 0x1FF) < 0x3C)
                     bDoColorLight = true;
 
                 break;
@@ -2034,7 +2034,7 @@ void CEntity::ProcessLightsForEntity()
             case e2dCoronaFlashType::FLASH_ONLY_RAIN:
                 if (CWeather::Rain > 0.0001F) {
                     fIntensity = CWeather::Rain;
-                    bDoColorLight = 1;
+                    bDoColorLight = true;
                 }
                 break;
 

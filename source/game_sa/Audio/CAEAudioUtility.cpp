@@ -1,19 +1,14 @@
 #include "StdInc.h" // TODO: Remove
 
 #include <chrono>
-#include <cmath>
-#include <cstdlib>
 
 #include "CAEAudioUtility.h"
-
-constexpr float RAND_MAX_RECIPROCAL = 1.0f / static_cast<float>(RAND_MAX);
 
 std::int64_t &CAEAudioUtility::startTimeMs = *reinterpret_cast<std::int64_t *> (0xb610f8);
 float (&CAEAudioUtility::m_sfLogLookup)[50][2] = *reinterpret_cast<float(*)[50][2]> (0xb61100);
 
 void CAEAudioUtility::InjectHooks()
 {
-    
     ReversibleHooks::Install("CAEAudioUtility", "GetRandomNumberInRange_int", 0x4d9c10, (std::int32_t(*)(std::int32_t, std::int32_t)) CAEAudioUtility::GetRandomNumberInRange);
     ReversibleHooks::Install("CAEAudioUtility", "GetRandomNumberInRange_float", 0x4d9c50, (float(*)(float, float)) CAEAudioUtility::GetRandomNumberInRange);
     ReversibleHooks::Install("CAEAudioUtility", "ResolveProbability", 0x4d9c80, &CAEAudioUtility::ResolveProbability);
@@ -88,7 +83,8 @@ std::uint32_t CAEAudioUtility::ConvertFromMSToBytes(std::uint32_t a, std::uint32
     return value + value % (2 * frequencyMult);
 }
 
-void CAEAudioUtility::StaticInitialise(void)
+// 0x5B97F0
+void CAEAudioUtility::StaticInitialise()
 {
     constexpr size_t LOOKUP_SIZE = sizeof(CAEAudioUtility::m_sfLogLookup) / sizeof(float) / 2;
 

@@ -41,7 +41,7 @@ extern unsigned int MAX_NUM_3DMARKERS; // default 32
 extern unsigned int MAX_NUM_USER_3DMARKERS; // default 5
 extern unsigned int MAX_NUM_DIRECTION_ARROWS; // default 5
 
-class  C3dMarkers {
+class C3dMarkers {
 public:
     static unsigned char &m_colDiamond; // default 255
     static tDirectionArrow *ms_directionArrows;
@@ -53,13 +53,18 @@ public:
     static C3dMarker *m_aMarkerArray;
     static RpClump **m_pRpClumpArray;
 
+public:
+    static void InjectHooks();
+
+    static void Init();
+    static void Update();
+    static void Shutdown();
     // returns slot index; -1 if not found
     static int DirectionArrowFindFirstFreeSlot();
     static void DirectionArrowSet(CVector posn, float size, int red, int green, int blue, int alpha, float dir_x, float dir_y, float dir_z);
     static void DirectionArrowsDraw();
     static void DirectionArrowsInit();
     static void ForceRender(unsigned char bEnable);
-    static void Init();
     static RpClump* LoadMarker(char const* modelName);
     // load user 3d markers from save file; always return true
     static bool LoadUser3dMarkers();
@@ -69,8 +74,6 @@ public:
     static void Render();
     // save user 3d markers to save file; always return true
     static void SaveUser3dMarkers();
-    static void Shutdown();
-    static void Update();
     // only set material color (m_user3dMarkerColor) for first material in first atomic; 'data' is unused
     static RpAtomic* User3dMarkerAtomicCB(RpAtomic* atomic, void* _IGNORED_ data);
     static void User3dMarkerDelete(int slotIndex);

@@ -101,3 +101,8 @@ void CWaterLevel::SyncWater()
 {
     CWaterLevel::m_nWaterTimeOffset = CTimer::m_snTimeInMilliseconds;
 }
+
+// 0x6EAE80
+void CWaterLevel::WaterLevelInitialise() {
+    plugin::Call<0x6EAE80>();
+}

@@ -5,24 +5,26 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "RenderWare.h"
 
 class CSpecialFX {
 public:
-    static bool &bVideoCam;
-    static bool &bLiftCam;
-    static unsigned int &SnapShotFrames;
-    static bool &bSnapShotActive;
+    static bool& bVideoCam;
+    static bool& bLiftCam;
+    static unsigned int& SnapShotFrames;
+    static bool& bSnapShotActive;
 
-    // unused function; for 'weaponType', see eWeaponType
-    static void AddWeaponStreak(int weaponType);
+public:
+    static void InjectHooks();
+
     static void Init();
+    static void Update();
+    static void Shutdown();
+    static void AddWeaponStreak(eWeaponType weaponType);
     static void Render();
     static void Render2DFXs();
     static void ReplayStarted();
-    static void Shutdown();
-    static void Update();
 };
 
-extern RwTexture *&gpFinishFlagTex;
+extern RwTexture*& gpFinishFlagTex;
