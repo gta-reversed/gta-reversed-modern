@@ -261,3 +261,29 @@ struct RpHAnimFrameExtension
 
 typedef RtAnimAnimation RpHAnimAnimation;
 typedef RpHAnimKeyFrame RpHAnimStdKeyFrame;
+
+void RpHAnimHierarchySetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x7C45E0
+RpHAnimHierarchy* RpHAnimHierarchyCreate(RwInt32 numNodes, RwUInt32* nodeFlags, RwInt32* nodeIDs, RpHAnimHierarchyFlag flags, RwInt32 maxInterpKeyFrameSize); // 0x7C4C30
+RpHAnimHierarchy* RpHAnimHierarchyCreateFromHierarchy(RpHAnimHierarchy* hierarchy, RpHAnimHierarchyFlag flags, RwInt32 maxInterpKeyFrameSize); // 0x7C4ED0
+RpHAnimHierarchy* RpHAnimHierarchyDestroy(RpHAnimHierarchy* hierarchy); // 0x7C4D30
+RpHAnimHierarchy* RpHAnimHierarchyCreateSubHierarchy(RpHAnimHierarchy* parentHierarchy, RwInt32 startNode, RpHAnimHierarchyFlag flags, RwInt32 maxInterpKeyFrameSize); // 0x7C4DB0
+RpHAnimHierarchy* RpHAnimHierarchyAttach(RpHAnimHierarchy* hierarchy); // 0x7C4F40
+RpHAnimHierarchy* RpHAnimHierarchyDetach(RpHAnimHierarchy* hierarchy); // 0x7C4FF0
+RpHAnimHierarchy* RpHAnimHierarchyAttachFrameIndex(RpHAnimHierarchy* hierarchy, RwInt32 nodeIndex); // 0x7C5020
+RpHAnimHierarchy* RpHAnimHierarchyDetachFrameIndex(RpHAnimHierarchy* hierarchy, RwInt32 nodeIndex); // 0x7C5100
+RwBool RpHAnimFrameSetHierarchy(RwFrame* frame, RpHAnimHierarchy* hierarchy); // 0x7C5130
+RpHAnimHierarchy* RpHAnimFrameGetHierarchy(RwFrame* frame); // 0x7C5160
+RwMatrix* RpHAnimHierarchyGetMatrixArray(RpHAnimHierarchy* hierarchy); // 0x7C5120
+RwBool RpHAnimHierarchyUpdateMatrices(RpHAnimHierarchy* hierarchy); // 0x7C51D0
+RwInt32 RpHAnimIDGetIndex(RpHAnimHierarchy* hierarchy, RwInt32 ID); // 0x7C51A0
+RwBool RpHAnimPluginAttach(); // 0x7C4600
+void RpHAnimKeyFrameApply(void* matrix, void* voidIFrame); // 0x7C5B80
+void RpHAnimKeyFrameBlend(void* voidOut, void* voidIn1, void* voidIn2, RwReal alpha); // 0x7C60C0
+void RpHAnimKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2, RwReal time, void* customData); // 0x7C5CA0
+void RpHAnimKeyFrameAdd(void* voidOut, void* voidIn1, void* voidIn2); // 0x7C6720
+void RpHAnimKeyFrameMulRecip(void* voidFrame, void* voidStart); // 0x7C65C0
+RtAnimAnimation* RpHAnimKeyFrameStreamRead(RwStream* stream, RtAnimAnimation* animation); // 0x7C64C0
+RwBool RpHAnimKeyFrameStreamWrite(const RtAnimAnimation* animation, RwStream* stream); // 0x7C6540
+RwInt32 RpHAnimKeyFrameStreamGetSize(const RtAnimAnimation* animation); // 0x7C65B0
+RwBool RpHAnimFrameSetID(RwFrame* frame, RwInt32 id); // 0x7C5170
+RwInt32 RpHAnimFrameGetID(RwFrame* frame); // 0x7C5190

@@ -136,3 +136,27 @@ enum RpSkinD3D9Pipeline
     rpSKIND3D9PIPELINEFORCEENUMSIZEINT = RWFORCEENUMSIZEINT
 };
 typedef enum RpSkinD3D9Pipeline RpSkinD3D9Pipeline;
+
+void RpSkinSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x7C67F0
+RwBool RpSkinPluginAttach(); // 0x7C6820
+RpAtomic* RpSkinAtomicSetHAnimHierarchy(RpAtomic* atomic, RpHAnimHierarchy* hierarchy); // 0x7C7520
+RpHAnimHierarchy* RpSkinAtomicGetHAnimHierarchy(const RpAtomic* atomic); // 0x7C7540
+RpGeometry* RpSkinGeometrySetSkin(RpGeometry* geometry, RpSkin* skin); // 0x7C7560
+RpSkin* RpSkinGeometryGetSkin(RpGeometry* geometry); // 0x7C7550
+RpSkin* RpSkinCreate(RwUInt32 numVertices, RwUInt32 numBones, RwMatrixWeights* vertexWeights, RwUInt32* vertexIndices, RwMatrix* inverseMatrices); // 0x7C75B0
+RpSkin* RpSkinDestroy(RpSkin* skin); // 0x7C77A0
+RwUInt32 RpSkinGetNumBones(RpSkin* skin); // 0x7C77E0
+RwMatrixWeights* RpSkinGetVertexBoneWeights(RpSkin* skin); // 0x7C77F0
+const RwUInt32* RpSkinGetVertexBoneIndices(RpSkin* skin); // 0x7C7800
+const RwMatrix* RpSkinGetSkinToBoneMatrices(RpSkin* skin); // 0x7C7810
+RwBool RpSkinIsSplit(RpSkin* skin); // 0x7C7820
+RpAtomic* RpSkinAtomicSetType(RpAtomic* atomic, RpSkinType type); // 0x7C7830
+RpSkinType RpSkinAtomicGetType(RpAtomic* atomic); // 0x7C7880
+RpGeometry* _rpSkinInitialize(RpGeometry* geometry); // 0x7C8740
+RpGeometry* _rpSkinDeinitialize(RpGeometry* geometry); // 0x7C8820
+RwUInt8* _rpSkinGetMeshBoneRemapIndices(RpSkin* skin); // 0x7C8A40
+RwUInt8* _rpSkinGetMeshBoneRLECount(RpSkin* skin); // 0x7C8A50
+RwUInt8* _rpSkinGetMeshBoneRLE(RpSkin* skin); // 0x7C8A60
+RpSkin* _rpSkinSplitDataCreate(RpSkin* skin, RwUInt32 boneLimit, RwUInt32 numMatrices, RwUInt32 numMeshes, RwUInt32 numRLE); // 0x7C8A70
+RwBool _rpSkinSplitDataDestroy(RpSkin* skin); // 0x7C8B10
+RxNodeDefinition* RxNodeDefinitionGetD3D9SkinAtomicAllInOne(); // 0x7CB2A0

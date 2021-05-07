@@ -5190,3 +5190,133 @@ struct RwChunkHeaderInfo
                          *   previously used to stream out the data */
     RwBool isComplex;   /**< Internal Use */
 };
+
+#define RwRenderStateGetMacro(_state, _value) (RWSRCGLOBAL(dOpenDevice).fpRenderStateGet(_state, _value))
+
+#define RwRenderStateSetMacro(_state, _value) (RWSRCGLOBAL(dOpenDevice).fpRenderStateSet(_state, _value))
+
+#define RwRenderStateGet(_state, _value) RwRenderStateGetMacro(_state, _value)
+
+#define RwRenderStateSet(_state, _value) RwRenderStateSetMacro(_state, _value)
+
+RwMemoryFunctions* RwOsGetMemoryInterface(); // 0x802230
+RwFreeList* _rwFreeListCreate(RwInt32 entrySize, RwInt32 entriesPerBlock, RwInt32 alignment, RwUInt32 hint, const RwChar* fileCreate, RwUInt32 lineCreate); // 0x801980
+RwFreeList* RwFreeListCreateAndPreallocateSpace(RwInt32 entrySize, RwInt32 entriesPerBlock, RwInt32 alignment, RwInt32 numBlocksToPreallocate, RwFreeList* inPlaceSpaceForFreeListStruct, RwUInt32 hint); // 0x801B70
+RwBool RwFreeListDestroy(RwFreeList* freelist); // 0x801B80
+void RwFreeListSetFlags(RwFreeList* freeList, RwUInt32 flags); // 0x801C10
+RwUInt32 RwFreeListGetFlags(RwFreeList* freeList); // 0x801C20
+RwInt32 RwFreeListPurge(RwFreeList* freelist); // 0x801E00
+RwFreeList* RwFreeListForAllUsed(RwFreeList* freelist, RwFreeListCallBack fpCallBack, void* pData); // 0x801E90
+RwInt32 RwFreeListPurgeAllFreeLists(); // 0x801F90
+void RwStreamSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x7EC760
+RwStream* _rwStreamInitialize(RwStream* stream, RwBool rwOwned, RwStreamType type, RwStreamAccessType accessType, const void* pData); // 0x7EC810
+RwStream* RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const void* pData); // 0x7ECEF0
+RwBool RwStreamClose(RwStream* stream, void* pData); // 0x7ECE20
+RwUInt32 RwStreamRead(RwStream* stream, void* buffer, RwUInt32 length); // 0x7EC9D0
+RwStream* RwStreamWrite(RwStream* stream, const void* buffer, RwUInt32 length); // 0x7ECB30
+RwStream* RwStreamSkip(RwStream* stream, RwUInt32 offset); // 0x7ECD00
+RwBool _rwStringOpen(); // 0x80A240
+void _rwStringClose(); // 0x80A440
+RwBool _rwStringDestroy(RwChar* string); // 0x80A450
+RwUInt32 _rwStringStreamGetSize(const RwChar* string); // 0x80A470
+const RwChar* _rwStringStreamWrite(const RwChar* string, RwStream* stream); // 0x80A4A0
+RwChar* _rwStringStreamFindAndRead(RwChar* string, RwStream* stream); // 0x80A510
+void RwPluginRegistrySetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x8087B0
+RwBool _rwPluginRegistrySetStaticPluginsSize(RwPluginRegistry* reg, RwInt32 size); // 0x808430
+RwInt32 _rwPluginRegistryAddPlugin(RwPluginRegistry* reg, RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB); // 0x8084A0
+RwInt32 _rwPluginRegistryGetPluginOffset(const RwPluginRegistry* reg, RwUInt32 pluginID); // 0x808470
+const RwPluginRegistry* _rwPluginRegistryInitObject(const RwPluginRegistry* reg, void* object); // 0x8086E0
+const RwPluginRegistry* _rwPluginRegistryDeInitObject(const RwPluginRegistry* reg, void* object); // 0x808740
+const RwPluginRegistry* _rwPluginRegistryCopyObject(const RwPluginRegistry* reg, void* dstObject, const void* srcObject); // 0x808770
+RwInt32 _rwPluginRegistryAddPluginStream(RwPluginRegistry* reg, RwUInt32 pluginID, RwPluginDataChunkReadCallBack readCB, RwPluginDataChunkWriteCallBack writeCB, RwPluginDataChunkGetSizeCallBack getSizeCB); // 0x8088E0
+RwInt32 _rwPluginRegistryAddPlgnStrmlwysCB(RwPluginRegistry* reg, RwUInt32 pluginID, RwPluginDataChunkAlwaysCallBack alwaysCB); // 0x808920
+RwInt32 _rwPluginRegistryAddPlgnStrmRightsCB(RwPluginRegistry* reg, RwUInt32 pluginID, RwPluginDataChunkRightsCallBack rightsCB); // 0x808950
+const RwPluginRegistry* _rwPluginRegistryReadDataChunks(const RwPluginRegistry* reg, RwStream* stream, void* object); // 0x808980
+const RwPluginRegistry* _rwPluginRegistryWriteDataChunks(const RwPluginRegistry* reg, RwStream* stream, const void* object); // 0x808B40
+const RwPluginRegistry* _rwPluginRegistrySkipDataChunks(const RwPluginRegistry* reg, RwStream* stream); // 0x808C10
+RwInt32 _rwPluginRegistryGetSize(const RwPluginRegistry* reg, const void* object); // 0x808B00
+const RwPluginRegistry* _rwPluginRegistryInvokeRights(const RwPluginRegistry* reg, RwUInt32 id, void* obj, RwUInt32 extraData); // 0x808AB0
+RwBool RwEngineGetMatrixTolerances(RwMatrixTolerance * const tolerance); // 0x7F1780
+RwBool RwEngineSetMatrixTolerances(const RwMatrixTolerance * const tolerance); // 0x7F17B0
+void RwMatrixSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x7F16A0
+RwBool RwMatrixDestroy(RwMatrix* mpMat); // 0x7F2A20
+RwMatrix* RwMatrixCreate(); // 0x7F2A50
+RwMatrix* RwMatrixMultiply(RwMatrix* matrixOut, const RwMatrix* MatrixIn1, const RwMatrix* matrixIn2); // 0x7F18B0
+RwMatrix* RwMatrixTransform(RwMatrix* matrix, const RwMatrix* transform, RwOpCombineType combineOp); // 0x7F25A0
+RwMatrix* RwMatrixOrthoNormalize(RwMatrix* matrixOut, const RwMatrix* matrixIn); // 0x7F1920
+RwMatrix* RwMatrixInvert(RwMatrix* matrixOut, const RwMatrix* matrixIn); // 0x7F2070
+RwMatrix* RwMatrixScale(RwMatrix* matrix, const RwV3d* scale, RwOpCombineType combineOp); // 0x7F22C0
+RwMatrix* RwMatrixTranslate(RwMatrix* matrix, const RwV3d* translation, RwOpCombineType combineOp); // 0x7F2450
+RwMatrix* RwMatrixRotate(RwMatrix* matrix, const RwV3d* axis, RwReal angle, RwOpCombineType combineOp); // 0x7F1FD0
+RwMatrix* RwMatrixRotateOneMinusCosineSine(RwMatrix* matrix, const RwV3d* unitAxis, RwReal oneMinusCosine, RwReal sine, RwOpCombineType combineOp); // 0x7F1D00
+const RwMatrix* RwMatrixQueryRotate(const RwMatrix* matrix, RwV3d* unitAxis, RwReal* angle, RwV3d* center); // 0x7F2720
+RwMatrix* RwMatrixUpdate(RwMatrix* matrix); // 0x7F18A0
+RwMatrix* RwMatrixOptimize(RwMatrix* matrix, const RwMatrixTolerance* tolerance); // 0x7F17E0
+RwReal _rwMatrixDeterminant(const RwMatrix* matrix); // 0x7F1450
+RwReal _rwMatrixNormalError(const RwMatrix* matrix); // 0x7F1500
+RwReal _rwMatrixOrthogonalError(const RwMatrix* matrix); // 0x7F14A0
+RwReal _rwMatrixIdentityError(const RwMatrix* matrix); // 0x7F1590
+RwReal RwV3dNormalize(RwV3d* out, const RwV3d* in); // 0x7ED9B0
+RwReal RwV3dLength(const RwV3d* in); // 0x7EDAC0
+RwReal RwV2dLength(const RwV2d* in); // 0x7EDBF0
+RwReal RwV2dNormalize(RwV2d* out, const RwV2d* in); // 0x7EDC60
+RwV3d* RwV3dTransformPoint(RwV3d* pointOut, const RwV3d* pointIn, const RwMatrix* matrix); // 0x7EDD60
+RwV3d* RwV3dTransformPoints(RwV3d* pointsOut, const RwV3d* pointsIn, RwInt32 numPoints, const RwMatrix* matrix); // 0x7EDD90
+RwV3d* RwV3dTransformVector(RwV3d* vectorOut, const RwV3d* vectorIn, const RwMatrix* matrix); // 0x7EDDC0
+RwV3d* RwV3dTransformVectors(RwV3d* vectorsOut, const RwV3d* vectorsIn, RwInt32 numPoints, const RwMatrix* matrix); // 0x7EDDF0
+RwReal _rwSqrt(const RwReal num); // 0x7EDB30
+RwReal _rwInvSqrt(const RwReal num); // 0x7EDB90
+RwReal _rwV3dNormalize(RwV3d* out, const RwV3d* in); // 0x7ED910
+RwSList* _rwSListCreate(RwInt32 size, RwUInt32 hint); // 0x809160
+RwBool _rwSListDestroy(RwSList* sList); // 0x809440
+void _rwSListDestroyEndEntries(RwSList* sList, RwInt32 amount); // 0x809400
+void* _rwSListGetEntry(RwSList* sList, RwInt32 entry); // 0x809510
+void* _rwSListGetNewEntry(RwSList* sList, RwUInt32 hint); // 0x809240
+RwInt32 _rwSListGetNumEntries(const RwSList* sList); // 0x8094B0
+void* _rwSListGetBegin(RwSList* sList); // 0x809530
+void* _rwSListGetEnd(RwSList* sList); // 0x809540
+RwBool RwIm2DRenderPrimitive(RwPrimitiveType primType, RwIm2DVertex* vertices, RwInt32 numVertices);
+RwBool RwIm2DRenderIndexedPrimitive(RwPrimitiveType primType, RwIm2DVertex* vertices, RwInt32 numVertices, RwImVertexIndex* indices, RwInt32 numIndices);
+RwBool RwIm2DRenderTriangle(RwIm2DVertex* vertices, RwInt32 numVertices, RwInt32 vert1, RwInt32 vert2, RwInt32 vert3);
+RwBool RwIm2DRenderLine(RwIm2DVertex* vertices, RwInt32 numVertices, RwInt32 vert1, RwInt32 vert2);
+RwUInt32 RwEngineGetVersion(); // 0x7F2BA0
+RwBool RwEngineInit(const RwMemoryFunctions* memFuncs, RwUInt32 initFlags, RwUInt32 resArenaSize); // 0x7F3170
+RwInt32 RwEngineRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor initCB, RwPluginObjectDestructor termCB); // 0x7F2BB0
+RwInt32 RwEngineGetPluginOffset(RwUInt32 pluginID); // 0x7F2BE0
+RwBool RwEngineOpen(RwEngineOpenParams* initParams); // 0x7F2F70
+RwBool RwEngineStart(); // 0x7F2E70
+RwBool RwEngineStop(); // 0x7F2E20
+RwBool RwEngineClose(); // 0x7F2F00
+RwBool RwEngineTerm(); // 0x7F3130
+RwInt32 RwEngineGetNumSubSystems(); // 0x7F2C00
+RwSubSystemInfo* RwEngineGetSubSystemInfo(RwSubSystemInfo* subSystemInfo, RwInt32 subSystemIndex); // 0x7F2C30
+RwInt32 RwEngineGetCurrentSubSystem(); // 0x7F2C60
+RwBool RwEngineSetSubSystem(RwInt32 subSystemIndex); // 0x7F2C90
+RwInt32 RwEngineGetNumVideoModes(); // 0x7F2CC0
+RwVideoMode* RwEngineGetVideoModeInfo(RwVideoMode* modeinfo, RwInt32 modeIndex); // 0x7F2CF0
+RwInt32 RwEngineGetCurrentVideoMode(); // 0x7F2D20
+RwBool RwEngineSetVideoMode(RwInt32 modeIndex); // 0x7F2D50
+RwInt32 RwEngineGetTextureMemorySize(); // 0x7F2D80
+RwInt32 RwEngineGetMaxTextureSize(); // 0x7F2DB0
+RwBool RwEngineSetFocus(RwBool enable); // 0x7F2DE0
+RwMetrics* RwEngineGetMetrics(); // 0x7F2E10
+RwFileFunctions* RwOsGetFileInterface(); // 0x804130
+RwError* RwErrorGet(RwError* code); // 0x808880
+RwError* RwErrorSet(RwError* code); // 0x808820
+RwInt32 _rwerror(RwInt32 code, ...); // 0x8088D0
+RwBool RwResourcesSetArenaSize(RwUInt32 size); // 0x8080C0
+RwInt32 RwResourcesGetArenaSize(); // 0x8081B0
+RwInt32 RwResourcesGetArenaUsage(); // 0x8081C0
+RwBool RwResourcesEmptyArena(); // 0x8081F0
+RwResEntry* RwResourcesAllocateResEntry(void* owner, RwResEntry* ownerRef, RwInt32 size, RwResEntryDestroyNotify destroyNotify); // 0x807ED0
+RwBool RwResourcesFreeResEntry(RwResEntry* entry); // 0x807DE0
+void _rwResourcesPurge(); // 0x807E50
+RwBool RwStreamFindChunk(RwStream* stream, RwUInt32 type, RwUInt32* lengthOut, RwUInt32* versionOut); // 0x7ED2D0
+RwStream* _rwStreamWriteVersionedChunkHeader(RwStream* stream, RwInt32 type, RwInt32 size, RwUInt32 version, RwUInt32 buildNum); // 0x7ED270
+RwStream* RwStreamWriteReal(RwStream* stream, const RwReal* reals, RwUInt32 numBytes); // 0x7ED3D0
+RwStream* RwStreamWriteInt32(RwStream* stream, const RwInt32* ints, RwUInt32 numBytes); // 0x7ED460
+RwStream* RwStreamWriteInt16(RwStream* stream, const RwInt16* ints, RwUInt32 numBytes); // 0x7ED480
+RwStream* RwStreamReadReal(RwStream* stream, RwReal* reals, RwUInt32 numBytes); // 0x7ED4F0
+RwStream* RwStreamReadInt32(RwStream* stream, RwInt32* ints, RwUInt32 numBytes); // 0x7ED540
+RwStream* RwStreamReadInt16(RwStream* stream, RwInt16* ints, RwUInt32 numBytes); // 0x7ED4A0
+RwStream* RwStreamReadChunkHeaderInfo(RwStream* stream, RwChunkHeaderInfo* chunkHeaderInfo); // 0x7ED590
