@@ -424,7 +424,35 @@ struct RtAnimInterpolator
 /* Access to array of interpolated frames occupying a block of memory
  * after the end of the RtAnimInterpolator structure.
  */
-#define rtANIMGETINTERPFRAME( anim, nodeIndex )                              \
-        ( (void *)( ( (RwUInt8 *)&(anim[1]) +                                  \
-                      ((nodeIndex) *                                           \
-                       anim->currentInterpKeyFrameSize) ) ) )
+#define rtANIMGETINTERPFRAME(anim, nodeIndex) \
+                            ( (void *)( ( (RwUInt8 *)&(anim[1]) + ((nodeIndex) *anim->currentInterpKeyFrameSize) ) ) )
+
+
+void RtAnimAnimationFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x7CCC80
+RwBool RtAnimInitialize(); // 0x7CCCA0
+RwBool RtAnimRegisterInterpolationScheme(RtAnimInterpolatorInfo* interpolatorInfo); // 0x7CCD40
+RtAnimInterpolatorInfo* RtAnimGetInterpolatorInfo(RwInt32 typeID); // 0x7CCDE0
+RtAnimAnimation* RtAnimAnimationCreate(RwInt32 typeID, RwInt32 numFrames, RwInt32 flags, RwReal duration); // 0x7CCE40
+RwBool RtAnimAnimationDestroy(RtAnimAnimation* animation); // 0x7CCF10
+RtAnimAnimation* RtAnimAnimationRead(const RwChar* filename); // 0x7CCF30
+RwBool RtAnimAnimationWrite(const RtAnimAnimation* animation, const RwChar* filename); // 0x7CD160
+RtAnimAnimation* RtAnimAnimationStreamRead(RwStream* stream); // 0x7CD220
+RwBool RtAnimAnimationStreamWrite(const RtAnimAnimation* animation, RwStream* stream); // 0x7CD410
+RwInt32 RtAnimAnimationStreamGetSize(const RtAnimAnimation* animation); // 0x7CD4D0
+RwUInt32 RtAnimAnimationGetNumNodes(const RtAnimAnimation* animation); // 0x7CD4F0
+RtAnimInterpolator* RtAnimInterpolatorCreate(RwInt32 numNodes, RwInt32 maxInterpKeyFrameSize); // 0x7CD520
+void RtAnimInterpolatorDestroy(RtAnimInterpolator* anim); // 0x7CD590
+RwBool RtAnimInterpolatorSetCurrentAnim(RtAnimInterpolator* animI, RtAnimAnimation* anim); // 0x7CD5A0
+RwBool RtAnimInterpolatorSetKeyFrameCallBacks(RtAnimInterpolator* anim, RwInt32 keyFrameTypeID); // 0x7CD660
+void RtAnimInterpolatorSetAnimLoopCallBack(RtAnimInterpolator* anim, RtAnimCallBack callBack, void* data); // 0x7CD6F0
+void RtAnimInterpolatorSetAnimCallBack(RtAnimInterpolator* anim, RtAnimCallBack callBack, RwReal time, void* data); // 0x7CD710
+RwBool RtAnimInterpolatorCopy(RtAnimInterpolator* outAnim, RtAnimInterpolator* inAnim); // 0x7CD730
+RwBool RtAnimInterpolatorSubAnimTime(RtAnimInterpolator* anim, RwReal time); // 0x7CD760
+RwBool RtAnimInterpolatorAddAnimTime(RtAnimInterpolator* anim, RwReal time); // 0x7CD8D0
+RwBool RtAnimInterpolatorSetCurrentTime(RtAnimInterpolator* anim, RwReal time); // 0x7CDAB0
+RwBool RtAnimAnimationMakeDelta(RtAnimAnimation* animation, RwInt32 numNodes, RwReal time); // 0x7CDB00
+RwBool RtAnimInterpolatorBlend(RtAnimInterpolator* outAnim, RtAnimInterpolator* inAnim1, RtAnimInterpolator* inAnim2, RwReal alpha); // 0x7CDBF0
+RwBool RtAnimInterpolatorAddTogether(RtAnimInterpolator* outAnim, RtAnimInterpolator* inAnim1, RtAnimInterpolator* inAnim2); // 0x7CDC50
+RtAnimInterpolator* RtAnimInterpolatorCreateSubInterpolator(RtAnimInterpolator* parentAnim, RwInt32 startNode, RwInt32 numNodes, RwInt32 maxInterpKeyFrameSize); // 0x7CDCB0
+RwBool RtAnimInterpolatorBlendSubInterpolator(RtAnimInterpolator* outAnim, RtAnimInterpolator* inAnim1, RtAnimInterpolator* inAnim2, RwReal alpha); // 0x7CDCF0
+RwBool RtAnimInterpolatorAddSubInterpolator(RtAnimInterpolator* outAnim, RtAnimInterpolator* mainAnim, RtAnimInterpolator* subAnim); // 0x7CDEF0

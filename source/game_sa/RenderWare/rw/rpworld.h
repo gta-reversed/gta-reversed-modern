@@ -2292,3 +2292,290 @@ struct rpWorldChunkInfo34000
     RwInt32 format;  /* Flags about the world */
 };
 #endif /* (!defined(DOXYGEN)) */
+
+void _rwD3D9VSSetActiveWorldMatrix(const RwMatrix* worldMatrix); // 0x764650
+void _rwD3D9VSGetComposedTransformMatrix(); // 0x7646E0
+void _rwD3D9VSGetWorldViewTransposedMatrix(); // 0x764730
+void _rwD3D9VSGetWorldViewMatrix(); // 0x764760
+void _rwD3D9VSGetInverseWorldMatrix(); // 0x7647B0
+void _rwD3D9VSGetWorldMultiplyMatrix(RwMatrix* worldMultiplyMatrix, const RwMatrix* matrix); // 0x764920
+void _rwD3D9VSGetWorldMultiplyTransposeMatrix(void* worldMultiplyMatrix, const RwMatrix* matrix); // 0x764960
+void _rwD3D9VSGetWorldViewMultiplyTransposeMatrix(void* worldViewMultiplyMatrix, const RwMatrix* matrix); // 0x7649D0
+void _rwD3D9VSGetWorldNormalizedMultiplyTransposeMatrix(void* worldMultiplyMatrix, const RwMatrix* matrix); // 0x764A70
+void _rwD3D9VSGetWorldNormalizedViewMultiplyTransposeMatrix(void* worldViewMultiplyMatrix, const RwMatrix* matrix); // 0x764B50
+void _rwD3D9VSGetWorldNormalizedTransposeMatrix(); // 0x764C60
+void _rwD3D9VSGetProjectionTransposedMatrix(); // 0x764D20
+void _rwD3D9VSGetNormalInLocalSpace(const RwV3d* normalWorldSpace, RwV3d* normalLocalSpace); // 0x764D30
+void _rwD3D9VSGetPointInLocalSpace(const RwV3d* pointWorldSpace, RwV3d* pointLocalSpace); // 0x764E70
+void _rwD3D9VSGetRadiusInLocalSpace(RwReal radiusWorldSpace, RwReal* radiusLocalSpace); // 0x764F60
+void _rpD3D9VertexShaderCachePurge(); // 0x75EE60
+void* _rpD3D9GetVertexShader(const _rpD3D9VertexShaderDescriptor* desc, _rpD3D9VertexShaderDispatchDescriptor* dispatch); // 0x75EED0
+RwUInt32 _rpD3D9GetNumConstantsUsed(const _rpD3D9VertexShaderDescriptor* desc); // 0x75EDD0
+void _rxD3D9VertexShaderDefaultBeginCallBack(void* object, RwUInt32 type, _rpD3D9VertexShaderDescriptor* desc); // 0x760DF0
+RwV4d* _rxD3D9VertexShaderDefaultLightingCallBack(void* object, RwUInt32 type, RwV4d* shaderConstantPtr, _rpD3D9VertexShaderDescriptor* desc); // 0x761170
+void* _rxD3D9VertexShaderDefaultGetMaterialShaderCallBack(const RpMaterial* material, _rpD3D9VertexShaderDescriptor* desc, _rpD3D9VertexShaderDispatchDescriptor* dispatch); // 0x761010
+void _rxD3D9VertexShaderDefaultMeshRenderCallBack(RxD3D9ResEntryHeader* resEntryHeader, RxD3D9InstanceData* instancedMesh, const _rpD3D9VertexShaderDescriptor* desc, const _rpD3D9VertexShaderDispatchDescriptor* dispatch); // 0x761030
+void _rxD3D9VertexShaderDefaultEndCallBack(void* object, RwUInt32 type, _rpD3D9VertexShaderDescriptor* desc); // 0x761000
+void _rpD3D9VertexShaderUpdateLightsColors(RwV4d* shaderConstantPtr, const _rpD3D9VertexShaderDescriptor* desc, RwReal ambientCoef, RwReal diffuseCoef); // 0x761720
+void _rpD3D9VertexShaderUpdateMaterialColor(const RwRGBA* color, const _rpD3D9VertexShaderDispatchDescriptor* dispatch); // 0x761820
+void _rpD3D9VertexShaderUpdateFogData(const _rpD3D9VertexShaderDescriptor* desc, const _rpD3D9VertexShaderDispatchDescriptor* dispatch); // 0x7618B0
+void _rpD3D9VertexShaderUpdateMorphingCoef(RwReal morphingCoef, const _rpD3D9VertexShaderDispatchDescriptor* dispatch); // 0x761950
+void _rpD3DVertexShaderSetUVAnimMatrix(RwMatrix* matrix, const _rpD3D9VertexShaderDispatchDescriptor* dispatch); // 0x7619A0
+void _rpD3D9VertexShaderSetEnvMatrix(RwFrame* frame, const _rpD3D9VertexShaderDescriptor* desc, const _rpD3D9VertexShaderDispatchDescriptor* dispatch); // 0x761A10
+void _rpD3D9VertexShaderSetBumpMatrix(RwFrame* frame, RwReal factor, const _rpD3D9VertexShaderDispatchDescriptor* dispatch); // 0x761B70
+RxNodeDefinition* RxNodeDefinitionGetD3D9WorldSectorAllInOne(); // 0x75E9F0
+RxNodeDefinition* RxNodeDefinitionGetD3D9AtomicAllInOne(); // 0x7582E0
+void RpMaterialSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x74D8C0
+RpMaterial* RpMaterialCreate(); // 0x74D990
+RwBool RpMaterialDestroy(RpMaterial* material); // 0x74DA20
+RpMaterial* RpMaterialClone(RpMaterial* material); // 0x74DA80
+RpMaterial* RpMaterialSetTexture(RpMaterial* material, RwTexture* texture); // 0x74DBC0
+RwInt32 RpMaterialRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB); // 0x74DBF0
+RwInt32 RpMaterialRegisterPluginStream(RwUInt32 pluginID, RwPluginDataChunkReadCallBack readCB, RwPluginDataChunkWriteCallBack writeCB, RwPluginDataChunkGetSizeCallBack getSizeCB); // 0x74DC20
+RwInt32 RpMaterialSetStreamAlwaysCallBack(RwUInt32 pluginID, RwPluginDataChunkAlwaysCallBack alwaysCB); // 0x74DC50
+RwInt32 RpMaterialSetStreamRightsCallBack(RwUInt32 pluginID, RwPluginDataChunkRightsCallBack rightsCB); // 0x74DC70
+RwInt32 RpMaterialGetPluginOffset(RwUInt32 pluginID); // 0x74DC90
+RwBool RpMaterialValidatePlugins(const RpMaterial* material); // 0x74DCB0
+RwUInt32 RpMaterialStreamGetSize(const RpMaterial* material); // 0x74E010
+RpMaterial* RpMaterialStreamRead(RwStream* stream); // 0x74DD30
+const RpMaterial* RpMaterialStreamWrite(const RpMaterial* material, RwStream* stream); // 0x74E050
+RpMaterialChunkInfo* _rpMaterialChunkInfoRead(RwStream* stream, RpMaterialChunkInfo* materialChunkInfo, RwInt32* bytesRead); // 0x74DCC0
+RpMaterialList* _rpMaterialListInitialize(RpMaterialList* matList); // 0x74E1B0
+RpMaterialList* _rpMaterialListDeinitialize(RpMaterialList* matList); // 0x74E150
+RpMaterial** _rpMaterialListAlloc(RwUInt32 count); // 0x74E1C0
+RpMaterial* _rpMaterialListGetMaterial(const RpMaterialList* matList, RwInt32 matIndex); // 0x74E2B0
+RpMaterialList* _rpMaterialListSetSize(RpMaterialList* matList, RwInt32 size); // 0x74E2C0
+RpMaterialList* _rpMaterialListCopy(RpMaterialList* matListOut, const RpMaterialList* matListIn); // 0x74E1F0
+RwInt32 _rpMaterialListAppendMaterial(RpMaterialList* matList, RpMaterial* material); // 0x74E350
+RwInt32 _rpMaterialListFindMaterialIndex(const RpMaterialList* matList, const RpMaterial* material); // 0x74E420
+RwUInt32 _rpMaterialListStreamGetSize(const RpMaterialList* matList); // 0x74E450
+RpMaterialList* _rpMaterialListStreamRead(RwStream* stream, RpMaterialList* matList); // 0x74E600
+const RpMaterialList* _rpMaterialListStreamWrite(const RpMaterialList* matList, RwStream* stream); // 0x74E4B0
+void* _rpMeshOpen(void* instance, RwInt32 offset, RwInt32 size); // 0x758970
+void* _rpMeshClose(void* instance, RwInt32 offset, RwInt32 size); // 0x758940
+RwInt16 _rpMeshGetNextSerialNumber(void); // 0x7590E0
+RpBuildMesh* _rpBuildMeshCreate(RwUInt32 bufferSize); // 0x758A90
+RwBool _rpBuildMeshDestroy(RpBuildMesh* mesh); // 0x758B80
+RwBool _rpMeshDestroy(RpMeshHeader* mesh); // 0x758BC0
+RpBuildMesh* _rpBuildMeshAddTriangle(RpBuildMesh* mesh, RpMaterial* material, RwInt32 vert1, RwInt32 vert2, RwInt32 vert3, RwUInt16 matIndex, RwUInt16 textureIndex, RwUInt16 rasterIndex, RwUInt16 pipelineIndex); // 0x758C00
+RpMeshHeader* _rpMeshHeaderForAllMeshes(RpMeshHeader* meshHeader, RpMeshCallBack fpCallBack, void* pData); // 0x758D30
+RwStream* _rpMeshWrite(const RpMeshHeader* meshHeader, const void* object, RwStream* stream, const RpMaterialList* matList); // 0x758D70
+RpMeshHeader* _rpMeshRead(RwStream* stream, const void* object, const RpMaterialList* matList); // 0x758EC0
+RwInt32 _rpMeshSize(const RpMeshHeader* meshHeader, const void* object); // 0x759090
+void _rpMeshHeaderDestroy(RpMeshHeader* meshHeader); // 0x758910
+RpMeshHeader* _rpMeshHeaderCreate(RwUInt32 size); // 0x758920
+RpTriStripPolygon* RpTriStripPolygonFollowStrip(RpTriStripPolygon* curr, RpTriStripPolygon* prev); // 0x75C330
+RwUInt32 RpTriStripDefaultCost(RpTriStripPolygon* startPolygon, RwUInt32 testFrame, void* data); // 0x75B500
+RpTriStripMesh* RpTriStripMeshTunnel(RpTriStripMesh* mesh, void* data); // 0x75B780
+RpTriStripMesh* RpTriStripMeshQuick(RpTriStripMesh* mesh, void* data); // 0x75BD80
+RpMeshHeader* RpBuildMeshGenerateTriStrip(RpBuildMesh* buildMesh, void* data); // 0x75C380
+RpMeshHeader* RpBuildMeshGenerateTrivialTriStrip(RpBuildMesh* buildMesh, void* data); // 0x759100
+RpMeshHeader* RpBuildMeshGenerateDefaultTriStrip(RpBuildMesh* buildmesh, void* data); // 0x7591B0
+RpMeshHeader* RpBuildMeshGeneratePreprocessTriStrip(RpBuildMesh* buildmesh, void* data); // 0x75A900
+RpMeshHeader* RpBuildMeshGenerateExhaustiveTriStrip(RpBuildMesh* buildmesh, void* data); // 0x75A940
+RpMeshHeader* RpBuildMeshGenerateDefaultIgnoreWindingTriStrip(RpBuildMesh* buildmesh, void* data); // 0x75A8E0
+RpMeshHeader* RpBuildMeshGeneratePreprocessIgnoreWindingTriStrip(RpBuildMesh* buildmesh, void* data); // 0x75A920
+RpMeshHeader* RpBuildMeshGenerateExhaustiveIgnoreWindingTriStrip(RpBuildMesh* buildmesh, void* data); // 0x75B4E0
+RwBool RpMeshSetTriStripMethod(RpTriStripMeshCallBack callback, void* data); // 0x75D4C0
+RwBool RpMeshGetTriStripMethod(RpTriStripMeshCallBack* callback, void* data); // 0x75D500
+RpMeshHeader* _rpTriListMeshGenerate(RpBuildMesh* buildMesh, void* data); // 0x75D530
+RpMeshHeader* _rpMeshOptimise(RpBuildMesh* buildmesh, RwUInt32 flags); // 0x75D970
+RpGeometry* RpGeometryTransform(RpGeometry* geometry, const RwMatrix* matrix); // 0x74BFE0
+RpGeometry* RpGeometryCreateSpace(RwReal radius); // 0x74C130
+const RpMorphTarget* RpMorphTargetCalcBoundingSphere(const RpMorphTarget* morphTarget, RwSphere* boundingSphere); // 0x74C200
+RwInt32 RpGeometryAddMorphTargets(RpGeometry* geometry, RwInt32 mtcount); // 0x74C310
+RwInt32 RpGeometryAddMorphTarget(RpGeometry* geometry); // 0x74C4D0
+RpGeometry* RpGeometryRemoveMorphTarget(RpGeometry* geometry, RwInt32 morphTarget); // 0x74C4E0
+const RpGeometry* RpGeometryTriangleSetVertexIndices(const RpGeometry* geometry, RpTriangle* triangle, RwUInt16 vert1, RwUInt16 vert2, RwUInt16 vert3); // 0x74C690
+RpGeometry* RpGeometryTriangleSetMaterial(RpGeometry* geometry, RpTriangle* triangle, RpMaterial* material); // 0x74C6C0
+const RpGeometry* RpGeometryTriangleGetVertexIndices(const RpGeometry* geometry, const RpTriangle* triangle, RwUInt16* vert1, RwUInt16* vert2, RwUInt16* vert3); // 0x74C720
+RpMaterial* RpGeometryTriangleGetMaterial(const RpGeometry* geometry, const RpTriangle* triangle); // 0x74C760
+RpGeometry* RpGeometryForAllMaterials(RpGeometry* geometry, RpMaterialCallBack fpCallBack, void* pData); // 0x74C790
+RpGeometry* RpGeometryLock(RpGeometry* geometry, RwInt32 lockMode); // 0x74C7D0
+RpGeometry* RpGeometryUnlock(RpGeometry* geometry); // 0x74C800
+const RpGeometry* RpGeometryForAllMeshes(const RpGeometry* geometry, RpMeshCallBack fpCallBack, void* pData); // 0x74CA60
+RpGeometry* RpGeometryCreate(RwInt32 numVert, RwInt32 numTriangles, RwUInt32 format); // 0x74CA90
+RwBool RpGeometryDestroy(RpGeometry* geometry); // 0x74CCC0
+RwInt32 RpGeometryRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB); // 0x74CD70
+RwInt32 RpGeometryRegisterPluginStream(RwUInt32 pluginID, RwPluginDataChunkReadCallBack readCB, RwPluginDataChunkWriteCallBack writeCB, RwPluginDataChunkGetSizeCallBack getSizeCB); // 0x74CDA0
+RwInt32 RpGeometrySetStreamAlwaysCallBack(RwUInt32 pluginID, RwPluginDataChunkAlwaysCallBack alwaysCB); // 0x74CDD0
+RwInt32 RpGeometryGetPluginOffset(RwUInt32 pluginID); // 0x74CDF0
+RwBool RpGeometryValidatePlugins(const RpGeometry* geometry); // 0x74CE10
+RwUInt32 RpGeometryStreamGetSize(const RpGeometry* geometry); // 0x74CE20
+const RpGeometry* RpGeometryStreamWrite(const RpGeometry* geometry, RwStream* stream); // 0x74CED0
+RpGeometry* RpGeometryStreamRead(RwStream* stream); // 0x74D190
+RpGeometryChunkInfo* _rpGeometryChunkInfoRead(RwStream* stream, RpGeometryChunkInfo* geometryChunkInfo, RwInt32* bytesRead); // 0x74D750
+RpWorldSector* RpWorldSectorRender(RpWorldSector* worldSector); // 0x761C50
+const RpWorldSector* RpWorldSectorForAllMeshes(const RpWorldSector* sector, RpMeshCallBack fpCallBack, void* pData); // 0x761C60
+RwInt32 RpWorldSectorRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB); // 0x761C90
+RwInt32 RpWorldSectorRegisterPluginStream(RwUInt32 pluginID, RwPluginDataChunkReadCallBack readCB, RwPluginDataChunkWriteCallBack writeCB, RwPluginDataChunkGetSizeCallBack getSizeCB); // 0x761CC0
+RwInt32 RpWorldSectorSetStreamAlwaysCallBack(RwUInt32 pluginID, RwPluginDataChunkAlwaysCallBack alwaysCB); // 0x761CF0
+RwInt32 RpWorldSectorSetStreamRightsCallBack(RwUInt32 pluginID, RwPluginDataChunkRightsCallBack rightsCB); // 0x761D10
+RwInt32 RpWorldSectorGetPluginOffset(RwUInt32 pluginID); // 0x761D30
+RwBool RpWorldSectorValidatePlugins(const RpWorldSector* sector); // 0x761D50
+void RpLightSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x752250
+RpLight* RpLightCreate(RwInt32 type); // 0x752110
+RwBool RpLightDestroy(RpLight* light); // 0x7520D0
+RpLight* RpLightSetRadius(RpLight* light, RwReal radius); // 0x751A70
+RpLight* RpLightSetColor(RpLight* light, const RwRGBAReal* color); // 0x751A90
+RwReal RpLightGetConeAngle(const RpLight* light); // 0x751AE0
+RpLight* RpLightSetConeAngle(RpLight* ight, RwReal angle); // 0x751D20
+RwUInt32 RpLightStreamGetSize(const RpLight* light); // 0x751E10
+RpLight* RpLightStreamRead(RwStream* stream); // 0x751F00
+RpLightChunkInfo* _rpLightChunkInfoRead(RwStream* stream, RpLightChunkInfo* lightChunkInfo, RwInt32* bytesRead); // 0x752060
+RwInt32 RpLightRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB); // 0x751D60
+RwInt32 RpLightRegisterPluginStream(RwUInt32 pluginID, RwPluginDataChunkReadCallBack readCB, RwPluginDataChunkWriteCallBack writeCB, RwPluginDataChunkGetSizeCallBack getSizeCB); // 0x751D90
+RwInt32 RpLightSetStreamAlwaysCallBack(RwUInt32 pluginID, RwPluginDataChunkAlwaysCallBack alwaysCB); // 0x751DC0
+RwInt32 RpLightGetPluginOffset(RwUInt32 pluginID); // 0x751DE0
+RwBool RpLightValidatePlugins(const RpLight* light); // 0x751E00
+void RpD3D9LightSetAttenuationParams(RpLight* light, const RpD3D9AttenuationParams* params); // 0x755D20
+void RpD3D9LightGetAttenuationParams(const RpLight* light, RpD3D9AttenuationParams* params); // 0x755D50
+RwBool _rwD3D9LightsOpen(void); // 0x755D80
+RwBool _rwD3D9LightsGlobalEnable(RpLightFlag flags); // 0x756070
+RwBool _rwD3D9LightDirectionalEnable(RpLight* light); // 0x756260
+RwBool _rwD3D9LightLocalEnable(RpLight* light); // 0x756390
+void _rwD3D9LightsEnable(RwBool enable, RwUInt32 type); // 0x756600
+void _rwD3D9LightsClose(void); // 0x755FE0
+void RpAtomicSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x749720
+void RpClumpSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x749740
+RpAtomic* AtomicDefaultRenderCallBack(RpAtomic* atomic); // 0x7491C0
+void _rpAtomicResyncInterpolatedSphere(RpAtomic* atomic); // 0x7491F0
+const RwSphere* RpAtomicGetWorldBoundingSphere(RpAtomic* atomic); // 0x749330
+void RpClumpGtaCancelStream();
+RpClump* RpClumpForAllAtomics(RpClump* clump, RpAtomicCallBack callback, void* pData); // 0x749B70
+RpClump* RpClumpForAllLights(RpClump* clump, RpLightCallBack callback, void* pData); // 0x749C00
+RpClump* RpClumpForAllCameras(RpClump* clump, RwCameraCallBack callback, void* pData); // 0x749BB0
+RpAtomic* RpAtomicSetFrame(RpAtomic* atomic, RwFrame* frame); // 0x74BF20
+RpClump* RpClumpCreateSpace(const RwV3d* position, RwReal radius); // 0x749970
+RpClump* RpClumpRender(RpClump* clump); // 0x749B20
+RpClump* RpClumpRemoveAtomic(RpClump* clump, RpAtomic* atomic); // 0x74A4C0
+RpClump* RpClumpAddAtomic(RpClump* clump, RpAtomic* atomic); // 0x74A490
+RpClump* RpClumpRemoveLight(RpClump* clump, RpLight* light); // 0x74A520
+RpClump* RpClumpAddLight(RpClump* clump, RpLight* light); // 0x74A4F0
+RpClump* RpClumpRemoveCamera(RpClump* clump, RwCamera* camera); // 0x74A580
+RpClump* RpClumpAddCamera(RpClump* clump, RwCamera* camera); // 0x74A550
+RwBool RpClumpDestroy(RpClump* clump); // 0x74A310
+RpClump* RpClumpCreate(void); // 0x74A290
+RpClump* RpClumpClone(RpClump* clump); // 0x749F70
+RwBool RpAtomicDestroy(RpAtomic* atomic); // 0x749DC0
+RpAtomic* RpAtomicClone(RpAtomic* atomic); // 0x749E60
+RpAtomic* RpAtomicCreate(void); // 0x749C50
+RpAtomic* RpAtomicSetGeometry(RpAtomic* atomic, RpGeometry* geometry, RwUInt32 flags); // 0x749D40
+RpClump* RpClumpSetCallBack(RpClump* clump, RpClumpCallBack callback); // 0x74A240
+RpClumpCallBack RpClumpGetCallBack(const RpClump* clump); // 0x74A270
+RwInt32 RpClumpGetNumAtomics(RpClump* clump); // 0x7498E0
+RwInt32 RpClumpGetNumLights(RpClump* clump); // 0x749910
+RwInt32 RpClumpGetNumCameras(RpClump* clump); // 0x749940
+RpClump* RpLightGetClump(const RpLight* light); // 0x749E40
+RpClump* RwCameraGetClump(const RwCamera* camera); // 0x749E50
+RwUInt32 RpAtomicStreamGetSize(RpAtomic* atomic); // 0x74A5B0
+RpAtomic* RpAtomicStreamRead(RwStream* stream); // 0x74B030
+RpAtomic* RpAtomicStreamWrite(RpAtomic* atomic, RwStream* stream); // 0x74A850
+RwUInt32 RpClumpStreamGetSize(RpClump* clump); // 0x74A5E0
+RpClump* RpClumpStreamRead(RwStream* stream); // 0x74B420
+RpClump* RpClumpStreamWrite(RpClump* clump, RwStream* stream); // 0x74AA10
+RpClumpChunkInfo* _rpClumpChunkInfoRead(RwStream* stream, RpClumpChunkInfo* clumpChunkInfo, RwInt32* bytesRead); // 0x74BD40
+RwInt32 RpAtomicRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB); // 0x74BDA0
+RwInt32 RpClumpRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB); // 0x74BDD0
+RwInt32 RpAtomicRegisterPluginStream(RwUInt32 pluginID, RwPluginDataChunkReadCallBack readCB, RwPluginDataChunkWriteCallBack writeCB, RwPluginDataChunkGetSizeCallBack getSizeCB); // 0x74BE00
+RwInt32 RpAtomicSetStreamAlwaysCallBack(RwUInt32 pluginID, RwPluginDataChunkAlwaysCallBack alwaysCB); // 0x74BE30
+RwInt32 RpAtomicSetStreamRightsCallBack(RwUInt32 pluginID, RwPluginDataChunkRightsCallBack rightsCB); // 0x74BE50
+RwInt32 RpClumpRegisterPluginStream(RwUInt32 pluginID, RwPluginDataChunkReadCallBack readCB, RwPluginDataChunkWriteCallBack writeCB, RwPluginDataChunkGetSizeCallBack getSizeCB); // 0x74BE70
+RwInt32 RpClumpSetStreamAlwaysCallBack(RwUInt32 pluginID, RwPluginDataChunkAlwaysCallBack alwaysCB); // 0x74BEA0
+RwInt32 RpAtomicGetPluginOffset(RwUInt32 pluginID); // 0x74BEC0
+RwInt32 RpClumpGetPluginOffset(RwUInt32 pluginID); // 0x74BEE0
+RwBool RpAtomicValidatePlugins(const RpAtomic* atomic); // 0x74BF00
+RwBool RpClumpValidatePlugins(const RpClump* clump); // 0x74BF10
+RwBool RpAtomicInstance(RpAtomic* atomic); // 0x74BF40
+RwBool _rpWorldFindBBox(RpWorld* world, RwBBox* boundingBox); // 0x74EFA0
+RpWorld* _rpWorldSetupSectorBoundingBoxes(RpWorld* world); // 0x74F020
+void _rpWorldSectorDeinstanceAll(RpSector* sector); // 0x74ECA0
+void _rpWorldSectorDestroyRecurse(RpSector* sector); // 0x74ED50
+RwBool _rpWorldForAllGlobalLights(RpLightCallBack callBack, void* pData); // 0x74EF10
+RpWorldSector* _rpWorldSectorForAllLocalLights(RpWorldSector* sector, RpLightCallBack callBack, void* pData); // 0x74EF60
+RpWorldSector* _rpSectorDefaultRenderCallBack(RpWorldSector* sector); // 0x74EEC0
+RpWorld* RpWorldLock(RpWorld* world); // 0x74F1A0
+RpWorld* RpWorldUnlock(RpWorld* world); // 0x74F210
+void _rpWorldRegisterWorld(RpWorld* world, RwUInt32 memorySize); // 0x74F0C0
+void _rpWorldUnregisterWorld(RpWorld* world); // 0x74F140
+RwBool RpWorldPluginAttach(); // 0x74FDA0
+RpWorld* RpWorldForAllClumps(RpWorld* world, RpClumpCallBack fpCallBack, void* pData); // 0x74FB80
+RpWorld* RpWorldForAllMaterials(RpWorld* world, RpMaterialCallBack fpCallBack, void* pData); // 0x74FBC0
+RpWorld* RpWorldForAllLights(RpWorld* world, RpLightCallBack fpCallBack, void* pData); // 0x74FC00
+RpWorld* RpWorldForAllWorldSectors(RpWorld* world, RpWorldSectorCallBack fpCallBack, void* pData); // 0x74FC70
+RpWorld* RpWorldRender(RpWorld* world); // 0x74F570
+RwBool RpWorldDestroy(RpWorld* world); // 0x74F610
+RpWorld* RpWorldCreate(RwBBox* boundingBox); // 0x74F760
+RpWorld* RpWorldSetSectorRenderCallBack(RpWorld* world, RpWorldSectorCallBackRender fpCallBack); // 0x74F730
+RpWorldSectorCallBackRender RpWorldGetSectorRenderCallBack(const RpWorld* world); // 0x74F750
+RpWorld* RpWorldSectorGetWorld(const RpWorldSector* sector); // 0x74F4E0
+RwInt32 RpWorldRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB); // 0x74FCD0
+RwInt32 RpWorldRegisterPluginStream(RwUInt32 pluginID, RwPluginDataChunkReadCallBack readCB, RwPluginDataChunkWriteCallBack writeCB, RwPluginDataChunkGetSizeCallBack getSizeCB); // 0x74FD00
+RwInt32 RpWorldSetStreamAlwaysCallBack(RwUInt32 pluginID, RwPluginDataChunkAlwaysCallBack alwaysCB); // 0x74FD30
+RwInt32 RpWorldSetStreamRightsCallBack(RwUInt32 pluginID, RwPluginDataChunkRightsCallBack rightsCB); // 0x74FD50
+RwInt32 RpWorldGetPluginOffset(RwUInt32 pluginID); // 0x74FD70
+RwBool RpWorldValidatePlugins(RpWorld* world); // 0x74FD90
+void RpD3D9GeometrySetUsageFlags(RpGeometry* geometry, RpD3D9GeometryUsageFlag flags); // 0x7588B0
+RpD3D9GeometryUsageFlag RpD3D9GeometryGetUsageFlags(const RpGeometry* geometry); // 0x7588D0
+void RpD3D9WorldSectorSetUsageFlags(RpWorldSector* sector, RpD3D9WorldSectorUsageFlag flags); // 0x7588E0
+RpD3D9WorldSectorUsageFlag RpD3D9WorldSectorGetUsageFlags(const RpWorldSector* sector); // 0x758900
+void RxD3D9AllInOneSetInstanceCallBack(RxPipelineNode* node, RxD3D9AllInOneInstanceCallBack callback); // 0x757380
+RxD3D9AllInOneInstanceCallBack RxD3D9AllInOneGetInstanceCallBack(RxPipelineNode* node); // 0x757390
+void RxD3D9AllInOneSetReinstanceCallBack(RxPipelineNode* node, RxD3D9AllInOneReinstanceCallBack callback); // 0x7573A0
+RxD3D9AllInOneReinstanceCallBack RxD3D9AllInOneGetReinstanceCallBack(RxPipelineNode* node); // 0x7573B0
+void RxD3D9AllInOneSetLightingCallBack(RxPipelineNode* node, RxD3D9AllInOneLightingCallBack callback); // 0x7573C0
+RxD3D9AllInOneLightingCallBack RxD3D9AllInOneGetLightingCallBack(RxPipelineNode* node); // 0x7573D0
+void RxD3D9AllInOneSetRenderCallBack(RxPipelineNode* node, RxD3D9AllInOneRenderCallBack callback); // 0x7573E0
+RxD3D9AllInOneRenderCallBack RxD3D9AllInOneGetRenderCallBack(RxPipelineNode* node); // 0x7573F0
+void _rpD3D9AddDynamicGeometry(RpGeometry* geometry); // 0x74E970
+void _rpD3D9RemoveDynamicGeometry(RpGeometry* geometry); // 0x74E9E0
+RwUInt32 _rpD3D9VertexDeclarationGetSize(RwUInt32 type); // 0x7522E0
+RwUInt32 _rpD3D9VertexDeclarationGetStride(const void* vertexDeclaration); // 0x7522F0
+RwUInt32 _rpD3D9VertexDeclarationInstV3d(RwUInt32 type, RwUInt8* mem, const RwV3d* src, RwInt32 numVerts, RwUInt32 stride); // 0x752AD0
+RwUInt32 _rpD3D9VertexDeclarationInstV3dComp(RwUInt32 type, RwUInt8* mem, const RpVertexNormal* src, RwInt32 numVerts, RwUInt32 stride); // 0x7531B0
+RwUInt32 _rpD3D9VertexDeclarationInstV3dMorph(RwUInt32 type, RwUInt8* mem, const RwV3d* src1, const RwV3d* src2, RwReal scale, RwInt32 numVerts, RwUInt32 stride); // 0x753B60
+RwUInt32 _rpD3D9VertexDeclarationInstV2d(RwUInt32 type, RwUInt8* mem, const RwV2d* src, RwInt32 numVerts, RwUInt32 stride); // 0x7544E0
+RwBool _rpD3D9VertexDeclarationInstColor(RwUInt8* mem, const RwRGBA* color, RwInt32 numVerts, RwUInt32 stride); // 0x754AE0
+RwUInt32 _rpD3D9VertexDeclarationInstIndices(RwUInt32 type, RwUInt8* mem, const RwUInt32* indices, RwInt32 numVerts, RwUInt32 stride); // 0x754B40
+RwUInt32 _rpD3D9VertexDeclarationInstIndicesRemap(RwUInt32 type, RwUInt8* mem, const RwUInt32* indices, const RwUInt8* remap, RwInt32 numVerts, RwUInt32 stride); // 0x754C80
+RwUInt32 _rpD3D9VertexDeclarationInstWeights(RwUInt32 type, RwUInt8* mem, const RwV4d* src, RwInt32 numVerts, RwUInt32 stride); // 0x752320
+RwUInt32 _rpD3D9VertexDeclarationInstTangent(RwUInt32 type, RwUInt8* mem, const RwV3d* pos, const RwTexCoords* texCoord, RxD3D9ResEntryHeader* meshHeader, RwUInt32 stride); // 0x754E20
+void _rpD3D9VertexDeclarationUnInstV3d(RwUInt32 type, RwV3d* dst, const RwUInt8* src); // 0x7551F0
+void _rpD3D9VertexDeclarationUnInstV2d(RwUInt32 type, RwV2d* dst, const RwUInt8* src); // 0x7555E0
+void _rpD3D9GetMinMaxValuesV3d(const RwV3d* src, RwInt32 numElements, RwV3d* min, RwV3d* max); // 0x755830
+void _rpD3D9GetMinMaxValuesV2d(const RwV2d* src, RwInt32 numElements, RwV2d* min, RwV2d* max); // 0x7558F0
+RwUInt32 _rpD3D9FindFormatV3d(const RwV3d* src, RwInt32 numElements); // 0x755980
+RwUInt32 _rpD3D9FindFormatV2d(const RwV2d* src, RwInt32 numElements); // 0x755AA0
+RxPipeline* RpWorldSetDefaultSectorPipeline(RxPipeline* pipeline); // 0x75E270
+RxPipeline* RpAtomicSetDefaultPipeline(RxPipeline* pipeline); // 0x75E2A0
+RxPipeline* RpMaterialSetDefaultPipeline(RxPipeline* pipeline); // 0x75E2D0
+const RpGeometry* RpGeometryIsCorrectlySorted(const RpGeometry* geometry, RwBool* result); // 0x75D9D0
+RpGeometry* RpGeometrySortByMaterial(const RpGeometry* geometry, RpGeometrySortByMaterialCallBack callback); // 0x75DAE0
+void RpTieSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x74FF60
+void RpLightTieSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x74FF80
+RpWorld* RpWorldRemoveCamera(RpWorld* world, RwCamera* camera); // 0x750F50
+RpWorld* RpWorldAddCamera(RpWorld* world, RwCamera* camera); // 0x750F20
+RpWorld* RwCameraGetWorld(const RwCamera* camera); // 0x750F80
+RpWorld* RpWorldRemoveAtomic(RpWorld* world, RpAtomic* atomic); // 0x750FC0
+RpWorld* RpWorldAddAtomic(RpWorld* world, RpAtomic* atomic); // 0x750F90
+RpWorld* RpAtomicGetWorld(const RpAtomic* atomic); // 0x751050
+RpWorld* RpWorldAddClump(RpWorld* world, RpClump* clump); // 0x751300
+RpWorld* RpWorldRemoveClump(RpWorld* world, RpClump* clump); // 0x751460
+RpWorld* RpClumpGetWorld(const RpClump* clump); // 0x7516B0
+RpWorld* RpWorldAddLight(RpWorld* world, RpLight* light); // 0x751910
+RpWorld* RpWorldRemoveLight(RpWorld* world, RpLight* light); // 0x751960
+RpWorld* RpLightGetWorld(const RpLight* light); // 0x7519E0
+RwCamera* RwCameraForAllClumpsInFrustum(RwCamera* camera, void* data); // 0x7516C0
+RwCamera* RwCameraForAllAtomicsInFrustum(RwCamera* camera, RpAtomicCallBack callback, void* data); // 0x7517F0
+RwCamera* RwCameraForAllSectorsInFrustum(RwCamera* camera, RpWorldSectorCallBack callBack, void* pData); // 0x751660
+RpLight* RpLightForAllWorldSectors(RpLight* light, RpWorldSectorCallBack callback, void* data); // 0x7519F0
+RpAtomic* RpAtomicForAllWorldSectors(RpAtomic* atomic, RpWorldSectorCallBack callback, void* data); // 0x751060
+RpWorldSector* RpWorldSectorForAllAtomics(RpWorldSector* sector, RpAtomicCallBack callback, void* data); // 0x7510A0
+RpWorldSector* RpWorldSectorForAllCollisionAtomics(RpWorldSector* sector, RpAtomicCallBack callback, void* data); // 0x751140
+RpWorldSector* RpWorldSectorForAllLights(RpWorldSector* sector, RpLightCallBack callback, void* data); // 0x7511E0
+RwUInt32 RpWorldStreamGetSize(const RpWorld* world); // 0x761EA0
+RpWorld* RpWorldStreamRead(RwStream* stream); // 0x762960
+const RpWorld* RpWorldStreamWrite(const RpWorld* world, RwStream* stream); // 0x762150
+RpWorldSectorChunkInfo* _rpWorldSectorChunkInfoRead(RwStream* stream, RpWorldSectorChunkInfo* worldSectorChunkInfo, RwInt32* bytesRead); // 0x7635B0
+RpPlaneSectorChunkInfo* _rpPlaneSectorChunkInfoRead(RwStream* stream, RpPlaneSectorChunkInfo* planeSectorChunkInfo, RwInt32* bytesRead); // 0x763620
+RpWorldChunkInfo* _rpWorldChunkInfoRead(RwStream* stream, RpWorldChunkInfo* worldChunkInfo, RwInt32* bytesRead); // 0x763690

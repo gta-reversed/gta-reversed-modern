@@ -273,3 +273,33 @@ struct RpUVAnimMaterialExtension
                 /**< animation functions apply animations to the first   */
                 /**< pass and dual pass UV transformations only */ 
 };
+
+_rpUVAnimCustomData* _rpUVAnimCustomDataStreamRead(RwStream* stream); // 0x7CBF70
+const _rpUVAnimCustomData* _rpUVAnimCustomDataStreamWrite(const _rpUVAnimCustomData* customData, RwStream* stream); // 0x7CBFD0
+RwUInt32 _rpUVAnimCustomDataStreamGetSize(const _rpUVAnimCustomData* customData); // 0x7CC010
+RwBool RpUVAnimPluginAttach(); // 0x7CB940
+void RpUVAnimLinearKeyFrameApply(void* matrix, void* voidIFrame); // 0x7CC9F0
+void RpUVAnimLinearKeyFrameBlend(void* voidOut, void* voidIn1, void* voidIn2, RwReal alpha); // 0x7CCAC0
+void RpUVAnimLinearKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2, RwReal time, void* customData); // 0x7CCA40
+void RpUVAnimLinearKeyFrameAdd(void* voidOut, void* voidIn1, void* voidIn2); // 0x7CCBE0
+void RpUVAnimLinearKeyFrameMulRecip(void* voidFrame, void* voidStart); // 0x7CCB30
+void RpUVAnimParamKeyFrameApply(void* matrix, void* voidIFrame); // 0x7CC560
+void RpUVAnimParamKeyFrameBlend(void* voidOut, void* voidIn1, void* voidIn2, RwReal alpha); // 0x7CC6A0
+void RpUVAnimParamKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2, RwReal time, void* customData); // 0x7CC600
+void RpUVAnimParamKeyFrameAdd(void* voidOut, void* voidIn1, void* voidIn2); // 0x7CC750
+void RpUVAnimParamKeyFrameMulRecip(void* voidFrame, void* voidStart); // 0x7CC740
+RtAnimAnimation* RpUVAnimKeyFrameStreamRead(RwStream* stream, RtAnimAnimation* animation); // 0x7CC870
+RwBool RpUVAnimKeyFrameStreamWrite(const RtAnimAnimation* animation, RwStream* stream); // 0x7CC920
+RwInt32 RpUVAnimKeyFrameStreamGetSize(const RtAnimAnimation* animation); // 0x7CC9D0
+RpUVAnim* RpUVAnimCreate(const RwChar* name, RwUInt32 numNodes, RwUInt32 numFrames, RwReal duration, RwUInt32* nodeIndexToUVChannelMap, RpUVAnimKeyFrameType keyframeType); // 0x7CC020
+RwBool RpUVAnimDestroy(RpUVAnim* anim); // 0x7CC0C0
+RpUVAnim* RpUVAnimAddRef(RpUVAnim* anim); // 0x7CC100
+const RwChar* RpUVAnimGetName(const RpUVAnim* anim); // 0x7CC3A0
+RpMaterial* RpMaterialSetUVAnim(RpMaterial* material, RpUVAnim* anim, RwUInt32 slot); // 0x7CC3B0
+RpUVAnimInterpolator* RpMaterialUVAnimGetInterpolator(RpMaterial* material, RwUInt32 slot); // 0x7CC430
+RpMaterial* RpMaterialUVAnimSetInterpolator(RpMaterial* material, RpUVAnimInterpolator* interp, RwUInt32 slot); // 0x7CC450
+RpMaterial* RpMaterialUVAnimSetCurrentTime(RpMaterial* material, RwReal time); // 0x7CC470
+RpMaterial* RpMaterialUVAnimAddAnimTime(RpMaterial* material, RwReal deltaTime); // 0x7CC4B0
+RpMaterial* RpMaterialUVAnimSubAnimTime(RpMaterial* material, RwReal deltaTime); // 0x7CC4F0
+RpMaterial* RpMaterialUVAnimApplyUpdate(RpMaterial* material); // 0x7CC110
+RwBool RpMaterialUVAnimExists(const RpMaterial* material); // 0x7CC530
