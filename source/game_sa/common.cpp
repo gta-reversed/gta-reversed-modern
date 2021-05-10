@@ -5,8 +5,10 @@ https://github.com/DK22Pac/plugin-sdk
 Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+
 #include "CDebugMenu.h"
 
+int& g_nNumIm3dDrawCalls = *(int*)0xB73708;
 int gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
 char *gString = (char *)0xB71670;
 
@@ -14,149 +16,297 @@ float &GAME_GRAVITY = *(float *)0x863984;
 
 char(&PC_Scratch)[16384] = *(char(*)[16384])0xC8E0C8;
 
+RpLight* (&ObjectAffectingLights)[6] = *reinterpret_cast<RpLight* (*)[6]>(0xC886F0);
+int& numExtraDirectionalLights = *reinterpret_cast<int*>(0xC88708);
+
+RwV3d& sun2Dir = *reinterpret_cast<RwV3d*>(0xB7CB14);
+
+RwRGBAReal& FullLight = *reinterpret_cast<RwRGBAReal*>(0x8D60C0); //  <1.0, 1.0, 1.0, 1.0>
+
+char (&IndicateR)[8] = *reinterpret_cast<char (*)[8]>(0x8D60D0);
+char (&IndicateG)[8] = *reinterpret_cast<char (*)[8]>(0x8D60D8);
+char (&IndicateB)[8] = *reinterpret_cast<char (*)[8]>(0x8D60E0);
+
+RpLight*& pAmbient = *reinterpret_cast<RpLight**>(0xC886E8);
+RwRGBAReal& AmbientLightColour = *reinterpret_cast<RwRGBAReal*>(0xC886A4);
+RwRGBAReal& AmbientLightColourForFrame = *reinterpret_cast<RwRGBAReal*>(0xC886D4);
+RwRGBAReal& AmbientLightColourForFrame_PedsCarsAndObjects = *reinterpret_cast<RwRGBAReal*>(0xC886C4);
+RpLight*& pDirect = *reinterpret_cast<RpLight**>(0xC886EC);
+RwRGBAReal& DirectionalLightColour = *reinterpret_cast<RwRGBAReal*>(0xC88694);
+RwRGBAReal& DirectionalLightColourForFrame = *reinterpret_cast<RwRGBAReal*>(0xC886B4);
+
+RwRGBAReal (&DirectAmbientLight)[2] = *reinterpret_cast<RwRGBAReal (*)[2]>(0xC8865C); // Direct, Ambient Light
+
+float& gfLaRiotsLightMult = *(float*)0x8CD060; // 1.0f
+
+unsigned int &ClumpOffset = *(unsigned int *)0xB5F878;
+
+// used to convert 0-255 to 0.0f-1.0f, also see RwRGBARealFromRwRGBAMacro
+float& flt_859A3C = *(float*)0x859A3C; // 1.0f / 255.0f = 0.0039215689f
+
+float& flt_858B14 = *(float*)0x858B14; // 1.0f / 32768.0f = 0.000030517578f
+
+float& flt_859520 = *(float*)0x859520; // 1.0f / 640.0f = 0.0015625f        1.0f / DEFAULT_SCREEN_WIDTH
+float& flt_859524 = *(float*)0x859524; // 1.0f / 448.0f = 0.002232143f      1.0f / DEFAULT_SCREEN_HEIGHT
+
 void InjectCommonHooks()
 {
     HookInstall(0x53E230, &Render2dStuff); // This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without :D
+
+//    ReversibleHooks::Install("common", "FindPlayerCoors", 0x56E010, &FindPlayerCoors);
+//    ReversibleHooks::Install("common", "FindPlayerSpeed", 0x56E090, &FindPlayerSpeed);
+    ReversibleHooks::Install("common", "FindPlayerEntity", 0x56E120, &FindPlayerEntity);
+//    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld", 0x56E250, &FindPlayerCentreOfWorld);
+//    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoSniperShift", 0x56E320, &FindPlayerCentreOfWorld_NoSniperShift);
+//    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoInteriorShift", 0x56E400, &FindPlayerCentreOfWorld_NoInteriorShift);
+//    ReversibleHooks::Install("common", "FindPlayerHeading", 0x56E450, &FindPlayerHeading);
+    ReversibleHooks::Install("common", "FindPlayerHeight", 0x56E520, &FindPlayerHeight);
+    ReversibleHooks::Install("common", "FindPlayerPed", 0x56E210, &FindPlayerPed);
+//    ReversibleHooks::Install("common", "FindPlayerVehicle", 0x56E0D0, &FindPlayerVehicle);
+    ReversibleHooks::Install("common", "FindPlayerWanted", 0x56E230, &FindPlayerWanted);
+    ReversibleHooks::Install("common", "InTwoPlayersMode", 0x441390, &InTwoPlayersMode);
+
+//    ReversibleHooks::Install("common", "MakeUpperCase", 0x7186E0, &MakeUpperCase);
+//    ReversibleHooks::Install("common", "GetEventGlobalGroup", 0x4ABA50, &GetEventGlobalGroup);
+    ReversibleHooks::Install("common", "DefinedState", 0x734650, &DefinedState);
+    ReversibleHooks::Install("common", "DefinedState2d", 0x734750, &DefinedState2d);
+
+//    ReversibleHooks::Install("common", "GetFirstAtomicCallback", 0x734810, &GetFirstAtomicCallback);
+//    ReversibleHooks::Install("common", "GetFirstAtomic", 0x734820, &GetFirstAtomic);
+//    ReversibleHooks::Install("common", "Get2DEffectAtomicCallback", 0x734850, &Get2DEffectAtomicCallback);
+//    ReversibleHooks::Install("common", "Get2DEffectAtomic", 0x734880, &Get2DEffectAtomic);
+//    ReversibleHooks::Install("common", "GetFirstObjectCallback", 0x7348B0, &GetFirstObjectCallback);
+//    ReversibleHooks::Install("common", "GetFirstObject", 0x7348C0, &GetFirstObject);
+//    ReversibleHooks::Install("common", "GetFirstFrameCallback", 0x7348F0, &GetFirstFrameCallback);
+//    ReversibleHooks::Install("common", "GetFirstChild", 0x734900, &GetFirstChild);
+//    ReversibleHooks::Install("common", "GetFirstTextureCallback", 0x734930, &GetFirstTextureCallback);
+//    ReversibleHooks::Install("common", "GetFirstTexture", 0x734940, &GetFirstTexture);
+//    ReversibleHooks::Install("common", "GetAnimHierarchyFromSkinClump", 0x734A40, &GetAnimHierarchyFromSkinClump);
+//    ReversibleHooks::Install("common", "GetAnimHierarchyFromFrame", 0x734AB0, &GetAnimHierarchyFromFrame);
+//    ReversibleHooks::Install("common", "GetAnimHierarchyFromClump", 0x734B10, &GetAnimHierarchyFromClump);
+//    ReversibleHooks::Install("common", "AtomicRemoveAnimFromSkinCB", 0x734B90, &AtomicRemoveAnimFromSkinCB);
+
+//    ReversibleHooks::Install("common", "SetLightsWithTimeOfDayColour", 0x7354E0, &SetLightsWithTimeOfDayColour);
+    ReversibleHooks::Install("common", "LightsDestroy", 0x735730, &LightsDestroy);
+    ReversibleHooks::Install("common", "WorldReplaceNormalLightsWithScorched", 0x7357E0, &WorldReplaceNormalLightsWithScorched);
+//    ReversibleHooks::Install("common", "AddAnExtraDirectionalLight", 0x735840, &AddAnExtraDirectionalLight);
+    ReversibleHooks::Install("common", "RemoveExtraDirectionalLights", 0x7359E0, &RemoveExtraDirectionalLights);
+    ReversibleHooks::Install("common", "SetAmbientAndDirectionalColours", 0x735A20, &SetAmbientAndDirectionalColours);
+    ReversibleHooks::Install("common", "SetBrightMarkerColours", 0x735BD0, &SetBrightMarkerColours);
+    ReversibleHooks::Install("common", "ReSetAmbientAndDirectionalColours", 0x735C40, &ReSetAmbientAndDirectionalColours);
+    ReversibleHooks::Install("common", "DeActivateDirectional", 0x735C70, &DeActivateDirectional);
+    ReversibleHooks::Install("common", "ActivateDirectional", 0x735C80, &ActivateDirectional);
+    ReversibleHooks::Install("common", "SetAmbientColours_void", 0x735D30, static_cast<void(*)()>(&SetAmbientColours));
+    ReversibleHooks::Install("common", "SetAmbientColours_color", 0x735D50, static_cast<void(*)(RwRGBAReal* color)>(&SetAmbientColours));
+    ReversibleHooks::Install("common", "SetDirectionalColours", 0x735D70, &SetDirectionalColours);
+    ReversibleHooks::Install("common", "SetLightColoursForPedsCarsAndObjects", 0x735D90, &SetLightColoursForPedsCarsAndObjects);
+//    ReversibleHooks::Install("common", "SetLightsForInfraredVisionHeatObjects", 0x735E40, &SetLightsForInfraredVisionHeatObjects);
+//    ReversibleHooks::Install("common", "StoreAndSetLightsForInfraredVisionHeatObjects", 0x735E70, &StoreAndSetLightsForInfraredVisionHeatObjects);
+    ReversibleHooks::Install("common", "RestoreLightsForInfraredVisionHeatObjects", 0x735EF0, &RestoreLightsForInfraredVisionHeatObjects);
+    ReversibleHooks::Install("common", "SetLightsForInfraredVisionDefaultObjects", 0x735F20, &SetLightsForInfraredVisionDefaultObjects);
+    ReversibleHooks::Install("common", "SetLightsForNightVision", 0x735F70, &SetLightsForNightVision);
+//    ReversibleHooks::Install("common", "GetDayNightBalance", 0x6FAB30, &GetDayNightBalance);
+//    ReversibleHooks::Install("common", "AsciiToGxtChar", 0x718600, &AsciiToGxtChar);
+//    ReversibleHooks::Install("common", "WriteRaster", 0x005A4150, &WriteRaster);
+//    ReversibleHooks::Install("common", "CalcScreenCoors_VVff", 0x71DA00, static_cast<bool(*)(CVector const&, CVector*, float*, float*)>(&CalcScreenCoors));
+//    ReversibleHooks::Install("common", "CalcScreenCoors_VV", 0x71DAB0, static_cast<bool(*)(CVector const&, CVector*)>(&CalcScreenCoors));
+    ReversibleHooks::Install("common", "LittleTest", 0x541330, &LittleTest);
+
+    ReversibleHooks::Install("common", "RemoveRefsCB", 0x7226D0, &RemoveRefsCB);
     ReversibleHooks::Install("common", "IsGlassModel", 0x46A760, &IsGlassModel);
 }
 
-CVector FindPlayerCoors(int playerId)
-{
+// 0x56E010
+CVector FindPlayerCoors(int playerId) {
     return plugin::CallAndReturn<CVector, 0x56E010, int>(playerId);
 }
 
-CVector& FindPlayerSpeed(int playerId)
-{
-    return ((CVector& (__cdecl *)(int))0x56E090)(playerId);
+// 0x56E090
+CVector& FindPlayerSpeed(int playerId) {
+    return plugin::CallAndReturn<CVector&, 0x56E090, int>(playerId);
 }
 
-CEntity * FindPlayerEntity(int playerId)
-{
-    return ((CEntity *(__cdecl *)(int))0x56E120)(playerId);
+// 0x56E120
+CEntity* FindPlayerEntity(int playerId) {
+    CPlayerPed* ped = FindPlayerPed(playerId);
+
+    if ((ped->m_nPedFlags & 0x100) != 0 && ped->m_pVehicle)
+        return ped->m_pVehicle;
+
+    return nullptr;
 }
 
-CVector const& FindPlayerCentreOfWorld(int playerId)
-{
-    return ((CVector const& (__cdecl *)(int))0x56E250)(playerId);
+// 0x56E250
+CVector const& FindPlayerCentreOfWorld(int playerId) {
+    return ((CVector const&(__cdecl*)(int))0x56E250)(playerId);
 }
 
-CVector const& FindPlayerCentreOfWorld_NoSniperShift(int playerId)
-{
-    return ((CVector const& (__cdecl *)(int))0x56E320)(playerId);
+// 0x56E320
+CVector const& FindPlayerCentreOfWorld_NoSniperShift(int playerId) {
+    return ((CVector const&(__cdecl*)(int))0x56E320)(playerId);
 }
 
-CVector FindPlayerCentreOfWorld_NoInteriorShift(int playerId)
-{
-    return ((CVector(__cdecl *)(int))0x56E400)(playerId);
+// 0x56E400
+CVector FindPlayerCentreOfWorld_NoInteriorShift(int playerId) {
+    return ((CVector(__cdecl*)(int))0x56E400)(playerId);
 }
 
-float FindPlayerHeading(int playerId)
-{
-    return ((float(__cdecl *)(int))0x56E450)(playerId);
+// 0x56E450
+float FindPlayerHeading(int playerId) {
+    return ((float(__cdecl*)(int))0x56E450)(playerId);
 }
 
-float FindPlayerHeight()
-{
-    return ((float(__cdecl *)())0x56E520)();
+// unused
+// 0x56E520
+float FindPlayerHeight() {
+    CPlayerPed* ped = CWorld::Players[CWorld::PlayerInFocus].m_pPed;
+    CMatrixLink* matrix = ped->m_matrix;
+    if (matrix)
+        return matrix->GetPosition().z;
+    else
+        return ped->m_placement.m_vPosn.z;
 }
 
-CPlayerPed * FindPlayerPed(int playerId)
-{
-    return ((CPlayerPed *(__cdecl *)(int))0x56E210)(playerId);
+// 0x56E210
+CPlayerPed* FindPlayerPed(int playerId) {
+    return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_pPed;
 }
 
-CAutomobile * FindPlayerVehicle(int playerId, bool bIncludeRemote)
-{
+// 0x56E0D0
+CAutomobile* FindPlayerVehicle(int playerId, bool bIncludeRemote) {
     return ((CAutomobile *(__cdecl *)(int, bool))0x56E0D0)(playerId, bIncludeRemote);
+
+    CPlayerInfo playerInfo = CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)];
+
+    if (!playerInfo.m_pPed || (playerInfo.m_pPed->m_nPedFlags & 0x100) == 0) {
+        return nullptr;
+    }
+    if (!bIncludeRemote || (playerInfo.m_pRemoteVehicle) == nullptr) {
+        return static_cast<CAutomobile*>(playerInfo.m_pPed->m_pVehicle);
+    }
+
+    return nullptr;
 }
 
-bool InTwoPlayersMode()
-{
-    return ((bool(__cdecl *)())0x441390)();
+// 0x56E230
+CWanted* FindPlayerWanted(int playerId) {
+    return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_PlayerData.m_pWanted;
 }
 
-CVector Multiply3x3(CMatrix& const m, CVector& const v)
-{
-    CVector result;
-    result.x = m.GetRight().x * v.x + m.GetForward().x * v.y + m.GetUp().x * v.z;
-    result.y = m.GetRight().y * v.x + m.GetForward().y * v.y + m.GetUp().y * v.z;
-    result.z = m.GetRight().z * v.x + m.GetForward().z * v.y + m.GetUp().z * v.z;
-    return result;
+// TODO: Rename CGameLogic::IsCoopGameGoingOn
+// 0x441390
+bool InTwoPlayersMode() {
+    return CWorld::Players[0].m_pPed && CWorld::Players[1].m_pPed;
+}
+
+CVector Multiply3x3(CMatrix& m, CVector& v) {
+    return CVector{
+        m.GetRight().x * v.x + m.GetForward().x * v.y + m.GetUp().x * v.z,
+        m.GetRight().y * v.x + m.GetForward().y * v.y + m.GetUp().y * v.z,
+        m.GetRight().z * v.x + m.GetForward().z * v.y + m.GetUp().z * v.z,
+    };
 }
 
 // vector by matrix mult, resulting in a vector where each component is the dot product of the in vector and a matrix direction
-CVector Multiply3x3(CVector& const v, CMatrix& const m)
-{
+CVector Multiply3x3(CVector& v, CMatrix& m) {
     return CVector(DotProduct(m.GetRight(), v),
                    DotProduct(m.GetForward(), v),
                    DotProduct(m.GetUp(), v));
 }
 
-void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos)
-{
+// 0x54ECE0
+void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos) {
     plugin::Call<0x54ECE0, RwV3d&, CSimpleTransform const&, RwV3d const&>(point, placement, vecPos);
 }
 
-void TransformVectors(RwV3d* vecsOut, int numVectors, CMatrix const& matrix, RwV3d const* vecsin)
-{
+// 0x54EEA0
+void TransformVectors(RwV3d* vecsOut, int numVectors, CMatrix const& matrix, RwV3d const* vecsin) {
     plugin::Call<0x54EEA0, RwV3d*, int, CMatrix const&, RwV3d const*>(vecsOut, numVectors, matrix, vecsin);
 }
 
-void TransformVectors(RwV3d* vecsOut, int numVectors, CSimpleTransform const& transform, RwV3d const* vecsin)
-{
+// 0x54EE30
+void TransformVectors(RwV3d* vecsOut, int numVectors, CSimpleTransform const& transform, RwV3d const* vecsin) {
     plugin::Call<0x54EE30, RwV3d*, int, CSimpleTransform const&, RwV3d const*>(vecsOut, numVectors, transform, vecsin);
 }
 
-CWanted * FindPlayerWanted(int playerId)
-{
-    return ((CWanted*(__cdecl *)(int))0x56E230)(playerId);
+// 0x4D62A0
+AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, char* name) {
+    return ((AnimBlendFrameData * (__cdecl*)(RpClump*, char*))0x4D62A0)(clump, name);
 }
 
-unsigned int &ClumpOffset = *(unsigned int *)0xB5F878;
-
-AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, char *name)
-{
-    return ((AnimBlendFrameData *(__cdecl *)(RpClump *, char *))0x4D62A0)(clump, name);
+// 0x7186E0
+char* MakeUpperCase(char* dest, char* src) {
+    return ((char*(__cdecl*)(char*, char*))0x7186E0)(dest, src);
 }
 
-char *MakeUpperCase(char *dest, char *src)
-{
-    return ((char *(__cdecl *)(char *, char *))0x7186E0)(dest, src);
-}
-
-// Converted from cdecl void CreateDebugFont(void) 0x734610
+// 0x734610
 void CreateDebugFont() {
-    ((void(__cdecl *)())0x734610)();
+    // NOP
 }
 
-CEventGroup* GetEventGlobalGroup()
-{
+// 0x4ABA50
+CEventGroup* GetEventGlobalGroup() {
     return plugin::CallAndReturn<CEventGroup*, 0x4ABA50>();
 }
 
-// Converted from cdecl void DestroyDebugFont(void) 0x734620
+// 0x734620
 void DestroyDebugFont() {
-    ((void(__cdecl *)())0x734620)();
+    // NOP
 }
 
-// Converted from cdecl void ObrsPrintfString(char const*,short,short) 0x734630
+// unused
+// 0x734630
 void ObrsPrintfString(char const* arg0, short arg1, short arg2) {
-    ((void(__cdecl *)(char const*, short, short))0x734630)(arg0, arg1, arg2);
+    // NOP
 }
 
-// Converted from cdecl void FlushObrsPrintfs(void) 0x734640
+// 0x734640
 void FlushObrsPrintfs() {
-    ((void(__cdecl *)())0x734640)();
+    // NOP
 }
 
-// Converted from cdecl void DefinedState(void) 0x734650
+// 0x734650
 void DefinedState() {
-    ((void(__cdecl *)())0x734650)();
+    CRGBA rgbaFog(
+        CTimeCycle::m_CurrentColours.m_nSkyBottomRed,
+        CTimeCycle::m_CurrentColours.m_nSkyBottomGreen,
+        CTimeCycle::m_CurrentColours.m_nSkyBottomBlue
+    );
+
+    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,       (void*)true);
+    RwRenderStateSet(rwRENDERSTATETEXTUREPERSPECTIVE,   (void*)true);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          (void*)true);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         (void*)true);
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,            (void*)rwSHADEMODEGOURAUD);
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,        (void*)rwFILTERLINEAR);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,    (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,             (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,            (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEBORDERCOLOR,          (void*)(RWRGBALONG(0, 0, 0, 255)));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,            (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEFOGCOLOR,             (void*)rgbaFog.ToIntARGB());
+    RwRenderStateSet(rwRENDERSTATEFOGTYPE,              (void*)rwFOGTYPELINEAR);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,             (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    (void*)rwALPHATESTFUNCTIONGREATER);
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)2); // TODO: ?
 }
 
-// Converted from cdecl void DefinedState2d(void) 0x734750
+// 0x734750
 void DefinedState2d() {
-    ((void(__cdecl *)())0x734750)();
+    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,       (void*)true);
+    RwRenderStateSet(rwRENDERSTATETEXTUREPERSPECTIVE,   (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,            (void*)rwSHADEMODEGOURAUD);
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,        (void*)rwFILTERLINEAR);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,    (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,             (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,            (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEBORDERCOLOR,          (void*)(RWRGBALONG(0, 0, 0, 255)));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,            (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,             (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    (void*)rwALPHATESTFUNCTIONGREATER);
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)2); // TODO: ?
 }
 
 // Converted from cdecl RpAtomic* GetFirstAtomicCallback(RpAtomic *atomic,void *data) 0x734810
@@ -299,29 +449,110 @@ void SkinGetBonePositionsToTable(RpClump* clump, RwV3d* table) {
     ((void(__cdecl *)(RpClump*, RwV3d*))0x735360)(clump, table);
 }
 
-// Converted from cdecl void SetLightsWithTimeOfDayColour(RpWorld *world) 0x7354E0
+// 0x7354E0
 void SetLightsWithTimeOfDayColour(RpWorld* world) {
     ((void(__cdecl *)(RpWorld*))0x7354E0)(world);
+    return;
+
+    if (pAmbient) {
+        AmbientLightColourForFrame.red = CTimeCycle::GetAmbientRed() * CCoronas::LightsMult;
+        AmbientLightColourForFrame.green = CTimeCycle::GetAmbientGreen() * CCoronas::LightsMult;
+        AmbientLightColourForFrame.blue = CTimeCycle::GetAmbientBlue() * CCoronas::LightsMult;
+        AmbientLightColourForFrame_PedsCarsAndObjects.red = CTimeCycle::GetAmbientRed_Obj() * CCoronas::LightsMult;
+        AmbientLightColourForFrame_PedsCarsAndObjects.green = CTimeCycle::GetAmbientGreen_Obj() * CCoronas::LightsMult;
+        AmbientLightColourForFrame_PedsCarsAndObjects.blue = CTimeCycle::GetAmbientBlue_Obj() * CCoronas::LightsMult;
+        if (CWeather::LightningFlash) {
+            AmbientLightColourForFrame.blue = 1.0;
+            AmbientLightColourForFrame.green = 1.0;
+            AmbientLightColourForFrame.red = 1.0;
+            AmbientLightColourForFrame_PedsCarsAndObjects.blue = 1.0;
+            AmbientLightColourForFrame_PedsCarsAndObjects.green = 1.0;
+            AmbientLightColourForFrame_PedsCarsAndObjects.red = 1.0;
+        }
+        RpLightSetColor(pAmbient, &AmbientLightColourForFrame);
+    }
+
+    if (pDirect) {
+        DirectionalLightColourForFrame.red = CTimeCycle::m_CurrentColours.m_fIllumination * 0.99609375f * CCoronas::LightsMult;
+        DirectionalLightColourForFrame.green = DirectionalLightColourForFrame.red;
+        DirectionalLightColourForFrame.blue = DirectionalLightColourForFrame.red;
+        RpLightSetColor(pDirect, &DirectionalLightColourForFrame);
+
+        RwMatrix* out[6];
+        /*
+        out[0].x = 0.0;
+        out[0].y = 0.0;
+        out[0].z = 1.0;
+
+        CVector in = CrossProduct({0.0f, 0.0f, 1.0f}, sun2Dir);
+        in.Normalise();
+        CVector vecCross = CrossProduct(in, sun2Dir);
+
+        out[1].x = vecCross.x;
+        out[1].y = vecCross.y;
+        out[1].z = vecCross.z;
+
+        out[2] = in;
+
+        out[3].z = -sun2Dir.x;
+
+        out[4].x = -sun2Dir.y;
+        out[4].y = -sun2Dir.z;
+        */
+
+        auto* parentFrame = static_cast<RwFrame*>(pDirect->object.object.parent);
+        RwFrameTransform(parentFrame, reinterpret_cast<const RwMatrix*>(&out), RwOpCombineType::rwCOMBINEREPLACE);
+    }
 }
 
-// Converted from cdecl void LightsEnable(int) 0x735720
+// unused
+// 0x735720
 void LightsEnable(int arg0) {
-    ((void(__cdecl *)(int))0x735720)(arg0);
+    // NOP
 }
 
-// Converted from cdecl RpWorld* LightsDestroy(RpWorld *world) 0x735730
-RpWorld* LightsDestroy(RpWorld* world) {
-    return ((RpWorld* (__cdecl *)(RpWorld*))0x735730)(world);
+// 0x735730
+void LightsDestroy(RpWorld* world) {
+    if (!world) {
+        return;
+    }
+
+    if (pAmbient) {
+        RpWorldRemoveLight(world, pAmbient);
+        RpLightDestroy(pAmbient);
+        pAmbient = nullptr;
+    }
+    if (pDirect) {
+        RpWorldRemoveLight(world, pDirect);
+        auto* parentFrame = static_cast<RwFrame*>(pDirect->object.object.parent);
+        RwFrameDestroy(parentFrame);
+        RpLightDestroy(pDirect);
+        pDirect = nullptr;
+    }
+
+    for (auto& light : ObjectAffectingLights) {
+        if (light) {
+            RpWorldRemoveLight(world, light);
+            auto* parentFrame = static_cast<RwFrame*>(light->object.object.parent);
+            RwFrameDestroy(parentFrame);
+            RpLightDestroy(light);
+            light = nullptr;
+        }
+    }
 }
 
-// Converted from cdecl void WorldReplaceNormalLightsWithScorched(RpWorld *world,float lighting) 0x7357E0
+// 0x7357E0
 void WorldReplaceNormalLightsWithScorched(RpWorld* world, float lighting) {
-    ((void(__cdecl *)(RpWorld*, float))0x7357E0)(world, lighting);
+    RwRGBAReal color{lighting, lighting, lighting};
+    RpLightSetColor(pAmbient, &color);
+    pDirect->object.object.flags = 0;
 }
 
-// Converted from cdecl void WorldReplaceScorchedLightsWithNormal(RpWorld *world) 0x735820
+// unused
+// 0x735820
 void WorldReplaceScorchedLightsWithNormal(RpWorld* world) {
-    ((void(__cdecl *)(RpWorld*))0x735820)(world);
+    RpLightSetColor(pAmbient, &AmbientLightColourForFrame);
+    pDirect->object.object.flags = 1;
 }
 
 // Converted from cdecl void AddAnExtraDirectionalLight(RpWorld *world,float x,float y,float z,float red,float green,float blue) 0x735840
@@ -329,116 +560,195 @@ void AddAnExtraDirectionalLight(RpWorld* world, float x, float y, float z, float
     ((void(__cdecl *)(RpWorld*, float, float, float, float, float, float))0x735840)(world, x, y, z, red, green, blue);
 }
 
-// Converted from cdecl void RemoveExtraDirectionalLights(RpWorld *world) 0x7359E0
+// 0x7359E0
 void RemoveExtraDirectionalLights(RpWorld* world) {
-    ((void(__cdecl *)(RpWorld*))0x7359E0)(world);
+    for (auto& light : ObjectAffectingLights) {
+        light->object.object.flags = 0;
+    }
+    numExtraDirectionalLights = 0;
 }
 
-// Converted from cdecl void SetAmbientAndDirectionalColours(float lighting) 0x735A20
+// used in SetFlashyColours and SetFlashyColours_Mild which unused
+// 0x735A20
 void SetAmbientAndDirectionalColours(float lighting) {
-    ((void(__cdecl *)(float))0x735A20)(lighting);
+    AmbientLightColour.red = AmbientLightColourForFrame.red * lighting;
+    AmbientLightColour.green = AmbientLightColourForFrame.green * lighting;
+    AmbientLightColour.blue = AmbientLightColourForFrame.blue * lighting;
+
+    DirectionalLightColour.red = DirectionalLightColourForFrame.red * lighting;
+    DirectionalLightColour.green = DirectionalLightColourForFrame.green * lighting;
+    DirectionalLightColour.blue = DirectionalLightColourForFrame.blue * lighting;
+
+    RpLightSetColor(pAmbient, &AmbientLightColour);
+    RpLightSetColor(pDirect, &DirectionalLightColour);
 }
 
-// Converted from cdecl void SetFlashyColours(float lighting) 0x735AB0
+// unused
+// 0x735AB0
 void SetFlashyColours(float lighting) {
-    ((void(__cdecl *)(float))0x735AB0)(lighting);
+    if ((CTimer::m_snTimeInMilliseconds & 0x100) != 0) {
+        AmbientLightColour.red = 1.0f;
+        AmbientLightColour.green = 1.0f;
+        AmbientLightColour.blue = 1.0f;
+        DirectionalLightColour.red = DirectionalLightColourForFrame.red;
+        DirectionalLightColour.green = DirectionalLightColourForFrame.green;
+        DirectionalLightColour.blue = DirectionalLightColourForFrame.blue;
+        RpLightSetColor(pAmbient, &AmbientLightColour);
+        RpLightSetColor(pDirect, &DirectionalLightColour);
+    } else {
+        SetAmbientAndDirectionalColours(lighting * 0.75f);
+    }
 }
 
-// Converted from cdecl void SetFlashyColours_Mild(float lighting) 0x735B40
+// unused
+// 0x735B40
 void SetFlashyColours_Mild(float lighting) {
-    ((void(__cdecl *)(float))0x735B40)(lighting);
+    if ((CTimer::m_snTimeInMilliseconds & 0x100) != 0) {
+        AmbientLightColour.red = 1.0f;
+        AmbientLightColour.green = 1.0f;
+        AmbientLightColour.blue = 1.0f;
+        DirectionalLightColour.red = DirectionalLightColourForFrame.red;
+        DirectionalLightColour.green = DirectionalLightColourForFrame.green;
+        DirectionalLightColour.blue = DirectionalLightColourForFrame.blue;
+        RpLightSetColor(pAmbient, &AmbientLightColour);
+        RpLightSetColor(pDirect, &DirectionalLightColour);
+    } else {
+        SetAmbientAndDirectionalColours(lighting * 0.9f);
+    }
 }
 
-// Converted from cdecl void SetBrightMarkerColours(float lighting) 0x735BD0
+// 0x735BD0
 void SetBrightMarkerColours(float lighting) {
-    ((void(__cdecl *)(float))0x735BD0)(lighting);
+    AmbientLightColour.red = 0.6f;
+    AmbientLightColour.green = 0.6f;
+    AmbientLightColour.blue = 0.6f;
+    DirectionalLightColour.red = 1.0f;
+    DirectionalLightColour.green = 1.0f;
+    DirectionalLightColour.blue = 1.0f;
+    RpLightSetColor(pAmbient, &AmbientLightColour);
+    RpLightSetColor(pDirect, &DirectionalLightColour);
 }
 
-// Converted from cdecl void ReSetAmbientAndDirectionalColours(void) 0x735C40
+// 0x735C40
 void ReSetAmbientAndDirectionalColours() {
-    ((void(__cdecl *)())0x735C40)();
+    RpLightSetColor(pAmbient, &AmbientLightColourForFrame);
+    RpLightSetColor(pDirect, &DirectionalLightColourForFrame);
 }
 
-// Converted from cdecl void DeActivateDirectional(void) 0x735C70
+// 0x735C70
 void DeActivateDirectional() {
-    ((void(__cdecl *)())0x735C70)();
+    pDirect->object.object.flags = 0;
 }
 
-// Converted from cdecl void ActivateDirectional(void) 0x735C80
+// 0x735C80
 void ActivateDirectional() {
-    plugin::Call<0x735C80>();
+    pDirect->object.object.flags = 1;
 }
 
-// Converted from cdecl void SetAmbientColoursToIndicateRoadGroup(int) 0x735C90
+// unused
+// 0x735C90
 void SetAmbientColoursToIndicateRoadGroup(int arg0) {
-    ((void(__cdecl *)(int))0x735C90)(arg0);
+    AmbientLightColour.red = IndicateR[arg0 % 7] * flt_859A3C;
+    AmbientLightColour.green = IndicateG[arg0 % 7] * flt_859A3C;
+    AmbientLightColour.blue = IndicateB[arg0 % 7] * flt_859A3C;
+    RpLightSetColor(pAmbient, &AmbientLightColour);
 }
 
-// Converted from cdecl void SetFullAmbient(void) 0x735D10
+// unused
+// 0x735D10
 void SetFullAmbient() {
-    ((void(__cdecl *)())0x735D10)();
+    RpLightSetColor(pAmbient, &FullLight);
 }
 
-// Converted from cdecl void SetAmbientColours(void) 0x735D30
+// 0x735D30
 void SetAmbientColours() {
-    ((void(__cdecl *)())0x735D30)();
+    RpLightSetColor(pAmbient, &AmbientLightColourForFrame);
 }
 
-// Converted from cdecl void SetAmbientColours(RwRGBAReal *color) 0x735D50
+// 0x735D50
 void SetAmbientColours(RwRGBAReal* color) {
-    ((void(__cdecl *)(RwRGBAReal*))0x735D50)(color);
+    RpLightSetColor(pAmbient, color);
 }
 
-// Converted from cdecl void SetDirectionalColours(RwRGBAReal *color) 0x735D70
+// 0x735D70
 void SetDirectionalColours(RwRGBAReal* color) {
-    ((void(__cdecl *)(RwRGBAReal*))0x735D70)(color);
+    RpLightSetColor(pDirect, color);
 }
 
-// Converted from cdecl void SetLightColoursForPedsCarsAndObjects(float lighting) 0x735D90
+// 0x735D90
 void SetLightColoursForPedsCarsAndObjects(float lighting) {
-    ((void(__cdecl *)(float))0x735D90)(lighting);
+    DirectionalLightColour.red = DirectionalLightColourForFrame.red * lighting;
+    DirectionalLightColour.green = DirectionalLightColourForFrame.green * lighting;
+    DirectionalLightColour.blue = DirectionalLightColourForFrame.blue * lighting;
+
+    AmbientLightColour.red = CTimeCycle::m_BrightnessAddedToAmbientRed + AmbientLightColourForFrame_PedsCarsAndObjects.red * lighting;
+    AmbientLightColour.green = CTimeCycle::m_BrightnessAddedToAmbientGreen + AmbientLightColourForFrame_PedsCarsAndObjects.green * lighting;
+    AmbientLightColour.blue = CTimeCycle::m_BrightnessAddedToAmbientBlue + AmbientLightColourForFrame_PedsCarsAndObjects.blue * lighting;
+
+    RpLightSetColor(pAmbient, &AmbientLightColour);
+    RpLightSetColor(pDirect, &DirectionalLightColour);
 }
 
-// Converted from cdecl void SetLightsForInfraredVisionHeatObjects(void) 0x735E40
+// 0x735E40
 void SetLightsForInfraredVisionHeatObjects() {
     ((void(__cdecl *)())0x735E40)();
+    return;
+
+//    RpLightSetColor(pAmbient, CPostEffects::m_fInfraredVisionHeatObjectCol);
+//    RpLightSetColor(pDirect, CPostEffects::m_fInfraredVisionHeatObjectCol);
 }
 
-// Converted from cdecl void StoreAndSetLightsForInfraredVisionHeatObjects(void) 0x735E70
+// 0x735E70
 void StoreAndSetLightsForInfraredVisionHeatObjects() {
-    ((void(__cdecl *)())0x735E70)();
+//    ((void(__cdecl *)())0x735E70)();
+//    return;
+
+//    DirectAmbientLight[1] = AmbientLightColour;
+//    DirectAmbientLight[0] = DirectionalLightColour;
+//    RpLightSetColor(pAmbient, CPostEffects::m_fInfraredVisionHeatObjectCol);
+//    RpLightSetColor(pDirect, CPostEffects::m_fInfraredVisionHeatObjectCol);
 }
 
-// Converted from cdecl void RestoreLightsForInfraredVisionHeatObjects(void) 0x735EF0
+// 0x735EF0
 void RestoreLightsForInfraredVisionHeatObjects() {
-    ((void(__cdecl *)())0x735EF0)();
+    RpLightSetColor(pAmbient, &DirectAmbientLight[1]);
+    RpLightSetColor(pDirect, &DirectAmbientLight[0]);
 }
 
-// Converted from cdecl void SetLightsForInfraredVisionDefaultObjects(void) 0x735F20
+// 0x735F20
 void SetLightsForInfraredVisionDefaultObjects() {
-    ((void(__cdecl *)())0x735F20)();
+    RwRGBAReal color{0.0f, 0.0f, 1.0f, 1.0f};
+    RpLightSetColor(pAmbient, &color);
+    RpLightSetColor(pDirect, &color);
 }
 
-// Converted from cdecl void SetLightsForNightVision(void) 0x735F70
+// 0x735F70
 void SetLightsForNightVision() {
-    ((void(__cdecl *)())0x735F70)();
+    RwRGBAReal color{0.0f, 1.0f, 0.0f, 1.0f};
+    RpLightSetColor(pAmbient, &color);
+    RpLightSetColor(pDirect, &color);
 }
 
-float GetDayNightBalance()
-{
+// 0x6FAB30
+float GetDayNightBalance() {
     return plugin::CallAndReturn<float, 0x6FAB30>();
 }
 
-// Converted from cdecl RpAtomic* RemoveRefsCB(RpAtomic *atomic, void *data) 0x7226D0
-RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data) {
-    return plugin::CallAndReturn<RpAtomic*, 0x7226D0, RpAtomic*, void*>(atomic, data);
+// 0x7226D0
+void RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data) {
+//    return plugin::Call<0x7226D0, RpAtomic*, void*>(atomic, data);
+
+    auto* modelInfo = CVisibilityPlugins::GetAtomicModelInfo(atomic);
+    modelInfo->RemoveRef();
 }
 
-// Converted from cdecl void RemoveRefsForAtomic(RpClump *clump) 0x7226F0
+// unused
+// 0x7226F0
 void RemoveRefsForAtomic(RpClump* clump) {
     plugin::Call<0x7226F0, RpClump*>(clump);
 }
 
+// 0x46A760
 bool IsGlassModel(CEntity* pEntity)
 {
     if (!pEntity->IsObject())
@@ -626,6 +936,7 @@ bool RpAnimBlendPluginAttach() {
     return plugin::CallAndReturn<bool, 0x4D6150>();
 }
 
+// 0x718600
 void AsciiToGxtChar(char const *src, char *dst) {
     plugin::Call<0x718600, char const *, char *>(src, dst);
 }
@@ -638,26 +949,25 @@ void WriteRaster(RwRaster * pRaster, char const * pszPath) {
     plugin::Call<0x005A4150>(pRaster, pszPath);
 }
 
+// 0x71DA00
 bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos, float* pScreenX, float* pScreenY)
 {
     return plugin::CallAndReturn<bool, 0x71DA00, CVector const&, CVector*, float*, float*>(vecPoint, pVecOutPos, pScreenX, pScreenY);
 }
 
+// 0x71DAB0
 bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos)
 {
     return plugin::CallAndReturn<bool, 0x71DAB0, CVector const&, CVector*>(vecPoint, pVecOutPos);
 }
 
-void LittleTest()
-{
-    plugin::Call<0x541330>();
+// 0x541330
+void LittleTest() {
+    ++g_nNumIm3dDrawCalls;
 }
 
-void Render2dStuff()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__cdecl*)())0x53E230)();
-#else
+// 0x53E230
+void Render2dStuff() {
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)false);
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)false);
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)true);
@@ -709,12 +1019,12 @@ void Render2dStuff()
     CGarages::PrintMessages();
     CFont::DrawFonts();
 
-    //NOTSA: Imgui menu draw loop
+    // NOTSA: ImGui menu draw loop
     CDebugMenu::ImguiDrawLoop();
     CDebugMenu::ImGuiDrawMouse();
-#endif
 }
 
+// NOTSA
 std::wstring UTF8ToUnicode(const std::string &str)
 {
     std::wstring out;
@@ -735,6 +1045,7 @@ std::wstring UTF8ToUnicode(const std::string &str)
     return out;
 }
 
+// NOTSA
 std::string UnicodeToUTF8(const std::wstring &str)
 {
     std::string out;

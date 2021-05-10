@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CPed.h"
 #include "eWeaponType.h"
 #include "CPad.h"
@@ -17,20 +16,19 @@ class CPlayerInfo;
 
 class CPlayerPed : public CPed {
 public:
-	CPed * m_p3rdPersonMouseTarget;
-	int field_7A0;
+    CPed* m_p3rdPersonMouseTarget;
+    int field_7A0;
 
     // did we display "JCK_HLP" message
-    static bool &bHasDisplayedPlayerQuitEnterCarHelpText;
+    static bool& bHasDisplayedPlayerQuitEnterCarHelpText;
+
+public:
+    static void InjectHooks();
 
     CPlayerPed(int playerId, bool bGroupCreated);
 
-    // Thanks to Silent
-    inline CWanted *GetWanted() {
-        return m_pPlayerData ? m_pPlayerData->m_pWanted : nullptr;
-    }
-
-    static void InjectHooks();
+    bool Load() override;
+    bool Save() override;
 
     CPad* GetPadFromPlayer();
     bool CanPlayerStartMission();
@@ -89,6 +87,11 @@ public:
     void ProcessWeaponSwitch(CPad* pad);
     bool FindWeaponLockOnTarget();
     bool FindNextWeaponLockOnTarget(CEntity* arg0, bool arg1);
+    // Thanks to Silent
+    // 0x41BE60
+    inline CWanted* GetWanted() {
+        return m_pPlayerData ? m_pPlayerData->m_pWanted : nullptr;
+    }
     int GetWantedLevel();
 
     static void RemovePlayerPed(int playerId);
@@ -100,7 +103,7 @@ public:
 
 VALIDATE_SIZE(CPlayerPed, 0x7A4);
 
-extern char *abTempNeverLeavesGroup; // char abTempNeverLeavesGroup[7];
-extern int &gPlayIdlesAnimBlockIndex;
+extern char* abTempNeverLeavesGroup; // char abTempNeverLeavesGroup[7];
+extern int& gPlayIdlesAnimBlockIndex;
 
 bool LOSBlockedBetweenPeds(CEntity* entity1, CEntity* entity2);

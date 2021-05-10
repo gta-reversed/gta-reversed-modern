@@ -2437,6 +2437,15 @@ MACRO_STOP
 #define RwCameraGetFrame(_camera)                               \
     RwCameraGetFrameMacro(_camera)
 
+#define RwRasterGetDepthMacro(_raster) ((_raster)->depth)
+#define RwRasterGetDepth(_raster) RwRasterGetDepthMacro(_raster)
+
+#define RwIm2DGetNearScreenZMacro() (RWSRCGLOBAL(dOpenDevice).zBufferNear)
+#define RwIm2DGetNearScreenZ() RwIm2DGetNearScreenZMacro()
+
+#define RwCameraGetNearClipPlaneMacro(_camera) ((_camera)->nearPlane)
+#define RwCameraGetNearClipPlane(_camera) RwCameraGetNearClipPlaneMacro(_camera)
+
 #endif /* !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE)) */
 
 /****************************************************************************
