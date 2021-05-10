@@ -244,10 +244,17 @@ public:
 public:
     static void InjectHooks();
 
+    static void Init(char const* datFile);
+    static void InitialiseAllConnectLodObjects();
+    static void InitialiseConnectLodObjects(unsigned short a1);
+    static void InitialiseSpecialAnimGroup(unsigned short a1);
+    static void InitialiseSpecialAnimGroupsAttachedToCharModels();
+
     static int AddScriptCheckpoint(float atX, float atY, float atZ, float PointToX, float PointToY, float PointToZ, float radius, int type);
     static int AddScriptEffectSystem(FxSystem_c* a1);
     static int AddScriptSearchLight(float startX, float startY, float startZ, CEntity* entity, float targetX, float targetY, float targetZ, float targetRadius, float baseRadius);
     static unsigned int AddScriptSphere(unsigned int id, CVector posn, float radius);
+
     static void AddToBuildingSwapArray(CBuilding* pBuilding, int oldModelId, int newModelId);
     static void AddToInvisibilitySwapArray(CEntity* a2, bool bVisible);
     static void AddToListOfConnectedLodObjects(CObject* pObject1, CObject* pObject2);
@@ -276,28 +283,30 @@ public:
     static bool HasVehicleModelBeenBlockedByScript(int modelIndex);
     static void HighlightImportantAngledArea(unsigned int markerId, float fromX, float fromY, float toX, float toY, float angledToX, float angledToY, float angledFromX, float angledFromY, float height);
     static void HighlightImportantArea(int markerId, float fromX, float fromY, float toX, float toY, float height);
-    static void Init(char const* datFile);
-    static void InitialiseAllConnectLodObjects();
-    static void InitialiseConnectLodObjects(unsigned short a1);
-    static void InitialiseSpecialAnimGroup(unsigned short a1);
-    static void InitialiseSpecialAnimGroupsAttachedToCharModels();
+
     static bool IsEntityWithinAnySearchLight(CEntity* pEntity, int* pIndex);
     static bool IsEntityWithinSearchLight(unsigned int index, CEntity* pEntity);
     static bool IsPedStopped(CPed* ped);
     static bool IsPlayerOnAMission();
     static bool IsPointWithinSearchLight(CVector* pointPosn, int index);
     static bool IsVehicleStopped(CVehicle* pVehicle);
+
     static void Load();
+    static void Save();
+
     static void MoveSearchLightBetweenTwoPoints(int index, float x1, float y1, float z1, float x2, float y2, float z2, float pathSpeed);
     static void MoveSearchLightToEntity(int index, CEntity* pEntity, float pathSpeed);
     static void MoveSearchLightToPointAndStop(int index, float x, float y, float z, float pathSpeed);
     static void PrintListSizes();
+
     static void Process();
     static void ProcessAllSearchLights();
     static void ProcessWaitingForScriptBrainArray();
+
     static void ReadMultiScriptFileOffsetsFromScript();
     static void ReadObjectNamesFromScript();
     static void ReinitialiseSwitchStatementData();
+
     static void RemoveFromVehicleModelsBlockedByScript(int modelIndex);
     static int RemoveFromWaitingForScriptBrainArray(CEntity* a1, short modelIndex);
     static void RemoveScriptCheckpoint(int arg1);
@@ -306,8 +315,8 @@ public:
     static void RemoveScriptSphere(int index);
     static void RemoveScriptTextureDictionary();
     static void RemoveThisPed(CPed* ped);
+
     static void RenderAllSearchLights();
-    static void Save();
     static bool ScriptAttachAnimGroupToCharModel(int modelId, char* ifpName);
     static void ScriptConnectLodsFunction(int objectHandle1, int objectHandle2);
     static void ScriptDebugCircle2D(float x, float y, float width, float height, CRGBA color);
