@@ -28,7 +28,7 @@ void CGame::InjectHooks() {
 //    ReversibleHooks::Install("CGame", "ReloadIPLs", 0x53BED0, &CGame::ReloadIPLs);
 //    ReversibleHooks::Install("CGame", "ShutDownForRestart", 0x53C550, &CGame::ShutDownForRestart);
 //    ReversibleHooks::Install("CGame", "Shutdown", 0x53C900, &CGame::Shutdown);
-//    ReversibleHooks::Install("CGame", "ShutdownRenderWare", 0x53BB80, &CGame::ShutdownRenderWare);
+    ReversibleHooks::Install("CGame", "ShutdownRenderWare", 0x53BB80, &CGame::ShutdownRenderWare);
 //    ReversibleHooks::Install("CGame", "DrasticTidyUpMemory", 0x53C810, &CGame::DrasticTidyUpMemory);
 //    ReversibleHooks::Install("CGame", "FinalShutdown", 0x53BC30, &CGame::FinalShutdown);
 //    ReversibleHooks::Install("CGame", "TidyUpMemory", 0x53C500, &CGame::TidyUpMemory);

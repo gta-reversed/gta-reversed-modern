@@ -1,9 +1,18 @@
 #include "StdInc.h"
 
+float& CCoronas::SunScreenX = *(float*)0xC3E028;
+float& CCoronas::SunScreenY = *(float*)0xC3E02C;
+//bool& CCoronas::SunBlockedByClouds = *(bool*)0x0;
+bool& CCoronas::bChangeBrightnessImmediately = *(bool*)0xC3E034;
+unsigned int& CCoronas::NumCoronas = *(unsigned int*)0xC3E038;
+float& CCoronas::LightsMult = *(float*)0x8D4B5C; // 1.0f
+unsigned int& CCoronas::MoonSize = *(unsigned int*)0x8D4B60; // 3
 RwTexture* (&gpCoronaTexture)[CORONA_TEXTURES_COUNT] = *(RwTexture*(*)[CORONA_TEXTURES_COUNT])0xC3E000;
 CRegisteredCorona(&CCoronas::aCoronas)[MAX_NUM_CORONAS] = *(CRegisteredCorona(*)[MAX_NUM_CORONAS])0xC3E058;
 
 unsigned short(&CCoronas::ms_aEntityLightsOffsets)[8] = *(unsigned short(*)[8])0x8D5028;
+
+char (&coronaTexturesAlphaMasks)[260] = *(char (*)[260])0x8D4A58;
 
 void CCoronas::InjectHooks() {
 //    ReversibleHooks::Install("CCoronas", "Init", 0x6FAA70, &CCoronas::Init);

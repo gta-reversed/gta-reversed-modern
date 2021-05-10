@@ -8,7 +8,6 @@ Do not delete this comment block. Respect others' work!
 
 #include <string>
 
-#include "PluginBase.h"
 #include "CVector.h"
 #include "CEntity.h"
 #include "CPlayerPed.h"
@@ -60,8 +59,28 @@ extern float &GAME_GRAVITY; // default 0.0080000004
 
 extern char(&PC_Scratch)[16384];
 
+extern float& gfLaRiotsLightMult;
+
+const unsigned int rwVENDORID_ROCKSTAR = 0x0253F2;
+extern unsigned int &ClumpOffset;
+
+#define RpClumpGetAnimBlendClumpData(clump) (*(CAnimBlendClumpData **)(((unsigned int)(clump) + ClumpOffset)))
+
+#define RpGeometryGetMesh(_geometry, _index) (&((RpMesh*)(((char*)(_geometry)->mesh) + sizeof(RpMeshHeader) + ((_geometry)->mesh->firstMeshOffset)))[_index])
+
+constexpr float TWO_PI = 6.28318530718f;
+constexpr float PI = 3.14159265358979323846f;
+constexpr float HALF_PI = PI / 2.0f;
+constexpr float LOG10_2 = 0.30102999566398119802f; // log10(2)
+
+extern float& flt_858B14;
+extern float& flt_858B14;
+extern float& flt_859520;
+extern float& flt_859524;
+
 void InjectCommonHooks();
-                            // returns player coors
+
+// returns player coors
 CVector FindPlayerCoors(int playerId = -1);
 // returns player speed
 CVector& FindPlayerSpeed(int playerId = -1);
@@ -80,34 +99,18 @@ float FindPlayerHeight();
 // returns player ped
 CPlayerPed * FindPlayerPed(int playerId = -1);
 // returns player vehicle
-CAutomobile * FindPlayerVehicle(int playerId, bool bIncludeRemote);
+CAutomobile* FindPlayerVehicle(int playerId, bool bIncludeRemote);
+// returns player wanted
+CWanted * FindPlayerWanted(int playerId = -1);
 // 2 players are playing
 bool InTwoPlayersMode();
 
-CVector Multiply3x3(CMatrix& const m, CVector& const v);
-// vector by matrix mult, resulting in a vector where each component is
-// the dot product of the in vector and a matrix direction
-CVector Multiply3x3(CVector& const v, CMatrix& const m);
+CVector Multiply3x3(CMatrix& m, CVector& v);
+CVector Multiply3x3(CVector& v, CMatrix& m);
 
 void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos);
 void TransformVectors(RwV3d* vecsOut, int numVectors, CMatrix const& matrix, RwV3d const* vecsin);
 void TransformVectors(RwV3d* vecsOut, int numVectors, CSimpleTransform const& transform, RwV3d const* vecsin);
-
-
-// returns player wanted
-CWanted * FindPlayerWanted(int playerId = -1);
-
-const unsigned int rwVENDORID_ROCKSTAR = 0x0253F2;
-extern unsigned int &ClumpOffset;
-
-#define RpClumpGetAnimBlendClumpData(clump) (*(CAnimBlendClumpData **)(((unsigned int)(clump) + ClumpOffset)))
-
-#define RpGeometryGetMesh(_geometry, _index) (&((RpMesh*)(((char*)(_geometry)->mesh) + sizeof(RpMeshHeader) + ((_geometry)->mesh->firstMeshOffset)))[_index])
-
-constexpr float TWO_PI = 6.28318530718f;
-constexpr float PI = 3.14159265358979323846f;
-constexpr float HALF_PI = PI / 2.0f;
-constexpr float LOG10_2 = 0.30102999566398119802f; // log10(2)
 
 constexpr float DegreesToRadians(float angleInDegrees) {
     return angleInDegrees * PI / 180.0F;
@@ -122,7 +125,6 @@ T clamp(T value, T low, T high)
 {
     return std::min(std::max(value, low), high);
 }
-
 
 inline const float lerp(float fMin, float fMax, float fProgress) {
     return fMin * (1.0F - fProgress) + fMax * fProgress;
@@ -190,7 +192,7 @@ void SkinGetBonePositionsToTable(RpClump* clump, RwV3d* table);
 void SetLightsWithTimeOfDayColour(RpWorld* world);
 // dummy function
 void LightsEnable(int arg0);
-RpWorld* LightsDestroy(RpWorld* world);
+void LightsDestroy(RpWorld* world);
 // lighting = [0.0f;1.0f]
 void WorldReplaceNormalLightsWithScorched(RpWorld* world, float lighting);
 void WorldReplaceScorchedLightsWithNormal(RpWorld* world);
@@ -222,7 +224,7 @@ void SetLightsForNightVision();
 float GetDayNightBalance();
 
 // 'data' is unused
-RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data);
+void RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data);
 void RemoveRefsForAtomic(RpClump* clump);
 
 bool IsGlassModel(CEntity* pEntity);

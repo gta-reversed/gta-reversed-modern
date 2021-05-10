@@ -6,8 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
 enum eStreamingFlags {
     STREAMING_UNKNOWN_1 = 0x1,
     STREAMING_GAME_REQUIRED = 0x2,
@@ -33,11 +31,9 @@ public:
     short m_nNextIndex; // ms_pArrayBase array index
     short m_nPrevIndex; // ms_pArrayBase array index
     short m_nNextIndexOnCd;
-    union
-    {
+    union {
         unsigned char m_nFlags; // see eStreamingFlags
-        struct
-        {
+        struct {
             unsigned char bUnkn0x1 : 1;
             unsigned char bGameRequired : 1;
             unsigned char bMissionRequired : 1;
@@ -48,27 +44,25 @@ public:
     };
     unsigned char m_nImgId;
     unsigned int m_nCdPosn;
-    unsigned int m_nCdSize; // number of blocks/sectors; m_nCdSize * STREAMING_BLOCK_SIZE = actual size in bytes
+    unsigned int m_nCdSize;     // number of blocks/sectors; m_nCdSize * STREAMING_BLOCK_SIZE = actual size in bytes
     unsigned char m_nLoadState; // see eStreamingLoadState
-private:
-    char  __pad[3];
+    char __pad[3];
+
+    static CStreamingInfo*& ms_pArrayBase;
 
 public:
-     static CStreamingInfo *&ms_pArrayBase;
+    static void InjectHooks();
 
-     static void InjectHooks();
-     void Init();
-     void AddToList(CStreamingInfo* listStart);
-     uint32_t GetCdPosn();
-     void SetCdPosnAndSize(uint32_t CdPosn, uint32_t CdSize);
-     bool GetCdPosnAndSize(uint32_t& CdPosn, uint32_t& CdSize);
-     uint32_t GetCdSize() { return m_nCdSize; }
-     CStreamingInfo* GetNext() { return m_nNextIndex == -1 ? nullptr : &ms_pArrayBase[m_nNextIndex]; }
-     CStreamingInfo *GetPrev() { return m_nPrevIndex == -1 ? nullptr : &ms_pArrayBase[m_nPrevIndex]; }
-     bool InList();
-     void RemoveFromList();
+    void Init();
+    void AddToList(CStreamingInfo* listStart);
+    uint32_t GetCdPosn();
+    void SetCdPosnAndSize(uint32_t CdPosn, uint32_t CdSize);
+    bool GetCdPosnAndSize(uint32_t& CdPosn, uint32_t& CdSize);
+    uint32_t GetCdSize() { return m_nCdSize; }
+    CStreamingInfo* GetNext() { return m_nNextIndex == -1 ? nullptr : &ms_pArrayBase[m_nNextIndex]; }
+    CStreamingInfo* GetPrev() { return m_nPrevIndex == -1 ? nullptr : &ms_pArrayBase[m_nPrevIndex]; }
+    bool InList();
+    void RemoveFromList();
 };
 
 VALIDATE_SIZE(CStreamingInfo, 0x14);
-
-//#include "meta/meta.CStreamingInfo.h"

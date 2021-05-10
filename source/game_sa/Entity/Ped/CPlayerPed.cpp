@@ -7,15 +7,24 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-char *abTempNeverLeavesGroup = (char *)0xC0BC08;
-int &gPlayIdlesAnimBlockIndex = *(int *)0xC0BC10;
-bool &CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = *(bool *)0xC0BC15;
+char* abTempNeverLeavesGroup = (char*)0xC0BC08;
+int& gPlayIdlesAnimBlockIndex = *(int*)0xC0BC10;
+bool& CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = *(bool*)0xC0BC15;
 
-void CPlayerPed::InjectHooks()
-{
-    HookInstall(0x60A530, &CPlayerPed::ResetSprintEnergy); 
-    HookInstall(0x60A8A0, &CPlayerPed::ResetPlayerBreath);
-    HookInstall(0x6094A0, &CPlayerPed::RemovePlayerPed);
+void CPlayerPed::InjectHooks() {
+    ReversibleHooks::Install("CPlayerPed", "ResetSprintEnergy", 0x60A530, &CPlayerPed::ResetSprintEnergy);
+    ReversibleHooks::Install("CPlayerPed", "ResetPlayerBreath", 0x60A8A0, &CPlayerPed::ResetPlayerBreath);
+    ReversibleHooks::Install("CPlayerPed", "RemovePlayerPed", 0x6094A0, &CPlayerPed::RemovePlayerPed);
+}
+
+// 0x5D46E0
+bool CPlayerPed::Load() {
+    return plugin::CallMethodAndReturn<bool, 0x5D46E0>(this);
+}
+
+// 0x5D57E0
+bool CPlayerPed::Save() {
+    return plugin::CallMethodAndReturn<bool, 0x5D57E0>(this);
 }
 
 // Converted from thiscall void CPlayerPed::CPlayerPed(int playerId,bool bGroupCreated) 0x60D5B0
@@ -25,9 +34,6 @@ CPlayerPed::CPlayerPed(int playerId, bool bGroupCreated) : CPed(plugin::dummy) {
 
 // Converted from cdecl void CPlayerPed::RemovePlayerPed(int playerId) 0x6094A0
 void CPlayerPed::RemovePlayerPed(int playerId) {
-#ifdef USE_DEFAULT_FUNCTIONS
-  plugin::Call<0x6094A0, int>(playerId);
-#else
     CPed* playerPed = CWorld::Players[playerId].m_pPed;
     CPlayerInfo* pPlayerInfo = &CWorld::Players[playerId];
     if (playerPed)
@@ -40,11 +46,9 @@ void CPlayerPed::RemovePlayerPed(int playerId) {
             playerVehicle->m_fBreakPedal = 0.1f;
         }
         CWorld::Remove(static_cast<CEntity*>(playerPed));
-        if (playerPed)
-            delete playerPed;
+        delete playerPed;
         pPlayerInfo->m_pPed = nullptr;
     }
-#endif
 }
 
 // Converted from cdecl void CPlayerPed::DeactivatePlayerPed(int playerId) 0x609520
@@ -199,11 +203,7 @@ void CPlayerPed::MakePlayerGroupReappear() {
 
 void CPlayerPed::ResetSprintEnergy() 
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x60A530, CPlayerPed *>(this);
-#else
     m_pPlayerData->m_fTimeCanRun = CStats::GetFatAndMuscleModifier(STAT_MOD_TIME_CAN_RUN);
-#endif
 }
 
 // Converted from thiscall bool CPlayerPed::HandleSprintEnergy(bool, float) 0x60A550
@@ -222,12 +222,8 @@ float CPlayerPed::GetButtonSprintResults(eSprintType sprintType) {
 }
 
 void CPlayerPed::ResetPlayerBreath() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x60A8A0, CPlayerPed *>(this);
-#else
     m_pPlayerData->m_fBreath = CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG);
     m_pPlayerData->m_bRequireHandleBreath = false;
-#endif
 }
 
 // Converted from thiscall void CPlayerPed::HandlePlayerBreath(bool, float) 0x60A8D0

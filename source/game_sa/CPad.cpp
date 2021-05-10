@@ -20,7 +20,8 @@ CPad* CPad::Pads = (CPad*)0xB73458; // size is 2
 
 void CPad::InjectHooks()
 {
-    ReversibleHooks::Install("CPad", "UpdatePads", 0x541DD0, &CPad::UpdatePads);
+    HookInstall(0x541DD0, CPad::UpdatePads); // changes logic of the function and shouldn't be toggled on/off
+
     ReversibleHooks::Install("CPad", "DoCheats", 0x439AF0, &CPad::DoCheats);
     ReversibleHooks::Install("CPad", "isEnterJustPressed", 0x4D5980, &CPad::isEnterJustPressed);
     ReversibleHooks::Install("CPad", "isStandardKeyJustPressed", 0x4D59B0, &CPad::isStandardKeyJustPressed);

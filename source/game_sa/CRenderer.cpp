@@ -13,13 +13,13 @@ std::int32_t MAX_VISIBLE_LOD_PTRS = 1000;
 std::int32_t MAX_VISIBLE_SUPERLOD_PTRS = 50;
 bool& CRenderer::ms_bRenderTunnels = *(bool*)0xB745C0;
 bool& CRenderer::ms_bRenderOutsideTunnels = *(bool*)0xB745C1;
-tRenderListEntry*& CRenderer::ms_pLodDontRenderList = *(tRenderListEntry * *)0xB745CC;
-tRenderListEntry*& CRenderer::ms_pLodRenderList = *(tRenderListEntry * *)0xB745D0;
-CVehicle*& CRenderer::m_pFirstPersonVehicle = *(CVehicle * *)0xB745D4;
-CEntity** CRenderer::ms_aInVisibleEntityPtrs = (CEntity * *)0xB745D8;
-CEntity** CRenderer::ms_aVisibleSuperLodPtrs = (CEntity * *)0xB74830;
-CEntity** CRenderer::ms_aVisibleLodPtrs = (CEntity * *)0xB748F8;
-CEntity** CRenderer::ms_aVisibleEntityPtrs = (CEntity * *)0xB75898;
+tRenderListEntry*& CRenderer::ms_pLodDontRenderList = *(tRenderListEntry**)0xB745CC;
+tRenderListEntry*& CRenderer::ms_pLodRenderList = *(tRenderListEntry**)0xB745D0;
+CVehicle*& CRenderer::m_pFirstPersonVehicle = *(CVehicle**)0xB745D4;
+CEntity** CRenderer::ms_aInVisibleEntityPtrs = (CEntity**)0xB745D8;
+CEntity** CRenderer::ms_aVisibleSuperLodPtrs = (CEntity**)0xB74830;
+CEntity** CRenderer::ms_aVisibleLodPtrs = (CEntity**)0xB748F8;
+CEntity** CRenderer::ms_aVisibleEntityPtrs = (CEntity**)0xB75898;
 int& CRenderer::ms_nNoOfVisibleSuperLods = *(int*)0xB76838;
 int& CRenderer::ms_nNoOfInVisibleEntities = *(int*)0xB7683C;
 int& CRenderer::ms_nNoOfVisibleLods = *(int*)0xB76840;
@@ -32,43 +32,43 @@ CVector& CRenderer::ms_vecCameraPosition = *(CVector*)0xB76870;
 float& CRenderer::ms_lodDistScale = *(float*)0x8CD800;
 float& CRenderer::ms_lowLodDistScale = *(float*)0x8CD804;
 unsigned int& gnRendererModelRequestFlags = *(unsigned int*)0xB745C4;
-CEntity**& gpOutEntitiesForGetObjectsInFrustum = *(CEntity * **)0xB76854;
+CEntity**& gpOutEntitiesForGetObjectsInFrustum = *(CEntity***)0xB76854;
 
 void CRenderer::InjectHooks()
 {
-    HookInstall(0x5531E0, &CRenderer::RenderFadingInEntities);
-    HookInstall(0x553220, &CRenderer::RenderFadingInUnderwaterEntities);
-    HookInstall(0x553230, &CRenderer::RenderOneRoad);
-    HookInstall(0x553260, &CRenderer::RenderOneNonRoad);
-    HookInstall(0x553390, &CRenderer::RemoveVehiclePedLights);
-    HookInstall(0x5534B0, &CRenderer::AddEntityToRenderList);
-    HookInstall(0x5536D0, &CRenderer::GetLodRenderListBase);
-    HookInstall(0x5536E0, &CRenderer::GetLodDontRenderListBase);
-    HookInstall(0x5536F0, &CRenderer::ResetLodRenderLists);
-    HookInstall(0x553710, &CRenderer::AddToLodRenderList);
-    HookInstall(0x553740, &CRenderer::AddToLodDontRenderList);
-    HookInstall(0x553770, &CRenderer::ProcessLodRenderLists);
-    HookInstall(0x553910, &CRenderer::PreRender);
-    HookInstall(0x553A10, &CRenderer::RenderRoads);
-    HookInstall(0x553AA0, &CRenderer::RenderEverythingBarRoads);
-    HookInstall(0x553D00, &CRenderer::RenderFirstPersonVehicle);
-    HookInstall(0x553E40, &CRenderer::SetupLightingForEntity);
-    HookInstall(0x554230, &CRenderer::SetupEntityVisibility);
-    HookInstall(0x553F60, &CRenderer::SetupMapEntityVisibility);
-    HookInstall(0x554650, &CRenderer::SetupBigBuildingVisibility);
-    HookInstall(0x553540, &CRenderer::SetupScanLists);
-    HookInstall(0x5535D0, &CRenderer::ScanSectorList_ListModels);
-    HookInstall(0x553650, &ScanSectorList_ListModelsVisible);
-    HookInstall(0x554840, &CRenderer::ScanSectorList);
-    HookInstall(0x554B10, &CRenderer::ScanBigBuildingList);
-    HookInstall(0x554EB0, &CRenderer::ShouldModelBeStreamed);
-    HookInstall(0x555680, &CRenderer::ScanPtrList_RequestModels);
-    HookInstall(0x5556E0, &CRenderer::ConstructRenderList);
-    HookInstall(0x555900, &CRenderer::ScanSectorList_RequestModels);
-    HookInstall(0x554FE0, &CRenderer::ScanWorld);
-    HookInstall(0x554C60, &CRenderer::GetObjectsInFrustum);
-    HookInstall(0x555960, &CRenderer::RequestObjectsInFrustum);
-    HookInstall(0x555CB0, &CRenderer::RequestObjectsInDirection);
+    ReversibleHooks::Install("CRenderer", "RenderFadingInEntities", 0x5531E0, &CRenderer::RenderFadingInEntities);
+    ReversibleHooks::Install("CRenderer", "RenderFadingInUnderwaterEntities", 0x553220, &CRenderer::RenderFadingInUnderwaterEntities);
+    ReversibleHooks::Install("CRenderer", "RenderOneRoad", 0x553230, &CRenderer::RenderOneRoad);
+    ReversibleHooks::Install("CRenderer", "RenderOneNonRoad", 0x553260, &CRenderer::RenderOneNonRoad);
+    ReversibleHooks::Install("CRenderer", "RemoveVehiclePedLights", 0x553390, &CRenderer::RemoveVehiclePedLights);
+    ReversibleHooks::Install("CRenderer", "AddEntityToRenderList", 0x5534B0, &CRenderer::AddEntityToRenderList);
+    ReversibleHooks::Install("CRenderer", "GetLodRenderListBase", 0x5536D0, &CRenderer::GetLodRenderListBase);
+    ReversibleHooks::Install("CRenderer", "GetLodDontRenderListBase", 0x5536E0, &CRenderer::GetLodDontRenderListBase);
+    ReversibleHooks::Install("CRenderer", "ResetLodRenderLists", 0x5536F0, &CRenderer::ResetLodRenderLists);
+    ReversibleHooks::Install("CRenderer", "AddToLodRenderList", 0x553710, &CRenderer::AddToLodRenderList);
+    ReversibleHooks::Install("CRenderer", "AddToLodDontRenderList", 0x553740, &CRenderer::AddToLodDontRenderList);
+    ReversibleHooks::Install("CRenderer", "ProcessLodRenderLists", 0x553770, &CRenderer::ProcessLodRenderLists);
+    ReversibleHooks::Install("CRenderer", "PreRender", 0x553910, &CRenderer::PreRender);
+    ReversibleHooks::Install("CRenderer", "RenderRoads", 0x553A10, &CRenderer::RenderRoads);
+    ReversibleHooks::Install("CRenderer", "RenderEverythingBarRoads", 0x553AA0, &CRenderer::RenderEverythingBarRoads);
+    ReversibleHooks::Install("CRenderer", "RenderFirstPersonVehicle", 0x553D00, &CRenderer::RenderFirstPersonVehicle);
+    ReversibleHooks::Install("CRenderer", "SetupLightingForEntity", 0x553E40, &CRenderer::SetupLightingForEntity);
+    ReversibleHooks::Install("CRenderer", "SetupEntityVisibility", 0x554230, &CRenderer::SetupEntityVisibility);
+    ReversibleHooks::Install("CRenderer", "SetupMapEntityVisibility", 0x553F60, &CRenderer::SetupMapEntityVisibility);
+    ReversibleHooks::Install("CRenderer", "SetupBigBuildingVisibility", 0x554650, &CRenderer::SetupBigBuildingVisibility);
+    ReversibleHooks::Install("CRenderer", "SetupScanLists", 0x553540, &CRenderer::SetupScanLists);
+    ReversibleHooks::Install("CRenderer", "ScanSectorList_ListModels", 0x5535D0, &CRenderer::ScanSectorList_ListModels);
+    ReversibleHooks::Install("CRenderer", "ScanSectorList_ListModelsVisible);", 0x553650, &CRenderer::ScanSectorList_ListModelsVisible);
+    ReversibleHooks::Install("CRenderer", "ScanSectorList", 0x554840, &CRenderer::ScanSectorList);
+    ReversibleHooks::Install("CRenderer", "ScanBigBuildingList", 0x554B10, &CRenderer::ScanBigBuildingList);
+    ReversibleHooks::Install("CRenderer", "ShouldModelBeStreamed", 0x554EB0, &CRenderer::ShouldModelBeStreamed);
+    ReversibleHooks::Install("CRenderer", "ScanPtrList_RequestModels", 0x555680, &CRenderer::ScanPtrList_RequestModels);
+    ReversibleHooks::Install("CRenderer", "ConstructRenderList", 0x5556E0, &CRenderer::ConstructRenderList);
+    ReversibleHooks::Install("CRenderer", "ScanSectorList_RequestModels", 0x555900, &CRenderer::ScanSectorList_RequestModels);
+    ReversibleHooks::Install("CRenderer", "ScanWorld", 0x554FE0, &CRenderer::ScanWorld);
+    ReversibleHooks::Install("CRenderer", "GetObjectsInFrustum", 0x554C60, &CRenderer::GetObjectsInFrustum);
+    ReversibleHooks::Install("CRenderer", "RequestObjectsInFrustum", 0x555960, &CRenderer::RequestObjectsInFrustum);
+    ReversibleHooks::Install("CRenderer", "RequestObjectsInDirection", 0x555CB0, &CRenderer::RequestObjectsInDirection);
 
 }
 
@@ -90,33 +90,25 @@ void CRenderer::Shutdown() {
     // empty 
 }
 
+// 0x5531E0
 void CRenderer::RenderFadingInEntities() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x5531E0>();
-#else
     RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
     DeActivateDirectional();
     SetAmbientColours();
     CVisibilityPlugins::RenderFadingEntities();
-#endif
 }
 
+// 0x553220
 void CRenderer::RenderFadingInUnderwaterEntities() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553220>();
-#else
     DeActivateDirectional();
     SetAmbientColours();
     CVisibilityPlugins::RenderFadingUnderwaterEntities();
-#endif
 }
 
+// 0x553230
 void CRenderer::RenderOneRoad(CEntity* entity) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553230, CEntity*>(entity);
-#else
     if (CPostEffects::IsVisionFXActive()) {
         CPostEffects::FilterFX_StoreAndSetDayNightBalance();
         entity->Render();
@@ -124,13 +116,10 @@ void CRenderer::RenderOneRoad(CEntity* entity) {
         return;
     }
     entity->Render();
-#endif
 }
 
+// 0x553260
 void CRenderer::RenderOneNonRoad(CEntity* entity) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553260, CEntity*>(entity);
-#else
     CPed* pPed = static_cast<CPed*>(entity);
     CVehicle* pVehicle = static_cast<CVehicle*>(entity);
     if (entity->m_nType != ENTITY_TYPE_PED || pPed->m_nPedState != PEDSTATE_DRIVING) {
@@ -169,23 +158,17 @@ void CRenderer::RenderOneNonRoad(CEntity* entity) {
             entity->RemoveLighting(bSetupLighting);
         }
     }
-#endif
 }
 
+// 0x553390
 void CRenderer::RemoveVehiclePedLights(CPhysical* entity) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553390, CPhysical*>(entity);
-#else
     if (!entity->physicalFlags.bDestroyed)
         CPointLights::RemoveLightsAffectingObject();
-#endif
 }
 
+// 0x05534B0
 void CRenderer::AddEntityToRenderList(CEntity* pEntity, float fDistance)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x05534B0, CEntity*, float>(pEntity, fDistance);
-#else
     CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[pEntity->m_nModelIndex];
     pBaseModelInfo->SetHasBeenPreRendered(false);
     if (!pEntity->m_bDistanceFade) {
@@ -205,59 +188,41 @@ void CRenderer::AddEntityToRenderList(CEntity* pEntity, float fDistance)
         ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities] = pEntity;
         ms_nNoOfVisibleEntities++;
     }
-#endif
 }
 
+// 0x5536D0
 tRenderListEntry* CRenderer::GetLodRenderListBase() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<tRenderListEntry*, 0x5536D0>();
-#else
     return reinterpret_cast<tRenderListEntry*>(&PC_Scratch[24]);
-#endif
 }
 
+// 0x5536E0
 tRenderListEntry* CRenderer::GetLodDontRenderListBase() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<tRenderListEntry*, 0x5536E0>();
-#else
     return reinterpret_cast<tRenderListEntry*>(&PC_Scratch[0x2000]);
-#endif
 }
 
+// 0x5536F0
 void CRenderer::ResetLodRenderLists() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x5536F0>();
-#else
     ms_pLodRenderList = GetLodRenderListBase();
     ms_pLodDontRenderList = GetLodDontRenderListBase();
-#endif
 }
 
+// 0x553710
 void CRenderer::AddToLodRenderList(CEntity* entity, float distance) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553710, CEntity*, float>(entity, distance);
-#else
     ms_pLodRenderList->pEntity = entity;
     ms_pLodRenderList->distance = distance;
     ++ms_pLodRenderList;
-#endif
 }
 
 // unused
+// 0x553740
 void CRenderer::AddToLodDontRenderList(CEntity* entity, float distance) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553740, CEntity*, float>(entity, distance);
-#else
     ms_pLodDontRenderList->pEntity = entity;
     ms_pLodDontRenderList->distance = distance;
     ++ms_pLodDontRenderList;
-#endif
 }
 
+// 0x553770
 void CRenderer::ProcessLodRenderLists() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553770>();
-#else
     for (auto renderListEntry = GetLodRenderListBase(); renderListEntry != ms_pLodRenderList; renderListEntry++) {
         CEntity* entity = renderListEntry->pEntity;
         if (entity && !entity->m_bIsVisible) {
@@ -317,13 +282,10 @@ void CRenderer::ProcessLodRenderLists() {
             entity->m_nNumLodChildrenRendered = 0;
         }
     }
-#endif
 }
 
+// 0x553910
 void CRenderer::PreRender() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553910>();
-#else
     for (std::int32_t i = 0; i < ms_nNoOfVisibleLods; ++i) {
         ms_aVisibleLodPtrs[i]->PreRender();
     }
@@ -356,13 +318,10 @@ void CRenderer::PreRender() {
     }
     CHeli::SpecialHeliPreRender();
     CShadows::RenderExtraPlayerShadows();
-#endif
 }
 
+// 0x553A10
 void CRenderer::RenderRoads() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553A10>();
-#else
     RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
@@ -381,24 +340,23 @@ void CRenderer::RenderRoads() {
             }
         }
     }
-#endif
 }
 
+// 0x553AA0
 void CRenderer::RenderEverythingBarRoads() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553AA0>();
-#else
     RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
     if (!CGame::currArea)
         RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)140u);
+
     for (std::int32_t i = 0; i < ms_nNoOfVisibleEntities; i++) {
         CEntity* entity = ms_aVisibleEntityPtrs[i];
         CVehicle* pVehicle = static_cast<CVehicle*>(entity);
         CPed* pPed = static_cast<CPed*>(entity);
         if (entity->m_nType == ENTITY_TYPE_BUILDING && CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex]->IsRoad())
             continue;
+
         bool bInserted = false;
         if (entity->m_nType == ENTITY_TYPE_VEHICLE || (entity->m_nType == ENTITY_TYPE_PED && CVisibilityPlugins::GetClumpAlpha(entity->m_pRwClump) != 255)) {
             if (entity->m_nType == ENTITY_TYPE_VEHICLE) {
@@ -435,13 +393,10 @@ void CRenderer::RenderEverythingBarRoads() {
     RwCameraEndUpdate(Scene.m_pRwCamera);
     Scene.m_pRwCamera->zShift = oldzShift;
     RwCameraBeginUpdate(Scene.m_pRwCamera);
-#endif
 }
 
+// 0x553D00
 void CRenderer::RenderFirstPersonVehicle() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553D00>();
-#else
     if (CRenderer::m_pFirstPersonVehicle) {
         bool bRestoreAlphaTest = false;
         if (CWorld::Players[0].m_pPed->GetActiveWeapon().m_nType == WEAPON_MICRO_UZI) {
@@ -459,13 +414,10 @@ void CRenderer::RenderFirstPersonVehicle() {
         if (bRestoreAlphaTest)
             RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)0);
     }
-#endif
 }
 
+// 0x553E40
 bool CRenderer::SetupLightingForEntity(CPhysical* entity) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<bool, 0x553E40, CPhysical*>(entity);
-#else
     CCarFXRenderer::SetFxEnvMapLightMult(1.0f);
     if (entity->physicalFlags.bDestroyed) {
         WorldReplaceNormalLightsWithScorched(Scene.m_pRpWorld, 0.18f);
@@ -478,13 +430,10 @@ bool CRenderer::SetupLightingForEntity(CPhysical* entity) {
     CCarFXRenderer::SetFxEnvMapLightMult(lightingMultiplier);
     SetLightColoursForPedsCarsAndObjects(lightingMultiplier);
     return true;
-#endif
 }
 
+// 0x553F60
 int CRenderer::SetupMapEntityVisibility(CEntity* pEntity, CBaseModelInfo* pBaseModelInfo, float fDistance, bool bIsTimeInRange) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<int, 0x553F60, CEntity*, CBaseModelInfo*, float, bool>(pEntity, pBaseModelInfo, fDistance, bIsTimeInRange);
-#else
     if (!pEntity->m_bTunnelTransition
         && ((!CRenderer::ms_bRenderTunnels && pEntity->m_bTunnel) || (!CRenderer::ms_bRenderOutsideTunnels && !pEntity->m_bTunnel)))
     {
@@ -564,13 +513,10 @@ int CRenderer::SetupMapEntityVisibility(CEntity* pEntity, CBaseModelInfo* pBaseM
         pBaseModelInfo->m_nAlpha = 255;
     pBaseModelInfo->SetHasBeenPreRendered(false);
     return RENDERER_CULLED;
-#endif
 }
 
+// 0x554230
 int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<int, 0x554230, CEntity*, float*>(pEntity, outDistance);
-#else
     const std::int32_t modelId = pEntity->m_nModelIndex;
     CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CBaseModelInfo* pBaseAtomicModelInfo = pBaseModelInfo->AsAtomicModelInfoPtr();
@@ -578,40 +524,34 @@ int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
         if ((!ms_bRenderTunnels && pEntity->m_bTunnel || !ms_bRenderOutsideTunnels && !pEntity->m_bTunnel))
             return RENDERER_INVISIBLE;
     }
+
     bool bIsTimeInRange = true;
     if (!pBaseAtomicModelInfo)
     {
         if (pBaseModelInfo->GetModelType() != MODEL_INFO_CLUMP && pBaseModelInfo->GetModelType() != MODEL_INFO_WEAPON)
         {
-            if (FindPlayerVehicle(-1, 0) == pEntity)
-            {
-                if (gbFirstPersonRunThisFrame)
+            if (FindPlayerVehicle(-1, false) == pEntity && gbFirstPersonRunThisFrame && CReplay::Mode != REPLAY_MODE_1) {
+                std::uint32_t dwDirectionWasLooking = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nDirectionWasLooking;
+                CAutomobile* pVehicle = FindPlayerVehicle(-1, false);
+                CBike* pBike = dynamic_cast<CBike*>(pVehicle);
+                if (!pVehicle->IsBike() || !(pBike->damageFlags.bDamageFlag8))
                 {
-                    if (CReplay::Mode != REPLAY_MODE_1)
+                    if (dwDirectionWasLooking == 3)
+                        return RENDERER_CULLED;
+                    if (modelId == MODEL_RHINO || modelId == MODEL_COACH || TheCamera.m_bInATunnelAndABigVehicle)
+                        return RENDERER_CULLED;
+                    if (dwDirectionWasLooking) {
+                        m_pFirstPersonVehicle = static_cast<CVehicle*>(pEntity);
+                        return RENDERER_CULLED;
+                    }
+                    if (pVehicle->m_pHandlingData->m_bNo1fpsLookBehind)
+                        return RENDERER_CULLED;
+                    if (!pVehicle->IsBoat()
+                        || modelId == MODEL_REEFER || modelId == MODEL_TROPIC || modelId == MODEL_PREDATOR
+                        || modelId == MODEL_SKIMMER)
                     {
-                        std::uint32_t dwDirectionWasLooking = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nDirectionWasLooking;
-                        CAutomobile* pVehicle = FindPlayerVehicle(-1, 0);
-                        CBike* pBike = reinterpret_cast<CBike*>(pVehicle);
-                        if (!pVehicle->IsBike() || !(pBike->damageFlags.bDamageFlag8))
-                        {
-                            if (dwDirectionWasLooking == 3)
-                                return RENDERER_CULLED;
-                            if (modelId == MODEL_RHINO || modelId == MODEL_COACH || TheCamera.m_bInATunnelAndABigVehicle)
-                                return RENDERER_CULLED;
-                            if (dwDirectionWasLooking) {
-                                m_pFirstPersonVehicle = static_cast<CVehicle*>(pEntity);
-                                return RENDERER_CULLED;
-                            }
-                            if (pVehicle->m_pHandlingData->m_bNo1fpsLookBehind)
-                                return RENDERER_CULLED;
-                            if (!pVehicle->IsBoat()
-                                || modelId == MODEL_REEFER || modelId == MODEL_TROPIC || modelId == MODEL_PREDATOR
-                                || modelId == MODEL_SKIMMER)
-                            {
-                                m_pFirstPersonVehicle = static_cast<CVehicle*>(pEntity);
-                                return RENDERER_CULLED;
-                            }
-                        }
+                        m_pFirstPersonVehicle = static_cast<CVehicle*>(pEntity);
+                        return RENDERER_CULLED;
                     }
                 }
             }
@@ -690,18 +630,15 @@ int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
         return SetupMapEntityVisibility(pEntity, pBaseModelInfo, *outDistance, bIsTimeInRange);
     }
     return RENDERER_INVISIBLE;
-
-#endif
 }
 
+// 0x554650
 int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<int, 0x554650, CEntity*, float*>(entity, outDistance);
-#else
     CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex];
     bool bIsTimeInRange = true;
     if (entity->m_nAreaCode != CGame::currArea && entity->m_nAreaCode != AREA_CODE_13)
         return RENDERER_INVISIBLE;
+
     if (pBaseModelInfo->GetModelType() == MODEL_INFO_TIME)
     {
         tTimeInfo* pModelTimeInfo = pBaseModelInfo->GetTimeInfo();
@@ -755,13 +692,10 @@ int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
     if (!entity->m_pRwObject)
         entity->CreateRwObject();
     return RENDERER_STREAMME;
-#endif
 }
 
+// 0x5535D0
 void CRenderer::ScanSectorList_ListModels(std::int32_t sectorX, std::int32_t sectorY) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x5535D0, std::int32_t, std::int32_t>(sectorX, sectorY);
-#else
     SetupScanLists(sectorX, sectorY);
     CPtrListDoubleLink** pScanLists = reinterpret_cast<CPtrListDoubleLink**>(&PC_Scratch);
     for (std::int32_t scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
@@ -779,13 +713,10 @@ void CRenderer::ScanSectorList_ListModels(std::int32_t sectorX, std::int32_t sec
             }
         }
     }
-#endif
 }
 
+// 0x553650
 void CRenderer::ScanSectorList_ListModelsVisible(std::int32_t sectorX, std::int32_t sectorY) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553650, std::int32_t, std::int32_t>(sectorX, sectorY);
-#else
     SetupScanLists(sectorX, sectorY);
     CEntity** pEntity = gpOutEntitiesForGetObjectsInFrustum;
     CPtrListDoubleLink** pScanLists = reinterpret_cast<CPtrListDoubleLink**>(&PC_Scratch);
@@ -806,13 +737,10 @@ void CRenderer::ScanSectorList_ListModelsVisible(std::int32_t sectorX, std::int3
             }
         }
     }
-#endif
 }
 
+// 0x554840
 void CRenderer::ScanSectorList(std::int32_t sectorX, std::int32_t sectorY) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x554840, std::int32_t, std::int32_t >(sectorX, sectorY);
-#else
     bool bRequestModel = false;
     float fDistanceX = CWorld::GetSectorPosX(sectorX) - CRenderer::ms_vecCameraPosition.x;
     float fDistanceY = CWorld::GetSectorPosY(sectorY) - CRenderer::ms_vecCameraPosition.y;
@@ -910,13 +838,10 @@ void CRenderer::ScanSectorList(std::int32_t sectorX, std::int32_t sectorY) {
             }
         }
     }
-#endif
 }
 
+// 0x554B10
 void CRenderer::ScanBigBuildingList(std::int32_t sectorX, std::int32_t sectorY) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x554B10, std::int32_t, std::int32_t>(sectorX, sectorY);
-#else
     if (sectorX >= 0 && sectorY >= 0 && sectorX < MAX_LOD_PTR_LISTS_X && sectorY < MAX_LOD_PTR_LISTS_Y) {
         CPtrList& list = CWorld::GetLodPtrList(sectorX, sectorY);
         bool bRequestModel = false;
@@ -944,31 +869,28 @@ void CRenderer::ScanBigBuildingList(std::int32_t sectorX, std::int32_t sectorY) 
             }
         }
     }
-#endif
 }
 
+// 0x554EB0
 bool CRenderer::ShouldModelBeStreamed(CEntity* entity, CVector const& point, float farClip) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<bool, 0x554EB0, CEntity*, CVector const&, float>(entity, point, farClip);
-#else
     if (entity->m_nAreaCode != CGame::currArea && entity->m_nAreaCode != AREA_CODE_13)
         return false;
+
     CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex];
     tTimeInfo* pTimeInfo = pModelInfo->GetTimeInfo();
     if (pTimeInfo && !CClock::GetIsTimeInRange(pTimeInfo->m_nTimeOn, pTimeInfo->m_nTimeOff))
         return false;
+
     const float fMagnitude = (entity->GetPosition() - point).Magnitude();
     const float fDrawDistanceRadius = TheCamera.m_fLODDistMultiplier * pModelInfo->m_fDrawDistance;
     if (fMagnitude <= pModelInfo->GetColModel()->GetBoundRadius() + farClip && fDrawDistanceRadius > fMagnitude)
         return true;
+
     return false;
-#endif
 }
 
+// 0x555680
 void CRenderer::ScanPtrList_RequestModels(CPtrList& list) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x555680, CPtrList&>(list);
-#else
     for (auto pNode = list.GetNode(); pNode; pNode = pNode->pNext) {
         CEntity* entity = reinterpret_cast<CEntity*>(pNode->pItem);
         if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
@@ -977,13 +899,10 @@ void CRenderer::ScanPtrList_RequestModels(CPtrList& list) {
                 CStreaming::RequestModel(entity->m_nModelIndex, gnRendererModelRequestFlags);
         }
     }
-#endif
 }
 
+// 0x5556E0
 void CRenderer::ConstructRenderList() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x5556E0>();
-#else
     eZoneAttributes zoneAttributes = CCullZones::FindTunnelAttributesForCoors(TheCamera.GetPosition());
     ms_bRenderTunnels = (zoneAttributes & (ZONE_ATTRIBUTE_UNKNOWN_2 | ZONE_ATTRIBUTE_UNKNOWN_1)) != 0;
     if ((zoneAttributes & ZONE_ATTRIBUTE_UNKNOWN_1) || !(zoneAttributes & ZONE_ATTRIBUTE_UNKNOWN_2))
@@ -1021,26 +940,20 @@ void CRenderer::ConstructRenderList() {
     ScanWorld();
     ProcessLodRenderLists();
     CStreaming::StartRenderEntities();
-#endif
 }
 
+// 0x555900
 void CRenderer::ScanSectorList_RequestModels(std::int32_t sectorX, std::int32_t sectorY) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x555900, std::int32_t, std::int32_t>(sectorX, sectorY);
-#else
     if (sectorX >= 0 && sectorY >= 0 && sectorX < MAX_SECTORS_X && sectorY < MAX_SECTORS_Y) {
         CSector* pSector = GetSector(sectorX, sectorY);
         ScanPtrList_RequestModels(pSector->m_buildings);
         ScanPtrList_RequestModels(pSector->m_dummies);
         ScanPtrList_RequestModels(CWorld::ms_aRepeatSectors->m_lists[REPEATSECTOR_OBJECTS]);
     }
-#endif
 }
 
+// 0x554FE0
 void CRenderer::ScanWorld() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x554FE0>();
-#else
     CVector frustumPoints[13];
     const float farPlane = TheCamera.m_pRwCamera->farPlane;
     const float width = TheCamera.m_pRwCamera->viewWindow.x;
@@ -1054,7 +967,7 @@ void CRenderer::ScanWorld() {
     for (std::int32_t i = 5; i < 13; i++) {
         frustumPoints[i] = CVector(0.0f, 0.0f, 0.0f);
     }
-    CRenderer::m_pFirstPersonVehicle = 0;
+    CRenderer::m_pFirstPersonVehicle = nullptr;
     CVisibilityPlugins::InitAlphaEntityList();
     CWorld::IncrementCurrentScanCode();
     static CVector lastCameraPosition;
@@ -1062,9 +975,9 @@ void CRenderer::ScanWorld() {
     CVector distance = TheCamera.GetPosition() - lastCameraPosition;
     static bool bUnusedBool = false;
     if (DotProduct(distance, lastCameraForward) >= 16.0f || DotProduct(TheCamera.m_mCameraMatrix.GetForward(), lastCameraForward) <= 0.98f)
-        bUnusedBool = 0;
+        bUnusedBool = false;
     else
-        bUnusedBool = 1;
+        bUnusedBool = true;
     lastCameraPosition = TheCamera.GetPosition();
     lastCameraForward = TheCamera.m_mCameraMatrix.GetForward();
     frustumPoints[5] = (frustumPoints[1] * MAX_LOD_DISTANCE) / farPlane;
@@ -1111,14 +1024,11 @@ void CRenderer::ScanWorld() {
     points[4].x = CWorld::GetLodSectorfX(frustumPoints[4].x);
     points[4].y = CWorld::GetLodSectorfY(frustumPoints[4].y );
     CWorldScan::ScanWorld(points, 5, CRenderer::ScanBigBuildingList);
-#endif
 }
 
+// 0x554C60
 std::int32_t CRenderer::GetObjectsInFrustum(CEntity** outEntities, float farPlane, RwMatrix* transformMatrix)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<std::int32_t, 0x554C60, CEntity**, float, RwMatrixTag*>(outEntities, farPlane, transformMatrix);
-#else
     CVector frustumPoints[13];
     const float width = TheCamera.m_pRwCamera->viewWindow.x;
     const float height = TheCamera.m_pRwCamera->viewWindow.y;
@@ -1153,13 +1063,10 @@ std::int32_t CRenderer::GetObjectsInFrustum(CEntity** outEntities, float farPlan
     else
         CWorldScan::ScanWorld(points, 3, CRenderer::ScanSectorList_ListModelsVisible);
     return gpOutEntitiesForGetObjectsInFrustum - outEntities;
-#endif
 }
 
+// 0x555960
 void CRenderer::RequestObjectsInFrustum(RwMatrix* transformMatrix, std::int32_t modelRequestFlags) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x555960, RwMatrixTag*, std::int32_t>(transformMatrix, modelRequestFlags);
-#else
     const float farPlane = TheCamera.m_pRwCamera->farPlane;
     const float width = TheCamera.m_pRwCamera->viewWindow.x;
     const float height = TheCamera.m_pRwCamera->viewWindow.y;
@@ -1196,15 +1103,12 @@ void CRenderer::RequestObjectsInFrustum(RwMatrix* transformMatrix, std::int32_t 
     points[2].x = CWorld::GetSectorfX(frustumPoints[6].x);
     points[2].y = CWorld::GetSectorfY(frustumPoints[6].y);
     CWorldScan::ScanWorld(points, 3, ScanSectorList_RequestModels);
-#endif
 }
 
-// modelRequesFlags is always set to `STREAMING_LOADING_SCENE` when this function is called
-void CRenderer::RequestObjectsInDirection(CVector const& posn, float angle, std::int32_t modelRequesFlags) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x555CB0, CVector const&, float, std::int32_t>(posn, angle, modelRequesFlags);
-#else
-    RwMatrix matrix; 
+// modelRequestFlags is always set to `STREAMING_LOADING_SCENE` when this function is called
+// 0x555CB0
+void CRenderer::RequestObjectsInDirection(CVector const& posn, float angle, std::int32_t modelRequestFlags) {
+    RwMatrix matrix;
     matrix.at = { 0.0f, 0.0f, 1.0f };
     matrix.up = { 0.0f, 1.0f, 0.0f };
     matrix.right = { 1.0f, 0.0f, 0.0f };
@@ -1216,15 +1120,12 @@ void CRenderer::RequestObjectsInDirection(CVector const& posn, float angle, std:
     axis = { 0.0f, 0.0f, 1.0f };
     RwMatrixRotate(&matrix, &axis, angle, rwCOMBINEPOSTCONCAT);
     RwMatrixTranslate(&matrix, &posn, rwCOMBINEPOSTCONCAT);
-    RequestObjectsInFrustum(&matrix, modelRequesFlags);
-#endif
+    RequestObjectsInFrustum(&matrix, modelRequestFlags);
 }
 
+// 0x553540
 void CRenderer::SetupScanLists(std::int32_t sectorX, std::int32_t sectorY)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x553540, int, int>(sectorX, sectorY);
-#else
     CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
     tScanLists* pScanLists = reinterpret_cast<tScanLists*>(&PC_Scratch);
     if (sectorX >= 0 && sectorY >= 0 && sectorX < MAX_SECTORS_X && sectorY < MAX_SECTORS_Y) {
@@ -1243,5 +1144,4 @@ void CRenderer::SetupScanLists(std::int32_t sectorX, std::int32_t sectorY)
         pScanLists->pedsList = &pRepeatSector->m_lists[2];
         pScanLists->dummiesList = nullptr;
     }
-#endif
 }
