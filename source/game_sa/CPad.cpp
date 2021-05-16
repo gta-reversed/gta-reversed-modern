@@ -18,11 +18,9 @@ CKeyboardState& CPad::NewKeyState = *(CKeyboardState*)0xB73190;
 
 CPad* CPad::Pads = (CPad*)0xB73458; // size is 2
 
-void CPad::InjectHooks()
-{
+void CPad::InjectHooks() {
     HookInstall(0x541DD0, CPad::UpdatePads); // changes logic of the function and shouldn't be toggled on/off
 
-    ReversibleHooks::Install("CPad", "DoCheats", 0x439AF0, &CPad::DoCheats);
     ReversibleHooks::Install("CPad", "isEnterJustPressed", 0x4D5980, &CPad::isEnterJustPressed);
     ReversibleHooks::Install("CPad", "isStandardKeyJustPressed", 0x4D59B0, &CPad::isStandardKeyJustPressed);
     ReversibleHooks::Install("CPad", "isMenuKeyJustPressed", 0x744D50, &CPad::isMenuKeyJustPressed);
@@ -65,6 +63,7 @@ void CPad::StartShake_Train(float x, float y) {
     plugin::CallMethod<0x53FA70, CPad*, float, float>(this, x, y);
 }
 
+// dummy function
 // Converted from thiscall void CPad::ProcessPCSpecificStuff(void) 0x53FB40
 void CPad::ProcessPCSpecificStuff() {
     plugin::CallMethod<0x53FB40, CPad*>(this);
@@ -492,22 +491,4 @@ bool CPad::isMenuKeyJustPressed() {
 // 0x744D90
 bool CPad::isTabJustPressed() {
     return NewKeyState.tab && !OldKeyState.tab;
-}
-
-// TODO: Move to CCheats
-// 0x438450
-void CPad::ResetCheats() {
-    memset(&CCheat::m_aCheatsActive, 0, sizeof(CCheat::m_aCheatsActive));
-    CWeather::ReleaseWeather();
-    CTimer::ms_fTimeScale = 1.0f;
-    CCheat::m_CheatString[0] = '\0';
-    CCheat::m_bHasPlayerCheated = false;
-}
-
-// 0x439AF0
-void CPad::DoCheats() {
-    for (short i = 0; i < 256; ++i)
-        if (CPad::NewKeyState.standardKeys[i])
-            if (!CPad::OldKeyState.standardKeys[i])
-                CCheat::AddToCheatString(i);
 }

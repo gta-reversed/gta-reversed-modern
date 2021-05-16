@@ -1,3 +1,5 @@
+#include "StdInc.h"
+
 #include "rtpng.h"
 
 RwImage *RtPNGImageWrite(RwImage *image, const RwChar *imageName) {

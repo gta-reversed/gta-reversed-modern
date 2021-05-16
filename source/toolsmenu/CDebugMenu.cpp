@@ -20,922 +20,896 @@ bool CDebugMenu::m_showMenu = false;
 CSprite2d CDebugMenu::m_mouseSprite;
 ImGuiIO* CDebugMenu::io = {};
 
-//https://stackoverflow.com/a/19839371
-bool findStringCaseInsensitive(const std::string& strHaystack, const std::string& strNeedle)
-{
-  auto it = std::search(
+// https://stackoverflow.com/a/19839371
+bool findStringCaseInsensitive(const std::string& strHaystack, const std::string& strNeedle) {
+    auto it = std::search(
       strHaystack.begin(), strHaystack.end(),
       strNeedle.begin(), strNeedle.end(),
       [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
-  );
-  return (it != strHaystack.end());
+    );
+    return (it != strHaystack.end());
 }
 
 void CDebugMenu::ImguiInitialise() {
-  if (m_imguiInitialised) {
-    return;
-  }
+    if (m_imguiInitialised) {
+        return;
+    }
 
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  io = &ImGui::GetIO();
-  io->WantCaptureMouse = true;
-  io->WantCaptureKeyboard = true;
-  io->WantSetMousePos = true;
-  io->ConfigFlags = ImGuiConfigFlags_NavEnableSetMousePos;
-  io->DisplaySize = ImVec2((float)RsGlobal.maximumWidth, (float)RsGlobal.maximumHeight);
-  // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-  //HWND& hwnd = *(HWND*)0xC97C1C;
-  //ImGui_ImplWin32_Init(hwnd);
-  ImGui_ImplRW_Init(GetD3DDevice());
-  printf("Imgui initialized\n");
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    io = &ImGui::GetIO();
+    io->WantCaptureMouse = true;
+    io->WantCaptureKeyboard = true;
+    io->WantSetMousePos = true;
+    io->ConfigFlags = ImGuiConfigFlags_NavEnableSetMousePos;
+    io->DisplaySize = ImVec2((float)RsGlobal.maximumWidth, (float)RsGlobal.maximumHeight);
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    // HWND& hwnd = *(HWND*)0xC97C1C;
+    // ImGui_ImplWin32_Init(hwnd);
+    ImGui_ImplRW_Init(GetD3DDevice());
+    printf("Imgui initialized\n");
 
-  // Mouse
-  int txd = CTxdStore::AddTxdSlot("imgui_mouse");
-  if (CTxdStore::LoadTxd(txd, "models\\fronten_pc.txd")) {
-    CTxdStore::AddRef(txd);
-    CTxdStore::PushCurrentTxd();
-    CTxdStore::SetCurrentTxd(txd);
-    m_mouseSprite.SetTexture("mouse", "mousea");
-  } else {
-    printf("Failed to load fronten_pc.txd\n");
-  }
-  CTxdStore::PopCurrentTxd();
+    // Mouse
+    int txd = CTxdStore::AddTxdSlot("imgui_mouse");
+    if (CTxdStore::LoadTxd(txd, "models\\fronten_pc.txd")) {
+        CTxdStore::AddRef(txd);
+        CTxdStore::PushCurrentTxd();
+        CTxdStore::SetCurrentTxd(txd);
+        m_mouseSprite.SetTexture((char*)"mouse", (char*)"mousea");
+    } else {
+        printf("Failed to load fronten_pc.txd\n");
+    }
+    CTxdStore::PopCurrentTxd();
 
-  // Keyboard section
-  io->KeyMap[ImGuiKey_Tab] = VK_TAB;
-  io->KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
-  io->KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
-  io->KeyMap[ImGuiKey_UpArrow] = VK_UP;
-  io->KeyMap[ImGuiKey_DownArrow] = VK_DOWN;
-  io->KeyMap[ImGuiKey_PageUp] = VK_PRIOR;
-  io->KeyMap[ImGuiKey_PageDown] = VK_NEXT;
-  io->KeyMap[ImGuiKey_Home] = VK_HOME;
-  io->KeyMap[ImGuiKey_End] = VK_END;
-  io->KeyMap[ImGuiKey_Insert] = VK_INSERT;
-  io->KeyMap[ImGuiKey_Delete] = VK_DELETE;
-  io->KeyMap[ImGuiKey_Backspace] = VK_BACK;
-  io->KeyMap[ImGuiKey_Space] = VK_SPACE;
-  io->KeyMap[ImGuiKey_Enter] = VK_RETURN;
-  io->KeyMap[ImGuiKey_Escape] = VK_ESCAPE;
-  io->KeyMap[ImGuiKey_KeyPadEnter] = VK_RETURN;
-  io->KeyMap[ImGuiKey_A] = 'A';
-  io->KeyMap[ImGuiKey_C] = 'C';
-  io->KeyMap[ImGuiKey_V] = 'V';
-  io->KeyMap[ImGuiKey_X] = 'X';
-  io->KeyMap[ImGuiKey_Y] = 'Y';
-  io->KeyMap[ImGuiKey_Z] = 'Z';
+    // Keyboard section
+    io->KeyMap[ImGuiKey_Tab] = VK_TAB;
+    io->KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
+    io->KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
+    io->KeyMap[ImGuiKey_UpArrow] = VK_UP;
+    io->KeyMap[ImGuiKey_DownArrow] = VK_DOWN;
+    io->KeyMap[ImGuiKey_PageUp] = VK_PRIOR;
+    io->KeyMap[ImGuiKey_PageDown] = VK_NEXT;
+    io->KeyMap[ImGuiKey_Home] = VK_HOME;
+    io->KeyMap[ImGuiKey_End] = VK_END;
+    io->KeyMap[ImGuiKey_Insert] = VK_INSERT;
+    io->KeyMap[ImGuiKey_Delete] = VK_DELETE;
+    io->KeyMap[ImGuiKey_Backspace] = VK_BACK;
+    io->KeyMap[ImGuiKey_Space] = VK_SPACE;
+    io->KeyMap[ImGuiKey_Enter] = VK_RETURN;
+    io->KeyMap[ImGuiKey_Escape] = VK_ESCAPE;
+    io->KeyMap[ImGuiKey_KeyPadEnter] = VK_RETURN;
+    io->KeyMap[ImGuiKey_A] = 'A';
+    io->KeyMap[ImGuiKey_C] = 'C';
+    io->KeyMap[ImGuiKey_V] = 'V';
+    io->KeyMap[ImGuiKey_X] = 'X';
+    io->KeyMap[ImGuiKey_Y] = 'Y';
+    io->KeyMap[ImGuiKey_Z] = 'Z';
 
-  m_vehicleToolInput.Initialise(256, &m_vehiclesMap);
-  m_pedToolInput.Initialise(256, &m_pedsMap);
-  m_missionToolInput.Initialise(256, &m_missionsMap);
-  m_imguiInitialised = true;
+    m_vehicleToolInput.Initialise(256, &m_vehiclesMap);
+    m_pedToolInput.Initialise(256, &m_pedsMap);
+    m_missionToolInput.Initialise(256, &m_missionsMap);
+    m_imguiInitialised = true;
 }
 
 void CDebugMenu::ImguiInputUpdate() {
-  if (!m_showMenu)
-    return;
+    if (!m_showMenu)
+        return;
 
-  // Update display size, in case of window resize after imgui was already initialized
-  io->DisplaySize = ImVec2((float)RsGlobal.maximumWidth, (float)RsGlobal.maximumHeight);
+    // Update display size, in case of window resize after imgui was already initialized
+    io->DisplaySize = ImVec2((float)RsGlobal.maximumWidth, (float)RsGlobal.maximumHeight);
 
-  // Partially taken from https://github.com/Juarez12/re3/blob/f1a7aeaa0f574813ed3cec8a085e2f310aa3a366/src/imgui/ImGuiIII.cpp
+    // Partially taken from https://github.com/Juarez12/re3/blob/f1a7aeaa0f574813ed3cec8a085e2f310aa3a366/src/imgui/ImGuiIII.cpp
 
-  static BYTE KeyStates[256];
+    static BYTE KeyStates[256];
 
-  GetKeyboardState(KeyStates);
+    GetKeyboardState(KeyStates);
 
-  for (int i = 0; i < 256; i++)
-  {
-    if (KeyStates[i] & 0x80 && !io->KeysDown[i])
-    {
-      io->KeysDown[i] = true;
+    for (int i = 0; i < 256; i++) {
+        if (KeyStates[i] & 0x80 && !io->KeysDown[i]) {
+            io->KeysDown[i] = true;
 
-      char res[2] = { 0 };
-      if (ToAscii(i, MapVirtualKey(i, 0), (const BYTE*)KeyStates, (LPWORD)res, 0) == 1)
-      {
-        io->AddInputCharactersUTF8(res);
-      }
+            char res[2] = {0};
+            if (ToAscii(i, MapVirtualKey(i, 0), (const BYTE*)KeyStates, (LPWORD)res, 0) == 1) {
+                io->AddInputCharactersUTF8(res);
+            }
+        } else if (!(KeyStates[i] & 0x80) && io->KeysDown[i])
+            io->KeysDown[i] = false;
     }
-    else if (!(KeyStates[i] & 0x80) && io->KeysDown[i])
-      io->KeysDown[i] = false;
-  }
 
-  io->KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
-  io->KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
-  io->KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
-  io->KeySuper = false;
+    io->KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
+    io->KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+    io->KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
+    io->KeySuper = false;
 
-  // Mouse
+    // Mouse
 
-  CPad* pad = CPad::GetPad(0);
-  pad->DisablePlayerControls = true;
+    CPad* pad = CPad::GetPad(0);
+    pad->DisablePlayerControls = true;
 
-  m_MousePos.x += CPad::NewMouseControllerState.X;
-  m_MousePos.y -= CPad::NewMouseControllerState.Y;
+    m_MousePos.x += CPad::NewMouseControllerState.X;
+    m_MousePos.y -= CPad::NewMouseControllerState.Y;
 
-  if (m_MousePos.x < 0.0f)
-    m_MousePos.x = 0.0f;
-  if (m_MousePos.y < 0.0f)
-    m_MousePos.y = 0.0f;
-  if (m_MousePos.x >= (float)RsGlobal.maximumWidth)
-    m_MousePos.x = (float)RsGlobal.maximumWidth;
-  if (m_MousePos.y >= (float)RsGlobal.maximumHeight)
-    m_MousePos.y = (float)RsGlobal.maximumHeight;
+    if (m_MousePos.x < 0.0f)
+        m_MousePos.x = 0.0f;
+    if (m_MousePos.y < 0.0f)
+        m_MousePos.y = 0.0f;
+    if (m_MousePos.x >= (float)RsGlobal.maximumWidth)
+        m_MousePos.x = (float)RsGlobal.maximumWidth;
+    if (m_MousePos.y >= (float)RsGlobal.maximumHeight)
+        m_MousePos.y = (float)RsGlobal.maximumHeight;
 
-  if (CPad::NewMouseControllerState.wheelDown)
-    io->MouseWheel -= (20.0F * io->DeltaTime);
+    if (CPad::NewMouseControllerState.wheelDown)
+        io->MouseWheel -= (20.0F * io->DeltaTime);
 
-  if (CPad::NewMouseControllerState.wheelUp)
-    io->MouseWheel += (20.0F * io->DeltaTime);
+    if (CPad::NewMouseControllerState.wheelUp)
+        io->MouseWheel += (20.0F * io->DeltaTime);
 
-  io->MousePos = ImVec2(m_MousePos.x, m_MousePos.y);
-  io->MouseDown[0] = CPad::NewMouseControllerState.lmb;
-  io->MouseDown[1] = CPad::NewMouseControllerState.mmb;
-  io->MouseDown[2] = CPad::NewMouseControllerState.rmb;
+    io->MousePos = ImVec2(m_MousePos.x, m_MousePos.y);
+    io->MouseDown[0] = CPad::NewMouseControllerState.lmb;
+    io->MouseDown[1] = CPad::NewMouseControllerState.mmb;
+    io->MouseDown[2] = CPad::NewMouseControllerState.rmb;
 
-  CPad::NewMouseControllerState.X = 0.0f;
-  CPad::NewMouseControllerState.Y = 0.0f;
+    CPad::NewMouseControllerState.X = 0.0f;
+    CPad::NewMouseControllerState.Y = 0.0f;
 }
 
 void CDebugMenu::ImguiDisplayFramePerSecond() {
-  // Top-left framerate display overlay window.
-  ImGui::SetNextWindowPos(ImVec2(10, 10));
-  bool open = true;
-  ImGui::Begin("FPS", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-  ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
-  ImGui::End();
+    // Top-left framerate display overlay window.
+    ImGui::SetNextWindowPos(ImVec2(10, 10));
+    bool open = true;
+    ImGui::Begin("FPS", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+    ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
+    ImGui::End();
 }
 
-void CDebugMenu::ImGuiDrawMouse()
-{
-  if (!m_showMenu || !m_mouseSprite.m_pTexture)
-    return;
+void CDebugMenu::ImGuiDrawMouse() {
+    if (!m_showMenu || !m_mouseSprite.m_pTexture)
+        return;
 
-  CRect mouseRect = CRect(io->MousePos.x, io->MousePos.y, (float)CMenuManager::StretchX(18.0f) + io->MousePos.x, (float)CMenuManager::StretchX(18.0f) + io->MousePos.y);
-  m_mouseSprite.Draw(mouseRect, CRGBA(255, 255, 255, 255));
+    CRect mouseRect = CRect(io->MousePos.x, io->MousePos.y, (float)CMenuManager::StretchX(18.0f) + io->MousePos.x, (float)CMenuManager::StretchX(18.0f) + io->MousePos.y);
+    m_mouseSprite.Draw(mouseRect, CRGBA(255, 255, 255, 255));
 }
 
-void CDebugMenu::ProcessCheatTool()
-{
-  if (ImGui::CollapsingHeader("Player")) {
-    if (ImGui::RadioButton("Adrenaline", false)) {
-      CCheat::AdrenalineCheat();
+void CDebugMenu::ProcessCheatTool() {
+    if (ImGui::CollapsingHeader("Player")) {
+        if (ImGui::RadioButton("Adrenaline", false)) {
+            CCheat::AdrenalineCheat();
+        }
+        if (ImGui::RadioButton("Health Money Armour", false)) {
+            CCheat::MoneyArmourHealthCheat();
+        }
+        if (ImGui::RadioButton("Weapon 1", false)) {
+            CCheat::WeaponCheat1();
+        }
+        if (ImGui::RadioButton("Weapon 2", false)) {
+            CCheat::WeaponCheat2();
+        }
+        if (ImGui::RadioButton("Weapon 3", false)) {
+            CCheat::WeaponCheat3();
+        }
+        if (ImGui::RadioButton("Weapon Skills", false)) {
+            CCheat::WeaponSkillsCheat();
+        }
+        if (ImGui::RadioButton("Never wanted", false)) {
+            CCheat::NotWantedCheat();
+        }
+        if (ImGui::RadioButton("Wanted", false)) {
+            CCheat::WantedCheat();
+        }
+        if (ImGui::RadioButton("Wanted Up", false)) {
+            CCheat::WantedLevelUpCheat();
+        }
+        if (ImGui::RadioButton("Wanted Down", false)) {
+            CCheat::WantedLevelDownCheat();
+        }
+        if (ImGui::RadioButton("Health", false)) {
+            CCheat::HealthCheat();
+        }
+        if (ImGui::RadioButton("Muscle", false)) {
+            CCheat::MuscleCheat();
+        }
+        if (ImGui::RadioButton("Skinny", false)) {
+            CCheat::SkinnyCheat();
+        }
+        if (ImGui::RadioButton("Fat", false)) {
+            CCheat::FatCheat();
+        }
+        if (ImGui::RadioButton("Stamina", false)) {
+            CCheat::StaminaCheat();
+        }
+        if (ImGui::RadioButton("Vehicle Skills", false)) {
+            CCheat::VehicleSkillsCheat();
+        }
     }
-    if (ImGui::RadioButton("Health Money Armour", false)) {
-      CCheat::MoneyArmourHealthCheat();
-    }
-    if (ImGui::RadioButton("Weapon 1", false)) {
-      CCheat::WeaponCheat1();
-    }
-    if (ImGui::RadioButton("Weapon 2", false)) {
-      CCheat::WeaponCheat2();
-    }
-    if (ImGui::RadioButton("Weapon 3", false)) {
-      CCheat::WeaponCheat3();
-    }
-    if (ImGui::RadioButton("Weapon Skills", false)) {
-      CCheat::WeaponSkillsCheat();
-    }
-    if (ImGui::RadioButton("Never wanted", false)) {
-      CCheat::NotWantedCheat();
-    }
-    if (ImGui::RadioButton("Wanted", false)) {
-      CCheat::WantedCheat();
-    }
-    if (ImGui::RadioButton("Wanted Up", false)) {
-      CCheat::WantedLevelUpCheat();
-    }
-    if (ImGui::RadioButton("Wanted Down", false)) {
-      CCheat::WantedLevelDownCheat();
-    }
-    if (ImGui::RadioButton("Health", false)) {
-      CCheat::HealthCheat();
-    }
-    if (ImGui::RadioButton("Muscle", false)) {
-      CCheat::MuscleCheat();
-    }
-    if (ImGui::RadioButton("Skinny", false)) {
-      CCheat::SkinnyCheat();
-    }
-    if (ImGui::RadioButton("Fat", false)) {
-      CCheat::FatCheat();
-    }
-    if (ImGui::RadioButton("Stamina", false)) {
-      CCheat::StaminaCheat();
-    }
-    if (ImGui::RadioButton("Vehicle Skills", false)) {
-      CCheat::VehicleSkillsCheat();
-    }
-  }
 
-  if (ImGui::CollapsingHeader("Vehicle")) {
-    if (ImGui::RadioButton("Apache", false)) {
-      CCheat::ApacheCheat();
+    if (ImGui::CollapsingHeader("Vehicle")) {
+        if (ImGui::RadioButton("Apache", false)) {
+            CCheat::ApacheCheat();
+        }
+        if (ImGui::RadioButton("Vortex", false)) {
+            CCheat::VortexCheat();
+        }
+        if (ImGui::RadioButton("Dozer", false)) {
+            CCheat::DozerCheat();
+        }
+        if (ImGui::RadioButton("Flyboy", false)) {
+            CCheat::FlyboyCheat();
+        }
+        if (ImGui::RadioButton("Golf Cart", false)) {
+            CCheat::GolfcartCheat();
+        }
+        if (ImGui::RadioButton("Hearse", false)) {
+            CCheat::HearseCheat();
+        }
+        if (ImGui::RadioButton("Love fist", false)) {
+            CCheat::LovefistCheat();
+        }
+        if (ImGui::RadioButton("Monster Truck", false)) {
+            CCheat::MonsterTruckCheat();
+        }
+        if (ImGui::RadioButton("Quad", false)) {
+            CCheat::QuadCheat();
+        }
+        if (ImGui::RadioButton("Stock Car 1", false)) {
+            CCheat::StockCarCheat();
+        }
+        if (ImGui::RadioButton("Stock Car 2", false)) {
+            CCheat::StockCar2Cheat();
+        }
+        if (ImGui::RadioButton("Stock Car 3", false)) {
+            CCheat::StockCar3Cheat();
+        }
+        if (ImGui::RadioButton("Stock Car 4", false)) {
+            CCheat::StockCar4Cheat();
+        }
+        if (ImGui::RadioButton("Stunt Plane", false)) {
+            CCheat::StuntPlaneCheat();
+        }
+        if (ImGui::RadioButton("Tank", false)) {
+            CCheat::TankCheat();
+        }
+        if (ImGui::RadioButton("Tanker", false)) {
+            CCheat::TankerCheat();
+        }
+        if (ImGui::RadioButton("Trashmaster", false)) {
+            CCheat::TrashmasterCheat();
+        }
     }
-    if (ImGui::RadioButton("Vortex", false)) {
-      CCheat::VortexCheat();
-    }
-    if (ImGui::RadioButton("Dozer", false)) {
-      CCheat::DozerCheat();
-    }
-    if (ImGui::RadioButton("Flyboy", false)) {
-      CCheat::FlyboyCheat();
-    }
-    if (ImGui::RadioButton("Golf Cart", false)) {
-      CCheat::GolfcartCheat();
-    }
-    if (ImGui::RadioButton("Hearse", false)) {
-      CCheat::HearseCheat();
-    }
-    if (ImGui::RadioButton("Love fist", false)) {
-      CCheat::LovefistCheat();
-    }
-    if (ImGui::RadioButton("Monster Truck", false)) {
-      CCheat::MonsterTruckCheat();
-    }
-    if (ImGui::RadioButton("Quad", false)) {
-      CCheat::QuadCheat();
-    }
-    if (ImGui::RadioButton("Stock Car 1", false)) {
-      CCheat::StockCarCheat();
-    }
-    if (ImGui::RadioButton("Stock Car 2", false)) {
-      CCheat::StockCar2Cheat();
-    }
-    if (ImGui::RadioButton("Stock Car 3", false)) {
-      CCheat::StockCar3Cheat();
-    }
-    if (ImGui::RadioButton("Stock Car 4", false)) {
-      CCheat::StockCar4Cheat();
-    }
-    if (ImGui::RadioButton("Stunt Plane", false)) {
-      CCheat::StuntPlaneCheat();
-    }
-    if (ImGui::RadioButton("Tank", false)) {
-      CCheat::TankCheat();
-    }
-    if (ImGui::RadioButton("Tanker", false)) {
-      CCheat::TankerCheat();
-    }
-    if (ImGui::RadioButton("Trashmaster", false)) {
-      CCheat::TrashmasterCheat();
-    }
-  }
 
-  if (ImGui::CollapsingHeader("Weather")) {
-    if (ImGui::RadioButton("Cloudy Weather", false)) {
-      CCheat::CloudyWeatherCheat();
+    if (ImGui::CollapsingHeader("Weather")) {
+        if (ImGui::RadioButton("Cloudy Weather", false)) {
+            CCheat::CloudyWeatherCheat();
+        }
+        if (ImGui::RadioButton("Extra Sunny Weather", false)) {
+            CCheat::ExtraSunnyWeatherCheat();
+        }
+        if (ImGui::RadioButton("Sunny Weather", false)) {
+            CCheat::SunnyWeatherCheat();
+        }
+        if (ImGui::RadioButton("Fast time", false)) {
+            CCheat::FastTimeCheat();
+        }
+        if (ImGui::RadioButton("Foggy Weather", false)) {
+            CCheat::FoggyWeatherCheat();
+        }
+        if (ImGui::RadioButton("Rainy Weather", false)) {
+            CCheat::RainyWeatherCheat();
+        }
+        if (ImGui::RadioButton("Sandstorm", false)) {
+            CCheat::SandstormCheat();
+        }
+        if (ImGui::RadioButton("Slow Time", false)) {
+            CCheat::SlowTimeCheat();
+        }
+        if (ImGui::RadioButton("Storm", false)) {
+            CCheat::StormCheat();
+        }
+        if (ImGui::RadioButton("Dusk", false)) {
+            CCheat::DuskCheat();
+        }
     }
-    if (ImGui::RadioButton("Extra Sunny Weather", false)) {
-      CCheat::ExtraSunnyWeatherCheat();
-    }
-    if (ImGui::RadioButton("Sunny Weather", false)) {
-      CCheat::SunnyWeatherCheat();
-    }
-    if (ImGui::RadioButton("Fast time", false)) {
-      CCheat::FastTimeCheat();
-    }
-    if (ImGui::RadioButton("Foggy Weather", false)) {
-      CCheat::FoggyWeatherCheat();
-    }
-    if (ImGui::RadioButton("Rainy Weather", false)) {
-      CCheat::RainyWeatherCheat();
-    }
-    if (ImGui::RadioButton("Sandstorm", false)) {
-      CCheat::SandstormCheat();
-    }
-    if (ImGui::RadioButton("Slow Time", false)) {
-      CCheat::SlowTimeCheat();
-    }
-    if (ImGui::RadioButton("Storm", false)) {
-      CCheat::StormCheat();
-    }
-    if (ImGui::RadioButton("Dusk", false)) {
-      CCheat::DuskCheat();
-    }
-  }
 
-  if (ImGui::CollapsingHeader("Misc")) {
-    if (ImGui::RadioButton("Blow Up Cars", false)) {
-      CCheat::BlowUpCarsCheat();
+    if (ImGui::CollapsingHeader("Misc")) {
+        if (ImGui::RadioButton("Blow Up Cars", false)) {
+            CCheat::BlowUpCarsCheat();
+        }
+        if (ImGui::RadioButton("Jetpack", false)) {
+            CCheat::JetpackCheat();
+        }
+        if (ImGui::RadioButton("DriveBy", false)) {
+            CCheat::DrivebyCheat();
+        }
+        if (ImGui::RadioButton("All Cars Are Great", false)) {
+            CCheat::AllCarsAreGreatCheat();
+        }
+        if (ImGui::RadioButton("All Cars Are Shit", false)) {
+            CCheat::AllCarsAreShitCheat();
+        }
+        if (ImGui::RadioButton("Black Cars", false)) {
+            CCheat::BlackCarsCheat();
+        }
+        if (ImGui::RadioButton("Beach Party", false)) {
+            CCheat::BeachPartyCheat();
+        }
+        if (ImGui::RadioButton("Countryside Invasion", false)) {
+            CCheat::CountrysideInvasionCheat();
+        }
+        if (ImGui::RadioButton("Elvis Lives Matter", false)) {
+            CCheat::ElvisLivesCheat();
+        }
+        if (ImGui::RadioButton("Everyone Attacks Player", false)) {
+            CCheat::EverybodyAttacksPlayerCheat();
+        }
+        if (ImGui::RadioButton("Funhouse", false)) {
+            CCheat::FunhouseCheat();
+        }
+        if (ImGui::RadioButton("Gang Land", false)) {
+            CCheat::GangLandCheat();
+        }
+        if (ImGui::RadioButton("Gangs", false)) {
+            CCheat::GangsCheat();
+        }
+        if (ImGui::RadioButton("Love Conquers All", false)) {
+            CCheat::LoveConquersAllCheat();
+        }
+        if (ImGui::RadioButton("Love fist", false)) {
+            CCheat::LovefistCheat();
+        }
+        if (ImGui::RadioButton("Mayhem", false)) {
+            CCheat::MayhemCheat();
+        }
+        if (ImGui::RadioButton("Midnight", false)) {
+            CCheat::MidnightCheat();
+        }
+        if (ImGui::RadioButton("Ninja", false)) {
+            CCheat::NinjaCheat();
+        }
+        if (ImGui::RadioButton("Parachute", false)) {
+            CCheat::ParachuteCheat();
+        }
+        if (ImGui::RadioButton("Pink Cars", false)) {
+            CCheat::PinkCarsCheat();
+        }
+        if (ImGui::RadioButton("Predator", false)) {
+            CCheat::PredatorCheat();
+        }
+        if (ImGui::RadioButton("Riot", false)) {
+            CCheat::RiotCheat();
+        }
+        if (ImGui::RadioButton("Village People", false)) {
+            CCheat::VillagePeopleCheat();
+        }
     }
-    if (ImGui::RadioButton("Jetpack", false)) {
-      CCheat::JetpackCheat();
-    }
-    if (ImGui::RadioButton("DriveBy", false)) {
-      CCheat::DrivebyCheat();
-    }
-    if (ImGui::RadioButton("All Cars Are Great", false)) {
-      CCheat::AllCarsAreGreatCheat();
-    }
-    if (ImGui::RadioButton("All Cars Are Shit", false)) {
-      CCheat::AllCarsAreShitCheat();
-    }
-    if (ImGui::RadioButton("Black Cars", false)) {
-      CCheat::BlackCarsCheat();
-    }
-    if (ImGui::RadioButton("Beach Party", false)) {
-      CCheat::BeachPartyCheat();
-    }
-    if (ImGui::RadioButton("Countryside Invasion", false)) {
-      CCheat::CountrysideInvasionCheat();
-    }
-    if (ImGui::RadioButton("Elvis Lives Matter", false)) {
-      CCheat::ElvisLivesCheat();
-    }
-    if (ImGui::RadioButton("Everyone Attacks Player", false)) {
-      CCheat::EverybodyAttacksPlayerCheat();
-    }
-    if (ImGui::RadioButton("Funhouse", false)) {
-      CCheat::FunhouseCheat();
-    }
-    if (ImGui::RadioButton("Gang Land", false)) {
-      CCheat::GangLandCheat();
-    }
-    if (ImGui::RadioButton("Gangs", false)) {
-      CCheat::GangsCheat();
-    }
-    if (ImGui::RadioButton("Love Conquers All", false)) {
-      CCheat::LoveConquersAllCheat();
-    }
-    if (ImGui::RadioButton("Love fist", false)) {
-      CCheat::LovefistCheat();
-    }
-    if (ImGui::RadioButton("Mayhem", false)) {
-      CCheat::MayhemCheat();
-    }
-    if (ImGui::RadioButton("Midnight", false)) {
-      CCheat::MidnightCheat();
-    }
-    if (ImGui::RadioButton("Ninja", false)) {
-      CCheat::NinjaCheat();
-    }
-    if (ImGui::RadioButton("Parachute", false)) {
-      CCheat::ParachuteCheat();
-    }
-    if (ImGui::RadioButton("Pink Cars", false)) {
-      CCheat::PinkCarsCheat();
-    }
-    if (ImGui::RadioButton("Predator", false)) {
-      CCheat::PredatorCheat();
-    }
-    if (ImGui::RadioButton("Riot", false)) {
-      CCheat::RiotCheat();
-    }
-    if (ImGui::RadioButton("Village People", false)) {
-      CCheat::VillagePeopleCheat();
-    }
-  }
 
-  if (ImGui::RadioButton("Reset Cheats", false)) {
-    CPad::ResetCheats();
-  }
+    if (ImGui::RadioButton("Reset Cheats", false)) {
+        CCheat::ResetCheats();
+    }
 }
 
-void CDebugMenu::SpawnPed(std::int32_t modelID, CVector position)
-{
-  CStreaming::RequestModel(modelID, STREAMING_MISSION_REQUIRED | STREAMING_KEEP_IN_MEMORY);
-  CStreaming::LoadAllRequestedModels(false);
-  CPed* ped = new CCivilianPed(CPopulation::IsFemale(modelID) ? PED_TYPE_CIVFEMALE : PED_TYPE_CIVMALE, modelID);
-  if (ped) {
-    ped->SetOrientation(0.0f, 0.0f, 0.0f);
-    ped->SetPosn(position);
-    CWorld::Add(ped);
-    ped->PositionAnyPedOutOfCollision();
-  }
+void CDebugMenu::SpawnPed(std::int32_t modelID, CVector position) {
+    CStreaming::RequestModel(modelID, STREAMING_MISSION_REQUIRED | STREAMING_KEEP_IN_MEMORY);
+    CStreaming::LoadAllRequestedModels(false);
+    CPed* ped = new CCivilianPed(CPopulation::IsFemale(modelID) ? PED_TYPE_CIVFEMALE : PED_TYPE_CIVMALE, modelID);
+    if (ped) {
+        ped->SetOrientation(0.0f, 0.0f, 0.0f);
+        ped->SetPosn(position);
+        CWorld::Add(ped);
+        ped->PositionAnyPedOutOfCollision();
+    }
 }
 
-void CDebugMenu::ProcessPedTool()
-{
-  ImGui::PushItemWidth(465.0f);
-  bool reclaim_focus = false;
-  ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
-  if (ImGui::InputText(" ", &m_pedToolInput.GetInputBuffer(), input_text_flags)) {
-    reclaim_focus = true;
-  }
-  ImGui::PopItemWidth();
+void CDebugMenu::ProcessPedTool() {
+    ImGui::PushItemWidth(465.0f);
+    bool reclaim_focus = false;
+    ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
+    if (ImGui::InputText(" ", &m_pedToolInput.GetInputBuffer(), input_text_flags)) {
+        reclaim_focus = true;
+    }
+    ImGui::PopItemWidth();
 
-  // Auto-focus on window apparition
-  ImGui::SetItemDefaultFocus();
-  if (reclaim_focus)
-    ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+    // Auto-focus on window apparition
+    ImGui::SetItemDefaultFocus();
+    if (reclaim_focus)
+        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
 
-  m_pedToolInput.Process();
+    m_pedToolInput.Process();
 
-  ImGui::BeginChild("##pedstool", ImVec2(0, 310));
-  const auto w = ImGui::GetWindowWidth();
-  static bool widthSet = false;
-  ImGui::Columns(2);
-  if (!widthSet) {
-    widthSet = true;
-    ImGui::SetColumnWidth(0, w * 0.2f);
-    ImGui::SetColumnWidth(1, w * 0.8f);
-  }
-  ImGui::TextUnformatted("ID");
-  ImGui::NextColumn();
-  ImGui::TextUnformatted("Name");
-  ImGui::NextColumn();
-  ImGui::Separator();
-  static std::int32_t selectedId = -1;
-  for (const auto& x : m_pedToolInput.GetGridListMap()) {
-    const std::int32_t id = x.first;
-    const std::string& name = x.second;
-    ImGui::PushID(id);
-
-    ImGui::Text("%i", id);
+    ImGui::BeginChild("##pedstool", ImVec2(0, 310));
+    const auto w = ImGui::GetWindowWidth();
+    static bool widthSet = false;
+    ImGui::Columns(2);
+    if (!widthSet) {
+        widthSet = true;
+        ImGui::SetColumnWidth(0, w * 0.2f);
+        ImGui::SetColumnWidth(1, w * 0.8f);
+    }
+    ImGui::TextUnformatted("ID");
     ImGui::NextColumn();
-    if (ImGui::Selectable(name.c_str(), selectedId == id, ImGuiSelectableFlags_SpanAllColumns)) {
-      selectedId = id;
-    }
-    if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && selectedId != -1)
-      SpawnPed(selectedId, FindPlayerPed()->TransformFromObjectSpace(CVector(2.0f, 2.0f, 0.0f)));
+    ImGui::TextUnformatted("Name");
     ImGui::NextColumn();
-    ImGui::PopID();
-  }
-  ImGui::EndColumns();
-  ImGui::EndChild();
-  ImGui::Separator();
+    ImGui::Separator();
+    static std::int32_t selectedId = -1;
+    for (const auto& x : m_pedToolInput.GetGridListMap()) {
+        const std::int32_t id = x.first;
+        const std::string& name = x.second;
+        ImGui::PushID(id);
 
-  ImGui::SetCursorPosX(117);
-  if (ImGui::Button("SPAWN PED", ImVec2(250, 0)) && selectedId != -1) {
-    SpawnPed(selectedId, FindPlayerPed()->TransformFromObjectSpace(CVector(2.0f, 2.0f, 0.0f)));
-  }
+        ImGui::Text("%i", id);
+        ImGui::NextColumn();
+        if (ImGui::Selectable(name.c_str(), selectedId == id, ImGuiSelectableFlags_SpanAllColumns)) {
+            selectedId = id;
+        }
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && selectedId != -1)
+            SpawnPed(selectedId, FindPlayerPed()->TransformFromObjectSpace(CVector(2.0f, 2.0f, 0.0f)));
+        ImGui::NextColumn();
+        ImGui::PopID();
+    }
+    ImGui::EndColumns();
+    ImGui::EndChild();
+    ImGui::Separator();
+
+    ImGui::SetCursorPosX(117);
+    if (ImGui::Button("SPAWN PED", ImVec2(250, 0)) && selectedId != -1) {
+        SpawnPed(selectedId, FindPlayerPed()->TransformFromObjectSpace(CVector(2.0f, 2.0f, 0.0f)));
+    }
 }
 
 bool showPlayerInfo;
-void CDebugMenu::ShowPlayerInfo()
-{
-  if (!showPlayerInfo) return;
-  CPlayerPed* pLocalPlayer = FindPlayerPed();
-  if (pLocalPlayer != nullptr)
-  {
-    ImGui::Begin("Player Information");
+void CDebugMenu::ShowPlayerInfo() {
+    if (!showPlayerInfo)
+        return;
+    CPlayerPed* pLocalPlayer = FindPlayerPed();
+    if (pLocalPlayer != nullptr) {
+        ImGui::Begin("Player Information");
 
-    float pos[3] = { pLocalPlayer->GetPosition().x, pLocalPlayer->GetPosition().y, pLocalPlayer->GetPosition().z };
-    ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
+        float pos[3] = {pLocalPlayer->GetPosition().x, pLocalPlayer->GetPosition().y, pLocalPlayer->GetPosition().z};
+        ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
 
-    ImGui::End();
-  }
-}
-
-void CDebugMenu::ProcessVehicleTool()
-{
-  ImGui::PushItemWidth(465.0f);
-  bool reclaim_focus = false;
-  ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
-  if (ImGui::InputText(" ", &m_vehicleToolInput.GetInputBuffer(), input_text_flags)) {
-    reclaim_focus = true;
-  }
-  ImGui::PopItemWidth();
-
-  // Auto-focus on window apparition
-  ImGui::SetItemDefaultFocus();
-  if (reclaim_focus)
-    ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
-
-  m_vehicleToolInput.Process();
-
-  ImGui::BeginChild("##vehiclestool", ImVec2(0, 310));
-  const auto w = ImGui::GetWindowWidth();
-  static bool widthSet = false;
-  ImGui::Columns(2);
-  if (!widthSet) {
-    widthSet = true;
-    ImGui::SetColumnWidth(0, w * 0.2f);
-    ImGui::SetColumnWidth(1, w * 0.8f);
-  }
-  ImGui::TextUnformatted("ID");
-  ImGui::NextColumn();
-  ImGui::TextUnformatted("Name");
-  ImGui::NextColumn();
-  ImGui::Separator();
-  static std::int32_t selectedId = -1;
-  for (const auto& x : m_vehicleToolInput.GetGridListMap()) {
-    const std::int32_t id = x.first;
-    const std::string& name = x.second;
-    ImGui::PushID(id);
-
-    ImGui::Text("%i", id);
-    ImGui::NextColumn();
-    if (ImGui::Selectable(name.c_str(), selectedId == id, ImGuiSelectableFlags_SpanAllColumns)) {
-      selectedId = id;
+        ImGui::End();
     }
-    if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && selectedId != -1)
-      CCheat::VehicleCheat(selectedId);
-    ImGui::NextColumn();
-    ImGui::PopID();
-  }
-  ImGui::EndColumns();
-  ImGui::EndChild();
-  ImGui::Separator();
-
-  ImGui::SetCursorPosX(117);
-  if (ImGui::Button("SPAWN VEHICLE", ImVec2(250, 0)) && selectedId != -1) {
-    CCheat::VehicleCheat(selectedId);
-  }
 }
 
-void CDebugMenu::InitializeAndStartNewScript()
-{
-  CTheScripts::WipeLocalVariableMemoryForMissionScript();
-  CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[200000]);
-  script->m_bUseMissionCleanup = true;
-  script->m_bIsMission = true;
-  script->m_pBaseIP = &CTheScripts::ScriptSpace[200000];
-  CTheScripts::bAlreadyRunningAMissionScript = true;
-  CGameLogic::ClearSkip(false);
-}
-
-bool CDebugMenu::StartMission(std::int32_t missionId, bool bDoMissionCleanUp)
-{
-  if (!m_bStartMission && CTheScripts::IsPlayerOnAMission()) {
-    if (CCutsceneMgr::ms_cutsceneLoadStatus == 2) {
-      CCutsceneMgr::DeleteCutsceneData();
+void CDebugMenu::ProcessVehicleTool() {
+    ImGui::PushItemWidth(465.0f);
+    bool reclaim_focus = false;
+    ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
+    if (ImGui::InputText(" ", &m_vehicleToolInput.GetInputBuffer(), input_text_flags)) {
+        reclaim_focus = true;
     }
-    CTheScripts::FailCurrentMission = 2;
-  }
-  if (CTheScripts::FailCurrentMission > 0) {
-    m_bStartMission = true;
-    m_missionToStartId = missionId;
-    return true;
-  }
-  m_bStartMission = false;
-  CTheScripts::bPlayerIsOffTheMap = false;
-  CGame::currArea = 0;
-  CPlayerPed* player = FindPlayerPed();
-  FindPlayerPed()->m_nAreaCode = AREA_CODE_NORMAL_WORLD;
-  if (!CGame::currArea) {
-    player->m_pEnex = nullptr;
-    CEntryExitManager::ms_entryExitStackPosn = 0;
-    CTimeCycle::StopExtraColour(false);
-  }
+    ImGui::PopItemWidth();
 
-  if (bDoMissionCleanUp)
-    CTheScripts::MissionCleanUp.Process();
-  if (CTheScripts::NumberOfExclusiveMissionScripts > 0) {
-    if (missionId <= 65532)
-      return false;
-    missionId = 0xFFFF - missionId;
-  }
-  CTimer::Suspend();
-  int offsetToMission = CTheScripts::MultiScriptArray[missionId];
-  CFileMgr::ChangeDir("\\");
-  if (CGame::bMissionPackGame) {
-    size_t bytesRead = 0;
-    while (FrontEndMenuManager.CheckMissionPackValidMenu())
-    {
-      CFileMgr::SetDirMyDocuments();
-      sprintf(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
-      FILE* file = CFileMgr::OpenFile(gString, "rb");
-      if (file) {
-        CFileMgr::Seek(file, offsetToMission, 0);
-        bytesRead = CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
-        CFileMgr::CloseFile(file);
-        if (bytesRead >= 1) {
-          InitializeAndStartNewScript();
-          break;
+    // Auto-focus on window apparition
+    ImGui::SetItemDefaultFocus();
+    if (reclaim_focus)
+        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+
+    m_vehicleToolInput.Process();
+
+    ImGui::BeginChild("##vehiclestool", ImVec2(0, 310));
+    const auto w = ImGui::GetWindowWidth();
+    static bool widthSet = false;
+    ImGui::Columns(2);
+    if (!widthSet) {
+        widthSet = true;
+        ImGui::SetColumnWidth(0, w * 0.2f);
+        ImGui::SetColumnWidth(1, w * 0.8f);
+    }
+    ImGui::TextUnformatted("ID");
+    ImGui::NextColumn();
+    ImGui::TextUnformatted("Name");
+    ImGui::NextColumn();
+    ImGui::Separator();
+    static std::int32_t selectedId = -1;
+    for (const auto& x : m_vehicleToolInput.GetGridListMap()) {
+        const std::int32_t id = x.first;
+        const std::string& name = x.second;
+        ImGui::PushID(id);
+
+        ImGui::Text("%i", id);
+        ImGui::NextColumn();
+        if (ImGui::Selectable(name.c_str(), selectedId == id, ImGuiSelectableFlags_SpanAllColumns)) {
+            selectedId = id;
         }
-      }
-      else if (bytesRead >= 1) {
-        break;
-      }
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && selectedId != -1)
+            CCheat::VehicleCheat(selectedId);
+        ImGui::NextColumn();
+        ImGui::PopID();
     }
-  }
-  CFileMgr::SetDir(gta_empty_string);
-  if (!CGame::bMissionPackGame) {
-    FILE* file = CFileMgr::OpenFile("data\\script\\main.scm", "rb");
-    CFileMgr::Seek(file, offsetToMission, 0);
-    CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
-    CFileMgr::CloseFile(file);
-    InitializeAndStartNewScript();
-  }
-  CTimer::Resume();
-  return true;
+    ImGui::EndColumns();
+    ImGui::EndChild();
+    ImGui::Separator();
+
+    ImGui::SetCursorPosX(117);
+    if (ImGui::Button("SPAWN VEHICLE", ImVec2(250, 0)) && selectedId != -1) {
+        CCheat::VehicleCheat(selectedId);
+    }
 }
 
-void CDebugMenu::ProcessMissionTool()
-{
-  if (m_bStartMission) {
-    StartMission(m_missionToStartId);
-  }
-  ImGui::PushItemWidth(465.0f);
-  bool reclaim_focus = false;
-  ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
-  if (ImGui::InputText(" ", &m_missionToolInput.GetInputBuffer(), input_text_flags)) {
-    reclaim_focus = true;
-  }
-  ImGui::PopItemWidth();
+void CDebugMenu::InitializeAndStartNewScript() {
+    CTheScripts::WipeLocalVariableMemoryForMissionScript();
+    CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[200000]);
+    script->m_bUseMissionCleanup = true;
+    script->m_bIsMission = true;
+    script->m_pBaseIP = &CTheScripts::ScriptSpace[200000];
+    CTheScripts::bAlreadyRunningAMissionScript = true;
+    CGameLogic::ClearSkip(false);
+}
 
-  // Auto-focus on window apparition
-  ImGui::SetItemDefaultFocus();
-  if (reclaim_focus)
-    ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
-
-  m_missionToolInput.Process();
-
-  ImGui::BeginChild("##missionstool", ImVec2(0, 310));
-  const auto w = ImGui::GetWindowWidth();
-  static bool widthSet = false;
-  ImGui::Columns(2);
-  if (!widthSet) {
-    widthSet = true;
-    ImGui::SetColumnWidth(0, w * 0.2f);
-    ImGui::SetColumnWidth(1, w * 0.8f);
-  }
-  ImGui::TextUnformatted("ID");
-  ImGui::NextColumn();
-  ImGui::TextUnformatted("Name");
-  ImGui::NextColumn();
-  ImGui::Separator();
-  static std::int32_t selectedId = -1;
-  for (const auto& x : m_missionToolInput.GetGridListMap()) {
-    const std::int32_t id = x.first;
-    const std::string& name = x.second;
-    ImGui::PushID(id);
-
-    ImGui::Text("%i", id);
-    ImGui::NextColumn();
-    if (ImGui::Selectable(name.c_str(), selectedId == id, ImGuiSelectableFlags_SpanAllColumns)) {
-      selectedId = id;
+bool CDebugMenu::StartMission(std::int32_t missionId, bool bDoMissionCleanUp) {
+    if (!m_bStartMission && CTheScripts::IsPlayerOnAMission()) {
+        if (CCutsceneMgr::ms_cutsceneLoadStatus == 2) {
+            CCutsceneMgr::DeleteCutsceneData();
+        }
+        CTheScripts::FailCurrentMission = 2;
     }
-    if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && selectedId != -1) {
-      CHud::SetHelpMessage("Starting Mission!", true, false, false);
-      StartMission(selectedId);
+    if (CTheScripts::FailCurrentMission > 0) {
+        m_bStartMission = true;
+        m_missionToStartId = missionId;
+        return true;
     }
-    ImGui::NextColumn();
-    ImGui::PopID();
-  }
-  ImGui::EndColumns();
-  ImGui::EndChild();
-  ImGui::Separator();
+    m_bStartMission = false;
+    CTheScripts::bPlayerIsOffTheMap = false;
+    CGame::currArea = 0;
+    CPlayerPed* player = FindPlayerPed();
+    FindPlayerPed()->m_nAreaCode = AREA_CODE_NORMAL_WORLD;
+    if (!CGame::currArea) {
+        player->m_pEnex = nullptr;
+        CEntryExitManager::ms_entryExitStackPosn = 0;
+        CTimeCycle::StopExtraColour(false);
+    }
 
-  ImGui::SetCursorPosX(117);
-  if (ImGui::Button("START MISSION", ImVec2(250, 0)) && selectedId != -1) {
-    CHud::SetHelpMessage("Starting Mission!", true, false, false);
-    StartMission(selectedId);
-  }
+    if (bDoMissionCleanUp)
+        CTheScripts::MissionCleanUp.Process();
+
+    if (CTheScripts::NumberOfExclusiveMissionScripts > 0) {
+        if (missionId <= 65532)
+            return false;
+        missionId = 0xFFFF - missionId;
+    }
+    CTimer::Suspend();
+    int offsetToMission = CTheScripts::MultiScriptArray[missionId];
+    CFileMgr::ChangeDir("\\");
+    if (CGame::bMissionPackGame) {
+        size_t bytesRead = 0;
+        while (FrontEndMenuManager.CheckMissionPackValidMenu()) {
+            CFileMgr::SetDirMyDocuments();
+            sprintf(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
+            FILE* file = CFileMgr::OpenFile(gString, "rb");
+            if (file) {
+                CFileMgr::Seek(file, offsetToMission, 0);
+                bytesRead = CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
+                CFileMgr::CloseFile(file);
+                if (bytesRead >= 1) {
+                    InitializeAndStartNewScript();
+                    break;
+                }
+            } else if (bytesRead >= 1) {
+                break;
+            }
+        }
+    }
+    CFileMgr::SetDir(gta_empty_string);
+    if (!CGame::bMissionPackGame) {
+        FILE* file = CFileMgr::OpenFile("data\\script\\main.scm", "rb");
+        CFileMgr::Seek(file, offsetToMission, 0);
+        CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
+        CFileMgr::CloseFile(file);
+        InitializeAndStartNewScript();
+    }
+    CTimer::Resume();
+    return true;
+}
+
+void CDebugMenu::ProcessMissionTool() {
+    if (m_bStartMission) {
+        StartMission(m_missionToStartId);
+    }
+    ImGui::PushItemWidth(465.0f);
+    bool reclaim_focus = false;
+    ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
+    if (ImGui::InputText(" ", &m_missionToolInput.GetInputBuffer(), input_text_flags)) {
+        reclaim_focus = true;
+    }
+    ImGui::PopItemWidth();
+
+    // Auto-focus on window apparition
+    ImGui::SetItemDefaultFocus();
+    if (reclaim_focus)
+        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+
+    m_missionToolInput.Process();
+
+    ImGui::BeginChild("##missionstool", ImVec2(0, 310));
+    const auto w = ImGui::GetWindowWidth();
+    static bool widthSet = false;
+    ImGui::Columns(2);
+    if (!widthSet) {
+        widthSet = true;
+        ImGui::SetColumnWidth(0, w * 0.2f);
+        ImGui::SetColumnWidth(1, w * 0.8f);
+    }
+    ImGui::TextUnformatted("ID");
+    ImGui::NextColumn();
+    ImGui::TextUnformatted("Name");
+    ImGui::NextColumn();
+    ImGui::Separator();
+    static std::int32_t selectedId = -1;
+    for (const auto& x : m_missionToolInput.GetGridListMap()) {
+        const std::int32_t id = x.first;
+        const std::string& name = x.second;
+        ImGui::PushID(id);
+
+        ImGui::Text("%i", id);
+        ImGui::NextColumn();
+        if (ImGui::Selectable(name.c_str(), selectedId == id, ImGuiSelectableFlags_SpanAllColumns)) {
+            selectedId = id;
+        }
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && selectedId != -1) {
+            CHud::SetHelpMessage("Starting Mission!", true, false, false);
+            StartMission(selectedId);
+        }
+        ImGui::NextColumn();
+        ImGui::PopID();
+    }
+    ImGui::EndColumns();
+    ImGui::EndChild();
+    ImGui::Separator();
+
+    ImGui::SetCursorPosX(117);
+    if (ImGui::Button("START MISSION", ImVec2(250, 0)) && selectedId != -1) {
+        CHud::SetHelpMessage("Starting Mission!", true, false, false);
+        StartMission(selectedId);
+    }
 }
 
 void CDebugMenu::PostFxTool() {
-  ImGui::Checkbox("In Cutscene", &CPostEffects::m_bInCutscene);
-  ImGui::Checkbox("Skip Post Process", &CPostEffects::m_bDisableAllPostEffect);
-  ImGui::Checkbox("Save Photo From Script", &CPostEffects::m_bSavePhotoFromScript);
-  ImGui::Checkbox("Radiosity", &CPostEffects::m_bRadiosity);
-  ImGui::Checkbox("Night Vision", &CPostEffects::m_bNightVision);
-  ImGui::Checkbox("Infrared Vision", &CPostEffects::m_bInfraredVision);
-  ImGui::Checkbox("Grain", &CPostEffects::m_bGrainEnable);
-  ImGui::Checkbox("Heat Haze FX", &CPostEffects::m_bHeatHazeFX);
-  ImGui::Checkbox("Darkness Filter", &CPostEffects::m_bDarknessFilter);
-  ImGui::Checkbox("CCTV", &CPostEffects::m_bCCTV);
-  ImGui::Checkbox("SpeedFX Test Mode", &CPostEffects::m_bSpeedFXTestMode);
-  ImGui::Checkbox("Fog", &CPostEffects::m_bFog);
-  ImGui::Checkbox("Water Depth Darkness", &CPostEffects::m_bWaterDepthDarkness);
+    ImGui::Checkbox("In Cutscene", &CPostEffects::m_bInCutscene);
+    ImGui::Checkbox("Skip Post Process", &CPostEffects::m_bDisableAllPostEffect);
+    ImGui::Checkbox("Save Photo From Script", &CPostEffects::m_bSavePhotoFromScript);
+    ImGui::Checkbox("Radiosity", &CPostEffects::m_bRadiosity);
+    ImGui::Checkbox("Night Vision", &CPostEffects::m_bNightVision);
+    ImGui::Checkbox("Infrared Vision", &CPostEffects::m_bInfraredVision);
+    ImGui::Checkbox("Grain", &CPostEffects::m_bGrainEnable);
+    ImGui::Checkbox("Heat Haze FX", &CPostEffects::m_bHeatHazeFX);
+    ImGui::Checkbox("Darkness Filter", &CPostEffects::m_bDarknessFilter);
+    ImGui::Checkbox("CCTV", &CPostEffects::m_bCCTV);
+    ImGui::Checkbox("SpeedFX Test Mode", &CPostEffects::m_bSpeedFXTestMode);
+    ImGui::Checkbox("Fog", &CPostEffects::m_bFog);
+    ImGui::Checkbox("Water Depth Darkness", &CPostEffects::m_bWaterDepthDarkness);
 }
 
 void CDebugMenu::ProcessRenderTool() {
-  if (ImGui::CollapsingHeader("Post Processing")) {
-    PostFxTool();
-  }
+    if (ImGui::CollapsingHeader("Post Processing")) {
+        PostFxTool();
+    }
 }
 
-//TODO: The code is a mess, clean it up
-void CDebugMenu::ProcessHooksTool()
-{
-  static std::string HooksFilterContent;
+// TODO: The code is a mess, clean it up
+void CDebugMenu::ProcessHooksTool() {
+    static std::string HooksFilterContent;
 
-  ImGui::PushItemWidth(465.0f);
-  bool reclaim_focus = false;
-  ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
-  if (ImGui::InputText(" ", &HooksFilterContent, input_text_flags)) {
-    reclaim_focus = true;
-  }
-  ImGui::PopItemWidth();
-
-  // Auto-focus on window apparition
-  ImGui::SetItemDefaultFocus();
-  if (reclaim_focus)
-    ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
-
-
-  ImGui::BeginChild("##hookstool", ImVec2(0, 0));
-  ImGui::SetNextItemOpen(true);
-  ImGui::AlignTextToFramePadding();
-  if (ImGui::TreeNode("Reversible Hooks"))
-  {
-    const auto& allHooks = ReversibleHooks::GetAllHooks();
-    // Handle disabling/enabling of all hooks at once
-    ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 40);
-
-    std::string disabledAllStr = "all_disabled";
-    ImGui::PushID(disabledAllStr.c_str());
-    if (ImGui::Button("-")) {
-      for (auto& classHooks : allHooks)
-        for (auto& hook : classHooks.second)
-          if (hook->m_bIsHooked)
-            hook->Switch();
+    ImGui::PushItemWidth(465.0f);
+    bool reclaim_focus = false;
+    ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
+    if (ImGui::InputText(" ", &HooksFilterContent, input_text_flags)) {
+        reclaim_focus = true;
     }
-    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Disable all");
-    ImGui::PopID();
+    ImGui::PopItemWidth();
 
-    ImGui::SameLine();
-    std::string enableAllStr = "all_enabled";
-    ImGui::PushID(enableAllStr.c_str());
-    if (ImGui::Button("+")) {
-      for (auto& classHooks : allHooks)
-        for (auto& hook : classHooks.second)
-          if (!hook->m_bIsHooked)
-            hook->Switch();
-    }
-    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Enable all");
-    ImGui::PopID();
-    // End of disabling/enabling of all hooks at once
+    // Auto-focus on window apparition
+    ImGui::SetItemDefaultFocus();
+    if (reclaim_focus)
+        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
 
-    for (auto& classHooks : allHooks) {
-      if (!HooksFilterContent.empty() && !findStringCaseInsensitive(classHooks.first, HooksFilterContent))
-        continue;
+    ImGui::BeginChild("##hookstool", ImVec2(0, 0));
+    ImGui::SetNextItemOpen(true);
+    ImGui::AlignTextToFramePadding();
+    if (ImGui::TreeNode("Reversible Hooks")) {
+        const auto& allHooks = ReversibleHooks::GetAllHooks();
+        // Handle disabling/enabling of all hooks at once
+        ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 40);
 
-      ImGui::AlignTextToFramePadding();
-      bool treeOpen = ImGui::TreeNodeEx(classHooks.first.c_str(), ImGuiTreeNodeFlags_AllowItemOverlap);
-      ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 40);
+        std::string disabledAllStr = "all_disabled";
+        ImGui::PushID(disabledAllStr.c_str());
+        if (ImGui::Button("-")) {
+            for (auto& classHooks : allHooks)
+                for (auto& hook : classHooks.second)
+                    if (hook->m_bIsHooked)
+                        hook->Switch();
+        }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Disable all");
+        ImGui::PopID();
 
-      std::string disabledStr = classHooks.first + "_disabled";
-      ImGui::PushID(disabledStr.c_str());
-      if (ImGui::Button("-")) {
-        for (auto& hook : classHooks.second)
-          hook->m_bImguiHooked = false;
-      }
-      if (ImGui::IsItemHovered()) ImGui::SetTooltip("Disable all");
-      ImGui::PopID();
+        ImGui::SameLine();
+        std::string enableAllStr = "all_enabled";
+        ImGui::PushID(enableAllStr.c_str());
+        if (ImGui::Button("+")) {
+            for (auto& classHooks : allHooks)
+                for (auto& hook : classHooks.second)
+                    if (!hook->m_bIsHooked)
+                        hook->Switch();
+        }
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Enable all");
+        ImGui::PopID();
+        // End of disabling/enabling of all hooks at once
 
-      ImGui::SameLine();
-      std::string enableStr = classHooks.first + "_enabled";
-      ImGui::PushID(enableStr.c_str());
-      if (ImGui::Button("+")) {
-        for (auto& hook : classHooks.second)
-          hook->m_bImguiHooked = true;
-      }
-      if (ImGui::IsItemHovered()) ImGui::SetTooltip("Enable all");
-      ImGui::PopID();
+        for (auto& classHooks : allHooks) {
+            if (!HooksFilterContent.empty() && !findStringCaseInsensitive(classHooks.first, HooksFilterContent))
+                continue;
 
-      for (auto& hook : classHooks.second)
-        if (hook->m_bIsHooked != hook->m_bImguiHooked)
-          ReversibleHooks::Switch(hook);
+            ImGui::AlignTextToFramePadding();
+            bool treeOpen = ImGui::TreeNodeEx(classHooks.first.c_str(), ImGuiTreeNodeFlags_AllowItemOverlap);
+            ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 40);
 
-      if (treeOpen) {
-        for (auto& hook : classHooks.second) {
-          ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-          ImGui::AlignTextToFramePadding();
-          ImGui::Text(hook->m_eHookType == eReversibleHookType::Simple ? "S" : "V");
-          ImGui::PopStyleVar();
-          ImGui::SameLine();
-          ImGui::Checkbox(hook->m_sFunctionName.c_str(), &hook->m_bImguiHooked);
+            std::string disabledStr = classHooks.first + "_disabled";
+            ImGui::PushID(disabledStr.c_str());
+            if (ImGui::Button("-")) {
+                for (auto& hook : classHooks.second)
+                    hook->m_bImguiHooked = false;
+            }
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Disable all");
+            ImGui::PopID();
+
+            ImGui::SameLine();
+            std::string enableStr = classHooks.first + "_enabled";
+            ImGui::PushID(enableStr.c_str());
+            if (ImGui::Button("+")) {
+                for (auto& hook : classHooks.second)
+                    hook->m_bImguiHooked = true;
+            }
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("Enable all");
+            ImGui::PopID();
+
+            for (auto& hook : classHooks.second)
+                if (hook->m_bIsHooked != hook->m_bImguiHooked)
+                    ReversibleHooks::Switch(hook);
+
+            if (treeOpen) {
+                for (auto& hook : classHooks.second) {
+                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::Text(hook->m_eHookType == eReversibleHookType::Simple ? "S" : "V");
+                    ImGui::PopStyleVar();
+                    ImGui::SameLine();
+                    ImGui::Checkbox(hook->m_sFunctionName.c_str(), &hook->m_bImguiHooked);
+                }
+                ImGui::TreePop();
+            }
         }
         ImGui::TreePop();
-      }
     }
-    ImGui::TreePop();
-  }
-  ImGui::EndChild();
+    ImGui::EndChild();
 }
 
-void CDebugMenu::ImguiDisplayPlayerInfo()
-{
-  if (CTimer::GetIsPaused()) {
-    return;
-  }
-
-  if (m_showMenu && FindPlayerPed()) {
-    ImGui::SetNextWindowSize(ImVec2(484, 420), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Debug Window", &m_showMenu, ImGuiWindowFlags_NoResize);
-    if (ImGui::BeginMenuBar())
-    {
-      if (ImGui::BeginMenu("File"))
-      {
-        ImGui::EndMenu();
-      }
-      ImGui::EndMenuBar();
+void CDebugMenu::ImguiDisplayPlayerInfo() {
+    if (CTimer::GetIsPaused()) {
+        return;
     }
 
-    if (ImGui::BeginTabBar("Debug Tabs"))
-    {
-      if (ImGui::BeginTabItem("Peds"))
-      {
-        //ImGui::Checkbox("Show Player Information", &showPlayerInfo);
-        ProcessPedTool();
-        ImGui::EndTabItem();
-      }
-      if (ImGui::BeginTabItem("Vehicles"))
-      {
-        ProcessVehicleTool();
-        ImGui::EndTabItem();
-      }
-      if (ImGui::BeginTabItem("Cheats"))
-      {
-        ProcessCheatTool();
-        ImGui::EndTabItem();
-      }
-      if (ImGui::BeginTabItem("Missions"))
-      {
-        ProcessMissionTool();
-        ImGui::EndTabItem();
-      }
-      if (ImGui::BeginTabItem("Rendering"))
-      {
-        ProcessRenderTool();
-        ImGui::EndTabItem();
-      }
-      if (ImGui::BeginTabItem("Hooks"))
-      {
-        ProcessHooksTool();
-        ImGui::EndTabItem();
-      }
-      ImGui::EndTabBar();
+    if (m_showMenu && FindPlayerPed()) {
+        ImGui::SetNextWindowSize(ImVec2(484, 420), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Debug Window", &m_showMenu, ImGuiWindowFlags_NoResize);
+        if (ImGui::BeginMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+        }
+
+        if (ImGui::BeginTabBar("Debug Tabs")) {
+            if (ImGui::BeginTabItem("Peds")) {
+                // ImGui::Checkbox("Show Player Information", &showPlayerInfo);
+                ProcessPedTool();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Vehicles")) {
+                ProcessVehicleTool();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Cheats")) {
+                ProcessCheatTool();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Missions")) {
+                ProcessMissionTool();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Rendering")) {
+                ProcessRenderTool();
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("Hooks")) {
+                ProcessHooksTool();
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
+        ImGui::End();
     }
-    ImGui::End();
-  }
-  ShowPlayerInfo();
+    ShowPlayerInfo();
 }
 
-static void DebugCode()
-{
-//  CPad* pad = CPad::GetPad(0);
-//  if (pad->IsStandardKeyJustDown('1')) {
-//
-//  }
-//  if (pad->IsStandardKeyJustDown('2')) {
-//
-//  }
+static void DebugCode() {
+    CPad* pad = CPad::GetPad(0);
+    if (pad->IsStandardKeyJustDown('1')) {
+        printf("");
+    }
+    if (pad->IsStandardKeyJustDown('2')) {
+        printf("");
+    }
 
-  /*
-  // spawn RC cars
-  auto player = FindPlayerPed();
-  if (player) {
-      int32_t vehicleId = -1;
+    /*
+    // spawn RC cars
+    auto player = FindPlayerPed();
+    if (player) {
+        int32_t vehicleId = -1;
 
-      if (pad->IsStandardKeyJustDown('1'))
-          vehicleId = MODEL_RCBANDIT;
-      else if (pad->IsStandardKeyJustDown('2'))
-          vehicleId = MODEL_RCTIGER;
-      else if (pad->IsStandardKeyJustDown('3'))
-          vehicleId = MODEL_RCBARON;
+        if (pad->IsStandardKeyJustDown('1'))
+            vehicleId = MODEL_RCBANDIT;
+        else if (pad->IsStandardKeyJustDown('2'))
+            vehicleId = MODEL_RCTIGER;
+        else if (pad->IsStandardKeyJustDown('3'))
+            vehicleId = MODEL_RCBARON;
 
-      if (vehicleId != -1) {
-          CStreaming::RequestModel(vehicleId, STREAMING_GAME_REQUIRED);
-          CStreaming::LoadAllRequestedModels(false);
-          CVector pos = player->GetPosition() + CVector(2.0f, 1.0f, 1.0f);
-          CRemote::GivePlayerRemoteControlledCar(pos, player->GetHeading(), vehicleId);
-          CVehicle::bDisableRemoteDetonation = true;
-          CVehicle::bDisableRemoteDetonationOnContact = true;
-          printf("spawned rc car\n");
-      }
-  }
-*/
+        if (vehicleId != -1) {
+            CStreaming::RequestModel(vehicleId, STREAMING_GAME_REQUIRED);
+            CStreaming::LoadAllRequestedModels(false);
+            CVector pos = player->GetPosition() + CVector(2.0f, 1.0f, 1.0f);
+            CRemote::GivePlayerRemoteControlledCar(pos, player->GetHeading(), vehicleId);
+            CVehicle::bDisableRemoteDetonation = true;
+            CVehicle::bDisableRemoteDetonationOnContact = true;
+            printf("spawned rc car\n");
+        }
+    }
+  */
 }
 
-void CDebugMenu::ImguiDrawLoop()
-{
-  CPad* pad = CPad::GetPad(0);
-  auto bF7JustPressed = (CPad::NewKeyState.FKeys[6] && !CPad::OldKeyState.FKeys[6]);
-  if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustDown('M')) || bF7JustPressed) {
-    m_showMenu = !m_showMenu;
-    pad->bPlayerSafe = m_showMenu;
-  }
+void CDebugMenu::ImguiDrawLoop() {
+    CPad* pad = CPad::GetPad(0);
+    auto bF7JustPressed = (CPad::NewKeyState.FKeys[6] && !CPad::OldKeyState.FKeys[6]);
+    if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustDown('M')) || bF7JustPressed) {
+        m_showMenu = !m_showMenu;
+        pad->bPlayerSafe = m_showMenu;
+    }
 
-  DebugCode();
+    DebugCode();
 
-  if (!m_showMenu)
-    return;
+    if (!m_showMenu)
+        return;
 
-  io->DeltaTime = CTimer::ms_fTimeStep * 0.02f;
+    io->DeltaTime = CTimer::ms_fTimeStep * 0.02f;
 
-  ImGui_ImplRW_NewFrame();
-  ImGui::NewFrame();
+    ImGui_ImplRW_NewFrame();
+    ImGui::NewFrame();
 
-  ImguiDisplayPlayerInfo();
-  ImguiDisplayFramePerSecond();
+    ImguiDisplayPlayerInfo();
+    ImguiDisplayFramePerSecond();
 
-  ImGui::EndFrame();
-  ImGui::Render();
-  ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+    ImGui::EndFrame();
+    ImGui::Render();
+    ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
 }
 
-void CDebugMenu::Shutdown()
-{
-  printf("CDebugMenu::Shutdown\n");
-  m_showMenu = false;
-  if (m_imguiInitialised)
-    ImGui::DestroyContext();
-  m_mouseSprite.Delete();
-  std::int32_t slot = CTxdStore::FindTxdSlot("imgui_mouse");
-  if (slot != -1)
-    CTxdStore::RemoveTxdSlot(slot);
+void CDebugMenu::Shutdown() {
+    printf("CDebugMenu::Shutdown\n");
+    m_showMenu = false;
+    if (m_imguiInitialised)
+        ImGui::DestroyContext();
+
+    m_mouseSprite.Delete();
+    std::int32_t slot = CTxdStore::FindTxdSlot("imgui_mouse");
+    if (slot != -1)
+        CTxdStore::RemoveTxdSlot(slot);
 }
 
 
 CDebugMenuToolInput::ToolMap CDebugMenu::m_vehiclesMap{
-    {400, "Landstalker" },
+    { 400, "Landstalker" },
     { 401, "Bravura" },
     { 402, "Buffalo" },
     { 403, "Linerunner" },
@@ -1150,7 +1124,7 @@ CDebugMenuToolInput::ToolMap CDebugMenu::m_vehiclesMap{
 };
 
 CDebugMenuToolInput::ToolMap CDebugMenu::m_pedsMap{
-    {0, "CJ"},
+    { 0, "CJ"},
     { 1,   "Truth" },
     { 2,   "Maccer" },
     { 7,   "Male 01 (Special" },

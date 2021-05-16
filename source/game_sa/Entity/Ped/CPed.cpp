@@ -9,18 +9,18 @@ Do not delete this comment block. Respect others' work!
 
 void CPed::InjectHooks()
 {
-    HookInstall(0x5E3960, &CPed::IsPedInControl);
-    HookInstall(0x5E0170, &CPed::IsAlive);
-    HookInstall(0x5E6320, &CPed::ClearWeapons);
-    HookInstall(0x5DF200, &CPed::GetWeaponSlot);
-    HookInstall(0x5DF060, &CPed::CanBeArrested);
-    HookInstall(0x5DF090, &CPed::CanStrafeOrMouseControl);
-    HookInstall(0x5DF000, &CPed::CanPedReturnToState); 
-    HookInstall(0x5E8BE0, &CPed::GiveWeaponWhenJoiningGang);
-    HookInstall(0x5E6580, (char(CPed::*)()) &CPed::GetWeaponSkill);
-    HookInstall(0x5E6530, &CPed::ReplaceWeaponForScriptedCutscene);
-    HookInstall(0x5E6550, &CPed::RemoveWeaponForScriptedCutscene);
-    HookInstall(0x5E8AB0, &CPed::GiveWeaponAtStartOfFight);
+    ReversibleHooks::Install("CPed", "IsPedInControl", 0x5E3960, &CPed::IsPedInControl);
+    ReversibleHooks::Install("CPed", "IsAlive", 0x5E0170, &CPed::IsAlive);
+    ReversibleHooks::Install("CPed", "ClearWeapons", 0x5E6320, &CPed::ClearWeapons);
+    ReversibleHooks::Install("CPed", "GetWeaponSlot", 0x5DF200, &CPed::GetWeaponSlot);
+    ReversibleHooks::Install("CPed", "CanBeArrested", 0x5DF060, &CPed::CanBeArrested);
+    ReversibleHooks::Install("CPed", "CanStrafeOrMouseControl", 0x5DF090, &CPed::CanStrafeOrMouseControl);
+    ReversibleHooks::Install("CPed", "CanPedReturnToState", 0x5DF000, &CPed::CanPedReturnToState);
+    ReversibleHooks::Install("CPed", "GiveWeaponWhenJoiningGang", 0x5E8BE0, &CPed::GiveWeaponWhenJoiningGang);
+    ReversibleHooks::Install("CPed", "GetWeaponSkill_char", 0x5E6580, (char(CPed::*)()) &CPed::GetWeaponSkill);
+    ReversibleHooks::Install("CPed", "ReplaceWeaponForScriptedCutscene", 0x5E6530, &CPed::ReplaceWeaponForScriptedCutscene);
+    ReversibleHooks::Install("CPed", "RemoveWeaponForScriptedCutscene", 0x5E6550, &CPed::RemoveWeaponForScriptedCutscene);
+    ReversibleHooks::Install("CPed", "GiveWeaponAtStartOfFight", 0x5E8AB0, &CPed::GiveWeaponAtStartOfFight);
     ReversibleHooks::Install("CPed", "ProcessBuoyancy", 0x5E1FA0, &CPed::ProcessBuoyancy);
 }
 
@@ -187,10 +187,7 @@ bool CPed::UseGroundColModel()
 
 bool CPed::CanPedReturnToState()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall*)(CPed*))0x5DF000)(this);
-#else
-    return 
+    return
         m_nPedState <= PEDSTATE_STATES_NO_AI && 
         m_nPedState != PEDSTATE_AIMGUN &&
         m_nPedState != PEDSTATE_ATTACK && 
@@ -198,7 +195,6 @@ bool CPed::CanPedReturnToState()
         m_nPedState != PEDSTATE_EVADE_STEP &&
         m_nPedState != PEDSTATE_SNIPER_MODE && 
         m_nPedState != PEDSTATE_LOOK_ENTITY;
-#endif 
 }
 
 // Converted from thiscall bool CPed::CanSetPedState(void) 0x5DF030
@@ -209,24 +205,17 @@ bool CPed::CanSetPedState()
 
 bool CPed::CanBeArrested()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall*)(CPed*))0x5DF060)(this);
-#else
-    return 
+    return
         m_nPedState != PEDSTATE_DIE &&
         m_nPedState != PEDSTATE_DEAD && 
         m_nPedState != PEDSTATE_ARRESTED && 
         m_nPedState != PEDSTATE_ENTER_CAR && 
         m_nPedState != PEDSTATE_EXIT_CAR;
-#endif
 }
 
 bool CPed::CanStrafeOrMouseControl()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall*)(CPed*))0x5DF090)(this);
-#else
-    return 
+    return
         m_nPedState == PEDSTATE_IDLE || 
         m_nPedState == PEDSTATE_FLEE_ENTITY ||
         m_nPedState == PEDSTATE_FLEE_POSITION || 
@@ -236,7 +225,6 @@ bool CPed::CanStrafeOrMouseControl()
         m_nPedState == PEDSTATE_FIGHT || 
         m_nPedState == PEDSTATE_JUMP ||
         m_nPedState == PEDSTATE_ANSWER_MOBILE;
-#endif
 }
 
 // Converted from thiscall bool CPed::CanBeDeleted(void) 0x5DF100
@@ -259,11 +247,7 @@ void CPed::RemoveGogglesModel()
 
 int CPed::GetWeaponSlot(eWeaponType weaponType)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(__thiscall *)(CPed*, eWeaponType))0x5DF200)(this, weaponType);
-#else
     return CWeaponInfo::GetWeaponInfo(weaponType, 1)->m_nSlot;
-#endif
 }
 
 // Converted from thiscall void CPed::GrantAmmo(eWeaponType weaponType,uint ammo) 0x5DF220
@@ -372,12 +356,7 @@ void CPed::Dress()
 // Checks if the Pedestrian is still alive.
 bool CPed::IsAlive()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-
-    return ((bool(__thiscall *)(CPed*))0x5E0170)(this);
-#else
     return m_nPedState != PEDSTATE_DIE && m_nPedState != PEDSTATE_DEAD;
-#endif
 }
 
 // Converted from thiscall void CPed::UpdateStatEnteringVehicle(void) 0x5E01A0
@@ -574,7 +553,7 @@ void CPed::ProcessBuoyancy()
         if (CWaterLevel::GetWaterLevel(vecSplashPos.x, vecSplashPos.y, vecSplashPos.z, &fWaterZ, true, nullptr)) {
             vecSplashPos.z = fWaterZ;
             g_fx.TriggerWaterSplash(vecSplashPos);
-            AudioEngine.ReportWaterSplash(this, -100.0F, 1U);
+            AudioEngine.ReportWaterSplash(this, -100.0F, true);
         }
     }
 
@@ -642,16 +621,12 @@ void CPed::ProcessBuoyancy()
 // Can Pedestrains be moved or not? Like in air or being dead.
 bool CPed::IsPedInControl()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall *)(CPed*))0x5E3960)(this);
-#else
     if (!bIsLanding && !bIsInTheAir)
     {
         if (m_nPedState != PEDSTATE_DIE && m_nPedState != PEDSTATE_DEAD && m_nPedState != PEDSTATE_ARRESTED)
             return true;
     }
     return false;
-#endif
 }
 
 // Converted from thiscall void CPed::RemoveWeaponModel(int modelIndex) 0x5E3990
@@ -674,9 +649,6 @@ void CPed::PutOnGoggles()
 
 char CPed::GetWeaponSkill(eWeaponType weaponType)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-  return ((char(__thiscall*)(CPed*, eWeaponType))0x5E3B60)(this, weaponType);
-#else
     if ( weaponType < WEAPON_PISTOL || weaponType > WEAPON_TEC9 )
         return 1;
     if (!m_nPedType || m_nPedType == PED_TYPE_PLAYER2)
@@ -695,7 +667,6 @@ char CPed::GetWeaponSkill(eWeaponType weaponType)
     if (weaponType != WEAPON_PISTOL || m_nPedType != PED_TYPE_COP)
         return m_nWeaponSkill;
     return 3;
-#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall void CPed::SetWeaponSkill(eWeaponType weaponType,char skill) 0x5E3C10
@@ -794,6 +765,7 @@ void CPed::GiveWeapon(eWeaponType weaponType, unsigned int ammo, bool likeUnused
     ((void(__thiscall *)(CPed*, eWeaponType, unsigned int, bool))0x5E6080)(this, weaponType, ammo, likeUnused);
 }
 
+// NOTSA
 void CPed::GiveWeaponSet1() {
     GiveWeapon(WEAPON_BRASSKNUCKLE, 1, true);
     GiveWeapon(WEAPON_BASEBALLBAT, 1, true);
@@ -807,6 +779,7 @@ void CPed::GiveWeaponSet1() {
     GiveWeapon(WEAPON_SPRAYCAN, 200, true);
 }
 
+// NOTSA
 void CPed::GiveWeaponSet2() {
     GiveWeapon(WEAPON_KNIFE, 0, true);
     GiveWeapon(WEAPON_GRENADE, 10, true);
@@ -819,6 +792,7 @@ void CPed::GiveWeaponSet2() {
     GiveWeapon(WEAPON_EXTINGUISHER, 200, true);
 }
 
+// NOTSA
 void CPed::GiveWeaponSet3() {
     GiveWeapon(WEAPON_CHAINSAW, 0, true);
     GiveWeapon(WEAPON_REMOTE_SATCHEL_CHARGE, 5, true);
@@ -851,18 +825,14 @@ void CPed::ClearWeapon(eWeaponType weaponType)
 // Clears every weapon from the pedestrian.
 void CPed::ClearWeapons()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall *)(CPed*))0x5E6320)(this);
-#else
     CPed::RemoveWeaponModel(-1);
     CPed::RemoveGogglesModel();
-    for(unsigned int i = 0; i < 13; i++)
+    for (auto & m_aWeapon : m_aWeapons)
     {
-        m_aWeapons[i].Shutdown();
+        m_aWeapon.Shutdown();
     }
     CWeaponInfo* getWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_UNARMED, 1);
     SetCurrentWeapon(getWeaponInfo->m_nSlot);
-#endif
 }
 
 // Converted from thiscall void CPed::RemoveWeaponWhenEnteringVehicle(int) 0x5E6370
@@ -880,36 +850,24 @@ void CPed::ReplaceWeaponWhenExitingVehicle()
 // Converted from thiscall void CPed::ReplaceWeaponForScriptedCutscene(void) 0x5E6530
 void CPed::ReplaceWeaponForScriptedCutscene()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall *)(CPed*))0x5E6530)(this);
-#else
     m_nSavedWeapon = m_aWeapons[m_nActiveWeaponSlot].m_nType;
     SetCurrentWeapon(0);
-#endif
 }
 
 // Converted from thiscall void CPed::RemoveWeaponForScriptedCutscene(void) 0x5E6550
 void CPed::RemoveWeaponForScriptedCutscene()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall *)(CPed*))0x5E6550)(this);
-#else
     if (m_nSavedWeapon != WEAPON_UNIDENTIFIED)
     {
         CWeaponInfo* weaponInfo = CWeaponInfo::GetWeaponInfo(m_nSavedWeapon, 1);
         CPed::SetCurrentWeapon(weaponInfo->m_nSlot);
         m_nSavedWeapon = WEAPON_UNIDENTIFIED;
     }
-#endif
 }
 
 char CPed::GetWeaponSkill()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((char(__thiscall*)(CPed*))0x5E6580)(this);
-#else
     return CPed::GetWeaponSkill(m_aWeapons[m_nActiveWeaponSlot].m_nType);
-#endif
 }
 
 // Converted from thiscall void CPed::PreRenderAfterTest(void) 0x5E65A0
@@ -993,9 +951,6 @@ bool IsPedPointerValid(CPed* ped)
 // Converted from thiscall void CPed::GiveWeaponAtStartOfFight(void) 0x5E8AB0
 void CPed::GiveWeaponAtStartOfFight()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CPed*))0x5E8AB0)(this);
-#else
     if (m_nCreatedBy != PED_MISSION && GetActiveWeapon().m_nType == eWeaponType::WEAPON_UNARMED)
     {
         const auto GiveRandomWeaponByType = [this](eWeaponType type, uint16_t maxRandom)
@@ -1034,14 +989,10 @@ void CPed::GiveWeaponAtStartOfFight()
                 break;
         }
     }
-#endif
 }
 
 void CPed::GiveWeaponWhenJoiningGang()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CPed*))0x5E8BE0)(this);
-#else
     if (m_aWeapons[m_nActiveWeaponSlot].m_nType == WEAPON_UNARMED && m_nDelayedWeapon == WEAPON_UNIDENTIFIED) {
         if (CCheat::m_aCheatsActive[eCheats::CHEAT_NO_ONE_CAN_STOP_US]) {
             GiveDelayedWeapon(WEAPON_AK47, 200);
@@ -1060,7 +1011,6 @@ void CPed::GiveWeaponWhenJoiningGang()
             CPed::SetCurrentWeapon(pWeaponInfo->m_nSlot);
         }
     }
-#endif
 }
 
 // Converted from thiscall bool CPed::GetPedTalking(void) 0x5EFF50

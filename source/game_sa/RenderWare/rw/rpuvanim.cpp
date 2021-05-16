@@ -1,3 +1,5 @@
+#include "StdInc.h"
+
 #include "rpuvanim.h"
 
 _rpUVAnimCustomData* _rpUVAnimCustomDataStreamRead(RwStream* stream) {

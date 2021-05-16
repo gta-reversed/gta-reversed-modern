@@ -1,3 +1,5 @@
+#include "StdInc.h"
+
 #include "rtbmp.h"
 
 RwImage* RtBMPImageWrite(RwImage* image, const RwChar* imageName) {

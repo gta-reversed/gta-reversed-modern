@@ -266,6 +266,9 @@ void InjectHooksMain()
     CReplay::InjectHooks();
     CDarkel::InjectHooks();
     CGeneral::InjectHooks();
+    CGamma::InjectHooks();
+    CHudColours::InjectHooks();
+    CTxdStore::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

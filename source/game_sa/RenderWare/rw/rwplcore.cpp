@@ -1,3 +1,5 @@
+#include "StdInc.h"
+
 #include "rwplcore.h"
 
 RwMemoryFunctions* RwOsGetMemoryInterface() {

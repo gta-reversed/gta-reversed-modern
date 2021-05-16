@@ -1,3 +1,5 @@
+#include "StdInc.h"
+
 #include "rphanim.h"
 
 void RpHAnimHierarchySetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc) {

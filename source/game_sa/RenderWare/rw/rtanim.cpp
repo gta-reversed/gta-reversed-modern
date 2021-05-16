@@ -1,3 +1,5 @@
+#include "StdInc.h"
+
 #include "rtanim.h"
 
 void RtAnimAnimationFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc) {

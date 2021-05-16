@@ -11,37 +11,34 @@
 #include "CMouseControllerState.h"
 #include "CControllerState.h"
 
-enum ePadButton : unsigned int
-{
-    LEFTSTICKX,		// Left / Right	GO_LEFT / GO_RIGHT
-    LEFTSTICKY,		// Forward / Backward	GO_FORWARD / GO_BACK
-    RIGHTSTICKX,	// Special CTRL Left / Special CTRL Right	PED_1RST_PERSON_LOOK_LEFT / PED_1RST_PERSON_LOOK_RIGHT
-    RIGHTSTICKY,	// Special CTRL Up / Special CTRL Down	PED_1RST_PERSON_LOOK_UP / PED_1RST_PERSON_LOOK_DOWN
-    LEFTSHOULDER1,	// Action, Secondary Fire	PED_ANSWER_PHONE, PED_FIREWEAPON_ALT
-    LEFTSHOULDER2,	// Previous Weapon / Zoom In	PED_CYCLE_WEAPON_LEFT / PED_SNIPER_ZOOM_IN
-    RIGHTSHOULDER1,	// Aim Weapon	PED_LOCK_TARGET
-    RIGHTSHOULDER2,	// Next Weapon / Zoom Out	PED_CYCLE_WEAPON_RIGHT / PED_SNIPER_ZOOM_OUT
-    DPADUP,			// Group Control Forward	GROUP_CONTROL_FWD
-    DPADDOWN,		// Group Control Backward	GROUP_CONTROL_BWD
-    DPADLEFT,		// Conversation - No	CONVERSATION_NO
-    DPADRIGHT,		// Conversation - Yes	CONVERSATION_YES
-    START,			// Pause Menu
-    SELECT,			// Change Camera	CAMERA_CHANGE_VIEW_ALL_SITUATIONS
-    SQUARE,			// Jump	PED_JUMPING
-    TRIANGLE,		// Enter Vehicle	VEHICLE_ENTER_EXIT
-    CROSS,			// Sprint	PED_SPRINT
-    CIRCLE,			// Fire Weapon	PED_FIREWEAPON
-    LEFTSHOCK,		// Crouch	PED_DUCK
-    RIGHTSHOCK,		// Look Behind	PED_LOOKBEHIND
+enum ePadButton : unsigned int {
+    LEFTSTICKX,     // Left / Right	GO_LEFT / GO_RIGHT
+    LEFTSTICKY,     // Forward / Backward	GO_FORWARD / GO_BACK
+    RIGHTSTICKX,    // Special CTRL Left / Special CTRL Right	PED_1RST_PERSON_LOOK_LEFT / PED_1RST_PERSON_LOOK_RIGHT
+    RIGHTSTICKY,    // Special CTRL Up / Special CTRL Down	PED_1RST_PERSON_LOOK_UP / PED_1RST_PERSON_LOOK_DOWN
+    LEFTSHOULDER1,  // Action, Secondary Fire	PED_ANSWER_PHONE, PED_FIREWEAPON_ALT
+    LEFTSHOULDER2,  // Previous Weapon / Zoom In	PED_CYCLE_WEAPON_LEFT / PED_SNIPER_ZOOM_IN
+    RIGHTSHOULDER1, // Aim Weapon	PED_LOCK_TARGET
+    RIGHTSHOULDER2, // Next Weapon / Zoom Out	PED_CYCLE_WEAPON_RIGHT / PED_SNIPER_ZOOM_OUT
+    DPADUP,         // Group Control Forward	GROUP_CONTROL_FWD
+    DPADDOWN,       // Group Control Backward	GROUP_CONTROL_BWD
+    DPADLEFT,       // Conversation - No	CONVERSATION_NO
+    DPADRIGHT,      // Conversation - Yes	CONVERSATION_YES
+    START,          // Pause Menu
+    SELECT,         // Change Camera	CAMERA_CHANGE_VIEW_ALL_SITUATIONS
+    SQUARE,         // Jump	PED_JUMPING
+    TRIANGLE,       // Enter Vehicle	VEHICLE_ENTER_EXIT
+    CROSS,          // Sprint	PED_SPRINT
+    CIRCLE,         // Fire Weapon	PED_FIREWEAPON
+    LEFTSHOCK,      // Crouch	PED_DUCK
+    RIGHTSHOCK,     // Look Behind	PED_LOOKBEHIND
     // --		Sneak	SNEAK_ABOUT
     // --		Cycle Target Left	PED_CYCLE_TARGET_LEFT
     // --		Cycle Target Right	PED_CYCLE_TARGET_RIGHT
     // --		Center Camera	PED_CENTER_CAMERA_BEHIND_PLAYER
 };
 
-
 class CPed;
-
 
 class CPad {
 public:
@@ -53,16 +50,12 @@ public:
     CControllerState PCTempJoyState;
     CControllerState PCTempMouseState;
     char Phase;
-private:
     char _pad109;
-public:
     short Mode;
     short ShakeDur;
 
-    union
-    {
-        struct
-        {
+    union {
+        struct {
             unsigned short unk1 : 1; // eCamMode::MODE_1STPERSON leftover?
             unsigned short unk2 : 1; // unused
             unsigned short bPlayerAwaitsInGarage : 1;
@@ -75,6 +68,7 @@ public:
         };
         unsigned short DisablePlayerControls;
     };
+
     char ShakeFreq;
     char bHornHistory[5];
     char iCurrHornHistory;
@@ -92,20 +86,18 @@ public:
     int AverageEntries;
     int NoShakeBeforeThis;
     char NoShakeFreq;
-private:
     char _pad131[3];
-public:
 
+public:
     // Static variables
 
-    // mouse states
-    static CMouseControllerState &PCTempMouseControllerState;
-    static CMouseControllerState &NewMouseControllerState;
-    static CMouseControllerState &OldMouseControllerState;
+    static CMouseControllerState& PCTempMouseControllerState;
+    static CMouseControllerState& NewMouseControllerState;
+    static CMouseControllerState& OldMouseControllerState;
 
-    static CKeyboardState &TempKeyState;
-    static CKeyboardState &OldKeyState;
-    static CKeyboardState &NewKeyState;
+    static CKeyboardState& TempKeyState;
+    static CKeyboardState& OldKeyState;
+    static CKeyboardState& NewKeyState;
 
     static CPad* Pads;
 
@@ -123,7 +115,6 @@ public:
     void StartShake(short time, unsigned char frequency, unsigned int arg2);
     void StartShake_Distance(short time, unsigned char frequency, float x, float y, float z);
     void StartShake_Train(float x, float y);
-    // dummy function
     void ProcessPCSpecificStuff();
     void StopShaking(short arg0);
     static CPad* GetPad(int padNumber);
@@ -192,9 +183,6 @@ public:
     bool isStandardKeyJustPressed(std::uint8_t key);
     bool isMenuKeyJustPressed();
     bool isTabJustPressed();
-
-    static void ResetCheats();
-    void DoCheats();
 };
 
 VALIDATE_SIZE(CPad, 0x134);

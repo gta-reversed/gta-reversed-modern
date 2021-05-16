@@ -1,3 +1,5 @@
+#include "StdInc.h"
+
 #include "rpskin.h"
 
 void RpSkinSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc) {

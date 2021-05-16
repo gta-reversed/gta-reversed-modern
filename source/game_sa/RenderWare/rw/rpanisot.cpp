@@ -1,3 +1,5 @@
+#include "StdInc.h"
+
 #include "rpanisot.h"
 
 RwInt8 RpAnisotGetMaxSupportedMaxAnisotropy() {
