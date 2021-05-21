@@ -6,57 +6,56 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVehicle.h"
 #include "CVector.h"
 #include "CPed.h"
 #include "CTask.h"
 
-class  CCarEnterExit {
+class CCarEnterExit {
 public:
-     static float const &ms_fMaxSpeed_CanDragPedOut;
-     static float const &ms_fMaxSpeed_PlayerCanDragPedOut;
-     static bool &ms_bPedOffsetsCalculated;
-     static CVector &ms_vecPedGetUpAnimOffset;
-     static CVector &ms_vecPedQuickDraggedOutCarAnimOffset;
-     static CVector &ms_vecPedBedLAnimOffset;
-     static CVector &ms_vecPedBedRAnimOffset;
-     static CVector &ms_vecPedDeskAnimOffset;
-     static CVector &ms_vecPedChairAnimOffset;
+    static const float& ms_fMaxSpeed_CanDragPedOut;
+    static const float& ms_fMaxSpeed_PlayerCanDragPedOut;
+    static bool& ms_bPedOffsetsCalculated;
+    static CVector& ms_vecPedGetUpAnimOffset;
+    static CVector& ms_vecPedQuickDraggedOutCarAnimOffset;
+    static CVector& ms_vecPedBedLAnimOffset;
+    static CVector& ms_vecPedBedRAnimOffset;
+    static CVector& ms_vecPedDeskAnimOffset;
+    static CVector& ms_vecPedChairAnimOffset;
 
-     static void AddInCarAnim(CVehicle const *vehicle, CPed *ped, bool bAsDriver);
-     static bool CarHasDoorToClose(CVehicle const *vehicle, int doorId);
-     static bool CarHasDoorToOpen(CVehicle const *vehicle, int doorID);
-     static bool CarHasOpenableDoor(CVehicle const *vehicle, int DoorID_UnusedArg, CPed const *ped);
-     static bool CarHasPartiallyOpenDoor(CVehicle const *vehicle, int doorID);
-     static int ComputeDoorFlag(CVehicle const *vehicle, int doorId, bool bCheckVehicleType);
-     static int ComputeOppositeDoorFlag(CVehicle const *vehicle, int doorId, bool bCheckVehicleType);
-     static signed int ComputePassengerIndexFromCarDoor(CVehicle const *vehicle, int doorID);
-     static int ComputeSlowJackedPed(CVehicle const *vehicle, int doorID);
-     static signed int ComputeTargetDoorToEnterAsPassenger(CVehicle const *pVehicle, int nPassengerNum);
-     static int ComputeTargetDoorToExit(CVehicle const *pVehicle, CPed const *pPed);
-     static bool GetNearestCarDoor(CPed const *pPed, CVehicle const *pVehicle, CVector *outPos, int doorID);
-     static bool GetNearestCarPassengerDoor(CPed const *ped, CVehicle const *vehicle, CVector *outVec, int *doorId, bool flag1, bool flag2, bool flag3);
-     static CVector *GetPositionToOpenCarDoor(CVector *out, CVehicle const *vehicle, int doorId);
-     static bool IsCarDoorInUse(CVehicle const *vehicle, int door1Id, int door2Id);
-     static bool IsCarDoorReady(CVehicle const *vehicle, int doorID);
-     static bool IsCarQuickJackPossible(CVehicle const *vehicle, int doorID, CPed const *ped);
-     static bool IsCarSlowJackRequired(CVehicle const *vehicle, int doorID);
-     static bool IsClearToDriveAway(CVehicle const *outVehicle);
-     static bool IsPathToDoorBlockedByVehicleCollisionModel(CPed const *ped, CVehicle *vehicle, CVector const *pos);
-     static bool IsPedHealthy(CPed *vehicle);
-     static bool IsPlayerToQuitCarEnter(CPed const *ped, CVehicle const *vehicle, int StartTime, CTask *task);
-     static bool IsRoomForPedToLeaveCar(CVehicle const *veh, int doorID, CVector *pos);
-     static bool IsVehicleHealthy(CVehicle const *vehicle);
-     static bool IsVehicleStealable(CVehicle const *vehicle, CPed const *ped);
-     static void MakeUndraggedDriverPedLeaveCar(CVehicle const *vehicle, CPed const *ped);
-     static void MakeUndraggedPassengerPedsLeaveCar(CVehicle const *targetVehicle, CPed const *draggedPed, CPed const *ped);
-    //! unused
-     static void QuitEnteringCar(CPed *ped, CVehicle *vehicle, int doorID, bool bCarWasBeingJacked);
-     static void RemoveCarSitAnim(CPed* ped);
-     static void RemoveGetInAnims(CPed const *ped);
-     static void SetAnimOffsetForEnterOrExitVehicle();
-     static void SetPedInCarDirect(CPed *ped, CVehicle *vehicle, int seatNumber, bool bAsDriver);
+public:
+    static void InjectHooks();
+
+    static void AddInCarAnim(const CVehicle* vehicle, CPed* ped, bool bAsDriver);
+    static bool CarHasDoorToClose(const CVehicle* vehicle, int doorId);
+    static bool CarHasDoorToOpen(const CVehicle* vehicle, int doorId);
+    static bool CarHasOpenableDoor(const CVehicle* vehicle, int doorId_UnusedArg, const CPed* ped);
+    static bool CarHasPartiallyOpenDoor(const CVehicle* vehicle, int doorId);
+    static int ComputeDoorFlag(const CVehicle* vehicle, int doorId, bool bCheckVehicleType);
+    static int ComputeOppositeDoorFlag(const CVehicle* vehicle, int doorId, bool bCheckVehicleType);
+    static signed int ComputePassengerIndexFromCarDoor(const CVehicle* vehicle, int doorId);
+    static int ComputeSlowJackedPed(const CVehicle* vehicle, int doorId);
+    static signed int ComputeTargetDoorToEnterAsPassenger(const CVehicle* vehicle, int nPassengerNum);
+    static int ComputeTargetDoorToExit(const CVehicle* vehicle, const CPed* ped);
+    static bool GetNearestCarDoor(const CPed* ped, const CVehicle* vehicle, CVector* outPos, int doorId);
+    static bool GetNearestCarPassengerDoor(const CPed* ped, const CVehicle* vehicle, CVector* outVec, int* doorId, bool flag1, bool flag2, bool flag3);
+    static CVector* GetPositionToOpenCarDoor(CVector* out, const CVehicle* vehicle, int doorId);
+    static bool IsCarDoorInUse(const CVehicle* vehicle, int firstDoorId, int secondDoorId);
+    static bool IsCarDoorReady(const CVehicle* vehicle, int doorId);
+    static bool IsCarQuickJackPossible(const CVehicle* vehicle, int doorId, const CPed* ped);
+    static bool IsCarSlowJackRequired(const CVehicle* vehicle, int doorId);
+    static bool IsClearToDriveAway(const CVehicle* outVehicle);
+    static bool IsPathToDoorBlockedByVehicleCollisionModel(const CPed* ped, CVehicle* vehicle, const CVector* pos);
+    static bool IsPedHealthy(CPed* vehicle);
+    static bool IsPlayerToQuitCarEnter(const CPed* ped, const CVehicle* vehicle, int startTime, CTask* task);
+    static bool IsRoomForPedToLeaveCar(const CVehicle* vehicle, int doorId, CVector* pos);
+    static bool IsVehicleHealthy(const CVehicle* vehicle);
+    static bool IsVehicleStealable(const CVehicle* vehicle, const CPed* ped);
+    static void MakeUndraggedDriverPedLeaveCar(const CVehicle* vehicle, const CPed* ped);
+    static void MakeUndraggedPassengerPedsLeaveCar(const CVehicle* targetVehicle, const CPed* draggedPed, const CPed* ped);
+    static void QuitEnteringCar(CPed* ped, CVehicle* vehicle, int doorId, bool bCarWasBeingJacked);
+    static void RemoveCarSitAnim(CPed* ped);
+    static void RemoveGetInAnims(const CPed* ped);
+    static void SetAnimOffsetForEnterOrExitVehicle();
+    static void SetPedInCarDirect(CPed* ped, CVehicle* vehicle, int seatNumber, bool bAsDriver);
 };
-
-//#include "meta/meta.CCarEnterExit.h"

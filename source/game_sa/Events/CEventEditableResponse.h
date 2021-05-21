@@ -5,7 +5,7 @@ class CEventEditableResponse : public CEvent {
 public:
     bool m_bAddToEventGroup;
     bool field_D;
-    short m_taskId;
+    short m_taskId; // see eTaskType
     short field_10;
     unsigned short field_12;
 

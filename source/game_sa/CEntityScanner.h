@@ -6,22 +6,25 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
 class CEntity;
 class CPed;
 
 class CEntityScanner {
 protected:
-    void *vtable;
+    void* vtable;
+
 public:
     int field_4;
-    unsigned int   m_nCount;
+    unsigned int m_nCount;
     CEntity* m_apEntities[16];
     CEntity* m_pClosestEntityInRange;
 
+public:
+    static void InjectHooks();
+
     void Clear();
     void ScanForEntitiesInRange(int arg2, CPed* pPed);
+    CEntity* GetClosestPedInRange();
 };
 
 VALIDATE_SIZE(CEntityScanner, 0x50);

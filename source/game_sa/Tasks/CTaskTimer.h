@@ -6,21 +6,21 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CTimer.h"
 
-class CTaskTimer 
-{
+class CTaskTimer {
 public:
     unsigned int m_nStartTime;
     int m_nInterval;
     bool m_bStarted;
     bool m_bStopped;
-private:
     char _pad[2];
+
 public:
-    
-    inline CTaskTimer(unsigned int start, unsigned int interval) { // @420E10
+    static void InjectHooks();
+
+    // 0x420E10
+    inline CTaskTimer(unsigned int start, unsigned int interval) {
         m_nStartTime = start;
         m_nInterval = interval;
         m_bStarted = true;
@@ -31,9 +31,9 @@ public:
         m_nInterval = 0;
         m_bStarted = false;
         m_bStopped = false;
-    }   
-    
-    inline bool Start (int time) {
+    }
+
+    inline bool Start(int time) {
         if (time >= 0) {
             m_nStartTime = CTimer::m_snTimeInMilliseconds;
             m_nInterval = time;
@@ -44,7 +44,7 @@ public:
     }
 
     inline bool Stop() {
-        if(m_bStarted) {
+        if (m_bStarted) {
             m_bStopped = true;
             m_nInterval -= CTimer::m_snTimeInMilliseconds - m_nStartTime;
             return true;

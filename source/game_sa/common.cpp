@@ -60,7 +60,6 @@ void InjectCommonHooks()
 //    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoSniperShift", 0x56E320, &FindPlayerCentreOfWorld_NoSniperShift);
 //    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoInteriorShift", 0x56E400, &FindPlayerCentreOfWorld_NoInteriorShift);
 //    ReversibleHooks::Install("common", "FindPlayerHeading", 0x56E450, &FindPlayerHeading);
-    ReversibleHooks::Install("common", "FindPlayerHeight", 0x56E520, &FindPlayerHeight);
     ReversibleHooks::Install("common", "FindPlayerPed", 0x56E210, &FindPlayerPed);
 //    ReversibleHooks::Install("common", "FindPlayerVehicle", 0x56E0D0, &FindPlayerVehicle);
     ReversibleHooks::Install("common", "FindPlayerWanted", 0x56E230, &FindPlayerWanted);
@@ -91,7 +90,6 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "WorldReplaceNormalLightsWithScorched", 0x7357E0, &WorldReplaceNormalLightsWithScorched);
 //    ReversibleHooks::Install("common", "AddAnExtraDirectionalLight", 0x735840, &AddAnExtraDirectionalLight);
     ReversibleHooks::Install("common", "RemoveExtraDirectionalLights", 0x7359E0, &RemoveExtraDirectionalLights);
-    ReversibleHooks::Install("common", "SetAmbientAndDirectionalColours", 0x735A20, &SetAmbientAndDirectionalColours);
     ReversibleHooks::Install("common", "SetBrightMarkerColours", 0x735BD0, &SetBrightMarkerColours);
     ReversibleHooks::Install("common", "ReSetAmbientAndDirectionalColours", 0x735C40, &ReSetAmbientAndDirectionalColours);
     ReversibleHooks::Install("common", "DeActivateDirectional", 0x735C70, &DeActivateDirectional);
@@ -128,12 +126,11 @@ CVector& FindPlayerSpeed(int playerId) {
 
 // 0x56E120
 CEntity* FindPlayerEntity(int playerId) {
-    CPlayerPed* ped = FindPlayerPed(playerId);
+    auto player = FindPlayerPed(playerId);
+    if (player->bInVehicle && player->m_pVehicle) 
+        return player->m_pVehicle;
 
-    if ((ped->m_nPedFlags & 0x100) != 0 && ped->m_pVehicle)
-        return ped->m_pVehicle;
-
-    return nullptr;
+    return player;
 }
 
 // 0x56E250
@@ -735,11 +732,10 @@ float GetDayNightBalance() {
 }
 
 // 0x7226D0
-void RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data) {
-//    return plugin::Call<0x7226D0, RpAtomic*, void*>(atomic, data);
-
+RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data) {
     auto* modelInfo = CVisibilityPlugins::GetAtomicModelInfo(atomic);
     modelInfo->RemoveRef();
+    return atomic;
 }
 
 // unused
@@ -749,8 +745,7 @@ void RemoveRefsForAtomic(RpClump* clump) {
 }
 
 // 0x46A760
-bool IsGlassModel(CEntity* pEntity)
-{
+bool IsGlassModel(CEntity* pEntity) {
     if (!pEntity->IsObject())
         return false;
 

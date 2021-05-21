@@ -269,6 +269,10 @@ void InjectHooksMain()
     CGamma::InjectHooks();
     CHudColours::InjectHooks();
     CTxdStore::InjectHooks();
+    CCarEnterExit::InjectHooks();
+    CEntityScanner::InjectHooks();
+    CPedType::InjectHooks();
+    CAcquaintance::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

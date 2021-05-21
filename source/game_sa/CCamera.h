@@ -102,9 +102,7 @@ public:
     bool m_bTransitionJUSTStarted;
     bool m_bTransitionState;
     unsigned char m_nActiveCam;
-private:
     char _pad5A[2];
-public:
     unsigned int m_nCamShakeStart;
     unsigned int m_nFirstPersonCamLastInputTime;
     unsigned int m_nLongestTimeInMill;
@@ -173,9 +171,7 @@ public:
     float m_fSoundDistUpAsReadOld;
     float m_fAvoidTheGeometryProbsTimer;
     unsigned short m_nAvoidTheGeometryProbsDirn;
-private:
     char _pad16A[2];
-public:
     float m_fWideScreenReductionAmount;
     float m_fStartingFOVForInterPol;
     CCam m_aCams[3];
@@ -213,9 +209,7 @@ public:
     CCamPathSplines m_aPathArray[4];
     bool m_bMirrorActive;
     bool m_bResetOldMatrix;
-private:
     char _pad972[2];
-public:
     CMatrix m_mCameraMatrix;
     CMatrix m_mCameraMatrixOld;
     CMatrix m_mViewMatrix;
@@ -245,16 +239,12 @@ public:
     float m_fScriptPercentageInterToCatchUp;
     unsigned int m_nScriptTimeForInterpolation;
     unsigned short m_nFadeInOutFlag;
-private:
     char _padC32[2];
-public:
     int m_nModeObbeCamIsInForCar;
-    short m_nModeToGoTo;    // see eCamMode
+    eCamMode m_nModeToGoTo;
     short m_nMusicFadingDirection;
     short m_nTypeOfSwitch; // see eSwitchType
-private:
     char _padC3E[2];
-public:
     unsigned int m_nFadeStartTime;
     unsigned int m_nFadeTimeStartedMusic;
     int m_nExtraEntitiesCount;
@@ -314,9 +304,7 @@ public:
     } m_aCamTweak[5];
 
     bool m_bCameraVehicleTweaksInitialized;
-private:
     char _padD45[3];
-public:
     float m_fCurrentTweakDistance;
     float m_fCurrentTweakAltitude;
     float m_fCurrentTweakAngle;
@@ -500,5 +488,3 @@ VALIDATE_SIZE(CCamera, 0xD78);
 
 extern CCamera &TheCamera;
 extern bool &gbModelViewer;
-
-//#include "meta/meta.CCamera.h"

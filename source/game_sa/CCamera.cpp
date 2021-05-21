@@ -75,7 +75,7 @@ void CCamera::InjectHooks() {
 //    ReversibleHooks::Install("CCamera", "SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString", 0x50BDA0, &CCamera::SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString);
 //    ReversibleHooks::Install("CCamera", "SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString", 0x50BE30, &CCamera::SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString);
 //    ReversibleHooks::Install("CCamera", "Using1stPersonWeaponMode", 0x50BFF0, &CCamera::Using1stPersonWeaponMode);
-//    ReversibleHooks::Install("CCamera", "SetParametersForScriptInterpolation", 0x50C030, &CCamera::SetParametersForScriptInterpolation);
+    ReversibleHooks::Install("CCamera", "SetParametersForScriptInterpolation", 0x50C030, &CCamera::SetParametersForScriptInterpolation);
 //    ReversibleHooks::Install("CCamera", "SetPercentAlongCutScene", 0x50C070, &CCamera::SetPercentAlongCutScene);
 //    ReversibleHooks::Install("CCamera", "SetZoomValueFollowPedScript", 0x50C160, &CCamera::SetZoomValueFollowPedScript);
 //    ReversibleHooks::Install("CCamera", "SetZoomValueCamStringScript", 0x50C1B0, &CCamera::SetZoomValueCamStringScript);
@@ -83,7 +83,7 @@ void CCamera::InjectHooks() {
 //    ReversibleHooks::Install("CCamera", "TakeControl", 0x50C7C0, &CCamera::TakeControl);
 //    ReversibleHooks::Install("CCamera", "TakeControlNoEntity", 0x50C8B0, &CCamera::TakeControlNoEntity);
 //    ReversibleHooks::Install("CCamera", "TakeControlAttachToEntity", 0x50C910, &CCamera::TakeControlAttachToEntity);
-//    ReversibleHooks::Install("CCamera", "TakeControlWithSpline", 0x50CAE0, &CCamera::TakeControlWithSpline);
+    ReversibleHooks::Install("CCamera", "TakeControlWithSpline", 0x50CAE0, &CCamera::TakeControlWithSpline);
 //    ReversibleHooks::Install("CCamera", "SetCamCollisionVarDataSet", 0x50CB60, &CCamera::SetCamCollisionVarDataSet);
 //    ReversibleHooks::Install("CCamera", "SetNearClipBasedOnPedCollision", 0x50CB90, &CCamera::SetNearClipBasedOnPedCollision);
 //    ReversibleHooks::Install("CCamera", "SetColVarsPed", 0x50CC50, &CCamera::SetColVarsPed);
@@ -342,7 +342,7 @@ void CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString() {
     }
 }
 
-//! unused
+// unused
 // 0x50BDA0
 void CCamera::SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString(CPed* targetPed) {
     return plugin::CallMethodDynGlobal<CCamera*, CPed*>(0x50BDA0, this, targetPed);
@@ -408,11 +408,10 @@ bool CCamera::Using1stPersonWeaponMode() {
 
 // 0x50C030
 void CCamera::SetParametersForScriptInterpolation(float interpolationToStopMoving, float interpolationToCatchUp, unsigned int timeForInterpolation) {
-//    field_C2C = timeForInterpolation;
-//    m_bScriptParametersSetForInterPol = true;
-//    field_C24 = interpolationToStopMoving * 0.01f;
-//    field_C28 = interpolationToCatchUp * 0.01f;
-    return plugin::CallMethodDynGlobal<CCamera*, float, float, unsigned int>(0x50C030, this, interpolationToStopMoving, interpolationToCatchUp, timeForInterpolation);
+    m_nScriptTimeForInterpolation = timeForInterpolation;
+    m_bScriptParametersSetForInterPol = true;
+    m_fScriptPercentageInterToStopMoving = interpolationToStopMoving * 0.01f;
+    m_fScriptPercentageInterToCatchUp = interpolationToCatchUp * 0.01f;
 }
 
 // 0x50C070
@@ -452,14 +451,14 @@ void CCamera::SetZoomValueCamStringScript(short zoomMode) {
 // 0x50C260
 void CCamera::StartCooperativeCamMode() {
     m_bCooperativeCamMode = true;
-    // TODO: CGameLogic::n2PlayerPedInFocus = 2;
+    CGameLogic::n2PlayerPedInFocus = 2;
 }
 
 //! unused
 // 0x50C270
 void CCamera::StopCooperativeCamMode() {
     m_bCooperativeCamMode = false;
-    // TODO: CGameLogic::n2PlayerPedInFocus = 2;
+    CGameLogic::n2PlayerPedInFocus = 2;
 }
 
 // 0x50C280
@@ -506,13 +505,12 @@ void CCamera::TakeControlAttachToEntity(CEntity* target, CEntity* attached, CVec
 
 // 0x50CAE0
 void CCamera::TakeControlWithSpline(eSwitchType switchType) {
-//    m_bLookingAtPlayer = false;
-//    m_bLookingAtVector = false;
-//    m_bCutsceneFinished = false;
-//    field_C38 = 17;
-//    field_C3C = switchType;
-//    m_bStartInterScript = true;
-    plugin::CallMethodDynGlobal<CCamera*, eSwitchType>(0x50CAE0, this, switchType);
+    m_bLookingAtPlayer = false;
+    m_bLookingAtVector = false;
+    m_bCutsceneFinished = false;
+    m_nModeToGoTo = MODE_FLYBY;
+    m_nTypeOfSwitch = switchType;
+    m_bStartInterScript = true;
 }
 
 // 0x50CB10
@@ -522,7 +520,7 @@ void CCamera::UpdateAimingCoors(CVector const* aimingTargetCoors) {
     m_vecAimingTargetCoors.z = aimingTargetCoors->z;
 }
 
-//! unused
+// unused
 // 0x50CB90
 void CCamera::SetNearClipBasedOnPedCollision(float arg2) {
     plugin::CallMethodDynGlobal<CCamera*, float>(0x50CB90, this, arg2);
