@@ -22,6 +22,8 @@ void CPed::InjectHooks()
     ReversibleHooks::Install("CPed", "RemoveWeaponForScriptedCutscene", 0x5E6550, &CPed::RemoveWeaponForScriptedCutscene);
     ReversibleHooks::Install("CPed", "GiveWeaponAtStartOfFight", 0x5E8AB0, &CPed::GiveWeaponAtStartOfFight);
     ReversibleHooks::Install("CPed", "ProcessBuoyancy", 0x5E1FA0, &CPed::ProcessBuoyancy);
+    ReversibleHooks::Install("CPed", "Initialise", 0x5DEBB0, &CPed::Initialise);
+    ReversibleHooks::Install("CPed", "IsPlayer", 0x5DF8F0, &CPed::IsPlayer);
 }
 
 CPed::CPed(ePedType pedtype) : CPhysical(), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
@@ -95,10 +97,10 @@ void CPed::CreateDeadPedWeaponPickups()
     ((void(__thiscall *)(CPed*))0x4591D0)(this);
 }
 
-// Converted from cdecl void CPed::Initialise(void) 0x5DEBB0
-void CPed::Initialise()
-{
-    ((void(__cdecl *)())0x5DEBB0)();
+// 0x5DEBB0
+void CPed::Initialise() {
+    CPedType::Initialise();
+    CCarEnterExit::SetAnimOffsetForEnterOrExitVehicle();
 }
 
 // Converted from thiscall void CPed::SetPedStats(ePedStats statsType) 0x5DEBC0
@@ -188,12 +190,12 @@ bool CPed::UseGroundColModel()
 bool CPed::CanPedReturnToState()
 {
     return
-        m_nPedState <= PEDSTATE_STATES_NO_AI && 
+        m_nPedState <= PEDSTATE_STATES_NO_AI &&
         m_nPedState != PEDSTATE_AIMGUN &&
-        m_nPedState != PEDSTATE_ATTACK && 
-        m_nPedState != PEDSTATE_FIGHT && 
+        m_nPedState != PEDSTATE_ATTACK &&
+        m_nPedState != PEDSTATE_FIGHT &&
         m_nPedState != PEDSTATE_EVADE_STEP &&
-        m_nPedState != PEDSTATE_SNIPER_MODE && 
+        m_nPedState != PEDSTATE_SNIPER_MODE &&
         m_nPedState != PEDSTATE_LOOK_ENTITY;
 }
 
@@ -207,22 +209,22 @@ bool CPed::CanBeArrested()
 {
     return
         m_nPedState != PEDSTATE_DIE &&
-        m_nPedState != PEDSTATE_DEAD && 
-        m_nPedState != PEDSTATE_ARRESTED && 
-        m_nPedState != PEDSTATE_ENTER_CAR && 
+        m_nPedState != PEDSTATE_DEAD &&
+        m_nPedState != PEDSTATE_ARRESTED &&
+        m_nPedState != PEDSTATE_ENTER_CAR &&
         m_nPedState != PEDSTATE_EXIT_CAR;
 }
 
 bool CPed::CanStrafeOrMouseControl()
 {
     return
-        m_nPedState == PEDSTATE_IDLE || 
+        m_nPedState == PEDSTATE_IDLE ||
         m_nPedState == PEDSTATE_FLEE_ENTITY ||
-        m_nPedState == PEDSTATE_FLEE_POSITION || 
-        m_nPedState == PEDSTATE_NONE || 
-        m_nPedState == PEDSTATE_AIMGUN || 
-        m_nPedState == PEDSTATE_ATTACK || 
-        m_nPedState == PEDSTATE_FIGHT || 
+        m_nPedState == PEDSTATE_FLEE_POSITION ||
+        m_nPedState == PEDSTATE_NONE ||
+        m_nPedState == PEDSTATE_AIMGUN ||
+        m_nPedState == PEDSTATE_ATTACK ||
+        m_nPedState == PEDSTATE_FIGHT ||
         m_nPedState == PEDSTATE_JUMP ||
         m_nPedState == PEDSTATE_ANSWER_MOBILE;
 }
@@ -304,10 +306,10 @@ void CPed::SetLookTimer(unsigned int time)
     ((void(__thiscall *)(CPed*, unsigned int))0x5DF8D0)(this, time);
 }
 
-// Converted from thiscall bool CPed::IsPlayer(void) 0x5DF8F0
+// 0x5DF8F0
 bool CPed::IsPlayer()
 {
-    return ((bool(__thiscall *)(CPed*))0x5DF8F0)(this);
+    return !m_nPedType || m_nPedType == PED_TYPE_PLAYER2;
 }
 
 // Converted from thiscall void CPed::SetPedPositionInCar(void) 0x5DF910
@@ -543,9 +545,9 @@ void CPed::ProcessBuoyancy()
     CTimeCycle::GetAmbientBlue();
     rand();
     */
-	// Add splash particle if it's the first frame we're touching water, and
-	// the movement of ped is downward, preventing particles from being created
-	// if ped is standing still and water wave touches him
+    // Add splash particle if it's the first frame we're touching water, and
+    // the movement of ped is downward, preventing particles from being created
+    // if ped is standing still and water wave touches him
     if (!physicalFlags.bTouchingWater && m_vecMoveSpeed.z < -0.01F) {
         auto vecMoveDir = m_vecMoveSpeed * CTimer::ms_fTimeStep * 4.0F;
         auto vecSplashPos = GetPosition() + vecMoveDir;
@@ -568,7 +570,7 @@ void CPed::ProcessBuoyancy()
         bIsDrowning = true;
 
         bool bPlayerSwimmingOrClimbing = false;
-        if (!IsPlayer()) {           
+        if (!IsPlayer()) {
             CEventInWater cEvent(0.75F);
             GetEventGroup().Add(&cEvent, false);
         }
@@ -617,8 +619,8 @@ void CPed::ProcessBuoyancy()
     }
 }
 
-// Converted from thiscall bool CPed::IsPedInControl(void) 0x5E3960
-// Can Pedestrains be moved or not? Like in air or being dead.
+// Can Pedestrians be moved or not? Like in air or being dead.
+// 0x5E3960
 bool CPed::IsPedInControl()
 {
     if (!bIsLanding && !bIsInTheAir)

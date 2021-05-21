@@ -6,6 +6,19 @@
 */
 #include "StdInc.h"
 
+void CTaskTimer::InjectHooks() {
+    ReversibleHooks::Install("CTaskTimer", "IsOutOfTime", 0x420E30, &CTaskTimer::IsOutOfTime);
+}
+
+// 0x420E30
 bool CTaskTimer::IsOutOfTime() {
-    return ((bool(__thiscall*)(CTaskTimer*))0x420E30)(this);
+    if (!m_bStarted)
+        return false;
+
+    if (m_bStopped) {
+        m_nStartTime = CTimer::m_snTimeInMilliseconds;
+        m_bStopped = false;
+    }
+
+    return CTimer::m_snTimeInMilliseconds >= (m_nStartTime + m_nInterval);
 }

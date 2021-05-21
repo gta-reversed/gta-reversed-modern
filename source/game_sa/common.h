@@ -223,8 +223,7 @@ void SetLightsForInfraredVisionDefaultObjects();
 void SetLightsForNightVision();
 float GetDayNightBalance();
 
-// 'data' is unused
-void RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data);
+RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data);
 void RemoveRefsForAtomic(RpClump* clump);
 
 bool IsGlassModel(CEntity* pEntity);
