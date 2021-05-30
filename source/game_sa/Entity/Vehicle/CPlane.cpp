@@ -19,3 +19,8 @@ extern float& PLANE_DAMAGE_THRESHHOLD = *(float*)0x8D33E4;         // 500.0
 extern float& PLANE_DAMAGE_SCALE_MASS = *(float*)0x8D33E8;         // 10000.0
 extern float& PLANE_DAMAGE_DESTROY_THRESHHOLD = *(float*)0x8D33EC; // 5000.0
 extern CVector& vecRCBaronGunPos = *(CVector*)0x8D33F0;            // <0.0, 0.45, 0.0>
+
+CPlane::CPlane(int modelIndex, unsigned char createdBy) : CAutomobile(plugin::dummy)
+{
+    plugin::CallMethod<0x6C8E20, CPlane*, int, unsigned char>(this, modelIndex, createdBy);
+}

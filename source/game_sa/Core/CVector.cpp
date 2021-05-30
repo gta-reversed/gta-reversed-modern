@@ -177,3 +177,8 @@ float DotProduct(const CVector& v1, const CVector& v2)
 {
     return v1.z * v2.z + v1.y * v2.y + v1.x * v2.x;
 }
+
+float DotProduct2D(const CVector& v1, const CVector& v2)
+{
+    return v1.y * v2.y + v1.x * v2.x;
+}

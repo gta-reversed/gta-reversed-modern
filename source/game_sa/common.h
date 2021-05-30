@@ -86,6 +86,10 @@ CVector FindPlayerCoors(int playerId = -1);
 CVector& FindPlayerSpeed(int playerId = -1);
 // returns player ped or player vehicle if he's driving
 CEntity * FindPlayerEntity(int playerId = -1);
+// returns player vehicle
+CVehicle* FindPlayerVehicle(int playerId = -1);
+// returns player train
+CTrain* FindPlayerTrain(int playerId = -1);
 // gets player coords
 CVector const& FindPlayerCentreOfWorld(int playerId = -1);
 // gets player coords with skipping sniper shift

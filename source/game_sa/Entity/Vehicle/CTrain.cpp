@@ -26,7 +26,7 @@ void CTrain::InjectHooks()
 
 // Converted from thiscall void CTrain::CTrain(int modelIndex,uchar createdBy) 0x6F6030
 CTrain::CTrain(int modelIndex, unsigned char createdBy) : CVehicle(plugin::dummy) {
-    ((void(__thiscall*)(CTrain*, int, unsigned char))0x6F6030)(this, modelIndex, createdBy);
+    plugin::CallMethod<0x6F6030, CTrain*, int, unsigned char>(this, modelIndex, createdBy);
 }
 
 // Converted from cdecl void CTrain::ReadAndInterpretTrackFile(char *filename,CTrainNode **nodes,int *lineCount,float *totalDist,int skipStations) 0x6F55D0

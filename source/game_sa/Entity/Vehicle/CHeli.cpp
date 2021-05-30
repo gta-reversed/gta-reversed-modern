@@ -15,7 +15,7 @@ tHeliLight* CHeli::HeliSearchLights = (tHeliLight*)0xC1C990;
 
 // Converted from thiscall void CHeli::CHeli(int modelIndex,uchar createdBy) 0x6C4190
 CHeli::CHeli(int modelIndex, unsigned char createdBy) : CAutomobile(plugin::dummy) {
-    ((void(__thiscall*)(CHeli*, int, unsigned char))0x6C4190)(this, modelIndex, createdBy);
+    plugin::CallMethod<0x6C4190, CHeli*, int, unsigned char>(this, modelIndex, createdBy);
 }
 
 // Converted from cdecl void CHeli::InitHelis(void) 0x6C4560

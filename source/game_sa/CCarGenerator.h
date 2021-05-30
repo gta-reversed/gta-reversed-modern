@@ -45,18 +45,20 @@ private:
     char _pad1E[2];
 public:
 
-     bool CheckForBlockage(int modelId);
-     bool CheckIfWithinRangeOfAnyPlayers();
-     void DoInternalProcessing();
-     void Process();
-     void Setup(float x, float y, float z, float angle, int modelId, short color1, short color2, unsigned char bforceSpawn, unsigned char alarm_chances, unsigned char doorLock_chances, unsigned short minDelay, unsigned short maxDelay, unsigned char iplId, unsigned char bOwnedbyplayer);
-     void SwitchOff();
-     void SwitchOn();
+    static bool& HotdogVendorPositionOffsetInitialized;
+    static CVector& HotdogVendorPositionOffset;
+
+    static void InjectHooks();
+    bool CheckForBlockage(int modelId);
+    bool CheckIfWithinRangeOfAnyPlayers();
+    void DoInternalProcessing();
+    void Process();
+    void Setup(CVector posn, float angle, int modelId, short color1, short color2, unsigned char bforceSpawn, unsigned char alarmChances, unsigned char doorLockChances, unsigned short minDelay, unsigned short maxDelay, unsigned char iplId, unsigned char bOwnedbyplayer);
+    void SwitchOff();
+    void SwitchOn();
 
     //! unused
-     static unsigned int CalcNextGen();
-    //! unused
-     static CCarGenerator *Get(unsigned short index);
+    static unsigned int CalcNextGen();
 };
 
 VALIDATE_SIZE(CCarGenerator, 0x20);

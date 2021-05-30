@@ -4,7 +4,7 @@ float& CMonsterTruck::DUMPER_COL_ANGLEMULT = *(float*)0x8D33A8;
 float& fWheelExtensionRate = *(float*)0x8D33AC;
 
 CMonsterTruck::CMonsterTruck(int modelIndex, unsigned char createdBy) : CAutomobile(plugin::dummy) {
-    ((void(__thiscall*)(CMonsterTruck*, int, unsigned char))0x6C8D60)(this, modelIndex, createdBy);
+    plugin::CallMethod<0x6C8D60, CMonsterTruck*, int, unsigned char>(this, modelIndex, createdBy);
 }
 
 void CMonsterTruck::ExtendSuspension() {
