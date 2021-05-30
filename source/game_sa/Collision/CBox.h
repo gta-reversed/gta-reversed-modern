@@ -6,20 +6,19 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVector.h"
 
 class CBox {
 public:
-	CVector m_vecMin;
-	CVector m_vecMax;
+    CVector m_vecMin;
+    CVector m_vecMax;
 
 public:
     static void InjectHooks();
 
-	void Set(CVector const& vecMin, CVector const& vecMax);
-	// updates box corners, like (if left>right then swap(left, right))
-	void Recalc();
+    void Set(CVector const& vecMin, CVector const& vecMax);
+    // updates box corners, like (if left>right then swap(left, right))
+    void Recalc();
 
 public:
     inline CVector GetSize() const { return m_vecMax - m_vecMin; }

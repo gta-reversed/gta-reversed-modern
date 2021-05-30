@@ -273,6 +273,13 @@ void InjectHooksMain()
     CEntityScanner::InjectHooks();
     CPedType::InjectHooks();
     CAcquaintance::InjectHooks();
+    CWeather::InjectHooks();
+    CPathFind::InjectHooks();
+    CLoadMonitor::InjectHooks();
+    CPlantMgr::InjectHooks();
+    CDecisionMakerTypes::InjectHooks();
+    CDecisionMakerTypesFileLoader::InjectHooks();
+    CPedStats::InjectHooks();
     CCarGenerator::InjectHooks();
     CTheCarGenerators::InjectHooks();
 

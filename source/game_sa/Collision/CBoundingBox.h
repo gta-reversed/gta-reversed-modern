@@ -6,12 +6,12 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CBox.h"
 
 class CBoundingBox : public CBox {
 public:
     CBoundingBox();
+    CBoundingBox(CVector vecMin, CVector vecMax);
 };
 
 VALIDATE_SIZE(CBoundingBox, 0x18);

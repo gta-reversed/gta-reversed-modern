@@ -1,10 +1,9 @@
 #pragma once
 
 /*
-TODO: size of CLoadMonitor is unknown, and it's uncomplete. 
+TODO: size of CLoadMonitor is unknown, and it's uncomplete.
 */
-class CLoadMonitor
-{
+class CLoadMonitor {
 public:
     std::int32_t field_0;
     char field_4;
@@ -68,7 +67,17 @@ public:
     std::int32_t m_numModelsRequest;
     char field_48[88];
 
+public:
+    static void InjectHooks();
+
+    CLoadMonitor();
+    CLoadMonitor* Constructor();
+
+    ~CLoadMonitor();
+    CLoadMonitor*  Destructor();
+
     void BeginFrame();
+    void EndFrame();
     void StartTimer(unsigned int timerIndex);
     void EndTimer(unsigned int timerIndex);
 };

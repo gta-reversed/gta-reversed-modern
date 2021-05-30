@@ -103,10 +103,11 @@ void CPed::Initialise() {
     CCarEnterExit::SetAnimOffsetForEnterOrExitVehicle();
 }
 
-// Converted from thiscall void CPed::SetPedStats(ePedStats statsType) 0x5DEBC0
-void CPed::SetPedStats(ePedStats statsType)
-{
-    ((void(__thiscall *)(CPed*, ePedStats))0x5DEBC0)(this, statsType);
+// unused
+// 0x5DEBC0
+void CPed::SetPedStats(ePedStats statsType) {
+    // auto index = static_cast<int>(statsType);
+    // m_pStats = &CPedStats::ms_apPedStats[index];
 }
 
 // Converted from thiscall void CPed::Update(void) 0x5DEBE0
