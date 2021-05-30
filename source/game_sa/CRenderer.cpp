@@ -83,11 +83,11 @@ void CWorldScan::SetExtraRectangleToScan(float minX, float maxX, float minY, flo
 }
 
 void CRenderer::Init() {
-    // empty 
+    // empty
 }
 
 void CRenderer::Shutdown() {
-    // empty 
+    // empty
 }
 
 // 0x5531E0
@@ -656,7 +656,6 @@ int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
             }
             bIsTimeInRange = false;
         }
-        
     }
     else if (pBaseModelInfo->GetModelType() == MODEL_INFO_VEHICLE)
     {
@@ -904,8 +903,8 @@ void CRenderer::ScanPtrList_RequestModels(CPtrList& list) {
 // 0x5556E0
 void CRenderer::ConstructRenderList() {
     eZoneAttributes zoneAttributes = CCullZones::FindTunnelAttributesForCoors(TheCamera.GetPosition());
-    ms_bRenderTunnels = (zoneAttributes & (ZONE_ATTRIBUTE_UNKNOWN_2 | ZONE_ATTRIBUTE_UNKNOWN_1)) != 0;
-    if ((zoneAttributes & ZONE_ATTRIBUTE_UNKNOWN_1) || !(zoneAttributes & ZONE_ATTRIBUTE_UNKNOWN_2))
+    ms_bRenderTunnels = (zoneAttributes & (eZoneAttributes::UNKNOWN_2 | eZoneAttributes::UNKNOWN_1)) != 0;
+    if ((zoneAttributes & eZoneAttributes::UNKNOWN_1) || !(zoneAttributes & eZoneAttributes::UNKNOWN_2))
         ms_bRenderOutsideTunnels = true;
     else
         ms_bRenderOutsideTunnels = false;
@@ -1035,7 +1034,7 @@ std::int32_t CRenderer::GetObjectsInFrustum(CEntity** outEntities, float farPlan
     frustumPoints[0] = CVector(0.0f, 0.0f, 0.0f);
     frustumPoints[1].x = frustumPoints[4].x = -(farPlane * width);
     frustumPoints[1].y = frustumPoints[2].y = farPlane * height;
-    frustumPoints[2].x = frustumPoints[3].x = farPlane * width; 
+    frustumPoints[2].x = frustumPoints[3].x = farPlane * width;
     frustumPoints[3].y = frustumPoints[4].y = -(farPlane * height);
     frustumPoints[1].z = frustumPoints[2].z = frustumPoints[3].z = frustumPoints[4].z = farPlane;
     for (std::int32_t i = 5; i < 13; i++) {
