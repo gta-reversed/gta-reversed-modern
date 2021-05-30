@@ -50,7 +50,7 @@ bool COcclusion::OccluderHidesBehind(CActiveOccluder* first, CActiveOccluder* se
 
 bool COcclusion::IsPositionOccluded(CVector vecPos, float fRadius)
 {
-    return plugin::CallAndReturn<bool, 0x71E080, CVector, float>(vecPos, fRadius);
+    return plugin::CallAndReturn<bool, 0x7200B0, CVector, float>(vecPos, fRadius);
 }
 
 void COcclusion::ProcessBeforeRendering()

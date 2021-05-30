@@ -189,8 +189,7 @@ void CBike::GetCorrectedWorldDoorPosition(CVector& out, CVector arg1, CVector ar
 }
 
 // Converted from thiscall void CBike::CBike(int modelIndex,uchar createdBy) 0x6BF430
-/*
 CBike::CBike(int modelIndex, unsigned char createdBy) : CVehicle(plugin::dummy) {
-    ((void(__thiscall*)(CBike*, int, unsigned char))0x6BF430)(this, modelIndex, createdBy);
+    plugin::CallMethod<0x6BF430, CBike*, int, unsigned char>(this, modelIndex, createdBy);
 }
-*/
+

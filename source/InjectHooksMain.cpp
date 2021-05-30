@@ -273,6 +273,8 @@ void InjectHooksMain()
     CEntityScanner::InjectHooks();
     CPedType::InjectHooks();
     CAcquaintance::InjectHooks();
+    CCarGenerator::InjectHooks();
+    CTheCarGenerators::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

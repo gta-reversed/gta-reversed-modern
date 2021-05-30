@@ -16,6 +16,7 @@ class CCarCtrl
 {
 public:
     static unsigned int& NumLawEnforcerCars;
+    static unsigned int& NumParkedCars;
     static unsigned int& NumAmbulancesOnDuty;
     static unsigned int& NumFireTrucksOnDuty;
     static unsigned int& MaxNumberOfCarsInUse;

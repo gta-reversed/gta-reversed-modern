@@ -1208,7 +1208,7 @@ void CVehicle::SetRemap(int remapIndex)
 }
 
 // Converted from thiscall void CVehicle::SetCollisionLighting(uchar lighting) 0x6D0CA0
-void CVehicle::SetCollisionLighting(unsigned char lighting)
+void CVehicle::SetCollisionLighting(tColLighting lighting)
 {
     for (auto& colLighting : m_anCollisionLighting)
         colLighting = lighting;

@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 void CRunningScript::InjectHooks() {
-    ReversibleHooks::Install("CRunningScript", "Init", 0x465C20, &CRunningScript::Init);
+    ReversibleHooks::Install("CRunningScript", "Init", 0x4648E0, &CRunningScript::Init);
 //    ReversibleHooks::Install("CRunningScript", "LocateCarCommand", 0x487A20, &CRunningScript::LocateCarCommand);
 //    ReversibleHooks::Install("CRunningScript", "LocateObjectCommand", 0x487D10, &CRunningScript::LocateObjectCommand);
 //    ReversibleHooks::Install("CRunningScript", "PlayAnimScriptCommand", 0x470150, &CRunningScript::PlayAnimScriptCommand);

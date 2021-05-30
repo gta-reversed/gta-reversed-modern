@@ -22,3 +22,5 @@ CompressedVector CompressVector(const CVector& vec);
 float UncompressUnitFloat(int16_t val);
 CVector UncompressUnitVector(const CompressedVector& compressedVec);
 CompressedVector CompressUnitVector(CVector const& vec);
+CVector UncompressLargeVector(const CompressedVector& compressedVec);
+CompressedVector CompressLargeVector(CVector const& vec);

@@ -490,7 +490,7 @@ public:
     void SetRemapTexDictionary(int txdId);
     // index for m_awRemapTxds[] array
     void SetRemap(int remapIndex);
-    void SetCollisionLighting(unsigned char lighting);
+    void SetCollisionLighting(tColLighting lighting);
     void UpdateLightingFromStoredPolys();
     void CalculateLightingFromCollision();
     void ResetAfterRender();

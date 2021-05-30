@@ -40,3 +40,21 @@ CompressedVector CompressUnitVector(CVector const& vec)
     result.z = static_cast<int16_t>(vec.z * 4096.0F);
     return  result;
 }
+
+CVector UncompressLargeVector(const CompressedVector& compressedVec)
+{
+    CVector result;
+    result.x = static_cast<float>(compressedVec.x) / 8.0F;
+    result.y = static_cast<float>(compressedVec.y) / 8.0F;
+    result.z = static_cast<float>(compressedVec.z) / 8.0F;
+    return result;
+}
+
+CompressedVector CompressLargeVector(const CVector& vec)
+{
+    CompressedVector result;
+    result.x = static_cast<int16_t>(vec.x * 8.0F);
+    result.y = static_cast<int16_t>(vec.y * 8.0F);
+    result.z = static_cast<int16_t>(vec.z * 8.0F);
+    return  result;
+}

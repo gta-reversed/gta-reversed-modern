@@ -46,7 +46,7 @@ void CAutomobile::InjectHooks()
 }
 
 CAutomobile::CAutomobile(int modelIndex, unsigned char createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy) {
-    ((void(__thiscall*)(CAutomobile*, int, unsigned char, bool))0x6B0A90)(this, modelIndex, createdBy, setupSuspensionLines);
+    plugin::CallMethod<0x6B0A90, CAutomobile*, int, unsigned char, bool>(this, modelIndex, createdBy, setupSuspensionLines);
 }
 
 void CAutomobile::ProcessControl()

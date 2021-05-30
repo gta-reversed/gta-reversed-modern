@@ -56,6 +56,7 @@ void InjectCommonHooks()
 //    ReversibleHooks::Install("common", "FindPlayerCoors", 0x56E010, &FindPlayerCoors);
 //    ReversibleHooks::Install("common", "FindPlayerSpeed", 0x56E090, &FindPlayerSpeed);
     ReversibleHooks::Install("common", "FindPlayerEntity", 0x56E120, &FindPlayerEntity);
+    ReversibleHooks::Install("common", "FindPlayerTrain", 0x56E160, &FindPlayerTrain);
 //    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld", 0x56E250, &FindPlayerCentreOfWorld);
 //    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoSniperShift", 0x56E320, &FindPlayerCentreOfWorld_NoSniperShift);
 //    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoInteriorShift", 0x56E400, &FindPlayerCentreOfWorld_NoInteriorShift);
@@ -131,6 +132,24 @@ CEntity* FindPlayerEntity(int playerId) {
         return player->m_pVehicle;
 
     return player;
+}
+
+CVehicle* FindPlayerVehicle(int playerId)
+{
+    auto pPed = FindPlayerPed(playerId);
+    if (pPed && pPed->bInVehicle)
+        return pPed->m_pVehicle;
+    else
+        return nullptr;
+}
+
+// 0x56E160
+CTrain* FindPlayerTrain(int playerId) {
+    auto vehicle = FindPlayerVehicle(playerId);
+    if (vehicle && vehicle->IsTrain())
+        return vehicle->AsTrain();
+    else
+        return nullptr;
 }
 
 // 0x56E250
