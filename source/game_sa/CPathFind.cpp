@@ -9,6 +9,10 @@ Do not delete this comment block. Respect others' work!
 
 CPathFind &ThePaths = *(CPathFind *)(0x96F050);
 
+void CPathFind::InjectHooks() {
+
+}
+
 CVector CPathNode::GetNodeCoors()
 {
     CVector result;
@@ -19,6 +23,11 @@ CVector CPathNode::GetNodeCoors()
 void CPathFind::Init()
 {
     plugin::CallMethod<0x44D080, CPathFind*>(this);
+}
+
+// 0x450950
+void CPathFind::Shutdown() {
+    plugin::CallMethod<0x450950, CPathFind*>(this);
 }
 
 bool CPathFind::TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress)
@@ -39,7 +48,7 @@ CVector* CPathFind::TakeWidthIntoAccountForWandering(CVector* outPosition, CNode
         (this, outPosition, nodeAddress, randomSeed);
 }
 
-void CPathFind::FindNextNodeWandering(int pathType, float x, float y, float z, CNodeAddress* startNodeAddress, 
+void CPathFind::FindNextNodeWandering(int pathType, float x, float y, float z, CNodeAddress* startNodeAddress,
                                       CNodeAddress* targetNodeAddress, unsigned int dir, int8_t* outDir)
 {
     plugin::CallMethod <0x451B70, CPathFind*, int, float, float, float, CNodeAddress*, CNodeAddress*, unsigned int, int8_t*>
@@ -95,8 +104,17 @@ CNodeAddress* CPathFind::FindNodeClosestToCoors(CNodeAddress* pathLink, float X,
         unsigned short, int, unsigned short, unsigned short, int>(this, pathLink, X, Y, Z, _nodeType, maxDistance, unk2, unk3, unk4, bBoatsOnly, unk6);
 }
 
-// dummy function
+// 0x44D2B0
+void CPathFind::AllocatePathFindInfoMem() {
+    // NOP
+}
+
 // 0x44D0E0
 void CPathFind::PreparePathData() {
+    // NOP
+}
 
+// 0x450A60
+void CPathFind::UpdateStreaming(bool a1) {
+    return plugin::CallMethod<0x450A60, CPathFind*, bool>(this, a1);
 }

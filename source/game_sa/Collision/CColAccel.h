@@ -47,7 +47,7 @@ enum eColAccelState : int32_t {
     COLACCEL_LOADING = 2,
 };
 
-typedef struct PackedModelStartEnd {
+struct PackedModelStartEnd {
     int16_t wModelStart;
     int16_t wModelEnd;
 };

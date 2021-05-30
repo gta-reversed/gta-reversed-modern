@@ -63,7 +63,7 @@ void CPedType::Load(int a2) {
 // 0x608B30
 void CPedType::LoadPedData() {
     ePedType pedType = PED_TYPE_MISSION8;
-    FILE* file = CFileMgr::OpenFile("DATA\\PED.DAT", "r");
+    FILESTREAM file = CFileMgr::OpenFile("DATA\\PED.DAT", "r");
     for (char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
         if (*line == '#' || !*line)
             continue;

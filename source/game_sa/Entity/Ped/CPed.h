@@ -22,6 +22,7 @@
 #include "CAnimBlendAssociation.h"
 #include "CFire.h"
 #include "CPedGroups.h"
+#include "ePedStats.h"
 
 enum ePedType : unsigned int {
     PED_TYPE_PLAYER1 = 0,
@@ -92,15 +93,10 @@ enum ePedPieceTypes {
     PED_PIECE_HEAD = 9
 };
 
-enum ePedCreatedBy
-{
+enum ePedCreatedBy : unsigned char {
     PED_UNKNOWN = 0,
     PED_GAME = 1,
     PED_MISSION = 2,
-};
-
-enum ePedStats {
-
 };
 
 enum eMoveState {
@@ -114,8 +110,7 @@ enum eMoveState {
     PEDMOVE_SPRINT
 };
 
-enum eFightingStyle
-{
+enum eFightingStyle : char {
     STYLE_STANDARD = 4,
     STYLE_BOXING,
     STYLE_KUNG_FU,
@@ -127,8 +122,10 @@ enum eFightingStyle
 
 class CObject;
 class CVehicle;
+class CPedStat;
+class CPedStats;
 
-class  CPed : public CPhysical {
+class CPed : public CPhysical {
 protected:
     CPed(plugin::dummy_func_t) : CPhysical(), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
         plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy,
@@ -141,67 +138,67 @@ public:
     char field_460[8];
     int field_468;
     union {
-        /* https://code.google.com/p/mtasa-blue/source/browse/tags/1.3.4/MTA10/game_sa/CPedSA.h */
+        /* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CPedSA.h */
         struct {
             // 1st byte starts here (m_nPedFlags)
-            unsigned int bIsStanding : 1; // is ped standing on something
-            unsigned int bWasStanding : 1; // was ped standing on something
-            unsigned int bIsLooking : 1; // is ped looking at something or in a direction
-            unsigned int bIsRestoringLook : 1; // is ped restoring head postion from a look
-            unsigned int bIsAimingGun : 1; // is ped aiming gun
-            unsigned int bIsRestoringGun : 1; // is ped moving gun back to default posn
-            unsigned int bCanPointGunAtTarget : 1; // can ped point gun at target
-            unsigned int bIsTalking : 1; // is ped talking(see Chat())
+            unsigned int bIsStanding : 1;            // is ped standing on something
+            unsigned int bWasStanding : 1;           // was ped standing on something
+            unsigned int bIsLooking : 1;             // is ped looking at something or in a direction
+            unsigned int bIsRestoringLook : 1;       // is ped restoring head position from a look
+            unsigned int bIsAimingGun : 1;           // is ped aiming gun
+            unsigned int bIsRestoringGun : 1;        // is ped moving gun back to default posn
+            unsigned int bCanPointGunAtTarget : 1;   // can ped point gun at target
+            unsigned int bIsTalking : 1;             // is ped talking(see Chat())
 
-            unsigned int bInVehicle : 1; // is in a vehicle
-            unsigned int bIsInTheAir : 1; // is in the air
-            unsigned int bIsLanding : 1; // is landing after being in the air
+            unsigned int bInVehicle : 1;             // is in a vehicle
+            unsigned int bIsInTheAir : 1;            // is in the air
+            unsigned int bIsLanding : 1;             // is landing after being in the air
             unsigned int bHitSomethingLastFrame : 1; // has been in a collision last fram
-            unsigned int bIsNearCar : 1; // has been in a collision last fram
-            unsigned int bRenderPedInCar : 1; // has been in a collision last fram
-            unsigned int bUpdateAnimHeading : 1; // update ped heading due to heading change during anim sequence
-            unsigned int bRemoveHead : 1; // waiting on AntiSpazTimer to remove head
+            unsigned int bIsNearCar : 1;             // has been in a collision last fram
+            unsigned int bRenderPedInCar : 1;        // has been in a collision last fram
+            unsigned int bUpdateAnimHeading : 1;     // update ped heading due to heading change during anim sequence
+            unsigned int bRemoveHead : 1;            // waiting on AntiSpazTimer to remove head
 
-            unsigned int bFiringWeapon : 1; // is pulling trigger
-            unsigned int bHasACamera : 1; // does ped possess a camera to document accidents
-            unsigned int bPedIsBleeding : 1; // Ped loses a lot of blood if true
-            unsigned int bStopAndShoot : 1; // Ped cannot reach target to attack with fist, need to use gun
-            unsigned int bIsPedDieAnimPlaying : 1; // is ped die animation finished so can dead now
-            unsigned int bStayInSamePlace : 1; // when set, ped stays put
-            unsigned int bKindaStayInSamePlace : 1; // when set, ped doesn't seek out opponent or cover large distances. Will still shuffle and look for cover
-            unsigned int bBeingChasedByPolice : 1; // use nodes for routefind
+            unsigned int bFiringWeapon : 1;          // is pulling trigger
+            unsigned int bHasACamera : 1;            // does ped possess a camera to document accidents
+            unsigned int bPedIsBleeding : 1;         // Ped loses a lot of blood if true
+            unsigned int bStopAndShoot : 1;          // Ped cannot reach target to attack with fist, need to use gun
+            unsigned int bIsPedDieAnimPlaying : 1;   // is ped die animation finished so can dead now
+            unsigned int bStayInSamePlace : 1;       // when set, ped stays put
+            unsigned int bKindaStayInSamePlace : 1;  // when set, ped doesn't seek out opponent or cover large distances. Will still shuffle and look for cover
+            unsigned int bBeingChasedByPolice : 1;   // use nodes for route find
 
-            unsigned int bNotAllowedToDuck : 1; // Is this ped allowed to duck at all?
-            unsigned int bCrouchWhenShooting : 1; // duck behind cars etc
-            unsigned int bIsDucking : 1; // duck behind cars etc
-            unsigned int bGetUpAnimStarted : 1; // don't want to play getup anim if under something
-            unsigned int bDoBloodyFootprints : 1; // unsigned int bIsLeader :1;
+            unsigned int bNotAllowedToDuck : 1;      // Is this ped allowed to duck at all?
+            unsigned int bCrouchWhenShooting : 1;    // duck behind cars etc
+            unsigned int bIsDucking : 1;             // duck behind cars etc
+            unsigned int bGetUpAnimStarted : 1;      // don't want to play getup anim if under something
+            unsigned int bDoBloodyFootprints : 1;    // unsigned int bIsLeader :1;
             unsigned int bDontDragMeOutCar : 1;
-            unsigned int bStillOnValidPoly : 1; // set if the polygon the ped is on is still valid for collision
+            unsigned int bStillOnValidPoly : 1;      // set if the polygon the ped is on is still valid for collision
             unsigned int bAllowMedicsToReviveMe : 1;
 
             // 5th byte starts here (m_nSecondPedFlags)
             unsigned int bResetWalkAnims : 1;
-            unsigned int bOnBoat : 1; // flee but only using nodes
-            unsigned int bBusJacked : 1; // flee but only using nodes
-            unsigned int bFadeOut : 1; // set if you want ped to fade out
-            unsigned int bKnockedUpIntoAir : 1; // has ped been knocked up into the air by a car collision
-            unsigned int bHitSteepSlope : 1; // has ped collided/is standing on a steep slope (surface type)
-            unsigned int bCullExtraFarAway : 1; // special ped only gets culled if it's extra far away (for roadblocks)
+            unsigned int bOnBoat : 1;               // flee but only using nodes
+            unsigned int bBusJacked : 1;            // flee but only using nodes
+            unsigned int bFadeOut : 1;              // set if you want ped to fade out
+            unsigned int bKnockedUpIntoAir : 1;     // has ped been knocked up into the air by a car collision
+            unsigned int bHitSteepSlope : 1;        // has ped collided/is standing on a steep slope (surface type)
+            unsigned int bCullExtraFarAway : 1;     // special ped only gets culled if it's extra far away (for roadblocks)
             unsigned int bTryingToReachDryLand : 1; // has ped just exited boat and trying to get to dry land
 
             unsigned int bCollidedWithMyVehicle : 1;
-            unsigned int bRichFromMugging : 1; // ped has lots of cash cause they've been mugging people
-            unsigned int bChrisCriminal : 1; // Is a criminal as killed during Chris' police mission (should be counted as such)
-            unsigned int bShakeFist : 1; // test shake hand at look entity
-            unsigned int bNoCriticalHits : 1; // ped cannot be killed by a single bullet
+            unsigned int bRichFromMugging : 1;        // ped has lots of cash cause they've been mugging people
+            unsigned int bChrisCriminal : 1;          // Is a criminal as killed during Chris' police mission (should be counted as such)
+            unsigned int bShakeFist : 1;              // test shake hand at look entity
+            unsigned int bNoCriticalHits : 1;         // ped cannot be killed by a single bullet
             unsigned int bHasAlreadyBeenRecorded : 1; // Used for replays
             unsigned int bUpdateMatricesRequired : 1; // if PedIK has altered bones so matrices need updated this frame
-            unsigned int bFleeWhenStanding : 1; //
+            unsigned int bFleeWhenStanding : 1;       //
 
-            unsigned int bMiamiViceCop : 1;  //
-            unsigned int bMoneyHasBeenGivenByScript : 1; //
-            unsigned int bHasBeenPhotographed : 1;  //
+            unsigned int bMiamiViceCop : 1;
+            unsigned int bMoneyHasBeenGivenByScript : 1;
+            unsigned int bHasBeenPhotographed : 1;
             unsigned int bIsDrowning : 1;
             unsigned int bDrownsInWater : 1;
             unsigned int bHeadStuckInCollision : 1;
@@ -230,11 +227,11 @@ public:
             unsigned int bKilledByStealth : 1;
             unsigned int bDoesntDropWeaponsWhenDead : 1;
             unsigned int bCalledPreRender : 1;
-            unsigned int bBloodPuddleCreated : 1; // Has a static puddle of blood been created yet
+            unsigned int bBloodPuddleCreated : 1;      // Has a static puddle of blood been created yet
             unsigned int bPartOfAttackWave : 1;
             unsigned int bClearRadarBlipOnDeath : 1;
-            unsigned int bNeverLeavesGroup : 1; // flag that we want to test 3 extra spheres on col model
-            unsigned int bTestForBlockedPositions : 1; // this sets these indicator flags for various posisions on the front of the ped
+            unsigned int bNeverLeavesGroup : 1;        // flag that we want to test 3 extra spheres on col model
+            unsigned int bTestForBlockedPositions : 1; // this sets these indicator flags for various positions on the front of the ped
 
             unsigned int bRightArmBlocked : 1;
             unsigned int bLeftArmBlocked : 1;
@@ -248,18 +245,18 @@ public:
             unsigned int bWaitingForScriptBrainToLoad : 1;
             unsigned int bHasGroupDriveTask : 1;
             unsigned int bCanExitCar : 1;
-            unsigned int CantBeKnockedOffBike : 2; // 0=Default(harder for mission peds) 1=Never 2=Always normal(also for mission peds)
+            unsigned int CantBeKnockedOffBike : 2;  // 0=Default(harder for mission peds) 1=Never 2=Always normal(also for mission peds)
             unsigned int bHasBeenRendered : 1;
             unsigned int bIsCached : 1;
-            unsigned int bPushOtherPeds : 1; // GETS RESET EVERY FRAME - SET IN TASK: want to push other peds around (eg. leader of a group or ped trying to get in a car)
-            unsigned int bPedThirdFlags32 : 1; // unknown
+            unsigned int bPushOtherPeds : 1;        // GETS RESET EVERY FRAME - SET IN TASK: want to push other peds around (eg. leader of a group or ped trying to get in a car)
+            unsigned int bPedThirdFlags32 : 1;      // unknown
 
             // 13th byte starts here (m_nFourthPedFlags)
             unsigned int bHasBulletProofVest : 1;
             unsigned int bUsingMobilePhone : 1;
             unsigned int bUpperBodyDamageAnimsOnly : 1;
             unsigned int bStuckUnderCar : 1;
-            unsigned int bKeepTasksAfterCleanUp : 1; // If true ped will carry on with task even after cleanup
+            unsigned int bKeepTasksAfterCleanUp : 1;            // If true ped will carry on with task even after cleanup
             unsigned int bIsDyingStuck : 1;
             unsigned int bIgnoreHeightCheckOnGotoPointTask : 1; // set when walking round buildings, reset when task quits
             unsigned int bForceDieInCar : 1;
@@ -286,11 +283,11 @@ public:
         unsigned int m_nFourthPedFlags;
     };
     CPedIntelligence   *m_pIntelligence;
-    CPlayerPedData        *m_pPlayerData;
-    unsigned char       m_nCreatedBy; // see ePedCreatedBy
+    CPlayerPedData     *m_pPlayerData;
+    ePedCreatedBy       m_nCreatedBy;
     char                field_485[3];
     AnimBlendFrameData *m_apBones[TOTAL_PED_NODES]; // for Index, see ePedNode
-    int        m_nAnimGroup;
+    int                 m_nAnimGroup;
     CVector2D           m_vecAnimMovingShiftLocal;
     CPedAcquaintance    m_acquaintance;
     RpClump            *m_pWeaponObject;
@@ -303,9 +300,9 @@ public:
     short field_50A;
     CPedIK              m_pedIK;
     int field_52C;
-    ePedState           m_nPedState; // see ePedState
+    ePedState           m_nPedState;
     int                 m_nMoveState;
-    int m_nSwimmingMoveState; // type is eMoveState and used for swimming in CTaskSimpleSwim::ProcessPed
+    int                 m_nSwimmingMoveState; // type is eMoveState and used for swimming in CTaskSimpleSwim::ProcessPed
     int field_53C;
     float               m_fHealth;
     float               m_fMaxHealth;
@@ -325,7 +322,7 @@ public:
     int field_590;
     int field_594;
     ePedType            m_nPedType;
-    void               *m_pStats; // CPedStat *
+    CPedStat           *m_pStats;
     CWeapon             m_aWeapons[13];
     eWeaponType         m_nSavedWeapon; // when we need to hide ped weapon, we save it temporary here
     eWeaponType         m_nDelayedWeapon; // 'delayed' weapon is like an additional weapon, f.e., simple cop has a nitestick as current and pistol as delayed weapons
@@ -338,7 +335,7 @@ public:
     int field_724;
     int field_728;
     char                m_nWeaponSkill;
-    char                m_nFightingStyle; // see eFightingStyle
+    eFightingStyle      m_nFightingStyle;
     char                m_nAllowedAttackMoves;
     char field_72F;
     CFire              *m_pFire;
@@ -370,6 +367,7 @@ public:
     char field_796[2];
     int field_798;
 
+public:
     // class virtual functions
 
     // Process applied anim
@@ -382,7 +380,8 @@ public:
     // class functions
     static void InjectHooks();
 
-	CPed(ePedType);
+    CPed(ePedType);
+
     bool PedIsInvolvedInConversation();
     bool PedIsReadyForConversation(bool arg0);
     bool PedCanPickUpPickUp();
