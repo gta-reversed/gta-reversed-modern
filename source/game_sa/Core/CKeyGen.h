@@ -6,14 +6,18 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+// CRC-32-IEEE
+// https://www.xilinx.com/support/documentation/application_notes/xapp209.pdf
 
 class CKeyGen {
 public:
-    static unsigned int *keyTable;
+    static const unsigned int keyTable[256];
 
-    static unsigned int GetKey(char const* str, int size);
-    static unsigned int GetKey(char const* str);
-    static unsigned int GetUppercaseKey(char const* str);
-    static unsigned int AppendStringToKey(unsigned int key, char const* str);
+public:
+    static void InjectHooks();
+
+    static unsigned int AppendStringToKey(unsigned int key, const char* str);
+    static unsigned int GetKey(const char* str);
+    static unsigned int GetKey(const char* str, int size);
+    static unsigned int GetUppercaseKey(const char* str);
 };
