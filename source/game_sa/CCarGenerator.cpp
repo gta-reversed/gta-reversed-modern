@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
-bool& CCarGenerator::HotdogVendorPositionOffsetInitialized = *reinterpret_cast<bool*>(0xC2B974);
-CVector& CCarGenerator::HotdogVendorPositionOffset = *reinterpret_cast<CVector*>(0xC2B968);
+bool& CCarGenerator::m_bHotdogVendorPositionOffsetInitialized = *reinterpret_cast<bool*>(0xC2B974);
+CVector& CCarGenerator::m_HotdogVendorPositionOffset = *reinterpret_cast<CVector*>(0xC2B968);
 
 void CCarGenerator::InjectHooks()
 {
@@ -10,11 +10,12 @@ void CCarGenerator::InjectHooks()
     ReversibleHooks::Install("CCarGenerator", "DoInternalProcessing", 0x6F34D0, &CCarGenerator::DoInternalProcessing);
     ReversibleHooks::Install("CCarGenerator", "Process", 0x6F3E90, &CCarGenerator::Process);
     ReversibleHooks::Install("CCarGenerator", "Setup", 0x6F2E50, &CCarGenerator::Setup);
-    ReversibleHooks::Install("CCarGenerator", "SwitchOff", 0x6F3E30, &CCarGenerator::SwitchOff);
+    ReversibleHooks::Install("CCarGenerator", "SwitchOff", 0x6F2E30, &CCarGenerator::SwitchOff);
     ReversibleHooks::Install("CCarGenerator", "SwitchOn", 0x6F32C0, &CCarGenerator::SwitchOn);
     ReversibleHooks::Install("CCarGenerator", "CalcNextGen", 0x6F2E40, &CCarGenerator::CalcNextGen);
 }
 
+// 0x6F32E0
 bool CCarGenerator::CheckForBlockage(int modelId)
 {
     float radius;
@@ -58,6 +59,7 @@ bool CCarGenerator::CheckForBlockage(int modelId)
     return false;
 }
 
+// 0x6F2F40
 bool CCarGenerator::CheckIfWithinRangeOfAnyPlayers()
 {
     bool bVisible = false;
@@ -90,11 +92,15 @@ bool CCarGenerator::CheckIfWithinRangeOfAnyPlayers()
     float posnZ = UncompressLargeVector(m_vecPosn).z;
     if ((CGame::currArea == AREA_CODE_NORMAL_WORLD && posnZ < 950.0f || CGame::currArea != AREA_CODE_NORMAL_WORLD && posnZ >= 950.0f)
         && (relPosn.Magnitude2D() >= TheCamera.m_fGenerationDistMultiplier * 160.0f - 20.0f || bHighPriority)
-        && DotProduct2D(FindPlayerSpeed(-1), relPosn) <= 0.0f)
+        && DotProduct2D(FindPlayerSpeed(-1), relPosn) <= 0.0f
+    ) {
         return true;
+    }
+
     return false;
 }
 
+// 0x6F34D0
 void CCarGenerator::DoInternalProcessing()
 {
     int actualModelId;
@@ -102,7 +108,7 @@ void CCarGenerator::DoInternalProcessing()
     float baseZ;
     CColPoint colPoint;
     CEntity* pEntity;
-    char plateText[8];
+    tCarGenPlateText plate{};
     int tractorDriverPedType;
 
     bool nightTime = CClock::ms_nGameClockHours > 21 || CClock::ms_nGameClockHours < 7;
@@ -159,7 +165,7 @@ void CCarGenerator::DoInternalProcessing()
         return;
 
     if (CModelInfo::IsBoatModel(actualModelId) ||
-        actualModelId == MODEL_LEVIATHN || 
+        actualModelId == MODEL_LEVIATHN ||
         actualModelId == MODEL_SEASPAR ||
         actualModelId == MODEL_SKIMMER)
     {
@@ -192,13 +198,15 @@ void CCarGenerator::DoInternalProcessing()
 
         if (!CWorld::ProcessVerticalLine(posn, -1000.0f, colPoint, pEntity, true, false, false, false, false, false, nullptr))
             return;
+
         baseZ = colPoint.m_vecPoint.z;
-        CTheCarGenerators::m_SpecialPlateHandler.Find(CTheCarGenerators::GetIndex(this), plateText);
-        if (plateText[0])
+        plate.m_nCarGenId = CTheCarGenerators::GetIndex(this);
+        CTheCarGenerators::m_SpecialPlateHandler.Find(plate.m_nCarGenId, plate.m_szPlateText);
+        if (plate.m_szPlateText[0])
         {
             auto pModel = CModelInfo::GetModelInfo(actualModelId)->AsVehicleModelInfoPtr();
             if (pModel->m_pPlateMaterial)
-                pModel->SetCustomCarPlateText(plateText);
+                pModel->SetCustomCarPlateText(plate.m_szPlateText);
         }
 
         switch (CModelInfo::GetModelInfo(actualModelId)->AsVehicleModelInfoPtr()->m_nVehicleType)
@@ -281,27 +289,29 @@ void CCarGenerator::DoInternalProcessing()
 
     CWorld::Add(pVeh);
     if (tractorDriverPedType != -1)
-        CCarCtrl::SetUpDriverAndPassengersForVehicle(pVeh, tractorDriverPedType, 0, 0, 0, 99);
+        CCarCtrl::SetUpDriverAndPassengersForVehicle(pVeh, tractorDriverPedType, 0, false, false, 99);
 
     if (actualModelId == MODEL_HOTDOG && m_nModelId == MODEL_HOTDOG && CStreaming::ms_aInfoForModel[MODEL_BMOCHIL].m_nLoadState == LOADSTATE_LOADED)
     {
         CPed* ped = CPopulation::AddPed(ePedType::PED_TYPE_CIVMALE, MODEL_BMOCHIL, pVeh->GetPosition() - pVeh->GetRight() * 3.0f, false);
         if (ped)
         {
-            if (!HotdogVendorPositionOffsetInitialized)
+            if (!m_bHotdogVendorPositionOffsetInitialized)
             {
-                HotdogVendorPositionOffsetInitialized = true;
-                HotdogVendorPositionOffset.Set(0.0F, 0.0F, 0.6F);
+                m_bHotdogVendorPositionOffsetInitialized = true;
+                m_HotdogVendorPositionOffset.Set(0.0f, 0.0f, 0.6f);
             }
-            ped->AttachPedToEntity(pVeh, HotdogVendorPositionOffset, 3, 0.0F, eWeaponType::WEAPON_UNARMED);
-            CTheScripts::ScriptsForBrains.CheckIfNewEntityNeedsScript(ped, 0, 0);
+            ped->AttachPedToEntity(pVeh, m_HotdogVendorPositionOffset, 3, 0.0f, eWeaponType::WEAPON_UNARMED);
+            CTheScripts::ScriptsForBrains.CheckIfNewEntityNeedsScript(ped, 0, nullptr);
         }
     }
 
     if (CGeneral::GetRandomNumberInRange(0, 100) < m_nAlarm)
         pVeh->m_nAlarmState = -1;
+
     if (CGeneral::GetRandomNumberInRange(0, 100) < m_nDoorLock)
         pVeh->m_nDoorLock = eCarLock::CARLOCK_LOCKED;
+
     if (m_nColor1 != -1 && m_nColor2 != -1)
     {
         pVeh->m_nPrimaryColor = m_nColor1;
@@ -317,13 +327,17 @@ void CCarGenerator::DoInternalProcessing()
     m_nNextGenTime = CalcNextGen();
 }
 
+// 0x6F3E90
 void CCarGenerator::Process()
 {
     if (m_nVehicleHandle == -1 &&
-        (CTheCarGenerators::GenerateEvenIfPlayerIsCloseCounter || m_nNextGenTime <= CTimer::m_snTimeInMilliseconds) &&
-        m_nGenerateCount != 0 &&
-        CheckIfWithinRangeOfAnyPlayers())
-    {
+        (
+            CTheCarGenerators::GenerateEvenIfPlayerIsCloseCounter
+            || m_nNextGenTime <= CTimer::m_snTimeInMilliseconds
+        )
+            && m_nGenerateCount != 0
+            && CheckIfWithinRangeOfAnyPlayers()
+    ) {
         DoInternalProcessing();
     }
 
@@ -344,23 +358,29 @@ void CCarGenerator::Process()
     }
 }
 
-void CCarGenerator::Setup(CVector posn, float angle, int modelId, short color1, short color2, unsigned char bforceSpawn, unsigned char alarmChances, unsigned char doorLockChances, unsigned short minDelay, unsigned short maxDelay, unsigned char iplId, unsigned char bIgnorepopulationlimit)
+
+// 0x6F2E50
+void CCarGenerator::Setup(const CVector& posn, float angle, int modelId, short color1, short color2, unsigned char bForceSpawn, unsigned char alarmChances, unsigned char doorLockChances, unsigned short minDelay, unsigned short maxDelay, unsigned char iplId, unsigned char bIgnorePopulationLimit)
 {
+    static constexpr float magic = 256.0f / 360.0f; // 0x8722E8 original expression 128.0f / 180.0f
+
     m_vecPosn = CompressLargeVector(posn);
-    m_nAngle = angle * (256.0F / 360.0F);
+    m_nAngle = angle * magic;
     m_nModelId = modelId;
+
     if (color1 == -1)
         m_nColor1 = -1;
     else
         m_nColor1 = color1;
+
     if (color2 == -1)
         m_nColor2 = -1;
     else
         m_nColor2 = color1;
 
     bWaitUntilFarFromPlayer = false;
-    bIgnorePopulationLimit = bIgnorepopulationlimit;
-    bHighPriority = bforceSpawn;
+    bIgnorePopulationLimit = bIgnorePopulationLimit;
+    bHighPriority = bForceSpawn;
     bPlayerHasAlreadyOwnedCar = false;
 
     m_nAlarm = alarmChances;
@@ -375,17 +395,20 @@ void CCarGenerator::Setup(CVector posn, float angle, int modelId, short color1, 
     m_bIsUsed = true;
 }
 
+// 0x6F2E30
 void CCarGenerator::SwitchOff()
 {
     m_nGenerateCount = 0;
 }
 
+// 0x6F32C0
 void CCarGenerator::SwitchOn()
 {
     m_nGenerateCount = -1;
     m_nNextGenTime = CalcNextGen();
 }
 
+// 0x6F2E40
 unsigned int CCarGenerator::CalcNextGen()
 {
     return CTimer::m_snTimeInMilliseconds + 4;

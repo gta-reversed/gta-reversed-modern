@@ -6,8 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
 struct tCarGenPlateText {
     int m_nCarGenId; // -1 - empty
     char m_szPlateText[12];
@@ -17,13 +15,16 @@ VALIDATE_SIZE(tCarGenPlateText, 0x10);
 
 class CSpecialPlateHandler {
 public:
-    tCarGenPlateText m_plateTextEntries[15];
+    static constexpr unsigned int PLATES_COUNT = 15;
+    tCarGenPlateText m_plateTextEntries[PLATES_COUNT];
     unsigned int m_nCount;
 
+public:
+    static void InjectHooks();
+
     void Init();
-    // Returns -1 if not found, or plate text id if found. outText contain plate text if found, "\0" otherwise.
-    int Find(int carGenId, char* outText);
-    void Add(int carGenId, char* plateText);
+    void Find(int carGenId, char* outText);
+    void Add(int carGenId, const char* plateText);
     void Remove(int plateTextId);
 };
 

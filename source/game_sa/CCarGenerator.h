@@ -6,10 +6,9 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CompressedVector.h"
 
-class  CCarGenerator {
+class CCarGenerator {
 public:
     short            m_nModelId;
     char             m_nColor1;
@@ -19,10 +18,8 @@ public:
     char             m_nAlarm;
     char             m_nDoorLock;
 
-    union
-    {
-        struct
-        {
+    union {
+        struct {
             unsigned char bWaitUntilFarFromPlayer : 1;
             unsigned char bHighPriority : 1;
             unsigned char bActive : 1;
@@ -33,34 +30,31 @@ public:
     };
     short            m_nMinDelay;
     short            m_nMaxDelay;
-private:
+
     char _pad12[2];
-public:
+
     int              m_nNextGenTime;
     short            m_nVehicleHandle;
-    signed short            m_nGenerateCount; // (0) Don't Spawn , (1 - 32767) Spawn X number of times , (-1) Always Spawn.
+    signed short     m_nGenerateCount; // (0) Don't Spawn , (1 - 32767) Spawn X number of times , (-1) Always Spawn.
     char             m_nIplId;
     bool             m_bIsUsed;
-private:
-    char _pad1E[2];
-public:
 
-    static bool& HotdogVendorPositionOffsetInitialized;
-    static CVector& HotdogVendorPositionOffset;
+    char _pad1E[2];
+
+public:
+    static bool& m_bHotdogVendorPositionOffsetInitialized;
+    static CVector& m_HotdogVendorPositionOffset;
 
     static void InjectHooks();
     bool CheckForBlockage(int modelId);
     bool CheckIfWithinRangeOfAnyPlayers();
     void DoInternalProcessing();
     void Process();
-    void Setup(CVector posn, float angle, int modelId, short color1, short color2, unsigned char bforceSpawn, unsigned char alarmChances, unsigned char doorLockChances, unsigned short minDelay, unsigned short maxDelay, unsigned char iplId, unsigned char bOwnedbyplayer);
+    void Setup(const CVector& posn, float angle, int modelId, short color1, short color2, unsigned char bForceSpawn, unsigned char alarmChances, unsigned char doorLockChances, unsigned short minDelay, unsigned short maxDelay, unsigned char iplId, unsigned char bIgnorePopulationLimit);
     void SwitchOff();
     void SwitchOn();
 
-    //! unused
     static unsigned int CalcNextGen();
 };
 
 VALIDATE_SIZE(CCarGenerator, 0x20);
-
-//#include "meta/meta.CCarGenerator.h"
