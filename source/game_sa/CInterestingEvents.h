@@ -1,6 +1,7 @@
 #pragma once
 
 class CInterestingEvents {
+public:
     enum EType {
 
     };

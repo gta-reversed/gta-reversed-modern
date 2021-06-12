@@ -285,6 +285,14 @@ void InjectHooksMain()
     CCullZones::InjectHooks();
     CSpecialPlateHandler::InjectHooks();
     CKeyGen::InjectHooks();
+    CAccidentManager::InjectHooks();
+    CTaskComplexMedicTreatInjuredPed::InjectHooks();
+    CTaskComplexTreatAccident::InjectHooks();
+    CTaskSimpleGiveCPR::InjectHooks();
+    CTaskComplexDriveFireTruck::InjectHooks();
+    CTaskComplexUseWaterCannon::InjectHooks();
+    CTaskSimpleRunAnim::InjectHooks();
+    CTaskComplexUseSwatRope::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

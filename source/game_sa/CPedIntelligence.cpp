@@ -545,12 +545,7 @@ void CPedIntelligence::ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryT
                 CTask* pDriveTask = nullptr;
                 if (m_TaskMgr.m_aPrimaryTasks[TASK_PRIMARY_DEFAULT]->GetId() == TASK_SIMPLE_CAR_DRIVE)
                 {
-                    auto pTaskSimpleCarDriveTimed = (CTaskSimpleCarDriveTimed*)CTask::operator new(112);
-                    if (pTaskSimpleCarDriveTimed)
-                    {
-                        pTaskSimpleCarDriveTimed->Constructor(m_pPed->m_pVehicle, 0);
-                    }
-                    pDriveTask = static_cast<CTask*>(pTaskSimpleCarDriveTimed);
+                    pDriveTask = static_cast<CTask*>(new CTaskSimpleCarDriveTimed(m_pPed->m_pVehicle, 0));
                 }
                 else
                 {

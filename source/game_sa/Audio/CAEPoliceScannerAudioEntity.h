@@ -11,6 +11,7 @@
 
 class  CAEPoliceScannerAudioEntity : public CAEAudioEntity {
 public:
+    void UpdateParameters(CAESound* sound, short curPlayPos) override;
 };
 
 VALIDATE_SIZE(CAEPoliceScannerAudioEntity, 0x7C);

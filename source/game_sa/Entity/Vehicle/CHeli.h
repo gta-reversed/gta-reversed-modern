@@ -98,6 +98,8 @@ public:
     CVector FindSwatPositionRelativeToHeli(int swatNumber);
     bool SendDownSwat();
 
+    inline unsigned int GetRopeId() { return reinterpret_cast<int>(this + m_nNumSwatOccupants - 1); }
+
     static void InitHelis();
     static void AddHeliSearchLight(CVector const& origin, CVector const& target, float targetRadius, float power, unsigned int coronaIndex, unsigned char unknownFlag, unsigned char drawShadow);
     static void Pre_SearchLightCone();
