@@ -121,13 +121,7 @@ CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
         {
             if (ped->bInVehicle)
             {
-                auto pTaskSimpleCarDriveTimed = (CTaskSimpleCarDriveTimed*)CTask::operator new(112);
-                if (pTaskSimpleCarDriveTimed)
-                {
-                    pTaskSimpleCarDriveTimed->Constructor(ped->m_pVehicle, 2000);
-                    return (CTask*)pTaskSimpleCarDriveTimed;
-                }
-                return nullptr;
+                return new CTaskSimpleCarDriveTimed(ped->m_pVehicle, 2000);
             }
             return CreateFirstSubTask(ped);
         }
@@ -229,12 +223,7 @@ CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
     auto pTaskSimpleStandStill = new CTaskSimpleStandStill(500, 0, 0, 8.0f);
     pTaskComplexSequence->AddTask(pTaskSimpleStandStill);
 
-    auto pTaskSimpleRunAnim = (CTaskSimpleRunAnim*)CTask::operator new(32);
-    if (pTaskSimpleRunAnim)
-    {
-        pTaskSimpleRunAnim->Constructor(ped->m_nAnimGroup, 4, 4.0f, 0);
-    }
-    pTaskComplexSequence->AddTask(pTaskSimpleRunAnim);
+    pTaskComplexSequence->AddTask(new CTaskSimpleRunAnim(ped->m_nAnimGroup, ANIM_ID_ROADCROSS, 4.0F, false));
 
     auto pTaskSimpleScratchHead = (CTaskSimpleScratchHead*)CTask::operator new(32);
     if (pTaskSimpleScratchHead)
@@ -388,12 +377,7 @@ CTask* CTaskComplexWander::CreateSubTask(CPed* ped, int taskId)
         {
         case TASK_SIMPLE_CAR_DRIVE_TIMED:
         {
-            auto pTaskSimpleCarDriveTimed = (CTaskSimpleCarDriveTimed*)CTask::operator new(112);
-            if (pTaskSimpleCarDriveTimed)
-            {
-                pTaskSimpleCarDriveTimed->Constructor(ped->m_pVehicle, 2000);
-                return (CTask*)pTaskSimpleCarDriveTimed;
-            }
+            return new CTaskSimpleCarDriveTimed(ped->m_pVehicle, 2000);
             break;
         }
         case TASK_SIMPLE_GO_TO_POINT:

@@ -49,4 +49,5 @@ public:
     static std::int32_t ComputeEntityHitSide(CVector* point, CEntity* entity);
     static std::int8_t ComputeClosestSurfacePoint(CPed* ped, CEntity* entity, CVector* point);
     static std::int32_t ComputeEntityHitSide(CPed* ped, CEntity* entity);
+    static bool IsEntityBlockingTarget(CEntity* entity, CVector& point, float distance);
 };

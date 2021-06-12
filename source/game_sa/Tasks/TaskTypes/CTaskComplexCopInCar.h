@@ -11,11 +11,11 @@
 #include "CVehicle.h"
 #include "CPed.h"
 
-class  CTaskComplexCopInCar : public CTaskComplex {
+class CTaskComplexCopInCar: public CTaskComplex{
 public:
-    CVehicle *m_pVehicle;
-    CPed *m_pCop1;
-    CPed *m_pCop2;
+    CVehicle* m_pVehicle;
+    CPed* m_pCop1;
+    CPed* m_pCop2;
     CTaskTimer m_timer1;
     CTaskTimer m_timer2;
     unsigned char m_nFlags;

@@ -34,7 +34,7 @@ CInterestingEvents* CInterestingEvents::Destructor() {
 
 // 0x602590
 void CInterestingEvents::Add(CInterestingEvents::EType type, CEntity* entity) {
-    plugin::CallMethod<0x602590, CInterestingEvents*>(this);
+    plugin::CallMethod<0x602590, CInterestingEvents*, CInterestingEvents::EType, CEntity*>(this, type, entity);
 }
 
 // 0x605A30

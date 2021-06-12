@@ -57,3 +57,8 @@ std::int32_t CPedGeometryAnalyser::ComputeEntityHitSide(CPed* ped, CEntity* enti
 {
     return plugin::CallAndReturn<std::int32_t, 0x5F3BC0, CPed*, CEntity*>(ped, entity);
 }
+
+bool CPedGeometryAnalyser::IsEntityBlockingTarget(CEntity* entity, CVector& point, float distance)
+{
+    return plugin::CallAndReturn<bool, 0x5F3970, CEntity*, CVector&, float>(entity, point, distance);
+}

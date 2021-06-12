@@ -43,6 +43,13 @@ private:
     char padding[3];
 public:
     CTaskSimpleCarDrive* Constructor(CVehicle* pVehicle, CTaskUtilityLineUpPedWithCar* pUtilityTask, bool bUpdateCurrentVehicle);
+    CTaskSimpleCarDrive(CVehicle* pVehicle, CTaskUtilityLineUpPedWithCar* pUtilityTask, bool bUpdateCurrentVehicle);
+
+    bool ProcessPed(class CPed* ped) override;
+    CTask* Clone() override;
+    eTaskType GetId() override { return TASK_SIMPLE_CAR_DRIVE; }
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
+
 };
 
 VALIDATE_SIZE(CTaskSimpleCarDrive, 0x60);

@@ -51,3 +51,8 @@ void CRopes::Update()
 {
     ((void(__cdecl*)())0x558D70)();
 }
+
+bool CRopes::FindCoorsAlongRope(unsigned int ropeId, float fCoorAlongRope, CVector* pVecPosition, CVector* arg4)
+{
+    return plugin::CallAndReturn<bool, 0x555E40, unsigned int, float, CVector*, CVector*>(ropeId, fCoorAlongRope, pVecPosition, arg4);
+}

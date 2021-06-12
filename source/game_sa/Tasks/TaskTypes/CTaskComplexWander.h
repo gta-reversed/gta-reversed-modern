@@ -27,6 +27,8 @@ class CNodeAddress;
 class CVector;
 
 class CTaskComplexWander : public CTaskComplex {
+protected:
+    CTaskComplexWander(plugin::dummy_func_t) : CTaskComplex() {}
 public:
     int m_nMoveState; // see eMoveState
     unsigned char m_nDir;
