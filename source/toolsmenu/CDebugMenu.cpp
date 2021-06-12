@@ -834,17 +834,8 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
     ShowPlayerInfo();
 }
 
-static void DebugCode() {
+static void Spawn_RC_Cars() {
     CPad* pad = CPad::GetPad(0);
-    if (pad->IsStandardKeyJustDown('1')) {
-        printf("");
-    }
-    if (pad->IsStandardKeyJustDown('2')) {
-        printf("");
-    }
-
-    /*
-    // spawn RC cars
     auto player = FindPlayerPed();
     if (player) {
         int32_t vehicleId = -1;
@@ -866,7 +857,16 @@ static void DebugCode() {
             printf("spawned rc car\n");
         }
     }
-  */
+}
+
+static void DebugCode() {
+    CPad* pad = CPad::GetPad(0);
+    if (pad->IsStandardKeyJustDown('1')) {
+        printf("");
+    }
+    if (pad->IsStandardKeyJustDown('2')) {
+        printf("");
+    }
 }
 
 void CDebugMenu::ImguiDrawLoop() {
@@ -1393,7 +1393,7 @@ CDebugMenuToolInput::ToolMap CDebugMenu::m_pedsMap{
     { 286, "FBI Agent" },
     { 287, "Army Officer" },
     { 288, "Desert Sheriff" },
-    // These are cutscene specific 
+    // These are cutscene specific
     { 290, "Special Actor 1" },
     { 291, "Special Actor 2" },
     { 292, "Special Actor 3" },

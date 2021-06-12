@@ -99,7 +99,6 @@ CObject::CObject(CDummyObject* pDummyObj) : CPhysical()
     m_nAreaCode = pDummyObj->m_nAreaCode;
     m_bRenderDamaged = pDummyObj->m_bRenderDamaged;
 
-    
     if (m_pRwObject)
     {
         auto* pAtomic = m_pRwAtomic;
@@ -989,8 +988,8 @@ void CObject::ProcessSamSiteBehaviour() {
     auto fHeading = CGeneral::GetATanOfXY(m_matrix->GetForward().x, m_matrix->GetForward().y);
     auto* pPlayerVeh = FindPlayerVehicle(-1, false);
     if (!pPlayerVeh
-        || pPlayerVeh->GetVehicleAppearance() == eVehicleApperance::VEHICLE_APPEARANCE_BIKE
-        || pPlayerVeh->GetVehicleAppearance() == eVehicleApperance::VEHICLE_APPEARANCE_AUTOMOBILE)
+        || pPlayerVeh->GetVehicleAppearance() == eVehicleAppearance::VEHICLE_APPEARANCE_BIKE
+        || pPlayerVeh->GetVehicleAppearance() == eVehicleAppearance::VEHICLE_APPEARANCE_AUTOMOBILE)
     {
         auto* pPlayer = FindPlayerPed(-1);
         if (pPlayer->GetIntelligence()->GetTaskJetPack())

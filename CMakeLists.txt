@@ -17,14 +17,14 @@ add_subdirectory(libs/vorbis)
 
 set(_src_root_path "${CMAKE_CURRENT_SOURCE_DIR}")
 file(
-    GLOB_RECURSE _headerfiles_list 
+    GLOB_RECURSE _headerfiles_list
     LIST_DIRECTORIES false
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
     "${_src_root_path}/source/*.h*"
 )
 
 file(
-    GLOB_RECURSE _sourcefiles_list 
+    GLOB_RECURSE _sourcefiles_list
     LIST_DIRECTORIES false
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
     "${_src_root_path}/source/*.c*"
@@ -35,6 +35,9 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT g
 
 add_library(gta_reversed MODULE ${_headerfiles_list} ${_sourcefiles_list} .editorconfig)
 set_target_properties(gta_reversed PROPERTIES SUFFIX ".asi")
+if(MSVC)
+    target_compile_options(gta_reversed PRIVATE "/MP")
+endif()
 
 target_include_directories(gta_reversed PRIVATE
     source/
@@ -75,7 +78,7 @@ endforeach()
 
 
 foreach(_source IN ITEMS ${_sourcefiles_list})
-    get_filename_component(_source_path "${_source}" PATH) 
+    get_filename_component(_source_path "${_source}" PATH)
     string(REPLACE "/" "\\" _source_path_msvc "${_source_path}")
     string(REPLACE "source" "Sources" _source_path_strip_source_filter "${_source_path_msvc}")
     source_group("${_source_path_strip_source_filter}" FILES "${_source}")

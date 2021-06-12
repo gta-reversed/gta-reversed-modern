@@ -446,7 +446,7 @@ void CBoat::ProcessControl_Reversed() {
     auto pWantedInfo = FindPlayerPed()->m_pPlayerData->m_pWanted;
     if (pWantedInfo->m_nWantedLevel > 0 && m_nModelIndex == eModelID::MODEL_PREDATOR) {
         auto pPlayerVeh = FindPlayerVehicle(-1, false);
-        if (pPlayerVeh && pPlayerVeh->GetVehicleAppearance() == eVehicleApperance::VEHICLE_APPEARANCE_BOAT) {
+        if (pPlayerVeh && pPlayerVeh->GetVehicleAppearance() == eVehicleAppearance::VEHICLE_APPEARANCE_BOAT) {
             auto iCarMission = m_autoPilot.m_nCarMission;
             if (iCarMission == eCarMission::MISSION_ATTACKPLAYER
                 || (iCarMission >= eCarMission::MISSION_RAMPLAYER_FARAWAY && iCarMission <= eCarMission::MISSION_BLOCKPLAYER_CLOSE)) {

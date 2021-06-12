@@ -44,10 +44,7 @@ unsigned int &ClumpOffset = *(unsigned int *)0xB5F878;
 // used to convert 0-255 to 0.0f-1.0f, also see RwRGBARealFromRwRGBAMacro
 float& flt_859A3C = *(float*)0x859A3C; // 1.0f / 255.0f = 0.0039215689f
 
-float& flt_858B14 = *(float*)0x858B14; // 1.0f / 32768.0f = 0.000030517578f
 
-float& flt_859520 = *(float*)0x859520; // 1.0f / 640.0f = 0.0015625f        1.0f / DEFAULT_SCREEN_WIDTH
-float& flt_859524 = *(float*)0x859524; // 1.0f / 448.0f = 0.002232143f      1.0f / DEFAULT_SCREEN_HEIGHT
 
 void InjectCommonHooks()
 {

@@ -6,9 +6,8 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-enum  eVehicleHandlingModelFlags : unsigned int {
+enum eVehicleHandlingModelFlags : unsigned int {
+    VEHICLE_HANDLING_MODEL_NONE = 0x0,
     VEHICLE_HANDLING_MODEL_IS_VAN = 0x1,
     VEHICLE_HANDLING_MODEL_IS_BUS = 0x2,
     VEHICLE_HANDLING_MODEL_IS_LOW = 0x4,

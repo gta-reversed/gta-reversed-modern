@@ -49,3 +49,8 @@ bool CAudioEngine::IsCutsceneTrackActive() {
 void CAudioEngine::RetuneRadio(signed char radioId) {
     plugin::CallMethod<0x507E10, CAudioEngine*>(this, radioId);
 }
+
+// 0x506EA0
+void CAudioEngine::ReportFrontendAudioEvent(eAudioEvents audioEventId, float a2, float a3) {
+    plugin::CallMethod<0x506EA0, CAudioEngine*, int, float, float>(this, audioEventId, a2, a3);
+}
