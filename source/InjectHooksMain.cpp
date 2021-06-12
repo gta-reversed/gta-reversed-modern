@@ -293,6 +293,7 @@ void InjectHooksMain()
     CTaskComplexUseWaterCannon::InjectHooks();
     CTaskSimpleRunAnim::InjectHooks();
     CTaskComplexUseSwatRope::InjectHooks();
+    CStuntJumpManager::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

@@ -21,7 +21,7 @@
 #include "FxSystem_c.h"
 #include "CFire.h"
 
-/*  Thanks to MTA team for https://code.google.com/p/mtasa-blue/source/browse/tags/1.3.4/MTA10/game_sa/CVehicleSA.h */
+/*  Thanks to MTA team for https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CVehicleSA.cpp */
 
 enum eCarWeapon {
     CAR_WEAPON_NOT_USED,
@@ -42,12 +42,13 @@ enum eCarLock {
     CARLOCK_SKIP_SHUT_DOORS
 };
 
-enum eVehicleApperance {
+enum eVehicleAppearance {
+    VEHICLE_APPEARANCE_NONE = 0,
     VEHICLE_APPEARANCE_AUTOMOBILE = 1,
-    VEHICLE_APPEARANCE_BIKE,
-    VEHICLE_APPEARANCE_HELI,
-    VEHICLE_APPEARANCE_BOAT,
-    VEHICLE_APPEARANCE_PLANE,
+    VEHICLE_APPEARANCE_BIKE = 2,
+    VEHICLE_APPEARANCE_HELI = 3,
+    VEHICLE_APPEARANCE_BOAT = 4,
+    VEHICLE_APPEARANCE_PLANE = 5,
 };
 
 enum eVehicleLightsFlags {
@@ -78,8 +79,7 @@ enum eVehicleOverrideLightsState {
     FORCE_CAR_LIGHTS_ON = 2
 };
 
-enum eCarPiece
-{
+enum eCarPiece {
     CAR_PIECE_DEFAULT = 0,
     CAR_PIECE_BONNET,
     CAR_PIECE_BOOT,
@@ -144,7 +144,7 @@ struct tHydrualicData
 
     // applied when the vehicle is at rest (idle/not moving)
     // and does NOT apply if numpad keys are pressed (car hopping)
-    float m_fSuspensionNormalIdleUpperLimit; 
+    float m_fSuspensionNormalIdleUpperLimit;
     float m_fSuspensionNormalIdleLowerLimit;
     float m_wheelSuspension[4];
 };
@@ -273,7 +273,7 @@ public:
             unsigned int bUsedForReplay : 1; // This car is controlled by replay and should be removed when replay is done.
         } vehicleFlags;
     };
-    
+
     unsigned int m_nCreationTime;
     unsigned char  m_nPrimaryColor;
     unsigned char  m_nSecondaryColor;
@@ -294,7 +294,7 @@ public:
     uint8_t  m_nWindowsOpenFlags; // initialised, but not used?
     uint8_t  m_nNitroBoosts;
     int8_t   m_vehicleSpecialColIndex;
-    CEntity *m_pEntityWeAreOn; // we get it from CWorld::ProcessVerticalLine or ProcessEntityCollision, it's entity under us, 
+    CEntity *m_pEntityWeAreOn; // we get it from CWorld::ProcessVerticalLine or ProcessEntityCollision, it's entity under us,
                                //only static entities (buildings or roads)
     CFire *m_pFire;
     float  m_fSteerAngle;
@@ -329,8 +329,8 @@ public:
     unsigned int m_nTimeTillWeNeedThisCar; // game won't try to delete this car while this time won't reach
     unsigned int m_nGunFiringTime; // last time when gun on vehicle was fired (used on boats)
     unsigned int m_nTimeWhenBlowedUp; // game will delete vehicle when 60 seconds after this time will expire
-    short  m_nCopsInCarTimer; // timer for police car (which is following player) occupants to stay in car. If this timer reachs 
-                             // some value, they will leave a car. The timer increases each frame if player is stopped in car, 
+    short  m_nCopsInCarTimer; // timer for police car (which is following player) occupants to stay in car. If this timer reachs
+                             // some value, they will leave a car. The timer increases each frame if player is stopped in car,
                              // otherway it resets
     short  m_wBombTimer;     // goes down with each frame
     CPed *m_pWhoDetonatedMe; // if vehicle was detonated, game copies m_pWhoInstalledBombOnMe here
@@ -494,8 +494,7 @@ public:
     void UpdateLightingFromStoredPolys();
     void CalculateLightingFromCollision();
     void ResetAfterRender();
-    // 2 - bike, 3 - heli, 4 - boat, 5 - plane
-    int GetVehicleAppearance();
+    eVehicleAppearance GetVehicleAppearance();
     // returns false if vehicle model has no car plate material
     bool CustomCarPlate_TextureCreate(CVehicleModelInfo* model);
     void CustomCarPlate_TextureDestroy();

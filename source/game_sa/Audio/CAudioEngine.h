@@ -1,5 +1,7 @@
 #pragma once
 
+#include "eAudioEvents.h"
+
 class CEntity;
 class CColPoint;
 class CVector;
@@ -46,7 +48,7 @@ public:
     void SetNonStreamFaderScalingFactor(float);
     void DisableEffectsLoading();
     void EnableEffectsLoading();
-    void ReportFrontendAudioEvent(int, float, float);
+    void ReportFrontendAudioEvent(eAudioEvents audioEventId, float a2, float a3);
     void ResetSoundEffects();
     void ReportCollision(CEntity* pEntity1, CEntity* pEntity2, int surface1, int surface2, CColPoint* pColPoint, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, int bOnlyPlayOneShotCollisionSound, bool bUnknown);
     void ReportBulletHit(CEntity*, uchar, CVector&, float);

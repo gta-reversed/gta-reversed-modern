@@ -30,7 +30,7 @@ void CTrafficLights::InjectHooks()
 bool CTrafficLights::ShouldCarStopForLight(CVehicle* pVehicle, bool bUnkn)
 {
     auto iAppeareance = pVehicle->GetVehicleAppearance();
-    if (iAppeareance == eVehicleApperance::VEHICLE_APPEARANCE_HELI || iAppeareance == eVehicleApperance::VEHICLE_APPEARANCE_PLANE)
+    if (iAppeareance == eVehicleAppearance::VEHICLE_APPEARANCE_HELI || iAppeareance == eVehicleAppearance::VEHICLE_APPEARANCE_PLANE)
         return false;
 
     auto& pCurrentNodeInfo = pVehicle->m_autoPilot.m_nCurrentPathNodeInfo;
@@ -123,7 +123,7 @@ bool CTrafficLights::ShouldCarStopForLight(CVehicle* pVehicle, bool bUnkn)
 bool CTrafficLights::ShouldCarStopForBridge(CVehicle* pVehicle)
 {
     auto iAppeareance = pVehicle->GetVehicleAppearance();
-    if (iAppeareance == eVehicleApperance::VEHICLE_APPEARANCE_HELI || iAppeareance == eVehicleApperance::VEHICLE_APPEARANCE_PLANE)
+    if (iAppeareance == eVehicleAppearance::VEHICLE_APPEARANCE_HELI || iAppeareance == eVehicleAppearance::VEHICLE_APPEARANCE_PLANE)
         return false;
 
     auto& pNextNodeInfo = pVehicle->m_autoPilot.m_nNextPathNodeInfo;

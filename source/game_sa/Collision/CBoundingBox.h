@@ -12,6 +12,8 @@ class CBoundingBox : public CBox {
 public:
     CBoundingBox();
     CBoundingBox(CVector vecMin, CVector vecMax);
+
+    bool IsPointWithin(const CVector& point);
 };
 
 VALIDATE_SIZE(CBoundingBox, 0x18);

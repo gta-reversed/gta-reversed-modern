@@ -11,12 +11,12 @@
 #include "CVector.h"
 #include "CPlayerPed.h"
 
-enum  ePlayerState {
+enum ePlayerState : unsigned char {
     PLAYERSTATE_PLAYING,
-    PLAYERSTATE_HASDIED,
-    PLAYERSTATE_HASBEENARRESTED,
-    PLAYERSTATE_FAILEDMISSION,
-    PLAYERSTATE_LEFTGAME
+    PLAYERSTATE_HAS_DIED,
+    PLAYERSTATE_HAS_BEEN_ARRESTED,
+    PLAYERSTATE_FAILED_MISSION,
+    PLAYERSTATE_LEFT_GAME
 };
 
 class CPed;
@@ -39,7 +39,7 @@ public:
     bool m_bTryingToExitCar;                // if player holds exit car button, want to trigger getout once car slowed enough with a passenger
     char _pad0[2];
     CVehicle* m_pLastTargetVehicle;         // Last vehicle player tried to enter.
-    unsigned char m_nPlayerState;           // see ePlayerState
+    ePlayerState m_nPlayerState;
     bool m_bAfterRemoteVehicleExplosion;
     bool m_bCreateRemoteVehicleExplosion;
     bool m_bFadeAfterRemoteVehicleExplosion;

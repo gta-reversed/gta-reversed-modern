@@ -86,6 +86,7 @@ void CVehicle::InjectHooks()
     ReversibleHooks::Install("CVehicle", "ApplyBoatWaterResistance", 0x6D2740, &CVehicle::ApplyBoatWaterResistance);
     ReversibleHooks::Install("CVehicle", "ProcessBoatControl", 0x6DBCE0, &CVehicle::ProcessBoatControl);
     ReversibleHooks::Install("CVehicle", "ChangeLawEnforcerState", 0x6D2330, &CVehicle::ChangeLawEnforcerState);
+    ReversibleHooks::Install("CVehicle", "GetVehicleAppearance", 0x6D1080, &CVehicle::GetVehicleAppearance);
 
 }
 
@@ -194,7 +195,7 @@ CVehicle::CVehicle(unsigned char createdBy) : CPhysical(), m_vehicleAudio(), m_a
     m_pFireParticle = nullptr;
     m_pDustParticle = nullptr;
     m_pCustomCarPlate = nullptr;
-   
+
     memset(m_anUpgrades, 0xFFu, sizeof(m_anUpgrades));
     m_fWheelScale = 1.0;
     m_nWindowsOpenFlags = 0;
@@ -906,7 +907,7 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend)
         if (RpAnimBlendClumpGetAssociation(driver->m_pRwClump, eAnimID::ANIM_ID_CAR_SIT))
         {
             CAnimManager::BlendAnimation(driver->m_pRwClump, eAnimGroup::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_IDLE], 4.0F);
-            
+
         }
         return;
     }
@@ -1012,7 +1013,7 @@ bool CVehicle::CanPedStepOutCar(bool bIgnoreSpeedUpright)
 bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright)
 {
     auto const fUpZ = m_matrix->GetUp().z;
-    if (fabs(fUpZ) <= 0.1F) 
+    if (fabs(fUpZ) <= 0.1F)
     {
         if (fabs(m_vecMoveSpeed.z) > 0.05F
             || m_vecMoveSpeed.Magnitude2D() > 0.01F
@@ -1241,10 +1242,37 @@ void CVehicle::ResetAfterRender()
     ((void(__thiscall*)(CVehicle*))0x6D0E20)(this);
 }
 
-// Converted from thiscall int CVehicle::GetVehicleAppearance(void) 0x6D1080
-int CVehicle::GetVehicleAppearance()
-{
-    return ((int(__thiscall*)(CVehicle*))0x6D1080)(this);
+// 0x6D1080
+eVehicleAppearance CVehicle::GetVehicleAppearance() {
+    unsigned int flags = (
+        m_pHandlingData->m_nModelFlags &
+        (
+            VEHICLE_HANDLING_MODEL_IS_BOAT |
+            VEHICLE_HANDLING_MODEL_IS_PLANE |
+            VEHICLE_HANDLING_MODEL_IS_HELI |
+            VEHICLE_HANDLING_MODEL_IS_BIKE
+        )
+    );
+
+    if (flags <= VEHICLE_HANDLING_MODEL_IS_HELI) {
+        switch (flags) {
+        case VEHICLE_HANDLING_MODEL_IS_HELI:
+            return VEHICLE_APPEARANCE_HELI;
+        case VEHICLE_HANDLING_MODEL_NONE:
+            return VEHICLE_APPEARANCE_AUTOMOBILE;
+        case VEHICLE_HANDLING_MODEL_IS_BIKE:
+            return VEHICLE_APPEARANCE_BIKE;
+        }
+        return VEHICLE_APPEARANCE_NONE;
+    }
+
+    if (flags == VEHICLE_HANDLING_MODEL_IS_PLANE)
+        return VEHICLE_APPEARANCE_PLANE;
+
+    if (flags != VEHICLE_HANDLING_MODEL_IS_BOAT)
+        return VEHICLE_APPEARANCE_NONE;
+
+    return VEHICLE_APPEARANCE_BOAT;
 }
 
 // Converted from thiscall bool CVehicle::CustomCarPlate_TextureCreate(CVehicleModelInfo *model) 0x6D10E0
@@ -1922,7 +1950,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
     else if (contactSpeedFwd != 0.0f) {
         fwd = -contactSpeedFwd / wheelsOnGround;
         if (!bBraking && fabs(m_fGasPedal) < 0.01f) {
-            if (IsBike()) 
+            if (IsBike())
                 brake = gHandlingDataMgr.fWheelFriction * 0.6f / (m_pHandlingData->m_fMass + 200.0f);
             else if (IsPlane())
                 brake = 0.0f;
@@ -2421,7 +2449,7 @@ void CVehicle::AddExhaustParticles()
                 bHasDoubleExhaust = true;
             break;
         case MODEL_NRG500:
-            if (!m_anExtras[0] || m_anExtras[0] == 1)  
+            if (!m_anExtras[0] || m_anExtras[0] == 1)
                 secondExhaustPos = pVehicleModelInfo->m_pVehicleStruct->m_avDummyPos[DUMMY_EXHAUST_SECONDARY];
             break;
         case MODEL_BF400:
