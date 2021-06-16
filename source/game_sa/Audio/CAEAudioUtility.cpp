@@ -22,18 +22,16 @@ void CAEAudioUtility::InjectHooks()
     HookInstall(0x5b97f0, &CAEAudioUtility::StaticInitialise);
 }
 
-// Exactly the same as CGeneral::GetRandomNumberInRange
+// 0x4d9c10
 std::int32_t CAEAudioUtility::GetRandomNumberInRange(std::int32_t a, std::int32_t b)
 {
-    // TODO: Use better RNG
-    return a + static_cast<std::int32_t>(rand() * RAND_MAX_RECIPROCAL * (b - a + 1) );
+    return CGeneral::GetRandomNumberInRange(a, b);
 }
 
-// Exactly the same as CGeneral::GetRandomNumberInRange
+// 0x4d9c50
 float CAEAudioUtility::GetRandomNumberInRange(float a, float b)
 {
-    // TODO: Use better RNG
-    return a + (b - a) * rand() * RAND_MAX_RECIPROCAL;
+    return CGeneral::GetRandomNumberInRange(a, b);
 }
 
 bool CAEAudioUtility::ResolveProbability(float p)

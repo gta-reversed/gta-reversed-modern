@@ -8,64 +8,140 @@ Do not delete this comment block. Respect others' work!
 #include "StdInc.h"
 
 void CGeneral::InjectHooks() {
-//    ReversibleHooks::Install("CGeneral", "LimitAngle", 0x53CB00, &CGeneral::LimitAngle);
-//    ReversibleHooks::Install("CGeneral", "LimitRadianAngle", 0x53CB50, &CGeneral::LimitRadianAngle);
-//    ReversibleHooks::Install("CGeneral", "GetRadianAngleBetweenPoints", 0x53CBE0, &CGeneral::GetRadianAngleBetweenPoints);
-//    ReversibleHooks::Install("CGeneral", "GetATanOfXY", 0x53CC70, &CGeneral::GetATanOfXY);
-//    ReversibleHooks::Install("CGeneral", "GetNodeHeadingFromVector", 0x53CDC0, &CGeneral::GetNodeHeadingFromVector);
-//    ReversibleHooks::Install("CGeneral", "SolveQuadratic", 0x53CE30, &CGeneral::SolveQuadratic);
-//    ReversibleHooks::Install("CGeneral", "GetAngleBetweenPoints", 0x53CEA0, &CGeneral::GetAngleBetweenPoints);
-//    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, (unsigned int (*)(int, int)) & CGeneral::GetRandomNumberInRange);
-//    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_float", 0x41BD90, (float (*)(float, float)) & CGeneral::GetRandomNumberInRange);
-//    ReversibleHooks::Install("CGeneral", "CamShakeNoPos", 0x50A970, &CGeneral::CamShakeNoPos);
+    ReversibleHooks::Install("CGeneral", "LimitAngle", 0x53CB00, &CGeneral::LimitAngle);
+    ReversibleHooks::Install("CGeneral", "LimitRadianAngle", 0x53CB50, &CGeneral::LimitRadianAngle);
+    ReversibleHooks::Install("CGeneral", "GetRadianAngleBetweenPoints", 0x53CBE0, &CGeneral::GetRadianAngleBetweenPoints);
+    ReversibleHooks::Install("CGeneral", "GetATanOfXY", 0x53CC70, &CGeneral::GetATanOfXY);
+    ReversibleHooks::Install("CGeneral", "GetNodeHeadingFromVector", 0x53CDC0, &CGeneral::GetNodeHeadingFromVector);
+    ReversibleHooks::Install("CGeneral", "SolveQuadratic", 0x53CE30, &CGeneral::SolveQuadratic);
+    ReversibleHooks::Install("CGeneral", "GetAngleBetweenPoints", 0x53CEA0, &CGeneral::GetAngleBetweenPoints);
+    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, (unsigned int (*)(int, int)) & CGeneral::GetRandomNumberInRange);
+    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_float", 0x41BD90, (float (*)(float, float)) & CGeneral::GetRandomNumberInRange);
 }
 
-// Converted from cdecl float CGeneral::LimitAngle(float angle) 0x53CB00
+// 0x53CB00
 float CGeneral::LimitAngle(float angle) {
-    return ((float(__cdecl *)(float))0x53CB00)(angle);
+    while (angle >= 180.0f) {
+        angle -= 360.0f;
+    }
+
+    while (angle < -180.0f) {
+        angle += 360.0f;
+    }
+
+    return angle;
 }
 
-// Converted from cdecl float CGeneral::LimitRadianAngle(float angle) 0x53CB50
+// 0x53CB50
 float CGeneral::LimitRadianAngle(float angle) {
-    return ((float(__cdecl *)(float))0x53CB50)(angle);
+    float result = clamp(angle, -25.0f, 25.0f);
+
+    while (result >= PI) {
+        result -= 2 * PI;
+    }
+
+    while (result < -PI) {
+        result += 2 * PI;
+    }
+
+    return result;
 }
 
-// Converted from cdecl float CGeneral::GetRadianAngleBetweenPoints(float x1,float y1,float x2,float y2) 0x53CBE0
+// 0x53CBE0
 float CGeneral::GetRadianAngleBetweenPoints(float x1, float y1, float x2, float y2) {
-    return ((float(__cdecl *)(float, float, float, float))0x53CBE0)(x1, y1, x2, y2);
+    float x = x2 - x1;
+    float y = y2 - y1;
+
+    if (y == 0.0f)
+        y = 0.0001f;
+
+    if (x > 0.0f) {
+        if (y > 0.0f)
+            return PI - atan2(x / y, 1.0f);
+        else
+            return -atan2(x / y, 1.0f);
+    } else {
+        if (y > 0.0f)
+            return -(PI + atan2(x / y, 1.0f));
+        else
+            return -atan2(x / y, 1.0f);
+    }
 }
 
-// Converted from cdecl float CGeneral::GetATanOfXY(float x,float y) 0x53CC70
+// 0x53CC70
 float CGeneral::GetATanOfXY(float x, float y) {
-    return ((float(__cdecl *)(float, float))0x53CC70)(x, y);
+    if (x == 0.0f && y == 0.0f)
+        return 0.0f;
+
+    float xabs = abs(x);
+    float yabs = abs(y);
+
+    if (xabs < yabs) {
+        if (y > 0.0f) {
+            if (x > 0.0f)
+                return 0.5f * PI - atan2(x / y, 1.0f);
+            else
+                return 0.5f * PI + atan2(-x / y, 1.0f);
+        } else {
+            if (x > 0.0f)
+                return 1.5f * PI + atan2(x / -y, 1.0f);
+            else
+                return 1.5f * PI - atan2(-x / -y, 1.0f);
+        }
+    } else {
+        if (y > 0.0f) {
+            if (x > 0.0f)
+                return atan2(y / x, 1.0f);
+            else
+                return PI - atan2(y / -x, 1.0f);
+        } else {
+            if (x > 0.0f)
+                return 2.0f * PI - atan2(-y / x, 1.0f);
+            else
+                return PI + atan2(-y / -x, 1.0f);
+        }
+    }
 }
 
-// Converted from cdecl uchar CGeneral::GetNodeHeadingFromVector(float x,float y) 0x53CDC0
-unsigned char CGeneral::GetNodeHeadingFromVector(float x, float y) {
-    return ((unsigned char(__cdecl *)(float, float))0x53CDC0)(x, y);
+// 0x53CDC0
+unsigned int CGeneral::GetNodeHeadingFromVector(float x, float y) {
+    float angle = GetRadianAngleBetweenPoints(x, y, 0.0f, 0.0f);
+    if (angle < 0.0f)
+        angle += TWO_PI;
+
+    angle = RWDEG2RAD(22.5f) + TWO_PI - angle;
+
+    if (angle >= TWO_PI)
+        angle -= TWO_PI;
+
+    return (int)floor(angle / RWDEG2RAD(45.0f));
 }
 
-// Converted from cdecl bool CGeneral::SolveQuadratic(float a,float b,float c,float &x1,float &x2) 0x53CE30
+// 0x53CE30
 bool CGeneral::SolveQuadratic(float a, float b, float c, float& x1, float& x2) {
-    return ((bool(__cdecl *)(float, float, float, float&, float&))0x53CE30)(a, b, c, x1, x2);
+    float discriminant = b * b - 4.f * a * c;
+    if (discriminant < 0.0f)
+        return false;
+
+    float discriminantSqrt = sqrt(discriminant);
+    x2 = (-b + discriminantSqrt) / (2.0f * a);
+    x1 = (-b - discriminantSqrt) / (2.0f * a);
+    return true;
 }
 
-// Converted from cdecl float CGeneral::GetAngleBetweenPoints(float x1,float y1,float x2,float y2) 0x53CEA0
+// 0x53CEA0
 float CGeneral::GetAngleBetweenPoints(float x1, float y1, float x2, float y2) {
-    return ((float(__cdecl *)(float, float, float, float))0x53CEA0)(x1, y1, x2, y2);
+    return RWRAD2DEG(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
 }
 
-// Converted from cdecl uint CGeneral::GetRandomNumberInRange(int min, int max) 0x407180
+// 0x407180
 unsigned int CGeneral::GetRandomNumberInRange(int min, int max) {
-    return ((unsigned int(__cdecl *)(int, int))0x407180)(min, max);
+    // TODO: Use better RNG
+    return min + static_cast<int>(rand() * RAND_MAX_RECIPROCAL * (max - min + 1) );
 }
 
-// Converted from cdecl float CGeneral::GetRandomNumberInRange(float min,float max) 0x41BD90
+// 0x41BD90
 float CGeneral::GetRandomNumberInRange(float min, float max) {
-    return ((float(__cdecl *)(float, float))0x41BD90)(min, max);
-}
-
-// 0x50A970
-void CGeneral::CamShakeNoPos(CCamera *camera, float strength) {
-    ((void(__cdecl *)(CCamera*, float))0x50A970)(camera, strength);
+    // TODO: Use better RNG
+    return min + (max - min) * rand() * RAND_MAX_RECIPROCAL;
 }

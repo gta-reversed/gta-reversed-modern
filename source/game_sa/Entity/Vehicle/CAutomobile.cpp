@@ -1029,11 +1029,8 @@ bool CAutomobile::ProcessAI(unsigned int& extraHandlingFlags)
         if (playerSlot >= 0)
             ProcessControlInputs(playerSlot);
     }
-    else {
-        ePedType pedType = m_pDriver->m_nPedType;
-        if (pedType == PED_TYPE_PLAYER1 || pedType == PED_TYPE_PLAYER2)
-            ProcessControlInputs(static_cast<uint8_t>(pedType));
-    }
+    else if (m_pDriver->IsPlayer())
+        ProcessControlInputs(static_cast<uint8_t>(m_pDriver->m_nPedType));
 
     if (m_nStatus == STATUS_PLAYER) {
         if (!IsHeli()) {

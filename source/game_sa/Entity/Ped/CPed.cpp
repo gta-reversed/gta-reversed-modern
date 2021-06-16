@@ -308,9 +308,9 @@ void CPed::SetLookTimer(unsigned int time)
 }
 
 // 0x5DF8F0
-bool CPed::IsPlayer()
+bool CPed::IsPlayer() const
 {
-    return !m_nPedType || m_nPedType == PED_TYPE_PLAYER2;
+    return m_nPedType == PED_TYPE_PLAYER1 || m_nPedType == PED_TYPE_PLAYER2;
 }
 
 // Converted from thiscall void CPed::SetPedPositionInCar(void) 0x5DF910

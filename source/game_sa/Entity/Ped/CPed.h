@@ -421,7 +421,7 @@ public:
     float GetBikeRidingSkill();
     static void ShoulderBoneRotation(RpClump* clump);
     void SetLookTimer(unsigned int time);
-    bool IsPlayer();
+    bool IsPlayer() const;
     void SetPedPositionInCar();
     void RestoreHeadingRate();
     static void RestoreHeadingRateCB(CAnimBlendAssociation* association, void* data);
