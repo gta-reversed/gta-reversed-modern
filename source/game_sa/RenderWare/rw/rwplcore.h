@@ -3674,6 +3674,7 @@ MACRO_STOP
 #endif /* (! ( defined(RWDEBUG) || defined(RWSUPPRESSINLINE) )) */
 
 #define RWRAD2DEG(_x) ((_x) * (((RwReal)180)/(rwPI)))
+#define RWDEG2RAD(_x) ((_x) * (rwPI/((RwReal)180)))
 
 #if (!defined(rw4OVERPISQ))
 #define rw4OVERPISQ  ( ((RwReal)4) / ( rwPI * rwPI ))
