@@ -97,7 +97,7 @@ void CPlayerPedData::SetInitialState() {
     m_LastHSMissileTarget = nullptr;
     m_pCurrentProstitutePed = nullptr;
     m_pLastProstituteShagged = nullptr;
-    m_dwPlayerFlags |= 0x1010;
+    m_nPlayerFlags |= 0x1010;
     m_bLastHSMissileLOS = 0;
     m_nModelIndexOfLastBuildingShot = -1;
 }

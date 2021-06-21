@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CBike.h"
 #include "CAnimBlendAssociation.h"
 
@@ -35,13 +35,19 @@ public:
     float field_828;
     float m_fDistanceBetweenWheels;
     float m_fWheelsBalance;
-    unsigned char field_834;
-    char _pad[3];
+    uchar field_834;
+    char  _pad[3];
 
-    //funcs
+public:
+    static void InjectHooks();
 
     CBmx(int modelIndex, unsigned char createdBy);
- 
+
+    // VTABLE
+    void BlowUpCar(CEntity* damager, unsigned char bHideExplosion) override { /* NOP */ }; // 0x6C0560
+
+    // FUNCS
+
     void GetFrameOffset(float& arg0, float& arg1);
     void ProcessBunnyHop();
 

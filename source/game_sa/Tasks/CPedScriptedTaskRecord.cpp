@@ -4,23 +4,23 @@ CPedScriptedTaskRecordData(&CPedScriptedTaskRecord::ms_scriptedTasks)[TOTAL_SCRI
 
 void CPedScriptedTaskRecordData::InjectHooks()
 {
-    HookInstall(0x608330, &CPedScriptedTaskRecordData::Constructor);
-    HookInstall(0x608520, &CPedScriptedTaskRecordData::AssociateWithTask);
-    HookInstall(0x608500, &CPedScriptedTaskRecordData::AssociateWithEvent);
-    HookInstall(0x608390, (void(CPedScriptedTaskRecordData::*)(CPed*, std::int32_t, CEventScriptCommand*)) & CPedScriptedTaskRecordData::Set);
-    HookInstall(0x6083E0, (void(CPedScriptedTaskRecordData::*)(CPed*, std::int32_t, CTask*)) & CPedScriptedTaskRecordData::Set);
-    HookInstall(0x6084A0, &CPedScriptedTaskRecordData::SetAsGroupTask);
-    HookInstall(0x608440, &CPedScriptedTaskRecordData::SetAsAttractorScriptTask);
-    HookInstall(0x608350, &CPedScriptedTaskRecordData::Flush);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Constructor",0x608330, &CPedScriptedTaskRecordData::Constructor);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "AssociateWithTask",0x608520, &CPedScriptedTaskRecordData::AssociateWithTask);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "AssociateWithEvent",0x608500, &CPedScriptedTaskRecordData::AssociateWithEvent);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Set_CEventScriptCommand",0x608390, (void(CPedScriptedTaskRecordData::*)(CPed*, int, CEventScriptCommand*)) & CPedScriptedTaskRecordData::Set);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Set_CTask",0x6083E0, (void(CPedScriptedTaskRecordData::*)(CPed*, int, CTask*)) & CPedScriptedTaskRecordData::Set);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "SetAsGroupTask",0x6084A0, &CPedScriptedTaskRecordData::SetAsGroupTask);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "SetAsAttractorScriptTask",0x608440, &CPedScriptedTaskRecordData::SetAsAttractorScriptTask);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Flush",0x608350, &CPedScriptedTaskRecordData::Flush);
 }
 
 void CPedScriptedTaskRecord::InjectHooks()
 {
-    HookInstall(0x608580, &CPedScriptedTaskRecord::GetRecordAssociatedWithEvent);
-    HookInstall(0x608750, (eScriptedTaskStatus(*)(CPed*)) & CPedScriptedTaskRecord::GetStatus);
-    HookInstall(0x608710, (eScriptedTaskStatus(*)(CPed*, std::int32_t)) & CPedScriptedTaskRecord::GetStatus);
-    HookInstall(0x608540, &CPedScriptedTaskRecord::GetVacantSlot);
-    HookInstall(0x6085E0, &CPedScriptedTaskRecord::Process);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetRecordAssociatedWithEvent", 0x608580, &CPedScriptedTaskRecord::GetRecordAssociatedWithEvent);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetStatus_", 0x608750, (eScriptedTaskStatus(*)(CPed*)) & CPedScriptedTaskRecord::GetStatus);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetStatus_opcode", 0x608710, (eScriptedTaskStatus(*)(CPed*, int)) & CPedScriptedTaskRecord::GetStatus);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetVacantSlot", 0x608540, &CPedScriptedTaskRecord::GetVacantSlot);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Process", 0x6085E0, &CPedScriptedTaskRecord::Process);
 }
 
 CPedScriptedTaskRecordData::CPedScriptedTaskRecordData()
@@ -32,42 +32,31 @@ CPedScriptedTaskRecordData::CPedScriptedTaskRecordData()
     m_status = eScriptedTaskStatus::FLUSHED;
 }
 
+// 0x608330
 CPedScriptedTaskRecordData* CPedScriptedTaskRecordData::Constructor()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CPedScriptedTaskRecordData*, 0x608330, CPedScriptedTaskRecordData*>(this);
-#else
     this->CPedScriptedTaskRecordData::CPedScriptedTaskRecordData();
     return this;
-#endif
 }
 
+// 0x608520
 void CPedScriptedTaskRecordData::AssociateWithTask(CTask* task)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x608520, CPedScriptedTaskRecordData*, CTask*>(this, task);
-#else
     m_event = nullptr;
     m_task = task;
     m_status = eScriptedTaskStatus::TASK_ASSOCIATED;
-#endif
 }
 
+// 0x608500
 void CPedScriptedTaskRecordData::AssociateWithEvent(CEventScriptCommand* event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-        plugin::CallMethod<0x608500, CPedScriptedTaskRecordData*, CEventScriptCommand*>(this, event);
-#else
     m_event = event;
     m_status = eScriptedTaskStatus::EVENT_ASSOCIATED;
-#endif
 }
 
-void CPedScriptedTaskRecordData::Set(CPed* ped, std::int32_t opcode, CEventScriptCommand* event)
+// 0x608390
+void CPedScriptedTaskRecordData::Set(CPed* ped, int opcode, CEventScriptCommand* event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x608390, CPedScriptedTaskRecordData*, CPed*, std::int32_t, CEventScriptCommand*>(this, ped, opcode, event);
-#else
     Flush();
     m_ped = ped;
     ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
@@ -75,14 +64,11 @@ void CPedScriptedTaskRecordData::Set(CPed* ped, std::int32_t opcode, CEventScrip
     m_status = eScriptedTaskStatus::EVENT_ASSOCIATED;
     m_opcode = opcode;
     m_event = event;
-#endif
 }
 
-void CPedScriptedTaskRecordData::Set(CPed* ped, std::int32_t opcode, CTask* task)
+// 0x6083E0
+void CPedScriptedTaskRecordData::Set(CPed* ped, int opcode, CTask* task)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x6083E0, CPedScriptedTaskRecordData*, CPed*, std::int32_t, CTask*>(this, ped, opcode, task);
-#else
     Flush();
     m_ped = ped;
     ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
@@ -90,14 +76,11 @@ void CPedScriptedTaskRecordData::Set(CPed* ped, std::int32_t opcode, CTask* task
     m_event = nullptr;
     m_task = task;
     m_status = eScriptedTaskStatus::TASK_ASSOCIATED;
-#endif
 }
 
-void CPedScriptedTaskRecordData::SetAsGroupTask(CPed* ped, std::int32_t opcode, CTask* task)
+// 0x6084A0
+void CPedScriptedTaskRecordData::SetAsGroupTask(CPed* ped, int opcode, CTask* task)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x6084A0, CPedScriptedTaskRecordData*, CPed*, std::int32_t, CTask*>(this, ped, opcode, task);
-#else
     Flush();
     m_ped = ped;
     ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
@@ -105,14 +88,11 @@ void CPedScriptedTaskRecordData::SetAsGroupTask(CPed* ped, std::int32_t opcode, 
     m_event = nullptr;
     m_task = task;
     m_status = eScriptedTaskStatus::GROUP;
-#endif
 }
 
-void CPedScriptedTaskRecordData::SetAsAttractorScriptTask(CPed* ped, std::int32_t opcode, CTask* task)
+// 0x608440
+void CPedScriptedTaskRecordData::SetAsAttractorScriptTask(CPed* ped, int opcode, CTask* task)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x608440, CPedScriptedTaskRecordData*, CPed*, std::int32_t, CTask*>(this, ped, opcode, task);
-#else
     Flush();
     m_ped = ped;
     ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
@@ -120,14 +100,11 @@ void CPedScriptedTaskRecordData::SetAsAttractorScriptTask(CPed* ped, std::int32_
     m_event = nullptr;
     m_task = task;
     m_status = eScriptedTaskStatus::BRAIN;
-#endif
 }
 
+// 0x608350
 void CPedScriptedTaskRecordData::Flush()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x608350, CPedScriptedTaskRecordData*>(this);
-#else
     if (m_ped)
         m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
     m_ped = nullptr;
@@ -135,72 +112,53 @@ void CPedScriptedTaskRecordData::Flush()
     m_task = nullptr;
     m_status = eScriptedTaskStatus::FLUSHED;
     m_opcode = -1;
-#endif
 }
 
+// 0x608580
 CPedScriptedTaskRecordData* CPedScriptedTaskRecord::GetRecordAssociatedWithEvent(CEvent* event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<CPedScriptedTaskRecordData*, 0x608580, CEvent*>(event);
-#else
-    for (std::int32_t i = 0; i < TOTAL_SCRIPTED_TASKS; i++) {
-        CPedScriptedTaskRecordData& taskRecordData = ms_scriptedTasks[i];
+    for (auto& taskRecordData : ms_scriptedTasks) {
         if (taskRecordData.m_event == event)
             return &taskRecordData;
     }
     return nullptr;
-#endif
 }
 
+// 0x608750
 eScriptedTaskStatus CPedScriptedTaskRecord::GetStatus(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<eScriptedTaskStatus, 0x608750, CPed*>(ped);
-#else
-    for (std::int32_t i = 0; i < TOTAL_SCRIPTED_TASKS; i++) {
-        CPedScriptedTaskRecordData& taskRecordData = ms_scriptedTasks[i];
+    for (auto & taskRecordData : ms_scriptedTasks) {
         if (taskRecordData.m_ped == ped)
             return eScriptedTaskStatus::TASK_ASSOCIATED;
     }
     return eScriptedTaskStatus::EVENT_ASSOCIATED;
-#endif
 }
 
-eScriptedTaskStatus CPedScriptedTaskRecord::GetStatus(CPed* ped, std::int32_t opcode)
+// 0x608710
+eScriptedTaskStatus CPedScriptedTaskRecord::GetStatus(CPed* ped, int opcode)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<eScriptedTaskStatus, 0x608710, CPed*, std::int32_t>(ped, opcode);
-#else
-    for (std::int32_t i = 0; i < TOTAL_SCRIPTED_TASKS; i++) {
-        CPedScriptedTaskRecordData& taskRecordData = ms_scriptedTasks[i];
+    for (auto & taskRecordData : ms_scriptedTasks) {
         if ((opcode == -1 || taskRecordData.m_opcode == opcode) && taskRecordData.m_ped == ped)
             return taskRecordData.m_status;
     }
     return eScriptedTaskStatus::NONE;
-#endif
 }
 
-std::int32_t CPedScriptedTaskRecord::GetVacantSlot()
+// 0x608540
+int CPedScriptedTaskRecord::GetVacantSlot()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<std::int32_t, 0x608540>();
-#else
-    for (std::int32_t i = 0; i < TOTAL_SCRIPTED_TASKS; i++) {
+    for (int i = 0; i < TOTAL_SCRIPTED_TASKS; i++) {
         CPedScriptedTaskRecordData& taskRecordData = ms_scriptedTasks[i];
         if (!taskRecordData.m_event && !taskRecordData.m_task && !taskRecordData.m_ped)
             return i;
     }
     return -1;
-#endif
 }
 
+// 0x6085E0
 void CPedScriptedTaskRecord::Process()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x6085E0>();
-#else
-    for (std::int32_t i = 0; i < TOTAL_SCRIPTED_TASKS; i++) {
-        CPedScriptedTaskRecordData& taskRecordData = ms_scriptedTasks[i];
+    for (auto& taskRecordData : ms_scriptedTasks) {
         if (taskRecordData.m_event || taskRecordData.m_task || taskRecordData.m_ped) {
             if (!taskRecordData.m_ped) {
                 taskRecordData.Flush();
@@ -240,5 +198,4 @@ void CPedScriptedTaskRecord::Process()
             }
         }
     }
-#endif
 }

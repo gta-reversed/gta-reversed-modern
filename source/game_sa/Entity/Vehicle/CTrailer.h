@@ -50,13 +50,21 @@ public:
     static float& m_fTrailerSuspensionForce; // 1.5
     static float& m_fTrailerDampingForce; // 0.1
 
+public:
+    static void InjectHooks();
+
     CTrailer(int modelIndex, unsigned char createdBy);
 
+    bool SetTowLink(CVehicle* targetVehicle, bool arg1) override;
+
     void ScanForTowLink();
+
+private:
+    bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1);
 };
 
 VALIDATE_SIZE(CTrailer, 0x9F4);
 
-extern float& TRAILER_TOWED_MINRATIO; // 0.9
-extern float& RELINK_TRAILER_DIFF_LIMIT_XY; // 0.4
-extern float& RELINK_TRAILER_DIFF_LIMIT_Z; // 1.0
+extern float& TRAILER_TOWED_MINRATIO; // 0.9f 0x8D346C
+extern float& RELINK_TRAILER_DIFF_LIMIT_XY; // 0.4f // 0x8D3470
+extern float& RELINK_TRAILER_DIFF_LIMIT_Z; // 1.0f // 0x8D3474

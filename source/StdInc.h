@@ -589,7 +589,7 @@
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleIKLookAt.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleIKManager.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleInAir.h"
-#include "game_sa\Tasks\TaskTypes\CTaskSimpleJetpack.h"
+#include "game_sa\Tasks\TaskTypes\CTaskSimpleJetPack.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleNone.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimplePlayerOnFoot.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleRunAnim.h"

@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CAutomobile.h"
 
 enum ePlaneNodes {
@@ -74,7 +73,26 @@ private:
     char _pad[3];
 
 public:
+    static int& GenPlane_ModelIndex;
+    static unsigned int& GenPlane_Status;
+    static unsigned int& GenPlane_LastTimeGenerated;
+
+    static bool& GenPlane_Active;               // true
+    static float& ANDROM_COL_ANGLE_MULT;        // 0.00015
+    static float& HARRIER_NOZZLE_ROTATE_LIMIT;  // 5000.0
+    static float& HARRIER_NOZZLE_SWITCH_LIMIT;  // 3000.0
+    static float& PLANE_MIN_PROP_SPEED;         // 0.05
+    static float& PLANE_STD_PROP_SPEED;         // 0.18
+    static float& PLANE_MAX_PROP_SPEED;         // 0.34
+    static float& PLANE_ROC_PROP_SPEED;         // 0.01
+
+public:
+    static void InjectHooks();
+
     CPlane(int modelIndex, unsigned char createdBy);
+
+    void BlowUpCar(CEntity* damager, unsigned char bHideExplosion) override;
+    void Fix() override;
 
     void IsAlreadyFlying();
     void SetGearUp();
@@ -88,18 +106,9 @@ public:
     static void FindPlaneCreationCoors(CVector* arg0, CVector* arg1, float* arg2, float* arg3, bool arg4);
     static void DoPlaneGenerationAndRemoval();
 
-    static int& GenPlane_ModelIndex;
-    static unsigned int& GenPlane_Status;
-    static unsigned int& GenPlane_LastTimeGenerated;
-
-    static bool& GenPlane_Active;               // true
-    static float& ANDROM_COL_ANGLE_MULT;        // 0.00015
-    static float& HARRIER_NOZZLE_ROTATE_LIMIT;  // 5000.0
-    static float& HARRIER_NOZZLE_SWITCH_LIMIT;  // 3000.0
-    static float& PLANE_MIN_PROP_SPEED;         // 0.05
-    static float& PLANE_STD_PROP_SPEED;         // 0.18
-    static float& PLANE_MAX_PROP_SPEED;         // 0.34
-    static float& PLANE_ROC_PROP_SPEED;         // 0.01
+private:
+    void BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion);
+    void Fix_Reversed();
 };
 
 VALIDATE_SIZE(CPlane, 0xA04);

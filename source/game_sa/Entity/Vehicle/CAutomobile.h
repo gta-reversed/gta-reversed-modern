@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CVehicle.h"
 #include "CDoor.h"
 #include "CBouncingPanel.h"
@@ -180,7 +180,11 @@ public:
     static CVector &vecHunterGunPos; // { 0.0f, 4.8f, -1.3f }
     static CMatrix *matW2B;
 
+public:
     //vtable
+    void Fix() override;
+    bool SetTowLink(CVehicle* targetVehicle, bool arg1) override;
+
     void ProcessControl() override;
     CVector AddMovingCollisionSpeed(CVector& point) override;
 
@@ -191,6 +195,8 @@ public:
     virtual void ProcessSuspension();
 
 private:
+    void Fix_Reversed();
+    bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1);
     void ProcessControl_Reversed();
     CVector AddMovingCollisionSpeed_Reversed(CVector& point);
     bool ProcessAI_Reversed(unsigned int& extraHandlingFlags);
@@ -198,8 +204,8 @@ private:
     void ProcessFlyingCarStuff_Reversed();
     void DoHoverSuspensionRatios_Reversed();
     void ProcessSuspension_Reversed();
-public:
 
+public:
     static void InjectHooks();
     //funcs
     CAutomobile(int modelIndex, unsigned char createdBy, bool setupSuspensionLines);
@@ -278,7 +284,7 @@ public:
         return false;
     }
 
-    bool IsRealHeli(void) { return !!(m_pHandlingData->m_nModelFlags & VEHICLE_HANDLING_MODEL_IS_HELI); }
+    bool IsRealHeli() { return !!(m_pHandlingData->m_nModelFlags & VEHICLE_HANDLING_MODEL_IS_HELI); }
 
     // Find and save components ptrs (RwFrame) to m_modelNodes array
     void SetupModelNodes();

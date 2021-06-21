@@ -440,8 +440,8 @@ public:
     // get special ride anim data for bile or quad
     virtual CRideAnimData* GetRideAnimData() { return nullptr; }
     virtual void SetupSuspensionLines() { /* Do nothing */ }
-    virtual CVector AddMovingCollisionSpeed(CVector& point) { return CVector(); }
-    virtual void Fix() { /* Do nothing */ }
+    virtual CVector AddMovingCollisionSpeed(CVector& point) { return {}; }
+    virtual void Fix() { /* Do nothing */ } // 0x6D6390
     virtual void SetupDamageAfterLoad() { /* Do nothing */ }
     virtual void DoBurstAndSoftGroundRatios() { /* Do nothing */ }
     virtual float GetHeightAboveRoad();
@@ -452,7 +452,7 @@ public:
     virtual bool CanPedJumpOutCar(CPed* ped);
     virtual bool GetTowHitchPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh);
     virtual bool GetTowBarPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh);
-    virtual bool SetTowLink(CVehicle* arg0, bool arg1) { return false; }
+    virtual bool SetTowLink(CVehicle* targetVehicle, bool arg1) { return false; }
     virtual bool BreakTowLink() { return false; }
     virtual float FindWheelWidth(bool bRear) { return 0.25F; }
     virtual bool Save();

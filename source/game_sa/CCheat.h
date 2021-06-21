@@ -9,6 +9,7 @@
 #include "CVehicle.h"
 #include "eCheats.h"
 
+// NOTSA
 struct Cheat {
     DWORD installAddress;
     void* method;
@@ -19,11 +20,14 @@ struct Cheat {
 
 class CCheat {
 public:
-     static void(*(&m_aCheatFunctions)[92])();
-     static int(&m_aCheatHashKeys)[92]; // static int m_aCheatHashKeys[92]
-     static char(&m_CheatString)[30]; // static char m_CheatString[30]
-     static bool(&m_aCheatsActive)[92]; // static bool m_aCheatsActive[92]
-     static bool &m_bHasPlayerCheated;
+    static constexpr unsigned short CHEAT_STRING_SIZE = 30;
+    static constexpr unsigned short CHEAT_MIN_HASH_SIZE = 6;
+
+    static void (*(&m_aCheatFunctions)[TOTAL_CHEATS])();
+    static int (&m_aCheatHashKeys)[TOTAL_CHEATS];    // static int m_aCheatHashKeys[TOTAL_CHEATS]
+    static char (&m_CheatString)[CHEAT_STRING_SIZE]; // static char m_CheatString[CHEAT_STRING_SIZE]
+    static bool (&m_aCheatsActive)[TOTAL_CHEATS];    // static bool m_aCheatsActive[TOTAL_CHEATS]
+    static bool &m_bHasPlayerCheated;
 
 public:
      static void InjectHooks();
@@ -89,7 +93,7 @@ public:
      static void TankCheat();
      static void TankerCheat();
      static void TrashmasterCheat();
-     static void VehicleCheat(int vehicleModelId);
+     static CVehicle* VehicleCheat(eModelID vehicleModelId);
      static void VehicleSkillsCheat();
      static void VillagePeopleCheat();
      static void VortexCheat();
@@ -101,6 +105,5 @@ public:
      static void WeaponCheat3();
      static void WeaponSkillsCheat();
      static bool IsZoneStreamingAllowed();
+     static void EnableLegitimateCheat(eCheats cheat);
 };
-
-//#include "meta/meta.CCheat.h"

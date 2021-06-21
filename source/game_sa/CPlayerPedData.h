@@ -56,7 +56,7 @@ public:
             unsigned char m_bPlayerFlagsByte3;
             unsigned char m_bPlayerFlagsByte4;
         };
-        unsigned int m_dwPlayerFlags;
+        unsigned int m_nPlayerFlags;
     };
     unsigned int m_nPlayerGroup;
     unsigned int m_nAdrenalineEndTime;

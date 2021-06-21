@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CTaskManager.h"
 #include "CEventHandler.h"
 #include "CEventGroup.h"
@@ -14,14 +13,13 @@
 #include "CTaskTimer.h"
 #include "CEventScanner.h"
 #include "CTaskSimpleUseGun.h"
-#include "CTaskSimpleJetpack.h"
 #include "CTaskSimpleFight.h"
 #include "CTaskSimpleHoldEntity.h"
 #include "CTaskSimpleThrowProjectile.h"
 #include "CTaskSimpleSwim.h"
 #include "CTaskSimpleDuck.h"
 #include "CTaskSimpleClimb.h"
-#include "CTaskSimpleJetpack.h"
+#include "CTaskSimpleJetPack.h"
 #include "CTaskSimpleInAir.h"
 #include "CPedStuckChecker.h"
 #include "CVehicleScanner.h"
@@ -42,8 +40,8 @@ public:
     float          m_fDmRadius;
     int field_CC;
     char field_D0;
-    unsigned char  m_nEventId;
-    unsigned char  m_nEventPriority;
+    unsigned char m_nEventId;
+    unsigned char m_nEventPriority;
     char field_D3;
     CVehicleScanner m_vehicleScanner;
     CEntityScanner m_entityScanner;
@@ -60,71 +58,74 @@ public:
     int m_AnotherStaticCounter;
     int m_StaticCounter;
     CVector m_vecLastPedPosDuringDamageEntity;
-    class CEntity *m_apInterestingEntities[3];
-    
+    class CEntity* m_apInterestingEntities[3];
+
     static float& STEALTH_KILL_RANGE;
     static float& LIGHT_AI_LEVEL_MAX;
     static float& flt_8D2384;
     static float& flt_8D2388;
 
+public:
     static void InjectHooks();
 
+    static void* operator new(unsigned int size);
+    static void operator delete(void* object);
+
     CEntity** GetPedEntities();
-	void SetPedDecisionMakerType(int newType);
-	void SetPedDecisionMakerTypeInGroup(int newType);
-	void RestorePedDecisionMakerType();
-	void SetHearingRange(float range);
-	void SetSeeingRange(float range);
-	bool IsInHearingRange(CVector const& posn);
-	bool IsInSeeingRange(CVector const& posn);
-	bool FindRespectedFriendInInformRange();
-	bool IsRespondingToEvent(eEventType eventType);
-	void AddTaskPhysResponse(CTask* pTask, int unUsed);
-	void AddTaskEventResponseTemp(CTask* pTask, int unUsed);
-	void AddTaskEventResponseNonTemp(CTask* pTask, int unUsed);
-	void AddTaskPrimaryMaybeInGroup(CTask* pTask, bool bAffectsPed);
-	CTask* FindTaskByType(int taskId);
-	CTaskSimpleFight* GetTaskFighting();
-	CTaskSimpleUseGun* GetTaskUseGun();
-	CTaskSimpleThrowProjectile* GetTaskThrow();
+    void SetPedDecisionMakerType(int newType);
+    void SetPedDecisionMakerTypeInGroup(int newType);
+    void RestorePedDecisionMakerType();
+    void SetHearingRange(float range);
+    void SetSeeingRange(float range);
+    bool IsInHearingRange(CVector const& posn);
+    bool IsInSeeingRange(CVector const& posn);
+    bool FindRespectedFriendInInformRange();
+    bool IsRespondingToEvent(eEventType eventType);
+    void AddTaskPhysResponse(CTask* pTask, int unUsed);
+    void AddTaskEventResponseTemp(CTask* pTask, int unUsed);
+    void AddTaskEventResponseNonTemp(CTask* pTask, int unUsed);
+    void AddTaskPrimaryMaybeInGroup(CTask* pTask, bool bAffectsPed);
+    CTask* FindTaskByType(int taskId);
+    CTaskSimpleFight* GetTaskFighting();
+    CTaskSimpleUseGun* GetTaskUseGun();
+    CTaskSimpleThrowProjectile* GetTaskThrow();
     CTask* GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask);
-	CTaskSimpleSwim* GetTaskSwim();
-	CTaskSimpleDuck* GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask);
-	CTaskSimpleJetPack* GetTaskJetPack();
-	CTaskSimpleInAir* GetTaskInAir();
-	CTaskSimpleClimb* GetTaskClimb();
-	bool GetUsingParachute();
-	void SetTaskDuckSecondary(unsigned short nLengthOfDuck);
-	void ClearTaskDuckSecondary();
-	void ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryTasks);
-	void FlushImmediately(bool bSetPrimaryDefaultTask);
-	C2dEffect* GetEffectInUse();
-	void SetEffectInUse(C2dEffect* arg1);
-	void ProcessAfterProcCol();
-	void ProcessAfterPreRender();
-	void ProcessEventHandler();
-	bool IsFriendlyWith(CPed* pPed);
-	bool IsThreatenedBy(CPed const& ped);
-	bool Respects(CPed* pPed);
-	bool IsInACarOrEnteringOne();
-	static bool AreFriends(CPed* ped1, CPed* ped2);
-	bool IsPedGoingSomewhereOnFoot();
-	int GetMoveStateFromGoToTask();
-	void FlushIntelligence();
-	bool TestForStealthKill(CPed* pTarget, bool bFullTest);
-	void RecordEventForScript(int EventID, int EventPriority);
-	bool HasInterestingEntites();
-	bool IsInterestingEntity(CEntity* pEntity);
-	void LookAtInterestingEntities();
-	void RemoveAllInterestingEntities();
-	bool IsPedGoingForCarDoor();
-	float CanSeeEntityWithLights(CEntity* pEntity, int unUsed);
-	void ProcessStaticCounter();
-	void ProcessFirst();
-	void Process();
+    CTaskSimpleSwim* GetTaskSwim();
+    CTaskSimpleDuck* GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask);
+    CTaskSimpleJetPack* GetTaskJetPack();
+    CTaskSimpleInAir* GetTaskInAir();
+    CTaskSimpleClimb* GetTaskClimb();
+    bool GetUsingParachute();
+    void SetTaskDuckSecondary(unsigned short nLengthOfDuck);
+    void ClearTaskDuckSecondary();
+    void ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryTasks);
+    void FlushImmediately(bool bSetPrimaryDefaultTask);
+    C2dEffect* GetEffectInUse();
+    void SetEffectInUse(C2dEffect* effect);
+    void ProcessAfterProcCol();
+    void ProcessAfterPreRender();
+    void ProcessEventHandler();
+    bool IsFriendlyWith(CPed* pPed);
+    bool IsThreatenedBy(CPed const& ped);
+    bool Respects(CPed* pPed);
+    bool IsInACarOrEnteringOne();
+    static bool AreFriends(CPed* ped1, CPed* ped2);
+    bool IsPedGoingSomewhereOnFoot();
+    int GetMoveStateFromGoToTask();
+    void FlushIntelligence();
+    bool TestForStealthKill(CPed* pTarget, bool bFullTest);
+    void RecordEventForScript(int EventID, int EventPriority);
+    bool HasInterestingEntites();
+    bool IsInterestingEntity(CEntity* pEntity);
+    void LookAtInterestingEntities();
+    void RemoveAllInterestingEntities();
+    bool IsPedGoingForCarDoor();
+    float CanSeeEntityWithLights(CEntity* pEntity, int unUsed);
+    void ProcessStaticCounter();
+    void ProcessFirst();
+    void Process();
     CTask* GetActivePrimaryTask();
     float GetPedFOVRange();
-	static void operator delete(void* arg1);
 };
 
 VALIDATE_SIZE(CPedIntelligence, 0x294);
