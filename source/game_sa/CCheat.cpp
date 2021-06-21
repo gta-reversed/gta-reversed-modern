@@ -133,10 +133,11 @@ void CCheat::AddToCheatString(char LastPressedKey) {
         return;
     }
 
-    for (auto i = 28; i >= 0; --i) {
+    for (auto i = CHEAT_STRING_SIZE - 1 - 1; i >= 1; --i) {
         m_CheatString[i] = m_CheatString[i - 1];
     }
     m_CheatString[0] = LastPressedKey;
+    m_CheatString[CHEAT_STRING_SIZE - 1] = 0;
 
     unsigned int strLen = strlen(m_CheatString);
     if (strLen < CHEAT_MIN_HASH_SIZE) {
