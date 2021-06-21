@@ -6,20 +6,20 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVector.h"
 
-class  CCrimeBeingQd {
+#include "eCrimeType.h"
+
+
+class CCrimeBeingQd {
 public:
-    unsigned int m_nCrimeType; // see eCrimeType
+    eCrimeType   m_nCrimeType;
     unsigned int m_nCrimeID;
     unsigned int m_nTimeOfQing;
     CVector      m_vecCoors;
     bool         m_bAlreadyReported;
     bool         m_bPoliceDontReallyCare;
-private:
-    char _pad1A[2];
-public:
+    char         _pad1A[2];
 };
 
 VALIDATE_SIZE(CCrimeBeingQd, 0x1C);

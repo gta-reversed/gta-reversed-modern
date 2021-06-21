@@ -11,6 +11,7 @@
 */
 
 enum eStats : unsigned short {
+    // INT
     STAT_PROGRESS_MADE = 0,
     STAT_TOTAL_PROGRESS = 1,
     STAT_FURTHEST_HOOP = 2,
@@ -93,6 +94,8 @@ enum eStats : unsigned short {
     STAT_RIFLE_SKILL = 79,
     STAT_APPEARANCE = 80,
     STAT_GAMBLING = 81,
+
+    // FLOAT
     STAT_PEOPLE_WASTED_BY_OTHERS = 120,
     STAT_PEOPLE_YOUVE_WASTED = 121,
     STAT_ROAD_VEHICLES_DESTROYED = 122,

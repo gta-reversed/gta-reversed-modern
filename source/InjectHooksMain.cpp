@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-
+#include "CSimpleVariablesSaveStructure.h"
 #include "CAEAudioChannel.h"
 #include "CAEAudioEnvironment.h"
 #include "CAEAudioHardware.h"
@@ -223,7 +223,6 @@ void InjectHooksMain()
     CPlayerPed::InjectHooks();
     CStats::InjectHooks();
     CCarCtrl::InjectHooks();
-    CText::InjectHooks();
     CTheZones::InjectHooks();
     CMenuManager::InjectHooks();
     CSprite2d::InjectHooks();
@@ -302,6 +301,8 @@ void InjectHooksMain()
     CTaskSimpleRunAnim::InjectHooks();
     CTaskComplexUseSwatRope::InjectHooks();
     CStuntJumpManager::InjectHooks();
+    CLocalisation::InjectHooks();
+    CSimpleVariablesSaveStructure::InjectHooks();
     CPedGeometryAnalyser::InjectHooks();
     CPlane::InjectHooks();
     CHeli::InjectHooks();

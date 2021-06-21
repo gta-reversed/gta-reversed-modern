@@ -20,13 +20,14 @@ public:
 public:
     static void InjectHooks();
 
-    static void Render();
-    static void PrintCreditText(float scaleX, float scaleY, const char* text, float& position, float currentOffset, bool highlighted);
-    static void PrintCreditSpace(float spaceSize, unsigned int& position);
-    static void RenderCredits();
     static void Start();
     static void Stop();
 
+    static void Render();
+    static void PrintCreditText(float scaleX, float scaleY, const char* text, float& position, float currentOffset, bool highlighted);
+    static inline void PrintCreditSpace(float spaceSize, float& position);
+    static void RenderCredits();
+
     //NOTSA
-    static void PrintCreditTextHelper(char *textKey, float scale, bool highlighted);
+    static inline void PrintCreditTextHelper(const char* textKey, float scale, bool highlighted);
 };

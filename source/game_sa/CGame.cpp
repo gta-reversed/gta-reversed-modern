@@ -11,6 +11,9 @@ RwMatrix*& CGame::m_pWorkingMatrix1 = *reinterpret_cast<RwMatrix**>(0xB72920);
 RwMatrix*& CGame::m_pWorkingMatrix2 = *reinterpret_cast<RwMatrix**>(0xB72924);
 int& gameTxdSlot = *reinterpret_cast<int*>(0xB728E8);
 
+bool& gbLARiots = *(bool*)0xB72958;
+bool& gbLARiots_NoPoliceCars = *(bool*)0xB72959;
+
 void CGame::InjectHooks() {
 //    ReversibleHooks::Install("CGame", "CanSeeOutSideFromCurrArea", 0x53C4A0, &CGame::CanSeeOutSideFromCurrArea);
 //    ReversibleHooks::Install("CGame", "CanSeeWaterFromCurrArea", 0x53C4B0, &CGame::CanSeeWaterFromCurrArea);
@@ -20,7 +23,7 @@ void CGame::InjectHooks() {
     ReversibleHooks::Install("CGame", "Initialise", 0x53BC80, &CGame::Initialise);
 //    ReversibleHooks::Install("CGame", "InitialiseCoreDataAfterRW", 0x5BFA90, &CGame::InitialiseCoreDataAfterRW);
 //    ReversibleHooks::Install("CGame", "InitialiseEssentialsAfterRW", 0x5BA160, &CGame::InitialiseEssentialsAfterRW);
-//    ReversibleHooks::Install("CGame", "InitialiseOnceBeforeRW", 0x53BB50, &CGame::InitialiseOnceBeforeRW);
+    ReversibleHooks::Install("CGame", "InitialiseOnceBeforeRW", 0x53BB50, &CGame::InitialiseOnceBeforeRW);
 //    ReversibleHooks::Install("CGame", "InitialiseRenderWare", 0x5BD600, &CGame::InitialiseRenderWare);
 //    ReversibleHooks::Install("CGame", "InitialiseWhenRestarting", 0x53C680, &CGame::InitialiseWhenRestarting);
 //    ReversibleHooks::Install("CGame", "Process", 0x53BEE0, &CGame::Process);
@@ -300,11 +303,24 @@ void CGame::InitialiseCoreDataAfterRW() {
 // 0x5BA160
 bool CGame::InitialiseEssentialsAfterRW() {
     return plugin::CallAndReturn<bool, 0x5BA160>();
+
+    /*
+    TheText.Load(false);
+    if (!CCarFXRenderer::Initialise() || !CGrassRenderer::Initialise() || !CCustomBuildingRenderer::Initialise())
+        return false;
+
+    CTimer::Initialise();
+    return true;
+    */
 }
 
 // 0x53BB50
 void CGame::InitialiseOnceBeforeRW() {
-    plugin::Call<0x53BB50>();
+    CMemoryMgr::Init();
+    CLocalisation::Initialise();
+    CFileMgr::Initialise();
+    CdStreamInit(5);
+    CPad::Initialise();
 }
 
 // 0x5BD600

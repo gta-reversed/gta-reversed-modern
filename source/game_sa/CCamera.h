@@ -488,4 +488,7 @@ VALIDATE_SIZE(CCamera, 0xD78);
 
 extern CCamera &TheCamera;
 extern bool &gbModelViewer;
+extern char& gbCineyCamMessageDisplayed;
+
 static void CamShakeNoPos(CCamera* camera, float strength);
+

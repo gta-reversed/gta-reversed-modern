@@ -178,7 +178,7 @@ void CStuntJumpManager::Update() {
             time = m_iTimer;
         }
 
-        m_iTimer = int(CTimer::ms_fTimeStep * flt_858B38 * flt_858C4C) + time;
+        m_iTimer = int(CTimer::ms_fTimeStep * 0.02f * 1000.0f) + time;
         if (m_iTimer > 1000 && time <= 1000) {
             auto vehicle = FindPlayerVehicle(-1, false);
             if (vehicle) {
@@ -191,7 +191,7 @@ void CStuntJumpManager::Update() {
         break;
     }
     case eJumpState::END_POINT_INTERSECTED: {
-        m_iTimer += int(CTimer::ms_fTimeStep * flt_858B38 * flt_858C4C);
+        m_iTimer += int(CTimer::ms_fTimeStep * 0.02f * 1000.0f);
         if (m_iTimer < 300)
             return;
 

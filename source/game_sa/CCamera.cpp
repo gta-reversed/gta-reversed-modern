@@ -9,6 +9,7 @@ bool &CCamera::bDidWeProcessAnyCinemaCam = *reinterpret_cast<bool *>(0xB6EC2D);
 
 CCamera &TheCamera = *reinterpret_cast<CCamera *>(0xB6F028);
 bool& gbModelViewer = *reinterpret_cast<bool*>(0xBA6728);
+char& gbCineyCamMessageDisplayed = *(char*)0x8CC381; // 2
 
 CCam& CCamera::GetActiveCamera() {
     return TheCamera.m_aCams[TheCamera.m_nActiveCam];

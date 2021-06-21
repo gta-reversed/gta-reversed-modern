@@ -50,6 +50,8 @@ public:
 };
 
 extern int &gameTxdSlot;
+extern bool& gbLARiots;
+extern bool& gbLARiots_NoPoliceCars;
 
 bool MoveMem(void **pMem);
 bool MoveColModelMemory(CColModel &colModel, bool a2);
@@ -58,5 +60,3 @@ bool TidyUpModelInfo2(CEntity *entity, bool a2);
 void ValidateVersion();
 void D3DDeviceRestoreCallback();
 bool DoHaspChecks();
-
-//#include "meta/meta.CGame.h"
