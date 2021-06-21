@@ -20,7 +20,29 @@ extern float& PLANE_DAMAGE_SCALE_MASS = *(float*)0x8D33E8;         // 10000.0
 extern float& PLANE_DAMAGE_DESTROY_THRESHHOLD = *(float*)0x8D33EC; // 5000.0
 extern CVector& vecRCBaronGunPos = *(CVector*)0x8D33F0;            // <0.0, 0.45, 0.0>
 
+void CPlane::InjectHooks() {
+
+}
+
 CPlane::CPlane(int modelIndex, unsigned char createdBy) : CAutomobile(plugin::dummy)
 {
     plugin::CallMethod<0x6C8E20, CPlane*, int, unsigned char>(this, modelIndex, createdBy);
+}
+
+// 0x6CCCF0
+void CPlane::BlowUpCar(CEntity* damager, unsigned char bHideExplosion) {
+    return BlowUpCar_Reversed(damager, bHideExplosion);
+}
+
+void CPlane::BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion) {
+    plugin::CallMethod<0x6CCCF0, CPlane*, CEntity*, unsigned char>(this, damager, bHideExplosion);
+}
+
+// 0x6CABB0
+void CPlane::Fix() {
+    Fix_Reversed();
+}
+
+void CPlane::Fix_Reversed() {
+    plugin::CallMethod<0x6CABB0, CPlane*>(this);
 }

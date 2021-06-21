@@ -3229,7 +3229,16 @@ void CRunningScript::ProcessCommands1300To1399(int commandId) {
     case COMMAND_IS_CHAR_STUCK: // 0x571
         break;
     case COMMAND_SET_ALL_TAXIS_HAVE_NITRO: // 0x572
+    {
+        /*
+        CollectParameters(1);
+        if (ScriptParams[0])
+            CCheat::EnableLegitimateCheat(CHEAT_ALL_TAXIS_NITRO);
+        else
+            CCheat::m_aCheatsActive[CHEAT_ALL_TAXIS_NITRO] = false;
+        */
         break;
+    }
     case COMMAND_SET_CHAR_STOP_SHOOT_DONT_SEEK_ENTITY: // 0x573
         break;
     case COMMAND_FREEZE_CAR_POSITION_AND_DONT_LOAD_COLLISION: // 0x574
@@ -5787,7 +5796,16 @@ void CRunningScript::ProcessCommands2600To2699(int commandId) {
     case COMMAND_SET_UP_CONVERSATION_END_NODE_WITH_SCRIPTED_SPEECH: // 0xA3C
         break;
     case COMMAND_ACTIVATE_PIMP_CHEAT: // 0xA3D
+    {
+        /*
+        CollectParameters(1);
+        if (ScriptParams[0])
+            CCheat::EnableLegitimateCheat(CHEAT_PROSTITUTES_PAY_YOU);
+        else
+            CCheat::m_aCheatsActive[CHEAT_PROSTITUTES_PAY_YOU] = false;
+        */
         break;
+    }
     case COMMAND_GET_RANDOM_CHAR_IN_AREA_OFFSET_NO_SAVE: // 0xA3E
         break;
     case COMMAND_SET_SCRIPT_COOP_GAME: // 0xA3F

@@ -13,6 +13,10 @@ unsigned int& CHeli::NumberOfSearchLights = *(unsigned int*)0xC1C96C;
 bool& CHeli::bHeliControlsCheat = *(bool*)0xC1C970;
 tHeliLight* CHeli::HeliSearchLights = (tHeliLight*)0xC1C990;
 
+void CHeli::InjectHooks() {
+
+}
+
 // Converted from thiscall void CHeli::CHeli(int modelIndex,uchar createdBy) 0x6C4190
 CHeli::CHeli(int modelIndex, unsigned char createdBy) : CAutomobile(plugin::dummy) {
     plugin::CallMethod<0x6C4190, CHeli*, int, unsigned char>(this, modelIndex, createdBy);
@@ -28,9 +32,9 @@ void CHeli::AddHeliSearchLight(CVector const& origin, CVector const& target, flo
     ((void(__cdecl*)(CVector const&, CVector const&, float, float, unsigned int, unsigned char, unsigned char))0x6C45B0)(origin, target, targetRadius, power, coronaIndex, unknownFlag, drawShadow);
 }
 
-// Converted from thiscall void CHeli::PreRenderAlways(void) 0x6C4640
+// 0x6C4640
 void CHeli::PreRenderAlways() {
-    ((void(__thiscall*)(CHeli*))0x6C4640)(this);
+    // NOP
 }
 
 // Converted from cdecl void CHeli::Pre_SearchLightCone(void) 0x6C4650
@@ -43,9 +47,9 @@ void CHeli::Post_SearchLightCone() {
     ((void(__cdecl*)())0x6C46E0)();
 }
 
-// Converted from cdecl void CHeli::SpecialHeliPreRender(void) 0x6C4750
+// 0x6C4750
 void CHeli::SpecialHeliPreRender() {
-    ((void(__cdecl*)())0x6C4750)();
+    // NOP
 }
 
 // Converted from thiscall CVector CHeli::FindSwatPositionRelativeToHeli(int swatNumber) 0x6C4760
@@ -55,9 +59,9 @@ CVector CHeli::FindSwatPositionRelativeToHeli(int swatNumber) {
     return result;
 }
 
-// Converted from cdecl void CHeli::SwitchPoliceHelis(bool enable) 0x6C4800
+// 0x6C4800
 void CHeli::SwitchPoliceHelis(bool enable) {
-    ((void(__cdecl*)(bool))0x6C4800)(enable);
+    bPoliceHelisAllowed = enable;
 }
 
 // Converted from cdecl void CHeli::SearchLightCone(int coronaIndex,CVector origin,CVector target,float targetRadius,float power,uchar unknownFlag,uchar drawShadow,CVector* ,CVector* ,CVector* ,bool,float baseRadius) 0x6C58E0
@@ -88,4 +92,22 @@ void CHeli::UpdateHelis() {
 // Converted from cdecl void CHeli::RenderAllHeliSearchLights(void) 0x6C7C50
 void CHeli::RenderAllHeliSearchLights() {
     ((void(__cdecl*)())0x6C7C50)();
+}
+
+// 0x6C6D30
+void CHeli::BlowUpCar(CEntity* damager, unsigned char bHideExplosion) {
+    return BlowUpCar_Reversed(damager, bHideExplosion);
+}
+
+void CHeli::BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion) {
+    plugin::CallMethod<0x6C6D30, CHeli*, CEntity*, unsigned char>(this, damager, bHideExplosion);
+}
+
+// 0x6C4530
+void CHeli::Fix() {
+    Fix_Reversed();
+}
+
+void CHeli::Fix_Reversed() {
+    plugin::CallMethod<0x6C4530, CHeli*>(this);
 }

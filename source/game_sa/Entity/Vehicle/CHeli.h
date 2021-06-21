@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CAutomobile.h"
 
 enum eHeliNodes {
@@ -38,12 +37,12 @@ enum eHeliNodes {
 struct tHeliLight {
     CVector m_vecOrigin;
     CVector m_vecTarget;
-    float m_fTargetRadius;
-    float m_fPower;
-    int m_nCoronaIndex;
-    bool field_24; // unknown flag
-    bool m_bDrawShadow;
-    char _pad[2];
+    float   m_fTargetRadius;
+    float   m_fPower;
+    int     m_nCoronaIndex;
+    bool    field_24; // unknown flag
+    bool    m_bDrawShadow;
+    char    _pad[2];
     CVector field_28[3];
 };
 
@@ -54,36 +53,36 @@ protected:
     CHeli(plugin::dummy_func_t) : CAutomobile(plugin::dummy) {}
 public:
     char               m_nHeliFlags;
-    char _pad1[3];
+    char               _pad1[3];
     float              m_fLeftRightSkid;
     float              m_fSteeringUpDown;
     float              m_fSteeringLeftRight;
     float              m_fAccelerationBreakStatus;
-    int field_99C;
+    int                field_99C;
     int                m_fRotorZ;
     int                m_fSecondRotorZ;
     float              m_fMaxAltitude;
-    float field_9AC;
+    float              field_9AC;
     float              m_fMinAltitude;
-    int field_9B4;
-    char field_9B8;
+    int                field_9B4;
+    char               field_9B8;
     char               m_nNumSwatOccupants;
     char               m_anSwatIDs[4];
-    char _pad2[2];
-    int field_9C0[4];
-    int field_9D0;
-    class FxSystem_c **m_pParticlesList;
-    char field_9D8[24];
-    int field_9F0;
+    char               _pad2[2];
+    int                field_9C0[4];
+    int                field_9D0;
+    class FxSystem_c** m_pParticlesList;
+    char               field_9D8[24];
+    int                field_9F0;
     CVector            m_vecSearchLightTarget;
     float              m_fSearchLightIntensity;
-    int field_A04;
-    int field_A08;
-    class FxSystem_c **m_ppGunflashFx;
+    int                field_A04;
+    int                field_A08;
+    class FxSystem_c** m_ppGunflashFx;
     char               m_nFiringMultiplier;
     bool               m_bSearchLightEnabled;
-    char _pad3[2];
-    float field_A14;
+    char               _pad3[2];
+    float              field_A14;
 
     static bool& bPoliceHelisAllowed; // 1
     static unsigned int& TestForNewRandomHelisTimer;
@@ -92,9 +91,15 @@ public:
     static bool& bHeliControlsCheat;
     static tHeliLight* HeliSearchLights; // tHeliLight CHeli::HeliSearchLights[4]
 
+public:
+    static void InjectHooks();
+
     CHeli(int modelIndex, unsigned char createdBy);
 
-    void PreRenderAlways(); // dummy function
+    void BlowUpCar(CEntity* damager, unsigned char bHideExplosion) override;
+    void Fix() override;
+
+    void PreRenderAlways();
     CVector FindSwatPositionRelativeToHeli(int swatNumber);
     bool SendDownSwat();
 
@@ -111,6 +116,10 @@ public:
     static bool TestSniperCollision(CVector* origin, CVector* target);
     static void UpdateHelis();
     static void RenderAllHeliSearchLights();
+
+private:
+    void BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion);
+    void Fix_Reversed();
 };
 
 VALIDATE_SIZE(CHeli, 0xA18);

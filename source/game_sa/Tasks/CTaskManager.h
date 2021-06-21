@@ -6,10 +6,9 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CTask.h"
 
-enum ePrimaryTasks //array indexes
+enum ePrimaryTasks // array indexes
 {
     TASK_PRIMARY_PHYSICAL_RESPONSE = 0,
     TASK_PRIMARY_EVENT_RESPONSE_TEMP,
@@ -19,9 +18,9 @@ enum ePrimaryTasks //array indexes
     TASK_PRIMARY_MAX
 };
 
-enum eSecondaryTasks //array indexes
+enum eSecondaryTasks // array indexes
 {
-    TASK_SECONDARY_ATTACK = 0,                // want duck to be after attack
+    TASK_SECONDARY_ATTACK = 0,              // want duck to be after attack
     TASK_SECONDARY_DUCK,                    // because attack controls ducking movement
     TASK_SECONDARY_SAY,
     TASK_SECONDARY_FACIAL_COMPLEX,
@@ -32,12 +31,13 @@ enum eSecondaryTasks //array indexes
 
 class CTaskComplex;
 
-class  CTaskManager {
+class CTaskManager {
 public:
-    CTask *m_aPrimaryTasks[TASK_PRIMARY_MAX];
-    CTask *m_aSecondaryTasks[TASK_SECONDARY_MAX];
-    class CPed *m_pPed;
-    
+    CTask* m_aPrimaryTasks[TASK_PRIMARY_MAX];
+    CTask* m_aSecondaryTasks[TASK_SECONDARY_MAX];
+    class CPed* m_pPed;
+
+public:
     static void InjectHooks();
 
     CTaskManager* Constructor(CPed* ped);
@@ -56,7 +56,7 @@ public:
     CTaskSimple* GetSimplestTask(int taskIndex);
     void AddSubTasks(CTaskComplex* task);
     void ParentsControlChildren(CTaskComplex* pTask);
-    void SetTask(CTask* task, int taskIndex,int arg2 = 0);
+    void SetTask(CTask* task, int taskIndex, int arg2 = 0);
     void SetTaskSecondary(CTask* task, int taskIndex);
     void ClearTaskEventResponse();
     void ManageTasks();

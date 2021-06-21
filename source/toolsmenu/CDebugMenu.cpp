@@ -512,7 +512,7 @@ void CDebugMenu::ProcessVehicleTool() {
             selectedId = id;
         }
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && selectedId != -1)
-            CCheat::VehicleCheat(selectedId);
+            CCheat::VehicleCheat(static_cast<eModelID>(selectedId));
         ImGui::NextColumn();
         ImGui::PopID();
     }
@@ -522,7 +522,7 @@ void CDebugMenu::ProcessVehicleTool() {
 
     ImGui::SetCursorPosX(117);
     if (ImGui::Button("SPAWN VEHICLE", ImVec2(250, 0)) && selectedId != -1) {
-        CCheat::VehicleCheat(selectedId);
+        CCheat::VehicleCheat(static_cast<eModelID>(selectedId));
     }
 }
 
@@ -863,6 +863,7 @@ static void DebugCode() {
     CPad* pad = CPad::GetPad(0);
     if (pad->IsStandardKeyJustDown('1')) {
         printf("");
+        CCheat::TankerCheat();
     }
     if (pad->IsStandardKeyJustDown('2')) {
         printf("");

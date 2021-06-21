@@ -6,21 +6,23 @@
 */
 #include "StdInc.h"
 #include "CWaterCannons.h"
+#include "CAutomobile.h"
+
 
 bool& CAutomobile::m_sAllTaxiLights = *(bool*)0xC1BFD0;
 CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;
 CMatrix* CAutomobile::matW2B = (CMatrix*)0xC1C220;
 CColPoint* aAutomobileColPoints = (CColPoint*)0xC1BFF8;
 
-const CVector PACKER_COL_PIVOT = CVector(0.0, 0.0, 2.0);
-const float CAR_BALANCE_MULT = 0.08f;
+const CVector PACKER_COL_PIVOT = CVector(0.0, 0.0, 2.0); // 0x8D3174
+const float CAR_BALANCE_MULT = 0.08f; // 0x8D3138
 
 static const CVector TANK_SHOT_DOOM_POS(0.0f, -1.394f, 2.296f);
 static const CVector TANK_SHOT_DOOM_DEFAULT_TARGET(0.0f, 2.95f, 2.97f);
 static const CVector TANK_SHOT_DOOM_DISTANCE_TO_DEFAULT_TARGET = TANK_SHOT_DOOM_DEFAULT_TARGET - TANK_SHOT_DOOM_POS;
 
 static const uint32_t TIGER_GUNFIRE_RATE = 60;
-static const CVector TIGER_GUN_POS(0.0f, 0.5f, 0.2f);
+static const CVector TIGER_GUN_POS(0.0f, 0.5f, 0.2f); // 0xC1C208
 
 void CAutomobile::InjectHooks()
 {
@@ -47,6 +49,15 @@ void CAutomobile::InjectHooks()
 
 CAutomobile::CAutomobile(int modelIndex, unsigned char createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy) {
     plugin::CallMethod<0x6B0A90, CAutomobile*, int, unsigned char, bool>(this, modelIndex, createdBy, setupSuspensionLines);
+}
+
+// 0x6B4410
+bool CAutomobile::SetTowLink(CVehicle* targetVehicle, bool arg1) {
+    return SetTowLink_Reversed(targetVehicle, arg1);
+}
+
+bool CAutomobile::SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1) {
+    return plugin::CallMethodAndReturn<bool, 0x6B4410, CAutomobile*, CVehicle*, bool>(this, targetVehicle, arg1);
 }
 
 void CAutomobile::ProcessControl()
@@ -3067,6 +3078,15 @@ void CAutomobile::FireTruckControl(CFire* fire)
 bool CAutomobile::HasCarStoppedBecauseOfLight()
 {
     return ((bool(__thiscall*)(CAutomobile*))0x44D520)(this);
+}
+
+// 0x6A3440
+void CAutomobile::Fix() {
+    Fix_Reversed();
+}
+
+void CAutomobile::Fix_Reversed() {
+    plugin::CallMethod<0x6A3440, CAutomobile*>(this);
 }
 
 // Converted from cdecl RwObject* GetCurrentAtomicObjectCB(RwObject *object, void *data) 0x6A0750

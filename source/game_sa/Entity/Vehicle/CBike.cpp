@@ -5,11 +5,16 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-
+#include "CBike.h"
 
 void CBike::InjectHooks()
 {
     ReversibleHooks::Install("CBike", "ProcessBuoyancy", 0x6B5FB0, &CBike::ProcessBuoyancy);
+}
+
+// Converted from thiscall void CBike::CBike(int modelIndex,uchar createdBy) 0x6BF430
+CBike::CBike(int modelIndex, unsigned char createdBy) : CVehicle(plugin::dummy) {
+    plugin::CallMethod<0x6BF430, CBike*, int, unsigned char>(this, modelIndex, createdBy);
 }
 
 // Converted from void CBike::ProcessAI(uint &) 0x0
@@ -22,9 +27,9 @@ void CBike::SetupModelNodes() {
     ((void(__thiscall*)(CBike*))0x6B5960)(this);
 }
 
-// Converted from thiscall void CBike::dmgDrawCarCollidingParticles(CVector const& position,float power,eWeaponType weaponType) 0x6B5A00
+// 0x6B5A00
 void CBike::dmgDrawCarCollidingParticles(CVector const& position, float power, eWeaponType weaponType) {
-    ((void(__thiscall*)(CBike*, CVector const&, float, eWeaponType))0x6B5A00)(this, position, power, weaponType);
+    // NOP
 }
 
 // Converted from cdecl bool CBike::DamageKnockOffRider(CVehicle *,float,ushort,CEntity *,CVector &,CVector &) 0x6B5A10
@@ -32,9 +37,10 @@ bool CBike::DamageKnockOffRider(CVehicle* arg0, float arg1, unsigned short arg2,
     return ((bool(__cdecl*)(CVehicle*, float, unsigned short, CEntity*, CVector&, CVector&))0x6B5A10)(arg0, arg1, arg2, arg3, arg4, arg5);
 }
 
-// Converted from thiscall CPed* CBike::KnockOffRider(eWeaponType,uchar,CPed *,bool) 0x6B5F40
+// dummy function
+// 0x6B5F40
 CPed* CBike::KnockOffRider(eWeaponType arg0, unsigned char arg1, CPed* arg2, bool arg3) {
-    return ((CPed * (__thiscall*)(CBike*, eWeaponType, unsigned char, CPed*, bool))0x6B5F40)(this, arg0, arg1, arg2, arg3);
+    return arg2;
 }
 
 // Converted from thiscall void CBike::SetRemoveAnimFlags(CPed *ped) 0x6B5F50
@@ -148,9 +154,9 @@ bool CBike::GetAllWheelsOffGround() {
     return ((bool(__thiscall*)(CBike*))0x6B6790)(this);
 }
 
-// Converted from thiscall void CBike::DebugCode(void) 0x6B67A0
+// 0x6B67A0
 void CBike::DebugCode() {
-    ((void(__thiscall*)(CBike*))0x6B67A0)(this);
+    // NOP
 }
 
 // Converted from thiscall void CBike::DoSoftGroundResistance(uint &) 0x6B6D40
@@ -188,8 +194,20 @@ void CBike::GetCorrectedWorldDoorPosition(CVector& out, CVector arg1, CVector ar
     ((void(__thiscall*)(CBike*, CVector&, CVector, CVector))0x6BF230)(this, out, arg1, arg2);
 }
 
-// Converted from thiscall void CBike::CBike(int modelIndex,uchar createdBy) 0x6BF430
-CBike::CBike(int modelIndex, unsigned char createdBy) : CVehicle(plugin::dummy) {
-    plugin::CallMethod<0x6BF430, CBike*, int, unsigned char>(this, modelIndex, createdBy);
+// 0x6BEA10
+void CBike::BlowUpCar(CEntity* damager, unsigned char bHideExplosion) {
+    return BlowUpCar_Reversed(damager, bHideExplosion);
 }
 
+void CBike::BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion) {
+    plugin::CallMethod<0x6BEA10, CBike*, CEntity*, unsigned char>(this, damager, bHideExplosion);
+}
+
+// 0x6B7050
+void CBike::Fix() {
+    Fix_Reversed();
+}
+
+void CBike::Fix_Reversed() {
+    plugin::CallMethod<0x6B7050, CBike*>(this);
+}
