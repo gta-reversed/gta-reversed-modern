@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CSimpleTransform.h"
 #include "CMatrixLink.h"
 
@@ -48,10 +48,10 @@ public:
 public:
     static constexpr uint32_t NUM_MATRICES_TO_CREATE = 900;
     
-    inline CVector& GetRight() { return m_matrix->GetRight(); }
-    inline CVector& GetForward() { return m_matrix->GetForward(); }
-    inline CVector& GetUp() { return m_matrix->GetUp(); }
-    inline CVector& GetPosition() { return m_matrix ? m_matrix->GetPosition() : m_placement.m_vPosn; }
+    inline CVector& GetRight() const { return m_matrix->GetRight(); }
+    inline CVector& GetForward() const { return m_matrix->GetForward(); }
+    inline CVector& GetUp() const { return m_matrix->GetUp(); }
+    inline CVector& GetPosition() const { return m_matrix ? m_matrix->GetPosition() : m_placement.m_vPosn; }
 };
 
 VALIDATE_SIZE(CPlaceable, 0x18);

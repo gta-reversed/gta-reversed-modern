@@ -2,27 +2,27 @@
 
 void CEventPotentialWalkIntoVehicle::InjectHooks()
 {
-    HookInstall(0x4AE320, &CEventPotentialWalkIntoVehicle::Constructor);
-    HookInstall(0x4AE420, &CEventPotentialWalkIntoVehicle::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventPotentialWalkIntoVehicle", "CEventPotentialWalkIntoVehicle", 0x4AE320, &CEventPotentialWalkIntoVehicle::Constructor);
+    ReversibleHooks::Install("CEventPotentialWalkIntoVehicle", "AffectsPed", 0x4AE420, &CEventPotentialWalkIntoVehicle::AffectsPed_Reversed);
 }
 
 void CEventPotentialWalkIntoObject::InjectHooks()
 {
-    HookInstall(0x4AE5D0, &CEventPotentialWalkIntoObject::Constructor);
-    HookInstall(0x4B4950, &CEventPotentialWalkIntoObject::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventPotentialWalkIntoObject", "CEventPotentialWalkIntoObject", 0x4AE5D0, &CEventPotentialWalkIntoObject::Constructor);
+    ReversibleHooks::Install("CEventPotentialWalkIntoObject", "AffectsPed", 0x4B4950, &CEventPotentialWalkIntoObject::AffectsPed_Reversed);
 }
 
 void CEventPotentialWalkIntoFire::InjectHooks()
 {
-    HookInstall(0x4B1E20, &CEventPotentialWalkIntoFire::Constructor);
-    HookInstall(0x4B6890, &CEventPotentialWalkIntoFire::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventPotentialWalkIntoFire", "CEventPotentialWalkIntoFire", 0x4B1E20, &CEventPotentialWalkIntoFire::Constructor);
+    ReversibleHooks::Install("CEventPotentialWalkIntoFire", "AffectsPed", 0x4B6890, &CEventPotentialWalkIntoFire::AffectsPed_Reversed);
 }
 
 void CEventPotentialWalkIntoPed::InjectHooks()
 {
-    HookInstall(0x4AE6E0, &CEventPotentialWalkIntoPed::Constructor);
-    HookInstall(0x4AE800, &CEventPotentialWalkIntoPed::AffectsPed_Reversed);
-    HookInstall(0x4AE950, &CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed);
+    ReversibleHooks::Install("CEventPotentialWalkIntoPed", "CEventPotentialWalkIntoPed", 0x4AE6E0, &CEventPotentialWalkIntoPed::Constructor);
+    ReversibleHooks::Install("CEventPotentialWalkIntoPed", "AffectsPed", 0x4AE800, &CEventPotentialWalkIntoPed::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventPotentialWalkIntoPed", "TakesPriorityOver", 0x4AE950, &CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed);
 }
 
 CEventPotentialWalkIntoVehicle::CEventPotentialWalkIntoVehicle(CVehicle* vehicle, std::int32_t moveState)
@@ -45,13 +45,10 @@ CEventPotentialWalkIntoVehicle* CEventPotentialWalkIntoVehicle::Constructor(CVeh
     return this;
 }
 
+// 0x4AE420
 bool CEventPotentialWalkIntoVehicle::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AE420, CEventPotentialWalkIntoVehicle*, CPed*>(this, ped);
-#else
     return CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped)
@@ -79,14 +76,16 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped)
                 if (taskEnterCarAsDriver) {
                     if (m_vehicle == taskEnterCarAsDriver->m_pTargetVehicle && m_vehicle->IsPlane())
                         return false;
+
                     targetPos = taskEnterCarAsDriver->GetTargetPos();
                 }
                 if (isGoToPointTask || taskEnterCarAsDriver) {
                     CVector surfacePoint;
-                    CPedGeometryAnalyser::ComputeClosestSurfacePoint(ped, m_vehicle, &surfacePoint);
-                    std::int32_t hitSide = CPedGeometryAnalyser::ComputeEntityHitSide(&surfacePoint, m_vehicle);
-                    if (hitSide != CPedGeometryAnalyser::ComputeEntityHitSide(&targetPos, m_vehicle))
+                    CPedGeometryAnalyser::ComputeClosestSurfacePoint(*ped, *m_vehicle, surfacePoint);
+                    std::int32_t hitSide = CPedGeometryAnalyser::ComputeEntityHitSide(surfacePoint, *m_vehicle);
+                    if (hitSide != CPedGeometryAnalyser::ComputeEntityHitSide(targetPos, *m_vehicle))
                         return true;
+
                     return false;
                 }
                 return true;
@@ -116,13 +115,10 @@ CEventPotentialWalkIntoObject* CEventPotentialWalkIntoObject::Constructor(CObjec
     return this;
 }
 
+// 0x4B4950
 bool CEventPotentialWalkIntoObject::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B4950, CEventPotentialWalkIntoObject*, CPed*>(this, ped);
-#else
     return CEventPotentialWalkIntoObject::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventPotentialWalkIntoObject::AffectsPed_Reversed(CPed* ped)
@@ -148,7 +144,7 @@ bool CEventPotentialWalkIntoObject::AffectsPed_Reversed(CPed* ped)
                 return true;
             }
         }
-         
+
     }
     return false;
 }
@@ -166,6 +162,7 @@ CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(CVector* firePos, float
             m_radius = 1.5f;
         else
             m_radius = 1.0f;
+
         m_radius += 0.35f;
     }
 }
@@ -176,13 +173,10 @@ CEventPotentialWalkIntoFire* CEventPotentialWalkIntoFire::Constructor(CVector* f
     return this;
 }
 
+// 0x4B6890
 bool CEventPotentialWalkIntoFire::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B6890, CEventPotentialWalkIntoFire*, CPed*>(this, ped);
-#else
     return CEventPotentialWalkIntoFire::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventPotentialWalkIntoFire::AffectsPed_Reversed(CPed* ped)
@@ -220,22 +214,16 @@ CEventPotentialWalkIntoPed* CEventPotentialWalkIntoPed::Constructor(CPed* ped, C
     return this;
 }
 
+// 0x4AE800
 bool CEventPotentialWalkIntoPed::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AE800, CEventPotentialWalkIntoPed*, CPed*>(this, ped);
-#else
     return CEventPotentialWalkIntoPed::AffectsPed_Reversed(ped);
-#endif
 }
 
+// 0x4AE950
 bool CEventPotentialWalkIntoPed::TakesPriorityOver(CEvent* refEvent)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AE950, CEventPotentialWalkIntoPed*, CEvent*>(this, refEvent);
-#else
     return CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(refEvent);
-#endif
 }
 
 bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped)
@@ -244,8 +232,10 @@ bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped)
         CTask* partnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
         if (!partnerTask)
             partnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_BE_IN_COUPLE);
+
         if (!partnerTask)
             partnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
+
         if (partnerTask) {
             CTask* thisPedPartnerTask = m_ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
             if (!thisPedPartnerTask)
@@ -260,12 +250,15 @@ bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped)
         auto followFootstepsTask = reinterpret_cast<CTaskComplexFollowPedFootsteps*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_FOLLOW_PED_FOOTSTEPS));
         if (followFootstepsTask && followFootstepsTask->m_targetPed == m_ped)
             return false;
+
         auto killPedOnFootTask = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetIntelligence()->FindTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT));
         if (killPedOnFootTask && killPedOnFootTask->m_target == m_ped) 
             return false;
+
         CTask* activeTask = ped->GetTaskManager().GetSimplestActiveTask();
         if (!activeTask || !CTask::IsGoToTask(activeTask))
             return false;
+
         return true;
     }
     return false;

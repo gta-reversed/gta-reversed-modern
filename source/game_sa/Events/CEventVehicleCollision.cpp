@@ -2,9 +2,9 @@
 
 void CEventVehicleCollision::InjectHooks()
 {
-    HookInstall(0x4AC840, &CEventVehicleCollision::Constructor);
-    HookInstall(0x4B6BC0, &CEventVehicleCollision::Clone_Reversed);
-    HookInstall(0x4B2EE0, &CEventVehicleCollision::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventVehicleCollision", "Constructor",0x4AC840, &CEventVehicleCollision::Constructor);
+    ReversibleHooks::Install("CEventVehicleCollision", "Clone",0x4B6BC0, &CEventVehicleCollision::Clone_Reversed);
+    ReversibleHooks::Install("CEventVehicleCollision", "AffectsPed",0x4B2EE0, &CEventVehicleCollision::AffectsPed_Reversed);
 }
 
 CEventVehicleCollision::CEventVehicleCollision(std::int16_t pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, std::int8_t moveState, std::int16_t evadeType)
@@ -27,35 +27,24 @@ CEventVehicleCollision::~CEventVehicleCollision()
         m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(m_vehicle));
 }
 
+// 0x4AC840
 CEventVehicleCollision* CEventVehicleCollision::Constructor(std::int16_t pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, std::int8_t moveState, std::int16_t evadeType)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventVehicleCollision*, 0x4AC840, CEvent*, std::int16_t, float, CVehicle*, const CVector&, const CVector&, std::int8_t, std::int16_t>
-        (this, pieceType, damageIntensity, vehicle, collisionImpactVelocity, collisionPosition, moveState, evadeType);
-#else
     this->CEventVehicleCollision::CEventVehicleCollision(pieceType, damageIntensity, vehicle, collisionImpactVelocity, collisionPosition, moveState, evadeType);
     return this;
-#endif
 }
 
+// 0x4B6BC0
 CEvent* CEventVehicleCollision::Clone()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEvent*, 0x4B6BC0, CEvent*>(this);
-#else
     return CEventVehicleCollision::Clone_Reversed();
-#endif
 }
 
+// 0x4B2EE0
 bool CEventVehicleCollision::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B2EE0, CEvent*, CPed*>(this, ped);
-#else
     return CEventVehicleCollision::AffectsPed_Reversed(ped);
-#endif
 }
-
 
 CEvent* CEventVehicleCollision::Clone_Reversed()
 {
@@ -66,23 +55,28 @@ bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
 {
     if (!ped->IsAlive())
         return false;
+
     if (m_evadeType)
         return true;
+
     if (!m_vehicle)
         return false;
+
     if (ped->bInVehicle
         || m_vehicle->m_vehicleType == VEHICLE_BOAT
         || -DotProduct(m_collisionImpactVelocity, ped->GetForward()) < 0.35f)
     {
         return false;
     }
+
     CTask* pSimplestActiveTask = ped->GetTaskManager().GetSimplestActiveTask();
     if (pSimplestActiveTask && CTask::IsGoToTask(pSimplestActiveTask)) {
-        CTaskSimpleGoTo* pGoToTask = static_cast<CTaskSimpleGoTo*>(pSimplestActiveTask);
+        auto* pGoToTask = static_cast<CTaskSimpleGoTo*>(pSimplestActiveTask);
         std::int32_t hitSide = CPedGeometryAnalyser::ComputeEntityHitSide(*ped, *m_vehicle);
         if (hitSide == CPedGeometryAnalyser::ComputeEntityHitSide(pGoToTask->m_vecTargetPoint, *m_vehicle)) {
             if (!m_vehicle->m_pTractor && !m_vehicle->m_pTrailer)
                 return false;
+
             CVector boundingBoxPlanes[4];
             float planes_D[4];
             CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanes(ped->GetPosition().z, *m_vehicle, boundingBoxPlanes, planes_D);
@@ -98,6 +92,7 @@ bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
                 return false;
         }
     }
+
     CTask* pActiveTask = ped->GetTaskManager().GetActiveTask();
     if (pActiveTask) {
         if (pActiveTask->GetId() == TASK_COMPLEX_WALK_ROUND_CAR) {
@@ -117,5 +112,6 @@ bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
                 return false;
         }
     }
+
     return true;
 }

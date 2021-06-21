@@ -2,8 +2,8 @@
 
 void CEventInAir::InjectHooks()
 {
-    HookInstall(0x4B0CB0, &CEventInAir::Constructor);
-    HookInstall(0x4B0C00, &CEventInAir::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventInAir", "Constructor", 0x4B0CB0, &CEventInAir::Constructor);
+    ReversibleHooks::Install("CEventInAir", "AffectsPed", 0x4B0C00, &CEventInAir::AffectsPed_Reversed);
 }
 
 CEventInAir* CEventInAir::Constructor()
@@ -12,13 +12,10 @@ CEventInAir* CEventInAir::Constructor()
     return this;
 }
 
+// 0x4B0C00
 bool CEventInAir::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B0C00, CEvent*, CPed*>(this, ped);
-#else
     return CEventInAir::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventInAir::AffectsPed_Reversed(CPed* ped)
@@ -32,9 +29,13 @@ bool CEventInAir::AffectsPed_Reversed(CPed* ped)
         return false;
     }
     CTask* simplestActiveTask = ped->GetTaskManager().GetSimplestActiveTask();
-    if (simplestActiveTask && simplestActiveTask->GetId() == TASK_SIMPLE_FALL
-        || ped->m_pDamageEntity || !ped->m_bUsesCollision || ped->m_pAttachedTo || !CPedGeometryAnalyser::IsInAir(ped))
-    {
+    if (simplestActiveTask &&
+        simplestActiveTask->GetId() == TASK_SIMPLE_FALL ||
+        ped->m_pDamageEntity ||
+        !ped->m_bUsesCollision ||
+        ped->m_pAttachedTo ||
+        !CPedGeometryAnalyser::IsInAir(*ped)
+    ) {
         return false;
     }
     return ped->IsAlive();
@@ -42,10 +43,10 @@ bool CEventInAir::AffectsPed_Reversed(CPed* ped)
 
 void CEventStuckInAir::InjectHooks()
 {
-    HookInstall(0x4B1490, &CEventStuckInAir::Constructor);
-    HookInstall(0x4B1600, &CEventStuckInAir::GetEventPriority_Reversed);
-    HookInstall(0x4B1580, &CEventStuckInAir::AffectsPed_Reversed);
-    HookInstall(0x4B15B0, &CEventStuckInAir::TakesPriorityOver_Reversed);
+    ReversibleHooks::Install("CEventStuckInAir", "Constructor", 0x4B1490, &CEventStuckInAir::Constructor);
+    ReversibleHooks::Install("CEventStuckInAir", "GetEventPriority", 0x4B1600, &CEventStuckInAir::GetEventPriority_Reversed);
+    ReversibleHooks::Install("CEventStuckInAir", "AffectsPed", 0x4B1580, &CEventStuckInAir::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventStuckInAir", "TakesPriorityOver", 0x4B15B0, &CEventStuckInAir::TakesPriorityOver_Reversed);
 }
 
 CEventStuckInAir::CEventStuckInAir(CPed* ped)
@@ -67,37 +68,29 @@ CEventStuckInAir* CEventStuckInAir::Constructor(CPed* ped)
     return this;
 }
 
+// 0x4B1600
 int CEventStuckInAir::GetEventPriority()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<int, 0x4B1600, CEvent*>(this);
-#else
     return CEventStuckInAir::GetEventPriority_Reversed();
-#endif
 }
 
+// 0x4B1580
 bool CEventStuckInAir::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B1580, CEvent*, CPed*>(this, ped);
-#else
     return CEventStuckInAir::AffectsPed_Reversed(ped);
-#endif
 }
 
+// 0x4B15B0
 bool CEventStuckInAir::TakesPriorityOver(CEvent* refEvent)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B15B0, CEvent*, CEvent*>(this, refEvent);
-#else
     return CEventStuckInAir::TakesPriorityOver_Reversed(refEvent);
-#endif
 }
 
 int CEventStuckInAir::GetEventPriority_Reversed()
 {
     if (m_ped && m_ped->GetEventHandler().GetCurrentEventType() != EVENT_STUCK_IN_AIR && m_ped->GetEventGroup().m_count > 1)
         return 75;
+
     return 63;
 }
 
@@ -105,6 +98,7 @@ bool CEventStuckInAir::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->bIsStanding)
         return false;
+
     return ped->GetStuckChecker().m_state != PED_STUCK_STATE_NONE;
 }
 
@@ -112,5 +106,6 @@ bool CEventStuckInAir::TakesPriorityOver_Reversed(CEvent* refEvent)
 {
     if (refEvent->GetEventPriority() < 74 && refEvent->GetEventType() != EVENT_STUCK_IN_AIR)
         return true;
+
     return CEvent::TakesPriorityOver(refEvent);
 }
