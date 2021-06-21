@@ -17,8 +17,16 @@
 #include "CAEUserRadioTrackManager.h"
 #include "CDebugMenu.h"
 
+void WaitForDebugger() {
+    while (!::IsDebuggerPresent()) {
+        ::Sleep(100);
+    }
+}
+
 void InjectHooksMain()
 {
+    // WaitForDebugger();
+
     CDebug::InjectHooks();
     InjectCommonHooks();
     CGame::InjectHooks();

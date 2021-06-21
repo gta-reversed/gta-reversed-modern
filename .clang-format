@@ -1,0 +1,7 @@
+Language: Cpp
+PointerAlignment: Left
+DerivePointerAlignment: False
+IndentWrappedFunctionNames: False
+IndentWidth: 4
+ColumnLimit: 180
+SortIncludes: Never
