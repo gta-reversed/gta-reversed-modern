@@ -6,10 +6,7 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
-
-class PLUGIN_API CTimer
-{
+class CTimer {
 public:
     typedef std::uint64_t(__cdecl* TimerFunction_t)();
     static TimerFunction_t& ms_fnTimerFunction;
@@ -34,9 +31,11 @@ public:
     static float& ms_fTimeScale;
     static unsigned int& m_snTimeInMillisecondsPauseMode;
     static unsigned int& m_snTimeInMillisecondsNonClipped;
-    static unsigned int& ms_nPreviousTimeInMillisecondsNonClipped;
+    static unsigned int& m_snPreviousTimeInMillisecondsNonClipped;
     static unsigned int& m_snTimeInMilliseconds;
     static std::uint64_t& m_snRenderStartTime;
+    static std::uint64_t& m_snRenderPauseTime;
+    static unsigned int& m_snRenderTimerPauseCount;
 
     // Freshly from R*:
     static unsigned int& m_snPPPPreviousTimeInMilliseconds;
@@ -44,23 +43,23 @@ public:
     static unsigned int& m_snPPreviousTimeInMilliseconds;
     static unsigned int& m_snPreviousTimeInMilliseconds;
 
+public:
     static void InjectHooks();
 
     // class functions
     static void Initialise();
     static void Shutdown();
-    static void UpdateVariables(float timeStep);
     static void Suspend();
     static void Resume();
-    static int GetCyclesPerMillisecond();
-    // cycles per ms * 20
-    static int GetCyclesPerFrame();
-    static unsigned int GetCurrentTimeInCycles();
     static void Stop();
-    static bool GetIsSlowMotionActive();
     static void StartUserPause();
     static void EndUserPause();
+    static unsigned int GetCyclesPerMillisecond();
+    static unsigned int GetCyclesPerFrame();
+    static std::uint64_t GetCurrentTimeInCycles();
+    static bool GetIsSlowMotionActive();
     static bool GetIsPaused() { return m_UserPause || m_CodePause; }
-    static void Update();
+    static void UpdateVariables(float timeStep);
     static void UpdateTimeStep(float fTimeStep);
+    static void Update();
 };
