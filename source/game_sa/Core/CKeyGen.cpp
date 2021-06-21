@@ -90,7 +90,7 @@ void CKeyGen::InjectHooks() {
 // 0x53CF70
 unsigned int CKeyGen::AppendStringToKey(unsigned int key, const char* str) {
     for (int i = 0; str[i]; ++i) {
-        key = (key >> 8) ^ keyTable[str[i] ^ (key & 0xFF)];
+        key = keyTable[(unsigned char)(str[i] ^ key)] ^ (key >> 8);
     }
     return key;
 }
@@ -99,7 +99,7 @@ unsigned int CKeyGen::AppendStringToKey(unsigned int key, const char* str) {
 unsigned int CKeyGen::GetKey(const char* str) {
     unsigned int key = INITIAL_REMAINDER;
     for (int i = 0; str[i]; ++i) {
-        key = (key >> 8) ^ keyTable[str[i] ^ (key & 0xFF)];
+        key = keyTable[(unsigned char)(str[i] ^ key)] ^ (key >> 8);
     }
     return key;
 }
@@ -108,7 +108,7 @@ unsigned int CKeyGen::GetKey(const char* str) {
 unsigned int CKeyGen::GetKey(const char* str, int size) {
     unsigned int key = INITIAL_REMAINDER;
     for (int i = 0; i < size; ++i) {
-        key = (key >> 8) ^ keyTable[str[i] ^ (key & 0xFF)];
+        key = keyTable[(unsigned char)(str[i] ^ key)] ^ (key >> 8);
     }
     return key;
 }
@@ -117,7 +117,7 @@ unsigned int CKeyGen::GetKey(const char* str, int size) {
 unsigned int CKeyGen::GetUppercaseKey(const char* str) {
     unsigned int key = INITIAL_REMAINDER;
     for (int i = 0; str[i]; ++i) {
-        key = (key >> 8) ^ keyTable[toupper(str[i]) ^ (key & 0xFF)];
+        key = keyTable[(unsigned char)(toupper((unsigned char)str[i]) ^ key)] ^ (key >> 8);
     }
     return key;
 }
