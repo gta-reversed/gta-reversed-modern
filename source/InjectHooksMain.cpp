@@ -294,6 +294,7 @@ void InjectHooksMain()
     CTaskSimpleRunAnim::InjectHooks();
     CTaskComplexUseSwatRope::InjectHooks();
     CStuntJumpManager::InjectHooks();
+    CPedGeometryAnalyser::InjectHooks();
     CPlane::InjectHooks();
     CHeli::InjectHooks();
     CBmx::InjectHooks();
