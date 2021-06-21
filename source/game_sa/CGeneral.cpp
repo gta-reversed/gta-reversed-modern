@@ -135,9 +135,11 @@ float CGeneral::GetAngleBetweenPoints(float x1, float y1, float x2, float y2) {
 }
 
 // 0x407180
+// Differs from CAEAudioUtility in that this one returns [min, max), while
+// the other one returns [mim, max]
 unsigned int CGeneral::GetRandomNumberInRange(int min, int max) {
     // TODO: Use better RNG
-    return min + static_cast<int>(rand() * RAND_MAX_RECIPROCAL * (max - min + 1) );
+    return min + static_cast<int>(rand() * RAND_MAX_RECIPROCAL * (max - min));
 }
 
 // 0x41BD90
