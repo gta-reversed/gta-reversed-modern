@@ -8,7 +8,7 @@
 
 #include "PluginBase.h"
 #include "CTaskTimer.h"
-#include "C2dEffect.h"
+#include "Plugins\TwoDEffectPlugin\C2dEffect.h"
 
 class  CAttractorScanner {
 public:

@@ -104,13 +104,15 @@ bool C2dEffect::PluginAttach()
         MAKECHUNKID(rwVENDORID_ROCKSTAR, 0xF8),
         t2dEffectPluginConstructor,
         t2dEffectPluginDestructor,
-        t2dEffectPluginCopyConstructor);
+        t2dEffectPluginCopyConstructor
+    );
 
     RpGeometryRegisterPluginStream(
         MAKECHUNKID(rwVENDORID_ROCKSTAR, 0xF8),
         Rwt2dEffectPluginDataChunkReadCallBack,
         Rwt2dEffectPluginDataChunkWriteCallBack,
-        Rwt2dEffectPluginDataChunkGetSizeCallBack);
+        Rwt2dEffectPluginDataChunkGetSizeCallBack
+    );
 
     return C2dEffect::g2dEffectPluginOffset != -1;
 }

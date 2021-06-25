@@ -8,7 +8,7 @@
 #include "PluginBase.h"
 #include "RenderWare.h"
 #include "CColModel.h"
-#include "C2dEffect.h"
+#include "Plugins\TwoDEffectPlugin\C2dEffect.h"
 #include "eModelID.h"
 
 enum ModelInfoType : unsigned char

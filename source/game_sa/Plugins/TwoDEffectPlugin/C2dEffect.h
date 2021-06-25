@@ -5,24 +5,24 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CVector.h"
 #include "CRGBA.h"
 
-enum e2dEffectType {
-	EFFECT_LIGHT,
-	EFFECT_PARTICLE,
-	EFFECT_ATTRACTOR = 3,
-	EFFECT_SUN_GLARE,
-	EFFECT_FURNITUR,
-	EFFECT_ENEX,
-	EFFECT_ROADSIGN,
-	EFFECT_SLOTMACHINE_WHEEL,
-	EFFECT_COVER_POINT,
-	EFFECT_ESCALATOR,
+enum e2dEffectType : unsigned char {
+    EFFECT_LIGHT,
+    EFFECT_PARTICLE,
+    EFFECT_ATTRACTOR = 3,
+    EFFECT_SUN_GLARE,
+    EFFECT_FURNITUR,
+    EFFECT_ENEX,
+    EFFECT_ROADSIGN,
+    EFFECT_SLOTMACHINE_WHEEL,
+    EFFECT_COVER_POINT,
+    EFFECT_ESCALATOR,
 };
 
-enum ePedAttractorType {
+enum ePedAttractorType : unsigned char {
     PED_ATTRACTOR_ATM            = 0, // Ped uses ATM(at day time only)
     PED_ATTRACTOR_SEAT           = 1, // Ped sits(at day time only)
     PED_ATTRACTOR_STOP           = 2, // Ped stands(at day time only)
@@ -36,7 +36,7 @@ enum ePedAttractorType {
 };
 
 // From https://gtamods.com/wiki/2d_Effect_(RW_Section)
-enum e2dCoronaFlashType {
+enum e2dCoronaFlashType : unsigned char {
     FLASH_DEFAULT         = 0,
     FLASH_RANDOM          = 1,
     FLASH_RANDOM_WHEN_WET = 2,
@@ -55,10 +55,10 @@ enum e2dCoronaFlashType {
 
 struct tEffectLight {
     RwRGBA m_color;
-    float m_fCoronaFarClip;
-    float m_fPointlightRange;
-    float m_fCoronaSize;
-    float m_fShadowSize;
+    float  m_fCoronaFarClip;
+    float  m_fPointlightRange;
+    float  m_fCoronaSize;
+    float  m_fShadowSize;
     union {
         unsigned short m_nFlags;
         struct {
@@ -77,47 +77,48 @@ struct tEffectLight {
             unsigned short m_bBlinking3 : 1;
         };
     };
-    unsigned char m_nCoronaFlashType; // see e2dCoronaFlashType
-    bool m_bCoronaEnableReflection;
-    unsigned char m_nCoronaFlareType;
-    unsigned char m_nShadowColorMultiplier;
-    char m_nShadowZDistance;
-    char offsetX;
-    char offsetY;
-    char offsetZ;
-private:
-    char _pad2E[2];
-public:
-    RwTexture *m_pCoronaTex;
-    RwTexture *m_pShadowTex;
-    int field_38;
-    int field_3C;
+    e2dCoronaFlashType m_nCoronaFlashType;
+    bool               m_bCoronaEnableReflection;
+    unsigned char      m_nCoronaFlareType;
+    unsigned char      m_nShadowColorMultiplier;
+    char               m_nShadowZDistance;
+    char               offsetX;
+    char               offsetY;
+    char               offsetZ;
+    // char               _pad2E[2];
+    RwTexture*         m_pCoronaTex;
+    RwTexture*         m_pShadowTex;
+    int                field_38;
+    int                field_3C;
 };
+VALIDATE_SIZE(tEffectLight, 0x30);
 
 struct tEffectParticle {
     char m_szName[24];
 };
+VALIDATE_SIZE(tEffectParticle, 0x18);
 
 struct tEffectPedAttractor {
-    RwV3d m_vecQueueDir;
-    RwV3d m_vecUseDir;
-    RwV3d m_vecForwardDir;
-    unsigned char m_nAttractorType; // see ePedAttractorType
-    unsigned char m_nPedExistingProbability;
-    unsigned char field_36;
-    unsigned char m_nFlags;
-    char m_szScriptName[8];
+    RwV3d             m_vecQueueDir;
+    RwV3d             m_vecUseDir;
+    RwV3d             m_vecForwardDir;
+    ePedAttractorType m_nAttractorType;
+    unsigned char     m_nPedExistingProbability;
+    unsigned char     field_36;
+    unsigned char     m_nFlags;
+    char              m_szScriptName[8];
 };
+VALIDATE_SIZE(tEffectPedAttractor, 0x30);
 
 struct tEffectEnEx {
-    float m_fEnterAngle;
-    RwV2d m_vecRadius;
-    RwV3d m_vecExitPosn;
-    float m_fExitAngle;
-    short m_nInteriorId;
+    float         m_fEnterAngle;
+    RwV2d         m_vecRadius;
+    RwV3d         m_vecExitPosn;
+    float         m_fExitAngle;
+    short         m_nInteriorId;
     unsigned char m_nFlags1;
     unsigned char m_nSkyColor;
-    char m_szInteriorName[8];
+    char          m_szInteriorName[8];
     unsigned char m_nTimeOn;
     unsigned char m_nTimeOff;
     union {
@@ -138,51 +139,46 @@ struct CRoadsignAttrFlags {
 };
 VALIDATE_SIZE(CRoadsignAttrFlags, 0x2);
 
-
 struct tEffectRoadsign {
-    RwV2d m_vecSize;
-    RwV3d m_vecRotation;
+    RwV2d              m_vecSize;
+    RwV3d              m_vecRotation;
     CRoadsignAttrFlags m_nFlags;
-private:
-    char _pad26[2];
-public:
-    char *m_pText; // size is 64
-    RpAtomic *m_pAtomic;
+    // char               _pad26[2];
+    char*              m_pText; // size is 64
+    RpAtomic*          m_pAtomic;
 };
 VALIDATE_SIZE(tEffectRoadsign, 0x20);
 
 struct tEffectCoverPoint {
-    RwV2d m_vecDirection;
+    RwV2d         m_vecDirection;
     unsigned char m_nType;
-private:
-    char _pad19[3];
-public:
+    // char _pad19[3];
 };
+VALIDATE_SIZE(tEffectCoverPoint, 0xC);
 
 struct tEffectEscalator {
-    RwV3d m_vecBottom;
-    RwV3d m_vecTop;
-    RwV3d m_vecEnd;
+    RwV3d         m_vecBottom;
+    RwV3d         m_vecTop;
+    RwV3d         m_vecEnd;
     unsigned char m_nDirection; // 0 - down, 1 - up
-private:
-    char _pad35[3];
-public:
+    // char          _pad35[3];
 };
+VALIDATE_SIZE(tEffectEscalator, 0x28);
 
 class C2dEffect {
-public:
-	CVector m_vecPosn;
-    unsigned char m_nType; // see e2dEffectType
-    char padding[3];
+  public:
+    CVector       m_vecPosn;
+    e2dEffectType m_nType;
+    char          _pad0[3];
     union {
-        tEffectLight light;
-        tEffectParticle particle;
+        tEffectLight        light;
+        tEffectParticle     particle;
         tEffectPedAttractor pedAttractor;
-        tEffectEnEx enEx;
-        tEffectRoadsign roadsign;
-        std::int32_t iSlotMachineIndex;
-        tEffectCoverPoint coverPoint;
-        tEffectEscalator escalator;
+        tEffectEnEx         enEx;
+        tEffectRoadsign     roadsign;
+        std::int32_t        iSlotMachineIndex;
+        tEffectCoverPoint   coverPoint;
+        tEffectEscalator    escalator;
     };
 
 public:
@@ -192,10 +188,8 @@ public:
 public:
     static void InjectHooks();
 
-public:
     void Shutdown();
 
-public:
     static int Roadsign_GetNumLinesFromFlags(CRoadsignAttrFlags flags);
     static int Roadsign_GetNumLettersFromFlags(CRoadsignAttrFlags flags);
     static int Roadsign_GetPaletteIDFromFlags(CRoadsignAttrFlags flags);
@@ -205,7 +199,7 @@ public:
 };
 VALIDATE_SIZE(C2dEffect, 0x40);
 
-//RW PLUGIN
+// RW PLUGIN
 struct t2dEffectPluginEntry {
     unsigned int m_nObjCount;
     C2dEffect m_pObjects[16]; // Size not real, it's decided on runtime, 16 is written here only to see the objects in debugger without issues
@@ -225,10 +219,10 @@ VALIDATE_SIZE(t2dEffectPlugin, 0x4);
 unsigned int RpGeometryGet2dFxCount(RpGeometry* pGeometry);
 C2dEffect* RpGeometryGet2dFxAtIndex(RpGeometry* pGeometry, int iEffectInd);
 
-void* t2dEffectPluginConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject); 
+void* t2dEffectPluginConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
 void* t2dEffectPluginDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
 void* t2dEffectPluginCopyConstructor(void* dstObject, const void* srcObject, RwInt32 offsetInObject, RwInt32 sizeInObject);
 
 RwStream* Rwt2dEffectPluginDataChunkReadCallBack(RwStream* stream, RwInt32 binaryLength, void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
 RwStream* Rwt2dEffectPluginDataChunkWriteCallBack(RwStream* stream, RwInt32 binaryLength, const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
-RwInt32   Rwt2dEffectPluginDataChunkGetSizeCallBack(const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
+RwInt32 Rwt2dEffectPluginDataChunkGetSizeCallBack(const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
