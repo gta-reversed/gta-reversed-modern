@@ -503,6 +503,7 @@
 #include "game_sa\RenderWare\rw\rtquat.h"
 #include "game_sa\RenderWare\rw\rwcore.h"
 #include "game_sa\RenderWare\rw\rwplcore.h"
+#include "game_sa\RenderWare\rw\rwtexdict.h"
 #include "game_sa\RenderWare\rw\skeleton.h"
 
 #include "game_sa\Scripts\CRunningScript.h"
