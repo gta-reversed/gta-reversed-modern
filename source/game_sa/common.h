@@ -169,8 +169,6 @@ RwObject* GetFirstObjectCallback(RwObject* object, void* data);
 RwObject* GetFirstObject(RwFrame* frame);
 RwFrame* GetFirstFrameCallback(RwFrame* frame, void* data);
 RwFrame* GetFirstChild(RwFrame* frame);
-RwTexture* GetFirstTextureCallback(RwTexture* texture, void* data);
-RwTexture* GetFirstTexture(RwTexDictionary* txd);
 RpHAnimHierarchy* GetAnimHierarchyFromSkinClump(RpClump* clump);
 RpHAnimHierarchy* GetAnimHierarchyFromFrame(RwFrame* frame);
 RpHAnimHierarchy* GetAnimHierarchyFromClump(RpClump* clump);
