@@ -37,13 +37,15 @@ public:
      static bool LoadClumpFile(RwStream *stream, unsigned int modelIndex);
      static void LoadClumpFile(char const *filename);
      static int LoadClumpObject(char const *line);
-     static bool LoadCollisionFile(unsigned char *data, unsigned int dataSize, unsigned char colId);
-     static bool LoadCollisionFile(char const *filename, unsigned char colId);
-     static bool LoadCollisionFileFirstTime(unsigned char *data, unsigned int dataSize, unsigned char colId);
-     static void LoadCollisionModel(unsigned char *data, CColModel &outColModel);
-     static void LoadCollisionModelVer2(unsigned char *data, unsigned int dataSize, CColModel &outColModel, char const *modelName);
-     static void LoadCollisionModelVer3(unsigned char *data, unsigned int dataSize, CColModel &outColModel, char const *modelName);
-     static void LoadCollisionModelVer4(void *data, unsigned int dataSize, CColModel &outColModel, char const *modelName);
+
+     static bool LoadCollisionFile(unsigned char* data, unsigned int dataSize, unsigned char colId);
+     static bool LoadCollisionFile(const char* filename, unsigned char colId);
+     static bool LoadCollisionFileFirstTime(unsigned char* data, unsigned int dataSize, unsigned char colId);
+     static void LoadCollisionModel(unsigned char* data, CColModel& outColModel);
+     static void LoadCollisionModelVer2(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName);
+     static void LoadCollisionModelVer3(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName);
+     static void LoadCollisionModelVer4(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName);
+
      static void LoadCullZone(char const *line);
      static void LoadEntryExit(char const *line);
      static void LoadGarage(char const *line);
