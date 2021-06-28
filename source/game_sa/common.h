@@ -146,6 +146,13 @@ inline bool approxEqual2(float f1, float f2, float epsilon = 0.01F)
     return f1 == f2 || fabs(f1 - f2) < epsilon;
 }
 
+extern constexpr unsigned int make_fourcc4(const char fourcc[4]) {
+    return fourcc[0] << 0 |
+           fourcc[1] << 8 |
+           fourcc[2] << 16 |
+           fourcc[3] << 24;
+}
+
 AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, char *name);
 
 char *MakeUpperCase(char *dest, char *src);

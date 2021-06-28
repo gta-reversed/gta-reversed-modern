@@ -77,18 +77,39 @@ int CFileLoader::LoadClumpObject(char const *line) {
     return plugin::CallAndReturnDynGlobal<int, char const *>(0x5B4040, line);
 }
 
-bool CFileLoader::LoadCollisionFile(unsigned char *data, unsigned int dataSize, unsigned char colId) {
-    return plugin::CallAndReturn<bool, 0x538440, unsigned char *, unsigned int, unsigned char>(data, dataSize, colId);
+// 0x538440
+bool CFileLoader::LoadCollisionFile(unsigned char* data, unsigned int dataSize, unsigned char colId) {
+    return plugin::CallAndReturn<bool, 0x538440, unsigned char*, unsigned int, unsigned char>(data, dataSize, colId);
 }
 
-bool CFileLoader::LoadCollisionFile(char const* filename, unsigned char colId)
-{
-    return plugin::CallAndReturn<bool, 0x5B4040, char const*, unsigned char>(filename, colId);
+// 0x5B4E60
+bool CFileLoader::LoadCollisionFile(const char* filename, unsigned char colId) {
+    return plugin::CallAndReturn<bool, 0x5B4E60, const char*, unsigned char>(filename, colId);
 }
 
-bool CFileLoader::LoadCollisionFileFirstTime(unsigned char* data, unsigned int dataSize, unsigned char colId)
-{
+// 0x5B5000
+bool CFileLoader::LoadCollisionFileFirstTime(unsigned char* data, unsigned int dataSize, unsigned char colId) {
     return plugin::CallAndReturn<bool, 0x5B5000, unsigned char*, unsigned int, unsigned char>(data, dataSize, colId);
+}
+
+// 0x537580
+void CFileLoader::LoadCollisionModel(unsigned char* data, CColModel& outColModel) {
+    plugin::Call<0x537580, unsigned char*, CColModel&>(data, outColModel);
+}
+
+// 0x537EE0
+void CFileLoader::LoadCollisionModelVer2(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName) {
+    plugin::Call<0x537EE0, unsigned char*, unsigned int, CColModel&, const char*>(data, dataSize, outColModel, modelName);
+}
+
+// 0x537CE0
+void CFileLoader::LoadCollisionModelVer3(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName) {
+    plugin::Call<0x537CE0, unsigned char*, unsigned int, CColModel&, const char*>(data, dataSize, outColModel, modelName);
+}
+
+// 0x537AE0
+void CFileLoader::LoadCollisionModelVer4(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName) {
+    plugin::Call<0x537AE0, unsigned char*, unsigned int, CColModel&, const char*>(data, dataSize, outColModel, modelName);
 }
 
 bool CFileLoader::FinishLoadClumpFile(RwStream *stream, unsigned int modelIndex) {
