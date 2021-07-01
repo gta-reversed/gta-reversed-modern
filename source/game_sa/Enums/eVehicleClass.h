@@ -6,10 +6,8 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-enum eVehicleClass
-{  
+enum eVehicleClass : char {
+    VEHICLE_CLASS_IGNORE = -1,
     VEHICLE_CLASS_NORMAL = 0,
     VEHICLE_CLASS_POORFAMILY,
     VEHICLE_CLASS_RICHFAMILY,
@@ -22,6 +20,4 @@ enum eVehicleClass
     VEHICLE_CLASS_LEISUREBOAT,
     VEHICLE_CLASS_WORKERBOAT,
     VEHICLE_CLASS_BICYCLE,
-    VEHICLE_CLASS_IGNORE = -1
 };
-

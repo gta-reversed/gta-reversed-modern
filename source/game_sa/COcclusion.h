@@ -1,5 +1,5 @@
 #pragma once
-#include "PluginBase.h"
+
 #include "CVector2D.h"
 #include "CVector.h"
 
@@ -80,7 +80,7 @@ public:
 
 public:
     static void Init();
-    static void AddOne(float dirMidX, float dirMidY, float dirMidZ, float widthX, float widthY, float height, float rotX, float rotY, float rotZ, float flags, bool isInterior);
+    static void AddOne(float dirMidX, float dirMidY, float dirMidZ, float widthX, float widthY, float height, float rotX, float rotY, float rotZ, int flags, bool isInterior);
     static bool OccluderHidesBehind(CActiveOccluder* first, CActiveOccluder* second);
     static bool IsPositionOccluded(CVector vecPos, float fRadius);
     static void ProcessBeforeRendering();

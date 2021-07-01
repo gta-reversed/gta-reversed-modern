@@ -6,15 +6,13 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "RenderWare.h"
 #include "CEntity.h"
 #include "CClumpModelInfo.h"
 #include "CAtomicModelInfo.h"
 #include "CLinkList.h"
 
-enum eAtomicComponentFlag
-{
+enum eAtomicComponentFlag {
     ATOMIC_IS_OK_STATE = 0x1,
     ATOMIC_IS_DAM_STATE = 0x2,
     ATOMIC_IS_LEFT = 0x4,
@@ -29,30 +27,27 @@ enum eAtomicComponentFlag
     ATOMIC_IS_REPLACEMENT_UPGRADE = 0x800,
     ATOMIC_IS_DOOR_WINDOW_OPENED = 0x1000,
     ATOMIC_DISABLE_REFLECTIONS = 0x2000,
-    //ATOMIC_HAS_DYNAMIC_TEXTURES  = 0x2000, // TODO: WTF is this?
+    // ATOMIC_HAS_DYNAMIC_TEXTURES  = 0x2000, // TODO: WTF is this?
     ATOMIC_IS_BLOWN_UP = 0x4000,
     ATOMIC_VEHCOMP_15 = 0x8000
 };
 
-struct tAtomicVisibilityPlugin
-{
-   std::int16_t m_modelId;
-   union {
-       std::uint16_t m_flags; // eAtomicComponentFlag
-       std::int16_t m_userValue;
-   };
+struct tAtomicVisibilityPlugin {
+    std::int16_t m_modelId;
+    union {
+        std::uint16_t m_flags; // eAtomicComponentFlag
+        std::int16_t m_userValue;
+    };
 };
 VALIDATE_SIZE(tAtomicVisibilityPlugin, 0x4);
 
-struct tClumpVisibilityPlugin
-{
+struct tClumpVisibilityPlugin {
     void* m_visibilityCallBack;
     std::int32_t m_alpha;
 };
 VALIDATE_SIZE(tClumpVisibilityPlugin, 0x8);
 
-struct tFrameVisibilityPlugin
-{
+struct tFrameVisibilityPlugin {
     union {
         std::int32_t m_hierarchyId;
         CClumpModelInfo* m_modelInfo;
@@ -60,8 +55,7 @@ struct tFrameVisibilityPlugin
 };
 VALIDATE_SIZE(tFrameVisibilityPlugin, 0x4);
 
-class CVisibilityPlugins
-{
+class CVisibilityPlugins {
 public:
     static const std::int32_t TOTAL_ALPHA_LISTS = 20;
     static const std::int32_t TOTAL_ALPHA_BOAT_ATOMIC_LISTS = 20;
@@ -70,14 +64,13 @@ public:
     static const std::int32_t TOTAL_ALPHA_DRAW_LAST_LISTS = 50;
     static const std::int32_t TOTAL_WEAPON_PEDS_FOR_PC = 100;
     using tAlphaRenderOrderedListCB = void(__cdecl*)(CEntity* entity, float distance);
-    struct AlphaObjectInfo
-    {
+    struct AlphaObjectInfo {
         union {
             RpAtomic* m_atomic;
             CEntity* m_entity;
         };
         void* m_pCallback;
-        float m_distance; // alpha   
+        float m_distance; // alpha
     };
 
     static std::int32_t& ms_atomicPluginOffset;
@@ -177,7 +170,7 @@ public:
     static void SetAtomicFlag(RpAtomic* pRpAtomic, std::uint16_t flag);
     static void SetClumpForAllAtomicsFlag(RpClump* pRpClump, std::uint16_t flag);
     static void SetAtomicId(void* pRpAtomic, std::int16_t id);
-    static void SetAtomicRenderCallback(RpAtomic *pRpAtomic, RpAtomicCallBackRender renderCB);
+    static void SetAtomicRenderCallback(RpAtomic* pRpAtomic, RpAtomicCallBackRender renderCB);
     static void SetClumpAlpha(RpClump* pRpClump, int dwAlpha);
     static void SetClumpModelInfo(RpClump* pRpClump, CClumpModelInfo* pClumpModelInfo);
     static void SetFrameHierarchyId(RwFrame* pRwFrame, std::int32_t id);
@@ -188,4 +181,4 @@ public:
     static bool VehicleVisibilityCB_BigVehicle(RpClump* pRpClump);
 };
 
-#define RpAtomicGetVisibilityPlugin(atomic) ((tAtomicVisibilityPlugin *)((unsigned int)atomic + CVisibilityPlugins::ms_atomicPluginOffset))
+#define RpAtomicGetVisibilityPlugin(atomic) ((tAtomicVisibilityPlugin*)((unsigned int)atomic + CVisibilityPlugins::ms_atomicPluginOffset))

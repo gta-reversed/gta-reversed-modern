@@ -47,11 +47,9 @@ inline void createDirectory(const wchar_t *path)
         CloseHandle(folderHandle);
 }
 
+// 0x744FB0
 static char *InitUserDirectories()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((char*(*)()) 0x744FB0)();
-#else
     if (*gta_user_dir_path == 0)
     {
         // MikuAuahDark: Let's improve the function
@@ -73,7 +71,7 @@ static char *InitUserDirectories()
             else
                 wcscat(gtaUserDirWide.data(), USERFILES);
             createDirectory(gtaUserDirWide.data());
-            
+
             size_t userDirLen = wcslen(gtaUserDirWide.data());
             wcscpy(userGalleryDirWide.data(), gtaUserDirWide.data());
             wcscpy(userTracksDirWide.data(), gtaUserDirWide.data());
@@ -115,14 +113,11 @@ static char *InitUserDirectories()
     }
 
     return gta_user_dir_path;
-#endif
 }
 
+// 0x5386f0
 void CFileMgr::Initialise()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(*)()) 0x5386f0)();
-#else
     memset(ms_rootDirName, 0, DIRNAMELENGTH);
 
     if (WindowsCharset != CP_UTF8)
@@ -147,14 +142,11 @@ void CFileMgr::Initialise()
         _getcwd(ms_rootDirName, DIRNAMELENGTH);
 
     ms_rootDirName[strlen(ms_rootDirName)] = '\\';
-#endif
 }
 
+// 0x538730
 int CFileMgr::ChangeDir(const char *path)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(*)(const char*)) 0x538730)(path);
-#else
     memset(ms_dirName, 0, DIRNAMELENGTH);
 
     if (*path == '\\')
@@ -187,14 +179,11 @@ int CFileMgr::ChangeDir(const char *path)
         r = _chdir(ms_dirName);
 
     return r;
-#endif
 }
 
+// 0x5387D0
 int CFileMgr::SetDir(const char *path)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(*)(const char*)) 0x5387D0)(path);
-#else
     memset(ms_dirName, 0, DIRNAMELENGTH);
     memcpy(ms_dirName, ms_rootDirName, strlen(ms_rootDirName));
 
@@ -211,7 +200,7 @@ int CFileMgr::SetDir(const char *path)
         if (*lastPos != '\\')
             lastPos[1] = '\\';
     }
-    
+
     int r;
     if (WindowsCharset != CP_UTF8)
     {
@@ -222,14 +211,11 @@ int CFileMgr::SetDir(const char *path)
         r = _chdir(ms_dirName);
 
     return r;
-#endif
 }
 
+// 0x538860
 int CFileMgr::SetDirMyDocuments()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(*)()) 0x538860)();
-#else
     char *userDir = InitUserDirectories();
     if (strlen(userDir) >= DIRNAMELENGTH)
     {
@@ -249,18 +235,15 @@ int CFileMgr::SetDirMyDocuments()
         r = _chdir(ms_dirName);
 
     return r;
-#endif
 }
 
+// 0x538890
 size_t CFileMgr::LoadFile(const char *path, unsigned char *buf, size_t size, const char *mode)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(*)(const char*, unsigned char*, int, const char*)) 0x538890)(path, buf, size, mode);
-#else
-    FILE *f = CFileMgr::OpenFile(path, mode);
+    FILESTREAM f = CFileMgr::OpenFile(path, mode);
     if (f == nullptr)
         return -1;
-    
+
     // MikuAuahDark: The original implementation actually ignore
     // "size" parameter and adds NUL terminator at the end of the
     // buffer, but that behavior causes buffer overflow
@@ -268,94 +251,67 @@ size_t CFileMgr::LoadFile(const char *path, unsigned char *buf, size_t size, con
     fclose(f);
 
     return readed;
-#endif
 }
 
-FILE* CFileMgr::OpenFile(const char *path, const char *mode)
+// 0x538900
+FILESTREAM CFileMgr::OpenFile(const char *path, const char *mode)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((FILE*(*)(const char*, const char*)) 0x538900)(path, mode);
-#else
     if (WindowsCharset == CP_UTF8)
         return fopen(path, mode);
-    
+
     // MikuAuahDark: Let's improve it to allow opening non-ANSI names
     // Convert to wide char
     std::wstring pathWide = UTF8ToUnicode(path);
     std::wstring modeWide = UTF8ToUnicode(mode);
     return _wfopen(pathWide.c_str(), modeWide.c_str());
-#endif
 }
 
-FILE* CFileMgr::OpenFileForWriting(const char *path)
+// 0x538910
+FILESTREAM CFileMgr::OpenFileForWriting(const char *path)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((FILE*(*)(const char*)) 0x538910)(path);
-#else
     return CFileMgr::OpenFile(path, "wb");
-#endif
 }
 
-FILE* CFileMgr::OpenFileForAppending(const char *path)
+// 0x538930
+FILESTREAM CFileMgr::OpenFileForAppending(const char *path)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((FILE*(*)(const char*)) 0x538930)(path);
-#else
     return CFileMgr::OpenFile(path, "a");
-#endif
 }
 
-size_t CFileMgr::Read(FILE *file, void *buf, size_t size)
+// 0x538950
+size_t CFileMgr::Read(FILESTREAM file, void *buf, size_t size)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((size_t(*)(FILE*, void*, size_t)) 0x538950)(file, buf, size);
-#else
     return fread(buf, 1, size, file);
-#endif
 }
 
-size_t CFileMgr::Write(FILE *file, const void *buf, size_t size)
+// 0x538970
+size_t CFileMgr::Write(FILESTREAM file, const void *buf, size_t size)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((size_t(*)(FILE*, const void*, size_t)) 0x538970)(file, buf, size);
-#else
     return fwrite(buf, 1, size, file);
-#endif
 }
 
-bool CFileMgr::Seek(FILE *file, long offset, int origin)
+// 0x538990
+bool CFileMgr::Seek(FILESTREAM file, long offset, int origin)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(*)(FILE*, long, int)) 0x538990)(file, offset, origin);
-#else
     // MikuAuahDark: Pretty sure it shouldn't be ret != 0
     return fseek(file, offset, origin) != 0;
-#endif
 }
 
-bool CFileMgr::ReadLine(FILE *file, char *str, int num)
+// 0x5389b0
+bool CFileMgr::ReadLine(FILESTREAM file, char *str, int num)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(*)(FILE*, char*, size_t)) 0x5389b0)(file, str, num);
-#else
     return fgets(str, num, file) != nullptr;
-#endif
 }
 
-int CFileMgr::CloseFile(FILE *file)
+// 0x5389d0
+int CFileMgr::CloseFile(FILESTREAM file)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(*)(FILE*)) 0x5389d0)(file);
-#else
     return fclose(file);
-#endif
 }
 
-int CFileMgr::GetFileLength(FILE *file)
+// 0x5389e0
+int CFileMgr::GetFileLength(FILESTREAM file)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(*)(FILE*)) 0x5389e0)(file);
-#else
     int currentPos, size;
     // MikuAuahDark: The actual implementation uses RwOsGetFileInterface
     // but for sake of portability, default stdio functions is used.
@@ -366,7 +322,7 @@ int CFileMgr::GetFileLength(FILE *file)
     functions->rwfseek(file, 0, SEEK_END);
     size = functions->rwftell(file);
     functions->rwfseek(file, currentPos, SEEK_SET);
-    
+
     return size;
     */
     currentPos = ftell(file);
@@ -375,51 +331,41 @@ int CFileMgr::GetFileLength(FILE *file)
     fseek(file, currentPos, SEEK_SET);
 
     return size;
-#endif
 }
 
-int CFileMgr::Tell(FILE *file)
+// 0x538a20
+int CFileMgr::Tell(FILESTREAM file)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(*)(FILE*)) 0x538a20)(file);
-#else
     /*
     RwFileFunctions *functions = RwOsGetFileInterface();
     return functions->rwftell(file);
     */
-
     return ftell(file);
-#endif
 }
 
-bool CFileMgr::GetErrorReadWrite(FILE *file)
+// 0x538a50
+bool CFileMgr::GetErrorReadWrite(FILESTREAM file)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(*)(FILE*)) 0x538a50)(file);
-#else
     return (bool) ferror(file);
-#endif
 }
 
 void CFileMgr::InjectHooks()
 {
-#ifndef USE_DEFAULT_FUNCTIONS
-    HookInstall(0x5386f0, &CFileMgr::Initialise);
-    HookInstall(0x538730, &CFileMgr::ChangeDir);
-    HookInstall(0x5387D0, &CFileMgr::SetDir);
-    HookInstall(0x538860, &CFileMgr::SetDirMyDocuments);
-    HookInstall(0x538890, &CFileMgr::LoadFile);
-    HookInstall(0x538900, &CFileMgr::OpenFile);
-    HookInstall(0x538910, &CFileMgr::OpenFileForWriting);
-    HookInstall(0x538930, &CFileMgr::OpenFileForAppending);
-    HookInstall(0x538950, &CFileMgr::Read);
-    HookInstall(0x538970, &CFileMgr::Write);
-    HookInstall(0x538990, &CFileMgr::Seek);
-    HookInstall(0x5389b0, &CFileMgr::ReadLine);
-    HookInstall(0x5389d0, &CFileMgr::CloseFile);
-    HookInstall(0x5389e0, &CFileMgr::GetFileLength);
-    HookInstall(0x538a20, &CFileMgr::Tell);
-    HookInstall(0x538a50, &CFileMgr::GetErrorReadWrite);
-    HookInstall(0x744fb0, &InitUserDirectories);
-#endif
+    ReversibleHooks::Install("CFileMgr", "Initialise", 0x5386f0, &CFileMgr::Initialise);
+    ReversibleHooks::Install("CFileMgr", "ChangeDir", 0x538730, &CFileMgr::ChangeDir);
+    ReversibleHooks::Install("CFileMgr", "SetDir", 0x5387D0, &CFileMgr::SetDir);
+    ReversibleHooks::Install("CFileMgr", "SetDirMyDocuments", 0x538860, &CFileMgr::SetDirMyDocuments);
+    ReversibleHooks::Install("CFileMgr", "LoadFile", 0x538890, &CFileMgr::LoadFile);
+    ReversibleHooks::Install("CFileMgr", "OpenFile", 0x538900, &CFileMgr::OpenFile);
+    ReversibleHooks::Install("CFileMgr", "OpenFileForWriting", 0x538910, &CFileMgr::OpenFileForWriting);
+    ReversibleHooks::Install("CFileMgr", "OpenFileForAppending", 0x538930, &CFileMgr::OpenFileForAppending);
+    ReversibleHooks::Install("CFileMgr", "Read", 0x538950, &CFileMgr::Read);
+    ReversibleHooks::Install("CFileMgr", "Write", 0x538970, &CFileMgr::Write);
+    ReversibleHooks::Install("CFileMgr", "Seek", 0x538990, &CFileMgr::Seek);
+    ReversibleHooks::Install("CFileMgr", "ReadLine", 0x5389b0, &CFileMgr::ReadLine);
+    ReversibleHooks::Install("CFileMgr", "CloseFile", 0x5389d0, &CFileMgr::CloseFile);
+    ReversibleHooks::Install("CFileMgr", "GetFileLength", 0x5389e0, &CFileMgr::GetFileLength);
+    ReversibleHooks::Install("CFileMgr", "Tell", 0x538a20, &CFileMgr::Tell);
+    ReversibleHooks::Install("CFileMgr", "GetErrorReadWrite", 0x538a50, &CFileMgr::GetErrorReadWrite);
+    ReversibleHooks::Install("CFileMgr", "InitUserDirectories", 0x744fb0, &InitUserDirectories);
 }

@@ -9,6 +9,7 @@ CColModel& CTempColModels::ms_colModelWheel1 = *(CColModel*)0x968F40;
 CColModel& CTempColModels::ms_colModelBodyPart1 = *(CColModel*)0x968F70;
 CColModel& CTempColModels::ms_colModelBodyPart2 = *(CColModel*)0x968FA0;
 CColModel& CTempColModels::ms_colModelWeapon = *(CColModel*)0x968FD0;
+CColModel& CTempColModels::ms_colModelBBox = *(CColModel*)0x968A00;
 
 void CTempColModels::InjectHooks()
 {

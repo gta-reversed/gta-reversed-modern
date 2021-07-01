@@ -41,4 +41,6 @@ public:
     static void InjectHooks();
 
     static void Init();
+    static int RegisterAudioBox(char name[16], int id, bool b, float x1, float y1, float z1, float x2, float y2, float z2);
+    static int RegisterAudioSphere(char name[16], int id, bool b, float x1, float y1, float z1, float radius);
 };

@@ -141,8 +141,9 @@ void CBaseModelInfo::ConvertAnimFileIndex()
 {
     CBaseModelInfo::ConvertAnimFileIndex_Reversed();
 }
-void CBaseModelInfo::ConvertAnimFileIndex_Reversed()
-{}
+void CBaseModelInfo::ConvertAnimFileIndex_Reversed() {
+    // NOP
+}
 
 signed int CBaseModelInfo::GetAnimFileIndex()
 {

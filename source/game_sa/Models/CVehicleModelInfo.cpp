@@ -152,7 +152,7 @@ void CVehicleModelInfo::Init()
 void CVehicleModelInfo::Init_Reversed()
 {
     CClumpModelInfo::Init();
-    m_nVehicleType = eVehicleType::VEHICLE_NONE;
+    m_nVehicleType = eVehicleType::VEHICLE_IGNORE;
     m_nWheelModelIndex = 01;
     m_fBikeSteerAngle = 999.99F;
 }
@@ -405,7 +405,7 @@ int CVehicleModelInfo::ChooseSecondComponent()
     return -1;
 }
 
-bool CVehicleModelInfo::IsUpgradeAvailable(VehicleUpgradePosn upgrade)
+bool CVehicleModelInfo::IsUpgradeAvailable(eVehicleUpgradePosn upgrade)
 {
     return m_pVehicleStruct->m_aUpgrades[upgrade].m_nParentComponentId >= 0;
 }

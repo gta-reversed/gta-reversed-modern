@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CBaseModelInfo.h"
 #include "CAtomicModelInfo.h"
 #include "CDamageAtomicModelInfo.h"
@@ -16,8 +16,7 @@
 #include "CLodTimeModelInfo.h"
 #include "CPedModelInfo.h"
 
-enum eModelInfoType : unsigned char
-{
+enum eModelInfoType : unsigned char {
     MODEL_INFO_TYPE_ATOMIC = 1,
     MODEL_INFO_TYPE_TIME = 3,
     MODEL_INFO_TYPE_WEAPON = 4,
@@ -27,13 +26,11 @@ enum eModelInfoType : unsigned char
     MODEL_INFO_TYPE_LOD_ATOMIC = 8,
 };
 
-class CModelInfo
-{
+class CModelInfo {
 public:
-	// variables
-	//static CBaseModelInfo *ms_modelInfoPtrs[20000]; Use GetModelInfo(int index) to get model info by id
+    // static CBaseModelInfo *ms_modelInfoPtrs[20000]; Use GetModelInfo(int index) to get model info by id
     static constexpr int NUM_MODEL_INFOS = 20000;
-	static CBaseModelInfo* (&ms_modelInfoPtrs)[NUM_MODEL_INFOS];
+    static CBaseModelInfo* (&ms_modelInfoPtrs)[NUM_MODEL_INFOS];
     static int& ms_lastPositionSearched;
 
     static constexpr int NUM_ATOMIC_MODEL_INFOS = 14000;
@@ -69,40 +66,38 @@ public:
 public:
     static void InjectHooks();
 
-	// functions
-	static void ReInit2dEffects();
-	static void ShutDown();
-	static CAtomicModelInfo* AddAtomicModel(int index);
-	static CDamageAtomicModelInfo* AddDamageAtomicModel(int index);
-	static CLodAtomicModelInfo* AddLodAtomicModel(int index);
-	static CTimeModelInfo* AddTimeModel(int index);
-	static CLodTimeModelInfo* AddLodTimeModel(int index);
-	static CWeaponModelInfo* AddWeaponModel(int index);
-	static CClumpModelInfo* AddClumpModel(int index);
-	static CVehicleModelInfo* AddVehicleModel(int index);
-	static class CPedModelInfo* AddPedModel(int index);
-	static void Initialise();
-	static CBaseModelInfo* GetModelInfo(char const* name, int* index);
-	static CBaseModelInfo* GetModelInfoFromHashKey(unsigned int uiHash, int* index);
-	static CBaseModelInfo* GetModelInfouint16_t(char const* name, unsigned short* pOutIndex);
-	// get model in range (search for model only in range (min;max))
-	static CBaseModelInfo* GetModelInfo(char const* name, int minIndex, int maxIndex);
-	static CStore<C2dEffect, NUM_2DFX_INFOS>* Get2dEffectStore();
-	static bool IsBoatModel(int index);
-	static bool IsCarModel(int index);
-	static bool IsTrainModel(int index);
-	static bool IsHeliModel(int index);
-	static bool IsPlaneModel(int index);
-	static bool IsBikeModel(int index);
-	static bool IsFakePlaneModel(int index);
-	static bool IsMonsterTruckModel(int index);
-	static bool IsQuadBikeModel(int index);
-	static bool IsBmxModel(int index);
-	static bool IsTrailerModel(int index);
-	// return -1 if model is not a vehicle model otherwise returns vehicle model type
-	static int IsVehicleModelType(int index);
+    static void ReInit2dEffects();
+    static void ShutDown();
+    static CAtomicModelInfo* AddAtomicModel(int index);
+    static CDamageAtomicModelInfo* AddDamageAtomicModel(int index);
+    static CLodAtomicModelInfo* AddLodAtomicModel(int index);
+    static CTimeModelInfo* AddTimeModel(int index);
+    static CLodTimeModelInfo* AddLodTimeModel(int index);
+    static CWeaponModelInfo* AddWeaponModel(int index);
+    static CClumpModelInfo* AddClumpModel(int index);
+    static CVehicleModelInfo* AddVehicleModel(int index);
+    static class CPedModelInfo* AddPedModel(int index);
+    static void Initialise();
+    static CBaseModelInfo* GetModelInfo(const char* name, int* index);
+    static CBaseModelInfo* GetModelInfoFromHashKey(unsigned int uiHash, int* index);
+    static CBaseModelInfo* GetModelInfoUInt16(const char* name, unsigned short* pOutIndex);
+    // get model in range (search for model only in range (min;max))
+    static CBaseModelInfo* GetModelInfo(const char* name, int minIndex, int maxIndex);
+    static CStore<C2dEffect, NUM_2DFX_INFOS>* Get2dEffectStore();
+    static bool IsBoatModel(int index);
+    static bool IsCarModel(int index);
+    static bool IsTrainModel(int index);
+    static bool IsHeliModel(int index);
+    static bool IsPlaneModel(int index);
+    static bool IsBikeModel(int index);
+    static bool IsFakePlaneModel(int index);
+    static bool IsMonsterTruckModel(int index);
+    static bool IsQuadBikeModel(int index);
+    static bool IsBmxModel(int index);
+    static bool IsTrailerModel(int index);
+    // return -1 if model is not a vehicle model otherwise returns vehicle model type
+    static int IsVehicleModelType(int index);
 
-    static CBaseModelInfo *GetModelInfo(int index) { return ms_modelInfoPtrs[index]; }
+    static CBaseModelInfo* GetModelInfo(int index) { return ms_modelInfoPtrs[index]; }
     static void SetModelInfo(int index, CBaseModelInfo* pInfo) { ms_modelInfoPtrs[index] = pInfo; }
-
 };

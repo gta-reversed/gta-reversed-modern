@@ -37,9 +37,10 @@ void COcclusion::Init()
     COcclusion::PreviousListWalkThroughFA = -1;
 }
 
-void COcclusion::AddOne(float dirMidX, float dirMidY, float dirMidZ, float widthX, float widthY, float height, float rotX, float rotY, float rotZ, float flags, bool isInterior)
+// 0x71DCD0
+void COcclusion::AddOne(float dirMidX, float dirMidY, float dirMidZ, float widthX, float widthY, float height, float rotX, float rotY, float rotZ, int flags, bool isInterior)
 {
-    plugin::Call<0x71DCD0, float, float, float, float, float, float, float, float, float, float, bool>
+    plugin::Call<0x71DCD0, float, float, float, float, float, float, float, float, float, int, bool>
         (dirMidX, dirMidY, dirMidZ, widthX, widthY, height, rotX, rotY, rotZ, flags, isInterior);
 }
 

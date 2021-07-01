@@ -8,39 +8,36 @@
 
 #include <cstdio>
 
-#include "PluginBase.h"
-
 // For backward compatibility
-typedef FILE *FILESTREAM;
+typedef FILE* FILESTREAM;
 constexpr size_t DIRNAMELENGTH = 128;
 
-class CFileMgr
-{
+class CFileMgr {
 public:
     // variables
     // length: 128
-    static char *ms_dirName;
+    static char* ms_dirName;
     // length: 128
-    static char *ms_rootDirName;
+    static char* ms_rootDirName;
     // functions
     static void Initialise();
-    static int ChangeDir(const char *path);
-    static int SetDir(const char *path);
+    static int ChangeDir(const char* path);
+    static int SetDir(const char* path);
     static int SetDirMyDocuments();
-    static size_t LoadFile(const char *path, unsigned char *buf, size_t size, const char *mode);
-    static FILE *OpenFile(const char *path, const char *mode);
-    static FILE *OpenFileForWriting(const char *path);
-    static FILE *OpenFileForAppending(const char *path);
-    static size_t Read(FILE *file, void *buf, size_t size);
-    static size_t Write(FILE *file, const void *buf, size_t size);
-    static bool Seek(FILE *file, long offset, int origin);
-    static bool ReadLine(FILE *file, char *str, int num);
-    static int CloseFile(FILE *file);
-    static int GetFileLength(FILE *file);
-    static int Tell(FILE *file);
-    static bool GetErrorReadWrite(FILE *file);
+    static size_t LoadFile(const char* path, unsigned char* buf, size_t size, const char* mode);
+    static FILESTREAM OpenFile(const char* path, const char* mode);
+    static FILESTREAM OpenFileForWriting(const char* path);
+    static FILESTREAM OpenFileForAppending(const char* path);
+    static size_t Read(FILESTREAM file, void* buf, size_t size);
+    static size_t Write(FILESTREAM file, const void* buf, size_t size);
+    static bool Seek(FILESTREAM file, long offset, int origin);
+    static bool ReadLine(FILESTREAM file, char* str, int num);
+    static int CloseFile(FILESTREAM file);
+    static int GetFileLength(FILESTREAM file);
+    static int Tell(FILESTREAM file);
+    static bool GetErrorReadWrite(FILESTREAM file);
 
 private:
-    friend void InjectHooksMain(void);
+    friend void InjectHooksMain();
     static void InjectHooks();
 };

@@ -6,9 +6,7 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-struct  tBikeHandlingData {
+struct tBikeHandlingData {
     int m_nVehicleId;
     float m_fLeanFwdCOM;
     float m_fLeanFwdForce;

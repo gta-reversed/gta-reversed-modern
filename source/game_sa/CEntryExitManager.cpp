@@ -11,9 +11,12 @@ CQuadTreeNode*& CEntryExitManager::mp_QuadTree = *reinterpret_cast<CQuadTreeNode
 CEntryExit*& CEntryExitManager::mp_Active = *reinterpret_cast<CEntryExit**>(0x96A7D4);
 CPool<CEntryExit>*& CEntryExitManager::mp_poolEntryExits = *reinterpret_cast<CPool<CEntryExit>**>(0x96A7D8);
 unsigned int& CEntryExitManager::ms_numVisibleEntities = *reinterpret_cast<unsigned int*>(0x96A7DC);
+// ms_entryExitStack? 0x96A718 = a * 10.0f; float a = 1.0f / (50.0f * 50.0f);
 
 void CEntryExitManager::InjectHooks() {
 //    ReversibleHooks::Install("CEntryExitManager", "Init", 0x43F880, &CEntryExitManager::Init);
+//    ReversibleHooks::Install("CEntryExitManager", "Load", 0x5D55C0, &CEntryExitManager::Load);
+//    ReversibleHooks::Install("CEntryExitManager", "Save", 0x5D5970, &CEntryExitManager::Save);
 //    ReversibleHooks::Install("CEntryExitManager", "Update", 0x440D10, &CEntryExitManager::Update);
 //    ReversibleHooks::Install("CEntryExitManager", "Shutdown", 0x440B90, &CEntryExitManager::Shutdown);
 //    ReversibleHooks::Install("CEntryExitManager", "ShutdownForRestart", 0x440C40, &CEntryExitManager::ShutdownForRestart);
@@ -22,6 +25,16 @@ void CEntryExitManager::InjectHooks() {
 // 0x43F880
 void CEntryExitManager::Init() {
     plugin::Call<0x43F880>();
+}
+
+// 0x5D55C0
+void CEntryExitManager::Load() {
+    plugin::Call<0x5D55C0>();
+}
+
+// 0x5D5970
+void CEntryExitManager::Save() {
+    plugin::Call<0x5D5970>();
 }
 
 // 0x440D10
@@ -39,9 +52,14 @@ void CEntryExitManager::ShutdownForRestart() {
     plugin::Call<0x440C40>();
 }
 
-int CEntryExitManager::AddOne(float entranceX, float entranceY, float entranceZ, float entranceAngle, float entranceRangeX, float entranceRangeY, float fUnused, float exitX, float exitY, float exitZ, float exitAngle, int area, int flags, int skyColor, int timeOn, int timeOff, int numberOfPeds, char const* name)
+// 0x43E410
+void CEntryExitManager::AddEntryExitToStack(CEntryExit* entryExit) {
+    plugin::Call<0x43E410, CEntryExit*>(entryExit);
+}
+
+int CEntryExitManager::AddOne(float entranceX, float entranceY, float entranceZ, float entranceAngle, float entranceRangeX, float entranceRangeY, float fUnused, float exitX, float exitY, float exitZ, float exitAngle, int area, int flags, int skyColor, int timeOn, int timeOff, int numberOfPeds, const char* name)
 {
-    return plugin::CallAndReturn<int, 0x43FA00, float, float, float, float, float, float, float, float, float, float, float, int, int, int, int, int, int, char const*>
+    return plugin::CallAndReturn<int, 0x43FA00, float, float, float, float, float, float, float, float, float, float, float, int, int, int, int, int, int, const char*>
         (entranceX, entranceY, entranceZ, entranceAngle, entranceRangeX, entranceRangeY, fUnused, exitX, exitY, exitZ, exitAngle, area, flags, skyColor, timeOn, timeOff, numberOfPeds, name);
 }
 
@@ -58,4 +76,39 @@ int CEntryExitManager::FindNearestEntryExit(CVector2D const& position, float ran
 // 0x43F0A0
 void CEntryExitManager::PostEntryExitsCreation() {
     plugin::Call<0x43F0A0>();
+}
+
+// 0x43ED80
+void CEntryExitManager::ResetAreaCodeForVisibleObjects() {
+    plugin::Call<0x43ED80>();
+}
+
+// 0x43ECF0
+void CEntryExitManager::SetAreaCodeForVisibleObjects() {
+    plugin::Call<0x43ECF0>();
+}
+
+// 0x43EFD0
+int CEntryExitManager::GetEntryExitIndex(const char* name, unsigned short enabledFlags, unsigned short disabledFlags) {
+    return plugin::CallAndReturn<int, 0x43EFD0, const char*, unsigned short, unsigned short>(name, enabledFlags, disabledFlags);
+}
+
+// 0x43F180
+void CEntryExitManager::EnableBurglaryHouses(bool a1) {
+    plugin::Call<0x43F180, bool>(a1);
+}
+
+// 0x43FDB0
+void CEntryExitManager::GotoEntryExit(CEntryExit* entryExit) {
+    plugin::Call<0x43FDB0, CEntryExit*>(entryExit);
+}
+
+// 0x43FEA0
+void CEntryExitManager::GotoEntryExitVC(const char* name) {
+    plugin::Call<0x43FEA0, const char*>(name);
+}
+
+// 0x43F050
+void CEntryExitManager::LinkEntryExit(CEntryExit* entryExit) {
+    plugin::Call<0x43F050, CEntryExit*>(entryExit);
 }

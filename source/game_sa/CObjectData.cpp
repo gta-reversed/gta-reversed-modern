@@ -8,7 +8,8 @@ void CObjectData::InjectHooks()
     ReversibleHooks::Install("CObjectData", "SetObjectData", 0x5A2D00, &CObjectData::SetObjectData);
 }
 
-void CObjectData::Initialise(char* fileName, bool bUnused)
+// 0x5B5360
+void CObjectData::Initialise(const char* fileName, bool bUnused)
 {
     auto& pDefault = CObjectData::GetDefault();
     pDefault.m_fMass = 99999.0F;
@@ -55,7 +56,7 @@ void CObjectData::Initialise(char* fileName, bool bUnused)
         memset(&pCurInfo, 0, sizeof(CObjectData));
         char modelName[256], effectName[256];
         float fPercentSubmerged;
-        int32_t iColDamEffect, iSpecialColResp, iCameraAvoid, iCausesExplosion, iFxType; // Have to be read as 32 bit integers and later assigned to 8 bit int
+        int32_t iColDamEffect, iSpecialColResp, iCameraAvoid, iCausesExplosion, iFxType; // Have to be read as 32-bit integers and later assigned to 8 bit int
         sscanf(pLine, "%s %f %f %f %f %f %f %f %d %d %d %d %d %f %f %f %s %f %f %f %f %f %d %d",
             modelName,
             &pCurInfo.m_fMass,
@@ -139,6 +140,7 @@ void CObjectData::Initialise(char* fileName, bool bUnused)
     CFileMgr::CloseFile(pFile);
 }
 
+// 0x5A2D00
 void CObjectData::SetObjectData(int dwModelIndex, CObject& pObject)
 {
     auto* const pModelInfo = CModelInfo::GetModelInfo(dwModelIndex);
