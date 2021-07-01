@@ -487,7 +487,7 @@ bool CStreaming::ConvertBufferToObject(unsigned char* pFileBuffer, int modelId)
             RwStreamClose(pRwStream, &rwStreamInitializationData);
             return false;
         }
-       
+
     }
     else if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL) {
         int modelTxdIndex = modelId - RESOURCE_ID_TXD;
@@ -914,8 +914,8 @@ void CStreaming::Load()
 }
 
 // There are only 2 streaming channels within CStreaming::ms_channel. In this function,
-// if your current channelIndex is zero then "1 - channelIndex" will give you the other 
-// streaming channel within CStreaming::ms_channel which is 1 (second streaming channel). 
+// if your current channelIndex is zero then "1 - channelIndex" will give you the other
+// streaming channel within CStreaming::ms_channel which is 1 (second streaming channel).
 // 0x40EA10
 void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests)
 {
@@ -1531,7 +1531,7 @@ void CStreaming::RequestSpecialModel(int modelId, char const* name, int flags)
         }
     }
     const auto modelNameKey = pModelInfo->m_nKey;
-    pModelInfo->m_nKey = CKeyGen::GetUppercaseKey(name);
+    pModelInfo->SetModelName(name);
     CBaseModelInfo* pFoundModelInfo = nullptr;
     for (int i = 0; i < 1001; i++) {
         CBaseModelInfo* pTheModelInfo = CModelInfo::ms_modelInfoPtrs[i];
@@ -1554,7 +1554,7 @@ void CStreaming::RequestSpecialModel(int modelId, char const* name, int flags)
         pModelInfo->SetTexDictionary("generic");
     else
         pModelInfo->SetTexDictionary(name);
-    // The first 3 bytes of outOffset is used for m_nCdPosn and 
+    // The first 3 bytes of outOffset is used for m_nCdPosn and
     // the remaining 1 byte is used for m_nImgId
     // outOffset & 0xFFFFF = returns the first 3 bytes and ignores the last one
     // outOffset >> 24 = Ignores the first 3 bytes and returns the last byte
@@ -1683,17 +1683,17 @@ void CStreaming::ReInit() {
     for (std::int32_t i = 0; i < TOTAL_SPECIAL_MODELS; i++) {
         const std::int32_t modelId = i + SPECIAL_MODELS_RESOURCE_ID;
         RemoveModel(modelId);
-        CModelInfo::ms_modelInfoPtrs[modelId]->m_nKey = CKeyGen::GetUppercaseKey(gta_empty_string);
+        CModelInfo::ms_modelInfoPtrs[modelId]->SetModelName(gta_empty_string);
     }
     for (std::int32_t i = 0; i < TOTAL_CLOTHES_MODELS; i++) {
         const std::int32_t modelId = i + CLOTHES_MODELS_RESOURCE_ID;
         RemoveModel(modelId);
-        CModelInfo::ms_modelInfoPtrs[modelId]->m_nKey = CKeyGen::GetUppercaseKey(gta_empty_string);
+        CModelInfo::ms_modelInfoPtrs[modelId]->SetModelName(gta_empty_string);
     }
     for (std::int32_t i = 0; i < TOTAL_CUTSCENE_MODELS; i++) {
         const std::int32_t modelId = i + CUTSCENE_MODELS_RESOURCE_ID;
         RemoveModel(modelId);
-        CModelInfo::ms_modelInfoPtrs[modelId]->m_nKey = CKeyGen::GetUppercaseKey(gta_empty_string);
+        CModelInfo::ms_modelInfoPtrs[modelId]->SetModelName(gta_empty_string);
     }
 }
 
@@ -2495,11 +2495,11 @@ void CStreaming::Init2()
     ms_numPriorityRequests = 0;
     CTheScripts::StreamedScripts.Initialise();
     // ms_streamingBufferSize is 0 at this point.
-    // After calling LoadCdDirectory, ms_streamingBufferSize will contain the maximum number 
+    // After calling LoadCdDirectory, ms_streamingBufferSize will contain the maximum number
     // of memory blocks/sectors used for a streaming model, like txd, dff, col, ipl, scm, etc.
     // The size of one streaming sector is STREAMING_BLOCK_SIZE by default.
     LoadCdDirectory();
-    if (ms_streamingBufferSize & 1) // check if the value of ms_streamingBufferSize is odd 
+    if (ms_streamingBufferSize & 1) // check if the value of ms_streamingBufferSize is odd
         ms_streamingBufferSize++; // make it even by adding 1
 
     // Since gta sa streamer runs on a secondary thread, if two models can fit

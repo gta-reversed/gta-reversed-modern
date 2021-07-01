@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CBaseModelInfo.h"
 #include "RwObjectNameIdAssocation.h"
 
@@ -19,6 +19,7 @@ struct tCompSearchStructByName {
 
     inline tCompSearchStructByName(char* name, RwFrame* frame) : m_pName(name), m_pFrame(frame) {}
 };
+
 struct tCompSearchStructById {
     int32_t m_nId;
     RwFrame* m_pFrame;
@@ -26,20 +27,19 @@ struct tCompSearchStructById {
     inline tCompSearchStructById(int32_t id, RwFrame* frame) : m_nId(id), m_pFrame(frame) {}
 };
 
-
-class  CClumpModelInfo : public CBaseModelInfo {
+class CClumpModelInfo : public CBaseModelInfo {
 public:
-    CClumpModelInfo() : CBaseModelInfo() {}
-public:
-	union{
-		char *m_animFileName;
-		unsigned int m_dwAnimFileIndex;
-	};
+    union {
+        char*        m_animFileName;
+        unsigned int m_dwAnimFileIndex;
+    };
 
 public:
     static void InjectHooks();
 
-    // Overriden vtable methods
+    CClumpModelInfo() : CBaseModelInfo() {}
+
+    // Overridden vtable methods
     ModelInfoType GetModelType() override;
     void Init() override;
     void Shutdown() override;
@@ -51,9 +51,9 @@ public:
     void ConvertAnimFileIndex() override;
     signed int GetAnimFileIndex() override;
 
-	// Added vtable methods
-    virtual CBox *GetBoundingBox();
-    virtual void SetClump(RpClump *clump);
+    // Added vtable methods
+    virtual CBox* GetBoundingBox();
+    virtual void SetClump(RpClump* clump);
 
     // Reversed vtable methods
     ModelInfoType GetModelType_Reversed();
@@ -72,19 +72,19 @@ public:
     // Class functions
     void SetFrameIds(RwObjectNameIdAssocation* data);
 
-	// static functions
-	static RpAtomic* SetAtomicRendererCB(RpAtomic *atomic, void *renderFunc);
+    // static functions
+    static RpAtomic* SetAtomicRendererCB(RpAtomic* atomic, void* renderFunc);
     static RpAtomic* AtomicSetupLightingCB(RpAtomic* atomic, void* data);
     static RpAtomic* SetHierarchyForSkinAtomic(RpAtomic* pAtomic, void* data);
-	/* struct tSearchData { char *name; RwFrame *result; };
-	  returns 0 if we found frame, or last frame if we need to continue searching */
-	static RwFrame *FindFrameFromNameCB(RwFrame *frame, void *searchData);
-	static RwFrame *FindFrameFromNameWithoutIdCB(RwFrame *frame, void *searchData);
-	static RwFrame *FindFrameFromIdCB(RwFrame *frame, void *searchData);
-	static RwFrame *FillFrameArrayCB(RwFrame *frame, void *data);
-	static RwFrame *GetFrameFromId(RpClump *clump, int id);
-	static RwFrame *GetFrameFromName(RpClump *clump, char *name);
-	static void FillFrameArray(RpClump *clump, RwFrame **frames);
+    /* struct tSearchData { char *name; RwFrame *result; };
+      returns 0 if we found frame, or last frame if we need to continue searching */
+    static RwFrame* FindFrameFromNameCB(RwFrame* frame, void* searchData);
+    static RwFrame* FindFrameFromNameWithoutIdCB(RwFrame* frame, void* searchData);
+    static RwFrame* FindFrameFromIdCB(RwFrame* frame, void* searchData);
+    static RwFrame* FillFrameArrayCB(RwFrame* frame, void* data);
+    static RwFrame* GetFrameFromId(RpClump* clump, int id);
+    static RwFrame* GetFrameFromName(RpClump* clump, char* name);
+    static void FillFrameArray(RpClump* clump, RwFrame** frames);
 };
 
 void SetClumpModelInfoFlags(CClumpModelInfo* modelInfo, unsigned int dwFlags);

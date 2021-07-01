@@ -13,13 +13,27 @@ CPool<IplDef> *&CIplStore::ms_pPool = *(CPool<IplDef> **)0x8E3FB0;
 unsigned int MAX_IPL_ENTITY_INDEX_ARRAYS = 40;
 unsigned int MAX_IPL_INSTANCES = 1000;
 
-CEntity **ppCurrIplInstance = (CEntity **)0x8E3EFC;
-unsigned int &NumIplEntityIndexArrays = *(unsigned int *)0x8E3F00;
-int **IplEntityIndexArrays = (int **)0x8E3F08;
-bool &gbIplsNeededAtPosn = *(bool *)0x8E3FA8;
-CVector &gvecIplsNeededAtPosn = *(CVector *)0x8E3FD0;
-unsigned int &gCurrIplInstancesCount = *(unsigned int *)0xBCC0D8;
-CEntity **gCurrIplInstances = (CEntity **)0xBCC0E0;
+CEntity** ppCurrIplInstance = (CEntity**)0x8E3EFC;
+unsigned int& NumIplEntityIndexArrays = *(unsigned int*)0x8E3F00;
+int** IplEntityIndexArrays = (int**)0x8E3F08;
+bool& gbIplsNeededAtPosn = *(bool*)0x8E3FA8;
+CVector& gvecIplsNeededAtPosn = *(CVector*)0x8E3FD0;
+unsigned int& gCurrIplInstancesCount = *(unsigned int*)0xBCC0D8;
+CEntity** gCurrIplInstances = (CEntity**)0xBCC0E0;
+
+void CIplStore::InjectHooks() {
+    ReversibleHooks::Install("CIplStore", "GetIplEntityIndexArray", 0x4047B0, &CIplStore::GetIplEntityIndexArray);
+}
+
+// 0x405EC0
+void CIplStore::Initialise() {
+    plugin::Call<0x405EC0>();
+}
+
+// 0x405FA0
+void CIplStore::Shutdown() {
+    plugin::Call<0x405FA0>();
+}
 
 // Converted from cdecl int CIplStore::AddIplSlot(char const*name) 0x405AC0
 int CIplStore::AddIplSlot(char const* name) {
@@ -56,9 +70,9 @@ CRect* CIplStore::GetBoundingBox(int iplSlotIndex) {
     return plugin::CallAndReturn<CRect*, 0x404C70, int>(iplSlotIndex);
 }
 
-// Converted from cdecl int* CIplStore::GetIplEntityIndexArray(int arrayIndex) 0x4047B0
+// 0x4047B0
 int* CIplStore::GetIplEntityIndexArray(int arrayIndex) {
-    return plugin::CallAndReturn<int*, 0x4047B0, int>(arrayIndex);
+    return IplEntityIndexArrays[arrayIndex];
 }
 
 // Converted from cdecl char* CIplStore::GetIplName(int iplSlotIndex) 0x404A60
@@ -81,14 +95,14 @@ void CIplStore::IncludeEntity(int iplSlotIndex, CEntity* entity) {
     plugin::Call<0x404C90, int, CEntity*>(iplSlotIndex, entity);
 }
 
-// Converted from cdecl void CIplStore::Initialise(void) 0x405EC0
-void CIplStore::Initialise() {
-    plugin::Call<0x405EC0>();
+// 0x5D5420
+void CIplStore::Save() {
+    plugin::Call<0x5D5420>();
 }
 
-// Converted from cdecl bool CIplStore::Load(void) 0x5D54A0
-bool CIplStore::Load() {
-    return plugin::CallAndReturn<bool, 0x5D54A0>();
+// 0x5D54A0
+void CIplStore::Load() {
+    plugin::Call<0x5D54A0>();
 }
 
 // Converted from cdecl void CIplStore::LoadAllRemainingIpls(void) 0x405780
@@ -151,11 +165,6 @@ void CIplStore::RequestIpls(CVector const& posn, int playerNumber) {
     plugin::Call<0x405520, CVector const&, int>(posn, playerNumber);
 }
 
-// Converted from cdecl bool CIplStore::Save(void) 0x5D5420
-bool CIplStore::Save() {
-    return plugin::CallAndReturn<bool, 0x5D5420>();
-}
-
 // Converted from cdecl void CIplStore::SetIplsRequired(CVector const&posn,int playerNumber) 0x404700
 void CIplStore::SetIplsRequired(CVector const& posn, int playerNumber) {
     plugin::Call<0x404700, CVector const&, int>(posn, playerNumber);
@@ -166,14 +175,9 @@ void CIplStore::SetIsInterior(int iplSlotIndex, bool isInterior) {
     plugin::Call<0x404A90, int, bool>(iplSlotIndex, isInterior);
 }
 
-// Converted from cdecl int CIplStore::SetupRelatedIpls(char const*iplName,int entityArraysIndex,CEntity **instances) 0x404DE0
+// 0x404DE0
 int CIplStore::SetupRelatedIpls(char const* iplName, int entityArraysIndex, CEntity** instances) {
     return plugin::CallAndReturn<int, 0x404DE0, char const*, int, CEntity**>(iplName, entityArraysIndex, instances);
-}
-
-// Converted from cdecl void CIplStore::Shutdown(void) 0x405FA0
-void CIplStore::Shutdown() {
-    plugin::Call<0x405FA0>();
 }
 
 // Converted from cdecl void SetIfInteriorIplIsRequired(CVector2D const&posn,void *data) 0x4045F0

@@ -1,5 +1,5 @@
 #pragma once
-#include "PluginBase.h"
+
 #include "CColModel.h"
 
 class CTempColModels {
@@ -12,8 +12,8 @@ public:
     static CColModel& ms_colModelWheel1;
     static CColModel& ms_colModelBodyPart1;
     static CColModel& ms_colModelBodyPart2;
-
     static CColModel& ms_colModelWeapon;
+    static CColModel& ms_colModelBBox;
 
 public:
     static void InjectHooks();

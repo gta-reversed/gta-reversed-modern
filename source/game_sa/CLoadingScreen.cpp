@@ -29,93 +29,97 @@ bool& CLoadingScreen::m_bReadyToDelete = *(bool*)0xBAB33D;
 float& CLoadingScreen::m_timeSinceLastScreen = *(float*)0xBAB340;
 CSprite2d* CLoadingScreen::m_aSplashes = (CSprite2d*)0xBAB35C;  // CSprite2d CLoadingScreen::m_aSplashes[7]
 
-// Converted from cdecl void CLoadingScreen::Shutdown(void) 0x58FF10 
+void CLoadingScreen::InjectHooks() {
+    ReversibleHooks::Install("CLoadingScreen", "LoadingScreen", 0x53DED0, LoadingScreen);
+}
+
+// 0x5902B0
+void CLoadingScreen::Init(bool unusedFlag, bool bLoaded) {
+    plugin::Call<0x5902B0, bool, bool>(unusedFlag, bLoaded);
+}
+
+// 0x58FF10
 void CLoadingScreen::Shutdown() {
     plugin::Call<0x58FF10>();
 }
 
-// Converted from cdecl void CLoadingScreen::RenderSplash(void) 0x58FF60 
+// 0x58FF60
 void CLoadingScreen::RenderSplash() {
     plugin::Call<0x58FF60>();
 }
 
-// Converted from cdecl void CLoadingScreen::LoadSplashes(uchar bStarting,uchar bNvidia) 0x5900B0 
-void CLoadingScreen::LoadSplashes(unsigned char bStarting, unsigned char bNvidia) {
+// 0x5900B0
+void CLoadingScreen::LoadSplashes(bool bStarting, bool bNvidia) {
     plugin::Call<0x5900B0, unsigned char, unsigned char>(bStarting, bNvidia);
 }
 
-// Converted from cdecl void CLoadingScreen::DisplayMessage(char const *message) 0x590220 
+// 0x590220
 void CLoadingScreen::DisplayMessage(char const* message) {
     plugin::Call<0x590220, char const*>(message);
 }
 
-// Converted from cdecl void CLoadingScreen::SetLoadingBarMsg(char const *msg1,char const *msg2) 0x590240 
+// 0x590240
 void CLoadingScreen::SetLoadingBarMsg(char const* msg1, char const* msg2) {
     plugin::Call<0x590240, char const*, char const*>(msg1, msg2);
 }
 
-// Converted from cdecl double CLoadingScreen::GetClockTime(bool bIgnorePauseTime) 0x590280 
+// 0x590280
 double CLoadingScreen::GetClockTime(bool bIgnorePauseTime) {
     return plugin::CallAndReturn<double, 0x590280, bool>(bIgnorePauseTime);
 }
 
-// Converted from cdecl void CLoadingScreen::Init(bool unusedflag,bool bLoaded) 0x5902B0 
-void CLoadingScreen::Init(bool unusedflag, bool bLoaded) {
-    plugin::Call<0x5902B0, bool, bool>(unusedflag, bLoaded);
-}
-
-// Converted from cdecl void CLoadingScreen::Continue(void) 0x590320 
+// 0x590320
 void CLoadingScreen::Continue() {
     plugin::Call<0x590320>();
 }
 
-// Converted from cdecl void CLoadingScreen::RenderLoadingBar(void) 0x590370 
+// 0x590370
 void CLoadingScreen::RenderLoadingBar() {
     plugin::Call<0x590370>();
 }
 
-// Converted from cdecl void CLoadingScreen::DisplayNextSplash(void) 0x5904D0 
+// 0x5904D0
 void CLoadingScreen::DisplayNextSplash() {
     plugin::Call<0x5904D0>();
 }
 
-// Converted from cdecl void CLoadingScreen::StartFading(void) 0x590530 
+// 0x590530
 void CLoadingScreen::StartFading() {
     plugin::Call<0x590530>();
 }
 
-// Converted from cdecl void CLoadingScreen::DisplayPCScreen(void) 0x590570 
+// 0x590570
 void CLoadingScreen::DisplayPCScreen() {
     plugin::Call<0x590570>();
 }
 
-// Converted from cdecl void CLoadingScreen::Update(void) 0x5905E0 
+// 0x5905E0
 void CLoadingScreen::Update() {
     plugin::Call<0x5905E0>();
 }
 
-// Converted from cdecl void CLoadingScreen::DoPCTitleFadeOut(void) 0x590860 
+// 0x590860
 void CLoadingScreen::DoPCTitleFadeOut() {
     plugin::Call<0x590860>();
 }
 
-// Converted from cdecl void CLoadingScreen::DoPCTitleFadeIn(void) 0x590990 
+// 0x590990
 void CLoadingScreen::DoPCTitleFadeIn() {
     plugin::Call<0x590990>();
 }
 
-// Converted from cdecl void CLoadingScreen::DoPCScreenChange(uint bFinish) 0x590AC0 
+// 0x590AC0
 void CLoadingScreen::DoPCScreenChange(unsigned int bFinish) {
     plugin::Call<0x590AC0, unsigned int>(bFinish);
 }
 
-// Converted from cdecl void CLoadingScreen::NewChunkLoaded(void) 0x590D00 
+// 0x590D00
 void CLoadingScreen::NewChunkLoaded() {
     plugin::Call<0x590D00>();
 }
 
 // 0x53DED0
-void LoadingScreen(char *msg1, char *msg2) {
+void LoadingScreen(const char* msg1, const char* msg2) {
     if (msg1) {
         CLoadingScreen::SetLoadingBarMsg(msg1, msg2);
     }

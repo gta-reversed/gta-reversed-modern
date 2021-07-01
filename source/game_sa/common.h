@@ -112,6 +112,8 @@ void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const
 void TransformVectors(RwV3d* vecsOut, int numVectors, CMatrix const& matrix, RwV3d const* vecsin);
 void TransformVectors(RwV3d* vecsOut, int numVectors, CSimpleTransform const& transform, RwV3d const* vecsin);
 
+// Converts degrees to radians
+// keywords: 0.017453292 flt_8595EC
 constexpr float DegreesToRadians(float angleInDegrees) {
     return angleInDegrees * PI / 180.0F;
 }

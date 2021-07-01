@@ -27,7 +27,7 @@ void CModelInfo::InjectHooks()
     ReversibleHooks::Install("CModelInfo", "ShutDown", 0x4C63E0, &CModelInfo::ShutDown);
     ReversibleHooks::Install("CModelInfo", "ReInit2dEffects", 0x4C63B0, &CModelInfo::ReInit2dEffects);
 
-    ReversibleHooks::Install("CModelInfo", "GetModelInfouint16_t", 0x4C59F0, &CModelInfo::GetModelInfouint16_t);
+    ReversibleHooks::Install("CModelInfo", "GetModelInfoUInt16", 0x4C59F0, &CModelInfo::GetModelInfoUInt16);
     ReversibleHooks::Install("CModelInfo", "GetModelInfoFromHashKey", 0x4C59B0, &CModelInfo::GetModelInfoFromHashKey);
     ReversibleHooks::Install("CModelInfo", "GetModelInfo_full", 0x4C5940, (CBaseModelInfo * (*)(char const*, int*)) & CModelInfo::GetModelInfo);
     ReversibleHooks::Install("CModelInfo", "GetModelInfo_minmax", 0x4C5A20, (CBaseModelInfo*(*)(char const*, int, int))&CModelInfo::GetModelInfo);
@@ -56,7 +56,7 @@ void CModelInfo::InjectHooks()
     ReversibleHooks::Install("CModelInfo", "IsVehicleModelType", 0x4C5C80, &CModelInfo::IsVehicleModelType);
 }
 
-// Converted from stdcall void CModelInfo::ReInit2dEffects(void) 0x4C63B0
+// 0x4C63B0
 void CModelInfo::ReInit2dEffects()
 {
     ms_2dFXInfoStore.m_nCount = 0;
@@ -64,7 +64,7 @@ void CModelInfo::ReInit2dEffects()
         CModelInfo::GetModelInfo(i)->Init2dEffects();
 }
 
-// Converted from stdcall void CModelInfo::ShutDown(void) 0x4C63E0
+// 0x4C63E0
 void CModelInfo::ShutDown()
 {
     for (uint32_t i = 0; i < ms_atomicModelInfoStore.m_nCount; ++i)
@@ -111,7 +111,7 @@ void CModelInfo::ShutDown()
     ms_2dFXInfoStore.m_nCount = 0;
 }
 
-// Converted from stdcall CAtomicModelInfo* CModelInfo::AddAtomicModel(int index) 0x4C6620
+// 0x4C6620
 CAtomicModelInfo* CModelInfo::AddAtomicModel(int index)
 {
     auto& pInfo = ms_atomicModelInfoStore.AddItem();
@@ -120,7 +120,7 @@ CAtomicModelInfo* CModelInfo::AddAtomicModel(int index)
     return &pInfo;
 }
 
-// Converted from stdcall CDamageAtomicModelInfo* CModelInfo::AddDamageAtomicModel(int index) 0x4C6650
+// 0x4C6650
 CDamageAtomicModelInfo* CModelInfo::AddDamageAtomicModel(int index)
 {
     auto& pInfo = ms_damageAtomicModelInfoStore.AddItem();
@@ -129,7 +129,7 @@ CDamageAtomicModelInfo* CModelInfo::AddDamageAtomicModel(int index)
     return &pInfo;
 }
 
-// Converted from stdcall CLodAtomicModelInfo* CModelInfo::AddLodAtomicModel(int index) 0x4C6680
+// 0x4C6680
 CLodAtomicModelInfo* CModelInfo::AddLodAtomicModel(int index)
 {
     auto& pInfo =  ms_lodAtomicModelInfoStore.AddItem();
@@ -138,7 +138,7 @@ CLodAtomicModelInfo* CModelInfo::AddLodAtomicModel(int index)
     return &pInfo;
 }
 
-// Converted from stdcall CTimeModelInfo* CModelInfo::AddTimeModel(int index) 0x4C66B0
+// 0x4C66B0
 CTimeModelInfo* CModelInfo::AddTimeModel(int index)
 {
     auto& pInfo = ms_timeModelInfoStore.AddItem();
@@ -147,7 +147,7 @@ CTimeModelInfo* CModelInfo::AddTimeModel(int index)
     return &pInfo;
 }
 
-// Converted from stdcall CLodTimeModelInfo* CModelInfo::AddLodTimeModel(int index) 0x4C66E0
+// 0x4C66E0
 CLodTimeModelInfo* CModelInfo::AddLodTimeModel(int index)
 {
     auto& pInfo = ms_lodTimeModelInfoStore.AddItem();
@@ -156,7 +156,7 @@ CLodTimeModelInfo* CModelInfo::AddLodTimeModel(int index)
     return &pInfo;
 }
 
-// Converted from stdcall CWeaponModelInfo* CModelInfo::AddWeaponModel(int index) 0x4C6710
+// 0x4C6710
 CWeaponModelInfo* CModelInfo::AddWeaponModel(int index)
 {
     auto& pInfo = ms_weaponModelInfoStore.AddItem();
@@ -165,7 +165,7 @@ CWeaponModelInfo* CModelInfo::AddWeaponModel(int index)
     return &pInfo;
 }
 
-// Converted from stdcall CClumpModelInfo* CModelInfo::AddClumpModel(int) index 0x4C6740
+// 0x4C6740
 CClumpModelInfo* CModelInfo::AddClumpModel(int index)
 {
     auto& pInfo = ms_clumpModelInfoStore.AddItem();
@@ -174,7 +174,7 @@ CClumpModelInfo* CModelInfo::AddClumpModel(int index)
     return &pInfo;
 }
 
-// Converted from stdcall CVehicleModelInfo* CModelInfo::AddVehicleModel(int index) 0x4C6770
+// 0x4C6770
 CVehicleModelInfo* CModelInfo::AddVehicleModel(int index)
 {
     auto& pInfo = ms_vehicleModelInfoStore.AddItem();
@@ -183,7 +183,7 @@ CVehicleModelInfo* CModelInfo::AddVehicleModel(int index)
     return &pInfo;
 }
 
-// Converted from stdcall CPedModelInfo* CModelInfo::AddPedModel(int index) 0x4C67A0
+// 0x4C67A0
 CPedModelInfo* CModelInfo::AddPedModel(int index)
 {
     auto& pInfo = ms_pedModelInfoStore.AddItem();
@@ -192,7 +192,7 @@ CPedModelInfo* CModelInfo::AddPedModel(int index)
     return &pInfo;
 }
 
-// Converted from stdcall void CModelInfo::Initialise(void) 0x4C6810
+// 0x4C6810
 void CModelInfo::Initialise()
 {
     memset(ms_modelInfoPtrs, 0, sizeof(ms_modelInfoPtrs));
@@ -248,8 +248,8 @@ void CModelInfo::Initialise()
     pBodyPart2->m_fDrawDistance = 80.0F;
 }
 
-// Converted from stdcall CBaseModelInfo* CModelInfo::GetModelInfo(char* name,int *index) 0x4C5940
-CBaseModelInfo* CModelInfo::GetModelInfo(char const* name, int* index)
+// 0x4C5940
+CBaseModelInfo* CModelInfo::GetModelInfo(const char* name, int* index)
 {
     auto iKey = CKeyGen::GetUppercaseKey(name);
     auto iCurInd = CModelInfo::ms_lastPositionSearched;
@@ -287,7 +287,7 @@ CBaseModelInfo* CModelInfo::GetModelInfo(char const* name, int* index)
     return nullptr;
 }
 
-// Converted from stdcall CBaseModelInfo* CModelInfo::GetModelInfoFromHashKey(uint,int *index) 0x4C59B0
+// 0x4C59B0
 CBaseModelInfo* CModelInfo::GetModelInfoFromHashKey(unsigned int uiHash, int* index)
 {
     for (int32_t i = 0; i < NUM_MODEL_INFOS; ++i) {
@@ -303,8 +303,8 @@ CBaseModelInfo* CModelInfo::GetModelInfoFromHashKey(unsigned int uiHash, int* in
     return nullptr;
 }
 
-// Converted from stdcall CBaseModelInfo* CModelInfo::GetModelInfouint16_t(char *name,ushort *pOutIndex) 0x4C59F0
-CBaseModelInfo* CModelInfo::GetModelInfouint16_t(char const* name, unsigned short* pOutIndex)
+// 0x4C59F0
+CBaseModelInfo* CModelInfo::GetModelInfoUInt16(const char* name, unsigned short* pOutIndex)
 {
     int modelId = 0;
     auto result = CModelInfo::GetModelInfo(name, &modelId);
@@ -314,7 +314,7 @@ CBaseModelInfo* CModelInfo::GetModelInfouint16_t(char const* name, unsigned shor
     return result;
 }
 
-// Converted from stdcall CBaseModelInfo* CModelInfo::GetModelInfo(char* name,int minIndex,int maxInedx) 0x4C5A20
+// 0x4C5A20
 CBaseModelInfo* CModelInfo::GetModelInfo(char const* name, int minIndex, int maxIndex)
 {
     auto iKey = CKeyGen::GetUppercaseKey(name);
@@ -336,7 +336,7 @@ CStore<C2dEffect, CModelInfo::NUM_2DFX_INFOS>* CModelInfo::Get2dEffectStore()
     return ((CStore<C2dEffect, NUM_2DFX_INFOS>* (__cdecl *)())0x4C5A60)();
 }
 
-// Converted from stdcall bool CModelInfo::IsBoatModel(int index) 0x4C5A70
+// 0x4C5A70
 bool CModelInfo::IsBoatModel(int index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
@@ -349,7 +349,7 @@ bool CModelInfo::IsBoatModel(int index)
     return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_BOAT;
 }
 
-// Converted from stdcall bool CModelInfo::IsCarModel(int index) 0x4C5AA0
+// 0x4C5AA0
 bool CModelInfo::IsCarModel(int index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
@@ -362,7 +362,7 @@ bool CModelInfo::IsCarModel(int index)
     return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_AUTOMOBILE;
 }
 
-// Converted from stdcall bool CModelInfo::IsTrainModel(int index) 0x4C5AD0
+// 0x4C5AD0
 bool CModelInfo::IsTrainModel(int index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
@@ -375,7 +375,7 @@ bool CModelInfo::IsTrainModel(int index)
     return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_TRAIN;
 }
 
-// Converted from stdcall bool CModelInfo::IsHeliModel(int index) 0x4C5B00
+// 0x4C5B00
 bool CModelInfo::IsHeliModel(int index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
@@ -388,7 +388,7 @@ bool CModelInfo::IsHeliModel(int index)
     return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_HELI;
 }
 
-// Converted from stdcall bool CModelInfo::IsPlaneModel(int index) 0x4C5B30
+// 0x4C5B30
 bool CModelInfo::IsPlaneModel(int index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
@@ -401,7 +401,7 @@ bool CModelInfo::IsPlaneModel(int index)
     return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_PLANE;
 }
 
-// Converted from stdcall bool CModelInfo::IsBikeModel(int index) 0x4C5B60
+// 0x4C5B60
 bool CModelInfo::IsBikeModel(int index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
@@ -414,7 +414,7 @@ bool CModelInfo::IsBikeModel(int index)
     return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_BIKE;
 }
 
-// Converted from stdcall bool CModelInfo::IsFakePlaneModel(int index) 0x4C5B90
+// 0x4C5B90
 bool CModelInfo::IsFakePlaneModel(int index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
@@ -427,7 +427,7 @@ bool CModelInfo::IsFakePlaneModel(int index)
     return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_FPLANE;
 }
 
-// Converted from stdcall bool CModelInfo::IsMonsterTruckModel(int index) 0x4C5BC0
+// 0x4C5BC0
 bool CModelInfo::IsMonsterTruckModel(int index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
@@ -440,7 +440,7 @@ bool CModelInfo::IsMonsterTruckModel(int index)
     return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_MTRUCK;
 }
 
-// Converted from stdcall bool CModelInfo::IsQuadBikeModel(int index) 0x4C5BF0
+// 0x4C5BF0
 bool CModelInfo::IsQuadBikeModel(int index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
@@ -453,7 +453,7 @@ bool CModelInfo::IsQuadBikeModel(int index)
     return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_QUAD;
 }
 
-// Converted from stdcall bool CModelInfo::IsBmxModel(int index) 0x4C5C20
+// 0x4C5C20
 bool CModelInfo::IsBmxModel(int index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
@@ -466,7 +466,7 @@ bool CModelInfo::IsBmxModel(int index)
     return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_BMX;
 }
 
-// Converted from stdcall bool CModelInfo::IsTrailerModel(int index) 0x4C5C50
+// 0x4C5C50
 bool CModelInfo::IsTrailerModel(int index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
@@ -479,7 +479,7 @@ bool CModelInfo::IsTrailerModel(int index)
     return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_TRAILER;
 }
 
-// Converted from stdcall int CModelInfo::IsVehicleModelType(int index) 0x4C5C80
+// 0x4C5C80
 int CModelInfo::IsVehicleModelType(int index)
 {
     if (index >= NUM_MODEL_INFOS)

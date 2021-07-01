@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CPhysical.h"
 #include "CAEVehicleAudioEntity.h"
 #include "tHandlingData.h"
@@ -643,7 +643,7 @@ public:
     bool IsFakeAircraft() const { return m_vehicleSubType == VEHICLE_FHELI || m_vehicleSubType == VEHICLE_FPLANE; }
     bool IsPlane() const { return m_vehicleSubType == VEHICLE_PLANE; }
     bool IsHeli() const { return m_vehicleSubType == VEHICLE_HELI; }
-    bool IsVehicleTypeValid() const { return m_vehicleSubType != VEHICLE_NONE; }
+    bool IsVehicleTypeValid() const { return m_vehicleSubType != VEHICLE_IGNORE; }
     bool IsBoat() const { return m_vehicleType == VEHICLE_BOAT; }
     bool IsBike() const { return m_vehicleType == VEHICLE_BIKE; }
     bool IsQuad() const { return m_vehicleType == VEHICLE_QUAD; }

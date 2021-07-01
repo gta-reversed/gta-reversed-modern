@@ -6,16 +6,21 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "IplDef.h"
 #include "CEntity.h"
 #include "CQuadTreeNode.h"
 #include "CEntity.h"
 
-class  CIplStore {
+class CIplStore {
 public:
-    static CQuadTreeNode *&ms_pQuadTree;
-    static CPool<IplDef> *&ms_pPool;
+    static CQuadTreeNode*& ms_pQuadTree;
+    static CPool<IplDef>*& ms_pPool;
+
+public:
+    static void InjectHooks();
+
+    static void Initialise();
+    static void Shutdown();
 
     // returns slot index
     static int AddIplSlot(char const* name);
@@ -32,8 +37,8 @@ public:
     static int GetNewIplEntityIndexArray(int entitiesCount);
     static bool HaveIplsLoaded(CVector const& coords, int playerNumber);
     static void IncludeEntity(int iplSlotIndex, CEntity* entity);
-    static void Initialise();
-    static bool Load();
+    static void Save();
+    static void Load();
     static void LoadAllRemainingIpls();
     static bool LoadIpl(int iplSlotIndex, unsigned char* data, int dataSize);
     static bool LoadIplBoundingBox(int iplSlotIndex, unsigned char* data, int dataSize);
@@ -46,26 +51,24 @@ public:
     static void RemoveRelatedIpls(int entityArraysIndex);
     static void RequestIplAndIgnore(int iplSlotIndex);
     static void RequestIpls(CVector const& posn, int playerNumber);
-    static bool Save();
     static void SetIplsRequired(CVector const& posn, int playerNumber);
     static void SetIsInterior(int iplSlotIndex, bool isInterior);
     static int SetupRelatedIpls(char const* iplName, int entityArraysIndex, CEntity** instances);
-    static void Shutdown();
 
     // 0x59EB20
     inline static bool HasDynamicStreamingDisabled(int iplSlotIndex) { return ms_pPool->GetAt(iplSlotIndex)->m_bDisableDynamicStreaming; }
 };
 
 extern unsigned int MAX_IPL_ENTITY_INDEX_ARRAYS; // default 40
-extern unsigned int MAX_IPL_INSTANCES; // default 1000
+extern unsigned int MAX_IPL_INSTANCES;           // default 1000
 
-extern CEntity **ppCurrIplInstance;
-extern unsigned int &NumIplEntityIndexArrays;
-extern int **IplEntityIndexArrays; // int *IplEntityIndexArrays[40]
-extern bool &gbIplsNeededAtPosn;
-extern CVector &gvecIplsNeededAtPosn;
-extern unsigned int &gCurrIplInstancesCount;
-extern CEntity **gCurrIplInstances; // CEntity *gCurrIplInstances[1000]
+extern CEntity** ppCurrIplInstance;
+extern unsigned int& NumIplEntityIndexArrays;
+extern int** IplEntityIndexArrays; // int *IplEntityIndexArrays[40]
+extern bool& gbIplsNeededAtPosn;
+extern CVector& gvecIplsNeededAtPosn;
+extern unsigned int& gCurrIplInstancesCount;
+extern CEntity** gCurrIplInstances; // CEntity *gCurrIplInstances[1000]
 
 void SetIfInteriorIplIsRequired(CVector2D const& posn, void* data);
 void SetIfIplIsRequired(CVector2D const& posn, void* data);

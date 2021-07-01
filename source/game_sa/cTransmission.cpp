@@ -2,22 +2,31 @@
 
 void cTransmission::InjectHooks()
 {
-    HookInstall(0x6D0590, &cTransmission::DisplayGearRatios);
-    HookInstall(0x6D0460, &cTransmission::InitGearRatios);
-    HookInstall(0x6D0530, &cTransmission::CalculateGearForSimpleCar);
-    HookInstall(0x6D05E0, &cTransmission::CalculateDriveAcceleration);
+    ReversibleHooks::Install("cTransmission", "DisplayGearRatios", 0x6D0590, &cTransmission::DisplayGearRatios);
+    ReversibleHooks::Install("cTransmission", "InitGearRatios", 0x6D0460, &cTransmission::InitGearRatios);
+    ReversibleHooks::Install("cTransmission", "CalculateGearForSimpleCar", 0x6D0530, &cTransmission::CalculateGearForSimpleCar);
+    ReversibleHooks::Install("cTransmission", "CalculateDriveAcceleration", 0x6D05E0, &cTransmission::CalculateDriveAcceleration);
 }
 
+// unused
+//
+// Usage:
+//     auto vehicle = FindPlayerVehicle(-1, false);
+//     if (vehicle) {
+//         vehicle->m_pHandlingData->GetTransmission().DisplayGearRatios();
+//     }
+//
+// 0x6D0590
 void cTransmission::DisplayGearRatios()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethod<0x6D0590, cTransmission*>(this);
-#else
-    static const float magic = 0.277778f / 50.0f;
+    // 1000 millimeters / 1 hour in seconds
+    // flt_858630
+    static constexpr float magic_0 = 1000.0f / 3600.0f;
+    static constexpr float magic = magic_0 / 50.0f;
+
     for (std::uint8_t i = 0; i <= m_nNumberOfGears; i++)
     {
         tTransmissionGear& gear = m_aGears[i];
-        float a = (1.0f / magic) * gear.m_maxVelocity;
         printf(
             "%d, max v = %3.2f, up at = %3.2f, down at = %3.2f\n",
             i,
@@ -25,14 +34,11 @@ void cTransmission::DisplayGearRatios()
             (1.0f / magic) * gear.m_changeUpVelocity,
             (1.0f / magic) * gear.m_changeDownVelocity);
     }
-#endif
 }
 
+// 0x6D0460
 void cTransmission::InitGearRatios()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethod<0x6D0460, cTransmission*>(this);
-#else
     memset(m_aGears, 0, sizeof(m_aGears));
     float averageHalfGearVelocity = 0.5f * m_fMaxGearVelocity / m_nNumberOfGears;
     float maxGearVelocity = m_fMaxGearVelocity - averageHalfGearVelocity;
@@ -59,14 +65,11 @@ void cTransmission::InitGearRatios()
     m_aGears[0].m_changeUpVelocity = -0.01f;
     m_aGears[0].m_changeDownVelocity = m_maxReverseGearVelocity;
     m_aGears[1].m_changeDownVelocity = -0.01f;
-#endif
 }
 
+// 0x6D0530
 void cTransmission::CalculateGearForSimpleCar(float speed, uchar& currentGear)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethod<0x6D0530, cTransmission*, float, uchar&>(this, speed, currentGear);
-#else
     m_currentVelocity = speed;
     tTransmissionGear& gear = m_aGears[currentGear];
     if (speed > gear.m_changeUpVelocity)
@@ -79,20 +82,18 @@ void cTransmission::CalculateGearForSimpleCar(float speed, uchar& currentGear)
         if (currentGear > 0)
             currentGear--;
     }
-#endif
 }
 
+// 0x6D05E0
 float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uchar& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8_t allWheelsOnGround, uint8_t handlingCheat)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<float, 0x6D05E0, cTransmission*, float const&, uchar&, float&, float&, float*, float*, uint8_t, uint8_t>(this, gasPedal, currentGear, gearChangeCount, velocity, a6, a7, allWheelsOnGround, handlingCheat);
-#else
     static float cheatMultiplier = 0.0f;
     static float driveAcceleration = 0.0f;
     static float currentVelocity = 0.0f;
     currentVelocity = velocity;
     if (currentVelocity < m_maxReverseGearVelocity)
         return 0.0f;
+
     while (currentVelocity <= m_fMaxGearVelocity)
     {
         m_currentVelocity = currentVelocity;
@@ -196,7 +197,7 @@ float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uchar& cu
                     driveAcceleration *= *a7;
                 }
                 else
-                { 
+                {
                     *a6 += fabs(gasPedal) / m_fEngineInertia * CTimer::ms_fTimeStep * TRANSMISSION_FREE_ACCELERATION;
                     *a6 = std::min(*a6, 1.0f);
                     *a7 = 0.1f;
@@ -230,6 +231,4 @@ float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uchar& cu
             return 0.0f;
     }
     return 0.0f;
-#endif
 }
-

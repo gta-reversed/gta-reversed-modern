@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CBaseModelInfo.h"
 
 struct tVehicleComponentFlag {
@@ -13,14 +13,14 @@ struct tVehicleComponentFlag {
     unsigned int m_nFlag;
 };
 
-class  CAtomicModelInfo : public CBaseModelInfo {
+class CAtomicModelInfo : public CBaseModelInfo {
 public:
     CAtomicModelInfo() : CBaseModelInfo() {}
 
 public:
     static void InjectHooks();
 
-	// vtable overrides
+    // vtable overrides
     CAtomicModelInfo* AsAtomicModelInfoPtr() override;
     ModelInfoType GetModelType() override;
     void Init() override;
@@ -30,7 +30,7 @@ public:
     RwObject* CreateInstance(RwMatrix* matrix) override;
 
     // vtable added methods
-	virtual void SetAtomic(RpAtomic *atomic);
+    virtual void SetAtomic(RpAtomic* atomic);
 
     // vtable implementations;
     CAtomicModelInfo* AsAtomicModelInfoPtr_Reversed();
@@ -43,7 +43,7 @@ public:
     void SetAtomic_Reversed(RpAtomic* atomic);
 
     // class methods
-	struct RpAtomic *GetAtomicFromDistance(float distance);
+    struct RpAtomic* GetAtomicFromDistance(float distance);
     void SetupVehicleUpgradeFlags(char const* name);
 };
 

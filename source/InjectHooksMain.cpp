@@ -314,6 +314,9 @@ void InjectHooksMain()
     JPegPlugin::InjectHooks();
     PipelinePlugin::InjectHooks();
     CCollisionPlugin::InjectHooks();
+    CIplStore::InjectHooks();
+    cHandlingDataMgr::InjectHooks();
+    CLoadingScreen::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();
