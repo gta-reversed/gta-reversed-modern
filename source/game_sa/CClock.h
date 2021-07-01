@@ -8,7 +8,7 @@
 
 class CClock {
 public:
-    static unsigned char (&daysInMonth)[12]; // static unsigned char const daysInMonth[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+    static unsigned char daysInMonth[12];
     static bool& bClockHasBeenStored;
     static unsigned short& ms_Stored_nGameClockSeconds;
     static unsigned char& ms_Stored_nGameClockMinutes;
@@ -31,12 +31,10 @@ public:
     static void Update();
 
     static unsigned short GetGameClockMinutesUntil(unsigned char hours, unsigned char minutes);
-    static bool GetIsTimeInRange(unsigned char hourA, unsigned char hourB);
+    static bool GetIsTimeInRange(unsigned char from, unsigned char h2);
     static void NormaliseGameClock();
     static void OffsetClockByADay(unsigned int timeDirection);
     static void SetGameClock(unsigned char hours, unsigned char minutes, unsigned char day);
     static void StoreClock();
     static void RestoreClock();
 };
-
-//#include "meta/meta.CClock.h"
