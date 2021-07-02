@@ -79,7 +79,7 @@ void CSimpleVariablesSaveStructure::Construct() {
     m_bInvertLook4Pad = CPad::bInvertLook4Pad;
 
     m_nMaximumWantedLevel = CWanted::MaximumWantedLevel;
-    m_nMaxChaos = CWanted::nMaximumWantedLevel;
+    m_nMaxChaos = CWanted::MaximumChaosLevel;
 
     m_bGermanGame = CLocalisation::germanGame;
     m_bFrenchGame = CLocalisation::frenchGame;
@@ -150,7 +150,7 @@ void CSimpleVariablesSaveStructure::Extract(unsigned int& versionId) const {
     CPad::bInvertLook4Pad = m_bInvertLook4Pad;
 
     CWanted::MaximumWantedLevel = m_nMaximumWantedLevel;
-    CWanted::nMaximumWantedLevel = m_nMaxChaos;
+    CWanted::MaximumChaosLevel = m_nMaxChaos;
 
     CLocalisation::germanGame = m_bGermanGame;
     CLocalisation::frenchGame = m_bFrenchGame;
