@@ -7,11 +7,13 @@
 #include "StdInc.h"
 
 unsigned int& CWanted::MaximumWantedLevel = *(unsigned int*)0x8CDEE4;
-unsigned int& CWanted::nMaximumWantedLevel = *(unsigned int*)0x8CDEE8;
+// 0x8CDEE8
+unsigned int CWanted::MaximumChaosLevel = 9200; // original name nMaximumWantedLevel
 bool& CWanted::bUseNewsHeliInAdditionToPolice = *(bool*)0xB7CB8C;
 
 void CWanted::InjectHooks()
 {
+    ReversibleHooks::Install("CWanted", "UpdateWantedLevel", 0x561C90, &CWanted::UpdateWantedLevel);
     ReversibleHooks::Install("CWanted", "AreSwatRequired", 0x561F40, &CWanted::AreSwatRequired);
     ReversibleHooks::Install("CWanted", "AreFbiRequired", 0x561F60, &CWanted::AreFbiRequired);
     ReversibleHooks::Install("CWanted", "AreArmyRequired", 0x561F80, &CWanted::AreArmyRequired);
@@ -64,13 +66,77 @@ void CWanted::Reset() {
 void CWanted::InitialiseStaticVariables() 
 {
     MaximumWantedLevel = 6;
-    nMaximumWantedLevel = 9200;
+    MaximumChaosLevel = 9200;
     bUseNewsHeliInAdditionToPolice = false;
 }
 
 // Converted from thiscall void CWanted::UpdateWantedLevel(void) 0x561C90
 void CWanted::UpdateWantedLevel() {
-    plugin::CallMethod<0x561C90, CWanted*>(this);
+    //plugin::CallMethod<0x561C90, CWanted*>(this);
+    m_nChaosLevel = std::min(m_nChaosLevel, MaximumChaosLevel);
+
+    unsigned int wantedLevel = m_nWantedLevel;
+
+    if (m_nChaosLevel > 4800) {
+        CStats::IncrementStat(eStats::STAT_TOTAL_NUMBER_OF_WANTED_STARS_ATTAINED, (float)(6 - wantedLevel));
+        m_nWantedLevel = 6;
+        m_nMaxCopCarsInPursuit = 3;
+        m_nMaxCopsInPursuit = 10;
+        m_nChanceOnRoadBlock = 30;
+    }
+    else if (m_nChaosLevel > 2400) {
+        CStats::IncrementStat(eStats::STAT_TOTAL_NUMBER_OF_WANTED_STARS_ATTAINED, (float)(5 - wantedLevel));
+        m_nWantedLevel = 5;
+        m_nMaxCopCarsInPursuit = 2;
+        m_nMaxCopsInPursuit = 6;
+        m_nChanceOnRoadBlock = 24;
+    }
+    else if (m_nChaosLevel > 1200) {
+        CStats::IncrementStat(eStats::STAT_TOTAL_NUMBER_OF_WANTED_STARS_ATTAINED, (float)(4 - wantedLevel));
+        m_nWantedLevel = 4;
+        m_nMaxCopCarsInPursuit = 2;
+        m_nMaxCopsInPursuit = 6;
+        m_nChanceOnRoadBlock = 18;
+    }
+    else if (m_nChaosLevel > 550) {
+        CStats::IncrementStat(eStats::STAT_TOTAL_NUMBER_OF_WANTED_STARS_ATTAINED, (float)(3 - wantedLevel));
+        m_nWantedLevel = 3;
+        m_nMaxCopCarsInPursuit = 2;
+        m_nMaxCopsInPursuit = 4;
+        m_nChanceOnRoadBlock = 12;
+    }
+    else if (m_nChaosLevel > 180) {
+        CStats::IncrementStat(eStats::STAT_TOTAL_NUMBER_OF_WANTED_STARS_ATTAINED, (float)(2 - wantedLevel));
+        m_nWantedLevel = 2;
+        m_nMaxCopCarsInPursuit = 2;
+        m_nMaxCopsInPursuit = 3;
+        m_nChanceOnRoadBlock = 0;
+    }
+    else if (m_nChaosLevel > 50) {
+        CStats::IncrementStat(eStats::STAT_TOTAL_NUMBER_OF_WANTED_STARS_ATTAINED, (float)(1 - wantedLevel));
+        m_nWantedLevel = 1;
+        m_nMaxCopCarsInPursuit = 1;
+        m_nMaxCopsInPursuit = 1;
+        m_nChanceOnRoadBlock = 0;
+    }
+    else {
+        if (m_nWantedLevel == 1)
+            CStats::IncrementStat(STAT_TOTAL_NUMBER_OF_WANTED_STARS_EVADED, 1.0);
+
+        m_nWantedLevel = 0;
+        m_nMaxCopCarsInPursuit = 0;
+        m_nMaxCopsInPursuit = 0;
+        m_nChanceOnRoadBlock = 0;
+    }
+
+    if (wantedLevel != m_nWantedLevel)
+        m_nLastTimeWantedLevelChanged = CTimer::m_snTimeInMilliseconds;
+
+    if (m_bEverybodyBackOff || m_bPoliceBackOff || m_bPoliceBackOffGarage) {
+        m_nMaxCopCarsInPursuit = 0;
+        m_nMaxCopsInPursuit = 0;
+        m_nChanceOnRoadBlock = 0;
+    }
 }
 
 // Set Maximum Wanted Level
@@ -81,31 +147,31 @@ void CWanted::SetMaximumWantedLevel(int level)
     {
     case 0:
         MaximumWantedLevel = 0;
-        nMaximumWantedLevel = 0;
+        MaximumChaosLevel = 0;
         break;
     case 1:
         MaximumWantedLevel = 1;
-        nMaximumWantedLevel = 115;
+        MaximumChaosLevel = 115;
         break;
     case 2:
         MaximumWantedLevel = 2;
-        nMaximumWantedLevel = 365;
+        MaximumChaosLevel = 365;
         break;
     case 3:
         MaximumWantedLevel = 3;
-        nMaximumWantedLevel = 875;
+        MaximumChaosLevel = 875;
         break;
     case 4:
         MaximumWantedLevel = 4;
-        nMaximumWantedLevel = 1800;
+        MaximumChaosLevel = 1800;
         break;
     case 5:
         MaximumWantedLevel = 5;
-        nMaximumWantedLevel = 3500;
+        MaximumChaosLevel = 3500;
         break;
     case 6:
         MaximumWantedLevel = 6;
-        nMaximumWantedLevel = 6900;
+        MaximumChaosLevel = 6900;
         break;
     default:
         return;
@@ -202,19 +268,18 @@ void CWanted::RegisterCrime_Immediately(eCrimeType crimeType, const CVector& pos
 }
 
 // 0x562470
-void CWanted::SetWantedLevel(int level) {
+void CWanted::SetWantedLevel(unsigned int level) {
     if (CCheat::m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE])
         return;
 
-    int newLevel = level;
-    if (level > MaximumWantedLevel)
-        newLevel = MaximumWantedLevel;
+    unsigned int newLevel = std::min(level, MaximumWantedLevel);
 
     ClearQdCrimes();
 
     switch (newLevel) {
     case 0:
         m_nChaosLevel = 0;
+        break;
     case 1:
         m_nChaosLevel = 70;
         break;
@@ -238,16 +303,17 @@ void CWanted::SetWantedLevel(int level) {
 }
 
 // 0x562540
-void CWanted::CheatWantedLevel(int level) {
+void CWanted::CheatWantedLevel(unsigned int level) {
     if (level > MaximumWantedLevel) {
         SetMaximumWantedLevel(level);
     }
+
     SetWantedLevel(level);
     UpdateWantedLevel();
 }
 
 // 0x562570
-void CWanted::SetWantedLevelNoDrop(int level) {
+void CWanted::SetWantedLevelNoDrop(unsigned int level) {
     if (m_nWantedLevel < m_nWantedLevelBeforeParole)
         SetWantedLevel(m_nWantedLevelBeforeParole);
 

@@ -57,7 +57,7 @@ public:
     char            _pad299[3];
 
     static unsigned int &MaximumWantedLevel; // default 6
-    static unsigned int &nMaximumWantedLevel; // default 9200
+    static unsigned int MaximumChaosLevel;
     static bool &bUseNewsHeliInAdditionToPolice;
 
 public:
@@ -84,9 +84,9 @@ public:
     static void UpdateEachFrame();
     void RegisterCrime(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare);
     void RegisterCrime_Immediately(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare);
-    void SetWantedLevel(int level);
-    void CheatWantedLevel(int level);
-    void SetWantedLevelNoDrop(int level);
+    void SetWantedLevel(unsigned int level);
+    void CheatWantedLevel(unsigned int level);
+    void SetWantedLevelNoDrop(unsigned int level);
     void ClearWantedLevelAndGoOnParole();
     static int WorkOutPolicePresence(CVector posn, float radius);
     void UpdateCrimesQ();
