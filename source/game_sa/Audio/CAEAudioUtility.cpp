@@ -16,6 +16,8 @@ void CAEAudioUtility::InjectHooks()
     ReversibleHooks::Install("CAEAudioUtility", "AudioLog10", 0x4d9e50, &CAEAudioUtility::AudioLog10);
     ReversibleHooks::Install("CAEAudioUtility", "ConvertFromBytesToMS", 0x4d9ef0, &CAEAudioUtility::ConvertFromBytesToMS);
     ReversibleHooks::Install("CAEAudioUtility", "ConvertFromMSToBytes", 0x4d9f40, &CAEAudioUtility::ConvertFromMSToBytes);
+    //ReversibleHooks::Install("CAEAudioUtility", "GetBankAndSoundFromScriptSlotAudioEvent", 0x4D9CC0, GetBankAndSoundFromScriptSlotAudioEvent);
+    //ReversibleHooks::Install("CAEAudioUtility", "FindVehicleOfPlayer", 0x4D9E10, FindVehicleOfPlayer);
 
     // Those 2 change logic of the functions, and shouldn't be toggled on/off
     HookInstall(0x4d9e80, &CAEAudioUtility::GetCurrentTimeInMilliseconds);
@@ -25,7 +27,9 @@ void CAEAudioUtility::InjectHooks()
 // 0x4d9c10
 int CAEAudioUtility::GetRandomNumberInRange(const int min, const int max)
 {
-    return CGeneral::GetRandomNumberInRange(min, max);
+    // This and CGeneral differs in that this function returns a number [min, max + 1], while
+    // the other [min, max]. To solve this we do `max + 1`
+    return CGeneral::GetRandomNumberInRange(min, max + 1);
 }
 
 // 0x4d9c50
@@ -104,4 +108,14 @@ void CAEAudioUtility::StaticInitialise()
     }
 
     startTimeMs = GetCurrentTimeInMilliseconds();
+}
+
+// 0x4D9CC0
+bool CAEAudioUtility::GetBankAndSoundFromScriptSlotAudioEvent(int* a1, int* a2, int* a3, int a4) {
+    return plugin::CallAndReturn<bool, 0x4D9CC0, int*, int*, int*, int>(a1, a2, a3, a4);
+}
+
+// 0x4D9E10
+CVehicle* CAEAudioUtility::FindVehicleOfPlayer() {
+    return plugin::CallAndReturn<CVehicle*, 0x4D9E10>();
 }
