@@ -160,7 +160,7 @@ public:
     void PreRenderForGlassWindow();
     void SetRwObjectAlpha(int alpha);
     CVector* FindTriggerPointCoors(CVector* pOutVec, int triggerIndex);
-    C2dEffect* GetRandom2dEffect(int effectType, unsigned char bCheckForEmptySlot);
+    C2dEffect* GetRandom2dEffect(int effectType, bool bCheckForEmptySlot);
     CVector TransformFromObjectSpace(CVector const& offset);
     CVector* TransformFromObjectSpace(CVector& outPosn, CVector const& offset);
     void CreateEffects();

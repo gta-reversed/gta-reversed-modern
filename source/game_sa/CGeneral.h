@@ -6,9 +6,8 @@
 */
 #pragma once
 
-#include <cstdlib>
+#include <cstdlib> // RAND_MAX
 
-#include "CCamera.h"
 
 class CGeneral {
 public:
@@ -21,8 +20,9 @@ public:
     static unsigned int GetNodeHeadingFromVector(float x, float y);
     static bool SolveQuadratic(float a, float b, float c, float& x1, float& x2);
     static float GetAngleBetweenPoints(float x1, float y1, float x2, float y2);
-    static unsigned int GetRandomNumberInRange(int min, int max); // returns random int in range [min;max)
-    static float GetRandomNumberInRange(float min, float max);    // returns random float in range [min;max)
+    static int GetRandomNumberInRange(const int min, const int max);
+    static float GetRandomNumberInRange(const float min, const float max);
 };
 
-extern constexpr float RAND_MAX_RECIPROCAL = 1.0f / static_cast<float>(RAND_MAX); // 1.0 / 32767.0 == 0.000030518509
+extern constexpr float RAND_MAX_INT_RECIPROCAL = 1.0f / static_cast<float>(RAND_MAX + 1); // 1.0 / 32768.0 == 1.0 / (RAND_MAX + 1) = 0.0000305175781
+extern constexpr float RAND_MAX_FLOAT_RECIPROCAL = 1.0f / static_cast<float>(RAND_MAX);   // 1.0 / 32767.0 == 1.0 / RAND_MAX       = 0.0000305185094
