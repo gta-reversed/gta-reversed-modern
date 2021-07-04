@@ -117,14 +117,14 @@ void CClouds::MovingFog_Create(CVector* posn) {
         return;
     }
 
-    ms_mf.m_vecPosn[slotId].x = rand() * RAND_MAX_RECIPROCAL * 116.0f - 58.0f + posn->x;
-    ms_mf.m_vecPosn[slotId].y = rand() * RAND_MAX_RECIPROCAL * 116.0f - 58.0f + posn->y;
-    ms_mf.m_vecPosn[slotId].z = rand() * RAND_MAX_RECIPROCAL * 10.0f - 5.0f + posn->z;
+    ms_mf.m_vecPosn[slotId].x = rand() * RAND_MAX_FLOAT_RECIPROCAL * 116.0f - 58.0f + posn->x;
+    ms_mf.m_vecPosn[slotId].y = rand() * RAND_MAX_FLOAT_RECIPROCAL * 116.0f - 58.0f + posn->y;
+    ms_mf.m_vecPosn[slotId].z = rand() * RAND_MAX_FLOAT_RECIPROCAL * 10.0f - 5.0f + posn->z;
 
-    ms_mf.m_fSize[slotId] = rand() * RAND_MAX_RECIPROCAL * 6.0f + 4.0f;
+    ms_mf.m_fSize[slotId] = rand() * RAND_MAX_FLOAT_RECIPROCAL * 6.0f + 4.0f;
     ms_mf.m_fIntensity[slotId] = 1.0f;
-    ms_mf.m_fMaxIntensity[slotId] = rand() * RAND_MAX_RECIPROCAL * 12.0f + 8.0f;
-    ms_mf.m_fSpeed[slotId] = rand() * RAND_MAX_RECIPROCAL * 0.7f + 0.5f;
+    ms_mf.m_fMaxIntensity[slotId] = rand() * RAND_MAX_FLOAT_RECIPROCAL * 12.0f + 8.0f;
+    ms_mf.m_fSpeed[slotId] = rand() * RAND_MAX_FLOAT_RECIPROCAL * 0.7f + 0.5f;
     ms_mf.m_bFogSlots[slotId] = true;
 }
 

@@ -4,8 +4,13 @@ Authors: GTA Community. See more here
 https://github.com/DK22Pac/plugin-sdk
 Do not delete this comment block. Respect others' work!
 */
-
 #include "StdInc.h"
+
+#include <random>
+#include <cassert>
+
+static std::random_device randomDevice;
+static std::mt19937 randomEngine(randomDevice());
 
 void CGeneral::InjectHooks() {
     ReversibleHooks::Install("CGeneral", "LimitAngle", 0x53CB00, &CGeneral::LimitAngle);
@@ -15,8 +20,8 @@ void CGeneral::InjectHooks() {
     ReversibleHooks::Install("CGeneral", "GetNodeHeadingFromVector", 0x53CDC0, &CGeneral::GetNodeHeadingFromVector);
     ReversibleHooks::Install("CGeneral", "SolveQuadratic", 0x53CE30, &CGeneral::SolveQuadratic);
     ReversibleHooks::Install("CGeneral", "GetAngleBetweenPoints", 0x53CEA0, &CGeneral::GetAngleBetweenPoints);
-    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, (unsigned int (*)(int, int)) & CGeneral::GetRandomNumberInRange);
-    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_float", 0x41BD90, (float (*)(float, float)) & CGeneral::GetRandomNumberInRange);
+    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, (int (*)(const int, const int)) & CGeneral::GetRandomNumberInRange);
+    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_float", 0x41BD90, (float (*)(const float, const float)) & CGeneral::GetRandomNumberInRange);
 }
 
 // 0x53CB00
@@ -134,16 +139,33 @@ float CGeneral::GetAngleBetweenPoints(float x1, float y1, float x2, float y2) {
     return RWRAD2DEG(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
 }
 
-// 0x407180
-// Differs from CAEAudioUtility in that this one returns [min, max), while
-// the other one returns [mim, max]
-unsigned int CGeneral::GetRandomNumberInRange(int min, int max) {
+/**
+ * Returns a pseudo-random number between min and max, exclusive [min, max).
+ * @param  min Minimum value
+ * @param  max Maximum value. Must be greater than min.
+ * @return Integer between min and max, exclusive.
+ * @addr   0x407180
+ */
+int CGeneral::GetRandomNumberInRange(const int min, const int max) {
+#ifdef BETTER_RNG
     // TODO: Use better RNG
-    return min + static_cast<int>(rand() * RAND_MAX_RECIPROCAL * (max - min));
+#else
+    return min + static_cast<int>(rand() * RAND_MAX_INT_RECIPROCAL * (max - min));
+#endif
 }
 
-// 0x41BD90
-float CGeneral::GetRandomNumberInRange(float min, float max) {
-    // TODO: Use better RNG
-    return min + (max - min) * rand() * RAND_MAX_RECIPROCAL;
+/**
+ * Returns a pseudo-random number between min and max, inclusive [min, max].
+ * @param  min Minimum value
+ * @param  max Maximum value. Must be greater than min.
+ * @return Float between min and max, exclusive.
+ * @addr   0x41BD90
+ */
+float CGeneral::GetRandomNumberInRange(const float min, const float max) {
+#ifdef BETTER_RNG
+    std::uniform_real_distribution<float> uniform_dist(min, max);
+    return uniform_dist(randomEngine);
+#else
+    return min + (max - min) * rand() * RAND_MAX_FLOAT_RECIPROCAL;
+#endif
 }

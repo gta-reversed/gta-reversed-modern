@@ -1109,8 +1109,14 @@ CVector* CEntity::FindTriggerPointCoors(CVector* pOutVec, int triggerIndex)
     return pOutVec;
 }
 
-// Converted from thiscall C2dEffect* CEntity::GetRandom2dEffect(int effectType,uchar) 0x533410
-C2dEffect* CEntity::GetRandom2dEffect(int effectType, unsigned char bCheckForEmptySlot)
+/**
+ * Returns a random effect with the given effectType among all the effects of the entity.
+ * @param effectType Type of effect. See e2dEffectType. (Always EFFECT_ATTRACTOR)
+ * @param bCheckForEmptySlot Should check for empty slot. (Always true)
+ * @return Random effect
+ * @addr 0x533410
+ */
+C2dEffect* CEntity::GetRandom2dEffect(int effectType, bool bCheckForEmptySlot)
 {
     C2dEffect* apArr[32];
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);

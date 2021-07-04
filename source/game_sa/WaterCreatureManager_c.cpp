@@ -145,7 +145,7 @@ void WaterCreatureManager_c::Update(float fTimestep)
                 if (WaterCreatureManager_c::CanAddWaterCreatureAtPos(nType, vecCreationPos))
                 {
                     const auto& pInfo = WaterCreatureManager_c::GetCreatureInfo(nType);
-                    auto iNumCreated = CGeneral::GetRandomNumberInRange(pInfo.m_nMinCreated, pInfo.m_nMaxCreated);
+                    unsigned int iNumCreated = CGeneral::GetRandomNumberInRange(pInfo.m_nMinCreated, pInfo.m_nMaxCreated);
                     iNumCreated = std::min(iNumCreated, m_freeList.GetNumItems());
 
                     WaterCreature_c* pGroupLeader = nullptr;
