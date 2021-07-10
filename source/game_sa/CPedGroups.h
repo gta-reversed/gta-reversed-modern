@@ -29,7 +29,7 @@ public:
     static signed int GetGroupId(CPedGroup* pedgrp);
     static CPedGroup* GetPedsGroup(CPed* ped);
     static bool IsGroupLeader(CPed* ped);
-    static char IsInPlayersGroup(CPed* a1);
+    static bool IsInPlayersGroup(CPed* ped);
     static void Process();
     static void RegisterKillByPlayer();
     static void RemoveAllFollowersFromGroup(int groupID);

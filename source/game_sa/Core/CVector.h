@@ -75,6 +75,11 @@ public:
     {
         return x * x + y * y;
     }
+
+    inline bool IsZero()
+    {
+        return x == 0.0F && y == 0.0F && z == 0.0F;
+    }
 };
 
 inline CVector operator-(const CVector& vecOne, const CVector& vecTwo) {

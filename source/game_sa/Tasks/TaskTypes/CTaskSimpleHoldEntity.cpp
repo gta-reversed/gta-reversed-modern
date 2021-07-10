@@ -104,7 +104,7 @@ CTaskSimpleHoldEntity::~CTaskSimpleHoldEntity() {
         }
     }
     if (m_pAnimBlendAssociation)
-        m_pAnimBlendAssociation->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, 0);
+        m_pAnimBlendAssociation->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
     if (m_pAnimBlock)
         CAnimManager::RemoveAnimBlockRef(m_pAnimBlock - CAnimManager::ms_aAnimBlocks);
 }

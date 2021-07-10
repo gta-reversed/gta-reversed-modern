@@ -36,7 +36,7 @@ CTaskSimpleGangDriveBy::~CTaskSimpleGangDriveBy()
     if (m_bAnimsReferenced)
         CAnimManager::RemoveAnimBlockRef(CAnimManager::GetAnimationBlockIndex(m_nRequiredAnimGroup));
     if (m_pAnimAssoc)
-        m_pAnimAssoc->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, 0);
+        m_pAnimAssoc->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
     if (m_pTargetEntity)
         m_pTargetEntity->CleanUpOldReference(&m_pTargetEntity);
 }

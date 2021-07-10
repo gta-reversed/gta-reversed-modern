@@ -61,5 +61,7 @@ public:
     static bool GetIsPaused() { return m_UserPause || m_CodePause; }
     static void UpdateVariables(float timeStep);
     static void UpdateTimeStep(float fTimeStep);
+
+    static inline unsigned int GetTimeStepInMilliseconds() { return ms_fTimeStep * 20.0F; }
     static void Update();
 };

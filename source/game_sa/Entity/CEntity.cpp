@@ -1370,6 +1370,13 @@ void CEntity::GetBoundCentre(CVector& outCentre)
     CEntity::TransformFromObjectSpace(outCentre, pColCenter);
 }
 
+CVector CEntity::GetBoundCentre()
+{
+    CVector v;
+    GetBoundCentre(v);
+    return v;
+}
+
 // Converted from thiscall void CEntity::RenderEffects(void) 0x5342B0
 void CEntity::RenderEffects()
 {
