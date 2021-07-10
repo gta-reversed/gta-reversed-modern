@@ -1,9 +1,11 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 #include "StdInc.h"
 
-void InjectHooksMain(void);
+#include "config.h"
 
-void DisplayConsole(void)
+void InjectHooksMain();
+
+void DisplayConsole()
 {
     if (AllocConsole())
     {
@@ -22,7 +24,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
         RwCamera * pRwCamera = *(RwCamera**)0xC1703C;
 
         // Fail if RenderWare has already been started
-        if (pRwCamera) 
+        if (pRwCamera)
         {
             MessageBox(NULL, "gta_reversed failed to load (RenderWare has already been started)", "Error", MB_ICONERROR | MB_OK);
             return FALSE;
