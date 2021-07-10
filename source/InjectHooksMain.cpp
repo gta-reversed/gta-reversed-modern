@@ -317,6 +317,19 @@ void InjectHooksMain()
     CIplStore::InjectHooks();
     cHandlingDataMgr::InjectHooks();
     CLoadingScreen::InjectHooks();
+    CTaskSimpleUninterruptable::InjectHooks();
+    CTaskSimpleSetStayInSamePlace::InjectHooks();
+    CTaskSimpleGetUp::InjectHooks();
+    CTaskComplexGetUpAndStandStill::InjectHooks();
+    CTaskSimpleFall::InjectHooks();
+    CTaskComplexFallAndGetUp::InjectHooks();
+    CTaskSimpleJump::InjectHooks();
+    CTaskSimpleInAir::InjectHooks();
+    CTaskSimpleLand::InjectHooks();
+    CTaskSimpleClimb::InjectHooks();
+    CTaskSimpleHitHead::InjectHooks();
+    CTaskComplexInAirAndLand::InjectHooks();
+    CTaskComplexJump::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

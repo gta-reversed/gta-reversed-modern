@@ -51,7 +51,8 @@ public:
     inline CVector& GetRight() const { return m_matrix->GetRight(); }
     inline CVector& GetForward() const { return m_matrix->GetForward(); }
     inline CVector& GetUp() const { return m_matrix->GetUp(); }
-    inline CVector& GetPosition() const { return m_matrix ? m_matrix->GetPosition() : m_placement.m_vPosn; }
+    inline const CVector& GetPosition() const { return m_matrix ? m_matrix->GetPosition() : m_placement.m_vPosn; }
+    inline CVector& GetPosition() { return m_matrix ? m_matrix->GetPosition() : m_placement.m_vPosn; }
 };
 
 VALIDATE_SIZE(CPlaceable, 0x18);

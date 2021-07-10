@@ -1352,16 +1352,7 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
                     {
                         CTask* pActiveTask = pPlayerPed->m_pIntelligence->m_TaskMgr.GetActiveTask();
                         if (pActiveTask->GetId() != TASK_COMPLEX_JUMP)
-                        {
-                            CTaskComplexJump* pComplexTaskJump = nullptr;
-                            CTask* pNewTask = static_cast<CTask*>(CTask::operator new(20));
-                            if (pNewTask)
-                            {
-                                pComplexTaskJump = static_cast<CTaskComplexJump*>(pNewTask);
-                                pComplexTaskJump = pComplexTaskJump->Constructor(COMPLEX_JUMP_TYPE_JUMP);
-                            }
-                            pPlayerPed->m_pIntelligence->m_TaskMgr.SetTask(pComplexTaskJump, 3, 0);
-                        }
+                            pPlayerPed->m_pIntelligence->m_TaskMgr.SetTask(new CTaskComplexJump(COMPLEX_JUMP_TYPE_JUMP), 3, 0);
                     }
                 }
             }

@@ -104,6 +104,11 @@ void CAnimBlendAssociation::AllocateAnimBlendNodeArray(int count) {
     plugin::CallMethodDynGlobal<CAnimBlendAssociation *, int>(0x4CE9F0, this, count);
 }
 
+void CAnimBlendAssociation::SetBlend(float blendAmount, float blendDelta)
+{
+    plugin::CallMethod<0x4CEBA0, CAnimBlendAssociation*, float, float>(this, blendAmount, blendDelta);
+}
+
 void CAnimBlendAssociation::SetCurrentTime(float currentTime)
 {
     plugin::CallMethod<0x4CEA80, CAnimBlendAssociation*, float>(this, currentTime);

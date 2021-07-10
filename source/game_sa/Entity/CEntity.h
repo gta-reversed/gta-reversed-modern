@@ -169,6 +169,7 @@ public:
     void DetachFromRwObject();
     CVector* GetBoundCentre(CVector* pOutCentre);
     void GetBoundCentre(CVector& outCentre);
+    CVector GetBoundCentre();
     void RenderEffects();
     // is entity touching entity
     bool GetIsTouching(CEntity* entity);

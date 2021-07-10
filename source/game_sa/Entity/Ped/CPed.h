@@ -530,6 +530,7 @@ public:
     inline CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
     inline CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
     inline CWeapon& GetActiveWeapon() { return m_aWeapons[m_nActiveWeaponSlot]; }
+    inline CPlayerPed* AsPlayerPed() { return reinterpret_cast<CPlayerPed*>(this); }
 
     static void* operator new(unsigned int size);
     static void operator delete(void* data);

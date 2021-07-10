@@ -24,3 +24,8 @@ bool CPedGroups::AreInSameGroup(CPed* ped1, CPed* ped2) {
 CPedGroup* CPedGroups::GetPedsGroup(CPed* ped) {
     return plugin::CallAndReturnDynGlobal<CPedGroup*, CPed*>(0x5F7E80, ped);
 }
+
+bool CPedGroups::IsInPlayersGroup(CPed* ped)
+{
+    return plugin::CallAndReturn<bool, 0x5F7F10, CPed*>(ped);
+}
