@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTheCarGenerators.h"
+
 unsigned char& CTheCarGenerators::GenerateEvenIfPlayerIsCloseCounter = *reinterpret_cast<unsigned char*>(0xC279D0);
 unsigned char& CTheCarGenerators::ProcessCounter = *reinterpret_cast<unsigned char*>(0xC279D1);
 unsigned int& CTheCarGenerators::NumOfCarGenerators = *reinterpret_cast<unsigned int*>(0xC279D4);
@@ -17,15 +19,20 @@ void CTheCarGenerators::InjectHooks()
     ReversibleHooks::Install("CTheCarGenerators", "Get", 0x479D60, &CTheCarGenerators::Get);
 }
 
-signed int CTheCarGenerators::CreateCarGenerator(CVector posn, float angle, int modelId, short color1, short color2, unsigned char forceSpawn, unsigned char alarmChances, unsigned char doorLockChances, unsigned short minDelay, unsigned short maxDelay, unsigned char iplId, unsigned char bIgnorePopulationLimit) {
+// return index of CarGenerator in CTheCarGenerators::CarGeneratorArray
+// 0x6F31A0
+signed int CTheCarGenerators::CreateCarGenerator(CVector posn, float angle, int modelId, short color1, short color2, uchar forceSpawn, uchar alarmChances, uchar doorLockChances,
+                                                 ushort minDelay, ushort maxDelay, uchar iplId, bool ignorePopulationLimit)
+{
     if (modelId != -1 && (modelId < MODEL_LANDSTAL || modelId > MODEL_VEG_PALMKB8))
         return -1;
+
     int carGenIndex = 0;
     for (auto& carGen : CarGeneratorArray)
     {
         if (!carGen.m_bIsUsed)
         {
-            carGen.Setup(posn, angle, modelId, color1, color2, forceSpawn, alarmChances, doorLockChances, minDelay, maxDelay, iplId, bIgnorePopulationLimit);
+            carGen.Setup(posn, angle, modelId, color1, color2, forceSpawn, alarmChances, doorLockChances, minDelay, maxDelay, iplId, ignorePopulationLimit);
             NumOfCarGenerators++;
             return carGenIndex;
         }
@@ -50,8 +57,9 @@ void CTheCarGenerators::Init() {
 
 void CTheCarGenerators::Load() {
     Init();
-    CGenericGameStorage::LoadDataFromWorkBuffer(&NumOfCarGenerators, sizeof(int));
-    CGenericGameStorage::LoadDataFromWorkBuffer(&ProcessCounter, sizeof(char));
+
+    CGenericGameStorage::LoadDataFromWorkBuffer(&NumOfCarGenerators, sizeof(NumOfCarGenerators));
+    CGenericGameStorage::LoadDataFromWorkBuffer(&ProcessCounter, sizeof(ProcessCounter));
     CGenericGameStorage::LoadDataFromWorkBuffer(&GenerateEvenIfPlayerIsCloseCounter, sizeof(char));
     for (unsigned int i = 0; i < NumOfCarGenerators; i++)
     {
@@ -94,21 +102,21 @@ void CTheCarGenerators::RemoveCarGenerators(unsigned char IplID) {
 }
 
 void CTheCarGenerators::Save() {
-    int numOfCarGeneratorsToSave = 0;
+    unsigned int numOfCarGeneratorsToSave = 0;
 
     for (auto& carGen : CarGeneratorArray)
         if (carGen.m_bIsUsed && carGen.m_nIplId == 0)
             numOfCarGeneratorsToSave++;
 
-    CGenericGameStorage::SaveDataToWorkBuffer(&numOfCarGeneratorsToSave, sizeof(int));
-    CGenericGameStorage::SaveDataToWorkBuffer(&ProcessCounter, sizeof(char));
-    CGenericGameStorage::SaveDataToWorkBuffer(&GenerateEvenIfPlayerIsCloseCounter, sizeof(char));
-    for (unsigned short i = 0; i < NUM_CAR_GENERATORS; i++)
-        if (CarGeneratorArray[i].m_bIsUsed && CarGeneratorArray[i].m_nIplId == 0)
-        {
+    CGenericGameStorage::SaveDataToWorkBuffer(&numOfCarGeneratorsToSave, sizeof(numOfCarGeneratorsToSave));
+    CGenericGameStorage::SaveDataToWorkBuffer(&ProcessCounter, sizeof(ProcessCounter));
+    CGenericGameStorage::SaveDataToWorkBuffer(&GenerateEvenIfPlayerIsCloseCounter, sizeof(GenerateEvenIfPlayerIsCloseCounter));
+    for (unsigned short i = 0; i < NUM_CAR_GENERATORS; i++) {
+        if (CarGeneratorArray[i].m_bIsUsed && CarGeneratorArray[i].m_nIplId == 0) {
             CGenericGameStorage::SaveDataToWorkBuffer(&i, sizeof(short));
             CGenericGameStorage::SaveDataToWorkBuffer(CarGeneratorArray + i, sizeof(CCarGenerator));
         }
+    }
     CGenericGameStorage::SaveDataToWorkBuffer(&m_SpecialPlateHandler.m_nCount, sizeof(int));
     for (int i = 0; i < 15; i++)
         CGenericGameStorage::SaveDataToWorkBuffer(m_SpecialPlateHandler.m_plateTextEntries + i, sizeof(tCarGenPlateText));

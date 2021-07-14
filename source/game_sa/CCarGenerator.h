@@ -8,15 +8,38 @@
 
 #include "CompressedVector.h"
 
+#include "CVector.h"
+
+struct CFileCarGenerator {
+    CVector m_vecPosn;
+    float   m_fAngle;
+    int     m_nModelId;
+    int     m_nPrimaryColor;
+    int     m_nSecondaryColor;
+    union {
+        struct {
+            unsigned int m_bForceSpawn : 1;            // & 1
+            unsigned int m_bIgnorePopulationLimit : 1; // & 2
+        };
+        unsigned int m_nFlags;
+    };
+    int     m_nAlarmChance;
+    int     m_nDoorLockChance;
+    int     m_nMinDelay;
+    int     m_nMaxDelay;
+};
+
+VALIDATE_SIZE(CFileCarGenerator, 0x30);
+
 class CCarGenerator {
 public:
-    short            m_nModelId;
-    char             m_nColor1;
-    char             m_nColor2;
+    signed short     m_nModelId;
+    signed char      m_nPrimaryColor;
+    signed char      m_nSecondaryColor;
     CompressedVector m_vecPosn;
     char             m_nAngle;
-    char             m_nAlarm;
-    char             m_nDoorLock;
+    unsigned char    m_nAlarmChance;    // in percentage 0-100
+    unsigned char    m_nDoorLockChance; // in percentage 0-100
 
     union {
         struct {
@@ -28,29 +51,30 @@ public:
         };
         unsigned char m_nFlags;
     };
-    short            m_nMinDelay;
-    short            m_nMaxDelay;
-
-    char _pad12[2];
-
-    int              m_nNextGenTime;
-    short            m_nVehicleHandle;
+    unsigned short   m_nMinDelay;
+    unsigned short   m_nMaxDelay;
+    // char             _pad12[2];
+    unsigned int     m_nNextGenTime;
+    signed short     m_nVehicleHandle;
     signed short     m_nGenerateCount; // (0) Don't Spawn , (1 - 32767) Spawn X number of times , (-1) Always Spawn.
-    char             m_nIplId;
+    unsigned char    m_nIplId;
     bool             m_bIsUsed;
-
-    char _pad1E[2];
+    // char             _pad1E[2];
 
 public:
     static bool& m_bHotdogVendorPositionOffsetInitialized;
     static CVector& m_HotdogVendorPositionOffset;
 
+public:
     static void InjectHooks();
+
     bool CheckForBlockage(int modelId);
     bool CheckIfWithinRangeOfAnyPlayers();
     void DoInternalProcessing();
     void Process();
-    void Setup(const CVector& posn, float angle, int modelId, short color1, short color2, unsigned char bForceSpawn, unsigned char alarmChances, unsigned char doorLockChances, unsigned short minDelay, unsigned short maxDelay, unsigned char iplId, unsigned char bIgnorePopulationLimit);
+    void Setup(const CVector& posn, float angle, int modelId, short color1, short color2, uchar bForceSpawn,
+               uchar alarmChance, uchar doorLockChance, ushort minDelay, ushort maxDelay,
+               uchar iplId, bool ignorePopulationLimit);
     void SwitchOff();
     void SwitchOn();
 

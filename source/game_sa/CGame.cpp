@@ -2,6 +2,7 @@
 
 #include "CDebugMenu.h"
 #include "CWaterCannons.h"
+#include "CTheCarGenerators.h"
 
 char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
 int& CGame::currLevel = *reinterpret_cast<int*>(0xB7290C);

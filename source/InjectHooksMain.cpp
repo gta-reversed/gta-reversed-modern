@@ -17,6 +17,9 @@
 #include "CAEUserRadioTrackManager.h"
 #include "CDebugMenu.h"
 
+#include "CCarGenerator.h"
+#include "CTheCarGenerators.h"
+
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
         printf("Debugger not present\n");
@@ -26,7 +29,7 @@ void WaitForDebugger() {
 
 void InjectHooksMain()
 {
-    // WaitForDebugger();
+     // WaitForDebugger();
 
     CDebug::InjectHooks();
     InjectCommonHooks();

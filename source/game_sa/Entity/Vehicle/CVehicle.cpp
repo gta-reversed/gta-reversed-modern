@@ -96,12 +96,12 @@ CVehicle::CVehicle(unsigned char createdBy) : CPhysical(), m_vehicleAudio(), m_a
     m_bHasPreRenderEffects = true;
     m_nType = eEntityType::ENTITY_TYPE_VEHICLE;
 
-    m_fRawSteerAngle = 0.0;
-    m_fSteerAngle = 0.0;
-    m_f2ndSteerAngle = 0.0;
+    m_fRawSteerAngle = 0.0f;
+    m_fSteerAngle = 0.0f;
+    m_f2ndSteerAngle = 0.0f;
     m_nCurrentGear = 1;
-    m_fGearChangeCount = 0.0;
-    m_fWheelSpinForAudio = 0.0;
+    m_fGearChangeCount = 0.0f;
+    m_fWheelSpinForAudio = 0.0f;
     m_nCreatedBy = createdBy;
     m_nForcedRandomRouteSeed = 0;
 
@@ -169,14 +169,14 @@ CVehicle::CVehicle(unsigned char createdBy) : CPhysical(), m_vehicleAudio(), m_a
     m_pTrailer = nullptr;
     m_nTimeTillWeNeedThisCar = 0;
     m_nAlarmState = 0;
-    m_nDoorLock = 1;
+    m_nDoorLock = eCarLock::CARLOCK_UNLOCKED;
     m_nProjectileWeaponFiringTime = 0;
     m_nAdditionalProjectileWeaponFiringTime = 0;
     m_nTimeForMinigunFiring = 0;
     m_pLastDamageEntity = nullptr;
     m_pEntityWeAreOn = nullptr;
-    m_fVehicleRearGroundZ = 0.0;
-    m_fVehicleFrontGroundZ = 0.0;
+    m_fVehicleRearGroundZ = 0.0f;
+    m_fVehicleFrontGroundZ = 0.0f;
     field_511 = 0;
     field_512 = 0;
     m_comedyControlState = 0;
@@ -197,7 +197,7 @@ CVehicle::CVehicle(unsigned char createdBy) : CPhysical(), m_vehicleAudio(), m_a
     m_pCustomCarPlate = nullptr;
 
     memset(m_anUpgrades, 0xFFu, sizeof(m_anUpgrades));
-    m_fWheelScale = 1.0;
+    m_fWheelScale = 1.0f;
     m_nWindowsOpenFlags = 0;
     m_nNitroBoosts = 0;
     m_nHasslePosId = 0;
