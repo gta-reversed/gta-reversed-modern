@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "CCarGenerator.h"
+
+#include "CTheCarGenerators.h"
+
 bool& CCarGenerator::m_bHotdogVendorPositionOffsetInitialized = *reinterpret_cast<bool*>(0xC2B974);
 CVector& CCarGenerator::m_HotdogVendorPositionOffset = *reinterpret_cast<CVector*>(0xC2B968);
 
@@ -18,18 +22,13 @@ void CCarGenerator::InjectHooks()
 // 0x6F32E0
 bool CCarGenerator::CheckForBlockage(int modelId)
 {
-    float radius;
-    CVector posn;
+    auto pCarColModel = CModelInfo::GetModelInfo(modelId)->GetColModel();
+    float radius = pCarColModel ? pCarColModel->GetBoundRadius() : 2.0f;
+
     short entityCount;
     CEntity* pObjectList[8];
 
-    auto pCarColModel = CModelInfo::GetModelInfo(modelId)->GetColModel();
-    if (pCarColModel)
-        radius = pCarColModel->GetBoundRadius();
-    else
-        radius = 2.0f;
-
-    posn = UncompressLargeVector(m_vecPosn);
+    CVector posn = UncompressLargeVector(m_vecPosn);
     CWorld::FindObjectsKindaColliding(posn, radius, true, &entityCount, 8, pObjectList, false, true, true, false, false);
 
     for (int i = 0; i < entityCount; i++)
@@ -72,9 +71,10 @@ bool CCarGenerator::CheckIfWithinRangeOfAnyPlayers()
         relPosn.Magnitude2D() < TheCamera.m_fGenerationDistMultiplier * 240.0f)
     {
         CVector origin = UncompressLargeVector(m_vecPosn);
-        if (TheCamera.IsSphereVisible(origin, 0.0f) &&
-            !COcclusion::IsPositionOccluded(origin, 0.0f))
+        if (TheCamera.IsSphereVisible(origin, 0.0f) && !COcclusion::IsPositionOccluded(origin, 0.0f))
+        {
             bVisible = true;
+        }
     }
 
     if (relPosn.Magnitude2D() >= TheCamera.m_fGenerationDistMultiplier * 160.0f && !bVisible)
@@ -113,7 +113,8 @@ void CCarGenerator::DoInternalProcessing()
 
     bool nightTime = CClock::ms_nGameClockHours > 21 || CClock::ms_nGameClockHours < 7;
     if (!bIgnorePopulationLimit
-        && (nightTime && CCarCtrl::NumParkedCars >= 10 || !nightTime && CCarCtrl::NumParkedCars >= 5))
+        && (nightTime && CCarCtrl::NumParkedCars >= 10 || !nightTime && CCarCtrl::NumParkedCars >= 5)
+    )
         return;
 
     if (m_nModelId >= 0)
@@ -131,22 +132,24 @@ void CCarGenerator::DoInternalProcessing()
     }
     else
     {
-        if (m_nModelId == -1 || CStreaming::ms_aInfoForModel[-m_nModelId].m_nLoadState != LOADSTATE_LOADED)
+        if (m_nModelId == MODEL_INVALID || CStreaming::ms_aInfoForModel[-m_nModelId].m_nLoadState != LOADSTATE_LOADED)
         {
             CTheZones::GetZoneInfo(FindPlayerCoors(-1), nullptr);
             actualModelId = CPopulation::m_AppropriateLoadedCars.PickRandomCar(true, true);
 
             if (actualModelId < 0)
                 return;
+
             auto pModelInfo = CModelInfo::GetModelInfo(actualModelId)->AsVehicleModelInfoPtr();
             if (pModelInfo->IsBoat())
                 return;
+
             if (pModelInfo->GetBoundingBox()->GetLength() > 8.0f)
                 return;
 
             m_nModelId = -actualModelId;
-            m_nColor1 = -1;
-            m_nColor2 = -1;
+            m_nPrimaryColor = -1;
+            m_nSecondaryColor = -1;
         }
         else
         {
@@ -161,7 +164,10 @@ void CCarGenerator::DoInternalProcessing()
     }
 
     if (CStreaming::ms_aInfoForModel[actualModelId].m_nLoadState != LOADSTATE_LOADED ||
-        actualModelId == MODEL_HOTDOG && m_nModelId == MODEL_HOTDOG && CStreaming::ms_aInfoForModel[MODEL_BMOCHIL].m_nLoadState != LOADSTATE_LOADED)
+        actualModelId == MODEL_HOTDOG &&
+        m_nModelId == MODEL_HOTDOG &&
+        CStreaming::ms_aInfoForModel[MODEL_BMOCHIL].m_nLoadState != LOADSTATE_LOADED
+    )
         return;
 
     if (CModelInfo::IsBoatModel(actualModelId) ||
@@ -306,21 +312,21 @@ void CCarGenerator::DoInternalProcessing()
         }
     }
 
-    if (CGeneral::GetRandomNumberInRange(0, 100) < m_nAlarm)
+    if (CGeneral::GetRandomNumberInRange(0, 100) < m_nAlarmChance)
         pVeh->m_nAlarmState = -1;
 
-    if (CGeneral::GetRandomNumberInRange(0, 100) < m_nDoorLock)
+    if (CGeneral::GetRandomNumberInRange(0, 100) < m_nDoorLockChance)
         pVeh->m_nDoorLock = eCarLock::CARLOCK_LOCKED;
 
-    if (m_nColor1 != -1 && m_nColor2 != -1)
+    if (m_nPrimaryColor != -1 && m_nSecondaryColor != -1)
     {
-        pVeh->m_nPrimaryColor = m_nColor1;
-        pVeh->m_nSecondaryColor = m_nColor2;
+        pVeh->m_nPrimaryColor = m_nPrimaryColor;
+        pVeh->m_nSecondaryColor = m_nSecondaryColor;
     }
     else if (m_nModelId < -1)
     {
-        m_nColor1 = pVeh->m_nPrimaryColor;
-        m_nColor2 = pVeh->m_nSecondaryColor;
+        m_nPrimaryColor = pVeh->m_nPrimaryColor;
+        m_nSecondaryColor = pVeh->m_nSecondaryColor;
     }
     CVisibilityPlugins::SetClumpAlpha(pVeh->m_pRwClump, 0);
     m_nVehicleHandle = CPools::ms_pVehiclePool->GetRef(pVeh);
@@ -358,33 +364,26 @@ void CCarGenerator::Process()
     }
 }
 
-
 // 0x6F2E50
-void CCarGenerator::Setup(const CVector& posn, float angle, int modelId, short color1, short color2, unsigned char bForceSpawn, unsigned char alarmChances, unsigned char doorLockChances, unsigned short minDelay, unsigned short maxDelay, unsigned char iplId, unsigned char bIgnorePopulationLimit)
+void CCarGenerator::Setup(const CVector& posn, float angle, int modelId, short color1, short color2, uchar bForceSpawn,
+                          uchar alarmChance, uchar doorLockChance, ushort minDelay, ushort maxDelay,
+                          uchar iplId, bool ignorePopulationLimit)
 {
     static constexpr float magic = 256.0f / 360.0f; // 0x8722E8 original expression 128.0f / 180.0f
 
     m_vecPosn = CompressLargeVector(posn);
     m_nAngle = angle * magic;
     m_nModelId = modelId;
-
-    if (color1 == -1)
-        m_nColor1 = -1;
-    else
-        m_nColor1 = color1;
-
-    if (color2 == -1)
-        m_nColor2 = -1;
-    else
-        m_nColor2 = color1;
+    m_nPrimaryColor = color1;
+    m_nSecondaryColor = color2;
 
     bWaitUntilFarFromPlayer = false;
-    bIgnorePopulationLimit = bIgnorePopulationLimit;
+    bIgnorePopulationLimit = ignorePopulationLimit;
     bHighPriority = bForceSpawn;
     bPlayerHasAlreadyOwnedCar = false;
 
-    m_nAlarm = alarmChances;
-    m_nDoorLock = doorLockChances;
+    m_nAlarmChance = alarmChance;
+    m_nDoorLockChance = doorLockChance;
     m_nMinDelay = minDelay;
     m_nMaxDelay = maxDelay;
     m_nIplId = iplId;

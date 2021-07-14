@@ -6,96 +6,136 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "RenderWare.h"
 #include "CBoundingBox.h"
 #include "CColModel.h"
-#include "CFileCarGenerator.h"
 #include "CEntity.h"
 #include "CFileObjectInstance.h"
 #include "CFileMgr.h"
 
-class  CFileLoader {
-public:
-     static char(&ms_line)[512]; // static char ms_line[512]
 
-     static void InjectHooks();
-
-    //! copy textures from dictionary to baseDictionary
-     static void AddTexDictionaries(RwTexDictionary *dictionary, RwTexDictionary *baseDictionary);
-     static RpAtomic *FindRelatedModelInfoCB(RpAtomic *atomic, void *data);
-     static bool FinishLoadClumpFile(RwStream *stream, unsigned int modelIndex);
-     static void LoadAnimatedClumpObject(char const *line);
-     static bool LoadAtomicFile(RwStream *stream, unsigned int modelId);
-     static void LoadAtomicFile(char const *filename);
-     static RpClump *LoadAtomicFile2Return(char const *filename);
-     static void LoadAudioZone(char const *line);
-     static void LoadBoundingBox(unsigned char *data, CBoundingBox &outBoundBox);
-     static void LoadCarGenerator(CFileCarGenerator *carGen, int iplId);
-     static void LoadCarGenerator(char const *line, int iplId);
-     static void LoadCarPathNode(char const *line, int objModelIndex, int pathEntryIndex, bool a4);
-     static bool LoadClumpFile(RwStream *stream, unsigned int modelIndex);
-     static void LoadClumpFile(char const *filename);
-     static int LoadClumpObject(char const *line);
-
-     static bool LoadCollisionFile(unsigned char* data, unsigned int dataSize, unsigned char colId);
-     static bool LoadCollisionFile(const char* filename, unsigned char colId);
-     static bool LoadCollisionFileFirstTime(unsigned char* data, unsigned int dataSize, unsigned char colId);
-     static void LoadCollisionModel(unsigned char* data, CColModel& outColModel);
-     static void LoadCollisionModelVer2(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName);
-     static void LoadCollisionModelVer3(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName);
-     static void LoadCollisionModelVer4(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName);
-
-     static void LoadCullZone(char const *line);
-     static void LoadEntryExit(char const *line);
-     static void LoadGarage(char const *line);
-     static void LoadLevel(char const *filename);
-     static char *LoadLine(FILESTREAM file);
-     static char *LoadLine(char **outLine, int &outSize);
-     static int LoadObject(char const *line);
-     static CEntity *LoadObjectInstance(CFileObjectInstance *objInstance, char const *modelname);
-     static CEntity *LoadObjectInstance(char const *line);
-     static void LoadObjectTypes(char const *filename);
-     static void LoadOcclusionVolume(char const *line, char const *filename);
-     static int LoadPathHeader(char const *line, int &outPathType);
-     static int LoadPedObject(char const *line);
-     static void LoadPedPathNode(char const *line, int objModelIndex, int pathEntryIndex);
-     static void LoadPickup(char const *line);
-     static void LoadScene(char const *filename);
-     static void LoadStuntJump(char const *line);
-     static void LoadTXDParent(char const *line);
-    //! load txd from file
-     static RwTexDictionary *LoadTexDictionary(char const *filename);
-     static void LoadTimeCyclesModifier(char const *line);
-     static int LoadTimeObject(char const *line);
-     static int LoadVehicleObject(char const *line);
-     static int LoadWeaponObject(char const *line);
-     static void LoadZone(char const *line);
-    //! dummy function
-     static void ReloadObjectTypes(char const *arg1);
-     static void ReloadPaths(char const *filename);
-    //! save txd to file
-     static void SaveTexDictionary(RwTexDictionary *dictionary, char const *filename);
-     static RpAtomic *SetRelatedModelInfoCB(RpAtomic *atomic, RpClump* clump);
-     static bool StartLoadClumpFile(RwStream *stream, unsigned int modelIndex);
+enum eSection : unsigned char {
+    UNDEFINED = 0,
+    OBJECT = 1,
+    TIME_OBJECT = 3,
+    WEAPON_OBJECT = 4,
+    CLUMP_OBJECT = 5,
+    ANIMATED_CLUMP_OBJECT = 6,
+    VEHICLE_OBJECT = 7,
+    PED_OBJECT = 8,
+    PATH_NODE = 9,
+    TWO_D_EFFECT = 10,
+    TXD_PARENT = 11,
 };
 
-//! global variable to be used in a callback
- extern unsigned int &gAtomicModelId;
+enum eIDE : unsigned char {
+    IDE_NONE,
+    IDE_OBJS,
+    IDE_MLO, // ?
+    IDE_TOBJ,
+    IDE_WEAP,
+    IDE_HIER,
+    IDE_ANIM,
+    IDE_CARS,
+    IDE_PEDS,
+    IDE_PATH,
+    IDE_2DFX,
+    IDE_TXDP,
+};
 
- void GetNameAndDamage(char const *nodeName, char *outName, bool &outDamage);
-//! Makes a copy of atomic and adds it to clump
-//! @param atomic callback atomic
-//! @param data clump object (RpClump *)
-//! @return callback atomic
- RpAtomic *CloneAtomicToClumpCB(RpAtomic *atomic, void *data);
-//! Gets file name from a path
- char const *GetFilename(char const *filepath);
- void LoadingScreenLoadingFile(char const *filename);
-//! Adds texture to the dictionary
-//! @param texture callback texture
-//! @param data texture dictionary (RwTexDictionary *)
-//! @return callback texture
- RwTexture *AddTextureCB(RwTexture *texture, void *data);
+enum eIPL : unsigned char {
+    IPL_NONE,
+    IPL_PATH,
+    IPL_INST,
+    IPL_MULT,
+    IPL_ZONE,
+    IPL_CULL,
+    IPL_OCCL,
+    IPL_UNK7,
+    IPL_GRGE,
+    IPL_ENEX,
+    IPL_PICK,
+    IPL_CARS,
+    IPL_JUMP,
+    IPL_TCYC,
+    IPL_AUZO,
+};
 
-//#include "meta/meta.CFileLoader.h"
+class CFileLoader {
+public:
+    static char (&ms_line)[512]; // static char ms_line[512]
+
+public:
+    static void InjectHooks();
+
+    static void AddTexDictionaries(RwTexDictionary* dictionary, RwTexDictionary* baseDictionary);
+    static void SaveTexDictionary(RwTexDictionary* dictionary, const char* filename);
+    static RwTexDictionary* LoadTexDictionary(const char* filename);
+
+    static int LoadAnimatedClumpObject(const char* line);
+    static bool LoadAtomicFile(RwStream* stream, unsigned int modelId);
+    static void LoadAtomicFile(const char* filename);
+    static RpClump* LoadAtomicFile2Return(const char* filename);
+
+    static char* LoadLine(FILESTREAM file);
+    static char* LoadLine(char** outLine, int& outSize);
+
+    static void LoadAudioZone(const char* line);
+    static void LoadBoundingBox(unsigned char* data, CBoundingBox& outBoundBox);
+    static void LoadCarGenerator(struct CFileCarGenerator* carGen, int iplId);
+    static void LoadCarGenerator(const char* line, int iplId);
+    static void LoadCarPathNode(const char* line, int objModelIndex, int pathEntryIndex, bool a4);
+
+    static bool StartLoadClumpFile(RwStream* stream, unsigned int modelIndex);
+    static bool FinishLoadClumpFile(RwStream* stream, unsigned int modelIndex);
+    static bool LoadClumpFile(RwStream* stream, unsigned int modelIndex);
+    static void LoadClumpFile(const char* filename);
+    static int LoadClumpObject(const char* line);
+
+    static bool LoadCollisionFile(unsigned char* data, unsigned int dataSize, unsigned char colId);
+    static bool LoadCollisionFile(const char* filename, unsigned char colId);
+    static bool LoadCollisionFileFirstTime(unsigned char* data, unsigned int dataSize, unsigned char colId);
+    static void LoadCollisionModel(unsigned char* data, CColModel& outColModel);
+    static void LoadCollisionModelVer2(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName);
+    static void LoadCollisionModelVer3(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName);
+    static void LoadCollisionModelVer4(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName);
+
+    static void LoadCullZone(const char* line);
+    static void LoadEntryExit(const char* line);
+    static void LoadGarage(const char* line);
+    static void LoadLevel(const char* filename);
+
+    static int LoadObject(const char* line);
+    static void Load2dEffect(const char* line);
+    static CEntity* LoadObjectInstance(CFileObjectInstance* objInstance, const char* modelName);
+    static CEntity* LoadObjectInstance(const char* line);
+    static void LoadOcclusionVolume(const char* line, const char* filename);
+    static int LoadPathHeader(const char* line, int& outPathType);
+    static int LoadPedObject(const char* line);
+    static void LoadPedPathNode(const char* line, int objModelIndex, int pathEntryIndex);
+    static void LoadPickup(const char* line);
+    static void LoadStuntJump(const char* line);
+    static int LoadTXDParent(const char* line);
+    static void LoadTimeCyclesModifier(const char* line);
+    static int LoadTimeObject(const char* line);
+    static int LoadVehicleObject(const char* line);
+    static int LoadWeaponObject(const char* line);
+    static void LoadZone(const char* line);
+    static void LoadScene(const char* filename);
+    static void LoadObjectTypes(const char* filename);
+
+    static void ReloadObjectTypes(const char* arg1);
+    static void ReloadPaths(const char* filename);
+
+    static RpAtomic* FindRelatedModelInfoCB(RpAtomic* atomic, void* data);
+    static RpAtomic* SetRelatedModelInfoCB(RpAtomic* atomic, void* data);
+};
+
+// global variable to be used in a callback
+extern unsigned int& gAtomicModelId;
+
+const char* GetFilename(const char* filepath);
+void LoadingScreenLoadingFile(const char* str);
+
+RwTexture* AddTextureCB(RwTexture* texture, void* dict);
+RpAtomic* CloneAtomicToClumpCB(RpAtomic* atomic, void* data);

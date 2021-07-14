@@ -31,7 +31,7 @@ enum eCarWeapon {
     CAR_WEAPON_DOUBLE_ROCKET
 };
 
-enum eCarLock {
+enum eCarLock : unsigned int {
     CARLOCK_NOT_USED,
     CARLOCK_UNLOCKED,
     CARLOCK_LOCKED,
@@ -338,7 +338,7 @@ public:
     float  m_fVehicleRearGroundZ;  // or CWorld::ProcessVerticalLine
     char field_4EC; // initialised, but not used?
     char field_4ED[11]; // possibly non-used data?
-    unsigned int m_nDoorLock; // see enum eCarLock
+    eCarLock m_nDoorLock;
     unsigned int m_nProjectileWeaponFiringTime; // manual-aimed projectiles for hunter, lock-on projectile for hydra
     unsigned int m_nAdditionalProjectileWeaponFiringTime; // manual-aimed projectiles for hydra
     unsigned int m_nTimeForMinigunFiring; // minigun on hunter
