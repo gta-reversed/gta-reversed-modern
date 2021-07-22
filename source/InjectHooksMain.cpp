@@ -30,7 +30,7 @@ void WaitForDebugger() {
 
 void InjectHooksMain()
 {
-     // WaitForDebugger();
+    // WaitForDebugger();
 
     CDebug::InjectHooks();
     InjectCommonHooks();
@@ -336,6 +336,7 @@ void InjectHooksMain()
     CTaskSimpleHitHead::InjectHooks();
     CTaskComplexInAirAndLand::InjectHooks();
     CTaskComplexJump::InjectHooks();
+    ModelIndices::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();
