@@ -1,173 +1,527 @@
 #include "StdInc.h"
 
+#include "ModelIndices.h"
+
 namespace ModelIndices {
-    unsigned short& MI_TRAFFICLIGHTS = *(unsigned short*)0x8CD4F4;
-    unsigned short& MI_TRAFFICLIGHTS_VERTICAL = *(unsigned short*)0x8CD4F8;
-    unsigned short& MI_TRAFFICLIGHTS_MIAMI = *(unsigned short*)0x8CD4FC;
-    unsigned short& MI_TRAFFICLIGHTS_VEGAS = *(unsigned short*)0x8CD500;
-    unsigned short& MI_TRAFFICLIGHTS_TWOVERTICAL = *(unsigned short*)0x8CD504;
-    unsigned short& MI_TRAFFICLIGHTS_3 = *(unsigned short*)0x8CD508;
-    unsigned short& MI_TRAFFICLIGHTS_4 = *(unsigned short*)0x8CD50C;
-    unsigned short& MI_TRAFFICLIGHTS_5 = *(unsigned short*)0x8CD510;
-    unsigned short& MI_TRAFFICLIGHTS_GAY = *(unsigned short*)0x8CD514;
-    unsigned short& MI_SINGLESTREETLIGHTS1 = *(unsigned short*)0x8CD518;
-    unsigned short& MI_SINGLESTREETLIGHTS2 = *(unsigned short*)0x8CD51C;
-    unsigned short& MI_SINGLESTREETLIGHTS3 = *(unsigned short*)0x8CD520;
-    unsigned short& MI_DOUBLESTREETLIGHTS = *(unsigned short*)0x8CD524;
-    unsigned short& MI_STREETLAMP1 = *(unsigned short*)0x8CD528;
-    unsigned short& MI_STREETLAMP2 = *(unsigned short*)0x8CD52C;
-    unsigned short& MODELID_CRANE_1 = *(unsigned short*)0x8CD530;
-    unsigned short& MODELID_CRANE_2 = *(unsigned short*)0x8CD534;
-    unsigned short& MODELID_CRANE_3 = *(unsigned short*)0x8CD538;
-    unsigned short& MODELID_CRANE_4 = *(unsigned short*)0x8CD53C;
-    unsigned short& MODELID_CRANE_5 = *(unsigned short*)0x8CD540;
-    unsigned short& MODELID_CRANE_6 = *(unsigned short*)0x8CD544;
-    unsigned short& MI_PARKINGMETER = *(unsigned short*)0x8CD548;
-    unsigned short& MI_PARKINGMETER2 = *(unsigned short*)0x8CD54C;
-    unsigned short& MI_MALLFAN = *(unsigned short*)0x8CD550;
-    unsigned short& MI_HOTELFAN_NIGHT = *(unsigned short*)0x8CD554;
-    unsigned short& MI_HOTELFAN_DAY = *(unsigned short*)0x8CD558;
-    unsigned short& MI_HOTROOMFAN = *(unsigned short*)0x8CD55C;
-    unsigned short& MI_PHONEBOOTH1 = *(unsigned short*)0x8CD560;
-    unsigned short& MI_WASTEBIN = *(unsigned short*)0x8CD564;
-    unsigned short& MI_BIN = *(unsigned short*)0x8CD568;
-    unsigned short& MI_POSTBOX1 = *(unsigned short*)0x8CD56C;
-    unsigned short& MI_NEWSSTAND = *(unsigned short*)0x8CD570;
-    unsigned short& MI_TRAFFICCONE = *(unsigned short*)0x8CD574;
-    unsigned short& MI_DUMP1 = *(unsigned short*)0x8CD578;
-    unsigned short& MI_ROADWORKBARRIER1 = *(unsigned short*)0x8CD57C;
-    unsigned short& MI_ROADBLOCKFUCKEDCAR1 = *(unsigned short*)0x8CD580;
-    unsigned short& MI_ROADBLOCKFUCKEDCAR2 = *(unsigned short*)0x8CD584;
-    unsigned short& MI_BUSSIGN1 = *(unsigned short*)0x8CD588;
-    unsigned short& MI_NOPARKINGSIGN1 = *(unsigned short*)0x8CD58C;
-    unsigned short& MI_PHONESIGN = *(unsigned short*)0x8CD590;
-    unsigned short& MI_FIRE_HYDRANT = *(unsigned short*)0x8CD594;
-    unsigned short& MI_COLLECTABLE1 = *(unsigned short*)0x8CD598;
-    unsigned short& MI_MONEY = *(unsigned short*)0x8CD59C;
-    unsigned short& MI_CARMINE = *(unsigned short*)0x8CD5A0;
-    unsigned short& MI_NAUTICALMINE = *(unsigned short*)0x8CD5A4;
-    unsigned short& MI_TELLY = *(unsigned short*)0x8CD5A8;
-    unsigned short& MI_BRIEFCASE = *(unsigned short*)0x8CD5AC;
-    unsigned short& MI_GLASS1 = *(unsigned short*)0x8CD5B0;
-    unsigned short& MI_GLASS8 = *(unsigned short*)0x8CD5B4;
-    unsigned short& MI_EXPLODINGBARREL = *(unsigned short*)0x8CD5B8;
-    unsigned short& MI_PICKUP_ADRENALINE = *(unsigned short*)0x8CD5BC;
-    unsigned short& MI_PICKUP_BODYARMOUR = *(unsigned short*)0x8CD5C0;
-    unsigned short& MI_PICKUP_INFO = *(unsigned short*)0x8CD5C4;
-    unsigned short& MI_PICKUP_HEALTH = *(unsigned short*)0x8CD5C8;
-    unsigned short& MI_PICKUP_BONUS = *(unsigned short*)0x8CD5CC;
-    unsigned short& MI_PICKUP_BRIBE = *(unsigned short*)0x8CD5D0;
-    unsigned short& MI_PICKUP_KILLFRENZY = *(unsigned short*)0x8CD5D4;
-    unsigned short& MI_PICKUP_CAMERA = *(unsigned short*)0x8CD5D8;
-    unsigned short& MI_PICKUP_PARACHUTE = *(unsigned short*)0x8CD5DC;
-    unsigned short& MI_PICKUP_REVENUE = *(unsigned short*)0x8CD5E0;
-    unsigned short& MI_PICKUP_SAVEGAME = *(unsigned short*)0x8CD5E4;
-    unsigned short& MI_PICKUP_PROPERTY = *(unsigned short*)0x8CD5E8;
-    unsigned short& MI_PICKUP_PROPERTY_FORSALE = *(unsigned short*)0x8CD5EC;
-    unsigned short& MI_PICKUP_CLOTHES = *(unsigned short*)0x8CD5F0;
-    unsigned short& MI_PICKUP_2P_KILLFRENZY = *(unsigned short*)0x8CD5F4;
-    unsigned short& MI_PICKUP_2P_COOP = *(unsigned short*)0x8CD5F8;
-    unsigned short& MI_BOLLARDLIGHT = *(unsigned short*)0x8CD5FC;
-    unsigned short& MI_FENCE = *(unsigned short*)0x8CD600;
-    unsigned short& MI_FENCE2 = *(unsigned short*)0x8CD604;
-    unsigned short& MI_BUOY = *(unsigned short*)0x8CD608;
-    unsigned short& MI_PARKTABLE = *(unsigned short*)0x8CD60C;
-    unsigned short& MI_LAMPPOST1 = *(unsigned short*)0x8CD610;
-    unsigned short& MI_MLAMPPOST = *(unsigned short*)0x8CD614;
-    unsigned short& MI_BARRIER1 = *(unsigned short*)0x8CD618;
-    unsigned short& MI_LITTLEHA_POLICE = *(unsigned short*)0x8CD61C;
-    unsigned short& MI_TELPOLE02 = *(unsigned short*)0x8CD620;
-    unsigned short& MI_TRAFFICLIGHT01 = *(unsigned short*)0x8CD624;
-    unsigned short& MI_PARKBENCH = *(unsigned short*)0x8CD628;
-    unsigned short& MI_LIGHTBEAM = *(unsigned short*)0x8CD62C;
-    unsigned short& MI_AIRPORTRADAR = *(unsigned short*)0x8CD630;
-    unsigned short& MI_RCBOMB = *(unsigned short*)0x8CD634;
-    unsigned short& MI_BEACHBALL = *(unsigned short*)0x8CD638;
-    unsigned short& MI_SANDCASTLE1 = *(unsigned short*)0x8CD63C;
-    unsigned short& MI_SANDCASTLE2 = *(unsigned short*)0x8CD640;
-    unsigned short& MI_JELLYFISH = *(unsigned short*)0x8CD644;
-    unsigned short& MI_JELLYFISH01 = *(unsigned short*)0x8CD648;
-    unsigned short& MI_FISH1SINGLE = *(unsigned short*)0x8CD64C;
-    unsigned short& MI_FISH1S = *(unsigned short*)0x8CD650;
-    unsigned short& MI_FISH2SINGLE = *(unsigned short*)0x8CD654;
-    unsigned short& MI_FISH2S = *(unsigned short*)0x8CD658;
-    unsigned short& MI_FISH3SINGLE = *(unsigned short*)0x8CD65C;
-    unsigned short& MI_FISH3S = *(unsigned short*)0x8CD660;
-    unsigned short& MI_TURTLE = *(unsigned short*)0x8CD664;
-    unsigned short& MI_DOLPHIN = *(unsigned short*)0x8CD668;
-    unsigned short& MI_SHARK = *(unsigned short*)0x8CD66C;
-    unsigned short& MI_SUBMARINE = *(unsigned short*)0x8CD670;
-    unsigned short& MI_ESCALATORSTEP = *(unsigned short*)0x8CD674;
-    unsigned short& MI_ESCALATORSTEP8 = *(unsigned short*)0x8CD678;
-    unsigned short& MI_LOUNGE_WOOD_UP = *(unsigned short*)0x8CD67C;
-    unsigned short& MI_LOUNGE_TOWEL_UP = *(unsigned short*)0x8CD680;
-    unsigned short& MI_LOUNGE_WOOD_DN = *(unsigned short*)0x8CD684;
-    unsigned short& MI_LOTION = *(unsigned short*)0x8CD688;
-    unsigned short& MI_BEACHTOWEL01 = *(unsigned short*)0x8CD68C;
-    unsigned short& MI_BEACHTOWEL02 = *(unsigned short*)0x8CD690;
-    unsigned short& MI_BEACHTOWEL03 = *(unsigned short*)0x8CD694;
-    unsigned short& MI_BEACHTOWEL04 = *(unsigned short*)0x8CD698;
-    unsigned short& MI_BLIMP_NIGHT = *(unsigned short*)0x8CD69C;
-    unsigned short& MI_BLIMP_DAY = *(unsigned short*)0x8CD6A0;
-    unsigned short& MI_YT_MAIN_BODY = *(unsigned short*)0x8CD6A4;
-    unsigned short& MI_YT_MAIN_BODY2 = *(unsigned short*)0x8CD6A8;
-    unsigned short& MI_SAMSITE = *(unsigned short*)0x8CD6AC;
-    unsigned short& MI_SAMSITE2 = *(unsigned short*)0x8CD6B0;
-    unsigned short& MI_TRAINCROSSING = *(unsigned short*)0x8CD6B4;
-    unsigned short& MI_TRAINCROSSING1 = *(unsigned short*)0x8CD6B8;
-    unsigned short& MI_MAGNOCRANE = *(unsigned short*)0x8CD6BC;
-    unsigned short& MI_CRANETROLLEY = *(unsigned short*)0x8CD6C0;
-    unsigned short& MI_QUARRYCRANE_ARM = *(unsigned short*)0x8CD6C4;
-    unsigned short& MI_OBJECTFORMAGNOCRANE1 = *(unsigned short*)0x8CD6C8;
-    unsigned short& MI_OBJECTFORMAGNOCRANE2 = *(unsigned short*)0x8CD6CC;
-    unsigned short& MI_OBJECTFORMAGNOCRANE3 = *(unsigned short*)0x8CD6D0;
-    unsigned short& MI_OBJECTFORMAGNOCRANE4 = *(unsigned short*)0x8CD6D4;
-    unsigned short& MI_OBJECTFORMAGNOCRANE5 = *(unsigned short*)0x8CD6D8;
-    unsigned short& MI_OBJECTFORBUILDINGSITECRANE1 = *(unsigned short*)0x8CD6DC;
-    unsigned short& MI_MAGNOCRANE_HOOK = *(unsigned short*)0x8CD6E0;
-    unsigned short& MI_HARVESTERBODYPART1 = *(unsigned short*)0x8CD6E4;
-    unsigned short& MI_HARVESTERBODYPART2 = *(unsigned short*)0x8CD6E8;
-    unsigned short& MI_HARVESTERBODYPART3 = *(unsigned short*)0x8CD6EC;
-    unsigned short& MI_HARVESTERBODYPART4 = *(unsigned short*)0x8CD6F0;
-    unsigned short& MI_GRASSHOUSE = *(unsigned short*)0x8CD6F4;
-    unsigned short& MI_GRASSPLANT = *(unsigned short*)0x8CD6F8;
-    unsigned short& MI_CRANE_HARNESS = *(unsigned short*)0x8CD6FC;
-    unsigned short& MI_CRANE_MAGNET = *(unsigned short*)0x8CD700;
-    unsigned short& MI_QUARY_ROCK1 = *(unsigned short*)0x8CD704;
-    unsigned short& MI_QUARY_ROCK2 = *(unsigned short*)0x8CD708;
-    unsigned short& MI_QUARY_ROCK3 = *(unsigned short*)0x8CD70C;
-    unsigned short& MI_ATM = *(unsigned short*)0x8CD710;
-    unsigned short& MI_DEAD_TIED_COP = *(unsigned short*)0x8CD714;
-    unsigned short& MI_WINDSOCK = *(unsigned short*)0x8CD718;
-    unsigned short& MI_WRECKING_BALL = *(unsigned short*)0x8CD71C;
-    unsigned short& MI_FREEFALL_BOMB = *(unsigned short*)0x8CD720;
-    unsigned short& MI_WONG_DISH = *(unsigned short*)0x8CD724;
-    unsigned short& MI_GANG_DRINK = *(unsigned short*)0x8CD728;
-    unsigned short& MI_GANG_SMOKE = *(unsigned short*)0x8CD72C;
-    unsigned short& MI_RHYMESBOOK = *(unsigned short*)0x8CD730;
-    unsigned short& MI_KMB_ROCK = *(unsigned short*)0x8CD734;
-    unsigned short& MI_KMB_PLANK = *(unsigned short*)0x8CD738;
-    unsigned short& MI_KMB_BOMB = *(unsigned short*)0x8CD73C;
-    unsigned short& MI_MINI_MAGNET = *(unsigned short*)0x8CD740;
-    unsigned short& MI_HANGING_CARCASS = *(unsigned short*)0x8CD744;
-    unsigned short& MI_IMY_SHASH_WALL = *(unsigned short*)0x8CD748;
-    unsigned short& MI_PARACHUTE_BACKPACK = *(unsigned short*)0x8CD74C;
-    unsigned short& MI_OYSTER = *(unsigned short*)0x8CD750;
-    unsigned short& MI_HORSESHOE = *(unsigned short*)0x8CD754;
-    unsigned short& MI_OFFROAD_WHEEL = *(unsigned short*)0x8CD758;
-    unsigned short& MI_FLARE = *(unsigned short*)0x8CD75C;
-    unsigned short& MI_NITRO_BOTTLE_SMALL = *(unsigned short*)0x8CD760;
-    unsigned short& MI_NITRO_BOTTLE_LARGE = *(unsigned short*)0x8CD764;
-    unsigned short& MI_NITRO_BOTTLE_DOUBLE = *(unsigned short*)0x8CD768;
-    unsigned short& MI_HYDRAULICS = *(unsigned short*)0x8CD76C;
-    unsigned short& MI_STEREO_UPGRADE = *(unsigned short*)0x8CD770;
-    unsigned short& MI_BASKETBALL = *(unsigned short*)0x8CD774;
-    unsigned short& MI_POOL_CUE_BALL = *(unsigned short*)0x8CD778;
-    unsigned short& MI_PUNCHBAG = *(unsigned short*)0x8CD77C;
-    unsigned short& MI_IMY_GRAY_CRATE = *(unsigned short*)0x8CD780;
+    ModelIndex& MI_TRAFFICLIGHTS = *(ModelIndex*)0x8CD4F4;
+    ModelIndex& MI_TRAFFICLIGHTS_VERTICAL = *(ModelIndex*)0x8CD4F8;
+    ModelIndex& MI_TRAFFICLIGHTS_MIAMI = *(ModelIndex*)0x8CD4FC;
+    ModelIndex& MI_TRAFFICLIGHTS_VEGAS = *(ModelIndex*)0x8CD500;
+    ModelIndex& MI_TRAFFICLIGHTS_TWOVERTICAL = *(ModelIndex*)0x8CD504;
+    ModelIndex& MI_TRAFFICLIGHTS_3 = *(ModelIndex*)0x8CD508;
+    ModelIndex& MI_TRAFFICLIGHTS_4 = *(ModelIndex*)0x8CD50C;
+    ModelIndex& MI_TRAFFICLIGHTS_5 = *(ModelIndex*)0x8CD510;
+    ModelIndex& MI_TRAFFICLIGHTS_GAY = *(ModelIndex*)0x8CD514;
+    ModelIndex& MI_SINGLESTREETLIGHTS1 = *(ModelIndex*)0x8CD518;
+    ModelIndex& MI_SINGLESTREETLIGHTS2 = *(ModelIndex*)0x8CD51C;
+    ModelIndex& MI_SINGLESTREETLIGHTS3 = *(ModelIndex*)0x8CD520;
+    ModelIndex& MI_DOUBLESTREETLIGHTS = *(ModelIndex*)0x8CD524;
+    ModelIndex& MI_STREETLAMP1 = *(ModelIndex*)0x8CD528;
+    ModelIndex& MI_STREETLAMP2 = *(ModelIndex*)0x8CD52C;
+    ModelIndex& MODELID_CRANE_1 = *(ModelIndex*)0x8CD530;
+    ModelIndex& MODELID_CRANE_2 = *(ModelIndex*)0x8CD534;
+    ModelIndex& MODELID_CRANE_3 = *(ModelIndex*)0x8CD538;
+    ModelIndex& MODELID_CRANE_4 = *(ModelIndex*)0x8CD53C;
+    ModelIndex& MODELID_CRANE_5 = *(ModelIndex*)0x8CD540;
+    ModelIndex& MODELID_CRANE_6 = *(ModelIndex*)0x8CD544;
+    ModelIndex& MI_PARKINGMETER = *(ModelIndex*)0x8CD548;
+    ModelIndex& MI_PARKINGMETER2 = *(ModelIndex*)0x8CD54C;
+    ModelIndex& MI_MALLFAN = *(ModelIndex*)0x8CD550;
+    ModelIndex& MI_HOTELFAN_NIGHT = *(ModelIndex*)0x8CD554;
+    ModelIndex& MI_HOTELFAN_DAY = *(ModelIndex*)0x8CD558;
+    ModelIndex& MI_HOTROOMFAN = *(ModelIndex*)0x8CD55C;
+    ModelIndex& MI_PHONEBOOTH1 = *(ModelIndex*)0x8CD560;
+    ModelIndex& MI_WASTEBIN = *(ModelIndex*)0x8CD564;
+    ModelIndex& MI_BIN = *(ModelIndex*)0x8CD568;
+    ModelIndex& MI_POSTBOX1 = *(ModelIndex*)0x8CD56C;
+    ModelIndex& MI_NEWSSTAND = *(ModelIndex*)0x8CD570;
+    ModelIndex& MI_TRAFFICCONE = *(ModelIndex*)0x8CD574;
+    ModelIndex& MI_DUMP1 = *(ModelIndex*)0x8CD578;
+    ModelIndex& MI_ROADWORKBARRIER1 = *(ModelIndex*)0x8CD57C;
+    ModelIndex& MI_ROADBLOCKFUCKEDCAR1 = *(ModelIndex*)0x8CD580;
+    ModelIndex& MI_ROADBLOCKFUCKEDCAR2 = *(ModelIndex*)0x8CD584;
+    ModelIndex& MI_BUSSIGN1 = *(ModelIndex*)0x8CD588;
+    ModelIndex& MI_NOPARKINGSIGN1 = *(ModelIndex*)0x8CD58C;
+    ModelIndex& MI_PHONESIGN = *(ModelIndex*)0x8CD590;
+    ModelIndex& MI_FIRE_HYDRANT = *(ModelIndex*)0x8CD594;
+    ModelIndex& MI_COLLECTABLE1 = *(ModelIndex*)0x8CD598;
+    ModelIndex& MI_MONEY = *(ModelIndex*)0x8CD59C;
+    ModelIndex& MI_CARMINE = *(ModelIndex*)0x8CD5A0;
+    ModelIndex& MI_NAUTICALMINE = *(ModelIndex*)0x8CD5A4;
+    ModelIndex& MI_TELLY = *(ModelIndex*)0x8CD5A8;
+    ModelIndex& MI_BRIEFCASE = *(ModelIndex*)0x8CD5AC;
+    ModelIndex& MI_GLASS1 = *(ModelIndex*)0x8CD5B0;
+    ModelIndex& MI_GLASS8 = *(ModelIndex*)0x8CD5B4;
+    ModelIndex& MI_EXPLODINGBARREL = *(ModelIndex*)0x8CD5B8;
+    ModelIndex& MI_PICKUP_ADRENALINE = *(ModelIndex*)0x8CD5BC;
+    ModelIndex& MI_PICKUP_BODYARMOUR = *(ModelIndex*)0x8CD5C0;
+    ModelIndex& MI_PICKUP_INFO = *(ModelIndex*)0x8CD5C4;
+    ModelIndex& MI_PICKUP_HEALTH = *(ModelIndex*)0x8CD5C8;
+    ModelIndex& MI_PICKUP_BONUS = *(ModelIndex*)0x8CD5CC;
+    ModelIndex& MI_PICKUP_BRIBE = *(ModelIndex*)0x8CD5D0;
+    ModelIndex& MI_PICKUP_KILLFRENZY = *(ModelIndex*)0x8CD5D4;
+    ModelIndex& MI_PICKUP_CAMERA = *(ModelIndex*)0x8CD5D8;
+    ModelIndex& MI_PICKUP_PARACHUTE = *(ModelIndex*)0x8CD5DC;
+    ModelIndex& MI_PICKUP_REVENUE = *(ModelIndex*)0x8CD5E0;
+    ModelIndex& MI_PICKUP_SAVEGAME = *(ModelIndex*)0x8CD5E4;
+    ModelIndex& MI_PICKUP_PROPERTY = *(ModelIndex*)0x8CD5E8;
+    ModelIndex& MI_PICKUP_PROPERTY_FORSALE = *(ModelIndex*)0x8CD5EC;
+    ModelIndex& MI_PICKUP_CLOTHES = *(ModelIndex*)0x8CD5F0;
+    ModelIndex& MI_PICKUP_2P_KILLFRENZY = *(ModelIndex*)0x8CD5F4;
+    ModelIndex& MI_PICKUP_2P_COOP = *(ModelIndex*)0x8CD5F8;
+    ModelIndex& MI_BOLLARDLIGHT = *(ModelIndex*)0x8CD5FC;
+    ModelIndex& MI_FENCE = *(ModelIndex*)0x8CD600;
+    ModelIndex& MI_FENCE2 = *(ModelIndex*)0x8CD604;
+    ModelIndex& MI_BUOY = *(ModelIndex*)0x8CD608;
+    ModelIndex& MI_PARKTABLE = *(ModelIndex*)0x8CD60C;
+    ModelIndex& MI_LAMPPOST1 = *(ModelIndex*)0x8CD610;
+    ModelIndex& MI_MLAMPPOST = *(ModelIndex*)0x8CD614;
+    ModelIndex& MI_BARRIER1 = *(ModelIndex*)0x8CD618;
+    ModelIndex& MI_LITTLEHA_POLICE = *(ModelIndex*)0x8CD61C;
+    ModelIndex& MI_TELPOLE02 = *(ModelIndex*)0x8CD620;
+    ModelIndex& MI_TRAFFICLIGHT01 = *(ModelIndex*)0x8CD624;
+    ModelIndex& MI_PARKBENCH = *(ModelIndex*)0x8CD628;
+    ModelIndex& MI_LIGHTBEAM = *(ModelIndex*)0x8CD62C;
+    ModelIndex& MI_AIRPORTRADAR = *(ModelIndex*)0x8CD630;
+    ModelIndex& MI_RCBOMB = *(ModelIndex*)0x8CD634;
+    ModelIndex& MI_BEACHBALL = *(ModelIndex*)0x8CD638;
+    ModelIndex& MI_SANDCASTLE1 = *(ModelIndex*)0x8CD63C;
+    ModelIndex& MI_SANDCASTLE2 = *(ModelIndex*)0x8CD640;
+    ModelIndex& MI_JELLYFISH = *(ModelIndex*)0x8CD644;
+    ModelIndex& MI_JELLYFISH01 = *(ModelIndex*)0x8CD648;
+    ModelIndex& MI_FISH1SINGLE = *(ModelIndex*)0x8CD64C;
+    ModelIndex& MI_FISH1S = *(ModelIndex*)0x8CD650;
+    ModelIndex& MI_FISH2SINGLE = *(ModelIndex*)0x8CD654;
+    ModelIndex& MI_FISH2S = *(ModelIndex*)0x8CD658;
+    ModelIndex& MI_FISH3SINGLE = *(ModelIndex*)0x8CD65C;
+    ModelIndex& MI_FISH3S = *(ModelIndex*)0x8CD660;
+    ModelIndex& MI_TURTLE = *(ModelIndex*)0x8CD664;
+    ModelIndex& MI_DOLPHIN = *(ModelIndex*)0x8CD668;
+    ModelIndex& MI_SHARK = *(ModelIndex*)0x8CD66C;
+    ModelIndex& MI_SUBMARINE = *(ModelIndex*)0x8CD670;
+    ModelIndex& MI_ESCALATORSTEP = *(ModelIndex*)0x8CD674;
+    ModelIndex& MI_ESCALATORSTEP8 = *(ModelIndex*)0x8CD678;
+    ModelIndex& MI_LOUNGE_WOOD_UP = *(ModelIndex*)0x8CD67C;
+    ModelIndex& MI_LOUNGE_TOWEL_UP = *(ModelIndex*)0x8CD680;
+    ModelIndex& MI_LOUNGE_WOOD_DN = *(ModelIndex*)0x8CD684;
+    ModelIndex& MI_LOTION = *(ModelIndex*)0x8CD688;
+    ModelIndex& MI_BEACHTOWEL01 = *(ModelIndex*)0x8CD68C;
+    ModelIndex& MI_BEACHTOWEL02 = *(ModelIndex*)0x8CD690;
+    ModelIndex& MI_BEACHTOWEL03 = *(ModelIndex*)0x8CD694;
+    ModelIndex& MI_BEACHTOWEL04 = *(ModelIndex*)0x8CD698;
+    ModelIndex& MI_BLIMP_NIGHT = *(ModelIndex*)0x8CD69C;
+    ModelIndex& MI_BLIMP_DAY = *(ModelIndex*)0x8CD6A0;
+    ModelIndex& MI_YT_MAIN_BODY = *(ModelIndex*)0x8CD6A4;
+    ModelIndex& MI_YT_MAIN_BODY2 = *(ModelIndex*)0x8CD6A8;
+    ModelIndex& MI_SAMSITE = *(ModelIndex*)0x8CD6AC;
+    ModelIndex& MI_SAMSITE2 = *(ModelIndex*)0x8CD6B0;
+    ModelIndex& MI_TRAINCROSSING = *(ModelIndex*)0x8CD6B4;
+    ModelIndex& MI_TRAINCROSSING1 = *(ModelIndex*)0x8CD6B8;
+    ModelIndex& MI_MAGNOCRANE = *(ModelIndex*)0x8CD6BC;
+    ModelIndex& MI_CRANETROLLEY = *(ModelIndex*)0x8CD6C0;
+    ModelIndex& MI_QUARRYCRANE_ARM = *(ModelIndex*)0x8CD6C4;
+    ModelIndex& MI_OBJECTFORMAGNOCRANE1 = *(ModelIndex*)0x8CD6C8;
+    ModelIndex& MI_OBJECTFORMAGNOCRANE2 = *(ModelIndex*)0x8CD6CC;
+    ModelIndex& MI_OBJECTFORMAGNOCRANE3 = *(ModelIndex*)0x8CD6D0;
+    ModelIndex& MI_OBJECTFORMAGNOCRANE4 = *(ModelIndex*)0x8CD6D4;
+    ModelIndex& MI_OBJECTFORMAGNOCRANE5 = *(ModelIndex*)0x8CD6D8;
+    ModelIndex& MI_OBJECTFORBUILDINGSITECRANE1 = *(ModelIndex*)0x8CD6DC;
+    ModelIndex& MI_MAGNOCRANE_HOOK = *(ModelIndex*)0x8CD6E0;
+    ModelIndex& MI_HARVESTERBODYPART1 = *(ModelIndex*)0x8CD6E4;
+    ModelIndex& MI_HARVESTERBODYPART2 = *(ModelIndex*)0x8CD6E8;
+    ModelIndex& MI_HARVESTERBODYPART3 = *(ModelIndex*)0x8CD6EC;
+    ModelIndex& MI_HARVESTERBODYPART4 = *(ModelIndex*)0x8CD6F0;
+    ModelIndex& MI_GRASSHOUSE = *(ModelIndex*)0x8CD6F4;
+    ModelIndex& MI_GRASSPLANT = *(ModelIndex*)0x8CD6F8;
+    ModelIndex& MI_CRANE_HARNESS = *(ModelIndex*)0x8CD6FC;
+    ModelIndex& MI_CRANE_MAGNET = *(ModelIndex*)0x8CD700;
+    ModelIndex& MI_QUARY_ROCK1 = *(ModelIndex*)0x8CD704;
+    ModelIndex& MI_QUARY_ROCK2 = *(ModelIndex*)0x8CD708;
+    ModelIndex& MI_QUARY_ROCK3 = *(ModelIndex*)0x8CD70C;
+    ModelIndex& MI_ATM = *(ModelIndex*)0x8CD710;
+    ModelIndex& MI_DEAD_TIED_COP = *(ModelIndex*)0x8CD714;
+    ModelIndex& MI_WINDSOCK = *(ModelIndex*)0x8CD718;
+    ModelIndex& MI_WRECKING_BALL = *(ModelIndex*)0x8CD71C;
+    ModelIndex& MI_FREEFALL_BOMB = *(ModelIndex*)0x8CD720;
+    ModelIndex& MI_WONG_DISH = *(ModelIndex*)0x8CD724;
+    ModelIndex& MI_GANG_DRINK = *(ModelIndex*)0x8CD728;
+    ModelIndex& MI_GANG_SMOKE = *(ModelIndex*)0x8CD72C;
+    ModelIndex& MI_RHYMESBOOK = *(ModelIndex*)0x8CD730;
+    ModelIndex& MI_KMB_ROCK = *(ModelIndex*)0x8CD734;
+    ModelIndex& MI_KMB_PLANK = *(ModelIndex*)0x8CD738;
+    ModelIndex& MI_KMB_BOMB = *(ModelIndex*)0x8CD73C;
+    ModelIndex& MI_MINI_MAGNET = *(ModelIndex*)0x8CD740;
+    ModelIndex& MI_HANGING_CARCASS = *(ModelIndex*)0x8CD744;
+    ModelIndex& MI_IMY_SHASH_WALL = *(ModelIndex*)0x8CD748;
+    ModelIndex& MI_PARACHUTE_BACKPACK = *(ModelIndex*)0x8CD74C;
+    ModelIndex& MI_OYSTER = *(ModelIndex*)0x8CD750;
+    ModelIndex& MI_HORSESHOE = *(ModelIndex*)0x8CD754;
+    ModelIndex& MI_OFFROAD_WHEEL = *(ModelIndex*)0x8CD758;
+    ModelIndex& MI_FLARE = *(ModelIndex*)0x8CD75C;
+    ModelIndex& MI_NITRO_BOTTLE_SMALL = *(ModelIndex*)0x8CD760;
+    ModelIndex& MI_NITRO_BOTTLE_LARGE = *(ModelIndex*)0x8CD764;
+    ModelIndex& MI_NITRO_BOTTLE_DOUBLE = *(ModelIndex*)0x8CD768;
+    ModelIndex& MI_HYDRAULICS = *(ModelIndex*)0x8CD76C;
+    ModelIndex& MI_STEREO_UPGRADE = *(ModelIndex*)0x8CD770;
+    ModelIndex& MI_BASKETBALL = *(ModelIndex*)0x8CD774;
+    ModelIndex& MI_POOL_CUE_BALL = *(ModelIndex*)0x8CD778;
+    ModelIndex& MI_PUNCHBAG = *(ModelIndex*)0x8CD77C;
+    ModelIndex& MI_IMY_GRAY_CRATE = *(ModelIndex*)0x8CD780;
 }
 
+void ModelIndices::InjectHooks() {
+    ReversibleHooks::Install("ModelIndices", "InitModelIndices", 0x5BCA10, &InitModelIndices);
+    ReversibleHooks::Install("ModelIndices", "MatchAllModelStrings", 0x5B57C0, &MatchAllModelStrings);
+}
+
+// 0x5BCA10
 void InitModelIndices()
 {
-    plugin::Call<0x5BCA10>();
+    using namespace ModelIndices;
+
+    MI_TRAFFICLIGHTS               = -1;
+    MI_TRAFFICLIGHTS_VERTICAL      = -1;
+    MI_TRAFFICLIGHTS_MIAMI         = -1;
+    MI_TRAFFICLIGHTS_VEGAS         = -1;
+    MI_TRAFFICLIGHTS_TWOVERTICAL   = -1;
+    MI_TRAFFICLIGHTS_3             = -1;
+    MI_TRAFFICLIGHTS_4             = -1;
+    MI_TRAFFICLIGHTS_5             = -1;
+    MI_TRAFFICLIGHTS_GAY           = -1;
+    MI_SINGLESTREETLIGHTS1         = -1;
+    MI_SINGLESTREETLIGHTS2         = -1;
+    MI_SINGLESTREETLIGHTS3         = -1;
+    MI_DOUBLESTREETLIGHTS          = -1;
+    MI_STREETLAMP1                 = -1;
+    MI_STREETLAMP2                 = -1;
+    MODELID_CRANE_1                = -1;
+    MODELID_CRANE_2                = -1;
+    MODELID_CRANE_3                = -1;
+    MODELID_CRANE_4                = -1;
+    MODELID_CRANE_5                = -1;
+    MODELID_CRANE_6                = -1;
+    MI_PARKINGMETER                = -1;
+    MI_PARKINGMETER2               = -1;
+    MI_MALLFAN                     = -1;
+    MI_HOTELFAN_NIGHT              = -1;
+    MI_HOTELFAN_DAY                = -1;
+    MI_HOTROOMFAN                  = -1;
+    MI_PHONEBOOTH1                 = -1;
+    MI_WASTEBIN                    = -1;
+    MI_BIN                         = -1;
+    MI_POSTBOX1                    = -1;
+    MI_NEWSSTAND                   = -1;
+    MI_TRAFFICCONE                 = -1;
+    MI_DUMP1                       = -1;
+    MI_ROADWORKBARRIER1            = -1;
+    MI_ROADBLOCKFUCKEDCAR1         = -1;
+    MI_ROADBLOCKFUCKEDCAR2         = -1;
+    MI_BUSSIGN1                    = -1;
+    MI_NOPARKINGSIGN1              = -1;
+    MI_PHONESIGN                   = -1;
+    MI_FIRE_HYDRANT                = -1;
+    MI_COLLECTABLE1                = -1;
+    MI_MONEY                       = -1;
+    MI_CARMINE                     = -1;
+    MI_NAUTICALMINE                = -1;
+    MI_TELLY                       = -1;
+    MI_BRIEFCASE                   = -1;
+    MI_GLASS1                      = -1;
+    MI_GLASS8                      = -1;
+    MI_EXPLODINGBARREL             = -1;
+    MI_PICKUP_ADRENALINE           = -1;
+    MI_PICKUP_BODYARMOUR           = -1;
+    MI_PICKUP_INFO                 = -1;
+    MI_PICKUP_HEALTH               = -1;
+    MI_PICKUP_BONUS                = -1;
+    MI_PICKUP_BRIBE                = -1;
+    MI_PICKUP_KILLFRENZY           = -1;
+    MI_PICKUP_CAMERA               = -1;
+    MI_PICKUP_PARACHUTE            = -1;
+    MI_PICKUP_REVENUE              = -1;
+    MI_PICKUP_SAVEGAME             = -1;
+    MI_PICKUP_PROPERTY             = -1;
+    MI_PICKUP_PROPERTY_FORSALE     = -1;
+    MI_PICKUP_CLOTHES              = -1;
+    MI_PICKUP_2P_KILLFRENZY        = -1;
+    MI_PICKUP_2P_COOP              = -1;
+    MI_BOLLARDLIGHT                = -1;
+    MI_FENCE                       = -1;
+    MI_FENCE2                      = -1;
+    MI_BUOY                        = -1;
+    MI_PARKTABLE                   = -1;
+    MI_LAMPPOST1                   = -1;
+    MI_MLAMPPOST                   = -1;
+    MI_BARRIER1                    = -1;
+    MI_LITTLEHA_POLICE             = -1;
+    MI_TELPOLE02                   = -1;
+    MI_TRAFFICLIGHT01              = -1;
+    MI_PARKBENCH                   = -1;
+    MI_LIGHTBEAM                   = -1;
+    MI_AIRPORTRADAR                = -1;
+    MI_RCBOMB                      = -1;
+    MI_BEACHBALL                   = -1;
+    MI_SANDCASTLE1                 = -1;
+    MI_SANDCASTLE2                 = -1;
+    MI_JELLYFISH                   = -1;
+    MI_JELLYFISH01                 = -1;
+    MI_FISH1SINGLE                 = -1;
+    MI_FISH1S                      = -1;
+    MI_FISH2SINGLE                 = -1;
+    MI_FISH2S                      = -1;
+    MI_FISH3SINGLE                 = -1;
+    MI_FISH3S                      = -1;
+    MI_TURTLE                      = -1;
+    MI_DOLPHIN                     = -1;
+    MI_SHARK                       = -1;
+    MI_SUBMARINE                   = -1;
+    MI_ESCALATORSTEP               = -1;
+    MI_ESCALATORSTEP8              = -1;
+    MI_LOUNGE_WOOD_UP              = -1;
+    MI_LOUNGE_TOWEL_UP             = -1;
+    MI_LOUNGE_WOOD_DN              = -1;
+    MI_LOTION                      = -1;
+    MI_BEACHTOWEL01                = -1;
+    MI_BEACHTOWEL02                = -1;
+    MI_BEACHTOWEL03                = -1;
+    MI_BEACHTOWEL04                = -1;
+    MI_BLIMP_NIGHT                 = -1;
+    MI_BLIMP_DAY                   = -1;
+    MI_YT_MAIN_BODY                = -1;
+    MI_YT_MAIN_BODY2               = -1;
+    MI_SAMSITE                     = -1;
+    MI_SAMSITE2                    = -1;
+    MI_TRAINCROSSING               = -1;
+    MI_TRAINCROSSING1              = -1;
+    MI_MAGNOCRANE                  = -1;
+    MI_CRANETROLLEY                = -1;
+    MI_QUARRYCRANE_ARM             = -1;
+    MI_OBJECTFORMAGNOCRANE1        = -1;
+    MI_OBJECTFORMAGNOCRANE2        = -1;
+    MI_OBJECTFORMAGNOCRANE3        = -1;
+    MI_OBJECTFORMAGNOCRANE4        = -1;
+    MI_OBJECTFORMAGNOCRANE5        = -1;
+    MI_OBJECTFORBUILDINGSITECRANE1 = -1;
+    MI_MAGNOCRANE_HOOK             = -1;
+    MI_HARVESTERBODYPART1          = -1;
+    MI_HARVESTERBODYPART2          = -1;
+    MI_HARVESTERBODYPART3          = -1;
+    MI_HARVESTERBODYPART4          = -1;
+    MI_GRASSHOUSE                  = -1;
+    MI_GRASSPLANT                  = -1;
+    MI_CRANE_HARNESS               = -1;
+    MI_CRANE_MAGNET                = -1;
+    MI_QUARY_ROCK1                 = -1;
+    MI_QUARY_ROCK2                 = -1;
+    MI_QUARY_ROCK3                 = -1;
+    MI_ATM                         = -1;
+    MI_DEAD_TIED_COP               = -1;
+    MI_WINDSOCK                    = -1;
+    MI_WRECKING_BALL               = -1;
+    MI_FREEFALL_BOMB               = -1;
+    MI_WONG_DISH                   = -1;
+    MI_GANG_DRINK                  = -1;
+    MI_GANG_SMOKE                  = -1;
+    MI_RHYMESBOOK                  = -1;
+    MI_KMB_ROCK                    = -1;
+    MI_KMB_PLANK                   = -1;
+    MI_KMB_BOMB                    = -1;
+    MI_MINI_MAGNET                 = -1;
+    MI_HANGING_CARCASS             = -1;
+    MI_IMY_SHASH_WALL              = -1;
+    MI_PARACHUTE_BACKPACK          = -1;
+    MI_OYSTER                      = -1;
+    MI_HORSESHOE                   = -1;
+    MI_OFFROAD_WHEEL               = -1;
+    MI_FLARE                       = -1;
+    MI_NITRO_BOTTLE_SMALL          = -1;
+    MI_NITRO_BOTTLE_LARGE          = -1;
+    MI_NITRO_BOTTLE_DOUBLE         = -1;
+    MI_HYDRAULICS                  = -1;
+    MI_STEREO_UPGRADE              = -1;
+    MI_BASKETBALL                  = -1;
+    MI_POOL_CUE_BALL               = -1;
+    MI_PUNCHBAG                    = -1;
+    MI_IMY_GRAY_CRATE              = -1;
+}
+
+// 0x5B57C0
+void MatchAllModelStrings() {
+    using namespace ModelIndices;
+
+    struct {const char* name; ModelIndex& index; } models[] = {
+        { "fire_hydrant",       MI_FIRE_HYDRANT                },
+        { "phonesign",          MI_PHONESIGN                   },
+        { "noparkingsign1",     MI_NOPARKINGSIGN1              },
+        { "bussign1",           MI_BUSSIGN1                    },
+        { "DYN_ROADBARRIER_6",  MI_ROADWORKBARRIER1            },
+        { "la_fuckcar1",        MI_ROADBLOCKFUCKEDCAR1         },
+        { "la_fuckcar2",        MI_ROADBLOCKFUCKEDCAR2         },
+        { "dump1",              MI_DUMP1                       },
+        { "trafficcone",        MI_TRAFFICCONE                 },
+        { "newsstand1",         MI_NEWSSTAND                   },
+        { "postbox1",           MI_POSTBOX1                    },
+        { "bin1",               MI_BIN                         },
+        { "wastebin",           MI_WASTEBIN                    },
+        { "phonebooth1",        MI_PHONEBOOTH1                 },
+        { "parkingmeter",       MI_PARKINGMETER                },
+        { "parkingmeterg",      MI_PARKINGMETER2               },
+        { "mall_fans",          MI_MALLFAN                     },
+        { "htl_fan_rotate_nt",  MI_HOTELFAN_NIGHT              },
+        { "htl_fan_rotate_dy",  MI_HOTELFAN_DAY                },
+        { "hotroomfan",         MI_HOTROOMFAN                  },
+        { "trafficlight1",      MI_TRAFFICLIGHTS               },
+        { "MTraffic4",          MI_TRAFFICLIGHTS_VERTICAL      },
+        { "MTraffic1",          MI_TRAFFICLIGHTS_MIAMI         },
+        { "vgsstriptlights1",   MI_TRAFFICLIGHTS_VEGAS         },
+        { "MTraffic2",          MI_TRAFFICLIGHTS_TWOVERTICAL   },
+        { "lamppost1",          MI_SINGLESTREETLIGHTS1         },
+        { "lamppost2",          MI_SINGLESTREETLIGHTS2         },
+        { "lamppost3",          MI_SINGLESTREETLIGHTS3         },
+        { "doublestreetlght1",  MI_DOUBLESTREETLIGHTS          },
+        { "Streetlamp1",        MI_STREETLAMP1                 },
+        { "Streetlamp2",        MI_STREETLAMP2                 },
+        { "doc_crane_cab0",     MODELID_CRANE_1                },
+        { "doc_crane_cab01",    MODELID_CRANE_2                },
+        { "doc_crane_cab02",    MODELID_CRANE_3                },
+        { "doc_crane_cab03",    MODELID_CRANE_4                },
+        { "boatcranelg0",       MODELID_CRANE_5                },
+        { "LODnetopa0",         MODELID_CRANE_6                },
+        { "package1",           MI_COLLECTABLE1                },
+        { "Money",              MI_MONEY                       },
+        { "barrel1",            MI_CARMINE                     },
+        { "barrel2",            MI_NAUTICALMINE                },
+        { "DYN_TV_2",           MI_TELLY                       },
+        { "briefcase",          MI_BRIEFCASE                   },
+        { "wglasssmash",        MI_GLASS1                      },
+        { "glassfx_composh",    MI_GLASS8                      },
+        { "adrenaline",         MI_PICKUP_ADRENALINE           },
+        { "bodyarmour",         MI_PICKUP_BODYARMOUR           },
+        { "info",               MI_PICKUP_INFO                 },
+        { "health",             MI_PICKUP_HEALTH               },
+        { "bonus",              MI_PICKUP_BONUS                },
+        { "bribe",              MI_PICKUP_BRIBE                },
+        { "killfrenzy",         MI_PICKUP_KILLFRENZY           },
+        { "camerapickup",       MI_PICKUP_CAMERA               },
+        { "gun_para",           MI_PICKUP_PARACHUTE            },
+        { "para_pack",          MI_PARACHUTE_BACKPACK          },
+        { "bigdollar",          MI_PICKUP_REVENUE              },
+        { "pickupsave",         MI_PICKUP_SAVEGAME             },
+        { "property_locked",    MI_PICKUP_PROPERTY             },
+        { "property_fsale",     MI_PICKUP_PROPERTY_FORSALE     },
+        { "clothesp",           MI_PICKUP_CLOTHES              },
+        { "killfrenzy2plyr",    MI_PICKUP_2P_KILLFRENZY        },
+        { "2player",            MI_PICKUP_2P_COOP              },
+        { "bollardlight",       MI_BOLLARDLIGHT                },
+        { "bar_barrier10",      MI_FENCE                       },
+        { "bar_barrier12",      MI_FENCE2                      },
+        { "bouy",               MI_BUOY                        },
+        { "parktable1",         MI_PARKTABLE                   },
+        { "CJ_OYSTER",          MI_OYSTER                      },
+        { "cj_horse_Shoe",      MI_HORSESHOE                   },
+        { "wheel_or1",          MI_OFFROAD_WHEEL               },
+        { "nto_b_s",            MI_NITRO_BOTTLE_SMALL          },
+        { "nto_b_l",            MI_NITRO_BOTTLE_LARGE          },
+        { "nto_b_tw",           MI_NITRO_BOTTLE_DOUBLE         },
+        { "lamppost1",          MI_LAMPPOST1                   },
+        { "mlamppost",          MI_MLAMPPOST                   },
+        { "roadworkbarrier1",   MI_BARRIER1                    },
+        { "littleha_police",    MI_LITTLEHA_POLICE             },
+        { "telgrphpole02",      MI_TELPOLE02                   },
+        { "trafficlight1",      MI_TRAFFICLIGHT01              },
+        { "parkbench1",         MI_PARKBENCH                   },
+        { "Money",              MI_MONEY                       },
+        { "od_lightbeam",       MI_LIGHTBEAM                   },
+        { "ap_radar1_01",       MI_AIRPORTRADAR                },
+        { "rcbomb",             MI_RCBOMB                      },
+        { "beachball",          MI_BEACHBALL                   },
+        { "sandcastle1",        MI_SANDCASTLE1                 },
+        { "sandcastle2",        MI_SANDCASTLE2                 },
+        { "jellyfish",          MI_JELLYFISH                   },
+        { "jellyfish01",        MI_JELLYFISH01                 },
+        { "fish1single",        MI_FISH1SINGLE                 },
+        { "fish1s",             MI_FISH1S                      },
+        { "fish2single",        MI_FISH2SINGLE                 },
+        { "fish2s",             MI_FISH2S                      },
+        { "fish3single",        MI_FISH3SINGLE                 },
+        { "fish3s",             MI_FISH3S                      },
+        { "turtle",             MI_TURTLE                      },
+        { "dolphin",            MI_DOLPHIN                     },
+        { "shark",              MI_SHARK                       },
+        { "submarine",          MI_SUBMARINE                   },
+        { "Esc_step",           MI_ESCALATORSTEP               },
+        { "Esc_step8",          MI_ESCALATORSTEP8              },
+        { "lounge_wood_up",     MI_LOUNGE_WOOD_UP              },
+        { "lounge_towel_up",    MI_LOUNGE_TOWEL_UP             },
+        { "lounge_wood_dn",     MI_LOUNGE_WOOD_DN              },
+        { "lotion",             MI_LOTION                      },
+        { "beachtowel01",       MI_BEACHTOWEL01                },
+        { "beachtowel02",       MI_BEACHTOWEL02                },
+        { "beachtowel03",       MI_BEACHTOWEL03                },
+        { "beachtowel04",       MI_BEACHTOWEL04                },
+        { "blimp_night",        MI_BLIMP_NIGHT                 },
+        { "blimp_day",          MI_BLIMP_DAY                   },
+        { "yt_main_body",       MI_YT_MAIN_BODY                },
+        { "yt_main_body2",      MI_YT_MAIN_BODY2               },
+        { "mil_samsite",        MI_SAMSITE                     },
+        { "samsite_SFXRF",      MI_SAMSITE2                    },
+        { "traincross2",        MI_TRAINCROSSING               },
+        { "traincross1",        MI_TRAINCROSSING1              },
+        { "MagnoCrane_03",      MI_MAGNOCRANE                  },
+        { "TwrCrane_M_02",      MI_CRANETROLLEY                },
+        { "quarry_cranearm",    MI_QUARRYCRANE_ARM             },
+        { "kmb_container_red",  MI_OBJECTFORMAGNOCRANE1        },
+        { "kmb_container_yel",  MI_OBJECTFORMAGNOCRANE2        },
+        { "kmb_container_blue", MI_OBJECTFORMAGNOCRANE3        },
+        { "barrel4",            MI_OBJECTFORMAGNOCRANE4        },
+        { "kmb_container_open", MI_OBJECTFORMAGNOCRANE5        },
+        { "blockpallet",        MI_OBJECTFORBUILDINGSITECRANE1 },
+        { "magnocrane5_SFS",    MI_MAGNOCRANE_HOOK             },
+        { "kmb_deadarm",        MI_HARVESTERBODYPART1          },
+        { "kmb_deadleg",        MI_HARVESTERBODYPART2          },
+        { "kmb_deadhead",       MI_HARVESTERBODYPART3          },
+        { "kmb_deadtorso",      MI_HARVESTERBODYPART4          },
+        { "grasshouse",         MI_GRASSHOUSE                  },
+        { "grassplant",         MI_GRASSPLANT                  },
+        { "INDUS_MAGNET",       MI_CRANE_MAGNET                },
+        { "CJ_PLAYER_HARNESS",  MI_CRANE_HARNESS               },
+        { "dyn_quarryrock01",   MI_QUARY_ROCK1                 },
+        { "dyn_quarryrock02",   MI_QUARY_ROCK2                 },
+        { "dyn_quarryrock03",   MI_QUARY_ROCK3                 },
+        { "KMB_ATM3",           MI_ATM                         },
+        { "dead_tied_cop",      MI_DEAD_TIED_COP               },
+        { "bonyrd_windsock",    MI_WINDSOCK                    },
+        { "DYN_WREKING_BALL",   MI_WRECKING_BALL               },
+        { "bomb",               MI_FREEFALL_BOMB               },
+        { "mini_magnet",        MI_MINI_MAGNET                 },
+        { "ab_carcass",         MI_HANGING_CARCASS             },
+        { "wong_dish",          MI_WONG_DISH                   },
+        { "CJ_BEAR_BOTTLE",     MI_GANG_DRINK                  },
+        { "CJ_CIGGY",           MI_GANG_SMOKE                  },
+        { "CJ_TRAFFIC_LIGHT3",  MI_TRAFFICLIGHTS_3             },
+        { "CJ_TRAFFIC_LIGHT4",  MI_TRAFFICLIGHTS_4             },
+        { "CJ_TRAFFIC_LIGHT5",  MI_TRAFFICLIGHTS_5             },
+        { "GAY_TRAFFIC_LIGHT",  MI_TRAFFICLIGHTS_GAY           },
+        { "imy_shash_wall",     MI_IMY_SHASH_WALL              },
+        { "flare",              MI_FLARE                       },
+        { "hydralics",          MI_HYDRAULICS                  },
+        { "stereo",             MI_STEREO_UPGRADE              },
+        { "BBALL_COL",          MI_BASKETBALL                  },
+        { "k_poolballcue",      MI_POOL_CUE_BALL               },
+        { "punchbagnu",         MI_PUNCHBAG                    },
+        { "imy_bbox",           MI_IMY_GRAY_CRATE              },
+    };
+
+    for (auto& model : models)
+        CModelInfo::GetModelInfoUInt16(model.name, &model.index);
+}
+
+// 0x5B6160
+void MatchModelStringUint16(char* name, ModelIndex) {
+    // NOP
+}
+
+// 0x53ED30
+void TestModelIndices() {
+    // NOP
 }

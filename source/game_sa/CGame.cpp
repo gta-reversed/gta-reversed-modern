@@ -174,11 +174,6 @@ bool CGame::Init1(char const *datFile) {
     return true;
 }
 
-// 0x53ED30
-void TestModelIndices() {
-    // NOP
-}
-
 // 0x5BA1A0
 void CGame::Init2(char const* datFile) {
     LoadingScreen((char*)"Loading the Game", (char*)"Add Particles");
