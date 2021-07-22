@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CRadar.h"
+
 unsigned int& CStreaming::ms_memoryAvailable = *reinterpret_cast<unsigned int*>(0x8A5A80);
 int& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int*>(0x8A5A84);
 bool& CStreaming::ms_bLoadVehiclesInLoadScene = *reinterpret_cast<bool*>(0x8A5A88);

@@ -1,6 +1,14 @@
 #include "StdInc.h"
 
-void CPlayerInfo::InjectHooks() {
+void CPlayerInfo::InjectHooks()
+{
+    ReversibleHooks::Install("CPlayerInfo", "IsPlayerInRemoteMode", 0x56DAB0, &CPlayerInfo::IsPlayerInRemoteMode);
+}
+
+bool CPlayerInfo::IsPlayerInRemoteMode()
+{
+    //plugin::CallMethod<0x56DAB0, CPlayerInfo*>(this);
+    return m_pRemoteVehicle != nullptr;
 }
 
 // 0x56F7D0
