@@ -93,6 +93,7 @@ public:
 
 public:
     static void InjectHooks();
+    bool IsPlayerInRemoteMode();
     void DeletePlayerSkin();
     void LoadPlayerSkin();
     void Clear();

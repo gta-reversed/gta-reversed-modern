@@ -96,5 +96,3 @@ public:
     static void Update();
     static void UpdateTerritoryUnderControlPercentage();
 };
-
-//#include "meta/meta.CGangWars.h"

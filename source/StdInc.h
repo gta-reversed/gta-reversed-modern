@@ -231,7 +231,6 @@
 #include "game_sa\CPopulation.h"
 #include "game_sa\CProjectileInfo.h"
 #include "game_sa\CQueuedMode.h"
-#include "game_sa\CRadar.h"
 #include "game_sa\CRealTimeShadow.h"
 #include "game_sa\CRealTimeShadowManager.h"
 #include "game_sa\CReference.h"

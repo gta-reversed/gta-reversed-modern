@@ -6,6 +6,8 @@
 */
 #include "StdInc.h"
 
+#include "CRadar.h"
+
 unsigned short& CObject::nNoTempObjects = *(unsigned short*)(0xBB4A70);
 float& CObject::fDistToNearestTree = *(float*)0x8D0A20;
 bool& CObject::bAircraftCarrierSamSiteDisabled = *(bool*)0x8D0A24;

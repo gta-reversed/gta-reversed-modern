@@ -19,6 +19,7 @@
 
 #include "CCarGenerator.h"
 #include "CTheCarGenerators.h"
+#include "CRadar.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
@@ -320,6 +321,7 @@ void InjectHooksMain()
     CIplStore::InjectHooks();
     cHandlingDataMgr::InjectHooks();
     CLoadingScreen::InjectHooks();
+    CRadar::InjectHooks();
     CText::InjectHooks();
     CTaskSimpleUninterruptable::InjectHooks();
     CTaskSimpleSetStayInSamePlace::InjectHooks();

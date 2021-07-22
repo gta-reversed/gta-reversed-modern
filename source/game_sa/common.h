@@ -18,10 +18,10 @@ Do not delete this comment block. Respect others' work!
 
 const char gta_empty_string[4] = {0, 0, 0, 0};
 
-#define DEFAULT_SCREEN_WIDTH (640)
-#define DEFAULT_SCREEN_HEIGHT (448)
-#define DEFAULT_SCREEN_HEIGHT_PAL (512)
-#define DEFAULT_SCREEN_HEIGHT_NTSC (448)
+#define DEFAULT_SCREEN_WIDTH (640.0f)
+#define DEFAULT_SCREEN_HEIGHT (448.0f)
+#define DEFAULT_SCREEN_HEIGHT_PAL (512.0f)
+#define DEFAULT_SCREEN_HEIGHT_NTSC (448.0f)
 #define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
 #define DEFAULT_VIEWWINDOW (0.7f)
 
@@ -31,6 +31,8 @@ const char gta_empty_string[4] = {0, 0, 0, 0};
 #define SCREEN_HEIGHT ((float)RsGlobal.maximumHeight)
 #define SCREEN_ASPECT_RATIO (CDraw::ms_fAspectRatio)
 #define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetScaledFOV() * 0.5f)))
+#define SCREEN_WIDTH_UNIT (SCREEN_WIDTH / 640.0f)
+#define SCREEN_HEIGHT_UNIT (SCREEN_HEIGHT / 448.0f)
 
 // This scales from PS2 pixel coordinates to the real resolution
 #define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH / DEFAULT_SCREEN_WIDTH)
@@ -72,7 +74,9 @@ constexpr float TWO_PI = 6.28318530718f;
 constexpr float PI = 3.14159265358979323846f;
 constexpr float HALF_PI = PI / 2.0f;
 constexpr float LOG10_2 = 0.30102999566398119802f; // log10(2)
-
+constexpr float SQRT_2 = 1.41421356237309504880f;
+constexpr float SIN_PI = 0.0f; // std::sin(PI);
+constexpr float COS_PI = -1.0f; // std::cos(PI);
 
 void InjectCommonHooks();
 
