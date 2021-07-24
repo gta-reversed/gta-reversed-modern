@@ -43,8 +43,6 @@ void CAESmoothFadeThread::Initialise()
         SetThreadPriority(m_threadHandle, 0);
         m_bThreadCreated = true;
         m_bThreadInvalid = false;
-        //NOTSA: Added thread name to ease debugging
-        SetThreadDescription(m_threadHandle, L"CAESmoothFadeThread");
     }
 }
 
