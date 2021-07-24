@@ -1567,8 +1567,10 @@ void CRunningScript::ProcessCommands500To599(int commandId) {
     case COMMAND_RESTORE_WEATHER: // 0x252
         break;
     case COMMAND_STORE_CLOCK: // 0x253
+        CClock::StoreClock();
         break;
     case COMMAND_RESTORE_CLOCK: // 0x254
+        CClock::RestoreClock();
         break;
     case COMMAND_RESTART_CRITICAL_MISSION: // 0x255
         break;

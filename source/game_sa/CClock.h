@@ -9,7 +9,7 @@
 class CClock {
 public:
     static unsigned char daysInMonth[12];
-    static bool& bClockHasBeenStored;
+    static bool bClockHasBeenStored;
     static unsigned short& ms_Stored_nGameClockSeconds;
     static unsigned char& ms_Stored_nGameClockMinutes;
     static unsigned char& ms_Stored_nGameClockHours;
@@ -31,7 +31,7 @@ public:
     static void Update();
 
     static unsigned short GetGameClockMinutesUntil(unsigned char hours, unsigned char minutes);
-    static bool GetIsTimeInRange(unsigned char from, unsigned char h2);
+    static bool GetIsTimeInRange(unsigned char from, unsigned char to);
     static void NormaliseGameClock();
     static void OffsetClockByADay(unsigned int timeDirection);
     static void SetGameClock(unsigned char hours, unsigned char minutes, unsigned char day);
