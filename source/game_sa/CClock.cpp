@@ -2,7 +2,8 @@
 
 // 0x8CCF24
 unsigned char CClock::daysInMonth[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-bool& CClock::bClockHasBeenStored = *reinterpret_cast<bool*>(0xB70144);
+// 0xB70144
+bool CClock::bClockHasBeenStored;
 unsigned short& CClock::ms_Stored_nGameClockSeconds = *reinterpret_cast<unsigned short*>(0xB70148);
 unsigned char& CClock::ms_Stored_nGameClockMinutes = *reinterpret_cast<unsigned char*>(0xB7014A);
 unsigned char& CClock::ms_Stored_nGameClockHours = *reinterpret_cast<unsigned char*>(0xB7014B);
