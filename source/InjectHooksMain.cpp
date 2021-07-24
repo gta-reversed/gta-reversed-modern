@@ -358,5 +358,6 @@ void InjectHooksMain()
     CAEVorbisDecoder::InjectHooks();
     CAEWaveDecoder::InjectHooks();
     CAEWMADecoder::InjectHooks();
+    CAETwinLoopSoundEntity::InjectHooks();
     CAEDoorAudioEntity::InjectHooks();
 }
