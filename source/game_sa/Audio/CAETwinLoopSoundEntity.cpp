@@ -160,7 +160,7 @@ void CAETwinLoopSoundEntity::PlayTwinLoopSound(CVector posn, float volume, float
     if (m_pSound2)
         m_pSound2->StopSoundAndForget();
 
-    auto envFlags = flags | (SOUND_REQUEST_UPDATES | SOUND_REQUEST_UPDATES);
+    eSoundEnvironment envFlags = static_cast<eSoundEnvironment>(flags | SOUND_REQUEST_UPDATES | SOUND_REQUEST_UPDATES);
 
     CAESound sound;
     sound.Initialise(m_nBankSlotId, m_nSoundId1, this, posn, volume, maxDistance, speed, timeScale, 0, envFlags, 0.0f, 0);
