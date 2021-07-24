@@ -1,7 +1,8 @@
 Language: Cpp
 PointerAlignment: Left
-DerivePointerAlignment: False
-IndentWrappedFunctionNames: False
+DerivePointerAlignment: false
+IndentWrappedFunctionNames: false
 IndentWidth: 4
 ColumnLimit: 180
-SortIncludes: Never
+SortIncludes: false
+AccessModifierOffset: -4
