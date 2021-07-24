@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
 #include "CSimpleVariablesSaveStructure.h"
+
+// Audio
 #include "CAEAudioChannel.h"
 #include "CAEAudioEnvironment.h"
 #include "CAEAudioHardware.h"
@@ -15,6 +17,8 @@
 #include "CAEWMADecoder.h"
 #include "CAEStreamingDecoder.h"
 #include "CAEUserRadioTrackManager.h"
+#include "CAEDoorAudioEntity.h"
+
 #include "CDebugMenu.h"
 
 #include "CCarGenerator.h"
@@ -354,4 +358,5 @@ void InjectHooksMain()
     CAEVorbisDecoder::InjectHooks();
     CAEWaveDecoder::InjectHooks();
     CAEWMADecoder::InjectHooks();
+    CAEDoorAudioEntity::InjectHooks();
 }

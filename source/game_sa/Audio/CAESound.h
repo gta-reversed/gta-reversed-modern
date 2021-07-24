@@ -6,11 +6,12 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVector.h"
-class CAEAudioEntity;
 
-enum  eSoundEnvironment : unsigned short {
+class CAEAudioEntity;
+class CEntity;
+
+enum eSoundEnvironment : unsigned short {
     SOUND_FRONT_END                        = 0x1,
     SOUND_UNCANCELLABLE                    = 0x2,
     SOUND_REQUEST_UPDATES                  = 0x4,
@@ -31,20 +32,12 @@ enum eSoundState : short {
     SOUND_STOPPED = 1,
 };
 
-class  CAESound {
-public:
-    CAESound() { m_pPhysicalEntity = nullptr; }
-    CAESound(CAESound& sound);
-    CAESound(short bankSlotId, short sfxId, CAEAudioEntity* baseAudio, CVector posn, float volume,
-        float fDistance, float speed, float timeScale, unsigned char ignoredServiceCycles,
-        unsigned short environmentFlags, float speedVariability);
-    ~CAESound();
-    CAESound& operator=(CAESound const& sound);
+class CAESound {
 public:
     short                 m_nBankSlotId;
     short                 m_nSoundIdInSlot;
-    CAEAudioEntity       *m_pBaseAudio;
-    class CEntity        *m_pPhysicalEntity;
+    CAEAudioEntity*       m_pBaseAudio;
+    CEntity*              m_pPhysicalEntity;
     unsigned int          m_nEvent; // see eAudioEvents
     float                 m_fMaxVolume;
     float                 m_fVolume;
@@ -94,7 +87,20 @@ public:
 
 public:
     static void InjectHooks();
-    
+
+    CAESound() { m_pPhysicalEntity = nullptr; }
+    CAESound(CAESound& sound);
+    CAESound(short bankSlotId, short sfxId, CAEAudioEntity* baseAudio, CVector posn,
+             float volume, float fDistance, float speed, float timeScale, unsigned char ignoredServiceCycles,
+             eSoundEnvironment environmentFlags, float speedVariability);
+    ~CAESound();
+
+    CAESound& operator=(CAESound const& sound);
+
+    void Initialise(short bankSlotId, short sfxId, CAEAudioEntity *baseAudio, CVector posn,
+                    float volume, float maxDistance, float speed, float timeScale, unsigned char ignoredServiceCycles,
+                    eSoundEnvironment environmentFlags, float speedVariability, short currPlayPosn);
+
     void UnregisterWithPhysicalEntity();
     void StopSound();
     bool GetUncancellable() const { return m_bUncancellable; }
@@ -122,9 +128,6 @@ public:
     void StopSoundAndForget();
     void SetPosition(CVector vecPos);
     void CalculateVolume();
-    void Initialise(short bankSlotId, short sfxId, CAEAudioEntity *baseAudio, CVector posn,
-        float volume, float maxDistance, float speed, float timeScale, unsigned char ignoredServiceCycles,
-        unsigned short environmentFlags, float speedVariability, short currPlayPosn);
     void UpdateParameters(short curPlayPos);
     void SoundHasFinished();
 
