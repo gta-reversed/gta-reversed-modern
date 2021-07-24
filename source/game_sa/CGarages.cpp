@@ -47,19 +47,29 @@ void CGarages::PrintMessages()
 }
 
 // 0x447B80
-void CGarages::TriggerMessage(char* cTagMsg, short wMsgMin, unsigned short ucTime, short wMsgMax)
+void CGarages::TriggerMessage(char* cTagMsg, int16_t wMsgMin, uint16_t ucTime, int16_t wMsgMax)
 {
-    plugin::Call<0x447B80, char*, short, unsigned short, short>(cTagMsg, wMsgMin, ucTime, wMsgMax);
+    plugin::Call<0x447B80, char*, int16_t, uint16_t, int16_t>(cTagMsg, wMsgMin, ucTime, wMsgMax);
 }
 
 // 0x448AF0
-bool CGarages::IsModelIndexADoor(int nModelIndex)
+bool CGarages::IsModelIndexADoor(int32_t nModelIndex)
 {
-    return plugin::CallAndReturn<bool, 0x448AF0, int>(nModelIndex);
+    return plugin::CallAndReturn<bool, 0x448AF0, int32_t>(nModelIndex);
 }
 
 // 0x44A240
-int CGarages::FindGarageForObject(CObject* pObject)
+int32_t CGarages::FindGarageForObject(CObject* pObject)
 {
-    return plugin::CallAndReturn<int, 0x44A240, CObject*>(pObject);
+    return plugin::CallAndReturn<int32_t, 0x44A240, CObject*>(pObject);
+}
+
+// Garage flags
+// 0x1	door opens up and rotate
+// 0x2	door goes in
+// 0x4	camera follow players
+//
+// 0x4471E0
+void CGarages::AddOne(float x1, float y1, float z1, float frontX, float frontY, float x2, float y2, float z2, eGarageType type, uint32_t a10, char* name, uint32_t door) {
+    plugin::Call<0x4471E0, float, float, float, float, float, float, float, float, eGarageType, uint32_t, char*, uint32_t>(x1, y1, z1, frontX, frontY, x2, y2, z2, type, a10, name, door);
 }

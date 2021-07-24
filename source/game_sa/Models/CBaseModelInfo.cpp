@@ -201,10 +201,10 @@ void CBaseModelInfo::SetColModel(CColModel *colModel, bool bIsLodModel)
     if (!pTimeInfo)
         return;
 
-    if (pTimeInfo->m_wOtherTimeModel == -1)
+    if (pTimeInfo->m_nOtherTimeModel == -1)
         return;
 
-    auto pLodInfo = CModelInfo::GetModelInfo(pTimeInfo->m_wOtherTimeModel);
+    auto pLodInfo = CModelInfo::GetModelInfo(pTimeInfo->m_nOtherTimeModel);
     pLodInfo->m_pColModel = colModel;
     pLodInfo->bIsLod = false;
 }

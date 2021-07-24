@@ -38,9 +38,9 @@ enum eModelInfoSpecialType : unsigned char {
 struct tTimeInfo {
     unsigned char m_nTimeOn;
     unsigned char m_nTimeOff;
-    signed short m_wOtherTimeModel;
+    signed short  m_nOtherTimeModel;
 
-    void SetTimes(int on, int off) { m_nTimeOn = on; m_nTimeOff = off; }
+    void SetTimes(unsigned char on, unsigned char off) { m_nTimeOn = on; m_nTimeOff = off; }
 };
 
 VALIDATE_SIZE(tTimeInfo, 0x4);

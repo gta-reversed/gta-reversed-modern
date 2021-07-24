@@ -8,7 +8,7 @@ void CLodTimeModelInfo::InjectHooks()
 
 CLodTimeModelInfo::CLodTimeModelInfo() : CLodAtomicModelInfo()
 {
-    m_lodTimeInfo.m_wOtherTimeModel = -1;
+    m_lodTimeInfo.m_nOtherTimeModel = -1;
 }
 
 ModelInfoType CLodTimeModelInfo::GetModelType()
