@@ -36,6 +36,10 @@ void CAEAudioHardware::LoadSoundBank(ushort bankId, short bankSlotId)
     plugin::CallMethod<0x4D88A0, CAEAudioHardware*, ushort, short>(this, bankId, bankSlotId);
 }
 
+bool CAEAudioHardware::IsSoundBankLoaded(ushort bankId, short bankSlotId) {
+    return plugin::CallMethodAndReturn<bool, 0x4D88C0, CAEAudioHardware*, ushort, short>(this, bankId, bankSlotId);
+}
+
 void CAEAudioHardware::StopSound(short channel, ushort channelSlot)
 {
     plugin::CallMethod<0x4D88E0, CAEAudioHardware*, short, ushort>(this, channel, channelSlot);

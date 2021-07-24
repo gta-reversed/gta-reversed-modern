@@ -95,7 +95,7 @@ public:
     void GetChannelPlayTimes(short channel, short* outArr);
     void SetChannelVolume(short channel, ushort channelSlot, float volume, uchar unused);
     void LoadSoundBank(ushort bankId, short bankSlotId);
-    void IsSoundBankLoaded(ushort, short);
+    bool IsSoundBankLoaded(ushort bankId, short bankSlotId);
     void GetSoundBankLoadingStatus(ushort, short);
     void StopSound(short channel, ushort channelSlot);
     void SetChannelPosition(short channel, ushort channelSlot, CVector* vecPos, uchar unused);
