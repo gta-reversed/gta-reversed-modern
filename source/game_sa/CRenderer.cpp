@@ -576,7 +576,7 @@ int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
         if (pBaseModelInfo->GetModelType() == MODEL_INFO_TIME)
         {
             tTimeInfo* pModelTimeInfo = pBaseModelInfo->GetTimeInfo();
-            int wOtherTimeModel = pModelTimeInfo->m_wOtherTimeModel;
+            int wOtherTimeModel = pModelTimeInfo->m_nOtherTimeModel;
             if (CClock::GetIsTimeInRange(pModelTimeInfo->m_nTimeOn, pModelTimeInfo->m_nTimeOff))
             {
                 if (wOtherTimeModel != -1 && CModelInfo::ms_modelInfoPtrs[wOtherTimeModel]->m_pRwObject)
@@ -642,7 +642,7 @@ int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
     if (pBaseModelInfo->GetModelType() == MODEL_INFO_TIME)
     {
         tTimeInfo* pModelTimeInfo = pBaseModelInfo->GetTimeInfo();
-        int wOtherTimeModel = pModelTimeInfo->m_wOtherTimeModel;
+        int wOtherTimeModel = pModelTimeInfo->m_nOtherTimeModel;
         if (CClock::GetIsTimeInRange(pModelTimeInfo->m_nTimeOn, pModelTimeInfo->m_nTimeOff))
         {
             if (wOtherTimeModel != -1 && CModelInfo::ms_modelInfoPtrs[wOtherTimeModel]->m_pRwObject)

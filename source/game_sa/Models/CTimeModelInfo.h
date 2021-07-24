@@ -5,23 +5,25 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CAtomicModelInfo.h"
 
-class  CTimeModelInfo : public CAtomicModelInfo {
+class CTimeModelInfo : public CAtomicModelInfo {
 public:
-    CTimeModelInfo();
-public:
-	tTimeInfo m_timeInfo;
+    tTimeInfo m_timeInfo;
 
 public:
     static void InjectHooks();
 
-// virtual
+    CTimeModelInfo();
+    ~CTimeModelInfo();
+
     ModelInfoType GetModelType() override;
     tTimeInfo* GetTimeInfo() override;
 
-// virtual implementations
+    tTimeInfo* FindOtherTimeModel(const char* modelName);
+
+private:
     ModelInfoType GetModelType_Reversed();
     tTimeInfo* GetTimeInfo_Reversed();
 };

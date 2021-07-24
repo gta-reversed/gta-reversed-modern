@@ -62,6 +62,6 @@ public:
     static void UpdateVariables(float timeStep);
     static void UpdateTimeStep(float fTimeStep);
 
-    static inline unsigned int GetTimeStepInMilliseconds() { return ms_fTimeStep * 20.0F; }
+    static inline uint32_t GetTimeStepInMilliseconds() { return static_cast<uint32_t>(ms_fTimeStep * 20.0F); }
     static void Update();
 };

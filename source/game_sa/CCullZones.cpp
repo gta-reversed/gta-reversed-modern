@@ -37,7 +37,7 @@ void CCullZones::Init() {
 
 // flags: see eZoneAttributes
 // 0x72DF70
-void CCullZones::AddCullZone(const CVector* center, float zero1, float fWidthY, float fBottomZ, float fWidthX, float zero2, float fTopZ, uint16_t flags) {
+void CCullZones::AddCullZone(const CVector& center, float zero1, float fWidthY, float fBottomZ, float fWidthX, float zero2, float fTopZ, uint16_t flags) {
     int i = NumAttributeZones;
 
     if ((flags & (eZoneAttributes::UNKNOWN_1 | eZoneAttributes::UNKNOWN_2))) {
@@ -47,8 +47,8 @@ void CCullZones::AddCullZone(const CVector* center, float zero1, float fWidthY, 
 
     // Will be computed if flags less than 0x880 (UNKNOWN_1 + UNKNOWN_2)
     if (flags) {
-        aAttributeZones[i].zoneDef.x = center->x - zero1 - fWidthX;
-        aAttributeZones[i].zoneDef.y = center->y - fWidthY - zero2;
+        aAttributeZones[i].zoneDef.x = center.x - zero1 - fWidthX;
+        aAttributeZones[i].zoneDef.y = center.y - fWidthY - zero2;
         aAttributeZones[i].zoneDef.field_4 = zero1 + zero1;
         aAttributeZones[i].zoneDef.widthY = fWidthY + fWidthY;
         aAttributeZones[i].zoneDef.bottomZ = fBottomZ;
@@ -63,40 +63,41 @@ void CCullZones::AddCullZone(const CVector* center, float zero1, float fWidthY, 
 
 // flags: see eZoneAttributes
 // 0x72DB50
-void CCullZones::AddTunnelAttributeZone(const CVector* center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, uint16_t flags) {
+void CCullZones::AddTunnelAttributeZone(const CVector& center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, uint16_t flags) {
     int i = NumTunnelAttributeZones;
+    auto& attribute = aTunnelAttributeZones[i];
 
-    aTunnelAttributeZones[i].zoneDef.x = center->x - unk1 - fWidthX;
-    aTunnelAttributeZones[i].zoneDef.y = center->y - fWidthY - unk2;
-    aTunnelAttributeZones[i].zoneDef.field_4 = unk1 + unk1;
-    aTunnelAttributeZones[i].zoneDef.widthY = fWidthY + fWidthY;
-    aTunnelAttributeZones[i].zoneDef.bottomZ = fBottomZ;
-    aTunnelAttributeZones[i].zoneDef.widthX = fWidthX + fWidthX;
-    aTunnelAttributeZones[i].zoneDef.field_A = unk2 + unk2;
-    aTunnelAttributeZones[i].zoneDef.topZ = fTopZ;
-    aTunnelAttributeZones[i].flags = static_cast<eZoneAttributes>(flags);
+    attribute.zoneDef.x = center.x - unk1 - fWidthX;
+    attribute.zoneDef.y = center.y - fWidthY - unk2;
+    attribute.zoneDef.field_4 = unk1 + unk1;
+    attribute.zoneDef.widthY = fWidthY + fWidthY;
+    attribute.zoneDef.bottomZ = fBottomZ;
+    attribute.zoneDef.widthX = fWidthX + fWidthX;
+    attribute.zoneDef.field_A = unk2 + unk2;
+    attribute.zoneDef.topZ = fTopZ;
+    attribute.flags = static_cast<eZoneAttributes>(flags);
 
     NumTunnelAttributeZones += 1;
 }
 
-// flags: see eZoneAttributes
 // 0x72DC10
-void CCullZones::AddMirrorAttributeZone(const CVector* center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, uint16_t flags, int cm, float vX, float vY, float vZ) {
+void CCullZones::AddMirrorAttributeZone(const CVector& center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, eZoneAttributes flags, float cm, float vX, float vY, float vZ) {
     int i = NumMirrorAttributeZones;
+    auto& attribute = aMirrorAttributeZones[i];
 
-    aMirrorAttributeZones[i].zoneDef.x = center->x - unk1 - fWidthX;
-    aMirrorAttributeZones[i].zoneDef.y = center->y - fWidthY - unk2;
-    aMirrorAttributeZones[i].zoneDef.field_4 = unk1 + unk1;
-    aMirrorAttributeZones[i].zoneDef.widthY = fWidthY + fWidthY;
-    aMirrorAttributeZones[i].zoneDef.bottomZ = fBottomZ;
-    aMirrorAttributeZones[i].zoneDef.widthX = fWidthX + fWidthX;
-    aMirrorAttributeZones[i].zoneDef.field_A = unk2 + unk2;
-    aMirrorAttributeZones[i].zoneDef.topZ = fTopZ;
-    aMirrorAttributeZones[i].flags = static_cast<eZoneAttributes>(flags);
-    aMirrorAttributeZones[i].cm = cm;
-    aMirrorAttributeZones[i].vx = vX * 100.0f;
-    aMirrorAttributeZones[i].vy = vY * 100.0f;
-    aMirrorAttributeZones[i].vz = vZ * 100.0f;
+    attribute.zoneDef.x = center.x - unk1 - fWidthX;
+    attribute.zoneDef.y = center.y - fWidthY - unk2;
+    attribute.zoneDef.field_4 = unk1 + unk1;
+    attribute.zoneDef.widthY = fWidthY + fWidthY;
+    attribute.zoneDef.bottomZ = fBottomZ;
+    attribute.zoneDef.widthX = fWidthX + fWidthX;
+    attribute.zoneDef.field_A = unk2 + unk2;
+    attribute.zoneDef.topZ = fTopZ;
+    attribute.flags = static_cast<eZoneAttributes>(flags);
+    attribute.cm = cm;
+    attribute.vx = vX * 100.0f;
+    attribute.vy = vY * 100.0f;
+    attribute.vz = vZ * 100.0f;
 
     NumMirrorAttributeZones += 1;
 }
@@ -198,7 +199,8 @@ void CCullZones::Update() {
     if ((CTimer::m_FrameCounter & 7) == 2) {
         auto cameraPosition = TheCamera.GetGameCamPosition();
         CurrentFlags_Camera = FindAttributesForCoors(cameraPosition->x, cameraPosition->y);
-    } else if ((CTimer::m_FrameCounter & 7) == 6) {
+    }
+    else if ((CTimer::m_FrameCounter & 7) == 6) {
         CVector posn = FindPlayerCoors();
         CurrentFlags_Player = FindAttributesForCoors(posn.x, posn.y);
         if (!bMilitaryZonesDisabled && (CurrentFlags_Player & eZoneAttributes::MILITARY_ZONE) != 0) {

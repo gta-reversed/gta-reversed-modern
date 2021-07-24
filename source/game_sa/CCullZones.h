@@ -1,4 +1,5 @@
 #pragma once
+
 #include "CVector.h"
 
 // https://gtamods.com/wiki/CULL
@@ -84,13 +85,14 @@ struct CZoneDef {
 
 VALIDATE_SIZE(CZoneDef, 0x10);
 
+// https://gtaforums.com/topic/202532-sadoc-ipl-definitions/page/5/?tab=comments#comment-3875562
 struct CCullZoneReflection {
     CZoneDef zoneDef;
-    int cm;
-    char vx;
-    char vy;
-    char vz;
-    char flags;
+    float    cm; // mirror plane coordinate in direction axis.
+    char     vx; // mirror direction (like [-1 0 0] or [0 1 0] or [0 0 -1])
+    char     vy;
+    char     vz;
+    char     flags;
 
     bool IsPointWithin(const CVector& point) { return zoneDef.IsPointWithin(point); };
 };
@@ -124,9 +126,9 @@ public:
     static void Init();
     static void Update();
 
-    static void AddCullZone(const CVector* center, float zero1, float fWidthY, float fBottomZ, float fWidthX, float zero2, float fTopZ, uint16_t flags);
-    static void AddTunnelAttributeZone(const CVector* center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, uint16_t flags);
-    static void AddMirrorAttributeZone(const CVector* center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, uint16_t flags, int cm, float vX, float vY, float vZ);
+    static void AddCullZone(const CVector& center, float zero1, float fWidthY, float fBottomZ, float fWidthX, float zero2, float fTopZ, uint16_t flags);
+    static void AddTunnelAttributeZone(const CVector& center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, uint16_t flags);
+    static void AddMirrorAttributeZone(const CVector& center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, eZoneAttributes flags, float cm, float vX, float vY, float vZ);
 
     static bool InRoomForAudio();
     static bool CamNoRain();

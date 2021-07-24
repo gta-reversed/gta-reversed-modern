@@ -5,7 +5,8 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
+#define INVALID_POOL_SLOT (-1)
 
 /*
     R* terminology      Our terminology
