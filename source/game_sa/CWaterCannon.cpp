@@ -1,3 +1,4 @@
+#include "StdInc.h"
 #include "CWaterCannon.h"
 
 RxVertexIndex (&CWaterCannon::m_auRenderIndices)[18] = *(RxVertexIndex (*)[18])0xC80700;
