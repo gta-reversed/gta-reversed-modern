@@ -17,6 +17,7 @@
 #include "CAEWMADecoder.h"
 #include "CAEStreamingDecoder.h"
 #include "CAEUserRadioTrackManager.h"
+#include "CAEWaterCannonAudioEntity.h"
 #include "CAEDoorAudioEntity.h"
 
 #include "CDebugMenu.h"
@@ -24,6 +25,7 @@
 #include "CCarGenerator.h"
 #include "CTheCarGenerators.h"
 #include "CRadar.h"
+#include "CWaterCannons.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
@@ -341,6 +343,7 @@ void InjectHooksMain()
     CTaskComplexInAirAndLand::InjectHooks();
     CTaskComplexJump::InjectHooks();
     ModelIndices::InjectHooks();
+    CWaterCannons::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();
@@ -358,6 +361,7 @@ void InjectHooksMain()
     CAEVorbisDecoder::InjectHooks();
     CAEWaveDecoder::InjectHooks();
     CAEWMADecoder::InjectHooks();
+    CAEWaterCannonAudioEntity::InjectHooks();
     CAETwinLoopSoundEntity::InjectHooks();
     CAEDoorAudioEntity::InjectHooks();
 }

@@ -110,3 +110,13 @@ void CWaterLevel::SyncWater()
 void CWaterLevel::WaterLevelInitialise() {
     plugin::Call<0x6EAE80>();
 }
+
+// 0x6EB710
+void CWaterLevel::PreRenderWater() {
+    plugin::Call<0x6EB710>();
+}
+
+// 0x6EF650
+void CWaterLevel::RenderWater() {
+    plugin::Call<0x6EF650>();
+}

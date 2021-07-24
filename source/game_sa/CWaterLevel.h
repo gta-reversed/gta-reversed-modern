@@ -19,7 +19,55 @@ struct CWaterVertex
 
 class CWaterLevel {
 public:
+   /*
+   * m_BlocksToBeRenderedOutsideWorldX
+   * m_BlocksToBeRenderedOutsideWorldY
+   * m_CurrentDesiredFlowX
+   * m_CurrentDesiredFlowY
+   * m_CurrentFlowX
+   * m_CurrentFlowY
+   * m_ElementsOnQuadsAndTrianglesList
+   * m_NumBlocksOutsideWorldToBeRendered
+   * m_QuadsAndTrianglesInEachBlock
+   * m_QuadsAndTrianglesList
+   * m_WaterFogCol
+   * m_WaterFogDensity
+   * m_WaterFogHourOfDayEnd
+   * m_WaterFogHourOfDayStart
+   * m_WaterFogInsideCol
+   * m_aQuads
+   * m_aTriangles
+   */
+    static CWaterVertex m_aVertices[1021];
+    static bool& m_bWaterFog;
+    static bool& m_bWaterFogScript;
+    /*
+    * m_fWaterFogHeight
+    * m_fWaterFogInsideFadeSpeed
+    * m_nNumOfWaterQuads
+    * m_nNumOfWaterTriangles
+    */
+    static uint32_t m_nNumOfWaterVertices;
+    static uint32_t& m_nWaterConfiguration;
+    static uint32_t& m_nWaterTimeOffset;
+    static float* faWaveMultipliersX;
+    static float* faWaveMultipliersY;
+
+  public:
+    static RwRaster* waterclear256Raster;
+    static RwTexture* texWaterclear256;
+    static RwRaster* seabd32Raster;
+    static RwTexture* texSeabd32;
+    static RwRaster* waterwakeRaster;
+    static RwTexture* texWaterwake;
+
+    /* m_nWaterConfiguration
+    * ms_WaterFog
+    */
+
+public:
     static void InjectHooks();
+
     /*
     * AddToQuadsAndTrianglesList(int, int, int, unsigned int)
     * AddWaterLevelQuad(int, int, CRenPar, int, int, CRenPar, int, int, CRenPar, int, int, CRenPar, unsigned int)
@@ -40,7 +88,7 @@ public:
     * FixVertexOnToLine(CWaterVertex*, CWaterVertex*, CWaterVertex*, float*)
     * GetGroundLevel(CVector const&, float*, ColData*, float)
     * GetGroundLevel_WS(CVector const&, float*, ColData*, float)
-    * 
+    *
     */
     static bool GetWaterDepth(CVector const& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel);
     static bool GetWaterLevel(float x, float y, float z, float * pOutWaterLevel, unsigned char bTouchingWater, CVector* pVecNormals);
@@ -49,8 +97,9 @@ public:
     * HandleBeachToysStuff()
     * IsLocationOutOfWorldBounds_WS(CVector const&, int)
     * MarkQuadsAndPolysToBeRendered(int, int, bool)
-    * PreRenderWater()
-    * RenderAndEmptyRenderBuffer()
+    */
+    static void PreRenderWater();
+    /* RenderAndEmptyRenderBuffer()
     * RenderBoatWakes()
     * RenderDetailedSeaBedSegment(int, int, float, float, float, float)
     * RenderFlatWaterRectangle(int, int, int, int, CRenPar, CRenPar, CRenPar, CRenPar)
@@ -65,8 +114,9 @@ public:
     * RenderShipsOnHorizon()
     * RenderTransparentWater()
     * RenderWakeSegment(CVector2D&, CVector2D&, CVector2D&, CVector2D&, float&, float&, float&, float&, float&)
-    * RenderWater()
-    * RenderWaterFog()
+    */
+    static void RenderWater();
+    /* RenderWaterFog()
     * RenderWaterRectangle(int, int, int, int, CRenPar, CRenPar, CRenPar, CRenPar)
     * RenderWaterTriangle(int, int, CRenPar, int, int, CRenPar, int, int, CRenPar)
     * ScanThroughBlocks()
@@ -83,50 +133,5 @@ public:
     * WaterLevelInitialise()
     */
     static void SyncWater();
-    /*
-    * m_BlocksToBeRenderedOutsideWorldX
-    * m_BlocksToBeRenderedOutsideWorldY
-    * m_CurrentDesiredFlowX
-    * m_CurrentDesiredFlowY
-    * m_CurrentFlowX
-    * m_CurrentFlowY
-    * m_ElementsOnQuadsAndTrianglesList
-    * m_NumBlocksOutsideWorldToBeRendered
-    * m_QuadsAndTrianglesInEachBlock
-    * m_QuadsAndTrianglesList
-    * m_WaterFogCol
-    * m_WaterFogDensity
-    * m_WaterFogHourOfDayEnd
-    * m_WaterFogHourOfDayStart
-    * m_WaterFogInsideCol
-    * m_aQuads
-    * m_aTriangles
-    */
-    static CWaterVertex m_aVertices[1021];
-    static bool& m_bWaterFog;
-    static bool& m_bWaterFogScript;
-    /*
-    * m_fWaterFogHeight
-    * m_fWaterFogInsideFadeSpeed
-    * m_nNumOfWaterQuads
-    * m_nNumOfWaterTriangles
-    */
-    static uint32_t m_nNumOfWaterVertices;
-    static uint32_t& m_nWaterConfiguration;
-    static uint32_t& m_nWaterTimeOffset;
-    static float* faWaveMultipliersX;
-    static float* faWaveMultipliersY;
-
-public:
-    static RwRaster* waterclear256Raster;
-    static RwTexture* texWaterclear256;
-    static RwRaster* seabd32Raster;
-    static RwTexture* texSeabd32;
-    static RwRaster* waterwakeRaster;
-    static RwTexture* texWaterwake;
-
-    /* m_nWaterConfiguration
-    * ms_WaterFog
-    */
     static void WaterLevelInitialise();
 };
