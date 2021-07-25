@@ -162,7 +162,7 @@ int CAEVorbisDecoder::GetStreamID()
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((int(__thiscall *)(CAEVorbisDecoder*)) 0x502460)(this);
 #else
-    return dataStream->trackID;
+    return dataStream->m_nTrackId;
 #endif
 }
 

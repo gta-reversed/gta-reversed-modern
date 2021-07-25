@@ -153,7 +153,7 @@ int CAEWaveDecoder::GetStreamID()
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((int(__thiscall *)(CAEWaveDecoder*)) 0x503280)(this);
 #else
-    return dataStream->trackID;
+    return dataStream->m_nTrackId;
 #endif
 }
 
