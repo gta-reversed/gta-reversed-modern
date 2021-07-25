@@ -256,7 +256,7 @@ int CAEWMADecoder::GetStreamID()
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((int(__thiscall *)(CAEWMADecoder*)) 0x502750)(this);
 #else
-    return dataStream->trackID;
+    return dataStream->m_nTrackId;
 #endif
 }
 

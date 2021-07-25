@@ -6,44 +6,35 @@
 #include "CAEStreamTransformer.h"
 #include "CFileMgr.h"
 
-CAEDataStream::CAEDataStream(std::int32_t trackID, char* filename, std::uint32_t startPosition, std::uint32_t length, int encrypted)
-: fileHandle(nullptr)
-, filename(filename)
-, isOpen(false)
-, currentPosition(0)
-, startPosition(startPosition)
-, length(length)
-, trackID(trackID)
-, isEncrypted(encrypted)
-, refCount(1)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    using Constructor = void(__thiscall*)(CAEDataStream*, std::int32_t, char*, std::uint32_t, std::uint32_t, int);
-    ((Constructor) (0x4dc620))(this, trackID, filename, startPosition, length, encrypted);
-#endif
+// originally startPosition and length is int32_t
+// 0x4dc620
+CAEDataStream::CAEDataStream(int32_t trackId, char* filename, uint32_t startPosition, uint32_t length, bool encrypted) {
+    m_pFileHandle      = nullptr;
+    m_pszFilename      = filename;
+    m_bIsOpen          = false;
+    m_nCurrentPosition = 0;
+    m_nStartPosition   = startPosition;
+    m_nLength          = length;
+    m_nTrackId         = trackId;
+    m_bIsEncrypted     = encrypted;
+    m_lRefCount        = 1;
 }
 
+// 0x4dc490
 CAEDataStream::~CAEDataStream()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CAEDataStream*)) (0x4dc490))(this);
-#else
     Close();
 
-    if (filename)
+    if (m_pszFilename)
     {
-        delete[] filename;
-        filename = nullptr;
+        delete[] m_pszFilename;
+        m_pszFilename = nullptr;
     }
-#endif
 }
 
+// 0x4dc410
 HRESULT CAEDataStream::QueryInterface(REFIID riid, void** objout)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using QIFunc = HRESULT(__stdcall *)(CAEDataStream*, REFIID, void**);
-    return ((QIFunc) (0x4dc410))(this, riid, objout);
-#else
     // MikuAuahDark: Despite having QueryInterface implemented,
     // I don't think CAEDataStream is meant to be QueryInterface'd.
     // See CAEDataStream::Release
@@ -55,26 +46,18 @@ HRESULT CAEDataStream::QueryInterface(REFIID riid, void** objout)
     }
 
     return E_NOINTERFACE;
-#endif
 }
 
+// 0x4dc460
 ULONG CAEDataStream::AddRef()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using AddRefFunc = HRESULT(__stdcall *)(CAEDataStream*);
-    return ((AddRefFunc) (0x4dc460))(this);
-#else
-    return ++refCount;
-#endif
+    return ++m_lRefCount;
 }
 
+// 0x4dc5b0
 ULONG CAEDataStream::Release()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using ReleaseFunc = HRESULT(__stdcall *)(CAEDataStream*);
-    return ((ReleaseFunc) (0x4dc5b0))(this);
-#else
-    if (--refCount == 0)
+    if (--m_lRefCount == 0)
     {
         delete this;
         return 0;
@@ -83,233 +66,200 @@ ULONG CAEDataStream::Release()
     // MikuAuahDark: I think CAEDataStream isn't mean to be
     // QueryInterface'd? 0x4dc608 clearly says "mov eax, 0xbad"
     return 0xbad;
-#endif
 }
 
+// 0x4dc320
 HRESULT CAEDataStream::Read(void* dest, ULONG size, ULONG* readed)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using ReadFunc = HRESULT(__stdcall *)(CAEDataStream*, void*, ULONG, ULONG*);
-    return ((ReadFunc) (0x4dc320))(this, dest, size, readed);
-#else
     *readed = static_cast<ULONG> (FillBuffer(dest, size));
     return S_OK;
-#endif
 }
 
+// 0x4dc4d0
 HRESULT CAEDataStream::Write(const void* src, ULONG size, ULONG* written)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using WriteFunc = HRESULT(__stdcall *)(CAEDataStream*, const void*, ULONG, ULONG*);
-    return ((WriteFunc) 0x4dc4d0)(this, src, size, written);
-#else
     return E_NOTIMPL;
-#endif
 }
 
+// 0x4dc340
 HRESULT CAEDataStream::Seek(LARGE_INTEGER offset, DWORD whence, ULARGE_INTEGER* newOffset)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using SeekFunc = HRESULT(__stdcall *)(CAEDataStream*, LARGE_INTEGER, DWORD, ULARGE_INTEGER*);
-    return ((SeekFunc) (0x4dc340))(this, offset, whence, newOffset);
-#else
     // C-style cast is not a good idea here
     // but I can't figure out which cast is best to preserve
     // the sign-bit of LARGE_INTEGER
-    if (isOpen == false)
+    if (m_bIsOpen == false)
         return E_INVALIDARG;
 
-    unsigned long pos = Seek((long) offset.QuadPart, static_cast<int> (whence));
+    unsigned long pos = Seek((long) offset.QuadPart, static_cast<int32_t> (whence));
     if (newOffset)
         newOffset->QuadPart = pos;
 
     return S_OK;
-#endif
 }
 
-HRESULT CAEDataStream::SetSize(ULARGE_INTEGER newsize)
+// 0x4dc4e0
+HRESULT CAEDataStream::SetSize(ULARGE_INTEGER newSize)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using SetSizeFunc = HRESULT(__stdcall *)(CAEDataStream*, ULARGE_INTEGER);
-    return ((SetSizeFunc) 0x4dc4e0)(this, newsize);
-#else
     return E_NOTIMPL;
-#endif
 }
 
+// 0x4dc4f0
 HRESULT CAEDataStream::CopyTo(IStream* target, ULARGE_INTEGER size, ULARGE_INTEGER* readed, ULARGE_INTEGER* written)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using CopyToFunc = HRESULT(__stdcall *)(CAEDataStream*, IStream*, ULARGE_INTEGER, ULARGE_INTEGER*, ULARGE_INTEGER*);
-    return ((CopyToFunc) 0x4dc4f0)(this, target, size, readed, written);
-#else
     return E_NOTIMPL;
-#endif
 }
 
+// 0x4dc500
 HRESULT CAEDataStream::Commit(DWORD flags)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using CommitFunc = HRESULT(__stdcall *)(CAEDataStream*, DWORD);
-    return ((CommitFunc) 0x4dc500)(this, flags);
-#else
     return E_NOTIMPL;
-#endif
 }
 
+// 0x4dc510
 HRESULT CAEDataStream::Revert()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using RevertFunc = HRESULT(__stdcall *)(CAEDataStream*);
-    return ((RevertFunc) 0x4dc510)(this);
-#else
     return E_NOTIMPL;
-#endif
 }
 
+// 0x4dc520
 HRESULT CAEDataStream::LockRegion(ULARGE_INTEGER offset, ULARGE_INTEGER size, DWORD type)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using LRFunc = HRESULT(__stdcall *)(CAEDataStream*, ULARGE_INTEGER, ULARGE_INTEGER, DWORD);
-    return ((LRFunc) 0x4dc520)(this, offset, size, type);
-#else
     return E_NOTIMPL;
-#endif
 }
 
+// 0x4dc530
 HRESULT CAEDataStream::UnlockRegion(ULARGE_INTEGER libOffset, ULARGE_INTEGER cb, DWORD dwLockType)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using URFunc = HRESULT(__stdcall *)(CAEDataStream*, ULARGE_INTEGER, ULARGE_INTEGER, DWORD);
-    return ((URFunc) 0x4dc530)(this, libOffset, cb, dwLockType);
-#else
     return E_NOTIMPL;
-#endif
 }
 
+// 0x4dc3a0
 HRESULT CAEDataStream::Stat(STATSTG* statout, DWORD flags)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using StatFunc = HRESULT(__stdcall *)(CAEDataStream*, STATSTG*, DWORD);
-    return ((StatFunc) (0x4dc3a0))(this, statout, flags);
-#else
-    if (isOpen == false || statout == nullptr || flags != STATFLAG_NONAME)
+    if (m_bIsOpen == false || statout == nullptr || flags != STATFLAG_NONAME)
         return E_INVALIDARG;
 
-    DWORD fileSize = static_cast<DWORD> (CFileMgr::GetFileLength(fileHandle));
+    DWORD fileSize = static_cast<DWORD> (CFileMgr::GetFileLength(m_pFileHandle));
     memset(statout, 0, sizeof(STATSTG));
     statout->cbSize.LowPart = fileSize;
     statout->type = STGTY_STREAM;
     return S_OK;
-#endif
 }
 
+// 0x4dc540
 HRESULT CAEDataStream::Clone(IStream** target)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using CloneFunc = HRESULT(__stdcall *)(CAEDataStream*, IStream**);
-    return ((CloneFunc) 0x4dc540)(this, target);
-#else
     return E_NOTIMPL;
-#endif
 }
 
+// 0x4dc1c0
 size_t CAEDataStream::FillBuffer(void* dest, size_t size)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using FillFunc = int(__thiscall *)(CAEDataStream*, void*, size_t);
-    return ((FillFunc) (0x4dc1c0))(this, dest, size);
-#else
-    if (isOpen == false)
+    if (m_bIsOpen == false)
         return 0;
 
-    size_t sizeToRead = static_cast<size_t> ((currentPosition - length) - startPosition);
+    size_t sizeToRead = static_cast<size_t>((m_nCurrentPosition - m_nLength) - m_nStartPosition);
     if (size < sizeToRead)
         sizeToRead = size;
 
-    size = CFileMgr::Read(fileHandle, dest, sizeToRead);
+    size = CFileMgr::Read(m_pFileHandle, dest, sizeToRead);
 
-    if (isEncrypted)
-        CAEStreamTransformer::instance.TransformBuffer(dest, size, currentPosition);
+    if (m_bIsEncrypted)
+        CAEStreamTransformer::instance.TransformBuffer(dest, size, m_nCurrentPosition);
 
-    currentPosition += static_cast<std::uint32_t> (size);
+    m_nCurrentPosition += static_cast<uint32_t>(size);
     return size;
-#endif
 }
 
-std::uint32_t CAEDataStream::GetCurrentPosition()
+// 0x4dc230
+uint32_t CAEDataStream::GetCurrentPosition()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using TellFunc = unsigned long(__thiscall *)(CAEDataStream*);
-    return ((TellFunc) (0x4dc230))(this);
-#else
-    std::uint32_t pos = static_cast<std::uint32_t> (CFileMgr::Tell(fileHandle));
-    return pos - startPosition;
-#endif
+    uint32_t pos = static_cast<uint32_t>(CFileMgr::Tell(m_pFileHandle));
+    return pos - m_nStartPosition;
 }
 
-std::uint32_t CAEDataStream::Seek(long offset, int whence)
+// 0x4dc250
+uint32_t CAEDataStream::Seek(long offset, int32_t whence)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using SeekFunc = unsigned long(__thiscall *)(CAEDataStream*, long, int);
-    return ((SeekFunc) 0x4dc250)(this, offset, whence);
-#else
-    if (isOpen == false)
-        return std::uint32_t(-1);
+    if (m_bIsOpen == false)
+        return uint32_t(-1);
 
     if (whence == SEEK_SET)
-        offset += startPosition;
+    {
+        offset += m_nStartPosition;
+    }
     else if (whence == SEEK_END)
-    {                      
-        offset = (length + startPosition) - offset;
+    {
+        offset = (m_nLength + m_nStartPosition) - offset;
         whence = SEEK_SET;
     }
 
-    CFileMgr::Seek(fileHandle, offset, whence);
+    CFileMgr::Seek(m_pFileHandle, offset, whence);
 
-    currentPosition = static_cast<std::uint32_t> (CFileMgr::Tell(fileHandle));
-    return currentPosition - startPosition;
-#endif
+    m_nCurrentPosition = static_cast<uint32_t>(CFileMgr::Tell(m_pFileHandle));
+    return m_nCurrentPosition - m_nStartPosition;
 }
 
 bool CAEDataStream::Close()
 {
-    if (isOpen)
+    if (m_bIsOpen)
     {
-        isOpen = false;
-        return CFileMgr::CloseFile(fileHandle);
+        m_bIsOpen = false;
+        return CFileMgr::CloseFile(m_pFileHandle);
     }
 
     return true;
 }
 
+// 0x4dc2b0
 bool CAEDataStream::Initialise()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using InitFunc = bool(__thiscall*)(CAEDataStream*);
-    return ((InitFunc) (0x4dc2b0))(this);
-#else
-    if (isOpen)
+    if (m_bIsOpen)
         return true;
 
     // MikuAuahDark: Rewrite it to use CFileMgr
     CFileMgr::SetDir("");
-    fileHandle = CFileMgr::OpenFile(filename, "rb");
+    m_pFileHandle = CFileMgr::OpenFile(m_pszFilename, "rb");
 
-    if (fileHandle)
+    if (m_pFileHandle)
     {
-        CFileMgr::Seek(fileHandle, startPosition, SEEK_SET);
+        CFileMgr::Seek(m_pFileHandle, m_nStartPosition, SEEK_SET);
 
-        currentPosition = static_cast<std::uint32_t> (CFileMgr::Tell(fileHandle));
-        length = length == 0 ? CFileMgr::GetFileLength(fileHandle) : length;
-        isOpen = true;
+        m_nCurrentPosition = static_cast<uint32_t>(CFileMgr::Tell(m_pFileHandle));
+        m_nLength = m_nLength == 0 ? CFileMgr::GetFileLength(m_pFileHandle) : m_nLength;
+        m_bIsOpen = true;
     }
 
-    return fileHandle != nullptr;
-#endif
+    return m_pFileHandle != nullptr;
 }
 
-CAEDataStream *CAEDataStream::ctor(std::int32_t trackID, char *filename, std::uint32_t startPosition, std::uint32_t length, int encrypted)
+void CAEDataStream::InjectHooks()
+{
+    ReversibleHooks::Install("CAEDataStream", "CAEDataStream", 0x4dc620, &CAEDataStream::ctor);
+    ReversibleHooks::Install("CAEDataStream", "~CAEDataStream", 0x4dc490, &CAEDataStream::dtor);
+    ReversibleHooks::Install("CAEDataStream", "Initialise", 0x4dc2b0, &CAEDataStream::Initialise);
+    ReversibleHooks::Install("CAEDataStream", "FillBuffer", 0x4dc1c0, &CAEDataStream::FillBuffer);
+    ReversibleHooks::Install("CAEDataStream", "GetCurrentPosition", 0x4dc230, &CAEDataStream::GetCurrentPosition);
+    ReversibleHooks::Install("CAEDataStream", "Seek_uint32_t", 0x4dc250, (uint32_t(CAEDataStream::*)(long offset, int32_t whence)) &CAEDataStream::Seek);
+    ReversibleHooks::Install("CAEDataStream", "Seek", 0x4dc340, (HRESULT(__stdcall CAEDataStream::*)(LARGE_INTEGER, DWORD, ULARGE_INTEGER*)) &CAEDataStream::Seek);
+    ReversibleHooks::Install("CAEDataStream", "Read", 0x4dc320, &CAEDataStream::Read);
+    ReversibleHooks::Install("CAEDataStream", "Stat", 0x4dc3a0, &CAEDataStream::Stat);
+    ReversibleHooks::Install("CAEDataStream", "QueryInterface", 0x4dc410, &CAEDataStream::QueryInterface);
+    ReversibleHooks::Install("CAEDataStream", "AddRef", 0x4dc460, &CAEDataStream::AddRef);
+    ReversibleHooks::Install("CAEDataStream", "Write", 0x4dc4d0, &CAEDataStream::Write);
+    ReversibleHooks::Install("CAEDataStream", "SetSize", 0x4dc4e0, &CAEDataStream::SetSize);
+    ReversibleHooks::Install("CAEDataStream", "CopyTo", 0x4dc4f0, &CAEDataStream::CopyTo);
+    ReversibleHooks::Install("CAEDataStream", "Commit", 0x4dc500, &CAEDataStream::Commit);
+    ReversibleHooks::Install("CAEDataStream", "Revert", 0x4dc510, &CAEDataStream::Revert);
+    ReversibleHooks::Install("CAEDataStream", "LockRegion", 0x4dc520, &CAEDataStream::LockRegion);
+    ReversibleHooks::Install("CAEDataStream", "UnlockRegion", 0x4dc530, &CAEDataStream::UnlockRegion);
+    ReversibleHooks::Install("CAEDataStream", "Clone", 0x4dc540, &CAEDataStream::Clone);
+    ReversibleHooks::Install("CAEDataStream", "Release", 0x4dc5b0, &CAEDataStream::Release);
+
+    CAEStreamTransformer::InjectHooks();
+}
+
+CAEDataStream *CAEDataStream::ctor(int32_t trackID, char *filename, uint32_t startPosition, uint32_t length, int32_t encrypted)
 {
     this->CAEDataStream::CAEDataStream(trackID, filename, startPosition, length, encrypted);
     return this;
@@ -318,32 +268,4 @@ CAEDataStream *CAEDataStream::ctor(std::int32_t trackID, char *filename, std::ui
 void CAEDataStream::dtor()
 {
     this->CAEDataStream::~CAEDataStream();
-}
-
-void CAEDataStream::InjectHooks()
-{
-#ifndef USE_DEFAULT_FUNCTIONS
-    HookInstall(0x4dc1c0, &CAEDataStream::FillBuffer);
-    HookInstall(0x4dc230, &CAEDataStream::GetCurrentPosition);
-    HookInstall(0x4dc250, (std::uint32_t(CAEDataStream::*)(long offset, int whence)) &CAEDataStream::Seek);
-    HookInstall(0x4dc2b0, &CAEDataStream::Initialise);
-    HookInstall(0x4dc320, &CAEDataStream::Read);
-    HookInstall(0x4dc340, (HRESULT(__stdcall CAEDataStream::*)(LARGE_INTEGER, DWORD, ULARGE_INTEGER*)) &CAEDataStream::Seek);
-    HookInstall(0x4dc3a0, &CAEDataStream::Stat);
-    HookInstall(0x4dc410, &CAEDataStream::QueryInterface);
-    HookInstall(0x4dc460, &CAEDataStream::AddRef);
-    HookInstall(0x4dc490, &CAEDataStream::dtor);
-    HookInstall(0x4dc4d0, &CAEDataStream::Write);
-    HookInstall(0x4dc4e0, &CAEDataStream::SetSize);
-    HookInstall(0x4dc4f0, &CAEDataStream::CopyTo);
-    HookInstall(0x4dc500, &CAEDataStream::Commit);
-    HookInstall(0x4dc510, &CAEDataStream::Revert);
-    HookInstall(0x4dc520, &CAEDataStream::LockRegion);
-    HookInstall(0x4dc530, &CAEDataStream::UnlockRegion);
-    HookInstall(0x4dc540, &CAEDataStream::Clone);
-    HookInstall(0x4dc5b0, &CAEDataStream::Release);
-    HookInstall(0x4dc620, &CAEDataStream::ctor);
-
-    CAEStreamTransformer::InjectHooks();
-#endif
 }
