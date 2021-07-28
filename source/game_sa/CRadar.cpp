@@ -1233,7 +1233,7 @@ void CRadar::DrawMap()
         else if (speed >= RADAR_MAX_SPEED)
             m_radarRange = RADAR_MAX_RANGE;
         else
-            m_radarRange = (speed - RADAR_MIN_SPEED) * (850.0f / RADAR_MIN_SPEED) + RADAR_MIN_RANGE;
+            m_radarRange = (speed - RADAR_MIN_SPEED) * (850.0f / (RADAR_MIN_SPEED * 10.0f)) + RADAR_MIN_RANGE;
     }
 
 DRAW_RADAR:
