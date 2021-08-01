@@ -8,33 +8,33 @@
 
 class CClock {
 public:
-    static unsigned char daysInMonth[12];
-    static bool bClockHasBeenStored;
-    static unsigned short& ms_Stored_nGameClockSeconds;
-    static unsigned char& ms_Stored_nGameClockMinutes;
-    static unsigned char& ms_Stored_nGameClockHours;
-    static unsigned char& ms_Stored_nGameClockDays;
-    static unsigned char& ms_Stored_nGameClockMonths;
-    static unsigned char& CurrentDay;
-    static unsigned short& ms_nGameClockSeconds;
-    static unsigned char& ms_nGameClockMinutes;
-    static unsigned char& ms_nGameClockHours;
-    static unsigned char& ms_nGameClockDays;
-    static unsigned char& ms_nGameClockMonth;
-    static unsigned int& ms_nLastClockTick;
-    static unsigned int& ms_nMillisecondsPerGameMinute;
+    static uint8_t daysInMonth[12];
+    static bool& bClockHasBeenStored;
+    static uint16_t& ms_Stored_nGameClockSeconds;
+    static uint8_t& ms_Stored_nGameClockMinutes;
+    static uint8_t& ms_Stored_nGameClockHours;
+    static uint8_t& ms_Stored_nGameClockDays;
+    static uint8_t& ms_Stored_nGameClockMonths;
+    static uint8_t& CurrentDay;
+    static uint16_t& ms_nGameClockSeconds;
+    static uint8_t& ms_nGameClockMinutes;
+    static uint8_t& ms_nGameClockHours;
+    static uint8_t& ms_nGameClockDays;
+    static uint8_t& ms_nGameClockMonth;
+    static uint32_t& ms_nLastClockTick;
+    static uint32_t& ms_nMillisecondsPerGameMinute;
 
 public:
     static void InjectHooks();
 
-    static void Initialise(unsigned int millisecondsPerGameMinute);
+    static void Initialise(uint32_t millisecondsPerGameMinute);
     static void Update();
 
-    static unsigned short GetGameClockMinutesUntil(unsigned char hours, unsigned char minutes);
-    static bool GetIsTimeInRange(unsigned char from, unsigned char to);
+    static uint16_t GetGameClockMinutesUntil(uint8_t hours, uint8_t minutes);
+    static bool GetIsTimeInRange(uint8_t from, uint8_t to);
     static void NormaliseGameClock();
-    static void OffsetClockByADay(unsigned int timeDirection);
-    static void SetGameClock(unsigned char hours, unsigned char minutes, unsigned char day);
+    static void OffsetClockByADay(uint32_t timeDirection);
+    static void SetGameClock(uint8_t hours, uint8_t minutes, uint8_t day);
     static void StoreClock();
     static void RestoreClock();
 };

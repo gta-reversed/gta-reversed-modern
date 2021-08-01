@@ -143,6 +143,7 @@
 - CAEVorbisDecoder
 - CAEWaveDecoder
 - CAEWMADecoder
+- CClock
 
 ## Partially Reversed
 
