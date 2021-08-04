@@ -154,8 +154,14 @@ void CBulletTraces::Render()
         RwIm3DVertexSetRGBA(&verts[3], 255, 255, 128, (char)(invertedLifetimeProgress * trace.m_nTransparency)); // Only vertex 3 has non-zero alpha
 
         if (RwIm3DTransform(verts, std::size(verts), nullptr, rwIM3D_VERTEXRGBA)) {
-            RwImVertexIndex indices[] = { 2, 2, 4, 1, 3, 1, 0, 3, 0, 3, 3, 5 };
-            RwIm3DRenderIndexedPrimitive(RwPrimitiveType::rwPRIMTYPETRILIST, indices, std::size(verts));
+            RwImVertexIndex indices[] = {
+                // Each row represents a triangle
+                4, 1, 3,
+                1, 0, 3,
+                0, 2, 3,
+                3, 2, 5
+            };
+            RwIm3DRenderIndexedPrimitive(RwPrimitiveType::rwPRIMTYPETRILIST, indices, std::size(indices));
             RwIm3DEnd();
         }
     }
