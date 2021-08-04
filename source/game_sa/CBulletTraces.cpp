@@ -194,9 +194,10 @@ void CBulletTraces::AddTrace(const CVector& posMuzzle, const CVector& posBulletH
     case MODE_ROCKETLAUNCHER_RUNABOUT:
     case MODE_ROCKETLAUNCHER_RUNABOUT_HS:
     case MODE_HELICANNON_1STPERSON:
+        break;
+    default:
         goto skip_early_outs;
     }
-
     
     if (FindPlayerEntity()->AsPhysical()->m_vecMoveSpeed.Magnitude() >= 0.05f) {
 skip_early_outs:
