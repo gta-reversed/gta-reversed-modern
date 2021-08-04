@@ -30,7 +30,11 @@ void CBulletTraces::Render()
 
 void CBulletTraces::Update()
 {
-    return plugin::Call<0x723FB0>();
+    for (auto& trace : aTraces) {
+        if (CTimer::m_snTimeInMilliseconds - trace.m_nCreationTime >= trace.m_nLifeTime) {
+            trace.m_bExists = false;
+        }
+    }
 }
 
 void CBulletTraces::AddTrace(const CVector& from, const CVector& to, eWeaponType weaponType, CEntity* pFromEntity)
