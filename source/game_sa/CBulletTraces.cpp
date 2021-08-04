@@ -11,6 +11,7 @@ void CBulletTraces::InjectHooks()
     ReversibleHooks::Install("CBulletTraces", "AddTrace_Wrapper", 0x726AF0, static_cast<void(*)(const CVector&, const CVector&, eWeaponType, CEntity*)>(&CBulletTraces::AddTrace));
 }
 
+// 0x721D50
 void CBulletTraces::Init()
 {
     for (auto& trace : aTraces) {
@@ -27,6 +28,7 @@ CBulletTrace* CBulletTraces::GetFree() {
     return nullptr;
 }
 
+// 0x723750
 void CBulletTraces::AddTrace(const CVector& from, const CVector& to, float radius, uint32_t dissapearTime, uint8_t alpha)
 {
     if (CBulletTrace* pTrace = GetFree()) {
@@ -90,6 +92,7 @@ void CBulletTraces::AddTrace(const CVector& from, const CVector& to, float radiu
     }
 }
 
+// 0x723C10
 void CBulletTraces::Render()
 {
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
@@ -163,6 +166,7 @@ void CBulletTraces::Render()
     RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)RwCullMode::rwCULLMODECULLBACK);
 }
 
+// 0x723FB0
 void CBulletTraces::Update()
 {
     for (auto& trace : aTraces) {
@@ -172,6 +176,7 @@ void CBulletTraces::Update()
     }
 }
 
+// 0x726AF0
 void CBulletTraces::AddTrace(const CVector& posMuzzle, const CVector& posBulletHit, eWeaponType weaponType, CEntity* pFromEntity)
 {
     if (FindPlayerEntity() != pFromEntity) {
