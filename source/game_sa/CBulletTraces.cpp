@@ -8,7 +8,7 @@ void CBulletTraces::InjectHooks()
     ReversibleHooks::Install("CBulletTraces", "AddTrace", 0x723750, static_cast<void(*)(const CVector&, const CVector&, float, uint32_t, uint8_t)>(&CBulletTraces::AddTrace));
     ReversibleHooks::Install("CBulletTraces", "Render", 0x723C10, &CBulletTraces::Render);
     ReversibleHooks::Install("CBulletTraces", "Update", 0x723FB0, &CBulletTraces::Update);
-    ReversibleHooks::Install("CBulletTraces", "AddTrace", 0x726AF0, static_cast<void(*)(const CVector&, const CVector&, eWeaponType, CEntity*)>(&CBulletTraces::AddTrace));
+    ReversibleHooks::Install("CBulletTraces", "AddTrace_Wrapper", 0x726AF0, static_cast<void(*)(const CVector&, const CVector&, eWeaponType, CEntity*)>(&CBulletTraces::AddTrace));
 }
 
 void CBulletTraces::Init()
