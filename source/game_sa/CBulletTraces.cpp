@@ -176,9 +176,7 @@ void CBulletTraces::Render()
 void CBulletTraces::Update()
 {
     for (auto& trace : aTraces) {
-        if (CTimer::m_snTimeInMilliseconds - trace.m_nCreationTime >= trace.m_nLifeTime) {
-            trace.m_bExists = false;
-        }
+        trace.Update();
     }
 }
 

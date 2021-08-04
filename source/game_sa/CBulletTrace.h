@@ -24,7 +24,11 @@ private:
     char _pad29[3];
 public:
 
-    void Update();
+    void Update() {
+        if (CTimer::m_snTimeInMilliseconds - m_nCreationTime >= m_nLifeTime) {
+            m_bExists = false;
+        }
+    }
 
     // NOTSA
     CVector GetDirection() const noexcept { return m_vecEnd - m_vecStart; }

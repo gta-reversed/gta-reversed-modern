@@ -15,7 +15,7 @@ public:
     static void AddTrace(const CVector& from, const CVector& to, float radius, uint32_t dissapearTime, uint8_t alpha);
     static void Render();
     static void AddTrace(const CVector& from, const CVector& to, eWeaponType weaponType, class CEntity* a4);
-    void Update();
+    static void Update();
 
     static CBulletTrace* CBulletTraces::GetFree(); // Inlined function (Kinda NOTSA)
     static size_t GetTraceIndex(CBulletTrace* pTrace) { return std::distance(std::begin(aTraces), pTrace); } // NOTSA
