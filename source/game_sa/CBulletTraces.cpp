@@ -185,41 +185,37 @@ void CBulletTraces::Update()
 // 0x726AF0
 void CBulletTraces::AddTrace(const CVector& posMuzzle, const CVector& posBulletHit, eWeaponType weaponType, CEntity* pFromEntity)
 {
-    if (FindPlayerEntity() != pFromEntity) {
-        goto skip_early_outs;
+    if (FindPlayerPed() == pFromEntity || FindPlayerVehicle() && FindPlayerVehicle() == pFromEntity) {
+        switch (CCamera::GetActiveCamera().m_nMode) {
+        case MODE_M16_1STPERSON:
+        case MODE_SNIPER:
+        case MODE_CAMERA:
+        case MODE_ROCKETLAUNCHER:
+        case MODE_ROCKETLAUNCHER_HS:
+        case MODE_M16_1STPERSON_RUNABOUT:
+        case MODE_SNIPER_RUNABOUT:
+        case MODE_ROCKETLAUNCHER_RUNABOUT:
+        case MODE_ROCKETLAUNCHER_RUNABOUT_HS:
+        case MODE_HELICANNON_1STPERSON: {
+            if (FindPlayerEntity()->AsPhysical()->m_vecMoveSpeed.Magnitude() < 0.05f) {
+                return;
+            }
+        }
+        }
     }
     
-    switch (CCamera::GetActiveCamera().m_nMode) {
-    case MODE_M16_1STPERSON:
-    case MODE_SNIPER:
-    case MODE_CAMERA:
-    case MODE_ROCKETLAUNCHER:
-    case MODE_ROCKETLAUNCHER_HS:
-    case MODE_M16_1STPERSON_RUNABOUT:
-    case MODE_SNIPER_RUNABOUT:
-    case MODE_ROCKETLAUNCHER_RUNABOUT:
-    case MODE_ROCKETLAUNCHER_RUNABOUT_HS:
-    case MODE_HELICANNON_1STPERSON:
-        break;
-    default:
-        goto skip_early_outs;
-    }
-    
-    if (FindPlayerEntity()->AsPhysical()->m_vecMoveSpeed.Magnitude() >= 0.05f) {
-skip_early_outs:
-         CVector dir = posBulletHit - posMuzzle;
-         const float traceLengthOriginal = dir.Magnitude();
-         dir.Normalise();
+    CVector dir = posBulletHit - posMuzzle;
+    const float traceLengthOriginal = dir.Magnitude();
+    dir.Normalise();
 
-         const float traceLengthNew = CGeneral::GetRandomNumberInRange(0.0f, traceLengthOriginal);
-         const CVector from = posMuzzle + dir * traceLengthNew;
-         const float fRadius = std::min(CGeneral::GetRandomNumberInRange(2.0f, 5.0f), traceLengthOriginal - traceLengthNew);
-         AddTrace(
-             from,
-             from + dir * fRadius,
-             0.01f,
-             300u,
-             70u
-         );
-    }
+    const float traceLengthNew = CGeneral::GetRandomNumberInRange(0.0f, traceLengthOriginal);
+    const CVector from = posMuzzle + dir * traceLengthNew;
+    const float fRadius = std::min(CGeneral::GetRandomNumberInRange(2.0f, 5.0f), traceLengthOriginal - traceLengthNew);
+    AddTrace(
+        from,
+        from + dir * fRadius,
+        0.01f,
+        300u,
+        70u
+    );
 }
