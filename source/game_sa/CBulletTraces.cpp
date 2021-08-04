@@ -37,7 +37,42 @@ void CBulletTraces::Update()
     }
 }
 
-void CBulletTraces::AddTrace(const CVector& from, const CVector& to, eWeaponType weaponType, CEntity* pFromEntity)
+void CBulletTraces::AddTrace(const CVector& posMuzzle, const CVector& posBulletHit, eWeaponType weaponType, CEntity* pFromEntity)
 {
-    return plugin::Call<0x726AF0, const CVector&, const CVector&, int32_t, CEntity*>(from, to, weaponType, pFromEntity);
+    if (FindPlayerEntity() != pFromEntity) {
+        goto skip_early_outs;
+    }
+    
+    switch (CCamera::GetActiveCamera().m_nMode) {
+    case MODE_M16_1STPERSON:
+    case MODE_SNIPER:
+    case MODE_CAMERA:
+    case MODE_ROCKETLAUNCHER:
+    case MODE_ROCKETLAUNCHER_HS:
+    case MODE_M16_1STPERSON_RUNABOUT:
+    case MODE_SNIPER_RUNABOUT:
+    case MODE_ROCKETLAUNCHER_RUNABOUT:
+    case MODE_ROCKETLAUNCHER_RUNABOUT_HS:
+    case MODE_HELICANNON_1STPERSON:
+        goto skip_early_outs;
+    }
+
+    
+    if (FindPlayerEntity()->AsPhysical()->m_vecMoveSpeed.Magnitude() >= 0.05f) {
+skip_early_outs:
+         CVector dir = posBulletHit - posMuzzle;
+         const float traceLengthOriginal = dir.Magnitude();
+         dir.Normalise();
+
+         const float traceLengthNew = CGeneral::GetRandomNumberInRange(0.0f, traceLengthOriginal);
+         const CVector from = posMuzzle + dir * traceLengthNew;
+         const float fRadius = std::min(CGeneral::GetRandomNumberInRange(2.0f, 5.0f), traceLengthOriginal - traceLengthNew);
+         AddTrace(
+             from,
+             from + dir * fRadius,
+             0.01f,
+             300u,
+             70u
+         );
+    }
 }
