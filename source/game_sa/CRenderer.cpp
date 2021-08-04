@@ -533,8 +533,7 @@ int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
             if (FindPlayerVehicle(-1, false) == pEntity && gbFirstPersonRunThisFrame && CReplay::Mode != REPLAY_MODE_1) {
                 std::uint32_t dwDirectionWasLooking = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nDirectionWasLooking;
                 CAutomobile* pVehicle = FindPlayerVehicle(-1, false);
-                CBike* pBike = dynamic_cast<CBike*>(pVehicle);
-                if (!pVehicle->IsBike() || !(pBike->damageFlags.bDamageFlag8))
+                if (!pVehicle->IsBike() || !(pVehicle->AsBike()->damageFlags.bDamageFlag8))
                 {
                     if (dwDirectionWasLooking == 3)
                         return RENDERER_CULLED;
