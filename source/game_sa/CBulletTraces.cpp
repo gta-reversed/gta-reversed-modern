@@ -13,7 +13,9 @@ void CBulletTraces::InjectHooks()
 
 void CBulletTraces::Init()
 {
-    return plugin::Call<0x721D50>();
+    for (auto& trace : aTraces) {
+        trace.m_bExists = false;
+    }
 }
 
 void CBulletTraces::AddTrace(const CVector& from, const CVector& to, float radius, uint32_t dissapearTime, uint8_t alpha)
