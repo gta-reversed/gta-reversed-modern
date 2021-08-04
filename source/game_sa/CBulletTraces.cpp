@@ -92,7 +92,75 @@ void CBulletTraces::AddTrace(const CVector& from, const CVector& to, float radiu
 
 void CBulletTraces::Render()
 {
-    return plugin::Call<0x723C10>();
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)RwBlendFunction::rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)RwBlendFunction::rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)RwCullMode::rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)NULL);
+
+    RxObjSpace3DVertex verts[6];
+    for (auto& trace : aTraces) {
+        if (!trace.m_bExists)
+            continue;
+
+        // Visualization of how this stuff works:
+        // https://discord.com/channels/479682870047408139/670955312496246784/872593057726496788
+        // Or if the above link is dead: https://imgur.com/a/2hWCyS8
+
+        CVector startToCamDirNorm = trace.m_vecStart - TheCamera.GetPosition();
+        startToCamDirNorm.Normalise();
+
+        CVector traceDirNorm = trace.GetDirection();
+        const float traceLength = traceDirNorm.NormaliseAndMag();
+
+        const float invertedLifetimeProgress = 1.0f - (float)trace.GetRemainingLifetime() / (float)trace.m_nLifeTime;
+        const float fSphereRadius = invertedLifetimeProgress * trace.m_fRadius;
+
+        // Imagine a sphere.
+        // This vector right here goes from the center of that sphere towards the surface
+        // of the sphere.
+        CVector sphereSurfaceDir = CrossProduct(startToCamDirNorm, traceDirNorm);
+        sphereSurfaceDir.Normalise();
+
+        // The point on the surface of the sphere which has a radius of `fCurrRadius`
+        const CVector pointOnSuraceOfRadiusSphere = sphereSurfaceDir * fSphereRadius;
+
+        // Current position on the trace
+        const CVector currPosOnTrace = trace.m_vecEnd - trace.GetDirection() * invertedLifetimeProgress;
+
+        // Set vertex positions
+        const CVector vertPositions[std::size(verts)] = {
+            currPosOnTrace,
+            currPosOnTrace + pointOnSuraceOfRadiusSphere,
+            currPosOnTrace - pointOnSuraceOfRadiusSphere,
+
+            trace.m_vecEnd,
+            trace.m_vecEnd + pointOnSuraceOfRadiusSphere,
+            trace.m_vecEnd - pointOnSuraceOfRadiusSphere,
+        };
+
+        for (auto i = 0; i < std::size(verts); i++) {
+            const CVector& pos = vertPositions[i];
+            RwIm3DVertexSetPos(&verts[i], pos.x, pos.y, pos.z);
+        }
+        
+        // Set colors
+        for (auto& vert : verts)
+            RwIm3DVertexSetRGBA(&vert, 255, 255, 128, 0);
+        RwIm3DVertexSetRGBA(&verts[3], 255, 255, 128, (char)(invertedLifetimeProgress * trace.m_nTransparency)); // Only vertex 3 has non-zero alpha
+
+        if (RwIm3DTransform(verts, std::size(verts), nullptr, rwIM3D_VERTEXRGBA)) {
+            RwImVertexIndex indices[] = { 2, 2, 4, 1, 3, 1, 0, 3, 0, 3, 3, 5 };
+            RwIm3DRenderIndexedPrimitive(RwPrimitiveType::rwPRIMTYPETRILIST, indices, std::size(verts));
+            RwIm3DEnd();
+        }
+    }
+
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)RwBlendFunction::rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)RwBlendFunction::rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)RwCullMode::rwCULLMODECULLBACK);
 }
 
 void CBulletTraces::Update()

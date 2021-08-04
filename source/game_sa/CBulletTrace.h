@@ -16,7 +16,7 @@ public:
 private:
     char _pad19[3];
 public:
-    int           m_nCreationTime;
+    uint32_t           m_nCreationTime;
     unsigned int  m_nLifeTime;
     float         m_fRadius;
     unsigned char m_nTransparency;
@@ -25,6 +25,10 @@ private:
 public:
 
     void Update();
+
+    // NOTSA
+    CVector GetDirection() const noexcept { return m_vecEnd - m_vecStart; }
+    uint32_t GetRemainingLifetime() const noexcept { return CTimer::m_snTimeInMilliseconds - m_nCreationTime; }
 };
 
 VALIDATE_SIZE(CBulletTrace, 0x2C);
