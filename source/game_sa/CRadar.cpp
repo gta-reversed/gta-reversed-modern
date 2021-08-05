@@ -108,8 +108,8 @@ char* CRadar::RadarBlipFileNames[][2] = {
 eRadarTraceHeight& CRadar::legendTraceHeight = *(eRadarTraceHeight*)0xBAA350;
 unsigned int& CRadar::legendTraceTimer = *(unsigned int*)0xBAA354;
 
-unsigned int CRadar::mapYouAreHereTimer = 0; //0xBAA358
-bool CRadar::mapYouAreHereDisplay = true; //0x8D0930
+unsigned int& CRadar::mapYouAreHereTimer = *(unsigned int*)0xBAA358;
+bool& CRadar::mapYouAreHereDisplay = *(bool*)0x8D0930;
 
 #define RADAR_MIN_RANGE (180.0f)
 #define RADAR_MAX_RANGE (350.0f)
