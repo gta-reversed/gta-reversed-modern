@@ -22,5 +22,5 @@ public:
     static void InjectHooks();
 
     static void SetFOV(float fovValue);
-    static float CalculateAspectRatio();
+    static void CalculateAspectRatio();
 };
