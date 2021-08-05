@@ -459,18 +459,18 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
 
     if (objInstance->m_bUnderwater)
         pNewEntity->m_bUnderwater = true;
-
     if (objInstance->m_bTunnel)
         pNewEntity->m_bTunnel = true;
-
     if (objInstance->m_bTunnelTransition)
         pNewEntity->m_bTunnelTransition = true;
-
+    if (objInstance->m_bRedundantStream)
+        pNewEntity->m_bUnimportantStream = true;
     pNewEntity->m_nAreaCode = objInstance->m_nAreaCode;
     pNewEntity->m_nLodIndex = objInstance->m_nLodInstanceIndex;
 
     if (objInstance->m_nModelId == ModelIndices::MI_TRAINCROSSING)
     {
+        pNewEntity->GetMatrix();
         pNewEntity->AllocateStaticMatrix();
         CObject::SetMatrixForTrainCrossing(&pNewEntity->GetMatrix(), PI * 0.43f);
     }
