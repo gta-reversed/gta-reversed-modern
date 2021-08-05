@@ -179,8 +179,8 @@ public:
     static unsigned int& legendTraceTimer;
     static eRadarTraceHeight& legendTraceHeight;
 
-    static unsigned int mapYouAreHereTimer;
-    static bool mapYouAreHereDisplay;
+    static unsigned int& mapYouAreHereTimer;
+    static bool& mapYouAreHereDisplay;
 
     static char* RadarBlipFileNames[][2];
 

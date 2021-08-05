@@ -47,52 +47,43 @@ void CClock::Initialise(uint32_t millisecondsPerGameMinute) {
 
 /// @brief Updates the game clock. (0x52CF10)
 void CClock::Update() {
+    if (ms_nMillisecondsPerGameMinute < (CTimer::m_snTimeInMilliseconds - ms_nLastClockTick) || CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK]) {
+        if (!CCheat::m_aCheatsActive[CHEAT_ALWAYS_MIDNIGHT] && !CCheat::m_aCheatsActive[CHEAT_STOP_GAME_CLOCK_ORANGE_SKY]) {
+            // next minute
+            ms_nGameClockMinutes++;
+            ms_nLastClockTick += ms_nMillisecondsPerGameMinute;
+
+            if (CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK])
+                ms_nLastClockTick = CTimer::m_snTimeInMilliseconds;
+
+            // next hour
+            if (ms_nGameClockMinutes >= 60) {
+                ms_nGameClockMinutes = 0;
+                ms_nGameClockHours++;
+
+                // next day
+                if (ms_nGameClockHours >= 24) {
+                    ms_nGameClockHours = 0;
+                    ms_nGameClockDays++;
+
+                    if (CurrentDay == 7)
+                        CurrentDay = 1;
+                    else
+                        CurrentDay++;
+
+                    CStats::IncrementStat(STAT_DAYS_PASSED_IN_GAME, 1.0f);
+
+                    // next month
+                    if (ms_nGameClockDays >= daysInMonth[ms_nGameClockMonth]) {
+                        ms_nGameClockDays = 1;
+                        if (++ms_nGameClockMonth > 12u)
+                                ms_nGameClockMonth = 1;
+                    }
+                }
+            }
+        }
+    }
     ms_nGameClockSeconds = (CTimer::m_snTimeInMilliseconds - ms_nLastClockTick) * 60 / ms_nMillisecondsPerGameMinute;
-
-    if (ms_nMillisecondsPerGameMinute >= (CTimer::m_snTimeInMilliseconds - ms_nLastClockTick) && !CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK])
-        return;
-
-    if (CCheat::m_aCheatsActive[CHEAT_ALWAYS_MIDNIGHT] || CCheat::m_aCheatsActive[CHEAT_STOP_GAME_CLOCK_ORANGE_SKY])
-        return;
-
-    // next minute
-    ms_nGameClockMinutes++;
-    ms_nLastClockTick += ms_nMillisecondsPerGameMinute;
-
-    if (CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK])
-        ms_nLastClockTick = CTimer::m_snTimeInMilliseconds;
-
-    // next hour
-    if (ms_nGameClockMinutes <= 59)
-        return;
-
-    ms_nGameClockMinutes = 0;
-    ms_nGameClockHours++;
-
-    // next day
-    if (ms_nGameClockHours <= 23)
-        return;
-
-    ms_nGameClockHours = 0;
-    ms_nGameClockDays++;
-
-    if (CurrentDay == 7)
-        CurrentDay = 1;
-    else
-        CurrentDay++;
-
-    CStats::IncrementStat(STAT_DAYS_PASSED_IN_GAME, 1.0f);
-
-    // next month
-    if (daysInMonth[ms_nGameClockMonth] > ms_nGameClockDays)
-        return;
-
-    ms_nGameClockDays = 1;
-
-    if (ms_nGameClockMonth == 12)
-        ms_nGameClockMonth = 1;
-    else
-        ms_nGameClockMonth++;
 }
 
 /// @brief Number of minutes remaining to specific time. (0x52CEB0)
