@@ -95,12 +95,12 @@ void CBulletTraces::AddTrace(const CVector& from, const CVector& to, float radiu
 // 0x723C10
 void CBulletTraces::Render()
 {
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)RwBlendFunction::rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)RwBlendFunction::rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)RwCullMode::rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)RwBlendFunction::rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)RwBlendFunction::rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)RwCullMode::rwCULLMODECULLNONE);
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)NULL);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)NULL);
 
     RxObjSpace3DVertex verts[6];
     for (auto& trace : aTraces) {
@@ -127,7 +127,7 @@ void CBulletTraces::Render()
         sphereSurfaceDir.Normalise();
 
         // The point on the surface of the sphere which has a radius of `fCurrRadius`
-        const CVector pointOnSuraceOfRadiusSphere = sphereSurfaceDir * fSphereRadius;
+        const CVector pointOnSurfaceOfRadiusSphere= sphereSurfaceDir * fSphereRadius;
 
         // Current position on the trace
         const CVector currPosOnTrace = trace.m_vecEnd - trace.GetDirection() * invertedLifetimeProgress;
@@ -167,9 +167,9 @@ void CBulletTraces::Render()
     }
 
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)RwBlendFunction::rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)RwBlendFunction::rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)RwCullMode::rwCULLMODECULLBACK);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,     (void*)RwBlendFunction::rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,    (void*)RwBlendFunction::rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,     (void*)RwCullMode::rwCULLMODECULLBACK);
 }
 
 // 0x723FB0

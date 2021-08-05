@@ -1,6 +1,6 @@
 #pragma once
+
 class CVector;
-#include <stdint.h>
 
 class CBulletTraces {
 public:
@@ -12,11 +12,11 @@ public:
 private:
 public:
     static void Init();
-    static void AddTrace(const CVector& from, const CVector& to, float radius, uint32_t dissapearTime, uint8_t alpha);
+    static void AddTrace(const CVector& from, const CVector& to, float radius, uint32_t disappearTime, uint8_t alpha);
     static void Render();
-    static void AddTrace(const CVector& from, const CVector& to, eWeaponType weaponType, class CEntity* a4);
+    static void AddTrace(const CVector& from, const CVector& to, eWeaponType weaponType, class CEntity* pFromEntity);
     static void Update();
 
-    static CBulletTrace* CBulletTraces::GetFree(); // Inlined function (Kinda NOTSA)
+    static CBulletTrace* GetFree(); // Inlined function (Kinda NOTSA)
     static size_t GetTraceIndex(CBulletTrace* pTrace) { return std::distance(std::begin(aTraces), pTrace); } // NOTSA
 };
