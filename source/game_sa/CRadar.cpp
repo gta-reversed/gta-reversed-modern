@@ -631,7 +631,7 @@ void CRadar::CalculateCachedSinCos()
         return;
     }
 
-    if (TheCamera.GetLookDirection() == LOOKING_DIRECTION_UNKNOWN_3) {
+    if (TheCamera.GetLookDirection() == LOOKING_DIRECTION_FORWARD) {
         float angle;
 
         if (TheCamera.m_matrix) {
@@ -664,9 +664,7 @@ void CRadar::CalculateCachedSinCos()
     }
     else {
         auto entityPosn = targetEntity->GetPosition();
-        in.x = entityPosn.x - activeCam.m_vecSourceBeforeLookBehind.x;
-        in.y = entityPosn.y - activeCam.m_vecSourceBeforeLookBehind.y;
-        in.z = entityPosn.z - activeCam.m_vecSourceBeforeLookBehind.z;
+        in = entityPosn - activeCam.m_vecSourceBeforeLookBehind;
     }
 
     float angle = atan2(-in.x, in.y);
@@ -1201,7 +1199,6 @@ void CRadar::DrawMap()
     CPlayerPed* player = FindPlayerPed(-1);
     bool mapShouldDrawn = !CGame::currArea && player->m_nAreaCode == 0 && FrontEndMenuManager.m_nRadarMode != 1;
 
-    CalculateCachedSinCos();
     CalculateCachedSinCos();
 
     CVehicle* vehicle = FindPlayerVehicle(-1, false);

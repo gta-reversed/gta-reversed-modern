@@ -26,9 +26,9 @@ enum eSwitchType : unsigned short {
 
 enum eLookingDirection {
     LOOKING_DIRECTION_UNKNOWN_1 = 0,
-    LOOKING_DIRECTION_BEHIND,
-    LOOKING_DIRECTION_UNKNOWN_3,
-    LOOKING_DIRECTION_FORWARD,
+    LOOKING_DIRECTION_BEHIND    = 1,
+    LOOKING_DIRECTION_UNKNOWN_3 = 2,
+    LOOKING_DIRECTION_FORWARD   = 3,
 };
 
 enum class eGroundHeightType : std::int32_t {
