@@ -33,9 +33,12 @@ void CQuaternion::Get(RwMatrixTag* out)
     auto y2r = vecImag2.y * real;
     auto z2r = vecImag2.z * real;
 
-    RwV3dAssign(RwMatrixGetRight(out), &CVector(1.0F-(z2z+y2y),   z2r+y2x,        z2x-y2r));
-    RwV3dAssign(RwMatrixGetUp(out),    &CVector(y2x-z2r,          1.0F-(z2z+x2x), x2r+z2y));
-    RwV3dAssign(RwMatrixGetAt(out),    &CVector(y2r+z2x,          z2y-x2r,        1.0F-(y2y+x2x)));
+    CVector right{1.0F-(z2z+y2y),   z2r+y2x,        z2x-y2r},
+            up   {y2x-z2r,          1.0F-(z2z+x2x), x2r+z2y},
+            at   {y2r+z2x,          z2y-x2r,        1.0F-(y2y+x2x)};
+    RwV3dAssign(RwMatrixGetRight(out), &right);
+    RwV3dAssign(RwMatrixGetUp(out), &up);
+    RwV3dAssign(RwMatrixGetAt(out), &at);
 }
 
 // Quat to euler angles

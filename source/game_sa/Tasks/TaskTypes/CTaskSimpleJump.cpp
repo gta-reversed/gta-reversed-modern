@@ -106,7 +106,8 @@ bool CTaskSimpleJump::ProcessPed_Reversed(CPed* ped)
     }
     else if (ped->IsPlayer())
     {
-        CEventSoundQuiet _event(ped, 45.0F, -1, CVector());
+        CVector empty{};
+        CEventSoundQuiet _event(ped, 45.0F, -1, empty);
         GetEventGlobalGroup()->Add(&_event, false);
     }
 

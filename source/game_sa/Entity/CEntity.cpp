@@ -1244,9 +1244,11 @@ void CEntity::CreateEffects()
 
             auto pFrame = RpAtomicGetFrame(pSignAtomic);
             RwFrameSetIdentity(pFrame);
-            RwFrameRotate(pFrame, &CVector(0.0F, 0.0F, 1.0F), pEffect->roadsign.m_vecRotation.z, RwOpCombineType::rwCOMBINEREPLACE);
-            RwFrameRotate(pFrame, &CVector(1.0F, 0.0F, 0.0F), pEffect->roadsign.m_vecRotation.x, RwOpCombineType::rwCOMBINEPOSTCONCAT);
-            RwFrameRotate(pFrame, &CVector(0.0F, 1.0F, 0.0F), pEffect->roadsign.m_vecRotation.y, RwOpCombineType::rwCOMBINEPOSTCONCAT);
+
+            const CVector axis0{1.0F, 0.0F, 0.0F}, axis1{0.0F, 1.0F, 0.0F}, axis2{0.0F, 0.0F, 1.0F};
+            RwFrameRotate(pFrame, &axis2, pEffect->roadsign.m_vecRotation.z, RwOpCombineType::rwCOMBINEREPLACE);
+            RwFrameRotate(pFrame, &axis0, pEffect->roadsign.m_vecRotation.x, RwOpCombineType::rwCOMBINEPOSTCONCAT);
+            RwFrameRotate(pFrame, &axis1, pEffect->roadsign.m_vecRotation.y, RwOpCombineType::rwCOMBINEPOSTCONCAT);
             RwFrameTranslate(pFrame, &pEffect->m_vecPosn, RwOpCombineType::rwCOMBINEPOSTCONCAT);
             RwFrameUpdateObjects(pFrame);
             pEffect->roadsign.m_pAtomic = pSignAtomic;
@@ -2125,7 +2127,10 @@ void CEntity::ProcessLightsForEntity()
             auto bCanCreateLight = true;
             if (pEffect->light.m_bCheckDirection) {
                 const auto& camPos = TheCamera.GetPosition();
-                auto vecLightPos = Multiply3x3(GetMatrix(), CVector(pEffect->light.offsetX, pEffect->light.offsetY, pEffect->light.offsetZ));
+                CVector lightOffset{static_cast<float>(pEffect->light.offsetX),
+                                    static_cast<float>(pEffect->light.offsetY),
+                                    static_cast<float>(pEffect->light.offsetZ)};
+                auto vecLightPos = Multiply3x3(GetMatrix(), lightOffset);
 
                 auto fDot = DotProduct(vecLightPos, (camPos - vecEffPos));
                 bCanCreateLight = fDot >= 0.0F;

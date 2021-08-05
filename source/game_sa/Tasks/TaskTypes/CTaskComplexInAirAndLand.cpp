@@ -85,7 +85,8 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped)
 
             if (ped->m_pPlayerData)
             {
-                CEventSoundQuiet eventSound(ped, ped->m_pPlayerData->m_pPedClothesDesc->GetIsWearingBalaclava() ? 75.0F : 60.0F, -1, CVector());
+                CVector empty{};
+                CEventSoundQuiet eventSound(ped, ped->m_pPlayerData->m_pPedClothesDesc->GetIsWearingBalaclava() ? 75.0F : 60.0F, -1, empty);
                 GetEventGlobalGroup()->Add(&eventSound, false);
             }
 
@@ -117,7 +118,8 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped)
 
             if (ped->m_pPlayerData)
             {
-                CEventSoundQuiet eventSound(ped, ped->m_pPlayerData->m_pPedClothesDesc->GetIsWearingBalaclava() ? 70.0F : 55.0F, -1, CVector());
+                CVector empty{};
+                CEventSoundQuiet eventSound(ped, ped->m_pPlayerData->m_pPedClothesDesc->GetIsWearingBalaclava() ? 70.0F : 55.0F, -1, empty);
                 GetEventGlobalGroup()->Add(&eventSound, false);
             }
 

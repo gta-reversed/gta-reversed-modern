@@ -314,7 +314,7 @@ void cBuoyancy::AddSplashParticles(CPhysical* pEntity, CVector vecFrom, CVector 
         auto pPed = reinterpret_cast<CPed*>(pEntity);
         auto pSwimTask = pPed->GetIntelligence()->GetTaskSwim();
         if (!pSwimTask) {
-            auto& vecPedForward = pEntity->GetForwardVector();
+            auto vecPedForward = pEntity->GetForwardVector();
             auto fPedAngle = CGeneral::GetAngleBetweenPoints(vecPedForward.x, vecPedForward.y, 0.0F, 0.0F);
             fPedAngle = CGeneral::LimitAngle(fPedAngle) + 180.0F;
 

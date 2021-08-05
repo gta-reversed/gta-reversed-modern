@@ -9,6 +9,6 @@ void CCustomBuildingDNPipeline::PreRenderUpdate(RpAtomic* pAtomic, bool ignoreDN
 
 RpAtomic* CCustomBuildingDNPipeline::PreRenderUpdateRpAtomicCB(RpAtomic* pAtomic, void* data)
 {
-    CCustomBuildingDNPipeline::PreRenderUpdate(pAtomic, reinterpret_cast<bool>(data));
+    CCustomBuildingDNPipeline::PreRenderUpdate(pAtomic, static_cast<bool>(reinterpret_cast<intptr_t>(data)));
     return pAtomic;
 }
