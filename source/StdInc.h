@@ -112,7 +112,6 @@
 #include "game_sa\CBouncingPanel.h"
 #include "game_sa\CBridge.h"
 #include "game_sa\CBrightLights.h"
-#include "game_sa\CBulletInfo.h"
 #include "game_sa\CBulletTrace.h"
 #include "game_sa\CBulletTraces.h"
 #include "game_sa\CCam.h"

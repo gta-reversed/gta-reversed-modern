@@ -2,10 +2,12 @@
 
 CAudioEngine& AudioEngine = *reinterpret_cast<CAudioEngine*>(0xB6BC90);
 
-void CAudioEngine::ReportCollision(CEntity* pEntity1, CEntity* pEntity2, int32 surface1, int32 surface2, CColPoint* pColPoint, CVector* normal, float fCollisionImpact1,
-                                   float fCollisionImpact2, int32 bOnlyPlayOneShotCollisionSound, bool bUnknown) {
-    return plugin::CallMethod<0x506EB0, CAudioEngine*, CEntity*, CEntity*, int32, int32, CColPoint*, CVector*, float, float, int32, bool>(
-        this, pEntity1, pEntity2, surface1, surface2, pColPoint, normal, fCollisionImpact1, fCollisionImpact2, bOnlyPlayOneShotCollisionSound, bUnknown);
+void CAudioEngine::ReportCollision(CEntity* entity1, CEntity* entity2, int32 surface1, int32 surface2, CColPoint* pColPoint, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, int32 bOnlyPlayOneShotCollisionSound, bool bUnknown) {
+    return plugin::CallMethod<0x506EB0, CAudioEngine*, CEntity*, CEntity*, int32, int32, CColPoint*, CVector*, float, float, int32, bool>(this, entity1, entity2, surface1, surface2, pColPoint, normal, fCollisionImpact1, fCollisionImpact2, bOnlyPlayOneShotCollisionSound, bUnknown);
+}
+
+void CAudioEngine::ReportBulletHit(CEntity* entity, uint8 surfaceType, const CVector& point, float angleWithColPointNorm) {
+    plugin::CallMethod<0x506EC0, CAudioEngine*, CEntity*, uint8, const CVector&, float>(this, entity, surfaceType, point, angleWithColPointNorm);
 }
 
 void CAudioEngine::ReportMissionAudioEvent(uint16 eventId, CObject* pObject) {

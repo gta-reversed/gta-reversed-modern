@@ -39,6 +39,7 @@
 #include "COcclusion.h"
 #include "COccluder.h"
 #include "CActiveOccluder.h"
+#include "CBulletInfo.h"
 
 #include "CTaskSimpleFight.h"
 #include "CTaskComplexUseGoggles.h"
@@ -56,6 +57,7 @@ void InjectHooksMain()
 {
     // WaitForDebugger();
 
+    CBulletInfo::InjectHooks();
     CVehicleRecording::InjectHooks();
     Fx_c::InjectHooks();
     CBrightLights::InjectHooks();

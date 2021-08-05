@@ -6,6 +6,9 @@
 */
 #include "StdInc.h"
 
+#include "CWeapon.h"
+#include "CBulletInfo.h"
+
 float& CWeapon::ms_fExtinguisherAimAngle = *(float*)0x8D610C;
 bool& CWeapon::bPhotographHasBeenTaken = *(bool*)0xC8A7C0;
 bool& CWeapon::ms_bTakePhoto = *(bool*)0xC8A7C1;

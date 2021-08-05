@@ -50,8 +50,8 @@ public:
     void EnableEffectsLoading();
     void ReportFrontendAudioEvent(eAudioEvents audioEventId, float a2, float a3);
     void ResetSoundEffects();
-    void ReportCollision(CEntity* pEntity1, CEntity* pEntity2, int32 surface1, int32 surface2, CColPoint* pColPoint, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, int32 bOnlyPlayOneShotCollisionSound, bool bUnknown);
-    void ReportBulletHit(CEntity*, uint8, CVector&, float);
+    void ReportCollision(CEntity* entity1, CEntity* entity2, int32 surface1, int32 surface2, CColPoint* colPoint, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, int32 bOnlyPlayOneShotCollisionSound, bool bUnknown);
+    void ReportBulletHit(CEntity* entity, uint8 surfaceType, const CVector& point, float angleWithColPointNorm);
     void ReportObjectDestruction(CEntity* pEntity);
     void ReportGlassCollisionEvent(int32, CVector&);
     void ReportWaterSplash(CPhysical* pPhysical, float volume, bool forcePlaySplashSound);

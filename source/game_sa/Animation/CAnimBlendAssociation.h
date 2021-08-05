@@ -89,6 +89,14 @@ public:
     bool UpdateBlend(float blendDeltaMult);
     bool UpdateTime(float unused1, float unused2);
     void UpdateTimeStep(float speedMult, float timeMult);
+
+    // NOTSA
+    void SetFlag(eAnimationFlags flag, bool value) {
+        if (value)
+            m_nFlags |= (int)flag;
+        else
+            m_nFlags &= ~(int)flag;
+    }
 };
 
 //VTABLE_DESC(CAnimBlendAssociation, 0x85C6D0, 1);
