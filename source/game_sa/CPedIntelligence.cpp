@@ -732,7 +732,7 @@ bool CPedIntelligence::IsInACarOrEnteringOne() {
     {
         return pTakSimpleCarDrive->m_pVehicle;
     }
-    return nullptr;
+    return false;
 }
 
 // 0x601D10

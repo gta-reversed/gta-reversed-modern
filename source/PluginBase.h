@@ -36,7 +36,7 @@ static const dummy_func_t dummy; // Dummy func tag object
 
 // meta template for functions
 #if (defined(__GNUC__) || defined(__GNUG__) || defined(__clang__))
-template<auto Func>
+template<typename Func>
 struct meta;
 #elif (defined(_MSC_VER))
 template<typename FuncType, FuncType Func>

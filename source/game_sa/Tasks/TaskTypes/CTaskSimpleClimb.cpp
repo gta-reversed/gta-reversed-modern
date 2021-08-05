@@ -247,7 +247,8 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped)
 
             if (ped->IsPlayer())
             {
-                CEventSoundQuiet _event(ped, 50.0F, -1, CVector());
+                CVector empty{};
+                CEventSoundQuiet _event(ped, 50.0F, -1, empty);
                 GetEventGlobalGroup()->Add(&_event, false);
             }
 

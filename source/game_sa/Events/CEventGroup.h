@@ -9,7 +9,6 @@
 #include "PluginBase.h"
 #include "CEvent.h"
 
-enum eTaskType;
 class CPed;
 
 const std::int32_t TOTAL_EVENTS_PER_EVENTGROUP = 16;

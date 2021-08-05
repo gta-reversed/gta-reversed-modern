@@ -500,7 +500,8 @@ void CVehicleModelInfo::SetRenderPipelines()
         return;
 
     carFrame = RwFrameCreate();
-    RwMatrixRotate(RwFrameGetMatrix(carFrame), &CVector(1.0F, 0.0f, 0.0f), 60.0F, RwOpCombineType::rwCOMBINEREPLACE);
+    const CVector axis{1.0F, 0.0f, 0.0f};
+    RwMatrixRotate(RwFrameGetMatrix(carFrame), &axis, 60.0F, RwOpCombineType::rwCOMBINEREPLACE);
     RwFrameUpdateObjects(carFrame);
     RwFrameGetLTM(carFrame);
 }

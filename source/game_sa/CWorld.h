@@ -16,17 +16,17 @@
 #include "CPed.h"
 #include "CVehicle.h"
 
-extern const std::int32_t MAX_PLAYERS = 2;
-extern const std::int32_t MAX_WORLD_UNITS = 6000;
-extern const std::int32_t MAX_SECTORS_X = 120;
-extern const std::int32_t MAX_SECTORS_Y = 120;
-extern const std::int32_t MAX_SECTORS = MAX_SECTORS_X * MAX_SECTORS_Y;
-extern const std::int32_t MAX_REPEAT_SECTORS_X = 16;
-extern const std::int32_t MAX_REPEAT_SECTORS_Y = 16;
-extern const std::int32_t MAX_REPEAT_SECTORS = MAX_REPEAT_SECTORS_X * MAX_REPEAT_SECTORS_Y;
-extern const std::int32_t MAX_LOD_PTR_LISTS_X = 30; 
-extern const std::int32_t MAX_LOD_PTR_LISTS_Y = 30;
-extern const std::int32_t MAX_LOD_PTR_LISTS = MAX_LOD_PTR_LISTS_X * MAX_LOD_PTR_LISTS_Y;
+constexpr std::int32_t MAX_PLAYERS = 2;
+constexpr std::int32_t MAX_WORLD_UNITS = 6000;
+constexpr std::int32_t MAX_SECTORS_X = 120;
+constexpr std::int32_t MAX_SECTORS_Y = 120;
+constexpr std::int32_t MAX_SECTORS = MAX_SECTORS_X * MAX_SECTORS_Y;
+constexpr std::int32_t MAX_REPEAT_SECTORS_X = 16;
+constexpr std::int32_t MAX_REPEAT_SECTORS_Y = 16;
+constexpr std::int32_t MAX_REPEAT_SECTORS = MAX_REPEAT_SECTORS_X * MAX_REPEAT_SECTORS_Y;
+constexpr std::int32_t MAX_LOD_PTR_LISTS_X = 30; 
+constexpr std::int32_t MAX_LOD_PTR_LISTS_Y = 30;
+constexpr std::int32_t MAX_LOD_PTR_LISTS = MAX_LOD_PTR_LISTS_X * MAX_LOD_PTR_LISTS_Y;
 
 class CWorld {
 public:

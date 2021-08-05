@@ -2,9 +2,9 @@
 
 void CTaskSimpleHoldEntity::InjectHooks() {
 
-    HookInstall(0x6913A0, (CTaskSimpleHoldEntity*(CPhysical::*)(CEntity*, CVector*, char, unsigned char, int, int, bool)) & CTaskSimpleHoldEntity::Constructor);
-    HookInstall(0x691470, (CTaskSimpleHoldEntity * (CPhysical::*)(CEntity*, CVector*, char, unsigned char, char*, char*, int)) & CTaskSimpleHoldEntity::Constructor);
-    HookInstall(0x691550, (CTaskSimpleHoldEntity * (CPhysical::*)(CEntity*, CVector*, char, unsigned char, CAnimBlock*, CAnimBlendHierarchy*, int)) & CTaskSimpleHoldEntity::Constructor);
+    HookInstall(0x6913A0, (CTaskSimpleHoldEntity*(CTaskSimpleHoldEntity::*)(CEntity*, CVector*, char, unsigned char, int, int, bool)) & CTaskSimpleHoldEntity::Constructor);
+    HookInstall(0x691470, (CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, char, unsigned char, char*, char*, int)) & CTaskSimpleHoldEntity::Constructor);
+    HookInstall(0x691550, (CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, char, unsigned char, CAnimBlock*, CAnimBlendHierarchy*, int)) & CTaskSimpleHoldEntity::Constructor);
     HookInstall(0x6929B0, &CTaskSimpleHoldEntity::Clone_Reversed);
     HookInstall(0x691460, &CTaskSimpleHoldEntity::GetId_Reversed);
     HookInstall(0x693BD0, &CTaskSimpleHoldEntity::MakeAbortable_Reversed);
