@@ -234,13 +234,13 @@ int CRadar::GetActualBlipArrayIndex(int blipIndex)
     if (blipIndex == -1)
         return -1;
 
-    auto blip16 = (unsigned short)blipIndex;
-    auto blipHiWord = (blipIndex >> 16) & RwUInt16MAXVAL;
-    tRadarTrace& trace = ms_RadarTrace[blip16];
-    if (blipHiWord != trace.m_nCounter || !trace.m_bTrackingBlip)
+    uint16_t traceIndex = (uint16_t)blipIndex;
+    uint16_t counter = blipIndex >> 16;
+    tRadarTrace& trace = ms_RadarTrace[traceIndex];
+    if (counter != trace.m_nCounter || !trace.m_bTrackingBlip)
         return -1;
 
-    return blip16;
+    return traceIndex;
 }
 
 // 0x5828A0
@@ -754,7 +754,7 @@ void CRadar::ChangeBlipDisplay(int blipIndex, eBlipDisplay blipDisplay)
     if (index == -1)
         return;
 
-    ms_RadarTrace[index].m_bTrackingBlip = (blipDisplay == BLIP_DISPLAY_BLIPONLY) || (blipDisplay == BLIP_DISPLAY_BOTH);
+    ms_RadarTrace[index].m_nBlipDisplayFlag = blipDisplay;
 }
 
 // 0x583D70
