@@ -157,8 +157,8 @@ struct tRadarTrace {
     unsigned char  m_bFriendly : 1;     // It is affected by BLIP_COLOUR_THREAT.
     unsigned char  m_bBlipRemain : 1;   // It has the priority over the entity (it will still appear after the entity's deletion).
     unsigned char  m_bBlipFade : 1;     // Possibly a leftover. Always unset (unused).
-    unsigned char  pad : 2;
     unsigned char  m_nCoordBlipAppearance : 2; // see eBlipAppearance
+
     unsigned char  m_nBlipDisplayFlag : 2;     // see eBlipDisplay
     unsigned char  m_nBlipType : 4;            // see eBlipType
 };
