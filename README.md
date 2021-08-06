@@ -11,6 +11,9 @@ Building this project will result in a DLL file, that DLL file can be injected i
 ### Progress
 The progress of reversed classes can be tracked [here](docs/ReversedClasses.MD).
 
+### Coding Guidelines 
+Before you start writing code, please make sure to read the [coding guidelines](docs/CodingGuidelines.MD) for this project.
+
 ### Build Instructions
 You can either build with Premake5 or CMake, that's up to you.
 ##### Premake5
