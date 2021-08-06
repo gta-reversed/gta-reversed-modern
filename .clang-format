@@ -6,3 +6,4 @@ IndentWidth: 4
 ColumnLimit: 180
 SortIncludes: false
 AccessModifierOffset: -4
+AllowShortFunctionsOnASingleLine: Empty
