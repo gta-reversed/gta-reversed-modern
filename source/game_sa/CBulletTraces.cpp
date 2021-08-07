@@ -50,21 +50,22 @@ void CBulletTraces::AddTrace(const CVector& from, const CVector& to, float radiu
     }
     // Play sound front-end
 
-    const CVector camPos = TheCamera.GetPosition();
+    CMatrix camMat = TheCamera.GetMatrix();
+    const CVector camPos = camMat.GetPosition();
 
-    const float fromCamDir_Dot_CamRight = DotProduct(from - camPos, TheCamera.GetMatrix().GetRight());
-    const float fromCamDir_Dot_CamUp = DotProduct(from - camPos, TheCamera.GetMatrix().GetUp());
-    const float fromCamDir_Dot_CamFwd = DotProduct(from - camPos, TheCamera.GetMatrix().GetForward());
+    const float fromCamDir_Dot_CamRight = DotProduct(from - camPos, camMat.GetRight());
+    const float fromCamDir_Dot_CamUp = DotProduct(from - camPos, camMat.GetUp());
+    const float fromCamDir_Dot_CamFwd = DotProduct(from - camPos, camMat.GetForward());
 
-    const float toCamDir_Dot_CamRight = DotProduct(to - camPos, TheCamera.GetMatrix().GetRight());
-    const float toCamDir_Dot_CamFwd = DotProduct(to - camPos, TheCamera.GetMatrix().GetForward());
+    const float toCamDir_Dot_CamRight = DotProduct(to - camPos, camMat.GetRight());
+    const float toCamDir_Dot_CamFwd = DotProduct(to - camPos, camMat.GetForward());
 
     if (toCamDir_Dot_CamFwd * fromCamDir_Dot_CamFwd < 0.0f) {
         const float absFromCamDir_Dot_CamFwd = fabs(fromCamDir_Dot_CamFwd);
         const float absToCamDir_Dot_CamFwd = fabs(toCamDir_Dot_CamFwd);
 
         const float v43 = absFromCamDir_Dot_CamFwd / (absFromCamDir_Dot_CamFwd + absToCamDir_Dot_CamFwd);
-        const float v51 = DotProduct(to - camPos, TheCamera.GetMatrix().GetUp()) - fromCamDir_Dot_CamUp;
+        const float v51 = DotProduct(to - camPos, camMat.GetUp()) - fromCamDir_Dot_CamUp;
         const float v52 = v51 * v43;
         const float v44 = (toCamDir_Dot_CamRight - fromCamDir_Dot_CamRight) * v43 + fromCamDir_Dot_CamRight;
         const float v42 = CVector2D{ v52 + fromCamDir_Dot_CamUp, v44 }.Magnitude(); // Originally uses sqrt and stuff, but this is cleaner
