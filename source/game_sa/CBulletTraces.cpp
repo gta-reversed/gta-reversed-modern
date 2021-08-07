@@ -127,7 +127,7 @@ void CBulletTraces::Render()
         sphereSurfaceDir.Normalise();
 
         // The point on the surface of the sphere which has a radius of `fCurrRadius`
-        const CVector pointOnSurfaceOfRadiusSphere= sphereSurfaceDir * fSphereRadius;
+        const CVector pointOnSurfaceOfRadiusSphere = sphereSurfaceDir * fSphereRadius;
 
         // Current position on the trace
         const CVector currPosOnTrace = trace.m_vecEnd - trace.GetDirection() * invertedLifetimeProgress;
@@ -135,12 +135,12 @@ void CBulletTraces::Render()
         // Set vertex positions
         const CVector vertPositions[std::size(verts)] = {
             currPosOnTrace,
-            currPosOnTrace + pointOnSuraceOfRadiusSphere,
-            currPosOnTrace - pointOnSuraceOfRadiusSphere,
+            currPosOnTrace + pointOnSurfaceOfRadiusSphere,
+            currPosOnTrace - pointOnSurfaceOfRadiusSphere,
 
             trace.m_vecEnd,
-            trace.m_vecEnd + pointOnSuraceOfRadiusSphere,
-            trace.m_vecEnd - pointOnSuraceOfRadiusSphere,
+            trace.m_vecEnd + pointOnSurfaceOfRadiusSphere,
+            trace.m_vecEnd - pointOnSurfaceOfRadiusSphere,
         };
 
         for (auto i = 0; i < std::size(verts); i++) {
