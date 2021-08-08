@@ -53,7 +53,11 @@ void CFireManager::Init() {
 }
 
 uint32_t CFireManager::GetNumOfNonScriptFires() {
-    return plugin::CallMethodAndReturn<uint32_t, 0x538F10, CFireManager*>(this);
+    uint32_t c = 0;
+    for (auto& fire : m_aFires)
+        if (fire.m_nFlags.bActive && !fire.m_nFlags.bCreatedByScript)
+            c++;
+    return c;
 }
 
 CFire * CFireManager::FindNearestFire(CVector const& point, bool bCheckWasExtinguished, bool bCheckWasCreatedByScript) {
