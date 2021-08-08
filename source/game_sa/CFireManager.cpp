@@ -23,7 +23,7 @@ void CFireManager::InjectHooks() {
     ReversibleHooks::Install("CFireManager", "CreateAllFxSystems", 0x539D50, &CFireManager::CreateAllFxSystems);
     ReversibleHooks::Install("CFireManager", "Shutdown", 0x539DD0, &CFireManager::Shutdown);
     ReversibleHooks::Install("CFireManager", "GetNextFreeFire", 0x539E50, &CFireManager::GetNextFreeFire);
-    //ReversibleHooks::Install("CFireManager", "StartFire", 0x539F00, &CFireManager::StartFire);
+    ReversibleHooks::Install("CFireManager", "StartFire_NoTarget", 0x539F00, static_cast<CFire*(CFireManager::*)(CVector, float, uint8_t, CEntity*, uint, int8_t, uint8_t)>(&CFireManager::StartFire));
     //ReversibleHooks::Install("CFireManager", "StartFire", 0x53A050, &CFireManager::StartFire);
     //ReversibleHooks::Install("CFireManager", "StartScriptFire", 0x53A270, &CFireManager::StartScriptFire);
     //ReversibleHooks::Install("CFireManager", "Update", 0x53AF00, &CFireManager::Update);
@@ -225,8 +225,12 @@ CFire* CFireManager::GetNextFreeFire(bool bMayExtinguish) {
     }
 }
 
-CFire * CFireManager::StartFire(CVector pos, float size, uint8_t unused, CEntity * creator, uint time, signed char numGenerations, uint8_t unused_) {
-    return plugin::CallMethodAndReturn<CFire *, 0x539F00, CFireManager*, CVector, float, uint8_t, CEntity *, uint, signed char, uint8_t>(this, pos, size, unused, creator, time, numGenerations, unused_);
+CFire * CFireManager::StartFire(CVector pos, float fStrength, uint8_t unused, CEntity * pCreator, uint32_t nTimeToBurn, uint8_t nGenerations, uint8_t unused_) {
+    CFire* pFire = GetNextFreeFire(false);
+    if (!pFire)
+        return nullptr;
+    pFire->Start(pCreator, pos, nTimeToBurn, std::min<uint8_t>((uint8_t)m_nMaxFireGenerationsAllowed, nGenerations));
+    return pFire;
 }
 
 CFire * CFireManager::StartFire(CEntity * target, CEntity * creator, float size, uint8_t unused, uint lifetime, signed char numGenerations) {

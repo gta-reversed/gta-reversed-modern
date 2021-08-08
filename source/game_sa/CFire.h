@@ -28,7 +28,7 @@ public:
     CEntity *m_pEntityCreator;
     unsigned int m_nTimeToBurn;
     float m_fStrength;
-    char m_nNumGenerationsAllowed;
+    uint8_t m_nNumGenerationsAllowed;
     unsigned char m_nRemovalDist;
 private:
     char _pad1[2];
@@ -39,6 +39,7 @@ public:
     ~CFire() = default;
 
     void Initialise();
+    void Start(CEntity* pCreator, CVector pos, uint32_t nTimeToBurn, uint8_t nGens);
     void CreateFxSysForStrength(const CVector& point, RwMatrixTag* m);
     void Extinguish();
     void ExtinguishWithWater(float fWaterStrength);

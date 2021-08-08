@@ -43,6 +43,28 @@ void CFire::Initialise() {
     return plugin::CallMethod<0x538B30, CFire*>(this);
 }
 
+void CFire::Start(CEntity* pCreator, CVector pos, uint32_t nTimeToBurn, uint8_t nGens) {
+    m_nFlags = {
+      true,  // bActive
+      false, // bCreatedByScript
+      true,  // bMakesNoise
+      false, // bBeingExtinguished
+      true   // bFirstGeneration
+    };
+
+    m_nTimeToBurn = CTimer::m_snTimeInMilliseconds + (uint32_t)(CGeneral::GetRandomNumberInRange(1.0f, 1.3f) * (float)nTimeToBurn);
+
+    SetTarget(nullptr);
+    SetCreator(pCreator);
+
+    m_nNumGenerationsAllowed = nGens;
+    m_fStrength = 1.0f;
+    m_vecPosition = pos;
+
+    CreateFxSysForStrength(m_vecPosition, nullptr);
+}
+}
+
 void CFire::CreateFxSysForStrength(const CVector& point, RwMatrixTag* m) {
     return plugin::CallMethod<0x539360, CFire*, const CVector&, RwMatrixTag*>(this, point, m);
 }
