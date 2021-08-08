@@ -125,9 +125,9 @@ public:
     unsigned int GetDoorStatus(int doorNodeIndex);
     unsigned int GetDoorStatus(eDoors door);
     // Status is a value between 0-250
-    void SetEngineStatus(unsigned int status);
+    void SetEngineStatus(uint32_t status);
     // Status is a value between 0-250
-    unsigned int GetEngineStatus();
+    uint32_t GetEngineStatus();
     void SetAeroplaneCompStatus(int component, unsigned int status);
     unsigned int GetAeroplaneCompStatus(int component);
     // damageCompId - eLights/ePanel/... id for this component
