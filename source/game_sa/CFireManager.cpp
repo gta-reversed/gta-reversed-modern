@@ -216,16 +216,13 @@ CFire* CFireManager::GetNextFreeFire(bool bMayExtinguish) {
 
     // At this point there are no inactive fires in the pool 
     // So try to extinguish a script / first generation fire
-    CFire* pFire = std::begin(m_aFires);
-    for (;;) {
-        if (pFire->IsFirstGen() || pFire->IsScript())
-            break; /* found */
-        if (pFire == std::end(m_aFires))
-            return nullptr;
+    for (auto& fire : m_aFires) {
+        if (fire.IsFirstGen() || fire.IsScript()) {
+            fire.m_nFlags.bCreatedByScript = false;
+            fire.Extinguish();
+            return &fire;
+        }
     }
-    pFire->m_nFlags.bCreatedByScript = false;
-    pFire->Extinguish();
-    return pFire;
 }
 
 CFire * CFireManager::StartFire(CVector pos, float size, uint8_t unused, CEntity * creator, uint time, signed char numGenerations, uint8_t unused_) {
