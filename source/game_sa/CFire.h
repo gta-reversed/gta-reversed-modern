@@ -35,8 +35,9 @@ private:
 public:
     FxSystem_c *m_pFxSystem;
 
-    CFire();
-    ~CFire();
+    CFire() = default;
+    ~CFire() = default;
+
     void Initialise();
     void CreateFxSysForStrength(RwV3d* point, RwMatrixTag* matrix);
     void Extinguish();

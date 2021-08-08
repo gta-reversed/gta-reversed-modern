@@ -1,47 +1,46 @@
-/*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
-    Authors: GTA Community. See more here
-    https://github.com/DK22Pac/plugin-sdk
-    Do not delete this comment block. Respect others' work!
-*/
 #pragma once
-
 #include "PluginBase.h"
 #include "CFire.h"
 
-#define MAX_NUM_FIRES 60
 
-class  CFireManager {
+class CFireManager {
 public:
-    CFire m_aFires[MAX_NUM_FIRES];
-    unsigned int m_nMaxFireGenerationsAllowed; // initialised with 999999 in Init()
+    CFire m_aFires[60];
+    uint32_t m_nMaxFireGenerationsAllowed;
+
+public:
+    static void InjectHooks();
 
     CFireManager();
     ~CFireManager();
+
+public:
+    CFireManager* Destructor();
+    CFireManager* Constructor();
+public:
     void Init();
-    unsigned int GetNumOfNonScriptFires();
-    CFire* FindNearestFire(CVector const& position, bool notBeingExtinguished, bool notScript);
+    uint32_t GetNumOfNonScriptFires();
+    CFire * FindNearestFire(CVector const& point, bool bCheckWasExtinguished, bool bCheckWasCreatedByScript);
     bool PlentyFiresAvailable();
-    void ExtinguishPoint(CVector point, float range);
-    bool ExtinguishPointWithWater(CVector point, float range, float fireSizeMp);
-    bool IsScriptFireExtinguished(short fireIndex);
-    void RemoveScriptFire(short fireIndex);
+    void ExtinguishPoint(CVector point, float fRadiusSq);
+    bool ExtinguishPointWithWater(CVector point, float fRadiusSq, float fFireSize);
+    bool IsScriptFireExtinguished(short id);
+    void RemoveScriptFire(short fireID);
     void RemoveAllScriptFires();
     void ClearAllScriptFireFlags();
-    void SetScriptFireAudio(short fireIndex, bool enable);
-    CVector* GetScriptFireCoords(short fireIndex);
-    unsigned int GetNumFiresInRange(CVector* point, float range);
-    unsigned int GetNumFiresInArea(float cornerA_x, float cornerA_y, float cornerA_z, float cornerB_x, float cornerB_y, float cornerB_z);
+    void SetScriptFireAudio(short fireID, bool bFlag);
+    const CVector& GetScriptFireCoords(short fireID);
+    uint32_t GetNumFiresInRange(const CVector& point, float fRadiusSq);
+    uint32_t GetNumFiresInArea(float minX, float minY, float minZ, float maxX, float maxY, float maxZ);
     void DestroyAllFxSystems();
-    void CreateAllFxSystems();
+    int8_t CreateAllFxSystems();
     void Shutdown();
-    void GetNextFreeFire(unsigned char bAllowDeletingOldFire); // bAllowDeletingOldFire - allow deleting old fire if no free slots available
-    CFire* StartFire(CVector point, _IGNORED_ float size, _IGNORED_ unsigned char arg2, CEntity* creator, unsigned int time, signed char numGenerations, _IGNORED_ unsigned char arg6);
-    CFire* StartFire(CEntity* target, CEntity* creator, _IGNORED_ float size, _IGNORED_ unsigned char arg3, unsigned int time, signed char numGenerations);
-    int StartScriptFire(CVector const& point, CEntity* target, _IGNORED_ float arg2, _IGNORED_ unsigned char arg3, signed char numGenerations, int size);
+    CFire * GetNextFreeFire(uint8_t bUnused);
+    CFire * StartFire(CVector pos, float size, uint8_t unused, CEntity * creator, uint time, signed char numGenerations, uint8_t unused_);
+    CFire * StartFire(CEntity * target, CEntity * creator, float size, uint8_t unused, uint lifetime, signed char numGenerations);
+    int32_t StartScriptFire(CVector const& pos, CEntity * pTarget, float _fUnused, uint8_t _nUnused, signed char nAllowedGenerations, int32_t nStrength);
     void Update();
 };
-
 VALIDATE_SIZE(CFireManager, 0x964);
 
-extern CFireManager &gFireManager;
+extern CFireManager& gFireManager;
