@@ -26,7 +26,7 @@ void CFireManager::InjectHooks() {
     ReversibleHooks::Install("CFireManager", "StartFire_NoTarget", 0x539F00, static_cast<CFire*(CFireManager::*)(CVector, float, uint8_t, CEntity*, uint32_t, uint8_t, uint8_t)>(&CFireManager::StartFire));
     ReversibleHooks::Install("CFireManager", "StartFire", 0x53A050, static_cast<CFire *(CFireManager::*)(CEntity*, CEntity*, float, uint8_t, uint32_t, uint8_t)>(&CFireManager::StartFire));
     ReversibleHooks::Install("CFireManager", "StartScriptFire", 0x53A270, &CFireManager::StartScriptFire);
-    //ReversibleHooks::Install("CFireManager", "Update", 0x53AF00, &CFireManager::Update);
+    ReversibleHooks::Install("CFireManager", "Update", 0x53AF00, &CFireManager::Update);
 }
 
 CFireManager::CFireManager() {
@@ -57,6 +57,15 @@ uint32_t CFireManager::GetNumOfNonScriptFires() {
     for (auto& fire : m_aFires)
         if (fire.m_nFlags.bActive && !fire.m_nFlags.bCreatedByScript)
             c++;
+    return c;
+}
+
+uint32_t CFireManager::GetNumOfFires() {
+    uint32_t c = 0;
+    for (auto& fire : m_aFires) {
+        if (fire.IsActive())
+            c++;
+    }
     return c;
 }
 
@@ -308,5 +317,145 @@ int32_t CFireManager::StartScriptFire(CVector const& pos, CEntity * pTarget, flo
 }
 
 void CFireManager::Update() {
-    return plugin::CallMethod<0x53AF00, CFireManager*>(this);
+    if (CReplay::Mode == 1)
+        return;
+    for (auto& fire : m_aFires) {
+        fire.ProcessFire();
+    }
+    if (CGameLogic::LaRiotsActiveHere() && (CTimer::m_snTimeInMilliseconds / 500u != CTimer::m_snPreviousTimeInMilliseconds / 500u)) {
+        const float fRandomAngleRad = CGeneral::GetRandomNumberInRange(0.0f, 2 * rwPI);
+        const float fRandomDir = CGeneral::GetRandomNumberInRange(35.0f, 60.0f);
+        CVector point = TheCamera.GetPosition() + CVector{
+            std::sin(fRandomAngleRad) * fRandomDir,
+            std::cos(fRandomAngleRad) * fRandomDir,
+            10.0f
+        };
+
+        CEntity* pHitEntity{};
+        bool bHit{};
+        point.z = CWorld::FindGroundZFor3DCoord(point.x, point.y, point.z, &bHit, &pHitEntity);
+
+        CVector pointToCamDirNorm = (TheCamera.GetPosition() - point);
+        pointToCamDirNorm.Normalise();
+
+        const double fDist = *reinterpret_cast<double*>((char*)0x862B90 + 376);
+        if (DotProduct(TheCamera.GetForward(), pointToCamDirNorm) > 0.2f || rand() < RAND_MAX / 2) {
+            auto pFx = g_fxMan.CreateFxSystem("riot_smoke", &point, nullptr, true);
+            if (pFx)
+                pFx->PlayAndKill();
+        } else {
+            StartFire(point, CGeneral::GetRandomNumberInRange(0.5f, 2.5f), true, nullptr, 30000u, 5, 1);
+        }
+    }
+
+    int32_t nFires = (int32_t)GetNumOfFires();
+    bool firesVisited[60] = {false};
+    do {
+        /* Find strongest fire */
+        CFire* pStrongest{};
+        for (size_t i = 0; i < 60; i++) {
+            if (firesVisited[i])
+                continue;
+            CFire& fire = Get(i);
+            if (fire.IsActive() && (!pStrongest || pStrongest->m_fStrength < fire.m_fStrength))
+                pStrongest = &fire;
+        }
+
+        float fCombinedStrength{};
+        int32_t nCombinedCeilStrength{};
+        for (size_t i = 0; i < 60; i++) {
+            if (firesVisited[i])
+                continue;
+            CFire& fire = Get(i);
+            if ((fire.m_vecPosition - pStrongest->m_vecPosition).Magnitude() < 6.0f) {
+                fCombinedStrength += fire.m_fStrength;
+                nCombinedCeilStrength += (int32_t)std::ceil(fire.m_fStrength);
+                nFires--;
+                firesVisited[i] = true;
+            }
+        }
+
+        if (fCombinedStrength > 4.0f && nCombinedCeilStrength) {
+            const CVector baseColor{ 40.0f, 32.0f, 20.0f }; // From addresses 0x8CCFF0, 0x8CCFF1, 0x8CCFF2 (These are int values originally)
+
+            const float fDir = std::min(7.0f, fCombinedStrength - 6.0f + 3.0f);
+
+            CVector shdwPos = pStrongest->m_vecPosition;
+            shdwPos.z += 5.0f;
+            const float fColorMult = CGeneral::GetRandomNumberInRange(0.6f, 1.0f);
+            {
+                const CVector shdwColor = baseColor * fColorMult;
+                CShadows::StoreStaticShadow(
+                    reinterpret_cast<unsigned int>(pStrongest),
+                    2,
+                    gpShadowExplosionTex,
+                    &shdwPos,
+                    fDir * -1.2f,
+                    0.0f,
+                    0.0f,
+                    fDir * 1.2f,
+                    0,
+                    (uint8_t)shdwColor.x,
+                    (uint8_t)shdwColor.y,
+                    (uint8_t)shdwColor.z,
+                    10.0f,
+                    1.0f,
+                    40.0f,
+                    false,
+                    0.0f
+                );
+            }
+            if (fCombinedStrength > 6.0f) {
+                CVector point = pStrongest->m_vecPosition + CVector{ 0.0f, 0.0f, 2.6f };
+                {
+                    CVector camToPointDirNorm = TheCamera.GetPosition() - point;
+                    camToPointDirNorm.Normalise();
+                    point += camToPointDirNorm * 3.5f;
+                }
+                const auto RegisterCorona = [&](auto idx, CVector pos, eCoronaFlareType flare = eCoronaFlareType::FLARETYPE_NONE) {
+                    const CVector crnaColor = baseColor * (fColorMult * 0.8f);
+                    CCoronas::RegisterCorona(
+                        reinterpret_cast<unsigned int>(pStrongest),
+                        nullptr,
+                        (unsigned char)crnaColor.x, // r
+                        (unsigned char)crnaColor.y, // g
+                        (unsigned char)crnaColor.z, // b
+                        0xFF,                       // a
+                        pos,
+                        fDir * 0.5f,
+                        70.0f,
+                        eCoronaType::CORONATYPE_HEADLIGHT,
+                        flare,
+                        false,
+                        false,
+                        0,
+                        0.0f,
+                        false,
+                        1.5f,
+                        0,
+                        15.0f,
+                        false,
+                        false
+                    );
+                };
+
+                RegisterCorona(reinterpret_cast<unsigned int>(pStrongest), point, eCoronaFlareType::FLARETYPE_HEADLIGHTS);
+
+                point.z += 2.0f;
+                RegisterCorona(reinterpret_cast<unsigned int>(pStrongest) + 1, point);
+                point.z -= 2.0f;
+
+                CVector camRightNorm = TheCamera.GetRight();
+                camRightNorm.z = 0.0f;
+                camRightNorm.Normalise();
+
+                point += camRightNorm * 2.0f;
+                RegisterCorona(reinterpret_cast<unsigned int>(pStrongest) + 2, point);
+
+                point -= camRightNorm * 4.0f;
+                RegisterCorona(reinterpret_cast<unsigned int>(pStrongest) + 3, point);
+            }
+        }
+
+    } while (nFires > 0);
 }
