@@ -12,7 +12,7 @@ void CFireManager::InjectHooks() {
     //ReversibleHooks::Install("CFireManager", "ExtinguishPoint", 0x539450, &CFireManager::ExtinguishPoint);
     //ReversibleHooks::Install("CFireManager", "ExtinguishPointWithWater", 0x5394C0, &CFireManager::ExtinguishPointWithWater);
     //ReversibleHooks::Install("CFireManager", "IsScriptFireExtinguished", 0x5396E0, &CFireManager::IsScriptFireExtinguished);
-    //ReversibleHooks::Install("CFireManager", "RemoveScriptFire", 0x539700, &CFireManager::RemoveScriptFire);
+    ReversibleHooks::Install("CFireManager", "RemoveScriptFire", 0x539700, &CFireManager::RemoveScriptFire);
     //ReversibleHooks::Install("CFireManager", "RemoveAllScriptFires", 0x539720, &CFireManager::RemoveAllScriptFires);
     //ReversibleHooks::Install("CFireManager", "ClearAllScriptFireFlags", 0x5397A0, &CFireManager::ClearAllScriptFireFlags);
     //ReversibleHooks::Install("CFireManager", "SetScriptFireAudio", 0x5397B0, &CFireManager::SetScriptFireAudio);
@@ -87,8 +87,12 @@ bool CFireManager::IsScriptFireExtinguished(short id) {
     return plugin::CallMethodAndReturn<bool, 0x5396E0, CFireManager*, short>(this, id);
 }
 
-void CFireManager::RemoveScriptFire(short fireID) {
-    return plugin::CallMethod<0x539700, CFireManager*, short>(this, fireID);
+void CFireManager::RemoveScriptFire(uint16_t fireID) {
+    CFire& fire = Get(fireID);
+    if (fire.m_nFlags.bCreatedByScript) {
+        fire.m_nFlags.bCreatedByScript = false;
+        fire.Extinguish();
+    }
 }
 
 void CFireManager::RemoveAllScriptFires() {

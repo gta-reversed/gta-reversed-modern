@@ -40,6 +40,7 @@ public:
     CFire * StartFire(CEntity * target, CEntity * creator, float size, uint8_t unused, uint lifetime, signed char numGenerations);
     int32_t StartScriptFire(CVector const& pos, CEntity * pTarget, float _fUnused, uint8_t _nUnused, signed char nAllowedGenerations, int32_t nStrength);
     void Update();
+    CFire& Get(size_t idx) { return m_aFires[idx]; }
 };
 VALIDATE_SIZE(CFireManager, 0x964);
 
