@@ -25,7 +25,7 @@ public:
     void ExtinguishPoint(CVector point, float fRadiusSq);
     bool ExtinguishPointWithWater(CVector point, float fRadiusSq, float fFireSize);
     bool IsScriptFireExtinguished(short id);
-    void RemoveScriptFire(short fireID);
+    void RemoveScriptFire(uint16_t fireID);
     void RemoveAllScriptFires();
     void ClearAllScriptFireFlags();
     void SetScriptFireAudio(short fireID, bool bFlag);

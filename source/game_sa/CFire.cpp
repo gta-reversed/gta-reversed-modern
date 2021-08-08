@@ -21,3 +21,10 @@ void CFire::ProcessFire() {
     return plugin::CallMethod<0x53A570, CFire*>(this);
 }
 
+void CFire::DestroyFx() {
+    if (m_pFxSystem) {
+        g_fxMan.DestroyFxSystem(m_pFxSystem);   
+        m_pFxSystem = nullptr;
+    }
+}
+

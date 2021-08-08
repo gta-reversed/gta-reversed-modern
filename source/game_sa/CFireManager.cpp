@@ -19,7 +19,7 @@ void CFireManager::InjectHooks() {
     ReversibleHooks::Install("CFireManager", "GetScriptFireCoords", 0x5397E0, &CFireManager::GetScriptFireCoords);
     ReversibleHooks::Install("CFireManager", "GetNumFiresInRange", 0x5397F0, &CFireManager::GetNumFiresInRange);
     ReversibleHooks::Install("CFireManager", "GetNumFiresInArea", 0x539860, &CFireManager::GetNumFiresInArea);
-    //ReversibleHooks::Install("CFireManager", "DestroyAllFxSystems", 0x539D10, &CFireManager::DestroyAllFxSystems);
+    ReversibleHooks::Install("CFireManager", "DestroyAllFxSystems", 0x539D10, &CFireManager::DestroyAllFxSystems);
     //ReversibleHooks::Install("CFireManager", "CreateAllFxSystems", 0x539D50, &CFireManager::CreateAllFxSystems);
     //ReversibleHooks::Install("CFireManager", "Shutdown", 0x539DD0, &CFireManager::Shutdown);
     //ReversibleHooks::Install("CFireManager", "GetNextFreeFire", 0x539E50, &CFireManager::GetNextFreeFire);
@@ -147,7 +147,11 @@ uint32_t CFireManager::GetNumFiresInArea(float minX, float minY, float minZ, flo
 }
  
 void CFireManager::DestroyAllFxSystems() {
-    return plugin::CallMethod<0x539D10, CFireManager*>(this);
+    for (auto& fire : m_aFires) {
+        if (fire.IsActive()) {
+            fire.DestroyFx();
+        }
+    }
 }
 
 int8_t CFireManager::CreateAllFxSystems() {

@@ -44,6 +44,7 @@ public:
     void ProcessFire();
     bool IsActive() const { return m_nFlags.bActive; }
     bool IsScript() const { return m_nFlags.bCreatedByScript; }
+    void DestroyFx();
 };
 
 VALIDATE_SIZE(CFire, 0x28);
