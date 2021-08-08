@@ -72,7 +72,7 @@ uint32_t CFireManager::GetNumOfFires() {
 
 CFire * CFireManager::FindNearestFire(CVector const& point, bool bCheckIsBeingExtinguished, bool bCheckWasCreatedByScript) {
     float fNearestDist2DSq = std::numeric_limits<float>::max();
-    CFire* pNearestFire;
+    CFire* pNearestFire{};
     for (auto& fire : m_aFires) {
         if (!fire.IsActive())
             continue;
