@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+void CFire::Extinguish()
+{
+    plugin::Call<0x5393F0>();
+}
 
 void CFire::ExtinguishWithWater(float fWaterStrength) {
     const float fOriginalStrength = m_fStrength;
@@ -96,9 +100,9 @@ void CFire::Start(CEntity* pCreator, CEntity* pTarget, uint32_t nTimeToBurn, uin
         true   // bFirstGeneration
     };
 
-    m_vecPosition = pTarget->GetPosition();
     m_nNumGenerationsAllowed = nGens;
     m_fStrength = 1.0f;
+    m_vecPosition = pTarget->GetPosition();
 
     if (pTarget->IsPed() && static_cast<CPed*>(pTarget)->IsPlayer())
         m_nTimeToBurn = CTimer::m_snTimeInMilliseconds + 2333;
@@ -111,6 +115,36 @@ void CFire::Start(CEntity* pCreator, CEntity* pTarget, uint32_t nTimeToBurn, uin
     SetCreator(pCreator);
 
     CreateFxSysForStrength(m_vecPosition, nullptr);
+}
+
+void CFire::Start(CVector pos, float fStrength, CEntity* pTarget, uint8_t nGens) {
+    SetTarget(pTarget);
+    SetCreator(nullptr);
+
+    m_nFlags = {
+        true,  // bActive
+        true,  // bCreatedByScript
+        true,  // bMakesNoise
+        false, // bBeingExtinguished
+        true   // bFirstGeneration
+    };
+
+    m_nNumGenerationsAllowed = nGens;
+    m_fStrength = fStrength;
+    m_vecPosition = pos;
+
+    if (pTarget) {
+        switch (pTarget->m_nType) { /* Set target's `m_pFire` to `this` */
+        case eEntityType::ENTITY_TYPE_PED:
+            static_cast<CPed*>(pTarget)->m_pFire = this;
+            break;
+        case eEntityType::ENTITY_TYPE_VEHICLE:
+            static_cast<CVehicle*>(pTarget)->m_pFire = this;
+            break;
+        }
+    }
+
+    CreateFxSysForStrength(pTarget ? pos : pTarget->GetPosition(), nullptr);
 }
 
 void CFire::CreateFxSysForStrength(const CVector& point, RwMatrixTag* m) {
@@ -136,17 +170,8 @@ void CFire::SetTarget(CEntity* pTarget) {
     if (m_pEntityTarget)
         m_pEntityTarget->CleanUpOldReference(&m_pEntityTarget); /* Assume old target's m_pFire is not pointing to `*this` */
     m_pEntityTarget = pTarget; /* assign, even if its null, to clear it */
-    if (pTarget) {
-        m_pEntityTarget->RegisterReference(&m_pEntityTarget);
-        switch (pTarget->m_nType) { /* Set target to point to `*this` */
-        case eEntityType::ENTITY_TYPE_PED:
-            static_cast<CPed*>(pTarget)->m_pFire = this;
-            break;
-        case eEntityType::ENTITY_TYPE_VEHICLE:
-            static_cast<CVehicle*>(pTarget)->m_pFire = this;
-            break;
-        }
-    }
+    if (pTarget)
+        m_pEntityTarget->RegisterReference(&m_pEntityTarget); /* Assume caller set pTarget->m_pFire */
 }
 
 void CFire::SetCreator(CEntity* pCreator) {

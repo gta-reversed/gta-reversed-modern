@@ -25,7 +25,7 @@ void CFireManager::InjectHooks() {
     ReversibleHooks::Install("CFireManager", "GetNextFreeFire", 0x539E50, &CFireManager::GetNextFreeFire);
     ReversibleHooks::Install("CFireManager", "StartFire_NoTarget", 0x539F00, static_cast<CFire*(CFireManager::*)(CVector, float, uint8_t, CEntity*, uint32_t, uint8_t, uint8_t)>(&CFireManager::StartFire));
     ReversibleHooks::Install("CFireManager", "StartFire", 0x53A050, static_cast<CFire *(CFireManager::*)(CEntity*, CEntity*, float, uint8_t, uint32_t, uint8_t)>(&CFireManager::StartFire));
-    //ReversibleHooks::Install("CFireManager", "StartScriptFire", 0x53A270, &CFireManager::StartScriptFire);
+    ReversibleHooks::Install("CFireManager", "StartScriptFire", 0x53A270, &CFireManager::StartScriptFire);
     //ReversibleHooks::Install("CFireManager", "Update", 0x53AF00, &CFireManager::Update);
 }
 
@@ -269,8 +269,41 @@ CFire * CFireManager::StartFire(CEntity * pTarget, CEntity * pCreator, float fSt
     return nullptr;
 }
 
-int32_t CFireManager::StartScriptFire(CVector const& pos, CEntity * pTarget, float _fUnused, uint8_t _nUnused, signed char nAllowedGenerations, int32_t nStrength) {
-    return plugin::CallMethodAndReturn<int32_t, 0x53A270, CFireManager*, CVector const&, CEntity *, float, uint8_t, signed char, int32_t>(this, pos, pTarget, _fUnused, _nUnused, nAllowedGenerations, nStrength);
+int32_t CFireManager::StartScriptFire(CVector const& pos, CEntity * pTarget, float _fUnused, uint8_t _nUnused, uint8_t nGenerations, int32_t nStrength) {
+
+    if (pTarget) {
+        /* Extinguish current fire (if any) of target */
+        const auto StopFire = [](CFire* pFire) {
+            pFire->Extinguish();
+            pFire->m_nFlags.bCreatedByScript = false;
+        };
+        switch (pTarget->m_nType) {
+        case eEntityType::ENTITY_TYPE_PED: {
+            auto pPedTarget = static_cast<CPed*>(pTarget);
+            if (pPedTarget->m_pFire)
+                StopFire(pPedTarget->m_pFire);
+            break;
+        }
+        case eEntityType::ENTITY_TYPE_VEHICLE: {
+            auto pVehTarget = static_cast<CVehicle*>(pTarget);
+            if (pVehTarget->m_pFire)
+                StopFire(pVehTarget->m_pFire);
+            /* Set engine status for automobiles */
+            if (pVehTarget->IsAutomobile()) {
+                auto& dmgMgr = static_cast<CAutomobile*>(pVehTarget)->m_damageManager;
+                if (dmgMgr.GetEngineStatus() >= 225)
+                    dmgMgr.SetEngineStatus(215);
+            }
+            break;
+        }
+        }
+    }
+
+    if (auto pFire = GetNextFreeFire(true)) {
+        pFire->Start(pos, (float)nStrength, pTarget, std::min<uint8_t>((uint8_t)m_nMaxFireGenerationsAllowed, nGenerations));
+        return CTheScripts::GetNewUniqueScriptThingIndex(GetIndexOf(pFire), 5);
+    }
+    return -1;
 }
 
 void CFireManager::Update() {
