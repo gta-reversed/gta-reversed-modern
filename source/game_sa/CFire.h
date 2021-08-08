@@ -41,6 +41,7 @@ public:
     void Initialise();
     void CreateFxSysForStrength(const CVector& point, RwMatrixTag* m);
     void Extinguish();
+    void ExtinguishWithWater(float fWaterStrength);
     void ProcessFire();
     bool IsActive() const { return m_nFlags.bActive; }
     bool IsScript() const { return m_nFlags.bCreatedByScript; }
