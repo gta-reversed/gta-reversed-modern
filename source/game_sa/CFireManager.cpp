@@ -11,7 +11,7 @@ void CFireManager::InjectHooks() {
     ReversibleHooks::Install("CFireManager", "PlentyFiresAvailable", 0x539340, &CFireManager::PlentyFiresAvailable);
     ReversibleHooks::Install("CFireManager", "ExtinguishPoint", 0x539450, &CFireManager::ExtinguishPoint);
     ReversibleHooks::Install("CFireManager", "ExtinguishPointWithWater", 0x5394C0, &CFireManager::ExtinguishPointWithWater);
-    //ReversibleHooks::Install("CFireManager", "IsScriptFireExtinguished", 0x5396E0, &CFireManager::IsScriptFireExtinguished);
+    ReversibleHooks::Install("CFireManager", "IsScriptFireExtinguished", 0x5396E0, &CFireManager::IsScriptFireExtinguished);
     ReversibleHooks::Install("CFireManager", "RemoveScriptFire", 0x539700, &CFireManager::RemoveScriptFire);
     ReversibleHooks::Install("CFireManager", "RemoveAllScriptFires", 0x539720, &CFireManager::RemoveAllScriptFires);
     ReversibleHooks::Install("CFireManager", "ClearAllScriptFireFlags", 0x5397A0, &CFireManager::ClearAllScriptFireFlags);
@@ -117,7 +117,7 @@ bool CFireManager::ExtinguishPointWithWater(CVector point, float fRadius, float 
 }
 
 bool CFireManager::IsScriptFireExtinguished(short id) {
-    return plugin::CallMethodAndReturn<bool, 0x5396E0, CFireManager*, short>(this, id);
+    return !Get(id).IsActive();
 }
 
 void CFireManager::RemoveScriptFire(uint16_t fireID) {
