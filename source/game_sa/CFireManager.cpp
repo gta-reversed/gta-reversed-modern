@@ -18,7 +18,7 @@ void CFireManager::InjectHooks() {
     ReversibleHooks::Install("CFireManager", "SetScriptFireAudio", 0x5397B0, &CFireManager::SetScriptFireAudio);
     ReversibleHooks::Install("CFireManager", "GetScriptFireCoords", 0x5397E0, &CFireManager::GetScriptFireCoords);
     ReversibleHooks::Install("CFireManager", "GetNumFiresInRange", 0x5397F0, &CFireManager::GetNumFiresInRange);
-    //ReversibleHooks::Install("CFireManager", "GetNumFiresInArea", 0x539860, &CFireManager::GetNumFiresInArea);
+    ReversibleHooks::Install("CFireManager", "GetNumFiresInArea", 0x539860, &CFireManager::GetNumFiresInArea);
     //ReversibleHooks::Install("CFireManager", "DestroyAllFxSystems", 0x539D10, &CFireManager::DestroyAllFxSystems);
     //ReversibleHooks::Install("CFireManager", "CreateAllFxSystems", 0x539D50, &CFireManager::CreateAllFxSystems);
     //ReversibleHooks::Install("CFireManager", "Shutdown", 0x539DD0, &CFireManager::Shutdown);
@@ -131,9 +131,21 @@ uint32_t CFireManager::GetNumFiresInRange(const CVector& point, float fRadius) {
 }
 
 uint32_t CFireManager::GetNumFiresInArea(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
-    return plugin::CallMethodAndReturn<uint32_t, 0x539860, CFireManager*, float, float, float, float, float, float>(this, minX, minY, minZ, maxX, maxY, maxZ);
+    CBoundingBox boundingBox{
+        {minX, minY, minZ},
+        {maxX, maxY, maxZ}
+    };
+    uint32_t c = 0;
+    for (auto& fire : m_aFires) {
+        if (fire.IsActive() && !fire.IsScript()) {
+            if (boundingBox.IsPointWithin(fire.m_vecPosition)) {
+                c++;
+            }
+        }
+    }
+    return c;
 }
-
+ 
 void CFireManager::DestroyAllFxSystems() {
     return plugin::CallMethod<0x539D10, CFireManager*>(this);
 }

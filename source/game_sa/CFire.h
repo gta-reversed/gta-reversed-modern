@@ -42,6 +42,8 @@ public:
     void CreateFxSysForStrength(const CVector& point, RwMatrixTag* m);
     void Extinguish();
     void ProcessFire();
+    bool IsActive() const { return m_nFlags.bActive; }
+    bool IsScript() const { return m_nFlags.bCreatedByScript; }
 };
 
 VALIDATE_SIZE(CFire, 0x28);
