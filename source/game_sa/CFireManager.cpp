@@ -339,7 +339,11 @@ void CFireManager::Update() {
         CVector pointToCamDirNorm = (TheCamera.GetPosition() - point);
         pointToCamDirNorm.Normalise();
 
-        const double fDist = *reinterpret_cast<double*>((char*)0x862B90 + 376);
+        // In the PC version 0.2f and "riot_smoke" is accessed through an array
+        // On the Android version it's inlined
+        // Android values used here, and on the PC version the array access isn't
+        // a 100% clear to me.
+        // TODO: Use the array here
         if (DotProduct(TheCamera.GetForward(), pointToCamDirNorm) > 0.2f || rand() < RAND_MAX / 2) {
             auto pFx = g_fxMan.CreateFxSystem("riot_smoke", &point, nullptr, true);
             if (pFx)
