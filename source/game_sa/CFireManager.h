@@ -33,7 +33,7 @@ public:
     uint32_t GetNumFiresInRange(const CVector& point, float fRadiusSq);
     uint32_t GetNumFiresInArea(float minX, float minY, float minZ, float maxX, float maxY, float maxZ);
     void DestroyAllFxSystems();
-    int8_t CreateAllFxSystems();
+    void CreateAllFxSystems();
     void Shutdown();
     CFire * GetNextFreeFire(uint8_t bUnused);
     CFire * StartFire(CVector pos, float size, uint8_t unused, CEntity * creator, uint time, signed char numGenerations, uint8_t unused_);
