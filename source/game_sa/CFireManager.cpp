@@ -5,7 +5,7 @@ CFireManager& gFireManager = *reinterpret_cast<CFireManager*>(0xB71F80);
 void CFireManager::InjectHooks() {
     //ReversibleHooks::Install("CFireManager", "Constructor", 0x539DA0, &CFireManager::Constructor);
     //ReversibleHooks::Install("CFireManager", "Destructor", 0x538BB0, &CFireManager::Destructor);
-    //ReversibleHooks::Install("CFireManager", "Init", 0x538BC0, &CFireManager::Init);
+    ReversibleHooks::Install("CFireManager", "Init", 0x538BC0, &CFireManager::Init);
     //ReversibleHooks::Install("CFireManager", "GetNumOfNonScriptFires", 0x538F10, &CFireManager::GetNumOfNonScriptFires);
     //ReversibleHooks::Install("CFireManager", "FindNearestFire", 0x538F40, &CFireManager::FindNearestFire);
     //ReversibleHooks::Install("CFireManager", "PlentyFiresAvailable", 0x539340, &CFireManager::PlentyFiresAvailable);
@@ -46,7 +46,10 @@ CFireManager* CFireManager::Constructor() {
 }
 
 void CFireManager::Init() {
-    plugin::CallMethod<0x538BC0, CFireManager*>(this);
+    for (auto& fire : m_aFires) {
+        fire.Initialise();
+    }
+    m_nMaxFireGenerationsAllowed = 1'000'000 - 1;
 }
 
 uint32_t CFireManager::GetNumOfNonScriptFires() {

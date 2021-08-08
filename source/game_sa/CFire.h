@@ -39,7 +39,7 @@ public:
     ~CFire() = default;
 
     void Initialise();
-    void CreateFxSysForStrength(RwV3d* point, RwMatrixTag* matrix);
+    void CreateFxSysForStrength(const CVector& point, RwMatrixTag* m);
     void Extinguish();
     void ProcessFire();
 };
