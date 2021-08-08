@@ -223,6 +223,7 @@ CFire* CFireManager::GetNextFreeFire(bool bMayExtinguish) {
             return &fire;
         }
     }
+    return nullptr;
 }
 
 CFire * CFireManager::StartFire(CVector pos, float fStrength, uint8_t unused, CEntity * pCreator, uint32_t nTimeToBurn, uint8_t nGenerations, uint8_t unused_) {
