@@ -1,9 +1,5 @@
 #include "StdInc.h"
 
-void CFire::Extinguish()
-{
-    plugin::Call<0x5393F0>();
-}
 
 void CFire::ExtinguishWithWater(float fWaterStrength) {
     const float fOriginalStrength = m_fStrength;
