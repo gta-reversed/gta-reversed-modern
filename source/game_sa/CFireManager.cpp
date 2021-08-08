@@ -7,7 +7,7 @@ void CFireManager::InjectHooks() {
     //ReversibleHooks::Install("CFireManager", "Destructor", 0x538BB0, &CFireManager::Destructor);
     ReversibleHooks::Install("CFireManager", "Init", 0x538BC0, &CFireManager::Init);
     ReversibleHooks::Install("CFireManager", "GetNumOfNonScriptFires", 0x538F10, &CFireManager::GetNumOfNonScriptFires);
-    //ReversibleHooks::Install("CFireManager", "FindNearestFire", 0x538F40, &CFireManager::FindNearestFire);
+    ReversibleHooks::Install("CFireManager", "FindNearestFire", 0x538F40, &CFireManager::FindNearestFire);
     ReversibleHooks::Install("CFireManager", "PlentyFiresAvailable", 0x539340, &CFireManager::PlentyFiresAvailable);
     //ReversibleHooks::Install("CFireManager", "ExtinguishPoint", 0x539450, &CFireManager::ExtinguishPoint);
     //ReversibleHooks::Install("CFireManager", "ExtinguishPointWithWater", 0x5394C0, &CFireManager::ExtinguishPointWithWater);
@@ -60,8 +60,25 @@ uint32_t CFireManager::GetNumOfNonScriptFires() {
     return c;
 }
 
-CFire * CFireManager::FindNearestFire(CVector const& point, bool bCheckWasExtinguished, bool bCheckWasCreatedByScript) {
-    return plugin::CallMethodAndReturn<CFire *, 0x538F40, CFireManager*, CVector const&, bool, bool>(this, point, bCheckWasExtinguished, bCheckWasCreatedByScript);
+CFire * CFireManager::FindNearestFire(CVector const& point, bool bCheckIsBeingExtinguished, bool bCheckWasCreatedByScript) {
+    float fNearestDist2DSq = std::numeric_limits<float>::max();
+    CFire* pNearestFire;
+    for (auto& fire : m_aFires) {
+        if (!fire.IsActive())
+            continue;
+        if (bCheckWasCreatedByScript && fire.IsScript())
+            continue;
+        if (bCheckIsBeingExtinguished && fire.IsBeingExtinguished())
+            continue;
+        if (fire.m_pEntityTarget && fire.m_pEntityTarget->IsPed())
+            continue;
+        const float fDist2DSq = (fire.m_vecPosition - point).SquaredMagnitude2D();
+        if (fDist2DSq < fNearestDist2DSq) {
+            fNearestDist2DSq = fDist2DSq;
+            pNearestFire = &fire;
+        }
+    }
+    return pNearestFire;
 }
 
 bool CFireManager::PlentyFiresAvailable() {
