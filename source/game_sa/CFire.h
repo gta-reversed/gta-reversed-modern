@@ -48,6 +48,8 @@ public:
     bool IsFirstGen() const { return m_nFlags.bFirstGeneration; }
     bool IsBeingExtinguished() const { return m_nFlags.bBeingExtinguished; }
     void DestroyFx();
-};
 
+    void SetTarget(CEntity* pTarget);
+    void SetCreator(CEntity* pCreator);
+};
 VALIDATE_SIZE(CFire, 0x28);

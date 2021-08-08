@@ -62,3 +62,28 @@ void CFire::DestroyFx() {
     }
 }
 
+void CFire::SetTarget(CEntity* pTarget) {
+    if (m_pEntityTarget)
+        m_pEntityTarget->CleanUpOldReference(&m_pEntityTarget); /* Assume old target's m_pFire is not pointing to `*this` */
+    m_pEntityTarget = pTarget; /* assign, even if its null, to clear it */
+    if (pTarget) {
+        m_pEntityTarget->RegisterReference(&m_pEntityTarget);
+        switch (pTarget->m_nType) { /* Set target to point to `*this` */
+        case eEntityType::ENTITY_TYPE_PED:
+            static_cast<CPed*>(pTarget)->m_pFire = this;
+            break;
+        case eEntityType::ENTITY_TYPE_VEHICLE:
+            static_cast<CVehicle*>(pTarget)->m_pFire = this;
+            break;
+        }
+    }
+}
+
+void CFire::SetCreator(CEntity* pCreator) {
+    if (m_pEntityCreator)
+        m_pEntityCreator->CleanUpOldReference(&m_pEntityCreator);
+    m_pEntityCreator = pCreator; /* assign, even if its null, to clear it */
+    if (pCreator)
+        pCreator->RegisterReference(&m_pEntityCreator);
+}
+
