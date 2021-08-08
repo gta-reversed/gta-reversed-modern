@@ -23,7 +23,7 @@ You can either build with Premake5 or CMake, that's up to you.
 
 3) You'll find gta_reversed.sln shortcut in the same folder as premake5.bat.
 
-##### CMake
+##### CMake (GUI)
 1) Download and install latest CMake for windows from [HERE](https://cmake.org/download/).
 
 2) Open CMake GUI ![Capture](https://gitlab.com/gtahackers/gta-reversed/uploads/9409c1da6c25fbe4423f750d45f29000/Capture.PNG) 
@@ -41,6 +41,15 @@ You can either build with Premake5 or CMake, that's up to you.
 
 6) Once configuration is complete, click the Generate button.  
 7) You'll find GTASA.sln in Bin folder.
+
+##### CMake (CLI)
+1) Download and install latest CMake for windows from [HERE](https://cmake.org/download/) and make sure to add it to your PATH.
+
+2) Clone the project, including the submodules `git clone --recurse-submodules https://github.com/codenulls/gta-reversed.git`.
+
+3) Open Command Prompt in the `gta-reversed` directory and run `cmake -Bbuild -H. -A Win32`.
+
+4) To open the Visual Studio project, simply run `cmake --open build` or open `build/GTASA.sln` manually.
 
 ### Credits
 - All contributors of [plugin-sdk](https://github.com/DK22Pac/plugin-sdk) project.

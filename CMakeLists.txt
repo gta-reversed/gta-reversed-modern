@@ -6,6 +6,19 @@ project(GTASA C CXX)
 ############# create the gta_reversed project
 #############################################################################################
 
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+
+set(BUILD_SHARED_LIBS 1)
+set(INSTALL_DOCS 0)
+set(INSTALL_PKG_CONFIG_MODULE 0)
+set(INSTALL_CMAKE_PACKAGE_MODULE 0)
+
+# Put DLLs in root
+set(CMAKE_INSTALL_BINDIR .)
+# And other components in its own folder
+set(CMAKE_INSTALL_LIBDIR gta-reversed/lib)
+set(CMAKE_INSTALL_INCLUDEDIR gta-reversed/include)
+
 add_subdirectory(libs/ogg)
 add_library(Ogg::ogg ALIAS ogg)
 
@@ -85,6 +98,7 @@ foreach(_source IN ITEMS ${_sourcefiles_list})
 endforeach()
 
 target_precompile_headers(gta_reversed PRIVATE source/StdInc.cpp)
+install(TARGETS gta_reversed DESTINATION .)
 
 list(APPEND _sourcefiles_list StdInc.cpp)
 
