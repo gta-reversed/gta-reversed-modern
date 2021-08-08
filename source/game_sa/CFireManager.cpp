@@ -351,7 +351,7 @@ void CFireManager::Update() {
 
     int32_t nFires = (int32_t)GetNumOfFires();
     bool firesVisited[60] = {false};
-    do {
+    while (nFires > 0) {
         /* Find strongest fire */
         CFire* pStrongest{};
         for (size_t i = 0; i < 60; i++) {
@@ -368,7 +368,7 @@ void CFireManager::Update() {
             if (firesVisited[i])
                 continue;
             CFire& fire = Get(i);
-            if ((fire.m_vecPosition - pStrongest->m_vecPosition).Magnitude() < 6.0f) {
+            if ((fire.m_vecPosition - pStrongest->m_vecPosition).Magnitude2D() < 6.0f) {
                 fCombinedStrength += fire.m_fStrength;
                 nCombinedCeilStrength += (int32_t)std::ceil(fire.m_fStrength);
                 nFires--;
@@ -458,5 +458,5 @@ void CFireManager::Update() {
             }
         }
 
-    } while (nFires > 0);
+    }
 }
