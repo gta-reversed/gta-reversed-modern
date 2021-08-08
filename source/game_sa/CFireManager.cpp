@@ -14,7 +14,7 @@ void CFireManager::InjectHooks() {
     //ReversibleHooks::Install("CFireManager", "IsScriptFireExtinguished", 0x5396E0, &CFireManager::IsScriptFireExtinguished);
     ReversibleHooks::Install("CFireManager", "RemoveScriptFire", 0x539700, &CFireManager::RemoveScriptFire);
     ReversibleHooks::Install("CFireManager", "RemoveAllScriptFires", 0x539720, &CFireManager::RemoveAllScriptFires);
-    //ReversibleHooks::Install("CFireManager", "ClearAllScriptFireFlags", 0x5397A0, &CFireManager::ClearAllScriptFireFlags);
+    ReversibleHooks::Install("CFireManager", "ClearAllScriptFireFlags", 0x5397A0, &CFireManager::ClearAllScriptFireFlags);
     //ReversibleHooks::Install("CFireManager", "SetScriptFireAudio", 0x5397B0, &CFireManager::SetScriptFireAudio);
     //ReversibleHooks::Install("CFireManager", "GetScriptFireCoords", 0x5397E0, &CFireManager::GetScriptFireCoords);
     //ReversibleHooks::Install("CFireManager", "GetNumFiresInRange", 0x5397F0, &CFireManager::GetNumFiresInRange);
@@ -105,7 +105,9 @@ void CFireManager::RemoveAllScriptFires() {
 }
 
 void CFireManager::ClearAllScriptFireFlags() {
-    return plugin::CallMethod<0x5397A0, CFireManager*>(this);
+    for (auto& fire : m_aFires) {
+        fire.m_nFlags.bCreatedByScript = false;
+    }
 }
 
 void CFireManager::SetScriptFireAudio(short fireID, bool bFlag) {
