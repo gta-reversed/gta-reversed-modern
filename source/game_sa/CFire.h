@@ -40,6 +40,7 @@ public:
 
     void Initialise();
     void Start(CEntity* pCreator, CVector pos, uint32_t nTimeToBurn, uint8_t nGens);
+    void Start(CEntity* pCreator, CEntity* pTarget, uint32_t nTimeToBurn, uint8_t nGens);
     void CreateFxSysForStrength(const CVector& point, RwMatrixTag* m);
     void Extinguish();
     void ExtinguishWithWater(float fWaterStrength);

@@ -63,6 +63,58 @@ void CFire::Start(CEntity* pCreator, CVector pos, uint32_t nTimeToBurn, uint8_t 
 
     CreateFxSysForStrength(m_vecPosition, nullptr);
 }
+
+void CFire::Start(CEntity* pCreator, CEntity* pTarget, uint32_t nTimeToBurn, uint8_t nGens) {
+    switch (pTarget->m_nType) {
+    case eEntityType::ENTITY_TYPE_PED: {
+        auto pPedTarget = static_cast<CPed*>(pTarget);
+        pPedTarget->m_pFire = this;
+        CCrime::ReportCrime(
+            pPedTarget->m_nPedType == ePedType::PED_TYPE_COP ? eCrimeType::CRIME_SET_COP_PED_ON_FIRE : eCrimeType::CRIME_SET_PED_ON_FIRE,
+            pPedTarget,
+            static_cast<CPed*>(pCreator)
+        );
+        break;
+    }
+    case eEntityType::ENTITY_TYPE_VEHICLE: {
+        auto pVehTarget = static_cast<CVehicle*>(pTarget);
+        pVehTarget->m_pFire = this;
+        CCrime::ReportCrime(
+            eCrimeType::CRIME_SET_CAR_ON_FIRE,
+            reinterpret_cast<CPed*>(pVehTarget), // TODO: Change ReportCrime's signature to take CEntity* here..
+            static_cast<CPed*>(pCreator)
+        );
+        break;
+    }
+    case eEntityType::ENTITY_TYPE_OBJECT: {
+        static_cast<CObject*>(pTarget)->m_pFire = this;
+        break;
+    }
+    }
+
+    m_nFlags = {
+        true,  // bActive
+        false, // bCreatedByScript
+        true,  // bMakesNoise
+        false, // bBeingExtinguished
+        true   // bFirstGeneration
+    };
+
+    m_vecPosition = pTarget->GetPosition();
+    m_nNumGenerationsAllowed = nGens;
+    m_fStrength = 1.0f;
+
+    if (pTarget->IsPed() && static_cast<CPed*>(pTarget)->IsPlayer())
+        m_nTimeToBurn = CTimer::m_snTimeInMilliseconds + 2333;
+    else if (pTarget->IsVehicle())
+        m_nTimeToBurn = CTimer::m_snTimeInMilliseconds + CGeneral::GetRandomNumberInRange(0, 1000) + 3000;
+    else
+        m_nTimeToBurn = CTimer::m_snTimeInMilliseconds + CGeneral::GetRandomNumberInRange(0, 1000) + nTimeToBurn;
+
+    SetTarget(pTarget);
+    SetCreator(pCreator);
+
+    CreateFxSysForStrength(m_vecPosition, nullptr);
 }
 
 void CFire::CreateFxSysForStrength(const CVector& point, RwMatrixTag* m) {
