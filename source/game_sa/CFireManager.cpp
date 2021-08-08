@@ -16,7 +16,7 @@ void CFireManager::InjectHooks() {
     ReversibleHooks::Install("CFireManager", "RemoveAllScriptFires", 0x539720, &CFireManager::RemoveAllScriptFires);
     ReversibleHooks::Install("CFireManager", "ClearAllScriptFireFlags", 0x5397A0, &CFireManager::ClearAllScriptFireFlags);
     ReversibleHooks::Install("CFireManager", "SetScriptFireAudio", 0x5397B0, &CFireManager::SetScriptFireAudio);
-    //ReversibleHooks::Install("CFireManager", "GetScriptFireCoords", 0x5397E0, &CFireManager::GetScriptFireCoords);
+    ReversibleHooks::Install("CFireManager", "GetScriptFireCoords", 0x5397E0, &CFireManager::GetScriptFireCoords);
     //ReversibleHooks::Install("CFireManager", "GetNumFiresInRange", 0x5397F0, &CFireManager::GetNumFiresInRange);
     //ReversibleHooks::Install("CFireManager", "GetNumFiresInArea", 0x539860, &CFireManager::GetNumFiresInArea);
     //ReversibleHooks::Install("CFireManager", "DestroyAllFxSystems", 0x539D10, &CFireManager::DestroyAllFxSystems);
@@ -115,7 +115,7 @@ void CFireManager::SetScriptFireAudio(short fireID, bool bFlag) {
 }
 
 const CVector& CFireManager::GetScriptFireCoords(short fireID) {
-    return plugin::CallMethodAndReturn<const CVector&, 0x5397E0, CFireManager*, short>(this, fireID);
+    return Get(fireID).m_vecPosition;
 }
 
 uint32_t CFireManager::GetNumFiresInRange(const CVector& point, float fRadiusSq) {
