@@ -41,6 +41,7 @@ void InjectHooksMain()
     COnscreenCounterEntry::InjectHooks();
     CPedTaskPair::InjectHooks();
     CDirectory::InjectHooks();
+    CFireManager::InjectHooks();
     CDebug::InjectHooks();
     InjectCommonHooks();
     CGame::InjectHooks();
