@@ -360,12 +360,13 @@ void CFireManager::Update() {
         CFire* pStrongest{};
         for (size_t i = 0; i < 60; i++) {
             if (firesVisited[i])
-                continue;
+                continue; /* Already processed */ 
             CFire& fire = Get(i);
             if (fire.IsActive() && (!pStrongest || pStrongest->m_fStrength < fire.m_fStrength))
                 pStrongest = &fire;
         }
 
+        /* Sum up strengths of all fires within 6.0 units range */ 
         float fCombinedStrength{};
         int32_t nCombinedCeilStrength{};
         for (size_t i = 0; i < 60; i++) {
@@ -417,6 +418,8 @@ void CFireManager::Update() {
                     camToPointDirNorm.Normalise();
                     point += camToPointDirNorm * 3.5f;
                 }
+
+                /* Wrapper lambda for code radability */
                 const auto RegisterCorona = [&](auto idx, CVector pos, eCoronaFlareType flare = eCoronaFlareType::FLARETYPE_NONE) {
                     const CVector crnaColor = baseColor * (fColorMult * 0.8f);
                     CCoronas::RegisterCorona(
@@ -448,7 +451,7 @@ void CFireManager::Update() {
 
                 point.z += 2.0f;
                 RegisterCorona(reinterpret_cast<unsigned int>(pStrongest) + 1, point);
-                point.z -= 2.0f;
+                point.z -= 2.0f; /* Point stay at same height as originally */ 
 
                 CVector camRightNorm = TheCamera.GetRight();
                 camRightNorm.z = 0.0f;
