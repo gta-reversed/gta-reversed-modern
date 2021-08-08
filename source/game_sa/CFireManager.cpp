@@ -204,17 +204,18 @@ void CFireManager::Shutdown() {
     }
 }
 
-CFire * CFireManager::GetNextFreeFire(uint8_t bUnused) {
-    if (!bUnused) /* called unused, because the only place this is called from doesn't use it  */
-        return nullptr;
+CFire* CFireManager::GetNextFreeFire(bool bMayExtinguish) {
     for (auto& fire : m_aFires) {
         if (!fire.IsActive() && !fire.IsScript()) {
             return &fire;
         }
     }
 
+    if (!bMayExtinguish)
+        return nullptr;
+
     // At this point there are no inactive fires in the pool 
-    // Must recycle a script / first generation fire         
+    // So try to extinguish a script / first generation fire
     CFire* pFire = std::begin(m_aFires);
     for (;;) {
         if (pFire->IsFirstGen() || pFire->IsScript())
