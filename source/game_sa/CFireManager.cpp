@@ -9,7 +9,7 @@ void CFireManager::InjectHooks() {
     ReversibleHooks::Install("CFireManager", "GetNumOfNonScriptFires", 0x538F10, &CFireManager::GetNumOfNonScriptFires);
     ReversibleHooks::Install("CFireManager", "FindNearestFire", 0x538F40, &CFireManager::FindNearestFire);
     ReversibleHooks::Install("CFireManager", "PlentyFiresAvailable", 0x539340, &CFireManager::PlentyFiresAvailable);
-    //ReversibleHooks::Install("CFireManager", "ExtinguishPoint", 0x539450, &CFireManager::ExtinguishPoint);
+    ReversibleHooks::Install("CFireManager", "ExtinguishPoint", 0x539450, &CFireManager::ExtinguishPoint);
     //ReversibleHooks::Install("CFireManager", "ExtinguishPointWithWater", 0x5394C0, &CFireManager::ExtinguishPointWithWater);
     //ReversibleHooks::Install("CFireManager", "IsScriptFireExtinguished", 0x5396E0, &CFireManager::IsScriptFireExtinguished);
     ReversibleHooks::Install("CFireManager", "RemoveScriptFire", 0x539700, &CFireManager::RemoveScriptFire);
@@ -92,8 +92,15 @@ bool CFireManager::PlentyFiresAvailable() {
     return false;
 }
 
-void CFireManager::ExtinguishPoint(CVector point, float fRadiusSq) {
-    return plugin::CallMethod<0x539450, CFireManager*, CVector, float>(this, point, fRadiusSq);
+void CFireManager::ExtinguishPoint(CVector point, float fRadius) {
+    for (auto& fire : m_aFires) {
+        if (!fire.IsActive())
+            continue;
+        if ((fire.m_vecPosition - point).SquaredMagnitude() > fRadius * fRadius)
+            continue;
+        fire.m_nFlags.bCreatedByScript = false;
+        fire.Extinguish();
+    }
 }
 
 bool CFireManager::ExtinguishPointWithWater(CVector point, float fRadiusSq, float fFireSize) {
