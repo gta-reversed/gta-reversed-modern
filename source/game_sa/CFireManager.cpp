@@ -22,7 +22,7 @@ void CFireManager::InjectHooks() {
     ReversibleHooks::Install("CFireManager", "DestroyAllFxSystems", 0x539D10, &CFireManager::DestroyAllFxSystems);
     ReversibleHooks::Install("CFireManager", "CreateAllFxSystems", 0x539D50, &CFireManager::CreateAllFxSystems);
     ReversibleHooks::Install("CFireManager", "Shutdown", 0x539DD0, &CFireManager::Shutdown);
-    //ReversibleHooks::Install("CFireManager", "GetNextFreeFire", 0x539E50, &CFireManager::GetNextFreeFire);
+    ReversibleHooks::Install("CFireManager", "GetNextFreeFire", 0x539E50, &CFireManager::GetNextFreeFire);
     //ReversibleHooks::Install("CFireManager", "StartFire", 0x539F00, &CFireManager::StartFire);
     //ReversibleHooks::Install("CFireManager", "StartFire", 0x53A050, &CFireManager::StartFire);
     //ReversibleHooks::Install("CFireManager", "StartScriptFire", 0x53A270, &CFireManager::StartScriptFire);
@@ -172,7 +172,26 @@ void CFireManager::Shutdown() {
 }
 
 CFire * CFireManager::GetNextFreeFire(uint8_t bUnused) {
-    return plugin::CallMethodAndReturn<CFire *, 0x539E50, CFireManager*, uint8_t>(this, bUnused);
+    if (!bUnused) /* called unused, because the only place this is called from doesn't use it  */
+        return nullptr;
+    for (auto& fire : m_aFires) {
+        if (!fire.IsActive() && !fire.IsScript()) {
+            return &fire;
+        }
+    }
+
+    // At this point there are no inactive fires in the pool 
+    // Must recycle a script / first generation fire         
+    CFire* pFire = std::begin(m_aFires);
+    for (;;) {
+        if (pFire->IsFirstGen() || pFire->IsScript())
+            break; /* found */
+        if (pFire == std::end(m_aFires))
+            return nullptr;
+    }
+    pFire->m_nFlags.bCreatedByScript = false;
+    pFire->Extinguish();
+    return pFire;
 }
 
 CFire * CFireManager::StartFire(CVector pos, float size, uint8_t unused, CEntity * creator, uint time, signed char numGenerations, uint8_t unused_) {

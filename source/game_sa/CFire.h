@@ -44,6 +44,7 @@ public:
     void ProcessFire();
     bool IsActive() const { return m_nFlags.bActive; }
     bool IsScript() const { return m_nFlags.bCreatedByScript; }
+    bool IsFirstGen() const { return m_nFlags.bFirstGeneration; }
     void DestroyFx();
 };
 
