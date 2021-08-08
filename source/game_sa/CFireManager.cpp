@@ -30,6 +30,7 @@ void CFireManager::InjectHooks() {
 }
 
 CFireManager::CFireManager() {
+    Init();
 }
 
 CFireManager::~CFireManager() {
