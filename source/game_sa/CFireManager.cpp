@@ -354,30 +354,39 @@ void CFireManager::Update() {
     }
 
     int32_t nFires = (int32_t)GetNumOfFires();
-    bool firesVisited[60] = {false};
+    bool firesVisited[60] = {false}; // Lookup table to see if a fire's strength was already included into a group of fires
     while (nFires > 0) {
-        /* Find strongest fire */
+        // Repeat until there are no active fires left 
+        // Find strongest un-visited fire, and sum of the strength of all fires within 6.0 units of it 
+        // Based on this strength possibly create a shadow (if combined strength > 4), and coronas (combined strength > 6)
+
+        // Find strongest fire, which hasn't yet been visited
         CFire* pStrongest{};
         for (size_t i = 0; i < 60; i++) {
             if (firesVisited[i])
-                continue; /* Already processed */ 
+                continue;
             CFire& fire = Get(i);
             if (fire.IsActive() && (!pStrongest || pStrongest->m_fStrength < fire.m_fStrength))
                 pStrongest = &fire;
         }
 
-        /* Sum up strengths of all fires within 6.0 units range */ 
+        // Sum up strengths of all fires (that haven't yet been visited) within 6.0 units range
         float fCombinedStrength{};
         int32_t nCombinedCeilStrength{};
         for (size_t i = 0; i < 60; i++) {
-            if (firesVisited[i])
-                continue;
             CFire& fire = Get(i);
+            if (firesVisited[i] || !fire.IsActive())
+                continue;
             if ((fire.m_vecPosition - pStrongest->m_vecPosition).Magnitude2D() < 6.0f) {
                 fCombinedStrength += fire.m_fStrength;
                 nCombinedCeilStrength += (int32_t)std::ceil(fire.m_fStrength);
                 nFires--;
                 firesVisited[i] = true;
+
+                // R* also does some weird vector point calculation,
+                // which doesn't seem to end up being used. Probably old code left in?
+                // <vector defined where `fCombinedStrength` is, lets name it averagedFirePos = {}>
+                // averagedFirePos += fire.m_vecPosition * std::ceil(fire.m_fStrength);
             }
         }
 
@@ -412,6 +421,10 @@ void CFireManager::Update() {
                 );
             }
             if (fCombinedStrength > 6.0f) {
+                // Create coronas in a _|_ like shape.
+                // Keep in mind, the right line's end is always pointing towards the camera,
+                // so what you see is more like |
+
                 CVector point = pStrongest->m_vecPosition + CVector{ 0.0f, 0.0f, 2.6f };
                 {
                     CVector camToPointDirNorm = TheCamera.GetPosition() - point;
@@ -419,7 +432,7 @@ void CFireManager::Update() {
                     point += camToPointDirNorm * 3.5f;
                 }
 
-                /* Wrapper lambda for code radability */
+                // Wrapper lambda for code radability 
                 const auto RegisterCorona = [&](auto idx, CVector pos, eCoronaFlareType flare = eCoronaFlareType::FLARETYPE_NONE) {
                     const CVector crnaColor = baseColor * (fColorMult * 0.8f);
                     CCoronas::RegisterCorona(
@@ -447,11 +460,12 @@ void CFireManager::Update() {
                     );
                 };
 
+                // Each corona only differs in position, and ID
                 RegisterCorona(reinterpret_cast<unsigned int>(pStrongest), point, eCoronaFlareType::FLARETYPE_HEADLIGHTS);
 
                 point.z += 2.0f;
                 RegisterCorona(reinterpret_cast<unsigned int>(pStrongest) + 1, point);
-                point.z -= 2.0f; /* Point stay at same height as originally */ 
+                point.z -= 2.0f;
 
                 CVector camRightNorm = TheCamera.GetRight();
                 camRightNorm.z = 0.0f;
