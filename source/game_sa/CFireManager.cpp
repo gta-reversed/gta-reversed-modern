@@ -363,10 +363,10 @@ void CFireManager::Update() {
         // Find strongest fire, which hasn't yet been visited
         CFire* pStrongest{};
         for (size_t i = 0; i < 60; i++) {
-            if (firesVisited[i])
-                continue;
             CFire& fire = Get(i);
-            if (fire.IsActive() && (!pStrongest || pStrongest->m_fStrength < fire.m_fStrength))
+            if (firesVisited[i] || !fire.IsActive())
+                continue;
+            if (!pStrongest || pStrongest->m_fStrength < fire.m_fStrength)
                 pStrongest = &fire;
         }
 
