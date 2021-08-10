@@ -36,15 +36,18 @@ class CBmx;
 
 class CStats {
 public:
-    static tStatMessage* StatMessage; // static tStatMessage StatMessage
+    static constexpr size_t FIRST_INT_STAT = 120;
+    static constexpr size_t FIRST_UNUSED_STAT = 82;
+
+    static tStatMessage (&StatMessage)[8];
     static unsigned int& TotalNumStatMessages;
-    static char* LastMissionPassedName;   // static char LastMissionPassedName[8]
-    static int* TimesMissionAttempted;    // static int TimesMissionAttempted[100]
-    static int* FavoriteRadioStationList; // static int FavoriteRadioStationList[14]
-    static int* PedsKilledOfThisType;     // static int PedsKilledOfThisType[32]
-    static float* StatReactionValue;      // static float StatReactionValue[59]
-    static int* StatTypesInt;             // static int StatTypesInt[224]
-    static float* StatTypesFloat;         // static float StatTypesFloat[83]
+    static char (&LastMissionPassedName)[8];
+    static int (&TimesMissionAttempted)[100];
+    static int (&FavoriteRadioStationList)[14];
+    static int (&PedsKilledOfThisType)[32];
+    static float (&StatReactionValue)[59];
+    static int (&StatTypesInt)[223];
+    static float (&StatTypesFloat)[82];
     static short& m_ThisStatIsABarChart;
     static bool& bStatUpdateMessageDisplayed;
     static unsigned int& m_SprintStaminaCounter;
@@ -68,7 +71,7 @@ public:
 
     static char* GetStatID(eStats stat);
     static bool GetStatType(eStats stat);
-    static float GetStatValue(unsigned short stat);
+    static float GetStatValue(eStats stat);
     static char GetTimesMissionAttempted(unsigned char missionId);
     static void RegisterMissionAttempted(unsigned char missionId);
     static void RegisterMissionPassed(unsigned char missionId);
@@ -84,7 +87,7 @@ public:
     static bool SafeToShowThisStat(eStats stat);
     static bool CheckForThreshold(float* pValue, float range);
     static bool IsStatCapped(eStats stat);
-    static void ProcessReactionStatsOnDecrement(unsigned char stat);
+    static void ProcessReactionStatsOnDecrement(eStats stat);
     static void CheckForStatsMessage();
     static void LoadStatUpdateConditions();
     static void LoadActionReactionStats();
@@ -92,7 +95,7 @@ public:
     static float GetFatAndMuscleModifier(eStatModAbilities statMod);
     static void DecrementStat(eStats stat, float value);
     static void SetStatValue(eStats stat, float value);
-    static void RegisterFastestTime(eStats stat, int time);
+    static void RegisterFastestTime(eStats stat, int fastestTime);
     static void RegisterBestPosition(eStats stat, int position);
     static char* FindCriminalRatingString();
     static int ConstructStatLine(int arg0, unsigned char arg1);
@@ -102,7 +105,7 @@ public:
     static void UpdateSexAppealStat();
     static void Init();
     static void IncrementStat(eStats stat, float value);
-    static void SetNewRecordStat(unsigned short stat, float value);
+    static void SetNewRecordStat(eStats stat, float value);
     static void UpdateFatAndMuscleStats(unsigned int value);
     static void UpdateStatsWhenSprinting();
     static void UpdateStatsWhenRunning();

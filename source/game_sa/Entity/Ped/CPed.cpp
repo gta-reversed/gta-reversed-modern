@@ -659,12 +659,12 @@ char CPed::GetWeaponSkill(eWeaponType weaponType)
         int skillStat = CWeaponInfo::GetSkillStatIndex(weaponType);
         CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, WEAPON_GOLFCLUB);
         float golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_nReqStatLevel);
-        if (golfClubStatLevel <= CStats::GetStatValue(skillStat))
+        if (golfClubStatLevel <= CStats::GetStatValue((eStats)skillStat))
             return 2;
 
         CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, WEAPON_BRASSKNUCKLE);
         float brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_nReqStatLevel);
-        if (brassKnuckleStatLevel > CStats::GetStatValue(skillStat))
+        if (brassKnuckleStatLevel > CStats::GetStatValue((eStats)skillStat))
             return 0;
 
         return 1;
