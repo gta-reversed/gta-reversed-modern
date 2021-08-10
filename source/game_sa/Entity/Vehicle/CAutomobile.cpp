@@ -2491,6 +2491,7 @@ inline void CAutomobile::ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver)
     }
 }
 
+// 0x6A9680
 void CAutomobile::ProcessHarvester()
 {
     if (m_nStatus == STATUS_PLAYER) {
@@ -2543,7 +2544,7 @@ void CAutomobile::ProcessHarvester()
         CVector pos = *m_matrix * CVector(-1.2f, -3.8f, 1.5f);
         CVector velocity = GetForward() * -0.1f;
         velocity.x += CGeneral::GetRandomNumberInRange(0.05f, -0.05f);
-        velocity.y = CGeneral::GetRandomNumberInRange(0.05f, -0.05f);
+        velocity.y += CGeneral::GetRandomNumberInRange(0.05f, -0.05f);
         int32_t bodyPartModelId = -1;
         switch (m_harvesterParticleCounter - 1)
         {
