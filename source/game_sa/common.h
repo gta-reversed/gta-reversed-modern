@@ -86,8 +86,6 @@ CVector FindPlayerCoors(int playerId = -1);
 CVector& FindPlayerSpeed(int playerId = -1);
 // returns player ped or player vehicle if he's driving
 CEntity * FindPlayerEntity(int playerId = -1);
-// returns player vehicle
-CVehicle* FindPlayerVehicle(int playerId = -1);
 // returns player train
 CTrain* FindPlayerTrain(int playerId = -1);
 // gets player coords
@@ -102,8 +100,7 @@ float FindPlayerHeading(int playerId = -1);
 float FindPlayerHeight();
 // returns player ped
 CPlayerPed * FindPlayerPed(int playerId = -1);
-// returns player vehicle
-CAutomobile* FindPlayerVehicle(int playerId, bool bIncludeRemote);
+CVehicle* FindPlayerVehicle(int playerId = -1, bool bIncludeRemote = false);
 // returns player wanted
 CWanted * FindPlayerWanted(int playerId = -1);
 // 2 players are playing

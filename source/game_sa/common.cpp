@@ -59,7 +59,7 @@ void InjectCommonHooks()
 //    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoInteriorShift", 0x56E400, &FindPlayerCentreOfWorld_NoInteriorShift);
 //    ReversibleHooks::Install("common", "FindPlayerHeading", 0x56E450, &FindPlayerHeading);
     ReversibleHooks::Install("common", "FindPlayerPed", 0x56E210, &FindPlayerPed);
-//    ReversibleHooks::Install("common", "FindPlayerVehicle", 0x56E0D0, &FindPlayerVehicle);
+    ReversibleHooks::Install("common", "FindPlayerVehicle", 0x56E0D0, &FindPlayerVehicle);
     ReversibleHooks::Install("common", "FindPlayerWanted", 0x56E230, &FindPlayerWanted);
     ReversibleHooks::Install("common", "InTwoPlayersMode", 0x441390, &InTwoPlayersMode);
 
@@ -132,15 +132,6 @@ CEntity* FindPlayerEntity(int playerId) {
     return player;
 }
 
-CVehicle* FindPlayerVehicle(int playerId)
-{
-    auto pPed = FindPlayerPed(playerId);
-    if (pPed && pPed->bInVehicle)
-        return pPed->m_pVehicle;
-    else
-        return nullptr;
-}
-
 // 0x56E160
 CTrain* FindPlayerTrain(int playerId) {
     auto vehicle = FindPlayerVehicle(playerId);
@@ -186,20 +177,20 @@ CPlayerPed* FindPlayerPed(int playerId) {
     return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_pPed;
 }
 
+// Returns player vehicle
 // 0x56E0D0
-CAutomobile* FindPlayerVehicle(int playerId, bool bIncludeRemote) {
-    return ((CAutomobile *(__cdecl *)(int, bool))0x56E0D0)(playerId, bIncludeRemote);
-
-    CPlayerInfo playerInfo = CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)];
-
-    if (!playerInfo.m_pPed || (playerInfo.m_pPed->m_nPedFlags & 0x100) == 0) {
+CVehicle* FindPlayerVehicle(int playerId, bool bIncludeRemote) {
+    CPlayerPed* player = FindPlayerPed(playerId);
+    if (!player || !player->bInVehicle)
         return nullptr;
-    }
-    if (!bIncludeRemote || (playerInfo.m_pRemoteVehicle) == nullptr) {
-        return static_cast<CAutomobile*>(playerInfo.m_pPed->m_pVehicle);
+
+    if (bIncludeRemote) {
+        CPlayerInfo* playerInfo = player->GetPlayerInfoForThisPlayerPed();
+        if (playerInfo->m_pRemoteVehicle)
+            return playerInfo->m_pRemoteVehicle;
     }
 
-    return nullptr;
+    return player->m_pVehicle;
 }
 
 // 0x56E230
@@ -970,13 +961,13 @@ void LittleTest() {
 
 // 0x53E230
 void Render2dStuff() {
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)false);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)false);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)false);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)false);
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)true);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)rwRENDERSTATENARENDERSTATE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)rwRENDERSTATENARENDERSTATE);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)rwCULLMODECULLNONE);
     CReplay::Display();
     CPickups::RenderPickUpText();
     if (TheCamera.m_bWideScreenOn && !FrontEndMenuManager.m_bWidescreenOn)
