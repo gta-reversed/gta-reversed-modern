@@ -811,8 +811,9 @@ bool CAutomobile::ProcessAI(unsigned int& extraHandlingFlags)
     m_autoPilot.carCtrlFlags.bHonkAtPed = false;
     if (recordingId >= 0 && !CVehicleRecording::bUseCarAI[recordingId])
         return false;
+
     eCarMission carMission = m_autoPilot.m_nCarMission;
-    CAutomobile* playerVehicle = FindPlayerVehicle(-1, false);
+    CVehicle* playerVehicle = FindPlayerVehicle(-1, false);
     if (playerVehicle && playerVehicle != this && FindPlayerWanted()->m_nWantedLevel > 3
         && (carMission == MISSION_RAMPLAYER_FARAWAY
             || carMission == MISSION_BLOCKPLAYER_FARAWAY
