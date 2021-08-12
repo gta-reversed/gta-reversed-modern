@@ -10,7 +10,7 @@ void CDirectory::InjectHooks() {
     ReversibleHooks::Install("CDirectory", "AddItem", 0x532310, &CDirectory::AddItem); 
     ReversibleHooks::Install("CDirectory", "ReadDirFile", 0x532350, &CDirectory::ReadDirFile); 
     ReversibleHooks::Install("CDirectory", "WriteDirFile", 0x532410, &CDirectory::WriteDirFile); 
-    // ReversibleHooks::Install("CDirectory", "FindItem", 0x532450, static_cast<DirectoryInfo*(CDirectory::*)(const char*)>(&CDirectory::FindItem)); 
+    ReversibleHooks::Install("CDirectory", "FindItem", 0x532450, static_cast<DirectoryInfo*(CDirectory::*)(const char*)>(&CDirectory::FindItem)); 
     // ReversibleHooks::Install("CDirectory", "FindItem", 0x5324A0, static_cast<bool(CDirectory::*)(const char*, uint32_t&, uint32_t&)>(&CDirectory::FindItem)); 
     // ReversibleHooks::Install("CDirectory", "FindItem", 0x5324D0, static_cast<bool(CDirectory::*)(uint32_t, uint32_t&, uint32_t&)>(&CDirectory::FindItem)); 
 }
@@ -101,7 +101,13 @@ bool CDirectory::WriteDirFile(const char* fileName) {
 
 // 0x532450
 CDirectory::DirectoryInfo* CDirectory::FindItem(const char* itemName) {
-    return plugin::CallMethodAndReturn<DirectoryInfo*, 0x532450, CDirectory*, const char*>(this, itemName);
+    if (m_nNumEntries) {
+        for (DirectoryInfo* it = m_pEntries; it != m_pEntries + m_nNumEntries; it++) {
+            if (stricmp(it->m_szName, itemName) == 0)
+                return it;
+        }
+    }
+    return nullptr;
 }
 
 // 0x5324A0
