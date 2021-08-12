@@ -92,7 +92,11 @@ void CDirectory::ReadDirFile(const char* filename) {
 
 // 0x532410
 bool CDirectory::WriteDirFile(const char* fileName) {
-    return plugin::CallMethodAndReturn<bool, 0x532410, CDirectory*, const char*>(this, fileName);
+    auto pFile = CFileMgr::OpenFileForWriting(fileName);
+    const auto nNumBytesToWrite = sizeof(*m_pEntries) * m_nNumEntries;
+    const auto nBytesWritten = CFileMgr::Write(pFile, m_pEntries, nNumBytesToWrite);
+    CFileMgr::CloseFile(pFile);
+    return nNumBytesToWrite == nBytesWritten;
 }
 
 // 0x532450
