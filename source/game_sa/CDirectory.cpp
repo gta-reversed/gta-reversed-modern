@@ -11,7 +11,7 @@ void CDirectory::InjectHooks() {
     ReversibleHooks::Install("CDirectory", "ReadDirFile", 0x532350, &CDirectory::ReadDirFile); 
     ReversibleHooks::Install("CDirectory", "WriteDirFile", 0x532410, &CDirectory::WriteDirFile); 
     ReversibleHooks::Install("CDirectory", "FindItem", 0x532450, static_cast<DirectoryInfo*(CDirectory::*)(const char*)>(&CDirectory::FindItem)); 
-    // ReversibleHooks::Install("CDirectory", "FindItem", 0x5324A0, static_cast<bool(CDirectory::*)(const char*, uint32_t&, uint32_t&)>(&CDirectory::FindItem)); 
+    ReversibleHooks::Install("CDirectory", "FindItem", 0x5324A0, static_cast<bool(CDirectory::*)(const char*, uint32_t&, uint32_t&)>(&CDirectory::FindItem)); 
     // ReversibleHooks::Install("CDirectory", "FindItem", 0x5324D0, static_cast<bool(CDirectory::*)(uint32_t, uint32_t&, uint32_t&)>(&CDirectory::FindItem)); 
 }
 
@@ -112,7 +112,12 @@ CDirectory::DirectoryInfo* CDirectory::FindItem(const char* itemName) {
 
 // 0x5324A0
 bool CDirectory::FindItem(const char* name, uint32_t& outOffset, uint32_t& outStreamingSize) {
-    return plugin::CallMethodAndReturn<bool, 0x5324A0, CDirectory*, const char*, uint32_t&, uint32_t&>(this, name, outOffset, outStreamingSize);
+    if (DirectoryInfo* pInfo = FindItem(name)) {
+        outOffset = pInfo->m_nOffset;
+        outStreamingSize = pInfo->m_nStreamingSize;
+        return true;
+    }
+    return false;
 }
 
 // 0x5324D0
