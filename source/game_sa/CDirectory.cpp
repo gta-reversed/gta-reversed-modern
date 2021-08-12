@@ -54,8 +54,11 @@ CDirectory* CDirectory::Destructor() {
 }
 
 // 0x5322F0
-int32_t CDirectory::Init(int32_t capacity, DirectoryInfo* entries) {
-    return plugin::CallMethodAndReturn<int32_t, 0x5322F0, CDirectory*, int32_t, DirectoryInfo*>(this, capacity, entries);
+void CDirectory::Init(int32_t capacity, DirectoryInfo* entries) {
+    m_nCapacity = capacity;
+    m_pEntries = entries;
+    m_nNumEntries = 0;
+    m_bOwnsEntries = false;
 }
 
 // 0x532310
