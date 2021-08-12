@@ -29,6 +29,7 @@ public:
 public:
     CDirectory();
     CDirectory(size_t capacity);
+    ~CDirectory();
 private:
     CDirectory* Destructor();
     CDirectory* Constructor();
