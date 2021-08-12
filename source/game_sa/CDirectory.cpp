@@ -72,7 +72,22 @@ void CDirectory::AddItem(const DirectoryInfo& dirInfo) {
 
 // 0x532350
 void CDirectory::ReadDirFile(const char* filename) {
-    plugin::CallMethod<0x532350, CDirectory*, const char*>(this, filename);
+    auto pFile = CFileMgr::OpenFile(filename, "rb");
+    {
+        /* Unused stuff */
+        byte unused[4];
+        CFileMgr::Read(pFile, &unused, sizeof(unused));
+    }
+    uint32_t nNumEntires{};
+    CFileMgr::Read(pFile, &nNumEntires, sizeof(nNumEntires));
+
+    for (size_t i = 0; i < nNumEntires; i++) {
+        DirectoryInfo info;
+        CFileMgr::Read(pFile, &info, sizeof(info));
+        AddItem(info);
+        /* Possible optimization: Read directly into m_pEntries */
+    }
+    CFileMgr::CloseFile(pFile);
 }
 
 // 0x532410
