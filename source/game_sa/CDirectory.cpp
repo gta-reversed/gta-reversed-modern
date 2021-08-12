@@ -3,9 +3,9 @@
 
 
 void CDirectory::InjectHooks() {
-    // ReversibleHooks::Install("CDirectory", "CDirectory", 0x532290, &CDirectory::CDirectory); 
-    // ReversibleHooks::Install("CDirectory", "CDirectory", 0x5322A0, &CDirectory::CDirectory); 
-    // ReversibleHooks::Install("CDirectory", "~CDirectory", 0x5322D0, &CDirectory::~CDirectory); 
+    ReversibleHooks::Install("CDirectory", "CDirectory", 0x532290, static_cast<CDirectory*(CDirectory::*)()>(&CDirectory::Constructor));
+    ReversibleHooks::Install("CDirectory", "CDirectory", 0x5322A0, static_cast<CDirectory*(CDirectory::*)(size_t)>(&CDirectory::Constructor));
+    ReversibleHooks::Install("CDirectory", "~CDirectory", 0x5322D0, &CDirectory::Destructor); 
     // ReversibleHooks::Install("CDirectory", "Init", 0x5322F0, &CDirectory::Init); 
     // ReversibleHooks::Install("CDirectory", "AddItem", 0x532310, &CDirectory::AddItem); 
     // ReversibleHooks::Install("CDirectory", "ReadDirFile", 0x532350, &CDirectory::ReadDirFile); 
@@ -17,6 +17,7 @@ void CDirectory::InjectHooks() {
 
 // 0x532290
 CDirectory::CDirectory() {
+    /* done by the compiler */
 }
 
 // 0x532290
@@ -24,18 +25,26 @@ CDirectory* CDirectory::Constructor() {
     this->CDirectory::CDirectory();
     return this;
 }
+
 // 0x5322A0
-CDirectory::CDirectory(size_t capacity) {
+CDirectory::CDirectory(size_t capacity) :
+    m_nCapacity(capacity),
+    m_pEntries(new DirectoryInfo[capacity]),
+    m_bOwnsEntries(true)
+{
+    /* rest done by the compiler */
 }
 
 // 0x5322A0
 CDirectory* CDirectory::Constructor(size_t capacity) {
-    this->CDirectory::CDirectory();
+    this->CDirectory::CDirectory(capacity);
     return this;
 }
 
 // 0x5322D0
 CDirectory::~CDirectory() {
+    if (m_pEntries && m_bOwnsEntries)
+        delete[] m_pEntries;
 }
 
 // 0x5322D0
