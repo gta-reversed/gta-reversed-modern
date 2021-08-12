@@ -19,34 +19,30 @@ public:
         unsigned short m_nSizeInArchive;
         char m_szName[24];
     };
-    DirectoryInfo *m_pEntries;
-    unsigned int m_nCapacity;
-    unsigned int m_nNumEntries;
-    bool m_bOwnsEntries;
-private:
-    char _padD[3];
+
 public:
+    DirectoryInfo* m_pEntries{};
+    unsigned int   m_nCapacity{};
+    unsigned int   m_nNumEntries{};
+    bool           m_bOwnsEntries{};
 
-    void* operator new(unsigned int size)
-    {
-        return ((void* (__cdecl*)(unsigned int))0x82119A)(size);
-    }
-
-    void operator delete(void* object)
-    {
-        ((void(__cdecl*)(void*))0x8214BD)(object);
-    }
-
+public:
     CDirectory();
-    CDirectory(int capacity);
-    ~CDirectory();
-    void Init(int capacity, void* entries);
-    void AddItem(DirectoryInfo const& entry);
-    void ReadDirFile(char const* filename);
-    bool WriteDirFile(char const* filename);
-    DirectoryInfo* FindItem(char const* name);
-    DirectoryInfo* FindItem(char const* name, unsigned int& outOffset, unsigned int& outStreamingSize);
-    DirectoryInfo* FindItem(unsigned int key, unsigned int& outOffset, unsigned int& outStreamingSize);
+    CDirectory(size_t capacity);
+private:
+    CDirectory* Destructor();
+    CDirectory* Constructor();
+    CDirectory* Constructor(size_t capacity);
+public:
+    static void InjectHooks();
+
+    int32_t Init(int32_t capacity, DirectoryInfo* entries);
+    void AddItem(DirectoryInfo* dirInfo);
+    void ReadDirFile(const char* filename);
+    bool WriteDirFile(const char* fileName);
+    DirectoryInfo* FindItem(const char* itemName);
+    bool CDirectory::FindItem(const char* name, uint32_t& outOffset, uint32_t& outStreamingSize);
+    bool CDirectory::FindItem(uint32_t hashKey, uint32_t& outOffset, uint32_t& outStreamingSize);
 };
 
 VALIDATE_SIZE(CDirectory, 0x10);
