@@ -136,7 +136,6 @@
 #include "game_sa\CustomCarEnvMapPipeline.h"
 #include "game_sa\CustomCarPlateMgr.h"
 #include "game_sa\CutsceneMgr.h"
-#include "game_sa\DamageManager.h"
 #include "game_sa\Darkel.h"
 #include "game_sa\Date.h"
 #include "game_sa\Decision.h"

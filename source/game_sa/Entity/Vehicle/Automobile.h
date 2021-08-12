@@ -11,52 +11,20 @@
 #include "BouncingPanel.h"
 #include "DamageManager.h"
 #include "ColPoint.h"
+
 #include "eSurfaceType.h"
+#include "eCarWheel.h"
+#include "eCarNodes.h"
+
+enum eWheelStatus;
 
 class CObject;
 
-enum eCarNodes {
-    CAR_NODE_NONE = 0,
-    CAR_CHASSIS = 1,
-    CAR_WHEEL_RF = 2,
-    CAR_WHEEL_RM = 3,
-    CAR_WHEEL_RB = 4,
-    CAR_WHEEL_LF = 5,
-    CAR_WHEEL_LM = 6,
-    CAR_WHEEL_LB = 7,
-    CAR_DOOR_RF = 8,
-    CAR_DOOR_RR = 9,
-    CAR_DOOR_LF = 10,
-    CAR_DOOR_LR = 11,
-    CAR_BUMP_FRONT = 12,
-    CAR_BUMP_REAR = 13,
-    CAR_WING_RF = 14,
-    CAR_WING_LF = 15,
-    CAR_BONNET = 16,
-    CAR_BOOT = 17,
-    CAR_WINDSCREEN = 18,
-    CAR_EXHAUST = 19,
-    CAR_MISC_A = 20,
-    CAR_MISC_B = 21,
-    CAR_MISC_C = 22,
-    CAR_MISC_D = 23,
-    CAR_MISC_E = 24,
-    CAR_NUM_NODES
-};
-
-enum eCarWheel {
-    CARWHEEL_FRONT_LEFT = 0,
-    CARWHEEL_REAR_LEFT = 1,
-    CARWHEEL_FRONT_RIGHT = 2,
-    CARWHEEL_REAR_RIGHT = 3
-};
-
-enum eExtraHandlingFlags : uint32
-{
-    EXTRA_HANDLING_PERFECT = 0x1,
-    EXTRA_HANDLING_NITROS = 0x2,
+enum eExtraHandlingFlags : uint32 {
+    EXTRA_HANDLING_PERFECT              = 0x1,
+    EXTRA_HANDLING_NITROS               = 0x2,
     EXTRA_HANDLING_WHEELS_TOUCHING_SAND = 0x8,
-    EXTRA_HANDLING_TAXI_BOOST = 0x10
+    EXTRA_HANDLING_TAXI_BOOST           = 0x10
 };
 
 class FxSystem_c;
@@ -349,7 +317,7 @@ public:
     // Close all doors
     void CloseAllDoors();
     void DoSoftGroundResistance(uint32& extraHandlingFlags);
-    void ProcessCarWheelPair(int32 leftWheel, int32 rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront);
+    void ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront);
     float GetCarRoll();
     float GetCarPitch();
     bool IsInAir();
@@ -382,6 +350,7 @@ public:
     bool RcbanditCheckHitWheels();
     void FireTruckControl(CFire* fire);
     bool HasCarStoppedBecauseOfLight();
+    CDoor& GetDoor(eDoors door) { return m_doors[(unsigned)door]; }
 };
 
 VALIDATE_SIZE(CAutomobile, 0x988);

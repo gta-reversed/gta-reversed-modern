@@ -2075,7 +2075,7 @@ void CAutomobile::DoSoftGroundResistance(uint32& extraHandlingFlags)
     }
 }
 
-void CAutomobile::ProcessCarWheelPair(int32 leftWheel, int32 rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront)
+void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront)
 {
     bool driveWheels = false;
     if (bFront && gHandlingDataMgr.HasFrontWheelDrive(m_pHandlingData->m_nVehicleId))

@@ -6,47 +6,57 @@
 */
 #pragma once
 
+#include "eCarWheel.h"
+#include "eCarNodes.h"
+
 class CAutomobile;
 
-enum eDamageState {
-    DAMSTATE_OK = 0,
-    DAMSTATE_OPENED = 1,
-    DAMSTATE_DAMAGED = 2,
+enum ePanelDamageState : uint8 {
+    DAMSTATE_OK             = 0,
+    DAMSTATE_OPENED         = 1,
+    DAMSTATE_DAMAGED        = 2,
     DAMSTATE_OPENED_DAMAGED = 3,
-    DAMSTATE_NOTPRESENT = 4
+    DAMSTATE_NOTPRESENT     = 4
 };
 
-enum tComponent {
-    COMPONENT_WHEEL_LF = 1,
-    COMPONENT_WHEEL_RF = 2,
-    COMPONENT_WHEEL_LR = 3,
-    COMPONENT_WHEEL_RR = 4,
-    COMPONENT_BONNET = 5,
-    COMPONENT_BOOT = 6,
-    COMPONENT_DOOR_LF = 7,
-    COMPONENT_DOOR_RF = 8,
-    COMPONENT_DOOR_LR = 9,
-    COMPONENT_DOOR_RR = 10,
-    COMPONENT_WING_LF = 11,
-    COMPONENT_WING_RF = 12,
-    COMPONENT_WING_LR = 13,
-    COMPONENT_WING_RR = 14,
+// original name
+enum tComponent : uint8 {
+    COMPONENT_NA         = 0,
+    COMPONENT_WHEEL_LF   = 1,
+    COMPONENT_WHEEL_RF   = 2,
+    COMPONENT_WHEEL_LR   = 3,
+    COMPONENT_WHEEL_RR   = 4,
+    COMPONENT_BONNET     = 5,
+    COMPONENT_BOOT       = 6,
+    COMPONENT_DOOR_LF    = 7,
+    COMPONENT_DOOR_RF    = 8,
+    COMPONENT_DOOR_LR    = 9,
+    COMPONENT_DOOR_RR    = 10,
+    COMPONENT_WING_LF    = 11,
+    COMPONENT_WING_RF    = 12,
+    COMPONENT_WING_LR    = 13,
+    COMPONENT_WING_RR    = 14,
     COMPONENT_WINDSCREEN = 15,
     COMPONENT_BUMP_FRONT = 16,
-    COMPONENT_BUMP_REAR = 17
+    COMPONENT_BUMP_REAR  = 17,
+
+    MAX_COMPONENTS = COMPONENT_BUMP_REAR /* cause it starts at 1, not 0 */
 };
 
-enum tComponentGroup {
-    COMPGROUP_PANEL = 0,
-    COMPGROUP_WHEEL = 1,
-    COMPGROUP_DOOR = 2,
+// original name
+enum tComponentGroup : uint8 {
+    COMPGROUP_PANEL  = 0,
+    COMPGROUP_WHEEL  = 1,
+    COMPGROUP_DOOR   = 2,
     COMPGROUP_BONNET = 3,
-    COMPGROUP_BOOT = 4,
-    COMPGROUP_LIGHT = 5,
-    COMPGROUP_NA = 6
+    COMPGROUP_BOOT   = 4,
+    COMPGROUP_LIGHT  = 5,
+    COMPGROUP_NA     = 6,
+
+    MAX_COMGROUPS
 };
 
-enum eWheelStatus {
+enum eCarWheelStatus : uint8  {
     WHEEL_STATUS_OK = 0,
     WHEEL_STATUS_BURST,
     WHEEL_STATUS_MISSING,
@@ -54,97 +64,121 @@ enum eWheelStatus {
     WHEEL_STATUS_4
 };
 
-enum ePanels {
-    WING_FRONT_LEFT = 0,
-    WING_FRONT_RIGHT = 1,
-    WINDSCREEN = 4,
-    BUMP_FRONT = 5,
-    BUMP_REAR = 6
+enum ePanels : uint8 {
+    FRONT_LEFT_PANEL = 0,
+    FRONT_RIGHT_PANEL,
+    REAR_LEFT_PANEL,
+    REAR_RIGHT_PANEL,
+    WINDSCREEN_PANEL,
+    FRONT_BUMPER,
+    REAR_BUMPER,
+
+    MAX_PANELS
 };
 
-enum eDoors {
+enum eDoors : uint8  {
     DOOR_BONNET = 0,
     DOOR_BOOT,
     DOOR_LEFT_FRONT,
     DOOR_RIGHT_FRONT,
     DOOR_LEFT_REAR,
     DOOR_RIGHT_REAR,
+
+    MAX_DOORS
+};
+using eDoorStatus = ePanelDamageState;
+
+enum eLights : uint8 {
+    LIGHT_FRONT_LEFT  = 0,
+    LIGHT_FRONT_RIGHT = 1,
+    LIGHT_REAR_RIGHT  = 2,
+    LIGHT_REAR_LEFT   = 3,
+
+    MAX_LIGHTS
 };
 
-enum eLights {
-    LIGHT_FRONT_LEFT = 0,
-    LIGHT_FRONT_RIGHT = 1,
-    LIGHT_REAR_RIGHT = 2,
-    LIGHT_REAR_LEFT = 3
+enum eLightsState : uint8 {
+    VEHICLE_LIGHT_OK      = 0x0,
+    VEHICLE_LIGHT_SMASHED = 0x1,
 };
 
 class CDamageManager {
 public:
-    float m_fWheelDamageEffect;
-    uint8 m_nEngineStatus;
+    float           m_fWheelDamageEffect;
+    uint8           m_nEngineStatus; // 0 - 250
+    eCarWheelStatus m_anWheelsStatus[eCarWheel::MAX_CARWHEELS];
+    eDoorStatus     m_aDoorsStatus[eDoors::MAX_DOORS];
     union {
-        uint8 m_anWheelsStatus[4]; // see eWheelStatus
-    };
-    union {
-        uint8 m_anDoorsStatus[6];
-        struct {
-            uint8 m_nBonnetStatus;
-            uint8 m_nBootStatus;
-            uint8 m_nLeftFrontDoorStatus;
-            uint8 m_nRightFrontDoorStatus;
-            uint8 m_nLeftRearDoorStatus;
-            uint8 m_nRightRearDoorStatus;
-        };
-    };
-    union {
+        /* Great job R*, really could've just used an array here... Ends up to be the same size... */
+
         uint32 m_nLightsStatus;
         struct {
-            uint32 m_nLeftFrontLightStatus : 2;
-            uint32 m_nRightFrontLightStatus : 2;
-            uint32 m_nRightRearLightStatus : 2;
-            uint32 m_nLeftRearLightStatus : 2;
-        };
+            uint32 leftFront : 2;
+            uint32 rightFront : 2;
+            uint32 rightRear : 2;
+            uint32 leftRear : 2;
+        } m_lightStates;
     };
-    uint32 m_nPanelsStatus;
+    union {
+        uint32 m_nPanelsStatus; // Index with ePanels
+        struct {
+            uint32 frontLeft : 4;
+            uint32 frontRight : 4;
+            uint32 rearLeft : 4;
+            uint32 rearRight : 4;
+            uint32 windscreen : 4;
+            uint32 frontBumper : 4;
+            uint32 rearBumper : 4;
+        } m_panelStates;
+        struct {
+            /* unknown, bitfields of 2 */
+        } m_aeroplanePanelStates;
+    };
 
-    //funcs
+public:
+    static void InjectHooks();
 
-    // damageCompId - eLights/ePanel/... id for this component
-    bool GetComponentGroup(tComponent component, tComponentGroup* group, uint8* damageCompId);
+    void Init();
     void ResetDamageStatus();
-    void SetLightStatus(eLights light, uint32 status);
-    uint32 GetLightStatus(eLights light);
-    void SetPanelStatus(int32 panel, uint32 status);
-    uint32 GetPanelStatus(int32 arg0);
-    void SetWheelStatus(int32 wheel, uint32 status);
-    uint32 GetWheelStatus(int32 wheel);
-    void SetDoorStatus(eDoors door, uint32 status);
-    void SetDoorStatus(int32 doorNodeIndex, uint32 status);
-    uint32 GetDoorStatus(int32 doorNodeIndex);
-    uint32 GetDoorStatus(eDoors door);
-    // Status is a value between 0-250
-    void SetEngineStatus(uint32 status);
-    // Status is a value between 0-250
-    uint32 GetEngineStatus();
-    void SetAeroplaneCompStatus(int32 component, uint32 status);
-    uint32 GetAeroplaneCompStatus(int32 component);
-    // damageCompId - eLights/ePanel/... id for this component
-    bool ProgressDoorDamage(uint8 damageCompId, CAutomobile* car);
-    // Empty function
-    bool ProgressEngineDamage(float arg0);
-    // Set next level of damage to panel
-    bool ProgressPanelDamage(uint8 panel);
-    // Set next level of damage to panel
-    bool ProgressWheelDamage(uint8 wheel);
-    // Set next level of damage to aeroplane component
-    bool ProgressAeroplaneDamage(uint8 component);
-    bool ApplyDamage(CAutomobile* car, tComponent component, float intensity, float arg3);
-    void FuckCarCompletely(bool skipWheels);
+    void ResetDamageStatusAndWheelDamage();
+    void FuckCarCompletely(bool bDetachWheel);
+    bool ApplyDamage(CAutomobile* vehicle, tComponent compId, float fIntensity, float fColDmgMult);
+
+    // Set next level of damage to aero-plane component
+    bool ProgressAeroplaneDamage(uint8 nFrameId);
+    bool ProgressWheelDamage(eCarWheel wheel);
+    bool ProgressPanelDamage(ePanels panel);
+    void ProgressEngineDamage();
+    bool ProgressDoorDamage(eDoors door, CAutomobile* pAuto);
+
+    uint8 GetAeroplaneCompStatus(uint8 frame);
+    void SetAeroplaneCompStatus(uint8 frame, ePanelDamageState status);
+
+    uint8 GetEngineStatus();
+    void SetEngineStatus(uint8 status);
+
+    // There are 2 door function, one takes `tComponent` the other `eDoors`.
+    // To select the correct version to call look at the called function's address when you are REing code
+    // And chose accordingly.
+    eDoorStatus GetDoorStatus_Component(tComponent nDoorIdx);
+    void SetDoorStatus_Component(tComponent door, eDoorStatus status);
+
+    eDoorStatus GetDoorStatus(eDoors door);
+    void SetDoorStatus(eDoors door, eDoorStatus status);
+
+    eCarWheelStatus GetWheelStatus(eCarWheel wheel);
+    void SetWheelStatus(eCarWheel wheel, eCarWheelStatus status);
+
+    ePanelDamageState GetPanelStatus(ePanels panel);
+    void SetPanelStatus(ePanels panel, ePanelDamageState status);
+
+    eLightsState GetLightStatus(eLights light);
+    void SetLightStatus(eLights light, eLightsState status);
+
     // returns -1 if no node for this panel
-    int32 GetCarNodeIndexFromPanel(ePanels panel);
-    // returns -1 if no node for this door
-    int32 GetCarNodeIndexFromDoor(eDoors door);
-    void Reset();
+    static eCarNodes GetCarNodeIndexFromPanel(ePanels panel);
+    static eCarNodes GetCarNodeIndexFromDoor(eDoors door);
+    static bool GetComponentGroup(tComponent nComp, tComponentGroup& outCompGroup, uint8& outComponentRelativeIdx);
 };
 
 VALIDATE_SIZE(CDamageManager, 0x18);
