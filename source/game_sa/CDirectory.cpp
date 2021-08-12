@@ -6,8 +6,8 @@ void CDirectory::InjectHooks() {
     ReversibleHooks::Install("CDirectory", "CDirectory", 0x532290, static_cast<CDirectory*(CDirectory::*)()>(&CDirectory::Constructor));
     ReversibleHooks::Install("CDirectory", "CDirectory", 0x5322A0, static_cast<CDirectory*(CDirectory::*)(size_t)>(&CDirectory::Constructor));
     ReversibleHooks::Install("CDirectory", "~CDirectory", 0x5322D0, &CDirectory::Destructor); 
-    // ReversibleHooks::Install("CDirectory", "Init", 0x5322F0, &CDirectory::Init); 
-    // ReversibleHooks::Install("CDirectory", "AddItem", 0x532310, &CDirectory::AddItem); 
+    ReversibleHooks::Install("CDirectory", "Init", 0x5322F0, &CDirectory::Init); 
+    ReversibleHooks::Install("CDirectory", "AddItem", 0x532310, &CDirectory::AddItem); 
     // ReversibleHooks::Install("CDirectory", "ReadDirFile", 0x532350, &CDirectory::ReadDirFile); 
     // ReversibleHooks::Install("CDirectory", "WriteDirFile", 0x532410, &CDirectory::WriteDirFile); 
     // ReversibleHooks::Install("CDirectory", "FindItem", 0x532450, static_cast<DirectoryInfo*(CDirectory::*)(const char*)>(&CDirectory::FindItem)); 
@@ -62,8 +62,12 @@ void CDirectory::Init(int32_t capacity, DirectoryInfo* entries) {
 }
 
 // 0x532310
-void CDirectory::AddItem(DirectoryInfo* dirInfo) {
-    plugin::CallMethod<0x532310, CDirectory*, DirectoryInfo*>(this, dirInfo);
+void CDirectory::AddItem(const DirectoryInfo& dirInfo) {
+    if (m_nNumEntries < m_nCapacity) {
+        m_pEntries[m_nNumEntries++] = dirInfo;
+    } else {
+        printf("Too many objects without modelinfo structures\n");
+    }
 }
 
 // 0x532350

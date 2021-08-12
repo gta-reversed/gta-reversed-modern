@@ -37,7 +37,7 @@ public:
     static void InjectHooks();
 
     void Init(int32_t capacity, DirectoryInfo* entries);
-    void AddItem(DirectoryInfo* dirInfo);
+    void AddItem(const DirectoryInfo& dirInfo);
     void ReadDirFile(const char* filename);
     bool WriteDirFile(const char* fileName);
     DirectoryInfo* FindItem(const char* itemName);
