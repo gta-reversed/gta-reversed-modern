@@ -107,8 +107,7 @@ public:
     };
     uint32 m_nPanelsStatus;
 
-    //funcs
-
+public:
     // damageCompId - eLights/ePanel/... id for this component
     bool GetComponentGroup(tComponent component, tComponentGroup* group, uint8* damageCompId);
     void ResetDamageStatus();
@@ -116,10 +115,14 @@ public:
     uint32 GetLightStatus(eLights light);
     void SetPanelStatus(int32 panel, uint32 status);
     uint32 GetPanelStatus(int32 arg0);
-    void SetWheelStatus(int32 wheel, uint32 status);
+    void SetWheelStatus(int32 wheel, uint32 status) {
+        m_anWheelsStatus[wheel] = status;
+    }
     uint32 GetWheelStatus(int32 wheel);
-    void SetDoorStatus(eDoors door, uint32 status);
-    void SetDoorStatus(int32 doorNodeIndex, uint32 status);
+    void SetDoorStatus(eDoors door, uint32 status) {
+        if (door >= 0 && door < 6)
+            m_anDoorsStatus[door] = status;
+    }
     uint32 GetDoorStatus(int32 doorNodeIndex);
     uint32 GetDoorStatus(eDoors door);
     // Status is a value between 0-250

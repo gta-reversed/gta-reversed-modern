@@ -757,6 +757,10 @@ void CAutomobile::ProcessControl()
     }
 }
 
+void CAutomobile::ProcessControlInputs(uint8 playerNum) {
+    return ProcessControlInputs_Reversed(playerNum);
+}
+
 CVector CAutomobile::AddMovingCollisionSpeed(CVector& point)
 {
     if (m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_PLANE) {
@@ -1347,6 +1351,10 @@ void CAutomobile::ProcessSuspension()
 void CAutomobile::ProcessControl_Reversed()
 {
     return CAutomobile::ProcessControl();
+}
+
+void CAutomobile::ProcessControlInputs_Reversed(uint8 playerNum) {
+    plugin::CallMethod<0x6AD690, CAutomobile*, uint8>(this, playerNum);
 }
 
 CVector CAutomobile::AddMovingCollisionSpeed_Reversed(CVector& point)

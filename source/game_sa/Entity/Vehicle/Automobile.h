@@ -187,6 +187,7 @@ public:
     bool SetTowLink(CVehicle* targetVehicle, bool arg1) override;
 
     void ProcessControl() override;
+    void ProcessControlInputs(uint8 playerNum) override;
     CVector AddMovingCollisionSpeed(CVector& point) override;
 
     virtual bool ProcessAI(uint32& extraHandlingFlags);
@@ -199,6 +200,7 @@ private:
     void Fix_Reversed();
     bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1);
     void ProcessControl_Reversed();
+    void ProcessControlInputs_Reversed(uint8 playerNum);
     CVector AddMovingCollisionSpeed_Reversed(CVector& point);
     bool ProcessAI_Reversed(uint32& extraHandlingFlags);
     void ResetSuspension_Reversed();
@@ -210,6 +212,10 @@ public:
     static void InjectHooks();
     //funcs
     CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines);
+
+    void PreRender() override {
+        plugin::CallMethod<0x6AAB50, CAutomobile*>(this);
+    }
 
     void SetEngineState(bool state)
     {
@@ -267,6 +273,14 @@ public:
                 return true;
         }
         return false;
+    }
+
+    [[nodiscard]] bool AreFrontWheelsNotTouchingGround() const { // NOTSA
+        return m_fWheelsSuspensionCompression[eCarWheel::CARWHEEL_FRONT_LEFT] >= 1.0f && m_fWheelsSuspensionCompression[eCarWheel::CARWHEEL_FRONT_RIGHT];
+    }
+
+    [[nodiscard]] bool AreRearWheelsNotTouchingGround() const { // NOTSA
+        return m_fWheelsSuspensionCompression[eCarWheel::CARWHEEL_REAR_LEFT] >= 1.0f && m_fWheelsSuspensionCompression[eCarWheel::CARWHEEL_REAR_RIGHT];
     }
 
     // check the previous compression state using m_fWheelsSuspensionCompressionPrev
