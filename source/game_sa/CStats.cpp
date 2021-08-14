@@ -117,14 +117,13 @@ float CStats::GetStatValue(eStats stat) {
 
 // 0x55A070
 void CStats::SetStatValue(eStats stat, float value) {
-    if (!GetStatType(stat)) { // int
+    if (GetStatType(stat)) {
+        StatTypesFloat[stat] = value;
+    } else { // int
         assert(stat >= FIRST_INT_STAT);
 
         StatTypesInt[stat - FIRST_INT_STAT] = static_cast<int>(value);
     }
-
-    StatTypesFloat[stat] = value;
-
     CheckForStatsMessage();
 }
 
