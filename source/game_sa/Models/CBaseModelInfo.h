@@ -35,17 +35,8 @@ enum eModelInfoSpecialType : unsigned char {
     BREAKABLE_STATUE = 11,
 };
 
-struct tTimeInfo {
-    unsigned char m_nTimeOn;
-    unsigned char m_nTimeOff;
-    signed short  m_nOtherTimeModel;
-
-    void SetTimes(unsigned char on, unsigned char off) { m_nTimeOn = on; m_nTimeOff = off; }
-};
-
-VALIDATE_SIZE(tTimeInfo, 0x4);
-
 class CVehicleModelInfo;
+class CTimeInfo;
 
 // originally an abstract class
 class CBaseModelInfo {
@@ -118,7 +109,7 @@ public:
     virtual class CDamageAtomicModelInfo* AsDamageAtomicModelInfoPtr();
     virtual class CLodAtomicModelInfo* AsLodAtomicModelInfoPtr();
     virtual ModelInfoType GetModelType() = 0;
-    virtual tTimeInfo* GetTimeInfo();
+    virtual CTimeInfo* GetTimeInfo();
     virtual void Init();
     virtual void Shutdown();
     virtual void DeleteRwObject() = 0;
@@ -133,7 +124,7 @@ public:
     class CAtomicModelInfo* AsAtomicModelInfoPtr_Reversed();
     class CDamageAtomicModelInfo* AsDamageAtomicModelInfoPtr_Reversed();
     class CLodAtomicModelInfo* AsLodAtomicModelInfoPtr_Reversed();
-    tTimeInfo* GetTimeInfo_Reversed();
+    CTimeInfo* GetTimeInfo_Reversed();
     void Init_Reversed();
     void Shutdown_Reversed();
     void SetAnimFile_Reversed(char const* filename);

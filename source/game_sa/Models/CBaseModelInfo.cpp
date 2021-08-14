@@ -87,11 +87,11 @@ CLodAtomicModelInfo* CBaseModelInfo::AsLodAtomicModelInfoPtr_Reversed()
     return nullptr;
 }
 
-tTimeInfo *CBaseModelInfo::GetTimeInfo()
+CTimeInfo *CBaseModelInfo::GetTimeInfo()
 {
     return CBaseModelInfo::GetTimeInfo_Reversed();
 }
-tTimeInfo* CBaseModelInfo::GetTimeInfo_Reversed()
+CTimeInfo* CBaseModelInfo::GetTimeInfo_Reversed()
 {
     return nullptr;
 }
@@ -201,10 +201,10 @@ void CBaseModelInfo::SetColModel(CColModel *colModel, bool bIsLodModel)
     if (!pTimeInfo)
         return;
 
-    if (pTimeInfo->m_nOtherTimeModel == -1)
+    if (pTimeInfo->GetOtherTimeModel() == -1)
         return;
 
-    auto pLodInfo = CModelInfo::GetModelInfo(pTimeInfo->m_nOtherTimeModel);
+    auto pLodInfo = CModelInfo::GetModelInfo(pTimeInfo->GetOtherTimeModel());
     pLodInfo->m_pColModel = colModel;
     pLodInfo->bIsLod = false;
 }
