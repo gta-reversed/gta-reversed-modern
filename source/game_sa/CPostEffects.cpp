@@ -278,7 +278,7 @@ void CPostEffects::Update() {
 }
 
 // 0x700EC0
-void CPostEffects::DrawQuad(float x1, float y1, float x2, float y2, char red, unsigned int green, unsigned int blue, char alpha, RwRaster* raster) {
+void CPostEffects::DrawQuad(float x1, float y1, float x2, float y2, char red, unsigned int green, unsigned int blue, unsigned char alpha, RwRaster* raster) {
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, raster);
 
     auto color = CRGBA(red, green, blue, alpha).ToIntARGB();
@@ -555,7 +555,7 @@ void CPostEffects::NightVision() {
         RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
         RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 
-        for (int i = 0, end = m_fNightVisionSwitchOnFXCount; i < end; i++) {
+        for (int i = 0, end = (int)m_fNightVisionSwitchOnFXCount; i < end; i++) {
             DrawQuad(0.0f, 0.0f, fRasterFrontBufferWidth, fRasterFrontBufferHeight, 8, 8, 8, 255, pVisionFXRaster);
         }
 
@@ -695,10 +695,10 @@ void CPostEffects::InfraredVisionStoreAndSetLightsForHeatObjects(CPed* ped) {
     }
 
     // store color
-    RwUInt8 red = m_fInfraredVisionHeatObjectCol.red;
-    RwUInt8 green = m_fInfraredVisionHeatObjectCol.green;
-    RwUInt8 blue = m_fInfraredVisionHeatObjectCol.blue;
-    RwUInt8 alpha = m_fInfraredVisionHeatObjectCol.alpha;
+    auto red = (RwUInt8)m_fInfraredVisionHeatObjectCol.red;
+    auto green = (RwUInt8)m_fInfraredVisionHeatObjectCol.green;
+    auto blue = (RwUInt8)m_fInfraredVisionHeatObjectCol.blue;
+    auto alpha = (RwUInt8)m_fInfraredVisionHeatObjectCol.alpha;
 
     if (ped->m_nPedState == PEDSTATE_DEAD) {
         int v8 = CTimer::m_snTimeInMilliseconds - ped->m_nDeathTime;

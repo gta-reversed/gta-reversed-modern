@@ -354,7 +354,7 @@ bool CPedIntelligence::GetUsingParachute() {
     }
 
     int blockID = pAnimAssoc->m_pHierarchy->m_nAnimBlockId;
-    if (stricmp(CAnimManager::ms_aAnimBlocks[blockID].szName, "parachute") != 0)
+    if (_stricmp(CAnimManager::ms_aAnimBlocks[blockID].szName, "parachute") != 0)
     {
         while (true)
         {

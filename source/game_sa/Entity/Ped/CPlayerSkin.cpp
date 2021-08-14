@@ -37,7 +37,7 @@ void CPlayerSkin::RenderFrontendSkinEdit() {
         if (CPlayerSkin::m_Angle > 360.0) {
             CPlayerSkin::m_Angle -= 360.0f;
         }
-        CPlayerSkin::m_C3F04C = CTimer::m_snTimeInMillisecondsPauseMode;
+        CPlayerSkin::m_C3F04C = (float)CTimer::m_snTimeInMillisecondsPauseMode;
     }
     auto* frame = static_cast<RwFrame*>(CPlayerSkin::m_Clump->object.parent);
     RwFrameTransform(frame, &parentFrame->modelling, rwCOMBINEREPLACE);

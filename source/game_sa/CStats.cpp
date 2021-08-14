@@ -156,14 +156,15 @@ int CStats::FindLeastFavoriteRadioStation() {
 int CStats::FindCriminalRatingNumber() {
     CPlayerInfo* playerInfo = FindPlayerPed()->GetPlayerInfoForThisPlayerPed();
 
-    int value = GetStatValue(STAT_TOTAL_LEGITIMATE_KILLS)
+    int value = (int)(
+        GetStatValue(STAT_TOTAL_LEGITIMATE_KILLS)
         - (GetStatValue(STAT_TIMES_BUSTED) - GetStatValue(STAT_NUMBER_OF_HOSPITAL_VISITS)) * 3.0f
         + (GetStatValue(STAT_HIGHEST_FIREFIGHTER_MISSION_LEVEL) + GetStatValue(STAT_HIGHEST_PARAMEDIC_MISSION_LEVEL)) * 10.0f
         + playerInfo->m_nMoney / 5000.0f
         + GetStatValue(STAT_PLANES_HELICOPTERS_DESTROYED) * 30.0f
         + GetStatValue(STAT_TOTAL_FIRES_EXTINGUISHED)
         + GetStatValue(STAT_CRIMINALS_KILLED_ON_VIGILANTE_MISSION)
-        + GetStatValue(STAT_PEOPLE_SAVED_IN_AN_AMBULANCE);
+        + GetStatValue(STAT_PEOPLE_SAVED_IN_AN_AMBULANCE));
 
     if (CCheat::m_bHasPlayerCheated || GetStatValue(STAT_TIMES_CHEATED)) {
         value -= 10 * GetStatValue(STAT_TIMES_CHEATED);
@@ -176,10 +177,10 @@ int CStats::FindCriminalRatingNumber() {
     float bulletsFired = GetStatValue(STAT_BULLETS_FIRED);
 
     if (bulletsFired >= 100.0f) {
-        value += 500 * (GetStatValue(STAT_BULLETS_THAT_HIT) / bulletsFired);
+        value += (int)(500 * (GetStatValue(STAT_BULLETS_THAT_HIT) / bulletsFired));
     }
 
-    return value + 10 * GetPercentageProgress();
+    return value + (int)(10 * GetPercentageProgress());
 }
 
 // 0x5591E0
@@ -366,12 +367,12 @@ void CStats::SetNewRecordStat(eStats stat, float value) {
 
 // 0x55A0B0
 void CStats::RegisterFastestTime(eStats stat, int fastestTime) {
-    SetNewRecordStat(stat, fastestTime);
+    SetNewRecordStat(stat, (float)fastestTime);
 }
 
 // 0x55A160
 void CStats::RegisterBestPosition(eStats stat, int position) {
-    SetNewRecordStat(stat, position);
+    SetNewRecordStat(stat, (float)position);
 }
 
 // Converted from cdecl char* CStats::FindCriminalRatingString(void) 0x55A210
@@ -482,7 +483,7 @@ void CStats::IncrementStat(eStats stat, float value)
     }
 
     player->m_fHealth += value;
-    UpdateStatsAddToHealth(value);
+    UpdateStatsAddToHealth((uint32_t)value);
     ProcessReactionStatsOnIncrement(stat);
     CheckForStatsMessage();
 }

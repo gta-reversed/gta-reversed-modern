@@ -31,7 +31,7 @@ public:
         };
     };
     char _pad2[3];
-    int m_nProcessCounter;
+    uint32_t m_nProcessCounter;
     CTaskTimer m_timer;
     CEntity* m_pClimbEntity;
 private:

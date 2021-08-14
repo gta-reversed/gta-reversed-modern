@@ -5,7 +5,7 @@
  */
 
 #include "StdInc.h" // TODO: Remove
-
+#include <VersionHelpers.h>
 #include <propvarutil.h>
 
 #include <mfidl.h>
@@ -182,7 +182,7 @@ bool CAEMFDecoder::Initialise()
             sourceReader->Release(); sourceReader = nullptr;
             return false;
         }
-        lengthMs = prop.uhVal.QuadPart / 10000;
+        lengthMs = (long)(prop.uhVal.QuadPart / 10000);
         if (lengthMs < 7000)
         {
             pcmAudio->Release(); pcmAudio = nullptr;
@@ -191,7 +191,8 @@ bool CAEMFDecoder::Initialise()
         }
 
         tempBuffer = new int16_t[TEMPBUFFRAME * 2];
-        return initialized = true;
+        initialized = true;
+        return true;
     }
 
     return false;
@@ -370,10 +371,9 @@ bool CAEMFDecoder::InitLibrary()
         return true;
 
     // If user is running < Windows 7, don't bother.
-    // Despite all APIs used are supported in Vista, AAC decoding is only supported
-    // in Windows 7 or later
-    DWORD winver = GetVersion();
-    if ((winver & 0xFF) > 6 || ((winver & 0xFF) == 6 && ((winver & 0xFFFF) >> 8) >= 1))
+    // Despite all APIs used are supported in Vista, 
+    // AAC decoding is only supported in Windows 7 or later
+    if (IsWindows7OrGreater())
     {
         // Load MediaFoundation libraries
         mfPlatModule = LoadLibraryA("mfplat.dll");

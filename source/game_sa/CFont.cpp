@@ -172,8 +172,8 @@ void CFont::SetDropShadowPosition(short value)
 // 0x719590
 void CFont::SetEdge(short value) {
     CFont::m_nFontShadow = 0;
-    CFont::m_nFontOutlineSize = value;
-    CFont::m_nFontOutlineOrShadow = value;
+    CFont::m_nFontOutlineSize = (uint8_t)(value);
+    CFont::m_nFontOutlineOrShadow = (uint8_t)(value);
 }
 
 #ifdef SetProp

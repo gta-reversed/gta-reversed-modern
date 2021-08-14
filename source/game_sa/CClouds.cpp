@@ -69,7 +69,7 @@ void CClouds::Init() {
 // 0x712FF0
 void CClouds::Update() {
     CloudRotation = std::sin(TheCamera.m_fOrientation - 0.85f) * CWeather::Wind * 0.001f + CClouds::CloudRotation;
-    IndividualRotation += (CTimer::ms_fTimeStep * CWeather::Wind * 0.5f + 0.3f) * 60.0f;
+    IndividualRotation += (int)((CTimer::ms_fTimeStep * CWeather::Wind * 0.5f + 0.3f) * 60.0f);
 }
 
 // 0x712FA0

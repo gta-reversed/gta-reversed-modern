@@ -38,7 +38,7 @@ void CKeyArray::Load(uint length, FILESTREAM file, uint* offset, uchar nSkipByte
 
 // 0x69F540
 void CKeyArray::Update(char* offset) {
-    for (auto i = 0; i < size; ++i) {
+    for (uint32_t i = 0; i < size; ++i) {
         data[i].string = (GxtChar*)((uchar*)offset + (uint)(data[i].string));
     }
 }

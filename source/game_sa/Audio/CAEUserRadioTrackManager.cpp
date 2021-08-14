@@ -189,7 +189,7 @@ bool CAEUserRadioTrackManager::ReadUserTracks()
         return false;
     }
 
-    userTracksCount = size / sizeof(tUserTracksInfo);
+    userTracksCount = (uint16_t)(size / sizeof(tUserTracksInfo));
 
     if (userTracksInfo)
         CMemoryMgr::Free(userTracksInfo);
@@ -300,7 +300,7 @@ eAudioFileType CAEUserRadioTrackManager::GetAudioFileType(const char *filename)
 
     for (const tAudioExtensionType &audioExtType: audioExtensionTypes)
     {
-        if (stricmp(audioExtType.extension, dotPosition) == 0)
+        if (_stricmp(audioExtType.extension, dotPosition) == 0)
             return audioExtType.type;
     }
 
@@ -314,7 +314,7 @@ bool CAEUserRadioTrackManager::IsShortcut(const char *path)
     return ((bool(__thiscall *)(CAEUserRadioTrackManager*, const char*)) 0x4f32c0)(this, path);
 #else
     const char *dot = strrchr(path, '.');
-    return dot ? stricmp(dot, ".lnk") == 0 : false;
+    return dot ? _stricmp(dot, ".lnk") == 0 : false;
 #endif
 }
 
@@ -494,17 +494,17 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring &path)
     IShellLinkW *shellLink = nullptr;
     IPersistFile *persistFile = nullptr;
 
-    if (FAILED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (void **) &shellLink)))
-        return nullptr;
+    if (FAILED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (void**)&shellLink)))
+        throw std::runtime_error{"CoCreateInstance failed"};
 
     if (FAILED(shellLink->QueryInterface(IID_IPersistFile, (void **) &persistFile)))
     {
         shellLink->Release();
-        return nullptr;
+        throw std::runtime_error{ "QueryInterface failed" };
     }
     
     wchar_t *target = new wchar_t[MAX_PATH];
-    WIN32_FIND_DATAW findData;
+    WIN32_FIND_DATAW findData{};
     if (
         FAILED(persistFile->Load(path.c_str(), STGM_READ)) ||
         FAILED(shellLink->GetPath(target, MAX_PATH, &findData, 0))
@@ -512,7 +512,7 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring &path)
     {
         persistFile->Release();
         shellLink->Release();
-        return nullptr;
+        throw std::runtime_error{ "Load or GetPath failed" };
     }
 
     persistFile->Release();

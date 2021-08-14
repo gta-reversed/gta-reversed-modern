@@ -146,14 +146,13 @@ void CBirds::Update()
         && CClock::ms_nGameClockHours > 5U
         && (CTimer::m_FrameCounter & 0x1FF) == MAX_BIRDS) {
 
-        auto iNumBirdsToCreate = CGeneral::GetRandomNumberInRange(1, MAX_BIRDS + 1 - CBirds::uiNumberOfBirds);
+        auto iNumBirdsToCreate = (uint32_t)CGeneral::GetRandomNumberInRange(1, MAX_BIRDS + 1 - CBirds::uiNumberOfBirds);
         eBirdsBiome eBiome = eBirdsBiome::BIOME_WATER;
 
         if (TheCamera.m_fDistanceToWater > 30.0F) {
             if (CWeather::WeatherRegion == eWeatherRegion::WEATHER_REGION_DESERT) {
                 eBiome = eBirdsBiome::BIOME_DESERT;
-                if (iNumBirdsToCreate >= 3 - CBirds::uiNumberOfBirds)
-                    iNumBirdsToCreate = 3 - CBirds::uiNumberOfBirds;
+                iNumBirdsToCreate = std::min(iNumBirdsToCreate, CBirds::uiNumberOfBirds);
             }
             else {
                 eBiome = eBirdsBiome::BIOME_NORMAL;

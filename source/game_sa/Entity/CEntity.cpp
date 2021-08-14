@@ -2480,6 +2480,6 @@ RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* pAtomic, void* pData)
 
 RpMaterial* CEntity::SetMaterialAlphaCB(RpMaterial* pMaterial, void* pData)
 {
-    pMaterial->color.alpha = reinterpret_cast<RwUInt8>(pData);
+    pMaterial->color.alpha = (RwUInt8)pData;
     return pMaterial;
 }
