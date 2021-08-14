@@ -107,7 +107,7 @@ CWanted * FindPlayerWanted(int32 playerId = -1);
 CPlayerInfo& FindPlayerInfo(int playerId = -1);
 
 CVector Multiply3x3(CMatrix& m, CVector& v);
-CVector Multiply3x3(CVector& v, CMatrix& m);
+CVector Multiply3x3(const CVector& v, const CMatrix& m);
 
 void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos);
 void TransformVectors(RwV3d* vecsOut, int32 numVectors, CMatrix const& matrix, RwV3d const* vecsin);

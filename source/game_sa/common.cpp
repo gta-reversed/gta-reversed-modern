@@ -241,10 +241,11 @@ CVector Multiply3x3(CMatrix& m, CVector& v) {
 }
 
 // vector by matrix mult, resulting in a vector where each component is the dot product of the in vector and a matrix direction
-CVector Multiply3x3(CVector& v, CMatrix& m) {
-    return CVector(DotProduct(m.GetRight(), v),
-                   DotProduct(m.GetForward(), v),
-                   DotProduct(m.GetUp(), v));
+CVector Multiply3x3(const CVector& v, const CMatrix& m) {
+    // TODO: Make crappy cmatrix accessors const...
+    return CVector(DotProduct(const_cast<CMatrix&>(m).GetRight(), v),
+                   DotProduct(const_cast<CMatrix&>(m).GetForward(), v),
+                   DotProduct(const_cast<CMatrix&>(m).GetUp(), v));
 }
 
 // 0x54ECE0

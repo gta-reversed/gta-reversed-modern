@@ -17,9 +17,13 @@ class CColCacheEntry;
 class CCollision {
 public:
     static CLinkList<CCollisionData*> &ms_colModelCache;
+    static int32& ms_iProcessLineNumCrossings;
+
 public:
     static void InjectHooks();
 
+    static void Init();
+    static void Shutdown();
     // dummy function
     static void Update();
     static void SortOutCollisionAfterLoad();
@@ -51,8 +55,6 @@ public:
     static bool PointInPoly(CVector* point, CColTriangle* tri, CVector* arg2, CVector* triVerts);
     static void Closest3(CVector* arg0, CVector* arg1);
     static bool SphereCastVersusVsPoly(CColSphere* sphere1, CColSphere* sphere2, CColTriangle* tri, CColTrianglePlane* triPlane, CompressedVector* verts);
-    static void Init();
-    static void Shutdown();
     static void CalculateTrianglePlanes(CCollisionData* colData);
     static void RemoveTrianglePlanes(CCollisionData* colData);
     static bool ProcessSphereSphere(CColSphere const& sphere1, CColSphere const& sphere2, CColPoint& colPoint, float& maxTouchDistance);

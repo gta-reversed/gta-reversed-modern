@@ -7,7 +7,10 @@
 
 #include "StdInc.h"
 
+#include "Collision.h"
+
 CLinkList<CCollisionData*>& CCollision::ms_colModelCache = *(CLinkList<CCollisionData*>*)0x96592C;
+int32& CCollision::ms_iProcessLineNumCrossings = *(int32*)0x9655D0;
 
 void CCollision::InjectHooks()
 {
