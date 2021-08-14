@@ -43,7 +43,7 @@ public:
     unsigned char m_nLevel; // see eLevelName
 
 	// Returns pointer to GXT name string.
-	const char* GetTranslatedName();
+    const char* GetTranslatedName() const;
 };
 
 VALIDATE_SIZE(CZone, 0x20);
