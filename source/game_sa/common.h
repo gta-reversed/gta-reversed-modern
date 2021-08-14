@@ -308,7 +308,7 @@ extern unsigned short &uiTempBufferIndicesStored;
 extern unsigned short &uiTempBufferVerticesStored;
 constexpr int32_t TOTAL_TEMP_BUFFER_INDICES = 4096;
 extern RxVertexIndex(&aTempBufferIndices)[TOTAL_TEMP_BUFFER_INDICES]; // size 4096
-constexpr int32_t TOTAL_TEMP_BUFFER_VERTICES = 1024;
-extern RxObjSpace3DVertex(&aTempBufferVertices)[TOTAL_TEMP_BUFFER_VERTICES]; // size 1024 - after this there are 2 more arrays like this, both sized 512
+constexpr int32_t TOTAL_TEMP_BUFFER_VERTICES = 2048;
+extern RxObjSpace3DVertex(&aTempBufferVertices)[TOTAL_TEMP_BUFFER_VERTICES];
 constexpr int32_t TOTAL_RADIOSITY_VERTEX_BUFFER = 1532;
 extern RwD3D9Vertex(&aRadiosityVertexBuffer)[TOTAL_RADIOSITY_VERTEX_BUFFER];

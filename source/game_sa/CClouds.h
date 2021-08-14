@@ -11,6 +11,14 @@
 #define MAX_MOVING_FOG 350
 #define MAX_VOLUMETRIC_CLOUDS 180
 
+#define SKYP_WIDTH_MULT 1.4f
+#define SKYP_CAM_DIST 30.f
+
+#define SKYP_ABOVE_HORIZON_Z 0.5f
+#define SKYP_HORIZON_Z 0.0f
+#define SKYP_SEA_HORIZON_Z -0.1f
+#define SKYP_BELOW_HORIZON_Z -0.3f
+
 struct tMovingFog {
     bool         m_bFogSlots[MAX_MOVING_FOG];
     char         _pad15E[2];
@@ -25,8 +33,8 @@ struct tMovingFog {
 };
 
 struct tVolumetricClouds {
-    char       m_bSlots[MAX_VOLUMETRIC_CLOUDS];
-    char       m_bInsideVisibilityRange[MAX_VOLUMETRIC_CLOUDS];
+    bool       m_bSlots[MAX_VOLUMETRIC_CLOUDS];
+    bool       m_bInsideVisibilityRange[MAX_VOLUMETRIC_CLOUDS];
     CVector    field_168[MAX_VOLUMETRIC_CLOUDS];
     CVector    field_9D8[MAX_VOLUMETRIC_CLOUDS];
     int        m_nHeight[MAX_VOLUMETRIC_CLOUDS];
