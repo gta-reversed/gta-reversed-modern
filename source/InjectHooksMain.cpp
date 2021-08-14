@@ -77,6 +77,7 @@ void InjectHooksMain()
     CDamageAtomicModelInfo::InjectHooks();
     CWeaponModelInfo::InjectHooks();
     CPedModelInfo::InjectHooks();
+    CTimeInfo::InjectHooks();
     SurfaceInfos_c::InjectHooks();
     CFileLoader::InjectHooks();
     CFileMgr::InjectHooks();

@@ -574,9 +574,9 @@ int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
     {
         if (pBaseModelInfo->GetModelType() == MODEL_INFO_TIME)
         {
-            tTimeInfo* pModelTimeInfo = pBaseModelInfo->GetTimeInfo();
-            int wOtherTimeModel = pModelTimeInfo->m_nOtherTimeModel;
-            if (CClock::GetIsTimeInRange(pModelTimeInfo->m_nTimeOn, pModelTimeInfo->m_nTimeOff))
+            CTimeInfo* pModelTimeInfo = pBaseModelInfo->GetTimeInfo();
+            int wOtherTimeModel = pModelTimeInfo->GetOtherTimeModel();
+            if (CClock::GetIsTimeInRange(pModelTimeInfo->GetTimeOn(), pModelTimeInfo->GetTimeOff()))
             {
                 if (wOtherTimeModel != -1 && CModelInfo::ms_modelInfoPtrs[wOtherTimeModel]->m_pRwObject)
                     pBaseModelInfo->m_nAlpha = 255;
@@ -640,9 +640,9 @@ int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
 
     if (pBaseModelInfo->GetModelType() == MODEL_INFO_TIME)
     {
-        tTimeInfo* pModelTimeInfo = pBaseModelInfo->GetTimeInfo();
-        int wOtherTimeModel = pModelTimeInfo->m_nOtherTimeModel;
-        if (CClock::GetIsTimeInRange(pModelTimeInfo->m_nTimeOn, pModelTimeInfo->m_nTimeOff))
+        CTimeInfo* pModelTimeInfo = pBaseModelInfo->GetTimeInfo();
+        int wOtherTimeModel = pModelTimeInfo->GetOtherTimeModel();
+        if (CClock::GetIsTimeInRange(pModelTimeInfo->GetTimeOn(), pModelTimeInfo->GetTimeOff()))
         {
             if (wOtherTimeModel != -1 && CModelInfo::ms_modelInfoPtrs[wOtherTimeModel]->m_pRwObject)
                 pBaseModelInfo->m_nAlpha = 255;
@@ -875,8 +875,8 @@ bool CRenderer::ShouldModelBeStreamed(CEntity* entity, CVector const& point, flo
         return false;
 
     CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex];
-    tTimeInfo* pTimeInfo = pModelInfo->GetTimeInfo();
-    if (pTimeInfo && !CClock::GetIsTimeInRange(pTimeInfo->m_nTimeOn, pTimeInfo->m_nTimeOff))
+    CTimeInfo* pTimeInfo = pModelInfo->GetTimeInfo();
+    if (pTimeInfo && !CClock::GetIsTimeInRange(pTimeInfo->GetTimeOn(), pTimeInfo->GetTimeOff()))
         return false;
 
     const float fMagnitude = (entity->GetPosition() - point).Magnitude();

@@ -7,25 +7,21 @@
 #pragma once
 
 #include "CAtomicModelInfo.h"
+#include "CTimeInfo.h"
 
 class CTimeModelInfo : public CAtomicModelInfo {
 public:
-    tTimeInfo m_timeInfo;
+    CTimeInfo m_timeInfo;
 
 public:
     static void InjectHooks();
 
-    CTimeModelInfo();
-    ~CTimeModelInfo();
-
     ModelInfoType GetModelType() override;
-    tTimeInfo* GetTimeInfo() override;
-
-    tTimeInfo* FindOtherTimeModel(const char* modelName);
+    CTimeInfo* GetTimeInfo() override;
 
 private:
     ModelInfoType GetModelType_Reversed();
-    tTimeInfo* GetTimeInfo_Reversed();
+    CTimeInfo* GetTimeInfo_Reversed();
 };
 
 VALIDATE_SIZE(CTimeModelInfo, 0x24);

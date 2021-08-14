@@ -1,23 +1,23 @@
 #pragma once
+
 #include "PluginBase.h"
 #include "CAtomicModelInfo.h"
+#include "CTimeInfo.h"
 
 class  CLodTimeModelInfo : public CLodAtomicModelInfo {
 public:
-    CLodTimeModelInfo();
-public:
-    tTimeInfo m_lodTimeInfo;
+    CTimeInfo m_lodTimeInfo;
 
 public:
     static void InjectHooks();
 
     // virtual
     ModelInfoType GetModelType() override;
-    tTimeInfo* GetTimeInfo() override;
+    CTimeInfo* GetTimeInfo() override;
 
     // virtual implementations
     ModelInfoType GetModelType_Reversed();
-    tTimeInfo* GetTimeInfo_Reversed();
+    CTimeInfo* GetTimeInfo_Reversed();
 };
 
 VALIDATE_SIZE(CLodTimeModelInfo, 0x28);

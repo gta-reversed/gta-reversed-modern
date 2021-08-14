@@ -53,7 +53,7 @@ void CFileLoader::InjectHooks() {
     ReversibleHooks::Install("CFileLoader", "LoadStuntJump", 0x5B45D0, &CFileLoader::LoadStuntJump);
     ReversibleHooks::Install("CFileLoader", "LoadTXDParent", 0x5B75E0, &CFileLoader::LoadTXDParent);
     ReversibleHooks::Install("CFileLoader", "LoadTimeCyclesModifier", 0x5B81D0, &CFileLoader::LoadTimeCyclesModifier);
-    // ReversibleHooks::Install("CFileLoader", "LoadTimeObject", 0x5B3DE0, &CFileLoader::LoadTimeObject);
+    ReversibleHooks::Install("CFileLoader", "LoadTimeObject", 0x5B3DE0, &CFileLoader::LoadTimeObject);
     // ReversibleHooks::Install("CFileLoader", "LoadVehicleObject", 0x5B6F30, &CFileLoader::LoadVehicleObject);
     ReversibleHooks::Install("CFileLoader", "LoadWeaponObject", 0x5B3FB0, &CFileLoader::LoadWeaponObject);
     ReversibleHooks::Install("CFileLoader", "LoadZone", 0x5B4AB0, &CFileLoader::LoadZone);
@@ -730,7 +730,50 @@ void CFileLoader::LoadTimeCyclesModifier(const char* line) {
 
 // 0x5B3DE0
 int CFileLoader::LoadTimeObject(const char* line) {
-    return plugin::CallAndReturn<int, 0x5B3DE0, const char*>(line);
+    int32_t modelId;
+    char    modelName[24];
+    char    texName[24];
+    float   drawDistance[3];
+    int32_t flags;
+    int32_t timeOn;
+    int32_t timeOff;
+
+    int numValuesRead = sscanf(line, "%d %s %s %f %d %d %d", &modelId, modelName, texName, &drawDistance[0], &flags, &timeOn, &timeOff);
+
+    if (numValuesRead != 7 || drawDistance[0] < 4.0) {
+        int32_t numObjs;
+
+        if (sscanf(line, "%d %s %s %d", &modelId, modelName, texName, &numObjs) != 4)
+            return -1;
+
+        switch (numObjs) {
+        case 1:
+            sscanf(line, "%d %s %s %d %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &flags, &timeOn, &timeOff);
+            break;
+        case 2:
+            sscanf(line, "%d %s %s %d %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &flags, &timeOn, &timeOff);
+            break;
+        case 3:
+            sscanf(line, "%d %s %s %d %f %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &drawDistance[2], &flags, &timeOn, &timeOff);
+            break;
+        }
+    }
+
+    CTimeModelInfo* timeModel = CModelInfo::AddTimeModel(modelId);
+    timeModel->m_fDrawDistance = drawDistance[0];
+    timeModel->SetModelName(modelName);
+    timeModel->SetTexDictionary(texName);
+
+    CTimeInfo* timeInfo = timeModel->GetTimeInfo();
+    timeInfo->SetTimes(timeOn, timeOff);
+
+    SetAtomicModelInfoFlags(timeModel, flags);
+
+    CTimeInfo* otherTimeInfo = timeInfo->FindOtherTimeModel(modelName);
+    if (otherTimeInfo)
+        otherTimeInfo->SetOtherTimeModel(modelId);
+
+    return modelId;
 }
 
 // 0x5B6F30
