@@ -273,9 +273,9 @@ void FlushObrsPrintfs() {
 // 0x734650
 void DefinedState() {
     CRGBA rgbaFog(
-        CTimeCycle::m_CurrentColours.m_nSkyBottomRed,
-        CTimeCycle::m_CurrentColours.m_nSkyBottomGreen,
-        CTimeCycle::m_CurrentColours.m_nSkyBottomBlue
+        (uint8_t)CTimeCycle::m_CurrentColours.m_nSkyBottomRed,
+        (uint8_t)CTimeCycle::m_CurrentColours.m_nSkyBottomGreen,
+        (uint8_t)CTimeCycle::m_CurrentColours.m_nSkyBottomBlue
     );
 
     RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,       (void*)true);

@@ -120,10 +120,10 @@ enum eFightingStyle : char {
     STYLE_ELBOWS = 16,
 };
 
-class CObject;
-class CVehicle;
-class CPedStat;
-class CPedStats;
+class  CObject;
+class  CVehicle;
+struct CPedStat;
+class  CPedStats;
 
 class CPed : public CPhysical {
 protected:

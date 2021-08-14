@@ -105,11 +105,12 @@ bool CAEWMADecoder::Initialise()
                                         nullptr,
                                         &dummyNameLen,
                                         &dataType,
-                                        nullptr, (BYTE *) &duration,
+                                        nullptr,
+                                        (BYTE*)&duration,
                                         &dummyBufLen
                                     );
 
-                                    lengthMs = duration / 10000ULL;
+                                    lengthMs = (long)(duration / 10000ULL);
                                     initialized = lengthMs >= 7000;
 
                                     delete[] indices;

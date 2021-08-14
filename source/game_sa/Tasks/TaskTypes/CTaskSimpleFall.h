@@ -11,7 +11,7 @@ public:
     eAnimGroup m_nAnimGroup;
     CAnimBlendAssociation* m_pAnim;
     int m_nTotalDownTime;
-    int m_nCurrentDownTime;
+    uint32_t m_nCurrentDownTime;
 
 private:
     CTaskSimpleFall* Constructor(eAnimID nAnimId, eAnimGroup nAnimGroup, int nDownTime);

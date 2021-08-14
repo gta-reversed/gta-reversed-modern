@@ -156,7 +156,7 @@ CTask* CTaskComplexUseSwatRope::ControlSubTask_Reversed(CPed* ped)
         {
             ped->SetPosn(posn);
             ped->m_fAimingRotation = ped->m_fCurrentRotation - CTimer::ms_fTimeStep * 0.05F;
-            ped->m_vecMoveSpeed.z = -0.03;
+            ped->m_vecMoveSpeed.z = -0.03f;
             ped->Say(177, 0, 1.0F, false, false, false);
         }
     }

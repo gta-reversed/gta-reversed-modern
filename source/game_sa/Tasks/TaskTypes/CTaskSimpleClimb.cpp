@@ -574,10 +574,10 @@ CEntity* CTaskSimpleClimb::ScanToGrab(CPed* ped, CVector& climbPos, float& fAngl
 
     auto outPoint = *ped->m_matrix * ms_ClimbColModel.GetBoundCenter();
 
-    int x1 = floorf((outPoint.x - ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
-    int x2 = floorf((outPoint.x + ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
-    int y1 = floorf((outPoint.y - ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
-    int y2 = floorf((outPoint.y + ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
+    int x1 = (int)floorf((outPoint.x - ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
+    int x2 = (int)floorf((outPoint.x + ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
+    int y1 = (int)floorf((outPoint.y - ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
+    int y2 = (int)floorf((outPoint.y + ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
 
     CWorld::IncrementCurrentScanCode();
 
@@ -850,7 +850,7 @@ void CTaskSimpleClimb::GetCameraStickModifier(CEntity* pEntity, float& fVertical
         CEntity* pColEntity;
         if (CWorld::ProcessVerticalLine(vec, vec.z - 3.0F, colPoint, pColEntity, true, true, false, true, false, false, 0))
         {
-            m_nFallAfterVault = std::max(vec.z - colPoint.m_vecPoint.z - 1.0F, 0.0F) * 10.0F;
+            m_nFallAfterVault = (char)(std::max(vec.z - colPoint.m_vecPoint.z - 1.0F, 0.0F) * 10.0F);
         }
         else
         {

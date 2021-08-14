@@ -141,7 +141,7 @@ public:
     static void SetupBackBufferVertex();
     static void Update();
 
-    static void DrawQuad(float x1, float y1, float x2, float y2, char red, unsigned int green, unsigned int blue, char alpha, RwRaster* raster);
+    static void DrawQuad(float x1, float y1, float x2, float y2, char red, unsigned int green, unsigned int blue, unsigned char alpha, RwRaster* raster);
     static void DrawQuadSetDefaultUVs();
     static void DrawQuadSetPixelUVs(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8);
     static void DrawQuadSetUVs(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8);

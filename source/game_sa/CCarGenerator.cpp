@@ -369,13 +369,13 @@ void CCarGenerator::Setup(const CVector& posn, float angle, int modelId, short c
                           uchar alarmChance, uchar doorLockChance, ushort minDelay, ushort maxDelay,
                           uchar iplId, bool ignorePopulationLimit)
 {
-    static constexpr float magic = 256.0f / 360.0f; // 0x8722E8 original expression 128.0f / 180.0f
+    constexpr float magic = 256.0f / 360.0f; // 0x8722E8 original expression 128.0f / 180.0f
 
     m_vecPosn = CompressLargeVector(posn);
-    m_nAngle = angle * magic;
+    m_nAngle = (char)(angle * magic);
     m_nModelId = modelId;
-    m_nPrimaryColor = color1;
-    m_nSecondaryColor = color2;
+    m_nPrimaryColor = (uint8_t)(color1);
+    m_nSecondaryColor = (uint8_t)(color2);;
 
     bWaitUntilFarFromPlayer = false;
     bIgnorePopulationLimit = ignorePopulationLimit;

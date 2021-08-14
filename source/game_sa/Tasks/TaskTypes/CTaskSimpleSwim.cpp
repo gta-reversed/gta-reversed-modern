@@ -878,7 +878,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
             oxygen = static_cast<unsigned int>(
                 ((100.0f - pPlayerData->m_fBreath / CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 100.0f) * 0.33333334f));
         }
-        if (CGeneral::GetRandomNumberInRange(0, 100) < oxygen)
+        if ((unsigned)CGeneral::GetRandomNumberInRange(0, 100) < oxygen)
         {
             RpHAnimHierarchy* pRwAnimHierarchy = GetAnimHierarchyFromSkinClump(pPed->m_pRwClump);
             RwV3d* pBoneSpine1Pos = &RpHAnimHierarchyGetMatrixArray(pRwAnimHierarchy)[BONE_SPINE1].pos;

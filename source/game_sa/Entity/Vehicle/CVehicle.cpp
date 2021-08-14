@@ -202,7 +202,7 @@ CVehicle::CVehicle(unsigned char createdBy) : CPhysical(), m_vehicleAudio(), m_a
     m_nNitroBoosts = 0;
     m_nHasslePosId = 0;
     m_nVehicleWeaponInUse = 0;
-    m_fDirtLevel = (rand() % 15);
+    m_fDirtLevel = (float)((rand() % 15));
     m_nCreationTime = CTimer::m_snTimeInMilliseconds;
     CVehicle::SetCollisionLighting(0x48);
 }
@@ -813,9 +813,9 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId,
         case ANIM_GROUP_MTRKCARANIMS:
         case ANIM_GROUP_STDTALLCARAMIMS:
         case ANIM_GROUP_BFINJCARAMIMS:
-            fAnimStart = 0.05;
-            fAnimEnd = 0.3;
-            fAnimEnd2 = 0.475F;
+            fAnimStart = 0.05f;
+            fAnimEnd = 0.3f;
+            fAnimEnd2 = 0.475f;
             break;
         default:
             assert(false); // Shouldn't ever enter this

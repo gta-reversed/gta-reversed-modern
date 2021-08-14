@@ -50,7 +50,7 @@ void CSpecialPlateHandler::Remove(int plateTextId) {
         tCarGenPlateText* plateText = &m_plateTextEntries[plateTextId];
         plateText->m_nCarGenId = -1;
         plateText->m_szPlateText[0] = 0;
-        if (plateTextId < m_nCount - 1) {
+        if ((unsigned)plateTextId < m_nCount - 1) {
             *plateText = m_plateTextEntries[m_nCount - 1];
         }
         --m_nCount;

@@ -9,7 +9,7 @@ struct CKeyEntry {
 class CKeyArray {
 public:
     CKeyEntry* data;
-    uint       size;
+    uint32_t   size;
 
 public:
     CKeyArray();

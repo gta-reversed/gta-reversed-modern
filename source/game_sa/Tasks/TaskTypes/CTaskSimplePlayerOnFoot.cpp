@@ -892,12 +892,13 @@ MAKE_PLAYER_LOOK_AT_ENTITY:
         bTargetedPedDead = true;
     }
 
+    CVector distance{};
     if ((pWeaponInfo->m_nWeaponFire || pIntelligence->GetTaskFighting() && !bTargetedPedDead)
         && (pPlayerPed->bIsDucking || !pWeaponInfo->flags.bAimWithArm))
     {
         goto ABORT_LOOKING_IF_POSSIBLE;
     }
-    CVector distance = pTargetedObject->GetPosition() - pPlayerPed->GetPosition();
+    distance = pTargetedObject->GetPosition() - pPlayerPed->GetPosition();
     if (DotProduct(distance, pPlayerPed->GetForwardVector()) <= 0.0f)
     {
     ABORT_LOOKING_IF_POSSIBLE:
@@ -1015,7 +1016,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
                         gLastRandomNumberForIdleAnimationID = randomNumber;
                         if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0 && CTimer::m_snTimeInMilliseconds > 1200000)
                         {
-                            pPlayerPed->Say(336, 0, 0.2, 0, 0, 0);
+                            pPlayerPed->Say(336, 0, 0.2f, 0, 0, 0);
                         }
                     }
                 }
@@ -1040,8 +1041,8 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed)
         {
             CVector2D moveSpeed(0.0, 0.0);
             CPad* pPad = pPlayerPed->GetPadFromPlayer();
-            double pedWalkUpDown = moveSpeed.y;
-            double pedWalkLeftRight = moveSpeed.x;
+            float pedWalkUpDown = moveSpeed.y;
+            float pedWalkLeftRight = moveSpeed.x;
             if (!pTaskUseGun->m_pWeaponInfo->flags.b1stPerson || CGameLogic::IsPlayerUse2PlayerControls(pPlayerPed))
             {
                 pedWalkUpDown = pPad->GetPedWalkUpDown();
@@ -1052,8 +1053,8 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed)
                 pedWalkUpDown = pPad->GetPedWalkUpDown(pPlayerPed);
                 pedWalkLeftRight = pPad->GetPedWalkLeftRight(pPlayerPed);
             }
-            moveSpeed.x = pedWalkLeftRight * 0.0078125f;
-            moveSpeed.y = pedWalkUpDown * 0.0078125f;
+            moveSpeed.x = pedWalkLeftRight / 128.0f;
+            moveSpeed.y = pedWalkUpDown / 128.0f;
             CEntity* pTargetedObject = pPlayerPed->m_pTargetedObject;
             if (CGameLogic::IsPlayerUse2PlayerControls(pPlayerPed))
             {
@@ -1064,8 +1065,8 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed)
                     float radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -moveSpeed.x, moveSpeed.y)
                         - TheCamera.m_fOrientation;
                     float limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
-                    double negativeSinRadian = -sin(limitedRadianAngle);
-                    double cosRadian = cos(limitedRadianAngle);
+                    float negativeSinRadian = -sin(limitedRadianAngle);
+                    float cosRadian = cos(limitedRadianAngle);
                     if (pTargetedObject)
                     {
                         if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(pPlayerPed, negativeSinRadian, cosRadian, 0.0f, 0.0f))
@@ -1081,7 +1082,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed)
                     else
                     {
                         pPlayerPed->m_fAimingRotation = limitedRadianAngle;
-                        double moveSpeedY = 0.0;
+                        float moveSpeedY = 0.0;
                         if (CGameLogic::IsPlayerAllowedToGoInThisDirection(pPlayerPed, negativeSinRadian, cosRadian, 0.0, 0.0))
                         {
                             moveSpeedY = moveBlendRatio;

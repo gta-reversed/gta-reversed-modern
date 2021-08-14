@@ -73,7 +73,7 @@ void CAESmoothFadeThread::WaitForExit()
 
 void CAESmoothFadeThread::Service()
 {
-    m_nLastServiceTime = CAEAudioUtility::GetCurrentTimeInMilliseconds();
+    m_nLastServiceTime = (uint32_t)CAEAudioUtility::GetCurrentTimeInMilliseconds();
     for (auto& entry : m_aEntries)
     {
         if (entry.m_nStatus == eSmoothFadeEntryStatus::STATE_INACTIVE)
