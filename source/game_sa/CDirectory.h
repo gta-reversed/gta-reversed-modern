@@ -42,8 +42,8 @@ public:
     void ReadDirFile(const char* filename);
     bool WriteDirFile(const char* fileName);
     DirectoryInfo* FindItem(const char* itemName);
-    bool CDirectory::FindItem(const char* name, uint32_t& outOffset, uint32_t& outStreamingSize);
-    bool CDirectory::FindItem(uint32_t hashKey, uint32_t& outOffset, uint32_t& outStreamingSize);
+    bool FindItem(const char* name, uint32_t& outOffset, uint32_t& outStreamingSize);
+    bool FindItem(uint32_t hashKey, uint32_t& outOffset, uint32_t& outStreamingSize);
 };
 
 VALIDATE_SIZE(CDirectory, 0x10);
