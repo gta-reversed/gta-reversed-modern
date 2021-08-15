@@ -3,16 +3,16 @@
 
 
 void CDirectory::InjectHooks() {
-    ReversibleHooks::Install("CDirectory", "CDirectory", 0x532290, static_cast<CDirectory*(CDirectory::*)()>(&CDirectory::Constructor));
-    ReversibleHooks::Install("CDirectory", "CDirectory", 0x5322A0, static_cast<CDirectory*(CDirectory::*)(size_t)>(&CDirectory::Constructor));
+    ReversibleHooks::Install("CDirectory", "CDirectory_Empty", 0x532290, static_cast<CDirectory*(CDirectory::*)()>(&CDirectory::Constructor));
+    ReversibleHooks::Install("CDirectory", "CDirectory_Capacity", 0x5322A0, static_cast<CDirectory*(CDirectory::*)(size_t)>(&CDirectory::Constructor));
     ReversibleHooks::Install("CDirectory", "~CDirectory", 0x5322D0, &CDirectory::Destructor); 
     ReversibleHooks::Install("CDirectory", "Init", 0x5322F0, &CDirectory::Init); 
     ReversibleHooks::Install("CDirectory", "AddItem", 0x532310, &CDirectory::AddItem); 
     ReversibleHooks::Install("CDirectory", "ReadDirFile", 0x532350, &CDirectory::ReadDirFile); 
     ReversibleHooks::Install("CDirectory", "WriteDirFile", 0x532410, &CDirectory::WriteDirFile); 
     ReversibleHooks::Install("CDirectory", "FindItem", 0x532450, static_cast<DirectoryInfo*(CDirectory::*)(const char*)>(&CDirectory::FindItem)); 
-    ReversibleHooks::Install("CDirectory", "FindItem", 0x5324A0, static_cast<bool(CDirectory::*)(const char*, uint32_t&, uint32_t&)>(&CDirectory::FindItem)); 
-    ReversibleHooks::Install("CDirectory", "FindItem", 0x5324D0, static_cast<bool(CDirectory::*)(uint32_t, uint32_t&, uint32_t&)>(&CDirectory::FindItem)); 
+    ReversibleHooks::Install("CDirectory", "FindItem_ByName", 0x5324A0, static_cast<bool(CDirectory::*)(const char*, uint32_t&, uint32_t&)>(&CDirectory::FindItem)); 
+    ReversibleHooks::Install("CDirectory", "FindItem_ByHash", 0x5324D0, static_cast<bool(CDirectory::*)(uint32_t, uint32_t&, uint32_t&)>(&CDirectory::FindItem)); 
 }
 
 // 0x532290
@@ -124,9 +124,12 @@ bool CDirectory::FindItem(const char* name, uint32_t& outOffset, uint32_t& outSt
 bool CDirectory::FindItem(uint32_t hashKey, uint32_t& outOffset, uint32_t& outStreamingSize) {
     if (m_nNumEntries) {
         for (DirectoryInfo* it = m_pEntries; it != m_pEntries + m_nNumEntries; it++) {
-            if (CKeyGen::GetUppercaseKey(it->m_szName) == hashKey)
-                return it;
+            if (CKeyGen::GetUppercaseKey(it->m_szName) == hashKey) {
+                outOffset = it->m_nOffset;
+                outStreamingSize = it->m_nStreamingSize;
+                return true;
+            }
         }
     }
-    return nullptr;
+    return false;
 }
