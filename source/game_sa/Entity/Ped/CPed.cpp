@@ -51,7 +51,6 @@ void CPed::InjectHooks() {
     // ReversibleHooks::Install("CPed", "RemoveWeaponModel", 0x5E3990, &CPed::RemoveWeaponModel);
     // ReversibleHooks::Install("CPed", "RemoveWeaponWhenEnteringVehicle", 0x5E6370, &CPed::RemoveWeaponWhenEnteringVehicle);
     // ReversibleHooks::Install("CPed", "AddGogglesModel", 0x5E3A90, &CPed::AddGogglesModel);
-    // ReversibleHooks::Install("CPed", "GetWeaponSkill", 0x5E3B60, static_cast<int8_t(CPed::*)(eWeaponType)>(&CPed::GetWeaponSkill));
     // ReversibleHooks::Install("CPed", "SetWeaponSkill", 0x5E3C10, &CPed::SetWeaponSkill);
     // ReversibleHooks::Install("CPed", "ClearLook", 0x5E3FF0, &CPed::ClearLook);
     // ReversibleHooks::Install("CPed", "TurnBody", 0x5E4000, &CPed::TurnBody);
@@ -60,7 +59,6 @@ void CPed::InjectHooks() {
     // ReversibleHooks::Install("CPed", "PutOnGoggles", 0x5E3AE0, &CPed::PutOnGoggles);
     // ReversibleHooks::Install("CPed", "SortPeds", 0x5E17E0, &CPed::SortPeds);
     // ReversibleHooks::Install("CPed", "ReplaceWeaponWhenExitingVehicle", 0x5E6490, &CPed::ReplaceWeaponWhenExitingVehicle);
-    ReversibleHooks::Install("CPed", "RemoveWeaponForScriptedCutscene", 0x5E6550, &CPed::RemoveWeaponForScriptedCutscene);
     // ReversibleHooks::Install("CPed", "KillPedWithCar", 0x5F0360, &CPed::KillPedWithCar);
     // ReversibleHooks::Install("CPed", "IsPedHeadAbovePos", 0x5F02C0, &CPed::IsPedHeadAbovePos);
     // ReversibleHooks::Install("CPed", "RemoveWeaponAnims", 0x5F0250, &CPed::RemoveWeaponAnims);
@@ -75,7 +73,6 @@ void CPed::InjectHooks() {
     // ReversibleHooks::Install("CPed", "DisablePedSpeech", 0x5EFF60, &CPed::DisablePedSpeech);
     // ReversibleHooks::Install("CPed", "GetPedTalking", 0x5EFF50, &CPed::GetPedTalking);
     ReversibleHooks::Install("CPed", "GiveWeaponWhenJoiningGang", 0x5E8BE0, &CPed::GiveWeaponWhenJoiningGang);
-    ReversibleHooks::Install("CPed", "GiveWeaponAtStartOfFight", 0x5E8AB0, &CPed::GiveWeaponAtStartOfFight);
     // ReversibleHooks::Install("CPed", "GiveDelayedWeapon", 0x5E89B0, &CPed::GiveDelayedWeapon);
     ReversibleHooks::Install("CPed", "GetWeaponSkill", 0x5E6580, static_cast<char(CPed::*)()>(&CPed::GetWeaponSkill));
     // ReversibleHooks::Install("CPed", "PreRenderAfterTest", 0x5E65A0, &CPed::PreRenderAfterTest);
