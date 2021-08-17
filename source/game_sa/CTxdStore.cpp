@@ -309,7 +309,7 @@ void CTxdStore::SetupTxdParent(int32_t index) {
 RwTexture* CTxdStore::TxdStoreFindCB(const char* name) {
     RwTexDictionary* txd = RwTexDictionaryGetCurrent();
     for (; txd; txd = GetTxdParent(txd)) {
-        RwTexture* tex = RwTexDictionaryFindNamedTexture(txd, name)
+        RwTexture* tex = RwTexDictionaryFindNamedTexture(txd, name);
         if (tex)
             return tex;
     }
