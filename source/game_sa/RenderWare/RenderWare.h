@@ -38,3 +38,5 @@ _D3DMATRIX *GetD3DViewTransform();
 _D3DMATRIX *GetD3DProjTransform();
 
 #define RWRSTATE(a) (reinterpret_cast<void *>(a))
+
+#define PLUGINOFFSET(type, base, offset) ((type*)((char*)(base) + (offset)))
