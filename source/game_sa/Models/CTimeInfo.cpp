@@ -1,3 +1,4 @@
+#include "StdInc.h"
 #include "CTimeInfo.h"
 
 void CTimeInfo::InjectHooks() {
