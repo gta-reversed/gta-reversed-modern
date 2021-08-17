@@ -578,7 +578,7 @@ void CEntity::PreRender_Reversed()
         else if (m_nModelIndex == eModelID::MODEL_MISSILE) {
             if (CReplay::Mode != REPLAY_MODE_1) {
                 CVector vecPos = GetPosition();
-                auto fRand = static_cast<float>(rand() & 0xF) / 16.0F;
+                auto fRand = static_cast<float>(rand() % 16) / 16.0F;
                 CShadows::StoreShadowToBeRendered(eShadowTextureType::SHADOWTEX_PED,
                                                   gpShadowExplosionTex,
                                                   &vecPos,
@@ -632,7 +632,7 @@ void CEntity::PreRender_Reversed()
         }
         else if (m_nModelIndex == ModelIndices::MI_FLARE) {
             CVector vecPos = GetPosition();
-            auto fRand = static_cast<float>(rand() & 0xF) / 16.0F;
+            auto fRand = static_cast<float>(rand() % 16) / 16.0F;
             fRand = std::max(fRand, 0.5F);
             CShadows::StoreShadowToBeRendered(eShadowTextureType::SHADOWTEX_PED,
                                               gpShadowExplosionTex,
@@ -2140,7 +2140,7 @@ void CEntity::ProcessLightsForEntity()
                 bSkipCoronaChecks = true;
                 auto fBrightness = fIntensity;
                 if (pEffect->light.m_bBlinking1)
-                    fBrightness = (1.0F - (rand() & 0x1F) * 0.012F) * fIntensity;
+                    fBrightness = (1.0F - (rand() % 32) * 0.012F) * fIntensity;
 
                 if (pEffect->light.m_bBlinking2 && (CTimer::m_FrameCounter + uiRand) & 3)
                     fBrightness = 0.0F;

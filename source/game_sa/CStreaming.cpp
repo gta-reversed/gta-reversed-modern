@@ -1169,7 +1169,7 @@ void CStreaming::LoadZoneVehicle(const CVector& point) {
 // 0x40BA70
 void CStreaming::PossiblyStreamCarOutAfterCreation(int modelId) {
     if (CModelInfo::ms_modelInfoPtrs[modelId]->m_nFlags & STREAMING_UNKNOWN_1) {
-        if (rand() & 1)
+        if (rand() % 2)
             SetModelIsDeletable(modelId);
     }
 }
@@ -2800,7 +2800,7 @@ void CStreaming::StreamOneNewCar() {
         return;
     }
     if (m_bBoatsNeeded && (CPopulation::m_LoadedBoats.CountMembers() < 2 ||
-        CPopulation::m_LoadedBoats.CountMembers() <= 2 && (rand() & 7) == 3)) {
+        CPopulation::m_LoadedBoats.CountMembers() <= 2 && (rand() % 8) == 3)) {
         std::int32_t carModelId = CCarCtrl::ChooseCarModelToLoad(POPCYCLE_CARGROUP_BOATS);
         if (carModelId >= 0) {
             RequestModel(carModelId, STREAMING_KEEP_IN_MEMORY);

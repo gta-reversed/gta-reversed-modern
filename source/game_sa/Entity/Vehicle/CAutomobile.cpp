@@ -3071,7 +3071,7 @@ void CAutomobile::FireTruckControl(CFire* fire)
         newTurretPosition += GetSpeed(newTurretPosition - GetPosition()) * CTimer::ms_fTimeStep;
     }
 
-    point.z += (rand() & 0xF) * 0.001f;
+    point.z += (rand() % 16) * 0.001f;
     CVector endPoint = m_vecMoveSpeed * CVector(1.0f, 1.0f, 0.3f);
     if (ModelIndices::IsSwatVan(m_nModelIndex))
         endPoint += point * 0.4f;

@@ -93,8 +93,8 @@ void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int 
         switch (eBiome) {
         case eBirdsBiome::BIOME_WATER:
             fSpeedMult = (float)iSpeedRandFactor * 0.02F + 4.0F;    // [4.0 : 4.6]
-            pBird.m_BodyColor.Set((rand() & 0x3F) + 0x50);          // [80 : 143]
-            pBird.m_WingsColor.Set((rand() & 0x3F) - 0x4C);         // [166 : 242]
+            pBird.m_BodyColor.Set(rand() % 64 + 0x50);          // [80 : 143]
+            pBird.m_WingsColor.Set(rand() % 64 - 0x4C);         // [166 : 242]
             pBird.m_fSize = CGeneral::GetRandomNumberInRange(0.8F, 1.2F);
             pBird.m_nWingStillness = 1000 - 12 * iSpeedRandFactor;  // [640 : 1000]
             break;
@@ -114,8 +114,8 @@ void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int 
         case eBirdsBiome::BIOME_NORMAL:
         default:
             fSpeedMult = (float)iSpeedRandFactor * 0.02F + 5.0F;    // [5.0 : 5.6]
-            pBird.m_BodyColor.Set((rand() & 0x7F) + 0x80);          // [127 : 255]
-            pBird.m_WingsColor.Set((rand() & 0x7F) + 0x80);         // [127 : 255]
+            pBird.m_BodyColor.Set(rand() % 128 + 0x80);          // [127 : 255]
+            pBird.m_WingsColor.Set(rand() % 128 + 0x80);         // [127 : 255]
             pBird.m_fSize = CGeneral::GetRandomNumberInRange(0.5F, 0.6F);
             pBird.m_nWingStillness = 500 - 6 * iSpeedRandFactor;    // [320 : 500]
             break;
@@ -186,8 +186,8 @@ void CBirds::Update()
                 float fBirdSpawnZ = fFlightHeight + vecCamPos.z;
                 float fSpawnAngleCamRelative;
 
-                if (rand() & 1)
-                    fSpawnAngleCamRelative = (float)((unsigned char)(rand() & 0xFF)) * 0.024531251F; // [0 : 255] mapped to [0 : 2π]
+                if (rand() % 2)
+                    fSpawnAngleCamRelative = (float)(unsigned char)(rand() % 256) * 0.024531251F; // [0 : 255] mapped to [0 : 2π]
                 else {
                     auto vecForward = TheCamera.m_mCameraMatrix.GetForward();
                     vecForward.z = 0.0F;
@@ -195,7 +195,7 @@ void CBirds::Update()
                         vecForward.x = 0.01F;
 
                     vecForward.Normalise();
-                    unsigned char cRand = ((unsigned char)(rand() & 0xFF)) - 128;
+                    unsigned char cRand = (unsigned char)(rand() % 256) - 128;
                     fSpawnAngleCamRelative = ((float)cRand) / 256.0F + atan2(vecForward.x, vecForward.y); // [0 : 1] + atan2(...)
                 }
                     

@@ -289,7 +289,7 @@ void CObject::ProcessControl_Reversed()
     if (m_pObjectInfo->m_bCausesExplosion
         && objectFlags.bIsExploded
         && m_bIsVisible
-        && (rand() & 0x1F) == 10)
+        && (rand() % 32) == 10)
     {
         m_bUsesCollision = false;
         m_bIsVisible = false;

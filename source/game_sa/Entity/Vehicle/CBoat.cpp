@@ -452,7 +452,7 @@ void CBoat::ProcessControl_Reversed() {
                 || (iCarMission >= eCarMission::MISSION_RAMPLAYER_FARAWAY && iCarMission <= eCarMission::MISSION_BLOCKPLAYER_CLOSE)) {
 
                 if (static_cast<uint32_t>(CTimer::m_snTimeInMilliseconds) > m_nAttackPlayerTime)
-                    m_nAttackPlayerTime = (rand() && 0xFFF) + CTimer::m_snTimeInMilliseconds + 4500;
+                    m_nAttackPlayerTime = rand() % 4096 + CTimer::m_snTimeInMilliseconds + 4500;
             }
         }
     }

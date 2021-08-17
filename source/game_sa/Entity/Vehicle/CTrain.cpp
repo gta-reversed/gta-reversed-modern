@@ -295,7 +295,7 @@ void CTrain::ProcessControl_Reversed()
                     }
                     else
                     {
-                        m_nNumPassengersToEnter = (rand() & 3) + 1; // rand(1, 4)
+                        m_nNumPassengersToEnter = rand() % 4 + 1; // rand(1, 4)
                     }
                     m_nPassengersGenerationState = TRAIN_PASSENGERS_TELL_PASSENGERS_TO_ENTER;
                 }

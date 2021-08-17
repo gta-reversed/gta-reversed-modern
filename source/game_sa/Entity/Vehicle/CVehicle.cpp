@@ -2513,7 +2513,7 @@ void CVehicle::AddExhaustParticles()
                     pSecondExhaustFxSystem->AddParticle(&secondExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
                 }
                 if (m_fGasPedal > 0.5f && m_nCurrentGear < 3) {
-                    if (rand() & 1) {
+                    if (rand() % 2) {
                         FxSystem_c* pSecondaryExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
                         if (bFirstExhaustSubmergedInWater)
                         {

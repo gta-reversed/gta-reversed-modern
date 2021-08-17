@@ -34,7 +34,7 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
     field_4A = 0;
     m_ucCarFollowDist = 10;
     m_ucHeliTargetDist2 = 10;
-    field_50 = (rand() & 7) + 2;
+    field_50 = rand() % 8 + 2;
     m_vehicleRecordingId = -1;
     m_bPlaneDogfightSomething = 0;
     m_pCarWeMakingSlowDownFor = nullptr;
