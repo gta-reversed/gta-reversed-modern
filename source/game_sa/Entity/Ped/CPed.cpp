@@ -7,23 +7,160 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-void CPed::InjectHooks()
-{
-    ReversibleHooks::Install("CPed", "IsPedInControl", 0x5E3960, &CPed::IsPedInControl);
-    ReversibleHooks::Install("CPed", "IsAlive", 0x5E0170, &CPed::IsAlive);
+void CPed::InjectHooks() {
+    // Constructors
+    // ReversibleHooks::Install("CPed", "CPed", 0x5E8030, &CPed::Constructor);
+
+    // Destructors
+    // ReversibleHooks::Install("CPed", "~CPed", 0x5E8620, static_cast<CPed*(CPed::*)()>(&CPed::Destructor));
+
+    // Static functions
+    // ReversibleHooks::Install("CPed", "operator delete", 0x5E4760, &CPed::operator delete);
+    // ReversibleHooks::Install("CPed", "operator new", 0x5E4720, &CPed::operator new);
+    // ReversibleHooks::Install("CPed", "SpawnFlyingComponent", 0x5F0190, &CPed::SpawnFlyingComponent);
+    // ReversibleHooks::Install("CPed", "PedCanPickUpPickUp", 0x455560, &CPed::PedCanPickUpPickUp);
+    // ReversibleHooks::Install("CPed", "Update", 0x5DEBE0, &CPed::Update);
+    ReversibleHooks::Install("CPed", "Initialise", 0x5DEBB0, &CPed::Initialise);
+    // ReversibleHooks::Install("CPed", "UpdateStatLeavingVehicle", 0x5E01B0, &CPed::UpdateStatLeavingVehicle);
+    // ReversibleHooks::Install("CPed", "UpdateStatEnteringVehicle", 0x5E01A0, &CPed::UpdateStatEnteringVehicle);
+    // ReversibleHooks::Install("CPed", "ShoulderBoneRotation", 0x5DF560, &CPed::ShoulderBoneRotation);
+    // ReversibleHooks::Install("CPed", "RestoreHeadingRateCB", 0x5DFD70, &CPed::RestoreHeadingRateCB);
+
+    // Methods
+    // ReversibleHooks::Install("CPed", "PedIsInvolvedInConversation", 0x43AB90, &CPed::PedIsInvolvedInConversation);
     ReversibleHooks::Install("CPed", "ClearWeapons", 0x5E6320, &CPed::ClearWeapons);
-    ReversibleHooks::Install("CPed", "GetWeaponSlot", 0x5DF200, &CPed::GetWeaponSlot);
-    ReversibleHooks::Install("CPed", "CanBeArrested", 0x5DF060, &CPed::CanBeArrested);
-    ReversibleHooks::Install("CPed", "CanStrafeOrMouseControl", 0x5DF090, &CPed::CanStrafeOrMouseControl);
-    ReversibleHooks::Install("CPed", "CanPedReturnToState", 0x5DF000, &CPed::CanPedReturnToState);
+    // ReversibleHooks::Install("CPed", "ClearWeapon", 0x5E62B0, &CPed::ClearWeapon);
+    // ReversibleHooks::Install("CPed", "SetCurrentWeapon", 0x5E6280, static_cast<void(CPed::*)(eWeaponType)>(&CPed::SetCurrentWeapon));
+    // ReversibleHooks::Install("CPed", "SetCurrentWeapon", 0x5E61F0, static_cast<void(CPed::*)(int32_t)>(&CPed::SetCurrentWeapon));
+    // ReversibleHooks::Install("CPed", "GiveWeapon", 0x5E6080, &CPed::GiveWeapon);
+    // ReversibleHooks::Install("CPed", "TakeOffGoggles", 0x5E6010, &CPed::TakeOffGoggles);
+    // ReversibleHooks::Install("CPed", "AddWeaponModel", 0x5E5ED0, &CPed::AddWeaponModel);
+    // ReversibleHooks::Install("CPed", "PlayFootSteps", 0x5E57F0, &CPed::PlayFootSteps);
+    // ReversibleHooks::Install("CPed", "DoFootLanded", 0x5E5380, &CPed::DoFootLanded);
+    // ReversibleHooks::Install("CPed", "ClearAll", 0x5E5320, &CPed::ClearAll);
+    // ReversibleHooks::Install("CPed", "CalculateNewOrientation", 0x5E52E0, &CPed::CalculateNewOrientation);
+    // ReversibleHooks::Install("CPed", "CalculateNewVelocity", 0x5E4C50, &CPed::CalculateNewVelocity);
+    // ReversibleHooks::Install("CPed", "SetCharCreatedBy", 0x5E47E0, &CPed::SetCharCreatedBy);
+    // ReversibleHooks::Install("CPed", "SetPedState", 0x5E4500, &CPed::SetPedState);
+    // ReversibleHooks::Install("CPed", "GiveObjectToPedToHold", 0x5E4390, &CPed::GiveObjectToPedToHold);
+    // ReversibleHooks::Install("CPed", "ClearLookFlag", 0x5E1950, &CPed::ClearLookFlag);
+    // ReversibleHooks::Install("CPed", "WorkOutHeadingForMovingFirstPerson", 0x5E1A00, &CPed::WorkOutHeadingForMovingFirstPerson);
+    // ReversibleHooks::Install("CPed", "UpdatePosition", 0x5E1B10, &CPed::UpdatePosition);
+    // ReversibleHooks::Install("CPed", "MakeTyresMuddySectorList", 0x6AE0D0, &CPed::MakeTyresMuddySectorList);
+    ReversibleHooks::Install("CPed", "IsPedInControl", 0x5E3960, &CPed::IsPedInControl);
+    // ReversibleHooks::Install("CPed", "RemoveWeaponModel", 0x5E3990, &CPed::RemoveWeaponModel);
+    // ReversibleHooks::Install("CPed", "RemoveWeaponWhenEnteringVehicle", 0x5E6370, &CPed::RemoveWeaponWhenEnteringVehicle);
+    // ReversibleHooks::Install("CPed", "AddGogglesModel", 0x5E3A90, &CPed::AddGogglesModel);
+    // ReversibleHooks::Install("CPed", "GetWeaponSkill", 0x5E3B60, static_cast<int8_t(CPed::*)(eWeaponType)>(&CPed::GetWeaponSkill));
+    // ReversibleHooks::Install("CPed", "SetWeaponSkill", 0x5E3C10, &CPed::SetWeaponSkill);
+    // ReversibleHooks::Install("CPed", "ClearLook", 0x5E3FF0, &CPed::ClearLook);
+    // ReversibleHooks::Install("CPed", "TurnBody", 0x5E4000, &CPed::TurnBody);
+    // ReversibleHooks::Install("CPed", "IsPointerValid", 0x5E4220, &CPed::IsPointerValid);
+    // ReversibleHooks::Install("CPed", "GetBonePosition", 0x5E4280, &CPed::GetBonePosition);
+    // ReversibleHooks::Install("CPed", "PutOnGoggles", 0x5E3AE0, &CPed::PutOnGoggles);
+    // ReversibleHooks::Install("CPed", "SortPeds", 0x5E17E0, &CPed::SortPeds);
+    // ReversibleHooks::Install("CPed", "ReplaceWeaponWhenExitingVehicle", 0x5E6490, &CPed::ReplaceWeaponWhenExitingVehicle);
+    ReversibleHooks::Install("CPed", "RemoveWeaponForScriptedCutscene", 0x5E6550, &CPed::RemoveWeaponForScriptedCutscene);
+    // ReversibleHooks::Install("CPed", "KillPedWithCar", 0x5F0360, &CPed::KillPedWithCar);
+    // ReversibleHooks::Install("CPed", "IsPedHeadAbovePos", 0x5F02C0, &CPed::IsPedHeadAbovePos);
+    // ReversibleHooks::Install("CPed", "RemoveWeaponAnims", 0x5F0250, &CPed::RemoveWeaponAnims);
+    // ReversibleHooks::Install("CPed", "DoesLOSBulletHitPed", 0x5F01A0, &CPed::DoesLOSBulletHitPed);
+    // ReversibleHooks::Install("CPed", "RemoveBodyPart", 0x5F0140, &CPed::RemoveBodyPart);
+    // ReversibleHooks::Install("CPed", "Say", 0x5EFFE0, &CPed::Say);
+    // ReversibleHooks::Install("CPed", "SayScript", 0x5EFFB0, &CPed::SayScript);
+    // ReversibleHooks::Install("CPed", "CanPedHoldConversation", 0x5EFFA0, &CPed::CanPedHoldConversation);
+    // ReversibleHooks::Install("CPed", "EnablePedSpeechForScriptSpeech", 0x5EFF90, &CPed::EnablePedSpeechForScriptSpeech);
+    // ReversibleHooks::Install("CPed", "DisablePedSpeechForScriptSpeech", 0x5EFF80, &CPed::DisablePedSpeechForScriptSpeech);
+    // ReversibleHooks::Install("CPed", "EnablePedSpeech", 0x5EFF70, &CPed::EnablePedSpeech);
+    // ReversibleHooks::Install("CPed", "DisablePedSpeech", 0x5EFF60, &CPed::DisablePedSpeech);
+    // ReversibleHooks::Install("CPed", "GetPedTalking", 0x5EFF50, &CPed::GetPedTalking);
     ReversibleHooks::Install("CPed", "GiveWeaponWhenJoiningGang", 0x5E8BE0, &CPed::GiveWeaponWhenJoiningGang);
-    ReversibleHooks::Install("CPed", "GetWeaponSkill_char", 0x5E6580, (char(CPed::*)()) &CPed::GetWeaponSkill);
+    ReversibleHooks::Install("CPed", "GiveWeaponAtStartOfFight", 0x5E8AB0, &CPed::GiveWeaponAtStartOfFight);
+    // ReversibleHooks::Install("CPed", "GiveDelayedWeapon", 0x5E89B0, &CPed::GiveDelayedWeapon);
+    ReversibleHooks::Install("CPed", "GetWeaponSkill", 0x5E6580, static_cast<char(CPed::*)()>(&CPed::GetWeaponSkill));
+    // ReversibleHooks::Install("CPed", "PreRenderAfterTest", 0x5E65A0, &CPed::PreRenderAfterTest);
+    // ReversibleHooks::Install("CPed", "SetIdle", 0x5E7980, &CPed::SetIdle);
+    // ReversibleHooks::Install("CPed", "SetLook", 0x5E79B0, static_cast<int32_t(CPed::*)(float)>(&CPed::SetLook));
+    // ReversibleHooks::Install("CPed", "SetLook", 0x5E7A60, static_cast<int32_t(CPed::*)(CEntity *)>(&CPed::SetLook));
+    // ReversibleHooks::Install("CPed", "Look", 0x5E7B20, &CPed::Look);
     ReversibleHooks::Install("CPed", "ReplaceWeaponForScriptedCutscene", 0x5E6530, &CPed::ReplaceWeaponForScriptedCutscene);
     ReversibleHooks::Install("CPed", "RemoveWeaponForScriptedCutscene", 0x5E6550, &CPed::RemoveWeaponForScriptedCutscene);
     ReversibleHooks::Install("CPed", "GiveWeaponAtStartOfFight", 0x5E8AB0, &CPed::GiveWeaponAtStartOfFight);
     ReversibleHooks::Install("CPed", "ProcessBuoyancy", 0x5E1FA0, &CPed::ProcessBuoyancy);
-    ReversibleHooks::Install("CPed", "Initialise", 0x5DEBB0, &CPed::Initialise);
+    // ReversibleHooks::Install("CPed", "PositionPedOutOfCollision", 0x5E0820, &CPed::PositionPedOutOfCollision);
+    // ReversibleHooks::Install("CPed", "GrantAmmo", 0x5DF220, &CPed::GrantAmmo);
+    ReversibleHooks::Install("CPed", "GetWeaponSlot", 0x5DF200, &CPed::GetWeaponSlot);
+    // ReversibleHooks::Install("CPed", "PositionAnyPedOutOfCollision", 0x5E13C0, &CPed::PositionAnyPedOutOfCollision);
+    // ReversibleHooks::Install("CPed", "CanBeDeletedEvenInVehicle", 0x5DF150, &CPed::CanBeDeletedEvenInVehicle);
+    // ReversibleHooks::Install("CPed", "CanBeDeleted", 0x5DF100, &CPed::CanBeDeleted);
+    ReversibleHooks::Install("CPed", "CanStrafeOrMouseControl", 0x5DF090, &CPed::CanStrafeOrMouseControl);
+    ReversibleHooks::Install("CPed", "CanBeArrested", 0x5DF060, &CPed::CanBeArrested);
+    // ReversibleHooks::Install("CPed", "CanSetPedState", 0x5DF030, &CPed::CanSetPedState);
+    ReversibleHooks::Install("CPed", "CanPedReturnToState", 0x5DF000, &CPed::CanPedReturnToState);
+    // ReversibleHooks::Install("CPed", "UseGroundColModel", 0x5DEFE0, &CPed::UseGroundColModel);
+    // ReversibleHooks::Install("CPed", "IsPedShootable", 0x5DEFD0, &CPed::IsPedShootable);
+    // ReversibleHooks::Install("CPed", "GetLocalDirection", 0x5DEF60, &CPed::GetLocalDirection);
+    // ReversibleHooks::Install("CPed", "ClearAimFlag", 0x5DEF20, &CPed::ClearAimFlag);
+    // ReversibleHooks::Install("CPed", "SetAimFlag", 0x5DEED0, static_cast<int8_t(CPed::*)(CEntity *)>(&CPed::SetAimFlag));
+    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEE40, static_cast<int8_t(CPed::*)(CEntity *, bool, bool)>(&CPed::SetLookFlag));
+    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEDC0, static_cast<int8_t(CPed::*)(float, bool, bool)>(&CPed::SetLookFlag));
+    // ReversibleHooks::Install("CPed", "CanUseTorsoWhenLooking", 0x5DED90, &CPed::CanUseTorsoWhenLooking);
+    // ReversibleHooks::Install("CPed", "PedIsReadyForConversation", 0x43ABA0, &CPed::PedIsReadyForConversation);
+    // ReversibleHooks::Install("CPed", "CreateDeadPedMoney", 0x4590F0, &CPed::CreateDeadPedMoney);
+    // ReversibleHooks::Install("CPed", "CreateDeadPedPickupCoors", 0x459180, &CPed::CreateDeadPedPickupCoors);
+    // ReversibleHooks::Install("CPed", "CreateDeadPedWeaponPickups", 0x4591D0, &CPed::CreateDeadPedWeaponPickups);
+    // ReversibleHooks::Install("CPed", "IsWearingGoggles", 0x479D10, &CPed::IsWearingGoggles);
+    // ReversibleHooks::Install("CPed", "SetAmmo", 0x5DF290, &CPed::SetAmmo);
+    // ReversibleHooks::Install("CPed", "SetStayInSamePlace", 0x481090, &CPed::SetStayInSamePlace);
+    // ReversibleHooks::Install("CPed", "SetPedStats", 0x5DEBC0, &CPed::SetPedStats);
+    // ReversibleHooks::Install("CPed", "SetMoveState", 0x5DEC00, &CPed::SetMoveState);
+    // ReversibleHooks::Install("CPed", "SetMoveAnimSpeed", 0x5DEC10, &CPed::SetMoveAnimSpeed);
+    // ReversibleHooks::Install("CPed", "StopNonPartialAnims", 0x5DED10, &CPed::StopNonPartialAnims);
+    // ReversibleHooks::Install("CPed", "RestartNonPartialAnims", 0x5DED50, &CPed::RestartNonPartialAnims);
+    // ReversibleHooks::Install("CPed", "DoWeHaveWeaponAvailable", 0x5DF300, &CPed::DoWeHaveWeaponAvailable);
+    // ReversibleHooks::Install("CPed", "RemoveGogglesModel", 0x5DF170, &CPed::RemoveGogglesModel);
+    // ReversibleHooks::Install("CPed", "SetGunFlashAlpha", 0x5DF400, &CPed::SetGunFlashAlpha);
+    // ReversibleHooks::Install("CPed", "CanSeeEntity", 0x5E0730, &CPed::CanSeeEntity);
+    // ReversibleHooks::Install("CPed", "SetPedDefaultDecisionMaker", 0x5E06E0, &CPed::SetPedDefaultDecisionMaker);
+    // ReversibleHooks::Install("CPed", "GetWalkAnimSpeed", 0x5E04B0, &CPed::GetWalkAnimSpeed);
+    // ReversibleHooks::Install("CPed", "StopPlayingHandSignal", 0x5E0480, &CPed::StopPlayingHandSignal);
+    // ReversibleHooks::Install("CPed", "IsPlayingHandSignal", 0x5E0460, &CPed::IsPlayingHandSignal);
+    // ReversibleHooks::Install("CPed", "CanThrowEntityThatThisPedIsHolding", 0x5E0400, &CPed::CanThrowEntityThatThisPedIsHolding);
+    // ReversibleHooks::Install("CPed", "DropEntityThatThisPedIsHolding", 0x5E0360, &CPed::DropEntityThatThisPedIsHolding);
+    // ReversibleHooks::Install("CPed", "GetEntityThatThisPedIsHolding", 0x5E02E0, &CPed::GetEntityThatThisPedIsHolding);
+    // ReversibleHooks::Install("CPed", "GetHoldingTask", 0x5E0290, &CPed::GetHoldingTask);
+    // ReversibleHooks::Install("CPed", "ReleaseCoverPoint", 0x5E0270, &CPed::ReleaseCoverPoint);
+    // ReversibleHooks::Install("CPed", "DoGunFlash", 0x5DF340, &CPed::DoGunFlash);
+    // ReversibleHooks::Install("CPed", "GetTransformedBonePosition", 0x5E01C0, &CPed::GetTransformedBonePosition);
+    ReversibleHooks::Install("CPed", "IsAlive", 0x5E0170, &CPed::IsAlive);
+    // ReversibleHooks::Install("CPed", "DeadPedMakesTyresBloody", 0x6B4200, &CPed::DeadPedMakesTyresBloody);
+    // ReversibleHooks::Install("CPed", "Undress", 0x5E00F0, &CPed::Undress);
+    // ReversibleHooks::Install("CPed", "SetLookTimer", 0x5DF8D0, &CPed::SetLookTimer);
+    // ReversibleHooks::Install("CPed", "RestoreHeadingRate", 0x5DFD60, &CPed::RestoreHeadingRate);
+    // ReversibleHooks::Install("CPed", "Dress", 0x5E0130, &CPed::Dress);
     ReversibleHooks::Install("CPed", "IsPlayer", 0x5DF8F0, &CPed::IsPlayer);
+    // ReversibleHooks::Install("CPed", "GetBikeRidingSkill", 0x5DF510, &CPed::GetBikeRidingSkill);
+    // ReversibleHooks::Install("CPed", "SetPedPositionInCar", 0x5DF910, &CPed::SetPedPositionInCar);
+    // ReversibleHooks::Install("CPed", "SetRadioStation", 0x5DFD90, &CPed::SetRadioStation);
+    // ReversibleHooks::Install("CPed", "PositionAttachedPed", 0x5DFDF0, &CPed::PositionAttachedPed);
+    // ReversibleHooks::Install("CPed", "ResetGunFlashAlpha", 0x5DF4E0, &CPed::ResetGunFlashAlpha);
+
+    // Virtual methods
+    // ReversibleHooks::Install("CPed", "SetModelIndex", 0x5E4880, &CPed::SetModelIndex_Reversed);
+    // ReversibleHooks::Install("CPed", "DeleteRwObject", 0x5DEBF0, &CPed::DeleteRwObject_Reversed);
+    // ReversibleHooks::Install("CPed", "ProcessControl", 0x5E8CD0, &CPed::ProcessControl_Reversed);
+    // ReversibleHooks::Install("CPed", "Teleport", 0x5E4110, &CPed::Teleport_Reversed);
+    // ReversibleHooks::Install("CPed", "SpecialEntityPreCollisionStuff", 0x5E3C30, &CPed::SpecialEntityPreCollisionStuff_Reversed);
+    // ReversibleHooks::Install("CPed", "SpecialEntityCalcCollisionSteps", 0x5E3E90, &CPed::SpecialEntityCalcCollisionSteps_Reversed);
+    // ReversibleHooks::Install("CPed", "PreRender", 0x5E8A20, &CPed::PreRender_Reversed);
+    // ReversibleHooks::Install("CPed", "Render", 0x5E7680, &CPed::Render_Reversed);
+    // ReversibleHooks::Install("CPed", "SetupLighting", 0x553F00, &CPed::SetupLighting_Reversed);
+    // ReversibleHooks::Install("CPed", "RemoveLighting", 0x5533B0, &CPed::RemoveLighting_Reversed);
+    // ReversibleHooks::Install("CPed", "FlagToDestroyWhenNextProcessed", 0x5E7B70, &CPed::FlagToDestroyWhenNextProcessed_Reversed);
+    // ReversibleHooks::Install("CPed", "ProcessEntityCollision", 0x5E2530, &CPed::ProcessEntityCollision_Reversed);
+    // ReversibleHooks::Install("CPed", "SetMoveAnim", 0x5E4A00, &CPed::SetMoveAnim_Reversed);
+    // ReversibleHooks::Install("CPed", "Save", 0x5D5730, &CPed::Save_Reversed);
+    // ReversibleHooks::Install("CPed", "Load", 0x5D4640, &CPed::Load_Reversed);
 }
 
 CPed::CPed(ePedType pedtype) : CPhysical(), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
