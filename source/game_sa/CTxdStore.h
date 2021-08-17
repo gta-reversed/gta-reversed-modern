@@ -15,9 +15,11 @@ public:
     // class variables
 
     static CPool<TxdDef>*& ms_pTxdPool;
-
-    static RwTexDictionary* ms_pStoredTxd;
+    static RwTexDictionary*& ms_pStoredTxd;
+    static int32_t& ms_lastSlotFound;
     // variables list is not finished. Need to make CPools before.
+
+    static int16_t (&defaultTxds)[4];
 
 public:
     static void InjectHooks();
@@ -26,29 +28,38 @@ public:
     static void Shutdown();
     static void GameShutdown();
 
-    static bool StartLoadTxd(int index, RwStream* stream);
-    static bool FinishLoadTxd(int index, RwStream* stream);
-    static bool LoadTxd(int index, RwStream* stream);
-    static bool LoadTxd(int index, char const* filename);
+    static bool StartLoadTxd(int32_t index, RwStream* stream);
+    static bool FinishLoadTxd(int32_t index, RwStream* stream);
+    static bool LoadTxd(int32_t index, RwStream* stream);
+    static bool LoadTxd(int32_t index, const char* filename);
 
     static void PushCurrentTxd();
     static void PopCurrentTxd();
-    static void SetCurrentTxd(int index);
+    static void SetCurrentTxd(int32_t index);
 
-    static int FindTxdSlot(char const* name);
-    static int FindTxdSlot(unsigned int hash);
+    static int32_t FindTxdSlot(const char* name);
+    static int32_t FindTxdSlot(uint32_t hash);
 
-    static size_t GetTxd(int index);
-    static int GetParentTxdSlot(int index);
+    static RwTexDictionary* GetTxd(int32_t index);
+    static int32_t GetParentTxdSlot(int32_t index);
 
-    static void Create(int index);
+    static void Create(int32_t index);
 
-    static int AddTxdSlot(char const* name);
-    static void RemoveTxdSlot(int index);
-    static void RemoveTxd(int index);
+    static int32_t AddTxdSlot(const char* name);
+    static void RemoveTxdSlot(int32_t index);
+    static void RemoveTxd(int32_t index);
 
-    static TxdDef* AddRef(int index);
-    static void RemoveRef(int index);
-    static TxdDef* RemoveRefWithoutDelete(int index);
-    static unsigned int GetNumRefs(int index);
+    static void AddRef(int32_t index);
+    static void RemoveRef(int32_t index);
+    static void RemoveRefWithoutDelete(int32_t index);
+    static int32_t GetNumRefs(int32_t index);
+
+    static RwTexDictionary* GetTxdParent(RwTexDictionary* txd);
+    static void SetTxdParent(RwTexDictionary* txd, RwTexDictionary* parent);
+    static void SetupTxdParent(int32_t index);
+
+    static RwTexture* TxdStoreFindCB(const char* name);
+    static RwTexture* TxdStoreLoadCB(const char* name, const char* mask);
 };
+
+RwTexture* RemoveIfRefCountIsGreaterThanOne(RwTexture* texture, void* data);
