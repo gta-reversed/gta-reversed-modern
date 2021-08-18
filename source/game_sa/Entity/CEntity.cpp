@@ -538,7 +538,7 @@ void CEntity::PreRender_Reversed()
 
         auto vecCamPos = CVector2D(TheCamera.GetPosition());
         auto vecEntPos = CVector2D(GetPosition());
-        auto fDist = DistanceBetweenPoints(vecCamPos, vecEntPos);
+        auto fDist = DistanceBetweenPoints2D(vecCamPos, vecEntPos);
         CObject::fDistToNearestTree = std::min(CObject::fDistToNearestTree, fDist);
         CEntity::ModifyMatrixForTreeInWind();
     }
