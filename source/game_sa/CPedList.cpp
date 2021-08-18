@@ -2,14 +2,15 @@
 #include "CPedList.h"
 
 void CPedList::InjectHooks() {
-    // ReversibleHooks::Install("CPedList", "Empty", 0x699DB0, &CPedList::Empty);
+    ReversibleHooks::Install("CPedList", "Empty", 0x699DB0, &CPedList::Empty);
     // ReversibleHooks::Install("CPedList", "BuildListFromGroup_NoLeader", 0x699DD0, &CPedList::BuildListFromGroup_NoLeader);
     // ReversibleHooks::Install("CPedList", "ExtractPedsWithGuns", 0x69A4C0, &CPedList::ExtractPedsWithGuns);
 }
 
 // 0x699DB0
 void CPedList::Empty() {
-    plugin::CallMethod<0x699DB0, CPedList*>(this);
+    m_count = 0;
+    memset(m_peds, 0, sizeof(m_peds));
 }
 
 // 0x699DD0
