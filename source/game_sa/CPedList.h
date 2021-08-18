@@ -23,6 +23,8 @@ public:
     void ExtractPedsWithGuns(CPedList& pFrom);
     void ClearUnused();
     void AddMember(CPed* ped);
+    void RemoveMemberNoFill(int i);
+    CPed* Get(int i);
     uint32_t GetCapacity() const;
 
     // Inlined functions below (Present in Android version)
@@ -31,5 +33,8 @@ public:
     void BuildListOfPedsOfPedType(int pedtype);
     void RemovePedsAttackingPedType(int pedtype);
     void RemovePedsThatDontListenToPlayer();
+
+    CPed** begin() { return m_peds; }
+    CPed** end() { return m_peds + GetCapacity(); }
 };
 VALIDATE_SIZE(CPedList, 0x7C);
