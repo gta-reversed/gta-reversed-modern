@@ -257,7 +257,7 @@ void CBoat::AddWakePoint(CVector posn)
         return;
     }
 
-    if (DistanceBetweenPoints(posn, m_avecWakePoints[0]) <= CBoat::MIN_WAKE_INTERVAL)
+    if (DistanceBetweenPoints2D(posn, m_avecWakePoints[0]) <= CBoat::MIN_WAKE_INTERVAL)
         return;
 
     short uiMaxWakePoints = 31;
@@ -399,7 +399,7 @@ void CBoat::FillBoatList()
         if (fCamDot > 100.0F || fCamDot < -15.0F)
             continue;
 
-        auto fDistFromCam = DistanceBetweenPoints(vecBoatPos, vecCamPos);
+        auto fDistFromCam = DistanceBetweenPoints2D(vecBoatPos, vecCamPos);
         if (fDistFromCam > 80.0F) // Originally squared dist, compared to 6400.0F
             continue;
 
@@ -416,7 +416,7 @@ void CBoat::FillBoatList()
         for (int32_t iCheckedInd = 0; iCheckedInd < NUM_WAKE_GEN_BOATS; ++iCheckedInd) {
             auto pCheckedBoat = CBoat::apFrameWakeGeneratingBoats[iCheckedInd];
             auto vecCheckedPos = CVector2D(pCheckedBoat->GetPosition());
-            auto fCheckedDistFromCam = DistanceBetweenPoints(vecCheckedPos, vecCamPos); // Originally squared dist
+            auto fCheckedDistFromCam = DistanceBetweenPoints2D(vecCheckedPos, vecCamPos); // Originally squared dist
             if (fCheckedDistFromCam < fMinDist) {
                 fMinDist = fCheckedDistFromCam;
                 iNewInd = iCheckedInd;
