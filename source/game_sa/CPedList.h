@@ -21,6 +21,9 @@ public:
     void Empty();
     void BuildListFromGroup_NoLeader(CPedGroupMembership& groupMembership);
     void ExtractPedsWithGuns(CPedList& pFrom);
+    void ClearUnused();
+    void AddMember(CPed* ped);
+    uint32_t GetCapacity() const;
 
     // Inlined functions below (Present in Android version)
     void FillUpHoles();
