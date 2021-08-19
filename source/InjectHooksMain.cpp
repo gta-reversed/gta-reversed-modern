@@ -226,6 +226,7 @@ void InjectHooksMain()
     CWaterLevel::InjectHooks();
     cBuoyancy::InjectHooks();
     CWanted::InjectHooks();
+    CEscalators::InjectHooks();
     CWeapon::InjectHooks();
     CWorld::InjectHooks();
     cTransmission::InjectHooks();
