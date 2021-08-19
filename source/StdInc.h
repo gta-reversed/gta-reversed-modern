@@ -19,6 +19,8 @@
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
+#pragma warning(disable : 26812) // Disable unscoped enum warning
+
 #include "game_sa\constants.h"
 #include "game_sa\CConversations.h"
 #include "game_sa\CPlantMgr.h"
