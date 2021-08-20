@@ -193,20 +193,12 @@ void CTaskManager::StopTimers(CEvent* pEvent) {
 
 // 0x6819D0
 CTask* CTaskManager::GetSimplestActiveTask() {
-    // Return last sub-task of current active task
-    CTask* last = nullptr;
-    for (CTask* task = GetActiveTask(); task; task = task->GetSubTask())
-        last = task;
-    return last;
+    return GetSimplestTask(GetActiveTask());
 }
 
 // 0x681A00
 CTaskSimple* CTaskManager::GetSimplestTask(int taskIndex) {
-    // Return last sub-task of the given primary task (at taskIndex)
-    CTask* last = nullptr;
-    for (CTask* task = GetPrimaryTask(taskIndex); task; task = task->GetSubTask())
-        last = task;
-    return static_cast<CTaskSimple*>(last);
+    return GetSimplestTask(GetPrimaryTask(taskIndex));
 }
 
 // 0x681A30
