@@ -196,27 +196,11 @@ void CTaskManager::StopTimers(CEvent* pEvent) {
 
 // 0x6819D0
 CTask* CTaskManager::GetSimplestActiveTask() {
-    CTask* task = nullptr;
-    CTask* result = nullptr;
-    int primaryTaskIndex = 0;
-    while (!m_aPrimaryTasks[primaryTaskIndex])
-    {
-        if (++primaryTaskIndex >= TASK_PRIMARY_MAX)
-        {
-            task = nullptr;
-            goto GET_SIMPLE_TASK;
-        }
-    }
-
-    task = m_aPrimaryTasks[primaryTaskIndex];
-
-GET_SIMPLE_TASK:
-    while (task)
-    {
-        result = task;
-        task = task->GetSubTask();
-    }
-    return result;
+    // Return last sub-task of current active task
+    CTask* last = nullptr;
+    for (CTask* task = GetActiveTask(); task; task = task->GetSubTask())
+        last = task;
+    return last;
 }
 
 // 0x681A00
