@@ -117,21 +117,12 @@ CTask* CTaskManager::FindActiveTaskByType(int taskType) {
 
 // 0x6817D0
 CTask* CTaskManager::FindTaskByType(int taskIndex, int taskId) {
-    CTask* result = nullptr;
-    CTask* pTask = m_aPrimaryTasks[taskIndex];
-    while (pTask)
-    {
-        if (result)
-        {
-            break;
+    for (CTask* task = GetPrimaryTask(taskIndex); task; task = task->GetSubTask()) {
+        if (task->GetId() == taskId) {
+            return task;
         }
-        if (pTask->GetId() == taskId)
-        {
-            result = pTask;
-        }
-        pTask = pTask->GetSubTask();
     }
-    return result;
+    return nullptr;
 }
 
 // 0x681810
