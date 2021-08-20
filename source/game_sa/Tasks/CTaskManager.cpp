@@ -286,32 +286,26 @@ void CTaskManager::SetTask(CTask* pTask, int taskIndex, int arg2) {
 // 0x681B60
 void CTaskManager::SetTaskSecondary(CTask* pTask, int taskIndex) {
     CTask* pCurrentSecondaryTask = m_aSecondaryTasks[taskIndex];
-    if (pCurrentSecondaryTask != pTask)
-    {
-        if (pCurrentSecondaryTask)
-        {
-            delete pCurrentSecondaryTask;
-            pCurrentSecondaryTask = nullptr;
-        }
-        m_aSecondaryTasks[taskIndex] = pTask;
-        AddSubTasks(static_cast<CTaskComplex*>(pTask));
-        CTask* pTheTask = m_aSecondaryTasks[taskIndex];
-        if (pTheTask)
-        {
-            CTask* pSimpleTask = nullptr;
-            do
-            {
-                pSimpleTask = pTheTask;
-                pTheTask = pTheTask->GetSubTask();
-            } while (pTheTask);
+    if (pCurrentSecondaryTask == pTask)
+        return;
 
-            if (!pSimpleTask->IsSimple())
-            {
-                delete m_aSecondaryTasks[taskIndex];
-                m_aSecondaryTasks[taskIndex] = nullptr;
-            }
-        }
+    
+    if (pCurrentSecondaryTask)
+    {
+        delete pCurrentSecondaryTask;
+        pCurrentSecondaryTask = nullptr;
     }
+
+    m_aSecondaryTasks[taskIndex] = pTask;
+
+    AddSubTasks(static_cast<CTaskComplex*>(pTask));
+
+    if (CTask* simplest = GetSimplestTask(GetTaskSecondary(taskIndex))) {
+        if (simplest && !simplest->IsSimple()) {
+            delete m_aSecondaryTasks[taskIndex];
+            m_aSecondaryTasks[taskIndex] = nullptr;
+        }
+    }  
 }
 
 // 0x681BD0
