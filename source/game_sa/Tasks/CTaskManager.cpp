@@ -64,55 +64,26 @@ CTask* CTaskManager::GetActiveTask() {
 
 // 0x681740
 CTask* CTaskManager::FindActiveTaskByType(int taskType) {
-    CTask* result = nullptr;
-    int primaryTaskIndex = 0;
-    while (!m_aPrimaryTasks[primaryTaskIndex])
-    {
-        if (++primaryTaskIndex >= TASK_PRIMARY_MAX)
-        {
-            goto CHECK_IN_SECONDARY_TASKS;
+    // First try current active task, and its sub-tasks
+    for (CTask* task = GetActiveTask(); task; task = task->GetSubTask()) {
+        if (task->GetId() == taskType) {
+            return task;
         }
-    }
-    CTask* pPrimaryTask = (CTask*)m_aPrimaryTasks[primaryTaskIndex];
-    if (!pPrimaryTask)
-    {
-    CHECK_IN_SECONDARY_TASKS:
-        for (auto task : m_aSecondaryTasks)
-        {
-            while (task)
-            {
-                if (result)
-                {
-                    break;
-                }
-                if (task->GetId() == taskType)
-                {
-                    result = task;
-                }
-
-                task = task->GetSubTask();
-            }
-        }
-        return result;
     }
 
-    while (!result)
-    {
-        if (pPrimaryTask->GetId() == taskType)
-        {
-            result = pPrimaryTask;
-        }
-        pPrimaryTask = pPrimaryTask->GetSubTask();
-        if (!pPrimaryTask)
-        {
-            if (result)
-            {
-                return result;
+    // Traverse all secondary tasks and their subtasks, and return last match
+    CTask* lastFound = nullptr;
+    for (int i = 0; i < TASK_SECONDARY_MAX; i++) {
+        for (CTask* sub = GetTaskSecondary(i); sub; sub = sub->GetSubTask()) {
+            if (sub->GetId() == taskType) {
+                lastFound = sub;
+                break; /* break inner */
             }
-            goto CHECK_IN_SECONDARY_TASKS;
         }
     }
-    return result;
+    // TODO, NOTE: This is stupid. Why go begin -> end, and return the last match, when
+    // going end -> begin and returning the last matching sub-task would do the same?
+    return lastFound;
 }
 
 // 0x6817D0
