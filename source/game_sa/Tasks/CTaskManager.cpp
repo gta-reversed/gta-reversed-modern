@@ -172,14 +172,11 @@ void CTaskManager::SetNextSubTask(CTaskComplex* pTask) {
 }
 
 // 0x681970
-CTaskSimple* CTaskManager::GetSimplestTask(CTask* pTask) {
-    CTaskSimple* result = nullptr;
-    while (pTask)
-    {
-        result = static_cast<CTaskSimple*>(pTask);
-        pTask = pTask->GetSubTask();
-    }
-    return result;
+CTaskSimple* CTaskManager::GetSimplestTask(CTask* task) {
+    CTask* last = nullptr;
+    for (; task; task = task->GetSubTask())
+        last = task;
+    return static_cast<CTaskSimple*>(last);
 }
 
 // (CEvent const* _event)
