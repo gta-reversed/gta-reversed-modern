@@ -205,14 +205,11 @@ CTask* CTaskManager::GetSimplestActiveTask() {
 
 // 0x681A00
 CTaskSimple* CTaskManager::GetSimplestTask(int taskIndex) {
-    CTaskSimple* result = nullptr;
-    CTask* pTask = m_aPrimaryTasks[taskIndex];
-    while (pTask)
-    {
-        result = static_cast<CTaskSimple*>(pTask);
-        pTask = pTask->GetSubTask();
-    }
-    return result;
+    // Return last sub-task of the given primary task (at taskIndex)
+    CTask* last = nullptr;
+    for (CTask* task = GetPrimaryTask(taskIndex); task; task = task->GetSubTask())
+        last = task;
+    return static_cast<CTaskSimple*>(last);
 }
 
 // 0x681A30
