@@ -229,24 +229,15 @@ void CTaskManager::AddSubTasks(CTaskComplex* pTask) {
 // (CTask *task)
 // 0x681A80
 void CTaskManager::ParentsControlChildren(CTaskComplex* pTask) {
-    if (pTask)
-    {
-        while (!pTask->IsSimple())
+    for (; pTask && !pTask->IsSimple(); pTask = static_cast<CTaskComplex*>(pTask->GetSubTask())) {
+        CTask* pSubTask = pTask->GetSubTask();
+        CTaskComplex* pControlSubTask = static_cast<CTaskComplex*>(pTask->ControlSubTask(m_pPed));
+        if (pSubTask != pControlSubTask)
         {
-            CTask* pSubTask = pTask->GetSubTask();
-            CTaskComplex* pControlSubTask = static_cast<CTaskComplex*>(pTask->ControlSubTask(m_pPed));
-            if (pSubTask != pControlSubTask)
-            {
-                pSubTask->MakeAbortable(m_pPed, ABORT_PRIORITY_URGENT, nullptr);
-                pTask->SetSubTask(pControlSubTask);
-                AddSubTasks(pControlSubTask);
-                return;
-            }
-            pTask = static_cast<CTaskComplex*>(pTask->GetSubTask());
-            if (!pTask)
-            {
-                return;
-            }
+            pSubTask->MakeAbortable(m_pPed, ABORT_PRIORITY_URGENT, nullptr);
+            pTask->SetSubTask(pControlSubTask);
+            AddSubTasks(pControlSubTask);
+            return;
         }
     }
 }
