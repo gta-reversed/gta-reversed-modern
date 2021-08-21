@@ -134,7 +134,7 @@ int32_t C3dMarkers::SaveUser3dMarkers() {
 
 // 0x721140
 void C3dMarkers::DirectionArrowSet(CVector posn, float size, int red, int green, int blue, int alpha, float dir_x, float dir_y, float dir_z) {
-    plugin::Call<0x721140, CVector, float, int32_t, int32_t, int32_t, int32_t, float, float, float>(pos, size, red, green, blue, alpha, dir_x, dir_y, dir_z);
+    plugin::Call<0x721140, CVector, float, int32_t, int32_t, int32_t, int32_t, float, float, float>(posn, size, red, green, blue, alpha, dir_x, dir_y, dir_z);
 }
 
 // 0x726D40
