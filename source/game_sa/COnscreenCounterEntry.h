@@ -13,17 +13,18 @@ public:
     unsigned int   m_nVarId;
     unsigned int   m_nMaxVarValue;
     char           m_szDescriptionTextKey[10];
-    unsigned short m_nType; // 0 - counter (%), 1 - line, 2 - conter counter (%/%)
-    char           m_szDisplayedText[42]; // possibly 2b padding?
+    unsigned short m_nType;                     // 0 - counter (%), 1 - line, 2 - conter counter (%/%)
+    char           m_szDisplayedText[42];       // possibly 2b padding?
     bool           m_bEnabled;
     bool           m_bFlashWhenFirstDisplayed;
-    unsigned char  m_nColourId; // color index from HudColours
+    unsigned char  m_nColourId;                 // color index from HudColours
+
+public:
+    static void InjectHooks();
 
     //! unused
-     void ProcessForDisplayCounter(int type);
+    void ProcessForDisplayCounter(uint16_t type);
     //! unused
-     void SetColourID(unsigned char ColourID);
+    void SetColourID(uint8_t a2);
 };
 VALIDATE_SIZE(COnscreenCounterEntry, 0x44);
-
-//#include "meta/meta.COnscreenCounterEntry.h"
