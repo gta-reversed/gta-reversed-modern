@@ -38,6 +38,7 @@ void InjectHooksMain()
 {
     // WaitForDebugger();
 
+    COnscreenCounterEntry::InjectHooks();
     CPedTaskPair::InjectHooks();
     CDebug::InjectHooks();
     InjectCommonHooks();
