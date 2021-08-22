@@ -6,6 +6,7 @@
 class CMemoryMgr 
 {
 public:
+    static void Init() {}; // NOP
     static void *Malloc(size_t size);
     static void Free(void *memory);
     static void *Realloc(void *memory, size_t size);

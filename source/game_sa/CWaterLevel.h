@@ -112,6 +112,7 @@ public:
     * m_nNumOfWaterTriangles
     */
     static uint32_t m_nNumOfWaterVertices;
+    static uint32_t& m_nWaterConfiguration;
     static uint32_t& m_nWaterTimeOffset;
     static float* faWaveMultipliersX;
     static float* faWaveMultipliersY;

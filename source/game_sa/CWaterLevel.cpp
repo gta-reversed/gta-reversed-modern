@@ -1,5 +1,6 @@
 #include "StdInc.h"
 
+uint32_t& CWaterLevel::m_nWaterConfiguration = *(uint32_t*)0xC228A0;
 uint32_t& CWaterLevel::m_nWaterTimeOffset = *(uint32_t*)0xC228A4;
 float* CWaterLevel::faWaveMultipliersX = (float*)0x8D38C8;
 float* CWaterLevel::faWaveMultipliersY = (float*)0x8D38E8;

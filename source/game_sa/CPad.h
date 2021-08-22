@@ -7,6 +7,7 @@
 #pragma once
 
 #include "rw/skeleton.h"
+
 #include "CKeyboardState.h"
 #include "CMouseControllerState.h"
 #include "CControllerState.h"
@@ -101,6 +102,9 @@ public:
 
     static CPad* Pads;
 
+    static bool& bInvertLook4Pad;
+
+public:
     static void InjectHooks();
 
     // Functions list : Not finished

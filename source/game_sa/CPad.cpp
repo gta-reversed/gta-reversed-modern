@@ -18,6 +18,8 @@ CKeyboardState& CPad::NewKeyState = *(CKeyboardState*)0xB73190;
 
 CPad* CPad::Pads = (CPad*)0xB73458; // size is 2
 
+bool& CPad::bInvertLook4Pad = *(bool*)0xB73402;
+
 void CPad::InjectHooks() {
     HookInstall(0x541DD0, CPad::UpdatePads); // changes logic of the function and shouldn't be toggled on/off
 
