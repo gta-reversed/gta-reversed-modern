@@ -195,3 +195,13 @@ bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle) {
 void CTheScripts::WipeLocalVariableMemoryForMissionScript() {
     plugin::CallDynGlobal(0x464BB0);
 }
+
+// 0x464D40
+void CTheScripts::StartTestScript() {
+    StartNewScript(CTheScripts::ScriptSpace);
+}
+
+// 0x46A000
+void CTheScripts::Process() {
+    plugin::CallDynGlobal(0x46A000);
+}
