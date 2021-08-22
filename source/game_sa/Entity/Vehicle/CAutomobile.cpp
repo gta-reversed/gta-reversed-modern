@@ -1384,7 +1384,7 @@ void CAutomobile::HydraulicControl()
         if (m_nStatus == STATUS_PLAYER) {
             if (m_pDriver && m_pDriver->IsPlayer())
                 driver = static_cast<CPlayerPed*>(m_pDriver);
-            if (CGameLogic::GameState != GAME_STATE_0)
+            if (CGameLogic::GameState != GAME_STATE_INITIAL)
                 return;
         }
         if (!CVehicle::GetSpecialColModel())
@@ -2630,7 +2630,7 @@ void CAutomobile::TankControl()
     }
     if (m_nStatus != STATUS_PLAYER || m_nModelIndex != MODEL_RHINO)
         return;
-    if (CGameLogic::GameState != GAME_STATE_0 || !m_pDriver || !m_pDriver->IsPlayer())
+    if (CGameLogic::GameState != GAME_STATE_INITIAL || !m_pDriver || !m_pDriver->IsPlayer())
         return;
     CPad* pad = static_cast<CPlayerPed*>(m_pDriver)->GetPadFromPlayer();
     if (!pad)
