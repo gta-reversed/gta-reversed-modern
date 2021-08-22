@@ -56,3 +56,5 @@ public:
     static void NewChunkLoaded();
 	
 };
+
+void LoadingScreen(char* msg1, char* msg2);
