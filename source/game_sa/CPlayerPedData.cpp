@@ -39,20 +39,14 @@ CPlayerPedData *CPlayerPedData::Destructor() {
 // 0x571880
 void CPlayerPedData::AllocateData() {
     if (!m_pWanted) {
-        m_pWanted = new CWanted();
-        if (!m_pWanted) {
-            m_pWanted = nullptr;
-        }
+      m_pWanted = new CWanted();
     }
+    m_pWanted->Initialise();
 
     if (!m_pPedClothesDesc) {
-        m_pPedClothesDesc = new CPedClothesDesc();
-        if (m_pPedClothesDesc) {
-            m_pPedClothesDesc->Initialise();
-        } else {
-            m_pPedClothesDesc = nullptr;
-        }
+      m_pPedClothesDesc = new CPedClothesDesc;
     }
+    m_pPedClothesDesc->Initialise();
 }
 
 //  0x56F890
