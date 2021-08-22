@@ -8,15 +8,25 @@
 
 #include "PluginBase.h"
 
-class  CCredits {
+class CCredits {
 public:
-    static int &CreditsStartTime;
-    static bool &bCreditsGoing;
+    static int &m_nCreditsStartTime;
+    static bool &m_bCreditsGoing;
+
+    //NOTSA
+    static float m_Position;
+    static float m_CurrentOffset;
+
+public:
+    static void InjectHooks();
 
     static void Render();
-    static void PrintCreditText(float scaleX, float scaleY, unsigned short* text, unsigned int& position, float currentOffset, bool highlighted);
+    static void PrintCreditText(float scaleX, float scaleY, const char* text, float& position, float currentOffset, bool highlighted);
     static void PrintCreditSpace(float spaceSize, unsigned int& position);
     static void RenderCredits();
     static void Start();
     static void Stop();
+
+    //NOTSA
+    static void PrintCreditTextHelper(char *textKey, float scale, bool highlighted);
 };
