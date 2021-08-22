@@ -317,6 +317,7 @@ void InjectHooksMain()
     CIplStore::InjectHooks();
     cHandlingDataMgr::InjectHooks();
     CLoadingScreen::InjectHooks();
+    CText::InjectHooks();
     CTaskSimpleUninterruptable::InjectHooks();
     CTaskSimpleSetStayInSamePlace::InjectHooks();
     CTaskSimpleGetUp::InjectHooks();

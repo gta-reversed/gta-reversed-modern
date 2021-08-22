@@ -276,7 +276,7 @@
 #include "game_sa\CStreaming.h"
 #include "game_sa\CStreamingInfo.h"
 #include "game_sa\CStuckCarCheck.h"
-#include "game_sa\CText.h"
+#include "game_sa\Text\CText.h"
 #include "game_sa\CTheCarGenerators.h"
 #include "game_sa\CTheZones.h"
 #include "game_sa\CTimeCycle.h"
