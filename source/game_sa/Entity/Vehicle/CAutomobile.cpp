@@ -14,8 +14,8 @@ CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;
 CMatrix* CAutomobile::matW2B = (CMatrix*)0xC1C220;
 CColPoint* aAutomobileColPoints = (CColPoint*)0xC1BFF8;
 
-const CVector PACKER_COL_PIVOT = CVector(0.0, 0.0, 2.0); // 0x8D3174
-const float CAR_BALANCE_MULT = 0.08f; // 0x8D3138
+const CVector PACKER_COL_PIVOT = CVector(0.0f, 0.0f, 2.0f);
+const float CAR_BALANCE_MULT = 0.08f;
 
 static const CVector TANK_SHOT_DOOM_POS(0.0f, -1.394f, 2.296f);
 static const CVector TANK_SHOT_DOOM_DEFAULT_TARGET(0.0f, 2.95f, 2.97f);
@@ -45,6 +45,8 @@ void CAutomobile::InjectHooks()
     ReversibleHooks::Install("CAutomobile", "RcbanditCheck1CarWheels", 0x6B3F70, &CAutomobile::RcbanditCheck1CarWheels);
     ReversibleHooks::Install("CAutomobile", "RcbanditCheckHitWheels", 0x6B45E0, &CAutomobile::RcbanditCheckHitWheels);
     ReversibleHooks::Install("CAutomobile", "FireTruckControl", 0x729B60, &CAutomobile::FireTruckControl);
+    ReversibleHooks::Install("CAutomobile", "SetHeliOrientation", 0x6A2450, &CAutomobile::SetHeliOrientation);
+    ReversibleHooks::Install("CAutomobile", "ClearHeliOrientation", 0x6A2460, &CAutomobile::ClearHeliOrientation);
 }
 
 CAutomobile::CAutomobile(int modelIndex, unsigned char createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy) {
@@ -1795,16 +1797,16 @@ void CAutomobile::TellHeliToGoToCoors(float x, float y, float z, float altitudeM
     ((void(__thiscall*)(CAutomobile*, float, float, float, float, float))0x6A2390)(this, x, y, z, altitudeMin, altitudeMax);
 }
 
-// Converted from thiscall void CAutomobile::SetHeliOrientation(float angle) 0x6A2450
+// 0x6A2450
 void CAutomobile::SetHeliOrientation(float angle)
 {
-    ((void(__thiscall*)(CAutomobile*, float))0x6A2450)(this, angle);
+    m_fForcedOrientation = angle;
 }
 
-// Converted from thiscall void CAutomobile::ClearHeliOrientation(void) 0x6A2460
+// 0x6A2460
 void CAutomobile::ClearHeliOrientation()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6A2460)(this);
+    m_fForcedOrientation = 0.0f;
 }
 
 // Converted from thiscall void CAutomobile::TellPlaneToGoToCoors(float x, float y, float z, float altitudeMin, float altitudeMax) 0x6A2470
@@ -1813,16 +1815,18 @@ void CAutomobile::TellPlaneToGoToCoors(float x, float y, float z, float altitude
     ((void(__thiscall*)(CAutomobile*, float, float, float, float, float))0x6A2470)(this, x, y, z, altitudeMin, altitudeMax);
 }
 
-// Converted from thiscall void CAutomobile::HideAllComps(void) 0x6A2510
+// unused
+// 0x6A2510
 void CAutomobile::HideAllComps()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6A2510)(this);
+    // NOP
 }
 
-// Converted from thiscall void CAutomobile::ShowAllComps(void) 0x6A2520
+// unused
+// 0x6A2520
 void CAutomobile::ShowAllComps()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6A2520)(this);
+    // NOP
 }
 
 // Converted from thiscall void CAutomobile::SetRandomDamage(bool) 0x6A2530
