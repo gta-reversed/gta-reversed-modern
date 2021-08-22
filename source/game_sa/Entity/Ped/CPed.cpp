@@ -362,16 +362,16 @@ bool CPed::IsAlive()
     return m_nPedState != PEDSTATE_DIE && m_nPedState != PEDSTATE_DEAD;
 }
 
-// Converted from thiscall void CPed::UpdateStatEnteringVehicle(void) 0x5E01A0
+// 0x5E01A0
 void CPed::UpdateStatEnteringVehicle()
 {
-    ((void(__thiscall *)(CPed*))0x5E01A0)(this);
+    // NOP
 }
 
-// Converted from thiscall void CPed::UpdateStatLeavingVehicle(void) 0x5E01B0
+// 0x5E01B0
 void CPed::UpdateStatLeavingVehicle()
 {
-    ((void(__thiscall *)(CPed*))0x5E01B0)(this);
+    // NOP
 }
 
 // Converted from thiscall void CPed::GetTransformedBonePosition(RwV3d &inOffsetOutPosn,uint boneId,bool updateSkinBones) 0x5E01C0
@@ -462,12 +462,6 @@ bool CPed::OurPedCanSeeThisEntity(CEntity* entity, bool isSpotted)
 void CPed::SortPeds(CPed** pedList, int arg1, int arg2)
 {
     ((void(__thiscall *)(CPed*, CPed**, int, int))0x5E17E0)(this, pedList, arg1, arg2);
-}
-
-// Converted from thiscall void CPed::ClearLookFlag(void) 0x5E1950
-void CPed::ClearLookFlag()
-{
-    ((void(__thiscall *)(CPed*))0x5E1950)(this);
 }
 
 // Converted from thiscall float CPed::WorkOutHeadingForMovingFirstPerson(float heading) 0x5E1A00
@@ -650,10 +644,16 @@ void CPed::PutOnGoggles()
     ((void(__thiscall *)(CPed*))0x5E3AE0)(this);
 }
 
+char CPed::GetWeaponSkill()
+{
+    return GetWeaponSkill(m_aWeapons[m_nActiveWeaponSlot].m_nType);
+}
+
 char CPed::GetWeaponSkill(eWeaponType weaponType)
 {
     if ( weaponType < WEAPON_PISTOL || weaponType > WEAPON_TEC9 )
         return 1;
+
     if (!m_nPedType || m_nPedType == PED_TYPE_PLAYER2)
     {
         int skillStat = CWeaponInfo::GetSkillStatIndex(weaponType);
@@ -661,14 +661,18 @@ char CPed::GetWeaponSkill(eWeaponType weaponType)
         float golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_nReqStatLevel);
         if (golfClubStatLevel <= CStats::GetStatValue(skillStat))
             return 2;
+
         CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, WEAPON_BRASSKNUCKLE);
         float brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_nReqStatLevel);
         if (brassKnuckleStatLevel > CStats::GetStatValue(skillStat))
             return 0;
+
         return 1;
     }
+
     if (weaponType != WEAPON_PISTOL || m_nPedType != PED_TYPE_COP)
         return m_nWeaponSkill;
+
     return 3;
 }
 
@@ -678,10 +682,16 @@ void CPed::SetWeaponSkill(eWeaponType weaponType, char skill)
     ((void(__thiscall *)(CPed*, eWeaponType, char))0x5E3C10)(this, weaponType, skill);
 }
 
-// Converted from thiscall void CPed::ClearLook(void) 0x5E3FF0
+// 0x5E1950
+void CPed::ClearLookFlag()
+{
+    ((void(__thiscall *)(CPed*))0x5E1950)(this);
+}
+
+// 0x5E3FF0
 void CPed::ClearLook()
 {
-    ((void(__thiscall *)(CPed*))0x5E3FF0)(this);
+    ClearLookFlag();
 }
 
 // Converted from thiscall bool CPed::TurnBody(void) 0x5E4000
@@ -866,11 +876,6 @@ void CPed::RemoveWeaponForScriptedCutscene()
         CPed::SetCurrentWeapon(weaponInfo->m_nSlot);
         m_nSavedWeapon = WEAPON_UNIDENTIFIED;
     }
-}
-
-char CPed::GetWeaponSkill()
-{
-    return CPed::GetWeaponSkill(m_aWeapons[m_nActiveWeaponSlot].m_nType);
 }
 
 // Converted from thiscall void CPed::PreRenderAfterTest(void) 0x5E65A0

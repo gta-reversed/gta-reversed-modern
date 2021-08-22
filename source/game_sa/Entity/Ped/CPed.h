@@ -430,9 +430,7 @@ public:
     void Undress(char* modelName);
     void Dress();
     bool IsAlive();
-    // dummy function
     void UpdateStatEnteringVehicle();
-    // dummy function
     void UpdateStatLeavingVehicle();
     void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, unsigned int boneId, bool updateSkinBones);
     void ReleaseCoverPoint();
