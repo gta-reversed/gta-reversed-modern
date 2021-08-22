@@ -12,25 +12,60 @@ bool& CWanted::bUseNewsHeliInAdditionToPolice = *(bool*)0xB7CB8C;
 
 void CWanted::InjectHooks()
 {
-    HookInstall(0x561F40, &CWanted::AreSwatRequired);
-    HookInstall(0x561F60, &CWanted::AreFbiRequired);
-    HookInstall(0x561F80, &CWanted::AreArmyRequired);
-    HookInstall(0x561C70, &CWanted::InitialiseStaticVariables);
-    HookInstall(0x561E70, &CWanted::SetMaximumWantedLevel);
+    ReversibleHooks::Install("CWanted", "AreSwatRequired", 0x561F40, &CWanted::AreSwatRequired);
+    ReversibleHooks::Install("CWanted", "AreFbiRequired", 0x561F60, &CWanted::AreFbiRequired);
+    ReversibleHooks::Install("CWanted", "AreArmyRequired", 0x561F80, &CWanted::AreArmyRequired);
+    ReversibleHooks::Install("CWanted", "InitialiseStaticVariables", 0x561C70, &CWanted::InitialiseStaticVariables);
+    ReversibleHooks::Install("CWanted", "SetMaximumWantedLevel", 0x561E70, &CWanted::SetMaximumWantedLevel);
+    ReversibleHooks::Install("CWanted", "Initialise", 0x562390, &CWanted::Initialise);
+    ReversibleHooks::Install("CWanted", "ClearQdCrimes", 0x561FE0, &CWanted::ClearQdCrimes);
+    ReversibleHooks::Install("CWanted", "IsInPursuit", 0x562330, &CWanted::IsInPursuit);
+    ReversibleHooks::Install("CWanted", "SetWantedLevel", 0x562470, &CWanted::SetWantedLevel);
+    ReversibleHooks::Install("CWanted", "CheatWantedLevel", 0x562540, &CWanted::CheatWantedLevel);
+    ReversibleHooks::Install("CWanted", "SetWantedLevelNoDrop", 0x562570, &CWanted::SetWantedLevelNoDrop);
+    ReversibleHooks::Install("CWanted", "ClearWantedLevelAndGoOnParole", 0x5625A0, &CWanted::ClearWantedLevelAndGoOnParole);
+    ReversibleHooks::Install("CWanted", "CanCopJoinPursuit_func", 0x562F60, static_cast<bool (*)(CCopPed*, unsigned char, CCopPed**, unsigned char&)>(CWanted::CanCopJoinPursuit));
+    // ReversibleHooks::Install("CWanted", "CanCopJoinPursuit_method", 0x562FB0, static_cast<bool (CWanted::*)(CCopPed*)>(&CWanted::CanCopJoinPursuit));
 }
 
-// Converted from cdecl void CWanted::InitialiseStaticVariables(void) 0x561C70
+// 0x562390
+void CWanted::Initialise() {
+    m_nFlags &= 0xC0;
+    m_nChaosLevel = 0;
+    m_nChaosLevelBeforeParole = 0;
+    m_nLastTimeWantedDecreased = 0;
+    m_nLastTimeWantedLevelChanged = 0;
+    m_nTimeOfParole = 0;
+    m_nCopsInPursuit = 0;
+    m_nMaxCopsInPursuit = 0;
+    m_nMaxCopCarsInPursuit = 0;
+    m_nChanceOnRoadBlock = 0;
+    m_fMultiplier = 1.0f;
+    m_nTimeCounting = 0;
+    m_bLeavePlayerAlone = false;
+    m_nWantedLevel = 0;
+    m_nWantedLevelBeforeParole = 0;
+    m_nCopsBeatingSuspect = 0;
+
+    for (auto& cop : m_pCopsInPursuit) {
+        cop  = nullptr;
+    }
+
+    ClearQdCrimes();
+}
+
+// 0x562400
+void CWanted::Reset() {
+    Initialise();
+}
+
 // Initialize Static Variables
+// 0x561C70
 void CWanted::InitialiseStaticVariables() 
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x561C70>();
-#else
     MaximumWantedLevel = 6;
     nMaximumWantedLevel = 9200;
-    bUseNewsHeliInAdditionToPolice = 0;
-#endif // USE_DEFAULT_FUNCTIONS
-
+    bUseNewsHeliInAdditionToPolice = false;
 }
 
 // Converted from thiscall void CWanted::UpdateWantedLevel(void) 0x561C90
@@ -38,14 +73,10 @@ void CWanted::UpdateWantedLevel() {
     plugin::CallMethod<0x561C90, CWanted*>(this);
 }
 
-// Converted from cdecl void CWanted::SetMaximumWantedLevel(int level) 0x561E70
 // Set Maximum Wanted Level
-void CWanted::SetMaximumWantedLevel(int level) 
+// 0x561E70
+void CWanted::SetMaximumWantedLevel(int level)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-
-    plugin::Call<0x561E70, int>(level);
-#else
     switch (level)
     {
     case 0:
@@ -79,8 +110,6 @@ void CWanted::SetMaximumWantedLevel(int level)
     default:
         return;
     }
-
-#endif
 }
 
 // Converted from thiscall bool CWanted::AreMiamiViceRequired(void) 0x561F30
@@ -88,37 +117,25 @@ bool CWanted::AreMiamiViceRequired() {
     return plugin::CallMethodAndReturn<bool, 0x561F30, CWanted*>(this);
 }
 
-// Converted from thiscall bool CWanted::AreSwatRequired(void) 0x561F40
 // Checks if SWAT is needed after four wanted level stars
-bool CWanted::AreSwatRequired() 
+// 0x561F40
+bool CWanted::AreSwatRequired() const
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x561F40, CWanted*>(this);
-#else
     return m_nWantedLevel == 4 || m_bSwatRequired;
-#endif // USE_DEFAULT_FUNCTIONS
 }
 
-// Converted from thiscall bool CWanted::AreFbiRequired(void) 0x561F60
 // Checks if FBI is needed after five wanted level stars
-bool CWanted::AreFbiRequired() 
+// 0x561F60
+bool CWanted::AreFbiRequired() const
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x561F60, CWanted*>(this);
-#else
     return m_nWantedLevel == 5 || m_bFbiRequired;
-#endif // USE_DEFAULT_FUNCTIONS
 }
 
-// Converted from thiscall bool CWanted::AreArmyRequired(void) 0x561F80
 // Checks if Army is needed after six wanted level stars
-bool CWanted::AreArmyRequired() 
+// 0x561F80
+bool CWanted::AreArmyRequired() const
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x561F80, CWanted*>(this);
-#else
     return m_nWantedLevel == 6 || m_bArmyRequired;
-#endif // USE_DEFAULT_FUNCTIONS
 }
 
 // Converted from thiscall int CWanted::NumOfHelisRequired(void) 0x561FA0
@@ -131,19 +148,26 @@ void CWanted::ResetPolicePursuit() {
     plugin::Call<0x561FD0>();
 }
 
-// Converted from thiscall void CWanted::ClearQdCrimes(void) 0x561FE0
+// 0x562760
+void CWanted::UpdateCrimesQ() {
+    plugin::CallMethod<0x562760, CWanted*>(this);
+}
+
+// 0x561FE0
 void CWanted::ClearQdCrimes() {
-    plugin::CallMethod<0x561FE0, CWanted*>(this);
+    for (auto& crime : m_CrimesBeingQd) {
+        crime.m_nCrimeType = eCrimeType::CRIME_NONE;
+    }
 }
 
-// Converted from thiscall bool CWanted::AddCrimeToQ(eCrimeType crimeType,int crimeId,CVector const&posn,bool bAlreadyReported,bool bPoliceDontReallyCare) 0x562000
-bool CWanted::AddCrimeToQ(eCrimeType crimeType, int crimeId, CVector const& posn, bool bAlreadyReported, bool bPoliceDontReallyCare) {
-    return plugin::CallMethodAndReturn<bool, 0x562000, CWanted*, eCrimeType, int, CVector const&, bool, bool>(this, crimeType, crimeId, posn, bAlreadyReported, bPoliceDontReallyCare);
+// 0x562000
+bool CWanted::AddCrimeToQ(eCrimeType crimeType, int crimeId, const CVector& posn, bool bAlreadyReported, bool bPoliceDontReallyCare) {
+    return plugin::CallMethodAndReturn<bool, 0x562000, CWanted*, eCrimeType, int, const CVector&, bool, bool>(this, crimeType, crimeId, posn, bAlreadyReported, bPoliceDontReallyCare);
 }
 
-// Converted from thiscall void CWanted::ReportCrimeNow(eCrimeType crimeType,CVector const&posn,bool bPoliceDontReallyCare) 0x562120
-void CWanted::ReportCrimeNow(eCrimeType crimeType, CVector const& posn, bool bPoliceDontReallyCare) {
-    plugin::CallMethod<0x562120, CWanted*, eCrimeType, CVector const&, bool>(this, crimeType, posn, bPoliceDontReallyCare);
+// Converted from thiscall void CWanted::ReportCrimeNow(eCrimeType crimeType,const CVector&posn,bool bPoliceDontReallyCare) 0x562120
+void CWanted::ReportCrimeNow(eCrimeType crimeType, const CVector& posn, bool bPoliceDontReallyCare) {
+    plugin::CallMethod<0x562120, CWanted*, eCrimeType, const CVector&, bool>(this, crimeType, posn, bPoliceDontReallyCare);
 }
 
 // Converted from cdecl void CWanted::RemovePursuitCop(CCopPed *cop,CCopPed **copsArray,uchar &copsCounter) 0x562300
@@ -151,9 +175,15 @@ void CWanted::RemovePursuitCop(CCopPed* cop, CCopPed** copsArray, unsigned char&
     plugin::Call<0x562300, CCopPed*, CCopPed**, unsigned char&>(cop, copsArray, copsCounter);
 }
 
-// Converted from thiscall bool CWanted::IsInPursuit(CCopPed *cop) 0x562330
+// 0x562330
 bool CWanted::IsInPursuit(CCopPed* cop) {
-    return plugin::CallMethodAndReturn<bool, 0x562330, CWanted*, CCopPed*>(this, cop);
+    for (auto& elem : m_pCopsInPursuit) {
+        if (elem == cop) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // Converted from cdecl void CWanted::UpdateEachFrame(void) 0x562360
@@ -161,54 +191,84 @@ void CWanted::UpdateEachFrame() {
     plugin::Call<0x562360>();
 }
 
-// Converted from thiscall void CWanted::Initialise(void) 0x562390
-void CWanted::Initialise() {
-    plugin::CallMethod<0x562390, CWanted*>(this);
-}
-
-// Converted from thiscall void CWanted::Reset(void) 0x562400
-void CWanted::Reset() {
-    plugin::CallMethod<0x562400, CWanted*>(this);
-}
-
-// Converted from thiscall void CWanted::RegisterCrime(eCrimeType crimeType,CVector const&posn,uint crimeId,bool bPoliceDontReallyCare) 0x562410
-void CWanted::RegisterCrime(eCrimeType crimeType, CVector const& posn, CPed* ped, bool bPoliceDontReallyCare) {
+// 0x562410
+void CWanted::RegisterCrime(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare) {
     plugin::CallMethod<0x562410, CWanted*, eCrimeType, CVector const&, CPed*, bool>(this, crimeType, posn, ped, bPoliceDontReallyCare);
 }
 
-// Converted from thiscall void CWanted::RegisterCrime_Immediately(eCrimeType crimeType,CVector const&posn,uint crimeId,bool bPoliceDontReallyCare) 0x562430
-void CWanted::RegisterCrime_Immediately(eCrimeType crimeType, CVector const& posn, CPed* ped, bool bPoliceDontReallyCare) {
+// 0x562430
+void CWanted::RegisterCrime_Immediately(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare) {
     plugin::CallMethod<0x562430, CWanted*, eCrimeType, CVector const&, CPed*, bool>(this, crimeType, posn, ped, bPoliceDontReallyCare);
 }
 
-// Converted from thiscall void CWanted::SetWantedLevel(int level) 0x562470
+// 0x562470
 void CWanted::SetWantedLevel(int level) {
-    plugin::CallMethod<0x562470, CWanted*, int>(this, level);
+    if (CCheat::m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE])
+        return;
+
+    int newLevel = level;
+    if (level > MaximumWantedLevel)
+        newLevel = MaximumWantedLevel;
+
+    ClearQdCrimes();
+
+    switch (newLevel) {
+    case 0:
+        m_nChaosLevel = 0;
+    case 1:
+        m_nChaosLevel = 70;
+        break;
+    case 2:
+        m_nChaosLevel = 200;
+        break;
+    case 3:
+        m_nChaosLevel = 570;
+        break;
+    case 4:
+        m_nChaosLevel = 1220;
+        break;
+    case 5:
+        m_nChaosLevel = 2420;
+        break;
+    case 6:
+        m_nChaosLevel = 4620;
+        break;
+    }
+    UpdateWantedLevel();
 }
 
-// Converted from thiscall void CWanted::CheatWantedLevel(int level) 0x562540
+// 0x562540
 void CWanted::CheatWantedLevel(int level) {
-    plugin::CallMethod<0x562540, CWanted*, int>(this, level);
+    if (level > MaximumWantedLevel) {
+        SetMaximumWantedLevel(level);
+    }
+    SetWantedLevel(level);
+    UpdateWantedLevel();
 }
 
-// Converted from thiscall void CWanted::SetWantedLevelNoDrop(int level) 0x562570
+// 0x562570
 void CWanted::SetWantedLevelNoDrop(int level) {
-    plugin::CallMethod<0x562570, CWanted*, int>(this, level);
+    if (m_nWantedLevel < m_nWantedLevelBeforeParole)
+        SetWantedLevel(m_nWantedLevelBeforeParole);
+
+    if (level > m_nWantedLevel)
+        SetWantedLevel(level);
 }
 
-// Converted from thiscall void CWanted::ClearWantedLevelAndGoOnParole(void) 0x5625A0
+// 0x5625A0
 void CWanted::ClearWantedLevelAndGoOnParole() {
-    plugin::CallMethod<0x5625A0, CWanted*>(this);
+    CStats::IncrementStat(STAT_TOTAL_NUMBER_OF_WANTED_STARS_EVADED, m_nWantedLevel);
+    auto playerWanted = FindPlayerWanted(-1);
+    m_nChaosLevelBeforeParole = playerWanted->m_nChaosLevel;
+    m_nWantedLevelBeforeParole = playerWanted->m_nWantedLevel;
+    m_nTimeOfParole = CTimer::m_snTimeInMilliseconds;
+    m_nChaosLevel = 0;
+    m_nWantedLevel = 0;
 }
 
 // Converted from cdecl int CWanted::WorkOutPolicePresence(CVector posn,float radius) 0x5625F0
 int CWanted::WorkOutPolicePresence(CVector posn, float radius) {
     return plugin::CallAndReturn<int, 0x5625F0, CVector, float>(posn, radius);
-}
-
-// Converted from thiscall void CWanted::UpdateCrimesQ(void) 0x562760
-void CWanted::UpdateCrimesQ() {
-    plugin::CallMethod<0x562760, CWanted*>(this);
 }
 
 // Converted from thiscall bool CWanted::IsClosestCop(CPed *ped,int numCopsToCheck) 0x5627D0
@@ -231,17 +291,30 @@ void CWanted::RemoveExcessPursuitCops() {
     plugin::CallMethod<0x562C40, CWanted*>(this);
 }
 
-// Converted from thiscall void CWanted::Update(void) 0x562C90
+// 0x562C90
 void CWanted::Update() {
     plugin::CallMethod<0x562C90, CWanted*>(this);
 }
 
-// Converted from cdecl bool CWanted::CanCopJoinPursuit(CCopPed *cop,uchar maxCopsCount,CCopPed **copsArray,uchar &copsCounter) 0x562F60
-bool CWanted::CanCopJoinPursuit(CCopPed* cop, unsigned char maxCopsCount, CCopPed** copsArray, unsigned char& copsCounter) {
-    return plugin::CallAndReturn<bool, 0x562F60, CCopPed*, unsigned char, CCopPed**, unsigned char&>(cop, maxCopsCount, copsArray, copsCounter);
+// 0x562F60
+bool CWanted::CanCopJoinPursuit(CCopPed* target, unsigned char maxCopsCount, CCopPed** copsArray, unsigned char& copsCounter) {
+    if (!maxCopsCount)
+        return false;
+
+    while (true) {
+        if (copsCounter < maxCopsCount)
+            return true;
+
+        CCopPed* cop = ComputePursuitCopToDisplace(target, copsArray);
+        if (!cop)
+            break;
+
+        RemovePursuitCop(cop, copsArray, copsCounter);
+    }
+    return false;
 }
 
-// Converted from thiscall bool CWanted::CanCopJoinPursuit(CCopPed *cop) 0x562FB0
+// 0x562FB0
 bool CWanted::CanCopJoinPursuit(CCopPed* cop) {
     return plugin::CallMethodAndReturn<bool, 0x562FB0, CWanted*, CCopPed*>(this, cop);
 }
