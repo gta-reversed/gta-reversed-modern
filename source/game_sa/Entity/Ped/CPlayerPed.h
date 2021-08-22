@@ -7,8 +7,9 @@
 #pragma once
 
 #include "CPed.h"
-#include "eWeaponType.h"
 #include "CPad.h"
+
+#include "eWeaponType.h"
 #include "eSprintType.h"
 
 class CEventDamage;
@@ -46,6 +47,7 @@ public:
     void Clear3rdPersonMouseTarget();
     // GetWanted()->m_nWantedLevel = 0;
     void Busted();
+    unsigned int GetWantedLevel();
     void SetWantedLevel(int level);
     void SetWantedLevelNoDrop(int level);
     void CheatWantedLevel(int level);
@@ -92,7 +94,6 @@ public:
     inline CWanted* GetWanted() {
         return m_pPlayerData ? m_pPlayerData->m_pWanted : nullptr;
     }
-    int GetWantedLevel();
 
     static void RemovePlayerPed(int playerId);
     static void DeactivatePlayerPed(int playerId);

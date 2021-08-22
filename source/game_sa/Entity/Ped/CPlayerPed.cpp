@@ -15,6 +15,12 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "ResetSprintEnergy", 0x60A530, &CPlayerPed::ResetSprintEnergy);
     ReversibleHooks::Install("CPlayerPed", "ResetPlayerBreath", 0x60A8A0, &CPlayerPed::ResetPlayerBreath);
     ReversibleHooks::Install("CPlayerPed", "RemovePlayerPed", 0x6094A0, &CPlayerPed::RemovePlayerPed);
+    ReversibleHooks::Install("CPlayerPed", "Busted", 0x609EF0, &CPlayerPed::Busted);
+    ReversibleHooks::Install("CPlayerPed", "GetWantedLevel", 0x41BE60, &CPlayerPed::GetWantedLevel);
+    ReversibleHooks::Install("CPlayerPed", "SetWantedLevel", 0x609F10, &CPlayerPed::SetWantedLevel);
+    ReversibleHooks::Install("CPlayerPed", "SetWantedLevelNoDrop", 0x609F30, &CPlayerPed::SetWantedLevelNoDrop);
+    ReversibleHooks::Install("CPlayerPed", "CheatWantedLevel", 0x609F50, &CPlayerPed::CheatWantedLevel);
+    ReversibleHooks::Install("CPlayerPed", "DoStuffToGoOnFire", 0x60A020, &CPlayerPed::DoStuffToGoOnFire);
 }
 
 // 0x5D46E0
@@ -131,24 +137,40 @@ void CPlayerPed::Clear3rdPersonMouseTarget() {
     plugin::CallMethod<0x609ED0, CPlayerPed *>(this);
 }
 
-// Converted from thiscall void CPlayerPed::Busted(void) 0x609EF0
+// 0x609EF0
 void CPlayerPed::Busted() {
-    plugin::CallMethod<0x609EF0, CPlayerPed *>(this);
+    CWanted* pWanted = GetWanted();
+    if (pWanted) {
+        pWanted->m_nChaosLevel = 0;
+    }
 }
 
-// Converted from thiscall void CPlayerPed::SetWantedLevel(int level) 0x609F10
+// 0x41BE60
+unsigned int CPlayerPed::GetWantedLevel() {
+    CWanted* pWanted = GetWanted();
+    if (pWanted) {
+        return pWanted->m_nWantedLevel;
+    }
+
+    return 0;
+}
+
+// 0x609F10
 void CPlayerPed::SetWantedLevel(int level) {
-    plugin::CallMethod<0x609F10, CPlayerPed *, int>(this, level);
+    CWanted* pWanted = GetWanted();
+    pWanted->SetWantedLevel(level);
 }
 
-// Converted from thiscall void CPlayerPed::SetWantedLevelNoDrop(int level) 0x609F30
+// 0x609F30
 void CPlayerPed::SetWantedLevelNoDrop(int level) {
-    plugin::CallMethod<0x609F30, CPlayerPed *, int>(this, level);
+    CWanted* pWanted = GetWanted();
+    pWanted->SetWantedLevelNoDrop(level);
 }
 
-// Converted from thiscall void CPlayerPed::CheatWantedLevel(int level) 0x609F50
+// 0x609F50
 void CPlayerPed::CheatWantedLevel(int level) {
-    plugin::CallMethod<0x609F50, CPlayerPed *, int>(this, level);
+    CWanted* pWanted = GetWanted();
+    pWanted->CheatWantedLevel(level);
 }
 
 // Converted from thiscall bool CPlayerPed::CanIKReachThisTarget(CVector posn, CWeapon *weapon, bool) 0x609F80
@@ -161,9 +183,10 @@ CPlayerInfo* CPlayerPed::GetPlayerInfoForThisPlayerPed() {
     return plugin::CallMethodAndReturn<CPlayerInfo*, 0x609FF0, CPlayerPed *>(this);
 }
 
-// Converted from thiscall void CPlayerPed::DoStuffToGoOnFire(void) 0x60A020
+// 0x60A020
 void CPlayerPed::DoStuffToGoOnFire() {
-    plugin::CallMethod<0x60A020, CPlayerPed *>(this);
+    if (m_nPedState == PEDSTATE_SNIPER_MODE)
+        TheCamera.ClearPlayerWeaponMode();
 }
 
 // Converted from thiscall void CPlayerPed::AnnoyPlayerPed(bool) 0x60A040
@@ -201,7 +224,8 @@ void CPlayerPed::MakePlayerGroupReappear() {
     plugin::CallMethod<0x60A4B0, CPlayerPed *>(this);
 }
 
-void CPlayerPed::ResetSprintEnergy() 
+// 0x60A530
+void CPlayerPed::ResetSprintEnergy()
 {
     m_pPlayerData->m_fTimeCanRun = CStats::GetFatAndMuscleModifier(STAT_MOD_TIME_CAN_RUN);
 }
@@ -344,9 +368,4 @@ bool CPlayerPed::FindWeaponLockOnTarget() {
 // Converted from thiscall bool CPlayerPed::FindNextWeaponLockOnTarget(CEntity *,bool) 0x60E530
 bool CPlayerPed::FindNextWeaponLockOnTarget(CEntity* arg0, bool arg1) {
     return plugin::CallMethodAndReturn<bool, 0x60E530, CPlayerPed *, CEntity*, bool>(this, arg0, arg1);
-}
-
-// Converted from thiscall int CPlayerPed::GetWantedLevel(void) 0x41BE60
-int CPlayerPed::GetWantedLevel() {
-    return plugin::CallMethodAndReturn<int, 0x41BE60, CPlayerPed *>(this);
 }
