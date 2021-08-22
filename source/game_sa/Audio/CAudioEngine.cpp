@@ -41,3 +41,11 @@ void CAudioEngine::StopRadio(tVehicleAudioSettings* audioSettings, unsigned char
 {
     plugin::CallMethod<0x506F70, CAudioEngine*, tVehicleAudioSettings*, unsigned char>(this, audioSettings, bDuringPause);
 }
+
+bool CAudioEngine::IsCutsceneTrackActive() {
+    return plugin::CallMethodAndReturn<bool, 0x507150>(this);
+}
+
+void CAudioEngine::RetuneRadio(signed char radioId) {
+    plugin::CallMethod<0x507E10, CAudioEngine*>(this, radioId);
+}

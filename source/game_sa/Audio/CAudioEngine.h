@@ -75,7 +75,7 @@ public:
     void PlayRadioAnnouncement(uint);
     void PlayPreloadedCutsceneTrack();
     void StopCutsceneTrack(uchar);
-    void IsCutsceneTrackActive();
+    bool IsCutsceneTrackActive();
     void GetCutsceneTrackStatus();
     void GetBeatTrackStatus();
     void RetuneRadio(signed char);
