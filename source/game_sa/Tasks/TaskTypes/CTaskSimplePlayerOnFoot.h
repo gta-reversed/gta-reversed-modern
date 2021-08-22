@@ -6,7 +6,6 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CTaskSimple.h"
 #include "CAnimBlendAssociation.h"
 
@@ -16,14 +15,15 @@ extern float& gDuckAnimBlendData;
 extern bool& gbUnknown_8D2FE8;
 
 class CPed;
-class  CTaskSimplePlayerOnFoot : public CTaskSimple {
+class CTaskSimplePlayerOnFoot : public CTaskSimple {
 public:
-    int m_nAnimationBlockIndex;
+    int          m_nAnimationBlockIndex;
     unsigned int m_nFrameCounter;
-    int m_nTimer;
-    int dword_14; // always 0
-    CEntity* m_pLookingAtEntity; // always 0
+    int          m_nTimer;
+    int          dword_14;           // always 0
+    CEntity*     m_pLookingAtEntity; // always 0
 
+public:
     static void InjectHooks();
 
     bool ProcessPed(class CPed* ped) override;
@@ -37,8 +37,7 @@ public:
     void PlayerControlFighter(CPlayerPed* pPlayerPed);
     void PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed);
     void PlayerControlDucked(CPed* pPed);
-    int  PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAndDucking);
-
+    int PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAndDucking);
 };
 
 VALIDATE_SIZE(CTaskSimplePlayerOnFoot, 0x1C);
