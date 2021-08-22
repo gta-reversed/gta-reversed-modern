@@ -2,13 +2,13 @@
 
 void CTaskSimpleStealthKill::InjectHooks()
 {
-    HookInstall(0x62E540, &CTaskSimpleStealthKill::ProcessPed_Reversed);
-    HookInstall(0x6225F0, &CTaskSimpleStealthKill::Constructor);
-    HookInstall(0x623830, &CTaskSimpleStealthKill::Clone_Reversed);
-    HookInstall(0x622670, &CTaskSimpleStealthKill::GetId_Reversed);
-    HookInstall(0x6226F0, &CTaskSimpleStealthKill::MakeAbortable_Reversed);
-    HookInstall(0x6296D0, &CTaskSimpleStealthKill::ManageAnim);
-    HookInstall(0x622790, &CTaskSimpleStealthKill::FinishAnimStealthKillCB);
+    ReversibleHooks::Install("CTaskSimpleStealthKill", "ProcessPed_Reversed", 0x62E540, &CTaskSimpleStealthKill::ProcessPed_Reversed);
+    ReversibleHooks::Install("CTaskSimpleStealthKill", "Constructor", 0x6225F0, &CTaskSimpleStealthKill::Constructor);
+    ReversibleHooks::Install("CTaskSimpleStealthKill", "Clone_Reversed", 0x623830, &CTaskSimpleStealthKill::Clone_Reversed);
+    ReversibleHooks::Install("CTaskSimpleStealthKill", "GetId_Reversed", 0x622670, &CTaskSimpleStealthKill::GetId_Reversed);
+    ReversibleHooks::Install("CTaskSimpleStealthKill", "MakeAbortable_Reversed", 0x6226F0, &CTaskSimpleStealthKill::MakeAbortable_Reversed);
+    ReversibleHooks::Install("CTaskSimpleStealthKill", "ManageAnim", 0x6296D0, &CTaskSimpleStealthKill::ManageAnim);
+    ReversibleHooks::Install("CTaskSimpleStealthKill", "FinishAnimStealthKillCB", 0x622790, &CTaskSimpleStealthKill::FinishAnimStealthKillCB);
 }
 
 CTaskSimpleStealthKill::CTaskSimpleStealthKill(bool bKeepTargetAlive, CPed* pTarget, int nAssocGroupId)
@@ -24,14 +24,11 @@ CTaskSimpleStealthKill::CTaskSimpleStealthKill(bool bKeepTargetAlive, CPed* pTar
         pTarget->RegisterReference(reinterpret_cast<CEntity**>(&m_pTarget));
 }
 
+// 0x6225F0
 CTaskSimpleStealthKill* CTaskSimpleStealthKill::Constructor(bool bKeepTargetAlive, CPed* pTarget, int nAssocGroupId)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CTaskSimpleStealthKill*, 0x6225F0, CTaskSimpleStealthKill*, bool, CPed*, int>(this, bKeepTargetAlive, pTarget, nAssocGroupId);
-#else
     this->CTaskSimpleStealthKill::CTaskSimpleStealthKill(bKeepTargetAlive, pTarget, nAssocGroupId);
     return this;
-#endif
 }
 
 bool CTaskSimpleStealthKill::ProcessPed_Reversed(CPed* ped) {
@@ -76,13 +73,10 @@ bool CTaskSimpleStealthKill::ProcessPed_Reversed(CPed* ped) {
     return false;
 }
 
+// 0x62E540
 bool CTaskSimpleStealthKill::ProcessPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x62E540, CTask*, CPed*>(this, ped);
-#else
     return CTaskSimpleStealthKill::ProcessPed_Reversed(ped);
-#endif
 }
 
 CTask* CTaskSimpleStealthKill::Clone_Reversed()
@@ -90,22 +84,16 @@ CTask* CTaskSimpleStealthKill::Clone_Reversed()
     return new CTaskSimpleStealthKill(m_bKeepTargetAlive, m_pTarget, m_nAssocGroupId);
 }
 
+// 0x623830
 CTask* CTaskSimpleStealthKill::Clone()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CTaskSimpleStealthKill*, 0x623830, CTaskSimpleStealthKill*>(this);
-#else
     return CTaskSimpleStealthKill::Clone_Reversed();
-#endif
 }
 
+// 0x6226F0
 bool CTaskSimpleStealthKill::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x6226F0, CTaskSimpleStealthKill*, CPed*, eAbortPriority, CEvent*>(this, ped, priority, _event);
-#else
     return CTaskSimpleStealthKill::MakeAbortable_Reversed(ped, priority, _event);
-#endif
 }
 
 bool CTaskSimpleStealthKill::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event)
@@ -114,7 +102,7 @@ bool CTaskSimpleStealthKill::MakeAbortable_Reversed(class CPed* ped, eAbortPrior
     if (priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_pAnim)
         {
-            m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, 0);
+            m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
             m_pAnim = nullptr;
         }
 
@@ -128,7 +116,7 @@ bool CTaskSimpleStealthKill::MakeAbortable_Reversed(class CPed* ped, eAbortPrior
              _event->GetEventType() == EVENT_DAMAGE &&
              eventDamage->m_pSourceEntity == m_pTarget) {
         m_bIsAborting = true;
-        m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, 0);
+        m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
         return true;
     }
     else {
@@ -136,20 +124,15 @@ bool CTaskSimpleStealthKill::MakeAbortable_Reversed(class CPed* ped, eAbortPrior
     }
 }
 
+// 0x622670
 eTaskType CTaskSimpleStealthKill::GetId()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<eTaskType, 0x622670, CTaskSimpleStealthKill*>(this);
-#else
     return CTaskSimpleStealthKill::GetId_Reversed();
-#endif
 }
 
+// 0x6296D0
 void CTaskSimpleStealthKill::ManageAnim(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CTaskSimpleStealthKill*, CPed*))0x6296D0)(this, ped);
-#else
     CAnimBlock* pAnimBlock = CAnimManager::ms_aAnimAssocGroups[m_nAssocGroupId].m_pAnimBlock;
     if (pAnimBlock && pAnimBlock->bLoaded)
     {
@@ -161,7 +144,7 @@ void CTaskSimpleStealthKill::ManageAnim(CPed* ped)
         {
             m_pAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, m_nAssocGroupId, ANIM_ID_KILL_KNIFE_PED_DIE, 8.0f);
             CPedDamageResponseCalculator damageCalculator(ped, CPedDamageResponseCalculator::ms_damageFactor, m_pTarget->GetActiveWeapon().m_nType, PED_PIECE_TORSO, false);
-            CEventDamage eventDamage(m_pTarget, CTimer::m_snTimeInMilliseconds, m_pTarget->GetActiveWeapon().m_nType, PED_PIECE_TORSO, 0, 0, ped->bInVehicle);
+            CEventDamage eventDamage(m_pTarget, CTimer::m_snTimeInMilliseconds, m_pTarget->GetActiveWeapon().m_nType, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
             if (eventDamage.AffectsPed(ped))
             {
                 damageCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
@@ -188,14 +171,11 @@ void CTaskSimpleStealthKill::ManageAnim(CPed* ped)
         if (m_nTime > 10000)
             m_bIsAborting = true;
     }
-#endif
 }
 
+// 0x622790
 void CTaskSimpleStealthKill::FinishAnimStealthKillCB(CAnimBlendAssociation* pAnimAssoc, void* data)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((void(__cdecl*)(CAnimBlendAssociation*, void*))0x622790)(pAnimAssoc, data);
-#else
     auto pTaskSimpleStealthKill = reinterpret_cast<CTaskSimpleStealthKill*>(data);
     if (pAnimAssoc->m_nAnimId != ANIM_ID_KILL_KNIFE_PLAYER && pAnimAssoc->m_nAnimId != ANIM_ID_KILL_KNIFE_PED_DIE)
     {
@@ -206,5 +186,4 @@ void CTaskSimpleStealthKill::FinishAnimStealthKillCB(CAnimBlendAssociation* pAni
         pTaskSimpleStealthKill->m_bIsAborting = true;
         pTaskSimpleStealthKill->m_pAnim = nullptr;
     }
-#endif
 }
