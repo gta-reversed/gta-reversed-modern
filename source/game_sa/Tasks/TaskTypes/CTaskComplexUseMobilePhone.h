@@ -6,11 +6,10 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CTaskComplex.h"
 #include "CTaskTimer.h"
 
-class  CTaskComplexUseMobilePhone : public CTaskComplex {
+class CTaskComplexUseMobilePhone : public CTaskComplex {
 public:
     int m_nDuration;
     CTaskTimer m_timer;
@@ -21,4 +20,3 @@ public:
 };
 
 VALIDATE_SIZE(CTaskComplexUseMobilePhone, 0x20);
-
