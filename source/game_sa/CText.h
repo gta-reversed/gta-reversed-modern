@@ -90,7 +90,7 @@ public:
     ~CText();
 
     // Returns text pointer by GXT key
-    char* __thiscall Get(char* key);
+    char* __thiscall Get(const char* key);
     // Reads MPACK tag
     static void __stdcall ReadTag(char* buf, FILE* file, int* pFileOffset, bool dontRead);
     // Loads mission table from GXT file

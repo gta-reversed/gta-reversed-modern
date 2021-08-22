@@ -22,7 +22,7 @@ CText* CText::Destructor() {
     return plugin::CallMethodAndReturnDynGlobal<CText*>(0x6A0140, this);
 }
 
-char* CText::Get(char* key) {
+char* CText::Get(const char* key) {
     return plugin::CallMethodAndReturnDynGlobal<char*, CText*>(0x6A0050, this, key);
 }
 
