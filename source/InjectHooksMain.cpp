@@ -309,6 +309,8 @@ void InjectHooksMain()
     CBmx::InjectHooks();
     CTrailer::InjectHooks();
     CQuadBike::InjectHooks();
+    JPegPlugin::InjectHooks();
+    PipelinePlugin::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

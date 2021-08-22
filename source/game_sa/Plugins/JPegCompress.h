@@ -6,16 +6,28 @@
 */
 
 #pragma once
-#include "PluginBase.h"
+
 #include "RenderWare.h"
 #include "CMenuManager.h"
 
+namespace JPegPlugin
+{
+void InjectHooks();
+}
+
+void JPegCompressScreen(RwCamera* camera, struct jpeg_destination_mgr& dst);
+
 /**
  * Compress camera screen and save at the given file path
+ *
+ * @addr  0x5D0820
  */
-void JPegCompressScreenToFile(char const * pszPath);
+extern void JPegCompressScreenToFile(RwCamera* camera, char const* path);
 
 /**
  * Compress camera screen to the given buffer
  */
-void JPegCompressScreenToBuffer(char ** pBuffer, unsigned int * pSize);
+extern void JPegCompressScreenToBuffer(char** buffer, unsigned int* size);
+
+void JPegDecompressToRaster(RwRaster* raster, struct jpeg_source_mgr& src);
+void JPegDecompressToVramFromBuffer(RwRaster* raster, RwInt8** unk);
