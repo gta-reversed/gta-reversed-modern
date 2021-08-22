@@ -25,6 +25,7 @@ public:
     static bool& CPostEffects::m_bCCTV;
     static bool& CPostEffects::m_bSkipPostProcess;
     static bool& CPostEffects::m_bSavePhotoFromScript;
+    static RwRGBAReal& CPostEffects::m_fInfraredVisionHeatObjectCol;
 
     static RwRaster& CPostEffects::pRasterFrontBuffer;
     static RwRaster& CPostEffects::randomRaster;

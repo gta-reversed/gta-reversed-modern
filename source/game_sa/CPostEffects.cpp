@@ -17,6 +17,7 @@ bool& CPostEffects::m_bDarknessFilter = *(bool*)0xC402C4;
 bool& CPostEffects::m_bCCTV = *(bool*)0xC402C5;
 bool& CPostEffects::m_bSkipPostProcess = *(bool*)0xC402CF;
 bool& CPostEffects::m_bSavePhotoFromScript = *(bool*)0xC402D0;
+RwRGBAReal& CPostEffects::m_fInfraredVisionHeatObjectCol = *(RwRGBAReal*)0x8D50BC;
 
 RwRaster& CPostEffects::pRasterFrontBuffer = *(RwRaster*)(0xC402D8);
 RwRaster& CPostEffects::randomRaster = *(RwRaster*)(0xC402B0);
