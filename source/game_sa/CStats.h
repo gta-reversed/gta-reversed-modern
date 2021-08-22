@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "eStats.h"
 #include "eStatModAbilities.h"
 #include "eStatsReactions.h"
@@ -25,8 +24,8 @@ struct tStatMessage {
     short stat_num; // unique stat id
     bool displayed;
     unsigned char condition; // this can be lessthan/morethan, see eStatMessageCondition
-    float value; // value stat must reach to display message
-    char text_id[8]; // text id from american.gxt text file to display
+    float value;             // value stat must reach to display message
+    char text_id[8];         // text id from american.gxt text file to display
 };
 
 VALIDATE_SIZE(tStatMessage, 0x10);
@@ -37,38 +36,38 @@ class CBmx;
 
 class CStats {
 public:
-    static tStatMessage *StatMessage;          // static tStatMessage StatMessage
-    static unsigned int &TotalNumStatMessages;
-    static char *LastMissionPassedName;        // static char LastMissionPassedName[8]
-    static int *TimesMissionAttempted;         // static int TimesMissionAttempted[100]
-    static int *FavoriteRadioStationList;      // static int FavoriteRadioStationList[14]
-    static int *PedsKilledOfThisType;          // static int PedsKilledOfThisType[32]
-    static float *StatReactionValue;           // static float StatReactionValue[59]
-    static int *StatTypesInt;                  // static int StatTypesInt[224]
-    static float *StatTypesFloat;              // static float StatTypesFloat[83]
-    static short &m_ThisStatIsABarChart;
-    static bool &bStatUpdateMessageDisplayed;
-    static unsigned int &m_SprintStaminaCounter;
-    static unsigned int &m_CycleStaminaCounter;
-    static unsigned int &m_CycleSkillCounter;
-    static unsigned int &m_SwimStaminaCounter;
-    static unsigned int &m_SwimUnderWaterCounter;
-    static unsigned int &m_DrivingCounter;
-    static unsigned int &m_FlyingCounter;
-    static unsigned int &m_BoatCounter;
-    static unsigned int &m_BikeCounter;
-    static unsigned int &m_FatCounter;
-    static unsigned int &m_RunningCounter;
-    static unsigned int &m_WeaponCounter;
-    static unsigned int &m_DeathCounter;
-    static unsigned int &m_MaxHealthCounter;
-    static unsigned int &m_AddToHealthCounter;
-    static unsigned int &m_LastWeaponTypeFired;
+    static tStatMessage* StatMessage; // static tStatMessage StatMessage
+    static unsigned int& TotalNumStatMessages;
+    static char* LastMissionPassedName;   // static char LastMissionPassedName[8]
+    static int* TimesMissionAttempted;    // static int TimesMissionAttempted[100]
+    static int* FavoriteRadioStationList; // static int FavoriteRadioStationList[14]
+    static int* PedsKilledOfThisType;     // static int PedsKilledOfThisType[32]
+    static float* StatReactionValue;      // static float StatReactionValue[59]
+    static int* StatTypesInt;             // static int StatTypesInt[224]
+    static float* StatTypesFloat;         // static float StatTypesFloat[83]
+    static short& m_ThisStatIsABarChart;
+    static bool& bStatUpdateMessageDisplayed;
+    static unsigned int& m_SprintStaminaCounter;
+    static unsigned int& m_CycleStaminaCounter;
+    static unsigned int& m_CycleSkillCounter;
+    static unsigned int& m_SwimStaminaCounter;
+    static unsigned int& m_SwimUnderWaterCounter;
+    static unsigned int& m_DrivingCounter;
+    static unsigned int& m_FlyingCounter;
+    static unsigned int& m_BoatCounter;
+    static unsigned int& m_BikeCounter;
+    static unsigned int& m_FatCounter;
+    static unsigned int& m_RunningCounter;
+    static unsigned int& m_WeaponCounter;
+    static unsigned int& m_DeathCounter;
+    static unsigned int& m_MaxHealthCounter;
+    static unsigned int& m_AddToHealthCounter;
+    static unsigned int& m_LastWeaponTypeFired;
 
     static void InjectHooks();
 
-    static char* GetStatID(unsigned short stat);
-    static bool GetStatType(unsigned short stat);
+    static char* GetStatID(eStats stat);
+    static bool GetStatType(eStats stat);
     static float GetStatValue(unsigned short stat);
     static char GetTimesMissionAttempted(unsigned char missionId);
     static void RegisterMissionAttempted(unsigned char missionId);
@@ -82,7 +81,7 @@ public:
     static void BuildStatLine(char* line, void* pValue1, int metrics, void* pValue2, int type);
     static int ConvertToMins(int value);
     static int ConvertToSecs(int value);
-    static bool SafeToShowThisStat(unsigned char stat);
+    static bool SafeToShowThisStat(eStats stat);
     static bool CheckForThreshold(float* pValue, float range);
     static bool IsStatCapped(eStats stat);
     static void ProcessReactionStatsOnDecrement(unsigned char stat);
