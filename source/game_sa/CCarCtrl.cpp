@@ -10,6 +10,7 @@
 unsigned int& CCarCtrl::NumLawEnforcerCars = *(unsigned int*)0x969098;
 unsigned int& CCarCtrl::NumAmbulancesOnDuty = *(unsigned int*)0x9690A8;
 unsigned int& CCarCtrl::NumFireTrucksOnDuty = *(unsigned int*)0x9690AC;
+unsigned int& CCarCtrl::MaxNumberOfCarsInUse = *(unsigned int*)0x8A5B24;
 
 void CCarCtrl::InjectHooks()
 {
