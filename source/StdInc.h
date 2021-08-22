@@ -427,6 +427,7 @@
 #include "game_sa\Enums\eCarMission.h"
 #include "game_sa\Enums\eClothesModelPart.h"
 #include "game_sa\Enums\eClothesTexturePart.h"
+#include "game_sa\Enums\eCrimeType.h"
 #include "game_sa\Enums\eDecisionMakerEvents.h"
 #include "game_sa\Enums\eEmergencyPedVoices.h"
 #include "game_sa\Enums\eEntityStatus.h"

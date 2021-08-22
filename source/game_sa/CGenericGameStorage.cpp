@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CSimpleVariablesSaveStructure.h"
+
 /*
     Plugin-SDK (Grand Theft Auto San Andreas) source file
     Authors: GTA Community. See more here
@@ -13,4 +15,9 @@ bool CGenericGameStorage::LoadDataFromWorkBuffer(void* pData, int size) {
 
 bool CGenericGameStorage::SaveDataToWorkBuffer(void* pData, int Size) {
     return plugin::CallAndReturnDynGlobal<bool, void*, int>(0x5D1270, pData, Size);
+}
+
+// 0x5D0F50
+int CGenericGameStorage::GetCurrentVersionNumber() {
+    return plugin::CallAndReturn<int, 0x5D0F50>();
 }

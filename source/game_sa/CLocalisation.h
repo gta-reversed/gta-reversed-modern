@@ -6,10 +6,16 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 
 class  CLocalisation {
 public:
+    static bool &nastyGame;
+    static bool &germanGame;
+    static bool &frenchGame;
+
+public:
+    static void InjectHooks();
+
     static void Initialise();
     static void SetNormalGame();
     static void SetFrenchGame();
@@ -28,8 +34,4 @@ public:
     static bool StealFromDeadPed();
     static bool KillPeds();
     static bool PedsOnFire();
-
-    static bool &nastyGame;
-    static bool &germanGame;
-    static bool &frenchGame;
 };

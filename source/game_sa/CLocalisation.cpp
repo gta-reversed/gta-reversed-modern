@@ -11,92 +11,121 @@ bool& CLocalisation::nastyGame = *(bool*)0xB9B7EC;
 bool& CLocalisation::germanGame = *(bool*)0xB9B7ED;
 bool& CLocalisation::frenchGame = *(bool*)0xB9B7EE;
 
-// Converted from cdecl void CLocalisation::Initialise(void) 0x56D180
+void CLocalisation::InjectHooks() {
+    ReversibleHooks::Install("CLocalisation", "Initialise", 0x56D180, &CLocalisation::Initialise);
+    ReversibleHooks::Install("CLocalisation", "SetNormalGame", 0x56D1A0, &CLocalisation::SetNormalGame);
+    ReversibleHooks::Install("CLocalisation", "SetFrenchGame", 0x56D1C0, &CLocalisation::SetFrenchGame);
+    ReversibleHooks::Install("CLocalisation", "SetGermanGame", 0x56D1E0, &CLocalisation::SetGermanGame);
+    ReversibleHooks::Install("CLocalisation", "GermanGame", 0x56D200, &CLocalisation::GermanGame);
+    ReversibleHooks::Install("CLocalisation", "FrenchGame", 0x56D210, &CLocalisation::FrenchGame);
+    ReversibleHooks::Install("CLocalisation", "Metric", 0x56D220, &CLocalisation::Metric);
+    ReversibleHooks::Install("CLocalisation", "Blood", 0x56D230, &CLocalisation::Blood);
+    ReversibleHooks::Install("CLocalisation", "Porn", 0x56D240, &CLocalisation::Porn);
+    ReversibleHooks::Install("CLocalisation", "ScreamsFromKills", 0x56D240, &CLocalisation::ScreamsFromKills);
+    ReversibleHooks::Install("CLocalisation", "Prostitutes", 0x56D240, &CLocalisation::Prostitutes);
+    ReversibleHooks::Install("CLocalisation", "KickingWhenDown", 0x56D270, &CLocalisation::KickingWhenDown);
+    ReversibleHooks::Install("CLocalisation", "ShootLimbs", 0x56D280, &CLocalisation::ShootLimbs);
+    ReversibleHooks::Install("CLocalisation", "KnockDownPeds", 0x56D290, &CLocalisation::KnockDownPeds);
+    ReversibleHooks::Install("CLocalisation", "KillFrenzy", 0x56D290, &CLocalisation::KillFrenzy);
+    ReversibleHooks::Install("CLocalisation", "StealFromDeadPed", 0x56D2B0, &CLocalisation::StealFromDeadPed);
+    ReversibleHooks::Install("CLocalisation", "KillPeds", 0x56D2C0, &CLocalisation::KillPeds);
+    ReversibleHooks::Install("CLocalisation", "PedsOnFire", 0x56D2C0, &CLocalisation::PedsOnFire);
+}
+
+// 0x56D180
 void CLocalisation::Initialise() {
-    ((void(__cdecl*)())0x56D180)();
+    nastyGame = true;
+    germanGame = false;
+    frenchGame = false;
 }
 
-// Converted from cdecl void CLocalisation::SetNormalGame(void) 0x56D1A0
+// 0x56D1A0
 void CLocalisation::SetNormalGame() {
-    ((void(__cdecl*)())0x56D1A0)();
+    nastyGame = true;
+    frenchGame = false;
+    germanGame = false;
 }
 
-// Converted from cdecl void CLocalisation::SetFrenchGame(void) 0x56D1C0
+// 0x56D1C0
 void CLocalisation::SetFrenchGame() {
-    ((void(__cdecl*)())0x56D1C0)();
+    frenchGame = true;
+    germanGame = false;
+    nastyGame = true;
 }
 
-// Converted from cdecl void CLocalisation::SetGermanGame(void) 0x56D1E0
+// 0x56D1E0
 void CLocalisation::SetGermanGame() {
-    ((void(__cdecl*)())0x56D1E0)();
+    germanGame = true;
+    frenchGame = false;
+    nastyGame = false;
 }
 
-// Converted from cdecl bool CLocalisation::GermanGame(void) 0x56D200
+// 0x56D200
 bool CLocalisation::GermanGame() {
-    return ((bool(__cdecl*)())0x56D200)();
+    return germanGame;
 }
 
-// Converted from cdecl bool CLocalisation::FrenchGame(void) 0x56D210
+// 0x56D210
 bool CLocalisation::FrenchGame() {
-    return ((bool(__cdecl*)())0x56D210)();
+    return frenchGame;
 }
 
-// Converted from cdecl bool CLocalisation::Metric(void) 0x56D220
+// 0x56D220
 bool CLocalisation::Metric() {
-    return ((bool(__cdecl*)())0x56D220)();
+    return FrontEndMenuManager.m_nLanguage != false;
 }
 
-// Converted from cdecl bool CLocalisation::Blood(void) 0x56D230
+// 0x56D230
 bool CLocalisation::Blood() {
-    return ((bool(__cdecl*)())0x56D230)();
+    return true;
 }
 
-// Converted from cdecl bool CLocalisation::Porn(void) 0x56D240
+// 0x56D240
 bool CLocalisation::Porn() {
-    return ((bool(__cdecl*)())0x56D240)();
+    return true;
 }
 
-// Converted from cdecl bool CLocalisation::ScreamsFromKills(void) 0x56D250
+// 0x56D250
 bool CLocalisation::ScreamsFromKills() {
-    return ((bool(__cdecl*)())0x56D250)();
+    return !germanGame;
 }
 
-// Converted from cdecl bool CLocalisation::Prostitutes(void) 0x56D260
+// 0x56D260
 bool CLocalisation::Prostitutes() {
-    return ((bool(__cdecl*)())0x56D260)();
+    return true;
 }
 
-// Converted from cdecl bool CLocalisation::KickingWhenDown(void) 0x56D270
+// 0x56D270
 bool CLocalisation::KickingWhenDown() {
-    return ((bool(__cdecl*)())0x56D270)();
+    return true;
 }
 
-// Converted from cdecl bool CLocalisation::ShootLimbs(void) 0x56D280
+// 0x56D280
 bool CLocalisation::ShootLimbs() {
-    return ((bool(__cdecl*)())0x56D280)();
+    return nastyGame;
 }
 
-// Converted from cdecl bool CLocalisation::KnockDownPeds(void) 0x56D290
+// 0x56D290
 bool CLocalisation::KnockDownPeds() {
-    return ((bool(__cdecl*)())0x56D290)();
+    return nastyGame;
 }
 
-// Converted from cdecl bool CLocalisation::KillFrenzy(void) 0x56D2A0
+// 0x56D2A0
 bool CLocalisation::KillFrenzy() {
-    return ((bool(__cdecl*)())0x56D2A0)();
+    return nastyGame;
 }
 
-// Converted from cdecl bool CLocalisation::StealFromDeadPed(void) 0x56D2B0
+// 0x56D2B0
 bool CLocalisation::StealFromDeadPed() {
-    return ((bool(__cdecl*)())0x56D2B0)();
+    return nastyGame;
 }
 
-// Converted from cdecl bool CLocalisation::KillPeds(void) 0x56D2C0
+// 0x56D2C0
 bool CLocalisation::KillPeds() {
-    return ((bool(__cdecl*)())0x56D2C0)();
+    return nastyGame;
 }
 
-// Converted from cdecl bool CLocalisation::PedsOnFire(void) 0x56D2D0
+// 0x56D2D0
 bool CLocalisation::PedsOnFire() {
-    return ((bool(__cdecl*)())0x56D2D0)();
+    return nastyGame;
 }
