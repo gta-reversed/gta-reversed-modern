@@ -304,3 +304,8 @@ CEntity* CFileLoader::LoadObjectInstance(char const* line)
         &objInstance.m_nLodInstanceIndex);
     return CFileLoader::LoadObjectInstance(&objInstance, modelName);
 }
+
+// 0x5B9030
+void CFileLoader::LoadLevel(const char* filename) {
+    plugin::CallDynGlobal<char const *>(0x5B9030, filename);
+}
