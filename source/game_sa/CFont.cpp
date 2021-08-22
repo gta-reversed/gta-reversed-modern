@@ -34,12 +34,64 @@ unsigned char& CFont::m_nFontShadow = *(unsigned char*)0xC71A96;
 CRGBA* CFont::m_FontDropColor = (CRGBA*)0xC71A97;
 unsigned char& CFont::m_nFontOutlineSize = *(unsigned char*)0xC71A9B;
 unsigned char& CFont::m_nFontOutline = *(unsigned char*)0xC71A9C;
+unsigned char& CFont::m_nFontOutlineOrShadow = *(unsigned char*)0xC71A9C;
 
 tFontData* gFontData = (tFontData*)0xC718B0;
 
-void CFont::Initialise()
-{
-    ((void(__cdecl*)())0x5BA690)();
+void CFont::InjectHooks() {
+    ReversibleHooks::Install("CFont", "Initialise", 0x5BA690, &CFont::Initialise);
+    ReversibleHooks::Install("CFont", "SetEdge", 0x719590, &CFont::SetEdge);
+    ReversibleHooks::Install("CFont", "DrawFonts", 0x71A210, &CFont::DrawFonts);
+}
+
+// 0x7187C0
+void ReadFontsDat() {
+    plugin::Call<0x7187C0>();
+}
+
+// 0x5BA690
+void CFont::Initialise() {
+    int fontsTxd = CTxdStore::AddTxdSlot("fonts");
+    CTxdStore::LoadTxd(fontsTxd, "MODELS\\FONTS.TXD");
+    CTxdStore::AddRef(fontsTxd);
+    CTxdStore::PushCurrentTxd();
+    CTxdStore::SetCurrentTxd(fontsTxd);
+    CFont::Sprite->SetTexture((char *) "font2", (char *) "font2m");
+    CFont::Sprite[1].SetTexture((char *) "font1", (char *) "font1m");
+
+    ReadFontsDat();
+
+    CFont::SetScale(1.0f, 1.0f);
+    CFont::SetSlantRefPoint((float) RsGlobal.maximumWidth, 0.0f);
+    CFont::SetSlant(0.0);
+
+    CFont::SetColor(CRGBA(255, 255, 255, 0));
+    CFont::SetOrientation(ALIGN_LEFT);
+    CFont::SetJustify(false);
+
+    CFont::SetWrapx((float) RsGlobal.maximumWidth);
+
+    CFont::SetCentreSize((float) RsGlobal.maximumWidth);
+    CFont::SetBackground(false, false);
+
+    CFont::SetBackgroundColor(CRGBA(128, 128, 128, 128));
+    CFont::SetProportional(true);
+    CFont::SetFontStyle(FONT_GOTHIC);
+    CFont::SetRightJustifyWrap(0.0f);
+    CFont::SetAlphaFade(255.0f);
+    CFont::SetDropShadowPosition(0);
+    CTxdStore::PopCurrentTxd();
+
+    int ps2btnsTxd = CTxdStore::AddTxdSlot("ps2btns");
+    CTxdStore::LoadTxd(ps2btnsTxd, "MODELS\\PCBTNS.TXD");
+    CTxdStore::AddRef(ps2btnsTxd);
+    CTxdStore::PushCurrentTxd();
+    CTxdStore::SetCurrentTxd(ps2btnsTxd);
+    CFont::ButtonSprite[1].SetTexture((char *) "up", (char *) "upA");
+    CFont::ButtonSprite[2].SetTexture((char *) "down", (char *) "downA");
+    CFont::ButtonSprite[3].SetTexture((char *) "left", (char *) "leftA");
+    CFont::ButtonSprite[4].SetTexture((char *) "right", (char *) "rightA");
+    CTxdStore::PopCurrentTxd();
 }
 
 void CFont::Shutdown()
@@ -117,11 +169,12 @@ void CFont::SetDropShadowPosition(short value)
     ((void(__cdecl*)(short))0x719570)(value);
 }
 
-void CFont::SetEdge(short value)
-{
-    ((void(__cdecl*)(short))0x719590)(value);
+// 0x719590
+void CFont::SetEdge(short value) {
+    CFont::m_nFontShadow = 0;
+    CFont::m_nFontOutlineSize = value;
+    CFont::m_nFontOutlineOrShadow = value;
 }
-
 
 #ifdef SetProp
 #define SET_PROP_USED
@@ -171,9 +224,10 @@ float CFont::GetStringWidth(char* string, bool unk1, bool unk2)
     return ((float(__cdecl*)(char*, bool, bool))0x71A0E0)(string, unk1, unk2);
 }
 
-void CFont::DrawFonts()
-{
-    ((void(__cdecl*)())0x71A210)();
+// same as RenderFontBuffer()
+// 0x71A210
+void CFont::DrawFonts() {
+    CFont::RenderFontBuffer();
 }
 
 short CFont::ProcessCurrentString(bool print, float x, float y, char* text)
