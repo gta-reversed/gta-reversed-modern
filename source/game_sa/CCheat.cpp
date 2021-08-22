@@ -3,12 +3,13 @@
 const unsigned short CHEAT_STRING_SIZE = 30;
 const unsigned short CHEAT_MIN_HASH_SIZE = 6;
 
-void(*(&CCheat::m_aCheatFunctions)[92])() = *reinterpret_cast<void(*(*)[92])()>(0x8A5B58);
-int(&CCheat::m_aCheatHashKeys)[92] = *reinterpret_cast<int(*)[92]>(0x8A5CC8);
-char(&CCheat::m_CheatString)[CHEAT_STRING_SIZE] = *reinterpret_cast<char(*)[CHEAT_STRING_SIZE]>(0x969110);
-bool(&CCheat::m_aCheatsActive)[92] = *reinterpret_cast<bool(*)[92]>(0x969130);
+void (*(&CCheat::m_aCheatFunctions)[92])() = *reinterpret_cast<void (*(*)[92])()>(0x8A5B58);
+int (&CCheat::m_aCheatHashKeys)[92] = *reinterpret_cast<int (*)[92]>(0x8A5CC8);
+char (&CCheat::m_CheatString)[CHEAT_STRING_SIZE] = *reinterpret_cast<char (*)[CHEAT_STRING_SIZE]>(0x969110);
+bool (&CCheat::m_aCheatsActive)[92] = *reinterpret_cast<bool (*)[92]>(0x969130);
 bool& CCheat::m_bHasPlayerCheated = *reinterpret_cast<bool*>(0x96918C);
 
+// NOTSA
 std::vector<Cheat> cheats = {
         { 0x4385b0,  CCheat::WeaponCheat1, "WeaponCheat1", 0xde4b237d, CHEAT_WEAPON_SET1 },
         { 0x438890,  CCheat::WeaponCheat2, "WeaponCheat2", 0xb22a28d1, CHEAT_WEAPON_SET2 },
@@ -104,10 +105,12 @@ std::vector<Cheat> cheats = {
         { 0x0, nullptr, "", 0x2bdd2fa1, CHEAT_ALL_TAXIS_NITRO },
 };
 
-void CCheat::InjectHooks()
-{
+void CCheat::InjectHooks() {
     ReversibleHooks::Install("CCheat", "AddToCheatString", 0x438480, &CCheat::AddToCheatString);
     ReversibleHooks::Install("CCheat", "HandleSpecialCheats", 0x439A10, &CCheat::HandleSpecialCheats);
+    ReversibleHooks::Install("CCheat", "DoCheats", 0x439AF0, &CCheat::DoCheats);
+    ReversibleHooks::Install("CCheat", "ResetCheats", 0x438450, &CCheat::ResetCheats);
+    ReversibleHooks::Install("CCheat", "IsZoneStreamingAllowed", 0x407410, &CCheat::IsZoneStreamingAllowed);
 
     for (auto& cheat: cheats) {
         if (cheat.installAddress == 0x0) {
@@ -122,9 +125,7 @@ void CCheat::InjectHooks()
             }
         }
     }
-    ReversibleHooks::Install("CCheat", "IsZoneStreamingAllowed", 0x407410, &CCheat::IsZoneStreamingAllowed);
 }
-
 
 void CCheat::AddToCheatString(char LastPressedKey) {
     if (CCutsceneMgr::ms_running) {
@@ -149,7 +150,7 @@ void CCheat::AddToCheatString(char LastPressedKey) {
 
         hashIndex = -1;
         for (int j = 0; j < TOTAL_CHEATS; ++j) {
-            if (CCheat::m_aCheatHashKeys[j] != hash) {
+            if (m_aCheatHashKeys[j] != hash) {
                 continue;
             }
             hashIndex = j;
@@ -159,32 +160,49 @@ void CCheat::AddToCheatString(char LastPressedKey) {
         }
 
         char* gxtKey;
-        if (CCheat::m_aCheatsActive[hashIndex]) {
-            gxtKey = "CHEAT8";
+        if (m_aCheatsActive[hashIndex]) {
+            gxtKey = (char*)"CHEAT8";
         } else {
-            gxtKey = "CHEAT1";
+            gxtKey = (char*)"CHEAT1";
         }
         char* message = TheText.Get(gxtKey);
         CHud::SetHelpMessage(message, true, false, false);
         CStats::IncrementStat(STAT_TIMES_CHEATED, 1.0f);
 
-        auto cheatFunc = CCheat::m_aCheatFunctions[hashIndex];
-        CCheat::m_bHasPlayerCheated = true;
+        auto cheatFunc = m_aCheatFunctions[hashIndex];
+        m_bHasPlayerCheated = true;
         if (cheatFunc) {
             cheatFunc();
         } else {
-            CCheat::m_aCheatsActive[hashIndex] ^= true;
+            m_aCheatsActive[hashIndex] ^= true;
         }
-        CCheat::m_CheatString[0] = '\0';
+        m_CheatString[0] = '\0';
         return;
     }
+}
+
+// 0x438450
+void CCheat::ResetCheats() {
+    memset(&m_aCheatsActive, 0, sizeof(m_aCheatsActive));
+    CWeather::ReleaseWeather();
+    CTimer::ms_fTimeScale = 1.0f;
+    m_CheatString[0] = '\0';
+    m_bHasPlayerCheated = false;
+}
+
+// 0x439AF0
+void CCheat::DoCheats() {
+    for (short i = 0; i < 256; ++i)
+        if (CPad::NewKeyState.standardKeys[i])
+            if (!CPad::OldKeyState.standardKeys[i])
+                AddToCheatString(i);
 }
 
 void CCheat::AdrenalineCheat() {
   CPlayerPedData *playerData = FindPlayerPed(-1)->m_pPlayerData;
 
-    CCheat::m_aCheatsActive[CHEAT_ADRENALINE_MODE] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_ADRENALINE_MODE]) {
+    m_aCheatsActive[CHEAT_ADRENALINE_MODE] ^= true;
+    if (m_aCheatsActive[CHEAT_ADRENALINE_MODE]) {
         playerData->m_dwPlayerFlags &= 0xFFFFFFFD; // TODO: Replace 0xFFFFFFFD
     } else {
         CPickups::GivePlayerGoodiesWithPickUpMI(MODEL_ADRENALINE, 0);
@@ -192,28 +210,28 @@ void CCheat::AdrenalineCheat() {
 }
 
 void CCheat::AllCarsAreGreatCheat() {
-    CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC]) {
+    m_aCheatsActive[CHEAT_FAST_TRAFFIC] ^= true;
+    if (m_aCheatsActive[CHEAT_FAST_TRAFFIC]) {
         HandleSpecialCheats(CHEAT_FAST_TRAFFIC);
         CStreaming::ReclassifyLoadedCars();
     }
 }
 
 void CCheat::AllCarsAreShitCheat() {
-    CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC]) {
+    m_aCheatsActive[CHEAT_CHEAP_TRAFFIC] ^= true;
+    if (m_aCheatsActive[CHEAT_CHEAP_TRAFFIC]) {
         HandleSpecialCheats(CHEAT_CHEAP_TRAFFIC);
         CStreaming::ReclassifyLoadedCars();
     }
 }
 
 void CCheat::ApacheCheat() {
-    CCheat::VehicleCheat(MODEL_HUNTER);
+    VehicleCheat(MODEL_HUNTER);
 }
 
 void CCheat::BeachPartyCheat() {
-    CCheat::m_aCheatsActive[CHEAT_BEACH_PARTY] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_BEACH_PARTY]) {
+    m_aCheatsActive[CHEAT_BEACH_PARTY] ^= true;
+    if (m_aCheatsActive[CHEAT_BEACH_PARTY]) {
         int peds[8] = {
             MODEL_BMYBE,
             MODEL_HMYBE,
@@ -245,9 +263,9 @@ void CCheat::BeachPartyCheat() {
 }
 
 void CCheat::BlackCarsCheat() {
-    CCheat::m_aCheatsActive[CHEAT_BLACK_TRAFFIC] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_BLACK_TRAFFIC]) {
-        CCheat::m_aCheatsActive[CHEAT_PINK_TRAFFIC] = false;
+    m_aCheatsActive[CHEAT_BLACK_TRAFFIC] ^= true;
+    if (m_aCheatsActive[CHEAT_BLACK_TRAFFIC]) {
+        m_aCheatsActive[CHEAT_PINK_TRAFFIC] = false;
     }
 }
 
@@ -260,8 +278,8 @@ void CCheat::CloudyWeatherCheat() {
 }
 
 void CCheat::CountrysideInvasionCheat() {
-    CCheat::m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC]) {
+    m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC] ^= true;
+    if (m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC]) {
         int peds[8] = {
             MODEL_CWFOFR,
             MODEL_CWFOHB,
@@ -282,17 +300,17 @@ void CCheat::CountrysideInvasionCheat() {
         if (player->m_nPedState != PEDSTATE_DRIVING) {
             CClothes::RebuildPlayer(player, false);
         }
-        if (CCheat::m_aCheatsActive[CHEAT_BEACH_PARTY]) {
-            CCheat::BeachPartyCheat();
+        if (m_aCheatsActive[CHEAT_BEACH_PARTY]) {
+            BeachPartyCheat();
         }
-        if (CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC]) {
-            CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC] = false;
+        if (m_aCheatsActive[CHEAT_CHEAP_TRAFFIC]) {
+            m_aCheatsActive[CHEAT_CHEAP_TRAFFIC] = false;
         }
-        if (CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC]) {
-            CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC] = false;
+        if (m_aCheatsActive[CHEAT_FAST_TRAFFIC]) {
+            m_aCheatsActive[CHEAT_FAST_TRAFFIC] = false;
         }
-        if (CCheat::m_aCheatsActive[CHEAT_FUNHOUSE_THEME]) {
-            CCheat::FunhouseCheat();
+        if (m_aCheatsActive[CHEAT_FUNHOUSE_THEME]) {
+            FunhouseCheat();
         }
 
         CStreaming::ReclassifyLoadedCars();
@@ -300,22 +318,22 @@ void CCheat::CountrysideInvasionCheat() {
 }
 
 void CCheat::DozerCheat() {
-    CCheat::VehicleCheat(MODEL_DOZER);
+    VehicleCheat(MODEL_DOZER);
 }
 
 void CCheat::DrivebyCheat() {
-    CCheat::m_aCheatsActive[CHEAT_WEAPON_AIMING_WHILE_DRIVING] ^= true;
+    m_aCheatsActive[CHEAT_WEAPON_AIMING_WHILE_DRIVING] ^= true;
 
     CPlayerPed *player = FindPlayerPed(-1);
-    if (CCheat::m_aCheatsActive[CHEAT_WEAPON_AIMING_WHILE_DRIVING] && player->m_aWeapons[WEAPON_KNIFE].m_nType == WEAPON_UNARMED) {
+    if (m_aCheatsActive[CHEAT_WEAPON_AIMING_WHILE_DRIVING] && player->m_aWeapons[WEAPON_KNIFE].m_nType == WEAPON_UNARMED) {
         player->GiveDelayedWeapon(WEAPON_MICRO_UZI, 150);
         player->SetCurrentWeapon(WEAPON_MICRO_UZI);
     }
 }
 
 void CCheat::DuskCheat() {
-    CCheat::m_aCheatsActive[CHEAT_STOP_GAME_CLOCK_ORANGE_SKY] ^= true;
-    if (!CCheat::m_aCheatsActive[CHEAT_STOP_GAME_CLOCK_ORANGE_SKY]) {
+    m_aCheatsActive[CHEAT_STOP_GAME_CLOCK_ORANGE_SKY] ^= true;
+    if (!m_aCheatsActive[CHEAT_STOP_GAME_CLOCK_ORANGE_SKY]) {
         CClock::ms_nGameClockHours = 21;
         CClock::ms_nGameClockMinutes = 0;
         CClock::ms_nGameClockSeconds = 0;
@@ -323,8 +341,8 @@ void CCheat::DuskCheat() {
 }
 
 void CCheat::ElvisLivesCheat() {
-    CCheat::m_aCheatsActive[CHEAT_ELVIS_IS_EVERYWHERE] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_ELVIS_IS_EVERYWHERE]) {
+    m_aCheatsActive[CHEAT_ELVIS_IS_EVERYWHERE] ^= true;
+    if (m_aCheatsActive[CHEAT_ELVIS_IS_EVERYWHERE]) {
         int peds[8] = {
             MODEL_VHMYELV,
             MODEL_VBMYELV,
@@ -364,7 +382,7 @@ void CCheat::FatCheat() {
 }
 
 void CCheat::FlyboyCheat() {
-    CCheat::VehicleCheat(MODEL_HYDRA);
+    VehicleCheat(MODEL_HYDRA);
 }
 
 void CCheat::FoggyWeatherCheat() {
@@ -372,8 +390,8 @@ void CCheat::FoggyWeatherCheat() {
 }
 
 void CCheat::FunhouseCheat() {
-    CCheat::m_aCheatsActive[CHEAT_FUNHOUSE_THEME] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_FUNHOUSE_THEME]) {
+    m_aCheatsActive[CHEAT_FUNHOUSE_THEME] ^= true;
+    if (m_aCheatsActive[CHEAT_FUNHOUSE_THEME]) {
         CPostEffects::m_bHeatHazeFX = false;
     } else {
         int peds[8] = {
@@ -410,13 +428,13 @@ void CCheat::FunhouseCheat() {
 }
 
 void CCheat::GangLandCheat() {
-    CCheat::m_aCheatsActive[CHEAT_GANGS_CONTROLS_THE_STREETS] ^= true;
-    CPopulation::m_bOnlyCreateRandomGangMembers = CCheat::m_aCheatsActive[CHEAT_GANGS_CONTROLS_THE_STREETS];
+    m_aCheatsActive[CHEAT_GANGS_CONTROLS_THE_STREETS] ^= true;
+    CPopulation::m_bOnlyCreateRandomGangMembers = m_aCheatsActive[CHEAT_GANGS_CONTROLS_THE_STREETS];
 }
 
 void CCheat::GangsCheat() {
-    CCheat::m_aCheatsActive[CHEAT_GANGMEMBERS_EVERYWHERE] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_GANGMEMBERS_EVERYWHERE]) {
+    m_aCheatsActive[CHEAT_GANGMEMBERS_EVERYWHERE] ^= true;
+    if (m_aCheatsActive[CHEAT_GANGMEMBERS_EVERYWHERE]) {
         int peds[8] = {
             MODEL_BALLAS1,
             MODEL_BALLAS2,
@@ -432,25 +450,26 @@ void CCheat::GangsCheat() {
 }
 
 void CCheat::GolfcartCheat() {
-    CCheat::VehicleCheat(MODEL_CADDY);
+    VehicleCheat(MODEL_CADDY);
 }
 
+// Handles BeachParty, Funhouse, AllCarsAreGreat , AllCarsAreCheap cheats toggling
 void CCheat::HandleSpecialCheats(eCheats cheatID) {
-    if (CCheat::m_aCheatsActive[CHEAT_BEACH_PARTY] && cheatID != CHEAT_BEACH_PARTY) {
-        CCheat::BeachPartyCheat();
+    if (m_aCheatsActive[CHEAT_BEACH_PARTY] && cheatID != CHEAT_BEACH_PARTY) {
+        BeachPartyCheat();
     }
-    if (CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC] && cheatID != CHEAT_CHEAP_TRAFFIC) {
-        CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC] = false;
+    if (m_aCheatsActive[CHEAT_CHEAP_TRAFFIC] && cheatID != CHEAT_CHEAP_TRAFFIC) {
+        m_aCheatsActive[CHEAT_CHEAP_TRAFFIC] = false;
     }
-    if (CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC] && cheatID != CHEAT_FAST_TRAFFIC) {
-        CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC] = false;
+    if (m_aCheatsActive[CHEAT_FAST_TRAFFIC] && cheatID != CHEAT_FAST_TRAFFIC) {
+        m_aCheatsActive[CHEAT_FAST_TRAFFIC] = false;
     }
-    if (CCheat::m_aCheatsActive[CHEAT_FUNHOUSE_THEME] && cheatID != CHEAT_FUNHOUSE_THEME) {
-        CCheat::FunhouseCheat();
+    if (m_aCheatsActive[CHEAT_FUNHOUSE_THEME] && cheatID != CHEAT_FUNHOUSE_THEME) {
+        FunhouseCheat();
     }
-    if (CCheat::m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC]) {
+    if (m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC]) {
         if (cheatID != CHEAT_COUNTRY_TRAFFIC) {
-            CCheat::CountrysideInvasionCheat();
+            CountrysideInvasionCheat();
         }
     }
 }
@@ -477,7 +496,7 @@ void CCheat::HealthCheat() {
 }
 
 void CCheat::HearseCheat() {
-    CCheat::VehicleCheat(MODEL_ROMERO);
+    VehicleCheat(MODEL_ROMERO);
 }
 
 void CCheat::JetpackCheat() {
@@ -485,8 +504,8 @@ void CCheat::JetpackCheat() {
 }
 
 void CCheat::LoveConquersAllCheat() {
-    CCheat::m_aCheatsActive[CHEAT_SLUT_MAGNET] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_SLUT_MAGNET]) {
+    m_aCheatsActive[CHEAT_SLUT_MAGNET] ^= true;
+    if (m_aCheatsActive[CHEAT_SLUT_MAGNET]) {
         int peds[8] = {
             MODEL_BMYPIMP,
             MODEL_BFYPRO,
@@ -508,7 +527,7 @@ void CCheat::LoveConquersAllCheat() {
 }
 
 void CCheat::LovefistCheat() {
-    CCheat::VehicleCheat(MODEL_STRETCH);
+    VehicleCheat(MODEL_STRETCH);
 }
 
 void CCheat::MayhemCheat() {
@@ -516,8 +535,8 @@ void CCheat::MayhemCheat() {
 }
 
 void CCheat::MidnightCheat() {
-    CCheat::m_aCheatsActive[CHEAT_ALWAYS_MIDNIGHT] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_ALWAYS_MIDNIGHT]) {
+    m_aCheatsActive[CHEAT_ALWAYS_MIDNIGHT] ^= true;
+    if (m_aCheatsActive[CHEAT_ALWAYS_MIDNIGHT]) {
         CClock::ms_nGameClockHours = 0;
         CClock::ms_nGameClockMinutes = 0;
         CClock::ms_nGameClockSeconds = 0;
@@ -530,11 +549,11 @@ void CCheat::MoneyArmourHealthCheat() {
 
     playerInfo->m_nMoney += 250000;
     player->m_fArmour = playerInfo->m_nMaxArmour;
-    CCheat::HealthCheat();
+    HealthCheat();
 }
 
 void CCheat::MonsterTruckCheat() {
-    CCheat::VehicleCheat(MODEL_MONSTERA);
+    VehicleCheat(MODEL_MONSTERA);
 }
 
 void CCheat::MuscleCheat() {
@@ -547,10 +566,10 @@ void CCheat::MuscleCheat() {
 }
 
 void CCheat::NinjaCheat() {
-    CCheat::m_aCheatsActive[CHEAT_NINJA_THEME] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_NINJA_THEME]) {
-        if (CCheat::m_aCheatsActive[CHEAT_BLACK_TRAFFIC]) {
-            CCheat::m_aCheatsActive[CHEAT_BLACK_TRAFFIC] = false;
+    m_aCheatsActive[CHEAT_NINJA_THEME] ^= true;
+    if (m_aCheatsActive[CHEAT_NINJA_THEME]) {
+        if (m_aCheatsActive[CHEAT_BLACK_TRAFFIC]) {
+            m_aCheatsActive[CHEAT_BLACK_TRAFFIC] = false;
         }
     } else {
         int peds[8] = {
@@ -565,25 +584,25 @@ void CCheat::NinjaCheat() {
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
-        if (CCheat::m_aCheatsActive[CHEAT_BEACH_PARTY]) {
-            CCheat::BeachPartyCheat();
+        if (m_aCheatsActive[CHEAT_BEACH_PARTY]) {
+            BeachPartyCheat();
         }
-        if (CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC]) {
-            CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC] = false;
+        if (m_aCheatsActive[CHEAT_CHEAP_TRAFFIC]) {
+            m_aCheatsActive[CHEAT_CHEAP_TRAFFIC] = false;
         }
-        if (CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC]) {
-            CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC] = false;
+        if (m_aCheatsActive[CHEAT_FAST_TRAFFIC]) {
+            m_aCheatsActive[CHEAT_FAST_TRAFFIC] = false;
         }
-        if (CCheat::m_aCheatsActive[CHEAT_FUNHOUSE_THEME]) {
-            CCheat::FunhouseCheat();
+        if (m_aCheatsActive[CHEAT_FUNHOUSE_THEME]) {
+            FunhouseCheat();
         }
-        if (CCheat::m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC]) {
-            CCheat::CountrysideInvasionCheat();
+        if (m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC]) {
+            CountrysideInvasionCheat();
         }
         CStreaming::ReclassifyLoadedCars();
-        if (!CCheat::m_aCheatsActive[CHEAT_BLACK_TRAFFIC]) {
-            CCheat::m_aCheatsActive[CHEAT_BLACK_TRAFFIC] = true;
-            CCheat::m_aCheatsActive[CHEAT_PINK_TRAFFIC] = false;
+        if (!m_aCheatsActive[CHEAT_BLACK_TRAFFIC]) {
+            m_aCheatsActive[CHEAT_BLACK_TRAFFIC] = true;
+            m_aCheatsActive[CHEAT_PINK_TRAFFIC] = false;
         }
 
         CStreaming::RequestModel(MODEL_KATANA, STREAMING_GAME_REQUIRED);
@@ -599,7 +618,7 @@ void CCheat::NotWantedCheat() {
     CPlayerPed* player = FindPlayerPed(-1);
     player->CheatWantedLevel(0);
     player->bWantedByPolice = false;
-    CCheat::m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE] ^= true;
+    m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE] ^= true;
 }
 
 void CCheat::ParachuteCheat() {
@@ -611,18 +630,20 @@ void CCheat::ParachuteCheat() {
 }
 
 void CCheat::PinkCarsCheat() {
-    CCheat::m_aCheatsActive[CHEAT_PINK_TRAFFIC] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_PINK_TRAFFIC]) {
-        CCheat::m_aCheatsActive[CHEAT_BLACK_TRAFFIC] = false;
+    m_aCheatsActive[CHEAT_PINK_TRAFFIC] ^= true;
+    if (m_aCheatsActive[CHEAT_PINK_TRAFFIC]) {
+        m_aCheatsActive[CHEAT_BLACK_TRAFFIC] = false;
     }
 }
 
+// unused
+// does nothing (NOP)
 void CCheat::PredatorCheat() {
-
+    // NOP
 }
 
 void CCheat::QuadCheat() {
-    CCheat::VehicleCheat(MODEL_QUAD);
+    VehicleCheat(MODEL_QUAD);
 }
 
 void CCheat::RainyWeatherCheat() {
@@ -630,7 +651,7 @@ void CCheat::RainyWeatherCheat() {
 }
 
 void CCheat::RiotCheat() {
-    CCheat::m_aCheatsActive[CHEAT_RIOT_MODE] ^= true;
+    m_aCheatsActive[CHEAT_RIOT_MODE] ^= true;
 }
 
 void CCheat::SandstormCheat() {
@@ -658,19 +679,19 @@ void CCheat::StaminaCheat() {
 }
 
 void CCheat::StockCarCheat() {
-    CCheat::VehicleCheat(MODEL_BLOODRA);
+    VehicleCheat(MODEL_BLOODRA);
 }
 
 void CCheat::StockCar2Cheat() {
-    CCheat::VehicleCheat(MODEL_RNCHLURE);
+    VehicleCheat(MODEL_RNCHLURE);
 }
 
 void CCheat::StockCar3Cheat() {
-    CCheat::VehicleCheat(MODEL_HOTRINA);
+    VehicleCheat(MODEL_HOTRINA);
 }
 
 void CCheat::StockCar4Cheat() {
-    CCheat::VehicleCheat(MODEL_HOTRINB);
+    VehicleCheat(MODEL_HOTRINB);
 }
 
 void CCheat::StormCheat() {
@@ -680,7 +701,7 @@ void CCheat::StormCheat() {
 }
 
 void CCheat::StuntPlaneCheat() {
-    CCheat::VehicleCheat(MODEL_STUNT);
+    VehicleCheat(MODEL_STUNT);
 }
 
 void CCheat::SunnyWeatherCheat() {
@@ -688,7 +709,7 @@ void CCheat::SunnyWeatherCheat() {
 }
 
 void CCheat::TankCheat() {
-    CCheat::VehicleCheat(MODEL_RHINO);
+    VehicleCheat(MODEL_RHINO);
 }
 
 void CCheat::TankerCheat() {
@@ -696,11 +717,11 @@ void CCheat::TankerCheat() {
 }
 
 void CCheat::TrashmasterCheat() {
-    CCheat::VehicleCheat(MODEL_TRASH);
+    VehicleCheat(MODEL_TRASH);
 }
 
-CVehicle* CCheat::VehicleCheat(int vehicleModelId) {
-    return plugin::CallAndReturnDynGlobal<CVehicle*, int>(0x43A0B0, vehicleModelId); //CAutomobile::PlaceOnRoadProperly Places skimmer incorrectly, it's placed at millions units underground
+void CCheat::VehicleCheat(int vehicleModelId) {
+    plugin::CallAndReturnDynGlobal<CVehicle*, int>(0x43A0B0, vehicleModelId); // CAutomobile::PlaceOnRoadProperly Places skimmer incorrectly, it's placed at millions units underground
 }
 
 void CCheat::VehicleSkillsCheat() {
@@ -712,10 +733,10 @@ void CCheat::VehicleSkillsCheat() {
 
 void CCheat::VillagePeopleCheat() {
 
-    CCheat::m_aCheatsActive[CHEAT_PEDS_ATTACK_YOU_WITH_ROCKETS] ^= true;
-    if (CCheat::m_aCheatsActive[CHEAT_PEDS_ATTACK_YOU_WITH_ROCKETS]) {
-        CCheat::m_aCheatsActive[CHEAT_EVERYONE_ARMED] = false;
-        CCheat::EverybodyAttacksPlayerCheat();
+    m_aCheatsActive[CHEAT_PEDS_ATTACK_YOU_WITH_ROCKETS] ^= true;
+    if (m_aCheatsActive[CHEAT_PEDS_ATTACK_YOU_WITH_ROCKETS]) {
+        m_aCheatsActive[CHEAT_EVERYONE_ARMED] = false;
+        EverybodyAttacksPlayerCheat();
     } else {
         int peds[8] = {
             MODEL_WMYCON,
@@ -728,13 +749,13 @@ void CCheat::VillagePeopleCheat() {
             -2,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
-        CCheat::EverybodyAttacksPlayerCheat();
-        CCheat::m_aCheatsActive[CHEAT_EVERYONE_ARMED] = true;
+        EverybodyAttacksPlayerCheat();
+        m_aCheatsActive[CHEAT_EVERYONE_ARMED] = true;
     }
 }
 
 void CCheat::VortexCheat() {
-    CCheat::VehicleCheat(MODEL_VORTEX);
+    VehicleCheat(MODEL_VORTEX);
 }
 
 void CCheat::WantedCheat() {
@@ -872,14 +893,13 @@ void CCheat::SuicideCheat() {
     pPlayer->GetEventGroup().Add(&damageEvent, false);
 }
 
-bool CCheat::IsZoneStreamingAllowed()
-{
-    return CCheat::m_aCheatsActive[CHEAT_ELVIS_IS_EVERYWHERE]
-        || CCheat::m_aCheatsActive[CHEAT_PEDS_ATTACK_YOU_WITH_ROCKETS]
-        || CCheat::m_aCheatsActive[CHEAT_BEACH_PARTY]
-        || CCheat::m_aCheatsActive[CHEAT_GANGMEMBERS_EVERYWHERE]
-        || CCheat::m_aCheatsActive[CHEAT_NINJA_THEME]
-        || CCheat::m_aCheatsActive[CHEAT_SLUT_MAGNET]
-        || CCheat::m_aCheatsActive[CHEAT_FUNHOUSE_THEME]
-        || CCheat::m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC];
+bool CCheat::IsZoneStreamingAllowed() {
+    return m_aCheatsActive[CHEAT_ELVIS_IS_EVERYWHERE]
+        || m_aCheatsActive[CHEAT_PEDS_ATTACK_YOU_WITH_ROCKETS]
+        || m_aCheatsActive[CHEAT_BEACH_PARTY]
+        || m_aCheatsActive[CHEAT_GANGMEMBERS_EVERYWHERE]
+        || m_aCheatsActive[CHEAT_NINJA_THEME]
+        || m_aCheatsActive[CHEAT_SLUT_MAGNET]
+        || m_aCheatsActive[CHEAT_FUNHOUSE_THEME]
+        || m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC];
 }

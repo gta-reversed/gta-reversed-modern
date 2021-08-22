@@ -164,7 +164,7 @@ bool CGame::Init1(char const *datFile) {
     ThePaths.Init();
     CPathFind::AllocatePathFindInfoMem();
     CTaskSimpleFight::LoadMeleeData();
-    CPad::ResetCheats();
+    CCheat::ResetCheats();
     g_fx.Init();
     return true;
 }

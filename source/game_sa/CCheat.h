@@ -6,9 +6,8 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVehicle.h"
-#include <eCheats.h>
+#include "eCheats.h"
 
 struct Cheat {
     DWORD installAddress;
@@ -20,15 +19,19 @@ struct Cheat {
 
 class CCheat {
 public:
-
      static void(*(&m_aCheatFunctions)[92])();
      static int(&m_aCheatHashKeys)[92]; // static int m_aCheatHashKeys[92]
      static char(&m_CheatString)[30]; // static char m_CheatString[30]
      static bool(&m_aCheatsActive)[92]; // static bool m_aCheatsActive[92]
      static bool &m_bHasPlayerCheated;
 
+public:
      static void InjectHooks();
+
      static void AddToCheatString(char LastPressedKey);
+     static void ResetCheats();
+     static void DoCheats();
+
      static void AdrenalineCheat();
      static void AllCarsAreGreatCheat();
      static void AllCarsAreShitCheat();
@@ -52,7 +55,6 @@ public:
      static void GangLandCheat();
      static void GangsCheat();
      static void GolfcartCheat();
-     //! handles BeachParty, Funhouse, AllCarsAreGreat , AllCarsAreCheap cheats toggling
      static void HandleSpecialCheats(eCheats cheatID);
      static void HealthCheat();
      static void HearseCheat();
@@ -68,8 +70,6 @@ public:
      static void NotWantedCheat();
      static void ParachuteCheat();
      static void PinkCarsCheat();
-     //! unused
-     //! does nothing (NOP)
      static void PredatorCheat();
      static void QuadCheat();
      static void RainyWeatherCheat();
@@ -89,7 +89,7 @@ public:
      static void TankCheat();
      static void TankerCheat();
      static void TrashmasterCheat();
-     static CVehicle* VehicleCheat(int vehicleModelId);
+     static void VehicleCheat(int vehicleModelId);
      static void VehicleSkillsCheat();
      static void VillagePeopleCheat();
      static void VortexCheat();
