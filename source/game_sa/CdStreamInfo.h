@@ -1,4 +1,5 @@
 #pragma once
+
 #include <windows.h>
 #include "Queue.h"
 
@@ -16,7 +17,7 @@ union SyncObj
     CONDITION_VARIABLE cv;
 };
 
-struct CdStream	// sizeof = 0x30
+struct CdStream
 {
     std::uint32_t nSectorOffset;
     std::uint32_t nSectorsToRead;
@@ -31,7 +32,7 @@ struct CdStream	// sizeof = 0x30
     OVERLAPPED overlapped;
 };
 
-struct CdStreamInfoSA	// sizeof = 0x8CC
+struct CdStreamInfoSA
 {
     DWORD streamCreateFlags;
     BOOL streamingInitialized;
@@ -53,9 +54,9 @@ struct CdStreamInfoSA	// sizeof = 0x8CC
     DWORD gta3_id;
 };
 
-static_assert(sizeof(SyncObj) == sizeof(HANDLE), "Incorrect struct size: SyncObj");
-static_assert(sizeof(CdStreamInfoSA) == 0x8CC, "Incorrect struct size: CdStreamInfoSA");
-static_assert(sizeof(CdStream) == 0x30, "Incorrect struct size: CdStream");
+VALIDATE_SIZE(SyncObj, sizeof(HANDLE));
+VALIDATE_SIZE(CdStreamInfoSA, 0x8CC);
+VALIDATE_SIZE(CdStream, 0x30);
 
 const std::int32_t MAX_CD_STREAM_HANDLES = 32;
 const std::int32_t MAX_CD_STREAM_IMAGE_NAME_SIZE = 64;
@@ -80,7 +81,7 @@ eCdStreamStatus __cdecl CdStreamSync(std::int32_t streamId);
 eCdStreamStatus __cdecl CdStreamGetStatus(std::int32_t streamId);
 bool __cdecl CdStreamRead(std::int32_t streamId, std::uint8_t* lpBuffer, std::uint32_t offsetAndHandle, std::int32_t sectorCount);
 static std::uint32_t __cdecl CdStreamGetLastPosn() { return gLastCdStreamPosn; }
-DWORD WINAPI CdStreamThread(LPVOID lpParam);
+[[noreturn]] DWORD WINAPI CdStreamThread(LPVOID lpParam);
 void __cdecl CdStreamInitThread();
 void __cdecl CdStreamInit(std::int32_t streamCount);
 void __cdecl CdStreamRemoveImages();

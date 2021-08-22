@@ -49,22 +49,20 @@ static CSync cdStreamThreadSync;
 
 void InjectCdStreamHooks()
 {
-    HookInstall(0x4067B0, &CdStreamOpen);
-    HookInstall(0x406460, &CdStreamSync);
-    HookInstall(0x4063E0, &CdStreamGetStatus);
-    HookInstall(0x406A20, &CdStreamRead);
-    HookInstall(0x406560, &CdStreamThread);
-    HookInstall(0x4068F0, &CdStreamInitThread);
-    HookInstall(0x406B70, &CdStreamInit);
-    HookInstall(0x406690, &CdStreamRemoveImages);
-    HookInstall(0x406370, &CdStreamShutdown);
+    ReversibleHooks::Install("CdStreamInfo", "CdStreamOpen", 0x4067B0, &CdStreamOpen);
+    ReversibleHooks::Install("CdStreamInfo", "CdStreamSync", 0x406460, &CdStreamSync);
+    ReversibleHooks::Install("CdStreamInfo", "CdStreamGetStatus", 0x4063E0, &CdStreamGetStatus);
+    ReversibleHooks::Install("CdStreamInfo", "CdStreamRead", 0x406A20, &CdStreamRead);
+    ReversibleHooks::Install("CdStreamInfo", "CdStreamThread", 0x406560, &CdStreamThread);
+    ReversibleHooks::Install("CdStreamInfo", "CdStreamInitThread", 0x4068F0, &CdStreamInitThread);
+    ReversibleHooks::Install("CdStreamInfo", "CdStreamInit", 0x406B70, &CdStreamInit);
+    ReversibleHooks::Install("CdStreamInfo", "CdStreamRemoveImages", 0x406690, &CdStreamRemoveImages);
+    ReversibleHooks::Install("CdStreamInfo", "CdStreamShutdown", 0x406370, &CdStreamShutdown);
 }
 
+// 0x4067B0
 std::int32_t __cdecl CdStreamOpen(const char* lpFileName)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<std::int32_t, 0x4067B0, const char*>(lpFileName);
-#else
     std::int32_t freeHandleIndex = 0;
     for (; freeHandleIndex < MAX_CD_STREAM_HANDLES; freeHandleIndex++) {
         if (!gStreamFileHandles[freeHandleIndex])
@@ -72,13 +70,12 @@ std::int32_t __cdecl CdStreamOpen(const char* lpFileName)
     }
     SetLastError(NO_ERROR);
     const DWORD dwFlagsAndAttributes = gStreamFileCreateFlags | FILE_ATTRIBUTE_READONLY | FILE_FLAG_RANDOM_ACCESS;
-    HANDLE file = CreateFileA(lpFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, dwFlagsAndAttributes, NULL);
+    HANDLE file = CreateFileA(lpFileName, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, dwFlagsAndAttributes, nullptr);
     gStreamFileHandles[freeHandleIndex] = file;
     if (file == INVALID_HANDLE_VALUE)
         return 0;
     strncpy(gCdImageNames[freeHandleIndex], lpFileName, MAX_CD_STREAM_IMAGE_NAME_SIZE);
     return freeHandleIndex << 24;
-#endif
 }
 
 // This function halts the caller thread if CdStreamThread is still reading the file to "sync" it.
@@ -90,16 +87,14 @@ std::int32_t __cdecl CdStreamOpen(const char* lpFileName)
 // So it's fixed here because we used a critical section for it.
 // Workflow:
 // 1. CdStreamRead is called on the main thread and signals gStreamSemaphore to
-//    read game asset in a secondary thread a.k.a CdStreamThread.
+//    read game asset in a secondary thread a.k.a. CdStreamThread.
 // 2. CdStreamThread starts reading the file on the secondary thread, and the main thread
 //    immediately calls CdStreamSync to stop the main thread from execution until the model data has been read from the file.
 // 3. When CdStreamThread is done reading the file, it signals `stream.sync.hSemaphore`, so the main thread can
-//    continue exectuting code and continue the gameplay. 
+//    continue executing code and continue the gameplay.
+// 0x406460
 eCdStreamStatus __cdecl CdStreamSync(std::int32_t streamId)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<eCdStreamStatus, 0x406460, std::int32_t>(streamId);
-#else
     CdStream& stream = gCdStreams[streamId];
 #ifdef APPLY_CD_STREAM_DEADLOCK_FIX
     CLockGuard lockGuard(cdStreamThreadSync);
@@ -124,14 +119,11 @@ eCdStreamStatus __cdecl CdStreamSync(std::int32_t streamId)
             return eCdStreamStatus::READING_FAILURE;
     }
     return eCdStreamStatus::READING_SUCCESS;
-#endif
 }
 
+// 0x4063E0
 eCdStreamStatus __cdecl CdStreamGetStatus(std::int32_t streamId)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<eCdStreamStatus, 0x4063E0, std::int32_t>(streamId);
-#else
     CdStream& stream = gCdStreams[streamId];
     if (gStreamingInitialized) {
         if (stream.bInUse)
@@ -149,7 +141,6 @@ eCdStreamStatus __cdecl CdStreamGetStatus(std::int32_t streamId)
             return eCdStreamStatus::READING;
     }
     return eCdStreamStatus::READING_SUCCESS;
-#endif
 }
 
 // When CdStreamRead is called, it will update CdStream information for the channel and
@@ -158,11 +149,9 @@ eCdStreamStatus __cdecl CdStreamGetStatus(std::int32_t streamId)
 // for the channel, then it will return false.
 // When CdStreamThread is done reading the model, then CdStreamThread will set `stream.nSectorsToRead` and `stream.bInUse` to 0,
 // so the main thread can call CdStreamRead again to read more models.
+// 0x406A20
 bool __cdecl CdStreamRead(std::int32_t streamId, std::uint8_t* lpBuffer, std::uint32_t offsetAndHandle, std::int32_t sectorCount)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<bool, 0x406A20, std::int32_t, std::uint8_t*, std::uint32_t, std::int32_t>(streamId, lpBuffer, offsetAndHandle, sectorCount);
-#else
     CdStream& stream = gCdStreams[streamId];
     gLastCdStreamPosn = sectorCount + offsetAndHandle;
     const std::uint32_t sectorOffset = offsetAndHandle & 0xFFFFFF;
@@ -177,7 +166,7 @@ bool __cdecl CdStreamRead(std::int32_t streamId, std::uint8_t* lpBuffer, std::ui
         stream.lpBuffer = lpBuffer;
         stream.bLocked = false;
         AddToQueue(&gStreamQueue, streamId);
-        if (!ReleaseSemaphore(gStreamSemaphore, 1, 0))
+        if (!ReleaseSemaphore(gStreamSemaphore, 1, nullptr))
             printf("Signal Sema Error\n");
         return true;
     }
@@ -186,21 +175,18 @@ bool __cdecl CdStreamRead(std::int32_t streamId, std::uint8_t* lpBuffer, std::ui
     if (gOverlappedIO) {
         LPOVERLAPPED overlapped = &gCdStreams[streamId].overlapped;
         overlapped->Offset = overlappedOffset;
-        if (ReadFile(stream.hFile, lpBuffer, numberOfBytesToRead, NULL, overlapped) || GetLastError() == ERROR_IO_PENDING)
+        if (ReadFile(stream.hFile, lpBuffer, numberOfBytesToRead, nullptr, overlapped) || GetLastError() == ERROR_IO_PENDING)
             return true;
         return false;
     }
-    SetFilePointer(stream.hFile, overlappedOffset, 0, 0);
+    SetFilePointer(stream.hFile, overlappedOffset, nullptr, 0);
     DWORD numberOfBytesRead = 0;
-    return ReadFile(stream.hFile, lpBuffer, numberOfBytesToRead, &numberOfBytesRead, 0);
-#endif
+    return ReadFile(stream.hFile, lpBuffer, numberOfBytesToRead, &numberOfBytesRead, nullptr);
 }
 
-DWORD WINAPI CdStreamThread(LPVOID lpParam)
+// 0x406560
+[[noreturn]] DWORD WINAPI CdStreamThread(LPVOID lpParam)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<DWORD, 0x406560, LPVOID>(lpParam);
-#else
     while (true) {
         WaitForSingleObject(gStreamSemaphore, INFINITE);
         const std::int32_t streamId = GetFirstInQueue(&gStreamQueue);
@@ -211,7 +197,7 @@ DWORD WINAPI CdStreamThread(LPVOID lpParam)
             const DWORD overlappedOffset = stream.nSectorOffset * STREAMING_SECTOR_SIZE;
             if (gOverlappedIO) {
                 stream.overlapped.Offset = overlappedOffset;
-                if (ReadFile(stream.hFile, stream.lpBuffer, numberOfBytesToRead, NULL, &stream.overlapped)) {
+                if (ReadFile(stream.hFile, stream.lpBuffer, numberOfBytesToRead, nullptr, &stream.overlapped)) {
                     stream.status = eCdStreamStatus::READING_SUCCESS;
                 }
                 else if (GetLastError() != ERROR_IO_PENDING) {
@@ -226,9 +212,9 @@ DWORD WINAPI CdStreamThread(LPVOID lpParam)
                 }
             }
             else {
-                SetFilePointer(stream.hFile, overlappedOffset, 0u, 0u);
+                SetFilePointer(stream.hFile, overlappedOffset, nullptr, 0u);
                 DWORD numberOfBytesRead = 0;
-                if (ReadFile(stream.hFile, stream.lpBuffer, numberOfBytesToRead, &numberOfBytesRead, NULL))
+                if (ReadFile(stream.hFile, stream.lpBuffer, numberOfBytesToRead, &numberOfBytesRead, nullptr))
                     stream.status = eCdStreamStatus::READING_SUCCESS;
                 else
                     stream.status = eCdStreamStatus::READING_FAILURE;
@@ -242,21 +228,17 @@ DWORD WINAPI CdStreamThread(LPVOID lpParam)
         // in CdStreamSync to avoid causing a deadlock.
         stream.nSectorsToRead = 0;
         if (stream.bLocked)
-            ReleaseSemaphore(stream.sync.hSemaphore, 1, 0);
+            ReleaseSemaphore(stream.sync.hSemaphore, 1, nullptr);
         stream.bInUse = false;
     }
-    return 0;
-#endif
 }
 
+// 0x4068F0
 void __cdecl CdStreamInitThread()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x4068F0>();
-#else
     SetLastError(NO_ERROR);
     for (std::int32_t i = 0; i < gStreamCount; i++) {
-        HANDLE hSemaphore = CreateSemaphoreA(0, 0, 2, 0);
+        HANDLE hSemaphore = CreateSemaphoreA(nullptr, 0, 2, nullptr);
         gCdStreams[i].sync.hSemaphore = hSemaphore;
         if (!hSemaphore) {
             printf("%s: failed to create sync semaphore\n", "cdvd_stream");
@@ -264,9 +246,9 @@ void __cdecl CdStreamInitThread()
         }
     }
     InitialiseQueue(&gStreamQueue, gStreamCount + 1);
-    gStreamSemaphore = CreateSemaphoreA(0, 0, 5, "CdStream");
+    gStreamSemaphore = CreateSemaphoreA(nullptr, 0, 5, "CdStream");
     if (gStreamSemaphore) {
-        gStreamingThread = CreateThread(NULL, 0x10000, CdStreamThread, NULL, CREATE_SUSPENDED, &gStreamingThreadId);
+        gStreamingThread = CreateThread(nullptr, 0x10000, CdStreamThread, nullptr, CREATE_SUSPENDED, &gStreamingThreadId);
         if (gStreamingThread) {
             SetThreadPriority(gStreamingThread, GetThreadPriority(GetCurrentThread()));
             ResumeThread(gStreamingThread);
@@ -278,16 +260,13 @@ void __cdecl CdStreamInitThread()
     else {
         printf("%s: failed to create stream semaphore\n", "cdvd_stream");
     }
-#endif
 }
 
+// 0x406B70
 void __cdecl CdStreamInit(std::int32_t streamCount)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x406B70, std::int32_t>(streamCount);
-#else
     for (std::int32_t i = 0; i < MAX_CD_STREAM_HANDLES; i++) {
-        gStreamFileHandles[i] = 0;
+        gStreamFileHandles[i] = nullptr;
         gCdImageNames[i][0] = 0;
     }
     DWORD bytesPerSector = 0;
@@ -315,15 +294,11 @@ void __cdecl CdStreamInit(std::int32_t streamCount)
     }
     CdStreamInitThread();
     CMemoryMgr::FreeAlign(pAllocatedMemory);
-#endif
 }
 
-
+// 0x406690
 void __cdecl CdStreamRemoveImages()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x406690>();
-#else
     for (std::int32_t i = 0; i < gStreamCount; ++i) {
         CdStreamSync(i);
     }
@@ -331,18 +306,15 @@ void __cdecl CdStreamRemoveImages()
         SetLastError(NO_ERROR);
         if (gStreamFileHandles[i])
             CloseHandle(gStreamFileHandles[i]);
-        gStreamFileHandles[i] = 0;
+        gStreamFileHandles[i] = nullptr;
         gCdImageNames[i][0] = 0;
     }
     gOpenStreamCount = 0;
-#endif
 }
 
+// 0x406370
 void __cdecl CdStreamShutdown()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x406370>();
-#else
     if (gStreamingInitialized) {
         FinalizeQueue(&gStreamQueue);
         CloseHandle(gStreamSemaphore);
@@ -352,5 +324,4 @@ void __cdecl CdStreamShutdown()
         }
     }
     LocalFree(gCdStreams);
-#endif
 }
