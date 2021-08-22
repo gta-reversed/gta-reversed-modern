@@ -1,3 +1,5 @@
+#include "StdInc.h"
+
 #include "rwcore.h"
 
 RxHeap* RxHeapCreate(RwUInt32 size) {

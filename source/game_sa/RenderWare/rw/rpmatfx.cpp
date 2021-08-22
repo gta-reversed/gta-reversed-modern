@@ -1,3 +1,5 @@
+#include "StdInc.h"
+
 #include "rpmatfx.h"
 
 void RpMatFXMaterialDataSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc) {

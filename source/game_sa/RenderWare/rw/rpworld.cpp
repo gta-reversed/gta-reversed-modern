@@ -1,3 +1,5 @@
+#include "StdInc.h"
+
 #include "rpworld.h"
 
 void _rwD3D9VSSetActiveWorldMatrix(const RwMatrix* worldMatrix) {

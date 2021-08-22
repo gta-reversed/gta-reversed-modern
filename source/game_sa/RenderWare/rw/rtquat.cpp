@@ -1,3 +1,5 @@
+#include "StdInc.h"
+
 #include "rtquat.h"
 
 void RtQuatConvertToMatrix(const RtQuat* const qpQuat, RwMatrix* const mpMatrix) {

@@ -1,3 +1,5 @@
+#include "StdInc.h"
+
 #include "rtdict.h"
 
 RtDictSchema* RtDictSchemaInit(RtDictSchema* schema) {
