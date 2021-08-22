@@ -480,8 +480,8 @@
 #include "game_sa\Models\CLodTimeModelInfo.h"
 #include "game_sa\Models\CVehicleModelInfo.h"
 #include "game_sa\Models\CWeaponModelInfo.h"
+#include "game_sa/Plugins/NodeNamePlugin/NodeName.h"
 #include "game_sa\Plugins\JPegCompressPlugin\JPegCompress.h"
-#include "game_sa\Plugins\NodeName.h"
 #include "game_sa\Plugins\PipelinePlugin\PipelinePlugin.h"
 
 #include "game_sa\RenderWare\D3DIndexDataBuffer.h"

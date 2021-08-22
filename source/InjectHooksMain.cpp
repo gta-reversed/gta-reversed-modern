@@ -19,6 +19,7 @@
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
+        printf("Debugger not present\n");
         ::Sleep(100);
     }
 }
@@ -309,6 +310,7 @@ void InjectHooksMain()
     CBmx::InjectHooks();
     CTrailer::InjectHooks();
     CQuadBike::InjectHooks();
+    NodeNamePlugin::InjectHooks();
     JPegPlugin::InjectHooks();
     PipelinePlugin::InjectHooks();
 

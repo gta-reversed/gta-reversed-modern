@@ -104,7 +104,7 @@ RpAtomic* CFileLoader::SetRelatedModelInfoCB(RpAtomic* atomic, RpClump* clump)
 {
     char name[24];
     auto pAtomicModelInfo = CModelInfo::GetModelInfo(gAtomicModelId)->AsAtomicModelInfoPtr();
-    char* frameNodeName = GetFrameNodeName(RpAtomicGetFrame(atomic));
+    const char* frameNodeName = GetFrameNodeName(RpAtomicGetFrame(atomic));
 
     bool bDamage = false;
     GetNameAndDamage(frameNodeName, name, bDamage);
