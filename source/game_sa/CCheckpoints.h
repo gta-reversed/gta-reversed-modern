@@ -8,20 +8,22 @@
 #include "PluginBase.h"
 #include "CCheckpoint.h"
 
-extern unsigned int MAX_NUM_CHECKPOINTS; // default 32
+#define MAX_NUM_CHECKPOINTS 32
 
-class  CCheckpoints {
+class CCheckpoints {
 public:
-    static unsigned int &NumActiveCPts; // not used, only initialised (0)
-    static CCheckpoint *m_aCheckPtArray; // static CCheckpoint m_aCheckPtArray[32]
+    static uint32_t& NumActiveCPts; // not used, only initialised (0)
+    static CCheckpoint(&m_aCheckPtArray)[MAX_NUM_CHECKPOINTS];
 
-    static void DeleteCP(unsigned int id, unsigned short type);
+public:
+    static void InjectHooks();
+
     static void Init();
-    static CCheckpoint* PlaceMarker(unsigned int id, unsigned short type, CVector& posn, CVector& direction, float size, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha, unsigned short pulsePeriod, float pulseFraction, short rotateRate);
-    static void Render();
-    static void SetHeading(unsigned int id, float angle);
-    // dummy function
     static void Shutdown();
+    static void UpdatePos(uint32_t id, CVector& posn);
+    static void SetHeading(uint32_t id, float angle);
     static void Update();
-    static void UpdatePos(unsigned int id, CVector& posn);
+    static CCheckpoint* PlaceMarker(uint32_t id, uint16_t type, CVector& posn, CVector& dir, float size, uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha, uint16_t pulsePeriod, float pulseFraction, int16_t rotateRate);
+    static void DeleteCP(uint32_t id, uint16_t type);
+    static void Render();
 };
