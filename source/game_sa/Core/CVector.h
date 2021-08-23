@@ -145,6 +145,7 @@ inline CVector Pow(const CVector& vec, float fPow) {
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b);
 float DotProduct(CVector* v1, CVector* v2);
 CVector CrossProduct(const CVector& a, const CVector& b);
+CVector Normalized(const CVector& vec);
 float DotProduct(const CVector& v1, const CVector& v2);
 float DotProduct2D(const CVector& v1, const CVector& v2);
 VALIDATE_SIZE(CVector, 0xC);

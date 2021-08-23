@@ -197,6 +197,7 @@ void CColStore::IncludeModelIndex(int colSlot, int modelId)
         pDef->m_nModelIdEnd = modelId;
 }
 
+// Yes, this in the IDB it's `CWorld::hasCollisionLoaded`
 bool CColStore::HasCollisionLoaded(CVector const& pos, int areaCode)
 {
     CColStore::SetCollisionRequired(pos, areaCode);

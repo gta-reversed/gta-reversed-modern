@@ -18,41 +18,54 @@ enum e3dMarkerType {
     MARKER3D_TORUS = 4,
     MARKER3D_CONE = 5,
     MARKER3D_CONE_NO_COLLISION = 6,
+
+    NUM_MARKER_TYPES,
+
     MARKER3D_NA = 257
 };
 
-class  C3dMarker {
+class C3dMarker {
 public:
-    CMatrix         m_mat;
-    RpAtomic       *m_pAtomic;
-    RpMaterial     *m_pMaterial;
-    unsigned short  m_nType; // see e3dMarkerType
-    bool            m_bIsUsed;
-    bool            m_bMustBeRenderedThisFrame;
-    int             m_nIdentifier;
-    CRGBA           m_colour;
-    short           m_nPulsePeriod;
-    short           m_nRotateRate;
-    int             m_nStartTime;
-    float           m_fPulseFraction;
-    float           m_fStdSize;
-    float           m_fSize;
-    float           m_fBrightness;
-    float           m_fCameraRange;
-    CVector         m_vecNormal;
-    short           m_nLastMapReadX; // float casted to short
-    short           m_nLastMapReadY; // float casted to short
-    float           m_fLastMapReadResultZ;
-    float           m_fRoofHeight;
-    CVector         m_vecLastPosition;
-    int             m_nOnScreenTestTime;
+    CMatrix m_mat;
+    RpAtomic* m_pAtomic;
+    RpMaterial* m_pMaterial;
+    uint16_t m_nType;
+    bool m_bIsUsed;
+    bool m_bMustBeRenderedThisFrame;
+    int32_t m_nIdentifier;
+    CRGBA m_colour;
+    int16_t m_nPulsePeriod;
+    int16_t m_nRotateRate;
+    int32_t m_nStartTime;
+    float m_fPulseFraction;
+    float m_fStdSize;
+    float m_fSize;
+    float m_fBrightness;
+    float m_fCameraRange;
+    CVector m_vecNormal;
+    int16_t m_nLastMapReadX;
+    int16_t m_nLastMapReadY;
+    float m_fLastMapReadResultZ;
+    float m_fRoofHeight;
+    CVector m_vecLastPosition;
+    int32_t m_nOnScreenTestTime;
 
-    bool AddMarker(unsigned int id, unsigned short type, float size, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha, unsigned short pulsePeriod, float pulseFraction, short rotateRate);
+public:
+    static void InjectHooks();
+
+    ~C3dMarker();
+    C3dMarker();
+
+    bool AddMarker(uint32_t id, e3dMarkerType type, float size, uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha, uint16_t pulsePeriod, float pulseFraction, int16_t rotateRate);
     void DeleteMarkerObject();
-    bool IsZCoordinateUpToDate();
     void Render();
-    void SetZCoordinateIfNotUpToDate(float coordinate);
-    void UpdateZCoordinate(CVector arg0, float arg1);
-};
+    bool IsZCoordinateUpToDate();
+    void UpdateZCoordinate(CVector newPos, float zDistance);
+    void SetZCoordinateIfNotUpToDate(float zCoord);
 
+private:
+    C3dMarker* Constructor();
+    C3dMarker* Destructor();
+};
 VALIDATE_SIZE(C3dMarker, 0xA0);
+

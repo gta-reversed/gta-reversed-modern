@@ -35,7 +35,7 @@ public:
         m_pAttachMatrix = nullptr;
         m_bOwnsAttachedMatrix = false;
     }
-
+    
 private:
     // RwV3d-like:
     CVector      m_right;
@@ -87,6 +87,7 @@ public:
 	void CopyToRwMatrix(RwMatrix *matrix); // similar to UpdateRW(RwMatrixTag *)
 	void SetRotate(CQuaternion& quat);
     void Scale(float scale);
+    void Scale(float x, float y, float z);
 	void ForceUpVector(CVector vecUp);
     void ConvertToEulerAngles(float* pX, float* pY, float* pZ, unsigned int uiFlags);
     void ConvertFromEulerAngles(float x, float y, float z, unsigned int uiFlags);

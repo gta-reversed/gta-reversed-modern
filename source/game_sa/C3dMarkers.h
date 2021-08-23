@@ -51,7 +51,7 @@ public:
     static float &m_angleDiamond;
     static unsigned int &NumActiveMarkers;
     static C3dMarker *m_aMarkerArray;
-    static RpClump **m_pRpClumpArray;
+    static RpClump* (&m_pRpClumpArray)[NUM_MARKER_TYPES];
 
 public:
     static void InjectHooks();
@@ -83,7 +83,7 @@ public:
     // returns slot index; -1 if not created; for 'colour', see eHudColours 
     static int User3dMarkerSet(float x, float y, float z, int colour);
     static void User3dMarkersDraw();
-};
 
-// 'data' is a pointer to store atomic (RpAtomic **)
-RpAtomic* MarkerAtomicCB(RpAtomic* atomic, void* data);
+    static RpClump* GetClumpForType(e3dMarkerType type);
+    static RpAtomic* GetClonedAtomicForType(e3dMarkerType type);
+};

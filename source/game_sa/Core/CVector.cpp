@@ -168,6 +168,12 @@ CVector CrossProduct(const CVector& a, const CVector& b)
     return result;
 }
 
+CVector Normalized(const CVector& vec) {
+    CVector copy(vec);
+    copy.Normalise();
+    return vec;
+}
+
 float DotProduct(CVector* v1, CVector* v2)
 {
     return v1->z * v2->z + v1->y * v2->y + v1->x * v2->x;

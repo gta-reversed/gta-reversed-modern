@@ -42,7 +42,8 @@ void CMatrix::InjectHooks()
     ReversibleHooks::Install("CMatrix", "Reorthogonalise", 0x59B6A0, &CMatrix::Reorthogonalise);
     ReversibleHooks::Install("CMatrix", "CopyToRwMatrix", 0x59B8B0, &CMatrix::CopyToRwMatrix);
     ReversibleHooks::Install("CMatrix", "SetRotate_quat", 0x59BBF0, (void(CMatrix::*)(CQuaternion&))(&CMatrix::SetRotate));
-    ReversibleHooks::Install("CMatrix", "Scale", 0x459350, &CMatrix::Scale);
+    ReversibleHooks::Install("CMatrix", "Scale", 0x459350, (void(CMatrix::*)(float))(&CMatrix::Scale));
+    ReversibleHooks::Install("CMatrix", "ScaleXYZ", 0x5A2E60, (void(CMatrix::*)(float, float, float))(&CMatrix::Scale));
     ReversibleHooks::Install("CMatrix", "ForceUpVector", 0x59B7E0, &CMatrix::ForceUpVector);
     ReversibleHooks::Install("CMatrix", "ConvertToEulerAngles", 0x59A840, &CMatrix::ConvertToEulerAngles);
     ReversibleHooks::Install("CMatrix", "ConvertFromEulerAngles", 0x59AA40, &CMatrix::ConvertFromEulerAngles);
@@ -327,6 +328,12 @@ void CMatrix::Scale(float scale) {
     m_right *= scale;
     m_forward *= scale;
     m_up *= scale;
+}
+
+void CMatrix::Scale(float x, float y, float z) {
+    m_right *= x;
+    m_forward *= y;
+    m_up *= z;
 }
 
 void CMatrix::ForceUpVector(CVector vecUp) {
