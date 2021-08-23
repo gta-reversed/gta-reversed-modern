@@ -135,7 +135,6 @@
 #include "game_sa\CCover.h"
 #include "game_sa\CCoverPoint.h"
 #include "game_sa\CCranes.h"
-#include "game_sa\CCredits.h"
 #include "game_sa\CCreepingFire.h"
 #include "game_sa\CCrimeBeingQd.h"
 #include "game_sa\CCustomBuildingDNPipeline.h"

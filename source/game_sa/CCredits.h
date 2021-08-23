@@ -6,16 +6,10 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
 class CCredits {
 public:
-    static int &m_nCreditsStartTime;
-    static bool &m_bCreditsGoing;
-
-    //NOTSA
-    static float m_Position;
-    static float m_CurrentOffset;
+    static uint32_t& CreditsStartTime;
+    static bool& bCreditsGoing;
 
 public:
     static void InjectHooks();
@@ -27,7 +21,4 @@ public:
     static void PrintCreditText(float scaleX, float scaleY, const char* text, float& position, float currentOffset, bool highlighted);
     static inline void PrintCreditSpace(float spaceSize, float& position);
     static void RenderCredits();
-
-    //NOTSA
-    static inline void PrintCreditTextHelper(const char* textKey, float scale, bool highlighted);
 };
