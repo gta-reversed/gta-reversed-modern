@@ -16,7 +16,7 @@ enum eStreamingFlags {
     STREAMING_DONTREMOVE_IN_LOADSCENE = STREAMING_LOADING_SCENE | STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED,
 };
 
-enum eStreamingLoadState {
+enum eStreamingLoadState : uint8_t {
     LOADSTATE_NOT_LOADED = 0,
     LOADSTATE_LOADED = 1,
     LOADSTATE_REQUESTED = 2,
@@ -45,7 +45,7 @@ public:
     unsigned char m_nImgId;
     unsigned int m_nCdPosn;
     unsigned int m_nCdSize;     // number of blocks/sectors; m_nCdSize * STREAMING_BLOCK_SIZE = actual size in bytes
-    unsigned char m_nLoadState; // see eStreamingLoadState
+    eStreamingLoadState m_nLoadState;
     char __pad[3];
 
     static CStreamingInfo*& ms_pArrayBase;
