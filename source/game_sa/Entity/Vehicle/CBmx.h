@@ -41,7 +41,7 @@ public:
 public:
     static void InjectHooks();
 
-    CBmx(int modelIndex, unsigned char createdBy);
+    CBmx(int modelIndex, eVehicleCreatedBy createdBy);
 
     // VTABLE
     void BlowUpCar(CEntity* damager, unsigned char bHideExplosion) override { /* NOP */ }; // 0x6C0560

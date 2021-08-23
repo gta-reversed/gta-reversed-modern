@@ -24,9 +24,9 @@ void CPlane::InjectHooks() {
 
 }
 
-CPlane::CPlane(int modelIndex, unsigned char createdBy) : CAutomobile(plugin::dummy)
+CPlane::CPlane(int modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(plugin::dummy)
 {
-    plugin::CallMethod<0x6C8E20, CPlane*, int, unsigned char>(this, modelIndex, createdBy);
+    plugin::CallMethod<0x6C8E20, CPlane*, int, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
 
 // 0x6CCCF0

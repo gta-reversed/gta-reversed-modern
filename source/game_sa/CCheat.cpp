@@ -836,7 +836,7 @@ void CCheat::TankerCheat() {
     if (CStreaming::ms_aInfoForModel[MODEL_PETROTR].m_nLoadState != LOADSTATE_LOADED)
         return;
 
-    CTrailer* trailer = new CTrailer(MODEL_PETROTR, 1);
+    CTrailer* trailer = new CTrailer(MODEL_PETROTR, RANDOM_VEHICLE);
     CVector posn = vehicle->GetPosition();
     trailer->SetPosn(posn);
     trailer->SetOrientation(0.0f, 0.0f, 3.4906585f); // DegreesToRadians() ?

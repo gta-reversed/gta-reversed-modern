@@ -28,7 +28,7 @@ enum eBoatNodes {
 
 class CBoat : public CVehicle {
 public:
-    CBoat(int modelIndex, unsigned char createdBy);
+    CBoat(int modelIndex, eVehicleCreatedBy createdBy);
     ~CBoat() override;
 public:
     float              m_fMovingHiRotation; // works as counter also
