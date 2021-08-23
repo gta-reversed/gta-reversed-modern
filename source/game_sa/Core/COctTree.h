@@ -10,47 +10,45 @@
 #include "CPool.h"
 
 class  COctTree {
-protected:
-    COctTree(plugin::dummy_func_t) {}
 public:
-    unsigned int level;
-    bool         lastStep; // no childrens
+    unsigned int            level;
+    bool                    lastStep;       // no children
 private:
-    char _pad09;
+    char                    _pad09;
 public:
-    short        childrens[8]; // pool slot IDs,  -1 - empty
+    short                   children[8];    // pool slot IDs,  -1 - empty
 private:
-    char _pad1A[2];
+    char                    _pad1A[2];
 public:
-    unsigned int redComponent;
-    unsigned int greenComponent;
-    unsigned int blueComponent;
+    unsigned int            redComponent;
+    unsigned int            greenComponent;
+    unsigned int            blueComponent;
 
-    static bool &ms_bFailed;
-    static unsigned int &ms_level;
-    static CPool<COctTree> &ms_octTreePool;
+    static bool             ms_bFailed;
+    static unsigned int     ms_level;
+    static CPool<COctTree>  ms_octTreePool;
 
     //vtable
 
-    bool InsertTree(unsigned char colorRed, unsigned char colorGreen, unsigned char colorBlue);
-    void FillPalette(unsigned char* colors);
+    virtual bool            InsertTree(unsigned char colorRed, unsigned char colorGreen, unsigned char colorBlue);
+    virtual void            FillPalette(unsigned char* colors);
 
     COctTree();
     ~COctTree();
-    unsigned int FindNearestColour(unsigned char colorRed, unsigned char colorGreen, unsigned char colorBlue);
-    void InitPool(void* data, int dataSize);
-    unsigned int NoOfChildren();
-    void ReduceTree();
-    void RemoveChildren();
-    void ShutdownPool();
-    void empty();
-    static void operator delete(void* data);
-    static void* operator new(unsigned int size);
 
-private:
-    virtual void virtual_dummy() {}
+    unsigned int            FindNearestColour(unsigned char colorRed, unsigned char colorGreen, unsigned char colorBlue);
+    unsigned int            NoOfChildren();
+    void                    ReduceTree();
+    void                    RemoveChildren();
+    void                    empty();
+
+    void                    InitPool(void* data, int dataSize);
+    void                    ShutdownPool();
+
+    //static void operator delete(void* data);  //  Not needed, since destructor already does what this operator does.
+    static void*            operator new(unsigned int size);
 };
 
 VALIDATE_SIZE(COctTree, 0x28);
 
-extern COctTree *&gpTmpOctTree;
+extern COctTree *gpTmpOctTree;
