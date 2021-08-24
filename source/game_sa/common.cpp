@@ -54,7 +54,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "FindPlayerSpeed", 0x56E090, &FindPlayerSpeed);
     ReversibleHooks::Install("common", "FindPlayerEntity", 0x56E120, &FindPlayerEntity);
     ReversibleHooks::Install("common", "FindPlayerTrain", 0x56E160, &FindPlayerTrain);
-//    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld", 0x56E250, &FindPlayerCentreOfWorld);
+    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld", 0x56E250, &FindPlayerCentreOfWorld);
 //    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoSniperShift", 0x56E320, &FindPlayerCentreOfWorld_NoSniperShift);
 //    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoInteriorShift", 0x56E400, &FindPlayerCentreOfWorld_NoInteriorShift);
 //    ReversibleHooks::Install("common", "FindPlayerHeading", 0x56E450, &FindPlayerHeading);
@@ -162,7 +162,11 @@ CTrain* FindPlayerTrain(int playerId) {
 
 // 0x56E250
 CVector const& FindPlayerCentreOfWorld(int playerId) {
-    return ((CVector const&(__cdecl*)(int))0x56E250)(playerId);
+    if (CCarCtrl::bCarsGeneratedAroundCamera)
+        return TheCamera.GetPosition();
+    if (CVehicle* veh = FindPlayerVehicle(playerId, true))
+        return veh->GetPosition();
+    return FindPlayerPed(playerId)->GetPosition();
 }
 
 // 0x56E320
