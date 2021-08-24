@@ -120,7 +120,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "SetLightsForNightVision", 0x735F70, &SetLightsForNightVision);
     ReversibleHooks::Install("common", "GetDayNightBalance", 0x6FAB30, &GetDayNightBalance);
     ReversibleHooks::Install("common", "AsciiToGxtChar", 0x718600, &AsciiToGxtChar);
-//    ReversibleHooks::Install("common", "WriteRaster", 0x005A4150, &WriteRaster);
+    ReversibleHooks::Install("common", "WriteRaster", 0x005A4150, &WriteRaster);
 //    ReversibleHooks::Install("common", "CalcScreenCoors_VVff", 0x71DA00, static_cast<bool(*)(CVector const&, CVector*, float*, float*)>(&CalcScreenCoors));
 //    ReversibleHooks::Install("common", "CalcScreenCoors_VV", 0x71DAB0, static_cast<bool(*)(CVector const&, CVector*)>(&CalcScreenCoors));
     ReversibleHooks::Install("common", "LittleTest", 0x541330, &LittleTest);
@@ -1036,7 +1036,12 @@ bool RpAnimBlendPluginAttach() {
 void WriteRaster(RwRaster * pRaster, char const * pszPath) {
     assert(pRaster);
     assert(pszPath && pszPath[0]);
-    plugin::Call<0x005A4150>(pRaster, pszPath);
+
+    RwImage* img = RwImageCreate(RwRasterGetWidth(pRaster), RwRasterGetHeight(pRaster), RwRasterGetDepth(pRaster));
+    RwImageAllocatePixels(img);
+    RwImageSetFromRaster(img, pRaster);
+    RtPNGImageWrite(img, pszPath);
+    RwImageDestroy(img);
 }
 
 // 0x71DA00
