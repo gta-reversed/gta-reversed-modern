@@ -440,6 +440,7 @@ RpAtomic* AtomicRemoveAnimFromSkinCB(RpAtomic* atomic, void* data) {
             pCurrAnim = nullptr;
         }
     }
+    return atomic;
 }
 
 // Converted from cdecl bool RpAtomicConvertGeometryToTL(RpAtomic *atomic) 0x734BE0
@@ -512,6 +513,7 @@ RpMaterial* forceLinearFilteringMatTexturesCB(RpMaterial* material, void* data) 
 // Converted from cdecl bool SetFilterModeOnAtomicsTextures(RpAtomic *atomic,RwTextureFilterMode filtering) 0x734D80
 bool SetFilterModeOnAtomicsTextures(RpAtomic* atomic, RwTextureFilterMode filtering) {
     RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), forceLinearFilteringMatTexturesCB, (void*)(unsigned)filtering);
+    return true;
 }
 
 // Converted from cdecl RpAtomic* forceLinearFilteringAtomicsCB(RpAtomic *atomic,void *data) 0x734DA0
@@ -523,6 +525,7 @@ RpAtomic* forceLinearFilteringAtomicsCB(RpAtomic* atomic, void* data) {
 // Converted from cdecl bool SetFilterModeOnClumpsTextures(RpClump *clump,RwTextureFilterMode filtering) 0x734DC0
 bool SetFilterModeOnClumpsTextures(RpClump* clump, RwTextureFilterMode filtering) {
     RpClumpForAllAtomics(clump, forceLinearFilteringAtomicsCB, (void*)(unsigned)filtering);
+    return true;
 }
 
 // Converted from cdecl bool RpGeometryReplaceOldMaterialWithNewMaterial(RpGeometry *geometry,RpMaterial *oldMaterial,RpMaterial *newMaterial) 0x734DE0
