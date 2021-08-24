@@ -69,8 +69,8 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "DefinedState2d", 0x734750, &DefinedState2d);
 
 //    ReversibleHooks::Install("common", "GetNameAndDamage", 0x5370A0, &GetNameAndDamage);
-//    ReversibleHooks::Install("common", "GetFirstAtomicCallback", 0x734810, &GetFirstAtomicCallback);
-//    ReversibleHooks::Install("common", "GetFirstAtomic", 0x734820, &GetFirstAtomic);
+    ReversibleHooks::Install("common", "GetFirstAtomicCallback", 0x734810, &GetFirstAtomicCallback);
+    ReversibleHooks::Install("common", "GetFirstAtomic", 0x734820, &GetFirstAtomic);
 //    ReversibleHooks::Install("common", "Get2DEffectAtomicCallback", 0x734850, &Get2DEffectAtomicCallback);
 //    ReversibleHooks::Install("common", "Get2DEffectAtomic", 0x734880, &Get2DEffectAtomic);
 //    ReversibleHooks::Install("common", "GetFirstObjectCallback", 0x7348B0, &GetFirstObjectCallback);
@@ -321,12 +321,15 @@ void GetNameAndDamage(const char* nodeName, char* outName, bool& outDamage) {
 
 // Converted from cdecl RpAtomic* GetFirstAtomicCallback(RpAtomic *atomic,void *data) 0x734810
 RpAtomic* GetFirstAtomicCallback(RpAtomic* atomic, void* data) {
-    return ((RpAtomic* (__cdecl *)(RpAtomic*, void*))0x734810)(atomic, data);
+    *(RpAtomic**)(data) = atomic;
+    return nullptr;
 }
 
 // Converted from cdecl RpAtomic* GetFirstAtomic(RpClump *clump) 0x734820
 RpAtomic* GetFirstAtomic(RpClump* clump) {
-    return ((RpAtomic* (__cdecl *)(RpClump*))0x734820)(clump);
+    RpAtomic* atomic{};
+    RpClumpForAllAtomics(clump, GetFirstAtomicCallback, &atomic);
+    return atomic;
 }
 
 // Converted from cdecl RpAtomic* Get2DEffectAtomicCallback(RpAtomic *atomic,void *data) 0x734850
