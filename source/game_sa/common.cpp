@@ -79,7 +79,8 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "GetFirstChild", 0x734900, &GetFirstChild);
 //    ReversibleHooks::Install("common", "GetFirstTextureCallback", 0x734930, &GetFirstTextureCallback);
 //    ReversibleHooks::Install("common", "GetFirstTexture", 0x734940, &GetFirstTexture);
-//    ReversibleHooks::Install("common", "GetAnimHierarchyFromSkinClump", 0x734A40, &GetAnimHierarchyFromSkinClump);
+    ReversibleHooks::Install("common", "skinAtomicGetHAnimHierarchCB", 0x734A20, &skinAtomicGetHAnimHierarchCB);
+    ReversibleHooks::Install("common", "GetAnimHierarchyFromSkinClump", 0x734A40, &GetAnimHierarchyFromSkinClump);
 //    ReversibleHooks::Install("common", "GetAnimHierarchyFromFrame", 0x734AB0, &GetAnimHierarchyFromFrame);
 //    ReversibleHooks::Install("common", "GetAnimHierarchyFromClump", 0x734B10, &GetAnimHierarchyFromClump);
 //    ReversibleHooks::Install("common", "AtomicRemoveAnimFromSkinCB", 0x734B90, &AtomicRemoveAnimFromSkinCB);
@@ -370,9 +371,16 @@ RwFrame* GetFirstChild(RwFrame* frame) {
     return child;
 }
 
+RpAtomic* skinAtomicGetHAnimHierarchCB(RpAtomic* atomic, void* data) {
+    *(RpHAnimHierarchy**)(data) = RpSkinAtomicGetHAnimHierarchy(atomic);
+    return nullptr;
+}
+
 // Converted from cdecl RpHAnimHierarchy* GetAnimHierarchyFromSkinClump(RpClump *clump) 0x734A40
 RpHAnimHierarchy* GetAnimHierarchyFromSkinClump(RpClump* clump) {
-    return ((RpHAnimHierarchy* (__cdecl *)(RpClump*))0x734A40)(clump);
+    RpHAnimHierarchy* bugstarDevFrom2003{};
+    RpClumpForAllAtomics(clump, skinAtomicGetHAnimHierarchCB, &bugstarDevFrom2003);
+    return bugstarDevFrom2003;
 }
 
 // Converted from cdecl RpHAnimHierarchy* GetAnimHierarchyFromFrame(RwFrame *frame) 0x734AB0
