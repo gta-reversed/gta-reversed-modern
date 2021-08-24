@@ -72,9 +72,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "GetFirstAtomicCallback", 0x734810, &GetFirstAtomicCallback);
     ReversibleHooks::Install("common", "GetFirstAtomic", 0x734820, &GetFirstAtomic);
 //    ReversibleHooks::Install("common", "Get2DEffectAtomicCallback", 0x734850, &Get2DEffectAtomicCallback);
-//    ReversibleHooks::Install("common", "Get2DEffectAtomic", 0x734880, &Get2DEffectAtomic);
-//    ReversibleHooks::Install("common", "GetFirstObjectCallback", 0x7348B0, &GetFirstObjectCallback);
-//    ReversibleHooks::Install("common", "GetFirstObject", 0x7348C0, &GetFirstObject);
+    ReversibleHooks::Install("common", "Get2DEffectAtomic", 0x734880, &Get2DEffectAtomic);
 //    ReversibleHooks::Install("common", "GetFirstFrameCallback", 0x7348F0, &GetFirstFrameCallback);
 //    ReversibleHooks::Install("common", "GetFirstChild", 0x734900, &GetFirstChild);
 //    ReversibleHooks::Install("common", "GetFirstTextureCallback", 0x734930, &GetFirstTextureCallback);
@@ -339,7 +337,9 @@ RpAtomic* Get2DEffectAtomicCallback(RpAtomic* atomic, void* data) {
 
 // Converted from cdecl RpAtomic* Get2DEffectAtomic(RpClump *clump) 0x734880
 RpAtomic* Get2DEffectAtomic(RpClump* clump) {
-    return ((RpAtomic* (__cdecl *)(RpClump*))0x734880)(clump);
+    RpAtomic* atomic{};
+    RpClumpForAllAtomics(clump, Get2DEffectAtomicCallback, &atomic);
+    return atomic;
 }
 
 // Converted from cdecl RwObject* GetFirstObjectCallback(RwObject *object,void *data) 0x7348B0
