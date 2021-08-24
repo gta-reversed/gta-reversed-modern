@@ -73,6 +73,8 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "GetFirstAtomic", 0x734820, &GetFirstAtomic);
 //    ReversibleHooks::Install("common", "Get2DEffectAtomicCallback", 0x734850, &Get2DEffectAtomicCallback);
     ReversibleHooks::Install("common", "Get2DEffectAtomic", 0x734880, &Get2DEffectAtomic);
+    ReversibleHooks::Install("common", "GetFirstObjectCallback", 0x7348B0, &GetFirstObjectCallback);
+    ReversibleHooks::Install("common", "GetFirstObject", 0x7348C0, &GetFirstObject);
 //    ReversibleHooks::Install("common", "GetFirstFrameCallback", 0x7348F0, &GetFirstFrameCallback);
 //    ReversibleHooks::Install("common", "GetFirstChild", 0x734900, &GetFirstChild);
 //    ReversibleHooks::Install("common", "GetFirstTextureCallback", 0x734930, &GetFirstTextureCallback);
@@ -344,12 +346,15 @@ RpAtomic* Get2DEffectAtomic(RpClump* clump) {
 
 // Converted from cdecl RwObject* GetFirstObjectCallback(RwObject *object,void *data) 0x7348B0
 RwObject* GetFirstObjectCallback(RwObject* object, void* data) {
-    return ((RwObject* (__cdecl *)(RwObject*, void*))0x7348B0)(object, data);
+    *(RwObject**)(data) = object;
+    return nullptr;
 }
 
 // Converted from cdecl RwObject* GetFirstObject(RwFrame *frame) 0x7348C0
 RwObject* GetFirstObject(RwFrame* frame) {
-    return ((RwObject* (__cdecl *)(RwFrame*))0x7348C0)(frame);
+    RwObject* obj{};
+    RwFrameForAllObjects(frame, GetFirstObjectCallback, &obj);
+    return obj;
 }
 
 // Converted from cdecl RwFrame* GetFirstFrameCallback(RwFrame *frame,void *data) 0x7348F0
