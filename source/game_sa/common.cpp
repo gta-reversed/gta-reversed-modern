@@ -560,9 +560,6 @@ void SkinGetBonePositionsToTable(RpClump* clump, RwV3d* table) {
 
 // 0x7354E0
 void SetLightsWithTimeOfDayColour(RpWorld* world) {
-    ((void(__cdecl *)(RpWorld*))0x7354E0)(world);
-    return;
-
     if (pAmbient) {
         AmbientLightColourForFrame.red = CTimeCycle::GetAmbientRed() * CCoronas::LightsMult;
         AmbientLightColourForFrame.green = CTimeCycle::GetAmbientGreen() * CCoronas::LightsMult;
@@ -599,7 +596,7 @@ void SetLightsWithTimeOfDayColour(RpWorld* world) {
         mat.up = Normalized(CrossProduct(vertical, CTimeCycle::m_vecDirnLightToSun));
         mat.right = CrossProduct(mat.up, CTimeCycle::m_vecDirnLightToSun);
 
-        RwFrameTransform(RpClumpGetFrame(RpClumpGetFrame(pDirect)), &mat, RwOpCombineType::rwCOMBINEREPLACE);
+        RwFrameTransform(RpClumpGetFrame(pDirect), &mat, RwOpCombineType::rwCOMBINEREPLACE);
     }
 }
 
