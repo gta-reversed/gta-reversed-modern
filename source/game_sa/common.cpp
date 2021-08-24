@@ -57,7 +57,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "FindPlayerCentreOfWorld", 0x56E250, &FindPlayerCentreOfWorld);
 //    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoSniperShift", 0x56E320, &FindPlayerCentreOfWorld_NoSniperShift);
 //    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoInteriorShift", 0x56E400, &FindPlayerCentreOfWorld_NoInteriorShift);
-//    ReversibleHooks::Install("common", "FindPlayerHeading", 0x56E450, &FindPlayerHeading);
+    ReversibleHooks::Install("common", "FindPlayerHeading", 0x56E450, &FindPlayerHeading);
     ReversibleHooks::Install("common", "FindPlayerPed", 0x56E210, &FindPlayerPed);
     ReversibleHooks::Install("common", "FindPlayerVehicle", 0x56E0D0, &FindPlayerVehicle);
     ReversibleHooks::Install("common", "FindPlayerWanted", 0x56E230, &FindPlayerWanted);
@@ -181,7 +181,9 @@ CVector FindPlayerCentreOfWorld_NoInteriorShift(int playerId) {
 
 // 0x56E450
 float FindPlayerHeading(int playerId) {
-    return ((float(__cdecl*)(int))0x56E450)(playerId);
+    if (CVehicle* veh = FindPlayerVehicle(playerId, true))
+        return veh->GetHeading();
+    return FindPlayerPed(playerId)->GetHeading();
 }
 
 // unused
