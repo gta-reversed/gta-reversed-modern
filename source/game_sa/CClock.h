@@ -37,4 +37,5 @@ public:
     static void SetGameClock(uint8_t hours, uint8_t minutes, uint8_t day);
     static void StoreClock();
     static void RestoreClock();
+    static auto GetMinutesToday();
 };

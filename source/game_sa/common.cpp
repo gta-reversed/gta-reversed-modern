@@ -118,7 +118,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "RestoreLightsForInfraredVisionHeatObjects", 0x735EF0, &RestoreLightsForInfraredVisionHeatObjects);
     ReversibleHooks::Install("common", "SetLightsForInfraredVisionDefaultObjects", 0x735F20, &SetLightsForInfraredVisionDefaultObjects);
     ReversibleHooks::Install("common", "SetLightsForNightVision", 0x735F70, &SetLightsForNightVision);
-//    ReversibleHooks::Install("common", "GetDayNightBalance", 0x6FAB30, &GetDayNightBalance);
+    ReversibleHooks::Install("common", "GetDayNightBalance", 0x6FAB30, &GetDayNightBalance);
 //    ReversibleHooks::Install("common", "AsciiToGxtChar", 0x718600, &AsciiToGxtChar);
 //    ReversibleHooks::Install("common", "WriteRaster", 0x005A4150, &WriteRaster);
 //    ReversibleHooks::Install("common", "CalcScreenCoors_VVff", 0x71DA00, static_cast<bool(*)(CVector const&, CVector*, float*, float*)>(&CalcScreenCoors));
@@ -819,7 +819,16 @@ void SetLightsForNightVision() {
 
 // 0x6FAB30
 float GetDayNightBalance() {
-    return plugin::CallAndReturn<float, 0x6FAB30>();
+    const auto minutes = CClock::GetMinutesToday();
+    if (minutes < 360)
+        return 1.0f;
+    if (minutes < 420)
+        return (float)(420 - minutes) / 60.0f;
+    if (minutes < 1200)
+        return 0.0f;
+    if (minutes >= 1260)
+        return 1.0f;
+    return 1.0f - (float)(1260 - minutes) / 60.0f;
 }
 
 // 0x7226D0
