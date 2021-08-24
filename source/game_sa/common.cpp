@@ -75,8 +75,8 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "Get2DEffectAtomic", 0x734880, &Get2DEffectAtomic);
     ReversibleHooks::Install("common", "GetFirstObjectCallback", 0x7348B0, &GetFirstObjectCallback);
     ReversibleHooks::Install("common", "GetFirstObject", 0x7348C0, &GetFirstObject);
-//    ReversibleHooks::Install("common", "GetFirstFrameCallback", 0x7348F0, &GetFirstFrameCallback);
-//    ReversibleHooks::Install("common", "GetFirstChild", 0x734900, &GetFirstChild);
+    ReversibleHooks::Install("common", "GetFirstFrameCallback", 0x7348F0, &GetFirstFrameCallback);
+    ReversibleHooks::Install("common", "GetFirstChild", 0x734900, &GetFirstChild);
 //    ReversibleHooks::Install("common", "GetFirstTextureCallback", 0x734930, &GetFirstTextureCallback);
 //    ReversibleHooks::Install("common", "GetFirstTexture", 0x734940, &GetFirstTexture);
 //    ReversibleHooks::Install("common", "GetAnimHierarchyFromSkinClump", 0x734A40, &GetAnimHierarchyFromSkinClump);
@@ -359,12 +359,15 @@ RwObject* GetFirstObject(RwFrame* frame) {
 
 // Converted from cdecl RwFrame* GetFirstFrameCallback(RwFrame *frame,void *data) 0x7348F0
 RwFrame* GetFirstFrameCallback(RwFrame* frame, void* data) {
-    return ((RwFrame* (__cdecl *)(RwFrame*, void*))0x7348F0)(frame, data);
+    *(RwFrame**)(data) = frame;
+    return nullptr;
 }
 
 // Converted from cdecl RwFrame* GetFirstChild(RwFrame *frame) 0x734900
 RwFrame* GetFirstChild(RwFrame* frame) {
-    return ((RwFrame* (__cdecl *)(RwFrame*))0x734900)(frame);
+    RwFrame* child{};
+    RwFrameForAllChildren(frame, GetFirstFrameCallback, &child);
+    return child;
 }
 
 // Converted from cdecl RpHAnimHierarchy* GetAnimHierarchyFromSkinClump(RpClump *clump) 0x734A40
