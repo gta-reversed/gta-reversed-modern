@@ -68,7 +68,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "DefinedState", 0x734650, &DefinedState);
     ReversibleHooks::Install("common", "DefinedState2d", 0x734750, &DefinedState2d);
 
-//    ReversibleHooks::Install("common", "GetNameAndDamage", 0x5370A0, &GetNameAndDamage);
+    ReversibleHooks::Install("common", "GetNameAndDamage", 0x5370A0, &GetNameAndDamage);
 //    ReversibleHooks::Install("common", "GetFirstAtomicCallback", 0x734810, &GetFirstAtomicCallback);
 //    ReversibleHooks::Install("common", "GetFirstAtomic", 0x734820, &GetFirstAtomic);
 //    ReversibleHooks::Install("common", "Get2DEffectAtomicCallback", 0x734850, &Get2DEffectAtomicCallback);
@@ -315,8 +315,31 @@ void DefinedState2d() {
 }
 
 // 0x5370A0
+// TODO: Check `outName` size (to avoid buffer overflow)
 void GetNameAndDamage(const char* nodeName, char* outName, bool& outDamage) {
-    plugin::Call<0x5370A0, const char*, char*, bool&>(nodeName, outName, outDamage);
+    const size_t nodeNameLen = strlen(nodeName);
+    const auto EndsWith = [=](const char* with) {
+        const auto withlen = strlen(with);
+        assert(withlen <= nodeNameLen);
+        return strncmp(nodeName + nodeNameLen - withlen, with, withlen) == 0;
+    };
+
+    const auto TerminatedCopy = [=](size_t off) {
+        strncpy(outName, nodeName, nodeNameLen - off);
+        outName[nodeNameLen - off] = 0;
+    };
+
+    if (EndsWith("_dam")) {
+        outDamage = true;
+        TerminatedCopy(sizeof("_dam") - 1);
+    }
+    else {
+        outDamage = false;
+        if (EndsWith("_l0") || EndsWith("_L0"))
+            TerminatedCopy(sizeof("_l0") - 1);
+        else
+            strcpy(outName, nodeName);
+    }
 }
 
 // Converted from cdecl RpAtomic* GetFirstAtomicCallback(RpAtomic *atomic,void *data) 0x734810
