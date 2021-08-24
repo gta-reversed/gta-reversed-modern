@@ -2,8 +2,6 @@
 
 #include "GxtChar.h"
 
-#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
-
 // 0x718600
 void AsciiToGxtChar(const char* src, GxtChar* dst) {
     for (int i = 0; src[i]; ++i) {

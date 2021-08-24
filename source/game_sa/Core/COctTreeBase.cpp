@@ -1,9 +1,13 @@
 #include "StdInc.h"
 
-COctTreeBase** gOctTreeBase = (COctTreeBase**)0xBC1290;
+#include "COctTreeBase.h"
+
+COctTreeBase& gOctTreeBase = *(COctTreeBase*)0xBC1290;
 
 //  0x5A7570
-COctTreeBase::COctTreeBase() {}
+COctTreeBase::COctTreeBase() : COctTree() {
+    // NOP
+}
 
 //  0x856690
 COctTreeBase::~COctTreeBase() {}
@@ -15,7 +19,7 @@ bool COctTreeBase::InsertTree(uint8_t colorRed, uint8_t colorGreen, uint8_t colo
     if (!COctTree::InsertTree(colorRed, colorGreen, colorBlue))
         return false;
 
-    numBranches--;
+    m_nNumBranches--;
 
     return true;
 }
@@ -24,11 +28,11 @@ bool COctTreeBase::InsertTree(uint8_t colorRed, uint8_t colorGreen, uint8_t colo
 void COctTreeBase::FillPalette(uint8_t* colors) {
     ms_level = 0;
 
-    if (hasTransparentPixels) {
-        colors[0] = 0;
-        colors[1] = 0;
-        colors[2] = 0;
-        colors[3] = 0;
+    if (m_bHasTransparentPixels) {
+        colors[0] = 0; // red
+        colors[1] = 0; // green
+        colors[2] = 0; // blue
+        colors[3] = 0; // alpha
 
         ms_level = 1;
     }
@@ -40,8 +44,8 @@ void COctTreeBase::FillPalette(uint8_t* colors) {
 void COctTreeBase::Init(int32_t numBranches) {
     ms_level = 0;
 
-    this->numBranches = numBranches;
-    hasTransparentPixels = 0;
+    m_nNumBranches = numBranches;
+    m_bHasTransparentPixels = 0;
 
     empty();
 }
@@ -57,10 +61,10 @@ bool COctTreeBase::Insert(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlu
         if (ms_bFailed) {
             gpTmpOctTree = nullptr;
             ReduceTree();
-            numBranches += (*gpTmpOctTree)->NoOfChildren() - 1;
+            m_nNumBranches += gpTmpOctTree->NoOfChildren() - 1;
 
-            (*gpTmpOctTree)->lastStep = 1;
-            (*gpTmpOctTree)->RemoveChildren();
+            gpTmpOctTree->m_bLastStep = true;
+            gpTmpOctTree->RemoveChildren();
 
             if (ms_bFailed)
                 continue;
@@ -69,13 +73,13 @@ bool COctTreeBase::Insert(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlu
         return false;
     }
 
-    if (numBranches <= 0) {
+    if (m_nNumBranches <= 0) {
         gpTmpOctTree = nullptr;
         ReduceTree();
-        numBranches += (*gpTmpOctTree)->NoOfChildren() - 1;
+        m_nNumBranches += gpTmpOctTree->NoOfChildren() - 1;
 
-        (*gpTmpOctTree)->lastStep = 1;
-        (*gpTmpOctTree)->RemoveChildren();
+        gpTmpOctTree->m_bLastStep = true;
+        gpTmpOctTree->RemoveChildren();
     }
 
     return true;
@@ -83,25 +87,42 @@ bool COctTreeBase::Insert(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlu
 
 //  0x5A7840
 void COctTreeBase::ReduceBranches(int32_t newBranchesCount) {
-    const int32_t branchesToCount = hasTransparentPixels ? newBranchesCount + 1 : newBranchesCount;
+    const int32_t branchesToCount = m_bHasTransparentPixels ? newBranchesCount + 1 : newBranchesCount;
 
-    while (numBranches < branchesToCount) {
+    while (m_nNumBranches < branchesToCount) {
         gpTmpOctTree = nullptr;
         ReduceTree();
-        numBranches += (*gpTmpOctTree)->NoOfChildren() - 1;
+        m_nNumBranches += gpTmpOctTree->NoOfChildren() - 1;
 
-        (*gpTmpOctTree)->lastStep = 1;
-        (*gpTmpOctTree)->RemoveChildren();
+        gpTmpOctTree->m_bLastStep = true;
+        gpTmpOctTree->RemoveChildren();
     }
 }
 
 void COctTreeBase::InjectHooks() {
-    //  Virtual class methods
-    ReversibleHooks::Install("COctTreeBase", "InsertTree", 0x5A7710, &COctTreeBase::InsertTree);
-    ReversibleHooks::Install("COctTreeBase", "FillPalette", 0x5A7280, &COctTreeBase::FillPalette);
-
-    //  Class methods
+    ReversibleHooks::Install("COctTreeBase", "COctTreeBase", 0x5A7570, &COctTreeBase::Constructor);
+    ReversibleHooks::Install("COctTreeBase", "~COctTreeBase", 0x856690, &COctTreeBase::Destructor);
     ReversibleHooks::Install("COctTreeBase", "Init", 0x5A7260, &COctTreeBase::Init);
     ReversibleHooks::Install("COctTreeBase", "Insert", 0x5A7750, &COctTreeBase::Insert);
+    ReversibleHooks::Install("COctTreeBase", "InsertTree", 0x5A7710, &COctTreeBase::InsertTree);
+    ReversibleHooks::Install("COctTreeBase", "FillPalette", 0x5A7280, &COctTreeBase::FillPalette);
     ReversibleHooks::Install("COctTreeBase", "ReduceBranches", 0x5A7840, &COctTreeBase::ReduceBranches);
+}
+
+COctTreeBase* COctTreeBase::Constructor() {
+    this->COctTreeBase::COctTreeBase();
+    return this;
+}
+
+COctTreeBase* COctTreeBase::Destructor() {
+    this->COctTreeBase::~COctTreeBase();
+    return this;
+}
+
+bool COctTreeBase::InsertTree_Reversed(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue) {
+    return COctTreeBase::InsertTree(colorRed, colorGreen, colorBlue);
+}
+
+void COctTreeBase::FillPalette_Reversed(uint8_t* colors) {
+    COctTreeBase::FillPalette(colors);
 }
