@@ -11,7 +11,7 @@
 
 class  COctTree {
 public:
-    unsigned int            level;
+    uint32_t                level;
     bool                    lastStep;       // no children
 private:
     char                    _pad09;
@@ -20,35 +20,37 @@ public:
 private:
     char                    _pad1A[2];
 public:
-    unsigned int            redComponent;
-    unsigned int            greenComponent;
-    unsigned int            blueComponent;
+    uint32_t                redComponent;
+    uint32_t                greenComponent;
+    uint32_t                blueComponent;
 
-    static bool             ms_bFailed;
-    static unsigned int     ms_level;
-    static CPool<COctTree>  ms_octTreePool;
+    static bool&            ms_bFailed;
+    static uint32_t&        ms_level;
+    static CPool<COctTree>& ms_octTreePool;
 
     //vtable
 
-    virtual bool            InsertTree(unsigned char colorRed, unsigned char colorGreen, unsigned char colorBlue);
-    virtual void            FillPalette(unsigned char* colors);
+    virtual bool            InsertTree(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue);
+    virtual void            FillPalette(uint8_t* colors);
 
     COctTree();
     ~COctTree();
 
-    unsigned int            FindNearestColour(unsigned char colorRed, unsigned char colorGreen, unsigned char colorBlue);
-    unsigned int            NoOfChildren();
+    uint32_t                FindNearestColour(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue);
+    uint32_t                NoOfChildren();
     void                    ReduceTree();
     void                    RemoveChildren();
     void                    empty();
 
-    void                    InitPool(void* data, int dataSize);
-    void                    ShutdownPool();
+    static void             InitPool(void* data, int32_t dataSize);
+    static void             ShutdownPool();
 
     //static void operator delete(void* data);  //  Not needed, since destructor already does what this operator does.
-    static void*            operator new(unsigned int size);
+    static void*            operator new(uint32_t size);
+
+    static void             InjectHooks();
 };
 
 VALIDATE_SIZE(COctTree, 0x28);
 
-extern COctTree *gpTmpOctTree;
+extern COctTree **gpTmpOctTree;

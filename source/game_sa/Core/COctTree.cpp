@@ -1,12 +1,32 @@
 #include "StdInc.h"
 
-bool COctTree::ms_bFailed;
-unsigned int COctTree::ms_level;
-CPool<COctTree> COctTree::ms_octTreePool;
-COctTree* gpTmpOctTree;
+bool& COctTree::ms_bFailed = *(bool*)0xBC12DC;
+uint32_t& COctTree::ms_level = *(uint32_t*)0xBC12E0;
+CPool<COctTree>& COctTree::ms_octTreePool = *(CPool<COctTree>*)0xBC12E4;
+COctTree** gpTmpOctTree = (COctTree**)0xBC12D8;
 
-bool COctTree::InsertTree(unsigned char colorRed, unsigned char colorGreen, unsigned char colorBlue) {
-    const unsigned short poolind = ((colorRed << ms_level >> 5) & 4) + ((colorGreen << ms_level >> 6) & 2) + ((colorBlue << ms_level >> 7) & 1);
+//  0x5A6DB0
+COctTree::COctTree() {
+    level = 0;
+    redComponent = 0;
+    greenComponent = 0;
+    blueComponent = 0;
+
+    for (uint32_t i = ARRAY_SIZE(children) - 1; i; --i)
+        children[i] = -1;
+
+    lastStep = false;
+}
+
+//  0x5A7490
+COctTree::~COctTree() {
+    empty();
+    ms_octTreePool.Delete(this);
+}
+
+//  0x5A75B0
+bool COctTree::InsertTree(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue) {
+    const uint16_t poolIndex = ((colorRed << ms_level >> 5) & 4) + ((colorGreen << ms_level >> 6) & 2) + ((colorBlue << ms_level >> 7) & 1);
     ms_level++;
 
     redComponent += colorRed;
@@ -14,7 +34,7 @@ bool COctTree::InsertTree(unsigned char colorRed, unsigned char colorGreen, unsi
     blueComponent += colorBlue;
     level++;
 
-    if (ms_level == 8 || lastStep) {
+    if (ms_level == ARRAY_SIZE(children) || lastStep) {
         ms_level = 0;
         lastStep = true;
 
@@ -23,34 +43,40 @@ bool COctTree::InsertTree(unsigned char colorRed, unsigned char colorGreen, unsi
         return level == 1;
     }
 
-    COctTree* treeel = nullptr;
-    if (children[poolind] >= 0) {
-        if (!ms_octTreePool.m_byteMap[children[poolind]].bEmpty)
-            treeel = &ms_octTreePool.m_pObjects[children[poolind]];
+    COctTree* treeElement = nullptr;
+    if (children[poolIndex] >= 0) {
+        if (!ms_octTreePool.IsFreeSlotAtIndex(poolIndex))
+            treeElement = ms_octTreePool.GetAt(poolIndex);
     } else {
-        treeel = ms_octTreePool.New();
+        treeElement = ms_octTreePool.New();
 
-        if (!treeel) {
+        if (!treeElement) {
             ms_bFailed = true;
             return 0;
         }
 
-        children[poolind] = (treeel - ms_octTreePool.m_pObjects) / sizeof(COctTree);
+        children[poolIndex] = ms_octTreePool.GetIndex(treeElement);
     }
 
-    bool treeinserted = treeel->InsertTree(colorRed, colorGreen, colorBlue);
+#ifdef FIX_BUGS
+    if (!treeel)
+        return 0;
+#endif
 
-    if (ms_bFailed && treeel->level < 2) {
-        delete treeel;
-        children[poolind] = -1;
+    bool bTreeInserted = treeElement->InsertTree(colorRed, colorGreen, colorBlue);
+
+    if (ms_bFailed && treeElement->level < 2) {
+        delete treeElement;
+        children[poolIndex] = -1;
 
         return 0;
     }
 
-    return treeinserted;
+    return bTreeInserted;
 }
 
-void COctTree::FillPalette(unsigned char* colors) {
+//  0x5A70F0
+void COctTree::FillPalette(uint8_t* colors) {
     if (lastStep == 1) {
         colors[ms_level + 0] = redComponent / level;
         colors[ms_level + 1] = greenComponent / level;
@@ -59,163 +85,148 @@ void COctTree::FillPalette(unsigned char* colors) {
 
         level = ms_level++;
     } else {
-        for (unsigned int i = 7; i; --i) {
-            const short poolind = children[i];
+        for (uint32_t i = ARRAY_SIZE(children) - 1; i; --i) {
+            const int16_t poolIndex = children[i];
 
-            if (poolind < 0)
+            if (poolIndex < 0)
                 continue;
 
-            if (!ms_octTreePool.m_byteMap[poolind].bEmpty)
-                ms_octTreePool.m_pObjects[poolind].FillPalette(colors);
+            if (!ms_octTreePool.IsFreeSlotAtIndex(poolIndex))
+                ms_octTreePool.GetAt(poolIndex)->FillPalette(colors);
         }
     }
 }
 
-COctTree::COctTree() {
-    level = 0;
-    redComponent = 0;
-    greenComponent = 0;
-    blueComponent = 0;
-
-    children[0] = -1;
-    children[2] = -1;
-    children[4] = -1;
-    children[6] = -1;
-
-    lastStep = false;
-}
-
-COctTree::~COctTree() {
-    empty();
-    ms_octTreePool.Delete(this);
-}
-
-unsigned int COctTree::FindNearestColour(unsigned char colorRed, unsigned char colorGreen, unsigned char colorBlue) {
+//  0x5A71E0
+uint32_t COctTree::FindNearestColour(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue) {
     if (lastStep != 0)
         return level;
 
-    COctTree* treeel = this;
+    COctTree* treeElement = this;
     do {
-        unsigned int treeind = treeel->children[(colorBlue >> 7) + ((colorGreen >> 6) & 2) + ((colorRed >> 5) & 4)];
-        if (!ms_octTreePool.m_byteMap[treeind].bEmpty)
-            treeel = &ms_octTreePool.m_pObjects[treeind];
+        uint32_t treeIndex = treeElement->children[(colorBlue >> 7) + ((colorGreen >> 6) & 2) + ((colorRed >> 5) & 4)];
+        if (!ms_octTreePool.IsFreeSlotAtIndex(treeIndex))
+            treeElement = ms_octTreePool.GetAt(treeIndex);
 
         colorRed *= 2;
         colorGreen *= 2;
         colorBlue *= 2;
-    } while (!treeel->lastStep);
+    } while (!treeElement->lastStep);
 
-    return treeel->level;
+    return treeElement->level;
 }
 
-void COctTree::InitPool(void* data, int dataSize) {
-    ms_octTreePool.Init(dataSize / 41, data, (char*)data + 40 + (dataSize / 41));
-    ms_octTreePool.m_bIsLocked = true;
+//  0x5A6DE0
+uint32_t COctTree::NoOfChildren() {
+    unsigned int numOfChildren = 0;
+    for (uint32_t i = ARRAY_SIZE(children) - 1; i; --i)
+        if (children[i] >= 0)
+            numOfChildren++;
+
+    return numOfChildren;
 }
 
-unsigned int COctTree::NoOfChildren() {
-    unsigned int numofchildren = 0;
-
-    if (children[0] >= 0)
-        numofchildren++;
-
-    if (children[1] >= 0)
-        numofchildren++;
-
-    if (children[2] >= 0)
-        numofchildren++;
-
-    if (children[3] >= 0)
-        numofchildren++;
-
-    if (children[4] >= 0)
-        numofchildren++;
-
-    if (children[5] >= 0)
-        numofchildren++;
-
-    if (children[6] >= 0)
-        numofchildren++;
-
-    if (children[7] >= 0)
-        numofchildren++;
-
-    return numofchildren;
-}
-
+//  0x5A7040
 void COctTree::ReduceTree() {
     if (lastStep == 1)
         return;
 
     ms_level++;
 
-    unsigned int currlevel = 0;
-    unsigned int totallevels = 0;
-    static unsigned int lastlevel;
-    for (unsigned int i = 7; i; --i) {
+    uint32_t currentLevel = 0;
+    uint32_t totalLevels = 0;
+    static uint32_t lastLevel;
+    for (uint32_t i = ARRAY_SIZE(children) - 1; i; --i) {
         if (children[i] < 0)
             continue;
 
-        currlevel++;
+        currentLevel++;
 
-        if (!ms_octTreePool.m_byteMap[children[i]].bEmpty) {
-            COctTree* tree = &ms_octTreePool.m_pObjects[children[i]];
+        if (!ms_octTreePool.IsFreeSlotAtIndex(children[i])) {
+            COctTree* tree = ms_octTreePool.GetAt(children[i]);
 
             tree->ReduceTree();
-            totallevels += tree->level;
+            totalLevels += tree->level;
         }
     }
 
-    if (currlevel >= 2 && (totallevels < lastlevel || !gpTmpOctTree)) {
-        lastlevel = totallevels;
-        gpTmpOctTree = this;
+    if (currentLevel >= 2 && (totalLevels < lastLevel || !*gpTmpOctTree)) {
+        lastLevel = totalLevels;
+        *gpTmpOctTree = this;
     }
 
     ms_level--;
 }
 
+//  0x5A74F0
 void COctTree::RemoveChildren() {
-    for (unsigned int i = 7; i; --i) {
-        const short poolind = children[i];
+    for (uint32_t i = ARRAY_SIZE(children) - 1; i; --i) {
+        const int16_t poolIndex = children[i];
 
-        if (poolind < 0)
+        if (poolIndex < 0)
             continue;
 
-        if (ms_octTreePool.m_byteMap[poolind].bEmpty)
+        if (ms_octTreePool.IsFreeSlotAtIndex(poolIndex))
             continue;
 
-        if (!&ms_octTreePool.m_pObjects[poolind])
+        if (!ms_octTreePool.GetAt(poolIndex))
             continue;
 
-        delete &ms_octTreePool.m_pObjects[poolind];
+        delete ms_octTreePool.GetAt(poolIndex);
 
         children[i] = -1;
     }
 }
 
-void COctTree::ShutdownPool() {
-    ms_octTreePool.Flush();
-}
-
+//  0x5A6FC0
 void COctTree::empty() {
     level = 0;
     redComponent = 0;
     greenComponent = 0;
     blueComponent = 0;
 
-    for (unsigned int i = 7; i; --i) {
-        const short poolind = children[i];
+    for (uint32_t i = ARRAY_SIZE(children) - 1; i; --i) {
+        const int16_t poolIndex = children[i];
 
-        if (poolind < 0)
+        if (poolIndex < 0)
             continue;
 
-        if (!ms_octTreePool.m_byteMap[poolind].bEmpty && ms_octTreePool.m_pObjects + poolind)
-            delete &ms_octTreePool.m_pObjects[poolind];
+        if (!ms_octTreePool.IsFreeSlotAtIndex(poolIndex) && ms_octTreePool.GetAt(poolIndex))
+            delete ms_octTreePool.GetAt(poolIndex);
 
         children[i] = -1;
     }
 }
 
-void* COctTree::operator new(unsigned int size) {
+//  0x5A7460
+void COctTree::InitPool(void* data, int32_t dataSize) {
+    ms_octTreePool.Init(dataSize / sizeof(COctTree) + 1, data, (char*)data + sizeof(COctTree) * (dataSize / sizeof(COctTree)) + 1);
+    ms_octTreePool.m_bIsLocked = true;
+}
+
+//  0x5A6F70
+void COctTree::ShutdownPool() {
+    ms_octTreePool.Flush();
+}
+
+//  0x5A7410
+void* COctTree::operator new(uint32_t size) {
     return ms_octTreePool.New();
+}
+
+void COctTree::InjectHooks() {
+    //  Virtual class methods
+    ReversibleHooks::Install("COctTree", "InsertTree", 0x5A75B0, &COctTree::InsertTree);
+    ReversibleHooks::Install("COctTree", "FillPalette", 0x5A70F0, &COctTree::FillPalette);
+
+    //  Class methods
+    ReversibleHooks::Install("COctTree", "FindNearestColour", 0x5A71E0, &COctTree::FindNearestColour);
+    ReversibleHooks::Install("COctTree", "NoOfChildren", 0x5A6DE0, &COctTree::NoOfChildren);
+    ReversibleHooks::Install("COctTree", "ReduceTree", 0x5A7040, &COctTree::ReduceTree);
+    ReversibleHooks::Install("COctTree", "RemoveChildren", 0x5A74F0, &COctTree::RemoveChildren);
+    ReversibleHooks::Install("COctTree", "empty", 0x5A6FC0, &COctTree::empty);
+
+    //  Static class methods
+    ReversibleHooks::Install("COctTree", "InitPool", 0x5A7460, &COctTree::InitPool);
+    ReversibleHooks::Install("COctTree", "ShutdownPool", 0x5A6F70, &COctTree::ShutdownPool);
 }
