@@ -51,7 +51,7 @@ void InjectCommonHooks()
     HookInstall(0x53E230, &Render2dStuff); // This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without :D
 
     ReversibleHooks::Install("common", "FindPlayerCoors", 0x56E010, &FindPlayerCoors);
-//    ReversibleHooks::Install("common", "FindPlayerSpeed", 0x56E090, &FindPlayerSpeed);
+    ReversibleHooks::Install("common", "FindPlayerSpeed", 0x56E090, &FindPlayerSpeed);
     ReversibleHooks::Install("common", "FindPlayerEntity", 0x56E120, &FindPlayerEntity);
     ReversibleHooks::Install("common", "FindPlayerTrain", 0x56E160, &FindPlayerTrain);
 //    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld", 0x56E250, &FindPlayerCentreOfWorld);
@@ -138,7 +138,7 @@ CVector FindPlayerCoors(int playerId) {
 
 // 0x56E090
 CVector& FindPlayerSpeed(int playerId) {
-    return plugin::CallAndReturn<CVector&, 0x56E090, int>(playerId);
+    return static_cast<CPhysical*>(FindPlayerEntity(playerId))->m_vecMoveSpeed;
 }
 
 // 0x56E120
