@@ -87,7 +87,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "RpAtomicConvertGeometryToTL", 0x734BE0, &RpAtomicConvertGeometryToTL);
     ReversibleHooks::Install("common", "RpAtomicConvertGeometryToTS", 0x734C20, &RpAtomicConvertGeometryToTS);
 
-    ReversibleHooks::Install("common", "atomicConvertGeometryToTL", 0x734C20, &atomicConvertGeometryToTL);
+    ReversibleHooks::Install("common", "atomicConvertGeometryToTL", 0x734C60, &atomicConvertGeometryToTL);
     ReversibleHooks::Install("common", "RpClumpConvertGeometryToTL", 0x734CB0, &RpClumpConvertGeometryToTL);
 
     ReversibleHooks::Install("common", "atomicConvertGeometryToTS", 0x734CE0, &atomicConvertGeometryToTS);
