@@ -83,7 +83,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "GetAnimHierarchyFromSkinClump", 0x734A40, &GetAnimHierarchyFromSkinClump);
 //    ReversibleHooks::Install("common", "GetAnimHierarchyFromFrame", 0x734AB0, &GetAnimHierarchyFromFrame);
     ReversibleHooks::Install("common", "GetAnimHierarchyFromClump", 0x734B10, &GetAnimHierarchyFromClump);
-//    ReversibleHooks::Install("common", "AtomicRemoveAnimFromSkinCB", 0x734B90, &AtomicRemoveAnimFromSkinCB);
+    ReversibleHooks::Install("common", "AtomicRemoveAnimFromSkinCB", 0x734B90, &AtomicRemoveAnimFromSkinCB);
 
 //    ReversibleHooks::Install("common", "SetLightsWithTimeOfDayColour", 0x7354E0, &SetLightsWithTimeOfDayColour);
     ReversibleHooks::Install("common", "LightsDestroy", 0x735730, &LightsDestroy);
@@ -395,7 +395,14 @@ RpHAnimHierarchy* GetAnimHierarchyFromClump(RpClump* clump) {
 
 // Converted from cdecl RpAtomic* AtomicRemoveAnimFromSkinCB(RpAtomic *atomic,void *data) 0x734B90
 RpAtomic* AtomicRemoveAnimFromSkinCB(RpAtomic* atomic, void* data) {
-    return ((RpAtomic* (__cdecl *)(RpAtomic*, void*))0x734B90)(atomic, data);
+    if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))) {
+        if (RpHAnimHierarchy* hier = RpSkinAtomicGetHAnimHierarchy(atomic)) {
+            RtAnimAnimation*& pCurrAnim = hier->currentAnim->pCurrentAnim;
+            if (pCurrAnim)
+                RtAnimAnimationDestroy(pCurrAnim);
+            pCurrAnim = nullptr;
+        }
+    }
 }
 
 // Converted from cdecl bool RpAtomicConvertGeometryToTL(RpAtomic *atomic) 0x734BE0
