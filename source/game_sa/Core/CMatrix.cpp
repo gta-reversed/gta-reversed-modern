@@ -76,12 +76,6 @@ CMatrix::~CMatrix()
     CMatrix::Detach();
 }
 
-CMatrix CMatrix::FromNormal(CVector normal) {
-    CMatrix out;
-    out.m_up = normal;
-
-}
-
 void CMatrix::Attach(RwMatrix* matrix, bool bOwnsMatrix)
 {
     CMatrix::Detach();
@@ -573,4 +567,11 @@ CMatrix Invert(CMatrix& in)
     CMatrix result;
     Invert(in, result);
     return result;
+}
+
+CVector2D MultiplyMatrixWithVector(const CMatrix& mat, const CVector& point) {
+    return {
+        mat.m_up.x * point.z + mat.m_forward.x * point.y + mat.m_right.x * point.x + mat.m_pos.x,
+        mat.m_up.y * point.z + mat.m_right.y * point.x + mat.m_forward.y * point.y + mat.m_pos.y
+    };
 }
