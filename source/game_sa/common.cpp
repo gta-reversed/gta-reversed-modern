@@ -114,7 +114,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "SetDirectionalColours", 0x735D70, &SetDirectionalColours);
     ReversibleHooks::Install("common", "SetLightColoursForPedsCarsAndObjects", 0x735D90, &SetLightColoursForPedsCarsAndObjects);
     ReversibleHooks::Install("common", "SetLightsForInfraredVisionHeatObjects", 0x735E40, &SetLightsForInfraredVisionHeatObjects);
-//    ReversibleHooks::Install("common", "StoreAndSetLightsForInfraredVisionHeatObjects", 0x735E70, &StoreAndSetLightsForInfraredVisionHeatObjects);
+    ReversibleHooks::Install("common", "StoreAndSetLightsForInfraredVisionHeatObjects", 0x735E70, &StoreAndSetLightsForInfraredVisionHeatObjects);
     ReversibleHooks::Install("common", "RestoreLightsForInfraredVisionHeatObjects", 0x735EF0, &RestoreLightsForInfraredVisionHeatObjects);
     ReversibleHooks::Install("common", "SetLightsForInfraredVisionDefaultObjects", 0x735F20, &SetLightsForInfraredVisionDefaultObjects);
     ReversibleHooks::Install("common", "SetLightsForNightVision", 0x735F70, &SetLightsForNightVision);
@@ -792,13 +792,9 @@ void SetLightsForInfraredVisionHeatObjects() {
 
 // 0x735E70
 void StoreAndSetLightsForInfraredVisionHeatObjects() {
-//    ((void(__cdecl *)())0x735E70)();
-//    return;
-
-//    DirectAmbientLight[1] = AmbientLightColour;
-//    DirectAmbientLight[0] = DirectionalLightColour;
-//    RpLightSetColor(pAmbient, CPostEffects::m_fInfraredVisionHeatObjectCol);
-//    RpLightSetColor(pDirect, CPostEffects::m_fInfraredVisionHeatObjectCol);
+    DirectAmbientLight[1] = AmbientLightColour;
+    DirectAmbientLight[0] = DirectionalLightColour;
+    SetLightsForInfraredVisionHeatObjects();
 }
 
 // 0x735EF0
