@@ -29,7 +29,7 @@ enum eWeaponSkill
 class CWeaponInfo {
 public:
     /* some info here https://code.google.com/p/mtasa-blue/source/browse/tags/1.3.4/MTA10/game_sa/CWeaponInfoSA.h */
-    unsigned int   m_nWeaponFire; // see eWeaponFire
+    eWeaponFire    m_nWeaponFire; // see eWeaponFire
     float          m_fTargetRange; // max targeting range
     float          m_fWeaponRange; // absolute gun range / default melee attack range
     int            m_nModelId1; // modelinfo id

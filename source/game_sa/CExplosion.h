@@ -52,6 +52,8 @@ public:
 
     static CAEExplosionAudioEntity &m_ExplosionAudioEntity;
 
+    void InjectHooks();
+
     static void ClearAllExplosions();
     // dummy function
     static void Shutdown();

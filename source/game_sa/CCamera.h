@@ -490,5 +490,4 @@ extern CCamera &TheCamera;
 extern bool &gbModelViewer;
 extern char& gbCineyCamMessageDisplayed;
 
-static void CamShakeNoPos(CCamera* camera, float strength);
-
+void CamShakeNoPos(CCamera* camera, float strength);

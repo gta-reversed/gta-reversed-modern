@@ -27,6 +27,8 @@ public:
 
     static CProjectile **ms_apProjectile; // static CProjectile *ms_apProjectile[MAX_PROJECTILES]
 
+    void InjectHooks();
+
     static void Initialise();
     static void RemoveFXSystem(unsigned char bInstantly);
     static void Shutdown();

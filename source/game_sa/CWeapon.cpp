@@ -6,17 +6,6 @@
 */
 #include "StdInc.h"
 
-void CWeapon::InjectHooks()
-{
-    HookInstall(0x73A380, &CWeapon::Shutdown);
-    HookInstall(0x73AEB0, &CWeapon::Reload);
-    HookInstall(0x73B1C0, &CWeapon::IsTypeMelee);
-    HookInstall(0x73B1E0, &CWeapon::IsType2Handed);
-    HookInstall(0x73B210, &CWeapon::IsTypeProjectile);
-    HookInstall(0x73B2A0, &CWeapon::HasWeaponAmmoToBeUsed);
-    HookInstall(0x73B240, (bool(*)(eWeaponType weaponType))&CWeapon::CanBeUsedFor2Player);
-}
-
 float& CWeapon::ms_fExtinguisherAimAngle = *(float*)0x8D610C;
 bool& CWeapon::bPhotographHasBeenTaken = *(bool*)0xC8A7C0;
 bool& CWeapon::ms_bTakePhoto = *(bool*)0xC8A7C1;
@@ -25,54 +14,111 @@ float& fPlayerAimScale = *(float*)0x8D6110;
 float& fPlayerAimScaleDist = *(float*)0x8D6114;
 float& fPlayerAimRotRate = *(float*)0x8D6118;
 float& SHOTGUN_SPREAD_RATE = *(float*)0x8D611C;
-unsigned int& SHOTGUN_NUM_PELLETS = *(unsigned int*)0x8D6120;
-unsigned int& SPAS_NUM_PELLETS = *(unsigned int*)0x8D6124;
+uint32_t& SHOTGUN_NUM_PELLETS = *(uint32_t*)0x8D6120;
+uint32_t& SPAS_NUM_PELLETS = *(uint32_t*)0x8D6124;
 float& PELLET_COL_SCALE_RATIO_MULT = *(float*)0x8D6128;
 float* fReloadAnimSampleFraction = (float*)0x8D612C;
 
-// Converted from cdecl void CWeapon::InitialiseWeapons(void) 0x73A300
+void CWeapon::InjectHooks() {
+    ReversibleHooks::Install("CWeapon", "Constructor", 0x73B430, &CWeapon::Constructor);
+    ReversibleHooks::Install("CWeapon", "Shutdown", 0x73A380, &CWeapon::Shutdown);
+    ReversibleHooks::Install("CWeapon", "Reload", 0x73AEB0, &CWeapon::Reload);
+    ReversibleHooks::Install("CWeapon", "IsTypeMelee", 0x73B1C0, &CWeapon::IsTypeMelee);
+    ReversibleHooks::Install("CWeapon", "IsType2Handed", 0x73B1E0, &CWeapon::IsType2Handed);
+    ReversibleHooks::Install("CWeapon", "IsTypeProjectile", 0x73B210, &CWeapon::IsTypeProjectile);
+    ReversibleHooks::Install("CWeapon", "HasWeaponAmmoToBeUsed", 0x73B2A0, &CWeapon::HasWeaponAmmoToBeUsed);
+    ReversibleHooks::Install("CWeapon", "CanBeUsedFor2Player", 0x73B240, (bool (*)(eWeaponType weaponType))&CWeapon::CanBeUsedFor2Player);
+    ReversibleHooks::Install("CWeapon", "InitialiseWeapons", 0x73A300, &CWeapon::InitialiseWeapons);
+    ReversibleHooks::Install("CWeapon", "ShutdownWeapons", 0x73A330, &CWeapon::ShutdownWeapons);
+    ReversibleHooks::Install("CWeapon", "UpdateWeapons", 0x73A360, &CWeapon::UpdateWeapons);
+    ReversibleHooks::Install("CWeapon", "AddGunshell", 0x73A3E0, &CWeapon::AddGunshell);
+    ReversibleHooks::Install("CWeapon", "ProcessLineOfSight", 0x73B300, &CWeapon::ProcessLineOfSight);
+    ReversibleHooks::Install("CWeapon", "StopWeaponEffect", 0x73B360, &CWeapon::StopWeaponEffect);
+    ReversibleHooks::Install("CWeapon", "TargetWeaponRangeMultiplier", 0x73B380, &CWeapon::TargetWeaponRangeMultiplier);
+    ReversibleHooks::Install("CWeapon", "Initialise", 0x73B4A0, &CWeapon::Initialise);
+    ReversibleHooks::Install("CWeapon", "DoWeaponEffect", 0x73E690, &CWeapon::DoWeaponEffect);
+    ReversibleHooks::Install("CWeapon", "FireSniper", 0x73AAC0, &CWeapon::FireSniper);
+}
+
+// 0x73A300
 void CWeapon::InitialiseWeapons() {
-    plugin::Call<0x73A300>();
+    CWeaponInfo::Initialise();
+    CShotInfo::Initialise();
+    CExplosion::Initialise();
+    CProjectileInfo::Initialise();
+    CBulletInfo::Initialise();
+
+    bPhotographHasBeenTaken = false;
+    ms_bTakePhoto = false;
 }
 
-// Converted from cdecl void CWeapon::ShutdownWeapons(void) 0x73A330
+// 0x73A330
 void CWeapon::ShutdownWeapons() {
-    plugin::Call<0x73A330>();
+    CWeaponInfo::Shutdown();
+    CShotInfo::Shutdown();
+    CExplosion::Shutdown();
+    CProjectileInfo::Shutdown();
+    CBulletInfo::Shutdown();
+
+    ms_PelletTestCol.RemoveCollisionVolumes();
 }
 
-// Converted from cdecl void CWeapon::UpdateWeapons(void) 0x73A360
+// 0x73A360
 void CWeapon::UpdateWeapons() {
-    plugin::Call<0x73A360>();
+    CShotInfo::Update();
+    CExplosion::Update();
+    CProjectileInfo::Update();
+    CBulletInfo::Update();
 }
 
-// Converted from thiscall void CWeapon::Shutdown(void) 0x73A380
+// 0x73A380
 void CWeapon::Shutdown() 
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x73A380, CWeapon*>(this);
-#else
-    int weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nModelId1;
+    int32_t weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nModelId1;
+    int32_t weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nModelId2;
+
     if (weaponModelID1 != -1)
         CModelInfo::ms_modelInfoPtrs[weaponModelID1]->RemoveRef();
-    int weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nModelId2;
+    
     if (weaponModelID2 != -1)
         CModelInfo::ms_modelInfoPtrs[weaponModelID2]->RemoveRef();
+
     m_nType = WEAPON_UNARMED;
     m_nState = WEAPONSTATE_READY;
     m_nTotalAmmo = 0;
     m_nAmmoInClip = 0;
     m_nTimeForNextShot = 0;
-#endif
 }
 
-// Converted from thiscall void CWeapon::AddGunshell(CEntity *creator,CVector const&position,CVector2D const&direction,float size) 0x73A3E0
-void CWeapon::AddGunshell(CEntity* creator, CVector const& position, CVector2D const& direction, float size) {
-    plugin::CallMethod<0x73A3E0, CWeapon*, CEntity*, CVector const&, CVector2D const&, float>(this, creator, position, direction, size);
+// 0x73A3E0
+void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& direction, float size) {
+    if (!creator || !creator->GetIsOnScreen())
+        return;
+
+    CVector& posDiff = TheCamera.GetPosition() - creator->GetPosition();
+
+    //if (posDiff.SquaredMagnitude() > 100.0f) @ original code
+    if (posDiff.Magnitude() > 10.0f)
+        return;
+
+    CVector velocity(direction.x, direction.y, CGeneral::GetRandomNumberInRange(0.4f, 1.6f));
+
+    FxPrtMult_c fxprt(0.5f, 0.5f, 0.5f, 1.0f, size, 1.0f, 1.0f);
+
+    switch (m_nType) {
+    case eWeaponType::WEAPON_SPAS12_SHOTGUN:
+    case eWeaponType::WEAPON_SHOTGUN:
+        fxprt.m_color.red = 0.6f;
+        fxprt.m_color.green = 0.1f;
+        fxprt.m_color.blue = 0.1f;
+    }
+
+    g_fx.m_pPrtGunshell->AddParticle(&position, &velocity, 0.0f, &fxprt, -1.0f, 1.2f, 0.6f, 0);
 }
 
-// Converted from cdecl void CWeapon::GenerateDamageEvent(CPed *victim,CEntity *creator,eWeaponType weaponType,int damageFactor,ePedPieceTypes pedPiece,int direction) 0x73A530
-void CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int damageFactor, ePedPieceTypes pedPiece, int direction) {
-    plugin::Call<0x73A530, CPed*, CEntity*, eWeaponType, int, ePedPieceTypes, int>(victim, creator, weaponType, damageFactor, pedPiece, direction);
+// Converted from cdecl void CWeapon::GenerateDamageEvent(CPed *victim,CEntity *creator,eWeaponType weaponType,int32_t damageFactor,ePedPieceTypes pedPiece,int32_t direction) 0x73A530
+void CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32_t damageFactor, ePedPieceTypes pedPiece, int32_t direction) {
+    plugin::Call<0x73A530, CPed*, CEntity*, eWeaponType, int32_t, ePedPieceTypes, int32_t>(victim, creator, weaponType, damageFactor, pedPiece, direction);
 }
 
 // Converted from thiscall bool CWeapon::LaserScopeDot(CVector *outCoord,float *outSize) 0x73A8D0
@@ -80,107 +126,132 @@ bool CWeapon::LaserScopeDot(CVector* outCoord, float* outSize) {
     return plugin::CallMethodAndReturn<bool, 0x73A8D0, CWeapon*, CVector*, float*>(this, outCoord, outSize);
 }
 
-// Converted from thiscall bool CWeapon::FireSniper(CPed *creator, CEntity *victim, CVector *target) 0x73AAC0
+// 0x73AAC0
 bool CWeapon::FireSniper(CPed* creator, CEntity* victim, CVector* target) {
-    return plugin::CallMethodAndReturn<bool, 0x73AAC0, CWeapon*, CPed*, CEntity*, CVector*>(this, creator, victim, target);
+    CCam& activeCam = TheCamera.GetActiveCamera();
+
+    if (FindPlayerPed() == creator) {
+        switch (activeCam.m_nMode) {
+        case MODE_M16_1STPERSON:
+        case MODE_SNIPER:
+        case MODE_CAMERA:
+        case MODE_ROCKETLAUNCHER:
+        case MODE_ROCKETLAUNCHER_HS:
+        case MODE_M16_1STPERSON_RUNABOUT:
+        case MODE_SNIPER_RUNABOUT:
+        case MODE_ROCKETLAUNCHER_RUNABOUT:
+        case MODE_ROCKETLAUNCHER_RUNABOUT_HS:
+            break;
+        default:
+            return false;
+        }
+    }
+
+    // todo: make sense of literals.
+    float vecFrontZ_Y = activeCam.m_vecFront.z * 0.145 - activeCam.m_vecFront.y * 0.98940003;
+
+    if (vecFrontZ_Y > 0.99699998)
+        CCoronas::MoonSize = (CCoronas::MoonSize + 1) % 8;
+
+    CVector velocity = activeCam.m_vecFront;
+    velocity.Normalise();
+    velocity *= 16.0f;
+
+    CBulletInfo::AddBullet(creator, m_nType, activeCam.m_vecSource, velocity);
+
+    ePedType creatorPedType = creator->m_nPedType;
+
+    // recoil effect for players
+    if (creatorPedType == PED_TYPE_PLAYER1 || creatorPedType == PED_TYPE_PLAYER2) {
+        CVector creatorPos = FindPlayerCoors();
+        CPad* creatorPad = CPad::GetPad(creatorPedType);
+
+        creatorPad->StartShake_Distance(240, 128, creatorPos.x, creatorPos.y, creatorPos.z);
+        CamShakeNoPos(&TheCamera, 0.2f);
+    }
+
+    eEntityType entityType = creator->m_nType;
+
+    if (entityType == PED_TYPE_PLAYER_UNUSED)
+        CCrime::ReportCrime(CRIME_FIRE_WEAPON, creator, creator);
+    else if (entityType == PED_TYPE_PLAYER_NETWORK && creator->field_460)
+        CCrime::ReportCrime(CRIME_FIRE_WEAPON, creator, creator->field_460);
+
+    CVector targetPoint = velocity * 40.0f + activeCam.m_vecSource;
+    bool hasNoSound = m_nType == WEAPON_PISTOL_SILENCED || m_nType == WEAPON_TEARGAS;
+    CEventGroup* eventGroup = GetEventGlobalGroup();
+
+    CEventGunShot gs(creator, activeCam.m_vecSource, targetPoint, hasNoSound);
+    eventGroup->Add(static_cast<CEvent*>(&gs), false);
+
+    CEventGunShotWhizzedBy gsw(creator, activeCam.m_vecSource, targetPoint, hasNoSound);
+    eventGroup->Add(static_cast<CEvent*>(&gsw), false);
+
+    g_InterestingEvents.Add((CInterestingEvents::EType)22, creator); // todo: enum
+
+    return true;
 }
 
-// Converted from thiscall void CWeapon::Reload(CPed *owner) 0x73AEB0
-void CWeapon::Reload(CPed* owner) 
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x73AEB0, CWeapon*, CPed*>(this, owner);
-#else
-    CWeaponInfo* pedWeaponInfo;
+// 0x73AEB0
+void CWeapon::Reload(CPed* owner) {
+    if (!m_nTotalAmmo)
+        return;
 
-    if (owner)
-    {
-        auto skill = owner->GetWeaponSkill(m_nType);
-        pedWeaponInfo = CWeaponInfo::GetWeaponInfo(m_nType, skill);
-    }
-    else
-    {
-        pedWeaponInfo = CWeaponInfo::GetWeaponInfo(m_nType, 1);
-    }
-    unsigned short ammo = pedWeaponInfo->m_nAmmoClip;
-    if (m_nTotalAmmo >= ammo)
-        m_nAmmoInClip = ammo;
-    else
-        m_nAmmoInClip = m_nTotalAmmo;
-#endif
-
+    uint32_t ammo = GetWeaponInfo(owner).m_nAmmoClip;
+    m_nAmmoInClip = std::min(ammo, m_nTotalAmmo);
 }
 
-// Converted from cdecl void FireOneInstantHitRound(CVector *startPoint,CVector *endPoint,int intensity) 0x73AF00
-void FireOneInstantHitRound(CVector* startPoint, CVector* endPoint, int intensity) {
-    plugin::Call<0x73AF00, CVector*, CVector*, int>(startPoint, endPoint, intensity);
+// Converted from cdecl void FireOneInstantHitRound(CVector *startPoint,CVector *endPoint,int32_t intensity) 0x73AF00
+void FireOneInstantHitRound(CVector* startPoint, CVector* endPoint, int32_t intensity) {
+    plugin::Call<0x73AF00, CVector*, CVector*, int32_t>(startPoint, endPoint, intensity);
 }
 
 bool CWeapon::IsTypeMelee() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x73B1C0, CWeapon*>(this);
-#else
     return CWeaponInfo::GetWeaponInfo(m_nType, 1)->m_nWeaponFire == WEAPON_FIRE_MELEE;
-#endif
 }
 
-bool CWeapon::IsType2Handed() 
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x73B1E0, CWeapon*>(this);
-#else
-    // Use switch?
-    return 
-        m_nType == WEAPON_M4 || 
-        m_nType == WEAPON_AK47 ||
-        m_nType == WEAPON_SPAS12_SHOTGUN || 
-        m_nType == WEAPON_SHOTGUN ||
-        m_nType == WEAPON_SNIPERRIFLE ||
-        m_nType == WEAPON_FLAMETHROWER ||
-        m_nType == WEAPON_COUNTRYRIFLE;
-#endif
+bool CWeapon::IsType2Handed() {
+    switch (m_nType) {
+    case WEAPON_M4: 
+    case WEAPON_AK47:
+    case WEAPON_SPAS12_SHOTGUN:
+    case WEAPON_SHOTGUN:
+    case WEAPON_SNIPERRIFLE:
+    case WEAPON_FLAMETHROWER:
+    case WEAPON_COUNTRYRIFLE:
+        return true;
+    }
+
+    return false;
 }
 
-bool CWeapon::IsTypeProjectile() 
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x73B210, CWeapon*>(this);
-#else
-    // Use switch?
-    return
-        m_nType == WEAPON_GRENADE ||
-        m_nType == WEAPON_REMOTE_SATCHEL_CHARGE ||
-        m_nType == WEAPON_TEARGAS ||
-        m_nType == WEAPON_MOLOTOV ||
-        m_nType == WEAPON_FREEFALL_BOMB;
-#endif 
+bool CWeapon::IsTypeProjectile() {
+    switch (m_nType) {
+    case WEAPON_GRENADE:
+    case WEAPON_REMOTE_SATCHEL_CHARGE:
+    case WEAPON_TEARGAS:
+    case WEAPON_MOLOTOV:
+    case WEAPON_FREEFALL_BOMB:
+        return true;
+    }
+
+    return false;
 }
 
 bool CWeapon::CanBeUsedFor2Player(eWeaponType weaponType) {
-#ifdef USE_DEFAULT_FUNCTIONS
-  return plugin::CallAndReturn<bool, 0x73B240, eWeaponType>(weaponType);
-#else
-    switch (weaponType)
-    {
+    switch (weaponType) {
     case WEAPON_CHAINSAW:
     case WEAPON_SNIPERRIFLE:
     case WEAPON_RLAUNCHER:
     case WEAPON_PARACHUTE:
         return false;
-    default:
-        return true;
     }
+
     return true;
-#endif 
 }
 
-bool CWeapon::HasWeaponAmmoToBeUsed() 
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x73B2A0, CWeapon*>(this);
-#else
-    switch (m_nType)
-    {
+bool CWeapon::HasWeaponAmmoToBeUsed() {
+    switch (m_nType) {
     case WEAPON_UNARMED:
     case WEAPON_BRASSKNUCKLE:
     case WEAPON_GOLFCLUB:
@@ -196,41 +267,115 @@ bool CWeapon::HasWeaponAmmoToBeUsed()
     case WEAPON_FLOWERS:
     case WEAPON_PARACHUTE:
         return true;
-    default:
-        return m_nTotalAmmo != 0;
     }
-    return false;
-#endif
+
+    return m_nTotalAmmo != 0;
 }
 
-// Converted from cdecl bool CWeapon::ProcessLineOfSight(CVector const&startPoint,CVector const&endPoint,CColPoint &outColPoint,CEntity *&outEntity,eWeaponType weaponType,CEntity *,bool buildings,bool vehicles,bool peds,bool objects,bool dummies,bool,bool doIgnoreCameraCheck) 0x73B300
-bool CWeapon::ProcessLineOfSight(CVector const& startPoint, CVector const& endPoint, CColPoint& outColPoint, CEntity*& outEntity, eWeaponType weaponType, CEntity* arg5, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool arg11, bool doIgnoreCameraCheck) {
-    return plugin::CallAndReturn<bool, 0x73B300, CVector const&, CVector const&, CColPoint&, CEntity*&, eWeaponType, CEntity*, bool, bool, bool, bool, bool, bool, bool>(startPoint, endPoint, outColPoint, outEntity, weaponType, arg5, buildings, vehicles, peds, objects, dummies, arg11, doIgnoreCameraCheck);
+// 0x73B300
+bool CWeapon::ProcessLineOfSight(const CVector& startPoint, const CVector& endPoint, CColPoint& outColPoint, CEntity*& outEntity, eWeaponType weaponType, CEntity* arg5,
+                                 bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool arg11, bool doIgnoreCameraCheck) {
+    CBirds::HandleGunShot(&startPoint, &endPoint);
+    CShadows::GunShotSetsOilOnFire(&startPoint, &endPoint);
+
+    return CWorld::ProcessLineOfSight(startPoint, endPoint, outColPoint, outEntity, buildings, vehicles, peds, objects, dummies, false, doIgnoreCameraCheck, true);
 }
 
-// Converted from thiscall void CWeapon::StopWeaponEffect(void) 0x73B360
+// 0x73B360
 void CWeapon::StopWeaponEffect() {
-    plugin::CallMethod<0x73B360, CWeapon*>(this);
+    if (!m_pFxSystem || m_nType == WEAPON_MOLOTOV)
+        return;
+
+    m_pFxSystem->Kill();
+    m_pFxSystem = nullptr;
 }
 
-// Converted from cdecl float CWeapon::TargetWeaponRangeMultiplier(CEntity *victim,CEntity *weaponOwner) 0x73B380
+// 0x73B380
 float CWeapon::TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner) {
-    return plugin::CallAndReturn<float, 0x73B380, CEntity*, CEntity*>(victim, weaponOwner);
+    if (!victim || !weaponOwner)
+        return 1.0f;
+
+   switch (victim->m_nType) {
+   case eEntityType::ENTITY_TYPE_VEHICLE: {
+       if (!victim->AsVehicle()->IsBike())
+           return 3.0f;
+       break;
+   }
+   case eEntityType::ENTITY_TYPE_PED: {
+       CPed* pedVictim = static_cast<CPed*>(victim);
+
+       if (pedVictim->m_pVehicle && !pedVictim->m_pVehicle->IsBike()) {
+           return 3.0f;
+       }
+
+       if (CEntity* pAttachedTo = pedVictim->m_pAttachedTo) {
+           if (pAttachedTo->IsVehicle() && !static_cast<CVehicle*>(pAttachedTo)->IsBike())
+               return 3.0f;
+       }
+       break;
+   }
+   }
+
+   if (!weaponOwner->IsPed() || !static_cast<CPed*>(weaponOwner)->IsPlayer())
+       return 1.0f;
+
+ }
+
+// 0x73B430
+CWeapon::CWeapon(eWeaponType weaponType, int32_t ammo) {
+    m_nType = weaponType;
+    m_nState = WEAPONSTATE_READY;
+    m_nAmmoInClip = 0;
+    m_nTotalAmmo = std::min(ammo, 99999);
+
+    if (m_nTotalAmmo) {
+        uint32_t ammoClip = GetWeaponInfo().m_nAmmoClip;
+        m_nAmmoInClip = std::min(ammoClip, m_nTotalAmmo);
+    }
+
+    m_nTimeForNextShot = 0;
+    field_14 = 0;
+    m_pFxSystem = nullptr;
+    m_bNoModel = false;
 }
 
-// Converted from thiscall void CWeapon::CWeapon(eWeaponType weaponType,int ammo) 0x73B430
-CWeapon::CWeapon(eWeaponType weaponType, int ammo) {
-    plugin::CallMethod<0x73B430, CWeapon*, eWeaponType, int>(this, weaponType, ammo);
+CWeapon* CWeapon::Constructor(eWeaponType weaponType, int32_t ammo) {
+    this->CWeapon::CWeapon(weaponType, ammo);
+
+    return this;
 }
 
-// Converted from thiscall void CWeapon::Initialise(eWeaponType weaponType,int ammo,CPed *owner) 0x73B4A0
-void CWeapon::Initialise(eWeaponType weaponType, int ammo, CPed* owner) {
-    plugin::CallMethod<0x73B4A0, CWeapon*, eWeaponType, int, CPed*>(this, weaponType, ammo, owner);
+// 0x73B4A0
+void CWeapon::Initialise(eWeaponType weaponType, int32_t ammo, CPed* owner) {
+    m_nType = weaponType;
+    m_nState = WEAPONSTATE_READY;
+    m_nAmmoInClip = 0;
+    m_nTotalAmmo = std::min(ammo, 99999);
+
+    if (m_nTotalAmmo) {
+        uint32_t ammoClip = GetWeaponInfo(owner).m_nAmmoClip;
+
+        m_nAmmoInClip = std::min(ammoClip, m_nTotalAmmo);
+    }
+
+    m_nTimeForNextShot = 0;
+
+    int32_t model1 = CWeaponInfo::GetWeaponInfo(weaponType, 1)->m_nModelId1;
+    int32_t model2 = CWeaponInfo::GetWeaponInfo(weaponType, 1)->m_nModelId2;
+
+    if (model1 != -1)
+        CModelInfo::ms_modelInfoPtrs[model1]->AddRef();
+
+    if (model2 != -1)
+        CModelInfo::ms_modelInfoPtrs[model2]->AddRef();
+
+    m_pFxSystem = nullptr;
+    m_bNoModel = false;
 }
 
-// Converted from thiscall void CWeapon::DoBulletImpact(CEntity *owner,CEntity *victim,CVector *startPoint,CVector *endPoint,CColPoint *colPoint,int) 0x73B550
-void CWeapon::DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoint, CVector* endPoint, CColPoint* colPoint, int arg5) {
-    plugin::CallMethod<0x73B550, CWeapon*, CEntity*, CEntity*, CVector*, CVector*, CColPoint*, int>(this, owner, victim, startPoint, endPoint, colPoint, arg5);
+// Converted from thiscall void CWeapon::DoBulletImpact(CEntity *owner,CEntity *victim,CVector *startPoint,CVector *endPoint,CColPoint *colPoint,int32_t) 0x73B550
+void CWeapon::DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoint, CVector* endPoint, CColPoint* colPoint, int32_t arg5) {
+    plugin::CallMethod<0x73B550, CWeapon*, CEntity*, CEntity*, CVector*, CVector*, CColPoint*, int32_t>(this, owner, victim, startPoint, endPoint, colPoint, arg5);
 }
 
 // Converted from thiscall bool CWeapon::TakePhotograph(CEntity *owner, CVector *point) 0x73C1F0
@@ -238,9 +383,9 @@ bool CWeapon::TakePhotograph(CEntity* owner, CVector* point) {
     return plugin::CallMethodAndReturn<bool, 0x73C1F0, CWeapon*, CEntity*, CVector*>(this, owner, point);
 }
 
-// Converted from thiscall void CWeapon::SetUpPelletCol(int numPellets,CEntity *owner,CEntity *victim,CVector &point,CColPoint &colPoint,CMatrix &outMatrix) 0x73C710
-void CWeapon::SetUpPelletCol(int numPellets, CEntity* owner, CEntity* victim, CVector& point, CColPoint& colPoint, CMatrix& outMatrix) {
-    plugin::CallMethod<0x73C710, CWeapon*, int, CEntity*, CEntity*, CVector&, CColPoint&, CMatrix&>(this, numPellets, owner, victim, point, colPoint, outMatrix);
+// Converted from thiscall void CWeapon::SetUpPelletCol(int32_t numPellets,CEntity *owner,CEntity *victim,CVector &point,CColPoint &colPoint,CMatrix &outMatrix) 0x73C710
+void CWeapon::SetUpPelletCol(int32_t numPellets, CEntity* owner, CEntity* victim, CVector& point, CColPoint& colPoint, CMatrix& outMatrix) {
+    plugin::CallMethod<0x73C710, CWeapon*, int32_t, CEntity*, CEntity*, CVector&, CColPoint&, CMatrix&>(this, numPellets, owner, victim, point, colPoint, outMatrix);
 }
 
 // Converted from thiscall void CWeapon::FireInstantHitFromCar2(CVector startPoint,CVector endPoint,CVehicle *vehicle,CEntity *owner) 0x73CBA0
@@ -268,9 +413,9 @@ void CWeapon::Update(CPed* owner) {
     plugin::CallMethod<0x73DB40, CWeapon*, CPed*>(this, owner);
 }
 
-// Converted from thiscall bool CWeapon::CanBeUsedFor2Player(void) 0x73DEF0
+// 0x73DEF0
 bool CWeapon::CanBeUsedFor2Player() {
-    return plugin::CallMethodAndReturn<bool, 0x73DEF0, CWeapon*>(this);
+    return CanBeUsedFor2Player(m_nType);
 }
 
 // Converted from cdecl void CWeapon::FindNearestTargetEntityWithScreenCoors(float screenX,float screenY,float range,CVector point,float *outX,float *outY) 0x73E240
@@ -283,9 +428,47 @@ float CWeapon::EvaluateTargetForHeatSeekingMissile(CEntity* entity, CVector& pos
     return plugin::CallAndReturn<float, 0x73E560, CEntity*, CVector&, CVector&, float, bool, CEntity*>(entity, posn, direction, distanceMultiplier, fromVehicle, lastEntity);
 }
 
-// Converted from thiscall void CWeapon::DoWeaponEffect(CVector origin,CVector target) 0x73E690
+// 0x73E690
 void CWeapon::DoWeaponEffect(CVector origin, CVector target) {
-    plugin::CallMethod<0x73E690, CWeapon*, CVector, CVector>(this, origin, target);
+    char fxName[32];
+
+    switch (m_nType) {
+    case WEAPON_FLAMETHROWER:
+        strcpy(fxName, "flamethrower");
+        break;
+    case WEAPON_EXTINGUISHER:
+        strcpy(fxName, "extinguisher");
+        break;
+    case WEAPON_SPRAYCAN:
+        strcpy(fxName, "spraycan");
+        break;
+    default:
+        return StopWeaponEffect();
+    }
+
+    RwMatrix* mat = RwMatrixCreate();
+    g_fx.CreateMatFromVec(mat, &origin, &target);
+
+    if (m_pFxSystem) {
+        m_pFxSystem->SetMatrix(mat);
+        m_pFxSystem->SetConstTime(1, 1.0f);
+    } else {
+        CVector origin(0.0f, 0.0f, 0.0f);
+
+        m_pFxSystem = g_fxMan.CreateFxSystem(fxName, &origin, mat, false);
+
+        if (!m_pFxSystem) {
+            RwMatrixDestroy(mat);
+            return;
+        }
+
+        m_pFxSystem->CopyParentMatrix();
+        m_pFxSystem->Play();
+        m_pFxSystem->SetMustCreatePrts(true);
+        m_pFxSystem->SetConstTime(1, 1.0f);
+    }
+
+    RwMatrixDestroy(mat);
 }
 
 // Converted from thiscall bool CWeapon::FireAreaEffect(CEntity *firingEntity,CVector *origin, CEntity *targetEntity, CVector *target) 0x73E800
@@ -330,5 +513,12 @@ bool CWeapon::FireM16_1stPerson(CEntity* owner) {
 
 // Converted from thiscall bool CWeapon::Fire(CEntity *firingEntity,CVector *origin, CVector *muzzlePosn, CEntity *targetEntity, CVector *target, CVector *originForDriveBy) 0x742300
 bool CWeapon::Fire(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity, CVector* target, CVector* originForDriveBy) {
-    return plugin::CallMethodAndReturn<bool, 0x742300, CWeapon*, CEntity*, CVector*, CVector*, CEntity*, CVector*, CVector*>(this, firingEntity, origin, muzzlePosn, targetEntity, target, originForDriveBy);
+    return plugin::CallMethodAndReturn<bool, 0x742300, CWeapon*, CEntity*, CVector*, CVector*, CEntity*, CVector*, CVector*>(this, firingEntity, origin, muzzlePosn, targetEntity,
+                                                                                                                             target, originForDriveBy);
+}
+
+CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) {
+    uint8_t skill = owner ? owner->GetWeaponSkill(m_nType) : WEAPSKILL_STD;
+
+    return *CWeaponInfo::GetWeaponInfo(m_nType, skill);
 }

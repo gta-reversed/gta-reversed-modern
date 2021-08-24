@@ -135,7 +135,8 @@ public:
     CAEPedSpeechAudioEntity		m_pedSpeech;
     CAEWeaponAudioEntity		m_weaponAudio;
     char field_43C[36];
-    char field_460[8];
+    CPed* field_460;
+    char field_464[4];
     int field_468;
     union {
         /* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CPedSA.h */

@@ -27,6 +27,8 @@ private:
     char _pad2A[2];
 public:
 
+    void InjectHooks();
+
     static void Initialise();
     static void Shutdown();
     static bool AddBullet(CEntity* creator, eWeaponType weaponType, CVector position, CVector velocity);
