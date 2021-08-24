@@ -50,7 +50,7 @@ void InjectCommonHooks()
 {
     HookInstall(0x53E230, &Render2dStuff); // This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without :D
 
-//    ReversibleHooks::Install("common", "FindPlayerCoors", 0x56E010, &FindPlayerCoors);
+    ReversibleHooks::Install("common", "FindPlayerCoors", 0x56E010, &FindPlayerCoors);
 //    ReversibleHooks::Install("common", "FindPlayerSpeed", 0x56E090, &FindPlayerSpeed);
     ReversibleHooks::Install("common", "FindPlayerEntity", 0x56E120, &FindPlayerEntity);
     ReversibleHooks::Install("common", "FindPlayerTrain", 0x56E160, &FindPlayerTrain);
@@ -131,7 +131,9 @@ void InjectCommonHooks()
 
 // 0x56E010
 CVector FindPlayerCoors(int playerId) {
-    return plugin::CallAndReturn<CVector, 0x56E010, int>(playerId);
+    if (CEntity* e = FindPlayerEntity(playerId))
+        return e->GetPosition();
+    return {};
 }
 
 // 0x56E090
@@ -141,11 +143,12 @@ CVector& FindPlayerSpeed(int playerId) {
 
 // 0x56E120
 CEntity* FindPlayerEntity(int playerId) {
-    auto player = FindPlayerPed(playerId);
-    if (player->bInVehicle && player->m_pVehicle) 
-        return player->m_pVehicle;
-
-    return player;
+    if (auto player = FindPlayerPed(playerId)) {
+        if (player->bInVehicle && player->m_pVehicle) 
+            return player->m_pVehicle;
+        return player;
+    }
+    return nullptr;
 }
 
 // 0x56E160
