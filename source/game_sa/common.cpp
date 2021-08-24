@@ -244,10 +244,11 @@ char* MakeUpperCase(char* dest, char* src) {
     return ((char*(__cdecl*)(char*, char*))0x7186E0)(dest, src);
 }
 
+// NOTSA
 bool EndsWith(const char* str, const char* with, bool caseSensitive) {
     const auto strsz = strlen(str), withsz = strlen(with);
     assert(strsz >= withsz);
-    return (caseSensitive ? strncmp : _strnicmp)(str + strsz - withsz, with, withsz);
+    return (caseSensitive ? strncmp : _strnicmp)(str + strsz - withsz, with, withsz) == 0;
 }
 
 // 0x734610
@@ -320,26 +321,30 @@ void DefinedState2d() {
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)2); // TODO: ?
 }
 
-// 0x5370A0
 // TODO: Check `outName` size (to avoid buffer overflow)
+// 0x5370A0
 void GetNameAndDamage(const char* nodeName, char* outName, bool& outDamage) {
+    const size_t nodesz = strlen(nodeName);
+
     const auto TerminatedCopy = [=](size_t off) {
-        const size_t nodesz = strlen(nodeName);
         strncpy(outName, nodeName, nodesz - off);
         outName[nodesz - off] = 0;
     };
 
-    const auto NodeEndsWith = [nodeName](auto with, bool cs = true) {
-        return EndsWith(nodeName, with, cs);
-    };
-
-    if (NodeEndsWith("_dam")) {
+    if (EndsWith(nodeName, "_dam", true)) {
         outDamage = true;
         TerminatedCopy(sizeof("_dam") - 1);
     }
     else {
         outDamage = false;
-        if (NodeEndsWith("_l0", false))
+        /* Izzotop: Originally it might have looked like this
+        if (
+            nodeName[nodesz - 3] == '_' &&
+            (nodeName[nodesz - 2] == 'L' || nodeName[nodesz - 2] == 'l') &&
+            nodeName[nodesz - 1] == '0'
+        )
+        */
+        if (EndsWith(nodeName,"_l0", false))
             TerminatedCopy(sizeof("_l0") - 1);
         else
             strcpy(outName, nodeName);
