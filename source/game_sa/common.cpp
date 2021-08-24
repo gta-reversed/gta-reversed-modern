@@ -244,6 +244,12 @@ char* MakeUpperCase(char* dest, char* src) {
     return ((char*(__cdecl*)(char*, char*))0x7186E0)(dest, src);
 }
 
+bool EndsWith(const char* str, const char* with, bool caseSensitive) {
+    const auto strsz = strlen(str), withsz = strlen(with);
+    assert(strsz >= withsz);
+    return (caseSensitive ? strncmp : _strnicmp)(str + strsz - withsz, with, withsz);
+}
+
 // 0x734610
 void CreateDebugFont() {
     // NOP
@@ -317,25 +323,23 @@ void DefinedState2d() {
 // 0x5370A0
 // TODO: Check `outName` size (to avoid buffer overflow)
 void GetNameAndDamage(const char* nodeName, char* outName, bool& outDamage) {
-    const size_t nodeNameLen = strlen(nodeName);
-    const auto EndsWith = [=](const char* with) {
-        const auto withlen = strlen(with);
-        assert(withlen <= nodeNameLen);
-        return strncmp(nodeName + nodeNameLen - withlen, with, withlen) == 0;
-    };
-
     const auto TerminatedCopy = [=](size_t off) {
-        strncpy(outName, nodeName, nodeNameLen - off);
-        outName[nodeNameLen - off] = 0;
+        const size_t nodesz = strlen(nodeName);
+        strncpy(outName, nodeName, nodesz - off);
+        outName[nodesz - off] = 0;
     };
 
-    if (EndsWith("_dam")) {
+    const auto NodeEndsWith = [nodeName](auto with, bool cs = true) {
+        return EndsWith(nodeName, with, cs);
+    };
+
+    if (NodeEndsWith("_dam")) {
         outDamage = true;
         TerminatedCopy(sizeof("_dam") - 1);
     }
     else {
         outDamage = false;
-        if (EndsWith("_l0") || EndsWith("_L0"))
+        if (NodeEndsWith("_l0", false))
             TerminatedCopy(sizeof("_l0") - 1);
         else
             strcpy(outName, nodeName);
