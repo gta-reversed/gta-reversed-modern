@@ -76,6 +76,12 @@ CMatrix::~CMatrix()
     CMatrix::Detach();
 }
 
+CMatrix CMatrix::FromNormal(CVector normal) {
+    CMatrix out;
+    out.m_up = normal;
+
+}
+
 void CMatrix::Attach(RwMatrix* matrix, bool bOwnsMatrix)
 {
     CMatrix::Detach();

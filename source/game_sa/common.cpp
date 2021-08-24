@@ -100,7 +100,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "forceLinearFilteringMatTexturesCB", 0x734D60, &forceLinearFilteringMatTexturesCB);
     ReversibleHooks::Install("common", "SetFilterModeOnAtomicsTextures", 0x734D80, &SetFilterModeOnAtomicsTextures);
 
-//    ReversibleHooks::Install("common", "SetLightsWithTimeOfDayColour", 0x7354E0, &SetLightsWithTimeOfDayColour);
+    ReversibleHooks::Install("common", "SetLightsWithTimeOfDayColour", 0x7354E0, &SetLightsWithTimeOfDayColour);
     ReversibleHooks::Install("common", "LightsDestroy", 0x735730, &LightsDestroy);
     ReversibleHooks::Install("common", "WorldReplaceNormalLightsWithScorched", 0x7357E0, &WorldReplaceNormalLightsWithScorched);
 //    ReversibleHooks::Install("common", "AddAnExtraDirectionalLight", 0x735840, &AddAnExtraDirectionalLight);
@@ -584,30 +584,19 @@ void SetLightsWithTimeOfDayColour(RpWorld* world) {
         DirectionalLightColourForFrame.blue = DirectionalLightColourForFrame.red;
         RpLightSetColor(pDirect, &DirectionalLightColourForFrame);
 
-        RwMatrix* out[6];
-        /*
-        out[0].x = 0.0;
-        out[0].y = 0.0;
-        out[0].z = 1.0;
+        const CVector vertical{ 0.0f, 0.0f, 1.0f };
 
-        CVector in = CrossProduct({0.0f, 0.0f, 1.0f}, sun2Dir);
-        in.Normalise();
-        CVector vecCross = CrossProduct(in, sun2Dir);
+        // TODO: This is a fairly commonly used thing,
+        // would be nice to make a function out of it..
+        // Is basically calculates a matrix out of a normal.
+       
+        RwMatrix mat;
 
-        out[1].x = vecCross.x;
-        out[1].y = vecCross.y;
-        out[1].z = vecCross.z;
+        mat.at = -CTimeCycle::m_vecDirnLightToSun;
+        mat.up = Normalized(CrossProduct(vertical, CTimeCycle::m_vecDirnLightToSun));
+        mat.right = CrossProduct(mat.up, CTimeCycle::m_vecDirnLightToSun);
 
-        out[2] = in;
-
-        out[3].z = -sun2Dir.x;
-
-        out[4].x = -sun2Dir.y;
-        out[4].y = -sun2Dir.z;
-        */
-
-        auto* parentFrame = static_cast<RwFrame*>(pDirect->object.object.parent);
-        RwFrameTransform(parentFrame, reinterpret_cast<const RwMatrix*>(&out), RwOpCombineType::rwCOMBINEREPLACE);
+        RwFrameTransform(RpClumpGetFrame(RpClumpGetFrame(pDirect)), &mat, RwOpCombineType::rwCOMBINEREPLACE);
     }
 }
 
