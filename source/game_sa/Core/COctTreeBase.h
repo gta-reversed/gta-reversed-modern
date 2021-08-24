@@ -11,13 +11,24 @@
 
 class  COctTreeBase : public COctTree {
 public:
-    unsigned int numBranches;
-    bool32       hasTransparentPixels;
+    uint32_t        numBranches;
+    bool32          hasTransparentPixels;
+
+    //vtable
+
+    virtual bool    InsertTree(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue) override;
+    virtual void    FillPalette(uint8_t* colors) override;
 
     COctTreeBase();
-    void Init(int numBranches);
-    bool Insert(unsigned char colorRed, unsigned char colorGreen, unsigned char colorBlue);
-    void ReduceBranches(int newBranchesCount);
+    ~COctTreeBase();
+
+    void            Init(int32_t numBranches);
+    bool            Insert(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue);
+    void            ReduceBranches(int32_t newBranchesCount);
+
+    static void     InjectHooks();
 };
+
+extern COctTreeBase** gOctTreeBase;
 
 VALIDATE_SIZE(COctTreeBase, 0x30);
