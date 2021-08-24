@@ -90,6 +90,9 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "atomicConvertGeometryToTL", 0x734C20, &atomicConvertGeometryToTL);
     ReversibleHooks::Install("common", "RpClumpConvertGeometryToTL", 0x734CB0, &RpClumpConvertGeometryToTL);
 
+    ReversibleHooks::Install("common", "atomicConvertGeometryToTS", 0x734CE0, &atomicConvertGeometryToTS);
+    ReversibleHooks::Install("common", "RpClumpConvertGeometryToTS", 0x734D30, &RpClumpConvertGeometryToTS);
+
 //    ReversibleHooks::Install("common", "SetLightsWithTimeOfDayColour", 0x7354E0, &SetLightsWithTimeOfDayColour);
     ReversibleHooks::Install("common", "LightsDestroy", 0x735730, &LightsDestroy);
     ReversibleHooks::Install("common", "WorldReplaceNormalLightsWithScorched", 0x7357E0, &WorldReplaceNormalLightsWithScorched);
@@ -455,9 +458,19 @@ bool RpClumpConvertGeometryToTL(RpClump* clump) {
     return success;
 }
 
+// 0x734CE0
+RpAtomic* atomicConvertGeometryToTS(RpAtomic* atomic, void* data) {
+    if (!RpAtomicConvertGeometryToTS(atomic)) {
+        *(bool*)(data) = false;
+    }
+    return atomic;
+}
+
 // Converted from cdecl bool RpClumpConvertGeometryToTS(RpClump *clump) 0x734D30
 bool RpClumpConvertGeometryToTS(RpClump* clump) {
-    return ((bool(__cdecl *)(RpClump*))0x734D30)(clump);
+    bool success{ true };
+    RpClumpForAllAtomics(clump, atomicConvertGeometryToTS, &success);
+    return success;
 }
 
 // Converted from cdecl RpMaterial* forceLinearFilteringMatTexturesCB(RpMaterial *material,void *data) 0x734D60
