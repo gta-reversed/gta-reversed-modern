@@ -344,7 +344,7 @@ void GetNameAndDamage(const char* nodeName, char* outName, bool& outDamage) {
             nodeName[nodesz - 1] == '0'
         )
         */
-        if (EndsWith(nodeName,"_l0", false))
+        if (EndsWith(nodeName, "_l0", false))
             TerminatedCopy(sizeof("_l0") - 1);
         else
             strcpy(outName, nodeName);
