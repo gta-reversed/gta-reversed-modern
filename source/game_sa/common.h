@@ -171,7 +171,7 @@ extern constexpr unsigned int make_fourcc4(const char fourcc[4]) {
 
 AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, char *name);
 
-char *MakeUpperCase(char *dest, char *src);
+char *MakeUpperCase(char *dest, const char *src);
 
 class CEventGroup* GetEventGlobalGroup();
 // dummy function
