@@ -1048,6 +1048,22 @@ void WriteRaster(RwRaster * pRaster, char const * pszPath) {
 bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos, float* pScreenX, float* pScreenY)
 {
     return plugin::CallAndReturn<bool, 0x71DA00, CVector const&, CVector*, float*, float*>(vecPoint, pVecOutPos, pScreenX, pScreenY);
+
+    // TODO: Figure out how to get screen size..
+    //CVector screen =  TheCamera.m_mViewMatrix * vecPoint;
+    //if (screen.z <= 1.0f)
+    //    return false;
+
+    //const float depth = 1.0f / screen.z;
+
+    //CVector2D screenSize{}; // TODO..
+
+    //*pVecOutPos = screen * depth * CVector(screenSize.x, screenSize.y, 1.0f);
+
+    //*pScreenX = screenSize.x * depth / CDraw::ms_fFOV * 70.0f;
+    //*pScreenY = screenSize.y * depth / CDraw::ms_fFOV * 70.0f;
+
+    //return true;
 }
 
 // 0x71DAB0
