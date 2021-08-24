@@ -93,6 +93,10 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "atomicConvertGeometryToTS", 0x734CE0, &atomicConvertGeometryToTS);
     ReversibleHooks::Install("common", "RpClumpConvertGeometryToTS", 0x734D30, &RpClumpConvertGeometryToTS);
 
+
+    ReversibleHooks::Install("common", "forceLinearFilteringMatTexturesCB", 0x734D60, &forceLinearFilteringMatTexturesCB);
+    ReversibleHooks::Install("common", "SetFilterModeOnAtomicsTextures", 0x734D80, &SetFilterModeOnAtomicsTextures);
+
 //    ReversibleHooks::Install("common", "SetLightsWithTimeOfDayColour", 0x7354E0, &SetLightsWithTimeOfDayColour);
     ReversibleHooks::Install("common", "LightsDestroy", 0x735730, &LightsDestroy);
     ReversibleHooks::Install("common", "WorldReplaceNormalLightsWithScorched", 0x7357E0, &WorldReplaceNormalLightsWithScorched);
@@ -475,12 +479,14 @@ bool RpClumpConvertGeometryToTS(RpClump* clump) {
 
 // Converted from cdecl RpMaterial* forceLinearFilteringMatTexturesCB(RpMaterial *material,void *data) 0x734D60
 RpMaterial* forceLinearFilteringMatTexturesCB(RpMaterial* material, void* data) {
-    return ((RpMaterial* (__cdecl *)(RpMaterial*, void*))0x734D60)(material, data);
+    if (RwTexture* tex = RpMaterialGetTexture(material))
+        RwTextureSetFilterMode(tex, (RwTextureFilterMode)((unsigned)data));
+    return material;
 }
 
 // Converted from cdecl bool SetFilterModeOnAtomicsTextures(RpAtomic *atomic,RwTextureFilterMode filtering) 0x734D80
 bool SetFilterModeOnAtomicsTextures(RpAtomic* atomic, RwTextureFilterMode filtering) {
-    return ((bool(__cdecl *)(RpAtomic*, RwTextureFilterMode))0x734D80)(atomic, filtering);
+    RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), forceLinearFilteringMatTexturesCB, (void*)(unsigned)filtering);
 }
 
 // Converted from cdecl RpAtomic* forceLinearFilteringAtomicsCB(RpAtomic *atomic,void *data) 0x734DA0
