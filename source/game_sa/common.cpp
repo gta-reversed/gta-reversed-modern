@@ -63,7 +63,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "FindPlayerWanted", 0x56E230, &FindPlayerWanted);
     ReversibleHooks::Install("common", "InTwoPlayersMode", 0x441390, &InTwoPlayersMode);
 
-//    ReversibleHooks::Install("common", "MakeUpperCase", 0x7186E0, &MakeUpperCase);
+    ReversibleHooks::Install("common", "MakeUpperCase", 0x7186E0, &MakeUpperCase);
 //    ReversibleHooks::Install("common", "GetEventGlobalGroup", 0x4ABA50, &GetEventGlobalGroup);
     ReversibleHooks::Install("common", "DefinedState", 0x734650, &DefinedState);
     ReversibleHooks::Install("common", "DefinedState2d", 0x734750, &DefinedState2d);
@@ -264,9 +264,16 @@ AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, char* name) {
     return ((AnimBlendFrameData * (__cdecl*)(RpClump*, char*))0x4D62A0)(clump, name);
 }
 
+char ToUpper(char ch) {
+    return (ch >= 'a' && ch <= 'z') ? ch - ('a' - 'A') : ch;
+}
+
 // 0x7186E0
-char* MakeUpperCase(char* dest, char* src) {
-    return ((char*(__cdecl*)(char*, char*))0x7186E0)(dest, src);
+char* MakeUpperCase(char* dest, const char * src) {
+    for (; *src; src++, dest++)
+        *dest = ToUpper(*src);
+    *dest = 0;
+    return dest;
 }
 
 // 0x734610
