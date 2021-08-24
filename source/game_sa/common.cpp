@@ -93,6 +93,9 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "atomicConvertGeometryToTS", 0x734CE0, &atomicConvertGeometryToTS);
     ReversibleHooks::Install("common", "RpClumpConvertGeometryToTS", 0x734D30, &RpClumpConvertGeometryToTS);
 
+    ReversibleHooks::Install("common", "forceLinearFilteringAtomicsCB", 0x734DA0, &forceLinearFilteringAtomicsCB);
+    ReversibleHooks::Install("common", "SetFilterModeOnClumpsTextures", 0x734DC0, &SetFilterModeOnClumpsTextures);
+
 
     ReversibleHooks::Install("common", "forceLinearFilteringMatTexturesCB", 0x734D60, &forceLinearFilteringMatTexturesCB);
     ReversibleHooks::Install("common", "SetFilterModeOnAtomicsTextures", 0x734D80, &SetFilterModeOnAtomicsTextures);
@@ -491,12 +494,13 @@ bool SetFilterModeOnAtomicsTextures(RpAtomic* atomic, RwTextureFilterMode filter
 
 // Converted from cdecl RpAtomic* forceLinearFilteringAtomicsCB(RpAtomic *atomic,void *data) 0x734DA0
 RpAtomic* forceLinearFilteringAtomicsCB(RpAtomic* atomic, void* data) {
-    return ((RpAtomic* (__cdecl *)(RpAtomic*, void*))0x734DA0)(atomic, data);
+    SetFilterModeOnAtomicsTextures(atomic, (RwTextureFilterMode)((unsigned)data));
+    return atomic;
 }
 
 // Converted from cdecl bool SetFilterModeOnClumpsTextures(RpClump *clump,RwTextureFilterMode filtering) 0x734DC0
 bool SetFilterModeOnClumpsTextures(RpClump* clump, RwTextureFilterMode filtering) {
-    return ((bool(__cdecl *)(RpClump*, RwTextureFilterMode))0x734DC0)(clump, filtering);
+    RpClumpForAllAtomics(clump, forceLinearFilteringAtomicsCB, (void*)(unsigned)filtering);
 }
 
 // Converted from cdecl bool RpGeometryReplaceOldMaterialWithNewMaterial(RpGeometry *geometry,RpMaterial *oldMaterial,RpMaterial *newMaterial) 0x734DE0
