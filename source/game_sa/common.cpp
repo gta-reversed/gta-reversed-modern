@@ -85,6 +85,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "GetAnimHierarchyFromClump", 0x734B10, &GetAnimHierarchyFromClump);
     ReversibleHooks::Install("common", "AtomicRemoveAnimFromSkinCB", 0x734B90, &AtomicRemoveAnimFromSkinCB);
     ReversibleHooks::Install("common", "RpAtomicConvertGeometryToTL", 0x734BE0, &RpAtomicConvertGeometryToTL);
+    ReversibleHooks::Install("common", "RpAtomicConvertGeometryToTS", 0x734C20, &RpAtomicConvertGeometryToTS);
 
 //    ReversibleHooks::Install("common", "SetLightsWithTimeOfDayColour", 0x7354E0, &SetLightsWithTimeOfDayColour);
     ReversibleHooks::Install("common", "LightsDestroy", 0x735730, &LightsDestroy);
@@ -423,7 +424,17 @@ bool RpAtomicConvertGeometryToTL(RpAtomic* atomic) {
 
 // Converted from cdecl bool RpAtomicConvertGeometryToTS(RpAtomic *atomic) 0x734C20
 bool RpAtomicConvertGeometryToTS(RpAtomic* atomic) {
-    return ((bool(__cdecl *)(RpAtomic*))0x734C20)(atomic);
+    RpGeometry* pGeom = RpAtomicGetGeometry(atomic);
+
+    auto flags = RpGeometryGetFlags(pGeom);
+    if (flags & rpGEOMETRYNATIVE || flags & rpGEOMETRYTRISTRIP)
+        return false;
+
+    RpGeometryLock(pGeom, rpGEOMETRYLOCKALL);
+    RpGeometrySetFlags(pGeom, flags | rpGEOMETRYTRISTRIP);
+    RpGeometryUnlock(pGeom);
+
+    return true;
 }
 
 // Converted from cdecl bool RpClumpConvertGeometryToTL(RpClump *clump) 0x734CB0
