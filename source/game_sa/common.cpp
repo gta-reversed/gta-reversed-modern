@@ -5,7 +5,7 @@ https://github.com/DK22Pac/plugin-sdk
 Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-
+#include "GxtChar.h"
 #include "CDebugMenu.h"
 
 int& g_nNumIm3dDrawCalls = *(int*)0xB73708;
@@ -119,7 +119,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "SetLightsForInfraredVisionDefaultObjects", 0x735F20, &SetLightsForInfraredVisionDefaultObjects);
     ReversibleHooks::Install("common", "SetLightsForNightVision", 0x735F70, &SetLightsForNightVision);
     ReversibleHooks::Install("common", "GetDayNightBalance", 0x6FAB30, &GetDayNightBalance);
-//    ReversibleHooks::Install("common", "AsciiToGxtChar", 0x718600, &AsciiToGxtChar);
+    ReversibleHooks::Install("common", "AsciiToGxtChar", 0x718600, &AsciiToGxtChar);
 //    ReversibleHooks::Install("common", "WriteRaster", 0x005A4150, &WriteRaster);
 //    ReversibleHooks::Install("common", "CalcScreenCoors_VVff", 0x71DA00, static_cast<bool(*)(CVector const&, CVector*, float*, float*)>(&CalcScreenCoors));
 //    ReversibleHooks::Install("common", "CalcScreenCoors_VV", 0x71DAB0, static_cast<bool(*)(CVector const&, CVector*)>(&CalcScreenCoors));
