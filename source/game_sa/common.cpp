@@ -64,7 +64,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "InTwoPlayersMode", 0x441390, &InTwoPlayersMode);
 
     ReversibleHooks::Install("common", "MakeUpperCase", 0x7186E0, &MakeUpperCase);
-//    ReversibleHooks::Install("common", "GetEventGlobalGroup", 0x4ABA50, &GetEventGlobalGroup);
+    ReversibleHooks::Install("common", "GetEventGlobalGroup", 0x4ABA50, &GetEventGlobalGroup);
     ReversibleHooks::Install("common", "DefinedState", 0x734650, &DefinedState);
     ReversibleHooks::Install("common", "DefinedState2d", 0x734750, &DefinedState2d);
 
@@ -283,7 +283,13 @@ void CreateDebugFont() {
 
 // 0x4ABA50
 CEventGroup* GetEventGlobalGroup() {
-    return plugin::CallAndReturn<CEventGroup*, 0x4ABA50>();
+    static CEventGroup*& globalEvents = *(CEventGroup**)0xA9AF6C;
+
+    if (globalEvents)
+        return globalEvents;
+
+    globalEvents = new CEventGroup(nullptr);
+    return globalEvents;
 }
 
 // 0x734620
