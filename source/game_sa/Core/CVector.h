@@ -27,7 +27,7 @@ public:
     }
 
     constexpr CVector(float X, float Y, float Z) :
-        RwV3d(ConstructRwV3d(x, y, z))
+        RwV3d(ConstructRwV3d(X, Y, Z))
     {
     }
 
