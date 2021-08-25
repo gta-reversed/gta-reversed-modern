@@ -235,6 +235,16 @@ void CMirrors::BuildCameraMatrixForScreens(CMatrix & mat) {
     }
 }
 
+bool CMirrors::AreEitherScreensVisibleToCam() {
+    for (int i = 0; i < 2; i++) {
+        TheCamera.m_bMirrorActive = false;
+        if (TheCamera.IsSphereVisible(CVector::AvarageN(&Screens8Track[i * 4], 4), 8.0f)) {
+            return false;
+        }
+    }
+    return false;
+}
+
 // 0x726DF0
 void CMirrors::BeforeConstructRenderList() {
     if (d3dRestored) {
@@ -256,13 +266,8 @@ void CMirrors::BeforeConstructRenderList() {
         if ((pMirrorAttrs->flags & CAM_STAIRS_FOR_PLAYER) == 0)
             return true;
 
-        // Check if either mirrors are visible
-        for (int i = 0; i < 2; i++) {
-            TheCamera.m_bMirrorActive = false;
-            if (TheCamera.IsSphereVisible(CVector::AvarageN(&Screens8Track[i * 4], 4), 8.0f)) {
-                return false;
-            }
-        }
+        if (!AreEitherScreensVisibleToCam())
+            return false;
 
         // Actually update cam
 
@@ -280,7 +285,7 @@ void CMirrors::BeforeConstructRenderList() {
         return true;
     };
 
-    if (TryUpdate()) {
+    if (!TryUpdate()) {
         ShutDown();
     }
 
@@ -322,5 +327,7 @@ void CMirrors::BeforeMainRender() {
 
         RwCameraSetRaster(Scene.m_pRwCamera, prevCamRaster);
         RwCameraSetZRaster(Scene.m_pRwCamera, prevCamZRaster);
+
+        TheCamera.RestoreCameraAfterMirror();
     }
 }
