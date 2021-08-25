@@ -1,10 +1,11 @@
 #include "StdInc.h"
 
-SSimpleReversibleHook::SSimpleReversibleHook(uint32_t installAddress, void* addressToJumpTo, int iJmpCodeSize) {
-    m_iLibFunctionAddress = (uint32_t)addressToJumpTo;
-    m_iRealHookedAddress = installAddress;
-    m_iHookedBytes = iJmpCodeSize;
-
+SSimpleReversibleHook::SSimpleReversibleHook(std::string id, std::string name, uint32_t installAddress, void* addressToJumpTo, int iJmpCodeSize) :
+    SReversibleHook(id, name, eReversibleHookType::Simple),
+    m_iLibFunctionAddress((uint32_t)addressToJumpTo),
+    m_iRealHookedAddress(installAddress),
+    m_iHookedBytes(iJmpCodeSize)
+{
     m_HookContent.jumpLocation = ReversibleHooks::GetJMPLocation(installAddress, m_iLibFunctionAddress);
     memset(m_HookContent.possibleNops, NOP_OPCODE, iJmpCodeSize - ReversibleHooks::x86JMPSize);
 
@@ -60,10 +61,6 @@ SSimpleReversibleHook::SSimpleReversibleHook(uint32_t installAddress, void* addr
         installHook(false);
     }
     VirtualProtect((void*)installAddress, maxBytesToProtect, dwProtect[0], &dwProtect[1]);
-}
-
-std::shared_ptr<SSimpleReversibleHook> SSimpleReversibleHook::InstallHook(uint32_t installAddress, void* addressToJumpTo, int iJmpCodeSize) {
-    return std::make_shared<SSimpleReversibleHook>(installAddress, addressToJumpTo, iJmpCodeSize);
 }
 
 void SSimpleReversibleHook::Switch()

@@ -1,6 +1,10 @@
 #include "StdInc.h"
 
-SVirtualReversibleHook::SVirtualReversibleHook(void* libFuncAddress, const std::vector<uint32_t>& vecAddressesToHook) {
+SVirtualReversibleHook::SVirtualReversibleHook(std::string id, std::string name, void* libFuncAddress, const std::vector<uint32_t>& vecAddressesToHook) :
+    SReversibleHook(id, name, eReversibleHookType::Virtual)
+{
+    assert(vecAddressesToHook.size() > 0);
+
     m_LibFunctionAddress = reinterpret_cast<uint32_t>(libFuncAddress);
 
     DWORD dwProtectInitial[2] = { 0 };
@@ -19,12 +23,6 @@ SVirtualReversibleHook::SVirtualReversibleHook(void* libFuncAddress, const std::
     m_bIsHooked = true;
     m_bImguiHooked = true;
 };
-
-std::shared_ptr<SVirtualReversibleHook> SVirtualReversibleHook::InstallHook(void* libFuncAddress, const std::vector<uint32_t>& vecAddressesToHook)
-{
-    assert(vecAddressesToHook.size() > 0);
-    return std::make_shared<SVirtualReversibleHook>(libFuncAddress, vecAddressesToHook);
-}
 
 void SVirtualReversibleHook::Switch()
 {

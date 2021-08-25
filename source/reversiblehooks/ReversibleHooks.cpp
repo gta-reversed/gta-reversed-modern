@@ -43,33 +43,17 @@ namespace detail {
 void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, unsigned int installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault)
 {
     assert(!GetHook(sIdentifier, sFuncName));
-    if (m_HooksMap.find(sIdentifier) == m_HooksMap.end())
-        m_HooksMap[sIdentifier] = std::vector<std::shared_ptr<SReversibleHook>>();
 
     auto& usedVector = m_HooksMap[sIdentifier];
-    auto pHook = SSimpleReversibleHook::InstallHook(installAddress, addressToJumpTo, iJmpCodeSize);
-    pHook->m_sIdentifier = sIdentifier;
-    pHook->m_sFunctionName = sFuncName;
-    pHook->m_eHookType = eReversibleHookType::Simple;
-
-    usedVector.push_back(pHook);
+    usedVector.emplace_back(std::make_shared<SSimpleReversibleHook>(sIdentifier, sFuncName, installAddress, addressToJumpTo, iJmpCodeSize));
     if (bDisableByDefault)
-        pHook->Switch();
+        usedVector.back()->Switch();
 }
 
 void HookInstallVirtual(const std::string& sIdentifier, const std::string& sFuncName, void* libVTableAddress, const std::vector<uint32_t>& vecAddressesToHook)
 {
     assert(!GetHook(sIdentifier, sFuncName));
-    if (m_HooksMap.find(sIdentifier) == m_HooksMap.end())
-        m_HooksMap[sIdentifier] = std::vector<std::shared_ptr<SReversibleHook>>();
-
-    auto& usedVector = m_HooksMap[sIdentifier];
-    auto pHook = SVirtualReversibleHook::InstallHook(libVTableAddress, vecAddressesToHook);
-    pHook->m_sIdentifier = sIdentifier;
-    pHook->m_sFunctionName = sFuncName;
-    pHook->m_eHookType = eReversibleHookType::Virtual;
-
-    usedVector.push_back(pHook);
+    m_HooksMap[sIdentifier].emplace_back(std::make_shared<SVirtualReversibleHook>(sIdentifier, sFuncName, libVTableAddress, vecAddressesToHook));
 }
 
 void HookSwitch(std::shared_ptr<SReversibleHook> pHook)
@@ -110,3 +94,10 @@ unsigned int GetFunctionLocationFromJMP(unsigned int dwJmpLoc, unsigned int dwJm
     return dwJmpOffset + dwJmpLoc + x86JMPSize;
 }
 }; // namespace ReversibleHooks
+
+SReversibleHook::SReversibleHook(std::string id, std::string name, eReversibleHookType type) :
+    m_sIdentifier(std::move(id)),
+    m_sFunctionName(std::move(name)),
+    m_eHookType(type)
+{
+}

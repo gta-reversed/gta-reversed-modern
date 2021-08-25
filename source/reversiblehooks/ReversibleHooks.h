@@ -25,6 +25,7 @@ struct SReversibleHook {
     std::string m_sFunctionName;
     eReversibleHookType m_eHookType;
 
+    SReversibleHook(std::string id, std::string name, eReversibleHookType type);
     virtual ~SReversibleHook() = default;
     virtual void Switch() = 0;
 };
@@ -40,8 +41,7 @@ struct SSimpleReversibleHook : SReversibleHook {
     unsigned int m_iLibHookedBytes;
     unsigned int m_iLibFunctionAddress;
 
-    SSimpleReversibleHook(uint32_t installAddress, void* addressToJumpTo, int iJmpCodeSize = 5);
-    static std::shared_ptr<SSimpleReversibleHook> InstallHook(uint32_t installAddress, void* addressToJumpTo, int iJmpCodeSize = 5);
+    SSimpleReversibleHook(std::string id, std::string name, uint32_t installAddress, void* addressToJumpTo, int iJmpCodeSize = 5);
     virtual void Switch() override;
     virtual ~SSimpleReversibleHook() override = default;
 };
@@ -51,8 +51,7 @@ struct SVirtualReversibleHook : SReversibleHook {
     uint32_t m_OriginalFunctionAddress;
     uint32_t m_LibFunctionAddress;
 
-    SVirtualReversibleHook(void* libFuncAddress, const std::vector<uint32_t>& vecAddressesToHook);
-    static std::shared_ptr<SVirtualReversibleHook> InstallHook(void* libFuncAddress, const std::vector<uint32_t>& vecAddressesToHook);
+    SVirtualReversibleHook(std::string id, std::string name, void* libFuncAddress, const std::vector<uint32_t>& vecAddressesToHook);
     virtual void Switch() override;
     virtual ~SVirtualReversibleHook() override = default;
 };
