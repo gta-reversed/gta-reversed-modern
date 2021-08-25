@@ -234,7 +234,7 @@ void CMirrors::BuildCameraMatrixForScreens(CMatrix & mat) {
     }
 }
 
-bool CMirrors::AreEitherScreensVisibleToCam() {
+bool CMirrors::IsEitherScreenVisibleToCam() {
     for (int i = 0; i < 2; i++) {
         TheCamera.m_bMirrorActive = false;
         if (TheCamera.IsSphereVisible(CVector::AvarageN(&Screens8Track[i * 4], 4), 8.0f)) {
@@ -255,18 +255,17 @@ void CMirrors::BeforeConstructRenderList() {
         // Check player is in heli/plane
         if (CVehicle* veh = FindPlayerVehicle()) {
             if (veh->IsHeli() || veh->IsPlane())
-                return true;
+                return false;
         }
 
         CCullZoneReflection* pMirrorAttrs = CCullZones::FindMirrorAttributesForCoors_(TheCamera.GetPosition());
         if (!pMirrorAttrs)
-            return true;
-
-        if ((pMirrorAttrs->flags & CAM_STAIRS_FOR_PLAYER) == 0)
-            return true;
-
-        if (!AreEitherScreensVisibleToCam())
             return false;
+
+        if (pMirrorAttrs->flags & CAM_STAIRS_FOR_PLAYER) {
+            if (!IsEitherScreenVisibleToCam())
+                return false;
+        }
 
         // Actually update cam
 

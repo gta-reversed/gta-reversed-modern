@@ -31,7 +31,7 @@ public:
     static void BuildCameraMatrixForScreens(CMatrix & mat);
     static void BeforeConstructRenderList();
     static void BeforeMainRender();
-    static bool AreEitherScreensVisibleToCam();
+    static bool IsEitherScreenVisibleToCam();
 };
 
 extern bool& bFudgeNow;
