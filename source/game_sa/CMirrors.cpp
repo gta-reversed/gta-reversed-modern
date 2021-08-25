@@ -20,7 +20,7 @@ void CMirrors::InjectHooks() {
     ReversibleHooks::Install("CMirrors", "RenderMirrorBuffer", 0x726090, &CMirrors::RenderMirrorBuffer);
     ReversibleHooks::Install("CMirrors", "BuildCameraMatrixForScreens", 0x7266B0, &CMirrors::BuildCameraMatrixForScreens);
     // ReversibleHooks::Install("CMirrors", "BeforeConstructRenderList", 0x726DF0, &CMirrors::BeforeConstructRenderList);
-    // ReversibleHooks::Install("CMirrors", "BeforeMainRender", 0x727140, &CMirrors::BeforeMainRender);
+    ReversibleHooks::Install("CMirrors", "BeforeMainRender", 0x727140, &CMirrors::BeforeMainRender);
 }
 
 // 0x723000
@@ -238,7 +238,34 @@ void CMirrors::BeforeConstructRenderList() {
     plugin::Call<0x726DF0>();
 }
 
+void RenderScene() {
+    plugin::Call<0x53DF40>();
+}
+
 // 0x727140
 void CMirrors::BeforeMainRender() {
-    plugin::Call<0x727140>();
+    if (!TypeOfMirror)
+        return;
+
+    RwRaster* prevCamRaster = RwCameraGetRaster(Scene.m_pRwCamera);
+    RwRaster* prevCamZRaster = RwCameraGetZRaster(Scene.m_pRwCamera);
+
+    RwCameraSetRaster(Scene.m_pRwCamera, pBuffer);
+    RwCameraSetZRaster(Scene.m_pRwCamera, pZBuffer);
+
+    TheCamera.SetCameraUpForMirror();
+
+    RwRGBA color{ 0, 0, 0, 0xFF };
+    RwCameraClear(Scene.m_pRwCamera, &color, rwCAMERACLEARZ | rwCAMERACLEARIMAGE | (GraphicsLowQuality() ? rwCAMERACLEARSTENCIL : 0));
+    if (RsCameraBeginUpdate(Scene.m_pRwCamera)) {
+        bRenderingReflection = true;
+        DefinedState();
+        RenderScene();
+        CVisibilityPlugins::RenderWeaponPedsForPC();
+        bRenderingReflection = false;
+        RwCameraEndUpdate(Scene.m_pRwCamera);
+
+        RwCameraSetRaster(Scene.m_pRwCamera, prevCamRaster);
+        RwCameraSetZRaster(Scene.m_pRwCamera, prevCamZRaster);
+    }
 }

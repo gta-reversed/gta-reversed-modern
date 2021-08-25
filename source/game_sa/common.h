@@ -287,6 +287,8 @@ CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* asso
 void RpAnimBlendKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2, float time, void* customData);
 bool RpAnimBlendPluginAttach();
 
+bool GraphicsLowQuality();
+
 /**
 * Writes given raster to PNG file using RtPNGImageWrite
 */
