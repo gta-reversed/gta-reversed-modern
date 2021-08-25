@@ -19,8 +19,8 @@ void CQuadBike::InjectHooks() {
 }
 
 // 0x6CE370
-CQuadBike::CQuadBike(int modelIndex, unsigned char createdBy) :CAutomobile(plugin::dummy) {
-    plugin::CallMethod<0x6CE370, CQuadBike*, int, unsigned char>(this, modelIndex, createdBy);
+CQuadBike::CQuadBike(int modelIndex, eVehicleCreatedBy createdBy) :CAutomobile(plugin::dummy) {
+    plugin::CallMethod<0x6CE370, CQuadBike*, int, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
 
 // 0x6CDC30

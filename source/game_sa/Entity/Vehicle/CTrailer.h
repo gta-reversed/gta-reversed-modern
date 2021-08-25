@@ -53,7 +53,7 @@ public:
 public:
     static void InjectHooks();
 
-    CTrailer(int modelIndex, unsigned char createdBy);
+    CTrailer(int modelIndex, eVehicleCreatedBy createdBy);
 
     bool SetTowLink(CVehicle* targetVehicle, bool arg1) override;
 

@@ -112,7 +112,7 @@ public:
     // reversed virtual functions
     void ProcessControl_Reversed();
 
-    CTrain(int modelIndex, unsigned char createdBy);
+    CTrain(int modelIndex, eVehicleCreatedBy createdBy);
 
     bool FindMaximumSpeedToStopAtStations(float* speed);
     unsigned int FindNumCarriagesPulled();
