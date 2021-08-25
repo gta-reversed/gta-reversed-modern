@@ -794,14 +794,21 @@ void CCamera::ImproveNearClip(CVehicle* pVehicle, CPed* pPed, CVector* source, C
     return plugin::CallMethodDynGlobal<CCamera*, CVehicle*, CPed*, CVector*, CVector*>(0x516B20, this, pVehicle, pPed, source, targPosn);
 }
 
+static CMatrix& preMirrorMat = *(CMatrix*)0xB6FE40;
+
 // 0x51A560
 void CCamera::SetCameraUpForMirror() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x51A560, this);
+    preMirrorMat = m_mCameraMatrix;
+    m_mCameraMatrix = m_mMatMirror;
+    CopyCameraMatrixToRWCam(true);
+    CalculateDerivedValues(true, false);
 }
 
 // 0x51A5A0
 void CCamera::RestoreCameraAfterMirror() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x51A5A0, this);
+    SetMatrix(preMirrorMat);
+    CopyCameraMatrixToRWCam(true);
+    CalculateDerivedValues(false, false);
 }
 
 // 0x51A5D0
