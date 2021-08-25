@@ -6,35 +6,34 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CPool.h"
 
-class  COctTree {
+class COctTree {
 public:
-    uint32_t                level;
-    bool                    lastStep;       // no children
-private:
+    uint32_t                m_nLevel;
+    bool                    m_bLastStep;       // no children
     char                    _pad09;
-public:
-    short                   children[8];    // pool slot IDs,  -1 - empty
-private:
+    short m_aChildrens[8];    // pool slot IDs,  -1 - empty
     char                    _pad1A[2];
-public:
-    uint32_t                redComponent;
-    uint32_t                greenComponent;
-    uint32_t                blueComponent;
+    uint32_t                m_nRedComponent;
+    uint32_t                m_nGreenComponent;
+    uint32_t                m_nBlueComponent;
 
+public:
     static bool&            ms_bFailed;
     static uint32_t&        ms_level;
     static CPool<COctTree>& ms_octTreePool;
 
-    //vtable
-
-    virtual bool            InsertTree(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue);
-    virtual void            FillPalette(uint8_t* colors);
-
+public:
     COctTree();
     ~COctTree();
+
+    static void*            operator new(uint32_t size);
+    static void             operator delete(void* data);
+
+    //vtable
+    virtual bool            InsertTree(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue);
+    virtual void            FillPalette(uint8_t* colors);
 
     uint32_t                FindNearestColour(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue);
     uint32_t                NoOfChildren();
@@ -45,12 +44,17 @@ public:
     static void             InitPool(void* data, int32_t dataSize);
     static void             ShutdownPool();
 
-    //static void operator delete(void* data);  //  Not needed, since destructor already does what this operator does.
-    static void*            operator new(uint32_t size);
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
 
-    static void             InjectHooks();
+    COctTree* Constructor();
+    COctTree* Destructor();
+
+    bool InsertTree_Reversed(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue);
+    void FillPalette_Reversed(uint8_t* colors);
 };
 
 VALIDATE_SIZE(COctTree, 0x28);
 
-extern COctTree **gpTmpOctTree;
+extern COctTree*& gpTmpOctTree;

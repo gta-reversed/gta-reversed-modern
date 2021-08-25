@@ -6,29 +6,37 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "COctTree.h"
 
-class  COctTreeBase : public COctTree {
+class COctTreeBase : public COctTree {
 public:
-    uint32_t        numBranches;
-    bool32          hasTransparentPixels;
+    uint32_t m_nNumBranches;
+    bool32   m_bHasTransparentPixels;
 
-    //vtable
-
-    virtual bool    InsertTree(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue) override;
-    virtual void    FillPalette(uint8_t* colors) override;
-
+public:
     COctTreeBase();
     ~COctTreeBase();
 
-    void            Init(int32_t numBranches);
-    bool            Insert(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue);
-    void            ReduceBranches(int32_t newBranchesCount);
+    //vtable
 
-    static void     InjectHooks();
+    bool InsertTree(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue) override;
+    void FillPalette(uint8_t* colors) override;
+
+    void Init(int32_t numBranches);
+    bool Insert(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue);
+    void ReduceBranches(int32_t newBranchesCount);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    COctTreeBase* Constructor();
+    COctTreeBase* Destructor();
+
+    bool InsertTree_Reversed(uint8_t colorRed, uint8_t colorGreen, uint8_t colorBlue);
+    void FillPalette_Reversed(uint8_t* colors);
 };
 
-extern COctTreeBase** gOctTreeBase;
+extern COctTreeBase& gOctTreeBase;
 
 VALIDATE_SIZE(COctTreeBase, 0x30);

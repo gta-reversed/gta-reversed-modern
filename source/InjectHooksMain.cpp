@@ -348,6 +348,8 @@ void InjectHooksMain()
     CTaskComplexJump::InjectHooks();
     ModelIndices::InjectHooks();
     CWaterCannons::InjectHooks();
+    COctTree::InjectHooks();
+    COctTreeBase::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();
