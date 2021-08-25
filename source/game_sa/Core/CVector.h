@@ -7,6 +7,7 @@ Do not delete this comment block. Respect others' work!
 #pragma once
 #include "PluginBase.h"
 #include "RenderWare.h"
+#include <numeric>
 
 // Hacky solution so we need to not modify `RwV3d`
 constexpr RwV3d ConstructRwV3d(float x, float y, float z) {
@@ -100,6 +101,13 @@ public:
     inline bool IsZero()
     {
         return x == 0.0F && y == 0.0F && z == 0.0F;
+    }
+
+    // Calculate the avarage position
+    static CVector Avarage(const CVector* begin, const CVector* end);
+
+    static CVector AvarageN(const CVector* begin, size_t n) {
+        return Avarage(begin, begin + n);
     }
 };
 

@@ -19,7 +19,7 @@ void CMirrors::InjectHooks() {
     ReversibleHooks::Install("CMirrors", "BuildCamMatrix", 0x723150, &CMirrors::BuildCamMatrix);
     ReversibleHooks::Install("CMirrors", "RenderMirrorBuffer", 0x726090, &CMirrors::RenderMirrorBuffer);
     ReversibleHooks::Install("CMirrors", "BuildCameraMatrixForScreens", 0x7266B0, &CMirrors::BuildCameraMatrixForScreens);
-    // ReversibleHooks::Install("CMirrors", "BeforeConstructRenderList", 0x726DF0, &CMirrors::BeforeConstructRenderList);
+    ReversibleHooks::Install("CMirrors", "BeforeConstructRenderList", 0x726DF0, &CMirrors::BeforeConstructRenderList);
     ReversibleHooks::Install("CMirrors", "BeforeMainRender", 0x727140, &CMirrors::BeforeMainRender);
 }
 
@@ -77,7 +77,7 @@ void CMirrors::RenderMirrorBuffer() {
         return;
 
     RwRaster* raster = RwCameraGetRaster(Scene.m_pRwCamera);
-    const CVector2D rastersz{ RwRasterGetWidth(raster), RwRasterGetHeight(raster) };
+    const CVector2D rastersz{ (float)RwRasterGetWidth(raster), (float)RwRasterGetHeight(raster) };
 
     DefinedState();
 
@@ -92,7 +92,7 @@ void CMirrors::RenderMirrorBuffer() {
 
     RwImVertexIndex indices[] = { 0, 1, 2, 0, 2, 3 };
 
-    if (MirrorFlags & 2 || bFudgeNow) {
+    if (MirrorFlags & CAM_STAIRS_FOR_PLAYER || bFudgeNow) {
         RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
         RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
         RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
@@ -140,9 +140,9 @@ void CMirrors::RenderMirrorBuffer() {
             RwIm2DVertexSetRecipCameraZ(&vertices[i], 1.0f / RwCameraGetNearClipPlane(Scene.m_pRwCamera));
             RwIm2DVertexSetIntRGBA(&vertices[i], 0xFF, 0xFF, 0xFF, 0xFF);
 
-            RwIm2DVertexGetScreenX(&vertices[i], pos[i].x);
-            RwIm2DVertexGetScreenY(&vertices[i], pos[i].y);
-            RwIm2DVertexGetScreenZ(&vertices[i], pos[i].z);
+            RwIm2DVertexSetScreenX(&vertices[i], pos[i].x);
+            RwIm2DVertexSetScreenY(&vertices[i], pos[i].y);
+            RwIm2DVertexSetScreenZ(&vertices[i], pos[i].z);
         }
 
         RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, vertices, std::size(vertices), indices, std::size(indices));
@@ -235,7 +235,60 @@ void CMirrors::BuildCameraMatrixForScreens(CMatrix & mat) {
 
 // 0x726DF0
 void CMirrors::BeforeConstructRenderList() {
-    plugin::Call<0x726DF0>();
+    if (d3dRestored) {
+        d3dRestored = false;
+        Init();
+    }
+
+    const auto TryUpdate = [] {
+        // Check player is in heli/plane
+        if (CVehicle* veh = FindPlayerVehicle()) {
+            if (veh->IsHeli() || veh->IsPlane())
+                return true;
+        }
+
+        CCullZoneReflection* pMirrorAttrs = CCullZones::FindMirrorAttributesForCoors_(TheCamera.GetPosition());
+        if (!pMirrorAttrs)
+            return true;
+
+        if ((pMirrorAttrs->flags & CAM_STAIRS_FOR_PLAYER) == 0)
+            return true;
+
+        // Check if either mirrors are visible
+        for (int i = 0; i < 2; i++) {
+            TheCamera.m_bMirrorActive = false;
+            if (TheCamera.IsSphereVisible(CVector::AvarageN(&Screens8Track[i * 4], 4), 8.0f)) {
+                return false;
+            }
+        }
+
+        // Actually update cam
+
+        MirrorV = pMirrorAttrs->cm;
+        MirrorNormal = CVector{
+            (float)pMirrorAttrs->vx,
+            (float)pMirrorAttrs->vy,
+            (float)pMirrorAttrs->vz,
+        } / 100.0f;
+        MirrorFlags = pMirrorAttrs->flags;
+
+        TypeOfMirror = (fabs(MirrorNormal.z) <= 0.7f) ? 1 : 2;
+        CreateBuffer();
+
+        return true;
+    };
+
+    if (TryUpdate()) {
+        ShutDown();
+    }
+
+    if (MirrorFlags & CAM_STAIRS_FOR_PLAYER || bFudgeNow) {
+        CMatrix mat{};
+        BuildCameraMatrixForScreens(mat);
+        TheCamera.DealWithMirrorBeforeConstructRenderList(true, MirrorNormal, MirrorV, &mat);
+    } else {
+        TheCamera.DealWithMirrorBeforeConstructRenderList(true, MirrorNormal, MirrorV, nullptr);
+    }
 }
 
 void RenderScene() {

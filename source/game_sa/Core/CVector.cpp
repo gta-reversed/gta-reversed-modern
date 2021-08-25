@@ -142,6 +142,10 @@ void CVector::FromMultiply3x3(CMatrix const& matrix, CVector const& vector)
     z = matrix.m_right.z * vector.x + matrix.m_forward.z * vector.y + matrix.m_up.z * vector.z;
 }
 
+CVector CVector::Avarage(const CVector* begin, const CVector* end) {
+    return std::accumulate(begin, end, CVector{}) / (float)std::distance(begin, end);
+}
+
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b)
 {
     out->Cross(*a, *b);

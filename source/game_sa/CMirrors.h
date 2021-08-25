@@ -28,10 +28,11 @@ public:
     static void CreateBuffer();
     static void BuildCamMatrix(CMatrix& mat, CVector pointA, CVector pointB);
     static void RenderMirrorBuffer();
-    static void BuildCameraMatrixForScreens(const CMatrix& mat);
+    static void BuildCameraMatrixForScreens(CMatrix & mat);
     static void BeforeConstructRenderList();
     static void BeforeMainRender();
 };
 
 extern bool& bFudgeNow;
-extern float* Screens8Track; // float Screens8Track[24]
+extern CVector(&Screens8Track)[8];
+
