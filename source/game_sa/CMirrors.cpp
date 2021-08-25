@@ -13,8 +13,8 @@ bool& bFudgeNow = *(bool*)0xC7C72A;
 float* Screens8Track = (float*)0x8D5DD8;
 
 void CMirrors::InjectHooks() {
-    // ReversibleHooks::Install("CMirrors", "Init", 0x723000, &CMirrors::Init);
-    // ReversibleHooks::Install("CMirrors", "ShutDown", 0x723050, &CMirrors::ShutDown);
+    ReversibleHooks::Install("CMirrors", "Init", 0x723000, &CMirrors::Init);
+    ReversibleHooks::Install("CMirrors", "ShutDown", 0x723050, &CMirrors::ShutDown);
     // ReversibleHooks::Install("CMirrors", "CreateBuffer", 0x7230A0, &CMirrors::CreateBuffer);
     // ReversibleHooks::Install("CMirrors", "BuildCamMatrix", 0x723150, &CMirrors::BuildCamMatrix);
     // ReversibleHooks::Install("CMirrors", "RenderMirrorBuffer", 0x726090, &CMirrors::RenderMirrorBuffer);
@@ -25,12 +25,19 @@ void CMirrors::InjectHooks() {
 
 // 0x723000
 void CMirrors::Init() {
-    plugin::Call<0x723000>();
+    ShutDown();
 }
 
 // 0x723050
 void CMirrors::ShutDown() {
-    plugin::Call<0x723050>();
+    if (pBuffer)
+        RwRasterDestroy(pBuffer);
+    if (pZBuffer)
+        RwRasterDestroy(pZBuffer);
+    pBuffer = 0;
+    pZBuffer = 0;
+    TypeOfMirror = 0;
+    MirrorFlags = 0;
 }
 
 // 0x7230A0
