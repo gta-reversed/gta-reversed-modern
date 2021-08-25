@@ -63,6 +63,7 @@ namespace ReversibleHooks {
         void HookSwitch(std::shared_ptr<SReversibleHook> pHook);
         bool IsFunctionHooked(const std::string& sIdentifier, const std::string& sFuncName);
         std::shared_ptr<SReversibleHook> GetHook(const std::string& sIdentifier, const std::string& sFuncName);
+        void VirtualCopy(void* dst, void* src, size_t nbytes);
     };
 
     template <typename T>

@@ -80,6 +80,13 @@ std::shared_ptr<SReversibleHook> GetHook(const std::string& sIdentifier, const s
     return nullptr;
 }
 
+void VirtualCopy(void* dst, void* src, size_t nbytes) {
+    DWORD dwProtect[2] = { 0 };
+    VirtualProtect(dst, nbytes, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
+    memcpy(dst, src, nbytes);
+    VirtualProtect(dst, nbytes, dwProtect[0], &dwProtect[1]);
+}
+
 }; // namespace detail
 }; // namespace ReversibleHooks
 

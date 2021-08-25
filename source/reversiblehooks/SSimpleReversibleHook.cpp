@@ -65,34 +65,14 @@ SSimpleReversibleHook::SSimpleReversibleHook(std::string id, std::string name, u
 
 void SSimpleReversibleHook::Switch()
 {
-    DWORD dwProtect[2] = { 0 };
+    using namespace ReversibleHooks::detail;
     if (m_bIsHooked) {
-        auto pGTADst = (void*)m_iRealHookedAddress;
-        auto pGTASrc = (void*)&m_OriginalFunctionContent;
-        VirtualProtect(pGTADst, m_iHookedBytes, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
-        memcpy(pGTADst, pGTASrc, m_iHookedBytes);
-        VirtualProtect(pGTADst, m_iHookedBytes, dwProtect[0], &dwProtect[1]);
-
-        auto pLibDst = (void*)m_iLibFunctionAddress;
-        auto pLibSrc = (void*)&m_LibHookContent;
-        VirtualProtect(pLibDst, m_iLibHookedBytes, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
-        memcpy(pLibDst, pLibSrc, m_iLibHookedBytes);
-        VirtualProtect(pLibDst, m_iLibHookedBytes, dwProtect[0], &dwProtect[1]);
+        VirtualCopy((void*)m_iRealHookedAddress, (void*)&m_OriginalFunctionContent, m_iHookedBytes);
+        VirtualCopy((void*)m_iLibFunctionAddress, (void*)&m_LibHookContent, m_iLibHookedBytes);
+    } else {
+        VirtualCopy((void*)m_iRealHookedAddress, (void*)&m_HookContent, m_iHookedBytes);
+        VirtualCopy((void*)m_iLibFunctionAddress, (void*)&m_LibOriginalFunctionContent, m_iLibHookedBytes);
     }
-    else {
-        auto pGTADst = (void*)m_iRealHookedAddress;
-        auto pGTASrc = (void*)&m_HookContent;
-        VirtualProtect(pGTADst, m_iHookedBytes, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
-        memcpy(pGTADst, pGTASrc, m_iHookedBytes);
-        VirtualProtect(pGTADst, m_iHookedBytes, dwProtect[0], &dwProtect[1]);
-
-        auto pLibDst = (void*)m_iLibFunctionAddress;
-        auto pLibSrc = (void*)&m_LibOriginalFunctionContent;
-        VirtualProtect(pLibDst, m_iLibHookedBytes, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
-        memcpy(pLibDst, pLibSrc, m_iLibHookedBytes);
-        VirtualProtect(pLibDst, m_iLibHookedBytes, dwProtect[0], &dwProtect[1]);
-    }
-
     m_bIsHooked = !m_bIsHooked;
     m_bImguiHooked = m_bIsHooked;
 }

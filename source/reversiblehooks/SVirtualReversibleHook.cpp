@@ -13,10 +13,9 @@ SVirtualReversibleHook::SVirtualReversibleHook(std::string id, std::string name,
     VirtualProtect((void*)vecAddressesToHook[0], 4, dwProtectInitial[0], &dwProtectInitial[1]);
 
     for (auto uiAddress : vecAddressesToHook) {
-        DWORD dwProtect[2] = { 0 };
-        VirtualProtect((void*)uiAddress, 4, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
-        *reinterpret_cast<uint32_t*>(uiAddress) = m_LibFunctionAddress;
-        VirtualProtect((void*)uiAddress, 4, dwProtect[0], &dwProtect[1]);
+        using namespace ReversibleHooks::detail;
+        
+        VirtualCopy((void*)uiAddress, (void*)m_LibFunctionAddress, 4);
         m_vecHookedAddresses.push_back(uiAddress);
     }
 
@@ -27,10 +26,8 @@ SVirtualReversibleHook::SVirtualReversibleHook(std::string id, std::string name,
 void SVirtualReversibleHook::Switch()
 {
     for (auto uiAddress : m_vecHookedAddresses) {
-        DWORD dwProtect[2] = { 0 };
-        VirtualProtect((void*)uiAddress, 5, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
-        *reinterpret_cast<uint32_t*>(uiAddress) = m_bIsHooked ?  m_OriginalFunctionAddress : m_LibFunctionAddress;
-        VirtualProtect((void*)uiAddress, 5, dwProtect[0], &dwProtect[1]);
+        using namespace ReversibleHooks::detail;
+        VirtualCopy((void*)uiAddress, (void*)(m_bIsHooked ? m_OriginalFunctionAddress : m_LibFunctionAddress), 5);
     }
 
     m_bIsHooked = !m_bIsHooked;
