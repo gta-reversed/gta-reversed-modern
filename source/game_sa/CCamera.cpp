@@ -66,6 +66,7 @@ void CCamera::InjectHooks() {
 //    ReversibleHooks::Install("CCamera", "GetLookDirection", 0x50AE90, &CCamera::GetLookDirection);
 //    ReversibleHooks::Install("CCamera", "GetLookingForwardFirstPerson", 0x50AED0, &CCamera::GetLookingForwardFirstPerson);
 //    ReversibleHooks::Install("CCamera", "CopyCameraMatrixToRWCam", 0x50AFA0, &CCamera::CopyCameraMatrixToRWCam);
+    ReversibleHooks::Install("CCamera", "CalculateMirroredMatrix", 0x50B380, &CCamera::CalculateMirroredMatrix);
     ReversibleHooks::Install("CCamera", "DealWithMirrorBeforeConstructRenderList", 0x50B510, &CCamera::DealWithMirrorBeforeConstructRenderList);
 //    ReversibleHooks::Install("CCamera", "ProcessFade", 0x50B5D0, &CCamera::ProcessFade);
 //    ReversibleHooks::Install("CCamera", "ProcessMusicFade", 0x50B6D0, &CCamera::ProcessMusicFade);
@@ -293,7 +294,19 @@ void CCamera::CopyCameraMatrixToRWCam(bool bUpdateMatrix) {
 
 // 0x50B380
 void CCamera::CalculateMirroredMatrix(CVector posn, float mirrorV, CMatrix *camMatrix, CMatrix* mirrorMatrix) {
-    return plugin::CallMethodDynGlobal<CCamera*, CVector, float, CMatrix*, CMatrix*>(0x50B380, this, posn, mirrorV, camMatrix, mirrorMatrix);
+    mirrorMatrix->GetPosition() = camMatrix->GetPosition() - posn * 2 * (DotProduct(posn, camMatrix->GetPosition()) - mirrorV);
+
+    const CVector fwd = camMatrix->GetForward() - posn * 2 * DotProduct(posn, camMatrix->GetForward());
+    mirrorMatrix->GetForward() = fwd;
+
+    const CVector up = camMatrix->GetUp() - posn * 2 * DotProduct(posn, camMatrix->GetUp());
+    mirrorMatrix->GetUp() = up;
+
+    mirrorMatrix->GetRight() = CVector{
+        up.y * fwd.z - up.z * fwd.y,
+        up.z * fwd.x - up.x * fwd.z,
+        up.x * fwd.y - up.y * fwd.x
+    };
 }
 
 // 0x50B510
