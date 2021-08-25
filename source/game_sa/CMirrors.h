@@ -7,27 +7,31 @@
 #pragma once
 #include "PluginBase.h"
 #include "CMatrix.h"
+#include "CVector.h"
 
-class  CMirrors {
+class CMirrors {
 public:
-    static RwRaster *&pBuffer;
-    static RwRaster *&pZBuffer;
-    static unsigned int &TypeOfMirror;
-    static bool &bRenderingReflection;
-    static bool &d3dRestored;
-    static unsigned int &MirrorFlags;
-    static float &MirrorV;
-    static CVector &MirrorNormal;
+    static int32_t& MirrorFlags;
+    static float& MirrorV;
+    static RwRaster*& pBuffer;
+    static RwRaster*& pZBuffer;
+    static int32_t& TypeOfMirror;
+    static int8_t& bRenderingReflection;
+    static int8_t& d3dRestored;
+    static CVector& MirrorNormal;
 
+public:
+    static void InjectHooks();
+
+    static void Init();
+    static void ShutDown();
+    static void CreateBuffer();
+    static void BuildCamMatrix(const CMatrix& mat, CVector pointA, CVector pointB);
+    static void RenderMirrorBuffer();
+    static void BuildCameraMatrixForScreens(const CMatrix& mat);
     static void BeforeConstructRenderList();
     static void BeforeMainRender();
-    static void BuildCamMatrix(CMatrix* mat, CVector pointA, CVector pointB);
-    static void BuildCameraMatrixForScreens(CMatrix* mat);
-    static void CreateBuffer();
-    static void Init();
-    static void RenderMirrorBuffer();
-    static void ShutDown();
 };
 
-extern bool &bFudgeNow;
-extern float *Screens8Track; // float Screens8Track[24]
+extern bool& bFudgeNow;
+extern float* Screens8Track; // float Screens8Track[24]
