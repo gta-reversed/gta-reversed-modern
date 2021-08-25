@@ -12,15 +12,8 @@ SVirtualReversibleHook::SVirtualReversibleHook(std::string id, std::string name,
     m_OriginalFunctionAddress = *reinterpret_cast<uint32_t*>(vecAddressesToHook[0]);
     VirtualProtect((void*)vecAddressesToHook[0], 4, dwProtectInitial[0], &dwProtectInitial[1]);
 
-    for (auto uiAddress : vecAddressesToHook) {
-        using namespace ReversibleHooks::detail;
-        
-        VirtualCopy((void*)uiAddress, (void*)m_LibFunctionAddress, 4);
-        m_vecHookedAddresses.push_back(uiAddress);
-    }
-
-    m_bIsHooked = true;
-    m_bImguiHooked = true;
+    m_bIsHooked = false;
+    Switch(); // Installs hooks (also sets `m_bIsHooked` to `true`)
 };
 
 void SVirtualReversibleHook::Switch()
