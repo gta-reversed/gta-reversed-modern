@@ -10,7 +10,7 @@ int8_t& CMirrors::bRenderingReflection = *(int8_t*)0xC7C728;
 int8_t& CMirrors::d3dRestored = *(int8_t*)0xC7C729;
 CVector& CMirrors::MirrorNormal = *(CVector*)0xC803D8;
 bool& bFudgeNow = *(bool*)0xC7C72A;
-CVector(&Screens8Track)[8] = *(CVector(*)[8])0x8D5DD8;
+CVector(&Screens8Track)[4][2] = *(CVector(*)[4][2])0x8D5DD8;
 
 void CMirrors::InjectHooks() {
     ReversibleHooks::Install("CMirrors", "Init", 0x723000, &CMirrors::Init);
@@ -109,7 +109,7 @@ void CMirrors::RenderMirrorBuffer() {
             RxObjSpace3DVertex vertices[4];
             for (int i = 0; i < 4; i++) {
                 RwIm3DVertexSetRGBA(&vertices[i], 0xFF, 0xFF, 0xFF, 0xFF);
-                RwV3dAssign(RwIm3DVertexGetPos(&vertices[i]), &Screens8Track[x * 4 + i]);
+                RwV3dAssign(RwIm3DVertexGetPos(&vertices[i]), &Screens8Track[x][i]);
                 RwIm3DVertexSetU(&vertices[i], uvs[i].x);
                 RwIm3DVertexSetV(&vertices[i], uvs[i].y);
             }
@@ -237,7 +237,7 @@ void CMirrors::BuildCameraMatrixForScreens(CMatrix & mat) {
 bool CMirrors::IsEitherScreenVisibleToCam() {
     for (int i = 0; i < 2; i++) {
         TheCamera.m_bMirrorActive = false;
-        if (TheCamera.IsSphereVisible(CVector::AvarageN(&Screens8Track[i * 4], 4), 8.0f)) {
+        if (TheCamera.IsSphereVisible(CVector::AvarageN(std::begin(Screens8Track[i]), 4), 8.0f)) {
             return false;
         }
     }

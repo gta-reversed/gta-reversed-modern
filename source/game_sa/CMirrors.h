@@ -35,5 +35,5 @@ public:
 };
 
 extern bool& bFudgeNow;
-extern CVector(&Screens8Track)[8];
+extern CVector(&Screens8Track)[4][2];
 
