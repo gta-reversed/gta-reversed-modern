@@ -106,7 +106,7 @@ void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& 
     switch (m_nType) {
     case eWeaponType::WEAPON_SPAS12_SHOTGUN:
     case eWeaponType::WEAPON_SHOTGUN:
-        fxprt.SetColors(0.6f, 0.1f, 0.1f);
+        fxprt.SetColor(0.6f, 0.1f, 0.1f);
     }
 
     g_fx.m_pPrtGunshell->AddParticle(&position, &velocity, 0.0f, &fxprt, -1.0f, 1.2f, 0.6f, 0);
