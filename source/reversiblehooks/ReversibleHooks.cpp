@@ -72,16 +72,14 @@ bool IsFunctionHooked(const std::string& sIdentifier, const std::string& sFuncNa
 
 std::shared_ptr<SReversibleHook> GetHook(const std::string& sIdentifier, const std::string& sFuncName)
 {
-    if (m_HooksMap.find(sIdentifier) == m_HooksMap.end())
-        return nullptr;
-
-    auto& vecHooks = m_HooksMap[sIdentifier];
-    auto findResult = std::find_if(vecHooks.begin(), vecHooks.end(), [&](const std::shared_ptr<SReversibleHook> hook) {return hook->m_sFunctionName == sFuncName; });
-    if (findResult == vecHooks.end())
-        return nullptr;
-
-    return *findResult;
+    auto hooks = m_HooksMap.find(sIdentifier);
+    if (hooks != m_HooksMap.end())
+        for (auto& hook : hooks->second)
+            if (hook->m_sFunctionName == sFuncName)
+                return hook;
+    return nullptr;
 }
+
 }; // namespace detail
 
 unsigned int GetJMPLocation(unsigned int dwFrom, unsigned int dwTo)
