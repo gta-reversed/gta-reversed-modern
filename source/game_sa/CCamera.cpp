@@ -299,7 +299,7 @@ void CCamera::CalculateMirroredMatrix(CVector posn, float mirrorV, CMatrix *camM
 
 // 0x50B510
 void CCamera::DealWithMirrorBeforeConstructRenderList(bool bActiveMirror, CVector mirrorNormal, float mirrorV, CMatrix* matMirror) {
-    plugin::CallMethodDynGlobal<CCamera*, bool, CVector, float, CMatrix*>(0x50B380, this, bActiveMirror, mirrorNormal, mirrorV, matMirror);
+    plugin::CallMethodDynGlobal<CCamera*, bool, CVector, float, CMatrix*>(0x50B510, this, bActiveMirror, mirrorNormal, mirrorV, matMirror);
 }
 
 // 0x50B8F0
