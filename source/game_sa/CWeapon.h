@@ -54,7 +54,7 @@ public:
     void AddGunshell(CEntity* creator, CVector& position, const CVector2D& direction, float size);
     bool LaserScopeDot(CVector* outCoord, float* outSize);
     bool FireSniper(CPed* creator, CEntity* victim, CVector* target);
-    void Reload(CPed* owner);
+    void Reload(CPed* owner = nullptr);
     bool IsTypeMelee();
     bool IsType2Handed();
     bool IsTypeProjectile();

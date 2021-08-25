@@ -322,10 +322,7 @@ CWeapon::CWeapon(eWeaponType weaponType, int32_t ammo) {
     m_nAmmoInClip = 0;
     m_nTotalAmmo = std::min(ammo, 99999);
 
-    if (m_nTotalAmmo) {
-        uint32_t ammoClip = GetWeaponInfo().m_nAmmoClip;
-        m_nAmmoInClip = std::min(ammoClip, m_nTotalAmmo);
-    }
+    Reload();
 
     m_nTimeForNextShot = 0;
     field_14 = 0;
@@ -346,11 +343,7 @@ void CWeapon::Initialise(eWeaponType weaponType, int32_t ammo, CPed* owner) {
     m_nAmmoInClip = 0;
     m_nTotalAmmo = std::min(ammo, 99999);
 
-    if (m_nTotalAmmo) {
-        uint32_t ammoClip = GetWeaponInfo(owner).m_nAmmoClip;
-
-        m_nAmmoInClip = std::min(ammoClip, m_nTotalAmmo);
-    }
+    Reload(owner);
 
     m_nTimeForNextShot = 0;
 
