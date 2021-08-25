@@ -39,6 +39,14 @@ void UnHook(const std::string& className, const char* functionName)
     }
 }
 
+void CheckAll() {
+    for (auto& pair : m_HooksMap) {
+        for (auto& hook : pair.second) {
+            hook->Check();
+        }
+    }
+}
+
 namespace detail {
 void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, unsigned int installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault)
 {

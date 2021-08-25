@@ -28,6 +28,7 @@ struct SReversibleHook {
     SReversibleHook(std::string id, std::string name, eReversibleHookType type);
     virtual ~SReversibleHook() = default;
     virtual void Switch() = 0;
+    virtual void Check() = 0;
 };
 
 struct SSimpleReversibleHook : SReversibleHook {
@@ -42,7 +43,10 @@ struct SSimpleReversibleHook : SReversibleHook {
     unsigned int m_iLibFunctionAddress;
 
     SSimpleReversibleHook(std::string id, std::string name, uint32_t installAddress, void* addressToJumpTo, int iJmpCodeSize = 5);
+    bool CheckLibFnForChangesAndStore(void* expected);
+    void ApplyJumpToGTACode();
     virtual void Switch() override;
+    virtual void Check() override;
     virtual ~SSimpleReversibleHook() override = default;
 };
 
@@ -53,6 +57,7 @@ struct SVirtualReversibleHook : SReversibleHook {
 
     SVirtualReversibleHook(std::string id, std::string name, void* libFuncAddress, const std::vector<uint32_t>& vecAddressesToHook);
     virtual void Switch() override;
+    virtual void Check() override {}
     virtual ~SVirtualReversibleHook() override = default;
 };
 
@@ -85,6 +90,8 @@ namespace ReversibleHooks {
     std::map<std::string, std::vector<std::shared_ptr<SReversibleHook>>>& GetAllHooks();
 
     void UnHook(const std::string& className, const char* functionName = nullptr);
+
+    void CheckAll();
 
     constexpr unsigned int x86JMPSize = 5U;
     constexpr auto GetJMPLocation(unsigned int dwFrom, unsigned int dwTo) { return dwTo - dwFrom - x86JMPSize; }

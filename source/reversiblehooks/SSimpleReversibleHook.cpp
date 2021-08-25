@@ -63,16 +63,50 @@ SSimpleReversibleHook::SSimpleReversibleHook(std::string id, std::string name, u
     VirtualProtect((void*)installAddress, maxBytesToProtect, dwProtect[0], &dwProtect[1]);
 }
 
+// VS has this magic called `Edit and Continue`
+// The way it works is as follows:
+// A function address basically just points to a `jmp` instruction, which
+// then jumps to the actual function.
+// Whenever a function is edited the compiler changes the `jmp` address
+// thus, what we've stored as `m_LibOriginalFunctionContent` has changed.
+// So, here we check if thats the case, and update `m_LibOriginalFunctionContent` if necessary
+bool SSimpleReversibleHook::CheckLibFnForChangesAndStore(void* expected) {
+    if (memcmp((void*)m_iLibFunctionAddress, expected, m_iLibHookedBytes) != 0) {
+        memcpy(&m_LibOriginalFunctionContent, (void*)m_iLibFunctionAddress, m_iLibHookedBytes);
+        return true;
+    }
+    return false;
+}
+
+void SSimpleReversibleHook::ApplyJumpToGTACode() {
+    using namespace ReversibleHooks::detail;
+    VirtualCopy((void*)m_iLibFunctionAddress, (void*)&m_LibHookContent, m_iLibHookedBytes);
+}
+
 void SSimpleReversibleHook::Switch()
 {
     using namespace ReversibleHooks::detail;
     if (m_bIsHooked) {
+        // Unhook (make our code jump to the GTA function)
+
         VirtualCopy((void*)m_iRealHookedAddress, (void*)&m_OriginalFunctionContent, m_iHookedBytes);
-        VirtualCopy((void*)m_iLibFunctionAddress, (void*)&m_LibHookContent, m_iLibHookedBytes);
+        ApplyJumpToGTACode();
     } else {
+        // Hook (make the GTA function jump to ours)
+
         VirtualCopy((void*)m_iRealHookedAddress, (void*)&m_HookContent, m_iHookedBytes);
         VirtualCopy((void*)m_iLibFunctionAddress, (void*)&m_LibOriginalFunctionContent, m_iLibHookedBytes);
     }
     m_bIsHooked = !m_bIsHooked;
     m_bImguiHooked = m_bIsHooked;
+}
+
+void SSimpleReversibleHook::Check() {
+    if (m_bIsHooked) {
+        CheckLibFnForChangesAndStore((void*)m_LibOriginalFunctionContent);
+    } else {
+        if (CheckLibFnForChangesAndStore((void*)&m_LibHookContent)) {
+            ApplyJumpToGTACode(); // Compiler overwrote it, so we must re-apply the jump
+        }
+    }
 }
