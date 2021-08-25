@@ -8,11 +8,32 @@ Do not delete this comment block. Respect others' work!
 #include "PluginBase.h"
 #include "RenderWare.h"
 
+// Hacky solution so we need to not modify `RwV3d`
+constexpr RwV3d ConstructRwV3d(float x, float y, float z) {
+    RwV3d v{};
+    v.x = x;
+    v.y = y;
+    v.z = z;
+    return v;
+}
+
 class CVector : public RwV3d {
 public:
-    CVector();
-    CVector(float X, float Y, float Z);
-    CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
+
+    constexpr CVector() :
+        RwV3d(ConstructRwV3d(0.0f, 0.0f, 0.0f))
+    {
+    }
+
+    constexpr CVector(float X, float Y, float Z) :
+        RwV3d(ConstructRwV3d(x, y, z))
+    {
+    }
+
+    constexpr CVector(RwV3d rwVec) :
+        RwV3d(rwVec)
+    {
+    }
 
 public:
     static void InjectHooks();
