@@ -95,7 +95,7 @@ void CMirrors::RenderMirrorBuffer() {
     if (MirrorFlags & CAM_STAIRS_FOR_PLAYER || bFudgeNow) {
         RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
         RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
         RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
 
         for (int x = 0; x < 2; x++) {
@@ -143,8 +143,10 @@ void CMirrors::RenderMirrorBuffer() {
             RwIm2DVertexSetScreenX(&vertices[i], pos[i].x);
             RwIm2DVertexSetScreenY(&vertices[i], pos[i].y);
             RwIm2DVertexSetScreenZ(&vertices[i], pos[i].z);
-        }
 
+            RwIm3DVertexSetU(&vertices[i], uvs[i].x);
+            RwIm3DVertexSetV(&vertices[i], uvs[i].y);
+        }
         RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, vertices, std::size(vertices), indices, std::size(indices));
     }
 
