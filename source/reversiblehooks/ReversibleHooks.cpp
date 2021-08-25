@@ -81,16 +81,6 @@ std::shared_ptr<SReversibleHook> GetHook(const std::string& sIdentifier, const s
 }
 
 }; // namespace detail
-
-unsigned int GetJMPLocation(unsigned int dwFrom, unsigned int dwTo)
-{
-    return dwTo - dwFrom - x86JMPSize;
-}
-
-unsigned int GetFunctionLocationFromJMP(unsigned int dwJmpLoc, unsigned int dwJmpOffset)
-{
-    return dwJmpOffset + dwJmpLoc + x86JMPSize;
-}
 }; // namespace ReversibleHooks
 
 SReversibleHook::SReversibleHook(std::string id, std::string name, eReversibleHookType type) :

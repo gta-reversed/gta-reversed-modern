@@ -86,6 +86,6 @@ namespace ReversibleHooks {
     void UnHook(const std::string& className, const char* functionName = nullptr);
 
     constexpr unsigned int x86JMPSize = 5U;
-    unsigned int GetJMPLocation(unsigned int dwFrom, unsigned int dwTo);
-    unsigned int GetFunctionLocationFromJMP(unsigned int dwJmpLoc, unsigned int dwJmpOffset);
+    constexpr auto GetJMPLocation(unsigned int dwFrom, unsigned int dwTo) { return dwTo - dwFrom - x86JMPSize; }
+    constexpr auto GetFunctionLocationFromJMP(unsigned int dwJmpLoc, unsigned int dwJmpOffset) { return dwJmpOffset + dwJmpLoc + x86JMPSize; }
 };
