@@ -66,8 +66,7 @@ void CCamera::InjectHooks() {
 //    ReversibleHooks::Install("CCamera", "GetLookDirection", 0x50AE90, &CCamera::GetLookDirection);
 //    ReversibleHooks::Install("CCamera", "GetLookingForwardFirstPerson", 0x50AED0, &CCamera::GetLookingForwardFirstPerson);
 //    ReversibleHooks::Install("CCamera", "CopyCameraMatrixToRWCam", 0x50AFA0, &CCamera::CopyCameraMatrixToRWCam);
-//    ReversibleHooks::Install("CCamera", "CalculateMirroredMatrix", 0x50B380, &CCamera::CalculateMirroredMatrix);
-//    ReversibleHooks::Install("CCamera", "DealWithMirrorBeforeConstructRenderList", 0x50B510, &CCamera::DealWithMirrorBeforeConstructRenderList);
+    ReversibleHooks::Install("CCamera", "DealWithMirrorBeforeConstructRenderList", 0x50B510, &CCamera::DealWithMirrorBeforeConstructRenderList);
 //    ReversibleHooks::Install("CCamera", "ProcessFade", 0x50B5D0, &CCamera::ProcessFade);
 //    ReversibleHooks::Install("CCamera", "ProcessMusicFade", 0x50B6D0, &CCamera::ProcessMusicFade);
 //    ReversibleHooks::Install("CCamera", "Restore", 0x50B930, &CCamera::Restore);
@@ -299,7 +298,17 @@ void CCamera::CalculateMirroredMatrix(CVector posn, float mirrorV, CMatrix *camM
 
 // 0x50B510
 void CCamera::DealWithMirrorBeforeConstructRenderList(bool bActiveMirror, CVector mirrorNormal, float mirrorV, CMatrix* matMirror) {
-    plugin::CallMethodDynGlobal<CCamera*, bool, CVector, float, CMatrix*>(0x50B510, this, bActiveMirror, mirrorNormal, mirrorV, matMirror);
+    m_bMirrorActive = bActiveMirror;
+
+    if (!bActiveMirror)
+        return;
+
+    if (matMirror)
+        m_mMatMirror = *matMirror;
+    else
+        CalculateMirroredMatrix(mirrorNormal, mirrorV, &m_mCameraMatrix, &m_mMatMirror);
+
+    m_mMatMirrorInverse = Invert(m_mMatMirror);
 }
 
 // 0x50B8F0
