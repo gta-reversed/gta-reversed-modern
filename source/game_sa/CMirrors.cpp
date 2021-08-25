@@ -120,12 +120,11 @@ void CMirrors::RenderMirrorBuffer() {
             }
         }
     } else {
-        const float zBufferNear = RwEngineInstance->dOpenDevice.zBufferNear;
-        const CVector pos[] = {
-           { 0.0f,       0.0f,       zBufferNear },
-           { 0.0f,       rastersz.y, zBufferNear },
-           { rastersz.x, rastersz.y, zBufferNear },
-           { rastersz.x, 0.0f,       zBufferNear }
+        const CVector2D pos[] = {
+           { 0.0f,       0.0f,      },
+           { 0.0f,       rastersz.y },
+           { rastersz.x, rastersz.y },
+           { rastersz.x, 0.0f,      }
         };
 
         constexpr CVector2D uvs[] = {
@@ -142,7 +141,7 @@ void CMirrors::RenderMirrorBuffer() {
 
             RwIm2DVertexSetScreenX(&vertices[i], pos[i].x);
             RwIm2DVertexSetScreenY(&vertices[i], pos[i].y);
-            RwIm2DVertexSetScreenZ(&vertices[i], pos[i].z);
+            RwIm2DVertexSetScreenZ(&vertices[i], RwIm2DGetNearScreenZ());
 
             RwIm3DVertexSetU(&vertices[i], uvs[i].x);
             RwIm3DVertexSetV(&vertices[i], uvs[i].y);
