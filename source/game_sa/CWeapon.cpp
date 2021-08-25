@@ -155,12 +155,10 @@ bool CWeapon::FireSniper(CPed* creator, CEntity* victim, CVector* target) {
 
     CBulletInfo::AddBullet(creator, m_nType, activeCam.m_vecSource, velocity);
 
-    ePedType creatorPedType = creator->m_nPedType;
-
     // recoil effect for players
-    if (creatorPedType == PED_TYPE_PLAYER1 || creatorPedType == PED_TYPE_PLAYER2) {
+    if (creator->IsPlayer()) {
         CVector creatorPos = FindPlayerCoors();
-        CPad* creatorPad = CPad::GetPad(creatorPedType);
+        CPad* creatorPad = CPad::GetPad(creator->m_nPedType);
 
         creatorPad->StartShake_Distance(240, 128, creatorPos.x, creatorPos.y, creatorPos.z);
         CamShakeNoPos(&TheCamera, 0.2f);
