@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "CDirectory.h"
 
 
@@ -72,41 +73,43 @@ void CDirectory::AddItem(const DirectoryInfo& dirInfo) {
 
 // 0x532350
 void CDirectory::ReadDirFile(const char* filename) {
-    auto pFile = CFileMgr::OpenFile(filename, "rb");
+    auto file = CFileMgr::OpenFile(filename, "rb");
     {
         /* Unused stuff */
         byte unused[4];
-        CFileMgr::Read(pFile, &unused, sizeof(unused));
+        CFileMgr::Read(file, &unused, sizeof(unused));
     }
-    uint32_t nNumEntires{};
-    CFileMgr::Read(pFile, &nNumEntires, sizeof(nNumEntires));
+    uint32_t nNumEntries{};
+    CFileMgr::Read(file, &nNumEntries, sizeof(nNumEntries));
 
-    for (size_t i = 0; i < nNumEntires; i++) {
+    for (size_t i = 0; i < nNumEntries; i++) {
         DirectoryInfo info;
-        CFileMgr::Read(pFile, &info, sizeof(info));
+        CFileMgr::Read(file, &info, sizeof(info));
         AddItem(info);
         /* Possible optimization: Read directly into m_pEntries */
     }
-    CFileMgr::CloseFile(pFile);
+    CFileMgr::CloseFile(file);
 }
 
 // 0x532410
 bool CDirectory::WriteDirFile(const char* fileName) {
-    auto pFile = CFileMgr::OpenFileForWriting(fileName);
+    auto file = CFileMgr::OpenFileForWriting(fileName);
     const auto nNumBytesToWrite = sizeof(*m_pEntries) * m_nNumEntries;
-    const auto nBytesWritten = CFileMgr::Write(pFile, m_pEntries, nNumBytesToWrite);
-    CFileMgr::CloseFile(pFile);
+    const auto nBytesWritten = CFileMgr::Write(file, m_pEntries, nNumBytesToWrite);
+    CFileMgr::CloseFile(file);
     return nNumBytesToWrite == nBytesWritten;
 }
 
 // 0x532450
 CDirectory::DirectoryInfo* CDirectory::FindItem(const char* itemName) {
-    if (m_nNumEntries) {
-        for (DirectoryInfo* it = m_pEntries; it != m_pEntries + m_nNumEntries; it++) {
-            if (stricmp(it->m_szName, itemName) == 0)
-                return it;
-        }
+    if (m_nNumEntries <= 0)
+        return nullptr;
+
+    for (DirectoryInfo* it = m_pEntries; it != m_pEntries + m_nNumEntries; it++) {
+        if (_stricmp(it->m_szName, itemName) == 0)
+            return it;
     }
+
     return nullptr;
 }
 
@@ -122,14 +125,16 @@ bool CDirectory::FindItem(const char* name, uint32_t& outOffset, uint32_t& outSt
 
 // 0x5324D0
 bool CDirectory::FindItem(uint32_t hashKey, uint32_t& outOffset, uint32_t& outStreamingSize) {
-    if (m_nNumEntries) {
-        for (DirectoryInfo* it = m_pEntries; it != m_pEntries + m_nNumEntries; it++) {
-            if (CKeyGen::GetUppercaseKey(it->m_szName) == hashKey) {
-                outOffset = it->m_nOffset;
-                outStreamingSize = it->m_nStreamingSize;
-                return true;
-            }
+    if (m_nNumEntries <= 0)
+        return false;
+
+    for (DirectoryInfo* it = m_pEntries; it != m_pEntries + m_nNumEntries; it++) {
+        if (CKeyGen::GetUppercaseKey(it->m_szName) == hashKey) {
+            outOffset = it->m_nOffset;
+            outStreamingSize = it->m_nStreamingSize;
+            return true;
         }
     }
+
     return false;
 }
