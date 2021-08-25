@@ -18,7 +18,7 @@ void CMirrors::InjectHooks() {
     ReversibleHooks::Install("CMirrors", "CreateBuffer", 0x7230A0, &CMirrors::CreateBuffer);
     ReversibleHooks::Install("CMirrors", "BuildCamMatrix", 0x723150, &CMirrors::BuildCamMatrix);
     ReversibleHooks::Install("CMirrors", "RenderMirrorBuffer", 0x726090, &CMirrors::RenderMirrorBuffer);
-    // ReversibleHooks::Install("CMirrors", "BuildCameraMatrixForScreens", 0x7266B0, &CMirrors::BuildCameraMatrixForScreens);
+    ReversibleHooks::Install("CMirrors", "BuildCameraMatrixForScreens", 0x7266B0, &CMirrors::BuildCameraMatrixForScreens);
     // ReversibleHooks::Install("CMirrors", "BeforeConstructRenderList", 0x726DF0, &CMirrors::BeforeConstructRenderList);
     // ReversibleHooks::Install("CMirrors", "BeforeMainRender", 0x727140, &CMirrors::BeforeMainRender);
 }
@@ -190,8 +190,47 @@ void CMirrors::RenderMirrorBuffer() {
 }
 
 // 0x7266B0
-void CMirrors::BuildCameraMatrixForScreens(const CMatrix& mat) {
-    plugin::Call<0x7266B0, const CMatrix&>(mat);
+void CMirrors::BuildCameraMatrixForScreens(CMatrix & mat) {
+    const uint32_t timeSeconds = (CTimer::m_snTimeInMilliseconds / 1000u) % 32; // Wrapped to (0, 32]
+    const uint32_t timeMsLeftInSecond = CTimer::m_snTimeInMilliseconds % 1000u;
+    switch (timeSeconds) {
+    case 0u:
+    case 1u:
+    case 2u:
+    case 3u: {
+        BuildCamMatrix(
+            mat,
+            { ((float)timeMsLeftInSecond / 1000.0f + (float)timeSeconds) * 6.0f - 1249.3f, -224.5f, 1064.2f },
+            { -1265.4f, -207.5f, 1053.2f }
+        );
+        break;
+    }
+    case 10u:
+    case 11u:
+    case 12u:
+    case 13u: {
+        BuildCamMatrix(mat,
+            { -1406.4f, -135.3f, 1045.65f },
+            { -1402.5f, -146.8f, 1043.10f }
+        );
+        break;
+    }
+    case 22u:
+    case 23u:
+    case 24u:
+    case 25u: {
+        BuildCamMatrix(mat,
+            { -1479.0f, -290.5f, 1099.54f },
+            { -1428.0f, -256.7f, ((float)timeMsLeftInSecond / 1000.0f + (float)(timeSeconds - 22)) * 3.0f + 1057.3f }
+        );
+        break;
+    }
+    default: {
+        mat.SetRotateZOnly((CTimer::m_snTimeInMilliseconds % 16384) * 0.00038349521f);
+        mat.SetTranslateOnly({ -1397.0, -219.0, 1054.0 });
+        break;
+    }
+    }
 }
 
 // 0x726DF0
