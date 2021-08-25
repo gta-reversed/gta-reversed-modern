@@ -321,7 +321,9 @@ void CMirrors::BeforeMainRender() {
         DefinedState();
         RenderScene();
         CVisibilityPlugins::RenderWeaponPedsForPC();
+        CVisibilityPlugins::ms_weaponPedsForPC.Clear();
         bRenderingReflection = false;
+
         RwCameraEndUpdate(Scene.m_pRwCamera);
 
         RwCameraSetRaster(Scene.m_pRwCamera, prevCamRaster);
