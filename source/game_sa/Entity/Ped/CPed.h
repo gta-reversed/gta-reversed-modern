@@ -335,7 +335,7 @@ public:
     int field_720;
     int field_724;
     int field_728;
-    char                m_nWeaponSkill;
+    eWeaponSkill        m_nWeaponSkill;
     eFightingStyle      m_nFightingStyle;
     char                m_nAllowedAttackMoves;
     char field_72F;
@@ -457,7 +457,7 @@ public:
     void RemoveWeaponModel(int modelIndex);
     void AddGogglesModel(int modelIndex, bool* pGogglesType);
     void PutOnGoggles();
-    char GetWeaponSkill(eWeaponType weaponType);
+    eWeaponSkill GetWeaponSkill(eWeaponType weaponType);
     void SetWeaponSkill(eWeaponType weaponType, char skill);
     void ClearLook();
     bool TurnBody();
@@ -486,7 +486,7 @@ public:
     void ReplaceWeaponWhenExitingVehicle();
     void ReplaceWeaponForScriptedCutscene();
     void RemoveWeaponForScriptedCutscene();
-    char GetWeaponSkill();
+    eWeaponSkill GetWeaponSkill();
     void PreRenderAfterTest();
     void SetIdle();
     void SetLook(float heading);

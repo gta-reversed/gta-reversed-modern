@@ -18,7 +18,7 @@
 #define WEAPONINFO_NUM_WEAPONS_WITH_SKILLS 11
 #define WEAPONINFO_NUM_WEAPONS 46
 
-enum eWeaponSkill
+enum class eWeaponSkill : uint8_t
 {
 	WEAPSKILL_POOR,
 	WEAPSKILL_STD,
@@ -103,7 +103,7 @@ public:
 	// load weapon data file
 	static void LoadWeaponData();
 	// get weapon info for this type and with this skill
-	static CWeaponInfo *GetWeaponInfo(eWeaponType weaponType, unsigned char skill);
+	static CWeaponInfo *GetWeaponInfo(eWeaponType weaponType, eWeaponSkill skill);
 	// get weapon type by name
 	static eWeaponType FindWeaponType(char *name);
 	// get weapon fire type by name
