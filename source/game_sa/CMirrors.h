@@ -26,7 +26,7 @@ public:
     static void Init();
     static void ShutDown();
     static void CreateBuffer();
-    static void BuildCamMatrix(const CMatrix& mat, CVector pointA, CVector pointB);
+    static void BuildCamMatrix(CMatrix& mat, CVector pointA, CVector pointB);
     static void RenderMirrorBuffer();
     static void BuildCameraMatrixForScreens(const CMatrix& mat);
     static void BeforeConstructRenderList();

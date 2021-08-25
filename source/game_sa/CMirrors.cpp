@@ -16,7 +16,7 @@ void CMirrors::InjectHooks() {
     ReversibleHooks::Install("CMirrors", "Init", 0x723000, &CMirrors::Init);
     ReversibleHooks::Install("CMirrors", "ShutDown", 0x723050, &CMirrors::ShutDown);
     ReversibleHooks::Install("CMirrors", "CreateBuffer", 0x7230A0, &CMirrors::CreateBuffer);
-    // ReversibleHooks::Install("CMirrors", "BuildCamMatrix", 0x723150, &CMirrors::BuildCamMatrix);
+    ReversibleHooks::Install("CMirrors", "BuildCamMatrix", 0x723150, &CMirrors::BuildCamMatrix);
     // ReversibleHooks::Install("CMirrors", "RenderMirrorBuffer", 0x726090, &CMirrors::RenderMirrorBuffer);
     // ReversibleHooks::Install("CMirrors", "BuildCameraMatrixForScreens", 0x7266B0, &CMirrors::BuildCameraMatrixForScreens);
     // ReversibleHooks::Install("CMirrors", "BeforeConstructRenderList", 0x726DF0, &CMirrors::BeforeConstructRenderList);
@@ -64,8 +64,11 @@ void CMirrors::CreateBuffer() {
 }
 
 // 0x723150
-void CMirrors::BuildCamMatrix(const CMatrix& mat, CVector pointA, CVector pointB) {
-    plugin::Call<0x723150, const CMatrix&, CVector, CVector>(mat, pointA, pointB);
+void CMirrors::BuildCamMatrix(CMatrix& mat, CVector pointA, CVector pointB) {
+    mat.SetTranslateOnly(pointA);
+    mat.GetForward() = Normalized(pointB - pointA);
+    mat.GetRight() = CrossProduct({ 0.0f, 0.0f, 1.0f }, mat.GetForward());
+    mat.GetUp() = CrossProduct(mat.GetForward(), mat.GetRight());
 }
 
 // 0x726090
