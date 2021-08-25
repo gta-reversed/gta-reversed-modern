@@ -13,14 +13,16 @@ class  CVector2D
 public:
     float x, y;
     
-    inline CVector2D() {
-        x = 0.0f;
-        y = 0.0f;
+    constexpr CVector2D() :
+        x(0.0f),
+        y(0.0f)
+    {
     }
 
-    inline CVector2D(float X, float Y) {
-        x = X;
-        y = Y;
+    constexpr CVector2D(float X, float Y) :
+        x(X),
+        y(Y)
+    {
     }
 
     CVector2D(const class CVector& vec3d);
