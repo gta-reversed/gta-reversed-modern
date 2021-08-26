@@ -235,10 +235,12 @@ void CTaskManager::AddSubTasks(CTaskComplex* pTask) {
     } while (pSubTask);
 }
 
-// (CTask *task)
 // 0x681A80
 void CTaskManager::ParentsControlChildren(CTaskComplex* pTask) {
-    for (; pTask && !pTask->IsSimple(); pTask = static_cast<CTaskComplex*>(pTask->GetSubTask())) {
+    if (!pTask)
+        return;
+
+    for (; !pTask->IsSimple(); pTask = static_cast<CTaskComplex*>(pTask->GetSubTask())) {
         CTask* pSubTask = pTask->GetSubTask();
         CTaskComplex* pControlSubTask = static_cast<CTaskComplex*>(pTask->ControlSubTask(m_pPed));
         if (pSubTask != pControlSubTask)
