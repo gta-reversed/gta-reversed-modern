@@ -437,6 +437,9 @@ void CSprite2d::Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, 
 }
 
 // draws progress line. Progress is a value in ranges 0 - 100.
+// ----------------------
+// | +++++++++++--------|
+// ----------------------
 // 0x728640
 void CSprite2d::DrawBarChart(float x, float y, unsigned short width, unsigned char height, float progress,
     signed char progressAdd, unsigned char drawPercentage, unsigned char drawBlackBorder,
