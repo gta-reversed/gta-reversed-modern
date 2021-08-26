@@ -357,6 +357,7 @@ void CTaskManager::ManageTasks()
             return;
         }
 
+        // TODO: magic number and pSimplestTask is shadow local variable
         for (int i = 0; i < 11; i++)
         {
             ParentsControlChildren((CTaskComplex*)m_aPrimaryTasks[iTaskIndex]);
@@ -392,39 +393,39 @@ void CTaskManager::ManageTasks()
 
     for (auto& secondaryTask : m_aSecondaryTasks)
     {
-        if (secondaryTask)
+        if (!secondaryTask)
+            continue;
+
+        bool bProcessPedFailed = false;
+        while (true)
         {
-            bool bProcessPedFailed = false;
-            while (true)
+            ParentsControlChildren((CTaskComplex*)secondaryTask);
+            CTaskSimple* pSimplestTask1 = GetSimplestTask(secondaryTask);
+            if (!pSimplestTask1->IsSimple())
             {
-                ParentsControlChildren((CTaskComplex*)secondaryTask);
-                CTaskSimple* pSimplestTask = GetSimplestTask(secondaryTask);
-                if (!pSimplestTask->IsSimple())
-                {
-                    break;
-                }
-
-                pSimplestTask = GetSimplestTask(secondaryTask);
-                if (!pSimplestTask->ProcessPed(m_pPed))
-                {
-                    bProcessPedFailed =  true;
-                    break;
-                }
-
-                SetNextSubTask((CTaskComplex*)pSimplestTask->m_pParentTask);
-                if (!secondaryTask->GetSubTask())
-                {
-                    break;
-                }
+                break;
             }
 
-            if (bProcessPedFailed)
+            pSimplestTask1 = GetSimplestTask(secondaryTask);
+            if (!pSimplestTask1->ProcessPed(m_pPed))
             {
-                continue;
+                bProcessPedFailed =  true;
+                break;
             }
-            delete secondaryTask;
-            secondaryTask = nullptr;
+
+            SetNextSubTask((CTaskComplex*)pSimplestTask1->m_pParentTask);
+            if (!secondaryTask->GetSubTask())
+            {
+                break;
+            }
         }
+
+        if (bProcessPedFailed) {
+            continue;
+        }
+
+        delete secondaryTask;
+        secondaryTask = nullptr;
     }
 }
 
