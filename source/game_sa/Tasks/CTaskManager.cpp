@@ -65,10 +65,8 @@ CTaskManager* CTaskManager::Destructor() {
 
 // 0x681720
 CTask* CTaskManager::GetActiveTask() {
-    for (auto& task : m_aPrimaryTasks)
-    {
-        if (task)
-        {
+    for (auto& task : m_aPrimaryTasks) {
+        if (task) {
             return task;
         }
     }
