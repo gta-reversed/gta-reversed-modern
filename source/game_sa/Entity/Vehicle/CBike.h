@@ -112,7 +112,7 @@ public:
     void ProcessAI(unsigned int& arg0);
 
     // FUNCS
-    CBike(int modelIndex, unsigned char createdBy);
+    CBike(int modelIndex, eVehicleCreatedBy createdBy);
 
     inline bool IsAnyWheelMakingContactWithGround() {
         return m_fWheelsSuspensionCompression[0] != 1.0F

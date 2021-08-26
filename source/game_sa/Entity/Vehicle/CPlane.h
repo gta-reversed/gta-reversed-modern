@@ -89,7 +89,7 @@ public:
 public:
     static void InjectHooks();
 
-    CPlane(int modelIndex, unsigned char createdBy);
+    CPlane(int modelIndex, eVehicleCreatedBy createdBy);
 
     void BlowUpCar(CEntity* damager, unsigned char bHideExplosion) override;
     void Fix() override;

@@ -43,7 +43,7 @@ void CBoat::InjectHooks()
     ReversibleHooks::Install("CBoat", "GetBoatAtomicObjectCB", 0x6F00D0, &GetBoatAtomicObjectCB);
 }
 
-CBoat::CBoat(int modelIndex, unsigned char createdBy) : CVehicle(createdBy)
+CBoat::CBoat(int modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy)
 {
     memset(&m_boatFlap, 0, sizeof(m_boatFlap));
     auto pModelInfo = reinterpret_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(modelIndex));

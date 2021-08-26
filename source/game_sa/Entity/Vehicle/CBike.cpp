@@ -13,8 +13,8 @@ void CBike::InjectHooks()
 }
 
 // Converted from thiscall void CBike::CBike(int modelIndex,uchar createdBy) 0x6BF430
-CBike::CBike(int modelIndex, unsigned char createdBy) : CVehicle(plugin::dummy) {
-    plugin::CallMethod<0x6BF430, CBike*, int, unsigned char>(this, modelIndex, createdBy);
+CBike::CBike(int modelIndex, eVehicleCreatedBy createdBy) : CVehicle(plugin::dummy) {
+    plugin::CallMethod<0x6BF430, CBike*, int, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
 
 // Converted from void CBike::ProcessAI(uint &) 0x0

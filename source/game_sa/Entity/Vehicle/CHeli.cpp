@@ -18,8 +18,8 @@ void CHeli::InjectHooks() {
 }
 
 // Converted from thiscall void CHeli::CHeli(int modelIndex,uchar createdBy) 0x6C4190
-CHeli::CHeli(int modelIndex, unsigned char createdBy) : CAutomobile(plugin::dummy) {
-    plugin::CallMethod<0x6C4190, CHeli*, int, unsigned char>(this, modelIndex, createdBy);
+CHeli::CHeli(int modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(plugin::dummy) {
+    plugin::CallMethod<0x6C4190, CHeli*, int, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
 
 // Converted from cdecl void CHeli::InitHelis(void) 0x6C4560
