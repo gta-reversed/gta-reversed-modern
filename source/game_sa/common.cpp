@@ -326,27 +326,30 @@ void DefinedState2d() {
 void GetNameAndDamage(const char* nodeName, char* outName, bool& outDamage) {
     const size_t nodesz = strlen(nodeName);
 
-    const auto TerminatedCopy = [=](size_t off) {
-        strncpy(outName, nodeName, nodesz - off);
-        outName[nodesz - off] = 0;
+    const auto TerminatedCopy = [=](size_t offset) {
+        strncpy(outName, nodeName, nodesz - offset);
+        outName[nodesz - offset] = 0;
     };
 
-    if (EndsWith(nodeName, "_dam", true)) {
+    // EndsWith "_dam"
+    if (nodeName[nodesz - 4] == '_' &&
+        nodeName[nodesz - 3] == 'd' &&
+        nodeName[nodesz - 2] == 'a' &&
+        nodeName[nodesz - 1] == 'm'
+    ) {
         outDamage = true;
         TerminatedCopy(sizeof("_dam") - 1);
     }
     else {
         outDamage = false;
-        /* Izzotop: Originally it might have looked like this
+        // EndsWith "_l0" or "_L0"
         if (
             nodeName[nodesz - 3] == '_' &&
             (nodeName[nodesz - 2] == 'L' || nodeName[nodesz - 2] == 'l') &&
             nodeName[nodesz - 1] == '0'
-        )
-        */
-        if (EndsWith(nodeName, "_l0", false))
+        ) {
             TerminatedCopy(sizeof("_l0") - 1);
-        else
+        } else
             strcpy(outName, nodeName);
     }
 }
