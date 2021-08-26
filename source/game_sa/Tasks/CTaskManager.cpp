@@ -7,12 +7,14 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
+#include "CTaskManager.h"
+
 void CTaskManager::InjectHooks()
 {
     CTaskSimple::InjectHooks();
 
-    ReversibleHooks::Install("CTaskManager", "Constructor", 0x6816A0, &CTaskManager::Constructor);
-    ReversibleHooks::Install("CTaskManager", "Destructor", 0x6816D0, &CTaskManager::Destructor);
+    ReversibleHooks::Install("CTaskManager", "CTaskManager", 0x6816A0, &CTaskManager::Constructor);
+    ReversibleHooks::Install("CTaskManager", "~CTaskManager", 0x6816D0, &CTaskManager::Destructor);
     ReversibleHooks::Install("CTaskManager", "GetActiveTask", 0x681720, &CTaskManager::GetActiveTask);
     ReversibleHooks::Install("CTaskManager", "FindActiveTaskByType", 0x681740, &CTaskManager::FindActiveTaskByType);
     ReversibleHooks::Install("CTaskManager", "FindTaskByType", 0x6817D0, &CTaskManager::FindTaskByType);
@@ -34,20 +36,31 @@ void CTaskManager::InjectHooks()
 }
 
 // 0x6816A0
-CTaskManager* CTaskManager::Constructor(CPed* ped) {
+CTaskManager::CTaskManager(CPed* ped) {
     m_pPed = ped;
-    m_aPrimaryTasks[0] = nullptr;
-    m_aPrimaryTasks[1] = nullptr;
-    m_aPrimaryTasks[2] = nullptr;
-    m_aPrimaryTasks[3] = nullptr;
-    m_aPrimaryTasks[4] = nullptr;
-    memset(m_aSecondaryTasks, 0, sizeof(m_aSecondaryTasks));
-    return this;
+
+    for (auto& primaryTask : m_aPrimaryTasks) {
+        primaryTask = nullptr;
+    }
+
+    for (auto& secondaryTask : m_aSecondaryTasks) {
+        secondaryTask = nullptr;
+    }
 }
 
 // 0x6816D0
-void CTaskManager::Destructor() {
+CTaskManager::~CTaskManager() {
     Flush();
+}
+
+CTaskManager* CTaskManager::Constructor(CPed* ped) {
+    this->CTaskManager::CTaskManager(ped);
+    return this;
+}
+
+CTaskManager* CTaskManager::Destructor() {
+    this->CTaskManager::~CTaskManager();
+    return this;
 }
 
 // 0x681720

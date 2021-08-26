@@ -40,8 +40,12 @@ public:
 public:
     static void InjectHooks();
 
+    CTaskManager(CPed* ped);
+    ~CTaskManager();
+
     CTaskManager* Constructor(CPed* ped);
-    void Destructor();
+    CTaskManager* Destructor();
+
     CTask* GetActiveTask();
     CTask* FindActiveTaskByType(int taskType);
     CTask* FindTaskByType(int taskIndex, int taskType);
@@ -61,7 +65,9 @@ public:
     void ClearTaskEventResponse();
     void ManageTasks();
     bool HasPrimaryTask(CTask const* task);
-    CTask* GetPrimaryTask(std::int32_t taskIndex) { return m_aPrimaryTasks[taskIndex]; }
+    CTask* GetPrimaryTask(int32_t taskIndex) {
+        return m_aPrimaryTasks[taskIndex];
+    }
 };
 
 VALIDATE_SIZE(CTaskManager, 0x30);
