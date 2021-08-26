@@ -503,7 +503,7 @@ void CSprite2d::DrawBarChart(float x, float y, unsigned short width, unsigned ch
         CFont::SetColor({ 0, 0, 0, color.a });
         CFont::SetEdge(0);
         CFont::SetFontStyle(FONT_SUBTITLES);
-        CFont::SetScale(height * 0.04f, height / 0.03f);
+        CFont::SetScale(height * 0.03f, height / 0.04f);
 
         float textX = unclampedCurrX;
         if (x + 50.0f <= unclampedCurrX) {
