@@ -5,6 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+#include <GxtChar.h>
 
 // static variables
 int& CSprite2d::nextBufferIndex = *reinterpret_cast<int*>(0xC80458);
@@ -50,6 +51,7 @@ void CSprite2d::InjectHooks()
     ReversibleHooks::Install("CSprite2d", "DrawRect_CRect_CRGBA4", 0x727C10, static_cast<void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::DrawRect));
     ReversibleHooks::Install("CSprite2d", "DrawRectXLU", 0x727C50, &CSprite2d::DrawRectXLU);
     ReversibleHooks::Install("CSprite2d", "DrawAnyRect", 0x727CC0, &CSprite2d::DrawAnyRect);
+    ReversibleHooks::Install("CSprite2d", "DrawBarChart", 0x728640, &CSprite2d::DrawBarChart);
     // ReversibleHooks::Install("CSprite2d", "DrawCircleAtNearClip", 0x727D60, &CSprite2d::DrawCircleAtNearClip);
 }
 
@@ -435,13 +437,83 @@ void CSprite2d::Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, 
 }
 
 // draws progress line. Progress is a value in ranges 0 - 100.
+// 0x728640
 void CSprite2d::DrawBarChart(float x, float y, unsigned short width, unsigned char height, float progress,
     signed char progressAdd, unsigned char drawPercentage, unsigned char drawBlackBorder,
     CRGBA color, CRGBA addColor)
 {
-    ((void(__cdecl*)(float, float, unsigned short, unsigned char, float, signed char, unsigned char,
-        unsigned char, CRGBA, CRGBA))0x728640)(x, y, width, height, progress, progressAdd, drawPercentage,
-            drawBlackBorder, color, addColor);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)nullptr);
+    RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEFLAT);
+
+    progress = std::max(0.0f, progress);
+
+    const float maxX = x + (float)width;
+    const float unclampedCurrX = x + (float)width * progress / 100.0f;
+    const float currX = std::min(unclampedCurrX, maxX);
+    DrawRect({
+        x,
+        y,
+        std::min(maxX, currX),
+        y + height
+    }, color);
+
+    CRGBA loadingBarBgColor = color / 2.0f;
+    loadingBarBgColor.a = 255;
+    DrawRect({
+        std::min(maxX, currX),
+        y,
+        maxX,
+        y + height
+    }, loadingBarBgColor);
+
+    if (progressAdd) {
+        addColor.a = color.a;
+        DrawRect({
+            std::max(x - 1.0f, std::min(maxX, currX) - (float)progressAdd),
+            y,
+            std::min(maxX, currX),
+            y + height
+        }, addColor);
+    }
+
+    if (drawBlackBorder) {
+        const float w = 2 * SCREEN_WIDTH_UNIT, h = 2 * SCREEN_HEIGHT_UNIT;
+        const CRect rects[] = {
+            //left,   top,        right,      bottom
+            { x,      y,          maxX,       y + h },           // Top
+            { x,      y + height, maxX,       y + height - h },   // Bottom
+            { x,      y,          x + w,      y + height },      // Left
+            { maxX,   y,          maxX - w,   y + height }       // Right
+        };
+
+        for (const CRect& rect : rects) {
+            DrawRect(rect, { 0, 0, 0, color.a });
+        }
+    }
+
+    if (drawPercentage) {
+        char text[12];
+        sprintf(text, "%d%%", (unsigned)progress);
+
+        GxtChar gxtText[12];
+        AsciiToGxtChar(text, gxtText);
+
+        CFont::SetWrapx(x);
+        CFont::SetRightJustifyWrap(maxX);
+        CFont::SetColor({ 0, 0, 0, color.a });
+        CFont::SetEdge(0);
+        CFont::SetFontStyle(FONT_SUBTITLES);
+        CFont::SetScale(height * 0.04f, height / 0.03f);
+
+        float textX = unclampedCurrX;
+        if (x + 50.0f <= unclampedCurrX) {
+            CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
+        } else {
+            CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
+            textX += 5.0f;
+        }
+        CFont::PrintString(textX, y + 2.0f, gxtText);
+    }
 }
 
 #define DrawBarChart(x, y, width, height, progress, progressAdd, drawPercentage, \
