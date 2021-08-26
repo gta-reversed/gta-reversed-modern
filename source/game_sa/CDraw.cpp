@@ -43,12 +43,12 @@ void DoFade() {
         return;
 
     if (JustLoadedDontFadeInYet) {
-        fadeTimer = CTimer::m_snTimeInMilliseconds;
+        FadeTimer = CTimer::m_snTimeInMilliseconds;
         JustLoadedDontFadeInYet = false;
     }
 
     if (StillToFadeOut) {
-        if (CTimer::m_snTimeInMilliseconds - fadeTimer <= fadeOutTime) {
+        if (CTimer::m_snTimeInMilliseconds - FadeTimer <= FadeOutTime) {
             TheCamera.SetFadeColour(0, 0, 0);
             TheCamera.Fade(0.0f, eFadeFlag::FADE_IN);
             TheCamera.ProcessFade();
