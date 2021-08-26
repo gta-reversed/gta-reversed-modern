@@ -160,26 +160,23 @@ void CTaskManager::FlushImmediately() {
 // 0x681920
 void CTaskManager::SetNextSubTask(CTaskComplex* pTask) {
     CTask* nextSubTask = nullptr;
-    if (pTask)
-    {
-        while (true)
-        {
-            nextSubTask = pTask->CreateNextSubTask(m_pPed);
-            if (nextSubTask)
-            {
-                break;
-            }
-            pTask->SetSubTask(nullptr);
-            pTask = static_cast<CTaskComplex*>(pTask->m_pParentTask);
+    if (!pTask)
+        return;
 
-            if (!pTask)
-            {
-                return;
-            }
+    while (true) {
+        nextSubTask = pTask->CreateNextSubTask(m_pPed);
+        if (nextSubTask) {
+            break;
         }
-        pTask->SetSubTask(nextSubTask);
-        AddSubTasks((CTaskComplex*)nextSubTask);
+        pTask->SetSubTask(nullptr);
+        pTask = static_cast<CTaskComplex*>(pTask->m_pParentTask);
+
+        if (!pTask) {
+            return;
+        }
     }
+    pTask->SetSubTask(nextSubTask);
+    AddSubTasks((CTaskComplex*)nextSubTask);
 }
 
 // 0x681970
