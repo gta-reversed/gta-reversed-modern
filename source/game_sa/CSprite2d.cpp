@@ -494,6 +494,7 @@ void CSprite2d::DrawBarChart(float x, float y, unsigned short width, unsigned ch
         }
     }
 
+    // unused
     if (drawPercentage) {
         char text[12];
         sprintf(text, "%d%%", (unsigned)progress);
