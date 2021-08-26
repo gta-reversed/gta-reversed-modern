@@ -47,36 +47,42 @@ public:
     CWeapon(plugin::dummy_func_t) {}
     CWeapon(eWeaponType weaponType, int32_t ammo);
 
+    void Initialise(eWeaponType weaponType, int32_t ammo, CPed* owner);
+    static void InitialiseWeapons();
     void Shutdown();
+    static void ShutdownWeapons();
+
     void AddGunshell(CEntity* creator, CVector& position, const CVector2D& direction, float size);
     bool LaserScopeDot(CVector* outCoord, float* outSize);
-    bool FireSniper(CPed* creator, CEntity* victim, CVector* target);
+    bool FireSniper(CPed* shooter, CEntity* victim, CVector* target);
     void Reload(CPed* owner = nullptr);
+
     bool IsTypeMelee();
     bool IsType2Handed();
     bool IsTypeProjectile();
+
     bool HasWeaponAmmoToBeUsed();
     void StopWeaponEffect();
-    void Initialise(eWeaponType weaponType, int32_t ammo, CPed* owner);
     void DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoint, CVector* endPoint, CColPoint* colPoint, int32_t arg5);
     bool TakePhotograph(CEntity* owner, CVector* point);
     void SetUpPelletCol(int32_t numPellets, CEntity* owner, CEntity* victim, CVector& point, CColPoint& colPoint, CMatrix& outMatrix);
-    void FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehicle* vehicle, CEntity* owner);
-    void Update(CPed* owner);
     bool CanBeUsedFor2Player();
+
     // outX and outY will be placed in [-1;1] ranges
     void DoWeaponEffect(CVector origin, CVector target);
+
     bool FireAreaEffect(CEntity* firingEntity, CVector* origin, CEntity* targetEntity, CVector* target);
     bool FireInstantHitFromCar(CVehicle* vehicle, bool leftSide, bool rightSide);
     void FireFromCar(CVehicle* vehicle, bool leftSide, bool rightSide);
+    void FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehicle* vehicle, CEntity* owner);
     bool FireInstantHit(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity, CVector* target, CVector* originForDriveBy, bool arg6, bool muzzle);
     bool FireProjectile(CEntity* firingEntity, CVector* origin, CEntity* targetEntity, CVector* target, float force);
     bool FireM16_1stPerson(CEntity* owner);
     bool Fire(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity, CVector* target, CVector* originForDriveBy);
 
-    static void InitialiseWeapons();
-    static void ShutdownWeapons();
+    void Update(CPed* owner);
     static void UpdateWeapons();
+
     static void GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32_t damageFactor, ePedPieceTypes pedPiece, int32_t direction);
     static bool CanBeUsedFor2Player(eWeaponType weaponType);
     static float TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner);
