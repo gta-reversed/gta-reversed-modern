@@ -74,7 +74,6 @@ void DoFade() {
             color.Set(0, 0, 0, 0);
         }
 
-        CRect rt(-5.0f, SCREEN_HEIGHT + 5.0f, SCREEN_WIDTH + 5.0f, -5.0f);
-        CSprite2d::DrawRect(rt, color);
+        CSprite2d::DrawRect({-5.0f, SCREEN_HEIGHT + 5.0f, SCREEN_WIDTH + 5.0f, -5.0f }, color);
     }
 }
