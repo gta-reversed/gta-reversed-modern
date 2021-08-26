@@ -287,30 +287,38 @@ float CWeapon::TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner
     if (!victim || !weaponOwner)
         return 1.0f;
 
-   switch (victim->m_nType) {
-   case eEntityType::ENTITY_TYPE_VEHICLE: {
-       if (!victim->AsVehicle()->IsBike())
-           return 3.0f;
-       break;
-   }
-   case eEntityType::ENTITY_TYPE_PED: {
-       CPed* pedVictim = static_cast<CPed*>(victim);
+    switch (victim->m_nType) {
+    case eEntityType::ENTITY_TYPE_VEHICLE: {
+        if (!victim->AsVehicle()->IsBike())
+            return 3.0f;
+        break;
+    }
+    case eEntityType::ENTITY_TYPE_PED: {
+        CPed* pedVictim = static_cast<CPed*>(victim);
 
-       if (pedVictim->m_pVehicle && !pedVictim->m_pVehicle->IsBike()) {
-           return 3.0f;
-       }
+        if (pedVictim->m_pVehicle && !pedVictim->m_pVehicle->IsBike()) {
+            return 3.0f;
+        }
 
-       if (CEntity* pAttachedTo = pedVictim->m_pAttachedTo) {
-           if (pAttachedTo->IsVehicle() && !static_cast<CVehicle*>(pAttachedTo)->IsBike())
-               return 3.0f;
-       }
-       break;
-   }
-   }
+        if (CEntity* pAttachedTo = pedVictim->m_pAttachedTo) {
+            if (pAttachedTo->IsVehicle() && !static_cast<CVehicle*>(pAttachedTo)->IsBike())
+                return 3.0f;
+        }
+        break;
+    }
+    }
 
-   if (!weaponOwner->IsPed() || !static_cast<CPed*>(weaponOwner)->IsPlayer())
+    if (!weaponOwner->IsPed() || !static_cast<CPed*>(weaponOwner)->IsPlayer())
        return 1.0f;
 
+    switch (TheCamera.GetActiveCamera().m_nMode) {
+    case MODE_TWOPLAYER_IN_CAR_AND_SHOOTING:
+        return 2.0f;
+    case MODE_HELICANNON_1STPERSON:
+        return 3.0f;
+    }
+
+    return 1.0f;
  }
 
 // 0x73B430
