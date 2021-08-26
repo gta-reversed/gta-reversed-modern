@@ -191,8 +191,8 @@ void CCamera::Enable1rstPersonCamCntrlsScript() {
 }
 
 // 0x50AC20
-void CCamera::Fade(float fadeDuration, short fadeInOutFlag) {
-    plugin::CallMethodDynGlobal<CCamera*, float, short>(0x50AC20, this, fadeDuration, fadeInOutFlag);
+void CCamera::Fade(float fadeDuration, eFadeFlag fadeInOutFlag) {
+    plugin::CallMethodDynGlobal<CCamera*, float, eFadeFlag>(0x50AC20, this, fadeDuration, fadeInOutFlag);
 }
 
 // 0x50AD20
