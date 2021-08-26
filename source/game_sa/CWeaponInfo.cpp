@@ -51,9 +51,9 @@ int CWeaponInfo::GetSkillStatIndex(int weaponType) {
 #endif
 }
 
-CWeaponInfo* CWeaponInfo::GetWeaponInfo(eWeaponType weaponType, unsigned char skill)
+CWeaponInfo* CWeaponInfo::GetWeaponInfo(eWeaponType weaponType, eWeaponSkill skill)
 {
-    return ((CWeaponInfo * (__cdecl*)(eWeaponType, unsigned char))0x743C60)(weaponType, skill);
+    return ((CWeaponInfo * (__cdecl*)(eWeaponType, eWeaponSkill))0x743C60)(weaponType, skill);
 }
 
 eWeaponType CWeaponInfo::FindWeaponType(char* name)

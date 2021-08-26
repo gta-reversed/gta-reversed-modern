@@ -3,7 +3,7 @@
 
 class CEntity;
 class CVehicle;
-enum eWeaponType : std::uint32_t;
+enum eWeaponType : uint32_t;
 
 class CEventVehicleDamage : public CEventEditableResponse
 {

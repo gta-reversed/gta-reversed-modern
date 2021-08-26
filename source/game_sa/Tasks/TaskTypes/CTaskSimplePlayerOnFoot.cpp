@@ -93,7 +93,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
     CPad* pPad = pPlayerPed->GetPadFromPlayer();
 
     eWeaponType weaponType = pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType;
-    unsigned char weaponSkill = pPlayerPed->GetWeaponSkill();
+    eWeaponSkill weaponSkill = pPlayerPed->GetWeaponSkill();
     CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, weaponSkill);
 
     if (pPlayerData->m_bHaveTargetSelected && !pPlayerPed->m_pTargetedObject)
@@ -330,7 +330,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 }
                 case 4:
                 {
-                    if (!CWeaponInfo::GetWeaponInfo(pActiveWeapon->m_nType, 1)->flags.bHeavy)
+                    if (!CWeaponInfo::GetWeaponInfo(pActiveWeapon->m_nType, eWeaponSkill::WEAPSKILL_STD)->flags.bHeavy)
                     {
                         fightCommand = 12;
                         gunCommand[0] = 12;
@@ -745,7 +745,7 @@ PED_WEAPON_AIMING_CODE:
         {
             CPed* pTargetedEntity = (CPed*)pPlayerPed->m_pTargetedObject;
             CWeapon* pActiveWeapon = &pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot];
-            char weaponSkill = 0;
+            eWeaponSkill weaponSkill = eWeaponSkill::WEAPSKILL_POOR;
             int pedState = 0;
             if ((fabs((double)pPad->AimWeaponLeftRight(pPlayerPed)) > 100.0
                 || fabs((double)pPad->AimWeaponUpDown(pPlayerPed)) > 100.0)
@@ -777,7 +777,7 @@ PED_WEAPON_AIMING_CODE:
                     pPlayerPed->FindNextWeaponLockOnTarget(pPlayerPed->m_pTargetedObject, false);
                 }
             }
-            if (CWeaponInfo::GetWeaponInfo(pActiveWeapon->m_nType, 1)->m_nWeaponFire == WEAPON_FIRE_INSTANT_HIT)
+            if (CWeaponInfo::GetWeaponInfo(pActiveWeapon->m_nType, eWeaponSkill::WEAPSKILL_STD)->m_nWeaponFire == WEAPON_FIRE_INSTANT_HIT)
             {
                 pTargetedEntity = (CPed*)pPlayerPed->m_pTargetedObject;
                 if (pTargetedEntity && pTargetedEntity->m_nType == ENTITY_TYPE_PED && pIntelligence->IsInSeeingRange(pPlayerPed->GetPosition())) {
@@ -1288,7 +1288,7 @@ int CTaskSimplePlayerOnFoot::PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAn
     }
 
 DONT_MODIFY_MOVE_BLEND_RATIO:
-    if (!(CWeaponInfo::GetWeaponInfo(pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType, 1)->flags.bHeavy))
+    if (!(CWeaponInfo::GetWeaponInfo(pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType, eWeaponSkill::WEAPSKILL_STD)->flags.bHeavy))
     {
         if (!pPed->m_standingOnEntity || !pPed->m_standingOnEntity->m_bIsStatic || pPed->m_standingOnEntity->m_bHasContacted)
         {
@@ -1334,7 +1334,7 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
         pPlayerPed->m_pIntelligence->SetTaskDuckSecondary(0);
     }
 
-    if (!pPlayerPed->bIsInTheAir && !(CWeaponInfo::GetWeaponInfo(pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType, 1)->flags.bHeavy))
+    if (!pPlayerPed->bIsInTheAir && !(CWeaponInfo::GetWeaponInfo(pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType, eWeaponSkill::WEAPSKILL_STD)->flags.bHeavy))
     {
         if (pPad->JumpJustDown())
         {
