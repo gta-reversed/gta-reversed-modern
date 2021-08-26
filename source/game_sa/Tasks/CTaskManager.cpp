@@ -298,9 +298,7 @@ void CTaskManager::SetTaskSecondary(CTask* pTask, int taskIndex) {
     if (pCurrentSecondaryTask == pTask)
         return;
 
-    
-    if (pCurrentSecondaryTask)
-    {
+    if (pCurrentSecondaryTask) {
         delete pCurrentSecondaryTask;
         pCurrentSecondaryTask = nullptr;
     }
@@ -314,7 +312,7 @@ void CTaskManager::SetTaskSecondary(CTask* pTask, int taskIndex) {
             delete m_aSecondaryTasks[taskIndex];
             m_aSecondaryTasks[taskIndex] = nullptr;
         }
-    }  
+    }
 }
 
 // 0x681BD0
