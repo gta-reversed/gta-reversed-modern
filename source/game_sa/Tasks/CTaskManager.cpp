@@ -113,7 +113,7 @@ CTask* CTaskManager::GetTaskSecondary(int taskIndex) {
 }
 
 // 0x681820
-bool CTaskManager::HasTaskSecondary(CTask const* task) {
+bool CTaskManager::HasTaskSecondary(const CTask* task) {
     for (auto& secondaryTask : m_aSecondaryTasks) {
         if (secondaryTask && secondaryTask == task)
             return true;
@@ -251,43 +251,42 @@ void CTaskManager::ParentsControlChildren(CTaskComplex* pTask) {
     }
 }
 
-// (CTask *task, int taskIndex, bool)
 // 0x681AF0
-void CTaskManager::SetTask(CTask* pTask, int taskIndex, int arg2) {
-    CTask* pPrimaryTask = nullptr;
-    if (!pTask)
+void CTaskManager::SetTask(CTask* task, int taskIndex, bool unused) {
+    CTask* primaryTask = nullptr;
+    if (!task)
     {
-        pPrimaryTask = m_aPrimaryTasks[taskIndex];
-        if (pPrimaryTask)
+        primaryTask = m_aPrimaryTasks[taskIndex];
+        if (primaryTask)
         {
-            delete pPrimaryTask;
+            delete primaryTask;
             m_aPrimaryTasks[taskIndex] = nullptr;
             return;
         }
     }
 
-    pPrimaryTask = m_aPrimaryTasks[taskIndex];
-    if (pPrimaryTask != pTask)
-    {
-        delete pPrimaryTask;
+    primaryTask = m_aPrimaryTasks[taskIndex];
+    if (primaryTask == task)
+        return;
 
-        m_aPrimaryTasks[taskIndex] = pTask;
-        AddSubTasks(static_cast<CTaskComplex*>(pTask));
-        if (m_aPrimaryTasks[taskIndex])
+    delete primaryTask;
+
+    m_aPrimaryTasks[taskIndex] = task;
+    AddSubTasks(static_cast<CTaskComplex*>(task));
+    if (m_aPrimaryTasks[taskIndex])
+    {
+        CTask* simplestTask = GetSimplestTask(m_aPrimaryTasks[taskIndex]);
+        if (!simplestTask->IsSimple())
         {
-            CTask* pSimplestTask = GetSimplestTask(m_aPrimaryTasks[taskIndex]);
-            if (!pSimplestTask->IsSimple())
+            primaryTask = m_aPrimaryTasks[taskIndex];
+            if (!primaryTask)
             {
-                pPrimaryTask = m_aPrimaryTasks[taskIndex];
-                if (!pPrimaryTask)
-                {
-                    m_aPrimaryTasks[taskIndex] = nullptr;
-                    return;
-                }
-                delete pPrimaryTask;
                 m_aPrimaryTasks[taskIndex] = nullptr;
                 return;
             }
+            delete primaryTask;
+            m_aPrimaryTasks[taskIndex] = nullptr;
+            return;
         }
     }
 }
@@ -429,7 +428,7 @@ void CTaskManager::ManageTasks()
     }
 }
 
-bool CTaskManager::HasPrimaryTask(CTask const* task)
+bool CTaskManager::HasPrimaryTask(const CTask* task)
 {
     for (auto& primaryTask : m_aPrimaryTasks) {
         if (primaryTask && primaryTask == task)

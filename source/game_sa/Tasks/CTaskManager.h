@@ -52,7 +52,7 @@ public:
     CTask* FindActiveTaskByType(int taskType);
     CTask* FindTaskByType(int taskIndex, int taskType);
     CTask* GetTaskSecondary(int taskIndex);
-    bool HasTaskSecondary(CTask const* task);
+    bool HasTaskSecondary(const CTask* task);
     void Flush();
     void FlushImmediately();
     void SetNextSubTask(CTaskComplex* pTask);
@@ -62,11 +62,11 @@ public:
     CTaskSimple* GetSimplestTask(int taskIndex);
     void AddSubTasks(CTaskComplex* task);
     void ParentsControlChildren(CTaskComplex* pTask);
-    void SetTask(CTask* task, int taskIndex, int arg2 = 0);
+    void SetTask(CTask* task, int taskIndex, bool unused = 0);
     void SetTaskSecondary(CTask* task, int taskIndex);
     void ClearTaskEventResponse();
     void ManageTasks();
-    bool HasPrimaryTask(CTask const* task);
+    bool HasPrimaryTask(const CTask* task);
 
     CTask* GetPrimaryTask(int32_t taskIndex) {
         return m_aPrimaryTasks[taskIndex];
