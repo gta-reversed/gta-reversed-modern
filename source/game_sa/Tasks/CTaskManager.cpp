@@ -216,27 +216,23 @@ CTaskSimple* CTaskManager::GetSimplestTask(int taskIndex) {
 
 // 0x681A30
 void CTaskManager::AddSubTasks(CTaskComplex* pTask) {
-    if (pTask)
-    {
-        CTask* pSubTask = nullptr;
-        do
-        {
-            if (pTask->IsSimple())
-            {
-                break;
-            }
-            pSubTask = pTask->CreateFirstSubTask(m_pPed);
-            if (pSubTask)
-            {
-                pTask->SetSubTask(pSubTask);
-            }
-            else
-            {
-                SetNextSubTask(static_cast<CTaskComplex*>(pTask->m_pParentTask));
-            }
-            pTask = static_cast<CTaskComplex*>(pSubTask);
-        } while (pSubTask);
-    }
+    if (!pTask)
+        return;
+
+    CTask* pSubTask = nullptr;
+    do {
+        if (pTask->IsSimple()) {
+            break;
+        }
+
+        pSubTask = pTask->CreateFirstSubTask(m_pPed);
+        if (pSubTask) {
+            pTask->SetSubTask(pSubTask);
+        } else {
+            SetNextSubTask(static_cast<CTaskComplex*>(pTask->m_pParentTask));
+        }
+        pTask = static_cast<CTaskComplex*>(pSubTask);
+    } while (pSubTask);
 }
 
 // (CTask *task)
