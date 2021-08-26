@@ -20,7 +20,7 @@ float& PELLET_COL_SCALE_RATIO_MULT = *(float*)0x8D6128;
 float* fReloadAnimSampleFraction = (float*)0x8D612C;
 
 void CWeapon::InjectHooks() {
-    ReversibleHooks::Install("CWeapon", "Constructor", 0x73B430, &CWeapon::Constructor);
+    ReversibleHooks::Install("CWeapon", "CWeapon", 0x73B430, &CWeapon::Constructor);
     ReversibleHooks::Install("CWeapon", "Shutdown", 0x73A380, &CWeapon::Shutdown);
     ReversibleHooks::Install("CWeapon", "Reload", 0x73AEB0, &CWeapon::Reload);
     ReversibleHooks::Install("CWeapon", "IsTypeMelee", 0x73B1C0, &CWeapon::IsTypeMelee);
@@ -319,7 +319,7 @@ float CWeapon::TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner
     }
 
     return 1.0f;
- }
+}
 
 // 0x73B430
 CWeapon::CWeapon(eWeaponType weaponType, int32_t ammo) {
