@@ -48,7 +48,7 @@ public:
 
     static float& DUMPER_COL_ANGLEMULT; // 0.0002
 
-    CMonsterTruck(int modelIndex, unsigned char createdBy);
+    CMonsterTruck(int modelIndex, eVehicleCreatedBy createdBy);
 
     void ExtendSuspension();
 };

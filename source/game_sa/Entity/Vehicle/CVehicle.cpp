@@ -90,7 +90,7 @@ void CVehicle::InjectHooks()
 
 }
 
-CVehicle::CVehicle(unsigned char createdBy) : CPhysical(), m_vehicleAudio(), m_autoPilot()
+CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(), m_autoPilot()
 {
     //plugin::CallMethod<0x6D5F10, CVehicle*, unsigned char>(this, createdBy);
     m_bHasPreRenderEffects = true;
