@@ -20,7 +20,7 @@ float& PELLET_COL_SCALE_RATIO_MULT = *(float*)0x8D6128;
 float* fReloadAnimSampleFraction = (float*)0x8D612C;
 
 void CWeapon::InjectHooks() {
-    ReversibleHooks::Install("CWeapon", "Constructor", 0x73B430, &CWeapon::Constructor);
+    ReversibleHooks::Install("CWeapon", "CWeapon", 0x73B430, &CWeapon::Constructor);
     ReversibleHooks::Install("CWeapon", "Shutdown", 0x73A380, &CWeapon::Shutdown);
     ReversibleHooks::Install("CWeapon", "Reload", 0x73AEB0, &CWeapon::Reload);
     ReversibleHooks::Install("CWeapon", "IsTypeMelee", 0x73B1C0, &CWeapon::IsTypeMelee);
@@ -287,31 +287,31 @@ float CWeapon::TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner
     if (!victim || !weaponOwner)
         return 1.0f;
 
-   switch (victim->m_nType) {
-   case eEntityType::ENTITY_TYPE_VEHICLE: {
-       if (!victim->AsVehicle()->IsBike())
-           return 3.0f;
-       break;
-   }
-   case eEntityType::ENTITY_TYPE_PED: {
-       CPed* pedVictim = static_cast<CPed*>(victim);
+    switch (victim->m_nType) {
+    case eEntityType::ENTITY_TYPE_VEHICLE: {
+        if (!victim->AsVehicle()->IsBike())
+            return 3.0f;
+        break;
+    }
+    case eEntityType::ENTITY_TYPE_PED: {
+        CPed* pedVictim = static_cast<CPed*>(victim);
 
-       if (pedVictim->m_pVehicle && !pedVictim->m_pVehicle->IsBike()) {
-           return 3.0f;
-       }
+        if (pedVictim->m_pVehicle && !pedVictim->m_pVehicle->IsBike()) {
+            return 3.0f;
+        }
 
-       if (CEntity* pAttachedTo = pedVictim->m_pAttachedTo) {
-           if (pAttachedTo->IsVehicle() && !static_cast<CVehicle*>(pAttachedTo)->IsBike())
-               return 3.0f;
-       }
-       break;
-   }
-   }
+        if (CEntity* pAttachedTo = pedVictim->m_pAttachedTo) {
+            if (pAttachedTo->IsVehicle() && !static_cast<CVehicle*>(pAttachedTo)->IsBike())
+                return 3.0f;
+        }
+        break;
+    }
+    }
 
-   if (!weaponOwner->IsPed() || !static_cast<CPed*>(weaponOwner)->IsPlayer())
-       return 1.0f;
+    if (!weaponOwner->IsPed() || !static_cast<CPed*>(weaponOwner)->IsPlayer())
+        return 1.0f;
 
- }
+}
 
 // 0x73B430
 CWeapon::CWeapon(eWeaponType weaponType, int32_t ammo) {

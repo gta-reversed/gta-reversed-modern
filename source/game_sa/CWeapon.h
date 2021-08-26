@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "eWeaponType.h"
 #include "FxSystem_c.h"
 #include "CVector2D.h"
@@ -14,8 +13,7 @@
 
 enum ePedPieceTypes;
 
-enum eWeaponState : uint32_t
-{
+enum eWeaponState : uint32_t {
     WEAPONSTATE_READY = 0,
     WEAPONSTATE_FIRING,
     WEAPONSTATE_RELOADING,
@@ -28,28 +26,27 @@ class CVehicle;
 class CColModel;
 
 class CWeapon {
-private:
-    CWeapon* CWeapon::Constructor(eWeaponType weaponType, int32_t ammo);
 public:
-    eWeaponType m_nType;
+    eWeaponType  m_nType;
     eWeaponState m_nState;
-	uint32_t m_nAmmoInClip;
-	uint32_t m_nTotalAmmo;
-	uint32_t m_nTimeForNextShot;
-	uint8_t field_14;
-	uint8_t m_bNoModel;
-	uint8_t field_16;
-	uint8_t field_17;
-    FxSystem_c *m_pFxSystem; // flamethrower, spraycan, extinguisher particle
+    uint32_t     m_nAmmoInClip;
+    uint32_t     m_nTotalAmmo;
+    uint32_t     m_nTimeForNextShot;
+    uint8_t      field_14;
+    uint8_t      m_bNoModel;
+    uint8_t      field_16;
+    uint8_t      field_17;
+    FxSystem_c*  m_pFxSystem; // flamethrower, spraycan, extinguisher particle
 
-    static float &ms_fExtinguisherAimAngle; // default -0.34907 rad. (-pi/8)
-    static bool &bPhotographHasBeenTaken;
-    static bool &ms_bTakePhoto;
-    static CColModel &ms_PelletTestCol;
+    static float&     ms_fExtinguisherAimAngle; // default -0.34907 rad. (-pi/8)
+    static bool&      bPhotographHasBeenTaken;
+    static bool&      ms_bTakePhoto;
+    static CColModel& ms_PelletTestCol;
 
-    static void InjectHooks();
-
+public:
+    CWeapon(plugin::dummy_func_t) {}
     CWeapon(eWeaponType weaponType, int32_t ammo);
+
     void Shutdown();
     void AddGunshell(CEntity* creator, CVector& position, const CVector2D& direction, float size);
     bool LaserScopeDot(CVector* outCoord, float* outSize);
@@ -93,7 +90,12 @@ public:
     static bool ProcessLineOfSight(CVector const& startPoint, CVector const& endPoint, CColPoint& outColPoint, CEntity*& outEntity, eWeaponType weaponType, CEntity* arg5, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool arg11, bool doIgnoreCameraCheck);
 
     inline CWeaponInfo& GetWeaponInfo(CPed* owner = nullptr);
-    CWeapon(plugin::dummy_func_t) {}
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CWeapon* Constructor(eWeaponType weaponType, int32_t ammo);
 };
 
 VALIDATE_SIZE(CWeapon, 0x1C);
