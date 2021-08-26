@@ -62,7 +62,8 @@ void DoFade() {
     }
 
     if (CDraw::FadeValue != 0) {
-        CRGBA color;
+        CRGBA color(0, 0, 0, 0);
+
         if (!TheCamera.m_bFadeTargetIsSplashScreen) {
             color.Set(
                 (CDraw::FadeRed   * CDraw::FadeValue) / CDraw::FadeValue,
@@ -70,8 +71,6 @@ void DoFade() {
                 (CDraw::FadeBlue  * CDraw::FadeValue) / CDraw::FadeValue,
                 std::max<uint8_t>(0, CDraw::FadeValue)
             );
-        } else {
-            color.Set(0, 0, 0, 0);
         }
 
         CSprite2d::DrawRect({-5.0f, SCREEN_HEIGHT + 5.0f, SCREEN_WIDTH + 5.0f, -5.0f }, color);
