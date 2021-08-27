@@ -73,7 +73,9 @@ void CFont::InjectHooks() {
     ReversibleHooks::Install("CFont", "PrintString", 0x71A700, &CFont::PrintString);
     ReversibleHooks::Install("CFont", "PrintStringFromBottom", 0x71A820, &CFont::PrintStringFromBottom);
     ReversibleHooks::Install("CFont", "InitPerFrame", 0x719800, &CFont::InitPerFrame);
-    
+
+    ReversibleHooks::Install("CFont", "GetNumberLines", 0x71A5E0, &CFont::GetNumberLines);
+    ReversibleHooks::Install("CFont", "ProcessStringToDisplay", 0x71A600, &CFont::ProcessStringToDisplay);
 }
 
 // 0x7187C0
@@ -145,12 +147,12 @@ void CFont::Shutdown()
 
 void CFont::PrintChar(float x, float y, char character)
 {
-    ((void(__cdecl*)(float, float, char))0x718A10)(x, y, character);
+    plugin::Call<0x718A10, float, float, char>(x, y, character);
 }
 
 char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
 {
-    return ((char* (__cdecl*)(char*, CRGBA&, bool, char*))0x718F00)(text, color, isBlip, tag);
+    return plugin::CallAndReturn<char*, 0x718F00, char*, CRGBA&, bool, char*>(text, color, isBlip, tag);
 }
 
 // 0x719380
@@ -294,7 +296,7 @@ void CFont::SetOrientation(eFontAlignment alignment)
     m_bFontRightAlign = alignment == ALIGN_RIGHT;
 }
 
-// 0x719800
+// 0x719800 (needs review)
 void CFont::InitPerFrame()
 {
     m_nFontOutline = 0;
@@ -302,7 +304,7 @@ void CFont::InitPerFrame()
     m_nFontShadow = 0;
     m_bNewLine = false;
     m_nExtraFontSymbolId = 0;
-    RenderState.m_pFontTexture = nullptr;
+    RenderState.m_pFontTexture = nullptr; // todo: wtf
     m_pEmptyChar = &setup[0];
 
     CSprite::InitSpriteBuffer();
@@ -310,12 +312,12 @@ void CFont::InitPerFrame()
 
 void CFont::RenderFontBuffer()
 {
-    ((void(__cdecl*)())0x719840)();
+    plugin::Call<0x719840>();
 }
 
 float CFont::GetStringWidth(char* string, bool unk1, bool unk2)
 {
-    return ((float(__cdecl*)(char*, bool, bool))0x71A0E0)(string, unk1, unk2);
+    return plugin::CallAndReturn<float, 0x71A0E0, char*, bool, bool>(string, unk1, unk2);
 }
 
 // same as RenderFontBuffer() (0x71A210)
@@ -325,17 +327,19 @@ void CFont::DrawFonts() {
 
 short CFont::ProcessCurrentString(bool print, float x, float y, const char* text)
 {
-    return ((short(__cdecl*)(bool, float, float, const char*))0x71A220)(print, x, y, text);
+    return plugin::CallAndReturn<short, 0x71A220, bool, float, float, const char*>(print, x, y, text);
 }
 
+// 0x71A5E0
 short CFont::GetNumberLines(float x, float y, const char* text)
 {
-    return ((short(__cdecl*)(float, float, const char*))0x71A5E0)(x, y, text);
+    return ProcessCurrentString(false, x, y, text);
 }
 
+// 0x71A600
 short CFont::ProcessStringToDisplay(float x, float y, const char* text)
 {
-    return ((short(__cdecl*)(float, float, const char*))0x71A600)(x, y, text);
+    return ProcessCurrentString(true, x, y, text);
 }
 
 // 0x71A620
