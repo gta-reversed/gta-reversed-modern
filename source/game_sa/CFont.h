@@ -24,7 +24,7 @@ struct CFontChar {
     uint8_t m_nFontStyle;
     bool m_bPropOn;
     uint8_t _pad1;
-    uint16_t m_wFontTexture;
+    int16_t m_wFontTexture;
     uint8_t m_nOutline;
     uint8_t _pad2;
 };
@@ -62,7 +62,7 @@ public:
     static CSprite2d (&ButtonSprite)[MAX_FONT_BUTTON_SPRITES];
     static unsigned char& m_nExtraFontSymbolId;
     static bool& m_bNewLine;
-    static CRGBA *m_Color;
+    static CRGBA* m_Color;
     static CVector2D& m_Scale;
     static float& m_fSlant;
     static CVector2D& m_fSlantRefPoint;
@@ -81,7 +81,7 @@ public:
     static unsigned char& m_FontTextureId;
     static unsigned char& m_FontStyle;
     static unsigned char& m_nFontShadow;
-    static CRGBA *m_FontDropColor;
+    static CRGBA* m_FontDropColor;
     static unsigned char& m_nFontOutlineSize;
     static unsigned char& m_nFontOutline;
     static unsigned char& m_nFontOutlineOrShadow;

@@ -8,6 +8,9 @@
 */
 #include "CFont.h"
 
+CFontChar (&setup)[9] = *(CFontChar(*)[9])0xC716B0;
+
+CFontChar* m_pEmptyChar = (CFontChar*)0xC716A8;
 CFontChar& CFont::RenderState = *(CFontChar*)0xC71AA0;
 CSprite2d (&CFont::Sprite)[MAX_FONT_SPRITES] = *(CSprite2d(*)[2])0xC71AD0;
 CSprite2d (&CFont::ButtonSprite)[MAX_FONT_BUTTON_SPRITES] = *(CSprite2d(*)[15])0xC71AD8;
@@ -69,6 +72,8 @@ void CFont::InjectHooks() {
     ReversibleHooks::Install("CFont", "GetTextRect", 0x71A620, &CFont::GetTextRect);
     ReversibleHooks::Install("CFont", "PrintString", 0x71A700, &CFont::PrintString);
     ReversibleHooks::Install("CFont", "PrintStringFromBottom", 0x71A820, &CFont::PrintStringFromBottom);
+    ReversibleHooks::Install("CFont", "InitPerFrame", 0x719800, &CFont::InitPerFrame);
+    
 }
 
 // 0x7187C0
@@ -290,7 +295,6 @@ void CFont::SetOrientation(eFontAlignment alignment)
 }
 
 // 0x719800
-// not done.
 void CFont::InitPerFrame()
 {
     m_nFontOutline = 0;
@@ -298,8 +302,9 @@ void CFont::InitPerFrame()
     m_nFontShadow = 0;
     m_bNewLine = false;
     m_nExtraFontSymbolId = 0;
-    //RenderState.m_wFontTexture = -1;
-    //m_pEmptyChar = &setup
+    RenderState.m_wFontTexture = 0; // todo: make sense of this
+    m_pEmptyChar = &setup[0];
+
     CSprite::InitSpriteBuffer();
 }
 
