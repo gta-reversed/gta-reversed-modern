@@ -18,7 +18,7 @@ public:
     static void Stop();
 
     static void Render();
-    static void PrintCreditText(float scaleX, float scaleY, const char* text, float& position, float currentOffset, bool highlighted);
-    static inline void PrintCreditSpace(float spaceSize, float& position);
+    static void PrintCreditText(float scaleX, float scaleY, const char* text, uint32_t& position, float currentOffset, bool highlighted);
+    static inline void PrintCreditSpace(float spaceSize, uint32_t& position);
     static void RenderCredits();
 };
