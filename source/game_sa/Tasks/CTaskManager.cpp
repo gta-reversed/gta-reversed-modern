@@ -107,6 +107,15 @@ CTask* CTaskManager::GetTaskSecondary(int taskIndex) {
     return m_aSecondaryTasks[taskIndex];
 }
 
+// NOTSA?
+bool CTaskManager::HasPrimaryTask(const CTask* task) {
+    for (auto& primaryTask : m_aPrimaryTasks) {
+        if (primaryTask && primaryTask == task)
+            return true;
+    }
+    return false;
+}
+
 // 0x681820
 bool CTaskManager::HasTaskSecondary(const CTask* task) {
     for (auto& secondaryTask : m_aSecondaryTasks) {
@@ -182,14 +191,11 @@ CTaskSimple* CTaskManager::GetSimplestTask(CTask* task) {
     return static_cast<CTaskSimple*>(last);
 }
 
-// (CEvent const* _event)
 // 0x6819A0
-void CTaskManager::StopTimers(CEvent* pEvent) {
-    for (auto& primaryTask : m_aPrimaryTasks)
-    {
-        if (primaryTask)
-        {
-            primaryTask->StopTimer(pEvent);
+void CTaskManager::StopTimers(const CEvent* event) {
+    for (auto& primaryTask : m_aPrimaryTasks) {
+        if (primaryTask) {
+            primaryTask->StopTimer(event);
         }
     }
 }
@@ -419,13 +425,4 @@ void CTaskManager::ManageTasks()
         delete secondaryTask;
         secondaryTask = nullptr;
     }
-}
-
-bool CTaskManager::HasPrimaryTask(const CTask* task)
-{
-    for (auto& primaryTask : m_aPrimaryTasks) {
-        if (primaryTask && primaryTask == task)
-            return true;
-    }
-    return false;
 }

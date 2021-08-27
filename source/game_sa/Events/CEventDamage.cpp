@@ -80,20 +80,14 @@ CEventDamage* CEventDamage::Constructor(CEntity* source, unsigned int startTime,
 #endif
 }
 
-eEventType CEventDamage::GetEventType() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((eEventType(__thiscall*)(CEvent*))0x4AD910)(this);
-#else
+// 0x4AD910
+eEventType CEventDamage::GetEventType() const {
     return CEventDamage::GetEventType_Reversed();
-#endif
 }
 
-int CEventDamage::GetEventPriority() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(__thiscall*)(CEvent*))0x4AD950)(this);
-#else
+// 0x4AD950
+int CEventDamage::GetEventPriority() const {
     return CEventDamage::GetEventPriority_Reversed();
-#endif
 }
 
 int CEventDamage::GetLifeTime() {
@@ -136,7 +130,7 @@ void CEventDamage::ReportCriminalEvent(CPed* ped) {
 #endif
 }
 
-CEntity* CEventDamage::GetSourceEntity() {
+CEntity* CEventDamage::GetSourceEntity() const {
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((CEntity * (__thiscall*)(CEvent*))0x4ADA70)(this);
 #else
@@ -144,12 +138,9 @@ CEntity* CEventDamage::GetSourceEntity() {
 #endif
 }
 
-bool CEventDamage::TakesPriorityOver(CEvent* refEvent) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall*)(CEvent*, CEvent*))0x4ADB00)(this, refEvent);
-#else
+// 0x4ADB00
+bool CEventDamage::TakesPriorityOver(const CEvent& refEvent) {
     return CEventDamage::TakesPriorityOver_Reversed(refEvent);
-#endif
 }
 
 float CEventDamage::GetLocalSoundLevel() {
@@ -327,7 +318,7 @@ void CEventDamage::ReportCriminalEvent_Reversed(CPed* ped) {
     }
 }
 
-CEntity* CEventDamage::GetSourceEntity_Reversed() {
+CEntity* CEventDamage::GetSourceEntity_Reversed() const {
     if (m_pSourceEntity && m_pSourceEntity->m_nType == ENTITY_TYPE_VEHICLE) {
         CVehicle* pVehicle = static_cast<CVehicle*>(m_pSourceEntity);
         if (pVehicle->m_pDriver)
@@ -336,20 +327,20 @@ CEntity* CEventDamage::GetSourceEntity_Reversed() {
     return m_pSourceEntity;
 }
 
-bool CEventDamage::TakesPriorityOver_Reversed(CEvent* refEvent) {
-    if (refEvent->GetEventType() == EVENT_IN_WATER && m_damageResponse.m_bHealthZero && m_bAddToEventGroup
-        || refEvent->GetEventType() == EVENT_ON_FIRE && m_damageResponse.m_bHealthZero && m_bAddToEventGroup
-        || refEvent->GetEventType() == EVENT_KNOCK_OFF_BIKE && m_damageResponse.m_bHealthZero && m_bAddToEventGroup) {
+bool CEventDamage::TakesPriorityOver_Reversed(const CEvent& refEvent) {
+    if (refEvent.GetEventType() == EVENT_IN_WATER && m_damageResponse.m_bHealthZero && m_bAddToEventGroup
+        || refEvent.GetEventType() == EVENT_ON_FIRE && m_damageResponse.m_bHealthZero && m_bAddToEventGroup
+        || refEvent.GetEventType() == EVENT_KNOCK_OFF_BIKE && m_damageResponse.m_bHealthZero && m_bAddToEventGroup) {
         return true;
     }
     CPed* pPed = static_cast<CPed*>(m_pSourceEntity);
-    if (m_pSourceEntity && m_pSourceEntity->m_nType == ENTITY_TYPE_PED && pPed->IsPlayer() && refEvent->GetEventType() == EVENT_DAMAGE) {
-        if (refEvent->GetSourceEntity() == m_pSourceEntity && (!m_damageResponse.m_bHealthZero || !m_bAddToEventGroup))
+    if (m_pSourceEntity && m_pSourceEntity->m_nType == ENTITY_TYPE_PED && pPed->IsPlayer() && refEvent.GetEventType() == EVENT_DAMAGE) {
+        if (refEvent.GetSourceEntity() == m_pSourceEntity && (!m_damageResponse.m_bHealthZero || !m_bAddToEventGroup))
             return CEvent::TakesPriorityOver(refEvent);
         return true;
     }
-    if (refEvent->GetEventType() == EVENT_DAMAGE) {
-        if (GetSourceEntity() != refEvent->GetSourceEntity())
+    if (refEvent.GetEventType() == EVENT_DAMAGE) {
+        if (GetSourceEntity() != refEvent.GetSourceEntity())
             return true;
     }
     return CEvent::TakesPriorityOver(refEvent);
@@ -368,10 +359,8 @@ CEventEditableResponse* CEventDamage::CloneEditable_Reversed() {
     return pClonedEvent;
 }
 
+// 0x4AD9C0
 void CEventDamage::From(CEventDamage* pCopyFrom) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4AD9C0, CEventDamage*, CEvent*>(this, pCopyFrom);
-#else
     m_pSourceEntity = pCopyFrom->m_pSourceEntity;
     if (pCopyFrom->m_pSourceEntity)
         pCopyFrom->m_pSourceEntity->RegisterReference(&m_pSourceEntity);
@@ -385,7 +374,6 @@ void CEventDamage::From(CEventDamage* pCopyFrom) {
     m_fAnimBlend = pCopyFrom->m_fAnimBlend;
     m_fAnimSpeed = pCopyFrom->m_fAnimSpeed;
     m_ucFlags = pCopyFrom->m_ucFlags;
-#endif
 }
 
 void CEventDamage::ProcessDamage(CPed* ped) {

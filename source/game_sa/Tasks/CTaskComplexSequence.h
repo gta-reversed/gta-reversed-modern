@@ -1,10 +1,10 @@
 #pragma once
+
 #include "CTaskComplex.h"
 
 class CTask;
     
-class CTaskComplexSequence : public CTaskComplex
-{
+class CTaskComplexSequence : public CTaskComplex {
 public:
     int m_nCurrentTaskIndex;         // Used in m_aTasks
     CTask* m_aTasks[8];
@@ -18,33 +18,34 @@ public:
     char field_3B;
     unsigned char m_nReferenceCount; // count of how many CTaskComplexUseSequence instances are using this sequence
 
-    static void InjectHooks();
-
+public:
     CTaskComplexSequence();
     ~CTaskComplexSequence();
-private:
-    CTaskComplexSequence* Constructor();
-public:
 
     // original virtual functions
     CTask* Clone() override;
     eTaskType GetId() override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
 
-    // reversed virtual functions
-    CTask* Clone_Reversed();
-    eTaskType GetId_Reversed() { return TASK_COMPLEX_SEQUENCE; }
-    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
-    CTask* CreateNextSubTask_Reversed(CPed* ped);
-    CTask* CreateFirstSubTask_Reversed(CPed* ped);
-    CTask* ControlSubTask_Reversed(CPed* ped);
-
     void AddTask(CTask* pTask);
     CTask* CreateNextSubTask(CPed* pPed, int* pTaskIndex, int* pRepeatCount);
     void Flush();
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskComplexSequence* Constructor();
+
+    CTask* Clone_Reversed();
+    eTaskType GetId_Reversed() { return TASK_COMPLEX_SEQUENCE; }
+    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event);
+    CTask* CreateNextSubTask_Reversed(CPed* ped);
+    CTask* CreateFirstSubTask_Reversed(CPed* ped);
+    CTask* ControlSubTask_Reversed(CPed* ped);
 };
 
 VALIDATE_SIZE(CTaskComplexSequence, 0x40);

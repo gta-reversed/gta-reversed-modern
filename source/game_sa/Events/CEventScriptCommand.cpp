@@ -21,8 +21,7 @@ CEventScriptCommand::CEventScriptCommand(std::int32_t primaryTaskIndex, CTask* t
 
 CEventScriptCommand::~CEventScriptCommand()
 {
-    if (m_task)
-        delete m_task;
+    delete m_task;
 }
 
 CEventScriptCommand* CEventScriptCommand::Constructor(std::int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds)
@@ -35,13 +34,10 @@ CEventScriptCommand* CEventScriptCommand::Constructor(std::int32_t primaryTaskIn
 #endif
 }
 
-int CEventScriptCommand::GetEventPriority()
+// 0x4B0B20
+int CEventScriptCommand::GetEventPriority() const
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<int, 0x4B0B20, CEvent*>(this);
-#else
     return CEventScriptCommand::GetEventPriority_Reversed();
-#endif
 }
 
 CEvent* CEventScriptCommand::Clone()
@@ -62,7 +58,7 @@ bool CEventScriptCommand::AffectsPed(CPed* ped)
 #endif
 }
 
-bool CEventScriptCommand::TakesPriorityOver(CEvent* refEvent)
+bool CEventScriptCommand::TakesPriorityOver(const CEvent& refEvent)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x4B0BA0, CEvent*, CEvent*>(this, refEvent);
@@ -80,16 +76,13 @@ bool CEventScriptCommand::IsValid(CPed* ped)
 #endif
 }
 
+// 0x4B0AA0
 CTask* CEventScriptCommand::CloneScriptTask()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CTask*, 0x4B0AA0, CEvent*>(this);
-#else
     return CEventScriptCommand::CloneScriptTask_Reversed();
-#endif
 }
 
-int CEventScriptCommand::GetEventPriority_Reversed()
+int CEventScriptCommand::GetEventPriority_Reversed() const
 {
     if (m_affectsDeadPeds)
         return 75;
@@ -119,12 +112,12 @@ bool CEventScriptCommand::AffectsPed_Reversed(CPed* ped)
     return ped->IsAlive() || m_affectsDeadPeds;
 }
 
-bool CEventScriptCommand::TakesPriorityOver_Reversed(CEvent* refEvent)
+bool CEventScriptCommand::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
-    eEventType refEventType = refEvent->GetEventType();
+    eEventType refEventType = refEvent.GetEventType();
     if (m_affectsDeadPeds && (refEventType == EVENT_DEATH || m_affectsDeadPeds && refEventType == EVENT_DAMAGE))
         return true;
-    return GetEventPriority() >= refEvent->GetEventPriority();
+    return GetEventPriority() >= refEvent.GetEventPriority();
 }
 
 bool CEventScriptCommand::IsValid_Reversed(CPed* ped)

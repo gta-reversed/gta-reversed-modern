@@ -36,7 +36,7 @@ CTask* CTaskSimplePause::Clone()
     return plugin::CallMethodAndReturn<CTask*, 0x48E780, CTask*>(this);
 }
 
-bool CTaskSimplePause::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimplePause::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
     m_timer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
     m_timer.m_nInterval = -1;
@@ -44,12 +44,12 @@ bool CTaskSimplePause::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
     return true;
 }
 
-bool CTaskSimplePause::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimplePause::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x48E810, CTask*, CPed*, int, CEvent*>(this, ped, priority, _event);
+    return plugin::CallMethodAndReturn<bool, 0x48E810, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
 #else
-    return CTaskSimplePause::MakeAbortable_Reversed(ped, priority, _event);
+    return CTaskSimplePause::MakeAbortable_Reversed(ped, priority, event);
 #endif
 }
 

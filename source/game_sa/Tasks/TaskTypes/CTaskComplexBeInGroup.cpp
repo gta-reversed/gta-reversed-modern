@@ -16,9 +16,9 @@ CTask* CTaskComplexBeInGroup::Clone()
     return plugin::CallMethodAndReturn<CTask*, 0x636BE0, CTask*>(this);
 }
 
-bool CTaskComplexBeInGroup::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskComplexBeInGroup::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 { 
-    return plugin::CallMethodAndReturn<bool, 0x632EB0, CTask*, CPed*, int, CEvent*>(this, ped, priority, _event);
+    return plugin::CallMethodAndReturn<bool, 0x632EB0, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
 }
 
 CTask* CTaskComplexBeInGroup::CreateNextSubTask(CPed* ped)

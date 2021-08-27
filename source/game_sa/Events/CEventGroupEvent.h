@@ -1,34 +1,50 @@
 #pragma once
-#include "PluginBase.h"
+
 #include "CEvent.h"
 #include "CPedGroup.h"
 
 class CPed;
-class CEventGroupEvent : public CEvent
-{
+
+class CEventGroupEvent : public CEvent {
 public:
-    CPed* m_ped;
+    CPed*   m_ped;
     CEvent* m_event;
 
-    static void InjectHooks();
-
+public:
     CEventGroupEvent(CPed* ped, CEvent* event);
     ~CEventGroupEvent();
-private:
-    CEventGroupEvent* Constructor(CPed* ped, CEvent* event);
-public:
-    eEventType GetEventType() override { return EVENT_GROUP_EVENT; }
-    int GetEventPriority() override { return 41; };
-    int GetLifeTime() override { return 0; }
+
+    eEventType GetEventType() const override {
+        return EVENT_GROUP_EVENT;
+    }
+    int32_t GetEventPriority() const override {
+        return 41;
+    };
+    int GetLifeTime() override {
+        return 0;
+    }
     CEvent* Clone() override;
-    bool AffectsPed(CPed* ped) override { return false; }
-    bool AffectsPedGroup(CPedGroup* pedGroup) override { return pedGroup->m_groupMembership.IsMember(m_ped); }
-    float GetLocalSoundLevel() override { return 100.0f; }
+    bool AffectsPed(CPed* ped) override {
+        return false;
+    }
+    bool AffectsPedGroup(CPedGroup* pedGroup) override {
+        return pedGroup->m_groupMembership.IsMember(m_ped);
+    }
+    float GetLocalSoundLevel() override {
+        return 100.0f;
+    }
 
     CEvent* Clone_Reversed();
-    bool BaseEventTakesPriorityOverBaseEvent(CEventGroupEvent* other);
+    bool BaseEventTakesPriorityOverBaseEvent(const CEventGroupEvent& other);
+
 private:
-    bool IsPriorityEvent();
+    bool IsPriorityEvent() const;
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CEventGroupEvent* Constructor(CPed* ped, CEvent* event);
 };
 
 VALIDATE_SIZE(CEventGroupEvent, 0x14);

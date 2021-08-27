@@ -33,7 +33,7 @@ public:
 
     CTask* Clone() override;
     eTaskType GetId() override { return TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override { return false; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; }
     bool ProcessPed(CPed* ped) override;
 
 };

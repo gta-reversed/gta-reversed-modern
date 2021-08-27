@@ -221,7 +221,7 @@ bool CEventPotentialWalkIntoPed::AffectsPed(CPed* ped)
 }
 
 // 0x4AE950
-bool CEventPotentialWalkIntoPed::TakesPriorityOver(CEvent* refEvent)
+bool CEventPotentialWalkIntoPed::TakesPriorityOver(const CEvent& refEvent)
 {
     return CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(refEvent);
 }
@@ -264,7 +264,7 @@ bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
-bool CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(CEvent* refEvent)
+bool CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
     if (CEventHandler::IsTemporaryEvent(refEvent))
         return true;

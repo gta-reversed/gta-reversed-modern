@@ -36,9 +36,9 @@ CTaskComplexEnterCar::~CTaskComplexEnterCar()
     m_pTargetVehicle->ClearGettingInFlags(m_nDoorFlagsSet);
 }
 
-bool CTaskComplexEnterCar::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskComplexEnterCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x63A730, CTask*, CPed*, int, CEvent*>(this, ped, priority, _event);
+    return plugin::CallMethodAndReturn<bool, 0x63A730, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
 }
 
 CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped)

@@ -160,7 +160,7 @@ bool CEventAreaCodes::AffectsPed(CPed* ped)
 #endif
 }
 
-bool CEventAreaCodes::TakesPriorityOver(CEvent* refEvent)
+bool CEventAreaCodes::TakesPriorityOver(const CEvent& refEvent)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x4B2350, CEventAreaCodes*, CEvent*>(this, refEvent);
@@ -201,7 +201,7 @@ bool CEventAreaCodes::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
-bool CEventAreaCodes::TakesPriorityOver_Reversed(CEvent* refEvent)
+bool CEventAreaCodes::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
     if (CEventHandler::IsTemporaryEvent(refEvent))
         return true;

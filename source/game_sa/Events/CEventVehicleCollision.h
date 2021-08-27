@@ -30,12 +30,12 @@ public:
 private:
     CEventVehicleCollision* Constructor(std::int16_t pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, std::int8_t moveState, std::int16_t evadeType);
 public:
-    eEventType GetEventType() override { return EVENT_VEHICLE_COLLISION; }
-    int GetEventPriority() override { return 58; }
+    eEventType GetEventType() const override { return EVENT_VEHICLE_COLLISION; }
+    int32_t GetEventPriority() const override { return 58; }
     int GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override;
-    bool TakesPriorityOver(CEvent* refEvent) override { return true; }
+    bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
 
     CEvent* Clone_Reversed();
     bool AffectsPed_Reversed(CPed* ped);

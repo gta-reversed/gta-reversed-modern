@@ -41,9 +41,9 @@ private:
 public:
     static void InjectHooks();
 
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
 private:
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
 
 public:
     static void FinishRunAnimCB(CAnimBlendAssociation* pBlendAssoc, void* data); //data is CTaskSimpleAnim
