@@ -171,7 +171,7 @@ extern constexpr unsigned int make_fourcc4(const char fourcc[4]) {
 
 AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, char *name);
 
-char *MakeUpperCase(char *dest, char *src);
+char *MakeUpperCase(char *dest, const char *src);
 bool EndsWith(const char* str, const char* with, bool caseSensitive = true);
 
 class CEventGroup* GetEventGlobalGroup();
@@ -195,13 +195,16 @@ RwObject* GetFirstObjectCallback(RwObject* object, void* data);
 RwObject* GetFirstObject(RwFrame* frame);
 RwFrame* GetFirstFrameCallback(RwFrame* frame, void* data);
 RwFrame* GetFirstChild(RwFrame* frame);
+RpAtomic* SkinAtomicGetHAnimHierarchCB(RpAtomic* atomic, void* data);
 RpHAnimHierarchy* GetAnimHierarchyFromSkinClump(RpClump* clump);
 RpHAnimHierarchy* GetAnimHierarchyFromFrame(RwFrame* frame);
 RpHAnimHierarchy* GetAnimHierarchyFromClump(RpClump* clump);
 RpAtomic* AtomicRemoveAnimFromSkinCB(RpAtomic* atomic, void* data);
 bool RpAtomicConvertGeometryToTL(RpAtomic* atomic);
 bool RpAtomicConvertGeometryToTS(RpAtomic* atomic);
+RpAtomic* atomicConvertGeometryToTL(RpAtomic* atomic, void* data);
 bool RpClumpConvertGeometryToTL(RpClump* clump);
+RpAtomic* atomicConvertGeometryToTS(RpAtomic* atomic, void* data);
 bool RpClumpConvertGeometryToTS(RpClump* clump);
 RpMaterial* forceLinearFilteringMatTexturesCB(RpMaterial* material, void* data);
 bool SetFilterModeOnAtomicsTextures(RpAtomic* atomic, RwTextureFilterMode filtering);
@@ -289,27 +292,27 @@ void RpAnimBlendKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2,
 bool RpAnimBlendPluginAttach();
 
 /**
-* Writes given raster to PNG file using RtPNGImageWrite
-*/
+ * Writes given raster to PNG file using RtPNGImageWrite
+ */
 void Render2dStuff();
-void WriteRaster(RwRaster * pRaster, char const * pszPath);
+void WriteRaster(RwRaster* raster, char const* path);
 bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos, float* pScreenX, float* pScreenY);
 bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos);
 
 void LittleTest();
 
 /* Convert UTF-8 string to Windows Unicode. Free pointer using delete[] */
-std::wstring UTF8ToUnicode(const std::string &str);
+std::wstring UTF8ToUnicode(const std::string& str);
 /* Convert Windows Unicode to UTF-8. Free pointer using delete[] */
-std::string UnicodeToUTF8(const std::wstring &str);
+std::string UnicodeToUTF8(const std::wstring& str);
 
 extern int WindowsCharset;
 
-extern unsigned short &uiTempBufferIndicesStored;
-extern unsigned short &uiTempBufferVerticesStored;
+extern unsigned short& uiTempBufferIndicesStored;
+extern unsigned short& uiTempBufferVerticesStored;
 constexpr int32_t TOTAL_TEMP_BUFFER_INDICES = 4096;
-extern RxVertexIndex(&aTempBufferIndices)[TOTAL_TEMP_BUFFER_INDICES]; // size 4096
+extern RxVertexIndex (&aTempBufferIndices)[TOTAL_TEMP_BUFFER_INDICES]; // size 4096
 constexpr int32_t TOTAL_TEMP_BUFFER_VERTICES = 2048;
-extern RxObjSpace3DVertex(&aTempBufferVertices)[TOTAL_TEMP_BUFFER_VERTICES];
+extern RxObjSpace3DVertex (&aTempBufferVertices)[TOTAL_TEMP_BUFFER_VERTICES];
 constexpr int32_t TOTAL_RADIOSITY_VERTEX_BUFFER = 1532;
-extern RwD3D9Vertex(&aRadiosityVertexBuffer)[TOTAL_RADIOSITY_VERTEX_BUFFER];
+extern RwD3D9Vertex (&aRadiosityVertexBuffer)[TOTAL_RADIOSITY_VERTEX_BUFFER];

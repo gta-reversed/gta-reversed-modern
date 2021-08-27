@@ -147,4 +147,5 @@ float DotProduct(CVector* v1, CVector* v2);
 CVector CrossProduct(const CVector& a, const CVector& b);
 float DotProduct(const CVector& v1, const CVector& v2);
 float DotProduct2D(const CVector& v1, const CVector& v2);
+static CVector Normalized(CVector v) { v.Normalise(); return v; }
 VALIDATE_SIZE(CVector, 0xC);
