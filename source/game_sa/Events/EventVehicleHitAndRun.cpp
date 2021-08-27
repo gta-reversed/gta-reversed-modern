@@ -23,32 +23,23 @@ CEventVehicleHitAndRun::~CEventVehicleHitAndRun()
         m_victim->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_victim));
 }
 
+// 0x4AE990
 CEventVehicleHitAndRun* CEventVehicleHitAndRun::Constructor(CPed* victim, CVehicle* vehicle)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventVehicleHitAndRun*, 0x4AE990, CEvent*, CPed*, CVehicle*>(this, victim, vehicle);
-#else
     this->CEventVehicleHitAndRun::CEventVehicleHitAndRun(victim, vehicle);
     return this;
-#endif
 }
 
+// 0x4B7100
 CEvent* CEventVehicleHitAndRun::Clone()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEvent*, 0x4B7100, CEvent*>(this);
-#else
     return CEventVehicleHitAndRun::Clone_Reversed();
-#endif
 }
 
+// 0x4B27D0
 void CEventVehicleHitAndRun::ReportCriminalEvent(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethod<0x4B27D0, CEvent*, CPed*>(this, ped);
-#else
     return CEventVehicleHitAndRun::ReportCriminalEvent_Reversed(ped);
-#endif
 }
 
 CEvent* CEventVehicleHitAndRun::Clone_Reversed()

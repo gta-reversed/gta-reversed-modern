@@ -71,12 +71,9 @@ CEvent* CEventEditableResponse::Clone() {
 #endif
 }
 
-bool CEventEditableResponse::HasEditableResponse() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall*)(CEvent*))0x420EF0)(this);
-#else
+// 0x420EF0
+bool CEventEditableResponse::HasEditableResponse() const {
     return CEventEditableResponse::HasEditableResponse_Reversed();
-#endif
 }
 
 CEvent* CEventEditableResponse::Clone_Reversed() {
@@ -124,15 +121,14 @@ void CEventEditableResponse::InformVehicleOccupants(CPed* ped) {
 #endif
 }
 
+// 0x4B2B00
 void CEventEditableResponse::InformRespectedFriends(CPed* ped) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4B2B00, CEventEditableResponse*, CPed*>(this, ped);
-#else
     if (!m_bAddToEventGroup)
         return;
     uint32 numPedsToScan = ped->m_pIntelligence->m_nDmNumPedsToScan;
     if (!numPedsToScan)
         return;
+
     CEntity** pEntities = ped->m_pIntelligence->m_entityScanner.m_apEntities;
     for (size_t entityIndex = 0; entityIndex < numPedsToScan; entityIndex++) {
         CEntity* pEntity = pEntities[entityIndex];
@@ -166,7 +162,6 @@ void CEventEditableResponse::InformRespectedFriends(CPed* ped) {
                 delete pClonedEvent;
         }
     }
-#endif
 }
 
 void CEventEditableResponse::InformGroup(CPed* ped) {
