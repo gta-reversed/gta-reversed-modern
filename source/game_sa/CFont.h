@@ -24,9 +24,7 @@ struct CFontChar {
     uint8_t m_nFontStyle;
     bool m_bPropOn;
     uint8_t _pad1;
-    int16_t m_wFontTexture;
-    uint8_t m_nOutline;
-    uint8_t _pad2;
+    RwTexture* m_pFontTexture;
 };
 VALIDATE_SIZE(CFontChar, 0x30);
 

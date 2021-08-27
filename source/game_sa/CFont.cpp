@@ -302,7 +302,7 @@ void CFont::InitPerFrame()
     m_nFontShadow = 0;
     m_bNewLine = false;
     m_nExtraFontSymbolId = 0;
-    RenderState.m_wFontTexture = 0; // todo: make sense of this
+    RenderState.m_pFontTexture = nullptr;
     m_pEmptyChar = &setup[0];
 
     CSprite::InitSpriteBuffer();
