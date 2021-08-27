@@ -55,13 +55,10 @@ eTaskType CTaskComplexSequence::GetId()
 #endif
 }
 
-bool CTaskComplexSequence::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event)
+// 0x632C00
+bool CTaskComplexSequence::MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn <bool, 0x632C00, CTask*, class CPed*, eAbortPriority, class CEvent*>(this, ped, priority, _event);
-#else
-    return MakeAbortable_Reversed(ped, priority, _event);
-#endif
+    return MakeAbortable_Reversed(ped, priority, event);
 }
 
 CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped)
@@ -114,9 +111,9 @@ CTask* CTaskComplexSequence::Clone_Reversed()
     return pClonedComplexSequence;
 }
 
-bool CTaskComplexSequence::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event)
+bool CTaskComplexSequence::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return m_pSubTask->MakeAbortable(ped, priority, _event);
+    return m_pSubTask->MakeAbortable(ped, priority, event);
 }
 
 CTask* CTaskComplexSequence::CreateNextSubTask_Reversed(CPed* ped)

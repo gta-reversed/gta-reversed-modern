@@ -57,22 +57,16 @@ bool CEventVehicleDamage::IsCriminalEvent()
 #endif
 }
 
+// 0x4B50B0
 void CEventVehicleDamage::ReportCriminalEvent(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethod<0x4B50B0, CEvent*, CPed*>(this, ped);
-#else
     return CEventVehicleDamage::ReportCriminalEvent_Reversed(ped);
-#endif
 }
 
-CEntity* CEventVehicleDamage::GetSourceEntity()
+// 0x4B1A70
+CEntity* CEventVehicleDamage::GetSourceEntity() const
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEntity*, 0x4B1A70, CEvent*>(this);
-#else
     return CEventVehicleDamage::GetSourceEntity_Reversed();
-#endif
 }
 
 bool CEventVehicleDamage::AffectsPed_Reversed(CPed* ped)
@@ -109,7 +103,7 @@ void CEventVehicleDamage::ReportCriminalEvent_Reversed(CPed* ped)
     }
 }
 
-CEntity* CEventVehicleDamage::GetSourceEntity_Reversed()
+CEntity* CEventVehicleDamage::GetSourceEntity_Reversed() const
 {
     if (m_attacker && m_attacker->m_nType == ENTITY_TYPE_VEHICLE) {
         CVehicle* vehicle = static_cast<CVehicle*>(m_attacker);

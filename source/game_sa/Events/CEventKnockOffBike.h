@@ -36,9 +36,9 @@ private:
     CEventKnockOffBike* Constructor(CVehicle* vehicle, CVector* moveSpeed, CVector* collisionImpactVelocity, float damageIntensity, float a6, std::uint8_t knockOffType, std::uint8_t knockOutDirection, std::int32_t time, CPed* ped, bool isVictimDriver, bool forceKnockOff);
     CEventKnockOffBike* Constructor();
 public:
-    eEventType GetEventType() override { return EVENT_KNOCK_OFF_BIKE; }
+    eEventType GetEventType() const override { return EVENT_KNOCK_OFF_BIKE; }
     float GetLocalSoundLevel() override { return 60.0f; }
-    std::int32_t GetEventPriority() override { return 70; }
+    int32_t GetEventPriority() const override { return 70; }
     std::int32_t GetLifeTime() override { return 0; }
     CEventKnockOffBike* Clone() override { return new CEventKnockOffBike(m_vehicle, &m_moveSpeed, &m_collisionImpactVelocity, m_damageIntensity, field_28, m_knockOffType, m_knockOffDirection, m_time, m_ped, m_isVictimDriver, m_forceKnockOff); }
     bool AffectsPed(CPed* ped) override;

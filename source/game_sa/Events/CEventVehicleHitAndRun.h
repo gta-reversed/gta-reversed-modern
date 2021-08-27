@@ -17,8 +17,8 @@ public:
 private:
     CEventVehicleHitAndRun* Constructor(CPed* victim, CVehicle* vehicle);
 public:
-    eEventType GetEventType() override { return EVENT_VEHICLE_HIT_AND_RUN; }
-    int GetEventPriority() override { return 14; }
+    eEventType GetEventType() const override { return EVENT_VEHICLE_HIT_AND_RUN; }
+    int32_t GetEventPriority() const override { return 14; }
     int GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override { return ped->IsAlive(); }

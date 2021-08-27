@@ -19,7 +19,7 @@ private:
 public:
     CTask* Clone() override { return new CTaskComplexFollowPedFootsteps(m_targetPed); }
     eTaskType GetId() override { return TASK_COMPLEX_FOLLOW_PED_FOOTSTEPS; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

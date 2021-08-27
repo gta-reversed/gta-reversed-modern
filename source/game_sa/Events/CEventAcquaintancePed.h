@@ -1,81 +1,81 @@
 #pragma once
+
 #include "CEventEditableResponse.h"
 #include "CVector.h"
 
-class CEventAcquaintancePed : public CEventEditableResponse
-{
+class CEventAcquaintancePed : public CEventEditableResponse {
 public:
     CPed* m_ped;
 
-    static void InjectHooks();
-
+public:
     CEventAcquaintancePed(CPed* ped);
     ~CEventAcquaintancePed();
-private:
-    CEventAcquaintancePed* Constructor(CPed* ped);
-public:
+
     int GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
-    CEntity* GetSourceEntity() override { return reinterpret_cast<CEntity*>(m_ped); }
-    bool TakesPriorityOver(CEvent* refEvent) override;
+    CEntity* GetSourceEntity() const override { return reinterpret_cast<CEntity*>(m_ped); }
+    bool TakesPriorityOver(const CEvent& refEvent) override;
     bool CanBeInterruptedBySameEvent() override { return true; }
-private:
-    bool AffectsPed_Reversed(CPed* ped);
-    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
-    bool TakesPriorityOver_Reversed(CEvent* refEvent);
-};
 
-class CEventAcquaintancePedHate : public CEventAcquaintancePed
-{
-public:
+private:
+    friend void InjectHooksMain();
     static void InjectHooks();
 
-    CEventAcquaintancePedHate(CPed* ped) : CEventAcquaintancePed (ped) {}
-    ~CEventAcquaintancePedHate() {}
-private:
-    CEventAcquaintancePedHate* Constructor(CPed* ped);
-public:
-    eEventType GetEventType() override { return EVENT_ACQUAINTANCE_PED_HATE; }
-    int GetEventPriority() override { return 26; }
-    CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedHate(m_ped); }
+    CEventAcquaintancePed* Constructor(CPed* ped);
+
+    bool AffectsPed_Reversed(CPed* ped);
+    bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
+    bool TakesPriorityOver_Reversed(const CEvent& refEvent);
 };
 
-class CEventAcquaintancePedRespect : public CEventAcquaintancePed
-{
+class CEventAcquaintancePedHate : public CEventAcquaintancePed {
+public:
+    CEventAcquaintancePedHate(CPed* ped) : CEventAcquaintancePed (ped) {}
+    ~CEventAcquaintancePedHate() {}
+
+    eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_HATE; }
+    int32_t GetEventPriority() const override { return 26; }
+    CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedHate(m_ped); }
+
+private:
+    friend class CEventAcquaintancePed;
+    static void InjectHooks();
+
+    CEventAcquaintancePedHate* Constructor(CPed* ped);
+};
+
+class CEventAcquaintancePedRespect : public CEventAcquaintancePed {
 public:
     CEventAcquaintancePedRespect(CPed* ped) : CEventAcquaintancePed(ped) {}
     ~CEventAcquaintancePedRespect() {}
 
-    eEventType GetEventType() override { return EVENT_ACQUAINTANCE_PED_RESPECT; }
-    int GetEventPriority() override { return 23; }
+    eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_RESPECT; }
+    int32_t GetEventPriority() const override { return 23; }
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedRespect(m_ped); }
 };
 
-class CEventAcquaintancePedLike : public CEventAcquaintancePed
-{
+class CEventAcquaintancePedLike : public CEventAcquaintancePed {
 public:
     CEventAcquaintancePedLike(CPed* ped) : CEventAcquaintancePed(ped) {}
     ~CEventAcquaintancePedLike() {}
 
-    eEventType GetEventType() override { return EVENT_ACQUAINTANCE_PED_LIKE; }
-    int GetEventPriority() override { return 22; }
+    eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_LIKE; }
+    int32_t GetEventPriority() const override { return 22; }
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedLike(m_ped); }
 };
 
-class CEventAcquaintancePedDislike : public CEventAcquaintancePed
-{
+class CEventAcquaintancePedDislike : public CEventAcquaintancePed {
 public:
     CEventAcquaintancePedDislike(CPed* ped) : CEventAcquaintancePed(ped) {}
     ~CEventAcquaintancePedDislike() {}
 
-    eEventType GetEventType() override { return EVENT_ACQUAINTANCE_PED_DISLIKE; }
-    int GetEventPriority() override { return 24; }
+    eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_DISLIKE; }
+    int32_t GetEventPriority() const override { return 24; }
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedDislike(m_ped); }
 };
 
-class CEventAcquaintancePedHateBadlyLit : public CEventAcquaintancePed
-{
+class CEventAcquaintancePedHateBadlyLit : public CEventAcquaintancePed {
 public:
     std::uint32_t m_startTimeInMs;
     CVector m_point;
@@ -87,8 +87,8 @@ public:
 private:
     CEventAcquaintancePedHateBadlyLit* Constructor(CPed* ped, std::int32_t startTimeInMs, const CVector& point);
 public:
-    eEventType GetEventType() override { return EVENT_ACQUAINTANCE_PED_HATE_BADLY_LIT; }
-    int GetEventPriority() override { return 25; }
+    eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_HATE_BADLY_LIT; }
+    int32_t GetEventPriority() const override { return 25; }
     bool AffectsPed(CPed* ped) override;
     bool CanBeInterruptedBySameEvent() override { return true; }
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedHateBadlyLit(m_ped, m_startTimeInMs, m_point); }
@@ -105,8 +105,8 @@ public:
 private:
     CEventSeenCop* Constructor(CPed* cop);
 public:
-    eEventType GetEventType() override { return EVENT_SEEN_COP; }
-    std::int32_t GetEventPriority() override { return 21; }
+    eEventType GetEventType() const override { return EVENT_SEEN_COP; }
+    int32_t GetEventPriority() const override { return 21; }
     bool AffectsPed(CPed* ped) override { return CEventAcquaintancePed::AffectsPed(ped); }
     CEventSeenCop* CloneEditable() override { return new CEventSeenCop(m_ped); }
 };

@@ -42,12 +42,12 @@ CTask* CTaskSimpleGoToPoint::Clone()
 #endif
 }
 
-bool CTaskSimpleGoToPoint::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleGoToPoint::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<bool, 0x667D60, CTask*, CPed*, int, CEvent*>(this, ped, priority, _event);
+    return plugin::CallMethodAndReturn<bool, 0x667D60, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
 #else
-    return CTaskSimpleGoToPoint::MakeAbortable_Reversed(ped, priority, _event);
+    return CTaskSimpleGoToPoint::MakeAbortable_Reversed(ped, priority, event);
 #endif
 }
 
@@ -66,7 +66,7 @@ CTask* CTaskSimpleGoToPoint::Clone_Reversed()
         gotoPointFlags.m_bMoveTowardsTargetPoint, gotoPointFlags.m_b04);
 }
 
-bool CTaskSimpleGoToPoint::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleGoToPoint::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
     if (gotoFlags.m_bIsIKChainSet) {
         if (g_ikChainMan->IsLooking(ped))
