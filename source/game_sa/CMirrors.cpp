@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "CMirrors.h"
 
 int32_t& CMirrors::MirrorFlags = *(int32_t*)0xC7C618;
@@ -34,8 +35,8 @@ void CMirrors::ShutDown() {
         RwRasterDestroy(pBuffer);
     if (pZBuffer)
         RwRasterDestroy(pZBuffer);
-    pBuffer = 0;
-    pZBuffer = 0;
+    pBuffer = nullptr;
+    pZBuffer = nullptr;
     TypeOfMirror = 0;
     MirrorFlags = 0;
 }
