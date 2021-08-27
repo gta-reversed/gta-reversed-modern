@@ -10,6 +10,26 @@
 #include "CRect.h"
 #include "CSprite2d.h"
 
+struct CFontChar {
+    uint8_t m_cLetter;
+    uint8_t _pad0[3];
+    CVector2D m_vPosn;
+    float m_fWidth;
+    float m_fHeight;
+    CRGBA m_color;
+    float m_fWrap;
+    float m_fSlant;
+    CVector2D m_vSlanRefPoint;
+    bool m_bContainImages;
+    uint8_t m_nFontStyle;
+    bool m_bPropOn;
+    uint8_t _pad1;
+    uint16_t m_wFontTexture;
+    uint8_t m_nOutline;
+    uint8_t _pad2;
+};
+VALIDATE_SIZE(CFontChar, 0x30);
+
 struct tFontData {
     char m_propValues[208];
     char m_spaceValue;
@@ -28,12 +48,14 @@ enum eFontStyle : unsigned char {
     FONT_MENU,
     FONT_PRICEDOWN
 };
-class  CFont {
+
+class CFont {
 public:
     // static variables
     static constexpr size_t MAX_FONT_SPRITES = 2;
     static constexpr size_t MAX_FONT_BUTTON_SPRITES = 15;
 
+    static CFontChar& RenderState;
     // font textures array
     static CSprite2d (&Sprite)[MAX_FONT_SPRITES];
     // button textures array
@@ -52,7 +74,7 @@ public:
     static bool& m_bFontPropOn;
     static bool& m_bFontIsBlip;
     static unsigned int m_dwFontAlpha;
-    static CRGBA *m_FontBackgroundColor;
+    static CRGBA& m_FontBackgroundColor;
     static float& m_fWrapx;
     static float& m_fFontCentreSize;
     static float& m_fRightJustifyWrap;
@@ -116,10 +138,10 @@ public:
     static void RenderFontBuffer();
     static float GetStringWidth(char *string, bool unk1, bool unk2);
     static void DrawFonts();
-    static short ProcessCurrentString(bool print, float x, float y, char *text);
-    static short GetNumberLines(float x, float y, char *text);
-    static short ProcessStringToDisplay(float x, float y, char *text);
-    static void GetTextRect(CRect *rect, float x, float y, char *text);
+    static short ProcessCurrentString(bool print, float x, float y, const char *text);
+    static short GetNumberLines(float x, float y, const char *text);
+    static short ProcessStringToDisplay(float x, float y, const char *text);
+    static void GetTextRect(CRect *rect, float x, float y, const char *text);
     static void PrintString(float x, float y, const char *text);
-    static void PrintStringFromBottom(float x, float y, char *text);
+    static void PrintStringFromBottom(float x, float y, const char *text);
 };

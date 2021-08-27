@@ -8,6 +8,7 @@
 */
 #include "CFont.h"
 
+CFontChar& CFont::RenderState = *(CFontChar*)0xC71AA0;
 CSprite2d (&CFont::Sprite)[MAX_FONT_SPRITES] = *(CSprite2d(*)[2])0xC71AD0;
 CSprite2d (&CFont::ButtonSprite)[MAX_FONT_BUTTON_SPRITES] = *(CSprite2d(*)[15])0xC71AD8;
 unsigned char& CFont::m_nExtraFontSymbolId = *(unsigned char*)0xC71A54; // aka. PS2Symbol
@@ -24,7 +25,7 @@ bool& CFont::m_bEnlargeBackgroundBox = *(bool*)0xC71A7C;
 bool& CFont::m_bFontPropOn = *(bool*)0xC71A7D;
 bool& CFont::m_bFontIsBlip = *(bool*)0xC71A7E;
 unsigned int CFont::m_dwFontAlpha = *(unsigned int*)0xC71A80;
-CRGBA* CFont::m_FontBackgroundColor = (CRGBA*)0xC71A84;
+CRGBA& CFont::m_FontBackgroundColor = *(CRGBA*)0xC71A84;
 float& CFont::m_fWrapx = *(float*)0xC71A88;
 float& CFont::m_fFontCentreSize = *(float*)0xC71A8C;
 float& CFont::m_fRightJustifyWrap = *(float*)0xC71A90;
@@ -66,6 +67,7 @@ void CFont::InjectHooks() {
 
     // wip
     ReversibleHooks::Install("CFont", "GetTextRect", 0x71A620, &CFont::GetTextRect);
+    ReversibleHooks::Install("CFont", "PrintString", 0x71A700, &CFont::PrintString);
 }
 
 // 0x7187C0
@@ -270,7 +272,7 @@ void CFont::SetBackground(bool enable, bool includeWrap)
 // 0x7195E0
 void CFont::SetBackgroundColor(CRGBA color)
 {
-    *m_FontBackgroundColor = color;
+    m_FontBackgroundColor = color;
 }
 
 // 0x719600
@@ -315,23 +317,23 @@ void CFont::DrawFonts() {
     RenderFontBuffer();
 }
 
-short CFont::ProcessCurrentString(bool print, float x, float y, char* text)
+short CFont::ProcessCurrentString(bool print, float x, float y, const char* text)
 {
-    return ((short(__cdecl*)(bool, float, float, char*))0x71A220)(print, x, y, text);
+    return ((short(__cdecl*)(bool, float, float, const char*))0x71A220)(print, x, y, text);
 }
 
-short CFont::GetNumberLines(float x, float y, char* text)
+short CFont::GetNumberLines(float x, float y, const char* text)
 {
-    return ((short(__cdecl*)(float, float, char*))0x71A5E0)(x, y, text);
+    return ((short(__cdecl*)(float, float, const char*))0x71A5E0)(x, y, text);
 }
 
-short CFont::ProcessStringToDisplay(float x, float y, char* text)
+short CFont::ProcessStringToDisplay(float x, float y, const char* text)
 {
-    return ((short(__cdecl*)(float, float, char*))0x71A600)(x, y, text);
+    return ((short(__cdecl*)(float, float, const char*))0x71A600)(x, y, text);
 }
 
 // 0x71A620
-void CFont::GetTextRect(CRect* rect, float x, float y, char* text)
+void CFont::GetTextRect(CRect* rect, float x, float y, const char* text)
 {
     auto nLines = GetNumberLines(x, y, text);
 
@@ -352,12 +354,34 @@ void CFont::GetTextRect(CRect* rect, float x, float y, char* text)
     rect->top = nLines * (32.0f * m_Scale->y * 0.5f + 2.0f * m_Scale->y) + y + 4.0f;
 }
 
+// 0x71A700
 void CFont::PrintString(float x, float y, const char* text)
 {
-    ((void(__cdecl*)(float, float, const char*))0x71A700)(x, y, text);
+    if (*text == '\0' || *text == '*')
+        return;
+
+    if (m_bFontBackground) {
+        CRect rt;
+
+        RenderState.m_color = *m_Color;
+        GetTextRect(&rt, x, y, text);
+
+        if (m_bEnlargeBackgroundBox) {
+            rt.left -= 1.0f;
+            rt.right += 1.0f;
+            rt.top += 1.0f;
+            rt.bottom -= 1.0f;
+
+            FrontEndMenuManager.DrawWindow(rt, '\0', 0, m_FontBackgroundColor, false, true);
+        } else {
+            CSprite2d::DrawRect(rt, m_FontBackgroundColor);
+        }
+    }
+
+    ProcessStringToDisplay(x, y, text);
 }
 
-void CFont::PrintStringFromBottom(float x, float y, char* text)
+void CFont::PrintStringFromBottom(float x, float y, const char* text)
 {
-    ((void(__cdecl*)(float, float, char*))0x71A820)(x, y, text);
+    ((void(__cdecl*)(float, float, const char*))0x71A820)(x, y, text);
 }
