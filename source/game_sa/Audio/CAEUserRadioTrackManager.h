@@ -22,50 +22,50 @@
 
 constexpr size_t MAX_SUPPORTED_DECODERS = 8;
 
-class CAEUserRadioTrackManager
-{
+class CAEUserRadioTrackManager {
 public:
-    static CAEUserRadioTrackManager &instance;
-    
+    tUserTracksInfo*    m_pUserTracksInfo;
+    bool                m_bUserTracksLoaded;
+    bool                m_bUserTracksLoadedCopy;
+    uint16_t            m_nUserTracksCount;
+    bool                m_baDecodersSupported[MAX_SUPPORTED_DECODERS]; // index with eAudioFileType
+    DWORD               m_nUserTracksScanThreadID;
+    HANDLE              m_hwndUserTracksScanThreadHandle;
+    eUserTrackScanState m_nUserTracksScanState;
+
+    static CAEUserRadioTrackManager& instance;
+
+public:
     bool Initialise();
     void Shutdown();
-    char *GetTrackPath(std::int32_t trackID);
-    CAEStreamingDecoder *LoadUserTrack(std::int32_t trackID);
+
+    char* GetTrackPath(int32_t trackID);
+    CAEStreamingDecoder* LoadUserTrack(int32_t trackID);
     bool ReadUserTracks();
     bool ScanUserTracks();
     void DeleteUserTracksInfo();
-    void SetUserTrackIndex(std::int32_t index);
-    std::int32_t SelectUserTrackIndex();
-    
-    eAudioFileType GetAudioFileType(const char *filename);
-    bool IsShortcut(const char *path);
-    std::uint8_t GetUserTrackPlayMode();
+    void SetUserTrackIndex(int32_t index);
+    int32_t SelectUserTrackIndex();
 
-public:
-    tUserTracksInfo *userTracksInfo;
-    bool userTracksLoaded;
-    bool _userTracksLoadedCopy;
-    std::uint16_t userTracksCount;
-    bool decodersSupported[MAX_SUPPORTED_DECODERS]; // index with eAudioFileType
-    DWORD userTracksScanThreadID;
-    HANDLE userTracksScanThreadHandle;
-    eUserTrackScanState userTracksScanState;
+    eAudioFileType GetAudioFileType(const char* filename);
+    bool IsShortcut(const char* path);
+    uint8_t GetUserTrackPlayMode();
 
 private:
     static tAudioExtensionType (&audioExtensionTypes)[7];
 
-    static DWORD __stdcall WriteUserTracksThread(CAEUserRadioTrackManager *self);
-    int WriteUserTracksFile(const char *dir, size_t &currentLength, FILE *file, std::vector<tUserTracksInfo> &offsets, int depth);
-    char *ResolveShortcut(const char *path);
+    static DWORD __stdcall WriteUserTracksThread(CAEUserRadioTrackManager* self);
+    int WriteUserTracksFile(const char* dir, size_t& currentLength, FILE* file, std::vector<tUserTracksInfo>& offsets, int depth);
+    char* ResolveShortcut(const char* path);
 
 // Private functions which aren't part of GTASA itself
 private:
-    int WriteUserTracksFile(const std::wstring &dir, size_t &currentLength, FILE *file, std::vector<tUserTracksInfo> &offsets, int depth);
+    int WriteUserTracksFile(const std::wstring& dir, size_t& currentLength, FILE* file, std::vector<tUserTracksInfo>& offsets, int depth);
 
-    static std::wstring ResolveShortcut(const std::wstring &path);
+    static std::wstring ResolveShortcut(const std::wstring& path);
 
 private:
-    friend void InjectHooksMain(void);
+    friend void InjectHooksMain();
     static void InjectHooks();
 };
 
