@@ -39,13 +39,9 @@ void CTaskManager::InjectHooks()
 CTaskManager::CTaskManager(CPed* ped) {
     m_pPed = ped;
 
-    for (auto& primaryTask : m_aPrimaryTasks) {
-        primaryTask = nullptr;
-    }
+    std::fill(std::begin(m_aPrimaryTasks), std::end(m_aPrimaryTasks), nullptr);
 
-    for (auto& secondaryTask : m_aSecondaryTasks) {
-        secondaryTask = nullptr;
-    }
+    std::fill(std::begin(m_aSecondaryTasks), std::end(m_aSecondaryTasks), nullptr);
 }
 
 // 0x6816D0
@@ -54,12 +50,12 @@ CTaskManager::~CTaskManager() {
 }
 
 CTaskManager* CTaskManager::Constructor(CPed* ped) {
-    this->CTaskManager::CTaskManager(ped);
+    this->CTaskManager(ped);
     return this;
 }
 
 CTaskManager* CTaskManager::Destructor() {
-    this->CTaskManager::~CTaskManager();
+    this->~CTaskManager();
     return this;
 }
 
