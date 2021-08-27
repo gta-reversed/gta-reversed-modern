@@ -4,6 +4,7 @@
 #include "CWaterCannons.h"
 #include "CTheCarGenerators.h"
 #include "CRadar.h"
+#include "CCredits.h"
 
 char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
 int& CGame::currLevel = *reinterpret_cast<int*>(0xB7290C);
@@ -265,7 +266,7 @@ void CGame::Init2(char const* datFile) {
     CInformGroupEventQueue::Init();
 
     LoadingScreen(nullptr, nullptr);
-    CCredits::m_bCreditsGoing = false;
+    CCredits::bCreditsGoing = false;
     CReplay::Init();
     CShopping::Init();
     LoadingScreen(nullptr, nullptr);
