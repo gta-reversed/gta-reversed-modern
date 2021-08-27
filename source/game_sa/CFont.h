@@ -10,9 +10,6 @@
 #include "CRect.h"
 #include "CSprite2d.h"
 
-#define MAX_FONT_SPRITES 2
-#define MAX_FONT_BUTTON_SPRITES 15
-
 struct tFontData {
     char m_propValues[208];
     char m_spaceValue;
@@ -34,11 +31,13 @@ enum eFontStyle : unsigned char {
 class  CFont {
 public:
     // static variables
+    static constexpr size_t MAX_FONT_SPRITES = 2;
+    static constexpr size_t MAX_FONT_BUTTON_SPRITES = 15;
 
-    // font textures array. Num of elements: MAX_FONT_SPRITES (2)
-    static CSprite2d *Sprite;
-    // button textures array. Num of elements: MAX_FONT_BUTTON_SPRITES (15)
-    static CSprite2d *ButtonSprite;
+    // font textures array
+    static CSprite2d (&Sprite)[MAX_FONT_SPRITES];
+    // button textures array
+    static CSprite2d (&ButtonSprite)[MAX_FONT_BUTTON_SPRITES];
     static unsigned char& m_nExtraFontSymbolId;
     static bool& m_bNewLine;
     static CRGBA *m_Color;
@@ -104,9 +103,6 @@ public:
     // set outline size
     static void SetEdge(short value);
     // toggles character proportions in text
-#ifdef SetProp
-#undef SetProp
-#endif
     static void SetProportional(bool on);
     // setups text background
     static void SetBackground(bool enable, bool includeWrap);

@@ -8,8 +8,8 @@
 */
 #include "CFont.h"
 
-CSprite2d* CFont::Sprite = (CSprite2d*)0xC71AD0;
-CSprite2d* CFont::ButtonSprite = (CSprite2d*)0xC71AD8;
+CSprite2d (&CFont::Sprite)[MAX_FONT_SPRITES] = *(CSprite2d(*)[2])0xC71AD0;
+CSprite2d (&CFont::ButtonSprite)[MAX_FONT_BUTTON_SPRITES] = *(CSprite2d(*)[15])0xC71AD8;
 unsigned char& CFont::m_nExtraFontSymbolId = *(unsigned char*)0xC71A54; // aka. PS2Symbol
 bool& CFont::m_bNewLine = *(bool*)0xC71A55;
 CRGBA* CFont::m_Color = (CRGBA*)0xC71A60;
@@ -40,10 +40,9 @@ tFontData* gFontData = (tFontData*)0xC718B0;
 
 void CFont::InjectHooks() {
     ReversibleHooks::Install("CFont", "Initialise", 0x5BA690, &CFont::Initialise);
-    ReversibleHooks::Install("CFont", "SetEdge", 0x719590, &CFont::SetEdge);
-    ReversibleHooks::Install("CFont", "DrawFonts", 0x71A210, &CFont::DrawFonts);
+    ReversibleHooks::Install("CFont", "Shutdown", 0x7189B0, &CFont::Shutdown);
 
-    // wip
+    // styling functions
     ReversibleHooks::Install("CFont", "SetScale", 0x719380, &CFont::SetScale);
     ReversibleHooks::Install("CFont", "SetScaleForCurrentlanguage", 0x7193A0, &CFont::SetScaleForCurrentlanguage);
     ReversibleHooks::Install("CFont", "SetSlantRefPoint", 0x719400, &CFont::SetSlantRefPoint);
@@ -52,6 +51,18 @@ void CFont::InjectHooks() {
     ReversibleHooks::Install("CFont", "SetFontStyle", 0x719490, &CFont::SetFontStyle);
     ReversibleHooks::Install("CFont", "SetWrapx", 0x7194D0, &CFont::SetWrapx);
     ReversibleHooks::Install("CFont", "SetCentreSize", 0x7194E0, &CFont::SetCentreSize);
+    ReversibleHooks::Install("CFont", "SetRightJustifyWrap", 0x7194F0, &CFont::SetRightJustifyWrap);
+    ReversibleHooks::Install("CFont", "SetAlphaFade", 0x719500, &CFont::SetAlphaFade);
+    ReversibleHooks::Install("CFont", "SetDropColor", 0x719510, &CFont::SetDropColor);
+    ReversibleHooks::Install("CFont", "SetDropShadowPosition", 0x719570, &CFont::SetDropShadowPosition);
+    ReversibleHooks::Install("CFont", "SetEdge", 0x719590, &CFont::SetEdge);
+    ReversibleHooks::Install("CFont", "SetProportional", 0x7195B0, &CFont::SetProportional);
+    ReversibleHooks::Install("CFont", "SetBackground", 0x7195C0, &CFont::SetBackground);
+    ReversibleHooks::Install("CFont", "SetBackgroundColor", 0x7195E0, &CFont::SetBackgroundColor);
+    ReversibleHooks::Install("CFont", "SetJustify", 0x719600, &CFont::SetJustify);
+    ReversibleHooks::Install("CFont", "SetOrientation", 0x719610, &CFont::SetOrientation);
+
+    ReversibleHooks::Install("CFont", "DrawFonts", 0x71A210, &CFont::DrawFonts);
 }
 
 // 0x7187C0
@@ -104,9 +115,21 @@ void CFont::Initialise() {
     CTxdStore::PopCurrentTxd();
 }
 
+// 0x7189B0
 void CFont::Shutdown()
 {
-    ((void(__cdecl*)())0x7189B0)();
+    Sprite[0].Delete();
+    Sprite[1].Delete();
+
+    auto fontSlot = CTxdStore::FindTxdSlot("fonts");
+    CTxdStore::RemoveTxdSlot(fontSlot);
+
+    for (CSprite2d& bs : ButtonSprite) {
+        bs.Delete();
+    }
+
+    auto buttonSlot = CTxdStore::FindTxdSlot("ps2btns");
+    CTxdStore::RemoveTxdSlot(buttonSlot);
 }
 
 void CFont::PrintChar(float x, float y, char character)
@@ -195,21 +218,18 @@ void CFont::SetCentreSize(float value)
 // 0x7194F0
 void CFont::SetRightJustifyWrap(float value)
 {
-    //((void(__cdecl*)(float))0x7194F0)(value);
     m_fRightJustifyWrap = value;
 }
 
 // 0x719500
 void CFont::SetAlphaFade(float alpha)
 {
-    //((void(__cdecl*)(float))0x719500)(alpha);
     m_dwFontAlpha = alpha;
 }
 
 // 0x719510
 void CFont::SetDropColor(CRGBA color)
 {
-    //((void(__cdecl*)(CRGBA))0x719510)(color);
     *m_FontDropColor = color;
 
     if (m_dwFontAlpha < 255)
@@ -219,7 +239,6 @@ void CFont::SetDropColor(CRGBA color)
 // 0x719570
 void CFont::SetDropShadowPosition(short value)
 {
-    //((void(__cdecl*)(short))0x719570)(value);
     m_nFontOutlineSize = 0;
     m_nFontOutlineOrShadow = 0;
     m_nFontShadow = (uint8_t)value;
@@ -232,23 +251,15 @@ void CFont::SetEdge(short value) {
     m_nFontOutlineOrShadow = (uint8_t)value;
 }
 
-#ifdef SetProp
-#define SET_PROP_USED
-#undef SetProp
-#endif
+// 0x7195B0
 void CFont::SetProportional(bool on)
 {
-    ((void(__cdecl*)(bool))0x7195B0)(on);
+    m_bFontPropOn = on;
 }
-#ifdef SET_PROP_USED
-#undef SET_PROP_USED
-#define SetProp SetPropA
-#endif
 
 // 0x7195C0
 void CFont::SetBackground(bool enable, bool includeWrap)
 {
-    //((void(__cdecl*)(bool, bool))0x7195C0)(enable, includeWrap);
     m_bFontBackground = enable;
     m_bEnlargeBackgroundBox = includeWrap;
 }
@@ -256,7 +267,6 @@ void CFont::SetBackground(bool enable, bool includeWrap)
 // 0x7195E0
 void CFont::SetBackgroundColor(CRGBA color)
 {
-    //((void(__cdecl*)(CRGBA))0x7195E0)(color);
     *m_FontBackgroundColor = color;
 }
 
@@ -300,7 +310,7 @@ float CFont::GetStringWidth(char* string, bool unk1, bool unk2)
 // same as RenderFontBuffer()
 // 0x71A210
 void CFont::DrawFonts() {
-    CFont::RenderFontBuffer();
+    RenderFontBuffer();
 }
 
 short CFont::ProcessCurrentString(bool print, float x, float y, char* text)
