@@ -44,4 +44,17 @@ public:
 
     bool operator==(CRGBA const& rhs) const;
     CRGBA& operator=(CRGBA const& rhs);
+
+    CRGBA operator*(float mult) {
+        return {
+            (uint8_t)((float)r * mult),
+            (uint8_t)((float)g * mult),
+            (uint8_t)((float)b * mult),
+            (uint8_t)((float)a * mult)
+        };
+    }
+
+    CRGBA operator/(float divisor) {
+        return *this * (1 / divisor);
+    }
 };
