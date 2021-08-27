@@ -40,7 +40,6 @@ CTaskManager::CTaskManager(CPed* ped) {
     m_pPed = ped;
 
     std::fill(std::begin(m_aPrimaryTasks), std::end(m_aPrimaryTasks), nullptr);
-
     std::fill(std::begin(m_aSecondaryTasks), std::end(m_aSecondaryTasks), nullptr);
 }
 
@@ -50,12 +49,12 @@ CTaskManager::~CTaskManager() {
 }
 
 CTaskManager* CTaskManager::Constructor(CPed* ped) {
-    this->CTaskManager(ped);
+    this->CTaskManager::CTaskManager(ped);
     return this;
 }
 
 CTaskManager* CTaskManager::Destructor() {
-    this->~CTaskManager();
+    this->CTaskManager::~CTaskManager();
     return this;
 }
 
