@@ -934,6 +934,7 @@ bool RpAnimBlendPluginAttach() {
     return plugin::CallAndReturn<bool, 0x4D6150>();
 }
 
+// 0x70F9B0
 bool GraphicsLowQuality() {
     if (g_fx.GetFxQuality() < FxQuality_e::FXQUALITY_MEDIUM)
         return false;

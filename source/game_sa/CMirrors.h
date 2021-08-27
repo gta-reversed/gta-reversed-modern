@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CMatrix.h"
 #include "CVector.h"
 
@@ -28,12 +28,13 @@ public:
     static void CreateBuffer();
     static void BuildCamMatrix(CMatrix& mat, CVector pointA, CVector pointB);
     static void RenderMirrorBuffer();
-    static void BuildCameraMatrixForScreens(CMatrix & mat);
+    static void BuildCameraMatrixForScreens(CMatrix& mat);
     static void BeforeConstructRenderList();
     static void BeforeMainRender();
+
+    // NOTSA
     static bool IsEitherScreenVisibleToCam();
 };
 
 extern bool& bFudgeNow;
-extern CVector(&Screens8Track)[4][2];
-
+extern CVector (&Screens8Track)[4][2];

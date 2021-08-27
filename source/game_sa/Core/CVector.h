@@ -5,7 +5,9 @@ https://github.com/DK22Pac/plugin-sdk
 Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
+#include "PluginBase.h" // !!!
+
 #include "RenderWare.h"
 #include <numeric>
 
@@ -103,11 +105,11 @@ public:
         return x == 0.0F && y == 0.0F && z == 0.0F;
     }
 
-    // Calculate the avarage position
-    static CVector Avarage(const CVector* begin, const CVector* end);
+    // Calculate the average position
+    static CVector Average(const CVector* begin, const CVector* end);
 
-    static CVector AvarageN(const CVector* begin, size_t n) {
-        return Avarage(begin, begin + n);
+    static CVector AverageN(const CVector* begin, size_t n) {
+        return Average(begin, begin + n);
     }
 };
 
@@ -177,4 +179,5 @@ CVector CrossProduct(const CVector& a, const CVector& b);
 float DotProduct(const CVector& v1, const CVector& v2);
 float DotProduct2D(const CVector& v1, const CVector& v2);
 static CVector Normalized(CVector v) { v.Normalise(); return v; }
+
 VALIDATE_SIZE(CVector, 0xC);

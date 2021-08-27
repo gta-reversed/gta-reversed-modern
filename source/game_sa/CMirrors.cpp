@@ -13,6 +13,22 @@ CVector& CMirrors::MirrorNormal = *(CVector*)0xC803D8;
 bool& bFudgeNow = *(bool*)0xC7C72A;
 CVector(&Screens8Track)[4][2] = *(CVector(*)[4][2])0x8D5DD8;
 
+/*
+constexpr float MX1 = -1333.453f;
+constexpr float MX2 = -1477.845f;
+
+constexpr float MY1 = -221.89799f;
+constexpr float MY2 = -189.96899f;
+
+constexpr float MZ = 1079.141f;
+constexpr float MZ1 = 1067.141f;
+
+CVector Screens8Track_[4][2] = {
+    CVector{MX1, MY1, MZ}, CVector{MX1, -189.89799f, MZ}, CVector{MX1, -189.89799f, MZ1}, CVector{MX1, MY1, MZ1},
+    CVector{MX2, MY2, MZ}, CVector{MX2, -221.96899f, MZ}, CVector{MX2, -221.96899f, MZ1}, CVector{MX2, MY2, MZ1}
+};
+*/
+
 void CMirrors::InjectHooks() {
     ReversibleHooks::Install("CMirrors", "Init", 0x723000, &CMirrors::Init);
     ReversibleHooks::Install("CMirrors", "ShutDown", 0x723050, &CMirrors::ShutDown);
@@ -82,22 +98,22 @@ void CMirrors::RenderMirrorBuffer() {
 
     DefinedState();
 
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,(void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,(void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,(void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)pBuffer);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,(void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDZERO);
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     (void*)rwFILTERLINEAR);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)pBuffer);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDONE);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDZERO);
 
     RwImVertexIndex indices[] = { 0, 1, 2, 0, 2, 3 };
 
     if (MirrorFlags & CAM_STAIRS_FOR_PLAYER || bFudgeNow) {
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
         RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-        RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
 
         for (int x = 0; x < 2; x++) {
             constexpr CVector2D uvs[4]{
@@ -182,13 +198,13 @@ void CMirrors::RenderMirrorBuffer() {
         }
     }
 
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)nullptr);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)nullptr);
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
 }
 
 // 0x7266B0
@@ -196,10 +212,10 @@ void CMirrors::BuildCameraMatrixForScreens(CMatrix & mat) {
     const uint32_t timeSeconds = (CTimer::m_snTimeInMilliseconds / 1000u) % 32; // Wrapped to (0, 32]
     const uint32_t timeMsLeftInSecond = CTimer::m_snTimeInMilliseconds % 1000u;
     switch (timeSeconds) {
-    case 0u:
-    case 1u:
-    case 2u:
-    case 3u: {
+    case 0:
+    case 1:
+    case 2:
+    case 3: {
         BuildCamMatrix(
             mat,
             { ((float)timeMsLeftInSecond / 1000.0f + (float)timeSeconds) * 6.0f - 1249.3f, -224.5f, 1064.2f },
@@ -207,20 +223,20 @@ void CMirrors::BuildCameraMatrixForScreens(CMatrix & mat) {
         );
         break;
     }
-    case 10u:
-    case 11u:
-    case 12u:
-    case 13u: {
+    case 10:
+    case 11:
+    case 12:
+    case 13: {
         BuildCamMatrix(mat,
             { -1406.4f, -135.3f, 1045.65f },
             { -1402.5f, -146.8f, 1043.10f }
         );
         break;
     }
-    case 22u:
-    case 23u:
-    case 24u:
-    case 25u: {
+    case 22:
+    case 23:
+    case 24:
+    case 25: {
         BuildCamMatrix(mat,
             { -1479.0f, -290.5f, 1099.54f },
             { -1428.0f, -256.7f, ((float)timeMsLeftInSecond / 1000.0f + (float)(timeSeconds - 22)) * 3.0f + 1057.3f }
@@ -235,10 +251,11 @@ void CMirrors::BuildCameraMatrixForScreens(CMatrix & mat) {
     }
 }
 
+// NOTSA, inlined
 bool CMirrors::IsEitherScreenVisibleToCam() {
     for (int i = 0; i < 2; i++) {
         TheCamera.m_bMirrorActive = false;
-        if (TheCamera.IsSphereVisible(CVector::AvarageN(std::begin(Screens8Track[i]), 4), 8.0f)) {
+        if (TheCamera.IsSphereVisible(CVector::AverageN(std::begin(Screens8Track[i]), 4), 8.0f)) {
             return false;
         }
     }
