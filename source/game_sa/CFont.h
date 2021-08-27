@@ -10,6 +10,7 @@
 #include "CRect.h"
 #include "CSprite2d.h"
 
+// todo: move
 struct CFontChar {
     uint8_t m_cLetter;
     uint8_t _pad0[3];
@@ -24,7 +25,27 @@ struct CFontChar {
     uint8_t m_nFontStyle;
     bool m_bPropOn;
     uint8_t _pad1;
-    RwTexture* m_pFontTexture;
+    uint16_t m_dwFontTexture;
+    uint8_t m_nOutline;
+    uint8_t _pad2;
+public:
+    CFontChar* Set(CFontChar& setup) {
+        m_cLetter = setup.m_cLetter;
+        m_vPosn.x = setup.m_vPosn.x;
+        m_vPosn.y = setup.m_vPosn.y;
+        m_fWidth = setup.m_fWidth;
+        m_fHeight = setup.m_fHeight;
+        m_color = setup.m_color;
+        m_fWrap = setup.m_fWrap;
+        m_fSlant = setup.m_fSlant;
+        m_vSlanRefPoint.x = setup.m_vSlanRefPoint.x;
+        m_vSlanRefPoint.y = setup.m_vSlanRefPoint.y;
+        m_bContainImages = setup.m_bContainImages;
+        m_nFontStyle = setup.m_nFontStyle;
+        m_bPropOn = setup.m_bPropOn;
+        m_dwFontTexture = setup.m_dwFontTexture;
+        m_nOutline = setup.m_nOutline;
+    }
 };
 VALIDATE_SIZE(CFontChar, 0x30);
 

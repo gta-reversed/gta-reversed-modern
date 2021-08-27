@@ -9,8 +9,8 @@
 #include "CFont.h"
 
 CFontChar (&setup)[9] = *(CFontChar(*)[9])0xC716B0;
+CFontChar* pEmptyChar = (CFontChar*)0xC716A8;
 
-CFontChar* m_pEmptyChar = (CFontChar*)0xC716A8;
 CFontChar& CFont::RenderState = *(CFontChar*)0xC71AA0;
 CSprite2d (&CFont::Sprite)[MAX_FONT_SPRITES] = *(CSprite2d(*)[2])0xC71AD0;
 CSprite2d (&CFont::ButtonSprite)[MAX_FONT_BUTTON_SPRITES] = *(CSprite2d(*)[15])0xC71AD8;
@@ -304,8 +304,8 @@ void CFont::InitPerFrame()
     m_nFontShadow = 0;
     m_bNewLine = false;
     m_nExtraFontSymbolId = 0;
-    RenderState.m_pFontTexture = nullptr; // todo: wtf
-    m_pEmptyChar = &setup[0];
+    RenderState.m_dwFontTexture = 0; // todo: wtf
+    pEmptyChar = &setup[0];
 
     CSprite::InitSpriteBuffer();
 }
