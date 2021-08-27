@@ -34,13 +34,13 @@ struct tFontData {
     char m_unpropValue;
 };
 
-enum eFontAlignment : unsigned char {
+enum class eFontAlignment : uint8_t {
     ALIGN_CENTER,
     ALIGN_LEFT,
     ALIGN_RIGHT
 };
 
-enum eFontStyle : unsigned char {
+enum class eFontStyle : uint8_t {
     FONT_GOTHIC,
     FONT_SUBTITLES,
     FONT_MENU,

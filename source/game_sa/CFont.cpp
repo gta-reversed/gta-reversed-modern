@@ -100,7 +100,7 @@ void CFont::Initialise() {
     CFont::SetSlant(0.0);
 
     CFont::SetColor(CRGBA(255, 255, 255, 0));
-    CFont::SetOrientation(ALIGN_LEFT);
+    CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
     CFont::SetJustify(false);
 
     CFont::SetWrapx((float) RsGlobal.maximumWidth);
@@ -110,7 +110,7 @@ void CFont::Initialise() {
 
     CFont::SetBackgroundColor(CRGBA(128, 128, 128, 128));
     CFont::SetProportional(true);
-    CFont::SetFontStyle(FONT_GOTHIC);
+    CFont::SetFontStyle(eFontStyle::FONT_GOTHIC);
     CFont::SetRightJustifyWrap(0.0f);
     CFont::SetAlphaFade(255.0f);
     CFont::SetDropShadowPosition(0);
@@ -202,16 +202,16 @@ void CFont::SetColor(CRGBA color)
 void CFont::SetFontStyle(eFontStyle style)
 {
     switch (style) {
-    case FONT_PRICEDOWN:
+    case eFontStyle::FONT_PRICEDOWN:
         m_FontTextureId = 1;
         m_FontStyle = 1;
         break;
-    case FONT_MENU:
+    case eFontStyle::FONT_MENU:
         m_FontTextureId = 0;
         m_FontStyle = 2;
         break;
     default:
-        m_FontTextureId = style;
+        m_FontTextureId = static_cast<uint8_t>(style);
         m_FontStyle = 0;
     }
 }
@@ -292,8 +292,8 @@ void CFont::SetJustify(bool on)
 // 0x719610
 void CFont::SetOrientation(eFontAlignment alignment)
 {
-    m_bFontCentreAlign = alignment == ALIGN_CENTER;
-    m_bFontRightAlign = alignment == ALIGN_RIGHT;
+    m_bFontCentreAlign = alignment == eFontAlignment::ALIGN_CENTER;
+    m_bFontRightAlign = alignment == eFontAlignment::ALIGN_RIGHT;
 }
 
 // 0x719800 (needs review)
