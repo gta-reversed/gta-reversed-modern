@@ -68,7 +68,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "DefinedState", 0x734650, &DefinedState);
     ReversibleHooks::Install("common", "DefinedState2d", 0x734750, &DefinedState2d);
 
-//    ReversibleHooks::Install("common", "GetNameAndDamage", 0x5370A0, &GetNameAndDamage);
+    ReversibleHooks::Install("common", "GetNameAndDamage", 0x5370A0, &GetNameAndDamage);
     ReversibleHooks::Install("common", "GetFirstAtomicCallback", 0x734810, &GetFirstAtomicCallback);
     ReversibleHooks::Install("common", "GetFirstAtomic", 0x734820, &GetFirstAtomic);
 //    ReversibleHooks::Install("common", "Get2DEffectAtomicCallback", 0x734850, &Get2DEffectAtomicCallback);
@@ -276,6 +276,13 @@ char* MakeUpperCase(char* dest, const char * src) {
     return dest;
 }
 
+// NOTSA
+bool EndsWith(const char* str, const char* with, bool caseSensitive) {
+    const auto strsz = strlen(str), withsz = strlen(with);
+    assert(strsz >= withsz);
+    return (caseSensitive ? strncmp : _strnicmp)(str + strsz - withsz, with, withsz) == 0;
+}
+
 // 0x734610
 void CreateDebugFont() {
     // NOP
@@ -352,9 +359,37 @@ void DefinedState2d() {
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)2); // TODO: ?
 }
 
+// TODO: Check `outName` size (to avoid buffer overflow)
 // 0x5370A0
 void GetNameAndDamage(const char* nodeName, char* outName, bool& outDamage) {
-    plugin::Call<0x5370A0, const char*, char*, bool&>(nodeName, outName, outDamage);
+    const size_t nodesz = strlen(nodeName);
+
+    const auto TerminatedCopy = [=](size_t offset) {
+        strncpy(outName, nodeName, nodesz - offset);
+        outName[nodesz - offset] = 0;
+    };
+
+    // EndsWith "_dam"
+    if (nodeName[nodesz - 4] == '_' &&
+        nodeName[nodesz - 3] == 'd' &&
+        nodeName[nodesz - 2] == 'a' &&
+        nodeName[nodesz - 1] == 'm'
+    ) {
+        outDamage = true;
+        TerminatedCopy(sizeof("_dam") - 1);
+    }
+    else {
+        outDamage = false;
+        // EndsWith "_l0" or "_L0"
+        if (
+            nodeName[nodesz - 3] == '_' &&
+            (nodeName[nodesz - 2] == 'L' || nodeName[nodesz - 2] == 'l') &&
+            nodeName[nodesz - 1] == '0'
+        ) {
+            TerminatedCopy(sizeof("_l0") - 1);
+        } else
+            strcpy(outName, nodeName);
+    }
 }
 
 // Converted from cdecl RpAtomic* GetFirstAtomicCallback(RpAtomic *atomic,void *data) 0x734810

@@ -879,6 +879,7 @@ void CDebugMenu::ImguiDrawLoop() {
     }
 
     DebugCode();
+    ReversibleHooks::CheckAll();
 
     if (!m_showMenu)
         return;

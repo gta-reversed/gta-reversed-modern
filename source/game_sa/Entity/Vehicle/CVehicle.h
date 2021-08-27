@@ -58,7 +58,7 @@ enum eVehicleLightsFlags {
     VEHICLE_LIGHTS_DISABLE_REAR = 32
 };
 
-enum eVehicleCreatedBy {
+enum eVehicleCreatedBy : uint8_t {
     RANDOM_VEHICLE = 1,
     MISSION_VEHICLE = 2,
     PARKED_VEHICLE = 3,
@@ -154,7 +154,7 @@ VALIDATE_SIZE(tHydrualicData, 0x28);
 class CVehicle : public CPhysical {
 public:
     CVehicle(plugin::dummy_func_t) : CPhysical() {} //TODO: Remove
-    CVehicle(unsigned char createdBy);
+    CVehicle(eVehicleCreatedBy createdBy);
     ~CVehicle() override;
     static void* operator new(unsigned int size);
     static void operator delete(void* data);
@@ -301,7 +301,7 @@ public:
     float  m_f2ndSteerAngle; // used for steering 2nd set of wheels or elevators etc..
     float  m_fGasPedal;
     float  m_fBreakPedal;
-    unsigned char  m_nCreatedBy; // see eVehicleCreatedBy
+    eVehicleCreatedBy  m_nCreatedBy;
     short m_nExtendedRemovalRange; // when game wants to delete a vehicle, it gets min(m_wExtendedRemovalRange, 170.0)
     unsigned char m_nBombOnBoard : 3; // 0 = None
                               // 1 = Timed
@@ -657,7 +657,7 @@ public:
     bool IsConstructionVehicle() const { return  m_nModelIndex == MODEL_DUMPER || m_nModelIndex == MODEL_DOZER || m_nModelIndex == MODEL_FORKLIFT; }
     bool IsRoadVehicle() const { return m_vehicleSubType != VEHICLE_HELI && m_vehicleSubType != VEHICLE_PLANE && m_vehicleSubType != VEHICLE_TRAIN; }
 
-    inline unsigned char GetCreatedBy() { return m_nCreatedBy; }
+    inline eVehicleCreatedBy GetCreatedBy() { return m_nCreatedBy; }
     inline bool IsCreatedBy(eVehicleCreatedBy v) { return v == m_nCreatedBy; }
 
     bool CanUpdateHornCounter() { return m_nAlarmState == 0 || m_nAlarmState == -1 || m_nStatus == STATUS_WRECKED; }

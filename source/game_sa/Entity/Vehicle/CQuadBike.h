@@ -49,7 +49,7 @@ public:
 public:
     static void InjectHooks();
 
-    CQuadBike(int modelIndex, unsigned char createdBy);
+    CQuadBike(int modelIndex, eVehicleCreatedBy createdBy);
 
     ~CQuadBike() override;
 

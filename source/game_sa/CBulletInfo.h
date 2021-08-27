@@ -11,7 +11,7 @@
 #include "eWeaponType.h"
 #include "CEntity.h"
 
-class  CBulletInfo {
+class CBulletInfo {
 public:
     eWeaponType m_nWeaponType;
     CEntity *m_pCreator;
@@ -26,6 +26,8 @@ public:
 private:
     char _pad2A[2];
 public:
+
+    static void InjectHooks();
 
     static void Initialise();
     static void Shutdown();

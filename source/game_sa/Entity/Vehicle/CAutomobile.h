@@ -208,7 +208,7 @@ private:
 public:
     static void InjectHooks();
     //funcs
-    CAutomobile(int modelIndex, unsigned char createdBy, bool setupSuspensionLines);
+    CAutomobile(int modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines);
 
     void SetEngineState(bool state)
     {

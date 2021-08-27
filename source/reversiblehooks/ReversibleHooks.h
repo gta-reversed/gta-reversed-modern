@@ -25,7 +25,10 @@ struct SReversibleHook {
     std::string m_sFunctionName;
     eReversibleHookType m_eHookType;
 
+    SReversibleHook(std::string id, std::string name, eReversibleHookType type);
+    virtual ~SReversibleHook() = default;
     virtual void Switch() = 0;
+    virtual void Check() = 0;
 };
 
 struct SSimpleReversibleHook : SReversibleHook {
@@ -39,8 +42,12 @@ struct SSimpleReversibleHook : SReversibleHook {
     unsigned int m_iLibHookedBytes;
     unsigned int m_iLibFunctionAddress;
 
-    static std::shared_ptr<SSimpleReversibleHook> InstallHook(uint32_t installAddress, void* addressToJumpTo, int iJmpCodeSize = 5);
+    SSimpleReversibleHook(std::string id, std::string name, uint32_t installAddress, void* addressToJumpTo, int iJmpCodeSize = 5);
+    bool CheckLibFnForChangesAndStore(void* expected);
+    void ApplyJumpToGTACode();
     virtual void Switch() override;
+    virtual void Check() override;
+    virtual ~SSimpleReversibleHook() override = default;
 };
 
 struct SVirtualReversibleHook : SReversibleHook {
@@ -48,52 +55,45 @@ struct SVirtualReversibleHook : SReversibleHook {
     uint32_t m_OriginalFunctionAddress;
     uint32_t m_LibFunctionAddress;
 
-    static std::shared_ptr<SVirtualReversibleHook> InstallHook(void* libFuncAddress, const std::vector<uint32_t>& vecAddressesToHook);
+    SVirtualReversibleHook(std::string id, std::string name, void* libFuncAddress, const std::vector<uint32_t>& vecAddressesToHook);
     virtual void Switch() override;
+    virtual void Check() override {}
+    virtual ~SVirtualReversibleHook() override = default;
 };
 
-class ReversibleHooks {
-public:
-    static ReversibleHooks& GetInstance() {
-        static ReversibleHooks instance;
-        return instance;
-    }
+namespace ReversibleHooks {
+    namespace detail {
+        void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, unsigned int installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, bool bDisableByDefault = false);
+        void HookInstallVirtual(const std::string& sIdentifier, const std::string& sFuncName, void* libVTableAddress, const std::vector<uint32_t>& vecAddressesToHook);
+        void HookSwitch(std::shared_ptr<SReversibleHook> pHook);
+        bool IsFunctionHooked(const std::string& sIdentifier, const std::string& sFuncName);
+        std::shared_ptr<SReversibleHook> GetHook(const std::string& sIdentifier, const std::string& sFuncName);
+        void VirtualCopy(void* dst, void* src, size_t nbytes);
+    };
 
     template <typename T>
     static void Install(const std::string& sIdentifier, const std::string& sFuncName, DWORD installAddress, T addressToJumpTo, bool bDisableByDefault = false, int iJmpCodeSize = 5) {
         auto ptr = FunctionPointerToVoidP(addressToJumpTo);
-        ReversibleHooks::GetInstance().HookInstall(sIdentifier, sFuncName, installAddress, ptr, iJmpCodeSize, bDisableByDefault);
+        detail::HookInstall(sIdentifier, sFuncName, installAddress, ptr, iJmpCodeSize, bDisableByDefault);
     }
 
     template <typename T>
     static void InstallVirtual(const std::string& sIdentifier, const std::string& sFuncName, T libVTableAddress, const std::vector<uint32_t>& vecAddressesToHook) {
         auto ptr = FunctionPointerToVoidP(libVTableAddress);
-        ReversibleHooks::GetInstance().HookInstallVirtual(sIdentifier, sFuncName, ptr, vecAddressesToHook);
+        detail::HookInstallVirtual(sIdentifier, sFuncName, ptr, vecAddressesToHook);
     }
 
     static void Switch(std::shared_ptr<SReversibleHook> pHook) {
-        ReversibleHooks::GetInstance().HookSwitch(pHook);
-    }
-    static std::map<std::string, std::vector<std::shared_ptr<SReversibleHook>>>& GetAllHooks() {
-        return ReversibleHooks::GetInstance().m_HooksMap;
+        detail::HookSwitch(pHook);
     }
 
-    static void UnHook(const std::string& className, const char* functionName = nullptr);
-private:
-    void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, unsigned int installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, bool bDisableByDefault = false);
-    void HookInstallVirtual(const std::string& sIdentifier, const std::string& sFuncName, void* libVTableAddress, const std::vector<uint32_t>& vecAddressesToHook);
-    void HookSwitch(std::shared_ptr<SReversibleHook> pHook) const;
-    bool IsFunctionHooked(const std::string& sIdentifier, const std::string& sFuncName);
-    std::shared_ptr<SReversibleHook> GetHook(const std::string& sIdentifier, const std::string& sFuncName);
+    std::map<std::string, std::vector<std::shared_ptr<SReversibleHook>>>& GetAllHooks();
 
-public:
-    static constexpr unsigned int x86JMPSize = 5U;
-    static unsigned int GetJMPLocation(unsigned int dwFrom, unsigned int dwTo);
-    static unsigned int GetFunctionLocationFromJMP(unsigned int dwJmpLoc, unsigned int dwJmpOffset);
+    void UnHook(const std::string& className, const char* functionName = nullptr);
 
-private:
-    std::map<std::string, std::vector<std::shared_ptr<SReversibleHook>>> m_HooksMap;
-    ReversibleHooks() = default;
-    ReversibleHooks(ReversibleHooks const&) = delete;
-    void operator=(ReversibleHooks const&) = delete;
+    void CheckAll();
+
+    constexpr unsigned int x86JMPSize = 5U;
+    constexpr auto GetJMPLocation(unsigned int dwFrom, unsigned int dwTo) { return dwTo - dwFrom - x86JMPSize; }
+    constexpr auto GetFunctionLocationFromJMP(unsigned int dwJmpLoc, unsigned int dwJmpOffset) { return dwJmpOffset + dwJmpLoc + x86JMPSize; }
 };

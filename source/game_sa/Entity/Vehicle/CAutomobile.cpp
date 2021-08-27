@@ -49,8 +49,8 @@ void CAutomobile::InjectHooks()
     ReversibleHooks::Install("CAutomobile", "ClearHeliOrientation", 0x6A2460, &CAutomobile::ClearHeliOrientation);
 }
 
-CAutomobile::CAutomobile(int modelIndex, unsigned char createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy) {
-    plugin::CallMethod<0x6B0A90, CAutomobile*, int, unsigned char, bool>(this, modelIndex, createdBy, setupSuspensionLines);
+CAutomobile::CAutomobile(int modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy) {
+    plugin::CallMethod<0x6B0A90, CAutomobile*, int, eVehicleCreatedBy, bool>(this, modelIndex, createdBy, setupSuspensionLines);
 }
 
 // 0x6B4410
