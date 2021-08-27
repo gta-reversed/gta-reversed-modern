@@ -63,6 +63,9 @@ void CFont::InjectHooks() {
     ReversibleHooks::Install("CFont", "SetOrientation", 0x719610, &CFont::SetOrientation);
 
     ReversibleHooks::Install("CFont", "DrawFonts", 0x71A210, &CFont::DrawFonts);
+
+    // wip
+    ReversibleHooks::Install("CFont", "GetTextRect", 0x71A620, &CFont::GetTextRect);
 }
 
 // 0x7187C0
@@ -307,8 +310,7 @@ float CFont::GetStringWidth(char* string, bool unk1, bool unk2)
     return ((float(__cdecl*)(char*, bool, bool))0x71A0E0)(string, unk1, unk2);
 }
 
-// same as RenderFontBuffer()
-// 0x71A210
+// same as RenderFontBuffer() (0x71A210)
 void CFont::DrawFonts() {
     RenderFontBuffer();
 }
@@ -328,9 +330,26 @@ short CFont::ProcessStringToDisplay(float x, float y, char* text)
     return ((short(__cdecl*)(float, float, char*))0x71A600)(x, y, text);
 }
 
+// 0x71A620
 void CFont::GetTextRect(CRect* rect, float x, float y, char* text)
 {
-    ((void(__cdecl*)(CRect*, float, float, char*))0x71A620)(rect, x, y, text);
+    auto nLines = GetNumberLines(x, y, text);
+
+    if (m_bFontCentreAlign) {
+        rect->left = m_fFontCentreSize / 2.0f - x + 4.0f;
+        rect->right = m_fFontCentreSize / 2.0f + x + 4.0f;
+    }
+    else if (m_bFontRightAlign) {
+        rect->left = m_fRightJustifyWrap - 4.0f;
+        rect->right = x;
+    }
+    else {
+        rect->left = x - 4.0f;
+        rect->right = m_fWrapx + 4.0f;
+    }
+
+    rect->bottom = y - 4.0f;
+    rect->top = nLines * (32.0f * m_Scale->y * 0.5f + 2.0f * m_Scale->y) + y + 4.0f;
 }
 
 void CFont::PrintString(float x, float y, const char* text)
