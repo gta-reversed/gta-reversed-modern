@@ -79,7 +79,7 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "GetFirstChild", 0x734900, &GetFirstChild);
 //    ReversibleHooks::Install("common", "GetFirstTextureCallback", 0x734930, &GetFirstTextureCallback);
 //    ReversibleHooks::Install("common", "GetFirstTexture", 0x734940, &GetFirstTexture);
-    ReversibleHooks::Install("common", "skinAtomicGetHAnimHierarchCB", 0x734A20, &skinAtomicGetHAnimHierarchCB);
+    ReversibleHooks::Install("common", "SkinAtomicGetHAnimHierarchCB", 0x734A20, &SkinAtomicGetHAnimHierarchCB);
     ReversibleHooks::Install("common", "GetAnimHierarchyFromSkinClump", 0x734A40, &GetAnimHierarchyFromSkinClump);
 //    ReversibleHooks::Install("common", "GetAnimHierarchyFromFrame", 0x734AB0, &GetAnimHierarchyFromFrame);
     ReversibleHooks::Install("common", "GetAnimHierarchyFromClump", 0x734B10, &GetAnimHierarchyFromClump);
@@ -392,80 +392,82 @@ void GetNameAndDamage(const char* nodeName, char* outName, bool& outDamage) {
     }
 }
 
-// Converted from cdecl RpAtomic* GetFirstAtomicCallback(RpAtomic *atomic,void *data) 0x734810
+// 0x734810
 RpAtomic* GetFirstAtomicCallback(RpAtomic* atomic, void* data) {
     *(RpAtomic**)(data) = atomic;
     return nullptr;
 }
 
-// Converted from cdecl RpAtomic* GetFirstAtomic(RpClump *clump) 0x734820
+// 0x734820
 RpAtomic* GetFirstAtomic(RpClump* clump) {
     RpAtomic* atomic{};
     RpClumpForAllAtomics(clump, GetFirstAtomicCallback, &atomic);
     return atomic;
 }
 
-// Converted from cdecl RpAtomic* Get2DEffectAtomicCallback(RpAtomic *atomic,void *data) 0x734850
+// 0x734850
 RpAtomic* Get2DEffectAtomicCallback(RpAtomic* atomic, void* data) {
     return ((RpAtomic* (__cdecl *)(RpAtomic*, void*))0x734850)(atomic, data);
 }
 
-// Converted from cdecl RpAtomic* Get2DEffectAtomic(RpClump *clump) 0x734880
+// 0x734880
 RpAtomic* Get2DEffectAtomic(RpClump* clump) {
     RpAtomic* atomic{};
     RpClumpForAllAtomics(clump, Get2DEffectAtomicCallback, &atomic);
     return atomic;
 }
 
-// Converted from cdecl RwObject* GetFirstObjectCallback(RwObject *object,void *data) 0x7348B0
+// 0x7348B0
 RwObject* GetFirstObjectCallback(RwObject* object, void* data) {
     *(RwObject**)(data) = object;
     return nullptr;
 }
 
-// Converted from cdecl RwObject* GetFirstObject(RwFrame *frame) 0x7348C0
+// 0x7348C0
 RwObject* GetFirstObject(RwFrame* frame) {
     RwObject* obj{};
     RwFrameForAllObjects(frame, GetFirstObjectCallback, &obj);
     return obj;
 }
 
-// Converted from cdecl RwFrame* GetFirstFrameCallback(RwFrame *frame,void *data) 0x7348F0
+// 0x7348F0
 RwFrame* GetFirstFrameCallback(RwFrame* frame, void* data) {
     *(RwFrame**)(data) = frame;
     return nullptr;
 }
 
-// Converted from cdecl RwFrame* GetFirstChild(RwFrame *frame) 0x734900
+// 0x734900
 RwFrame* GetFirstChild(RwFrame* frame) {
     RwFrame* child{};
     RwFrameForAllChildren(frame, GetFirstFrameCallback, &child);
     return child;
 }
 
-RpAtomic* skinAtomicGetHAnimHierarchCB(RpAtomic* atomic, void* data) {
+// name not from Android
+// 0x734A20
+RpAtomic* SkinAtomicGetHAnimHierarchCB(RpAtomic* atomic, void* data) {
     *(RpHAnimHierarchy**)(data) = RpSkinAtomicGetHAnimHierarchy(atomic);
     return nullptr;
 }
 
-// Converted from cdecl RpHAnimHierarchy* GetAnimHierarchyFromSkinClump(RpClump *clump) 0x734A40
+// 0x734A40
 RpHAnimHierarchy* GetAnimHierarchyFromSkinClump(RpClump* clump) {
     RpHAnimHierarchy* bugstarDevFrom2003{};
-    RpClumpForAllAtomics(clump, skinAtomicGetHAnimHierarchCB, &bugstarDevFrom2003);
+    RpClumpForAllAtomics(clump, SkinAtomicGetHAnimHierarchCB, &bugstarDevFrom2003);
     return bugstarDevFrom2003;
 }
 
-// Converted from cdecl RpHAnimHierarchy* GetAnimHierarchyFromFrame(RwFrame *frame) 0x734AB0
+// 0x734AB0
 RpHAnimHierarchy* GetAnimHierarchyFromFrame(RwFrame* frame) {
     return ((RpHAnimHierarchy* (__cdecl *)(RwFrame*))0x734AB0)(frame);
 }
 
-// Converted from cdecl RpHAnimHierarchy* GetAnimHierarchyFromClump(RpClump *clump) 0x734B10
+// 0x734B10
 RpHAnimHierarchy* GetAnimHierarchyFromClump(RpClump* clump) {
     return GetAnimHierarchyFromFrame(RpClumpGetFrame(clump));
 }
 
-// Converted from cdecl RpAtomic* AtomicRemoveAnimFromSkinCB(RpAtomic *atomic,void *data) 0x734B90
+// 0x734B90
 RpAtomic* AtomicRemoveAnimFromSkinCB(RpAtomic* atomic, void* data) {
     if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))) {
         if (RpHAnimHierarchy* hier = RpSkinAtomicGetHAnimHierarchy(atomic)) {
@@ -478,7 +480,7 @@ RpAtomic* AtomicRemoveAnimFromSkinCB(RpAtomic* atomic, void* data) {
     return atomic;
 }
 
-// Converted from cdecl bool RpAtomicConvertGeometryToTL(RpAtomic *atomic) 0x734BE0
+// 0x734BE0
 bool RpAtomicConvertGeometryToTL(RpAtomic* atomic) {
     RpGeometry* pGeom = RpAtomicGetGeometry(atomic);
 
@@ -493,7 +495,7 @@ bool RpAtomicConvertGeometryToTL(RpAtomic* atomic) {
     return true;
 }
 
-// Converted from cdecl bool RpAtomicConvertGeometryToTS(RpAtomic *atomic) 0x734C20
+// 0x734C20
 bool RpAtomicConvertGeometryToTS(RpAtomic* atomic) {
     RpGeometry* pGeom = RpAtomicGetGeometry(atomic);
 
@@ -516,7 +518,7 @@ RpAtomic* atomicConvertGeometryToTL(RpAtomic* atomic, void* data) {
     return atomic;
 }
 
-// Converted from cdecl bool RpClumpConvertGeometryToTL(RpClump *clump) 0x734CB0
+// 0x734CB0
 bool RpClumpConvertGeometryToTL(RpClump* clump) {
     bool success{ true };
     RpClumpForAllAtomics(clump, atomicConvertGeometryToTL, &success);
@@ -531,64 +533,64 @@ RpAtomic* atomicConvertGeometryToTS(RpAtomic* atomic, void* data) {
     return atomic;
 }
 
-// Converted from cdecl bool RpClumpConvertGeometryToTS(RpClump *clump) 0x734D30
+// 0x734D30
 bool RpClumpConvertGeometryToTS(RpClump* clump) {
     bool success{ true };
     RpClumpForAllAtomics(clump, atomicConvertGeometryToTS, &success);
     return success;
 }
 
-// Converted from cdecl RpMaterial* forceLinearFilteringMatTexturesCB(RpMaterial *material,void *data) 0x734D60
+// 0x734D60
 RpMaterial* forceLinearFilteringMatTexturesCB(RpMaterial* material, void* data) {
     if (RwTexture* tex = RpMaterialGetTexture(material))
         RwTextureSetFilterMode(tex, (RwTextureFilterMode)((unsigned)data));
     return material;
 }
 
-// Converted from cdecl bool SetFilterModeOnAtomicsTextures(RpAtomic *atomic,RwTextureFilterMode filtering) 0x734D80
+// 0x734D80
 bool SetFilterModeOnAtomicsTextures(RpAtomic* atomic, RwTextureFilterMode filtering) {
     RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), forceLinearFilteringMatTexturesCB, (void*)(unsigned)filtering);
     return true;
 }
 
-// Converted from cdecl RpAtomic* forceLinearFilteringAtomicsCB(RpAtomic *atomic,void *data) 0x734DA0
+// 0x734DA0
 RpAtomic* forceLinearFilteringAtomicsCB(RpAtomic* atomic, void* data) {
     SetFilterModeOnAtomicsTextures(atomic, (RwTextureFilterMode)((unsigned)data));
     return atomic;
 }
 
-// Converted from cdecl bool SetFilterModeOnClumpsTextures(RpClump *clump,RwTextureFilterMode filtering) 0x734DC0
+// 0x734DC0
 bool SetFilterModeOnClumpsTextures(RpClump* clump, RwTextureFilterMode filtering) {
     RpClumpForAllAtomics(clump, forceLinearFilteringAtomicsCB, (void*)(unsigned)filtering);
     return true;
 }
 
-// Converted from cdecl bool RpGeometryReplaceOldMaterialWithNewMaterial(RpGeometry *geometry,RpMaterial *oldMaterial,RpMaterial *newMaterial) 0x734DE0
+// 0x734DE0
 bool RpGeometryReplaceOldMaterialWithNewMaterial(RpGeometry* geometry, RpMaterial* oldMaterial, RpMaterial* newMaterial) {
     return ((bool(__cdecl *)(RpGeometry*, RpMaterial*, RpMaterial*))0x734DE0)(geometry, oldMaterial, newMaterial);
 }
 
-// Converted from cdecl RwTexture* RwTexDictionaryFindHashNamedTexture(RwTexDictionary *txd,uint hash) 0x734E50
+// 0x734E50
 RwTexture* RwTexDictionaryFindHashNamedTexture(RwTexDictionary* txd, unsigned int hash) {
     return ((RwTexture* (__cdecl *)(RwTexDictionary*, unsigned int))0x734E50)(txd, hash);
 }
 
-// Converted from cdecl RpClump* RpClumpGetBoundingSphere(RpClump *clump,RwSphere *bound,bool) 0x734FC0
+// 0x734FC0
 RpClump* RpClumpGetBoundingSphere(RpClump* clump, RwSphere* bound, bool arg2) {
     return ((RpClump* (__cdecl *)(RpClump*, RwSphere*, bool))0x734FC0)(clump, bound, arg2);
 }
 
-// Converted from cdecl void SkinGetBonePositions(RpClump *clump) 0x735140
+// 0x735140
 void SkinGetBonePositions(RpClump* clump) {
     ((void(__cdecl *)(RpClump*))0x735140)(clump);
 }
 
-// Converted from cdecl void SkinSetBonePositions(RpClump *clump) 0x7352D0
+// 0x7352D0
 void SkinSetBonePositions(RpClump* clump) {
     ((void(__cdecl *)(RpClump*))0x7352D0)(clump);
 }
 
-// Converted from cdecl void SkinGetBonePositionsToTable(RpClump *clump,RwV3d *table) 0x735360
+// 0x735360
 void SkinGetBonePositionsToTable(RpClump* clump, RwV3d* table) {
     ((void(__cdecl *)(RpClump*, RwV3d*))0x735360)(clump, table);
 }
@@ -1066,16 +1068,15 @@ bool RpAnimBlendPluginAttach() {
     return plugin::CallAndReturn<bool, 0x4D6150>();
 }
 
-// US-1.00 @ 0x005A4150
-// EU-1.00 @ 0x005A4150
-void WriteRaster(RwRaster * pRaster, char const * pszPath) {
-    assert(pRaster);
-    assert(pszPath && pszPath[0]);
+// 0x5A4150
+void WriteRaster(RwRaster* raster, char const* path) {
+    assert(raster);
+    assert(path && path[0]);
 
-    RwImage* img = RwImageCreate(RwRasterGetWidth(pRaster), RwRasterGetHeight(pRaster), RwRasterGetDepth(pRaster));
+    RwImage* img = RwImageCreate(RwRasterGetWidth(raster), RwRasterGetHeight(raster), RwRasterGetDepth(raster));
     RwImageAllocatePixels(img);
-    RwImageSetFromRaster(img, pRaster);
-    RtPNGImageWrite(img, pszPath);
+    RwImageSetFromRaster(img, raster);
+    RtPNGImageWrite(img, path);
     RwImageDestroy(img);
 }
 
