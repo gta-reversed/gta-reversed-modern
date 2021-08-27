@@ -63,5 +63,6 @@ public:
     static void UpdateTimeStep(float fTimeStep);
 
     static inline uint32_t GetTimeStepInMilliseconds() { return static_cast<uint32_t>(ms_fTimeStep * 20.0F); }
+    static auto GetTimeMs() { return m_snTimeInMilliseconds; }
     static void Update();
 };

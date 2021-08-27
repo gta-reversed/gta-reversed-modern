@@ -30,6 +30,7 @@ public:
     CWaterCannon* Destructor();
 
     void Init();
+    bool HasActiveSection() const;
     void Update_OncePerFrame(short);
     void Update_NewInput(CVector* start, CVector* end);
     void PushPeds();
