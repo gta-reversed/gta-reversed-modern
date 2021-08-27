@@ -30,9 +30,9 @@ CTaskComplexPartnerChat* CTaskComplexPartnerChat::Constructor(const char* comman
 }
 
 
-bool CTaskComplexPartnerChat::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskComplexPartnerChat::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x682C60, CTask*, CPed*, int, CEvent*>(this, ped, priority, _event);
+    return plugin::CallMethodAndReturn<bool, 0x682C60, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
 }
 
 CTaskComplexSequence* CTaskComplexPartnerChat::GetPartnerSequence()

@@ -1,6 +1,6 @@
 #pragma once
 
-enum class eCrimeType : unsigned int {
+enum eCrimeType : unsigned int {
     CRIME_NONE = 0,
     CRIME_FIRE_WEAPON = 1,
     CRIME_DAMAGED_PED = 2,

@@ -50,9 +50,9 @@ bool CTaskSimpleInAir::ProcessPed(CPed* ped)
 }
 
 // 0x678DC0
-bool CTaskSimpleInAir::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleInAir::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return MakeAbortable_Reversed(ped, priority, _event);
+    return MakeAbortable_Reversed(ped, priority, event);
 }
 
 bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
@@ -207,12 +207,12 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
     return false;
 }
 
-bool CTaskSimpleInAir::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleInAir::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
     if (priority == ABORT_PRIORITY_IMMEDIATE
         || priority == ABORT_PRIORITY_URGENT && (
             ped->bIsDrowning
-            || _event && (_event->GetEventType() == EVENT_SCRIPT_COMMAND && _event->GetEventPriority() == 71 || _event->GetEventType() == EVENT_STUCK_IN_AIR)
+            || event && (event->GetEventType() == EVENT_SCRIPT_COMMAND && event->GetEventPriority() == 71 || event->GetEventType() == EVENT_STUCK_IN_AIR)
             )
         )
     {

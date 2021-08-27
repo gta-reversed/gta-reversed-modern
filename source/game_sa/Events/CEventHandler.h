@@ -6,15 +6,13 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CEventHandlerHistory.h"
 
 class CTask;
 class CEvent;
 class CPed;
 
-class CEventHandler
-{
+class CEventHandler {
 public:
     CPed* m_ped;
     CEventHandlerHistory m_history;
@@ -24,10 +22,11 @@ public:
     CTask* m_sayTask;
     CTask* m_partialAnimTask;
 
+public:
     void HandleEvents();
     void FlushImmediately();
     eEventType GetCurrentEventType();
-    static bool IsTemporaryEvent(CEvent* _event);
+    static bool IsTemporaryEvent(const CEvent& event);
 };
 
 VALIDATE_SIZE(CEventHandler, 0x34);

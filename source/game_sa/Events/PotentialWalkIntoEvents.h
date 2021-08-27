@@ -15,10 +15,10 @@ public:
 private:
     CEventPotentialWalkIntoVehicle* Constructor(CVehicle* vehicle, std::int32_t moveState);
 public:
-    eEventType GetEventType() override { return EVENT_POTENTIAL_WALK_INTO_VEHICLE; }
-    bool TakesPriorityOver(CEvent* refEvent) override { return true; }
+    eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_VEHICLE; }
+    bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
     CEventPotentialWalkIntoVehicle* CloneEditable() override { return new CEventPotentialWalkIntoVehicle(m_vehicle, m_moveState); }
-    std::int32_t GetEventPriority() override { return 29; }
+    int32_t GetEventPriority() const override { return 29; }
     std::int32_t GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
 private:
@@ -40,10 +40,10 @@ public:
 private:
     CEventPotentialWalkIntoObject* Constructor(CObject* object, std::int32_t moveState);
 public:
-    eEventType GetEventType() override { return EVENT_POTENTIAL_WALK_INTO_OBJECT; }
-    bool TakesPriorityOver(CEvent* refEvent) override { return true; }
+    eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_OBJECT; }
+    bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
     CEventPotentialWalkIntoObject* CloneEditable() override { return new CEventPotentialWalkIntoObject(m_object, m_moveState); }
-    std::int32_t GetEventPriority() override { return 27; }
+    int32_t GetEventPriority() const override { return 27; }
     std::int32_t GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
 private:
@@ -66,8 +66,8 @@ public:
 private:
     CEventPotentialWalkIntoFire* Constructor(CVector* firePos, float fireSize, std::int32_t moveState);
 public:
-    eEventType GetEventType() override { return EVENT_POTENTIAL_WALK_INTO_FIRE; }
-    std::int32_t GetEventPriority() override { return 31; }
+    eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_FIRE; }
+    int32_t GetEventPriority() const override { return 31; }
     std::int32_t GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     CEventPotentialWalkIntoFire* CloneEditable() override { return new CEventPotentialWalkIntoFire(&m_firePos, m_fireSize, m_moveState); }
@@ -91,16 +91,16 @@ public:
 private:
     CEventPotentialWalkIntoPed* Constructor(CPed* ped, CVector* targetPoint, std::int32_t moveState);
 public:
-    eEventType GetEventType() override { return EVENT_POTENTIAL_WALK_INTO_PED; }
-    std::int32_t GetEventPriority() override { return 28; }
+    eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_PED; }
+    int32_t GetEventPriority() const override { return 28; }
     std::int32_t GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
-    CEntity* GetSourceEntity() override { return m_ped; }
-    bool TakesPriorityOver(CEvent* refEvent) override;
+    CEntity* GetSourceEntity() const override { return m_ped; }
+    bool TakesPriorityOver(const CEvent& refEvent) override;
     CEventPotentialWalkIntoPed* CloneEditable() override { return new CEventPotentialWalkIntoPed(m_ped, &m_targetPoint, m_moveState); }
 private:
     bool AffectsPed_Reversed(CPed* ped);
-    bool TakesPriorityOver_Reversed(CEvent* refEvent);
+    bool TakesPriorityOver_Reversed(const CEvent& refEvent);
 };
 
 VALIDATE_SIZE(CEventPotentialWalkIntoPed, 0x28);

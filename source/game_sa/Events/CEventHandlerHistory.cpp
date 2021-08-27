@@ -96,7 +96,7 @@ void CEventHandlerHistory::RecordCurrentEvent(CPed* ped, CEvent& event)
     plugin::CallMethod<0x4BC4B0, CEventHandlerHistory*, CPed*, CEvent&>(this, ped, event);
 #else
     if (event.GetEventType() != EVENT_SCRIPT_COMMAND) {
-        if (CEventHandler::IsTemporaryEvent(&event)) {
+        if (CEventHandler::IsTemporaryEvent(event)) {
             if (m_nonTempEvent) {
                 StoreActiveEvent();
                 m_nonTempEvent = nullptr;
@@ -131,14 +131,14 @@ bool CEventHandlerHistory::TakesPriorityOverCurrentEvent(CEvent& event)
     return plugin::CallMethodAndReturn<bool, 0x4BC580, CEventHandlerHistory*, CEvent&>(this, event);
 #else
     if (m_nonTempEvent)
-        return event.TakesPriorityOver(m_nonTempEvent);
+        return event.TakesPriorityOver(*m_nonTempEvent);
     if (!m_tempEvent)
         return true;
-    if (CEventHandler::IsTemporaryEvent(&event))
-        return event.TakesPriorityOver(m_tempEvent);
-    if (!event.TakesPriorityOver(m_tempEvent))
+    if (CEventHandler::IsTemporaryEvent(event))
+        return event.TakesPriorityOver(*m_tempEvent);
+    if (!event.TakesPriorityOver(*m_tempEvent))
         return false;
-    if (!m_storedActiveEvent || event.TakesPriorityOver(m_storedActiveEvent))
+    if (!m_storedActiveEvent || event.TakesPriorityOver(*m_storedActiveEvent))
         return true;
     return false;
 #endif

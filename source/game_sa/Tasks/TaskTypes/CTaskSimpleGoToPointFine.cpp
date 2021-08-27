@@ -40,12 +40,12 @@ CTask* CTaskSimpleGoToPointFine::Clone()
 #endif
 }
 
-bool CTaskSimpleGoToPointFine::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleGoToPointFine::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<bool, 0x663500, CTask*, CPed*, int, CEvent*>(this, ped, priority, _event);
+    return plugin::CallMethodAndReturn<bool, 0x663500, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
 #else
-    return CTaskSimpleGoToPointFine::MakeAbortable_Reversed(ped, priority, _event);
+    return CTaskSimpleGoToPointFine::MakeAbortable_Reversed(ped, priority, event);
 #endif
 }
 
@@ -63,7 +63,7 @@ CTask* CTaskSimpleGoToPointFine::Clone_Reversed()
     return new CTaskSimpleGoToPointFine(m_fBlend, m_vecTargetPoint, m_fRadius, 0);
 }
 
-bool CTaskSimpleGoToPointFine::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleGoToPointFine::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
     QuitIK(ped);
     ped->SetMoveState(PEDMOVE_STILL);
