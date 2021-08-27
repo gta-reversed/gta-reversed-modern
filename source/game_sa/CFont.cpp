@@ -174,10 +174,10 @@ void CFont::SetFontStyle(eFontStyle style)
         m_FontTextureId = 0;
         m_FontStyle = 2;
         break;
+    default:
+        m_FontTextureId = style;
+        m_FontStyle = 0;
     }
-
-    m_FontTextureId = style;
-    m_FontStyle = 0;
 }
 
 // 0x7194D0
