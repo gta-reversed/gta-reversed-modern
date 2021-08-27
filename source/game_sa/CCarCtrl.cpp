@@ -12,6 +12,7 @@ unsigned int& CCarCtrl::NumParkedCars = *(unsigned int*)0x9690A0;
 unsigned int& CCarCtrl::NumAmbulancesOnDuty = *(unsigned int*)0x9690A8;
 unsigned int& CCarCtrl::NumFireTrucksOnDuty = *(unsigned int*)0x9690AC;
 unsigned int& CCarCtrl::MaxNumberOfCarsInUse = *(unsigned int*)0x8A5B24;
+bool& CCarCtrl::bCarsGeneratedAroundCamera = *(bool*)0x56E250;
 
 void CCarCtrl::InjectHooks()
 {

@@ -5,7 +5,7 @@ https://github.com/DK22Pac/plugin-sdk
 Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-
+#include "GxtChar.h"
 #include "CDebugMenu.h"
 
 int& g_nNumIm3dDrawCalls = *(int*)0xB73708;
@@ -50,41 +50,57 @@ void InjectCommonHooks()
 {
     HookInstall(0x53E230, &Render2dStuff); // This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without :D
 
-//    ReversibleHooks::Install("common", "FindPlayerCoors", 0x56E010, &FindPlayerCoors);
-//    ReversibleHooks::Install("common", "FindPlayerSpeed", 0x56E090, &FindPlayerSpeed);
+    ReversibleHooks::Install("common", "FindPlayerCoors", 0x56E010, &FindPlayerCoors);
+    ReversibleHooks::Install("common", "FindPlayerSpeed", 0x56E090, &FindPlayerSpeed);
     ReversibleHooks::Install("common", "FindPlayerEntity", 0x56E120, &FindPlayerEntity);
     ReversibleHooks::Install("common", "FindPlayerTrain", 0x56E160, &FindPlayerTrain);
-//    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld", 0x56E250, &FindPlayerCentreOfWorld);
+    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld", 0x56E250, &FindPlayerCentreOfWorld);
 //    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoSniperShift", 0x56E320, &FindPlayerCentreOfWorld_NoSniperShift);
 //    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoInteriorShift", 0x56E400, &FindPlayerCentreOfWorld_NoInteriorShift);
-//    ReversibleHooks::Install("common", "FindPlayerHeading", 0x56E450, &FindPlayerHeading);
+    ReversibleHooks::Install("common", "FindPlayerHeading", 0x56E450, &FindPlayerHeading);
     ReversibleHooks::Install("common", "FindPlayerPed", 0x56E210, &FindPlayerPed);
     ReversibleHooks::Install("common", "FindPlayerVehicle", 0x56E0D0, &FindPlayerVehicle);
     ReversibleHooks::Install("common", "FindPlayerWanted", 0x56E230, &FindPlayerWanted);
     ReversibleHooks::Install("common", "InTwoPlayersMode", 0x441390, &InTwoPlayersMode);
 
-//    ReversibleHooks::Install("common", "MakeUpperCase", 0x7186E0, &MakeUpperCase);
-//    ReversibleHooks::Install("common", "GetEventGlobalGroup", 0x4ABA50, &GetEventGlobalGroup);
+    ReversibleHooks::Install("common", "MakeUpperCase", 0x7186E0, &MakeUpperCase);
+    ReversibleHooks::Install("common", "GetEventGlobalGroup", 0x4ABA50, &GetEventGlobalGroup);
     ReversibleHooks::Install("common", "DefinedState", 0x734650, &DefinedState);
     ReversibleHooks::Install("common", "DefinedState2d", 0x734750, &DefinedState2d);
 
     ReversibleHooks::Install("common", "GetNameAndDamage", 0x5370A0, &GetNameAndDamage);
-//    ReversibleHooks::Install("common", "GetFirstAtomicCallback", 0x734810, &GetFirstAtomicCallback);
-//    ReversibleHooks::Install("common", "GetFirstAtomic", 0x734820, &GetFirstAtomic);
+    ReversibleHooks::Install("common", "GetFirstAtomicCallback", 0x734810, &GetFirstAtomicCallback);
+    ReversibleHooks::Install("common", "GetFirstAtomic", 0x734820, &GetFirstAtomic);
 //    ReversibleHooks::Install("common", "Get2DEffectAtomicCallback", 0x734850, &Get2DEffectAtomicCallback);
-//    ReversibleHooks::Install("common", "Get2DEffectAtomic", 0x734880, &Get2DEffectAtomic);
-//    ReversibleHooks::Install("common", "GetFirstObjectCallback", 0x7348B0, &GetFirstObjectCallback);
-//    ReversibleHooks::Install("common", "GetFirstObject", 0x7348C0, &GetFirstObject);
-//    ReversibleHooks::Install("common", "GetFirstFrameCallback", 0x7348F0, &GetFirstFrameCallback);
-//    ReversibleHooks::Install("common", "GetFirstChild", 0x734900, &GetFirstChild);
+    ReversibleHooks::Install("common", "Get2DEffectAtomic", 0x734880, &Get2DEffectAtomic);
+    ReversibleHooks::Install("common", "GetFirstObjectCallback", 0x7348B0, &GetFirstObjectCallback);
+    ReversibleHooks::Install("common", "GetFirstObject", 0x7348C0, &GetFirstObject);
+    ReversibleHooks::Install("common", "GetFirstFrameCallback", 0x7348F0, &GetFirstFrameCallback);
+    ReversibleHooks::Install("common", "GetFirstChild", 0x734900, &GetFirstChild);
 //    ReversibleHooks::Install("common", "GetFirstTextureCallback", 0x734930, &GetFirstTextureCallback);
 //    ReversibleHooks::Install("common", "GetFirstTexture", 0x734940, &GetFirstTexture);
-//    ReversibleHooks::Install("common", "GetAnimHierarchyFromSkinClump", 0x734A40, &GetAnimHierarchyFromSkinClump);
+    ReversibleHooks::Install("common", "SkinAtomicGetHAnimHierarchCB", 0x734A20, &SkinAtomicGetHAnimHierarchCB);
+    ReversibleHooks::Install("common", "GetAnimHierarchyFromSkinClump", 0x734A40, &GetAnimHierarchyFromSkinClump);
 //    ReversibleHooks::Install("common", "GetAnimHierarchyFromFrame", 0x734AB0, &GetAnimHierarchyFromFrame);
-//    ReversibleHooks::Install("common", "GetAnimHierarchyFromClump", 0x734B10, &GetAnimHierarchyFromClump);
-//    ReversibleHooks::Install("common", "AtomicRemoveAnimFromSkinCB", 0x734B90, &AtomicRemoveAnimFromSkinCB);
+    ReversibleHooks::Install("common", "GetAnimHierarchyFromClump", 0x734B10, &GetAnimHierarchyFromClump);
+    ReversibleHooks::Install("common", "AtomicRemoveAnimFromSkinCB", 0x734B90, &AtomicRemoveAnimFromSkinCB);
+    ReversibleHooks::Install("common", "RpAtomicConvertGeometryToTL", 0x734BE0, &RpAtomicConvertGeometryToTL);
+    ReversibleHooks::Install("common", "RpAtomicConvertGeometryToTS", 0x734C20, &RpAtomicConvertGeometryToTS);
 
-//    ReversibleHooks::Install("common", "SetLightsWithTimeOfDayColour", 0x7354E0, &SetLightsWithTimeOfDayColour);
+    ReversibleHooks::Install("common", "atomicConvertGeometryToTL", 0x734C60, &atomicConvertGeometryToTL);
+    ReversibleHooks::Install("common", "RpClumpConvertGeometryToTL", 0x734CB0, &RpClumpConvertGeometryToTL);
+
+    ReversibleHooks::Install("common", "atomicConvertGeometryToTS", 0x734CE0, &atomicConvertGeometryToTS);
+    ReversibleHooks::Install("common", "RpClumpConvertGeometryToTS", 0x734D30, &RpClumpConvertGeometryToTS);
+
+    ReversibleHooks::Install("common", "forceLinearFilteringAtomicsCB", 0x734DA0, &forceLinearFilteringAtomicsCB);
+    ReversibleHooks::Install("common", "SetFilterModeOnClumpsTextures", 0x734DC0, &SetFilterModeOnClumpsTextures);
+
+
+    ReversibleHooks::Install("common", "forceLinearFilteringMatTexturesCB", 0x734D60, &forceLinearFilteringMatTexturesCB);
+    ReversibleHooks::Install("common", "SetFilterModeOnAtomicsTextures", 0x734D80, &SetFilterModeOnAtomicsTextures);
+
+    ReversibleHooks::Install("common", "SetLightsWithTimeOfDayColour", 0x7354E0, &SetLightsWithTimeOfDayColour);
     ReversibleHooks::Install("common", "LightsDestroy", 0x735730, &LightsDestroy);
     ReversibleHooks::Install("common", "WorldReplaceNormalLightsWithScorched", 0x7357E0, &WorldReplaceNormalLightsWithScorched);
 //    ReversibleHooks::Install("common", "AddAnExtraDirectionalLight", 0x735840, &AddAnExtraDirectionalLight);
@@ -97,14 +113,14 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "SetAmbientColours_color", 0x735D50, static_cast<void(*)(RwRGBAReal* color)>(&SetAmbientColours));
     ReversibleHooks::Install("common", "SetDirectionalColours", 0x735D70, &SetDirectionalColours);
     ReversibleHooks::Install("common", "SetLightColoursForPedsCarsAndObjects", 0x735D90, &SetLightColoursForPedsCarsAndObjects);
-//    ReversibleHooks::Install("common", "SetLightsForInfraredVisionHeatObjects", 0x735E40, &SetLightsForInfraredVisionHeatObjects);
-//    ReversibleHooks::Install("common", "StoreAndSetLightsForInfraredVisionHeatObjects", 0x735E70, &StoreAndSetLightsForInfraredVisionHeatObjects);
+    ReversibleHooks::Install("common", "SetLightsForInfraredVisionHeatObjects", 0x735E40, &SetLightsForInfraredVisionHeatObjects);
+    ReversibleHooks::Install("common", "StoreAndSetLightsForInfraredVisionHeatObjects", 0x735E70, &StoreAndSetLightsForInfraredVisionHeatObjects);
     ReversibleHooks::Install("common", "RestoreLightsForInfraredVisionHeatObjects", 0x735EF0, &RestoreLightsForInfraredVisionHeatObjects);
     ReversibleHooks::Install("common", "SetLightsForInfraredVisionDefaultObjects", 0x735F20, &SetLightsForInfraredVisionDefaultObjects);
     ReversibleHooks::Install("common", "SetLightsForNightVision", 0x735F70, &SetLightsForNightVision);
-//    ReversibleHooks::Install("common", "GetDayNightBalance", 0x6FAB30, &GetDayNightBalance);
-//    ReversibleHooks::Install("common", "AsciiToGxtChar", 0x718600, &AsciiToGxtChar);
-//    ReversibleHooks::Install("common", "WriteRaster", 0x005A4150, &WriteRaster);
+    ReversibleHooks::Install("common", "GetDayNightBalance", 0x6FAB30, &GetDayNightBalance);
+    ReversibleHooks::Install("common", "AsciiToGxtChar", 0x718600, &AsciiToGxtChar);
+    ReversibleHooks::Install("common", "WriteRaster", 0x005A4150, &WriteRaster);
 //    ReversibleHooks::Install("common", "CalcScreenCoors_VVff", 0x71DA00, static_cast<bool(*)(CVector const&, CVector*, float*, float*)>(&CalcScreenCoors));
 //    ReversibleHooks::Install("common", "CalcScreenCoors_VV", 0x71DAB0, static_cast<bool(*)(CVector const&, CVector*)>(&CalcScreenCoors));
     ReversibleHooks::Install("common", "LittleTest", 0x541330, &LittleTest);
@@ -115,21 +131,24 @@ void InjectCommonHooks()
 
 // 0x56E010
 CVector FindPlayerCoors(int playerId) {
-    return plugin::CallAndReturn<CVector, 0x56E010, int>(playerId);
+    if (CEntity* e = FindPlayerEntity(playerId))
+        return e->GetPosition();
+    return {};
 }
 
 // 0x56E090
 CVector& FindPlayerSpeed(int playerId) {
-    return plugin::CallAndReturn<CVector&, 0x56E090, int>(playerId);
+    return static_cast<CPhysical*>(FindPlayerEntity(playerId))->m_vecMoveSpeed;
 }
 
 // 0x56E120
 CEntity* FindPlayerEntity(int playerId) {
-    auto player = FindPlayerPed(playerId);
-    if (player->bInVehicle && player->m_pVehicle) 
-        return player->m_pVehicle;
-
-    return player;
+    if (auto player = FindPlayerPed(playerId)) {
+        if (player->bInVehicle && player->m_pVehicle) 
+            return player->m_pVehicle;
+        return player;
+    }
+    return nullptr;
 }
 
 // 0x56E160
@@ -143,7 +162,11 @@ CTrain* FindPlayerTrain(int playerId) {
 
 // 0x56E250
 CVector const& FindPlayerCentreOfWorld(int playerId) {
-    return ((CVector const&(__cdecl*)(int))0x56E250)(playerId);
+    if (CCarCtrl::bCarsGeneratedAroundCamera)
+        return TheCamera.GetPosition();
+    if (CVehicle* veh = FindPlayerVehicle(playerId, true))
+        return veh->GetPosition();
+    return FindPlayerPed(playerId)->GetPosition();
 }
 
 // 0x56E320
@@ -158,7 +181,9 @@ CVector FindPlayerCentreOfWorld_NoInteriorShift(int playerId) {
 
 // 0x56E450
 float FindPlayerHeading(int playerId) {
-    return ((float(__cdecl*)(int))0x56E450)(playerId);
+    if (CVehicle* veh = FindPlayerVehicle(playerId, true))
+        return veh->GetHeading();
+    return FindPlayerPed(playerId)->GetHeading();
 }
 
 // unused
@@ -239,9 +264,16 @@ AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, char* name) {
     return ((AnimBlendFrameData * (__cdecl*)(RpClump*, char*))0x4D62A0)(clump, name);
 }
 
+char ToUpper(char ch) {
+    return (ch >= 'a' && ch <= 'z') ? ch - ('a' - 'A') : ch;
+}
+
 // 0x7186E0
-char* MakeUpperCase(char* dest, char* src) {
-    return ((char*(__cdecl*)(char*, char*))0x7186E0)(dest, src);
+char* MakeUpperCase(char* dest, const char * src) {
+    for (; *src; src++, dest++)
+        *dest = ToUpper(*src);
+    *dest = 0;
+    return dest;
 }
 
 // NOTSA
@@ -258,7 +290,13 @@ void CreateDebugFont() {
 
 // 0x4ABA50
 CEventGroup* GetEventGlobalGroup() {
-    return plugin::CallAndReturn<CEventGroup*, 0x4ABA50>();
+    static CEventGroup*& globalEvents = *(CEventGroup**)0xA9AF6C;
+
+    if (globalEvents)
+        return globalEvents;
+
+    globalEvents = new CEventGroup(nullptr);
+    return globalEvents;
 }
 
 // 0x734620
@@ -354,141 +392,211 @@ void GetNameAndDamage(const char* nodeName, char* outName, bool& outDamage) {
     }
 }
 
-// Converted from cdecl RpAtomic* GetFirstAtomicCallback(RpAtomic *atomic,void *data) 0x734810
+// 0x734810
 RpAtomic* GetFirstAtomicCallback(RpAtomic* atomic, void* data) {
-    return ((RpAtomic* (__cdecl *)(RpAtomic*, void*))0x734810)(atomic, data);
+    *(RpAtomic**)(data) = atomic;
+    return nullptr;
 }
 
-// Converted from cdecl RpAtomic* GetFirstAtomic(RpClump *clump) 0x734820
+// 0x734820
 RpAtomic* GetFirstAtomic(RpClump* clump) {
-    return ((RpAtomic* (__cdecl *)(RpClump*))0x734820)(clump);
+    RpAtomic* atomic{};
+    RpClumpForAllAtomics(clump, GetFirstAtomicCallback, &atomic);
+    return atomic;
 }
 
-// Converted from cdecl RpAtomic* Get2DEffectAtomicCallback(RpAtomic *atomic,void *data) 0x734850
+// 0x734850
 RpAtomic* Get2DEffectAtomicCallback(RpAtomic* atomic, void* data) {
     return ((RpAtomic* (__cdecl *)(RpAtomic*, void*))0x734850)(atomic, data);
 }
 
-// Converted from cdecl RpAtomic* Get2DEffectAtomic(RpClump *clump) 0x734880
+// 0x734880
 RpAtomic* Get2DEffectAtomic(RpClump* clump) {
-    return ((RpAtomic* (__cdecl *)(RpClump*))0x734880)(clump);
+    RpAtomic* atomic{};
+    RpClumpForAllAtomics(clump, Get2DEffectAtomicCallback, &atomic);
+    return atomic;
 }
 
-// Converted from cdecl RwObject* GetFirstObjectCallback(RwObject *object,void *data) 0x7348B0
+// 0x7348B0
 RwObject* GetFirstObjectCallback(RwObject* object, void* data) {
-    return ((RwObject* (__cdecl *)(RwObject*, void*))0x7348B0)(object, data);
+    *(RwObject**)(data) = object;
+    return nullptr;
 }
 
-// Converted from cdecl RwObject* GetFirstObject(RwFrame *frame) 0x7348C0
+// 0x7348C0
 RwObject* GetFirstObject(RwFrame* frame) {
-    return ((RwObject* (__cdecl *)(RwFrame*))0x7348C0)(frame);
+    RwObject* obj{};
+    RwFrameForAllObjects(frame, GetFirstObjectCallback, &obj);
+    return obj;
 }
 
-// Converted from cdecl RwFrame* GetFirstFrameCallback(RwFrame *frame,void *data) 0x7348F0
+// 0x7348F0
 RwFrame* GetFirstFrameCallback(RwFrame* frame, void* data) {
-    return ((RwFrame* (__cdecl *)(RwFrame*, void*))0x7348F0)(frame, data);
+    *(RwFrame**)(data) = frame;
+    return nullptr;
 }
 
-// Converted from cdecl RwFrame* GetFirstChild(RwFrame *frame) 0x734900
+// 0x734900
 RwFrame* GetFirstChild(RwFrame* frame) {
-    return ((RwFrame* (__cdecl *)(RwFrame*))0x734900)(frame);
+    RwFrame* child{};
+    RwFrameForAllChildren(frame, GetFirstFrameCallback, &child);
+    return child;
 }
 
-// Converted from cdecl RpHAnimHierarchy* GetAnimHierarchyFromSkinClump(RpClump *clump) 0x734A40
+// name not from Android
+// 0x734A20
+RpAtomic* SkinAtomicGetHAnimHierarchCB(RpAtomic* atomic, void* data) {
+    *(RpHAnimHierarchy**)(data) = RpSkinAtomicGetHAnimHierarchy(atomic);
+    return nullptr;
+}
+
+// 0x734A40
 RpHAnimHierarchy* GetAnimHierarchyFromSkinClump(RpClump* clump) {
-    return ((RpHAnimHierarchy* (__cdecl *)(RpClump*))0x734A40)(clump);
+    RpHAnimHierarchy* bugstarDevFrom2003{};
+    RpClumpForAllAtomics(clump, SkinAtomicGetHAnimHierarchCB, &bugstarDevFrom2003);
+    return bugstarDevFrom2003;
 }
 
-// Converted from cdecl RpHAnimHierarchy* GetAnimHierarchyFromFrame(RwFrame *frame) 0x734AB0
+// 0x734AB0
 RpHAnimHierarchy* GetAnimHierarchyFromFrame(RwFrame* frame) {
     return ((RpHAnimHierarchy* (__cdecl *)(RwFrame*))0x734AB0)(frame);
 }
 
-// Converted from cdecl RpHAnimHierarchy* GetAnimHierarchyFromClump(RpClump *clump) 0x734B10
+// 0x734B10
 RpHAnimHierarchy* GetAnimHierarchyFromClump(RpClump* clump) {
-    return ((RpHAnimHierarchy* (__cdecl *)(RpClump*))0x734B10)(clump);
+    return GetAnimHierarchyFromFrame(RpClumpGetFrame(clump));
 }
 
-// Converted from cdecl RpAtomic* AtomicRemoveAnimFromSkinCB(RpAtomic *atomic,void *data) 0x734B90
+// 0x734B90
 RpAtomic* AtomicRemoveAnimFromSkinCB(RpAtomic* atomic, void* data) {
-    return ((RpAtomic* (__cdecl *)(RpAtomic*, void*))0x734B90)(atomic, data);
+    if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))) {
+        if (RpHAnimHierarchy* hier = RpSkinAtomicGetHAnimHierarchy(atomic)) {
+            RtAnimAnimation*& pCurrAnim = hier->currentAnim->pCurrentAnim;
+            if (pCurrAnim)
+                RtAnimAnimationDestroy(pCurrAnim);
+            pCurrAnim = nullptr;
+        }
+    }
+    return atomic;
 }
 
-// Converted from cdecl bool RpAtomicConvertGeometryToTL(RpAtomic *atomic) 0x734BE0
+// 0x734BE0
 bool RpAtomicConvertGeometryToTL(RpAtomic* atomic) {
-    return ((bool(__cdecl *)(RpAtomic*))0x734BE0)(atomic);
+    RpGeometry* pGeom = RpAtomicGetGeometry(atomic);
+
+    auto flags = RpGeometryGetFlags(pGeom);
+    if (flags & rpGEOMETRYNATIVE || !(flags & rpGEOMETRYTRISTRIP))
+        return false;
+
+    RpGeometryLock(pGeom, rpGEOMETRYLOCKALL);
+    RpGeometrySetFlags(pGeom, flags & ~rpGEOMETRYTRISTRIP);
+    RpGeometryUnlock(pGeom);
+
+    return true;
 }
 
-// Converted from cdecl bool RpAtomicConvertGeometryToTS(RpAtomic *atomic) 0x734C20
+// 0x734C20
 bool RpAtomicConvertGeometryToTS(RpAtomic* atomic) {
-    return ((bool(__cdecl *)(RpAtomic*))0x734C20)(atomic);
+    RpGeometry* pGeom = RpAtomicGetGeometry(atomic);
+
+    auto flags = RpGeometryGetFlags(pGeom);
+    if (flags & rpGEOMETRYNATIVE || flags & rpGEOMETRYTRISTRIP)
+        return false;
+
+    RpGeometryLock(pGeom, rpGEOMETRYLOCKALL);
+    RpGeometrySetFlags(pGeom, flags | rpGEOMETRYTRISTRIP);
+    RpGeometryUnlock(pGeom);
+
+    return true;
 }
 
-// Converted from cdecl bool RpClumpConvertGeometryToTL(RpClump *clump) 0x734CB0
+// 0x734C60
+RpAtomic* atomicConvertGeometryToTL(RpAtomic* atomic, void* data) {
+    if (!RpAtomicConvertGeometryToTL(atomic)) {
+        *(bool*)(data) = false;
+    }
+    return atomic;
+}
+
+// 0x734CB0
 bool RpClumpConvertGeometryToTL(RpClump* clump) {
-    return ((bool(__cdecl *)(RpClump*))0x734CB0)(clump);
+    bool success{ true };
+    RpClumpForAllAtomics(clump, atomicConvertGeometryToTL, &success);
+    return success;
 }
 
-// Converted from cdecl bool RpClumpConvertGeometryToTS(RpClump *clump) 0x734D30
+// 0x734CE0
+RpAtomic* atomicConvertGeometryToTS(RpAtomic* atomic, void* data) {
+    if (!RpAtomicConvertGeometryToTS(atomic)) {
+        *(bool*)(data) = false;
+    }
+    return atomic;
+}
+
+// 0x734D30
 bool RpClumpConvertGeometryToTS(RpClump* clump) {
-    return ((bool(__cdecl *)(RpClump*))0x734D30)(clump);
+    bool success{ true };
+    RpClumpForAllAtomics(clump, atomicConvertGeometryToTS, &success);
+    return success;
 }
 
-// Converted from cdecl RpMaterial* forceLinearFilteringMatTexturesCB(RpMaterial *material,void *data) 0x734D60
+// 0x734D60
 RpMaterial* forceLinearFilteringMatTexturesCB(RpMaterial* material, void* data) {
-    return ((RpMaterial* (__cdecl *)(RpMaterial*, void*))0x734D60)(material, data);
+    if (RwTexture* tex = RpMaterialGetTexture(material))
+        RwTextureSetFilterMode(tex, (RwTextureFilterMode)((unsigned)data));
+    return material;
 }
 
-// Converted from cdecl bool SetFilterModeOnAtomicsTextures(RpAtomic *atomic,RwTextureFilterMode filtering) 0x734D80
+// 0x734D80
 bool SetFilterModeOnAtomicsTextures(RpAtomic* atomic, RwTextureFilterMode filtering) {
-    return ((bool(__cdecl *)(RpAtomic*, RwTextureFilterMode))0x734D80)(atomic, filtering);
+    RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), forceLinearFilteringMatTexturesCB, (void*)(unsigned)filtering);
+    return true;
 }
 
-// Converted from cdecl RpAtomic* forceLinearFilteringAtomicsCB(RpAtomic *atomic,void *data) 0x734DA0
+// 0x734DA0
 RpAtomic* forceLinearFilteringAtomicsCB(RpAtomic* atomic, void* data) {
-    return ((RpAtomic* (__cdecl *)(RpAtomic*, void*))0x734DA0)(atomic, data);
+    SetFilterModeOnAtomicsTextures(atomic, (RwTextureFilterMode)((unsigned)data));
+    return atomic;
 }
 
-// Converted from cdecl bool SetFilterModeOnClumpsTextures(RpClump *clump,RwTextureFilterMode filtering) 0x734DC0
+// 0x734DC0
 bool SetFilterModeOnClumpsTextures(RpClump* clump, RwTextureFilterMode filtering) {
-    return ((bool(__cdecl *)(RpClump*, RwTextureFilterMode))0x734DC0)(clump, filtering);
+    RpClumpForAllAtomics(clump, forceLinearFilteringAtomicsCB, (void*)(unsigned)filtering);
+    return true;
 }
 
-// Converted from cdecl bool RpGeometryReplaceOldMaterialWithNewMaterial(RpGeometry *geometry,RpMaterial *oldMaterial,RpMaterial *newMaterial) 0x734DE0
+// 0x734DE0
 bool RpGeometryReplaceOldMaterialWithNewMaterial(RpGeometry* geometry, RpMaterial* oldMaterial, RpMaterial* newMaterial) {
     return ((bool(__cdecl *)(RpGeometry*, RpMaterial*, RpMaterial*))0x734DE0)(geometry, oldMaterial, newMaterial);
 }
 
-// Converted from cdecl RwTexture* RwTexDictionaryFindHashNamedTexture(RwTexDictionary *txd,uint hash) 0x734E50
+// 0x734E50
 RwTexture* RwTexDictionaryFindHashNamedTexture(RwTexDictionary* txd, unsigned int hash) {
     return ((RwTexture* (__cdecl *)(RwTexDictionary*, unsigned int))0x734E50)(txd, hash);
 }
 
-// Converted from cdecl RpClump* RpClumpGetBoundingSphere(RpClump *clump,RwSphere *bound,bool) 0x734FC0
+// 0x734FC0
 RpClump* RpClumpGetBoundingSphere(RpClump* clump, RwSphere* bound, bool arg2) {
     return ((RpClump* (__cdecl *)(RpClump*, RwSphere*, bool))0x734FC0)(clump, bound, arg2);
 }
 
-// Converted from cdecl void SkinGetBonePositions(RpClump *clump) 0x735140
+// 0x735140
 void SkinGetBonePositions(RpClump* clump) {
     ((void(__cdecl *)(RpClump*))0x735140)(clump);
 }
 
-// Converted from cdecl void SkinSetBonePositions(RpClump *clump) 0x7352D0
+// 0x7352D0
 void SkinSetBonePositions(RpClump* clump) {
     ((void(__cdecl *)(RpClump*))0x7352D0)(clump);
 }
 
-// Converted from cdecl void SkinGetBonePositionsToTable(RpClump *clump,RwV3d *table) 0x735360
+// 0x735360
 void SkinGetBonePositionsToTable(RpClump* clump, RwV3d* table) {
     ((void(__cdecl *)(RpClump*, RwV3d*))0x735360)(clump, table);
 }
 
 // 0x7354E0
 void SetLightsWithTimeOfDayColour(RpWorld* world) {
-    ((void(__cdecl *)(RpWorld*))0x7354E0)(world);
-    return;
-
     if (pAmbient) {
         AmbientLightColourForFrame.red = CTimeCycle::GetAmbientRed() * CCoronas::LightsMult;
         AmbientLightColourForFrame.green = CTimeCycle::GetAmbientGreen() * CCoronas::LightsMult;
@@ -513,30 +621,19 @@ void SetLightsWithTimeOfDayColour(RpWorld* world) {
         DirectionalLightColourForFrame.blue = DirectionalLightColourForFrame.red;
         RpLightSetColor(pDirect, &DirectionalLightColourForFrame);
 
-        RwMatrix* out[6];
-        /*
-        out[0].x = 0.0;
-        out[0].y = 0.0;
-        out[0].z = 1.0;
+        const CVector vertical{ 0.0f, 0.0f, 1.0f };
 
-        CVector in = CrossProduct({0.0f, 0.0f, 1.0f}, sun2Dir);
-        in.Normalise();
-        CVector vecCross = CrossProduct(in, sun2Dir);
+        // TODO: This is a fairly commonly used thing,
+        // would be nice to make a function out of it..
+        // Is basically calculates a matrix out of a normal.
+       
+        RwMatrix mat;
 
-        out[1].x = vecCross.x;
-        out[1].y = vecCross.y;
-        out[1].z = vecCross.z;
+        mat.at = -CTimeCycle::m_vecDirnLightToSun;
+        mat.up = Normalized(CrossProduct(vertical, CTimeCycle::m_vecDirnLightToSun));
+        mat.right = CrossProduct(mat.up, CTimeCycle::m_vecDirnLightToSun);
 
-        out[2] = in;
-
-        out[3].z = -sun2Dir.x;
-
-        out[4].x = -sun2Dir.y;
-        out[4].y = -sun2Dir.z;
-        */
-
-        auto* parentFrame = static_cast<RwFrame*>(pDirect->object.object.parent);
-        RwFrameTransform(parentFrame, reinterpret_cast<const RwMatrix*>(&out), RwOpCombineType::rwCOMBINEREPLACE);
+        RwFrameTransform(RpClumpGetFrame(pDirect), &mat, RwOpCombineType::rwCOMBINEREPLACE);
     }
 }
 
@@ -726,22 +823,15 @@ void SetLightColoursForPedsCarsAndObjects(float lighting) {
 
 // 0x735E40
 void SetLightsForInfraredVisionHeatObjects() {
-    ((void(__cdecl *)())0x735E40)();
-    return;
-
-//    RpLightSetColor(pAmbient, CPostEffects::m_fInfraredVisionHeatObjectCol);
-//    RpLightSetColor(pDirect, CPostEffects::m_fInfraredVisionHeatObjectCol);
+    RpLightSetColor(pAmbient, &CPostEffects::m_fInfraredVisionHeatObjectCol);
+    RpLightSetColor(pDirect, &CPostEffects::m_fInfraredVisionHeatObjectCol);
 }
 
 // 0x735E70
 void StoreAndSetLightsForInfraredVisionHeatObjects() {
-//    ((void(__cdecl *)())0x735E70)();
-//    return;
-
-//    DirectAmbientLight[1] = AmbientLightColour;
-//    DirectAmbientLight[0] = DirectionalLightColour;
-//    RpLightSetColor(pAmbient, CPostEffects::m_fInfraredVisionHeatObjectCol);
-//    RpLightSetColor(pDirect, CPostEffects::m_fInfraredVisionHeatObjectCol);
+    DirectAmbientLight[1] = AmbientLightColour;
+    DirectAmbientLight[0] = DirectionalLightColour;
+    SetLightsForInfraredVisionHeatObjects();
 }
 
 // 0x735EF0
@@ -766,7 +856,16 @@ void SetLightsForNightVision() {
 
 // 0x6FAB30
 float GetDayNightBalance() {
-    return plugin::CallAndReturn<float, 0x6FAB30>();
+    const auto minutes = CClock::GetMinutesToday();
+    if (minutes < 360)
+        return 1.0f;
+    if (minutes < 420)
+        return (float)(420 - minutes) / 60.0f;
+    if (minutes < 1200)
+        return 0.0f;
+    if (minutes >= 1260)
+        return 1.0f;
+    return 1.0f - (float)(1260 - minutes) / 60.0f;
 }
 
 // 0x7226D0
@@ -969,18 +1068,38 @@ bool RpAnimBlendPluginAttach() {
     return plugin::CallAndReturn<bool, 0x4D6150>();
 }
 
-// US-1.00 @ 0x005A4150
-// EU-1.00 @ 0x005A4150
-void WriteRaster(RwRaster * pRaster, char const * pszPath) {
-    assert(pRaster);
-    assert(pszPath && pszPath[0]);
-    plugin::Call<0x005A4150>(pRaster, pszPath);
+// 0x5A4150
+void WriteRaster(RwRaster* raster, char const* path) {
+    assert(raster);
+    assert(path && path[0]);
+
+    RwImage* img = RwImageCreate(RwRasterGetWidth(raster), RwRasterGetHeight(raster), RwRasterGetDepth(raster));
+    RwImageAllocatePixels(img);
+    RwImageSetFromRaster(img, raster);
+    RtPNGImageWrite(img, path);
+    RwImageDestroy(img);
 }
 
 // 0x71DA00
 bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos, float* pScreenX, float* pScreenY)
 {
     return plugin::CallAndReturn<bool, 0x71DA00, CVector const&, CVector*, float*, float*>(vecPoint, pVecOutPos, pScreenX, pScreenY);
+
+    // TODO: Figure out how to get screen size..
+    //CVector screen =  TheCamera.m_mViewMatrix * vecPoint;
+    //if (screen.z <= 1.0f)
+    //    return false;
+
+    //const float depth = 1.0f / screen.z;
+
+    //CVector2D screenSize{}; // TODO..
+
+    //*pVecOutPos = screen * depth * CVector(screenSize.x, screenSize.y, 1.0f);
+
+    //*pScreenX = screenSize.x * depth / CDraw::ms_fFOV * 70.0f;
+    //*pScreenY = screenSize.y * depth / CDraw::ms_fFOV * 70.0f;
+
+    //return true;
 }
 
 // 0x71DAB0
