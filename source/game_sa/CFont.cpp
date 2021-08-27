@@ -14,9 +14,9 @@ CSprite2d (&CFont::ButtonSprite)[MAX_FONT_BUTTON_SPRITES] = *(CSprite2d(*)[15])0
 unsigned char& CFont::m_nExtraFontSymbolId = *(unsigned char*)0xC71A54; // aka. PS2Symbol
 bool& CFont::m_bNewLine = *(bool*)0xC71A55;
 CRGBA* CFont::m_Color = (CRGBA*)0xC71A60;
-CVector2D* CFont::m_Scale = (CVector2D*)0xC71A64;
+CVector2D& CFont::m_Scale = *(CVector2D*)0xC71A64;
 float& CFont::m_fSlant = *(float*)0xC71A6C;
-CVector2D* CFont::m_fSlantRefPoint = (CVector2D*)0xC71A70;
+CVector2D& CFont::m_fSlantRefPoint = *(CVector2D*)0xC71A70;
 bool& CFont::m_bFontJustify = *(bool*)0xC71A78;
 bool& CFont::m_bFontCentreAlign = *(bool*)0xC71A79;
 bool& CFont::m_bFontRightAlign = *(bool*)0xC71A7A;
@@ -68,6 +68,7 @@ void CFont::InjectHooks() {
     // wip
     ReversibleHooks::Install("CFont", "GetTextRect", 0x71A620, &CFont::GetTextRect);
     ReversibleHooks::Install("CFont", "PrintString", 0x71A700, &CFont::PrintString);
+    ReversibleHooks::Install("CFont", "PrintStringFromBottom", 0x71A820, &CFont::PrintStringFromBottom);
 }
 
 // 0x7187C0
@@ -150,7 +151,7 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
 // 0x719380
 void CFont::SetScale(float w, float h)
 {
-    m_Scale->Set(w, h);
+    m_Scale.Set(w, h);
 }
 
 // 0x7193A0
@@ -161,17 +162,17 @@ void CFont::SetScaleForCurrentlanguage(float w, float h)
     case 2:
     case 3:
     case 4:
-        m_Scale->Set(h, w * 0.8f);
+        m_Scale.Set(h, w * 0.8f);
         break;
     default:
-        m_Scale->Set(w, h);
+        m_Scale.Set(w, h);
     }
 }
 
 // 0x719400
 void CFont::SetSlantRefPoint(float x, float y)
 {
-    m_fSlantRefPoint->Set(x, y);
+    m_fSlantRefPoint.Set(x, y);
 }
 
 // 0x719420
@@ -351,7 +352,7 @@ void CFont::GetTextRect(CRect* rect, float x, float y, const char* text)
     }
 
     rect->bottom = y - 4.0f;
-    rect->top = nLines * (32.0f * m_Scale->y * 0.5f + 2.0f * m_Scale->y) + y + 4.0f;
+    rect->top = nLines * 18.0f * m_Scale.y + y + 4.0f;
 }
 
 // 0x71A700
@@ -381,7 +382,13 @@ void CFont::PrintString(float x, float y, const char* text)
     ProcessStringToDisplay(x, y, text);
 }
 
+// 0x71A820
 void CFont::PrintStringFromBottom(float x, float y, const char* text)
 {
-    ((void(__cdecl*)(float, float, const char*))0x71A820)(x, y, text);
+    float drawY = y - (18.0f * m_Scale.y) * CFont::GetNumberLines(x, y, text);
+
+    if (m_fSlant != 0.0f)
+        drawY -= (m_fSlantRefPoint.x - x) * m_fSlant + m_fSlantRefPoint.y;
+
+    PrintString(x, drawY, text);
 }

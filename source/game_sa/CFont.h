@@ -63,9 +63,9 @@ public:
     static unsigned char& m_nExtraFontSymbolId;
     static bool& m_bNewLine;
     static CRGBA *m_Color;
-    static CVector2D *m_Scale;
+    static CVector2D& m_Scale;
     static float& m_fSlant;
-    static CVector2D *m_fSlantRefPoint;
+    static CVector2D& m_fSlantRefPoint;
     static bool& m_bFontJustify;
     static bool& m_bFontCentreAlign;
     static bool& m_bFontRightAlign;
