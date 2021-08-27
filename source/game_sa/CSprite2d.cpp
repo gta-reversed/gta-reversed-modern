@@ -486,7 +486,7 @@ void CSprite2d::DrawBarChart(float x, float y, unsigned short width, unsigned ch
         const float w = 2 * SCREEN_WIDTH_UNIT, h = 2 * SCREEN_HEIGHT_UNIT;
         const CRect rects[] = {
             //left,     top,              right,    bottom
-            { x,        y,                endX,     y + h },            // Top
+            { x,        y,                endX,     y + h      },       // Top
             { x,        y + height - h,   endX,     y + height },       // Bottom
             { x,        y,                x + w,    y + height },       // Left
             { endX - w, y,                endX,     y + height }        // Right
@@ -522,15 +522,4 @@ void CSprite2d::DrawBarChart(float x, float y, unsigned short width, unsigned ch
         }
         CFont::PrintString((float)textX, y + 2.0f, gxtText);
     }
-}
-
-#define DrawBarChart(x, y, width, height, progress, progressAdd, drawPercentage, \
-    drawBlackBorder, color, addColor) ((void (__cdecl *)(float, float, unsigned short,\
-    unsigned char, float, signed char, unsigned char, unsigned char, int, int))0x728640)\
-    (x, y, width, height, progress, progressAdd, drawPercentage, drawBlackBorder, color,\
-    addColor);
-
-void Draw()
-{
-    DrawBarChart(300.0, 100.0, 300, 50, 60.0, 0, false, true, 0xFF0000FF, 0);
 }
