@@ -450,31 +450,34 @@ void CSprite2d::DrawBarChart(float x, float y, unsigned short width, unsigned ch
 
     progress = std::max(0.0f, progress);
 
-    const float maxX = x + (float)width;
+    const float endX = x + (float)width;
     const float unclampedCurrX = x + (float)width * progress / 100.0f;
-    const float currX = std::min(unclampedCurrX, maxX);
+    const float currX = std::min(unclampedCurrX, endX);
+
+    // Progress rect
     DrawRect({
         x,
         y,
-        std::min(maxX, currX),
+        currX,
         y + height
     }, color);
 
+    // Background (from currX to endX)
     CRGBA loadingBarBgColor = color / 2.0f;
-    loadingBarBgColor.a = 255;
+    loadingBarBgColor.a = color.a;
     DrawRect({
-        std::min(maxX, currX),
+        currX,
         y,
-        maxX,
+        endX,
         y + height
     }, loadingBarBgColor);
 
     if (progressAdd) {
         addColor.a = color.a;
         DrawRect({
-            std::max(x - 1.0f, std::min(maxX, currX) - (float)progressAdd),
+            std::max<float>(x - 1.0f, currX - (x - 1.0f)),
             y,
-            std::min(maxX, currX),
+            currX,
             y + height
         }, addColor);
     }
@@ -482,11 +485,11 @@ void CSprite2d::DrawBarChart(float x, float y, unsigned short width, unsigned ch
     if (drawBlackBorder) {
         const float w = 2 * SCREEN_WIDTH_UNIT, h = 2 * SCREEN_HEIGHT_UNIT;
         const CRect rects[] = {
-            //left,   top,        right,      bottom
-            { x,      y,          maxX,       y + h },           // Top
-            { x,      y + height, maxX,       y + height - h },   // Bottom
-            { x,      y,          x + w,      y + height },      // Left
-            { maxX,   y,          maxX - w,   y + height }       // Right
+            //left,     top,              right,    bottom
+            { x,        y,                endX,     y + h },            // Top
+            { x,        y + height - h,   endX,     y + height },       // Bottom
+            { x,        y,                x + w,    y + height },       // Left
+            { endX - w, y,                endX,     y + height }        // Right
         };
 
         for (const CRect& rect : rects) {
@@ -498,25 +501,26 @@ void CSprite2d::DrawBarChart(float x, float y, unsigned short width, unsigned ch
     if (drawPercentage) {
         char text[12];
         sprintf(text, "%d%%", (unsigned)progress);
-
+        
         GxtChar gxtText[12];
         AsciiToGxtChar(text, gxtText);
 
         CFont::SetWrapx(x);
-        CFont::SetRightJustifyWrap(maxX);
+        CFont::SetRightJustifyWrap(endX);
         CFont::SetColor({ 0, 0, 0, color.a });
         CFont::SetEdge(0);
         CFont::SetFontStyle(FONT_SUBTITLES);
         CFont::SetScale(height * 0.03f, height / 0.04f);
 
-        float textX = unclampedCurrX;
-        if (x + 50.0f <= unclampedCurrX) {
+        auto textX = (uint16_t)unclampedCurrX;
+        if (x + 50.0f <= (float)textX) {
             CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
-        } else {
-            CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
-            textX += 5.0f;
         }
-        CFont::PrintString(textX, y + 2.0f, gxtText);
+        else {
+            CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
+            textX += 5;
+        }
+        CFont::PrintString((float)textX, y + 2.0f, gxtText);
     }
 }
 
