@@ -135,9 +135,9 @@ void CFont::SetScaleForCurrentlanguage(float w, float h)
     case 4:
         m_Scale->Set(h, w * 0.8f);
         break;
+    default:
+        m_Scale->Set(w, h);
     }
-
-    m_Scale->Set(w, h);
 }
 
 // 0x719400
