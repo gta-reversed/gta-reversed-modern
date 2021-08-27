@@ -10,7 +10,7 @@
 
 CSprite2d* CFont::Sprite = (CSprite2d*)0xC71AD0;
 CSprite2d* CFont::ButtonSprite = (CSprite2d*)0xC71AD8;
-unsigned char& CFont::m_nExtraFontSymbolId = *(unsigned char*)0xC71A54;
+unsigned char& CFont::m_nExtraFontSymbolId = *(unsigned char*)0xC71A54; // aka. PS2Symbol
 bool& CFont::m_bNewLine = *(bool*)0xC71A55;
 CRGBA* CFont::m_Color = (CRGBA*)0xC71A60;
 CVector2D* CFont::m_Scale = (CVector2D*)0xC71A64;
@@ -42,6 +42,16 @@ void CFont::InjectHooks() {
     ReversibleHooks::Install("CFont", "Initialise", 0x5BA690, &CFont::Initialise);
     ReversibleHooks::Install("CFont", "SetEdge", 0x719590, &CFont::SetEdge);
     ReversibleHooks::Install("CFont", "DrawFonts", 0x71A210, &CFont::DrawFonts);
+
+    // wip
+    ReversibleHooks::Install("CFont", "SetScale", 0x719380, &CFont::SetScale);
+    ReversibleHooks::Install("CFont", "SetScaleForCurrentlanguage", 0x7193A0, &CFont::SetScaleForCurrentlanguage);
+    ReversibleHooks::Install("CFont", "SetSlantRefPoint", 0x719400, &CFont::SetSlantRefPoint);
+    ReversibleHooks::Install("CFont", "SetSlant", 0x719420, &CFont::SetSlant);
+    ReversibleHooks::Install("CFont", "SetColor", 0x719430, &CFont::SetColor);
+    ReversibleHooks::Install("CFont", "SetFontStyle", 0x719490, &CFont::SetFontStyle);
+    ReversibleHooks::Install("CFont", "SetWrapx", 0x7194D0, &CFont::SetWrapx);
+    ReversibleHooks::Install("CFont", "SetCentreSize", 0x7194E0, &CFont::SetCentreSize);
 }
 
 // 0x7187C0
@@ -109,71 +119,117 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
     return ((char* (__cdecl*)(char*, CRGBA&, bool, char*))0x718F00)(text, color, isBlip, tag);
 }
 
+// 0x719380
 void CFont::SetScale(float w, float h)
 {
-    ((void(__cdecl*)(float, float))0x719380)(w, h);
+    m_Scale->Set(w, h);
 }
 
+// 0x7193A0
 void CFont::SetScaleForCurrentlanguage(float w, float h)
 {
-    ((void(__cdecl*)(float, float))0x7193A0)(w, h);
+    switch (FrontEndMenuManager.m_nLanguage) {
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        m_Scale->Set(h, w * 0.8f);
+        break;
+    }
+
+    m_Scale->Set(w, h);
 }
 
+// 0x719400
 void CFont::SetSlantRefPoint(float x, float y)
 {
-    ((void(__cdecl*)(float, float))0x719400)(x, y);
+    m_fSlantRefPoint->Set(x, y);
 }
 
+// 0x719420
 void CFont::SetSlant(float value)
 {
-    ((void(__cdecl*)(float))0x719420)(value);
+    m_fSlant = value;
 }
 
+// 0x719430
 void CFont::SetColor(CRGBA color)
 {
-    ((void(__cdecl*)(CRGBA))0x719430)(color);
+    *m_Color = color;
+
+    if (m_dwFontAlpha < 255) {
+        m_Color->a = (color.a * m_dwFontAlpha) / 255;
+    }
 }
 
-void CFont::SetFontStyle(short style)
+// 0x719490
+void CFont::SetFontStyle(eFontStyle style)
 {
-    ((void(__cdecl*)(short))0x719490)(style);
+    switch (style) {
+    case FONT_PRICEDOWN:
+        m_FontTextureId = 1;
+        m_FontStyle = 1;
+        break;
+    case FONT_MENU:
+        m_FontTextureId = 0;
+        m_FontStyle = 2;
+        break;
+    }
+
+    m_FontTextureId = style;
+    m_FontStyle = 0;
 }
 
+// 0x7194D0
 void CFont::SetWrapx(float value)
 {
-    ((void(__cdecl*)(float))0x7194D0)(value);
+    m_fWrapx = value;
 }
 
+// 0x7194E0
 void CFont::SetCentreSize(float value)
 {
-    ((void(__cdecl*)(float))0x7194E0)(value);
+    m_fFontCentreSize = value;
 }
 
+// 0x7194F0
 void CFont::SetRightJustifyWrap(float value)
 {
-    ((void(__cdecl*)(float))0x7194F0)(value);
+    //((void(__cdecl*)(float))0x7194F0)(value);
+    m_fRightJustifyWrap = value;
 }
 
+// 0x719500
 void CFont::SetAlphaFade(float alpha)
 {
-    ((void(__cdecl*)(float))0x719500)(alpha);
+    //((void(__cdecl*)(float))0x719500)(alpha);
+    m_dwFontAlpha = alpha;
 }
 
+// 0x719510
 void CFont::SetDropColor(CRGBA color)
 {
-    ((void(__cdecl*)(CRGBA))0x719510)(color);
+    //((void(__cdecl*)(CRGBA))0x719510)(color);
+    *m_FontDropColor = color;
+
+    if (m_dwFontAlpha < 255)
+        m_FontDropColor->a = m_Color->a * m_dwFontAlpha;
 }
 
+// 0x719570
 void CFont::SetDropShadowPosition(short value)
 {
-    ((void(__cdecl*)(short))0x719570)(value);
+    //((void(__cdecl*)(short))0x719570)(value);
+    m_nFontOutlineSize = 0;
+    m_nFontOutlineOrShadow = 0;
+    m_nFontShadow = (uint8_t)value;
 }
 
 // 0x719590
 void CFont::SetEdge(short value) {
-    CFont::m_nFontShadow = 0;
-    CFont::m_nFontOutlineSize = (uint8_t)(value);
-    CFont::m_nFontOutlineOrShadow = (uint8_t)(value);
+    m_nFontShadow = 0;
+    m_nFontOutlineSize = (uint8_t)value;
+    m_nFontOutlineOrShadow = (uint8_t)value;
 }
 
 #ifdef SetProp
@@ -189,29 +245,46 @@ void CFont::SetProportional(bool on)
 #define SetProp SetPropA
 #endif
 
+// 0x7195C0
 void CFont::SetBackground(bool enable, bool includeWrap)
 {
-    ((void(__cdecl*)(bool, bool))0x7195C0)(enable, includeWrap);
+    //((void(__cdecl*)(bool, bool))0x7195C0)(enable, includeWrap);
+    m_bFontBackground = enable;
+    m_bEnlargeBackgroundBox = includeWrap;
 }
 
+// 0x7195E0
 void CFont::SetBackgroundColor(CRGBA color)
 {
-    ((void(__cdecl*)(CRGBA))0x7195E0)(color);
+    //((void(__cdecl*)(CRGBA))0x7195E0)(color);
+    *m_FontBackgroundColor = color;
 }
 
+// 0x719600
 void CFont::SetJustify(bool on)
 {
-    ((void(__cdecl*)(bool))0x719600)(on);
+    m_bFontJustify = on;
 }
 
+// 0x719610
 void CFont::SetOrientation(eFontAlignment alignment)
 {
-    ((void(__cdecl*)(eFontAlignment))0x719610)(alignment);
+    m_bFontCentreAlign = alignment == ALIGN_CENTER;
+    m_bFontRightAlign = alignment == ALIGN_RIGHT;
 }
 
+// 0x719800
+// not done.
 void CFont::InitPerFrame()
 {
-    ((void(__cdecl*)())0x719800)();
+    m_nFontOutline = 0;
+    m_nFontOutlineOrShadow = 0;
+    m_nFontShadow = 0;
+    m_bNewLine = false;
+    m_nExtraFontSymbolId = 0;
+    //RenderState.m_wFontTexture = -1;
+    //m_pEmptyChar = &setup
+    CSprite::InitSpriteBuffer();
 }
 
 void CFont::RenderFontBuffer()

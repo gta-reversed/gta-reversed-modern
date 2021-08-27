@@ -89,7 +89,7 @@ public:
     // set text color
     static void SetColor(CRGBA color);
     // set text style
-    static void SetFontStyle(short style);
+    static void SetFontStyle(eFontStyle style);
     // set line width at right
     static void SetWrapx(float value);
     // set line width at center
