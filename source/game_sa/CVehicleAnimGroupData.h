@@ -98,16 +98,14 @@ enum eVehAnimDoorOffset : unsigned char {
 
 // Most of the code was inlined in final exe, in android IDB 99% of the code is inlined,
 // on PC version some methods are left, but without symbols the names aren't matching original source most likely
-class CVehicleAnimGroup
-{
+class CVehicleAnimGroup {
 public:
     CVehicleAnimGroup();
 
 public:
-    unsigned char m_ucFirstGroup; // see eAnimGroup
-    unsigned char m_ucSecondGroup; // see eAnimGroup
-private:
-    unsigned char _align[2];
+    unsigned char m_ucFirstGroup;  // see AssocGroupId
+    unsigned char m_ucSecondGroup; // see AssocGroupId
+    char          _pad[2];
 
 public:
     sVehicleAnimDataGroupFlags m_animFlags;
@@ -121,8 +119,8 @@ public:
 
     void InitAnimGroup(unsigned char firstGroup, unsigned char secondGroup, int animFlags, int animSpecialFlags, sVehAnimGroupGeneralTiming* generalTiming, sVehAnimGroupInOutTiming* startTiming, sVehAnimGroupInOutTiming* endTiming);
     void CopyAnimGroup(CVehicleAnimGroup* src);
-    int GetGroup(int animId);
-    float ComputeCriticalBlendTime(int animId);
+    uint32 GetGroup(AnimationId animId);
+    float ComputeCriticalBlendTime(AnimationId animId);
     CVector ComputeAnimDoorOffsets(eVehAnimDoorOffset doorId);
 
 public:
@@ -133,8 +131,7 @@ public:
 VALIDATE_SIZE(CVehicleAnimGroup, 0x94);
 
 
-class CVehicleAnimGroupData
-{
+class CVehicleAnimGroupData {
 public:
     static constexpr int NUM_VEH_ANIM_GROUPS = 30;
     static CVehicleAnimGroup(&m_vehicleAnimGroups)[NUM_VEH_ANIM_GROUPS]; // Access using GetVehicleAnimGroup()
@@ -142,15 +139,16 @@ public:
 public:
     static void InjectHooks();
 
-    static void GetInOutTimings(int iGroup, eInOutTimingMode mode, float* pfAnimStart, float* pfAnimEnd);
-    static int GetGroupForAnim(int iGroup, int animId);
-    static CVector GetAnimDoorOffset(int iGroup, eVehAnimDoorOffset doorId);
-    static float ComputeCriticalBlendTime(int iGroup, int animId);
+    static void GetInOutTimings(AssocGroupId groupId, eInOutTimingMode mode, float* pfAnimStart, float* pfAnimEnd);
+    static int GetGroupForAnim(AssocGroupId groupId, AnimationId animId);
+    static CVector GetAnimDoorOffset(AssocGroupId groupId, eVehAnimDoorOffset doorId);
+    static float ComputeCriticalBlendTime(AssocGroupId groupId, AnimationId animId);
 
-    static bool UsesTruckDrivingAnims(int iGroup);
-    static bool UsesKartDrivingAnims(int iGroup);
-    static bool UsesHovercraftDrivingAnims(int iGroup);
+    static bool UsesTruckDrivingAnims(AssocGroupId groupId);
+    static bool UsesKartDrivingAnims(AssocGroupId groupId);
+    static bool UsesHovercraftDrivingAnims(AssocGroupId groupId);
+
 public:
-// Helpers
+    // Helpers
     inline static CVehicleAnimGroup& GetVehicleAnimGroup(int iGroup) { return m_vehicleAnimGroups[iGroup]; }
 };

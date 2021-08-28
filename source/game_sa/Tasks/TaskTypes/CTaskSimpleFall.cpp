@@ -13,14 +13,14 @@ void CTaskSimpleFall::InjectHooks()
     ReversibleHooks::Install("CTaskSimpleFall", "MakeAbortable", 0x678370, &CTaskSimpleFall::MakeAbortable_Reversed);
 }
 
-CTaskSimpleFall* CTaskSimpleFall::Constructor(eAnimID nAnimId, eAnimGroup nAnimGroup, int nDownTime)
+CTaskSimpleFall* CTaskSimpleFall::Constructor(AnimationId nAnimId, AssocGroupId nAnimGroup, int nDownTime)
 {
     this->CTaskSimpleFall::CTaskSimpleFall(nAnimId, nAnimGroup, nDownTime);
     return this;
 }
 
 // 0x6782C0
-CTaskSimpleFall::CTaskSimpleFall(eAnimID nAnimId, eAnimGroup nAnimGroup, int nDownTime)
+CTaskSimpleFall::CTaskSimpleFall(AnimationId nAnimId, AssocGroupId nAnimGroup, int nDownTime)
 {
     m_nAnimId = nAnimId;
     m_nAnimGroup = nAnimGroup;

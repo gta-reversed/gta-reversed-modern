@@ -415,7 +415,7 @@ public:
     // component index in m_apModelNodes array
     virtual bool IsComponentPresent(int componentId) { return false; }
     virtual void OpenDoor(CPed* ped, int componentId, eDoors door, float doorOpenRatio, bool playSound) { /* Do nothing */ }
-    virtual void ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int arg2, unsigned int nAnimID, float fTime);
+    virtual void ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int animGroup, unsigned int animId, float fTime);
     virtual float GetDooorAngleOpenRatio(eDoors door) { return 0.0F; }
     virtual float GetDooorAngleOpenRatio(unsigned int door) { return 0.0F; }
     virtual bool IsDoorReady(eDoors door) { return false; }
