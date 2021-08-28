@@ -320,6 +320,7 @@ int32_t CFireManager::StartScriptFire(CVector const& pos, CEntity * pTarget, flo
 void CFireManager::Update() {
     if (CReplay::Mode == 1)
         return;
+
     for (auto& fire : m_aFires) {
         fire.ProcessFire();
     }

@@ -6,7 +6,7 @@ unsigned int CDamageManager::GetWheelStatus(int wheel)
 }
 
 void CDamageManager::SetEngineStatus(uint32_t status) {
-    plugin::CallMethod<0x6C22A0, CDamageManager*, uint>(this, status);
+    plugin::CallMethod<0x6C22A0, CDamageManager*, uint32_t>(this, status);
 }
 
 uint32_t CDamageManager::GetEngineStatus() {
