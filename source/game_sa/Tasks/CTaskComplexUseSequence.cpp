@@ -147,7 +147,7 @@ CTask* CTaskComplexUseSequence::CreateNextSubTask_Reversed(CPed* ped)
     else
     {
         auto pTaskComplexSequence = &CTaskSequences::ms_taskSequence[m_nSequenceIndex];
-        return pTaskComplexSequence->CreateNextSubTask(ped, &m_nCurrentTaskIndex, &m_nSequenceRepeatedCount);
+        return pTaskComplexSequence->CreateNextSubTask(ped, m_nCurrentTaskIndex, m_nSequenceRepeatedCount);
     }
     return nullptr;
 }
