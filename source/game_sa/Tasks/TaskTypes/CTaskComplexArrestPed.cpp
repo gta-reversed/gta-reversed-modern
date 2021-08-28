@@ -2,7 +2,7 @@
 
 void CTaskComplexArrestPed::InjectHooks()
 {
-    HookInstall(0x68B990, &CTaskComplexArrestPed::Constructor);
+    ReversibleHooks::Install(0x68B990, &CTaskComplexArrestPed::Constructor);
 }
 
 CTaskComplexArrestPed::CTaskComplexArrestPed(CPed* ped)

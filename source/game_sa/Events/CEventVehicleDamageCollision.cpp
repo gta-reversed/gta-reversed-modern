@@ -2,8 +2,8 @@
 
 void CEventVehicleDamageCollision::InjectHooks()
 {
-    HookInstall(0x6A0620, &CEventVehicleDamageCollision::Constructor);
-    HookInstall(0x6A0670, &CEventVehicleDamageCollision::CloneEditable_Reversed);
+    ReversibleHooks::Install(0x6A0620, &CEventVehicleDamageCollision::Constructor);
+    ReversibleHooks::Install(0x6A0670, &CEventVehicleDamageCollision::CloneEditable_Reversed);
 }
 
 CEventVehicleDamageCollision::CEventVehicleDamageCollision(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType) :

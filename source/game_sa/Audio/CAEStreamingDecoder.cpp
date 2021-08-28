@@ -47,7 +47,7 @@ void CAEStreamingDecoder::dtor()
 void CAEStreamingDecoder::InjectHooks()
 {
 #ifndef USE_DEFAULT_FUNCTIONS
-    HookInstall(0x4f2810, &CAEStreamingDecoder::ctor);
-    HookInstall(0x4f2830, &CAEStreamingDecoder::dtor);
+    ReversibleHooks::Install(0x4f2810, &CAEStreamingDecoder::ctor);
+    ReversibleHooks::Install(0x4f2830, &CAEStreamingDecoder::dtor);
 #endif
 }

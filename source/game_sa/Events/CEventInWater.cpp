@@ -2,9 +2,9 @@
 
 void CEventInWater::InjectHooks()
 {
-    HookInstall(0x4B1370, &CEventInWater::Constructor);
-    HookInstall(0x4B13D0, &CEventInWater::AffectsPed_Reversed);
-    HookInstall(0x4B1420, &CEventInWater::TakesPriorityOver_Reversed);
+    ReversibleHooks::Install(0x4B1370, &CEventInWater::Constructor);
+    ReversibleHooks::Install(0x4B13D0, &CEventInWater::AffectsPed_Reversed);
+    ReversibleHooks::Install(0x4B1420, &CEventInWater::TakesPriorityOver_Reversed);
 }
 
 CEventInWater::CEventInWater(float acceleration)

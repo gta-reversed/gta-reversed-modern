@@ -2,11 +2,11 @@
 
 void CTaskSimpleGoToPoint::InjectHooks()
 {
-    HookInstall(0x667CD0, &CTaskSimpleGoToPoint::Constructor);
-    HookInstall(0x66CC60, &CTaskSimpleGoToPoint::Clone_Reversed);
-    HookInstall(0x667D60, &CTaskSimpleGoToPoint::MakeAbortable_Reversed);
-    HookInstall(0x66D710, &CTaskSimpleGoToPoint::ProcessPed_Reversed);
-    HookInstall(0x645700, &CTaskSimpleGoToPoint::UpdatePoint);
+    ReversibleHooks::Install(0x667CD0, &CTaskSimpleGoToPoint::Constructor);
+    ReversibleHooks::Install(0x66CC60, &CTaskSimpleGoToPoint::Clone_Reversed);
+    ReversibleHooks::Install(0x667D60, &CTaskSimpleGoToPoint::MakeAbortable_Reversed);
+    ReversibleHooks::Install(0x66D710, &CTaskSimpleGoToPoint::ProcessPed_Reversed);
+    ReversibleHooks::Install(0x645700, &CTaskSimpleGoToPoint::UpdatePoint);
 }
 
 CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(int moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) :

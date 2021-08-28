@@ -2,15 +2,15 @@
 
 void CEventKnockOffBike::InjectHooks()
 {
-    HookInstall(0x4AFCF0, (CEventKnockOffBike * (CEventKnockOffBike::*)(CVehicle*, CVector*, CVector*, float, float, std::uint8_t, std::uint8_t, std::int32_t, CPed*, bool, bool)) & CEventKnockOffBike::Constructor);
-    HookInstall(0x4AFC70, (CEventKnockOffBike * (CEventKnockOffBike::*)()) & CEventKnockOffBike::Constructor);
-    HookInstall(0x4AFEE0, &CEventKnockOffBike::AffectsPed_Reversed);
-    HookInstall(0x4B4E80, &CEventKnockOffBike::ReportCriminalEvent_Reversed);
-    HookInstall(0x4B4AA0, &CEventKnockOffBike::From); // operator=
-    HookInstall(0x4AFDD0, &CEventKnockOffBike::From);
-    HookInstall(0x4AFF60, &CEventKnockOffBike::SetPedOutCar);
-    HookInstall(0x4B0020, &CEventKnockOffBike::CalcForcesAndAnims);
-    HookInstall(0x4B4AC0, &CEventKnockOffBike::SetPedSafePosition);
+    ReversibleHooks::Install(0x4AFCF0, (CEventKnockOffBike * (CEventKnockOffBike::*)(CVehicle*, CVector*, CVector*, float, float, std::uint8_t, std::uint8_t, std::int32_t, CPed*, bool, bool)) & CEventKnockOffBike::Constructor);
+    ReversibleHooks::Install(0x4AFC70, (CEventKnockOffBike * (CEventKnockOffBike::*)()) & CEventKnockOffBike::Constructor);
+    ReversibleHooks::Install(0x4AFEE0, &CEventKnockOffBike::AffectsPed_Reversed);
+    ReversibleHooks::Install(0x4B4E80, &CEventKnockOffBike::ReportCriminalEvent_Reversed);
+    ReversibleHooks::Install(0x4B4AA0, &CEventKnockOffBike::From); // operator=
+    ReversibleHooks::Install(0x4AFDD0, &CEventKnockOffBike::From);
+    ReversibleHooks::Install(0x4AFF60, &CEventKnockOffBike::SetPedOutCar);
+    ReversibleHooks::Install(0x4B0020, &CEventKnockOffBike::CalcForcesAndAnims);
+    ReversibleHooks::Install(0x4B4AC0, &CEventKnockOffBike::SetPedSafePosition);
 }
 
 CEventKnockOffBike::CEventKnockOffBike(CVehicle* vehicle, CVector* moveSpeed, CVector* collisionImpactVelocity, float damageIntensity, float a6, std::uint8_t knockOffType, std::uint8_t knockOffDirection, std::int32_t time, CPed* ped, bool isVictimDriver, bool forceKnockOff)

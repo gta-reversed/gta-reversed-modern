@@ -2,7 +2,7 @@
 
 void CTaskComplexFollowPedFootsteps::InjectHooks()
 {
-    HookInstall(0x694E20, &CTaskComplexFollowPedFootsteps::Constructor);
+    ReversibleHooks::Install(0x694E20, &CTaskComplexFollowPedFootsteps::Constructor);
 }
 
 CTaskComplexFollowPedFootsteps::CTaskComplexFollowPedFootsteps(CPed* ped)

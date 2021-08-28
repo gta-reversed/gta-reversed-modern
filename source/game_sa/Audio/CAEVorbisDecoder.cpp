@@ -235,18 +235,18 @@ void CAEVorbisDecoder::dtor()
 void CAEVorbisDecoder::InjectHooks()
 {
 #ifndef USE_DEFAULT_FUNCTIONS
-    HookInstall(0x5023f0, &CAEVorbisDecoder::dtor);
-    HookInstall(0x502460, &CAEVorbisDecoder::GetStreamID);
-    HookInstall(0x502470, &CAEVorbisDecoder::FillBuffer);
-    HookInstall(0x5024d0, &CAEVorbisDecoder::Initialise);
-    HookInstall(0x502560, &CAEVorbisDecoder::GetSampleRate);
-    HookInstall(0x502580, &CAEVorbisDecoder::ReadCallback);
-    HookInstall(0x5025d0, &CAEVorbisDecoder::CloseCallback);
-    HookInstall(0x5025b0, &CAEVorbisDecoder::SeekCallback);
-    HookInstall(0x5025f0, &CAEVorbisDecoder::TellCallback);
-    HookInstall(0x502610, &CAEVorbisDecoder::GetStreamLengthMs);
-    HookInstall(0x502640, &CAEVorbisDecoder::GetStreamPlayTimeMs);
-    HookInstall(0x502670, &CAEVorbisDecoder::SetCursor);
-    HookInstall(0x5026b0, &CAEVorbisDecoder::ctor);
+    ReversibleHooks::Install(0x5023f0, &CAEVorbisDecoder::dtor);
+    ReversibleHooks::Install(0x502460, &CAEVorbisDecoder::GetStreamID);
+    ReversibleHooks::Install(0x502470, &CAEVorbisDecoder::FillBuffer);
+    ReversibleHooks::Install(0x5024d0, &CAEVorbisDecoder::Initialise);
+    ReversibleHooks::Install(0x502560, &CAEVorbisDecoder::GetSampleRate);
+    ReversibleHooks::Install(0x502580, &CAEVorbisDecoder::ReadCallback);
+    ReversibleHooks::Install(0x5025d0, &CAEVorbisDecoder::CloseCallback);
+    ReversibleHooks::Install(0x5025b0, &CAEVorbisDecoder::SeekCallback);
+    ReversibleHooks::Install(0x5025f0, &CAEVorbisDecoder::TellCallback);
+    ReversibleHooks::Install(0x502610, &CAEVorbisDecoder::GetStreamLengthMs);
+    ReversibleHooks::Install(0x502640, &CAEVorbisDecoder::GetStreamPlayTimeMs);
+    ReversibleHooks::Install(0x502670, &CAEVorbisDecoder::SetCursor);
+    ReversibleHooks::Install(0x5026b0, &CAEVorbisDecoder::ctor);
 #endif
 }

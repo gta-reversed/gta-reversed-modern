@@ -2,7 +2,7 @@
 
 void CTaskComplexKillPedOnFoot::InjectHooks()
 {
-    HookInstall(0x620E30, &CTaskComplexKillPedOnFoot::Constructor);
+    ReversibleHooks::Install(0x620E30, &CTaskComplexKillPedOnFoot::Constructor);
 }
 
 CTaskComplexKillPedOnFoot::CTaskComplexKillPedOnFoot(CPed* target, std::int32_t time, std::uint32_t pedFlags, std::int32_t delay, std::int32_t chance, std::int8_t a7)

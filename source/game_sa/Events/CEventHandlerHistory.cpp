@@ -2,16 +2,16 @@
 
 void CEventHandlerHistory::InjectHooks()
 {
-    HookInstall(0x4BC550, &CEventHandlerHistory::ClearAllEvents);
-    HookInstall(0x4B8C60, &CEventHandlerHistory::ClearNonTempEvent);
-    HookInstall(0x4B8C40, &CEventHandlerHistory::ClearTempEvent);
-    HookInstall(0x4B8CA0, &CEventHandlerHistory::GetCurrentEvent);
-    HookInstall(0x4B8C80, &CEventHandlerHistory::GetCurrentEventPriority);
-    HookInstall(0x4B8B90, &CEventHandlerHistory::IsRespondingToEvent);
-    HookInstall(0x4BC4B0, &CEventHandlerHistory::RecordCurrentEvent);
-    HookInstall(0x4B8BF0, &CEventHandlerHistory::StoreActiveEvent);
-    HookInstall(0x4BC580, &CEventHandlerHistory::TakesPriorityOverCurrentEvent);
-    HookInstall(0x4B8C20, &CEventHandlerHistory::TickStoredEvent);
+    ReversibleHooks::Install(0x4BC550, &CEventHandlerHistory::ClearAllEvents);
+    ReversibleHooks::Install(0x4B8C60, &CEventHandlerHistory::ClearNonTempEvent);
+    ReversibleHooks::Install(0x4B8C40, &CEventHandlerHistory::ClearTempEvent);
+    ReversibleHooks::Install(0x4B8CA0, &CEventHandlerHistory::GetCurrentEvent);
+    ReversibleHooks::Install(0x4B8C80, &CEventHandlerHistory::GetCurrentEventPriority);
+    ReversibleHooks::Install(0x4B8B90, &CEventHandlerHistory::IsRespondingToEvent);
+    ReversibleHooks::Install(0x4BC4B0, &CEventHandlerHistory::RecordCurrentEvent);
+    ReversibleHooks::Install(0x4B8BF0, &CEventHandlerHistory::StoreActiveEvent);
+    ReversibleHooks::Install(0x4BC580, &CEventHandlerHistory::TakesPriorityOverCurrentEvent);
+    ReversibleHooks::Install(0x4B8C20, &CEventHandlerHistory::TickStoredEvent);
 }
 
 CEventHandlerHistory::~CEventHandlerHistory()

@@ -2,9 +2,9 @@
 
 void CEventSoundQuiet::InjectHooks()
 {
-    HookInstall(0x5E05B0, &CEventSoundQuiet::Constructor);
-    HookInstall(0x4B5240, &CEventSoundQuiet::AffectsPed_Reversed);
-    HookInstall(0x5E0670, &CEventSoundQuiet::CloneEditable_Reversed);
+    ReversibleHooks::Install(0x5E05B0, &CEventSoundQuiet::Constructor);
+    ReversibleHooks::Install(0x4B5240, &CEventSoundQuiet::AffectsPed_Reversed);
+    ReversibleHooks::Install(0x5E0670, &CEventSoundQuiet::CloneEditable_Reversed);
 }
 
 CEventSoundQuiet::CEventSoundQuiet(CEntity* entity, float fLocalSoundLevel, std::uint32_t startTime, CVector& position)

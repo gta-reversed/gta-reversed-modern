@@ -2,61 +2,61 @@
 
 void CEvent::InjectHooks()
 {
-    HookInstall(0x4ABFC0, &CEvent::Constructor);
-    HookInstall(0x4AC050, &CEvent::CalcSoundLevelIncrement);
-    HookInstall(0x4B2850, &CEvent::GetSoundLevel);
+    ReversibleHooks::Install(0x4ABFC0, &CEvent::Constructor);
+    ReversibleHooks::Install(0x4AC050, &CEvent::CalcSoundLevelIncrement);
+    ReversibleHooks::Install(0x4B2850, &CEvent::GetSoundLevel);
 }
 
 void CEventRevived::InjectHooks()
 {
-    HookInstall(0x4AEC50, &CEventRevived::Constructor);
-    HookInstall(0x4AECB0, &CEventRevived::AffectsPed_Reversed);
+    ReversibleHooks::Install(0x4AEC50, &CEventRevived::Constructor);
+    ReversibleHooks::Install(0x4AECB0, &CEventRevived::AffectsPed_Reversed);
 }
 
 void CEventEscalator::InjectHooks()
 {
-    HookInstall(0x5FF820, &CEventEscalator::Constructor);
-    HookInstall(0x4B2580, &CEventEscalator::AffectsPed_Reversed);
+    ReversibleHooks::Install(0x5FF820, &CEventEscalator::Constructor);
+    ReversibleHooks::Install(0x4B2580, &CEventEscalator::AffectsPed_Reversed);
 }
 
 void CEventSexyVehicle::InjectHooks()
 {
-    HookInstall(0x4AF010, &CEventSexyVehicle::Constructor);
+    ReversibleHooks::Install(0x4AF010, &CEventSexyVehicle::Constructor);
 }
 
 void CEventChatPartner::InjectHooks()
 {
-    HookInstall(0x4AECD0, &CEventChatPartner::Constructor);
+    ReversibleHooks::Install(0x4AECD0, &CEventChatPartner::Constructor);
 }
 
 void CEventCopCarBeingStolen::InjectHooks()
 {
-    HookInstall(0x4B1740, &CEventCopCarBeingStolen::Constructor);
-    HookInstall(0x4B1860, &CEventCopCarBeingStolen::AffectsPed_Reversed);
+    ReversibleHooks::Install(0x4B1740, &CEventCopCarBeingStolen::Constructor);
+    ReversibleHooks::Install(0x4B1860, &CEventCopCarBeingStolen::AffectsPed_Reversed);
 }
 
 void CEventCarUpsideDown::InjectHooks()
 {
-    HookInstall(0x4B1CC0, &CEventCarUpsideDown::Constructor);
-    HookInstall(0x4B1DB0, &CEventCarUpsideDown::AffectsPed_Reversed);
+    ReversibleHooks::Install(0x4B1CC0, &CEventCarUpsideDown::Constructor);
+    ReversibleHooks::Install(0x4B1DB0, &CEventCarUpsideDown::AffectsPed_Reversed);
 }
 
 void CEventPassObject::InjectHooks()
 {
-    HookInstall(0x65DC70, &CEventPassObject::Constructor);
-    HookInstall(0x4B1700, &CEventPassObject::IsValid_Reversed);
+    ReversibleHooks::Install(0x65DC70, &CEventPassObject::Constructor);
+    ReversibleHooks::Install(0x4B1700, &CEventPassObject::IsValid_Reversed);
 }
 
 void CEventLeanOnVehicle::InjectHooks()
 {
-    HookInstall(0x65DAF0, &CEventLeanOnVehicle::Constructor);
-    HookInstall(0x4B16C0, &CEventLeanOnVehicle::IsValid_Reversed);
+    ReversibleHooks::Install(0x65DAF0, &CEventLeanOnVehicle::Constructor);
+    ReversibleHooks::Install(0x4B16C0, &CEventLeanOnVehicle::IsValid_Reversed);
 }
 
 void CEventOnFire::InjectHooks()
 {
-    HookInstall(0x5FF740, &CEventOnFire::Constructor);
-    HookInstall(0x4B1050, &CEventOnFire::AffectsPed_Reversed);
+    ReversibleHooks::Install(0x5FF740, &CEventOnFire::Constructor);
+    ReversibleHooks::Install(0x4B1050, &CEventOnFire::AffectsPed_Reversed);
 }
 
 CEvent::CEvent() {

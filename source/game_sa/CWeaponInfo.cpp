@@ -10,7 +10,7 @@
 CWeaponInfo* aWeaponInfo = (CWeaponInfo*)0xC8AAB8;
 
 void CWeaponInfo::InjectHooks() {
-    HookInstall(0x00743CD0, &CWeaponInfo::GetSkillStatIndex, 7);
+    ReversibleHooks::Install(0x00743CD0, &CWeaponInfo::GetSkillStatIndex, 7);
 }
 
 CWeaponInfo::CWeaponInfo()

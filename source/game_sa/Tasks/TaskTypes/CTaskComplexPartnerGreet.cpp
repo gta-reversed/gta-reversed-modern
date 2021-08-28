@@ -2,7 +2,7 @@
 
 void CTaskComplexPartnerGreet::InjectHooks()
 {
-    HookInstall(0x684210, &CTaskComplexPartnerGreet::Constructor);
+    ReversibleHooks::Install(0x684210, &CTaskComplexPartnerGreet::Constructor);
 }
 
 CTaskComplexPartnerGreet::CTaskComplexPartnerGreet(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, std::int32_t handShakeType, CVector point) :

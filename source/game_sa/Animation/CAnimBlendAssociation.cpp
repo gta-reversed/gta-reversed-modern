@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 void CAnimBlendAssociation::InjectHooks() {
-    HookInstall(0x4CEFC0, &CAnimBlendAssociation::Constructor);
+    ReversibleHooks::Install(0x4CEFC0, &CAnimBlendAssociation::Constructor);
 }
 
 void* CAnimBlendAssociation::operator new(unsigned int size) {

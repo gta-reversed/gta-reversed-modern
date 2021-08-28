@@ -24,7 +24,7 @@ void CPhysical::InjectHooks()
     ReversibleHooks::Install("CPhysical", "ApplyTurnForce", 0x542A50, &CPhysical::ApplyTurnForce);
     ReversibleHooks::Install("CPhysical", "ApplyForce", 0x542B50, &CPhysical::ApplyForce);
     ReversibleHooks::Install("CPhysical", "GetSpeed", 0x542CE0, &CPhysical::GetSpeed);
-    //HookInstall(0x542DD0, &CPhysical::ApplyMoveSpeed); // Go to the function definition and see why this is commented
+    //ReversibleHooks::Install(0x542DD0, &CPhysical::ApplyMoveSpeed); // Go to the function definition and see why this is commented
     ReversibleHooks::Install("CPhysical", "ApplyTurnSpeed", 0x542E20, &CPhysical::ApplyTurnSpeed);
     ReversibleHooks::Install("CPhysical", "ApplyMoveForce_vec", 0x5429F0, (void(CPhysical::*)(CVector force)) & CPhysical::ApplyMoveForce);
     ReversibleHooks::Install("CPhysical", "SetDamagedPieceRecord", 0x5428C0, &CPhysical::SetDamagedPieceRecord);

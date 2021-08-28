@@ -2,7 +2,7 @@
 
 void CEventCreatePartnerTask::InjectHooks()
 {
-    HookInstall(0x5F6190, &CEventCreatePartnerTask::Constructor);
+    ReversibleHooks::Install(0x5F6190, &CEventCreatePartnerTask::Constructor);
 }
 
 CEventCreatePartnerTask::CEventCreatePartnerTask(std::int32_t randomNumber, CPed* partner, bool leadSpeaker, float distanceMultiplier)

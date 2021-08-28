@@ -2,9 +2,9 @@
 
 void CEventGlobalGroup::InjectHooks()
 {
-    HookInstall(0x4AB900, &CEventGlobalGroup::GetSoundLevel);
-    HookInstall(0x4AB9C0, &CEventGlobalGroup::AddEventsToPed);
-    HookInstall(0x4AB8A0, &CEventGlobalGroup::AddEventsToGroup);
+    ReversibleHooks::Install(0x4AB900, &CEventGlobalGroup::GetSoundLevel);
+    ReversibleHooks::Install(0x4AB9C0, &CEventGlobalGroup::AddEventsToPed);
+    ReversibleHooks::Install(0x4AB8A0, &CEventGlobalGroup::AddEventsToGroup);
 }
 
 float CEventGlobalGroup::GetSoundLevel(CEntity* entity, CVector& position)

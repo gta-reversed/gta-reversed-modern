@@ -2,16 +2,16 @@
 
 void CTaskComplexWanderCop::InjectHooks()
 {
-    HookInstall(0x460C80, &CTaskComplexWanderCop::Constructor);
-    HookInstall(0x460CE0, &CTaskComplexWanderCop::Clone_Reversed);
-    HookInstall(0x674860, &CTaskComplexWanderCop::CreateNextSubTask_Reversed);
-    HookInstall(0x674750, &CTaskComplexWanderCop::CreateFirstSubTask_Reversed);
-    HookInstall(0x674D80, &CTaskComplexWanderCop::ControlSubTask_Reversed);
-    HookInstall(0x6702B0, &CTaskComplexWanderCop::ScanForStuff_Reversed);
-    HookInstall(0x66B1B0, &CTaskComplexWanderCop::LookForCarAlarms);
-    HookInstall(0x66B290, &CTaskComplexWanderCop::LookForStolenCopCars);
-    HookInstall(0x66B300, &CTaskComplexWanderCop::LookForCriminals);
-    HookInstall(0x66B160, &CTaskComplexWanderCop::ShouldPursuePlayer);
+    ReversibleHooks::Install(0x460C80, &CTaskComplexWanderCop::Constructor);
+    ReversibleHooks::Install(0x460CE0, &CTaskComplexWanderCop::Clone_Reversed);
+    ReversibleHooks::Install(0x674860, &CTaskComplexWanderCop::CreateNextSubTask_Reversed);
+    ReversibleHooks::Install(0x674750, &CTaskComplexWanderCop::CreateFirstSubTask_Reversed);
+    ReversibleHooks::Install(0x674D80, &CTaskComplexWanderCop::ControlSubTask_Reversed);
+    ReversibleHooks::Install(0x6702B0, &CTaskComplexWanderCop::ScanForStuff_Reversed);
+    ReversibleHooks::Install(0x66B1B0, &CTaskComplexWanderCop::LookForCarAlarms);
+    ReversibleHooks::Install(0x66B290, &CTaskComplexWanderCop::LookForStolenCopCars);
+    ReversibleHooks::Install(0x66B300, &CTaskComplexWanderCop::LookForCriminals);
+    ReversibleHooks::Install(0x66B160, &CTaskComplexWanderCop::ShouldPursuePlayer);
 }
 
 CTaskComplexWanderCop::CTaskComplexWanderCop(int moveState, unsigned char dir) : CTaskComplexWander(moveState, dir, true, 0.5) {

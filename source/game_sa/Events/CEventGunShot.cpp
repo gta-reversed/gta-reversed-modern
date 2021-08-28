@@ -4,11 +4,11 @@ float& CEventGunShot::ms_fGunShotSenseRangeForRiot2 = *(float*)0x8A625C;
 
 void CEventGunShot::InjectHooks()
 {
-    HookInstall(0x4AC610, &CEventGunShot::Constructor);
-    HookInstall(0x4B2CD0, &CEventGunShot::AffectsPed_Reversed);
-    HookInstall(0x4AC810, &CEventGunShot::IsCriminalEvent_Reversed);
-    HookInstall(0x4AC780, &CEventGunShot::TakesPriorityOver_Reversed);
-    HookInstall(0x4B6B20, &CEventGunShot::CloneEditable_Reversed);
+    ReversibleHooks::Install(0x4AC610, &CEventGunShot::Constructor);
+    ReversibleHooks::Install(0x4B2CD0, &CEventGunShot::AffectsPed_Reversed);
+    ReversibleHooks::Install(0x4AC810, &CEventGunShot::IsCriminalEvent_Reversed);
+    ReversibleHooks::Install(0x4AC780, &CEventGunShot::TakesPriorityOver_Reversed);
+    ReversibleHooks::Install(0x4B6B20, &CEventGunShot::CloneEditable_Reversed);
 }
 
 CEventGunShot::CEventGunShot(CEntity* entity, CVector startPoint, CVector endPoint, bool bHasNoSound)

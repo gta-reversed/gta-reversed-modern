@@ -30,6 +30,6 @@ void CAEStreamTransformer::TransformBuffer(void *buffer, size_t size, std::uint3
 
 void CAEStreamTransformer::InjectHooks()
 {
-    HookInstall(0x4f1750, &CAEStreamTransformer::Initialise);
-    HookInstall(0x4f17d0, &CAEStreamTransformer::TransformBuffer);
+    ReversibleHooks::Install(0x4f1750, &CAEStreamTransformer::Initialise);
+    ReversibleHooks::Install(0x4f17d0, &CAEStreamTransformer::TransformBuffer);
 }

@@ -2,29 +2,29 @@
 
 void CEventPlayerCommandToGroup::InjectHooks()
 {
-    HookInstall(0x4B23D0, &CEventPlayerCommandToGroup::Constructor);
-    HookInstall(0x4B24D0, &CEventPlayerCommandToGroup::AffectsPedGroup_Reversed);
+    ReversibleHooks::Install(0x4B23D0, &CEventPlayerCommandToGroup::Constructor);
+    ReversibleHooks::Install(0x4B24D0, &CEventPlayerCommandToGroup::AffectsPedGroup_Reversed);
 }
 
 void CEventPlayerCommandToGroupAttack::InjectHooks()
 {
-    HookInstall(0x5F6340, &CEventPlayerCommandToGroupAttack::Constructor);
-    HookInstall(0x4B2530, &CEventPlayerCommandToGroupAttack::AffectsPedGroup_Reversed);
+    ReversibleHooks::Install(0x5F6340, &CEventPlayerCommandToGroupAttack::Constructor);
+    ReversibleHooks::Install(0x4B2530, &CEventPlayerCommandToGroupAttack::AffectsPedGroup_Reversed);
 }
 
 void CEventPlayerCommandToGroupGather::InjectHooks()
 {
-    HookInstall(0x609250, &CEventPlayerCommandToGroupGather::Constructor);
+    ReversibleHooks::Install(0x609250, &CEventPlayerCommandToGroupGather::Constructor);
 }
 
 void CEventDontJoinPlayerGroup::InjectHooks()
 {
-    HookInstall(0x6090E0, &CEventDontJoinPlayerGroup::Constructor);
+    ReversibleHooks::Install(0x6090E0, &CEventDontJoinPlayerGroup::Constructor);
 }
 
 void CEventNewGangMember::InjectHooks()
 {
-    HookInstall(0x608F70, &CEventNewGangMember::Constructor);
+    ReversibleHooks::Install(0x608F70, &CEventNewGangMember::Constructor);
 }
 
 CEventPlayerCommandToGroup::CEventPlayerCommandToGroup(ePlayerGroupCommand command, CPed* target)

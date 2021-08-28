@@ -2,14 +2,14 @@
 
 void CTaskComplexGoToPointAndStandStill::InjectHooks()
 {
-    HookInstall(0x668120, &CTaskComplexGoToPointAndStandStill::Constructor);
-    HookInstall(0x66CEA0, &CTaskComplexGoToPointAndStandStill::Clone_Reversed);
-    HookInstall(0x66DBA0, &CTaskComplexGoToPointAndStandStill::CreateNextSubTask_Reversed);
-    HookInstall(0x66DC40, &CTaskComplexGoToPointAndStandStill::CreateFirstSubTask_Reversed);
-    HookInstall(0x668570, &CTaskComplexGoToPointAndStandStill::ControlSubTask_Reversed);
-    HookInstall(0x46FE60, &CTaskComplexGoToPointAndStandStill::GoToPoint);
-    HookInstall(0x668250, &CTaskComplexGoToPointAndStandStill::SelectMoveState);
-    HookInstall(0x6682D0, (CTask*(CTaskComplexGoToPointAndStandStill::*)(int, CPed*)) & CTaskComplexGoToPointAndStandStill::CreateFirstSubTask);
+    ReversibleHooks::Install(0x668120, &CTaskComplexGoToPointAndStandStill::Constructor);
+    ReversibleHooks::Install(0x66CEA0, &CTaskComplexGoToPointAndStandStill::Clone_Reversed);
+    ReversibleHooks::Install(0x66DBA0, &CTaskComplexGoToPointAndStandStill::CreateNextSubTask_Reversed);
+    ReversibleHooks::Install(0x66DC40, &CTaskComplexGoToPointAndStandStill::CreateFirstSubTask_Reversed);
+    ReversibleHooks::Install(0x668570, &CTaskComplexGoToPointAndStandStill::ControlSubTask_Reversed);
+    ReversibleHooks::Install(0x46FE60, &CTaskComplexGoToPointAndStandStill::GoToPoint);
+    ReversibleHooks::Install(0x668250, &CTaskComplexGoToPointAndStandStill::SelectMoveState);
+    ReversibleHooks::Install(0x6682D0, (CTask*(CTaskComplexGoToPointAndStandStill::*)(int, CPed*)) & CTaskComplexGoToPointAndStandStill::CreateFirstSubTask);
 }
 
 CTaskComplexGoToPointAndStandStill::CTaskComplexGoToPointAndStandStill(int moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint)

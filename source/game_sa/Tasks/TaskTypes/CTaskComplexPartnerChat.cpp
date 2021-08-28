@@ -2,7 +2,7 @@
 
 void CTaskComplexPartnerChat::InjectHooks()
 {
-    HookInstall(0x684290, &CTaskComplexPartnerChat::Constructor);
+    ReversibleHooks::Install(0x684290, &CTaskComplexPartnerChat::Constructor);
 }
 
 CTaskComplexPartnerChat::CTaskComplexPartnerChat(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, std::int8_t updateDirectionCount, bool conversationEnabled, bool a8, CVector point) :

@@ -2,8 +2,8 @@
 
 void CEventVehicleDamageWeapon::InjectHooks()
 {
-    HookInstall(0x61C2E0, &CEventVehicleDamageWeapon::Constructor);
-    HookInstall(0x61C330, &CEventVehicleDamageWeapon::CloneEditable_Reversed);
+    ReversibleHooks::Install(0x61C2E0, &CEventVehicleDamageWeapon::Constructor);
+    ReversibleHooks::Install(0x61C330, &CEventVehicleDamageWeapon::CloneEditable_Reversed);
 }
 
 CEventVehicleDamageWeapon::CEventVehicleDamageWeapon(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType) :
