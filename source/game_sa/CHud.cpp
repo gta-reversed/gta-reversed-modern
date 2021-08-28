@@ -119,7 +119,7 @@ void CHud::DrawMissionTitle() {
     plugin::Call<0x58D240>();
 }
 
-// Converted from cdecl void CHud::DrawOddJobMessage(uchar priority) 0x58CC80
+// Converted from cdecl void CHud::DrawOddJobMessage(uint8_t priority) 0x58CC80
 void CHud::DrawOddJobMessage(unsigned char priority) {
     plugin::Call<0x58CC80, unsigned char>(priority);
 }
@@ -129,7 +129,7 @@ void CHud::DrawRadar() {
     plugin::Call<0x58A330>();
 }
 
-// Converted from cdecl void CHud::DrawScriptText(uchar priority) 0x58C080
+// Converted from cdecl void CHud::DrawScriptText(uint8_t priority) 0x58C080
 void CHud::DrawScriptText(unsigned char priority) {
     plugin::Call<0x58C080, unsigned char>(priority);
 }
@@ -154,12 +154,12 @@ void CHud::DrawVitalStats() {
     plugin::Call<0x589650>();
 }
 
-// Converted from cdecl void CHud::GetRidOfAllHudMessages(uchar) 0x588A50
+// Converted from cdecl void CHud::GetRidOfAllHudMessages(uint8_t) 0x588A50
 void CHud::GetRidOfAllHudMessages(unsigned char arg0) {
     plugin::Call<0x588A50, unsigned char>(arg0);
 }
 
-// Converted from cdecl float CHud::GetYPosBasedOnHealth(uchar playerId,float pos,signed char offset) 0x588B60
+// Converted from cdecl float CHud::GetYPosBasedOnHealth(uint8_t playerId,float pos,signed char offset) 0x588B60
 float CHud::GetYPosBasedOnHealth(unsigned char playerId, float pos, char offset) {
     return plugin::CallAndReturn<float, 0x588B60, unsigned char, float, signed>(playerId, pos, offset);
 }
@@ -183,7 +183,7 @@ void CHud::ResetWastedText() {
     plugin::Call<0x589070>();
 }
 
-// Converted from cdecl void CHud::SetBigMessage(char *text,ushort style) 0x588FC0
+// Converted from cdecl void CHud::SetBigMessage(char *text,uint16_t style) 0x588FC0
 void CHud::SetBigMessage(char* text, unsigned short style) {
     plugin::Call<0x588FC0, char*, unsigned short>(text, style);
 }
@@ -193,7 +193,7 @@ void CHud::SetHelpMessage(char const* text, bool quickMessage, bool permanent, b
     plugin::Call<0x588BE0, char const*, bool, bool, bool>(text, quickMessage, permanent, addToBrief);
 }
 
-// Converted from cdecl void CHud::SetHelpMessageStatUpdate(uchar state,ushort statId,float diff,float max) 0x588D40
+// Converted from cdecl void CHud::SetHelpMessageStatUpdate(uint8_t state,uint16_t statId,float diff,float max) 0x588D40
 void CHud::SetHelpMessageStatUpdate(unsigned char state, unsigned short statId, float diff, float max) {
     plugin::Call<0x588D40, unsigned char, unsigned short, float, float>(state, statId, diff, max);
 }
@@ -212,7 +212,7 @@ void CHud::SetVehicleName(char* name) {
     plugin::Call<0x588F50, char*>(name);
 }
 
-// Converted from cdecl void CHud::SetZoneName(char *name,uchar displayState) 0x588BB0
+// Converted from cdecl void CHud::SetZoneName(char *name,uint8_t displayState) 0x588BB0
 void CHud::SetZoneName(char* name, unsigned char displayState) {
     plugin::Call<0x588BB0, char*, unsigned char>(name, displayState);
 }

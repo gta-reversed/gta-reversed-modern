@@ -21,8 +21,8 @@ void CTheCarGenerators::InjectHooks()
 
 // return index of CarGenerator in CTheCarGenerators::CarGeneratorArray
 // 0x6F31A0
-signed int CTheCarGenerators::CreateCarGenerator(CVector posn, float angle, int modelId, short color1, short color2, uchar forceSpawn, uchar alarmChances, uchar doorLockChances,
-                                                 ushort minDelay, ushort maxDelay, uchar iplId, bool ignorePopulationLimit)
+signed int CTheCarGenerators::CreateCarGenerator(CVector posn, float angle, int modelId, short color1, short color2, uint8_t forceSpawn, uint8_t alarmChances, uint8_t doorLockChances,
+                                                 uint16_t minDelay, uint16_t maxDelay, uint8_t iplId, bool ignorePopulationLimit)
 {
     if (modelId != -1 && (modelId < MODEL_LANDSTAL || modelId > MODEL_VEG_PALMKB8))
         return -1;

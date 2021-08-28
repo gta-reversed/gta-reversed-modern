@@ -380,7 +380,7 @@ char* CStats::FindCriminalRatingString() {
     return plugin::CallAndReturn<char*, 0x55A210>();
 }
 
-// Converted from cdecl int CStats::ConstructStatLine(int, uchar) 0x55A780
+// Converted from cdecl int CStats::ConstructStatLine(int, uint8_t) 0x55A780
 int CStats::ConstructStatLine(int arg0, unsigned char arg1) {
     return plugin::CallAndReturn<int, 0x55A780, int, unsigned char>(arg0, arg1);
 }
@@ -404,12 +404,12 @@ void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
         IncrementStat(STAT_FAT, energy - 1000.0f);
 }
 
-// Converted from cdecl void CStats::DisplayScriptStatUpdateMessage(uchar state, uint stat, float value) 0x55B980
+// Converted from cdecl void CStats::DisplayScriptStatUpdateMessage(uint8_t state, uint32 stat, float value) 0x55B980
 void CStats::DisplayScriptStatUpdateMessage(unsigned char state, eStats stat, float value) {
     plugin::Call<0x55B980, unsigned char, eStats, float>(state, stat, value);
 }
 
-// Converted from cdecl void CStats::UpdateRespectStat(uchar) 0x55BC50
+// Converted from cdecl void CStats::UpdateRespectStat(uint8_t) 0x55BC50
 void CStats::UpdateRespectStat(unsigned char arg0) {
     plugin::Call<0x55BC50, unsigned char>(arg0);
 }
@@ -488,7 +488,7 @@ void CStats::IncrementStat(eStats stat, float value)
     CheckForStatsMessage();
 }
 
-// Converted from cdecl void CStats::UpdateFatAndMuscleStats(uint value) 0x55C470
+// Converted from cdecl void CStats::UpdateFatAndMuscleStats(uint32 value) 0x55C470
 void CStats::UpdateFatAndMuscleStats(unsigned int value) {
     plugin::Call<0x55C470, unsigned int>(value);
 }
@@ -569,7 +569,7 @@ void CStats::UpdateStatsOnRespawn() {
     plugin::Call<0x55CFC0>();
 }
 
-// Converted from cdecl void CStats::UpdateStatsAddToHealth(uint addToHealth) 0x55D030
+// Converted from cdecl void CStats::UpdateStatsAddToHealth(uint32 addToHealth) 0x55D030
 void CStats::UpdateStatsAddToHealth(unsigned int addToHealth) {
     plugin::Call<0x55D030, unsigned int>(addToHealth);
 }

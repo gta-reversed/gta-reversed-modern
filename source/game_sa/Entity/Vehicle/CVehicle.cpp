@@ -605,7 +605,7 @@ void CVehicle::RemoveLighting_Reversed(bool bRemove)
     DeActivateDirectional();
 }
 
-// Converted from void CVehicle::ProcessOpenDoor(CPed *ped,uint doorComponentId,uint,uint,float) 0x871EF0
+// Converted from void CVehicle::ProcessOpenDoor(CPed *ped,uint32 doorComponentId,uint32,uint32,float) 0x871EF0
 void CVehicle::ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int arg2, unsigned int nAnimID, float fTime)
 {
     CVehicle::ProcessOpenDoor_Reversed(ped, doorComponentId, arg2, nAnimID, fTime);
@@ -843,7 +843,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId,
     }
 }
 
-// Converted from void CVehicle::ProcessDrivingAnims(CPed *driver,uchar) 0x871F38
+// Converted from void CVehicle::ProcessDrivingAnims(CPed *driver,uint8_t) 0x871F38
 void CVehicle::ProcessDrivingAnims(CPed* driver, unsigned char bBlend)
 {
     CVehicle::ProcessDrivingAnims_Reversed(driver, bBlend);
@@ -1208,7 +1208,7 @@ void CVehicle::SetRemap(int remapIndex)
     }
 }
 
-// Converted from thiscall void CVehicle::SetCollisionLighting(uchar lighting) 0x6D0CA0
+// Converted from thiscall void CVehicle::SetCollisionLighting(uint8_t lighting) 0x6D0CA0
 void CVehicle::SetCollisionLighting(tColLighting lighting)
 {
     for (auto& colLighting : m_anCollisionLighting)
@@ -1299,7 +1299,7 @@ float CVehicle::ProcessWheelRotation(tWheelState wheelState, CVector const& arg1
     return ((float(__thiscall*)(CVehicle*, tWheelState, CVector const&, CVector const&, float))0x6D1230)(this, wheelState, arg1, arg2, arg3);
 }
 
-// Converted from thiscall bool CVehicle::CanVehicleBeDamaged(CEntity *damager,eWeaponType weapon,uchar *) 0x6D1280
+// Converted from thiscall bool CVehicle::CanVehicleBeDamaged(CEntity *damager,eWeaponType weapon,uint8_t *) 0x6D1280
 bool CVehicle::CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, unsigned char* arg2)
 {
     return ((bool(__thiscall*)(CVehicle*, CEntity*, eWeaponType, unsigned char*))0x6D1280)(this, damager, weapon, arg2);
@@ -1317,7 +1317,7 @@ bool CVehicle::AddPassenger(CPed* passenger)
     return ((bool(__thiscall*)(CVehicle*, CPed*))0x6D13A0)(this, passenger);
 }
 
-// Converted from thiscall bool CVehicle::AddPassenger(CPed *passenger,uchar seatNumber) 0x6D14D0
+// Converted from thiscall bool CVehicle::AddPassenger(CPed *passenger,uint8_t seatNumber) 0x6D14D0
 bool CVehicle::AddPassenger(CPed* passenger, unsigned char seatNumber)
 {
     return ((bool(__thiscall*)(CVehicle*, CPed*, unsigned char))0x6D14D0)(this, passenger, seatNumber);
@@ -1499,7 +1499,7 @@ RwFrame* SetVehicleAtomicVisibilityCB(RwFrame* component, void* data)
     return ((RwFrame * (__cdecl*)(RwFrame*, void*))0x6D26D0)(component, data);
 }
 
-// Converted from thiscall void CVehicle::SetComponentVisibility(RwFrame *component,uint visibilityState) 0x6D2700
+// Converted from thiscall void CVehicle::SetComponentVisibility(RwFrame *component,uint32 visibilityState) 0x6D2700
 void CVehicle::SetComponentVisibility(RwFrame* component, unsigned int visibilityState)
 {
     ((void(__thiscall*)(CVehicle*, RwFrame*, unsigned int))0x6D2700)(this, component, visibilityState);
@@ -1580,43 +1580,43 @@ void CVehicle::MakeDirty(CColPoint& colPoint)
     ((void(__thiscall*)(CVehicle*, CColPoint&))0x6D2BF0)(this, colPoint);
 }
 
-// Converted from thiscall bool CVehicle::AddWheelDirtAndWater(CColPoint &colPoint,uint,uchar,uchar) 0x6D2D50
+// Converted from thiscall bool CVehicle::AddWheelDirtAndWater(CColPoint &colPoint,uint32,uint8_t,uint8_t) 0x6D2D50
 bool CVehicle::AddWheelDirtAndWater(CColPoint& colPoint, unsigned int arg1, unsigned char arg2, unsigned char arg3)
 {
     return ((bool(__thiscall*)(CVehicle*, CColPoint&, unsigned int, unsigned char, unsigned char))0x6D2D50)(this, colPoint, arg1, arg2, arg3);
 }
 
-// Converted from thiscall void CVehicle::SetGettingInFlags(uchar doorId) 0x6D3000
+// Converted from thiscall void CVehicle::SetGettingInFlags(uint8_t doorId) 0x6D3000
 void CVehicle::SetGettingInFlags(unsigned char doorId)
 {
     ((void(__thiscall*)(CVehicle*, unsigned char))0x6D3000)(this, doorId);
 }
 
-// Converted from thiscall void CVehicle::SetGettingOutFlags(uchar doorId) 0x6D3020
+// Converted from thiscall void CVehicle::SetGettingOutFlags(uint8_t doorId) 0x6D3020
 void CVehicle::SetGettingOutFlags(unsigned char doorId)
 {
     ((void(__thiscall*)(CVehicle*, unsigned char))0x6D3020)(this, doorId);
 }
 
-// Converted from thiscall void CVehicle::ClearGettingInFlags(uchar doorId) 0x6D3040
+// Converted from thiscall void CVehicle::ClearGettingInFlags(uint8_t doorId) 0x6D3040
 void CVehicle::ClearGettingInFlags(unsigned char doorId)
 {
     ((void(__thiscall*)(CVehicle*, unsigned char))0x6D3040)(this, doorId);
 }
 
-// Converted from thiscall void CVehicle::ClearGettingOutFlags(uchar doorId) 0x6D3060
+// Converted from thiscall void CVehicle::ClearGettingOutFlags(uint8_t doorId) 0x6D3060
 void CVehicle::ClearGettingOutFlags(unsigned char doorId)
 {
     ((void(__thiscall*)(CVehicle*, unsigned char))0x6D3060)(this, doorId);
 }
 
-// Converted from thiscall void CVehicle::SetWindowOpenFlag(uchar doorId) 0x6D3080
+// Converted from thiscall void CVehicle::SetWindowOpenFlag(uint8_t doorId) 0x6D3080
 void CVehicle::SetWindowOpenFlag(unsigned char doorId)
 {
     ((void(__thiscall*)(CVehicle*, unsigned char))0x6D3080)(this, doorId);
 }
 
-// Converted from thiscall void CVehicle::ClearWindowOpenFlag(uchar doorId) 0x6D30B0
+// Converted from thiscall void CVehicle::ClearWindowOpenFlag(uint8_t doorId) 0x6D30B0
 void CVehicle::ClearWindowOpenFlag(unsigned char doorId)
 {
     ((void(__thiscall*)(CVehicle*, unsigned char))0x6D30B0)(this, doorId);
@@ -2028,7 +2028,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
     }
 }
 
-// Converted from thiscall void CVehicle::ProcessBikeWheel(CVector &,CVector &,CVector &,CVector &,int,float,float,float,float,char,float *,tWheelState *,eBikeWheelSpecial,ushort) 0x6D73B0
+// Converted from thiscall void CVehicle::ProcessBikeWheel(CVector &,CVector &,CVector &,CVector &,int,float,float,float,float,char,float *,tWheelState *,eBikeWheelSpecial,uint16_t) 0x6D73B0
 void CVehicle::ProcessBikeWheel(CVector& arg0, CVector& arg1, CVector& arg2, CVector& arg3, int arg4, float arg5, float arg6, float arg7, float arg8, char arg9, float* arg10, tWheelState* arg11, eBikeWheelSpecial arg12, unsigned short arg13)
 {
     ((void(__thiscall*)(CVehicle*, CVector&, CVector&, CVector&, CVector&, int, float, float, float, float, char, float*, tWheelState*, eBikeWheelSpecial, unsigned short))0x6D73B0)(this, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
@@ -2540,7 +2540,7 @@ void CVehicle::AddExhaustParticles()
     }
 }
 
-// Converted from thiscall bool CVehicle::AddSingleWheelParticles(tWheelState,uint,float,float,CColPoint *,CVector *,float,int,uint surfaceType,bool *bloodState,uint) 0x6DE880
+// Converted from thiscall bool CVehicle::AddSingleWheelParticles(tWheelState,uint32,float,float,CColPoint *,CVector *,float,int,uint32 surfaceType,bool *bloodState,uint32) 0x6DE880
 bool CVehicle::AddSingleWheelParticles(tWheelState arg0, unsigned int arg1, float arg2, float arg3, CColPoint* arg4, CVector* arg5, float arg6, int arg7, unsigned int surfaceType, bool* bloodState, unsigned int arg10)
 {
     return ((bool(__thiscall*)(CVehicle*, tWheelState, unsigned int, float, float, CColPoint*, CVector*, float, int, unsigned int, bool*, unsigned int))0x6DE880)(this, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, surfaceType, bloodState, arg10);
@@ -2600,19 +2600,19 @@ void CVehicle::ProcessSirenAndHorn(bool arg0)
     ((void(__thiscall*)(CVehicle*, bool))0x6E0950)(this, arg0);
 }
 
-// Converted from thiscall bool CVehicle::DoHeadLightEffect(int dummyId,CMatrix &vehicleMatrix,uchar lightId,uchar lightState) 0x6E0A50
+// Converted from thiscall bool CVehicle::DoHeadLightEffect(int dummyId,CMatrix &vehicleMatrix,uint8_t lightId,uint8_t lightState) 0x6E0A50
 bool CVehicle::DoHeadLightEffect(int dummyId, CMatrix& vehicleMatrix, unsigned char lightId, unsigned char lightState)
 {
     return ((bool(__thiscall*)(CVehicle*, int, CMatrix&, unsigned char, unsigned char))0x6E0A50)(this, dummyId, vehicleMatrix, lightId, lightState);
 }
 
-// Converted from thiscall void CVehicle::DoHeadLightBeam(int,CMatrix &matrix,uchar) 0x6E0E20
+// Converted from thiscall void CVehicle::DoHeadLightBeam(int,CMatrix &matrix,uint8_t) 0x6E0E20
 void CVehicle::DoHeadLightBeam(int arg0, CMatrix& matrix, unsigned char arg2)
 {
     ((void(__thiscall*)(CVehicle*, int, CMatrix&, unsigned char))0x6E0E20)(this, arg0, matrix, arg2);
 }
 
-// Converted from thiscall void CVehicle::DoHeadLightReflectionSingle(CMatrix &matrix,uchar lightId) 0x6E1440
+// Converted from thiscall void CVehicle::DoHeadLightReflectionSingle(CMatrix &matrix,uint8_t lightId) 0x6E1440
 void CVehicle::DoHeadLightReflectionSingle(CMatrix& matrix, unsigned char lightId)
 {
     ((void(__thiscall*)(CVehicle*, CMatrix&, unsigned char))0x6E1440)(this, matrix, lightId);
@@ -2624,19 +2624,19 @@ void CVehicle::DoHeadLightReflectionTwin(CMatrix& matrix)
     ((void(__thiscall*)(CVehicle*, CMatrix&))0x6E1600)(this, matrix);
 }
 
-// Converted from thiscall void CVehicle::DoHeadLightReflection(CMatrix &,uint,uchar,uchar) 0x6E1720
+// Converted from thiscall void CVehicle::DoHeadLightReflection(CMatrix &,uint32,uint8_t,uint8_t) 0x6E1720
 void CVehicle::DoHeadLightReflection(CMatrix& arg0, unsigned int flags, unsigned char left, unsigned char right)
 {
     ((void(__thiscall*)(CVehicle*, CMatrix&, unsigned int, unsigned char, unsigned char))0x6E1720)(this, arg0, flags, left, right);
 }
 
-// Converted from thiscall bool CVehicle::DoTailLightEffect(int lightId,CMatrix &matrix,uchar,uchar,uint,uchar) 0x6E1780
+// Converted from thiscall bool CVehicle::DoTailLightEffect(int lightId,CMatrix &matrix,uint8_t,uint8_t,uint32,uint8_t) 0x6E1780
 bool CVehicle::DoTailLightEffect(int lightId, CMatrix& matrix, unsigned char arg2, unsigned char arg3, unsigned int arg4, unsigned char arg5)
 {
     return ((bool(__thiscall*)(CVehicle*, int, CMatrix&, unsigned char, unsigned char, unsigned int, unsigned char))0x6E1780)(this, lightId, matrix, arg2, arg3, arg4, arg5);
 }
 
-// Converted from thiscall void CVehicle::DoVehicleLights(CMatrix &matrix,uint flags) 0x6E1A60
+// Converted from thiscall void CVehicle::DoVehicleLights(CMatrix &matrix,uint32 flags) 0x6E1A60
 void CVehicle::DoVehicleLights(CMatrix& matrix, unsigned int flags)
 {
     ((void(__thiscall*)(CVehicle*, CMatrix&, unsigned int))0x6E1A60)(this, matrix, flags);

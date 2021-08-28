@@ -2607,7 +2607,7 @@ bool CStreaming::IsObjectInCdImage(int modelId) {
 
 // 0x5D29A0
 void CStreaming::Save() {
-    plugin::CallDynGlobal(0x5D29A0);
+    plugin::Call<0x5D29A0>();
 }
 
 // 0x407A30

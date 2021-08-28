@@ -42,11 +42,11 @@ public:
 
 public:
     CAETwinLoopSoundEntity();
-    CAETwinLoopSoundEntity(short bank, short soundType1, short soundType2, CAEAudioEntity* audio, ushort minTime, ushort maxTime, short sfxPlayStart1, short sfxPlayStart2);
+    CAETwinLoopSoundEntity(short bank, short soundType1, short soundType2, CAEAudioEntity* audio, uint16_t minTime, uint16_t maxTime, short sfxPlayStart1, short sfxPlayStart2);
 
     ~CAETwinLoopSoundEntity();
 
-    void Initialise(short bank, short sfx1, short sfx2, CAEAudioEntity* audio, ushort minTime, ushort maxTime, short sfxPlayStart1, short sfxPlayStart2);
+    void Initialise(short bank, short sfx1, short sfx2, CAEAudioEntity* audio, uint16_t minTime, uint16_t maxTime, short sfxPlayStart1, short sfxPlayStart2);
 
     void UpdateParameters(CAESound* sound, short curPlayPos) override;
 

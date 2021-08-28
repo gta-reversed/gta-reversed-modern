@@ -109,7 +109,7 @@ void CCutsceneMgr::FinishCutscene() {
     plugin::Call<0x5B04D0>();
 }
 
-// Converted from cdecl uint CCutsceneMgr::GetCutsceneTimeInMilleseconds(void) 0x5B0550
+// Converted from cdecl uint32 CCutsceneMgr::GetCutsceneTimeInMilleseconds(void) 0x5B0550
 long long CCutsceneMgr::GetCutsceneTimeInMilleseconds() {
     return plugin::CallAndReturn<long long, 0x5B0550>();
 }

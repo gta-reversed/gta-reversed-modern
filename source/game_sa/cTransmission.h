@@ -44,8 +44,8 @@ public:
     cTransmission() {}
     void DisplayGearRatios();
     void InitGearRatios();
-    void CalculateGearForSimpleCar(float speed, uchar& currentGear);
-    float CalculateDriveAcceleration(float const& gasPedal, uchar& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8_t allWheelsOnGround, uint8_t handlingType);
+    void CalculateGearForSimpleCar(float speed, uint8_t& currentGear);
+    float CalculateDriveAcceleration(float const& gasPedal, uint8_t& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8_t allWheelsOnGround, uint8_t handlingType);
 };
 
 VALIDATE_SIZE(cTransmission, 0x68);

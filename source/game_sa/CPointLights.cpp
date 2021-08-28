@@ -39,7 +39,7 @@ bool CPointLights::ProcessVerticalLineUsingCache(CVector point, float* outZ) {
     return plugin::CallAndReturn<bool, 0x6FFFF0, CVector, float*>(point, outZ);
 }
 
-// Converted from cdecl void CPointLights::AddLight(uchar lightType,CVector point,CVector direction,float radius,float red,float green,float blue,uchar fogType,bool generateExtraShadows,CEntity *entityAffected) 0x7000E0
+// Converted from cdecl void CPointLights::AddLight(uint8_t lightType,CVector point,CVector direction,float radius,float red,float green,float blue,uint8_t fogType,bool generateExtraShadows,CEntity *entityAffected) 0x7000E0
 void CPointLights::AddLight(unsigned char lightType, CVector point, CVector direction, float radius, float red, float green, float blue, unsigned char fogType, bool generateExtraShadows, CEntity* entityAffected) {
     plugin::Call<0x7000E0, unsigned char, CVector, CVector, float, float, float, float, unsigned char, bool, CEntity*>(lightType, point, direction, radius, red, green, blue, fogType, generateExtraShadows, entityAffected);
 }

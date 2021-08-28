@@ -10,11 +10,11 @@
 */
 
 bool CGenericGameStorage::LoadDataFromWorkBuffer(void* pData, int size) {
-    return plugin::CallAndReturnDynGlobal<bool, void*, int>(0x5D1300, pData, size);
+    return plugin::CallAndReturn<bool, 0x5D1300, void*, int>(pData, size);
 }
 
 bool CGenericGameStorage::SaveDataToWorkBuffer(void* pData, int Size) {
-    return plugin::CallAndReturnDynGlobal<bool, void*, int>(0x5D1270, pData, Size);
+    return plugin::CallAndReturn<bool, 0x5D1270, void*, int>(pData, Size);
 }
 
 // 0x5D0F50

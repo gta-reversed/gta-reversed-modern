@@ -23,7 +23,7 @@ void FxManager_c::CalcFrustumInfo(RwCamera* camera) {
     ((void(__thiscall*)(FxManager_c*, RwCamera*))0x4A9140)(this, camera);
 }
 
-// Converted from thiscall void FxManager_c::Render(RwCamera *camera,uchar) 0x4A92A0
+// Converted from thiscall void FxManager_c::Render(RwCamera *camera,uint8_t) 0x4A92A0
 void FxManager_c::Render(RwCamera* camera, unsigned char arg1) {
     ((void(__thiscall*)(FxManager_c*, RwCamera*, unsigned char))0x4A92A0)(this, camera, arg1);
 }
@@ -68,17 +68,17 @@ FxManager_c::FxManager_c() {
     ((void(__thiscall*)(FxManager_c*))0x4A9470)(this);
 }
 
-// Converted from thiscall bool FxManager_c::ShouldCreate(FxSystemBP_c *bpSystem,RwMatrixTag *transform,RwMatrixTag *objectMatrix,uchar ignoreBoundingChecks) 0x4A9500
+// Converted from thiscall bool FxManager_c::ShouldCreate(FxSystemBP_c *bpSystem,RwMatrixTag *transform,RwMatrixTag *objectMatrix,uint8_t ignoreBoundingChecks) 0x4A9500
 bool FxManager_c::ShouldCreate(FxSystemBP_c* bpSystem, RwMatrix* transform, RwMatrix* objectMatrix, unsigned char ignoreBoundingChecks) {
     return ((bool(__thiscall*)(FxManager_c*, FxSystemBP_c*, RwMatrix*, RwMatrix*, unsigned char))0x4A9500)(this, bpSystem, transform, objectMatrix, ignoreBoundingChecks);
 }
 
-// Converted from thiscall FxSystem_c* FxManager_c::CreateFxSystem(FxSystemBP_c *bpSystem,RwMatrixTag *transform,RwMatrixTag *objectMatrix,uchar ignoreBoundingChecks) 0x4A95C0
+// Converted from thiscall FxSystem_c* FxManager_c::CreateFxSystem(FxSystemBP_c *bpSystem,RwMatrixTag *transform,RwMatrixTag *objectMatrix,uint8_t ignoreBoundingChecks) 0x4A95C0
 FxSystem_c* FxManager_c::CreateFxSystem(FxSystemBP_c* bpSystem, RwMatrix* transform, RwMatrix* objectMatrix, unsigned char ignoreBoundingChecks) {
     return ((FxSystem_c * (__thiscall*)(FxManager_c*, FxSystemBP_c*, RwMatrix*, RwMatrix*, unsigned char))0x4A95C0)(this, bpSystem, transform, objectMatrix, ignoreBoundingChecks);
 }
 
-// Converted from thiscall FxSystem_c* FxManager_c::CreateFxSystem(FxSystemBP_c *bpSystem,RwV3d *position,RwMatrixTag *objectMatrix,uchar ignoreBoundingChecks) 0x4A96B0
+// Converted from thiscall FxSystem_c* FxManager_c::CreateFxSystem(FxSystemBP_c *bpSystem,RwV3d *position,RwMatrixTag *objectMatrix,uint8_t ignoreBoundingChecks) 0x4A96B0
 FxSystem_c* FxManager_c::CreateFxSystem(FxSystemBP_c* bpSystem, RwV3d* position, RwMatrix* objectMatrix, unsigned char ignoreBoundingChecks) {
     return ((FxSystem_c * (__thiscall*)(FxManager_c*, FxSystemBP_c*, RwV3d*, RwMatrix*, unsigned char))0x4A96B0)(this, bpSystem, position, objectMatrix, ignoreBoundingChecks);
 }
@@ -113,12 +113,12 @@ void FxManager_c::UnloadFxProject() {
     ((void(__thiscall*)(FxManager_c*))0x4A9AE0)(this);
 }
 
-// Converted from thiscall FxSystem_c* FxManager_c::CreateFxSystem(char *name,RwMatrixTag *transform,RwMatrixTag *objectMatrix,uchar ignoreBoundingChecks) 0x4A9BB0
+// Converted from thiscall FxSystem_c* FxManager_c::CreateFxSystem(char *name,RwMatrixTag *transform,RwMatrixTag *objectMatrix,uint8_t ignoreBoundingChecks) 0x4A9BB0
 FxSystem_c* FxManager_c::CreateFxSystem(char* name, RwMatrix* transform, RwMatrix* objectMatrix, unsigned char ignoreBoundingChecks) {
     return ((FxSystem_c * (__thiscall*)(FxManager_c*, char*, RwMatrix*, RwMatrix*, unsigned char))0x4A9BB0)(this, name, transform, objectMatrix, ignoreBoundingChecks);
 }
 
-// Converted from thiscall FxSystem_c* FxManager_c::CreateFxSystem(char *name,RwV3d *position,RwMatrixTag *objectMatrix,uchar ignoreBoundingChecks) 0x4A9BE0
+// Converted from thiscall FxSystem_c* FxManager_c::CreateFxSystem(char *name,RwV3d *position,RwMatrixTag *objectMatrix,uint8_t ignoreBoundingChecks) 0x4A9BE0
 FxSystem_c* FxManager_c::CreateFxSystem(char* name, RwV3d* position, RwMatrix* objectMatrix, unsigned char ignoreBoundingChecks) {
     return ((FxSystem_c * (__thiscall*)(FxManager_c*, char*, RwV3d*, RwMatrix*, unsigned char))0x4A9BE0)(this, name, position, objectMatrix, ignoreBoundingChecks);
 }

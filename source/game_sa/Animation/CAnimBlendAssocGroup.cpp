@@ -17,7 +17,7 @@ CAnimBlendAssociation* CAnimBlendAssocGroup::CopyAnimation(char const* AnimName)
     return plugin::CallMethodAndReturn<CAnimBlendAssociation*, 0x4CE0B0, CAnimBlendAssocGroup*, char const*>(this, AnimName);
 }
 
-// Converted from thiscall CAnimBlendAssociation* CAnimBlendAssocGroup::CopyAnimation(uint ID) 0x4CE130
+// Converted from thiscall CAnimBlendAssociation* CAnimBlendAssocGroup::CopyAnimation(uint32 ID) 0x4CE130
 CAnimBlendAssociation* CAnimBlendAssocGroup::CopyAnimation(unsigned int ID) {
     return plugin::CallMethodAndReturn<CAnimBlendAssociation*, 0x4CE130, CAnimBlendAssocGroup*, unsigned int>(this, ID);
 }
@@ -50,7 +50,7 @@ CAnimBlendStaticAssociation* CAnimBlendAssocGroup::GetAnimation(unsigned int ID)
     return plugin::CallMethodAndReturn<CAnimBlendStaticAssociation*, 0x4CE090, CAnimBlendAssocGroup*, unsigned int>(this, ID);
 }
 
-// Converted from thiscall uint CAnimBlendAssocGroup::GetAnimationId(char const *AnimName) 0x4CE1B0
+// Converted from thiscall uint32 CAnimBlendAssocGroup::GetAnimationId(char const *AnimName) 0x4CE1B0
 unsigned int CAnimBlendAssocGroup::GetAnimationId(char const* AnimName) {
     return plugin::CallMethodAndReturn<unsigned int, 0x4CE1B0, CAnimBlendAssocGroup*, char const*>(this, AnimName);
 }

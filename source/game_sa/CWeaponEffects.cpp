@@ -36,7 +36,7 @@ bool CWeaponEffects::IsLockedOn(int crosshairId) {
     return plugin::CallAndReturn<bool, 0x742BD0, int>(crosshairId);
 }
 
-// Converted from cdecl void CWeaponEffects::MarkTarget(int crosshairId,CVector posn,uchar red,uchar green,uchar blue,uchar alpha,float size,uchar) 0x742BF0
+// Converted from cdecl void CWeaponEffects::MarkTarget(int crosshairId,CVector posn,uint8_t red,uint8_t green,uint8_t blue,uint8_t alpha,float size,uint8_t) 0x742BF0
 void CWeaponEffects::MarkTarget(int crosshairId, CVector posn, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha, float size, unsigned char arg7) {
     plugin::Call<0x742BF0, int, CVector, unsigned char, unsigned char, unsigned char, unsigned char, float, unsigned char>(crosshairId, posn, red, green, blue, alpha, size, arg7);
 }

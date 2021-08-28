@@ -11,7 +11,7 @@ CAETwinLoopSoundEntity::CAETwinLoopSoundEntity() : CAEAudioEntity() {
 }
 
 // 0x4F2AE0
-CAETwinLoopSoundEntity::CAETwinLoopSoundEntity(short bankSlotId, short soundType1, short soundType2, CAEAudioEntity* audio, ushort minTime, ushort maxTime, short sfxPlayStart1, short sfxPlayStart2) : CAEAudioEntity() {
+CAETwinLoopSoundEntity::CAETwinLoopSoundEntity(short bankSlotId, short soundType1, short soundType2, CAEAudioEntity* audio, uint16_t minTime, uint16_t maxTime, short sfxPlayStart1, short sfxPlayStart2) : CAEAudioEntity() {
     Initialise(bankSlotId, soundType1, soundType2, audio, minTime, maxTime, sfxPlayStart1, sfxPlayStart2);
 }
 
@@ -26,7 +26,7 @@ CAETwinLoopSoundEntity::~CAETwinLoopSoundEntity() {
 }
 
 // 0x4F28A0
-void CAETwinLoopSoundEntity::Initialise(short bankSlotId, short sfx1, short sfx2, CAEAudioEntity* audio, ushort minTime, ushort maxTime, short sfxPlayStart1, short sfxPlayStart2) {
+void CAETwinLoopSoundEntity::Initialise(short bankSlotId, short sfx1, short sfx2, CAEAudioEntity* audio, uint16_t minTime, uint16_t maxTime, short sfxPlayStart1, short sfxPlayStart2) {
     m_nBankSlotId        = bankSlotId;
     m_nSoundId1          = sfx1;
     m_nSoundId2          = sfx2;

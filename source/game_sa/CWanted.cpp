@@ -236,7 +236,7 @@ void CWanted::ReportCrimeNow(eCrimeType crimeType, const CVector& posn, bool bPo
     plugin::CallMethod<0x562120, CWanted*, eCrimeType, const CVector&, bool>(this, crimeType, posn, bPoliceDontReallyCare);
 }
 
-// Converted from cdecl void CWanted::RemovePursuitCop(CCopPed *cop,CCopPed **copsArray,uchar &copsCounter) 0x562300
+// Converted from cdecl void CWanted::RemovePursuitCop(CCopPed *cop,CCopPed **copsArray,uint8_t &copsCounter) 0x562300
 void CWanted::RemovePursuitCop(CCopPed* cop, CCopPed** copsArray, unsigned char& copsCounter) {
     plugin::Call<0x562300, CCopPed*, CCopPed**, unsigned char&>(cop, copsArray, copsCounter);
 }

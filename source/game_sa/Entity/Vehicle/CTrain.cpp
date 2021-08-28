@@ -24,7 +24,7 @@ void CTrain::InjectHooks()
     HookInstall(0x6F86A0, &CTrain::ProcessControl_Reversed);
 }
 
-// Converted from thiscall void CTrain::CTrain(int modelIndex,uchar createdBy) 0x6F6030
+// Converted from thiscall void CTrain::CTrain(int modelIndex,uint8_t createdBy) 0x6F6030
 CTrain::CTrain(int modelIndex, eVehicleCreatedBy createdBy) : CVehicle(plugin::dummy) {
     plugin::CallMethod<0x6F6030, CTrain*, int, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
@@ -49,7 +49,7 @@ void ProcessTrainAnnouncements() {
     ((void(__cdecl*)())0x6F5910)();
 }
 
-// Converted from cdecl void PlayAnnouncement(uchar,uchar) 0x6F5920
+// Converted from cdecl void PlayAnnouncement(uint8_t,uint8_t) 0x6F5920
 void PlayAnnouncement(unsigned char arg0, unsigned char arg1) {
     ((void(__cdecl*)(unsigned char, unsigned char))0x6F5920)(arg0, arg1);
 }
@@ -64,7 +64,7 @@ bool CTrain::FindMaximumSpeedToStopAtStations(float* speed) {
     return ((bool(__thiscall*)(CTrain*, float*))0x6F5BA0)(this, speed);
 }
 
-// Converted from thiscall uint CTrain::FindNumCarriagesPulled(void) 0x6F5CD0
+// Converted from thiscall uint32 CTrain::FindNumCarriagesPulled(void) 0x6F5CD0
 unsigned int CTrain::FindNumCarriagesPulled() {
     return ((unsigned int(__thiscall*)(CTrain*))0x6F5CD0)(this);
 }
@@ -124,7 +124,7 @@ CTrain* CTrain::FindEngine(CTrain* train) {
     return ((CTrain * (__cdecl*)(CTrain*))0x6F5E90)(train);
 }
 
-// Converted from cdecl CTrain* CTrain::FindCarriage(CTrain* train,uchar carriage) 0x6F5EB0
+// Converted from cdecl CTrain* CTrain::FindCarriage(CTrain* train,uint8_t carriage) 0x6F5EB0
 CTrain* CTrain::FindCarriage(CTrain* train, unsigned char carriage) {
     return ((CTrain * (__cdecl*)(CTrain*, unsigned char))0x6F5EB0)(train, carriage);
 }
@@ -204,7 +204,7 @@ void CTrain::InitTrains() {
     ((void(__cdecl*)())0x6F7440)();
 }
 
-// Converted from cdecl void CTrain::CreateMissionTrain(CVector posn,bool clockwiseDirection,uint trainType,CTrain**outFirstCarriage,CTrain**outLastCarriage,int nodeIndex,int trackId,bool isMissionTrain) 0x6F7550
+// Converted from cdecl void CTrain::CreateMissionTrain(CVector posn,bool clockwiseDirection,uint32 trainType,CTrain**outFirstCarriage,CTrain**outLastCarriage,int nodeIndex,int trackId,bool isMissionTrain) 0x6F7550
 void CTrain::CreateMissionTrain(CVector posn, bool clockwiseDirection, unsigned int trainType, CTrain** outFirstCarriage, CTrain** outLastCarriage, int nodeIndex, int trackId, bool isMissionTrain) {
     ((void(__cdecl*)(CVector, bool, unsigned int, CTrain * *, CTrain * *, int, int, bool))0x6F7550)(posn, clockwiseDirection, trainType, outFirstCarriage, outLastCarriage, nodeIndex, trackId, isMissionTrain);
 }
