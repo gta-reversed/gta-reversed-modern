@@ -61,17 +61,17 @@ public:
 private:
     CTaskSimpleSwim* Constructor(CVector* pPosition, CPed* pPed);
 public:
-    // original virutal functions
+    // original virtual functions
     CTask* Clone() override;
     eTaskType GetId() override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed *pPed) override;
 
     // reversed virtual functions
     CTask* Clone_Reversed();
     eTaskType GetId_Reversed() { return TASK_SIMPLE_SWIM; };
     bool ProcessPed_Reversed(CPed* pPed);
-    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
+    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event);
 
     void ApplyRollAndPitch(CPed* pPed);
     void ProcessSwimAnims(CPed *pPed);

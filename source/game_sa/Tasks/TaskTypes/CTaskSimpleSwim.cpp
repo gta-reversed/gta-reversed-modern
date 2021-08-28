@@ -81,13 +81,10 @@ eTaskType CTaskSimpleSwim::GetId() {
 #endif
 }
 
-bool CTaskSimpleSwim::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event)
+// 0x68B100
+bool CTaskSimpleSwim::MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall*)(CTask*, CPed*, int, class CEvent*))plugin::GetVMT(this, 6))(this, ped, priority, _event);
-#else
-    return MakeAbortable_Reversed(ped, priority, _event);
-#endif
+    return MakeAbortable_Reversed(ped, priority, event);
 }
 
 bool CTaskSimpleSwim::ProcessPed(CPed* pPed)
@@ -103,9 +100,9 @@ CTask* CTaskSimpleSwim::Clone_Reversed() {
     return new CTaskSimpleSwim(&m_vecPos, m_pPed);
 }
 
-bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event)
+bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    CEventDamage* pDamageEvent = reinterpret_cast<CEventDamage*>(_event);
+    const CEventDamage* pDamageEvent = static_cast<const CEventDamage*>(event);
 
     if (priority == ABORT_PRIORITY_IMMEDIATE)
     {
@@ -124,8 +121,8 @@ bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority pri
 
         ped->RestoreHeadingRate();
     }
-    else if (!_event || _event->GetEventPriority() < 71
-        && (_event->GetEventType() != EVENT_DAMAGE || !pDamageEvent->m_damageResponse.m_bHealthZero || !pDamageEvent->m_bAddToEventGroup))
+    else if (!event || event->GetEventPriority() < 71
+        && (event->GetEventType() != EVENT_DAMAGE || !pDamageEvent->m_damageResponse.m_bHealthZero || !pDamageEvent->m_bAddToEventGroup))
     {
         return false;
     }
@@ -133,7 +130,7 @@ bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority pri
     if (m_pFxSystem)
     {
         m_pFxSystem->Kill();
-        m_pFxSystem = 0;
+        m_pFxSystem = nullptr;
     }
     return true;
 }
@@ -150,7 +147,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
         if (pFxSystem)
         {
             pFxSystem->Kill();
-            m_pFxSystem = 0;
+            m_pFxSystem = nullptr;
         }
         return true;
     }
@@ -189,7 +186,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
         FxSystem_c* pFxSystem = m_pFxSystem;
         if (pFxSystem) {
             pFxSystem->Kill();
-            m_pFxSystem = 0;
+            m_pFxSystem = nullptr;
         }
         return true;
     }
@@ -255,8 +252,8 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
         ProcessControlAI(pPed);
 
         if (m_nSwimState == SWIM_UNDERWATER_SPRINTING) {
-            CPedDamageResponseCalculator damageCalculator(0, CTimer::ms_fTimeStep, WEAPON_DROWNING, PED_PIECE_TORSO, false);
-            CEventDamage eventDamage(0, CTimer::m_snTimeInMilliseconds, WEAPON_DROWNING, PED_PIECE_TORSO, 0, 0, pPed->bInVehicle);
+            CPedDamageResponseCalculator damageCalculator(nullptr, CTimer::ms_fTimeStep, WEAPON_DROWNING, PED_PIECE_TORSO, false);
+            CEventDamage eventDamage(nullptr, CTimer::m_snTimeInMilliseconds, WEAPON_DROWNING, PED_PIECE_TORSO, 0, 0, pPed->bInVehicle);
             if (eventDamage.AffectsPed(pPed))
                 damageCalculator.ComputeDamageResponse(pPed, &eventDamage.m_damageResponse, true);
             else
@@ -310,7 +307,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* pPed)
     }
     else {
         if (pAnimAssociation
-            || (pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_SWIM_TREAD, 8.0f)) != 0)
+            || (pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_SWIM_TREAD, 8.0f)) != nullptr)
         {
             if (pAnimAssociation->m_fBlendAmount >= 1.0f)
                 m_bFinishedBlending = true;
@@ -320,14 +317,14 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* pPed)
         if (pFixSystem)
         {
             pFixSystem->Kill();
-            pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_pFxSystem = 0;
+            pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_pFxSystem = nullptr;
         }
 
         if (pPlayerPed->IsPlayer() && !m_nSwimState)
         {
             CVector& vecPos = pPlayerPed->GetPosition();
             float waterLevel = 0.0f;
-            if (CWaterLevel::GetWaterLevel(vecPos.x, vecPos.y, vecPos.z, &waterLevel, 1, 0))
+            if (CWaterLevel::GetWaterLevel(vecPos.x, vecPos.y, vecPos.z, &waterLevel, 1, nullptr))
             {
                 if (waterLevel - 2.0f > vecPos.z)
                     m_nSwimState = SWIM_UNDERWATER_SPRINTING;
@@ -747,7 +744,6 @@ void CTaskSimpleSwim::ProcessSwimmingResistance(CPed* pPed)
         if (pPed->m_vecMoveSpeed.z < 0.0f)
             pPed->m_vecMoveSpeed.z = 0.0f;
     }
-    return;
 #endif
 }
 
@@ -770,7 +766,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
     if (m_nSwimState != SWIM_TREAD) {
         if (m_pFxSystem) {
             m_pFxSystem->Kill();
-            m_pFxSystem = 0;
+            m_pFxSystem = nullptr;
         }
     }
     else {
@@ -820,7 +816,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
             float fPedPosZ = pPed->GetPosition().z;
             if (fabs(pBoneRHandPos->z - fPedPosZ) < 0.05f)
             {
-                auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneRHandPos, 0, 0);
+                auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneRHandPos, nullptr, 0);
                 if (pFxSystem)
                 {
                     pFxSystem->PlayAndKill();
@@ -830,7 +826,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
 
             if (fabs(pBoneLHandPos->z - fPedPosZ) < 0.05f)
             {
-                auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneLHandPos, 0, 0);
+                auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneLHandPos, nullptr, 0);
                 if (pFxSystem)
                 {
                     pFxSystem->PlayAndKill();
@@ -839,7 +835,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
             }
             if (fabs(pBoneRFootPos->z - fPedPosZ) < 0.05f)
             {
-                auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneRFootPos, 0, 0);
+                auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneRFootPos, nullptr, 0);
                 if (pFxSystem)
                 {
                     pFxSystem->PlayAndKill();
@@ -848,7 +844,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
             }
             if (fabs(pBoneLFootPos->z - fPedPosZ) < 0.05f)
             {
-                auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneLFootPos, 0, 0);
+                auto pFxSystem = g_fxMan.CreateFxSystem("water_swim", pBoneLFootPos, nullptr, 0);
                 if (pFxSystem)
                 {
                     pFxSystem->PlayAndKill();

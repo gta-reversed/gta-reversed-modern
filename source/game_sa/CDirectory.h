@@ -5,7 +5,6 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
 
 /*
     http://www.gtamodding.com/wiki/IMG_archive
@@ -14,39 +13,37 @@
 class CDirectory {
 public:
     struct DirectoryInfo {
-        unsigned int m_nOffset;
-        unsigned short m_nStreamingSize;
-        unsigned short m_nSizeInArchive;
-        char m_szName[24];
+        uint32_t m_nOffset;
+        uint16_t m_nStreamingSize;
+        uint16_t m_nSizeInArchive;
+        char     m_szName[24];
     };
-    DirectoryInfo *m_pEntries;
-    unsigned int m_nCapacity;
-    unsigned int m_nNumEntries;
-    bool m_bOwnsEntries;
-private:
-    char _padD[3];
+
+    DirectoryInfo* m_pEntries{};
+    uint32_t       m_nCapacity{};
+    uint32_t       m_nNumEntries{};
+    bool           m_bOwnsEntries{};
+
 public:
-
-    void* operator new(unsigned int size)
-    {
-        return ((void* (__cdecl*)(unsigned int))0x82119A)(size);
-    }
-
-    void operator delete(void* object)
-    {
-        ((void(__cdecl*)(void*))0x8214BD)(object);
-    }
-
     CDirectory();
-    CDirectory(int capacity);
+    CDirectory(size_t capacity);
     ~CDirectory();
-    void Init(int capacity, void* entries);
-    void AddItem(DirectoryInfo const& entry);
-    void ReadDirFile(char const* filename);
-    bool WriteDirFile(char const* filename);
-    DirectoryInfo* FindItem(char const* name);
-    DirectoryInfo* FindItem(char const* name, unsigned int& outOffset, unsigned int& outStreamingSize);
-    DirectoryInfo* FindItem(unsigned int key, unsigned int& outOffset, unsigned int& outStreamingSize);
+
+    void Init(int32_t capacity, DirectoryInfo* entries);
+    void AddItem(const DirectoryInfo& dirInfo);
+    void ReadDirFile(const char* filename);
+    bool WriteDirFile(const char* fileName);
+    DirectoryInfo* FindItem(const char* itemName);
+    bool FindItem(const char* name, uint32_t& outOffset, uint32_t& outStreamingSize);
+    bool FindItem(uint32_t hashKey, uint32_t& outOffset, uint32_t& outStreamingSize);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CDirectory* Destructor();
+    CDirectory* Constructor();
+    CDirectory* Constructor(size_t capacity);
 };
 
 VALIDATE_SIZE(CDirectory, 0x10);

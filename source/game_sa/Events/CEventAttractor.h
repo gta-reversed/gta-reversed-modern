@@ -17,8 +17,8 @@ public:
 private:
     CEventAttractor* Constructor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor);
 public:
-    eEventType GetEventType() override { return EVENT_ATTRACTOR; }
-    int GetEventPriority() override { return 0; }
+    eEventType GetEventType() const override { return EVENT_ATTRACTOR; }
+    int32_t GetEventPriority() const override { return 0; }
     int GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     CEventEditableResponse* CloneEditable() override;
@@ -40,7 +40,7 @@ public:
 private:
     CEventScriptedAttractor* Constructor(C2dEffect* the2dEffect, CEntity* entity, bool bAvoidLookingAtAttractor);
 public:
-    eEventType GetEventType() override { return EVENT_SCRIPTED_ATTRACTOR; }
+    eEventType GetEventType() const override { return EVENT_SCRIPTED_ATTRACTOR; }
     CEventScriptedAttractor* CloneEditable() override { return new CEventScriptedAttractor(m_2dEffect, m_entity, false); }
 
 };

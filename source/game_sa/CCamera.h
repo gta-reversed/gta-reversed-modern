@@ -18,6 +18,11 @@ Do not delete this comment block. Respect others' work!
 #include "CPed.h"
 #include "CGarage.h"
 
+enum class eFadeFlag : uint16_t {
+    FADE_IN,
+    FADE_OUT
+};
+
 enum eSwitchType : unsigned short {
     SWITCHTYPE_NONE,
     SWITCHTYPE_INTERPOLATION,
@@ -367,7 +372,7 @@ public:
     void DrawBordersForWideScreen();
     void Enable1rstPersonCamCntrlsScript();
     void Enable1rstPersonWeaponsCamera();
-    void Fade(float fadeDuration, short fadeInOutFlag);
+    void Fade(float fadeDuration, eFadeFlag fadeInOutFlag);
     void Find3rdPersonCamTargetVector(float range, CVector source, CVector *pCamera, CVector *pPoint);
     float Find3rdPersonQuickAimPitch();
     float FindCamFOV();
@@ -490,5 +495,4 @@ extern CCamera &TheCamera;
 extern bool &gbModelViewer;
 extern char& gbCineyCamMessageDisplayed;
 
-static void CamShakeNoPos(CCamera* camera, float strength);
-
+void CamShakeNoPos(CCamera* camera, float strength);

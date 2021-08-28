@@ -17,11 +17,11 @@ public:
 private:
     CEventSoundQuiet* Constructor(CEntity* entity, float fLocalSoundLevel, std::uint32_t startTime, CVector& position);
 public:
-    eEventType GetEventType() override { return EVENT_SOUND_QUIET; }
-    int GetEventPriority() override { return 8; }
+    eEventType GetEventType() const override { return EVENT_SOUND_QUIET; }
+    int32_t GetEventPriority() const override { return 8; }
     int GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
-    CEntity* GetSourceEntity() override { return m_entity; }
+    CEntity* GetSourceEntity() const override { return m_entity; }
     float GetLocalSoundLevel() override { return m_fLocalSoundLevel; }
     bool CanBeInterruptedBySameEvent() override { return true; }
     CEventEditableResponse* CloneEditable() override;

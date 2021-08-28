@@ -56,13 +56,13 @@ eTaskType CTaskSimplePlayHandSignalAnim::GetId_Reversed()
     return eTaskType::TASK_SIMPLE_HANDSIGNAL_ANIM;
 }
 
-bool CTaskSimplePlayHandSignalAnim::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimplePlayHandSignalAnim::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed(ped, priority, _event);
+    return CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed(ped, priority, event);
 }
-bool CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return CTaskSimpleAnim::MakeAbortable(ped, priority, _event);
+    return CTaskSimpleAnim::MakeAbortable(ped, priority, event);
 }
 
 bool CTaskSimplePlayHandSignalAnim::ProcessPed(CPed* ped)

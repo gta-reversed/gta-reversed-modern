@@ -17,7 +17,7 @@ public:
     CTask* Clone() override { return new CTaskSimpleSetStayInSamePlace(m_bStayInSamePlace); }
     eTaskType GetId() override { return TASK_SIMPLE_SET_STAY_IN_SAME_PLACE; }
     bool ProcessPed(CPed* ped) override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override { return true; }
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }
 
     bool ProcessPed_Reversed(CPed* ped);
 };

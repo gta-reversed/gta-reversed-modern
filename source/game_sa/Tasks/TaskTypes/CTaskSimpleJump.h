@@ -28,11 +28,11 @@ public:
 
     CTask* Clone() override;
     eTaskType GetId() override { return TASK_SIMPLE_JUMP; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
     CTask* Clone_Reversed();
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);
 
     bool CheckIfJumpBlocked(CPed* ped);
