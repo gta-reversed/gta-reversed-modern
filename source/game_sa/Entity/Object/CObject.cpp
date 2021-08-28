@@ -676,7 +676,7 @@ bool CObject::Save()
     return true;
 }
 
-// Converted from thiscall void CObject::ProcessGarageDoorBehaviour(void) 0x44A4D0
+// 0x44A4D0
 void CObject::ProcessGarageDoorBehaviour() {
     if (m_nGarageDoorGarageIndex < 0)
         m_nGarageDoorGarageIndex = CGarages::FindGarageForObject(this);
@@ -712,7 +712,7 @@ void CObject::ProcessGarageDoorBehaviour() {
     CEntity::UpdateRwFrame();
 }
 
-// Converted from thiscall bool CObject::CanBeDeleted(void) 0x59F120
+// 0x59F120
 bool CObject::CanBeDeleted() {
     switch (m_nObjectType)
     {
@@ -727,13 +727,13 @@ bool CObject::CanBeDeleted() {
     }
 }
 
-// Converted from thiscall void CObject::SetRelatedDummy(CDummyObject *relatedDummy) 0x59F160
+// 0x59F160
 void CObject::SetRelatedDummy(CDummyObject* relatedDummy) {
     m_pDummyObject = relatedDummy;
     relatedDummy->RegisterReference(reinterpret_cast<CEntity**>(&m_pDummyObject));
 }
 
-// Converted from thiscall bool CObject::TryToExplode(void) 0x59F2D0
+// 0x59F2D0
 bool CObject::TryToExplode() {
     if (!m_pObjectInfo->m_bCausesExplosion)
         return false;
@@ -746,23 +746,23 @@ bool CObject::TryToExplode() {
     return true;
 }
 
-// Converted from thiscall void CObject::SetObjectTargettable(uint8_t targetable) 0x59F300
+// 0x59F300
 void CObject::SetObjectTargettable(unsigned char targetable) {
     objectFlags.bIsTargatable = targetable;
 }
 
-// Converted from thiscall bool CObject::CanBeTargetted(void) 0x59F320
+// 0x59F320
 bool CObject::CanBeTargetted() {
     return objectFlags.bIsTargatable;
 }
 
-// Converted from thiscall void CObject::RefModelInfo(int modelIndex) 0x59F330
+// 0x59F330
 void CObject::RefModelInfo(int modelIndex) {
     m_nRefModelIndex = modelIndex;
     CModelInfo::GetModelInfo(modelIndex)->AddRef();
 }
 
-// Converted from thiscall void CObject::SetRemapTexture(RwTexture *remapTexture, short txdIndex) 0x59F350
+// 0x59F350
 void CObject::SetRemapTexture(RwTexture* remapTexture, short txdIndex) {
     m_pRemapTexture = remapTexture;
     m_wRemapTxd = txdIndex;
@@ -770,36 +770,36 @@ void CObject::SetRemapTexture(RwTexture* remapTexture, short txdIndex) {
         CTxdStore::AddRef(txdIndex);
 }
 
-// Converted from thiscall float CObject::GetRopeHeight(void) 0x59F380
+// 0x59F380
 float CObject::GetRopeHeight() {
     const auto ropeIndex = CRopes::FindRope(reinterpret_cast<uint32_t>(this));
     return CRopes::GetRope(ropeIndex).m_fRopeSegmentLength;
 }
 
-// Converted from thiscall void CObject::SetRopeHeight(float height) 0x59F3A0
+// 0x59F3A0
 void CObject::SetRopeHeight(float height) {
     const auto ropeIndex = CRopes::FindRope(reinterpret_cast<uint32_t>(this));
     CRopes::GetRope(ropeIndex).m_fRopeSegmentLength = height;
 }
 
-// Converted from thiscall CEntity* CObject::GetObjectCarriedWithRope(void) 0x59F3C0
+// 0x59F3C0
 CEntity* CObject::GetObjectCarriedWithRope() {
     const auto ropeIndex = CRopes::FindRope(reinterpret_cast<uint32_t>(this));
     return CRopes::GetRope(ropeIndex).m_pAttachedEntity;
 }
 
-// Converted from thiscall void CObject::ReleaseObjectCarriedWithRope(void) 0x59F3E0
+// 0x59F3E0
 void CObject::ReleaseObjectCarriedWithRope() {
     const auto ropeIndex = CRopes::FindRope(reinterpret_cast<uint32_t>(this));
     CRopes::GetRope(ropeIndex).ReleasePickedUpObject();
 }
 
-// Converted from thiscall void CObject::AddToControlCodeList(void) 0x59F400
+// 0x59F400
 void CObject::AddToControlCodeList() {
    m_pControlCodeList = CWorld::ms_listObjectsWithControlCode.AddItem(this);
 }
 
-// Converted from thiscall void CObject::RemoveFromControlCodeList(void) 0x59F450
+// 0x59F450
 void CObject::RemoveFromControlCodeList() {
     if (!m_pControlCodeList)
         return;
@@ -808,7 +808,7 @@ void CObject::RemoveFromControlCodeList() {
     m_pControlCodeList = nullptr;
 }
 
-// Converted from thiscall void CObject::ResetDoorAngle(void) 0x59F4B0
+// 0x59F4B0
 void CObject::ResetDoorAngle() {
     if (!physicalFlags.bDisableMoveForce || m_fDoorStartAngle <= -1000.0F)
         return;
@@ -823,7 +823,7 @@ void CObject::ResetDoorAngle() {
     CEntity::UpdateRwFrame();
 }
 
-// Converted from thiscall void CObject::LockDoor(void) 0x59F5C0
+// 0x59F5C0
 void CObject::LockDoor() {
     objectFlags.bIsDoorOpen = false;
     physicalFlags.bCollidable = true;
@@ -831,7 +831,7 @@ void CObject::LockDoor() {
     CObject::ResetDoorAngle();
 }
 
-// Converted from thiscall void CObject::Init(void) 0x59F840
+// 0x59F840
 void CObject::Init() {
     m_nType = eEntityType::ENTITY_TYPE_OBJECT;
     m_pObjectInfo = &CObjectData::GetDefault();
@@ -936,7 +936,7 @@ void CObject::Init() {
     m_wScriptTriggerIndex = -1;
 }
 
-// Converted from thiscall void CObject::DoBurnEffect(void) 0x59FB50
+// 0x59FB50
 void CObject::DoBurnEffect() {
     const auto& pBox = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox();
     const auto& vecSize = pBox.GetSize();
@@ -965,7 +965,7 @@ void CObject::DoBurnEffect() {
     }
 }
 
-// Converted from thiscall uint8_t CObject::GetLightingFromCollisionBelow(void) 0x59FD00
+// 0x59FD00
 void CObject::GetLightingFromCollisionBelow() {
     CColPoint colPoint;
     CEntity* pEntity;
@@ -973,7 +973,7 @@ void CObject::GetLightingFromCollisionBelow() {
         m_nColLighting = colPoint.m_nLightingB;
 }
 
-// Converted from thiscall void CObject::ProcessSamSiteBehaviour(void) 0x5A07D0
+// 0x5A07D0
 void CObject::ProcessSamSiteBehaviour() {
     if (objectFlags.bIsBroken)
         return;
@@ -1045,7 +1045,7 @@ void CObject::ProcessSamSiteBehaviour() {
     CEntity::UpdateRwFrame();
 }
 
-// Converted from thiscall void CObject::ProcessTrainCrossingBehaviour(void) 0x5A0B50
+// 0x5A0B50
 void CObject::ProcessTrainCrossingBehaviour() {
     if (!(static_cast<uint8_t>(CTimer::m_FrameCounter + m_nRandomSeedUpperByte) & 0x10))
     {
@@ -1081,7 +1081,7 @@ void CObject::ProcessTrainCrossingBehaviour() {
     CEntity::UpdateRwFrame();
 }
 
-// Converted from thiscall void CObject::ObjectDamage(float damage,CVector *fxOrigin,CVector *fxDirection,CEntity *damager,eWeaponType weaponType) 0x5A0D90
+// 0x5A0D90
 void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection, CEntity* damager, eWeaponType weaponType) {
     if (!m_bUsesCollision)
         return;
@@ -1249,7 +1249,7 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
     }
 }
 
-// Converted from thiscall void CObject::Explode(void) 0x5A1340
+// 0x5A1340
 void CObject::Explode() {
     CVector vecPos = GetPosition();
     vecPos.z += 0.5F;
@@ -1286,7 +1286,7 @@ void CObject::Explode() {
     }
 }
 
-// Converted from thiscall void CObject::ObjectFireDamage(float damage,CEntity *damager) 0x5A1580
+// 0x5A1580
 void CObject::ObjectFireDamage(float damage, CEntity* damager) {
     if (m_nModelIndex != ModelIndices::MI_GRASSPLANT && m_nModelIndex != ModelIndices::MI_GRASSHOUSE)
         return;
@@ -1351,7 +1351,7 @@ void CObject::ObjectFireDamage(float damage, CEntity* damager) {
     }
 }
 
-// Converted from cdecl void CObject::TryToFreeUpTempObjects(int numObjects) 0x5A1840
+// 0x5A1840
 void CObject::TryToFreeUpTempObjects(int numObjects) {
     const auto iPoolSize = CPools::ms_pObjectPool->GetSize();
     if (!iPoolSize)
@@ -1371,7 +1371,7 @@ void CObject::TryToFreeUpTempObjects(int numObjects) {
     }
 }
 
-// Converted from cdecl void CObject::DeleteAllTempObjects(void) 0x5A18B0
+// 0x5A18B0
 void CObject::DeleteAllTempObjects() {
     const auto iPoolSize = CPools::ms_pObjectPool->GetSize();
     if (!iPoolSize)
@@ -1387,7 +1387,7 @@ void CObject::DeleteAllTempObjects() {
     }
 }
 
-// Converted from cdecl void CObject::DeleteAllMissionObjects(void) 0x5A1910
+// 0x5A1910
 void CObject::DeleteAllMissionObjects() {
     const auto iPoolSize = CPools::ms_pObjectPool->GetSize();
     if (!iPoolSize)
@@ -1403,7 +1403,7 @@ void CObject::DeleteAllMissionObjects() {
     }
 }
 
-// Converted from cdecl void CObject::DeleteAllTempObjectsInArea(CVector point,float radius) 0x5A1980
+// 0x5A1980
 void CObject::DeleteAllTempObjectsInArea(CVector point, float radius) {
     const auto iPoolSize = CPools::ms_pObjectPool->GetSize();
     if (!iPoolSize)
@@ -1421,7 +1421,7 @@ void CObject::DeleteAllTempObjectsInArea(CVector point, float radius) {
     }
 }
 
-// Converted from thiscall void CObject::GrabObjectToCarryWithRope(CPhysical *attachTo) 0x5A1AB0
+// 0x5A1AB0
 void CObject::GrabObjectToCarryWithRope(CPhysical* attachTo) {
     const auto iRopeInd = CRopes::FindRope(reinterpret_cast<uint32_t>(this));
     auto& pRope = CRopes::GetRope(iRopeInd);
@@ -1437,7 +1437,7 @@ void CObject::GrabObjectToCarryWithRope(CPhysical* attachTo) {
     pRope.m_pRopeAttachObject->m_bUsesCollision = false;
 }
 
-// Converted from thiscall bool CObject::CanBeUsedToTakeCoverBehind(void) 0x5A1B60
+// 0x5A1B60
 bool CObject::CanBeUsedToTakeCoverBehind() {
     if (m_nObjectType == eObjectType::OBJECT_MISSION)
         return false;
@@ -1485,7 +1485,7 @@ CObject* CObject::Create(CDummyObject* dummyObject) {
     return new CObject(dummyObject);
 }
 
-// Converted from cdecl void CObject::SetMatrixForTrainCrossing(CMatrix *matrix,float) 0x59F200
+// 0x59F200
 void CObject::SetMatrixForTrainCrossing(CMatrix* matrix, float fAngle) {
     auto vecForward = CrossProduct(CVector(0.0F, 0.0F, 1.0F), matrix->GetRight());
     const auto fCos = cos(fAngle);
@@ -1497,7 +1497,7 @@ void CObject::SetMatrixForTrainCrossing(CMatrix* matrix, float fAngle) {
     matrix->GetForward() = vecForward;
 }
 
-// Converted from thiscall void CObject::ProcessControlLogic(void) 0x5A29A0
+// 0x5A29A0
 void CObject::ProcessControlLogic() {
     if (m_nModelIndex == ModelIndices::MI_SAMSITE || m_nModelIndex == ModelIndices::MI_SAMSITE2)
         CObject::ProcessSamSiteBehaviour();
@@ -1544,12 +1544,12 @@ void CObject::ProcessControlLogic() {
         CObject::ProcessGarageDoorBehaviour();
 }
 
-// Converted from cdecl bool IsObjectPointerValid_NotInWorld(CObject *object) 0x5A2B90
+// 0x5A2B90
 bool IsObjectPointerValid_NotInWorld(CObject* object) {
     return CPools::ms_pObjectPool->IsObjectValid(object);
 }
 
-// Converted from cdecl bool IsObjectPointerValid(CObject *object) 0x5A2C20
+// 0x5A2C20
 bool IsObjectPointerValid(CObject* object) {
     if (!CPools::ms_pObjectPool->IsObjectValid(object))
         return false;

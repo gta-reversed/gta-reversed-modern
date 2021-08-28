@@ -11,12 +11,12 @@ RwV3d& CPedIK::XaxisIK = *(RwV3d*)0x8D232C;
 RwV3d& CPedIK::YaxisIK = *(RwV3d*)0x8D2338;
 RwV3d& CPedIK::ZaxisIK = *(RwV3d*)0x8D2344;
 
-// Converted from thiscall void CPedIK::RotateTorso(AnimBlendFrameData *bone,LimbOrientation &orientation,bool flag) 0x5FDDB0 
+// 0x5FDDB0 
 void CPedIK::RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool flag) {
     plugin::CallMethod<0x5FDDB0, CPedIK*, AnimBlendFrameData*, LimbOrientation&, bool>(this, bone, orientation, flag);
 }
 
-// Converted from thiscall bool CPedIK::PointGunInDirection(float Z_angle, float arg2 , bool flag , float arg4 ) 0x5FDC00 
+// 0x5FDC00 
 bool CPedIK::PointGunInDirection(float Z_angle, float arg2, bool flag, float arg4) {
     return plugin::CallMethodAndReturn<bool, 0x5FDC00, CPedIK*, float, float, bool, float>(this, Z_angle, arg2, flag, arg4);
 }
@@ -26,7 +26,7 @@ void CPedIK::PointGunAtPosition(CVector const& posn, float arg2) {
     plugin::CallMethod<0x5FDE20, CPedIK*, CVector const&, float>(this, posn, arg2);
 }
 
-// Converted from cdecl RwMatrixTag* CPedIK::GetWorldMatrix(RwFrame *frame, RwMatrixTag *transformMat) 0x5FD8F0 
+// 0x5FD8F0 
 RwMatrixTag* CPedIK::GetWorldMatrix(RwFrame* frame, RwMatrixTag* transformMat) {
     return plugin::CallAndReturn<RwMatrixTag*, 0x5FD8F0, RwFrame*, RwMatrixTag*>(frame, transformMat);
 }

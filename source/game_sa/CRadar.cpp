@@ -777,14 +777,14 @@ void CRadar::SetBlipAlwaysDisplayInZoom(int blipIndex, unsigned char display)
         ms_RadarTrace[index].m_bBlipRemain = display;
 }
 
-// Converted from cdecl void CRadar::SetBlipFade(int blipIndex,uint8_t fade) 0x583E00
+// 0x583E00
 void CRadar::SetBlipFade(int blipIndex, unsigned char fade)
 {
     // unused
     ((void(__cdecl*)(int, unsigned char))0x583E00)(blipIndex, fade);
 }
 
-// Converted from cdecl void CRadar::SetCoordBlipAppearance(int blipIndex,uint8_t appearance) 0x583E50
+// 0x583E50
 void CRadar::SetCoordBlipAppearance(int blipIndex, unsigned char appearance)
 {
     ((void(__cdecl*)(int, unsigned char))0x583E50)(blipIndex, appearance);
