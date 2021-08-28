@@ -286,7 +286,7 @@ void CRunningScript::ReadTextLabelFromScript(char* pBuffer, unsigned char nBuffe
 // Removes script from list
 // 0x464BD0
 void CRunningScript::RemoveScriptFromList(CRunningScript** queueList) {
-    plugin::CallMethodDynGlobal<CRunningScript*, CRunningScript**>(0x464BD0, this, queueList);
+    plugin::CallMethod<0x464BD0, CRunningScript*, CRunningScript**>(this, queueList);
 }
 
 // 0x46AF50

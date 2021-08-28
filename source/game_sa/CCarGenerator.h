@@ -72,9 +72,9 @@ public:
     bool CheckIfWithinRangeOfAnyPlayers();
     void DoInternalProcessing();
     void Process();
-    void Setup(const CVector& posn, float angle, int modelId, short color1, short color2, uchar bForceSpawn,
-               uchar alarmChance, uchar doorLockChance, ushort minDelay, ushort maxDelay,
-               uchar iplId, bool ignorePopulationLimit);
+    void Setup(const CVector& posn, float angle, int modelId, short color1, short color2, uint8_t bForceSpawn,
+               uint8_t alarmChance, uint8_t doorLockChance, uint16_t minDelay, uint16_t maxDelay,
+               uint8_t iplId, bool ignorePopulationLimit);
     void SwitchOff();
     void SwitchOn();
 

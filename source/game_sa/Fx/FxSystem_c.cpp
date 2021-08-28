@@ -47,12 +47,12 @@ void FxSystem_c::AddParticle(RwV3d* position, RwV3d* velocity, float arg2, FxPrt
     ((void(__thiscall *)(FxSystem_c*, RwV3d*, RwV3d*, float, FxPrtMult_c*, float, float, float, unsigned char))0x4AA440)(this, position, velocity, arg2, prtMult, arg4, brightness, arg6, arg8);
 }
 
-// Converted from thiscall void FxSystem_c::AddParticle(RwMatrixTag *transform,RwV3d *position,float,FxPrtMult_c *prtMult,float,float,float,uchar) 0x4AA540
+// Converted from thiscall void FxSystem_c::AddParticle(RwMatrixTag *transform,RwV3d *position,float,FxPrtMult_c *prtMult,float,float,float,uint8_t) 0x4AA540
 void FxSystem_c::AddParticle(RwMatrixTag* transform, RwV3d* position, float arg2, FxPrtMult_c* prtMult, float arg4, float arg5, float arg6, unsigned char arg7) {
     ((void(__thiscall *)(FxSystem_c*, RwMatrixTag*, RwV3d*, float, FxPrtMult_c*, float, float, float, unsigned char))0x4AA540)(this, transform, position, arg2, prtMult, arg4, arg5, arg6, arg7);
 }
 
-// Converted from thiscall void FxSystem_c::EnablePrim(int primIndex,uchar enable) 0x4AA610
+// Converted from thiscall void FxSystem_c::EnablePrim(int primIndex,uint8_t enable) 0x4AA610
 void FxSystem_c::EnablePrim(int primIndex, unsigned char enable) {
     ((void(__thiscall *)(FxSystem_c*, int, unsigned char))0x4AA610)(this, primIndex, enable);
 }
@@ -72,7 +72,7 @@ void FxSystem_c::AddOffsetPos(RwV3d* pos) {
     ((void(__thiscall *)(FxSystem_c*, RwV3d*))0x4AA690)(this, pos);
 }
 
-// Converted from thiscall void FxSystem_c::SetConstTime(uchar,float amount) 0x4AA6C0
+// Converted from thiscall void FxSystem_c::SetConstTime(uint8_t,float amount) 0x4AA6C0
 void FxSystem_c::SetConstTime(unsigned char arg0, float amount) {
     ((void(__thiscall *)(FxSystem_c*, unsigned char, float))0x4AA6C0)(this, arg0, amount);
 }
@@ -117,7 +117,7 @@ eFxSystemPlayStatus FxSystem_c::GetPlayStatus() {
     return ((eFxSystemPlayStatus(__thiscall *)(FxSystem_c*))0x4AA900)(this);
 }
 
-// Converted from thiscall void FxSystem_c::SetLocalParticles(uchar enable) 0x4AA910
+// Converted from thiscall void FxSystem_c::SetLocalParticles(uint8_t enable) 0x4AA910
 void FxSystem_c::SetLocalParticles(unsigned char enable) {
     ((void(__thiscall *)(FxSystem_c*, unsigned char))0x4AA910)(this, enable);
 }
@@ -157,12 +157,12 @@ void FxSystem_c::ResetBoundingSphere() {
     ((void(__thiscall *)(FxSystem_c*))0x4AABF0)(this);
 }
 
-// Converted from thiscall void FxSystem_c::SetZTestEnable(uchar enable) 0x4AAC50
+// Converted from thiscall void FxSystem_c::SetZTestEnable(uint8_t enable) 0x4AAC50
 void FxSystem_c::SetZTestEnable(unsigned char enable) {
     ((void(__thiscall *)(FxSystem_c*, unsigned char))0x4AAC50)(this, enable);
 }
 
-// Converted from thiscall void FxSystem_c::SetMustCreatePrts(uchar enable) 0x4AAC70
+// Converted from thiscall void FxSystem_c::SetMustCreatePrts(uint8_t enable) 0x4AAC70
 void FxSystem_c::SetMustCreatePrts(unsigned char enable) {
     ((void(__thiscall *)(FxSystem_c*, unsigned char))0x4AAC70)(this, enable);
 }

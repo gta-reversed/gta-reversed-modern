@@ -33,7 +33,7 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building)
 }
 
 void CCover::Init() {
-    plugin::CallDynGlobal(0x698710);
+    plugin::Call<0x698710>();
 }
 
 bool CCover::ShouldThisBuildingHaveItsCoverPointsCreated(CBuilding* building)

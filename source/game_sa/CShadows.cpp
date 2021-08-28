@@ -47,17 +47,17 @@ void CShadows::Shutdown() {
     ((void(__cdecl*)())0x706ED0)();
 }
 
-// Converted from cdecl void CShadows::AddPermanentShadow(uchar type,RwTexture *texture,CVector *posn,float topX,float topY,float rightX,float rightY,short intensity,uchar red,uchar greeb,uchar blue,float drawDistance,uint time,float upDistance) 0x706F60
+// Converted from cdecl void CShadows::AddPermanentShadow(uint8_t type,RwTexture *texture,CVector *posn,float topX,float topY,float rightX,float rightY,short intensity,uint8_t red,uint8_t greeb,uint8_t blue,float drawDistance,uint32 time,float upDistance) 0x706F60
 void CShadows::AddPermanentShadow(unsigned char type, RwTexture* texture, CVector* posn, float topX, float topY, float rightX, float rightY, short intensity, unsigned char red, unsigned char greeb, unsigned char blue, float drawDistance, unsigned int time, float upDistance) {
     ((void(__cdecl*)(unsigned char, RwTexture*, CVector*, float, float, float, float, short, unsigned char, unsigned char, unsigned char, float, unsigned int, float))0x706F60)(type, texture, posn, topX, topY, rightX, rightY, intensity, red, greeb, blue, drawDistance, time, upDistance);
 }
 
-// Converted from cdecl void CShadows::StoreShadowToBeRendered(uchar type,RwTexture *texture,CVector *posn,float topX,float topY,float rightX,float rightY,short intensity,uchar red,uchar green,uchar blue,float zDistance,bool drawOnWater,float scale,CRealTimeShadow *realTimeShadow,bool drawOnBuildings) 0x707390
+// Converted from cdecl void CShadows::StoreShadowToBeRendered(uint8_t type,RwTexture *texture,CVector *posn,float topX,float topY,float rightX,float rightY,short intensity,uint8_t red,uint8_t green,uint8_t blue,float zDistance,bool drawOnWater,float scale,CRealTimeShadow *realTimeShadow,bool drawOnBuildings) 0x707390
 void CShadows::StoreShadowToBeRendered(unsigned char type, RwTexture* texture, CVector* posn, float topX, float topY, float rightX, float rightY, short intensity, unsigned char red, unsigned char green, unsigned char blue, float zDistance, bool drawOnWater, float scale, CRealTimeShadow* realTimeShadow, bool drawOnBuildings) {
     ((void(__cdecl*)(unsigned char, RwTexture*, CVector*, float, float, float, float, short, unsigned char, unsigned char, unsigned char, float, bool, float, CRealTimeShadow*, bool))0x707390)(type, texture, posn, topX, topY, rightX, rightY, intensity, red, green, blue, zDistance, drawOnWater, scale, realTimeShadow, drawOnBuildings);
 }
 
-// Converted from cdecl void CShadows::SetRenderModeForShadowType(uchar shadowType) 0x707460
+// Converted from cdecl void CShadows::SetRenderModeForShadowType(uint8_t shadowType) 0x707460
 void CShadows::SetRenderModeForShadowType(unsigned char shadowType) {
     ((void(__cdecl*)(unsigned char))0x707460)(shadowType);
 }
@@ -87,12 +87,12 @@ void CShadows::TidyUpShadows() {
     ((void(__cdecl*)())0x707770)();
 }
 
-// Converted from cdecl void CShadows::AffectColourWithLighting(uchar shadowType, uchar dayNightIntensity, uchar red, uchar green, uchar blue, uchar *outRed, uchar *outGreen, uchar *outBlue) 0x707850
+// Converted from cdecl void CShadows::AffectColourWithLighting(uint8_t shadowType, uint8_t dayNightIntensity, uint8_t red, uint8_t green, uint8_t blue, uint8_t *outRed, uint8_t *outGreen, uint8_t *outBlue) 0x707850
 void CShadows::AffectColourWithLighting(unsigned char shadowType, unsigned char dayNightIntensity, unsigned char red, unsigned char green, unsigned char blue, unsigned char* outRed, unsigned char* outGreen, unsigned char* outBlue) {
     ((void(__cdecl*)(unsigned char, unsigned char, unsigned char, unsigned char, unsigned char, unsigned char*, unsigned char*, unsigned char*))0x707850)(shadowType, dayNightIntensity, red, green, blue, outRed, outGreen, outBlue);
 }
 
-// Converted from cdecl void CShadows::StoreShadowToBeRendered(uchar shadowTextureType,CVector *posn,float frontX,float frontY,float sideX,float sideY,short intensity,uchar red,uchar green,uchar blue) 0x707930
+// Converted from cdecl void CShadows::StoreShadowToBeRendered(uint8_t shadowTextureType,CVector *posn,float frontX,float frontY,float sideX,float sideY,short intensity,uint8_t red,uint8_t green,uint8_t blue) 0x707930
 void CShadows::StoreShadowToBeRendered(unsigned char shadowTextureType, CVector* posn, float frontX, float frontY, float sideX, float sideY, short intensity, unsigned char red, unsigned char green, unsigned char blue) {
     ((void(__cdecl*)(unsigned char, CVector*, float, float, float, float, short, unsigned char, unsigned char, unsigned char))0x707930)(shadowTextureType, posn, frontX, frontY, sideX, sideY, intensity, red, green, blue);
 }
@@ -123,27 +123,27 @@ void CShadows::RenderStaticShadows() {
     ((void(__cdecl*)())0x708300)();
 }
 
-// Converted from cdecl void CShadows::CastShadowEntityXY(CEntity *entity,float conrerAX,float cornerAY,float cornerBX,float cornerBY,CVector *posn,float frontX,float frontY,float sideX,float sideY,short intensity,uchar red,uchar green,uchar blue,float zDistance,float scale,CPolyBunch **ppPolyBunch,uchar *pDayNightIntensity,int shadowType) 0x7086B0
+// Converted from cdecl void CShadows::CastShadowEntityXY(CEntity *entity,float conrerAX,float cornerAY,float cornerBX,float cornerBY,CVector *posn,float frontX,float frontY,float sideX,float sideY,short intensity,uint8_t red,uint8_t green,uint8_t blue,float zDistance,float scale,CPolyBunch **ppPolyBunch,uint8_t *pDayNightIntensity,int shadowType) 0x7086B0
 void CShadows::CastShadowEntityXY(CEntity* entity, float conrerAX, float cornerAY, float cornerBX, float cornerBY, CVector* posn, float frontX, float frontY, float sideX, float sideY, short intensity, unsigned char red, unsigned char green, unsigned char blue, float zDistance, float scale, CPolyBunch** ppPolyBunch, unsigned char* pDayNightIntensity, int shadowType) {
     ((void(__cdecl*)(CEntity*, float, float, float, float, CVector*, float, float, float, float, short, unsigned char, unsigned char, unsigned char, float, float, CPolyBunch**, unsigned char*, int))0x7086B0)(entity, conrerAX, cornerAY, cornerBX, cornerBY, posn, frontX, frontY, sideX, sideY, intensity, red, green, blue, zDistance, scale, ppPolyBunch, pDayNightIntensity, shadowType);
 }
 
-// Converted from cdecl void CShadows::CastShadowEntityXYZ(CEntity *entity,CVector *posn,float frontX,float frontY,float sideX,float sideY,short intensity,uchar red,uchar green,uchar blue,float zDistance,float scale,CPolyBunch **ppPolyBunch,CRealTimeShadow *realTimeShadow) 0x70A040
+// Converted from cdecl void CShadows::CastShadowEntityXYZ(CEntity *entity,CVector *posn,float frontX,float frontY,float sideX,float sideY,short intensity,uint8_t red,uint8_t green,uint8_t blue,float zDistance,float scale,CPolyBunch **ppPolyBunch,CRealTimeShadow *realTimeShadow) 0x70A040
 void CShadows::CastShadowEntityXYZ(CEntity* entity, CVector* posn, float frontX, float frontY, float sideX, float sideY, short intensity, unsigned char red, unsigned char green, unsigned char blue, float zDistance, float scale, CPolyBunch** ppPolyBunch, CRealTimeShadow* realTimeShadow) {
     ((void(__cdecl*)(CEntity*, CVector*, float, float, float, float, short, unsigned char, unsigned char, unsigned char, float, float, CPolyBunch**, CRealTimeShadow*))0x70A040)(entity, posn, frontX, frontY, sideX, sideY, intensity, red, green, blue, zDistance, scale, ppPolyBunch, realTimeShadow);
 }
 
-// Converted from cdecl void CShadows::CastPlayerShadowSectorList(CPtrList &ptrList,float conrerAX,float cornerAY,float cornerBX,float cornerBY,CVector *posn, float frontX, float frontY, float sideX, float sideY, short intensity, uchar red, uchar green, uchar blue, float zDistance, float scale,CPolyBunch **ppPolyBunch,uchar *pDayNightIntensity,int shadowType) 0x70A470
+// Converted from cdecl void CShadows::CastPlayerShadowSectorList(CPtrList &ptrList,float conrerAX,float cornerAY,float cornerBX,float cornerBY,CVector *posn, float frontX, float frontY, float sideX, float sideY, short intensity, uint8_t red, uint8_t green, uint8_t blue, float zDistance, float scale,CPolyBunch **ppPolyBunch,uint8_t *pDayNightIntensity,int shadowType) 0x70A470
 void CShadows::CastPlayerShadowSectorList(CPtrList& ptrList, float conrerAX, float cornerAY, float cornerBX, float cornerBY, CVector* posn, float frontX, float frontY, float sideX, float sideY, short intensity, unsigned char red, unsigned char green, unsigned char blue, float zDistance, float scale, CPolyBunch** ppPolyBunch, unsigned char* pDayNightIntensity, int shadowType) {
     ((void(__cdecl*)(CPtrList&, float, float, float, float, CVector*, float, float, float, float, short, unsigned char, unsigned char, unsigned char, float, float, CPolyBunch**, unsigned char*, int))0x70A470)(ptrList, conrerAX, cornerAY, cornerBX, cornerBY, posn, frontX, frontY, sideX, sideY, intensity, red, green, blue, zDistance, scale, ppPolyBunch, pDayNightIntensity, shadowType);
 }
 
-// Converted from cdecl void CShadows::CastShadowSectorList(CPtrList &ptrList,float conrerAX,float cornerAY,float cornerBX,float cornerBY,CVector *posn, float frontX, float frontY, float sideX, float sideY, short intensity, uchar red, uchar green, uchar blue, float zDistance, float scale,CPolyBunch **ppPolyBunch,uchar *pDayNightIntensity,int shadowType) 0x70A630
+// Converted from cdecl void CShadows::CastShadowSectorList(CPtrList &ptrList,float conrerAX,float cornerAY,float cornerBX,float cornerBY,CVector *posn, float frontX, float frontY, float sideX, float sideY, short intensity, uint8_t red, uint8_t green, uint8_t blue, float zDistance, float scale,CPolyBunch **ppPolyBunch,uint8_t *pDayNightIntensity,int shadowType) 0x70A630
 void CShadows::CastShadowSectorList(CPtrList& ptrList, float conrerAX, float cornerAY, float cornerBX, float cornerBY, CVector* posn, float frontX, float frontY, float sideX, float sideY, short intensity, unsigned char red, unsigned char green, unsigned char blue, float zDistance, float scale, CPolyBunch** ppPolyBunch, unsigned char* pDayNightIntensity, int shadowType) {
     ((void(__cdecl*)(CPtrList&, float, float, float, float, CVector*, float, float, float, float, short, unsigned char, unsigned char, unsigned char, float, float, CPolyBunch**, unsigned char*, int))0x70A630)(ptrList, conrerAX, cornerAY, cornerBX, cornerBY, posn, frontX, frontY, sideX, sideY, intensity, red, green, blue, zDistance, scale, ppPolyBunch, pDayNightIntensity, shadowType);
 }
 
-// Converted from cdecl void CShadows::CastRealTimeShadowSectorList(CPtrList &ptrList,float conrerAX,float cornerAY,float cornerBX,float cornerBY,CVector *posn, float frontX, float frontY, float sideX, float sideY, short intensity, uchar red, uchar green, uchar blue, float zDistance, float scale,CPolyBunch **ppPolyBunch,CRealTimeShadow *realTimeShadow,uchar *pDayNightIntensity) 0x70A7E0
+// Converted from cdecl void CShadows::CastRealTimeShadowSectorList(CPtrList &ptrList,float conrerAX,float cornerAY,float cornerBX,float cornerBY,CVector *posn, float frontX, float frontY, float sideX, float sideY, short intensity, uint8_t red, uint8_t green, uint8_t blue, float zDistance, float scale,CPolyBunch **ppPolyBunch,CRealTimeShadow *realTimeShadow,uint8_t *pDayNightIntensity) 0x70A7E0
 void CShadows::CastRealTimeShadowSectorList(CPtrList& ptrList, float conrerAX, float cornerAY, float cornerBX, float cornerBY, CVector* posn, float frontX, float frontY, float sideX, float sideY, short intensity, unsigned char red, unsigned char green, unsigned char blue, float zDistance, float scale, CPolyBunch** ppPolyBunch, CRealTimeShadow* realTimeShadow, unsigned char* pDayNightIntensity) {
     ((void(__cdecl*)(CPtrList&, float, float, float, float, CVector*, float, float, float, float, short, unsigned char, unsigned char, unsigned char, float, float, CPolyBunch**, CRealTimeShadow*, unsigned char*))0x70A7E0)(ptrList, conrerAX, cornerAY, cornerBX, cornerBY, posn, frontX, frontY, sideX, sideY, intensity, red, green, blue, zDistance, scale, ppPolyBunch, realTimeShadow, pDayNightIntensity);
 }
@@ -158,7 +158,7 @@ void CShadows::GeneratePolysForStaticShadow(short staticShadowIndex) {
     ((void(__cdecl*)(short))0x70B730)(staticShadowIndex);
 }
 
-// Converted from cdecl bool CShadows::StoreStaticShadow(uint id,uchar type,RwTexture *texture,CVector *posn,float frontX,float frontY,float sideX,float sideY,short intensity,uchar red,uchar green,uchar blue,float zDistane,float scale,float drawDistance,bool temporaryShadow,float upDistance) 0x70BA00
+// Converted from cdecl bool CShadows::StoreStaticShadow(uint32 id,uint8_t type,RwTexture *texture,CVector *posn,float frontX,float frontY,float sideX,float sideY,short intensity,uint8_t red,uint8_t green,uint8_t blue,float zDistane,float scale,float drawDistance,bool temporaryShadow,float upDistance) 0x70BA00
 bool CShadows::StoreStaticShadow(unsigned int id, unsigned char type, RwTexture* texture, CVector* posn, float frontX, float frontY, float sideX, float sideY, short intensity, unsigned char red, unsigned char green, unsigned char blue, float zDistane, float scale, float drawDistance, bool temporaryShadow, float upDistance) {
     return ((bool(__cdecl*)(unsigned int, unsigned char, RwTexture*, CVector*, float, float, float, float, short, unsigned char, unsigned char, unsigned char, float, float, float, bool, float))0x70BA00)(id, type, texture, posn, frontX, frontY, sideX, sideY, intensity, red, green, blue, zDistane, scale, drawDistance, temporaryShadow, upDistance);
 }
@@ -168,12 +168,12 @@ void CShadows::StoreShadowForVehicle(CVehicle* vehicle, VEH_SHD_TYPE vehShadowTy
     ((void(__cdecl*)(CVehicle*, VEH_SHD_TYPE))0x70BDA0)(vehicle, vehShadowType);
 }
 
-// Converted from cdecl void CShadows::StoreCarLightShadow(CVehicle *vehicle,int id,RwTexture *texture,CVector *posn,float frontX,float frontY,float sideX,float sideY,uchar red,uchar green,uchar blue,float maxViewAngle) 0x70C500
+// Converted from cdecl void CShadows::StoreCarLightShadow(CVehicle *vehicle,int id,RwTexture *texture,CVector *posn,float frontX,float frontY,float sideX,float sideY,uint8_t red,uint8_t green,uint8_t blue,float maxViewAngle) 0x70C500
 void CShadows::StoreCarLightShadow(CVehicle* vehicle, int id, RwTexture* texture, CVector* posn, float frontX, float frontY, float sideX, float sideY, unsigned char red, unsigned char green, unsigned char blue, float maxViewAngle) {
     ((void(__cdecl*)(CVehicle*, int, RwTexture*, CVector*, float, float, float, float, unsigned char, unsigned char, unsigned char, float))0x70C500)(vehicle, id, texture, posn, frontX, frontY, sideX, sideY, red, green, blue, maxViewAngle);
 }
 
-// Converted from cdecl void CShadows::StoreShadowForPole(CEntity *entity,float offsetX,float offsetY,float offsetZ,float poleHeight,float poleWidth,uint localId) 0x70C750
+// Converted from cdecl void CShadows::StoreShadowForPole(CEntity *entity,float offsetX,float offsetY,float offsetZ,float poleHeight,float poleWidth,uint32 localId) 0x70C750
 void CShadows::StoreShadowForPole(CEntity* entity, float offsetX, float offsetY, float offsetZ, float poleHeight, float poleWidth, unsigned int localId) {
     ((void(__cdecl*)(CEntity*, float, float, float, float, float, unsigned int))0x70C750)(entity, offsetX, offsetY, offsetZ, poleHeight, poleWidth, localId);
 }
@@ -183,7 +183,7 @@ void CShadows::UpdatePermanentShadows() {
     ((void(__cdecl*)())0x70C950)();
 }
 
-// Converted from cdecl void CShadows::RenderIndicatorShadow(uint id,uchar shadowType,RwTexture *texture,CVector *posn,float frontX,float frontY,float sideX,float sideY, short intensity) 0x70CCB0
+// Converted from cdecl void CShadows::RenderIndicatorShadow(uint32 id,uint8_t shadowType,RwTexture *texture,CVector *posn,float frontX,float frontY,float sideX,float sideY, short intensity) 0x70CCB0
 void CShadows::RenderIndicatorShadow(unsigned int id, unsigned char shadowType, RwTexture* texture, CVector* posn, float frontX, float frontY, float sideX, float sideY, short intensity) {
     ((void(__cdecl*)(unsigned int, unsigned char, RwTexture*, CVector*, float, float, float, float, short))0x70CCB0)(id, shadowType, texture, posn, frontX, frontY, sideX, sideY, intensity);
 }

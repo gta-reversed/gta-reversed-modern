@@ -20,8 +20,8 @@ void CData::Unload() {
 
 // nSkipBytes always 0
 // 0x69F5D0
-void CData::Load(uint length, FILESTREAM file, uint* offset, uchar nSkipBytes) {
-    return plugin::CallMethod<0x69F5D0, CData*, uint, FILESTREAM, uint*, uchar>(this, length, file, offset, nSkipBytes);
+void CData::Load(uint32 length, FILESTREAM file, uint32* offset, uint8_t nSkipBytes) {
+    return plugin::CallMethod<0x69F5D0, CData*, uint32, FILESTREAM, uint32*, uint8_t>(this, length, file, offset, nSkipBytes);
 
 #ifdef USE_ORIGINAL_CODE
     // todo: add original code

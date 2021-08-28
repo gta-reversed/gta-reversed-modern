@@ -12,12 +12,12 @@ void D3DResourceSystem::CancelBuffering() {
     plugin::Call<0x730900>();
 }
 
-// Converted from cdecl uint D3DResourceSystem::GetTotalIndexDataSize() 0x7307F0
+// Converted from cdecl uint32 D3DResourceSystem::GetTotalIndexDataSize() 0x7307F0
 unsigned int D3DResourceSystem::GetTotalIndexDataSize() {
     return plugin::CallAndReturn<unsigned int, 0x7307F0>();
 }
 
-// Converted from cdecl uint D3DResourceSystem::GetTotalPixelsSize() 0x730660
+// Converted from cdecl uint32 D3DResourceSystem::GetTotalPixelsSize() 0x730660
 unsigned int D3DResourceSystem::GetTotalPixelsSize() {
     return plugin::CallAndReturn<unsigned int, 0x730660>();
 }
@@ -37,22 +37,22 @@ void D3DResourceSystem::Shutdown() {
     plugin::Call<0x730A00>();
 }
 
-// Converted from cdecl void D3DResourceSystem::TidyUpD3DIndexBuffers(uint count) 0x730740
+// Converted from cdecl void D3DResourceSystem::TidyUpD3DIndexBuffers(uint32 count) 0x730740
 void D3DResourceSystem::TidyUpD3DIndexBuffers(unsigned int count) {
     plugin::Call<0x730740, unsigned int>(count);
 }
 
-// Converted from cdecl void D3DResourceSystem::TidyUpD3DTextures(uint count) 0x7305E0
+// Converted from cdecl void D3DResourceSystem::TidyUpD3DTextures(uint32 count) 0x7305E0
 void D3DResourceSystem::TidyUpD3DTextures(unsigned int count) {
     plugin::Call<0x7305E0, unsigned int>(count);
 }
 
-// Converted from cdecl int D3DResourceSystem::CreateIndexBuffer(uint numIndices, uint format, IDirect3DIndexBuffer9 **ppIndexBuffer) 0x7306A0
+// Converted from cdecl int D3DResourceSystem::CreateIndexBuffer(uint32 numIndices, uint32 format, IDirect3DIndexBuffer9 **ppIndexBuffer) 0x7306A0
 int D3DResourceSystem::CreateIndexBuffer(unsigned int numIndices, unsigned int format, void** ppIndexBuffer) {
     return plugin::CallAndReturn<int, 0x7306A0, unsigned int, unsigned int, void**>(numIndices, format, ppIndexBuffer);
 }
 
-// Converted from cdecl int D3DResourceSystem::CreateTexture(int width, int height, uint format, IDirect3DTexture9 **ppTexture) 0x730510
+// Converted from cdecl int D3DResourceSystem::CreateTexture(int width, int height, uint32 format, IDirect3DTexture9 **ppTexture) 0x730510
 int D3DResourceSystem::CreateTexture(int width, int height, unsigned int format, void** ppTexture) {
     return plugin::CallAndReturn<int, 0x730510, int, int, unsigned int, void**>(width, height, format, ppTexture);
 }

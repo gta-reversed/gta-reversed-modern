@@ -40,7 +40,7 @@ public:
     bool Initialise();
     void Terminate();
     void Reset();
-    void PauseManually(uchar bPause);
+    void PauseManually(uint8_t bPause);
     void Service();
     CAESound* RequestNewSound(CAESound* pSound);
     int16_t AreSoundsPlayingInBankSlot(short bankSlot);
@@ -48,8 +48,8 @@ public:
     int16_t AreSoundsOfThisEventPlayingForThisEntityAndPhysical(short eventId, CAEAudioEntity* audioEntity, CPhysical* physical);
     void CancelSoundsOfThisEventPlayingForThisEntity(short eventId, CAEAudioEntity* audioEntity);
     void CancelSoundsOfThisEventPlayingForThisEntityAndPhysical(short eventId, CAEAudioEntity* audioEntity, CPhysical* physical);
-    void CancelSoundsInBankSlot(short bankSlot, uchar bFullStop);
-    void CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, uchar bFullStop);
+    void CancelSoundsInBankSlot(short bankSlot, uint8_t bFullStop);
+    void CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, uint8_t bFullStop);
     int16_t GetVirtualChannelForPhysicalChannel(short physicalChannel);
 
 public:

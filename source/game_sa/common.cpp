@@ -898,7 +898,7 @@ CAnimBlendClumpData* RpAnimBlendAllocateData(RpClump* clump) {
     return plugin::CallAndReturn<CAnimBlendClumpData*, 0x4D5F50, RpClump*>(clump);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump *clump,CAnimBlendAssociation *association,uint flags,float startTime,float blendAmount) 0x4D6790
+// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump *clump,CAnimBlendAssociation *association,uint32 flags,float startTime,float blendAmount) 0x4D6790
 CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump* clump, CAnimBlendAssociation* association, unsigned int flags, float startTime, float blendAmount) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6790, RpClump*, CAnimBlendAssociation*, unsigned int, float, float>(clump, association, flags, startTime, blendAmount);
 }
@@ -913,7 +913,7 @@ void RpAnimBlendClumpFillFrameArray(RpClump* clump, AnimBlendFrameData** frameDa
     plugin::Call<0x4D64A0, RpClump*, AnimBlendFrameData**>(clump, frameData);
 }
 
-// Converted from cdecl AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump *clump,uint id) 0x4D6400
+// Converted from cdecl AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump *clump,uint32 id) 0x4D6400
 AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, unsigned int id) {
     return plugin::CallAndReturn<AnimBlendFrameData*, 0x4D6400, RpClump*, unsigned int>(clump, id);
 }
@@ -923,7 +923,7 @@ AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, char const* name) 
     return plugin::CallAndReturn<AnimBlendFrameData*, 0x4D62A0, RpClump*, char const*>(clump, name);
 }
 
-// Converted from cdecl AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump *clump,uint key) 0x4D6370
+// Converted from cdecl AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump *clump,uint32 key) 0x4D6370
 AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, unsigned int key) {
     return plugin::CallAndReturn<AnimBlendFrameData*, 0x4D6370, RpClump*, unsigned int>(clump, key);
 }
@@ -938,7 +938,7 @@ CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, char const
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6870, RpClump*, char const*>(clump, name);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump *clump,uint animId) 0x4D68B0
+// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump *clump,uint32 animId) 0x4D68B0
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, unsigned int animId) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D68B0, RpClump*, unsigned int>(clump, animId);
 }
@@ -948,7 +948,7 @@ CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D15E0, RpClump*>(clump);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump *clump,uint flags) 0x4D6A70
+// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump *clump,uint32 flags) 0x4D6A70
 CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump, unsigned int flags) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6A70, RpClump*, unsigned int>(clump, flags);
 }
@@ -973,17 +973,17 @@ CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation_N(RpClump* clum
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D69F0, RpClump*, int>(clump, n);
 }
 
-// Converted from cdecl uint RpAnimBlendClumpGetNumAssociations(RpClump *clump) 0x4D6B60
+// Converted from cdecl uint32 RpAnimBlendClumpGetNumAssociations(RpClump *clump) 0x4D6B60
 unsigned int RpAnimBlendClumpGetNumAssociations(RpClump* clump) {
     return plugin::CallAndReturn<unsigned int, 0x4D6B60, RpClump*>(clump);
 }
 
-// Converted from cdecl uint RpAnimBlendClumpGetNumNonPartialAssociations(RpClump *clump) 0x4D6BB0
+// Converted from cdecl uint32 RpAnimBlendClumpGetNumNonPartialAssociations(RpClump *clump) 0x4D6BB0
 unsigned int RpAnimBlendClumpGetNumNonPartialAssociations(RpClump* clump) {
     return plugin::CallAndReturn<unsigned int, 0x4D6BB0, RpClump*>(clump);
 }
 
-// Converted from cdecl uint RpAnimBlendClumpGetNumPartialAssociations(RpClump *clump) 0x4D6B80
+// Converted from cdecl uint32 RpAnimBlendClumpGetNumPartialAssociations(RpClump *clump) 0x4D6B80
 unsigned int RpAnimBlendClumpGetNumPartialAssociations(RpClump* clump) {
     return plugin::CallAndReturn<unsigned int, 0x4D6B80, RpClump*>(clump);
 }
@@ -1013,12 +1013,12 @@ void RpAnimBlendClumpRemoveAllAssociations(RpClump* clump) {
     plugin::Call<0x4D6C00, RpClump*>(clump);
 }
 
-// Converted from cdecl void RpAnimBlendClumpRemoveAssociations(RpClump *clump,uint flags) 0x4D6820
+// Converted from cdecl void RpAnimBlendClumpRemoveAssociations(RpClump *clump,uint32 flags) 0x4D6820
 void RpAnimBlendClumpRemoveAssociations(RpClump* clump, unsigned int flags) {
     plugin::Call<0x4D6820, RpClump*, unsigned int>(clump, flags);
 }
 
-// Converted from cdecl void RpAnimBlendClumpSetBlendDeltas(RpClump *clump,uint flags,float delta) 0x4D67E0
+// Converted from cdecl void RpAnimBlendClumpSetBlendDeltas(RpClump *clump,uint32 flags,float delta) 0x4D67E0
 void RpAnimBlendClumpSetBlendDeltas(RpClump* clump, unsigned int flags, float delta) {
     plugin::Call<0x4D67E0, RpClump*, unsigned int, float>(clump, flags, delta);
 }
@@ -1053,7 +1053,7 @@ CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* asso
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6AB0, CAnimBlendAssociation*>(association);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation *association,uint flags) 0x4D6AD0
+// Converted from cdecl CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation *association,uint32 flags) 0x4D6AD0
 CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association, unsigned int flags) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6AD0, CAnimBlendAssociation*, unsigned int>(association, flags);
 }

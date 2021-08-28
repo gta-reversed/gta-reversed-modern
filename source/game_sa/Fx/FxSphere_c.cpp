@@ -11,7 +11,7 @@ FxSphere_c::FxSphere_c() {
     ((void(__thiscall*)(FxSphere_c*))0x4A9F70)(this);
 }
 
-// Converted from cdecl void* FxSphere_c::operator new(uint size,int notAligned) 0x4A9F80
+// Converted from cdecl void* FxSphere_c::operator new(uint32 size,int notAligned) 0x4A9F80
 void* FxSphere_c::operator new(unsigned int size, int notAligned) {
     return ((void* (__cdecl*)(unsigned int, int))0x4A9F80)(size, notAligned);
 }

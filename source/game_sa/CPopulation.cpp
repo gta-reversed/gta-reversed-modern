@@ -142,7 +142,7 @@ CPed* CPopulation::AddExistingPedInCar(CPed* ped, CVehicle* vehicle) {
     return ((CPed * (__cdecl*)(CPed*, CVehicle*))0x611560)(ped, vehicle);
 }
 
-// Converted from cdecl void CPopulation::UpdatePedCount(CPed *ped,uchar updateState) 0x611570
+// Converted from cdecl void CPopulation::UpdatePedCount(CPed *ped,uint8_t updateState) 0x611570
 void CPopulation::UpdatePedCount(CPed* ped, unsigned char updateState) {
     ((void(__cdecl*)(CPed*, unsigned char))0x611570)(ped, updateState);
 }
@@ -242,7 +242,7 @@ bool CPopulation::TestSafeForRealObject(CDummyObject* dummyObject) {
     return ((bool(__cdecl*)(CDummyObject*))0x6123A0)(dummyObject);
 }
 
-// Converted from cdecl CPed* CPopulation::AddPed(ePedType pedType,uint modelIndex,CVector const&posn,bool makeWander) 0x612710
+// Converted from cdecl CPed* CPopulation::AddPed(ePedType pedType,uint32 modelIndex,CVector const&posn,bool makeWander) 0x612710
 CPed* CPopulation::AddPed(ePedType pedType, unsigned int modelIndex, CVector const& posn, bool makeWander) {
     return ((CPed * (__cdecl*)(ePedType, unsigned int, CVector const&, bool))0x612710)(pedType, modelIndex, posn, makeWander);
 }

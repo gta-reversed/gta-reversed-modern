@@ -167,7 +167,7 @@ plugin::dummy, plugin::dummy, plugin::dummy }
     ((void(__thiscall *)(CPed*, ePedType))0x5E8030)(this, pedtype);
 }
 
-// Converted from thiscall void* CPed::operator new(uint size) 0x5E4720
+// Converted from thiscall void* CPed::operator new(uint32 size) 0x5E4720
 void* CPed::operator new(unsigned int size) {
     return ((void* (__cdecl *)(unsigned int))0x5E4720)(size);
 }
@@ -387,13 +387,13 @@ int CPed::GetWeaponSlot(eWeaponType weaponType)
     return CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nSlot;
 }
 
-// Converted from thiscall void CPed::GrantAmmo(eWeaponType weaponType,uint ammo) 0x5DF220
+// Converted from thiscall void CPed::GrantAmmo(eWeaponType weaponType,uint32 ammo) 0x5DF220
 void CPed::GrantAmmo(eWeaponType weaponType, unsigned int ammo)
 {
     ((void(__thiscall *)(CPed*, eWeaponType, unsigned int))0x5DF220)(this, weaponType, ammo);
 }
 
-// Converted from thiscall void CPed::SetAmmo(eWeaponType weaponType,uint ammo) 0x5DF290
+// Converted from thiscall void CPed::SetAmmo(eWeaponType weaponType,uint32 ammo) 0x5DF290
 void CPed::SetAmmo(eWeaponType weaponType, unsigned int ammo)
 {
     ((void(__thiscall *)(CPed*, eWeaponType, unsigned int))0x5DF290)(this, weaponType, ammo);
@@ -435,7 +435,7 @@ void CPed::ShoulderBoneRotation(RpClump* clump)
     plugin::Call<0x5DF560, RpClump*>(clump);
 }
 
-// Converted from thiscall void CPed::SetLookTimer(uint time) 0x5DF8D0
+// Converted from thiscall void CPed::SetLookTimer(uint32 time) 0x5DF8D0
 void CPed::SetLookTimer(unsigned int time)
 {
     ((void(__thiscall *)(CPed*, unsigned int))0x5DF8D0)(this, time);
@@ -508,7 +508,7 @@ void CPed::UpdateStatLeavingVehicle()
     // NOP
 }
 
-// Converted from thiscall void CPed::GetTransformedBonePosition(RwV3d &inOffsetOutPosn,uint boneId,bool updateSkinBones) 0x5E01C0
+// Converted from thiscall void CPed::GetTransformedBonePosition(RwV3d &inOffsetOutPosn,uint32 boneId,bool updateSkinBones) 0x5E01C0
 void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, unsigned int boneId, bool updateSkinBones)
 {
     ((void(__thiscall *)(CPed*, RwV3d&, unsigned int, bool))0x5E01C0)(this, inOffsetOutPosn, boneId, updateSkinBones);
@@ -532,7 +532,7 @@ CEntity* CPed::GetEntityThatThisPedIsHolding()
     return ((CEntity* (__thiscall *)(CPed*))0x5E02E0)(this);
 }
 
-// Converted from thiscall void CPed::DropEntityThatThisPedIsHolding(uchar) 0x5E0360
+// Converted from thiscall void CPed::DropEntityThatThisPedIsHolding(uint8_t) 0x5E0360
 void CPed::DropEntityThatThisPedIsHolding(unsigned char arg0)
 {
     ((void(__thiscall *)(CPed*, unsigned char))0x5E0360)(this, arg0);
@@ -840,13 +840,13 @@ bool CPed::IsPointerValid()
     return ((bool(__thiscall *)(CPed*))0x5E4220)(this);
 }
 
-// Converted from thiscall void CPed::GetBonePosition(RwV3d &outPosition,uint boneId,bool updateSkinBones) 0x5E4280
+// Converted from thiscall void CPed::GetBonePosition(RwV3d &outPosition,uint32 boneId,bool updateSkinBones) 0x5E4280
 void CPed::GetBonePosition(RwV3d& outPosition, unsigned int boneId, bool updateSkinBones)
 {
     ((void(__thiscall *)(CPed*, RwV3d&, unsigned int, bool))0x5E4280)(this, outPosition, boneId, updateSkinBones);
 }
 
-// Converted from thiscall CObject* CPed::GiveObjectToPedToHold(int modelIndex,uchar replace) 0x5E4390
+// Converted from thiscall CObject* CPed::GiveObjectToPedToHold(int modelIndex,uint8_t replace) 0x5E4390
 CObject* CPed::GiveObjectToPedToHold(int modelIndex, unsigned char replace)
 {
     return ((CObject* (__thiscall *)(CPed*, int, unsigned char))0x5E4390)(this, modelIndex, replace);
@@ -858,7 +858,7 @@ void CPed::SetPedState(ePedState pedState)
     ((void(__thiscall *)(CPed*, ePedState))0x5E4500)(this, pedState);
 }
 
-// Converted from thiscall void CPed::SetCharCreatedBy(uchar createdBy) 0x5E47E0
+// Converted from thiscall void CPed::SetCharCreatedBy(uint8_t createdBy) 0x5E47E0
 void CPed::SetCharCreatedBy(unsigned char createdBy)
 {
     ((void(__thiscall *)(CPed*, unsigned char))0x5E47E0)(this, createdBy);
@@ -882,7 +882,7 @@ void CPed::ClearAll()
     ((void(__thiscall *)(CPed*))0x5E5320)(this);
 }
 
-// Converted from thiscall void CPed::DoFootLanded(bool leftFoot,uchar) 0x5E5380
+// Converted from thiscall void CPed::DoFootLanded(bool leftFoot,uint8_t) 0x5E5380
 void CPed::DoFootLanded(bool leftFoot, unsigned char arg1)
 {
     ((void(__thiscall *)(CPed*, bool, unsigned char))0x5E5380)(this, leftFoot, arg1);
@@ -906,7 +906,7 @@ void CPed::TakeOffGoggles()
     ((void(__thiscall *)(CPed*))0x5E6010)(this);
 }
 
-// Converted from thiscall void CPed::GiveWeapon(eWeaponType weaponType,uint ammo,bool likeUnused) 0x5E6080
+// Converted from thiscall void CPed::GiveWeapon(eWeaponType weaponType,uint32 ammo,bool likeUnused) 0x5E6080
 void CPed::GiveWeapon(eWeaponType weaponType, unsigned int ammo, bool likeUnused)
 {
     ((void(__thiscall *)(CPed*, eWeaponType, unsigned int, bool))0x5E6080)(this, weaponType, ammo, likeUnused);
@@ -1042,13 +1042,13 @@ void CPed::Look()
     ((void(__thiscall *)(CPed*))0x5E7B20)(this);
 }
 
-// Converted from thiscall CEntity* CPed::AttachPedToEntity(CEntity *entity,CVector offset,ushort,float,eWeaponType weaponType) 0x5E7CB0
+// Converted from thiscall CEntity* CPed::AttachPedToEntity(CEntity *entity,CVector offset,uint16_t,float,eWeaponType weaponType) 0x5E7CB0
 CEntity* CPed::AttachPedToEntity(CEntity* entity, CVector offset, unsigned short arg2, float arg3, eWeaponType weaponType)
 {
     return ((CEntity* (__thiscall *)(CPed*, CEntity*, CVector, unsigned short, float, eWeaponType))0x5E7CB0)(this, entity, offset, arg2, arg3, weaponType);
 }
 
-// Converted from thiscall CEntity* CPed::AttachPedToBike(CEntity *entity,CVector offset,ushort,float,float,eWeaponType weaponType) 0x5E7E60
+// Converted from thiscall CEntity* CPed::AttachPedToBike(CEntity *entity,CVector offset,uint16_t,float,float,eWeaponType weaponType) 0x5E7E60
 CEntity* CPed::AttachPedToBike(CEntity* entity, CVector offset, unsigned short arg2, float arg3, float arg4, eWeaponType weaponType)
 {
     return ((CEntity* (__thiscall *)(CPed*, CEntity*, CVector, unsigned short, float, float, eWeaponType))0x5E7E60)(this, entity, offset, arg2, arg3, arg4, weaponType);
@@ -1078,7 +1078,7 @@ void CPed::RequestDelayedWeapon()
     ((void(__thiscall *)(CPed*))0x5E8910)(this);
 }
 
-// Converted from thiscall void CPed::GiveDelayedWeapon(eWeaponType weaponType,uint ammo) 0x5E89B0
+// Converted from thiscall void CPed::GiveDelayedWeapon(eWeaponType weaponType,uint32 ammo) 0x5E89B0
 void CPed::GiveDelayedWeapon(eWeaponType weaponType, unsigned int ammo)
 {
     ((void(__thiscall *)(CPed*, eWeaponType, unsigned int))0x5E89B0)(this, weaponType, ammo);
@@ -1191,13 +1191,13 @@ void CPed::CanPedHoldConversation()
     ((void(__thiscall *)(CPed*))0x5EFFA0)(this);
 }
 
-// Converted from thiscall void CPed::SayScript(int,uchar,uchar,uchar) 0x5EFFB0
+// Converted from thiscall void CPed::SayScript(int,uint8_t,uint8_t,uint8_t) 0x5EFFB0
 void CPed::SayScript(int arg0, unsigned char arg1, unsigned char arg2, unsigned char arg3)
 {
     ((void(__thiscall *)(CPed*, int, unsigned char, unsigned char, unsigned char))0x5EFFB0)(this, arg0, arg1, arg2, arg3);
 }
 
-// Converted from thiscall void CPed::Say(ushort,uint,float,uchar,uchar,uchar) 0x5EFFE0
+// Converted from thiscall void CPed::Say(uint16_t,uint32,float,uint8_t,uint8_t,uint8_t) 0x5EFFE0
 void CPed::Say(unsigned short arg0, unsigned int arg1, float arg2, unsigned char arg3, unsigned char arg4, unsigned char arg5)
 {
     ((void(__thiscall *)(CPed*, unsigned short, unsigned int, float, unsigned char, unsigned char, unsigned char))0x5EFFE0)(this, arg0, arg1, arg2, arg3, arg4, arg5);

@@ -1914,7 +1914,7 @@ void CAutomobile::PlayHornIfNecessary()
     ((void(__thiscall*)(CAutomobile*))0x6A3820)(this);
 }
 
-// Converted from thiscall void CAutomobile::SetBusDoorTimer(uint time, uchar) 0x6A3860
+// Converted from thiscall void CAutomobile::SetBusDoorTimer(uint32 time, uint8_t) 0x6A3860
 void CAutomobile::SetBusDoorTimer(unsigned int time, unsigned char arg1)
 {
     ((void(__thiscall*)(CAutomobile*, unsigned int, unsigned char))0x6A3860)(this, time, arg1);
@@ -2020,7 +2020,7 @@ void CAutomobile::TowTruckControl()
     ((void(__thiscall*)(CAutomobile*))0x6A40F0)(this);
 }
 
-// Converted from thiscall CPed* CAutomobile::KnockPedOutCar(eWeaponType, ushort, CPed *) 0x6A44C0
+// Converted from thiscall CPed* CAutomobile::KnockPedOutCar(eWeaponType, uint16_t, CPed *) 0x6A44C0
 CPed* CAutomobile::KnockPedOutCar(eWeaponType arg0, unsigned short arg1, CPed* arg2)
 {
     return ((CPed * (__thiscall*)(CAutomobile*, eWeaponType, unsigned short, CPed*))0x6A44C0)(this, arg0, arg1, arg2);
@@ -2318,7 +2318,7 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately)
     ((void(__thiscall*)(CAutomobile*, unsigned char))0x6A7090)(this, bExplodeImmediately);
 }
 
-// Converted from thiscall CObject* CAutomobile::SpawnFlyingComponent(int nodeIndex, uint collisionType) 0x6A8580
+// Converted from thiscall CObject* CAutomobile::SpawnFlyingComponent(int nodeIndex, uint32 collisionType) 0x6A8580
 CObject* CAutomobile::SpawnFlyingComponent(int nodeIndex, unsigned int collisionType)
 {
     return ((CObject * (__thiscall*)(CAutomobile*, int, unsigned int))0x6A8580)(this, nodeIndex, collisionType);

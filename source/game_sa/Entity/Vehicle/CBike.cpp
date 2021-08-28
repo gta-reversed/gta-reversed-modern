@@ -12,12 +12,12 @@ void CBike::InjectHooks()
     ReversibleHooks::Install("CBike", "ProcessBuoyancy", 0x6B5FB0, &CBike::ProcessBuoyancy);
 }
 
-// Converted from thiscall void CBike::CBike(int modelIndex,uchar createdBy) 0x6BF430
+// Converted from thiscall void CBike::CBike(int modelIndex,uint8_t createdBy) 0x6BF430
 CBike::CBike(int modelIndex, eVehicleCreatedBy createdBy) : CVehicle(plugin::dummy) {
     plugin::CallMethod<0x6BF430, CBike*, int, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
 
-// Converted from void CBike::ProcessAI(uint &) 0x0
+// Converted from void CBike::ProcessAI(uint32 &) 0x0
 void CBike::ProcessAI(unsigned int& arg0) {
     ((void(__thiscall*)(CBike*, unsigned int&))(*(void***)this)[66])(this, arg0);
 }
@@ -32,7 +32,7 @@ void CBike::dmgDrawCarCollidingParticles(CVector const& position, float power, e
     // NOP
 }
 
-// Converted from cdecl bool CBike::DamageKnockOffRider(CVehicle *,float,ushort,CEntity *,CVector &,CVector &) 0x6B5A10
+// Converted from cdecl bool CBike::DamageKnockOffRider(CVehicle *,float,uint16_t,CEntity *,CVector &,CVector &) 0x6B5A10
 bool CBike::DamageKnockOffRider(CVehicle* arg0, float arg1, unsigned short arg2, CEntity* arg3, CVector& arg4, CVector& arg5) {
     return ((bool(__cdecl*)(CVehicle*, float, unsigned short, CEntity*, CVector&, CVector&))0x6B5A10)(arg0, arg1, arg2, arg3, arg4, arg5);
 }
@@ -159,7 +159,7 @@ void CBike::DebugCode() {
     // NOP
 }
 
-// Converted from thiscall void CBike::DoSoftGroundResistance(uint &) 0x6B6D40
+// Converted from thiscall void CBike::DoSoftGroundResistance(uint32 &) 0x6B6D40
 void CBike::DoSoftGroundResistance(unsigned int& arg0) {
     ((void(__thiscall*)(CBike*, unsigned int&))0x6B6D40)(this, arg0);
 }
