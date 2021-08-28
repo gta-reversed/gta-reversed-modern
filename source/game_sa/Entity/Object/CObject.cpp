@@ -952,16 +952,15 @@ void CObject::DoBurnEffect() {
         auto vecParticlePos = *m_matrix * CVector(fRandX, fRandY, fRandZ);
 
         //auto smokePart = FxPrtMult_c() Originally overwriten right after
-        auto smokePart = FxPrtMult_c(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.4F);
-        auto vecVelocity = CVector(0.0F, 0.0F, 0.02F);
-        g_fx.m_pPrtSmokeII3expand->AddParticle(&vecParticlePos,
-                                               &vecVelocity,
-                                               0.0F,
-                                               &smokePart,
-                                               -1.0F,
-                                               1.2F,
-                                               0.6F,
-                                               false);
+        g_fx.m_pPrtSmokeII3expand->AddParticle(vecParticlePos,
+            CVector{0.0F, 0.0F, 0.02F},
+            0.0F,
+            FxPrtMult_c{ 0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.4F },
+            -1.0F,
+            1.2F,
+            0.6F,
+            false
+        );
     }
 }
 

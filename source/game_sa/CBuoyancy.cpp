@@ -307,7 +307,7 @@ void cBuoyancy::AddSplashParticles(CPhysical* pEntity, CVector vecFrom, CVector 
         auto vecVelocity = vecSplashDir * fMoveSpeed * 60.0F + vecVelocityModifier;
         float fRand = CGeneral::GetRandomNumberInRange(0.0F, 0.5F);
         vecTransformedPoint += (vecSplashDir * fRand);
-        g_fx.m_pPrtWatersplash->AddParticle(&vecTransformedPoint, &vecVelocity, 0.0F, &curParticle, -1.0F, 1.2F, 0.6F, 0);
+        g_fx.m_pPrtWatersplash->AddParticle(vecTransformedPoint, vecVelocity, 0.0F, curParticle, -1.0F, 1.2F, 0.6F, 0);
     }
 
     if (pEntity->IsPed()) {
@@ -318,8 +318,6 @@ void cBuoyancy::AddSplashParticles(CPhysical* pEntity, CVector vecFrom, CVector 
             auto fPedAngle = CGeneral::GetAngleBetweenPoints(vecPedForward.x, vecPedForward.y, 0.0F, 0.0F);
             fPedAngle = CGeneral::LimitAngle(fPedAngle) + 180.0F;
 
-            curParticle = FxPrtMult_c(1.0F, 1.0F, 1.0F, 0.2F, 0.4F, 0.0F, 0.5F);
-            auto vecPedVelocity = CVector(0.0F, 0.0F, 0.0F);
             auto vecPedParticlePos = pEntity->GetPosition() + (vecPedForward * 0.4F);
         
             if (pPed->m_pPlayerData)
@@ -327,7 +325,7 @@ void cBuoyancy::AddSplashParticles(CPhysical* pEntity, CVector vecFrom, CVector 
             else
                 vecPedParticlePos.z += 0.5F;
 
-            g_fx.m_pPrtWake->AddParticle(&vecPedParticlePos, &vecPedVelocity, 0.0F, &curParticle, fPedAngle, 1.2F, 0.6F, 0);
+            g_fx.m_pPrtWake->AddParticle(vecPedParticlePos, {}, 0.0F, FxPrtMult_c{ 1.0F, 1.0F, 1.0F, 0.2F, 0.4F, 0.0F, 0.5F }, fPedAngle, 1.2F, 0.6F, 0);
             pPed->m_pedAudio.AddAudioEvent(eAudioEvents::AE_PED_SWIM_WAKE, 0.0F, 1.0F, 0, 0, 0, 0);
         }
     }

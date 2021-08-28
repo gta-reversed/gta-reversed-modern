@@ -68,8 +68,8 @@ public:
     void PlayAndKill();
     void Kill();
     void AttachToBone(CEntity* entity, int boneId);
-    void AddParticle(RwV3d* position, RwV3d* velocity, float arg2, FxPrtMult_c* prtMult, float arg4, float brightness, float arg6, unsigned char arg7);
-    void AddParticle(RwMatrixTag* transform, RwV3d* position, float arg2, FxPrtMult_c* prtMult, float arg4, float arg5, float arg6, unsigned char arg7);
+    void AddParticle(const CVector& position, const CVector& velocity, float arg2, const FxPrtMult_c& prtMult, float arg4, float brightness, float arg6, unsigned char arg7);
+    void AddParticle(const RwMatrix& transform, const CVector& position, float arg2, const FxPrtMult_c& prtMult, float arg4, float arg5, float arg6, unsigned char arg7);
     void EnablePrim(int primIndex, unsigned char enable);
     void SetMatrix(RwMatrixTag* matrix);
     void SetOffsetPos(RwV3d* pos);

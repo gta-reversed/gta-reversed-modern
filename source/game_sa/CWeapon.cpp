@@ -136,8 +136,6 @@ void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& 
     if (DistanceBetweenPoints(TheCamera.GetPosition(), creator->GetPosition()) > 10.0f)
         return;
 
-    CVector velocity(direction.x, direction.y, CGeneral::GetRandomNumberInRange(0.4f, 1.6f));
-
     FxPrtMult_c fxprt(0.5f, 0.5f, 0.5f, 1.0f, size, 1.0f, 1.0f);
 
     switch (m_nType) {
@@ -146,7 +144,7 @@ void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& 
         fxprt.SetColor(0.6f, 0.1f, 0.1f);
     }
 
-    g_fx.m_pPrtGunshell->AddParticle(&position, &velocity, 0.0f, &fxprt, -1.0f, 1.2f, 0.6f, 0);
+    g_fx.m_pPrtGunshell->AddParticle(position, CVector{ direction.x, direction.y, CGeneral::GetRandomNumberInRange(0.4f, 1.6f) }, 0.0f, fxprt, -1.0f, 1.2f, 0.6f, 0);
 }
 
 // Converted from cdecl void CWeapon::GenerateDamageEvent(CPed *victim,CEntity *creator,eWeaponType weaponType,int32_t damageFactor,ePedPieceTypes pedPiece,int32_t direction) 0x73A530

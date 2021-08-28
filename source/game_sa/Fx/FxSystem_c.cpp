@@ -43,13 +43,13 @@ void FxSystem_c::AttachToBone(CEntity* entity, int boneId) {
 }
 
 //  0x4AA440
-void FxSystem_c::AddParticle(RwV3d* position, RwV3d* velocity, float arg2, FxPrtMult_c* prtMult, float arg4, float brightness, float arg6, unsigned char arg8) {
-    ((void(__thiscall *)(FxSystem_c*, RwV3d*, RwV3d*, float, FxPrtMult_c*, float, float, float, unsigned char))0x4AA440)(this, position, velocity, arg2, prtMult, arg4, brightness, arg6, arg8);
+void FxSystem_c::AddParticle(const CVector& position, const CVector& velocity, float arg2, const FxPrtMult_c& prtMult, float arg4, float brightness, float arg6, unsigned char arg8) {
+    plugin::CallMethod<0x4AA440, FxSystem_c*, const CVector&, const CVector&, float, const FxPrtMult_c&, float, float, float, unsigned char>(this, position, velocity, arg2, prtMult, arg4, brightness, arg6, arg8);
 }
 
 // Converted from thiscall void FxSystem_c::AddParticle(RwMatrixTag *transform,RwV3d *position,float,FxPrtMult_c *prtMult,float,float,float,uchar) 0x4AA540
-void FxSystem_c::AddParticle(RwMatrixTag* transform, RwV3d* position, float arg2, FxPrtMult_c* prtMult, float arg4, float arg5, float arg6, unsigned char arg7) {
-    ((void(__thiscall *)(FxSystem_c*, RwMatrixTag*, RwV3d*, float, FxPrtMult_c*, float, float, float, unsigned char))0x4AA540)(this, transform, position, arg2, prtMult, arg4, arg5, arg6, arg7);
+void FxSystem_c::AddParticle(const RwMatrix& transform, const CVector& position, float arg2, const FxPrtMult_c& prtMult, float arg4, float arg5, float arg6, unsigned char arg7) {
+    plugin::CallMethod<0x4AA540, FxSystem_c*, const RwMatrix&, const CVector&, float, const FxPrtMult_c&, float, float, float, unsigned char>(this, transform, position, arg2, prtMult, arg4, arg5, arg6, arg7);
 }
 
 // Converted from thiscall void FxSystem_c::EnablePrim(int primIndex,uchar enable) 0x4AA610

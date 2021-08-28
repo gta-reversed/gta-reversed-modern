@@ -2501,7 +2501,7 @@ void CVehicle::AddExhaustParticles()
                     fxPrt.m_fSize = 0.6f;
                     pFirstExhaustFxSystem = g_fx.m_pPrtBubble;
                 }
-                pFirstExhaustFxSystem->AddParticle(&firstExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
+                pFirstExhaustFxSystem->AddParticle(firstExhaustPos, vecParticleVelocity, 0.0f, fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
                 if (bHasDoubleExhaust) {
                     FxSystem_c* pSecondExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
                     if (bSecondExhaustSubmergedInWater)
@@ -2510,7 +2510,7 @@ void CVehicle::AddExhaustParticles()
                         fxPrt.m_fSize = 0.6f;
                         pSecondExhaustFxSystem = g_fx.m_pPrtBubble;
                     }
-                    pSecondExhaustFxSystem->AddParticle(&secondExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
+                    pSecondExhaustFxSystem->AddParticle(secondExhaustPos, vecParticleVelocity, 0.0f, fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
                 }
                 if (m_fGasPedal > 0.5f && m_nCurrentGear < 3) {
                     if (rand() % 2) {
@@ -2521,7 +2521,7 @@ void CVehicle::AddExhaustParticles()
                             fxPrt.m_fSize = 0.6f;
                             pSecondaryExhaustFxSystem = g_fx.m_pPrtBubble;
                         }
-                        pSecondaryExhaustFxSystem->AddParticle(&firstExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
+                        pSecondaryExhaustFxSystem->AddParticle(firstExhaustPos, vecParticleVelocity, 0.0f, fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
                     }
                     else if (bHasDoubleExhaust)
                     {
@@ -2532,7 +2532,7 @@ void CVehicle::AddExhaustParticles()
                             fxPrt.m_fSize = 0.6f;
                             pSecondaryExhaustFxSystem = g_fx.m_pPrtBubble;
                         }
-                        pSecondaryExhaustFxSystem->AddParticle(&secondExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
+                        pSecondaryExhaustFxSystem->AddParticle(secondExhaustPos, vecParticleVelocity, 0.0f, fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
                     }
                 }
             }

@@ -796,9 +796,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
         float fRadianAngle = CGeneral::GetAngleBetweenPoints(vecPedUp.x, vecPedUp.y, 0.0f, 0.0f);
         float fLimitedRadianAngle = CGeneral::LimitAngle(fRadianAngle) + 180.0f;
 
-        FxPrtMult_c fxPrtMult(1.0f, 1.0f, 1.0f, 0.2f, 0.4f, 0.0f, 0.5f);
-        CVector vecParticleVelocity;
-        g_fx.m_pPrtWake->AddParticle((RwV3d*)& vecParticlePosition, (RwV3d*)& vecParticleVelocity, 0.0f, (FxPrtMult_c*)& fxPrtMult, fLimitedRadianAngle, 1.2f, 0.6f, 0);
+        g_fx.m_pPrtWake->AddParticle(vecParticlePosition, {}, 0.0f, FxPrtMult_c{ 1.0f, 1.0f, 1.0f, 0.2f, 0.4f, 0.0f, 0.5f }, fLimitedRadianAngle, 1.2f, 0.6f, 0);
         pPed->m_pedAudio.AddAudioEvent(76, 0.0, 1.0f, 0, 0, 0, 0);
 
         if (m_nSwimState == SWIM_SPRINTING)
@@ -877,10 +875,16 @@ void CTaskSimpleSwim::ProcessEffects(CPed* pPed)
         if ((unsigned)CGeneral::GetRandomNumberInRange(0, 100) < oxygen)
         {
             RpHAnimHierarchy* pRwAnimHierarchy = GetAnimHierarchyFromSkinClump(pPed->m_pRwClump);
-            RwV3d* pBoneSpine1Pos = &RpHAnimHierarchyGetMatrixArray(pRwAnimHierarchy)[BONE_SPINE1].pos;
-            static FxPrtMult_c fxPrtMult(1.0f, 1.0f, 1.0f, 0.25f, 0.30000001f, 0.0f, 0.5f);
-            RwV3d vecParticleVelocity = { 0.0f, 0.0f, 2.0f };
-            g_fx.m_pPrtBubble->AddParticle(pBoneSpine1Pos, &vecParticleVelocity, 0.0f, &fxPrtMult, -1.0f, 1.2f, 0.60000002f, 0);
+            g_fx.m_pPrtBubble->AddParticle(
+                RpHAnimHierarchyGetMatrixArray(pRwAnimHierarchy)[BONE_SPINE1].pos,
+                { 0.0f, 0.0f, 2.0f },
+                0.0f,
+                FxPrtMult_c{ 1.0f, 1.0f, 1.0f, 0.25f, 0.3f, 0.0f, 0.5f },
+                -1.0f,
+                1.2f,
+                0.6f,
+                0
+            );
         }
         break;
     }
