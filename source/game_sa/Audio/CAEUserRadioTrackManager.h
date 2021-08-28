@@ -27,7 +27,7 @@ public:
     tUserTracksInfo*    m_pUserTracksInfo;
     bool                m_bUserTracksLoaded;
     bool                m_bUserTracksLoadedCopy;
-    uint16_t            m_nUserTracksCount;
+    uint16              m_nUserTracksCount;
     bool                m_baDecodersSupported[MAX_SUPPORTED_DECODERS]; // index with eAudioFileType
     DWORD               m_nUserTracksScanThreadID;
     HANDLE              m_hwndUserTracksScanThreadHandle;
@@ -39,13 +39,13 @@ public:
     bool Initialise();
     void Shutdown();
 
-    char* GetTrackPath(int32_t trackID);
-    CAEStreamingDecoder* LoadUserTrack(int32_t trackID);
+    char* GetTrackPath(int32 trackID) const;
+    CAEStreamingDecoder* LoadUserTrack(int32 trackID);
     bool ReadUserTracks();
     bool ScanUserTracks();
     void DeleteUserTracksInfo();
-    void SetUserTrackIndex(int32_t index);
-    int32_t SelectUserTrackIndex();
+    void SetUserTrackIndex(int32 index);
+    int32 SelectUserTrackIndex() const;
 
     eAudioFileType GetAudioFileType(const char* filename);
     bool IsShortcut(const char* path);
@@ -55,18 +55,17 @@ private:
     static tAudioExtensionType (&audioExtensionTypes)[7];
 
     static DWORD __stdcall WriteUserTracksThread(CAEUserRadioTrackManager* self);
-    int WriteUserTracksFile(const char* dir, size_t& currentLength, FILE* file, std::vector<tUserTracksInfo>& offsets, int depth);
+    int WriteUserTracksFile(const char* dir, size_t& currentLength, FILESTREAM file, std::vector<tUserTracksInfo>& offsets, int depth);
     char* ResolveShortcut(const char* path);
 
 // Private functions which aren't part of GTASA itself
 private:
-    int WriteUserTracksFile(const std::wstring& dir, size_t& currentLength, FILE* file, std::vector<tUserTracksInfo>& offsets, int depth);
-
-    static std::wstring ResolveShortcut(const std::wstring& path);
-
-private:
     friend void InjectHooksMain();
     static void InjectHooks();
+
+    int WriteUserTracksFile(const std::wstring& dir, size_t& currentLength, FILESTREAM file, std::vector<tUserTracksInfo>& offsets, int depth);
+
+    static std::wstring ResolveShortcut(const std::wstring& path);
 };
 
 VALIDATE_SIZE(CAEUserRadioTrackManager, 0x1c);
