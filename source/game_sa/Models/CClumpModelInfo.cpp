@@ -250,7 +250,7 @@ void CClumpModelInfo::SetClump_Reversed(RpClump* clump)
     }
 }
 
-// Converted from thiscall void CClumpModelInfo::SetFrameIds(RwObjectNameIdAssocation *data) 0x4C5460
+// 0x4C5460
 void CClumpModelInfo::SetFrameIds(RwObjectNameIdAssocation* data) {
     if (!data->m_pName)
         return;

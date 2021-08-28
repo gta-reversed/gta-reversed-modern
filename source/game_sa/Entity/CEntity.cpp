@@ -892,7 +892,7 @@ void CEntity::FlagToDestroyWhenNextProcessed_Reversed()
     return;
 }
 
-// Converted from thiscall void CEntity::UpdateRwFrame(void) 0x532B00
+// 0x532B00
 void CEntity::UpdateRwFrame()
 {
     if (!m_pRwObject)
@@ -901,7 +901,7 @@ void CEntity::UpdateRwFrame()
     RwFrameUpdateObjects(static_cast<RwFrame*>(rwObjectGetParent(m_pRwObject)));
 }
 
-// Converted from thiscall void CEntity::UpdateRpHAnim(void) 0x532B20
+// 0x532B20
 void CEntity::UpdateRpHAnim()
 {
     auto* pFirstAtomic = GetFirstAtomic(m_pRwClump);
@@ -914,7 +914,7 @@ void CEntity::UpdateRpHAnim()
     }
 }
 
-// Converted from thiscall bool CEntity::HasPreRenderEffects(void) 0x532B70
+// 0x532B70
 bool CEntity::HasPreRenderEffects()
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -957,7 +957,7 @@ bool CEntity::HasPreRenderEffects()
     return true;
 }
 
-// Converted from thiscall bool CEntity::DoesNotCollideWithFlyers(void) 0x532D40
+// 0x532D40
 bool CEntity::DoesNotCollideWithFlyers()
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -967,7 +967,7 @@ bool CEntity::DoesNotCollideWithFlyers()
     return pModelInfo->bDontCollideWithFlyer;
 }
 
-// Converted from stdcall RpMaterial* MaterialUpdateUVAnimCB(RpMaterial *material,void *data) 0x532D70
+// 0x532D70
 RpMaterial* MaterialUpdateUVAnimCB(RpMaterial* material, void* data)
 {
     if (!RpMaterialUVAnimExists(material))
@@ -979,7 +979,7 @@ RpMaterial* MaterialUpdateUVAnimCB(RpMaterial* material, void* data)
     return material;
 }
 
-// Converted from thiscall void CEntity::ModifyMatrixForPoleInWind(void) 0x532DB0
+// 0x532DB0
 void CEntity::ModifyMatrixForPoleInWind()
 {
     auto vecWindDir = CVector(CWeather::WindDir.x + 0.01F, CWeather::WindDir.y + 0.01F, 0.1F);
@@ -998,7 +998,7 @@ void CEntity::ModifyMatrixForPoleInWind()
     CEntity::UpdateRwFrame();
 }
 
-// Converted from thiscall bool CEntity::LivesInThisNonOverlapSector(int sectorX,int sectorY) 0x533050
+// 0x533050
 bool CEntity::LivesInThisNonOverlapSector(int sectorX, int sectorY)
 {
     auto rect = CRect();
@@ -1012,7 +1012,7 @@ bool CEntity::LivesInThisNonOverlapSector(int sectorX, int sectorY)
 
 }
 
-// Converted from thiscall void CEntity::SetupBigBuilding(void) 0x533150
+// 0x533150
 void CEntity::SetupBigBuilding()
 {
     m_bUsesCollision = false;
@@ -1023,7 +1023,7 @@ void CEntity::SetupBigBuilding()
     pModelInfo->bDoWeOwnTheColModel = true;
 }
 
-// Converted from thiscall void CEntity::ModifyMatrixForCrane(void) 0x533170
+// 0x533170
 void CEntity::ModifyMatrixForCrane()
 {
     if (CTimer::GetIsPaused())
@@ -1044,7 +1044,7 @@ void CEntity::ModifyMatrixForCrane()
 
 }
 
-// Converted from thiscall void CEntity::PreRenderForGlassWindow(void) 0x533240
+// 0x533240
 void CEntity::PreRenderForGlassWindow()
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -1055,7 +1055,7 @@ void CEntity::PreRenderForGlassWindow()
     m_bIsVisible = false;
 }
 
-// Converted from thiscall void CEntity::SetRwObjectAlpha(int alpha) 0x5332C0
+// 0x5332C0
 void CEntity::SetRwObjectAlpha(int alpha)
 {
     if (!m_pRwObject)
@@ -1069,7 +1069,7 @@ void CEntity::SetRwObjectAlpha(int alpha)
     }
 }
 
-// Converted from stdcall bool IsEntityPointerValid(CEntity *entity) 0x533310
+// 0x533310
 bool IsEntityPointerValid(CEntity* entity)
 {
     if (!entity)
@@ -1093,7 +1093,7 @@ bool IsEntityPointerValid(CEntity* entity)
     return false;
 }
 
-// Converted from thiscall CVector CEntity::FindTriggerPointCoors(int triggerIndex) 0x533380
+// 0x533380
 CVector* CEntity::FindTriggerPointCoors(CVector* pOutVec, int triggerIndex)
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -1143,7 +1143,7 @@ C2dEffect* CEntity::GetRandom2dEffect(int effectType, bool bCheckForEmptySlot)
     return nullptr;
 }
 
-// Converted from thiscall CVector CEntity::TransformFromObjectSpace(CVector const &offset) 0x5334F0
+// 0x5334F0
 CVector CEntity::TransformFromObjectSpace(CVector const& offset)
 {
     auto result = CVector();
@@ -1156,7 +1156,7 @@ CVector CEntity::TransformFromObjectSpace(CVector const& offset)
     return result;
 }
 
-// Converted from thiscall void CEntity::TransformFromObjectSpace(CVector &outPosn,CVector const &offset) 0x533560
+// 0x533560
 CVector* CEntity::TransformFromObjectSpace(CVector& outPosn, CVector const& offset)
 {
     auto result = CEntity::TransformFromObjectSpace(offset);
@@ -1164,7 +1164,7 @@ CVector* CEntity::TransformFromObjectSpace(CVector& outPosn, CVector const& offs
     return &outPosn;
 }
 
-// Converted from thiscall void CEntity::CreateEffects(void) 0x533790
+// 0x533790
 void CEntity::CreateEffects()
 {
     m_bHasRoadsignText = false;
@@ -1265,7 +1265,7 @@ void CEntity::CreateEffects()
     }
 }
 
-// Converted from thiscall void CEntity::DestroyEffects(void) 0x533BF0
+// 0x533BF0
 void CEntity::DestroyEffects()
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -1300,7 +1300,7 @@ void CEntity::DestroyEffects()
     }
 }
 
-// Converted from thiscall void CEntity::AttachToRwObject(RwObject *object, bool updateEntityMatrix) 0x533ED0
+// 0x533ED0
 void CEntity::AttachToRwObject(RwObject* object, bool updateEntityMatrix)
 {
     if (!m_bIsVisible)
@@ -1334,7 +1334,7 @@ void CEntity::AttachToRwObject(RwObject* object, bool updateEntityMatrix)
     CEntity::CreateEffects();
 }
 
-// Converted from thiscall void CEntity::DetachFromRwObject(void) 0x533FB0
+// 0x533FB0
 void CEntity::DetachFromRwObject()
 {
     if (!m_pRwObject)
@@ -1356,7 +1356,7 @@ void CEntity::DetachFromRwObject()
     m_pRwObject = nullptr;
 }
 
-// Converted from thiscall CVector CEntity::GetBoundCentre(void) 0x534250
+// 0x534250
 CVector* CEntity::GetBoundCentre(CVector* pOutCentre)
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -1364,7 +1364,7 @@ CVector* CEntity::GetBoundCentre(CVector* pOutCentre)
     return CEntity::TransformFromObjectSpace(*pOutCentre, pColCenter);
 }
 
-// Converted from thiscall void CEntity::GetBoundCentre(CVector &outCentre) 0x534290
+// 0x534290
 void CEntity::GetBoundCentre(CVector& outCentre)
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -1379,7 +1379,7 @@ CVector CEntity::GetBoundCentre()
     return v;
 }
 
-// Converted from thiscall void CEntity::RenderEffects(void) 0x5342B0
+// 0x5342B0
 void CEntity::RenderEffects()
 {
     if (!m_bHasRoadsignText)
@@ -1398,7 +1398,7 @@ void CEntity::RenderEffects()
     }
 }
 
-// Converted from thiscall bool CEntity::GetIsTouching(CEntity *entity) 0x5343F0
+// 0x5343F0
 bool CEntity::GetIsTouching(CEntity* entity)
 {
     CVector thisVec;
@@ -1413,7 +1413,7 @@ bool CEntity::GetIsTouching(CEntity* entity)
     return (thisVec - otherVec).Magnitude() <= (fThisRadius + fOtherRadius);
 }
 
-// Converted from thiscall bool CEntity::GetIsTouching(CVector const &centre,float radius) 0x5344B0
+// 0x5344B0
 bool CEntity::GetIsTouching(CVector const& centre, float radius)
 {
     CVector thisVec;
@@ -1423,7 +1423,7 @@ bool CEntity::GetIsTouching(CVector const& centre, float radius)
     return (thisVec - centre).Magnitude() <= (fThisRadius + radius);
 }
 
-// Converted from thiscall bool CEntity::GetIsOnScreen(void) 0x534540
+// 0x534540
 bool CEntity::GetIsOnScreen()
 {
     CVector thisVec;
@@ -1439,7 +1439,7 @@ bool CEntity::GetIsOnScreen()
     return false;
 }
 
-// Converted from thiscall bool CEntity::GetIsBoundingBoxOnScreen(void) 0x5345D0
+// 0x5345D0
 bool CEntity::GetIsBoundingBoxOnScreen()
 {
     auto pColModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
@@ -1475,7 +1475,7 @@ bool CEntity::GetIsBoundingBoxOnScreen()
     return true;
 }
 
-// Converted from thiscall void CEntity::ModifyMatrixForTreeInWind(void) 0x534E90
+// 0x534E90
 void CEntity::ModifyMatrixForTreeInWind()
 {
     if (CTimer::GetIsPaused())
@@ -1520,7 +1520,7 @@ void CEntity::ModifyMatrixForTreeInWind()
 
 }
 
-// Converted from thiscall void CEntity::ModifyMatrixForBannerInWind(void) 0x535040
+// 0x535040
 void CEntity::ModifyMatrixForBannerInWind()
 {
     if (CTimer::GetIsPaused())
@@ -1569,7 +1569,7 @@ RwMatrix* CEntity::GetModellingMatrix()
     return RwFrameGetMatrix((RwFrame*)rwObjectGetParent(m_pRwObject));
 }
 
-// Converted from thiscall CColModel* CEntity::GetColModel(void) 0x535300
+// 0x535300
 CColModel* CEntity::GetColModel()
 {
     if (IsVehicle() && static_cast<CVehicle*>(this)->m_vehicleSpecialColIndex > -1)
@@ -1578,7 +1578,7 @@ CColModel* CEntity::GetColModel()
         return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
 }
 
-// Converted from thiscall void CEntity::CalculateBBProjection(CVector *,CVector *,CVector *,CVector *) 0x535340
+// 0x535340
 //https://gamedev.stackexchange.com/a/35948
 //https://gamedev.stackexchange.com/questions/153326/how-to-rotate-directional-billboard-particle-sprites-toward-the-direction-the-pa/153814#153814
 void CEntity::CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, CVector* pVecCorner3, CVector* pVecCorner4)
@@ -1695,7 +1695,7 @@ void CEntity::CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, 
 
 }
 
-// Converted from thiscall void CEntity::UpdateAnim(void) 0x535F00
+// 0x535F00
 void CEntity::UpdateAnim()
 {
     m_bDontUpdateHierarchy = false;
@@ -1723,7 +1723,7 @@ void CEntity::UpdateAnim()
     RpAnimBlendClumpUpdateAnimations(m_pRwClump, fStep, bOnScreen);
 }
 
-// Converted from thiscall bool CEntity::IsVisible(void) 0x536BC0
+// 0x536BC0
 bool CEntity::IsVisible()
 {
     if (!m_pRwObject || !m_bIsVisible)
@@ -1732,14 +1732,14 @@ bool CEntity::IsVisible()
     return CEntity::GetIsOnScreen();
 }
 
-// Converted from thiscall float CEntity::GetDistanceFromCentreOfMassToBaseOfModel(void) 0x536BE0
+// 0x536BE0
 float CEntity::GetDistanceFromCentreOfMassToBaseOfModel()
 {
     auto pColModel = CEntity::GetColModel();
     return -pColModel->m_boundBox.m_vecMin.z;
 }
 
-// Converted from thiscall void CEntity::CleanUpOldReference(CEntity** entity) 0x571A00
+// 0x571A00
 void CEntity::CleanUpOldReference(CEntity** entity)
 {
     if (!m_pReferences)
@@ -1760,7 +1760,7 @@ void CEntity::CleanUpOldReference(CEntity** entity)
     CReferences::pEmptyList = pRef;
 }
 
-// Converted from thiscall void CEntity::ResolveReferences(void) 0x571A40
+// 0x571A40
 void CEntity::ResolveReferences()
 {
     auto pRef = m_pReferences;
@@ -1784,7 +1784,7 @@ void CEntity::ResolveReferences()
     m_pReferences = nullptr;
 }
 
-// Converted from thiscall void CEntity::PruneReferences(void) 0x571A90
+// 0x571A90
 void CEntity::PruneReferences()
 {
     if (!m_pReferences)
@@ -1808,7 +1808,7 @@ void CEntity::PruneReferences()
     }
 }
 
-// Converted from thiscall void CEntity::RegisterReference(CEntity** entity) 0x571B70
+// 0x571B70
 void CEntity::RegisterReference(CEntity** entity)
 {
     if (IsBuilding() && !m_bIsTempBuilding && !m_bIsProcObject && !m_nIplIndex)
@@ -1869,7 +1869,7 @@ void CEntity::RegisterReference(CEntity** entity)
     }
 }
 
-// Converted from thiscall void CEntity::ProcessLightsForEntity(void) 0x6FC7A0
+// 0x6FC7A0
 void CEntity::ProcessLightsForEntity()
 {
     auto fBalance = GetDayNightBalance();
@@ -2340,7 +2340,7 @@ void CEntity::ProcessLightsForEntity()
     }
 }
 
-// Converted from thiscall void CEntity::RemoveEscalatorsForEntity(void) 0x717900
+// 0x717900
 void CEntity::RemoveEscalatorsForEntity()
 {
     for (auto& pEscalator : CEscalators::aEscalators) {
@@ -2355,7 +2355,7 @@ void CEntity::RemoveEscalatorsForEntity()
     }
 }
 
-// Converted from thiscall bool CEntity::IsEntityOccluded(void) 0x71FAE0
+// 0x71FAE0
 bool CEntity::IsEntityOccluded()
 {
     CVector vecCenter;

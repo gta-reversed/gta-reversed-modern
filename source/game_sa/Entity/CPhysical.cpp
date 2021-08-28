@@ -624,7 +624,7 @@ void CPhysical::ProcessShift_Reversed()
     }
 }
 
-// Converted from thiscall void CPhysical::RemoveAndAdd(void) 0x542560
+// 0x542560
 void CPhysical::RemoveAndAdd()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -709,7 +709,7 @@ void CPhysical::RemoveAndAdd()
 #endif
 }
 
-// Converted from thiscall void CPhysical::AddToMovingList(void) 0x542800
+// 0x542800
 void CPhysical::AddToMovingList()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -723,7 +723,7 @@ void CPhysical::AddToMovingList()
 #endif
 }
 
-// Converted from thiscall void CPhysical::RemoveFromMovingList(void) 0x542860
+// 0x542860
 void CPhysical::RemoveFromMovingList()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -738,7 +738,7 @@ void CPhysical::RemoveFromMovingList()
 #endif
 }
 
-// Converted from thiscall void CPhysical::SetDamagedPieceRecord(float damageIntensity,CEntity *damagingEntity,CColPoint &colPoint,float distanceMult) 0x5428C0
+// 0x5428C0
 void CPhysical::SetDamagedPieceRecord(float fDamageIntensity, CEntity* entity, CColPoint* colPoint, float fDistanceMult)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
@@ -923,7 +923,7 @@ void CPhysical::ApplyGravity()
 #endif
 }
 
-// Converted from thiscall void CPhysical::ApplyFrictionMoveForce(CVector moveForce) 0x5430A0
+// 0x5430A0
 void CPhysical::ApplyFrictionMoveForce(CVector moveForce)
 {
 #ifdef USE_DEFAULT_FUNCTIONS

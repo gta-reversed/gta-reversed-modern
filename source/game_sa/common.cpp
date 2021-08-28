@@ -687,7 +687,7 @@ void WorldReplaceScorchedLightsWithNormal(RpWorld* world) {
     pDirect->object.object.flags = 1;
 }
 
-// Converted from cdecl void AddAnExtraDirectionalLight(RpWorld *world,float x,float y,float z,float red,float green,float blue) 0x735840
+// 0x735840
 void AddAnExtraDirectionalLight(RpWorld* world, float x, float y, float z, float red, float green, float blue) {
     ((void(__cdecl *)(RpWorld*, float, float, float, float, float, float))0x735840)(world, x, y, z, red, green, blue);
 }
@@ -893,177 +893,177 @@ bool IsGlassModel(CEntity* pEntity) {
     return pModelInfo->IsGlass();
 }
 
-// Converted from cdecl CAnimBlendClumpData* RpAnimBlendAllocateData(RpClump *clump) 0x4D5F50
+// 0x4D5F50
 CAnimBlendClumpData* RpAnimBlendAllocateData(RpClump* clump) {
     return plugin::CallAndReturn<CAnimBlendClumpData*, 0x4D5F50, RpClump*>(clump);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump *clump,CAnimBlendAssociation *association,uint32 flags,float startTime,float blendAmount) 0x4D6790
+// 0x4D6790
 CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump* clump, CAnimBlendAssociation* association, unsigned int flags, float startTime, float blendAmount) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6790, RpClump*, CAnimBlendAssociation*, unsigned int, float, float>(clump, association, flags, startTime, blendAmount);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpExtractAssociations(RpClump *clump) 0x4D6BE0
+// 0x4D6BE0
 CAnimBlendAssociation* RpAnimBlendClumpExtractAssociations(RpClump* clump) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6BE0, RpClump*>(clump);
 }
 
-// Converted from cdecl void RpAnimBlendClumpFillFrameArray(RpClump *clump,AnimBlendFrameData **frameData) 0x4D64A0
+// 0x4D64A0
 void RpAnimBlendClumpFillFrameArray(RpClump* clump, AnimBlendFrameData** frameData) {
     plugin::Call<0x4D64A0, RpClump*, AnimBlendFrameData**>(clump, frameData);
 }
 
-// Converted from cdecl AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump *clump,uint32 id) 0x4D6400
+// 0x4D6400
 AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, unsigned int id) {
     return plugin::CallAndReturn<AnimBlendFrameData*, 0x4D6400, RpClump*, unsigned int>(clump, id);
 }
 
-// Converted from cdecl AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump *clump,char const*name) 0x4D62A0
+// 0x4D62A0
 AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, char const* name) {
     return plugin::CallAndReturn<AnimBlendFrameData*, 0x4D62A0, RpClump*, char const*>(clump, name);
 }
 
-// Converted from cdecl AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump *clump,uint32 key) 0x4D6370
+// 0x4D6370
 AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, unsigned int key) {
     return plugin::CallAndReturn<AnimBlendFrameData*, 0x4D6370, RpClump*, unsigned int>(clump, key);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump *clump,bool,CAnimBlendHierarchy *hierarchy) 0x4D68E0
+// 0x4D68E0
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, bool arg1, CAnimBlendHierarchy* hierarchy) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D68E0, RpClump*, bool, CAnimBlendHierarchy*>(clump, arg1, hierarchy);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump *clump,char const*name) 0x4D6870
+// 0x4D6870
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, char const* name) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6870, RpClump*, char const*>(clump, name);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump *clump,uint32 animId) 0x4D68B0
+// 0x4D68B0
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, unsigned int animId) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D68B0, RpClump*, unsigned int>(clump, animId);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump *clump) 0x4D15E0
+// 0x4D15E0
 CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D15E0, RpClump*>(clump);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump *clump,uint32 flags) 0x4D6A70
+// 0x4D6A70
 CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump, unsigned int flags) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6A70, RpClump*, unsigned int>(clump, flags);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation(RpClump *clump,CAnimBlendAssociation **pAssociation,float *blendAmount) 0x4D6910
+// 0x4D6910
 CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation(RpClump* clump, CAnimBlendAssociation** pAssociation, float* blendAmount) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6910, RpClump*, CAnimBlendAssociation**, float*>(clump, pAssociation, blendAmount);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation_N(RpClump *clump,int n) 0x4D6A30
+// 0x4D6A30
 CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation_N(RpClump* clump, int n) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6A30, RpClump*, int>(clump, n);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation(RpClump *clump) 0x4D69A0
+// 0x4D69A0
 CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation(RpClump* clump) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D69A0, RpClump*>(clump);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation_N(RpClump *clump,int n) 0x4D69F0
+// 0x4D69F0
 CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation_N(RpClump* clump, int n) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D69F0, RpClump*, int>(clump, n);
 }
 
-// Converted from cdecl uint32 RpAnimBlendClumpGetNumAssociations(RpClump *clump) 0x4D6B60
+// 0x4D6B60
 unsigned int RpAnimBlendClumpGetNumAssociations(RpClump* clump) {
     return plugin::CallAndReturn<unsigned int, 0x4D6B60, RpClump*>(clump);
 }
 
-// Converted from cdecl uint32 RpAnimBlendClumpGetNumNonPartialAssociations(RpClump *clump) 0x4D6BB0
+// 0x4D6BB0
 unsigned int RpAnimBlendClumpGetNumNonPartialAssociations(RpClump* clump) {
     return plugin::CallAndReturn<unsigned int, 0x4D6BB0, RpClump*>(clump);
 }
 
-// Converted from cdecl uint32 RpAnimBlendClumpGetNumPartialAssociations(RpClump *clump) 0x4D6B80
+// 0x4D6B80
 unsigned int RpAnimBlendClumpGetNumPartialAssociations(RpClump* clump) {
     return plugin::CallAndReturn<unsigned int, 0x4D6B80, RpClump*>(clump);
 }
 
-// Converted from cdecl void RpAnimBlendClumpGiveAssociations(RpClump *clump,CAnimBlendAssociation *association) 0x4D6C30
+// 0x4D6C30
 void RpAnimBlendClumpGiveAssociations(RpClump* clump, CAnimBlendAssociation* association) {
     plugin::Call<0x4D6C30, RpClump*, CAnimBlendAssociation*>(clump, association);
 }
 
-// Converted from cdecl void RpAnimBlendClumpInit(RpClump *clump) 0x4D6720
+// 0x4D6720
 void RpAnimBlendClumpInit(RpClump* clump) {
     plugin::Call<0x4D6720, RpClump*>(clump);
 }
 
-// Converted from cdecl bool RpAnimBlendClumpIsInitialized(RpClump *clump) 0x4D6760
+// 0x4D6760
 bool RpAnimBlendClumpIsInitialized(RpClump* clump) {
     return plugin::CallAndReturn<bool, 0x4D6760, RpClump*>(clump);
 }
 
-// Converted from cdecl void RpAnimBlendClumpPauseAllAnimations(RpClump *clump) 0x4D6B00
+// 0x4D6B00
 void RpAnimBlendClumpPauseAllAnimations(RpClump* clump) {
     plugin::Call<0x4D6B00, RpClump*>(clump);
 }
 
-// Converted from cdecl void RpAnimBlendClumpRemoveAllAssociations(RpClump *clump) 0x4D6C00
+// 0x4D6C00
 void RpAnimBlendClumpRemoveAllAssociations(RpClump* clump) {
     plugin::Call<0x4D6C00, RpClump*>(clump);
 }
 
-// Converted from cdecl void RpAnimBlendClumpRemoveAssociations(RpClump *clump,uint32 flags) 0x4D6820
+// 0x4D6820
 void RpAnimBlendClumpRemoveAssociations(RpClump* clump, unsigned int flags) {
     plugin::Call<0x4D6820, RpClump*, unsigned int>(clump, flags);
 }
 
-// Converted from cdecl void RpAnimBlendClumpSetBlendDeltas(RpClump *clump,uint32 flags,float delta) 0x4D67E0
+// 0x4D67E0
 void RpAnimBlendClumpSetBlendDeltas(RpClump* clump, unsigned int flags, float delta) {
     plugin::Call<0x4D67E0, RpClump*, unsigned int, float>(clump, flags, delta);
 }
 
-// Converted from cdecl void RpAnimBlendClumpUnPauseAllAnimations(RpClump *clump) 0x4D6B30
+// 0x4D6B30
 void RpAnimBlendClumpUnPauseAllAnimations(RpClump* clump) {
     plugin::Call<0x4D6B30, RpClump*>(clump);
 }
 
-// Converted from cdecl void RpAnimBlendClumpUpdateAnimations(RpClump *clump,float step,bool onScreen) 0x4D34F0
+// 0x4D34F0
 void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float step, bool onScreen) {
     plugin::Call<0x4D34F0, RpClump*, float, bool>(clump, step, onScreen);
 }
 
-// Converted from cdecl RtAnimAnimation* RpAnimBlendCreateAnimationForHierarchy(RpHAnimHierarchy *hierarchy) 0x4D60E0
+// 0x4D60E0
 RtAnimAnimation* RpAnimBlendCreateAnimationForHierarchy(RpHAnimHierarchy* hierarchy) {
     return plugin::CallAndReturn<RtAnimAnimation*, 0x4D60E0, RpHAnimHierarchy*>(hierarchy);
 }
 
-// Converted from cdecl char* RpAnimBlendFrameGetName(RwFrame *frame) 0x4D5EF0
+// 0x4D5EF0
 char* RpAnimBlendFrameGetName(RwFrame* frame) {
     return plugin::CallAndReturn<char*, 0x4D5EF0, RwFrame*>(frame);
 }
 
-// Converted from cdecl void RpAnimBlendFrameSetName(RwFrame *frame,char *name) 0x4D5F00
+// 0x4D5F00
 void RpAnimBlendFrameSetName(RwFrame* frame, char* name) {
     plugin::Call<0x4D5F00, RwFrame*, char*>(frame, name);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation *association) 0x4D6AB0
+// 0x4D6AB0
 CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6AB0, CAnimBlendAssociation*>(association);
 }
 
-// Converted from cdecl CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation *association,uint32 flags) 0x4D6AD0
+// 0x4D6AD0
 CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association, unsigned int flags) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6AD0, CAnimBlendAssociation*, unsigned int>(association, flags);
 }
 
-// Converted from cdecl void RpAnimBlendKeyFrameInterpolate(void *voidOut,void *voidIn1,void *voidIn2,float time,void *customData) 0x4D60C0
+// 0x4D60C0
 void RpAnimBlendKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2, float time, void* customData) {
     plugin::Call<0x4D60C0, void*, void*, void*, float, void*>(voidOut, voidIn1, voidIn2, time, customData);
 }
 
-// Converted from cdecl bool RpAnimBlendPluginAttach(void) 0x4D6150
+// 0x4D6150
 bool RpAnimBlendPluginAttach() {
     return plugin::CallAndReturn<bool, 0x4D6150>();
 }

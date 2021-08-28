@@ -330,7 +330,7 @@ CBaseModelInfo* CModelInfo::GetModelInfo(char const* name, int minIndex, int max
     return nullptr;
 }
 
-// Converted from stdcall void* CModelInfo::Get2dEffectStore(void) 0x4C5A60
+// 0x4C5A60
 CStore<C2dEffect, CModelInfo::NUM_2DFX_INFOS>* CModelInfo::Get2dEffectStore()
 {
     return ((CStore<C2dEffect, NUM_2DFX_INFOS>* (__cdecl *)())0x4C5A60)();

@@ -70,7 +70,7 @@ void CWanted::InitialiseStaticVariables()
     bUseNewsHeliInAdditionToPolice = false;
 }
 
-// Converted from thiscall void CWanted::UpdateWantedLevel(void) 0x561C90
+// 0x561C90
 void CWanted::UpdateWantedLevel() {
     //plugin::CallMethod<0x561C90, CWanted*>(this);
     m_nChaosLevel = std::min(m_nChaosLevel, MaximumChaosLevel);
@@ -178,7 +178,7 @@ void CWanted::SetMaximumWantedLevel(int level)
     }
 }
 
-// Converted from thiscall bool CWanted::AreMiamiViceRequired(void) 0x561F30
+// 0x561F30
 bool CWanted::AreMiamiViceRequired() {
     return plugin::CallMethodAndReturn<bool, 0x561F30, CWanted*>(this);
 }
@@ -204,12 +204,12 @@ bool CWanted::AreArmyRequired() const
     return m_nWantedLevel == 6 || m_bArmyRequired;
 }
 
-// Converted from thiscall int CWanted::NumOfHelisRequired(void) 0x561FA0
+// 0x561FA0
 int CWanted::NumOfHelisRequired() {
     return plugin::CallMethodAndReturn<int, 0x561FA0, CWanted*>(this);
 }
 
-// Converted from cdecl void CWanted::ResetPolicePursuit(void) 0x561FD0
+// 0x561FD0
 void CWanted::ResetPolicePursuit() {
     plugin::Call<0x561FD0>();
 }
@@ -231,12 +231,12 @@ bool CWanted::AddCrimeToQ(eCrimeType crimeType, int crimeId, const CVector& posn
     return plugin::CallMethodAndReturn<bool, 0x562000, CWanted*, eCrimeType, int, const CVector&, bool, bool>(this, crimeType, crimeId, posn, bAlreadyReported, bPoliceDontReallyCare);
 }
 
-// Converted from thiscall void CWanted::ReportCrimeNow(eCrimeType crimeType,const CVector&posn,bool bPoliceDontReallyCare) 0x562120
+// 0x562120
 void CWanted::ReportCrimeNow(eCrimeType crimeType, const CVector& posn, bool bPoliceDontReallyCare) {
     plugin::CallMethod<0x562120, CWanted*, eCrimeType, const CVector&, bool>(this, crimeType, posn, bPoliceDontReallyCare);
 }
 
-// Converted from cdecl void CWanted::RemovePursuitCop(CCopPed *cop,CCopPed **copsArray,uint8_t &copsCounter) 0x562300
+// 0x562300
 void CWanted::RemovePursuitCop(CCopPed* cop, CCopPed** copsArray, unsigned char& copsCounter) {
     plugin::Call<0x562300, CCopPed*, CCopPed**, unsigned char&>(cop, copsArray, copsCounter);
 }
@@ -252,7 +252,7 @@ bool CWanted::IsInPursuit(CCopPed* cop) {
     return false;
 }
 
-// Converted from cdecl void CWanted::UpdateEachFrame(void) 0x562360
+// 0x562360
 void CWanted::UpdateEachFrame() {
     plugin::Call<0x562360>();
 }
@@ -332,27 +332,27 @@ void CWanted::ClearWantedLevelAndGoOnParole() {
     m_nWantedLevel = 0;
 }
 
-// Converted from cdecl int CWanted::WorkOutPolicePresence(CVector posn,float radius) 0x5625F0
+// 0x5625F0
 int CWanted::WorkOutPolicePresence(CVector posn, float radius) {
     return plugin::CallAndReturn<int, 0x5625F0, CVector, float>(posn, radius);
 }
 
-// Converted from thiscall bool CWanted::IsClosestCop(CPed *ped,int numCopsToCheck) 0x5627D0
+// 0x5627D0
 bool CWanted::IsClosestCop(CPed* ped, int numCopsToCheck) {
     return plugin::CallMethodAndReturn<bool, 0x5627D0, CWanted*, CPed*, int>(this, ped, numCopsToCheck);
 }
 
-// Converted from cdecl CCopPed* CWanted::ComputePursuitCopToDisplace(CCopPed *cop,CCopPed **copsArray) 0x562B00
+// 0x562B00
 CCopPed* CWanted::ComputePursuitCopToDisplace(CCopPed* cop, CCopPed** copsArray) {
     return plugin::CallAndReturn<CCopPed*, 0x562B00, CCopPed*, CCopPed**>(cop, copsArray);
 }
 
-// Converted from thiscall void CWanted::RemovePursuitCop(CCopPed *cop) 0x562C10
+// 0x562C10
 void CWanted::RemovePursuitCop(CCopPed* cop) {
     plugin::CallMethod<0x562C10, CWanted*, CCopPed*>(this, cop);
 }
 
-// Converted from thiscall void CWanted::RemoveExcessPursuitCops(void) 0x562C40
+// 0x562C40
 void CWanted::RemoveExcessPursuitCops() {
     plugin::CallMethod<0x562C40, CWanted*>(this);
 }
@@ -385,7 +385,7 @@ bool CWanted::CanCopJoinPursuit(CCopPed* cop) {
     return plugin::CallMethodAndReturn<bool, 0x562FB0, CWanted*, CCopPed*>(this, cop);
 }
 
-// Converted from thiscall bool CWanted::SetPursuitCop(CCopPed *cop) 0x563060
+// 0x563060
 bool CWanted::SetPursuitCop(CCopPed* cop) {
     return plugin::CallMethodAndReturn<bool, 0x563060, CWanted*, CCopPed*>(this, cop);
 }
