@@ -137,8 +137,8 @@ void CWaterCannon::Render() {
 
     for (int i = 0; i < SECTIONS_COUNT; i++) {
         if (IsSectionActive(prevIdx) && IsSectionActive(currIdx)) {
-            CVector prevPosn = GetSectionPosn(prevIdx);
-            CVector currPosn = GetSectionPosn(currIdx);
+            const CVector prevPosn = GetSectionPosn(prevIdx);
+            const CVector currPosn = GetSectionPosn(currIdx);
 
             const CVector currToPrevDir = prevPosn - currPosn;
             if (currToPrevDir.SquaredMagnitude() < 25.0f) {
@@ -179,7 +179,7 @@ void CWaterCannon::Render() {
                     prevPosn - thisFwd,
                     prevPosn + thisFwd,
                 };
-                for (int v = 0; v < std::size(vertices); v++) {
+                for (size_t v = 0; v < std::size(vertices); v++) {
                     RxObjSpace3DVertexSetPos(&vertices[v], &pos[v]);
                 }
 
@@ -187,7 +187,7 @@ void CWaterCannon::Render() {
                 CEntity* hitEntity{};
                 const bool hasSectionHit = CWorld::ProcessLineOfSight(prevPosn, currPosn, colPoint, hitEntity, true, true, false, false, false, false, false, false);
                 if (hasSectionHit) {
-                    FxPrtMult_c prtinfo{ 1.0, 1.0, 1.0, 0.15000001, 0.75, 1.0, 0.2 };
+                    FxPrtMult_c prtinfo{ 1.0f, 1.0f, 1.0f, 0.15f, 0.75f, 1.0f, 0.2f };
                     CVector direction = colPoint.m_vecNormal * 3.0f * CVector::Random(0.2f, 1.8f);
 
                     for (int n = 0; n < 2; n++) {
