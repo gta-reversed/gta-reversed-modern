@@ -41,7 +41,7 @@ private:
     bool IsSectionActive(size_t idx) const;
     CVector GetSectionPosn(size_t idx) const;
     CVector GetSectionMoveSpeed(size_t idx) const;
-    CBoundingBox GetBounding() const;
+    CBoundingBox GetSectionsBoundingBox() const;
 };
 
 VALIDATE_SIZE(CWaterCannon, 0x3CC);
