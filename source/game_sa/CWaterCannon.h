@@ -35,6 +35,11 @@ public:
     void Update_NewInput(CVector* start, CVector* end);
     void PushPeds();
     void Render();
+
+private:
+    // NOTSA
+    bool IsSectionActive(size_t idx);
+    CVector& GetSectionPosn(size_t idx);
 };
 
 VALIDATE_SIZE(CWaterCannon, 0x3CC);
