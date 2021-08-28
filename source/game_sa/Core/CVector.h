@@ -17,6 +17,8 @@ public:
 public:
     static void InjectHooks();
 
+    static CVector Random(float min, float max);
+
     // Returns length of vector
     float Magnitude();
 
@@ -66,12 +68,12 @@ public:
         x = rwvec.x; y = rwvec.y; z = rwvec.z;
     }
 
-    inline float SquaredMagnitude()
+    inline float SquaredMagnitude() const
     {
         return x*x + y*y + z*z;
     }
 
-    inline float SquaredMagnitude2D()
+    inline float SquaredMagnitude2D() 
     {
         return x * x + y * y;
     }
@@ -147,4 +149,5 @@ float DotProduct(CVector* v1, CVector* v2);
 CVector CrossProduct(const CVector& a, const CVector& b);
 float DotProduct(const CVector& v1, const CVector& v2);
 float DotProduct2D(const CVector& v1, const CVector& v2);
+static CVector Normalized(CVector v) { v.Normalise(); return v; }
 VALIDATE_SIZE(CVector, 0xC);
