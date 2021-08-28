@@ -15,7 +15,7 @@ eEventType CEventHandler::GetCurrentEventType()
     return plugin::CallMethodAndReturn<eEventType, 0x4B8CC0, CEventHandler*>(this);
 }
 
-bool CEventHandler::IsTemporaryEvent(const CEvent& event)
+bool CEventHandler::IsTemporaryEvent(CEvent* _event)
 {
-    return plugin::CallAndReturn<bool, 0x4BC370, const CEvent&>(event);
+    return plugin::CallAndReturn<bool, 0x4BC370, CEvent*>(_event);
 }

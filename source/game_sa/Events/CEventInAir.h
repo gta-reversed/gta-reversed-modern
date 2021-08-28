@@ -1,52 +1,50 @@
 #pragma once
-
 #include "CEvent.h"
 
-class CEventInAir : public CEvent {
+class CEventInAir : public CEvent
+{
 public:
+
+    static void InjectHooks();
+
     CEventInAir() {};
     ~CEventInAir() {};
-
-    eEventType GetEventType() const override { return EVENT_IN_AIR; }
-    int32_t GetEventPriority() const override { return 61; }
+private:
+    CEventInAir* Constructor();
+public:
+    eEventType GetEventType() override { return EVENT_IN_AIR; }
+    int GetEventPriority() override { return 61; }
     int GetLifeTime() override { return 0; }
     CEvent* Clone() override { return new CEventInAir(); }
     bool AffectsPed(CPed* ped) override;
 
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    CEventInAir* Constructor();
-
     bool AffectsPed_Reversed(CPed* ped);
 };
 
-class CEventStuckInAir : public CEvent {
+class CEventStuckInAir : public CEvent
+{
 public:
     CPed* m_ped;
 
-public:
+    static void InjectHooks();
+
     CEventStuckInAir(CPed* ped);
     ~CEventStuckInAir();
+private:
+    CEventStuckInAir* Constructor(CPed* ped);
+public:
 
-    eEventType GetEventType() const override { return EVENT_STUCK_IN_AIR; }
-    int32_t GetEventPriority() const override;
+    eEventType GetEventType() override { return EVENT_STUCK_IN_AIR; }
+    int GetEventPriority() override;
     int GetLifeTime() override { return 0; }
     CEvent* Clone() override { return new CEventStuckInAir(m_ped); }
     bool AffectsPed(CPed* ped) override;
-    bool TakesPriorityOver(const CEvent& refEvent) override;
+    bool TakesPriorityOver(CEvent* refEvent) override;
     bool CanBeInterruptedBySameEvent() override { return true; }
 
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    CEventStuckInAir* Constructor(CPed* ped);
-
-    int32_t GetEventPriority_Reversed() const;
+    int GetEventPriority_Reversed();
     bool AffectsPed_Reversed(CPed* ped);
-    bool TakesPriorityOver_Reversed(const CEvent& refEvent);
+    bool TakesPriorityOver_Reversed(CEvent* refEvent);
 };
 
 VALIDATE_SIZE(CEventInAir, 0xC);

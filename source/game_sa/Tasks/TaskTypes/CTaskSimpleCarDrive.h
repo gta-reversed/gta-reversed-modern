@@ -32,12 +32,12 @@ public:
     CTaskTimer m_copCarStolenTimer;
     union {
         struct {
-            uint8_t m_b01 : 1;
-            uint8_t m_b02 : 1;
-            uint8_t m_bUpdateCurrentVehicle : 1; // updates m_pVehicle pointer to the current occupied vehicle by ped
-            uint8_t m_b04 : 1;
+            std::uint8_t m_b01 : 1;
+            std::uint8_t m_b02 : 1;
+            std::uint8_t m_bUpdateCurrentVehicle : 1; // updates m_pVehicle pointer to the current occupied vehicle by ped
+            std::uint8_t m_b04 : 1;
         };
-        uint8_t m_nFlags;
+        std::uint8_t m_nFlags;
     };
 private:
     char padding[3];
@@ -48,7 +48,7 @@ public:
     bool ProcessPed(class CPed* ped) override;
     CTask* Clone() override;
     eTaskType GetId() override { return TASK_SIMPLE_CAR_DRIVE; }
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
 
 };
 

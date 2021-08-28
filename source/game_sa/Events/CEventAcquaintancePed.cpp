@@ -34,22 +34,31 @@ CEventAcquaintancePed* CEventAcquaintancePed::Constructor(CPed* ped)
     return this;
 }
 
-// 0x4AFA30
 bool CEventAcquaintancePed::AffectsPed(CPed* ped)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4AFA30, CEvent*, CPed*>(this, ped);
+#else
     return CEventAcquaintancePed::AffectsPed_Reversed(ped);
+#endif
 }
 
-// 0x4AF970
 bool CEventAcquaintancePed::AffectsPedGroup(CPedGroup* pedGroup)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4AF970, CEvent*, CPedGroup*>(this, pedGroup);
+#else
     return CEventAcquaintancePed::AffectsPedGroup_Reversed(pedGroup);
+#endif
 }
 
-// 0x4AF8F0
-bool CEventAcquaintancePed::TakesPriorityOver(const CEvent& refEvent)
+bool CEventAcquaintancePed::TakesPriorityOver(CEvent* refEvent)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4AF8F0, CEvent*, CEvent*>(this, refEvent);
+#else
     return CEventAcquaintancePed::TakesPriorityOver_Reversed(refEvent);
+#endif
 }
 
 bool CEventAcquaintancePed::AffectsPed_Reversed(CPed* ped)
@@ -77,10 +86,10 @@ bool CEventAcquaintancePed::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
     return false;
 }
 
-bool CEventAcquaintancePed::TakesPriorityOver_Reversed(const CEvent& refEvent)
+bool CEventAcquaintancePed::TakesPriorityOver_Reversed(CEvent* refEvent)
 {
-    if (refEvent.GetEventType() == GetEventType()) {
-        const auto theRefEvent = static_cast<const CEventAcquaintancePed*>(&refEvent);
+    if (refEvent->GetEventType() == GetEventType()) {
+        CEventAcquaintancePed* theRefEvent = static_cast<CEventAcquaintancePed*>(refEvent);
         if (m_ped && m_ped->IsPlayer()) 
             return theRefEvent->m_ped && !theRefEvent->m_ped->IsPlayer();
         return false;
@@ -123,10 +132,13 @@ CEventAcquaintancePedHateBadlyLit* CEventAcquaintancePedHateBadlyLit::Constructo
     return this;
 }
 
-// 0x4AFA90
 bool CEventAcquaintancePedHateBadlyLit::AffectsPed(CPed* ped)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4AFA90, CEvent*, CPed*>(this, ped);
+#else
     return CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed(ped);
+#endif
 }
 
 bool CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed(CPed* ped)

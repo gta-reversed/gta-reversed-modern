@@ -16,8 +16,8 @@ public:
 private:
     CEventDeath* Constructor(bool bDrowning);
 public:
-    eEventType GetEventType() const override { return EVENT_DEATH; }
-    int32_t GetEventPriority() const override { return 73; }
+    eEventType GetEventType() override { return EVENT_DEATH; }
+    int GetEventPriority() override { return 73; }
     int GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override { return 1; }

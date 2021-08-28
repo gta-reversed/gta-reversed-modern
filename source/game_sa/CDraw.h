@@ -13,10 +13,10 @@ public:
     static float& ms_fFarClipZ;
     static float& ms_fNearClipZ;
     static float& ms_fAspectRatio;
-    static uint8_t& FadeRed;
-    static uint8_t& FadeGreen;
-    static uint8_t& FadeBlue;
-    static uint8_t& FadeValue;
+    static unsigned char& FadeRed;
+    static unsigned char& FadeGreen;
+    static unsigned char& FadeBlue;
+    static unsigned char& FadeValue;
 
 public:
     static void InjectHooks();
@@ -24,5 +24,3 @@ public:
     static void SetFOV(float fovValue);
     static void CalculateAspectRatio();
 };
-
-static void DoFade();

@@ -42,9 +42,9 @@ CTask* CTaskComplexAvoidOtherPedWhileWandering::ControlSubTask(CPed* ped)
     return plugin::CallMethodAndReturn<CTask*, 0x6721B0, CTaskComplexAvoidOtherPedWhileWandering*, CPed*>(this, ped);
 }
 
-bool CTaskComplexAvoidOtherPedWhileWandering::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexAvoidOtherPedWhileWandering::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x66A260, CTaskComplexAvoidOtherPedWhileWandering*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x66A260, CTaskComplexAvoidOtherPedWhileWandering*, CPed*, eAbortPriority, CEvent*>(this, ped, priority, event);
 }
 
 CTask* CTaskComplexAvoidOtherPedWhileWandering::CreateNextSubTask(CPed* ped)

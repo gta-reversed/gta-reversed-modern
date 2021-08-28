@@ -67,7 +67,7 @@ public:
         bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff = false);
     ~CTaskComplexEnterCar();
 
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

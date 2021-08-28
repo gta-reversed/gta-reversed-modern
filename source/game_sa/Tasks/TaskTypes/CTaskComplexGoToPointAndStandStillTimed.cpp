@@ -41,16 +41,23 @@ CTask* CTaskComplexGoToPointAndStandStillTimed::Clone()
 #endif
 }
 
-// 0x6686A0
-void CTaskComplexGoToPointAndStandStillTimed::StopTimer(const CEvent* event)
+
+void CTaskComplexGoToPointAndStandStillTimed::StopTimer(CEvent* _event)
 {
-    return CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed(event);
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return plugin::CallMethod<0x6686A0, CTask*, CEvent*>(this, _event);
+#else
+    return CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed(_event);
+#endif
 }
 
-// 0x668640
-bool CTaskComplexGoToPointAndStandStillTimed::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexGoToPointAndStandStillTimed::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    return CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed(ped, priority, event);
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return plugin::CallMethodAndReturn<bool, 0x668640, CTask*, CPed*, int, CEvent*>(this, ped, priority, _event);
+#else
+    return CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed(ped, priority, _event);
+#endif
 }
 
 CTask* CTaskComplexGoToPointAndStandStillTimed::CreateFirstSubTask(CPed* ped)
@@ -77,16 +84,16 @@ CTask* CTaskComplexGoToPointAndStandStillTimed::Clone_Reversed()
 }
 
 
-void CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed(const CEvent* event)
+void CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed(CEvent* _event)
 {
-    if (!CEventHandler::IsTemporaryEvent(*event))
+    if (!CEventHandler::IsTemporaryEvent(_event)) 
         m_timer.Stop();
 }
 
-bool CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    bool bSubTaskAbortable = m_pSubTask->MakeAbortable(ped, priority, event);
-    if (bSubTaskAbortable && priority == ABORT_PRIORITY_URGENT && (!event || !CEventHandler::IsTemporaryEvent(*event)))
+    bool bSubTaskAbortable = m_pSubTask->MakeAbortable(ped, priority, _event);
+    if (bSubTaskAbortable && priority == ABORT_PRIORITY_URGENT && (!_event || !CEventHandler::IsTemporaryEvent(_event)))
         m_timer.Stop();
     return bSubTaskAbortable;
 }

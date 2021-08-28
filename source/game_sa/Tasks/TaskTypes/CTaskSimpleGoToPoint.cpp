@@ -42,12 +42,12 @@ CTask* CTaskSimpleGoToPoint::Clone()
 #endif
 }
 
-bool CTaskSimpleGoToPoint::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleGoToPoint::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<bool, 0x667D60, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x667D60, CTask*, CPed*, int, CEvent*>(this, ped, priority, _event);
 #else
-    return CTaskSimpleGoToPoint::MakeAbortable_Reversed(ped, priority, event);
+    return CTaskSimpleGoToPoint::MakeAbortable_Reversed(ped, priority, _event);
 #endif
 }
 
@@ -66,7 +66,7 @@ CTask* CTaskSimpleGoToPoint::Clone_Reversed()
         gotoPointFlags.m_bMoveTowardsTargetPoint, gotoPointFlags.m_b04);
 }
 
-bool CTaskSimpleGoToPoint::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleGoToPoint::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
     if (gotoFlags.m_bIsIKChainSet) {
         if (g_ikChainMan->IsLooking(ped))
@@ -122,7 +122,7 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
                 }
                 else {
                     bool bSprinting = false;
-                    CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo(ped->m_aWeapons[ped->m_nActiveWeaponSlot].m_nType, eWeaponSkill::WEAPSKILL_STD);
+                    CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo(ped->m_aWeapons[ped->m_nActiveWeaponSlot].m_nType, 1);
                     if (!pWeaponInfo->flags.bHeavy) {
                         CTaskSimpleHoldEntity* pTask = static_cast<CTaskSimpleHoldEntity*>(ped->m_pIntelligence->GetTaskHold(false));
                         if (!pTask || !pTask->m_pAnimBlendAssociation) {

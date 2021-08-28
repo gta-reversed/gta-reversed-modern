@@ -38,9 +38,9 @@ CTaskComplexKillPedOnFoot* CTaskComplexKillPedOnFoot::Constructor(CPed* target, 
     return this;
 }
 
-bool CTaskComplexKillPedOnFoot::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexKillPedOnFoot::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x625E40, CTaskComplexKillPedOnFoot*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x625E40, CTaskComplexKillPedOnFoot*, CPed*, eAbortPriority, CEvent*>(this, ped, priority, event);
 }
 
 CTask* CTaskComplexKillPedOnFoot::CreateNextSubTask(CPed* ped)

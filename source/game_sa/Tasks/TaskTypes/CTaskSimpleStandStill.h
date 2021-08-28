@@ -30,11 +30,11 @@ private:
 public:
     CTask* Clone()  override;
     eTaskType GetId() override { return TASK_SIMPLE_STAND_STILL; };
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
     bool ProcessPed(CPed* ped) override;
 
     CTask* Clone_Reversed();
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event);
     bool ProcessPed_Reversed(CPed* ped);
 };
 

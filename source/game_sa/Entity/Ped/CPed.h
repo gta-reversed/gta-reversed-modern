@@ -135,8 +135,7 @@ public:
     CAEPedSpeechAudioEntity		m_pedSpeech;
     CAEWeaponAudioEntity		m_weaponAudio;
     char field_43C[36];
-    CPed* field_460;
-    char field_464[4];
+    char field_460[8];
     int field_468;
     union {
         /* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CPedSA.h */
@@ -335,7 +334,7 @@ public:
     int field_720;
     int field_724;
     int field_728;
-    eWeaponSkill        m_nWeaponSkill;
+    char                m_nWeaponSkill;
     eFightingStyle      m_nFightingStyle;
     char                m_nAllowedAttackMoves;
     char field_72F;
@@ -457,7 +456,7 @@ public:
     void RemoveWeaponModel(int modelIndex);
     void AddGogglesModel(int modelIndex, bool* pGogglesType);
     void PutOnGoggles();
-    eWeaponSkill GetWeaponSkill(eWeaponType weaponType);
+    char GetWeaponSkill(eWeaponType weaponType);
     void SetWeaponSkill(eWeaponType weaponType, char skill);
     void ClearLook();
     bool TurnBody();
@@ -486,7 +485,7 @@ public:
     void ReplaceWeaponWhenExitingVehicle();
     void ReplaceWeaponForScriptedCutscene();
     void RemoveWeaponForScriptedCutscene();
-    eWeaponSkill GetWeaponSkill();
+    char GetWeaponSkill();
     void PreRenderAfterTest();
     void SetIdle();
     void SetLook(float heading);

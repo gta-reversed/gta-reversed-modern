@@ -45,9 +45,9 @@ bool CTaskSimpleFall::ProcessPed(CPed* ped)
 }
 
 // 0x678370
-bool CTaskSimpleFall::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleFall::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    return MakeAbortable_Reversed(ped, priority, event);
+    return MakeAbortable_Reversed(ped, priority, _event);
 }
 
 bool CTaskSimpleFall::ProcessPed_Reversed(CPed* ped)
@@ -89,7 +89,7 @@ bool CTaskSimpleFall::ProcessPed_Reversed(CPed* ped)
     return false;
 }
 
-bool CTaskSimpleFall::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleFall::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
     auto pFallAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FALL_FRONT);
     if (!pFallAnim)
@@ -112,12 +112,12 @@ bool CTaskSimpleFall::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
 
     if (priority == ABORT_PRIORITY_URGENT)
     {
-        if (event)
+        if (_event)
         {
-            auto eventType = event->GetEventType();
+            auto eventType = _event->GetEventType();
             if (eventType == EVENT_DAMAGE && ped->m_fHealth < 1.0F
                 || eventType == EVENT_IN_WATER
-                || event->GetEventPriority() == 71
+                || _event->GetEventPriority() == 71
                 || eventType == EVENT_STUCK_IN_AIR
                 )
             {

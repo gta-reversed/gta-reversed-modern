@@ -22,12 +22,12 @@ public:
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
 
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event);
 
     CTask* CreateSubTask(eTaskType taskType);
     bool IsFalling();

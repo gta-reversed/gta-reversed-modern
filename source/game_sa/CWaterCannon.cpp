@@ -74,7 +74,7 @@ bool CWaterCannon::HasActiveSection() const {
 
 // 0x72A280
 void CWaterCannon::Update_OncePerFrame(short a1) {
-    if (CTimer::GetTimeInMilliseconds() > m_nCreationTime + 150) {
+    if (CTimer::GetTimeMs() > m_nCreationTime + 150) {
         const auto section = (m_nSectionsCount + 1) % SECTIONS_COUNT;
         m_nSectionsCount = section;
         m_anSectionState[section] = false;

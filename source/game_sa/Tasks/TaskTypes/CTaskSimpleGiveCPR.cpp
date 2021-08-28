@@ -46,9 +46,9 @@ bool CTaskSimpleGiveCPR::ProcessPed(CPed* ped)
 }
 
 // 0x6589B0
-bool CTaskSimpleGiveCPR::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleGiveCPR::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    return MakeAbortable_Reversed(ped, priority, event);
+    return MakeAbortable_Reversed(ped, priority, _event);
 }
 
 CTask* CTaskSimpleGiveCPR::Clone_Reversed()
@@ -80,9 +80,9 @@ bool CTaskSimpleGiveCPR::ProcessPed_Reversed(CPed* ped)
     }
 }
 
-bool CTaskSimpleGiveCPR::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleGiveCPR::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    eEventType eventType = event->GetEventType();
+    eEventType eventType = _event->GetEventType();
 
     if (priority == ABORT_PRIORITY_IMMEDIATE
         || eventType == EVENT_DEATH

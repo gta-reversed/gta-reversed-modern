@@ -41,7 +41,7 @@ private:
 public:
     CTask* Clone() override { return new CTaskComplexKillPedOnFoot(m_target, m_time, m_pedFlags, m_actionDelay, m_actionChance, field_20); }
     eTaskType GetId() override { return TASK_COMPLEX_KILL_PED_ON_FOOT; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

@@ -29,11 +29,11 @@ CTaskSimpleAnim::~CTaskSimpleAnim()
     m_pAnim = nullptr;
 }
 
-bool CTaskSimpleAnim::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleAnim::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    return CTaskSimpleAnim::MakeAbortable_Reversed(ped, priority, event);
+    return CTaskSimpleAnim::MakeAbortable_Reversed(ped, priority, _event);
 }
-bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
     bool bSkipBlend = false;
     auto fBlend = -4.0F;
@@ -44,14 +44,14 @@ bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
     }
     else if (m_bDontInterrupt)
     {
-        if (event && event->GetEventType() != eEventType::EVENT_SCRIPT_COMMAND)
+        if (_event && _event->GetEventType() != eEventType::EVENT_SCRIPT_COMMAND)
             return false;
     }
-    else if (event)
+    else if (_event)
     {
-        if (event->GetEventType() == eEventType::EVENT_SCRIPT_COMMAND)
+        if (_event->GetEventType() == eEventType::EVENT_SCRIPT_COMMAND)
         {
-            const auto* pEvent = static_cast<const CEventScriptCommand*>(event);
+            auto* pEvent = static_cast<CEventScriptCommand*>(_event);
             if (pEvent->m_task)
             {
                 if (pEvent->m_task->GetId() == eTaskType::TASK_SIMPLE_NAMED_ANIM)

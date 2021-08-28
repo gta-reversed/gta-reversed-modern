@@ -91,9 +91,9 @@ bool CTaskSimpleClimb::ProcessPed(CPed* ped)
 }
 
 // 0x67A280
-bool CTaskSimpleClimb::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleClimb::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    return MakeAbortable_Reversed(ped, priority, event);
+    return MakeAbortable_Reversed(ped, priority, _event);
 }
 
 bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped)
@@ -248,8 +248,8 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped)
             if (ped->IsPlayer())
             {
                 CVector empty{};
-                CEventSoundQuiet event(ped, 50.0F, -1, empty);
-                GetEventGlobalGroup()->Add(&event, false);
+                CEventSoundQuiet _event(ped, 50.0F, -1, empty);
+                GetEventGlobalGroup()->Add(&_event, false);
             }
 
             if (m_pAnim)
@@ -334,9 +334,9 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped)
     return false;
 }
 
-bool CTaskSimpleClimb::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleClimb::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    if (event && event->GetEventPriority() < 71 && ped->m_fHealth > 0.0F)
+    if (_event && _event->GetEventPriority() < 71 && ped->m_fHealth > 0.0F)
         return false;
 
     if (m_pAnim)

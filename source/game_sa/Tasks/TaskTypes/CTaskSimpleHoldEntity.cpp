@@ -161,11 +161,11 @@ eTaskType CTaskSimpleHoldEntity::GetId() {
 #endif
 }
 
-bool CTaskSimpleHoldEntity::MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) {
+bool CTaskSimpleHoldEntity::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x693BD0, CTaskSimpleHoldEntity*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x693BD0, CTaskSimpleHoldEntity*, CPed*, eAbortPriority, CEvent*>(this, ped, priority, _event);
 #else
-    return CTaskSimpleHoldEntity::MakeAbortable_Reversed(ped, priority, event);
+    return CTaskSimpleHoldEntity::MakeAbortable_Reversed(ped, priority, _event);
 #endif
 }
 
@@ -193,7 +193,7 @@ CTask* CTaskSimpleHoldEntity::Clone_Reversed() {
     return nullptr;
 }
 
-bool CTaskSimpleHoldEntity::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event) {
+bool CTaskSimpleHoldEntity::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event) {
     if (priority == ABORT_PRIORITY_URGENT || priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_pAnimBlendAssociation) {
             m_pAnimBlendAssociation->m_fBlendDelta = -4.0f;

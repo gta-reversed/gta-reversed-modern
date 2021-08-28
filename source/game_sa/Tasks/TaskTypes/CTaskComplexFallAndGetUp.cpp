@@ -78,9 +78,9 @@ CTask* CTaskComplexFallAndGetUp::ControlSubTask(CPed* ped)
 }
 
 // 0x6787F0
-bool CTaskComplexFallAndGetUp::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexFallAndGetUp::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    return MakeAbortable_Reversed(ped, priority, event);
+    return MakeAbortable_Reversed(ped, priority, _event);
 }
 
 CTask* CTaskComplexFallAndGetUp::CreateFirstSubTask_Reversed(CPed* ped)
@@ -106,10 +106,10 @@ CTask* CTaskComplexFallAndGetUp::ControlSubTask_Reversed(CPed* ped)
     return m_pSubTask;
 }
 
-bool CTaskComplexFallAndGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexFallAndGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
     if (priority == ABORT_PRIORITY_IMMEDIATE)
-        return m_pSubTask->MakeAbortable(ped, priority, event);
+        return m_pSubTask->MakeAbortable(ped, priority, _event);
 
     if (ped->m_nPedState == PEDSTATE_ARRESTED || ped->bIsBeingArrested)
         return false;
@@ -122,7 +122,7 @@ bool CTaskComplexFallAndGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority 
             m_nFallDownTime = 0;
     }
 
-    return m_pSubTask->MakeAbortable(ped, priority, event);
+    return m_pSubTask->MakeAbortable(ped, priority, _event);
 }
 
 // 0x678900

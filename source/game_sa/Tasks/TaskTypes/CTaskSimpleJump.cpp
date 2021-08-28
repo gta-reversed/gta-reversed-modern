@@ -49,9 +49,9 @@ CTask* CTaskSimpleJump::Clone()
 }
 
 // 0x679B60
-bool CTaskSimpleJump::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleJump::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    return MakeAbortable_Reversed(ped, priority, event);
+    return MakeAbortable_Reversed(ped, priority, _event);
 }
 
 // 0x680C60;
@@ -67,7 +67,7 @@ CTask* CTaskSimpleJump::Clone_Reversed()
     return newTask;
 }
 
-bool CTaskSimpleJump::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleJump::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
     if (m_pAnim)
     {
@@ -107,8 +107,8 @@ bool CTaskSimpleJump::ProcessPed_Reversed(CPed* ped)
     else if (ped->IsPlayer())
     {
         CVector empty{};
-        CEventSoundQuiet event(ped, 45.0F, -1, empty);
-        GetEventGlobalGroup()->Add(&event, false);
+        CEventSoundQuiet _event(ped, 45.0F, -1, empty);
+        GetEventGlobalGroup()->Add(&_event, false);
     }
 
     return true;

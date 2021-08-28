@@ -74,7 +74,7 @@ void CPed::InjectHooks() {
     // ReversibleHooks::Install("CPed", "GetPedTalking", 0x5EFF50, &CPed::GetPedTalking);
     ReversibleHooks::Install("CPed", "GiveWeaponWhenJoiningGang", 0x5E8BE0, &CPed::GiveWeaponWhenJoiningGang);
     // ReversibleHooks::Install("CPed", "GiveDelayedWeapon", 0x5E89B0, &CPed::GiveDelayedWeapon);
-    ReversibleHooks::Install("CPed", "GetWeaponSkill", 0x5E6580, static_cast<eWeaponSkill(CPed::*)()>(&CPed::GetWeaponSkill));
+    ReversibleHooks::Install("CPed", "GetWeaponSkill", 0x5E6580, static_cast<char(CPed::*)()>(&CPed::GetWeaponSkill));
     // ReversibleHooks::Install("CPed", "PreRenderAfterTest", 0x5E65A0, &CPed::PreRenderAfterTest);
     // ReversibleHooks::Install("CPed", "SetIdle", 0x5E7980, &CPed::SetIdle);
     // ReversibleHooks::Install("CPed", "SetLook", 0x5E79B0, static_cast<int32_t(CPed::*)(float)>(&CPed::SetLook));
@@ -384,7 +384,7 @@ void CPed::RemoveGogglesModel()
 
 int CPed::GetWeaponSlot(eWeaponType weaponType)
 {
-    return CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nSlot;
+    return CWeaponInfo::GetWeaponInfo(weaponType, 1)->m_nSlot;
 }
 
 // Converted from thiscall void CPed::GrantAmmo(eWeaponType weaponType,uint ammo) 0x5DF220
@@ -778,36 +778,36 @@ void CPed::PutOnGoggles()
     ((void(__thiscall *)(CPed*))0x5E3AE0)(this);
 }
 
-eWeaponSkill CPed::GetWeaponSkill()
+char CPed::GetWeaponSkill()
 {
     return GetWeaponSkill(m_aWeapons[m_nActiveWeaponSlot].m_nType);
 }
 
-eWeaponSkill CPed::GetWeaponSkill(eWeaponType weaponType)
+char CPed::GetWeaponSkill(eWeaponType weaponType)
 {
     if ( weaponType < WEAPON_PISTOL || weaponType > WEAPON_TEC9 )
-        return eWeaponSkill::WEAPSKILL_STD;
+        return 1;
 
     if (!m_nPedType || m_nPedType == PED_TYPE_PLAYER2)
     {
         int skillStat = CWeaponInfo::GetSkillStatIndex(weaponType);
-        CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_PRO);
+        CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, WEAPON_GOLFCLUB);
         float golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_nReqStatLevel);
         if (golfClubStatLevel <= CStats::GetStatValue((eStats)skillStat))
-            return eWeaponSkill::WEAPSKILL_PRO;
+            return 2;
 
-        CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD);
+        CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, WEAPON_BRASSKNUCKLE);
         float brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_nReqStatLevel);
         if (brassKnuckleStatLevel > CStats::GetStatValue((eStats)skillStat))
-            return eWeaponSkill::WEAPSKILL_POOR;
+            return 0;
 
-        return eWeaponSkill::WEAPSKILL_STD;
+        return 1;
     }
 
     if (weaponType != WEAPON_PISTOL || m_nPedType != PED_TYPE_COP)
         return m_nWeaponSkill;
 
-    return eWeaponSkill::WEAPSKILL_COP;
+    return 3;
 }
 
 // Converted from thiscall void CPed::SetWeaponSkill(eWeaponType weaponType,char skill) 0x5E3C10
@@ -978,7 +978,7 @@ void CPed::ClearWeapons()
     {
         m_aWeapon.Shutdown();
     }
-    CWeaponInfo* getWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_UNARMED, eWeaponSkill::WEAPSKILL_STD);
+    CWeaponInfo* getWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_UNARMED, 1);
     SetCurrentWeapon(getWeaponInfo->m_nSlot);
 }
 
@@ -1006,7 +1006,7 @@ void CPed::RemoveWeaponForScriptedCutscene()
 {
     if (m_nSavedWeapon != WEAPON_UNIDENTIFIED)
     {
-        CWeaponInfo* weaponInfo = CWeaponInfo::GetWeaponInfo(m_nSavedWeapon, eWeaponSkill::WEAPSKILL_STD);
+        CWeaponInfo* weaponInfo = CWeaponInfo::GetWeaponInfo(m_nSavedWeapon, 1);
         CPed::SetCurrentWeapon(weaponInfo->m_nSlot);
         m_nSavedWeapon = WEAPON_UNIDENTIFIED;
     }
@@ -1138,17 +1138,17 @@ void CPed::GiveWeaponWhenJoiningGang()
     if (m_aWeapons[m_nActiveWeaponSlot].m_nType == WEAPON_UNARMED && m_nDelayedWeapon == WEAPON_UNIDENTIFIED) {
         if (CCheat::m_aCheatsActive[eCheats::CHEAT_NO_ONE_CAN_STOP_US]) {
             GiveDelayedWeapon(WEAPON_AK47, 200);
-            SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(WEAPON_AK47, eWeaponSkill::WEAPSKILL_STD)->m_nSlot);
+            SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(WEAPON_AK47, 1)->m_nSlot);
         }
         else {
             CWeaponInfo* pWeaponInfo = nullptr;
             if (CCheat::m_aCheatsActive[eCheats::CHEAT_ROCKET_MAYHEM]) {
                 GiveDelayedWeapon(WEAPON_RLAUNCHER, 200);
-                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, eWeaponSkill::WEAPSKILL_STD);
+                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, 1);
             }
             else {
                 CPed::GiveDelayedWeapon(WEAPON_PISTOL, 200);
-                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_PISTOL, eWeaponSkill::WEAPSKILL_STD);
+                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_PISTOL, 1);
             }
             CPed::SetCurrentWeapon(pWeaponInfo->m_nSlot);
         }

@@ -91,14 +91,14 @@ CTask* CTaskSimpleStealthKill::Clone()
 }
 
 // 0x6226F0
-bool CTaskSimpleStealthKill::MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleStealthKill::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event)
 {
-    return CTaskSimpleStealthKill::MakeAbortable_Reversed(ped, priority, event);
+    return CTaskSimpleStealthKill::MakeAbortable_Reversed(ped, priority, _event);
 }
 
-bool CTaskSimpleStealthKill::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleStealthKill::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event)
 {
-    CEventDamage* eventDamage = (CEventDamage*)event;
+    CEventDamage* eventDamage = (CEventDamage*)_event;
     if (priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_pAnim)
         {
@@ -113,9 +113,8 @@ bool CTaskSimpleStealthKill::MakeAbortable_Reversed(class CPed* ped, eAbortPrior
              !m_bKeepTargetAlive &&
              m_pAnim &&
              m_pAnim->m_nAnimId == ANIM_ID_KILL_KNIFE_PED_DIE &&
-             event->GetEventType() == EVENT_DAMAGE &&
-             eventDamage->m_pSourceEntity == m_pTarget
-     ) {
+             _event->GetEventType() == EVENT_DAMAGE &&
+             eventDamage->m_pSourceEntity == m_pTarget) {
         m_bIsAborting = true;
         m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
         return true;

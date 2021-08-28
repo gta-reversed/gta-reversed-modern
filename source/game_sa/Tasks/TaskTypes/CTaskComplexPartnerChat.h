@@ -18,7 +18,7 @@ private:
 public:
     CTask* Clone() override { return new CTaskComplexPartnerChat(m_commandName, m_partner, m_leadSpeaker,  m_distanceMultiplier, m_updateDirectionCount, m_conversationEnabled, field_75, m_point); }
     eTaskType GetId() override { return TASK_COMPLEX_PARTNER_CHAT; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
     virtual CTaskComplexSequence* GetPartnerSequence();
 
 };

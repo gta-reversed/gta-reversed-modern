@@ -16,8 +16,8 @@ public:
 private:
     CEventCreatePartnerTask* Constructor(std::int32_t randomNumber, CPed* partner, bool leadSpeaker, float distanceMultiplier);
 public:
-    eEventType GetEventType() const override { return EVENT_CREATE_PARTNER_TASK; }
-    int32_t GetEventPriority() const override { return 6; }
+    eEventType GetEventType() override { return EVENT_CREATE_PARTNER_TASK; }
+    int GetEventPriority() override { return 6; }
     int GetLifeTime() override { return 0; }
     CEvent* Clone() override { return new CEventCreatePartnerTask(m_randomNumber, m_partner, m_leadSpeaker, m_distanceMultiplier); }
     bool AffectsPed(CPed* ped) override { return true; }

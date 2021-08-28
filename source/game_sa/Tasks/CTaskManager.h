@@ -30,52 +30,38 @@ enum eSecondaryTasks // array indexes
 };
 
 class CTaskComplex;
-class CTaskSimple;
-class CPed;
 
 class CTaskManager {
 public:
     CTask* m_aPrimaryTasks[TASK_PRIMARY_MAX];
     CTask* m_aSecondaryTasks[TASK_SECONDARY_MAX];
-    CPed*  m_pPed;
+    class CPed* m_pPed;
 
 public:
     static void InjectHooks();
 
-    CTaskManager(CPed* ped);
-    ~CTaskManager();
-
     CTaskManager* Constructor(CPed* ped);
-    CTaskManager* Destructor();
-
+    void Destructor();
     CTask* GetActiveTask();
     CTask* FindActiveTaskByType(int taskType);
     CTask* FindTaskByType(int taskIndex, int taskType);
     CTask* GetTaskSecondary(int taskIndex);
-
-    bool HasPrimaryTask(const CTask* task);
-    bool HasTaskSecondary(const CTask* task);
-
+    bool HasTaskSecondary(CTask const* task);
     void Flush();
     void FlushImmediately();
-
     void SetNextSubTask(CTaskComplex* pTask);
-
-    static CTaskSimple* GetSimplestTask(CTask* task);
-    void StopTimers(const CEvent* event);
+    static class CTaskSimple* GetSimplestTask(CTask* task);
+    void StopTimers(CEvent* _event);
     CTask* GetSimplestActiveTask();
     CTaskSimple* GetSimplestTask(int taskIndex);
-
     void AddSubTasks(CTaskComplex* task);
     void ParentsControlChildren(CTaskComplex* pTask);
-    void SetTask(CTask* task, int taskIndex, bool unused = false);
+    void SetTask(CTask* task, int taskIndex, int arg2 = 0);
     void SetTaskSecondary(CTask* task, int taskIndex);
     void ClearTaskEventResponse();
     void ManageTasks();
-
-    CTask* GetPrimaryTask(int32_t taskIndex) {
-        return m_aPrimaryTasks[taskIndex];
-    }
+    bool HasPrimaryTask(CTask const* task);
+    CTask* GetPrimaryTask(std::int32_t taskIndex) { return m_aPrimaryTasks[taskIndex]; }
 };
 
 VALIDATE_SIZE(CTaskManager, 0x30);

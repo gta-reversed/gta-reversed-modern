@@ -6,7 +6,7 @@
 */
 #pragma once
 
-enum eWeaponType : uint32_t
+enum eWeaponType : std::uint32_t
 {
     WEAPON_UNARMED = 0,
     WEAPON_BRASSKNUCKLE,

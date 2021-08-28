@@ -46,7 +46,7 @@ public:
 
     CTask* Clone() override;
     eTaskType GetId() override { return TASK_COMPLEX_LEAVE_CAR; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

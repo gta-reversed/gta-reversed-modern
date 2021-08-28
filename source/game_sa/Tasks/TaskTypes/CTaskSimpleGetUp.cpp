@@ -39,9 +39,9 @@ bool CTaskSimpleGetUp::ProcessPed(CPed* ped)
 }
 
 // 0x677FE0
-bool CTaskSimpleGetUp::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleGetUp::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    return MakeAbortable_Reversed(ped, priority, event);
+    return MakeAbortable_Reversed(ped, priority, _event);
 }
 
 bool CTaskSimpleGetUp::ProcessPed_Reversed(CPed* ped)
@@ -63,7 +63,7 @@ bool CTaskSimpleGetUp::ProcessPed_Reversed(CPed* ped)
     return false;
 }
 
-bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
 
     if (priority == ABORT_PRIORITY_URGENT)
@@ -71,17 +71,17 @@ bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
         bool bTooMuchTimePassed = false;
         bool bFatalDamage = false;
 
-        if (event)
+        if (_event)
         {
-            if (event->GetEventType() == EVENT_DAMAGE)
+            if (_event->GetEventType() == EVENT_DAMAGE)
             {
-                const auto eventDamage = static_cast<const CEventDamage*>(event);
+                auto eventDamage = reinterpret_cast<CEventDamage*>(_event);
                 if (eventDamage->m_damageResponse.m_bHealthZero && eventDamage->m_bAddToEventGroup)
                     bFatalDamage = true;
                 else if (CTimer::m_snTimeInMilliseconds - eventDamage->m_nStartTime > CTimer::GetTimeStepInMilliseconds() * 3.0F)
                     bTooMuchTimePassed = true;
             }
-            else if (event->GetEventPriority() < 61)
+            else if (_event->GetEventPriority() < 61)
                 return false;
         }
 

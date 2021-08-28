@@ -92,7 +92,7 @@ void CGameLogic::ForceDeathRestart() {
     CGameLogic::GameState = GAME_STATE_LOGO;
     CGameLogic::TimeOfLastEvent = CTimer::m_snTimeInMilliseconds - 3001;
     TheCamera.SetFadeColour(0, 0, 0);
-    TheCamera.Fade(4.0f, eFadeFlag::FADE_IN);
+    TheCamera.Fade(4.0f, 0);
 }
 
 // 0x441210

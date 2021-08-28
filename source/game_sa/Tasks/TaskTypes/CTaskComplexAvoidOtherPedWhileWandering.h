@@ -32,7 +32,7 @@ public:
     CTask* Clone() override;
     CTask* ControlSubTask(CPed* ped) override;
     eTaskType GetId() override { return TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
 

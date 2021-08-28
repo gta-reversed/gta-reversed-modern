@@ -897,7 +897,7 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
             ped->SetGunFlashAlpha(false);
             RwFrameUpdateObjects(weaponFrame);
             RpClumpRender(ped->m_pWeaponObject);
-            eWeaponSkill weaponSkill = ped->GetWeaponSkill();
+            std::int8_t weaponSkill = ped->GetWeaponSkill();
             if (CWeaponInfo::GetWeaponInfo(activeWeapon.m_nType, weaponSkill)->flags.bTwinPistol) {
                 std::int32_t animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, BONE_L_HAND);
                 RwMatrixTag* pLeftHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];

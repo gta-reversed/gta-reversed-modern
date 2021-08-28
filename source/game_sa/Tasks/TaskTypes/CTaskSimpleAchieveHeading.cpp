@@ -20,7 +20,7 @@ CTask* CTaskSimpleAchieveHeading::Clone()
     return plugin::CallMethodAndReturn<CTask*, 0x66CCF0, CTaskSimpleAchieveHeading*>(this);
 }
 
-bool CTaskSimpleAchieveHeading::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleAchieveHeading::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x667EB0, CTaskSimpleAchieveHeading*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x667EB0, CTaskSimpleAchieveHeading*, CPed*, eAbortPriority, CEvent*>(this, ped, priority, _event);
 }

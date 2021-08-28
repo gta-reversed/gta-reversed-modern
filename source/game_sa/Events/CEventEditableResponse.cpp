@@ -200,7 +200,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPed* ped, bool bDecisionMa
     plugin::CallMethod<0x4B56C0, CEventEditableResponse*, CPed*, bool>(this, ped, bDecisionMakerTypeInGroup);
 #else
     if (m_taskId == TASK_NONE) {
-        int eventSourceType = CEventSource::ComputeEventSourceType(*this, *ped);
+        int eventSourceType = CEventSource::ComputeEventSourceType(this, ped);
         CDecisionMakerTypes::GetInstance()->MakeDecision(ped, GetEventType(), eventSourceType, ped->bInVehicle,
             TASK_SIMPLE_INFORM_RESPECTED_FRIENDS, 
             TASK_SIMPLE_INFORM_GROUP, 
@@ -228,7 +228,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
             }
         }
         if (pMember) {
-            int eventSourceType = CEventSource::ComputeEventSourceType(*this, *pMember);
+            int eventSourceType = CEventSource::ComputeEventSourceType(this, pMember);
             m_taskId = CDecisionMakerTypes::GetInstance()->MakeDecision(pedGroup, GetEventType(), eventSourceType, pMember->bInVehicle,
                 TASK_SIMPLE_INFORM_GROUP,
                 TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
@@ -241,7 +241,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
         pGroupLeader = pedGroup->m_groupMembership.GetLeader();
         if (m_taskId == TASK_NONE && pGroupLeader) {
             if (pGroupLeader->IsPlayer()) {
-                int eventSourceType = CEventSource::ComputeEventSourceType(*this, *pGroupLeader);
+                int eventSourceType = CEventSource::ComputeEventSourceType(this, pGroupLeader);
                 m_taskId = CDecisionMakerTypes::GetInstance()->MakeDecision(pedGroup, GetEventType(), eventSourceType, pGroupLeader->bInVehicle,
                     TASK_SIMPLE_INFORM_GROUP,
                     TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
@@ -259,7 +259,7 @@ bool CEventEditableResponse::ComputeResponseTaskOfType(CPed* ped, int taskId) {
 #else
     short outTaskId = -1;
     short unknownId = -1;
-    int eventSourceType = CEventSource::ComputeEventSourceType(*this, *ped);
+    int eventSourceType = CEventSource::ComputeEventSourceType(this, ped);
     CDecisionMakerTypes::GetInstance()->MakeDecision(ped, GetEventType(), eventSourceType, ped->bInVehicle,
         -1, -1, -1, taskId, false, &outTaskId, &unknownId);
     return taskId == outTaskId;
@@ -329,16 +329,22 @@ bool CEventDanger::AffectsPed(CPed* ped)
 #endif
 }
 
-// 0x4B54E0
 bool CEventDanger::AffectsPedGroup(CPedGroup* pedGroup)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4B54E0, CEventDanger*, CPedGroup*>(this, pedGroup);
+#else
     return CEventDanger::AffectsPedGroup_Reversed(pedGroup);
+#endif
 }
 
-// 0x4B2700
-CEntity* CEventDanger::GetSourceEntity() const
+CEntity* CEventDanger::GetSourceEntity()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<CEntity*, 0x4B2700, CEventDanger*>(this);
+#else
     return CEventDanger::GetSourceEntity_Reversed();
+#endif
 }
 
 bool CEventDanger::AffectsPed_Reversed(CPed* ped)
@@ -364,7 +370,7 @@ bool CEventDanger::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
     return false;
 }
 
-CEntity* CEventDanger::GetSourceEntity_Reversed() const
+CEntity* CEventDanger::GetSourceEntity_Reversed()
 {
     if (m_dangerFrom && m_dangerFrom->m_nType != ENTITY_TYPE_PED && m_dangerFrom->m_nType == ENTITY_TYPE_VEHICLE) {
         CVehicle* vehicle = static_cast<CVehicle*>(m_dangerFrom);
@@ -393,10 +399,13 @@ CEventSeenPanickedPed* CEventSeenPanickedPed::Constructor(CPed* ped)
     return this;
 }
 
-// 0x4B53C0
 bool CEventSeenPanickedPed::AffectsPed(CPed* ped)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4B53C0, CEventSeenPanickedPed*, CPed*>(this, ped);
+#else
     return CEventSeenPanickedPed::AffectsPed_Reversed(ped);
+#endif
 }
 
 bool CEventSeenPanickedPed::AffectsPed_Reversed(CPed* ped)

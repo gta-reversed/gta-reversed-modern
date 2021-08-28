@@ -41,9 +41,9 @@ CTask* CTaskComplexLeaveCar::Clone()
     return plugin::CallMethodAndReturn<CTask*, 0x63D9E0, CTask*>(this);
 }
 
-bool CTaskComplexLeaveCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexLeaveCar::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x641100, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x641100, CTask*, CPed*, int, CEvent*>(this, ped, priority, _event);
 }
 
 CTask* CTaskComplexLeaveCar::CreateNextSubTask(CPed* ped)

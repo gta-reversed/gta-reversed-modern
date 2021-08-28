@@ -12,15 +12,15 @@ public:
 private:
     CEventInWater* Constructor(float acceleration);
 public:
-    eEventType GetEventType() const override { return EVENT_IN_WATER; }
-    int32_t GetEventPriority() const override { return 62; }
+    eEventType GetEventType() override { return EVENT_IN_WATER; }
+    int GetEventPriority() override { return 62; }
     int GetLifeTime() override { return 0; }
     CEvent* Clone() override { return new CEventInWater(m_acceleration); }
     bool AffectsPed(CPed* ped) override;
-    bool TakesPriorityOver(const CEvent& refEvent) override;
+    bool TakesPriorityOver(CEvent* refEvent) override;
 
     bool AffectsPed_Reversed(CPed* ped);
-    bool TakesPriorityOver_Reversed(const CEvent& refEvent);
+    bool TakesPriorityOver_Reversed(CEvent* refEvent);
 };
 
 VALIDATE_SIZE(CEventInWater, 0x10);

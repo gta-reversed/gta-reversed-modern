@@ -28,7 +28,7 @@ enum eExplosionType {
 
 class CEntity;
 
-class CExplosion {
+class  CExplosion {
 public:
     unsigned int   m_nType; // see eExplosionType
     CVector        m_vecPosition;
@@ -51,8 +51,6 @@ public:
     float          m_fFuelSpeed[3];
 
     static CAEExplosionAudioEntity &m_ExplosionAudioEntity;
-
-    static void InjectHooks();
 
     static void ClearAllExplosions();
     // dummy function

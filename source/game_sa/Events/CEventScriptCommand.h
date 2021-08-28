@@ -1,42 +1,35 @@
 #pragma once
-
+#include "PluginBase.h"
 #include "CEvent.h"
-
 class CTask;
 
-class CEventScriptCommand : public CEvent {
+class CEventScriptCommand : public CEvent
+{
 public:
-    int32_t m_primaryTaskIndex;
-    CTask*  m_task;
-    bool    m_affectsDeadPeds;
+    std::int32_t m_primaryTaskIndex;
+    CTask* m_task;
+    bool m_affectsDeadPeds;
 
-public:
-    CEventScriptCommand(int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds);
+    static void InjectHooks();
+
+    CEventScriptCommand(std::int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds);
     ~CEventScriptCommand();
-
-    eEventType GetEventType() const override {
-        return EVENT_SCRIPT_COMMAND;
-    }
-    int32_t GetEventPriority() const override;
-    int GetLifeTime() override {
-        return 0;
-    }
+private:
+    CEventScriptCommand* Constructor(std::int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds);
+public:
+    eEventType GetEventType() override { return EVENT_SCRIPT_COMMAND; }
+    int GetEventPriority() override;
+    int GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override;
-    bool TakesPriorityOver(const CEvent& refEvent) override;
+    bool TakesPriorityOver(CEvent* refEvent) override;
     bool IsValid(CPed* ped) override;
     virtual CTask* CloneScriptTask();
 
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    CEventScriptCommand* Constructor(int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds);
-
-    int32_t GetEventPriority_Reversed() const;
+    int GetEventPriority_Reversed();
     CEvent* Clone_Reversed();
     bool AffectsPed_Reversed(CPed* ped);
-    bool TakesPriorityOver_Reversed(const CEvent& refEvent);
+    bool TakesPriorityOver_Reversed(CEvent* refEvent);
     bool IsValid_Reversed(CPed* ped);
     CTask* CloneScriptTask_Reversed();
 };

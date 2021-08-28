@@ -25,20 +25,26 @@ CTask* CTaskComplex::GetSubTask() {
     return ((CTask * (__thiscall*)(CTask*))0x421190)(this);
 }
 
-// 0x4211A0
 bool CTaskComplex::IsSimple() {
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return ((bool(__thiscall*)(CTask*))0x4211A0)(this);
+#else
     return CTaskComplex::IsSimple_Reversed();
+#endif
 }
 
-// 0x4211B0
-bool CTaskComplex::MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return CTaskComplex::MakeAbortable_Reversed(ped, priority, event);
+bool CTaskComplex::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) {
+#ifdef USE_DEFAULT_FUNCTIONS 
+    return ((bool(__thiscall*)(CTask*, CPed*, int, class CEvent*))0x4211B0)(this, ped, priority, _event);
+#else
+    return CTaskComplex::MakeAbortable_Reversed(ped, priority, _event);
+#endif
 }
 
 void CTaskComplex::SetSubTask(CTask* subTask){
     ((void(__thiscall*)(CTaskComplex*, CTask*))0x61A430)(this, subTask);
 }
 
-bool CTaskComplex::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return m_pSubTask->MakeAbortable(ped, priority, event);
+bool CTaskComplex::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event) {
+    return m_pSubTask->MakeAbortable(ped, priority, _event);
 }

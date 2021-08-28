@@ -8,7 +8,7 @@ Do not delete this comment block. Respect others' work!
 
 class CTimer {
 public:
-    typedef uint64_t(__cdecl* TimerFunction_t)();
+    typedef std::uint64_t(__cdecl* TimerFunction_t)();
     static TimerFunction_t& ms_fnTimerFunction;
 
     // class variables
@@ -33,8 +33,8 @@ public:
     static unsigned int& m_snTimeInMillisecondsNonClipped;
     static unsigned int& m_snPreviousTimeInMillisecondsNonClipped;
     static unsigned int& m_snTimeInMilliseconds;
-    static uint64_t& m_snRenderStartTime;
-    static uint64_t& m_snRenderPauseTime;
+    static std::uint64_t& m_snRenderStartTime;
+    static std::uint64_t& m_snRenderPauseTime;
     static unsigned int& m_snRenderTimerPauseCount;
 
     // Freshly from R*:
@@ -56,13 +56,13 @@ public:
     static void EndUserPause();
     static unsigned int GetCyclesPerMillisecond();
     static unsigned int GetCyclesPerFrame();
-    static uint64_t GetCurrentTimeInCycles();
+    static std::uint64_t GetCurrentTimeInCycles();
     static bool GetIsSlowMotionActive();
     static bool GetIsPaused() { return m_UserPause || m_CodePause; }
     static void UpdateVariables(float timeStep);
     static void UpdateTimeStep(float fTimeStep);
-    static void Update();
 
-    static uint32_t GetTimeInMilliseconds() { return m_snTimeInMilliseconds; }
-    static uint32_t GetTimeStepInMilliseconds() { return static_cast<uint32_t>(ms_fTimeStep * 20.0F); }
+    static inline uint32_t GetTimeStepInMilliseconds() { return static_cast<uint32_t>(ms_fTimeStep * 20.0F); }
+    static auto GetTimeMs() { return m_snTimeInMilliseconds; }
+    static void Update();
 };

@@ -5,43 +5,44 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
+#include "PluginBase.h"
+#include "rw/rwplcore.h"     // for RwRGBA stuct
 
-#include "rw/rwplcore.h" // for RwRGBA struct
-
-enum eZoneType : uint8_t {
-    ZONE_TYPE_NAVI = 0, // controls text s
-    ZONE_TYPE_MAP  = 3
+enum eZoneType {
+	ZONE_TYPE_NAVI = 0,		// controls text s
+	ZONE_TYPE_MAP = 3
 };
 
-enum eLevelName : uint8_t {
-    LEVEL_NAME_COUNTRY_SIDE,
-    LEVEL_NAME_LOS_SANTOS,
-    LEVEL_NAME_SAN_FIERRO,
-    LEVEL_NAME_LAS_VENTURAS
+enum eLevelName : int {
+	LEVEL_NAME_COUNTRY_SIDE,
+	LEVEL_NAME_LOS_SANTOS,
+	LEVEL_NAME_SAN_FIERRO,
+	LEVEL_NAME_LAS_VENTURAS
 };
 
 struct CZoneExtraInfo {
-    char m_nGangDensity[10];
-    char m_nDealerDensity;
-    RwRGBA ZoneColor;
-    char m_nFlags;
-    char m_nPopulationRace;
+	char m_nGangDensity[10];
+	char m_nDealerDensity;
+	RwRGBA ZoneColor;
+	char m_nFlags;
+	char m_nPopulationRace;
 };
 
 class CZone {
 public:
-    uint32_t   m_nLabel[2];
-    char       m_szTextKey[8];
-    int16_t    m_fX1;
-    int16_t    m_fY1;
-    int16_t    m_fZ1;
-    int16_t    m_fX2;
-    int16_t    m_fY2;
-    int16_t    m_fZ2;
-    int16_t    m_nZoneExtraIndexInfo;
-    eZoneType  m_nType;
-    eLevelName m_nLevel;
+    unsigned int  m_nLabel[2];
+	char          m_szTextKey[8];
+	short         m_fX1;
+	short         m_fY1;
+	short         m_fZ1;
+	short         m_fX2;
+	short         m_fY2;
+	short         m_fZ2;
+	short         m_nZoneExtraIndexInfo;
+	unsigned char m_nType; // see eZoneType
+    unsigned char m_nLevel; // see eLevelName
 
+	// Returns pointer to GXT name string.
     const char* GetTranslatedName() const;
 };
 

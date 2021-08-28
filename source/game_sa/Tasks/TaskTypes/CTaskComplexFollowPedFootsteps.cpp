@@ -36,9 +36,9 @@ CTaskComplexFollowPedFootsteps::~CTaskComplexFollowPedFootsteps()
     }
 }
 
-bool CTaskComplexFollowPedFootsteps::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexFollowPedFootsteps::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x694ED0, CTaskComplexFollowPedFootsteps*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x694ED0, CTaskComplexFollowPedFootsteps*, CPed*, eAbortPriority, CEvent*>(this, ped, priority, event);
 }
 
 CTask* CTaskComplexFollowPedFootsteps::CreateNextSubTask(CPed* ped)

@@ -41,9 +41,9 @@ bool CTaskSimpleLand::ProcessPed(CPed* ped)
 }
 
 // 0x678F40
-bool CTaskSimpleLand::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleLand::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    return MakeAbortable_Reversed(ped, priority, event);
+    return MakeAbortable_Reversed(ped, priority, _event);
 }
 
 bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped)
@@ -103,7 +103,7 @@ bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped)
     }
 }
 
-bool CTaskSimpleLand::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskSimpleLand::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
     if (priority != ABORT_PRIORITY_IMMEDIATE)
         return false;

@@ -24,10 +24,10 @@ public:
     eTaskType GetId() override { return TASK_SIMPLE_FALL; }
     CTask* Clone() override { return new CTaskSimpleFall(m_nAnimId, m_nAnimGroup, m_nTotalDownTime); }
     bool ProcessPed(CPed* ped) override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
 
     bool ProcessPed_Reversed(CPed* ped);
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event);
 
     bool StartAnim(CPed* ped);
     void ProcessFall(CPed* ped);

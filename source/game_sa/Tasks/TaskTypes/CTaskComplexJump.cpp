@@ -43,9 +43,9 @@ CTask* CTaskComplexJump::CreateNextSubTask(CPed* ped)
 }
 
 // 0x67A070
-bool CTaskComplexJump::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexJump::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    return MakeAbortable_Reversed(ped, priority, event);
+    return MakeAbortable_Reversed(ped, priority, _event);
 }
 
 CTask* CTaskComplexJump::Clone_Reversed()
@@ -102,13 +102,13 @@ CTask* CTaskComplexJump::CreateNextSubTask_Reversed(CPed* ped)
     return nullptr;
 }
 
-bool CTaskComplexJump::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexJump::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    if (priority == ABORT_PRIORITY_URGENT && event)
+    if (priority == ABORT_PRIORITY_URGENT && _event)
     {
-        if (event->GetEventType() == EVENT_DAMAGE)
+        if (_event->GetEventType() == EVENT_DAMAGE)
         {
-            const auto pDamageEvent = static_cast<const CEventDamage*>(event);
+            auto pDamageEvent = reinterpret_cast<CEventDamage*>(_event);
             if (pDamageEvent->m_weaponType == WEAPON_FALL
                 && pDamageEvent->m_damageResponse.m_bHealthZero
                 && pDamageEvent->m_bAddToEventGroup
@@ -119,7 +119,7 @@ bool CTaskComplexJump::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
                 return true;
             }
         }
-        else if (event->GetEventType() == EVENT_DEATH)
+        else if (_event->GetEventType() == EVENT_DEATH)
         {
             ped->bIsInTheAir = false;
             ped->bIsLanding = false;
@@ -127,7 +127,7 @@ bool CTaskComplexJump::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
         }
     }
 
-    if (m_pSubTask->MakeAbortable(ped, priority, event))
+    if (m_pSubTask->MakeAbortable(ped, priority, _event))
     {
         ped->bIsInTheAir = false;
         ped->bIsLanding = false;

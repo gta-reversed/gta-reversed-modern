@@ -12,7 +12,7 @@
 
 class CEntity;
 
-class CShotInfo {
+class  CShotInfo {
 public:
     int      m_nWeaponType;
     CVector  m_vecOrigin;

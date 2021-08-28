@@ -19,21 +19,27 @@ CEventGroupEvent::~CEventGroupEvent()
 {
     if (m_ped)
         m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
-
-    delete m_event;
+    if (m_event)
+        delete m_event;
 }
 
-// 0x4ADFD0
 CEventGroupEvent* CEventGroupEvent::Constructor(CPed* ped, CEvent* event)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<CEventGroupEvent*, 0x4ADFD0, CEventGroupEvent*, CPed*, CEvent* >(this, ped, event);
+#else
     this->CEventGroupEvent::CEventGroupEvent(ped, event);
     return this;
+#endif
 }
 
-// 0x4B6EE0
 CEvent* CEventGroupEvent::Clone()
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<CEvent*, 0x4B6EE0, CEvent*>(this);
+#else
     return CEventGroupEvent::Clone_Reversed();
+#endif
 }
 
 CEvent* CEventGroupEvent::Clone_Reversed()
@@ -41,8 +47,7 @@ CEvent* CEventGroupEvent::Clone_Reversed()
     return new CEventGroupEvent(m_ped, m_event->Clone());
 }
 
-// NOTSA, inlined
-bool CEventGroupEvent::IsPriorityEvent() const
+bool CEventGroupEvent::IsPriorityEvent()
 {
     switch (m_event->GetEventType()) {
     case EVENT_LEADER_ENTERED_CAR_AS_DRIVER:
@@ -57,12 +62,15 @@ bool CEventGroupEvent::IsPriorityEvent() const
     return false;
 }
 
-// 0x4AE100
-bool CEventGroupEvent::BaseEventTakesPriorityOverBaseEvent(const CEventGroupEvent& other)
+bool CEventGroupEvent::BaseEventTakesPriorityOverBaseEvent(CEventGroupEvent* other)
 {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn<bool, 0x4AE100, CEvent*, CEvent*>(this, other);
+#else
     if (IsPriorityEvent())
         return true;
-    if (other.IsPriorityEvent())
+    if (other->IsPriorityEvent())
         return false;
-    return m_event->TakesPriorityOver(*other.m_event);
+    return m_event->TakesPriorityOver(other->m_event);
+#endif
 }

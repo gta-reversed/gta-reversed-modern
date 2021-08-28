@@ -32,8 +32,8 @@ public:
     CTask* Clone_Reversed();
     eTaskType GetId() override;
     eTaskType GetId_Reversed() { return TASK_SIMPLE_STEALTH_KILL; };
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
-    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event);
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
+    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
     void ManageAnim(CPed* ped);
 
     static void FinishAnimStealthKillCB(CAnimBlendAssociation* pAnimAssoc, void* vpTaskSimpleStealthKill);

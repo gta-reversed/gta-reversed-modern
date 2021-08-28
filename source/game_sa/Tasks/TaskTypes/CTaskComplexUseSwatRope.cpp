@@ -51,9 +51,9 @@ CTask* CTaskComplexUseSwatRope::Clone()
 }
 
 // 0x659530
-bool CTaskComplexUseSwatRope::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexUseSwatRope::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    return MakeAbortable_Reversed(ped, priority, event);
+    return MakeAbortable_Reversed(ped, priority, _event);
 }
 
 // 0x65A3E0
@@ -82,9 +82,9 @@ CTask* CTaskComplexUseSwatRope::Clone_Reversed()
         return new CTaskComplexUseSwatRope(m_nRopeId);
 }
 
-bool CTaskComplexUseSwatRope::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexUseSwatRope::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
 {
-    eEventType eventType = event->GetEventType();
+    eEventType eventType = _event->GetEventType();
 
     if ((priority == ABORT_PRIORITY_IMMEDIATE
         || eventType == EVENT_DEATH
@@ -96,7 +96,7 @@ bool CTaskComplexUseSwatRope::MakeAbortable_Reversed(CPed* ped, eAbortPriority p
         || eventType == EVENT_VEHICLE_DAMAGE_COLLISION
         || ped->m_fHealth <= 20.0F
         )
-        && m_pSubTask->MakeAbortable(ped, priority, event)
+        && m_pSubTask->MakeAbortable(ped, priority, _event)
         )
     {
         ped->bIsStanding = false;

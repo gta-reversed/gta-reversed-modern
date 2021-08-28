@@ -65,10 +65,13 @@ eTaskType CTaskComplexUseSequence::GetId()
 #endif
 }
 
-// 0x639730
-bool CTaskComplexUseSequence::MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexUseSequence::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event)
 {
-    return MakeAbortable_Reversed(ped, priority, event);
+#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethodAndReturn <bool, 0x639730, CTask*, class CPed*, eAbortPriority, class CEvent*>(this, ped, priority, _event);
+#else     
+    return MakeAbortable_Reversed(ped, priority, _event);
+#endif
 }
 
 CTask* CTaskComplexUseSequence::CreateNextSubTask(CPed* ped)
@@ -116,12 +119,12 @@ CTask* CTaskComplexUseSequence::Clone_Reversed()
     return pClonedComplexUseSequence;
 }
 
-bool CTaskComplexUseSequence::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event)
+bool CTaskComplexUseSequence::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event)
 {
-    bool bMakeAbortable = m_pSubTask->MakeAbortable(ped, priority, event);
-    if (bMakeAbortable && event && event->GetEventType() == EVENT_DAMAGE)
+    bool bMakeAbortable = m_pSubTask->MakeAbortable(ped, priority, _event);
+    if (bMakeAbortable && _event && _event->GetEventType() == EVENT_DAMAGE)
     {
-        CEventDamage* pEventDamage = (CEventDamage*)event;
+        CEventDamage* pEventDamage = (CEventDamage*)_event;
         if (pEventDamage->m_damageResponse.m_bHealthZero && pEventDamage->m_bAddToEventGroup)
         {
             CTaskComplexSequence* pTaskComplexSequence = &CTaskSequences::ms_taskSequence[m_nSequenceIndex];

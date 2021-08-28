@@ -8,7 +8,7 @@
 
 #include "PluginBase.h"
 
-enum eWeaponFire : uint32_t {
+enum  eWeaponFire : unsigned int {
     WEAPON_FIRE_MELEE = 0,
     WEAPON_FIRE_INSTANT_HIT,
     WEAPON_FIRE_PROJECTILE,

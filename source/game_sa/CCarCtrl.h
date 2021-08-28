@@ -20,7 +20,6 @@ public:
     static unsigned int& NumAmbulancesOnDuty;
     static unsigned int& NumFireTrucksOnDuty;
     static unsigned int& MaxNumberOfCarsInUse;
-    static bool& bCarsGeneratedAroundCamera;
 
 	static void InjectHooks();
 

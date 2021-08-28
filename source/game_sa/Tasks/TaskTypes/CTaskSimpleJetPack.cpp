@@ -56,11 +56,11 @@ CTaskSimpleJetPack::~CTaskSimpleJetPack() {
 }
 
 // 0x67E6E0
-bool CTaskSimpleJetPack::MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return MakeAbortable_Reversed(ped, priority, event);
+bool CTaskSimpleJetPack::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) {
+    return MakeAbortable_Reversed(ped, priority, _event);
 }
-bool CTaskSimpleJetPack::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return plugin::CallMethodAndReturn<bool, 0x67E6E0, CTaskSimpleJetPack*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
+bool CTaskSimpleJetPack::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* event) {
+    return plugin::CallMethodAndReturn<bool, 0x67E6E0, CTaskSimpleJetPack*, CPed*, eAbortPriority, CEvent*>(this, ped, priority, event);
 }
 
 // 0x67C690

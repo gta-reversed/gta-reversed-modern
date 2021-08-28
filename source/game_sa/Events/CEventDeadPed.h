@@ -18,11 +18,11 @@ public:
 private:
     CEventDeadPed* Constructor(CPed* ped, bool bUnknown, std::uint32_t deathTimeInMs);
 public:
-    eEventType GetEventType() const override { return EVENT_DEAD_PED; }
-    int32_t GetEventPriority() const override { return 15; }
+    eEventType GetEventType() override { return EVENT_DEAD_PED; }
+    int GetEventPriority() override { return 15; }
     int GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
-    CEntity* GetSourceEntity() const override { return m_ped; }
+    CEntity* GetSourceEntity() override { return m_ped; }
     float GetLocalSoundLevel() override { return 60.0f; }
     CEventEditableResponse* CloneEditable() override;
 

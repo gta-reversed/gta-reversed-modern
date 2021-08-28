@@ -48,14 +48,14 @@ public:
     // original virtual functions
     CTask* Clone() override;
     eTaskType GetId() override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
     bool ProcessPed(class CPed* ped) override;
     bool SetPedPosition(class CPed* ped) override;
 private:
     // reversed virtual functions
     CTask* Clone_Reversed();
     eTaskType GetId_Reversed() { return TASK_SIMPLE_HOLD_ENTITY; };
-    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event);
+    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
     bool ProcessPed_Reversed(class CPed* ped);
     bool SetPedPosition_Reversed(class CPed* ped);
 public:

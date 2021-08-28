@@ -21,13 +21,13 @@ public:
 
     CTask* Clone() override;
     eTaskType GetId() override { return TASK_COMPLEX_USE_SWAT_ROPE; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
 
     CTask* Clone_Reversed();
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);
