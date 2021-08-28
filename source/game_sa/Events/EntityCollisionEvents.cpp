@@ -56,25 +56,19 @@ CEventPedCollisionWithPed* CEventPedCollisionWithPed::Constructor(std::int16_t p
     return this;
 }
 
-bool CEventPedCollisionWithPed::TakesPriorityOver(CEvent* refEvent)
+// 0x4ACAD0
+bool CEventPedCollisionWithPed::TakesPriorityOver(const CEvent& refEvent)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4ACAD0, CEventPedCollisionWithPed*, CEvent*>(this, refEvent);
-#else
     return CEventPedCollisionWithPed::TakesPriorityOver_Reversed(refEvent);
-#endif
 }
 
+// 0x4ACB10
 bool CEventPedCollisionWithPed::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4ACB10, CEventPedCollisionWithPed*, CPed*>(this, ped);
-#else
     return CEventPedCollisionWithPed::AffectsPed_Reversed(ped);
-#endif
 }
 
-bool CEventPedCollisionWithPed::TakesPriorityOver_Reversed(CEvent* refEvent)
+bool CEventPedCollisionWithPed::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
     if (CEventHandler::IsTemporaryEvent(refEvent))
         return true;

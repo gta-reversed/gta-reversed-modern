@@ -12,7 +12,7 @@
 
 extern unsigned int MAX_PROJECTILES; // default 32
 
-class  CProjectileInfo {
+class CProjectileInfo {
 public:
 	unsigned int  m_nWeaponType; // see eWeaponType
 	CEntity      *m_pCreator;
@@ -26,6 +26,8 @@ public:
 	FxSystem_c   *m_pFxSystem;
 
     static CProjectile **ms_apProjectile; // static CProjectile *ms_apProjectile[MAX_PROJECTILES]
+
+    static void InjectHooks();
 
     static void Initialise();
     static void RemoveFXSystem(unsigned char bInstantly);

@@ -3,7 +3,7 @@
 
 class CEntity;
 class CVehicle;
-enum eWeaponType : std::uint32_t;
+enum eWeaponType : uint32_t;
 
 class CEventVehicleDamage : public CEventEditableResponse
 {
@@ -19,18 +19,18 @@ public:
 private:
     CEventVehicleDamage* Constructor(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType);
 public:
-    int GetEventPriority() override { return 49; }
+    int32_t GetEventPriority() const override { return 49; }
     int GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     bool IsCriminalEvent() override;
     void ReportCriminalEvent(CPed* ped) override;
-    CEntity* GetSourceEntity() override;
+    CEntity* GetSourceEntity() const override;
     float GetLocalSoundLevel() override { return 55.0f; }
 
     bool AffectsPed_Reversed(CPed* ped);
     bool IsCriminalEvent_Reversed();
     void ReportCriminalEvent_Reversed(CPed* ped);;
-    CEntity* GetSourceEntity_Reversed();
+    CEntity* GetSourceEntity_Reversed() const;
 };
 
 VALIDATE_SIZE(CEventVehicleDamage, 0x20);

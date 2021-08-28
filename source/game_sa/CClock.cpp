@@ -228,3 +228,8 @@ void CClock::RestoreClock() {
     ms_nGameClockMinutes = ms_Stored_nGameClockMinutes;
     ms_nGameClockSeconds = ms_Stored_nGameClockSeconds;
 }
+
+// NOTSA
+uint32_t CClock::GetMinutesToday() {
+    return ms_nGameClockMinutes + 60 * ms_nGameClockHours + (unsigned)((float)ms_nGameClockSeconds / 60.0f);
+}
