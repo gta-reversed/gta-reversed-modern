@@ -110,7 +110,7 @@ void CWaterCannon::Update_NewInput(CVector* start, CVector* end) {
 }
 
 // NOTSA
-CBoundingBox CWaterCannon::GetBounding() const {
+CBoundingBox CWaterCannon::GetSectionsBoundingBox() const {
     // Ik, ik junk code, can't do better
 
     // R* originally used 10000 here, but thats bug prone (if map size gets increased)
@@ -133,13 +133,13 @@ CBoundingBox CWaterCannon::GetBounding() const {
 
 // 0x7295E0
 void CWaterCannon::PushPeds() {
-    const auto bounding = GetBounding();
+    const auto sectionsBounding = GetSectionsBoundingBox();
     for (int pedIdx = 0; pedIdx < CPools::ms_pPedPool->m_nSize; pedIdx++) {
         CPed* ped = CPools::ms_pPedPool->GetAt(pedIdx);
         if (!ped)
             continue;
         CVector pedPosn = ped->GetPosition();
-        if (!bounding.IsPointWithin(pedPosn))
+        if (!sectionsBounding.IsPointWithin(pedPosn))
             continue;
 
         if (!ped->physicalFlags.bMakeMassTwiceAsBig)
