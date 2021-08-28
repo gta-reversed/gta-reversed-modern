@@ -38,8 +38,10 @@ public:
 
 private:
     // NOTSA
-    bool IsSectionActive(size_t idx);
-    CVector& GetSectionPosn(size_t idx);
+    bool IsSectionActive(size_t idx) const;
+    CVector GetSectionPosn(size_t idx) const;
+    CVector GetSectionMoveSpeed(size_t idx) const;
+    CBoundingBox GetBounding() const;
 };
 
 VALIDATE_SIZE(CWaterCannon, 0x3CC);

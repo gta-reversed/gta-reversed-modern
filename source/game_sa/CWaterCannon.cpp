@@ -9,7 +9,7 @@ void CWaterCannon::InjectHooks() {
     ReversibleHooks::Install("CWaterCannon", "Init", 0x728B40, &CWaterCannon::Init);
     ReversibleHooks::Install("CWaterCannon", "Update_OncePerFrame", 0x72A280, &CWaterCannon::Update_OncePerFrame);
     ReversibleHooks::Install("CWaterCannon", "Update_NewInput", 0x728C20, &CWaterCannon::Update_NewInput);
-    // ReversibleHooks::Install("CWaterCannon", "PushPeds", 0x7295E0, &CWaterCannon::PushPeds);
+    ReversibleHooks::Install("CWaterCannon", "PushPeds", 0x7295E0, &CWaterCannon::PushPeds);
     ReversibleHooks::Install("CWaterCannon", "Render", 0x728DA0, &CWaterCannon::Render);
 }
 
@@ -109,9 +109,86 @@ void CWaterCannon::Update_NewInput(CVector* start, CVector* end) {
     m_anSectionState[m_nSectionsCount]   = 1;
 }
 
+// NOTSA
+CBoundingBox CWaterCannon::GetBounding() const {
+    // Ik, ik junk code, can't do better
+
+    // R* originally used 10000 here, but thats bug prone (if map size gets increased)
+    CVector min{ FLT_MAX, FLT_MAX, FLT_MAX }, max{ FLT_MIN, FLT_MIN, FLT_MIN };  
+    for (size_t i = 0; i < SECTIONS_COUNT; i++) { // TODO: C++20 ranges here pls
+        if (!IsSectionActive(i))
+            continue;
+        const auto Do = [posn = GetSectionPosn(i)](CVector& out, auto pr) {
+            out = CVector{
+                pr(out.x, posn.x),
+                pr(out.y, posn.y),
+                pr(out.z, posn.z)
+            };
+        };
+        Do(min, [](float a, float b) {return std::min(a, b); });
+        Do(max, [](float a, float b) {return std::max(a, b); });
+    }
+    return { min, max };
+}
+
 // 0x7295E0
 void CWaterCannon::PushPeds() {
-    plugin::CallMethod<0x7295E0, CWaterCannon*>(this);
+    const auto bounding = GetBounding();
+    for (int pedIdx = 0; pedIdx < CPools::ms_pPedPool->m_nSize; pedIdx++) {
+        CPed* ped = CPools::ms_pPedPool->GetAt(pedIdx);
+        if (!ped)
+            continue;
+        CVector pedPosn = ped->GetPosition();
+        if (!bounding.IsPointWithin(pedPosn))
+            continue;
+
+        if (!ped->physicalFlags.bMakeMassTwiceAsBig)
+            continue;
+
+        for (int i = 0; i < SECTIONS_COUNT; i++) {
+            const CVector secPosn = GetSectionPosn(i);
+            if ((pedPosn - secPosn).SquaredMagnitude() >= 5.0f)
+                continue;
+
+            const CVector secMoveSpeed = GetSectionMoveSpeed(i);
+
+            {
+                CEventHitByWaterCannon event(secPosn, secMoveSpeed);
+                ped->GetIntelligence()->GetEventGroup().Add(&event, false);
+            }
+
+            ped->bWasStanding = false;
+            ped->bIsStanding = false;
+
+            ped->ApplyMoveForce({ 0.0f, 0.0f, CTimer::ms_fTimeStep });
+
+            {
+                // TODO: Refactor... Ugly code
+                const CVector applyableMoveSpeed = (secMoveSpeed / 10.0f - ped->m_vecMoveSpeed) / 10.0f;
+
+                // Check if directions are the same (eg, + / +, - / -),
+                // differring sign bits will always yield a negativ result
+                /// (unless 0, but that is handled by > (instead of >=))
+                if (secMoveSpeed.x * applyableMoveSpeed.x > 0.0f) 
+                    ped->m_vecMoveSpeed.x = applyableMoveSpeed.x + secMoveSpeed.x;
+
+                if (secMoveSpeed.y * applyableMoveSpeed.y > 0.0f)
+                    ped->m_vecMoveSpeed.y = applyableMoveSpeed.y + secMoveSpeed.y;
+            }
+
+            FxPrtMult_c prtInfo{ 1.0f, 1.0f, 1.0f, 0.6f, 0.75f, 0.0f, 0.2f };
+
+            // TODO: Fix fx crap
+            CVector prtVel = ped->m_vecMoveSpeed * 0.3f;
+            g_fx.m_pPrtSmokeII3expand->AddParticle(&pedPosn, &prtVel, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, false);
+
+            CVector prtVel2 = ped->m_vecMoveSpeed * -0.3f;
+            prtVel2.z += 0.5f;
+            g_fx.m_pPrtSmokeII3expand->AddParticle(&pedPosn, &prtVel2, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, false);
+
+            break;
+        }
+    }
 }
 
 // 0x728DA0
@@ -228,10 +305,14 @@ void CWaterCannon::Render() {
 }
 
 // NOTSA
-bool CWaterCannon::IsSectionActive(size_t idx) {
+bool CWaterCannon::IsSectionActive(size_t idx) const {
     return m_anSectionState[idx];
 }
 
-CVector& CWaterCannon::GetSectionPosn(size_t idx) {
+CVector CWaterCannon::GetSectionPosn(size_t idx) const {
     return m_sectionPoint[idx];
+}
+
+CVector CWaterCannon::GetSectionMoveSpeed(size_t idx) const {
+    return m_sectionMoveSpeed[idx];
 }

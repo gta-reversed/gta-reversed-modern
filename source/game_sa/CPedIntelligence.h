@@ -126,6 +126,7 @@ public:
     void Process();
     CTask* GetActivePrimaryTask();
     float GetPedFOVRange();
+    CEventGroup& GetEventGroup() { return m_eventGroup; }
 };
 
 VALIDATE_SIZE(CPedIntelligence, 0x294);
