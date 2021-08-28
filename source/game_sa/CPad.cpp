@@ -50,12 +50,12 @@ void CPad::SetDrunkInputDelay(int delay) {
     plugin::CallMethod<0x53F910, CPad*, int>(this, delay);
 }
 
-// Converted from thiscall void CPad::StartShake(short time,uchar frequency,uint) 0x53F920
+// Converted from thiscall void CPad::StartShake(short time,uint8_t frequency,uint32) 0x53F920
 void CPad::StartShake(short time, unsigned char frequency, unsigned int arg2) {
     plugin::CallMethod<0x53F920, CPad*, short, unsigned char, unsigned int>(this, time, frequency, arg2);
 }
 
-// Converted from thiscall void CPad::StartShake_Distance(short time,uchar frequency,float x,float y,float z) 0x53F9A0
+// Converted from thiscall void CPad::StartShake_Distance(short time,uint8_t frequency,float x,float y,float z) 0x53F9A0
 void CPad::StartShake_Distance(short time, unsigned char frequency, float x, float y, float z) {
     plugin::CallMethod<0x53F9A0, CPad*, short, unsigned char, float, float, float>(this, time, frequency, x, y, z);
 }
@@ -184,12 +184,12 @@ bool CPad::ExitVehicleJustDown() {
     return plugin::CallMethodAndReturn<bool, 0x540120, CPad*>(this);
 }
 
-// Converted from thiscall uchar CPad::GetMeleeAttack(void) 0x540340
+// Converted from thiscall uint8_t CPad::GetMeleeAttack(void) 0x540340
 unsigned char CPad::GetMeleeAttack(bool bCheckButtonCircleStateOnly) {
     return plugin::CallMethodAndReturn<unsigned char, 0x540340, CPad*, bool>(this, bCheckButtonCircleStateOnly);
 }
 
-// Converted from thiscall uchar CPad::MeleeAttackJustDown(void) 0x540390
+// Converted from thiscall uint8_t CPad::MeleeAttackJustDown(void) 0x540390
 unsigned char CPad::MeleeAttackJustDown(bool bCheckButtonCircleStateOnly) {
     return plugin::CallMethodAndReturn<unsigned char, 0x540390, CPad*, bool>(this, bCheckButtonCircleStateOnly);
 }

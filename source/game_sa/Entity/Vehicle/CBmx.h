@@ -35,7 +35,7 @@ public:
     float field_828;
     float m_fDistanceBetweenWheels;
     float m_fWheelsBalance;
-    uchar field_834;
+    uint8_t field_834;
     char  _pad[3];
 
 public:

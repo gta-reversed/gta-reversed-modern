@@ -93,7 +93,7 @@ void CWorld::FindObjectsInRangeSectorList(CPtrList& arg0, CVector const& point, 
     plugin::Call<0x563500, CPtrList&, CVector const&, float, bool, short*, short, CEntity**>(arg0, point, radius, b2D, outCount, maxCount, outEntities);
 }
 
-// Converted from cdecl void CWorld::FindObjectsOfTypeInRangeSectorList(uint modelId,CPtrList &ptrList,CVector const&point,float radius,bool b2D,short *outCount,short maxCount,CEntity **outEntities) 0x5635C0
+// Converted from cdecl void CWorld::FindObjectsOfTypeInRangeSectorList(uint32 modelId,CPtrList &ptrList,CVector const&point,float radius,bool b2D,short *outCount,short maxCount,CEntity **outEntities) 0x5635C0
 void CWorld::FindObjectsOfTypeInRangeSectorList(unsigned int modelId, CPtrList& ptrList, CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities) {
     plugin::Call<0x5635C0, unsigned int, CPtrList&, CVector const&, float, bool, short*, short, CEntity**>(modelId, ptrList, point, radius, b2D, outCount, maxCount, outEntities);
 }
@@ -228,12 +228,12 @@ void CWorld::FindObjectsInRange(CVector const& point, float radius, bool b2D, sh
     plugin::Call<0x564A20, CVector const&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool>(point, radius, b2D, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
 }
 
-// Converted from cdecl void CWorld::FindObjectsOfTypeInRange(uint modelId,CVector const&point,float radius,bool b2D,short *outCount,short maxCount,CEntity **outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) 0x564C70
+// Converted from cdecl void CWorld::FindObjectsOfTypeInRange(uint32 modelId,CVector const&point,float radius,bool b2D,short *outCount,short maxCount,CEntity **outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) 0x564C70
 void CWorld::FindObjectsOfTypeInRange(unsigned int modelId, CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
     plugin::Call<0x564C70, unsigned int, CVector const&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool>(modelId, point, radius, b2D, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
 }
 
-// Converted from cdecl void CWorld::FindLodOfTypeInRange(uint modelId,CVector const&point,float radius,bool b2D,short *outCount,short maxCount,CEntity **outEntities) 0x564ED0
+// Converted from cdecl void CWorld::FindLodOfTypeInRange(uint32 modelId,CVector const&point,float radius,bool b2D,short *outCount,short maxCount,CEntity **outEntities) 0x564ED0
 void CWorld::FindLodOfTypeInRange(unsigned int modelId, CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities) {
     plugin::Call<0x564ED0, unsigned int, CVector const&, float, bool, short*, short, CEntity**>(modelId, point, radius, b2D, outCount, maxCount, outEntities);
 }
@@ -525,7 +525,7 @@ CEntity* CWorld::TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius
     return plugin::CallAndReturn<CEntity*, 0x569E20, CVector, float, CEntity*, bool, bool, bool, bool, bool, bool>(sphereCenter, sphereRadius, arg2, buildings, vehicles, peds, objects, dummies, doCameraIgnoreCheck);
 }
 
-// Converted from cdecl void CWorld::ClearExcitingStuffFromArea(CVector const&point,float radius,uchar bRemoveProjectilesAndShadows) 0x56A0D0
+// Converted from cdecl void CWorld::ClearExcitingStuffFromArea(CVector const&point,float radius,uint8_t bRemoveProjectilesAndShadows) 0x56A0D0
 void CWorld::ClearExcitingStuffFromArea(CVector const& point, float radius, unsigned char bRemoveProjectilesAndShadows) {
     plugin::Call<0x56A0D0, CVector const&, float, unsigned char>(point, radius, bRemoveProjectilesAndShadows);
 }

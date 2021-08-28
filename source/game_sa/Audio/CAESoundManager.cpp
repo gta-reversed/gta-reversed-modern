@@ -79,7 +79,7 @@ void CAESoundManager::Reset()
     }
 }
 
-void CAESoundManager::PauseManually(uchar bPause)
+void CAESoundManager::PauseManually(uint8_t bPause)
 {
     m_bManuallyPaused = bPause;
 }
@@ -428,7 +428,7 @@ void CAESoundManager::CancelSoundsOfThisEventPlayingForThisEntityAndPhysical(sho
     }
 }
 
-void CAESoundManager::CancelSoundsInBankSlot(short bankSlot, uchar bFullStop)
+void CAESoundManager::CancelSoundsInBankSlot(short bankSlot, uint8_t bFullStop)
 {
     for (auto& sound : m_aSounds)
     {
@@ -442,7 +442,7 @@ void CAESoundManager::CancelSoundsInBankSlot(short bankSlot, uchar bFullStop)
     }
 }
 
-void CAESoundManager::CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, uchar bFullStop)
+void CAESoundManager::CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, uint8_t bFullStop)
 {
     for (auto& sound : m_aSounds)
     {

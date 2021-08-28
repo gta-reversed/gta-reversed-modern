@@ -746,7 +746,7 @@ bool CObject::TryToExplode() {
     return true;
 }
 
-// Converted from thiscall void CObject::SetObjectTargettable(uchar targetable) 0x59F300
+// Converted from thiscall void CObject::SetObjectTargettable(uint8_t targetable) 0x59F300
 void CObject::SetObjectTargettable(unsigned char targetable) {
     objectFlags.bIsTargatable = targetable;
 }
@@ -965,7 +965,7 @@ void CObject::DoBurnEffect() {
     }
 }
 
-// Converted from thiscall uchar CObject::GetLightingFromCollisionBelow(void) 0x59FD00
+// Converted from thiscall uint8_t CObject::GetLightingFromCollisionBelow(void) 0x59FD00
 void CObject::GetLightingFromCollisionBelow() {
     CColPoint colPoint;
     CEntity* pEntity;

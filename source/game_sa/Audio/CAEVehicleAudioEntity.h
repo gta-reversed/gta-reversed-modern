@@ -202,9 +202,9 @@ public:
     void IsAccInhibitedBackwards(cVehicleParams&);
     void IsAccInhibitedForLowSpeed(cVehicleParams&);
     void IsAccInhibitedForTime();
-    void InhibitAccForTime(uint);
+    void InhibitAccForTime(uint32);
     void IsCrzInhibitedForTime();
-    void InhibitCrzForTime(uint);
+    void InhibitCrzForTime(uint32);
     void GetAccelAndBrake(cVehicleParams&);
     float GetVolumeForDummyIdle(float, float);
     float GetFrequencyForDummyIdle(float, float);
@@ -242,7 +242,7 @@ public:
     void ProcessVehicleSkidding(cVehicleParams&);
     void ProcessRainOnVehicle(cVehicleParams&);
     void PlayAircraftSound(short, short, short, float, float);
-    void ProcessGenericJet(uchar, cVehicleParams&, float, float, float, float, float);
+    void ProcessGenericJet(uint8_t, cVehicleParams&, float, float, float, float, float);
     void ProcessDummyJet(cVehicleParams&);
     void ProcessPlayerJet(cVehicleParams&);
     void ProcessDummySeaPlane(cVehicleParams&);
@@ -261,9 +261,9 @@ public:
     void ProcessDummyBicycle(cVehicleParams&);
     float GetFlyingMetalVolume(CPhysical*);
     void AddAudioEvent(int, CEntity*);
-    void GetHornState(uchar*, cVehicleParams&);
-    void GetSirenState(uchar*, uchar*, cVehicleParams&);
-    void PlayHornOrSiren(uchar, uchar, uchar, cVehicleParams&);
+    void GetHornState(uint8_t*, cVehicleParams&);
+    void GetSirenState(uint8_t*, uint8_t*, cVehicleParams&);
+    void PlayHornOrSiren(uint8_t, uint8_t, uint8_t, cVehicleParams&);
     void ProcessVehicleSirenAlarmHorn(cVehicleParams&);
     void UpdateBoatSound(short, short, short, float, float);
     void StopGenericEngineSound(short);

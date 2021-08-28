@@ -110,12 +110,12 @@ void CIplStore::LoadAllRemainingIpls() {
     plugin::Call<0x405780>();
 }
 
-// Converted from cdecl bool CIplStore::LoadIpl(int iplSlotIndex, uchar *data, int dataSize) 0x406080
+// Converted from cdecl bool CIplStore::LoadIpl(int iplSlotIndex, uint8_t *data, int dataSize) 0x406080
 bool CIplStore::LoadIpl(int iplSlotIndex, unsigned char* data, int dataSize) {
     return plugin::CallAndReturn<bool, 0x406080, int, unsigned char*, int>(iplSlotIndex, data, dataSize);
 }
 
-// Converted from cdecl bool CIplStore::LoadIplBoundingBox(int iplSlotIndex,uchar *data,int dataSize) 0x405C00
+// Converted from cdecl bool CIplStore::LoadIplBoundingBox(int iplSlotIndex,uint8_t *data,int dataSize) 0x405C00
 bool CIplStore::LoadIplBoundingBox(int iplSlotIndex, unsigned char* data, int dataSize) {
     return plugin::CallAndReturn<bool, 0x405C00, int, unsigned char*, int>(iplSlotIndex, data, dataSize);
 }

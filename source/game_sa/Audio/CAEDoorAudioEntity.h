@@ -3,9 +3,9 @@
 #include "CAEAudioEntity.h"
 
 class CAEDoorAudioEntity : public CAEAudioEntity {
-    uint m_nTime;
-    uint m_nMovingDoorTime;
-    uint m_nField84;
+    uint32 m_nTime;
+    uint32 m_nMovingDoorTime;
+    uint32 m_nField84;
 
 public:
     CAEDoorAudioEntity();

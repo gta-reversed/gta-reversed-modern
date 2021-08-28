@@ -36,7 +36,7 @@ int CAnimManager::GetFirstAssocGroup(char const* basename) {
     return plugin::CallAndReturn<int, 0x4D39B0, char const*>(basename);
 }
 
-// Converted from cdecl CAnimBlendHierarchy* CAnimManager::GetAnimation(uint hash,CAnimBlock const* ifp) 0x4D39F0
+// Converted from cdecl CAnimBlendHierarchy* CAnimManager::GetAnimation(uint32 hash,CAnimBlock const* ifp) 0x4D39F0
 CAnimBlendHierarchy* CAnimManager::GetAnimation(unsigned int hash, CAnimBlock const* ifp) {
     return plugin::CallAndReturn<CAnimBlendHierarchy*, 0x4D39F0, unsigned int, CAnimBlock const*>(hash, ifp);
 }
@@ -86,7 +86,7 @@ CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBl
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D3B30, RpClump*, CAnimBlendAssociation*, int, int>(clump, pAnimBlendAssoc, AssocGroupId, AnimationId);
 }
 
-// Converted from cdecl CAnimationStyleDescriptor* CAnimManager::AddAnimAssocDefinition(char const* groupName,char const* blockName,uint arg3,uint animsCount,void* pAnimDescriptor) 0x4D3BA0
+// Converted from cdecl CAnimationStyleDescriptor* CAnimManager::AddAnimAssocDefinition(char const* groupName,char const* blockName,uint32 arg3,uint32 animsCount,void* pAnimDescriptor) 0x4D3BA0
 CAnimationStyleDescriptor* CAnimManager::AddAnimAssocDefinition(char const* groupName, char const* blockName, unsigned int arg3, unsigned int animsCount, void* pAnimDescriptor) {
     return plugin::CallAndReturn<CAnimationStyleDescriptor*, 0x4D3BA0, char const*, char const*, unsigned int, unsigned int, void*>(groupName, blockName, arg3, animsCount, pAnimDescriptor);
 }

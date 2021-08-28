@@ -68,12 +68,12 @@ CPickup* CPickups::FindPickUpForThisObject(CObject* object) {
     return plugin::CallAndReturn<CPickup*, 0x4551C0, CObject*>(object);
 }
 
-// Converted from cdecl int CPickups::GenerateNewOne(CVector coors,uint modelId,uchar pickupType,uint ammo,uint moneyPerDay,bool isEmpty,char *message) 0x456F20
+// Converted from cdecl int CPickups::GenerateNewOne(CVector coors,uint32 modelId,uint8_t pickupType,uint32 ammo,uint32 moneyPerDay,bool isEmpty,char *message) 0x456F20
 int CPickups::GenerateNewOne(CVector coors, unsigned int modelId, unsigned char pickupType, unsigned int ammo, unsigned int moneyPerDay, bool isEmpty, char* message) {
     return plugin::CallAndReturn<int, 0x456F20, CVector, unsigned int, unsigned char, unsigned int, unsigned int, bool, char*>(coors, modelId, pickupType, ammo, moneyPerDay, isEmpty, message);
 }
 
-// Converted from cdecl int CPickups::GenerateNewOne_WeaponType(CVector coors,eWeaponType weaponType,uchar pickupType,uint ammo,bool isEmpty,char *message) 0x457380
+// Converted from cdecl int CPickups::GenerateNewOne_WeaponType(CVector coors,eWeaponType weaponType,uint8_t pickupType,uint32 ammo,bool isEmpty,char *message) 0x457380
 int CPickups::GenerateNewOne_WeaponType(CVector coors, eWeaponType weaponType, unsigned char pickupType, unsigned int ammo, bool isEmpty, char* message) {
     return plugin::CallAndReturn<int, 0x457380, CVector, eWeaponType, unsigned char, unsigned int, bool, char*>(coors, weaponType, pickupType, ammo, isEmpty, message);
 }
@@ -93,7 +93,7 @@ int CPickups::GetUniquePickupIndex(int pickupIndex) {
     return plugin::CallAndReturn<int, 0x455280, int>(pickupIndex);
 }
 
-// Converted from cdecl bool CPickups::GivePlayerGoodiesWithPickUpMI(ushort modelId,int playerId) 0x4564F0
+// Converted from cdecl bool CPickups::GivePlayerGoodiesWithPickUpMI(uint16_t modelId,int playerId) 0x4564F0
 bool CPickups::GivePlayerGoodiesWithPickUpMI(unsigned short modelId, int playerId) {
     return plugin::CallAndReturn<bool, 0x4564F0, unsigned short, int>(modelId, playerId);
 }
@@ -118,7 +118,7 @@ int CPickups::ModelForWeapon(eWeaponType weaponType) {
     return plugin::CallAndReturn<int, 0x454AC0, eWeaponType>(weaponType);
 }
 
-// Converted from cdecl void CPickups::PassTime(uint time) 0x455200
+// Converted from cdecl void CPickups::PassTime(uint32 time) 0x455200
 void CPickups::PassTime(unsigned int time) {
     plugin::Call<0x455200, unsigned int>(time);
 }
@@ -188,7 +188,7 @@ bool CPickups::TestForPickupsInBubble(CVector posn, float radius) {
     return plugin::CallAndReturn<bool, 0x456450, CVector, float>(posn, radius);
 }
 
-// Converted from cdecl bool CPickups::TryToMerge_WeaponType(CVector posn,eWeaponType weaponType,uchar pickupType,uint ammo, bool) 0x4555A0
+// Converted from cdecl bool CPickups::TryToMerge_WeaponType(CVector posn,eWeaponType weaponType,uint8_t pickupType,uint32 ammo, bool) 0x4555A0
 bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, unsigned char pickupType, unsigned int ammo, bool _IGNORED_ arg4) {
     return plugin::CallAndReturn<bool, 0x4555A0, CVector, eWeaponType, unsigned char, unsigned int, bool>(posn, weaponType, pickupType, ammo, arg4);
 }
@@ -198,7 +198,7 @@ void CPickups::Update() {
     plugin::Call<0x458DE0>();
 }
 
-// Converted from cdecl void CPickups::UpdateMoneyPerDay(int pickupHandle,ushort money) 0x455680
+// Converted from cdecl void CPickups::UpdateMoneyPerDay(int pickupHandle,uint16_t money) 0x455680
 void CPickups::UpdateMoneyPerDay(int pickupHandle, unsigned short money) {
     plugin::Call<0x455680, int, unsigned short>(pickupHandle, money);
 }

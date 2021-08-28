@@ -7,7 +7,7 @@
     Do not delete this comment block. Respect others' work!
 */
 
-// Converted from cdecl void CClothes::ConstructPedModel(uint modelid,CPedClothesDesc &newclothes,CPedClothesDesc const*oldclothes,bool bCutscenePlayer) 0x5A81E0 
+// Converted from cdecl void CClothes::ConstructPedModel(uint32 modelid,CPedClothesDesc &newclothes,CPedClothesDesc const*oldclothes,bool bCutscenePlayer) 0x5A81E0
 void CClothes::ConstructPedModel(unsigned int modelid, CPedClothesDesc& newclothes, CPedClothesDesc const* oldclothes, bool bCutscenePlayer) {
     plugin::Call<0x5A81E0, unsigned int, CPedClothesDesc&, CPedClothesDesc const*, bool>(modelid, newclothes, oldclothes, bCutscenePlayer);
 }
