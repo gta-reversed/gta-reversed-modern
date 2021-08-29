@@ -3,9 +3,10 @@
 CFireManager& gFireManager = *reinterpret_cast<CFireManager*>(0xB71F80);
 
 void CFireManager::InjectHooks() {
-    //ReversibleHooks::Install("CFireManager", "Constructor", 0x539DA0, &CFireManager::Constructor);
-    //ReversibleHooks::Install("CFireManager", "Destructor", 0x538BB0, &CFireManager::Destructor);
+    ReversibleHooks::Install("CFireManager", "CFireManager", 0x539DA0, &CFireManager::Constructor);
+    ReversibleHooks::Install("CFireManager", "~CFireManager", 0x538BB0, &CFireManager::Destructor);
     ReversibleHooks::Install("CFireManager", "Init", 0x538BC0, &CFireManager::Init);
+    ReversibleHooks::Install("CFireManager", "Shutdown", 0x539DD0, &CFireManager::Shutdown);
     ReversibleHooks::Install("CFireManager", "GetNumOfNonScriptFires", 0x538F10, &CFireManager::GetNumOfNonScriptFires);
     ReversibleHooks::Install("CFireManager", "FindNearestFire", 0x538F40, &CFireManager::FindNearestFire);
     ReversibleHooks::Install("CFireManager", "PlentyFiresAvailable", 0x539340, &CFireManager::PlentyFiresAvailable);
@@ -21,19 +22,21 @@ void CFireManager::InjectHooks() {
     ReversibleHooks::Install("CFireManager", "GetNumFiresInArea", 0x539860, &CFireManager::GetNumFiresInArea);
     ReversibleHooks::Install("CFireManager", "DestroyAllFxSystems", 0x539D10, &CFireManager::DestroyAllFxSystems);
     ReversibleHooks::Install("CFireManager", "CreateAllFxSystems", 0x539D50, &CFireManager::CreateAllFxSystems);
-    ReversibleHooks::Install("CFireManager", "Shutdown", 0x539DD0, &CFireManager::Shutdown);
     ReversibleHooks::Install("CFireManager", "GetNextFreeFire", 0x539E50, &CFireManager::GetNextFreeFire);
-    ReversibleHooks::Install("CFireManager", "StartFire_NoTarget", 0x539F00, static_cast<CFire*(CFireManager::*)(CVector, float, uint8_t, CEntity*, uint32_t, uint8_t, uint8_t)>(&CFireManager::StartFire));
-    ReversibleHooks::Install("CFireManager", "StartFire", 0x53A050, static_cast<CFire *(CFireManager::*)(CEntity*, CEntity*, float, uint8_t, uint32_t, uint8_t)>(&CFireManager::StartFire));
+    ReversibleHooks::Install("CFireManager", "StartFire_NoTarget", 0x539F00, static_cast<CFire*(CFireManager::*)(CVector, float, uint8, CEntity*, uint32, int8, uint8)>(&CFireManager::StartFire));
+    ReversibleHooks::Install("CFireManager", "StartFire", 0x53A050, static_cast<CFire *(CFireManager::*)(CEntity*, CEntity*, float, uint8, uint32, int8)>(&CFireManager::StartFire));
     ReversibleHooks::Install("CFireManager", "StartScriptFire", 0x53A270, &CFireManager::StartScriptFire);
     ReversibleHooks::Install("CFireManager", "Update", 0x53AF00, &CFireManager::Update);
 }
 
+// 0x539DA0
 CFireManager::CFireManager() {
     Init();
 }
 
+// 0x538BB0
 CFireManager::~CFireManager() {
+    // NOP
 }
 
 CFireManager* CFireManager::Destructor() {
@@ -46,42 +49,60 @@ CFireManager* CFireManager::Constructor() {
     return this;
 }
 
+// 0x538BC0
 void CFireManager::Init() {
-    for (auto& fire : m_aFires) {
+    for (CFire& fire : m_aFires) {
         fire.Initialise();
     }
     m_nMaxFireGenerationsAllowed = 1'000'000 - 1;
 }
 
-uint32_t CFireManager::GetNumOfNonScriptFires() {
-    uint32_t c = 0;
-    for (auto& fire : m_aFires)
+// 0x539DD0
+void CFireManager::Shutdown() {
+    for (CFire& fire : m_aFires) {
+        fire.m_nFlags.bCreatedByScript = false;
+        if (fire.IsActive()) {
+            fire.Extinguish();
+        }
+    }
+}
+
+// 0x538F10
+uint32 CFireManager::GetNumOfNonScriptFires() {
+    uint32 c = 0;
+    for (CFire& fire : m_aFires)
         if (fire.m_nFlags.bActive && !fire.m_nFlags.bCreatedByScript)
             c++;
     return c;
 }
 
-uint32_t CFireManager::GetNumOfFires() {
-    uint32_t c = 0;
-    for (auto& fire : m_aFires) {
+// NOTSA
+uint32 CFireManager::GetNumOfFires() {
+    uint32 c = 0;
+    for (CFire& fire : m_aFires) {
         if (fire.IsActive())
             c++;
     }
     return c;
 }
 
-CFire * CFireManager::FindNearestFire(CVector const& point, bool bCheckIsBeingExtinguished, bool bCheckWasCreatedByScript) {
-    float fNearestDist2DSq = std::numeric_limits<float>::max();
+// 0x538F40
+CFire* CFireManager::FindNearestFire(CVector const& point, bool bCheckIsBeingExtinguished, bool bCheckWasCreatedByScript) {
+    float fNearestDist2DSq = std::numeric_limits<float>::max(); // Izzotop :thinking
     CFire* pNearestFire{};
-    for (auto& fire : m_aFires) {
+    for (CFire& fire : m_aFires) {
         if (!fire.IsActive())
             continue;
+
         if (bCheckWasCreatedByScript && fire.IsScript())
             continue;
+
         if (bCheckIsBeingExtinguished && fire.IsBeingExtinguished())
             continue;
+
         if (fire.m_pEntityTarget && fire.m_pEntityTarget->IsPed())
             continue;
+
         const float fDist2DSq = (fire.m_vecPosition - point).SquaredMagnitude2D();
         if (fDist2DSq < fNearestDist2DSq) {
             fNearestDist2DSq = fDist2DSq;
@@ -91,9 +112,10 @@ CFire * CFireManager::FindNearestFire(CVector const& point, bool bCheckIsBeingEx
     return pNearestFire;
 }
 
+// 0x539340
 bool CFireManager::PlentyFiresAvailable() {
-    uint32_t c = 0;
-    for (auto& fire : m_aFires) {
+    uint32 c = 0;
+    for (CFire& fire : m_aFires) {
         if (fire.m_nFlags.bActive) 
             c++;
         if (c >= 6)
@@ -102,34 +124,42 @@ bool CFireManager::PlentyFiresAvailable() {
     return false;
 }
 
+// 0x539450
 void CFireManager::ExtinguishPoint(CVector point, float fRadius) {
-    for (auto& fire : m_aFires) {
+    for (CFire& fire : m_aFires) {
         if (!fire.IsActive())
             continue;
+
         if ((fire.m_vecPosition - point).SquaredMagnitude() > fRadius * fRadius)
             continue;
+
         fire.m_nFlags.bCreatedByScript = false;
         fire.Extinguish();
     }
 }
 
+// 0x5394C0
 bool CFireManager::ExtinguishPointWithWater(CVector point, float fRadius, float fWaterStrength) {
     bool bSuccess = false;
-    for (auto& fire : m_aFires) {
+    for (CFire& fire : m_aFires) {
         if (!fire.IsActive())
             continue;
+
         if ((fire.m_vecPosition - point).SquaredMagnitude() > fRadius * fRadius)
             continue;
+
         fire.ExtinguishWithWater(fWaterStrength);
         bSuccess = true;
     }
     return bSuccess;
 }
 
-bool CFireManager::IsScriptFireExtinguished(short id) {
+// 0x5396E0
+bool CFireManager::IsScriptFireExtinguished(int16 id) {
     return !Get(id).IsActive();
 }
 
+// 0x539700
 void CFireManager::RemoveScriptFire(uint16_t fireID) {
     CFire& fire = Get(fireID);
     if (fire.m_nFlags.bCreatedByScript) {
@@ -138,8 +168,9 @@ void CFireManager::RemoveScriptFire(uint16_t fireID) {
     }
 }
 
+// 0x539720
 void CFireManager::RemoveAllScriptFires() {
-    for (auto& fire : m_aFires) {
+    for (CFire& fire : m_aFires) {
         if (fire.m_nFlags.bCreatedByScript) {
             fire.m_nFlags.bCreatedByScript = false;
             fire.Extinguish();
@@ -147,23 +178,27 @@ void CFireManager::RemoveAllScriptFires() {
     }
 }
 
+// 0x5397A0
 void CFireManager::ClearAllScriptFireFlags() {
-    for (auto& fire : m_aFires) {
+    for (CFire& fire : m_aFires) {
         fire.m_nFlags.bCreatedByScript = false;
     }
 }
 
-void CFireManager::SetScriptFireAudio(short fireID, bool bFlag) {
+// 0x5397B0
+void CFireManager::SetScriptFireAudio(int16 fireID, bool bFlag) {
     Get(fireID).m_nFlags.bMakesNoise = bFlag;
 }
 
-const CVector& CFireManager::GetScriptFireCoords(short fireID) {
+// 0x5397E0
+const CVector& CFireManager::GetScriptFireCoords(int16 fireID) {
     return Get(fireID).m_vecPosition;
 }
 
-uint32_t CFireManager::GetNumFiresInRange(const CVector& point, float fRadius) {
-    uint32_t c = 0;
-    for (auto& fire : m_aFires) {
+// 0x5397F0
+uint32 CFireManager::GetNumFiresInRange(const CVector& point, float fRadius) {
+    uint32 c = 0;
+    for (CFire& fire : m_aFires) {
         if (fire.IsActive() && !fire.IsScript()) {
             if ((fire.m_vecPosition - point).Magnitude2D() <= fRadius) {
                 c++;
@@ -173,13 +208,14 @@ uint32_t CFireManager::GetNumFiresInRange(const CVector& point, float fRadius) {
     return c;
 }
 
-uint32_t CFireManager::GetNumFiresInArea(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+// 0x539860
+uint32 CFireManager::GetNumFiresInArea(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
     CBoundingBox boundingBox{
         {minX, minY, minZ},
         {maxX, maxY, maxZ}
     };
-    uint32_t c = 0;
-    for (auto& fire : m_aFires) {
+    uint32 c = 0;
+    for (CFire& fire : m_aFires) {
         if (fire.IsActive() && !fire.IsScript()) {
             if (boundingBox.IsPointWithin(fire.m_vecPosition)) {
                 c++;
@@ -188,34 +224,28 @@ uint32_t CFireManager::GetNumFiresInArea(float minX, float minY, float minZ, flo
     }
     return c;
 }
- 
+
+// 0x539D10
 void CFireManager::DestroyAllFxSystems() {
-    for (auto& fire : m_aFires) {
+    for (CFire& fire : m_aFires) {
         if (fire.IsActive()) {
             fire.DestroyFx();
         }
     }
 }
 
+// 0x539D50
 void CFireManager::CreateAllFxSystems() {
-    for (auto& fire : m_aFires) {
+    for (CFire& fire : m_aFires) {
         if (fire.IsActive()) {
             fire.CreateFxSysForStrength(fire.m_vecPosition, nullptr);
         }
     }
 }
 
-void CFireManager::Shutdown() {
-    for (auto& fire : m_aFires) {
-        fire.m_nFlags.bCreatedByScript = false;
-        if (fire.IsActive()) {
-            fire.Extinguish();
-        }
-    }
-}
-
+// 0x539E50
 CFire* CFireManager::GetNextFreeFire(bool bMayExtinguish) {
-    for (auto& fire : m_aFires) {
+    for (CFire& fire : m_aFires) {
         if (!fire.IsActive() && !fire.IsScript()) {
             return &fire;
         }
@@ -226,7 +256,7 @@ CFire* CFireManager::GetNextFreeFire(bool bMayExtinguish) {
 
     // At this point there are no inactive fires in the pool 
     // So try to extinguish a script / first generation fire
-    for (auto& fire : m_aFires) {
+    for (CFire& fire : m_aFires) {
         if (fire.IsFirstGen() || fire.IsScript()) {
             fire.m_nFlags.bCreatedByScript = false;
             fire.Extinguish();
@@ -236,33 +266,37 @@ CFire* CFireManager::GetNextFreeFire(bool bMayExtinguish) {
     return nullptr;
 }
 
-CFire * CFireManager::StartFire(CVector pos, float fStrength, uint8_t unused, CEntity * pCreator, uint32_t nTimeToBurn, uint8_t nGenerations, uint8_t unused_) {
-    CFire* pFire = GetNextFreeFire(false);
-    if (!pFire)
+// 0x539F00
+CFire* CFireManager::StartFire(CVector pos, float size, uint8 unused, CEntity* creator, uint32 nTimeToBurn, int8_t nGenerations, uint8 unused_) {
+    CFire* fire = GetNextFreeFire(false);
+    if (!fire)
         return nullptr;
-    pFire->Start(pCreator, pos, nTimeToBurn, std::min<uint8_t>((uint8_t)m_nMaxFireGenerationsAllowed, nGenerations));
-    return pFire;
+
+    fire->Start(creator, pos, nTimeToBurn, std::min<uint8>((uint8)m_nMaxFireGenerationsAllowed, nGenerations));
+    return fire;
 }
 
-CFire * CFireManager::StartFire(CEntity * pTarget, CEntity * pCreator, float fStrength, uint8_t unused, uint32_t lifetime, uint8_t nGenerations) {
-    /* Do few checks, and clear `m_pFire` if `pTarget` */
-    switch (pTarget->m_nType) {
+// 0x53A050
+CFire* CFireManager::StartFire(CEntity* target, CEntity* creator, float size, uint8 unused, uint32 lifetime, int8_t numGenerations) {
+    /* Do few checks, and clear `m_pFire` if `target` */
+    switch (target->m_nType) {
     case eEntityType::ENTITY_TYPE_PED: {
-        auto pPedTarget = static_cast<CPed*>(pTarget);
-        if (!pPedTarget->IsPedInControl())
+        auto pedTarget = static_cast<CPed*>(target);
+        if (!pedTarget->IsPedInControl())
             return nullptr;
-        if (pPedTarget->m_pFire)
+        if (pedTarget->m_pFire)
             return nullptr;
-        if (pPedTarget->physicalFlags.bFireProof)
+        if (pedTarget->physicalFlags.bFireProof)
             return nullptr;
         break;
     }
     case eEntityType::ENTITY_TYPE_VEHICLE: {
-        auto pVehTarget = static_cast<CVehicle*>(pTarget);
+        auto pVehTarget = static_cast<CVehicle*>(target);
         if (pVehTarget->m_pFire)
             return nullptr;
+
         if (pVehTarget->IsAutomobile()) {
-            if (static_cast<CAutomobile*>(pTarget)->m_damageManager.GetEngineStatus() >= 225)
+            if (static_cast<CAutomobile*>(target)->m_damageManager.GetEngineStatus() >= 225)
                 return nullptr;
         }
         if (pVehTarget->physicalFlags.bFireProof)
@@ -270,23 +304,25 @@ CFire * CFireManager::StartFire(CEntity * pTarget, CEntity * pCreator, float fSt
         break;
     }
     case eEntityType::ENTITY_TYPE_OBJECT: {
-        if (static_cast<CObject*>(pTarget)->m_pFire)
+        if (static_cast<CObject*>(target)->m_pFire)
             return nullptr;
         break;
     }
     }
-    if (auto pFire = GetNextFreeFire(false))
-        pFire->Start(pCreator, pTarget, lifetime, std::min<uint8_t>((uint8_t)m_nMaxFireGenerationsAllowed, nGenerations));
+
+    if (auto fire = GetNextFreeFire(false))
+        fire->Start(creator, target, lifetime, std::min<uint8>((uint8)m_nMaxFireGenerationsAllowed, numGenerations));
+
     return nullptr;
 }
 
-int32_t CFireManager::StartScriptFire(CVector const& pos, CEntity * pTarget, float _fUnused, uint8_t _nUnused, uint8_t nGenerations, int32_t nStrength) {
-
+// 0x53A270
+int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* pTarget, float _fUnused, uint8 _nUnused, int8_t nGenerations, int32 nStrength) {
     if (pTarget) {
         /* Extinguish current fire (if any) of target */
-        const auto StopFire = [](CFire* pFire) {
-            pFire->Extinguish();
-            pFire->m_nFlags.bCreatedByScript = false;
+        const auto StopFire = [](CFire* fire) {
+            fire->Extinguish();
+            fire->m_nFlags.bCreatedByScript = false;
         };
         switch (pTarget->m_nType) {
         case eEntityType::ENTITY_TYPE_PED: {
@@ -299,6 +335,7 @@ int32_t CFireManager::StartScriptFire(CVector const& pos, CEntity * pTarget, flo
             auto pVehTarget = static_cast<CVehicle*>(pTarget);
             if (pVehTarget->m_pFire)
                 StopFire(pVehTarget->m_pFire);
+
             /* Set engine status for automobiles */
             if (pVehTarget->IsAutomobile()) {
                 auto& dmgMgr = static_cast<CAutomobile*>(pVehTarget)->m_damageManager;
@@ -310,20 +347,22 @@ int32_t CFireManager::StartScriptFire(CVector const& pos, CEntity * pTarget, flo
         }
     }
 
-    if (auto pFire = GetNextFreeFire(true)) {
-        pFire->Start(pos, (float)nStrength, pTarget, std::min<uint8_t>((uint8_t)m_nMaxFireGenerationsAllowed, nGenerations));
-        return CTheScripts::GetNewUniqueScriptThingIndex(GetIndexOf(pFire), 5);
+    if (auto fire = GetNextFreeFire(true)) {
+        fire->Start(pos, (float)nStrength, pTarget, std::min<uint8>((uint8)m_nMaxFireGenerationsAllowed, nGenerations));
+        return CTheScripts::GetNewUniqueScriptThingIndex(GetIndexOf(fire), 5);
     }
     return -1;
 }
 
+// 0x53AF00
 void CFireManager::Update() {
     if (CReplay::Mode == 1)
         return;
 
-    for (auto& fire : m_aFires) {
+    for (CFire& fire : m_aFires) {
         fire.ProcessFire();
     }
+
     if (CGameLogic::LaRiotsActiveHere() && (CTimer::m_snTimeInMilliseconds / 500u != CTimer::m_snPreviousTimeInMilliseconds / 500u)) {
         const float fRandomAngleRad = CGeneral::GetRandomNumberInRange(0.0f, 2 * rwPI);
         const float fRandomDir = CGeneral::GetRandomNumberInRange(35.0f, 60.0f);
@@ -354,7 +393,7 @@ void CFireManager::Update() {
         }
     }
 
-    int32_t nFires = (int32_t)GetNumOfFires();
+    auto nFires = (int32)GetNumOfFires();
     bool firesVisited[60] = {false}; // Lookup table to see if a fire's strength was already included into a group of fires
     while (nFires > 0) {
         // Repeat until there are no active fires left 
@@ -373,14 +412,14 @@ void CFireManager::Update() {
 
         // Sum up strengths of all fires (that haven't yet been visited) within 6.0 units range
         float fCombinedStrength{};
-        int32_t nCombinedCeilStrength{};
+        int32 nCombinedCeilStrength{};
         for (size_t i = 0; i < 60; i++) {
             CFire& fire = Get(i);
             if (firesVisited[i] || !fire.IsActive())
                 continue;
             if ((fire.m_vecPosition - pStrongest->m_vecPosition).Magnitude2D() < 6.0f) {
                 fCombinedStrength += fire.m_fStrength;
-                nCombinedCeilStrength += (int32_t)std::ceil(fire.m_fStrength);
+                nCombinedCeilStrength += (int32)std::ceil(fire.m_fStrength);
                 nFires--;
                 firesVisited[i] = true;
 
@@ -402,7 +441,7 @@ void CFireManager::Update() {
             {
                 const CVector shdwColor = baseColor * fColorMult;
                 CShadows::StoreStaticShadow(
-                    reinterpret_cast<unsigned int>(pStrongest),
+                    reinterpret_cast<uint32>(pStrongest),
                     2,
                     gpShadowExplosionTex,
                     &shdwPos,
@@ -411,9 +450,9 @@ void CFireManager::Update() {
                     0.0f,
                     fDir * 1.2f,
                     0,
-                    (uint8_t)shdwColor.x,
-                    (uint8_t)shdwColor.y,
-                    (uint8_t)shdwColor.z,
+                    (uint8)shdwColor.x,
+                    (uint8)shdwColor.y,
+                    (uint8)shdwColor.z,
                     10.0f,
                     1.0f,
                     40.0f,
@@ -433,15 +472,15 @@ void CFireManager::Update() {
                     point += camToPointDirNorm * 3.5f;
                 }
 
-                // Wrapper lambda for code radability 
+                // Wrapper lambda for code readability
                 const auto RegisterCorona = [&](auto idx, CVector pos, eCoronaFlareType flare = eCoronaFlareType::FLARETYPE_NONE) {
                     const CVector crnaColor = baseColor * (fColorMult * 0.8f);
                     CCoronas::RegisterCorona(
-                        reinterpret_cast<unsigned int>(pStrongest),
+                        reinterpret_cast<uint32>(pStrongest),
                         nullptr,
-                        (unsigned char)crnaColor.x, // r
-                        (unsigned char)crnaColor.y, // g
-                        (unsigned char)crnaColor.z, // b
+                        (uint8)crnaColor.x, // r
+                        (uint8)crnaColor.y, // g
+                        (uint8)crnaColor.z, // b
                         0xFF,                       // a
                         pos,
                         fDir * 0.5f,
@@ -462,10 +501,10 @@ void CFireManager::Update() {
                 };
 
                 // Each corona only differs in position, and ID
-                RegisterCorona(reinterpret_cast<unsigned int>(pStrongest), point, eCoronaFlareType::FLARETYPE_HEADLIGHTS);
+                RegisterCorona(reinterpret_cast<uint32>(pStrongest), point, eCoronaFlareType::FLARETYPE_HEADLIGHTS);
 
                 point.z += 2.0f;
-                RegisterCorona(reinterpret_cast<unsigned int>(pStrongest) + 1, point);
+                RegisterCorona(reinterpret_cast<uint32>(pStrongest) + 1, point);
                 point.z -= 2.0f;
 
                 CVector camRightNorm = TheCamera.GetRight();
@@ -473,10 +512,10 @@ void CFireManager::Update() {
                 camRightNorm.Normalise();
 
                 point += camRightNorm * 2.0f;
-                RegisterCorona(reinterpret_cast<unsigned int>(pStrongest) + 2, point);
+                RegisterCorona(reinterpret_cast<uint32>(pStrongest) + 2, point);
 
                 point -= camRightNorm * 4.0f;
-                RegisterCorona(reinterpret_cast<unsigned int>(pStrongest) + 3, point);
+                RegisterCorona(reinterpret_cast<uint32>(pStrongest) + 3, point);
             }
         }
 

@@ -1,48 +1,58 @@
 #pragma once
-#include "PluginBase.h"
-#include "CFire.h"
 
+#include "CFire.h"
 
 class CFireManager {
 public:
-    CFire m_aFires[60];
-    uint32_t m_nMaxFireGenerationsAllowed;
+    CFire  m_aFires[60];
+    uint32 m_nMaxFireGenerationsAllowed;
 
 public:
-    static void InjectHooks();
-
     CFireManager();
     ~CFireManager();
 
-public:
-    CFireManager* Destructor();
-    CFireManager* Constructor();
-public:
     void Init();
-    uint32_t GetNumOfNonScriptFires();
-    uint32_t GetNumOfFires();
-    CFire * FindNearestFire(CVector const& point, bool bCheckWasExtinguished, bool bCheckWasCreatedByScript);
+    void Shutdown();
+
+    uint32 GetNumOfNonScriptFires();
+    uint32 GetNumOfFires();
+    CFire* FindNearestFire(const CVector& point, bool bCheckWasExtinguished, bool bCheckWasCreatedByScript);
     bool PlentyFiresAvailable();
+
     void ExtinguishPoint(CVector point, float fRadiusSq);
     bool ExtinguishPointWithWater(CVector point, float fRadiusSq, float fFireSize);
-    bool IsScriptFireExtinguished(short id);
+
+    bool IsScriptFireExtinguished(int16 id);
+
     void RemoveScriptFire(uint16_t fireID);
     void RemoveAllScriptFires();
     void ClearAllScriptFireFlags();
-    void SetScriptFireAudio(short fireID, bool bFlag);
-    const CVector& GetScriptFireCoords(short fireID);
-    uint32_t GetNumFiresInRange(const CVector& point, float fRadiusSq);
-    uint32_t GetNumFiresInArea(float minX, float minY, float minZ, float maxX, float maxY, float maxZ);
+
+    void SetScriptFireAudio(int16 fireID, bool bFlag);
+    const CVector& GetScriptFireCoords(int16 fireID);
+    uint32 GetNumFiresInRange(const CVector& point, float fRadiusSq);
+    uint32 GetNumFiresInArea(float minX, float minY, float minZ, float maxX, float maxY, float maxZ);
+
     void DestroyAllFxSystems();
     void CreateAllFxSystems();
-    void Shutdown();
-    CFire * GetNextFreeFire(bool bMayUseScriptFire);
-    CFire * StartFire(CVector pos, float size, uint8_t unused, CEntity * creator, uint32_t nTimeToBurn, uint8_t nGenerations, uint8_t unused_);
-    CFire * StartFire(CEntity * target, CEntity * creator, float size, uint8_t unused, uint32_t lifetime, uint8_t numGenerations);
-    int32_t StartScriptFire(CVector const& pos, CEntity * pTarget, float _fUnused, uint8_t _nUnused, uint8_t nGenerations, int32_t nStrength);
+
+    CFire* GetNextFreeFire(bool bMayUseScriptFire);
+    CFire* StartFire(CVector pos, float size, uint8_t unused, CEntity* creator, uint32 nTimeToBurn, int8_t nGenerations, uint8_t unused_);
+    CFire* StartFire(CEntity* target, CEntity* creator, float size, uint8_t unused, uint32 lifetime, int8_t numGenerations);
+    int32 StartScriptFire(const CVector& pos, CEntity* pTarget, float _fUnused, uint8_t _nUnused, int8_t nGenerations, int32 nStrength);
+
     void Update();
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CFireManager* Destructor();
+    CFireManager* Constructor();
+
+    // NOTSA
     CFire& Get(size_t idx) { return m_aFires[idx]; }
-    auto GetIndexOf(CFire const* pFire) const { return std::distance(std::begin(m_aFires), pFire); }
+    auto GetIndexOf(CFire const* fire) const { return std::distance(std::begin(m_aFires), fire); }
 };
 VALIDATE_SIZE(CFireManager, 0x964);
 
