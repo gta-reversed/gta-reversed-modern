@@ -2,8 +2,8 @@
 
 void CEventPedToFlee::InjectHooks()
 {
-    HookInstall(0x4AF240, &CEventPedToFlee::Constructor);
-    HookInstall(0x4B73D0, &CEventPedToFlee::Clone_Reversed);
+    ReversibleHooks::Install("CEventPedToFlee", "Constructor", 0x4AF240, &CEventPedToFlee::Constructor);
+    ReversibleHooks::Install("CEventPedToFlee", "Clone_Reversed", 0x4B73D0, &CEventPedToFlee::Clone_Reversed);
 }
 
 CEventPedToFlee::CEventPedToFlee(CPed* ped)
