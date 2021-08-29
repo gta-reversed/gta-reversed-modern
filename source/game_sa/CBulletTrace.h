@@ -5,34 +5,31 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CVector.h"
 
 class  CBulletTrace {
 public:
-    CVector       m_vecStart;
-    CVector       m_vecEnd;
-    bool          m_bExists;
-private:
-    char _pad19[3];
-public:
-    uint32_t           m_nCreationTime;
-    unsigned int  m_nLifeTime;
-    float         m_fRadius;
-    unsigned char m_nTransparency;
-private:
-    char _pad29[3];
-public:
+    CVector m_vecStart;
+    CVector m_vecEnd;
+    bool    m_bExists;
+    char    _pad19[3];
+    uint32  m_nCreationTime;
+    uint32  m_nLifeTime;
+    float   m_fRadius;
+    uint8   m_nTransparency;
+    char    _pad29[3];
 
+public:
     void Update() {
-        if (CTimer::m_snTimeInMilliseconds - m_nCreationTime >= m_nLifeTime) {
+        if (CTimer::GetTimeInMilliseconds() - m_nCreationTime >= m_nLifeTime) {
             m_bExists = false;
         }
     }
 
     // NOTSA
     CVector GetDirection() const noexcept { return m_vecEnd - m_vecStart; }
-    uint32_t GetRemainingLifetime() const noexcept { return CTimer::m_snTimeInMilliseconds - m_nCreationTime; }
+    uint32_t GetRemainingLifetime() const noexcept { return CTimer::GetTimeInMilliseconds() - m_nCreationTime; }
 };
 
 VALIDATE_SIZE(CBulletTrace, 0x2C);

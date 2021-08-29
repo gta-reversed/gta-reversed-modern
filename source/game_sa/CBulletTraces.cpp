@@ -1,26 +1,36 @@
 #include "StdInc.h"
 
-CBulletTrace(&CBulletTraces::aTraces)[16] = *(CBulletTrace(*)[16])0xC7C748;
+#include "CBulletTraces.h"
+
+CBulletTrace (&CBulletTraces::aTraces)[16] = *(CBulletTrace(*)[16])0xC7C748;
 
 void CBulletTraces::InjectHooks()
 {
     ReversibleHooks::Install("CBulletTraces", "Init", 0x721D50, &CBulletTraces::Init);
-    ReversibleHooks::Install("CBulletTraces", "AddTrace", 0x723750, static_cast<void(*)(const CVector&, const CVector&, float, uint32_t, uint8_t)>(&CBulletTraces::AddTrace));
+    ReversibleHooks::Install("CBulletTraces", "AddTrace", 0x723750, static_cast<void(*)(CVector*, CVector*, float, uint32_t, uint8_t)>(&CBulletTraces::AddTrace));
+    ReversibleHooks::Install("CBulletTraces", "AddTrace_Wrapper", 0x726AF0, static_cast<void(*)(CVector*, CVector*, eWeaponType, CEntity*)>(&CBulletTraces::AddTrace));
     ReversibleHooks::Install("CBulletTraces", "Render", 0x723C10, &CBulletTraces::Render);
     ReversibleHooks::Install("CBulletTraces", "Update", 0x723FB0, &CBulletTraces::Update);
-    ReversibleHooks::Install("CBulletTraces", "AddTrace_Wrapper", 0x726AF0, static_cast<void(*)(const CVector&, const CVector&, eWeaponType, CEntity*)>(&CBulletTraces::AddTrace));
 }
 
 // 0x721D50
 void CBulletTraces::Init()
 {
-    for (auto& trace : aTraces) {
+    for (CBulletTrace& trace : aTraces) {
         trace.m_bExists = false;
     }
 }
 
+// 0x723FB0
+void CBulletTraces::Update()
+{
+    for (CBulletTrace& trace : aTraces) {
+        trace.Update();
+    }
+}
+
 CBulletTrace* CBulletTraces::GetFree() {
-    for (auto& trace : aTraces) {
+    for (CBulletTrace& trace : aTraces) {
         if (!trace.m_bExists) {
             return &trace;
         }
@@ -29,12 +39,12 @@ CBulletTrace* CBulletTraces::GetFree() {
 }
 
 // 0x723750
-void CBulletTraces::AddTrace(const CVector& from, const CVector& to, float radius, uint32_t dissapearTime, uint8_t alpha)
+void CBulletTraces::AddTrace(CVector* from, CVector* to, float radius, uint32_t disappearTime, uint8_t alpha)
 {
     if (CBulletTrace* pTrace = GetFree()) {
-        pTrace->m_vecStart = from;
-        pTrace->m_vecEnd = to;
-        pTrace->m_nCreationTime = CTimer::m_snTimeInMilliseconds;
+        pTrace->m_vecStart = *from;
+        pTrace->m_vecEnd = *to;
+        pTrace->m_nCreationTime = CTimer::GetTimeInMilliseconds();
         pTrace->m_nTransparency = alpha;
         pTrace->m_bExists = true;
         pTrace->m_fRadius = radius;
@@ -43,9 +53,9 @@ void CBulletTraces::AddTrace(const CVector& from, const CVector& to, float radiu
         // (Probably done to keep the amount of traces as low as possible)
         const auto traceIdx = GetTraceIndex(pTrace);
         if (traceIdx < 10) {
-            pTrace->m_nLifeTime = (uint32_t)(traceIdx < 5 ? dissapearTime : dissapearTime / 2.0f);
+            pTrace->m_nLifeTime = (uint32_t)(traceIdx < 5 ? disappearTime : disappearTime / 2.0f);
         } else {
-            pTrace->m_nLifeTime = (uint32_t)(dissapearTime / 4.0f);
+            pTrace->m_nLifeTime = (uint32_t)(disappearTime / 4.0f);
         }
     }
     // Play sound front-end
@@ -53,19 +63,19 @@ void CBulletTraces::AddTrace(const CVector& from, const CVector& to, float radiu
     CMatrix camMat = TheCamera.GetMatrix();
     const CVector camPos = camMat.GetPosition();
 
-    const float fromCamDir_Dot_CamRight = DotProduct(from - camPos, camMat.GetRight());
-    const float fromCamDir_Dot_CamUp = DotProduct(from - camPos, camMat.GetUp());
-    const float fromCamDir_Dot_CamFwd = DotProduct(from - camPos, camMat.GetForward());
+    const float fromCamDir_Dot_CamRight = DotProduct(*from - camPos, camMat.GetRight());
+    const float fromCamDir_Dot_CamUp    = DotProduct(*from - camPos, camMat.GetUp());
+    const float fromCamDir_Dot_CamFwd   = DotProduct(*from - camPos, camMat.GetForward());
 
-    const float toCamDir_Dot_CamRight = DotProduct(to - camPos, camMat.GetRight());
-    const float toCamDir_Dot_CamFwd = DotProduct(to - camPos, camMat.GetForward());
+    const float toCamDir_Dot_CamRight   = DotProduct(*to - camPos, camMat.GetRight());
+    const float toCamDir_Dot_CamFwd     = DotProduct(*to - camPos, camMat.GetForward());
 
     if (toCamDir_Dot_CamFwd * fromCamDir_Dot_CamFwd < 0.0f) {
         const float absFromCamDir_Dot_CamFwd = fabs(fromCamDir_Dot_CamFwd);
         const float absToCamDir_Dot_CamFwd = fabs(toCamDir_Dot_CamFwd);
 
         const float v43 = absFromCamDir_Dot_CamFwd / (absFromCamDir_Dot_CamFwd + absToCamDir_Dot_CamFwd);
-        const float v51 = DotProduct(to - camPos, camMat.GetUp()) - fromCamDir_Dot_CamUp;
+        const float v51 = DotProduct(*to - camPos, camMat.GetUp()) - fromCamDir_Dot_CamUp;
         const float v52 = v51 * v43;
         const float v44 = (toCamDir_Dot_CamRight - fromCamDir_Dot_CamRight) * v43 + fromCamDir_Dot_CamRight;
         const float v42 = CVector2D{ v52 + fromCamDir_Dot_CamUp, v44 }.Magnitude(); // Originally uses sqrt and stuff, but this is cleaner
@@ -93,6 +103,47 @@ void CBulletTraces::AddTrace(const CVector& from, const CVector& to, float radiu
     }
 }
 
+// 0x726AF0
+void CBulletTraces::AddTrace(CVector* posMuzzle, CVector* posBulletHit, eWeaponType weaponType, CEntity* fromEntity)
+{
+    if (FindPlayerPed() == fromEntity || FindPlayerVehicle() && FindPlayerVehicle() == fromEntity) {
+        switch (CCamera::GetActiveCamera().m_nMode) {
+        case MODE_M16_1STPERSON:
+        case MODE_SNIPER:
+        case MODE_CAMERA:
+        case MODE_ROCKETLAUNCHER:
+        case MODE_ROCKETLAUNCHER_HS:
+        case MODE_M16_1STPERSON_RUNABOUT:
+        case MODE_SNIPER_RUNABOUT:
+        case MODE_ROCKETLAUNCHER_RUNABOUT:
+        case MODE_ROCKETLAUNCHER_RUNABOUT_HS:
+        case MODE_HELICANNON_1STPERSON: {
+            if (FindPlayerEntity()->AsPhysical()->m_vecMoveSpeed.Magnitude() < 0.05f) {
+                return;
+            }
+        }
+        }
+    }
+
+    CVector dir = *posBulletHit - *posMuzzle;
+    const float traceLengthOriginal = dir.Magnitude();
+    dir.Normalise();
+
+    const float traceLengthNew = CGeneral::GetRandomNumberInRange(0.0f, traceLengthOriginal);
+    const float fRadius = std::min(CGeneral::GetRandomNumberInRange(2.0f, 5.0f), traceLengthOriginal - traceLengthNew);
+
+    CVector from = *posMuzzle + dir * traceLengthNew;
+    CVector to = from + dir * fRadius;
+
+    AddTrace(
+        &from,
+        &to,
+        0.01f,
+        300,
+        70
+    );
+}
+
 // 0x723C10
 void CBulletTraces::Render()
 {
@@ -104,7 +155,7 @@ void CBulletTraces::Render()
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)NULL);
 
     RxObjSpace3DVertex verts[6];
-    for (auto& trace : aTraces) {
+    for (CBulletTrace& trace : aTraces) {
         if (!trace.m_bExists)
             continue;
 
@@ -171,50 +222,4 @@ void CBulletTraces::Render()
     RwRenderStateSet(rwRENDERSTATESRCBLEND,     (void*)RwBlendFunction::rwBLENDSRCALPHA);
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,    (void*)RwBlendFunction::rwBLENDINVSRCALPHA);
     RwRenderStateSet(rwRENDERSTATECULLMODE,     (void*)RwCullMode::rwCULLMODECULLBACK);
-}
-
-// 0x723FB0
-void CBulletTraces::Update()
-{
-    for (auto& trace : aTraces) {
-        trace.Update();
-    }
-}
-
-// 0x726AF0
-void CBulletTraces::AddTrace(const CVector& posMuzzle, const CVector& posBulletHit, eWeaponType weaponType, CEntity* pFromEntity)
-{
-    if (FindPlayerPed() == pFromEntity || FindPlayerVehicle() && FindPlayerVehicle() == pFromEntity) {
-        switch (CCamera::GetActiveCamera().m_nMode) {
-        case MODE_M16_1STPERSON:
-        case MODE_SNIPER:
-        case MODE_CAMERA:
-        case MODE_ROCKETLAUNCHER:
-        case MODE_ROCKETLAUNCHER_HS:
-        case MODE_M16_1STPERSON_RUNABOUT:
-        case MODE_SNIPER_RUNABOUT:
-        case MODE_ROCKETLAUNCHER_RUNABOUT:
-        case MODE_ROCKETLAUNCHER_RUNABOUT_HS:
-        case MODE_HELICANNON_1STPERSON: {
-            if (FindPlayerEntity()->AsPhysical()->m_vecMoveSpeed.Magnitude() < 0.05f) {
-                return;
-            }
-        }
-        }
-    }
-    
-    CVector dir = posBulletHit - posMuzzle;
-    const float traceLengthOriginal = dir.Magnitude();
-    dir.Normalise();
-
-    const float traceLengthNew = CGeneral::GetRandomNumberInRange(0.0f, traceLengthOriginal);
-    const CVector from = posMuzzle + dir * traceLengthNew;
-    const float fRadius = std::min(CGeneral::GetRandomNumberInRange(2.0f, 5.0f), traceLengthOriginal - traceLengthNew);
-    AddTrace(
-        from,
-        from + dir * fRadius,
-        0.01f,
-        300u,
-        70u
-    );
 }
