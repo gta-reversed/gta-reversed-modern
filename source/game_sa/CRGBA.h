@@ -6,38 +6,36 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
 struct RwRGBA;
 
 class CRGBA {
 public:
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-    unsigned char a;
+    uint8 r;
+    uint8 g;
+    uint8 b;
+    uint8 a;
 
-    CRGBA(unsigned char red, unsigned char green, unsigned char blue);
-    CRGBA(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
+    CRGBA(uint8 red, uint8 green, uint8 blue);
+    CRGBA(uint8 red, uint8 green, uint8 blue, uint8 alpha);
     CRGBA(CRGBA const& rhs);
-    CRGBA(unsigned int intValue);
+    CRGBA(uint32 intValue);
     CRGBA(RwRGBA const& rhs);
     CRGBA();
 
-    void Set(unsigned char red, unsigned char green, unsigned char blue);
-    void Set(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
-    void Set(unsigned int intValue);
+    void Set(uint8 red, uint8 green, uint8 blue);
+    void Set(uint8 red, uint8 green, uint8 blue, uint8 alpha);
+    void Set(uint32 intValue);
     void Set(CRGBA const& rhs);
-    void Set(CRGBA const& rhs, unsigned char alpha);
+    void Set(CRGBA const& rhs, uint8 alpha);
     void Set(RwRGBA const& rwcolor);
 
     CRGBA ToRGB() const;
-    unsigned int ToInt() const;
-    unsigned int ToIntARGB() const;
+    uint32 ToInt() const;
+    uint32 ToIntARGB() const;
     RwRGBA ToRwRGBA() const;
 
     void FromRwRGBA(RwRGBA const& rwcolor);
-    void FromARGB(unsigned int intValue);
+    void FromARGB(uint32 intValue);
 
     void Invert();
     CRGBA Inverted() const;
@@ -46,6 +44,15 @@ public:
     CRGBA& operator=(CRGBA const& rhs);
 
     CRGBA operator*(float mult) {
+        return {
+            (uint8_t)((float)r * mult),
+            (uint8_t)((float)g * mult),
+            (uint8_t)((float)b * mult),
+            (uint8_t)((float)a * mult)
+        };
+    }
+
+    CRGBA operator*(float mult) const {
         return {
             (uint8_t)((float)r * mult),
             (uint8_t)((float)g * mult),

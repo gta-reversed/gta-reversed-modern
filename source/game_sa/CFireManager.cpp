@@ -431,7 +431,7 @@ void CFireManager::Update() {
         }
 
         if (fCombinedStrength > 4.0f && nCombinedCeilStrength) {
-            const CVector baseColor{ 40.0f, 32.0f, 20.0f }; // From addresses 0x8CCFF0, 0x8CCFF1, 0x8CCFF2 (These are int values originally)
+            const CRGBA baseColor{ 40, 32, 20 }; // From addresses 0x8CCFF0, 0x8CCFF1, 0x8CCFF2
 
             const float fDir = std::min(7.0f, fCombinedStrength - 6.0f + 3.0f);
 
@@ -439,7 +439,7 @@ void CFireManager::Update() {
             shdwPos.z += 5.0f;
             const float fColorMult = CGeneral::GetRandomNumberInRange(0.6f, 1.0f);
             {
-                const CVector shdwColor = baseColor * fColorMult;
+                const CRGBA shdwColor = baseColor * fColorMult;
                 CShadows::StoreStaticShadow(
                     reinterpret_cast<uint32>(pStrongest),
                     2,
@@ -450,9 +450,9 @@ void CFireManager::Update() {
                     0.0f,
                     fDir * 1.2f,
                     0,
-                    (uint8)shdwColor.x,
-                    (uint8)shdwColor.y,
-                    (uint8)shdwColor.z,
+                    shdwColor.r,
+                    shdwColor.g,
+                    shdwColor.b,
                     10.0f,
                     1.0f,
                     40.0f,
@@ -474,14 +474,14 @@ void CFireManager::Update() {
 
                 // Wrapper lambda for code readability
                 const auto RegisterCorona = [&](auto idx, CVector pos, eCoronaFlareType flare = eCoronaFlareType::FLARETYPE_NONE) {
-                    const CVector crnaColor = baseColor * (fColorMult * 0.8f);
+                    const CRGBA crnaColor = baseColor * (fColorMult * 0.8f);
                     CCoronas::RegisterCorona(
                         reinterpret_cast<uint32>(pStrongest),
                         nullptr,
-                        (uint8)crnaColor.x, // r
-                        (uint8)crnaColor.y, // g
-                        (uint8)crnaColor.z, // b
-                        0xFF,                       // a
+                        crnaColor.r,
+                        crnaColor.g,
+                        crnaColor.b,
+                        0xFF,
                         pos,
                         fDir * 0.5f,
                         70.0f,
