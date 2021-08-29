@@ -2,7 +2,7 @@
 
 void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks()
 {
-    HookInstall(0x66A100, &CTaskComplexAvoidOtherPedWhileWandering::Constructor);
+    ReversibleHooks::Install("CTaskComplexAvoidOtherPedWhileWandering", "CTaskComplexAvoidOtherPedWhileWandering", 0x66A100, &CTaskComplexAvoidOtherPedWhileWandering::Constructor);
 }
 
 CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(CPed* ped, CVector* targetPoint, std::int32_t moveState)

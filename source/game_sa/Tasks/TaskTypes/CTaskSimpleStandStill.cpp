@@ -2,10 +2,10 @@
 
 void CTaskSimpleStandStill::InjectHooks()
 {
-    HookInstall(0x62F310, &CTaskSimpleStandStill::Constructor);
-    HookInstall(0x635CF0, &CTaskSimpleStandStill::Clone_Reversed);
-    HookInstall(0x4B8690, &CTaskSimpleStandStill::MakeAbortable_Reversed);
-    HookInstall(0x62F370, &CTaskSimpleStandStill::ProcessPed_Reversed);
+    ReversibleHooks::Install("CTaskSimpleStandStill", "CTaskSimpleStandStill", 0x62F310, &CTaskSimpleStandStill::Constructor);
+    ReversibleHooks::Install("CTaskSimpleStandStill", "Clone", 0x635CF0, &CTaskSimpleStandStill::Clone_Reversed);
+    ReversibleHooks::Install("CTaskSimpleStandStill", "MakeAbortable", 0x4B8690, &CTaskSimpleStandStill::MakeAbortable_Reversed);
+    ReversibleHooks::Install("CTaskSimpleStandStill", "ProcessPed", 0x62F370, &CTaskSimpleStandStill::ProcessPed_Reversed);
 }
 
 CTaskSimpleStandStill::CTaskSimpleStandStill(int nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData)
