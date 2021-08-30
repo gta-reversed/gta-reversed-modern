@@ -77,6 +77,7 @@ void CFont::InjectHooks() {
     ReversibleHooks::Install("CFont", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
     //ReversibleHooks::Install("CFont", "PrintChar", 0x718A10, &CFont::PrintChar);
     ReversibleHooks::Install("CFont", "GetLetterSize", 0x719750, &CFont::GetLetterSize);
+    ReversibleHooks::Install("CFont", "GetStringWidth", 0x71A0E0, &CFont::GetStringWidth);
 
     ReversibleHooks::Install("", "ReadFontsDat", 0x7187C0, &ReadFontsDat);
 }
@@ -669,13 +670,15 @@ float CFont::GetStringWidth(char* string, bool full, bool scriptText)
 
             pStr++;
             if (scriptText) {
-                //width += sub_719670(upper);
+                width += GetScriptLetterSize(upper);
             }
             else {
-                //width += GetCharacterSize(upper);
+                width += GetLetterSize(upper);
             }
         }
     }
+
+    return width;
 }
 
 // same as RenderFontBuffer() (0x71A210)
@@ -783,6 +786,12 @@ float CFont::GetLetterSize(uint8 letterId)
 
     return ((float)gFontData[m_FontTextureId].m_unpropValue + (float)m_nFontOutlineSize)
         * m_Scale.x;
+}
+
+// 0x719670, original name unknown
+float GetScriptLetterSize(uint8 letterId)
+{
+    return plugin::CallAndReturn<float, 0x719670, uint8>(letterId);
 }
 
 uint8 GetIDforPropVal(uint8 letterId, uint8 fontStyle)
