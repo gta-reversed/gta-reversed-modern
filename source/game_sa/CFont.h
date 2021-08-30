@@ -55,6 +55,24 @@ struct tFontData {
     char m_unpropValue;
 };
 
+enum class eExtraFontSymbol : uint8_t {
+    BUTTON_NONE = 0, // invalid
+    BUTTON_DPAD_UP = 1,
+    BUTTON_DPAD_DOWN = 2,
+    BUTTON_DPAD_LEFT = 3,
+    BUTTON_DPAD_RIGHT = 4,
+    BUTTON_CROSS = 5,
+    BUTTON_CIRCLE = 6,
+    BUTTON_SQUARE = 7,
+    BUTTON_TRIANGLE = 8,
+    BUTTON_KEY = 9, // followed by buttons, L1?
+    BUTTON_L2 = 10,
+    BUTTON_L3 = 11,
+    BUTTON_R1 = 12,
+    BUTTON_R2 = 13,
+    BUTTON_R3 = 14
+};
+
 enum class eFontAlignment : uint8_t {
     ALIGN_CENTER,
     ALIGN_LEFT,
@@ -79,7 +97,7 @@ public:
     static CSprite2d (&Sprite)[MAX_FONT_SPRITES];
     // button textures array
     static CSprite2d (&ButtonSprite)[MAX_FONT_BUTTON_SPRITES];
-    static unsigned char& m_nExtraFontSymbolId;
+    static eExtraFontSymbol& m_nExtraFontSymbolId;
     static bool& m_bNewLine;
     static CRGBA* m_Color;
     static CVector2D& m_Scale;

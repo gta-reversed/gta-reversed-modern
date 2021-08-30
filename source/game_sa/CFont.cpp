@@ -14,7 +14,7 @@ CFontChar* pEmptyChar = (CFontChar*)0xC716A8;
 CFontChar& CFont::RenderState = *(CFontChar*)0xC71AA0;
 CSprite2d (&CFont::Sprite)[MAX_FONT_SPRITES] = *(CSprite2d(*)[2])0xC71AD0;
 CSprite2d (&CFont::ButtonSprite)[MAX_FONT_BUTTON_SPRITES] = *(CSprite2d(*)[15])0xC71AD8;
-unsigned char& CFont::m_nExtraFontSymbolId = *(unsigned char*)0xC71A54; // aka. PS2Symbol
+eExtraFontSymbol& CFont::m_nExtraFontSymbolId = *(eExtraFontSymbol*)0xC71A54;
 bool& CFont::m_bNewLine = *(bool*)0xC71A55;
 CRGBA* CFont::m_Color = (CRGBA*)0xC71A60;
 CVector2D& CFont::m_Scale = *(CVector2D*)0xC71A64;
@@ -76,6 +76,8 @@ void CFont::InjectHooks() {
 
     ReversibleHooks::Install("CFont", "GetNumberLines", 0x71A5E0, &CFont::GetNumberLines);
     ReversibleHooks::Install("CFont", "ProcessStringToDisplay", 0x71A600, &CFont::ProcessStringToDisplay);
+
+    ReversibleHooks::Install("CFont", "ParseToken", 0x718F00, &CFont::ParseToken);
 }
 
 // 0x7187C0
@@ -90,30 +92,30 @@ void CFont::Initialise() {
     CTxdStore::AddRef(fontsTxd);
     CTxdStore::PushCurrentTxd();
     CTxdStore::SetCurrentTxd(fontsTxd);
-    CFont::Sprite->SetTexture((char *) "font2", (char *) "font2m");
-    CFont::Sprite[1].SetTexture((char *) "font1", (char *) "font1m");
+    Sprite[0].SetTexture("font2", "font2m");
+    Sprite[1].SetTexture("font1", "font1m");
 
     ReadFontsDat();
 
-    CFont::SetScale(1.0f, 1.0f);
-    CFont::SetSlantRefPoint((float) RsGlobal.maximumWidth, 0.0f);
-    CFont::SetSlant(0.0);
+    SetScale(1.0f, 1.0f);
+    SetSlantRefPoint(SCREEN_WIDTH, 0.0f);
+    SetSlant(0.0);
 
-    CFont::SetColor(CRGBA(255, 255, 255, 0));
-    CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
-    CFont::SetJustify(false);
+    SetColor(CRGBA(255, 255, 255, 0));
+    SetOrientation(eFontAlignment::ALIGN_LEFT);
+    SetJustify(false);
 
-    CFont::SetWrapx((float) RsGlobal.maximumWidth);
+    SetWrapx(SCREEN_WIDTH);
 
-    CFont::SetCentreSize((float) RsGlobal.maximumWidth);
-    CFont::SetBackground(false, false);
+    SetCentreSize(SCREEN_WIDTH);
+    SetBackground(false, false);
 
-    CFont::SetBackgroundColor(CRGBA(128, 128, 128, 128));
-    CFont::SetProportional(true);
-    CFont::SetFontStyle(eFontStyle::FONT_GOTHIC);
-    CFont::SetRightJustifyWrap(0.0f);
-    CFont::SetAlphaFade(255.0f);
-    CFont::SetDropShadowPosition(0);
+    SetBackgroundColor(CRGBA(128, 128, 128, 128));
+    SetProportional(true);
+    SetFontStyle(eFontStyle::FONT_GOTHIC);
+    SetRightJustifyWrap(0.0f);
+    SetAlphaFade(255.0f);
+    SetDropShadowPosition(0);
     CTxdStore::PopCurrentTxd();
 
     int ps2btnsTxd = CTxdStore::AddTxdSlot("ps2btns");
@@ -121,10 +123,12 @@ void CFont::Initialise() {
     CTxdStore::AddRef(ps2btnsTxd);
     CTxdStore::PushCurrentTxd();
     CTxdStore::SetCurrentTxd(ps2btnsTxd);
-    CFont::ButtonSprite[1].SetTexture((char *) "up", (char *) "upA");
-    CFont::ButtonSprite[2].SetTexture((char *) "down", (char *) "downA");
-    CFont::ButtonSprite[3].SetTexture((char *) "left", (char *) "leftA");
-    CFont::ButtonSprite[4].SetTexture((char *) "right", (char *) "rightA");
+
+    ButtonSprite[1].SetTexture("up", "upA");
+    ButtonSprite[2].SetTexture("down", "downA");
+    ButtonSprite[3].SetTexture("left", "leftA");
+    ButtonSprite[4].SetTexture("right", "rightA");
+
     CTxdStore::PopCurrentTxd();
 }
 
@@ -150,9 +154,142 @@ void CFont::PrintChar(float x, float y, char character)
     plugin::Call<0x718A10, float, float, char>(x, y, character);
 }
 
+// 0x718F00
 char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
 {
-    return plugin::CallAndReturn<char*, 0x718F00, char*, CRGBA&, bool, char*>(text, color, isBlip, tag);
+    // info about tokens: https://gtamods.com/wiki/GXT#Tokens
+
+    char* next = ++text;
+
+    auto ApplyStyle = [&](eHudColours hudColor) {
+        if (!isBlip)
+            color = HudColour.GetRGBA(hudColor, color.a);
+
+        if (tag)
+            *tag = *next;
+    };
+
+    switch (*next) {
+    case '<':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_DPAD_LEFT;
+        break;
+    case '>':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_DPAD_RIGHT;
+        break;
+    case 'A':
+    case 'a':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_L3;
+        break;
+    case 'B':
+    case 'b':
+        ApplyStyle(HUD_COLOUR_DARK_BLUE);
+        break;
+    case 'C':
+    case 'c':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_R3;
+        break;
+    case 'D':
+    case 'd':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_DPAD_DOWN;
+        break;
+    case 'G':
+    case 'g':
+        ApplyStyle(HUD_COLOUR_GREEN);
+        break;
+    case 'H':
+    case 'h':
+        if (!isBlip) {
+            color = {
+                    std::min<uint8>(color.r * 1.5f, 255.0f),
+                    std::min<uint8>(color.g * 1.5f, 255.0f),
+                    std::min<uint8>(color.b * 1.5f, 255.0f),
+                    color.a
+            };
+        }
+
+        if (tag)
+            *tag = *next;
+        break;
+    case 'J':
+    case 'j':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_R1;
+        break;
+    case 'K':
+    case 'k':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_KEY;
+        break;
+    case 'M':
+    case 'm':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_L2;
+        break;
+    case 'N':
+    case 'n':
+        m_bNewLine = true;
+        break;
+    case 'O':
+    case 'o':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_CIRCLE;
+        break;
+    case 'P':
+    case 'p':
+        ApplyStyle(HUD_COLOUR_PURPLE);
+        break;
+    case 'Q':
+    case 'q':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_SQUARE;
+        break;
+    case 'R':
+    case 'r':
+        ApplyStyle(HUD_COLOUR_RED);
+        break;
+    case 'S':
+    case 's':
+        ApplyStyle(HUD_COLOUR_LIGHT_GRAY);
+        break;
+    case 'T':
+    case 't':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_TRIANGLE;
+        break;
+    case 'U':
+    case 'u':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_DPAD_UP;
+        break;
+    case 'V':
+    case 'v':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_R2;
+        break;
+    case 'W':
+    case 'w':
+        ApplyStyle(HUD_COLOUR_LIGHT_GRAY);
+        break;
+    case 'X':
+    case 'x':
+        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_CROSS;
+        break;
+    case 'Y':
+    case 'y':
+        ApplyStyle(HUD_COLOUR_CREAM);
+        break;
+    case 'l':
+        ApplyStyle(HUD_COLOUR_BLACK);
+        break;
+    default:
+        break;
+    }
+
+    if (*next != '~') {
+        // skip text to the next '~' character.
+        char x;
+        do
+            x = (next++)[1];
+        while (x != '~');
+    }
+
+    char* ret = next + 2;
+    if (*next)
+        ret = next + 1;
+
+    return ret;
 }
 
 // 0x719380
@@ -303,7 +440,7 @@ void CFont::InitPerFrame()
     m_nFontOutlineOrShadow = 0;
     m_nFontShadow = 0;
     m_bNewLine = false;
-    m_nExtraFontSymbolId = 0;
+    m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_NONE;
     RenderState.m_dwFontTexture = 0; // todo: wtf
     pEmptyChar = &setup[0];
 
