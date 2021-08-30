@@ -45,6 +45,8 @@ tFontData* gFontData = (tFontData*)0xC718B0;
 void CFont::InjectHooks() {
     ReversibleHooks::Install("CFont", "Initialise", 0x5BA690, &CFont::Initialise);
     ReversibleHooks::Install("CFont", "Shutdown", 0x7189B0, &CFont::Shutdown);
+    //ReversibleHooks::Install("CFont", "PrintChar", 0x718A10, &CFont::PrintChar);
+    ReversibleHooks::Install("CFont", "ParseToken", 0x718F00, &CFont::ParseToken);
 
     // styling functions
     ReversibleHooks::Install("CFont", "SetScale", 0x719380, &CFont::SetScale);
@@ -66,20 +68,22 @@ void CFont::InjectHooks() {
     ReversibleHooks::Install("CFont", "SetJustify", 0x719600, &CFont::SetJustify);
     ReversibleHooks::Install("CFont", "SetOrientation", 0x719610, &CFont::SetOrientation);
 
+    ReversibleHooks::Install("CFont", "InitPerFrame", 0x719800, &CFont::InitPerFrame);
+    //ReversibleHooks::Install("CFont", "RenderFontBuffer", 0x719840, &CFont::RenderFontBuffer);
+    ReversibleHooks::Install("CFont", "GetStringWidth", 0x71A0E0, &CFont::GetStringWidth);
     ReversibleHooks::Install("CFont", "DrawFonts", 0x71A210, &CFont::DrawFonts);
+    //ReversibleHooks::Install("CFont", "ProcessCurrentString", 0x71A220, &CFont::ProcessCurrentString);
+    ReversibleHooks::Install("CFont", "GetNumberLines", 0x71A5E0, &CFont::GetNumberLines);
+    ReversibleHooks::Install("CFont", "ProcessStringToDisplay", 0x71A600, &CFont::ProcessStringToDisplay);
     ReversibleHooks::Install("CFont", "GetTextRect", 0x71A620, &CFont::GetTextRect);
     ReversibleHooks::Install("CFont", "PrintString", 0x71A700, &CFont::PrintString);
     ReversibleHooks::Install("CFont", "PrintStringFromBottom", 0x71A820, &CFont::PrintStringFromBottom);
-    ReversibleHooks::Install("CFont", "InitPerFrame", 0x719800, &CFont::InitPerFrame);
-    ReversibleHooks::Install("CFont", "GetNumberLines", 0x71A5E0, &CFont::GetNumberLines);
-    ReversibleHooks::Install("CFont", "ProcessStringToDisplay", 0x71A600, &CFont::ProcessStringToDisplay);
-    ReversibleHooks::Install("CFont", "ParseToken", 0x718F00, &CFont::ParseToken);
-    ReversibleHooks::Install("CFont", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
-    //ReversibleHooks::Install("CFont", "PrintChar", 0x718A10, &CFont::PrintChar);
     ReversibleHooks::Install("CFont", "GetLetterSize", 0x719750, &CFont::GetLetterSize);
-    ReversibleHooks::Install("CFont", "GetStringWidth", 0x71A0E0, &CFont::GetStringWidth);
 
     ReversibleHooks::Install("", "ReadFontsDat", 0x7187C0, &ReadFontsDat);
+    //ReversibleHooks::Install("CFont", "GetScriptLetterSize", 0x719670, &GetScriptLetterSize);
+    ReversibleHooks::Install("CFont", "GetIDforPropVal", 0x7192C0, &GetIDforPropVal);
+    ReversibleHooks::Install("CFont", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
 }
 
 // 0x7187C0
@@ -619,6 +623,7 @@ void CFont::InitPerFrame()
     CSprite::InitSpriteBuffer();
 }
 
+// 0x719840
 void CFont::RenderFontBuffer()
 {
     plugin::Call<0x719840>();
@@ -685,6 +690,7 @@ void CFont::DrawFonts() {
     RenderFontBuffer();
 }
 
+// 0x71A220
 int16 CFont::ProcessCurrentString(bool print, float x, float y, const char* text)
 {
     return plugin::CallAndReturn<int16, 0x71A220, bool, float, float, const char*>(print, x, y, text);
