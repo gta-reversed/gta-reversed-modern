@@ -781,7 +781,7 @@ float CFont::GetLetterSize(uint8 letterId)
     if (m_FontStyle)
         propValueIdx = GetIDforPropVal(letterId, m_FontStyle);
     else if (propValueIdx == 0x91)
-        propValueIdx = 0x40;
+        propValueIdx = '?';
     else if (propValueIdx > 0x9B)
         propValueIdx = 0;
 
@@ -802,7 +802,6 @@ float GetScriptLetterSize(uint8 letterId)
 // 0x7192C0
 uint8 GetIDforPropVal(uint8 letterId, uint8 fontStyle)
 {
-    //return plugin::CallAndReturn<uint8, 0x7192C0, uint8, uint8>(letterId, fontStyle);
     if (fontStyle == 1) {
         switch (letterId) {
         case 1:
@@ -846,7 +845,7 @@ float GetLetterIdPropValue(uint8 letterId)
 {
     uint8 id = letterId;
 
-    if (letterId == 0x40)
+    if (letterId == '?')
         id = 0;
 
     if (CFont::RenderState.m_bPropOn)
