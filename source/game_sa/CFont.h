@@ -12,8 +12,8 @@
 
 // todo: move
 struct CFontChar {
-    uint8_t m_cLetter;
-    uint8_t _pad0[3];
+    uint8 m_cLetter;
+    uint8 _pad0[3];
     CVector2D m_vPosn;
     float m_fWidth;
     float m_fHeight;
@@ -22,12 +22,12 @@ struct CFontChar {
     float m_fSlant;
     CVector2D m_vSlanRefPoint;
     bool m_bContainImages;
-    uint8_t m_nFontStyle;
+    uint8 m_nFontStyle;
     bool m_bPropOn;
-    uint8_t _pad1;
-    uint16_t m_dwFontTexture;
-    uint8_t m_nOutline;
-    uint8_t _pad2;
+    uint8 _pad1;
+    uint16 m_dwFontTexture;
+    uint8 m_nOutline;
+    uint8 _pad2;
 public:
     CFontChar* Set(CFontChar& setup) {
         m_cLetter = setup.m_cLetter;
@@ -55,7 +55,7 @@ struct tFontData {
     char m_unpropValue;
 };
 
-enum class eExtraFontSymbol : uint8_t {
+enum class eExtraFontSymbol : uint8 {
     BUTTON_NONE = 0, // invalid
     BUTTON_DPAD_UP = 1,
     BUTTON_DPAD_DOWN = 2,
@@ -73,13 +73,13 @@ enum class eExtraFontSymbol : uint8_t {
     BUTTON_R3 = 14
 };
 
-enum class eFontAlignment : uint8_t {
+enum class eFontAlignment : uint8 {
     ALIGN_CENTER,
     ALIGN_LEFT,
     ALIGN_RIGHT
 };
 
-enum class eFontStyle : uint8_t {
+enum class eFontStyle : uint8 {
     FONT_GOTHIC,
     FONT_SUBTITLES,
     FONT_MENU,
@@ -110,18 +110,18 @@ public:
     static bool& m_bEnlargeBackgroundBox;
     static bool& m_bFontPropOn;
     static bool& m_bFontIsBlip;
-    static unsigned int m_dwFontAlpha;
+    static uint32 m_dwFontAlpha;
     static CRGBA& m_FontBackgroundColor;
     static float& m_fWrapx;
     static float& m_fFontCentreSize;
     static float& m_fRightJustifyWrap;
-    static unsigned char& m_FontTextureId;
-    static unsigned char& m_FontStyle;
-    static unsigned char& m_nFontShadow;
+    static uint8& m_FontTextureId;
+    static uint8& m_FontStyle;
+    static uint8& m_nFontShadow;
     static CRGBA* m_FontDropColor;
-    static unsigned char& m_nFontOutlineSize;
-    static unsigned char& m_nFontOutline;
-    static unsigned char& m_nFontOutlineOrShadow;
+    static uint8& m_nFontOutlineSize;
+    static uint8& m_nFontOutline;
+    static uint8& m_nFontOutlineOrShadow;
 
     // static functions
     static void InjectHooks();
@@ -158,9 +158,9 @@ public:
     // drop color is used for text shadow and text outline
     static void SetDropColor(CRGBA color);
     // set shadow size
-    static void SetDropShadowPosition(short value);
+    static void SetDropShadowPosition(int16 value);
     // set outline size
-    static void SetEdge(short value);
+    static void SetEdge(int16 value);
     // toggles character proportions in text
     static void SetProportional(bool on);
     // setups text background
@@ -175,9 +175,9 @@ public:
     static void RenderFontBuffer();
     static float GetStringWidth(char *string, bool unk1, bool unk2);
     static void DrawFonts();
-    static short ProcessCurrentString(bool print, float x, float y, const char *text);
-    static short GetNumberLines(float x, float y, const char *text);
-    static short ProcessStringToDisplay(float x, float y, const char *text);
+    static int16 ProcessCurrentString(bool print, float x, float y, const char *text);
+    static int16 GetNumberLines(float x, float y, const char *text);
+    static int16 ProcessStringToDisplay(float x, float y, const char *text);
     static void GetTextRect(CRect *rect, float x, float y, const char *text);
     static void PrintString(float x, float y, const char *text);
     static void PrintStringFromBottom(float x, float y, const char *text);

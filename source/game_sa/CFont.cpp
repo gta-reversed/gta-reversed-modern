@@ -27,18 +27,18 @@ bool& CFont::m_bFontBackground = *(bool*)0xC71A7B;
 bool& CFont::m_bEnlargeBackgroundBox = *(bool*)0xC71A7C;
 bool& CFont::m_bFontPropOn = *(bool*)0xC71A7D;
 bool& CFont::m_bFontIsBlip = *(bool*)0xC71A7E;
-unsigned int CFont::m_dwFontAlpha = *(unsigned int*)0xC71A80;
+uint32 CFont::m_dwFontAlpha = *(uint32*)0xC71A80;
 CRGBA& CFont::m_FontBackgroundColor = *(CRGBA*)0xC71A84;
 float& CFont::m_fWrapx = *(float*)0xC71A88;
 float& CFont::m_fFontCentreSize = *(float*)0xC71A8C;
 float& CFont::m_fRightJustifyWrap = *(float*)0xC71A90;
-unsigned char& CFont::m_FontTextureId = *(unsigned char*)0xC71A94;
-unsigned char& CFont::m_FontStyle = *(unsigned char*)0xC71A95;
-unsigned char& CFont::m_nFontShadow = *(unsigned char*)0xC71A96;
+uint8& CFont::m_FontTextureId = *(uint8*)0xC71A94;
+uint8& CFont::m_FontStyle = *(uint8*)0xC71A95;
+uint8& CFont::m_nFontShadow = *(uint8*)0xC71A96;
 CRGBA* CFont::m_FontDropColor = (CRGBA*)0xC71A97;
-unsigned char& CFont::m_nFontOutlineSize = *(unsigned char*)0xC71A9B;
-unsigned char& CFont::m_nFontOutline = *(unsigned char*)0xC71A9C;
-unsigned char& CFont::m_nFontOutlineOrShadow = *(unsigned char*)0xC71A9C;
+uint8& CFont::m_nFontOutlineSize = *(uint8*)0xC71A9B;
+uint8& CFont::m_nFontOutline = *(uint8*)0xC71A9C;
+uint8& CFont::m_nFontOutlineOrShadow = *(uint8*)0xC71A9C;
 
 tFontData* gFontData = (tFontData*)0xC718B0;
 
@@ -285,11 +285,10 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
         while (x != '~');
     }
 
-    char* ret = next + 2;
     if (*next)
-        ret = next + 1;
+        return next + 1;
 
-    return ret;
+    return next + 2;
 }
 
 // 0x719380
@@ -348,7 +347,7 @@ void CFont::SetFontStyle(eFontStyle style)
         m_FontStyle = 2;
         break;
     default:
-        m_FontTextureId = static_cast<uint8_t>(style);
+        m_FontTextureId = static_cast<uint8>(style);
         m_FontStyle = 0;
     }
 }
@@ -387,18 +386,18 @@ void CFont::SetDropColor(CRGBA color)
 }
 
 // 0x719570
-void CFont::SetDropShadowPosition(short value)
+void CFont::SetDropShadowPosition(int16 value)
 {
     m_nFontOutlineSize = 0;
     m_nFontOutlineOrShadow = 0;
-    m_nFontShadow = (uint8_t)value;
+    m_nFontShadow = (uint8)value;
 }
 
 // 0x719590
-void CFont::SetEdge(short value) {
+void CFont::SetEdge(int16 value) {
     m_nFontShadow = 0;
-    m_nFontOutlineSize = (uint8_t)value;
-    m_nFontOutlineOrShadow = (uint8_t)value;
+    m_nFontOutlineSize = (uint8)value;
+    m_nFontOutlineOrShadow = (uint8)value;
 }
 
 // 0x7195B0
@@ -462,19 +461,19 @@ void CFont::DrawFonts() {
     RenderFontBuffer();
 }
 
-short CFont::ProcessCurrentString(bool print, float x, float y, const char* text)
+int16 CFont::ProcessCurrentString(bool print, float x, float y, const char* text)
 {
-    return plugin::CallAndReturn<short, 0x71A220, bool, float, float, const char*>(print, x, y, text);
+    return plugin::CallAndReturn<int16, 0x71A220, bool, float, float, const char*>(print, x, y, text);
 }
 
 // 0x71A5E0
-short CFont::GetNumberLines(float x, float y, const char* text)
+int16 CFont::GetNumberLines(float x, float y, const char* text)
 {
     return ProcessCurrentString(false, x, y, text);
 }
 
 // 0x71A600
-short CFont::ProcessStringToDisplay(float x, float y, const char* text)
+int16 CFont::ProcessStringToDisplay(float x, float y, const char* text)
 {
     return ProcessCurrentString(true, x, y, text);
 }
