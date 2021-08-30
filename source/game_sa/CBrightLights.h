@@ -8,7 +8,7 @@
 #include "PluginBase.h"
 #include "CVector.h"
 
-enum eBrightLightColor {
+enum eBrightLightColor : uint8 {
     BRIGHTLIGHT_GREEN_BIG = 1,
     BRIGHTLIGHT_YELLOW_BIG = 2,
     BRIGHTLIGHT_RED_BIG = 3,
@@ -18,28 +18,30 @@ enum eBrightLightColor {
 };
 
 struct tBrightLight {
-    CVector       m_vecPosition;
-    CVector       m_vecRight;
-    CVector       m_vecTop;
-    CVector       m_vecAt;
-    float         m_fDistanceToCamera;
-    unsigned char m_nColor; // see eBrightLightColor
+    CVector m_vecPosition;
+    CVector m_vecRight;
+    CVector m_vecTop;
+    CVector m_vecAt;
+    float m_fDistanceToCamera;
+    eBrightLightColor m_nColor; // see eBrightLightColor
     char field_35;
     char field_36;
     char field_37;
 };
-
 VALIDATE_SIZE(tBrightLight, 0x38);
 
-extern unsigned int MAX_NUM_BRIGHTLIGHTS; // default 32
+constexpr auto MAX_NUM_BRIGHTLIGHTS{32u};
 
-class  CBrightLights {
+class CBrightLights {
 public:
-    static tBrightLight *aBrightLights; // static tBrightLight aBrightLights[32]
-    static unsigned int &NumBrightLights;
+    static int32_t& NumBrightLights;
+    static tBrightLight (&aBrightLights)[MAX_NUM_BRIGHTLIGHTS];
 
+public:
+    static void InjectHooks();
+        
+    static void Init();
     static void RenderOutGeometryBuffer();
     static void Render();
-    static void RegisterOne(CVector posn, CVector top, CVector right, CVector at, unsigned char color, unsigned char arg5, unsigned char arg6, unsigned char arg7);
-    static void Init();
+    static void RegisterOne(CVector posn, CVector top, CVector right, CVector at, uint8_t color, uint8_t arg5, uint8_t arg6, uint8_t arg7);
 };
