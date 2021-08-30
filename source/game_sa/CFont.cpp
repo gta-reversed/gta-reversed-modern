@@ -375,9 +375,9 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
     case 'h':
         if (!isBlip) {
             color = {
-                    std::min<uint8>(color.r * 1.5f, 255.0f),
-                    std::min<uint8>(color.g * 1.5f, 255.0f),
-                    std::min<uint8>(color.b * 1.5f, 255.0f),
+                    (uint8)std::min((float)color.r * 1.5f, 255.0f),
+                    (uint8)std::min((float)color.g * 1.5f, 255.0f),
+                    (uint8)std::min((float)color.b * 1.5f, 255.0f),
                     color.a
             };
         }
@@ -454,10 +454,7 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
 
     if (*next != '~') {
         // skip text to the next '~' character.
-        char x;
-        do
-            x = (next++)[1];
-        while (x != '~');
+        for(; *next && *next != '~'; next++);
     }
 
     if (*next)
@@ -706,7 +703,7 @@ int16 CFont::ProcessStringToDisplay(float x, float y, const char* text)
 // 0x71A620
 void CFont::GetTextRect(CRect* rect, float x, float y, const char* text)
 {
-    auto nLines = GetNumberLines(x, y, text);
+    const int16 nLines = GetNumberLines(x, y, text);
 
     if (m_bFontCentreAlign) {
         rect->left = m_fFontCentreSize / 2.0f - x + 4.0f;
@@ -722,7 +719,7 @@ void CFont::GetTextRect(CRect* rect, float x, float y, const char* text)
     }
 
     rect->bottom = y - 4.0f;
-    rect->top = nLines * 18.0f * m_Scale.y + y + 4.0f;
+    rect->top = (float)nLines * 18.0f * m_Scale.y + y + 4.0f;
 }
 
 // 0x71A700
@@ -755,7 +752,7 @@ void CFont::PrintString(float x, float y, const char* text)
 // 0x71A820
 void CFont::PrintStringFromBottom(float x, float y, const char* text)
 {
-    float drawY = y - (18.0f * m_Scale.y) * CFont::GetNumberLines(x, y, text);
+    float drawY = y - (18.0f * m_Scale.y) * (float)CFont::GetNumberLines(x, y, text);
 
     if (m_fSlant != 0.0f)
         drawY -= (m_fSlantRefPoint.x - x) * m_fSlant + m_fSlantRefPoint.y;
