@@ -76,11 +76,67 @@ void CFont::InjectHooks() {
     ReversibleHooks::Install("CFont", "ParseToken", 0x718F00, &CFont::ParseToken);
     ReversibleHooks::Install("CFont", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
     //ReversibleHooks::Install("CFont", "PrintChar", 0x718A10, &CFont::PrintChar);
+
+    ReversibleHooks::Install("CFont", "ReadFontsDat", 0x7187C0, &ReadFontsDat);
 }
 
 // 0x7187C0
 void ReadFontsDat() {
-    plugin::Call<0x7187C0>();
+    CFileMgr::SetDir(gta_empty_string);
+    auto file = CFileMgr::OpenFile("DATA\\FONTS.DAT", "rb");
+
+    char* attrib[26];
+
+    uint32 totalFonts = 0;
+    uint32 fontId = 0;
+
+    for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
+        if (*line == '\0' || *line == '#')
+            continue;
+
+        if (sscanf(line, "%s", &attrib) == EOF)
+            continue;
+
+        if (!memcmp(attrib, "[TOTAL_FONTS]", 14)) {
+            auto nextLine = CFileLoader::LoadLine(file);
+
+            sscanf(nextLine, "%d", &totalFonts);
+        }
+        else if (!memcmp(attrib, "[FONT_ID]", 10)) {
+            auto nextLine = CFileLoader::LoadLine(file);
+
+            sscanf(nextLine, "%d", &fontId);
+        }
+        else if (!memcmp(attrib, "[REPLACEMENT_SPACE_CHAR]", 25)) {
+            auto nextLine = CFileLoader::LoadLine(file);
+            uint32 spaceValue;
+
+            sscanf(nextLine, "%d", &spaceValue); // maybe use inttypes?
+            gFontData[fontId].m_spaceValue = spaceValue;
+        }
+        else if (!memcmp(attrib, "[PROP]", 7)) {
+            for (int i = 0; i < 26; i++) {
+                auto nextLine = CFileLoader::LoadLine(file);
+                uint32 propValues[8];
+
+                sscanf(nextLine, "%d  %d  %d  %d  %d  %d  %d  %d",
+                    &propValues[0], &propValues[1], &propValues[2], &propValues[3],
+                    &propValues[4], &propValues[5], &propValues[6], &propValues[7]);
+
+                for (int j = 0; j < 8; j++)
+                    gFontData[fontId].m_propValues[i * 8 + j] = propValues[j];
+            }
+        }
+        else if (!memcmp(attrib, "[UNPROP]", 9)) {
+            auto nextLine = CFileLoader::LoadLine(file);
+            uint32 unpropValue;
+
+            sscanf(nextLine, "%d", &unpropValue);
+            gFontData[fontId].m_unpropValue = unpropValue;
+        }
+    }
+
+    CFileMgr::CloseFile(file);
 }
 
 // 0x5BA690

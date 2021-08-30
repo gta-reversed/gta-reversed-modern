@@ -50,13 +50,13 @@ public:
 VALIDATE_SIZE(CFontChar, 0x30);
 
 struct tFontData {
-    char m_propValues[208];
-    char m_spaceValue;
-    char m_unpropValue;
+    uint8 m_propValues[208];
+    uint8 m_spaceValue;
+    uint8 m_unpropValue;
 };
 
 enum eExtraFontSymbol : uint8 {
-    EXSYMBOL_NONE = 0, // invalid
+    EXSYMBOL_NONE = 0,      // invalid
     EXSYMBOL_DPAD_UP = 1,
     EXSYMBOL_DPAD_DOWN = 2,
     EXSYMBOL_DPAD_LEFT = 3,
@@ -65,7 +65,7 @@ enum eExtraFontSymbol : uint8 {
     EXSYMBOL_CIRCLE = 6,
     EXSYMBOL_SQUARE = 7,
     EXSYMBOL_TRIANGLE = 8,
-    EXSYMBOL_KEY = 9, // followed by buttons, L1?
+    EXSYMBOL_KEY = 9,       // followed by buttons, L1?
     EXSYMBOL_L2 = 10,
     EXSYMBOL_L3 = 11,
     EXSYMBOL_R1 = 12,
@@ -183,4 +183,5 @@ public:
     static void PrintStringFromBottom(float x, float y, const char *text);
 };
 
+void ReadFontsDat();
 float GetLetterIdPropValue(char letterId);
