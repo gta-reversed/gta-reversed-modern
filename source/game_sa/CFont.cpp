@@ -67,17 +67,15 @@ void CFont::InjectHooks() {
     ReversibleHooks::Install("CFont", "SetOrientation", 0x719610, &CFont::SetOrientation);
 
     ReversibleHooks::Install("CFont", "DrawFonts", 0x71A210, &CFont::DrawFonts);
-
-    // wip
     ReversibleHooks::Install("CFont", "GetTextRect", 0x71A620, &CFont::GetTextRect);
     ReversibleHooks::Install("CFont", "PrintString", 0x71A700, &CFont::PrintString);
     ReversibleHooks::Install("CFont", "PrintStringFromBottom", 0x71A820, &CFont::PrintStringFromBottom);
     ReversibleHooks::Install("CFont", "InitPerFrame", 0x719800, &CFont::InitPerFrame);
-
     ReversibleHooks::Install("CFont", "GetNumberLines", 0x71A5E0, &CFont::GetNumberLines);
     ReversibleHooks::Install("CFont", "ProcessStringToDisplay", 0x71A600, &CFont::ProcessStringToDisplay);
-
     ReversibleHooks::Install("CFont", "ParseToken", 0x718F00, &CFont::ParseToken);
+    ReversibleHooks::Install("CFont", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
+    //ReversibleHooks::Install("CFont", "PrintChar", 0x718A10, &CFont::PrintChar);
 }
 
 // 0x7187C0
@@ -149,9 +147,129 @@ void CFont::Shutdown()
     CTxdStore::RemoveTxdSlot(buttonSlot);
 }
 
+// 0x718A10
 void CFont::PrintChar(float x, float y, char character)
 {
     plugin::Call<0x718A10, float, float, char>(x, y, character);
+
+    // todo: check the fucking uv values
+
+    /*
+    // out of screen
+    if (x < 0.0f || x > SCREEN_WIDTH || y < 0.0f || y > SCREEN_HEIGHT)
+        return;
+
+    if (m_nExtraFontSymbolId) {
+        // extra symbol to be drawn (e.g. PS2 buttons)
+
+        CRect rt = {
+            x,
+            2.0f * RenderState.m_fHeight + y,
+            17.0f * RenderState.m_fHeight + x,
+            19.0f * RenderState.m_fHeight + y
+        };
+            
+
+        ButtonSprite[m_nExtraFontSymbolId].Draw(rt, { 255, 255, 255, RenderState.m_color.a });
+
+        return;
+    }
+
+    if (!character || character == '?') {
+        float propValue = GetLetterIdPropValue(character) / 32.0f;
+        bool zeroed = false;
+
+        if (RenderState.m_nFontStyle == 1 && character == 208) {
+            character = 0;
+            zeroed = true;
+        }
+
+        //auto v1 = (character >> 4);
+        //auto u1 = (character & 0xf) / 16.0f;
+
+        auto propval = propValue / 32.0f;
+
+        if (RenderState.m_dwFontTexture && RenderState.m_dwFontTexture != 1) {
+            if (!zeroed) {
+                CRect rt = {
+                    y,
+                    x,
+                    32.0f * propValue * RenderState.m_fWidth + x,
+                    16.0f * RenderState.m_fHeight + y,
+                };
+
+                float u1 = (character & 0xF) / 16.0f;
+                float v1 = (character >> 4) / 16.0f;
+                float u2 = propval / 16.0f + u1;
+                float v2 = v1;
+                float u3 = u1;
+                float v3 = v1 + 0.0625;
+                float u4 = u2 - 0.0001f;
+                float v4 = v3 - 0.0001f;
+
+                CSprite2d::AddToBuffer(rt, RenderState.m_color, u1, v1, u2, v2, u3, v3, u4, v4);
+            }
+
+            return;
+        }
+
+        if (!zeroed) {
+            CRect rt;
+
+            rt.left = x;
+
+            if (RenderState.m_fSlant == 0.0f) {
+                rt.top = y;
+                rt.right = 32.0f * RenderState.m_fWidth + x;
+
+                if (character < 0xC0) {
+                    rt.bottom = 20.0f * RenderState.m_fHeight + y;
+
+                    float u1 = (character & 0xF) / 16.0f;
+                    float v1 = (character >> 4) / 12.8f + 0.0021f;
+                    float u2 = u1 + 0.0615f;
+                    float v2 = v1;
+                    float u3 = u1;
+                    float v3 = v2 - 0.0021f;
+                    float u4 = u2;
+                    float v4 = v2 - 0.0021f;
+
+                    CSprite2d::AddToBuffer(rt, RenderState.m_color, u1, v1, u2, v2, u3, v3, u4, v4);
+                }
+                else {
+                    rt.bottom = 16.0f * RenderState.m_fHeight + y;
+
+                    float u1 = (character & 0xF) / 16.0f;
+                    float v1 = (character >> 4) / 12.8f + 0.0021f;
+                    float u2 = u1 + 0.0615f;
+                    float v2 = v1;
+                    float u3 = u1;
+                    float v3 = v2 - 0.016f;
+                    float u4 = u2;
+                    float v4 = v2 - 0.015f;
+
+                    CSprite2d::AddToBuffer(rt, RenderState.m_color, u1, v1, u2, v2, u3, v3, u4, v4);
+                }
+            }
+            else {
+                rt.top = y + 0.015f;
+                rt.right = 32.0f * RenderState.m_fWidth + x;
+                rt.bottom = 20.0f * RenderState.m_fHeight + y + 0.015f;
+
+                float u1 = (character & 0xF) / 16.0f;
+                float v1 = (character >> 4) / 12.8f + 0.00055f;
+                float u2 = u1 + 0.0615f;
+                float v2 = (character >> 4) / 12.8f + 0.078125f;
+                float u3 = u1;
+                float v3 = v2 - 0.016f;
+                float u4 = u2;
+                float v4 = v2 - 0.015f;
+
+                CSprite2d::AddToBuffer(rt, RenderState.m_color, u1, v1, u2, v2, u3, v3, u4, v4);
+            }
+        }
+    }
+    */
 }
 
 // 0x718F00
@@ -171,14 +289,14 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
 
     switch (*next) {
     case '<':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_DPAD_LEFT;
+        m_nExtraFontSymbolId = EXSYMBOL_DPAD_LEFT;
         break;
     case '>':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_DPAD_RIGHT;
+        m_nExtraFontSymbolId = EXSYMBOL_DPAD_RIGHT;
         break;
     case 'A':
     case 'a':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_L3;
+        m_nExtraFontSymbolId = EXSYMBOL_L3;
         break;
     case 'B':
     case 'b':
@@ -186,11 +304,11 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
         break;
     case 'C':
     case 'c':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_R3;
+        m_nExtraFontSymbolId = EXSYMBOL_R3;
         break;
     case 'D':
     case 'd':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_DPAD_DOWN;
+        m_nExtraFontSymbolId = EXSYMBOL_DPAD_DOWN;
         break;
     case 'G':
     case 'g':
@@ -212,15 +330,15 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
         break;
     case 'J':
     case 'j':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_R1;
+        m_nExtraFontSymbolId = EXSYMBOL_R1;
         break;
     case 'K':
     case 'k':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_KEY;
+        m_nExtraFontSymbolId = EXSYMBOL_KEY;
         break;
     case 'M':
     case 'm':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_L2;
+        m_nExtraFontSymbolId = EXSYMBOL_L2;
         break;
     case 'N':
     case 'n':
@@ -228,7 +346,7 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
         break;
     case 'O':
     case 'o':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_CIRCLE;
+        m_nExtraFontSymbolId = EXSYMBOL_CIRCLE;
         break;
     case 'P':
     case 'p':
@@ -236,7 +354,7 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
         break;
     case 'Q':
     case 'q':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_SQUARE;
+        m_nExtraFontSymbolId = EXSYMBOL_SQUARE;
         break;
     case 'R':
     case 'r':
@@ -248,15 +366,15 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
         break;
     case 'T':
     case 't':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_TRIANGLE;
+        m_nExtraFontSymbolId = EXSYMBOL_TRIANGLE;
         break;
     case 'U':
     case 'u':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_DPAD_UP;
+        m_nExtraFontSymbolId = EXSYMBOL_DPAD_UP;
         break;
     case 'V':
     case 'v':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_R2;
+        m_nExtraFontSymbolId = EXSYMBOL_R2;
         break;
     case 'W':
     case 'w':
@@ -264,7 +382,7 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
         break;
     case 'X':
     case 'x':
-        m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_CROSS;
+        m_nExtraFontSymbolId = EXSYMBOL_CROSS;
         break;
     case 'Y':
     case 'y':
@@ -439,7 +557,7 @@ void CFont::InitPerFrame()
     m_nFontOutlineOrShadow = 0;
     m_nFontShadow = 0;
     m_bNewLine = false;
-    m_nExtraFontSymbolId = eExtraFontSymbol::BUTTON_NONE;
+    m_nExtraFontSymbolId = EXSYMBOL_NONE;
     RenderState.m_dwFontTexture = 0; // todo: wtf
     pEmptyChar = &setup[0];
 
@@ -536,4 +654,18 @@ void CFont::PrintStringFromBottom(float x, float y, const char* text)
         drawY -= (m_fSlantRefPoint.x - x) * m_fSlant + m_fSlantRefPoint.y;
 
     PrintString(x, drawY, text);
+}
+
+// 0x718770
+float GetLetterIdPropValue(char letterId)
+{
+    uint8 id = letterId;
+
+    if (letterId == '?')
+        id = 0;
+
+    if (CFont::RenderState.m_bPropOn)
+        return gFontData[CFont::RenderState.m_dwFontTexture].m_propValues[id];
+    else
+        return gFontData[CFont::RenderState.m_dwFontTexture].m_unpropValue;
 }

@@ -55,22 +55,22 @@ struct tFontData {
     char m_unpropValue;
 };
 
-enum class eExtraFontSymbol : uint8 {
-    BUTTON_NONE = 0, // invalid
-    BUTTON_DPAD_UP = 1,
-    BUTTON_DPAD_DOWN = 2,
-    BUTTON_DPAD_LEFT = 3,
-    BUTTON_DPAD_RIGHT = 4,
-    BUTTON_CROSS = 5,
-    BUTTON_CIRCLE = 6,
-    BUTTON_SQUARE = 7,
-    BUTTON_TRIANGLE = 8,
-    BUTTON_KEY = 9, // followed by buttons, L1?
-    BUTTON_L2 = 10,
-    BUTTON_L3 = 11,
-    BUTTON_R1 = 12,
-    BUTTON_R2 = 13,
-    BUTTON_R3 = 14
+enum eExtraFontSymbol : uint8 {
+    EXSYMBOL_NONE = 0, // invalid
+    EXSYMBOL_DPAD_UP = 1,
+    EXSYMBOL_DPAD_DOWN = 2,
+    EXSYMBOL_DPAD_LEFT = 3,
+    EXSYMBOL_DPAD_RIGHT = 4,
+    EXSYMBOL_CROSS = 5,
+    EXSYMBOL_CIRCLE = 6,
+    EXSYMBOL_SQUARE = 7,
+    EXSYMBOL_TRIANGLE = 8,
+    EXSYMBOL_KEY = 9, // followed by buttons, L1?
+    EXSYMBOL_L2 = 10,
+    EXSYMBOL_L3 = 11,
+    EXSYMBOL_R1 = 12,
+    EXSYMBOL_R2 = 13,
+    EXSYMBOL_R3 = 14
 };
 
 enum class eFontAlignment : uint8 {
@@ -182,3 +182,5 @@ public:
     static void PrintString(float x, float y, const char *text);
     static void PrintStringFromBottom(float x, float y, const char *text);
 };
+
+float GetLetterIdPropValue(char letterId);
