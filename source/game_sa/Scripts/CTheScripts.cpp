@@ -90,6 +90,7 @@ tScriptText* CTheScripts::IntroTextLines = reinterpret_cast<tScriptText*>(0xA913
 tScriptRectangle* CTheScripts::IntroRectangles = reinterpret_cast<tScriptRectangle*>(0xA92D68);
 CSprite2d* CTheScripts::ScriptSprites = reinterpret_cast<CSprite2d*>(0xA94B68);
 tScriptSearchlight* CTheScripts::ScriptSearchLightArray = reinterpret_cast<tScriptSearchlight*>(0xA94D68);
+uint16& currentTextDrawer = *reinterpret_cast<uint16*>(0xA44B68);
 
 void CTheScripts::InjectHooks() {
     ReversibleHooks::Install("CTheScripts", "AddToBuildingSwapArray", 0x481140, &CTheScripts::AddToBuildingSwapArray);

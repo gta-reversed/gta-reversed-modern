@@ -627,7 +627,6 @@ void CFont::RenderFontBuffer()
 // 0x71A0E0
 float CFont::GetStringWidth(char* string, bool full, bool scriptText)
 {
-    //return plugin::CallAndReturn<float, 0x71A0E0, char*, bool, bool>(string, unk1, unk2);
     size_t len = CMessages::GetStringLength(string);
 
     char data[400] = {0};
@@ -794,17 +793,18 @@ float GetScriptLetterSize(uint8 letterId)
     return plugin::CallAndReturn<float, 0x719670, uint8>(letterId);
 }
 
+// 0x7192C0
 uint8 GetIDforPropVal(uint8 letterId, uint8 fontStyle)
 {
     return plugin::CallAndReturn<uint8, 0x7192C0, uint8, uint8>(letterId, fontStyle);
 }
 
 // 0x718770
-float GetLetterIdPropValue(char letterId)
+float GetLetterIdPropValue(uint8 letterId)
 {
     uint8 id = letterId;
 
-    if (letterId == '?')
+    if (letterId == 0x40)
         id = 0;
 
     if (CFont::RenderState.m_bPropOn)

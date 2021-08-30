@@ -331,3 +331,5 @@ public:
 };
 
 //#include "meta/meta.CTheScripts.h"
+
+uint16 currentTextDrawer;
