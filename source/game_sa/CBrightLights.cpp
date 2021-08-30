@@ -6,7 +6,7 @@ tBrightLight (&CBrightLights::aBrightLights)[MAX_NUM_BRIGHTLIGHTS] = *(tBrightLi
 
 void CBrightLights::InjectHooks() {
     ReversibleHooks::Install("CBrightLights", "Init", 0x722140, &CBrightLights::Init);
-    // ReversibleHooks::Install("CBrightLights", "RenderOutGeometryBuffer", 0x722150, &CBrightLights::RenderOutGeometryBuffer);
+    ReversibleHooks::Install("CBrightLights", "RenderOutGeometryBuffer", 0x722150, &CBrightLights::RenderOutGeometryBuffer);
     // ReversibleHooks::Install("CBrightLights", "Render", 0x7241C0, &CBrightLights::Render);
     // ReversibleHooks::Install("CBrightLights", "RegisterOne", 0x724770, &CBrightLights::RegisterOne);
 }
@@ -18,7 +18,16 @@ void CBrightLights::Init() {
 
 // 0x722150
 void CBrightLights::RenderOutGeometryBuffer() {
-    plugin::Call<0x722150>();
+    if (uiTempBufferIndicesStored) {
+        LittleTest();
+        if (RwIm3DTransform(aTempBufferVertices, uiTempBufferVerticesStored, nullptr, rwIM3D_VERTEXUV))
+        {
+            RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, aTempBufferIndices, uiTempBufferIndicesStored);
+            RwIm3DEnd();
+        }
+        uiTempBufferVerticesStored = 0;
+        uiTempBufferIndicesStored = 0;
+    }
 }
 
 // 0x7241C0
