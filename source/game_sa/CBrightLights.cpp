@@ -36,6 +36,26 @@ void CBrightLights::Render() {
 }
 
 // 0x724770
-void CBrightLights::RegisterOne(CVector posn, CVector top, CVector right, CVector at, uint8_t color, uint8_t arg5, uint8_t arg6, uint8_t arg7) {
-    plugin::Call<0x724770, CVector, CVector, CVector, CVector, uint8_t, uint8_t, uint8_t, uint8_t>(posn, top, right, at, color, arg5, arg6, arg7);
+void CBrightLights::RegisterOne(CVector posn, CVector top, CVector right, CVector at, eBrightLightColor color, uint8_t arg5, uint8_t arg6, uint8_t arg7) {
+    if (color == eBrightLightColor::BRIGHTLIGHT_NONE)
+        return;
+
+    if (NumBrightLights >= MAX_NUM_BRIGHTLIGHTS)
+        return;
+
+    const float distToCam = (TheCamera.GetPosition() - posn).Magnitude() / TheCamera.m_fLODDistMultiplier;
+    if (distToCam > 60.0f)
+        return;
+
+    aBrightLights[NumBrightLights++] = {
+        posn,
+        top,
+        right,
+        at,
+        distToCam,
+        color,
+        arg5,
+        arg6,
+        arg7
+    };
 }

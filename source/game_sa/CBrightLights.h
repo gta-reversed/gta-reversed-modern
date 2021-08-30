@@ -9,6 +9,7 @@
 #include "CVector.h"
 
 enum eBrightLightColor : uint8 {
+    BRIGHTLIGHT_NONE,
     BRIGHTLIGHT_GREEN_BIG = 1,
     BRIGHTLIGHT_YELLOW_BIG = 2,
     BRIGHTLIGHT_RED_BIG = 3,
@@ -24,9 +25,9 @@ struct tBrightLight {
     CVector m_vecAt;
     float m_fDistanceToCamera;
     eBrightLightColor m_nColor; // see eBrightLightColor
-    char field_35;
-    char field_36;
-    char field_37;
+    uint8_t field_35;
+    uint8_t field_36;
+    uint8_t field_37;
 };
 VALIDATE_SIZE(tBrightLight, 0x38);
 
@@ -43,5 +44,5 @@ public:
     static void Init();
     static void RenderOutGeometryBuffer();
     static void Render();
-    static void RegisterOne(CVector posn, CVector top, CVector right, CVector at, uint8_t color, uint8_t arg5, uint8_t arg6, uint8_t arg7);
+    static void RegisterOne(CVector posn, CVector top, CVector right, CVector at, eBrightLightColor color, uint8_t arg5, uint8_t arg6, uint8_t arg7);
 };
