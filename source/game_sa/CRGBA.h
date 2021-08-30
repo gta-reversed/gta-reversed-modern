@@ -57,4 +57,8 @@ public:
     CRGBA operator/(float divisor) {
         return *this * (1 / divisor);
     }
+
+    CRGBA& operator*=(float mult) {
+        *this = *this * mult;
+    }
 };
