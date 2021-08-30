@@ -665,7 +665,7 @@ float CFont::GetStringWidth(char* string, bool full, bool scriptText)
             if (!full && *pStr == ' ' && bLastWasTag)
                 return width;
 
-            char upper = toupper(*pStr); // (ch - 0x20)
+            char upper = *pStr - 0x20;
 
             pStr++;
             if (scriptText) {
@@ -796,7 +796,43 @@ float GetScriptLetterSize(uint8 letterId)
 // 0x7192C0
 uint8 GetIDforPropVal(uint8 letterId, uint8 fontStyle)
 {
-    return plugin::CallAndReturn<uint8, 0x7192C0, uint8, uint8>(letterId, fontStyle);
+    //return plugin::CallAndReturn<uint8, 0x7192C0, uint8, uint8>(letterId, fontStyle);
+    if (fontStyle == 1) {
+        switch (letterId) {
+        case 1:
+            return 208;
+        case 4:
+            return 93;
+        case 7:
+            return 206;
+        case 14:
+            return 207;
+        }
+    }
+
+    switch (letterId) {
+    case 6:
+        return 10;
+    case 8:
+        return 94;
+    case 9:
+        return 95;
+    case 26:
+        return 154;
+    case 31:
+        return 91;
+    case 62:
+        return 32;
+    case 143:
+        return 205;
+    }
+
+    if (letterId >= 16 && letterId <= 25)
+        return letterId - 128;
+    if (letterId >= 21 && letterId <= 58)
+        return letterId + 122;
+    if (letterId >= 64 && letterId <= 90)
+        return letterId + 90;
 }
 
 // 0x718770
