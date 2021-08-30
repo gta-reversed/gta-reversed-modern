@@ -569,10 +569,10 @@ void CFont::SetDropShadowPosition(int16 value)
 }
 
 // 0x719590
-void CFont::SetEdge(int16 value) {
+void CFont::SetEdge(uint8 value) {
     m_nFontShadow = 0;
-    m_nFontOutlineSize = (uint8)value;
-    m_nFontOutlineOrShadow = (uint8)value;
+    m_nFontOutlineSize = value;
+    m_nFontOutlineOrShadow = value;
 }
 
 // 0x7195B0

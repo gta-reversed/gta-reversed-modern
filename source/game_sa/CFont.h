@@ -160,7 +160,7 @@ public:
     // set shadow size
     static void SetDropShadowPosition(int16 value);
     // set outline size
-    static void SetEdge(int16 value);
+    static void SetEdge(uint8 value);
     // toggles character proportions in text
     static void SetProportional(bool on);
     // setups text background
