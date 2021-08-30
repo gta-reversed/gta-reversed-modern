@@ -1786,13 +1786,13 @@ bool CAutomobile::UpdateMovingCollision(float angle)
     return false;
 }
 
-// Converted from thiscall float CAutomobile::GetMovingCollisionOffset(void) 0x6A2150
+// 0x6A2150
 float CAutomobile::GetMovingCollisionOffset()
 {
     return ((float(__thiscall*)(CAutomobile*))0x6A2150)(this);
 }
 
-// Converted from thiscall void CAutomobile::TellHeliToGoToCoors(float x, float y, float z, float altitudeMin, float altitudeMax) 0x6A2390
+// 0x6A2390
 void CAutomobile::TellHeliToGoToCoors(float x, float y, float z, float altitudeMin, float altitudeMax)
 {
     ((void(__thiscall*)(CAutomobile*, float, float, float, float, float))0x6A2390)(this, x, y, z, altitudeMin, altitudeMax);
@@ -1810,7 +1810,7 @@ void CAutomobile::ClearHeliOrientation()
     m_fForcedOrientation = 0.0f;
 }
 
-// Converted from thiscall void CAutomobile::TellPlaneToGoToCoors(float x, float y, float z, float altitudeMin, float altitudeMax) 0x6A2470
+// 0x6A2470
 void CAutomobile::TellPlaneToGoToCoors(float x, float y, float z, float altitudeMin, float altitudeMax)
 {
     ((void(__thiscall*)(CAutomobile*, float, float, float, float, float))0x6A2470)(this, x, y, z, altitudeMin, altitudeMax);
@@ -1830,103 +1830,103 @@ void CAutomobile::ShowAllComps()
     // NOP
 }
 
-// Converted from thiscall void CAutomobile::SetRandomDamage(bool) 0x6A2530
+// 0x6A2530
 void CAutomobile::SetRandomDamage(bool arg0)
 {
     ((void(__thiscall*)(CAutomobile*, bool))0x6A2530)(this, arg0);
 }
 
-// Converted from thiscall void CAutomobile::SetTotalDamage(bool) 0x6A27F0
+// 0x6A27F0
 void CAutomobile::SetTotalDamage(bool arg0)
 {
     ((void(__thiscall*)(CAutomobile*, bool))0x6A27F0)(this, arg0);
 }
 
-// Converted from cdecl RpMaterial* DisableMatFx(RpMaterial *material, void *data) 0x6A2980
+// 0x6A2980
 RpMaterial* DisableMatFx(RpMaterial* material, void* data)
 {
     return ((RpMaterial * (__cdecl*)(RpMaterial*, void*))0x6A2980)(material, data);
 }
 
-// Converted from thiscall void CAutomobile::ReduceHornCounter(void) 0x6A29A0
+// 0x6A29A0
 void CAutomobile::ReduceHornCounter()
 {
     ((void(__thiscall*)(CAutomobile*))0x6A29A0)(this);
 }
 
-// Converted from thiscall void CAutomobile::CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo *model) 0x6A2F00
+// 0x6A2F00
 void CAutomobile::CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model)
 {
     ((void(__thiscall*)(CAutomobile*, CVehicleModelInfo*))0x6A2F00)(this, model);
 }
 
-// Converted from thiscall void CAutomobile::CustomCarPlate_AfterRenderingStop(CVehicleModelInfo *model) 0x6A2F30
+// 0x6A2F30
 void CAutomobile::CustomCarPlate_AfterRenderingStop(CVehicleModelInfo* model)
 {
     ((void(__thiscall*)(CAutomobile*, CVehicleModelInfo*))0x6A2F30)(this, model);
 }
 
-// Converted from thiscall bool CAutomobile::GetAllWheelsOffGround(void) 0x6A2F70
+// 0x6A2F70
 bool CAutomobile::GetAllWheelsOffGround()
 {
     return ((bool(__thiscall*)(CAutomobile*))0x6A2F70)(this);
 }
 
-// Converted from thiscall void CAutomobile::DebugCode(void) 0x6A2F80
+// 0x6A2F80
 void CAutomobile::DebugCode()
 {
     ((void(__thiscall*)(CAutomobile*))0x6A2F80)(this);
 }
 
-// Converted from thiscall void CAutomobile::FixTyre(eWheels wheel) 0x6A3580
+// 0x6A3580
 void CAutomobile::FixTyre(eWheelStatus wheel)
 {
     ((void(__thiscall*)(CAutomobile*, eWheelStatus))0x6A3580)(this, wheel);
 }
 
-// Converted from thiscall void CAutomobile::FixDoor(int nodeIndex, eDoors door) 0x6A35A0
+// 0x6A35A0
 void CAutomobile::FixDoor(int nodeIndex, eDoors door)
 {
     ((void(__thiscall*)(CAutomobile*, int, eDoors))0x6A35A0)(this, nodeIndex, door);
 }
 
-// Converted from thiscall void CAutomobile::FixPanel(int nodeIndex, ePanels panel) 0x6A3670
+// 0x6A3670
 void CAutomobile::FixPanel(int nodeIndex, ePanels panel)
 {
     ((void(__thiscall*)(CAutomobile*, int, ePanels))0x6A3670)(this, nodeIndex, panel);
 }
 
-// Converted from thiscall void CAutomobile::SetTaxiLight(bool enable) 0x6A3740
+// 0x6A3740
 void CAutomobile::SetTaxiLight(bool enable)
 {
     ((void(__thiscall*)(CAutomobile*, bool))0x6A3740)(this, enable);
 }
 
-// Converted from cdecl void CAutomobile::SetAllTaxiLights(bool) 0x6A3760
+// 0x6A3760
 void CAutomobile::SetAllTaxiLights(bool arg0)
 {
     ((void(__cdecl*)(bool))0x6A3760)(arg0);
 }
 
-// Converted from thiscall void CAutomobile::PlayHornIfNecessary(void) 0x6A3820
+// 0x6A3820
 void CAutomobile::PlayHornIfNecessary()
 {
     ((void(__thiscall*)(CAutomobile*))0x6A3820)(this);
 }
 
-// Converted from thiscall void CAutomobile::SetBusDoorTimer(uint time, uchar) 0x6A3860
+// 0x6A3860
 void CAutomobile::SetBusDoorTimer(unsigned int time, unsigned char arg1)
 {
     ((void(__thiscall*)(CAutomobile*, unsigned int, unsigned char))0x6A3860)(this, time, arg1);
 }
 
-// Converted from thiscall void CAutomobile::ProcessAutoBusDoors(void) 0x6A38A0
+// 0x6A38A0
 void CAutomobile::ProcessAutoBusDoors()
 {
     ((void(__thiscall*)(CAutomobile*))0x6A38A0)(this);
 }
 
-// Converted from thiscall void CAutomobile::BoostJumpControl(void) 0x6A3A60
+// 0x6A3A60
 void CAutomobile::BoostJumpControl()
 {
     ((void(__thiscall*)(CAutomobile*))0x6A3A60)(this);
@@ -2002,37 +2002,37 @@ void CAutomobile::DoNitroEffect(float power)
 #endif
 }
 
-// Converted from thiscall void CAutomobile::StopNitroEffect(void) 0x6A3E60
+// 0x6A3E60
 void CAutomobile::StopNitroEffect()
 {
     ((void(__thiscall*)(CAutomobile*))0x6A3E60)(this);
 }
 
-// Converted from thiscall void CAutomobile::NitrousControl(signed char) 0x6A3EA0
+// 0x6A3EA0
 void CAutomobile::NitrousControl(signed char arg0)
 {
     ((void(__thiscall*)(CAutomobile*, signed char))0x6A3EA0)(this, arg0);
 }
 
-// Converted from thiscall void CAutomobile::TowTruckControl(void) 0x6A40F0
+// 0x6A40F0
 void CAutomobile::TowTruckControl()
 {
     ((void(__thiscall*)(CAutomobile*))0x6A40F0)(this);
 }
 
-// Converted from thiscall CPed* CAutomobile::KnockPedOutCar(eWeaponType, ushort, CPed *) 0x6A44C0
+// 0x6A44C0
 CPed* CAutomobile::KnockPedOutCar(eWeaponType arg0, unsigned short arg1, CPed* arg2)
 {
     return ((CPed * (__thiscall*)(CAutomobile*, eWeaponType, unsigned short, CPed*))0x6A44C0)(this, arg0, arg1, arg2);
 }
 
-// Converted from thiscall void CAutomobile::PopBootUsingPhysics(void) 0x6A44D0
+// 0x6A44D0
 void CAutomobile::PopBootUsingPhysics()
 {
     ((void(__thiscall*)(CAutomobile*))0x6A44D0)(this);
 }
 
-// Converted from thiscall void CAutomobile::CloseAllDoors(void) 0x6A4520
+// 0x6A4520
 void CAutomobile::CloseAllDoors()
 {
     ((void(__thiscall*)(CAutomobile*))0x6A4520)(this);
@@ -2289,25 +2289,25 @@ void CAutomobile::ProcessCarWheelPair(int leftWheel, int rightWheel, float steer
     }
 }
 
-// Converted from thiscall float CAutomobile::GetCarRoll(void) 0x6A6010
+// 0x6A6010
 float CAutomobile::GetCarRoll()
 {
     return ((float(__thiscall*)(CAutomobile*))0x6A6010)(this);
 }
 
-// Converted from thiscall float CAutomobile::GetCarPitch(void) 0x6A6050
+// 0x6A6050
 float CAutomobile::GetCarPitch()
 {
     return ((float(__thiscall*)(CAutomobile*))0x6A6050)(this);
 }
 
-// Converted from thiscall bool CAutomobile::IsInAir(void) 0x6A6140
+// 0x6A6140
 bool CAutomobile::IsInAir()
 {
     return ((bool(__thiscall*)(CAutomobile*))0x6A6140)(this);
 }
 
-// Converted from thiscall void CAutomobile::dmgDrawCarCollidingParticles(CVector const& position, float force, eWeaponType weapon) 0x6A6DC0
+// 0x6A6DC0
 void CAutomobile::dmgDrawCarCollidingParticles(CVector const& position, float force, eWeaponType weapon)
 {
     ((void(__thiscall*)(CAutomobile*, CVector const&, float, eWeaponType))0x6A6DC0)(this, position, force, weapon);
@@ -2318,13 +2318,13 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately)
     ((void(__thiscall*)(CAutomobile*, unsigned char))0x6A7090)(this, bExplodeImmediately);
 }
 
-// Converted from thiscall CObject* CAutomobile::SpawnFlyingComponent(int nodeIndex, uint collisionType) 0x6A8580
+// 0x6A8580
 CObject* CAutomobile::SpawnFlyingComponent(int nodeIndex, unsigned int collisionType)
 {
     return ((CObject * (__thiscall*)(CAutomobile*, int, unsigned int))0x6A8580)(this, nodeIndex, collisionType);
 }
 
-// Converted from thiscall void CAutomobile::ProcessBuoyancy(void) 0x6A8C00
+// 0x6A8C00
 void CAutomobile::ProcessBuoyancy()
 {
     /* Unused code in sa function
@@ -2590,37 +2590,37 @@ void CAutomobile::ProcessHarvester()
     }
 }
 
-// Converted from thiscall void CAutomobile::ProcessSwingingDoor(int nodeIndex, eDoors door) 0x6A9D70
+// 0x6A9D70
 void CAutomobile::ProcessSwingingDoor(int nodeIndex, eDoors door)
 {
     ((void(__thiscall*)(CAutomobile*, int, eDoors))0x6A9D70)(this, nodeIndex, door);
 }
 
-// Converted from thiscall CObject* CAutomobile::RemoveBonnetInPedCollision(void) 0x6AA200
+// 0x6AA200
 CObject* CAutomobile::RemoveBonnetInPedCollision()
 {
     return ((CObject * (__thiscall*)(CAutomobile*))0x6AA200)(this);
 }
 
-// Converted from thiscall void CAutomobile::UpdateWheelMatrix(int nodeIndex, int flags) 0x6AA290
+// 0x6AA290
 void CAutomobile::UpdateWheelMatrix(int nodeIndex, int flags)
 {
     ((void(__thiscall*)(CAutomobile*, int, int))0x6AA290)(this, nodeIndex, flags);
 }
 
-// Converted from thiscall void CAutomobile::PopDoor(int nodeIndex, eDoors door, bool showVisualEffect) 0x6ADEF0
+// 0x6ADEF0
 void CAutomobile::PopDoor(int nodeIndex, eDoors door, bool showVisualEffect)
 {
     ((void(__thiscall*)(CAutomobile*, int, eDoors, bool))0x6ADEF0)(this, nodeIndex, door, showVisualEffect);
 }
 
-// Converted from thiscall void CAutomobile::PopPanel(int nodeIndex, ePanels panel, bool showVisualEffect) 0x6ADF80
+// 0x6ADF80
 void CAutomobile::PopPanel(int nodeIndex, ePanels panel, bool showVisualEffect)
 {
     ((void(__thiscall*)(CAutomobile*, int, ePanels, bool))0x6ADF80)(this, nodeIndex, panel, showVisualEffect);
 }
 
-// Converted from thiscall void CAutomobile::ScanForCrimes(void) 0x6ADFF0
+// 0x6ADFF0
 void CAutomobile::ScanForCrimes()
 {
     ((void(__thiscall*)(CAutomobile*))0x6ADFF0)(this);
@@ -2765,13 +2765,13 @@ void CAutomobile::TankControl()
     }
 }
 
-// Converted from thiscall void CAutomobile::BlowUpCarsInPath(void) 0x6AF110
+// 0x6AF110
 void CAutomobile::BlowUpCarsInPath()
 {
     ((void(__thiscall*)(CAutomobile*))0x6AF110)(this);
 }
 
-// Converted from thiscall void CAutomobile::PlaceOnRoadProperly(void) 0x6AF420
+// 0x6AF420
 void CAutomobile::PlaceOnRoadProperly()
 {
     auto pColModel = CEntity::GetColModel();
@@ -2873,37 +2873,37 @@ void CAutomobile::PlaceOnRoadProperly()
         static_cast<CPlane*>(this)->m_planeCreationHeading = CGeneral::GetATanOfXY(GetForward().x, GetForward().y);
 }
 
-// Converted from thiscall void CAutomobile::PopBoot(void) 0x6AF910
+// 0x6AF910
 void CAutomobile::PopBoot()
 {
     ((void(__thiscall*)(CAutomobile*))0x6AF910)(this);
 }
 
-// Converted from thiscall void CAutomobile::CloseBoot(void) 0x6AFA20
+// 0x6AFA20
 void CAutomobile::CloseBoot()
 {
     ((void(__thiscall*)(CAutomobile*))0x6AFA20)(this);
 }
 
-// Converted from thiscall void CAutomobile::DoHeliDustEffect(float, float) 0x6B0690
+// 0x6B0690
 void CAutomobile::DoHeliDustEffect(float arg0, float arg1)
 {
     ((void(__thiscall*)(CAutomobile*, float, float))0x6B0690)(this, arg0, arg1);
 }
 
-// Converted from thiscall void CAutomobile::SetBumperDamage(ePanels panel, bool withoutVisualEffect) 0x6B1350
+// 0x6B1350
 void CAutomobile::SetBumperDamage(ePanels panel, bool withoutVisualEffect)
 {
     ((void(__thiscall*)(CAutomobile*, ePanels, bool))0x6B1350)(this, panel, withoutVisualEffect);
 }
 
-// Converted from thiscall void CAutomobile::SetPanelDamage(ePanels panel, bool createWindowGlass) 0x6B1480
+// 0x6B1480
 void CAutomobile::SetPanelDamage(ePanels panel, bool createWindowGlass)
 {
     ((void(__thiscall*)(CAutomobile*, ePanels, bool))0x6B1480)(this, panel, createWindowGlass);
 }
 
-// Converted from thiscall void CAutomobile::SetDoorDamage(eDoors door, bool withoutVisualEffect) 0x6B1600
+// 0x6B1600
 void CAutomobile::SetDoorDamage(eDoors door, bool withoutVisualEffect)
 {
     ((void(__thiscall*)(CAutomobile*, eDoors, bool))0x6B1600)(this, door, withoutVisualEffect);
@@ -3080,7 +3080,7 @@ void CAutomobile::FireTruckControl(CFire* fire)
     CWaterCannons::UpdateOne((uint32_t)this, &newTurretPosition, &endPoint);
 }
 
-// Converted from thiscall bool CAutomobile::HasCarStoppedBecauseOfLight(void) 0x44D520
+// 0x44D520
 bool CAutomobile::HasCarStoppedBecauseOfLight()
 {
     return ((bool(__thiscall*)(CAutomobile*))0x44D520)(this);
@@ -3095,7 +3095,7 @@ void CAutomobile::Fix_Reversed() {
     plugin::CallMethod<0x6A3440, CAutomobile*>(this);
 }
 
-// Converted from cdecl RwObject* GetCurrentAtomicObjectCB(RwObject *object, void *data) 0x6A0750
+// 0x6A0750
 RwObject* GetCurrentAtomicObjectCB(RwObject* object, void* data)
 {
     if (RpAtomicGetFlags(object) & rpATOMICRENDER)

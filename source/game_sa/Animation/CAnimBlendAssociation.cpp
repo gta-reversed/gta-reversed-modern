@@ -1,22 +1,18 @@
 #include "StdInc.h"
 
-void CAnimBlendAssociation::InjectHooks()
-{
-    HookInstall(0x4CEFC0, &CAnimBlendAssociation::Constructor);
+void CAnimBlendAssociation::InjectHooks() {
+    ReversibleHooks::Install("CAnimBlendAssociation", "CAnimBlendAssociation", 0x4CEFC0, &CAnimBlendAssociation::Constructor);
 }
 
-void* CAnimBlendAssociation::operator new(unsigned int size)
-{
+void* CAnimBlendAssociation::operator new(unsigned int size) {
     return ((CAnimBlendAssociation * (__cdecl*)(unsigned int))0x82119A)(size);
 }
 
-void CAnimBlendAssociation::operator delete(void* object)
-{
+void CAnimBlendAssociation::operator delete(void* object) {
     ((void(__cdecl*)(void*))0x8214BD)(object);
 }
 
-CAnimBlendAssociation::CAnimBlendAssociation(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy)
-{
+CAnimBlendAssociation::CAnimBlendAssociation(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy) {
     m_fBlendAmount = 1.0f;
     m_fSpeed = 1.0f;
     m_pNodeArray = nullptr;
@@ -32,8 +28,7 @@ CAnimBlendAssociation::CAnimBlendAssociation(RpClump* pClump, CAnimBlendHierarch
     Init(pClump, pAnimHierarchy);
 }
 
-CAnimBlendAssociation::~CAnimBlendAssociation() 
-{
+CAnimBlendAssociation::~CAnimBlendAssociation() {
     if (m_pNodeArray)
         CMemoryMgr::FreeAlign(m_pNodeArray);
     if (m_pPrevious)
@@ -46,20 +41,18 @@ CAnimBlendAssociation::~CAnimBlendAssociation()
         CAnimManager::RemoveAnimBlockRef(m_pHierarchy->m_nAnimBlockId);
 }
 
-CAnimBlendAssociation* CAnimBlendAssociation::Constructor(RpClump *pClump, CAnimBlendHierarchy * pAnimHierarchy)
-{
+CAnimBlendAssociation* CAnimBlendAssociation::Constructor(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CAnimBlendAssociation*, 0x4CEFC0, CAnimBlendAssociation*, RpClump *, CAnimBlendHierarchy *>(this, pClump, pAnimHierarchy);
+    return plugin::CallMethodAndReturn<CAnimBlendAssociation*, 0x4CEFC0, CAnimBlendAssociation*, RpClump*, CAnimBlendHierarchy*>(this, pClump, pAnimHierarchy);
 #else
     this->CAnimBlendAssociation::CAnimBlendAssociation(pClump, pAnimHierarchy);
     return this;
 #endif
 }
 
-void CAnimBlendAssociation::Init(RpClump *pClump, CAnimBlendHierarchy * pAnimHierarchy)
-{
-//#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethod<0x4CED50, CAnimBlendAssociation *, RpClump *, CAnimBlendHierarchy *>(this, pClump, pAnimHierarchy);
+void CAnimBlendAssociation::Init(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy) {
+    //#ifdef USE_DEFAULT_FUNCTIONS
+    return plugin::CallMethod<0x4CED50, CAnimBlendAssociation*, RpClump*, CAnimBlendHierarchy*>(this, pClump, pAnimHierarchy);
 #if 0
     std::printf("\nCAnimBlendAssociation::Init1: called! pClump: %p | m_nSeqCount: %d\n\n", pClump, pAnimHierarchy->m_nSeqCount);
     CAnimBlendClumpData * pAnimClumpData = GetAnimClumpData(pClump); 
@@ -97,27 +90,25 @@ void CAnimBlendAssociation::Init(RpClump *pClump, CAnimBlendHierarchy * pAnimHie
 }
 
 void CAnimBlendAssociation::Start(float currentTime) {
-    plugin::CallMethodDynGlobal<CAnimBlendAssociation *, float>(0x4CEB70, this, currentTime);
+    plugin::CallMethod<0x4CEB70, CAnimBlendAssociation*, float>(this, currentTime);
 }
 
 void CAnimBlendAssociation::AllocateAnimBlendNodeArray(int count) {
-    plugin::CallMethodDynGlobal<CAnimBlendAssociation *, int>(0x4CE9F0, this, count);
+    plugin::CallMethod<0x4CE9F0, CAnimBlendAssociation*, int>(this, count);
 }
 
-void CAnimBlendAssociation::SetBlend(float blendAmount, float blendDelta)
-{
+void CAnimBlendAssociation::SetBlend(float blendAmount, float blendDelta) {
     plugin::CallMethod<0x4CEBA0, CAnimBlendAssociation*, float, float>(this, blendAmount, blendDelta);
 }
 
-void CAnimBlendAssociation::SetCurrentTime(float currentTime)
-{
+void CAnimBlendAssociation::SetCurrentTime(float currentTime) {
     plugin::CallMethod<0x4CEA80, CAnimBlendAssociation*, float>(this, currentTime);
 }
 
-void CAnimBlendAssociation::SetDeleteCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data) {
-    plugin::CallMethodDynGlobal<CAnimBlendAssociation*, void(*)(CAnimBlendAssociation*, void*), void*>(0x4CEBC0, this, callback, data);
+void CAnimBlendAssociation::SetDeleteCallback(void (*callback)(CAnimBlendAssociation*, void*), void* data) {
+    plugin::CallMethod<0x4CEBC0, CAnimBlendAssociation*, void (*)(CAnimBlendAssociation*, void*), void*>(this, callback, data);
 }
 
-void CAnimBlendAssociation::SetFinishCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data) {
-    plugin::CallMethodDynGlobal<CAnimBlendAssociation*, void(*)(CAnimBlendAssociation*, void*), void*>(0x4CEBE0, this, callback, data);
+void CAnimBlendAssociation::SetFinishCallback(void (*callback)(CAnimBlendAssociation*, void*), void* data) {
+    plugin::CallMethod<0x4CEBE0, CAnimBlendAssociation*, void (*)(CAnimBlendAssociation*, void*), void*>(this, callback, data);
 }

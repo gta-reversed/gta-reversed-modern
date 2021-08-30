@@ -423,7 +423,7 @@ void CVehicleModelInfo::SetVehicleColour(unsigned char prim, unsigned char sec, 
     m_nCurrentQuaternaryColor = quat;
 }
 
-// Converted from thiscall void CVehicleModelInfo::ChooseVehicleColour(unsigned char &prim, unsigned char &sec, unsigned char &tert, unsigned char &quat, int variationShift) 0x4C8500
+// 0x4C8500
 void CVehicleModelInfo::ChooseVehicleColour(unsigned char& prim, unsigned char& sec, unsigned char& tert, unsigned char& quat, int variationShift)
 {
     if (!m_nNumColorVariations || CCheat::m_aCheatsActive[eCheats::CHEAT_BLACK_TRAFFIC]) {
@@ -471,7 +471,7 @@ void CVehicleModelInfo::ChooseVehicleColour(unsigned char& prim, unsigned char& 
     }
 }
 
-// Converted from thiscall int CVehicleModelInfo::GetNumRemaps(void) 0x4C86B0
+// 0x4C86B0
 int CVehicleModelInfo::GetNumRemaps()
 {
     auto iCount = 0;
@@ -485,7 +485,7 @@ int CVehicleModelInfo::GetNumRemaps()
     return iCount;
 }
 
-// Converted from thiscall void CVehicleModelInfo::AddRemap(int txd) 0x4C86D0
+// 0x4C86D0
 void CVehicleModelInfo::AddRemap(int txd)
 {
     auto numRemaps = CVehicleModelInfo::GetNumRemaps();
@@ -1107,7 +1107,7 @@ RwObject* CVehicleModelInfo::ClearAtomicFlagCB(RwObject* object, void* data)
     return object;
 }
 
-// Converted from stdcall void CVehicleModelInfo::AddWheelUpgrade(int wheelSetNumber, int modelId) 0x4C8700
+// 0x4C8700
 void CVehicleModelInfo::AddWheelUpgrade(int wheelSetNumber, int modelId)
 {
     auto iUpgradesNum = CVehicleModelInfo::ms_numWheelUpgrades[wheelSetNumber];

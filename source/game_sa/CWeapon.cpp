@@ -149,12 +149,12 @@ void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& 
     g_fx.m_pPrtGunshell->AddParticle(&position, &velocity, 0.0f, &fxprt, -1.0f, 1.2f, 0.6f, 0);
 }
 
-// Converted from cdecl void CWeapon::GenerateDamageEvent(CPed *victim,CEntity *creator,eWeaponType weaponType,int32_t damageFactor,ePedPieceTypes pedPiece,int32_t direction) 0x73A530
+// 0x73A530
 void CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32_t damageFactor, ePedPieceTypes pedPiece, int32_t direction) {
     plugin::Call<0x73A530, CPed*, CEntity*, eWeaponType, int32_t, ePedPieceTypes, int32_t>(victim, creator, weaponType, damageFactor, pedPiece, direction);
 }
 
-// Converted from thiscall bool CWeapon::LaserScopeDot(CVector *outCoord,float *outSize) 0x73A8D0
+// 0x73A8D0
 bool CWeapon::LaserScopeDot(CVector* outCoord, float* outSize) {
     return plugin::CallMethodAndReturn<bool, 0x73A8D0, CWeapon*, CVector*, float*>(this, outCoord, outSize);
 }
@@ -359,42 +359,42 @@ float CWeapon::TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner
     return 1.0f;
 }
 
-// Converted from thiscall void CWeapon::DoBulletImpact(CEntity *owner,CEntity *victim,CVector *startPoint,CVector *endPoint,CColPoint *colPoint,int32_t) 0x73B550
+// 0x73B550
 void CWeapon::DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoint, CVector* endPoint, CColPoint* colPoint, int32_t arg5) {
     plugin::CallMethod<0x73B550, CWeapon*, CEntity*, CEntity*, CVector*, CVector*, CColPoint*, int32_t>(this, owner, victim, startPoint, endPoint, colPoint, arg5);
 }
 
-// Converted from thiscall bool CWeapon::TakePhotograph(CEntity *owner, CVector *point) 0x73C1F0
+// 0x73C1F0
 bool CWeapon::TakePhotograph(CEntity* owner, CVector* point) {
     return plugin::CallMethodAndReturn<bool, 0x73C1F0, CWeapon*, CEntity*, CVector*>(this, owner, point);
 }
 
-// Converted from thiscall void CWeapon::SetUpPelletCol(int32_t numPellets,CEntity *owner,CEntity *victim,CVector &point,CColPoint &colPoint,CMatrix &outMatrix) 0x73C710
+// 0x73C710
 void CWeapon::SetUpPelletCol(int32_t numPellets, CEntity* owner, CEntity* victim, CVector& point, CColPoint& colPoint, CMatrix& outMatrix) {
     plugin::CallMethod<0x73C710, CWeapon*, int32_t, CEntity*, CEntity*, CVector&, CColPoint&, CMatrix&>(this, numPellets, owner, victim, point, colPoint, outMatrix);
 }
 
-// Converted from thiscall void CWeapon::FireInstantHitFromCar2(CVector startPoint,CVector endPoint,CVehicle *vehicle,CEntity *owner) 0x73CBA0
+// 0x73CBA0
 void CWeapon::FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehicle* vehicle, CEntity* owner) {
     plugin::CallMethod<0x73CBA0, CWeapon*, CVector, CVector, CVehicle*, CEntity*>(this, startPoint, endPoint, vehicle, owner);
 }
 
-// Converted from cdecl void CWeapon::DoDoomAiming(CEntity *owner,CVector *start,CVector *end) 0x73CDC0
+// 0x73CDC0
 void CWeapon::DoDoomAiming(CEntity* owner, CVector* start, CVector* end) {
     plugin::Call<0x73CDC0, CEntity*, CVector*, CVector*>(owner, start, end);
 }
 
-// Converted from cdecl void CWeapon::DoTankDoomAiming(CEntity *vehicle,CEntity *owner,CVector *startPoint,CVector *endPoint) 0x73D1E0
+// 0x73D1E0
 void CWeapon::DoTankDoomAiming(CEntity* vehicle, CEntity* owner, CVector* startPoint, CVector* endPoint) {
     plugin::Call<0x73D1E0, CEntity*, CEntity*, CVector*, CVector*>(vehicle, owner, startPoint, endPoint);
 }
 
-// Converted from cdecl void CWeapon::DoDriveByAutoAiming(CEntity *owner,CVehicle *vehicle,CVector *startPoint,CVector *endPoint,bool canAimVehicles) 0x73D720
+// 0x73D720
 void CWeapon::DoDriveByAutoAiming(CEntity* owner, CVehicle* vehicle, CVector* startPoint, CVector* endPoint, bool canAimVehicles) {
     plugin::Call<0x73D720, CEntity*, CVehicle*, CVector*, CVector*, bool>(owner, vehicle, startPoint, endPoint, canAimVehicles);
 }
 
-// Converted from thiscall void CWeapon::Update(CPed *owner) 0x73DB40
+// 0x73DB40
 void CWeapon::Update(CPed* owner) {
     plugin::CallMethod<0x73DB40, CWeapon*, CPed*>(this, owner);
 }
@@ -412,12 +412,12 @@ bool CWeapon::CanBeUsedFor2Player() {
     return CanBeUsedFor2Player(m_nType);
 }
 
-// Converted from cdecl void CWeapon::FindNearestTargetEntityWithScreenCoors(float screenX,float screenY,float range,CVector point,float *outX,float *outY) 0x73E240
+// 0x73E240
 void CWeapon::FindNearestTargetEntityWithScreenCoors(float screenX, float screenY, float range, CVector point, float* outX, float* outY) {
     plugin::Call<0x73E240, float, float, float, CVector, float*, float*>(screenX, screenY, range, point, outX, outY);
 }
 
-// Converted from cdecl float CWeapon::EvaluateTargetForHeatSeekingMissile(CEntity *entity,CVector &posn,CVector &direction,float distanceMultiplier,bool fromVehicle,CEntity *lastEntity) 0x73E560
+// 0x73E560
 float CWeapon::EvaluateTargetForHeatSeekingMissile(CEntity* entity, CVector& posn, CVector& direction, float distanceMultiplier, bool fromVehicle, CEntity* lastEntity) {
     return plugin::CallAndReturn<float, 0x73E560, CEntity*, CVector&, CVector&, float, bool, CEntity*>(entity, posn, direction, distanceMultiplier, fromVehicle, lastEntity);
 }
@@ -463,47 +463,47 @@ void CWeapon::DoWeaponEffect(CVector origin, CVector target) {
     RwMatrixDestroy(mat);
 }
 
-// Converted from thiscall bool CWeapon::FireAreaEffect(CEntity *firingEntity,CVector *origin, CEntity *targetEntity, CVector *target) 0x73E800
+// 0x73E800
 bool CWeapon::FireAreaEffect(CEntity* firingEntity, CVector* origin, CEntity* targetEntity, CVector* target) {
     return plugin::CallMethodAndReturn<bool, 0x73E800, CWeapon*, CEntity*, CVector*, CEntity*, CVector*>(this, firingEntity, origin, targetEntity, target);
 }
 
-// Converted from thiscall bool CWeapon::FireInstantHitFromCar(CVehicle *vehicle,bool leftSide,bool rightSide) 0x73EC40
+// 0x73EC40
 bool CWeapon::FireInstantHitFromCar(CVehicle* vehicle, bool leftSide, bool rightSide) {
     return plugin::CallMethodAndReturn<bool, 0x73EC40, CWeapon*, CVehicle*, bool, bool>(this, vehicle, leftSide, rightSide);
 }
 
-// Converted from cdecl bool CWeapon::CheckForShootingVehicleOccupant(CEntity **pCarEntity,CColPoint *colPoint,eWeaponType weaponType,CVector const&origin,CVector const&target) 0x73F480
+// 0x73F480
 bool CWeapon::CheckForShootingVehicleOccupant(CEntity** pCarEntity, CColPoint* colPoint, eWeaponType weaponType, CVector const& origin, CVector const& target) {
     return plugin::CallAndReturn<bool, 0x73F480, CEntity**, CColPoint*, eWeaponType, CVector const&, CVector const&>(pCarEntity, colPoint, weaponType, origin, target);
 }
 
-// Converted from cdecl CEntity* CWeapon::PickTargetForHeatSeekingMissile(CVector origin,CVector direction,float distanceMultiplier,CEntity *ignoreEntity,bool fromVehicle,CEntity *lastEntity) 0x73F910
+// 0x73F910
 CEntity* CWeapon::PickTargetForHeatSeekingMissile(CVector origin, CVector direction, float distanceMultiplier, CEntity* ignoreEntity, bool fromVehicle, CEntity* lastEntity) {
     return plugin::CallAndReturn<CEntity*, 0x73F910, CVector, CVector, float, CEntity*, bool, CEntity*>(origin, direction, distanceMultiplier, ignoreEntity, fromVehicle, lastEntity);
 }
 
-// Converted from thiscall void CWeapon::FireFromCar(CVehicle *vehicle,bool leftSide,bool rightSide) 0x73FA20
+// 0x73FA20
 void CWeapon::FireFromCar(CVehicle* vehicle, bool leftSide, bool rightSide) {
     plugin::CallMethod<0x73FA20, CWeapon*, CVehicle*, bool, bool>(this, vehicle, leftSide, rightSide);
 }
 
-// Converted from thiscall bool CWeapon::FireInstantHit(CEntity *firingEntity,CVector *origin, CVector *muzzlePosn, CEntity *targetEntity, CVector *target, CVector *originForDriveBy, bool, bool muzzle) 0x73FB10
+// 0x73FB10
 bool CWeapon::FireInstantHit(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity, CVector* target, CVector* originForDriveBy, bool arg6, bool muzzle) {
     return plugin::CallMethodAndReturn<bool, 0x73FB10, CWeapon*, CEntity*, CVector*, CVector*, CEntity*, CVector*, CVector*, bool, bool>(this, firingEntity, origin, muzzlePosn, targetEntity, target, originForDriveBy, arg6, muzzle);
 }
 
-// Converted from thiscall bool CWeapon::FireProjectile(CEntity *firingEntity,CVector *origin, CEntity *targetEntity, CVector *target,float force) 0x741360
+// 0x741360
 bool CWeapon::FireProjectile(CEntity* firingEntity, CVector* origin, CEntity* targetEntity, CVector* target, float force) {
     return plugin::CallMethodAndReturn<bool, 0x741360, CWeapon*, CEntity*, CVector*, CEntity*, CVector*, float>(this, firingEntity, origin, targetEntity, target, force);
 }
 
-// Converted from thiscall bool CWeapon::FireM16_1stPerson(CEntity *owner) 0x741C00
+// 0x741C00
 bool CWeapon::FireM16_1stPerson(CEntity* owner) {
     return plugin::CallMethodAndReturn<bool, 0x741C00, CWeapon*, CEntity*>(this, owner);
 }
 
-// Converted from thiscall bool CWeapon::Fire(CEntity *firingEntity,CVector *origin, CVector *muzzlePosn, CEntity *targetEntity, CVector *target, CVector *originForDriveBy) 0x742300
+// 0x742300
 bool CWeapon::Fire(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, CEntity* targetEntity, CVector* target, CVector* originForDriveBy) {
     return plugin::CallMethodAndReturn<bool, 0x742300, CWeapon*, CEntity*, CVector*, CVector*, CEntity*, CVector*, CVector*>(this, firingEntity, origin, muzzlePosn, targetEntity,
                                                                                                                              target, originForDriveBy);

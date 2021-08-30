@@ -90,12 +90,12 @@ void CWeather::Init() {
     StreamAfterRainTimer = false;
 }
 
-// Converted from cdecl void CWeather::AddRain(void) 0x72A9A0
+// 0x72A9A0
 void CWeather::AddRain() {
     plugin::Call<0x72A9A0>();
 }
 
-// Converted from cdecl void CWeather::AddSandStormParticles(void) 0x72A820
+// 0x72A820
 void CWeather::AddSandStormParticles() {
     plugin::Call<0x72A820>();
 }
@@ -128,7 +128,7 @@ void CWeather::ForceWeatherNow(eWeatherType weatherType) {
   NewWeatherType = weatherType;
 }
 
-// Converted from cdecl bool CWeather::ForecastWeather(int weatherType,int numSteps) 0x72A590
+// 0x72A590
 bool CWeather::ForecastWeather(eWeatherType weatherType, int numSteps) {
     return plugin::CallAndReturn<bool, 0x72A590, int, int>(weatherType, numSteps);
 }
@@ -138,7 +138,7 @@ void CWeather::ReleaseWeather() {
     ForcedWeatherType = WEATHER_UNDEFINED;
 }
 
-// Converted from cdecl void CWeather::RenderRainStreaks(void) 0x72AF70
+// 0x72AF70
 void CWeather::RenderRainStreaks() {
     plugin::Call<0x72AF70>();
 }
@@ -154,12 +154,12 @@ void CWeather::SetWeatherToAppropriateTypeNow() {
     NewWeatherType = weatherType;
 }
 
-// Converted from cdecl void CWeather::Update(void) 0x72B850
+// 0x72B850
 void CWeather::Update() {
     plugin::Call<0x72B850>();
 }
 
-// Converted from cdecl void CWeather::UpdateInTunnelness(void) 0x72B630
+// 0x72B630
 void CWeather::UpdateInTunnelness() {
     plugin::Call<0x72B630>();
 }

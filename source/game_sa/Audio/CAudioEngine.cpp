@@ -8,9 +8,9 @@ void CAudioEngine::ReportCollision(CEntity* pEntity1, CEntity* pEntity2, int sur
         pEntity1, pEntity2, surface1, surface2, pColPoint, normal, fCollisionImpact1, fCollisionImpact2, bOnlyPlayOneShotCollisionSound, bUnknown);
 }
 
-void CAudioEngine::ReportMissionAudioEvent(ushort eventId, CObject* pObject)
+void CAudioEngine::ReportMissionAudioEvent(uint16_t eventId, CObject* pObject)
 {
-    return plugin::CallMethod <0x507350, CAudioEngine*, ushort, CObject*>(this, eventId, pObject);
+    return plugin::CallMethod <0x507350, CAudioEngine*, uint16_t, CObject*>(this, eventId, pObject);
 }
 
 void CAudioEngine::DisplayRadioStationName()

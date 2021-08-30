@@ -132,7 +132,7 @@ bool CStats::GetStatType(eStats stat) {
     return stat < FIRST_UNUSED_STAT;
 }
 
-// Converted from cdecl bool CStats::PopulateFavoriteRadioStationList(void) 0x558EC0
+// 0x558EC0
 bool CStats::PopulateFavoriteRadioStationList() {
     return plugin::CallAndReturn<bool, 0x558EC0>();
 }
@@ -142,12 +142,12 @@ int* CStats::GetFullFavoriteRadioStationList() {
     return FavoriteRadioStationList;
 }
 
-// Converted from cdecl int CStats::FindMostFavoriteRadioStation(void) 0x558FA0
+// 0x558FA0
 int CStats::FindMostFavoriteRadioStation() {
     return plugin::CallAndReturn<int, 0x558FA0>();
 }
 
-// Converted from cdecl int CStats::FindLeastFavoriteRadioStation(void) 0x559010
+// 0x559010
 int CStats::FindLeastFavoriteRadioStation() {
     return plugin::CallAndReturn<int, 0x559010>();
 }
@@ -188,7 +188,7 @@ float CStats::GetPercentageProgress() {
     return std::min(StatTypesFloat[STAT_PROGRESS_MADE] / 187.0f * 100.0f, 100.0f);
 }
 
-// Converted from cdecl void CStats::BuildStatLine(char *line, void *pValue1, int metrics, void *pValue2, int type) 0x559230
+// 0x559230
 void CStats::BuildStatLine(char* line, void* pValue1, int metrics, void* pValue2, int type) {
     plugin::Call<0x559230, char*, void*, int, void*, int>(line, pValue1, metrics, pValue2, type);
 }
@@ -280,12 +280,12 @@ bool CStats::IsStatCapped(eStats stat) {
     return false;
 }
 
-// Converted from cdecl void CStats::CheckForStatsMessage() 0x559760
+// 0x559760
 void CStats::CheckForStatsMessage() {
     plugin::Call<0x559760>();
 }
 
-// Converted from cdecl void CStats::LoadStatUpdateConditions(void) 0x559860
+// 0x559860
 void CStats::LoadStatUpdateConditions() {
     plugin::Call<0x559860>();
 }
@@ -331,7 +331,7 @@ int CStats::FindMaxNumberOfGroupMembers() {
     return 7;
 }
 
-// Converted from cdecl float CStats::GetFatAndMuscleModifier(eStatModAbilities statMod) 0x559AF0
+// 0x559AF0
 float CStats::GetFatAndMuscleModifier(eStatModAbilities statMod) {
     return plugin::CallAndReturn<float, 0x559AF0, eStatModAbilities>(statMod);
 }
@@ -375,12 +375,12 @@ void CStats::RegisterBestPosition(eStats stat, int position) {
     SetNewRecordStat(stat, (float)position);
 }
 
-// Converted from cdecl char* CStats::FindCriminalRatingString(void) 0x55A210
+// 0x55A210
 char* CStats::FindCriminalRatingString() {
     return plugin::CallAndReturn<char*, 0x55A210>();
 }
 
-// Converted from cdecl int CStats::ConstructStatLine(int, uchar) 0x55A780
+// 0x55A780
 int CStats::ConstructStatLine(int arg0, unsigned char arg1) {
     return plugin::CallAndReturn<int, 0x55A780, int, unsigned char>(arg0, arg1);
 }
@@ -404,17 +404,17 @@ void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
         IncrementStat(STAT_FAT, energy - 1000.0f);
 }
 
-// Converted from cdecl void CStats::DisplayScriptStatUpdateMessage(uchar state, uint stat, float value) 0x55B980
+// 0x55B980
 void CStats::DisplayScriptStatUpdateMessage(unsigned char state, eStats stat, float value) {
     plugin::Call<0x55B980, unsigned char, eStats, float>(state, stat, value);
 }
 
-// Converted from cdecl void CStats::UpdateRespectStat(uchar) 0x55BC50
+// 0x55BC50
 void CStats::UpdateRespectStat(unsigned char arg0) {
     plugin::Call<0x55BC50, unsigned char>(arg0);
 }
 
-// Converted from cdecl void CStats::UpdateSexAppealStat(void) 0x55BF20
+// 0x55BF20
 void CStats::UpdateSexAppealStat() {
     plugin::Call<0x55BF20>();
 }
@@ -488,7 +488,7 @@ void CStats::IncrementStat(eStats stat, float value)
     CheckForStatsMessage();
 }
 
-// Converted from cdecl void CStats::UpdateFatAndMuscleStats(uint value) 0x55C470
+// 0x55C470
 void CStats::UpdateFatAndMuscleStats(unsigned int value) {
     plugin::Call<0x55C470, unsigned int>(value);
 }
@@ -517,22 +517,22 @@ void CStats::UpdateStatsWhenRunning() {
     }
 }
 
-// Converted from cdecl void CStats::UpdateStatsWhenCycling(bool, CBmx *bmx) 0x55C780
+// 0x55C780
 void CStats::UpdateStatsWhenCycling(bool arg0, CBmx* bmx) {
     plugin::Call<0x55C780, bool, CBmx*>(arg0, bmx);
 }
 
-// Converted from cdecl void CStats::UpdateStatsWhenSwimming(bool, bool) 0x55C990
+// 0x55C990
 void CStats::UpdateStatsWhenSwimming(bool arg0, bool arg1) {
     plugin::Call<0x55C990, bool, bool>(arg0, arg1);
 }
 
-// Converted from cdecl void CStats::UpdateStatsWhenDriving(CVehicle *vehicle) 0x55CAC0
+// 0x55CAC0
 void CStats::UpdateStatsWhenDriving(CVehicle* vehicle) {
     plugin::Call<0x55CAC0, CVehicle*>(vehicle);
 }
 
-// Converted from cdecl void CStats::UpdateStatsWhenFlying(CVehicle *vehicle) 0x55CC00
+// 0x55CC00
 void CStats::UpdateStatsWhenFlying(CVehicle* vehicle) {
     plugin::Call<0x55CC00, CVehicle*>(vehicle);
 }
@@ -554,22 +554,22 @@ void CStats::UpdateStatsWhenOnMotorBike(CBike* bike) {
     }
 }
 
-// Converted from cdecl void CStats::UpdateStatsWhenWeaponHit(int weaponType) 0x55CEB0
+// 0x55CEB0
 void CStats::UpdateStatsWhenWeaponHit(eWeaponType weaponType) {
     plugin::Call<0x55CEB0, eWeaponType>(weaponType);
 }
 
-// Converted from cdecl void CStats::UpdateStatsWhenFighting(void) 0x55CFA0
+// 0x55CFA0
 void CStats::UpdateStatsWhenFighting() {
     UpdateFatAndMuscleStats(static_cast<unsigned int>(StatReactionValue[STAT_EXERCISE_RATE_FIGHT]));
 }
 
-// Converted from cdecl void CStats::UpdateStatsOnRespawn(void) 0x55CFC0
+// 0x55CFC0
 void CStats::UpdateStatsOnRespawn() {
     plugin::Call<0x55CFC0>();
 }
 
-// Converted from cdecl void CStats::UpdateStatsAddToHealth(uint addToHealth) 0x55D030
+// 0x55D030
 void CStats::UpdateStatsAddToHealth(unsigned int addToHealth) {
     plugin::Call<0x55D030, unsigned int>(addToHealth);
 }

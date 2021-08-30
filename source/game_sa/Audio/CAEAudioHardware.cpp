@@ -10,9 +10,9 @@ void CAEAudioHardware::InjectHooks()
 }
 
 void CAEAudioHardware::PlaySound(short channel,
-                                 ushort channelSlot,
-                                 ushort soundIdInSlot,
-                                 ushort bankSlot,
+                                 uint16_t channelSlot,
+                                 uint16_t soundIdInSlot,
+                                 uint16_t bankSlot,
                                  short playPosition,
                                  short flags,
                                  float speed)
@@ -26,33 +26,33 @@ void CAEAudioHardware::GetChannelPlayTimes(short channel, short* outArr)
     plugin::CallMethod<0x4D8820, CAEAudioHardware*, short, short*>(this, channel, outArr);
 }
 
-void CAEAudioHardware::SetChannelVolume(short channel, ushort channelSlot, float volume, uchar unused)
+void CAEAudioHardware::SetChannelVolume(short channel, uint16_t channelSlot, float volume, uint8_t unused)
 {
-    plugin::CallMethod<0x4D8870, CAEAudioHardware*, short, ushort, float, uchar>(this, channel, channelSlot, volume, unused);
+    plugin::CallMethod<0x4D8870, CAEAudioHardware*, short, uint16_t, float, uint8_t>(this, channel, channelSlot, volume, unused);
 }
 
-void CAEAudioHardware::LoadSoundBank(ushort bankId, short bankSlotId)
+void CAEAudioHardware::LoadSoundBank(uint16_t bankId, short bankSlotId)
 {
-    plugin::CallMethod<0x4D88A0, CAEAudioHardware*, ushort, short>(this, bankId, bankSlotId);
+    plugin::CallMethod<0x4D88A0, CAEAudioHardware*, uint16_t, short>(this, bankId, bankSlotId);
 }
 
-bool CAEAudioHardware::IsSoundBankLoaded(ushort bankId, short bankSlotId) {
-    return plugin::CallMethodAndReturn<bool, 0x4D88C0, CAEAudioHardware*, ushort, short>(this, bankId, bankSlotId);
+bool CAEAudioHardware::IsSoundBankLoaded(uint16_t bankId, short bankSlotId) {
+    return plugin::CallMethodAndReturn<bool, 0x4D88C0, CAEAudioHardware*, uint16_t, short>(this, bankId, bankSlotId);
 }
 
-void CAEAudioHardware::StopSound(short channel, ushort channelSlot)
+void CAEAudioHardware::StopSound(short channel, uint16_t channelSlot)
 {
-    plugin::CallMethod<0x4D88E0, CAEAudioHardware*, short, ushort>(this, channel, channelSlot);
+    plugin::CallMethod<0x4D88E0, CAEAudioHardware*, short, uint16_t>(this, channel, channelSlot);
 }
 
-void CAEAudioHardware::SetChannelPosition(short channel, ushort channelSlot, CVector* vecPos, uchar unused)
+void CAEAudioHardware::SetChannelPosition(short channel, uint16_t channelSlot, CVector* vecPos, uint8_t unused)
 {
-    plugin::CallMethod<0x4D8920, CAEAudioHardware*, short, ushort, CVector*, uchar>(this, channel, channelSlot, vecPos, unused);
+    plugin::CallMethod<0x4D8920, CAEAudioHardware*, short, uint16_t, CVector*, uint8_t>(this, channel, channelSlot, vecPos, unused);
 }
 
-void CAEAudioHardware::SetChannelFrequencyScalingFactor(short channel, ushort channelSlot, float freqFactor)
+void CAEAudioHardware::SetChannelFrequencyScalingFactor(short channel, uint16_t channelSlot, float freqFactor)
 {
-    plugin::CallMethod<0x4D8960, CAEAudioHardware*, short, ushort, float>(this, channel, channelSlot, freqFactor);
+    plugin::CallMethod<0x4D8960, CAEAudioHardware*, short, uint16_t, float>(this, channel, channelSlot, freqFactor);
 }
 
 void CAEAudioHardware::Service()
@@ -60,12 +60,12 @@ void CAEAudioHardware::Service()
     plugin::CallMethod<0x4D9870, CAEAudioHardware*>(this);
 }
 
-float CAEAudioHardware::GetSoundHeadroom(ushort soundId, short bankSlotId)
+float CAEAudioHardware::GetSoundHeadroom(uint16_t soundId, short bankSlotId)
 {
-    return plugin::CallMethodAndReturn<float, 0x4D8E30, CAEAudioHardware*, ushort, short>(this, soundId, bankSlotId);
+    return plugin::CallMethodAndReturn<float, 0x4D8E30, CAEAudioHardware*, uint16_t, short>(this, soundId, bankSlotId);
 }
 
-void CAEAudioHardware::RequestVirtualChannelSoundInfo(ushort soundIndex, ushort soundIdInSlot, ushort bankSlotId)
+void CAEAudioHardware::RequestVirtualChannelSoundInfo(uint16_t soundIndex, uint16_t soundIdInSlot, uint16_t bankSlotId)
 {
     if (soundIndex >= MAX_NUM_SOUNDS)
         return;
@@ -84,7 +84,7 @@ void CAEAudioHardware::GetVirtualChannelSoundLoopStartTimes(short* outArr)
     plugin::CallMethod<0x4D8EB0, CAEAudioHardware*, short*>(this, outArr);
 }
 
-int16_t CAEAudioHardware::AllocateChannels(ushort numChannels)
+int16_t CAEAudioHardware::AllocateChannels(uint16_t numChannels)
 {
     if (!numChannels || numChannels > m_wNumAvailableChannels)
         return -1;

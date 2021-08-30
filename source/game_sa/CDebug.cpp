@@ -4,7 +4,7 @@ std::vector<CDebug::tDebugText> CDebug::m_debugStrings;
 
 void CDebug::InjectHooks()
 {
-    HookInstall(0x532260, CDebug::DebugDisplayTextBuffer);
+    ReversibleHooks::Install("CDebug", "DebugDisplayTextBuffer", 0x532260, CDebug::DebugDisplayTextBuffer);
 }
 
 void CDebug::DebugInitTextBuffer()

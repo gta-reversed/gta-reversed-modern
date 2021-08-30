@@ -22,8 +22,8 @@ public:
 public:
     static void InjectHooks();
 
-    static signed int CreateCarGenerator(CVector posn, float angle, int modelId, short color1, short color2, uchar forceSpawn, uchar alarmChances, uchar doorLockChances,
-                                         ushort minDelay, ushort maxDelay, uchar iplId, bool ignorePopulationLimit);
+    static signed int CreateCarGenerator(CVector posn, float angle, int modelId, short color1, short color2, uint8_t forceSpawn, uint8_t alarmChances, uint8_t doorLockChances,
+                                         uint16_t minDelay, uint16_t maxDelay, uint8_t iplId, bool ignorePopulationLimit);
     static void Init();
     static void Load();
     static void Process();

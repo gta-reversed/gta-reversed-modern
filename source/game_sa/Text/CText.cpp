@@ -138,12 +138,12 @@ void CText::Load(bool bKeepMissionPack) {
     CFileMgr::SetDir("TEXT");
     FILESTREAM file = CFileMgr::OpenFile(filename, "rb");
 
-    ushort version = 0;
-    ushort encoding = 0;
+    uint16_t version = 0;
+    uint16_t encoding = 0;
     CFileMgr::Read(file, &version, sizeof(version));
     CFileMgr::Read(file, &encoding, sizeof(encoding));
 
-    uint offset = sizeof(ushort) * 2; // skip version and encoding
+    uint32 offset = sizeof(uint16_t) * 2; // skip version and encoding
     bool bTKEY = false;
     bool bTDAT = false;
     ChunkHeader header{};
@@ -236,8 +236,8 @@ void CText::GetNameOfLoadedMissionText(char* outStr) {
 }
 
 // 0x69F940
-bool CText::ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint* offset, uchar nSkipBytes) {
-    return plugin::CallMethodAndReturn<bool, 0x69F940, CText*, ChunkHeader*, FILESTREAM, uint*, uchar>(this, header, file, offset, nSkipBytes);
+bool CText::ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint32* offset, uint8_t nSkipBytes) {
+    return plugin::CallMethodAndReturn<bool, 0x69F940, CText*, ChunkHeader*, FILESTREAM, uint32*, uint8_t>(this, header, file, offset, nSkipBytes);
 
 #ifdef USE_ORIGINAL_CODE
     // Taken from re3. That not same as original, but do same thing

@@ -365,9 +365,9 @@ void CCarGenerator::Process()
 }
 
 // 0x6F2E50
-void CCarGenerator::Setup(const CVector& posn, float angle, int modelId, short color1, short color2, uchar bForceSpawn,
-                          uchar alarmChance, uchar doorLockChance, ushort minDelay, ushort maxDelay,
-                          uchar iplId, bool ignorePopulationLimit)
+void CCarGenerator::Setup(const CVector& posn, float angle, int modelId, short color1, short color2, uint8_t bForceSpawn,
+                          uint8_t alarmChance, uint8_t doorLockChance, uint16_t minDelay, uint16_t maxDelay,
+                          uint8_t iplId, bool ignorePopulationLimit)
 {
     constexpr float magic = 256.0f / 360.0f; // 0x8722E8 original expression 128.0f / 180.0f
 

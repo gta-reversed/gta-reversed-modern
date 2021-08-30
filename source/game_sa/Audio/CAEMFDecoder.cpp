@@ -448,16 +448,14 @@ void CAEMFDecoder::dtor()
 
 void CAEMFDecoder::InjectHooks()
 {
-#ifndef USE_DEFAULT_FUNCTIONS
-    HookInstall(0x4e7770, &CAEMFDecoder::ctor);
-    HookInstall(0x4e77c0, &CAEMFDecoder::dtor);
-    HookInstall(0x4e7cb0, &CAEMFDecoder::Initialise);
-    HookInstall(0x4e7860, &CAEMFDecoder::FillBuffer);
-    HookInstall(0x4e7920, &CAEMFDecoder::GetStreamLengthMs);
-    HookInstall(0x4e7940, &CAEMFDecoder::GetStreamPlayTimeMs);
-    HookInstall(0x4e78e0, &CAEMFDecoder::SetCursor);
-    HookInstall(0x4e78c0, &CAEMFDecoder::GetSampleRate);
-    HookInstall(0x4e77b0, &CAEMFDecoder::GetStreamID);
-    HookInstall(0x4e7c70, &CAEMFDecoder::InitLibrary);
-#endif
+    ReversibleHooks::Install("CAEMFDecoder", "CAEMFDecoder", 0x4e7770, &CAEMFDecoder::ctor);
+    ReversibleHooks::Install("CAEMFDecoder", "~CAEMFDecoder", 0x4e77c0, &CAEMFDecoder::dtor);
+    ReversibleHooks::Install("CAEMFDecoder", "Initialise", 0x4e7cb0, &CAEMFDecoder::Initialise);
+    ReversibleHooks::Install("CAEMFDecoder", "FillBuffer", 0x4e7860, &CAEMFDecoder::FillBuffer);
+    ReversibleHooks::Install("CAEMFDecoder", "GetStreamLengthMs", 0x4e7920, &CAEMFDecoder::GetStreamLengthMs);
+    ReversibleHooks::Install("CAEMFDecoder", "GetStreamPlayTimeMs", 0x4e7940, &CAEMFDecoder::GetStreamPlayTimeMs);
+    ReversibleHooks::Install("CAEMFDecoder", "SetCursor", 0x4e78e0, &CAEMFDecoder::SetCursor);
+    ReversibleHooks::Install("CAEMFDecoder", "GetSampleRate", 0x4e78c0, &CAEMFDecoder::GetSampleRate);
+    ReversibleHooks::Install("CAEMFDecoder", "GetStreamID", 0x4e77b0, &CAEMFDecoder::GetStreamID);
+    ReversibleHooks::Install("CAEMFDecoder", "InitLibrary", 0x4e7c70, &CAEMFDecoder::InitLibrary);
 }

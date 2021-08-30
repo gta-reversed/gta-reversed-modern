@@ -68,7 +68,7 @@ void cTransmission::InitGearRatios()
 }
 
 // 0x6D0530
-void cTransmission::CalculateGearForSimpleCar(float speed, uchar& currentGear)
+void cTransmission::CalculateGearForSimpleCar(float speed, uint8_t& currentGear)
 {
     m_currentVelocity = speed;
     tTransmissionGear& gear = m_aGears[currentGear];
@@ -85,7 +85,7 @@ void cTransmission::CalculateGearForSimpleCar(float speed, uchar& currentGear)
 }
 
 // 0x6D05E0
-float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uchar& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8_t allWheelsOnGround, uint8_t handlingCheat)
+float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uint8_t& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8_t allWheelsOnGround, uint8_t handlingCheat)
 {
     static float cheatMultiplier = 0.0f;
     static float driveAcceleration = 0.0f;

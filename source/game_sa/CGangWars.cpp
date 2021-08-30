@@ -149,7 +149,7 @@ bool CGangWars::GangWarGoingOn() {
 
 // 0x443920
 void CGangWars::InitAtStartOfGame() {
-    plugin::CallDynGlobal(0x443920);
+    plugin::Call<0x443920>();
 }
 
 // 0x
@@ -236,7 +236,7 @@ void CGangWars::TellGangMembersTo(bool bIsGangWarEnding) {
 
 // 0x443D50
 void CGangWars::TellStreamingWhichGangsAreNeeded(int* GangsBitFlags) {
-    plugin::CallDynGlobal<int*>(0x443D50, GangsBitFlags);
+    plugin::Call<0x443D50, int*>(GangsBitFlags);
 }
 
 // 0x446610

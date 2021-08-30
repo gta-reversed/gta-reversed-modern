@@ -36,60 +36,52 @@ static tAudioExtensionType defaultAudioExtensionTypes[] = {
 #endif
 tAudioExtensionType (&CAEUserRadioTrackManager::audioExtensionTypes)[7] = *reinterpret_cast<tAudioExtensionType(*)[7]>(0x8cbb28);
 
+// 0x4f35b0
 bool CAEUserRadioTrackManager::Initialise()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall *)(CAEUserRadioTrackManager*)) 0x4f35b0)(this);
-#else
-    userTracksLoaded = ReadUserTracks();
-    _userTracksLoadedCopy = userTracksLoaded;
-    memset(decodersSupported, 0, sizeof (decodersSupported));
-    decodersSupported[AUDIO_FILE_TYPE_VORBIS] = true;
-    decodersSupported[AUDIO_FILE_TYPE_WAV] = true;
-    decodersSupported[AUDIO_FILE_TYPE_WMA] = CAEWMADecoder::InitLibrary();
-    decodersSupported[AUDIO_FILE_TYPE_QUICKTIME] = CAEMFDecoder::InitLibrary();
+    m_bUserTracksLoaded = ReadUserTracks();
+    m_bUserTracksLoadedCopy = m_bUserTracksLoaded;
+    memset(m_baDecodersSupported, 0, sizeof (m_baDecodersSupported));
+    m_baDecodersSupported[AUDIO_FILE_TYPE_VORBIS] = true;
+    m_baDecodersSupported[AUDIO_FILE_TYPE_WAV] = true;
+    m_baDecodersSupported[AUDIO_FILE_TYPE_WMA] = CAEWMADecoder::InitLibrary();
+    m_baDecodersSupported[AUDIO_FILE_TYPE_QUICKTIME] = CAEMFDecoder::InitLibrary();
 
-    if (decodersSupported[AUDIO_FILE_TYPE_QUICKTIME] == false)
+    if (m_baDecodersSupported[AUDIO_FILE_TYPE_QUICKTIME] == false)
         // change MP3 decoder from QuickTime to WMA
         audioExtensionTypes[1].type = AUDIO_FILE_TYPE_WMA;
 
     return true;
-#endif
 }
 
+// 0x4f2fb0
 void CAEUserRadioTrackManager::Shutdown()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall *)(CAEUserRadioTrackManager*)) 0x4f2fb0)(this);
-#else
-    if (userTracksLoaded && userTracksInfo)
+    if (m_bUserTracksLoaded && m_pUserTracksInfo)
     {
-        CMemoryMgr::Free(userTracksInfo);
-        userTracksInfo = nullptr;
+        CMemoryMgr::Free(m_pUserTracksInfo);
+        m_pUserTracksInfo = nullptr;
     }
 
     CAEWMADecoder::Shutdown();
     CAEMFDecoder::Shutdown();
-#endif
 }
 
-char *CAEUserRadioTrackManager::GetTrackPath(std::int32_t trackID)
+// 0x4f3050
+char* CAEUserRadioTrackManager::GetTrackPath(int32 trackID) const
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((char*(__thiscall *)(CAEUserRadioTrackManager*, int)) 0x4f3050)(this, trackID);
-#else
-    if (trackID >= static_cast<std::int32_t> (userTracksCount))
+    if (trackID >= static_cast<int32>(m_nUserTracksCount))
         return nullptr;
 
     CFileMgr::SetDirMyDocuments();
     FILESTREAM ufiles = CFileMgr::OpenFile("sa-ufiles.dat", "rb");
     CFileMgr::SetDir("");
 
-    if (ufiles == 0)
+    if (ufiles == nullptr)
         return nullptr;
 
-    tUserTracksInfo &targetOffset = userTracksInfo[trackID];
-    char *dest = new char[targetOffset.pathLength + 1];
+    tUserTracksInfo& targetOffset = m_pUserTracksInfo[trackID];
+    char* dest = new char[targetOffset.pathLength + 1];
 
     CFileMgr::Seek(ufiles, targetOffset.startUfilesPath, SEEK_SET);
     CFileMgr::Read(ufiles, dest, targetOffset.pathLength);
@@ -98,29 +90,26 @@ char *CAEUserRadioTrackManager::GetTrackPath(std::int32_t trackID)
     // NULL-terminate the path
     dest[targetOffset.pathLength] = 0;
     return dest;
-#endif
 }
 
-CAEStreamingDecoder* CAEUserRadioTrackManager::LoadUserTrack(std::int32_t trackID)
+// 0x4f35f0
+CAEStreamingDecoder* CAEUserRadioTrackManager::LoadUserTrack(int32 trackID)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((CAEStreamingDecoder*(__thiscall *)(CAEUserRadioTrackManager*, int)) 0x4f35f0)(this, trackID);
-#else
-    if (userTracksLoaded == false)
+    if (m_bUserTracksLoaded == false)
         return nullptr;
 
-    if (trackID < 0 || trackID >= userTracksCount)
+    if (trackID < 0 || trackID >= m_nUserTracksCount)
         return nullptr;
     
-    tUserTracksInfo &targetOffset = userTracksInfo[trackID];
-    if (decodersSupported[targetOffset.fileType] == false)
+    tUserTracksInfo &targetOffset = m_pUserTracksInfo[trackID];
+    if (m_baDecodersSupported[targetOffset.fileType] == false)
         return nullptr;
 
-    char *filename = GetTrackPath(trackID);
+    char* filename = GetTrackPath(trackID);
     if (filename == nullptr)
         return nullptr;
-    
-    CAEStreamingDecoder *decoder = nullptr;
+
+    CAEStreamingDecoder* decoder = nullptr;
 
     // QuickTime decoder doesn't need the data stream
     if (targetOffset.fileType == AUDIO_FILE_TYPE_QUICKTIME)
@@ -128,7 +117,7 @@ CAEStreamingDecoder* CAEUserRadioTrackManager::LoadUserTrack(std::int32_t trackI
         decoder = new CAEMFDecoder(filename, trackID);
     else
     {
-        CAEDataStream *dataStream = new CAEDataStream(trackID, filename, 0, 0, 0);
+        CAEDataStream* dataStream = new CAEDataStream(trackID, filename, 0, 0, false);
 
         CFileMgr::SetDirMyDocuments();
         bool dataStreamInitialized = dataStream->Initialise();
@@ -167,184 +156,147 @@ CAEStreamingDecoder* CAEUserRadioTrackManager::LoadUserTrack(std::int32_t trackI
     }
 
     return decoder;
-#endif
 }
 
+// 0x4f2fd0
 bool CAEUserRadioTrackManager::ReadUserTracks()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall *)(CAEUserRadioTrackManager*)) 0x4f2fd0)(this);
-#else
     CFileMgr::SetDirMyDocuments();
-    FILE *f = CFileMgr::OpenFile("sa-utrax.dat", "rb");
+    FILESTREAM file = CFileMgr::OpenFile("sa-utrax.dat", "rb");
     CFileMgr::SetDir("");
 
-    if (f == nullptr)
+    if (file == nullptr)
         return false;
 
-    size_t size = static_cast<size_t> (CFileMgr::GetFileLength(f));
-    if (size == 0)
-    {
-        CFileMgr::CloseFile(f);
+    size_t size = static_cast<size_t>(CFileMgr::GetFileLength(file));
+    if (size == 0) {
+        CFileMgr::CloseFile(file);
         return false;
     }
 
-    userTracksCount = (uint16_t)(size / sizeof(tUserTracksInfo));
+    m_nUserTracksCount = size / sizeof(tUserTracksInfo);
 
-    if (userTracksInfo)
-        CMemoryMgr::Free(userTracksInfo);
-    userTracksInfo = (tUserTracksInfo *) CMemoryMgr::Malloc(size);
+    if (m_pUserTracksInfo)
+        CMemoryMgr::Free(m_pUserTracksInfo);
+    m_pUserTracksInfo = (tUserTracksInfo*)CMemoryMgr::Malloc(size);
 
-    CFileMgr::Read(f, userTracksInfo, size);
-    CFileMgr::CloseFile(f);
+    CFileMgr::Read(file, m_pUserTracksInfo, size);
+    CFileMgr::CloseFile(file);
 
     return true;
-#endif
 }
 
+// 0x4f4ba0
 bool CAEUserRadioTrackManager::ScanUserTracks()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall *)(CAEUserRadioTrackManager*)) 0x4f4ba0)(this);
-#else
-    switch (userTracksScanState)
-    {
-        case USER_TRACK_SCAN_OFF:
-        {
-            userTracksScanState = USER_TRACK_SCAN_IN_PROGRESS;
-            userTracksScanThreadHandle = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE) WriteUserTracksThread, this, 0, &userTracksScanThreadID);
-            // no "break"
-        }
-        case USER_TRACK_SCAN_IN_PROGRESS:
-            return false;
-        case USER_TRACK_SCAN_COMPLETE:
-        case USER_TRACK_SCAN_ERROR:
-            return true;
-        default:
-            return false;
+    switch (m_nUserTracksScanState) {
+    case USER_TRACK_SCAN_OFF: {
+        m_nUserTracksScanState = USER_TRACK_SCAN_IN_PROGRESS;
+        m_hwndUserTracksScanThreadHandle = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)WriteUserTracksThread, this, 0, &m_nUserTracksScanThreadID);
+        // no "break"
     }
-#endif
+    case USER_TRACK_SCAN_IN_PROGRESS:
+        return false;
+    case USER_TRACK_SCAN_COMPLETE:
+    case USER_TRACK_SCAN_ERROR:
+        return true;
+    default:
+        return false;
+    }
 }
 
+// 0x4f32f0
 void CAEUserRadioTrackManager::DeleteUserTracksInfo()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall *)(CAEUserRadioTrackManager*)) 0x4f32f0)(this);
-#else
-    TerminateThread(userTracksScanThreadHandle, 0);
+    TerminateThread(m_hwndUserTracksScanThreadHandle, 0);
     CFileMgr::SetDirMyDocuments();
-    remove("sa-ufiles.dat");
+    remove("sa-ufiles.dat"); // todo: cross-platform
     remove("sa-utrax.dat");
     CFileMgr::SetDir("");
 
-    userTracksScanState = USER_TRACK_SCAN_OFF;
-#endif
+    m_nUserTracksScanState = USER_TRACK_SCAN_OFF;
 }
 
-void CAEUserRadioTrackManager::SetUserTrackIndex(std::int32_t index)
+// 0x4f3340
+void CAEUserRadioTrackManager::SetUserTrackIndex(int32 index)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall *)(CAEUserRadioTrackManager*, int)) 0x4f3340)(this, index);
-#else
     if (index != -1)
         FrontEndMenuManager.field_AC = index;
-#endif
 }
 
-std::int32_t CAEUserRadioTrackManager::SelectUserTrackIndex()
+// 0x4f3250
+int32 CAEUserRadioTrackManager::SelectUserTrackIndex() const
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((std::uint32_t(__thiscall *)(CAEUserRadioTrackManager*)) 0x4f3250)(this);
-#else
-    if (userTracksCount > 0 && FrontEndMenuManager.m_nRadioMode >= 0)
-    {
-        switch (FrontEndMenuManager.m_nRadioMode)
-        {
-            case USER_TRACK_PLAY_RADIO:
-            case USER_TRACK_PLAY_RANDOM:
-            {
-                if (userTracksCount == 1)
-                    return FrontEndMenuManager.field_AC = 1;
-                else
-                {
-                    int index;
+    if (m_nUserTracksCount > 0 && FrontEndMenuManager.m_nRadioMode >= 0) {
+        switch (FrontEndMenuManager.m_nRadioMode) {
+        case USER_TRACK_PLAY_RADIO:
+        case USER_TRACK_PLAY_RANDOM: {
+            if (m_nUserTracksCount == 1)
+                return FrontEndMenuManager.field_AC = 1;
+            else {
+                int index;
 
-                    do
-                        index = static_cast<int> (CAEAudioUtility::GetRandomNumberInRange(0, userTracksCount - 1));
-                    while (index == FrontEndMenuManager.field_AC);
+                do
+                    index = static_cast<int>(CAEAudioUtility::GetRandomNumberInRange(0, m_nUserTracksCount - 1));
+                while (index == FrontEndMenuManager.field_AC);
 
-                    return FrontEndMenuManager.field_AC = index;
-                }
+                return FrontEndMenuManager.field_AC = index;
             }
-            case USER_TRACK_PLAY_SEQUENTAL:
-            {
-                return FrontEndMenuManager.field_AC = (FrontEndMenuManager.field_AC + 1) % userTracksCount;
-            }
+        }
+        case USER_TRACK_PLAY_SEQUENTAL: {
+            return FrontEndMenuManager.field_AC = (FrontEndMenuManager.field_AC + 1) % m_nUserTracksCount;
+        }
         }
     }
 
     return -1;
-#endif
 }
 
-eAudioFileType CAEUserRadioTrackManager::GetAudioFileType(const char *filename)
+// 0x4f31f0
+eAudioFileType CAEUserRadioTrackManager::GetAudioFileType(const char* filename)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((eAudioFileType(__thiscall *)(CAEUserRadioTrackManager*, const char*)) 0x4f31f0)(this, filename);
-#else
     constexpr size_t AUDIO_EXTENSIONS = sizeof(CAEUserRadioTrackManager::audioExtensionTypes) / sizeof(tAudioExtensionType);
-    const char *dotPosition = strrchr(filename, '.');
+    const char* dotPosition = strrchr(filename, '.');
 
     if (dotPosition == nullptr)
         return AUDIO_FILE_TYPE_UNKNOWN;
 
-    for (const tAudioExtensionType &audioExtType: audioExtensionTypes)
-    {
+    for (const tAudioExtensionType& audioExtType : audioExtensionTypes) {
         if (_stricmp(audioExtType.extension, dotPosition) == 0)
             return audioExtType.type;
     }
 
     return AUDIO_FILE_TYPE_UNKNOWN;
-#endif
 }
 
-bool CAEUserRadioTrackManager::IsShortcut(const char *path)
+// 0x4f32c0
+bool CAEUserRadioTrackManager::IsShortcut(const char* path)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall *)(CAEUserRadioTrackManager*, const char*)) 0x4f32c0)(this, path);
-#else
-    const char *dot = strrchr(path, '.');
+    const char* dot = strrchr(path, '.');
     return dot ? _stricmp(dot, ".lnk") == 0 : false;
-#endif
 }
 
-std::uint8_t CAEUserRadioTrackManager::GetUserTrackPlayMode()
+// 0x4f3330
+uint8 CAEUserRadioTrackManager::GetUserTrackPlayMode()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((eUserTrackPlayMode(__thiscall *)(CAEUserRadioTrackManager*)) 0x4f3330)(this);
-#else
-    return (std::uint8_t) FrontEndMenuManager.m_nRadioMode;
-#endif
+    return (uint8)FrontEndMenuManager.m_nRadioMode;
 }
 
-DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrackManager *self)
+// 0x4f4a20
+DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrackManager* self)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((DWORD(__stdcall *)(CAEUserRadioTrackManager*)) 0x4f4a20)(self);
-#else
     CoInitialize(nullptr);
-    
+
     // Open sa-ufiles.dat
     CFileMgr::SetDirMyDocuments();
-    FILE *file = CFileMgr::OpenFile("sa-ufiles.dat", "wb");
+    FILESTREAM file = CFileMgr::OpenFile("sa-ufiles.dat", "wb");
 
     if (file == nullptr)
-        self->userTracksScanState = USER_TRACK_SCAN_ERROR;
-    else
-    {
+        self->m_nUserTracksScanState = USER_TRACK_SCAN_ERROR;
+    else {
         // Create path to "User Tracks"
         size_t documentsDirLen = strlen(CFileMgr::ms_dirName), dummy = 0;
-        char *userTracksDir = new char[documentsDirLen + 15];
+        char* userTracksDir = new char[documentsDirLen + 15];
         std::vector<tUserTracksInfo> offsets;
 
         // Concat
@@ -358,55 +310,37 @@ DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrac
         // Open sa-utrax.dat containing the offsets
         file = CFileMgr::OpenFile("sa-utrax.dat", "wb");
 
+        // todo: FIX_BUGS
         // MikuAuahDark: GTASA doesn't check if sa-utrax.dat fails to open
         if (file == nullptr)
-            self->userTracksScanState = USER_TRACK_SCAN_ERROR;
-        else
-        {
+            self->m_nUserTracksScanState = USER_TRACK_SCAN_ERROR;
+        else {
             if (amountOfTracks > 0)
                 CFileMgr::Write(file, offsets.data(), amountOfTracks * sizeof(tUserTracksInfo));
 
             CFileMgr::CloseFile(file);
 
-            self->userTracksScanState = USER_TRACK_SCAN_COMPLETE;
             FrontEndMenuManager.field_AC = 0;
+            self->m_nUserTracksScanState = USER_TRACK_SCAN_COMPLETE;
         }
     }
 
     // Read user tracks back
-    self->userTracksLoaded = self->ReadUserTracks();
-    self->_userTracksLoadedCopy = self->userTracksLoaded;
+    self->m_bUserTracksLoaded = self->ReadUserTracks();
+    self->m_bUserTracksLoadedCopy = self->m_bUserTracksLoaded;
 
     CFileMgr::SetDir("");
     CoUninitialize();
     return 0;
-#endif
 }
 
-int CAEUserRadioTrackManager::WriteUserTracksFile(
-    const char *dir,
-    size_t &currentLength,
-    FILE *file,
-    std::vector<tUserTracksInfo> &offsets,
-    int depth
-)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    using WriteUtraxFunc = int(__thiscall *)(CAEUserRadioTrackManager*, const char*, size_t&, FILE*, std::vector<tUserTracksInfo>&, int);
-    return ((WriteUtraxFunc) 0x4f4690)(this, dir, currentLength, file, offsets, depth);
-#else
-    return WriteUserTracksFile(UTF8ToUnicode(dir), currentLength, file, offsets, depth);;
-#endif
+// 0x4f4690
+int CAEUserRadioTrackManager::WriteUserTracksFile(const char* dir, size_t& currentLength, FILESTREAM file, std::vector<tUserTracksInfo>& offsets, int depth) {
+    // todo: FIX_BUGS
+    return WriteUserTracksFile(UTF8ToUnicode(dir), currentLength, file, offsets, depth);
 }
 
-int CAEUserRadioTrackManager::WriteUserTracksFile(
-    const std::wstring &dir,
-    size_t &currentLength,
-    FILE *file,
-    std::vector<tUserTracksInfo> &offsets,
-    int depth
-)
-{
+int CAEUserRadioTrackManager::WriteUserTracksFile(const std::wstring& dir, size_t& currentLength, FILESTREAM file, std::vector<tUserTracksInfo>& offsets, int depth) {
     // Limit folder scan to 16 folders deep
     if (depth >= 15)
         return 0;
@@ -433,7 +367,7 @@ int CAEUserRadioTrackManager::WriteUserTracksFile(
             {
                 size_t filenameLength = wcslen(findData.cFileName);
                 std::wstring path = dir + L"\\" + findData.cFileName;
-                
+
                 // If the file is a shortcut, then resolve the target
                 const wchar_t *extension = wcsrchr(findData.cFileName, L'.');
                 if (path.rfind(L".lnk") == path.length() - 4)
@@ -475,44 +409,36 @@ int CAEUserRadioTrackManager::WriteUserTracksFile(
     return amountOfTracks;
 }
 
-char *CAEUserRadioTrackManager::ResolveShortcut(const char *path)
+// todo: FIX_BUGS
+// 0x4f30f0
+char* CAEUserRadioTrackManager::ResolveShortcut(const char* path)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using ShortcutFunc = char*(__thiscall *)(CAEUserRadioTrackManager*, const char*);
-    return ((ShortcutFunc) 0x4f30f0)(this, path);
-#else
     std::string str = UnicodeToUTF8(ResolveShortcut(UTF8ToUnicode(path)));
-    char *result = new char[str.length() + 1];
+    char* result = new char[str.length() + 1];
 
     memcpy(result, str.c_str(), str.length() + 1);
     return result;
-#endif
 }
 
 std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring &path)
 {
-    IShellLinkW *shellLink = nullptr;
-    IPersistFile *persistFile = nullptr;
+    IShellLinkW* shellLink = nullptr;
+    IPersistFile* persistFile = nullptr;
 
     if (FAILED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (void**)&shellLink)))
         throw std::runtime_error{"CoCreateInstance failed"};
 
-    if (FAILED(shellLink->QueryInterface(IID_IPersistFile, (void **) &persistFile)))
-    {
+    if (FAILED(shellLink->QueryInterface(IID_IPersistFile, (void**)&persistFile))) {
         shellLink->Release();
-        throw std::runtime_error{ "QueryInterface failed" };
+        return nullptr;
     }
-    
-    wchar_t *target = new wchar_t[MAX_PATH];
+
+    wchar_t* target = new wchar_t[MAX_PATH];
     WIN32_FIND_DATAW findData{};
-    if (
-        FAILED(persistFile->Load(path.c_str(), STGM_READ)) ||
-        FAILED(shellLink->GetPath(target, MAX_PATH, &findData, 0))
-    )
-    {
+    if (FAILED(persistFile->Load(path.c_str(), STGM_READ)) || FAILED(shellLink->GetPath(target, MAX_PATH, &findData, 0))) {
         persistFile->Release();
         shellLink->Release();
-        throw std::runtime_error{ "Load or GetPath failed" };
+        throw std::runtime_error{"Load or GetPath failed"};
     }
 
     persistFile->Release();
@@ -525,21 +451,19 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring &path)
 
 void CAEUserRadioTrackManager::InjectHooks()
 {
-#ifndef USE_DEFAULT_FUNCTIONS
-    HookInstall(0x4f2fb0, &CAEUserRadioTrackManager::Shutdown);
-    HookInstall(0x4f2fd0, &CAEUserRadioTrackManager::ReadUserTracks);
-    HookInstall(0x4f3050, &CAEUserRadioTrackManager::GetTrackPath);
-    HookInstall(0x4f30f0, (char*(CAEUserRadioTrackManager::*)(const char*)) &CAEUserRadioTrackManager::ResolveShortcut);
-    HookInstall(0x4f31f0, &CAEUserRadioTrackManager::GetAudioFileType);
-    HookInstall(0x4f3250, &CAEUserRadioTrackManager::SelectUserTrackIndex);
-    HookInstall(0x4f32f0, &CAEUserRadioTrackManager::DeleteUserTracksInfo);
-    HookInstall(0x4f32c0, &CAEUserRadioTrackManager::IsShortcut);
-    HookInstall(0x4f35b0, &CAEUserRadioTrackManager::Initialise);
-    HookInstall(0x4f35f0, &CAEUserRadioTrackManager::LoadUserTrack);
-    HookInstall(0x4f3330, &CAEUserRadioTrackManager::GetUserTrackPlayMode);
-    HookInstall(0x4f3340, &CAEUserRadioTrackManager::SetUserTrackIndex);
-    HookInstall(0x4f4690, (int(CAEUserRadioTrackManager::*)(const char*, size_t&, FILE*, std::vector<tUserTracksInfo>&, int)) &CAEUserRadioTrackManager::WriteUserTracksFile);
-    HookInstall(0x4f4a20, &CAEUserRadioTrackManager::WriteUserTracksThread);
-    HookInstall(0x4f4ba0, &CAEUserRadioTrackManager::ScanUserTracks);
-#endif
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "Initialise", 0x4f35b0, &CAEUserRadioTrackManager::Initialise);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "Shutdown", 0x4f2fb0, &CAEUserRadioTrackManager::Shutdown);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "ReadUserTracks", 0x4f2fd0, &CAEUserRadioTrackManager::ReadUserTracks);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "GetTrackPath", 0x4f3050, &CAEUserRadioTrackManager::GetTrackPath);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "ResolveShortcut", 0x4f30f0, (char* (CAEUserRadioTrackManager::*)(const char*)) & CAEUserRadioTrackManager::ResolveShortcut);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "GetAudioFileType", 0x4f31f0, &CAEUserRadioTrackManager::GetAudioFileType);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "SelectUserTrackIndex", 0x4f3250, &CAEUserRadioTrackManager::SelectUserTrackIndex);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "DeleteUserTracksInfo", 0x4f32f0, &CAEUserRadioTrackManager::DeleteUserTracksInfo);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "IsShortcut", 0x4f32c0, &CAEUserRadioTrackManager::IsShortcut);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "LoadUserTrack", 0x4f35f0, &CAEUserRadioTrackManager::LoadUserTrack);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "GetUserTrackPlayMode", 0x4f3330, &CAEUserRadioTrackManager::GetUserTrackPlayMode);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "SetUserTrackIndex", 0x4f3340, &CAEUserRadioTrackManager::SetUserTrackIndex);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "WriteUserTracksFile", 0x4f4690, (int(CAEUserRadioTrackManager::*)(const char*, size_t&, FILE*, std::vector<tUserTracksInfo>&, int)) & CAEUserRadioTrackManager::WriteUserTracksFile);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "WriteUserTracksThread", 0x4f4a20, &CAEUserRadioTrackManager::WriteUserTracksThread);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "ScanUserTracks", 0x4f4ba0, &CAEUserRadioTrackManager::ScanUserTracks);
 }

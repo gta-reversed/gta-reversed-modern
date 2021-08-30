@@ -23,52 +23,52 @@ int CPools::CheckBuildingAtomics() {
     return plugin::CallAndReturn<int, 0x550170>();
 }
 
-// Converted from cdecl void CPools::CheckPoolsEmpty(void) 0x551950
+// 0x551950
 void CPools::CheckPoolsEmpty() {
     plugin::Call<0x551950>();
 }
 
-// Converted from cdecl CObject* CPools::GetObject(int handle) 0x550050
+// 0x550050
 CObject* CPools::GetObject(int handle) {
     return plugin::CallAndReturn<CObject*, 0x550050, int>(handle);
 }
 
-// Converted from cdecl int CPools::GetObjectRef(CObject *object) 0x550020
+// 0x550020
 int CPools::GetObjectRef(CObject* object) {
     return plugin::CallAndReturn<int, 0x550020, CObject*>(object);
 }
 
-// Converted from cdecl CPed* CPools::GetPed(int handle) 0x54FF90
+// 0x54FF90
 CPed* CPools::GetPed(int handle) {
     return plugin::CallAndReturn<CPed*, 0x54FF90, int>(handle);
 }
 
-// Converted from cdecl int CPools::GetPedRef(CPed *ped) 0x54FF60
+// 0x54FF60
 int CPools::GetPedRef(CPed* ped) {
     return plugin::CallAndReturn<int, 0x54FF60, CPed*>(ped);
 }
 
-// Converted from cdecl CVehicle* CPools::GetVehicle(int) 0x54FFF0
+// 0x54FFF0
 CVehicle* CPools::GetVehicle(int handle) {
     return plugin::CallAndReturn<CVehicle*, 0x54FFF0, int>(handle);
 }
 
-// Converted from cdecl int CPools::GetVehicleRef(CVehicle *vehicle) 0x54FFC0
+// 0x54FFC0
 int CPools::GetVehicleRef(CVehicle* vehicle) {
     return plugin::CallAndReturn<int, 0x54FFC0, CVehicle*>(vehicle);
 }
 
-// Converted from cdecl void CPools::Initialise(void) 0x550F10
+// 0x550F10
 void CPools::Initialise() {
     plugin::Call<0x550F10>();
 }
 
-// Converted from cdecl bool CPools::Load(void) 0x5D0890
+// 0x5D0890
 bool CPools::Load() {
     return plugin::CallAndReturn<bool, 0x5D0890>();
 }
 
-// Converted from cdecl bool CPools::LoadObjectPool(void) 0x5D4A40
+// 0x5D4A40
 bool CPools::LoadObjectPool() {
     int32_t iNumObjects = 0;
     CGenericGameStorage::LoadDataFromWorkBuffer(&iNumObjects, 4);
@@ -90,17 +90,17 @@ bool CPools::LoadObjectPool() {
     return true;
 }
 
-// Converted from cdecl bool CPools::LoadPedPool(void) 0x5D2D70
+// 0x5D2D70
 bool CPools::LoadPedPool() {
     return plugin::CallAndReturn<bool, 0x5D2D70>();
 }
 
-// Converted from cdecl bool CPools::LoadVehiclePool(void) 0x5D2A20
+// 0x5D2A20
 bool CPools::LoadVehiclePool() {
     return plugin::CallAndReturn<bool, 0x5D2A20>();
 }
 
-// Converted from cdecl void CPools::MakeSureSlotInObjectPoolIsEmpty(int slot) 0x550080
+// 0x550080
 void CPools::MakeSureSlotInObjectPoolIsEmpty(int slot) {
     if (CPools::ms_pObjectPool->IsFreeSlotAtIndex(slot))
         return;
@@ -125,27 +125,27 @@ void CPools::MakeSureSlotInObjectPoolIsEmpty(int slot) {
     }
 }
 
-// Converted from cdecl bool CPools::Save(void) 0x5D0880
+// 0x5D0880
 bool CPools::Save() {
     return plugin::CallAndReturn<bool, 0x5D0880>();
 }
 
-// Converted from cdecl bool CPools::SaveObjectPool(void) 0x5D4940
+// 0x5D4940
 bool CPools::SaveObjectPool() {
     return plugin::CallAndReturn<bool, 0x5D4940>();
 }
 
-// Converted from cdecl bool CPools::SavePedPool(void) 0x5D4B40
+// 0x5D4B40
 bool CPools::SavePedPool() {
     return plugin::CallAndReturn<bool, 0x5D4B40>();
 }
 
-// Converted from cdecl bool CPools::SaveVehiclePool(void) 0x5D4800
+// 0x5D4800
 bool CPools::SaveVehiclePool() {
     return plugin::CallAndReturn<bool, 0x5D4800>();
 }
 
-// Converted from cdecl void CPools::ShutDown(void) 0x5519F0
+// 0x5519F0
 void CPools::ShutDown() {
     plugin::Call<0x5519F0>();
 }

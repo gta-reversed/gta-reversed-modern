@@ -12,17 +12,17 @@ void CPedGroups::InjectHooks() {
 
 // 0x5FB8C0
 void CPedGroups::Init() {
-    plugin::CallDynGlobal<>(0x5FB8C0);
+    plugin::Call<0x5FB8C0>();
 }
 
 // 0x5F7F40
 bool CPedGroups::AreInSameGroup(CPed* ped1, CPed* ped2) {
-    return plugin::CallAndReturnDynGlobal<bool, CPed*, CPed*>(0x5F7F40, ped1, ped2);
+    return plugin::CallAndReturn<bool, 0x5F7F40, CPed*, CPed*>(ped1, ped2);
 }
 
 // 0x5F7E80
 CPedGroup* CPedGroups::GetPedsGroup(CPed* ped) {
-    return plugin::CallAndReturnDynGlobal<CPedGroup*, CPed*>(0x5F7E80, ped);
+    return plugin::CallAndReturn<CPedGroup*, 0x5F7E80, CPed*>(ped);
 }
 
 bool CPedGroups::IsInPlayersGroup(CPed* ped)
