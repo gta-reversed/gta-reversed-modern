@@ -21,7 +21,10 @@ public:
     RwTexCoords m_texCoorsBA;
     RwTexCoords m_texCoorsBB;
     float m_fDistanceToCamera;
-    CRGBA m_color;
+    bool m_bAlwaysTrue;
+    uint8 m_colorR;
+    uint8 m_colorG;
+    uint8 m_colorB;
 };
 
 VALIDATE_SIZE(CRegisteredShinyText, 0x58);
@@ -37,5 +40,6 @@ public:
     static void Init();
     static void RenderOutGeometryBuffer();
     static void Render();
-    static void RegisterOne(CVector cornerAA, CVector cornerBA, CVector cornerBB, CVector cornerAB, float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha, float maxDistance);
+    static void RegisterOne(CVector cornerAA, CVector cornerBA, CVector cornerBB, CVector cornerAB, float u1, float v1, float u2, float v2, float u3, float v3, float u4,
+        float v4, bool alwaysTrue, unsigned char red, unsigned char green, unsigned char blue, float maxDistance);
 };
