@@ -76,8 +76,9 @@ void CFont::InjectHooks() {
     ReversibleHooks::Install("CFont", "ParseToken", 0x718F00, &CFont::ParseToken);
     ReversibleHooks::Install("CFont", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
     //ReversibleHooks::Install("CFont", "PrintChar", 0x718A10, &CFont::PrintChar);
+    ReversibleHooks::Install("CFont", "GetLetterSize", 0x719750, &CFont::GetLetterSize);
 
-    ReversibleHooks::Install("CFont", "ReadFontsDat", 0x7187C0, &ReadFontsDat);
+    ReversibleHooks::Install("", "ReadFontsDat", 0x7187C0, &ReadFontsDat);
 }
 
 // 0x7187C0
@@ -606,7 +607,7 @@ void CFont::SetOrientation(eFontAlignment alignment)
     m_bFontRightAlign = alignment == eFontAlignment::ALIGN_RIGHT;
 }
 
-// 0x719800 (needs review)
+// 0x719800
 void CFont::InitPerFrame()
 {
     m_nFontOutline = 0;
@@ -614,7 +615,7 @@ void CFont::InitPerFrame()
     m_nFontShadow = 0;
     m_bNewLine = false;
     m_nExtraFontSymbolId = EXSYMBOL_NONE;
-    RenderState.m_dwFontTexture = 0; // todo: wtf
+    RenderState.m_dwFontTexture = 0;
     pEmptyChar = &setup[0];
 
     CSprite::InitSpriteBuffer();
@@ -625,9 +626,59 @@ void CFont::RenderFontBuffer()
     plugin::Call<0x719840>();
 }
 
-float CFont::GetStringWidth(char* string, bool unk1, bool unk2)
+// 0x71A0E0
+float CFont::GetStringWidth(char* string, bool full, bool scriptText)
 {
-    return plugin::CallAndReturn<float, 0x71A0E0, char*, bool, bool>(string, unk1, unk2);
+    //return plugin::CallAndReturn<float, 0x71A0E0, char*, bool, bool>(string, unk1, unk2);
+    size_t len = CMessages::GetStringLength(string);
+
+    char data[400] = {0};
+
+    strncpy(data, string, len);
+
+    CMessages::InsertPlayerControlKeysInString(data);
+
+    float width = 0.0f;
+    bool bLastWasTag = false, bLastWasLetter = false;
+
+    char* pStr = data;
+
+    while (true) {
+        if (*pStr == ' ' && !full)
+            break;
+        if (*pStr == '\0')
+            break;
+
+        if (*pStr == '~') {
+            if (!full && (bLastWasTag || bLastWasLetter))
+                return width;
+
+            char* next = pStr + 1;
+
+            if (*next != '~') {
+                for (; *next && *next != '~'; next++);
+            }
+
+            pStr = next + 1;
+
+            if (bLastWasLetter || *pStr == '~')
+                bLastWasTag = true;
+        }
+        else {
+            if (!full && *pStr == ' ' && bLastWasTag)
+                return width;
+
+            char upper = toupper(*pStr); // (ch - 0x20)
+
+            pStr++;
+            if (scriptText) {
+                //width += sub_719670(upper);
+            }
+            else {
+                //width += GetCharacterSize(upper);
+            }
+        }
+    }
 }
 
 // same as RenderFontBuffer() (0x71A210)
@@ -710,6 +761,36 @@ void CFont::PrintStringFromBottom(float x, float y, const char* text)
         drawY -= (m_fSlantRefPoint.x - x) * m_fSlant + m_fSlantRefPoint.y;
 
     PrintString(x, drawY, text);
+}
+
+// 0x719750
+float CFont::GetLetterSize(uint8 letterId)
+{
+    uint8 propValueIdx = letterId;
+
+    if (letterId == 0x3F) {
+        letterId = 0;
+        propValueIdx = 0;
+    }
+
+    if (m_FontStyle)
+        propValueIdx = GetIDforPropVal(letterId, m_FontStyle);
+    else if (propValueIdx == 0x91)
+        propValueIdx = 0x40;
+    else if (propValueIdx > 0x9B)
+        propValueIdx = 0;
+
+    if (m_bFontPropOn)
+        return ((float)gFontData[m_FontTextureId].m_propValues[propValueIdx]
+            + (float)m_nFontOutlineSize) * m_Scale.x;
+
+    return ((float)gFontData[m_FontTextureId].m_unpropValue + (float)m_nFontOutlineSize)
+        * m_Scale.x;
+}
+
+uint8 GetIDforPropVal(uint8 letterId, uint8 fontStyle)
+{
+    return plugin::CallAndReturn<uint8, 0x7192C0, uint8, uint8>(letterId, fontStyle);
 }
 
 // 0x718770
