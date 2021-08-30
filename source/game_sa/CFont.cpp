@@ -478,7 +478,7 @@ void CFont::SetScaleForCurrentlanguage(float w, float h)
     case 2:
     case 3:
     case 4:
-        m_Scale.Set(h, w * 0.8f);
+        m_Scale.Set(w * 0.8f, h);
         break;
     default:
         m_Scale.Set(w, h);
