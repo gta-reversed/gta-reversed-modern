@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-uint32_t& CShinyTexts::NumShinyTexts = *(uint32_t*)0xC7C6F8;
+uint32& CShinyTexts::NumShinyTexts = *(uint32*)0xC7C6F8;
 CRegisteredShinyText(&CShinyTexts::aShinyTexts)[32] = *(CRegisteredShinyText(*)[32])0xC7D258;
 
 void CShinyTexts::InjectHooks() {
@@ -32,13 +32,13 @@ void CShinyTexts::RenderOutGeometryBuffer() {
 
 // 0x724890
 void CShinyTexts::Render() {
-    if (!NumShinyTexts)
+    if (NumShinyTexts == 0)
         return;
 
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,     (void*)rwCULLMODECULLNONE);
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,     (void*)rwBLENDONE);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,    (void*)rwBLENDONE);
 
     uiTempBufferIndicesStored  = 0;
     uiTempBufferVerticesStored = 0;
@@ -89,38 +89,43 @@ void CShinyTexts::Render() {
     NumShinyTexts = 0;
 
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
 }
 
 // Must be called each frame to re-draw
 // They are drawn once, then deleted
-void CShinyTexts::RegisterOne(CVector cornerAA, CVector cornerAB, CVector cornerBA, CVector cornerBB, float u1, float v1, float u2, float v2, float u3, float v3, float u4,
-    float v4, bool alwaysTrue, unsigned char red, unsigned char green, unsigned char blue, float maxDistance) {
+// 0x724B60
+void CShinyTexts::RegisterOne(CVector cornerAA, CVector cornerAB, CVector cornerBA, CVector cornerBB,
+                              float u1, float v1,
+                              float u2, float v2,
+                              float u3, float v3,
+                              float u4, float v4,
+                              bool alwaysTrue, uint8 red, uint8 green, uint8 blue, float maxDistance
+) {
     if (NumShinyTexts >= MAX_SHINYTEXTS)
         return;
+
     const float distToCam = (TheCamera.GetPosition() - cornerAA).Magnitude();
     if (distToCam > maxDistance)
         return;
 
     CRegisteredShinyText& text = aShinyTexts[NumShinyTexts];
 
-    text = {
-        cornerAA,
-        cornerAB,
-        cornerBA,
-        cornerBB,
-        {u1, v1},
-        {u2, v2},
-        {u3, v3},
-        {u4, v4},
-        distToCam,
-        alwaysTrue,
-        red,
-        green,
-        blue
-    };
+    text.m_vecCornerAA       = cornerAA;
+    text.m_vecCornerAB       = cornerAB;
+    text.m_vecCornerBA       = cornerBA;
+    text.m_vecCornerBB       = cornerBB;
+    text.m_texCoorsAA        = {u1, v1};
+    text.m_texCoorsAB        = {u2, v2};
+    text.m_texCoorsBA        = {u3, v3};
+    text.m_texCoorsBB        = {u4, v4};
+    text.m_fDistanceToCamera = distToCam;
+    text.m_bAlwaysTrue       = alwaysTrue;
+    text.m_colorR            = red;
+    text.m_colorG            = green;
+    text.m_colorB            = blue;
 
     const float halfMaxDist = maxDistance / 2.0f;
     if (halfMaxDist < distToCam) { // TODO: Fix this mess (add CRGB type)
