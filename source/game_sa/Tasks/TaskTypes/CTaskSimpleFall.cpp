@@ -57,7 +57,7 @@ bool CTaskSimpleFall::ProcessPed_Reversed(CPed* ped)
 
     if (m_bIsFinished && (ped->bIsStanding || ped->bIsDrowning))
     {
-        unsigned int nTimeStep = CTimer::GetTimeStepInMilliseconds();
+        unsigned int nTimeStep = CTimer::GetTimeStepInMS();
         if (m_nCurrentDownTime <= nTimeStep)
         {
             m_nCurrentDownTime = 0;

@@ -17,7 +17,7 @@ void CCredits::InjectHooks() {
 // 0x7170E0
 void CCredits::Start() {
     bCreditsGoing = true;
-    CreditsStartTime = CTimer::GetTimeInMilliseconds();
+    CreditsStartTime = CTimer::GetTimeInMS();
 }
 
 // 0x717100
@@ -70,7 +70,7 @@ void CCredits::RenderCredits() {
     DefinedState2d();
 
     uint32_t lineOffset = 0;
-    float    scrollOffset = float(CTimer::GetTimeInMilliseconds() - CreditsStartTime) * 0.0435f;
+    float    scrollOffset = float(CTimer::GetTimeInMS() - CreditsStartTime) * 0.0435f;
     
     CFont::SetBackground(false, false);
     CFont::SetCentreSize(SCREEN_WIDTH * 0.92f);
