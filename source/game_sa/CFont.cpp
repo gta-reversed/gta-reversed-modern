@@ -81,9 +81,9 @@ void CFont::InjectHooks() {
     ReversibleHooks::Install("CFont", "GetLetterSize", 0x719750, &CFont::GetLetterSize);
 
     ReversibleHooks::Install("", "ReadFontsDat", 0x7187C0, &ReadFontsDat);
-    //ReversibleHooks::Install("CFont", "GetScriptLetterSize", 0x719670, &GetScriptLetterSize);
-    ReversibleHooks::Install("CFont", "GetIDforPropVal", 0x7192C0, &GetIDforPropVal);
-    ReversibleHooks::Install("CFont", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
+    //ReversibleHooks::Install("", "GetScriptLetterSize", 0x719670, &GetScriptLetterSize);
+    //ReversibleHooks::Install("", "GetIDforPropVal", 0x7192C0, &GetIDforPropVal);
+    ReversibleHooks::Install("", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
 }
 
 // 0x7187C0
@@ -838,6 +838,8 @@ uint8 GetIDforPropVal(uint8 letterId, uint8 fontStyle)
         return letterId + 122;
     if (letterId >= 64 && letterId <= 90)
         return letterId + 90;
+
+    return letterId;
 }
 
 // 0x718770
