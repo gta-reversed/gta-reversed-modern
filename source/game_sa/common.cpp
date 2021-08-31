@@ -229,6 +229,8 @@ bool InTwoPlayersMode() {
     return CWorld::Players[0].m_pPed && CWorld::Players[1].m_pPed;
 }
 
+// NOTE: This function doesn't add m.GetPosition() like
+//       MultiplyMatrixWithVector @ 0x59C890 does.
 CVector Multiply3x3(CMatrix& m, CVector& v) {
     return CVector{
         m.GetRight().x * v.x + m.GetForward().x * v.y + m.GetUp().x * v.z,
