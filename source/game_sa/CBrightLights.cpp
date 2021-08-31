@@ -1,7 +1,8 @@
 #include "StdInc.h"
+
 #include "CBrightLights.h"
 
-uint32_t& CBrightLights::NumBrightLights = *(uint32_t*)0xC7C6FC;
+uint32& CBrightLights::NumBrightLights = *(uint32*)0xC7C6FC;
 tBrightLight (&CBrightLights::aBrightLights)[MAX_NUM_BRIGHTLIGHTS] = *(tBrightLight(*)[MAX_NUM_BRIGHTLIGHTS])0xC7CB58;
 
 void CBrightLights::InjectHooks() {
@@ -32,7 +33,7 @@ void CBrightLights::RenderOutGeometryBuffer() {
 
 // 0x7241C0
 void CBrightLights::Render() {
-    if (!NumBrightLights)
+    if (NumBrightLights == 0)
         return;
 
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
@@ -49,21 +50,21 @@ void CBrightLights::Render() {
         // Maybe render vertex buffer if running low on free items...
         if (uiTempBufferIndicesStored > TOTAL_TEMP_BUFFER_INDICES - 40u ||
             uiTempBufferVerticesStored > TOTAL_TEMP_BUFFER_VERTICES - 40u
-            )
-        {
+        ) {
             CBrightLights::RenderOutGeometryBuffer();
         }
         aBrightLights[i].Render();
     }
 
     RenderOutGeometryBuffer();
-    NumBrightLights = 0;
 
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+
+    NumBrightLights = 0;
 }
 
 // 0x724770
-void CBrightLights::RegisterOne(CVector posn, CVector top, CVector right, CVector at, eBrightLightColor color, uint8_t arg5, uint8_t arg6, uint8_t arg7) {
+void CBrightLights::RegisterOne(CVector posn, CVector top, CVector right, CVector at, eBrightLightColor color, uint8 arg5, uint8 arg6, uint8 arg7) {
     if (color == eBrightLightColor::BRIGHTLIGHT_NONE)
         return;
 
@@ -74,19 +75,22 @@ void CBrightLights::RegisterOne(CVector posn, CVector top, CVector right, CVecto
     if (distToCam > 60.0f)
         return;
 
-    aBrightLights[NumBrightLights++] = {
-        posn,
-        top,
-        right,
-        at,
-        distToCam,
-        color,
-        arg5,
-        arg6,
-        arg7
-    };
+    auto& light = aBrightLights[NumBrightLights];
+
+    light.m_vecPosition       = posn;
+    light.m_vecRight          = top;
+    light.m_vecTop            = right;
+    light.m_vecAt             = at;
+    light.m_fDistanceToCamera = distToCam;
+    light.m_nColor            = color;
+    light.field_35            = arg5;
+    light.field_36            = arg6;
+    light.field_37            = arg7;
+
+    NumBrightLights++;
 }
 
+// NOTSA, inlined
 CRGBA tBrightLight::GetColorRGBA() const {
     const auto GetAlpha = [this]() -> uint8 {
         if (m_fDistanceToCamera >= 45.0f)
@@ -117,13 +121,14 @@ CRGBA tBrightLight::GetColorRGBA() const {
     }
 }
 
+// NOTSA, inlined
 void tBrightLight::Render() const {
     // Get absolute vertex index in buffer (relative to the current number of vertices)
     const auto GetVertexRealIdx = [](unsigned i) {
         return (unsigned)uiTempBufferVerticesStored + i;
     };
 
-    // Get vertex pointer, i is passed to `GetVertexRealIdx`
+    // Get vertex pointer, `i` is passed to `GetVertexRealIdx`
     const auto GetVertex = [=](unsigned i) {
         return &aTempBufferVertices[GetVertexRealIdx(i)];
     };

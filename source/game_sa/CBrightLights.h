@@ -5,32 +5,32 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CVector.h"
 
 enum eBrightLightColor : uint8 {
-    BRIGHTLIGHT_NONE,
-    BRIGHTLIGHT_GREEN_BIG = 1,
-    BRIGHTLIGHT_YELLOW_BIG = 2,
-    BRIGHTLIGHT_RED_BIG = 3,
-    BRIGHTLIGHT_GREEN_SMALL = 13,
+    BRIGHTLIGHT_NONE         = 0,
+    BRIGHTLIGHT_GREEN_BIG    = 1,
+    BRIGHTLIGHT_YELLOW_BIG   = 2,
+    BRIGHTLIGHT_RED_BIG      = 3,
+    BRIGHTLIGHT_GREEN_SMALL  = 13,
     BRIGHTLIGHT_YELLOW_SMALL = 14,
-    BRIGHTLIGHT_RED_SMALL = 15
+    BRIGHTLIGHT_RED_SMALL    = 15
 };
 
 struct tBrightLight {
-    CVector m_vecPosition;
-    CVector m_vecRight;
-    CVector m_vecTop;
-    CVector m_vecAt;
-    float m_fDistanceToCamera;
-    eBrightLightColor m_nColor; // see eBrightLightColor
-    uint8_t field_35;
-    uint8_t field_36;
-    uint8_t field_37;
+    CVector           m_vecPosition;
+    CVector           m_vecRight;
+    CVector           m_vecTop;
+    CVector           m_vecAt;
+    float             m_fDistanceToCamera;
+    eBrightLightColor m_nColor;
+    uint8             field_35;
+    uint8             field_36;
+    uint8             field_37;
 
     CRGBA GetColorRGBA() const;
-    void Render() const;
+    void  Render() const;
 };
 VALIDATE_SIZE(tBrightLight, 0x38);
 
@@ -38,7 +38,7 @@ constexpr auto MAX_NUM_BRIGHTLIGHTS{32u};
 
 class CBrightLights {
 public:
-    static uint32_t& NumBrightLights;
+    static uint32& NumBrightLights;
     static tBrightLight (&aBrightLights)[MAX_NUM_BRIGHTLIGHTS];
 
 public:
@@ -47,5 +47,5 @@ public:
     static void Init();
     static void RenderOutGeometryBuffer();
     static void Render();
-    static void RegisterOne(CVector posn, CVector top, CVector right, CVector at, eBrightLightColor color, uint8_t arg5, uint8_t arg6, uint8_t arg7);
+    static void RegisterOne(CVector posn, CVector top, CVector right, CVector at, eBrightLightColor color, uint8 arg5, uint8 arg6, uint8 arg7);
 };

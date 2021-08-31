@@ -39,9 +39,11 @@ void InjectHooksMain()
     // WaitForDebugger();
 
     CBrightLights::InjectHooks();
+    CShinyTexts::InjectHooks();
     COnscreenCounterEntry::InjectHooks();
     CPedTaskPair::InjectHooks();
     CDirectory::InjectHooks();
+    CBulletTraces::InjectHooks();
     CDebug::InjectHooks();
     InjectCommonHooks();
     CGame::InjectHooks();
