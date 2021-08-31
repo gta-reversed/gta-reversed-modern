@@ -28,6 +28,9 @@ struct tBrightLight {
     uint8_t field_35;
     uint8_t field_36;
     uint8_t field_37;
+
+    CRGBA GetColorRGBA() const;
+    void Render() const;
 };
 VALIDATE_SIZE(tBrightLight, 0x38);
 
@@ -35,7 +38,7 @@ constexpr auto MAX_NUM_BRIGHTLIGHTS{32u};
 
 class CBrightLights {
 public:
-    static int32_t& NumBrightLights;
+    static uint32_t& NumBrightLights;
     static tBrightLight (&aBrightLights)[MAX_NUM_BRIGHTLIGHTS];
 
 public:
