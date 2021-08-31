@@ -27,8 +27,9 @@ struct CSkidmark
         const float radius = (GetLastPartPosn() - center).Magnitude();
         return { center, radius };
     }
-    void Update(CVector posn, CVector2D dir, float length, bool& bloodState);
+    void RegisterNewPart(CVector posn, CVector2D dir, float length, bool& bloodState);
     void Init(uint32_t id, CVector posn, eSkidMarkType type, bool& bloodState);
+    void Update();
 };
 VALIDATE_SIZE(CSkidmark, 0x158);
 

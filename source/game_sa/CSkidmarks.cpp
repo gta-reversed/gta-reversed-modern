@@ -11,7 +11,7 @@ void CSkidmarks::InjectHooks() {
     ReversibleHooks::Install("CSkidmarks", "RegisterOne", 0x720930, (void (*)(uint32_t, const CVector&, float, float, eSkidMarkType, bool&, float))(&CSkidmarks::RegisterOne));
     // ReversibleHooks::Install("CSkidmarks", "Render", 0x720640, &CSkidmarks::Render);
     ReversibleHooks::Install("CSkidmarks", "Shutdown", 0x720570, &CSkidmarks::Shutdown);
-    // ReversibleHooks::Install("CSkidmarks", "Update", 0x7205C0, &CSkidmarks::Update);
+    ReversibleHooks::Install("CSkidmarks", "Update", 0x7205C0, &CSkidmarks::Update);
 }
 
 // 0x720590
@@ -83,7 +83,7 @@ CSkidmark* CSkidmarks::GetNextFree(bool forceFree) {
 // 0x720930
 void CSkidmarks::RegisterOne(uint32_t index, const CVector& posn, float dirX, float dirY, eSkidMarkType type, bool& bloodState, float length) {
     if (CSkidmark* markById = FindById(index)) {
-        markById->Update(posn, { dirX, dirY }, length, bloodState);
+        markById->RegisterNewPart(posn, { dirX, dirY }, length, bloodState);
     } else if (CSkidmark* mark = GetNextFree(true)) {
         mark->Init(index, posn, type, bloodState);
     }
@@ -102,10 +102,12 @@ void CSkidmarks::Shutdown() {
 
 // 0x7205C0
 void CSkidmarks::Update() {
-    plugin::Call<0x7205C0>();
+    for (CSkidmark& mark : m_aSkidmarks) {
+        mark.Update();
+    }
 }
 
-void CSkidmark::Update(CVector posn, CVector2D dir, float length, bool& bloodState) {
+void CSkidmark::RegisterNewPart(CVector posn, CVector2D dir, float length, bool& bloodState) {
     if ((unsigned)m_type == (unsigned)bloodState) { // TODO: Okaaay?!?
         m_bActive = true;
         if (CTimer::GetTimeInMilliseconds() - m_timeUpdatedMs <= 100) {
@@ -164,4 +166,34 @@ void CSkidmark::Init(uint32_t id, CVector posn, eSkidMarkType type, bool& bloodS
     m_timeUpdatedMs = CTimer::GetTimeInMilliseconds() - 1'000;
     m_nNumParts = 0;
     m_type = bloodState ? (eSkidMarkType)3 : type; // TODO Missing enum..
+}
+
+void CSkidmark::Update() {
+    const auto timeMS = CTimer::GetTimeInMilliseconds();
+    switch (m_nState) {
+    case 1: {
+        if (m_bActive)
+            break;
+
+        const auto UpdateTime = [this, timeMS](uint32_t low, uint32_t high) {
+            m_timeLow += timeMS + low;
+            m_timeHigh += timeMS + high;
+        };
+
+        m_nState = 2;
+        if (m_nNumParts < 4)
+            UpdateTime(2500, 5000);
+        else if (m_nNumParts >= 9)
+            UpdateTime(10'000, 20'000);
+        else
+            UpdateTime(5'000, 10'000);
+        break;
+    }
+    case 2: {
+        if (timeMS > m_timeHigh)
+            m_nState = 0;
+        break;
+    }
+    }
+    m_bActive = false;
 }
