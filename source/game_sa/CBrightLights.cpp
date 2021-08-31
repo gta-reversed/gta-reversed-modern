@@ -128,7 +128,7 @@ void tBrightLight::Render() const {
         return (unsigned)uiTempBufferVerticesStored + i;
     };
 
-    // Get vertex pointer, it is passed to `GetVertexRealIdx`
+    // Get vertex pointer, `i` is passed to `GetVertexRealIdx`
     const auto GetVertex = [=](unsigned i) {
         return &aTempBufferVertices[GetVertexRealIdx(i)];
     };
