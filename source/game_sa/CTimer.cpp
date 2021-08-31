@@ -18,8 +18,8 @@ float& CTimer::game_FPS = *(float*)0xB7CB50;
 bool& CTimer::m_CodePause = *(bool*)0xB7CB48;
 bool& CTimer::m_UserPause = *(bool*)0xB7CB49;
 
-unsigned int& CTimer::m_FrameCounter = *(unsigned int*)0xB7CB4C;
-unsigned int& CTimer::m_snTimerDivider = *(unsigned int*)0xB7CB2C;
+uint32& CTimer::m_FrameCounter = *(uint32*)0xB7CB4C;
+uint32& CTimer::m_snTimerDivider = *(uint32*)0xB7CB2C;
 
 float& CTimer::ms_fTimeStep = *(float*)0xB7CB5C;
 float& CTimer::ms_fTimeStepNonClipped = *(float*)0xB7CB58;
@@ -28,19 +28,19 @@ float& CTimer::ms_fOldTimeStep = *(float*)0xB7CB54;
 float& CTimer::ms_fTimeScale = *(float*)0xB7CB64;
 float& CTimer::ms_fSlowMotionScale = *(float*)0xB7CB60;
 
-unsigned int& CTimer::m_snTimeInMillisecondsPauseMode = *(unsigned int*)0xB7CB7C;
-unsigned int& CTimer::m_snTimeInMillisecondsNonClipped = *(unsigned int*)0xB7CB80;
-unsigned int& CTimer::m_snTimeInMilliseconds = *(unsigned int*)0xB7CB84;
-unsigned int& CTimer::m_snPreviousTimeInMillisecondsNonClipped = *(unsigned int*)0xB7CB68;
+uint32& CTimer::m_snTimeInMillisecondsPauseMode = *(uint32*)0xB7CB7C;
+uint32& CTimer::m_snTimeInMillisecondsNonClipped = *(uint32*)0xB7CB80;
+uint32& CTimer::m_snTimeInMilliseconds = *(uint32*)0xB7CB84;
+uint32& CTimer::m_snPreviousTimeInMillisecondsNonClipped = *(uint32*)0xB7CB68;
 
-std::uint64_t& CTimer::m_snRenderStartTime = *(std::uint64_t*)0xB7CB38;
-std::uint64_t& CTimer::m_snRenderPauseTime = *(std::uint64_t*)0xB7CB30;
-unsigned int& CTimer::m_snRenderTimerPauseCount = *(unsigned int*)0xB7CB44;
+uint64& CTimer::m_snRenderStartTime = *(uint64*)0xB7CB38;
+uint64& CTimer::m_snRenderPauseTime = *(uint64*)0xB7CB30;
+uint32& CTimer::m_snRenderTimerPauseCount = *(uint32*)0xB7CB44;
 
-unsigned int& CTimer::m_snPPPPreviousTimeInMilliseconds = *(unsigned int*)0xB7CB6C;
-unsigned int& CTimer::m_snPPPreviousTimeInMilliseconds = *(unsigned int*)0xB7CB70;
-unsigned int& CTimer::m_snPPreviousTimeInMilliseconds = *(unsigned int*)0xB7CB74;
-unsigned int& CTimer::m_snPreviousTimeInMilliseconds = *(unsigned int*)0xB7CB78;
+uint32& CTimer::m_snPPPPreviousTimeInMilliseconds = *(uint32*)0xB7CB6C;
+uint32& CTimer::m_snPPPreviousTimeInMilliseconds = *(uint32*)0xB7CB70;
+uint32& CTimer::m_snPPreviousTimeInMilliseconds = *(uint32*)0xB7CB74;
+uint32& CTimer::m_snPreviousTimeInMilliseconds = *(uint32*)0xB7CB78;
 
 
 void CTimer::InjectHooks()
@@ -62,8 +62,8 @@ void CTimer::InjectHooks()
 
 // 64-bit RsTimer wrapper
 // 0x5617C0
-std::uint64_t GetMillisecondTime() {
-    return plugin::CallAndReturn<std::uint64_t, 0x5617C0>();
+uint64 GetMillisecondTime() {
+    return plugin::CallAndReturn<uint64, 0x5617C0>();
     // return RsTimer();
 }
 
@@ -159,20 +159,20 @@ void CTimer::EndUserPause()
 }
 
 // 0x561A40
-unsigned int CTimer::GetCyclesPerMillisecond()
+uint32 CTimer::GetCyclesPerMillisecond()
 {
     return m_snTimerDivider;
 }
 
 // cycles per ms * 20
 // 0x561A50
-unsigned int CTimer::GetCyclesPerFrame()
+uint32 CTimer::GetCyclesPerFrame()
 {
-    return (unsigned int)((float)m_snTimerDivider * 20.0f);
+    return (uint32)((float)m_snTimerDivider * 20.0f);
 }
 
 // 0x561A80
-std::uint64_t CTimer::GetCurrentTimeInCycles()
+uint64 CTimer::GetCurrentTimeInCycles()
 {
     return GetOSWPerformanceTime() - m_snRenderStartTime;
 }
@@ -188,13 +188,13 @@ void CTimer::UpdateVariables(float timeStep)
 {
     /* Izzotop: from IDA directly to here (tested)
     float step = timeStep / float(m_snTimerDivider);
-    m_snTimeInMillisecondsNonClipped += (unsigned int)(step);
+    m_snTimeInMillisecondsNonClipped += (uint32)(step);
     ms_fTimeStepNonClipped = step * 0.05f; // step / 20.0f;
 
     if (step > 300.f) {
         step = 300.f;
     }
-    m_snTimeInMilliseconds += (unsigned int)(step);
+    m_snTimeInMilliseconds += (uint32)(step);
 
     if (ms_fTimeStepNonClipped < 0.01f &&
         !GetIsPaused() &&
@@ -216,10 +216,10 @@ void CTimer::UpdateVariables(float timeStep)
 
     // Pirulax: Shorter code, same functionality.
     const float realStep = (float)timeStep / (float)m_snTimerDivider;
-    m_snTimeInMillisecondsNonClipped += (unsigned int)realStep;
+    m_snTimeInMillisecondsNonClipped += (uint32)realStep;
     ms_fTimeStepNonClipped = 0.05f * realStep; // step / 20.0f;
 
-    const auto timeToAdd = (unsigned int)std::min<float>(realStep, 300.0f); // Clamp to max 300
+    const auto timeToAdd = (uint32)std::min<float>(realStep, 300.0f); // Clamp to max 300
     m_snTimeInMilliseconds += timeToAdd;
     if (ms_fTimeStepNonClipped < 0.01f && !m_UserPause && !m_CodePause && !CSpecialFX::bSnapShotActive) {
         ms_fTimeStepNonClipped = 0.01f;
@@ -250,13 +250,13 @@ void CTimer::Update()
     m_snPreviousTimeInMilliseconds = m_snTimeInMilliseconds;
     m_snPreviousTimeInMillisecondsNonClipped = m_snTimeInMillisecondsNonClipped;
 
-    const uint64_t nRenderTimeBefore = m_snRenderStartTime;
+    const uint64 nRenderTimeBefore = m_snRenderStartTime;
     m_snRenderStartTime = ms_fnTimerFunction();
     auto fTimeDelta = float(m_snRenderStartTime - nRenderTimeBefore);
     if (!GetIsPaused())
         fTimeDelta *= ms_fTimeScale;
 
-    m_snTimeInMillisecondsPauseMode += (unsigned int)(fTimeDelta / float(m_snTimerDivider));
+    m_snTimeInMillisecondsPauseMode += (uint32)(fTimeDelta / float(m_snTimerDivider));
     if (GetIsPaused())
         fTimeDelta = 0.0f;
 
