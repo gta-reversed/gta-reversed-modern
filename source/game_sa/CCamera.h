@@ -402,7 +402,8 @@ public:
     bool IsExtraEntityToIgnore(CEntity *entity);
     bool IsItTimeForNewCamera(int camSequence, int startTime);
     bool IsSphereVisible(CVector const &origin, float radius, RwMatrixTag *transformMatrix);
-    bool IsSphereVisible(CVector const &origin, float radius);
+    bool IsSphereVisible(CVector const& origin, float radius);
+    bool IsSphereVisible(const CSphere& sphere) { return IsSphereVisible(sphere.m_vecCenter, sphere.m_fRadius); }
     void LerpFOV(float zoomInFactor, float zoomOutFactor, float timeLimit, bool bEase);
     void LoadPathSplines(FILE* file);
 

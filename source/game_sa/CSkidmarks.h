@@ -5,22 +5,31 @@
 
 constexpr auto SKIDMARKS_COUNT{ 32u };
 
-struct CSkidmark {
-    CVector m_vPosn[16]{}; // 00000000
-    int dwordC0{};         // 000000C0
-    bool fC4[60]{};        // 000000C4
-    int dword100{};        // 00000100
-    bool f104[60]{};       // 00000104
-    int dword140{};        // 00000140
-    int dword144{};        // 00000144
-    int time1{};           // 00000148
-    int time2{};           // 0000014C
-    int m_nSurfaceType{};  // 00000150
-    short m_nNumParts{};   // 00000154
-    bool m_nState{};       // 00000156
-    bool byte157{};        // 00000157
-};
+struct CSkidmark
+{
+    CVector m_vPosn[16];
+    float m_partDirY[16];
+    float m_partDirX[16];
+    uint32 m_id;
+    uint32 m_timeUpdatedMs;
+    int m_timeLow;
+    int m_timeHigh;
+    eSkidMarkType m_type;
+    uint16 m_nNumParts;
+    bool m_nState;
+    uint8 m_bActive;
 
+    CVector GetPartPosn(unsigned i) const { return m_vPosn[i]; }
+    CVector GetLastPartPosn() const { return GetPartPosn(m_nNumParts); }
+    CVector GetFirstPartPosn() const { return GetPartPosn(0); }
+    CSphere GetBoundingSphere() {
+        const CVector center = (GetLastPartPosn() + GetFirstPartPosn()) / 2.0f;
+        const float radius = (GetLastPartPosn() - center).Magnitude();
+        return { center, radius };
+    }
+    void Update(CVector posn, CVector2D dir, float length, bool& bloodState);
+    void Init(uint32_t id, CVector posn, eSkidMarkType type, bool& bloodState);
+};
 VALIDATE_SIZE(CSkidmark, 0x158);
 
 class CSkidmarks {
@@ -34,8 +43,10 @@ public:
 
     static void Clear();
     static void Init();
-    static void RegisterOne(unsigned int index, const CVector& posn, float dirX, float dirY, const bool* surfaceType, bool* bloodState, float length);
-    static void RegisterOne(unsigned int index, const CVector& posn, float dirX, float dirY, eSurfaceType surfaceType, bool* bloodState, float length);
+    static void RegisterOne(uint32_t index, const CVector& posn, float dirX, float dirY, const bool* surfaceType, bool& bloodState, float length);
+    static CSkidmark* FindById(uint32_t id);
+    static CSkidmark* GetNextFree(bool forceFree);
+    static void RegisterOne(uint32_t index, const CVector& posn, float dirX, float dirY, eSkidMarkType type, bool& bloodState, float length);
     static void Render();
     static void Shutdown();
     static void Update();
