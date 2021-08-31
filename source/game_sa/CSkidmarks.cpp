@@ -5,19 +5,20 @@ RwTexture*& CSkidmarks::m_pTexture = *reinterpret_cast<RwTexture**>(0xC79A88);
 CSkidmark (&CSkidmarks::m_aSkidmarks)[SKIDMARKS_COUNT] = *reinterpret_cast<CSkidmark (*)[SKIDMARKS_COUNT]>(0xC79AA8);
 
 void CSkidmarks::InjectHooks() {
-    ReversibleHooks::Install("CSkidmarks", "Clear", 0x720590, &CSkidmarks::Clear);
-    ReversibleHooks::Install("CSkidmarks", "Init", 0x7204E0, &CSkidmarks::Init);
-    ReversibleHooks::Install("CSkidmarks", "RegisterOne_EC0", 0x720EC0, (void (*)(uint32_t, const CVector&, float, float, const bool*, bool&, float))(&CSkidmarks::RegisterOne));
-    ReversibleHooks::Install("CSkidmarks", "RegisterOne", 0x720930, (void (*)(uint32_t, const CVector&, float, float, eSkidMarkType, bool&, float))(&CSkidmarks::RegisterOne));
-    // ReversibleHooks::Install("CSkidmarks", "Render", 0x720640, &CSkidmarks::Render);
-    ReversibleHooks::Install("CSkidmarks", "Shutdown", 0x720570, &CSkidmarks::Shutdown);
-    ReversibleHooks::Install("CSkidmarks", "Update", 0x7205C0, &CSkidmarks::Update);
+    using namespace ReversibleHooks;
+    Install("CSkidmarks", "Clear", 0x720590, &CSkidmarks::Clear);
+    Install("CSkidmarks", "Init", 0x7204E0, &CSkidmarks::Init, true);
+    Install("CSkidmarks", "RegisterOne_EC0", 0x720EC0, (void (*)(uint32_t, const CVector&, float, float, const bool*, bool&, float))(&CSkidmarks::RegisterOne));
+    Install("CSkidmarks", "RegisterOne", 0x720930, (void (*)(uint32_t, const CVector&, float, float, eSkidMarkType, bool&, float))(&CSkidmarks::RegisterOne));
+    Install("CSkidmarks", "Render", 0x720640, &CSkidmarks::Render);
+    Install("CSkidmarks", "Shutdown", 0x720570, &CSkidmarks::Shutdown);
+    Install("CSkidmarks", "Update", 0x7205C0, &CSkidmarks::Update);
 }
 
 // 0x720590
 void CSkidmarks::Clear() {
     for (CSkidmark& mark : m_aSkidmarks) {
-        mark.m_nState = 0;
+        mark.m_nState = eSkidmarkState::INACTIVE;
         mark.m_bActive = 0;
     }
 }
@@ -31,7 +32,7 @@ void CSkidmarks::Init() {
 
     Clear();
 
-    for (unsigned i = 0; i < 16; i++) {
+    for (unsigned i = 0; i < SKIDMARK_NUM_PARTS; i++) { // todo fix
         constexpr unsigned indicesRelative[] = { 0, 2, 1, 1, 2, 3 };
         for (unsigned v = 0; v < 6; v++) {
             m_aIndices[i + v] = (RxVertexIndex)(2 * i + indicesRelative[v]);
@@ -42,14 +43,14 @@ void CSkidmarks::Init() {
 // 0x720EC0
 void CSkidmarks::RegisterOne(uint32_t index, const CVector& posn, float dirX, float dirY, const bool* isSandy, bool& bloodState, float length) {
     if (bloodState)
-        CSkidmarks::RegisterOne(index, posn, dirX, dirY, (eSkidMarkType)3, bloodState, length); // TODO: Missing enum
+        CSkidmarks::RegisterOne(index, posn, dirX, dirY, eSkidMarkType::BLOODY, bloodState, length);
     else
-        CSkidmarks::RegisterOne(index, posn, dirX, dirY, *isSandy ? eSkidMarkType::SKIDMARK_SANDY : eSkidMarkType::SKIDMARK_DEFAULT, bloodState, length);
+        CSkidmarks::RegisterOne(index, posn, dirX, dirY, *isSandy ? eSkidMarkType::SANDY : eSkidMarkType::DEFALT, bloodState, length);
 }
 
 CSkidmark* CSkidmarks::FindById(uint32_t id) {
     for (CSkidmark& mark : m_aSkidmarks)
-        if (mark.m_nState == 1 && mark.m_id == id)
+        if (mark.m_nState == eSkidmarkState::JUST_UPDATED && mark.m_id == id)
             return &mark;
     return nullptr;
 }
@@ -57,7 +58,7 @@ CSkidmark* CSkidmarks::FindById(uint32_t id) {
 // Try get an unsued slot/forcefully reuse one that isn't visible
 CSkidmark* CSkidmarks::GetNextFree(bool forceFree) {
     for (CSkidmark& mark : m_aSkidmarks)
-        if (mark.m_nState == 0)
+        if (mark.m_nState == eSkidmarkState::INACTIVE)
             return &mark;
 
     if (forceFree) {
@@ -66,10 +67,10 @@ CSkidmark* CSkidmarks::GetNextFree(bool forceFree) {
         for (CSkidmark& mark : m_aSkidmarks) {
             if (mark.m_bActive)
                 continue;
-            if (mark.m_timeUpdatedMs > mostRecentlyUpdatedMs)
+            if (mark.m_lastDisappearTimeUpdateMs >= mostRecentlyUpdatedMs)
                 continue;
             if (!TheCamera.IsSphereVisible(mark.GetBoundingSphere())) {
-                mostRecentlyUpdatedMs = mark.m_timeUpdatedMs;
+                mostRecentlyUpdatedMs = mark.m_lastDisappearTimeUpdateMs;
                 mostRecentlyUpdatedMark = &mark;
             }
         }
@@ -78,7 +79,6 @@ CSkidmark* CSkidmarks::GetNextFree(bool forceFree) {
 
     return nullptr;
 }
-
 
 // 0x720930
 void CSkidmarks::RegisterOne(uint32_t index, const CVector& posn, float dirX, float dirY, eSkidMarkType type, bool& bloodState, float length) {
@@ -91,7 +91,20 @@ void CSkidmarks::RegisterOne(uint32_t index, const CVector& posn, float dirX, fl
 
 // 0x720640
 void CSkidmarks::Render() {
-    plugin::Call<0x720640>();
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)RwTextureGetRaster(m_pTexture));
+
+    for (CSkidmark& mark : m_aSkidmarks) {
+        mark.Render();
+    }
+
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
 }
 
 // 0x720570
@@ -105,95 +118,4 @@ void CSkidmarks::Update() {
     for (CSkidmark& mark : m_aSkidmarks) {
         mark.Update();
     }
-}
-
-void CSkidmark::RegisterNewPart(CVector posn, CVector2D dir, float length, bool& bloodState) {
-    if ((unsigned)m_type == (unsigned)bloodState) { // TODO: Okaaay?!?
-        m_bActive = true;
-        if (CTimer::GetTimeInMilliseconds() - m_timeUpdatedMs <= 100) {
-            m_vPosn[m_nNumParts] = posn; // Update existing, because of low delta time
-        } else {
-            if (m_nNumParts >= 15) {
-                m_timeUpdatedMs = CTimer::GetTimeInMilliseconds();
-                m_nState = 2;
-                m_timeLow = CTimer::GetTimeInMilliseconds() + 10'000;
-                m_timeHigh = CTimer::GetTimeInMilliseconds() + 20'000;
-                bloodState = false;
-            } else {
-                m_nNumParts++;
-                m_vPosn[m_nNumParts] = posn;
-
-                const CVector prevPosn = m_vPosn[m_nNumParts - 1];
-                CVector2D dirPrevPart = {
-                    prevPosn.x - posn.x,
-                    posn.y - prevPosn.y
-                };
-
-                if (dirPrevPart.Magnitude() > 0.0f)
-                    dirPrevPart.Normalise();
-                else
-                    dirPrevPart.y = 1.0f;
-
-                dir.Normalise();
-
-                const float absSqMag = 1.0f + fabs(dirPrevPart.y * dir.x + dirPrevPart.x * dir.y);
-                m_partDirY[m_nNumParts] = absSqMag * dirPrevPart.y * length / 2.0f;
-                m_partDirX[m_nNumParts] = absSqMag * dirPrevPart.x * length / 2.0f;
-
-                if (m_nNumParts == 1) {
-                    m_partDirY[0] = m_partDirY[1];
-                    m_partDirX[0] = m_partDirX[1];
-                }
-
-                if (m_nNumParts > 8)
-                    bloodState = false;
-            }
-        }
-    } else {
-        m_nState = 2;
-        m_timeLow = CTimer::GetTimeInMilliseconds() + 10'000;
-        m_timeHigh = CTimer::GetTimeInMilliseconds() + 20'000;
-    }
-}
-
-void CSkidmark::Init(uint32_t id, CVector posn, eSkidMarkType type, bool& bloodState) {
-    m_id = id;
-    m_vPosn[0] = posn;
-    m_partDirX[0] = 0.0f;
-    m_partDirY[0] = 0.0f;
-    m_bActive = true;
-    m_nState = 1;
-    m_timeUpdatedMs = CTimer::GetTimeInMilliseconds() - 1'000;
-    m_nNumParts = 0;
-    m_type = bloodState ? (eSkidMarkType)3 : type; // TODO Missing enum..
-}
-
-void CSkidmark::Update() {
-    const auto timeMS = CTimer::GetTimeInMilliseconds();
-    switch (m_nState) {
-    case 1: {
-        if (m_bActive)
-            break;
-
-        const auto UpdateTime = [this, timeMS](uint32_t low, uint32_t high) {
-            m_timeLow += timeMS + low;
-            m_timeHigh += timeMS + high;
-        };
-
-        m_nState = 2;
-        if (m_nNumParts < 4)
-            UpdateTime(2500, 5000);
-        else if (m_nNumParts >= 9)
-            UpdateTime(10'000, 20'000);
-        else
-            UpdateTime(5'000, 10'000);
-        break;
-    }
-    case 2: {
-        if (timeMS > m_timeHigh)
-            m_nState = 0;
-        break;
-    }
-    }
-    m_bActive = false;
 }

@@ -36,7 +36,7 @@ void WaitForDebugger() {
 
 void InjectHooksMain()
 {
-    // WaitForDebugger();
+     //WaitForDebugger();
 
     COnscreenCounterEntry::InjectHooks();
     CPedTaskPair::InjectHooks();
