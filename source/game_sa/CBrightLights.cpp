@@ -185,14 +185,14 @@ void tBrightLight::Render() const {
             );
         }
 
-        for (unsigned i = 0; i < 6; i++) {
+        for (unsigned i = 1; i <= 6; i++) {
             PushVerexIndex(0);
             PushVerexIndex(i);
             PushVerexIndex(i + 1);
         }
 
         uiTempBufferIndicesStored += 18;
-        uiTempBufferVerticesStored += 8;
+        uiTempBufferVerticesStored += segCount;
         break;
     }
     default: {
