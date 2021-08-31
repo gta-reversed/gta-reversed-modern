@@ -44,7 +44,7 @@ void CBulletTraces::AddTrace(CVector* from, CVector* to, float radius, uint32_t 
     if (CBulletTrace* pTrace = GetFree()) {
         pTrace->m_vecStart = *from;
         pTrace->m_vecEnd = *to;
-        pTrace->m_nCreationTime = CTimer::GetTimeInMilliseconds();
+        pTrace->m_nCreationTime = CTimer::GetTimeInMS();
         pTrace->m_nTransparency = alpha;
         pTrace->m_bExists = true;
         pTrace->m_fRadius = radius;

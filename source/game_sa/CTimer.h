@@ -63,7 +63,10 @@ public:
     static void UpdateTimeStep(float fTimeStep);
     static void Update();
 
+    // Inlined funcs
+    // They could have used functions with a longer name, ex:
+    // GetTimeInMillisecond, we have shorter GetTimeInMS
     static uint32 GetFrameCounter() { return m_FrameCounter; }
-    static uint32 GetTimeInMilliseconds() { return m_snTimeInMilliseconds; }
-    static uint32 GetTimeStepInMilliseconds() { return static_cast<uint32_t>(ms_fTimeStep * 20.0F); }
+    static uint32 GetTimeInMS() { return m_snTimeInMilliseconds; }
+    static uint32 GetTimeStepInMS() { return static_cast<uint32_t>(ms_fTimeStep * 20.0F); }
 };

@@ -131,7 +131,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
             }
             case WEAPON_RLAUNCHER_HS:
             {
-                pPlayerData->m_nFireHSMissilePressedTime = CTimer::GetTimeInMilliseconds();
+                pPlayerData->m_nFireHSMissilePressedTime = CTimer::GetTimeInMS();
                 pPlayerData->m_LastHSMissileTarget = nullptr;
                 weaponId = MODE_ROCKETLAUNCHER_HS;
                 break;
@@ -303,7 +303,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
 
                 eWeaponType activeWeaponType = pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType;
                 CPedDamageResponseCalculator damageCalculator(pPlayerPed, 0.0, activeWeaponType, PED_PIECE_TORSO, false);
-                CEventDamage eventDamage(pPlayerPed, CTimer::GetTimeInMilliseconds(), activeWeaponType, PED_PIECE_TORSO, 0, false, pTargetEntity->bInVehicle);
+                CEventDamage eventDamage(pPlayerPed, CTimer::GetTimeInMS(), activeWeaponType, PED_PIECE_TORSO, 0, false, pTargetEntity->bInVehicle);
                 if (eventDamage.AffectsPed(pTargetEntity))
                 {
                     damageCalculator.ComputeDamageResponse(pTargetEntity, &eventDamage.m_damageResponse, false);
@@ -559,7 +559,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                     {
                         unsigned char activeWeaponSlot = pPlayerPed->m_nActiveWeaponSlot;
                         CWeapon* pActiveWeapon = &pPlayerPed->m_aWeapons[activeWeaponSlot];
-                        if (TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nMode == MODE_CAMERA && CTimer::GetTimeInMilliseconds() > pActiveWeapon->m_nTimeForNextShot)
+                        if (TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nMode == MODE_CAMERA && CTimer::GetTimeInMS() > pActiveWeapon->m_nTimeForNextShot)
                         {
                             CVector firingPoint(0.0f, 0.0f, 0.6f);
                             CVector outputFiringPoint = *pPlayerPed->m_matrix * firingPoint;
@@ -940,7 +940,8 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
             pPad->SetTouched();
         }
         CAnimBlock* pAnimBlock = &CAnimManager::ms_aAnimBlocks[m_nAnimationBlockIndex];
-        unsigned int touchTimeDelta = pPad->GetTouchedTimeDelta(); CTimer::GetTimeInMilliseconds();
+        unsigned int touchTimeDelta = pPad->GetTouchedTimeDelta();
+        CTimer::GetTimeInMS();
         if (touchTimeDelta <= 10000)
         {
             if (pAnimBlock->bLoaded)
@@ -1014,7 +1015,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
                         pAnimNewAssoc->m_nFlags |= ANIM_FLAG_200;
                         gLastTouchTimeDelta = touchTimeDelta;
                         gLastRandomNumberForIdleAnimationID = randomNumber;
-                        if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0 && CTimer::GetTimeInMilliseconds() > 1200000)
+                        if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0 && CTimer::GetTimeInMS() > 1200000)
                         {
                             pPlayerPed->Say(336, 0, 0.2f, 0, 0, 0);
                         }

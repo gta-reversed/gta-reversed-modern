@@ -22,14 +22,14 @@ public:
 
 public:
     void Update() {
-        if (CTimer::GetTimeInMilliseconds() - m_nCreationTime >= m_nLifeTime) {
+        if (CTimer::GetTimeInMS() - m_nCreationTime >= m_nLifeTime) {
             m_bExists = false;
         }
     }
 
     // NOTSA
     CVector GetDirection() const noexcept { return m_vecEnd - m_vecStart; }
-    uint32_t GetRemainingLifetime() const noexcept { return CTimer::GetTimeInMilliseconds() - m_nCreationTime; }
+    uint32_t GetRemainingLifetime() const noexcept { return CTimer::GetTimeInMS() - m_nCreationTime; }
 };
 
 VALIDATE_SIZE(CBulletTrace, 0x2C);
