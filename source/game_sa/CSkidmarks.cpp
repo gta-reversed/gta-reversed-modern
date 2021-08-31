@@ -5,13 +5,13 @@ RwTexture*& CSkidmarks::m_pTexture = *reinterpret_cast<RwTexture**>(0xC79A88);
 CSkidmark (&CSkidmarks::m_aSkidmarks)[SKIDMARKS_COUNT] = *reinterpret_cast<CSkidmark (*)[SKIDMARKS_COUNT]>(0xC79AA8);
 
 void CSkidmarks::InjectHooks() {
-//    ReversibleHooks::Install("CSkidmarks", "Clear", 0x720590, &CSkidmarks::Clear);
-//    ReversibleHooks::Install("CSkidmarks", "Init", 0x7204E0, &CSkidmarks::Init);
+    // ReversibleHooks::Install("CSkidmarks", "Clear", 0x720590, &CSkidmarks::Clear);
+    // ReversibleHooks::Install("CSkidmarks", "Init", 0x7204E0, &CSkidmarks::Init);
     ReversibleHooks::Install("CSkidmarks", "RegisterOne_iVffbbf", 0x720EC0, (void (*)(unsigned int, const CVector&, float, float, const bool*, bool*, float))(&CSkidmarks::RegisterOne));
-//    ReversibleHooks::Install("CSkidmarks", "RegisterOne_iVffEbf", 0x720930, (void (*)(unsigned int, const CVector&, float, float, eSurfaceType, bool*, float))(&CSkidmarks::RegisterOne));
-//    ReversibleHooks::Install("CSkidmarks", "Render", 0x720640, &CSkidmarks::Render);
+    // ReversibleHooks::Install("CSkidmarks", "RegisterOne_iVffEbf", 0x720930, (void (*)(unsigned int, const CVector&, float, float, eSurfaceType, bool*, float))(&CSkidmarks::RegisterOne));
+    // ReversibleHooks::Install("CSkidmarks", "Render", 0x720640, &CSkidmarks::Render);
     ReversibleHooks::Install("CSkidmarks", "Shutdown", 0x720570, &CSkidmarks::Shutdown);
-//    ReversibleHooks::Install("CSkidmarks", "Update", 0x7205C0, &CSkidmarks::Update);
+    // ReversibleHooks::Install("CSkidmarks", "Update", 0x7205C0, &CSkidmarks::Update);
 }
 
 // 0x720590
