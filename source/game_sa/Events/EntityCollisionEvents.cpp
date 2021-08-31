@@ -2,33 +2,33 @@
 
 void CEventPedCollisionWithPed::InjectHooks()
 {
-    HookInstall(0x4AC990, &CEventPedCollisionWithPed::Constructor);
-    HookInstall(0x4ACAD0, &CEventPedCollisionWithPed::TakesPriorityOver_Reversed);
-    HookInstall(0x4ACB10, &CEventPedCollisionWithPed::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventPedCollisionWithPed", "CEventPedCollisionWithPed", 0x4AC990, &CEventPedCollisionWithPed::Constructor);
+    ReversibleHooks::Install("CEventPedCollisionWithPed", "TakesPriorityOver_Reversed", 0x4ACAD0, &CEventPedCollisionWithPed::TakesPriorityOver_Reversed);
+    ReversibleHooks::Install("CEventPedCollisionWithPed", "AffectsPed_Reversed", 0x4ACB10, &CEventPedCollisionWithPed::AffectsPed_Reversed);
 }
 
 void CEventPedCollisionWithPlayer::InjectHooks()
 {
-    HookInstall(0x5FED40, &CEventPedCollisionWithPlayer::Constructor);
+    ReversibleHooks::Install("CEventPedCollisionWithPlayer", "CEventPedCollisionWithPlayer", 0x5FED40, &CEventPedCollisionWithPlayer::Constructor);
 }
 
 void CEventPlayerCollisionWithPed::InjectHooks()
 {
-    HookInstall(0x5FEE40, &CEventPlayerCollisionWithPed::Constructor);
+    ReversibleHooks::Install("CEventPlayerCollisionWithPed", "CEventPlayerCollisionWithPed", 0x5FEE40, &CEventPlayerCollisionWithPed::Constructor);
 }
 
 void CEventObjectCollision::InjectHooks()
 {
-    HookInstall(0x4ACCF0, &CEventObjectCollision::Constructor);
-    HookInstall(0x4ACE30, &CEventObjectCollision::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventObjectCollision", "CEventObjectCollision", 0x4ACCF0, &CEventObjectCollision::Constructor);
+    ReversibleHooks::Install("CEventObjectCollision", "AffectsPed_Reversed", 0x4ACE30, &CEventObjectCollision::AffectsPed_Reversed);
 }
 
 void CEventBuildingCollision::InjectHooks()
 {
-    HookInstall(0x4ACF00, &CEventBuildingCollision::Constructor);
-    HookInstall(0x4AD070, &CEventBuildingCollision::AffectsPed_Reversed);
-    HookInstall(0x4AD1E0, &CEventBuildingCollision::IsHeadOnCollision);
-    HookInstall(0x4B3120, &CEventBuildingCollision::CanTreatBuildingAsObject);
+    ReversibleHooks::Install("CEventBuildingCollision", "CEventBuildingCollision", 0x4ACF00, &CEventBuildingCollision::Constructor);
+    ReversibleHooks::Install("CEventBuildingCollision", "AffectsPed_Reversed", 0x4AD070, &CEventBuildingCollision::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventBuildingCollision", "IsHeadOnCollision", 0x4AD1E0, &CEventBuildingCollision::IsHeadOnCollision);
+    ReversibleHooks::Install("CEventBuildingCollision", "CanTreatBuildingAsObject", 0x4B3120, &CEventBuildingCollision::CanTreatBuildingAsObject);
 }
 
 CEventPedCollisionWithPed::CEventPedCollisionWithPed(std::int16_t pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, std::int16_t moveState, std::int16_t victimMoveState)

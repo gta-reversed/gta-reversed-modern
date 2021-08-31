@@ -2,14 +2,14 @@
 
 void CEventScriptCommand::InjectHooks()
 {
-    HookInstall(0x4B0A00, &CEventScriptCommand::Constructor);
-    HookInstall(0x4B0A30, &CEventScriptCommand::GetEventType);
-    HookInstall(0x4B0B20, &CEventScriptCommand::GetEventPriority);
-    HookInstall(0x4B6490, &CEventScriptCommand::Clone);
-    HookInstall(0x4B0AF0, &CEventScriptCommand::AffectsPed);
-    HookInstall(0x4B0BA0, &CEventScriptCommand::TakesPriorityOver);
-    HookInstall(0x4B0AB0, &CEventScriptCommand::IsValid);
-    HookInstall(0x4B0AA0, &CEventScriptCommand::CloneScriptTask);
+    ReversibleHooks::Install("CEventScriptCommand", "Constructor", 0x4B0A00, &CEventScriptCommand::Constructor);
+    ReversibleHooks::Install("CEventScriptCommand", "GetEventType", 0x4B0A30, &CEventScriptCommand::GetEventType);
+    ReversibleHooks::Install("CEventScriptCommand", "GetEventPriority", 0x4B0B20, &CEventScriptCommand::GetEventPriority);
+    ReversibleHooks::Install("CEventScriptCommand", "Clone", 0x4B6490, &CEventScriptCommand::Clone);
+    ReversibleHooks::Install("CEventScriptCommand", "AffectsPed", 0x4B0AF0, &CEventScriptCommand::AffectsPed);
+    ReversibleHooks::Install("CEventScriptCommand", "TakesPriorityOver", 0x4B0BA0, &CEventScriptCommand::TakesPriorityOver);
+    ReversibleHooks::Install("CEventScriptCommand", "IsValid", 0x4B0AB0, &CEventScriptCommand::IsValid);
+    ReversibleHooks::Install("CEventScriptCommand", "CloneScriptTask", 0x4B0AA0, &CEventScriptCommand::CloneScriptTask);
 }
 
 CEventScriptCommand::CEventScriptCommand(std::int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds)

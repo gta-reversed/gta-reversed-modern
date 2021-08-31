@@ -2,9 +2,9 @@
 
 void CEventDeadPed::InjectHooks()
 {
-    HookInstall(0x4ADEA0, &CEventDeadPed::Constructor);
-    HookInstall(0x4B4830, &CEventDeadPed::AffectsPed_Reversed);
-    HookInstall(0x4B6E70, &CEventDeadPed::CloneEditable_Reversed);
+    ReversibleHooks::Install("CEventDeadPed", "Constructor", 0x4ADEA0, &CEventDeadPed::Constructor);
+    ReversibleHooks::Install("CEventDeadPed", "AffectsPed_Reversed", 0x4B4830, &CEventDeadPed::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventDeadPed", "CloneEditable_Reversed", 0x4B6E70, &CEventDeadPed::CloneEditable_Reversed);
 }
 
 CEventDeadPed::CEventDeadPed(CPed* ped, bool bUnknown, std::uint32_t deathTimeInMs)

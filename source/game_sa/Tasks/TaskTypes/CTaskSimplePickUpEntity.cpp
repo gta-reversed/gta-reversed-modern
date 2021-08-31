@@ -1,10 +1,10 @@
 #include "StdInc.h"
 
 void CTaskSimplePickUpEntity::InjectHooks() {
-    HookInstall(0x691870, (CTaskSimplePickUpEntity*(CTaskSimplePickUpEntity::*)(CEntity*, CVector*, char, uint8, CAnimBlock*, CAnimBlendHierarchy*, int, float)) & CTaskSimplePickUpEntity::Constructor);
-    HookInstall(0x6917B0, (CTaskSimplePickUpEntity * (CTaskSimplePickUpEntity::*)(CEntity*, CVector*, char, uint8, AnimationId, AssocGroupId, float)) & CTaskSimplePickUpEntity::Constructor);
-    HookInstall(0x692A90, &CTaskSimplePickUpEntity::Clone_Reversed);
-    HookInstall(0x691810, &CTaskSimplePickUpEntity::GetId_Reversed);
+    ReversibleHooks::Install("CTaskSimplePickUpEntity", "Constructor_1", 0x691870, (CTaskSimplePickUpEntity*(CTaskSimplePickUpEntity::*)(CEntity*, CVector*, char, uint8, CAnimBlock*, CAnimBlendHierarchy*, int, float)) & CTaskSimplePickUpEntity::Constructor);
+    ReversibleHooks::Install("CTaskSimplePickUpEntity", "Constructor_2", 0x6917B0, (CTaskSimplePickUpEntity * (CTaskSimplePickUpEntity::*)(CEntity*, CVector*, char, uint8, AnimationId, AssocGroupId, float)) & CTaskSimplePickUpEntity::Constructor);
+    ReversibleHooks::Install("CTaskSimplePickUpEntity", "Clone", 0x692A90, &CTaskSimplePickUpEntity::Clone_Reversed);
+    ReversibleHooks::Install("CTaskSimplePickUpEntity", "GetId", 0x691810, &CTaskSimplePickUpEntity::GetId_Reversed);
 }
 
 CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags,
