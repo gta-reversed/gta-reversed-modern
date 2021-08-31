@@ -75,7 +75,7 @@ bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
                 if (m_pAnim->m_nFlags & ANIM_FLAG_PARTIAL)
                     m_pAnim->m_fBlendDelta = fBlend;
                 else
-                    CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, eAnimID::ANIM_ID_IDLE, -fBlend);
+                    CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, AnimationId::ANIM_ID_IDLE, -fBlend);
             }
         }
     }

@@ -171,9 +171,9 @@ void CBoat::GetComponentWorldPosition(int componentId, CVector& posnOut)
     return CBoat::GetComponentWorldPosition_Reversed(componentId, posnOut);
 }
 
-void CBoat::ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int arg2, unsigned int arg3, float arg4)
+void CBoat::ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int animGroup, unsigned int arg3, float arg4)
 {
-    return CBoat::ProcessOpenDoor_Reversed(ped, doorComponentId, arg2, arg3, arg4);
+    return CBoat::ProcessOpenDoor_Reversed(ped, doorComponentId, animGroup, arg3, arg4);
 }
 
 void CBoat::BlowUpCar(CEntity* damager, unsigned char bHideExplosion)

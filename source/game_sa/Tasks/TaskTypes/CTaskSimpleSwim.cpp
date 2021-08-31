@@ -102,11 +102,11 @@ CTask* CTaskSimpleSwim::Clone_Reversed() {
 
 bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    const CEventDamage* pDamageEvent = static_cast<const CEventDamage*>(event);
+    const CEventDamage* damageEvent = static_cast<const CEventDamage*>(event);
 
     if (priority == ABORT_PRIORITY_IMMEDIATE)
     {
-        CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_FLAG_STARTED | ANIM_FLAG_LOOPED, 1000.0f);
+        CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0f);
         ped->m_nMoveState = PEDMOVE_STILL;
         ped->m_nSwimmingMoveState = PEDMOVE_STILL;
 
@@ -122,7 +122,7 @@ bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority pri
         ped->RestoreHeadingRate();
     }
     else if (!event || event->GetEventPriority() < 71
-        && (event->GetEventType() != EVENT_DAMAGE || !pDamageEvent->m_damageResponse.m_bHealthZero || !pDamageEvent->m_bAddToEventGroup))
+        && (event->GetEventType() != EVENT_DAMAGE || !damageEvent->m_damageResponse.m_bHealthZero || !damageEvent->m_bAddToEventGroup))
     {
         return false;
     }
@@ -159,7 +159,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
         {
             pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, m_AnimID);
         }
-        unsigned int animId = ANIM_ID_IDLE;
+        AnimationId animId = ANIM_ID_IDLE;
         pPed->m_nSwimmingMoveState = PEDMOVE_STILL;
         pPed->m_nMoveState = PEDMOVE_STILL;
         if (pAnimAssociation)
@@ -636,7 +636,7 @@ void CTaskSimpleSwim::ProcessSwimmingResistance(CPed* pPed)
     }
     case SWIM_BACK_TO_SURFACE:
     {
-        auto pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, 128);
+        auto pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, ANIM_ID_CLIMB_JUMP);
         if (!pAnimAssociation)
             pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, ANIM_ID_SWIM_JUMPOUT);
 

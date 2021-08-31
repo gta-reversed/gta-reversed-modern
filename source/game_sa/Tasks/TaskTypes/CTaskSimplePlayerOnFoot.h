@@ -15,6 +15,7 @@ extern float& gDuckAnimBlendData;
 extern bool& gbUnknown_8D2FE8;
 
 class CPed;
+
 class CTaskSimplePlayerOnFoot : public CTaskSimple {
 public:
     int          m_nAnimationBlockIndex;

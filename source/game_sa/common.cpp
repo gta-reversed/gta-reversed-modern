@@ -938,6 +938,7 @@ CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, char const
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6870, RpClump*, char const*>(clump, name);
 }
 
+// AnimationId animId
 // 0x4D68B0
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, unsigned int animId) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D68B0, RpClump*, unsigned int>(clump, animId);
