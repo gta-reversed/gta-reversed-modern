@@ -4,16 +4,15 @@
 
 #include "CAEDataStream.h"
 
-class CAEStreamTransformer
-{
+class CAEStreamTransformer {
 public:
     void Initialise();
-    void TransformBuffer(void* buffer, size_t size, std::uint32_t position);
+    void TransformBuffer(void* buffer, size_t size, uint32 position);
 
-    static CAEStreamTransformer &instance;
+    static CAEStreamTransformer& instance;
 
 private:
-    std::uint8_t table[16]; // EA 3A C4 A1 9A A8 14 F3 48 B0 D7 23 9D E8 FF F1
+    uint8 table[16]; // EA 3A C4 A1 9A A8 14 F3 48 B0 D7 23 9D E8 FF F1
 
     friend class CAEDataStream;
     static void InjectHooks();

@@ -20,35 +20,35 @@
 
 class CAETwinLoopSoundEntity : public CAEAudioEntity {
 public:
-    short           m_nBankSlotId;
-    short           m_nSoundId1;
-    short           m_nSoundId2;
+    int16           m_nBankSlotId;
+    int16           m_nSoundId1;
+    int16           m_nSoundId2;
     // char            _pad1[2];
     CAEAudioEntity* m_pBaseAudio;
-    short           m_bIsInitialised;
-    short           unused_field_8A;
-    short           unused_field_8C;
-    unsigned short  m_nPlayTimeMin;
-    unsigned short  m_nPlayTimeMax;
+    int16           m_bIsInitialised;
+    int16           unused_field_8A;
+    int16           unused_field_8C;
+    uint16          m_nPlayTimeMin;
+    uint16          m_nPlayTimeMax;
     // char            _pad2[2];
-    unsigned int    m_nTimeToSwapSounds;
+    uint32          m_nTimeToSwapSounds;
     bool            m_bPlayingFirstSound;
-    // char            _pad3;
-    short           m_nSoundPlayStart1; // 0 - 99 percentage
-    short           m_nSoundPlayStart2; // 0 - 99 percentage
-    // short           _pad_field_9E;
+    char            _pad3;
+    int16           m_nSoundPlayStart1; // 0 - 99 percentage
+    int16           m_nSoundPlayStart2; // 0 - 99 percentage
+    // char            _pad_field_9E[2];
     CAESound*       m_pSound1;
     CAESound*       m_pSound2;
 
 public:
     CAETwinLoopSoundEntity();
-    CAETwinLoopSoundEntity(short bank, short soundType1, short soundType2, CAEAudioEntity* audio, uint16_t minTime, uint16_t maxTime, short sfxPlayStart1, short sfxPlayStart2);
+    CAETwinLoopSoundEntity(int16 bank, int16 soundType1, int16 soundType2, CAEAudioEntity* audio, uint16 minTime, uint16 maxTime, int16 sfxPlayStart1, int16 sfxPlayStart2);
 
     ~CAETwinLoopSoundEntity();
 
-    void Initialise(short bank, short sfx1, short sfx2, CAEAudioEntity* audio, uint16_t minTime, uint16_t maxTime, short sfxPlayStart1, short sfxPlayStart2);
+    void Initialise(int16 bank, int16 sfx1, int16 sfx2, CAEAudioEntity* audio, uint16 minTime, uint16 maxTime, int16 sfxPlayStart1, int16 sfxPlayStart2);
 
-    void UpdateParameters(CAESound* sound, short curPlayPos) override;
+    void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
 
     void UpdateTwinLoopSound(CVector posn, float volume, float speed);
     void SwapSounds();
@@ -56,7 +56,7 @@ public:
     void StopSoundAndForget();
 
     float GetEmittedVolume();
-    void SetEmittedVolume(float volume);
+    void  SetEmittedVolume(float volume);
 
     bool IsTwinLoopPlaying();
     bool DoSoundsSwitchThisFrame();
@@ -67,7 +67,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    void UpdateParameters_Reversed(CAESound* sound, short curPlayPos);
+    void UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos);
 };
 
 VALIDATE_SIZE(CAETwinLoopSoundEntity, 0xA8);

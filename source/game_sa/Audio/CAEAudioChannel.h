@@ -1,79 +1,78 @@
 #pragma once
+
 #include "dsound.h"
-#include "PluginBase.h"
+
 #include "CVector.h"
 
 #pragma pack(push, 1)
-class CAEAudioChannel
-{
+class CAEAudioChannel {
 public:
-    CAEAudioChannel(IDirectSound* pDirectSound, unsigned short channelId, unsigned int samplesPerSec, unsigned short bitsPerSample);
+    IDirectSound*         m_pDirectSound;
+    IDirectSoundBuffer*   m_pDirectSoundBuffer;
+    IDirectSound3DBuffer* m_pDirectSound3DBuffer;
+    char                  _pad10[24];
+    uint32                m_nFlags;
+    uint32                m_nLengthInBytes;
+    uint32                field_30;
+    float                 m_fVolume;
+    bool                  m_bNoScalingFactor;
+    uint8                 field_39;
+    uint16                m_nChannelId;
+    uint32                m_nFrequency;
+    uint32                m_nOriginalFrequency;
+    bool                  m_bLooped;
+    uint8                 field_45;
+    uint8                 field_46[1];
+    uint16                field_47;
+    uint16                m_wFrequencyMult;
+    uint32                m_nBufferFrequency;
+    uint32                m_nBytesPerSec;
+    uint16                field_53;
+    uint16                m_wBitsPerSample;
+    uint16                field_57;
+    uint16                field_59;
+    char                  _pad;
+    uint32                m_nBufferStatus;
+
+public:
+    CAEAudioChannel(IDirectSound* directSound, uint16 channelId, uint32 samplesPerSec, uint16 bitsPerSample);
     virtual ~CAEAudioChannel();
 
-public:
-    IDirectSound* m_pDirectSound;
-    IDirectSoundBuffer* m_pDirectSoundBuffer;
-    IDirectSound3DBuffer* m_pDirectSound3DBuffer;
-    uint8_t gap10[24];
-    uint32_t m_dwFlags;
-    uint32_t m_dwLengthInBytes;
-    uint32_t field_30;
-    float m_fVolume;
-    bool m_bNoScalingFactor;
-    uint8_t field_39;
-    uint16_t m_nChannelId;
-    uint32_t m_dwFrequency;
-    uint32_t m_dwOriginalFrequency;
-    bool m_bLooped;
-    uint8_t field_45;
-    uint8_t field_46[1];
-    uint16_t field_47;
-    uint16_t m_wFrequencyMult;
-    uint32_t m_dwBufferFrequency;
-    uint32_t m_nBytesPerSec;
-    uint16_t field_53;
-    uint16_t m_wBitsPerSample;
-    uint16_t field_57;
-    uint16_t field_59;
-    uint8_t pad;
-    uint32_t m_dwBufferStatus;
+    // VTABLE
+    virtual void   Service() = 0;
+    virtual bool   IsSoundPlaying() = 0;
+    virtual uint16 GetPlayTime() = 0;
+    virtual uint16 GetLength() = 0;
+    virtual void   Play(int16, signed char, float) = 0;
+    virtual void   SynchPlayback() = 0;
+    virtual void   Stop() = 0;
+    virtual void   SetFrequencyScalingFactor(float factor);
 
-// VTABLE
-public:
-    virtual void Service() = 0;
-    virtual bool IsSoundPlaying() = 0;
-    virtual uint16_t GetPlayTime() = 0;
-    virtual uint16_t GetLength() = 0;
-    virtual void Play(short, signed char, float) = 0;
-    virtual void SynchPlayback() = 0;
-    virtual void Stop() = 0;
-    virtual void SetFrequencyScalingFactor(float factor);
+    void   SetPosition(CVector* vecPos);
+    float  GetVolume() const { return m_fVolume; };
+    void   SetVolume(float volume);
+    bool   IsBufferPlaying() const { return m_nBufferStatus & DSBSTATUS_PLAYING; };
+    int32  GetCurrentPlaybackPosition();
+    uint32 ConvertFromBytesToMS(uint32 bytes);
+    uint32 ConvertFromMsToBytes(uint32 ms);
+    void   SetFrequency(uint32 freq);
+    void   SetOriginalFrequency(uint32 freq);
+    void   UpdateStatus();
 
-private:
-    void SetFrequencyScalingFactor_Reversed(float factor);
-
-public:
-    static void InjectHooks();
-
-    void SetPosition(CVector* vecPos);
-    float GetVolume() const { return m_fVolume; };
-    void SetVolume(float volume);
-    bool IsBufferPlaying() const { return m_dwBufferStatus & DSBSTATUS_PLAYING; };
-    int GetCurrentPlaybackPosition();
-    uint32_t ConvertFromBytesToMS(uint32_t bytes);
-    uint32_t ConvertFromMsToBytes(uint32_t ms);
-    void SetFrequency(uint32_t freq);
-    void SetOriginalFrequency(uint32_t freq);
-    void UpdateStatus();
-
-// Methods not in android IDB
+    // Methods not in android IDB
     bool Lost();
 
-// Those 2 require DirectSound EAX 4.0 extensions or some alternative to be available in project
-    bool SetReverbAndDepth(uint32_t reverb, uint32_t depth);
-    void SetNotInRoom(uint8_t type); // 0 - frontend, 1 - world
+    // Those 2 require DirectSound EAX 4.0 extensions or some alternative to be available in project
+    bool SetReverbAndDepth(uint32 reverb, uint32 depth);
+    void SetNotInRoom(uint8 type); // 0 - frontend, 1 - world
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    void SetFrequencyScalingFactor_Reversed(float factor);
 };
 #pragma pack(pop)
 VALIDATE_SIZE(CAEAudioChannel, 0x60);
 
-extern uint32_t& g_numSoundChannelsUsed;
+extern uint32& g_numSoundChannelsUsed;

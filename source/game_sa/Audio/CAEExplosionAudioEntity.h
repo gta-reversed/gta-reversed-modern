@@ -6,14 +6,13 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CAEAudioEntity.h"
 
-class  CAEExplosionAudioEntity : public CAEAudioEntity {
+class CAEExplosionAudioEntity : public CAEAudioEntity {
 public:
     char field_7C;
-private:
     char _pad7D[3];
+
 public:
 };
 

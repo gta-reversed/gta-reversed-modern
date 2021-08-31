@@ -6,12 +6,11 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CAEAudioEntity.h"
 
-class  CAEPoliceScannerAudioEntity : public CAEAudioEntity {
+class CAEPoliceScannerAudioEntity : public CAEAudioEntity {
 public:
-    void UpdateParameters(CAESound* sound, short curPlayPos) override;
+    void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
 };
 
 VALIDATE_SIZE(CAEPoliceScannerAudioEntity, 0x7C);

@@ -5,177 +5,139 @@
 #include "CMemoryMgr.h"
 
 // WMA functions
-HRESULT(__stdcall *&CAEWMADecoder::WMCreateSyncReader)(IUnknown*, DWORD, IWMSyncReader**) = *(HRESULT(__stdcall **)(IUnknown*, DWORD, IWMSyncReader**)) 0xb6bad8;
-HMODULE &CAEWMADecoder::wmvCoreModule = *(HMODULE *) 0xb6bad4;
+HRESULT(__stdcall*& CAEWMADecoder::WMCreateSyncReader)(IUnknown*, DWORD, IWMSyncReader**) = *(HRESULT(__stdcall**)(IUnknown*, DWORD, IWMSyncReader**))0xb6bad8;
+HMODULE& CAEWMADecoder::wmvCoreModule = *(HMODULE*)0xb6bad4;
 
-CAEWMADecoder::CAEWMADecoder(CAEDataStream* dataStream)
-: CAEStreamingDecoder(dataStream)
-, initialized(false)
-, tempBufferUsed(0)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    using Constructor = void(__thiscall *)(CAEWMADecoder*, CAEDataStream*);
-    ((Constructor) 0x502720)(this, dataStream);
-#endif
+// 0x502720
+CAEWMADecoder::CAEWMADecoder(CAEDataStream* dataStream) : CAEStreamingDecoder(dataStream) {
+    m_bInitialized = false;
+    m_nTempBufferUsed = 0;
 }
 
-CAEWMADecoder::~CAEWMADecoder()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall *)(CAEWMADecoder*)) 0x502760)(this);
-#else
-    if (initialized)
-    {
+// 0x502760
+CAEWMADecoder::~CAEWMADecoder() {
+    if (m_bInitialized) {
         syncReader->Close();
         syncReader->Release();
-        initialized = false;
+        m_bInitialized = false;
     }
 
     CoUninitialize();
-#endif
 }
 
-bool CAEWMADecoder::Initialise()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    using InitFunc = bool(__thiscall *)(CAEWMADecoder*);
-    return ((InitFunc) 0x502c60)(this);
-#else
+// 0x502c60
+bool CAEWMADecoder::Initialise() {
     WMT_STREAM_SELECTION activateStream = WMT_ON;
 
     CoInitialize(nullptr);
 
-    if (CAEWMADecoder::WMCreateSyncReader)
-    {
-        if (SUCCEEDED(CAEWMADecoder::WMCreateSyncReader(nullptr, 0, &syncReader)))
-        {
-            if (SUCCEEDED(syncReader->OpenStream(dataStream)))
-            {
-                IWMProfile *profile;
-                
-                if (SUCCEEDED(syncReader->QueryInterface(IID_IWMProfile, (void **) &profile)))
-                {
-                    HRESULT selectResult = SelectStreamIndex(profile);
+    if (!WMCreateSyncReader)
+        return m_bInitialized;
 
-                    if (profile)
-                    {
-                        profile->Release();
-                        profile = nullptr;
-                    }
+    if (!SUCCEEDED(WMCreateSyncReader(nullptr, 0, &syncReader)))
+        return m_bInitialized;
 
-                    if (SUCCEEDED(selectResult))
-                    {
-                        DWORD outputNumber;
-                        IWMOutputMediaProps *mediaProps;
+    if (SUCCEEDED(syncReader->OpenStream(m_dataStream))) {
+        IWMProfile* profile;
 
-                        syncReader->SetStreamsSelected(1, &streamNumber, &activateStream);
-                        syncReader->SetReadStreamSamples(streamNumber, FALSE);
-                        syncReader->SetRange(0ULL, 0LL);
-                        syncReader->GetOutputNumberForStream(streamNumber, &outputNumber);
-                        
-                        if (SUCCEEDED(syncReader->GetOutputProps(outputNumber, &mediaProps)))
-                        {
-                            DWORD mediaTypeSize = 0;
-                            mediaProps->GetMediaType(nullptr, &mediaTypeSize);
-                            
-                            WM_MEDIA_TYPE *mediaTypeBase = (WM_MEDIA_TYPE *) CMemoryMgr::Malloc(mediaTypeSize);
-                            mediaProps->GetMediaType(mediaTypeBase, &mediaTypeSize);
-                            WAVEFORMATEX *mediaMetadata = (WAVEFORMATEX *) mediaTypeBase->pbFormat;
+        if (!SUCCEEDED(syncReader->QueryInterface(IID_IWMProfile, (void**)&profile)))
+            return m_bInitialized;
 
-                            if (mediaMetadata && mediaMetadata->nChannels == 2 && mediaMetadata->wBitsPerSample == 16)
-                            {
-                                IWMHeaderInfo3 *headerInfo;
-                                sampleRate = mediaMetadata->nSamplesPerSec;
+        HRESULT selectResult = SelectStreamIndex(profile);
 
-                                if (SUCCEEDED(syncReader->QueryInterface(IID_IWMHeaderInfo3, (void **) &headerInfo)))
-                                {
-                                    WORD count;
-                                    headerInfo->GetAttributeIndices(0, L"Duration", nullptr, nullptr, &count);
+        if (profile) {
+            profile->Release();
+            profile = nullptr;
+        }
 
-                                    WORD *indices = new WORD[count];
-                                    headerInfo->GetAttributeIndices(0, L"Duration", nullptr, indices, &count);
+        if (!SUCCEEDED(selectResult))
+            return m_bInitialized;
 
-                                    WORD dummyNameLen;
-                                    DWORD dummyBufLen = 8;
-                                    QWORD duration;
-                                    WMT_ATTR_DATATYPE dataType;
-                                    headerInfo->GetAttributeByIndexEx(
-                                        0,
-                                        indices[0],
-                                        nullptr,
-                                        &dummyNameLen,
-                                        &dataType,
-                                        nullptr,
-                                        (BYTE*)&duration,
-                                        &dummyBufLen
-                                    );
+        DWORD                outputNumber;
+        IWMOutputMediaProps* mediaProps;
 
-                                    lengthMs = (long)(duration / 10000ULL);
-                                    initialized = lengthMs >= 7000;
+        syncReader->SetStreamsSelected(1, &m_wStreamNumber, &activateStream);
+        syncReader->SetReadStreamSamples(m_wStreamNumber, FALSE);
+        syncReader->SetRange(0ULL, 0LL);
+        syncReader->GetOutputNumberForStream(m_wStreamNumber, &outputNumber);
 
-                                    delete[] indices;
-                                    headerInfo->Release();
-                                }
-                            }
+        if (!SUCCEEDED(syncReader->GetOutputProps(outputNumber, &mediaProps)))
+            return m_bInitialized;
 
-                            CMemoryMgr::Free(mediaTypeBase);
-                            mediaProps->Release();
-                        }
-                    }
-                }
-            }
-            else if (syncReader)
-            {
-                syncReader->Release();
-                syncReader = nullptr;
+        DWORD mediaTypeSize = 0;
+        mediaProps->GetMediaType(nullptr, &mediaTypeSize);
+
+        WM_MEDIA_TYPE* mediaTypeBase = (WM_MEDIA_TYPE*)CMemoryMgr::Malloc(mediaTypeSize);
+        mediaProps->GetMediaType(mediaTypeBase, &mediaTypeSize);
+        WAVEFORMATEX* mediaMetadata = (WAVEFORMATEX*)mediaTypeBase->pbFormat;
+
+        if (mediaMetadata && mediaMetadata->nChannels == 2 && mediaMetadata->wBitsPerSample == 16) {
+            IWMHeaderInfo3* headerInfo;
+            m_nSampleRate = mediaMetadata->nSamplesPerSec;
+
+            if (SUCCEEDED(syncReader->QueryInterface(IID_IWMHeaderInfo3, (void**)&headerInfo))) {
+                WORD count;
+                headerInfo->GetAttributeIndices(0, L"Duration", nullptr, nullptr, &count);
+
+                WORD* indices = new WORD[count];
+                headerInfo->GetAttributeIndices(0, L"Duration", nullptr, indices, &count);
+
+                WORD              dummyNameLen;
+                DWORD             dummyBufLen = 8;
+                QWORD             duration;
+                WMT_ATTR_DATATYPE dataType;
+                headerInfo->GetAttributeByIndexEx(0, indices[0], nullptr, &dummyNameLen, &dataType, nullptr, (BYTE*)&duration, &dummyBufLen);
+
+                m_nLengthMs = (long)(duration / 10000ULL);
+                m_bInitialized = m_nLengthMs >= 7000;
+
+                delete[] indices;
+                headerInfo->Release();
             }
         }
+
+        CMemoryMgr::Free(mediaTypeBase);
+        mediaProps->Release();
+    } else if (syncReader) {
+        syncReader->Release();
+        syncReader = nullptr;
     }
 
-    return initialized;
-#endif
+    return m_bInitialized;
 }
 
-size_t CAEWMADecoder::FillBuffer(void *dest, size_t size)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    using ReadFunc = size_t(__thiscall *)(CAEWMADecoder*, void*, size_t);
-    return ((ReadFunc) 0x5027d0)(this, dest, size);
-#else
-    char *buf = (char *) dest;
+// 0x5027d0
+size_t CAEWMADecoder::FillBuffer(void* dest, size_t size) {
+    char*  buf = (char*)dest;
     size_t written = 0;
 
-    if (tempBufferUsed > 0)
-    {
-        size_t sizeToCopy = tempBufferUsed > size ? size : tempBufferUsed;
-        memcpy(buf, buffer, sizeToCopy);
+    if (m_nTempBufferUsed > 0) {
+        size_t sizeToCopy = m_nTempBufferUsed > size ? size : m_nTempBufferUsed;
+        memcpy(buf, m_szBuffer, sizeToCopy);
 
-        tempBufferUsed -= sizeToCopy;
+        m_nTempBufferUsed -= sizeToCopy;
         size -= sizeToCopy;
         buf += sizeToCopy;
         written += sizeToCopy;
 
-        if (tempBufferUsed > 0)
+        if (m_nTempBufferUsed > 0)
             // Push buffer
-            memmove(buffer, buffer + sizeToCopy, tempBufferUsed);
+            memmove(m_szBuffer, m_szBuffer + sizeToCopy, m_nTempBufferUsed);
     }
 
-    while (size > 0)
-    {
-        INSSBuffer *nssBuffer = nullptr;
-        DWORD dummy1 = 0, dummy2 = 0;
-        WORD stream = 0;
+    while (size > 0) {
+        INSSBuffer* nssBuffer = nullptr;
+        DWORD       dummy1 = 0, dummy2 = 0;
+        WORD        stream = 0;
 
-        if (FAILED(syncReader->GetNextSample(streamNumber, &nssBuffer, &sampleTime, &sampleDuration, &dummy1, &dummy2, &stream)))
+        if (FAILED(syncReader->GetNextSample(m_wStreamNumber, &nssBuffer, &m_nSampleTime, &m_nSampleDuration, &dummy1, &dummy2, &stream)))
             return written;
 
-        if (stream == streamNumber)
-        {
-            BYTE *byteBuffer;
+        if (stream == m_wStreamNumber) {
+            BYTE* byteBuffer;
             DWORD bufferLen = 0;
 
-            if (FAILED(nssBuffer->GetBufferAndLength(&byteBuffer, &bufferLen)))
-            {
+            if (FAILED(nssBuffer->GetBufferAndLength(&byteBuffer, &bufferLen))) {
                 nssBuffer->Release();
                 return written;
             }
@@ -187,14 +149,13 @@ size_t CAEWMADecoder::FillBuffer(void *dest, size_t size)
             written += sizeToCopy;
             buf += sizeToCopy;
 
-            if (size == 0)
-            {
+            if (size == 0) {
                 // Store into temporary buffer
-                size_t freeTempBufSize = TEMPBUFSIZE - tempBufferUsed;
+                size_t freeTempBufSize = TEMPBUFSIZE - m_nTempBufferUsed;
                 byteBuffer += sizeToCopy;
                 sizeToCopy = bufferLen > freeTempBufSize ? freeTempBufSize : bufferLen;
-                memcpy(buffer + tempBufferUsed, byteBuffer, sizeToCopy);
-                tempBufferUsed += sizeToCopy;
+                memcpy(m_szBuffer + m_nTempBufferUsed, byteBuffer, sizeToCopy);
+                m_nTempBufferUsed += sizeToCopy;
             }
         }
 
@@ -202,86 +163,58 @@ size_t CAEWMADecoder::FillBuffer(void *dest, size_t size)
     }
 
     return written;
-#endif
 }
 
-long CAEWMADecoder::GetStreamLengthMs()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((long(__thiscall *)(CAEWMADecoder*)) 0x502ad0)(this);
-#else
-    if (initialized)
-        return lengthMs;
+// 0x502ad0
+long CAEWMADecoder::GetStreamLengthMs() {
+    if (m_bInitialized)
+        return m_nLengthMs;
 
     return -1;
-#endif
 }
 
-long CAEWMADecoder::GetStreamPlayTimeMs()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((long(__thiscall *)(CAEWMADecoder*)) 0x502af0)(this);
-#else
-    if (initialized)
-        return (long) ((sampleTime + sampleDuration) / 10000.0);
+// 0x502af0
+long CAEWMADecoder::GetStreamPlayTimeMs() {
+    if (m_bInitialized)
+        return (long)((m_nSampleTime + m_nSampleDuration) / 10000.0f);
 
     return -1;
-#endif
 }
 
-void CAEWMADecoder::SetCursor(unsigned long pos)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    using SeekFunc = void(__thiscall *)(CAEWMADecoder*, unsigned long);
-    ((SeekFunc) 0x502b50)(this, pos);
-#else
-    if (initialized)
+// 0x502b50
+void CAEWMADecoder::SetCursor(unsigned long pos) {
+    if (m_bInitialized)
         syncReader->SetRange(pos * 10000ULL, 0LL);
-#endif
 }
 
-int CAEWMADecoder::GetSampleRate()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(__thiscall *)(CAEWMADecoder*)) 0x502ab0)(this);
-#else
-    if (initialized)
-        return sampleRate;
+// 0x502ab0
+int32 CAEWMADecoder::GetSampleRate() {
+    if (m_bInitialized)
+        return m_nSampleRate;
 
     return -1;
-#endif
 }
 
-int CAEWMADecoder::GetStreamID()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(__thiscall *)(CAEWMADecoder*)) 0x502750)(this);
-#else
-    return dataStream->m_nTrackId;
-#endif
+// 0x502750
+int32 CAEWMADecoder::GetStreamID() {
+    return m_dataStream->m_nTrackId;
 }
 
-bool CAEWMADecoder::InitLibrary()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(*)()) 0x502b80)();
-#else
-    if (CAEWMADecoder::WMCreateSyncReader != nullptr)
+// 0x502b80
+bool CAEWMADecoder::InitLibrary() {
+    if (WMCreateSyncReader != nullptr)
         return true;
 
     wmvCoreModule = LoadLibraryA("wmvcore.dll");
-    if (wmvCoreModule != nullptr)
-    {
-        using WMCreateSyncReaderFunc = HRESULT(__stdcall *)(IUnknown*, DWORD, IWMSyncReader**);
-        CAEWMADecoder::WMCreateSyncReader = (WMCreateSyncReaderFunc) GetProcAddress(wmvCoreModule, "WMCreateSyncReader");
+    if (wmvCoreModule != nullptr) {
+        using WMCreateSyncReaderFunc = HRESULT(__stdcall*)(IUnknown*, DWORD, IWMSyncReader**);
+        WMCreateSyncReader = (WMCreateSyncReaderFunc)GetProcAddress(wmvCoreModule, "WMCreateSyncReader");
 
-        if (CAEWMADecoder::WMCreateSyncReader)
-        {
-            IWMSyncReader *reader = nullptr;
+        if (WMCreateSyncReader) {
+            IWMSyncReader* reader = nullptr;
 
             // MikuAuahDark: GTASA tests if WMCreateSyncReader actually works
-            if (SUCCEEDED(WMCreateSyncReader(nullptr, 0, &reader)))
-            {
+            if (SUCCEEDED(WMCreateSyncReader(nullptr, 0, &reader))) {
                 reader->Release();
                 return true;
             }
@@ -294,44 +227,35 @@ bool CAEWMADecoder::InitLibrary()
     }
 
     return false;
-#endif
 }
 
-void CAEWMADecoder::Shutdown()
-{
+void CAEWMADecoder::Shutdown() {
     // Free WMV core
-    if (CAEWMADecoder::WMCreateSyncReader)
-    {
+    if (WMCreateSyncReader) {
         FreeLibrary(wmvCoreModule);
-        CAEWMADecoder::WMCreateSyncReader = nullptr;
+        WMCreateSyncReader = nullptr;
         wmvCoreModule = nullptr;
     }
 }
 
-HRESULT CAEWMADecoder::SelectStreamIndex(IWMProfile *profile)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    using SelectStreamFunc = HRESULT(__thiscall *)(CAEWMADecoder*, IWMProfile*);
-    return ((SelectStreamFunc) 0x502990)(this, profile);
-#else
+// 0x502990
+HRESULT CAEWMADecoder::SelectStreamIndex(IWMProfile* profile) {
     if (profile == nullptr)
         return E_INVALIDARG;
 
     DWORD streams = 0;
-    if (SUCCEEDED(profile->GetStreamCount(&streams)))
-    {
-        IWMStreamConfig *streamConfig = nullptr;
-        GUID streamGUID;
+    if (SUCCEEDED(profile->GetStreamCount(&streams))) {
+        IWMStreamConfig* streamConfig = nullptr;
+        GUID             streamGUID;
 
-        streamNumber = 0;
+        m_wStreamNumber = 0;
 
-        for (DWORD i = 0; i < streams; i++)
-        {
+        for (DWORD i = 0; i < streams; i++) {
             WORD index;
 
             if (FAILED(profile->GetStream(i, &streamConfig)))
                 break;
-            
+
             if (FAILED(streamConfig->GetStreamNumber(&index)))
                 break;
 
@@ -341,43 +265,29 @@ HRESULT CAEWMADecoder::SelectStreamIndex(IWMProfile *profile)
             streamConfig->Release();
             streamConfig = nullptr;
 
-            if (streamGUID == WMMEDIATYPE_Audio)
-            {
-                streamNumber = index;
+            if (streamGUID == WMMEDIATYPE_Audio) {
+                m_wStreamNumber = index;
                 break;
             }
         }
 
-        if (streamConfig)
-        {
+        if (streamConfig) {
             streamConfig->Release();
             streamConfig = nullptr;
         }
     }
 
-    if (streamNumber == 0)
+    if (m_wStreamNumber == 0)
         return E_INVALIDARG;
 
     return S_OK;
-#endif
 }
 
-CAEWMADecoder *CAEWMADecoder::ctor(CAEDataStream *dataStream)
-{
-    this->CAEWMADecoder::CAEWMADecoder(dataStream);
-    return this;
-}
-
-void CAEWMADecoder::dtor()
-{
-    this->CAEWMADecoder::~CAEWMADecoder();
-}
-
-void CAEWMADecoder::InjectHooks()
-{
-    ReversibleHooks::Install("CAEWMADecoder", "CAEWMADecoder", 0x502720, &CAEWMADecoder::ctor);
-    ReversibleHooks::Install("CAEWMADecoder", "~CAEWMADecoder", 0x502760, &CAEWMADecoder::dtor);
+void CAEWMADecoder::InjectHooks() {
+    ReversibleHooks::Install("CAEWMADecoder", "CAEWMADecoder", 0x502720, &CAEWMADecoder::Constructor);
+    ReversibleHooks::Install("CAEWMADecoder", "~CAEWMADecoder", 0x502760, &CAEWMADecoder::Destructor);
     ReversibleHooks::Install("CAEWMADecoder", "Initialise", 0x502c60, &CAEWMADecoder::Initialise);
+    ReversibleHooks::Install("CAEWMADecoder", "InitLibrary", 0x502b80, &CAEWMADecoder::InitLibrary);
     ReversibleHooks::Install("CAEWMADecoder", "FillBuffer", 0x5027d0, &CAEWMADecoder::FillBuffer);
     ReversibleHooks::Install("CAEWMADecoder", "GetStreamLengthMs", 0x502ad0, &CAEWMADecoder::GetStreamLengthMs);
     ReversibleHooks::Install("CAEWMADecoder", "GetStreamPlayTimeMs", 0x502af0, &CAEWMADecoder::GetStreamPlayTimeMs);
@@ -385,5 +295,14 @@ void CAEWMADecoder::InjectHooks()
     ReversibleHooks::Install("CAEWMADecoder", "GetSampleRate", 0x502ab0, &CAEWMADecoder::GetSampleRate);
     ReversibleHooks::Install("CAEWMADecoder", "GetStreamID", 0x502750, &CAEWMADecoder::GetStreamID);
     ReversibleHooks::Install("CAEWMADecoder", "SelectStreamIndex", 0x502990, &CAEWMADecoder::SelectStreamIndex);
-    ReversibleHooks::Install("CAEWMADecoder", "InitLibrary", 0x502b80, &CAEWMADecoder::InitLibrary);
+}
+
+CAEWMADecoder* CAEWMADecoder::Constructor(CAEDataStream* dataStream) {
+    this->CAEWMADecoder::CAEWMADecoder(dataStream);
+    return this;
+}
+
+CAEWMADecoder* CAEWMADecoder::Destructor() {
+    this->CAEWMADecoder::~CAEWMADecoder();
+    return this;
 }

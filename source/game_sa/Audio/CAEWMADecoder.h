@@ -8,50 +8,48 @@
 
 #include "CAEStreamingDecoder.h"
 
-class CAEWMADecoder: public CAEStreamingDecoder
-{
+class CAEWMADecoder : public CAEStreamingDecoder {
+private:
+    static constexpr size_t TEMPBUFSIZE = 131072;
+
+    bool           m_bInitialized;
+    int32          _unknown;
+    uint64         m_nSampleTime;
+    uint64         m_nSampleDuration;
+    char           m_szBuffer[TEMPBUFSIZE];
+    size_t         m_nTempBufferUsed;
+    uint16         m_wStreamNumber;
+    int32          m_nSampleRate;
+    long           m_nLengthMs;
+    IWMSyncReader* syncReader;
+    int32          _unknown2;
+
+    HRESULT SelectStreamIndex(IWMProfile* profile);
+
+    static HRESULT(__stdcall*& WMCreateSyncReader)(IUnknown*, DWORD, IWMSyncReader**);
+    static HMODULE& wmvCoreModule;
+
 public:
-    CAEWMADecoder(CAEDataStream *dataStream);
+    CAEWMADecoder(CAEDataStream* dataStream);
     ~CAEWMADecoder() override;
 
-    bool Initialise() override;
-    size_t FillBuffer(void* dest,size_t size) override;
-    long GetStreamLengthMs() override;
-    long GetStreamPlayTimeMs() override;
-    void SetCursor(unsigned long pos) override;
-    int GetSampleRate() override;
-    int GetStreamID() override;
+    bool   Initialise() override;
+    size_t FillBuffer(void* dest, size_t size) override;
+    long   GetStreamLengthMs() override;
+    long   GetStreamPlayTimeMs() override;
+    void   SetCursor(unsigned long pos) override;
+    int32  GetSampleRate() override;
+    int32  GetStreamID() override;
 
     static bool InitLibrary();
     static void Shutdown();
 
 private:
-    static constexpr size_t TEMPBUFSIZE = 131072;
-
-    bool initialized;
-    int _unknown;
-    std::uint64_t sampleTime;
-    std::uint64_t sampleDuration;
-    char buffer[TEMPBUFSIZE];
-    size_t tempBufferUsed;
-    std::uint16_t streamNumber;
-    int sampleRate;
-    long lengthMs;
-    IWMSyncReader *syncReader;
-    int _unknown2;
-
-    HRESULT SelectStreamIndex(IWMProfile *profile);
-
-    static HRESULT(__stdcall *&WMCreateSyncReader)(IUnknown*, DWORD, IWMSyncReader**);
-    static HMODULE &wmvCoreModule;
-
-private:
-    friend void InjectHooksMain(void);
-
-    CAEWMADecoder *ctor(CAEDataStream *dataStream);
-    void dtor();
-
+    friend void InjectHooksMain();
     static void InjectHooks();
+
+    CAEWMADecoder* Constructor(CAEDataStream* dataStream);
+    CAEWMADecoder* Destructor();
 };
 
 VALIDATE_SIZE(CAEWMADecoder, 0x20038);

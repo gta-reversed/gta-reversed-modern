@@ -2,50 +2,38 @@
 
 #include "CAEStreamingDecoder.h"
 
-CAEStreamingDecoder::CAEStreamingDecoder(CAEDataStream* dataStream)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    using Constructor = void(__thiscall *)(CAEStreamingDecoder*, CAEDataStream*);
-    ((Constructor) (0x4f2810))(this, dataStream);
-#else
-    this->dataStream = dataStream;
+// 0x4f2810
+CAEStreamingDecoder::CAEStreamingDecoder(CAEDataStream* dataStream) {
+    m_dataStream = dataStream;
     if (dataStream)
         dataStream->Initialise();
-#endif
 }
 
 #ifdef USE_DEFAULT_FUNCTIONS
-void CAEStreamingDecoder::operator delete(void* mem)
-{
-    ((void(__thiscall *)(void*, int)) (0x4f2860))(mem, 1);
+void CAEStreamingDecoder::operator delete(void* mem) {
+    ((void(__thiscall*)(void*, int32))(0x4f2860))(mem, 1);
 }
 #endif
 
-CAEStreamingDecoder::~CAEStreamingDecoder()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall *)(CAEStreamingDecoder*)) (0x4f2830))(this);
-#else
+// 0x4f2830
+CAEStreamingDecoder::~CAEStreamingDecoder() {
     // The game checks if dataStream is nullptr, but
     // deleting null pointer is perfectly safe.
-    delete dataStream;
-    dataStream = nullptr;
-#endif
+    delete m_dataStream;
+    m_dataStream = nullptr;
 }
 
-CAEStreamingDecoder *CAEStreamingDecoder::ctor(CAEDataStream *dataStream)
-{
+void CAEStreamingDecoder::InjectHooks() {
+    ReversibleHooks::Install("CAEStreamingDecoder", "CAEStreamingDecoder", 0x4f2810, &CAEStreamingDecoder::Constructor);
+    ReversibleHooks::Install("CAEStreamingDecoder", "~CAEStreamingDecoder", 0x4f2830, &CAEStreamingDecoder::Destructor);
+}
+
+CAEStreamingDecoder* CAEStreamingDecoder::Constructor(CAEDataStream* dataStream) {
     this->CAEStreamingDecoder::CAEStreamingDecoder(dataStream);
     return this;
 }
 
-void CAEStreamingDecoder::dtor()
-{
+CAEStreamingDecoder* CAEStreamingDecoder::Destructor() {
     this->CAEStreamingDecoder::~CAEStreamingDecoder();
-}
-
-void CAEStreamingDecoder::InjectHooks()
-{
-    ReversibleHooks::Install("CAEStreamingDecoder", "CAEStreamingDecoder", 0x4f2810, &CAEStreamingDecoder::ctor);
-    ReversibleHooks::Install("CAEStreamingDecoder", "~CAEStreamingDecoder", 0x4f2830, &CAEStreamingDecoder::dtor);
+    return this;
 }

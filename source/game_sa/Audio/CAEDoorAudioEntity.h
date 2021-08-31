@@ -13,17 +13,17 @@ public:
     void StaticInitialise();
     void Reset();
 
-    void UpdateParameters(CAESound* sound, short curPlayPos) override;
+    void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
 
     void AddAudioEvent(eAudioEvents event, CPhysical* physical);
     void AddAudioEvent(eAudioEvents event, CVector& posn, float volume, float speed);
-    void PlayDoorSound(short sfxId, eAudioEvents event, CVector& posn, float volumeDelta, float speed);
+    void PlayDoorSound(int16 sfxId, eAudioEvents event, CVector& posn, float volumeDelta, float speed);
 
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    void UpdateParameters_Reversed(CAESound* sound, short curPlayPos);
+    void UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos);
 };
 
 VALIDATE_SIZE(CAEDoorAudioEntity, 0x88);

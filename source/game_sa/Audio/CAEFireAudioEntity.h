@@ -6,14 +6,15 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CAEAudioEntity.h"
+
+class FxSystem_c;
 
 class CAEFireAudioEntity : public CAEAudioEntity {
 public:
-    CAESound *field_7C;
-    CAESound *field_80;
-    class FxSystem_c *field_84;
+    CAESound*   field_7C;
+    CAESound*   field_80;
+    FxSystem_c* field_84;
 };
 
 VALIDATE_SIZE(CAEFireAudioEntity, 0x88);
