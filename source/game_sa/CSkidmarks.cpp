@@ -1,11 +1,12 @@
 #include "StdInc.h"
 
-unsigned short (&CSkidmarks::m_aIndices)[96] = *reinterpret_cast<unsigned short (*)[96]>(0xC799C8);
+RxVertexIndex (&CSkidmarks::m_aIndices)[96] = *reinterpret_cast<unsigned short (*)[96]>(0xC799C8);
 RwTexture*& CSkidmarks::m_pTexture = *reinterpret_cast<RwTexture**>(0xC79A88);
 CSkidmark (&CSkidmarks::m_aSkidmarks)[SKIDMARKS_COUNT] = *reinterpret_cast<CSkidmark (*)[SKIDMARKS_COUNT]>(0xC79AA8);
 
 void CSkidmarks::InjectHooks() {
     ReversibleHooks::Install("CSkidmarks", "Clear", 0x720590, &CSkidmarks::Clear);
+    ReversibleHooks::Install("CSkidmarks", "Init", 0x7204E0, &CSkidmarks::Init);
     ReversibleHooks::Install("CSkidmarks", "RegisterOne_iVffbbf", 0x720EC0, (void (*)(unsigned int, const CVector&, float, float, const bool*, bool*, float))(&CSkidmarks::RegisterOne));
     // ReversibleHooks::Install("CSkidmarks", "RegisterOne_iVffEbf", 0x720930, (void (*)(unsigned int, const CVector&, float, float, eSurfaceType, bool*, float))(&CSkidmarks::RegisterOne));
     // ReversibleHooks::Install("CSkidmarks", "Render", 0x720640, &CSkidmarks::Render);
@@ -23,7 +24,19 @@ void CSkidmarks::Clear() {
 
 // 0x7204E0
 void CSkidmarks::Init() {
-    plugin::Call<0x7204E0>();
+    CTxdStore::PushCurrentTxd();
+    CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("particle"));
+    m_pTexture = RwTextureRead("particleskid", 0);
+    CTxdStore::PopCurrentTxd();
+
+    Clear();
+
+    for (unsigned i = 0; i < 16; i++) {
+        constexpr unsigned indicesRelative[] = { 0, 2, 1, 1, 2, 3 };
+        for (unsigned v = 0; v < 6; v++) {
+            m_aIndices[i + v] = (RxVertexIndex)(2 * i + indicesRelative[v]);
+        }
+    }
 }
 
 // 0x720EC0

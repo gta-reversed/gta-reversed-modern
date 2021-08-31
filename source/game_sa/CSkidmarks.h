@@ -25,7 +25,7 @@ VALIDATE_SIZE(CSkidmark, 0x158);
 
 class CSkidmarks {
 public:
-    static unsigned short (&m_aIndices)[96];
+    static RxVertexIndex (&m_aIndices)[96];
     static RwTexture*& m_pTexture;
     static CSkidmark (&m_aSkidmarks)[SKIDMARKS_COUNT];
 
