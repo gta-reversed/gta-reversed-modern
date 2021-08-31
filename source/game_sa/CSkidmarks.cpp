@@ -7,7 +7,7 @@ CSkidmark (&CSkidmarks::m_aSkidmarks)[SKIDMARKS_COUNT] = *reinterpret_cast<CSkid
 void CSkidmarks::InjectHooks() {
     using namespace ReversibleHooks;
     Install("CSkidmarks", "Clear", 0x720590, &CSkidmarks::Clear);
-    Install("CSkidmarks", "Init", 0x7204E0, &CSkidmarks::Init, true);
+    Install("CSkidmarks", "Init", 0x7204E0, &CSkidmarks::Init);
     Install("CSkidmarks", "RegisterOne_EC0", 0x720EC0, (void (*)(uint32_t, const CVector&, float, float, const bool*, bool&, float))(&CSkidmarks::RegisterOne));
     Install("CSkidmarks", "RegisterOne", 0x720930, (void (*)(uint32_t, const CVector&, float, float, eSkidMarkType, bool&, float))(&CSkidmarks::RegisterOne));
     Install("CSkidmarks", "Render", 0x720640, &CSkidmarks::Render);
@@ -35,7 +35,7 @@ void CSkidmarks::Init() {
     for (unsigned i = 0; i < SKIDMARK_NUM_PARTS; i++) { // todo fix
         constexpr unsigned indicesRelative[] = { 0, 2, 1, 1, 2, 3 };
         for (unsigned v = 0; v < 6; v++) {
-            m_aIndices[i + v] = (RxVertexIndex)(2 * i + indicesRelative[v]);
+            m_aIndices[6 * i + v] = (RxVertexIndex)(2 * i + indicesRelative[v]);
         }
     }
 }
