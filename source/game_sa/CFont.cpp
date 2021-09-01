@@ -760,7 +760,7 @@ void CFont::PrintString(float x, float y, const char* text)
 // 0x71A820
 void CFont::PrintStringFromBottom(float x, float y, const char* text)
 {
-    float drawY = y - (18.0f * m_Scale.y) * (float)CFont::GetNumberLines(x, y, text);
+    float drawY = y - (Scale.y * 32.0f / 2.0f + Scale.y + Scale.y) * (float)GetNumberLines(x, y, text);
 
     if (m_fSlant != 0.0f)
         drawY -= (m_fSlantRefPoint.x - x) * m_fSlant + m_fSlantRefPoint.y;
