@@ -157,8 +157,8 @@ void CRadar::InjectHooks()
     ReversibleHooks::Install("CRadar", "GetNewUniqueBlipIndex", 0x582820, &CRadar::GetNewUniqueBlipIndex);
     ReversibleHooks::Install("CRadar", "TransformRadarPointToRealWorldSpace", 0x5835A0, &CRadar::TransformRadarPointToRealWorldSpace);
 
-    ReversibleHooks::Install("", "IsPointInsideRadar", 0x584D40, &IsPointInsideRadar);
-    ReversibleHooks::Install("", "GetTextureCorners", 0x584D90, &GetTextureCorners);
+    ReversibleHooks::Install("CRadar", "IsPointInsideRadar", 0x584D40, &IsPointInsideRadar);
+    ReversibleHooks::Install("common", "GetTextureCorners", 0x584D90, &GetTextureCorners);
 }
 
 // 0x587FB0
