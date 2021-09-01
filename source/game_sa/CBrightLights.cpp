@@ -92,14 +92,36 @@ void CBrightLights::RegisterOne(CVector posn, CVector top, CVector right, CVecto
 
 // NOTSA, inlined
 CRGBA tBrightLight::GetColorRGBA() const {
+    // Return alpha value.
+    // _BIG has at most 127 alpha, while _SMALL has 255
     const auto GetAlpha = [this]() -> uint8 {
-        if (m_fDistanceToCamera >= 45.0f)
-            return (uint8)((1.0f - invLerp(45.0f, 60.0f, m_fDistanceToCamera)) * 255.0f / 2.0f);
-        return (uint8)(255 / 2);
+
+        const auto UnadjAlpha = [this] {
+            if (m_fDistanceToCamera >= 45.0f)
+                return (uint8)((1.0f - invLerp(45.0f, 60.0f, m_fDistanceToCamera)) * 255.0f);
+            return (uint8)255;
+        };
+
+        switch (m_nColor) {
+        case BRIGHTLIGHT_GREEN_BIG:
+        case BRIGHTLIGHT_YELLOW_BIG:
+        case BRIGHTLIGHT_RED_BIG:
+            return UnadjAlpha() / 2;
+
+        case BRIGHTLIGHT_GREEN_SMALL:
+        case BRIGHTLIGHT_YELLOW_SMALL:
+        case BRIGHTLIGHT_RED_SMALL:
+            return UnadjAlpha();
+
+        default: { // NOTSA
+            assert(0);
+            return 0;
+        }
+        }
     };
 
     // Originally R* used:
-    // const auto rnd = (uint8)((float)(uint8)rand() / 5.0f);
+    //const auto rnd = (uint8)((float)(uint8)rand() / 5.0f);
     const auto rnd = (uint8)CGeneral::GetRandomNumberInRange(0, 255 / 5);
     switch (m_nColor) {
     case BRIGHTLIGHT_GREEN_BIG:
