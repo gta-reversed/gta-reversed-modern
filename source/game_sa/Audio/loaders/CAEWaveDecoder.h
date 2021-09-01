@@ -4,8 +4,8 @@
 
 #define WIN32_LEAN_AND_MEAN
 
-#include <windows.h>
-#include <MMReg.h> // WAVEFORMAT
+#include <Windows.h>
+#include <mmreg.h> // WAVEFORMAT
 
 #include "CAEStreamingDecoder.h"
 
