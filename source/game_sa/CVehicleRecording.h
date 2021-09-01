@@ -70,12 +70,12 @@ public:
     static void Load(RwStream *stream, std::int32_t resourceId, std::int32_t totalSize);
     static std::int32_t RegisterRecordingFile(char const* name);
     static void SetPlaybackSpeed(CVehicle* vehicle, float speed);
+    static void RenderLineSegment(int& numVertices);
     /*
     * PausePlaybackRecordedCar(CVehicle*)
     * RemoveAllRecordingsThatArentUsed()
     * RemoveRecordingFile(int)
     * Render()
-    * RenderLineSegment(int&)
     * RequestRecordingFile(int)
     * RestoreInfoForCar(CVehicle*, CVehicleStateEachFrame*, bool)
     * RestoreInfoForMatrix(CMatrix&, CVehicleStateEachFrame*)
