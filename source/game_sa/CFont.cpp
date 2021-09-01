@@ -714,7 +714,7 @@ void CFont::GetTextRect(CRect* rect, float x, float y, const char* text)
     const int16 nLines = GetNumberLines(x, y, text);
 
     if (m_bFontCentreAlign) {
-        rect->left = m_fFontCentreSize / 2.0f - x + 4.0f;
+        rect->left = x - (m_fFontCentreSize / 2.0f + 4.0f);
         rect->right = m_fFontCentreSize / 2.0f + x + 4.0f;
     }
     else if (m_bFontRightAlign) {
