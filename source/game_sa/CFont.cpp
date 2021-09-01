@@ -14,7 +14,7 @@ CFontChar* pEmptyChar = (CFontChar*)0xC716A8;
 CFontChar& CFont::RenderState = *(CFontChar*)0xC71AA0;
 CSprite2d (&CFont::Sprite)[MAX_FONT_SPRITES] = *(CSprite2d(*)[2])0xC71AD0;
 CSprite2d (&CFont::ButtonSprite)[MAX_FONT_BUTTON_SPRITES] = *(CSprite2d(*)[15])0xC71AD8;
-eExtraFontSymbol& CFont::m_nExtraFontSymbolId = *(eExtraFontSymbol*)0xC71A54;
+eExtraFontSymbol& CFont::PS2Symbol = *(eExtraFontSymbol*)0xC71A54;
 bool& CFont::m_bNewLine = *(bool*)0xC71A55;
 CRGBA& CFont::m_Color = *(CRGBA*)0xC71A60;
 CVector2D& CFont::m_Scale = *(CVector2D*)0xC71A64;
@@ -221,7 +221,7 @@ void CFont::PrintChar(float x, float y, char character)
     if (x < 0.0f || x > SCREEN_WIDTH || y < 0.0f || y > SCREEN_HEIGHT)
         return;
 
-    if (m_nExtraFontSymbolId) {
+    if (PS2Symbol) {
         // extra symbol to be drawn (e.g. PS2 buttons)
 
         CRect rt = {
@@ -232,7 +232,7 @@ void CFont::PrintChar(float x, float y, char character)
         };
             
 
-        ButtonSprite[m_nExtraFontSymbolId].Draw(rt, { 255, 255, 255, RenderState.m_color.a });
+        ButtonSprite[PS2Symbol].Draw(rt, { 255, 255, 255, RenderState.m_color.a });
 
         return;
     }
@@ -351,14 +351,14 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
 
     switch (*next) {
     case '<':
-        m_nExtraFontSymbolId = EXSYMBOL_DPAD_LEFT;
+        PS2Symbol = EXSYMBOL_DPAD_LEFT;
         break;
     case '>':
-        m_nExtraFontSymbolId = EXSYMBOL_DPAD_RIGHT;
+        PS2Symbol = EXSYMBOL_DPAD_RIGHT;
         break;
     case 'A':
     case 'a':
-        m_nExtraFontSymbolId = EXSYMBOL_L3;
+        PS2Symbol = EXSYMBOL_L3;
         break;
     case 'B':
     case 'b':
@@ -366,11 +366,11 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
         break;
     case 'C':
     case 'c':
-        m_nExtraFontSymbolId = EXSYMBOL_R3;
+        PS2Symbol = EXSYMBOL_R3;
         break;
     case 'D':
     case 'd':
-        m_nExtraFontSymbolId = EXSYMBOL_DPAD_DOWN;
+        PS2Symbol = EXSYMBOL_DPAD_DOWN;
         break;
     case 'G':
     case 'g':
@@ -392,15 +392,15 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
         break;
     case 'J':
     case 'j':
-        m_nExtraFontSymbolId = EXSYMBOL_R1;
+        PS2Symbol = EXSYMBOL_R1;
         break;
     case 'K':
     case 'k':
-        m_nExtraFontSymbolId = EXSYMBOL_KEY;
+        PS2Symbol = EXSYMBOL_KEY;
         break;
     case 'M':
     case 'm':
-        m_nExtraFontSymbolId = EXSYMBOL_L2;
+        PS2Symbol = EXSYMBOL_L2;
         break;
     case 'N':
     case 'n':
@@ -408,7 +408,7 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
         break;
     case 'O':
     case 'o':
-        m_nExtraFontSymbolId = EXSYMBOL_CIRCLE;
+        PS2Symbol = EXSYMBOL_CIRCLE;
         break;
     case 'P':
     case 'p':
@@ -416,7 +416,7 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
         break;
     case 'Q':
     case 'q':
-        m_nExtraFontSymbolId = EXSYMBOL_SQUARE;
+        PS2Symbol = EXSYMBOL_SQUARE;
         break;
     case 'R':
     case 'r':
@@ -428,15 +428,15 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
         break;
     case 'T':
     case 't':
-        m_nExtraFontSymbolId = EXSYMBOL_TRIANGLE;
+        PS2Symbol = EXSYMBOL_TRIANGLE;
         break;
     case 'U':
     case 'u':
-        m_nExtraFontSymbolId = EXSYMBOL_DPAD_UP;
+        PS2Symbol = EXSYMBOL_DPAD_UP;
         break;
     case 'V':
     case 'v':
-        m_nExtraFontSymbolId = EXSYMBOL_R2;
+        PS2Symbol = EXSYMBOL_R2;
         break;
     case 'W':
     case 'w':
@@ -444,7 +444,7 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
         break;
     case 'X':
     case 'x':
-        m_nExtraFontSymbolId = EXSYMBOL_CROSS;
+        PS2Symbol = EXSYMBOL_CROSS;
         break;
     case 'Y':
     case 'y':
@@ -616,7 +616,7 @@ void CFont::InitPerFrame()
     m_nFontOutlineOrShadow = 0;
     m_nFontShadow = 0;
     m_bNewLine = false;
-    m_nExtraFontSymbolId = EXSYMBOL_NONE;
+    PS2Symbol = EXSYMBOL_NONE;
     RenderState.m_dwFontTexture = 0;
     pEmptyChar = &setup[0];
 

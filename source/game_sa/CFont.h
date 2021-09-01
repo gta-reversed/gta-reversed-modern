@@ -97,7 +97,7 @@ public:
     static CSprite2d (&Sprite)[MAX_FONT_SPRITES];
     // button textures array
     static CSprite2d (&ButtonSprite)[MAX_FONT_BUTTON_SPRITES];
-    static eExtraFontSymbol& m_nExtraFontSymbolId;
+    static eExtraFontSymbol& PS2Symbol;
     static bool& m_bNewLine;
     static CRGBA& m_Color;
     static CVector2D& m_Scale;
