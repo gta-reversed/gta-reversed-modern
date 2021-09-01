@@ -16,7 +16,7 @@ CSprite2d (&CFont::Sprite)[MAX_FONT_SPRITES] = *(CSprite2d(*)[2])0xC71AD0;
 CSprite2d (&CFont::ButtonSprite)[MAX_FONT_BUTTON_SPRITES] = *(CSprite2d(*)[15])0xC71AD8;
 eExtraFontSymbol& CFont::m_nExtraFontSymbolId = *(eExtraFontSymbol*)0xC71A54;
 bool& CFont::m_bNewLine = *(bool*)0xC71A55;
-CRGBA* CFont::m_Color = (CRGBA*)0xC71A60;
+CRGBA& CFont::m_Color = *(CRGBA*)0xC71A60;
 CVector2D& CFont::m_Scale = *(CVector2D*)0xC71A64;
 float& CFont::m_fSlant = *(float*)0xC71A6C;
 CVector2D& CFont::m_fSlantRefPoint = *(CVector2D*)0xC71A70;
@@ -35,7 +35,7 @@ float& CFont::m_fRightJustifyWrap = *(float*)0xC71A90;
 uint8& CFont::m_FontTextureId = *(uint8*)0xC71A94;
 uint8& CFont::m_FontStyle = *(uint8*)0xC71A95;
 uint8& CFont::m_nFontShadow = *(uint8*)0xC71A96;
-CRGBA* CFont::m_FontDropColor = (CRGBA*)0xC71A97;
+CRGBA& CFont::m_FontDropColor = *(CRGBA*)0xC71A97;
 uint8& CFont::m_nFontOutlineSize = *(uint8*)0xC71A9B;
 uint8& CFont::m_nFontOutline = *(uint8*)0xC71A9C;
 uint8& CFont::m_nFontOutlineOrShadow = *(uint8*)0xC71A9C;
@@ -504,10 +504,10 @@ void CFont::SetSlant(float value)
 // 0x719430
 void CFont::SetColor(CRGBA color)
 {
-    *m_Color = color;
+    m_Color = color;
 
     if (m_dwFontAlpha < 255) {
-        m_Color->a = (color.a * m_dwFontAlpha) / 255;
+        m_Color.a = (color.a * m_dwFontAlpha) / 255;
     }
 }
 
@@ -556,10 +556,10 @@ void CFont::SetAlphaFade(float alpha)
 // 0x719510
 void CFont::SetDropColor(CRGBA color)
 {
-    *m_FontDropColor = color;
+    m_FontDropColor = color;
 
     if (m_dwFontAlpha < 255)
-        m_FontDropColor->a = m_Color->a * m_dwFontAlpha;
+        m_FontDropColor.a = m_Color.a * m_dwFontAlpha;
 }
 
 // 0x719570
@@ -739,7 +739,7 @@ void CFont::PrintString(float x, float y, const char* text)
     if (m_bFontBackground) {
         CRect rt;
 
-        RenderState.m_color = *m_Color;
+        RenderState.m_color = m_Color;
         GetTextRect(&rt, x, y, text);
 
         if (m_bEnlargeBackgroundBox) {

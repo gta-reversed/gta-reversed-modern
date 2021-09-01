@@ -99,7 +99,7 @@ public:
     static CSprite2d (&ButtonSprite)[MAX_FONT_BUTTON_SPRITES];
     static eExtraFontSymbol& m_nExtraFontSymbolId;
     static bool& m_bNewLine;
-    static CRGBA* m_Color;
+    static CRGBA& m_Color;
     static CVector2D& m_Scale;
     static float& m_fSlant;
     static CVector2D& m_fSlantRefPoint;
@@ -118,7 +118,7 @@ public:
     static uint8& m_FontTextureId;
     static uint8& m_FontStyle;
     static uint8& m_nFontShadow;
-    static CRGBA* m_FontDropColor;
+    static CRGBA& m_FontDropColor;
     static uint8& m_nFontOutlineSize;
     static uint8& m_nFontOutline;
     static uint8& m_nFontOutlineOrShadow;
