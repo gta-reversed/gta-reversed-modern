@@ -781,7 +781,7 @@ float CFont::GetLetterSize(uint8 letterId)
     if (m_FontStyle)
         propValueIdx = GetIDforPropVal(letterId, m_FontStyle);
     else if (propValueIdx == 0x91)
-        propValueIdx = '?';
+        propValueIdx = '@';
     else if (propValueIdx > 0x9B)
         propValueIdx = 0;
 
