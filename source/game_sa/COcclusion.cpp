@@ -41,11 +41,11 @@ void COcclusion::InjectHooks()
 // 0x71DCA0
 void COcclusion::Init()
 {
-    NumOccludersOnMap = 0;
+    NumOccludersOnMap         = 0;
     NumInteriorOcculdersOnMap = 0;
-    FarAwayList = -1;
-    NearbyList = -1;
-    ListWalkThroughFA = -1;
+    FarAwayList               = -1;
+    NearbyList                = -1;
+    ListWalkThroughFA         = -1;
     PreviousListWalkThroughFA = -1;
 }
 
@@ -369,7 +369,7 @@ bool COccluder::ProcessOneOccluder(CActiveOccluder* pActiveOccluder)
             DotProduct((vecPos + aVecArr[5] - vecCamPos), aVecArr[5]) < 0.0F
         };
 
-	    // Calculating vertices of a box
+        // Calculating vertices of a box
         COcclusion::gOccluderCoors[0] = vecPos + aVecArr[0] + aVecArr[2] + aVecArr[4];
         COcclusion::gOccluderCoors[1] = vecPos + aVecArr[1] + aVecArr[2] + aVecArr[4];
         COcclusion::gOccluderCoors[2] = vecPos + aVecArr[0] + aVecArr[3] + aVecArr[4];
