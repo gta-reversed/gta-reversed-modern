@@ -50,7 +50,7 @@ public:
     uint32_t            m_nTransformRenderFlags;
     RwRaster*           m_pRasterToRender;
     RwMatrix*           m_pTransformLTM;
-    void*               m_pVerts;
+    RxObjSpace3DVertex* m_pVerts;
 
 public:
     static void InjectHooks();
@@ -105,7 +105,7 @@ public:
 VALIDATE_SIZE(Fx_c, 0x70);
 
 void RenderBegin(RwRaster* raster, RwMatrix* transform, uint32 transformRenderFlags);
-void RenderAddTri(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float u1, float v1, float u2, float v2, float u3, float v3, int32 r1, int32 g1, int32 b1, int32 a1, int32 r2, int32 g2, int32 b2, int32 a2, int32 r3, int32 g3, int32 b3, int32 a3);
+void RenderAddTri(CVector pos1, CVector pos2, CVector pos3, RwTexCoords coord1, RwTexCoords coord2, RwTexCoords coord3, uint8 r1, uint8 g1, uint8 b1, uint8 a1, uint8 r2, uint8 g2, uint8 b2, uint8 a2, uint8 r3, uint8 g3, uint8 b3, uint8 a3);
 void RenderEnd();
 void RotateVecIntoVec(RwV3d* vectorsOut, RwV3d* vectorsIn, RwV3d* dir);
 void RotateVecAboutVec(RwV3d* out, RwV3d* arg1, RwV3d* arg2, float angle);

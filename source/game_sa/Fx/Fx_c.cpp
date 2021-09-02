@@ -53,6 +53,10 @@ void Fx_c::InjectHooks() {
     // Install("Fx_c", "TriggerWaterSplash", 0x4A1070, &Fx_c::TriggerWaterSplash);
     // Install("Fx_c", "TriggerBulletSplash", 0x4A10E0, &Fx_c::TriggerBulletSplash);
     // Install("Fx_c", "TriggerFootSplash", 0x4A1150, &Fx_c::TriggerFootSplash);
+
+    Install("Fx_c", "RenderAddTri", 0x4A1410, &RenderAddTri);
+    Install("Fx_c", "RenderEnd", 0x4A1600, &RenderEnd);
+    Install("Fx_c", "RenderBegin", 0x4A13B0, &RenderBegin);
 }
 
 // 0x49E620
@@ -287,18 +291,71 @@ void Fx_c::TriggerFootSplash(CVector& posn) {
 }
 
 // 0x4A13B0
-void RenderBegin(RwRaster* raster, RwMatrix* transform, unsigned int transformRenderFlags) {
-    ((void(__cdecl*)(RwRaster*, RwMatrix*, unsigned int))0x4A13B0)(raster, transform, transformRenderFlags);
+void RenderBegin(RwRaster* newRaster, RwMatrix* transform, uint32 transformRenderFlags) {
+    g_fx.m_pTransformLTM = transform;
+    g_fx.m_nVerticesCount = 0;
+    g_fx.m_nVerticesCount2 = 0;
+    g_fx.m_pRasterToRender = newRaster;
+    g_fx.m_nTransformRenderFlags = transformRenderFlags;
+    g_fx.m_pVerts = aTempBufferVertices;
+
+    // And maybe update raster on RW if the same isnt already set...
+    RwRaster* currRaster{};
+    RwRenderStateGet(rwRENDERSTATETEXTURERASTER, &currRaster);
+    if (currRaster != newRaster)
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)newRaster);
 }
 
+// TODO: I honestly think this should be a class method...
+// Although originally it wasnt.
+// NOTE: Method signature changed to use CVector + RwTexCoords instead of raw values for convenience.
 // 0x4A1410
-void RenderAddTri(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float u1, float v1, float u2, float v2, float u3, float v3, int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2, int r3, int g3, int b3, int a3) {
-    ((void(__cdecl*)(float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, int, int, int, int, int, int, int, int, int, int, int, int))0x4A1410)(x1, y1, z1, x2, y2, z2, x3, y3, z3, u1, v1, u2, v2, u3, v3, r1, g1, b1, a1, r2, g2, b2, a2, r3, g3, b3, a3);
+ void RenderAddTri(CVector pos1, CVector pos2, CVector pos3, RwTexCoords coord1, RwTexCoords coord2, RwTexCoords coord3, uint8 r1, uint8 g1, uint8 b1, uint8 a1, uint8 r2, uint8 g2, uint8 b2, uint8 a2, uint8 r3, uint8 g3, uint8 b3, uint8 a3) {
+    const auto GetVertex = [](unsigned i) {
+        return &g_fx.m_pVerts[i];
+    };
+
+    const CVector pos[] = { pos1, pos2, pos3 };
+    const RwRGBA color[] = {
+        {r1,  g1,  b1,  a1},
+        {r2,  g2,  b2,  a2},
+        {r3,  g3,  b3,  a3},
+    };
+    for (unsigned i = 0; i < 3; i++) {
+        RxObjSpace3DVertexSetPos(GetVertex(i), &pos[i]);
+        RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color[i]);
+    }
+
+    if (g_fx.m_pRasterToRender) {
+        const RwTexCoords uvs[] = { coord1, coord2, coord3 };
+        for (unsigned i = 0; i < 3; i++) {
+            RxObjSpace3DVertexSetU(GetVertex(i), uvs[i].u);
+            RxObjSpace3DVertexSetV(GetVertex(i), uvs[i].v);
+        }
+    }
+
+    g_fx.m_pVerts += 3;
+    g_fx.m_nVerticesCount2 += 3;
+    g_fx.m_nVerticesCount++;
+
+    if (g_fx.m_nVerticesCount2 >= 2045 || g_fx.m_nVerticesCount >= 4095) {
+        RenderEnd(); // Render vertices to free up vertex buffer
+    }
 }
 
 // 0x4A1600
 void RenderEnd() {
-    ((void(__cdecl*)())0x4A1600)();
+    if (!g_fx.m_nVerticesCount)
+        return;
+
+    if (RwIm3DTransform(aTempBufferVertices, 3 * g_fx.m_nVerticesCount, g_fx.m_pTransformLTM, g_fx.m_nTransformRenderFlags)) {
+        RwIm3DRenderPrimitive(rwPRIMTYPETRILIST);
+        RwIm3DEnd();
+    }
+
+    g_fx.m_pVerts = aTempBufferVertices;
+    g_fx.m_nVerticesCount2 = 0;
+    g_fx.m_nVerticesCount = 0;
 }
 
 // 0x4A1660
