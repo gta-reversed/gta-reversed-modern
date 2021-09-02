@@ -30,10 +30,10 @@ public:
     tScriptForBrains m_aScriptForBrains[NUM_SCRIPTS];
 
 public:
-     void AddNewScriptBrain(int16 ImgIndex, int16 Model, uint16 Priority, signed char attachType, signed char Type, float Radius);
-     void AddNewStreamedScriptBrainForCodeUse(int16 a2, char *a3, signed char attachtype);
-     void CheckIfNewEntityNeedsScript(CEntity *pEntity, signed char attachType, void *unused);
-     int16 GetIndexOfScriptBrainWithThisName(char const *name, signed char Attachtype);
+     void AddNewScriptBrain(int16 ImgIndex, int16 Model, uint16 Priority, int8 attachType, int8 Type, float Radius);
+     void AddNewStreamedScriptBrainForCodeUse(int16 a2, char *a3, int8 attachtype);
+     void CheckIfNewEntityNeedsScript(CEntity *pEntity, int8 attachType, void *unused);
+     int16 GetIndexOfScriptBrainWithThisName(char const *name, int8 Attachtype);
      bool HasAttractorScriptBrainWithThisNameLoaded(char const *name);
      void Init();
      bool IsObjectWithinBrainActivationRange(CObject *entity, CVector const *point);
@@ -41,7 +41,7 @@ public:
      void RequestAttractorScriptBrainWithThisName(char const *name);
      void StartAttractorScriptBrainWithThisName(char const *name, CEntity *pEntity, uint8 bHasAScriptBrain);
      void StartNewStreamedScriptBrain(uint8 index, CEntity *pEntity, uint8 bHasAScriptBrain);
-     void StartOrRequestNewStreamedScriptBrain(uint8 index, CEntity *pEntity, signed char attachType, uint8 bAddToWaitingArray);
-     void StartOrRequestNewStreamedScriptBrainWithThisName(char const *name, CEntity *pEntity, signed char attachType);
-     void SwitchAllObjectBrainsWithThisID(signed char ID, bool bStatus);
+     void StartOrRequestNewStreamedScriptBrain(uint8 index, CEntity *pEntity, int8 attachType, uint8 bAddToWaitingArray);
+     void StartOrRequestNewStreamedScriptBrainWithThisName(char const *name, CEntity *pEntity, int8 attachType);
+     void SwitchAllObjectBrainsWithThisID(int8 ID, bool bStatus);
 };

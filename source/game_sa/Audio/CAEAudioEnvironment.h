@@ -16,7 +16,7 @@ public:
     static float GetDopplerRelativeFrequency(float prevDist, float curDist, uint32 prevTime, uint32 curTime, float timeScale);
     static float GetDistanceAttenuation(float dist);
     static float GetDirectionalMikeAttenuation(const CVector& soundDir);
-    static void  GetReverbEnvironmentAndDepth(signed char* reverbEnv, int32* depth);
+    static void  GetReverbEnvironmentAndDepth(int8* reverbEnv, int32* depth);
     static void  GetPositionRelativeToCamera(CVector* vecOut, CVector* vecPos);
     static void  GetPositionRelativeToCamera(CVector* vecOut, CPlaceable* placeable);
 };

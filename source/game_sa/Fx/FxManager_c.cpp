@@ -125,8 +125,8 @@ void FxManager_c::ReturnParticle(FxEmitterPrt_c* emitter) {
 }
 
 // 0x4A93C0
-FxEmitterPrt_c* FxManager_c::GetParticle(signed char arg0) {
-    return ((FxEmitterPrt_c * (__thiscall*)(FxManager_c*, signed char))0x4A93C0)(this, arg0);
+FxEmitterPrt_c* FxManager_c::GetParticle(int8 arg0) {
+    return ((FxEmitterPrt_c * (__thiscall*)(FxManager_c*, int8))0x4A93C0)(this, arg0);
 }
 
 // 0x4A9400

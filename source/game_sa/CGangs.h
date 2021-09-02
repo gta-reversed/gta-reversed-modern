@@ -38,7 +38,7 @@ public:
     static void Load();
     static void Save();
     //! unused
-    static void SetGangPedModelOverride(int16 gangID, signed char PedModelOverride);
+    static void SetGangPedModelOverride(int16 gangID, int8 PedModelOverride);
     static void SetGangWeapons(int16 gangID, int32 weapID1, int32 weapID2, int32 weapID3);
     //! unused
     static void SetWillAttackPlayerWithCops(ePedType gangID, bool bAttackPlayerWithCops);

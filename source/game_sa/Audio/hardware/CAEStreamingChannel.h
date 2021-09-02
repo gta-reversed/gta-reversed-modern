@@ -38,7 +38,7 @@ public:
     bool   IsSoundPlaying() override;
     uint16 GetPlayTime() override;
     uint16 GetLength() override;
-    void   Play(int16, signed char, float) override;
+    void   Play(int16, int8, float) override;
     void   SynchPlayback() override;
     void   Stop() override;
     void   SetFrequencyScalingFactor(float factor) override;
@@ -51,5 +51,5 @@ public:
     uint32 FillBuffer(void* buffer, uint32 size);
     void   SetBassEQ(IDirectSoundFXParamEq* fxParamEq, float gain);
     void   SetReady();
-    void   PrepareStream(CAEStreamingDecoder* stream, signed char arg2, bool bStopCurrent);
+    void   PrepareStream(CAEStreamingDecoder* stream, int8 arg2, bool bStopCurrent);
 };

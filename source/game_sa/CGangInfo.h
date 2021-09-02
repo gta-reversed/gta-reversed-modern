@@ -10,7 +10,7 @@ class CGangInfo {
     PLUGIN_NO_DEFAULT_CONSTRUCTION(CGangInfo)
 
 public:
-    signed char m_nPedModelOverride;
+    int8 m_nPedModelOverride;
     int32       m_nGangWeapons[3];
 };
 

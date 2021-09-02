@@ -341,7 +341,7 @@ public:
     void DoNitroEffect(float power);
     // Remove nitro particle
     void StopNitroEffect();
-    void NitrousControl(signed char);
+    void NitrousControl(int8);
     void TowTruckControl();
     // Empty function
     CPed* KnockPedOutCar(eWeaponType arg0, uint16 arg1, CPed* arg2);

@@ -33,7 +33,7 @@ public:
     static void InjectHooks();
 
     void Init();
-    void AddCarToCheck(int32 carHandle, float distance, uint32 time, uint8 a5, bool bStuck, bool bFlipped, bool bWarp, signed char pathId);
+    void AddCarToCheck(int32 carHandle, float distance, uint32 time, uint8 a5, bool bStuck, bool bFlipped, bool bWarp, int8 pathId);
     bool AttemptToWarpVehicle(CVehicle* vehicle, CVector* origin, float orientation);
     void ClearStuckFlagForCar(int32 carHandle);
     bool HasCarBeenStuckForAWhile(int32 carHandle);

@@ -40,7 +40,7 @@ bool CAudioEngine::IsCutsceneTrackActive() {
     return plugin::CallMethodAndReturn<bool, 0x507150>(this);
 }
 
-void CAudioEngine::RetuneRadio(signed char radioId) {
+void CAudioEngine::RetuneRadio(int8 radioId) {
     plugin::CallMethod<0x507E10, CAudioEngine*>(this, radioId);
 }
 

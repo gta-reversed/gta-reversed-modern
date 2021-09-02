@@ -20,8 +20,8 @@ void CStuckCarCheck::Init() {
 }
 
 // 0x465970
-void CStuckCarCheck::AddCarToCheck(int32 carHandle, float distance, uint32 time, uint8 a5, bool bStuck, bool bFlipped, bool bWarp, signed char pathId) {
-    plugin::CallMethod<0x465970, CStuckCarCheck *, int32, float, uint32, uint8, bool, bool, bool, signed char>(this, carHandle, distance, time, a5, bStuck, bFlipped, bWarp, pathId);
+void CStuckCarCheck::AddCarToCheck(int32 carHandle, float distance, uint32 time, uint8 a5, bool bStuck, bool bFlipped, bool bWarp, int8 pathId) {
+    plugin::CallMethod<0x465970, CStuckCarCheck *, int32, float, uint32, uint8, bool, bool, bool, int8>(this, carHandle, distance, time, a5, bStuck, bFlipped, bWarp, pathId);
 }
 
 // 0x463A60

@@ -56,7 +56,7 @@ public:
     void CalcFrustumInfo(RwCamera* camera);
 
     void ReturnParticle(FxEmitterPrt_c* emitter);
-    FxEmitterPrt_c* GetParticle(signed char arg0);
+    FxEmitterPrt_c* GetParticle(int8 arg0);
     void FreeUpParticle();
 
     void Render(RwCamera* camera, uint8 arg1);

@@ -2009,9 +2009,9 @@ void CAutomobile::StopNitroEffect()
 }
 
 // 0x6A3EA0
-void CAutomobile::NitrousControl(signed char arg0)
+void CAutomobile::NitrousControl(int8 arg0)
 {
-    ((void(__thiscall*)(CAutomobile*, signed char))0x6A3EA0)(this, arg0);
+    ((void(__thiscall*)(CAutomobile*, int8))0x6A3EA0)(this, arg0);
 }
 
 // 0x6A40F0

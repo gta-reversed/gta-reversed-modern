@@ -442,7 +442,7 @@ void CSprite2d::Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, 
 // ----------------------
 // 0x728640
 void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float progress,
-    signed char progressAdd, uint8 drawPercentage, uint8 drawBlackBorder,
+    int8 progressAdd, uint8 drawPercentage, uint8 drawBlackBorder,
     CRGBA color, CRGBA addColor)
 {
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)nullptr);
