@@ -29,7 +29,7 @@ bool& CFont::m_bFontBackground = *(bool*)0xC71A7B;
 bool& CFont::m_bEnlargeBackgroundBox = *(bool*)0xC71A7C;
 bool& CFont::m_bFontPropOn = *(bool*)0xC71A7D;
 bool& CFont::m_bFontIsBlip = *(bool*)0xC71A7E;
-uint32& CFont::m_dwFontAlpha = *(uint32*)0xC71A80;
+float& CFont::m_fFontAlpha = *(float*)0xC71A80;
 CRGBA& CFont::m_FontBackgroundColor = *(CRGBA*)0xC71A84;
 float& CFont::m_fWrapx = *(float*)0xC71A88;
 float& CFont::m_fFontCentreSize = *(float*)0xC71A8C;
@@ -510,8 +510,8 @@ void CFont::SetColor(CRGBA color)
 {
     m_Color = color;
 
-    if (m_dwFontAlpha < 255) {
-        m_Color.a = (color.a * m_dwFontAlpha) / 255;
+    if (m_fFontAlpha < 255.0f) {
+        m_Color.a = (uint8)(color.a * m_fFontAlpha) / 255;
     }
 }
 
@@ -554,7 +554,7 @@ void CFont::SetRightJustifyWrap(float value)
 // 0x719500
 void CFont::SetAlphaFade(float alpha)
 {
-    m_dwFontAlpha = alpha;
+    m_fFontAlpha = alpha;
 }
 
 // TODO: const CRGBA& color
@@ -563,8 +563,8 @@ void CFont::SetDropColor(CRGBA color)
 {
     m_FontDropColor = color;
 
-    if (m_dwFontAlpha < 255)
-        m_FontDropColor.a = m_Color.a * m_dwFontAlpha;
+    if (m_fFontAlpha < 255.0f)
+        m_FontDropColor.a = (uint8)(m_Color.a * m_fFontAlpha);
 }
 
 // 0x719570
