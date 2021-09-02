@@ -13,6 +13,8 @@
 #include <mfidl.h>
 #include <mfapi.h>
 
+#include "oswrapper.h"
+
 // These GUIDs only available when we link with MediaFoundation
 // libraries. We don't really want to link with it tho.
 namespace MFID {
