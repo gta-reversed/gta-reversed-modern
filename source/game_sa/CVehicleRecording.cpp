@@ -39,6 +39,8 @@ void CVehicleRecording::SetPlaybackSpeed(CVehicle* vehicle, float speed)
     plugin::Call<0x459660, CVehicle*, float>(vehicle, speed);
 }
 
+// unused, inlined?
+// 0x459F00
 void CVehicleRecording::RenderLineSegment(int& numVertices) {
     if (numVertices > 1) {
         for (int i = 0; i < numVertices - 1; i++) {
