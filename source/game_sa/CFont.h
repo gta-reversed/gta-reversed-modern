@@ -12,39 +12,38 @@
 
 // todo: move
 struct CFontChar {
-    uint8 m_cLetter;
-    uint8 _pad0[3];
+    uint8     m_cLetter;
+    char      _pad0[3];
     CVector2D m_vPosn;
-    float m_fWidth;
-    float m_fHeight;
-    CRGBA m_color;
-    float m_fWrap;
-    float m_fSlant;
+    float     m_fWidth;
+    float     m_fHeight;
+    CRGBA     m_color;
+    float     m_fWrap;
+    float     m_fSlant;
     CVector2D m_vSlanRefPoint;
-    bool m_bContainImages;
-    uint8 m_nFontStyle;
-    bool m_bPropOn;
-    uint8 _pad1;
-    uint16 m_dwFontTexture;
-    uint8 m_nOutline;
-    uint8 _pad2;
+    bool      m_bContainImages;
+    uint8     m_nFontStyle;
+    bool      m_bPropOn;
+    char      _pad1;
+    uint16    m_wFontTexture;
+    uint8     m_nOutline;
+    char      _pad2;
+
 public:
     CFontChar* Set(CFontChar& setup) {
-        m_cLetter = setup.m_cLetter;
-        m_vPosn.x = setup.m_vPosn.x;
-        m_vPosn.y = setup.m_vPosn.y;
-        m_fWidth = setup.m_fWidth;
-        m_fHeight = setup.m_fHeight;
-        m_color = setup.m_color;
-        m_fWrap = setup.m_fWrap;
-        m_fSlant = setup.m_fSlant;
-        m_vSlanRefPoint.x = setup.m_vSlanRefPoint.x;
-        m_vSlanRefPoint.y = setup.m_vSlanRefPoint.y;
+        m_cLetter        = setup.m_cLetter;
+        m_vPosn          = setup.m_vPosn;
+        m_fWidth         = setup.m_fWidth;
+        m_fHeight        = setup.m_fHeight;
+        m_color          = setup.m_color;
+        m_fWrap          = setup.m_fWrap;
+        m_fSlant         = setup.m_fSlant;
+        m_vSlanRefPoint  = setup.m_vSlanRefPoint;
         m_bContainImages = setup.m_bContainImages;
-        m_nFontStyle = setup.m_nFontStyle;
-        m_bPropOn = setup.m_bPropOn;
-        m_dwFontTexture = setup.m_dwFontTexture;
-        m_nOutline = setup.m_nOutline;
+        m_nFontStyle     = setup.m_nFontStyle;
+        m_bPropOn        = setup.m_bPropOn;
+        m_wFontTexture   = setup.m_wFontTexture;
+        m_nOutline       = setup.m_nOutline;
     }
 };
 VALIDATE_SIZE(CFontChar, 0x30);
@@ -56,21 +55,21 @@ struct tFontData {
 };
 
 enum eExtraFontSymbol : uint8 {
-    EXSYMBOL_NONE = 0,      // invalid
-    EXSYMBOL_DPAD_UP = 1,
-    EXSYMBOL_DPAD_DOWN = 2,
-    EXSYMBOL_DPAD_LEFT = 3,
+    EXSYMBOL_NONE       = 0, // invalid
+    EXSYMBOL_DPAD_UP    = 1,
+    EXSYMBOL_DPAD_DOWN  = 2,
+    EXSYMBOL_DPAD_LEFT  = 3,
     EXSYMBOL_DPAD_RIGHT = 4,
-    EXSYMBOL_CROSS = 5,
-    EXSYMBOL_CIRCLE = 6,
-    EXSYMBOL_SQUARE = 7,
-    EXSYMBOL_TRIANGLE = 8,
-    EXSYMBOL_KEY = 9,       // followed by buttons, L1?
-    EXSYMBOL_L2 = 10,
-    EXSYMBOL_L3 = 11,
-    EXSYMBOL_R1 = 12,
-    EXSYMBOL_R2 = 13,
-    EXSYMBOL_R3 = 14
+    EXSYMBOL_CROSS      = 5,
+    EXSYMBOL_CIRCLE     = 6,
+    EXSYMBOL_SQUARE     = 7,
+    EXSYMBOL_TRIANGLE   = 8,
+    EXSYMBOL_KEY        = 9, // followed by buttons, L1?
+    EXSYMBOL_L2         = 10,
+    EXSYMBOL_L3         = 11,
+    EXSYMBOL_R1         = 12,
+    EXSYMBOL_R2         = 13,
+    EXSYMBOL_R3         = 14
 };
 
 enum class eFontAlignment : uint8 {
@@ -133,13 +132,13 @@ public:
     // this adds a single character into rendering buffer
     static void PrintChar(float x, float y, char character);
     // get next ' ' character in a string
-    static char *GetNextSpace(char *string);
+    static char* GetNextSpace(char* string);
     // tags processing
-    static char *ParseToken(char *text, CRGBA & color, bool isBlip, char *tag);
+    static char* ParseToken(char* text, CRGBA& color, bool isBlip, char* tag);
     // text scaling
     static void SetScale(float w, float h);
     // text scaling depends on current language
-    static void SetScaleForCurrentlanguage(float w, float h);
+    static void SetScaleForCurrentLanguage(float w, float h);
     // set text rotation point
     static void SetSlantRefPoint(float x, float y);
     // set text rotation angle
@@ -173,14 +172,14 @@ public:
     static void InitPerFrame();
     // draw text we have in buffer
     static void RenderFontBuffer();
-    static float GetStringWidth(char *string, bool unk1, bool unk2);
+    static float GetStringWidth(char* string, bool unk1, bool unk2);
     static void DrawFonts();
-    static int16 ProcessCurrentString(bool print, float x, float y, const char *text);
-    static int16 GetNumberLines(float x, float y, const char *text);
-    static int16 ProcessStringToDisplay(float x, float y, const char *text);
-    static void GetTextRect(CRect *rect, float x, float y, const char *text);
-    static void PrintString(float x, float y, const char *text);
-    static void PrintStringFromBottom(float x, float y, const char *text);
+    static int16 ProcessCurrentString(bool print, float x, float y, const char* text);
+    static int16 GetNumberLines(float x, float y, const char* text);
+    static int16 ProcessStringToDisplay(float x, float y, const char* text);
+    static void GetTextRect(CRect* rect, float x, float y, const char* text);
+    static void PrintString(float x, float y, const char* text);
+    static void PrintStringFromBottom(float x, float y, const char* text);
     static float GetLetterSize(uint8 ch);
 };
 

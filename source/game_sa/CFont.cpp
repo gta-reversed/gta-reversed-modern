@@ -43,47 +43,48 @@ uint8& CFont::m_nFontOutlineOrShadow = *(uint8*)0xC71A9C;
 tFontData* gFontData = (tFontData*)0xC718B0;
 
 void CFont::InjectHooks() {
-    ReversibleHooks::Install("CFont", "Initialise", 0x5BA690, &CFont::Initialise);
-    ReversibleHooks::Install("CFont", "Shutdown", 0x7189B0, &CFont::Shutdown);
-    //ReversibleHooks::Install("CFont", "PrintChar", 0x718A10, &CFont::PrintChar);
-    ReversibleHooks::Install("CFont", "ParseToken", 0x718F00, &CFont::ParseToken);
+    using namespace ReversibleHooks;
+    Install("CFont", "Initialise", 0x5BA690, &CFont::Initialise);
+    Install("CFont", "Shutdown", 0x7189B0, &CFont::Shutdown);
+    // Install("CFont", "PrintChar", 0x718A10, &CFont::PrintChar);
+    Install("CFont", "ParseToken", 0x718F00, &CFont::ParseToken);
 
     // styling functions
-    ReversibleHooks::Install("CFont", "SetScale", 0x719380, &CFont::SetScale);
-    ReversibleHooks::Install("CFont", "SetScaleForCurrentlanguage", 0x7193A0, &CFont::SetScaleForCurrentlanguage);
-    ReversibleHooks::Install("CFont", "SetSlantRefPoint", 0x719400, &CFont::SetSlantRefPoint);
-    ReversibleHooks::Install("CFont", "SetSlant", 0x719420, &CFont::SetSlant);
-    ReversibleHooks::Install("CFont", "SetColor", 0x719430, &CFont::SetColor);
-    ReversibleHooks::Install("CFont", "SetFontStyle", 0x719490, &CFont::SetFontStyle);
-    ReversibleHooks::Install("CFont", "SetWrapx", 0x7194D0, &CFont::SetWrapx);
-    ReversibleHooks::Install("CFont", "SetCentreSize", 0x7194E0, &CFont::SetCentreSize);
-    ReversibleHooks::Install("CFont", "SetRightJustifyWrap", 0x7194F0, &CFont::SetRightJustifyWrap);
-    ReversibleHooks::Install("CFont", "SetAlphaFade", 0x719500, &CFont::SetAlphaFade);
-    ReversibleHooks::Install("CFont", "SetDropColor", 0x719510, &CFont::SetDropColor);
-    ReversibleHooks::Install("CFont", "SetDropShadowPosition", 0x719570, &CFont::SetDropShadowPosition);
-    ReversibleHooks::Install("CFont", "SetEdge", 0x719590, &CFont::SetEdge);
-    ReversibleHooks::Install("CFont", "SetProportional", 0x7195B0, &CFont::SetProportional);
-    ReversibleHooks::Install("CFont", "SetBackground", 0x7195C0, &CFont::SetBackground);
-    ReversibleHooks::Install("CFont", "SetBackgroundColor", 0x7195E0, &CFont::SetBackgroundColor);
-    ReversibleHooks::Install("CFont", "SetJustify", 0x719600, &CFont::SetJustify);
-    ReversibleHooks::Install("CFont", "SetOrientation", 0x719610, &CFont::SetOrientation);
+    Install("CFont", "SetScale", 0x719380, &CFont::SetScale);
+    Install("CFont", "SetScaleForCurrentLanguage", 0x7193A0, &CFont::SetScaleForCurrentLanguage);
+    Install("CFont", "SetSlantRefPoint", 0x719400, &CFont::SetSlantRefPoint);
+    Install("CFont", "SetSlant", 0x719420, &CFont::SetSlant);
+    Install("CFont", "SetColor", 0x719430, &CFont::SetColor);
+    Install("CFont", "SetFontStyle", 0x719490, &CFont::SetFontStyle);
+    Install("CFont", "SetWrapx", 0x7194D0, &CFont::SetWrapx);
+    Install("CFont", "SetCentreSize", 0x7194E0, &CFont::SetCentreSize);
+    Install("CFont", "SetRightJustifyWrap", 0x7194F0, &CFont::SetRightJustifyWrap);
+    Install("CFont", "SetAlphaFade", 0x719500, &CFont::SetAlphaFade);
+    Install("CFont", "SetDropColor", 0x719510, &CFont::SetDropColor);
+    Install("CFont", "SetDropShadowPosition", 0x719570, &CFont::SetDropShadowPosition);
+    Install("CFont", "SetEdge", 0x719590, &CFont::SetEdge);
+    Install("CFont", "SetProportional", 0x7195B0, &CFont::SetProportional);
+    Install("CFont", "SetBackground", 0x7195C0, &CFont::SetBackground);
+    Install("CFont", "SetBackgroundColor", 0x7195E0, &CFont::SetBackgroundColor);
+    Install("CFont", "SetJustify", 0x719600, &CFont::SetJustify);
+    Install("CFont", "SetOrientation", 0x719610, &CFont::SetOrientation);
 
-    ReversibleHooks::Install("CFont", "InitPerFrame", 0x719800, &CFont::InitPerFrame);
-    //ReversibleHooks::Install("CFont", "RenderFontBuffer", 0x719840, &CFont::RenderFontBuffer);
-    ReversibleHooks::Install("CFont", "GetStringWidth", 0x71A0E0, &CFont::GetStringWidth);
-    ReversibleHooks::Install("CFont", "DrawFonts", 0x71A210, &CFont::DrawFonts);
-    //ReversibleHooks::Install("CFont", "ProcessCurrentString", 0x71A220, &CFont::ProcessCurrentString);
-    ReversibleHooks::Install("CFont", "GetNumberLines", 0x71A5E0, &CFont::GetNumberLines);
-    ReversibleHooks::Install("CFont", "ProcessStringToDisplay", 0x71A600, &CFont::ProcessStringToDisplay);
-    ReversibleHooks::Install("CFont", "GetTextRect", 0x71A620, &CFont::GetTextRect);
-    ReversibleHooks::Install("CFont", "PrintString", 0x71A700, &CFont::PrintString);
-    ReversibleHooks::Install("CFont", "PrintStringFromBottom", 0x71A820, &CFont::PrintStringFromBottom);
-    ReversibleHooks::Install("CFont", "GetLetterSize", 0x719750, &CFont::GetLetterSize);
+    Install("CFont", "InitPerFrame", 0x719800, &CFont::InitPerFrame);
+    // Install("CFont", "RenderFontBuffer", 0x719840, &CFont::RenderFontBuffer);
+    Install("CFont", "GetStringWidth", 0x71A0E0, &CFont::GetStringWidth);
+    Install("CFont", "DrawFonts", 0x71A210, &CFont::DrawFonts);
+    // Install("CFont", "ProcessCurrentString", 0x71A220, &CFont::ProcessCurrentString);
+    Install("CFont", "GetNumberLines", 0x71A5E0, &CFont::GetNumberLines);
+    Install("CFont", "ProcessStringToDisplay", 0x71A600, &CFont::ProcessStringToDisplay);
+    Install("CFont", "GetTextRect", 0x71A620, &CFont::GetTextRect);
+    Install("CFont", "PrintString", 0x71A700, &CFont::PrintString);
+    Install("CFont", "PrintStringFromBottom", 0x71A820, &CFont::PrintStringFromBottom);
+    Install("CFont", "GetLetterSize", 0x719750, &CFont::GetLetterSize);
 
-    ReversibleHooks::Install("", "ReadFontsDat", 0x7187C0, &ReadFontsDat);
-    //ReversibleHooks::Install("", "GetScriptLetterSize", 0x719670, &GetScriptLetterSize);
-    //ReversibleHooks::Install("", "GetIDforPropVal", 0x7192C0, &GetIDforPropVal);
-    ReversibleHooks::Install("", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
+    Install("", "ReadFontsDat", 0x7187C0, &ReadFontsDat);
+    // Install("", "GetScriptLetterSize", 0x719670, &GetScriptLetterSize);
+    // Install("", "GetIDforPropVal", 0x7192C0, &GetIDforPropVal);
+    Install("", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
 }
 
 // 0x7187C0
@@ -475,7 +476,7 @@ void CFont::SetScale(float w, float h)
 }
 
 // 0x7193A0
-void CFont::SetScaleForCurrentlanguage(float w, float h)
+void CFont::SetScaleForCurrentLanguage(float w, float h)
 {
     switch (FrontEndMenuManager.m_nLanguage) {
     case 1:
@@ -617,7 +618,7 @@ void CFont::InitPerFrame()
     m_nFontShadow = 0;
     m_bNewLine = false;
     PS2Symbol = EXSYMBOL_NONE;
-    RenderState.m_dwFontTexture = 0;
+    RenderState.m_wFontTexture = 0;
     pEmptyChar = &setup[0];
 
     CSprite::InitSpriteBuffer();
@@ -851,7 +852,7 @@ float GetLetterIdPropValue(uint8 letterId)
         id = 0;
 
     if (CFont::RenderState.m_bPropOn)
-        return gFontData[CFont::RenderState.m_dwFontTexture].m_propValues[id];
+        return gFontData[CFont::RenderState.m_wFontTexture].m_propValues[id];
     else
-        return gFontData[CFont::RenderState.m_dwFontTexture].m_unpropValue;
+        return gFontData[CFont::RenderState.m_wFontTexture].m_unpropValue;
 }
