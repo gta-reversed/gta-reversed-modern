@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "RenderWare.h"
 #include "List_c.h"
+
 #include "FxFrustumInfo_c.h"
 #include "FxMemoryPool_c.h"
 #include "FxSystemBP_c.h"
@@ -18,46 +18,61 @@ class FxEmitterPrt_c;
 
 class FxManager_c {
 public:
-	TList_c<FxSystemBP_c>   m_fxSystemBPList;
-	TList_c<FxSystem_c>     m_fxSystemList;
-	FxEmitterPrt_c *        m_pFxEmitters;
-	TList_c<FxEmitterPrt_c> m_fxEmitterPrtList;
-	int                     m_nFxTxdIndex;
-	RwV3d *                 m_pWindDir;
-	float *                 m_pfWindSpeed;
-	FxFrustumInfo_c         m_frustum;
-	unsigned int            m_nCurrentMatrix;
-	RwMatrix *              m_apMatrices[8];
-	FxMemoryPool_c          m_pool;
+    TList_c<FxSystemBP_c>   m_fxSystemBPs;
+    TList_c<FxSystem_c>     m_fxSystems;
+    FxEmitterPrt_c*         m_pFxEmitters;
+    TList_c<FxEmitterPrt_c> m_fxEmitterParticles;
+    int                     m_nFxTxdIndex;
+    RwV3d*                  m_pWindDir;
+    float*                  m_pfWindSpeed;
+    FxFrustumInfo_c         m_frustum;
+    uint32                  m_nCurrentMatrix;
+    RwMatrix*               m_apMatrices[8];
+    FxMemoryPool_c          m_pool;
+    bool                    m_bHeatHazeEnabled;
 
 public:
-	FxManager_c();
+    static void InjectHooks();
+
+    FxManager_c();
+    FxManager_c* Constructor();
+
     ~FxManager_c();
-    FxFrustumInfo_c* GetFrustumInfo();
-    void CalcFrustumInfo(RwCamera* camera);
-    void Render(RwCamera* camera, unsigned char arg1);
-    FxSystemBP_c* FindFxSystemBP(char* name);
-    void ReturnParticle(FxEmitterPrt_c* emitter);
-    FxEmitterPrt_c* GetParticle(signed char arg0);
-    void SetWindData(RwV3d* dir, float* speed);
-    void FreeUpParticle();
-    RwMatrix* FxRwMatrixCreate();
-    void FxRwMatrixDestroy(RwMatrix* matrix);
-    bool ShouldCreate(FxSystemBP_c* bpSystem, RwMatrix* transform, RwMatrix* objectMatrix, unsigned char ignoreBoundingChecks);
-    FxSystem_c* CreateFxSystem(FxSystemBP_c* bpSystem, RwMatrix* transform, RwMatrix* objectMatrix, unsigned char ignoreBoundingChecks);
-    FxSystem_c* CreateFxSystem(FxSystemBP_c* bpSystem, RwV3d* position, RwMatrix* objectMatrix, unsigned char ignoreBoundingChecks);
-    void DestroyFxSystem(FxSystem_c* system);
-    void DestroyAllFxSystems();
+    FxManager_c* Destructor();
+
     bool Init();
     void Exit();
+    void DestroyFxSystem(FxSystem_c* system);
+    void DestroyAllFxSystems();
     void Update(RwCamera* arg0, float timeDelta);
+
+    bool LoadFxProject(const char* filename);
     void UnloadFxProject();
-    FxSystem_c* CreateFxSystem(char* name, RwMatrix* transform, RwMatrix* objectMatrix, unsigned char ignoreBoundingChecks);
-    FxSystem_c* CreateFxSystem(char* name, RwV3d* position, RwMatrix* objectMatrix, unsigned char ignoreBoundingChecks);
+
     FxSystemBP_c* LoadFxSystemBP(char* filename, int file);
-    bool LoadFxProject(char* filename);
+    FxSystemBP_c* FindFxSystemBP(const char* name);
+
+    FxFrustumInfo_c* GetFrustumInfo();
+    void CalcFrustumInfo(RwCamera* camera);
+
+    void ReturnParticle(FxEmitterPrt_c* emitter);
+    FxEmitterPrt_c* GetParticle(signed char arg0);
+    void FreeUpParticle();
+
+    void Render(RwCamera* camera, uint8 arg1);
+
+    void SetWindData(RwV3d* dir, float* speed);
+
+    RwMatrix* FxRwMatrixCreate();
+    void FxRwMatrixDestroy(RwMatrix* matrix);
+
+    bool ShouldCreate(FxSystemBP_c* bpSystem, RwMatrix* transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks);
+    FxSystem_c* CreateFxSystem(FxSystemBP_c* bpSystem, RwMatrix* transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks);
+    FxSystem_c* CreateFxSystem(const char* name, RwMatrix* transform, RwMatrix* objectMatrix, bool ignoreBoundingChecks);
+    FxSystem_c* CreateFxSystem(FxSystemBP_c* bpSystem, RwV3d* position, RwMatrix* objectMatrix, bool ignoreBoundingChecks);
+    FxSystem_c* CreateFxSystem(const char* name, RwV3d* position, RwMatrix* objectMatrix, bool ignoreBoundingChecks);
 };
 
-VALIDATE_SIZE(FxManager_c, 0xB8);
+VALIDATE_SIZE(FxManager_c, 0xBC);
 
-extern  FxManager_c &g_fxMan;
+extern FxManager_c& g_fxMan;
