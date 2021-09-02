@@ -38,3 +38,19 @@ void CVehicleRecording::SetPlaybackSpeed(CVehicle* vehicle, float speed)
 {
     plugin::Call<0x459660, CVehicle*, float>(vehicle, speed);
 }
+
+// unused, inlined?
+// 0x459F00
+void CVehicleRecording::RenderLineSegment(int& numVertices) {
+    if (numVertices > 1) {
+        for (int i = 0; i < numVertices - 1; i++) {
+            aTempBufferIndices[2 * i] = i;
+            aTempBufferIndices[2 * i + 1] = i + 1;
+        }
+        if (RwIm3DTransform(aTempBufferVertices, numVertices, nullptr, 0)) {
+            RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, aTempBufferIndices, (numVertices - 1) * 2);
+            RwIm3DEnd();
+        }
+    }
+    numVertices = 0;
+}
