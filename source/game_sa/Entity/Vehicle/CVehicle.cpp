@@ -2608,7 +2608,7 @@ bool CVehicle::DoHeadLightEffect(int dummyId, CMatrix& vehicleMatrix, unsigned c
 }
 
 // 0x6E0E20
-void CVehicle::DoHeadLightBeam(unsigned dummyId, CMatrix& matrix, unsigned char arg2)
+void CVehicle::DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2)
 {
     CVector pointModelSpace = static_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(m_nModelIndex))->m_pVehicleStruct->m_avDummyPos[2 * dummyId];
     if (dummyId == 1 && pointModelSpace.IsZero())
@@ -2632,7 +2632,7 @@ void CVehicle::DoHeadLightBeam(unsigned dummyId, CMatrix& matrix, unsigned char 
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    (void*)rwALPHATESTFUNCTIONGREATER);
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)FALSE);
 
-    const float   angleMult   = m_nModelIndex == 530 ? 0.5f : 0.15f;
+    const float   angleMult   = ModelIndices::IsForklift((int32)m_nModelIndex) ? 0.5f : 0.15f;
     const CVector lightNormal = Normalized(matrix.GetForward() - matrix.GetUp() * angleMult);
     const CVector lightRight  = Normalized(CrossProduct(lightNormal, pointToCamDir));
     const CVector lightPos    = point - matrix.GetForward() * 0.1f;

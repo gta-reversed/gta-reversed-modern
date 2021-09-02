@@ -618,7 +618,7 @@ public:
     void PossiblyDropFreeFallBombForPlayer(eOrdnanceType ordnanceType, bool arg1);
     void ProcessSirenAndHorn(bool arg0);
     bool DoHeadLightEffect(int dummyId, CMatrix& vehicleMatrix, unsigned char lightId, unsigned char lightState);
-    void DoHeadLightBeam(unsigned dummyId, CMatrix& matrix, unsigned char arg2);
+    void DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2);
     void DoHeadLightReflectionSingle(CMatrix& matrix, unsigned char lightId);
     void DoHeadLightReflectionTwin(CMatrix& matrix);
     void DoHeadLightReflection(CMatrix& matrix, unsigned int flags, unsigned char left, unsigned char right);
