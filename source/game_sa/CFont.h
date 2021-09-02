@@ -30,6 +30,7 @@ struct CFontChar {
     char      _pad2;
 
 public:
+    // 0x718E50
     CFontChar* Set(CFontChar& setup) {
         m_cLetter        = setup.m_cLetter;
         m_vPosn          = setup.m_vPosn;
