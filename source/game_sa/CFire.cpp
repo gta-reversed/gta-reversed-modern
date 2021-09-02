@@ -23,7 +23,7 @@ void CFire::ExtinguishWithWater(float fWaterStrength) {
     AddParticle({ 0.0f, 0.0f, 0.8f });
     AddParticle({ 0.0f, 0.0f, 1.4f });
 
-    /* Re-create fx / extingiush */
+    /* Re-create fx / extinguish */
     m_nFlags.bBeingExtinguished = true;
     if (m_fStrength >= 0.0f) {
         if ((intmax_t)fOriginalStrength != (intmax_t)m_fStrength) { /* Check if integer part has changed */

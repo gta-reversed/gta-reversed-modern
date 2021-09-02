@@ -30,9 +30,6 @@ public:
     float m_fStrength;
     uint8_t m_nNumGenerationsAllowed;
     unsigned char m_nRemovalDist;
-private:
-    char _pad1[2];
-public:
     FxSystem_c *m_pFxSystem;
 
     CFire() = default;
@@ -50,8 +47,9 @@ public:
     bool IsScript() const { return m_nFlags.bCreatedByScript; }
     bool IsFirstGen() const { return m_nFlags.bFirstGeneration; }
     bool IsBeingExtinguished() const { return m_nFlags.bBeingExtinguished; }
-    void DestroyFx();
 
+    // NOTSA funcs
+    void DestroyFx();
     void SetTarget(CEntity* pTarget);
     void SetCreator(CEntity* pCreator);
 };
