@@ -37,9 +37,9 @@ public:
     void CreateAllFxSystems();
 
     CFire* GetNextFreeFire(bool bMayUseScriptFire);
-    CFire* StartFire(CVector pos, float size, uint8_t unused, CEntity* creator, uint32 nTimeToBurn, int8_t nGenerations, uint8_t unused_);
-    CFire* StartFire(CEntity* target, CEntity* creator, float size, uint8_t unused, uint32 lifetime, int8_t numGenerations);
-    int32 StartScriptFire(const CVector& pos, CEntity* pTarget, float _fUnused, uint8_t _nUnused, int8_t nGenerations, int32 nStrength);
+    CFire* StartFire(CVector pos, float size, uint8 unused, CEntity* creator, uint32 nTimeToBurn, int8 nGenerations, uint8 unused_);
+    CFire* StartFire(CEntity* target, CEntity* creator, float size, uint8 unused, uint32 lifetime, int8 numGenerations);
+    int32 StartScriptFire(const CVector& pos, CEntity* pTarget, float _fUnused, uint8 _nUnused, int8 nGenerations, int32 nStrength);
 
     void Update();
 

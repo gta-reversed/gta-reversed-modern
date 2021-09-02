@@ -267,7 +267,7 @@ CFire* CFireManager::GetNextFreeFire(bool bMayExtinguish) {
 }
 
 // 0x539F00
-CFire* CFireManager::StartFire(CVector pos, float size, uint8 unused, CEntity* creator, uint32 nTimeToBurn, int8_t nGenerations, uint8 unused_) {
+CFire* CFireManager::StartFire(CVector pos, float size, uint8 unused, CEntity* creator, uint32 nTimeToBurn, int8 nGenerations, uint8 unused_) {
     CFire* fire = GetNextFreeFire(false);
     if (!fire)
         return nullptr;
@@ -277,7 +277,7 @@ CFire* CFireManager::StartFire(CVector pos, float size, uint8 unused, CEntity* c
 }
 
 // 0x53A050
-CFire* CFireManager::StartFire(CEntity* target, CEntity* creator, float size, uint8 unused, uint32 lifetime, int8_t numGenerations) {
+CFire* CFireManager::StartFire(CEntity* target, CEntity* creator, float size, uint8 unused, uint32 lifetime, int8 numGenerations) {
     /* Do few checks, and clear `m_pFire` if `target` */
     switch (target->m_nType) {
     case eEntityType::ENTITY_TYPE_PED: {
@@ -317,7 +317,7 @@ CFire* CFireManager::StartFire(CEntity* target, CEntity* creator, float size, ui
 }
 
 // 0x53A270
-int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* pTarget, float _fUnused, uint8 _nUnused, int8_t nGenerations, int32 nStrength) {
+int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* pTarget, float _fUnused, uint8 _nUnused, int8 nGenerations, int32 nStrength) {
     if (pTarget) {
         /* Extinguish current fire (if any) of target */
         const auto StopFire = [](CFire* fire) {
