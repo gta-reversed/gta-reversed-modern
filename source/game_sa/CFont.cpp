@@ -383,10 +383,10 @@ char* CFont::ParseToken(char* text, CRGBA& color, bool isBlip, char* tag)
     case 'h':
         if (!isBlip) {
             color = {
-                    (uint8)std::min((float)color.r * 1.5f, 255.0f),
-                    (uint8)std::min((float)color.g * 1.5f, 255.0f),
-                    (uint8)std::min((float)color.b * 1.5f, 255.0f),
-                    color.a
+                (uint8)std::min((float)color.r * 1.5f, 255.0f),
+                (uint8)std::min((float)color.g * 1.5f, 255.0f),
+                (uint8)std::min((float)color.b * 1.5f, 255.0f),
+                color.a
             };
         }
 
@@ -717,8 +717,6 @@ int16 CFont::ProcessStringToDisplay(float x, float y, const char* text)
 // 0x71A620
 void CFont::GetTextRect(CRect* rect, float x, float y, const char* text)
 {
-    const int16 nLines = GetNumberLines(x, y, text);
-
     if (m_bFontCentreAlign) {
         rect->left = x - (m_fFontCentreSize / 2.0f + 4.0f);
         rect->right = m_fFontCentreSize / 2.0f + x + 4.0f;
@@ -733,7 +731,7 @@ void CFont::GetTextRect(CRect* rect, float x, float y, const char* text)
     }
 
     rect->bottom = y - 4.0f;
-    rect->top = (float)nLines * 18.0f * m_Scale.y + y + 4.0f;
+    rect->top = y + 4.0f + (m_Scale.y * 32.0f / 2.0f + m_Scale.y + m_Scale.y) * (float)GetNumberLines(x, y, text); // TODO: CFont::GetHeight
 }
 
 // 0x71A700
@@ -766,7 +764,7 @@ void CFont::PrintString(float x, float y, const char* text)
 // 0x71A820
 void CFont::PrintStringFromBottom(float x, float y, const char* text)
 {
-    float drawY = y - (m_Scale.y * 32.0f / 2.0f + m_Scale.y + m_Scale.y) * (float)GetNumberLines(x, y, text);
+    float drawY = y - (m_Scale.y * 32.0f / 2.0f + m_Scale.y + m_Scale.y) * (float)GetNumberLines(x, y, text); // TODO: CFont::GetHeight
 
     if (m_fSlant != 0.0f)
         drawY -= (m_fSlantRefPoint.x - x) * m_fSlant + m_fSlantRefPoint.y;
@@ -791,12 +789,11 @@ float CFont::GetLetterSize(uint8 letterId)
     else if (propValueIdx > 0x9B)
         propValueIdx = 0;
 
-    if (m_bFontPropOn)
-        return ((float)gFontData[m_FontTextureId].m_propValues[propValueIdx]
-            + (float)m_nFontOutlineSize) * m_Scale.x;
-
-    return ((float)gFontData[m_FontTextureId].m_unpropValue + (float)m_nFontOutlineSize)
-        * m_Scale.x;
+    if (m_bFontPropOn) {
+        return ((float)gFontData[m_FontTextureId].m_propValues[propValueIdx] + (float)m_nFontOutlineSize) * m_Scale.x;
+    } else {
+        return ((float)gFontData[m_FontTextureId].m_unpropValue + (float)m_nFontOutlineSize) * m_Scale.x;
+    }
 }
 
 // 0x719670, original name unknown
