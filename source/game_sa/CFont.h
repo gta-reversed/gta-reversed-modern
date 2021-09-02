@@ -110,7 +110,7 @@ public:
     static bool& m_bEnlargeBackgroundBox;
     static bool& m_bFontPropOn;
     static bool& m_bFontIsBlip;
-    static uint32 m_dwFontAlpha;
+    static uint32& m_dwFontAlpha;
     static CRGBA& m_FontBackgroundColor;
     static float& m_fWrapx;
     static float& m_fFontCentreSize;
