@@ -43,9 +43,8 @@ public:
 #pragma pack(pop)
 VALIDATE_SIZE(CBirdColor, 0x3);
 
-enum class eBirdMode : uint8
-{
-    BIRD_DRAW_UPDATE = 0x1, // Bird is drawn, but doesn't update position
+enum class eBirdMode : uint8 {
+    BIRD_DRAW_UPDATE   = 0x1, // Bird is drawn, but doesn't update position
     BIRD_DRAW_NOUPDATE = 0x2, // Bird is drawn and updates position
 };
 
@@ -74,10 +73,10 @@ VALIDATE_SIZE(CBird, 0x44);
 
 class CBirds {
 public:
-    static bool &bHasBirdBeenShot;
-    static uint32 &uiNumberOfBirds;
-    static CBird *aBirds;
-    static CVector &vecBirdShotAt;
+    static bool& bHasBirdBeenShot;
+    static uint32& uiNumberOfBirds;
+    static CBird* aBirds;
+    static CVector& vecBirdShotAt;
 
     static float* faCreationCoorsX; // { 0.0f, -1.0f, 2.0f, -3.0f, 1.0f, -2.0f }                     These spawn in a formation like this:
     static float* faCreationCoorsY; // { 0.0f, -1.0f, -2.0f, 1.0f, 1.0f, -2.0f }                                                      4           5
