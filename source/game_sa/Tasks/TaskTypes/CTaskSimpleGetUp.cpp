@@ -78,7 +78,7 @@ bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
                 const auto eventDamage = static_cast<const CEventDamage*>(event);
                 if (eventDamage->m_damageResponse.m_bHealthZero && eventDamage->m_bAddToEventGroup)
                     bFatalDamage = true;
-                else if (CTimer::m_snTimeInMilliseconds - eventDamage->m_nStartTime > CTimer::GetTimeStepInMilliseconds() * 3.0F)
+                else if (CTimer::m_snTimeInMilliseconds - eventDamage->m_nStartTime > CTimer::GetTimeStepInMS() * 3.0F)
                     bTooMuchTimePassed = true;
             }
             else if (event->GetEventPriority() < 61)

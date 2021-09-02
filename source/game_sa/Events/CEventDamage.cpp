@@ -1,26 +1,26 @@
 #include "StdInc.h"
 
 void CEventDamage::InjectHooks() {
-    HookInstall(0x4B33B0, (CEventDamage*(CEventDamage::*)(CEventDamage*)) & CEventDamage::Constructor);
-    HookInstall(0x4AD830, (CEventDamage * (CEventDamage::*)(CEntity*, unsigned int, eWeaponType, ePedPieceTypes, unsigned char, bool, bool)) & CEventDamage::Constructor);
-    HookInstall(0x4AD910, &CEventDamage::GetEventType_Reversed);
-    HookInstall(0x4AD950, &CEventDamage::GetEventPriority_Reversed);
-    HookInstall(0x4AD920, &CEventDamage::GetLifeTime_Reversed);
-    HookInstall(0x4B35A0, &CEventDamage::AffectsPed_Reversed);
-    HookInstall(0x4B38D0, &CEventDamage::AffectsPedGroup_Reversed);
-    HookInstall(0x4ADA90, &CEventDamage::IsCriminalEvent_Reversed);
-    HookInstall(0x4B3440, &CEventDamage::ReportCriminalEvent_Reversed);
-    HookInstall(0x4ADA70, &CEventDamage::GetSourceEntity_Reversed);
-    HookInstall(0x4ADB00, &CEventDamage::TakesPriorityOver_Reversed);
-    HookInstall(0x4AD930, &CEventDamage::GetLocalSoundLevel_Reversed);
-    HookInstall(0x4ADAE0, &CEventDamage::DoInformVehicleOccupants_Reversed);
-    HookInstall(0x4AD940, &CEventDamage::CanBeInterruptedBySameEvent_Reversed);
-    HookInstall(0x4B5D40, &CEventDamage::CloneEditable_Reversed);
-    HookInstall(0x4AD9C0, &CEventDamage::From);
-    HookInstall(0x4B3A20, &CEventDamage::ProcessDamage);
-    HookInstall(0x4ADC10, &CEventDamage::ComputeBodyPartToRemove);
-    HookInstall(0x4B3A60, &CEventDamage::ComputeDeathAnim);
-    HookInstall(0x4B3FC0, &CEventDamage::ComputeDamageAnim);
+    ReversibleHooks::Install("CEventDamage", "CEventDamage", 0x4B33B0, (CEventDamage*(CEventDamage::*)(CEventDamage*)) & CEventDamage::Constructor);
+    ReversibleHooks::Install("CEventDamage", "CEventDamage_1", 0x4AD830, (CEventDamage * (CEventDamage::*)(CEntity*, unsigned int, eWeaponType, ePedPieceTypes, unsigned char, bool, bool)) & CEventDamage::Constructor);
+    ReversibleHooks::Install("CEventDamage", "GetEventType_Reversed", 0x4AD910, &CEventDamage::GetEventType_Reversed);
+    ReversibleHooks::Install("CEventDamage", "GetEventPriority_Reversed", 0x4AD950, &CEventDamage::GetEventPriority_Reversed);
+    ReversibleHooks::Install("CEventDamage", "GetLifeTime_Reversed", 0x4AD920, &CEventDamage::GetLifeTime_Reversed);
+    ReversibleHooks::Install("CEventDamage", "AffectsPed_Reversed", 0x4B35A0, &CEventDamage::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventDamage", "AffectsPedGroup_Reversed", 0x4B38D0, &CEventDamage::AffectsPedGroup_Reversed);
+    ReversibleHooks::Install("CEventDamage", "IsCriminalEvent_Reversed", 0x4ADA90, &CEventDamage::IsCriminalEvent_Reversed);
+    ReversibleHooks::Install("CEventDamage", "ReportCriminalEvent_Reversed", 0x4B3440, &CEventDamage::ReportCriminalEvent_Reversed);
+    ReversibleHooks::Install("CEventDamage", "GetSourceEntity_Reversed", 0x4ADA70, &CEventDamage::GetSourceEntity_Reversed);
+    ReversibleHooks::Install("CEventDamage", "TakesPriorityOver_Reversed", 0x4ADB00, &CEventDamage::TakesPriorityOver_Reversed);
+    ReversibleHooks::Install("CEventDamage", "GetLocalSoundLevel_Reversed", 0x4AD930, &CEventDamage::GetLocalSoundLevel_Reversed);
+    ReversibleHooks::Install("CEventDamage", "DoInformVehicleOccupants_Reversed", 0x4ADAE0, &CEventDamage::DoInformVehicleOccupants_Reversed);
+    ReversibleHooks::Install("CEventDamage", "CanBeInterruptedBySameEvent_Reversed", 0x4AD940, &CEventDamage::CanBeInterruptedBySameEvent_Reversed);
+    ReversibleHooks::Install("CEventDamage", "CloneEditable_Reversed", 0x4B5D40, &CEventDamage::CloneEditable_Reversed);
+    ReversibleHooks::Install("CEventDamage", "From", 0x4AD9C0, &CEventDamage::From);
+    ReversibleHooks::Install("CEventDamage", "ProcessDamage", 0x4B3A20, &CEventDamage::ProcessDamage);
+    ReversibleHooks::Install("CEventDamage", "ComputeBodyPartToRemove", 0x4ADC10, &CEventDamage::ComputeBodyPartToRemove);
+    ReversibleHooks::Install("CEventDamage", "ComputeDeathAnim", 0x4B3A60, &CEventDamage::ComputeDeathAnim);
+    ReversibleHooks::Install("CEventDamage", "ComputeDamageAnim", 0x4B3FC0, &CEventDamage::ComputeDamageAnim);
 }
 
 CEventDamage::CEventDamage(CEventDamage* pCopyFrom) {

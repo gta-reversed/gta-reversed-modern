@@ -17,11 +17,13 @@
 #include "CPedIK.h"
 #include "CWeapon.h"
 #include "CVector2D.h"
-#include "eWeaponType.h"
-#include "ePedState.h"
 #include "CAnimBlendAssociation.h"
 #include "CFire.h"
 #include "CPedGroups.h"
+
+#include "AnimationEnums.h"
+#include "eWeaponType.h"
+#include "ePedState.h"
 #include "ePedStats.h"
 
 enum ePedType : unsigned int {
@@ -288,7 +290,7 @@ public:
     ePedCreatedBy       m_nCreatedBy;
     char                field_485[3];
     AnimBlendFrameData *m_apBones[TOTAL_PED_NODES]; // for Index, see ePedNode
-    int                 m_nAnimGroup;
+    AssocGroupId        m_nAnimGroup;
     CVector2D           m_vecAnimMovingShiftLocal;
     CPedAcquaintance    m_acquaintance;
     RpClump            *m_pWeaponObject;

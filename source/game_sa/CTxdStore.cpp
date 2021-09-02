@@ -46,7 +46,7 @@ void CTxdStore::InjectHooks() {
     ReversibleHooks::Install("CTxdStore", "SetupTxdParent", 0x731D50, &CTxdStore::SetupTxdParent);
 
     // global
-    ReversibleHooks::Install("", "RemoveIfRefCountIsGreaterThanOne", 0x731680, &RemoveIfRefCountIsGreaterThanOne);
+    ReversibleHooks::Install("common", "RemoveIfRefCountIsGreaterThanOne", 0x731680, &RemoveIfRefCountIsGreaterThanOne);
 }
 
 // initialise txd store

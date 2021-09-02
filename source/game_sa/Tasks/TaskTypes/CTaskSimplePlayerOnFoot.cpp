@@ -131,7 +131,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
             }
             case WEAPON_RLAUNCHER_HS:
             {
-                pPlayerData->m_nFireHSMissilePressedTime = CTimer::m_snTimeInMilliseconds;
+                pPlayerData->m_nFireHSMissilePressedTime = CTimer::GetTimeInMS();
                 pPlayerData->m_LastHSMissileTarget = nullptr;
                 weaponId = MODE_ROCKETLAUNCHER_HS;
                 break;
@@ -250,7 +250,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
             }
 
             CAnimBlendAssociation* pAnimAssociation = nullptr;
-            int animGroupID = pWeaponInfo->m_dwAnimGroup;
+            int animGroupID = pWeaponInfo->m_eAnimGroup;
             if (pTargetEntity && pPad->GetTarget()
                 && pPlayerData->m_fMoveBlendRatio < 1.9f
                 && pPlayerPed->m_nMoveState != PEDMOVE_SPRINT
@@ -269,12 +269,12 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                     }
                     else
                     {
-                        pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pWeaponInfo->m_dwAnimGroup, ANIM_ID_KILL_PARTIAL, 8.0f);
+                        pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pWeaponInfo->m_eAnimGroup, ANIM_ID_KILL_PARTIAL, 8.0f);
                     }
                 }
                 else
                 {
-                    pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pWeaponInfo->m_dwAnimGroup, ANIM_ID_KILL_PARTIAL, 8.0f);
+                    pAnimAssociation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pWeaponInfo->m_eAnimGroup, ANIM_ID_KILL_PARTIAL, 8.0f);
                 }
             }
             else
@@ -292,22 +292,18 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 bCheckButtonCircleStateOnly = true;
             }
             unsigned char meleeAttackJustDown = pPad->MeleeAttackJustDown(bCheckButtonCircleStateOnly);
-            if (meleeAttackJustDown && pAnimAssociation && pAnimAssociation->m_fBlendAmount > 0.5f
-                && pTargetEntity && pIntelligence->TestForStealthKill(pTargetEntity, true))
-            {
-                CTask* pNewTask = static_cast<CTask*>(CTask::operator new(32));
-                CTaskSimpleStealthKill* pTaskSimpleStealthKill = nullptr;
-                if (pNewTask)
-                {
-                    pTaskSimpleStealthKill = static_cast<CTaskSimpleStealthKill*>(pNewTask);
-                    pTaskSimpleStealthKill->Constructor(true, pTargetEntity, pWeaponInfo->m_dwAnimGroup);
-                }
-
-                pTaskManager->SetTask(pTaskSimpleStealthKill, 3, 0);
+            if (meleeAttackJustDown &&
+                pAnimAssociation &&
+                pAnimAssociation->m_fBlendAmount > 0.5f &&
+                pTargetEntity &&
+                pIntelligence->TestForStealthKill(pTargetEntity, true)
+            ) {
+                auto* pTaskSimpleStealthKill = new CTaskSimpleStealthKill(true, pTargetEntity, pWeaponInfo->m_eAnimGroup);
+                pTaskManager->SetTask(pTaskSimpleStealthKill, 3, false);
 
                 eWeaponType activeWeaponType = pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot].m_nType;
                 CPedDamageResponseCalculator damageCalculator(pPlayerPed, 0.0, activeWeaponType, PED_PIECE_TORSO, false);
-                CEventDamage eventDamage(pPlayerPed, CTimer::m_snTimeInMilliseconds, activeWeaponType, PED_PIECE_TORSO, 0, false, pTargetEntity->bInVehicle);
+                CEventDamage eventDamage(pPlayerPed, CTimer::GetTimeInMS(), activeWeaponType, PED_PIECE_TORSO, 0, false, pTargetEntity->bInVehicle);
                 if (eventDamage.AffectsPed(pTargetEntity))
                 {
                     damageCalculator.ComputeDamageResponse(pTargetEntity, &eventDamage.m_damageResponse, false);
@@ -563,7 +559,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                     {
                         unsigned char activeWeaponSlot = pPlayerPed->m_nActiveWeaponSlot;
                         CWeapon* pActiveWeapon = &pPlayerPed->m_aWeapons[activeWeaponSlot];
-                        if (TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nMode == MODE_CAMERA && CTimer::m_snTimeInMilliseconds > pActiveWeapon->m_nTimeForNextShot)
+                        if (TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nMode == MODE_CAMERA && CTimer::GetTimeInMS() > pActiveWeapon->m_nTimeForNextShot)
                         {
                             CVector firingPoint(0.0f, 0.0f, 0.6f);
                             CVector outputFiringPoint = *pPlayerPed->m_matrix * firingPoint;
@@ -587,8 +583,8 @@ PED_WEAPON_AIMING_CODE:
     {
         if (!pIntelligence->GetTaskUseGun())
         {
-            int animGroupId = pWeaponInfo->m_dwAnimGroup;
-            int crouchReloadAnimID = pWeaponInfo->flags.bReload ? 226 : 0;
+            AssocGroupId animGroupId = pWeaponInfo->m_eAnimGroup;
+            AnimationId crouchReloadAnimID = pWeaponInfo->flags.bReload ? ANIM_ID_RELOAD : ANIM_ID_WALK;
             if (!pPlayerPed->bIsDucking)
             {
                 if (!RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, crouchReloadAnimID))
@@ -932,7 +928,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
     CPad* pPad = pPlayerPed->GetPadFromPlayer();
     if (!CWorld::Players[0].m_pPed || !CWorld::Players[1].m_pPed)
     {
-        int animGroupID = 0;
+        AssocGroupId animGroupID = ANIM_GROUP_DEFAULT;
         if (TheCamera.m_bWideScreenOn
             || pPlayerPed->bIsDucking
             || pPlayerPed->bCrouchWhenShooting
@@ -944,7 +940,8 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
             pPad->SetTouched();
         }
         CAnimBlock* pAnimBlock = &CAnimManager::ms_aAnimBlocks[m_nAnimationBlockIndex];
-        unsigned int touchTimeDelta = pPad->GetTouchedTimeDelta(); CTimer::m_snTimeInMilliseconds;
+        unsigned int touchTimeDelta = pPad->GetTouchedTimeDelta();
+        CTimer::GetTimeInMS();
         if (touchTimeDelta <= 10000)
         {
             if (pAnimBlock->bLoaded)
@@ -1002,19 +999,23 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
                             randomNumber = CGeneral::GetRandomNumberInRange(0, 4);
                         } while (gLastRandomNumberForIdleAnimationID == randomNumber);
 
-                        int groupAndAnimIDs[8] = {
+                        uint32 groupAndAnimIDs[8] = {
                             ANIM_ID_STRETCH, ANIM_GROUP_PLAYIDLES,
-                            ANIM_ID_TIME, ANIM_GROUP_PLAYIDLES,
-                            ANIM_ID_SHLDR, ANIM_GROUP_PLAYIDLES,
-                            ANIM_ID_STRLEG, ANIM_GROUP_PLAYIDLES
+                            ANIM_ID_TIME,    ANIM_GROUP_PLAYIDLES,
+                            ANIM_ID_SHLDR,   ANIM_GROUP_PLAYIDLES,
+                            ANIM_ID_STRLEG,  ANIM_GROUP_PLAYIDLES
                         };
 
-                        CAnimBlendAssociation* pAnimNewAssoc = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump,
-                            groupAndAnimIDs[randomNumber * 2 + 1], groupAndAnimIDs[randomNumber * 2], 8.0f);
+                        CAnimBlendAssociation* pAnimNewAssoc = CAnimManager::BlendAnimation(
+                            pPlayerPed->m_pRwClump,
+                            static_cast<AssocGroupId>(groupAndAnimIDs[randomNumber * 2 + 1]),
+                            static_cast<AnimationId>(groupAndAnimIDs[randomNumber * 2]),
+                            8.0f
+                        );
                         pAnimNewAssoc->m_nFlags |= ANIM_FLAG_200;
                         gLastTouchTimeDelta = touchTimeDelta;
                         gLastRandomNumberForIdleAnimationID = randomNumber;
-                        if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0 && CTimer::m_snTimeInMilliseconds > 1200000)
+                        if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0 && CTimer::GetTimeInMS() > 1200000)
                         {
                             pPlayerPed->Say(336, 0, 0.2f, 0, 0, 0);
                         }
@@ -1157,7 +1158,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
                         {
                             return;
                         }
-                        auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pPlayerPed->m_nAnimGroup, 1u, gDuckAnimBlendData);
+                        auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pPlayerPed->m_nAnimGroup, ANIM_ID_RUN, gDuckAnimBlendData);
                         pNewAnimation->m_nFlags |= ANIM_FLAG_STARTED;
                         pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                         pedMoveState = PEDMOVE_RUN;
@@ -1168,7 +1169,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
                         {
                             return;
                         }
-                        auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pPlayerPed->m_nAnimGroup, 0, gDuckAnimBlendData);
+                        auto pNewAnimation = CAnimManager::BlendAnimation(pPlayerPed->m_pRwClump, pPlayerPed->m_nAnimGroup, ANIM_ID_WALK, gDuckAnimBlendData);
                         pNewAnimation->m_nFlags |= ANIM_FLAG_STARTED;
                         pPlayerPed->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                         pedMoveState = PEDMOVE_WALK;
@@ -1319,8 +1320,8 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
     pPlayerPed->SetRealMoveAnim();
     // What is the point of calling RpAnimBlendClumpGetAssociation here?
     // Nvm, let's keep it.
-    RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, 11);
-    RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, 12);
+    RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_IDLE_ARMED);
+    RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_IDLE_CHAT);
 
     if (bAvoidJumpingAndDucking)
     {

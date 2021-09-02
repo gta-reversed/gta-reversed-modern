@@ -606,9 +606,9 @@ void CVehicle::RemoveLighting_Reversed(bool bRemove)
 }
 
 // 0x871EF0
-void CVehicle::ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int arg2, unsigned int nAnimID, float fTime)
+void CVehicle::ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int animGroup, unsigned int animId, float fTime)
 {
-    CVehicle::ProcessOpenDoor_Reversed(ped, doorComponentId, arg2, nAnimID, fTime);
+    CVehicle::ProcessOpenDoor_Reversed(ped, doorComponentId, animGroup, animId, fTime);
 }
 void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId, unsigned int animGroup, unsigned int animId, float fTime)
 {
@@ -643,7 +643,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId,
     case ANIM_ID_CAR_OPEN_LHS_1:
     case ANIM_ID_CAR_OPEN_RHS_1:
         {
-        CVehicleAnimGroupData::GetInOutTimings(m_pHandlingData->m_nAnimGroup, eInOutTimingMode::OPEN_OUT, &fAnimStart, &fAnimEnd);
+        CVehicleAnimGroupData::GetInOutTimings(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup), eInOutTimingMode::OPEN_OUT, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart)
             this->OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, false);
         else if (fTime > fAnimEnd)
@@ -664,7 +664,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId,
     case ANIM_ID_CAR_CLOSE_LHS_1:
     case ANIM_ID_CAR_CLOSE_RHS_1:
     {
-        CVehicleAnimGroupData::GetInOutTimings(m_pHandlingData->m_nAnimGroup, eInOutTimingMode::CLOSE_OUT, &fAnimStart, &fAnimEnd);
+        CVehicleAnimGroupData::GetInOutTimings(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup), eInOutTimingMode::CLOSE_OUT, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart)
             this->OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         else if (fTime > fAnimEnd)
@@ -685,7 +685,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId,
     case ANIM_ID_CAR_CLOSEDOOR_LHS_1:
     case ANIM_ID_CAR_CLOSEDOOR_RHS_1:
         {
-        CVehicleAnimGroupData::GetInOutTimings(m_pHandlingData->m_nAnimGroup, eInOutTimingMode::CLOSE_IN, &fAnimStart, &fAnimEnd);
+        CVehicleAnimGroupData::GetInOutTimings(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup), eInOutTimingMode::CLOSE_IN, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart)
             this->OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         else if (fTime > fAnimEnd)
@@ -706,7 +706,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId,
     case ANIM_ID_CAR_GETOUT_LHS_1:
     case ANIM_ID_CAR_GETOUT_RHS_1:
         {
-        CVehicleAnimGroupData::GetInOutTimings(m_pHandlingData->m_nAnimGroup, eInOutTimingMode::OPEN_IN, &fAnimStart, &fAnimEnd);
+        CVehicleAnimGroupData::GetInOutTimings(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup), eInOutTimingMode::OPEN_IN, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart)
             this->OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
         else if (fTime > fAnimEnd)
@@ -853,9 +853,9 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend)
     if (m_bOffscreen || !driver->IsPlayer())
         return;
 
-    auto* pRadioTuneAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, eAnimID::ANIM_ID_CAR_TUNE_RADIO);
+    auto* pRadioTuneAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, AnimationId::ANIM_ID_CAR_TUNE_RADIO);
     if (bBlend)
-        pRadioTuneAnim = CAnimManager::BlendAnimation(driver->m_pRwClump, eAnimGroup::ANIM_GROUP_DEFAULT, eAnimID::ANIM_ID_CAR_TUNE_RADIO, 4.0F);
+        pRadioTuneAnim = CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, AnimationId::ANIM_ID_CAR_TUNE_RADIO, 4.0F);
 
     if (pRadioTuneAnim)
         return;
@@ -867,9 +867,9 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend)
         pUsedAnims = &aDriveAnimIdsLow;
     else if (IsBoat() && !m_pHandlingData->m_bSitInBoat)
         pUsedAnims = &aDriveAnimIdsBoat;
-    else if (CVehicleAnimGroupData::UsesKartDrivingAnims(m_pHandlingData->m_nAnimGroup))
+    else if (CVehicleAnimGroupData::UsesKartDrivingAnims(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup)))
         pUsedAnims = &aDriveAnimIdsKart;
-    else if (CVehicleAnimGroupData::UsesTruckDrivingAnims(m_pHandlingData->m_nAnimGroup))
+    else if (CVehicleAnimGroupData::UsesTruckDrivingAnims(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup)))
         pUsedAnims = &aDriveAnimIdsTruck;
     else
     {
@@ -904,9 +904,9 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend)
 
     if (!pIdleAnim)
     {
-        if (RpAnimBlendClumpGetAssociation(driver->m_pRwClump, eAnimID::ANIM_ID_CAR_SIT))
+        if (RpAnimBlendClumpGetAssociation(driver->m_pRwClump, AnimationId::ANIM_ID_CAR_SIT))
         {
-            CAnimManager::BlendAnimation(driver->m_pRwClump, eAnimGroup::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_IDLE], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_IDLE], 4.0F);
 
         }
         return;
@@ -940,7 +940,7 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend)
             || TheCamera.GetActiveCamera().m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_BEHIND)
             && (!pLookBackAnim || pLookBackAnim->m_fBlendAmount < 1.0F && pLookBackAnim->m_fBlendDelta <= 0.0F))
         {
-            CAnimManager::BlendAnimation(driver->m_pRwClump, eAnimGroup::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_BACK], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_BACK], 4.0F);
         }
         return;
     }
@@ -973,7 +973,7 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend)
             pLookRightAnim->m_fBlendDelta = 0.0F;
         }
         else
-            CAnimManager::BlendAnimation(driver->m_pRwClump, eAnimGroup::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_RIGHT], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_RIGHT], 4.0F);
     }
     else
     {
@@ -988,7 +988,7 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend)
             pLookRightAnim->m_fBlendDelta = 0.0F;
         }
         else
-            CAnimManager::BlendAnimation(driver->m_pRwClump, eAnimGroup::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_LEFT], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_LEFT], 4.0F);
     }
 
     if (pLookBackAnim)

@@ -2,9 +2,9 @@
 
 void CTaskSimplePause::InjectHooks()
 {
-    HookInstall(0x48E750, &CTaskSimplePause::Constructor);
-    HookInstall(0x48E830, &CTaskSimplePause::ProcessPed_Reversed);
-    HookInstall(0x48E810, &CTaskSimplePause::MakeAbortable_Reversed);
+    ReversibleHooks::Install("CTaskSimplePause", "CTaskSimplePause", 0x48E750, &CTaskSimplePause::Constructor);
+    ReversibleHooks::Install("CTaskSimplePause", "ProcessPed", 0x48E830, &CTaskSimplePause::ProcessPed_Reversed);
+    ReversibleHooks::Install("CTaskSimplePause", "MakeAbortable", 0x48E810, &CTaskSimplePause::MakeAbortable_Reversed);
 }
 
 CTaskSimplePause::CTaskSimplePause(int time)

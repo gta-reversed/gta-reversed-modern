@@ -3,10 +3,10 @@
 float& CTaskSimpleGoTo::ms_fLookAtThresholdDotProduct = *(float*)0xC18D48;
 
 void CTaskSimpleGoTo::InjectHooks() {
-    HookInstall(0x6679C0, &CTaskSimpleGoTo::Constructor);
-    HookInstall(0x667A10, &CTaskSimpleGoTo::HasCircledTarget);
-    HookInstall(0x667AD0, &CTaskSimpleGoTo::SetUpIK);
-    HookInstall(0x667CA0, &CTaskSimpleGoTo::QuitIK);
+    ReversibleHooks::Install("CTaskSimpleGoTo", "CTaskSimpleGoTo", 0x6679C0, &CTaskSimpleGoTo::Constructor);
+    ReversibleHooks::Install("CTaskSimpleGoTo", "HasCircledTarget", 0x667A10, &CTaskSimpleGoTo::HasCircledTarget);
+    ReversibleHooks::Install("CTaskSimpleGoTo", "SetUpIK", 0x667AD0, &CTaskSimpleGoTo::SetUpIK);
+    ReversibleHooks::Install("CTaskSimpleGoTo", "QuitIK", 0x667CA0, &CTaskSimpleGoTo::QuitIK);
 }
 
 CTaskSimpleGoTo::CTaskSimpleGoTo(int moveState, const CVector& targetPoint, float fRadius) 

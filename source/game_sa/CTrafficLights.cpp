@@ -237,7 +237,7 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
                                    pEntity->GetMatrix().GetUp(),
                                    pEntity->GetMatrix().GetRight(),
                                    CVector(0.0F, 0.0F, 0.0F),
-                                   iLightState + iLightColorBase,
+                                   (eBrightLightColor)(iLightState + iLightColorBase),
                                    0,
                                    0,
                                    0);

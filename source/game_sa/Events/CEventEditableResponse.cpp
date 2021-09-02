@@ -1,42 +1,42 @@
 #include "StdInc.h"
 
 void CEventEditableResponse::InjectHooks() {
-    HookInstall(0x4AC450, &CEventEditableResponse::Constructor);
-    HookInstall(0x420ED0, &CEventEditableResponse::Clone_Reversed);
-    HookInstall(0x420EF0, &CEventEditableResponse::HasEditableResponse_Reversed);
-    HookInstall(0x4AC490, &CEventEditableResponse::WillRespond);
-    HookInstall(0x4AC4A0, &CEventEditableResponse::InformVehicleOccupants);
-    HookInstall(0x4B2B00, &CEventEditableResponse::InformRespectedFriends);
-    HookInstall(0x4B7DF0, &CEventEditableResponse::InformGroup);
-    HookInstall(0x4AC5A0, &CEventEditableResponse::TriggerLookAt);
-    HookInstall(0x4B56C0, (void (CEventEditableResponse::*)(CPed * ped, bool))&CEventEditableResponse::ComputeResponseTaskType);
-    HookInstall(0x4B57A0, (void (CEventEditableResponse::*)(CPedGroup*)) & CEventEditableResponse::ComputeResponseTaskType);
-    HookInstall(0x4B5730, &CEventEditableResponse::ComputeResponseTaskOfType);
+    ReversibleHooks::Install("CEventEditableResponse", "Constructor", 0x4AC450, &CEventEditableResponse::Constructor);
+    ReversibleHooks::Install("CEventEditableResponse", "Clone_Reversed", 0x420ED0, &CEventEditableResponse::Clone_Reversed);
+    ReversibleHooks::Install("CEventEditableResponse", "HasEditableResponse_Reversed", 0x420EF0, &CEventEditableResponse::HasEditableResponse_Reversed);
+    ReversibleHooks::Install("CEventEditableResponse", "WillRespond", 0x4AC490, &CEventEditableResponse::WillRespond);
+    ReversibleHooks::Install("CEventEditableResponse", "InformVehicleOccupants", 0x4AC4A0, &CEventEditableResponse::InformVehicleOccupants);
+    ReversibleHooks::Install("CEventEditableResponse", "InformRespectedFriends", 0x4B2B00, &CEventEditableResponse::InformRespectedFriends);
+    ReversibleHooks::Install("CEventEditableResponse", "InformGroup", 0x4B7DF0, &CEventEditableResponse::InformGroup);
+    ReversibleHooks::Install("CEventEditableResponse", "TriggerLookAt", 0x4AC5A0, &CEventEditableResponse::TriggerLookAt);
+    ReversibleHooks::Install("CEventEditableResponse", "ComputeResponseTaskType_ped", 0x4B56C0, (void (CEventEditableResponse::*)(CPed * ped, bool))&CEventEditableResponse::ComputeResponseTaskType);
+    ReversibleHooks::Install("CEventEditableResponse", "ComputeResponseTaskType_ped_group", 0x4B57A0, (void (CEventEditableResponse::*)(CPedGroup*)) & CEventEditableResponse::ComputeResponseTaskType);
+    ReversibleHooks::Install("CEventEditableResponse", "ComputeResponseTaskOfType", 0x4B5730, &CEventEditableResponse::ComputeResponseTaskOfType);
 }
 
 void CEventSpecial::InjectHooks()
 {
-    HookInstall(0x4B1AE0, &CEventSpecial::Constructor);
+    ReversibleHooks::Install("CEventSpecial", "CEventSpecial", 0x4B1AE0, &CEventSpecial::Constructor);
 }
 
 void CEventFireNearby::InjectHooks()
 {
-    HookInstall(0x4B1F10, &CEventFireNearby::Constructor);
-    HookInstall(0x4B1F90, &CEventFireNearby::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventFireNearby", "CEventFireNearby", 0x4B1F10, &CEventFireNearby::Constructor);
+    ReversibleHooks::Install("CEventFireNearby", "AffectsPed", 0x4B1F90, &CEventFireNearby::AffectsPed_Reversed);
 }
 
 void CEventDanger::InjectHooks()
 {
-    HookInstall(0x4B2600, &CEventDanger::Constructor);
-    HookInstall(0x4B5470, &CEventDanger::AffectsPed_Reversed);
-    HookInstall(0x4B54E0, &CEventDanger::AffectsPedGroup_Reversed);
-    HookInstall(0x4B2700, &CEventDanger::GetSourceEntity_Reversed);
+    ReversibleHooks::Install("CEventDanger", "CEventDanger", 0x4B2600, &CEventDanger::Constructor);
+    ReversibleHooks::Install("CEventDanger", "AffectsPed", 0x4B5470, &CEventDanger::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventDanger", "AffectsPedGroup", 0x4B54E0, &CEventDanger::AffectsPedGroup_Reversed);
+    ReversibleHooks::Install("CEventDanger", "GetSourceEntity", 0x4B2700, &CEventDanger::GetSourceEntity_Reversed);
 }
 
 void CEventSeenPanickedPed::InjectHooks()
 {
-    HookInstall(0x4B2080, &CEventSeenPanickedPed::Constructor);
-    HookInstall(0x4B53C0, &CEventSeenPanickedPed::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventSeenPanickedPed", "CEventSeenPanickedPed", 0x4B2080, &CEventSeenPanickedPed::Constructor);
+    ReversibleHooks::Install("CEventSeenPanickedPed", "AffectsPed", 0x4B53C0, &CEventSeenPanickedPed::AffectsPed_Reversed);
 }
 
 CEventEditableResponse::CEventEditableResponse() {

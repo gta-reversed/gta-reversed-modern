@@ -1,10 +1,10 @@
 #pragma once
+
 #include "CTaskSimple.h"
 
-class CTaskSimpleLand : public CTaskSimple
-{
+class CTaskSimpleLand : public CTaskSimple {
     CAnimBlendAssociation* m_pAnim;
-    eAnimID m_nAnimId;
+    AnimationId            m_nAnimId;
     union {
         struct
         {
@@ -16,13 +16,9 @@ class CTaskSimpleLand : public CTaskSimple
     };
     unsigned char _pad_11[3];
 
-private:
-    CTaskSimpleLand* Constructor(eAnimID nAnimId);
 public:
-    CTaskSimpleLand(eAnimID nAnimId);
+    CTaskSimpleLand(AnimationId nAnimId);
     ~CTaskSimpleLand() override;
-
-    static void InjectHooks();
 
     eTaskType GetId() override { return TASK_SIMPLE_LAND; }
     CTask* Clone() override { return new CTaskSimpleLand(m_nAnimId); }
@@ -37,6 +33,11 @@ public:
 
     static void FinishAnimCB(CAnimBlendAssociation* pAnim, void* data);
 
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskSimpleLand* Constructor(AnimationId nAnimId);
 };
 
 VALIDATE_SIZE(CTaskSimpleLand, 0x14);

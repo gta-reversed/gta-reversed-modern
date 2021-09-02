@@ -2,11 +2,11 @@
 
 void CEventVehicleDamage::InjectHooks()
 {
-    HookInstall(0x4B18D0, &CEventVehicleDamage::Constructor);
-    HookInstall(0x4B1A00, &CEventVehicleDamage::AffectsPed_Reversed);
-    HookInstall(0x4B1A90, &CEventVehicleDamage::IsCriminalEvent_Reversed);
-    HookInstall(0x4B50B0, &CEventVehicleDamage::ReportCriminalEvent_Reversed);
-    HookInstall(0x4B1A70, &CEventVehicleDamage::GetSourceEntity_Reversed);
+    ReversibleHooks::Install("CEventVehicleDamage", "Constructor", 0x4B18D0, &CEventVehicleDamage::Constructor);
+    ReversibleHooks::Install("CEventVehicleDamage", "AffectsPed_Reversed", 0x4B1A00, &CEventVehicleDamage::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventVehicleDamage", "IsCriminalEvent_Reversed", 0x4B1A90, &CEventVehicleDamage::IsCriminalEvent_Reversed);
+    ReversibleHooks::Install("CEventVehicleDamage", "ReportCriminalEvent_Reversed", 0x4B50B0, &CEventVehicleDamage::ReportCriminalEvent_Reversed);
+    ReversibleHooks::Install("CEventVehicleDamage", "GetSourceEntity_Reversed", 0x4B1A70, &CEventVehicleDamage::GetSourceEntity_Reversed);
 }
 
 CEventVehicleDamage::CEventVehicleDamage(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType)

@@ -6,11 +6,12 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+#include "CVector.h"
+
+#include "AnimationEnums.h"
 #include "eWeaponFlags.h"
 #include "eWeaponType.h"
 #include "eWeaponFire.h"
-#include "CVector.h"
 
 #define MAX_WEAPON_INFOS 80
 #define MAX_WEAPON_NAMES 50
@@ -18,8 +19,7 @@
 #define WEAPONINFO_NUM_WEAPONS_WITH_SKILLS 11
 #define WEAPONINFO_NUM_WEAPONS 46
 
-enum class eWeaponSkill : uint8_t
-{
+enum class eWeaponSkill : uint8_t {
     WEAPSKILL_POOR,
     WEAPSKILL_STD,
     WEAPSKILL_PRO,
@@ -62,7 +62,7 @@ public:
         } flags;
         unsigned int m_nFlags;
     };
-    unsigned int   m_dwAnimGroup; // instead of storing pointers directly to anims, use anim association groups
+    AssocGroupId   m_eAnimGroup; // instead of storing pointers directly to anims, use anim association groups
     unsigned short m_nAmmoClip; // ammo in one clip
     unsigned short m_nDamage; // damage inflicted per hit
     CVector        m_vecFireOffset; // offset from weapon origin to projectile starting point
@@ -96,7 +96,7 @@ public:
     // weapon names array. Count: MAX_WEAPON_NAMES(50)
     static char **ms_aWeaponNames;
 
-    int GetCrouchReloadAnimationID();
+    AnimationId GetCrouchReloadAnimationID();
 
     // static functions
 

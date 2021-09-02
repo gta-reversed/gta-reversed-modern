@@ -8,7 +8,7 @@ Do not delete this comment block. Respect others' work!
 
 class CTimer {
 public:
-    typedef uint64_t(__cdecl* TimerFunction_t)();
+    typedef uint64(__cdecl* TimerFunction_t)();
     static TimerFunction_t& ms_fnTimerFunction;
 
     // class variables
@@ -19,29 +19,29 @@ public:
 
     static bool& m_CodePause;
     static bool& m_UserPause;
-    static unsigned int& m_FrameCounter;
+    static uint32& m_FrameCounter;
     static float& ms_fTimeStepNonClipped;
     static float& ms_fTimeStep;
-    static unsigned int& m_snTimerDivider;
+    static uint32& m_snTimerDivider;
 
     static float& ms_fOldTimeStep;
     static float& ms_fSlowMotionScale;
 
     // game speed
     static float& ms_fTimeScale;
-    static unsigned int& m_snTimeInMillisecondsPauseMode;
-    static unsigned int& m_snTimeInMillisecondsNonClipped;
-    static unsigned int& m_snPreviousTimeInMillisecondsNonClipped;
-    static unsigned int& m_snTimeInMilliseconds;
-    static uint64_t& m_snRenderStartTime;
-    static uint64_t& m_snRenderPauseTime;
-    static unsigned int& m_snRenderTimerPauseCount;
+    static uint32& m_snTimeInMillisecondsPauseMode;
+    static uint32& m_snTimeInMillisecondsNonClipped;
+    static uint32& m_snPreviousTimeInMillisecondsNonClipped;
+    static uint32& m_snTimeInMilliseconds;
+    static uint64& m_snRenderStartTime;
+    static uint64& m_snRenderPauseTime;
+    static uint32& m_snRenderTimerPauseCount;
 
     // Freshly from R*:
-    static unsigned int& m_snPPPPreviousTimeInMilliseconds;
-    static unsigned int& m_snPPPreviousTimeInMilliseconds;
-    static unsigned int& m_snPPreviousTimeInMilliseconds;
-    static unsigned int& m_snPreviousTimeInMilliseconds;
+    static uint32& m_snPPPPreviousTimeInMilliseconds;
+    static uint32& m_snPPPreviousTimeInMilliseconds;
+    static uint32& m_snPPreviousTimeInMilliseconds;
+    static uint32& m_snPreviousTimeInMilliseconds;
 
 public:
     static void InjectHooks();
@@ -54,15 +54,19 @@ public:
     static void Stop();
     static void StartUserPause();
     static void EndUserPause();
-    static unsigned int GetCyclesPerMillisecond();
-    static unsigned int GetCyclesPerFrame();
-    static uint64_t GetCurrentTimeInCycles();
+    static uint32 GetCyclesPerMillisecond();
+    static uint32 GetCyclesPerFrame();
+    static uint64 GetCurrentTimeInCycles();
     static bool GetIsSlowMotionActive();
     static bool GetIsPaused() { return m_UserPause || m_CodePause; }
     static void UpdateVariables(float timeStep);
     static void UpdateTimeStep(float fTimeStep);
     static void Update();
 
-    static uint32_t GetTimeInMilliseconds() { return m_snTimeInMilliseconds; }
-    static uint32_t GetTimeStepInMilliseconds() { return static_cast<uint32_t>(ms_fTimeStep * 20.0F); }
+    // Inlined funcs
+    // They could have used functions with a longer name, ex:
+    // GetTimeInMillisecond, we have shorter GetTimeInMS
+    static uint32 GetFrameCounter() { return m_FrameCounter; }
+    static uint32 GetTimeInMS() { return m_snTimeInMilliseconds; }
+    static uint32 GetTimeStepInMS() { return static_cast<uint32_t>(ms_fTimeStep * 20.0F); }
 };

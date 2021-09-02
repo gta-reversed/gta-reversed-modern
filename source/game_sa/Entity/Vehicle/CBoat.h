@@ -97,7 +97,7 @@ public:
     void Render() override;
     void ProcessControlInputs(unsigned char playerNum) override;
     void GetComponentWorldPosition(int componentId, CVector& posnOut) override;
-    void ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int arg2, unsigned int arg3, float arg4) override;
+    void ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int animGroup, unsigned int arg3, float arg4) override;
     void BlowUpCar(CEntity* damager, unsigned char bHideExplosion) override;
 
     // Reversed virtual methods

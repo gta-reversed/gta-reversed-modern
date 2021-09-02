@@ -4,19 +4,19 @@ float& CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE = *reinterpret_cast<float*>(0x8D2F
 float& CTaskSimpleSwim::SWIM_STOP_TIME = *reinterpret_cast<float*>(0x8D2FC0);
 
 void CTaskSimpleSwim::InjectHooks() {
-    HookInstall(0x688930, &CTaskSimpleSwim::Constructor);
-    HookInstall(0x68B050, &CTaskSimpleSwim::Clone_Reversed);
-    HookInstall(0x6889F0, &CTaskSimpleSwim::GetId_Reversed);
-    HookInstall(0x68B1C0, &CTaskSimpleSwim::ProcessPed_Reversed);
-    HookInstall(0x68B100, &CTaskSimpleSwim::MakeAbortable_Reversed);
-    HookInstall(0x68A8E0, &CTaskSimpleSwim::ApplyRollAndPitch);
-    HookInstall(0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims);
-    HookInstall(0x68A1D0, &CTaskSimpleSwim::ProcessSwimmingResistance);
-    HookInstall(0x68AA70, &CTaskSimpleSwim::ProcessEffects);
-    HookInstall(0x689640, &CTaskSimpleSwim::ProcessControlAI);
-    HookInstall(0x688A90, &CTaskSimpleSwim::ProcessControlInput);
-    HookInstall(0x68A9F0, &CTaskSimpleSwim::CreateFxSystem);
-    HookInstall(0x68AA50, &CTaskSimpleSwim::DestroyFxSystem);
+    ReversibleHooks::Install("CTaskSimpleSwim", "CTaskSimpleSwim", 0x688930, &CTaskSimpleSwim::Constructor);
+    ReversibleHooks::Install("CTaskSimpleSwim", "Clone", 0x68B050, &CTaskSimpleSwim::Clone_Reversed);
+    ReversibleHooks::Install("CTaskSimpleSwim", "GetId", 0x6889F0, &CTaskSimpleSwim::GetId_Reversed);
+    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessPed", 0x68B1C0, &CTaskSimpleSwim::ProcessPed_Reversed);
+    ReversibleHooks::Install("CTaskSimpleSwim", "MakeAbortable", 0x68B100, &CTaskSimpleSwim::MakeAbortable_Reversed);
+    ReversibleHooks::Install("CTaskSimpleSwim", "ApplyRollAndPitch", 0x68A8E0, &CTaskSimpleSwim::ApplyRollAndPitch);
+    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessSwimAnims", 0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims);
+    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessSwimmingResistance", 0x68A1D0, &CTaskSimpleSwim::ProcessSwimmingResistance);
+    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessEffects", 0x68AA70, &CTaskSimpleSwim::ProcessEffects);
+    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessControlAI", 0x689640, &CTaskSimpleSwim::ProcessControlAI);
+    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessControlInput", 0x688A90, &CTaskSimpleSwim::ProcessControlInput);
+    ReversibleHooks::Install("CTaskSimpleSwim", "CreateFxSystem", 0x68A9F0, &CTaskSimpleSwim::CreateFxSystem);
+    ReversibleHooks::Install("CTaskSimpleSwim", "DestroyFxSystem", 0x68AA50, &CTaskSimpleSwim::DestroyFxSystem);
 }
 
 CTaskSimpleSwim::CTaskSimpleSwim(CVector* pPosition, CPed* pPed) {
@@ -102,11 +102,11 @@ CTask* CTaskSimpleSwim::Clone_Reversed() {
 
 bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    const CEventDamage* pDamageEvent = static_cast<const CEventDamage*>(event);
+    const CEventDamage* damageEvent = static_cast<const CEventDamage*>(event);
 
     if (priority == ABORT_PRIORITY_IMMEDIATE)
     {
-        CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_FLAG_STARTED | ANIM_FLAG_LOOPED, 1000.0f);
+        CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.0f);
         ped->m_nMoveState = PEDMOVE_STILL;
         ped->m_nSwimmingMoveState = PEDMOVE_STILL;
 
@@ -122,7 +122,7 @@ bool CTaskSimpleSwim::MakeAbortable_Reversed(class CPed* ped, eAbortPriority pri
         ped->RestoreHeadingRate();
     }
     else if (!event || event->GetEventPriority() < 71
-        && (event->GetEventType() != EVENT_DAMAGE || !pDamageEvent->m_damageResponse.m_bHealthZero || !pDamageEvent->m_bAddToEventGroup))
+        && (event->GetEventType() != EVENT_DAMAGE || !damageEvent->m_damageResponse.m_bHealthZero || !damageEvent->m_bAddToEventGroup))
     {
         return false;
     }
@@ -159,7 +159,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
         {
             pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, m_AnimID);
         }
-        unsigned int animId = ANIM_ID_IDLE;
+        AnimationId animId = ANIM_ID_IDLE;
         pPed->m_nSwimmingMoveState = PEDMOVE_STILL;
         pPed->m_nMoveState = PEDMOVE_STILL;
         if (pAnimAssociation)
@@ -636,7 +636,7 @@ void CTaskSimpleSwim::ProcessSwimmingResistance(CPed* pPed)
     }
     case SWIM_BACK_TO_SURFACE:
     {
-        auto pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, 128);
+        auto pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, ANIM_ID_CLIMB_JUMP);
         if (!pAnimAssociation)
             pAnimAssociation = RpAnimBlendClumpGetAssociation(pPed->m_pRwClump, ANIM_ID_SWIM_JUMPOUT);
 
