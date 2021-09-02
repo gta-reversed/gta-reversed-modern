@@ -504,6 +504,7 @@ void CFont::SetSlant(float value)
     m_fSlant = value;
 }
 
+// TODO: const CRGBA& color
 // 0x719430
 void CFont::SetColor(CRGBA color)
 {
@@ -556,6 +557,7 @@ void CFont::SetAlphaFade(float alpha)
     m_dwFontAlpha = alpha;
 }
 
+// TODO: const CRGBA& color
 // 0x719510
 void CFont::SetDropColor(CRGBA color)
 {
@@ -593,6 +595,7 @@ void CFont::SetBackground(bool enable, bool includeWrap)
     m_bEnlargeBackgroundBox = includeWrap;
 }
 
+// TODO: const CRGBA& color
 // 0x7195E0
 void CFont::SetBackgroundColor(CRGBA color)
 {
