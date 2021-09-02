@@ -34,8 +34,8 @@ CColPoint *gaTempSphereColPoints = (CColPoint *)0xB9B250;
 short &TAG_SPRAYING_INCREMENT_VAL = *(short *)0x8CDEF0;
 
 void CWorld::InjectHooks() {
-    ReversibleHooks::Install("", "RemoveFallenPeds", 0x565CB0, &RemoveFallenPeds);
-    ReversibleHooks::Install("", "RemoveFallenCars", 0x565E80, &RemoveFallenCars);
+    ReversibleHooks::Install("CWorld", "RemoveFallenPeds", 0x565CB0, &RemoveFallenPeds);
+    ReversibleHooks::Install("CWorld", "RemoveFallenCars", 0x565E80, &RemoveFallenCars);
     ReversibleHooks::Install("CWorld", "Remove", 0x563280, &CWorld::Remove);
     ReversibleHooks::Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
 }

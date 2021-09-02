@@ -4,7 +4,7 @@ CScriptedBrainTaskEntry(&CScriptedBrainTaskStore::ms_entries)[TOTAL_SCRIPTED_BRA
 
 void CScriptedBrainTaskEntry::InjectHooks()
 {
-    ReversibleHooks::Install("CScriptedBrainTaskEntry::Constructor", "", 0x62EC40, &CScriptedBrainTaskEntry::Constructor);
+    ReversibleHooks::Install("CScriptedBrainTaskEntry", "CScriptedBrainTaskEntry", 0x62EC40, &CScriptedBrainTaskEntry::Constructor);
 }
 
 void CScriptedBrainTaskStore::InjectHooks()
