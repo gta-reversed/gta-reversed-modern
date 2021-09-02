@@ -65,7 +65,7 @@ public:
     static bool TestForExplosionInArea(eExplosionType explosionType, float x1, float y1, float z1, float x2, float y2, float z2);
     static void RemoveAllExplosionsInArea(CVector posn, float radius);
     static void Initialise();
-    static bool AddExplosion(CEntity* victim, CEntity* creator, eExplosionType explosionType, CVector posn, unsigned int time, bool bMakeSound, float camShake, bool bHideExplosion);
+    static bool AddExplosion(CEntity* victim, CEntity* creator, eExplosionType explosionType, const CVector& posn, uint32 time, bool bMakeSound, float camShake, bool bHideExplosion);
     static void Update();
 };
 
