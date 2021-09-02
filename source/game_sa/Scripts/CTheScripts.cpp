@@ -65,6 +65,7 @@ unsigned short& CTheScripts::MessageWidth = *reinterpret_cast<unsigned short*>(0
 unsigned short& CTheScripts::MessageCentre = *reinterpret_cast<unsigned short*>(0xA44B64);
 bool& CTheScripts::bUseMessageFormatting = *reinterpret_cast<bool*>(0xA44B66);
 bool& CTheScripts::UseTextCommands = *reinterpret_cast<bool*>(0xA44B67);
+uint16& CTheScripts::CurrentTextDrawer = *reinterpret_cast<uint16*>(0xA44B68);
 unsigned short& CTheScripts::NumberOfIntroTextLinesThisFrame = *reinterpret_cast<unsigned short*>(0xA44B68);
 unsigned short& CTheScripts::NumberOfUsedObjects = *reinterpret_cast<unsigned short*>(0xA44B6C);
 tUsedObject* CTheScripts::UsedObjectArray = reinterpret_cast<tUsedObject*>(0xA44B70);

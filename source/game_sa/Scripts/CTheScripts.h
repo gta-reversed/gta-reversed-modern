@@ -213,6 +213,7 @@ public:
     static unsigned short& MessageWidth;
     static unsigned short& MessageCentre;
     static bool& bUseMessageFormatting;
+    static uint16& CurrentTextDrawer;
     static bool& UseTextCommands;
     static unsigned short& NumberOfIntroTextLinesThisFrame;
     static unsigned short& NumberOfUsedObjects;

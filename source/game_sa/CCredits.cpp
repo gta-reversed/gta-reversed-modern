@@ -74,9 +74,9 @@ void CCredits::RenderCredits() {
     
     CFont::SetBackground(false, false);
     CFont::SetCentreSize(SCREEN_WIDTH * 0.92f);
-    CFont::SetOrientation(ALIGN_CENTER);
+    CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
     CFont::SetProportional(true);
-    CFont::SetFontStyle(FONT_SUBTITLES);
+    CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
     CFont::SetEdge(0);
     CFont::SetDropColor(CRGBA(0, 0, 255));
 
