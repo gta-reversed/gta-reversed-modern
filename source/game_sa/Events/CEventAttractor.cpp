@@ -10,7 +10,7 @@ void CEventAttractor::InjectHooks()
 
 void CEventScriptedAttractor::InjectHooks()
 {
-    ReversibleHooks::Install("CEventScriptedAttractor", "Constructor", 0x5FEF40, &CEventScriptedAttractor::Constructor);
+    ReversibleHooks::Install("CEventScriptedAttractor", "CEventScriptedAttractor", 0x5FEF40, &CEventScriptedAttractor::Constructor);
 }
 
 CEventAttractor::CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor)

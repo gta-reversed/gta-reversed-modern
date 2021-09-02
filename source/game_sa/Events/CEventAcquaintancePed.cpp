@@ -12,7 +12,7 @@ void CEventAcquaintancePed::InjectHooks()
 
 void CEventSeenCop::InjectHooks()
 {
-    ReversibleHooks::Install("CEventSeenCop", "Constructor", 0x5FF380, &CEventSeenCop::Constructor);
+    ReversibleHooks::Install("CEventSeenCop", "CEventSeenCop", 0x5FF380, &CEventSeenCop::Constructor);
 }
 
 CEventAcquaintancePed::CEventAcquaintancePed(CPed* ped)
@@ -91,7 +91,7 @@ bool CEventAcquaintancePed::TakesPriorityOver_Reversed(const CEvent& refEvent)
 
 void CEventAcquaintancePedHate::InjectHooks()
 {
-    ReversibleHooks::Install("CEventAcquaintancePedHate", "Constructor", 0x420E70, &CEventAcquaintancePedHate::Constructor);
+    ReversibleHooks::Install("CEventAcquaintancePedHate", "CEventAcquaintancePedHate", 0x420E70, &CEventAcquaintancePedHate::Constructor);
 }
 
 CEventAcquaintancePedHate* CEventAcquaintancePedHate::Constructor(CPed* ped)
@@ -103,8 +103,8 @@ CEventAcquaintancePedHate* CEventAcquaintancePedHate::Constructor(CPed* ped)
 
 void CEventAcquaintancePedHateBadlyLit::InjectHooks()
 {
-    ReversibleHooks::Install("CEventAcquaintancePedHateBadlyLit", "Constructor", 0x5FF250, &CEventAcquaintancePedHateBadlyLit::Constructor);
-    ReversibleHooks::Install("CEventAcquaintancePedHateBadlyLit", "AffectsPed_Reversed", 0x4AFA90, &CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventAcquaintancePedHateBadlyLit", "CEventAcquaintancePedHateBadlyLit", 0x5FF250, &CEventAcquaintancePedHateBadlyLit::Constructor);
+    ReversibleHooks::Install("CEventAcquaintancePedHateBadlyLit", "AffectsPed", 0x4AFA90, &CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed);
 }
 
 CEventAcquaintancePedHateBadlyLit::CEventAcquaintancePedHateBadlyLit(CPed* ped, std::int32_t startTimeInMs, const CVector& point) : CEventAcquaintancePed(ped)
