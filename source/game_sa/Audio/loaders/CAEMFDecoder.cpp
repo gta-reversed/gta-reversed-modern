@@ -8,7 +8,6 @@
 
 #include "CAEMFDecoder.h"
 
-#include <VersionHelpers.h> // todo: cross-platform
 #include <propvarutil.h>    // todo: cross-platform
 
 #include <mfidl.h>
@@ -306,7 +305,7 @@ bool CAEMFDecoder::InitLibrary() {
     // If user is running < Windows 7, don't bother.
     // Despite all APIs used are supported in Vista,
     // AAC decoding is only supported in Windows 7 or later
-    if (IsWindows7OrGreater()) {
+    if (IsWin7OrGreater()) {
         // Load MediaFoundation libraries
         mfPlatModule = LoadLibraryA("mfplat.dll");
         if (mfPlatModule == nullptr)

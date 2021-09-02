@@ -7,6 +7,7 @@ Do not delete this comment block. Respect others' work!
 #include "StdInc.h"
 #include "GxtChar.h"
 #include "CDebugMenu.h"
+#include "common.h"
 
 int& g_nNumIm3dDrawCalls = *(int*)0xB73708;
 int gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
@@ -261,6 +262,25 @@ void TransformVectors(RwV3d* vecsOut, int numVectors, CSimpleTransform const& tr
     plugin::Call<0x54EE30, RwV3d*, int, CSimpleTransform const&, RwV3d const*>(vecsOut, numVectors, transform, vecsin);
 }
 
+bool IsWin7OrGreater() {
+#ifdef _WIN32
+    OSVERSIONINFOEXW osvi = { sizeof(osvi), 0, 0, 0, 0, {0}, 0, 0 };
+    DWORDLONG        const dwlConditionMask = VerSetConditionMask(
+        VerSetConditionMask(
+            VerSetConditionMask(
+                0, VER_MAJORVERSION, VER_GREATER_EQUAL),
+            VER_MINORVERSION, VER_GREATER_EQUAL),
+        VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
+
+    osvi.dwMajorVersion = HIBYTE(_WIN32_WINNT_WIN7);
+    osvi.dwMinorVersion = LOBYTE(_WIN32_WINNT_WIN7);
+    osvi.wServicePackMajor = 0;
+
+    return VerifyVersionInfoW(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR, dwlConditionMask) != FALSE;
+#else
+    return false;
+#endif
+}
 // 0x4D62A0
 AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, char* name) {
     return ((AnimBlendFrameData * (__cdecl*)(RpClump*, char*))0x4D62A0)(clump, name);

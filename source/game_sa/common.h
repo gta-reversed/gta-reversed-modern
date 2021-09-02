@@ -169,6 +169,8 @@ extern constexpr unsigned int make_fourcc4(const char fourcc[4]) {
            fourcc[3] << 24;
 }
 
+bool IsWin7OrGreater();
+
 AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, char *name);
 
 char *MakeUpperCase(char *dest, const char *src);
