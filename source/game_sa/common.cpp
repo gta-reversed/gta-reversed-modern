@@ -269,8 +269,8 @@ bool IsWin7OrGreater() {
         VerSetConditionMask(
             VerSetConditionMask(
                 0, VER_MAJORVERSION, VER_GREATER_EQUAL),
-            VER_MINORVERSION, VER_GREATER_EQUAL),
-        VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
+                VER_MINORVERSION, VER_GREATER_EQUAL),
+                VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
 
     osvi.dwMajorVersion = HIBYTE(_WIN32_WINNT_WIN7);
     osvi.dwMinorVersion = LOBYTE(_WIN32_WINNT_WIN7);
