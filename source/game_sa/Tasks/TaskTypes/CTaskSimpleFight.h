@@ -10,7 +10,7 @@
 #include "CAnimBlendAssociation.h"
 #include "CEntity.h"
 
-enum eFightAttackType : char {
+enum eFightAttackType : int8 {
     FIGHT_ATTACK_HIT_1 = 0,
     FIGHT_ATTACK_HIT_2 = 1,
     FIGHT_ATTACK_HIT_3 = 2,

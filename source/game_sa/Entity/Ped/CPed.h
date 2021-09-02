@@ -111,7 +111,7 @@ enum eMoveState {
     PEDMOVE_SPRINT
 };
 
-enum eFightingStyle : char {
+enum eFightingStyle : int8 {
     STYLE_STANDARD = 4,
     STYLE_BOXING,
     STYLE_KUNG_FU,

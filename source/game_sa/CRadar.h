@@ -50,7 +50,7 @@ enum eBlipColour : uint32 {
 };
 
 // https://wiki.multitheftauto.com/index.php?title=Radar_Blips
-enum eRadarSprite : char {
+enum eRadarSprite : int8 {
     RADAR_SPRITE_NONE,          // 0
     RADAR_SPRITE_WHITE,         // 1
     RADAR_SPRITE_CENTRE,        // 2

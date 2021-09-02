@@ -11,7 +11,7 @@
 #include "CAnimBlendAssociation.h"
 #include "CEntity.h"
 
-enum eClimbHeights : char
+enum eClimbHeights : int8
 {
     CLIMB_NOT_READY = 0,
     CLIMB_GRAB,
