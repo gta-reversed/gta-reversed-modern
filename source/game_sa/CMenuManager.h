@@ -9,6 +9,7 @@
 #include "PluginBase.h"
 #include "CVector2D.h"
 #include "CSprite2d.h"
+#include "eLanguage.h"
 
 // Menu entries action to perform
 enum eMenuActions {   // There's many actions @0x57702E and @0x57CD88
@@ -207,7 +208,7 @@ public:
     char field_79[3];
     int titleLanguage;
     int textLanguage;
-    char                m_nLanguage;
+    eLanguage           m_nLanguage;
     char                m_nPreviousLanguage;
     char field_86[2];
     int field_88;
