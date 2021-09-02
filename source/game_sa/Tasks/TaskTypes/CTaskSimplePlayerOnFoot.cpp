@@ -999,17 +999,17 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
                             randomNumber = CGeneral::GetRandomNumberInRange(0, 4);
                         } while (gLastRandomNumberForIdleAnimationID == randomNumber);
 
-                        uint32 groupAndAnimIDs[8] = {
-                            ANIM_ID_STRETCH, ANIM_GROUP_PLAYIDLES,
-                            ANIM_ID_TIME,    ANIM_GROUP_PLAYIDLES,
-                            ANIM_ID_SHLDR,   ANIM_GROUP_PLAYIDLES,
-                            ANIM_ID_STRLEG,  ANIM_GROUP_PLAYIDLES
+                        constexpr struct { AnimationId animId; AssocGroupId assoc; } animations[] = {
+                            { ANIM_ID_STRETCH, ANIM_GROUP_PLAYIDLES },
+                            { ANIM_ID_TIME,    ANIM_GROUP_PLAYIDLES },
+                            { ANIM_ID_SHLDR,   ANIM_GROUP_PLAYIDLES },
+                            { ANIM_ID_STRLEG,  ANIM_GROUP_PLAYIDLES },
                         };
-
+                        auto animation = animations[randomNumber];
                         CAnimBlendAssociation* pAnimNewAssoc = CAnimManager::BlendAnimation(
                             pPlayerPed->m_pRwClump,
-                            static_cast<AssocGroupId>(groupAndAnimIDs[randomNumber * 2 + 1]),
-                            static_cast<AnimationId>(groupAndAnimIDs[randomNumber * 2]),
+                            animation.assoc,
+                            animation.animId,
                             8.0f
                         );
                         pAnimNewAssoc->m_nFlags |= ANIM_FLAG_200;
