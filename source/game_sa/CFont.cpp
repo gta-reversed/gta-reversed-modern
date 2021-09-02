@@ -1,12 +1,14 @@
-#include "StdInc.h"
-
 /*
     Plugin-SDK (Grand Theft Auto San Andreas) source file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
+#include "StdInc.h"
+
 #include "CFont.h"
+
+#include "eLanguage.h"
 
 CFontChar (&setup)[9] = *(CFontChar(*)[9])0xC716B0;
 CFontChar* pEmptyChar = (CFontChar*)0xC716A8;
@@ -479,10 +481,10 @@ void CFont::SetScale(float w, float h)
 void CFont::SetScaleForCurrentLanguage(float w, float h)
 {
     switch (FrontEndMenuManager.m_nLanguage) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
+    case eLanguage::FRENCH:
+    case eLanguage::GERMAN:
+    case eLanguage::ITALIAN:
+    case eLanguage::SPANISH:
         m_Scale.Set(w * 0.8f, h);
         break;
     default:
