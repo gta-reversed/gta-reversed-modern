@@ -47,7 +47,7 @@ void CFire::Start(CEntity* pCreator, CVector pos, uint32_t nTimeToBurn, uint8_t 
       true   // bFirstGeneration
     };
 
-    m_nTimeToBurn = CTimer::m_snTimeInMilliseconds + (uint32_t)(CGeneral::GetRandomNumberInRange(1.0f, 1.3f) * (float)nTimeToBurn);
+    m_nTimeToBurn = CTimer::GetTimeInMS() + (uint32_t)(CGeneral::GetRandomNumberInRange(1.0f, 1.3f) * (float)nTimeToBurn);
 
     SetTarget(nullptr);
     SetCreator(pCreator);
@@ -100,11 +100,11 @@ void CFire::Start(CEntity* pCreator, CEntity* pTarget, uint32_t nTimeToBurn, uin
     m_vecPosition = pTarget->GetPosition();
 
     if (pTarget->IsPed() && static_cast<CPed*>(pTarget)->IsPlayer())
-        m_nTimeToBurn = CTimer::m_snTimeInMilliseconds + 2333;
+        m_nTimeToBurn = CTimer::GetTimeInMS() + 2333;
     else if (pTarget->IsVehicle())
-        m_nTimeToBurn = CTimer::m_snTimeInMilliseconds + CGeneral::GetRandomNumberInRange(0, 1000) + 3000;
+        m_nTimeToBurn = CTimer::GetTimeInMS() + CGeneral::GetRandomNumberInRange(0, 1000) + 3000;
     else
-        m_nTimeToBurn = CTimer::m_snTimeInMilliseconds + CGeneral::GetRandomNumberInRange(0, 1000) + nTimeToBurn;
+        m_nTimeToBurn = CTimer::GetTimeInMS() + CGeneral::GetRandomNumberInRange(0, 1000) + nTimeToBurn;
 
     SetTarget(pTarget);
     SetCreator(pCreator);

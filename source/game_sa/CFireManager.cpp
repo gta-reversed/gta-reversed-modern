@@ -363,7 +363,7 @@ void CFireManager::Update() {
         fire.ProcessFire();
     }
 
-    if (CGameLogic::LaRiotsActiveHere() && (CTimer::m_snTimeInMilliseconds / 500u != CTimer::m_snPreviousTimeInMilliseconds / 500u)) {
+    if (CGameLogic::LaRiotsActiveHere() && (CTimer::GetTimeInMS() / 500u != CTimer::m_snPreviousTimeInMilliseconds / 500u)) {
         const float fRandomAngleRad = CGeneral::GetRandomNumberInRange(0.0f, 2 * rwPI);
         const float fRandomDir = CGeneral::GetRandomNumberInRange(35.0f, 60.0f);
         CVector point = TheCamera.GetPosition() + CVector{
