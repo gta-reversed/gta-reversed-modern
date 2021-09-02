@@ -35,11 +35,11 @@ public:
     char                field_1A[2];
     uint32              m_nTimeToStartMission;
     uint32              m_nTimeSwitchedToRealPhysics;
-    char                _smthPrev;
-    char                _smthCurr;
-    char                _smthNext;
-    char                m_nCurrentLane;
-    char                m_nNextLane;
+    int8                _smthPrev;
+    int8                _smthCurr;
+    int8                _smthNext;
+    int8                m_nCurrentLane;
+    int8                m_nNextLane;
     eCarDrivingStyle    m_nCarDrivingStyle;
     eCarMission         m_nCarMission;
     char                m_nTempAction;
