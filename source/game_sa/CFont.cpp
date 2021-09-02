@@ -511,7 +511,7 @@ void CFont::SetColor(CRGBA color)
     m_Color = color;
 
     if (m_fFontAlpha < 255.0f) {
-        m_Color.a = (uint8)(color.a * m_fFontAlpha) / 255;
+        m_Color.a = (uint8)((color.a * m_fFontAlpha) / 255.0f);
     }
 }
 
