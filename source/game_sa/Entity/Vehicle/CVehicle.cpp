@@ -87,6 +87,7 @@ void CVehicle::InjectHooks()
     ReversibleHooks::Install("CVehicle", "ProcessBoatControl", 0x6DBCE0, &CVehicle::ProcessBoatControl);
     ReversibleHooks::Install("CVehicle", "ChangeLawEnforcerState", 0x6D2330, &CVehicle::ChangeLawEnforcerState);
     ReversibleHooks::Install("CVehicle", "GetVehicleAppearance", 0x6D1080, &CVehicle::GetVehicleAppearance);
+    ReversibleHooks::Install("CVehicle", "DoHeadLightBeam", 0x6E0E20, &CVehicle::DoHeadLightBeam);
 
 }
 
@@ -2607,9 +2608,65 @@ bool CVehicle::DoHeadLightEffect(int dummyId, CMatrix& vehicleMatrix, unsigned c
 }
 
 // 0x6E0E20
-void CVehicle::DoHeadLightBeam(int arg0, CMatrix& matrix, unsigned char arg2)
+void CVehicle::DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2)
 {
-    ((void(__thiscall*)(CVehicle*, int, CMatrix&, unsigned char))0x6E0E20)(this, arg0, matrix, arg2);
+    CVector pointModelSpace = static_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(m_nModelIndex))->m_pVehicleStruct->m_avDummyPos[2 * dummyId];
+    if (dummyId == 1 && pointModelSpace.IsZero())
+        return;
+
+    CVector point = matrix.GetPosition() + Multiply3x3(matrix, pointModelSpace);
+    if (!arg2) {
+        point -= 2 * pointModelSpace.x * matrix.GetRight();
+    }
+    const CVector pointToCamDir = Normalized(TheCamera.GetPosition() - point);
+    const auto    alpha = (uint8)((1.0f - fabs(DotProduct(pointToCamDir, matrix.GetForward()))) * 32.0f);
+
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,    (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,             (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,            (void*)rwBLENDONE);
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,            (void*)rwSHADEMODEGOURAUD);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,        (void*)NULL);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,             (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    (void*)rwALPHATESTFUNCTIONGREATER);
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)FALSE);
+
+    const float   angleMult   = ModelIndices::IsForklift((int32)m_nModelIndex) ? 0.5f : 0.15f;
+    const CVector lightNormal = Normalized(matrix.GetForward() - matrix.GetUp() * angleMult);
+    const CVector lightRight  = Normalized(CrossProduct(lightNormal, pointToCamDir));
+    const CVector lightPos    = point - matrix.GetForward() * 0.1f;
+
+    const CVector posn[] = {
+        lightPos - lightRight * 0.05f,
+        lightPos + lightRight * 0.05f,
+        lightPos + lightNormal * 3.0f - lightRight * 0.5f,
+        lightPos + lightNormal * 3.0f + lightRight * 0.5f,
+        lightPos + lightNormal * 0.2f
+    };
+    const uint8 alphas[] = { alpha, alpha, 0, 0, alpha };
+
+    RxObjSpace3DVertex vertices[5];
+    for (unsigned i = 0; i < 5; i++) {
+        const RwRGBA color = { 255, 255, 255, alphas[i] };
+        RxObjSpace3DVertexSetPreLitColor(&vertices[i], &color);
+        RxObjSpace3DVertexSetPos(&vertices[i], &posn[i]);
+    }
+
+    if (RwIm3DTransform(vertices, std::size(vertices), 0, rwIM3D_VERTEXRGBA | rwIM3D_VERTEXXYZ))
+    {
+        RxVertexIndex indices[] = { 0, 1, 4, 1, 3, 4, 2, 3, 4, 0, 2, 4 };
+        RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, indices, std::size(indices));
+        RwIm3DEnd();
+    }
+
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,         (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,          (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,           (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,              (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,             (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,     (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,              (void*)rwCULLMODECULLBACK);
 }
 
 // 0x6E1440
