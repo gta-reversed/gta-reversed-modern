@@ -779,7 +779,7 @@ float CFont::GetLetterSize(uint8 letterId)
 {
     uint8 propValueIdx = letterId;
 
-    if (letterId == 0x3F) {
+    if (letterId == '?') {
         letterId = 0;
         propValueIdx = 0;
     }
