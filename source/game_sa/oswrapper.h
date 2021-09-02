@@ -1,4 +1,6 @@
 #pragma once
 
-std::uint64_t GetOSWPerformanceTime();
-std::int64_t GetOSWPerformanceFrequency();
+uint64_t GetOSWPerformanceTime();
+int64_t GetOSWPerformanceFrequency();
+
+bool IsWin7OrGreater();
