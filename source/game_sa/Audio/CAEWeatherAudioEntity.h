@@ -5,17 +5,15 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CAEAudioEntity.h"
 
 class CAEWeatherAudioEntity : public CAEAudioEntity {
 public:
-    unsigned char m_nThunderFrequencyVariationCounter;
-private:
-    char _pad7D[3];
+    uint8 m_nThunderFrequencyVariationCounter;
+    char  _pad7D[3];
+
 public:
-
-
 };
 
 VALIDATE_SIZE(CAEWeatherAudioEntity, 0x80);

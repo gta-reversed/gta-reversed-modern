@@ -6,29 +6,28 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CAESound.h"
+
 #include "eAudioEvents.h"
 
 class CEntity;
 
-class  CAEAudioEntity {
+class CAEAudioEntity {
+public:
+    CEntity* m_pEntity;
+    CAESound m_tempSound;
+
+    static int8_t*& m_pAudioEventVolumes;
+
 protected:
     CAEAudioEntity();
     ~CAEAudioEntity() = default;
-public:
-    CEntity *m_pEntity;
-    CAESound m_tempSound;
 
 public:
-// VTABLE
-    virtual void UpdateParameters(CAESound* sound, short curPlayPos) { /* Empty on purpose */ };
+    // VTABLE
+    virtual void UpdateParameters(CAESound* sound, int16 curPlayPos) { /* Empty on purpose */ };
 
-public:
-    static int8_t*& m_pAudioEventVolumes;
-
-public:
-    static float GetDefaultVolume(eAudioEvents audioEvent) { return static_cast<float>(CAEAudioEntity::m_pAudioEventVolumes[audioEvent]); }
+    static float GetDefaultVolume(eAudioEvents audioEvent) { return static_cast<float>(m_pAudioEventVolumes[audioEvent]); }
 };
 
 VALIDATE_SIZE(CAEAudioEntity, 0x7C);

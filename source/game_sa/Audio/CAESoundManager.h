@@ -1,56 +1,53 @@
 #pragma once
-#include "PluginBase.h"
+
 #include "CAESound.h"
 #include "CPhysical.h"
 
-static constexpr int MAX_NUM_SOUNDS = 300;
-static constexpr int MAX_NUM_AUDIO_CHANNELS = 64;
+static constexpr int32 MAX_NUM_SOUNDS = 300;
+static constexpr int32 MAX_NUM_AUDIO_CHANNELS = 64;
 
-enum eSoundPlayingStatus : int16_t
-{
+enum eSoundPlayingStatus : int16 {
     SOUND_NOT_PLAYING = 0,
     SOUND_PLAYING = 1,
     SOUND_HAS_STARTED = 2,
 };
 
-class CAESoundManager
-{
+class CAESoundManager {
 public:
-    CAESoundManager();
-    ~CAESoundManager();
-
-public:
-    uint16_t m_nNumAvailableChannels;
-    int16_t  m_nChannel;
+    uint16   m_nNumAvailableChannels;
+    int16    m_nChannel;
     CAESound m_aSounds[MAX_NUM_SOUNDS];
-    int16_t* m_aChannelSoundTable;
-    int16_t* m_aChannelSoundPlayTimes;
-    int16_t* m_aChannelSoundUncancellable;
-    int16_t  m_aSoundLengths[MAX_NUM_SOUNDS];
-    int16_t  m_aSoundLoopStartTimes[MAX_NUM_SOUNDS];
-    uint32_t m_nUpdateTime;
+    int16*   m_aChannelSoundTable;
+    int16*   m_aChannelSoundPlayTimes;
+    int16*   m_aChannelSoundUncancellable;
+    int16    m_aSoundLengths[MAX_NUM_SOUNDS];
+    int16    m_aSoundLoopStartTimes[MAX_NUM_SOUNDS];
+    uint32   m_nUpdateTime;
     bool     m_bPauseTimeInUse;
     bool     m_bManuallyPaused;
-    uint8_t  field_8CB6[2];
-    uint32_t m_nPauseUpdateTime;
+    uint8    field_8CB6[2];
+    uint32   m_nPauseUpdateTime;
 
 public:
     static void InjectHooks();
 
-    bool Initialise();
-    void Terminate();
-    void Reset();
-    void PauseManually(uint8_t bPause);
-    void Service();
+    CAESoundManager();
+    ~CAESoundManager();
+
+    bool      Initialise();
+    void      Terminate();
+    void      Reset();
+    void      PauseManually(uint8 bPause);
+    void      Service();
     CAESound* RequestNewSound(CAESound* pSound);
-    int16_t AreSoundsPlayingInBankSlot(short bankSlot);
-    int16_t AreSoundsOfThisEventPlayingForThisEntity(short eventId, CAEAudioEntity* audioEntity);
-    int16_t AreSoundsOfThisEventPlayingForThisEntityAndPhysical(short eventId, CAEAudioEntity* audioEntity, CPhysical* physical);
-    void CancelSoundsOfThisEventPlayingForThisEntity(short eventId, CAEAudioEntity* audioEntity);
-    void CancelSoundsOfThisEventPlayingForThisEntityAndPhysical(short eventId, CAEAudioEntity* audioEntity, CPhysical* physical);
-    void CancelSoundsInBankSlot(short bankSlot, uint8_t bFullStop);
-    void CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, uint8_t bFullStop);
-    int16_t GetVirtualChannelForPhysicalChannel(short physicalChannel);
+    int16     AreSoundsPlayingInBankSlot(int16 bankSlot);
+    int16     AreSoundsOfThisEventPlayingForThisEntity(int16 eventId, CAEAudioEntity* audioEntity);
+    int16     AreSoundsOfThisEventPlayingForThisEntityAndPhysical(int16 eventId, CAEAudioEntity* audioEntity, CPhysical* physical);
+    void      CancelSoundsOfThisEventPlayingForThisEntity(int16 eventId, CAEAudioEntity* audioEntity);
+    void      CancelSoundsOfThisEventPlayingForThisEntityAndPhysical(int16 eventId, CAEAudioEntity* audioEntity, CPhysical* physical);
+    void      CancelSoundsInBankSlot(int16 bankSlot, uint8 bFullStop);
+    void      CancelSoundsOwnedByAudioEntity(CAEAudioEntity* audioEntity, uint8 bFullStop);
+    int16     GetVirtualChannelForPhysicalChannel(int16 physicalChannel);
 
 public:
     bool IsPaused() const { return CTimer::GetIsPaused() || m_bManuallyPaused; }

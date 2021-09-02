@@ -5,174 +5,138 @@
 
 #include "CAEWaveDecoder.h"
 
-CAEWaveDecoder::CAEWaveDecoder(CAEDataStream* dataStream)
-: CAEStreamingDecoder(dataStream)
-, initialized(false)
-, _dataStreamCopy(dataStream)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    using Constructor = void(__thiscall *)(CAEWaveDecoder*, CAEDataStream*);
-    ((Constructor) 0x503250)(this, dataStream);
-#endif
+// 0x503250
+CAEWaveDecoder::CAEWaveDecoder(CAEDataStream* dataStream) : CAEStreamingDecoder(dataStream), m_bInitialized(false), _dataStreamCopy(dataStream) {
+
 }
 
-CAEWaveDecoder::~CAEWaveDecoder()
-{
-}
+CAEWaveDecoder::~CAEWaveDecoder() {}
 
-bool CAEWaveDecoder::Initialise()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    using InitFunc = bool(__thiscall *)(CAEWaveDecoder*);
-    return ((InitFunc) 0x5032b0)(this);
-#else
+// 0x5032b0
+bool CAEWaveDecoder::Initialise() {
     // RIFF<size>WAVEfmt<space><WAVEFORMAT><WORD>
     constexpr size_t HEADER_READ_SIZE = 36;
-    size_t readed = dataStream->FillBuffer(fileHeaderArray, HEADER_READ_SIZE);
+    size_t           readed = m_dataStream->FillBuffer(fileHeaderArray, HEADER_READ_SIZE);
 
-    if (readed == HEADER_READ_SIZE && bitsPerSample == 16 && (channelCount == 1 || channelCount == 2))
-    {
+    if (readed == HEADER_READ_SIZE && bitsPerSample == 16 && (channelCount == 1 || channelCount == 2)) {
         // Look for "data" tag
-        char tag[4] = {0, 0, 0, 0};
-        std::uint32_t size;
+        char   tag[4] = {0, 0, 0, 0};
+        uint32 size;
 
-        while (true)
-        {
-            if (dataStream->FillBuffer(tag, sizeof(tag)) != sizeof(tag))
+        while (true) {
+            if (m_dataStream->FillBuffer(tag, sizeof(tag)) != sizeof(tag))
                 // EOF
                 return false;
-            if (dataStream->FillBuffer(&size, sizeof(std::uint32_t)) != sizeof(std::uint32_t))
+            if (m_dataStream->FillBuffer(&size, sizeof(uint32)) != sizeof(uint32))
                 return false;
 
             if (memcmp(tag, "data", sizeof(tag)) == 0)
                 break;
 
-            dataStream->Seek(size, SEEK_CUR);
+            m_dataStream->Seek(size, SEEK_CUR);
         }
 
-        dataPosition = dataStream->GetCurrentPosition();
+        dataPosition = m_dataStream->GetCurrentPosition();
         dataChunkSize = size;
-        initialized = true;
+        m_bInitialized = true;
 
         if (GetStreamLengthMs() < 7000)
-            initialized = false;
+            m_bInitialized = false;
     }
 
-    return initialized;
-#endif
+    return m_bInitialized;
 }
 
-size_t CAEWaveDecoder::FillBuffer(void* dest, size_t size)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    using ReadFunc = size_t(__thiscall *)(CAEWaveDecoder*, void*, size_t);
-    return ((ReadFunc) 0x5032a0)(this, dest, size);
-#else
-    switch (channelCount)
-    {
-        case 1:
-        {
-            // Read half of it
-            size_t readed = dataStream->FillBuffer(dest, size / 2);
-            std::int16_t *byteStream = reinterpret_cast<std::int16_t *> (dest);
+// 0x5032a0
+size_t CAEWaveDecoder::FillBuffer(void* dest, size_t size) {
+    switch (channelCount) {
+    case 1: {
+        // Read half of it
+        size_t        readed = m_dataStream->FillBuffer(dest, size / 2);
+        int16* byteStream = reinterpret_cast<int16*>(dest);
 
-            // Duplicate channel data
-            for (int i = static_cast<int> (readed / sizeof(std::int16_t)) - 1; i >= 0; i--)
-                byteStream[i * 2] = byteStream[i * 2 + 1] = byteStream[i];
+        // Duplicate channel data
+        for (int32 i = static_cast<int32>(readed / sizeof(int16)) - 1; i >= 0; i--)
+            byteStream[i * 2] = byteStream[i * 2 + 1] = byteStream[i];
 
-            return readed * 2;
-        }
-        case 2:
-            // Use fast path
-            return dataStream->FillBuffer(dest, size);
-        default:
-            return 0;
+        return readed * 2;
     }
-#endif
+    case 2:
+        // Use fast path
+        return m_dataStream->FillBuffer(dest, size);
+    default:
+        return 0;
+    }
 }
 
-long CAEWaveDecoder::GetStreamLengthMs()
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((long(__thiscall *)(CAEWaveDecoder*)) 0x503310)(this);
-#else
-    if (initialized)
-    {
-        std::uint32_t samples = dataChunkSize / blockAlign;
+// 0x503310
+long CAEWaveDecoder::GetStreamLengthMs() {
+    if (m_bInitialized) {
+        uint32 samples = dataChunkSize / blockAlign;
         // More precise way would be involving using GCD
-        return long((float) samples * 1000.0f / (float) sampleRate);
+        return long((float)samples * 1000.0f / (float)sampleRate);
+    }
+
+    return -1;
+}
+
+long CAEWaveDecoder::GetStreamPlayTimeMs() {
+#ifdef USE_DEFAULT_FUNCTIONS
+    return ((long(__thiscall*)(CAEWaveDecoder*))0x503360)(this);
+#else
+    if (m_bInitialized) {
+        uint32 posByte = m_dataStream->GetCurrentPosition() - dataPosition;
+        uint32 posSamples = posByte / blockAlign;
+        // More precise way would be involving using GCD
+        return long((float)posSamples * 1000.0f / (float)sampleRate);
     }
 
     return -1;
 #endif
 }
 
-long CAEWaveDecoder::GetStreamPlayTimeMs()
-{
+void CAEWaveDecoder::SetCursor(unsigned long pos) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((long(__thiscall *)(CAEWaveDecoder*)) 0x503360)(this);
+    using SeekFunc = void(__thiscall*)(CAEWaveDecoder*, unsigned long);
+    ((SeekFunc)0x5033c0)(this, pos);
 #else
-    if (initialized)
-    {
-        std::uint32_t posByte = dataStream->GetCurrentPosition() - dataPosition;
-        std::uint32_t posSamples = posByte / blockAlign;
-        // More precise way would be involving using GCD
-        return long((float) posSamples * 1000.0f / (float) sampleRate);
-    }
-
-    return -1;
-#endif
-}
-
-void CAEWaveDecoder::SetCursor(unsigned long pos)
-{
-#ifdef USE_DEFAULT_FUNCTIONS
-    using SeekFunc = void(__thiscall *)(CAEWaveDecoder*, unsigned long);
-    ((SeekFunc) 0x5033c0)(this, pos);
-#else
-    if (initialized)
-    {
+    if (m_bInitialized) {
         // The calculation is exactly in this order!
-        std::uint32_t posByte = pos * sampleRate / 1000 * blockAlign;
-        dataStream->Seek(static_cast<long> (posByte + dataPosition), SEEK_SET);
+        uint32 posByte = pos * sampleRate / 1000 * blockAlign;
+        m_dataStream->Seek(static_cast<long>(posByte + dataPosition), SEEK_SET);
     }
 #endif
 }
 
-int CAEWaveDecoder::GetSampleRate()
-{
+int32 CAEWaveDecoder::GetSampleRate() {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(__thiscall *)(CAEWaveDecoder*)) 0x503300)(this);
+    return ((int32(__thiscall*)(CAEWaveDecoder*))0x503300)(this);
 #else
-    return initialized ? static_cast<int> (sampleRate) : -1;
+    return m_bInitialized ? static_cast<int32>(sampleRate) : -1;
 #endif
 }
 
-int CAEWaveDecoder::GetStreamID()
-{
+int32 CAEWaveDecoder::GetStreamID() {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(__thiscall *)(CAEWaveDecoder*)) 0x503280)(this);
+    return ((int32(__thiscall*)(CAEWaveDecoder*))0x503280)(this);
 #else
-    return dataStream->m_nTrackId;
+    return m_dataStream->m_nTrackId;
 #endif
 }
 
-CAEWaveDecoder *CAEWaveDecoder::ctor(CAEDataStream *dataStream)
-{
+CAEWaveDecoder* CAEWaveDecoder::Constructor(CAEDataStream* dataStream) {
     this->CAEWaveDecoder::CAEWaveDecoder(dataStream);
     return this;
 }
 
-void CAEWaveDecoder::dtor()
-{
+void CAEWaveDecoder::Destructor() {
     this->CAEWaveDecoder::~CAEWaveDecoder();
 }
 
-void CAEWaveDecoder::InjectHooks()
-{
+void CAEWaveDecoder::InjectHooks() {
 #ifndef USE_DEFAULT_FUNCTIONS
-    ReversibleHooks::Install("CAEWaveDecoder", "CAEWaveDecoder", 0x503250, &CAEWaveDecoder::ctor);
-    ReversibleHooks::Install("CAEWaveDecoder", "~CAEWaveDecoder", 0x503290, &CAEWaveDecoder::dtor);
+    ReversibleHooks::Install("CAEWaveDecoder", "CAEWaveDecoder", 0x503250, &CAEWaveDecoder::Constructor);
+    ReversibleHooks::Install("CAEWaveDecoder", "~CAEWaveDecoder", 0x503290, &CAEWaveDecoder::Destructor);
     ReversibleHooks::Install("CAEWaveDecoder", "Initialise", 0x5032b0, &CAEWaveDecoder::Initialise);
     ReversibleHooks::Install("CAEWaveDecoder", "FillBuffer", 0x502470, &CAEWaveDecoder::FillBuffer);
     ReversibleHooks::Install("CAEWaveDecoder", "GetStreamLengthMs", 0x503310, &CAEWaveDecoder::GetStreamLengthMs);

@@ -39,31 +39,31 @@ public:
     bool Initialise();
     void Shutdown();
 
-    char* GetTrackPath(int32 trackID) const;
+    char*                GetTrackPath(int32 trackID) const;
     CAEStreamingDecoder* LoadUserTrack(int32 trackID);
-    bool ReadUserTracks();
-    bool ScanUserTracks();
-    void DeleteUserTracksInfo();
-    void SetUserTrackIndex(int32 index);
-    int32 SelectUserTrackIndex() const;
+    bool                 ReadUserTracks();
+    bool                 ScanUserTracks();
+    void                 DeleteUserTracksInfo();
+    void                 SetUserTrackIndex(int32 index);
+    int32                SelectUserTrackIndex() const;
 
-    eAudioFileType GetAudioFileType(const char* filename);
-    bool IsShortcut(const char* path);
-    uint8_t GetUserTrackPlayMode();
+    eAudioFileType       GetAudioFileType(const char* filename);
+    bool                 IsShortcut(const char* path);
+    uint8                GetUserTrackPlayMode();
 
 private:
     static tAudioExtensionType (&audioExtensionTypes)[7];
 
     static DWORD __stdcall WriteUserTracksThread(CAEUserRadioTrackManager* self);
-    int WriteUserTracksFile(const char* dir, size_t& currentLength, FILESTREAM file, std::vector<tUserTracksInfo>& offsets, int depth);
+    int32   WriteUserTracksFile(const char* dir, size_t& currentLength, FILESTREAM file, std::vector<tUserTracksInfo>& offsets, int32 depth);
     char* ResolveShortcut(const char* path);
 
-// Private functions which aren't part of GTASA itself
+    // Private functions which aren't part of GTASA itself
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    int WriteUserTracksFile(const std::wstring& dir, size_t& currentLength, FILESTREAM file, std::vector<tUserTracksInfo>& offsets, int depth);
+    int32 WriteUserTracksFile(const std::wstring& dir, size_t& currentLength, FILESTREAM file, std::vector<tUserTracksInfo>& offsets, int32 depth);
 
     static std::wstring ResolveShortcut(const std::wstring& path);
 };

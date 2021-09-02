@@ -30,7 +30,7 @@ void CAEWaterCannonAudioEntity::StaticInitialise() {
 
 // unused
 // 0x
-void CAEWaterCannonAudioEntity::AddAudioEvent(int, CVector&) {
+void CAEWaterCannonAudioEntity::AddAudioEvent(int32, CVector&) {
     // NOP
 }
 
@@ -49,13 +49,13 @@ void CAEWaterCannonAudioEntity::ClearSplashInfo() {
 }
 
 // 0x502EF0
-void CAEWaterCannonAudioEntity::UpdateParameters(CAESound* sound, short curPlayPos) {
-    plugin::CallMethod<0x502EF0, CAEWaterCannonAudioEntity*, CAESound*, short>(this, sound, curPlayPos);
+void CAEWaterCannonAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
+    plugin::CallMethod<0x502EF0, CAEWaterCannonAudioEntity*, CAESound*, int16>(this, sound, curPlayPos);
 }
 
 // 0x502F80
-void CAEWaterCannonAudioEntity::UpdateGenericWaterCannonSound(bool splashInfoEnabled, short a3, short bankSlotId, short sfxId, float speed, float volume, CVector posn, float soundDistance) {
-    plugin::CallMethod<0x502F80, CAEWaterCannonAudioEntity*, bool, short, short, short, float, float, CVector, float>(this, splashInfoEnabled, a3, bankSlotId, sfxId, speed, volume, posn, soundDistance);
+void CAEWaterCannonAudioEntity::UpdateGenericWaterCannonSound(bool splashInfoEnabled, int16 a3, int16 bankSlotId, int16 sfxId, float speed, float volume, CVector posn, float soundDistance) {
+    plugin::CallMethod<0x502F80, CAEWaterCannonAudioEntity*, bool, int16, int16, int16, float, float, CVector, float>(this, splashInfoEnabled, a3, bankSlotId, sfxId, speed, volume, posn, soundDistance);
 }
 
 // 0x5030D0
@@ -78,6 +78,6 @@ CAEWaterCannonAudioEntity* CAEWaterCannonAudioEntity::Constructor() {
     return this;
 }
 
-void CAEWaterCannonAudioEntity::UpdateParameters_Reversed(CAESound* sound, short curPlayPos) {
+void CAEWaterCannonAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {
     CAEWaterCannonAudioEntity::UpdateParameters(sound, curPlayPos);
 }

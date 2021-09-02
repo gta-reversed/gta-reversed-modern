@@ -11,7 +11,7 @@ CAETwinLoopSoundEntity::CAETwinLoopSoundEntity() : CAEAudioEntity() {
 }
 
 // 0x4F2AE0
-CAETwinLoopSoundEntity::CAETwinLoopSoundEntity(short bankSlotId, short soundType1, short soundType2, CAEAudioEntity* audio, uint16_t minTime, uint16_t maxTime, short sfxPlayStart1, short sfxPlayStart2) : CAEAudioEntity() {
+CAETwinLoopSoundEntity::CAETwinLoopSoundEntity(int16 bankSlotId, int16 soundType1, int16 soundType2, CAEAudioEntity* audio, uint16 minTime, uint16 maxTime, int16 sfxPlayStart1, int16 sfxPlayStart2) : CAEAudioEntity() {
     Initialise(bankSlotId, soundType1, soundType2, audio, minTime, maxTime, sfxPlayStart1, sfxPlayStart2);
 }
 
@@ -26,7 +26,7 @@ CAETwinLoopSoundEntity::~CAETwinLoopSoundEntity() {
 }
 
 // 0x4F28A0
-void CAETwinLoopSoundEntity::Initialise(short bankSlotId, short sfx1, short sfx2, CAEAudioEntity* audio, uint16_t minTime, uint16_t maxTime, short sfxPlayStart1, short sfxPlayStart2) {
+void CAETwinLoopSoundEntity::Initialise(int16 bankSlotId, int16 sfx1, int16 sfx2, CAEAudioEntity* audio, uint16 minTime, uint16 maxTime, int16 sfxPlayStart1, int16 sfxPlayStart2) {
     m_nBankSlotId        = bankSlotId;
     m_nSoundId1          = sfx1;
     m_nSoundId2          = sfx2;
@@ -63,7 +63,7 @@ void CAETwinLoopSoundEntity::UpdateTwinLoopSound(CVector posn, float volume, flo
 }
 
 // 0x4F2E90
-void CAETwinLoopSoundEntity::UpdateParameters(CAESound* sound, short curPlayPos) {
+void CAETwinLoopSoundEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
     if (curPlayPos == -1) {
         if (sound == m_pSound1)
             m_pSound1 = nullptr;
@@ -120,15 +120,12 @@ void CAETwinLoopSoundEntity::StopSoundAndForget() {
 // unused
 // 0x4F2A80
 float CAETwinLoopSoundEntity::GetEmittedVolume() {
-    if (m_pSound1 && m_bPlayingFirstSound)
-    {
+    if (m_pSound1 && m_bPlayingFirstSound) {
         return m_pSound1->m_fVolume;
-    }
-    else if (m_pSound2 != nullptr && !m_bPlayingFirstSound)
-    {
+    } else if (m_pSound2 != nullptr && !m_bPlayingFirstSound) {
         return m_pSound2->m_fVolume;
-    }
-    else return -100.0f;
+    } else
+        return -100.0f;
 }
 
 // unused
@@ -175,7 +172,7 @@ void CAETwinLoopSoundEntity::PlayTwinLoopSound(CVector posn, float volume, float
     m_bPlayingFirstSound = true;
 }
 
-void CAETwinLoopSoundEntity::UpdateParameters_Reversed(CAESound* sound, short curPlayPos) {
+void CAETwinLoopSoundEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {
     CAETwinLoopSoundEntity::UpdateParameters(sound, curPlayPos);
 }
 
