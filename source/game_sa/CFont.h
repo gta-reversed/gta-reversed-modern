@@ -181,7 +181,7 @@ public:
     static void GetTextRect(CRect* rect, float x, float y, const char* text);
     static void PrintString(float x, float y, const char* text);
     static void PrintStringFromBottom(float x, float y, const char* text);
-    static float GetLetterSize(uint8 ch);
+    static float GetCharacterSize(uint8 ch);
 };
 
 static void ReadFontsDat();

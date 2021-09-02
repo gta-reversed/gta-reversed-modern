@@ -81,7 +81,7 @@ void CFont::InjectHooks() {
     Install("CFont", "GetTextRect", 0x71A620, &CFont::GetTextRect);
     Install("CFont", "PrintString", 0x71A700, &CFont::PrintString);
     Install("CFont", "PrintStringFromBottom", 0x71A820, &CFont::PrintStringFromBottom);
-    Install("CFont", "GetLetterSize", 0x719750, &CFont::GetLetterSize);
+    Install("CFont", "GetCharacterSize", 0x719750, &CFont::GetCharacterSize);
 
     Install("", "ReadFontsDat", 0x7187C0, &ReadFontsDat);
     // Install("", "GetScriptLetterSize", 0x719670, &GetScriptLetterSize);
@@ -683,7 +683,7 @@ float CFont::GetStringWidth(char* string, bool full, bool scriptText)
                 width += GetScriptLetterSize(upper);
             }
             else {
-                width += GetLetterSize(upper);
+                width += GetCharacterSize(upper);
             }
         }
     }
@@ -773,7 +773,7 @@ void CFont::PrintStringFromBottom(float x, float y, const char* text)
 }
 
 // 0x719750
-float CFont::GetLetterSize(uint8 letterId)
+float CFont::GetCharacterSize(uint8 letterId)
 {
     uint8 propValueIdx = letterId;
 
