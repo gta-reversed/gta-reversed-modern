@@ -374,4 +374,5 @@ void InjectHooksMain()
     CAEDoorAudioEntity::InjectHooks();
 
     FxManager_c::InjectHooks();
+    FxSystemBP_c::InjectHooks();
 }
