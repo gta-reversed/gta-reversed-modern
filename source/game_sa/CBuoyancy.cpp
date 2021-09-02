@@ -269,7 +269,7 @@ void cBuoyancy::PreCalcSetup(CPhysical* pEntity, float fBuoyancy)
     m_fBuoyancy = fBuoyancy;
 }
 
-void cBuoyancy::AddSplashParticles(CPhysical* pEntity, CVector vecFrom, CVector vecTo, CVector vecSplashDir, unsigned char bReduceParticleSize)
+void cBuoyancy::AddSplashParticles(CPhysical* pEntity, CVector vecFrom, CVector vecTo, CVector vecSplashDir, uint8 bReduceParticleSize)
 {
     auto fDistBetweenPoints = DistanceBetweenPoints(vecFrom, vecTo);
     auto vecUsedSpeed = pEntity->m_vecMoveSpeed;
@@ -291,7 +291,7 @@ void cBuoyancy::AddSplashParticles(CPhysical* pEntity, CVector vecFrom, CVector 
 
     auto vecVelocityModifier = vecUsedSpeed * CVector(0.0F, 0.0F, -1.0F) * 120.0F;
 
-    auto iNumParticles = std::max(1, static_cast<int>(fDistBetweenPoints + fDistBetweenPoints));
+    auto iNumParticles = std::max(1, static_cast<int32>(fDistBetweenPoints + fDistBetweenPoints));
     for (int32_t iIter = 0; iIter < iNumParticles; ++iIter) {
         auto fCurrentProgress = static_cast<float>(iIter) / static_cast<float>(iNumParticles);
         auto vecCurPoint = Lerp(vecFrom, vecTo, fCurrentProgress);

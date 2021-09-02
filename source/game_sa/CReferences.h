@@ -6,22 +6,20 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CReference.h"
 
 #define MAX_NUM_REFERENCES 3000
 
-class  CReferences
-{
+class CReferences {
 public:
-	static CReference (&aRefs)[MAX_NUM_REFERENCES];
-	static CReference* (&pEmptyList);
+    static CReference (&aRefs)[MAX_NUM_REFERENCES];
+    static CReference*(&pEmptyList);
 
 public:
     static void InjectHooks();
 
-	static void Init();
-	static unsigned int ListSize(CReference *ref);
-	static void RemoveReferencesToPlayer();
-	static void PruneAllReferencesInWorld();
+    static void   Init();
+    static uint32 ListSize(CReference* ref);
+    static void   RemoveReferencesToPlayer();
+    static void   PruneAllReferencesInWorld();
 };

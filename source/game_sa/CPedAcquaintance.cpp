@@ -9,28 +9,28 @@ void CAcquaintance::InjectHooks() {
 }
 
 // 0x608970
-unsigned int CAcquaintance::GetAcquaintances(unsigned int acquaintanceID) {
-    return plugin::CallMethodAndReturn<unsigned int, 0x608970, CAcquaintance*, unsigned int>(this, acquaintanceID);
+uint32 CAcquaintance::GetAcquaintances(uint32 acquaintanceID) {
+    return plugin::CallMethodAndReturn<uint32, 0x608970, CAcquaintance*, uint32>(this, acquaintanceID);
 }
 
 // 0x608960
-void CAcquaintance::SetAcquaintances(int acquaintanceId, unsigned int value) {
-    plugin::CallMethod<0x608960, CAcquaintance*, int, unsigned int>(this, acquaintanceId, value);
+void CAcquaintance::SetAcquaintances(int32 acquaintanceId, uint32 value) {
+    plugin::CallMethod<0x608960, CAcquaintance*, int32, uint32>(this, acquaintanceId, value);
 }
 
 // 0x6089A0
-void CAcquaintance::ClearAcquaintances(unsigned int acquaintanceId) {
-    plugin::CallMethod<0x6089A0, CAcquaintance*, unsigned int>(this, acquaintanceId);
+void CAcquaintance::ClearAcquaintances(uint32 acquaintanceId) {
+    plugin::CallMethod<0x6089A0, CAcquaintance*, uint32>(this, acquaintanceId);
 }
 
 // 0x608DA0
-void CAcquaintance::SetAsAcquaintance(unsigned int acquaintanceId, unsigned int pedTypeBitNum) {
-    plugin::CallMethod<0x608DA0, CAcquaintance*, unsigned int, unsigned int>(this, acquaintanceId, pedTypeBitNum);
+void CAcquaintance::SetAsAcquaintance(uint32 acquaintanceId, uint32 pedTypeBitNum) {
+    plugin::CallMethod<0x608DA0, CAcquaintance*, uint32, uint32>(this, acquaintanceId, pedTypeBitNum);
 }
 
 // 0x608980
-void CAcquaintance::ClearAsAcquaintance(unsigned int acquaintanceId, unsigned int pedTypeBitNum) {
-    plugin::CallMethod<0x608980, CAcquaintance*, unsigned int, int>(this, acquaintanceId, pedTypeBitNum);
+void CAcquaintance::ClearAsAcquaintance(uint32 acquaintanceId, uint32 pedTypeBitNum) {
+    plugin::CallMethod<0x608980, CAcquaintance*, uint32, int32>(this, acquaintanceId, pedTypeBitNum);
 }
 
 // 0x608AE0

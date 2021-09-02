@@ -9,7 +9,7 @@ public:
     CTaskTimer m_timer;
 
 public:
-    CTaskComplexGoToPointAndStandStillTimed(int moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int time);
+    CTaskComplexGoToPointAndStandStillTimed(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time);
     ~CTaskComplexGoToPointAndStandStillTimed();
 
     CTask* Clone() override;
@@ -22,7 +22,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskComplexGoToPointAndStandStillTimed* Constructor(int moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int time);
+    CTaskComplexGoToPointAndStandStillTimed* Constructor(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time);
     CTask* Clone_Reversed();
     void StopTimer_Reversed(const CEvent* event);
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);

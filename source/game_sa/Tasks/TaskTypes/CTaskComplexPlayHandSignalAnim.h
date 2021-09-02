@@ -6,30 +6,30 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskComplex.h"
 
-//typedef int AnimationId;
+//typedef int32 AnimationId;
 
-class  CTaskComplexPlayHandSignalAnim : public CTaskComplex {
+class CTaskComplexPlayHandSignalAnim : public CTaskComplex {
 public:
-    int   m_animationId;
+    int32   m_animationId;
     float m_fBlendFactor;
     union {
-        unsigned char m_nFlags;
+        uint8 m_nFlags;
         struct
         {
-            unsigned char m_bLeftHandLoaded : 1;
-            unsigned char m_bRightHandLoaded : 1;
-            unsigned char m_bAnimationLoaded : 1;
-            unsigned char m_bUseFatHands : 1;
+            uint8 m_bLeftHandLoaded : 1;
+            uint8 m_bRightHandLoaded : 1;
+            uint8 m_bAnimationLoaded : 1;
+            uint8 m_bUseFatHands : 1;
         };
     };
-    unsigned char _pad[3];
+    uint8 _pad[3];
 
     CTaskComplexPlayHandSignalAnim(AnimationId animationId, float blendFactor);
-    CTask* CreateSubTask(int taskType);
-    int GetAnimIdForPed(CPed* ped);
+    CTask* CreateSubTask(int32 taskType);
+    int32 GetAnimIdForPed(CPed* ped);
 };
 
 VALIDATE_SIZE(CTaskComplexPlayHandSignalAnim, 0x18);

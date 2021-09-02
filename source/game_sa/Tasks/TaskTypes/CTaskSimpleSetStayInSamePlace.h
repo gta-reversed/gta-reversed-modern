@@ -4,8 +4,8 @@
 class CTaskSimpleSetStayInSamePlace : public CTaskSimple
 {
 public:
-    unsigned char m_bStayInSamePlace;
-    unsigned char _pad_9[3];
+    uint8 m_bStayInSamePlace;
+    uint8 _pad_9[3];
 private:
     CTaskSimpleSetStayInSamePlace* Constructor(bool bStayInSamePlace);
 public:

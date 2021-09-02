@@ -6,12 +6,11 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "RenderWare.h"
 
 struct RpHAnimBlendInterpFrame {
     RtQuat orientation;
-    RwV3d translation;
+    RwV3d  translation;
 };
 
 VALIDATE_SIZE(RpHAnimBlendInterpFrame, 0x1C);

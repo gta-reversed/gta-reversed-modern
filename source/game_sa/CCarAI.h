@@ -5,11 +5,11 @@ https://github.com/DK22Pac/plugin-sdk
 Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CVehicle.h"
 
 
-class  CCarAI
+class CCarAI
 {
 public:
 
@@ -22,8 +22,8 @@ public:
 	static void TellCarToFollowOtherCar(CVehicle* pVehicle1, CVehicle* pVehicle2, float radius);
 	static char FindPoliceBikeMissionForWantedLevel();
 	static char FindPoliceBoatMissionForWantedLevel();
-	static int FindPoliceCarSpeedForWantedLevel(CVehicle* pVehicle);
-	static float GetCarToGoToCoors(CVehicle* pVehicle1, CVector* pVector, int drivingStyle, bool bSpeedLimit20);
+	static int32 FindPoliceCarSpeedForWantedLevel(CVehicle* pVehicle);
+	static float GetCarToGoToCoors(CVehicle* pVehicle1, CVector* pVector, int32 drivingStyle, bool bSpeedLimit20);
 	static float GetCarToParkAtCoors(CVehicle* pVehicle, CVector* pVector);
 	static void MellowOutChaseSpeed(CVehicle* pVehicle);
 	static void MakeWayForCarWithSiren(CVehicle* pVehicle);

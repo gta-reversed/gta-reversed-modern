@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-CTaskSimpleUseGun* CTaskSimpleUseGun::Constructor(CEntity* pTargetEntity, CVector vecTarget, unsigned char nCommand, unsigned short nBurstLength, bool bAimImmediate)
+CTaskSimpleUseGun* CTaskSimpleUseGun::Constructor(CEntity* pTargetEntity, CVector vecTarget, uint8 nCommand, uint16 nBurstLength, bool bAimImmediate)
 {
-    return plugin::CallMethodAndReturn<CTaskSimpleUseGun*, 0x61DE60, CTaskSimpleUseGun* , CEntity*, CVector, unsigned char, unsigned short, bool>
+    return plugin::CallMethodAndReturn<CTaskSimpleUseGun*, 0x61DE60, CTaskSimpleUseGun* , CEntity*, CVector, uint8, uint16, bool>
         (this, pTargetEntity, vecTarget, nCommand, nBurstLength, bAimImmediate);
 }
 
@@ -26,12 +26,12 @@ bool CTaskSimpleUseGun::ControlGun(CPed* pPed, CEntity* target, char nCount)
     return plugin::CallMethodAndReturn<bool, 0x61E040, CTaskSimpleUseGun*, CPed*, CEntity*, char>(this, pPed, target, nCount);
 }
 
-int CTaskSimpleUseGun::SkipAim(CPed* pPed)
+int32 CTaskSimpleUseGun::SkipAim(CPed* pPed)
 {
-    return plugin::CallMethodAndReturn<int, 0x61DFA0, CTaskSimpleUseGun*, CPed*>(this, pPed);
+    return plugin::CallMethodAndReturn<int32, 0x61DFA0, CTaskSimpleUseGun*, CPed*>(this, pPed);
 }
 
-int CTaskSimpleUseGun::ClearAnim(CPed* pPed)
+int32 CTaskSimpleUseGun::ClearAnim(CPed* pPed)
 {
-    return plugin::CallMethodAndReturn<int, 0x61E190, CTaskSimpleUseGun*, CPed*>(this, pPed);
+    return plugin::CallMethodAndReturn<int32, 0x61E190, CTaskSimpleUseGun*, CPed*>(this, pPed);
 }

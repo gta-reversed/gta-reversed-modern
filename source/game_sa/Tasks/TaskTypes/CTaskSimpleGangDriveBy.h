@@ -27,12 +27,12 @@ public:
     int8_t m_nFrequencyPercentage;
     char m_nFakeShootDirn;
     char _pad;
-    short m_nAttackTimer;
-    unsigned int m_nLOSCheckTime;
+    int16 m_nAttackTimer;
+    uint32 m_nLOSCheckTime;
     bool m_nLOSBlocked;
     char _pad2[3];
     float m_fAbortRange;
-    int m_nRequiredAnimID;
+    int32 m_nRequiredAnimID;
     int32_t m_nRequiredAnimGroup;
     CAnimBlendAssociation *m_pAnimAssoc;
     CWeaponInfo *m_pWeaponInfo;

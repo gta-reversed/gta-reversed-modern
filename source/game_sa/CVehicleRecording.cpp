@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-std::int32_t& CVehicleRecording::NumPlayBackFiles = *(std::int32_t*)0x97F630;
+int32& CVehicleRecording::NumPlayBackFiles = *(int32*)0x97F630;
 CPath(&CVehicleRecording::StreamingArray)[TOTAL_RRR_MODEL_IDS] = *(CPath(*)[TOTAL_RRR_MODEL_IDS])0x97D880;
 bool(&CVehicleRecording::bUseCarAI)[TOTAL_VEHICLE_RECORDS] = *(bool(*)[TOTAL_VEHICLE_RECORDS])0x97D6C0;
 
@@ -9,24 +9,24 @@ void CVehicleRecording::Init()
     plugin::Call<0x459390>();
 }
 
-bool CVehicleRecording::HasRecordingFileBeenLoaded(std::int32_t rrrNumber)
+bool CVehicleRecording::HasRecordingFileBeenLoaded(int32 rrrNumber)
 {
-    return plugin::CallAndReturn<bool, 0x45A060, std::int32_t>(rrrNumber);
+    return plugin::CallAndReturn<bool, 0x45A060, int32>(rrrNumber);
 }
 
-void CVehicleRecording::Load(RwStream *stream, std::int32_t resourceId, std::int32_t totalSize)
+void CVehicleRecording::Load(RwStream *stream, int32 resourceId, int32 totalSize)
 {
-    return plugin::Call<0x45A8F0, RwStream*, std::int32_t, std::int32_t>(stream, resourceId, totalSize);
+    return plugin::Call<0x45A8F0, RwStream*, int32, int32>(stream, resourceId, totalSize);
 }
 
-std::int32_t CVehicleRecording::RegisterRecordingFile(char const* name)
+int32 CVehicleRecording::RegisterRecordingFile(char const* name)
 {
-    return plugin::CallAndReturn<std::int32_t, 0x459F80, char const*>(name);
+    return plugin::CallAndReturn<int32, 0x459F80, char const*>(name);
 }
 
-void CVehicleRecording::StartPlaybackRecordedCar(CVehicle* vehicle, std::int32_t pathNumber, bool bUseCarAI, bool bLooped)
+void CVehicleRecording::StartPlaybackRecordedCar(CVehicle* vehicle, int32 pathNumber, bool bUseCarAI, bool bLooped)
 {
-    plugin::Call<0x45A980, CVehicle*, std::int32_t, bool, bool>(vehicle, pathNumber, bUseCarAI, bLooped);
+    plugin::Call<0x45A980, CVehicle*, int32, bool, bool>(vehicle, pathNumber, bUseCarAI, bLooped);
 }
 
 void CVehicleRecording::StopPlaybackRecordedCar(CVehicle* vehicle)
@@ -41,9 +41,9 @@ void CVehicleRecording::SetPlaybackSpeed(CVehicle* vehicle, float speed)
 
 // unused, inlined?
 // 0x459F00
-void CVehicleRecording::RenderLineSegment(int& numVertices) {
+void CVehicleRecording::RenderLineSegment(int32& numVertices) {
     if (numVertices > 1) {
-        for (int i = 0; i < numVertices - 1; i++) {
+        for (int32 i = 0; i < numVertices - 1; i++) {
             aTempBufferIndices[2 * i] = i;
             aTempBufferIndices[2 * i + 1] = i + 1;
         }

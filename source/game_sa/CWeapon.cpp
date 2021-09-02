@@ -14,8 +14,8 @@ float& fPlayerAimScale = *(float*)0x8D6110;
 float& fPlayerAimScaleDist = *(float*)0x8D6114;
 float& fPlayerAimRotRate = *(float*)0x8D6118;
 float& SHOTGUN_SPREAD_RATE = *(float*)0x8D611C;
-uint32_t& SHOTGUN_NUM_PELLETS = *(uint32_t*)0x8D6120;
-uint32_t& SPAS_NUM_PELLETS = *(uint32_t*)0x8D6124;
+uint32& SHOTGUN_NUM_PELLETS = *(uint32*)0x8D6120;
+uint32& SPAS_NUM_PELLETS = *(uint32*)0x8D6124;
 float& PELLET_COL_SCALE_RATIO_MULT = *(float*)0x8D6128;
 float* fReloadAnimSampleFraction = (float*)0x8D612C;
 
@@ -226,7 +226,7 @@ void CWeapon::Reload(CPed* owner) {
     if (!m_nTotalAmmo)
         return;
 
-    uint32_t ammo = GetWeaponInfo(owner).m_nAmmoClip;
+    uint32 ammo = GetWeaponInfo(owner).m_nAmmoClip;
     m_nAmmoInClip = std::min(ammo, m_nTotalAmmo);
 }
 

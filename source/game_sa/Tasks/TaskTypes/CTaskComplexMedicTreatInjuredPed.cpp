@@ -15,14 +15,14 @@ void CTaskComplexMedicTreatInjuredPed::InjectHooks()
     ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "ControlSubTask", 0x65ABF0, &CTaskComplexMedicTreatInjuredPed::ControlSubTask_Reversed);
 }
 
-CTaskComplexMedicTreatInjuredPed* CTaskComplexMedicTreatInjuredPed::Constructor(CVehicle* vehicle, CPed* ped, unsigned char isDriver)
+CTaskComplexMedicTreatInjuredPed* CTaskComplexMedicTreatInjuredPed::Constructor(CVehicle* vehicle, CPed* ped, uint8 isDriver)
 {
     this->CTaskComplexMedicTreatInjuredPed::CTaskComplexMedicTreatInjuredPed(vehicle, ped, isDriver);
     return this;
 }
 
 // 0x658BA0
-CTaskComplexMedicTreatInjuredPed::CTaskComplexMedicTreatInjuredPed(CVehicle* vehicle, CPed* ped, unsigned char isDriver) : CTaskComplex()
+CTaskComplexMedicTreatInjuredPed::CTaskComplexMedicTreatInjuredPed(CVehicle* vehicle, CPed* ped, uint8 isDriver) : CTaskComplex()
 {
     m_pVehicle = vehicle;
     m_pPartnerMedic = ped;

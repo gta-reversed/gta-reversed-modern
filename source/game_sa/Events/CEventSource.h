@@ -5,5 +5,5 @@ class CPed;
 
 class CEventSource {
 public:
-    static int ComputeEventSourceType(const CEvent& event, const CPed& ped);
+    static int32 ComputeEventSourceType(const CEvent& event, const CPed& ped);
 };

@@ -21,7 +21,7 @@ CMatrixLinkList::CMatrixLinkList() : m_head(), m_tail(), m_allocatedListHead(), 
     m_pObjects = nullptr;
 }
 
-void CMatrixLinkList::Init(int count)
+void CMatrixLinkList::Init(int32 count)
 {
     m_pObjects = new CMatrixLink[count];
 
@@ -84,9 +84,9 @@ void CMatrixLinkList::MoveToFreeList(CMatrixLink* pMat)
     m_freeListHead.Insert(pMat);
 }
 
-int CMatrixLinkList::GetNumFree()
+int32 CMatrixLinkList::GetNumFree()
 {
-    int result = 0;
+    int32 result = 0;
     auto pCur = m_freeListHead.m_pNext;
     while (pCur != &m_freeListTail) {
         pCur = pCur->m_pNext;
@@ -96,9 +96,9 @@ int CMatrixLinkList::GetNumFree()
     return result;
 }
 
-int CMatrixLinkList::GetNumUsed1()
+int32 CMatrixLinkList::GetNumUsed1()
 {
-    int result = 0;
+    int32 result = 0;
     auto pCur = m_head.m_pNext;
     while (pCur != &m_tail) {
         pCur = pCur->m_pNext;
@@ -108,9 +108,9 @@ int CMatrixLinkList::GetNumUsed1()
     return result;
 }
 
-int CMatrixLinkList::GetNumUsed2()
+int32 CMatrixLinkList::GetNumUsed2()
 {
-    int result = 0;
+    int32 result = 0;
     auto pCur = m_allocatedListHead.m_pNext;
     while (pCur != &m_allocatedListTail) {
         pCur = pCur->m_pNext;

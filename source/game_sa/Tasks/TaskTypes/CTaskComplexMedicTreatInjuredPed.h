@@ -8,19 +8,19 @@ class CTaskComplexMedicTreatInjuredPed : public CTaskComplex
 public:
     CVehicle* m_pVehicle;
     CPed* m_pPartnerMedic;
-    unsigned char m_bIsDriver;
+    uint8 m_bIsDriver;
     char _pad[3];
     CAccident* m_pAccident;
     CVector m_vecAccidentPosition;
-    unsigned char m_bLeftCarOnce;
+    uint8 m_bLeftCarOnce;
     char _pad2[3];
 
 
     static void InjectHooks();
-    CTaskComplexMedicTreatInjuredPed(CVehicle* vehicle, CPed* ped, unsigned char isDriver);
+    CTaskComplexMedicTreatInjuredPed(CVehicle* vehicle, CPed* ped, uint8 isDriver);
     ~CTaskComplexMedicTreatInjuredPed();
 private:
-    CTaskComplexMedicTreatInjuredPed* Constructor(CVehicle* vehicle, CPed* ped, unsigned char isDriver);
+    CTaskComplexMedicTreatInjuredPed* Constructor(CVehicle* vehicle, CPed* ped, uint8 isDriver);
 public:
 
     CTask* Clone() override;

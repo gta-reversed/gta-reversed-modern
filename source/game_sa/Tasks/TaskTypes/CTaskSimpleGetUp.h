@@ -4,9 +4,9 @@
 
 class CTaskSimpleGetUp : public CTaskSimple {
 public:
-    unsigned char m_bIsFinished;
-    unsigned char m_bAnimFinished;
-    unsigned char _pad_A[2];
+    uint8 m_bIsFinished;
+    uint8 m_bAnimFinished;
+    uint8 _pad_A[2];
     CAnimBlendAssociation* m_pAnim;
 
 public:

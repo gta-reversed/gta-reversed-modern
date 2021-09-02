@@ -17,23 +17,27 @@
 
 union tPoolObjectFlags {
     struct {
-        unsigned char nId : 7;
-        bool bEmpty : 1;
+        uint8 nId : 7;
+        bool  bEmpty : 1;
     };
+
 private:
-    unsigned char nValue;
+    uint8 nValue;
+
 public:
-    unsigned char IntValue() { return nValue; }
+    uint8 IntValue() {
+        return nValue;
+    }
 };
 
 VALIDATE_SIZE(tPoolObjectFlags, 1);
 
-template<class A, class B = A> class CPool {
+template <class A, class B = A> class CPool {
 public:
-    B                *m_pObjects;
-    tPoolObjectFlags *m_byteMap;
-    int               m_nSize;
-    int               m_nFirstFree;
+    B*                m_pObjects;
+    tPoolObjectFlags* m_byteMap;
+    int32             m_nSize;
+    int32             m_nFirstFree;
     bool              m_bOwnsAllocations;
     bool              m_bIsLocked; // Seemingly not used anywhere, only toggled on/off
 
@@ -47,13 +51,13 @@ public:
     }
 
     // Initializes pool
-    CPool(int nSize, const char* pPoolName) {
+    CPool(int32 nSize, const char* pPoolName) {
         m_pObjects = static_cast<B*>(operator new(sizeof(B) * nSize));
-        m_byteMap = static_cast<tPoolObjectFlags*>(operator new(sizeof(tPoolObjectFlags) *  nSize));
+        m_byteMap = static_cast<tPoolObjectFlags*>(operator new(sizeof(tPoolObjectFlags) * nSize));
         m_nSize = nSize;
         m_nFirstFree = -1;
         m_bOwnsAllocations = true;
-        for (int i = 0; i < nSize; ++i) {
+        for (int32 i = 0; i < nSize; ++i) {
             m_byteMap[i].bEmpty = true;
             m_byteMap[i].nId = 0;
         }
@@ -63,11 +67,13 @@ public:
         Flush();
     }
 
-    int GetSize () { return m_nSize; }
+    int32 GetSize() {
+        return m_nSize;
+    }
 
     // Initialises a pool with preallocated
     // To be called one-time-only for statically allocated pools.
-    void Init(int nSize, void* pObjects, void* pInfos) {
+    void Init(int32 nSize, void* pObjects, void* pInfos) {
         // Since we statically allocated the pools we do not deallocate.
         assert(this->m_pObjects == nullptr);
         m_pObjects = static_cast<B*>(pObjects);
@@ -75,7 +81,7 @@ public:
         m_nSize = nSize;
         m_nFirstFree = -1;
         m_bOwnsAllocations = false;
-        for (int i = 0; i < nSize; ++i) {
+        for (int32 i = 0; i < nSize; ++i) {
             m_byteMap[i].bEmpty = true;
             m_byteMap[i].nId = 0;
         }
@@ -95,37 +101,37 @@ public:
 
     // Clears pool
     void Clear() {
-        for (int i = 0; i < m_nSize; i++)
+        for (int32 i = 0; i < m_nSize; i++)
             m_byteMap[i].bEmpty = true;
     }
 
     // Returns if specified slot is free (0x404940)
-    bool IsFreeSlotAtIndex(int idx) {
+    bool IsFreeSlotAtIndex(int32 idx) {
         return m_byteMap[idx].bEmpty;
     }
 
     // Returns slot index for this object
-    int GetIndex(A* pObject) {
+    int32 GetIndex(A* pObject) {
         return reinterpret_cast<B*>(pObject) - m_pObjects;
     }
 
     // Returns pointer to object by slot index
-    A* GetAt(int nIndex) {
-        return !IsFreeSlotAtIndex(nIndex) ? (A *)&m_pObjects[nIndex] : nullptr;
+    A* GetAt(int32 nIndex) {
+        return !IsFreeSlotAtIndex(nIndex) ? (A*)&m_pObjects[nIndex] : nullptr;
     }
 
     // Marks slot as free / used (0x404970)
-    void SetFreeAt(int idx, bool bFree) {
+    void SetFreeAt(int32 idx, bool bFree) {
         m_byteMap[idx].bEmpty = bFree;
     }
 
     // Set new id for slot (0x54F9F0)
-    void SetIdAt(int idx, unsigned char id) {
+    void SetIdAt(int32 idx, uint8 id) {
         m_byteMap[idx].nId = id;
     }
 
     // Get id for slot (0x552200)
-    unsigned char GetIdAt(int idx) {
+    uint8 GetIdAt(int32 idx) {
         return m_byteMap[idx].nId;
     }
 
@@ -148,7 +154,7 @@ public:
     }
 
     // Allocates object at a specific index from a SCM handle (ref) (0x59F610)
-    void CreateAtRef(int nRef) {
+    void CreateAtRef(int32 nRef) {
         const auto nSlot = nRef >> 8;
         m_byteMap[nSlot].bEmpty = false;
         m_byteMap[nSlot].nId = nRef & 0x7F;
@@ -158,67 +164,65 @@ public:
     }
 
     // (0x5A1C00)
-    A *New(int nRef) {
-        A *result = &m_pObjects[nRef >> 8];
+    A* New(int32 nRef) {
+        A* result = &m_pObjects[nRef >> 8];
         CreateAtRef(nRef);
         return result;
     }
 
     // Deallocates object
     void Delete(A* pObject) {
-        int nIndex = reinterpret_cast<B*>(pObject) - m_pObjects;
+        int32 nIndex = reinterpret_cast<B*>(pObject) - m_pObjects;
         m_byteMap[nIndex].bEmpty = true;
         if (nIndex < m_nFirstFree)
             m_nFirstFree = nIndex;
     }
 
     // Returns SCM handle (ref) for object (0x424160)
-    int GetRef(A* pObject) {
+    int32 GetRef(A* pObject) {
         return (GetIndex(pObject) << 8) + m_byteMap[GetIndex(pObject)].IntValue();
     }
 
     // Returns pointer to object by SCM handle (ref)
-    A* GetAtRef(int ref) {
-        int nSlotIndex = ref >> 8;
+    A* GetAtRef(int32 ref) {
+        int32 nSlotIndex = ref >> 8;
         return nSlotIndex >= 0 && nSlotIndex < m_nSize && m_byteMap[nSlotIndex].IntValue() == (ref & 0xFF) ? reinterpret_cast<A*>(&m_pObjects[nSlotIndex]) : nullptr;
     }
 
-    A* GetAtRefNoChecks(int ref)
-    {
-        int nSlotIndex = ref >> 8;
+    A* GetAtRefNoChecks(int32 ref) {
+        int32 nSlotIndex = ref >> 8;
         return GetAt(nSlotIndex);
     }
 
     // (0x54F6B0)
-    unsigned int GetNoOfUsedSpaces() {
-        unsigned int counter = 0;
-        for (int i = 0; i < m_nSize; ++i) {
+    uint32 GetNoOfUsedSpaces() {
+        uint32 counter = 0;
+        for (int32 i = 0; i < m_nSize; ++i) {
             if (!IsFreeSlotAtIndex(i))
                 ++counter;
         }
         return counter;
     }
 
-    unsigned int GetNoOfFreeSpaces() {
+    uint32 GetNoOfFreeSpaces() {
         return m_nSize - GetNoOfUsedSpaces();
     }
 
     // (0x54F690)
-    unsigned int GetObjectSize() {
+    uint32 GetObjectSize() {
         return sizeof(B);
     }
 
     // (0x5A1CD0)
-    bool IsObjectValid(A *obj) {
-        int slot = GetIndex(obj);
+    bool IsObjectValid(A* obj) {
+        int32 slot = GetIndex(obj);
         return slot >= 0 && slot < m_nSize && !IsFreeSlotAtIndex(slot);
     }
 
     // Helper so we don't write memcpy manually
-    void CopyItem(A* dest, A* src)
-    {
+    void CopyItem(A* dest, A* src) {
         *reinterpret_cast<B*>(dest) = *reinterpret_cast<B*>(src);
     }
 };
 
-VALIDATE_SIZE(CPool<int>, 0x14);
+VALIDATE_SIZE(CPool<int32>, 0x14);

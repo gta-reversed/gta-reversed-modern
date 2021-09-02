@@ -6,7 +6,7 @@ void CColModel::InjectHooks()
     ReversibleHooks::Install("CColModel", "operator delete", 0x40FC40, &CColModel::operator delete);
     ReversibleHooks::Install("CColModel", "MakeMultipleAlloc", 0x40F740, &CColModel::MakeMultipleAlloc);
     ReversibleHooks::Install("CColModel", "AllocateData_void", 0x40F810, static_cast<void(CColModel::*)()>(&CColModel::AllocateData));
-    ReversibleHooks::Install("CColModel", "AllocateData_params", 0x40F870, static_cast<void(CColModel::*)(int, int, int, int, int, bool)>(&CColModel::AllocateData));
+    ReversibleHooks::Install("CColModel", "AllocateData_params", 0x40F870, static_cast<void(CColModel::*)(int32, int32, int32, int32, int32, bool)>(&CColModel::AllocateData));
     ReversibleHooks::Install("CColModel", "RemoveCollisionVolumes", 0x40F9E0, &CColModel::RemoveCollisionVolumes);
     ReversibleHooks::Install("CColModel", "CalculateTrianglePlanes", 0x40FA30, &CColModel::CalculateTrianglePlanes);
     ReversibleHooks::Install("CColModel", "RemoveTrianglePlanes", 0x40FA40, &CColModel::RemoveTrianglePlanes);
@@ -61,7 +61,7 @@ void CColModel::AllocateData()
 }
 
 // Memory layout of m_pColData is: | CCollisionData | CColSphere[] | CColLine[]/CColDisk[] | CColBox[] | Vertices[] | CColTriangle[] |
-void CColModel::AllocateData(int numSpheres, int numBoxes, int numLines, int numVertices, int numTriangles, bool bUsesDisks)
+void CColModel::AllocateData(int32 numSpheres, int32 numBoxes, int32 numLines, int32 numVertices, int32 numTriangles, bool bUsesDisks)
 {
     const auto baseSize = sizeof(CCollisionData);
     const auto spheresSize = numSpheres * sizeof(CColSphere);
@@ -82,7 +82,7 @@ void CColModel::AllocateData(int numSpheres, int numBoxes, int numLines, int num
     auto* pTrisStart = reinterpret_cast<void*>(vertsOffset + vertsSize);
     auto space = trianglesSize + 4;
     auto* pAlignedAddress = std::align(4, trianglesSize, pTrisStart, space);// 4 bytes aligned address
-    const auto trianglesOffset = reinterpret_cast<uint32_t>(pAlignedAddress);
+    const auto trianglesOffset = reinterpret_cast<uint32>(pAlignedAddress);
     assert(trianglesOffset && trianglesOffset >= (vertsOffset + vertsSize)); // Just to make sure that the alignment works properly
 
     CColModel::AllocateData(trianglesOffset + trianglesSize);
@@ -105,7 +105,7 @@ void CColModel::AllocateData(int numSpheres, int numBoxes, int numLines, int num
     m_pColData->bUsesDisks = bUsesDisks;
 }
 
-void CColModel::AllocateData(int size)
+void CColModel::AllocateData(int32 size)
 {
     m_boundSphere.m_bIsSingleColDataAlloc = true;
     m_pColData = static_cast<CCollisionData*>(CMemoryMgr::Malloc(size));
@@ -141,7 +141,7 @@ void CColModel::RemoveTrianglePlanes()
         m_pColData->RemoveTrianglePlanes();
 }
 
-void* CColModel::operator new(unsigned int size)
+void* CColModel::operator new(uint32 size)
 {
 	return CPools::ms_pColModelPool->New();
 }

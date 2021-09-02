@@ -6,22 +6,20 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CQuaternion.h"
 
-class  CAnimBlendNode {
+class CAnimBlendNode {
 public:
-    //by Github.com / jte
-    float m_theta0; // angle between two quaternions
-    float m_theta1; // 1 / sin(m_theta0), used in slerp calculation
-    int16_t m_endKeyFrameId;
-    int16_t m_startKeyFrameId;
-    float m_timeDelta;
-    CAnimBlendSequence* m_pAnimSequence;
-    CAnimBlendAssociation*m_pAnimBlendAssociation;
+    // by Github.com / jte
+    float                  m_theta0; // angle between two quaternions
+    float                  m_theta1; // 1 / sin(m_theta0), used in slerp calculation
+    int16_t                m_endKeyFrameId;
+    int16_t                m_startKeyFrameId;
+    float                  m_timeDelta;
+    CAnimBlendSequence*    m_pAnimSequence;
+    CAnimBlendAssociation* m_pAnimBlendAssociation;
 
-    //funcs
-
+public:
     void CalcDeltas();
     void CalcDeltasCompressed();
     bool FindKeyFrame(float arg1);

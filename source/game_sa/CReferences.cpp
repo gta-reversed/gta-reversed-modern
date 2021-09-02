@@ -23,9 +23,9 @@ void CReferences::Init()
     (&CReferences::aRefs[MAX_NUM_REFERENCES - 1])->m_pNext = nullptr;
 }
 
-unsigned int CReferences::ListSize(CReference* ref)
+uint32 CReferences::ListSize(CReference* ref)
 {
-    unsigned int count = 0;
+    uint32 count = 0;
     while (ref) {
         ref = ref->m_pNext;
         ++count;

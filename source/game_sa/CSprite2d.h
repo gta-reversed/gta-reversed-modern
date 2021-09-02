@@ -22,8 +22,8 @@ public:
     // class variables
     struct RwTexture* m_pTexture;
     // static variables
-    static int& nextBufferIndex;
-    static int& nextBufferVertex;
+    static int32& nextBufferIndex;
+    static int32& nextBufferVertex;
     static float& NearScreenZ;
     static float& RecipNearClip;
     // count: 8
@@ -63,9 +63,9 @@ public:
     static void SetVertices(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4);
     static void SetVertices(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4);
     static void SetVertices(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4, float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4);
-    static void SetVertices(int numVerts, float* posn, float* texCoors, const CRGBA& color);
-    static void SetVertices(int numVerts, float* posn, CRGBA* color);
-    static void SetMaskVertices(int numVerts, float* posn, float depth);
+    static void SetVertices(int32 numVerts, float* posn, float* texCoors, const CRGBA& color);
+    static void SetVertices(int32 numVerts, float* posn, CRGBA* color);
+    static void SetMaskVertices(int32 numVerts, float* posn, float depth);
     static void SetVertices(RwD3D9Vertex* vertices, const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4, float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4);
     // draws non-textured rectangle
     static void DrawRect(const CRect& posn, const CRGBA& color);
@@ -78,7 +78,7 @@ public:
     // draws rectangle, texture could be set with SetRenderState().
     static void DrawAnyRect(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4);
     // draws a triangle with rotation (degrees)
-    static void DrawCircleAtNearClip(CVector2D const& posn, float size, const CRGBA& color, int angle);
+    static void DrawCircleAtNearClip(CVector2D const& posn, float size, const CRGBA& color, int32 angle);
     // this makes some trick with sprite z position (z = NearScreenZ + 0.000001).
     static void SetVerticesForSniper(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4);
     static void OffsetTexCoordForBilinearFiltering(float width, float height);
@@ -87,7 +87,7 @@ public:
     // non-textured polygon
     static void Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color);
     // draws progress line. Progress is a value in ranges 0 - 100.
-    static void DrawBarChart(float x, float y, unsigned short width, unsigned char height, float progress, signed char progressAdd, unsigned char drawPercentage, unsigned char drawBlackBorder, CRGBA color, CRGBA addColor);
+    static void DrawBarChart(float x, float y, uint16 width, uint8 height, float progress, signed char progressAdd, uint8 drawPercentage, uint8 drawBlackBorder, CRGBA color, CRGBA addColor);
 };
 
 VALIDATE_SIZE(CSprite2d, 4);

@@ -127,17 +127,17 @@ void CColAccel::getColDef(ColDef& colDef)
     ++CColAccel::m_iNumColBounds;
 }
 
-void CColAccel::setIplDef(int iplIndex, IplDef iplDef)
+void CColAccel::setIplDef(int32 iplIndex, IplDef iplDef)
 {
     CColAccel::m_iplDefs[iplIndex] = iplDef;
 }
 
-IplDef CColAccel::getIplDef(int iplIndex)
+IplDef CColAccel::getIplDef(int32 iplIndex)
 {
     return CColAccel::m_iplDefs[iplIndex];
 }
 
-void CColAccel::cacheIPLSection(CEntity** ppEntities, int entitiesCount)
+void CColAccel::cacheIPLSection(CEntity** ppEntities, int32 entitiesCount)
 {
     if (CColAccel::isCacheLoading())
     {
@@ -172,7 +172,7 @@ void CColAccel::cacheIPLSection(CEntity** ppEntities, int entitiesCount)
     }
 }
 
-void CColAccel::addIPLEntity(CEntity** ppEntities, int entitiesCount, int entityIndex)
+void CColAccel::addIPLEntity(CEntity** ppEntities, int32 entitiesCount, int32 entityIndex)
 {
     if (CColAccel::m_iCacheState != eColAccelState::COLACCEL_STARTED)
         return;

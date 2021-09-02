@@ -14,19 +14,19 @@ void CMissionTextOffsets::Load(uint32 length, FILESTREAM file, uint32* offset, u
     // todo: taken from re3 and not tested!
     size_t entryCount = length / sizeof(tTextOffset);
     for (size_t mi = 0; mi < entryCount; mi++) {
-        for (unsigned int i = 0; i < sizeof(data[mi].szMissionName); i++) {
+        for (uint32 i = 0; i < sizeof(data[mi].szMissionName); i++) {
             CFileMgr::Read(file, &data[i].szMissionName[i], 1);
             (*offset)++;
         }
         char* _buf = (char*)&data[mi].offset;
-        for (unsigned int i = 0; i < sizeof(data[mi].offset); i++) {
+        for (uint32 i = 0; i < sizeof(data[mi].offset); i++) {
             CFileMgr::Read(file, &_buf[i], 1);
             (*offset)++;
         }
     }
-    size = (unsigned short)entryCount;
+    size = (uint16)entryCount;
 #else
-    size = (uint16_t) (length / sizeof(tTextOffset));
+    size = (uint16) (length / sizeof(tTextOffset));
     CFileMgr::Read(file, (char*)data, sizeof(tTextOffset) * size);
     *offset += sizeof(tTextOffset) * size;
 #endif

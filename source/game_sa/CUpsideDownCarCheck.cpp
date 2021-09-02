@@ -31,16 +31,16 @@ bool CUpsideDownCarCheck::AreAnyCarsUpsideDown() {
 }
 
 // 0x4638D0
-void CUpsideDownCarCheck::AddCarToCheck(int carHandle) {
-    plugin::CallMethod<0x4638D0, int>(carHandle);
+void CUpsideDownCarCheck::AddCarToCheck(int32 carHandle) {
+    plugin::CallMethod<0x4638D0, int32>(carHandle);
 }
 
 // 0x463910
-void CUpsideDownCarCheck::RemoveCarFromCheck(int carHandle) {
-    plugin::CallMethod<0x463910, int>(carHandle);
+void CUpsideDownCarCheck::RemoveCarFromCheck(int32 carHandle) {
+    plugin::CallMethod<0x463910, int32>(carHandle);
 }
 
 // 0x463940
-bool CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int carHandle) {
-    return plugin::CallMethodAndReturn<bool, 0x463940, CUpsideDownCarCheck*, int>(this, carHandle);
+bool CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int32 carHandle) {
+    return plugin::CallMethodAndReturn<bool, 0x463940, CUpsideDownCarCheck*, int32>(this, carHandle);
 }

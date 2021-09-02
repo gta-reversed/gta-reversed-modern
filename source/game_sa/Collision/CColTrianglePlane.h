@@ -6,12 +6,11 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CompressedVector.h"
 #include "CVector.h"
 #include "CColTriangle.h"
 
-enum eTrianglePlaneOrientation : unsigned char {
+enum eTrianglePlaneOrientation : uint8 {
     POS_X = 0,
     NEG_X = 1,
     POS_Y = 2,
@@ -22,14 +21,14 @@ enum eTrianglePlaneOrientation : unsigned char {
 
 class CColTrianglePlane {
 public:
-	CompressedVector m_normal;
-	unsigned short m_nDistance;
-	unsigned char m_nOrientation;
+    CompressedVector m_normal;
+    uint16           m_nDistance;
+    uint8            m_nOrientation;
 
 public:
     static void InjectHooks();
 
-	void GetNormal(CVector &out);
-	void Set(CompressedVector  const* vertices, CColTriangle & triangle);
+    void GetNormal(CVector& out);
+    void Set(CompressedVector const* vertices, CColTriangle& triangle);
 };
 VALIDATE_SIZE(CColTrianglePlane, 0xA);

@@ -40,7 +40,7 @@ void CWeaponInfo::LoadWeaponData() {
 }
 
 // 0x00743CD0
-int CWeaponInfo::GetSkillStatIndex(int weaponType) {
+int32 CWeaponInfo::GetSkillStatIndex(int32 weaponType) {
     if (weaponType < WEAPON_PISTOL || weaponType > WEAPON_TEC9)
         return -1;
 

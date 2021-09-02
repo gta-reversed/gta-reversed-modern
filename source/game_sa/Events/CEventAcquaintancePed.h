@@ -11,7 +11,7 @@ public:
     CEventAcquaintancePed(CPed* ped);
     ~CEventAcquaintancePed();
 
-    int GetLifeTime() override { return 0; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
     CEntity* GetSourceEntity() const override { return reinterpret_cast<CEntity*>(m_ped); }
@@ -77,15 +77,15 @@ public:
 
 class CEventAcquaintancePedHateBadlyLit : public CEventAcquaintancePed {
 public:
-    std::uint32_t m_startTimeInMs;
+    uint32 m_startTimeInMs;
     CVector m_point;
 
     static void InjectHooks();
 
-    CEventAcquaintancePedHateBadlyLit(CPed* ped, std::int32_t startTimeInMs, const CVector& point);
+    CEventAcquaintancePedHateBadlyLit(CPed* ped, int32 startTimeInMs, const CVector& point);
     ~CEventAcquaintancePedHateBadlyLit() {}
 private:
-    CEventAcquaintancePedHateBadlyLit* Constructor(CPed* ped, std::int32_t startTimeInMs, const CVector& point);
+    CEventAcquaintancePedHateBadlyLit* Constructor(CPed* ped, int32 startTimeInMs, const CVector& point);
 public:
     eEventType GetEventType() const override { return EVENT_ACQUAINTANCE_PED_HATE_BADLY_LIT; }
     int32_t GetEventPriority() const override { return 25; }

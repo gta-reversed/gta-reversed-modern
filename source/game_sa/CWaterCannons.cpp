@@ -20,7 +20,7 @@ void CWaterCannons::Init() {
 }
 
 // 0x728CB0
-void CWaterCannons::UpdateOne(unsigned int pVehicle, CVector* start, CVector* end) {
+void CWaterCannons::UpdateOne(uint32 pVehicle, CVector* start, CVector* end) {
     for (auto& cannon : aCannons) {
         if (cannon.m_nId == pVehicle) {
             cannon.Update_NewInput(start, end);
@@ -43,7 +43,7 @@ void CWaterCannons::UpdateOne(unsigned int pVehicle, CVector* start, CVector* en
 
 // 0x72A3C0
 void CWaterCannons::Update() {
-    short index = 0;
+    int16 index = 0;
     for (auto& cannon : aCannons) {
         cannon.m_audio.Service();
         if (cannon.m_nId > 0) {

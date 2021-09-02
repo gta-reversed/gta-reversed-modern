@@ -22,7 +22,7 @@ void CTxdStore::InjectHooks() {
     ReversibleHooks::Install("CTxdStore", "PushCurrentTxd", 0x7316A0, &CTxdStore::PushCurrentTxd);
     ReversibleHooks::Install("CTxdStore", "PopCurrentTxd", 0x7316B0, &CTxdStore::PopCurrentTxd);
     ReversibleHooks::Install("CTxdStore", "FindTxdSlot_name", 0x731850, static_cast<int32_t (*)(const char*)>(&CTxdStore::FindTxdSlot));
-    ReversibleHooks::Install("CTxdStore", "FindTxdSlot_hash", 0x7318E0, static_cast<int32_t (*)(uint32_t)>(&CTxdStore::FindTxdSlot));
+    ReversibleHooks::Install("CTxdStore", "FindTxdSlot_hash", 0x7318E0, static_cast<int32_t (*)(uint32)>(&CTxdStore::FindTxdSlot));
     ReversibleHooks::Install("CTxdStore", "StartLoadTxd", 0x731930, &CTxdStore::StartLoadTxd);
     ReversibleHooks::Install("CTxdStore", "Create", 0x731990, &CTxdStore::Create);
     ReversibleHooks::Install("CTxdStore", "SetCurrentTxd", 0x7319C0, &CTxdStore::SetCurrentTxd);
@@ -151,7 +151,7 @@ void CTxdStore::SetCurrentTxd(int32_t index) {
 // find txd by name. Returning value is txd index
 // 0x731850
 int32_t CTxdStore::FindTxdSlot(const char* name) {
-    uint32_t key = CKeyGen::GetUppercaseKey(name);
+    uint32 key = CKeyGen::GetUppercaseKey(name);
     int32_t last = ms_lastSlotFound;
 
     for (; last >= 0; last--) {
@@ -178,7 +178,7 @@ int32_t CTxdStore::FindTxdSlot(const char* name) {
 
 // find txd by name hash. Returning value is txd index
 // 0x7318E0
-int32_t CTxdStore::FindTxdSlot(uint32_t hash) {
+int32_t CTxdStore::FindTxdSlot(uint32 hash) {
     for (int32_t i = 0; i < ms_pTxdPool->GetSize(); i++) {
         TxdDef* txd = ms_pTxdPool->GetAt(i);
         if (txd && txd->m_hash == hash)
@@ -211,7 +211,7 @@ void CTxdStore::Create(int32_t index) {
 
 // allocate new slot for this txd
 // 0x731C80
-int CTxdStore::AddTxdSlot(const char* name) {
+int32 CTxdStore::AddTxdSlot(const char* name) {
     TxdDef* txd = ms_pTxdPool->New();
     txd->m_pRwDictionary = nullptr;
     txd->m_wRefsCount = 0;

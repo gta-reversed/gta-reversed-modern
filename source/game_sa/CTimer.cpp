@@ -100,7 +100,7 @@ void CTimer::Initialise()
     auto frequency = GetOSWPerformanceFrequency();
     if (frequency) {
         timerFunc = GetOSWPerformanceTime;
-        m_snTimerDivider = (uint32_t)(frequency / 1000);
+        m_snTimerDivider = (uint32)(frequency / 1000);
     } else {
         timerFunc = GetMillisecondTime;
         m_snTimerDivider = 1;

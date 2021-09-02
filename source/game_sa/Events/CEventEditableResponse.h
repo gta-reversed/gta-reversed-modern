@@ -1,13 +1,14 @@
 #pragma once
+
 #include "CEvent.h"
 
 class CEventEditableResponse : public CEvent {
 public:
-    bool m_bAddToEventGroup;
-    bool field_D;
-    short m_taskId; // see eTaskType
-    short field_10;
-    unsigned short field_12;
+    bool   m_bAddToEventGroup;
+    bool   field_D;
+    int16  m_taskId; // see eTaskType
+    int16  field_10;
+    uint16 field_12;
 
     static void InjectHooks();
 
@@ -30,7 +31,7 @@ public:
     void TriggerLookAt(CPed* ped);
     void ComputeResponseTaskType(CPed* ped, bool bDecisionMakerTypeInGroup);
     void ComputeResponseTaskType(CPedGroup* pedGroup);
-    bool ComputeResponseTaskOfType(CPed* ped, int taskId);
+    bool ComputeResponseTaskOfType(CPed* ped, int32 taskId);
 };
 
 VALIDATE_SIZE(CEventEditableResponse, 0x14);

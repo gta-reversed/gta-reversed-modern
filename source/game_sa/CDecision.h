@@ -24,9 +24,9 @@ enum eDecisionRelationship {
 
 class CDecision {
 public:
-    int m_anTaskTypes[6];                    // see eTaskType
-    unsigned char m_anResponseChances[6][4]; // 4 different relationships : see eDecisionRelationship
-    unsigned char m_anTypeFlags[2][6];       // 2 different types : see eDecisionTypes
+    int32 m_anTaskTypes[6];                    // see eTaskType
+    uint8 m_anResponseChances[6][4]; // 4 different relationships : see eDecisionRelationship
+    uint8 m_anTypeFlags[2][6];       // 2 different types : see eDecisionTypes
 
     // 0x6040C0
     inline CDecision() {

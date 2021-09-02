@@ -1,10 +1,10 @@
-#pragma once 
+#pragma once
+
 #include "CEventEditableResponse.h"
 
 class CVehicle;
 
-class CEventVehicleOnFire : public CEventEditableResponse
-{
+class CEventVehicleOnFire : public CEventEditableResponse {
 public:
     CVehicle* m_vehicle;
 
@@ -17,7 +17,7 @@ private:
 public:
     eEventType GetEventType() const override { return EVENT_VEHICLE_ON_FIRE; }
     int32_t GetEventPriority() const override { return 54; }
-    int GetLifeTime() override { return 0; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     float GetLocalSoundLevel() override { return 60.0f; }
     CEventEditableResponse* CloneEditable() override;

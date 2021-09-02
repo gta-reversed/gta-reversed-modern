@@ -61,7 +61,7 @@ bool CEventLeaderEnteredCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
 bool CEventLeaderEnteredCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
 {
     if (m_vehicle && pedGroup->m_bMembersEnterLeadersVehicle) {
-        for (std::int32_t i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
+        for (int32 i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
             CPed* member = pedGroup->GetMembership().GetMember(i);
             if (member) {
                 if (!member->bInVehicle
@@ -93,7 +93,7 @@ bool CEventLeaderExitedCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
 
 bool CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
 {
-    for (std::int32_t i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
+    for (int32 i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
         CPedGroupMembership& memberShip = pedGroup->GetMembership();
         CPed* member = memberShip.GetMember(i);
         if (member) {

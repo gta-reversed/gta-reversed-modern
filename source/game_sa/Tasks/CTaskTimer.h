@@ -10,17 +10,17 @@
 
 class CTaskTimer {
 public:
-    unsigned int m_nStartTime;
-    int m_nInterval;
-    bool m_bStarted;
-    bool m_bStopped;
-    char _pad[2];
+    uint32 m_nStartTime;
+    int32  m_nInterval;
+    bool   m_bStarted;
+    bool   m_bStopped;
+    char   _pad[2];
 
 public:
     static void InjectHooks();
 
     // 0x420E10
-    inline CTaskTimer(unsigned int start, unsigned int interval) {
+    inline CTaskTimer(uint32 start, uint32 interval) {
         m_nStartTime = start;
         m_nInterval = interval;
         m_bStarted = true;
@@ -33,7 +33,7 @@ public:
         m_bStopped = false;
     }
 
-    inline bool Start(int time) {
+    inline bool Start(int32 time) {
         if (time >= 0) {
             m_nStartTime = CTimer::m_snTimeInMilliseconds;
             m_nInterval = time;

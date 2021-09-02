@@ -8,7 +8,7 @@
 
 #include "CRGBA.h"
 
-enum eHudColours : unsigned char {
+enum eHudColours : uint8 {
     HUD_COLOUR_RED,
     HUD_COLOUR_GREEN,
     HUD_COLOUR_DARK_BLUE,
@@ -41,11 +41,11 @@ public:
     ~CHudColours();
     CHudColours* Destructor();
 
-    void SetRGBAValue(eHudColours colorIndex, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
-    unsigned int GetIntColour(eHudColours colorIndex);
+    void SetRGBAValue(eHudColours colorIndex, uint8 red, uint8 green, uint8 blue, uint8 alpha);
+    uint32 GetIntColour(eHudColours colorIndex);
 
     CRGBA GetRGB(eHudColours colorIndex);
-    CRGBA GetRGBA(eHudColours index, unsigned char alpha);
+    CRGBA GetRGBA(eHudColours index, uint8 alpha);
 };
 
 VALIDATE_SIZE(CHudColours, 0x3C);

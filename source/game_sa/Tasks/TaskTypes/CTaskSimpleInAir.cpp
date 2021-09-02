@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 float CTaskSimpleInAir::ms_fSlowFallThreshold = -0.05F;
-unsigned int CTaskSimpleInAir::ms_nMaxSlowFallFrames = 10;
+uint32 CTaskSimpleInAir::ms_nMaxSlowFallFrames = 10;
 
 void CTaskSimpleInAir::InjectHooks()
 {

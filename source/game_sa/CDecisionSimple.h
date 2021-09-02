@@ -5,16 +5,15 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
 
-class  CDecisionSimple {
+class CDecisionSimple {
 public:
-    int m_anTasks[6]; // task types, see eTaskType
-    float m_afChances[6];
-    unsigned int m_nCount; // tasks count (max 6)
+    int32  m_anTasks[6]; // task types, see eTaskType
+    float  m_afChances[6];
+    uint32 m_nCount; // tasks count (max 6)
 
-    void Set(int* taskTypes, unsigned char* chances, int count);
-    void MakeDecision(int taskType, short& outTaskType, int& outDecisionIndex);
+    void Set(int32* taskTypes, uint8* chances, int32 count);
+    void MakeDecision(int32 taskType, int16& outTaskType, int32& outDecisionIndex);
     void SetDefault();
 };
 

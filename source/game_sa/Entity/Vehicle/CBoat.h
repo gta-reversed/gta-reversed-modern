@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CVehicle.h"
 #include "CDoor.h"
 #include "tBoatHandlingData.h"
@@ -28,45 +28,39 @@ enum eBoatNodes {
 
 class CBoat : public CVehicle {
 public:
-    CBoat(int modelIndex, eVehicleCreatedBy createdBy);
+    CBoat(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CBoat() override;
 public:
-    float              m_fMovingHiRotation; // works as counter also
-    float              m_fPropSpeed; // propeller speed
-    float              m_fPropRotation; // propeller rotation (radians)
+    float m_fMovingHiRotation; // works as counter also
+    float m_fPropSpeed;        // propeller speed
+    float m_fPropRotation;     // propeller rotation (radians)
     struct {
-        unsigned char bOnWater : 1; // is placed on water
-        unsigned char bMovingOnWater : 1;
-        unsigned char bAnchored : 1; // is anchored
+        uint8 bOnWater : 1; // is placed on water
+        uint8 bMovingOnWater : 1;
+        uint8 bAnchored : 1; // is anchored
     } m_nBoatFlags;
-private:
-    char _pad5AD[3];
-public:
-    RwFrame           *m_aBoatNodes[BOAT_NUM_NODES];
+    char               _pad5AD[3];
+    RwFrame*           m_aBoatNodes[BOAT_NUM_NODES];
     CDoor              m_boatFlap; // for marquis model
-    tBoatHandlingData *m_pBoatHandling;
+    tBoatHandlingData* m_pBoatHandling;
     float              m_fAnchoredAngle; // radians, initialised with -9999.99
-    uint32_t           m_nAttackPlayerTime;
-    int field_604; // initialised with 0, not used
+    uint32           m_nAttackPlayerTime;
+    int32              field_604;       // initialised with 0, not used
     float              m_fBurningTimer; // starts when vehicle health is lower than 250.0, boat blows up when it hits 5000.0
-    CEntity           *m_pWhoDestroyedMe;
+    CEntity*           m_pWhoDestroyedMe;
     CVector            m_vecBoatMoveForce; // m_vecBoatMoveForce = m_vecMoveForce + m_vecFrictionMoveForce
     CVector            m_vecBoatTurnForce; // m_vecBoatTurnForce = m_vecTurnForce + m_vecFrictionTurnForce
-    FxSystem_c        *m_apPropSplashFx[2];
+    FxSystem_c*        m_apPropSplashFx[2];
     CVector            m_vecWaterDamping; // { 0.0f, 0.0f, DampingPower }
-    char field_63C; // initialised with 0, maybe boat handling type (@CBoat::DebugCode), possibly a leftover
-    unsigned char      m_nPadNumber; // 0 - 3
-private:
-    char _pad63E[2];
-public:
+    char               field_63C;         // initialised with 0, maybe boat handling type (@CBoat::DebugCode), possibly a leftover
+    uint8              m_nPadNumber;      // 0 - 3
+    char               _pad63E[2];
     float              m_fLastWaterImmersionDepth; // initialised with 7.0f, 0.0f - not in water
-    short              m_nNumWaterTrailPoints;
-private:
-    char _pad646[2];
-public:
+    int16              m_nNumWaterTrailPoints;
+    char               _pad646[2];
     CVector2D          m_avecWakePoints[32];
     float              m_afWakePointLifeTime[32];
-    unsigned char      m_anWakePointIntensity[32]; // m_anWakePointIntensity[i] = boat->m_vecMoveForce.Magnitude() * 100.0f;
+    uint8              m_anWakePointIntensity[32]; // m_anWakePointIntensity[i] = boat->m_vecMoveForce.Magnitude() * 100.0f;
 
     static constexpr int32_t NUM_WAKE_GEN_BOATS = 4;
     static CBoat*(&apFrameWakeGeneratingBoats)[NUM_WAKE_GEN_BOATS]; // static CBoat *apFrameWakeGeneratingBoats[4]
@@ -77,41 +71,41 @@ public:
     static float& fShapeTime; // 0.05
     static float& fRangeMult; // 0.6
 
-    static short* waUnknArr;  // static CBoat::waUnknArr[4]
-    static short* waUnknArr2; // static CBoat::waUnknArr2[4]
+    static int16* waUnknArr;  // static CBoat::waUnknArr[4]
+    static int16* waUnknArr2; // static CBoat::waUnknArr2[4]
 
-    static const constexpr uint32_t uiNumVertices = 4;
+    static const constexpr uint32 uiNumVertices = 4;
     static RxObjSpace3DVertex* aRenderVertices;
 
-    static const constexpr uint32_t uiNumIndices = 6;
+    static const constexpr uint32 uiNumIndices = 6;
     static RxVertexIndex* auRenderIndices;
 
     static void InjectHooks();
     //funcs
 
     // Virtual methods
-    void SetModelIndex(unsigned int index) override;
+    void SetModelIndex(uint32 index) override;
     void ProcessControl() override;
     void Teleport(CVector destination, bool resetRotation) override;
     void PreRender() override;
     void Render() override;
-    void ProcessControlInputs(unsigned char playerNum) override;
-    void GetComponentWorldPosition(int componentId, CVector& posnOut) override;
-    void ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int animGroup, unsigned int arg3, float arg4) override;
-    void BlowUpCar(CEntity* damager, unsigned char bHideExplosion) override;
+    void ProcessControlInputs(uint8 playerNum) override;
+    void GetComponentWorldPosition(int32 componentId, CVector& posnOut) override;
+    void ProcessOpenDoor(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 arg3, float arg4) override;
+    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
 
     // Reversed virtual methods
 private:
-    void SetModelIndex_Reversed(unsigned int index);
+    void SetModelIndex_Reversed(uint32 index);
     void ProcessControl_Reversed();
     void Teleport_Reversed(CVector destination, bool resetRotation);
     void PreRender_Reversed();
     void inline ProcessBoatNodeRendering(eBoatNodes eNode, float fRotation, RwUInt8 ucAlpha);
     void Render_Reversed();
-    void ProcessControlInputs_Reversed(unsigned char ucPadNum);
-    void GetComponentWorldPosition_Reversed(int componentId, CVector& posnOut);
-    void ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId, unsigned int arg2, unsigned int arg3, float arg4);
-    void BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion);
+    void ProcessControlInputs_Reversed(uint8 ucPadNum);
+    void GetComponentWorldPosition_Reversed(int32 componentId, CVector& posnOut);
+    void ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 arg2, uint32 arg3, float arg4);
+    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion);
 
 public:
     inline void SetupModelNodes(); // fill m_aBoatNodes array
@@ -122,7 +116,7 @@ public:
     void AddWakePoint(CVector posn);
 
     static bool IsSectorAffectedByWake(CVector2D vecPos, float fOffset, CBoat** ppBoats);
-    static float IsVertexAffectedByWake(CVector vecPos, CBoat* pBoat, short wIndex, bool bUnkn);
+    static float IsVertexAffectedByWake(CVector vecPos, CBoat* pBoat, int16 wIndex, bool bUnkn);
     static void CheckForSkippingCalculations();
     static void FillBoatList();
 };

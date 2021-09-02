@@ -14,13 +14,9 @@ public:
     CEventScriptCommand(int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds);
     ~CEventScriptCommand();
 
-    eEventType GetEventType() const override {
-        return EVENT_SCRIPT_COMMAND;
-    }
+    eEventType GetEventType() const override { return EVENT_SCRIPT_COMMAND; }
     int32_t GetEventPriority() const override;
-    int GetLifeTime() override {
-        return 0;
-    }
+    int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override;
     bool TakesPriorityOver(const CEvent& refEvent) override;

@@ -19,8 +19,8 @@ void CPools::InjectHooks()
     ReversibleHooks::Install("CPools", "MakeSureSlotInObjectPoolIsEmpty", 0x550080, &CPools::MakeSureSlotInObjectPoolIsEmpty);
 }
 
-int CPools::CheckBuildingAtomics() {
-    return plugin::CallAndReturn<int, 0x550170>();
+int32 CPools::CheckBuildingAtomics() {
+    return plugin::CallAndReturn<int32, 0x550170>();
 }
 
 // 0x551950
@@ -29,33 +29,33 @@ void CPools::CheckPoolsEmpty() {
 }
 
 // 0x550050
-CObject* CPools::GetObject(int handle) {
-    return plugin::CallAndReturn<CObject*, 0x550050, int>(handle);
+CObject* CPools::GetObject(int32 handle) {
+    return plugin::CallAndReturn<CObject*, 0x550050, int32>(handle);
 }
 
 // 0x550020
-int CPools::GetObjectRef(CObject* object) {
-    return plugin::CallAndReturn<int, 0x550020, CObject*>(object);
+int32 CPools::GetObjectRef(CObject* object) {
+    return plugin::CallAndReturn<int32, 0x550020, CObject*>(object);
 }
 
 // 0x54FF90
-CPed* CPools::GetPed(int handle) {
-    return plugin::CallAndReturn<CPed*, 0x54FF90, int>(handle);
+CPed* CPools::GetPed(int32 handle) {
+    return plugin::CallAndReturn<CPed*, 0x54FF90, int32>(handle);
 }
 
 // 0x54FF60
-int CPools::GetPedRef(CPed* ped) {
-    return plugin::CallAndReturn<int, 0x54FF60, CPed*>(ped);
+int32 CPools::GetPedRef(CPed* ped) {
+    return plugin::CallAndReturn<int32, 0x54FF60, CPed*>(ped);
 }
 
 // 0x54FFF0
-CVehicle* CPools::GetVehicle(int handle) {
-    return plugin::CallAndReturn<CVehicle*, 0x54FFF0, int>(handle);
+CVehicle* CPools::GetVehicle(int32 handle) {
+    return plugin::CallAndReturn<CVehicle*, 0x54FFF0, int32>(handle);
 }
 
 // 0x54FFC0
-int CPools::GetVehicleRef(CVehicle* vehicle) {
-    return plugin::CallAndReturn<int, 0x54FFC0, CVehicle*>(vehicle);
+int32 CPools::GetVehicleRef(CVehicle* vehicle) {
+    return plugin::CallAndReturn<int32, 0x54FFC0, CVehicle*>(vehicle);
 }
 
 // 0x550F10
@@ -101,7 +101,7 @@ bool CPools::LoadVehiclePool() {
 }
 
 // 0x550080
-void CPools::MakeSureSlotInObjectPoolIsEmpty(int slot) {
+void CPools::MakeSureSlotInObjectPoolIsEmpty(int32 slot) {
     if (CPools::ms_pObjectPool->IsFreeSlotAtIndex(slot))
         return;
 

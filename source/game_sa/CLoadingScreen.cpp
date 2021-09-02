@@ -8,9 +8,9 @@
 #include "StdInc.h"
 
 
-int& CLoadingScreen::m_currDisplayedSplash = *(int*)0x8D093C;
-int& CLoadingScreen::m_numChunksLoaded = *(int*)0x8D0940;
-int& CLoadingScreen::m_chunkBarAppeared = *(int*)0x8D0944;
+int32& CLoadingScreen::m_currDisplayedSplash = *(int32*)0x8D093C;
+int32& CLoadingScreen::m_numChunksLoaded = *(int32*)0x8D0940;
+int32& CLoadingScreen::m_chunkBarAppeared = *(int32*)0x8D0944;
 char* CLoadingScreen::m_PopUpMessage = (char*)0xBAB268;
 char* CLoadingScreen::m_LoadingGxtMsg2 = (char*)0xBAB278;
 char* CLoadingScreen::m_LoadingGxtMsg1 = (char*)0xBAB2C8;
@@ -50,7 +50,7 @@ void CLoadingScreen::RenderSplash() {
 
 // 0x5900B0
 void CLoadingScreen::LoadSplashes(bool bStarting, bool bNvidia) {
-    plugin::Call<0x5900B0, unsigned char, unsigned char>(bStarting, bNvidia);
+    plugin::Call<0x5900B0, uint8, uint8>(bStarting, bNvidia);
 }
 
 // 0x590220
@@ -109,8 +109,8 @@ void CLoadingScreen::DoPCTitleFadeIn() {
 }
 
 // 0x590AC0
-void CLoadingScreen::DoPCScreenChange(unsigned int bFinish) {
-    plugin::Call<0x590AC0, unsigned int>(bFinish);
+void CLoadingScreen::DoPCScreenChange(uint32 bFinish) {
+    plugin::Call<0x590AC0, uint32>(bFinish);
 }
 
 // 0x590D00

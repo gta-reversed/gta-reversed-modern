@@ -45,8 +45,8 @@ CTask* CTaskComplexArrestPed::ControlSubTask(CPed* ped)
     return plugin::CallMethodAndReturn<CTask*, 0x68D350, CTaskComplexArrestPed*, CPed*>(this, ped);
 }
 
-CTask* CTaskComplexArrestPed::CreateSubTask(std::int32_t taskId, CPed* ped)
+CTask* CTaskComplexArrestPed::CreateSubTask(int32 taskId, CPed* ped)
 {
-    return plugin::CallMethodAndReturn<CTask*, 0x68CF80, CTaskComplexArrestPed*, std::int32_t, CPed*>(this, taskId, ped);
+    return plugin::CallMethodAndReturn<CTask*, 0x68CF80, CTaskComplexArrestPed*, int32, CPed*>(this, taskId, ped);
 }
 

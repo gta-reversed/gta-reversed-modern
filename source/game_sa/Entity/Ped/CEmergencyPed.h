@@ -6,17 +6,15 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CPed.h"
 
-class  CEmergencyPed : public CPed
-{
+class CEmergencyPed : public CPed {
 public:
-	CEmergencyPed(unsigned int pedType, unsigned int modelIndex);
+    CEmergencyPed(uint32 pedType, uint32 modelIndex);
 
-	bool InRange(CPed *ped);
-	
-	void ProcessControl();
+    bool InRange(CPed* ped);
+
+    void ProcessControl();
 };
 
 VALIDATE_SIZE(CEmergencyPed, 0x79C);

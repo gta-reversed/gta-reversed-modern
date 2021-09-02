@@ -19,7 +19,7 @@ void CTaskComplexWander::InjectHooks()
     ReversibleHooks::Install("CTaskComplexWander", "GetWanderTaskByPedType", 0x673D00, CTaskComplexWander::GetWanderTaskByPedType);
 }
 
-CTaskComplexWander::CTaskComplexWander(int moveState, unsigned char dir, bool bWanderSensibly, float fTargetRadius) {
+CTaskComplexWander::CTaskComplexWander(int32 moveState, uint8 dir, bool bWanderSensibly, float fTargetRadius) {
     m_nMoveState = moveState;
     m_nDir = dir;
     m_fTargetRadius = fTargetRadius;
@@ -34,7 +34,7 @@ CTaskComplexWander::~CTaskComplexWander() {
     // nothing here
 }
 
-CTaskComplexWander* CTaskComplexWander::Constructor(int moveState, unsigned char dir, bool bWanderSensibly, float fTargetRadius) {
+CTaskComplexWander* CTaskComplexWander::Constructor(int32 moveState, uint8 dir, bool bWanderSensibly, float fTargetRadius) {
     this->CTaskComplexWander::CTaskComplexWander(moveState, dir, bWanderSensibly, 0.5f);
     return this;
 }
@@ -97,10 +97,10 @@ void CTaskComplexWander::UpdatePathNodes(CPed* pPed, int8_t dir, CNodeAddress* o
 CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
 {
     bool bTheTaskIDIs181 = false;
-    int taskId = m_pSubTask->GetId();
+    int32 taskId = m_pSubTask->GetId();
     if (taskId > TASK_SIMPLE_SCRATCH_HEAD)
     {
-        int theTaskID = taskId - TASK_COMPLEX_LEAVE_CAR;
+        int32 theTaskID = taskId - TASK_COMPLEX_LEAVE_CAR;
         if (theTaskID) // if taskId >= TASK_COMPLEX_LEAVE_CAR_AND_DIE
         {
             theTaskID = theTaskID - 15;
@@ -150,7 +150,7 @@ CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
             return (CTask*)pTaskSimpleScratchHead;
         }
 
-        int theTaskID = taskId - TASK_COMPLEX_OBSERVE_TRAFFIC_LIGHTS_AND_ACHIEVE_HEADING;
+        int32 theTaskID = taskId - TASK_COMPLEX_OBSERVE_TRAFFIC_LIGHTS_AND_ACHIEVE_HEADING;
         if (!theTaskID)
         {
             return CreateSubTask(ped, TASK_SIMPLE_GO_TO_POINT);
@@ -253,7 +253,7 @@ CTask* CTaskComplexWander::CreateFirstSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped)
 {
-    int subTaskId = m_pSubTask->GetId();
+    int32 subTaskId = m_pSubTask->GetId();
     if (subTaskId == TASK_COMPLEX_LEAVE_CAR || subTaskId == TASK_SIMPLE_CAR_DRIVE_TIMED)
     {
         return m_pSubTask;
@@ -305,7 +305,7 @@ CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped)
 
 void CTaskComplexWander::UpdateDir_Reversed(CPed* pPed)
 {
-    unsigned char newDir = m_nDir;
+    uint8 newDir = m_nDir;
     if (m_NextNode.m_wAreaId != -1)
     {
         if (ThePaths.m_pPathNodes[m_NextNode.m_wAreaId])
@@ -317,7 +317,7 @@ void CTaskComplexWander::UpdateDir_Reversed(CPed* pPed)
                 if (pPathNode->m_nNumLinks >= 3 && CTimer::m_FrameCounter != m_nLastUpdateDirFrameCount && m_bWanderSensibly)
                 {
                     m_nLastUpdateDirFrameCount = CTimer::m_FrameCounter;
-                    unsigned char remainder = (3 * CTimer::m_FrameCounter + pPed->m_nRandomSeed) % 100;
+                    uint8 remainder = (3 * CTimer::m_FrameCounter + pPed->m_nRandomSeed) % 100;
                     if (remainder <= 90u)
                     {
                         if (remainder > 80u)
@@ -339,8 +339,8 @@ void CTaskComplexWander::UpdateDir_Reversed(CPed* pPed)
         int8_t outDir;
         UpdatePathNodes(pPed, newDir, &m_LastNode, &m_NextNode, &outDir);
 
-        unsigned char currentDir = m_nDir;
-        unsigned char theDir = outDir;
+        uint8 currentDir = m_nDir;
+        uint8 theDir = outDir;
         if (outDir <= currentDir)
         {
             theDir = m_nDir;
@@ -366,10 +366,10 @@ void CTaskComplexWander::UpdatePathNodes_Reversed(CPed* pPed, int8_t dir, CNodeA
     ThePaths.FindNextNodeWandering(PATH_TYPE_BOATS, pos.x, pos.y, pos.z, originNode, targetNode, dir, outDir);
 }
 
-CTask* CTaskComplexWander::CreateSubTask(CPed* ped, int taskId)
+CTask* CTaskComplexWander::CreateSubTask(CPed* ped, int32 taskId)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CTask*, 0x671CB0, CTaskComplexWander*, CPed*, int>(this, ped, taskId);
+    return plugin::CallMethodAndReturn<CTask*, 0x671CB0, CTaskComplexWander*, CPed*, int32>(this, ped, taskId);
 #else
     if (taskId > TASK_COMPLEX_LEAVE_CAR)
     {
@@ -563,7 +563,7 @@ CTaskComplexWander* CTaskComplexWander::GetWanderTaskByPedType(CPed* pPed)
 #ifdef USE_DEFAULT_FUNCTIONS 
     return plugin::CallAndReturn<CTaskComplexWander*, 0x673D00, CPed*>(pPed);
 #else
-    unsigned char randomDir = CGeneral::GetRandomNumberInRange(0, 8);
+    uint8 randomDir = CGeneral::GetRandomNumberInRange(0, 8);
     switch (pPed->m_nPedType)
     {
     case PED_TYPE_COP:

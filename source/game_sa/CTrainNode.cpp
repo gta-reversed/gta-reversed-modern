@@ -59,6 +59,6 @@ float CTrainNode::GetDistanceFromStart() {
 }
 
 // 0x6F5F80
-unsigned char CTrainNode::GetLightingFromCollision() {
-    return ((unsigned char(__thiscall*)(CTrainNode*))0x6F5F80)(this);
+uint8 CTrainNode::GetLightingFromCollision() {
+    return ((uint8(__thiscall*)(CTrainNode*))0x6F5F80)(this);
 }

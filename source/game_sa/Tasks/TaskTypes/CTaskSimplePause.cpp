@@ -7,7 +7,7 @@ void CTaskSimplePause::InjectHooks()
     ReversibleHooks::Install("CTaskSimplePause", "MakeAbortable", 0x48E810, &CTaskSimplePause::MakeAbortable_Reversed);
 }
 
-CTaskSimplePause::CTaskSimplePause(int time)
+CTaskSimplePause::CTaskSimplePause(int32 time)
 {
     m_timer.m_nStartTime = 0;
     m_timer.m_nInterval = 0;
@@ -21,10 +21,10 @@ CTaskSimplePause::~CTaskSimplePause()
     // nothing here
 }
 
-CTaskSimplePause* CTaskSimplePause::Constructor(int time)
+CTaskSimplePause* CTaskSimplePause::Constructor(int32 time)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTaskSimplePause*, 0x48E750, CTask*, int>(this, time);
+    return plugin::CallMethodAndReturn<CTaskSimplePause*, 0x48E750, CTask*, int32>(this, time);
 #else
     this->CTaskSimplePause::CTaskSimplePause(time);
     return this;
@@ -47,7 +47,7 @@ bool CTaskSimplePause::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
 bool CTaskSimplePause::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x48E810, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x48E810, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
 #else
     return CTaskSimplePause::MakeAbortable_Reversed(ped, priority, event);
 #endif

@@ -46,18 +46,18 @@ void CPad::ReconcileTwoControllersInput(CControllerState const& controllerA, CCo
 }
 
 // 0x53F910
-void CPad::SetDrunkInputDelay(int delay) {
-    plugin::CallMethod<0x53F910, CPad*, int>(this, delay);
+void CPad::SetDrunkInputDelay(int32 delay) {
+    plugin::CallMethod<0x53F910, CPad*, int32>(this, delay);
 }
 
 // 0x53F920
-void CPad::StartShake(short time, unsigned char frequency, unsigned int arg2) {
-    plugin::CallMethod<0x53F920, CPad*, short, unsigned char, unsigned int>(this, time, frequency, arg2);
+void CPad::StartShake(int16 time, uint8 frequency, uint32 arg2) {
+    plugin::CallMethod<0x53F920, CPad*, int16, uint8, uint32>(this, time, frequency, arg2);
 }
 
 // 0x53F9A0
-void CPad::StartShake_Distance(short time, unsigned char frequency, float x, float y, float z) {
-    plugin::CallMethod<0x53F9A0, CPad*, short, unsigned char, float, float, float>(this, time, frequency, x, y, z);
+void CPad::StartShake_Distance(int16 time, uint8 frequency, float x, float y, float z) {
+    plugin::CallMethod<0x53F9A0, CPad*, int16, uint8, float, float, float>(this, time, frequency, x, y, z);
 }
 
 // 0x53FA70
@@ -72,13 +72,13 @@ void CPad::ProcessPCSpecificStuff() {
 }
 
 // 0x53FB50
-void CPad::StopShaking(short arg0) {
-    plugin::CallMethod<0x53FB50, CPad*, short>(this, arg0);
+void CPad::StopShaking(int16 arg0) {
+    plugin::CallMethod<0x53FB50, CPad*, int16>(this, arg0);
 }
 
 // 0x53FB70
-CPad* CPad::GetPad(int padNumber) {
-    return plugin::CallAndReturn<CPad*, 0x53FB70, int>(padNumber);
+CPad* CPad::GetPad(int32 padNumber) {
+    return plugin::CallAndReturn<CPad*, 0x53FB70, int32>(padNumber);
 }
 
 int16_t CPad::GetCarGunLeftRight()
@@ -92,31 +92,31 @@ int16_t CPad::GetCarGunUpDown()
 }
 
 // 0x53FB80
-short CPad::GetSteeringLeftRight() {
-    return plugin::CallMethodAndReturn<short, 0x53FB80, CPad*>(this);
+int16 CPad::GetSteeringLeftRight() {
+    return plugin::CallMethodAndReturn<int16, 0x53FB80, CPad*>(this);
 }
 
 // 0x53FBD0
-short CPad::GetSteeringUpDown() {
-    return plugin::CallMethodAndReturn<short, 0x53FBD0, CPad*>(this);
+int16 CPad::GetSteeringUpDown() {
+    return plugin::CallMethodAndReturn<int16, 0x53FBD0, CPad*>(this);
 }
 
-short CPad::GetPedWalkLeftRight(CPed* pPed) {
-    return plugin::CallMethodAndReturn<short, 0x540DC0, CPad*, CPed*>(this, pPed);
+int16 CPad::GetPedWalkLeftRight(CPed* pPed) {
+    return plugin::CallMethodAndReturn<int16, 0x540DC0, CPad*, CPed*>(this, pPed);
 }
 
-short CPad::GetPedWalkUpDown(CPed* pPed) {
-    return plugin::CallMethodAndReturn<short, 0x540E20, CPad*, CPed*>(this, pPed);
+int16 CPad::GetPedWalkUpDown(CPed* pPed) {
+    return plugin::CallMethodAndReturn<int16, 0x540E20, CPad*, CPed*>(this, pPed);
 }
 
 // 0x53FC90
-short CPad::GetPedWalkLeftRight() {
-    return plugin::CallMethodAndReturn<short, 0x53FC90, CPad*>(this);
+int16 CPad::GetPedWalkLeftRight() {
+    return plugin::CallMethodAndReturn<int16, 0x53FC90, CPad*>(this);
 }
 
 // 0x53FD30
-short CPad::GetPedWalkUpDown() {
-    return plugin::CallMethodAndReturn<short, 0x53FD30, CPad*>(this);
+int16 CPad::GetPedWalkUpDown() {
+    return plugin::CallMethodAndReturn<int16, 0x53FD30, CPad*>(this);
 }
 
 // 0x53FDD0
@@ -155,23 +155,23 @@ bool CPad::GetHydraulicJump() {
 }
 
 // 0x53FF90
-short CPad::GetCarGunFired() {
-    return plugin::CallMethodAndReturn<short, 0x53FF90, CPad*>(this);
+int16 CPad::GetCarGunFired() {
+    return plugin::CallMethodAndReturn<int16, 0x53FF90, CPad*>(this);
 }
 
 // 0x53FFE0
-short CPad::CarGunJustDown() {
-    return plugin::CallMethodAndReturn<short, 0x53FFE0, CPad*>(this);
+int16 CPad::CarGunJustDown() {
+    return plugin::CallMethodAndReturn<int16, 0x53FFE0, CPad*>(this);
 }
 
 // 0x540040
-short CPad::GetHandBrake() {
-    return plugin::CallMethodAndReturn<short, 0x540040, CPad*>(this);
+int16 CPad::GetHandBrake() {
+    return plugin::CallMethodAndReturn<int16, 0x540040, CPad*>(this);
 }
 
 // 0x540080
-short CPad::GetBrake() {
-    return plugin::CallMethodAndReturn<short, 0x540080, CPad*>(this);
+int16 CPad::GetBrake() {
+    return plugin::CallMethodAndReturn<int16, 0x540080, CPad*>(this);
 }
 
 // 0x5400D0
@@ -185,18 +185,18 @@ bool CPad::ExitVehicleJustDown() {
 }
 
 // 0x540340
-unsigned char CPad::GetMeleeAttack(bool bCheckButtonCircleStateOnly) {
-    return plugin::CallMethodAndReturn<unsigned char, 0x540340, CPad*, bool>(this, bCheckButtonCircleStateOnly);
+uint8 CPad::GetMeleeAttack(bool bCheckButtonCircleStateOnly) {
+    return plugin::CallMethodAndReturn<uint8, 0x540340, CPad*, bool>(this, bCheckButtonCircleStateOnly);
 }
 
 // 0x540390
-unsigned char CPad::MeleeAttackJustDown(bool bCheckButtonCircleStateOnly) {
-    return plugin::CallMethodAndReturn<unsigned char, 0x540390, CPad*, bool>(this, bCheckButtonCircleStateOnly);
+uint8 CPad::MeleeAttackJustDown(bool bCheckButtonCircleStateOnly) {
+    return plugin::CallMethodAndReturn<uint8, 0x540390, CPad*, bool>(this, bCheckButtonCircleStateOnly);
 }
 
 // 0x5403F0
-short CPad::GetAccelerate() {
-    return plugin::CallMethodAndReturn<short, 0x5403F0, CPad*>(this);
+int16 CPad::GetAccelerate() {
+    return plugin::CallMethodAndReturn<int16, 0x5403F0, CPad*>(this);
 }
 
 // 0x540440
@@ -270,8 +270,8 @@ bool CPad::ShiftTargetRightJustDown() {
 }
 
 // 0x5408B0
-short CPad::GetDisplayVitalStats(CPed* ped) {
-    return plugin::CallMethodAndReturn<short, 0x5408B0, CPad*, CPed*>(this, ped);
+int16 CPad::GetDisplayVitalStats(CPed* ped) {
+    return plugin::CallMethodAndReturn<int16, 0x5408B0, CPad*, CPed*>(this, ped);
 }
 
 // 0x540A70
@@ -376,7 +376,7 @@ void CPad::Clear(bool enablePlayerControls, bool resetPhase) {
     NoShakeFreq = 0;
 }
 
-CPad* GetPad(int padNumber)
+CPad* GetPad(int32 padNumber)
 {
     return &CPad::Pads[padNumber];
 }
@@ -386,9 +386,9 @@ void CPad::ProcessPad(bool padNum)
     ((void(__cdecl*)(bool))0x746A10)(padNum);
 }
 
-void CPad::Update(int pad)
+void CPad::Update(int32 pad)
 {
-    ((void(__thiscall*)(CPad*, int))0x541C40)(this, pad);
+    ((void(__thiscall*)(CPad*, int32))0x541C40)(this, pad);
 }
 
 // 0x541DD0
@@ -417,9 +417,9 @@ void CPad::SetTouched()
     plugin::CallMethod<0x53F200, CPad*>(this);
 }
 
-unsigned int CPad::GetTouchedTimeDelta()
+uint32 CPad::GetTouchedTimeDelta()
 {
-    return plugin::CallMethodAndReturn<unsigned int, 0x53F210, CPad*>(this);
+    return plugin::CallMethodAndReturn<uint32, 0x53F210, CPad*>(this);
 }
 
 bool CPad::WeaponJustDown(CPed* pPed)
@@ -432,24 +432,24 @@ bool CPad::GetEnterTargeting()
     return plugin::CallMethodAndReturn<bool, 0x5406B0, CPad*>(this);
 }
 
-int CPad::GetWeapon(CPed* pPed)
+int32 CPad::GetWeapon(CPed* pPed)
 {
-    return plugin::CallMethodAndReturn<int, 0x540180, CPad*, CPed*>(this, pPed);
+    return plugin::CallMethodAndReturn<int32, 0x540180, CPad*, CPed*>(this, pPed);
 }
 
-short CPad::AimWeaponLeftRight(CPed* pPed)
+int16 CPad::AimWeaponLeftRight(CPed* pPed)
 {
-    return plugin::CallMethodAndReturn<short, 0x541040, CPad*, CPed*>(this, pPed);
+    return plugin::CallMethodAndReturn<int16, 0x541040, CPad*, CPed*>(this, pPed);
 }
 
-short CPad::AimWeaponUpDown(CPed* pPed)
+int16 CPad::AimWeaponUpDown(CPed* pPed)
 {
-    return plugin::CallMethodAndReturn<short, 0x5410C0, CPad*, CPed*>(this, pPed);
+    return plugin::CallMethodAndReturn<int16, 0x5410C0, CPad*, CPed*>(this, pPed);
 }
 
-bool CPad::IsStandardKeyJustDown(std::uint8_t key)
+bool CPad::IsStandardKeyJustDown(uint8 key)
 {
-    return plugin::CallMethodAndReturn<bool, 0x4D59B0, CPad*, std::uint8_t>(this, key);
+    return plugin::CallMethodAndReturn<bool, 0x4D59B0, CPad*, uint8>(this, key);
 }
 
 bool CPad::IsCtrlJustDown()
@@ -461,7 +461,7 @@ bool CPad::IsCtrlJustDown()
     return false;
 }
 
-bool CPad::IsStandardKeyPressed(std::uint8_t key)
+bool CPad::IsStandardKeyPressed(uint8 key)
 {
     return NewKeyState.standardKeys[key] && OldKeyState.standardKeys[key];
 }
@@ -481,7 +481,7 @@ bool CPad::isEnterJustPressed() {
 }
 
 // 0x4D59B0
-bool CPad::isStandardKeyJustPressed(std::uint8_t key) {
+bool CPad::isStandardKeyJustPressed(uint8 key) {
     return NewKeyState.standardKeys[key] && !OldKeyState.standardKeys[key];;
 }
 

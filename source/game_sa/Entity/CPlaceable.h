@@ -9,7 +9,7 @@
 #include "CSimpleTransform.h"
 #include "CMatrixLink.h"
 
-class  CPlaceable {
+class CPlaceable {
 protected:
     CPlaceable(plugin::dummy_func_t) {}
     CPlaceable();
@@ -46,7 +46,7 @@ public:
     void SetMatrix(CMatrix& matrix);
 
 public:
-    static constexpr uint32_t NUM_MATRICES_TO_CREATE = 900;
+    static constexpr uint32 NUM_MATRICES_TO_CREATE = 900;
     
     inline CVector& GetRight() const { return m_matrix->GetRight(); }
     inline CVector& GetForward() const { return m_matrix->GetForward(); }

@@ -4,10 +4,10 @@
 class CTaskSimpleAchieveHeading : public CTaskSimple
 {
 public:
-    int field_8;
-    int field_C;
-    int field_10;
-    int field_14;
+    int32 field_8;
+    int32 field_C;
+    int32 field_10;
+    int32 field_14;
 
     CTaskSimpleAchieveHeading(float fAngle, float arg2, float arg3);
     ~CTaskSimpleAchieveHeading() override;

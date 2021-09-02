@@ -81,8 +81,8 @@ bool CProjectileInfo::RemoveIfThisIsAProjectile(CObject* object) {
 
 // Methods
 // 0x737B80
-void CProjectileInfo::RemoveFXSystem(uint8_t bInstantly) {
-    plugin::CallMethod<0x737B80, uint8_t>(bInstantly);
+void CProjectileInfo::RemoveFXSystem(uint8 bInstantly) {
+    plugin::CallMethod<0x737B80, uint8>(bInstantly);
 }
 
 // Virtual methods

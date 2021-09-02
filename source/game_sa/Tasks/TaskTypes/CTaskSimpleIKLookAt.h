@@ -6,19 +6,19 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CAnimBlendAssociation.h"
 #include "CTaskSimpleIKChain.h"
 
 
-class  CTaskSimpleIKLookAt : public CTaskSimpleIKChain {
+class CTaskSimpleIKLookAt : public CTaskSimpleIKChain {
 public:
     bool    m_bUseTorso;
     char     m_priority;
 
-    CTaskSimpleIKLookAt(char* idString _IGNORED_ ,CEntity* pEntity,int time,int offsetBoneTag, RwV3d offsetPos,
-        bool bUseTorso,float speed,int blendTime,int m_priority);
+    CTaskSimpleIKLookAt(char* idString _IGNORED_ ,CEntity* pEntity,int32 time,int32 offsetBoneTag, RwV3d offsetPos,
+        bool bUseTorso,float speed,int32 blendTime,int32 m_priority);
 };
 
 VALIDATE_SIZE(CTaskSimpleIKLookAt, 0x5C);

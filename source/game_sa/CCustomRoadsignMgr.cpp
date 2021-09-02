@@ -56,7 +56,7 @@ void CCustomRoadsignMgr::Shutdown()
     CCustomRoadsignMgr::pCharsetTex = nullptr;
 }
 
-RwTexture* CCustomRoadsignMgr::CreateRoadsignTexture(char* pName, int numOfChars)
+RwTexture* CCustomRoadsignMgr::CreateRoadsignTexture(char* pName, int32 numOfChars)
 {
     auto* pRaster = RwRasterCreate(SIGN_CHAR_WIDTH * numOfChars, SIGN_CHAR_HEIGHT, 32, rwRASTERFORMAT8888 | rwRASTERPIXELLOCKEDWRITE);
     assert(pRaster); //TODO: Remove if crash cause is found
@@ -94,7 +94,7 @@ RwTexture* CCustomRoadsignMgr::CreateRoadsignTexture(char* pName, int numOfChars
     return pTexture;
 }
 
-RwTexture* CCustomRoadsignMgr::SetupRoadsignAtomic(RpAtomic* pAtomic, char* pName, int numOfChars)
+RwTexture* CCustomRoadsignMgr::SetupRoadsignAtomic(RpAtomic* pAtomic, char* pName, int32 numOfChars)
 {
     auto* pTexture = CCustomRoadsignMgr::CreateRoadsignTexture(pName, numOfChars);
     if (!pTexture)
@@ -104,13 +104,13 @@ RwTexture* CCustomRoadsignMgr::SetupRoadsignAtomic(RpAtomic* pAtomic, char* pNam
     return reinterpret_cast<RwTexture*>(pAtomic); //BUG? This method isn't used anywhere anyways
 }
 
-RpAtomic* CCustomRoadsignMgr::SetAtomicAlpha(RpAtomic* pAtomic, unsigned char alpha)
+RpAtomic* CCustomRoadsignMgr::SetAtomicAlpha(RpAtomic* pAtomic, uint8 alpha)
 {
     RpGeometryForAllMaterials(RpAtomicGetGeometry(pAtomic), RoadsignSetMaterialAlphaCB, reinterpret_cast<void*>(alpha));
     return pAtomic;
 }
 
-RpAtomic* CCustomRoadsignMgr::CreateRoadsignAtomicA(float fWidth, float fHeight, signed int numLines, char* pLine1, char* pLine2, char* pLine3, char* pLine4, int lettersPerLine, unsigned char ucPallete)
+RpAtomic* CCustomRoadsignMgr::CreateRoadsignAtomicA(float fWidth, float fHeight, signed int numLines, char* pLine1, char* pLine2, char* pLine3, char* pLine4, int32 lettersPerLine, uint8 ucPallete)
 {
     char* apLines[]{ pLine1, pLine2, pLine3, pLine4 };
     RpMaterial* apMaterials[4]{};
@@ -289,7 +289,7 @@ RpAtomic* CCustomRoadsignMgr::CreateRoadsignAtomicA(float fWidth, float fHeight,
     return nullptr;
 }
 
-RpAtomic* CCustomRoadsignMgr::CreateRoadsignAtomic(float xScale, float yScale, signed int numLines, char* pLine1, char* pLine2, char* pLine3, char* pLine4, int lettersPerLine, unsigned char ucPallete)
+RpAtomic* CCustomRoadsignMgr::CreateRoadsignAtomic(float xScale, float yScale, signed int numLines, char* pLine1, char* pLine2, char* pLine3, char* pLine4, int32 lettersPerLine, uint8 ucPallete)
 {
     char dummy = ' ';
     auto* usedLine1 = pLine1 ? pLine1 : &dummy;
@@ -337,7 +337,7 @@ RpMaterial* RoadsignSetMaterialTextureCB(RpMaterial* material, void* data)
     return material;
 }
 
-bool RoadsignGenerateTextRaster(char* roadName, int numLetters, RwRaster* charsetRaster, int unused, RwRaster* signRaster)
+bool RoadsignGenerateTextRaster(char* roadName, int32 numLetters, RwRaster* charsetRaster, int32 unused, RwRaster* signRaster)
 {
     auto* signLock = reinterpret_cast<RwRGBA*>(RwRasterLock(signRaster, 0, rwRASTERLOCKWRITE | rwRASTERLOCKNOFETCH));
     if (!signLock)
@@ -360,7 +360,7 @@ bool RoadsignGenerateTextRaster(char* roadName, int numLetters, RwRaster* charse
 
     for (auto ind = 0; ind < numLetters; ++ind)
     {
-        int col = 1, row = 1;
+        int32 col = 1, row = 1;
         RoadsignGetLineAndRow(roadName[ind], &col, &row);
         auto* pCharsetPixels = &pCharsetLock[usedCharStride * SIGN_CHAR_HEIGHT * row + SIGN_CHAR_WIDTH * col];
         auto* pSignPixels = &signLock[ind * SIGN_CHAR_WIDTH];
@@ -378,7 +378,7 @@ bool RoadsignGenerateTextRaster(char* roadName, int numLetters, RwRaster* charse
     return true;
 }
 
-void RoadsignGetLineAndRow(char cLetter, int* line, int* row)
+void RoadsignGetLineAndRow(char cLetter, int32* line, int32* row)
 {
     switch (cLetter)
     {

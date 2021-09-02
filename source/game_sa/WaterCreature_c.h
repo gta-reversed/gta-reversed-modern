@@ -7,7 +7,7 @@
 #undef GetObject
 #endif
 
-enum eWaterCreatureType : unsigned char {
+enum eWaterCreatureType : uint8 {
     FISH1,
     FISH2,
     FISH3,
@@ -23,24 +23,24 @@ public:
     WaterCreature_c() : ListItem_c(), m_pObject(nullptr) {}
     ~WaterCreature_c() = default;
 public:
-    CObject* m_pObject;
-    uint8_t m_nCreatureType; // see eWaterCreatureType
-    uint8_t m_bShouldBeDeleted;
-    uint8_t m_ucTargetSwimSpeed;
-    unsigned __int8 pad;
-    int16_t m_wSpeedChangeCurTime;
-    int16_t m_wSpeedChangeTotalTime;
-    float m_fDefaultSpeed;
-    float m_fCurSpeed;
+    CObject*         m_pObject;
+    uint8            m_nCreatureType; // see eWaterCreatureType
+    uint8            m_bShouldBeDeleted;
+    uint8            m_ucTargetSwimSpeed;
+    unsigned __int8  pad;
+    int16_t          m_wSpeedChangeCurTime;
+    int16_t          m_wSpeedChangeTotalTime;
+    float            m_fDefaultSpeed;
+    float            m_fCurSpeed;
     WaterCreature_c* m_pFollowedCreature;
-    CVector m_vecOffsetFromFollowed;
-    float m_fHeading;
-    bool m_bChangedDir;
+    CVector          m_vecOffsetFromFollowed;
+    float            m_fHeading;
+    bool             m_bChangedDir;
 
 public:
     static void InjectHooks();
 
-    bool Init(int nType, CVector* pVecPos, WaterCreature_c* pParent, float fWaterLevel, float fWaterDepth);
+    bool Init(int32 nType, CVector* pVecPos, WaterCreature_c* pParent, float fWaterLevel, float fWaterDepth);
     void Exit();
     void Update(float fTimeStep);
 

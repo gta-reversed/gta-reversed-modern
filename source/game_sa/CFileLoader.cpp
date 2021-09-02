@@ -10,7 +10,7 @@ Do not delete this comment block. Respect others' work!
 #include "CTheCarGenerators.h"
 
 char (&CFileLoader::ms_line)[512] = *reinterpret_cast<char (*)[512]>(0xB71848);
-unsigned int& gAtomicModelId = *reinterpret_cast<unsigned int*>(0xB71840);
+uint32& gAtomicModelId = *reinterpret_cast<uint32*>(0xB71840);
 
 char (&colFileReadBuffer)[32768] = *(char (*)[32768])0xBC40D8;
 
@@ -22,17 +22,17 @@ void CFileLoader::InjectHooks() {
     ReversibleHooks::Install("CFileLoader", "LoadAtomicFile_stream", 0x5371F0, static_cast<bool(*)(RwStream*, unsigned)>(&CFileLoader::LoadAtomicFile));
     ReversibleHooks::Install("CFileLoader", "LoadAtomicFile", 0x5B39D0, static_cast<void(*)(const char*)>(&CFileLoader::LoadAtomicFile));
     // ReversibleHooks::Install("CFileLoader", "LoadLine_0", 0x536F80, static_cast<char*(*)(FILESTREAM)>(&CFileLoader::LoadLine));
-    // ReversibleHooks::Install("CFileLoader", "LoadLine_1", 0x536FE0, static_cast<char*(*)(char**, int&)>(&CFileLoader::LoadLine));
+    // ReversibleHooks::Install("CFileLoader", "LoadLine_1", 0x536FE0, static_cast<char*(*)(char**, int32&)>(&CFileLoader::LoadLine));
     ReversibleHooks::Install("CFileLoader", "LoadAudioZone", 0x5B4D70, &CFileLoader::LoadAudioZone);
-    ReversibleHooks::Install("CFileLoader", "LoadCarGenerator_0", 0x537990, static_cast<void(*)(CFileCarGenerator*, int)>(&CFileLoader::LoadCarGenerator));
-    ReversibleHooks::Install("CFileLoader", "LoadCarGenerator_1", 0x5B4740, static_cast<void(*)(const char*, int)>(&CFileLoader::LoadCarGenerator));
+    ReversibleHooks::Install("CFileLoader", "LoadCarGenerator_0", 0x537990, static_cast<void(*)(CFileCarGenerator*, int32)>(&CFileLoader::LoadCarGenerator));
+    ReversibleHooks::Install("CFileLoader", "LoadCarGenerator_1", 0x5B4740, static_cast<void(*)(const char*, int32)>(&CFileLoader::LoadCarGenerator));
     // ReversibleHooks::Install("CFileLoader", "LoadCarPathNode", 0x5B4380, &CFileLoader::LoadCarPathNode);
     ReversibleHooks::Install("CFileLoader", "StartLoadClumpFile", 0x5373F0, &CFileLoader::StartLoadClumpFile);
     ReversibleHooks::Install("CFileLoader", "FinishLoadClumpFile", 0x537450, &CFileLoader::FinishLoadClumpFile);
     ReversibleHooks::Install("CFileLoader", "LoadClumpFile", 0x5B3A30, static_cast<void(*)(const char*)>(&CFileLoader::LoadClumpFile));
     ReversibleHooks::Install("CFileLoader", "LoadClumpObject", 0x5B4040, &CFileLoader::LoadClumpObject);
-    // ReversibleHooks::Install("CFileLoader", "LoadCollisionFile_0", 0x538440, static_cast<bool(*)(unsigned char*, unsigned int, unsigned char)>(&CFileLoader::LoadCollisionFile));
-    // ReversibleHooks::Install("CFileLoader", "LoadCollisionFile_1", 0x5B4E60, static_cast<bool(*)(const char*, unsigned char)>(&CFileLoader::LoadCollisionFile));
+    // ReversibleHooks::Install("CFileLoader", "LoadCollisionFile_0", 0x538440, static_cast<bool(*)(uint8*, uint32, uint8)>(&CFileLoader::LoadCollisionFile));
+    // ReversibleHooks::Install("CFileLoader", "LoadCollisionFile_1", 0x5B4E60, static_cast<bool(*)(const char*, uint8)>(&CFileLoader::LoadCollisionFile));
     // ReversibleHooks::Install("CFileLoader", "LoadCollisionFileFirstTime", 0x5B5000, &CFileLoader::LoadCollisionFileFirstTime);
     // ReversibleHooks::Install("CFileLoader", "LoadCollisionModel", 0x537580, &CFileLoader::LoadCollisionModel);
     // ReversibleHooks::Install("CFileLoader", "LoadCollisionModelVer2", 0x537EE0, &CFileLoader::LoadCollisionModelVer2);
@@ -99,12 +99,12 @@ RwTexDictionary* CFileLoader::LoadTexDictionary(const char* filename) {
 }
 
 // 0x5B40C0
-int CFileLoader::LoadAnimatedClumpObject(const char* line) {
-    return plugin::CallAndReturn<int, 0x5B40C0, const char*>(line);
+int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
+    return plugin::CallAndReturn<int32, 0x5B40C0, const char*>(line);
 }
 
 // 0x5371F0
-bool CFileLoader::LoadAtomicFile(RwStream* stream, unsigned int modelId) {
+bool CFileLoader::LoadAtomicFile(RwStream* stream, uint32 modelId) {
     auto pAtomicModelInfo = CModelInfo::ms_modelInfoPtrs[modelId]->AsAtomicModelInfoPtr();
     bool bUseCommonVehicleTexDictionary = false;
     if (pAtomicModelInfo && pAtomicModelInfo->bUseCommonVehicleDictionary) {
@@ -165,21 +165,21 @@ char* CFileLoader::LoadLine(FILESTREAM file) {
 }
 
 // 0x536FE0
-char* CFileLoader::LoadLine(char** outLine, int& outSize) {
-    return plugin::CallAndReturn<char*, 0x536FE0, char**, int&>(outLine, outSize);;
+char* CFileLoader::LoadLine(char** outLine, int32& outSize) {
+    return plugin::CallAndReturn<char*, 0x536FE0, char**, int32&>(outLine, outSize);;
 }
 
 // IPL -> AUZO
 // 0x5B4D70
 void CFileLoader::LoadAudioZone(const char* line) {
     char  name[16];
-    int   id;
-    int   enabled;
+    int32   id;
+    int32   enabled;
     float x1, y1, z1;
     float x2, y2, z2;
     float radius;
 
-    int iNumRead = sscanf(line, "%s %d %d %f %f %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &x2, &y2, &z2);
+    int32 iNumRead = sscanf(line, "%s %d %d %f %f %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &x2, &y2, &z2);
     if (iNumRead == 9) {
         CAudioZones::RegisterAudioBox(name, id, enabled != 0, x1, y1, z1, x2, y2, z2);
         return;
@@ -191,12 +191,12 @@ void CFileLoader::LoadAudioZone(const char* line) {
 
 // unused?
 // 0x0
-void CFileLoader::LoadBoundingBox(unsigned char* data, CBoundingBox& outBoundBox) {
+void CFileLoader::LoadBoundingBox(uint8* data, CBoundingBox& outBoundBox) {
 
 }
 
 // 0x537990
-void CFileLoader::LoadCarGenerator(CFileCarGenerator* carGen, int iplId) {
+void CFileLoader::LoadCarGenerator(CFileCarGenerator* carGen, int32 iplId) {
     auto index = CTheCarGenerators::CreateCarGenerator(
         carGen->m_vecPosn,
         RWRAD2DEG(carGen->m_fAngle),
@@ -217,7 +217,7 @@ void CFileLoader::LoadCarGenerator(CFileCarGenerator* carGen, int iplId) {
 
 // IPL -> CARS
 // 0x5B4740
-void CFileLoader::LoadCarGenerator(const char* line, int iplId) {
+void CFileLoader::LoadCarGenerator(const char* line, int32 iplId) {
     CFileCarGenerator carGen;
     auto iNumRead = sscanf(
         line,
@@ -240,12 +240,12 @@ void CFileLoader::LoadCarGenerator(const char* line, int iplId) {
 }
 
 // 0x5B4380
-void CFileLoader::LoadCarPathNode(const char* line, int objModelIndex, int pathEntryIndex, bool a4) {
-    plugin::Call<0x5B4380, const char*, int, int, bool>(line, objModelIndex, pathEntryIndex, a4);
+void CFileLoader::LoadCarPathNode(const char* line, int32 objModelIndex, int32 pathEntryIndex, bool a4) {
+    plugin::Call<0x5B4380, const char*, int32, int32, bool>(line, objModelIndex, pathEntryIndex, a4);
 }
 
 // 0x5373F0
-bool CFileLoader::StartLoadClumpFile(RwStream* stream, unsigned int modelIndex) {
+bool CFileLoader::StartLoadClumpFile(RwStream* stream, uint32 modelIndex) {
     auto chunk = RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr);
     if (!chunk) {
         return false;
@@ -266,7 +266,7 @@ bool CFileLoader::StartLoadClumpFile(RwStream* stream, unsigned int modelIndex) 
 }
 
 // 0x537450
-bool CFileLoader::FinishLoadClumpFile(RwStream* stream, unsigned int modelIndex) {
+bool CFileLoader::FinishLoadClumpFile(RwStream* stream, uint32 modelIndex) {
     auto modelInfo = static_cast<CClumpModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelIndex]);
     bool isVehicle = modelInfo->GetModelType() == MODEL_INFO_VEHICLE;
 
@@ -286,8 +286,8 @@ bool CFileLoader::FinishLoadClumpFile(RwStream* stream, unsigned int modelIndex)
 }
 
 // 0x5372D0
-bool CFileLoader::LoadClumpFile(RwStream* stream, unsigned int modelIndex) {
-    return plugin::CallAndReturn<bool, 0x5372D0, RwStream*, unsigned int>(stream, modelIndex);
+bool CFileLoader::LoadClumpFile(RwStream* stream, uint32 modelIndex) {
+    return plugin::CallAndReturn<bool, 0x5372D0, RwStream*, uint32>(stream, modelIndex);
 }
 
 // 0x5B3A30
@@ -308,10 +308,10 @@ void CFileLoader::LoadClumpFile(const char* filename) {
 }
 
 // 0x5B4040
-int CFileLoader::LoadClumpObject(const char* line) {
+int32 CFileLoader::LoadClumpObject(const char* line) {
     char modelName[24];
     char texName[24];
-    int  objId = MODEL_INVALID;
+    int32  objId = MODEL_INVALID;
 
     auto iNumRead = sscanf(line, "%d %s %s", &objId, modelName, texName);
     if (iNumRead != 3)
@@ -325,52 +325,52 @@ int CFileLoader::LoadClumpObject(const char* line) {
 }
 
 // 0x538440
-bool CFileLoader::LoadCollisionFile(unsigned char* data, unsigned int dataSize, unsigned char colId) {
-    return plugin::CallAndReturn<bool, 0x538440, unsigned char*, unsigned int, unsigned char>(data, dataSize, colId);
+bool CFileLoader::LoadCollisionFile(uint8* data, uint32 dataSize, uint8 colId) {
+    return plugin::CallAndReturn<bool, 0x538440, uint8*, uint32, uint8>(data, dataSize, colId);
 }
 
 // 0x5B4E60
-bool CFileLoader::LoadCollisionFile(const char* filename, unsigned char colId) {
-    return plugin::CallAndReturn<bool, 0x5B4E60, const char*, unsigned char>(filename, colId);
+bool CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
+    return plugin::CallAndReturn<bool, 0x5B4E60, const char*, uint8>(filename, colId);
 }
 
 // 0x5B5000
-bool CFileLoader::LoadCollisionFileFirstTime(unsigned char* data, unsigned int dataSize, unsigned char colId) {
-    return plugin::CallAndReturn<bool, 0x5B5000, unsigned char*, unsigned int, unsigned char>(data, dataSize, colId);
+bool CFileLoader::LoadCollisionFileFirstTime(uint8* data, uint32 dataSize, uint8 colId) {
+    return plugin::CallAndReturn<bool, 0x5B5000, uint8*, uint32, uint8>(data, dataSize, colId);
 }
 
 // 0x537580
-void CFileLoader::LoadCollisionModel(unsigned char* data, CColModel& outColModel) {
-    plugin::Call<0x537580, unsigned char*, CColModel&>(data, outColModel);
+void CFileLoader::LoadCollisionModel(uint8* data, CColModel& outColModel) {
+    plugin::Call<0x537580, uint8*, CColModel&>(data, outColModel);
 }
 
 // 0x537EE0
-void CFileLoader::LoadCollisionModelVer2(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName) {
-    plugin::Call<0x537EE0, unsigned char*, unsigned int, CColModel&, const char*>(data, dataSize, outColModel, modelName);
+void CFileLoader::LoadCollisionModelVer2(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName) {
+    plugin::Call<0x537EE0, uint8*, uint32, CColModel&, const char*>(data, dataSize, outColModel, modelName);
 }
 
 // 0x537CE0
-void CFileLoader::LoadCollisionModelVer3(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName) {
-    plugin::Call<0x537CE0, unsigned char*, unsigned int, CColModel&, const char*>(data, dataSize, outColModel, modelName);
+void CFileLoader::LoadCollisionModelVer3(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName) {
+    plugin::Call<0x537CE0, uint8*, uint32, CColModel&, const char*>(data, dataSize, outColModel, modelName);
 }
 
 // 0x537AE0
-void CFileLoader::LoadCollisionModelVer4(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName) {
-    plugin::Call<0x537AE0, unsigned char*, unsigned int, CColModel&, const char*>(data, dataSize, outColModel, modelName);
+void CFileLoader::LoadCollisionModelVer4(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName) {
+    plugin::Call<0x537AE0, uint8*, uint32, CColModel&, const char*>(data, dataSize, outColModel, modelName);
 }
 
 // 0x5B3C60
-int CFileLoader::LoadObject(const char* line) {
-    int      modelId;
+int32 CFileLoader::LoadObject(const char* line) {
+    int32      modelId;
     char     modelName[24];
     char     texName[24];
     float    fDrawDist;
-    uint32_t nFlags;
+    uint32 nFlags;
 
     auto iNumRead = sscanf(line, "%d %s %s %f %d", &modelId, modelName, texName, &fDrawDist, &nFlags);
     if (iNumRead != 5 || fDrawDist < 4.0f)
     {
-        int objType;
+        int32 objType;
         float fDrawDist2_unused, fDrawDist3_unused;
         iNumRead = sscanf((char*)line, "%d %s %s %d", &modelId, modelName, texName, &objType);
         if (iNumRead != 4)
@@ -533,9 +533,9 @@ void CFileLoader::LoadCullZone(const char* line) {
     float zTop;
     CVector mirrorDirection;
     float cm;
-    int flags, flags2 = 0;
+    int32 flags, flags2 = 0;
 
-    int iNumRead = sscanf(
+    int32 iNumRead = sscanf(
         line,
         "%f %f %f %f %f %f %f %f %f %d %f %f %f %f",
         &center.x,
@@ -611,8 +611,8 @@ void CFileLoader::LoadOcclusionVolume(const char* line, const char* filename) {
 }
 
 // 0x5B41C0
-int CFileLoader::LoadPathHeader(const char* line, int& outPathType) {
-    int id;
+int32 CFileLoader::LoadPathHeader(const char* line, int32& outPathType) {
+    int32 id;
     char modelName[32];
 
     sscanf(line, "%d %d %s", &outPathType, &id, modelName);
@@ -621,14 +621,14 @@ int CFileLoader::LoadPathHeader(const char* line, int& outPathType) {
 
 // PEDS
 // 0x5B7420
-int CFileLoader::LoadPedObject(const char* line) {
-    return plugin::CallAndReturn<int, 0x5B7420, const char*>(line);
+int32 CFileLoader::LoadPedObject(const char* line) {
+    return plugin::CallAndReturn<int32, 0x5B7420, const char*>(line);
 }
 
 // useless
 // 0x5B41F0
-void CFileLoader::LoadPedPathNode(const char* line, int objModelIndex, int pathEntryIndex) {
-    plugin::Call<0x5B41F0, const char*, int, int>(line, objModelIndex, pathEntryIndex);
+void CFileLoader::LoadPedPathNode(const char* line, int32 objModelIndex, int32 pathEntryIndex) {
+    plugin::Call<0x5B41F0, const char*, int32, int32>(line, objModelIndex, pathEntryIndex);
 }
 
 // 0x5B47B0
@@ -643,9 +643,9 @@ void CFileLoader::LoadStuntJump(const char* line) {
     CVector b2Min;
     CVector b2Max;
     CVector cameraPosn;
-    int     reward;
+    int32     reward;
 
-    int iNumRead = sscanf(
+    int32 iNumRead = sscanf(
         line,
         "%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %d",
         &b1Min.x,
@@ -675,16 +675,16 @@ void CFileLoader::LoadStuntJump(const char* line) {
 }
 
 // 0x5B75E0
-int CFileLoader::LoadTXDParent(const char* line) {
+int32 CFileLoader::LoadTXDParent(const char* line) {
     char name[32];
     char parentName[32];
 
     sscanf(line, "%s %s", name, parentName);
-    int txdSlot = CTxdStore::FindTxdSlot(name);
+    int32 txdSlot = CTxdStore::FindTxdSlot(name);
     if (txdSlot == INVALID_POOL_SLOT)
         txdSlot = CTxdStore::AddTxdSlot(name);
 
-    int parentSlot = CTxdStore::FindTxdSlot(parentName);
+    int32 parentSlot = CTxdStore::FindTxdSlot(parentName);
     if (parentSlot == INVALID_POOL_SLOT)
         parentSlot = CTxdStore::AddTxdSlot(parentName);
 
@@ -697,8 +697,8 @@ int CFileLoader::LoadTXDParent(const char* line) {
 // 0x5B81D0
 void CFileLoader::LoadTimeCyclesModifier(const char* line) {
     CVector vec1, vec2;
-    int farClip;
-    int extraColor;
+    int32 farClip;
+    int32 extraColor;
     float extraColorIntensity;
     float falloffDist = 100.0f;
     float unused = 1.0f;
@@ -729,7 +729,7 @@ void CFileLoader::LoadTimeCyclesModifier(const char* line) {
 }
 
 // 0x5B3DE0
-int CFileLoader::LoadTimeObject(const char* line) {
+int32 CFileLoader::LoadTimeObject(const char* line) {
     int32_t modelId;
     char    modelName[24];
     char    texName[24];
@@ -738,7 +738,7 @@ int CFileLoader::LoadTimeObject(const char* line) {
     int32_t timeOn;
     int32_t timeOff;
 
-    int numValuesRead = sscanf(line, "%d %s %s %f %d %d %d", &modelId, modelName, texName, &drawDistance[0], &flags, &timeOn, &timeOff);
+    int32 numValuesRead = sscanf(line, "%d %s %s %f %d %d %d", &modelId, modelName, texName, &drawDistance[0], &flags, &timeOn, &timeOff);
 
     if (numValuesRead != 7 || drawDistance[0] < 4.0) {
         int32_t numObjs;
@@ -777,17 +777,17 @@ int CFileLoader::LoadTimeObject(const char* line) {
 }
 
 // 0x5B6F30
-int CFileLoader::LoadVehicleObject(const char* line) {
-    return plugin::CallAndReturn<int, 0x5B6F30, const char*>(line);
+int32 CFileLoader::LoadVehicleObject(const char* line) {
+    return plugin::CallAndReturn<int32, 0x5B6F30, const char*>(line);
 }
 
 // 0x5B3FB0
-int CFileLoader::LoadWeaponObject(const char* line) {
-    int objId;
+int32 CFileLoader::LoadWeaponObject(const char* line) {
+    int32 objId;
     char modelName[24];
     char texName[24];
     char animName[16];
-    int weaponType;
+    int32 weaponType;
     float drawDist;
 
     sscanf(line, "%d %s %s %s %d %f", &objId, modelName, texName, animName, &weaponType, &drawDist);
@@ -805,7 +805,7 @@ void CFileLoader::LoadZone(const char* line) {
     char name[24];
     signed int type;
     CVector min, max;
-    int island;
+    int32 island;
     char zoneName[12];
 
     auto iNumRead = sscanf(line, "%s %d %f %f %f %f %f %f %d %s", name, &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &island, zoneName);
@@ -814,8 +814,8 @@ void CFileLoader::LoadZone(const char* line) {
 }
 
 // 0x5B51E0
-void LinkLods(int a1) {
-    plugin::Call<0x5B51E0, int>(a1);
+void LinkLods(int32 a1) {
+    plugin::Call<0x5B51E0, int32>(a1);
 }
 
 // 0x5B8700
@@ -837,12 +837,12 @@ void CFileLoader::ReloadObjectTypes(const char* arg1) {
 // unused
 // 0x5B6E10
 void CFileLoader::ReloadPaths(const char* filename) {
-    int  objModelIndex;
-    int  id;
+    int32  objModelIndex;
+    int32  id;
     char unused[4];
 
     bool pathAllocated = false;
-    int pathEntryIndex = -1;
+    int32 pathEntryIndex = -1;
     FILESTREAM file = CFileMgr::OpenFile(filename, "r");
     for (char* line = LoadLine(file); line; line = LoadLine(file)) {
         if (*line == '#' || !*line)
@@ -890,7 +890,7 @@ RpAtomic* CFileLoader::FindRelatedModelInfoCB(RpAtomic* atomic, void* data) {
     const char* nodeName = GetFrameNodeName(RpAtomicGetFrame(atomic));
     GetNameAndDamage(nodeName, name, bDamage);
 
-    int modelId = MODEL_INVALID;
+    int32 modelId = MODEL_INVALID;
     CBaseModelInfo* modelInfo = CModelInfo::GetModelInfo(name, &modelId);
     if (modelInfo) {
         CAtomicModelInfo* atomicModelInfo = modelInfo->AsAtomicModelInfoPtr();

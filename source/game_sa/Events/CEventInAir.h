@@ -9,7 +9,7 @@ public:
 
     eEventType GetEventType() const override { return EVENT_IN_AIR; }
     int32_t GetEventPriority() const override { return 61; }
-    int GetLifeTime() override { return 0; }
+    int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override { return new CEventInAir(); }
     bool AffectsPed(CPed* ped) override;
 
@@ -32,7 +32,7 @@ public:
 
     eEventType GetEventType() const override { return EVENT_STUCK_IN_AIR; }
     int32_t GetEventPriority() const override;
-    int GetLifeTime() override { return 0; }
+    int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override { return new CEventStuckInAir(m_ped); }
     bool AffectsPed(CPed* ped) override;
     bool TakesPriorityOver(const CEvent& refEvent) override;

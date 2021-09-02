@@ -6,13 +6,12 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVector.h"
 
-class  CCreepingFire {
+class CCreepingFire {
 public:
     // 32x32 map areas
-    static unsigned char(*m_aFireStatus)[32]; // static unsigned char m_aFireStatus[32][32]
+    static uint8(*m_aFireStatus)[32]; // static uint8 m_aFireStatus[32][32]
 
     static bool TryToStartFireAtCoors(CVector posn, signed char numGenerations, _IGNORED_ bool arg2, bool scriptFire, float zDistance);
     static void SetReadyToBurn();

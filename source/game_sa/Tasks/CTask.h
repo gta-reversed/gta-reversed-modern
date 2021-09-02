@@ -21,7 +21,7 @@ class CTask {
 public:
     class CTask* m_pParentTask;
 
-    void* operator new(uint32_t size);
+    void* operator new(uint32 size);
     void operator delete(void* object);
 
     CTask();

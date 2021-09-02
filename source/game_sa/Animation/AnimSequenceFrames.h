@@ -1,10 +1,8 @@
 #pragma once
 
-#include "PluginBase.h"
 #include "CQuaternion.h"
 
-class CAnimSequenceRootFrameCompressed
-{
+class CAnimSequenceRootFrameCompressed {
 public:
     int16_t m_wQuatX;
     int16_t m_wQuatY;
@@ -17,8 +15,7 @@ public:
 };
 VALIDATE_SIZE(CAnimSequenceRootFrameCompressed, 0x10);
 
-class CAnimSequenceChildFrameCompressed
-{
+class CAnimSequenceChildFrameCompressed {
 public:
     int16_t m_wQuatX;
     int16_t m_wQuatY;
@@ -28,19 +25,17 @@ public:
 };
 VALIDATE_SIZE(CAnimSequenceChildFrameCompressed, 0xA);
 
-class CAnimSequenceRootFrameUncompressed
-{
+class CAnimSequenceRootFrameUncompressed {
 public:
     CQuaternion m_quat;
-    float m_fTime;
-    CVector m_vecTranslation;
+    float       m_fTime;
+    CVector     m_vecTranslation;
 };
 VALIDATE_SIZE(CAnimSequenceRootFrameUncompressed, 0x20);
 
-class CAnimSequenceChildFrameUncompressed
-{
+class CAnimSequenceChildFrameUncompressed {
 public:
     CQuaternion m_quat;
-    float m_fTime;
+    float       m_fTime;
 };
 VALIDATE_SIZE(CAnimSequenceChildFrameUncompressed, 0x14);

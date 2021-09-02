@@ -1,74 +1,71 @@
 #pragma once
 #include "CAEDoorAudioEntity.h"
 
-struct CStoredCar
-{
-    CVector m_vPosn;
-    uint32_t m_dwHandlingFlags;
-    uint8_t m_nStoredCarFlags;
-    uint8_t _pad0;
-    uint16_t m_wModelIndex;
-    int16_t m_awCarMods[15];
-    uint8_t m_nPrimaryColor;
-    uint8_t m_nSecondaryColor;
-    uint8_t m_nTertiaryColor;
-    uint8_t m_nQuaternaryColor;
-    uint8_t m_nRadiostation;
-    uint8_t m_anCompsToUse[2];
-    uint8_t m_nBombType;
-    uint8_t m_nPaintjob;
-    uint8_t m_nNitroBoosts;
-    uint8_t m_nPackedForwardX;
-    uint8_t m_nPackedForwardY;
-    uint8_t m_nPackedForwardZ;
-    uint8_t _pad1;
+struct CStoredCar {
+    CVector  m_vPosn;
+    uint32 m_dwHandlingFlags;
+    uint8  m_nStoredCarFlags;
+    uint8  _pad0;
+    uint16 m_wModelIndex;
+    int16_t  m_awCarMods[15];
+    uint8  m_nPrimaryColor;
+    uint8  m_nSecondaryColor;
+    uint8  m_nTertiaryColor;
+    uint8  m_nQuaternaryColor;
+    uint8  m_nRadiostation;
+    uint8  m_anCompsToUse[2];
+    uint8  m_nBombType;
+    uint8  m_nPaintjob;
+    uint8  m_nNitroBoosts;
+    uint8  m_nPackedForwardX;
+    uint8  m_nPackedForwardY;
+    uint8  m_nPackedForwardZ;
+    uint8  _pad1;
 
 public:
     static void InjectHooks();
 
     CVehicle* RestoreCar();
-    void StoreCar(CVehicle* pVehicle);
+    void      StoreCar(CVehicle* pVehicle);
 };
 VALIDATE_SIZE(CStoredCar, 0x40);
 
-class CGarage
-{
+class CGarage {
 public:
     CGarage() = default;
     ~CGarage() = default;
+
 public:
-    CVector m_vPosn;
+    CVector   m_vPosn;
     CVector2D m_vDirectionA;
     CVector2D m_vDirectionB;
-    float m_fTopZ;
-    float m_fWidth;
-    float m_fHeight;
-    float m_fLeftCoord;
-    float m_fRightCoord;
-    float m_fFrontCoord;
-    float m_fBackCoord;
-    float m_fDoorPosition;
-    uint32_t m_dwTimeToOpen;
+    float     m_fTopZ;
+    float     m_fWidth;
+    float     m_fHeight;
+    float     m_fLeftCoord;
+    float     m_fRightCoord;
+    float     m_fFrontCoord;
+    float     m_fBackCoord;
+    float     m_fDoorPosition;
+    uint32  m_dwTimeToOpen;
     CVehicle* m_pTargetCar;
-    char m_anName[8];
-    uint8_t m_nType; // see eGarageType
-    uint8_t m_nDoorState; // see eGarageDoorState
-    union
-    {
-        uint8_t m_nFlags;
-        struct
-        {
-            uint8_t m_b0x1 : 1;
-            uint8_t m_bInactive : 1;
-            uint8_t m_bUsedRespray : 1;
-            uint8_t m_bDoorOpensUp : 1;
-            uint8_t m_bDoorGoesIn : 1;
-            uint8_t m_bCameraFollowsPlayer : 1;
-            uint8_t m_bDoorClosed : 1;
-            uint8_t m_bRespraysAlwaysFree : 1;
+    char      m_anName[8];
+    uint8   m_nType;      // see eGarageType
+    uint8   m_nDoorState; // see eGarageDoorState
+    union {
+        uint8 m_nFlags;
+        struct {
+            uint8 m_b0x1 : 1;
+            uint8 m_bInactive : 1;
+            uint8 m_bUsedRespray : 1;
+            uint8 m_bDoorOpensUp : 1;
+            uint8 m_bDoorGoesIn : 1;
+            uint8 m_bCameraFollowsPlayer : 1;
+            uint8 m_bDoorClosed : 1;
+            uint8 m_bRespraysAlwaysFree : 1;
         };
     };
-    uint8_t m_nOriginalType;
+    uint8            m_nOriginalType;
     CAEDoorAudioEntity m_GarageAudio;
 
 public:
@@ -86,7 +83,7 @@ public:
     void PlayerArrestedOrDied();
     bool IsPointInsideGarage(CVector vecPoint);
     bool IsPointInsideGarage(CVector vecPoint, float fRadius);
-    int FindMaxNumStoredCarsForGarage();
+    int32 FindMaxNumStoredCarsForGarage();
     bool IsEntityEntirelyInside3D(CEntity* pEntity, float fRadius);
     bool IsEntityEntirelyOutside(CEntity* pEntity, float fRadius);
     bool IsPlayerOutsideGarage(float fRadius);
@@ -97,10 +94,10 @@ public:
     void ThrowCarsNearDoorOutOfGarage(CVehicle* pIgnoredVehicle);
     bool IsAnyOtherPedTouchingGarage(CPed* pIgnoredPed);
     bool IsAnyCarBlockingDoor();
-    int CountCarsWithCenterPointWithinGarage(CVehicle* pIgnoredVeh);
+    int32 CountCarsWithCenterPointWithinGarage(CVehicle* pIgnoredVeh);
     void RemoveCarsBlockingDoorNotInside();
-    void StoreAndRemoveCarsForThisHideOut(CStoredCar* pStoredCar, int iMaxSlot);
-    void StoreAndRemoveCarsForThisImpoundingGarage(CStoredCar* pStoredCar, int iMaxSlot);
+    void StoreAndRemoveCarsForThisHideOut(CStoredCar* pStoredCar, int32 iMaxSlot);
+    void StoreAndRemoveCarsForThisImpoundingGarage(CStoredCar* pStoredCar, int32 iMaxSlot);
     void TidyUpGarage();
     void TidyUpGarageClose();
     void CenterCarInGarage(CVehicle* pVehicle);

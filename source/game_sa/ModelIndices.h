@@ -2,7 +2,7 @@
 
 #include "eModelID.h"
 
-typedef unsigned short ModelIndex;
+typedef uint16 ModelIndex;
 
 namespace ModelIndices {
     extern ModelIndex& MI_TRAFFICLIGHTS;

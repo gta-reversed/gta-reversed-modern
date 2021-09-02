@@ -51,7 +51,7 @@ enum eCarWheel {
     CARWHEEL_REAR_RIGHT = 3
 };
 
-enum eExtraHandlingFlags : uint32_t
+enum eExtraHandlingFlags : uint32
 {
     EXTRA_HANDLING_PERFECT = 0x1,
     EXTRA_HANDLING_NITROS = 0x2,
@@ -64,24 +64,25 @@ class FxSystem_c;
 class CAutomobile : public CVehicle {
 protected:
     CAutomobile(plugin::dummy_func_t) : CVehicle(plugin::dummy) {}
+
 public:
     CDamageManager m_damageManager;
-    CDoor m_doors[6];
-    RwFrame *m_aCarNodes[CAR_NUM_NODES];
+    CDoor          m_doors[6];
+    RwFrame*       m_aCarNodes[CAR_NUM_NODES];
     CBouncingPanel m_panels[3];
-    CDoor m_swingingChassis;
-    CColPoint m_wheelColPoint[4];
-    float m_fWheelsSuspensionCompression[4]; // [0-1] with 0 being suspension fully compressed, and 1 being completely relaxed
-    float m_fWheelsSuspensionCompressionPrev[4];
-    float m_aWheelTimer[4];
-    float field_804;
-    float m_intertiaValue1;
-    float m_intertiaValue2;
-    int m_wheelSkidmarkType[4];
-    bool m_wheelSkidmarkBloodState[4];
-    bool m_wheelSkidmarkMuddy[4];
-    float m_wheelRotation[4];
-    float m_wheelPosition[4];
+    CDoor          m_swingingChassis;
+    CColPoint      m_wheelColPoint[4];
+    float          m_fWheelsSuspensionCompression[4]; // [0-1] with 0 being suspension fully compressed, and 1 being completely relaxed
+    float          m_fWheelsSuspensionCompressionPrev[4];
+    float          m_aWheelTimer[4];
+    float          field_804;
+    float          m_intertiaValue1;
+    float          m_intertiaValue2;
+    int32          m_wheelSkidmarkType[4];
+    bool           m_wheelSkidmarkBloodState[4];
+    bool           m_wheelSkidmarkMuddy[4];
+    float          m_wheelRotation[4];
+    float          m_wheelPosition[4];
     union {
         float m_wheelSpeed[4];
         struct {
@@ -94,91 +95,91 @@ public:
     float m_wheelRotationUnused[4]; // Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
     union {
         struct {
-            unsigned char bTaxiLightOn : 1;
-            unsigned char ucNPCFlagPad2 : 1;
-            unsigned char bIgnoreWater : 1;
-            unsigned char bDontDamageOnRoof : 1;
-            unsigned char bTakePanelDamage : 1;
-            unsigned char ucTaxiUnkn6 : 1;
-            unsigned char bLostTraction : 1;
-            unsigned char bSoftSuspension : 1;
+            uint8 bTaxiLightOn : 1;
+            uint8 ucNPCFlagPad2 : 1;
+            uint8 bIgnoreWater : 1;
+            uint8 bDontDamageOnRoof : 1;
+            uint8 bTakePanelDamage : 1;
+            uint8 ucTaxiUnkn6 : 1;
+            uint8 bLostTraction : 1;
+            uint8 bSoftSuspension : 1;
         } npcFlags;
-        unsigned char ucNPCVehicleFlags;
+        uint8 ucNPCVehicleFlags;
     };
-    char field_869;
-    short m_doingBurnout;
-    uint16_t m_wMiscComponentAngle;
-    uint16_t m_wMiscComponentAnglePrev;
-    uint32_t m_dwBusDoorTimerEnd;
-    int m_dwBusDoorTimerStart;
-    float m_aSuspensionSpringLength[4];
-    float m_aSuspensionLineLength[4];
-    float m_fFrontHeightAboveRoad;
-    float m_fRearHeightAboveRoad;
-    float m_fCarTraction;
-    float m_fTireTemperature;
-    float m_aircraftGoToHeading;
-    float m_fRotationBalance; // used in CHeli::TestSniperCollision
-    float m_fMoveDirection;
-    int field_8B4[6];
-    int field_8C8[6];
-    int m_dwBurnTimer;
-    CPhysical *m_pWheelCollisionEntity[4];
-    CVector m_vWheelCollisionPos[4];
-    char field_924;
-    char field_925;
-    char field_926;
-    char field_927;
-    char field_928;
-    char field_929;
-    char field_92A;
-    char field_92B;
-    char field_92C;
-    char field_92D;
-    char field_92E;
-    char field_92F;
-    char field_930;
-    char field_931;
-    char field_932;
-    char field_933;
-    char field_934;
-    char field_935;
-    char field_936;
-    char field_937;
-    char field_938;
-    char field_939;
-    char field_93A;
-    char field_93B;
-    char field_93C;
-    char field_93D;
-    char field_93E;
-    char field_93F;
-    int field_940;
-    int field_944;
-    float m_fDoomVerticalRotation;
-    float m_fDoomHorizontalRotation;
-    float m_fForcedOrientation;
-    float m_fUpDownLightAngle[2];
-    uint8_t m_nNumContactWheels;
-    uint8_t m_nWheelsOnGround;
-    uint8_t m_wheelsOnGrounPrev;
-    char field_963;
-    float field_964;
+    char        field_869;
+    int16       m_doingBurnout;
+    uint16    m_wMiscComponentAngle;
+    uint16    m_wMiscComponentAnglePrev;
+    uint32    m_dwBusDoorTimerEnd;
+    int32       m_dwBusDoorTimerStart;
+    float       m_aSuspensionSpringLength[4];
+    float       m_aSuspensionLineLength[4];
+    float       m_fFrontHeightAboveRoad;
+    float       m_fRearHeightAboveRoad;
+    float       m_fCarTraction;
+    float       m_fTireTemperature;
+    float       m_aircraftGoToHeading;
+    float       m_fRotationBalance; // used in CHeli::TestSniperCollision
+    float       m_fMoveDirection;
+    int32       field_8B4[6];
+    int32       field_8C8[6];
+    int32       m_dwBurnTimer;
+    CPhysical*  m_pWheelCollisionEntity[4];
+    CVector     m_vWheelCollisionPos[4];
+    char        field_924;
+    char        field_925;
+    char        field_926;
+    char        field_927;
+    char        field_928;
+    char        field_929;
+    char        field_92A;
+    char        field_92B;
+    char        field_92C;
+    char        field_92D;
+    char        field_92E;
+    char        field_92F;
+    char        field_930;
+    char        field_931;
+    char        field_932;
+    char        field_933;
+    char        field_934;
+    char        field_935;
+    char        field_936;
+    char        field_937;
+    char        field_938;
+    char        field_939;
+    char        field_93A;
+    char        field_93B;
+    char        field_93C;
+    char        field_93D;
+    char        field_93E;
+    char        field_93F;
+    int32       field_940;
+    int32       field_944;
+    float       m_fDoomVerticalRotation;
+    float       m_fDoomHorizontalRotation;
+    float       m_fForcedOrientation;
+    float       m_fUpDownLightAngle[2];
+    uint8     m_nNumContactWheels;
+    uint8     m_nWheelsOnGround;
+    uint8     m_wheelsOnGrounPrev;
+    char        field_963;
+    float       field_964;
     tWheelState m_aWheelState[4];
     FxSystem_c* m_exhaustNitroFxSystem[2];
-    uint8_t m_harvesterParticleCounter;
-    char field_981;
-    short field_982;
-    float field_984;
+    uint8     m_harvesterParticleCounter;
+    char        field_981;
+    int16       field_982;
+    float       field_984;
 
     // variables
     static constexpr float PACKER_COL_ANGLE_MULT = -0.0001f;
     static constexpr float FORKLIFT_COL_ANGLE_MULT = 0.0006f;
     static constexpr float DOZER_COL_ANGLE_MULT = 0.0002f;
     static constexpr float ROLL_ONTO_WHEELS_FORCE = 0.0025f;
-    static bool &m_sAllTaxiLights;
-    static CVector &vecHunterGunPos; // { 0.0f, 4.8f, -1.3f }
-    static CMatrix *matW2B;
+    static bool&           m_sAllTaxiLights;
+    static CVector&        vecHunterGunPos; // { 0.0f, 4.8f, -1.3f }
+    static CMatrix*        matW2B;
 
 public:
     //vtable
@@ -188,7 +189,7 @@ public:
     void ProcessControl() override;
     CVector AddMovingCollisionSpeed(CVector& point) override;
 
-    virtual bool ProcessAI(unsigned int& extraHandlingFlags);
+    virtual bool ProcessAI(uint32& extraHandlingFlags);
     virtual void ResetSuspension();
     virtual void ProcessFlyingCarStuff();
     virtual void DoHoverSuspensionRatios();
@@ -199,7 +200,7 @@ private:
     bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1);
     void ProcessControl_Reversed();
     CVector AddMovingCollisionSpeed_Reversed(CVector& point);
-    bool ProcessAI_Reversed(unsigned int& extraHandlingFlags);
+    bool ProcessAI_Reversed(uint32& extraHandlingFlags);
     void ResetSuspension_Reversed();
     void ProcessFlyingCarStuff_Reversed();
     void DoHoverSuspensionRatios_Reversed();
@@ -208,7 +209,7 @@ private:
 public:
     static void InjectHooks();
     //funcs
-    CAutomobile(int modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines);
+    CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines);
 
     void SetEngineState(bool state)
     {
@@ -323,16 +324,16 @@ public:
     // Repair vehicle's tyre
     void FixTyre(eWheelStatus wheel);
     // Repair vehicle's door. "nodeIndex" is an index of component in m_modelNodes array
-    void FixDoor(int nodeIndex, eDoors door);
+    void FixDoor(int32 nodeIndex, eDoors door);
     // Repair vehicle's panel. "nodeIndex" is an index of component in m_modelNodes array
-    void FixPanel(int nodeIndex, ePanels panel);
+    void FixPanel(int32 nodeIndex, ePanels panel);
     // Enable/disable taxi light for taxi
     void SetTaxiLight(bool enable);
     // Enable taxi light for all taxis (CAutomobile::m_sAllTaxiLights = true;)
     static void SetAllTaxiLights(bool arg0);
     // Play horn for NPC vehicle (called @CAutomobile::ProcessAI)
     void PlayHornIfNecessary();
-    void SetBusDoorTimer(unsigned int time, unsigned char arg1);
+    void SetBusDoorTimer(uint32 time, uint8 arg1);
     void ProcessAutoBusDoors();
     // Make player vehicle jumps when pressing horn
     void BoostJumpControl();
@@ -343,29 +344,29 @@ public:
     void NitrousControl(signed char);
     void TowTruckControl();
     // Empty function
-    CPed* KnockPedOutCar(eWeaponType arg0, unsigned short arg1, CPed* arg2);
+    CPed* KnockPedOutCar(eWeaponType arg0, uint16 arg1, CPed* arg2);
     void PopBootUsingPhysics();
     // Close all doors
     void CloseAllDoors();
-    void DoSoftGroundResistance(unsigned int& extraHandlingFlags);
-    void ProcessCarWheelPair(int leftWheel, int rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront);
+    void DoSoftGroundResistance(uint32& extraHandlingFlags);
+    void ProcessCarWheelPair(int32 leftWheel, int32 rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront);
     float GetCarRoll();
     float GetCarPitch();
     bool IsInAir();
     // Create colliding particles
     void dmgDrawCarCollidingParticles(CVector const&, float force, eWeaponType weapon);
     void ProcessCarOnFireAndExplode(bool bExplodeImmediately);
-    CObject* SpawnFlyingComponent(int nodeIndex, unsigned int collisionType);
+    CObject* SpawnFlyingComponent(int32 nodeIndex, uint32 collisionType);
     void ProcessBuoyancy();
     void inline ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver);
     // Process combine
     void ProcessHarvester();
-    void ProcessSwingingDoor(int nodeIndex, eDoors door);
+    void ProcessSwingingDoor(int32 nodeIndex, eDoors door);
     // Returns spawned flying component?
     CObject* RemoveBonnetInPedCollision();
-    void UpdateWheelMatrix(int nodeIndex, int flags);
-    void PopDoor(int nodeIndex, eDoors door, bool showVisualEffect);
-    void PopPanel(int nodeIndex, ePanels panel, bool showVisualEffect);
+    void UpdateWheelMatrix(int32 nodeIndex, int32 flags);
+    void PopDoor(int32 nodeIndex, eDoors door, bool showVisualEffect);
+    void PopPanel(int32 nodeIndex, ePanels panel, bool showVisualEffect);
     void ScanForCrimes();
     void TankControl();
     // Makes a vehicles acts like a tank on a road - blows up collided vehicles. Must be called in a loop

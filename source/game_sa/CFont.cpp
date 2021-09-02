@@ -124,7 +124,7 @@ void ReadFontsDat() {
             gFontData[fontId].m_spaceValue = spaceValue;
         }
         else if (!memcmp(attrib, "[PROP]", 7)) {
-            for (int i = 0; i < 26; i++) {
+            for (int32 i = 0; i < 26; i++) {
                 auto nextLine = CFileLoader::LoadLine(file);
                 uint32 propValues[8];
 
@@ -132,7 +132,7 @@ void ReadFontsDat() {
                     &propValues[0], &propValues[1], &propValues[2], &propValues[3],
                     &propValues[4], &propValues[5], &propValues[6], &propValues[7]);
 
-                for (int j = 0; j < 8; j++)
+                for (int32 j = 0; j < 8; j++)
                     gFontData[fontId].m_propValues[i * 8 + j] = propValues[j];
             }
         }
@@ -150,7 +150,7 @@ void ReadFontsDat() {
 
 // 0x5BA690
 void CFont::Initialise() {
-    int fontsTxd = CTxdStore::AddTxdSlot("fonts");
+    int32 fontsTxd = CTxdStore::AddTxdSlot("fonts");
     CTxdStore::LoadTxd(fontsTxd, "MODELS\\FONTS.TXD");
     CTxdStore::AddRef(fontsTxd);
     CTxdStore::PushCurrentTxd();
@@ -181,7 +181,7 @@ void CFont::Initialise() {
     SetDropShadowPosition(0);
     CTxdStore::PopCurrentTxd();
 
-    int ps2btnsTxd = CTxdStore::AddTxdSlot("ps2btns");
+    int32 ps2btnsTxd = CTxdStore::AddTxdSlot("ps2btns");
     CTxdStore::LoadTxd(ps2btnsTxd, "MODELS\\PCBTNS.TXD");
     CTxdStore::AddRef(ps2btnsTxd);
     CTxdStore::PushCurrentTxd();

@@ -58,7 +58,7 @@ public:
     void ReportWaterSplash(CVector, float);
     void ReportWeaponEvent(int32 audioEvent, eWeaponType weaponType, CPhysical* physical);
     void ReportDoorMovement(CPhysical* pPhysical);
-    void StopRadio(tVehicleAudioSettings* audioSettings, unsigned char bDuringPause);
+    void StopRadio(tVehicleAudioSettings* audioSettings, uint8 bDuringPause);
     void SetRadioAutoRetuneOnOff(uint8);
     void SetBassEnhanceOnOff(uint8);
     void SetRadioBassSetting(signed char);

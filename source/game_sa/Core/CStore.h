@@ -5,19 +5,21 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
 
-template <typename ObjectType, unsigned int Capacity>
-class CStore {
+template <typename ObjectType, uint32 Capacity> class CStore {
 public:
-    unsigned int m_nCount;
-    ObjectType   m_aObjects[Capacity];
+    uint32     m_nCount;
+    ObjectType m_aObjects[Capacity];
 
+public:
     CStore() {
         count = 0;
     }
 
-    inline ObjectType& GetItemAtIndex(unsigned int index) { return m_aObjects[index]; }
+    inline ObjectType& GetItemAtIndex(uint32 index) {
+        return m_aObjects[index];
+    }
+
     inline ObjectType& AddItem() {
         auto& pObj = m_aObjects[m_nCount];
         ++m_nCount;

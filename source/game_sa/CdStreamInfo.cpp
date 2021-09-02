@@ -2,43 +2,43 @@
 
 HANDLE(&gStreamFileHandles)[MAX_CD_STREAM_HANDLES] = *(HANDLE(*)[MAX_CD_STREAM_HANDLES])0x8E4010;
 char(&gCdImageNames)[MAX_CD_STREAM_HANDLES][MAX_CD_STREAM_IMAGE_NAME_SIZE] = *(char(*)[MAX_CD_STREAM_HANDLES][MAX_CD_STREAM_IMAGE_NAME_SIZE])0x8E4098;
-std::uint32_t& gStreamFileCreateFlags = *(std::uint32_t*)0x8E3FE0;
+uint32& gStreamFileCreateFlags = *(uint32*)0x8E3FE0;
 CdStream*& gCdStreams = *(CdStream**)0x8E3FFC;
-std::int32_t& gStreamCount = *(std::int32_t*)0x8E4090;
-std::int32_t& gOpenStreamCount = *(std::int32_t*)0x8E4094;
-std::int32_t& gStreamingInitialized = *(std::int32_t*)0x8E3FE4;
-std::int32_t& gOverlappedIO = *(std::int32_t*)0x8E3FE8;
+int32& gStreamCount = *(int32*)0x8E4090;
+int32& gOpenStreamCount = *(int32*)0x8E4094;
+int32& gStreamingInitialized = *(int32*)0x8E3FE4;
+int32& gOverlappedIO = *(int32*)0x8E3FE8;
 Queue& gStreamQueue = *(Queue*)0x8E3FEC;
 HANDLE& gStreamSemaphore = *(HANDLE*)0x8E4004;
 HANDLE& gStreamingThread = *(HANDLE*)0x8E4008;
 DWORD& gStreamingThreadId = *(DWORD*)0x8E4000;
-std::uint32_t& gLastCdStreamPosn = *(std::uint32_t*)0x8E4898;
+uint32& gLastCdStreamPosn = *(uint32*)0x8E4898;
 
 #define APPLY_CD_STREAM_DEADLOCK_FIX 1
 
 #ifdef APPLY_CD_STREAM_DEADLOCK_FIX
 // thanks to http://forums.codeguru.com/showthread.php?175474-a-CCriticalSection-question
-class CSync
-{
+class CSync {
 public:
     CSync() { InitializeCriticalSection(&m_CriticalSection); }
     ~CSync() { DeleteCriticalSection(&m_CriticalSection); }
     void Acquire() { EnterCriticalSection(&m_CriticalSection); }
     void Release() { LeaveCriticalSection(&m_CriticalSection); }
+
 private:
     CRITICAL_SECTION m_CriticalSection;
 };
 
-
-class CLockGuard
-{
+class CLockGuard {
 public:
     CLockGuard(CSync& refSync) : m_refSync(refSync) { Lock(); }
     ~CLockGuard() { Unlock(); }
+
 private:
     CSync& m_refSync;
     CLockGuard(const CLockGuard& refcSource);
     CLockGuard& operator=(const CLockGuard& refcSource);
+
 public:
     void Lock() { m_refSync.Acquire(); }
     void Unlock() { m_refSync.Release(); }
@@ -61,9 +61,9 @@ void InjectCdStreamHooks()
 }
 
 // 0x4067B0
-std::int32_t __cdecl CdStreamOpen(const char* lpFileName)
+int32 __cdecl CdStreamOpen(const char* lpFileName)
 {
-    std::int32_t freeHandleIndex = 0;
+    int32 freeHandleIndex = 0;
     for (; freeHandleIndex < MAX_CD_STREAM_HANDLES; freeHandleIndex++) {
         if (!gStreamFileHandles[freeHandleIndex])
             break;
@@ -93,7 +93,7 @@ std::int32_t __cdecl CdStreamOpen(const char* lpFileName)
 // 3. When CdStreamThread is done reading the file, it signals `stream.sync.hSemaphore`, so the main thread can
 //    continue executing code and continue the gameplay.
 // 0x406460
-eCdStreamStatus __cdecl CdStreamSync(std::int32_t streamId)
+eCdStreamStatus __cdecl CdStreamSync(int32 streamId)
 {
     CdStream& stream = gCdStreams[streamId];
 #ifdef APPLY_CD_STREAM_DEADLOCK_FIX
@@ -122,7 +122,7 @@ eCdStreamStatus __cdecl CdStreamSync(std::int32_t streamId)
 }
 
 // 0x4063E0
-eCdStreamStatus __cdecl CdStreamGetStatus(std::int32_t streamId)
+eCdStreamStatus __cdecl CdStreamGetStatus(int32 streamId)
 {
     CdStream& stream = gCdStreams[streamId];
     if (gStreamingInitialized) {
@@ -150,11 +150,11 @@ eCdStreamStatus __cdecl CdStreamGetStatus(std::int32_t streamId)
 // When CdStreamThread is done reading the model, then CdStreamThread will set `stream.nSectorsToRead` and `stream.bInUse` to 0,
 // so the main thread can call CdStreamRead again to read more models.
 // 0x406A20
-bool __cdecl CdStreamRead(std::int32_t streamId, std::uint8_t* lpBuffer, std::uint32_t offsetAndHandle, std::int32_t sectorCount)
+bool __cdecl CdStreamRead(int32 streamId, uint8* lpBuffer, uint32 offsetAndHandle, int32 sectorCount)
 {
     CdStream& stream = gCdStreams[streamId];
     gLastCdStreamPosn = sectorCount + offsetAndHandle;
-    const std::uint32_t sectorOffset = offsetAndHandle & 0xFFFFFF;
+    const uint32 sectorOffset = offsetAndHandle & 0xFFFFFF;
     stream.hFile = gStreamFileHandles[offsetAndHandle >> 24];
     SetLastError(NO_ERROR);
     if (gStreamingInitialized) {
@@ -189,7 +189,7 @@ bool __cdecl CdStreamRead(std::int32_t streamId, std::uint8_t* lpBuffer, std::ui
 {
     while (true) {
         WaitForSingleObject(gStreamSemaphore, INFINITE);
-        const std::int32_t streamId = GetFirstInQueue(&gStreamQueue);
+        const int32 streamId = GetFirstInQueue(&gStreamQueue);
         CdStream& stream = gCdStreams[streamId];
         stream.bInUse = true;
         if (stream.status == eCdStreamStatus::READING_SUCCESS) {
@@ -237,7 +237,7 @@ bool __cdecl CdStreamRead(std::int32_t streamId, std::uint8_t* lpBuffer, std::ui
 void __cdecl CdStreamInitThread()
 {
     SetLastError(NO_ERROR);
-    for (std::int32_t i = 0; i < gStreamCount; i++) {
+    for (int32 i = 0; i < gStreamCount; i++) {
         HANDLE hSemaphore = CreateSemaphoreA(nullptr, 0, 2, nullptr);
         gCdStreams[i].sync.hSemaphore = hSemaphore;
         if (!hSemaphore) {
@@ -263,9 +263,9 @@ void __cdecl CdStreamInitThread()
 }
 
 // 0x406B70
-void __cdecl CdStreamInit(std::int32_t streamCount)
+void __cdecl CdStreamInit(int32 streamCount)
 {
-    for (std::int32_t i = 0; i < MAX_CD_STREAM_HANDLES; i++) {
+    for (int32 i = 0; i < MAX_CD_STREAM_HANDLES; i++) {
         gStreamFileHandles[i] = nullptr;
         gCdImageNames[i][0] = 0;
     }
@@ -279,7 +279,7 @@ void __cdecl CdStreamInit(std::int32_t streamCount)
         gStreamFileCreateFlags |= FILE_FLAG_NO_BUFFERING;
     gOverlappedIO = 1;
     gStreamingInitialized = 0;
-    std::uint8_t* pAllocatedMemory = CMemoryMgr::MallocAlign(STREAMING_SECTOR_SIZE, bytesPerSector);
+    uint8* pAllocatedMemory = CMemoryMgr::MallocAlign(STREAMING_SECTOR_SIZE, bytesPerSector);
     SetLastError(NO_ERROR);
     gOpenStreamCount = 0;
     gStreamCount = streamCount;
@@ -299,10 +299,10 @@ void __cdecl CdStreamInit(std::int32_t streamCount)
 // 0x406690
 void __cdecl CdStreamRemoveImages()
 {
-    for (std::int32_t i = 0; i < gStreamCount; ++i) {
+    for (int32 i = 0; i < gStreamCount; ++i) {
         CdStreamSync(i);
     }
-    for (std::int32_t i = 0; i < gOpenStreamCount; i++) {
+    for (int32 i = 0; i < gOpenStreamCount; i++) {
         SetLastError(NO_ERROR);
         if (gStreamFileHandles[i])
             CloseHandle(gStreamFileHandles[i]);
@@ -319,7 +319,7 @@ void __cdecl CdStreamShutdown()
         FinalizeQueue(&gStreamQueue);
         CloseHandle(gStreamSemaphore);
         CloseHandle(gStreamingThread);
-        for (std::int32_t i = 0; i < gStreamCount; i++) {
+        for (int32 i = 0; i < gStreamCount; i++) {
             CloseHandle(gCdStreams[i].sync.hSemaphore);
         }
     }

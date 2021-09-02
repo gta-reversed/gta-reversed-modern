@@ -7,8 +7,8 @@
 
 #include "StdInc.h"
 
-uint8_t* CMatrix::EulerIndices1 = (uint8_t*)0x866D9C;
-uint8_t* CMatrix::EulerIndices2 = (uint8_t*)0x866D94;
+uint8* CMatrix::EulerIndices1 = (uint8*)0x866D9C;
+uint8* CMatrix::EulerIndices2 = (uint8*)0x866D94;
 int32_t& numMatrices = *(int32_t*)0xB74238;
 CMatrix& gDummyMatrix = *(CMatrix*)0xB74240;
 
@@ -338,7 +338,7 @@ void CMatrix::ForceUpVector(CVector vecUp) {
     m_up = vecUp;
 }
 
-void CMatrix::ConvertToEulerAngles(float* pX, float* pY, float* pZ, unsigned int uiFlags)
+void CMatrix::ConvertToEulerAngles(float* pX, float* pY, float* pZ, uint32 uiFlags)
 {
     float fArr[3][3];
 
@@ -421,7 +421,7 @@ void CMatrix::ConvertToEulerAngles(float* pX, float* pY, float* pZ, unsigned int
     }
 }
 
-void CMatrix::ConvertFromEulerAngles(float x, float y, float z, unsigned int uiFlags)
+void CMatrix::ConvertFromEulerAngles(float x, float y, float z, uint32 uiFlags)
 {
     /* Original indices deciding logic, i replaced it with clearer one
     auto iInd1 = CMatrix::EulerIndices1[(uiFlags >> 3) & 0x3];

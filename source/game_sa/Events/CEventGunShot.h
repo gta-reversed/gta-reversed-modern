@@ -6,9 +6,9 @@
 class CEventGunShot : public CEventEditableResponse {
 public:
     CEntity* m_entity;
-    CVector m_startPoint;
-    CVector m_endPoint;
-    bool m_bHasNoSound;
+    CVector  m_startPoint;
+    CVector  m_endPoint;
+    bool     m_bHasNoSound;
 
     static float& ms_fGunShotSenseRangeForRiot2;
     static void InjectHooks();
@@ -20,7 +20,7 @@ private:
 public:
     eEventType GetEventType() const override { return EVENT_SHOT_FIRED; }
     int32_t GetEventPriority() const override { return 35; }
-    int GetLifeTime() override { return 0; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     bool IsCriminalEvent() override;
     void ReportCriminalEvent(CPed* ped) override { } // empty

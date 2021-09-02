@@ -40,7 +40,7 @@ void WaterCreatureManager_c::Exit()
     m_freeList.RemoveAll();
 }
 
-int WaterCreatureManager_c::GetRandomWaterCreatureId()
+int32 WaterCreatureManager_c::GetRandomWaterCreatureId()
 {
     auto nRand = CGeneral::GetRandomNumberInRange(0, 100);
     if (nRand < 80)
@@ -55,7 +55,7 @@ int WaterCreatureManager_c::GetRandomWaterCreatureId()
     return eWaterCreatureType::DOLPHIN;
 }
 
-void WaterCreatureManager_c::TryToFreeUpWaterCreatures(int numToFree)
+void WaterCreatureManager_c::TryToFreeUpWaterCreatures(int32 numToFree)
 {
     auto* pCur = m_createdList.GetHead();
     int32_t iCounter = 0;
@@ -71,7 +71,7 @@ void WaterCreatureManager_c::TryToFreeUpWaterCreatures(int numToFree)
     }
 }
 
-bool WaterCreatureManager_c::CanAddWaterCreatureAtPos(int nCreatureType, CVector vecPos)
+bool WaterCreatureManager_c::CanAddWaterCreatureAtPos(int32 nCreatureType, CVector vecPos)
 {
     auto* pCur = m_createdList.GetHead();
     if (!pCur)
@@ -145,11 +145,11 @@ void WaterCreatureManager_c::Update(float fTimestep)
                 if (WaterCreatureManager_c::CanAddWaterCreatureAtPos(nType, vecCreationPos))
                 {
                     const auto& pInfo = WaterCreatureManager_c::GetCreatureInfo(nType);
-                    unsigned int iNumCreated = CGeneral::GetRandomNumberInRange(pInfo.m_nMinCreated, pInfo.m_nMaxCreated);
+                    uint32 iNumCreated = CGeneral::GetRandomNumberInRange(pInfo.m_nMinCreated, pInfo.m_nMaxCreated);
                     iNumCreated = std::min(iNumCreated, m_freeList.GetNumItems());
 
                     WaterCreature_c* pGroupLeader = nullptr;
-                    for (uint32_t i = 0; i < iNumCreated; ++i)
+                    for (uint32 i = 0; i < iNumCreated; ++i)
                     {
                         auto* pNewCreature = m_freeList.RemoveHead();
                         if (pNewCreature->Init(nType, &vecCreationPos, pGroupLeader, fWaterLevel, fWaterDepth))

@@ -17,7 +17,7 @@ void CAudioEngine::DisplayRadioStationName() {
 }
 
 void CAudioEngine::ReportWaterSplash(CPhysical* pPhysical, float volume, bool forcePlaySplashSound) {
-    return plugin::CallMethod<0x506F00, CAudioEngine*, CPhysical*, float, unsigned char>(this, pPhysical, volume, forcePlaySplashSound);
+    return plugin::CallMethod<0x506F00, CAudioEngine*, CPhysical*, float, uint8>(this, pPhysical, volume, forcePlaySplashSound);
 }
 
 void CAudioEngine::ReportWeaponEvent(int32 audioEvent, eWeaponType weaponType, CPhysical* physical) {
@@ -32,8 +32,8 @@ void CAudioEngine::ReportObjectDestruction(CEntity* pEntity) {
     plugin::CallMethod<0x506ED0, CAudioEngine*, CEntity*>(this, pEntity);
 }
 
-void CAudioEngine::StopRadio(tVehicleAudioSettings* audioSettings, unsigned char bDuringPause) {
-    plugin::CallMethod<0x506F70, CAudioEngine*, tVehicleAudioSettings*, unsigned char>(this, audioSettings, bDuringPause);
+void CAudioEngine::StopRadio(tVehicleAudioSettings* audioSettings, uint8 bDuringPause) {
+    plugin::CallMethod<0x506F70, CAudioEngine*, tVehicleAudioSettings*, uint8>(this, audioSettings, bDuringPause);
 }
 
 bool CAudioEngine::IsCutsceneTrackActive() {

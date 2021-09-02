@@ -34,15 +34,15 @@
 eLevelName& CTheZones::m_CurrLevel = *(eLevelName*)0xBA6718;
 
 char* CTheZones::ZonesVisited = (char*)0xBA3730;
-int& CTheZones::ZonesRevealed = *(int*)0xBA372C;
+int32& CTheZones::ZonesRevealed = *(int32*)0xBA372C;
 
-short& CTheZones::TotalNumberOfMapZones = *(short*)0xBA1900;
+int16& CTheZones::TotalNumberOfMapZones = *(int16*)0xBA1900;
 CZone* CTheZones::NavigationZoneArray = (CZone*)0xBA3798; 
 
-short& CTheZones::TotalNumberOfNavigationZones = *(short*)0xBA3794;
+int16& CTheZones::TotalNumberOfNavigationZones = *(int16*)0xBA3794;
 CZone* CTheZones::MapZoneArray = (CZone*)0xBA1908;
 
-short& CTheZones::TotalNumberOfZoneInfos = *(short*)0xBA1DE8;
+int16& CTheZones::TotalNumberOfZoneInfos = *(int16*)0xBA1DE8;
 CZoneInfo* CTheZones::ZoneInfoArray = (CZoneInfo*)0xBA1DF0;
 
 
@@ -76,9 +76,9 @@ bool CTheZones::GetCurrentZoneLockedOrUnlocked(float posx, float posy)
                                         (unsigned __int8)((posy + 3000.0) * 0.0016666667) + 9] != 0;
 }
 
-void CTheZones::AssignZoneInfoForThisZone(short index)
+void CTheZones::AssignZoneInfoForThisZone(int16 index)
 {
-    ((void(__cdecl*)(short)) FUNC_CTheZones__AssignZoneInfoForThisZone) (index);
+    ((void(__cdecl*)(int16)) FUNC_CTheZones__AssignZoneInfoForThisZone) (index);
 }
 
 bool CTheZones::ZoneIsEntirelyContainedWithinOtherZone(CZone* pZone1, CZone* pZone2)
@@ -123,13 +123,13 @@ void CTheZones::FillZonesWithGangColours(bool DisableRadarGangColors)
 
 // Returns pointer to zone by index
 // 572590
-CZone* CTheZones::GetNavigationZone(unsigned short index)
+CZone* CTheZones::GetNavigationZone(uint16 index)
 {
     return &CTheZones::NavigationZoneArray[index];
 }
 
 // Returns pointer to zone by index
-CZone* CTheZones::GetMapZone(unsigned short index)
+CZone* CTheZones::GetMapZone(uint16 index)
 {
     return &CTheZones::MapZoneArray[index];
 }
@@ -159,20 +159,20 @@ void CTheZones::CreateZone(const char* name, eZoneType type, float posX1, float 
 }
 
 // Returns 1 if point lies within the specified zonename otherwise return 0
-bool CTheZones::FindZone(CVector* point, int zonename_part1, int zonename_part2, eZoneType type)
+bool CTheZones::FindZone(CVector* point, int32 zonename_part1, int32 zonename_part2, eZoneType type)
 {
-    return ((bool(__cdecl*)(CVector*, int, int, eZoneType)) FUNC_CTheZones__FindZone)(point, zonename_part1, zonename_part2, type);
+    return ((bool(__cdecl*)(CVector*, int32, int32, eZoneType)) FUNC_CTheZones__FindZone)(point, zonename_part1, zonename_part2, type);
 }
 
 // Returns pointer to zone by index
-short CTheZones::FindZoneByLabel(const char* name, eZoneType type)
+int16 CTheZones::FindZoneByLabel(const char* name, eZoneType type)
 {
-    return ((short(__cdecl*)(const char*, eZoneType)) FUNC_CTheZones__FindZoneByLabel)(name, type);
+    return ((int16(__cdecl*)(const char*, eZoneType)) FUNC_CTheZones__FindZoneByLabel)(name, type);
 }
 
-void CTheZones::SetZoneRadarColours(short index, char flag, unsigned char red, unsigned char green, unsigned char blue)
+void CTheZones::SetZoneRadarColours(int16 index, char flag, uint8 red, uint8 green, uint8 blue)
 {
-    ((void(__cdecl*)(short, char, unsigned char, unsigned char, unsigned char)) FUNC_CTheZones__SetZoneRadarColours) (index, flag, red, green, blue);
+    ((void(__cdecl*)(int16, char, uint8, uint8, uint8)) FUNC_CTheZones__SetZoneRadarColours) (index, flag, red, green, blue);
 }
 
 // Updates CTheZones info
@@ -189,17 +189,17 @@ void CTheZones::Save()
     CGenericGameStorage::SaveDataToWorkBuffer(&TotalNumberOfZoneInfos, 2);
     CGenericGameStorage::SaveDataToWorkBuffer(&TotalNumberOfMapZones, 2);
 
-    for (int i = 0; i < TotalNumberOfNavigationZones; i++)
+    for (int32 i = 0; i < TotalNumberOfNavigationZones; i++)
     {
         CGenericGameStorage::SaveDataToWorkBuffer(&NavigationZoneArray[i], 0x20);
     }
 
-    for (int i = 0; i < TotalNumberOfZoneInfos; i++)
+    for (int32 i = 0; i < TotalNumberOfZoneInfos; i++)
     {
         CGenericGameStorage::SaveDataToWorkBuffer(&ZoneInfoArray[i], 0x11);
     }
 
-    for (int i = 0; i < TotalNumberOfMapZones; i++)
+    for (int32 i = 0; i < TotalNumberOfMapZones; i++)
     {
         CGenericGameStorage::SaveDataToWorkBuffer(&MapZoneArray[i], 0x20);
     }
@@ -217,17 +217,17 @@ void CTheZones::Load()
     CGenericGameStorage::LoadDataFromWorkBuffer(&TotalNumberOfZoneInfos, 2);
     CGenericGameStorage::LoadDataFromWorkBuffer(&TotalNumberOfMapZones, 2);
 
-    for (int i = 0; i < TotalNumberOfNavigationZones; i++)
+    for (int32 i = 0; i < TotalNumberOfNavigationZones; i++)
     {
         CGenericGameStorage::LoadDataFromWorkBuffer(&NavigationZoneArray[i], 0x20u);
     }
 
-    for (int i = 0; i < TotalNumberOfZoneInfos; i++)
+    for (int32 i = 0; i < TotalNumberOfZoneInfos; i++)
     {
         CGenericGameStorage::LoadDataFromWorkBuffer(&ZoneInfoArray[i], 0x11u);
     }
 
-    for (int i = 0; i < TotalNumberOfMapZones; i++)
+    for (int32 i = 0; i < TotalNumberOfMapZones; i++)
     {
         CGenericGameStorage::LoadDataFromWorkBuffer(&MapZoneArray[i], 0x20u);
     }

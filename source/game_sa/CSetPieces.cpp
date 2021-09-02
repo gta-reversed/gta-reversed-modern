@@ -7,12 +7,12 @@
 #include "StdInc.h"
 
 bool& CSetPieces::bDebug = *(bool*)0xA957F8;
-unsigned int& CSetPieces::NumSetPieces = *(unsigned int*)0xA957FC;
+uint32& CSetPieces::NumSetPieces = *(uint32*)0xA957FC;
 CSetPiece* CSetPieces::aSetPieces = (CSetPiece*)0xA95818;
 
 // 0x499500
-void CSetPieces::AddOne(unsigned char type, CVector2D cornerA, CVector2D cornerB, CVector2D spawnCoord1, CVector2D targetCoord1, CVector2D spawnCoord2, CVector2D targetCoord2) {
-    plugin::Call<0x499500, unsigned char, CVector2D, CVector2D, CVector2D, CVector2D, CVector2D, CVector2D>(type, cornerA, cornerB, spawnCoord1, targetCoord1, spawnCoord2, targetCoord2);
+void CSetPieces::AddOne(uint8 type, CVector2D cornerA, CVector2D cornerB, CVector2D spawnCoord1, CVector2D targetCoord1, CVector2D spawnCoord2, CVector2D targetCoord2) {
+    plugin::Call<0x499500, uint8, CVector2D, CVector2D, CVector2D, CVector2D, CVector2D, CVector2D>(type, cornerA, cornerB, spawnCoord1, targetCoord1, spawnCoord2, targetCoord2);
 }
 
 // 0x4994F0

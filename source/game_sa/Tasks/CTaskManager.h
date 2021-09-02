@@ -49,9 +49,9 @@ public:
     CTaskManager* Destructor();
 
     CTask* GetActiveTask();
-    CTask* FindActiveTaskByType(int taskType);
-    CTask* FindTaskByType(int taskIndex, int taskType);
-    CTask* GetTaskSecondary(int taskIndex);
+    CTask* FindActiveTaskByType(int32 taskType);
+    CTask* FindTaskByType(int32 taskIndex, int32 taskType);
+    CTask* GetTaskSecondary(int32 taskIndex);
 
     bool HasPrimaryTask(const CTask* task);
     bool HasTaskSecondary(const CTask* task);
@@ -64,12 +64,12 @@ public:
     static CTaskSimple* GetSimplestTask(CTask* task);
     void StopTimers(const CEvent* event);
     CTask* GetSimplestActiveTask();
-    CTaskSimple* GetSimplestTask(int taskIndex);
+    CTaskSimple* GetSimplestTask(int32 taskIndex);
 
     void AddSubTasks(CTaskComplex* task);
     void ParentsControlChildren(CTaskComplex* pTask);
-    void SetTask(CTask* task, int taskIndex, bool unused = false);
-    void SetTaskSecondary(CTask* task, int taskIndex);
+    void SetTask(CTask* task, int32 taskIndex, bool unused = false);
+    void SetTaskSecondary(CTask* task, int32 taskIndex);
     void ClearTaskEventResponse();
     void ManageTasks();
 

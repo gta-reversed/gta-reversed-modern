@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 bool& CBirds::bHasBirdBeenShot = *(bool*)0xC6A8A0;
-unsigned int& CBirds::uiNumberOfBirds = *(unsigned int*)0xC6A8A4;
+uint32& CBirds::uiNumberOfBirds = *(uint32*)0xC6A8A4;
 CBird* CBirds::aBirds = (CBird*)0xC6A8B0;
 CVector& CBirds::vecBirdShotAt = *(CVector*)0xC6AA48;
 
@@ -11,7 +11,7 @@ float* CBirds::faCreationCoorsZ = (float*)0x8D5280; // Size: 6
 float* CBirds::faRenderCoorsU = (float*)0x8D52B8; // Size: 8
 float* CBirds::faRenderCoorsV = (float*)0x8D5298; // Size: 8
 float* CBirds::faRenderPosY = (float*)0x8D52D8; // Size: 8
-unsigned int* CBirds::auRenderIndices = (unsigned int*)0x8D52F8; // Size: 30
+uint32* CBirds::auRenderIndices = (uint32*)0x8D52F8; // Size: 30
 
 void CBirds::InjectHooks()
 {
@@ -33,7 +33,7 @@ void CBirds::Init()
     CBirds::bHasBirdBeenShot = false;
 }
 
-void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int iBirdCount, eBirdsBiome eBiome, bool bCheckObstacles)
+void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int32 iBirdCount, eBirdsBiome eBiome, bool bCheckObstacles)
 {
     float fMaxDistance;
 
@@ -54,7 +54,7 @@ void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int 
         return;
 
     for (int32_t i = 0; i < iBirdCount; ++i) {
-        int iFreeBirdIndex = 0;
+        int32 iFreeBirdIndex = 0;
         while (iFreeBirdIndex < MAX_BIRDS) {
             auto& pBird = CBirds::aBirds[iFreeBirdIndex];
             if (!pBird.m_bCreated)
@@ -76,7 +76,7 @@ void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int 
             continue;
 
         auto fAngle = atan2(vecBirdDirection.x, vecBirdDirection.y);
-        unsigned int iSpeedRandFactor = rand() % 31;
+        uint32 iSpeedRandFactor = rand() % 31;
 
         ++CBirds::uiNumberOfBirds;
         pBird.m_bCreated = true;
@@ -146,7 +146,7 @@ void CBirds::Update()
         && CClock::ms_nGameClockHours > 5U
         && (CTimer::m_FrameCounter & 0x1FF) == MAX_BIRDS) {
 
-        auto iNumBirdsToCreate = (uint32_t)CGeneral::GetRandomNumberInRange(1, MAX_BIRDS + 1 - CBirds::uiNumberOfBirds);
+        auto iNumBirdsToCreate = (uint32)CGeneral::GetRandomNumberInRange(1, MAX_BIRDS + 1 - CBirds::uiNumberOfBirds);
         eBirdsBiome eBiome = eBirdsBiome::BIOME_WATER;
 
         if (TheCamera.m_fDistanceToWater > 30.0F) {
@@ -187,7 +187,7 @@ void CBirds::Update()
                 float fSpawnAngleCamRelative;
 
                 if (rand() % 2)
-                    fSpawnAngleCamRelative = (float)(unsigned char)(rand() % 256) * 0.024531251F; // [0 : 255] mapped to [0 : 2π]
+                    fSpawnAngleCamRelative = (float)(uint8)(rand() % 256) * 0.024531251F; // [0 : 255] mapped to [0 : 2π]
                 else {
                     auto vecForward = TheCamera.m_mCameraMatrix.GetForward();
                     vecForward.z = 0.0F;
@@ -195,7 +195,7 @@ void CBirds::Update()
                         vecForward.x = 0.01F;
 
                     vecForward.Normalise();
-                    unsigned char cRand = (unsigned char)(rand() % 256) - 128;
+                    uint8 cRand = (uint8)(rand() % 256) - 128;
                     fSpawnAngleCamRelative = ((float)cRand) / 256.0F + atan2(vecForward.x, vecForward.y); // [0 : 1] + atan2(...)
                 }
                     
@@ -218,7 +218,7 @@ void CBirds::Update()
         }
     }
 
-    int iBirdIndex = CTimer::m_FrameCounter % MAX_BIRDS;
+    int32 iBirdIndex = CTimer::m_FrameCounter % MAX_BIRDS;
     auto& pCheckedBird = CBirds::aBirds[iBirdIndex];
     if (pCheckedBird.m_bCreated && DistanceBetweenPoints2D(CVector2D(pCheckedBird.m_vecPosn), CVector2D(vecCamPos)) > pCheckedBird.m_fMaxBirdDistance)
     {
@@ -257,7 +257,7 @@ void CBirds::Render()
     if (!CBirds::uiNumberOfBirds)
         return;
 
-    unsigned int uiWingMoveTimeOffset = 0;
+    uint32 uiWingMoveTimeOffset = 0;
     uiTempBufferIndicesStored = 0;
     uiTempBufferVerticesStored = 0;
 

@@ -6,17 +6,15 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-class  CRideAnimData {
+class CRideAnimData {
 public:
-    unsigned int m_nAnimGroup;
-    float        m_fSteerAngle;
-    float        m_fAnimLean;
-    int          dwordC;
-    float        dword10;
-    float        m_fHandlebarsAngle;
-    float        m_fAnimPercentageState;
+    uint32 m_nAnimGroup;
+    float  m_fSteerAngle;
+    float  m_fAnimLean;
+    int32  dwordC;
+    float  dword10;
+    float  m_fHandlebarsAngle;
+    float  m_fAnimPercentageState;
 };
 
 VALIDATE_SIZE(CRideAnimData, 0x1C);

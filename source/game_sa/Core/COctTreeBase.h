@@ -6,18 +6,19 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "COctTree.h"
 
-class  COctTreeBase : public COctTree {
+class COctTreeBase : public COctTree {
 public:
-    unsigned int numBranches;
-    bool32       hasTransparentPixels;
+    uint32 numBranches;
+    bool32 hasTransparentPixels;
 
+public:
     COctTreeBase();
-    void Init(int numBranches);
-    bool Insert(unsigned char colorRed, unsigned char colorGreen, unsigned char colorBlue);
-    void ReduceBranches(int newBranchesCount);
+
+    void Init(int32 numBranches);
+    bool Insert(uint8 colorRed, uint8 colorGreen, uint8 colorBlue);
+    void ReduceBranches(int32 newBranchesCount);
 };
 
 VALIDATE_SIZE(COctTreeBase, 0x30);

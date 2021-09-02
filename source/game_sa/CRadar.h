@@ -37,7 +37,7 @@ enum eBlipDisplay {
 };
 
 // See <https://www.dropbox.com/s/oi3i4f0qsbe7z10/blip_marker_colors.html> to view these colors. (TODO: dead link, fix it.)
-enum eBlipColour : unsigned int {
+enum eBlipColour : uint32 {
     BLIP_COLOUR_RED,        // 0
     BLIP_COLOUR_GREEN,      // 1
     BLIP_COLOUR_BLUE,       // 2
@@ -118,15 +118,15 @@ enum eRadarSprite : char {
     RADAR_SPRITE_TORENO*/       // 64
 };
 
-enum eRadarTraceHeight : unsigned char {
+enum eRadarTraceHeight : uint8 {
     RADAR_TRACE_LOW,   // 0
     RADAR_TRACE_HIGH,  // 1
     RADAR_TRACE_NORMAL // 2
 };
 
 struct tBlipHandle {
-    unsigned short arrayIndex;
-    unsigned short number;
+    uint16 arrayIndex;
+    uint16 number;
 };
 
 VALIDATE_SIZE(tBlipHandle, 4);
@@ -143,53 +143,53 @@ VALIDATE_SIZE(airstrip_info, 0x10);
 class CEntryExit;
 
 struct tRadarTrace {
-    eBlipColour    m_nColour;
-    unsigned int   m_nEntityHandle;
-    CVector        m_vPosition;
-    unsigned short m_nCounter;
-    float          m_fSphereRadius;
-    unsigned short m_nBlipSize;
-    CEntryExit*    m_pEntryExit;
-    eRadarSprite   m_nBlipSprite;
-    unsigned char  m_bBright : 1;       // It makes use of bright colors. Always set.
-    unsigned char  m_bTrackingBlip : 1; // It is available.
-    unsigned char  m_bShortRange : 1;   // It doesn't show permanently on the radar.
-    unsigned char  m_bFriendly : 1;     // It is affected by BLIP_COLOUR_THREAT.
-    unsigned char  m_bBlipRemain : 1;   // It has the priority over the entity (it will still appear after the entity's deletion).
-    unsigned char  m_bBlipFade : 1;     // Possibly a leftover. Always unset (unused).
-    unsigned char  m_nCoordBlipAppearance : 2; // see eBlipAppearance
+    eBlipColour  m_nColour;
+    uint32       m_nEntityHandle;
+    CVector      m_vPosition;
+    uint16       m_nCounter;
+    float        m_fSphereRadius;
+    uint16       m_nBlipSize;
+    CEntryExit*  m_pEntryExit;
+    eRadarSprite m_nBlipSprite;
+    uint8        m_bBright : 1;              // It makes use of bright colors. Always set.
+    uint8        m_bTrackingBlip : 1;        // It is available.
+    uint8        m_bShortRange : 1;          // It doesn't show permanently on the radar.
+    uint8        m_bFriendly : 1;            // It is affected by BLIP_COLOUR_THREAT.
+    uint8        m_bBlipRemain : 1;          // It has the priority over the entity (it will still appear after the entity's deletion).
+    uint8        m_bBlipFade : 1;            // Possibly a leftover. Always unset (unused).
+    uint8        m_nCoordBlipAppearance : 2; // see eBlipAppearance
 
-    unsigned char  m_nBlipDisplayFlag : 2;     // see eBlipDisplay
-    unsigned char  m_nBlipType : 4;            // see eBlipType
+    uint8 m_nBlipDisplayFlag : 2; // see eBlipDisplay
+    uint8 m_nBlipType : 4;        // see eBlipType
 };
 
 VALIDATE_SIZE(tRadarTrace, 0x28);
 
 class CRadar {
 public:
-    static constexpr unsigned int MAX_RADAR_SPRITES = 64;
-    static constexpr unsigned int MAX_RADAR_TRACES = 175;
-    static constexpr unsigned int MAX_AIRSTRIP_INFOS = 4;
-    static constexpr unsigned int MAX_RADAR_WIDTH_TILES = 12;
-    static constexpr unsigned int MAX_RADAR_HEIGHT_TILES = 12;
+    static constexpr uint32 MAX_RADAR_SPRITES = 64;
+    static constexpr uint32 MAX_RADAR_TRACES = 175;
+    static constexpr uint32 MAX_AIRSTRIP_INFOS = 4;
+    static constexpr uint32 MAX_RADAR_WIDTH_TILES = 12;
+    static constexpr uint32 MAX_RADAR_HEIGHT_TILES = 12;
 
     static float& m_fRadarOrientation;
 
     // original name unknown
-    static unsigned int& legendTraceTimer;
+    static uint32& legendTraceTimer;
     static eRadarTraceHeight& legendTraceHeight;
 
-    static unsigned int& mapYouAreHereTimer;
+    static uint32& mapYouAreHereTimer;
     static bool& mapYouAreHereDisplay;
 
     static char* RadarBlipFileNames[][2];
 
     // 2990.0 by default
     static float& m_radarRange;
-    // static unsigned short MapLegendList[175];
-    static unsigned short* MapLegendList;
+    // static uint16 MapLegendList[175];
+    static uint16* MapLegendList;
     // num icons in legend
-    static unsigned short& MapLegendCounter;
+    static uint16& MapLegendCounter;
     // static CRGBA ArrowBlipColours[6];
     static CRGBA* ArrowBlipColour;
     // static tRadarTrace ms_RadarTrace[175];
@@ -200,9 +200,9 @@ public:
     static CSprite2d* RadarBlipSprites;
     static CRect& m_radarRect;
     // current airstrip index in airstrip_table
-    static unsigned char& airstrip_location;
+    static uint8& airstrip_location;
     // blip handle
-    static int& airstrip_blip;
+    static int32& airstrip_blip;
 
     static float& cachedCos;
     static float& cachedSin;
@@ -215,65 +215,65 @@ public:
 
     static void LoadTextures();
 
-    static int GetNewUniqueBlipIndex(int blipIndex);
-    static int GetActualBlipArrayIndex(int blipIndex);
+    static int32 GetNewUniqueBlipIndex(int32 blipIndex);
+    static int32 GetActualBlipArrayIndex(int32 blipIndex);
 
-    static void DrawLegend(int x, int y, eRadarSprite blipType);
+    static void DrawLegend(int32 x, int32 y, eRadarSprite blipType);
     static float LimitRadarPoint(CVector2D& point);
     static void LimitToMap(float* pX, float* pY);
-    static unsigned char CalculateBlipAlpha(float distance);
+    static uint8 CalculateBlipAlpha(float distance);
     static void TransformRadarPointToScreenSpace(CVector2D& out, const CVector2D& in);
     static void TransformRealWorldPointToRadarSpace(CVector2D& out, const CVector2D& in);
     static void TransformRadarPointToRealWorldSpace(CVector2D& out, const CVector2D& in);
-    static void TransformRealWorldToTexCoordSpace(CVector2D& out, const CVector2D& in, int arg2, int arg3);
+    static void TransformRealWorldToTexCoordSpace(CVector2D& out, const CVector2D& in, int32 arg2, int32 arg3);
     static void CalculateCachedSinCos();
-    static int SetCoordBlip(eBlipType type, CVector posn, _IGNORED_ unsigned int color, eBlipDisplay blipDisplay, _IGNORED_ char* scriptName);
-    static int SetShortRangeCoordBlip(eBlipType type, CVector posn, unsigned int color, eBlipDisplay blipDisplay, char* scriptName);
-    static int SetEntityBlip(eBlipType type, int entityHandle, unsigned int arg2, eBlipDisplay blipDisplay);
-    static void ChangeBlipColour(int blipIndex, unsigned int color);
-    static bool HasThisBlipBeenRevealed(int blipIndex);
-    static bool DisplayThisBlip(int spriteId, char priority);
-    static void ChangeBlipBrightness(int blipIndex, int brightness);
-    static void ChangeBlipScale(int blipIndex, int size);
-    static void ChangeBlipDisplay(int blipIndex, eBlipDisplay blipDisplay);
-    static void SetBlipSprite(int blipIndex, int spriteId);
-    static void SetBlipAlwaysDisplayInZoom(int blipIndex, unsigned char display);
-    static void SetBlipFade(int blipIndex, unsigned char fade);
-    static void SetCoordBlipAppearance(int blipIndex, unsigned char appearance);
-    static void SetBlipFriendly(int blipIndex, bool friendly);
-    static void SetBlipEntryExit(int blipIndex, CEntryExit* enex);
-    static void ShowRadarTrace(float x, float y, unsigned int size, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
-    static void ShowRadarTraceWithHeight(float x, float y, unsigned int size, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha, eRadarTraceHeight height);
-    static void ShowRadarMarker(CVector posn, unsigned int color, float radius);
-    static unsigned int GetRadarTraceColour(eBlipColour color, bool bright, bool friendly);
-    static void DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, unsigned int width, unsigned int height, const CRGBA& color);
+    static int32 SetCoordBlip(eBlipType type, CVector posn, _IGNORED_ uint32 color, eBlipDisplay blipDisplay, _IGNORED_ char* scriptName);
+    static int32 SetShortRangeCoordBlip(eBlipType type, CVector posn, uint32 color, eBlipDisplay blipDisplay, char* scriptName);
+    static int32 SetEntityBlip(eBlipType type, int32 entityHandle, uint32 arg2, eBlipDisplay blipDisplay);
+    static void ChangeBlipColour(int32 blipIndex, uint32 color);
+    static bool HasThisBlipBeenRevealed(int32 blipIndex);
+    static bool DisplayThisBlip(int32 spriteId, char priority);
+    static void ChangeBlipBrightness(int32 blipIndex, int32 brightness);
+    static void ChangeBlipScale(int32 blipIndex, int32 size);
+    static void ChangeBlipDisplay(int32 blipIndex, eBlipDisplay blipDisplay);
+    static void SetBlipSprite(int32 blipIndex, int32 spriteId);
+    static void SetBlipAlwaysDisplayInZoom(int32 blipIndex, uint8 display);
+    static void SetBlipFade(int32 blipIndex, uint8 fade);
+    static void SetCoordBlipAppearance(int32 blipIndex, uint8 appearance);
+    static void SetBlipFriendly(int32 blipIndex, bool friendly);
+    static void SetBlipEntryExit(int32 blipIndex, CEntryExit* enex);
+    static void ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha);
+    static void ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha, eRadarTraceHeight height);
+    static void ShowRadarMarker(CVector posn, uint32 color, float radius);
+    static uint32 GetRadarTraceColour(eBlipColour color, bool bright, bool friendly);
+    static void DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, uint32 width, uint32 height, const CRGBA& color);
     static void DrawYouAreHereSprite(float x, float y);
-    static void SetupRadarRect(int x, int y);
-    static void RequestMapSection(int x, int y);
-    static void RemoveMapSection(int x, int y);
+    static void SetupRadarRect(int32 x, int32 y);
+    static void RequestMapSection(int32 x, int32 y);
+    static void RemoveMapSection(int32 x, int32 y);
     static void RemoveRadarSections();
     static void StreamRadarSections(const CVector& worldPosn);
-    static void StreamRadarSections(int x, int y);
-    static int ClipRadarPoly(CVector2D* out, const CVector2D* in);
+    static void StreamRadarSections(int32 x, int32 y);
+    static int32 ClipRadarPoly(CVector2D* out, const CVector2D* in);
     static void DrawAreaOnRadar(const CRect& rect, const CRGBA& color, bool inMenu);
     static void DrawRadarMask();
     static void InitFrontEndMap();
-    static void AddBlipToLegendList(unsigned char arg0, int blipIndex);
+    static void AddBlipToLegendList(uint8 arg0, int32 blipIndex);
     static void SetMapCentreToPlayerCoords();
     static void Draw3dMarkers();
-    static void SetRadarMarkerState(int arg0, unsigned char arg1);
-    static void DrawRadarSprite(unsigned short spriteId, float x, float y, unsigned char alpha);
-    static void DrawRadarSection(int x, int y);
-    static void DrawRadarSectionMap(int x, int y, CRect rect);
+    static void SetRadarMarkerState(int32 arg0, uint8 arg1);
+    static void DrawRadarSprite(uint16 spriteId, float x, float y, uint8 alpha);
+    static void DrawRadarSection(int32 x, int32 y);
+    static void DrawRadarSectionMap(int32 x, int32 y, CRect rect);
     static void DrawRadarGangOverlay(bool inMenu);
     static void DrawRadarMap();
     static void DrawMap();
 
-    static void DrawCoordBlip(int blipIndex, bool isSprite);
-    static void DrawEntityBlip(int blipIndex, unsigned char arg1);
-    static void ClearActualBlip(int blipIndex);
-    static void ClearBlipForEntity(eBlipType blipType, int entityHandle);
-    static void ClearBlip(int blipIndex);
+    static void DrawCoordBlip(int32 blipIndex, bool isSprite);
+    static void DrawEntityBlip(int32 blipIndex, uint8 arg1);
+    static void ClearActualBlip(int32 blipIndex);
+    static void ClearBlipForEntity(eBlipType blipType, int32 entityHandle);
+    static void ClearBlip(int32 blipIndex);
     static void SetupAirstripBlips();
     static void DrawBlips();
 
@@ -281,7 +281,7 @@ public:
     static void Save();
 };
 
-bool ClipRadarTileCoords(int& x, int& y);
+bool ClipRadarTileCoords(int32& x, int32& y);
 bool IsPointInsideRadar(const CVector2D& point);
-void GetTextureCorners(int x, int y, CVector2D* corners);
-int LineRadarBoxCollision(CVector2D& result, const CVector2D& lineStart, const CVector2D& lineEnd);
+void GetTextureCorners(int32 x, int32 y, CVector2D* corners);
+int32 LineRadarBoxCollision(CVector2D& result, const CVector2D& lineStart, const CVector2D& lineEnd);

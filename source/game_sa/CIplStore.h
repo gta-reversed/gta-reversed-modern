@@ -23,51 +23,51 @@ public:
     static void Shutdown();
 
     // returns slot index
-    static int AddIplSlot(char const* name);
+    static int32 AddIplSlot(char const* name);
     static void AddIplsNeededAtPosn(CVector const& posn);
     static void ClearIplsNeededAtPosn();
-    static void EnableDynamicStreaming(int iplSlotIndex, bool enable);
+    static void EnableDynamicStreaming(int32 iplSlotIndex, bool enable);
     static void EnsureIplsAreInMemory(CVector const& posn);
     // returns -1 if slot not found
-    static int FindIplSlot(char const* name);
-    static CRect* GetBoundingBox(int iplSlotIndex);
-    static int* GetIplEntityIndexArray(int arrayIndex);
-    static char* GetIplName(int iplSlotIndex);
+    static int32 FindIplSlot(char const* name);
+    static CRect* GetBoundingBox(int32 iplSlotIndex);
+    static int32* GetIplEntityIndexArray(int32 arrayIndex);
+    static char* GetIplName(int32 iplSlotIndex);
     // returns array index
-    static int GetNewIplEntityIndexArray(int entitiesCount);
-    static bool HaveIplsLoaded(CVector const& coords, int playerNumber);
-    static void IncludeEntity(int iplSlotIndex, CEntity* entity);
+    static int32 GetNewIplEntityIndexArray(int32 entitiesCount);
+    static bool HaveIplsLoaded(CVector const& coords, int32 playerNumber);
+    static void IncludeEntity(int32 iplSlotIndex, CEntity* entity);
     static void Save();
     static void Load();
     static void LoadAllRemainingIpls();
-    static bool LoadIpl(int iplSlotIndex, unsigned char* data, int dataSize);
-    static bool LoadIplBoundingBox(int iplSlotIndex, unsigned char* data, int dataSize);
+    static bool LoadIpl(int32 iplSlotIndex, uint8* data, int32 dataSize);
+    static bool LoadIplBoundingBox(int32 iplSlotIndex, uint8* data, int32 dataSize);
     static void LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirection);
     static void RemoveAllIpls();
-    static void RemoveIpl(int iplSlotIndex);
-    static void RemoveIplAndIgnore(int iplSlotIndex);
-    static void RemoveIplSlot(int iplSlotIndex);
-    static void RemoveIplWhenFarAway(int iplSlotIndex);
-    static void RemoveRelatedIpls(int entityArraysIndex);
-    static void RequestIplAndIgnore(int iplSlotIndex);
-    static void RequestIpls(CVector const& posn, int playerNumber);
-    static void SetIplsRequired(CVector const& posn, int playerNumber);
-    static void SetIsInterior(int iplSlotIndex, bool isInterior);
-    static int SetupRelatedIpls(char const* iplName, int entityArraysIndex, CEntity** instances);
+    static void RemoveIpl(int32 iplSlotIndex);
+    static void RemoveIplAndIgnore(int32 iplSlotIndex);
+    static void RemoveIplSlot(int32 iplSlotIndex);
+    static void RemoveIplWhenFarAway(int32 iplSlotIndex);
+    static void RemoveRelatedIpls(int32 entityArraysIndex);
+    static void RequestIplAndIgnore(int32 iplSlotIndex);
+    static void RequestIpls(CVector const& posn, int32 playerNumber);
+    static void SetIplsRequired(CVector const& posn, int32 playerNumber);
+    static void SetIsInterior(int32 iplSlotIndex, bool isInterior);
+    static int32 SetupRelatedIpls(char const* iplName, int32 entityArraysIndex, CEntity** instances);
 
     // 0x59EB20
-    inline static bool HasDynamicStreamingDisabled(int iplSlotIndex) { return ms_pPool->GetAt(iplSlotIndex)->m_bDisableDynamicStreaming; }
+    inline static bool HasDynamicStreamingDisabled(int32 iplSlotIndex) { return ms_pPool->GetAt(iplSlotIndex)->m_bDisableDynamicStreaming; }
 };
 
-extern unsigned int MAX_IPL_ENTITY_INDEX_ARRAYS; // default 40
-extern unsigned int MAX_IPL_INSTANCES;           // default 1000
+extern uint32 MAX_IPL_ENTITY_INDEX_ARRAYS; // default 40
+extern uint32 MAX_IPL_INSTANCES;           // default 1000
 
 extern CEntity** ppCurrIplInstance;
-extern unsigned int& NumIplEntityIndexArrays;
-extern int** IplEntityIndexArrays; // int *IplEntityIndexArrays[40]
+extern uint32& NumIplEntityIndexArrays;
+extern int32** IplEntityIndexArrays; // int32 *IplEntityIndexArrays[40]
 extern bool& gbIplsNeededAtPosn;
 extern CVector& gvecIplsNeededAtPosn;
-extern unsigned int& gCurrIplInstancesCount;
+extern uint32& gCurrIplInstancesCount;
 extern CEntity** gCurrIplInstances; // CEntity *gCurrIplInstances[1000]
 
 void SetIfInteriorIplIsRequired(CVector2D const& posn, void* data);

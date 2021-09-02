@@ -24,7 +24,7 @@ void CBuilding::operator delete(void* data)
     CPools::ms_pBuildingPool->Delete(static_cast<CBuilding*>(data));
 }
 
-void CBuilding::ReplaceWithNewModel(int newModelIndex)
+void CBuilding::ReplaceWithNewModel(int32 newModelIndex)
 {
     this->DeleteRwObject();
     if (!CModelInfo::GetModelInfo(m_nModelIndex)->m_nRefCount)

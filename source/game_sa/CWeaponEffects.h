@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVector.h"
 #include "CRGBA.h"
 
@@ -15,40 +14,40 @@ enum eWeaponEffectsLockTexture {
     WEAPONEFFECTS_LOCK_ON_FIRE = 1
 };
 
-class  CWeaponEffects {
+class CWeaponEffects {
 public:
     bool    m_bActive;
-private:
-    char _pad01[3];
-public:
-    int     m_nTimeWhenToDeactivate; // -1 default
+    char    _pad01[3];
+    int32   m_nTimeWhenToDeactivate; // -1 default
     CVector m_vecPosn;
     CRGBA   m_color;
     float   m_fSize;
-    int field_1C;
-    int field_20;
+    int32   field_1C;
+    int32   field_20;
     float   m_fRotation;
-    char field_28;
-private:
-    char _pad29[3];
+    char    field_28;
+    char    _pad29[3];
+
 public:
+    static void InjectHooks();
 
     CWeaponEffects();
     ~CWeaponEffects();
+
     static void Init();
     static void Shutdown();
-    static bool IsLockedOn(int crosshairId);
-    static void MarkTarget(int crosshairId, CVector posn, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha, float size, unsigned char arg7);
-    static void ClearCrossHair(int crosshairId);
+    static bool IsLockedOn(int32 crosshairId);
+    static void MarkTarget(int32 crosshairId, CVector posn, uint8 red, uint8 green, uint8 blue, uint8 alpha, float size, uint8 arg7);
+    static void ClearCrossHair(int32 crosshairId);
     static void ClearCrossHairs();
-    static void ClearCrossHairImmediately(int crosshairId);
+    static void ClearCrossHairImmediately(int32 crosshairId);
     static void ClearCrossHairsImmediately();
     static void Render();
 };
 
 VALIDATE_SIZE(CWeaponEffects, 0x2C);
 
-extern unsigned int MAX_NUM_WEAPON_CROSSHAIRS; // default 2
+extern uint32 MAX_NUM_WEAPON_CROSSHAIRS; // default 2
 extern CWeaponEffects *gCrossHair; // CWeaponEffects gCrossHair[MAX_NUM_WEAPON_CROSSHAIRS]
 extern RwTexture *&gpCrossHairTex;
 extern RwTexture **gpCrossHairTexFlight; // RwTexture *gpCrossHairTexFlight[2];

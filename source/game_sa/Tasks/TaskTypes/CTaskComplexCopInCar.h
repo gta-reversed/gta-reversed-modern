@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskComplex.h"
 #include "CVehicle.h"
 #include "CPed.h"
@@ -18,7 +18,7 @@ public:
     CPed* m_pCop2;
     CTaskTimer m_timer1;
     CTaskTimer m_timer2;
-    unsigned char m_nFlags;
+    uint8 m_nFlags;
     char __flags[3];
 
     CTaskComplexCopInCar(CVehicle* pVeh, CPed* pCop1, CPed* pCop2, bool arg3);

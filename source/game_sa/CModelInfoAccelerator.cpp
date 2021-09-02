@@ -22,13 +22,13 @@ void CModelInfoAccelerator::Init()
     m_szFilePath[0] = '\0';
 }
 
-void CModelInfoAccelerator::AddModelInfoId(unsigned short modelId)
+void CModelInfoAccelerator::AddModelInfoId(uint16 modelId)
 {
     m_pIDs[m_nNumIDs] = modelId;
     ++m_nNumIDs;
 }
 
-unsigned short CModelInfoAccelerator::GetNextModelInfoId()
+uint16 CModelInfoAccelerator::GetNextModelInfoId()
 {
     auto result = m_pIDs[m_nNumIDs];
     ++m_nNumIDs;
@@ -37,7 +37,7 @@ unsigned short CModelInfoAccelerator::GetNextModelInfoId()
 
 void CModelInfoAccelerator::AllocModelInfoIds()
 {
-    m_pIDs = new unsigned short[BUFFER_SIZE];
+    m_pIDs = new uint16[BUFFER_SIZE];
     memset(m_pIDs, 0, BUFFER_SIZE);
 }
 
@@ -47,7 +47,7 @@ void CModelInfoAccelerator::FreeModelInfoIds()
     m_pIDs = nullptr;
 }
 
-void CModelInfoAccelerator::GetEntry(CBaseModelInfo** arg0, int* arg1, char* arg2)
+void CModelInfoAccelerator::GetEntry(CBaseModelInfo** arg0, int32* arg1, char* arg2)
 {}
 
 void CModelInfoAccelerator::End(char* arg0)

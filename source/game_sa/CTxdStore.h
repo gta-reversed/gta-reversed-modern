@@ -38,7 +38,7 @@ public:
     static void SetCurrentTxd(int32_t index);
 
     static int32_t FindTxdSlot(const char* name);
-    static int32_t FindTxdSlot(uint32_t hash);
+    static int32_t FindTxdSlot(uint32 hash);
 
     static RwTexDictionary* GetTxd(int32_t index);
     static int32_t GetParentTxdSlot(int32_t index);

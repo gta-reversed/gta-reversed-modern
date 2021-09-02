@@ -7,7 +7,7 @@ void WaterCreature_c::InjectHooks()
     ReversibleHooks::Install("WaterCreature_c", "Update", 0x6E4670, &WaterCreature_c::Update);
 }
 
-bool WaterCreature_c::Init(int nType, CVector* pVecPos, WaterCreature_c* pParent, float fWaterLevel, float fWaterDepth)
+bool WaterCreature_c::Init(int32 nType, CVector* pVecPos, WaterCreature_c* pParent, float fWaterLevel, float fWaterDepth)
 {
     if (CObject::nNoTempObjects >= 150)
         return false;

@@ -13,15 +13,15 @@
 class CDirectory {
 public:
     struct DirectoryInfo {
-        uint32_t m_nOffset;
-        uint16_t m_nStreamingSize;
-        uint16_t m_nSizeInArchive;
+        uint32 m_nOffset;
+        uint16 m_nStreamingSize;
+        uint16 m_nSizeInArchive;
         char     m_szName[24];
     };
 
     DirectoryInfo* m_pEntries{};
-    uint32_t       m_nCapacity{};
-    uint32_t       m_nNumEntries{};
+    uint32       m_nCapacity{};
+    uint32       m_nNumEntries{};
     bool           m_bOwnsEntries{};
 
 public:
@@ -34,8 +34,8 @@ public:
     void ReadDirFile(const char* filename);
     bool WriteDirFile(const char* fileName);
     DirectoryInfo* FindItem(const char* itemName);
-    bool FindItem(const char* name, uint32_t& outOffset, uint32_t& outStreamingSize);
-    bool FindItem(uint32_t hashKey, uint32_t& outOffset, uint32_t& outStreamingSize);
+    bool FindItem(const char* name, uint32& outOffset, uint32& outStreamingSize);
+    bool FindItem(uint32 hashKey, uint32& outOffset, uint32& outStreamingSize);
 
 private:
     friend void InjectHooksMain();

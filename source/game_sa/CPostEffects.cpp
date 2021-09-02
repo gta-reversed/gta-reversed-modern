@@ -25,25 +25,25 @@ float& CPostEffects::m_colourBottomVOffset = *(float*)0x8D515C; // 8
 bool& CPostEffects::m_bNightVision = *(bool*)0xC402B8;
 float& CPostEffects::m_fNightVisionSwitchOnFXCount = *(float*)0xC40300; // = CPostEffects::m_fNightVisionSwitchOnFXTime
 float& CPostEffects::m_fNightVisionSwitchOnFXTime = *(float*)0x8D50B0;  // 42480000h
-int& CPostEffects::m_NightVisionGrainStrength = *(int*)0x8D50A8;        // 48
+int32& CPostEffects::m_NightVisionGrainStrength = *(int32*)0x8D50A8;        // 48
 RwRGBA& CPostEffects::m_NightVisionMainCol = *(RwRGBA*)0x8D50AC;        // {0xFF, 0x0, 0x82, 0x0};
 
 bool& CPostEffects::m_bDarknessFilter = *(bool*)0xC402C4;
-int& CPostEffects::m_DarknessFilterAlpha = *(int*)0x8D5204;                   // 170
-int& CPostEffects::m_DarknessFilterAlphaDefault = *(int*)0x8D50F4;            // 170
-int& CPostEffects::m_DarknessFilterRadiosityIntensityLimit = *(int*)0x8D50F8; // 45
+int32& CPostEffects::m_DarknessFilterAlpha = *(int32*)0x8D5204;                   // 170
+int32& CPostEffects::m_DarknessFilterAlphaDefault = *(int32*)0x8D50F4;            // 170
+int32& CPostEffects::m_DarknessFilterRadiosityIntensityLimit = *(int32*)0x8D50F8; // 45
 
 float& CPostEffects::m_fWaterFXStartUnderWaterness = *(float*)0x8D514C; // 0.535f;
 float& CPostEffects::m_fWaterFullDarknessDepth = *(float*)0x8D5148;     // 90.0f
 bool& CPostEffects::m_bWaterDepthDarkness = *(bool*)0x8D5144;           // true;
 
 bool& CPostEffects::m_bHeatHazeFX = *(bool*)0xC402BA;
-int& CPostEffects::m_HeatHazeFXSpeedMin = *(int*)0x8D50EC;  // 6
-int& CPostEffects::m_HeatHazeFXSpeedMax = *(int*)0x8D50F0;  // 10
-int& CPostEffects::m_HeatHazeFXIntensity = *(int*)0x8D50E8; // 150
-int& CPostEffects::m_HeatHazeFXType = *(int*)0xC402BC;
-int& CPostEffects::m_HeatHazeFXTypeLast = *(int*)0x8D50E4; // -1
-int& CPostEffects::m_HeatHazeFXRandomShift = *(int*)0xC402C0;
+int32& CPostEffects::m_HeatHazeFXSpeedMin = *(int32*)0x8D50EC;  // 6
+int32& CPostEffects::m_HeatHazeFXSpeedMax = *(int32*)0x8D50F0;  // 10
+int32& CPostEffects::m_HeatHazeFXIntensity = *(int32*)0x8D50E8; // 150
+int32& CPostEffects::m_HeatHazeFXType = *(int32*)0xC402BC;
+int32& CPostEffects::m_HeatHazeFXTypeLast = *(int32*)0x8D50E4; // -1
+int32& CPostEffects::m_HeatHazeFXRandomShift = *(int32*)0xC402C0;
 float& CPostEffects::m_HeatHazeFXScanSizeX = *(float*)0xC40304;   // SCREEN_WIDTH * 0.0015625 * 24.0f;
 float& CPostEffects::m_HeatHazeFXScanSizeY = *(float*)0xC40308;   // SCREEN_HEIGHT * 0.002232143 * 24.0f;
 float& CPostEffects::m_HeatHazeFXRenderSizeX = *(float*)0xC4030C; // SCREEN_WIDTH * 0.0015625 * 24.0f;
@@ -56,7 +56,7 @@ bool& CPostEffects::m_bSpeedFXTestMode = *(bool*)0xC402C7;
 bool& CPostEffects::m_bSpeedFXUserFlag = *(bool*)0x8D5108;             // always true;
 bool& CPostEffects::m_bSpeedFXUserFlagCurrentFrame = *(bool*)0x8D5109; // 0
 float& CPostEffects::m_fSpeedFXManualSpeedCurrentFrame = *(float*)0xC402C8;
-int& CPostEffects::m_SpeedFXAlpha = *(int*)0x8D5104; // 36
+int32& CPostEffects::m_SpeedFXAlpha = *(int32*)0x8D5104; // 36
 
 RwRaster*& CPostEffects::pRasterFrontBuffer = *(RwRaster**)0xC402D8;
 
@@ -78,13 +78,13 @@ bool& CPostEffects::m_bRadiosity = *(bool*)0xC402CC;
 // bool& CPostEffects::m_bRadiosityStripCopyMode = *(bool*)0x0;
 // static CPostEffects::m_RadiosityFilterUCorrection;
 // static CPostEffects::m_RadiosityFilterVCorrection;
-int& CPostEffects::m_RadiosityIntensity = *(int*)0x8D5118;      // 35
-int& CPostEffects::m_RadiosityIntensityLimit = *(int*)0x8D5114; // 220
+int32& CPostEffects::m_RadiosityIntensity = *(int32*)0x8D5118;      // 35
+int32& CPostEffects::m_RadiosityIntensityLimit = *(int32*)0x8D5114; // 220
 bool& CPostEffects::m_bRadiosityBypassTimeCycleIntensityLimit = *(bool*)0xC402CE;
 float& CPostEffects::m_RadiosityPixelsX = *(float*)0xC40314;                    // SCREEN_WIDTH
 float& CPostEffects::m_RadiosityPixelsY = *(float*)0xC40318;                    // SCREEN_HEIGHT
-unsigned int& CPostEffects::m_RadiosityFilterPasses = *(unsigned int*)0x8D5110; // 1
-unsigned int& CPostEffects::m_RadiosityRenderPasses = *(unsigned int*)0x8D510C; // 2
+uint32& CPostEffects::m_RadiosityFilterPasses = *(uint32*)0x8D5110; // 1
+uint32& CPostEffects::m_RadiosityRenderPasses = *(uint32*)0x8D510C; // 2
 
 static RwBlendFunction& gStoredRenderStateSrcBlend = *(RwBlendFunction*)(0xC40280);
 static RwBlendFunction& gStoredRenderStateDestBlend = *(RwBlendFunction*)(0xC40284);
@@ -104,7 +104,7 @@ static float& fRasterFrontBufferHeight = *(float*)0xC40160;
 float& CPostEffects::m_VisionFXDayNightBalance = *(float*)0x8D50A4; // 1.0f
 
 bool& CPostEffects::m_bInfraredVision = *(bool*)0xC402B9;
-int& CPostEffects::m_InfraredVisionGrainStrength = *(int*)0x8D50B4;     // 64
+int32& CPostEffects::m_InfraredVisionGrainStrength = *(int32*)0x8D50B4;     // 64
 float& CPostEffects::m_fInfraredVisionFilterRadius = *(float*)0x8D50B8; // 3B449BA6h
 // float& CPostEffects::m_fInfraredVisionSwitchOnFXCount;
 RwRGBA& CPostEffects::m_InfraredVisionCol = *(RwRGBA*)0x8D50CC;                    // FF 3C 28 6E
@@ -124,10 +124,10 @@ RwRGBA& CPostEffects::m_waterCol = *(RwRGBA*)0x8D5140;    // {64, 64, 64, 64}
 RwIm2DVertex(&cc_vertices) = *(RwIm2DVertex*)0xC400D8;                 // always nullptr
 RwImVertexIndex (&cc_indices)[12] = *(RwImVertexIndex(*)[12])0x8D5174; // {0, 1, 2, 0, 2, 3, 0, 1, 2, 0, 2, 3};
 
-int& dword_C400E8 = *(int*)0xC400E8;
-int& dword_C40104 = *(int*)0xC40104;
-int& dword_C40120 = *(int*)0xC40120;
-int& dword_C4013C = *(int*)0xC4013C;
+int32& dword_C400E8 = *(int32*)0xC400E8;
+int32& dword_C40104 = *(int32*)0xC40104;
+int32& dword_C40120 = *(int32*)0xC40120;
+int32& dword_C4013C = *(int32*)0xC4013C;
 
 float (&dword_C3FE08_X)[180] = *(float (*)[180])0xC3FE08;
 float (&dword_C3FB38_Y)[180] = *(float (*)[180])0xC3FE08;
@@ -209,11 +209,11 @@ void CPostEffects::SetupBackBufferVertex() {
     // log(2.0) = 0.69314718055994528623
 
     // get maximum 2^N dimensions
-    int width = (int)log2((float)RwRasterGetWidth(pRaster));
-    width = (int)pow(2.0f, width);
+    int32 width = (int32)log2((float)RwRasterGetWidth(pRaster));
+    width = (int32)pow(2.0f, width);
 
-    int height = (int)log2((float)RwRasterGetHeight(pRaster));
-    height = (int)pow(2.0f, height);
+    int32 height = (int32)log2((float)RwRasterGetHeight(pRaster));
+    height = (int32)pow(2.0f, height);
 
     if (pRasterFrontBuffer) {
         if (width != RwRasterGetWidth(pRasterFrontBuffer) || height != RwRasterGetHeight(pRasterFrontBuffer)) {
@@ -278,7 +278,7 @@ void CPostEffects::Update() {
 }
 
 // 0x700EC0
-void CPostEffects::DrawQuad(float x1, float y1, float x2, float y2, char red, unsigned int green, unsigned int blue, unsigned char alpha, RwRaster* raster) {
+void CPostEffects::DrawQuad(float x1, float y1, float x2, float y2, char red, uint32 green, uint32 blue, uint8 alpha, RwRaster* raster) {
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, raster);
 
     auto color = CRGBA(red, green, blue, alpha).ToIntARGB();
@@ -399,7 +399,7 @@ void CPostEffects::ScriptCCTVSwitch(bool enable) {
 }
 
 // 0x701170
-void CPostEffects::ScriptDarknessFilterSwitch(bool enable, int alpha) {
+void CPostEffects::ScriptDarknessFilterSwitch(bool enable, int32 alpha) {
     m_bDarknessFilter = enable;
     if (alpha == 255) {
         m_DarknessFilterAlpha = m_DarknessFilterAlphaDefault;
@@ -444,8 +444,8 @@ void CPostEffects::ScriptResetForEffects() {
 }
 
 // 0x7039C0
-void CPostEffects::UnderWaterRipple(RwRGBA a1, float a2, float a3, int a4, float a5, float a6) {
-    plugin::Call<0x7039C0, RwRGBA, float, float, int, float, float>(a1, a2, a3, a4, a5, a6);
+void CPostEffects::UnderWaterRipple(RwRGBA a1, float a2, float a3, int32 a4, float a5, float a6) {
+    plugin::Call<0x7039C0, RwRGBA, float, float, int32, float, float>(a1, a2, a3, a4, a5, a6);
 }
 
 // unused
@@ -520,7 +520,7 @@ void CPostEffects::HeatHazeFXInit() {
     double x = flt_858B14 * pRasterFrontBuffer->width - m_HeatHazeFXScanSizeX;
     double y = flt_858B14 * pRasterFrontBuffer->height - m_HeatHazeFXScanSizeY;
     double speed = flt_858B14 * (m_HeatHazeFXSpeedMax - m_HeatHazeFXSpeedMin) + m_HeatHazeFXSpeedMin;
-    for (int i = 0; i < 180; i++) {
+    for (int32 i = 0; i < 180; i++) {
       dword_C3FE08_X[i] = rand() * x;
       dword_C3FB38_Y[i] = rand() * y;
       dword_C3F868_SPEED[i] = rand() * speed;
@@ -555,7 +555,7 @@ void CPostEffects::NightVision() {
         RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
         RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 
-        for (int i = 0, end = (int)m_fNightVisionSwitchOnFXCount; i < end; i++) {
+        for (int32 i = 0, end = (int32)m_fNightVisionSwitchOnFXCount; i < end; i++) {
             DrawQuad(0.0f, 0.0f, fRasterFrontBufferWidth, fRasterFrontBufferHeight, 8, 8, 8, 255, pVisionFXRaster);
         }
 
@@ -621,7 +621,7 @@ void CPostEffects::InfraredVision(RwRGBA color, RwRGBA colorMain) {
     RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
 
     float radius = m_fInfraredVisionFilterRadius * 100.0f;
-    int i = 0, j;
+    int32 i = 0, j;
     float xy;
     do {
         j = i + 1;
@@ -701,7 +701,7 @@ void CPostEffects::InfraredVisionStoreAndSetLightsForHeatObjects(CPed* ped) {
     auto alpha = (RwUInt8)m_fInfraredVisionHeatObjectCol.alpha;
 
     if (ped->m_nPedState == PEDSTATE_DEAD) {
-        int v8 = CTimer::m_snTimeInMilliseconds - ped->m_nDeathTime;
+        int32 v8 = CTimer::m_snTimeInMilliseconds - ped->m_nDeathTime;
         if (v8 < 0)
             v8 = ped->m_nDeathTime - CTimer::m_snTimeInMilliseconds;
 
@@ -742,8 +742,8 @@ void CPostEffects::CCTV() {
 }
 
 // 0x7037C0
-void CPostEffects::Grain(int strength, bool a2) {
-    plugin::Call<0x7037C0, int, bool>(strength, a2);
+void CPostEffects::Grain(int32 strength, bool a2) {
+    plugin::Call<0x7037C0, int32, bool>(strength, a2);
 }
 
 // 0x7030A0
@@ -752,12 +752,12 @@ void CPostEffects::SpeedFX(float speed) {
 }
 
 // 0x702F00
-void CPostEffects::DarknessFilter(int a1) {
-    plugin::Call<0x702F00, int>(a1);
+void CPostEffects::DarknessFilter(int32 a1) {
+    plugin::Call<0x702F00, int32>(a1);
 }
 
 // 0x703650
-void CPostEffects::ColourFilter(int pass1, int pass2) {
+void CPostEffects::ColourFilter(int32 pass1, int32 pass2) {
     plugin::Call<0x703650>();
     return;
 
@@ -792,7 +792,7 @@ void CPostEffects::ColourFilter(int pass1, int pass2) {
 }
 
 // 0x702080
-void CPostEffects::Radiosity(int a1, int a2, int a3, int a4) {
+void CPostEffects::Radiosity(int32 a1, int32 a2, int32 a3, int32 a4) {
     plugin::Call<0x702080>();
 }
 

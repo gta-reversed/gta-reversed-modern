@@ -12,13 +12,13 @@
 float& CWeather::TrafficLightsBrightness = *(float*)0xC812A8;
 bool& CWeather::bScriptsForceRain = *(bool*)0xC812AC;
 float& CWeather::Earthquake = *(float*)0xC81340;
-unsigned int& CWeather::CurrentRainParticleStrength = *(unsigned int*)0xC812B0;
-unsigned int& CWeather::LightningStartY = *(unsigned int*)0xC812B4;
-unsigned int& CWeather::LightningStartX = *(unsigned int*)0xC812B8;
-int& CWeather::LightningFlashLastChange = *(int*)0xC812BC;
-int& CWeather::WhenToPlayLightningSound = *(int*)0xC812C0;
-unsigned int& CWeather::LightningDuration = *(unsigned int*)0xC812C4;
-unsigned int& CWeather::LightningStart = *(unsigned int*)0xC812C8;
+uint32& CWeather::CurrentRainParticleStrength = *(uint32*)0xC812B0;
+uint32& CWeather::LightningStartY = *(uint32*)0xC812B4;
+uint32& CWeather::LightningStartX = *(uint32*)0xC812B8;
+int32& CWeather::LightningFlashLastChange = *(int32*)0xC812BC;
+int32& CWeather::WhenToPlayLightningSound = *(int32*)0xC812C0;
+uint32& CWeather::LightningDuration = *(uint32*)0xC812C4;
+uint32& CWeather::LightningStart = *(uint32*)0xC812C8;
 bool& CWeather::LightningFlash = *(bool*)0xC812CC;
 bool& CWeather::LightningBurst = *(bool*)0xC812CD;
 float& CWeather::HeadLightsSpectrum = *(float*)0xC812D0;
@@ -42,7 +42,7 @@ float& CWeather::Foggyness = *(float*)0xC81300;
 float& CWeather::CloudCoverage = *(float*)0xC81304;
 float& CWeather::WetRoads = *(float*)0xC81308;
 float& CWeather::InterpolationValue = *(float*)0xC8130C;
-unsigned int& CWeather::WeatherTypeInList = *(unsigned int*)0xC81310;
+uint32& CWeather::WeatherTypeInList = *(uint32*)0xC81310;
 eWeatherRegion& CWeather::WeatherRegion = *(eWeatherRegion*)0xC81314;
 eWeatherType& CWeather::ForcedWeatherType = *(eWeatherType*)0xC81318;
 eWeatherType& CWeather::NewWeatherType = *(eWeatherType*)0xC8131C;
@@ -129,8 +129,8 @@ void CWeather::ForceWeatherNow(eWeatherType weatherType) {
 }
 
 // 0x72A590
-bool CWeather::ForecastWeather(eWeatherType weatherType, int numSteps) {
-    return plugin::CallAndReturn<bool, 0x72A590, int, int>(weatherType, numSteps);
+bool CWeather::ForecastWeather(eWeatherType weatherType, int32 numSteps) {
+    return plugin::CallAndReturn<bool, 0x72A590, int32, int32>(weatherType, numSteps);
 }
 
 // 0x72A510

@@ -103,12 +103,12 @@ void CRunningScript::AddScriptToList(CRunningScript** queueList) {
 }
 
 // 0x
-void* CRunningScript::GetPointerToLocalVariable(int varId) {
-    return plugin::CallMethodAndReturn<void*, 0x463CA0, CRunningScript*, int>( this, varId);
+void* CRunningScript::GetPointerToLocalVariable(int32 varId) {
+    return plugin::CallMethodAndReturn<void*, 0x463CA0, CRunningScript*, int32>( this, varId);
 }
 
 // 0x465C20
-void CRunningScript::GivePedScriptedTask(std::int32_t pedHandle, CTask* task, std::int32_t opcode) {
+void CRunningScript::GivePedScriptedTask(int32 pedHandle, CTask* task, int32 opcode) {
     if (pedHandle == -1) {
         CTaskSequences::AddTaskToActiveSequence(task);
         return;
@@ -117,75 +117,75 @@ void CRunningScript::GivePedScriptedTask(std::int32_t pedHandle, CTask* task, st
     CPedGroup* pPedGroup = CPedGroups::GetPedsGroup(ped);
     CPed* pOtherPed = nullptr;
     if (m_externalType == 5 || m_externalType == 2 || !m_externalType || m_externalType == 3) {
-        std::int32_t* pLocalVariable = reinterpret_cast<std::int32_t*>(GetPointerToLocalVariable(0));
+        int32* pLocalVariable = reinterpret_cast<int32*>(GetPointerToLocalVariable(0));
         pOtherPed = CPools::ms_pPedPool->GetAtRef(*pLocalVariable);
     }
     if (ped->bHasAScriptBrain && pOtherPed != ped) {
         delete task;
     } else if (pOtherPed && m_externalType == 5) {
         if (CScriptedBrainTaskStore::SetTask(ped, task)) {
-            const std::int32_t slot = CPedScriptedTaskRecord::GetVacantSlot();
+            const int32 slot = CPedScriptedTaskRecord::GetVacantSlot();
             CPedScriptedTaskRecord::ms_scriptedTasks[slot].SetAsAttractorScriptTask(ped, opcode, task);
         }
     } else if (!pPedGroup || ped->IsPlayer()) {
         CEventScriptCommand eventScriptCommand(TASK_PRIMARY_PRIMARY, task, false);
         CEventScriptCommand* event = static_cast<CEventScriptCommand*>(ped->GetEventGroup().Add(&eventScriptCommand, false));
         if (event) {
-            const std::int32_t slot = CPedScriptedTaskRecord::GetVacantSlot();
+            const int32 slot = CPedScriptedTaskRecord::GetVacantSlot();
             CPedScriptedTaskRecord::ms_scriptedTasks[slot].Set(ped, opcode, event);
         }
     } else {
         pPedGroup->GetIntelligence().SetScriptCommandTask(ped, task);
         CTask* pScriptedTask = pPedGroup->GetIntelligence().GetTaskScriptCommand(ped);
-        const std::int32_t slot = CPedScriptedTaskRecord::GetVacantSlot();
+        const int32 slot = CPedScriptedTaskRecord::GetVacantSlot();
         CPedScriptedTaskRecord::ms_scriptedTasks[slot].SetAsGroupTask(ped, opcode, pScriptedTask);
         delete task;
     }
 }
 
 // 0x487A20
-void CRunningScript::LocateCarCommand(int commandId) {
-    plugin::CallMethod<0x487A20, CRunningScript*, int>(this, commandId);
+void CRunningScript::LocateCarCommand(int32 commandId) {
+    plugin::CallMethod<0x487A20, CRunningScript*, int32>(this, commandId);
 }
 
 // 0x487420
-void CRunningScript::LocateCharCarCommand(int commandId) {
-    plugin::CallMethod<0x487420, CRunningScript*, int>(this, commandId);
+void CRunningScript::LocateCharCarCommand(int32 commandId) {
+    plugin::CallMethod<0x487420, CRunningScript*, int32>(this, commandId);
 }
 
 // 0x4870F0
-void CRunningScript::LocateCharCharCommand(int commandId) {
-    plugin::CallMethod<0x4870F0, CRunningScript*, int>(this, commandId);
+void CRunningScript::LocateCharCharCommand(int32 commandId) {
+    plugin::CallMethod<0x4870F0, CRunningScript*, int32>(this, commandId);
 }
 
 // 0x486D80
-void CRunningScript::LocateCharCommand(int commandId) {
-    plugin::CallMethod<0x486D80, CRunningScript*, int>(this, commandId);
+void CRunningScript::LocateCharCommand(int32 commandId) {
+    plugin::CallMethod<0x486D80, CRunningScript*, int32>(this, commandId);
 }
 
 // 0x487720
-void CRunningScript::LocateCharObjectCommand(int commandId) {
-    plugin::CallMethod<0x487720, CRunningScript*, int>(this, commandId);
+void CRunningScript::LocateCharObjectCommand(int32 commandId) {
+    plugin::CallMethod<0x487720, CRunningScript*, int32>(this, commandId);
 }
 
 // 0x487D10
-void CRunningScript::LocateObjectCommand(int commandId) {
-    plugin::CallMethod<0x487D10, CRunningScript*, int>(this, commandId);
+void CRunningScript::LocateObjectCommand(int32 commandId) {
+    plugin::CallMethod<0x487D10, CRunningScript*, int32>(this, commandId);
 }
 
 // 0x4883F0
-void CRunningScript::ObjectInAngledAreaCheckCommand(int commandId) {
-    plugin::CallMethod<0x4883F0, CRunningScript*, int>(this, commandId);
+void CRunningScript::ObjectInAngledAreaCheckCommand(int32 commandId) {
+    plugin::CallMethod<0x4883F0, CRunningScript*, int32>(this, commandId);
 }
 
 // 0x489150
-void CRunningScript::ObjectInAreaCheckCommand(int commandId) {
-    plugin::CallMethod<0x489150, CRunningScript*, int>(this, commandId);
+void CRunningScript::ObjectInAreaCheckCommand(int32 commandId) {
+    plugin::CallMethod<0x489150, CRunningScript*, int32>(this, commandId);
 }
 
 // 0x470150
-void CRunningScript::PlayAnimScriptCommand(int commandId) {
-    plugin::CallMethod<0x470150, CRunningScript*, int>(this, commandId);
+void CRunningScript::PlayAnimScriptCommand(int32 commandId) {
+    plugin::CallMethod<0x470150, CRunningScript*, int32>(this, commandId);
 }
 
 // 0x464D70
@@ -195,18 +195,18 @@ bool CRunningScript::IsPedDead(CPed* pPed) {
 }
 
 // 0x488EC0
-void CRunningScript::CarInAreaCheckCommand(int commandId) {
-    plugin::CallMethod<0x488EC0, CRunningScript*, int>(this, commandId);
+void CRunningScript::CarInAreaCheckCommand(int32 commandId) {
+    plugin::CallMethod<0x488EC0, CRunningScript*, int32>(this, commandId);
 }
 
 // 0x487F60
-void CRunningScript::CharInAngledAreaCheckCommand(int commandId) {
-    plugin::CallMethod<0x487F60, CRunningScript*, int>(this, commandId);
+void CRunningScript::CharInAngledAreaCheckCommand(int32 commandId) {
+    plugin::CallMethod<0x487F60, CRunningScript*, int32>(this, commandId);
 }
 
 // 0x488B50
-void CRunningScript::CharInAreaCheckCommand(int commandId) {
-    plugin::CallMethod<0x488B50, CRunningScript*, int>(this, commandId);
+void CRunningScript::CharInAreaCheckCommand(int32 commandId) {
+    plugin::CallMethod<0x488B50, CRunningScript*, int32>(this, commandId);
 }
 
 // Collects parameter and returns it.
@@ -216,8 +216,8 @@ tScriptParam CRunningScript::CollectNextParameterWithoutIncreasingPC() {
 }
 
 // 0x464080
-void CRunningScript::CollectParameters(short count) {
-    plugin::CallMethod<0x464080, CRunningScript*, short>(this, count);
+void CRunningScript::CollectParameters(int16 count) {
+    plugin::CallMethod<0x464080, CRunningScript*, int16>(this, count);
 }
 
 // 0x485A50
@@ -226,37 +226,37 @@ void CRunningScript::DoDeathArrestCheck() {
 }
 
 // 0x488780
-void CRunningScript::FlameInAngledAreaCheckCommand(int commandId) {
-    plugin::CallMethod<0x488780, CRunningScript*, int>(this, commandId);
+void CRunningScript::FlameInAngledAreaCheckCommand(int32 commandId) {
+    plugin::CallMethod<0x488780, CRunningScript*, int32>(this, commandId);
 }
 
 // 0x464F50
-void CRunningScript::GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int* pModelId) {
-    plugin::CallMethod<0x464F50, ePedType, int*>(pedType, pModelId);
+void CRunningScript::GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int32* pModelId) {
+    plugin::CallMethod<0x464F50, ePedType, int32*>(pedType, pModelId);
 }
 
 // Returns offset of global variable
 // 0x464700
-short CRunningScript::GetIndexOfGlobalVariable() {
-    return plugin::CallMethodAndReturn<short, 0x464700>(this);
+int16 CRunningScript::GetIndexOfGlobalVariable() {
+    return plugin::CallMethodAndReturn<int16, 0x464700>(this);
 }
 
 // Returns state of pad button
 // 0x485B10
-short CRunningScript::GetPadState(unsigned short playerIndex, eButtonId buttonId) {
-    return plugin::CallMethodAndReturn<short, 0x485B10, CRunningScript*, unsigned short, eButtonId>(this, playerIndex, buttonId);
+int16 CRunningScript::GetPadState(uint16 playerIndex, eButtonId buttonId) {
+    return plugin::CallMethodAndReturn<int16, 0x485B10, CRunningScript*, uint16, eButtonId>(this, playerIndex, buttonId);
 }
 
 // Returns pointer to local variable pointed by offset and array index as well as multiplier.
 // 0x463CC0
-void* CRunningScript::GetPointerToLocalArrayElement(int off, unsigned short idx, unsigned char mul) {
-    return plugin::CallMethodAndReturn<void*, 0x463CC0, CRunningScript*, int, unsigned short, unsigned char>(this, off, idx, mul);
+void* CRunningScript::GetPointerToLocalArrayElement(int32 off, uint16 idx, uint8 mul) {
+    return plugin::CallMethodAndReturn<void*, 0x463CC0, CRunningScript*, int32, uint16, uint8>(this, off, idx, mul);
 }
 
 // Returns pointer to script variable of any type.
 // 0x464790
-tScriptParam* CRunningScript::GetPointerToScriptVariable(unsigned char variableType) {
-    return plugin::CallMethodAndReturn<tScriptParam*, 0x464790, CRunningScript*, unsigned char>(this, variableType);
+tScriptParam* CRunningScript::GetPointerToScriptVariable(uint8 variableType) {
+    return plugin::CallMethodAndReturn<tScriptParam*, 0x464790, CRunningScript*, uint8>(this, variableType);
 }
 
 // Terminates a script
@@ -267,8 +267,8 @@ void CRunningScript::ShutdownThisScript() {
 
 // Reads array offset and value from array index variable.
 // 0x463CF0
-void CRunningScript::ReadArrayInformation(int move, unsigned short* pOffset, int* pIdx) {
-    plugin::CallMethod<0x463CF0, CRunningScript*, int, unsigned short*, int*>(this, move, pOffset, pIdx);
+void CRunningScript::ReadArrayInformation(int32 move, uint16* pOffset, int32* pIdx) {
+    plugin::CallMethod<0x463CF0, CRunningScript*, int32, uint16*, int32*>(this, move, pOffset, pIdx);
 }
 
 // Collects parameters and puts them to local variables of new script
@@ -279,8 +279,8 @@ void CRunningScript::ReadParametersForNewlyStartedScript(CRunningScript* pNewScr
 
 // Collects string parameter
 // 0x463D50
-void CRunningScript::ReadTextLabelFromScript(char* pBuffer, unsigned char nBufferLength) {
-    plugin::CallMethod<0x463D50, CRunningScript*, char*, unsigned char>(this, pBuffer, nBufferLength);
+void CRunningScript::ReadTextLabelFromScript(char* pBuffer, uint8 nBufferLength) {
+    plugin::CallMethod<0x463D50, CRunningScript*, char*, uint8>(this, pBuffer, nBufferLength);
 }
 
 // Removes script from list
@@ -290,8 +290,8 @@ void CRunningScript::RemoveScriptFromList(CRunningScript** queueList) {
 }
 
 // 0x46AF50
-void CRunningScript::ScriptTaskPickUpObject(int commandId) {
-    plugin::CallMethod<0x46AF50, CRunningScript*, int>(this, commandId);
+void CRunningScript::ScriptTaskPickUpObject(int32 commandId) {
+    plugin::CallMethod<0x46AF50, CRunningScript*, int32>(this, commandId);
 }
 
 // 0x464DC0
@@ -300,8 +300,8 @@ void CRunningScript::SetCharCoordinates(CPed* pPed, float x, float y, float z, b
 }
 
 // 0x464370
-void CRunningScript::StoreParameters(short count) {
-    plugin::CallMethod<0x464370, CRunningScript*, short>(this, count);
+void CRunningScript::StoreParameters(int16 count) {
+    plugin::CallMethod<0x464370, CRunningScript*, int16>(this, count);
 }
 
 // 0x489490
@@ -317,8 +317,8 @@ void CRunningScript::UpdateCompareFlag(bool state) {
 
 // Sets instruction pointer, used in GOTO-like commands
 // 0x464DA0
-void CRunningScript::UpdatePC(int newIP) {
-    plugin::CallMethod<0x464DA0, CRunningScript*, int>(this, newIP);
+void CRunningScript::UpdatePC(int32 newIP) {
+    plugin::CallMethod<0x464DA0, CRunningScript*, int32>(this, newIP);
 }
 
 // unused
@@ -333,7 +333,7 @@ void CRunningScript::Process() {
 }
 
 // 0x465E60
-void CRunningScript::ProcessCommands0To99(int commandId) {
+void CRunningScript::ProcessCommands0To99(int32 commandId) {
     switch (commandId) {
     case COMMAND_NOP: // 0x000
         break;
@@ -542,7 +542,7 @@ void CRunningScript::ProcessCommands0To99(int commandId) {
 }
 
 // 0x466DE0
-void CRunningScript::ProcessCommands100To199(int commandId) {
+void CRunningScript::ProcessCommands100To199(int32 commandId) {
     switch (commandId) {
     case COMMAND_SUB_INT_VAR_FROM_INT_LVAR: // 0x064
         break;
@@ -750,7 +750,7 @@ void CRunningScript::ProcessCommands100To199(int commandId) {
 }
 
 // 0x469390
-void CRunningScript::ProcessCommands200To299(int commandId) {
+void CRunningScript::ProcessCommands200To299(int32 commandId) {
     switch (commandId) {
     case COMMAND_VAR_FLOAT: // 0x0C8
         break;
@@ -958,7 +958,7 @@ void CRunningScript::ProcessCommands200To299(int commandId) {
 }
 
 // 0x47C100
-void CRunningScript::ProcessCommands300To399(int commandId) {
+void CRunningScript::ProcessCommands300To399(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_CHAR_INVINCIBLE: // 0x12C
         break;
@@ -1166,7 +1166,7 @@ void CRunningScript::ProcessCommands300To399(int commandId) {
 }
 
 // 0x47D210
-void CRunningScript::ProcessCommands400To499(int commandId) {
+void CRunningScript::ProcessCommands400To499(int32 commandId) {
     switch (commandId) {
     case COMMAND_ADD_UPSIDEDOWN_CAR_CHECK: // 0x190
         break;
@@ -1374,7 +1374,7 @@ void CRunningScript::ProcessCommands400To499(int commandId) {
 }
 
 // 0x47E090
-void CRunningScript::ProcessCommands500To599(int commandId) {
+void CRunningScript::ProcessCommands500To599(int32 commandId) {
     switch (commandId) {
     case COMMAND_IS_CAR_UPSIDEDOWN: // 0x1F4
         break;
@@ -1584,7 +1584,7 @@ void CRunningScript::ProcessCommands500To599(int commandId) {
 }
 
 // 0x47F370
-void CRunningScript::ProcessCommands600To699(int commandId) {
+void CRunningScript::ProcessCommands600To699(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_COLL_OBJ_WAIT_ON_FOOT: // 0x258
         break;
@@ -1792,7 +1792,7 @@ void CRunningScript::ProcessCommands600To699(int commandId) {
 }
 
 // 0x47FA30
-void CRunningScript::ProcessCommands700To799(int commandId) {
+void CRunningScript::ProcessCommands700To799(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_SWAT_REQUIRED: // 0x2BC
         break;
@@ -2000,7 +2000,7 @@ void CRunningScript::ProcessCommands700To799(int commandId) {
 }
 
 // 0x481300
-void CRunningScript::ProcessCommands800To899(int commandId) {
+void CRunningScript::ProcessCommands800To899(int32 commandId) {
     switch (commandId) {
     case COMMAND_IS_CHAR_IN_PLAYERS_GROUP: // 0x320
         break;
@@ -2208,7 +2208,7 @@ void CRunningScript::ProcessCommands800To899(int commandId) {
 }
 
 // 0x483BD0
-void CRunningScript::ProcessCommands900To999(int commandId) {
+void CRunningScript::ProcessCommands900To999(int32 commandId) {
     switch (commandId) {
     case COMMAND_PRINT_STRING_IN_STRING_NOW: // 0x384
         break;
@@ -2416,7 +2416,7 @@ void CRunningScript::ProcessCommands900To999(int commandId) {
 }
 
 // 0x489500
-void CRunningScript::ProcessCommands1000To1099(int commandId) {
+void CRunningScript::ProcessCommands1000To1099(int32 commandId) {
     switch (commandId) {
     case COMMAND_FLASH_RADAR_BLIP: // 0x3E8
         break;
@@ -2624,7 +2624,7 @@ void CRunningScript::ProcessCommands1000To1099(int commandId) {
 }
 
 // 0x48A320
-void CRunningScript::ProcessCommands1100To1199(int commandId) {
+void CRunningScript::ProcessCommands1100To1199(int32 commandId) {
     switch (commandId) {
     case COMMAND_LOAD_COLLISION_WITH_SCREEN: // 0x44C
         break;
@@ -2832,7 +2832,7 @@ void CRunningScript::ProcessCommands1100To1199(int commandId) {
 }
 
 // 0x48B590
-void CRunningScript::ProcessCommands1200To1299(int commandId) {
+void CRunningScript::ProcessCommands1200To1299(int32 commandId) {
     switch (commandId) {
     case COMMAND_IS_INT_VAR_GREATER_THAN_CONSTANT: // 0x4B0
         break;
@@ -3040,7 +3040,7 @@ void CRunningScript::ProcessCommands1200To1299(int commandId) {
 }
 
 // 0x48CDD0
-void CRunningScript::ProcessCommands1300To1399(int commandId) {
+void CRunningScript::ProcessCommands1300To1399(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_CHAR_CAN_BE_DAMAGED_BY_MEMBERS_OF_GANG: // 0x514
         break;
@@ -3257,7 +3257,7 @@ void CRunningScript::ProcessCommands1300To1399(int commandId) {
 }
 
 // 0x48EAA0
-void CRunningScript::ProcessCommands1400To1499(int commandId) {
+void CRunningScript::ProcessCommands1400To1499(int32 commandId) {
     switch (commandId) {
     case COMMAND_REGISTER_VIGILANTE_LEVEL: // 0x578
         break;
@@ -3465,7 +3465,7 @@ void CRunningScript::ProcessCommands1400To1499(int commandId) {
 }
 
 // 0x490DB0
-void CRunningScript::ProcessCommands1500To1599(int commandId) {
+void CRunningScript::ProcessCommands1500To1599(int32 commandId) {
     switch (commandId) {
     case COMMAND_TASK_SMART_FLEE_POINT: // 0x5DC
         break;
@@ -3673,7 +3673,7 @@ void CRunningScript::ProcessCommands1500To1599(int commandId) {
 }
 
 // 0x493FE0
-void CRunningScript::ProcessCommands1600To1699(int commandId) {
+void CRunningScript::ProcessCommands1600To1699(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_PEDTYPE_AS_THREAT: // 0x640
         break;
@@ -3881,7 +3881,7 @@ void CRunningScript::ProcessCommands1600To1699(int commandId) {
 }
 
 // 0x496E00
-void CRunningScript::ProcessCommands1700To1799(int commandId) {
+void CRunningScript::ProcessCommands1700To1799(int32 commandId) {
     switch (commandId) {
     case COMMAND_TASK_KILL_THREATS_ON_FOOT_WHILE_DUCKING: // 0x6A4
         break;
@@ -4089,7 +4089,7 @@ void CRunningScript::ProcessCommands1700To1799(int commandId) {
 }
 
 // 0x46D050
-void CRunningScript::ProcessCommands1800To1899(int commandId) {
+void CRunningScript::ProcessCommands1800To1899(int32 commandId) {
     switch (commandId) {
     case COMMAND_CLEAR_CHAR_DECISION_MAKER_EVENT_RESPONSE: // 0x708
         break;
@@ -4297,7 +4297,7 @@ void CRunningScript::ProcessCommands1800To1899(int commandId) {
 }
 
 // 0x46B460
-void CRunningScript::ProcessCommands1900To1999(int commandId) {
+void CRunningScript::ProcessCommands1900To1999(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_ZONE_GANG_STRENGTH: // 0x76C
         break;
@@ -4505,7 +4505,7 @@ void CRunningScript::ProcessCommands1900To1999(int commandId) {
 }
 
 // 0x472310
-void CRunningScript::ProcessCommands2000To2099(int commandId) {
+void CRunningScript::ProcessCommands2000To2099(int32 commandId) {
     switch (commandId) {
     case COMMAND_GET_CURRENT_DAY_OF_WEEK: // 0x7D0
         break;
@@ -4713,7 +4713,7 @@ void CRunningScript::ProcessCommands2000To2099(int commandId) {
 }
 
 // 0x470A90
-void CRunningScript::ProcessCommands2100To2199(int commandId) {
+void CRunningScript::ProcessCommands2100To2199(int32 commandId) {
     switch (commandId) {
     case COMMAND_DO_CAMERA_BUMP: // 0x834
         break;
@@ -4921,7 +4921,7 @@ void CRunningScript::ProcessCommands2100To2199(int commandId) {
 }
 
 // 0x474900
-void CRunningScript::ProcessCommands2200To2299(int commandId) {
+void CRunningScript::ProcessCommands2200To2299(int32 commandId) {
     switch (commandId) {
     case COMMAND_ENABLE_CRANE_CONTROLS: // 0x898
         break;
@@ -5129,7 +5129,7 @@ void CRunningScript::ProcessCommands2200To2299(int commandId) {
 }
 
 // 0x4762D0
-void CRunningScript::ProcessCommands2300To2399(int commandId) {
+void CRunningScript::ProcessCommands2300To2399(int32 commandId) {
     switch (commandId) {
     case COMMAND_GET_MENU_POSITION: // 0x8FC
         break;
@@ -5337,7 +5337,7 @@ void CRunningScript::ProcessCommands2300To2399(int commandId) {
 }
 
 // 0x478000
-void CRunningScript::ProcessCommands2400To2499(int commandId) {
+void CRunningScript::ProcessCommands2400To2499(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_PLAYER_DISPLAY_VITAL_STATS_BUTTON: // 0x960
         break;
@@ -5545,7 +5545,7 @@ void CRunningScript::ProcessCommands2400To2499(int commandId) {
 }
 
 // 0x47A760
-void CRunningScript::ProcessCommands2500To2599(int commandId) {
+void CRunningScript::ProcessCommands2500To2599(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_PETROL_TANK_WEAKPOINT: // 0x9C4
         break;
@@ -5753,7 +5753,7 @@ void CRunningScript::ProcessCommands2500To2599(int commandId) {
 }
 
 // 0x479DA0
-void CRunningScript::ProcessCommands2600To2699(int commandId) {
+void CRunningScript::ProcessCommands2600To2699(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_SWIM_SPEED: // 0xA28
         break;

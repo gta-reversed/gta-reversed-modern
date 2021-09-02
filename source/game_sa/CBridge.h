@@ -8,5 +8,5 @@ public:
     static void Update();
     static void FindBridgeEntities();
     static bool ShouldLightsBeFlashing();
-    static bool ThisIsABridgeObjectMovingUp(unsigned int);
+    static bool ThisIsABridgeObjectMovingUp(uint32);
 };

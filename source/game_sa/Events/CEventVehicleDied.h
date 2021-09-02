@@ -2,13 +2,12 @@
 
 class CVehicle;
 
-class CEventVehicleDied : public CEvent
-{
+class CEventVehicleDied : public CEvent {
 public:
     CVehicle* m_vehicle;
-    bool m_IsOccupantLeavingCar;
-private:
-    char padding[3];
+    bool      m_IsOccupantLeavingCar;
+    char      _pad[3];
+
 public:
     static void InjectHooks();
 
@@ -19,7 +18,7 @@ private:
 public:
     eEventType GetEventType() const override { return EVENT_VEHICLE_DIED; }
     int32_t GetEventPriority() const override { return 72; }
-    int GetLifeTime() override { return 0; }
+    int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override;
 

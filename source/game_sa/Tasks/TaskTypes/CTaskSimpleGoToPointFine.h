@@ -7,10 +7,10 @@ public:
     float m_fBlend;
 
     static void InjectHooks();
-    CTaskSimpleGoToPointFine(float fBlend, CVector targetPoint, float fRadius, int unused);
+    CTaskSimpleGoToPointFine(float fBlend, CVector targetPoint, float fRadius, int32 unused);
     ~CTaskSimpleGoToPointFine();
 private:
-    CTaskSimpleGoToPointFine* Constructor(float fBlend, CVector targetPoint, float fRadius, int unused);
+    CTaskSimpleGoToPointFine* Constructor(float fBlend, CVector targetPoint, float fRadius, int32 unused);
 public:
     CTask* Clone() override;
     eTaskType GetId() override { return TASK_SIMPLE_GO_TO_POINT_FINE; };

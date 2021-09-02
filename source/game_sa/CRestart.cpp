@@ -12,23 +12,23 @@ float& CRestart::OverrideHeading = *(float*)0xA43260;
 bool& CRestart::bOverrideRestart = *(bool*)0xA43264;
 CVector* CRestart::OverridePosition = (CVector*)0xA43408;
 
-short& CRestart::NumberOfPoliceRestarts = *(short*)0xA43268;
-int& CRestart::PoliceRestartWhenToUse = *(int*)0xA43270;
+int16& CRestart::NumberOfPoliceRestarts = *(int16*)0xA43268;
+int32& CRestart::PoliceRestartWhenToUse = *(int32*)0xA43270;
 float& CRestart::PoliceRestartHeadings = *(float*)0xA43298;
 CVector* CRestart::PoliceRestartPoints = (CVector*)0xA43390;
 
-short& CRestart::NumberOfHospitalRestarts = *(short*)0xA4326C;
-int& CRestart::HospitalRestartWhenToUse = *(int*)0xA432C0;
+int16& CRestart::NumberOfHospitalRestarts = *(int16*)0xA4326C;
+int32& CRestart::HospitalRestartWhenToUse = *(int32*)0xA432C0;
 float& CRestart::HospitalRestartHeadings = *(float*)0xA432E8;
 CVector* CRestart::HospitalRestartPoints = (CVector*)0xA43318;
 
-void CRestart::AddHospitalRestartPoint(CVector const& point, float angle, int townId)
+void CRestart::AddHospitalRestartPoint(CVector const& point, float angle, int32 townId)
 {
-    ((void(__cdecl*)(CVector const&, float, int))0x460730)(point, angle, townId);
+    ((void(__cdecl*)(CVector const&, float, int32))0x460730)(point, angle, townId);
 }
-void CRestart::AddPoliceRestartPoint(CVector const& point, float angle, int townId)
+void CRestart::AddPoliceRestartPoint(CVector const& point, float angle, int32 townId)
 {
-    ((void(__cdecl*)(CVector const&, float, int))0x460780)(point, angle, townId);
+    ((void(__cdecl*)(CVector const&, float, int32))0x460780)(point, angle, townId);
 }
 void CRestart::CancelOverrideRestart()
 {

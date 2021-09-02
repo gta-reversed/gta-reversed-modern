@@ -101,7 +101,7 @@ void List_c::RemoveAll()
     m_nCount = 0;
 }
 
-uint32_t List_c::GetNumItems()
+uint32 List_c::GetNumItems()
 {
     return m_nCount;
 }
@@ -181,7 +181,7 @@ ListItem_c * List_c::GetPrev(ListItem_c * pItem) {
 
 // US-1.00 @ 0x004A9010
 // EU-1.00 @ 0x004A9010
-ListItem_c * List_c::GetItemOffset(bool bFromHead, int iOffset) {
+ListItem_c * List_c::GetItemOffset(bool bFromHead, int32 iOffset) {
     if (bFromHead)
     {
         auto* result = GetHead();

@@ -5,19 +5,19 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CEntity.h"
 
 class CBuilding : public CEntity {
 public:
     CBuilding();
-    static void* operator new(unsigned int size);
+    static void* operator new(uint32 size);
     static void operator delete(void* data);
 
 public:
     static void InjectHooks();
 
-    void ReplaceWithNewModel(int newModelIndex);
+    void ReplaceWithNewModel(int32 newModelIndex);
 };
 
 VALIDATE_SIZE(CBuilding, 0x38);

@@ -1,27 +1,26 @@
 #include "CEvent.h"
 
-class CEventDeath : public CEvent
-{
-    bool m_bDrowning;
-private:
-    char padding[3];
+class CEventDeath : public CEvent {
+    bool   m_bDrowning;
+    char   _pad[3];
 public:
-    std::uint32_t m_deathTimeInMs;
+    uint32 m_deathTimeInMs;
 
+public:
     static void InjectHooks();
 
     CEventDeath(bool bDrowning);
-    CEventDeath(bool bDrowning, unsigned int deathTimeInMs);
+    CEventDeath(bool bDrowning, uint32 deathTimeInMs);
     ~CEventDeath();
 private:
     CEventDeath* Constructor(bool bDrowning);
 public:
     eEventType GetEventType() const override { return EVENT_DEATH; }
     int32_t GetEventPriority() const override { return 73; }
-    int GetLifeTime() override { return 0; }
+    int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;
-    bool AffectsPed(CPed* ped) override { return 1; }
-    
+    bool AffectsPed(CPed* ped) override { return true; }
+
     CEvent* Clone_Reversed();
 };
 

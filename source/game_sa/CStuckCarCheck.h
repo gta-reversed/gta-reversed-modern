@@ -12,18 +12,18 @@
 #define STUCK_CAR_CHECK_SIZE 16
 
 struct StuckCar {
-    int m_nCarHandle;
+    int32   m_nCarHandle;
     CVector m_vCarPos;
-    int m_nStartTime;
-    float m_fDistance;
-    int m_nStuckTime;
-    bool m_bCarStuck;
-    char field_1D;
-    bool m_bStuck;
-    bool m_bFlipped;
-    bool m_bbWarp;
-    char m_pathID;
-    char __pad[2];
+    int32   m_nStartTime;
+    float   m_fDistance;
+    int32   m_nStuckTime;
+    bool    m_bCarStuck;
+    char    field_1D;
+    bool    m_bStuck;
+    bool    m_bFlipped;
+    bool    m_bbWarp;
+    char    m_pathID;
+    char    __pad[2];
 };
 
 class CStuckCarCheck {
@@ -33,16 +33,14 @@ public:
     static void InjectHooks();
 
     void Init();
-    void AddCarToCheck(int carHandle, float distance, unsigned int time, unsigned char a5, bool bStuck, bool bFlipped, bool bWarp, signed char pathId);
+    void AddCarToCheck(int32 carHandle, float distance, uint32 time, uint8 a5, bool bStuck, bool bFlipped, bool bWarp, signed char pathId);
     bool AttemptToWarpVehicle(CVehicle* vehicle, CVector* origin, float orientation);
-    void ClearStuckFlagForCar(int carHandle);
-    bool HasCarBeenStuckForAWhile(int carHandle);
-    bool IsCarInStuckCarArray(int carHandle);
+    void ClearStuckFlagForCar(int32 carHandle);
+    bool HasCarBeenStuckForAWhile(int32 carHandle);
+    bool IsCarInStuckCarArray(int32 carHandle);
     void Process();
-    void RemoveCarFromCheck(int carHandle);
+    void RemoveCarFromCheck(int32 carHandle);
     void ResetArrayElement(StuckCar& car);
 };
 
 VALIDATE_SIZE(CStuckCarCheck, 0x240);
-
-//#include "meta/meta.CStuckCarCheck.h"

@@ -68,5 +68,5 @@ public:
     // GetTimeInMillisecond, we have shorter GetTimeInMS
     static uint32 GetFrameCounter() { return m_FrameCounter; }
     static uint32 GetTimeInMS() { return m_snTimeInMilliseconds; }
-    static uint32 GetTimeStepInMS() { return static_cast<uint32_t>(ms_fTimeStep * 20.0F); }
+    static uint32 GetTimeStepInMS() { return static_cast<uint32>(ms_fTimeStep * 20.0F); }
 };

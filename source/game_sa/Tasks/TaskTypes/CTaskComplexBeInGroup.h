@@ -2,18 +2,18 @@
 
 class CTaskComplexBeInGroup : public CTaskComplex
 {
-    std::int32_t m_groupId;
+    int32 m_groupId;
     bool m_isLeader;
 private:
-    std::int8_t padding[3];
+    int8 padding[3];
 public:
     CPed* m_ped;
     CTask* m_mainTask;
-    std::int32_t m_mainTaskId;
+    int32 m_mainTaskId;
     CTask* m_secondaryTask;
-    std::int32_t m_secondaryTaskSlot; // used as index in CTaskManager::m_aSecondaryTasks
+    int32 m_secondaryTaskSlot; // used as index in CTaskManager::m_aSecondaryTasks
 
-    CTaskComplexBeInGroup(std::int32_t groupId, bool isLeader);
+    CTaskComplexBeInGroup(int32 groupId, bool isLeader);
     ~CTaskComplexBeInGroup() { }
 
     CTask* Clone() override;

@@ -8,12 +8,12 @@
 
 #include "rw/rwplcore.h" // for RwRGBA struct
 
-enum eZoneType : uint8_t {
+enum eZoneType : uint8 {
     ZONE_TYPE_NAVI = 0, // controls text s
-    ZONE_TYPE_MAP  = 3
+    ZONE_TYPE_MAP = 3
 };
 
-enum eLevelName : uint8_t {
+enum eLevelName : uint8 {
     LEVEL_NAME_COUNTRY_SIDE,
     LEVEL_NAME_LOS_SANTOS,
     LEVEL_NAME_SAN_FIERRO,
@@ -21,16 +21,16 @@ enum eLevelName : uint8_t {
 };
 
 struct CZoneExtraInfo {
-    char m_nGangDensity[10];
-    char m_nDealerDensity;
+    char   m_nGangDensity[10];
+    char   m_nDealerDensity;
     RwRGBA ZoneColor;
-    char m_nFlags;
-    char m_nPopulationRace;
+    char   m_nFlags;
+    char   m_nPopulationRace;
 };
 
 class CZone {
 public:
-    uint32_t   m_nLabel[2];
+    uint32     m_nLabel[2];
     char       m_szTextKey[8];
     int16_t    m_fX1;
     int16_t    m_fY1;

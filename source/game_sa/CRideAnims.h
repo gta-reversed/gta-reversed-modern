@@ -2,7 +2,7 @@
 
 #include "AnimationEnums.h"
 
-enum eRideAnim : unsigned char {
+enum eRideAnim : uint8 {
     RIDE_IDLE = 0,
     RIDE_LOOK_LEFT = 1,
     RIDE_LOOK_RIGHT = 2,
