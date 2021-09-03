@@ -310,7 +310,7 @@ void RenderBegin(RwRaster* newRaster, RwMatrix* transform, uint32 transformRende
 // Although originally it wasnt.
 // NOTE: Method signature changed to use CVector + RwTexCoords instead of raw values for convenience.
 // 0x4A1410
- void RenderAddTri(CVector pos1, CVector pos2, CVector pos3, RwTexCoords coord1, RwTexCoords coord2, RwTexCoords coord3, uint8 r1, uint8 g1, uint8 b1, uint8 a1, uint8 r2, uint8 g2, uint8 b2, uint8 a2, uint8 r3, uint8 g3, uint8 b3, uint8 a3) {
+void RenderAddTri(CVector pos1, CVector pos2, CVector pos3, RwTexCoords coord1, RwTexCoords coord2, RwTexCoords coord3, uint8 r1, uint8 g1, uint8 b1, uint8 a1, uint8 r2, uint8 g2, uint8 b2, uint8 a2, uint8 r3, uint8 g3, uint8 b3, uint8 a3) {
     const auto GetVertex = [](unsigned i) {
         return &g_fx.m_pVerts[i];
     };
