@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
 class CVehicle;
 
 class CAEAudioUtility {

@@ -7,7 +7,7 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-// Converted from thiscall void CLoadedCarGroup::SortBasedOnUsage(void)	0x611E10
+// Converted from thiscall void CLoadedCarGroup::SortBasedOnUsage()	0x611E10
 void CLoadedCarGroup::SortBasedOnUsage() {
     plugin::CallMethod<0x611E10, CLoadedCarGroup *>(this);
 }
@@ -32,12 +32,12 @@ int32 CLoadedCarGroup::GetMember(int32 count) {
     return plugin::CallMethodAndReturn<int32, 0x611C20, CLoadedCarGroup *, int32>(this, count);
 }
 
-// Converted from thiscall int32 CLoadedCarGroup::CountMembers(void)	0x611C30
+// Converted from thiscall int32 CLoadedCarGroup::CountMembers()	0x611C30
 int32 CLoadedCarGroup::CountMembers() {
     return plugin::CallMethodAndReturn<int32, 0x611C30, CLoadedCarGroup *>(this);
 }
 
-// Converted from thiscall void CLoadedCarGroup::Clear(void)	0x611B90
+// Converted from thiscall void CLoadedCarGroup::Clear()	0x611B90
 void CLoadedCarGroup::Clear() {
     plugin::CallMethod<0x611B90, CLoadedCarGroup *>(this);
 }

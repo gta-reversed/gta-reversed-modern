@@ -61,7 +61,7 @@ ListItem_c* List_c::GetTail()
 
 
 // EU-1.00 @ 0x004A8E70
-ListItem_c * List_c::RemoveHead(void) {
+ListItem_c * List_c::RemoveHead() {
     //return plugin::CallMethodAndReturn<ListItem_c *, 0x004A8E70, List_c *>(this);
     if (!m_pHead)
         return nullptr;
@@ -187,7 +187,7 @@ ListItem_c * List_c::GetItemOffset(bool bFromHead, int32 iOffset) {
         auto* result = GetHead();
         if (iOffset > 0 && result)
         {
-            int32_t iCounter = 0;
+            int32 iCounter = 0;
             while (iCounter < iOffset && result)
             {
                 ++iCounter;
@@ -201,7 +201,7 @@ ListItem_c * List_c::GetItemOffset(bool bFromHead, int32 iOffset) {
         auto* result = GetTail();
         if (iOffset > 0 && result)
         {
-            int32_t iCounter = 0;
+            int32 iCounter = 0;
             while (iCounter < iOffset && result)
             {
                 ++iCounter;

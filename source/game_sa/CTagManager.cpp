@@ -36,7 +36,7 @@ void CTagManager::Init()
 
 void CTagManager::ShutdownForRestart()
 {
-    for (int32_t i = CTagManager::ms_numTags; i > 0; --i)
+    for (int32 i = CTagManager::ms_numTags; i > 0; --i)
         CTagManager::ms_tagDesc[i].m_nAlpha = 0;
 
     CTagManager::ms_numTagged = 0;
@@ -61,7 +61,7 @@ tTagDesc* CTagManager::FindTagDesc(CEntity* pEntity)
     if (!CTagManager::ms_numTags)
         return nullptr;
 
-    for (int32_t i = CTagManager::ms_numTags - 1; i >= 0; --i) {
+    for (int32 i = CTagManager::ms_numTags - 1; i >= 0; --i) {
         auto pTagDesc = &CTagManager::ms_tagDesc[i];
         if (pTagDesc->m_pEntity == pEntity)
             return pTagDesc;
@@ -118,7 +118,7 @@ int64_t CTagManager::GetPercentageTaggedInArea(CRect* pArea)
 {
     int32 iTotalTags = 0;
     int32 iTagged = 0;
-    for (int32_t i = CTagManager::ms_numTags - 1; i >= 0; --i) {
+    for (int32 i = CTagManager::ms_numTags - 1; i >= 0; --i) {
         auto& pTagDesc = CTagManager::ms_tagDesc[i];
         auto vecPos = CVector2D(pTagDesc.m_pEntity->GetPosition());
         if (pArea->IsPointInside(vecPos)) {
@@ -137,7 +137,7 @@ void CTagManager::UpdateNumTagged()
     if (!CTagManager::ms_numTags)
         return;
 
-    for (int32_t i = CTagManager::ms_numTags - 1; i >= 0; --i) {
+    for (int32 i = CTagManager::ms_numTags - 1; i >= 0; --i) {
         auto& pTagDesc = CTagManager::ms_tagDesc[i];
         if (pTagDesc.m_nAlpha > CTagManager::ALPHA_TAGGED)
             ++CTagManager::ms_numTagged;
@@ -146,7 +146,7 @@ void CTagManager::UpdateNumTagged()
 
 void CTagManager::SetAlphaInArea(CRect* pArea, uint8 ucAlpha)
 {
-    for (int32_t i = CTagManager::ms_numTags - 1; i >= 0; --i) {
+    for (int32 i = CTagManager::ms_numTags - 1; i >= 0; --i) {
         auto& pTagDesc = CTagManager::ms_tagDesc[i];
         auto vecPos = CVector2D(pTagDesc.m_pEntity->GetPosition());
         if (pArea->IsPointInside(vecPos) && pTagDesc.m_pEntity->m_pRwAtomic) {
@@ -182,9 +182,9 @@ void CTagManager::SetAlpha(CEntity* pEntity, uint8 ucAlpha)
 CEntity* CTagManager::GetNearestTag(CVector const& vecPos)
 {
     auto vecPosUsed = CVector2D(vecPos.x, vecPos.y);
-    int32_t iClosestInd = -1;
+    int32 iClosestInd = -1;
     float fMinDist = RwRealMAXVAL;
-    for (int32_t i = CTagManager::ms_numTags - 1; i >= 0; --i) {
+    for (int32 i = CTagManager::ms_numTags - 1; i >= 0; --i) {
         auto& pTagDesc = CTagManager::ms_tagDesc[i];
         auto vecTagPos = CVector2D(pTagDesc.m_pEntity->GetPosition());
         auto fDist = (vecPosUsed - vecTagPos).SquaredMagnitude();
@@ -225,7 +225,7 @@ void CTagManager::Save()
     if (!CTagManager::ms_numTags)
         return;
 
-    for (int32_t i = 0; i < CTagManager::ms_numTags; ++i) {
+    for (int32 i = 0; i < CTagManager::ms_numTags; ++i) {
         auto& pTagDesc = CTagManager::ms_tagDesc[i];
         CGenericGameStorage::SaveDataToWorkBuffer(&pTagDesc.m_nAlpha, 1);
     }
@@ -237,7 +237,7 @@ void CTagManager::Load()
     if (!CTagManager::ms_numTags)
         return;
 
-    for (int32_t i = 0; i < CTagManager::ms_numTags; ++i) {
+    for (int32 i = 0; i < CTagManager::ms_numTags; ++i) {
         auto& pTagDesc = CTagManager::ms_tagDesc[i];
         CGenericGameStorage::LoadDataFromWorkBuffer(&pTagDesc.m_nAlpha, 1);
     }

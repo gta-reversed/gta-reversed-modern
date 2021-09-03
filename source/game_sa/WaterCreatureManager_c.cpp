@@ -58,7 +58,7 @@ int32 WaterCreatureManager_c::GetRandomWaterCreatureId()
 void WaterCreatureManager_c::TryToFreeUpWaterCreatures(int32 numToFree)
 {
     auto* pCur = m_createdList.GetHead();
-    int32_t iCounter = 0;
+    int32 iCounter = 0;
     while (iCounter < numToFree && pCur)
     {
         auto* pNext = m_createdList.GetNext(pCur);
@@ -94,7 +94,7 @@ bool WaterCreatureManager_c::CanAddWaterCreatureAtPos(int32 nCreatureType, CVect
 void WaterCreatureManager_c::TryToExitGroup(WaterCreature_c* pCreature)
 {
     auto* pExitCreature = pCreature->m_pFollowedCreature ? pCreature->m_pFollowedCreature : pCreature;
-    int32_t iCounter = 0;
+    int32 iCounter = 0;
     WaterCreature_c* apCreatures[32];
     auto* pCur = m_createdList.GetHead();
     while (pCur)
@@ -109,13 +109,13 @@ void WaterCreatureManager_c::TryToExitGroup(WaterCreature_c* pCreature)
     }
 
     const auto& vecCamPos = TheCamera.GetPosition();
-    for(int32_t i = 0; i < iCounter; ++i)
+    for(int32 i = 0; i < iCounter; ++i)
         if (DistanceBetweenPointsSquared(vecCamPos, apCreatures[i]->GetObject()->GetPosition()) < WaterCreatureManager_c::ms_fMaxWaterCreaturesDrawDistanceSquared)
             return; // Jump out of function if any of the creatures in group aren't out of camera reach.
                     // All fishes in group have to be destroyed at once as no to leave any of them with dangling pointers
 
 
-    for (int32_t i = 0; i < iCounter; ++i)
+    for (int32 i = 0; i < iCounter; ++i)
         apCreatures[i]->m_bShouldBeDeleted = true;
 }
 

@@ -55,7 +55,7 @@ CDirectory* CDirectory::Destructor() {
 }
 
 // 0x5322F0
-void CDirectory::Init(int32_t capacity, DirectoryInfo* entries) {
+void CDirectory::Init(int32 capacity, DirectoryInfo* entries) {
     m_nCapacity = capacity;
     m_pEntries = entries;
     m_nNumEntries = 0;

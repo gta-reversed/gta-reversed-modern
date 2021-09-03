@@ -17,8 +17,7 @@ enum eWaterCreatureType : uint8 {
     DOLPHIN
 };
 
-class WaterCreature_c : public ListItem_c
-{
+class WaterCreature_c : public ListItem_c {
 public:
     WaterCreature_c() : ListItem_c(), m_pObject(nullptr) {}
     ~WaterCreature_c() = default;
@@ -28,8 +27,8 @@ public:
     uint8            m_bShouldBeDeleted;
     uint8            m_ucTargetSwimSpeed;
     unsigned __int8  pad;
-    int16_t          m_wSpeedChangeCurTime;
-    int16_t          m_wSpeedChangeTotalTime;
+    int16            m_wSpeedChangeCurTime;
+    int16            m_wSpeedChangeTotalTime;
     float            m_fDefaultSpeed;
     float            m_fCurSpeed;
     WaterCreature_c* m_pFollowedCreature;

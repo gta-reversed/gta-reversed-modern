@@ -9,7 +9,7 @@
 
 uint8* CMatrix::EulerIndices1 = (uint8*)0x866D9C;
 uint8* CMatrix::EulerIndices2 = (uint8*)0x866D94;
-int32_t& numMatrices = *(int32_t*)0xB74238;
+int32& numMatrices = *(int32*)0xB74238;
 CMatrix& gDummyMatrix = *(CMatrix*)0xB74240;
 
 
@@ -358,7 +358,7 @@ void CMatrix::ConvertToEulerAngles(float* pX, float* pY, float* pZ, uint32 uiFla
     auto iInd1 = CMatrix::EulerIndices1[(uiFlags >> 3) & 0x3];
     auto iInd2 = CMatrix::EulerIndices2[iInd1 + ((uiFlags & 0x4) != 0)];
     auto iInd3 = CMatrix::EulerIndices2[iInd1 - ((uiFlags & 0x4) != 0) + 1]; */
-    int8_t iInd1 = 0, iInd2 = 1, iInd3 = 2;
+    int8 iInd1 = 0, iInd2 = 1, iInd3 = 2;
     switch (uiFlags & eMatrixEulerFlags::_ORDER_MASK) {
     case ORDER_XYZ:
         iInd1 = 0, iInd2 = 1, iInd3 = 2;
@@ -427,7 +427,7 @@ void CMatrix::ConvertFromEulerAngles(float x, float y, float z, uint32 uiFlags)
     auto iInd1 = CMatrix::EulerIndices1[(uiFlags >> 3) & 0x3];
     auto iInd2 = CMatrix::EulerIndices2[iInd1 + ((uiFlags & 0x4) != 0)];
     auto iInd3 = CMatrix::EulerIndices2[iInd1 - ((uiFlags & 0x4) != 0) + 1]; */
-    int8_t iInd1 = 0, iInd2 = 1, iInd3 = 2;
+    int8 iInd1 = 0, iInd2 = 1, iInd3 = 2;
     switch (uiFlags & eMatrixEulerFlags::_ORDER_MASK) {
     case ORDER_XYZ:
         iInd1 = 0, iInd2 = 1, iInd3 = 2;

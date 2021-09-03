@@ -10,6 +10,7 @@ public:
     int16  field_10;
     uint16 field_12;
 
+public:
     static void InjectHooks();
 
     CEventEditableResponse();
@@ -42,8 +43,8 @@ public:
     ~CEventSpecial() {}
 
     eEventType GetEventType() const override { return EVENT_SPECIAL; }
-    int32_t GetEventPriority() const override { return 52; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 52; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override { return true; }
     CEventSpecial* CloneEditable() override { return new CEventSpecial(); }
     
@@ -68,8 +69,8 @@ private:
     CEventFireNearby* Constructor(CVector const& position);
 public:
     eEventType GetEventType() const override { return EVENT_FIRE_NEARBY; }
-    int32_t GetEventPriority() const override { return 17; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 17; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     bool TakesPriorityOver(const CEvent& refevent) override { return true; }
     CEventFireNearby* CloneEditable() override { return new CEventFireNearby(m_position); }
@@ -95,8 +96,8 @@ private:
     CEventDanger* Constructor(CEntity* dangerFrom, float dangerRadius);
 public:
     eEventType GetEventType() const override { return EVENT_DANGER; }
-    int32_t GetEventPriority() const override { return 20; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 20; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
     CEntity* GetSourceEntity() const override;
@@ -118,8 +119,8 @@ public:
     ~CEventSeenPanickedPed();
 
     eEventType GetEventType() const override { return EVENT_SEEN_PANICKED_PED; }
-    int32_t GetEventPriority() const override { return 13; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 13; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     CEntity* GetSourceEntity() const override { return m_ped;}
     CEventSeenPanickedPed* CloneEditable() override { return new CEventSeenPanickedPed(m_ped); }

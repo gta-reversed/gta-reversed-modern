@@ -122,5 +122,5 @@ CMatrix  Invert(CMatrix& in);
 
 VALIDATE_SIZE(CMatrix, 0x48);
 
-extern int32_t& numMatrices;
+extern int32& numMatrices;
 extern CMatrix& gDummyMatrix;

@@ -6,7 +6,7 @@ CGarage(&CGarages::aGarages)[MAX_NUM_GARAGES] = *(CGarage(*)[MAX_NUM_GARAGES])0x
 CGarage*& CGarages::LastGaragePlayerWasIn = *(CGarage**)0x96BFDC;
 uint32& CGarages::LastTimeHelpMessage = *(uint32*)0x96BFE0;
 bool& CGarages::bCamShouldBeOutside = *(bool*)0x96BFE4;
-int32_t& CGarages::CrushedCarId = *(int32_t*)0x96BFE8; // Unused in SA
+int32& CGarages::CrushedCarId = *(int32*)0x96BFE8; // Unused in SA
 uint32(&CGarages::CarTypesCollected)[4] = *(uint32(*)[4])0x96BFEC;
 uint32& CGarages::PoliceCarsCollected = *(uint32*)0x96BFFC;
 uint32& CGarages::BankVansCollected = *(uint32*)0x96C000;
@@ -15,12 +15,12 @@ bool& CGarages::NoResprays = *(bool*)0x96C008;
 bool& CGarages::RespraysAreFree = *(bool*)0x96C009;
 bool& CGarages::BombsAreFree = *(bool*)0x96C00A;
 bool& CGarages::PlayerInGarage = *(bool*)0x96C00B;
-int32_t& CGarages::MessageNumberInString = *(int32_t*)0x96C00C;
-int32_t& CGarages::MessageNumberInString2 = *(int32_t*)0x96C010;
+int32& CGarages::MessageNumberInString = *(int32*)0x96C00C;
+int32& CGarages::MessageNumberInString2 = *(int32*)0x96C010;
 char(&CGarages::MessageIDString)[8] = *(char(*)[8])0x96C014;
 uint32& CGarages::MessageEndTime = *(uint32*)0x96C01C;
 uint32& CGarages::MessageStartTime = *(uint32*)0x96C020;
-int32_t& CGarages::NumGarages = *(int32_t*)0x96C024;
+int32& CGarages::NumGarages = *(int32*)0x96C024;
 
 CGarage*& pOldToGarageWeAreIn = *(CGarage**)0x96BFD8;
 
@@ -47,21 +47,21 @@ void CGarages::PrintMessages()
 }
 
 // 0x447B80
-void CGarages::TriggerMessage(char* cTagMsg, int16_t wMsgMin, uint16 ucTime, int16_t wMsgMax)
+void CGarages::TriggerMessage(char* cTagMsg, int16 wMsgMin, uint16 ucTime, int16 wMsgMax)
 {
-    plugin::Call<0x447B80, char*, int16_t, uint16, int16_t>(cTagMsg, wMsgMin, ucTime, wMsgMax);
+    plugin::Call<0x447B80, char*, int16, uint16, int16>(cTagMsg, wMsgMin, ucTime, wMsgMax);
 }
 
 // 0x448AF0
-bool CGarages::IsModelIndexADoor(int32_t nModelIndex)
+bool CGarages::IsModelIndexADoor(int32 nModelIndex)
 {
-    return plugin::CallAndReturn<bool, 0x448AF0, int32_t>(nModelIndex);
+    return plugin::CallAndReturn<bool, 0x448AF0, int32>(nModelIndex);
 }
 
 // 0x44A240
-int32_t CGarages::FindGarageForObject(CObject* pObject)
+int32 CGarages::FindGarageForObject(CObject* pObject)
 {
-    return plugin::CallAndReturn<int32_t, 0x44A240, CObject*>(pObject);
+    return plugin::CallAndReturn<int32, 0x44A240, CObject*>(pObject);
 }
 
 // Garage flags

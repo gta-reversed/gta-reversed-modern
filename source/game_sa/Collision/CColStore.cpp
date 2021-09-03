@@ -2,7 +2,7 @@
 
 CVector& CColStore::ms_vecCollisionNeeded = *(CVector*)0x965580;
 bool& CColStore::ms_bCollisionNeeded = *(bool*)0x965558;
-int32_t CColStore::ms_nRequiredCollisionArea = *(int32_t*)0x965554;
+int32 CColStore::ms_nRequiredCollisionArea = *(int32*)0x965554;
 
 CPool<ColDef>* &CColStore::ms_pColPool = *(CPool<ColDef>**)0x965560;
 CQuadTreeNode* &CColStore::ms_pQuadTree = *(CQuadTreeNode**)0x96555C;
@@ -60,7 +60,7 @@ void CColStore::Initialise()
 
 void CColStore::Shutdown()
 {
-    for (int32_t i = 0; i < TOTAL_COL_MODEL_IDS; ++i)
+    for (int32 i = 0; i < TOTAL_COL_MODEL_IDS; ++i)
         if (CColStore::ms_pColPool->GetAt(i))
             CColStore::RemoveColSlot(i);
 

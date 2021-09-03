@@ -32,13 +32,13 @@ class CZone {
 public:
     uint32     m_nLabel[2];
     char       m_szTextKey[8];
-    int16_t    m_fX1;
-    int16_t    m_fY1;
-    int16_t    m_fZ1;
-    int16_t    m_fX2;
-    int16_t    m_fY2;
-    int16_t    m_fZ2;
-    int16_t    m_nZoneExtraIndexInfo;
+    int16      m_fX1;
+    int16      m_fY1;
+    int16      m_fZ1;
+    int16      m_fX2;
+    int16      m_fY2;
+    int16      m_fZ2;
+    int16      m_nZoneExtraIndexInfo;
     eZoneType  m_nType;
     eLevelName m_nLevel;
 

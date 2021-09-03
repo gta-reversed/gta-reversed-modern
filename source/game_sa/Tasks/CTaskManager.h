@@ -73,7 +73,7 @@ public:
     void ClearTaskEventResponse();
     void ManageTasks();
 
-    CTask* GetPrimaryTask(int32_t taskIndex) {
+    CTask* GetPrimaryTask(int32 taskIndex) {
         return m_aPrimaryTasks[taskIndex];
     }
 };

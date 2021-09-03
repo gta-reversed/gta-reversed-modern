@@ -50,7 +50,7 @@ public:
     void Conjugate();
 
     // Squared length of a quat
-    float GetLengthSquared(void);
+    float GetLengthSquared();
 
     // Add right to the quat
     void operator+=(CQuaternion const& right);

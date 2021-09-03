@@ -34,7 +34,7 @@ void CMatrixLinkList::Init(int32 count)
     m_allocatedListHead.m_pNext = &m_allocatedListTail;
     m_allocatedListTail.m_pPrev = &m_allocatedListHead;
 
-    for (int32_t i = count - 1; i >= 0; --i) {
+    for (int32 i = count - 1; i >= 0; --i) {
         auto& pMat = m_pObjects[i];
         m_freeListHead.Insert(&pMat);
     }

@@ -14,7 +14,7 @@ public:
     ~CEventDeadPed();
 
     eEventType GetEventType() const override { return EVENT_DEAD_PED; }
-    int32_t GetEventPriority() const override { return 15; }
+    int32 GetEventPriority() const override { return 15; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     CEntity* GetSourceEntity() const override { return m_ped; }

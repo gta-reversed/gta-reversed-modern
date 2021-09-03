@@ -1910,7 +1910,7 @@ void CVehicle::SetupRender()
 }
 
 void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& wheelContactSpeed, CVector& wheelContactPoint,
-    int32 wheelsOnGround, float thrust, float brake, float adhesion, int8_t wheelId, float* wheelSpeed, tWheelState* wheelState, uint16 wheelStatus)
+    int32 wheelsOnGround, float thrust, float brake, float adhesion, int8 wheelId, float* wheelSpeed, tWheelState* wheelState, uint16 wheelStatus)
 {
     static bool bBraking = false;
     static bool bDriving = false;

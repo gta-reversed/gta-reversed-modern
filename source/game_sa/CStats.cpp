@@ -81,7 +81,7 @@ void CStats::Init() {
 
     bStatUpdateMessageDisplayed = false;
     CTimer::m_snTimeInMilliseconds = 0;
-    for (int32_t i = 0; i < 8; i++) {
+    for (int32 i = 0; i < 8; i++) {
         LastMissionPassedName[i] = '\0';
     }
     m_SprintStaminaCounter = 0;

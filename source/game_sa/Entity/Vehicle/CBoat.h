@@ -44,7 +44,7 @@ public:
     CDoor              m_boatFlap; // for marquis model
     tBoatHandlingData* m_pBoatHandling;
     float              m_fAnchoredAngle; // radians, initialised with -9999.99
-    uint32           m_nAttackPlayerTime;
+    uint32             m_nAttackPlayerTime;
     int32              field_604;       // initialised with 0, not used
     float              m_fBurningTimer; // starts when vehicle health is lower than 250.0, boat blows up when it hits 5000.0
     CEntity*           m_pWhoDestroyedMe;
@@ -62,7 +62,7 @@ public:
     float              m_afWakePointLifeTime[32];
     uint8              m_anWakePointIntensity[32]; // m_anWakePointIntensity[i] = boat->m_vecMoveForce.Magnitude() * 100.0f;
 
-    static constexpr int32_t NUM_WAKE_GEN_BOATS = 4;
+    static constexpr int32 NUM_WAKE_GEN_BOATS = 4;
     static CBoat*(&apFrameWakeGeneratingBoats)[NUM_WAKE_GEN_BOATS]; // static CBoat *apFrameWakeGeneratingBoats[4]
     static float& MAX_WAKE_LENGTH; // 50.0
     static float& MIN_WAKE_INTERVAL; // 2.0
@@ -80,6 +80,7 @@ public:
     static const constexpr uint32 uiNumIndices = 6;
     static RxVertexIndex* auRenderIndices;
 
+public:
     static void InjectHooks();
     //funcs
 

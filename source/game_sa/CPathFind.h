@@ -147,7 +147,7 @@ public:
     bool TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
     bool TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
     CVector* TakeWidthIntoAccountForWandering(CVector* outPosition, CNodeAddress nodeAddress, uint16 randomSeed);
-    void FindNextNodeWandering(int32 pathType, float x, float y, float z, CNodeAddress* startNodeAddress, CNodeAddress* targetNodeAddress, uint32 dir, int8_t* outDir);
+    void FindNextNodeWandering(int32 pathType, float x, float y, float z, CNodeAddress* startNodeAddress, CNodeAddress* targetNodeAddress, uint32 dir, int8* outDir);
     void DoPathSearch(uint8 pathType, CVector origin, CNodeAddress originAddr, CVector target, CNodeAddress* pResultNodes, int16* pNodesCount, int32 maxNodesToFind,
                       float* pDistance, float maxSearchDistance, CNodeAddress* targetAddr, float maxUnkLimit, bool oneSideOnly, CNodeAddress forbiddenNodeAddr,
                       bool includeNodesWithoutLinks, bool waterPath);

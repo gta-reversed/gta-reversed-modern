@@ -39,12 +39,12 @@ bool CPopCycle::FindNewPedType(ePedType* arg1, int32* modelindex, bool arg3, boo
     return plugin::CallAndReturn<bool, 0x60FBD0, ePedType*, int32*, bool, bool>(arg1, modelindex, arg3, arg4);
 }
 
-// Converted from cdecl float CPopCycle::GetCurrentPercOther_Peds(void)	0x610310
+// Converted from cdecl float CPopCycle::GetCurrentPercOther_Peds()	0x610310
 float CPopCycle::GetCurrentPercOther_Peds() {
     return plugin::CallAndReturn<float, 0x610310>();
 }
 
-// Converted from cdecl void CPopCycle::Initialise(void)	0x5BC090
+// Converted from cdecl void CPopCycle::Initialise()	0x5BC090
 void CPopCycle::Initialise() {
     plugin::Call<0x5BC090>();
 }
@@ -64,7 +64,7 @@ bool CPopCycle::PedIsAcceptableInCurrentZone(int32 modelIndex) {
     return plugin::CallAndReturn<bool, 0x610720, int32>(modelIndex);
 }
 
-// Converted from cdecl int32 CPopCycle::PickARandomGroupOfOtherPeds(void)	0x610420
+// Converted from cdecl int32 CPopCycle::PickARandomGroupOfOtherPeds()	0x610420
 int32 CPopCycle::PickARandomGroupOfOtherPeds() {
     return plugin::CallAndReturn<int32, 0x610420>();
 }
@@ -74,27 +74,27 @@ int32 CPopCycle::PickPedMIToStreamInForCurrentZone()
     return plugin::CallAndReturn<int32, 0x60FFD0>();
 }
 
-// Converted from cdecl void CPopCycle::PlayerKilledADealer(void)	0x610490
+// Converted from cdecl void CPopCycle::PlayerKilledADealer()	0x610490
 void CPopCycle::PlayerKilledADealer() {
     plugin::Call<0x610490>();
 }
 
-// Converted from cdecl void CPopCycle::Update(void)	0x610BF0
+// Converted from cdecl void CPopCycle::Update()	0x610BF0
 void CPopCycle::Update() {
     plugin::Call<0x610BF0>();
 }
 
-// Converted from cdecl void CPopCycle::UpdateAreaDodgyness(void)	0x610560
+// Converted from cdecl void CPopCycle::UpdateAreaDodgyness()	0x610560
 void CPopCycle::UpdateAreaDodgyness() {
     plugin::Call<0x610560>();
 }
 
-// Converted from cdecl void CPopCycle::UpdateDealerStrengths(void)	0x6104B0
+// Converted from cdecl void CPopCycle::UpdateDealerStrengths()	0x6104B0
 void CPopCycle::UpdateDealerStrengths() {
     plugin::Call<0x6104B0>();
 }
 
-// Converted from cdecl void CPopCycle::UpdatePercentages(void)	0x610770
+// Converted from cdecl void CPopCycle::UpdatePercentages()	0x610770
 void CPopCycle::UpdatePercentages() {
     plugin::Call<0x610770>();
 }

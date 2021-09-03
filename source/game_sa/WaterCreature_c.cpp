@@ -223,7 +223,7 @@ void WaterCreature_c::Update(float fTimeStep)
         auto fCurSpeed = m_fDefaultSpeed;
         if (m_ucTargetSwimSpeed > 0)
         {
-            m_wSpeedChangeCurTime += static_cast<int16_t>(fTimeStep * 1000.0F);
+            m_wSpeedChangeCurTime += static_cast<int16>(fTimeStep * 1000.0F);
             const auto fInvProgress = std::max(0.0F, 1.0F - static_cast<float>(m_wSpeedChangeCurTime) / static_cast<float>(m_wSpeedChangeTotalTime));
             fCurSpeed += static_cast<float>(m_ucTargetSwimSpeed) * 0.1F * fInvProgress * fCurSpeed;
             if (m_wSpeedChangeCurTime >= m_wSpeedChangeTotalTime)

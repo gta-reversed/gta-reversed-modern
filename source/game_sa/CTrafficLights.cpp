@@ -190,7 +190,7 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
     bool bSameDir = DotProduct(TheCamera.m_mCameraMatrix.GetForward(), pEntMat.GetForward()) > 0.0F;
 
     CVector vecCenter(0.0F, 0.0F, 0.0F);
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
         if (pEffect->m_nType != e2dEffectType::EFFECT_LIGHT)
             continue;

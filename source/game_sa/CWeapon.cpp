@@ -41,7 +41,7 @@ void CWeapon::InjectHooks() {
 }
 
 // 0x73B430
-CWeapon::CWeapon(eWeaponType weaponType, int32_t ammo) {
+CWeapon::CWeapon(eWeaponType weaponType, int32 ammo) {
     m_nType = weaponType;
     m_nState = eWeaponState::WEAPONSTATE_READY;
     m_nAmmoInClip = 0;
@@ -55,14 +55,14 @@ CWeapon::CWeapon(eWeaponType weaponType, int32_t ammo) {
     m_bNoModel = false;
 }
 
-CWeapon* CWeapon::Constructor(eWeaponType weaponType, int32_t ammo) {
+CWeapon* CWeapon::Constructor(eWeaponType weaponType, int32 ammo) {
     this->CWeapon::CWeapon(weaponType, ammo);
 
     return this;
 }
 
 // 0x73B4A0
-void CWeapon::Initialise(eWeaponType weaponType, int32_t ammo, CPed* owner) {
+void CWeapon::Initialise(eWeaponType weaponType, int32 ammo, CPed* owner) {
     m_nType = weaponType;
     m_nState = eWeaponState::WEAPONSTATE_READY;
     m_nAmmoInClip = 0;
@@ -72,8 +72,8 @@ void CWeapon::Initialise(eWeaponType weaponType, int32_t ammo, CPed* owner) {
 
     m_nTimeForNextShot = 0;
 
-    int32_t model1 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId1;
-    int32_t model2 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId2;
+    int32 model1 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId1;
+    int32 model2 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId2;
 
     if (model1 != -1)
         CModelInfo::ms_modelInfoPtrs[model1]->AddRef();
@@ -111,8 +111,8 @@ void CWeapon::ShutdownWeapons() {
 // 0x73A380
 void CWeapon::Shutdown() 
 {
-    int32_t weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId1;
-    int32_t weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId2;
+    int32 weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId1;
+    int32 weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId2;
 
     if (weaponModelID1 != -1)
         CModelInfo::ms_modelInfoPtrs[weaponModelID1]->RemoveRef();
@@ -150,8 +150,8 @@ void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& 
 }
 
 // 0x73A530
-void CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32_t damageFactor, ePedPieceTypes pedPiece, int32_t direction) {
-    plugin::Call<0x73A530, CPed*, CEntity*, eWeaponType, int32_t, ePedPieceTypes, int32_t>(victim, creator, weaponType, damageFactor, pedPiece, direction);
+void CWeapon::GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32 damageFactor, ePedPieceTypes pedPiece, int32 direction) {
+    plugin::Call<0x73A530, CPed*, CEntity*, eWeaponType, int32, ePedPieceTypes, int32>(victim, creator, weaponType, damageFactor, pedPiece, direction);
 }
 
 // 0x73A8D0
@@ -360,8 +360,8 @@ float CWeapon::TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner
 }
 
 // 0x73B550
-void CWeapon::DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoint, CVector* endPoint, CColPoint* colPoint, int32_t arg5) {
-    plugin::CallMethod<0x73B550, CWeapon*, CEntity*, CEntity*, CVector*, CVector*, CColPoint*, int32_t>(this, owner, victim, startPoint, endPoint, colPoint, arg5);
+void CWeapon::DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoint, CVector* endPoint, CColPoint* colPoint, int32 arg5) {
+    plugin::CallMethod<0x73B550, CWeapon*, CEntity*, CEntity*, CVector*, CVector*, CColPoint*, int32>(this, owner, victim, startPoint, endPoint, colPoint, arg5);
 }
 
 // 0x73C1F0
@@ -370,8 +370,8 @@ bool CWeapon::TakePhotograph(CEntity* owner, CVector* point) {
 }
 
 // 0x73C710
-void CWeapon::SetUpPelletCol(int32_t numPellets, CEntity* owner, CEntity* victim, CVector& point, CColPoint& colPoint, CMatrix& outMatrix) {
-    plugin::CallMethod<0x73C710, CWeapon*, int32_t, CEntity*, CEntity*, CVector&, CColPoint&, CMatrix&>(this, numPellets, owner, victim, point, colPoint, outMatrix);
+void CWeapon::SetUpPelletCol(int32 numPellets, CEntity* owner, CEntity* victim, CVector& point, CColPoint& colPoint, CMatrix& outMatrix) {
+    plugin::CallMethod<0x73C710, CWeapon*, int32, CEntity*, CEntity*, CVector&, CColPoint&, CMatrix&>(this, numPellets, owner, victim, point, colPoint, outMatrix);
 }
 
 // 0x73CBA0
@@ -516,6 +516,6 @@ CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) {
 }
 
 // 0x73AF00
-void FireOneInstantHitRound(CVector* startPoint, CVector* endPoint, int32_t intensity) {
-    plugin::Call<0x73AF00, CVector*, CVector*, int32_t>(startPoint, endPoint, intensity);
+void FireOneInstantHitRound(CVector* startPoint, CVector* endPoint, int32 intensity) {
+    plugin::Call<0x73AF00, CVector*, CVector*, int32>(startPoint, endPoint, intensity);
 }

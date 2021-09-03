@@ -198,7 +198,7 @@ void CAutomobile::ProcessControl()
             m_nFakePhysics = 0;
         }
     }
-    for (int32_t i = 0; i < 4; i++) {
+    for (int32 i = 0; i < 4; i++) {
         CEntity* collisionEntity = m_pWheelCollisionEntity[i];
         if (collisionEntity) {
             vehicleFlags.bRestingOnPhysical = true;
@@ -254,7 +254,7 @@ void CAutomobile::ProcessControl()
         NitrousControl(0);
     }
     else {
-        for (int32_t i = 0; i < 2; i++) {
+        for (int32 i = 0; i < 2; i++) {
             FxSystem_c* fxSys = m_exhaustNitroFxSystem[i];
             if (fxSys) {
                 fxSys->Kill();
@@ -305,7 +305,7 @@ void CAutomobile::ProcessControl()
         if (m_nModelIndex == MODEL_RCBARON)
             ProcessFlyingCarStuff();
         if (!npcFlags.bSoftSuspension) {
-            for (int32_t i = 0; i < 4; i++) {
+            for (int32 i = 0; i < 4; i++) {
                 float wheelRadius = 1.0f - m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i];
                 m_fWheelsSuspensionCompression[i] = (m_fWheelsSuspensionCompression[i] - wheelRadius) / (1.0f - wheelRadius);
             }
@@ -316,7 +316,7 @@ void CAutomobile::ProcessControl()
         CVector contactPoints[4];
         CVector contactSpeeds[4];
 
-        for (int32_t i = 0; i < 4; i++) {
+        for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompression[i] >= 1.0f) {
                 CColLine& colLine = colData->m_pLines[i];
                 CColDisk& colDisk = colData->m_pDisks[i];
@@ -339,7 +339,7 @@ void CAutomobile::ProcessControl()
             }
         }
 
-        for (int32_t i = 0; i < 4; i++) {
+        for (int32 i = 0; i < 4; i++) {
             CPhysical* collisionEntity = m_pWheelCollisionEntity[i];
             contactSpeeds[i] = GetSpeed(contactPoints[i]);
             if (collisionEntity) {
@@ -384,7 +384,7 @@ void CAutomobile::ProcessControl()
         m_nNumContactWheels = 0;
         m_nWheelsOnGround = 0;
 
-        for (int32_t i = 0; i < 4; i++) {
+        for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompression[i] >= 1.0f) {
                 m_aWheelTimer[i] = std::max(m_aWheelTimer[i] - CTimer::ms_fTimeStep, 0.0f);
                 if (m_aWheelTimer[i] <= 0.0f)
@@ -571,7 +571,7 @@ void CAutomobile::ProcessControl()
     float roughnessShake = 0.0f;
     float wheelSpinRate = 0.0f;
     float speed = m_vecMoveSpeed.SquaredMagnitude();
-    for (int32_t i = 0; i < 4; i++) {
+    for (int32 i = 0; i < 4; i++) {
         float suspensionChange = m_fWheelsSuspensionCompressionPrev[i] - m_fWheelsSuspensionCompression[i];
         if (suspensionChange > 0.3f && !extraHandlingWheelsTouchingSand && speed > 0.04f) {
             //m_damageManager.GetWheelStatus(i); // return value is ignored
@@ -629,13 +629,13 @@ void CAutomobile::ProcessControl()
             if (suspensionShake > 0.0f) {
                 float frequency = (200.0f * suspensionShake * speed * 2000.0f) / m_fMass + 100.0f;
                 frequency = std::min(frequency, 250.0f);
-                int16_t time = static_cast<int16_t>(CTimer::ms_fTimeStep * 20000.0f / frequency);
+                int16 time = static_cast<int16>(CTimer::ms_fTimeStep * 20000.0f / frequency);
                 CPad::GetPad(0)->StartShake(time, static_cast<uint8>(frequency), 0);
             }
             else {
                 float frequency = (200.0f * roughnessShake * speed * 2000.0f) / m_fMass + 40.0f;
                 frequency = std::min(frequency, 150.0f);
-                int16_t time = static_cast<int16_t>(CTimer::ms_fTimeStep * 5000.0f / frequency);
+                int16 time = static_cast<int16>(CTimer::ms_fTimeStep * 5000.0f / frequency);
                 CPad::GetPad(0)->StartShake(time, static_cast<uint8>(frequency), 0);
             }
         }
@@ -806,7 +806,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
 {
     CColModel* colModel = CEntity::GetColModel();
     CCollisionData* colData = colModel->m_pColData;
-    int8_t recordingId = this->m_autoPilot.m_vehicleRecordingId;
+    int8 recordingId = this->m_autoPilot.m_vehicleRecordingId;
     m_autoPilot.carCtrlFlags.bHonkAtCar = false;
     m_autoPilot.carCtrlFlags.bHonkAtPed = false;
     if (recordingId >= 0 && !CVehicleRecording::bUseCarAI[recordingId])
@@ -901,7 +901,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         float speed = m_autoPilot.m_speed * 0.02f;
         m_pHandlingData->GetTransmission().CalculateGearForSimpleCar(speed, m_nCurrentGear);
         float wheelRot = CVehicle::ProcessWheelRotation(WHEEL_STATE_NORMAL, GetForward(), m_vecMoveSpeed, 0.35f);
-        for (int32_t i = 0; i < 4; i++) {
+        for (int32 i = 0; i < 4; i++) {
             m_wheelRotation[i] += wheelRot;
         }
         PlayHornIfNecessary();
@@ -935,7 +935,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         return false;
     }
     case STATUS_ABANDONED:
-        for (int32_t i = 0; i < 4; i++) {
+        for (int32 i = 0; i < 4; i++) {
             if (m_pWheelCollisionEntity[i]) {
                 vehicleFlags.bRestingOnPhysical = true;
                 break;
@@ -1039,7 +1039,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         pad = static_cast<CPlayerPed*>(m_pDriver)->GetPadFromPlayer();
     PruneReferences();
     if (isRemotelyControlledByPlayer) {
-        int32_t playerSlot = CWorld::FindPlayerSlotWithRemoteVehiclePointer(this);
+        int32 playerSlot = CWorld::FindPlayerSlotWithRemoteVehiclePointer(this);
         if (playerSlot >= 0)
             ProcessControlInputs(playerSlot);
     }
@@ -1128,7 +1128,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
 
 void CAutomobile::ResetSuspension()
 {
-    for (int32_t i = 0; i < 4; i++) {
+    for (int32 i = 0; i < 4; i++) {
         m_fWheelsSuspensionCompression[i] = 1.0f;
         m_aWheelTimer[i] = 0.0f;
         m_wheelRotation[i] = 0.0f;
@@ -1150,7 +1150,7 @@ void CAutomobile::DoHoverSuspensionRatios()
 {
     if (GetUp().z >= 0.3f && !vehicleFlags.bIsDrowning) {
         auto colData = GetColModel()->m_pColData;
-        for (int32_t i = 0; i < 4; i++)  {
+        for (int32 i = 0; i < 4; i++)  {
             CColLine& line = colData->m_pLines[i];
             CVector start = *m_matrix * line.m_vecStart;
             CVector end = *m_matrix * line.m_vecEnd;
@@ -1185,26 +1185,26 @@ void CAutomobile::ProcessSuspension()
     float wheelSpringForceDampingLimits[4]; 
     CVector directions[4];
     CVector contactSpeeds[4];
-    int32_t wheelLineIndices[4];
+    int32 wheelLineIndices[4];
 
-    for (int32_t i = 0; i < 4; i++) {
+    for (int32 i = 0; i < 4; i++) {
         springLength[i] = m_fWheelsSuspensionCompression[i];
         wheelSpringForceDampingLimits[i] = 0.0f;
     }
 
     float forwardSpeed = fabs(DotProduct(m_vecMoveSpeed, GetForward()));
 
-    int32_t numWheelLoops = 1;
+    int32 numWheelLoops = 1;
     if (ModelIndices::IsRhino(m_nModelIndex) && CReplay::Mode != REPLAY_MODE_1)
         numWheelLoops = 3;
-    for (int32_t wheelLoopIndex = 0; wheelLoopIndex < numWheelLoops; wheelLoopIndex++) {
-        for (int32_t i = 0; i < 4; i++) {
+    for (int32 wheelLoopIndex = 0; wheelLoopIndex < numWheelLoops; wheelLoopIndex++) {
+        for (int32 i = 0; i < 4; i++) {
             directions[i] = GetUp() * -1.0f;
             if (springLength[i] < 1.0f) 
                 contactPoints[i] = m_wheelColPoint[i].m_vecPoint - GetPosition();
         }
 
-        for (int32_t i = 0; i < 4; i++) {
+        for (int32 i = 0; i < 4; i++) {
             if (springLength[i] >= 1.0f)
                 continue;
             float suspensionBias = m_pHandlingData->m_fSuspensionBiasBetweenFrontAndRear;
@@ -1239,7 +1239,7 @@ void CAutomobile::ProcessSuspension()
                     wheelSpringForceDampingLimits[i]);
         }
 
-        for (int32_t i = 0; i < 4; ++i) {
+        for (int32 i = 0; i < 4; ++i) {
             contactSpeeds[i] = CPhysical::GetSpeed(contactPoints[i]);
             if (m_pWheelCollisionEntity[i])
                 contactSpeeds[i] -= m_pWheelCollisionEntity[i]->GetSpeed(m_vWheelCollisionPos[i]);
@@ -1248,7 +1248,7 @@ void CAutomobile::ProcessSuspension()
             }
         }
 
-        for (int32_t i = 0; i < 4; ++i) {
+        for (int32 i = 0; i < 4; ++i) {
             float dampingForce = m_pHandlingData->m_fSuspensionDampingLevel;
             if (handlingFlags.bHydraulicInst && dampingForce > 0.1f && fabs(forwardSpeed) < 0.15f)
                 dampingForce = 0.1f;
@@ -1289,7 +1289,7 @@ void CAutomobile::ProcessSuspension()
 
         CCollisionData* colData = GetColModel()->m_pColData;
         float wheelsSuspensionCompressionPrev[4];
-        for (int32_t i = 0; i < 4; i++) {
+        for (int32 i = 0; i < 4; i++) {
             float wheelRadius = 1.0f - m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i];
             wheelsSuspensionCompressionPrev[i] = (wheelsSuspensionCompressionPrev[i] - wheelRadius) / (1.0f - wheelRadius);
             // yes, wheelsSuspensionCompressionPrev is unused here
@@ -1376,7 +1376,7 @@ void CAutomobile::ProcessSuspension_Reversed()
 
 void CAutomobile::SetupModelNodes()
 {
-    for (int32_t i = 0; i < CAR_NUM_NODES; i++) {
+    for (int32 i = 0; i < CAR_NUM_NODES; i++) {
         m_aCarNodes[i] = nullptr;
     }
     CClumpModelInfo::FillFrameArray(m_pRwClump, m_aCarNodes);
@@ -1411,7 +1411,7 @@ void CAutomobile::HydraulicControl()
         float extendedSpringLength = extendedUpperLimit - extendedLowerLimit;
         if (hydraulicData.m_fSuspensionExtendedUpperLimit >= 100.0f) {
             float minz = 0.0f;
-            for (int32_t i = 0; i < colData->m_nNumSpheres; i++) {
+            for (int32 i = 0; i < colData->m_nNumSpheres; i++) {
                 auto& colsphere = colData->m_pSpheres[i];
                 float z = colsphere.m_vecCenter.z - colsphere.m_fRadius;
                 if (z < minz)
@@ -1480,7 +1480,7 @@ void CAutomobile::HydraulicControl()
             float lineLength = extendedSpringLength + wheelRadius;
             m_wMiscComponentAngle = m_wMiscComponentAngle < 500 ? 500 : 60;
             if (m_wMiscComponentAngle >= 500) {
-                for (int32_t i = 0; i < 4; i++) {
+                for (int32 i = 0; i < 4; i++) {
                     CColLine& line = colData->m_pLines[i];
                     wheelPositions[i] = line.m_vecStart.z - m_aSuspensionLineLength[i] * m_fWheelsSuspensionCompression[i];
                     modelInfo->GetWheelPosn(i, pos, false);
@@ -1500,7 +1500,7 @@ void CAutomobile::HydraulicControl()
             }
             else {
                 lineLength = normalSpringLength + wheelRadius;
-                for (int32_t i = 0; i < 4; i++) {
+                for (int32 i = 0; i < 4; i++) {
                     CColLine& line = colData->m_pLines[i];
                     wheelPositions[i] = line.m_vecStart.z - m_fWheelsSuspensionCompression[i] * m_aSuspensionLineLength[i];
                     modelInfo->GetWheelPosn(i, pos, false);
@@ -1521,12 +1521,12 @@ void CAutomobile::HydraulicControl()
 
         if (!suspensionTriggered)
         {
-            for (int32_t i = 0; i < 4; i++) {
+            for (int32 i = 0; i < 4; i++) {
                 suspensionChange[i] = 1.0f;
             }
 
             if (m_nStatus == STATUS_PHYSICS) {
-                for (int32_t i = 0; i < 4; i++) {
+                for (int32 i = 0; i < 4; i++) {
                     suspensionChange[i] = hydraulicData.m_wheelSuspension[i];
                 }
             }
@@ -1562,14 +1562,14 @@ void CAutomobile::HydraulicControl()
                 }
                 else {
                     if (m_wMiscComponentAngle == 0) {
-                        for (int32_t i = 0; i < 4; i++) {
+                        for (int32 i = 0; i < 4; i++) {
                             suspensionChange[i] = 0.0f;
                         }
                     }
                     m_wMiscComponentAngle = 60;
                 }
 
-                for (int32_t i = 0; i < 4; i++) {
+                for (int32 i = 0; i < 4; i++) {
                     CColLine& line = colData->m_pLines[i];
                     suspensionChange[i] = std::min(suspensionChange[i], 1.0f);
                     float springLength = (extendedSpringLength - normalSpringLength) * suspensionChange[i] + normalSpringLength;
@@ -1592,7 +1592,7 @@ void CAutomobile::HydraulicControl()
             else {
                 if (m_wMiscComponentAngle < 504u)
                     m_wMiscComponentAngle++;
-                for (int32_t i = 0; i < 4; i++) {
+                for (int32 i = 0; i < 4; i++) {
                     CColLine& line = colData->m_pLines[i];
                     suspensionChange[i] = std::min(suspensionChange[i], 1.0f);
                     float springLength = (normalSpringLength - extendedSpringLength) * suspensionChange[i] + extendedSpringLength;
@@ -1628,18 +1628,18 @@ void CAutomobile::HydraulicControl()
         }
 
         if (setPrevRatio || suspensionTriggered) {
-            for (int32_t i = 0; i < 4; i++) {
+            for (int32 i = 0; i < 4; i++) {
                 float wheelRadius = 1.0f - m_aSuspensionSpringLength[i] / m_aSuspensionLineLength[i];
                 m_fWheelsSuspensionCompressionPrev[i] = (m_fWheelsSuspensionCompression[i] - wheelRadius) / (1.0f - wheelRadius);
             }
         }
-        for (int32_t i = 0; i < 4; i++) {
+        for (int32 i = 0; i < 4; i++) {
             hydraulicData.m_wheelSuspension[i] = 0.0f;
         }
     }
 }
 
-const int16_t DEFAULT_COLLISION_EXTENDLIMIT = 2500;
+const int16 DEFAULT_COLLISION_EXTENDLIMIT = 2500;
 
 bool CAutomobile::UpdateMovingCollision(float angle)
 {
@@ -1684,7 +1684,7 @@ bool CAutomobile::UpdateMovingCollision(float angle)
             }
 
             m_wMiscComponentAngle += static_cast<uint16>((pad->GetCarGunUpDown() / 128.0f) * colAngleMult * CTimer::ms_fTimeStep);
-            m_wMiscComponentAngle = clamp<int16_t>(m_wMiscComponentAngle, 0, DEFAULT_COLLISION_EXTENDLIMIT);
+            m_wMiscComponentAngle = clamp<int16>(m_wMiscComponentAngle, 0, DEFAULT_COLLISION_EXTENDLIMIT);
         }
 
         CMatrix rotMatrix;
@@ -1725,7 +1725,7 @@ bool CAutomobile::UpdateMovingCollision(float angle)
             CColTriangle& specialColTriangle = specialColData->m_pTriangles[triIndx];
             if (specialColTriangle.m_nMaterial == SURFACE_CAR_MOVINGCOMPONENT) {
                 const CColTriangle& colTriangle = colData->m_pTriangles[triIndx];
-                for (int32_t i = 0; i < 3; i++) {
+                for (int32 i = 0; i < 3; i++) {
                     CVector vertexPos = UncompressVector(colData->m_pVertices[colTriangle.m_vertIndices[i]]);
                     CVector distance  = vertexPos - componentPos;
                     vertexPos = (rotMatrix * distance) + componentPos;
@@ -1739,7 +1739,7 @@ bool CAutomobile::UpdateMovingCollision(float angle)
         }
 
         if (specialColData->m_pTrianglePlanes) {
-            for (int32_t i = 0; i < specialColData->m_nNumTriangles; i++) {
+            for (int32 i = 0; i < specialColData->m_nNumTriangles; i++) {
                 CColTrianglePlane& trianglePlane = specialColData->m_pTrianglePlanes[i];
                 trianglePlane.Set(specialColData->m_pVertices, specialColData->m_pTriangles[i]);
             }
@@ -1775,13 +1775,13 @@ bool CAutomobile::UpdateMovingCollision(float angle)
         return false;
     if (pad->GetCarGunUpDown() < -10.0f) {
         m_wMiscComponentAngle -= static_cast<uint16>(2 * (pad->GetCarGunUpDown() / 128.0f) * 10.0f * CTimer::ms_fTimeStep);
-        m_wMiscComponentAngle = std::min(static_cast<int16_t>(m_wMiscComponentAngle), DEFAULT_COLLISION_EXTENDLIMIT);
+        m_wMiscComponentAngle = std::min(static_cast<int16>(m_wMiscComponentAngle), DEFAULT_COLLISION_EXTENDLIMIT);
         return false;
     }
     if (!m_wMiscComponentAngle)
         return false;
     m_wMiscComponentAngle -= static_cast<uint16>(((pad->GetCarGunUpDown() + 100) * 10.0f * CTimer::ms_fTimeStep) / 128.0f);
-    if (static_cast<int16_t>(m_wMiscComponentAngle) < 0)
+    if (static_cast<int16>(m_wMiscComponentAngle) < 0)
         m_wMiscComponentAngle = 0;
     return false;
 }
@@ -2342,7 +2342,7 @@ void CAutomobile::ProcessBuoyancy()
         physicalFlags.bTouchingWater = false;
 
         m_fBuoyancyConstant = m_pHandlingData->m_fBuoyancyConstant;
-        for (int32_t i = 0; i < 4; ++i) {
+        for (int32 i = 0; i < 4; ++i) {
             auto& pColPoint = m_wheelColPoint[i];
             if (m_fWheelsSuspensionCompression[i] < 1.0F && g_surfaceInfos->IsWater(pColPoint.m_nSurfaceTypeB)) {
                 auto vecWaterImpactVelocity = (pColPoint.m_vecPoint + GetUp() * 0.3F) - GetPosition();
@@ -2499,7 +2499,7 @@ void CAutomobile::ProcessHarvester()
         if (m_vecMoveSpeed.Magnitude2D() > 0.01f) {
             if ((CTimer::m_FrameCounter & 1) != 0)
             {
-                for (int32_t i = CPools::ms_pPedPool->GetSize() - 1; i >= 0; i--) {
+                for (int32 i = CPools::ms_pPedPool->GetSize() - 1; i >= 0; i--) {
                     CPed* ped = CPools::ms_pPedPool->GetAt(i);
                     if (ped && !ped->IsPlayer()) {
                         CVector distance = ped->GetPosition() - GetPosition();
@@ -2520,7 +2520,7 @@ void CAutomobile::ProcessHarvester()
             }
             else
             {
-                for (int32_t i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
+                for (int32 i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
                     CObject* object = CPools::ms_pObjectPool->GetAt(i);
                     if (object && (m_nModelIndex == ModelIndices::MI_GRASSHOUSE || m_nModelIndex == ModelIndices::MI_GRASSPLANT)) {
                         CVector distance = object->GetPosition() - GetPosition();
@@ -2545,7 +2545,7 @@ void CAutomobile::ProcessHarvester()
         CVector velocity = GetForward() * -0.1f;
         velocity.x += CGeneral::GetRandomNumberInRange(0.05f, -0.05f);
         velocity.y += CGeneral::GetRandomNumberInRange(0.05f, -0.05f);
-        int32_t bodyPartModelId = -1;
+        int32 bodyPartModelId = -1;
         switch (m_harvesterParticleCounter - 1)
         {
         case 0:
@@ -2939,7 +2939,7 @@ bool CAutomobile::RcbanditCheck1CarWheels(CPtrList& ptrlist)
             CVector distance = GetPosition() - vehicle->GetPosition();
             if (distance.x < 10.0f && distance.y < 10.0f) {
                 auto modelInfo = CModelInfo::GetModelInfo(vehicle->m_nModelIndex)->AsVehicleModelInfoPtr();
-                for (int32_t i = 0; i < 4; i++) {
+                for (int32 i = 0; i < 4; i++) {
                     if (m_fWheelsSuspensionCompressionPrev[i] < 1.0f || m_nStatus == STATUS_SIMPLE) {
                         static CMatrix wheelMatrix;
                         CVector wheelPos;

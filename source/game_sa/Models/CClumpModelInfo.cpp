@@ -236,7 +236,7 @@ void CClumpModelInfo::SetClump_Reversed(RpClump* clump)
 
             auto pGeometry = RpAtomicGetGeometry(pFirstAtomic);
             auto pSkin = RpSkinGeometryGetSkin(pGeometry);
-            for (int32_t i = 0; i < RpGeometryGetNumVertices(pGeometry); ++i) {
+            for (int32 i = 0; i < RpGeometryGetNumVertices(pGeometry); ++i) {
                 auto& pWeight = RpSkinGetVertexBoneWeights(pSkin)[i];
                 auto fRecip = 1.0F / (pWeight.w0 + pWeight.w1 + pWeight.w2 + pWeight.w3);
                 pWeight.w0 *= fRecip;

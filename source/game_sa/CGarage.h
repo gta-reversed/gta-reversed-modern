@@ -7,7 +7,7 @@ struct CStoredCar {
     uint8  m_nStoredCarFlags;
     uint8  _pad0;
     uint16 m_wModelIndex;
-    int16_t  m_awCarMods[15];
+    int16  m_awCarMods[15];
     uint8  m_nPrimaryColor;
     uint8  m_nSecondaryColor;
     uint8  m_nTertiaryColor;

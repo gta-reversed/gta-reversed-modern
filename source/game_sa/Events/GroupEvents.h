@@ -41,7 +41,7 @@ private:
     CEventPlayerCommandToGroupAttack* Constructor(CPed* target);
 public:
     eEventType GetEventType() const override { return EVENT_PLAYER_COMMAND_TO_GROUP; }
-    int32_t GetEventPriority() const override { return 44; }
+    int32 GetEventPriority() const override { return 44; }
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
     CEventPlayerCommandToGroupAttack* CloneEditable() override { return new CEventPlayerCommandToGroupAttack(m_target); }
 private:
@@ -60,7 +60,7 @@ private:
     CEventPlayerCommandToGroupGather* Constructor(CPed* target);
 public:
     eEventType GetEventType() const override { return EVENT_PLAYER_COMMAND_TO_GROUP_GATHER; }
-    int32_t GetEventPriority() const override { return 45; }
+    int32 GetEventPriority() const override { return 45; }
     CEventPlayerCommandToGroupGather* CloneEditable() override { return new CEventPlayerCommandToGroupGather(m_target); }
 };
 
@@ -78,7 +78,7 @@ private:
     CEventDontJoinPlayerGroup* Constructor(CPed* player);
 public:
     eEventType GetEventType() const override { return EVENT_DONT_JOIN_GROUP; }
-    int32_t GetEventPriority() const override { return 43; }
+    int32 GetEventPriority() const override { return 43; }
     int32 GetLifeTime() override { return 0; }
     CEventDontJoinPlayerGroup* Clone() override { return new CEventDontJoinPlayerGroup(m_player); }
     bool AffectsPed(CPed* ped) override { return true; }
@@ -98,7 +98,7 @@ private:
     CEventNewGangMember* Constructor(CPed* member);
 public:
     eEventType GetEventType() const override { return EVENT_NEW_GANG_MEMBER; }
-    int32_t GetEventPriority() const override { return 42; }
+    int32 GetEventPriority() const override { return 42; }
     int32 GetLifeTime() override { return 0; }
     CEventNewGangMember* Clone() override { return new CEventNewGangMember(m_member); }
     bool AffectsPed(CPed* ped) override { return true; }

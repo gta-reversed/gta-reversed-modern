@@ -15,7 +15,7 @@ private:
     CEventLeaderEnteredCarAsDriver* Constructor(CVehicle* vehicle);
 public:
     eEventType GetEventType() const override { return EVENT_LEADER_ENTERED_CAR_AS_DRIVER; }
-    int32_t GetEventPriority() const override  { return 46; }
+    int32 GetEventPriority() const override  { return 46; }
     int32 GetLifeTime() override  { return 0; }
     bool AffectsPed(CPed* ped) override  { return false; }
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
@@ -41,7 +41,7 @@ private:
     CEventLeaderExitedCarAsDriver* Constructor();
 public:
     eEventType GetEventType() const override { return EVENT_LEADER_EXITED_CAR_AS_DRIVER; }
-    int32_t GetEventPriority() const override { return 47; }
+    int32 GetEventPriority() const override { return 47; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override { return false; }
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
@@ -63,7 +63,7 @@ private:
     CEventLeaderQuitEnteringCarAsDriver* Constructor();
 public:
     eEventType GetEventType() const override { return EVENT_LEADER_QUIT_ENTERING_CAR_AS_DRIVER; }
-    int32_t GetEventPriority() const override { return 48; }
+    int32 GetEventPriority() const override { return 48; }
     int32 GetLifeTime() override { return 0; }
     CEventLeaderQuitEnteringCarAsDriver* Clone() override { return new CEventLeaderQuitEnteringCarAsDriver(); }
     bool AffectsPed(CPed* ped) override { return false; }
@@ -88,7 +88,7 @@ private:
     CEventAreaCodes* Constructor(CPed* ped);
 public:
     eEventType GetEventType() const override { return EVENT_AREA_CODES; }
-    int32_t GetEventPriority() const override { return 55; }
+    int32 GetEventPriority() const override { return 55; }
     int32 GetLifeTime() override { return 0; }
     CEventAreaCodes* Clone() override { return new CEventAreaCodes(m_ped); }
     bool AffectsPed(CPed* ped) override;

@@ -947,7 +947,7 @@ bool CEntity::HasPreRenderEffects()
         if (!pModelInfo->m_n2dfxCount)
             return false;
 
-        for (int32_t i = 0; i < pModelInfo->m_n2dfxCount; ++i) {
+        for (int32 i = 0; i < pModelInfo->m_n2dfxCount; ++i) {
             if (pModelInfo->Get2dEffect(i)->m_nType == e2dEffectType::EFFECT_LIGHT)
                 return true;
         }
@@ -1097,7 +1097,7 @@ bool IsEntityPointerValid(CEntity* entity)
 CVector* CEntity::FindTriggerPointCoors(CVector* pOutVec, int32 triggerIndex)
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
         if (pEffect->m_nType == e2dEffectType::EFFECT_SLOTMACHINE_WHEEL && pEffect->iSlotMachineIndex == triggerIndex) {
             *pOutVec = GetMatrix() * pEffect->m_vecPosn;
@@ -1121,7 +1121,7 @@ C2dEffect* CEntity::GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot)
     C2dEffect* apArr[32];
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
     int32 iFoundCount = 0;
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
         if (pEffect->m_nType != effectType)
             continue;
@@ -1172,7 +1172,7 @@ void CEntity::CreateEffects()
     if (!pModelInfo->m_n2dfxCount)
         return;
 
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
         if (pEffect->m_nType == e2dEffectType::EFFECT_LIGHT) {
             m_bHasPreRenderEffects = true;
@@ -1272,7 +1272,7 @@ void CEntity::DestroyEffects()
     if (!pModelInfo->m_n2dfxCount)
         return;
 
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
 
         if (pEffect->m_nType == e2dEffectType::EFFECT_ATTRACTOR) {
@@ -1389,7 +1389,7 @@ void CEntity::RenderEffects()
     if (!pModelInfo->m_n2dfxCount)
         return;
 
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
         if (pEffect->m_nType != e2dEffectType::EFFECT_ROADSIGN)
             continue;
@@ -1457,7 +1457,7 @@ bool CEntity::GetIsBoundingBoxOnScreen()
         TransformVectors(&vecNormals[0], 2, tempTrans, &TheCamera.m_avecFrustumWorldNormals[0]);
     }
 
-    for (int32_t i = 0; i < 2; ++i) {
+    for (int32 i = 0; i < 2; ++i) {
         CVector vecUsed;
         vecUsed.x = vecBnd[signbit(vecNormals[i].x)].x;
         vecUsed.y = vecBnd[signbit(vecNormals[i].y)].y;
@@ -1824,7 +1824,7 @@ void CEntity::RegisterReference(CEntity** entity)
 
     if (!m_pReferences && !CReferences::pEmptyList) {
         auto iPedsSize = CPools::ms_pPedPool->GetSize();
-        for (int32_t i = 0; i < iPedsSize; ++i) {
+        for (int32 i = 0; i < iPedsSize; ++i) {
             auto pPed = CPools::ms_pPedPool->GetAt(i);
             if (pPed) {
                 pPed->PruneReferences();
@@ -1836,7 +1836,7 @@ void CEntity::RegisterReference(CEntity** entity)
 
         if (!CReferences::pEmptyList) {
             auto iVehsSize = CPools::ms_pVehiclePool->GetSize();
-            for (int32_t i = 0; i < iVehsSize; ++i) {
+            for (int32 i = 0; i < iVehsSize; ++i) {
                 auto pVeh = CPools::ms_pVehiclePool->GetAt(i);
                 if (pVeh) {
                     pVeh->PruneReferences();
@@ -1849,7 +1849,7 @@ void CEntity::RegisterReference(CEntity** entity)
 
         if (!CReferences::pEmptyList) {
             auto iObjectsSize = CPools::ms_pObjectPool->GetSize();
-            for (int32_t i = 0; i < iObjectsSize; ++i) {
+            for (int32 i = 0; i < iObjectsSize; ++i) {
                 auto pObj = CPools::ms_pObjectPool->GetAt(i);
                 if (pObj) {
                     pObj->PruneReferences();
@@ -1889,7 +1889,7 @@ void CEntity::ProcessLightsForEntity()
     if (!pModelInfo->m_n2dfxCount)
         return;
 
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
         auto fIntensity = 1.0F;
         auto uiRand = m_nRandomSeed ^ CCoronas::ms_aEntityLightsOffsets[iFxInd & 0x7];
@@ -2373,7 +2373,7 @@ bool CEntity::IsEntityOccluded()
     if (COcclusion::NumActiveOccluders <= 0)
         return false;
 
-    for (int32_t iOccInd = 0; iOccInd < COcclusion::NumActiveOccluders; ++iOccInd) {
+    for (int32 iOccInd = 0; iOccInd < COcclusion::NumActiveOccluders; ++iOccInd) {
         auto& pActiveOccluder = COcclusion::aActiveOccluders[iOccInd];
         auto fDepth = vecScreenPos.z - fBoundRadius;
         if (static_cast<float>(pActiveOccluder.m_wDepth) >= fDepth)

@@ -109,8 +109,7 @@ enum eRotationAxis {
 typedef int32 eOrdnanceType;
 typedef int32 eBikeWheelSpecial;
 
-enum eFlightModel : int32_t
-{
+enum eFlightModel : int32 {
     FLIGHT_MODEL_BARON = 1,
     FLIGHT_MODEL_RC = 2,
     FLIGHT_MODEL_PLANE = 3, // also used for cars
@@ -121,8 +120,7 @@ enum eFlightModel : int32_t
 class CWeapon;
 class CPed;
 
-enum tWheelState : int32_t
-{
+enum tWheelState : int32 {
     WHEEL_STATE_NORMAL,	  // standing still or rolling normally
     WHEEL_STATE_SPINNING, // rotating but not moving
     WHEEL_STATE_SKIDDING,
@@ -130,8 +128,7 @@ enum tWheelState : int32_t
 };
 
 
-struct tHydrualicData
-{
+struct tHydrualicData {
     // applied when the vehicle is moving
     // or when hopping keys are pressed (numpad keys)
     float m_fSuspensionNormalUpperLimit;
@@ -284,14 +281,14 @@ public:
     int16             m_nForcedRandomRouteSeed; // if this is non-zero the random wander gets deterministic
     CPed*             m_pDriver;
     CPed*             m_apPassengers[8];
-    uint8           m_nNumPassengers;
-    uint8           m_nNumGettingIn;
-    uint8           m_nGettingInFlags;
-    uint8           m_nGettingOutFlags;
-    uint8           m_nMaxPassengers;
-    uint8           m_nWindowsOpenFlags; // initialised, but not used?
-    uint8           m_nNitroBoosts;
-    int8_t            m_vehicleSpecialColIndex;
+    uint8             m_nNumPassengers;
+    uint8             m_nNumGettingIn;
+    uint8             m_nGettingInFlags;
+    uint8             m_nGettingOutFlags;
+    uint8             m_nMaxPassengers;
+    uint8             m_nWindowsOpenFlags; // initialised, but not used?
+    uint8             m_nNitroBoosts;
+    int8              m_vehicleSpecialColIndex;
     CEntity*          m_pEntityWeAreOn; // we get it from CWorld::ProcessVerticalLine or ProcessEntityCollision, it's entity under us,
                                         // only static entities (buildings or roads)
     CFire*            m_pFire;
@@ -586,7 +583,7 @@ public:
     void SetVehicleCreatedBy(int32 createdBy);
     void SetupRender();
     void ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& wheelContactSpeed, CVector& wheelContactPoint,
-        int32 wheelsOnGround, float thrust, float brake, float adhesion, int8_t wheelId, float* wheelSpeed, tWheelState* wheelState, uint16 wheelStatus);
+        int32 wheelsOnGround, float thrust, float brake, float adhesion, int8 wheelId, float* wheelSpeed, tWheelState* wheelState, uint16 wheelStatus);
     void ProcessBikeWheel(CVector& arg0, CVector& arg1, CVector& arg2, CVector& arg3, int32 arg4, float arg5, float arg6, float arg7, float arg8, char arg9, float* arg10, tWheelState* arg11, eBikeWheelSpecial arg12, uint16 arg13);
     // return nearest wheel?
     int32 FindTyreNearestPoint(float x, float y);

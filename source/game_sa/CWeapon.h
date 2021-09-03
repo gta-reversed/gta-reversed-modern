@@ -45,9 +45,9 @@ public:
 
 public:
     CWeapon(plugin::dummy_func_t) {}
-    CWeapon(eWeaponType weaponType, int32_t ammo);
+    CWeapon(eWeaponType weaponType, int32 ammo);
 
-    void Initialise(eWeaponType weaponType, int32_t ammo, CPed* owner);
+    void Initialise(eWeaponType weaponType, int32 ammo, CPed* owner);
     static void InitialiseWeapons();
     void Shutdown();
     static void ShutdownWeapons();
@@ -63,9 +63,9 @@ public:
 
     bool HasWeaponAmmoToBeUsed();
     void StopWeaponEffect();
-    void DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoint, CVector* endPoint, CColPoint* colPoint, int32_t arg5);
+    void DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoint, CVector* endPoint, CColPoint* colPoint, int32 arg5);
     bool TakePhotograph(CEntity* owner, CVector* point);
-    void SetUpPelletCol(int32_t numPellets, CEntity* owner, CEntity* victim, CVector& point, CColPoint& colPoint, CMatrix& outMatrix);
+    void SetUpPelletCol(int32 numPellets, CEntity* owner, CEntity* victim, CVector& point, CColPoint& colPoint, CMatrix& outMatrix);
     bool CanBeUsedFor2Player();
 
     // outX and outY will be placed in [-1;1] ranges
@@ -83,7 +83,7 @@ public:
     void Update(CPed* owner);
     static void UpdateWeapons();
 
-    static void GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32_t damageFactor, ePedPieceTypes pedPiece, int32_t direction);
+    static void GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32 damageFactor, ePedPieceTypes pedPiece, int32 direction);
     static bool CanBeUsedFor2Player(eWeaponType weaponType);
     static float TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner);
     static void DoDoomAiming(CEntity* owner, CVector* start, CVector* end);
@@ -101,7 +101,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CWeapon* Constructor(eWeaponType weaponType, int32_t ammo);
+    CWeapon* Constructor(eWeaponType weaponType, int32 ammo);
 };
 
 VALIDATE_SIZE(CWeapon, 0x1C);
@@ -115,4 +115,4 @@ extern uint32 &SPAS_NUM_PELLETS; // default 4
 extern float &PELLET_COL_SCALE_RATIO_MULT; // default 1.3
 extern float *fReloadAnimSampleFraction; // default { 0.5, 0.7, 0.75, 0.75, 0.7 }
 
-void FireOneInstantHitRound(CVector* startPoint, CVector* endPoint, int32_t intensity);
+void FireOneInstantHitRound(CVector* startPoint, CVector* endPoint, int32 intensity);

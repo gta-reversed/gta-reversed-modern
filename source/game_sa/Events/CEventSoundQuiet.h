@@ -18,7 +18,7 @@ private:
     CEventSoundQuiet* Constructor(CEntity* entity, float fLocalSoundLevel, uint32 startTime, CVector& position);
 public:
     eEventType GetEventType() const override { return EVENT_SOUND_QUIET; }
-    int32_t GetEventPriority() const override { return 8; }
+    int32 GetEventPriority() const override { return 8; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     CEntity* GetSourceEntity() const override { return m_entity; }

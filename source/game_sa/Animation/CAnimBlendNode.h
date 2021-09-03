@@ -13,8 +13,8 @@ public:
     // by Github.com / jte
     float                  m_theta0; // angle between two quaternions
     float                  m_theta1; // 1 / sin(m_theta0), used in slerp calculation
-    int16_t                m_endKeyFrameId;
-    int16_t                m_startKeyFrameId;
+    int16                  m_endKeyFrameId;
+    int16                  m_startKeyFrameId;
     float                  m_timeDelta;
     CAnimBlendSequence*    m_pAnimSequence;
     CAnimBlendAssociation* m_pAnimBlendAssociation;

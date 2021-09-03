@@ -19,7 +19,7 @@ private:
     CEventGunShot* Constructor(CEntity* entity, CVector startPoint, CVector endPoint, bool bHasNoSound);
 public:
     eEventType GetEventType() const override { return EVENT_SHOT_FIRED; }
-    int32_t GetEventPriority() const override { return 35; }
+    int32 GetEventPriority() const override { return 35; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     bool IsCriminalEvent() override;

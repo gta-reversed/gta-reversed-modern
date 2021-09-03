@@ -31,7 +31,7 @@ void CPed::InjectHooks() {
     ReversibleHooks::Install("CPed", "ClearWeapons", 0x5E6320, &CPed::ClearWeapons);
     // ReversibleHooks::Install("CPed", "ClearWeapon", 0x5E62B0, &CPed::ClearWeapon);
     // ReversibleHooks::Install("CPed", "SetCurrentWeapon", 0x5E6280, static_cast<void(CPed::*)(eWeaponType)>(&CPed::SetCurrentWeapon));
-    // ReversibleHooks::Install("CPed", "SetCurrentWeapon", 0x5E61F0, static_cast<void(CPed::*)(int32_t)>(&CPed::SetCurrentWeapon));
+    // ReversibleHooks::Install("CPed", "SetCurrentWeapon", 0x5E61F0, static_cast<void(CPed::*)(int32)>(&CPed::SetCurrentWeapon));
     // ReversibleHooks::Install("CPed", "GiveWeapon", 0x5E6080, &CPed::GiveWeapon);
     // ReversibleHooks::Install("CPed", "TakeOffGoggles", 0x5E6010, &CPed::TakeOffGoggles);
     // ReversibleHooks::Install("CPed", "AddWeaponModel", 0x5E5ED0, &CPed::AddWeaponModel);
@@ -77,8 +77,8 @@ void CPed::InjectHooks() {
     ReversibleHooks::Install("CPed", "GetWeaponSkill", 0x5E6580, static_cast<eWeaponSkill(CPed::*)()>(&CPed::GetWeaponSkill));
     // ReversibleHooks::Install("CPed", "PreRenderAfterTest", 0x5E65A0, &CPed::PreRenderAfterTest);
     // ReversibleHooks::Install("CPed", "SetIdle", 0x5E7980, &CPed::SetIdle);
-    // ReversibleHooks::Install("CPed", "SetLook", 0x5E79B0, static_cast<int32_t(CPed::*)(float)>(&CPed::SetLook));
-    // ReversibleHooks::Install("CPed", "SetLook", 0x5E7A60, static_cast<int32_t(CPed::*)(CEntity *)>(&CPed::SetLook));
+    // ReversibleHooks::Install("CPed", "SetLook", 0x5E79B0, static_cast<int32(CPed::*)(float)>(&CPed::SetLook));
+    // ReversibleHooks::Install("CPed", "SetLook", 0x5E7A60, static_cast<int32(CPed::*)(CEntity *)>(&CPed::SetLook));
     // ReversibleHooks::Install("CPed", "Look", 0x5E7B20, &CPed::Look);
     ReversibleHooks::Install("CPed", "ReplaceWeaponForScriptedCutscene", 0x5E6530, &CPed::ReplaceWeaponForScriptedCutscene);
     ReversibleHooks::Install("CPed", "RemoveWeaponForScriptedCutscene", 0x5E6550, &CPed::RemoveWeaponForScriptedCutscene);
@@ -98,9 +98,9 @@ void CPed::InjectHooks() {
     // ReversibleHooks::Install("CPed", "IsPedShootable", 0x5DEFD0, &CPed::IsPedShootable);
     // ReversibleHooks::Install("CPed", "GetLocalDirection", 0x5DEF60, &CPed::GetLocalDirection);
     // ReversibleHooks::Install("CPed", "ClearAimFlag", 0x5DEF20, &CPed::ClearAimFlag);
-    // ReversibleHooks::Install("CPed", "SetAimFlag", 0x5DEED0, static_cast<int8_t(CPed::*)(CEntity *)>(&CPed::SetAimFlag));
-    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEE40, static_cast<int8_t(CPed::*)(CEntity *, bool, bool)>(&CPed::SetLookFlag));
-    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEDC0, static_cast<int8_t(CPed::*)(float, bool, bool)>(&CPed::SetLookFlag));
+    // ReversibleHooks::Install("CPed", "SetAimFlag", 0x5DEED0, static_cast<int8(CPed::*)(CEntity *)>(&CPed::SetAimFlag));
+    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEE40, static_cast<int8(CPed::*)(CEntity *, bool, bool)>(&CPed::SetLookFlag));
+    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEDC0, static_cast<int8(CPed::*)(float, bool, bool)>(&CPed::SetLookFlag));
     // ReversibleHooks::Install("CPed", "CanUseTorsoWhenLooking", 0x5DED90, &CPed::CanUseTorsoWhenLooking);
     // ReversibleHooks::Install("CPed", "PedIsReadyForConversation", 0x43ABA0, &CPed::PedIsReadyForConversation);
     // ReversibleHooks::Install("CPed", "CreateDeadPedMoney", 0x4590F0, &CPed::CreateDeadPedMoney);

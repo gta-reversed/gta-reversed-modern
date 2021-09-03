@@ -656,7 +656,7 @@ void CObject::RemoveLighting_Reversed(bool bRemove)
 //0x5D2870 - Deserializes object from save storage buffer
 bool CObject::Load()
 {
-    int32_t iSaveStructSize; // unused
+    int32 iSaveStructSize; // unused
     CObjectSaveStructure saveStruct;
     CGenericGameStorage::LoadDataFromWorkBuffer(&iSaveStructSize, 4);
     CGenericGameStorage::LoadDataFromWorkBuffer(&saveStruct, sizeof(saveStruct));
@@ -923,7 +923,7 @@ void CObject::Init() {
         || m_nModelIndex == ModelIndices::MI_MAGNOCRANE
         || m_nModelIndex == ModelIndices::MI_CRANETROLLEY
         || m_nModelIndex == ModelIndices::MI_QUARRYCRANE_ARM
-        || CGarages::IsModelIndexADoor(static_cast<int16_t>(m_nModelIndex)))
+        || CGarages::IsModelIndexADoor(static_cast<int16>(m_nModelIndex)))
     {
         CObject::AddToControlCodeList();
     }
@@ -951,17 +951,10 @@ void CObject::DoBurnEffect() {
         const auto fRandZ = CGeneral::GetRandomNumberInRange(pBox.m_vecMin.z, pBox.m_vecMax.z);
         auto vecParticlePos = *m_matrix * CVector(fRandX, fRandY, fRandZ);
 
-        //auto smokePart = FxPrtMult_c() Originally overwriten right after
+        //auto smokePart = FxPrtMult_c() Originally overwritten right after
         auto smokePart = FxPrtMult_c(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.4F);
         auto vecVelocity = CVector(0.0F, 0.0F, 0.02F);
-        g_fx.m_pPrtSmokeII3expand->AddParticle(&vecParticlePos,
-                                               &vecVelocity,
-                                               0.0F,
-                                               &smokePart,
-                                               -1.0F,
-                                               1.2F,
-                                               0.6F,
-                                               false);
+        g_fx.m_pPrtSmokeII3expand->AddParticle(&vecParticlePos, &vecVelocity, 0.0F, &smokePart, -1.0F, 1.2F, 0.6F, false);
     }
 }
 

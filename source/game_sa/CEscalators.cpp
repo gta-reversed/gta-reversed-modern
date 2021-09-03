@@ -11,7 +11,7 @@ void CEscalators::InjectHooks() {
 
 // 0x717940
 void CEscalators::Shutdown() {
-    for (int32_t i = 0; i < NUM_ESCALATORS; ++i) {
+    for (int32 i = 0; i < NUM_ESCALATORS; ++i) {
         CEscalator& escalator = aEscalators[i];
 
         escalator.SwitchOff();
@@ -23,14 +23,14 @@ void CEscalators::Shutdown() {
 void CEscalators::Init() {
     Shutdown();
 
-    for (int32_t i = 0; i < NUM_ESCALATORS; ++i) {
+    for (int32 i = 0; i < NUM_ESCALATORS; ++i) {
         aEscalators[i].SwitchOff();
     }
 }
 
 // 0x717C90
 void CEscalators::AddOne(CVector const& vecStart, CVector const& vecBottom, CVector const& vecEnd, CVector const& vecTop, bool bMoveDown, CEntity* pEntity) {
-    for (int32_t i = 0; i < NUM_ESCALATORS; ++i) {
+    for (int32 i = 0; i < NUM_ESCALATORS; ++i) {
         CEscalator& escalator = aEscalators[i];
 
         if (!escalator.m_bExist) {
@@ -43,7 +43,7 @@ void CEscalators::AddOne(CVector const& vecStart, CVector const& vecBottom, CVec
 // 0x718580
 void CEscalators::Update() {
     if (CReplay::Mode != REPLAY_MODE_1) {
-        for (int32_t i = 0; i < NUM_ESCALATORS; ++i) {
+        for (int32 i = 0; i < NUM_ESCALATORS; ++i) {
             CEscalator& escalator = aEscalators[i];
 
             if (escalator.m_bExist)

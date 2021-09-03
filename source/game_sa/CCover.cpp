@@ -17,7 +17,7 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building)
     if (!pInfo->m_n2dfxCount)
         return;
 
-    for (int32_t iFxInd = 0; iFxInd < pInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pInfo->m_n2dfxCount; ++iFxInd) {
         auto* pEffect = pInfo->Get2dEffect(iFxInd);
         if (pEffect->m_nType != e2dEffectType::EFFECT_COVER_POINT)
             continue;

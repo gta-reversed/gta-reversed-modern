@@ -19,7 +19,7 @@ public:
 private:
     CEventVehicleDamage* Constructor(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType);
 public:
-    int32_t GetEventPriority() const override { return 49; }
+    int32 GetEventPriority() const override { return 49; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     bool IsCriminalEvent() override;

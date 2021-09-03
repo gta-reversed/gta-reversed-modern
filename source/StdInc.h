@@ -19,6 +19,7 @@
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
+#include "Base.h"
 #include "game_sa\constants.h"
 #include "game_sa\CConversations.h"
 #include "game_sa\CPlantMgr.h"

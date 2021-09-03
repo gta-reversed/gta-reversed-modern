@@ -536,7 +536,7 @@ void CVehicleModelInfo::ReduceMaterialsInVehicle()
 
     // CTimer::GetCurrentTimeInCycles(); // unused code used for performance diagnostics i guess
     RpClumpForAllAtomics(m_pRwClump, CVehicleModelInfo::StoreAtomicUsedMaterialsCB, &matList);
-    for (int32_t i = 0; i < m_pVehicleStruct->m_nNumExtras; ++i)
+    for (int32 i = 0; i < m_pVehicleStruct->m_nNumExtras; ++i)
         StoreAtomicUsedMaterialsCB(m_pVehicleStruct->m_apExtras[i], &matList);
 
     // CTimer::GetCurrentTimeInCycles();
@@ -568,7 +568,7 @@ void CVehicleModelInfo::DisableEnvMap()
 
 void CVehicleModelInfo::SetEnvMapCoeff(float coeff)
 {
-    auto iUsedCoeff = static_cast<int32_t>(floor(coeff * 1000.0F));
+    auto iUsedCoeff = static_cast<int32>(floor(coeff * 1000.0F));
     if (!m_pRwObject)
         return;
 
@@ -1179,7 +1179,7 @@ RpMaterial* CVehicleModelInfo::SetEnvMapCoeffCB(RpMaterial* material, void* data
     if (RpMatFXMaterialGetEffects(material) != RpMatFXMaterialFlags::rpMATFXEFFECTENVMAP)
         return material;
 
-    auto uiCoeff = reinterpret_cast<int32_t>(data);
+    auto uiCoeff = reinterpret_cast<int32>(data);
     float fCoeff = static_cast<float>(uiCoeff) / 1000.0F;
     RpMatFXMaterialSetEnvMapCoefficient(material, fCoeff);
     return material;
@@ -1237,10 +1237,10 @@ RpAtomic* CVehicleModelInfo::StoreAtomicUsedMaterialsCB(RpAtomic* atomic, void* 
     if (CVisibilityPlugins::GetAtomicId(atomic) & eAtomicComponentFlag::ATOMIC_DISABLE_REFLECTIONS)
         return atomic;
 
-    for (int32_t i = 0; i < pMeshHeader->numMeshes; ++i) {
+    for (int32 i = 0; i < pMeshHeader->numMeshes; ++i) {
         auto pMesh = RpGeometryGetMesh(pGeometry, i);
         // auto pMat = matList->materials; // Unused code i guess
-        // for (int32_t iMat = 0; iMat < matList->numMaterials; ++iMat)
+        // for (int32 iMat = 0; iMat < matList->numMaterials; ++iMat)
         //     pMat++;
 
         _rpMaterialListAppendMaterial(matList, pMesh->material);
@@ -1361,7 +1361,7 @@ void CVehicleModelInfo::LoadVehicleColours()
             auto iNumVariations = (iNumRead - 1) / 2;
             pModelInfo->m_nNumColorVariations = iNumVariations;
 
-            for (int32_t i = 0; i < iNumVariations; ++i) {
+            for (int32 i = 0; i < iNumVariations; ++i) {
                 pModelInfo->m_anPrimaryColors[i]    = colorBuffer[i][0];
                 pModelInfo->m_anSecondaryColors[i]  = colorBuffer[i][1];
                 pModelInfo->m_anTertiaryColors[i]   = 0;
@@ -1413,7 +1413,7 @@ void CVehicleModelInfo::LoadVehicleColours()
             auto iNumVariations = (iNumRead - 1) / 4;
             pModelInfo->m_nNumColorVariations = iNumVariations;
 
-            for (int32_t i = 0; i < iNumVariations; ++i) {
+            for (int32 i = 0; i < iNumVariations; ++i) {
                 pModelInfo->m_anPrimaryColors[i]    = colorBuffer[i][0];
                 pModelInfo->m_anSecondaryColors[i]  = colorBuffer[i][1];
                 pModelInfo->m_anTertiaryColors[i]   = colorBuffer[i][2];
@@ -1458,7 +1458,7 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
 
         switch (iLineType) {
         case eCarModsLineType::LINK: {
-            int32_t iModelId1 = -1, iModelId2 = -1;
+            int32 iModelId1 = -1, iModelId2 = -1;
             auto pToken = strtok(pLine, " \t,");
             if (pToken) {
                 auto pModel1 = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(pToken, &iModelId1));
@@ -1478,7 +1478,7 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
             if (!pToken)
                 break;
 
-            int32_t iModelId = -1;
+            int32 iModelId = -1;
             auto pModelInfo = CModelInfo::GetModelInfo(pToken, &iModelId)->AsVehicleModelInfoPtr();
             auto pNextToken = strtok(nullptr, " \t,");
             auto pUpgrade = pModelInfo->m_anUpgrades;
@@ -1502,7 +1502,7 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
         }
 
         case eCarModsLineType::WHEEL: {
-            int32_t iModelId = -1, iWheelSet;
+            int32 iModelId = -1, iWheelSet;
             sscanf(pLine, "%d", &iWheelSet);
             strtok(pLine, " \t,");
             char* pToken;
@@ -1544,7 +1544,7 @@ int16 CVehicleModelInfo::CLinkedUpgradeList::FindOtherUpgrade(int16 upgrade)
     if (!m_nLinksCount)
         return -1;
 
-    for (int32_t i = m_nLinksCount - 1; i >= 0; --i) {
+    for (int32 i = m_nLinksCount - 1; i >= 0; --i) {
         if (m_anUpgrade1[i] == upgrade)
             return m_anUpgrade2[i];
 
@@ -1570,7 +1570,7 @@ CVehicleModelInfo::CVehicleStructure::CVehicleStructure() : m_aUpgrades()
 
 CVehicleModelInfo::CVehicleStructure::~CVehicleStructure()
 {
-    for (int32_t i = 0; i < m_nNumExtras; ++i) {
+    for (int32 i = 0; i < m_nNumExtras; ++i) {
         auto pAtomic = m_apExtras[i];
         auto pFrame = RpAtomicGetFrame(pAtomic);
         RpAtomicDestroy(pAtomic);

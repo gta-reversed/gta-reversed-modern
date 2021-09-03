@@ -730,18 +730,18 @@ void CFileLoader::LoadTimeCyclesModifier(const char* line) {
 
 // 0x5B3DE0
 int32 CFileLoader::LoadTimeObject(const char* line) {
-    int32_t modelId;
+    int32 modelId;
     char    modelName[24];
     char    texName[24];
     float   drawDistance[3];
-    int32_t flags;
-    int32_t timeOn;
-    int32_t timeOff;
+    int32 flags;
+    int32 timeOn;
+    int32 timeOff;
 
     int32 numValuesRead = sscanf(line, "%d %s %s %f %d %d %d", &modelId, modelName, texName, &drawDistance[0], &flags, &timeOn, &timeOff);
 
     if (numValuesRead != 7 || drawDistance[0] < 4.0) {
-        int32_t numObjs;
+        int32 numObjs;
 
         if (sscanf(line, "%d %s %s %d", &modelId, modelName, texName, &numObjs) != 4)
             return -1;

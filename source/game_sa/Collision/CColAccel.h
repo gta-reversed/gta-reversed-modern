@@ -3,29 +3,29 @@
 #include "IplDef.h"
 
 struct CColAccelColBound {
-    CRect   m_Area;
-    int16_t m_wModelStart;
-    int16_t m_wModelEnd;
-    bool    m_bProcedural;
-    bool    m_bInterior;
+    CRect m_Area;
+    int16 m_wModelStart;
+    int16 m_wModelEnd;
+    bool  m_bProcedural;
+    bool  m_bInterior;
 };
 VALIDATE_SIZE(CColAccelColBound, 0x18);
 
 struct CColAccelColEntry {
     CBoundingBox m_boundBox;
     CSphere      m_boundSphere;
-    int16_t      m_wModelStart;
-    int16_t      m_wModelEnd;
-    uint8      m_nColSlot;
+    int16        m_wModelStart;
+    int16        m_wModelEnd;
+    uint8        m_nColSlot;
     bool         m_bUnkn;
 };
 VALIDATE_SIZE(CColAccelColEntry, 0x30);
 
 struct CColAccelIPLEntry {
-    int32_t m_nLodIndex;
-    int32_t m_nEntityIndex;
-    int32_t m_nModelId;
-    int32_t m_nLodModelId;
+    int32 m_nLodIndex;
+    int32 m_nEntityIndex;
+    int32 m_nModelId;
+    int32 m_nLodModelId;
     union {
         uint32 m_nFlags;
         struct {
@@ -38,15 +38,15 @@ struct CColAccelIPLEntry {
 };
 VALIDATE_SIZE(CColAccelIPLEntry, 0x14);
 
-enum eColAccelState : int32_t {
+enum eColAccelState : int32 {
     COLACCEL_ENDED = 0,
     COLACCEL_STARTED = 1,
     COLACCEL_LOADING = 2,
 };
 
 struct PackedModelStartEnd {
-    int16_t wModelStart;
-    int16_t wModelEnd;
+    int16 wModelStart;
+    int16 wModelEnd;
 };
 VALIDATE_SIZE(PackedModelStartEnd, 0x4);
 
@@ -54,15 +54,15 @@ class CColAccel {
 public:
     static CColAccelColBound*& m_colBounds;
     static IplDef*&            m_iplDefs;
-    static int32_t*&           m_iSectionSize;
-    static int32_t&            m_iCachingColSize;
+    static int32*&             m_iSectionSize;
+    static int32&              m_iCachingColSize;
     static eColAccelState&     m_iCacheState;
     static CColAccelColEntry*& mp_caccColItems;
-    static int32_t&            m_iNumColItems;
+    static int32&              m_iNumColItems;
     static CColAccelIPLEntry*& mp_caccIPLItems;
-    static int32_t&            m_iNumIPLItems;
-    static int32_t&            m_iNumSections;
-    static int32_t&            m_iNumColBounds;
+    static int32&              m_iNumIPLItems;
+    static int32&              m_iNumSections;
+    static int32&              m_iNumColBounds;
     static char const*         mp_cCacheName; // MODELS\CINFO.BIN
 
 public:

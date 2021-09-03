@@ -10,7 +10,7 @@
 #include "CPathFind.h"
 #include "eCarMission.h"
 
-enum eCarDrivingStyle : int8_t
+enum eCarDrivingStyle : int8
 {
     DRIVINGSTYLE_STOP_FOR_CARS,
     DRIVINGSTYLE_SLOW_DOWN_FOR_CARS,
@@ -89,7 +89,7 @@ public:
     char            field_8A[2];
     class CVehicle* m_pTargetCar;
     class CEntity*  m_pCarWeMakingSlowDownFor;
-    int8_t          m_vehicleRecordingId;
+    int8            m_vehicleRecordingId;
     bool            m_bPlaneDogfightSomething;
     int16           field_96;
 

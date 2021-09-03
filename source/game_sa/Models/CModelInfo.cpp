@@ -60,7 +60,7 @@ void CModelInfo::InjectHooks()
 void CModelInfo::ReInit2dEffects()
 {
     ms_2dFXInfoStore.m_nCount = 0;
-    for (int32_t i = 0; i < NUM_MODEL_INFOS; ++i)
+    for (int32 i = 0; i < NUM_MODEL_INFOS; ++i)
         CModelInfo::GetModelInfo(i)->Init2dEffects();
 }
 
@@ -290,7 +290,7 @@ CBaseModelInfo* CModelInfo::GetModelInfo(const char* name, int32* index)
 // 0x4C59B0
 CBaseModelInfo* CModelInfo::GetModelInfoFromHashKey(uint32 uiHash, int32* index)
 {
-    for (int32_t i = 0; i < NUM_MODEL_INFOS; ++i) {
+    for (int32 i = 0; i < NUM_MODEL_INFOS; ++i) {
         auto pInfo = CModelInfo::GetModelInfo(i);
         if (pInfo && pInfo->m_nKey == uiHash) {
             if (index)
@@ -321,7 +321,7 @@ CBaseModelInfo* CModelInfo::GetModelInfo(char const* name, int32 minIndex, int32
     if (minIndex > maxIndex)
         return nullptr;
 
-    for (int32_t i = minIndex; i <= maxIndex; ++i) {
+    for (int32 i = minIndex; i <= maxIndex; ++i) {
         auto pInfo = CModelInfo::GetModelInfo(i);
         if (pInfo && pInfo->m_nKey == iKey)
             return pInfo;

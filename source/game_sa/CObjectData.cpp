@@ -56,7 +56,7 @@ void CObjectData::Initialise(const char* fileName, bool bUnused)
         memset(&pCurInfo, 0, sizeof(CObjectData));
         char modelName[256], effectName[256];
         float fPercentSubmerged;
-        int32_t iColDamEffect, iSpecialColResp, iCameraAvoid, iCausesExplosion, iFxType; // Have to be read as 32-bit integers and later assigned to 8 bit int32
+        int32 iColDamEffect, iSpecialColResp, iCameraAvoid, iCausesExplosion, iFxType; // Have to be read as 32-bit integers and later assigned to 8 bit int32
         sscanf(pLine, "%s %f %f %f %f %f %f %f %d %d %d %d %d %f %f %f %s %f %f %f %f %f %d %d",
             modelName,
             &pCurInfo.m_fMass,
@@ -116,7 +116,7 @@ void CObjectData::Initialise(const char* fileName, bool bUnused)
             }
         }
 
-        int32_t iCheckedInd = 0;
+        int32 iCheckedInd = 0;
         bool bFound = false;
         while (iCheckedInd < iFirstFreeInd)
         {

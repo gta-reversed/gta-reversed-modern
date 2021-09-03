@@ -17,7 +17,7 @@ private:
     CEventGunAimedAt* Constructor(CPed* ped);
 public:
     eEventType GetEventType() const override { return EVENT_GUN_AIMED_AT; }
-    int32_t GetEventPriority() const override { return 50; }
+    int32 GetEventPriority() const override { return 50; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     bool IsCriminalEvent() override { return m_ped && m_ped->IsPlayer(); }

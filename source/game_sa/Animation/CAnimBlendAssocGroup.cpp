@@ -36,7 +36,7 @@ void CAnimBlendAssocGroup::CreateAssociations(char const* AnimName, char const* 
     plugin::CallMethod<0x4CE3B0, CAnimBlendAssocGroup*, char const*, char const*, char const*, int32>(this, AnimName, arg2, arg3, arg4);
 }
 
-// Converted from thiscall void CAnimBlendAssocGroup::DestroyAssociations(void) 004CDFF0
+// Converted from thiscall void CAnimBlendAssocGroup::DestroyAssociations() 004CDFF0
 void CAnimBlendAssocGroup::DestroyAssociations() {
     plugin::CallMethod<0x4CDFF0, CAnimBlendAssocGroup*>(this);
 }

@@ -30,7 +30,7 @@ private:
     CEventVehicleCollision* Constructor(int16 pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, int8 moveState, int16 evadeType);
 public:
     eEventType GetEventType() const override { return EVENT_VEHICLE_COLLISION; }
-    int32_t GetEventPriority() const override { return 58; }
+    int32 GetEventPriority() const override { return 58; }
     int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override;

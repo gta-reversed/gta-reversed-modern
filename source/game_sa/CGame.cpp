@@ -123,7 +123,7 @@ bool CGame::Init1(char const *datFile) {
     gameTxdSlot = CTxdStore::AddTxdSlot("generic");
     CTxdStore::Create(gameTxdSlot);
     CTxdStore::AddRef(gameTxdSlot);
-    int32_t slot = CTxdStore::AddTxdSlot("particle");
+    int32 slot = CTxdStore::AddTxdSlot("particle");
     CTxdStore::LoadTxd(slot, "MODELS\\PARTICLE.TXD");
     CTxdStore::AddRef(slot);
     CTxdStore::SetCurrentTxd(gameTxdSlot);

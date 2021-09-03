@@ -335,8 +335,8 @@ void CStreaming::ClearSlots(int32 totalSlots) {
 int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
     uint32 nextRequestModelPos = UINT32_MAX;
     uint32 firstRequestModelPos = UINT32_MAX;
-    int32_t firstRequestModelId = -1;
-    int32_t nextRequestModelId = -1;
+    int32 firstRequestModelId = -1;
+    int32 nextRequestModelId = -1;
     auto pStreamingInfo = ms_pStartRequestedList->GetNext();
     for (; pStreamingInfo != ms_pEndRequestedList; pStreamingInfo = pStreamingInfo->GetNext()) {
         int32 modelId = pStreamingInfo - ms_aInfoForModel;
@@ -1382,7 +1382,7 @@ void CStreaming::FlushChannels()
 void CStreaming::RequestModelStream(int32 channelId)
 {
     uint32 CdStreamLastPosn = CdStreamGetLastPosn();
-    int32_t modelId = GetNextFileOnCd(CdStreamLastPosn, true);
+    int32 modelId = GetNextFileOnCd(CdStreamLastPosn, true);
     if (modelId == -1)
         return;
     tStreamingChannel& channel = ms_channel[channelId];
@@ -1415,7 +1415,7 @@ void CStreaming::RequestModelStream(int32 channelId)
     uint32 sectorCount = 0;
     bool isPreviousModelBig = false;
     bool isPreviousModelPed = false;
-    const int32_t numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
+    const int32 numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
     int32 modelIndex = 0;
     for (; modelIndex < numberOfModelIds; modelIndex++) {
         streamingInfo = &ms_aInfoForModel[modelId];
@@ -3192,7 +3192,7 @@ void CStreaming::StreamZoneModels_Gangs(CVector const& unused) {
         const uint16 gang = 1 << groupId;
         if (!(gangsNeeded & gang) || ms_loadedGangs & gang) {
             if (!(gangsNeeded & gang) && ms_loadedGangs & gang) {
-                for (int32_t i = 0; i < CPopulation::GetNumPedsInGroup(pedGroupId); ++i) {
+                for (int32 i = 0; i < CPopulation::GetNumPedsInGroup(pedGroupId); ++i) {
                     int32 modelId = CPopulation::GetPedGroupModelId(pedGroupId, i);
                     SetModelIsDeletable(modelId);
                     SetModelTxdIsDeletable(modelId);

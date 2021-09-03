@@ -6,19 +6,19 @@
 
 // thanks to jte for reversing this
 struct ColDef {
-    CRect    m_Area;
+    CRect  m_Area;
     uint32 field_10;
     uint32 field_14;
     uint32 field_18;
     uint32 field_1C;
     uint16 field_20;
-    int16_t  m_nModelIdStart;
-    int16_t  m_nModelIdEnd;
+    int16  m_nModelIdStart;
+    int16  m_nModelIdEnd;
     uint16 m_nRefCount;
-    bool     m_bActive;
-    bool     m_bCollisionIsRequired;
-    bool     m_bProcedural;
-    bool     m_bInterior;
+    bool   m_bActive;
+    bool   m_bCollisionIsRequired;
+    bool   m_bProcedural;
+    bool   m_bInterior;
 
     static void* operator new(uint32 size);
     static void  operator delete(void* data);
@@ -33,7 +33,7 @@ public:
 
     static CVector& ms_vecCollisionNeeded;
     static bool& ms_bCollisionNeeded;
-    static int32_t ms_nRequiredCollisionArea;
+    static int32 ms_nRequiredCollisionArea;
 
 public:
     static void InjectHooks();

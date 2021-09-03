@@ -8,7 +8,7 @@
 
 #include "eTaskType.h"
 
-enum eAbortPriority : int32_t {
+enum eAbortPriority : int32 {
     ABORT_PRIORITY_LEISURE = 0,
     ABORT_PRIORITY_URGENT,
     ABORT_PRIORITY_IMMEDIATE

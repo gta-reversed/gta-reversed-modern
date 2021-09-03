@@ -4,24 +4,24 @@
 
 class CAnimSequenceRootFrameCompressed {
 public:
-    int16_t m_wQuatX;
-    int16_t m_wQuatY;
-    int16_t m_wQuatZ;
-    int16_t m_wQuatW;
-    int16_t m_wTime;
-    int16_t m_wTranslationX;
-    int16_t m_wTranslationY;
-    int16_t m_wTranslationZ;
+    int16 m_wQuatX;
+    int16 m_wQuatY;
+    int16 m_wQuatZ;
+    int16 m_wQuatW;
+    int16 m_wTime;
+    int16 m_wTranslationX;
+    int16 m_wTranslationY;
+    int16 m_wTranslationZ;
 };
 VALIDATE_SIZE(CAnimSequenceRootFrameCompressed, 0x10);
 
 class CAnimSequenceChildFrameCompressed {
 public:
-    int16_t m_wQuatX;
-    int16_t m_wQuatY;
-    int16_t m_wQuatZ;
-    int16_t m_wQuatW;
-    int16_t m_wTime;
+    int16 m_wQuatX;
+    int16 m_wQuatY;
+    int16 m_wQuatZ;
+    int16 m_wQuatW;
+    int16 m_wTime;
 };
 VALIDATE_SIZE(CAnimSequenceChildFrameCompressed, 0xA);
 

@@ -6,9 +6,9 @@ class CEntity;
 class CPhysical;
 class CVehicle;
 
-enum class eBuoyancyPointState : int32_t {
+enum class eBuoyancyPointState : int32 {
     COMPLETELY_ABOVE_WATER = 0x0,
-    COLLIDING_WITH_WATER = 0x1,
+    COLLIDING_WITH_WATER   = 0x1,
     COMPLETELY_UNDER_WATER = 0x2,
 };
 

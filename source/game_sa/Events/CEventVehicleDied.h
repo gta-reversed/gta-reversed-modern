@@ -17,7 +17,7 @@ private:
     CEventVehicleDied * Constructor(CVehicle* vehicle);
 public:
     eEventType GetEventType() const override { return EVENT_VEHICLE_DIED; }
-    int32_t GetEventPriority() const override { return 72; }
+    int32 GetEventPriority() const override { return 72; }
     int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override;

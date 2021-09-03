@@ -15,7 +15,7 @@ public:
     ~CEventGroupEvent();
 
     eEventType GetEventType() const override { return EVENT_GROUP_EVENT; }
-    int32_t GetEventPriority() const override { return 41; }
+    int32 GetEventPriority() const override { return 41; }
     int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override { return false; }

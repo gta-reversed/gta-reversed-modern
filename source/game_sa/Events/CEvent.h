@@ -10,11 +10,11 @@ enum eEventType;
 
 class CEvent {
 public:
-    int32_t m_nTimeActive;
-    bool    m_bValid;
-    bool    field_9;
-    bool    field_A;
-    bool    field_B;
+    int32 m_nTimeActive;
+    bool  m_bValid;
+    bool  field_9;
+    bool  field_A;
+    bool  field_B;
 
 public:
     static void* operator new(uint32 size) {
@@ -29,8 +29,8 @@ public:
 
     virtual ~CEvent();
     virtual eEventType GetEventType() const = 0;
-    virtual int32_t GetEventPriority() const = 0;
-    virtual int32_t GetLifeTime() = 0;
+    virtual int32 GetEventPriority() const = 0;
+    virtual int32 GetLifeTime() = 0;
     virtual CEvent* Clone() = 0;
     virtual bool AffectsPed(CPed* ped) { return true; };
     virtual bool AffectsPedGroup(CPedGroup* pedGroup) { return true; };
@@ -63,8 +63,8 @@ public:
     ~CEventRevived() {}
 
     eEventType GetEventType() const override { return EVENT_REVIVE; }
-    int32_t GetEventPriority() const override { return 74; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 74; }
+    int32 GetLifeTime() override { return 0; }
     CEventRevived* Clone() override { return new CEventRevived(); }
     bool AffectsPed(CPed* ped) override;
 
@@ -85,8 +85,8 @@ public:
     ~CEventEscalator() {}
 
     eEventType GetEventType() const override { return EVENT_ON_ESCALATOR; }
-    int32_t GetEventPriority() const override { return 56; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 56; }
+    int32 GetLifeTime() override { return 0; }
     CEventEscalator* Clone() override { return new CEventEscalator(); }
     bool AffectsPed(CPed* ped) override;
     bool TakesPriorityOver(const CEvent& refEvent) override { return GetEventType() != refEvent.GetEventType(); }
@@ -114,8 +114,8 @@ private:
     CEventSexyVehicle* Constructor(CVehicle* vehicle);
 public:
     eEventType GetEventType() const override { return EVENT_SEXY_VEHICLE; }
-    int32_t GetEventPriority() const override { return 3; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 3; }
+    int32 GetLifeTime() override { return 0; }
     CEventSexyVehicle* Clone() override { return new CEventSexyVehicle(m_vehicle); }
     bool AffectsPed(CPed* ped) override { return ped->IsAlive() && m_vehicle; }
 };
@@ -124,8 +124,8 @@ VALIDATE_SIZE(CEventSexyVehicle, 0x10);
 
 class CEventChatPartner : public CEvent {
 public:
-    bool m_leadSpeaker;
-    int8_t padding[3];
+    bool  m_leadSpeaker;
+    char  _pad[3];
     CPed* m_partner;
 
     static void InjectHooks();
@@ -136,8 +136,8 @@ private:
     CEventChatPartner* Constructor(bool leadSpeaker, CPed* partner);
 public:
     eEventType GetEventType() const override { return EVENT_CHAT_PARTNER; }
-    int32_t GetEventPriority() const override { return 5; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 5; }
+    int32 GetLifeTime() override { return 0; }
     CEventChatPartner* Clone() override { return new CEventChatPartner(m_leadSpeaker, m_partner); }
     bool AffectsPed(CPed* ped) override { return ped->IsAlive() && m_partner; }
 
@@ -158,8 +158,8 @@ private:
     CEventCopCarBeingStolen* Constructor(CPed* hijacker, CVehicle* vehicle);
 public:
     eEventType GetEventType() const override { return EVENT_COP_CAR_BEING_STOLEN; }
-    int32_t GetEventPriority() const override { return 38; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 38; }
+    int32 GetLifeTime() override { return 0; }
     CEventCopCarBeingStolen* Clone() override { return new CEventCopCarBeingStolen(m_hijacker, m_vehicle); }
     bool AffectsPed(CPed* ped) override;
 private:
@@ -181,8 +181,8 @@ private:
     CEventCarUpsideDown* Constructor(CVehicle* vehicle);
 public:
     eEventType GetEventType() const override { return EVENT_CAR_UPSIDE_DOWN; }
-    int32_t GetEventPriority() const override { return 18; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 18; }
+    int32 GetLifeTime() override { return 0; }
     CEventCarUpsideDown* Clone() override { return new CEventCarUpsideDown(m_vehicle); }
     bool AffectsPed(CPed* ped) override;
 private:
@@ -205,8 +205,8 @@ public:
     ~CEventPassObject();
 
     eEventType GetEventType() const override { return EVENT_PASS_OBJECT; }
-    int32_t GetEventPriority() const override { return 11; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 11; }
+    int32 GetLifeTime() override { return 0; }
     CEventPassObject* Clone() override { return new CEventPassObject(m_giver, m_dontPassObject); }
     bool AffectsPed(CPed* ped) override { return true; }
     bool IsValid(CPed* ped) override;
@@ -226,18 +226,18 @@ VALIDATE_SIZE(CEventPassObject, 0x14);
 class CEventLeanOnVehicle : public CEvent {
 public:
     CVehicle* m_vehicle;
-    int32_t m_leanAnimDurationInMs;
+    int32 m_leanAnimDurationInMs;
 
     static void InjectHooks();
 
-    CEventLeanOnVehicle(CVehicle* vehicle, int32_t leanAnimDurationInMs);
+    CEventLeanOnVehicle(CVehicle* vehicle, int32 leanAnimDurationInMs);
     ~CEventLeanOnVehicle();
 private:
-    CEventLeanOnVehicle* Constructor(CVehicle* vehicle, int32_t leanAnimDurationInMs);
+    CEventLeanOnVehicle* Constructor(CVehicle* vehicle, int32 leanAnimDurationInMs);
 public:
     eEventType GetEventType() const override { return EVENT_LEAN_ON_VEHICLE; }
-    int32_t GetEventPriority() const override { return 12; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 12; }
+    int32 GetLifeTime() override { return 0; }
     CEventLeanOnVehicle* Clone() override { return new CEventLeanOnVehicle(m_vehicle, m_leanAnimDurationInMs); }
     bool AffectsPed(CPed* ped) override { return true; }
     bool IsValid(CPed* ped) override;
@@ -259,8 +259,8 @@ private:
     CEventOnFire* Constructor();
 public:
     eEventType GetEventType() const override { return EVENT_ON_FIRE; }
-    int32_t GetEventPriority() const override { return 66; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 66; }
+    int32 GetLifeTime() override { return 0; }
     CEventOnFire* Clone() override { return new CEventOnFire(); }
     bool AffectsPed(CPed* ped) override;
     float GetLocalSoundLevel() override { return 60.0f; }

@@ -81,14 +81,14 @@ CPad* CPad::GetPad(int32 padNumber) {
     return plugin::CallAndReturn<CPad*, 0x53FB70, int32>(padNumber);
 }
 
-int16_t CPad::GetCarGunLeftRight()
+int16 CPad::GetCarGunLeftRight()
 {
-    return plugin::CallMethodAndReturn<int16_t, 0x53FC50, CPad*>(this);
+    return plugin::CallMethodAndReturn<int16, 0x53FC50, CPad*>(this);
 }
 
-int16_t CPad::GetCarGunUpDown()
+int16 CPad::GetCarGunUpDown()
 {
-    return plugin::CallMethodAndReturn<int16_t, 0x53FC10, CPad*>(this);
+    return plugin::CallMethodAndReturn<int16, 0x53FC10, CPad*>(this);
 }
 
 // 0x53FB80

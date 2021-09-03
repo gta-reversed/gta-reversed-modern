@@ -96,7 +96,7 @@ void CQuaternion::Conjugate()
 }
 
 // Squared length of a quat
-float CQuaternion::GetLengthSquared(void)
+float CQuaternion::GetLengthSquared()
 {
 	return ((float(__thiscall*)(CQuaternion*))0x4D12C0)(this);
 }

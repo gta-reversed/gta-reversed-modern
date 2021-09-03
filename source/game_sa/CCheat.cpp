@@ -121,7 +121,7 @@ void CCheat::InjectHooks() {
 
         for (auto& cheatFunc: CCheat::m_aCheatFunctions) {
             if (reinterpret_cast<unsigned long>(cheatFunc) == cheat.installAddress) {
-                cheatFunc = static_cast<void (*)(void)>(cheat.method);
+                cheatFunc = static_cast<void (*)()>(cheat.method);
             }
         }
     }

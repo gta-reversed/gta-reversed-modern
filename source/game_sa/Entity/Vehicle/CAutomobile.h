@@ -108,9 +108,9 @@ public:
     };
     char        field_869;
     int16       m_doingBurnout;
-    uint16    m_wMiscComponentAngle;
-    uint16    m_wMiscComponentAnglePrev;
-    uint32    m_dwBusDoorTimerEnd;
+    uint16      m_wMiscComponentAngle;
+    uint16      m_wMiscComponentAnglePrev;
+    uint32      m_dwBusDoorTimerEnd;
     int32       m_dwBusDoorTimerStart;
     float       m_aSuspensionSpringLength[4];
     float       m_aSuspensionLineLength[4];
@@ -160,14 +160,14 @@ public:
     float       m_fDoomHorizontalRotation;
     float       m_fForcedOrientation;
     float       m_fUpDownLightAngle[2];
-    uint8     m_nNumContactWheels;
-    uint8     m_nWheelsOnGround;
-    uint8     m_wheelsOnGrounPrev;
+    uint8       m_nNumContactWheels;
+    uint8       m_nWheelsOnGround;
+    uint8       m_wheelsOnGrounPrev;
     char        field_963;
     float       field_964;
     tWheelState m_aWheelState[4];
     FxSystem_c* m_exhaustNitroFxSystem[2];
-    uint8     m_harvesterParticleCounter;
+    uint8       m_harvesterParticleCounter;
     char        field_981;
     int16       field_982;
     float       field_984;
@@ -234,7 +234,7 @@ public:
     };
 
     inline bool IsAnyWheelTouchingSand() {
-        for (int32_t i = 0; i < 4; i++) {
+        for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompression[i] < 1.0f) {
                 if (g_surfaceInfos->GetAdhesionGroup(m_wheelColPoint[i].m_nSurfaceTypeB) == ADHESION_GROUP_SAND)
                     return true;
@@ -244,7 +244,7 @@ public:
     }
 
     inline bool IsAnyWheelTouchingRailTrack() {
-        for (int32_t i = 0; i < 4; i++) {
+        for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompression[i] < 1.0f) {
                 if (m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_RAILTRACK)
                     return true;
@@ -254,7 +254,7 @@ public:
     }
 
     inline bool IsAnyWheelTouchingShallowWaterGround() {
-        for (int32_t i = 0; i < 4; i++) {
+        for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompression[i] < 1.0f && m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_WATER_SHALLOW)
                 return true;
         }
@@ -271,14 +271,14 @@ public:
 
     // check the previous compression state using m_fWheelsSuspensionCompressionPrev
     inline bool DidAnyWheelTouchShallowWaterGroundPrev() {
-        for (int32_t i = 0; i < 4; i++) {
+        for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompressionPrev[i] < 1.0f && m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_WATER_SHALLOW)
                 return true;
         }
         return false;
     }
     inline bool DidAnyWheelTouchGroundPrev() {
-        for (int32_t i = 0; i < 4; i++) {
+        for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompressionPrev[i] < 1.0f)
                 return true;
         }

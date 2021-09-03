@@ -6,16 +6,16 @@ class CTask;
 
 class CEventScriptCommand : public CEvent {
 public:
-    int32_t m_primaryTaskIndex;
-    CTask*  m_task;
-    bool    m_affectsDeadPeds;
+    int32  m_primaryTaskIndex;
+    CTask* m_task;
+    bool   m_affectsDeadPeds;
 
 public:
-    CEventScriptCommand(int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds);
+    CEventScriptCommand(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds);
     ~CEventScriptCommand();
 
     eEventType GetEventType() const override { return EVENT_SCRIPT_COMMAND; }
-    int32_t GetEventPriority() const override;
+    int32 GetEventPriority() const override;
     int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override;
@@ -27,9 +27,9 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CEventScriptCommand* Constructor(int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds);
+    CEventScriptCommand* Constructor(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds);
 
-    int32_t GetEventPriority_Reversed() const;
+    int32 GetEventPriority_Reversed() const;
     CEvent* Clone_Reversed();
     bool AffectsPed_Reversed(CPed* ped);
     bool TakesPriorityOver_Reversed(const CEvent& refEvent);

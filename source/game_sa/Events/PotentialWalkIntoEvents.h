@@ -19,7 +19,7 @@ public:
     eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_VEHICLE; }
     bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
     CEventPotentialWalkIntoVehicle* CloneEditable() override { return new CEventPotentialWalkIntoVehicle(m_vehicle, m_moveState); }
-    int32_t GetEventPriority() const override { return 29; }
+    int32 GetEventPriority() const override { return 29; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
 private:
@@ -44,7 +44,7 @@ public:
     eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_OBJECT; }
     bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
     CEventPotentialWalkIntoObject* CloneEditable() override { return new CEventPotentialWalkIntoObject(m_object, m_moveState); }
-    int32_t GetEventPriority() const override { return 27; }
+    int32 GetEventPriority() const override { return 27; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
 private:
@@ -68,7 +68,7 @@ private:
     CEventPotentialWalkIntoFire* Constructor(CVector* firePos, float fireSize, int32 moveState);
 public:
     eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_FIRE; }
-    int32_t GetEventPriority() const override { return 31; }
+    int32 GetEventPriority() const override { return 31; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     CEventPotentialWalkIntoFire* CloneEditable() override { return new CEventPotentialWalkIntoFire(&m_firePos, m_fireSize, m_moveState); }
@@ -93,7 +93,7 @@ private:
     CEventPotentialWalkIntoPed* Constructor(CPed* ped, CVector* targetPoint, int32 moveState);
 public:
     eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_PED; }
-    int32_t GetEventPriority() const override { return 28; }
+    int32 GetEventPriority() const override { return 28; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     CEntity* GetSourceEntity() const override { return m_ped; }

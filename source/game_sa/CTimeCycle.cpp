@@ -129,62 +129,62 @@ void CTimeCycle::FindTimeCycleBox(CVector pos, CTimeCycleBox** outbox, float* in
     plugin::Call<0x55FFD0, CVector, CTimeCycleBox**, float*, bool, bool, CTimeCycleBox*>(pos, outbox, interpolation, bCheckLod, bCheckFar, exclude);
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientBlue(void)	0x560350	
+// Converted from cdecl float CTimeCycle::GetAmbientBlue()	0x560350
 float CTimeCycle::GetAmbientBlue() {
     return plugin::CallAndReturn<float, 0x560350>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientBlue_BeforeBrightness(void)	0x5603B0	
+// Converted from cdecl float CTimeCycle::GetAmbientBlue_BeforeBrightness()	0x5603B0
 float CTimeCycle::GetAmbientBlue_BeforeBrightness() {
     return plugin::CallAndReturn<float, 0x5603B0>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientBlue_Obj(void)	0x560380	
+// Converted from cdecl float CTimeCycle::GetAmbientBlue_Obj()	0x560380
 float CTimeCycle::GetAmbientBlue_Obj() {
     return plugin::CallAndReturn<float, 0x560380>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientGreen(void)	0x560340	
+// Converted from cdecl float CTimeCycle::GetAmbientGreen()	0x560340
 float CTimeCycle::GetAmbientGreen() {
     return plugin::CallAndReturn<float, 0x560340>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientGreen_BeforeBrightness(void)	0x5603A0	
+// Converted from cdecl float CTimeCycle::GetAmbientGreen_BeforeBrightness()	0x5603A0
 float CTimeCycle::GetAmbientGreen_BeforeBrightness() {
     return plugin::CallAndReturn<float, 0x5603A0>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientGreen_Obj(void)	0x560370	
+// Converted from cdecl float CTimeCycle::GetAmbientGreen_Obj()	0x560370
 float CTimeCycle::GetAmbientGreen_Obj() {
     return plugin::CallAndReturn<float, 0x560370>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientRed(void)	0x560330	
+// Converted from cdecl float CTimeCycle::GetAmbientRed()	0x560330
 float CTimeCycle::GetAmbientRed() {
     return plugin::CallAndReturn<float, 0x560330>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientRed_BeforeBrightness(void)	0x560390
+// Converted from cdecl float CTimeCycle::GetAmbientRed_BeforeBrightness()	0x560390
 float CTimeCycle::GetAmbientRed_BeforeBrightness() {
     return plugin::CallAndReturn<float, 0x560390>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientRed_Obj(void)	0x560360	
+// Converted from cdecl float CTimeCycle::GetAmbientRed_Obj()	0x560360
 float CTimeCycle::GetAmbientRed_Obj() {
     return plugin::CallAndReturn<float, 0x560360>();
 }
 
-// Converted from cdecl void CTimeCycle::InitForRestart(void)0x5601F0
+// Converted from cdecl void CTimeCycle::InitForRestart()0x5601F0
 void CTimeCycle::InitForRestart() {
     plugin::Call<0x5601F0>();
 }
 
-// Converted from cdecl void CTimeCycle::Initialise(void)	0x5BBAC0
+// Converted from cdecl void CTimeCycle::Initialise()	0x5BBAC0
 void CTimeCycle::Initialise() {
     plugin::Call<0x5BBAC0>();
 }
 
-// Converted from cdecl void CTimeCycle::SetConstantParametersForPostFX(void)0x560210
+// Converted from cdecl void CTimeCycle::SetConstantParametersForPostFX()0x560210
 void CTimeCycle::SetConstantParametersForPostFX() {
     plugin::Call<0x560210>();
 }
@@ -204,7 +204,7 @@ void CTimeCycle::StopExtraColour(bool bNoExtraColorInterior) {
     plugin::Call<0x55FF20, bool>(bNoExtraColorInterior);
 }
 
-// Converted from cdecl void CTimeCycle::Update(void)	0x561760
+// Converted from cdecl void CTimeCycle::Update()	0x561760
 void CTimeCycle::Update() {
     plugin::Call<0x561760>();
 }

@@ -35,8 +35,8 @@ void CProjectileInfo::Shutdown() {
 }
 
 // 0x737BF0
-CProjectileInfo* CProjectileInfo::GetProjectileInfo(int32_t infoId) {
-    return plugin::CallAndReturn<CProjectileInfo*, 0x737BF0, int32_t>(infoId);
+CProjectileInfo* CProjectileInfo::GetProjectileInfo(int32 infoId) {
+    return plugin::CallAndReturn<CProjectileInfo*, 0x737BF0, int32>(infoId);
 }
 
 // 0x737C00

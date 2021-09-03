@@ -6,9 +6,10 @@ class CEntity;
 class CEventAttractor : public CEventEditableResponse {
 public:
     C2dEffect* m_2dEffect;
-    CEntity* m_entity;
-    bool m_bAvoidLookingAtAttractor;
+    CEntity*   m_entity;
+    bool       m_bAvoidLookingAtAttractor;
 
+public:
     static void InjectHooks();
 
     CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor);
@@ -17,7 +18,7 @@ private:
     CEventAttractor* Constructor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor);
 public:
     eEventType GetEventType() const override { return EVENT_ATTRACTOR; }
-    int32_t GetEventPriority() const override { return 0; }
+    int32 GetEventPriority() const override { return 0; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     CEventEditableResponse* CloneEditable() override;

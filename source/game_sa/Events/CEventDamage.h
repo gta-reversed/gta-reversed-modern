@@ -39,7 +39,7 @@ public:
     ~CEventDamage();
 
     eEventType GetEventType() const override;
-    int32_t GetEventPriority() const override;
+    int32 GetEventPriority() const override;
     int32 GetLifeTime() override;
     bool AffectsPed(CPed* ped) override;
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
@@ -66,7 +66,7 @@ private:
     CEventDamage* Constructor(CEntity * source, uint32 startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, uint8 direction, bool a7, bool bPedInVehicle);
 
     eEventType GetEventType_Reversed() const { return EVENT_DAMAGE; }
-    int32_t GetEventPriority_Reversed() const { return 65; }
+    int32 GetEventPriority_Reversed() const { return 65; }
     int32 GetLifeTime_Reversed() { return 0; }
     bool AffectsPed_Reversed(CPed* ped);
     bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);

@@ -70,11 +70,11 @@ bool CPools::Load() {
 
 // 0x5D4A40
 bool CPools::LoadObjectPool() {
-    int32_t iNumObjects = 0;
+    int32 iNumObjects = 0;
     CGenericGameStorage::LoadDataFromWorkBuffer(&iNumObjects, 4);
-    for (int32_t i = 0; i < iNumObjects; ++i)
+    for (int32 i = 0; i < iNumObjects; ++i)
     {
-        int32_t iPoolRef = 0, iModelId = 0;
+        int32 iPoolRef = 0, iModelId = 0;
         CGenericGameStorage::LoadDataFromWorkBuffer(&iPoolRef, 4);
         CGenericGameStorage::LoadDataFromWorkBuffer(&iModelId, 4);
 

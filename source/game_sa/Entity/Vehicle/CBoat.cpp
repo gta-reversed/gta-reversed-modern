@@ -223,7 +223,7 @@ void CBoat::ModifyHandlingValue(bool const& bIncrement)
 
 void CBoat::PruneWakeTrail()
 {
-    int16_t iInd;
+    int16 iInd;
     for (iInd = 0; iInd < 32; ++iInd) {
         auto fPointLifeTime = m_afWakePointLifeTime[iInd];
         if (fPointLifeTime <= 0.0F)
@@ -291,7 +291,7 @@ bool CBoat::IsSectorAffectedByWake(CVector2D vecPos, float fOffset, CBoat** ppBo
         return false;
 
     bool bWakeFound = false;
-    for (int32_t i = 0; i < NUM_WAKE_GEN_BOATS; ++i) {
+    for (int32 i = 0; i < NUM_WAKE_GEN_BOATS; ++i) {
         auto pBoat = CBoat::apFrameWakeGeneratingBoats[i];
         if (!pBoat)
             continue;
@@ -299,7 +299,7 @@ bool CBoat::IsSectorAffectedByWake(CVector2D vecPos, float fOffset, CBoat** ppBo
         if (!pBoat->m_nNumWaterTrailPoints)
             continue;
 
-        for (int32_t iTrail = 0; iTrail < pBoat->m_nNumWaterTrailPoints; ++iTrail) {
+        for (int32 iTrail = 0; iTrail < pBoat->m_nNumWaterTrailPoints; ++iTrail) {
             auto fDist = (CBoat::WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[iTrail]) * CBoat::fShapeTime + static_cast<float>(iTrail) * CBoat::fShapeLength + fOffset;
             if (fabs(pBoat->m_avecWakePoints[iTrail].x - vecPos.x) >= fDist
                 || fabs(pBoat->m_avecWakePoints[iTrail].y - vecPos.y) >= fDist)
@@ -326,7 +326,7 @@ float CBoat::IsVertexAffectedByWake(CVector vecPos, CBoat* pBoat, int16 wIndex, 
     if (!pBoat->m_nNumWaterTrailPoints)
         return 0.0F;
 
-    for (int32_t iTrail = 0; iTrail < pBoat->m_nNumWaterTrailPoints; ++iTrail) {
+    for (int32 iTrail = 0; iTrail < pBoat->m_nNumWaterTrailPoints; ++iTrail) {
         auto fWakeDistSquared = powf((CBoat::WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[iTrail]) * CBoat::fShapeTime + static_cast<float>(iTrail) * CBoat::fShapeLength, 2);
         auto fTrailDistSquared = (pBoat->m_avecWakePoints[iTrail] - vecPos).SquaredMagnitude();
         if (fTrailDistSquared < fWakeDistSquared)
@@ -371,7 +371,7 @@ void CBoat::CheckForSkippingCalculations()
 
 void CBoat::FillBoatList()
 {
-    for (int32_t i = 0; i < NUM_WAKE_GEN_BOATS; i++)
+    for (int32 i = 0; i < NUM_WAKE_GEN_BOATS; i++)
         CBoat::apFrameWakeGeneratingBoats[i] = nullptr;
 
     auto vecCamPos = CVector2D(TheCamera.GetPosition());
@@ -382,9 +382,9 @@ void CBoat::FillBoatList()
     if (!iVehNum)
         return;
 
-    int32_t iCurBoat = 0;
+    int32 iCurBoat = 0;
 
-    for (int32_t iInd = 0; iInd < iVehNum; ++iInd) {
+    for (int32 iInd = 0; iInd < iVehNum; ++iInd) {
         auto pVeh = CPools::ms_pVehiclePool->GetAt(iInd);
         if (!pVeh || !pVeh->IsBoat())
             continue;
@@ -413,7 +413,7 @@ void CBoat::FillBoatList()
         // Insert the new boat into list, based on dist from camera
         auto iNewInd = -1;
         auto fMinDist = 999999.99F;
-        for (int32_t iCheckedInd = 0; iCheckedInd < NUM_WAKE_GEN_BOATS; ++iCheckedInd) {
+        for (int32 iCheckedInd = 0; iCheckedInd < NUM_WAKE_GEN_BOATS; ++iCheckedInd) {
             auto pCheckedBoat = CBoat::apFrameWakeGeneratingBoats[iCheckedInd];
             auto vecCheckedPos = CVector2D(pCheckedBoat->GetPosition());
             auto fCheckedDistFromCam = DistanceBetweenPoints2D(vecCheckedPos, vecCamPos); // Originally squared dist
@@ -703,7 +703,7 @@ void CBoat::PreRender_Reversed()
     m_vecBoatTurnForce = m_vecTurnSpeed + m_vecFrictionTurnSpeed;
     auto fSpeed = m_vecMoveSpeed.Magnitude();
 
-    int32_t iCounter = 0;
+    int32 iCounter = 0;
     constexpr eBoatNodes aCheckedNodes[2] = { eBoatNodes::BOAT_STATIC_PROP, eBoatNodes::BOAT_STATIC_PROP_2 };
     for (const auto eNode : aCheckedNodes) {
         auto pProp = m_aBoatNodes[eNode];

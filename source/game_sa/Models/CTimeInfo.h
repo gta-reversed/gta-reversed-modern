@@ -6,7 +6,7 @@ class CTimeInfo {
 public:
     uint8 m_nTimeOn;
     uint8 m_nTimeOff;
-    int16_t m_nOtherTimeModel = -1;
+    int16 m_nOtherTimeModel = -1;
 
 public:
     static void InjectHooks();
@@ -16,7 +16,7 @@ public:
 
     int32 GetOtherTimeModel() const { return m_nOtherTimeModel; }
 
-    void SetOtherTimeModel(int16_t otherTimeModel) { m_nOtherTimeModel = otherTimeModel; }
+    void SetOtherTimeModel(int16 otherTimeModel) { m_nOtherTimeModel = otherTimeModel; }
 
     uint8 GetTimeOn() const { return m_nTimeOn; }
 

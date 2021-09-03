@@ -86,8 +86,8 @@ bool cBuoyancy::ProcessBuoyancyBoat(CVehicle* pVehicle, float fBuoyancy, CVector
     float fBoundingHeight = m_vecBoundingMax.z - m_vecBoundingMin.z;
     auto fBoatHeightRatio = 1.0F / (fBoundingHeight * 9.0F);
 
-    for (int32_t iXMult = 0; iXMult < 3; ++iXMult) {
-        for (int32_t iYMult = 0; iYMult < 3; ++iYMult) {
+    for (int32 iXMult = 0; iXMult < 3; ++iXMult) {
+        for (int32 iYMult = 0; iYMult < 3; ++iYMult) {
             auto fCurrentX = m_vecBoundingMin.x + m_vecCenterOffset.x * iXMult;
             auto fCurrentY = m_vecBoundingMin.y + m_vecCenterOffset.y * iYMult;
             CVector vecCurPoint(fCurrentX, fCurrentY, 0.0F);
@@ -292,7 +292,7 @@ void cBuoyancy::AddSplashParticles(CPhysical* pEntity, CVector vecFrom, CVector 
     auto vecVelocityModifier = vecUsedSpeed * CVector(0.0F, 0.0F, -1.0F) * 120.0F;
 
     auto iNumParticles = std::max(1, static_cast<int32>(fDistBetweenPoints + fDistBetweenPoints));
-    for (int32_t iIter = 0; iIter < iNumParticles; ++iIter) {
+    for (int32 iIter = 0; iIter < iNumParticles; ++iIter) {
         auto fCurrentProgress = static_cast<float>(iIter) / static_cast<float>(iNumParticles);
         auto vecCurPoint = Lerp(vecFrom, vecTo, fCurrentProgress);
         auto vecTransformedPoint = (*pEntity->m_matrix) * vecCurPoint;
@@ -339,8 +339,8 @@ void cBuoyancy::SimpleCalcBuoyancy(CPhysical* pEntity)
 {
     CVector vecAllPoints[3][3];
 
-    for (int32_t iXMult = 0; iXMult < 3; ++iXMult) {
-        for (int32_t iYMult = 0; iYMult < 3; ++iYMult) {
+    for (int32 iXMult = 0; iXMult < 3; ++iXMult) {
+        for (int32 iYMult = 0; iYMult < 3; ++iYMult) {
             auto& pCurVec = vecAllPoints[iXMult][iYMult];
             pCurVec.Set(0.0F, 0.0F, 0.0F);
 
@@ -365,7 +365,7 @@ void cBuoyancy::SimpleCalcBuoyancy(CPhysical* pEntity)
     m_fEntityWaterImmersion = m_fEntityWaterImmersion / (9.0F * fHeight);
     auto fHalfHeightZ = m_vecBoundingMin.z + fHeight * 0.5F;
 
-    for (int32_t i = 0; i < 2; ++i) {
+    for (int32 i = 0; i < 2; ++i) {
         auto fMinYHeight = vecAllPoints[i][0].z;            // 000      000     ^y
         auto fMinYHeight2 = vecAllPoints[i + 1][0].z;       // 000  ->  000     │   x
         if (fMinYHeight > fHalfHeightZ                      // xx0      0xx     └───>
@@ -389,7 +389,7 @@ void cBuoyancy::SimpleCalcBuoyancy(CPhysical* pEntity)
         }
     }
 
-    for (int32_t i = 0; i < 2; ++i) {
+    for (int32 i = 0; i < 2; ++i) {
         auto fMinXHeight = vecAllPoints[0][i].z;            // 000      x00     ^y
         auto fMinXHeight2 = vecAllPoints[0][i + 1].z;       // x00  ->  x00     │   x
         if (fMinXHeight > fHalfHeightZ                      // x00      000     └───>

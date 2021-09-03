@@ -5,7 +5,7 @@
 
 class CTaskComplexGoToPointAndStandStillTimed : public CTaskComplexGoToPointAndStandStill {
 public:
-    int32_t    m_nTime;
+    int32      m_nTime;
     CTaskTimer m_timer;
 
 public:

@@ -37,7 +37,7 @@ private:
 public:
     eEventType GetEventType() const override { return EVENT_KNOCK_OFF_BIKE; }
     float GetLocalSoundLevel() override { return 60.0f; }
-    int32_t GetEventPriority() const override { return 70; }
+    int32 GetEventPriority() const override { return 70; }
     int32 GetLifeTime() override { return 0; }
     CEventKnockOffBike* Clone() override { return new CEventKnockOffBike(m_vehicle, &m_moveSpeed, &m_collisionImpactVelocity, m_damageIntensity, field_28, m_knockOffType, m_knockOffDirection, m_time, m_ped, m_isVictimDriver, m_forceKnockOff); }
     bool AffectsPed(CPed* ped) override;

@@ -84,10 +84,10 @@ void CTaskComplexWander::UpdateDir(CPed* pPed)
 #endif
 }
 
-void CTaskComplexWander::UpdatePathNodes(CPed* pPed, int8_t dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8_t* outDir)
+void CTaskComplexWander::UpdatePathNodes(CPed* pPed, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8* outDir)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((void(__thiscall*)(CTaskComplex*, CPed*, int8_t, CNodeAddress*, CNodeAddress*, int8_t*))0x669ED0)
+    return ((void(__thiscall*)(CTaskComplex*, CPed*, int8, CNodeAddress*, CNodeAddress*, int8*))0x669ED0)
         (this, pPed, dir, originNode, targetNode, outDir);
 #else
     return UpdatePathNodes_Reversed(pPed, dir, originNode, targetNode, outDir);
@@ -131,7 +131,7 @@ CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
         if (taskId == TASK_SIMPLE_SCRATCH_HEAD)
         {
             m_nDir++;
-            UpdatePathNodes(ped, m_nDir, &m_LastNode, &m_NextNode, (int8_t*)& m_nDir);
+            UpdatePathNodes(ped, m_nDir, &m_LastNode, &m_NextNode, (int8*)& m_nDir);
 
             if (m_NextNode.m_wAreaId != -1 && m_LastNode.m_wAreaId != -1)
             {
@@ -178,7 +178,7 @@ CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
     }
 
     UpdateDir(ped);
-    UpdatePathNodes(ped, m_nDir, &m_LastNode, &m_NextNode, (int8_t*)& m_nDir);
+    UpdatePathNodes(ped, m_nDir, &m_LastNode, &m_NextNode, (int8*)& m_nDir);
 
     if (m_NextNode.m_wAreaId != m_LastNode.m_wAreaId && m_NextNode.m_wNodeId != m_LastNode.m_wNodeId)
     {
@@ -247,7 +247,7 @@ CTask* CTaskComplexWander::CreateFirstSubTask_Reversed(CPed* ped)
     }
 
     UpdateDir(ped);
-    UpdatePathNodes(ped, m_nDir, &m_LastNode, &m_NextNode, (int8_t*)& m_nDir);
+    UpdatePathNodes(ped, m_nDir, &m_LastNode, &m_NextNode, (int8*)& m_nDir);
     return CreateSubTask(ped, TASK_SIMPLE_GO_TO_POINT);
 }
 
@@ -336,7 +336,7 @@ void CTaskComplexWander::UpdateDir_Reversed(CPed* pPed)
 
     if (newDir != m_nDir)
     {
-        int8_t outDir;
+        int8 outDir;
         UpdatePathNodes(pPed, newDir, &m_LastNode, &m_NextNode, &outDir);
 
         uint8 currentDir = m_nDir;
@@ -358,7 +358,7 @@ void CTaskComplexWander::UpdateDir_Reversed(CPed* pPed)
     }
 }
 
-void CTaskComplexWander::UpdatePathNodes_Reversed(CPed* pPed, int8_t dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8_t* outDir)
+void CTaskComplexWander::UpdatePathNodes_Reversed(CPed* pPed, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8* outDir)
 {
     *originNode = *targetNode;
     targetNode->m_wAreaId = -1;
@@ -507,7 +507,7 @@ void CTaskComplexWander::ScanForBlockedNodes(CPed* pPed)
         {
             m_pSubTask->MakeAbortable(pPed, ABORT_PRIORITY_LEISURE, 0);
 
-            int8_t outDir = 0;
+            int8 outDir = 0;
             UpdatePathNodes(pPed, m_nDir, &m_LastNode, &m_NextNode, &outDir);
             if (ScanForBlockedNode(pPed, &m_NextNode) || m_NextNode.operatorEqual(&m_LastNode))
             {

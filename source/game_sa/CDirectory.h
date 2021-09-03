@@ -16,12 +16,12 @@ public:
         uint32 m_nOffset;
         uint16 m_nStreamingSize;
         uint16 m_nSizeInArchive;
-        char     m_szName[24];
+        char   m_szName[24];
     };
 
     DirectoryInfo* m_pEntries{};
-    uint32       m_nCapacity{};
-    uint32       m_nNumEntries{};
+    uint32         m_nCapacity{};
+    uint32         m_nNumEntries{};
     bool           m_bOwnsEntries{};
 
 public:
@@ -29,7 +29,7 @@ public:
     CDirectory(size_t capacity);
     ~CDirectory();
 
-    void Init(int32_t capacity, DirectoryInfo* entries);
+    void Init(int32 capacity, DirectoryInfo* entries);
     void AddItem(const DirectoryInfo& dirInfo);
     void ReadDirFile(const char* filename);
     bool WriteDirFile(const char* fileName);

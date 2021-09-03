@@ -25,7 +25,7 @@ void CBirds::InjectHooks()
 
 void CBirds::Init()
 {
-    for (int32_t i = 0; i < MAX_BIRDS; ++i) {
+    for (int32 i = 0; i < MAX_BIRDS; ++i) {
         auto& pBird = aBirds[i];
         pBird.m_bCreated = false;
     }
@@ -53,7 +53,7 @@ void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int3
     if (iBirdCount <= 0)
         return;
 
-    for (int32_t i = 0; i < iBirdCount; ++i) {
+    for (int32 i = 0; i < iBirdCount; ++i) {
         int32 iFreeBirdIndex = 0;
         while (iFreeBirdIndex < MAX_BIRDS) {
             auto& pBird = CBirds::aBirds[iFreeBirdIndex];
@@ -128,7 +128,7 @@ void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int3
 
 void CBirds::Shutdown()
 {
-    for (int32_t i = 0; i < MAX_BIRDS; ++i) {
+    for (int32 i = 0; i < MAX_BIRDS; ++i) {
         auto& pBird = aBirds[i];
         if (pBird.m_bCreated)
             pBird.m_bCreated = false;
@@ -226,7 +226,7 @@ void CBirds::Update()
         CBirds::uiNumberOfBirds--;
     }
 
-    for (int32_t i = 0; i < MAX_BIRDS; ++i) {
+    for (int32 i = 0; i < MAX_BIRDS; ++i) {
         auto& pBird = aBirds[i];
         if (!pBird.m_bCreated)
             continue;
@@ -261,7 +261,7 @@ void CBirds::Render()
     uiTempBufferIndicesStored = 0;
     uiTempBufferVerticesStored = 0;
 
-    for (int32_t i = 0; i < MAX_BIRDS; ++i) {
+    for (int32 i = 0; i < MAX_BIRDS; ++i) {
         const auto& pBird = aBirds[i];
         if (!pBird.m_bCreated) {
             uiWingMoveTimeOffset += 100;
@@ -290,7 +290,7 @@ void CBirds::Render()
             matBirdTransform.GetUp().Set(0.0F, 0.0F, pBird.m_fSize);
 
             if (pBird.m_eBirdMode == eBirdMode::BIRD_DRAW_NOUPDATE || pBird.m_eBirdMode == eBirdMode::BIRD_DRAW_UPDATE) {
-                for (int32_t iIndice = 0; iIndice < 30; ++iIndice) {
+                for (int32 iIndice = 0; iIndice < 30; ++iIndice) {
                     auto uiVertInd = static_cast<RxVertexIndex>(uiTempBufferVerticesStored + CBirds::auRenderIndices[iIndice]);
                     aTempBufferIndices[uiTempBufferIndicesStored + iIndice] = uiVertInd;
                     aTempBufferIndices[uiTempBufferIndicesStored + iIndice + 30] = uiVertInd + 8;
@@ -319,7 +319,7 @@ void CBirds::Render()
                     cAlpha = static_cast<RwUInt8>(fTransparency * 255.0F);
                 }
 
-                for (int32_t uiVertInd = 0; uiVertInd < 8; ++uiVertInd) {
+                for (int32 uiVertInd = 0; uiVertInd < 8; ++uiVertInd) {
                     CVector vecPoint;
                     CBirdColor vertColor;
 
@@ -396,7 +396,7 @@ void CBirds::HandleGunShot(CVector const* pointA, CVector const* pointB)
 {
     CColLine colLine(*pointA, *pointB);
 
-    for (int32_t i = 0; i < MAX_BIRDS; ++i) {
+    for (int32 i = 0; i < MAX_BIRDS; ++i) {
         auto& pBird = aBirds[i];
         if (!pBird.m_bCreated)
             continue;

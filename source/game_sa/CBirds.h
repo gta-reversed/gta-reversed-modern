@@ -98,4 +98,4 @@ public:
     static void InjectHooks();
 };
 
-constexpr int32_t MAX_BIRDS = 6; // default: 6
+constexpr int32 MAX_BIRDS = 6; // default: 6

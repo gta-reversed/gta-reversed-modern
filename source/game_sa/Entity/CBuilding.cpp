@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-int32_t& gBuildings = *(int32_t*)0xB71804;
+int32& gBuildings = *(int32*)0xB71804;
 
 void CBuilding::InjectHooks()
 {

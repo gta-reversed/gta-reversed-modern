@@ -8,7 +8,7 @@ public:
     ~CEventInAir() {};
 
     eEventType GetEventType() const override { return EVENT_IN_AIR; }
-    int32_t GetEventPriority() const override { return 61; }
+    int32 GetEventPriority() const override { return 61; }
     int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override { return new CEventInAir(); }
     bool AffectsPed(CPed* ped) override;
@@ -31,7 +31,7 @@ public:
     ~CEventStuckInAir();
 
     eEventType GetEventType() const override { return EVENT_STUCK_IN_AIR; }
-    int32_t GetEventPriority() const override;
+    int32 GetEventPriority() const override;
     int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override { return new CEventStuckInAir(m_ped); }
     bool AffectsPed(CPed* ped) override;
@@ -44,7 +44,7 @@ private:
 
     CEventStuckInAir* Constructor(CPed* ped);
 
-    int32_t GetEventPriority_Reversed() const;
+    int32 GetEventPriority_Reversed() const;
     bool AffectsPed_Reversed(CPed* ped);
     bool TakesPriorityOver_Reversed(const CEvent& refEvent);
 };

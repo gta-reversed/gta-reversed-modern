@@ -14,17 +14,17 @@ struct RpAtomic;
 struct RpClump;
 
 struct tCompSearchStructByName {
-    char* m_pName;
+    char*    m_pName;
     RwFrame* m_pFrame;
 
     inline tCompSearchStructByName(char* name, RwFrame* frame) : m_pName(name), m_pFrame(frame) {}
 };
 
 struct tCompSearchStructById {
-    int32_t m_nId;
+    int32    m_nId;
     RwFrame* m_pFrame;
 
-    inline tCompSearchStructById(int32_t id, RwFrame* frame) : m_nId(id), m_pFrame(frame) {}
+    inline tCompSearchStructById(int32 id, RwFrame* frame) : m_nId(id), m_pFrame(frame) {}
 };
 
 class CClumpModelInfo : public CBaseModelInfo {

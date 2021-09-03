@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
 // WMA
 #include <wmsdkidl.h>
 #include <wmsdk.h>

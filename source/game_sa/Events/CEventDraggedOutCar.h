@@ -21,7 +21,7 @@ private:
     CEventDraggedOutCar* Constructor(CVehicle* vehicle, CPed* carjacker, bool IsDriverSeat);
 public:
     eEventType GetEventType() const override { return EVENT_DRAGGED_OUT_CAR; }
-    int32_t GetEventPriority() const override { return 40; }
+    int32 GetEventPriority() const override { return 40; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override { return ped->IsAlive() && m_carjacker; }
     bool AffectsPedGroup(CPedGroup* pedGroup) override { return FindPlayerPed(-1) == pedGroup->m_groupMembership.GetLeader(); }
