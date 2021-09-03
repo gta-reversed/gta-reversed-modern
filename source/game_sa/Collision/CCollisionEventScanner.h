@@ -1,11 +1,9 @@
 #pragma once
-#include "PluginBase.h"
 
 class CPed;
 class CEventGroup;
 
-class CCollisionEventScanner
-{
+class CCollisionEventScanner {
 public:
     // IMPORTANT: This function was probably __cdecl, i.e, it does not need `this`, but the compiler
     // messed up and made the first parameter `this`, which is a boolean, is being passed in ecx a.k.a `this`.

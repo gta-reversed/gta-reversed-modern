@@ -10,10 +10,10 @@
 
 #include <cctype> // toupper
 
-static constexpr unsigned int INITIAL_REMAINDER = 0xFFFFFFFF;
+static constexpr uint32 INITIAL_REMAINDER = 0xFFFFFFFF;
 
 // 0x8CD068
-const unsigned int CKeyGen::keyTable[256] = {
+const uint32 CKeyGen::keyTable[256] = {
     0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA,
     0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
     0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988,
@@ -82,42 +82,42 @@ const unsigned int CKeyGen::keyTable[256] = {
 
 void CKeyGen::InjectHooks() {
     ReversibleHooks::Install("CKeyGen", "AppendStringToKey", 0x53CF70, &CKeyGen::AppendStringToKey);
-    ReversibleHooks::Install("CKeyGen", "GetKey", 0x53CF00, static_cast<unsigned int(*)(const char*)>(CKeyGen::GetKey));
-    ReversibleHooks::Install("CKeyGen", "GetKey_size", 0x53CED0, static_cast<unsigned int(*)(const char*, int)>(CKeyGen::GetKey));
+    ReversibleHooks::Install("CKeyGen", "GetKey", 0x53CF00, static_cast<uint32(*)(const char*)>(CKeyGen::GetKey));
+    ReversibleHooks::Install("CKeyGen", "GetKey_size", 0x53CED0, static_cast<uint32(*)(const char*, int32)>(CKeyGen::GetKey));
     ReversibleHooks::Install("CKeyGen", "GetUppercaseKey", 0x53CF30, &CKeyGen::GetUppercaseKey);
 }
 
 // 0x53CF70
-unsigned int CKeyGen::AppendStringToKey(unsigned int key, const char* str) {
-    for (int i = 0; str[i]; ++i) {
-        key = keyTable[(unsigned char)(str[i] ^ key)] ^ (key >> 8);
+uint32 CKeyGen::AppendStringToKey(uint32 key, const char* str) {
+    for (int32 i = 0; str[i]; ++i) {
+        key = keyTable[(uint8)(str[i] ^ key)] ^ (key >> 8);
     }
     return key;
 }
 
 // 0x53CF00
-unsigned int CKeyGen::GetKey(const char* str) {
-    unsigned int key = INITIAL_REMAINDER;
-    for (int i = 0; str[i]; ++i) {
-        key = keyTable[(unsigned char)(str[i] ^ key)] ^ (key >> 8);
+uint32 CKeyGen::GetKey(const char* str) {
+    uint32 key = INITIAL_REMAINDER;
+    for (int32 i = 0; str[i]; ++i) {
+        key = keyTable[(uint8)(str[i] ^ key)] ^ (key >> 8);
     }
     return key;
 }
 
 // 0x53CED0
-unsigned int CKeyGen::GetKey(const char* str, int size) {
-    unsigned int key = INITIAL_REMAINDER;
-    for (int i = 0; i < size; ++i) {
-        key = keyTable[(unsigned char)(str[i] ^ key)] ^ (key >> 8);
+uint32 CKeyGen::GetKey(const char* str, int32 size) {
+    uint32 key = INITIAL_REMAINDER;
+    for (int32 i = 0; i < size; ++i) {
+        key = keyTable[(uint8)(str[i] ^ key)] ^ (key >> 8);
     }
     return key;
 }
 
 // 0x53CF30
-unsigned int CKeyGen::GetUppercaseKey(const char* str) {
-    unsigned int key = INITIAL_REMAINDER;
-    for (int i = 0; str[i]; ++i) {
-        key = keyTable[(unsigned char)(toupper((unsigned char)str[i]) ^ key)] ^ (key >> 8);
+uint32 CKeyGen::GetUppercaseKey(const char* str) {
+    uint32 key = INITIAL_REMAINDER;
+    for (int32 i = 0; str[i]; ++i) {
+        key = keyTable[(uint8)(toupper((uint8)str[i]) ^ key)] ^ (key >> 8);
     }
     return key;
 }

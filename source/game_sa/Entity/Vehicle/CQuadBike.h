@@ -37,29 +37,29 @@ class CQuadBike : public CAutomobile {
 protected:
     CQuadBike(plugin::dummy_func_t) : CAutomobile(plugin::dummy) {}
 public:
-    void*          m_pHandling;
-    CRideAnimData  m_sRideAnimData;
-    float          field_9A8;
-    int            field_9AC;
-    int            field_9B0;
-    int            field_9B4;
-    unsigned char  m_nQuadFlags;
-    char           _pad1[3];
+    void*         m_pHandling;
+    CRideAnimData m_sRideAnimData;
+    float         field_9A8;
+    int32         field_9AC;
+    int32         field_9B0;
+    int32         field_9B4;
+    uint8         m_nQuadFlags;
+    char          _pad1[3];
 
 public:
     static void InjectHooks();
 
-    CQuadBike(int modelIndex, eVehicleCreatedBy createdBy);
+    CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy);
 
     ~CQuadBike() override;
 
     void Fix() override;
     CRideAnimData* GetRideAnimData() override;
     void PreRender() override;
-    bool ProcessAI(unsigned int& extraHandlingFlags) override;
+    bool ProcessAI(uint32& extraHandlingFlags) override;
     void ProcessControl() override;
-    void ProcessControlInputs(unsigned char playerNum) override;
-    void ProcessDrivingAnims(CPed* driver, unsigned char bBlend) override;
+    void ProcessControlInputs(uint8 playerNum) override;
+    void ProcessDrivingAnims(CPed* driver, uint8 bBlend) override;
     void ProcessSuspension() override;
     void ResetSuspension() override;
     void SetupDamageAfterLoad() override;
@@ -69,10 +69,10 @@ private:
     void Fix_Reversed();
     CRideAnimData* GetRideAnimData_Reversed();
     void PreRender_Reversed();
-    bool ProcessAI_Reversed(unsigned int& extraHandlingFlags);
+    bool ProcessAI_Reversed(uint32& extraHandlingFlags);
     void ProcessControl_Reversed();
-    void ProcessControlInputs_Reversed(unsigned char playerNum);
-    void ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend);
+    void ProcessControlInputs_Reversed(uint8 playerNum);
+    void ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend);
     void ProcessSuspension_Reversed();
     void ResetSuspension_Reversed();
     void SetupDamageAfterLoad_Reversed();

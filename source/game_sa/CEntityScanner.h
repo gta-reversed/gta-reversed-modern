@@ -14,16 +14,16 @@ protected:
     void* vtable;
 
 public:
-    int field_4;
-    unsigned int m_nCount;
+    int32    field_4;
+    uint32   m_nCount;
     CEntity* m_apEntities[16];
     CEntity* m_pClosestEntityInRange;
 
 public:
     static void InjectHooks();
 
-    void Clear();
-    void ScanForEntitiesInRange(int arg2, CPed* pPed);
+    void     Clear();
+    void     ScanForEntitiesInRange(int32 arg2, CPed* pPed);
     CEntity* GetClosestPedInRange();
 };
 

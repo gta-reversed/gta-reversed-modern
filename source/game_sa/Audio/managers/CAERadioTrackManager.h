@@ -78,7 +78,7 @@ public:
 
 public:
     bool  IsVehicleRadioActive();
-    char* GetRadioStationName(signed char id);
+    char* GetRadioStationName(int8 id);
 
     // 11 structures
     static tMusicTrackHistory* m_nMusicTrackIndexHistory;

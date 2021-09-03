@@ -7,12 +7,12 @@ class CTaskSimpleCarDriveTimed : public CTaskSimpleCarDrive
 {
     CTaskSimpleCarDriveTimed() = delete;
 public:
-    int m_nTime;
+    int32 m_nTime;
     CTaskTimer m_nTimer;
 private:
-    CTaskSimpleCarDriveTimed* Constructor(CVehicle* pVehicle, int nTime);
+    CTaskSimpleCarDriveTimed* Constructor(CVehicle* pVehicle, int32 nTime);
 public:
-    CTaskSimpleCarDriveTimed(CVehicle* pVehicle, int nTime);
+    CTaskSimpleCarDriveTimed(CVehicle* pVehicle, int32 nTime);
     ~CTaskSimpleCarDriveTimed() override;
 
     bool ProcessPed(class CPed* ped) override;

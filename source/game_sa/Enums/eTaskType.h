@@ -8,7 +8,7 @@
 
 /* multitheftauto /MTA10/sdk/game/TaskTypes.h */
 
-enum eTaskType : int {
+enum eTaskType : int32 {
     // player tasks
     TASK_SIMPLE_PLAYER_ON_FOOT = 0,
 

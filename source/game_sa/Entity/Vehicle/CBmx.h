@@ -27,24 +27,24 @@ class CBmx : public CBike {
 protected:
     CBmx(plugin::dummy_func_t) : CBike(plugin::dummy) {}
 public:
-    float field_814;
-    float field_818;
-    float field_81C;
-    float field_820;
-    float field_824;
-    float field_828;
-    float m_fDistanceBetweenWheels;
-    float m_fWheelsBalance;
-    uint8_t field_834;
-    char  _pad[3];
+    float   field_814;
+    float   field_818;
+    float   field_81C;
+    float   field_820;
+    float   field_824;
+    float   field_828;
+    float   m_fDistanceBetweenWheels;
+    float   m_fWheelsBalance;
+    uint8 field_834;
+    char    _pad[3];
 
 public:
     static void InjectHooks();
 
-    CBmx(int modelIndex, eVehicleCreatedBy createdBy);
+    CBmx(int32 modelIndex, eVehicleCreatedBy createdBy);
 
     // VTABLE
-    void BlowUpCar(CEntity* damager, unsigned char bHideExplosion) override { /* NOP */ }; // 0x6C0560
+    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override { /* NOP */ }; // 0x6C0560
 
     // FUNCS
 

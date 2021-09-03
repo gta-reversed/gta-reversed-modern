@@ -5,15 +5,15 @@ class CAnimBlendAssociation;
 
 class CTaskSimpleDie : public CTaskSimple
 {
-    std::int32_t m_animGroupId;
-    std::int32_t m_animId;
+    int32 m_animGroupId;
+    int32 m_animId;
     CAnimBlendHierarchy* m_animHierarchy;
-    std::uint32_t m_animFlags;
+    uint32 m_animFlags;
     float m_blendDelta;
     float m_animSpeed;
-    std::uint8_t m_flags;
+    uint8 m_flags;
 private:
-    std::uint8_t padding[3];
+    uint8 padding[3];
 public:
     CAnimBlendAssociation* m_animAssociation;
 };

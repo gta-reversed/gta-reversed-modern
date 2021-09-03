@@ -6,7 +6,7 @@ void CEntryInfoNode::InjectHooks()
     ReversibleHooks::Install("CEntryInfoNode", "operator delete", 0x536DD0, &CEntryInfoNode::operator delete);
 }
 
-void* CEntryInfoNode::operator new(unsigned int size)
+void* CEntryInfoNode::operator new(uint32 size)
 {
     return CPools::ms_pEntryInfoNodePool->New();
 }

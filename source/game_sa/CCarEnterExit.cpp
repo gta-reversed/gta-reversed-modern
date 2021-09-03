@@ -53,88 +53,88 @@ void CCarEnterExit::AddInCarAnim(const CVehicle* vehicle, CPed* ped, bool bAsDri
 }
 
 // 0x
-bool CCarEnterExit::CarHasDoorToClose(const CVehicle* vehicle, int doorId) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int>(vehicle, doorId);
+bool CCarEnterExit::CarHasDoorToClose(const CVehicle* vehicle, int32 doorId) {
+    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
 }
 
 // 0x
-bool CCarEnterExit::CarHasDoorToOpen(const CVehicle* vehicle, int doorId) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int>(vehicle, doorId);
+bool CCarEnterExit::CarHasDoorToOpen(const CVehicle* vehicle, int32 doorId) {
+    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
 }
 
 // 0x
-bool CCarEnterExit::CarHasOpenableDoor(const CVehicle* vehicle, int doorId_UnusedArg, const CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int, const CPed*>(vehicle, doorId_UnusedArg, ped);
+bool CCarEnterExit::CarHasOpenableDoor(const CVehicle* vehicle, int32 doorId_UnusedArg, const CPed* ped) {
+    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32, const CPed*>(vehicle, doorId_UnusedArg, ped);
 }
 
 // 0x
-bool CCarEnterExit::CarHasPartiallyOpenDoor(const CVehicle* vehicle, int doorId) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int>(vehicle, doorId);
+bool CCarEnterExit::CarHasPartiallyOpenDoor(const CVehicle* vehicle, int32 doorId) {
+    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
 }
 
 // 0x
-int CCarEnterExit::ComputeDoorFlag(const CVehicle* vehicle, int doorId, bool bCheckVehicleType) {
-    return plugin::CallAndReturn<int, 0x0, const CVehicle*, int, bool>(vehicle, doorId, bCheckVehicleType);
+int32 CCarEnterExit::ComputeDoorFlag(const CVehicle* vehicle, int32 doorId, bool bCheckVehicleType) {
+    return plugin::CallAndReturn<int32, 0x0, const CVehicle*, int32, bool>(vehicle, doorId, bCheckVehicleType);
 }
 
 // 0x
-int CCarEnterExit::ComputeOppositeDoorFlag(const CVehicle* vehicle, int doorId, bool bCheckVehicleType) {
-    return plugin::CallAndReturn<int, 0x0, const CVehicle*, int, bool>(vehicle, doorId, bCheckVehicleType);
+int32 CCarEnterExit::ComputeOppositeDoorFlag(const CVehicle* vehicle, int32 doorId, bool bCheckVehicleType) {
+    return plugin::CallAndReturn<int32, 0x0, const CVehicle*, int32, bool>(vehicle, doorId, bCheckVehicleType);
 }
 
 // 0x
-signed int CCarEnterExit::ComputePassengerIndexFromCarDoor(const CVehicle* vehicle, int doorId) {
-    return plugin::CallAndReturn<signed int, 0x0, const CVehicle*, int>(vehicle, doorId);
+signed int CCarEnterExit::ComputePassengerIndexFromCarDoor(const CVehicle* vehicle, int32 doorId) {
+    return plugin::CallAndReturn<signed int, 0x0, const CVehicle*, int32>(vehicle, doorId);
 }
 
 // 0x
-int CCarEnterExit::ComputeSlowJackedPed(const CVehicle* vehicle, int doorId) {
-    return plugin::CallAndReturn<int, 0x0, const CVehicle*, int>(vehicle, doorId);
+int32 CCarEnterExit::ComputeSlowJackedPed(const CVehicle* vehicle, int32 doorId) {
+    return plugin::CallAndReturn<int32, 0x0, const CVehicle*, int32>(vehicle, doorId);
 }
 
 // 0x
-signed int CCarEnterExit::ComputeTargetDoorToEnterAsPassenger(const CVehicle* vehicle, int nPassengerNum) {
-    return plugin::CallAndReturn<signed int, 0x0, const CVehicle*, int>(vehicle, nPassengerNum);
+signed int CCarEnterExit::ComputeTargetDoorToEnterAsPassenger(const CVehicle* vehicle, int32 nPassengerNum) {
+    return plugin::CallAndReturn<signed int, 0x0, const CVehicle*, int32>(vehicle, nPassengerNum);
 }
 
 // 0x
-int CCarEnterExit::ComputeTargetDoorToExit(const CVehicle* vehicle, const CPed* ped) {
-    return plugin::CallAndReturn<int, 0x0, const CVehicle*, const CPed*>(vehicle, ped);
+int32 CCarEnterExit::ComputeTargetDoorToExit(const CVehicle* vehicle, const CPed* ped) {
+    return plugin::CallAndReturn<int32, 0x0, const CVehicle*, const CPed*>(vehicle, ped);
 }
 
 // 0x
-bool CCarEnterExit::GetNearestCarDoor(const CPed* ped, const CVehicle* vehicle, CVector* outPos, int doorId) {
-    return plugin::CallAndReturn<bool, 0x0, const CPed*, const CVehicle*, CVector*, int>(ped, vehicle, outPos, doorId);
+bool CCarEnterExit::GetNearestCarDoor(const CPed* ped, const CVehicle* vehicle, CVector* outPos, int32 doorId) {
+    return plugin::CallAndReturn<bool, 0x0, const CPed*, const CVehicle*, CVector*, int32>(ped, vehicle, outPos, doorId);
 }
 
 // 0x
-bool CCarEnterExit::GetNearestCarPassengerDoor(const CPed* ped, const CVehicle* vehicle, CVector* outVec, int* doorId, bool flag1, bool flag2, bool flag3) {
-    return plugin::CallAndReturn<bool, 0x0, const CPed*, const CVehicle*, CVector*, int*, bool, bool, bool>(ped, vehicle, outVec, doorId, flag1, flag2, flag3);
+bool CCarEnterExit::GetNearestCarPassengerDoor(const CPed* ped, const CVehicle* vehicle, CVector* outVec, int32* doorId, bool flag1, bool flag2, bool flag3) {
+    return plugin::CallAndReturn<bool, 0x0, const CPed*, const CVehicle*, CVector*, int32*, bool, bool, bool>(ped, vehicle, outVec, doorId, flag1, flag2, flag3);
 }
 
 // 0x
-CVector* CCarEnterExit::GetPositionToOpenCarDoor(CVector* out, const CVehicle* vehicle, int doorId) {
-    return plugin::CallAndReturn<CVector*, 0x0, CVector*, const CVehicle*, int>(out, vehicle, doorId);
+CVector* CCarEnterExit::GetPositionToOpenCarDoor(CVector* out, const CVehicle* vehicle, int32 doorId) {
+    return plugin::CallAndReturn<CVector*, 0x0, CVector*, const CVehicle*, int32>(out, vehicle, doorId);
 }
 
 // 0x
-bool CCarEnterExit::IsCarDoorInUse(const CVehicle* vehicle, int firstDoorId, int secondDoorId) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int, int>(vehicle, firstDoorId, secondDoorId);
+bool CCarEnterExit::IsCarDoorInUse(const CVehicle* vehicle, int32 firstDoorId, int32 secondDoorId) {
+    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32, int32>(vehicle, firstDoorId, secondDoorId);
 }
 
 // 0x
-bool CCarEnterExit::IsCarDoorReady(const CVehicle* vehicle, int doorId) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int>(vehicle, doorId);
+bool CCarEnterExit::IsCarDoorReady(const CVehicle* vehicle, int32 doorId) {
+    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
 }
 
 // 0x
-bool CCarEnterExit::IsCarQuickJackPossible(const CVehicle* vehicle, int doorId, const CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int, const CPed*>(vehicle, doorId, ped);
+bool CCarEnterExit::IsCarQuickJackPossible(const CVehicle* vehicle, int32 doorId, const CPed* ped) {
+    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32, const CPed*>(vehicle, doorId, ped);
 }
 
 // 0x
-bool CCarEnterExit::IsCarSlowJackRequired(const CVehicle* vehicle, int doorId) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int>(vehicle, doorId);
+bool CCarEnterExit::IsCarSlowJackRequired(const CVehicle* vehicle, int32 doorId) {
+    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
 }
 
 // 0x
@@ -153,13 +153,13 @@ bool CCarEnterExit::IsPedHealthy(CPed* vehicle) {
 }
 
 // 0x
-bool CCarEnterExit::IsPlayerToQuitCarEnter(const CPed* ped, const CVehicle* vehicle, int startTime, CTask* task) {
-    return plugin::CallAndReturn<bool, 0x0, const CPed*, const CVehicle*, int, CTask*>(ped, vehicle, startTime, task);
+bool CCarEnterExit::IsPlayerToQuitCarEnter(const CPed* ped, const CVehicle* vehicle, int32 startTime, CTask* task) {
+    return plugin::CallAndReturn<bool, 0x0, const CPed*, const CVehicle*, int32, CTask*>(ped, vehicle, startTime, task);
 }
 
 // 0x
-bool CCarEnterExit::IsRoomForPedToLeaveCar(const CVehicle* vehicle, int doorId, CVector* pos) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int, CVector*>(vehicle, doorId, pos);
+bool CCarEnterExit::IsRoomForPedToLeaveCar(const CVehicle* vehicle, int32 doorId, CVector* pos) {
+    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32, CVector*>(vehicle, doorId, pos);
 }
 
 // 0x
@@ -181,7 +181,7 @@ void CCarEnterExit::MakeUndraggedPassengerPedsLeaveCar(const CVehicle* targetVeh
 }
 
 // unused
-void CCarEnterExit::QuitEnteringCar(CPed* ped, CVehicle* vehicle, int doorId, bool bCarWasBeingJacked) {}
+void CCarEnterExit::QuitEnteringCar(CPed* ped, CVehicle* vehicle, int32 doorId, bool bCarWasBeingJacked) {}
 
 // 0x64F680
 void CCarEnterExit::RemoveCarSitAnim(CPed* ped) {
@@ -199,6 +199,6 @@ void CCarEnterExit::SetAnimOffsetForEnterOrExitVehicle() {
 }
 
 // 0x650280
-void CCarEnterExit::SetPedInCarDirect(CPed* ped, CVehicle* vehicle, int seatNumber, bool bAsDriver) {
-    plugin::Call<0x650280, CPed*, CVehicle*, int, bool>(ped, vehicle, seatNumber, bAsDriver);
+void CCarEnterExit::SetPedInCarDirect(CPed* ped, CVehicle* vehicle, int32 seatNumber, bool bAsDriver) {
+    plugin::Call<0x650280, CPed*, CVehicle*, int32, bool>(ped, vehicle, seatNumber, bAsDriver);
 }

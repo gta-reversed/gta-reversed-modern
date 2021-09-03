@@ -37,64 +37,64 @@ public:
     union {
         struct {
             /* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CEntitySA.h */
-            unsigned int m_bUsesCollision : 1;               // does entity use collision
-            unsigned int m_bCollisionProcessed : 1;          // has object been processed by a ProcessEntityCollision function
-            unsigned int m_bIsStatic : 1;                    // is entity static
-            unsigned int m_bHasContacted : 1;                // has entity processed some contact forces
-            unsigned int m_bIsStuck : 1;                     // is entity stuck
-            unsigned int m_bIsInSafePosition : 1;            // is entity in a collision free safe position
-            unsigned int m_bWasPostponed : 1;                // was entity control processing postponed
-            unsigned int m_bIsVisible : 1;                   // is the entity visible
+            uint32 m_bUsesCollision : 1;               // does entity use collision
+            uint32 m_bCollisionProcessed : 1;          // has object been processed by a ProcessEntityCollision function
+            uint32 m_bIsStatic : 1;                    // is entity static
+            uint32 m_bHasContacted : 1;                // has entity processed some contact forces
+            uint32 m_bIsStuck : 1;                     // is entity stuck
+            uint32 m_bIsInSafePosition : 1;            // is entity in a collision free safe position
+            uint32 m_bWasPostponed : 1;                // was entity control processing postponed
+            uint32 m_bIsVisible : 1;                   // is the entity visible
 
-            unsigned int m_bIsBIGBuilding : 1;               // Set if this entity is a big building
-            unsigned int m_bRenderDamaged : 1;               // use damaged LOD models for objects with applicable damage
-            unsigned int m_bStreamingDontDelete : 1;         // Don't let the streaming remove this
-            unsigned int m_bRemoveFromWorld : 1;             // remove this entity next time it should be processed
-            unsigned int m_bHasHitWall : 1;                  // has collided with a building (changes subsequent collisions)
-            unsigned int m_bImBeingRendered : 1;             // don't delete me because I'm being rendered
-            unsigned int m_bDrawLast : 1;                    // draw object last
-            unsigned int m_bDistanceFade : 1;                // Fade entity because it is far away
+            uint32 m_bIsBIGBuilding : 1;               // Set if this entity is a big building
+            uint32 m_bRenderDamaged : 1;               // use damaged LOD models for objects with applicable damage
+            uint32 m_bStreamingDontDelete : 1;         // Don't let the streaming remove this
+            uint32 m_bRemoveFromWorld : 1;             // remove this entity next time it should be processed
+            uint32 m_bHasHitWall : 1;                  // has collided with a building (changes subsequent collisions)
+            uint32 m_bImBeingRendered : 1;             // don't delete me because I'm being rendered
+            uint32 m_bDrawLast : 1;                    // draw object last
+            uint32 m_bDistanceFade : 1;                // Fade entity because it is far away
 
-            unsigned int m_bDontCastShadowsOn : 1;           // Don't cast shadows on this object
-            unsigned int m_bOffscreen : 1;                   // offscreen flag. This can only be trusted when it is set to true
-            unsigned int m_bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
-            unsigned int m_bDontStream : 1;                  // tell the streaming not to stream me
-            unsigned int m_bUnderwater : 1;                  // this object is underwater change drawing order
-            unsigned int m_bHasPreRenderEffects : 1;         // Object has a prerender effects attached to it
-            unsigned int m_bIsTempBuilding : 1;              // whether the building is temporary (i.e. can be created and deleted more than once)
-            unsigned int m_bDontUpdateHierarchy : 1;         // Don't update the animation hierarchy this frame
+            uint32 m_bDontCastShadowsOn : 1;           // Don't cast shadows on this object
+            uint32 m_bOffscreen : 1;                   // offscreen flag. This can only be trusted when it is set to true
+            uint32 m_bIsStaticWaitingForCollision : 1; // this is used by script created entities - they are static until the collision is loaded below them
+            uint32 m_bDontStream : 1;                  // tell the streaming not to stream me
+            uint32 m_bUnderwater : 1;                  // this object is underwater change drawing order
+            uint32 m_bHasPreRenderEffects : 1;         // Object has a prerender effects attached to it
+            uint32 m_bIsTempBuilding : 1;              // whether the building is temporary (i.e. can be created and deleted more than once)
+            uint32 m_bDontUpdateHierarchy : 1;         // Don't update the animation hierarchy this frame
 
-            unsigned int m_bHasRoadsignText : 1;             // entity is roadsign and has some 2dEffect text stuff to be rendered
-            unsigned int m_bDisplayedSuperLowLOD : 1;
-            unsigned int m_bIsProcObject : 1;                // set object has been generated by procedural object generator
-            unsigned int m_bBackfaceCulled : 1;              // has backface culling on
-            unsigned int m_bLightObject : 1;                 // light object with directional lights
-            unsigned int m_bUnimportantStream : 1;           // set that this object is unimportant, if streaming is having problems
-            unsigned int m_bTunnel : 1;                      // Is this model part of a tunnel
-            unsigned int m_bTunnelTransition : 1;            // This model should be rendered from within and outside the tunnel
+            uint32 m_bHasRoadsignText : 1;             // entity is roadsign and has some 2dEffect text stuff to be rendered
+            uint32 m_bDisplayedSuperLowLOD : 1;
+            uint32 m_bIsProcObject : 1;                // set object has been generated by procedural object generator
+            uint32 m_bBackfaceCulled : 1;              // has backface culling on
+            uint32 m_bLightObject : 1;                 // light object with directional lights
+            uint32 m_bUnimportantStream : 1;           // set that this object is unimportant, if streaming is having problems
+            uint32 m_bTunnel : 1;                      // Is this model part of a tunnel
+            uint32 m_bTunnelTransition : 1;            // This model should be rendered from within and outside the tunnel
         };
-        unsigned int m_nFlags;
+        uint32 m_nFlags;
     };
     /* */
     union {
         struct {
-            unsigned short m_nRandomSeedUpperByte : 8;
-            unsigned short m_nRandomSeedSecondByte : 8;
+            uint16 m_nRandomSeedUpperByte : 8;
+            uint16 m_nRandomSeedSecondByte : 8;
         };
-        unsigned short m_nRandomSeed;
+        uint16 m_nRandomSeed;
     };
-    unsigned short   m_nModelIndex;
+    uint16           m_nModelIndex;
     CReference*      m_pReferences;
     CLink<CEntity*>* m_pStreamingLink;
-    unsigned short   m_nScanCode;
-    unsigned char    m_nIplIndex;
-    unsigned char    m_nAreaCode; // see eAreaCodes
+    uint16           m_nScanCode;
+    uint8            m_nIplIndex;
+    uint8            m_nAreaCode; // see eAreaCodes
     union {
-        int m_nLodIndex; // -1 - without LOD model
+        int32    m_nLodIndex; // -1 - without LOD model
         CEntity* m_pLod;
     };
-    std::int8_t   m_nNumLodChildren;
-    std::uint8_t  m_nNumLodChildrenRendered;
+    int8          m_nNumLodChildren;
+    uint8         m_nNumLodChildrenRendered;
     eEntityType   m_nType : 3;
     eEntityStatus m_nStatus : 5;
 
@@ -105,8 +105,8 @@ public:
     virtual void Add(CRect const& rect);                            // VTab: 1
     virtual void Remove();                                          // VTab: 3
     virtual void SetIsStatic(bool isStatic);                        // VTab: 4
-    virtual void SetModelIndex(unsigned int index);                 // VTab: 5
-    virtual void SetModelIndexNoCreate(unsigned int index);         // VTab: 6
+    virtual void SetModelIndex(uint32 index);                 // VTab: 5
+    virtual void SetModelIndexNoCreate(uint32 index);         // VTab: 6
     virtual void CreateRwObject();                                  // VTab: 7
     virtual void DeleteRwObject();                                  // VTab: 8
     virtual CRect* GetBoundRect(CRect* pRect);                      // VTab: 9
@@ -117,7 +117,7 @@ public:
     virtual void Teleport(CVector destination, bool resetRotation); // VTab: 14
     virtual void SpecialEntityPreCollisionStuff(class CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored,
                                                 bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck); // VTab: 15
-    virtual unsigned char SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2);  // VTab: 16
+    virtual uint8 SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2);  // VTab: 16
     virtual void PreRender();                                                                                         // VTab: 17
     virtual void Render();                                                                                            // VTab: 18
     virtual bool SetupLighting();                                                                                     // VTab: 19
@@ -129,8 +129,8 @@ private:
     void Add_Reversed(CRect const& rect);
     void Remove_Reversed();
     void SetIsStatic_Reversed(bool isStatic);
-    void SetModelIndex_Reversed(unsigned int index);
-    void SetModelIndexNoCreate_Reversed(unsigned int index);
+    void SetModelIndex_Reversed(uint32 index);
+    void SetModelIndexNoCreate_Reversed(uint32 index);
     void CreateRwObject_Reversed();
     void DeleteRwObject_Reversed();
     CRect* GetBoundRect_Reversed(CRect* pRect);
@@ -140,7 +140,7 @@ private:
     bool TestCollision_Reversed(bool bApplySpeed);
     void Teleport_Reversed(CVector destination, bool resetRotation);
     void SpecialEntityPreCollisionStuff_Reversed(class CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck);
-    unsigned char SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2);
+    uint8 SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2);
     void PreRender_Reversed();
     void Render_Reversed();
     bool SetupLighting_Reversed();
@@ -154,13 +154,13 @@ public:
     bool HasPreRenderEffects();
     bool DoesNotCollideWithFlyers();
     void ModifyMatrixForPoleInWind();
-    bool LivesInThisNonOverlapSector(int sectorX, int sectorY);
+    bool LivesInThisNonOverlapSector(int32 sectorX, int32 sectorY);
     void SetupBigBuilding();
     void ModifyMatrixForCrane();
     void PreRenderForGlassWindow();
-    void SetRwObjectAlpha(int alpha);
-    CVector* FindTriggerPointCoors(CVector* pOutVec, int triggerIndex);
-    C2dEffect* GetRandom2dEffect(int effectType, bool bCheckForEmptySlot);
+    void SetRwObjectAlpha(int32 alpha);
+    CVector* FindTriggerPointCoors(CVector* pOutVec, int32 triggerIndex);
+    C2dEffect* GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot);
     CVector TransformFromObjectSpace(CVector const& offset);
     CVector* TransformFromObjectSpace(CVector& outPosn, CVector const& offset);
     void CreateEffects();

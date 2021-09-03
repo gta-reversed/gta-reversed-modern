@@ -1,8 +1,8 @@
 #include "StdInc.h"
 #include "eCrimeType.h"
 
-int& gLastRandomNumberForIdleAnimationID = *reinterpret_cast<int*>(0x8D2FEC);
-unsigned int& gLastTouchTimeDelta = *reinterpret_cast<unsigned int*>(0xC19664);
+int32& gLastRandomNumberForIdleAnimationID = *reinterpret_cast<int32*>(0x8D2FEC);
+uint32& gLastTouchTimeDelta = *reinterpret_cast<uint32*>(0xC19664);
 float& gDuckAnimBlendData = *reinterpret_cast<float*>(0x8D2FF0); // 4.0f
 bool& gbUnknown_8D2FE8 = *reinterpret_cast<bool*>(0x8D2FE8); // default value true; also always true
 
@@ -121,7 +121,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
             || TheCamera.m_bJustJumpedOutOf1stPersonBecauseOfTarget
             || pPad->GetTarget() && m_nFrameCounter < (CTimer::m_FrameCounter - 1))
         {
-            unsigned int weaponId = 0;
+            uint32 weaponId = 0;
             switch (weaponType)
             {
             case WEAPON_RLAUNCHER:
@@ -174,11 +174,11 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
     }
 
     CTaskSimpleUseGun* pNewSimpleUseGunTask = nullptr;
-    int gunCommand[4] = { 0 };
+    int32 gunCommand[4] = { 0 };
 
     if (pWeaponInfo->m_nWeaponFire == WEAPON_FIRE_MELEE)
     {
-        int fightCommand = 0;
+        int32 fightCommand = 0;
         gunCommand[0] = 0;
 
         if (!pPlayerPed->m_pTargetedObject && !pPad->GetTarget() && !pTaskManager->GetTaskSecondary(0))
@@ -250,7 +250,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
             }
 
             CAnimBlendAssociation* pAnimAssociation = nullptr;
-            int animGroupID = pWeaponInfo->m_eAnimGroup;
+            int32 animGroupID = pWeaponInfo->m_eAnimGroup;
             if (pTargetEntity && pPad->GetTarget()
                 && pPlayerData->m_fMoveBlendRatio < 1.9f
                 && pPlayerPed->m_nMoveState != PEDMOVE_SPRINT
@@ -291,7 +291,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
             {
                 bCheckButtonCircleStateOnly = true;
             }
-            unsigned char meleeAttackJustDown = pPad->MeleeAttackJustDown(bCheckButtonCircleStateOnly);
+            uint8 meleeAttackJustDown = pPad->MeleeAttackJustDown(bCheckButtonCircleStateOnly);
             if (meleeAttackJustDown &&
                 pAnimAssociation &&
                 pAnimAssociation->m_fBlendAmount > 0.5f &&
@@ -388,7 +388,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
         {
             if (pPad->WeaponJustDown(nullptr))
             {
-                unsigned char activeWeaponSlot = pPlayerPed->m_nActiveWeaponSlot;
+                uint8 activeWeaponSlot = pPlayerPed->m_nActiveWeaponSlot;
                 weaponType = pPlayerPed->m_aWeapons[activeWeaponSlot].m_nType;
                 CWeapon* pPlayerWeapon = &pPlayerPed->m_aWeapons[activeWeaponSlot];
                 if (weaponType == WEAPON_DETONATOR)
@@ -422,7 +422,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
             }
             else
             {
-                unsigned int nWeaponFire = pWeaponInfo->m_nWeaponFire;
+                uint32 nWeaponFire = pWeaponInfo->m_nWeaponFire;
                 if (pPlayerPed->m_nMoveState != PEDMOVE_SPRINT && pPlayerData->m_nChosenWeapon == pPlayerPed->m_nActiveWeaponSlot && (nWeaponFire - 1) < 4)
                 {
                     switch (nWeaponFire)
@@ -488,7 +488,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                     }
                     case WEAPON_FIRE_PROJECTILE:
                     {
-                        unsigned char activeWeaponSlot = pPlayerPed->m_nActiveWeaponSlot;
+                        uint8 activeWeaponSlot = pPlayerPed->m_nActiveWeaponSlot;
                         CWeapon* pActiveWeapon = &pPlayerPed->m_aWeapons[activeWeaponSlot];
                         if (pActiveWeapon->m_nType == WEAPON_RLAUNCHER || pActiveWeapon->m_nType == WEAPON_RLAUNCHER_HS)
                         {
@@ -557,7 +557,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                     }
                     case WEAPON_FIRE_CAMERA:
                     {
-                        unsigned char activeWeaponSlot = pPlayerPed->m_nActiveWeaponSlot;
+                        uint8 activeWeaponSlot = pPlayerPed->m_nActiveWeaponSlot;
                         CWeapon* pActiveWeapon = &pPlayerPed->m_aWeapons[activeWeaponSlot];
                         if (TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nMode == MODE_CAMERA && CTimer::GetTimeInMS() > pActiveWeapon->m_nTimeForNextShot)
                         {
@@ -616,7 +616,7 @@ PED_WEAPON_AIMING_CODE:
         }
     }
 
-    int fightCommand = 0;
+    int32 fightCommand = 0;
     if (!pPad->GetTarget()
         || pPlayerPed->m_pPlayerData->m_nChosenWeapon != pPlayerPed->m_nActiveWeaponSlot
         || pPlayerPed->m_nMoveState == PEDMOVE_SPRINT && pWeaponInfo->m_nWeaponFire
@@ -742,7 +742,7 @@ PED_WEAPON_AIMING_CODE:
             CPed* pTargetedEntity = (CPed*)pPlayerPed->m_pTargetedObject;
             CWeapon* pActiveWeapon = &pPlayerPed->m_aWeapons[pPlayerPed->m_nActiveWeaponSlot];
             eWeaponSkill weaponSkill = eWeaponSkill::WEAPSKILL_POOR;
-            int pedState = 0;
+            int32 pedState = 0;
             if ((fabs((double)pPad->AimWeaponLeftRight(pPlayerPed)) > 100.0
                 || fabs((double)pPad->AimWeaponUpDown(pPlayerPed)) > 100.0)
                 && !CGameLogic::IsCoopGameGoingOn()
@@ -809,7 +809,7 @@ PED_WEAPON_AIMING_CODE:
         }
         else if (pPad->GetEnterTargeting()
             || TheCamera.m_bJustJumpedOutOf1stPersonBecauseOfTarget
-            || m_nFrameCounter < (unsigned int)(CTimer::m_FrameCounter - 1))
+            || m_nFrameCounter < (uint32)(CTimer::m_FrameCounter - 1))
         {
             pPlayerPed->FindWeaponLockOnTarget();
         }
@@ -828,7 +828,7 @@ PED_WEAPON_AIMING_CODE:
     }
     else
     {
-        unsigned int nWeaponFire = pWeaponInfo->m_nWeaponFire;
+        uint32 nWeaponFire = pWeaponInfo->m_nWeaponFire;
         if (!nWeaponFire || nWeaponFire == WEAPON_FIRE_PROJECTILE || nWeaponFire == WEAPON_FIRE_USE)
         {
             goto MAKE_PLAYER_LOOK_AT_ENTITY;
@@ -908,7 +908,7 @@ MAKE_PLAYER_LOOK_AT_ENTITY:
     else if (!g_ikChainMan->IsLooking(pPlayerPed)
         || (g_ikChainMan->GetLookAtEntity(pPlayerPed) != (CEntity*)pTargetedObject))
     {
-        int pedBoneID = BONE_UNKNOWN;
+        int32 pedBoneID = BONE_UNKNOWN;
         if (pTargetedObject->m_nType == ENTITY_TYPE_PED)
         {
             pedBoneID = BONE_HEAD;
@@ -940,7 +940,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
             pPad->SetTouched();
         }
         CAnimBlock* pAnimBlock = &CAnimManager::ms_aAnimBlocks[m_nAnimationBlockIndex];
-        unsigned int touchTimeDelta = pPad->GetTouchedTimeDelta();
+        uint32 touchTimeDelta = pPad->GetTouchedTimeDelta();
         CTimer::GetTimeInMS();
         if (touchTimeDelta <= 10000)
         {
@@ -970,11 +970,11 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
                 {
                     while (true)
                     {
-                        unsigned int animHierarchyIndex = (uint32_t)pAnimAssoc1->m_pHierarchy - (uint32_t)CAnimManager::ms_aAnimations;
+                        uint32 animHierarchyIndex = (uint32)pAnimAssoc1->m_pHierarchy - (uint32)CAnimManager::ms_aAnimations;
                         animHierarchyIndex = animHierarchyIndex / 6 + (animHierarchyIndex >> 0x1f) >> 2;
                         animHierarchyIndex = animHierarchyIndex + (animHierarchyIndex >> 0x1f);
 
-                        int animBlockFirstAnimIndex = pAnimBlock->startAnimation;
+                        int32 animBlockFirstAnimIndex = pAnimBlock->startAnimation;
                         if (animHierarchyIndex >= animBlockFirstAnimIndex
                             && animHierarchyIndex < animBlockFirstAnimIndex + pAnimBlock->animationCount)
                         {
@@ -993,7 +993,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPed* pPed)
                     if (!(pPlayerPed->bIsLooking && pPlayerPed->bIsRestoringLook) && touchTimeDelta - gLastTouchTimeDelta > 20000)
                     {
                         // Play random idle animation
-                        int randomNumber = 0;
+                        int32 randomNumber = 0;
                         do
                         {
                             randomNumber = CGeneral::GetRandomNumberInRange(0, 4);
@@ -1151,7 +1151,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
                 if (!pPlayerPed->m_pIntelligence->GetTaskUseGun()
                     || pPlayerPed->m_pIntelligence->GetTaskUseGun()->m_pWeaponInfo->flags.bAimWithArm)
                 {
-                    int pedMoveState = PEDMOVE_NONE;
+                    int32 pedMoveState = PEDMOVE_NONE;
                     if (pPad->GetSprint())
                     {
                         if (pedMoveBlendRatio <= 0.5f)
@@ -1243,7 +1243,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPed* pPed)
 }
 
 // 0x6883D0
-int CTaskSimplePlayerOnFoot::PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAndDucking)
+int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAndDucking)
 {
     CPlayerPed* pPlayerPed = static_cast<CPlayerPed*>(pPed);
     CPlayerPedData * pPlayerData = pPed->m_pPlayerData;

@@ -1,5 +1,5 @@
 #pragma once
-#include "PluginBase.h"
+
 #include "CVehicle.h"
 
 enum eTrafficLightsState {
@@ -17,16 +17,16 @@ enum eTrafficLightsDirection {
 
 class CTrafficLights {
 private:
-    static uint8_t(&aTrafficLightColoursR)[3];
-    static uint8_t(&aTrafficLightColoursG)[3];
-    static uint8_t(&aTrafficLightColoursB)[3];
+    static uint8(&aTrafficLightColoursR)[3];
+    static uint8(&aTrafficLightColoursG)[3];
+    static uint8(&aTrafficLightColoursB)[3];
     static float& fLightMult;
 
     static CVector& vecTrafficLights5_1;
     static CVector& vecTrafficLights5_2;
     static CVector& vecTrafficLights_1;
     static CVector& vecTrafficLights_2;
-    static uint32_t& uiPedLightFlags;
+    static uint32& uiPedLightFlags;
 
 public:
     static void InjectHooks();
@@ -35,15 +35,15 @@ public:
     static bool ShouldCarStopForLight(CVehicle* pVehicle, bool bUnkn);
     static bool ShouldCarStopForBridge(CVehicle* pVehicle);
     static void DisplayActualLight(CEntity* pEntity);
-    static bool IsMITrafficLight(int modelIndex);
-    static unsigned char LightForPeds();
+    static bool IsMITrafficLight(int32 modelIndex);
+    static uint8 LightForPeds();
 
 private:
-    static unsigned char LightForCars1();
-    static unsigned char LightForCars2();
-    static unsigned char LightForCars1_Visual();
-    static unsigned char LightForCars2_Visual();
-    static int FindTrafficLightType(CEntity* pEntity);
+    static uint8 LightForCars1();
+    static uint8 LightForCars2();
+    static uint8 LightForCars1_Visual();
+    static uint8 LightForCars2_Visual();
+    static int32 FindTrafficLightType(CEntity* pEntity);
     static float FindOrientationForTrafficLightType(CEntity* pEntity);
-    static int FindTrafficLightTypeFromOrientation(float fOrientation);
+    static int32 FindTrafficLightTypeFromOrientation(float fOrientation);
 };

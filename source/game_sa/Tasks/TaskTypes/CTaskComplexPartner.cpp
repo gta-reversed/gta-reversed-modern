@@ -5,7 +5,7 @@ void CTaskComplexPartner::InjectHooks()
     ReversibleHooks::Install("CTaskComplexPartner", "CTaskComplexPartner", 0x681E70, &CTaskComplexPartner::Constructor);
 }
 
-CTaskComplexPartner::CTaskComplexPartner(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, bool makePedAlwaysFacePartner, std::int8_t updateDirectionCount, CVector point)
+CTaskComplexPartner::CTaskComplexPartner(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, bool makePedAlwaysFacePartner, int8 updateDirectionCount, CVector point)
 {
     m_leadSpeaker = leadSpeaker;
     m_makePedAlwaysFacePartner = makePedAlwaysFacePartner;
@@ -33,7 +33,7 @@ CTaskComplexPartner::~CTaskComplexPartner()
     }
 }
 
-CTaskComplexPartner* CTaskComplexPartner::Constructor(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, bool makePedAlwaysFacePartner, std::int8_t updateDirectionCount, CVector point)
+CTaskComplexPartner* CTaskComplexPartner::Constructor(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, bool makePedAlwaysFacePartner, int8 updateDirectionCount, CVector point)
 {
     this->CTaskComplexPartner::CTaskComplexPartner(commandName, partner, leadSpeaker,distanceMultiplier, makePedAlwaysFacePartner, updateDirectionCount, point);
     return this;

@@ -4,8 +4,8 @@
 class CTaskSimpleHitHead : public CTaskSimple
 {
 public:
-    unsigned char m_bIsFinished;
-    unsigned char _pad[3];
+    uint8 m_bIsFinished;
+    uint8 _pad[3];
     CAnimBlendAssociation* m_pAnim;
 
 private:

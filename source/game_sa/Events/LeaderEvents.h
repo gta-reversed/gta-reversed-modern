@@ -1,4 +1,5 @@
 #pragma once
+
 #include "CEventEditableResponse.h"
 #include "CPedGroup.h"
 
@@ -14,8 +15,8 @@ private:
     CEventLeaderEnteredCarAsDriver* Constructor(CVehicle* vehicle);
 public:
     eEventType GetEventType() const override { return EVENT_LEADER_ENTERED_CAR_AS_DRIVER; }
-    int32_t GetEventPriority() const override  { return 46; }
-    std::int32_t GetLifeTime() override  { return 0; }
+    int32 GetEventPriority() const override  { return 46; }
+    int32 GetLifeTime() override  { return 0; }
     bool AffectsPed(CPed* ped) override  { return false; }
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
     bool TakesPriorityOver(const CEvent& refEvent) override  { return true; }
@@ -40,8 +41,8 @@ private:
     CEventLeaderExitedCarAsDriver* Constructor();
 public:
     eEventType GetEventType() const override { return EVENT_LEADER_EXITED_CAR_AS_DRIVER; }
-    int32_t GetEventPriority() const override { return 47; }
-    std::int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 47; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override { return false; }
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
     bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
@@ -62,8 +63,8 @@ private:
     CEventLeaderQuitEnteringCarAsDriver* Constructor();
 public:
     eEventType GetEventType() const override { return EVENT_LEADER_QUIT_ENTERING_CAR_AS_DRIVER; }
-    int32_t GetEventPriority() const override { return 48; }
-    std::int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 48; }
+    int32 GetLifeTime() override { return 0; }
     CEventLeaderQuitEnteringCarAsDriver* Clone() override { return new CEventLeaderQuitEnteringCarAsDriver(); }
     bool AffectsPed(CPed* ped) override { return false; }
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
@@ -87,8 +88,8 @@ private:
     CEventAreaCodes* Constructor(CPed* ped);
 public:
     eEventType GetEventType() const override { return EVENT_AREA_CODES; }
-    int32_t GetEventPriority() const override { return 55; }
-    std::int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 55; }
+    int32 GetLifeTime() override { return 0; }
     CEventAreaCodes* Clone() override { return new CEventAreaCodes(m_ped); }
     bool AffectsPed(CPed* ped) override;
     bool TakesPriorityOver(const CEvent& refEvent) override;
@@ -109,7 +110,7 @@ private:
     CEventLeaderEntryExit* Constructor(CPed* ped);
 public:
     eEventType GetEventType() const override { return EVENT_LEADER_ENTRY_EXIT; }
-    std::int32_t GetLifeTime() override { return 0; }
+    int32 GetLifeTime() override { return 0; }
     CEventLeaderEntryExit* Clone() override { return new CEventLeaderEntryExit(m_ped); }
     bool AffectsPedGroup(CPedGroup* pedGroup) override { return m_ped && pedGroup->GetMembership().GetLeader() == m_ped; }
     bool TakesPriorityOver(const CEvent& refEvent) override { return true; }

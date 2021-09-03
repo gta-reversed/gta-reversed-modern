@@ -6,35 +6,35 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CSphere.h"
 
 class CColSphere : public CSphere {
 public:
     union {
-        unsigned char m_nMaterial;
-        unsigned char m_nColSlot;
+        uint8 m_nMaterial;
+        uint8 m_nColSlot;
     };
     union {
-        unsigned char m_nFlags;
+        uint8 m_nFlags;
         struct {
-            unsigned char m_bFlag0x01 : 1;
-            unsigned char m_bIsSingleColDataAlloc : 1;
-            unsigned char m_bIsActive : 1;
-            unsigned char m_bFlag0x08 : 1;
-            unsigned char m_bFlag0x10 : 1;
-            unsigned char m_bFlag0x20 : 1;
-            unsigned char m_bFlag0x40 : 1;
-            unsigned char m_bFlag0x80 : 1;
+            uint8 m_bFlag0x01 : 1;
+            uint8 m_bIsSingleColDataAlloc : 1;
+            uint8 m_bIsActive : 1;
+            uint8 m_bFlag0x08 : 1;
+            uint8 m_bFlag0x10 : 1;
+            uint8 m_bFlag0x20 : 1;
+            uint8 m_bFlag0x40 : 1;
+            uint8 m_bFlag0x80 : 1;
         };
     };
-    unsigned char m_nLighting;
-    unsigned char m_nLight;
+    uint8 m_nLighting;
+    uint8 m_nLight;
 
+public:
     static void InjectHooks();
 
     void Set(float radius, CVector const& center);
-    void Set(float radius, CVector const& center, std::uint8_t material, std::uint8_t flags, std::uint8_t lighting);
+    void Set(float radius, CVector const& center, uint8 material, uint8 flags, uint8 lighting);
     bool IntersectRay(CVector const& rayOrigin, CVector const& direction, CVector& intersectPoint1, CVector& intersectPoint2);
     bool IntersectEdge(CVector const& startPoint, CVector const& endPoint, CVector& intersectPoint1, CVector& intersectPoint2);
     bool IntersectSphere(CColSphere const& right);

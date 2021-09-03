@@ -8,12 +8,12 @@ class CTaskComplexWaitForPed : public CTaskComplex
 public:
     CPed* m_ped;
     float m_radius;
-    std::uint32_t m_timeInMs;
+    uint32 m_timeInMs;
     bool m_bRotateOtherPedsToWaitingPed;
 private:
     char padding[3];
     CTaskTimer m_timer;
-    std::int32_t m_framesToWaitForSettingRotation;
+    int32 m_framesToWaitForSettingRotation;
 };
 
 VALIDATE_SIZE(CTaskComplexWaitForPed, 0x2C);

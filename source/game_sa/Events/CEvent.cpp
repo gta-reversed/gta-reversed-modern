@@ -150,7 +150,7 @@ bool CEventEscalator::AffectsPed(CPed* ped)
 bool CEventEscalator::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->IsAlive() && !ped->IsPlayer() && ped->m_pContactEntity) {
-        std::int32_t modelId = ped->m_pContactEntity->m_nModelIndex;
+        int32 modelId = ped->m_pContactEntity->m_nModelIndex;
         if (modelId == ModelIndices::MI_ESCALATORSTEP || modelId == ModelIndices::MI_ESCALATORSTEP8)
             return true;
     }
@@ -317,7 +317,7 @@ bool CEventPassObject::IsValid_Reversed(CPed* ped)
     return false;
 }
 
-CEventLeanOnVehicle::CEventLeanOnVehicle(CVehicle* vehicle, std::int32_t leanAnimDurationInMs)
+CEventLeanOnVehicle::CEventLeanOnVehicle(CVehicle* vehicle, int32 leanAnimDurationInMs)
 {
     m_vehicle = vehicle;
     m_leanAnimDurationInMs = leanAnimDurationInMs;
@@ -331,7 +331,7 @@ CEventLeanOnVehicle::~CEventLeanOnVehicle()
         m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
 }
 
-CEventLeanOnVehicle* CEventLeanOnVehicle::Constructor(CVehicle* vehicle, std::int32_t leanAnimDurationInMs)
+CEventLeanOnVehicle* CEventLeanOnVehicle::Constructor(CVehicle* vehicle, int32 leanAnimDurationInMs)
 {
     this->CEventLeanOnVehicle::CEventLeanOnVehicle(vehicle, leanAnimDurationInMs);
     return this;

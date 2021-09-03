@@ -4,7 +4,7 @@
 class CTaskComplexPartnerDeal : public CTaskComplexPartner
 {
 public:
-    std::int32_t field_70;
+    int32 field_70;
 
     static void InjectHooks();
 

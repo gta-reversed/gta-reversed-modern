@@ -19,7 +19,7 @@ public:
     float       m_fLength;
     float       m_fLoopIntervalMin;
     float       m_fLoopLength;
-    short       m_nCullDist;
+    int16       m_nCullDist;
     uint8       m_nPlayMode;
     uint8       m_nNumEmitters;
     void**      m_emittersList;

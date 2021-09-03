@@ -34,7 +34,7 @@ void InjectHooks();
  * @since   gtasa
  * @return  true if plugin was successfully attached.
  */
-_PIPELINEPLUGINAPI RwBool PipelinePluginAttach(void);
+_PIPELINEPLUGINAPI RwBool PipelinePluginAttach();
 
 /**
  * Get pipeline ID

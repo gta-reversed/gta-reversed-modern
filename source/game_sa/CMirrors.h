@@ -5,19 +5,19 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CMatrix.h"
 
-class  CMirrors {
+class CMirrors {
 public:
-    static RwRaster *&pBuffer;
-    static RwRaster *&pZBuffer;
-    static unsigned int &TypeOfMirror;
-    static bool &bRenderingReflection;
-    static bool &d3dRestored;
-    static unsigned int &MirrorFlags;
-    static float &MirrorV;
-    static CVector &MirrorNormal;
+    static RwRaster*& pBuffer;
+    static RwRaster*& pZBuffer;
+    static uint32&    TypeOfMirror;
+    static bool&      bRenderingReflection;
+    static bool&      d3dRestored;
+    static uint32&    MirrorFlags;
+    static float&     MirrorV;
+    static CVector&   MirrorNormal;
 
     static void BeforeConstructRenderList();
     static void BeforeMainRender();

@@ -20,8 +20,8 @@ void CStuckCarCheck::Init() {
 }
 
 // 0x465970
-void CStuckCarCheck::AddCarToCheck(int carHandle, float distance, unsigned int time, unsigned char a5, bool bStuck, bool bFlipped, bool bWarp, signed char pathId) {
-    plugin::CallMethod<0x465970, CStuckCarCheck *, int, float, unsigned int, unsigned char, bool, bool, bool, signed char>(this, carHandle, distance, time, a5, bStuck, bFlipped, bWarp, pathId);
+void CStuckCarCheck::AddCarToCheck(int32 carHandle, float distance, uint32 time, uint8 a5, bool bStuck, bool bFlipped, bool bWarp, int8 pathId) {
+    plugin::CallMethod<0x465970, CStuckCarCheck *, int32, float, uint32, uint8, bool, bool, bool, int8>(this, carHandle, distance, time, a5, bStuck, bFlipped, bWarp, pathId);
 }
 
 // 0x463A60
@@ -30,8 +30,8 @@ bool CStuckCarCheck::AttemptToWarpVehicle(CVehicle* vehicle, CVector* origin, fl
 }
 
 // 0x463C40
-void CStuckCarCheck::ClearStuckFlagForCar(int carHandle) {
-    plugin::Call<0x463C40, CStuckCarCheck*, int>(this, carHandle);
+void CStuckCarCheck::ClearStuckFlagForCar(int32 carHandle) {
+    plugin::Call<0x463C40, CStuckCarCheck*, int32>(this, carHandle);
 //    for (auto& car: m_aStuckCars) {
 //        if (car.m_nCarHandle == carHandle) {
 //            car.m_bCarStuck = false;
@@ -41,8 +41,8 @@ void CStuckCarCheck::ClearStuckFlagForCar(int carHandle) {
 }
 
 // 0x463C00
-bool CStuckCarCheck::HasCarBeenStuckForAWhile(int carHandle) {
-    return plugin::CallMethodAndReturn<bool, 0x463C00, CStuckCarCheck*, int>(this, carHandle);
+bool CStuckCarCheck::HasCarBeenStuckForAWhile(int32 carHandle) {
+    return plugin::CallMethodAndReturn<bool, 0x463C00, CStuckCarCheck*, int32>(this, carHandle);
 //    for (auto& car: m_aStuckCars) {
 //        if (car.m_nCarHandle == carHandle && car.m_bCarStuck) {
 //            return true;
@@ -52,8 +52,8 @@ bool CStuckCarCheck::HasCarBeenStuckForAWhile(int carHandle) {
 }
 
 // 0x463C70
-bool CStuckCarCheck::IsCarInStuckCarArray(int carHandle) {
-    return plugin::CallMethodAndReturn<bool, 0x463C70, CStuckCarCheck*, int>(this, carHandle);
+bool CStuckCarCheck::IsCarInStuckCarArray(int32 carHandle) {
+    return plugin::CallMethodAndReturn<bool, 0x463C70, CStuckCarCheck*, int32>(this, carHandle);
 //    for (auto& car: m_aStuckCars) {
 //        if (car.m_nCarHandle == carHandle) {
 //            return true;
@@ -69,8 +69,8 @@ void CStuckCarCheck::Process() {
 
 // See CStuckCarCheck::ResetArrayElement
 // 0x463B80
-void CStuckCarCheck::RemoveCarFromCheck(int carHandle) {
-    plugin::CallMethod<0x463B80, CStuckCarCheck*, int>(this, carHandle);
+void CStuckCarCheck::RemoveCarFromCheck(int32 carHandle) {
+    plugin::CallMethod<0x463B80, CStuckCarCheck*, int32>(this, carHandle);
 //    for (auto& car: m_aStuckCars) {
 //        if (car.m_nCarHandle == carHandle) {
 //            ResetArrayElement(car);

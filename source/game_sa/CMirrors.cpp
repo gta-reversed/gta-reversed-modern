@@ -9,10 +9,10 @@ Do not delete this comment block. Respect others' work!
 
 RwRaster *&CMirrors::pBuffer = *(RwRaster **)0xC7C71C;
 RwRaster *&CMirrors::pZBuffer = *(RwRaster **)0xC7C720;
-unsigned int &CMirrors::TypeOfMirror = *(unsigned int *)0xC7C724;
+uint32 &CMirrors::TypeOfMirror = *(uint32 *)0xC7C724;
 bool &CMirrors::bRenderingReflection = *(bool *)0xC7C728;
 bool &CMirrors::d3dRestored = *(bool *)0xC7C729;
-unsigned int &CMirrors::MirrorFlags = *(unsigned int *)0xC7C618;
+uint32 &CMirrors::MirrorFlags = *(uint32 *)0xC7C618;
 float &CMirrors::MirrorV = *(float *)0xC7C61C;
 CVector &CMirrors::MirrorNormal = *(CVector *)0xC803D8;
 bool &bFudgeNow = *(bool *)0xC7C72A;

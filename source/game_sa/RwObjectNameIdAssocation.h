@@ -5,9 +5,8 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
 
-enum class eVehicleComponentFlags : unsigned int {
+enum class eVehicleComponentFlags : uint32 {
     IS_VEH_STRUCT_PART = 0x00000001,
     IS_DAMAGEABLE = 0x00000002,
     IS_WHEEL = 0x00000004,
@@ -36,48 +35,47 @@ enum class eVehicleComponentFlags : unsigned int {
 };
 struct tVehicleComponentFlagsUnion {
     union {
-        unsigned int m_nFlags;
+        uint32 m_nFlags;
         struct {
-            unsigned int bIsVehStructPart : 1;
-            unsigned int bIsDamageable : 1;
-            unsigned int bIsWheel : 1;
-            unsigned int bIsDummy : 1;
-            unsigned int bIsDoor : 1;
-            unsigned int bIsLeft : 1;
-            unsigned int bIsRight : 1;
-            unsigned int bIsFront : 1;
+            uint32 bIsVehStructPart : 1;
+            uint32 bIsDamageable : 1;
+            uint32 bIsWheel : 1;
+            uint32 bIsDummy : 1;
+            uint32 bIsDoor : 1;
+            uint32 bIsLeft : 1;
+            uint32 bIsRight : 1;
+            uint32 bIsFront : 1;
 
-            unsigned int bIsRear : 1;
-            unsigned int bIsExtra : 1;
-            unsigned int bHasAlpha : 1;
-            unsigned int bIsGlass : 1;
-            unsigned int bCull : 1;
-            unsigned int bIsRearDoor : 1;
-            unsigned int bIsFrontDoor : 1;
-            unsigned int bSwinging : 1;
+            uint32 bIsRear : 1;
+            uint32 bIsExtra : 1;
+            uint32 bHasAlpha : 1;
+            uint32 bIsGlass : 1;
+            uint32 bCull : 1;
+            uint32 bIsRearDoor : 1;
+            uint32 bIsFrontDoor : 1;
+            uint32 bSwinging : 1;
 
-            unsigned int bIsMainWheel : 1;
-            unsigned int bIsUpgrade : 1;
-            unsigned int bDisableReflections : 1;
-            unsigned int : 1;
-            unsigned int bIsTrainFrontBogie : 1;
-            unsigned int bIsTrainRearBogie : 1;
-            unsigned int bRenderAlways : 1;
-            unsigned int : 1;
+            uint32 bIsMainWheel : 1;
+            uint32 bIsUpgrade : 1;
+            uint32 bDisableReflections : 1;
+            uint32 : 1;
+            uint32 bIsTrainFrontBogie : 1;
+            uint32 bIsTrainRearBogie : 1;
+            uint32 bRenderAlways : 1;
+            uint32 : 1;
 
-            unsigned int : 5;
-            unsigned int bUnkn4 : 1;
-            unsigned int : 2;
+            uint32 : 5;
+            uint32 bUnkn4 : 1;
+            uint32 : 2;
         };
     };
 };
 VALIDATE_SIZE(tVehicleComponentFlagsUnion, 0x4);
 
-struct  RwObjectNameIdAssocation
-{
-	char *m_pName;
-	unsigned int m_dwHierarchyId;
-	unsigned int m_dwFlags; // see eVehicleComponentFlags
+struct RwObjectNameIdAssocation {
+    char*  m_pName;
+    uint32 m_dwHierarchyId;
+    uint32 m_dwFlags; // see eVehicleComponentFlags
 
 public:
     inline tVehicleComponentFlagsUnion AsFlagsUnion() {

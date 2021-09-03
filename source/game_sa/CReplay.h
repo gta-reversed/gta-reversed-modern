@@ -1,6 +1,6 @@
 #pragma once
 
-enum eReplayMode : std::int32_t {
+enum eReplayMode : int32 {
     REPLAY_MODE_0,
     REPLAY_MODE_1
 };
@@ -18,7 +18,7 @@ public:
     static void DisableReplays();
     static void EnableReplays();
     static void StorePedAnimation();
-    static void StorePedUpdate(CPed* ped, int a2);
+    static void StorePedUpdate(CPed* ped, int32 a2);
     static void RetrievePedAnimation();
     static void Display();
     static void MarkEverythingAsNew();
@@ -34,10 +34,10 @@ public:
     static void ProcessPedUpdate();
     static void ProcessReplayCamera();
     static void ProcessLookAroundCam();
-    static void FindPoolIndexForPed(int a1);
-    static void FindPoolIndexForVehicle(int a1);
-    static void CanWeFindPoolIndexForPed(int a1);
-    static void CanWeFindPoolIndexForVehicle(int a1);
+    static void FindPoolIndexForPed(int32 a1);
+    static void FindPoolIndexForVehicle(int32 a1);
+    static void CanWeFindPoolIndexForPed(int32 a1);
+    static void CanWeFindPoolIndexForVehicle(int32 a1);
     static void StorePlayerInfoVariables();
     static void StoreStuffInMem();
     static void RestorePlayerInfoVariables();
@@ -48,11 +48,11 @@ public:
     static void RestoreClothesDesc();
     static void DealWithNewPedPacket();
     static void PlayBackThisFrameInterpolation();
-    static void FastForwardToTime(unsigned int a1);
+    static void FastForwardToTime(uint32 a1);
     static void PlayBackThisFrame();
-    static void FindSizeOfPacket(unsigned short id);
-    static bool IsThisVehicleUsedInRecording(int a1);
-    static bool IsThisPedUsedInRecording(int a1);
+    static void FindSizeOfPacket(uint16 id);
+    static bool IsThisVehicleUsedInRecording(int32 a1);
+    static bool IsThisPedUsedInRecording(int32 a1);
     static void FindFirstFocusCoordinate(CVector* a1);
     static void NumberFramesAvailableToPlay();
     static void StreamAllNecessaryCarsAndPeds();
@@ -134,31 +134,31 @@ Variables list :
 * paProjectiles
 
 Functions list :
-*CanWeFindPoolIndexForPed(int)
-* CanWeFindPoolIndexForVehicle(int)
+*CanWeFindPoolIndexForPed(int32)
+* CanWeFindPoolIndexForVehicle(int32)
 * CreatePlayerPed()
 * DealWithNewPedPacket(CPacketNewPed*, bool, CPacketPlayerClothes*)
 * DisableReplays()
 * EmptyPedsAndVehiclePools_NoDestructors()
 * EmptyReplayBuffer()
 * EnableReplays()
-* FastForwardToTime(unsigned int)
+* FastForwardToTime(uint32)
 * FindFirstFocusCoordinate(CVector*)
-* FindPoolIndexForPed(int)
-* FindPoolIndexForVehicle(int)
-* FindSizeOfPacket(unsigned char)
+* FindPoolIndexForPed(int32)
+* FindPoolIndexForVehicle(int32)
+* FindSizeOfPacket(uint8)
 * FinishPlayback()
 * GoToNextBlock()
 * Init()
 * InitialisePedPoolConversionTable()
 * InitialisePoolConversionTables()
 * InitialiseVehiclePoolConversionTable()
-* IsThisPedUsedInRecording(int)
-* IsThisVehicleUsedInRecording(int)
+* IsThisPedUsedInRecording(int32)
+* IsThisVehicleUsedInRecording(int32)
 * MarkEverythingAsNew()
 * NumberFramesAvailableToPlay()
 * PlayBackThisFrame()
-* PlayBackThisFrameInterpolation(CAddressInReplayBuffer*, float, unsigned int*)
+* PlayBackThisFrameInterpolation(CAddressInReplayBuffer*, float, uint32*)
 * ProcessLookAroundCam()
 * ProcessPedUpdate(CPed*, float, CAddressInReplayBuffer*)
 * ProcessReplayCamera()
@@ -173,9 +173,9 @@ Functions list :
 * ShouldStandardCameraBeProcessed()
 * StoreClothesDesc(CPedClothesDesc*, CPacketPlayerClothes*)
 * StorePedAnimation(CPed*, CStoredAnimationState*)
-* StorePedUpdate(CPed*, int)
+* StorePedUpdate(CPed*, int32)
 * StorePlayerInfoVariables()
 * StoreStuffInMem()
 * StreamAllNecessaryCarsAndPeds()
-* TriggerPlayback(unsigned char, float, float, float, bool)
+* TriggerPlayback(uint8, float, float, float, bool)
 * Update()*/

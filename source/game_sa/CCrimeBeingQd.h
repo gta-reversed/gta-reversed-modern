@@ -10,16 +10,15 @@
 
 #include "eCrimeType.h"
 
-
 class CCrimeBeingQd {
 public:
-    eCrimeType   m_nCrimeType;
-    unsigned int m_nCrimeID;
-    unsigned int m_nTimeOfQing;
-    CVector      m_vecCoors;
-    bool         m_bAlreadyReported;
-    bool         m_bPoliceDontReallyCare;
-    char         _pad1A[2];
+    eCrimeType m_nCrimeType;
+    uint32     m_nCrimeID;
+    uint32     m_nTimeOfQing;
+    CVector    m_vecCoors;
+    bool       m_bAlreadyReported;
+    bool       m_bPoliceDontReallyCare;
+    char       _pad1A[2];
 };
 
 VALIDATE_SIZE(CCrimeBeingQd, 0x1C);

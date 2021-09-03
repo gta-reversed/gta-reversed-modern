@@ -13,10 +13,10 @@ public:
     static float& ms_fFarClipZ;
     static float& ms_fNearClipZ;
     static float& ms_fAspectRatio;
-    static uint8_t& FadeRed;
-    static uint8_t& FadeGreen;
-    static uint8_t& FadeBlue;
-    static uint8_t& FadeValue;
+    static uint8& FadeRed;
+    static uint8& FadeGreen;
+    static uint8& FadeBlue;
+    static uint8& FadeValue;
 
 public:
     static void InjectHooks();

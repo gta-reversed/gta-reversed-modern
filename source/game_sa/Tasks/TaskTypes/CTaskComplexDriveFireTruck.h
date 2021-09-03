@@ -5,8 +5,8 @@ class CTaskComplexDriveFireTruck : public CTaskComplex
 {
 public:
     CVehicle* m_pVehicle;
-    unsigned char m_bIsDriver;
-    unsigned char _pad_11[3];
+    uint8 m_bIsDriver;
+    uint8 _pad_11[3];
     CPed* m_pPartnerFireman;
     CFire* m_pFire;
 

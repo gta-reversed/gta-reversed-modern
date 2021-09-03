@@ -18,4 +18,4 @@ public:
 
 VALIDATE_SIZE(CBoundingBox, 0x18);
 
-extern int32_t& numBBFailed;
+extern int32& numBBFailed;

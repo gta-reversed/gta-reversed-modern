@@ -10,7 +10,7 @@
 #include "eWeaponType.h"
 #include "CPed.h"
 
-enum ePedType : unsigned int;
+enum ePedType : uint32;
 
 enum eScriptParameterType {
     SCRIPT_PARAM_END_OF_ARGUMENTS,
@@ -63,8 +63,8 @@ enum eButtonId {
 };
 
 union tScriptParam {
-    unsigned int uParam;
-    int iParam;
+    uint32 uParam;
+    int32 iParam;
     float fParam;
     void* pParam;
     char* szParam;
@@ -76,75 +76,75 @@ class CRunningScript {
 public:
     CRunningScript* m_pNext;
     CRunningScript* m_pPrev;
-    char m_szName[8];
-    unsigned char* m_pBaseIP;
-    unsigned char* m_pCurrentIP;
-    unsigned char* m_apStack[8];
-    unsigned short m_nSP;
-    char _pad3A[2];
-    tScriptParam m_aLocalVars[32];
-    int m_anTimers[2];
-    bool m_bIsActive;
-    bool m_bCondResult;
-    bool m_bUseMissionCleanup;
-    bool m_bIsExternal;
-    bool m_bTextBlockOverride;
-    std::int8_t m_externalType;
-    char field_CA[2];
-    int m_nWakeTime;
-    unsigned short m_nLogicalOp;
-    bool m_bNotFlag;
-    bool m_bWastedBustedCheck;
-    bool m_bWastedOrBusted;
-    char _padD5[3];
-    unsigned char* m_pSceneSkipIP;
-    bool m_bIsMission;
-    char _padDD[3];
+    char            m_szName[8];
+    uint8*          m_pBaseIP;
+    uint8*          m_pCurrentIP;
+    uint8*          m_apStack[8];
+    uint16          m_nSP;
+    char            _pad3A[2];
+    tScriptParam    m_aLocalVars[32];
+    int32           m_anTimers[2];
+    bool            m_bIsActive;
+    bool            m_bCondResult;
+    bool            m_bUseMissionCleanup;
+    bool            m_bIsExternal;
+    bool            m_bTextBlockOverride;
+    int8            m_externalType;
+    char            field_CA[2];
+    int32           m_nWakeTime;
+    uint16          m_nLogicalOp;
+    bool            m_bNotFlag;
+    bool            m_bWastedBustedCheck;
+    bool            m_bWastedOrBusted;
+    char            _padD5[3];
+    uint8*          m_pSceneSkipIP;
+    bool            m_bIsMission;
+    char            _padDD[3];
 
 public:
-    static unsigned char(__thiscall** CommandHandlerTable)(CRunningScript* _this, unsigned short commandId); // static unsigned char(__thiscall *CommandHandlerTable[27])(CRunningScript *,unsigned short )
+    static uint8(__thiscall** CommandHandlerTable)(CRunningScript* _this, uint16 commandId); // static uint8(__thiscall *CommandHandlerTable[27])(CRunningScript *,uint16 )
 
     static void InjectHooks();
 
     void Init();
 
-    void LocateCarCommand(int commandId);
-    void LocateObjectCommand(int commandId);
-    void PlayAnimScriptCommand(int commandId);
+    void LocateCarCommand(int32 commandId);
+    void LocateObjectCommand(int32 commandId);
+    void PlayAnimScriptCommand(int32 commandId);
 
-    void LocateCharCommand(int commandId);
-    void LocateCharCarCommand(int commandId);
-    void LocateCharCharCommand(int commandId);
-    void LocateCharObjectCommand(int commandId);
+    void LocateCharCommand(int32 commandId);
+    void LocateCharCarCommand(int32 commandId);
+    void LocateCharCharCommand(int32 commandId);
+    void LocateCharObjectCommand(int32 commandId);
 
-    void CarInAreaCheckCommand(int commandId);
-    void CharInAreaCheckCommand(int commandId);
-    void ObjectInAreaCheckCommand(int commandId);
+    void CarInAreaCheckCommand(int32 commandId);
+    void CharInAreaCheckCommand(int32 commandId);
+    void ObjectInAreaCheckCommand(int32 commandId);
 
-    void CharInAngledAreaCheckCommand(int commandId);
-    void FlameInAngledAreaCheckCommand(int commandId);
-    void ObjectInAngledAreaCheckCommand(int commandId);
+    void CharInAngledAreaCheckCommand(int32 commandId);
+    void FlameInAngledAreaCheckCommand(int32 commandId);
+    void ObjectInAngledAreaCheckCommand(int32 commandId);
 
-    void CollectParameters(short count);
+    void CollectParameters(int16 count);
     tScriptParam CollectNextParameterWithoutIncreasingPC();
 
-    void StoreParameters(short count);
+    void StoreParameters(int16 count);
 
-    void ReadArrayInformation(int move, unsigned short* pOffset, int* pIdx);
+    void ReadArrayInformation(int32 move, uint16* pOffset, int32* pIdx);
     void ReadParametersForNewlyStartedScript(CRunningScript* pNewScript);
-    void ReadTextLabelFromScript(char* pBuffer, unsigned char nBufferLength);
-    void GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int* pModelId);
-    short GetIndexOfGlobalVariable();
-    short GetPadState(unsigned short playerIndex, eButtonId buttonId);
+    void ReadTextLabelFromScript(char* pBuffer, uint8 nBufferLength);
+    void GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int32* pModelId);
+    int16 GetIndexOfGlobalVariable();
+    int16 GetPadState(uint16 playerIndex, eButtonId buttonId);
 
-    void* GetPointerToLocalVariable(int varId);
-    void* GetPointerToLocalArrayElement(int off, unsigned short idx, unsigned char mul);
-    tScriptParam* GetPointerToScriptVariable(unsigned char variableType);
+    void* GetPointerToLocalVariable(int32 varId);
+    void* GetPointerToLocalArrayElement(int32 off, uint16 idx, uint8 mul);
+    tScriptParam* GetPointerToScriptVariable(uint8 variableType);
 
     void DoDeathArrestCheck(); // original name DoDeatharrestCheck
 
     void SetCharCoordinates(CPed* pPed, float x, float y, float z, bool bWarpGang, bool bOffset);
-    void GivePedScriptedTask(std::int32_t pedHandle, CTask* task, std::int32_t opcode);
+    void GivePedScriptedTask(int32 pedHandle, CTask* task, int32 opcode);
 
     void AddScriptToList(CRunningScript** queueList);
     void RemoveScriptFromList(CRunningScript** queueList);
@@ -152,40 +152,40 @@ public:
 
     bool IsPedDead(CPed* pPed);
     bool ThisIsAValidRandomPed(ePedType pedType, bool civilian, bool gang, bool criminal);
-    void ScriptTaskPickUpObject(int commandId);
+    void ScriptTaskPickUpObject(int32 commandId);
 
     void UpdateCompareFlag(bool state);
-    void UpdatePC(int newIP);
+    void UpdatePC(int32 newIP);
 
     void ProcessOneCommand();
     void Process();
-    void ProcessCommands0To99(int commandId);
-    void ProcessCommands100To199(int commandId);
-    void ProcessCommands200To299(int commandId);
-    void ProcessCommands300To399(int commandId);
-    void ProcessCommands400To499(int commandId);
-    void ProcessCommands500To599(int commandId);
-    void ProcessCommands600To699(int commandId);
-    void ProcessCommands700To799(int commandId);
-    void ProcessCommands800To899(int commandId);
-    void ProcessCommands900To999(int commandId);
-    void ProcessCommands1000To1099(int commandId);
-    void ProcessCommands1100To1199(int commandId);
-    void ProcessCommands1200To1299(int commandId);
-    void ProcessCommands1300To1399(int commandId);
-    void ProcessCommands1400To1499(int commandId);
-    void ProcessCommands1500To1599(int commandId);
-    void ProcessCommands1600To1699(int commandId);
-    void ProcessCommands1700To1799(int commandId);
-    void ProcessCommands1800To1899(int commandId);
-    void ProcessCommands1900To1999(int commandId);
-    void ProcessCommands2000To2099(int commandId);
-    void ProcessCommands2100To2199(int commandId);
-    void ProcessCommands2200To2299(int commandId);
-    void ProcessCommands2300To2399(int commandId);
-    void ProcessCommands2400To2499(int commandId);
-    void ProcessCommands2500To2599(int commandId);
-    void ProcessCommands2600To2699(int commandId);
+    void ProcessCommands0To99(int32 commandId);
+    void ProcessCommands100To199(int32 commandId);
+    void ProcessCommands200To299(int32 commandId);
+    void ProcessCommands300To399(int32 commandId);
+    void ProcessCommands400To499(int32 commandId);
+    void ProcessCommands500To599(int32 commandId);
+    void ProcessCommands600To699(int32 commandId);
+    void ProcessCommands700To799(int32 commandId);
+    void ProcessCommands800To899(int32 commandId);
+    void ProcessCommands900To999(int32 commandId);
+    void ProcessCommands1000To1099(int32 commandId);
+    void ProcessCommands1100To1199(int32 commandId);
+    void ProcessCommands1200To1299(int32 commandId);
+    void ProcessCommands1300To1399(int32 commandId);
+    void ProcessCommands1400To1499(int32 commandId);
+    void ProcessCommands1500To1599(int32 commandId);
+    void ProcessCommands1600To1699(int32 commandId);
+    void ProcessCommands1700To1799(int32 commandId);
+    void ProcessCommands1800To1899(int32 commandId);
+    void ProcessCommands1900To1999(int32 commandId);
+    void ProcessCommands2000To2099(int32 commandId);
+    void ProcessCommands2100To2199(int32 commandId);
+    void ProcessCommands2200To2299(int32 commandId);
+    void ProcessCommands2300To2399(int32 commandId);
+    void ProcessCommands2400To2499(int32 commandId);
+    void ProcessCommands2500To2599(int32 commandId);
+    void ProcessCommands2600To2699(int32 commandId);
 };
 
 VALIDATE_SIZE(CRunningScript, 0xE0);

@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CBoundingBox.h"
 #include "CColSphere.h"
 #include "CCollisionData.h"
@@ -15,7 +14,7 @@ class CColModel {
 public:
     CColModel();
     ~CColModel();
-    static void* operator new(unsigned int size);
+    static void* operator new(uint32 size);
     static void operator delete(void* data);
     CColModel& operator=(CColModel const& colModel);
 
@@ -28,10 +27,10 @@ public:
     static void InjectHooks();
 
 private:
-    void AllocateData(int size);
+    void AllocateData(int32 size);
 public:
     void AllocateData();
-    void AllocateData(int numSpheres, int numBoxes, int numLines, int numVertices, int numTriangles, bool bUsesDisks);
+    void AllocateData(int32 numSpheres, int32 numBoxes, int32 numLines, int32 numVertices, int32 numTriangles, bool bUsesDisks);
     void MakeMultipleAlloc();
     void RemoveCollisionVolumes();
     void CalculateTrianglePlanes();

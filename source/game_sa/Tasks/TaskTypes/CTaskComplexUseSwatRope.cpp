@@ -12,14 +12,14 @@ void CTaskComplexUseSwatRope::InjectHooks()
     ReversibleHooks::Install("CTaskComplexUseSwatRope", "MakeAbortable", 0x659530, &CTaskComplexUseSwatRope::MakeAbortable_Reversed);
 }
 
-CTaskComplexUseSwatRope* CTaskComplexUseSwatRope::Constructor(unsigned int ropeId, CHeli* pHeli)
+CTaskComplexUseSwatRope* CTaskComplexUseSwatRope::Constructor(uint32 ropeId, CHeli* pHeli)
 {
     this->CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(ropeId, pHeli);
     return this;
 }
 
 // 0x659470
-CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(unsigned int ropeId, CHeli* pHeli)
+CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(uint32 ropeId, CHeli* pHeli)
 {
     m_nRopeId = ropeId;
     m_pHeli = pHeli;
@@ -29,7 +29,7 @@ CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(unsigned int ropeId, CHeli* pHe
     m_pHeli->RegisterReference(reinterpret_cast<CEntity * *>(&m_pHeli));
 }
 
-CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(unsigned int ropeId)
+CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(uint32 ropeId)
 {
     m_nRopeId = ropeId;
     m_pHeli = nullptr;

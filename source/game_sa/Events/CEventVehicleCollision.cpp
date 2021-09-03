@@ -7,7 +7,7 @@ void CEventVehicleCollision::InjectHooks()
     ReversibleHooks::Install("CEventVehicleCollision", "AffectsPed",0x4B2EE0, &CEventVehicleCollision::AffectsPed_Reversed);
 }
 
-CEventVehicleCollision::CEventVehicleCollision(std::int16_t pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, std::int8_t moveState, std::int16_t evadeType)
+CEventVehicleCollision::CEventVehicleCollision(int16 pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, int8 moveState, int16 evadeType)
 {
     m_pieceType = pieceType;
     m_evadeType = evadeType;
@@ -28,7 +28,7 @@ CEventVehicleCollision::~CEventVehicleCollision()
 }
 
 // 0x4AC840
-CEventVehicleCollision* CEventVehicleCollision::Constructor(std::int16_t pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, std::int8_t moveState, std::int16_t evadeType)
+CEventVehicleCollision* CEventVehicleCollision::Constructor(int16 pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, int8 moveState, int16 evadeType)
 {
     this->CEventVehicleCollision::CEventVehicleCollision(pieceType, damageIntensity, vehicle, collisionImpactVelocity, collisionPosition, moveState, evadeType);
     return this;
@@ -72,7 +72,7 @@ bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
     CTask* pSimplestActiveTask = ped->GetTaskManager().GetSimplestActiveTask();
     if (pSimplestActiveTask && CTask::IsGoToTask(pSimplestActiveTask)) {
         auto* pGoToTask = static_cast<CTaskSimpleGoTo*>(pSimplestActiveTask);
-        std::int32_t hitSide = CPedGeometryAnalyser::ComputeEntityHitSide(*ped, *m_vehicle);
+        int32 hitSide = CPedGeometryAnalyser::ComputeEntityHitSide(*ped, *m_vehicle);
         if (hitSide == CPedGeometryAnalyser::ComputeEntityHitSide(pGoToTask->m_vecTargetPoint, *m_vehicle)) {
             if (!m_vehicle->m_pTractor && !m_vehicle->m_pTrailer)
                 return false;
@@ -80,8 +80,8 @@ bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
             CVector boundingBoxPlanes[4];
             float planes_D[4];
             CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanes(ped->GetPosition().z, *m_vehicle, boundingBoxPlanes, planes_D);
-            std::int32_t targetPointInPlanes = 0, pedInPlanes = 0;
-            for (std::int32_t i = 0; i < 4; i++) {
+            int32 targetPointInPlanes = 0, pedInPlanes = 0;
+            for (int32 i = 0; i < 4; i++) {
                 CVector& plane = boundingBoxPlanes[i];
                 if (DotProduct(pGoToTask->m_vecTargetPoint, plane) + planes_D[i] < 0.0f)
                     ++targetPointInPlanes;

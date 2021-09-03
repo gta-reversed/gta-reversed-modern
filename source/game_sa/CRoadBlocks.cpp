@@ -27,13 +27,13 @@ void CRoadBlocks::ClearSpaceForRoadBlockObject(CVector a1, CVector a2) {
 }
 
 // 0x4619C0
-void CRoadBlocks::CreateRoadBlockBetween2Points(CVector a1, CVector a2, unsigned int a3) {
-    plugin::Call<0x4619C0, CVector, CVector, unsigned int>(a1, a2, a3);
+void CRoadBlocks::CreateRoadBlockBetween2Points(CVector a1, CVector a2, uint32 a3) {
+    plugin::Call<0x4619C0, CVector, CVector, uint32>(a1, a2, a3);
 }
 
 // 0x461170
-void CRoadBlocks::GenerateRoadBlockPedsForCar(CVehicle* a1, int a2, ePedType pedType) {
-    plugin::Call<0x461170, CVehicle*, int, ePedType>(a1, a2, pedType);
+void CRoadBlocks::GenerateRoadBlockPedsForCar(CVehicle* a1, int32 a2, ePedType pedType) {
+    plugin::Call<0x461170, CVehicle*, int32, ePedType>(a1, a2, pedType);
 }
 
 // 0x4629E0

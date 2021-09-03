@@ -5,7 +5,7 @@ void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks()
     ReversibleHooks::Install("CTaskComplexAvoidOtherPedWhileWandering", "CTaskComplexAvoidOtherPedWhileWandering", 0x66A100, &CTaskComplexAvoidOtherPedWhileWandering::Constructor);
 }
 
-CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(CPed* ped, CVector* targetPoint, std::int32_t moveState)
+CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(CPed* ped, CVector* targetPoint, int32 moveState)
 {
     m_ped = ped;
     field_1C = *targetPoint;
@@ -26,7 +26,7 @@ CTaskComplexAvoidOtherPedWhileWandering::~CTaskComplexAvoidOtherPedWhileWanderin
         m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
 }
 
-CTaskComplexAvoidOtherPedWhileWandering* CTaskComplexAvoidOtherPedWhileWandering::Constructor(CPed* ped, CVector* targetPoint, std::int32_t moveState)
+CTaskComplexAvoidOtherPedWhileWandering* CTaskComplexAvoidOtherPedWhileWandering::Constructor(CPed* ped, CVector* targetPoint, int32 moveState)
 {
     this->CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(ped, targetPoint, moveState);
     return this;
@@ -62,9 +62,9 @@ void CTaskComplexAvoidOtherPedWhileWandering::QuitIK(CPed* ped)
     return plugin::CallMethod<0x66A230, CTaskComplexAvoidOtherPedWhileWandering*, CPed*>(this, ped);
 }
 
-std::uint8_t CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CColSphere* colsphere, CPed* ped)
+uint8 CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CColSphere* colsphere, CPed* ped)
 {
-    return plugin::CallMethodAndReturn<std::uint8_t, 0x66A320, CTaskComplexAvoidOtherPedWhileWandering*, CColSphere*, CPed*>(this, colsphere, ped);
+    return plugin::CallMethodAndReturn<uint8, 0x66A320, CTaskComplexAvoidOtherPedWhileWandering*, CColSphere*, CPed*>(this, colsphere, ped);
 }
 
 void CTaskComplexAvoidOtherPedWhileWandering::SetUpIK(CPed* ped)

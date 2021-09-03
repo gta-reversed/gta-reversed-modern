@@ -6,12 +6,12 @@ void CSprite::InitSpriteBuffer()
 }
 
 void CSprite::RenderOneXLUSprite(float x, float y, float z, float halfWidth, float halfHeight,
-    unsigned char red, unsigned char green, unsigned char blue,
-    short alpha, float rhw, unsigned char intensity, unsigned char udir,
-    unsigned char vdir)
+    uint8 red, uint8 green, uint8 blue,
+    int16 alpha, float rhw, uint8 intensity, uint8 udir,
+    uint8 vdir)
 {
-    ((void(__cdecl*)(float, float, float, float, float, unsigned char, unsigned char, unsigned char,
-        short, float, unsigned char, unsigned char, unsigned char))0x70D000)(x, y, z, halfWidth, halfHeight,
+    ((void(__cdecl*)(float, float, float, float, float, uint8, uint8, uint8,
+        int16, float, uint8, uint8, uint8))0x70D000)(x, y, z, halfWidth, halfHeight,
             red, green, blue, alpha, rhw, intensity, udir, vdir);
 }
 

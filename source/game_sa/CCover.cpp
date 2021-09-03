@@ -6,9 +6,9 @@ void CCover::InjectHooks()
     ReversibleHooks::Install("CCover", "FindCoverPointsForThisBuilding", 0x699120, &CCover::FindCoverPointsForThisBuilding);
 }
 
-void CCover::AddCoverPoint(int maxPeds, CEntity* coverEntity, CVector* position, char coverType, unsigned char direction)
+void CCover::AddCoverPoint(int32 maxPeds, CEntity* coverEntity, CVector* position, char coverType, uint8 direction)
 {
-    plugin::Call<0x698F30, int, CEntity*, CVector*, char, unsigned char>(maxPeds, coverEntity, position, coverType, direction);
+    plugin::Call<0x698F30, int32, CEntity*, CVector*, char, uint8>(maxPeds, coverEntity, position, coverType, direction);
 }
 
 void CCover::FindCoverPointsForThisBuilding(CBuilding* building)
@@ -17,7 +17,7 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building)
     if (!pInfo->m_n2dfxCount)
         return;
 
-    for (int32_t iFxInd = 0; iFxInd < pInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pInfo->m_n2dfxCount; ++iFxInd) {
         auto* pEffect = pInfo->Get2dEffect(iFxInd);
         if (pEffect->m_nType != e2dEffectType::EFFECT_COVER_POINT)
             continue;
@@ -26,7 +26,7 @@ void CCover::FindCoverPointsForThisBuilding(CBuilding* building)
         const auto vedTransformed = Multiply3x3(building->GetMatrix(), vecDir);
 
         const auto fTwoPiToChar = 256.0F / TWO_PI;
-        const auto ucAngle = static_cast<uint8_t>(atan2(vedTransformed.x, vedTransformed.y) * fTwoPiToChar);
+        const auto ucAngle = static_cast<uint8>(atan2(vedTransformed.x, vedTransformed.y) * fTwoPiToChar);
         auto vecPoint = building->GetMatrix() * pEffect->m_vecPosn;
         CCover::AddCoverPoint(3, building, &vecPoint, pEffect->coverPoint.m_nType, ucAngle);
     }

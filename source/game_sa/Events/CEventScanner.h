@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CTaskTimer.h"
 #include "CAttractorScanner.h"
 
@@ -22,26 +21,22 @@ public:
     bool m_bScanAllowedScriptedTask;
 };
 
-class CVehiclePotentialCollisionScanner
-{
+class CVehiclePotentialCollisionScanner {
 public:
     CTaskTimer m_timer;
 };
 
-class CObjectPotentialCollisionScanner
-{
+class CObjectPotentialCollisionScanner {
 public:
     CTaskTimer m_timer;
 };
 
-class CSexyPedScanner
-{
+class CSexyPedScanner {
 public:
     CTaskTimer m_timer;
 };
 
-class CNearbyFireScanner
-{
+class CNearbyFireScanner {
 public:
     CTaskTimer m_timer;
 };
@@ -54,13 +49,13 @@ VALIDATE_SIZE(CNearbyFireScanner, 0xC);
 
 class CEventScanner {
 public:
-    std::uint32_t m_nNextScanTime;
+    uint32                            m_nNextScanTime;
     CVehiclePotentialCollisionScanner m_vehiclePotentialCollisionScanner;
-    CObjectPotentialCollisionScanner m_objectPotentialCollisionScanner;
-    CAttractorScanner m_attractorScanner;
-    CPedAcquaintanceScanner m_pedAcquaintanceScanner;
-    CSexyPedScanner m_sexyPedScanner;
-    CNearbyFireScanner m_nearbyFireScanner;
+    CObjectPotentialCollisionScanner  m_objectPotentialCollisionScanner;
+    CAttractorScanner                 m_attractorScanner;
+    CPedAcquaintanceScanner           m_pedAcquaintanceScanner;
+    CSexyPedScanner                   m_sexyPedScanner;
+    CNearbyFireScanner                m_nearbyFireScanner;
 
     void ScanForEvents(CPed* pPed);
     void ScanForEventsNow(CPed* ped, bool bDontScan);

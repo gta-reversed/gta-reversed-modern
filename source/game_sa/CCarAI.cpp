@@ -53,13 +53,13 @@ char CCarAI::FindPoliceBoatMissionForWantedLevel() {
 }
 
 // 0x41CAA0
-int CCarAI::FindPoliceCarSpeedForWantedLevel(CVehicle* pVehicle) {
-	return plugin::CallAndReturn<int, 0x41CAA0, CVehicle*>(pVehicle);
+int32 CCarAI::FindPoliceCarSpeedForWantedLevel(CVehicle* pVehicle) {
+	return plugin::CallAndReturn<int32, 0x41CAA0, CVehicle*>(pVehicle);
 }
 
 // 0x41CE30
-float CCarAI::GetCarToGoToCoors(CVehicle* pVehicle1, CVector* pVector, int drivingStyle, bool bSpeedLimit20) {
-	return plugin::CallAndReturn<float, 0x41CE30, CVehicle*, CVector*, int, bool>(pVehicle1, pVector, drivingStyle, bSpeedLimit20);
+float CCarAI::GetCarToGoToCoors(CVehicle* pVehicle1, CVector* pVector, int32 drivingStyle, bool bSpeedLimit20) {
+	return plugin::CallAndReturn<float, 0x41CE30, CVehicle*, CVector*, int32, bool>(pVehicle1, pVector, drivingStyle, bSpeedLimit20);
 }
 
 // 0x41D350

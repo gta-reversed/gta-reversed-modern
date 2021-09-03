@@ -6,22 +6,21 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CObject.h"
 
-class  CHandObject : public CObject {
+class CHandObject : public CObject {
 public:
-    CHandObject(int handModelIndex, CPed* pPed, bool bLeftHand);
-    ~CHandObject() = default;
-public:
-    class CPed  *m_pPed;
-    unsigned int m_nBoneIndex;
-    RwTexture   *m_pTexture;
-    bool         m_bUpdatedMatricesArray;
-    char _pad[3];
+    class CPed* m_pPed;
+    uint32      m_nBoneIndex;
+    RwTexture*  m_pTexture;
+    bool        m_bUpdatedMatricesArray;
+    char        _pad[3];
 
 public:
     static void InjectHooks();
+
+    CHandObject(int32 handModelIndex, CPed* pPed, bool bLeftHand);
+    ~CHandObject() = default;
 
     void ProcessControl() override;
     void PreRender() override;

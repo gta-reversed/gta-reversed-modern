@@ -5,7 +5,6 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
 
 enum eAudioEvents {
     AE_FRONTEND_START = 0x0,

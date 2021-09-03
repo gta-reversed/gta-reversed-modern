@@ -7,10 +7,10 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-std::int32_t MAX_INVISIBLE_ENTITY_PTRS = 150;
-std::int32_t MAX_VISIBLE_ENTITY_PTRS = 1000;
-std::int32_t MAX_VISIBLE_LOD_PTRS = 1000;
-std::int32_t MAX_VISIBLE_SUPERLOD_PTRS = 50;
+int32 MAX_INVISIBLE_ENTITY_PTRS = 150;
+int32 MAX_VISIBLE_ENTITY_PTRS = 1000;
+int32 MAX_VISIBLE_LOD_PTRS = 1000;
+int32 MAX_VISIBLE_SUPERLOD_PTRS = 50;
 bool& CRenderer::ms_bRenderTunnels = *(bool*)0xB745C0;
 bool& CRenderer::ms_bRenderOutsideTunnels = *(bool*)0xB745C1;
 tRenderListEntry*& CRenderer::ms_pLodDontRenderList = *(tRenderListEntry**)0xB745CC;
@@ -20,10 +20,10 @@ CEntity** CRenderer::ms_aInVisibleEntityPtrs = (CEntity**)0xB745D8;
 CEntity** CRenderer::ms_aVisibleSuperLodPtrs = (CEntity**)0xB74830;
 CEntity** CRenderer::ms_aVisibleLodPtrs = (CEntity**)0xB748F8;
 CEntity** CRenderer::ms_aVisibleEntityPtrs = (CEntity**)0xB75898;
-int& CRenderer::ms_nNoOfVisibleSuperLods = *(int*)0xB76838;
-int& CRenderer::ms_nNoOfInVisibleEntities = *(int*)0xB7683C;
-int& CRenderer::ms_nNoOfVisibleLods = *(int*)0xB76840;
-int& CRenderer::ms_nNoOfVisibleEntities = *(int*)0xB76844;
+int32& CRenderer::ms_nNoOfVisibleSuperLods = *(int32*)0xB76838;
+int32& CRenderer::ms_nNoOfInVisibleEntities = *(int32*)0xB7683C;
+int32& CRenderer::ms_nNoOfVisibleLods = *(int32*)0xB76840;
+int32& CRenderer::ms_nNoOfVisibleEntities = *(int32*)0xB76844;
 float& CRenderer::ms_fFarClipPlane = *(float*)0xB76848;
 float& CRenderer::ms_fCameraHeading = *(float*)0xB7684C;
 bool& CRenderer::m_loadingPriority = *(bool*)0xB76850;
@@ -31,7 +31,7 @@ bool& CRenderer::ms_bInTheSky = *(bool*)0xB76851;
 CVector& CRenderer::ms_vecCameraPosition = *(CVector*)0xB76870;
 float& CRenderer::ms_lodDistScale = *(float*)0x8CD800;
 float& CRenderer::ms_lowLodDistScale = *(float*)0x8CD804;
-unsigned int& gnRendererModelRequestFlags = *(unsigned int*)0xB745C4;
+uint32& gnRendererModelRequestFlags = *(uint32*)0xB745C4;
 CEntity**& gpOutEntitiesForGetObjectsInFrustum = *(CEntity***)0xB76854;
 
 void CRenderer::InjectHooks()
@@ -72,9 +72,9 @@ void CRenderer::InjectHooks()
 
 }
 
-void CWorldScan::ScanWorld(CVector2D *points, std::int32_t pointsCount, tScanFunction scanFunction)
+void CWorldScan::ScanWorld(CVector2D *points, int32 pointsCount, tScanFunction scanFunction)
 {
-    plugin::Call<0x72CAE0,CVector2D*, std::int32_t, tScanFunction>(points,pointsCount, scanFunction);
+    plugin::Call<0x72CAE0,CVector2D*, int32, tScanFunction>(points,pointsCount, scanFunction);
 }
 
 void CWorldScan::SetExtraRectangleToScan(float minX, float maxX, float minY, float maxY)
@@ -230,7 +230,7 @@ void CRenderer::ProcessLodRenderLists() {
             renderListEntry->pEntity = nullptr;
         }
     }
-    const std::uint8_t displaySuperLowLodFlag = 0x80u; // yes, this is very hacky. Blame R*
+    const uint8 displaySuperLowLodFlag = 0x80u; // yes, this is very hacky. Blame R*
     bool bAllLodsRendered = false;
     while (bAllLodsRendered) {
         for (auto renderListEntry = GetLodRenderListBase(); renderListEntry != ms_pLodRenderList; renderListEntry++) {
@@ -286,16 +286,16 @@ void CRenderer::ProcessLodRenderLists() {
 
 // 0x553910
 void CRenderer::PreRender() {
-    for (std::int32_t i = 0; i < ms_nNoOfVisibleLods; ++i) {
+    for (int32 i = 0; i < ms_nNoOfVisibleLods; ++i) {
         ms_aVisibleLodPtrs[i]->PreRender();
     }
-    for (std::int32_t i = 0; i < ms_nNoOfVisibleEntities; ++i) {
+    for (int32 i = 0; i < ms_nNoOfVisibleEntities; ++i) {
         ms_aVisibleEntityPtrs[i]->PreRender();
     }
-    for (std::int32_t i = 0; i < ms_nNoOfVisibleSuperLods; ++i) {
+    for (int32 i = 0; i < ms_nNoOfVisibleSuperLods; ++i) {
         ms_aVisibleSuperLodPtrs[i]->PreRender();
     }
-    for (std::int32_t i = 0; i < ms_nNoOfInVisibleEntities; ++i) {
+    for (int32 i = 0; i < ms_nNoOfInVisibleEntities; ++i) {
         ms_aInVisibleEntityPtrs[i]->PreRender();
     }
     for (auto link = CVisibilityPlugins::m_alphaEntityList.usedListHead.next;
@@ -327,7 +327,7 @@ void CRenderer::RenderRoads() {
     RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
     DeActivateDirectional();
     SetAmbientColours();
-    for (std::int32_t i = 0; i < CRenderer::ms_nNoOfVisibleEntities; ++i) {
+    for (int32 i = 0; i < CRenderer::ms_nNoOfVisibleEntities; ++i) {
         CEntity* entity = CRenderer::ms_aVisibleEntityPtrs[i];
         if (entity->m_nType == ENTITY_TYPE_BUILDING && CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex]->IsRoad()) {
             if (CPostEffects::IsVisionFXActive()) {
@@ -350,7 +350,7 @@ void CRenderer::RenderEverythingBarRoads() {
     if (!CGame::currArea)
         RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)140u);
 
-    for (std::int32_t i = 0; i < ms_nNoOfVisibleEntities; i++) {
+    for (int32 i = 0; i < ms_nNoOfVisibleEntities; i++) {
         CEntity* entity = ms_aVisibleEntityPtrs[i];
         CVehicle* pVehicle = static_cast<CVehicle*>(entity);
         CPed* pPed = static_cast<CPed*>(entity);
@@ -387,7 +387,7 @@ void CRenderer::RenderEverythingBarRoads() {
     RwCameraEndUpdate(Scene.m_pRwCamera);
     Scene.m_pRwCamera->zShift = Scene.m_pRwCamera->zShift - 100.0f;
     RwCameraBeginUpdate(Scene.m_pRwCamera);
-    for (std::int32_t i = 0; i < ms_nNoOfVisibleLods; ++i) {
+    for (int32 i = 0; i < ms_nNoOfVisibleLods; ++i) {
         RenderOneNonRoad(ms_aVisibleLodPtrs[i]);
     }
     RwCameraEndUpdate(Scene.m_pRwCamera);
@@ -433,7 +433,7 @@ bool CRenderer::SetupLightingForEntity(CPhysical* entity) {
 }
 
 // 0x553F60
-int CRenderer::SetupMapEntityVisibility(CEntity* pEntity, CBaseModelInfo* pBaseModelInfo, float fDistance, bool bIsTimeInRange) {
+int32 CRenderer::SetupMapEntityVisibility(CEntity* pEntity, CBaseModelInfo* pBaseModelInfo, float fDistance, bool bIsTimeInRange) {
     if (!pEntity->m_bTunnelTransition
         && ((!CRenderer::ms_bRenderTunnels && pEntity->m_bTunnel) || (!CRenderer::ms_bRenderOutsideTunnels && !pEntity->m_bTunnel)))
     {
@@ -516,8 +516,8 @@ int CRenderer::SetupMapEntityVisibility(CEntity* pEntity, CBaseModelInfo* pBaseM
 }
 
 // 0x554230
-int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
-    const std::int32_t modelId = pEntity->m_nModelIndex;
+int32 CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
+    const int32 modelId = pEntity->m_nModelIndex;
     CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CBaseModelInfo* pBaseAtomicModelInfo = pBaseModelInfo->AsAtomicModelInfoPtr();
     if (pEntity->m_nType == ENTITY_TYPE_VEHICLE && !pEntity->m_bTunnelTransition) {
@@ -531,7 +531,7 @@ int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
         if (pBaseModelInfo->GetModelType() != MODEL_INFO_CLUMP && pBaseModelInfo->GetModelType() != MODEL_INFO_WEAPON)
         {
             if (FindPlayerVehicle(-1, false) == pEntity && gbFirstPersonRunThisFrame && CReplay::Mode != REPLAY_MODE_1) {
-                std::uint32_t dwDirectionWasLooking = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nDirectionWasLooking;
+                uint32 dwDirectionWasLooking = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nDirectionWasLooking;
                 CVehicle* pVehicle = FindPlayerVehicle(-1, false);
                 if (!pVehicle->IsBike() || !(pVehicle->AsBike()->damageFlags.bDamageFlag8))
                 {
@@ -575,7 +575,7 @@ int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
         if (pBaseModelInfo->GetModelType() == MODEL_INFO_TIME)
         {
             CTimeInfo* pModelTimeInfo = pBaseModelInfo->GetTimeInfo();
-            int wOtherTimeModel = pModelTimeInfo->GetOtherTimeModel();
+            int32 wOtherTimeModel = pModelTimeInfo->GetOtherTimeModel();
             if (CClock::GetIsTimeInRange(pModelTimeInfo->GetTimeOn(), pModelTimeInfo->GetTimeOff()))
             {
                 if (wOtherTimeModel != -1 && CModelInfo::ms_modelInfoPtrs[wOtherTimeModel]->m_pRwObject)
@@ -632,7 +632,7 @@ int CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
 }
 
 // 0x554650
-int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
+int32 CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
     CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex];
     bool bIsTimeInRange = true;
     if (entity->m_nAreaCode != CGame::currArea && entity->m_nAreaCode != AREA_CODE_13)
@@ -641,7 +641,7 @@ int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
     if (pBaseModelInfo->GetModelType() == MODEL_INFO_TIME)
     {
         CTimeInfo* pModelTimeInfo = pBaseModelInfo->GetTimeInfo();
-        int wOtherTimeModel = pModelTimeInfo->GetOtherTimeModel();
+        int32 wOtherTimeModel = pModelTimeInfo->GetOtherTimeModel();
         if (CClock::GetIsTimeInRange(pModelTimeInfo->GetTimeOn(), pModelTimeInfo->GetTimeOff()))
         {
             if (wOtherTimeModel != -1 && CModelInfo::ms_modelInfoPtrs[wOtherTimeModel]->m_pRwObject)
@@ -667,7 +667,7 @@ int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
     CVector distance = entityPos - ms_vecCameraPosition;
     *outDistance = distance.Magnitude();
     if (entity->m_nNumLodChildrenRendered <= 0) {
-        int visbility = SetupMapEntityVisibility(entity, pBaseModelInfo, *outDistance, bIsTimeInRange);
+        int32 visbility = SetupMapEntityVisibility(entity, pBaseModelInfo, *outDistance, bIsTimeInRange);
         if (visbility != RENDERER_VISIBLE || entity->m_nNumLodChildren <= 1u)
             return visbility;
         if (entity->m_pLod && pBaseModelInfo->m_nAlpha == 255)
@@ -693,10 +693,10 @@ int CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance) {
 }
 
 // 0x5535D0
-void CRenderer::ScanSectorList_ListModels(std::int32_t sectorX, std::int32_t sectorY) {
+void CRenderer::ScanSectorList_ListModels(int32 sectorX, int32 sectorY) {
     SetupScanLists(sectorX, sectorY);
     CPtrListDoubleLink** pScanLists = reinterpret_cast<CPtrListDoubleLink**>(&PC_Scratch);
-    for (std::int32_t scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
+    for (int32 scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
         CPtrListDoubleLink* pDoubleLinkList = pScanLists[scanListIndex];
         if (pDoubleLinkList) {
             for (auto pDoubleLinkNode = pDoubleLinkList->GetNode(); pDoubleLinkNode; pDoubleLinkNode = pDoubleLinkNode->pNext) {
@@ -714,11 +714,11 @@ void CRenderer::ScanSectorList_ListModels(std::int32_t sectorX, std::int32_t sec
 }
 
 // 0x553650
-void CRenderer::ScanSectorList_ListModelsVisible(std::int32_t sectorX, std::int32_t sectorY) {
+void CRenderer::ScanSectorList_ListModelsVisible(int32 sectorX, int32 sectorY) {
     SetupScanLists(sectorX, sectorY);
     CEntity** pEntity = gpOutEntitiesForGetObjectsInFrustum;
     CPtrListDoubleLink** pScanLists = reinterpret_cast<CPtrListDoubleLink**>(&PC_Scratch);
-    for (std::int32_t scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
+    for (int32 scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
         CPtrListDoubleLink* pDoubleLinkList = pScanLists[scanListIndex];
         if (pDoubleLinkList) {
             for (auto pDoubleLinkNode = pDoubleLinkList->GetNode(); pDoubleLinkNode; pDoubleLinkNode = pDoubleLinkNode->pNext) {
@@ -738,7 +738,7 @@ void CRenderer::ScanSectorList_ListModelsVisible(std::int32_t sectorX, std::int3
 }
 
 // 0x554840
-void CRenderer::ScanSectorList(std::int32_t sectorX, std::int32_t sectorY) {
+void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
     bool bRequestModel = false;
     float fDistanceX = CWorld::GetSectorPosX(sectorX) - CRenderer::ms_vecCameraPosition.x;
     float fDistanceY = CWorld::GetSectorPosY(sectorY) - CRenderer::ms_vecCameraPosition.y;
@@ -750,7 +750,7 @@ void CRenderer::ScanSectorList(std::int32_t sectorX, std::int32_t sectorY) {
     }
     SetupScanLists(sectorX, sectorY);
     CPtrListDoubleLink** pScanLists = reinterpret_cast<CPtrListDoubleLink **>(&PC_Scratch);
-    for (std::int32_t scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
+    for (int32 scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
         CPtrListDoubleLink* pDoubleLinkList = pScanLists[scanListIndex];
         if (pDoubleLinkList) {
             CPtrNodeDoubleLink* pDoubleLinkNode = pDoubleLinkList->GetNode();
@@ -839,7 +839,7 @@ void CRenderer::ScanSectorList(std::int32_t sectorX, std::int32_t sectorY) {
 }
 
 // 0x554B10
-void CRenderer::ScanBigBuildingList(std::int32_t sectorX, std::int32_t sectorY) {
+void CRenderer::ScanBigBuildingList(int32 sectorX, int32 sectorY) {
     if (sectorX >= 0 && sectorY >= 0 && sectorX < MAX_LOD_PTR_LISTS_X && sectorY < MAX_LOD_PTR_LISTS_Y) {
         CPtrList& list = CWorld::GetLodPtrList(sectorX, sectorY);
         bool bRequestModel = false;
@@ -856,7 +856,7 @@ void CRenderer::ScanBigBuildingList(std::int32_t sectorX, std::int32_t sectorY) 
             if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
                 entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
                 float fDistance = 0.0f;
-                std::int32_t visibility = CRenderer::SetupBigBuildingVisibility(entity, &fDistance);
+                int32 visibility = CRenderer::SetupBigBuildingVisibility(entity, &fDistance);
                 if (visibility == RENDERER_VISIBLE) {
                     CRenderer::AddEntityToRenderList(entity, fDistance + 0.01f);
                     entity->m_bOffscreen = false;
@@ -941,7 +941,7 @@ void CRenderer::ConstructRenderList() {
 }
 
 // 0x555900
-void CRenderer::ScanSectorList_RequestModels(std::int32_t sectorX, std::int32_t sectorY) {
+void CRenderer::ScanSectorList_RequestModels(int32 sectorX, int32 sectorY) {
     if (sectorX >= 0 && sectorY >= 0 && sectorX < MAX_SECTORS_X && sectorY < MAX_SECTORS_Y) {
         CSector* pSector = GetSector(sectorX, sectorY);
         ScanPtrList_RequestModels(pSector->m_buildings);
@@ -962,7 +962,7 @@ void CRenderer::ScanWorld() {
     frustumPoints[2].x = frustumPoints[3].x = farPlane * width;
     frustumPoints[3].y = frustumPoints[4].y = -(farPlane * height);
     frustumPoints[1].z = frustumPoints[2].z = frustumPoints[3].z = frustumPoints[4].z = farPlane;
-    for (std::int32_t i = 5; i < 13; i++) {
+    for (int32 i = 5; i < 13; i++) {
         frustumPoints[i] = CVector(0.0f, 0.0f, 0.0f);
     }
     CRenderer::m_pFirstPersonVehicle = nullptr;
@@ -1025,7 +1025,7 @@ void CRenderer::ScanWorld() {
 }
 
 // 0x554C60
-std::int32_t CRenderer::GetObjectsInFrustum(CEntity** outEntities, float farPlane, RwMatrix* transformMatrix)
+int32 CRenderer::GetObjectsInFrustum(CEntity** outEntities, float farPlane, RwMatrix* transformMatrix)
 {
     CVector frustumPoints[13];
     const float width = TheCamera.m_pRwCamera->viewWindow.x;
@@ -1036,7 +1036,7 @@ std::int32_t CRenderer::GetObjectsInFrustum(CEntity** outEntities, float farPlan
     frustumPoints[2].x = frustumPoints[3].x = farPlane * width;
     frustumPoints[3].y = frustumPoints[4].y = -(farPlane * height);
     frustumPoints[1].z = frustumPoints[2].z = frustumPoints[3].z = frustumPoints[4].z = farPlane;
-    for (std::int32_t i = 5; i < 13; i++) {
+    for (int32 i = 5; i < 13; i++) {
         frustumPoints[i] = CVector(0.0f, 0.0f, 0.0f);
     }
     CWorld::IncrementCurrentScanCode();
@@ -1052,7 +1052,7 @@ std::int32_t CRenderer::GetObjectsInFrustum(CEntity** outEntities, float farPlan
     RwV3dTransformPoints(frustumPoints, frustumPoints, 13, theTransformMatrix);
     gpOutEntitiesForGetObjectsInFrustum = outEntities;
     CVector2D points[3];
-    for (std::int32_t i = 0; i < 3; i++) {
+    for (int32 i = 0; i < 3; i++) {
         points[i].x = CWorld::GetSectorfX(frustumPoints[i].x);
         points[i].y = CWorld::GetSectorfY(frustumPoints[i].y);
     }
@@ -1064,7 +1064,7 @@ std::int32_t CRenderer::GetObjectsInFrustum(CEntity** outEntities, float farPlan
 }
 
 // 0x555960
-void CRenderer::RequestObjectsInFrustum(RwMatrix* transformMatrix, std::int32_t modelRequestFlags) {
+void CRenderer::RequestObjectsInFrustum(RwMatrix* transformMatrix, int32 modelRequestFlags) {
     const float farPlane = TheCamera.m_pRwCamera->farPlane;
     const float width = TheCamera.m_pRwCamera->viewWindow.x;
     const float height = TheCamera.m_pRwCamera->viewWindow.y;
@@ -1075,7 +1075,7 @@ void CRenderer::RequestObjectsInFrustum(RwMatrix* transformMatrix, std::int32_t 
     frustumPoints[2].x = frustumPoints[3].x = farPlane * width;
     frustumPoints[3].y = frustumPoints[4].y = -(farPlane * height);
     frustumPoints[1].z = frustumPoints[2].z = frustumPoints[3].z = frustumPoints[4].z = farPlane;
-    for (std::int32_t i = 5; i < 13; i++ ) {
+    for (int32 i = 5; i < 13; i++ ) {
         frustumPoints[i] = CVector(0.0f, 0.0f, 0.0f);
     }
     CWorld::IncrementCurrentScanCode();
@@ -1105,7 +1105,7 @@ void CRenderer::RequestObjectsInFrustum(RwMatrix* transformMatrix, std::int32_t 
 
 // modelRequestFlags is always set to `STREAMING_LOADING_SCENE` when this function is called
 // 0x555CB0
-void CRenderer::RequestObjectsInDirection(CVector const& posn, float angle, std::int32_t modelRequestFlags) {
+void CRenderer::RequestObjectsInDirection(CVector const& posn, float angle, int32 modelRequestFlags) {
     RwMatrix matrix;
     matrix.at = { 0.0f, 0.0f, 1.0f };
     matrix.up = { 0.0f, 1.0f, 0.0f };
@@ -1122,7 +1122,7 @@ void CRenderer::RequestObjectsInDirection(CVector const& posn, float angle, std:
 }
 
 // 0x553540
-void CRenderer::SetupScanLists(std::int32_t sectorX, std::int32_t sectorY)
+void CRenderer::SetupScanLists(int32 sectorX, int32 sectorY)
 {
     CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
     tScanLists* pScanLists = reinterpret_cast<tScanLists*>(&PC_Scratch);

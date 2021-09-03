@@ -38,23 +38,23 @@ void FxSystem_c::Kill() {
 }
 
 // 0x4AA400
-void FxSystem_c::AttachToBone(CEntity* entity, int boneId) {
-    ((void(__thiscall *)(FxSystem_c*, CEntity*, int))0x4AA400)(this, entity, boneId);
+void FxSystem_c::AttachToBone(CEntity* entity, int32 boneId) {
+    ((void(__thiscall *)(FxSystem_c*, CEntity*, int32))0x4AA400)(this, entity, boneId);
 }
 
 //  0x4AA440
-void FxSystem_c::AddParticle(RwV3d* position, RwV3d* velocity, float arg2, FxPrtMult_c* prtMult, float arg4, float brightness, float arg6, unsigned char arg8) {
-    ((void(__thiscall *)(FxSystem_c*, RwV3d*, RwV3d*, float, FxPrtMult_c*, float, float, float, unsigned char))0x4AA440)(this, position, velocity, arg2, prtMult, arg4, brightness, arg6, arg8);
+void FxSystem_c::AddParticle(RwV3d* position, RwV3d* velocity, float arg2, FxPrtMult_c* prtMult, float arg4, float brightness, float arg6, uint8 arg8) {
+    ((void(__thiscall *)(FxSystem_c*, RwV3d*, RwV3d*, float, FxPrtMult_c*, float, float, float, uint8))0x4AA440)(this, position, velocity, arg2, prtMult, arg4, brightness, arg6, arg8);
 }
 
 // 0x4AA540
-void FxSystem_c::AddParticle(RwMatrixTag* transform, RwV3d* position, float arg2, FxPrtMult_c* prtMult, float arg4, float arg5, float arg6, unsigned char arg7) {
-    ((void(__thiscall *)(FxSystem_c*, RwMatrixTag*, RwV3d*, float, FxPrtMult_c*, float, float, float, unsigned char))0x4AA540)(this, transform, position, arg2, prtMult, arg4, arg5, arg6, arg7);
+void FxSystem_c::AddParticle(RwMatrixTag* transform, RwV3d* position, float arg2, FxPrtMult_c* prtMult, float arg4, float arg5, float arg6, uint8 arg7) {
+    ((void(__thiscall *)(FxSystem_c*, RwMatrixTag*, RwV3d*, float, FxPrtMult_c*, float, float, float, uint8))0x4AA540)(this, transform, position, arg2, prtMult, arg4, arg5, arg6, arg7);
 }
 
 // 0x4AA610
-void FxSystem_c::EnablePrim(int primIndex, unsigned char enable) {
-    ((void(__thiscall *)(FxSystem_c*, int, unsigned char))0x4AA610)(this, primIndex, enable);
+void FxSystem_c::EnablePrim(int32 primIndex, uint8 enable) {
+    ((void(__thiscall *)(FxSystem_c*, int32, uint8))0x4AA610)(this, primIndex, enable);
 }
 
 // 0x4AA630
@@ -73,8 +73,8 @@ void FxSystem_c::AddOffsetPos(RwV3d* pos) {
 }
 
 // 0x4AA6C0
-void FxSystem_c::SetConstTime(unsigned char arg0, float amount) {
-    ((void(__thiscall *)(FxSystem_c*, unsigned char, float))0x4AA6C0)(this, arg0, amount);
+void FxSystem_c::SetConstTime(uint8 arg0, float amount) {
+    ((void(__thiscall *)(FxSystem_c*, uint8, float))0x4AA6C0)(this, arg0, amount);
 }
 
 // 0x4AA6F0
@@ -118,18 +118,18 @@ eFxSystemPlayStatus FxSystem_c::GetPlayStatus() {
 }
 
 // 0x4AA910
-void FxSystem_c::SetLocalParticles(unsigned char enable) {
-    ((void(__thiscall *)(FxSystem_c*, unsigned char))0x4AA910)(this, enable);
+void FxSystem_c::SetLocalParticles(uint8 enable) {
+    ((void(__thiscall *)(FxSystem_c*, uint8))0x4AA910)(this, enable);
 }
 
 // 0x4AA930
-unsigned int FxSystem_c::ForAllParticles(void(*callback)(Particle_c *, int, void **), void* data) {
-    return ((unsigned int(__thiscall *)(FxSystem_c*, void(*)(Particle_c *, int, void **), void*))0x4AA930)(this, callback, data);
+uint32 FxSystem_c::ForAllParticles(void(*callback)(Particle_c *, int32, void **), void* data) {
+    return ((uint32(__thiscall *)(FxSystem_c*, void(*)(Particle_c *, int32, void **), void*))0x4AA930)(this, callback, data);
 }
 
 // 0x4AA9A0
-void FxSystem_c::UpdateBoundingBoxCB(Particle_c* particle, int arg1, void** data) {
-    ((void(__cdecl *)(Particle_c*, int, void**))0x4AA9A0)(particle, arg1, data);
+void FxSystem_c::UpdateBoundingBoxCB(Particle_c* particle, int32 arg1, void** data) {
+    ((void(__cdecl *)(Particle_c*, int32, void**))0x4AA9A0)(particle, arg1, data);
 }
 
 // 0x4AAA40
@@ -158,13 +158,13 @@ void FxSystem_c::ResetBoundingSphere() {
 }
 
 // 0x4AAC50
-void FxSystem_c::SetZTestEnable(unsigned char enable) {
-    ((void(__thiscall *)(FxSystem_c*, unsigned char))0x4AAC50)(this, enable);
+void FxSystem_c::SetZTestEnable(uint8 enable) {
+    ((void(__thiscall *)(FxSystem_c*, uint8))0x4AAC50)(this, enable);
 }
 
 // 0x4AAC70
-void FxSystem_c::SetMustCreatePrts(unsigned char enable) {
-    ((void(__thiscall *)(FxSystem_c*, unsigned char))0x4AAC70)(this, enable);
+void FxSystem_c::SetMustCreatePrts(uint8 enable) {
+    ((void(__thiscall *)(FxSystem_c*, uint8))0x4AAC70)(this, enable);
 }
 
 // 0x4AAC90

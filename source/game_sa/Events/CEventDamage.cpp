@@ -2,7 +2,7 @@
 
 void CEventDamage::InjectHooks() {
     ReversibleHooks::Install("CEventDamage", "CEventDamage", 0x4B33B0, (CEventDamage*(CEventDamage::*)(CEventDamage*)) & CEventDamage::Constructor);
-    ReversibleHooks::Install("CEventDamage", "CEventDamage_1", 0x4AD830, (CEventDamage * (CEventDamage::*)(CEntity*, unsigned int, eWeaponType, ePedPieceTypes, unsigned char, bool, bool)) & CEventDamage::Constructor);
+    ReversibleHooks::Install("CEventDamage", "CEventDamage_1", 0x4AD830, (CEventDamage * (CEventDamage::*)(CEntity*, uint32, eWeaponType, ePedPieceTypes, uint8, bool, bool)) & CEventDamage::Constructor);
     ReversibleHooks::Install("CEventDamage", "GetEventType_Reversed", 0x4AD910, &CEventDamage::GetEventType_Reversed);
     ReversibleHooks::Install("CEventDamage", "GetEventPriority_Reversed", 0x4AD950, &CEventDamage::GetEventPriority_Reversed);
     ReversibleHooks::Install("CEventDamage", "GetLifeTime_Reversed", 0x4AD920, &CEventDamage::GetLifeTime_Reversed);
@@ -33,7 +33,7 @@ CEventDamage::CEventDamage(CEventDamage* pCopyFrom) {
     From(pCopyFrom);
 }
 
-CEventDamage::CEventDamage(CEntity* source, unsigned int startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, unsigned char direction, bool a7, bool bPedInVehicle) {
+CEventDamage::CEventDamage(CEntity* source, uint32 startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, uint8 direction, bool a7, bool bPedInVehicle) {
     m_pSourceEntity = source;
     m_nStartTime = startTime;
     m_weaponType = weaponType;
@@ -71,9 +71,9 @@ CEventDamage* CEventDamage::Constructor(CEventDamage* pCopyFrom) {
 #endif
 }
 
-CEventDamage* CEventDamage::Constructor(CEntity* source, unsigned int startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, unsigned char direction, bool a7, bool bPedInVehicle) {
+CEventDamage* CEventDamage::Constructor(CEntity* source, uint32 startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, uint8 direction, bool a7, bool bPedInVehicle) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventDamage*, 0x4AD830, CEventDamage*, CEntity *, unsigned int, eWeaponType, ePedPieceTypes, unsigned char, bool, bool>(this, source, startTime, weaponType, pieceHit, direction, a7, bPedInVehicle);
+    return plugin::CallMethodAndReturn<CEventDamage*, 0x4AD830, CEventDamage*, CEntity *, uint32, eWeaponType, ePedPieceTypes, uint8, bool, bool>(this, source, startTime, weaponType, pieceHit, direction, a7, bPedInVehicle);
 #else
     this->CEventDamage::CEventDamage(source, startTime, weaponType, pieceHit, direction, a7, bPedInVehicle);
     return this;
@@ -86,13 +86,13 @@ eEventType CEventDamage::GetEventType() const {
 }
 
 // 0x4AD950
-int CEventDamage::GetEventPriority() const {
+int32 CEventDamage::GetEventPriority() const {
     return CEventDamage::GetEventPriority_Reversed();
 }
 
-int CEventDamage::GetLifeTime() {
+int32 CEventDamage::GetLifeTime() {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(__thiscall*)(CEvent*))0x4AD920)(this);
+    return ((int32(__thiscall*)(CEvent*))0x4AD920)(this);
 #else
     return CEventDamage::GetLifeTime_Reversed();
 #endif
@@ -380,16 +380,16 @@ void CEventDamage::ProcessDamage(CPed* ped) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x4B3A20, CEventDamage*, CPed*>(this, ped);
 #else
-    int boneFrameId = 0;
+    int32 boneFrameId = 0;
     CEventDamage::ComputeBodyPartToRemove(&boneFrameId);
     if (boneFrameId)
         ped->RemoveBodyPart(boneFrameId, m_ucDirection);
 #endif
 }
 
-void CEventDamage::ComputeBodyPartToRemove(int* pBoneFrameId) {
+void CEventDamage::ComputeBodyPartToRemove(int32* pBoneFrameId) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4ADC10, CEventDamage*, int*>(this, pBoneFrameId);
+    plugin::CallMethod<0x4ADC10, CEventDamage*, int32*>(this, pBoneFrameId);
 #else
     *pBoneFrameId = 0;
     switch (m_weaponType)
@@ -420,7 +420,7 @@ void CEventDamage::ComputeBodyPartToRemove(int* pBoneFrameId) {
     case WEAPON_RLAUNCHER_HS:
     case WEAPON_EXPLOSION: {
         if (m_damageResponse.m_bForceDeath) {
-            int boneArray[5] = {3, 8, 2, 4, 7};
+            int32 boneArray[5] = {3, 8, 2, 4, 7};
             *pBoneFrameId = boneArray[CGeneral::GetRandomNumberInRange(0, 5)];
         }
         break;
@@ -834,7 +834,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                     bPlayBodyPartHitAnim = false;
                 }
                 else {
-                    pPlayerData->m_nHitAnimDelayTimer = static_cast<unsigned int>(CTimer::m_snTimeInMilliseconds + 2500.0f);
+                    pPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(CTimer::m_snTimeInMilliseconds + 2500.0f);
                 }
             }
             if (bPlayBodyPartHitAnim) {
@@ -849,7 +849,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                     }
                 }
                 else {
-                    int currentEventAnimId = -1;
+                    int32 currentEventAnimId = -1;
                     CEvent* pCurrentEvent = ped->m_pIntelligence->m_eventHandler.m_history.GetCurrentEvent();
                     if (pCurrentEvent && pCurrentEvent->GetEventType() == EVENT_DAMAGE)
                         currentEventAnimId = static_cast<CEventDamage*>(pCurrentEvent)->m_nAnimID;
@@ -864,7 +864,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                             m_nAnimID = ANIM_ID_DAM_ARML_FRMFT;
                         if (m_nAnimID == currentEventAnimId) {
                             do {
-                                m_nAnimID = ANIM_ID_DAM_ARML_FRMBK - static_cast<unsigned int>((rand() * 0.000030517578f * -3.0f));
+                                m_nAnimID = ANIM_ID_DAM_ARML_FRMBK - static_cast<uint32>((rand() * 0.000030517578f * -3.0f));
                             } while (m_nAnimID == currentEventAnimId);
                         }
                         break;
@@ -948,9 +948,9 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
               CPlayerPedData * pPedPlayerData = ped->m_pPlayerData;
                 if (CTimer::m_snTimeInMilliseconds > pPedPlayerData->m_nHitAnimDelayTimer && ped->m_nPedState != PEDSTATE_DRIVING) {
                     if (m_weaponType == WEAPON_M4)
-                        pPedPlayerData->m_nHitAnimDelayTimer = static_cast<unsigned int>(CTimer::m_snTimeInMilliseconds + 2500.0f);
+                        pPedPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(CTimer::m_snTimeInMilliseconds + 2500.0f);
                     else
-                        pPedPlayerData->m_nHitAnimDelayTimer = static_cast<unsigned int>(CTimer::m_snTimeInMilliseconds + 1500.0f);
+                        pPedPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(CTimer::m_snTimeInMilliseconds + 1500.0f);
                 }
                 else {
                     m_nAnimID = ANIM_ID_NO_ANIMATION_SET;

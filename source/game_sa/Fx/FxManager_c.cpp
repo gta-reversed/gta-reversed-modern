@@ -95,8 +95,8 @@ void FxManager_c::UnloadFxProject() {
 }
 
 // 0x5C1F50
-FxSystemBP_c* FxManager_c::LoadFxSystemBP(char* filename, int file) {
-    return ((FxSystemBP_c * (__thiscall*)(FxManager_c*, char*, int))0x5C1F50)(this, filename, file);
+FxSystemBP_c* FxManager_c::LoadFxSystemBP(char* filename, int32 file) {
+    return ((FxSystemBP_c * (__thiscall*)(FxManager_c*, char*, int32))0x5C1F50)(this, filename, file);
 }
 
 // 0x4A9360
@@ -125,8 +125,8 @@ void FxManager_c::ReturnParticle(FxEmitterPrt_c* emitter) {
 }
 
 // 0x4A93C0
-FxEmitterPrt_c* FxManager_c::GetParticle(signed char arg0) {
-    return ((FxEmitterPrt_c * (__thiscall*)(FxManager_c*, signed char))0x4A93C0)(this, arg0);
+FxEmitterPrt_c* FxManager_c::GetParticle(int8 arg0) {
+    return ((FxEmitterPrt_c * (__thiscall*)(FxManager_c*, int8))0x4A93C0)(this, arg0);
 }
 
 // 0x4A9400

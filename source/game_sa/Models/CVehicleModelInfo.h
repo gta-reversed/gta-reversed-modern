@@ -69,14 +69,14 @@ enum eVehicleUpgradePosn {
     UPGRADE_NITRO,
 };
 
-enum class eCarColLineType : unsigned int {
+enum class eCarColLineType : uint32 {
     IGNORED = 0,
     GLOBAL_RGB = 1,
     CAR_2COL = 2,
     CAR_4COL = 3
 };
 
-enum class eCarModsLineType : unsigned int {
+enum class eCarModsLineType : uint32 {
     IGNORED = 0,
     LINK = 1,
     MODS = 2,
@@ -97,29 +97,29 @@ struct tRestoreEntry {
 VALIDATE_SIZE(tRestoreEntry, 0x8);
 
 union tVehicleCompsUnion {
-    unsigned int m_nComps;
+    uint32 m_nComps;
     struct {
-        unsigned int nExtraA_comp1 : 4;
-        unsigned int nExtraA_comp2 : 4;
-        unsigned int nExtraA_comp3 : 4;
-        unsigned int : 4;
+        uint32 nExtraA_comp1 : 4;
+        uint32 nExtraA_comp2 : 4;
+        uint32 nExtraA_comp3 : 4;
+        uint32 : 4;
 
-        unsigned int nExtraB_comp1 : 4;
-        unsigned int nExtraB_comp2 : 4;
-        unsigned int nExtraB_comp3 : 4;
-        unsigned int : 4;
+        uint32 nExtraB_comp1 : 4;
+        uint32 nExtraB_comp2 : 4;
+        uint32 nExtraB_comp3 : 4;
+        uint32 : 4;
     };
     struct {
-        unsigned int nExtraAComp : 12;
-        unsigned int nExtraARule : 4;
+        uint32 nExtraAComp : 12;
+        uint32 nExtraARule : 4;
 
-        unsigned int nExtraBComp : 12;
-        unsigned int nExtraBRule : 4;
+        uint32 nExtraBComp : 12;
+        uint32 nExtraBRule : 4;
     };
 
     struct {
-        unsigned int nExtraA : 16;
-        unsigned int nExtraB : 16;
+        uint32 nExtraA : 16;
+        uint32 nExtraB : 16;
     };
 };
 VALIDATE_SIZE(tVehicleCompsUnion, 0x4);
@@ -132,7 +132,7 @@ struct UpgradePosnDesc {
   public:
     CVector m_vPosition;
     CQuaternion m_qRotation;
-    int m_nParentComponentId;
+    int32 m_nParentComponentId;
 };
 VALIDATE_SIZE(UpgradePosnDesc, 0x20);
 
@@ -141,90 +141,92 @@ public:
     RpMaterial*        m_pPlateMaterial;
     char               m_szPlateText[8];
     char               field_30;
-    unsigned char      m_nPlateType;
+    uint8              m_nPlateType;
     char               m_szGameName[8];
     char               _pad3A[2];
-    unsigned int       m_nVehicleType;
+    uint32             m_nVehicleType;
     float              m_fWheelSizeFront;
     float              m_fWheelSizeRear;
-    short              m_nWheelModelIndex;
-    uint8_t            m_nHandlingId;
-    int8_t             field_4B;
-    unsigned char      m_nNumDoors;
+    int16              m_nWheelModelIndex;
+    uint8              m_nHandlingId;
+    int8               field_4B;
+    uint8              m_nNumDoors;
     eVehicleClass      m_nVehicleClass;
-    unsigned char      m_nFlags;
-    unsigned char      m_nWheelUpgradeClass;
-    unsigned char      m_nTimesUsed;
+    uint8              m_nFlags;
+    uint8              m_nWheelUpgradeClass;
+    uint8              m_nTimesUsed;
     char               field_51;
-    unsigned short     m_nFrq;
+    uint16             m_nFrq;
     tVehicleCompsUnion m_extraComps;
     float              m_fBikeSteerAngle;
 
     class CVehicleStructure {
-      public:
+    public:
         CVehicleStructure();
         ~CVehicleStructure();
-        static void* operator new(unsigned int size);
-        static void operator delete(void* data);
+        static void* operator new(uint32 size);
+        static void  operator delete(void* data);
 
-      public:
-        static constexpr int NUM_DUMMIES = 15;
-        static constexpr int NUM_UPGRADES = 18;
-        static constexpr int NUM_EXTRAS = 6;
+    public:
+        static constexpr int32 NUM_DUMMIES = 15;
+        static constexpr int32 NUM_UPGRADES = 18;
+        static constexpr int32 NUM_EXTRAS = 6;
 
-      public:
-        CVector m_avDummyPos[NUM_DUMMIES];
+    public:
+        CVector         m_avDummyPos[NUM_DUMMIES];
         UpgradePosnDesc m_aUpgrades[NUM_UPGRADES];
-        RpAtomic* m_apExtras[NUM_EXTRAS];
-        unsigned char m_nNumExtras;
-        unsigned int m_nMaskComponentsDamagable;
+        RpAtomic*       m_apExtras[NUM_EXTRAS];
+        uint8           m_nNumExtras;
+        uint32          m_nMaskComponentsDamagable;
 
-      public:
+    public:
         static CPool<CVehicleModelInfo::CVehicleStructure>*& m_pInfoPool;
 
-      public: // Helpers
-        inline bool IsDummyActive(eVehicleDummies dummy) const { return m_avDummyPos[dummy] != 0.0F; }
+    public: // Helpers
+        inline bool IsDummyActive(eVehicleDummies dummy) const {
+            return m_avDummyPos[dummy] != 0.0F;
+        }
 
     } * m_pVehicleStruct;
 
-    char          field_60[464];
-    RpMaterial*   m_apDirtMaterials[32];
-    unsigned char m_anPrimaryColors[8];
-    unsigned char m_anSecondaryColors[8];
-    unsigned char m_anTertiaryColors[8];
-    unsigned char m_anQuaternaryColors[8];
-    unsigned char m_nNumColorVariations;
-    unsigned char m_nLastColorVariation;
-    unsigned char m_nCurrentPrimaryColor;
-    unsigned char m_nCurrentSecondaryColor;
-    unsigned char m_nCurrentTertiaryColor;
-    unsigned char m_nCurrentQuaternaryColor;
-    short         m_anUpgrades[18];
-    short         m_anRemapTxds[4];
-    char          _pad302[2];
+    char        field_60[464];
+    RpMaterial* m_apDirtMaterials[32];
+    uint8       m_anPrimaryColors[8];
+    uint8       m_anSecondaryColors[8];
+    uint8       m_anTertiaryColors[8];
+    uint8       m_anQuaternaryColors[8];
+    uint8       m_nNumColorVariations;
+    uint8       m_nLastColorVariation;
+    uint8       m_nCurrentPrimaryColor;
+    uint8       m_nCurrentSecondaryColor;
+    uint8       m_nCurrentTertiaryColor;
+    uint8       m_nCurrentQuaternaryColor;
+    int16       m_anUpgrades[18];
+    int16       m_anRemapTxds[4];
+    char        _pad302[2];
 
     union {
         CAnimBlock* m_pAnimBlock;
         char* m_animBlockFileName;
-        unsigned int m_dwAnimBlockIndex;
+        uint32 m_dwAnimBlockIndex;
     };
 
     static class CLinkedUpgradeList {
       public:
-        short m_anUpgrade1[30];
-        short m_anUpgrade2[30];
-        unsigned int m_nLinksCount;
+        int16 m_anUpgrade1[30];
+        int16 m_anUpgrade2[30];
+        uint32 m_nLinksCount;
 
       public:
         // add upgrade with components upgrade1 and upgrade2
-        void AddUpgradeLink(std::int16_t upgrade1, std::int16_t upgrade2);
+        void AddUpgradeLink(int16 upgrade1, int16 upgrade2);
         // find linked upgrade for this upgrade. In this case upgrade param could be upgrade1 or upgrade2
-        std::int16_t FindOtherUpgrade(std::int16_t upgrade);
+        int16 FindOtherUpgrade(int16 upgrade);
     } & ms_linkedUpgrades;
 
     // vehicle components description tables
     // static RwObjectNameIdAssocation ms_vehicleDescs[12];
-    static constexpr int NUM_VEHICLE_MODEL_DESCS = 12;
+    static constexpr int32 NUM_VEHICLE_MODEL_DESCS = 12;
     static RwObjectNameIdAssocation* (&ms_vehicleDescs)[NUM_VEHICLE_MODEL_DESCS]; // use eVehicleType to access
 
     // remap texture
@@ -235,35 +237,35 @@ public:
     static RwTexture*(&ms_pLightsOnTexture);
 
     // color of currently rendered car
-    // static unsigned char ms_currentCol[4];
-    static constexpr int NUM_CURRENT_COLORS = 4;
-    static unsigned char (&ms_currentCol)[NUM_CURRENT_COLORS];
+    // static uint8 ms_currentCol[4];
+    static constexpr int32 NUM_CURRENT_COLORS = 4;
+    static uint8 (&ms_currentCol)[NUM_CURRENT_COLORS];
 
     // number of wheel upgrades available
-    // static short ms_numWheelUpgrades[4];
-    static constexpr int NUM_WHEELS = 4;
-    static short (&ms_numWheelUpgrades)[NUM_WHEELS];
+    // static int16 ms_numWheelUpgrades[4];
+    static constexpr int32 NUM_WHEELS = 4;
+    static int16 (&ms_numWheelUpgrades)[NUM_WHEELS];
 
-    static int (&ms_wheelFrameIDs)[NUM_WHEELS];
+    static int32 (&ms_wheelFrameIDs)[NUM_WHEELS];
 
     // wheels upgrades data
-    // static short ms_upgradeWheels[15][4];
-    static constexpr int NUM_WHEEL_UPGRADES = 15;
-    static short (&ms_upgradeWheels)[NUM_WHEEL_UPGRADES][NUM_WHEELS];
+    // static int16 ms_upgradeWheels[15][4];
+    static constexpr int32 NUM_WHEEL_UPGRADES = 15;
+    static int16 (&ms_upgradeWheels)[NUM_WHEEL_UPGRADES][NUM_WHEELS];
 
     // Light states for currently rendered car
-    static constexpr int NUM_LIGHTS = 4;
-    static unsigned char (&ms_lightsOn)[NUM_LIGHTS];
+    static constexpr int32 NUM_LIGHTS = 4;
+    static uint8 (&ms_lightsOn)[NUM_LIGHTS];
 
     // extras ids for next-spawned car
     // static char ms_compsUsed[2];
-    static constexpr int NUM_COMPS_USAGE = 2;
+    static constexpr int32 NUM_COMPS_USAGE = 2;
     static char (&ms_compsUsed)[NUM_COMPS_USAGE];
     static char (&ms_compsToUse)[NUM_COMPS_USAGE];
 
     // vehicle colours from carcols.dat
     // static CRGBA ms_vehicleColourTable[128];
-    static constexpr int NUM_VEHICLE_COLORS = 128;
+    static constexpr int32 NUM_VEHICLE_COLORS = 128;
     static CRGBA (&ms_vehicleColourTable)[NUM_VEHICLE_COLORS];
 
     static RwTextureCallBackFind& SavedTextureFindCallback;
@@ -297,26 +299,26 @@ public:
     // setup model render callbacks
     void SetAtomicRenderCallbacks();
     // set component flags
-    void SetVehicleComponentFlags(RwFrame* component, unsigned int flags);
+    void SetVehicleComponentFlags(RwFrame* component, uint32 flags);
     // get wheel position. Wheel is wheel id [0-3]. Local - get local offset (if false it will get world position)
-    void GetWheelPosn(int wheel, CVector& outVec, bool local);
+    void GetWheelPosn(int32 wheel, CVector& outVec, bool local);
     // get component local offset. Component is a frame hierarchy id. Returns true if component present
-    bool GetOriginalCompPosition(CVector& outVec, int component);
+    bool GetOriginalCompPosition(CVector& outVec, int32 component);
     // get vehicle extra with rules. Returns extra id.
-    int ChooseComponent();
+    int32 ChooseComponent();
     // get vehicle second extra with rules. Returns extra id.
-    int ChooseSecondComponent();
+    int32 ChooseSecondComponent();
     // check if upgrade is available
     bool IsUpgradeAvailable(eVehicleUpgradePosn upgrade);
     // set current vehicle colour for model
-    void SetVehicleColour(unsigned char prim, unsigned char sec, unsigned char tert, unsigned char quat);
+    void SetVehicleColour(uint8 prim, uint8 sec, uint8 tert, uint8 quat);
     // get color for car. variationShift determines how many color variations to skip.
     // For example, 1 will simply give you next color variation.
-    void ChooseVehicleColour(unsigned char& prim, unsigned char& sec, unsigned char& tert, unsigned char& quat, int variationShift);
+    void ChooseVehicleColour(uint8& prim, uint8& sec, uint8& tert, uint8& quat, int32 variationShift);
     // get num remaps in this model
-    int GetNumRemaps();
+    int32 GetNumRemaps();
     // add remap to model. Txd is id of tex dictionary.
-    void AddRemap(int txd);
+    void AddRemap(int32 txd);
     // setups rendering pipelines for atomics in model (CCustomCarEnvMapPipeline::CustomPipeAtomicSetup)
     void SetRenderPipelines();
     // gets car plate text
@@ -334,7 +336,7 @@ public:
     // setup environment map intensity for model
     void SetEnvMapCoeff(float coeff);
     // get num doors in this model
-    int GetNumDoors();
+    int32 GetNumDoors();
 
     // Static method's
     // setup lights states for currently rendered vehicle
@@ -362,7 +364,7 @@ public:
     static void ResetEditableMaterials(RpClump* clump);
     // this is used to disable _dam atomic and "enable" _ok atomic at vehicle model setup. Data is unused
     static RpAtomic* HideDamagedAtomicCB(RpAtomic* atomic, void* data);
-    // hide all atomics with state data (data is actually unsigned char)
+    // hide all atomics with state data (data is actually uint8)
     static RpAtomic* HideAllComponentsAtomicCB(RpAtomic* atomic, void* data);
     // check if material has alpha. Boolean result is stored to data (data is actually bool *)
     static RpMaterial* HasAlphaMaterialCB(RpMaterial* material, void* data);
@@ -378,39 +380,39 @@ public:
     static RpAtomic* SetAtomicRendererCB_Heli(RpAtomic* atomic, void* data);
     // setup train renderer. Data is unused
     static RpAtomic* SetAtomicRendererCB_Train(RpAtomic* atomic, void* data);
-    // setup objects flag. Data is actually flag (unsigned short)
+    // setup objects flag. Data is actually flag (uint16)
     static RwObject* SetAtomicFlagCB(RwObject* object, void* data);
-    // clear all atomic flag. Data is actually flag (unsigned short)
+    // clear all atomic flag. Data is actually flag (uint16)
     static RwObject* ClearAtomicFlagCB(RwObject* object, void* data);
     // adds wheel upgrade. This one is called from LoadVehicleUpgrades()
-    static void AddWheelUpgrade(int wheelSetNumber, int modelId);
+    static void AddWheelUpgrade(int32 wheelSetNumber, int32 modelId);
     // gets num upgrades for this set
-    static int GetWheelUpgrade(int wheelSetNumber, int wheelUpgradeNumber);
+    static int32 GetWheelUpgrade(int32 wheelSetNumber, int32 wheelUpgradeNumber);
     // gets wheel upgrade
-    static int GetNumWheelUpgrades(int wheelSetNumber);
+    static int32 GetNumWheelUpgrades(int32 wheelSetNumber);
     // do nothing
     static void DeleteVehicleColourTextures();
     // Set vehicle dirt textures
-    static void SetDirtTextures(CVehicleModelInfo* info, int dirtLevel);
+    static void SetDirtTextures(CVehicleModelInfo* info, int32 dirtLevel);
     // unloads 'white' texture
     static void ShutdownEnvironmentMaps();
-    // gets mat effect of this material. Data is actually int *
+    // gets mat effect of this material. Data is actually int32 *
     static RpMaterial* GetMatFXEffectMaterialCB(RpMaterial* material, void* data);
-    // sets mat effect for this material. Data is actually int
+    // sets mat effect for this material. Data is actually int32
     static RpMaterial* SetEnvironmentMapCB(RpMaterial* material, void* data);
-    // sets environment map intensity. Data is actually unsigned int
+    // sets environment map intensity. Data is actually uint32
     static RpMaterial* SetEnvMapCoeffCB(RpMaterial* material, void* data);
     // do nothing
     static RpAtomic* SetRenderPipelinesCB(RpAtomic* atomic, void* data);
     // gets max number of passengers for model
-    static int GetMaximumNumberOfPassengersFromNumberOfDoors(int modelId);
+    static int32 GetMaximumNumberOfPassengersFromNumberOfDoors(int32 modelId);
     // move all objects from data (it is actually RwFrame *) to frame
     static RwFrame* CollapseFramesCB(RwFrame* frame, void* data);
-    // setup environment map for atomic's materials. Data is actually int and it represents effect id
+    // setup environment map for atomic's materials. Data is actually int32 and it represents effect id
     static RpAtomic* SetEnvironmentMapAtomicCB(RpAtomic* atomic, void* data);
-    // setup environment map intensity for atomic with data (unsigned int)
+    // setup environment map intensity for atomic with data (uint32)
     static RpAtomic* SetEnvMapCoeffAtomicCB(RpAtomic* atomic, void* data);
-    static void AssignRemapTxd(const char* name, std::int16_t txdSlot);
+    static void AssignRemapTxd(const char* name, int16 txdSlot);
     static RpAtomic* StoreAtomicUsedMaterialsCB(RpAtomic* atomic, void* data); // data is RpMaterialList**
 
     static void SetupCommonData();
@@ -431,10 +433,10 @@ public:
 VALIDATE_SIZE(CVehicleModelInfo::CVehicleStructure, 0x314);
 VALIDATE_SIZE(CVehicleModelInfo, 0x308);
 
-static bool IsValidCompRule(int nRule);
-static int ChooseComponent(int rule, int comps);
-static int CountCompsInRule(int comps);
-static int GetListOfComponentsNotUsedByRules(unsigned int compRules, int numExtras, int* outList);
+static bool IsValidCompRule(int32 nRule);
+static int32 ChooseComponent(int32 rule, int32 comps);
+static int32 CountCompsInRule(int32 comps);
+static int32 GetListOfComponentsNotUsedByRules(uint32 compRules, int32 numExtras, int32* outList);
 static RpMaterial* RemoveWindowAlphaCB(RpMaterial* material, void* data); // data is RpMaterialList**
 static RwObject* GetOkAndDamagedAtomicCB(RwObject* object, void* data);   // data is &RpAtomic[2]
 static RpAtomic* atomicDefaultRenderCB(RpAtomic* atomic);
@@ -442,7 +444,7 @@ static RpAtomic* atomicDefaultRenderCB(RpAtomic* atomic);
 extern RwTexDictionary*& vehicleTxd;
 extern RwFrame*& carFrame;
 extern RwSurfaceProperties& gLightSurfProps;
-static constexpr int NUM_RESTORE_ENTRIES = 256;
+static constexpr int32 NUM_RESTORE_ENTRIES = 256;
 extern tRestoreEntry (&gRestoreEntries)[NUM_RESTORE_ENTRIES];
 extern RwTexture*& gpWhiteTexture;
 extern float& fEnvMapDefaultCoeff;

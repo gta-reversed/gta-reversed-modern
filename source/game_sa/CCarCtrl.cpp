@@ -7,11 +7,11 @@
 
 #include "StdInc.h"
 
-unsigned int& CCarCtrl::NumLawEnforcerCars = *(unsigned int*)0x969098;
-unsigned int& CCarCtrl::NumParkedCars = *(unsigned int*)0x9690A0;
-unsigned int& CCarCtrl::NumAmbulancesOnDuty = *(unsigned int*)0x9690A8;
-unsigned int& CCarCtrl::NumFireTrucksOnDuty = *(unsigned int*)0x9690AC;
-unsigned int& CCarCtrl::MaxNumberOfCarsInUse = *(unsigned int*)0x8A5B24;
+uint32& CCarCtrl::NumLawEnforcerCars = *(uint32*)0x969098;
+uint32& CCarCtrl::NumParkedCars = *(uint32*)0x9690A0;
+uint32& CCarCtrl::NumAmbulancesOnDuty = *(uint32*)0x9690A8;
+uint32& CCarCtrl::NumFireTrucksOnDuty = *(uint32*)0x9690AC;
+uint32& CCarCtrl::MaxNumberOfCarsInUse = *(uint32*)0x8A5B24;
 bool& CCarCtrl::bCarsGeneratedAroundCamera = *(bool*)0x56E250;
 
 void CCarCtrl::InjectHooks()
@@ -22,26 +22,26 @@ void CCarCtrl::InjectHooks()
 }
 
 // 0x421970
-int CCarCtrl::ChooseBoatModel() {
-    return plugin::CallAndReturn<int, 0x421970>();
+int32 CCarCtrl::ChooseBoatModel() {
+    return plugin::CallAndReturn<int32, 0x421970>();
 }
 
 // 0x421900
-int CCarCtrl::ChooseCarModelToLoad(int arg1) {
-    return plugin::CallAndReturn<int, 0x421900, int>(arg1);
+int32 CCarCtrl::ChooseCarModelToLoad(int32 arg1) {
+    return plugin::CallAndReturn<int32, 0x421900, int32>(arg1);
 }
 
-int CCarCtrl::ChooseGangCarModel(int loadedCarGroupId)
+int32 CCarCtrl::ChooseGangCarModel(int32 loadedCarGroupId)
 {
     return CPopulation::PickGangCar(loadedCarGroupId);
 }
 
 // 0x424CE0
-int CCarCtrl::ChooseModel(int* arg1) {
-    return plugin::CallAndReturn<int, 0x424CE0, int*>(arg1);
+int32 CCarCtrl::ChooseModel(int32* arg1) {
+    return plugin::CallAndReturn<int32, 0x424CE0, int32*>(arg1);
 }
 
-int CCarCtrl::ChoosePoliceCarModel(unsigned int ignoreLvpd1Model) {
+int32 CCarCtrl::ChoosePoliceCarModel(uint32 ignoreLvpd1Model) {
     CWanted* playerWanted = FindPlayerWanted(-1);
     if (playerWanted->AreSwatRequired() 
         && CStreaming::ms_aInfoForModel[MODEL_ENFORCER].m_nLoadState == LOADSTATE_LOADED 
@@ -76,7 +76,7 @@ void CCarCtrl::ClipTargetOrientationToLink(CVehicle* pVehicle, CCarPathLinkAddre
 }
 
 // 0x431F80
-CVehicle* CCarCtrl::CreateCarForScript(int modelid, CVector posn, unsigned char doMissionCleanup) {
+CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, uint8 doMissionCleanup) {
     if (CModelInfo::IsBoatModel(modelid))
     {
         auto* pBoat = new CBoat(modelid, eVehicleCreatedBy::MISSION_VEHICLE);
@@ -156,13 +156,13 @@ CVehicle* CCarCtrl::CreateCarForScript(int modelid, CVector posn, unsigned char 
 }
 
 // 0x42C740
-bool CCarCtrl::CreateConvoy(CVehicle* pVehicle, int arg2) {
-    return plugin::CallAndReturn<bool, 0x42C740, CVehicle*, int>(pVehicle, arg2);
+bool CCarCtrl::CreateConvoy(CVehicle* pVehicle, int32 arg2) {
+    return plugin::CallAndReturn<bool, 0x42C740, CVehicle*, int32>(pVehicle, arg2);
 }
 
 // 0x42C2B0
-bool CCarCtrl::CreatePoliceChase(CVehicle* pVehicle, int arg2, CNodeAddress NodeAddress) {
-    return plugin::CallAndReturn<bool, 0x42C2B0, CVehicle*, int, CNodeAddress>(pVehicle, arg2, NodeAddress);
+bool CCarCtrl::CreatePoliceChase(CVehicle* pVehicle, int32 arg2, CNodeAddress NodeAddress) {
+    return plugin::CallAndReturn<bool, 0x42C2B0, CVehicle*, int32, CNodeAddress>(pVehicle, arg2, NodeAddress);
 }
 
 // 0x428040
@@ -211,8 +211,8 @@ float CCarCtrl::FindPercDependingOnDistToLink(CVehicle* pVehicle, CCarPathLinkAd
 }
 
 // 0x421770
-int CCarCtrl::FindSequenceElement(int arg1) {
-    return plugin::CallAndReturn<int, 0x421770, int>(arg1);
+int32 CCarCtrl::FindSequenceElement(int32 arg1) {
+    return plugin::CallAndReturn<int32, 0x421770, int32>(arg1);
 }
 
 // 0x4224E0
@@ -260,8 +260,8 @@ void CCarCtrl::GenerateEmergencyServicesCar() {
 }
 
 // 0x42B7D0
-bool CCarCtrl::GenerateOneEmergencyServicesCar(unsigned int modelID, CVector posn) {
-    return plugin::CallAndReturn<bool, 0x42B7D0, unsigned int, CVector>(modelID, posn);
+bool CCarCtrl::GenerateOneEmergencyServicesCar(uint32 modelID, CVector posn) {
+    return plugin::CallAndReturn<bool, 0x42B7D0, uint32, CVector>(modelID, posn);
 }
 
 // 0x430050
@@ -300,8 +300,8 @@ void CCarCtrl::GetAIPlaneToDoDogFightAgainstPlayer(CAutomobile* pAutomobile) {
 }
 
 // 0x421440
-CVehicle* CCarCtrl::GetNewVehicleDependingOnCarModel(int modelID, unsigned char createdBy) {
-    return plugin::CallAndReturn<CVehicle*, 0x421440, int, unsigned char>(modelID, createdBy);
+CVehicle* CCarCtrl::GetNewVehicleDependingOnCarModel(int32 modelID, uint8 createdBy) {
+    return plugin::CallAndReturn<CVehicle*, 0x421440, int32, uint8>(modelID, createdBy);
 }
 
 // 0x4212E0
@@ -310,8 +310,8 @@ void CCarCtrl::Init() {
 }
 
 // 0x421740
-void CCarCtrl::InitSequence(int SequenceElements) {
-    plugin::Call<0x421740, int>(SequenceElements);
+void CCarCtrl::InitSequence(int32 SequenceElements) {
+    plugin::Call<0x421740, int32>(SequenceElements);
 }
 
 // 0x42C250
@@ -415,18 +415,18 @@ void CCarCtrl::ScanForPedDanger(CVehicle* pVehicle) {
 }
 
 // 0x42FBC0
-bool CCarCtrl::ScriptGenerateOneEmergencyServicesCar(unsigned int modelID, CVector posn) {
-    return plugin::CallAndReturn<bool, 0x42FBC0, unsigned int, CVector>(modelID, posn);
+bool CCarCtrl::ScriptGenerateOneEmergencyServicesCar(uint32 modelID, CVector posn) {
+    return plugin::CallAndReturn<bool, 0x42FBC0, uint32, CVector>(modelID, posn);
 }
 
 // 0x4342A0
-void CCarCtrl::SetCoordsOfScriptCar(CVehicle* pVehicle, float x, float y, float z, unsigned char arg5, unsigned char arg6) {
-    plugin::Call<0x4342A0, CVehicle*, float, float, float, unsigned char, unsigned char>(pVehicle, x, y, z, arg5, arg6);
+void CCarCtrl::SetCoordsOfScriptCar(CVehicle* pVehicle, float x, float y, float z, uint8 arg5, uint8 arg6) {
+    plugin::Call<0x4342A0, CVehicle*, float, float, float, uint8, uint8>(pVehicle, x, y, z, arg5, arg6);
 }
 
 // 0x4217C0
-void CCarCtrl::SetUpDriverAndPassengersForVehicle(CVehicle* pVehicle, int arg2, int arg3, bool arg4, bool arg5, int passengersNum) {
-    plugin::Call<0x4217C0, CVehicle*, int, int, bool, bool, int>(pVehicle, arg2, arg3, arg4, arg5, passengersNum);
+void CCarCtrl::SetUpDriverAndPassengersForVehicle(CVehicle* pVehicle, int32 arg2, int32 arg3, bool arg4, bool arg5, int32 passengersNum) {
+    plugin::Call<0x4217C0, CVehicle*, int32, int32, bool, bool, int32>(pVehicle, arg2, arg3, arg4, arg5, passengersNum);
 }
 
 // 0x432420
@@ -625,8 +625,8 @@ void CCarCtrl::TriggerDogFightMoves(CVehicle* pVehicle1, CVehicle* pVehicle2) {
 }
 
 // 0x424000
-void CCarCtrl::UpdateCarCount(CVehicle* pVehicle, unsigned char bDecrease) {
-    plugin::Call<0x424000, CVehicle*, unsigned char>(pVehicle, bDecrease);
+void CCarCtrl::UpdateCarCount(CVehicle* pVehicle, uint8 bDecrease) {
+    plugin::Call<0x424000, CVehicle*, uint8>(pVehicle, bDecrease);
 }
 
 // 0x436540

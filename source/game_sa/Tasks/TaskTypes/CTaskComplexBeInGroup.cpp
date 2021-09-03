@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-CTaskComplexBeInGroup::CTaskComplexBeInGroup(std::int32_t groupId, bool isLeader)
+CTaskComplexBeInGroup::CTaskComplexBeInGroup(int32 groupId, bool isLeader)
 {
     m_groupId = groupId;
     m_ped = 0;
@@ -18,7 +18,7 @@ CTask* CTaskComplexBeInGroup::Clone()
 
 bool CTaskComplexBeInGroup::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 { 
-    return plugin::CallMethodAndReturn<bool, 0x632EB0, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x632EB0, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
 }
 
 CTask* CTaskComplexBeInGroup::CreateNextSubTask(CPed* ped)

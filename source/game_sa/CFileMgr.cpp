@@ -145,7 +145,7 @@ void CFileMgr::Initialise()
 }
 
 // 0x538730
-int CFileMgr::ChangeDir(const char *path)
+int32 CFileMgr::ChangeDir(const char *path)
 {
     memset(ms_dirName, 0, DIRNAMELENGTH);
 
@@ -169,7 +169,7 @@ int CFileMgr::ChangeDir(const char *path)
             lastPos[1] = '\\';
     }
 
-    int r;
+    int32 r;
     if (WindowsCharset != CP_UTF8)
     {
         std::wstring pathWide = UTF8ToUnicode(ms_dirName);
@@ -182,7 +182,7 @@ int CFileMgr::ChangeDir(const char *path)
 }
 
 // 0x5387D0
-int CFileMgr::SetDir(const char *path)
+int32 CFileMgr::SetDir(const char *path)
 {
     memset(ms_dirName, 0, DIRNAMELENGTH);
     memcpy(ms_dirName, ms_rootDirName, strlen(ms_rootDirName));
@@ -201,7 +201,7 @@ int CFileMgr::SetDir(const char *path)
             lastPos[1] = '\\';
     }
 
-    int r;
+    int32 r;
     if (WindowsCharset != CP_UTF8)
     {
         std::wstring pathWide = UTF8ToUnicode(ms_dirName);
@@ -214,7 +214,7 @@ int CFileMgr::SetDir(const char *path)
 }
 
 // 0x538860
-int CFileMgr::SetDirMyDocuments()
+int32 CFileMgr::SetDirMyDocuments()
 {
     char *userDir = InitUserDirectories();
     if (strlen(userDir) >= DIRNAMELENGTH)
@@ -225,7 +225,7 @@ int CFileMgr::SetDirMyDocuments()
 
     strcpy(ms_dirName, userDir);
 
-    int r;
+    int32 r;
     if (WindowsCharset != CP_UTF8)
     {
         std::wstring pathWide = UTF8ToUnicode(ms_dirName);
@@ -238,7 +238,7 @@ int CFileMgr::SetDirMyDocuments()
 }
 
 // 0x538890
-size_t CFileMgr::LoadFile(const char *path, unsigned char *buf, size_t size, const char *mode)
+size_t CFileMgr::LoadFile(const char *path, uint8 *buf, size_t size, const char *mode)
 {
     FILESTREAM f = CFileMgr::OpenFile(path, mode);
     if (f == nullptr)
@@ -291,28 +291,28 @@ size_t CFileMgr::Write(FILESTREAM file, const void *buf, size_t size)
 }
 
 // 0x538990
-bool CFileMgr::Seek(FILESTREAM file, long offset, int origin)
+bool CFileMgr::Seek(FILESTREAM file, long offset, int32 origin)
 {
     // MikuAuahDark: Pretty sure it shouldn't be ret != 0
     return fseek(file, offset, origin) != 0;
 }
 
 // 0x5389b0
-bool CFileMgr::ReadLine(FILESTREAM file, char *str, int num)
+bool CFileMgr::ReadLine(FILESTREAM file, char *str, int32 num)
 {
     return fgets(str, num, file) != nullptr;
 }
 
 // 0x5389d0
-int CFileMgr::CloseFile(FILESTREAM file)
+int32 CFileMgr::CloseFile(FILESTREAM file)
 {
     return fclose(file);
 }
 
 // 0x5389e0
-int CFileMgr::GetFileLength(FILESTREAM file)
+int32 CFileMgr::GetFileLength(FILESTREAM file)
 {
-    int currentPos, size;
+    int32 currentPos, size;
     // MikuAuahDark: The actual implementation uses RwOsGetFileInterface
     // but for sake of portability, default stdio functions is used.
     /*
@@ -334,7 +334,7 @@ int CFileMgr::GetFileLength(FILESTREAM file)
 }
 
 // 0x538a20
-int CFileMgr::Tell(FILESTREAM file)
+int32 CFileMgr::Tell(FILESTREAM file)
 {
     /*
     RwFileFunctions *functions = RwOsGetFileInterface();

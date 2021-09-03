@@ -14,24 +14,24 @@ struct RpAtomic;
 struct RpClump;
 
 struct tCompSearchStructByName {
-    char* m_pName;
+    char*    m_pName;
     RwFrame* m_pFrame;
 
     inline tCompSearchStructByName(char* name, RwFrame* frame) : m_pName(name), m_pFrame(frame) {}
 };
 
 struct tCompSearchStructById {
-    int32_t m_nId;
+    int32    m_nId;
     RwFrame* m_pFrame;
 
-    inline tCompSearchStructById(int32_t id, RwFrame* frame) : m_nId(id), m_pFrame(frame) {}
+    inline tCompSearchStructById(int32 id, RwFrame* frame) : m_nId(id), m_pFrame(frame) {}
 };
 
 class CClumpModelInfo : public CBaseModelInfo {
 public:
     union {
-        char*        m_animFileName;
-        unsigned int m_dwAnimFileIndex;
+        char*  m_animFileName;
+        uint32 m_dwAnimFileIndex;
     };
 
 public:
@@ -44,7 +44,7 @@ public:
     void Init() override;
     void Shutdown() override;
     void DeleteRwObject() override;
-    unsigned int GetRwModelType() override;
+    uint32 GetRwModelType() override;
     RwObject* CreateInstance() override;
     RwObject* CreateInstance(RwMatrix* matrix) override;
     void SetAnimFile(char const* filename) override;
@@ -60,7 +60,7 @@ public:
     void Init_Reversed();
     void Shutdown_Reversed();
     void DeleteRwObject_Reversed();
-    unsigned int GetRwModelType_Reversed();
+    uint32 GetRwModelType_Reversed();
     RwObject* CreateInstance_Reversed();
     RwObject* CreateInstance_Reversed(RwMatrix* matrix);
     void SetAnimFile_Reversed(char const* filename);
@@ -82,11 +82,11 @@ public:
     static RwFrame* FindFrameFromNameWithoutIdCB(RwFrame* frame, void* searchData);
     static RwFrame* FindFrameFromIdCB(RwFrame* frame, void* searchData);
     static RwFrame* FillFrameArrayCB(RwFrame* frame, void* data);
-    static RwFrame* GetFrameFromId(RpClump* clump, int id);
+    static RwFrame* GetFrameFromId(RpClump* clump, int32 id);
     static RwFrame* GetFrameFromName(RpClump* clump, char* name);
     static void FillFrameArray(RpClump* clump, RwFrame** frames);
 };
 
-void SetClumpModelInfoFlags(CClumpModelInfo* modelInfo, unsigned int dwFlags);
+void SetClumpModelInfoFlags(CClumpModelInfo* modelInfo, uint32 dwFlags);
 
 VALIDATE_SIZE(CClumpModelInfo, 0x24);

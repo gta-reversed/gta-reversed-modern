@@ -57,7 +57,7 @@ float CAEAudioEnvironment::GetDirectionalMikeAttenuation(const CVector& soundDir
     return (1.0F - invLerp(-fCutoffFrequency, fCutoffFrequency, freq)) * fAttenuationMult;
 }
 
-void CAEAudioEnvironment::GetReverbEnvironmentAndDepth(signed char* reverbEnv, int32* depth) {
+void CAEAudioEnvironment::GetReverbEnvironmentAndDepth(int8* reverbEnv, int32* depth) {
     if (CWeather::UnderWaterness >= 0.5F) {
         *reverbEnv = 22;
         *depth = -12;

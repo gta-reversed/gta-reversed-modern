@@ -25,8 +25,8 @@ void Fx_c::Update(RwCamera* camera, float timeDelta) {
 }
 
 // 0x49E650
-void Fx_c::Render(RwCamera* camera, unsigned char arg1) {
-    ((void(__thiscall*)(Fx_c*, RwCamera*, unsigned char))0x49E650)(this, camera, arg1);
+void Fx_c::Render(RwCamera* camera, uint8 arg1) {
+    ((void(__thiscall*)(Fx_c*, RwCamera*, uint8))0x49E650)(this, camera, arg1);
 }
 
 // 0x49E660
@@ -70,18 +70,18 @@ void Fx_c::Reset() {
 }
 
 // 0x49EB00
-void Fx_c::AddBlood(CVector& origin, CVector& direction, int amount, float arg3) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int, float))0x49EB00)(this, origin, direction, amount, arg3);
+void Fx_c::AddBlood(CVector& origin, CVector& direction, int32 amount, float arg3) {
+    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32, float))0x49EB00)(this, origin, direction, amount, arg3);
 }
 
 // 0x49EE10
-void Fx_c::AddWood(CVector& origin, CVector& direction, int amount, float arg3) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int, float))0x49EE10)(this, origin, direction, amount, arg3);
+void Fx_c::AddWood(CVector& origin, CVector& direction, int32 amount, float arg3) {
+    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32, float))0x49EE10)(this, origin, direction, amount, arg3);
 }
 
 // 0x49F040
-void Fx_c::AddSparks(CVector& origin, CVector& direction, float force, int amount, CVector across, unsigned char sparksType, float spread, float life) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, float, int, CVector, unsigned char, float, float))0x49F040)(this, origin, direction, force, amount, across, sparksType, spread, life);
+void Fx_c::AddSparks(CVector& origin, CVector& direction, float force, int32 amount, CVector across, uint8 sparksType, float spread, float life) {
+    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, float, int32, CVector, uint8, float, float))0x49F040)(this, origin, direction, force, amount, across, sparksType, spread, life);
 }
 
 // 0x49F300
@@ -90,53 +90,53 @@ void Fx_c::AddTyreBurst(CVector& position, CVector& velocity) {
 }
 
 // 0x49F3D0
-void Fx_c::AddBulletImpact(CVector& position, CVector& direction, int bulletFxType, int amount, float arg4) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int, int, float))0x49F3D0)(this, position, direction, bulletFxType, amount, arg4);
+void Fx_c::AddBulletImpact(CVector& position, CVector& direction, int32 bulletFxType, int32 amount, float arg4) {
+    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32, int32, float))0x49F3D0)(this, position, direction, bulletFxType, amount, arg4);
 }
 
 // 0x49F670
-void Fx_c::AddPunchImpact(CVector& position, CVector& velocity, int arg2) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int))0x49F670)(this, position, velocity, arg2);
+void Fx_c::AddPunchImpact(CVector& position, CVector& velocity, int32 arg2) {
+    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32))0x49F670)(this, position, velocity, arg2);
 }
 
 // 0x49F750
-void Fx_c::AddDebris(CVector& position, RwRGBA& color, float scale, int amount) {
-    ((void(__thiscall*)(Fx_c*, CVector&, RwRGBA&, float, int))0x49F750)(this, position, color, scale, amount);
+void Fx_c::AddDebris(CVector& position, RwRGBA& color, float scale, int32 amount) {
+    ((void(__thiscall*)(Fx_c*, CVector&, RwRGBA&, float, int32))0x49F750)(this, position, color, scale, amount);
 }
 
 // 0x49F970
-void Fx_c::AddGlass(CVector& position, RwRGBA& color, float scale, int amount) {
-    ((void(__thiscall*)(Fx_c*, CVector&, RwRGBA&, float, int))0x49F970)(this, position, color, scale, amount);
+void Fx_c::AddGlass(CVector& position, RwRGBA& color, float scale, int32 amount) {
+    ((void(__thiscall*)(Fx_c*, CVector&, RwRGBA&, float, int32))0x49F970)(this, position, color, scale, amount);
 }
 
 // 0x49FB30
-void Fx_c::AddWheelSpray(CVehicle* vehicle, CVector position, unsigned char arg2, unsigned char arg3, float arg4) {
-    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, unsigned char, unsigned char, float))0x49FB30)(this, vehicle, position, arg2, arg3, arg4);
+void Fx_c::AddWheelSpray(CVehicle* vehicle, CVector position, uint8 arg2, uint8 arg3, float arg4) {
+    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, uint8, float))0x49FB30)(this, vehicle, position, arg2, arg3, arg4);
 }
 
 // 0x49FF20
-void Fx_c::AddWheelGrass(CVehicle* vehicle, CVector position, unsigned char arg2, float arg3) {
-    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, unsigned char, float))0x49FF20)(this, vehicle, position, arg2, arg3);
+void Fx_c::AddWheelGrass(CVehicle* vehicle, CVector position, uint8 arg2, float arg3) {
+    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x49FF20)(this, vehicle, position, arg2, arg3);
 }
 
 // 0x4A0170
-void Fx_c::AddWheelGravel(CVehicle* vehicle, CVector position, unsigned char arg2, float arg3) {
-    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, unsigned char, float))0x4A0170)(this, vehicle, position, arg2, arg3);
+void Fx_c::AddWheelGravel(CVehicle* vehicle, CVector position, uint8 arg2, float arg3) {
+    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x4A0170)(this, vehicle, position, arg2, arg3);
 }
 
 // 0x4A03C0
-void Fx_c::AddWheelMud(CVehicle* vehicle, CVector position, unsigned char arg2, float arg3) {
-    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, unsigned char, float))0x4A03C0)(this, vehicle, position, arg2, arg3);
+void Fx_c::AddWheelMud(CVehicle* vehicle, CVector position, uint8 arg2, float arg3) {
+    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x4A03C0)(this, vehicle, position, arg2, arg3);
 }
 
 // 0x4A0610
-void Fx_c::AddWheelSand(CVehicle* vehicle, CVector position, unsigned char arg2, float arg3) {
-    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, unsigned char, float))0x4A0610)(this, vehicle, position, arg2, arg3);
+void Fx_c::AddWheelSand(CVehicle* vehicle, CVector position, uint8 arg2, float arg3) {
+    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x4A0610)(this, vehicle, position, arg2, arg3);
 }
 
 // 0x4A09C0
-void Fx_c::AddWheelDust(CVehicle* vehicle, CVector position, unsigned char arg2, float arg3) {
-    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, unsigned char, float))0x4A09C0)(this, vehicle, position, arg2, arg3);
+void Fx_c::AddWheelDust(CVehicle* vehicle, CVector position, uint8 arg2, float arg3) {
+    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x4A09C0)(this, vehicle, position, arg2, arg3);
 }
 
 // 0x4A0D70
@@ -190,13 +190,13 @@ void Fx_c::Exit() {
 }
 
 // 0x4A13B0
-void RenderBegin(RwRaster* raster, RwMatrix* transform, unsigned int transformRenderFlags) {
-    ((void(__cdecl*)(RwRaster*, RwMatrix*, unsigned int))0x4A13B0)(raster, transform, transformRenderFlags);
+void RenderBegin(RwRaster* raster, RwMatrix* transform, uint32 transformRenderFlags) {
+    ((void(__cdecl*)(RwRaster*, RwMatrix*, uint32))0x4A13B0)(raster, transform, transformRenderFlags);
 }
 
 // 0x4A1410
-void RenderAddTri(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float u1, float v1, float u2, float v2, float u3, float v3, int r1, int g1, int b1, int a1, int r2, int g2, int b2, int a2, int r3, int g3, int b3, int a3) {
-    ((void(__cdecl*)(float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, int, int, int, int, int, int, int, int, int, int, int, int))0x4A1410)(x1, y1, z1, x2, y2, z2, x3, y3, z3, u1, v1, u2, v2, u3, v3, r1, g1, b1, a1, r2, g2, b2, a2, r3, g3, b3, a3);
+void RenderAddTri(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float u1, float v1, float u2, float v2, float u3, float v3, int32 r1, int32 g1, int32 b1, int32 a1, int32 r2, int32 g2, int32 b2, int32 a2, int32 r3, int32 g3, int32 b3, int32 a3) {
+    ((void(__cdecl*)(float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, int32, int32, int32, int32, int32, int32, int32, int32, int32, int32, int32, int32))0x4A1410)(x1, y1, z1, x2, y2, z2, x3, y3, z3, u1, v1, u2, v2, u3, v3, r1, g1, b1, a1, r2, g2, b2, a2, r3, g3, b3, a3);
 }
 
 // 0x4A1600

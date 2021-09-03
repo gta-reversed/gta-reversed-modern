@@ -5,7 +5,7 @@ void CTaskComplexPartnerChat::InjectHooks()
     ReversibleHooks::Install("CTaskComplexPartnerChat", "CTaskComplexPartnerChat", 0x684290, &CTaskComplexPartnerChat::Constructor);
 }
 
-CTaskComplexPartnerChat::CTaskComplexPartnerChat(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, std::int8_t updateDirectionCount, bool conversationEnabled, bool a8, CVector point) :
+CTaskComplexPartnerChat::CTaskComplexPartnerChat(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, int8 updateDirectionCount, bool conversationEnabled, bool a8, CVector point) :
     CTaskComplexPartner(commandName, partner, leadSpeaker, distanceMultiplier, false, updateDirectionCount, point)
 {
     m_taskId = TASK_COMPLEX_PARTNER_CHAT;
@@ -23,7 +23,7 @@ CTaskComplexPartnerChat::~CTaskComplexPartnerChat()
         CAEPedSpeechAudioEntity::ReleasePedConversation();
 }
 
-CTaskComplexPartnerChat* CTaskComplexPartnerChat::Constructor(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, std::int8_t updateDirectionCount, bool conversationEnabled, bool a8, CVector point)
+CTaskComplexPartnerChat* CTaskComplexPartnerChat::Constructor(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, int8 updateDirectionCount, bool conversationEnabled, bool a8, CVector point)
 {
     this->CTaskComplexPartnerChat::CTaskComplexPartnerChat(commandName, partner, leadSpeaker, distanceMultiplier, updateDirectionCount, conversationEnabled, a8, point);
     return this;
@@ -32,7 +32,7 @@ CTaskComplexPartnerChat* CTaskComplexPartnerChat::Constructor(const char* comman
 
 bool CTaskComplexPartnerChat::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x682C60, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x682C60, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
 }
 
 CTaskComplexSequence* CTaskComplexPartnerChat::GetPartnerSequence()

@@ -27,7 +27,7 @@ enum eVehicleSoundType : int8 {
     VEHICLE_SOUND_SPECIAL          = 0xA,
 };
 
-enum eRadioType : char {
+enum eRadioType : int8 {
     RADIO_CIVILIAN  = 0x0,
     RADIO_SPECIAL   = 0x1,
     RADIO_UNKNOWN   = 0x2,

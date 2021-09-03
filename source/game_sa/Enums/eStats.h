@@ -10,7 +10,7 @@
     https://www.gtamodding.com/wiki/List_of_statistics_(SA)
 */
 
-enum eStats : unsigned short {
+enum eStats : uint16 {
     // FLOAT
     STAT_PROGRESS_MADE = 0,
     STAT_TOTAL_PROGRESS = 1,

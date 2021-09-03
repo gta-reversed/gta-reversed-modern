@@ -95,11 +95,11 @@ void CClumpModelInfo::DeleteRwObject_Reversed()
         CBaseModelInfo::DeleteCollisionModel();
 }
 
-unsigned int CClumpModelInfo::GetRwModelType()
+uint32 CClumpModelInfo::GetRwModelType()
 {
     return CClumpModelInfo::GetRwModelType_Reversed();
 }
-unsigned int CClumpModelInfo::GetRwModelType_Reversed()
+uint32 CClumpModelInfo::GetRwModelType_Reversed()
 {
     return rpCLUMP;
 }
@@ -236,7 +236,7 @@ void CClumpModelInfo::SetClump_Reversed(RpClump* clump)
 
             auto pGeometry = RpAtomicGetGeometry(pFirstAtomic);
             auto pSkin = RpSkinGeometryGetSkin(pGeometry);
-            for (int32_t i = 0; i < RpGeometryGetNumVertices(pGeometry); ++i) {
+            for (int32 i = 0; i < RpGeometryGetNumVertices(pGeometry); ++i) {
                 auto& pWeight = RpSkinGetVertexBoneWeights(pSkin)[i];
                 auto fRecip = 1.0F / (pWeight.w0 + pWeight.w1 + pWeight.w2 + pWeight.w3);
                 pWeight.w0 *= fRecip;
@@ -353,7 +353,7 @@ RwFrame* CClumpModelInfo::FillFrameArrayCB(RwFrame* frame, void* data)
     return frame;
 }
 
-RwFrame* CClumpModelInfo::GetFrameFromId(RpClump* clump, int id)
+RwFrame* CClumpModelInfo::GetFrameFromId(RpClump* clump, int32 id)
 {
     auto searchInfo = tCompSearchStructById(id, nullptr);
     RwFrameForAllChildren(RpClumpGetFrame(clump), CClumpModelInfo::FindFrameFromIdCB, &searchInfo);
@@ -372,7 +372,7 @@ void CClumpModelInfo::FillFrameArray(RpClump* clump, RwFrame** frames)
     RwFrameForAllChildren(RpClumpGetFrame(clump), CClumpModelInfo::FillFrameArrayCB, frames);
 }
 
-void SetClumpModelInfoFlags(CClumpModelInfo* modelInfo, unsigned int dwFlags)
+void SetClumpModelInfoFlags(CClumpModelInfo* modelInfo, uint32 dwFlags)
 {
     SetBaseModelInfoFlags(modelInfo, dwFlags);
 

@@ -5,18 +5,18 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #ifdef _DX9_SDK_INSTALLED
 #include "d3d9.h"
 #endif
 
 class D3DIndexDataBuffer {
 public:
-    unsigned int m_nFormat;
-    int field_4;
-    unsigned int m_nCapcacity;
-    unsigned int m_nNumDatasInBuffer;
-    unsigned int m_nSize;
+    uint32 m_nFormat;
+    int32  field_4;
+    uint32 m_nCapcacity;
+    uint32 m_nNumDatasInBuffer;
+    uint32 m_nSize;
 #ifdef _D3D9_H_
     IDirect3DIndexBuffer9 **m_apIndexData;
 #else
@@ -25,17 +25,17 @@ public:
 
     void Clear();
     void Destroy();
-    unsigned int GetTotalDataSize();
-    void Resize(unsigned int newCapacity);
-    void Setup(unsigned int format, int _f4, unsigned int capacity);
+    uint32 GetTotalDataSize();
+    void Resize(uint32 newCapacity);
+    void Setup(uint32 format, int32 _f4, uint32 capacity);
 #ifdef _D3D9_H_
     IDirect3DIndexBuffer9* Pop();
-    IDirect3DIndexBuffer9* Pop(unsigned int indexCount);
+    IDirect3DIndexBuffer9* Pop(uint32 indexCount);
     bool Push(IDirect3DIndexBuffer9* indexBuffer);
     bool PushWithoutIncreasingCounter(IDirect3DIndexBuffer9* indexBuffer);
 #else
     void* Pop();
-    void* Pop(unsigned int indexCount);
+    void* Pop(uint32 indexCount);
     bool Push(void* indexBuffer);
     bool PushWithoutIncreasingCounter(void* indexBuffer);
 #endif

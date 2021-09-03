@@ -29,28 +29,28 @@ enum eGangWarState {
 
 class CGangWars {
 public:
-    static int& ZoneInfoForTraining;
-    static int (&GangRatingStrength)[3]; // static int GangRatingStrength[3]
-    static int (&GangRatings)[3];        // static int GangRatings[3]
-    static int& FightTimer;
+    static int32& ZoneInfoForTraining;
+    static int32 (&GangRatingStrength)[3]; // static int32 GangRatingStrength[3]
+    static int32 (&GangRatings)[3];        // static int32 GangRatings[3]
+    static int32& FightTimer;
     static float& TimeTillNextAttack;
     static eGangAttackState& State2;
-    static int& Gang2;
-    static unsigned int& LastTimeInArea;
-    static int& WarFerocity;
+    static int32& Gang2;
+    static uint32& LastTimeInArea;
+    static int32& WarFerocity;
     static float& Provocation;
-    static unsigned int& TimeStarted;
+    static uint32& TimeStarted;
     static eGangWarState& State;
-    static int (&aSpecificZones)[6]; // static int aSpecificZones[6]
+    static int32 (&aSpecificZones)[6]; // static int32 aSpecificZones[6]
     static float& Difficulty;
-    static int& Gang1;
+    static int32& Gang1;
     static CZone*& pZoneToFightOver;
     static CZoneInfo*& pZoneInfoToFightOver;
     static bool& bGangWarsActive;
     static bool& bTrainingMission;
     static bool& bPlayerIsCloseby;
     static bool& bCanTriggerGangWarWhenOnAMission;
-    static int& NumSpecificZones;
+    static int32& NumSpecificZones;
     static CRadar*& RadarBlip;
     static float& TerritoryUnderControlPercentage;
     static bool& bIsPlayerOnAMission;
@@ -62,13 +62,13 @@ public:
 
     static void AddKillToProvocation(ePedType pedType);
     static bool AttackWaveOvercome();
-    static unsigned int CalculateTimeTillNextAttack();
+    static uint32 CalculateTimeTillNextAttack();
     static bool CanPlayerStartAGangWarHere(CZoneInfo* zoneInfo);
     static void CheerVictory();
     static void ClearSpecificZonesToTriggerGangWar();
     static void ClearTheStreets();
-    static bool CreateAttackWave(int warFerocity, int waveID);
-    static bool CreateDefendingGroup(int unused);
+    static bool CreateAttackWave(int32 warFerocity, int32 waveID);
+    static bool CreateDefendingGroup(int32 unused);
     static void DoStuffWhenPlayerVictorious();
     static bool DoesPlayerControlThisZone(CZoneInfo* zoneInfo);
     static bool DontCreateCivilians();
@@ -77,22 +77,22 @@ public:
     static bool GangWarGoingOn();
     static void InitAtStartOfGame();
     static void Load();
-    static void MakeEnemyGainInfluenceInZone(int gangId, int gangDensityIncreaser);
+    static void MakeEnemyGainInfluenceInZone(int32 gangId, int32 gangDensityIncreaser);
     static bool MakePlayerGainInfluenceInZone(float removeMult);
-    static bool PedStreamedInForThisGang(int gangId);
-    static bool PickStreamedInPedForThisGang(int gangId, int* outPedId);
+    static bool PedStreamedInForThisGang(int32 gangId);
+    static bool PickStreamedInPedForThisGang(int32 gangId, int32* outPedId);
     static bool PickZoneToAttack();
     static void ReleaseCarsInAttackWave();
-    static int ReleasePedsInAttackWave(bool isEndOfWar, bool restoreGangPedsAcquaintance);
+    static int32 ReleasePedsInAttackWave(bool isEndOfWar, bool restoreGangPedsAcquaintance);
     static void Save();
     static void SetGangWarsActive(bool bActive);
-    static void SetSpecificZoneToTriggerGangWar(int zoneId);
+    static void SetSpecificZoneToTriggerGangWar(int32 zoneId);
     static void StartDefensiveGangWar();
     static void StartOffensiveGangWar();
-    static void StrengthenPlayerInfluenceInZone(int groveDensityIncreaser);
+    static void StrengthenPlayerInfluenceInZone(int32 groveDensityIncreaser);
     static void SwitchGangWarsActive();
     static void TellGangMembersTo(bool bIsGangWarEnding);
-    static void TellStreamingWhichGangsAreNeeded(int* GangsBitFlags);
+    static void TellStreamingWhichGangsAreNeeded(int32* GangsBitFlags);
     static void Update();
     static void UpdateTerritoryUnderControlPercentage();
 };

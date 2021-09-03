@@ -32,16 +32,14 @@ public:
 
     static void Initialise();
 
-    static signed int ChooseGangPedModel(short gangID);
+    static signed int ChooseGangPedModel(int16 gangID);
     //! unused
     static bool GetWillAttackPlayerWithCops(ePedType gangID);
     static void Load();
     static void Save();
     //! unused
-    static void SetGangPedModelOverride(short gangID, signed char PedModelOverride);
-    static void SetGangWeapons(short gangID, int weapID1, int weapID2, int weapID3);
+    static void SetGangPedModelOverride(int16 gangID, int8 PedModelOverride);
+    static void SetGangWeapons(int16 gangID, int32 weapID1, int32 weapID2, int32 weapID3);
     //! unused
     static void SetWillAttackPlayerWithCops(ePedType gangID, bool bAttackPlayerWithCops);
 };
-
-//#include "meta/meta.CGangs.h"

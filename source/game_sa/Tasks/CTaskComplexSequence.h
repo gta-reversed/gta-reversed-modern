@@ -31,7 +31,7 @@ public:
     CTask* ControlSubTask(CPed* ped) override;
 
     void AddTask(CTask* pTask);
-    CTask* CreateNextSubTask(CPed* ped, int& taskIndex, int& repeatCount);
+    CTask* CreateNextSubTask(CPed* ped, int32& taskIndex, int32& repeatCount);
     void Flush();
 
 private:

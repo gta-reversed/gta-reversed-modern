@@ -3,30 +3,30 @@
 
 class CEventPedCollisionWithPed : public CEvent {
 public:
-    int16_t m_pieceType;
-    char field_E[2];
-    float m_damageIntensity;
-    CPed* m_victim;
+    int16   m_pieceType;
+    char    field_E[2];
+    float   m_damageIntensity;
+    CPed*   m_victim;
     CVector m_collisionImpactVelocity;
     CVector m_collisionPos;
-    int16_t m_movestate; // see eMoveState
-    int16_t m_victimMoveState; // see eMoveState
+    int16   m_movestate; // see eMoveState
+    int16   m_victimMoveState; // see eMoveState
 
 public:
-    CEventPedCollisionWithPed(int16_t pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16_t moveState, int16_t victimMoveState);
+    CEventPedCollisionWithPed(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState);
     ~CEventPedCollisionWithPed();
 
     eEventType GetEventType() const override { return EVENT_PED_COLLISION_WITH_PED; };
     bool TakesPriorityOver(const CEvent& refEvent) override;
-    int32_t GetEventPriority() const override { return 60; };
-    int32_t GetLifeTime() override { return 0; };
+    int32 GetEventPriority() const override { return 60; };
+    int32 GetLifeTime() override { return 0; };
     CEventPedCollisionWithPed* Clone() override { return new CEventPedCollisionWithPed(m_pieceType, m_damageIntensity, m_victim, &m_collisionImpactVelocity, &m_collisionPos, m_movestate, m_victimMoveState); };
     bool AffectsPed(CPed* ped) override;
 
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-    CEventPedCollisionWithPed* Constructor(int16_t pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16_t moveState, int16_t victimMoveState);
+    CEventPedCollisionWithPed* Constructor(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState);
 
     bool TakesPriorityOver_Reversed(const CEvent& refEvent);
     bool AffectsPed_Reversed(CPed* ped);
@@ -36,7 +36,7 @@ VALIDATE_SIZE(CEventPedCollisionWithPed, 0x34);
 
 class CEventPedCollisionWithPlayer : public CEventPedCollisionWithPed {
 public:
-    CEventPedCollisionWithPlayer(int16_t pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16_t moveState, int16_t victimMoveState);
+    CEventPedCollisionWithPlayer(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState);
     ~CEventPedCollisionWithPlayer() {};
 
     eEventType GetEventType() const override { return EVENT_PED_COLLISION_WITH_PLAYER; }
@@ -46,7 +46,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CEventPedCollisionWithPlayer* Constructor(int16_t pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16_t moveState, int16_t victimMoveState);
+    CEventPedCollisionWithPlayer* Constructor(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState);
 
 };
 
@@ -54,7 +54,7 @@ VALIDATE_SIZE(CEventPedCollisionWithPlayer, 0x34);
 
 class CEventPlayerCollisionWithPed : public CEventPedCollisionWithPed {
 public:
-    CEventPlayerCollisionWithPed(int16_t pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16_t moveState, int16_t victimMoveState);
+    CEventPlayerCollisionWithPed(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState);
     ~CEventPlayerCollisionWithPed() {}
 
 public:
@@ -65,31 +65,31 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CEventPlayerCollisionWithPed* Constructor(int16_t pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16_t moveState, int16_t victimMoveState);
+    CEventPlayerCollisionWithPed* Constructor(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState);
 };
 
 VALIDATE_SIZE(CEventPlayerCollisionWithPed, 0x34);
 
 class CEventObjectCollision : public CEvent {
 public:
-    int16_t m_pieceType;
-    int16_t m_moveState;
-    float m_damageIntensity;
+    int16    m_pieceType;
+    int16    m_moveState;
+    float    m_damageIntensity;
     CObject* m_object;
-    CVector m_collisionImpactVelocity;
-    CVector m_collisionPos;
+    CVector  m_collisionImpactVelocity;
+    CVector  m_collisionPos;
 
     static void InjectHooks();
 
-    CEventObjectCollision(int16_t pieceType, float damageIntensity, CObject* object, CVector* collisionImpactVelocity, CVector* collisionPos, int16_t moveState);
+    CEventObjectCollision(int16 pieceType, float damageIntensity, CObject* object, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState);
     ~CEventObjectCollision();
 private:
-    CEventObjectCollision* Constructor(int16_t pieceType, float damageIntensity, CObject* object, CVector* collisionImpactVelocity, CVector* collisionPos, int16_t moveState);
+    CEventObjectCollision* Constructor(int16 pieceType, float damageIntensity, CObject* object, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState);
 public:
     eEventType GetEventType() const override { return EVENT_OBJECT_COLLISION; }
     bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
-    int32_t GetEventPriority() const override { return 57; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 57; }
+    int32 GetLifeTime() override { return 0; }
     CEventObjectCollision* Clone() override { return new CEventObjectCollision(m_pieceType, m_damageIntensity, m_object, &m_collisionImpactVelocity, &m_collisionPos, m_moveState); }
     bool AffectsPed(CPed* ped) override;
 private:
@@ -104,22 +104,22 @@ class CBuilding;
 
 class CEventBuildingCollision : public CEvent {
 public:
-    int16_t    m_pieceType;
-    int16_t    m_moveState;
+    int16      m_pieceType;
+    int16      m_moveState;
     float      m_damageIntensity;
     CBuilding* m_building;
     CVector    m_collisionImpactVelocity;
     CVector    m_collisionPos;
 
 public:
-    CEventBuildingCollision(int16_t pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, int16_t moveState);
+    CEventBuildingCollision(int16 pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState);
     ~CEventBuildingCollision();
 
     eEventType GetEventType() const override { return EVENT_BUILDING_COLLISION; }
     bool TakesPriorityOver(const CEvent& refEvent) override { return refEvent.GetEventType() != GetEventType(); }
     bool CanBeInterruptedBySameEvent() override { return true; }
-    int32_t GetEventPriority() const override { return 59; }
-    int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 59; }
+    int32 GetLifeTime() override { return 0; }
     CEventBuildingCollision* Clone() override { return new CEventBuildingCollision(m_pieceType, m_damageIntensity, m_building, &m_collisionImpactVelocity, &m_collisionPos, m_moveState); }
     bool AffectsPed(CPed* ped) override;
 
@@ -127,7 +127,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CEventBuildingCollision* Constructor(int16_t pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, int16_t moveState);
+    CEventBuildingCollision* Constructor(int16 pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState);
 
     bool AffectsPed_Reversed(CPed* ped);
     bool IsHeadOnCollision(CPed* ped);

@@ -3,7 +3,7 @@
 void CColSphere::InjectHooks()
 {
     ReversibleHooks::Install("CColSphere", "Set_1", 0x40FCF0, (void(CColSphere::*)(float, CVector const&))(&CColSphere::Set));
-    ReversibleHooks::Install("CColSphere", "Set_2", 0x40FD10, (void(CColSphere::*)(float, CVector const&, unsigned char, unsigned char, unsigned char))(&CColSphere::Set));
+    ReversibleHooks::Install("CColSphere", "Set_2", 0x40FD10, (void(CColSphere::*)(float, CVector const&, uint8, uint8, uint8))(&CColSphere::Set));
     ReversibleHooks::Install("CColSphere", "IntersectRay", 0x40FF20, &CColSphere::IntersectRay);
     ReversibleHooks::Install("CColSphere", "IntersectEdge", 0x4100E0, &CColSphere::IntersectEdge);
     ReversibleHooks::Install("CColSphere", "IntersectPoint", 0x410040, &CColSphere::IntersectPoint);
@@ -15,7 +15,7 @@ void CColSphere::Set(float radius, CVector const& center)
     m_vecCenter = center;
 }
 
-void CColSphere::Set(float radius, CVector const& center, std::uint8_t material, std::uint8_t flags, std::uint8_t lighting)
+void CColSphere::Set(float radius, CVector const& center, uint8 material, uint8 flags, uint8 lighting)
 {
     m_fRadius = radius;
     m_vecCenter = center;

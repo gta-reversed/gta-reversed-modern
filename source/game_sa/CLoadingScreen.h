@@ -10,9 +10,9 @@
 
 class CLoadingScreen {
 public:
-    static int&       m_currDisplayedSplash;        // 0x8D093C
-    static int&       m_numChunksLoaded;            // 0x8D0940
-    static int&       m_chunkBarAppeared;           // 0x8D0944
+    static int32&     m_currDisplayedSplash;        // 0x8D093C
+    static int32&     m_numChunksLoaded;            // 0x8D0940
+    static int32&     m_chunkBarAppeared;           // 0x8D0944
     static char*      m_PopUpMessage;               // m_PopUpMessage[16]
     static char*      m_LoadingGxtMsg2;             // m_LoadingGxtMsg2[80]
     static char*      m_LoadingGxtMsg1;             // m_LoadingGxtMsg1[80]
@@ -50,7 +50,7 @@ public:
     static void Update();
     static void DoPCTitleFadeOut();
     static void DoPCTitleFadeIn();
-    static void DoPCScreenChange(unsigned int bFinish);
+    static void DoPCScreenChange(uint32 bFinish);
     static void NewChunkLoaded();
 };
 

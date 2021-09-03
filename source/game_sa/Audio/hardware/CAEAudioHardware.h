@@ -120,7 +120,7 @@ public:
     void  GetActiveTrackID();
     void  GetPlayingTrackID();
     void  GetBeatInfo(struct tBeatInfo*);
-    void  SetBassSetting(signed char, float);
+    void  SetBassSetting(int8, float);
     void  DisableBassEq();
     void  EnableBassEq();
     void  SetChannelFlags(int16, uint16, int16);

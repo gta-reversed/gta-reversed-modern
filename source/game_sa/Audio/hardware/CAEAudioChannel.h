@@ -43,7 +43,7 @@ public:
     virtual bool   IsSoundPlaying() = 0;
     virtual uint16 GetPlayTime() = 0;
     virtual uint16 GetLength() = 0;
-    virtual void   Play(int16, signed char, float) = 0;
+    virtual void   Play(int16, int8, float) = 0;
     virtual void   SynchPlayback() = 0;
     virtual void   Stop() = 0;
     virtual void   SetFrequencyScalingFactor(float factor);
