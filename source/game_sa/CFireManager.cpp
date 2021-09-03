@@ -271,12 +271,11 @@ CFire* CFireManager::StartFire(CVector pos, float size, uint8 unused, CEntity* c
     if (CWaterLevel::IsPointUnderWaterNoWaves(pos))
         return;
 
-    CFire* fire = GetNextFreeFire(false);
-    if (!fire)
-        return nullptr;
-
-    fire->Start(creator, pos, nTimeToBurn, std::min<uint8>((uint8)m_nMaxFireGenerationsAllowed, nGenerations));
-    return fire;
+    if (CFire* fire = GetNextFreeFire(false)) {
+        fire->Start(creator, pos, nTimeToBurn, std::min<uint8>((uint8)m_nMaxFireGenerationsAllowed, nGenerations));
+        return fire;
+    }
+    return nullptr;
 }
 
 // 0x53A050
