@@ -18,9 +18,9 @@ enum eFrictionEffect {
 #pragma pack(push, 1)
 class SurfaceInfo_c {
 public:
-    char    tyreGrip;
-    char    wetGrip;
-    __int16 pad;
+    char tyreGrip;
+    char wetGrip;
+    char _pad[2];
     union {
         struct {
             uint32 ucAdhesionGroup : 3;

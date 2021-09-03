@@ -72,8 +72,7 @@ void CTheZones::ResetZonesRevealed()
 
 bool CTheZones::GetCurrentZoneLockedOrUnlocked(float posx, float posy)
 {
-    return CTheZones::ZonesVisited[10 *	(unsigned __int8)((posx + 3000.0) * 0.0016666667) -
-                                        (unsigned __int8)((posy + 3000.0) * 0.0016666667) + 9] != 0;
+    return CTheZones::ZonesVisited[10 *	(uint8)((posx + 3000.0) * 0.0016666667) - (uint8)((posy + 3000.0) * 0.0016666667) + 9] != 0; // todo: ugly
 }
 
 void CTheZones::AssignZoneInfoForThisZone(int16 index)

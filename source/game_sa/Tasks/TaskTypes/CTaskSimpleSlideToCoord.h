@@ -9,7 +9,7 @@ public:
     CTaskSimpleSlideToCoord(int32, char, char, float, char, char);
 
 public:
-    unsigned __int8 unkn[28];
+    uint8 unkn[28];
 
 public:
     static void InjectHooks();

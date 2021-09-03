@@ -591,7 +591,7 @@ void CPostEffects::SetFilterMainColour(RwRGBA a1, RwRGBA a2) {
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
 
     /*
-    dword_C400E8 = BYTE2(a2) | ((BYTE1(a2) | (((unsigned __int8)a2 | (HIBYTE(a2) << 8)) << 8)) << 8);
+    dword_C400E8 = BYTE2(a2) | ((BYTE1(a2) | (((int8)a2 | (HIBYTE(a2) << 8)) << 8)) << 8);
     dword_C40104 = dword_C400E8;
     dword_C40120 = dword_C400E8;
     dword_C4013C = dword_C400E8;

@@ -26,7 +26,7 @@ public:
     uint8            m_nCreatureType; // see eWaterCreatureType
     uint8            m_bShouldBeDeleted;
     uint8            m_ucTargetSwimSpeed;
-    unsigned __int8  pad;
+    char             _pad;
     int16            m_wSpeedChangeCurTime;
     int16            m_wSpeedChangeTotalTime;
     float            m_fDefaultSpeed;

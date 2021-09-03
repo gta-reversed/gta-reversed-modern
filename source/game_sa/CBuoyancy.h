@@ -14,12 +14,12 @@ enum class eBuoyancyPointState : int32 {
 
 #pragma pack(push, 8)
 struct CBuoyancyCalcStruct {
-    float           fCurrentAverageContribution;
-    float           fNewPointContribution;
-    CVector         vecCurOffsetTurnPoint;
-    float           fAddedDistToWaterSurface;
-    bool            bBuoyancyDataSummed;
-    unsigned __int8 pad[3];
+    float   fCurrentAverageContribution;
+    float   fNewPointContribution;
+    CVector vecCurOffsetTurnPoint;
+    float   fAddedDistToWaterSurface;
+    bool    bBuoyancyDataSummed;
+    char    _pad[3];
 };
 #pragma pack(pop)
 VALIDATE_SIZE(CBuoyancyCalcStruct, 0x1C);
