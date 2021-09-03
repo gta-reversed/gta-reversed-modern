@@ -2,10 +2,10 @@
 
 void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks()
 {
-    HookInstall(0x66A100, &CTaskComplexAvoidOtherPedWhileWandering::Constructor);
+    ReversibleHooks::Install("CTaskComplexAvoidOtherPedWhileWandering", "CTaskComplexAvoidOtherPedWhileWandering", 0x66A100, &CTaskComplexAvoidOtherPedWhileWandering::Constructor);
 }
 
-CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(CPed* ped, CVector* targetPoint, std::int32_t moveState)
+CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(CPed* ped, CVector* targetPoint, int32 moveState)
 {
     m_ped = ped;
     field_1C = *targetPoint;
@@ -26,7 +26,7 @@ CTaskComplexAvoidOtherPedWhileWandering::~CTaskComplexAvoidOtherPedWhileWanderin
         m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
 }
 
-CTaskComplexAvoidOtherPedWhileWandering* CTaskComplexAvoidOtherPedWhileWandering::Constructor(CPed* ped, CVector* targetPoint, std::int32_t moveState)
+CTaskComplexAvoidOtherPedWhileWandering* CTaskComplexAvoidOtherPedWhileWandering::Constructor(CPed* ped, CVector* targetPoint, int32 moveState)
 {
     this->CTaskComplexAvoidOtherPedWhileWandering::CTaskComplexAvoidOtherPedWhileWandering(ped, targetPoint, moveState);
     return this;
@@ -42,9 +42,9 @@ CTask* CTaskComplexAvoidOtherPedWhileWandering::ControlSubTask(CPed* ped)
     return plugin::CallMethodAndReturn<CTask*, 0x6721B0, CTaskComplexAvoidOtherPedWhileWandering*, CPed*>(this, ped);
 }
 
-bool CTaskComplexAvoidOtherPedWhileWandering::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* event)
+bool CTaskComplexAvoidOtherPedWhileWandering::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x66A260, CTaskComplexAvoidOtherPedWhileWandering*, CPed*, eAbortPriority, CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x66A260, CTaskComplexAvoidOtherPedWhileWandering*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
 }
 
 CTask* CTaskComplexAvoidOtherPedWhileWandering::CreateNextSubTask(CPed* ped)
@@ -62,9 +62,9 @@ void CTaskComplexAvoidOtherPedWhileWandering::QuitIK(CPed* ped)
     return plugin::CallMethod<0x66A230, CTaskComplexAvoidOtherPedWhileWandering*, CPed*>(this, ped);
 }
 
-std::uint8_t CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CColSphere* colsphere, CPed* ped)
+uint8 CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere(CColSphere* colsphere, CPed* ped)
 {
-    return plugin::CallMethodAndReturn<std::uint8_t, 0x66A320, CTaskComplexAvoidOtherPedWhileWandering*, CColSphere*, CPed*>(this, colsphere, ped);
+    return plugin::CallMethodAndReturn<uint8, 0x66A320, CTaskComplexAvoidOtherPedWhileWandering*, CColSphere*, CPed*>(this, colsphere, ped);
 }
 
 void CTaskComplexAvoidOtherPedWhileWandering::SetUpIK(CPed* ped)

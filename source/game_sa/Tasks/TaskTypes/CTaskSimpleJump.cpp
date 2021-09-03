@@ -49,9 +49,9 @@ CTask* CTaskSimpleJump::Clone()
 }
 
 // 0x679B60
-bool CTaskSimpleJump::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleJump::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return MakeAbortable_Reversed(ped, priority, _event);
+    return MakeAbortable_Reversed(ped, priority, event);
 }
 
 // 0x680C60;
@@ -67,7 +67,7 @@ CTask* CTaskSimpleJump::Clone_Reversed()
     return newTask;
 }
 
-bool CTaskSimpleJump::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleJump::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
     if (m_pAnim)
     {
@@ -107,8 +107,8 @@ bool CTaskSimpleJump::ProcessPed_Reversed(CPed* ped)
     else if (ped->IsPlayer())
     {
         CVector empty{};
-        CEventSoundQuiet _event(ped, 45.0F, -1, empty);
-        GetEventGlobalGroup()->Add(&_event, false);
+        CEventSoundQuiet event(ped, 45.0F, -1, empty);
+        GetEventGlobalGroup()->Add(&event, false);
     }
 
     return true;
@@ -129,7 +129,7 @@ bool CTaskSimpleJump::CheckIfJumpBlocked(CPed* ped)
     CVector savedPedPosition = ped->GetPosition();
     ped->SetPosn((*ped->m_matrix) * CVector(0.0F, 0.0F, 0.75F));
 
-    for (unsigned int i = 0; i < pedColData->m_nNumSpheres; i++)
+    for (uint32 i = 0; i < pedColData->m_nNumSpheres; i++)
         pedColData->m_pSpheres[i].m_fRadius = 0.3F;
 
     if (ped->TestCollision(false))
@@ -137,7 +137,7 @@ bool CTaskSimpleJump::CheckIfJumpBlocked(CPed* ped)
 
     ped->SetPosn(savedPedPosition);
 
-    for (unsigned int i = 0; i < pedColData->m_nNumSpheres; i++)
+    for (uint32 i = 0; i < pedColData->m_nNumSpheres; i++)
         pedColData->m_pSpheres[i].m_fRadius = 0.35F;
 
     return m_bIsJumpBlocked;

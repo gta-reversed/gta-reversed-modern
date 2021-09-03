@@ -1,9 +1,18 @@
 #include "StdInc.h"
 
-void ReversibleHooks::UnHook(const std::string& className, const char* functionName)
+static std::map<std::string, std::vector<std::shared_ptr<SReversibleHook>>> m_HooksMap;
+
+namespace ReversibleHooks{
+
+std::map<std::string, std::vector<std::shared_ptr<SReversibleHook>>>& GetAllHooks() {
+    return m_HooksMap;
+}
+
+void UnHook(const std::string& className, const char* functionName)
 {
     if (className.empty())
         return;
+
     const auto& allHooks = GetAllHooks();
     if (functionName) {
         for (auto& classHooks : allHooks) {
@@ -31,44 +40,37 @@ void ReversibleHooks::UnHook(const std::string& className, const char* functionN
     }
 }
 
-void ReversibleHooks::HookInstall(const std::string& sIdentifier, const std::string& sFuncName, unsigned int installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault)
+void CheckAll() {
+    for (auto& pair : m_HooksMap) {
+        for (auto& hook : pair.second) {
+            hook->Check();
+        }
+    }
+}
+
+namespace detail {
+void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault)
 {
     assert(!GetHook(sIdentifier, sFuncName));
-    if (m_HooksMap.find(sIdentifier) == m_HooksMap.end())
-        m_HooksMap[sIdentifier] = std::vector<std::shared_ptr<SReversibleHook>>();
 
     auto& usedVector = m_HooksMap[sIdentifier];
-    auto pHook = SSimpleReversibleHook::InstallHook(installAddress, addressToJumpTo, iJmpCodeSize);
-    pHook->m_sIdentifier = sIdentifier;
-    pHook->m_sFunctionName = sFuncName;
-    pHook->m_eHookType = eReversibleHookType::Simple;
-
-    usedVector.push_back(pHook);
+    usedVector.emplace_back(std::make_shared<SSimpleReversibleHook>(sIdentifier, sFuncName, installAddress, addressToJumpTo, iJmpCodeSize));
     if (bDisableByDefault)
-        pHook->Switch();
+        usedVector.back()->Switch();
 }
 
-void ReversibleHooks::HookInstallVirtual(const std::string& sIdentifier, const std::string& sFuncName, void* libVTableAddress, const std::vector<uint32_t>& vecAddressesToHook)
+void HookInstallVirtual(const std::string& sIdentifier, const std::string& sFuncName, void* libVTableAddress, const std::vector<uint32>& vecAddressesToHook)
 {
     assert(!GetHook(sIdentifier, sFuncName));
-    if (m_HooksMap.find(sIdentifier) == m_HooksMap.end())
-        m_HooksMap[sIdentifier] = std::vector<std::shared_ptr<SReversibleHook>>();
-
-    auto& usedVector = m_HooksMap[sIdentifier];
-    auto pHook = SVirtualReversibleHook::InstallHook(libVTableAddress, vecAddressesToHook);
-    pHook->m_sIdentifier = sIdentifier;
-    pHook->m_sFunctionName = sFuncName;
-    pHook->m_eHookType = eReversibleHookType::Virtual;
-
-    usedVector.push_back(pHook);
+    m_HooksMap[sIdentifier].emplace_back(std::make_shared<SVirtualReversibleHook>(sIdentifier, sFuncName, libVTableAddress, vecAddressesToHook));
 }
 
-void ReversibleHooks::HookSwitch(std::shared_ptr<SReversibleHook> pHook) const
+void HookSwitch(std::shared_ptr<SReversibleHook> pHook)
 {
     pHook->Switch();
 }
 
-bool ReversibleHooks::IsFunctionHooked(const std::string& sIdentifier, const std::string& sFuncName)
+bool IsFunctionHooked(const std::string& sIdentifier, const std::string& sFuncName)
 {
     auto hook = GetHook(sIdentifier, sFuncName);
     if (!hook)
@@ -77,25 +79,29 @@ bool ReversibleHooks::IsFunctionHooked(const std::string& sIdentifier, const std
     return hook->m_bIsHooked;
 }
 
-std::shared_ptr<SReversibleHook> ReversibleHooks::GetHook(const std::string& sIdentifier, const std::string& sFuncName)
+std::shared_ptr<SReversibleHook> GetHook(const std::string& sIdentifier, const std::string& sFuncName)
 {
-    if (m_HooksMap.find(sIdentifier) == m_HooksMap.end())
-        return nullptr;
-
-    auto& vecHooks = m_HooksMap[sIdentifier];
-    auto findResult = std::find_if(vecHooks.begin(), vecHooks.end(), [&](const std::shared_ptr<SReversibleHook> hook) {return hook->m_sFunctionName == sFuncName; });
-    if (findResult == vecHooks.end())
-        return nullptr;
-
-    return *findResult;
+    auto hooks = m_HooksMap.find(sIdentifier);
+    if (hooks != m_HooksMap.end())
+        for (auto& hook : hooks->second)
+            if (hook->m_sFunctionName == sFuncName)
+                return hook;
+    return nullptr;
 }
 
-unsigned int ReversibleHooks::GetJMPLocation(unsigned int dwFrom, unsigned int dwTo)
-{
-    return dwTo - dwFrom - ReversibleHooks::x86JMPSize;
+void VirtualCopy(void* dst, void* src, size_t nbytes) {
+    DWORD dwProtect[2] = { 0 };
+    VirtualProtect(dst, nbytes, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
+    memcpy(dst, src, nbytes);
+    VirtualProtect(dst, nbytes, dwProtect[0], &dwProtect[1]);
 }
 
-unsigned int ReversibleHooks::GetFunctionLocationFromJMP(unsigned int dwJmpLoc, unsigned int dwJmpOffset)
+}; // namespace detail
+}; // namespace ReversibleHooks
+
+SReversibleHook::SReversibleHook(std::string id, std::string name, eReversibleHookType type) :
+    m_sIdentifier(std::move(id)),
+    m_sFunctionName(std::move(name)),
+    m_eHookType(type)
 {
-    return dwJmpOffset + dwJmpLoc + ReversibleHooks::x86JMPSize;
 }

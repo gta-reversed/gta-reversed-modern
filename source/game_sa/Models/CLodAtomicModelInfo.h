@@ -1,13 +1,12 @@
 #pragma once
 #include "CAtomicModelInfo.h"
 
-class CLodAtomicModelInfo : public CAtomicModelInfo
-{
+class CLodAtomicModelInfo : public CAtomicModelInfo {
 public:
     CLodAtomicModelInfo();
 public:
-    int16_t field_20;
-    int16_t field_22;
+    int16 field_20;
+    int16 field_22;
 
 public:
     static void InjectHooks();

@@ -32,15 +32,15 @@ tMissionCleanupEntity* CMissionCleanup::FindFree()
 }
 
 // Adds entity to list
-void CMissionCleanup::AddEntityToList(int handle, MissionCleanUpEntityType type)
+void CMissionCleanup::AddEntityToList(int32 handle, MissionCleanUpEntityType type)
 {
-    ((void(__thiscall*)(CMissionCleanup*, int, MissionCleanUpEntityType)) FUNC_CMissionCleanup__AddEntityToList)(this, handle, type);
+    ((void(__thiscall*)(CMissionCleanup*, int32, MissionCleanUpEntityType)) FUNC_CMissionCleanup__AddEntityToList)(this, handle, type);
 }
 
 // Remotes entity from list
-void CMissionCleanup::RemoveEntityFromList(int handle, MissionCleanUpEntityType type)
+void CMissionCleanup::RemoveEntityFromList(int32 handle, MissionCleanUpEntityType type)
 {
-    ((void(__thiscall*)(CMissionCleanup*, int, MissionCleanUpEntityType)) FUNC_CMissionCleanup__RemoveEntityFromList)(this, handle, type);
+    ((void(__thiscall*)(CMissionCleanup*, int32, MissionCleanUpEntityType)) FUNC_CMissionCleanup__RemoveEntityFromList)(this, handle, type);
 }
 
 // Checks if collision has loaded for mission objects

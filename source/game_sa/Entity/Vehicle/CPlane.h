@@ -41,41 +41,40 @@ class CPlane : public CAutomobile {
 protected:
     CPlane(plugin::dummy_func_t) : CAutomobile(plugin::dummy) {}
 public:
-    float m_fLeftRightSkid;
-    float m_fSteeringUpDown;
-    float m_fSteeringLeftRight;
-    float m_fAccelerationBreakStatus;
-    float m_fAccelerationBreakStatusPrev;
-    float m_fSteeringFactor;
-    float field_9A0;
-    float m_planeCreationHeading; // The heading when plane is created or placed on road properly
-    float m_maxAltitude;
-    float m_altitude;
-    float m_minAltitude;
-    float m_planeHeading;
-    float m_planeHeadingPrev;
-    float m_forwardZ;
-    unsigned int m_nStartedFlyingTime;
-    float m_propSpeed;
-    float field_9C8;
-    float m_fLandingGearStatus;
-    int m_planeDamageWave;
-    FxSystem_c **m_pGunParticles;
-    unsigned char m_nFiringMultiplier;
-    int field_9DC;
-    int field_9E0;
-    int field_9E4;
-    FxSystem_c *m_apJettrusParticles[4];
-    FxSystem_c *m_pSmokeParticle;
-    unsigned int m_nSmokeTimer;
-    bool m_bSmokeEjectorEnabled;
-private:
-    char _pad[3];
+    float        m_fLeftRightSkid;
+    float        m_fSteeringUpDown;
+    float        m_fSteeringLeftRight;
+    float        m_fAccelerationBreakStatus;
+    float        m_fAccelerationBreakStatusPrev;
+    float        m_fSteeringFactor;
+    float        field_9A0;
+    float        m_planeCreationHeading; // The heading when plane is created or placed on road properly
+    float        m_maxAltitude;
+    float        m_altitude;
+    float        m_minAltitude;
+    float        m_planeHeading;
+    float        m_planeHeadingPrev;
+    float        m_forwardZ;
+    uint32       m_nStartedFlyingTime;
+    float        m_propSpeed;
+    float        field_9C8;
+    float        m_fLandingGearStatus;
+    int32        m_planeDamageWave;
+    FxSystem_c** m_pGunParticles;
+    uint8        m_nFiringMultiplier;
+    int32        field_9DC;
+    int32        field_9E0;
+    int32        field_9E4;
+    FxSystem_c*  m_apJettrusParticles[4];
+    FxSystem_c*  m_pSmokeParticle;
+    uint32       m_nSmokeTimer;
+    bool         m_bSmokeEjectorEnabled;
+    char         _pad[3];
 
 public:
-    static int& GenPlane_ModelIndex;
-    static unsigned int& GenPlane_Status;
-    static unsigned int& GenPlane_LastTimeGenerated;
+    static int32& GenPlane_ModelIndex;
+    static uint32& GenPlane_Status;
+    static uint32& GenPlane_LastTimeGenerated;
 
     static bool& GenPlane_Active;               // true
     static float& ANDROM_COL_ANGLE_MULT;        // 0.00015
@@ -89,9 +88,9 @@ public:
 public:
     static void InjectHooks();
 
-    CPlane(int modelIndex, unsigned char createdBy);
+    CPlane(int32 modelIndex, eVehicleCreatedBy createdBy);
 
-    void BlowUpCar(CEntity* damager, unsigned char bHideExplosion) override;
+    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
     void Fix() override;
 
     void IsAlreadyFlying();
@@ -99,7 +98,7 @@ public:
     void SetGearDown();
 
     static void InitPlaneGenerationAndRemoval();
-    static unsigned int CountPlanesAndHelis();
+    static uint32 CountPlanesAndHelis();
     static bool AreWeInNoPlaneZone();
     static bool AreWeInNoBigPlaneZone();
     static void SwitchAmbientPlanes(bool enable);
@@ -107,7 +106,7 @@ public:
     static void DoPlaneGenerationAndRemoval();
 
 private:
-    void BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion);
+    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion);
     void Fix_Reversed();
 };
 

@@ -17,7 +17,7 @@ bool& CVehicle::bDisableRemoteDetonation = *(bool*)0xC1CC00;
 bool& CVehicle::bDisableRemoteDetonationOnContact = *(bool*)0xC1CC01;
 bool& CVehicle::m_bEnableMouseSteering = *(bool*)0xC1CC02;
 bool& CVehicle::m_bEnableMouseFlying = *(bool*)0xC1CC03;
-int& CVehicle::m_nLastControlInput = *(int*)0xC1CC04;
+int32& CVehicle::m_nLastControlInput = *(int32*)0xC1CC04;
 CColModel** CVehicle::m_aSpecialColVehicle = (CColModel * *)0xC1CC08;
 bool& CVehicle::ms_forceVehicleLightsOff = *(bool*)0xC1CC18;
 bool& CVehicle::s_bPlaneGunsEjectShellCasings = *(bool*)0xC1CC19;
@@ -81,18 +81,19 @@ void CVehicle::InjectHooks()
     ReversibleHooks::Install("CVehicle", "CalculateLightingFromCollision", 0x6D0CF0, &CVehicle::CalculateLightingFromCollision);
     ReversibleHooks::Install("CVehicle", "ProcessWheel", 0x6D6C00, &CVehicle::ProcessWheel);
     ReversibleHooks::Install("CVehicle", "IsDriver_Ped", 0x6D1C40, (bool(CVehicle::*)(CPed*))(&CVehicle::IsDriver));
-    ReversibleHooks::Install("CVehicle", "IsDriver_Int", 0x6D1C60, (bool(CVehicle::*)(int))(&CVehicle::IsDriver));
+    ReversibleHooks::Install("CVehicle", "IsDriver_Int", 0x6D1C60, (bool(CVehicle::*)(int32))(&CVehicle::IsDriver));
     ReversibleHooks::Install("CVehicle", "AddExhaustParticles", 0x6DE240, &CVehicle::AddExhaustParticles);
     ReversibleHooks::Install("CVehicle", "ApplyBoatWaterResistance", 0x6D2740, &CVehicle::ApplyBoatWaterResistance);
     ReversibleHooks::Install("CVehicle", "ProcessBoatControl", 0x6DBCE0, &CVehicle::ProcessBoatControl);
     ReversibleHooks::Install("CVehicle", "ChangeLawEnforcerState", 0x6D2330, &CVehicle::ChangeLawEnforcerState);
     ReversibleHooks::Install("CVehicle", "GetVehicleAppearance", 0x6D1080, &CVehicle::GetVehicleAppearance);
+    ReversibleHooks::Install("CVehicle", "DoHeadLightBeam", 0x6E0E20, &CVehicle::DoHeadLightBeam);
 
 }
 
-CVehicle::CVehicle(unsigned char createdBy) : CPhysical(), m_vehicleAudio(), m_autoPilot()
+CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(), m_autoPilot()
 {
-    //plugin::CallMethod<0x6D5F10, CVehicle*, unsigned char>(this, createdBy);
+    //plugin::CallMethod<0x6D5F10, CVehicle*, uint8>(this, createdBy);
     m_bHasPreRenderEffects = true;
     m_nType = eEntityType::ENTITY_TYPE_VEHICLE;
 
@@ -270,7 +271,7 @@ CVehicle::~CVehicle()
         m_pCustomCarPlate = nullptr;
     }
 
-    const auto iRopeInd = CRopes::FindRope(reinterpret_cast<uint32_t>(this) + 1);
+    const auto iRopeInd = CRopes::FindRope(reinterpret_cast<uint32>(this) + 1);
     if (iRopeInd >= 0)
         CRopes::GetRope(iRopeInd).Remove();
 
@@ -278,7 +279,7 @@ CVehicle::~CVehicle()
         CDarkel::RegisterCarBlownUpByPlayer(this, 0);
 }
 
-void* CVehicle::operator new(unsigned int size) {
+void* CVehicle::operator new(uint32 size) {
     return CPools::ms_pVehiclePool->New();
 }
 
@@ -286,11 +287,11 @@ void CVehicle::operator delete(void* data) {
     CPools::ms_pVehiclePool->Delete(static_cast<CVehicle*>(data));
 }
 
-void CVehicle::SetModelIndex(unsigned int index)
+void CVehicle::SetModelIndex(uint32 index)
 {
     return CVehicle::SetModelIndex_Reversed(index);
 }
-void CVehicle::SetModelIndex_Reversed(unsigned int index)
+void CVehicle::SetModelIndex_Reversed(uint32 index)
 {
     CEntity::SetModelIndex(index);
     auto pVehModelInfo = reinterpret_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(index));
@@ -505,11 +506,11 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool 
     }
 }
 
-unsigned char CVehicle::SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2)
+uint8 CVehicle::SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2)
 {
     return CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bProcessCollisionBeforeSettingTimeStep, unk2);
 }
-unsigned char CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2)
+uint8 CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2)
 {
     if (physicalFlags.bDisableCollisionForce)
         return 1;
@@ -544,7 +545,7 @@ unsigned char CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessC
     else if (fLongestDir < 2.0F)
         *unk2 = true;
 
-    return static_cast<uint8_t>(ceil(fMove));
+    return static_cast<uint8>(ceil(fMove));
 }
 
 void CVehicle::PreRender()
@@ -576,7 +577,7 @@ void CVehicle::Render()
 void CVehicle::Render_Reversed()
 {
     auto* pVehInfo = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
-    const auto iDirtLevel = static_cast<int>(m_fDirtLevel) & 0xF;
+    const auto iDirtLevel = static_cast<int32>(m_fDirtLevel) & 0xF;
     CVehicleModelInfo::SetDirtTextures(pVehInfo, iDirtLevel);
 
     CEntity::Render();
@@ -605,12 +606,12 @@ void CVehicle::RemoveLighting_Reversed(bool bRemove)
     DeActivateDirectional();
 }
 
-// Converted from void CVehicle::ProcessOpenDoor(CPed *ped,uint doorComponentId,uint,uint,float) 0x871EF0
-void CVehicle::ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int arg2, unsigned int nAnimID, float fTime)
+// 0x871EF0
+void CVehicle::ProcessOpenDoor(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime)
 {
-    CVehicle::ProcessOpenDoor_Reversed(ped, doorComponentId, arg2, nAnimID, fTime);
+    CVehicle::ProcessOpenDoor_Reversed(ped, doorComponentId, animGroup, animId, fTime);
 }
-void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId, unsigned int animGroup, unsigned int animId, float fTime)
+void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime)
 {
     eDoors iCheckedDoor;
     switch (doorComponentId)
@@ -643,7 +644,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId,
     case ANIM_ID_CAR_OPEN_LHS_1:
     case ANIM_ID_CAR_OPEN_RHS_1:
         {
-        CVehicleAnimGroupData::GetInOutTimings(m_pHandlingData->m_nAnimGroup, eInOutTimingMode::OPEN_OUT, &fAnimStart, &fAnimEnd);
+        CVehicleAnimGroupData::GetInOutTimings(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup), eInOutTimingMode::OPEN_OUT, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart)
             this->OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, false);
         else if (fTime > fAnimEnd)
@@ -664,7 +665,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId,
     case ANIM_ID_CAR_CLOSE_LHS_1:
     case ANIM_ID_CAR_CLOSE_RHS_1:
     {
-        CVehicleAnimGroupData::GetInOutTimings(m_pHandlingData->m_nAnimGroup, eInOutTimingMode::CLOSE_OUT, &fAnimStart, &fAnimEnd);
+        CVehicleAnimGroupData::GetInOutTimings(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup), eInOutTimingMode::CLOSE_OUT, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart)
             this->OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         else if (fTime > fAnimEnd)
@@ -685,7 +686,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId,
     case ANIM_ID_CAR_CLOSEDOOR_LHS_1:
     case ANIM_ID_CAR_CLOSEDOOR_RHS_1:
         {
-        CVehicleAnimGroupData::GetInOutTimings(m_pHandlingData->m_nAnimGroup, eInOutTimingMode::CLOSE_IN, &fAnimStart, &fAnimEnd);
+        CVehicleAnimGroupData::GetInOutTimings(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup), eInOutTimingMode::CLOSE_IN, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart)
             this->OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         else if (fTime > fAnimEnd)
@@ -706,7 +707,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId,
     case ANIM_ID_CAR_GETOUT_LHS_1:
     case ANIM_ID_CAR_GETOUT_RHS_1:
         {
-        CVehicleAnimGroupData::GetInOutTimings(m_pHandlingData->m_nAnimGroup, eInOutTimingMode::OPEN_IN, &fAnimStart, &fAnimEnd);
+        CVehicleAnimGroupData::GetInOutTimings(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup), eInOutTimingMode::OPEN_IN, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart)
             this->OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
         else if (fTime > fAnimEnd)
@@ -843,19 +844,19 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId,
     }
 }
 
-// Converted from void CVehicle::ProcessDrivingAnims(CPed *driver,uchar) 0x871F38
-void CVehicle::ProcessDrivingAnims(CPed* driver, unsigned char bBlend)
+// 0x871F38
+void CVehicle::ProcessDrivingAnims(CPed* driver, uint8 bBlend)
 {
     CVehicle::ProcessDrivingAnims_Reversed(driver, bBlend);
 }
-void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend)
+void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend)
 {
     if (m_bOffscreen || !driver->IsPlayer())
         return;
 
-    auto* pRadioTuneAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, eAnimID::ANIM_ID_CAR_TUNE_RADIO);
+    auto* pRadioTuneAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, AnimationId::ANIM_ID_CAR_TUNE_RADIO);
     if (bBlend)
-        pRadioTuneAnim = CAnimManager::BlendAnimation(driver->m_pRwClump, eAnimGroup::ANIM_GROUP_DEFAULT, eAnimID::ANIM_ID_CAR_TUNE_RADIO, 4.0F);
+        pRadioTuneAnim = CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, AnimationId::ANIM_ID_CAR_TUNE_RADIO, 4.0F);
 
     if (pRadioTuneAnim)
         return;
@@ -867,9 +868,9 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend)
         pUsedAnims = &aDriveAnimIdsLow;
     else if (IsBoat() && !m_pHandlingData->m_bSitInBoat)
         pUsedAnims = &aDriveAnimIdsBoat;
-    else if (CVehicleAnimGroupData::UsesKartDrivingAnims(m_pHandlingData->m_nAnimGroup))
+    else if (CVehicleAnimGroupData::UsesKartDrivingAnims(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup)))
         pUsedAnims = &aDriveAnimIdsKart;
-    else if (CVehicleAnimGroupData::UsesTruckDrivingAnims(m_pHandlingData->m_nAnimGroup))
+    else if (CVehicleAnimGroupData::UsesTruckDrivingAnims(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup)))
         pUsedAnims = &aDriveAnimIdsTruck;
     else
     {
@@ -904,9 +905,9 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend)
 
     if (!pIdleAnim)
     {
-        if (RpAnimBlendClumpGetAssociation(driver->m_pRwClump, eAnimID::ANIM_ID_CAR_SIT))
+        if (RpAnimBlendClumpGetAssociation(driver->m_pRwClump, AnimationId::ANIM_ID_CAR_SIT))
         {
-            CAnimManager::BlendAnimation(driver->m_pRwClump, eAnimGroup::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_IDLE], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_IDLE], 4.0F);
 
         }
         return;
@@ -940,7 +941,7 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend)
             || TheCamera.GetActiveCamera().m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_BEHIND)
             && (!pLookBackAnim || pLookBackAnim->m_fBlendAmount < 1.0F && pLookBackAnim->m_fBlendDelta <= 0.0F))
         {
-            CAnimManager::BlendAnimation(driver->m_pRwClump, eAnimGroup::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_BACK], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_BACK], 4.0F);
         }
         return;
     }
@@ -973,7 +974,7 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend)
             pLookRightAnim->m_fBlendDelta = 0.0F;
         }
         else
-            CAnimManager::BlendAnimation(driver->m_pRwClump, eAnimGroup::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_RIGHT], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_RIGHT], 4.0F);
     }
     else
     {
@@ -988,14 +989,14 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend)
             pLookRightAnim->m_fBlendDelta = 0.0F;
         }
         else
-            CAnimManager::BlendAnimation(driver->m_pRwClump, eAnimGroup::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_LEFT], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_LEFT], 4.0F);
     }
 
     if (pLookBackAnim)
         pLookBackAnim->m_fBlendDelta = -4.0F;;
 }
 
-// Converted from float CVehicle::GetHeightAboveRoad(void) 0x871F54
+// 0x871F54
 float CVehicle::GetHeightAboveRoad()
 {
     return CVehicle::GetHeightAboveRoad_Reversed();
@@ -1005,7 +1006,7 @@ float CVehicle::GetHeightAboveRoad_Reversed()
     return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMin.z * -1.0F;
 }
 
-// Converted from bool CVehicle::CanPedStepOutCar(bool) 0x871F64
+// 0x871F64
 bool CVehicle::CanPedStepOutCar(bool bIgnoreSpeedUpright)
 {
     return CVehicle::CanPedStepOutCar_Reversed(bIgnoreSpeedUpright);
@@ -1035,7 +1036,7 @@ bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright)
 
 }
 
-// Converted from bool CVehicle::CanPedJumpOutCar(CPed *ped) 0x871F68
+// 0x871F68
 bool CVehicle::CanPedJumpOutCar(CPed* ped)
 {
     return CVehicle::CanPedJumpOutCar_Reversed(ped);
@@ -1078,7 +1079,7 @@ bool CVehicle::CanPedJumpOutCar_Reversed(CPed* ped)
     return false;
 }
 
-// Converted from bool CVehicle::GetTowHitchPos(CVector &posnOut,bool,CVehicle*) 0x871F6C
+// 0x871F6C
 bool CVehicle::GetTowHitchPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh)
 {
     return CVehicle::GetTowHitchPos_Reversed(posnOut, bCheckModelInfo, veh);
@@ -1094,7 +1095,7 @@ bool CVehicle::GetTowHitchPos_Reversed(CVector& posnOut, bool bCheckModelInfo, C
     return true;
 }
 
-// Converted from bool CVehicle::GetTowBarPos(CVector &posnOut,bool,CVehicle*) 0x871F70
+// 0x871F70
 bool CVehicle::GetTowBarPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh)
 {
     return CVehicle::GetTowBarPos_Reversed(posnOut, bCheckModelInfo, veh);
@@ -1110,37 +1111,37 @@ bool CVehicle::GetTowBarPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVe
     return true;
 }
 
-// Converted from bool CVehicle::Save(void) 0x871F80
+// 0x871F80
 bool CVehicle::Save()
 {
     return CVehicle::Save_Reversed();
 }
 bool CVehicle::Save_Reversed()
 {
-    uint32_t iStructSize = sizeof(CVehicleSaveStructure);
+    uint32 iStructSize = sizeof(CVehicleSaveStructure);
     auto iSaveStruct = CVehicleSaveStructure();
     iSaveStruct.Construct(this);
-    CGenericGameStorage::SaveDataToWorkBuffer(&iStructSize, sizeof(uint32_t)); // Unused, game ignores it on load and uses const value
+    CGenericGameStorage::SaveDataToWorkBuffer(&iStructSize, sizeof(uint32)); // Unused, game ignores it on load and uses const value
     CGenericGameStorage::SaveDataToWorkBuffer(&iSaveStruct, iStructSize);
     return true;
 }
 
-// Converted from bool CVehicle::Load(void) 0x871F84
+// 0x871F84
 bool CVehicle::Load()
 {
     return CVehicle::Load_Reversed();
 }
 bool CVehicle::Load_Reversed()
 {
-    uint32_t iStructSize;
+    uint32 iStructSize;
     auto iSaveStruct = CVehicleSaveStructure();
-    CGenericGameStorage::LoadDataFromWorkBuffer(&iStructSize, sizeof(uint32_t));
+    CGenericGameStorage::LoadDataFromWorkBuffer(&iStructSize, sizeof(uint32));
     CGenericGameStorage::LoadDataFromWorkBuffer(&iSaveStruct, sizeof(CVehicleSaveStructure)); //BUG: Should use the value readen line above this, not constant
     iSaveStruct.Extract(this);
     return true;
 }
 
-// Converted from stdcall void CVehicle::Shutdown(void) 0x6D0B40
+// 0x6D0B40
 void CVehicle::Shutdown()
 {
     for (auto& specialColModel : CVehicle::m_aSpecialColModel)
@@ -1148,8 +1149,8 @@ void CVehicle::Shutdown()
             specialColModel.RemoveCollisionVolumes();
 }
 
-// Converted from thiscall int CVehicle::GetRemapIndex(void) 0x6D0B70
-int CVehicle::GetRemapIndex()
+// 0x6D0B70
+int32 CVehicle::GetRemapIndex()
 {
     auto* modelInfo = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
     if (modelInfo->GetNumRemaps() <= 0)
@@ -1162,8 +1163,8 @@ int CVehicle::GetRemapIndex()
     return -1;
 }
 
-// Converted from thiscall void CVehicle::SetRemapTexDictionary(int txdId) 0x6D0BC0
-void CVehicle::SetRemapTexDictionary(int txdId)
+// 0x6D0BC0
+void CVehicle::SetRemapTexDictionary(int32 txdId)
 {
     if (txdId == m_nPreviousRemapTxd)
         return;
@@ -1178,8 +1179,8 @@ void CVehicle::SetRemapTexDictionary(int txdId)
     m_nRemapTxd = txdId;
 }
 
-// Converted from thiscall void CVehicle::SetRemap(int remapIndex) 0x6D0C00
-void CVehicle::SetRemap(int remapIndex)
+// 0x6D0C00
+void CVehicle::SetRemap(int32 remapIndex)
 {
     if (remapIndex == -1)
     {
@@ -1208,14 +1209,14 @@ void CVehicle::SetRemap(int remapIndex)
     }
 }
 
-// Converted from thiscall void CVehicle::SetCollisionLighting(uchar lighting) 0x6D0CA0
+// 0x6D0CA0
 void CVehicle::SetCollisionLighting(tColLighting lighting)
 {
     for (auto& colLighting : m_anCollisionLighting)
         colLighting = lighting;
 }
 
-// Converted from thiscall void CVehicle::UpdateLightingFromStoredPolys(void) 0x6D0CC0
+// 0x6D0CC0
 void CVehicle::UpdateLightingFromStoredPolys()
 {
     m_anCollisionLighting[0] = m_FrontCollPoly.m_nLighting;
@@ -1224,7 +1225,7 @@ void CVehicle::UpdateLightingFromStoredPolys()
     m_anCollisionLighting[2] = m_RearCollPoly.m_nLighting;
 }
 
-// Converted from thiscall void CVehicle::CalculateLightingFromCollision(void) 0x6D0CF0
+// 0x6D0CF0
 void CVehicle::CalculateLightingFromCollision()
 {
     float fAvgLight = 0.0F;
@@ -1236,7 +1237,7 @@ void CVehicle::CalculateLightingFromCollision()
 
 }
 
-// Converted from thiscall void CVehicle::ResetAfterRender(void) 0x6D0E20
+// 0x6D0E20
 void CVehicle::ResetAfterRender()
 {
     ((void(__thiscall*)(CVehicle*))0x6D0E20)(this);
@@ -1244,7 +1245,7 @@ void CVehicle::ResetAfterRender()
 
 // 0x6D1080
 eVehicleAppearance CVehicle::GetVehicleAppearance() {
-    unsigned int flags = (
+    uint32 flags = (
         m_pHandlingData->m_nModelFlags &
         (
             VEHICLE_HANDLING_MODEL_IS_BOAT |
@@ -1275,94 +1276,94 @@ eVehicleAppearance CVehicle::GetVehicleAppearance() {
     return VEHICLE_APPEARANCE_BOAT;
 }
 
-// Converted from thiscall bool CVehicle::CustomCarPlate_TextureCreate(CVehicleModelInfo *model) 0x6D10E0
+// 0x6D10E0
 bool CVehicle::CustomCarPlate_TextureCreate(CVehicleModelInfo* model)
 {
     return plugin::CallMethodAndReturn<bool, 0x6D10E0, CVehicle*, CVehicleModelInfo*>(this, model);
 }
 
-// Converted from thiscall void CVehicle::CustomCarPlate_TextureDestroy(void) 0x6D1150
+// 0x6D1150
 void CVehicle::CustomCarPlate_TextureDestroy()
 {
     ((void(__thiscall*)(CVehicle*))0x6D1150)(this);
 }
 
-// Converted from thiscall bool CVehicle::CanBeDeleted(void) 0x6D1180
+// 0x6D1180
 bool CVehicle::CanBeDeleted()
 {
     return ((bool(__thiscall*)(CVehicle*))0x6D1180)(this);
 }
 
-// Converted from thiscall float CVehicle::ProcessWheelRotation(tWheelState wheelState,CVector const&,CVector const&,float) 0x6D1230
+// 0x6D1230
 float CVehicle::ProcessWheelRotation(tWheelState wheelState, CVector const& arg1, CVector const& arg2, float arg3)
 {
     return ((float(__thiscall*)(CVehicle*, tWheelState, CVector const&, CVector const&, float))0x6D1230)(this, wheelState, arg1, arg2, arg3);
 }
 
-// Converted from thiscall bool CVehicle::CanVehicleBeDamaged(CEntity *damager,eWeaponType weapon,uchar *) 0x6D1280
-bool CVehicle::CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, unsigned char* arg2)
+// 0x6D1280
+bool CVehicle::CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, uint8* arg2)
 {
-    return ((bool(__thiscall*)(CVehicle*, CEntity*, eWeaponType, unsigned char*))0x6D1280)(this, damager, weapon, arg2);
+    return ((bool(__thiscall*)(CVehicle*, CEntity*, eWeaponType, uint8*))0x6D1280)(this, damager, weapon, arg2);
 }
 
-// Converted from thiscall void CVehicle::ProcessDelayedExplosion(void) 0x6D1340
+// 0x6D1340
 void CVehicle::ProcessDelayedExplosion()
 {
     ((void(__thiscall*)(CVehicle*))0x6D1340)(this);
 }
 
-// Converted from thiscall bool CVehicle::AddPassenger(CPed *passenger) 0x6D13A0
+// 0x6D13A0
 bool CVehicle::AddPassenger(CPed* passenger)
 {
     return ((bool(__thiscall*)(CVehicle*, CPed*))0x6D13A0)(this, passenger);
 }
 
-// Converted from thiscall bool CVehicle::AddPassenger(CPed *passenger,uchar seatNumber) 0x6D14D0
-bool CVehicle::AddPassenger(CPed* passenger, unsigned char seatNumber)
+// 0x6D14D0
+bool CVehicle::AddPassenger(CPed* passenger, uint8 seatNumber)
 {
-    return ((bool(__thiscall*)(CVehicle*, CPed*, unsigned char))0x6D14D0)(this, passenger, seatNumber);
+    return ((bool(__thiscall*)(CVehicle*, CPed*, uint8))0x6D14D0)(this, passenger, seatNumber);
 }
 
-// Converted from thiscall void CVehicle::RemovePassenger(CPed *passenger) 0x6D1610
+// 0x6D1610
 void CVehicle::RemovePassenger(CPed* passenger)
 {
     ((void(__thiscall*)(CVehicle*, CPed*))0x6D1610)(this, passenger);
 }
 
-// Converted from thiscall void CVehicle::SetDriver(CPed *driver) 0x6D16A0
+// 0x6D16A0
 void CVehicle::SetDriver(CPed* driver)
 {
     ((void(__thiscall*)(CVehicle*, CPed*))0x6D16A0)(this, driver);
 }
 
-// Converted from thiscall void CVehicle::RemoveDriver(bool) 0x6D1950
+// 0x6D1950
 void CVehicle::RemoveDriver(bool arg0)
 {
     ((void(__thiscall*)(CVehicle*, bool))0x6D1950)(this, arg0);
 }
 
-// Converted from thiscall CPed* CVehicle::SetUpDriver(int pedType,bool,bool) 0x6D1A50
-CPed* CVehicle::SetUpDriver(int pedType, bool arg1, bool arg2)
+// 0x6D1A50
+CPed* CVehicle::SetUpDriver(int32 pedType, bool arg1, bool arg2)
 {
-    return ((CPed * (__thiscall*)(CVehicle*, int, bool, bool))0x6D1A50)(this, pedType, arg1, arg2);
+    return ((CPed * (__thiscall*)(CVehicle*, int32, bool, bool))0x6D1A50)(this, pedType, arg1, arg2);
 }
 
-// Converted from thiscall CPed* CVehicle::SetupPassenger(int seatNumber,int pedType,bool,bool) 0x6D1AA0
-CPed* CVehicle::SetupPassenger(int seatNumber, int pedType, bool arg2, bool arg3)
+// 0x6D1AA0
+CPed* CVehicle::SetupPassenger(int32 seatNumber, int32 pedType, bool arg2, bool arg3)
 {
-    return ((CPed * (__thiscall*)(CVehicle*, int, int, bool, bool))0x6D1AA0)(this, seatNumber, pedType, arg2, arg3);
+    return ((CPed * (__thiscall*)(CVehicle*, int32, int32, bool, bool))0x6D1AA0)(this, seatNumber, pedType, arg2, arg3);
 }
 
-// Converted from thiscall bool CVehicle::IsPassenger(CPed *ped) 0x6D1BD0
+// 0x6D1BD0
 bool CVehicle::IsPassenger(CPed* ped)
 {
     return ((bool(__thiscall*)(CVehicle*, CPed*))0x6D1BD0)(this, ped);
 }
 
-// Converted from thiscall bool CVehicle::IsPassenger(int modelIndex) 0x6D1C00
-bool CVehicle::IsPassenger(int modelIndex)
+// 0x6D1C00
+bool CVehicle::IsPassenger(int32 modelIndex)
 {
-    return ((bool(__thiscall*)(CVehicle*, int))0x6D1C00)(this, modelIndex);
+    return ((bool(__thiscall*)(CVehicle*, int32))0x6D1C00)(this, modelIndex);
 }
 
 bool CVehicle::IsDriver(CPed* ped)
@@ -1372,60 +1373,60 @@ bool CVehicle::IsDriver(CPed* ped)
     return false;
 }
 
-bool CVehicle::IsDriver(int modelIndex)
+bool CVehicle::IsDriver(int32 modelIndex)
 {
     return m_pDriver && m_pDriver->m_nModelIndex == modelIndex;
 }
 
-// Converted from thiscall void CVehicle::KillPedsInVehicle(void) 0x6D1C80
+// 0x6D1C80
 void CVehicle::KillPedsInVehicle()
 {
     ((void(__thiscall*)(CVehicle*))0x6D1C80)(this);
 }
 
-// Converted from thiscall bool CVehicle::IsUpsideDown(void) 0x6D1D90
+// 0x6D1D90
 bool CVehicle::IsUpsideDown()
 {
     return ((bool(__thiscall*)(CVehicle*))0x6D1D90)(this);
 }
 
-// Converted from thiscall bool CVehicle::IsOnItsSide(void) 0x6D1DD0
+// 0x6D1DD0
 bool CVehicle::IsOnItsSide()
 {
     return ((bool(__thiscall*)(CVehicle*))0x6D1DD0)(this);
 }
 
-// Converted from thiscall bool CVehicle::CanPedOpenLocks(CPed *ped) 0x6D1E20
+// 0x6D1E20
 bool CVehicle::CanPedOpenLocks(CPed* ped)
 {
     return ((bool(__thiscall*)(CVehicle*, CPed*))0x6D1E20)(this, ped);
 }
 
-// Converted from thiscall bool CVehicle::CanDoorsBeDamaged(void) 0x6D1E60
+// 0x6D1E60
 bool CVehicle::CanDoorsBeDamaged()
 {
     return ((bool(__thiscall*)(CVehicle*))0x6D1E60)(this);
 }
 
-// Converted from thiscall bool CVehicle::CanPedEnterCar(void) 0x6D1E80
+// 0x6D1E80
 bool CVehicle::CanPedEnterCar()
 {
     return ((bool(__thiscall*)(CVehicle*))0x6D1E80)(this);
 }
 
-// Converted from thiscall void CVehicle::ProcessCarAlarm(void) 0x6D21F0
+// 0x6D21F0
 void CVehicle::ProcessCarAlarm()
 {
     ((void(__thiscall*)(CVehicle*))0x6D21F0)(this);
 }
 
-// Converted from stdcall void DestroyVehicleAndDriverAndPassengers(CVehicle *vehicle) 0x6D2250
+// 0x6D2250
 void DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle)
 {
     ((void(__cdecl*)(CVehicle*))0x6D2250)(vehicle);
 }
 
-// Converted from thiscall bool CVehicle::IsVehicleNormal(void) 0x6D22F0
+// 0x6D22F0
 bool CVehicle::IsVehicleNormal()
 {
     return ((bool(__thiscall*)(CVehicle*))0x6D22F0)(this);
@@ -1445,67 +1446,67 @@ void CVehicle::ChangeLawEnforcerState(bool bIsEnforcer)
     }
 }
 
-// Converted from thiscall bool CVehicle::IsLawEnforcementVehicle(void) 0x6D2370
+// 0x6D2370
 bool CVehicle::IsLawEnforcementVehicle()
 {
     return ((bool(__thiscall*)(CVehicle*))0x6D2370)(this);
 }
 
-// Converted from thiscall bool CVehicle::ShufflePassengersToMakeSpace(void) 0x6D2450
+// 0x6D2450
 bool CVehicle::ShufflePassengersToMakeSpace()
 {
     return ((bool(__thiscall*)(CVehicle*))0x6D2450)(this);
 }
 
-// Converted from thiscall void CVehicle::ExtinguishCarFire(void) 0x6D2460
+// 0x6D2460
 void CVehicle::ExtinguishCarFire()
 {
     ((void(__thiscall*)(CVehicle*))0x6D2460)(this);
 }
 
-// Converted from thiscall void CVehicle::ActivateBomb(void) 0x6D24F0
+// 0x6D24F0
 void CVehicle::ActivateBomb()
 {
     ((void(__thiscall*)(CVehicle*))0x6D24F0)(this);
 }
 
-// Converted from thiscall void CVehicle::ActivateBombWhenEntered(void) 0x6D2570
+// 0x6D2570
 void CVehicle::ActivateBombWhenEntered()
 {
     ((void(__thiscall*)(CVehicle*))0x6D2570)(this);
 }
 
-// Converted from thiscall bool CVehicle::CarHasRoof(void) 0x6D25D0
+// 0x6D25D0
 bool CVehicle::CarHasRoof()
 {
     return ((bool(__thiscall*)(CVehicle*))0x6D25D0)(this);
 }
 
-// Converted from thiscall float CVehicle::HeightAboveCeiling(float,eFlightModel) 0x6D2600
+// 0x6D2600
 float CVehicle::HeightAboveCeiling(float arg0, eFlightModel arg1)
 {
     return ((float(__thiscall*)(CVehicle*, float, eFlightModel))0x6D2600)(this, arg0, arg1);
 }
 
-// Converted from stdcall RwObject* SetVehicleAtomicVisibilityCB(RwObject *object,void *data) 0x6D2690
+// 0x6D2690
 RwObject* SetVehicleAtomicVisibilityCB(RwObject* object, void* data)
 {
     return ((RwObject * (__cdecl*)(RwObject*, void*))0x6D2690)(object, data);
 }
 
-// Converted from stdcall RwFrame* SetVehicleAtomicVisibilityCB(RwFrame *component,void *data) 0x6D26D0
+// 0x6D26D0
 RwFrame* SetVehicleAtomicVisibilityCB(RwFrame* component, void* data)
 {
     return ((RwFrame * (__cdecl*)(RwFrame*, void*))0x6D26D0)(component, data);
 }
 
-// Converted from thiscall void CVehicle::SetComponentVisibility(RwFrame *component,uint visibilityState) 0x6D2700
-void CVehicle::SetComponentVisibility(RwFrame* component, unsigned int visibilityState)
+// 0x6D2700
+void CVehicle::SetComponentVisibility(RwFrame* component, uint32 visibilityState)
 {
-    ((void(__thiscall*)(CVehicle*, RwFrame*, unsigned int))0x6D2700)(this, component, visibilityState);
+    ((void(__thiscall*)(CVehicle*, RwFrame*, uint32))0x6D2700)(this, component, visibilityState);
 }
 
-// Converted from thiscall void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData *boatHandling,float) 0x6D2740
+// 0x6D2740
 void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData* boatHandling, float fImmersionDepth)
 {
     float fSpeedMult = pow(fImmersionDepth, 2.0F) * m_pHandlingData->m_fSuspensionForceLevel * m_fMass / 1000.0F;
@@ -1538,309 +1539,309 @@ void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData* boatHandling, float f
         m_vecMoveSpeed.z *= vecSpeedMult.z;
 }
 
-// Converted from stdcall RpMaterial* SetCompAlphaCB(RpMaterial *material,void *data) 0x6D2950
+// 0x6D2950
 RpMaterial* SetCompAlphaCB(RpMaterial* material, void* data)
 {
     return ((RpMaterial * (__cdecl*)(RpMaterial*, void*))0x6D2950)(material, data);
 }
 
-// Converted from thiscall void CVehicle::SetComponentAtomicAlpha(RpAtomic *atomic,int alpha) 0x6D2960
-void CVehicle::SetComponentAtomicAlpha(RpAtomic* atomic, int alpha)
+// 0x6D2960
+void CVehicle::SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha)
 {
-    ((void(__cdecl*)(RpAtomic*, int))0x6D2960)(atomic, alpha);
+    ((void(__cdecl*)(RpAtomic*, int32))0x6D2960)(atomic, alpha);
 }
 
-// Converted from thiscall void CVehicle::UpdateClumpAlpha(void) 0x6D2980
+// 0x6D2980
 void CVehicle::UpdateClumpAlpha()
 {
     ((void(__thiscall*)(CVehicle*))0x6D2980)(this);
 }
 
-// Converted from thiscall void CVehicle::UpdatePassengerList(void) 0x6D29E0
+// 0x6D29E0
 void CVehicle::UpdatePassengerList()
 {
     ((void(__thiscall*)(CVehicle*))0x6D29E0)(this);
 }
 
-// Converted from thiscall CPed* CVehicle::PickRandomPassenger(void) 0x6D2A10
+// 0x6D2A10
 CPed* CVehicle::PickRandomPassenger()
 {
     return ((CPed * (__thiscall*)(CVehicle*))0x6D2A10)(this);
 }
 
-// Converted from thiscall void CVehicle::AddDamagedVehicleParticles(void) 0x6D2A80
+// 0x6D2A80
 void CVehicle::AddDamagedVehicleParticles()
 {
     ((void(__thiscall*)(CVehicle*))0x6D2A80)(this);
 }
 
-// Converted from thiscall void CVehicle::MakeDirty(CColPoint &colPoint) 0x6D2BF0
+// 0x6D2BF0
 void CVehicle::MakeDirty(CColPoint& colPoint)
 {
     ((void(__thiscall*)(CVehicle*, CColPoint&))0x6D2BF0)(this, colPoint);
 }
 
-// Converted from thiscall bool CVehicle::AddWheelDirtAndWater(CColPoint &colPoint,uint,uchar,uchar) 0x6D2D50
-bool CVehicle::AddWheelDirtAndWater(CColPoint& colPoint, unsigned int arg1, unsigned char arg2, unsigned char arg3)
+// 0x6D2D50
+bool CVehicle::AddWheelDirtAndWater(CColPoint& colPoint, uint32 arg1, uint8 arg2, uint8 arg3)
 {
-    return ((bool(__thiscall*)(CVehicle*, CColPoint&, unsigned int, unsigned char, unsigned char))0x6D2D50)(this, colPoint, arg1, arg2, arg3);
+    return ((bool(__thiscall*)(CVehicle*, CColPoint&, uint32, uint8, uint8))0x6D2D50)(this, colPoint, arg1, arg2, arg3);
 }
 
-// Converted from thiscall void CVehicle::SetGettingInFlags(uchar doorId) 0x6D3000
-void CVehicle::SetGettingInFlags(unsigned char doorId)
+// 0x6D3000
+void CVehicle::SetGettingInFlags(uint8 doorId)
 {
-    ((void(__thiscall*)(CVehicle*, unsigned char))0x6D3000)(this, doorId);
+    ((void(__thiscall*)(CVehicle*, uint8))0x6D3000)(this, doorId);
 }
 
-// Converted from thiscall void CVehicle::SetGettingOutFlags(uchar doorId) 0x6D3020
-void CVehicle::SetGettingOutFlags(unsigned char doorId)
+// 0x6D3020
+void CVehicle::SetGettingOutFlags(uint8 doorId)
 {
-    ((void(__thiscall*)(CVehicle*, unsigned char))0x6D3020)(this, doorId);
+    ((void(__thiscall*)(CVehicle*, uint8))0x6D3020)(this, doorId);
 }
 
-// Converted from thiscall void CVehicle::ClearGettingInFlags(uchar doorId) 0x6D3040
-void CVehicle::ClearGettingInFlags(unsigned char doorId)
+// 0x6D3040
+void CVehicle::ClearGettingInFlags(uint8 doorId)
 {
-    ((void(__thiscall*)(CVehicle*, unsigned char))0x6D3040)(this, doorId);
+    ((void(__thiscall*)(CVehicle*, uint8))0x6D3040)(this, doorId);
 }
 
-// Converted from thiscall void CVehicle::ClearGettingOutFlags(uchar doorId) 0x6D3060
-void CVehicle::ClearGettingOutFlags(unsigned char doorId)
+// 0x6D3060
+void CVehicle::ClearGettingOutFlags(uint8 doorId)
 {
-    ((void(__thiscall*)(CVehicle*, unsigned char))0x6D3060)(this, doorId);
+    ((void(__thiscall*)(CVehicle*, uint8))0x6D3060)(this, doorId);
 }
 
-// Converted from thiscall void CVehicle::SetWindowOpenFlag(uchar doorId) 0x6D3080
-void CVehicle::SetWindowOpenFlag(unsigned char doorId)
+// 0x6D3080
+void CVehicle::SetWindowOpenFlag(uint8 doorId)
 {
-    ((void(__thiscall*)(CVehicle*, unsigned char))0x6D3080)(this, doorId);
+    ((void(__thiscall*)(CVehicle*, uint8))0x6D3080)(this, doorId);
 }
 
-// Converted from thiscall void CVehicle::ClearWindowOpenFlag(uchar doorId) 0x6D30B0
-void CVehicle::ClearWindowOpenFlag(unsigned char doorId)
+// 0x6D30B0
+void CVehicle::ClearWindowOpenFlag(uint8 doorId)
 {
-    ((void(__thiscall*)(CVehicle*, unsigned char))0x6D30B0)(this, doorId);
+    ((void(__thiscall*)(CVehicle*, uint8))0x6D30B0)(this, doorId);
 }
 
-// Converted from thiscall bool CVehicle::SetVehicleUpgradeFlags(int upgradeModelIndex,int componentIndex,int &resultModelIndex) 0x6D30E0
-bool CVehicle::SetVehicleUpgradeFlags(int upgradeModelIndex, int componentIndex, int& resultModelIndex)
+// 0x6D30E0
+bool CVehicle::SetVehicleUpgradeFlags(int32 upgradeModelIndex, int32 componentIndex, int32& resultModelIndex)
 {
-    return ((bool(__thiscall*)(CVehicle*, int, int, int&))0x6D30E0)(this, upgradeModelIndex, componentIndex, resultModelIndex);
+    return ((bool(__thiscall*)(CVehicle*, int32, int32, int32&))0x6D30E0)(this, upgradeModelIndex, componentIndex, resultModelIndex);
 }
 
-// Converted from thiscall bool CVehicle::ClearVehicleUpgradeFlags(int,int componentIndex) 0x6D3210
-bool CVehicle::ClearVehicleUpgradeFlags(int arg0, int componentIndex)
+// 0x6D3210
+bool CVehicle::ClearVehicleUpgradeFlags(int32 arg0, int32 componentIndex)
 {
-    return ((bool(__thiscall*)(CVehicle*, int, int))0x6D3210)(this, arg0, componentIndex);
+    return ((bool(__thiscall*)(CVehicle*, int32, int32))0x6D3210)(this, arg0, componentIndex);
 }
 
-// Converted from stdcall RpAtomic* RemoveUpgradeCB(RpAtomic *atomic,void *data) 0x6D3300
+// 0x6D3300
 RpAtomic* RemoveUpgradeCB(RpAtomic* atomic, void* data)
 {
     return ((RpAtomic * (__cdecl*)(RpAtomic*, void*))0x6D3300)(atomic, data);
 }
 
-// Converted from stdcall RpAtomic* FindUpgradeCB(RpAtomic *atomic,void *data) 0x6D3370
+// 0x6D3370
 RpAtomic* FindUpgradeCB(RpAtomic* atomic, void* data)
 {
     return ((RpAtomic * (__cdecl*)(RpAtomic*, void*))0x6D3370)(atomic, data);
 }
 
-// Converted from stdcall RwObject* RemoveObjectsCB(RwObject *object,void *data) 0x6D33B0
+// 0x6D33B0
 RwObject* RemoveObjectsCB(RwObject* object, void* data)
 {
     return ((RwObject * (__cdecl*)(RwObject*, void*))0x6D33B0)(object, data);
 }
 
-// Converted from stdcall RwFrame* RemoveObjectsCB(RwFrame *component,void *data) 0x6D3420
+// 0x6D3420
 RwFrame* RemoveObjectsCB(RwFrame* component, void* data)
 {
     return ((RwFrame * (__cdecl*)(RwFrame*, void*))0x6D3420)(component, data);
 }
 
-// Converted from stdcall RwObject* CopyObjectsCB(RwObject *object,void *data) 0x6D3450
+// 0x6D3450
 RwObject* CopyObjectsCB(RwObject* object, void* data)
 {
     return ((RwObject * (__cdecl*)(RwObject*, void*))0x6D3450)(object, data);
 }
 
-// Converted from stdcall RwObject* FindReplacementUpgradeCB(RwObject *object,void *data) 0x6D3490
+// 0x6D3490
 RwObject* FindReplacementUpgradeCB(RwObject* object, void* data)
 {
     return ((RwObject * (__cdecl*)(RwObject*, void*))0x6D3490)(object, data);
 }
 
-// Converted from stdcall RpAtomic* RemoveAllUpgradesCB(RpAtomic *atomic,void *data) 0x6D34D0
+// 0x6D34D0
 RpAtomic* RemoveAllUpgradesCB(RpAtomic* atomic, void* data)
 {
     return ((RpAtomic * (__cdecl*)(RpAtomic*, void*))0x6D34D0)(atomic, data);
 }
 
-// Converted from thiscall RpAtomic* CVehicle::CreateUpgradeAtomic(CBaseModelInfo *model,UpgradePosnDesc const*upgradePosn,RwFrame *parentComponent,bool isDamaged) 0x6D3510
+// 0x6D3510
 RpAtomic* CVehicle::CreateUpgradeAtomic(CBaseModelInfo* model, UpgradePosnDesc const* upgradePosn, RwFrame* parentComponent, bool isDamaged)
 {
     return ((RpAtomic * (__thiscall*)(CVehicle*, CBaseModelInfo*, UpgradePosnDesc const*, RwFrame*, bool))0x6D3510)(this, model, upgradePosn, parentComponent, isDamaged);
 }
 
-// Converted from thiscall void CVehicle::RemoveUpgrade(int upgradeId) 0x6D3630
-void CVehicle::RemoveUpgrade(int upgradeId)
+// 0x6D3630
+void CVehicle::RemoveUpgrade(int32 upgradeId)
 {
-    ((void(__thiscall*)(CVehicle*, int))0x6D3630)(this, upgradeId);
+    ((void(__thiscall*)(CVehicle*, int32))0x6D3630)(this, upgradeId);
 }
 
-// Converted from thiscall int CVehicle::GetUpgrade(int upgradeId) 0x6D3650
-int CVehicle::GetUpgrade(int upgradeId)
+// 0x6D3650
+int32 CVehicle::GetUpgrade(int32 upgradeId)
 {
-    return ((int(__thiscall*)(CVehicle*, int))0x6D3650)(this, upgradeId);
+    return ((int32(__thiscall*)(CVehicle*, int32))0x6D3650)(this, upgradeId);
 }
 
-// Converted from thiscall RpAtomic* CVehicle::CreateReplacementAtomic(CBaseModelInfo *model,RwFrame *component,int,bool bDamaged,bool bIsWheel) 0x6D3700
-RpAtomic* CVehicle::CreateReplacementAtomic(CBaseModelInfo* model, RwFrame* component, int arg2, bool bDamaged, bool bIsWheel)
+// 0x6D3700
+RpAtomic* CVehicle::CreateReplacementAtomic(CBaseModelInfo* model, RwFrame* component, int32 arg2, bool bDamaged, bool bIsWheel)
 {
-    return ((RpAtomic * (__thiscall*)(CVehicle*, CBaseModelInfo*, RwFrame*, int, bool, bool))0x6D3700)(this, model, component, arg2, bDamaged, bIsWheel);
+    return ((RpAtomic * (__thiscall*)(CVehicle*, CBaseModelInfo*, RwFrame*, int32, bool, bool))0x6D3700)(this, model, component, arg2, bDamaged, bIsWheel);
 }
 
-// Converted from thiscall void CVehicle::AddReplacementUpgrade(int modelIndex,int nodeId) 0x6D3830
-void CVehicle::AddReplacementUpgrade(int modelIndex, int nodeId)
+// 0x6D3830
+void CVehicle::AddReplacementUpgrade(int32 modelIndex, int32 nodeId)
 {
-    ((void(__thiscall*)(CVehicle*, int, int))0x6D3830)(this, modelIndex, nodeId);
+    ((void(__thiscall*)(CVehicle*, int32, int32))0x6D3830)(this, modelIndex, nodeId);
 }
 
-// Converted from thiscall void CVehicle::RemoveReplacementUpgrade(int nodeId) 0x6D39E0
-void CVehicle::RemoveReplacementUpgrade(int nodeId)
+// 0x6D39E0
+void CVehicle::RemoveReplacementUpgrade(int32 nodeId)
 {
-    ((void(__thiscall*)(CVehicle*, int))0x6D39E0)(this, nodeId);
+    ((void(__thiscall*)(CVehicle*, int32))0x6D39E0)(this, nodeId);
 }
 
-// Converted from thiscall void CVehicle::GetReplacementUpgrade(int nodeId) 0x6D3A50
-void CVehicle::GetReplacementUpgrade(int nodeId)
+// 0x6D3A50
+void CVehicle::GetReplacementUpgrade(int32 nodeId)
 {
-    ((void(__thiscall*)(CVehicle*, int))0x6D3A50)(this, nodeId);
+    ((void(__thiscall*)(CVehicle*, int32))0x6D3A50)(this, nodeId);
 }
 
-// Converted from thiscall void CVehicle::RemoveAllUpgrades(void) 0x6D3AB0
+// 0x6D3AB0
 void CVehicle::RemoveAllUpgrades()
 {
     ((void(__thiscall*)(CVehicle*))0x6D3AB0)(this);
 }
 
-// Converted from thiscall int CVehicle::GetSpareHasslePosId(void) 0x6D3AE0
-int CVehicle::GetSpareHasslePosId()
+// 0x6D3AE0
+int32 CVehicle::GetSpareHasslePosId()
 {
-    return ((int(__thiscall*)(CVehicle*))0x6D3AE0)(this);
+    return ((int32(__thiscall*)(CVehicle*))0x6D3AE0)(this);
 }
 
-// Converted from thiscall void CVehicle::SetHasslePosId(int hasslePos,bool enable) 0x6D3B30
-void CVehicle::SetHasslePosId(int hasslePos, bool enable)
+// 0x6D3B30
+void CVehicle::SetHasslePosId(int32 hasslePos, bool enable)
 {
-    ((void(__thiscall*)(CVehicle*, int, bool))0x6D3B30)(this, hasslePos, enable);
+    ((void(__thiscall*)(CVehicle*, int32, bool))0x6D3B30)(this, hasslePos, enable);
 }
 
-// Converted from thiscall void CVehicle::InitWinch(int) 0x6D3B60
-void CVehicle::InitWinch(int arg0)
+// 0x6D3B60
+void CVehicle::InitWinch(int32 arg0)
 {
-    ((void(__thiscall*)(CVehicle*, int))0x6D3B60)(this, arg0);
+    ((void(__thiscall*)(CVehicle*, int32))0x6D3B60)(this, arg0);
 }
 
-// Converted from thiscall void CVehicle::UpdateWinch(void) 0x6D3B80
+// 0x6D3B80
 void CVehicle::UpdateWinch()
 {
     ((void(__thiscall*)(CVehicle*))0x6D3B80)(this);
 }
 
-// Converted from thiscall void CVehicle::RemoveWinch(void) 0x6D3C70
+// 0x6D3C70
 void CVehicle::RemoveWinch()
 {
     ((void(__thiscall*)(CVehicle*))0x6D3C70)(this);
 }
 
-// Converted from thiscall void CVehicle::ReleasePickedUpEntityWithWinch(void) 0x6D3CB0
+// 0x6D3CB0
 void CVehicle::ReleasePickedUpEntityWithWinch()
 {
     ((void(__thiscall*)(CVehicle*))0x6D3CB0)(this);
 }
 
-// Converted from thiscall void CVehicle::PickUpEntityWithWinch(CEntity *) 0x6D3CD0
+// 0x6D3CD0
 void CVehicle::PickUpEntityWithWinch(CEntity* arg0)
 {
     ((void(__thiscall*)(CVehicle*, CEntity*))0x6D3CD0)(this, arg0);
 }
 
-// Converted from thiscall CEntity* CVehicle::QueryPickedUpEntityWithWinch(void) 0x6D3CF0
+// 0x6D3CF0
 CEntity* CVehicle::QueryPickedUpEntityWithWinch()
 {
     return ((CEntity * (__thiscall*)(CVehicle*))0x6D3CF0)(this);
 }
 
-// Converted from thiscall float CVehicle::GetRopeHeightForHeli(void) 0x6D3D10
+// 0x6D3D10
 float CVehicle::GetRopeHeightForHeli()
 {
     return ((float(__thiscall*)(CVehicle*))0x6D3D10)(this);
 }
 
-// Converted from thiscall void CVehicle::SetRopeHeightForHeli(float height) 0x6D3D30
+// 0x6D3D30
 void CVehicle::SetRopeHeightForHeli(float height)
 {
     ((void(__thiscall*)(CVehicle*, float))0x6D3D30)(this, height);
 }
 
-// Converted from thiscall void CVehicle::RenderDriverAndPassengers(void) 0x6D3D60
+// 0x6D3D60
 void CVehicle::RenderDriverAndPassengers()
 {
     ((void(__thiscall*)(CVehicle*))0x6D3D60)(this);
 }
 
-// Converted from thiscall void CVehicle::PreRenderDriverAndPassengers(void) 0x6D3DB0
+// 0x6D3DB0
 void CVehicle::PreRenderDriverAndPassengers()
 {
     ((void(__thiscall*)(CVehicle*))0x6D3DB0)(this);
 }
 
-// Converted from thiscall float CVehicle::GetPlaneGunsAutoAimAngle(void) 0x6D3E00
+// 0x6D3E00
 float CVehicle::GetPlaneGunsAutoAimAngle()
 {
     return ((float(__thiscall*)(CVehicle*))0x6D3E00)(this);
 }
 
-// Converted from thiscall int CVehicle::GetPlaneNumGuns(void) 0x6D3F30
-int CVehicle::GetPlaneNumGuns()
+// 0x6D3F30
+int32 CVehicle::GetPlaneNumGuns()
 {
-    return ((int(__thiscall*)(CVehicle*))0x6D3F30)(this);
+    return ((int32(__thiscall*)(CVehicle*))0x6D3F30)(this);
 }
 
-// Converted from thiscall void CVehicle::SetFiringRateMultiplier(float multiplier) 0x6D4010
+// 0x6D4010
 void CVehicle::SetFiringRateMultiplier(float multiplier)
 {
     ((void(__thiscall*)(CVehicle*, float))0x6D4010)(this, multiplier);
 }
 
-// Converted from thiscall float CVehicle::GetFiringRateMultiplier(void) 0x6D4090
+// 0x6D4090
 float CVehicle::GetFiringRateMultiplier()
 {
     return ((float(__thiscall*)(CVehicle*))0x6D4090)(this);
 }
 
-// Converted from thiscall unsigned int CVehicle::GetPlaneGunsRateOfFire(void) 0x6D40E0
-unsigned int CVehicle::GetPlaneGunsRateOfFire()
+// 0x6D40E0
+uint32 CVehicle::GetPlaneGunsRateOfFire()
 {
-    return ((unsigned int(__thiscall*)(CVehicle*))0x6D40E0)(this);
+    return ((uint32(__thiscall*)(CVehicle*))0x6D40E0)(this);
 }
 
-// Converted from thiscall CVector CVehicle::GetPlaneGunsPosition(int gunId) 0x6D4290
-CVector CVehicle::GetPlaneGunsPosition(int gunId)
+// 0x6D4290
+CVector CVehicle::GetPlaneGunsPosition(int32 gunId)
 {
     CVector result;
-    ((void(__thiscall*)(CVehicle*, CVector*, int))0x6D4290)(this, &result, gunId);
+    ((void(__thiscall*)(CVehicle*, CVector*, int32))0x6D4290)(this, &result, gunId);
     return result;
 }
 
-// Converted from thiscall unsigned int CVehicle::GetPlaneOrdnanceRateOfFire(eOrdnanceType ordnanceType) 0x6D4590
-unsigned int CVehicle::GetPlaneOrdnanceRateOfFire(eOrdnanceType ordnanceType)
+// 0x6D4590
+uint32 CVehicle::GetPlaneOrdnanceRateOfFire(eOrdnanceType ordnanceType)
 {
-    return ((unsigned int(__thiscall*)(CVehicle*, eOrdnanceType))0x6D4590)(this, ordnanceType);
+    return ((uint32(__thiscall*)(CVehicle*, eOrdnanceType))0x6D4590)(this, ordnanceType);
 }
 
-// Converted from thiscall CVector CVehicle::GetPlaneOrdnancePosition(eOrdnanceType ordnanceType) 0x6D46E0
+// 0x6D46E0
 CVector CVehicle::GetPlaneOrdnancePosition(eOrdnanceType ordnanceType)
 {
     CVector result;
@@ -1848,68 +1849,68 @@ CVector CVehicle::GetPlaneOrdnancePosition(eOrdnanceType ordnanceType)
     return result;
 }
 
-// Converted from thiscall void CVehicle::SelectPlaneWeapon(bool bChange,eOrdnanceType ordnanceType) 0x6D4900
+// 0x6D4900
 void CVehicle::SelectPlaneWeapon(bool bChange, eOrdnanceType ordnanceType)
 {
     ((void(__thiscall*)(CVehicle*, bool, eOrdnanceType))0x6D4900)(this, bChange, ordnanceType);
 }
 
-// Converted from thiscall void CVehicle::DoPlaneGunFireFX(CWeapon *weapon,CVector &particlePos,CVector &gunshellPos,int particleIndex) 0x6D4AD0
-void CVehicle::DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& gunshellPos, int particleIndex)
+// 0x6D4AD0
+void CVehicle::DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& gunshellPos, int32 particleIndex)
 {
-    ((void(__thiscall*)(CVehicle*, CWeapon*, CVector&, CVector&, int))0x6D4AD0)(this, weapon, particlePos, gunshellPos, particleIndex);
+    ((void(__thiscall*)(CVehicle*, CWeapon*, CVector&, CVector&, int32))0x6D4AD0)(this, weapon, particlePos, gunshellPos, particleIndex);
 }
 
-// Converted from thiscall void CVehicle::FirePlaneGuns(void) 0x6D4D30
+// 0x6D4D30
 void CVehicle::FirePlaneGuns()
 {
     ((void(__thiscall*)(CVehicle*))0x6D4D30)(this);
 }
 
-// Converted from thiscall void CVehicle::FireUnguidedMissile(eOrdnanceType ordnanceType,bool bCheckTime) 0x6D5110
+// 0x6D5110
 void CVehicle::FireUnguidedMissile(eOrdnanceType ordnanceType, bool bCheckTime)
 {
     ((void(__thiscall*)(CVehicle*, eOrdnanceType, bool))0x6D5110)(this, ordnanceType, bCheckTime);
 }
 
-// Converted from thiscall bool CVehicle::CanBeDriven(void) 0x6D5400
+// 0x6D5400
 bool CVehicle::CanBeDriven()
 {
     return ((bool(__thiscall*)(CVehicle*))0x6D5400)(this);
 }
 
-// Converted from thiscall void CVehicle::ReactToVehicleDamage(CPed *ped) 0x6D5490
+// 0x6D5490
 void CVehicle::ReactToVehicleDamage(CPed* ped)
 {
     ((void(__thiscall*)(CVehicle*, CPed*))0x6D5490)(this, ped);
 }
 
-// Converted from thiscall bool CVehicle::GetVehicleLightsStatus(void) 0x6D55C0
+// 0x6D55C0
 bool CVehicle::GetVehicleLightsStatus()
 {
     return ((bool(__thiscall*)(CVehicle*))0x6D55C0)(this);
 }
 
-// Converted from thiscall bool CVehicle::CanPedLeanOut(CPed *ped) 0x6D5CF0
+// 0x6D5CF0
 bool CVehicle::CanPedLeanOut(CPed* ped)
 {
     return ((bool(__thiscall*)(CVehicle*, CPed*))0x6D5CF0)(this, ped);
 }
 
-// Converted from thiscall void CVehicle::SetVehicleCreatedBy(int createdBy) 0x6D5D70
-void CVehicle::SetVehicleCreatedBy(int createdBy)
+// 0x6D5D70
+void CVehicle::SetVehicleCreatedBy(int32 createdBy)
 {
-    ((void(__thiscall*)(CVehicle*, int))0x6D5D70)(this, createdBy);
+    ((void(__thiscall*)(CVehicle*, int32))0x6D5D70)(this, createdBy);
 }
 
-// Converted from thiscall void CVehicle::SetupRender(void) 0x6D64F0
+// 0x6D64F0
 void CVehicle::SetupRender()
 {
     ((void(__thiscall*)(CVehicle*))0x6D64F0)(this);
 }
 
 void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& wheelContactSpeed, CVector& wheelContactPoint,
-    int wheelsOnGround, float thrust, float brake, float adhesion, int8_t wheelId, float* wheelSpeed, tWheelState* wheelState, uint16_t wheelStatus)
+    int32 wheelsOnGround, float thrust, float brake, float adhesion, int8 wheelId, float* wheelSpeed, tWheelState* wheelState, uint16 wheelStatus)
 {
     static bool bBraking = false;
     static bool bDriving = false;
@@ -2028,67 +2029,67 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
     }
 }
 
-// Converted from thiscall void CVehicle::ProcessBikeWheel(CVector &,CVector &,CVector &,CVector &,int,float,float,float,float,char,float *,tWheelState *,eBikeWheelSpecial,ushort) 0x6D73B0
-void CVehicle::ProcessBikeWheel(CVector& arg0, CVector& arg1, CVector& arg2, CVector& arg3, int arg4, float arg5, float arg6, float arg7, float arg8, char arg9, float* arg10, tWheelState* arg11, eBikeWheelSpecial arg12, unsigned short arg13)
+// 0x6D73B0
+void CVehicle::ProcessBikeWheel(CVector& arg0, CVector& arg1, CVector& arg2, CVector& arg3, int32 arg4, float arg5, float arg6, float arg7, float arg8, char arg9, float* arg10, tWheelState* arg11, eBikeWheelSpecial arg12, uint16 arg13)
 {
-    ((void(__thiscall*)(CVehicle*, CVector&, CVector&, CVector&, CVector&, int, float, float, float, float, char, float*, tWheelState*, eBikeWheelSpecial, unsigned short))0x6D73B0)(this, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
+    ((void(__thiscall*)(CVehicle*, CVector&, CVector&, CVector&, CVector&, int32, float, float, float, float, char, float*, tWheelState*, eBikeWheelSpecial, uint16))0x6D73B0)(this, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13);
 }
 
-// Converted from thiscall int CVehicle::FindTyreNearestPoint(float x,float y) 0x6D7BC0
-int CVehicle::FindTyreNearestPoint(float x, float y)
+// 0x6D7BC0
+int32 CVehicle::FindTyreNearestPoint(float x, float y)
 {
-    return ((int(__thiscall*)(CVehicle*, float, float))0x6D7BC0)(this, x, y);
+    return ((int32(__thiscall*)(CVehicle*, float, float))0x6D7BC0)(this, x, y);
 }
 
-// Converted from thiscall void CVehicle::InflictDamage(CEntity *damager,eWeaponType weapon,float intensity,CVector coords) 0x6D7C90
+// 0x6D7C90
 void CVehicle::InflictDamage(CEntity* damager, eWeaponType weapon, float intensity, CVector coords)
 {
     ((void(__thiscall*)(CVehicle*, CEntity*, eWeaponType, float, CVector))0x6D7C90)(this, damager, weapon, intensity, coords);
 }
 
-// Converted from thiscall void CVehicle::KillPedsGettingInVehicle(void) 0x6D82F0
+// 0x6D82F0
 void CVehicle::KillPedsGettingInVehicle()
 {
     ((void(__thiscall*)(CVehicle*))0x6D82F0)(this);
 }
 
-// Converted from thiscall bool CVehicle::UsesSiren(void) 0x6D8470
+// 0x6D8470
 bool CVehicle::UsesSiren()
 {
     return ((bool(__thiscall*)(CVehicle*))0x6D8470)(this);
 }
 
-// Converted from thiscall bool CVehicle::IsSphereTouchingVehicle(float x,float y,float z,float radius) 0x6D84D0
+// 0x6D84D0
 bool CVehicle::IsSphereTouchingVehicle(float x, float y, float z, float radius)
 {
     return ((bool(__thiscall*)(CVehicle*, float, float, float, float))0x6D84D0)(this, x, y, z, radius);
 }
 
-// Converted from thiscall void CVehicle::FlyingControl(eFlightModel flightModel,float,float,float,float) 0x6D85F0
+// 0x6D85F0
 void CVehicle::FlyingControl(eFlightModel flightModel, float leftRightSkid, float steeringUpDown, float steeringLeftRight, float accelerationBreakStatus)
 {
     ((void(__thiscall*)(CVehicle*, eFlightModel, float, float, float, float))0x6D85F0)(this, flightModel, leftRightSkid, steeringUpDown, steeringLeftRight, accelerationBreakStatus);
 }
 
-// Converted from thiscall void CVehicle::BladeColSectorList(CPtrList &ptrList,CColModel &colModel,CMatrix &matrix,short,float) 0x6DAF00
-void CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatrix& matrix, short arg3, float arg4)
+// 0x6DAF00
+void CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatrix& matrix, int16 arg3, float arg4)
 {
-    ((void(__thiscall*)(CVehicle*, CPtrList&, CColModel&, CMatrix&, short, float))0x6DAF00)(this, ptrList, colModel, matrix, arg3, arg4);
+    ((void(__thiscall*)(CVehicle*, CPtrList&, CColModel&, CMatrix&, int16, float))0x6DAF00)(this, ptrList, colModel, matrix, arg3, arg4);
 }
 
-// Converted from thiscall void CVehicle::SetComponentRotation(RwFrame *component,int axis,float angle,bool bResetPosition) 0x6DBA30
-void CVehicle::SetComponentRotation(RwFrame* component, int axis, float angle, bool bResetPosition)
+// 0x6DBA30
+void CVehicle::SetComponentRotation(RwFrame* component, int32 axis, float angle, bool bResetPosition)
 {
-    plugin::CallMethod<0x6DBA30, CVehicle*, RwFrame*, int, float, bool>(this, component, axis, angle, bResetPosition);
+    plugin::CallMethod<0x6DBA30, CVehicle*, RwFrame*, int32, float, bool>(this, component, axis, angle, bResetPosition);
 }
 
-// Converted from thiscall void CVehicle::SetTransmissionRotation(RwFrame *component,float,float,CVector posn,bool isFront) 0x6DBBB0
+// 0x6DBBB0
 void CVehicle::SetTransmissionRotation(RwFrame* component, float arg1, float arg2, CVector posn, bool isFront)
 {
     ((void(__thiscall*)(CVehicle*, RwFrame*, float, float, CVector, bool))0x6DBBB0)(this, component, arg1, arg2, posn, isFront);
 }
 
-// Converted from thiscall void CVehicle::ProcessBoatControl(tBoatHandlingData *boatHandling,float &,bool,bool) 0x6DBCE0
+// 0x6DBCE0
 void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastWaterImmersionDepth, bool bCollidedWithWorld, bool bPostCollision)
 {
     CVector vecBuoyancyTurnPoint;
@@ -2403,32 +2404,32 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     }
 }
 
-// Converted from thiscall void CVehicle::DoBoatSplashes(float) 0x6DD130
+// 0x6DD130
 void CVehicle::DoBoatSplashes(float fWaterDamping)
 {
     plugin::CallMethod<0x6DD130, CVehicle*, float>(this, fWaterDamping);
 }
 
-// Converted from thiscall void CVehicle::DoSunGlare(void) 0x6DD6F0
+// 0x6DD6F0
 void CVehicle::DoSunGlare()
 {
     ((void(__thiscall*)(CVehicle*))0x6DD6F0)(this);
 }
 
-// Converted from thiscall void CVehicle::AddWaterSplashParticles(void) 0x6DDF60
+// 0x6DDF60
 void CVehicle::AddWaterSplashParticles()
 {
     ((void(__thiscall*)(CVehicle*))0x6DDF60)(this);
 }
 
-// Converted from thiscall void CVehicle::AddExhaustParticles(void) 0x6DE240
+// 0x6DE240
 void CVehicle::AddExhaustParticles()
 {
     if (m_bOffscreen)
         return;
     float fSquaredMagnitude = (TheCamera.GetPosition() - GetPosition()).SquaredMagnitude();
     if (fSquaredMagnitude > 256.0f || fSquaredMagnitude > 64.0f
-        && !((CTimer::m_FrameCounter + static_cast<std::uint8_t>(m_nModelIndex)) & 1))
+        && !((CTimer::m_FrameCounter + static_cast<uint8>(m_nModelIndex)) & 1))
     {
         return;
     }
@@ -2493,8 +2494,8 @@ void CVehicle::AddExhaustParticles()
                 particleAlpha = 0.25f - fMoveSpeed;
             float fLife = std::max(0.2f - fMoveSpeed, 0.0f);
             FxPrtMult_c fxPrt(0.9f, 0.9f, 1.0f, particleAlpha, 0.2f, 1.0f, fLife);
-            std::int32_t numExhausts = 2;
-            for (std::int32_t i = 0; i < 2; i++) {
+            int32 numExhausts = 2;
+            for (int32 i = 0; i < 2; i++) {
                 FxSystem_c* pFirstExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
                 if (bFirstExhaustSubmergedInWater) {
                     fxPrt.m_color.alpha = particleAlpha * 0.5f;
@@ -2540,145 +2541,201 @@ void CVehicle::AddExhaustParticles()
     }
 }
 
-// Converted from thiscall bool CVehicle::AddSingleWheelParticles(tWheelState,uint,float,float,CColPoint *,CVector *,float,int,uint surfaceType,bool *bloodState,uint) 0x6DE880
-bool CVehicle::AddSingleWheelParticles(tWheelState arg0, unsigned int arg1, float arg2, float arg3, CColPoint* arg4, CVector* arg5, float arg6, int arg7, unsigned int surfaceType, bool* bloodState, unsigned int arg10)
+// 0x6DE880
+bool CVehicle::AddSingleWheelParticles(tWheelState arg0, uint32 arg1, float arg2, float arg3, CColPoint* arg4, CVector* arg5, float arg6, int32 arg7, uint32 surfaceType, bool* bloodState, uint32 arg10)
 {
-    return ((bool(__thiscall*)(CVehicle*, tWheelState, unsigned int, float, float, CColPoint*, CVector*, float, int, unsigned int, bool*, unsigned int))0x6DE880)(this, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, surfaceType, bloodState, arg10);
+    return ((bool(__thiscall*)(CVehicle*, tWheelState, uint32, float, float, CColPoint*, CVector*, float, int32, uint32, bool*, uint32))0x6DE880)(this, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, surfaceType, bloodState, arg10);
 }
 
-// Converted from thiscall bool CVehicle::GetSpecialColModel(void) 0x6DF3D0
+// 0x6DF3D0
 bool CVehicle::GetSpecialColModel()
 {
     return ((bool(__thiscall*)(CVehicle*))0x6DF3D0)(this);
 }
 
-// Converted from thiscall void CVehicle::RemoveVehicleUpgrade(int upgradeModelIndex) 0x6DF930
-void CVehicle::RemoveVehicleUpgrade(int upgradeModelIndex)
+// 0x6DF930
+void CVehicle::RemoveVehicleUpgrade(int32 upgradeModelIndex)
 {
-    ((void(__thiscall*)(CVehicle*, int))0x6DF930)(this, upgradeModelIndex);
+    ((void(__thiscall*)(CVehicle*, int32))0x6DF930)(this, upgradeModelIndex);
 }
 
-// Converted from thiscall void CVehicle::AddUpgrade(int modelIndex,int upgradeIndex) 0x6DFA20
-void CVehicle::AddUpgrade(int modelIndex, int upgradeIndex)
+// 0x6DFA20
+void CVehicle::AddUpgrade(int32 modelIndex, int32 upgradeIndex)
 {
-    ((void(__thiscall*)(CVehicle*, int, int))0x6DFA20)(this, modelIndex, upgradeIndex);
+    ((void(__thiscall*)(CVehicle*, int32, int32))0x6DFA20)(this, modelIndex, upgradeIndex);
 }
 
-// Converted from thiscall void CVehicle::UpdateTrailerLink(bool,bool) 0x6DFC50
+// 0x6DFC50
 void CVehicle::UpdateTrailerLink(bool arg0, bool arg1)
 {
     ((void(__thiscall*)(CVehicle*, bool, bool))0x6DFC50)(this, arg0, arg1);
 }
 
-// Converted from thiscall void CVehicle::UpdateTractorLink(bool,bool) 0x6E0050
+// 0x6E0050
 void CVehicle::UpdateTractorLink(bool arg0, bool arg1)
 {
     ((void(__thiscall*)(CVehicle*, bool, bool))0x6E0050)(this, arg0, arg1);
 }
 
-// Converted from thiscall CEntity* CVehicle::ScanAndMarkTargetForHeatSeekingMissile(CEntity *entity) 0x6E0400
+// 0x6E0400
 CEntity* CVehicle::ScanAndMarkTargetForHeatSeekingMissile(CEntity* entity)
 {
     return ((CEntity * (__thiscall*)(CVehicle*, CEntity*))0x6E0400)(this, entity);
 }
 
-// Converted from thiscall void CVehicle::FireHeatSeakingMissile(CEntity *targetEntity,eOrdnanceType ordnanceType,bool) 0x6E05C0
+// 0x6E05C0
 void CVehicle::FireHeatSeakingMissile(CEntity* targetEntity, eOrdnanceType ordnanceType, bool arg2)
 {
     ((void(__thiscall*)(CVehicle*, CEntity*, eOrdnanceType, bool))0x6E05C0)(this, targetEntity, ordnanceType, arg2);
 }
 
-// Converted from thiscall void CVehicle::PossiblyDropFreeFallBombForPlayer(eOrdnanceType ordnanceType,bool) 0x6E07E0
+// 0x6E07E0
 void CVehicle::PossiblyDropFreeFallBombForPlayer(eOrdnanceType ordnanceType, bool arg1)
 {
     ((void(__thiscall*)(CVehicle*, eOrdnanceType, bool))0x6E07E0)(this, ordnanceType, arg1);
 }
 
-// Converted from thiscall void CVehicle::ProcessSirenAndHorn(bool) 0x6E0950
+// 0x6E0950
 void CVehicle::ProcessSirenAndHorn(bool arg0)
 {
     ((void(__thiscall*)(CVehicle*, bool))0x6E0950)(this, arg0);
 }
 
-// Converted from thiscall bool CVehicle::DoHeadLightEffect(int dummyId,CMatrix &vehicleMatrix,uchar lightId,uchar lightState) 0x6E0A50
-bool CVehicle::DoHeadLightEffect(int dummyId, CMatrix& vehicleMatrix, unsigned char lightId, unsigned char lightState)
+// 0x6E0A50
+bool CVehicle::DoHeadLightEffect(int32 dummyId, CMatrix& vehicleMatrix, uint8 lightId, uint8 lightState)
 {
-    return ((bool(__thiscall*)(CVehicle*, int, CMatrix&, unsigned char, unsigned char))0x6E0A50)(this, dummyId, vehicleMatrix, lightId, lightState);
+    return ((bool(__thiscall*)(CVehicle*, int32, CMatrix&, uint8, uint8))0x6E0A50)(this, dummyId, vehicleMatrix, lightId, lightState);
 }
 
-// Converted from thiscall void CVehicle::DoHeadLightBeam(int,CMatrix &matrix,uchar) 0x6E0E20
-void CVehicle::DoHeadLightBeam(int arg0, CMatrix& matrix, unsigned char arg2)
+// 0x6E0E20
+void CVehicle::DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2)
 {
-    ((void(__thiscall*)(CVehicle*, int, CMatrix&, unsigned char))0x6E0E20)(this, arg0, matrix, arg2);
+    CVector pointModelSpace = static_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(m_nModelIndex))->m_pVehicleStruct->m_avDummyPos[2 * dummyId];
+    if (dummyId == 1 && pointModelSpace.IsZero())
+        return;
+
+    CVector point = matrix.GetPosition() + Multiply3x3(matrix, pointModelSpace);
+    if (!arg2) {
+        point -= 2 * pointModelSpace.x * matrix.GetRight();
+    }
+    const CVector pointToCamDir = Normalized(TheCamera.GetPosition() - point);
+    const auto    alpha = (uint8)((1.0f - fabs(DotProduct(pointToCamDir, matrix.GetForward()))) * 32.0f);
+
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,    (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,             (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,            (void*)rwBLENDONE);
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,            (void*)rwSHADEMODEGOURAUD);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,        (void*)NULL);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,             (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    (void*)rwALPHATESTFUNCTIONGREATER);
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)FALSE);
+
+    const float   angleMult   = ModelIndices::IsForklift((int32)m_nModelIndex) ? 0.5f : 0.15f;
+    const CVector lightNormal = Normalized(matrix.GetForward() - matrix.GetUp() * angleMult);
+    const CVector lightRight  = Normalized(CrossProduct(lightNormal, pointToCamDir));
+    const CVector lightPos    = point - matrix.GetForward() * 0.1f;
+
+    const CVector posn[] = {
+        lightPos - lightRight * 0.05f,
+        lightPos + lightRight * 0.05f,
+        lightPos + lightNormal * 3.0f - lightRight * 0.5f,
+        lightPos + lightNormal * 3.0f + lightRight * 0.5f,
+        lightPos + lightNormal * 0.2f
+    };
+    const uint8 alphas[] = { alpha, alpha, 0, 0, alpha };
+
+    RxObjSpace3DVertex vertices[5];
+    for (unsigned i = 0; i < 5; i++) {
+        const RwRGBA color = { 255, 255, 255, alphas[i] };
+        RxObjSpace3DVertexSetPreLitColor(&vertices[i], &color);
+        RxObjSpace3DVertexSetPos(&vertices[i], &posn[i]);
+    }
+
+    if (RwIm3DTransform(vertices, std::size(vertices), 0, rwIM3D_VERTEXRGBA | rwIM3D_VERTEXXYZ))
+    {
+        RxVertexIndex indices[] = { 0, 1, 4, 1, 3, 4, 2, 3, 4, 0, 2, 4 };
+        RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, indices, std::size(indices));
+        RwIm3DEnd();
+    }
+
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,         (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,          (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,           (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,              (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,             (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,     (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,              (void*)rwCULLMODECULLBACK);
 }
 
-// Converted from thiscall void CVehicle::DoHeadLightReflectionSingle(CMatrix &matrix,uchar lightId) 0x6E1440
-void CVehicle::DoHeadLightReflectionSingle(CMatrix& matrix, unsigned char lightId)
+// 0x6E1440
+void CVehicle::DoHeadLightReflectionSingle(CMatrix& matrix, uint8 lightId)
 {
-    ((void(__thiscall*)(CVehicle*, CMatrix&, unsigned char))0x6E1440)(this, matrix, lightId);
+    ((void(__thiscall*)(CVehicle*, CMatrix&, uint8))0x6E1440)(this, matrix, lightId);
 }
 
-// Converted from thiscall void CVehicle::DoHeadLightReflectionTwin(CMatrix &matrix) 0x6E1600
+// 0x6E1600
 void CVehicle::DoHeadLightReflectionTwin(CMatrix& matrix)
 {
     ((void(__thiscall*)(CVehicle*, CMatrix&))0x6E1600)(this, matrix);
 }
 
-// Converted from thiscall void CVehicle::DoHeadLightReflection(CMatrix &,uint,uchar,uchar) 0x6E1720
-void CVehicle::DoHeadLightReflection(CMatrix& arg0, unsigned int flags, unsigned char left, unsigned char right)
+// 0x6E1720
+void CVehicle::DoHeadLightReflection(CMatrix& arg0, uint32 flags, uint8 left, uint8 right)
 {
-    ((void(__thiscall*)(CVehicle*, CMatrix&, unsigned int, unsigned char, unsigned char))0x6E1720)(this, arg0, flags, left, right);
+    ((void(__thiscall*)(CVehicle*, CMatrix&, uint32, uint8, uint8))0x6E1720)(this, arg0, flags, left, right);
 }
 
-// Converted from thiscall bool CVehicle::DoTailLightEffect(int lightId,CMatrix &matrix,uchar,uchar,uint,uchar) 0x6E1780
-bool CVehicle::DoTailLightEffect(int lightId, CMatrix& matrix, unsigned char arg2, unsigned char arg3, unsigned int arg4, unsigned char arg5)
+// 0x6E1780
+bool CVehicle::DoTailLightEffect(int32 lightId, CMatrix& matrix, uint8 arg2, uint8 arg3, uint32 arg4, uint8 arg5)
 {
-    return ((bool(__thiscall*)(CVehicle*, int, CMatrix&, unsigned char, unsigned char, unsigned int, unsigned char))0x6E1780)(this, lightId, matrix, arg2, arg3, arg4, arg5);
+    return ((bool(__thiscall*)(CVehicle*, int32, CMatrix&, uint8, uint8, uint32, uint8))0x6E1780)(this, lightId, matrix, arg2, arg3, arg4, arg5);
 }
 
-// Converted from thiscall void CVehicle::DoVehicleLights(CMatrix &matrix,uint flags) 0x6E1A60
-void CVehicle::DoVehicleLights(CMatrix& matrix, unsigned int flags)
+// 0x6E1A60
+void CVehicle::DoVehicleLights(CMatrix& matrix, uint32 flags)
 {
-    ((void(__thiscall*)(CVehicle*, CMatrix&, unsigned int))0x6E1A60)(this, matrix, flags);
+    ((void(__thiscall*)(CVehicle*, CMatrix&, uint32))0x6E1A60)(this, matrix, flags);
 }
 
-// Converted from thiscall void CVehicle::FillVehicleWithPeds(bool bSetClothesToAfro) 0x6E2900
+// 0x6E2900
 void CVehicle::FillVehicleWithPeds(bool bSetClothesToAfro)
 {
     ((void(__thiscall*)(CVehicle*, bool))0x6E2900)(this, bSetClothesToAfro);
 }
 
-// Converted from thiscall void CVehicle::DoBladeCollision(CVector,CMatrix &matrix,short,float,float) 0x6E2E50
-void CVehicle::DoBladeCollision(CVector arg0, CMatrix& matrix, short arg2, float arg3, float arg4)
+// 0x6E2E50
+void CVehicle::DoBladeCollision(CVector arg0, CMatrix& matrix, int16 arg2, float arg3, float arg4)
 {
-    ((void(__thiscall*)(CVehicle*, CVector, CMatrix&, short, float, float))0x6E2E50)(this, arg0, matrix, arg2, arg3, arg4);
+    ((void(__thiscall*)(CVehicle*, CVector, CMatrix&, int16, float, float))0x6E2E50)(this, arg0, matrix, arg2, arg3, arg4);
 }
 
-// Converted from thiscall void CVehicle::AddVehicleUpgrade(int modelId) 0x6E3290
-void CVehicle::AddVehicleUpgrade(int modelId)
+// 0x6E3290
+void CVehicle::AddVehicleUpgrade(int32 modelId)
 {
-    ((void(__thiscall*)(CVehicle*, int))0x6E3290)(this, modelId);
+    ((void(__thiscall*)(CVehicle*, int32))0x6E3290)(this, modelId);
 }
 
-// Converted from thiscall void CVehicle::SetupUpgradesAfterLoad(void) 0x6E3400
+// 0x6E3400
 void CVehicle::SetupUpgradesAfterLoad()
 {
     ((void(__thiscall*)(CVehicle*))0x6E3400)(this);
 }
 
-// Converted from thiscall void CVehicle::GetPlaneWeaponFiringStatus(bool &status,eOrdnanceType &ordnanceType) 0x6E3440 0x6E38A0
+// 0x6E38A0
 void CVehicle::GetPlaneWeaponFiringStatus(bool& status, eOrdnanceType& ordnanceType)
 {
     ((void(__thiscall*)(CVehicle*, bool&, eOrdnanceType&))0x6E3440)(this, status, ordnanceType);
 }
 
-// Converted from stdcall bool IsVehiclePointerValid(CVehicle *vehicle) 0x6E38F0
+// 0x6E38F0
 bool IsVehiclePointerValid(CVehicle* vehicle)
 {
     return ((bool(__cdecl*)(CVehicle*))0x6E38F0)(vehicle);
 }
 
-// Converted from thiscall void CVehicle::ProcessWeapons(void) 0x6E3950
+// 0x6E3950
 void CVehicle::ProcessWeapons()
 {
     ((void(__thiscall*)(CVehicle*))0x6E3950)(this);

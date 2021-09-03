@@ -42,11 +42,11 @@ void CLoadMonitor::EndFrame() {
 }
 
 // 0x53D050
-void CLoadMonitor::StartTimer(unsigned int timerIndex) {
-    plugin::CallMethod<0x53D050, CLoadMonitor*, unsigned int> (this, timerIndex);
+void CLoadMonitor::StartTimer(uint32 timerIndex) {
+    plugin::CallMethod<0x53D050, CLoadMonitor*, uint32> (this, timerIndex);
 }
 
 // 0x53D070
-void CLoadMonitor::EndTimer(unsigned int timerIndex) {
-    plugin::CallMethod<0x53D070, CLoadMonitor*, unsigned int>(this, timerIndex);
+void CLoadMonitor::EndTimer(uint32 timerIndex) {
+    plugin::CallMethod<0x53D070, CLoadMonitor*, uint32>(this, timerIndex);
 }

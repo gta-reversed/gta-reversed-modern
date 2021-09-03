@@ -1,6 +1,6 @@
 #pragma once
 
-enum ePedType : unsigned int;
+enum ePedType : uint32;
 
 class CPedType {
 public:
@@ -12,16 +12,16 @@ public:
     static void Initialise();
     static void Shutdown();
     static void Save();
-    static void Load(int a2);
+    static void Load(int32 a2);
     static void LoadPedData();
 
     static ePedType FindPedType(const char* pedTypeName);
-    static unsigned int GetPedFlag(ePedType pedType);
+    static uint32 GetPedFlag(ePedType pedType);
     static CPedAcquaintance* GetPedTypeAcquaintances(ePedType pedType);
-    static CPedAcquaintance* GetPedTypeAcquaintances(int acquaintanceId, ePedType pedType);
-    static void SetPedTypeAsAcquaintance(int acquaintanceId, ePedType pedType, int pedTypeBitNum);
-    static void ClearPedTypeAcquaintances(int acquaintanceId);
-    static void ClearPedTypeAsAcquaintance(int acquaintanceId, ePedType pedType, int pedTypeBitNum);
+    static CPedAcquaintance* GetPedTypeAcquaintances(int32 acquaintanceId, ePedType pedType);
+    static void SetPedTypeAsAcquaintance(int32 acquaintanceId, ePedType pedType, int32 pedTypeBitNum);
+    static void ClearPedTypeAcquaintances(int32 acquaintanceId);
+    static void ClearPedTypeAsAcquaintance(int32 acquaintanceId, ePedType pedType, int32 pedTypeBitNum);
 
     static bool PoliceDontCareAboutCrimesAgainstPedType(ePedType pedType);
 };

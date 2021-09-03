@@ -28,6 +28,6 @@ bool CBridge::ShouldLightsBeFlashing() {
 }
 
 // used in CPlayerInfo::Process
-bool CBridge::ThisIsABridgeObjectMovingUp(unsigned int) {
+bool CBridge::ThisIsABridgeObjectMovingUp(uint32) {
     return false;
 }

@@ -13,7 +13,7 @@ void CPtrNodeDoubleLink::InjectHooks()
     ReversibleHooks::Install("CPtrNodeDoubleLink", "AddToList", 0x5329A0, &CPtrNodeDoubleLink::AddToList);
 }
 
-void* CPtrNodeDoubleLink::operator new(unsigned int size)
+void* CPtrNodeDoubleLink::operator new(uint32 size)
 {
     return CPools::ms_pPtrNodeDoubleLinkPool->New();
 }

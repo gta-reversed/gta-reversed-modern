@@ -1,26 +1,26 @@
 #include "StdInc.h"
 
 void CEventDamage::InjectHooks() {
-    HookInstall(0x4B33B0, (CEventDamage*(CEventDamage::*)(CEventDamage*)) & CEventDamage::Constructor);
-    HookInstall(0x4AD830, (CEventDamage * (CEventDamage::*)(CEntity*, unsigned int, eWeaponType, ePedPieceTypes, unsigned char, bool, bool)) & CEventDamage::Constructor);
-    HookInstall(0x4AD910, &CEventDamage::GetEventType_Reversed);
-    HookInstall(0x4AD950, &CEventDamage::GetEventPriority_Reversed);
-    HookInstall(0x4AD920, &CEventDamage::GetLifeTime_Reversed);
-    HookInstall(0x4B35A0, &CEventDamage::AffectsPed_Reversed);
-    HookInstall(0x4B38D0, &CEventDamage::AffectsPedGroup_Reversed);
-    HookInstall(0x4ADA90, &CEventDamage::IsCriminalEvent_Reversed);
-    HookInstall(0x4B3440, &CEventDamage::ReportCriminalEvent_Reversed);
-    HookInstall(0x4ADA70, &CEventDamage::GetSourceEntity_Reversed);
-    HookInstall(0x4ADB00, &CEventDamage::TakesPriorityOver_Reversed);
-    HookInstall(0x4AD930, &CEventDamage::GetLocalSoundLevel_Reversed);
-    HookInstall(0x4ADAE0, &CEventDamage::DoInformVehicleOccupants_Reversed);
-    HookInstall(0x4AD940, &CEventDamage::CanBeInterruptedBySameEvent_Reversed);
-    HookInstall(0x4B5D40, &CEventDamage::CloneEditable_Reversed);
-    HookInstall(0x4AD9C0, &CEventDamage::From);
-    HookInstall(0x4B3A20, &CEventDamage::ProcessDamage);
-    HookInstall(0x4ADC10, &CEventDamage::ComputeBodyPartToRemove);
-    HookInstall(0x4B3A60, &CEventDamage::ComputeDeathAnim);
-    HookInstall(0x4B3FC0, &CEventDamage::ComputeDamageAnim);
+    ReversibleHooks::Install("CEventDamage", "CEventDamage", 0x4B33B0, (CEventDamage*(CEventDamage::*)(CEventDamage*)) & CEventDamage::Constructor);
+    ReversibleHooks::Install("CEventDamage", "CEventDamage_1", 0x4AD830, (CEventDamage * (CEventDamage::*)(CEntity*, uint32, eWeaponType, ePedPieceTypes, uint8, bool, bool)) & CEventDamage::Constructor);
+    ReversibleHooks::Install("CEventDamage", "GetEventType_Reversed", 0x4AD910, &CEventDamage::GetEventType_Reversed);
+    ReversibleHooks::Install("CEventDamage", "GetEventPriority_Reversed", 0x4AD950, &CEventDamage::GetEventPriority_Reversed);
+    ReversibleHooks::Install("CEventDamage", "GetLifeTime_Reversed", 0x4AD920, &CEventDamage::GetLifeTime_Reversed);
+    ReversibleHooks::Install("CEventDamage", "AffectsPed_Reversed", 0x4B35A0, &CEventDamage::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventDamage", "AffectsPedGroup_Reversed", 0x4B38D0, &CEventDamage::AffectsPedGroup_Reversed);
+    ReversibleHooks::Install("CEventDamage", "IsCriminalEvent_Reversed", 0x4ADA90, &CEventDamage::IsCriminalEvent_Reversed);
+    ReversibleHooks::Install("CEventDamage", "ReportCriminalEvent_Reversed", 0x4B3440, &CEventDamage::ReportCriminalEvent_Reversed);
+    ReversibleHooks::Install("CEventDamage", "GetSourceEntity_Reversed", 0x4ADA70, &CEventDamage::GetSourceEntity_Reversed);
+    ReversibleHooks::Install("CEventDamage", "TakesPriorityOver_Reversed", 0x4ADB00, &CEventDamage::TakesPriorityOver_Reversed);
+    ReversibleHooks::Install("CEventDamage", "GetLocalSoundLevel_Reversed", 0x4AD930, &CEventDamage::GetLocalSoundLevel_Reversed);
+    ReversibleHooks::Install("CEventDamage", "DoInformVehicleOccupants_Reversed", 0x4ADAE0, &CEventDamage::DoInformVehicleOccupants_Reversed);
+    ReversibleHooks::Install("CEventDamage", "CanBeInterruptedBySameEvent_Reversed", 0x4AD940, &CEventDamage::CanBeInterruptedBySameEvent_Reversed);
+    ReversibleHooks::Install("CEventDamage", "CloneEditable_Reversed", 0x4B5D40, &CEventDamage::CloneEditable_Reversed);
+    ReversibleHooks::Install("CEventDamage", "From", 0x4AD9C0, &CEventDamage::From);
+    ReversibleHooks::Install("CEventDamage", "ProcessDamage", 0x4B3A20, &CEventDamage::ProcessDamage);
+    ReversibleHooks::Install("CEventDamage", "ComputeBodyPartToRemove", 0x4ADC10, &CEventDamage::ComputeBodyPartToRemove);
+    ReversibleHooks::Install("CEventDamage", "ComputeDeathAnim", 0x4B3A60, &CEventDamage::ComputeDeathAnim);
+    ReversibleHooks::Install("CEventDamage", "ComputeDamageAnim", 0x4B3FC0, &CEventDamage::ComputeDamageAnim);
 }
 
 CEventDamage::CEventDamage(CEventDamage* pCopyFrom) {
@@ -33,7 +33,7 @@ CEventDamage::CEventDamage(CEventDamage* pCopyFrom) {
     From(pCopyFrom);
 }
 
-CEventDamage::CEventDamage(CEntity* source, unsigned int startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, unsigned char direction, bool a7, bool bPedInVehicle) {
+CEventDamage::CEventDamage(CEntity* source, uint32 startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, uint8 direction, bool a7, bool bPedInVehicle) {
     m_pSourceEntity = source;
     m_nStartTime = startTime;
     m_weaponType = weaponType;
@@ -71,34 +71,28 @@ CEventDamage* CEventDamage::Constructor(CEventDamage* pCopyFrom) {
 #endif
 }
 
-CEventDamage* CEventDamage::Constructor(CEntity* source, unsigned int startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, unsigned char direction, bool a7, bool bPedInVehicle) {
+CEventDamage* CEventDamage::Constructor(CEntity* source, uint32 startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, uint8 direction, bool a7, bool bPedInVehicle) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventDamage*, 0x4AD830, CEventDamage*, CEntity *, unsigned int, eWeaponType, ePedPieceTypes, unsigned char, bool, bool>(this, source, startTime, weaponType, pieceHit, direction, a7, bPedInVehicle);
+    return plugin::CallMethodAndReturn<CEventDamage*, 0x4AD830, CEventDamage*, CEntity *, uint32, eWeaponType, ePedPieceTypes, uint8, bool, bool>(this, source, startTime, weaponType, pieceHit, direction, a7, bPedInVehicle);
 #else
     this->CEventDamage::CEventDamage(source, startTime, weaponType, pieceHit, direction, a7, bPedInVehicle);
     return this;
 #endif
 }
 
-eEventType CEventDamage::GetEventType() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((eEventType(__thiscall*)(CEvent*))0x4AD910)(this);
-#else
+// 0x4AD910
+eEventType CEventDamage::GetEventType() const {
     return CEventDamage::GetEventType_Reversed();
-#endif
 }
 
-int CEventDamage::GetEventPriority() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(__thiscall*)(CEvent*))0x4AD950)(this);
-#else
+// 0x4AD950
+int32 CEventDamage::GetEventPriority() const {
     return CEventDamage::GetEventPriority_Reversed();
-#endif
 }
 
-int CEventDamage::GetLifeTime() {
+int32 CEventDamage::GetLifeTime() {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((int(__thiscall*)(CEvent*))0x4AD920)(this);
+    return ((int32(__thiscall*)(CEvent*))0x4AD920)(this);
 #else
     return CEventDamage::GetLifeTime_Reversed();
 #endif
@@ -136,7 +130,7 @@ void CEventDamage::ReportCriminalEvent(CPed* ped) {
 #endif
 }
 
-CEntity* CEventDamage::GetSourceEntity() {
+CEntity* CEventDamage::GetSourceEntity() const {
 #ifdef USE_DEFAULT_FUNCTIONS
     return ((CEntity * (__thiscall*)(CEvent*))0x4ADA70)(this);
 #else
@@ -144,12 +138,9 @@ CEntity* CEventDamage::GetSourceEntity() {
 #endif
 }
 
-bool CEventDamage::TakesPriorityOver(CEvent* refEvent) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall*)(CEvent*, CEvent*))0x4ADB00)(this, refEvent);
-#else
+// 0x4ADB00
+bool CEventDamage::TakesPriorityOver(const CEvent& refEvent) {
     return CEventDamage::TakesPriorityOver_Reversed(refEvent);
-#endif
 }
 
 float CEventDamage::GetLocalSoundLevel() {
@@ -216,7 +207,7 @@ bool CEventDamage::AffectsPed_Reversed(CPed* ped) {
         }
     }
     if (ped->bHasBulletProofVest) {
-        if (CWeaponInfo::GetWeaponInfo(m_weaponType, 1)->m_nWeaponFire == WEAPON_FIRE_INSTANT_HIT) {
+        if (CWeaponInfo::GetWeaponInfo(m_weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nWeaponFire == WEAPON_FIRE_INSTANT_HIT) {
             if (m_pedPieceType == PED_PIECE_TORSO || m_pedPieceType == PED_PIECE_ASS)
                 return false;
         }
@@ -327,7 +318,7 @@ void CEventDamage::ReportCriminalEvent_Reversed(CPed* ped) {
     }
 }
 
-CEntity* CEventDamage::GetSourceEntity_Reversed() {
+CEntity* CEventDamage::GetSourceEntity_Reversed() const {
     if (m_pSourceEntity && m_pSourceEntity->m_nType == ENTITY_TYPE_VEHICLE) {
         CVehicle* pVehicle = static_cast<CVehicle*>(m_pSourceEntity);
         if (pVehicle->m_pDriver)
@@ -336,20 +327,20 @@ CEntity* CEventDamage::GetSourceEntity_Reversed() {
     return m_pSourceEntity;
 }
 
-bool CEventDamage::TakesPriorityOver_Reversed(CEvent* refEvent) {
-    if (refEvent->GetEventType() == EVENT_IN_WATER && m_damageResponse.m_bHealthZero && m_bAddToEventGroup
-        || refEvent->GetEventType() == EVENT_ON_FIRE && m_damageResponse.m_bHealthZero && m_bAddToEventGroup
-        || refEvent->GetEventType() == EVENT_KNOCK_OFF_BIKE && m_damageResponse.m_bHealthZero && m_bAddToEventGroup) {
+bool CEventDamage::TakesPriorityOver_Reversed(const CEvent& refEvent) {
+    if (refEvent.GetEventType() == EVENT_IN_WATER && m_damageResponse.m_bHealthZero && m_bAddToEventGroup
+        || refEvent.GetEventType() == EVENT_ON_FIRE && m_damageResponse.m_bHealthZero && m_bAddToEventGroup
+        || refEvent.GetEventType() == EVENT_KNOCK_OFF_BIKE && m_damageResponse.m_bHealthZero && m_bAddToEventGroup) {
         return true;
     }
     CPed* pPed = static_cast<CPed*>(m_pSourceEntity);
-    if (m_pSourceEntity && m_pSourceEntity->m_nType == ENTITY_TYPE_PED && pPed->IsPlayer() && refEvent->GetEventType() == EVENT_DAMAGE) {
-        if (refEvent->GetSourceEntity() == m_pSourceEntity && (!m_damageResponse.m_bHealthZero || !m_bAddToEventGroup))
+    if (m_pSourceEntity && m_pSourceEntity->m_nType == ENTITY_TYPE_PED && pPed->IsPlayer() && refEvent.GetEventType() == EVENT_DAMAGE) {
+        if (refEvent.GetSourceEntity() == m_pSourceEntity && (!m_damageResponse.m_bHealthZero || !m_bAddToEventGroup))
             return CEvent::TakesPriorityOver(refEvent);
         return true;
     }
-    if (refEvent->GetEventType() == EVENT_DAMAGE) {
-        if (GetSourceEntity() != refEvent->GetSourceEntity())
+    if (refEvent.GetEventType() == EVENT_DAMAGE) {
+        if (GetSourceEntity() != refEvent.GetSourceEntity())
             return true;
     }
     return CEvent::TakesPriorityOver(refEvent);
@@ -368,10 +359,8 @@ CEventEditableResponse* CEventDamage::CloneEditable_Reversed() {
     return pClonedEvent;
 }
 
+// 0x4AD9C0
 void CEventDamage::From(CEventDamage* pCopyFrom) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4AD9C0, CEventDamage*, CEvent*>(this, pCopyFrom);
-#else
     m_pSourceEntity = pCopyFrom->m_pSourceEntity;
     if (pCopyFrom->m_pSourceEntity)
         pCopyFrom->m_pSourceEntity->RegisterReference(&m_pSourceEntity);
@@ -385,23 +374,22 @@ void CEventDamage::From(CEventDamage* pCopyFrom) {
     m_fAnimBlend = pCopyFrom->m_fAnimBlend;
     m_fAnimSpeed = pCopyFrom->m_fAnimSpeed;
     m_ucFlags = pCopyFrom->m_ucFlags;
-#endif
 }
 
 void CEventDamage::ProcessDamage(CPed* ped) {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x4B3A20, CEventDamage*, CPed*>(this, ped);
 #else
-    int boneFrameId = 0;
+    int32 boneFrameId = 0;
     CEventDamage::ComputeBodyPartToRemove(&boneFrameId);
     if (boneFrameId)
         ped->RemoveBodyPart(boneFrameId, m_ucDirection);
 #endif
 }
 
-void CEventDamage::ComputeBodyPartToRemove(int* pBoneFrameId) {
+void CEventDamage::ComputeBodyPartToRemove(int32* pBoneFrameId) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4ADC10, CEventDamage*, int*>(this, pBoneFrameId);
+    plugin::CallMethod<0x4ADC10, CEventDamage*, int32*>(this, pBoneFrameId);
 #else
     *pBoneFrameId = 0;
     switch (m_weaponType)
@@ -432,7 +420,7 @@ void CEventDamage::ComputeBodyPartToRemove(int* pBoneFrameId) {
     case WEAPON_RLAUNCHER_HS:
     case WEAPON_EXPLOSION: {
         if (m_damageResponse.m_bForceDeath) {
-            int boneArray[5] = {3, 8, 2, 4, 7};
+            int32 boneArray[5] = {3, 8, 2, 4, 7};
             *pBoneFrameId = boneArray[CGeneral::GetRandomNumberInRange(0, 5)];
         }
         break;
@@ -723,7 +711,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
     plugin::CallMethod<0x4B3FC0, CEventDamage*, CPed*, bool>(this, ped, bMakeActiveTaskAbortable);
 #else
     if (ped->bInVehicle && ped->m_pVehicle) {
-        CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo((eWeaponType)this->m_weaponType, 1);
+        CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo((eWeaponType)this->m_weaponType, eWeaponSkill::WEAPSKILL_STD);
         if (!pWeaponInfo->m_nWeaponFire
             && m_weaponType
             && m_weaponType != WEAPON_BRASSKNUCKLE
@@ -846,7 +834,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                     bPlayBodyPartHitAnim = false;
                 }
                 else {
-                    pPlayerData->m_nHitAnimDelayTimer = static_cast<unsigned int>(CTimer::m_snTimeInMilliseconds + 2500.0f);
+                    pPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(CTimer::m_snTimeInMilliseconds + 2500.0f);
                 }
             }
             if (bPlayBodyPartHitAnim) {
@@ -861,7 +849,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                     }
                 }
                 else {
-                    int currentEventAnimId = -1;
+                    int32 currentEventAnimId = -1;
                     CEvent* pCurrentEvent = ped->m_pIntelligence->m_eventHandler.m_history.GetCurrentEvent();
                     if (pCurrentEvent && pCurrentEvent->GetEventType() == EVENT_DAMAGE)
                         currentEventAnimId = static_cast<CEventDamage*>(pCurrentEvent)->m_nAnimID;
@@ -876,7 +864,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                             m_nAnimID = ANIM_ID_DAM_ARML_FRMFT;
                         if (m_nAnimID == currentEventAnimId) {
                             do {
-                                m_nAnimID = ANIM_ID_DAM_ARML_FRMBK - static_cast<unsigned int>((rand() * 0.000030517578f * -3.0f));
+                                m_nAnimID = ANIM_ID_DAM_ARML_FRMBK - static_cast<uint32>((rand() * 0.000030517578f * -3.0f));
                             } while (m_nAnimID == currentEventAnimId);
                         }
                         break;
@@ -960,9 +948,9 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
               CPlayerPedData * pPedPlayerData = ped->m_pPlayerData;
                 if (CTimer::m_snTimeInMilliseconds > pPedPlayerData->m_nHitAnimDelayTimer && ped->m_nPedState != PEDSTATE_DRIVING) {
                     if (m_weaponType == WEAPON_M4)
-                        pPedPlayerData->m_nHitAnimDelayTimer = static_cast<unsigned int>(CTimer::m_snTimeInMilliseconds + 2500.0f);
+                        pPedPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(CTimer::m_snTimeInMilliseconds + 2500.0f);
                     else
-                        pPedPlayerData->m_nHitAnimDelayTimer = static_cast<unsigned int>(CTimer::m_snTimeInMilliseconds + 1500.0f);
+                        pPedPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(CTimer::m_snTimeInMilliseconds + 1500.0f);
                 }
                 else {
                     m_nAnimID = ANIM_ID_NO_ANIMATION_SET;

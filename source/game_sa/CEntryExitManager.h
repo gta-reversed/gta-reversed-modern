@@ -16,15 +16,15 @@ class CEntryExitManager {
 public:
     static CEntryExit* (&ms_entryExitStack)[4]; // static CEntryExit *ms_entryExitStack[4]
     static bool& ms_bBurglaryHousesEnabled;
-    static int& ms_oldAreaCode;
+    static int32& ms_oldAreaCode;
     static CEntity* (&ms_visibleEntityList)[32]; // static CEntity *ms_visibleEntityList[32]
-    static int& ms_entryExitStackPosn;
+    static int32& ms_entryExitStackPosn;
     static bool& ms_bDisabled;
-    static int& ms_exitEnterState;
+    static int32& ms_exitEnterState;
     static CQuadTreeNode*& mp_QuadTree;
     static CEntryExit*& mp_Active;
     static CPool<CEntryExit>*& mp_poolEntryExits;
-    static unsigned int& ms_numVisibleEntities;
+    static uint32& ms_numVisibleEntities;
 
 public:
     static void InjectHooks();
@@ -37,13 +37,13 @@ public:
     static void ShutdownForRestart();
 
     static void AddEntryExitToStack(CEntryExit* entryExit);
-    static int AddOne(float entranceX, float entranceY, float entranceZ, float entranceAngle, float entranceRangeX, float entranceRangeY, float fUnused, float exitX, float exitY, float exitZ, float exitAngle, int area, int flags, int skyColor, int timeOn, int timeOff, int numberOfPeds, const char* name);
-    static void DeleteOne(int index);
+    static int32 AddOne(float entranceX, float entranceY, float entranceZ, float entranceAngle, float entranceRangeX, float entranceRangeY, float fUnused, float exitX, float exitY, float exitZ, float exitAngle, int32 area, int32 flags, int32 skyColor, int32 timeOn, int32 timeOff, int32 numberOfPeds, const char* name);
+    static void DeleteOne(int32 index);
     static void EnableBurglaryHouses(bool enable);
     static CEntity* FindNearestDoor(CEntryExit const& entryExit, float range);
-    static int FindNearestEntryExit(CVector2D const& position, float range, int ignoreArea);
-    static CEntryExit* GetEntryExit(int index);
-    static int GetEntryExitIndex(const char* name, unsigned short enabledFlags, unsigned short disabledFlags);
+    static int32 FindNearestEntryExit(CVector2D const& position, float range, int32 ignoreArea);
+    static CEntryExit* GetEntryExit(int32 index);
+    static int32 GetEntryExitIndex(const char* name, uint16 enabledFlags, uint16 disabledFlags);
     static void GetPositionRelativeToOutsideWorld(CVector& positionInOut);
     static void GotoEntryExit(CEntryExit* entryExit);
     static void GotoEntryExitVC(const char* name);
@@ -53,9 +53,9 @@ public:
     static void PostEntryExitsCreation();
     static void ResetAreaCodeForVisibleObjects();
     static void SetAreaCodeForVisibleObjects();
-    static void SetEnabled(int index, bool enable);
+    static void SetEnabled(int32 index, bool enable);
     static void SetEnabledByName(const char* name, bool enable);
-    static void SetEntryExitFlag(const char* name, unsigned int flag, bool enable);
-    static void SetEntryExitFlagWithIndex(int index, unsigned int flag, bool enable);
+    static void SetEntryExitFlag(const char* name, uint32 flag, bool enable);
+    static void SetEntryExitFlagWithIndex(int32 index, uint32 flag, bool enable);
     static bool WeAreInInteriorTransition();
 };

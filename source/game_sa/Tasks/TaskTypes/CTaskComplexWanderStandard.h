@@ -6,16 +6,16 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskComplexWander.h"
 #include "CTaskTimer.h"
 
-class  CTaskComplexWanderStandard : public CTaskComplexWander {
+class CTaskComplexWanderStandard : public CTaskComplexWander {
 public:
     CTaskTimer m_TaskTimer;
-    int m_nMinNextScanTime;
+    int32 m_nMinNextScanTime;
 
-    CTaskComplexWanderStandard* Constructor(int MoveState, unsigned char Dir, bool bWanderSensibly = true);
+    CTaskComplexWanderStandard* Constructor(int32 MoveState, uint8 Dir, bool bWanderSensibly = true);
 };
 
 VALIDATE_SIZE(CTaskComplexWanderStandard, 0x38);

@@ -72,7 +72,7 @@ bool CLocalisation::FrenchGame() {
 
 // 0x56D220
 bool CLocalisation::Metric() {
-    return FrontEndMenuManager.m_nLanguage != false;
+    return FrontEndMenuManager.m_nLanguage != eLanguage::AMERICAN;
 }
 
 // 0x56D230

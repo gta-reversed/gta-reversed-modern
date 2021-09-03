@@ -6,13 +6,10 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-class CNodeAddress
-{
+class CNodeAddress {
 public:
-    short m_wAreaId;
-    short m_wNodeId;
+    int16 m_wAreaId;
+    int16 m_wNodeId;
 
     CNodeAddress() : m_wAreaId(-1), m_wNodeId(-1) {}
 

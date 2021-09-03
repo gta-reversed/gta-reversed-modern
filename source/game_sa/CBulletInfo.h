@@ -6,26 +6,24 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVector.h"
 #include "eWeaponType.h"
 #include "CEntity.h"
 
-class  CBulletInfo {
+class CBulletInfo {
 public:
     eWeaponType m_nWeaponType;
-    CEntity *m_pCreator;
-    int      m_nDestroyTime;
-    bool     m_bExists;
-private:
-    char _pad0D[3];
+    CEntity*    m_pCreator;
+    int32       m_nDestroyTime;
+    bool        m_bExists;
+    char        _pad0D[3];
+    CVector     m_vecPosition;
+    CVector     m_vecVelocity;
+    int16       m_nDamage;
+    char        _pad2A[2];
+
 public:
-    CVector  m_vecPosition;
-    CVector  m_vecVelocity;
-    short    m_nDamage;
-private:
-    char _pad2A[2];
-public:
+    static void InjectHooks();
 
     static void Initialise();
     static void Shutdown();
@@ -35,7 +33,7 @@ public:
 
 VALIDATE_SIZE(CBulletInfo, 0x2C);
 
-extern unsigned int MAX_BULLET_INFOS; // default 8
+extern uint32 MAX_BULLET_INFOS; // default 8
 extern CBulletInfo *aBulletInfos; // CBulletInfo aBulletInfos[MAX_BULLET_INFOS]
 extern CVector &PlayerSniperBulletStart;
 extern CVector &PlayerSniperBulletEnd;

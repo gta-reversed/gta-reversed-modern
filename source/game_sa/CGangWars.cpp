@@ -6,28 +6,28 @@
 */
 #include "StdInc.h"
 
-int& CGangWars::ZoneInfoForTraining = *reinterpret_cast<int*>(0x8A5F40);
-int(&CGangWars::GangRatingStrength)[3] = *reinterpret_cast<int(*)[3]>(0x96AB2C);
-int(&CGangWars::GangRatings)[3] = *reinterpret_cast<int(*)[3]>(0x96AB38);
-int& CGangWars::FightTimer = *reinterpret_cast<int*>(0x96AB44);
+int32& CGangWars::ZoneInfoForTraining = *reinterpret_cast<int32*>(0x8A5F40);
+int32(&CGangWars::GangRatingStrength)[3] = *reinterpret_cast<int32(*)[3]>(0x96AB2C);
+int32(&CGangWars::GangRatings)[3] = *reinterpret_cast<int32(*)[3]>(0x96AB38);
+int32& CGangWars::FightTimer = *reinterpret_cast<int32*>(0x96AB44);
 float& CGangWars::TimeTillNextAttack = *reinterpret_cast<float*>(0x96AB48);
 eGangAttackState& CGangWars::State2 = *reinterpret_cast<eGangAttackState*>(0x96AB4C);
-int& CGangWars::Gang2 = *reinterpret_cast<int*>(0x96AB50);
-unsigned int& CGangWars::LastTimeInArea = *reinterpret_cast<unsigned int*>(0x96AB54);
-int& CGangWars::WarFerocity = *reinterpret_cast<int*>(0x96AB58);
+int32& CGangWars::Gang2 = *reinterpret_cast<int32*>(0x96AB50);
+uint32& CGangWars::LastTimeInArea = *reinterpret_cast<uint32*>(0x96AB54);
+int32& CGangWars::WarFerocity = *reinterpret_cast<int32*>(0x96AB58);
 float& CGangWars::Provocation = *reinterpret_cast<float*>(0x96AB5C);
-unsigned int& CGangWars::TimeStarted = *reinterpret_cast<unsigned int*>(0x96AB60);
+uint32& CGangWars::TimeStarted = *reinterpret_cast<uint32*>(0x96AB60);
 eGangWarState& CGangWars::State = *reinterpret_cast<eGangWarState*>(0x96AB64);
-int(&CGangWars::aSpecificZones)[6] = *reinterpret_cast<int(*)[6]>(0x96AB68);
+int32(&CGangWars::aSpecificZones)[6] = *reinterpret_cast<int32(*)[6]>(0x96AB68);
 float& CGangWars::Difficulty = *reinterpret_cast<float*>(0x96AB80);
-int& CGangWars::Gang1 = *reinterpret_cast<int*>(0x96AB84);
+int32& CGangWars::Gang1 = *reinterpret_cast<int32*>(0x96AB84);
 CZone*& CGangWars::pZoneToFightOver = *reinterpret_cast<CZone**>(0x96AB88);
 CZoneInfo*& CGangWars::pZoneInfoToFightOver = *reinterpret_cast<CZoneInfo**>(0x96AB8C);
 bool& CGangWars::bGangWarsActive = *reinterpret_cast<bool*>(0x96AB90);
 bool& CGangWars::bTrainingMission = *reinterpret_cast<bool*>(0x96AB91);
 bool& CGangWars::bPlayerIsCloseby = *reinterpret_cast<bool*>(0x96AB92);
 bool& CGangWars::bCanTriggerGangWarWhenOnAMission = *reinterpret_cast<bool*>(0x96AB93);
-int& CGangWars::NumSpecificZones = *reinterpret_cast<int*>(0x96AB94);
+int32& CGangWars::NumSpecificZones = *reinterpret_cast<int32*>(0x96AB94);
 CRadar*& CGangWars::RadarBlip = *reinterpret_cast<CRadar**>(0x96AB98);
 float& CGangWars::TerritoryUnderControlPercentage = *reinterpret_cast<float*>(0x96AB9C);
 bool& CGangWars::bIsPlayerOnAMission = *reinterpret_cast<bool*>(0x96ABA0);
@@ -82,8 +82,8 @@ bool CGangWars::AttackWaveOvercome() {
     return plugin::CallAndReturn<bool, 0x0>();
 }
 
-unsigned int CGangWars::CalculateTimeTillNextAttack() {
-    return plugin::CallAndReturn<unsigned int, 0x0>();
+uint32 CGangWars::CalculateTimeTillNextAttack() {
+    return plugin::CallAndReturn<uint32, 0x0>();
 }
 
 // 0x443F80
@@ -107,13 +107,13 @@ void CGangWars::ClearTheStreets() {
 }
 
 // 0x444810
-bool CGangWars::CreateAttackWave(int warFerocity, int waveID) {
-    return plugin::CallAndReturn<bool, 0x444810, int, int>(warFerocity, waveID);
+bool CGangWars::CreateAttackWave(int32 warFerocity, int32 waveID) {
+    return plugin::CallAndReturn<bool, 0x444810, int32, int32>(warFerocity, waveID);
 }
 
 // 0x4453D0
-bool CGangWars::CreateDefendingGroup(int unused) {
-    return plugin::CallAndReturn<bool, 0x4453D0, int>(unused);
+bool CGangWars::CreateDefendingGroup(int32 unused) {
+    return plugin::CallAndReturn<bool, 0x4453D0, int32>(unused);
 }
 
 // 0x
@@ -149,7 +149,7 @@ bool CGangWars::GangWarGoingOn() {
 
 // 0x443920
 void CGangWars::InitAtStartOfGame() {
-    plugin::CallDynGlobal(0x443920);
+    plugin::Call<0x443920>();
 }
 
 // 0x
@@ -158,8 +158,8 @@ void CGangWars::Load() {
 }
 
 // 0x
-void CGangWars::MakeEnemyGainInfluenceInZone(int gangId, int gangDensityIncreaser) {
-    plugin::Call<0x0, int, int>(gangId, gangDensityIncreaser);
+void CGangWars::MakeEnemyGainInfluenceInZone(int32 gangId, int32 gangDensityIncreaser) {
+    plugin::Call<0x0, int32, int32>(gangId, gangDensityIncreaser);
 }
 
 // 0x
@@ -168,13 +168,13 @@ bool CGangWars::MakePlayerGainInfluenceInZone(float removeMult) {
 }
 
 // 0x
-bool CGangWars::PedStreamedInForThisGang(int gangId) {
-    return plugin::CallAndReturn<bool, 0x0, int>(gangId);
+bool CGangWars::PedStreamedInForThisGang(int32 gangId) {
+    return plugin::CallAndReturn<bool, 0x0, int32>(gangId);
 }
 
 // 0x
-bool CGangWars::PickStreamedInPedForThisGang(int gangId, int* outPedId) {
-    return plugin::CallAndReturn<bool, 0x0, int, int*>(gangId, outPedId);
+bool CGangWars::PickStreamedInPedForThisGang(int32 gangId, int32* outPedId) {
+    return plugin::CallAndReturn<bool, 0x0, int32, int32*>(gangId, outPedId);
 }
 
 // 0x443B00
@@ -189,8 +189,8 @@ void CGangWars::ReleaseCarsInAttackWave() {
 
 // 0x
 // return num of released peds
-int CGangWars::ReleasePedsInAttackWave(bool isEndOfWar, bool restoreGangPedsAcquaintance) {
-    return plugin::CallAndReturn<int, 0x0, bool, bool>(isEndOfWar, restoreGangPedsAcquaintance);
+int32 CGangWars::ReleasePedsInAttackWave(bool isEndOfWar, bool restoreGangPedsAcquaintance) {
+    return plugin::CallAndReturn<int32, 0x0, bool, bool>(isEndOfWar, restoreGangPedsAcquaintance);
 }
 
 // 0x5D5530
@@ -204,8 +204,8 @@ void CGangWars::SetGangWarsActive(bool bActive) {
 }
 
 // 0x444010
-void CGangWars::SetSpecificZoneToTriggerGangWar(int zoneId) {
-    plugin::Call<0x444010, int>(zoneId);
+void CGangWars::SetSpecificZoneToTriggerGangWar(int32 zoneId) {
+    plugin::Call<0x444010, int32>(zoneId);
 }
 
 // 0x444300
@@ -219,8 +219,8 @@ void CGangWars::StartOffensiveGangWar() {
 }
 
 // 0x
-void CGangWars::StrengthenPlayerInfluenceInZone(int groveDensityIncreaser) {
-    plugin::Call<0x0, int>(groveDensityIncreaser);
+void CGangWars::StrengthenPlayerInfluenceInZone(int32 groveDensityIncreaser) {
+    plugin::Call<0x0, int32>(groveDensityIncreaser);
 }
 
 // 0x
@@ -235,8 +235,8 @@ void CGangWars::TellGangMembersTo(bool bIsGangWarEnding) {
 }
 
 // 0x443D50
-void CGangWars::TellStreamingWhichGangsAreNeeded(int* GangsBitFlags) {
-    plugin::CallDynGlobal<int*>(0x443D50, GangsBitFlags);
+void CGangWars::TellStreamingWhichGangsAreNeeded(int32* GangsBitFlags) {
+    plugin::Call<0x443D50, int32*>(GangsBitFlags);
 }
 
 // 0x446610

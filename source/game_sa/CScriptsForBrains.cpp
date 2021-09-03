@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-void CScriptsForBrains::CheckIfNewEntityNeedsScript(CEntity* pEntity, signed char attachType, void* unused)
+void CScriptsForBrains::CheckIfNewEntityNeedsScript(CEntity* pEntity, int8 attachType, void* unused)
 {
-    plugin::CallMethod<0x46FF20, CScriptsForBrains*, CEntity*, signed char, void*>(this, pEntity, attachType, unused);
+    plugin::CallMethod<0x46FF20, CScriptsForBrains*, CEntity*, int8, void*>(this, pEntity, attachType, unused);
 }
 
 void CScriptsForBrains::MarkAttractorScriptBrainWithThisNameAsNoLongerNeeded(char const* name)

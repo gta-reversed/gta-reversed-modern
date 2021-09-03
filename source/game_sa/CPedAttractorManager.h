@@ -1,8 +1,7 @@
 #pragma once
-#include "PluginBase.h"
 
 class CPedAttractorManager {
-    unsigned char ucPad[120];
+    uint8 ucPad[120];
 
 public:
     bool HasEmptySlot(C2dEffect const* pEffect, CEntity const* pEntity);

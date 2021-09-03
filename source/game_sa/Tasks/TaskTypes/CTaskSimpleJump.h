@@ -6,16 +6,16 @@ class CTaskSimpleJump : public CTaskSimple
 public:
     CVector m_vecClimbPos;
     float m_fClimbAngle;
-    unsigned char m_nClimbSurfaceType;
-    unsigned char _pad_19[3];
+    uint8 m_nClimbSurfaceType;
+    uint8 _pad_19[3];
     CEntity* m_pClimbEntity;
-    unsigned char m_bIsFinished;
-    unsigned char m_bIsJumpBlocked;
-    unsigned char m_bClimbJump;
-    unsigned char m_bLaunchAnimStarted;
-    unsigned char m_bCanClimb;
-    unsigned char m_bHighJump;
-    unsigned char _pad_26[2];
+    uint8 m_bIsFinished;
+    uint8 m_bIsJumpBlocked;
+    uint8 m_bClimbJump;
+    uint8 m_bLaunchAnimStarted;
+    uint8 m_bCanClimb;
+    uint8 m_bHighJump;
+    uint8 _pad_26[2];
     CAnimBlendAssociation* m_pAnim;
 
 private:
@@ -28,11 +28,11 @@ public:
 
     CTask* Clone() override;
     eTaskType GetId() override { return TASK_SIMPLE_JUMP; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
     CTask* Clone_Reversed();
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);
 
     bool CheckIfJumpBlocked(CPed* ped);

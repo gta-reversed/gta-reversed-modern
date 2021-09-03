@@ -2,7 +2,7 @@
 
 void CTaskComplexArrestPed::InjectHooks()
 {
-    HookInstall(0x68B990, &CTaskComplexArrestPed::Constructor);
+    ReversibleHooks::Install("CTaskComplexArrestPed", "CTaskComplexArrestPed", 0x68B990, &CTaskComplexArrestPed::Constructor);
 }
 
 CTaskComplexArrestPed::CTaskComplexArrestPed(CPed* ped)
@@ -25,9 +25,9 @@ CTaskComplexArrestPed* CTaskComplexArrestPed::Constructor(CPed* ped)
     return this;
 }
 
-bool CTaskComplexArrestPed::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* event)
+bool CTaskComplexArrestPed::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x68BA60, CTaskComplexArrestPed*, CPed*, eAbortPriority, CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x68BA60, CTaskComplexArrestPed*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
 }
 
 CTask* CTaskComplexArrestPed::CreateNextSubTask(CPed* ped)
@@ -45,8 +45,8 @@ CTask* CTaskComplexArrestPed::ControlSubTask(CPed* ped)
     return plugin::CallMethodAndReturn<CTask*, 0x68D350, CTaskComplexArrestPed*, CPed*>(this, ped);
 }
 
-CTask* CTaskComplexArrestPed::CreateSubTask(std::int32_t taskId, CPed* ped)
+CTask* CTaskComplexArrestPed::CreateSubTask(int32 taskId, CPed* ped)
 {
-    return plugin::CallMethodAndReturn<CTask*, 0x68CF80, CTaskComplexArrestPed*, std::int32_t, CPed*>(this, taskId, ped);
+    return plugin::CallMethodAndReturn<CTask*, 0x68CF80, CTaskComplexArrestPed*, int32, CPed*>(this, taskId, ped);
 }
 

@@ -34,22 +34,22 @@ public:
     CMatrix  m_mLeanMatrix;
     union {
         struct {
-            unsigned char bDamageFlag1 : 1;
-            unsigned char bDamageFlag2 : 1;
-            unsigned char bIgnoreWater : 1;
-            unsigned char bDamageFlag3 : 1;
-            unsigned char bDamageFlag4 : 1;
-            unsigned char bDamageFlag5 : 1;
-            unsigned char bDamageFlag7 : 1;
-            unsigned char bDamageFlag8 : 1;
+            uint8 bDamageFlag1 : 1;
+            uint8 bDamageFlag2 : 1;
+            uint8 bIgnoreWater : 1;
+            uint8 bDamageFlag3 : 1;
+            uint8 bDamageFlag4 : 1;
+            uint8 bDamageFlag5 : 1;
+            uint8 bDamageFlag7 : 1;
+            uint8 bDamageFlag8 : 1;
         } damageFlags;
-        unsigned char ucDamageFlags;
+        uint8 ucDamageFlags;
     };
     char          field_615[27];
     CVector       field_630;
     void*         m_pBikeHandlingData;
     CRideAnimData m_rideAnimData;
-    unsigned char m_anWheelDamageState[2];
+    uint8         m_anWheelDamageState[2];
     char          field_65E;
     char          field_65F;
     CColPoint     m_anWheelColPoint[4];
@@ -57,7 +57,7 @@ public:
     float         field_720[4];
     float         m_wheelCollisionState[4];
     float         field_740;
-    int           m_anWheelSurfaceType[2];
+    int32         m_anWheelSurfaceType[2];
     char          field_74C[2];
     char          field_74E[2];
     float         m_afWheelRotationX[2];
@@ -74,45 +74,45 @@ public:
     float         field_79C;
     float         field_7A0;
     float         field_7A4;
-    short         field_7A8;
+    int16         field_7A8;
     char          field_7AA[2];
-    int           field_7AC;
-    int           field_7B0;
+    int32         field_7AC;
+    int32         field_7B0;
     bool          m_bPedLeftHandFixed;
     bool          m_bPedRightHandFixed;
     char          field_7B6[2];
-    int           field_7B8;
-    int           field_7BC;
+    int32         field_7B8;
+    int32         field_7BC;
     CEntity*      m_apWheelCollisionEntity[4];
     CVector       m_avTouchPointsLocalSpace[4];
     CEntity*      m_pDamager;
-    unsigned char m_nNumContactWheels;
-    unsigned char m_nNumWheelsOnGround;
+    uint8         m_nNumContactWheels;
+    uint8         m_nNumWheelsOnGround;
     char          field_806;
     char          field_807;
-    int           field_808;
-    unsigned int  m_anWheelState[2]; // enum tWheelState
+    int32         field_808;
+    uint32        m_anWheelState[2]; // enum tWheelState
 
 public:
     static void InjectHooks();
 
     // VTABLE
     void Fix() override;
-    void BlowUpCar(CEntity* damager, unsigned char bHideExplosion) override;
+    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
 
-    bool IsDoorReady(eDoors door) override { return true; }            // 0x6B58E0
-    bool IsDoorFullyOpen(eDoors door) override { return false; }       // 0x6B58F0
-    bool IsDoorClosed(eDoors door) override { return false; }          // 0x6B5900
-    bool IsDoorMissing(eDoors door) override { return true; }          // 0x6B5910
-    bool IsDoorReady(unsigned int door) override { return true; }      // 0x6B5920
-    bool IsDoorFullyOpen(unsigned int door) override { return false; } // 0x6B5930
-    bool IsDoorClosed(unsigned int door) override { return false; }    // 0x6B5940
-    bool IsDoorMissing(unsigned int door) override { return true; }    // 0x6B5950
+    bool IsDoorReady(eDoors door) override { return true; }      // 0x6B58E0
+    bool IsDoorFullyOpen(eDoors door) override { return false; } // 0x6B58F0
+    bool IsDoorClosed(eDoors door) override { return false; }    // 0x6B5900
+    bool IsDoorMissing(eDoors door) override { return true; }    // 0x6B5910
+    bool IsDoorReady(uint32 door) override { return true; }      // 0x6B5920
+    bool IsDoorFullyOpen(uint32 door) override { return false; } // 0x6B5930
+    bool IsDoorClosed(uint32 door) override { return false; }    // 0x6B5940
+    bool IsDoorMissing(uint32 door) override { return true; }    // 0x6B5950
 
-    void ProcessAI(unsigned int& arg0);
+    void ProcessAI(uint32& arg0);
 
     // FUNCS
-    CBike(int modelIndex, unsigned char createdBy);
+    CBike(int32 modelIndex, eVehicleCreatedBy createdBy);
 
     inline bool IsAnyWheelMakingContactWithGround() {
         return m_fWheelsSuspensionCompression[0] != 1.0F
@@ -130,8 +130,8 @@ public:
 
     void SetupModelNodes();
     void dmgDrawCarCollidingParticles(CVector const& position, float power, eWeaponType weaponType);
-    static bool DamageKnockOffRider(CVehicle* arg0, float arg1, unsigned short arg2, CEntity* arg3, CVector& arg4, CVector& arg5);
-    CPed* KnockOffRider(eWeaponType arg0, unsigned char arg1, CPed* arg2, bool arg3);
+    static bool DamageKnockOffRider(CVehicle* arg0, float arg1, uint16 arg2, CEntity* arg3, CVector& arg4, CVector& arg5);
+    CPed* KnockOffRider(eWeaponType arg0, uint8 arg1, CPed* arg2, bool arg3);
     void SetRemoveAnimFlags(CPed* ped);
     void ReduceHornCounter();
     void ProcessBuoyancy();
@@ -139,7 +139,7 @@ public:
     void ResetSuspension();
     bool GetAllWheelsOffGround();
     void DebugCode(); // dummy function
-    void DoSoftGroundResistance(unsigned int& arg0);
+    void DoSoftGroundResistance(uint32& arg0);
     void PlayHornIfNecessary();
     void CalculateLeanMatrix();
     static void ProcessRiderAnims(CPed* rider, CVehicle* vehicle, CRideAnimData* rideData, tBikeHandlingData* handling);
@@ -148,7 +148,7 @@ public:
     void GetCorrectedWorldDoorPosition(CVector& out, CVector arg1, CVector arg2);
 
 private:
-    void BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion);
+    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion);
     void Fix_Reversed();
 };
 

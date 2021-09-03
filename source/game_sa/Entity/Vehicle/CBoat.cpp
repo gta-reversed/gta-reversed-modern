@@ -8,8 +8,8 @@ float& CBoat::fShapeLength = *(float*)0x8D3944; // 0.4
 float& CBoat::fShapeTime = *(float*)0x8D3948; // 0.05
 float& CBoat::fRangeMult = *(float*)0x8D394C; // 0.6
 
-short* CBoat::waUnknArr = (short*)0xC279A4;
-short* CBoat::waUnknArr2 = (short*)0xC279AC;
+int16* CBoat::waUnknArr = (int16*)0xC279A4;
+int16* CBoat::waUnknArr2 = (int16*)0xC279AC;
 
 RxObjSpace3DVertex* CBoat::aRenderVertices = (RxObjSpace3DVertex*)0xC278F8;
 RxVertexIndex* CBoat::auRenderIndices = (RxVertexIndex*)0xC27988;
@@ -43,7 +43,7 @@ void CBoat::InjectHooks()
     ReversibleHooks::Install("CBoat", "GetBoatAtomicObjectCB", 0x6F00D0, &GetBoatAtomicObjectCB);
 }
 
-CBoat::CBoat(int modelIndex, unsigned char createdBy) : CVehicle(createdBy)
+CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy)
 {
     memset(&m_boatFlap, 0, sizeof(m_boatFlap));
     auto pModelInfo = reinterpret_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(modelIndex));
@@ -136,7 +136,7 @@ CBoat::~CBoat()
     m_vehicleAudio.Terminate();
 }
 
-void CBoat::SetModelIndex(unsigned int index)
+void CBoat::SetModelIndex(uint32 index)
 {
     return CBoat::SetModelIndex_Reversed(index);
 }
@@ -161,22 +161,22 @@ void CBoat::Render()
     return CBoat::Render_Reversed();
 }
 
-void CBoat::ProcessControlInputs(unsigned char playerNum)
+void CBoat::ProcessControlInputs(uint8 playerNum)
 {
     return CBoat::ProcessControlInputs_Reversed(playerNum);
 }
 
-void CBoat::GetComponentWorldPosition(int componentId, CVector& posnOut)
+void CBoat::GetComponentWorldPosition(int32 componentId, CVector& posnOut)
 {
     return CBoat::GetComponentWorldPosition_Reversed(componentId, posnOut);
 }
 
-void CBoat::ProcessOpenDoor(CPed* ped, unsigned int doorComponentId, unsigned int arg2, unsigned int arg3, float arg4)
+void CBoat::ProcessOpenDoor(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 arg3, float arg4)
 {
-    return CBoat::ProcessOpenDoor_Reversed(ped, doorComponentId, arg2, arg3, arg4);
+    return CBoat::ProcessOpenDoor_Reversed(ped, doorComponentId, animGroup, arg3, arg4);
 }
 
-void CBoat::BlowUpCar(CEntity* damager, unsigned char bHideExplosion)
+void CBoat::BlowUpCar(CEntity* damager, uint8 bHideExplosion)
 {
     return CBoat::BlowUpCar_Reversed(damager, bHideExplosion);
 }
@@ -223,7 +223,7 @@ void CBoat::ModifyHandlingValue(bool const& bIncrement)
 
 void CBoat::PruneWakeTrail()
 {
-    int16_t iInd;
+    int16 iInd;
     for (iInd = 0; iInd < 32; ++iInd) {
         auto fPointLifeTime = m_afWakePointLifeTime[iInd];
         if (fPointLifeTime <= 0.0F)
@@ -245,7 +245,7 @@ void CBoat::PruneWakeTrail()
 
 void CBoat::AddWakePoint(CVector posn)
 {
-    auto ucIntensity = static_cast<unsigned char>(m_vecMoveSpeed.Magnitude() * 100.0F);
+    auto ucIntensity = static_cast<uint8>(m_vecMoveSpeed.Magnitude() * 100.0F);
 
     // No wake points exisiting, early out
     if (m_afWakePointLifeTime[0] < 0.0F) {
@@ -260,18 +260,18 @@ void CBoat::AddWakePoint(CVector posn)
     if (DistanceBetweenPoints2D(posn, m_avecWakePoints[0]) <= CBoat::MIN_WAKE_INTERVAL)
         return;
 
-    short uiMaxWakePoints = 31;
+    int16 uiMaxWakePoints = 31;
     if (!m_nStatus == eEntityStatus::STATUS_PLAYER) {
         if (m_nCreatedBy == eVehicleCreatedBy::MISSION_VEHICLE)
             uiMaxWakePoints = 20;
         else
             uiMaxWakePoints = 15;
     }
-    short uiCurWaterPoints = std::min(m_nNumWaterTrailPoints, uiMaxWakePoints);
+    int16 uiCurWaterPoints = std::min(m_nNumWaterTrailPoints, uiMaxWakePoints);
 
     // Shift wake points
     if (m_nNumWaterTrailPoints >= uiMaxWakePoints || uiCurWaterPoints > 0) {
-        for (unsigned int iInd = uiCurWaterPoints; iInd > 0; --iInd) {
+        for (uint32 iInd = uiCurWaterPoints; iInd > 0; --iInd) {
             m_avecWakePoints[iInd] = m_avecWakePoints[iInd - 1];
             m_anWakePointIntensity[iInd] = m_anWakePointIntensity[iInd - 1];
             m_afWakePointLifeTime[iInd] = m_afWakePointLifeTime[iInd - 1];
@@ -291,7 +291,7 @@ bool CBoat::IsSectorAffectedByWake(CVector2D vecPos, float fOffset, CBoat** ppBo
         return false;
 
     bool bWakeFound = false;
-    for (int32_t i = 0; i < NUM_WAKE_GEN_BOATS; ++i) {
+    for (int32 i = 0; i < NUM_WAKE_GEN_BOATS; ++i) {
         auto pBoat = CBoat::apFrameWakeGeneratingBoats[i];
         if (!pBoat)
             continue;
@@ -299,7 +299,7 @@ bool CBoat::IsSectorAffectedByWake(CVector2D vecPos, float fOffset, CBoat** ppBo
         if (!pBoat->m_nNumWaterTrailPoints)
             continue;
 
-        for (int32_t iTrail = 0; iTrail < pBoat->m_nNumWaterTrailPoints; ++iTrail) {
+        for (int32 iTrail = 0; iTrail < pBoat->m_nNumWaterTrailPoints; ++iTrail) {
             auto fDist = (CBoat::WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[iTrail]) * CBoat::fShapeTime + static_cast<float>(iTrail) * CBoat::fShapeLength + fOffset;
             if (fabs(pBoat->m_avecWakePoints[iTrail].x - vecPos.x) >= fDist
                 || fabs(pBoat->m_avecWakePoints[iTrail].y - vecPos.y) >= fDist)
@@ -314,7 +314,7 @@ bool CBoat::IsSectorAffectedByWake(CVector2D vecPos, float fOffset, CBoat** ppBo
     return bWakeFound;
 }
 
-float CBoat::IsVertexAffectedByWake(CVector vecPos, CBoat* pBoat, short wIndex, bool bUnkn)
+float CBoat::IsVertexAffectedByWake(CVector vecPos, CBoat* pBoat, int16 wIndex, bool bUnkn)
 {
     if (bUnkn) {
         CBoat::waUnknArr[wIndex] = 0;
@@ -326,7 +326,7 @@ float CBoat::IsVertexAffectedByWake(CVector vecPos, CBoat* pBoat, short wIndex, 
     if (!pBoat->m_nNumWaterTrailPoints)
         return 0.0F;
 
-    for (int32_t iTrail = 0; iTrail < pBoat->m_nNumWaterTrailPoints; ++iTrail) {
+    for (int32 iTrail = 0; iTrail < pBoat->m_nNumWaterTrailPoints; ++iTrail) {
         auto fWakeDistSquared = powf((CBoat::WAKE_LIFETIME - pBoat->m_afWakePointLifeTime[iTrail]) * CBoat::fShapeTime + static_cast<float>(iTrail) * CBoat::fShapeLength, 2);
         auto fTrailDistSquared = (pBoat->m_avecWakePoints[iTrail] - vecPos).SquaredMagnitude();
         if (fTrailDistSquared < fWakeDistSquared)
@@ -371,7 +371,7 @@ void CBoat::CheckForSkippingCalculations()
 
 void CBoat::FillBoatList()
 {
-    for (int32_t i = 0; i < NUM_WAKE_GEN_BOATS; i++)
+    for (int32 i = 0; i < NUM_WAKE_GEN_BOATS; i++)
         CBoat::apFrameWakeGeneratingBoats[i] = nullptr;
 
     auto vecCamPos = CVector2D(TheCamera.GetPosition());
@@ -382,9 +382,9 @@ void CBoat::FillBoatList()
     if (!iVehNum)
         return;
 
-    int32_t iCurBoat = 0;
+    int32 iCurBoat = 0;
 
-    for (int32_t iInd = 0; iInd < iVehNum; ++iInd) {
+    for (int32 iInd = 0; iInd < iVehNum; ++iInd) {
         auto pVeh = CPools::ms_pVehiclePool->GetAt(iInd);
         if (!pVeh || !pVeh->IsBoat())
             continue;
@@ -413,7 +413,7 @@ void CBoat::FillBoatList()
         // Insert the new boat into list, based on dist from camera
         auto iNewInd = -1;
         auto fMinDist = 999999.99F;
-        for (int32_t iCheckedInd = 0; iCheckedInd < NUM_WAKE_GEN_BOATS; ++iCheckedInd) {
+        for (int32 iCheckedInd = 0; iCheckedInd < NUM_WAKE_GEN_BOATS; ++iCheckedInd) {
             auto pCheckedBoat = CBoat::apFrameWakeGeneratingBoats[iCheckedInd];
             auto vecCheckedPos = CVector2D(pCheckedBoat->GetPosition());
             auto fCheckedDistFromCam = DistanceBetweenPoints2D(vecCheckedPos, vecCamPos); // Originally squared dist
@@ -428,7 +428,7 @@ void CBoat::FillBoatList()
     }
 }
 
-void CBoat::SetModelIndex_Reversed(unsigned int index)
+void CBoat::SetModelIndex_Reversed(uint32 index)
 {
     CVehicle::SetModelIndex(index);
     memset(m_aBoatNodes, 0, sizeof(m_aBoatNodes));
@@ -451,7 +451,7 @@ void CBoat::ProcessControl_Reversed() {
             if (iCarMission == eCarMission::MISSION_ATTACKPLAYER
                 || (iCarMission >= eCarMission::MISSION_RAMPLAYER_FARAWAY && iCarMission <= eCarMission::MISSION_BLOCKPLAYER_CLOSE)) {
 
-                if (static_cast<uint32_t>(CTimer::m_snTimeInMilliseconds) > m_nAttackPlayerTime)
+                if (static_cast<uint32>(CTimer::m_snTimeInMilliseconds) > m_nAttackPlayerTime)
                     m_nAttackPlayerTime = rand() % 4096 + CTimer::m_snTimeInMilliseconds + 4500;
             }
         }
@@ -703,7 +703,7 @@ void CBoat::PreRender_Reversed()
     m_vecBoatTurnForce = m_vecTurnSpeed + m_vecFrictionTurnSpeed;
     auto fSpeed = m_vecMoveSpeed.Magnitude();
 
-    int32_t iCounter = 0;
+    int32 iCounter = 0;
     constexpr eBoatNodes aCheckedNodes[2] = { eBoatNodes::BOAT_STATIC_PROP, eBoatNodes::BOAT_STATIC_PROP_2 };
     for (const auto eNode : aCheckedNodes) {
         auto pProp = m_aBoatNodes[eNode];
@@ -885,7 +885,7 @@ void CBoat::Render_Reversed()
     RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
 }
 
-void CBoat::ProcessControlInputs_Reversed(unsigned char ucPadNum)
+void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum)
 {
     m_nPadNumber = ucPadNum;
     if (ucPadNum > 3)
@@ -929,17 +929,17 @@ void CBoat::ProcessControlInputs_Reversed(unsigned char ucPadNum)
     m_fSteerAngle = DegreesToRadians(m_pHandlingData->m_fSteeringLock * fSignedPow);
 }
 
-void CBoat::GetComponentWorldPosition_Reversed(int componentId, CVector& posnOut)
+void CBoat::GetComponentWorldPosition_Reversed(int32 componentId, CVector& posnOut)
 {
     posnOut = RwFrameGetLTM(m_aBoatNodes[componentId])->pos;
 }
 
-void CBoat::ProcessOpenDoor_Reversed(CPed* ped, unsigned int doorComponentId, unsigned int arg2, unsigned int arg3, float arg4)
+void CBoat::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 arg2, uint32 arg3, float arg4)
 {
     return;
 }
 
-void CBoat::BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion)
+void CBoat::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion)
 {
     if (!vehicleFlags.bCanBeDamaged)
         return;

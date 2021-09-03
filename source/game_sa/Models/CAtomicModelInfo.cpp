@@ -75,11 +75,11 @@ void CAtomicModelInfo::DeleteRwObject_Reversed()
         CAnimManager::RemoveAnimBlockRef(iAnimIndex);
 }
 
-unsigned int CAtomicModelInfo::GetRwModelType()
+uint32 CAtomicModelInfo::GetRwModelType()
 {
     return CAtomicModelInfo::GetRwModelType_Reversed();
 }
-unsigned int CAtomicModelInfo::GetRwModelType_Reversed()
+uint32 CAtomicModelInfo::GetRwModelType_Reversed()
 {
     return rpATOMIC;
 }
@@ -220,7 +220,7 @@ void CAtomicModelInfo::SetupVehicleUpgradeFlags(char const* name)
     }
 }
 
-void SetAtomicModelInfoFlags(CAtomicModelInfo* modelInfo, unsigned int dwFlags)
+void SetAtomicModelInfoFlags(CAtomicModelInfo* modelInfo, uint32 dwFlags)
 {
     SetBaseModelInfoFlags(modelInfo, dwFlags);
 

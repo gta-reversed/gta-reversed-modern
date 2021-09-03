@@ -6,16 +6,14 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "RenderWare.h"
 
-class  CScene
-{
+class CScene {
 public:
-	RpWorld *m_pRpWorld;
-	RwCamera *m_pRwCamera;
+    RpWorld*  m_pRpWorld;
+    RwCamera* m_pRwCamera;
 };
 
 VALIDATE_SIZE(CScene, 0x8);
 
-extern  CScene &Scene;
+extern CScene& Scene;

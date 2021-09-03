@@ -1,13 +1,13 @@
 #include "StdInc.h"
 
-float &CCamera::m_f3rdPersonCHairMultY = *reinterpret_cast<float *>(0xB6EC10);
-float &CCamera::m_f3rdPersonCHairMultX = *reinterpret_cast<float *>(0xB6EC14);
-float &CCamera::m_fMouseAccelVertical = *reinterpret_cast<float *>(0xB6EC18);
-float &CCamera::m_fMouseAccelHorzntl = *reinterpret_cast<float *>(0xB6EC1C);
-bool &CCamera::m_bUseMouse3rdPerson = *reinterpret_cast<bool *>(0xB6EC2E);
-bool &CCamera::bDidWeProcessAnyCinemaCam = *reinterpret_cast<bool *>(0xB6EC2D);
+float& CCamera::m_f3rdPersonCHairMultY = *reinterpret_cast<float*>(0xB6EC10);
+float& CCamera::m_f3rdPersonCHairMultX = *reinterpret_cast<float*>(0xB6EC14);
+float& CCamera::m_fMouseAccelVertical = *reinterpret_cast<float*>(0xB6EC18);
+float& CCamera::m_fMouseAccelHorzntl = *reinterpret_cast<float*>(0xB6EC1C);
+bool& CCamera::m_bUseMouse3rdPerson = *reinterpret_cast<bool*>(0xB6EC2E);
+bool& CCamera::bDidWeProcessAnyCinemaCam = *reinterpret_cast<bool*>(0xB6EC2D);
 
-CCamera &TheCamera = *reinterpret_cast<CCamera *>(0xB6F028);
+CCamera& TheCamera = *reinterpret_cast<CCamera*>(0xB6F028);
 bool& gbModelViewer = *reinterpret_cast<bool*>(0xBA6728);
 char& gbCineyCamMessageDisplayed = *(char*)0x8CC381; // 2
 
@@ -132,12 +132,12 @@ void CCamera::InjectHooks() {
 
 // 0x5BC520
 void CCamera::Init() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x5BC520, this);
+    plugin::CallMethod<0x5BC520, CCamera*>(this);
 }
 
 // 0x51A450
 CCamera::CCamera() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x51A450, this);
+    plugin::CallMethod<0x51A450, CCamera*>(this);
 }
 
 CCamera* CCamera::Constructor() {
@@ -147,7 +147,7 @@ CCamera* CCamera::Constructor() {
 
 // 0x50A870
 CCamera::~CCamera() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x50A870, this);
+    plugin::CallMethod<0x50A870, CCamera*>(this);
 }
 
 CCamera* CCamera::Destructor() {
@@ -157,17 +157,17 @@ CCamera* CCamera::Destructor() {
 
 // 0x50A3B0
 void CCamera::InitCameraVehicleTweaks() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x50A3B0, this);
+    plugin::CallMethod<0x50A3B0, CCamera*>(this);
 }
 
 // 0x50A480
 void CCamera::ApplyVehicleCameraTweaks(CVehicle* vehicle) {
-    plugin::CallMethodDynGlobal<CCamera*, CVehicle*>(0x50A480, this, vehicle);
+    plugin::CallMethod<0x50A480, CCamera*, CVehicle*>(this, vehicle);
 }
 
 // 0x50A9F0
 void CCamera::CamShake(float arg2, float x, float y, float z) {
-    plugin::CallMethodDynGlobal<CCamera*, float, float, float, float>(0x50A9F0, this, arg2, x, y, z);
+    plugin::CallMethod<0x50A9F0, CCamera*, float, float, float, float>(this, arg2, x, y, z);
 }
 
 // 0x50AB10
@@ -191,8 +191,8 @@ void CCamera::Enable1rstPersonCamCntrlsScript() {
 }
 
 // 0x50AC20
-void CCamera::Fade(float fadeDuration, short fadeInOutFlag) {
-    plugin::CallMethodDynGlobal<CCamera*, float, short>(0x50AC20, this, fadeDuration, fadeInOutFlag);
+void CCamera::Fade(float fadeDuration, eFadeFlag fadeInOutFlag) {
+    plugin::CallMethod<0x50AC20, CCamera*, float, eFadeFlag>(this, fadeDuration, fadeInOutFlag);
 }
 
 // 0x50AD20
@@ -202,12 +202,12 @@ float CCamera::FindCamFOV() {
 
 // 0x50AD40
 float CCamera::Find3rdPersonQuickAimPitch() {
-    return plugin::CallMethodAndReturnDynGlobal<float, CCamera*>(0x50AD40, this);
+    return plugin::CallMethodAndReturn<float, 0x50AD40, CCamera*>(this);
 }
 
 // 0x50AD90
-unsigned int CCamera::GetCutSceneFinishTime() {
-    return plugin::CallMethodAndReturnDynGlobal<unsigned int, CCamera*>(0x50AD90, this);
+uint32 CCamera::GetCutSceneFinishTime() {
+    return plugin::CallMethodAndReturn<uint32, 0x50AD90, CCamera*>(this);
 }
 
 // 0x50ADE0
@@ -217,7 +217,7 @@ bool CCamera::GetFading() {
 
 // TODO: eFadingDirection
 // 0x50ADF0
-int CCamera::GetFadingDirection() {
+int32 CCamera::GetFadingDirection() {
     if (m_bFading)
         return m_nFadeInOutFlag == 1;
     else
@@ -230,8 +230,8 @@ bool CCamera::Get_Just_Switched_Status() {
 }
 
 // 0x50AE20
-int CCamera::GetScreenFadeStatus() {
-    return plugin::CallMethodAndReturn<int, 0x50AE20, CCamera *>(this);
+int32 CCamera::GetScreenFadeStatus() {
+    return plugin::CallMethodAndReturn<int32, 0x50AE20, CCamera*>(this);
 }
 
 // 0x50AE50
@@ -241,39 +241,39 @@ CVector* CCamera::GetGameCamPosition() {
 
 // 0x50AE60
 bool CCamera::GetLookingLRBFirstPerson() {
-    return plugin::CallMethodAndReturnDynGlobal<bool, CCamera*>(0x50AE60, this);
+    return plugin::CallMethodAndReturn<bool, 0x50AE60, CCamera*>(this);
 }
 
 // 0x50AE90
 signed int CCamera::GetLookDirection() {
-    return plugin::CallMethodAndReturnDynGlobal<signed int, CCamera*>(0x50AE90, this);
+    return plugin::CallMethodAndReturn<signed int, 0x50AE90, CCamera*>(this);
 }
 
 // 0x50AED0
 bool CCamera::GetLookingForwardFirstPerson() {
-    return plugin::CallMethodAndReturnDynGlobal<bool, CCamera*>(0x50AED0, this);
+    return plugin::CallMethodAndReturn<bool, 0x50AED0, CCamera*>(this);
 }
 
 // 0x50AF00
-void CCamera::GetArrPosForVehicleType(eVehicleType type, int *arrPos) {
+void CCamera::GetArrPosForVehicleType(eVehicleType type, int32* arrPos) {
     switch (type) {
-        case VEHICLE_MTRUCK:
-            *arrPos = 0;
-            break;
-        case VEHICLE_QUAD:
-            *arrPos = 1;
-            break;
-        case VEHICLE_HELI:
-            *arrPos = 2;
-            break;
-        case VEHICLE_PLANE:
-            *arrPos = 4;
-            break;
-        case VEHICLE_BOAT:
-            *arrPos = 3;
-            break;
-        default:
-            break;
+    case VEHICLE_MTRUCK:
+        *arrPos = 0;
+        break;
+    case VEHICLE_QUAD:
+        *arrPos = 1;
+        break;
+    case VEHICLE_HELI:
+        *arrPos = 2;
+        break;
+    case VEHICLE_PLANE:
+        *arrPos = 4;
+        break;
+    case VEHICLE_BOAT:
+        *arrPos = 3;
+        break;
+    default:
+        break;
     }
 }
 
@@ -289,7 +289,7 @@ void CCamera::InitialiseCameraForDebugMode() {
 
 // 0x50AFA0
 void CCamera::CopyCameraMatrixToRWCam(bool bUpdateMatrix) {
-    return plugin::CallMethodDynGlobal<CCamera*, bool>(0x50AFA0, this, bUpdateMatrix);
+    return plugin::CallMethod<0x50AFA0, CCamera*, bool>(this, bUpdateMatrix);
 }
 
 // 0x50B380
@@ -334,17 +334,17 @@ void CCamera::RenderMotionBlur() {
 
 // 0x50B930
 void CCamera::Restore() {
-    return plugin::CallMethodDynGlobal<CCamera*>(0x50B930, this);
+    return plugin::CallMethod<0x50B930, CCamera*>(this);
 }
 
 // 0x50BAB0
 void CCamera::RestoreWithJumpCut() {
-    return plugin::CallMethodDynGlobal<CCamera*>(0x50BAB0, this);
+    return plugin::CallMethod<0x50BAB0, CCamera*>(this);
 }
 
 // 0x50BD20
-void CCamera::SetCamCutSceneOffSet(CVector const* cutsceneOffset) {
-    return plugin::CallMethodDynGlobal<CCamera*, CVector const*>(0x50BAB0, this, cutsceneOffset);
+void CCamera::SetCamCutSceneOffSet(const CVector* cutsceneOffset) {
+    return plugin::CallMethod<0x50BAB0, CCamera*, CVector const*>(this, cutsceneOffset);
 }
 
 // 0x50BD40
@@ -352,8 +352,7 @@ void CCamera::SetCameraDirectlyBehindForFollowPed_CamOnAString() {
     m_bCamDirectlyBehind = true;
     CPed* player = FindPlayerPed(-1);
     if (player) {
-        m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x,
-                                                               player->m_matrix->GetForward().y);
+        m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x, player->m_matrix->GetForward().y);
     }
 }
 
@@ -362,20 +361,19 @@ void CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString() {
     m_bCamDirectlyInFront = true;
     CPed* player = FindPlayerPed(-1);
     if (player) {
-        m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x,
-                                                               player->m_matrix->GetForward().y);
+        m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x, player->m_matrix->GetForward().y);
     }
 }
 
 // unused
 // 0x50BDA0
 void CCamera::SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString(CPed* targetPed) {
-    return plugin::CallMethodDynGlobal<CCamera*, CPed*>(0x50BDA0, this, targetPed);
+    return plugin::CallMethod<0x50BDA0, CCamera*, CPed*>(this, targetPed);
 }
 
 // 0x50BE30
 void CCamera::SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString(CPed* targetPed) {
-    return plugin::CallMethodDynGlobal<CCamera*, CPed*>(0x50BE30, this, targetPed);
+    return plugin::CallMethod<0x50BE30, CCamera*, CPed*>(this, targetPed);
 }
 
 // 0x50BEC0
@@ -386,7 +384,7 @@ void CCamera::SetCamPositionForFixedMode(CVector const* fixedModeSource, CVector
 }
 
 // 0x50BF00
-void CCamera::SetFadeColour(unsigned char red, unsigned char green, unsigned char blue) {
+void CCamera::SetFadeColour(uint8 red, uint8 green, uint8 blue) {
     m_bFadeTargetIsSplashScreen = false;
     if (red == 2 && green == 2 && blue == 2) {
         m_bFadeTargetIsSplashScreen = true;
@@ -399,7 +397,7 @@ void CCamera::SetFadeColour(unsigned char red, unsigned char green, unsigned cha
 
 // TODO: eBlurType
 // 0x50BF40
-void CCamera::SetMotionBlur(unsigned char red, unsigned char green, unsigned char blue, int value, unsigned int blurType) {
+void CCamera::SetMotionBlur(uint8 red, uint8 green, uint8 blue, int32 value, uint32 blurType) {
     m_nBlurRed = red;
     m_nBlurGreen = green;
     m_nBlurBlue = blue;
@@ -408,7 +406,7 @@ void CCamera::SetMotionBlur(unsigned char red, unsigned char green, unsigned cha
 }
 
 // 0x50BF80
-void CCamera::SetMotionBlurAlpha(int alpha) {
+void CCamera::SetMotionBlurAlpha(int32 alpha) {
     m_nMotionBlurAddAlpha = alpha;
 }
 
@@ -419,20 +417,20 @@ void CCamera::SetNearClipScript(float nearClip) {
 }
 
 // 0x50BFB0
-void CCamera::SetNewPlayerWeaponMode(short mode, short maxZoom, short minZoom) {
-    this->m_PlayerWeaponMode.m_nMode = mode;
-    this->m_PlayerWeaponMode.m_nMaxZoom = maxZoom;
-    this->m_PlayerWeaponMode.m_nMinZoom = minZoom;
-    this->m_PlayerWeaponMode.m_fDuration = 0.0f;
+void CCamera::SetNewPlayerWeaponMode(int16 mode, int16 maxZoom, int16 minZoom) {
+    m_PlayerWeaponMode.m_nMode     = mode;
+    m_PlayerWeaponMode.m_nMaxZoom  = maxZoom;
+    m_PlayerWeaponMode.m_nMinZoom  = minZoom;
+    m_PlayerWeaponMode.m_fDuration = 0.0f;
 }
 
 // 0x50BFF0
 bool CCamera::Using1stPersonWeaponMode() {
-    return plugin::CallMethodAndReturnDynGlobal<bool, CCamera*>(0x50BFF0, this);
+    return plugin::CallMethodAndReturn<bool, 0x50BFF0, CCamera*>(this);
 }
 
 // 0x50C030
-void CCamera::SetParametersForScriptInterpolation(float interpolationToStopMoving, float interpolationToCatchUp, unsigned int timeForInterpolation) {
+void CCamera::SetParametersForScriptInterpolation(float interpolationToStopMoving, float interpolationToCatchUp, uint32 timeForInterpolation) {
     m_nScriptTimeForInterpolation = timeForInterpolation;
     m_bScriptParametersSetForInterPol = true;
     m_fScriptPercentageInterToStopMoving = interpolationToStopMoving * 0.01f;
@@ -441,7 +439,7 @@ void CCamera::SetParametersForScriptInterpolation(float interpolationToStopMovin
 
 // 0x50C070
 void CCamera::SetPercentAlongCutScene(float percent) {
-    return plugin::CallMethodDynGlobal<CCamera*>(0x50C070, this, percent);
+    return plugin::CallMethod<0x50C070, CCamera*>(this, percent);
 }
 
 // 0x50C100
@@ -463,14 +461,14 @@ void CCamera::SetWideScreenOff() {
 
 // zoomMode : value between 0 - 2
 // 0x50C160
-void CCamera::SetZoomValueFollowPedScript(short zoomMode) {
-    return plugin::CallMethodDynGlobal<CCamera*, short>(0x50C160, this, zoomMode);
+void CCamera::SetZoomValueFollowPedScript(int16 zoomMode) {
+    return plugin::CallMethod<0x50C160, CCamera*, int16>(this, zoomMode);
 }
 
 // zoomMode : 0- ZOOM_ONE , 1- ZOOM_TWO , 2- ZOOM_THREE
 // 0x50C1B0
-void CCamera::SetZoomValueCamStringScript(short zoomMode) {
-    return plugin::CallMethodDynGlobal<CCamera*, short>(0x50C1B0, this, zoomMode);
+void CCamera::SetZoomValueCamStringScript(int16 zoomMode) {
+    return plugin::CallMethod<0x50C1B0, CCamera*, int16>(this, zoomMode);
 }
 
 // 0x50C260
@@ -510,22 +508,22 @@ void CCamera::StoreValuesDuringInterPol(CVector* sourceDuringInter, CVector* tar
 
 // 0x50C360
 void CCamera::UpdateTargetEntity() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x50C360, this);
+    plugin::CallMethod<0x50C360, CCamera*>(this);
 }
 
 // 0x50C7C0
-void CCamera::TakeControl(CEntity* target, eCamMode modeToGoTo, eSwitchType switchType, int whoIsInControlOfTheCamera) {
-    plugin::CallMethodDynGlobal<CCamera*, CEntity*, eCamMode, eSwitchType, int>(0x50C7C0, this, target, modeToGoTo, switchType, whoIsInControlOfTheCamera);
+void CCamera::TakeControl(CEntity* target, eCamMode modeToGoTo, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
+    plugin::CallMethod<0x50C7C0, CCamera*, CEntity*, eCamMode, eSwitchType, int32>(this, target, modeToGoTo, switchType, whoIsInControlOfTheCamera);
 }
 
 // 0x50C8B0
-void CCamera::TakeControlNoEntity(CVector const* fixedModeVector, eSwitchType switchType, int whoIsInControlOfTheCamera) {
-    plugin::CallMethodDynGlobal<CCamera*, CVector const*, eSwitchType, int>(0x50C8B0, this, fixedModeVector, switchType, whoIsInControlOfTheCamera);
+void CCamera::TakeControlNoEntity(CVector const* fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
+    plugin::CallMethod<0x50C8B0, CCamera*, CVector const*, eSwitchType, int32>(this, fixedModeVector, switchType, whoIsInControlOfTheCamera);
 }
 
 // 0x50C910
-void CCamera::TakeControlAttachToEntity(CEntity* target, CEntity* attached, CVector* attachedCamOffset, CVector* attachedCamLookAt, float attachedCamAngle, eSwitchType switchType, int whoIsInControlOfTheCamera) {
-    plugin::CallMethodDynGlobal<CCamera*, CEntity*, CEntity*, CVector*, CVector*, float, eSwitchType, int>(0x50C910, this, target, attached, attachedCamOffset, attachedCamLookAt, attachedCamAngle, switchType, whoIsInControlOfTheCamera);
+void CCamera::TakeControlAttachToEntity(CEntity* target, CEntity* attached, CVector* attachedCamOffset, CVector* attachedCamLookAt, float attachedCamAngle, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
+    plugin::CallMethod<0x50C910, CCamera*, CEntity*, CEntity*, CVector*, CVector*, float, eSwitchType, int32>(this, target, attached, attachedCamOffset, attachedCamLookAt, attachedCamAngle, switchType, whoIsInControlOfTheCamera);
 }
 
 // 0x50CAE0
@@ -548,112 +546,112 @@ void CCamera::UpdateAimingCoors(CVector const* aimingTargetCoors) {
 // unused
 // 0x50CB90
 void CCamera::SetNearClipBasedOnPedCollision(float arg2) {
-    plugin::CallMethodDynGlobal<CCamera*, float>(0x50CB90, this, arg2);
+    plugin::CallMethod<0x50CB90, CCamera*, float>(this, arg2);
 }
 
 // TODO: eAimingType
 // 0x50CBF0
-void CCamera::SetColVarsAimWeapon(int aimingType) {
+void CCamera::SetColVarsAimWeapon(int32 aimingType) {
     if (aimingType <= 3) {
         switch (aimingType) {
-            case 0u:
-                CCamera::SetCamCollisionVarDataSet(0);
-                break;
-            case 1u:
-                CCamera::SetCamCollisionVarDataSet(1);
-                break;
-            case 2u:
-                CCamera::SetCamCollisionVarDataSet(2);
-                break;
-            case 3u:
-                CCamera::SetCamCollisionVarDataSet(3);
-                break;
-            default:
-                return;
+        case 0u:
+            CCamera::SetCamCollisionVarDataSet(0);
+            break;
+        case 1u:
+            CCamera::SetCamCollisionVarDataSet(1);
+            break;
+        case 2u:
+            CCamera::SetCamCollisionVarDataSet(2);
+            break;
+        case 3u:
+            CCamera::SetCamCollisionVarDataSet(3);
+            break;
+        default:
+            return;
         }
     }
 }
 
 // 0x50CC50
-void CCamera::SetColVarsPed(ePedType pedType, int nCamPedZoom) {
-    plugin::Call<0x50CC50, ePedType, int>(pedType, nCamPedZoom);
+void CCamera::SetColVarsPed(ePedType pedType, int32 nCamPedZoom) {
+    plugin::Call<0x50CC50, ePedType, int32>(pedType, nCamPedZoom);
 }
 
 // 0x50CD30
 void CCamera::CameraGenericModeSpecialCases(CPed* targetPed) {
-    plugin::CallMethodDynGlobal<CCamera*, CPed*>(0x50CD30, this, targetPed);
+    plugin::CallMethod<0x50CD30, CCamera*, CPed*>(this, targetPed);
 }
 
 // unused
 // 0x50CD80
 void CCamera::CameraPedModeSpecialCases() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x50CD80, this);
-//    CCollision::m_bCamCollideWithVehicles = true;
-//    CCollision::m_bCamCollideWithObjects = true;
-//    CCollision::m_bCamCollideWithPeds = true;
+    plugin::CallMethod<0x50CD80, CCamera*>(this);
+    //    CCollision::m_bCamCollideWithVehicles = true;
+    //    CCollision::m_bCamCollideWithObjects = true;
+    //    CCollision::m_bCamCollideWithPeds = true;
 }
 
 // 0x50CDA0
 void CCamera::CameraPedAimModeSpecialCases(CPed* ped) {
-    plugin::CallMethodDynGlobal<CCamera*, CPed*>(0x50CDA0, this, ped);
+    plugin::CallMethod<0x50CDA0, CCamera*, CPed*>(this, ped);
 }
 
 // 0x50CDE0
 void CCamera::CameraVehicleModeSpecialCases(CVehicle* vehicle) {
-    plugin::CallMethodDynGlobal<CCamera*, CVehicle*>(0x50CDE0, this, vehicle);
+    plugin::CallMethod<0x50CDE0, CCamera*, CVehicle*>(this, vehicle);
 }
 
 // 0x50CE80
 bool CCamera::IsExtraEntityToIgnore(CEntity* entity) {
-    return plugin::CallMethodAndReturnDynGlobal<bool, CCamera*, CEntity *>(0x50CE80, this, entity);
+    return plugin::CallMethodAndReturn<bool, 0x50CE80, CCamera*, CEntity*>(this, entity);
 }
 
 // 0x420C40
 bool CCamera::IsSphereVisible(CVector const& origin, float radius, RwMatrixTag* transformMatrix) {
-    return plugin::CallMethodAndReturnDynGlobal<bool, CCamera*, CVector const&, float, RwMatrixTag*>(0x420C40, this, origin, radius, transformMatrix);
+    return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, CVector const&, float, RwMatrixTag*>(this, origin, radius, transformMatrix);
 }
 
 // 0x420D40
 bool CCamera::IsSphereVisible(CVector const& origin, float radius) {
-    return plugin::CallMethodAndReturnDynGlobal<bool, CCamera*, CVector const&, float>(0x420D40, this, origin, radius);
+    return plugin::CallMethodAndReturn<bool, 0x420D40, CCamera*, CVector const&, float>(this, origin, radius);
 }
 
 // unused
 // 0x50CEB0
 bool CCamera::ConsiderPedAsDucking(CPed* ped) {
-    return plugin::CallMethodAndReturnDynGlobal<bool, CCamera*, CPed *>(0x50CEB0, this, ped);
+    return plugin::CallMethodAndReturn<bool, 0x50CEB0, CCamera*, CPed*>(this, ped);
 }
 
-//0x50CEF0
-void CCamera::ResetDuckingSystem(CPed *ped) {
-    plugin::CallMethodDynGlobal<CCamera*, CPed*>(0x50CEF0, this, ped);
+// 0x50CEF0
+void CCamera::ResetDuckingSystem(CPed* ped) {
+    plugin::CallMethod<0x50CEF0, CCamera*, CPed*>(this, ped);
 }
 
 // arg5 always used as false
 // 0x50CFA0
 void CCamera::HandleCameraMotionForDucking(CPed* ped, CVector* source, CVector* targPosn, bool arg5) {
-    plugin::CallMethodDynGlobal<CCamera*, CPed*, CVector*, CVector*, bool>(0x50CFA0, this, ped, source, targPosn, arg5);
+    plugin::CallMethod<0x50CFA0, CCamera*, CPed*, CVector*, CVector*, bool>(this, ped, source, targPosn, arg5);
 }
 
 // arg5 always used as false
 // 0x50D090
 void CCamera::HandleCameraMotionForDuckingDuringAim(CPed* ped, CVector* source, CVector* targPosn, bool arg5) {
-    plugin::CallMethodDynGlobal<CCamera*, CPed*, CVector*, CVector*, bool>(0x50D090, this, ped, source, targPosn, arg5);
+    plugin::CallMethod<0x50D090, CCamera*, CPed*, CVector*, CVector*, bool>(this, ped, source, targPosn, arg5);
 }
 
 // 0x50D160
 void CCamera::VectorMoveLinear(CVector* moveLinearPosnEnd, CVector* moveLinearPosnStart, float duration, bool bMoveLinearWithEase) {
-    plugin::CallMethodDynGlobal<CCamera*, CVector*, CVector*, float, bool>(0x50D160, this, moveLinearPosnEnd, moveLinearPosnStart, duration, bMoveLinearWithEase);
+    plugin::CallMethod<0x50D160, CCamera*, CVector*, CVector*, float, bool>(this, moveLinearPosnEnd, moveLinearPosnStart, duration, bMoveLinearWithEase);
 }
 
 // 0x50D1D0
 void CCamera::VectorTrackLinear(CVector* trackLinearStartPoint, CVector* trackLinearEndPoint, float duration, bool bEase) {
-    plugin::CallMethodDynGlobal<CCamera*, CVector*, CVector*, float, bool>(0x50D1D0, this, trackLinearStartPoint, trackLinearEndPoint, duration, bEase);
+    plugin::CallMethod<0x50D1D0, CCamera*, CVector*, CVector*, float, bool>(this, trackLinearStartPoint, trackLinearEndPoint, duration, bEase);
 }
 
 // 0x50D240
-void CCamera::AddShakeSimple(float duration, int type, float intensity) {
-    plugin::CallMethodDynGlobal<CCamera*, float, int, float>(0x50D240, this, duration, type, intensity);
+void CCamera::AddShakeSimple(float duration, int32 type, float intensity) {
+    plugin::CallMethod<0x50D240, CCamera*, float, int32, float>(this, duration, type, intensity);
 }
 
 // 0x50D280
@@ -668,17 +666,17 @@ void CCamera::LerpFOV(float zoomInFactor, float zoomOutFactor, float timeLimit, 
 
 // 0x50D2D0
 void CCamera::InitialiseScriptableComponents() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x50D2D0, this);
+    plugin::CallMethod<0x50D2D0, CCamera*>(this);
 }
 
 // 0x50B5D0
 void CCamera::ProcessFade() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x50B5D0, this);
+    plugin::CallMethod<0x50B5D0, CCamera*>(this);
 }
 
 // 0x50B6D0
 void CCamera::ProcessMusicFade() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x50B6D0, this);
+    plugin::CallMethod<0x50B6D0, CCamera*>(this);
 }
 
 // unused, empty
@@ -704,44 +702,44 @@ void CCamera::ProcessWideScreenOn() {
 
 // 0x516440
 void CCamera::ProcessVectorTrackLinear() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x516440, this);
+    plugin::CallMethod<0x516440, CCamera*>(this);
 }
 
 // 0x50D350
 void CCamera::ProcessVectorTrackLinear(float ratio) {
-    plugin::CallMethodDynGlobal<CCamera*, float>(0x50D350, this, ratio);
+    plugin::CallMethod<0x50D350, CCamera*, float>(this, ratio);
 }
 
 // 0x50D430
 void CCamera::ProcessVectorMoveLinear(float ratio) {
-    plugin::CallMethodDynGlobal<CCamera*, float>(0x50D430, this, ratio);
+    plugin::CallMethod<0x50D430, CCamera*, float>(this, ratio);
 }
 
 // 0x516500
 void CCamera::ProcessFOVLerp() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x516500, this);
+    plugin::CallMethod<0x516500, CCamera*>(this);
 }
 
 // 0x50D510
 void CCamera::ProcessFOVLerp(float ratio) {
-    plugin::CallMethodDynGlobal<CCamera*, float>(0x50D510, this, ratio);
+    plugin::CallMethod<0x50D510, CCamera*, float>(this, ratio);
 }
 
 // 0x5164A0
 void CCamera::ProcessVectorMoveLinear() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x5164A0, this);
+    plugin::CallMethod<0x5164A0, CCamera*>(this);
 }
 
 // unused
 // 0x51A6F0
 void CCamera::ProcessShake() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x51A6F0, this);
+    plugin::CallMethod<0x51A6F0, CCamera*>(this);
 }
 
 // shakeIntensity not used
 // 0x516560
 RwV3d* CCamera::ProcessShake(float shakeIntensity) {
-    return plugin::CallMethodAndReturnDynGlobal<RwV3d*, CCamera*, float>(0x516560, this, shakeIntensity);
+    return plugin::CallMethodAndReturn<RwV3d*, 0x516560, CCamera*, float>(this, shakeIntensity);
 }
 
 // unused
@@ -754,12 +752,12 @@ void CCamera::ProcessScriptedCommands() {
 
 // 0x52B730
 void CCamera::Process() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x52B730, this);
+    plugin::CallMethod<0x52B730, CCamera*>(this);
 }
 
 // 0x514860
 void CCamera::DrawBordersForWideScreen() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x514860, this);
+    plugin::CallMethod<0x514860, CCamera*>(this);
 }
 
 // 0x514950
@@ -770,28 +768,28 @@ void CCamera::FinishCutscene() {
 }
 
 // 0x514970
-void CCamera::Find3rdPersonCamTargetVector(float range, CVector source, CVector *pCamera, CVector *pPoint) {
-    plugin::CallMethodDynGlobal<CCamera*, float, CVector, CVector*, CVector*>(0x514970, this, range, source, pCamera, pPoint);
+void CCamera::Find3rdPersonCamTargetVector(float range, CVector source, CVector* pCamera, CVector* pPoint) {
+    plugin::CallMethod<0x514970, CCamera*, float, CVector, CVector*, CVector*>(this, range, source, pCamera, pPoint);
 }
 
 // 0x514B80
 float CCamera::CalculateGroundHeight(eGroundHeightType type) {
-    return plugin::CallMethodAndReturnDynGlobal<float, CCamera*, eGroundHeightType>(0x514B80, this, type);
+    return plugin::CallMethodAndReturn<float, 0x514B80, CCamera*, eGroundHeightType>(this, type);
 }
 
 // 0x514D60
 void CCamera::CalculateFrustumPlanes(bool bForMirror) {
-    plugin::CallMethodDynGlobal<CCamera*, bool>(0x514D60,this, bForMirror);
+    plugin::CallMethod<0x514D60, CCamera*, bool>(this, bForMirror);
 }
 
 // 0x5150E0
 void CCamera::CalculateDerivedValues(bool bForMirror, bool bOriented) {
-    return plugin::CallMethodDynGlobal<CCamera*, bool, bool>(0x5150E0, this, bForMirror, bOriented);
+    return plugin::CallMethod<0x5150E0, CCamera*, bool, bool>(this, bForMirror, bOriented);
 }
 
 // 0x516B20
 void CCamera::ImproveNearClip(CVehicle* pVehicle, CPed* pPed, CVector* source, CVector* targPosn) {
-    return plugin::CallMethodDynGlobal<CCamera*, CVehicle*, CPed*, CVector*, CVector*>(0x516B20, this, pVehicle, pPed, source, targPosn);
+    return plugin::CallMethod<0x516B20, CCamera*, CVehicle*, CPed*, CVector*, CVector*>(this, pVehicle, pPed, source, targPosn);
 }
 
 static CMatrix& preMirrorMat = *(CMatrix*)0xB6FE40;
@@ -813,32 +811,32 @@ void CCamera::RestoreCameraAfterMirror() {
 
 // 0x51A5D0
 bool CCamera::ConeCastCollisionResolve(CVector* source, CVector* center, CVector* pVecOut, float radius, float arg5, float* pFloatOut) {
-    return plugin::CallMethodAndReturnDynGlobal<bool, CCamera*, CVector*, CVector*, CVector*, float, float, float*>(0x51A5D0, this, source, center, pVecOut, radius, arg5, pFloatOut);
+    return plugin::CallMethodAndReturn<bool, 0x51A5D0, CCamera*, CVector*, CVector*, CVector*, float, float, float*>(this, source, center, pVecOut, radius, arg5, pFloatOut);
 }
 
 // 0x51E560
-bool CCamera::TryToStartNewCamMode(int camSequence) {
-    return plugin::CallMethodAndReturnDynGlobal<bool, CCamera*, int>(0x51E560, this, camSequence);
+bool CCamera::TryToStartNewCamMode(int32 camSequence) {
+    return plugin::CallMethodAndReturn<bool, 0x51E560, CCamera*, int32>(this, camSequence);
 }
 
 // 0x520190
 void CCamera::CameraColDetAndReact(CVector* source, CVector* target) {
-    plugin::CallMethodDynGlobal<CCamera*>(0x520190, this, source, target);
+    plugin::CallMethod<0x520190, CCamera*, CVector*, CVector*>(this, source, target);
 }
 
 // 0x527FA0
 void CCamera::CamControl() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x527FA0, this);
+    plugin::CallMethod<0x527FA0, CCamera*>(this);
 }
 
 // 0x5B24A0
 void CCamera::DeleteCutSceneCamDataMemory() {
-    plugin::CallMethodDynGlobal<CCamera*>(0x5B24A0, this);
+    plugin::CallMethod<0x5B24A0, CCamera*>(this);
 }
 
 // 0x5B24D0
 void CCamera::LoadPathSplines(FILE* file) {
-    plugin::CallMethodDynGlobal<CCamera*>(0x5B24D0, this);
+    plugin::CallMethod<0x5B24D0, CCamera*>(this);
 }
 
 // 0x50AB50
@@ -853,16 +851,16 @@ void CCamera::Enable1rstPersonWeaponsCamera() {
 }
 
 // 0x50CB60
-void CCamera::SetCamCollisionVarDataSet(int index) {
-    plugin::Call<0x50CB60, int>(index);
+void CCamera::SetCamCollisionVarDataSet(int32 index) {
+    plugin::Call<0x50CB60, int32>(index);
 }
 
 // 0x50CCA0
-void CCamera::SetColVarsVehicle(eVehicleType vehicleType, int camVehicleZoom) {
-    plugin::Call<0x50CCA0, eVehicleType, int>(vehicleType, camVehicleZoom);
+void CCamera::SetColVarsVehicle(eVehicleType vehicleType, int32 camVehicleZoom) {
+    plugin::Call<0x50CCA0, eVehicleType, int32>(vehicleType, camVehicleZoom);
 }
 
 // 0x50A970
-void CamShakeNoPos(CCamera *camera, float strength) {
-    ((void(__cdecl *)(CCamera*, float))0x50A970)(camera, strength);
+void CamShakeNoPos(CCamera* camera, float strength) {
+    ((void(__cdecl*)(CCamera*, float))0x50A970)(camera, strength);
 }

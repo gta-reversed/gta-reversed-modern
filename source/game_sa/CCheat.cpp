@@ -3,7 +3,7 @@
 #include "CTaskSimpleJetPack.h"
 
 void (*(&CCheat::m_aCheatFunctions)[TOTAL_CHEATS])() = *reinterpret_cast<void (*(*)[TOTAL_CHEATS])()>(0x8A5B58);
-int (&CCheat::m_aCheatHashKeys)[TOTAL_CHEATS] = *reinterpret_cast<int (*)[TOTAL_CHEATS]>(0x8A5CC8);
+int32 (&CCheat::m_aCheatHashKeys)[TOTAL_CHEATS] = *reinterpret_cast<int32 (*)[TOTAL_CHEATS]>(0x8A5CC8);
 char (&CCheat::m_CheatString)[CHEAT_STRING_SIZE] = *reinterpret_cast<char (*)[CHEAT_STRING_SIZE]>(0x969110);
 bool (&CCheat::m_aCheatsActive)[TOTAL_CHEATS] = *reinterpret_cast<bool (*)[TOTAL_CHEATS]>(0x969130);
 bool& CCheat::m_bHasPlayerCheated = *reinterpret_cast<bool*>(0x96918C);
@@ -121,7 +121,7 @@ void CCheat::InjectHooks() {
 
         for (auto& cheatFunc: CCheat::m_aCheatFunctions) {
             if (reinterpret_cast<unsigned long>(cheatFunc) == cheat.installAddress) {
-                cheatFunc = static_cast<void (*)(void)>(cheat.method);
+                cheatFunc = static_cast<void (*)()>(cheat.method);
             }
         }
     }
@@ -139,19 +139,19 @@ void CCheat::AddToCheatString(char LastPressedKey) {
     m_CheatString[0] = LastPressedKey;
     m_CheatString[CHEAT_STRING_SIZE - 1] = 0;
 
-    unsigned int strLen = strlen(m_CheatString);
+    uint32 strLen = strlen(m_CheatString);
     if (strLen < CHEAT_MIN_HASH_SIZE) {
         return;
     }
 
-    int hashIndex;
-    int cheatStringSize = CHEAT_MIN_HASH_SIZE;
+    int32 hashIndex;
+    int32 cheatStringSize = CHEAT_MIN_HASH_SIZE;
     for (auto i = CHEAT_MIN_HASH_SIZE; i < CHEAT_STRING_SIZE; i++) {
-        unsigned int hash = CKeyGen::GetKey(m_CheatString, cheatStringSize);
+        uint32 hash = CKeyGen::GetKey(m_CheatString, cheatStringSize);
         cheatStringSize++;
 
         hashIndex = -1;
-        for (int j = 0; j < TOTAL_CHEATS; ++j) {
+        for (int32 j = 0; j < TOTAL_CHEATS; ++j) {
             if (m_aCheatHashKeys[j] != hash) {
                 continue;
             }
@@ -194,7 +194,7 @@ void CCheat::ResetCheats() {
 
 // 0x439AF0
 void CCheat::DoCheats() {
-    for (short i = 0; i < 256; ++i)
+    for (int16 i = 0; i < 256; ++i)
         if (CPad::NewKeyState.standardKeys[i])
             if (!CPad::OldKeyState.standardKeys[i])
                 AddToCheatString(i);
@@ -239,7 +239,7 @@ void CCheat::ApacheCheat() {
 void CCheat::BeachPartyCheat() {
     m_aCheatsActive[CHEAT_BEACH_PARTY] ^= true;
     if (m_aCheatsActive[CHEAT_BEACH_PARTY]) {
-        int peds[8] = {
+        int32 peds[8] = {
             MODEL_BMYBE,
             MODEL_HMYBE,
             MODEL_WFYBE,
@@ -279,7 +279,7 @@ void CCheat::BlackCarsCheat() {
 
 // 0x439d80
 void CCheat::BlowUpCarsCheat() {
-    for (int index = 0; index < CPools::ms_pVehiclePool->m_nSize; index++) {
+    for (int32 index = 0; index < CPools::ms_pVehiclePool->m_nSize; index++) {
         CVehicle* vehicle = CPools::ms_pVehiclePool->GetAt(index);
         if (vehicle) {
             vehicle->BlowUpCar(nullptr, false);
@@ -296,7 +296,7 @@ void CCheat::CloudyWeatherCheat() {
 void CCheat::CountrysideInvasionCheat() {
     m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC] ^= true;
     if (m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC]) {
-        int peds[8] = {
+        int32 peds[8] = {
             MODEL_CWFOFR,
             MODEL_CWFOHB,
             MODEL_CWFYFR1,
@@ -363,7 +363,7 @@ void CCheat::DuskCheat() {
 void CCheat::ElvisLivesCheat() {
     m_aCheatsActive[CHEAT_ELVIS_IS_EVERYWHERE] ^= true;
     if (m_aCheatsActive[CHEAT_ELVIS_IS_EVERYWHERE]) {
-        int peds[8] = {
+        int32 peds[8] = {
             MODEL_VHMYELV,
             MODEL_VBMYELV,
             MODEL_VIMYELV,
@@ -435,7 +435,7 @@ void CCheat::FunhouseCheat() {
     if (m_aCheatsActive[CHEAT_FUNHOUSE_THEME]) {
         CPostEffects::m_bHeatHazeFX = false;
     } else {
-        int peds[8] = {
+        int32 peds[8] = {
             MODEL_WMYBELL,
             MODEL_WFYBURG,
             MODEL_WMOICE,
@@ -478,7 +478,7 @@ void CCheat::GangLandCheat() {
 void CCheat::GangsCheat() {
     m_aCheatsActive[CHEAT_GANGMEMBERS_EVERYWHERE] ^= true;
     if (m_aCheatsActive[CHEAT_GANGMEMBERS_EVERYWHERE]) {
-        int peds[8] = {
+        int32 peds[8] = {
             MODEL_BALLAS1,
             MODEL_BALLAS2,
             MODEL_BALLAS3,
@@ -561,7 +561,7 @@ void CCheat::JetpackCheat() {
 void CCheat::LoveConquersAllCheat() {
     m_aCheatsActive[CHEAT_SLUT_MAGNET] ^= true;
     if (m_aCheatsActive[CHEAT_SLUT_MAGNET]) {
-        int peds[8] = {
+        int32 peds[8] = {
             MODEL_BMYPIMP,
             MODEL_BFYPRO,
             MODEL_HFYPRO,
@@ -590,7 +590,7 @@ void CCheat::LovefistCheat() {
 void CCheat::MayhemCheat() {
     m_aCheatsActive[CHEAT_PEDS_ATTACK_OTHER_WITH_GOLFCLUB] ^= true;
     if (m_aCheatsActive[CHEAT_PEDS_ATTACK_OTHER_WITH_GOLFCLUB]) {
-        for (unsigned int pedType = PED_TYPE_CIVMALE; pedType <= PED_TYPE_PROSTITUTE; pedType++) {
+        for (uint32 pedType = PED_TYPE_CIVMALE; pedType <= PED_TYPE_PROSTITUTE; pedType++) {
             CPedType::SetPedTypeAsAcquaintance(4, static_cast<ePedType>(pedType), 0xFFFFF);
         }
 
@@ -599,12 +599,12 @@ void CCheat::MayhemCheat() {
             return;
         }
 
-        for (int pedIndex = 0; pedIndex < pedPool->m_nSize; pedIndex++) {
+        for (int32 pedIndex = 0; pedIndex < pedPool->m_nSize; pedIndex++) {
             CPed* ped = pedPool->GetAt(pedIndex);
             if (!ped || ped->IsPlayer())
                 continue;
 
-            for (unsigned int pedType_1 = PED_TYPE_CIVMALE; pedType_1 <= PED_TYPE_PROSTITUTE; ++pedType_1) {
+            for (uint32 pedType_1 = PED_TYPE_CIVMALE; pedType_1 <= PED_TYPE_PROSTITUTE; ++pedType_1) {
                 ped->m_acquaintance.SetAsAcquaintance(4, CPedType::GetPedFlag(static_cast<ePedType>(pedType_1)));
             }
             CPed* closestPed = static_cast<CPed*>(ped->m_pIntelligence->m_entityScanner.GetClosestPedInRange());
@@ -664,7 +664,7 @@ void CCheat::NinjaCheat() {
             m_aCheatsActive[CHEAT_BLACK_TRAFFIC] = false;
         }
     } else {
-        int peds[8] = {
+        int32 peds[8] = {
             MODEL_TRIADA,
             MODEL_TRIADB,
             MODEL_TRIBOSS,
@@ -836,7 +836,7 @@ void CCheat::TankerCheat() {
     if (CStreaming::ms_aInfoForModel[MODEL_PETROTR].m_nLoadState != LOADSTATE_LOADED)
         return;
 
-    CTrailer* trailer = new CTrailer(MODEL_PETROTR, 1);
+    CTrailer* trailer = new CTrailer(MODEL_PETROTR, RANDOM_VEHICLE);
     CVector posn = vehicle->GetPosition();
     trailer->SetPosn(posn);
     trailer->SetOrientation(0.0f, 0.0f, 3.4906585f); // DegreesToRadians() ?
@@ -871,7 +871,7 @@ void CCheat::VillagePeopleCheat() {
         m_aCheatsActive[CHEAT_EVERYONE_ARMED] = false;
         EverybodyAttacksPlayerCheat();
     } else {
-        int peds[8] = {
+        int32 peds[8] = {
             MODEL_WMYCON,
             MODEL_CWMYFR,
             MODEL_ARMY,
@@ -911,7 +911,7 @@ void CCheat::WantedLevelUpCheat() {
     if (!player)
         return;
 
-    uint8_t level = player->GetWantedLevel();
+    uint8 level = player->GetWantedLevel();
     player->CheatWantedLevel(std::min(level + 2, 6));
 }
 

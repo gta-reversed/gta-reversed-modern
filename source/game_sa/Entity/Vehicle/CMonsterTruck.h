@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CAutomobile.h"
 
 enum eMonsterTruckNodes {
@@ -46,9 +45,10 @@ public:
     float field_994;
     float field_998;
 
-    static float& DUMPER_COL_ANGLEMULT; // 0.0002
+    static float& DUMPER_COL_ANGLEMULT; // 0.0002f
 
-    CMonsterTruck(int modelIndex, unsigned char createdBy);
+public:
+    CMonsterTruck(int32 modelIndex, eVehicleCreatedBy createdBy);
 
     void ExtendSuspension();
 };

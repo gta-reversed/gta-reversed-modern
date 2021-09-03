@@ -4,9 +4,9 @@ void CTrailer::InjectHooks() {
 
 }
 
-CTrailer::CTrailer(int modelIndex, unsigned char createdBy) : CAutomobile(plugin::dummy)
+CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(plugin::dummy)
 {
-    plugin::CallMethod<0x6D03A0, CTrailer*, int, unsigned char>(this, modelIndex, createdBy);
+    plugin::CallMethod<0x6D03A0, CTrailer*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
 
 // 0x6CFDF0

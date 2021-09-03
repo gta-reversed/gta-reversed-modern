@@ -6,16 +6,14 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-class  CAnimationStyleDescriptor {
+class CAnimationStyleDescriptor {
 public:
-	char groupName[16];
-	char blockName[16];
-	int field_20;
-	int animsCount;
-	void *animNames;
-	void *animDesc;
+    char  groupName[16];
+    char  blockName[16];
+    int32 field_20;
+    int32 animsCount;
+    void* animNames;
+    void* animDesc;
 };
 
 VALIDATE_SIZE(CAnimationStyleDescriptor, 0x30);

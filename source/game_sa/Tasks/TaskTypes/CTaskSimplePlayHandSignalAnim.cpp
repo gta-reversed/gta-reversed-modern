@@ -11,8 +11,7 @@ void CTaskSimplePlayHandSignalAnim::InjectHooks()
     ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "StartAnim", 0x61AF60, &CTaskSimplePlayHandSignalAnim::StartAnim);
 }
 
-CTaskSimplePlayHandSignalAnim::CTaskSimplePlayHandSignalAnim(int animationId, float fBlendFactor, bool bFatHands,
-                                                             bool bHoldLastFrame) : CTaskSimpleAnim(bHoldLastFrame)
+CTaskSimplePlayHandSignalAnim::CTaskSimplePlayHandSignalAnim(AnimationId animationId, float fBlendFactor, bool bFatHands, bool bHoldLastFrame) : CTaskSimpleAnim(bHoldLastFrame)
 {
     m_nAnimationBlockIndex = animationId;
     m_pLeftHandObject = nullptr;
@@ -56,13 +55,13 @@ eTaskType CTaskSimplePlayHandSignalAnim::GetId_Reversed()
     return eTaskType::TASK_SIMPLE_HANDSIGNAL_ANIM;
 }
 
-bool CTaskSimplePlayHandSignalAnim::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimplePlayHandSignalAnim::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed(ped, priority, _event);
+    return CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed(ped, priority, event);
 }
-bool CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return CTaskSimpleAnim::MakeAbortable(ped, priority, _event);
+    return CTaskSimpleAnim::MakeAbortable(ped, priority, event);
 }
 
 bool CTaskSimplePlayHandSignalAnim::ProcessPed(CPed* ped)
@@ -87,14 +86,14 @@ bool CTaskSimplePlayHandSignalAnim::ProcessPed_Reversed(CPed* ped)
 
 void CTaskSimplePlayHandSignalAnim::StartAnim(CPed* pPed)
 {
-    const auto nAnimId = CGeneral::GetRandomNumberInRange(ANIM_ID_GSIGN1, ANIM_ID_GSIGN5 + 1);
+    const AnimationId animId = static_cast<const AnimationId>(CGeneral::GetRandomNumberInRange((int32)ANIM_ID_GSIGN1, (int32)ANIM_ID_GSIGN5 + 1));
 
     // Pointing / weapon logic
     if (pPed->GetEntityThatThisPedIsHolding()
         || g_ikChainMan->IsArmPointing(0, pPed)
         || pPed->GetActiveWeapon().m_nType != eWeaponType::WEAPON_UNARMED)
     {
-        m_pAnim = CAnimManager::BlendAnimation(pPed->m_pRwClump, eAnimGroup::ANIM_GROUP_HANDSIGNALL, nAnimId, m_fBlendFactor);
+        m_pAnim = CAnimManager::BlendAnimation(pPed->m_pRwClump, AssocGroupId::ANIM_GROUP_HANDSIGNALL, animId, m_fBlendFactor);
         m_pAnim->SetFinishCallback(CTaskSimpleAnim::FinishRunAnimCB, this);
 
         if (m_nAnimationBlockIndex == -1)
@@ -106,14 +105,14 @@ void CTaskSimplePlayHandSignalAnim::StartAnim(CPed* pPed)
             return;
 
         CWorld::Add(m_pLeftHandObject);
-        auto* pAnimHierarchy = CAnimManager::GetAnimAssociation(eAnimGroup::ANIM_GROUP_LHAND, m_nAnimationBlockIndex)->m_pHierarchy;
+        auto* pAnimHierarchy = CAnimManager::GetAnimAssociation(AssocGroupId::ANIM_GROUP_LHAND, m_nAnimationBlockIndex)->m_pHierarchy;
         CAnimManager::AddAnimation(m_pLeftHandObject->m_pRwClump, pAnimHierarchy, 0);
         ++CObject::nNoTempObjects;
         return;
     }
 
     // Both arms logic
-    m_pAnim = CAnimManager::BlendAnimation(pPed->m_pRwClump, eAnimGroup::ANIM_GROUP_HANDSIGNAL, nAnimId, m_fBlendFactor);
+    m_pAnim = CAnimManager::BlendAnimation(pPed->m_pRwClump, AssocGroupId::ANIM_GROUP_HANDSIGNAL, animId, m_fBlendFactor);
     m_pAnim->SetFinishCallback(CTaskSimpleAnim::FinishRunAnimCB, this);
     if (m_nAnimationBlockIndex == -1)
         return;
@@ -123,7 +122,7 @@ void CTaskSimplePlayHandSignalAnim::StartAnim(CPed* pPed)
     if (m_pLeftHandObject)
     {
         CWorld::Add(m_pLeftHandObject);
-        auto* pAnimHierarchy = CAnimManager::GetAnimAssociation(eAnimGroup::ANIM_GROUP_LHAND, m_nAnimationBlockIndex)->m_pHierarchy;
+        auto* pAnimHierarchy = CAnimManager::GetAnimAssociation(AssocGroupId::ANIM_GROUP_LHAND, m_nAnimationBlockIndex)->m_pHierarchy;
         CAnimManager::AddAnimation(m_pLeftHandObject->m_pRwClump, pAnimHierarchy, 0);
         ++CObject::nNoTempObjects;
     }
@@ -136,7 +135,7 @@ void CTaskSimplePlayHandSignalAnim::StartAnim(CPed* pPed)
     if (m_pRightHandObject)
     {
         CWorld::Add(m_pRightHandObject);
-        auto* pAnimHierarchy = CAnimManager::GetAnimAssociation(eAnimGroup::ANIM_GROUP_RHAND, m_nAnimationBlockIndex)->m_pHierarchy;
+        auto* pAnimHierarchy = CAnimManager::GetAnimAssociation(AssocGroupId::ANIM_GROUP_RHAND, m_nAnimationBlockIndex)->m_pHierarchy;
         CAnimManager::AddAnimation(m_pRightHandObject->m_pRwClump, pAnimHierarchy, 0);
         ++CObject::nNoTempObjects;
     }

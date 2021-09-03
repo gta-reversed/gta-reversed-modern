@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CCopPed.h"
 #include "CVehicle.h"
 
@@ -23,24 +22,24 @@ enum eSetPieceType {
     SETPIECE_2CARS_MEDIUM_SPEED = 8
 };
 
-class  CSetPiece {
+class CSetPiece {
 public:
-    int           m_nLastGenerationTime;
-    short         m_nAreaCornerX1;
-    short         m_nAreaCornerY1;
-    short         m_nAreaCornerX2;
-    short         m_nAreaCornerY2;
-    short         m_nSpawnCoord1X;
-    short         m_nSpawnCoord1Y;
-    short         m_nSpawnCoord2X;
-    short         m_nSpawnCoord2Y;
-    short         m_nTargetCoord1X;
-    short         m_nTargetCoord1Y;
-    short         m_nTargetCoord2X;
-    short         m_nTargetCoord2Y;
-    unsigned char m_nType; // see eSetPieceType
-private:
-    char _pad1D[3];
+    int32 m_nLastGenerationTime;
+    int16 m_nAreaCornerX1;
+    int16 m_nAreaCornerY1;
+    int16 m_nAreaCornerX2;
+    int16 m_nAreaCornerY2;
+    int16 m_nSpawnCoord1X;
+    int16 m_nSpawnCoord1Y;
+    int16 m_nSpawnCoord2X;
+    int16 m_nSpawnCoord2Y;
+    int16 m_nTargetCoord1X;
+    int16 m_nTargetCoord1Y;
+    int16 m_nTargetCoord2X;
+    int16 m_nTargetCoord2Y;
+    uint8 m_nType; // see eSetPieceType
+    char  _pad1D[3];
+
 public:
 
     CSetPiece();

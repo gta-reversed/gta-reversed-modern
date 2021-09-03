@@ -23,7 +23,7 @@ private:
 public:
     CTask* GetSubTask() override;
     bool IsSimple() override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
 
     virtual void SetSubTask(CTask* subTask);
     virtual CTask* CreateNextSubTask(CPed* ped) = 0;
@@ -32,7 +32,7 @@ public:
 
     CTask* GetSubTask_Reversed() { return m_pSubTask; }
     bool IsSimple_Reversed() { return false; }
-    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
+    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event);
 };
 
 VALIDATE_SIZE(CTaskComplex, 0xC);

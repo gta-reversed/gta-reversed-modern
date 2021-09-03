@@ -34,15 +34,15 @@ struct tRenderListEntry {
 
 VALIDATE_SIZE(tRenderListEntry, 8);
 
-extern std::int32_t MAX_INVISIBLE_ENTITY_PTRS; // default 150
-extern std::int32_t MAX_VISIBLE_ENTITY_PTRS;   // default 1000
-extern std::int32_t MAX_VISIBLE_LOD_PTRS;      // default 1000
-extern std::int32_t MAX_VISIBLE_SUPERLOD_PTRS; // default 50
+extern int32 MAX_INVISIBLE_ENTITY_PTRS; // default 150
+extern int32 MAX_VISIBLE_ENTITY_PTRS;   // default 1000
+extern int32 MAX_VISIBLE_LOD_PTRS;      // default 1000
+extern int32 MAX_VISIBLE_SUPERLOD_PTRS; // default 50
 
 class CWorldScan {
 public:
-    using tScanFunction = void(__cdecl*)(std::int32_t, std::int32_t);
-    static void ScanWorld(CVector2D* points, std::int32_t pointsCount, tScanFunction scanFunction);
+    using tScanFunction = void(__cdecl*)(int32, int32);
+    static void ScanWorld(CVector2D* points, int32 pointsCount, tScanFunction scanFunction);
     static void SetExtraRectangleToScan(float minX, float maxX, float minY, float maxY);
 };
 
@@ -57,10 +57,10 @@ public:
     static CEntity** ms_aVisibleSuperLodPtrs; // static CEntity *ms_aVisibleSuperLodPtrs[MAX_VISIBLE_SUPERLOD_PTRS];
     static CEntity** ms_aVisibleLodPtrs;      // static CEntity *ms_aVisibleLodPtrs[MAX_VISIBLE_LOD_PTRS];
     static CEntity** ms_aVisibleEntityPtrs;   // static CEntity *ms_aVisibleEntityPtrs[MAX_VISIBLE_ENTITY_PTRS];
-    static int& ms_nNoOfVisibleSuperLods;
-    static int& ms_nNoOfInVisibleEntities;
-    static int& ms_nNoOfVisibleLods;
-    static int& ms_nNoOfVisibleEntities;
+    static int32& ms_nNoOfVisibleSuperLods;
+    static int32& ms_nNoOfInVisibleEntities;
+    static int32& ms_nNoOfVisibleLods;
+    static int32& ms_nNoOfVisibleEntities;
     static float& ms_fFarClipPlane;
     static float& ms_fCameraHeading;
     static bool& m_loadingPriority;
@@ -94,24 +94,24 @@ public:
     static void RenderEverythingBarRoads();
     static void RenderFirstPersonVehicle();
     static bool SetupLightingForEntity(CPhysical* entity);
-    static int SetupMapEntityVisibility(CEntity* entity, CBaseModelInfo* modelInfo, float distance, bool bIsTimeInRange);
-    static int SetupEntityVisibility(CEntity* entity, float* outDistance);
-    static int SetupBigBuildingVisibility(CEntity* entity, float* outDistance);
-    static void ScanSectorList_ListModels(std::int32_t sectorX, std::int32_t sectorY);
-    static void ScanSectorList_ListModelsVisible(std::int32_t sectorX, std::int32_t sectorY);
-    static void ScanSectorList(std::int32_t sectorX, std::int32_t sectorY);
-    static void ScanBigBuildingList(std::int32_t sectorX, std::int32_t sectorY);
+    static int32 SetupMapEntityVisibility(CEntity* entity, CBaseModelInfo* modelInfo, float distance, bool bIsTimeInRange);
+    static int32 SetupEntityVisibility(CEntity* entity, float* outDistance);
+    static int32 SetupBigBuildingVisibility(CEntity* entity, float* outDistance);
+    static void ScanSectorList_ListModels(int32 sectorX, int32 sectorY);
+    static void ScanSectorList_ListModelsVisible(int32 sectorX, int32 sectorY);
+    static void ScanSectorList(int32 sectorX, int32 sectorY);
+    static void ScanBigBuildingList(int32 sectorX, int32 sectorY);
     static bool ShouldModelBeStreamed(CEntity* entity, CVector const& origin, float farClip);
     static void ScanPtrList_RequestModels(CPtrList& list);
     static void ConstructRenderList();
-    static void ScanSectorList_RequestModels(std::int32_t sectorX, std::int32_t sectorY);
+    static void ScanSectorList_RequestModels(int32 sectorX, int32 sectorY);
     static void ScanWorld();
     // returns objects count
-    static std::int32_t GetObjectsInFrustum(CEntity** outEntities, float farPlane, RwMatrix* transformMatrix);
-    static void RequestObjectsInFrustum(RwMatrix* transformMatrix, std::int32_t modelRequestFlags);
-    static void RequestObjectsInDirection(CVector const& posn, float angle, std::int32_t modelRequestFlags);
-    static void SetupScanLists(std::int32_t sectorX, std::int32_t sectorY);
+    static int32 GetObjectsInFrustum(CEntity** outEntities, float farPlane, RwMatrix* transformMatrix);
+    static void RequestObjectsInFrustum(RwMatrix* transformMatrix, int32 modelRequestFlags);
+    static void RequestObjectsInDirection(CVector const& posn, float angle, int32 modelRequestFlags);
+    static void SetupScanLists(int32 sectorX, int32 sectorY);
 };
 
-extern unsigned int& gnRendererModelRequestFlags;
+extern uint32& gnRendererModelRequestFlags;
 extern CEntity**& gpOutEntitiesForGetObjectsInFrustum;

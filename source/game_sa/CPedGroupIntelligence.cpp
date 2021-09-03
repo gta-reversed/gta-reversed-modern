@@ -1,25 +1,25 @@
 #include "StdInc.h"
 
 bool CPedGroupIntelligence::AddEvent(CEvent* event) {
-    return plugin::CallMethodAndReturnDynGlobal<bool, CPedGroupIntelligence*, CEvent*>(0x5F7470, this, event);
+    return plugin::CallMethodAndReturn<bool, 0x5F7470, CPedGroupIntelligence*, CEvent*>(this, event);
 }
 
 void CPedGroupIntelligence::SetScriptCommandTask(CPed* ped, CTask const* task) {
-    plugin::CallMethodDynGlobal<CPedGroupIntelligence*, CPed*, CTask const*>(0x5F8560, this, ped, task);
+    plugin::CallMethod<0x5F8560, CPedGroupIntelligence*, CPed*, CTask const*>(this, ped, task);
 }
 
 void CPedGroupIntelligence::ComputeDefaultTasks(CPed* ped) {
-    plugin::CallMethodDynGlobal<CPedGroupIntelligence*, CPed*>(0x5F88D0, this, ped);
+    plugin::CallMethod<0x5F88D0, CPedGroupIntelligence*, CPed*>(this, ped);
 }
 
 CTask* CPedGroupIntelligence::GetTaskScriptCommand(CPed* ped) {
-    return plugin::CallMethodAndReturnDynGlobal<CTask*, CPedGroupIntelligence*, CPed*>(0x5F8690, this, ped);
+    return plugin::CallMethodAndReturn<CTask*, 0x5F8690, CPedGroupIntelligence*, CPed*>(this, ped);
 }
 
-int CPedGroupIntelligence::SetGroupDecisionMakerType(int a2) {
-    return plugin::CallMethodAndReturnDynGlobal<int, CPedGroupIntelligence*, int>(0x5F7340, this, a2);
+int32 CPedGroupIntelligence::SetGroupDecisionMakerType(int32 a2) {
+    return plugin::CallMethodAndReturn<int32, 0x5F7340, CPedGroupIntelligence*, int32>(this, a2);
 }
 
 void CPedGroupIntelligence::SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator) {
-    plugin::CallMethodDynGlobal<CPedGroupIntelligence*, CTaskAllocator*>(0x5F7410, this, taskAllocator);
+    plugin::CallMethod<0x5F7410, CPedGroupIntelligence*, CTaskAllocator*>(this, taskAllocator);
 }

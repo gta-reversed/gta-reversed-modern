@@ -2,61 +2,61 @@
 
 void CEvent::InjectHooks()
 {
-    HookInstall(0x4ABFC0, &CEvent::Constructor);
-    HookInstall(0x4AC050, &CEvent::CalcSoundLevelIncrement);
-    HookInstall(0x4B2850, &CEvent::GetSoundLevel);
+    ReversibleHooks::Install("CEvent", "CEvent", 0x4ABFC0, &CEvent::Constructor);
+    ReversibleHooks::Install("CEvent", "CalcSoundLevelIncrement", 0x4AC050, &CEvent::CalcSoundLevelIncrement);
+    ReversibleHooks::Install("CEvent", "GetSoundLevel", 0x4B2850, &CEvent::GetSoundLevel);
 }
 
 void CEventRevived::InjectHooks()
 {
-    HookInstall(0x4AEC50, &CEventRevived::Constructor);
-    HookInstall(0x4AECB0, &CEventRevived::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventRevived", "CEventRevived", 0x4AEC50, &CEventRevived::Constructor);
+    ReversibleHooks::Install("CEventRevived", "AffectsPed_Reversed", 0x4AECB0, &CEventRevived::AffectsPed_Reversed);
 }
 
 void CEventEscalator::InjectHooks()
 {
-    HookInstall(0x5FF820, &CEventEscalator::Constructor);
-    HookInstall(0x4B2580, &CEventEscalator::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventEscalator", "CEventEscalator", 0x5FF820, &CEventEscalator::Constructor);
+    ReversibleHooks::Install("CEventEscalator", "AffectsPed_Reversed", 0x4B2580, &CEventEscalator::AffectsPed_Reversed);
 }
 
 void CEventSexyVehicle::InjectHooks()
 {
-    HookInstall(0x4AF010, &CEventSexyVehicle::Constructor);
+    ReversibleHooks::Install("CEventSexyVehicle", "CEventSexyVehicle", 0x4AF010, &CEventSexyVehicle::Constructor);
 }
 
 void CEventChatPartner::InjectHooks()
 {
-    HookInstall(0x4AECD0, &CEventChatPartner::Constructor);
+    ReversibleHooks::Install("CEventChatPartner", "CEventChatPartner", 0x4AECD0, &CEventChatPartner::Constructor);
 }
 
 void CEventCopCarBeingStolen::InjectHooks()
 {
-    HookInstall(0x4B1740, &CEventCopCarBeingStolen::Constructor);
-    HookInstall(0x4B1860, &CEventCopCarBeingStolen::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventCopCarBeingStolen", "CEventCopCarBeingStolen", 0x4B1740, &CEventCopCarBeingStolen::Constructor);
+    ReversibleHooks::Install("CEventCopCarBeingStolen", "AffectsPed_Reversed", 0x4B1860, &CEventCopCarBeingStolen::AffectsPed_Reversed);
 }
 
 void CEventCarUpsideDown::InjectHooks()
 {
-    HookInstall(0x4B1CC0, &CEventCarUpsideDown::Constructor);
-    HookInstall(0x4B1DB0, &CEventCarUpsideDown::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventCarUpsideDown", "CEventCarUpsideDown", 0x4B1CC0, &CEventCarUpsideDown::Constructor);
+    ReversibleHooks::Install("CEventCarUpsideDown", "AffectsPed_Reversed", 0x4B1DB0, &CEventCarUpsideDown::AffectsPed_Reversed);
 }
 
 void CEventPassObject::InjectHooks()
 {
-    HookInstall(0x65DC70, &CEventPassObject::Constructor);
-    HookInstall(0x4B1700, &CEventPassObject::IsValid_Reversed);
+    ReversibleHooks::Install("CEventPassObject", "CEventPassObject", 0x65DC70, &CEventPassObject::Constructor);
+    ReversibleHooks::Install("CEventPassObject", "IsValid_Reversed", 0x4B1700, &CEventPassObject::IsValid_Reversed);
 }
 
 void CEventLeanOnVehicle::InjectHooks()
 {
-    HookInstall(0x65DAF0, &CEventLeanOnVehicle::Constructor);
-    HookInstall(0x4B16C0, &CEventLeanOnVehicle::IsValid_Reversed);
+    ReversibleHooks::Install("CEventLeanOnVehicle", "CEventLeanOnVehicle", 0x65DAF0, &CEventLeanOnVehicle::Constructor);
+    ReversibleHooks::Install("CEventLeanOnVehicle", "IsValid_Reversed", 0x4B16C0, &CEventLeanOnVehicle::IsValid_Reversed);
 }
 
 void CEventOnFire::InjectHooks()
 {
-    HookInstall(0x5FF740, &CEventOnFire::Constructor);
-    HookInstall(0x4B1050, &CEventOnFire::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventOnFire", "CEventOnFire", 0x5FF740, &CEventOnFire::Constructor);
+    ReversibleHooks::Install("CEventOnFire", "AffectsPed_Reversed", 0x4B1050, &CEventOnFire::AffectsPed_Reversed);
 }
 
 CEvent::CEvent() {
@@ -150,7 +150,7 @@ bool CEventEscalator::AffectsPed(CPed* ped)
 bool CEventEscalator::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->IsAlive() && !ped->IsPlayer() && ped->m_pContactEntity) {
-        std::int32_t modelId = ped->m_pContactEntity->m_nModelIndex;
+        int32 modelId = ped->m_pContactEntity->m_nModelIndex;
         if (modelId == ModelIndices::MI_ESCALATORSTEP || modelId == ModelIndices::MI_ESCALATORSTEP8)
             return true;
     }
@@ -317,7 +317,7 @@ bool CEventPassObject::IsValid_Reversed(CPed* ped)
     return false;
 }
 
-CEventLeanOnVehicle::CEventLeanOnVehicle(CVehicle* vehicle, std::int32_t leanAnimDurationInMs)
+CEventLeanOnVehicle::CEventLeanOnVehicle(CVehicle* vehicle, int32 leanAnimDurationInMs)
 {
     m_vehicle = vehicle;
     m_leanAnimDurationInMs = leanAnimDurationInMs;
@@ -331,7 +331,7 @@ CEventLeanOnVehicle::~CEventLeanOnVehicle()
         m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
 }
 
-CEventLeanOnVehicle* CEventLeanOnVehicle::Constructor(CVehicle* vehicle, std::int32_t leanAnimDurationInMs)
+CEventLeanOnVehicle* CEventLeanOnVehicle::Constructor(CVehicle* vehicle, int32 leanAnimDurationInMs)
 {
     this->CEventLeanOnVehicle::CEventLeanOnVehicle(vehicle, leanAnimDurationInMs);
     return this;

@@ -42,26 +42,26 @@ bool CPathFind::TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddre
         (this, startNodeAddress, targetNodeAddress);
 }
 
-CVector* CPathFind::TakeWidthIntoAccountForWandering(CVector* outPosition, CNodeAddress nodeAddress, unsigned short randomSeed)
+CVector* CPathFind::TakeWidthIntoAccountForWandering(CVector* outPosition, CNodeAddress nodeAddress, uint16 randomSeed)
 {
-    return plugin::CallMethodAndReturn<CVector*, 0x4509A0, CPathFind*, CVector*, CNodeAddress, unsigned short>
+    return plugin::CallMethodAndReturn<CVector*, 0x4509A0, CPathFind*, CVector*, CNodeAddress, uint16>
         (this, outPosition, nodeAddress, randomSeed);
 }
 
-void CPathFind::FindNextNodeWandering(int pathType, float x, float y, float z, CNodeAddress* startNodeAddress,
-                                      CNodeAddress* targetNodeAddress, unsigned int dir, int8_t* outDir)
+void CPathFind::FindNextNodeWandering(int32 pathType, float x, float y, float z, CNodeAddress* startNodeAddress,
+                                      CNodeAddress* targetNodeAddress, uint32 dir, int8* outDir)
 {
-    plugin::CallMethod <0x451B70, CPathFind*, int, float, float, float, CNodeAddress*, CNodeAddress*, unsigned int, int8_t*>
+    plugin::CallMethod <0x451B70, CPathFind*, int32, float, float, float, CNodeAddress*, CNodeAddress*, uint32, int8*>
         (this, pathType, x, y, z, startNodeAddress, targetNodeAddress, dir, outDir);
 }
 
-void CPathFind::DoPathSearch(unsigned char pathType, CVector origin, CNodeAddress originAddr,
-    CVector target, CNodeAddress *pResultNodes, short *pNodesCount, int maxNodesToFind, float *pDistance,
+void CPathFind::DoPathSearch(uint8 pathType, CVector origin, CNodeAddress originAddr,
+    CVector target, CNodeAddress *pResultNodes, int16 *pNodesCount, int32 maxNodesToFind, float *pDistance,
     float maxSearchDistance, CNodeAddress *targetAddr, float maxUnkLimit, bool oneSideOnly,
     CNodeAddress forbiddenNodeAddr, bool includeNodesWithoutLinks, bool waterPath)
 {
-    ((void(__thiscall *)(CPathFind *, unsigned char, CVector, CNodeAddress, CVector, CNodeAddress *,
-        short *, int, float *, float, CNodeAddress *, float, bool, CNodeAddress, bool, bool))0x4515D0)(
+    ((void(__thiscall *)(CPathFind *, uint8, CVector, CNodeAddress, CVector, CNodeAddress *,
+        int16 *, int32, float *, float, CNodeAddress *, float, bool, CNodeAddress, bool, bool))0x4515D0)(
             this, pathType, origin, originAddr, target, pResultNodes, pNodesCount, maxNodesToFind, pDistance,
             maxSearchDistance, targetAddr, maxUnkLimit, oneSideOnly, forbiddenNodeAddr, includeNodesWithoutLinks,
             waterPath);
@@ -77,19 +77,19 @@ CPathNode *CPathFind::GetPathNode(CNodeAddress address)
     return ((CPathNode *(__thiscall *)(CPathFind *, CNodeAddress))0x420AC0)(this, address);
 }
 
-int CPathFind::LoadPathFindData(RwStream *stream, int index)
+int32 CPathFind::LoadPathFindData(RwStream *stream, int32 index)
 {
-    return plugin::CallMethodAndReturn<int, 0x4529F0, CPathFind*, RwStream *, int>(this, stream, index);
+    return plugin::CallMethodAndReturn<int32, 0x4529F0, CPathFind*, RwStream *, int32>(this, stream, index);
 }
 
-void CPathFind::UnLoadPathFindData(int index)
+void CPathFind::UnLoadPathFindData(int32 index)
 {
-    return plugin::CallMethod<0x44D0F0, CPathFind*, int>(this, index);
+    return plugin::CallMethod<0x44D0F0, CPathFind*, int32>(this, index);
 }
 
-std::int32_t CPathFind::LoadSceneForPathNodes(CVector point)
+int32 CPathFind::LoadSceneForPathNodes(CVector point)
 {
-    return plugin::CallMethodAndReturn<std::int32_t, 0x44DE00, CPathFind*, CVector>(this, point);
+    return plugin::CallMethodAndReturn<int32, 0x44DE00, CPathFind*, CVector>(this, point);
 }
 
 bool CPathFind::IsWaterNodeNearby(CVector position, float radius)
@@ -97,11 +97,11 @@ bool CPathFind::IsWaterNodeNearby(CVector position, float radius)
     return plugin::CallMethodAndReturn<bool, 0x450DE0, CPathFind*, CVector, float>(this, position, radius);
 }
 
-CNodeAddress* CPathFind::FindNodeClosestToCoors(CNodeAddress* pathLink, float X, float Y, float Z, int _nodeType, float maxDistance,
-    unsigned short unk2, int unk3, unsigned short unk4, unsigned short bBoatsOnly, int unk6)
+CNodeAddress* CPathFind::FindNodeClosestToCoors(CNodeAddress* pathLink, float X, float Y, float Z, int32 _nodeType, float maxDistance,
+    uint16 unk2, int32 unk3, uint16 unk4, uint16 bBoatsOnly, int32 unk6)
 {
-    return plugin::CallMethodAndReturn<CNodeAddress*, 0x44F460, CPathFind*, CNodeAddress*, float, float, float, int, float,
-        unsigned short, int, unsigned short, unsigned short, int>(this, pathLink, X, Y, Z, _nodeType, maxDistance, unk2, unk3, unk4, bBoatsOnly, unk6);
+    return plugin::CallMethodAndReturn<CNodeAddress*, 0x44F460, CPathFind*, CNodeAddress*, float, float, float, int32, float,
+        uint16, int32, uint16, uint16, int32>(this, pathLink, X, Y, Z, _nodeType, maxDistance, unk2, unk3, unk4, bBoatsOnly, unk6);
 }
 
 // 0x44D2B0

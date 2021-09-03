@@ -6,18 +6,16 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CPed.h"
 #include "CTask.h"
 
-
 class CPedTaskPair {
 public:
-    CPed*        m_pPed;
-    CTask*       m_pTask;
-    std::int32_t m_taskSlot;
-    std::int32_t field_C;
-    std::int8_t  field_10;
+    CPed*  m_pPed;
+    CTask* m_pTask;
+    int32  m_taskSlot;
+    int32  field_C;
+    int8   field_10;
 
 public:
     static void InjectHooks();

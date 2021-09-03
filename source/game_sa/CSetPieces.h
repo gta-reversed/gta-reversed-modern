@@ -6,20 +6,20 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CSetPiece.h"
 
-extern unsigned int MAX_SET_PIECES; // default 210
+extern uint32 MAX_SET_PIECES; // default 210
 
-class  CSetPieces {
+class CSetPieces {
 public:
-    static void AddOne(unsigned char type, CVector2D cornerA, CVector2D cornerB, CVector2D spawnCoord1, CVector2D targetCoord1, CVector2D spawnCoord2, CVector2D targetCoord2);
+    static void AddOne(uint8 type, CVector2D cornerA, CVector2D cornerB, CVector2D spawnCoord1, CVector2D targetCoord1, CVector2D spawnCoord2, CVector2D targetCoord2);
     static void Init();
     static bool Load();
     static bool Save();
     static void Update();
 
     static bool &bDebug;
-    static unsigned int &NumSetPieces;
+    static uint32 &NumSetPieces;
     static CSetPiece *aSetPieces; // static CSetPiece aSetPieces[MAX_SET_PIECES]
 };

@@ -1,37 +1,26 @@
 #include "StdInc.h"
 
-std::shared_ptr<SVirtualReversibleHook> SVirtualReversibleHook::InstallHook(void* libFuncAddress, const std::vector<uint32_t>& vecAddressesToHook)
+SVirtualReversibleHook::SVirtualReversibleHook(std::string id, std::string name, void* libFuncAddress, const std::vector<uint32>& vecAddressesToHook) :
+    SReversibleHook(id, name, eReversibleHookType::Virtual)
 {
     assert(vecAddressesToHook.size() > 0);
 
-    auto pHook = std::make_shared<SVirtualReversibleHook>();
-    pHook->m_LibFunctionAddress = reinterpret_cast<uint32_t>(libFuncAddress);
+    m_LibFunctionAddress = reinterpret_cast<uint32>(libFuncAddress);
 
     DWORD dwProtectInitial[2] = { 0 };
     VirtualProtect((void*)vecAddressesToHook[0], 4, PAGE_EXECUTE_READWRITE, &dwProtectInitial[0]);
-    pHook->m_OriginalFunctionAddress = *reinterpret_cast<uint32_t*>(vecAddressesToHook[0]);
+    m_OriginalFunctionAddress = *reinterpret_cast<uint32*>(vecAddressesToHook[0]);
     VirtualProtect((void*)vecAddressesToHook[0], 4, dwProtectInitial[0], &dwProtectInitial[1]);
 
-    for (auto uiAddress : vecAddressesToHook) {
-        DWORD dwProtect[2] = { 0 };
-        VirtualProtect((void*)uiAddress, 4, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
-        *reinterpret_cast<uint32_t*>(uiAddress) = pHook->m_LibFunctionAddress;
-        VirtualProtect((void*)uiAddress, 4, dwProtect[0], &dwProtect[1]);
-        pHook->m_vecHookedAddresses.push_back(uiAddress);
-    }
-
-    pHook->m_bIsHooked = true;
-    pHook->m_bImguiHooked = true;
-    return pHook;
-}
+    m_bIsHooked = false;
+    Switch(); // Installs hooks (also sets `m_bIsHooked` to `true`)
+};
 
 void SVirtualReversibleHook::Switch()
 {
     for (auto uiAddress : m_vecHookedAddresses) {
-        DWORD dwProtect[2] = { 0 };
-        VirtualProtect((void*)uiAddress, 5, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
-        *reinterpret_cast<uint32_t*>(uiAddress) = m_bIsHooked ?  m_OriginalFunctionAddress : m_LibFunctionAddress;
-        VirtualProtect((void*)uiAddress, 5, dwProtect[0], &dwProtect[1]);
+        using namespace ReversibleHooks::detail;
+        VirtualCopy((void*)uiAddress, (void*)(m_bIsHooked ? m_OriginalFunctionAddress : m_LibFunctionAddress), 5);
     }
 
     m_bIsHooked = !m_bIsHooked;

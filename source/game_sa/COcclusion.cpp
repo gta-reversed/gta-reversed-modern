@@ -4,13 +4,13 @@ COccluder(&COcclusion::aInteriorOccluders)[MAX_INTERIOR_OCCLUDERS] = *(COccluder
 COccluder(&COcclusion::aOccluders)[MAX_MAP_OCCLUDERS] = *(COccluder(*)[MAX_MAP_OCCLUDERS])0xC73FA0;
 CActiveOccluder(&COcclusion::aActiveOccluders)[MAX_ACTIVE_OCCLUDERS] = *(CActiveOccluder(*)[MAX_ACTIVE_OCCLUDERS])0xC78610;
 
-int& COcclusion::NumInteriorOcculdersOnMap = *(int*)0xC73CC4;
-int& COcclusion::NumOccludersOnMap = *(int*)0xC73F98;
-int& COcclusion::NumActiveOccluders = *(int*)0xC73CC0;
-short& COcclusion::FarAwayList = *(short*)0x8D5D68;
-short& COcclusion::NearbyList = *(short*)0x8D5D6C;
-short& COcclusion::ListWalkThroughFA = *(short*)0x8D5D70;
-short& COcclusion::PreviousListWalkThroughFA = *(short*)0x8D5D74;
+int32& COcclusion::NumInteriorOcculdersOnMap = *(int32*)0xC73CC4;
+int32& COcclusion::NumOccludersOnMap = *(int32*)0xC73F98;
+int32& COcclusion::NumActiveOccluders = *(int32*)0xC73CC0;
+int16& COcclusion::FarAwayList = *(int16*)0x8D5D68;
+int16& COcclusion::NearbyList = *(int16*)0x8D5D6C;
+int16& COcclusion::ListWalkThroughFA = *(int16*)0x8D5D70;
+int16& COcclusion::PreviousListWalkThroughFA = *(int16*)0x8D5D74;
 
 float& COcclusion::gMinXInOccluder = *(float*)0xC73CAC;
 float& COcclusion::gMaxXInOccluder = *(float*)0xC73CA8;
@@ -38,9 +38,9 @@ void COcclusion::Init()
 }
 
 // 0x71DCD0
-void COcclusion::AddOne(float dirMidX, float dirMidY, float dirMidZ, float widthX, float widthY, float height, float rotX, float rotY, float rotZ, int flags, bool isInterior)
+void COcclusion::AddOne(float dirMidX, float dirMidY, float dirMidZ, float widthX, float widthY, float height, float rotX, float rotY, float rotZ, int32 flags, bool isInterior)
 {
-    plugin::Call<0x71DCD0, float, float, float, float, float, float, float, float, float, int, bool>
+    plugin::Call<0x71DCD0, float, float, float, float, float, float, float, float, float, int32, bool>
         (dirMidX, dirMidY, dirMidZ, widthX, widthY, height, rotX, rotY, rotZ, flags, isInterior);
 }
 
@@ -74,7 +74,7 @@ void COccluder::ProcessOneOccluder(CActiveOccluder* pActiveOccluder)
     plugin::CallMethod<0x71E5D0, COccluder*, CActiveOccluder*>(this, pActiveOccluder);
 }
 
-void COccluder::ProcessLineSegment(int iInd1, int iInd2, CActiveOccluder* pActiveOccluder)
+void COccluder::ProcessLineSegment(int32 iInd1, int32 iInd2, CActiveOccluder* pActiveOccluder)
 {
-    plugin::CallMethod<0x71E130, COccluder*, int, int, CActiveOccluder*>(this, iInd1, iInd2, pActiveOccluder);
+    plugin::CallMethod<0x71E130, COccluder*, int32, int32, CActiveOccluder*>(this, iInd1, iInd2, pActiveOccluder);
 }

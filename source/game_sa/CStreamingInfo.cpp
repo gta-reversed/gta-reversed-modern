@@ -32,18 +32,18 @@ void CStreamingInfo::AddToList(CStreamingInfo* listStart) {
 }
 
 // 0x407570
-unsigned int CStreamingInfo::GetCdPosn() {
+uint32 CStreamingInfo::GetCdPosn() {
     return m_nCdPosn + CStreaming::ms_files[m_nImgId].m_StreamHandle;
 }
 
 // 0x4075E0
-void CStreamingInfo::SetCdPosnAndSize(uint32_t CdPosn, uint32_t CdSize) {
+void CStreamingInfo::SetCdPosnAndSize(uint32 CdPosn, uint32 CdSize) {
     m_nCdPosn = CdPosn;
     m_nCdSize = CdSize;
 }
 
 // 0x4075A0
-bool CStreamingInfo::GetCdPosnAndSize(uint32_t& CdPosn, uint32_t& CdSize) {
+bool CStreamingInfo::GetCdPosnAndSize(uint32& CdPosn, uint32& CdSize) {
     if (!m_nCdSize)
         return false;
     CdPosn = GetCdPosn();

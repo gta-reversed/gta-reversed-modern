@@ -12,14 +12,14 @@ void CTaskComplexUseSwatRope::InjectHooks()
     ReversibleHooks::Install("CTaskComplexUseSwatRope", "MakeAbortable", 0x659530, &CTaskComplexUseSwatRope::MakeAbortable_Reversed);
 }
 
-CTaskComplexUseSwatRope* CTaskComplexUseSwatRope::Constructor(unsigned int ropeId, CHeli* pHeli)
+CTaskComplexUseSwatRope* CTaskComplexUseSwatRope::Constructor(uint32 ropeId, CHeli* pHeli)
 {
     this->CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(ropeId, pHeli);
     return this;
 }
 
 // 0x659470
-CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(unsigned int ropeId, CHeli* pHeli)
+CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(uint32 ropeId, CHeli* pHeli)
 {
     m_nRopeId = ropeId;
     m_pHeli = pHeli;
@@ -29,7 +29,7 @@ CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(unsigned int ropeId, CHeli* pHe
     m_pHeli->RegisterReference(reinterpret_cast<CEntity * *>(&m_pHeli));
 }
 
-CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(unsigned int ropeId)
+CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(uint32 ropeId)
 {
     m_nRopeId = ropeId;
     m_pHeli = nullptr;
@@ -51,9 +51,9 @@ CTask* CTaskComplexUseSwatRope::Clone()
 }
 
 // 0x659530
-bool CTaskComplexUseSwatRope::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskComplexUseSwatRope::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return MakeAbortable_Reversed(ped, priority, _event);
+    return MakeAbortable_Reversed(ped, priority, event);
 }
 
 // 0x65A3E0
@@ -82,9 +82,9 @@ CTask* CTaskComplexUseSwatRope::Clone_Reversed()
         return new CTaskComplexUseSwatRope(m_nRopeId);
 }
 
-bool CTaskComplexUseSwatRope::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskComplexUseSwatRope::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    eEventType eventType = _event->GetEventType();
+    eEventType eventType = event->GetEventType();
 
     if ((priority == ABORT_PRIORITY_IMMEDIATE
         || eventType == EVENT_DEATH
@@ -96,7 +96,7 @@ bool CTaskComplexUseSwatRope::MakeAbortable_Reversed(CPed* ped, eAbortPriority p
         || eventType == EVENT_VEHICLE_DAMAGE_COLLISION
         || ped->m_fHealth <= 20.0F
         )
-        && m_pSubTask->MakeAbortable(ped, priority, _event)
+        && m_pSubTask->MakeAbortable(ped, priority, event)
         )
     {
         ped->bIsStanding = false;

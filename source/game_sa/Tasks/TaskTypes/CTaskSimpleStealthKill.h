@@ -6,37 +6,41 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CTaskSimple.h"
 #include "CPed.h"
 #include "CAnimBlendAssociation.h"
 
-class CTaskSimpleStealthKill : public CTaskSimple
-{
+class CTaskSimpleStealthKill : public CTaskSimple {
 public:
-    bool m_bKeepTargetAlive;
-    CPed *m_pTarget;
-    std::int32_t m_nAssocGroupId;
-    bool m_bIsAborting;
-    bool m_bIsFinished;
-    CAnimBlendAssociation *m_pAnim;
-    unsigned int m_nTime;
+    bool                   m_bKeepTargetAlive;
+    CPed*                  m_pTarget;
+    AssocGroupId           m_nAssocGroupId;
+    bool                   m_bIsAborting;
+    bool                   m_bIsFinished;
+    CAnimBlendAssociation* m_pAnim;
+    uint32                 m_nTime;
 
-    static void InjectHooks();
+public:
+    CTaskSimpleStealthKill(bool keepTargetAlive, CPed* target, AssocGroupId groupId);
 
-    CTaskSimpleStealthKill(bool bKeepTargetAlive, CPed* pTarget, int nAssocGroupId);
-    CTaskSimpleStealthKill* Constructor(bool bKeepTargetAlive, CPed* pTarget, int nAssocGroupId);
     bool ProcessPed(CPed* ped) override;
-    bool ProcessPed_Reversed(CPed* ped);
     CTask* Clone() override;
-    CTask* Clone_Reversed();
     eTaskType GetId() override;
-    eTaskType GetId_Reversed() { return TASK_SIMPLE_STEALTH_KILL; };
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
-    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event);
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     void ManageAnim(CPed* ped);
 
     static void FinishAnimStealthKillCB(CAnimBlendAssociation* pAnimAssoc, void* vpTaskSimpleStealthKill);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskSimpleStealthKill* Constructor(bool keepTargetAlive, CPed* target, AssocGroupId groupId);
+
+    bool ProcessPed_Reversed(CPed* ped);
+    CTask* Clone_Reversed();
+    eTaskType GetId_Reversed() { return TASK_SIMPLE_STEALTH_KILL; };
+    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event);
 };
 
 VALIDATE_SIZE(CTaskSimpleStealthKill, 0x20);

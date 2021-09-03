@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-int& CPlayerSkin::m_txdSlot = *(int*) 0xC3F03C;
+int32& CPlayerSkin::m_txdSlot = *(int32*) 0xC3F03C;
 RpClump*& CPlayerSkin::m_Clump = *(RpClump**)(0xC3F040);
 float& CPlayerSkin::m_Angle = *(float*) 0xC3F048;
 float& CPlayerSkin::m_C3F04C = *(float*) 0xC3F04C; // Rename CPlayerSkin:m_C3F04C
@@ -71,7 +71,7 @@ RwTexture* CPlayerSkin::GetSkinTexture(const char* name) {
         return skinTexture;
     }
 
-    int width, height, depth, flags;
+    int32 width, height, depth, flags;
     RwImageFindRasterFormat(image, rwRASTERTYPETEXTURE, &width, &height, &depth, &flags);
     RwRaster* raster = RwRasterCreate(width, height, depth, flags);
     RwRasterSetFromImage(raster, image);

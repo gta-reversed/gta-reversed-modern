@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle, float arg2, int arg3, int arg4)
+CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle, float arg2, int32 arg3, int32 arg4)
 {
-    plugin::CallMethodAndReturn<CTaskComplexCarDrive*, 0x63C940, CTaskComplexCarDrive*, CVehicle*, float, int, int>(this, vehicle, arg2, arg3, arg4);
+    plugin::CallMethodAndReturn<CTaskComplexCarDrive*, 0x63C940, CTaskComplexCarDrive*, CVehicle*, float, int32, int32>(this, vehicle, arg2, arg3, arg4);
 }
 
 CTaskComplexCarDrive::~CTaskComplexCarDrive()

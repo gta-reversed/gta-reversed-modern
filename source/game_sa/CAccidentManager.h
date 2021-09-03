@@ -1,20 +1,22 @@
 #pragma once
+
 #include "CAccident.h"
 
-const int NUM_ACCIDENTS = 16;
+const int32 NUM_ACCIDENTS = 16;
 
-class CAccidentManager
-{
+class CAccidentManager {
 public:
     CAccident m_Accidents[NUM_ACCIDENTS];
 
     static CAccidentManager*& gAccidentManager;
 
+public:
     static void InjectHooks();
+
     static CAccidentManager* GetInstance();
 
-    void ReportAccident(CPed* ped);
-    int GetNumberOfFreeAccidents();
+    void       ReportAccident(CPed* ped);
+    int32      GetNumberOfFreeAccidents();
     CAccident* GetNearestFreeAccidentExceptThisOne(CVector& posn, CAccident* thisOne, bool bIgnoreHeadless);
     CAccident* GetNearestFreeAccident(CVector& posn, bool bIgnoreHeadless);
 };

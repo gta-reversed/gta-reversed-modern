@@ -4,13 +4,13 @@
 
 class CStencilShadowObject {
 public:
-    CEntity* owner;
-    signed short int m_NumShadowFaces;
-    char m_Type;
-    char pad;
-    unsigned int m_FaceID;
-    unsigned int m_SizeOfShadowFacesData;
-    unsigned int m_ShadowFacesData;
+    CEntity*              owner;
+    int16                 m_NumShadowFaces;
+    char                  m_Type;
+    char                  pad;
+    uint32                m_FaceID;
+    uint32                m_SizeOfShadowFacesData;
+    uint32                m_ShadowFacesData;
     CStencilShadowObject* next;
     CStencilShadowObject* prev;
 

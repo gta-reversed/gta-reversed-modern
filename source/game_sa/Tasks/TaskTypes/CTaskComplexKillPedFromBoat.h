@@ -6,11 +6,11 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskComplex.h"
 #include "CPed.h"
 
-class  CTaskComplexKillPedFromBoat : public CTaskComplex {
+class CTaskComplexKillPedFromBoat : public CTaskComplex {
 public:
 	CPed *pPed;
 

@@ -10,19 +10,19 @@ Do not delete this comment block. Respect others' work!
 
 CPool<TxdDef>*& CTxdStore::ms_pTxdPool = *reinterpret_cast<CPool<TxdDef>**>(0xC8800C);
 RwTexDictionary*& CTxdStore::ms_pStoredTxd = *reinterpret_cast<RwTexDictionary**>(0xC88010);
-int32_t& CTxdStore::ms_lastSlotFound = *reinterpret_cast<int32_t*>(0xC88014);
+int32& CTxdStore::ms_lastSlotFound = *reinterpret_cast<int32*>(0xC88014);
 
-int16_t (&CTxdStore::defaultTxds)[4] = *reinterpret_cast<int16_t (*)[4]>(0xC88004);
+int16 (&CTxdStore::defaultTxds)[4] = *reinterpret_cast<int16 (*)[4]>(0xC88004);
 
-int32_t& TexDictionaryLinkPluginOffset = *reinterpret_cast<int32_t*>(0xC88018);
+int32& TexDictionaryLinkPluginOffset = *reinterpret_cast<int32*>(0xC88018);
 
 // variables list is not finished. Need to make CPools before.
 
 void CTxdStore::InjectHooks() {
     ReversibleHooks::Install("CTxdStore", "PushCurrentTxd", 0x7316A0, &CTxdStore::PushCurrentTxd);
     ReversibleHooks::Install("CTxdStore", "PopCurrentTxd", 0x7316B0, &CTxdStore::PopCurrentTxd);
-    ReversibleHooks::Install("CTxdStore", "FindTxdSlot_name", 0x731850, static_cast<int32_t (*)(const char*)>(&CTxdStore::FindTxdSlot));
-    ReversibleHooks::Install("CTxdStore", "FindTxdSlot_hash", 0x7318E0, static_cast<int32_t (*)(uint32_t)>(&CTxdStore::FindTxdSlot));
+    ReversibleHooks::Install("CTxdStore", "FindTxdSlot_name", 0x731850, static_cast<int32 (*)(const char*)>(&CTxdStore::FindTxdSlot));
+    ReversibleHooks::Install("CTxdStore", "FindTxdSlot_hash", 0x7318E0, static_cast<int32 (*)(uint32)>(&CTxdStore::FindTxdSlot));
     ReversibleHooks::Install("CTxdStore", "StartLoadTxd", 0x731930, &CTxdStore::StartLoadTxd);
     ReversibleHooks::Install("CTxdStore", "Create", 0x731990, &CTxdStore::Create);
     ReversibleHooks::Install("CTxdStore", "SetCurrentTxd", 0x7319C0, &CTxdStore::SetCurrentTxd);
@@ -32,8 +32,8 @@ void CTxdStore::InjectHooks() {
     ReversibleHooks::Install("CTxdStore", "GetNumRefs", 0x731AA0, &CTxdStore::GetNumRefs);
     ReversibleHooks::Install("CTxdStore", "AddTxdSlot", 0x731C80, &CTxdStore::AddTxdSlot);
     ReversibleHooks::Install("CTxdStore", "RemoveTxdSlot", 0x731CD0, &CTxdStore::RemoveTxdSlot);
-    ReversibleHooks::Install("CTxdStore", "LoadTxd_stream", 0x731DD0, static_cast<bool (*)(int32_t, RwStream*)>(&CTxdStore::LoadTxd));
-    ReversibleHooks::Install("CTxdStore", "LoadTxd_filename", 0x7320B0, static_cast<bool (*)(int32_t, const char*)>(&CTxdStore::LoadTxd));
+    ReversibleHooks::Install("CTxdStore", "LoadTxd_stream", 0x731DD0, static_cast<bool (*)(int32, RwStream*)>(&CTxdStore::LoadTxd));
+    ReversibleHooks::Install("CTxdStore", "LoadTxd_filename", 0x7320B0, static_cast<bool (*)(int32, const char*)>(&CTxdStore::LoadTxd));
     ReversibleHooks::Install("CTxdStore", "FinishLoadTxd", 0x731E40, &CTxdStore::FinishLoadTxd);
     ReversibleHooks::Install("CTxdStore", "RemoveTxd", 0x731E90, &CTxdStore::RemoveTxd);
     ReversibleHooks::Install("CTxdStore", "Initialise", 0x731F20, &CTxdStore::Initialise);
@@ -46,7 +46,7 @@ void CTxdStore::InjectHooks() {
     ReversibleHooks::Install("CTxdStore", "SetupTxdParent", 0x731D50, &CTxdStore::SetupTxdParent);
 
     // global
-    ReversibleHooks::Install("", "RemoveIfRefCountIsGreaterThanOne", 0x731680, &RemoveIfRefCountIsGreaterThanOne);
+    ReversibleHooks::Install("common", "RemoveIfRefCountIsGreaterThanOne", 0x731680, &RemoveIfRefCountIsGreaterThanOne);
 }
 
 // initialise txd store
@@ -55,8 +55,8 @@ void CTxdStore::Initialise() {
     if (!ms_pTxdPool)
         ms_pTxdPool = new CPool<TxdDef>(TOTAL_TXD_MODEL_IDS, "TexDictionary");
 
-    for (int32_t i = 0; i < 4; i++)
-        defaultTxds[i] = static_cast<int16_t>(AddTxdSlot("*"));
+    for (int32 i = 0; i < 4; i++)
+        defaultTxds[i] = static_cast<int16>(AddTxdSlot("*"));
 
     RwTextureSetFindCallBack(TxdStoreFindCB);
     RwTextureSetReadCallBack(TxdStoreLoadCB);
@@ -70,7 +70,7 @@ void CTxdStore::Shutdown() {
 
 // 0x732060
 void CTxdStore::GameShutdown() {
-    for (int32_t i = 0; i < TOTAL_TXD_MODEL_IDS; i++) {
+    for (int32 i = 0; i < TOTAL_TXD_MODEL_IDS; i++) {
         TxdDef* txd = ms_pTxdPool->GetAt(i);
         if (!txd || txd->m_wRefsCount)
             continue;
@@ -79,7 +79,7 @@ void CTxdStore::GameShutdown() {
 }
 
 // 0x731930
-bool CTxdStore::StartLoadTxd(int32_t index, RwStream* stream) {
+bool CTxdStore::StartLoadTxd(int32 index, RwStream* stream) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     if (!txd || !RwStreamFindChunk(stream, rwID_TEXDICTIONARY, nullptr, nullptr))
         return false;
@@ -90,7 +90,7 @@ bool CTxdStore::StartLoadTxd(int32_t index, RwStream* stream) {
 }
 
 // 0x731E40
-bool CTxdStore::FinishLoadTxd(int32_t index, RwStream* stream) {
+bool CTxdStore::FinishLoadTxd(int32 index, RwStream* stream) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     if (!txd)
         return false;
@@ -103,7 +103,7 @@ bool CTxdStore::FinishLoadTxd(int32_t index, RwStream* stream) {
 
 // load txd from stream
 // 0x731DD0
-bool CTxdStore::LoadTxd(int32_t index, RwStream* stream) {
+bool CTxdStore::LoadTxd(int32 index, RwStream* stream) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     if (!txd || !RwStreamFindChunk(stream, rwID_TEXDICTIONARY, nullptr, nullptr))
         return false;
@@ -115,7 +115,7 @@ bool CTxdStore::LoadTxd(int32_t index, RwStream* stream) {
 
 // load txd from file
 // 0x7320B0
-bool CTxdStore::LoadTxd(int32_t index, const char* filename) {
+bool CTxdStore::LoadTxd(int32 index, const char* filename) {
     char data[260];
     RwStream* stream;
     sprintf(data, "%s", filename);
@@ -142,7 +142,7 @@ void CTxdStore::PopCurrentTxd() {
 
 // set the txd to work with
 // 0x7319C0
-void CTxdStore::SetCurrentTxd(int32_t index) {
+void CTxdStore::SetCurrentTxd(int32 index) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     if (txd)
         RwTexDictionarySetCurrent(txd->m_pRwDictionary);
@@ -150,9 +150,9 @@ void CTxdStore::SetCurrentTxd(int32_t index) {
 
 // find txd by name. Returning value is txd index
 // 0x731850
-int32_t CTxdStore::FindTxdSlot(const char* name) {
-    uint32_t key = CKeyGen::GetUppercaseKey(name);
-    int32_t last = ms_lastSlotFound;
+int32 CTxdStore::FindTxdSlot(const char* name) {
+    uint32 key = CKeyGen::GetUppercaseKey(name);
+    int32 last = ms_lastSlotFound;
 
     for (; last >= 0; last--) {
         TxdDef* txd = ms_pTxdPool->GetAt(last);
@@ -178,8 +178,8 @@ int32_t CTxdStore::FindTxdSlot(const char* name) {
 
 // find txd by name hash. Returning value is txd index
 // 0x7318E0
-int32_t CTxdStore::FindTxdSlot(uint32_t hash) {
-    for (int32_t i = 0; i < ms_pTxdPool->GetSize(); i++) {
+int32 CTxdStore::FindTxdSlot(uint32 hash) {
+    for (int32 i = 0; i < ms_pTxdPool->GetSize(); i++) {
         TxdDef* txd = ms_pTxdPool->GetAt(i);
         if (txd && txd->m_hash == hash)
             return i;
@@ -189,21 +189,21 @@ int32_t CTxdStore::FindTxdSlot(uint32_t hash) {
 
 // plugin-sdk has named it to getTexDictionary
 // 0x408340
-RwTexDictionary* CTxdStore::GetTxd(int32_t index) {
+RwTexDictionary* CTxdStore::GetTxd(int32 index) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     return txd ? txd->m_pRwDictionary : nullptr;
 }
 
 // plugin-sdk has named it to getTXDEntryParentIndex
 // 0x408370
-int32_t CTxdStore::GetParentTxdSlot(int32_t index) {
+int32 CTxdStore::GetParentTxdSlot(int32 index) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     return txd ? txd->m_wParentIndex : -1;
 }
 
 // create rw tex dictionary for txd slot
 // 0x731990
-void CTxdStore::Create(int32_t index) {
+void CTxdStore::Create(int32 index) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     if (txd)
         txd->m_pRwDictionary = RwTexDictionaryCreate();
@@ -211,7 +211,7 @@ void CTxdStore::Create(int32_t index) {
 
 // allocate new slot for this txd
 // 0x731C80
-int CTxdStore::AddTxdSlot(const char* name) {
+int32 CTxdStore::AddTxdSlot(const char* name) {
     TxdDef* txd = ms_pTxdPool->New();
     txd->m_pRwDictionary = nullptr;
     txd->m_wRefsCount = 0;
@@ -223,7 +223,7 @@ int CTxdStore::AddTxdSlot(const char* name) {
 
 // remove txd slot
 // 0x731CD0
-void CTxdStore::RemoveTxdSlot(int32_t index) {
+void CTxdStore::RemoveTxdSlot(int32 index) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     if (!txd)
         return;
@@ -235,7 +235,7 @@ void CTxdStore::RemoveTxdSlot(int32_t index) {
 
 // remove txd
 // 0x731E90
-void CTxdStore::RemoveTxd(int32_t index) {
+void CTxdStore::RemoveTxd(int32 index) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     if (!txd)
         return;
@@ -252,7 +252,7 @@ void CTxdStore::RemoveTxd(int32_t index) {
 
 // add reference for txd
 // 0x731A00
-void CTxdStore::AddRef(int32_t index) {
+void CTxdStore::AddRef(int32 index) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     if (txd)
         txd->m_wRefsCount++;
@@ -260,7 +260,7 @@ void CTxdStore::AddRef(int32_t index) {
 
 // remove reference, if references count is 0, then delete txd
 // 0x731A30
-void CTxdStore::RemoveRef(int32_t index) {
+void CTxdStore::RemoveRef(int32 index) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     if (!txd)
         return;
@@ -271,7 +271,7 @@ void CTxdStore::RemoveRef(int32_t index) {
 
 // remove reference without deleting
 // 0x731A70
-void CTxdStore::RemoveRefWithoutDelete(int32_t index) {
+void CTxdStore::RemoveRefWithoutDelete(int32 index) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     if (txd)
         txd->m_wRefsCount--;
@@ -279,7 +279,7 @@ void CTxdStore::RemoveRefWithoutDelete(int32_t index) {
 
 // get references count
 // 0x731AA0
-int32_t CTxdStore::GetNumRefs(int32_t index) {
+int32 CTxdStore::GetNumRefs(int32 index) {
     TxdDef* txd = ms_pTxdPool->GetAt(index);
     return txd ? txd->m_wRefsCount : 0;
 }
@@ -293,7 +293,7 @@ void CTxdStore::SetTxdParent(RwTexDictionary* txd, RwTexDictionary* parent) {
 }
 
 // 0x731D50
-void CTxdStore::SetupTxdParent(int32_t index) {
+void CTxdStore::SetupTxdParent(int32 index) {
     TxdDef* txdcur = ms_pTxdPool->GetAt(index);
     if (!txdcur || txdcur->m_wParentIndex == -1)
         return;

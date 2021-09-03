@@ -11,14 +11,14 @@
 
 class CMirrors {
 public:
-    static int32_t& MirrorFlags;
-    static float& MirrorV;
+    static int32&     MirrorFlags;
+    static float&     MirrorV;
     static RwRaster*& pBuffer;
     static RwRaster*& pZBuffer;
-    static int32_t& TypeOfMirror;
-    static int8_t& bRenderingReflection;
-    static int8_t& d3dRestored;
-    static CVector& MirrorNormal;
+    static int32&     TypeOfMirror;
+    static int8&      bRenderingReflection;
+    static int8&      d3dRestored;
+    static CVector&   MirrorNormal;
 
 public:
     static void InjectHooks();

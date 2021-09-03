@@ -2,14 +2,14 @@
 
 void CTaskSimpleGoToPointFine::InjectHooks()
 {
-    HookInstall(0x65EEB0, &CTaskSimpleGoToPointFine::Constructor);
-    HookInstall(0x662040, &CTaskSimpleGoToPointFine::Clone_Reversed);
-    HookInstall(0x663500, &CTaskSimpleGoToPointFine::MakeAbortable_Reversed);
-    HookInstall(0x663540, &CTaskSimpleGoToPointFine::ProcessPed_Reversed);
-    HookInstall(0x65EF80, &CTaskSimpleGoToPointFine::SetBlendedMoveAnim);
+    ReversibleHooks::Install("CTaskSimpleGoToPointFine", "CTaskSimpleGoToPointFine", 0x65EEB0, &CTaskSimpleGoToPointFine::Constructor);
+    ReversibleHooks::Install("CTaskSimpleGoToPointFine", "Clone", 0x662040, &CTaskSimpleGoToPointFine::Clone_Reversed);
+    ReversibleHooks::Install("CTaskSimpleGoToPointFine", "MakeAbortable", 0x663500, &CTaskSimpleGoToPointFine::MakeAbortable_Reversed);
+    ReversibleHooks::Install("CTaskSimpleGoToPointFine", "ProcessPed", 0x663540, &CTaskSimpleGoToPointFine::ProcessPed_Reversed);
+    ReversibleHooks::Install("CTaskSimpleGoToPointFine", "SetBlendedMoveAnim", 0x65EF80, &CTaskSimpleGoToPointFine::SetBlendedMoveAnim);
 }
 
-CTaskSimpleGoToPointFine::CTaskSimpleGoToPointFine(float fBlend, CVector targetPoint, float fRadius, int unused) :
+CTaskSimpleGoToPointFine::CTaskSimpleGoToPointFine(float fBlend, CVector targetPoint, float fRadius, int32 unused) :
     CTaskSimpleGoTo(PEDMOVE_WALK, targetPoint, fRadius)
 {
     m_fBlend = fBlend;
@@ -20,10 +20,10 @@ CTaskSimpleGoToPointFine::~CTaskSimpleGoToPointFine()
     // nothing here
 }
 
-CTaskSimpleGoToPointFine* CTaskSimpleGoToPointFine::Constructor(float fBlend, CVector targetPoint, float fRadius, int unused)
+CTaskSimpleGoToPointFine* CTaskSimpleGoToPointFine::Constructor(float fBlend, CVector targetPoint, float fRadius, int32 unused)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTaskSimpleGoToPointFine*, 0x65EEB0, CTask*, float, CVector, float, int>
+    return plugin::CallMethodAndReturn<CTaskSimpleGoToPointFine*, 0x65EEB0, CTask*, float, CVector, float, int32>
         (this, fBlend, targetPoint, fRadius, unused);
 #else
     this->CTaskSimpleGoToPointFine::CTaskSimpleGoToPointFine(fBlend, targetPoint, fRadius, unused);
@@ -40,12 +40,12 @@ CTask* CTaskSimpleGoToPointFine::Clone()
 #endif
 }
 
-bool CTaskSimpleGoToPointFine::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleGoToPointFine::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<bool, 0x663500, CTask*, CPed*, int, CEvent*>(this, ped, priority, _event);
+    return plugin::CallMethodAndReturn<bool, 0x663500, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
 #else
-    return CTaskSimpleGoToPointFine::MakeAbortable_Reversed(ped, priority, _event);
+    return CTaskSimpleGoToPointFine::MakeAbortable_Reversed(ped, priority, event);
 #endif
 }
 
@@ -63,7 +63,7 @@ CTask* CTaskSimpleGoToPointFine::Clone_Reversed()
     return new CTaskSimpleGoToPointFine(m_fBlend, m_vecTargetPoint, m_fRadius, 0);
 }
 
-bool CTaskSimpleGoToPointFine::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleGoToPointFine::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
     QuitIK(ped);
     ped->SetMoveState(PEDMOVE_STILL);

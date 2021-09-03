@@ -1,15 +1,17 @@
 #pragma once
+
 #include "CEvent.h"
 #include "CPed.h"
 #include "CVehicle.h"
+
 class CVehicle;
 
-class CEventVehicleHitAndRun : public CEvent
-{
+class CEventVehicleHitAndRun : public CEvent {
 public:
-    CPed* m_victim;
+    CPed*     m_victim;
     CVehicle* m_vehicle;
 
+public:
     static void InjectHooks();
 
     CEventVehicleHitAndRun(CPed* victim, CVehicle* vehicle);
@@ -17,9 +19,9 @@ public:
 private:
     CEventVehicleHitAndRun* Constructor(CPed* victim, CVehicle* vehicle);
 public:
-    eEventType GetEventType() override { return EVENT_VEHICLE_HIT_AND_RUN; }
-    int GetEventPriority() override { return 14; }
-    int GetLifeTime() override { return 0; }
+    eEventType GetEventType() const override { return EVENT_VEHICLE_HIT_AND_RUN; }
+    int32 GetEventPriority() const override { return 14; }
+    int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override { return ped->IsAlive(); }
     bool IsCriminalEvent() override { return m_vehicle->m_pDriver && m_vehicle->m_pDriver->IsPlayer(); }

@@ -4,15 +4,15 @@ void CEventAcquaintancePed::InjectHooks()
 {
     CEventAcquaintancePedHate::InjectHooks();
     CEventAcquaintancePedHateBadlyLit::InjectHooks();
-    HookInstall(0x4AF820, &CEventAcquaintancePed::Constructor);
-    HookInstall(0x4AFA30, &CEventAcquaintancePed::AffectsPed_Reversed);
-    HookInstall(0x4AF970, &CEventAcquaintancePed::AffectsPedGroup_Reversed);
-    HookInstall(0x4AF8F0, &CEventAcquaintancePed::TakesPriorityOver_Reversed);
+    ReversibleHooks::Install("CEventAcquaintancePed", "Constructor", 0x4AF820, &CEventAcquaintancePed::Constructor);
+    ReversibleHooks::Install("CEventAcquaintancePed", "AffectsPed_Reversed", 0x4AFA30, &CEventAcquaintancePed::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventAcquaintancePed", "AffectsPedGroup_Reversed", 0x4AF970, &CEventAcquaintancePed::AffectsPedGroup_Reversed);
+    ReversibleHooks::Install("CEventAcquaintancePed", "TakesPriorityOver_Reversed", 0x4AF8F0, &CEventAcquaintancePed::TakesPriorityOver_Reversed);
 }
 
 void CEventSeenCop::InjectHooks()
 {
-    HookInstall(0x5FF380, &CEventSeenCop::Constructor);
+    ReversibleHooks::Install("CEventSeenCop", "CEventSeenCop", 0x5FF380, &CEventSeenCop::Constructor);
 }
 
 CEventAcquaintancePed::CEventAcquaintancePed(CPed* ped)
@@ -34,31 +34,22 @@ CEventAcquaintancePed* CEventAcquaintancePed::Constructor(CPed* ped)
     return this;
 }
 
+// 0x4AFA30
 bool CEventAcquaintancePed::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AFA30, CEvent*, CPed*>(this, ped);
-#else
     return CEventAcquaintancePed::AffectsPed_Reversed(ped);
-#endif
 }
 
+// 0x4AF970
 bool CEventAcquaintancePed::AffectsPedGroup(CPedGroup* pedGroup)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AF970, CEvent*, CPedGroup*>(this, pedGroup);
-#else
     return CEventAcquaintancePed::AffectsPedGroup_Reversed(pedGroup);
-#endif
 }
 
-bool CEventAcquaintancePed::TakesPriorityOver(CEvent* refEvent)
+// 0x4AF8F0
+bool CEventAcquaintancePed::TakesPriorityOver(const CEvent& refEvent)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AF8F0, CEvent*, CEvent*>(this, refEvent);
-#else
     return CEventAcquaintancePed::TakesPriorityOver_Reversed(refEvent);
-#endif
 }
 
 bool CEventAcquaintancePed::AffectsPed_Reversed(CPed* ped)
@@ -86,10 +77,10 @@ bool CEventAcquaintancePed::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
     return false;
 }
 
-bool CEventAcquaintancePed::TakesPriorityOver_Reversed(CEvent* refEvent)
+bool CEventAcquaintancePed::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
-    if (refEvent->GetEventType() == GetEventType()) {
-        CEventAcquaintancePed* theRefEvent = static_cast<CEventAcquaintancePed*>(refEvent);
+    if (refEvent.GetEventType() == GetEventType()) {
+        const auto theRefEvent = static_cast<const CEventAcquaintancePed*>(&refEvent);
         if (m_ped && m_ped->IsPlayer()) 
             return theRefEvent->m_ped && !theRefEvent->m_ped->IsPlayer();
         return false;
@@ -100,7 +91,7 @@ bool CEventAcquaintancePed::TakesPriorityOver_Reversed(CEvent* refEvent)
 
 void CEventAcquaintancePedHate::InjectHooks()
 {
-    HookInstall(0x420E70, &CEventAcquaintancePedHate::Constructor);
+    ReversibleHooks::Install("CEventAcquaintancePedHate", "CEventAcquaintancePedHate", 0x420E70, &CEventAcquaintancePedHate::Constructor);
 }
 
 CEventAcquaintancePedHate* CEventAcquaintancePedHate::Constructor(CPed* ped)
@@ -112,11 +103,11 @@ CEventAcquaintancePedHate* CEventAcquaintancePedHate::Constructor(CPed* ped)
 
 void CEventAcquaintancePedHateBadlyLit::InjectHooks()
 {
-    HookInstall(0x5FF250, &CEventAcquaintancePedHateBadlyLit::Constructor);
-    HookInstall(0x4AFA90, &CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventAcquaintancePedHateBadlyLit", "CEventAcquaintancePedHateBadlyLit", 0x5FF250, &CEventAcquaintancePedHateBadlyLit::Constructor);
+    ReversibleHooks::Install("CEventAcquaintancePedHateBadlyLit", "AffectsPed", 0x4AFA90, &CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed);
 }
 
-CEventAcquaintancePedHateBadlyLit::CEventAcquaintancePedHateBadlyLit(CPed* ped, std::int32_t startTimeInMs, const CVector& point) : CEventAcquaintancePed(ped)
+CEventAcquaintancePedHateBadlyLit::CEventAcquaintancePedHateBadlyLit(CPed* ped, int32 startTimeInMs, const CVector& point) : CEventAcquaintancePed(ped)
 {
     m_startTimeInMs = startTimeInMs;
     m_point = point;
@@ -126,19 +117,16 @@ CEventAcquaintancePedHateBadlyLit::CEventAcquaintancePedHateBadlyLit(CPed* ped, 
     }
 }
 
-CEventAcquaintancePedHateBadlyLit* CEventAcquaintancePedHateBadlyLit::Constructor(CPed* ped, std::int32_t startTimeInMs, const CVector& point)
+CEventAcquaintancePedHateBadlyLit* CEventAcquaintancePedHateBadlyLit::Constructor(CPed* ped, int32 startTimeInMs, const CVector& point)
 {
     this->CEventAcquaintancePedHateBadlyLit::CEventAcquaintancePedHateBadlyLit(ped, startTimeInMs, point);
     return this;
 }
 
+// 0x4AFA90
 bool CEventAcquaintancePedHateBadlyLit::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AFA90, CEvent*, CPed*>(this, ped);
-#else
     return CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed(CPed* ped)

@@ -4,14 +4,15 @@
 #include "CWaterCannons.h"
 #include "CTheCarGenerators.h"
 #include "CRadar.h"
+#include "CCredits.h"
 
 char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
-int& CGame::currLevel = *reinterpret_cast<int*>(0xB7290C);
-unsigned char& CGame::bMissionPackGame = *reinterpret_cast<unsigned char*>(0xB72910);
-int& CGame::currArea = *reinterpret_cast<int*>(0xB72914);
+int32& CGame::currLevel = *reinterpret_cast<int32*>(0xB7290C);
+uint8& CGame::bMissionPackGame = *reinterpret_cast<uint8*>(0xB72910);
+int32& CGame::currArea = *reinterpret_cast<int32*>(0xB72914);
 RwMatrix*& CGame::m_pWorkingMatrix1 = *reinterpret_cast<RwMatrix**>(0xB72920);
 RwMatrix*& CGame::m_pWorkingMatrix2 = *reinterpret_cast<RwMatrix**>(0xB72924);
-int& gameTxdSlot = *reinterpret_cast<int*>(0xB728E8);
+int32& gameTxdSlot = *reinterpret_cast<int32*>(0xB728E8);
 
 bool& gbLARiots = *(bool*)0xB72958;
 bool& gbLARiots_NoPoliceCars = *(bool*)0xB72959;
@@ -52,7 +53,7 @@ void CGame::ShutdownRenderWare() {
     CLoadingScreen::Shutdown();
     CHud::Shutdown();
     CFont::Shutdown();
-    for (int i = 0; i < CWorld::TOTAL_PLAYERS; i++) {
+    for (int32 i = 0; i < CWorld::TOTAL_PLAYERS; i++) {
         CWorld::Players[i].DeletePlayerSkin();
     }
     CPlayerSkin::Shutdown();
@@ -122,7 +123,7 @@ bool CGame::Init1(char const *datFile) {
     gameTxdSlot = CTxdStore::AddTxdSlot("generic");
     CTxdStore::Create(gameTxdSlot);
     CTxdStore::AddRef(gameTxdSlot);
-    int32_t slot = CTxdStore::AddTxdSlot("particle");
+    int32 slot = CTxdStore::AddTxdSlot("particle");
     CTxdStore::LoadTxd(slot, "MODELS\\PARTICLE.TXD");
     CTxdStore::AddRef(slot);
     CTxdStore::SetCurrentTxd(gameTxdSlot);
@@ -183,7 +184,7 @@ void CGame::Init2(char const* datFile) {
     LoadingScreen((char*)"Loading the Game", (char*)"Setup paths");
     CPathFind::PreparePathData();
 
-    for (int i = 0; i < CWorld::TOTAL_PLAYERS; ++i) {
+    for (int32 i = 0; i < CWorld::TOTAL_PLAYERS; ++i) {
         CWorld::Players[i].Clear();
         CWorld::Players[i].LoadPlayerSkin();
     }
@@ -265,7 +266,7 @@ void CGame::Init2(char const* datFile) {
     CInformGroupEventQueue::Init();
 
     LoadingScreen(nullptr, nullptr);
-    CCredits::m_bCreditsGoing = false;
+    CCredits::bCreditsGoing = false;
     CReplay::Init();
     CShopping::Init();
     LoadingScreen(nullptr, nullptr);

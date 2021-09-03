@@ -6,19 +6,21 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "FxPlane_c.h"
 
 class FxSphere_c {
 public:
-    RwV3d m_vecCenter;
-    float m_fRadius;
-    unsigned int m_nNumPlanesPassed;
+    RwV3d  m_vecCenter;
+    float  m_fRadius;
+    uint32 m_nNumPlanesPassed;
+
+public:
+    static void* operator new(uint32 size, int32 notAligned);
+    static void  operator delete(void* data);
 
     FxSphere_c();
-    static void* operator new(unsigned int size, int notAligned);
-    static void operator delete(void* data);
-    bool IsCollision(FxSphere_c* sphere);
+
+    bool  IsCollision(FxSphere_c* sphere);
     float GetDistToPlane(FxPlane_c* plane);
 };
 

@@ -3,13 +3,13 @@
 float& CTaskSimpleGoTo::ms_fLookAtThresholdDotProduct = *(float*)0xC18D48;
 
 void CTaskSimpleGoTo::InjectHooks() {
-    HookInstall(0x6679C0, &CTaskSimpleGoTo::Constructor);
-    HookInstall(0x667A10, &CTaskSimpleGoTo::HasCircledTarget);
-    HookInstall(0x667AD0, &CTaskSimpleGoTo::SetUpIK);
-    HookInstall(0x667CA0, &CTaskSimpleGoTo::QuitIK);
+    ReversibleHooks::Install("CTaskSimpleGoTo", "CTaskSimpleGoTo", 0x6679C0, &CTaskSimpleGoTo::Constructor);
+    ReversibleHooks::Install("CTaskSimpleGoTo", "HasCircledTarget", 0x667A10, &CTaskSimpleGoTo::HasCircledTarget);
+    ReversibleHooks::Install("CTaskSimpleGoTo", "SetUpIK", 0x667AD0, &CTaskSimpleGoTo::SetUpIK);
+    ReversibleHooks::Install("CTaskSimpleGoTo", "QuitIK", 0x667CA0, &CTaskSimpleGoTo::QuitIK);
 }
 
-CTaskSimpleGoTo::CTaskSimpleGoTo(int moveState, const CVector& targetPoint, float fRadius) 
+CTaskSimpleGoTo::CTaskSimpleGoTo(int32 moveState, const CVector& targetPoint, float fRadius)
 {
     m_moveState = moveState;
     m_vecTargetPoint = targetPoint;
@@ -22,10 +22,10 @@ CTaskSimpleGoTo::~CTaskSimpleGoTo()
     // nothing here
 }
 
-CTaskSimpleGoTo* CTaskSimpleGoTo::Constructor(int moveState, const CVector& targetPoint, float fRadius) 
+CTaskSimpleGoTo* CTaskSimpleGoTo::Constructor(int32 moveState, const CVector& targetPoint, float fRadius)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTaskSimpleGoTo*, 0x6679C0, CTask*, int, const CVector&, float>
+    return plugin::CallMethodAndReturn<CTaskSimpleGoTo*, 0x6679C0, CTask*, int32, const CVector&, float>
         (this, moveState, targetPoint, fRadius);
 #else
     this->CTaskSimpleGoTo::CTaskSimpleGoTo(moveState, targetPoint, fRadius);

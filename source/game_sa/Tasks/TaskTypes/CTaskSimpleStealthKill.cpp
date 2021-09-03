@@ -11,23 +11,23 @@ void CTaskSimpleStealthKill::InjectHooks()
     ReversibleHooks::Install("CTaskSimpleStealthKill", "FinishAnimStealthKillCB", 0x622790, &CTaskSimpleStealthKill::FinishAnimStealthKillCB);
 }
 
-CTaskSimpleStealthKill::CTaskSimpleStealthKill(bool bKeepTargetAlive, CPed* pTarget, int nAssocGroupId)
+CTaskSimpleStealthKill::CTaskSimpleStealthKill(bool keepTargetAlive, CPed* target, AssocGroupId groupId)
 {
-    m_bKeepTargetAlive = bKeepTargetAlive;
-    m_pTarget = pTarget;
-    m_nAssocGroupId = nAssocGroupId;
+    m_bKeepTargetAlive = keepTargetAlive;
+    m_pTarget = target;
+    m_nAssocGroupId = groupId;
     m_bIsAborting = false;
     m_bIsFinished = false;
     m_pAnim = nullptr;
     m_nTime = 0;
-    if (pTarget)
-        pTarget->RegisterReference(reinterpret_cast<CEntity**>(&m_pTarget));
+    if (target)
+        target->RegisterReference(reinterpret_cast<CEntity**>(&m_pTarget));
 }
 
 // 0x6225F0
-CTaskSimpleStealthKill* CTaskSimpleStealthKill::Constructor(bool bKeepTargetAlive, CPed* pTarget, int nAssocGroupId)
+CTaskSimpleStealthKill* CTaskSimpleStealthKill::Constructor(bool keepTargetAlive, CPed* target, AssocGroupId groupId)
 {
-    this->CTaskSimpleStealthKill::CTaskSimpleStealthKill(bKeepTargetAlive, pTarget, nAssocGroupId);
+    this->CTaskSimpleStealthKill::CTaskSimpleStealthKill(keepTargetAlive, target, groupId);
     return this;
 }
 
@@ -91,14 +91,14 @@ CTask* CTaskSimpleStealthKill::Clone()
 }
 
 // 0x6226F0
-bool CTaskSimpleStealthKill::MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event)
+bool CTaskSimpleStealthKill::MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return CTaskSimpleStealthKill::MakeAbortable_Reversed(ped, priority, _event);
+    return CTaskSimpleStealthKill::MakeAbortable_Reversed(ped, priority, event);
 }
 
-bool CTaskSimpleStealthKill::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, class CEvent* _event)
+bool CTaskSimpleStealthKill::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    CEventDamage* eventDamage = (CEventDamage*)_event;
+    CEventDamage* eventDamage = (CEventDamage*)event;
     if (priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_pAnim)
         {
@@ -113,8 +113,9 @@ bool CTaskSimpleStealthKill::MakeAbortable_Reversed(class CPed* ped, eAbortPrior
              !m_bKeepTargetAlive &&
              m_pAnim &&
              m_pAnim->m_nAnimId == ANIM_ID_KILL_KNIFE_PED_DIE &&
-             _event->GetEventType() == EVENT_DAMAGE &&
-             eventDamage->m_pSourceEntity == m_pTarget) {
+             event->GetEventType() == EVENT_DAMAGE &&
+             eventDamage->m_pSourceEntity == m_pTarget
+     ) {
         m_bIsAborting = true;
         m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
         return true;
@@ -167,7 +168,7 @@ void CTaskSimpleStealthKill::ManageAnim(CPed* ped)
     }
     else
     {
-        m_nTime += static_cast<std::uint32_t>(CTimer::ms_fTimeStep * 0.02f * 1000.0f);
+        m_nTime += static_cast<uint32>(CTimer::ms_fTimeStep * 0.02f * 1000.0f);
         if (m_nTime > 10000)
             m_bIsAborting = true;
     }

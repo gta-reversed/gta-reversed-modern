@@ -2,15 +2,15 @@
 
 void CTaskComplexGoToPointAndStandStillTimed::InjectHooks()
 {
-    HookInstall(0x6685E0, &CTaskComplexGoToPointAndStandStillTimed::Constructor);
-    HookInstall(0x66CF30, &CTaskComplexGoToPointAndStandStillTimed::Clone_Reversed);
-    HookInstall(0x6686A0, &CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed);
-    HookInstall(0x668640, &CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed);
-    HookInstall(0x66DC90, &CTaskComplexGoToPointAndStandStillTimed::CreateFirstSubTask_Reversed);
-    HookInstall(0x66DCE0, &CTaskComplexGoToPointAndStandStillTimed::ControlSubTask_Reversed);
+    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStillTimed", "CTaskComplexGoToPointAndStandStillTimed", 0x6685E0, &CTaskComplexGoToPointAndStandStillTimed::Constructor);
+    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStillTimed", "Clone", 0x66CF30, &CTaskComplexGoToPointAndStandStillTimed::Clone_Reversed);
+    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStillTimed", "StopTimer", 0x6686A0, &CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed);
+    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStillTimed", "MakeAbortable", 0x668640, &CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed);
+    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStillTimed", "CreateFirstSubTask", 0x66DC90, &CTaskComplexGoToPointAndStandStillTimed::CreateFirstSubTask_Reversed);
+    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStillTimed", "ControlSubTask", 0x66DCE0, &CTaskComplexGoToPointAndStandStillTimed::ControlSubTask_Reversed);
 }
 
-CTaskComplexGoToPointAndStandStillTimed::CTaskComplexGoToPointAndStandStillTimed(int moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int time)
+CTaskComplexGoToPointAndStandStillTimed::CTaskComplexGoToPointAndStandStillTimed(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time)
     : CTaskComplexGoToPointAndStandStill(moveState, targetPoint, fRadius, fMoveStateRadius, false, false)
 {
     m_nTime = time;
@@ -21,10 +21,10 @@ CTaskComplexGoToPointAndStandStillTimed::~CTaskComplexGoToPointAndStandStillTime
     // nothing here
 }
 
-CTaskComplexGoToPointAndStandStillTimed* CTaskComplexGoToPointAndStandStillTimed::Constructor(int moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int time)
+CTaskComplexGoToPointAndStandStillTimed* CTaskComplexGoToPointAndStandStillTimed::Constructor(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTaskComplexGoToPointAndStandStillTimed*, 0x6685E0, CTask*, int, const CVector&, float, float, int>
+    return plugin::CallMethodAndReturn<CTaskComplexGoToPointAndStandStillTimed*, 0x6685E0, CTask*, int32, const CVector&, float, float, int32>
         (this, moveState, targetPoint, fRadius, fMoveStateRadius, time);
 #else
     this->CTaskComplexGoToPointAndStandStillTimed::CTaskComplexGoToPointAndStandStillTimed(moveState,  targetPoint, fRadius, fMoveStateRadius, time);
@@ -41,23 +41,16 @@ CTask* CTaskComplexGoToPointAndStandStillTimed::Clone()
 #endif
 }
 
-
-void CTaskComplexGoToPointAndStandStillTimed::StopTimer(CEvent* _event)
+// 0x6686A0
+void CTaskComplexGoToPointAndStandStillTimed::StopTimer(const CEvent* event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethod<0x6686A0, CTask*, CEvent*>(this, _event);
-#else
-    return CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed(_event);
-#endif
+    return CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed(event);
 }
 
-bool CTaskComplexGoToPointAndStandStillTimed::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+// 0x668640
+bool CTaskComplexGoToPointAndStandStillTimed::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<bool, 0x668640, CTask*, CPed*, int, CEvent*>(this, ped, priority, _event);
-#else
-    return CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed(ped, priority, _event);
-#endif
+    return CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed(ped, priority, event);
 }
 
 CTask* CTaskComplexGoToPointAndStandStillTimed::CreateFirstSubTask(CPed* ped)
@@ -84,16 +77,16 @@ CTask* CTaskComplexGoToPointAndStandStillTimed::Clone_Reversed()
 }
 
 
-void CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed(CEvent* _event)
+void CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed(const CEvent* event)
 {
-    if (!CEventHandler::IsTemporaryEvent(_event)) 
+    if (!CEventHandler::IsTemporaryEvent(*event))
         m_timer.Stop();
 }
 
-bool CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    bool bSubTaskAbortable = m_pSubTask->MakeAbortable(ped, priority, _event);
-    if (bSubTaskAbortable && priority == ABORT_PRIORITY_URGENT && (!_event || !CEventHandler::IsTemporaryEvent(_event)))
+    bool bSubTaskAbortable = m_pSubTask->MakeAbortable(ped, priority, event);
+    if (bSubTaskAbortable && priority == ABORT_PRIORITY_URGENT && (!event || !CEventHandler::IsTemporaryEvent(*event)))
         m_timer.Stop();
     return bSubTaskAbortable;
 }

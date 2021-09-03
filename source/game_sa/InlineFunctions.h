@@ -12,5 +12,5 @@ inline CAnimBlendClumpData * GetAnimClumpData(RpClump * pClump)
 {
     const DWORD clumpOffset = (*(DWORD*)0xB5F878);
     //return reinterpret_cast <CAnimBlendClumpData *> (*(&pClump->object.type + clumpOffset));
-    return reinterpret_cast <CAnimBlendClumpData *> (*(DWORD *)(clumpOffset + ((int)pClump)  ));
+    return reinterpret_cast <CAnimBlendClumpData *> (*(DWORD *)(clumpOffset + ((int32)pClump)  ));
 }

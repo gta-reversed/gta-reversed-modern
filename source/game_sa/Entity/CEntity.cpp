@@ -143,24 +143,24 @@ void CEntity::Add_Reversed(CRect const& rect)
         usedRect.bottom = 2999.0F;
 
     if (m_bIsBIGBuilding) {
-        std::int32_t startSectorX = CWorld::GetLodSectorX(usedRect.left);
-        std::int32_t startSectorY = CWorld::GetLodSectorY(usedRect.top);
-        std::int32_t endSectorX = CWorld::GetLodSectorX(usedRect.right);
-        std::int32_t endSectorY = CWorld::GetLodSectorY(usedRect.bottom);
-        for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-            for (std::int32_t sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+        int32 startSectorX = CWorld::GetLodSectorX(usedRect.left);
+        int32 startSectorY = CWorld::GetLodSectorY(usedRect.top);
+        int32 endSectorX = CWorld::GetLodSectorX(usedRect.right);
+        int32 endSectorY = CWorld::GetLodSectorY(usedRect.bottom);
+        for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+            for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 auto& pLodListEntry = CWorld::GetLodPtrList(sectorX, sectorY);
                 pLodListEntry.AddItem(this);
             }
         }
     }
     else {
-        std::int32_t startSectorX = CWorld::GetSectorX(usedRect.left);
-        std::int32_t startSectorY = CWorld::GetSectorY(usedRect.top);
-        std::int32_t endSectorX = CWorld::GetSectorX(usedRect.right);
-        std::int32_t endSectorY = CWorld::GetSectorY(usedRect.bottom);
-        for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-            for (std::int32_t sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+        int32 startSectorX = CWorld::GetSectorX(usedRect.left);
+        int32 startSectorY = CWorld::GetSectorY(usedRect.top);
+        int32 endSectorX = CWorld::GetSectorX(usedRect.right);
+        int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
+        for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+            for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 CPtrListDoubleLink* pDoubleLinkList = nullptr;
                 auto pRepeatSector = GetRepeatSector(sectorX, sectorY);
                 auto pSector = GetSector(sectorX, sectorY);
@@ -214,24 +214,24 @@ void CEntity::Remove_Reversed()
         usedRect.bottom = 2999.0F;
 
     if (m_bIsBIGBuilding) {
-        std::int32_t startSectorX = CWorld::GetLodSectorX(usedRect.left);
-        std::int32_t startSectorY = CWorld::GetLodSectorY(usedRect.top);
-        std::int32_t endSectorX = CWorld::GetLodSectorX(usedRect.right);
-        std::int32_t endSectorY = CWorld::GetLodSectorY(usedRect.bottom);
-        for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-            for (std::int32_t sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+        int32 startSectorX = CWorld::GetLodSectorX(usedRect.left);
+        int32 startSectorY = CWorld::GetLodSectorY(usedRect.top);
+        int32 endSectorX = CWorld::GetLodSectorX(usedRect.right);
+        int32 endSectorY = CWorld::GetLodSectorY(usedRect.bottom);
+        for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+            for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 auto& pLodListEntry = CWorld::GetLodPtrList(sectorX, sectorY);
                 pLodListEntry.DeleteItem(this);
             }
         }
     }
     else {
-        std::int32_t startSectorX = CWorld::GetSectorX(usedRect.left);
-        std::int32_t startSectorY = CWorld::GetSectorY(usedRect.top);
-        std::int32_t endSectorX = CWorld::GetSectorX(usedRect.right);
-        std::int32_t endSectorY = CWorld::GetSectorY(usedRect.bottom);
-        for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-            for (std::int32_t sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+        int32 startSectorX = CWorld::GetSectorX(usedRect.left);
+        int32 startSectorY = CWorld::GetSectorY(usedRect.top);
+        int32 endSectorX = CWorld::GetSectorX(usedRect.right);
+        int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
+        for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+            for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 CPtrListDoubleLink* pDoubleLinkList = nullptr;
                 auto pRepeatSector = GetRepeatSector(sectorX, sectorY);
                 auto pSector = GetSector(sectorX, sectorY);
@@ -272,21 +272,21 @@ void CEntity::SetIsStatic_Reversed(bool isStatic)
     m_bIsStatic = isStatic;
 }
 
-void CEntity::SetModelIndex(unsigned int index)
+void CEntity::SetModelIndex(uint32 index)
 {
     return CEntity::SetModelIndex_Reversed(index);
 }
-void CEntity::SetModelIndex_Reversed(unsigned int index)
+void CEntity::SetModelIndex_Reversed(uint32 index)
 {
     CEntity::SetModelIndexNoCreate(index);
     CEntity::CreateRwObject();
 }
 
-void CEntity::SetModelIndexNoCreate(unsigned int index)
+void CEntity::SetModelIndexNoCreate(uint32 index)
 {
     return CEntity::SetModelIndexNoCreate_Reversed(index);
 }
-void CEntity::SetModelIndexNoCreate_Reversed(unsigned int index)
+void CEntity::SetModelIndexNoCreate_Reversed(uint32 index)
 {
     auto pModelInfo = CModelInfo::GetModelInfo(index);
     m_nModelIndex = index;
@@ -490,11 +490,11 @@ void CEntity::SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool b
     return;
 }
 
-unsigned char CEntity::SpecialEntityCalcCollisionSteps(bool * bProcessCollisionBeforeSettingTimeStep, bool* unk2)
+uint8 CEntity::SpecialEntityCalcCollisionSteps(bool * bProcessCollisionBeforeSettingTimeStep, bool* unk2)
 {
     return CEntity::SpecialEntityCalcCollisionSteps_Reversed(bProcessCollisionBeforeSettingTimeStep, unk2);
 }
-unsigned char CEntity::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2)
+uint8 CEntity::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2)
 {
     return 1;
 }
@@ -587,9 +587,9 @@ void CEntity::PreRender_Reversed()
                                                   0.0F,
                                                   -8.0F,
                                                   255,
-                                                  static_cast<unsigned char>(fRand * 200.0F),
-                                                  static_cast<unsigned char>(fRand * 160.0F),
-                                                  static_cast<unsigned char>(fRand * 120.0F),
+                                                  static_cast<uint8>(fRand * 200.0F),
+                                                  static_cast<uint8>(fRand * 160.0F),
+                                                  static_cast<uint8>(fRand * 120.0F),
                                                   20.0F,
                                                   false,
                                                   1.0F,
@@ -607,11 +607,11 @@ void CEntity::PreRender_Reversed()
                                        true,
                                        nullptr);
 
-                CCoronas::RegisterCorona(reinterpret_cast<unsigned int>(this),
+                CCoronas::RegisterCorona(reinterpret_cast<uint32>(this),
                                          nullptr,
-                                         static_cast<unsigned char>(fRand * 255.0F),
-                                         static_cast<unsigned char>(fRand * 220.0F),
-                                         static_cast<unsigned char>(fRand * 190.0F),
+                                         static_cast<uint8>(fRand * 255.0F),
+                                         static_cast<uint8>(fRand * 220.0F),
+                                         static_cast<uint8>(fRand * 190.0F),
                                          255,
                                          vecPos,
                                          fRand * 6.0F,
@@ -642,9 +642,9 @@ void CEntity::PreRender_Reversed()
                                               0.0F,
                                               -8.0F,
                                               255,
-                                              static_cast<unsigned char>(fRand * 200.0F),
-                                              static_cast<unsigned char>(fRand * 200.0F),
-                                              static_cast<unsigned char>(fRand * 200.0F),
+                                              static_cast<uint8>(fRand * 200.0F),
+                                              static_cast<uint8>(fRand * 200.0F),
+                                              static_cast<uint8>(fRand * 200.0F),
                                               20.0F,
                                               false,
                                               1.0F,
@@ -662,11 +662,11 @@ void CEntity::PreRender_Reversed()
                                    true,
                                    nullptr);
 
-            CCoronas::RegisterCorona(reinterpret_cast<unsigned int>(this),
+            CCoronas::RegisterCorona(reinterpret_cast<uint32>(this),
                                      nullptr,
-                                     static_cast<unsigned char>(fRand * 255.0F),
-                                     static_cast<unsigned char>(fRand * 255.0F),
-                                     static_cast<unsigned char>(fRand * 255.0F),
+                                     static_cast<uint8>(fRand * 255.0F),
+                                     static_cast<uint8>(fRand * 255.0F),
+                                     static_cast<uint8>(fRand * 255.0F),
                                      255,
                                      vecPos,
                                      fRand * 6.0F,
@@ -698,7 +698,7 @@ void CEntity::PreRender_Reversed()
             auto vecStreakStart = vecPos - vecScaledCam;
             auto vecStreakEnd = vecPos + vecScaledCam;
             if (CVector2D(pObject->m_vecMoveSpeed).Magnitude() > 0.03F) {
-                CMotionBlurStreaks::RegisterStreak(reinterpret_cast<unsigned int>(this),
+                CMotionBlurStreaks::RegisterStreak(reinterpret_cast<uint32>(this),
                                                    100,
                                                    100,
                                                    100,
@@ -715,7 +715,7 @@ void CEntity::PreRender_Reversed()
             if (CVector2D(pObject->m_vecMoveSpeed).Magnitude() > 0.03F) {
                 float fWaterLevel;
                 if (!CWaterLevel::GetWaterLevelNoWaves(vecPos.x, vecPos.y, vecPos.z, &fWaterLevel, nullptr, nullptr) || vecPos.z > fWaterLevel) {
-                    CMotionBlurStreaks::RegisterStreak(reinterpret_cast<unsigned int>(this),
+                    CMotionBlurStreaks::RegisterStreak(reinterpret_cast<uint32>(this),
                                                    255,
                                                    160,
                                                    100,
@@ -727,7 +727,7 @@ void CEntity::PreRender_Reversed()
         }
         else if (m_nModelIndex == ModelIndices::MI_BEACHBALL) {
             if (DistanceBetweenPoints(GetPosition(), TheCamera.GetPosition()) < 50.0F) {
-                auto ucShadowStrength = static_cast<unsigned char>(CTimeCycle::m_CurrentColours.m_nShadowStrength);
+                auto ucShadowStrength = static_cast<uint8>(CTimeCycle::m_CurrentColours.m_nShadowStrength);
                 CShadows::StoreShadowToBeRendered(eShadowType::SHADOW_DEFAULT,
                                                   gpShadowPedTex,
                                                   &GetPosition(),
@@ -828,7 +828,7 @@ void CEntity::Render_Reversed()
         return;
     }
 
-    uint32_t savedAlphaRef;
+    uint32 savedAlphaRef;
     if (m_nModelIndex == ModelIndices::MI_JELLYFISH || m_nModelIndex == ModelIndices::MI_JELLYFISH01) {
         RwRenderStateGet(rwRENDERSTATEALPHATESTFUNCTIONREF, &savedAlphaRef);
         RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, 0u);
@@ -892,7 +892,7 @@ void CEntity::FlagToDestroyWhenNextProcessed_Reversed()
     return;
 }
 
-// Converted from thiscall void CEntity::UpdateRwFrame(void) 0x532B00
+// 0x532B00
 void CEntity::UpdateRwFrame()
 {
     if (!m_pRwObject)
@@ -901,7 +901,7 @@ void CEntity::UpdateRwFrame()
     RwFrameUpdateObjects(static_cast<RwFrame*>(rwObjectGetParent(m_pRwObject)));
 }
 
-// Converted from thiscall void CEntity::UpdateRpHAnim(void) 0x532B20
+// 0x532B20
 void CEntity::UpdateRpHAnim()
 {
     auto* pFirstAtomic = GetFirstAtomic(m_pRwClump);
@@ -914,7 +914,7 @@ void CEntity::UpdateRpHAnim()
     }
 }
 
-// Converted from thiscall bool CEntity::HasPreRenderEffects(void) 0x532B70
+// 0x532B70
 bool CEntity::HasPreRenderEffects()
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -947,7 +947,7 @@ bool CEntity::HasPreRenderEffects()
         if (!pModelInfo->m_n2dfxCount)
             return false;
 
-        for (int32_t i = 0; i < pModelInfo->m_n2dfxCount; ++i) {
+        for (int32 i = 0; i < pModelInfo->m_n2dfxCount; ++i) {
             if (pModelInfo->Get2dEffect(i)->m_nType == e2dEffectType::EFFECT_LIGHT)
                 return true;
         }
@@ -957,7 +957,7 @@ bool CEntity::HasPreRenderEffects()
     return true;
 }
 
-// Converted from thiscall bool CEntity::DoesNotCollideWithFlyers(void) 0x532D40
+// 0x532D40
 bool CEntity::DoesNotCollideWithFlyers()
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -967,7 +967,7 @@ bool CEntity::DoesNotCollideWithFlyers()
     return pModelInfo->bDontCollideWithFlyer;
 }
 
-// Converted from stdcall RpMaterial* MaterialUpdateUVAnimCB(RpMaterial *material,void *data) 0x532D70
+// 0x532D70
 RpMaterial* MaterialUpdateUVAnimCB(RpMaterial* material, void* data)
 {
     if (!RpMaterialUVAnimExists(material))
@@ -979,7 +979,7 @@ RpMaterial* MaterialUpdateUVAnimCB(RpMaterial* material, void* data)
     return material;
 }
 
-// Converted from thiscall void CEntity::ModifyMatrixForPoleInWind(void) 0x532DB0
+// 0x532DB0
 void CEntity::ModifyMatrixForPoleInWind()
 {
     auto vecWindDir = CVector(CWeather::WindDir.x + 0.01F, CWeather::WindDir.y + 0.01F, 0.1F);
@@ -998,8 +998,8 @@ void CEntity::ModifyMatrixForPoleInWind()
     CEntity::UpdateRwFrame();
 }
 
-// Converted from thiscall bool CEntity::LivesInThisNonOverlapSector(int sectorX,int sectorY) 0x533050
-bool CEntity::LivesInThisNonOverlapSector(int sectorX, int sectorY)
+// 0x533050
+bool CEntity::LivesInThisNonOverlapSector(int32 sectorX, int32 sectorY)
 {
     auto rect = CRect();
     GetBoundRect(&rect);
@@ -1012,7 +1012,7 @@ bool CEntity::LivesInThisNonOverlapSector(int sectorX, int sectorY)
 
 }
 
-// Converted from thiscall void CEntity::SetupBigBuilding(void) 0x533150
+// 0x533150
 void CEntity::SetupBigBuilding()
 {
     m_bUsesCollision = false;
@@ -1023,7 +1023,7 @@ void CEntity::SetupBigBuilding()
     pModelInfo->bDoWeOwnTheColModel = true;
 }
 
-// Converted from thiscall void CEntity::ModifyMatrixForCrane(void) 0x533170
+// 0x533170
 void CEntity::ModifyMatrixForCrane()
 {
     if (CTimer::GetIsPaused())
@@ -1044,7 +1044,7 @@ void CEntity::ModifyMatrixForCrane()
 
 }
 
-// Converted from thiscall void CEntity::PreRenderForGlassWindow(void) 0x533240
+// 0x533240
 void CEntity::PreRenderForGlassWindow()
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -1055,8 +1055,8 @@ void CEntity::PreRenderForGlassWindow()
     m_bIsVisible = false;
 }
 
-// Converted from thiscall void CEntity::SetRwObjectAlpha(int alpha) 0x5332C0
-void CEntity::SetRwObjectAlpha(int alpha)
+// 0x5332C0
+void CEntity::SetRwObjectAlpha(int32 alpha)
 {
     if (!m_pRwObject)
         return;
@@ -1069,7 +1069,7 @@ void CEntity::SetRwObjectAlpha(int alpha)
     }
 }
 
-// Converted from stdcall bool IsEntityPointerValid(CEntity *entity) 0x533310
+// 0x533310
 bool IsEntityPointerValid(CEntity* entity)
 {
     if (!entity)
@@ -1093,11 +1093,11 @@ bool IsEntityPointerValid(CEntity* entity)
     return false;
 }
 
-// Converted from thiscall CVector CEntity::FindTriggerPointCoors(int triggerIndex) 0x533380
-CVector* CEntity::FindTriggerPointCoors(CVector* pOutVec, int triggerIndex)
+// 0x533380
+CVector* CEntity::FindTriggerPointCoors(CVector* pOutVec, int32 triggerIndex)
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
         if (pEffect->m_nType == e2dEffectType::EFFECT_SLOTMACHINE_WHEEL && pEffect->iSlotMachineIndex == triggerIndex) {
             *pOutVec = GetMatrix() * pEffect->m_vecPosn;
@@ -1116,12 +1116,12 @@ CVector* CEntity::FindTriggerPointCoors(CVector* pOutVec, int triggerIndex)
  * @return Random effect
  * @addr 0x533410
  */
-C2dEffect* CEntity::GetRandom2dEffect(int effectType, bool bCheckForEmptySlot)
+C2dEffect* CEntity::GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot)
 {
     C2dEffect* apArr[32];
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
-    int iFoundCount = 0;
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    int32 iFoundCount = 0;
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
         if (pEffect->m_nType != effectType)
             continue;
@@ -1143,7 +1143,7 @@ C2dEffect* CEntity::GetRandom2dEffect(int effectType, bool bCheckForEmptySlot)
     return nullptr;
 }
 
-// Converted from thiscall CVector CEntity::TransformFromObjectSpace(CVector const &offset) 0x5334F0
+// 0x5334F0
 CVector CEntity::TransformFromObjectSpace(CVector const& offset)
 {
     auto result = CVector();
@@ -1156,7 +1156,7 @@ CVector CEntity::TransformFromObjectSpace(CVector const& offset)
     return result;
 }
 
-// Converted from thiscall void CEntity::TransformFromObjectSpace(CVector &outPosn,CVector const &offset) 0x533560
+// 0x533560
 CVector* CEntity::TransformFromObjectSpace(CVector& outPosn, CVector const& offset)
 {
     auto result = CEntity::TransformFromObjectSpace(offset);
@@ -1164,7 +1164,7 @@ CVector* CEntity::TransformFromObjectSpace(CVector& outPosn, CVector const& offs
     return &outPosn;
 }
 
-// Converted from thiscall void CEntity::CreateEffects(void) 0x533790
+// 0x533790
 void CEntity::CreateEffects()
 {
     m_bHasRoadsignText = false;
@@ -1172,7 +1172,7 @@ void CEntity::CreateEffects()
     if (!pModelInfo->m_n2dfxCount)
         return;
 
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
         if (pEffect->m_nType == e2dEffectType::EFFECT_LIGHT) {
             m_bHasPreRenderEffects = true;
@@ -1195,7 +1195,7 @@ void CEntity::CreateEffects()
                 if (pEffect->enEx.m_nTimeOn > pEffect->enEx.m_nTimeOff && CClock::ms_nGameClockHours < pEffect->enEx.m_nTimeOff)
                     ucDays--;
 
-                srand(reinterpret_cast<unsigned int>(this) + ucDays);
+                srand(reinterpret_cast<uint32>(this) + ucDays);
             }
 
             auto fHeading = GetHeading();
@@ -1265,14 +1265,14 @@ void CEntity::CreateEffects()
     }
 }
 
-// Converted from thiscall void CEntity::DestroyEffects(void) 0x533BF0
+// 0x533BF0
 void CEntity::DestroyEffects()
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
     if (!pModelInfo->m_n2dfxCount)
         return;
 
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
 
         if (pEffect->m_nType == e2dEffectType::EFFECT_ATTRACTOR) {
@@ -1300,7 +1300,7 @@ void CEntity::DestroyEffects()
     }
 }
 
-// Converted from thiscall void CEntity::AttachToRwObject(RwObject *object, bool updateEntityMatrix) 0x533ED0
+// 0x533ED0
 void CEntity::AttachToRwObject(RwObject* object, bool updateEntityMatrix)
 {
     if (!m_bIsVisible)
@@ -1334,7 +1334,7 @@ void CEntity::AttachToRwObject(RwObject* object, bool updateEntityMatrix)
     CEntity::CreateEffects();
 }
 
-// Converted from thiscall void CEntity::DetachFromRwObject(void) 0x533FB0
+// 0x533FB0
 void CEntity::DetachFromRwObject()
 {
     if (!m_pRwObject)
@@ -1356,7 +1356,7 @@ void CEntity::DetachFromRwObject()
     m_pRwObject = nullptr;
 }
 
-// Converted from thiscall CVector CEntity::GetBoundCentre(void) 0x534250
+// 0x534250
 CVector* CEntity::GetBoundCentre(CVector* pOutCentre)
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -1364,7 +1364,7 @@ CVector* CEntity::GetBoundCentre(CVector* pOutCentre)
     return CEntity::TransformFromObjectSpace(*pOutCentre, pColCenter);
 }
 
-// Converted from thiscall void CEntity::GetBoundCentre(CVector &outCentre) 0x534290
+// 0x534290
 void CEntity::GetBoundCentre(CVector& outCentre)
 {
     auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -1379,7 +1379,7 @@ CVector CEntity::GetBoundCentre()
     return v;
 }
 
-// Converted from thiscall void CEntity::RenderEffects(void) 0x5342B0
+// 0x5342B0
 void CEntity::RenderEffects()
 {
     if (!m_bHasRoadsignText)
@@ -1389,7 +1389,7 @@ void CEntity::RenderEffects()
     if (!pModelInfo->m_n2dfxCount)
         return;
 
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
         if (pEffect->m_nType != e2dEffectType::EFFECT_ROADSIGN)
             continue;
@@ -1398,7 +1398,7 @@ void CEntity::RenderEffects()
     }
 }
 
-// Converted from thiscall bool CEntity::GetIsTouching(CEntity *entity) 0x5343F0
+// 0x5343F0
 bool CEntity::GetIsTouching(CEntity* entity)
 {
     CVector thisVec;
@@ -1413,7 +1413,7 @@ bool CEntity::GetIsTouching(CEntity* entity)
     return (thisVec - otherVec).Magnitude() <= (fThisRadius + fOtherRadius);
 }
 
-// Converted from thiscall bool CEntity::GetIsTouching(CVector const &centre,float radius) 0x5344B0
+// 0x5344B0
 bool CEntity::GetIsTouching(CVector const& centre, float radius)
 {
     CVector thisVec;
@@ -1423,7 +1423,7 @@ bool CEntity::GetIsTouching(CVector const& centre, float radius)
     return (thisVec - centre).Magnitude() <= (fThisRadius + radius);
 }
 
-// Converted from thiscall bool CEntity::GetIsOnScreen(void) 0x534540
+// 0x534540
 bool CEntity::GetIsOnScreen()
 {
     CVector thisVec;
@@ -1439,7 +1439,7 @@ bool CEntity::GetIsOnScreen()
     return false;
 }
 
-// Converted from thiscall bool CEntity::GetIsBoundingBoxOnScreen(void) 0x5345D0
+// 0x5345D0
 bool CEntity::GetIsBoundingBoxOnScreen()
 {
     auto pColModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
@@ -1457,7 +1457,7 @@ bool CEntity::GetIsBoundingBoxOnScreen()
         TransformVectors(&vecNormals[0], 2, tempTrans, &TheCamera.m_avecFrustumWorldNormals[0]);
     }
 
-    for (int32_t i = 0; i < 2; ++i) {
+    for (int32 i = 0; i < 2; ++i) {
         CVector vecUsed;
         vecUsed.x = vecBnd[signbit(vecNormals[i].x)].x;
         vecUsed.y = vecBnd[signbit(vecNormals[i].y)].y;
@@ -1475,7 +1475,7 @@ bool CEntity::GetIsBoundingBoxOnScreen()
     return true;
 }
 
-// Converted from thiscall void CEntity::ModifyMatrixForTreeInWind(void) 0x534E90
+// 0x534E90
 void CEntity::ModifyMatrixForTreeInWind()
 {
     if (CTimer::GetIsPaused())
@@ -1500,7 +1500,7 @@ void CEntity::ModifyMatrixForTreeInWind()
 
     }
     else {
-        auto uiTimeOffset = (reinterpret_cast<unsigned int>(this) + CTimer::m_snTimeInMilliseconds) & 0xFFF;
+        auto uiTimeOffset = (reinterpret_cast<uint32>(this) + CTimer::m_snTimeInMilliseconds) & 0xFFF;
         
         fWindOffset = sin(uiTimeOffset * 0.0015332032F) * 0.005F;
         if (CWeather::Wind >= 0.2F)
@@ -1520,14 +1520,14 @@ void CEntity::ModifyMatrixForTreeInWind()
 
 }
 
-// Converted from thiscall void CEntity::ModifyMatrixForBannerInWind(void) 0x535040
+// 0x535040
 void CEntity::ModifyMatrixForBannerInWind()
 {
     if (CTimer::GetIsPaused())
         return;
 
     auto vecPos = CVector2D(GetPosition());
-    auto uiOffset = static_cast<uint16_t>(16 * (CTimer::m_snTimeInMilliseconds + (static_cast<uint16_t>(vecPos.x + vecPos.y) * 64)));
+    auto uiOffset = static_cast<uint16>(16 * (CTimer::m_snTimeInMilliseconds + (static_cast<uint16>(vecPos.x + vecPos.y) * 64)));
 
     auto fWind = 0.2F;
     if (CWeather::Wind >= 0.1F) {
@@ -1538,7 +1538,7 @@ void CEntity::ModifyMatrixForBannerInWind()
     }
 
     auto fContrib = static_cast<float>(uiOffset & 0x7FF) / 2048.0F;
-    unsigned int uiIndex = uiOffset / 2048;
+    uint32 uiIndex = uiOffset / 2048;
     auto fWindOffset = (1.0F - fContrib) * CWeather::saBannerWindOffsets[uiIndex];
     fWindOffset += fContrib * CWeather::saBannerWindOffsets[(uiIndex + 1) & 0x1F];
     fWindOffset *= CWeather::Wind;
@@ -1569,7 +1569,7 @@ RwMatrix* CEntity::GetModellingMatrix()
     return RwFrameGetMatrix((RwFrame*)rwObjectGetParent(m_pRwObject));
 }
 
-// Converted from thiscall CColModel* CEntity::GetColModel(void) 0x535300
+// 0x535300
 CColModel* CEntity::GetColModel()
 {
     if (IsVehicle() && static_cast<CVehicle*>(this)->m_vehicleSpecialColIndex > -1)
@@ -1578,7 +1578,7 @@ CColModel* CEntity::GetColModel()
         return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
 }
 
-// Converted from thiscall void CEntity::CalculateBBProjection(CVector *,CVector *,CVector *,CVector *) 0x535340
+// 0x535340
 //https://gamedev.stackexchange.com/a/35948
 //https://gamedev.stackexchange.com/questions/153326/how-to-rotate-directional-billboard-particle-sprites-toward-the-direction-the-pa/153814#153814
 void CEntity::CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, CVector* pVecCorner3, CVector* pVecCorner4)
@@ -1695,7 +1695,7 @@ void CEntity::CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, 
 
 }
 
-// Converted from thiscall void CEntity::UpdateAnim(void) 0x535F00
+// 0x535F00
 void CEntity::UpdateAnim()
 {
     m_bDontUpdateHierarchy = false;
@@ -1723,7 +1723,7 @@ void CEntity::UpdateAnim()
     RpAnimBlendClumpUpdateAnimations(m_pRwClump, fStep, bOnScreen);
 }
 
-// Converted from thiscall bool CEntity::IsVisible(void) 0x536BC0
+// 0x536BC0
 bool CEntity::IsVisible()
 {
     if (!m_pRwObject || !m_bIsVisible)
@@ -1732,14 +1732,14 @@ bool CEntity::IsVisible()
     return CEntity::GetIsOnScreen();
 }
 
-// Converted from thiscall float CEntity::GetDistanceFromCentreOfMassToBaseOfModel(void) 0x536BE0
+// 0x536BE0
 float CEntity::GetDistanceFromCentreOfMassToBaseOfModel()
 {
     auto pColModel = CEntity::GetColModel();
     return -pColModel->m_boundBox.m_vecMin.z;
 }
 
-// Converted from thiscall void CEntity::CleanUpOldReference(CEntity** entity) 0x571A00
+// 0x571A00
 void CEntity::CleanUpOldReference(CEntity** entity)
 {
     if (!m_pReferences)
@@ -1760,7 +1760,7 @@ void CEntity::CleanUpOldReference(CEntity** entity)
     CReferences::pEmptyList = pRef;
 }
 
-// Converted from thiscall void CEntity::ResolveReferences(void) 0x571A40
+// 0x571A40
 void CEntity::ResolveReferences()
 {
     auto pRef = m_pReferences;
@@ -1784,7 +1784,7 @@ void CEntity::ResolveReferences()
     m_pReferences = nullptr;
 }
 
-// Converted from thiscall void CEntity::PruneReferences(void) 0x571A90
+// 0x571A90
 void CEntity::PruneReferences()
 {
     if (!m_pReferences)
@@ -1808,7 +1808,7 @@ void CEntity::PruneReferences()
     }
 }
 
-// Converted from thiscall void CEntity::RegisterReference(CEntity** entity) 0x571B70
+// 0x571B70
 void CEntity::RegisterReference(CEntity** entity)
 {
     if (IsBuilding() && !m_bIsTempBuilding && !m_bIsProcObject && !m_nIplIndex)
@@ -1824,7 +1824,7 @@ void CEntity::RegisterReference(CEntity** entity)
 
     if (!m_pReferences && !CReferences::pEmptyList) {
         auto iPedsSize = CPools::ms_pPedPool->GetSize();
-        for (int32_t i = 0; i < iPedsSize; ++i) {
+        for (int32 i = 0; i < iPedsSize; ++i) {
             auto pPed = CPools::ms_pPedPool->GetAt(i);
             if (pPed) {
                 pPed->PruneReferences();
@@ -1836,7 +1836,7 @@ void CEntity::RegisterReference(CEntity** entity)
 
         if (!CReferences::pEmptyList) {
             auto iVehsSize = CPools::ms_pVehiclePool->GetSize();
-            for (int32_t i = 0; i < iVehsSize; ++i) {
+            for (int32 i = 0; i < iVehsSize; ++i) {
                 auto pVeh = CPools::ms_pVehiclePool->GetAt(i);
                 if (pVeh) {
                     pVeh->PruneReferences();
@@ -1849,7 +1849,7 @@ void CEntity::RegisterReference(CEntity** entity)
 
         if (!CReferences::pEmptyList) {
             auto iObjectsSize = CPools::ms_pObjectPool->GetSize();
-            for (int32_t i = 0; i < iObjectsSize; ++i) {
+            for (int32 i = 0; i < iObjectsSize; ++i) {
                 auto pObj = CPools::ms_pObjectPool->GetAt(i);
                 if (pObj) {
                     pObj->PruneReferences();
@@ -1869,7 +1869,7 @@ void CEntity::RegisterReference(CEntity** entity)
     }
 }
 
-// Converted from thiscall void CEntity::ProcessLightsForEntity(void) 0x6FC7A0
+// 0x6FC7A0
 void CEntity::ProcessLightsForEntity()
 {
     auto fBalance = GetDayNightBalance();
@@ -1889,7 +1889,7 @@ void CEntity::ProcessLightsForEntity()
     if (!pModelInfo->m_n2dfxCount)
         return;
 
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
         auto fIntensity = 1.0F;
         auto uiRand = m_nRandomSeed ^ CCoronas::ms_aEntityLightsOffsets[iFxInd & 0x7];
@@ -1915,9 +1915,9 @@ void CEntity::ProcessLightsForEntity()
             auto fRadius = sqrt(fCamDist) * CWeather::SunGlare * 0.5F;
             vecEffPos += vecScaledCam;
 
-            auto ucRed = static_cast<unsigned char>((CTimeCycle::m_CurrentColours.m_nSunCoreRed + 510) * fGlare / 3.0F);
-            auto ucGreen = static_cast<unsigned char>((CTimeCycle::m_CurrentColours.m_nSunCoreGreen + 510) * fGlare / 3.0F);
-            auto ucBlue = static_cast<unsigned char>((CTimeCycle::m_CurrentColours.m_nSunCoreBlue + 510) * fGlare / 3.0F);
+            auto ucRed = static_cast<uint8>((CTimeCycle::m_CurrentColours.m_nSunCoreRed + 510) * fGlare / 3.0F);
+            auto ucGreen = static_cast<uint8>((CTimeCycle::m_CurrentColours.m_nSunCoreGreen + 510) * fGlare / 3.0F);
+            auto ucBlue = static_cast<uint8>((CTimeCycle::m_CurrentColours.m_nSunCoreBlue + 510) * fGlare / 3.0F);
             CCoronas::RegisterCorona(m_nRandomSeed + iFxInd + 1,
                                      nullptr,
                                      ucRed,
@@ -1967,7 +1967,7 @@ void CEntity::ProcessLightsForEntity()
         const auto& vecPos = GetPosition();
         auto iFlashType = pEffect->light.m_nCoronaFlashType;
         float fBalance;
-        unsigned int uiMode, uiOffset;
+        uint32 uiMode, uiOffset;
         if (iFlashType == e2dCoronaFlashType::FLASH_RANDOM_WHEN_WET && CWeather::WetRoads > 0.5F || bCoronaVisible) {
             switch (iFlashType) {
             case e2dCoronaFlashType::FLASH_DEFAULT:
@@ -2011,7 +2011,7 @@ void CEntity::ProcessLightsForEntity()
                 break;
 
             case e2dCoronaFlashType::FLASH_UNKN:
-                if (static_cast<unsigned char>(uiRand) > 0x10) {
+                if (static_cast<uint8>(uiRand) > 0x10) {
                     bDoColorLight = true;
                     break;
                 }
@@ -2060,8 +2060,8 @@ void CEntity::ProcessLightsForEntity()
                 bDoColorLight = true;
 
                 uiOffset = CTimer::m_snTimeInMilliseconds + 3333 * (iFlashType - 11);
-                uiOffset += static_cast<unsigned int>(vecPos.x * 20.0F);
-                uiOffset += static_cast<unsigned int>(vecPos.y * 10.0F);
+                uiOffset += static_cast<uint32>(vecPos.x * 20.0F);
+                uiOffset += static_cast<uint32>(vecPos.y * 10.0F);
 
                 uiMode = 9 * ((uiOffset % 10000) / 10000);
                 fBalance = ((uiOffset % 10000) - (1111 * uiMode)) * 0.0009F;
@@ -2099,7 +2099,7 @@ void CEntity::ProcessLightsForEntity()
                 bDoNoColorLight = true;
                 bSkipCoronaChecks = true;
 
-                CCoronas::RegisterCorona(reinterpret_cast<unsigned int>(this) + iFxInd,
+                CCoronas::RegisterCorona(reinterpret_cast<uint32>(this) + iFxInd,
                                          nullptr,
                                          0,
                                          0,
@@ -2161,16 +2161,16 @@ void CEntity::ProcessLightsForEntity()
                 fIntensity = CTimeCycle::m_CurrentColours.m_fSpriteBrightness * fBrightness * 0.1F;
                 auto fSize = pEffect->light.m_fCoronaSize * fSizeMult;
 
-                auto ucRed = static_cast<unsigned char>(static_cast<float>(pEffect->light.m_color.red) * fIntensity);
-                auto ucGreen = static_cast<unsigned char>(static_cast<float>(pEffect->light.m_color.green) * fIntensity);
-                auto ucBlue = static_cast<unsigned char>(static_cast<float>(pEffect->light.m_color.blue) * fIntensity);
+                auto ucRed = static_cast<uint8>(static_cast<float>(pEffect->light.m_color.red) * fIntensity);
+                auto ucGreen = static_cast<uint8>(static_cast<float>(pEffect->light.m_color.green) * fIntensity);
+                auto ucBlue = static_cast<uint8>(static_cast<float>(pEffect->light.m_color.blue) * fIntensity);
 
-                CCoronas::RegisterCorona(reinterpret_cast<unsigned int>(this) + iFxInd,
+                CCoronas::RegisterCorona(reinterpret_cast<uint32>(this) + iFxInd,
                                          nullptr,
                                          ucRed,
                                          ucGreen,
                                          ucBlue,
-                                         static_cast<unsigned char>(fDayNight * 255.0F),
+                                         static_cast<uint8>(fDayNight * 255.0F),
                                          vecEffPos,
                                          fSize,
                                          pEffect->light.m_fCoronaFarClip,
@@ -2196,7 +2196,7 @@ void CEntity::ProcessLightsForEntity()
 
         if (!bSkipCoronaChecks && bDoNoColorLight) {
             bSkipCoronaChecks = true;
-            CCoronas::RegisterCorona(reinterpret_cast<unsigned int>(this) + iFxInd,
+            CCoronas::RegisterCorona(reinterpret_cast<uint32>(this) + iFxInd,
                                         nullptr,
                                         0,
                                         0,
@@ -2220,7 +2220,7 @@ void CEntity::ProcessLightsForEntity()
         }
 
         if (!bSkipCoronaChecks && bUpdateCoronaCoors) {
-            CCoronas::UpdateCoronaCoors(reinterpret_cast<unsigned int>(this) + iFxInd, vecEffPos, pEffect->light.m_fCoronaFarClip, 0.0F);
+            CCoronas::UpdateCoronaCoors(reinterpret_cast<uint32>(this) + iFxInd, vecEffPos, pEffect->light.m_fCoronaFarClip, 0.0F);
         }
 
 // POINT LIGHTS
@@ -2294,11 +2294,11 @@ void CEntity::ProcessLightsForEntity()
             if (bDoColorLight) {
                 auto color = pEffect->light.m_color;
                 auto fColorMult = pEffect->light.m_nShadowColorMultiplier * fIntensity / 256.0F;
-                color.red    = static_cast<unsigned char>(static_cast<float>(color.red) * fColorMult);
-                color.green  = static_cast<unsigned char>(static_cast<float>(color.green) * fColorMult);
-                color.blue   = static_cast<unsigned char>(static_cast<float>(color.blue) * fColorMult);
+                color.red    = static_cast<uint8>(static_cast<float>(color.red) * fColorMult);
+                color.green  = static_cast<uint8>(static_cast<float>(color.green) * fColorMult);
+                color.blue   = static_cast<uint8>(static_cast<float>(color.blue) * fColorMult);
 
-                CShadows::StoreStaticShadow(reinterpret_cast<unsigned int>(this) + iFxInd,
+                CShadows::StoreStaticShadow(reinterpret_cast<uint32>(this) + iFxInd,
                                             eShadowType::SHADOW_ADDITIVE,
                                             pEffect->light.m_pShadowTex,
                                             &vecEffPos,
@@ -2317,7 +2317,7 @@ void CEntity::ProcessLightsForEntity()
                                             0.0F);
             }
             else if (bDoNoColorLight) {
-                CShadows::StoreStaticShadow(reinterpret_cast<unsigned int>(this) + iFxInd,
+                CShadows::StoreStaticShadow(reinterpret_cast<uint32>(this) + iFxInd,
                                             eShadowType::SHADOW_ADDITIVE,
                                             pEffect->light.m_pShadowTex,
                                             &vecEffPos,
@@ -2340,7 +2340,7 @@ void CEntity::ProcessLightsForEntity()
     }
 }
 
-// Converted from thiscall void CEntity::RemoveEscalatorsForEntity(void) 0x717900
+// 0x717900
 void CEntity::RemoveEscalatorsForEntity()
 {
     for (auto& pEscalator : CEscalators::aEscalators) {
@@ -2355,7 +2355,7 @@ void CEntity::RemoveEscalatorsForEntity()
     }
 }
 
-// Converted from thiscall bool CEntity::IsEntityOccluded(void) 0x71FAE0
+// 0x71FAE0
 bool CEntity::IsEntityOccluded()
 {
     CVector vecCenter;
@@ -2373,7 +2373,7 @@ bool CEntity::IsEntityOccluded()
     if (COcclusion::NumActiveOccluders <= 0)
         return false;
 
-    for (int32_t iOccInd = 0; iOccInd < COcclusion::NumActiveOccluders; ++iOccInd) {
+    for (int32 iOccInd = 0; iOccInd < COcclusion::NumActiveOccluders; ++iOccInd) {
         auto& pActiveOccluder = COcclusion::aActiveOccluders[iOccInd];
         auto fDepth = vecScreenPos.z - fBoundRadius;
         if (static_cast<float>(pActiveOccluder.m_wDepth) >= fDepth)

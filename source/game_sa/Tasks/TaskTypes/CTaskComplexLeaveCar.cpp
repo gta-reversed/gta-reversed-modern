@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-CTaskComplexLeaveCar::CTaskComplexLeaveCar(CVehicle* pTargetVehicle, int nTargetDoor, int nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut)
+CTaskComplexLeaveCar::CTaskComplexLeaveCar(CVehicle* pTargetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut)
 {
     m_nTargetDoor = nTargetDoor;
     m_nDelayTime = nDelayTime;
@@ -30,9 +30,9 @@ CTaskComplexLeaveCar::~CTaskComplexLeaveCar()
         delete m_pTaskUtilityLineUpPedWithCar;
 }
 
-CTaskComplexLeaveCar* CTaskComplexLeaveCar::Constructor(CVehicle* pTargetVehicle, int nTargetDoor, int nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut)
+CTaskComplexLeaveCar* CTaskComplexLeaveCar::Constructor(CVehicle* pTargetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut)
 {
-    return plugin::CallMethodAndReturn< CTaskComplexLeaveCar*, 0x63B8C0, CTaskComplexLeaveCar*, CVehicle*, int, int, bool, bool>
+    return plugin::CallMethodAndReturn< CTaskComplexLeaveCar*, 0x63B8C0, CTaskComplexLeaveCar*, CVehicle*, int32, int32, bool, bool>
         (this, pTargetVehicle, nTargetDoor, nDelayTime, bSensibleLeaveCar, bForceGetOut);
 }
 
@@ -41,9 +41,9 @@ CTask* CTaskComplexLeaveCar::Clone()
     return plugin::CallMethodAndReturn<CTask*, 0x63D9E0, CTask*>(this);
 }
 
-bool CTaskComplexLeaveCar::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskComplexLeaveCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x641100, CTask*, CPed*, int, CEvent*>(this, ped, priority, _event);
+    return plugin::CallMethodAndReturn<bool, 0x641100, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
 }
 
 CTask* CTaskComplexLeaveCar::CreateNextSubTask(CPed* ped)

@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CVector.h"
 #include "CVector2D.h"
@@ -24,17 +24,17 @@ public:
     bool m_bBlockedLOS;
     union
     {
-        unsigned char m_nFireGunThisFrame;
+        uint8 m_nFireGunThisFrame;
         struct
         {
-                unsigned char bRightHand : 1;
-                unsigned char bLefttHand : 1;
+                uint8 bRightHand : 1;
+                uint8 bLefttHand : 1;
         };
     };
     bool m_bSkipAim;
 
-    unsigned char m_nNextCommand;   // 0x1 reloading - 0x2 firing
-    unsigned char m_nLastCommand;	// active command - 0x1 reloading - 0x2 firing
+    uint8 m_nNextCommand;   // 0x1 reloading - 0x2 firing
+    uint8 m_nLastCommand;	// active command - 0x1 reloading - 0x2 firing
 private:
     char _pad[3];
 public:
@@ -46,21 +46,21 @@ public:
     CAnimBlendAssociation *m_pAnim;
 
     CWeaponInfo *m_pWeaponInfo;
-    unsigned short m_nBurstLength;
-    unsigned short m_nBurstShots;
+    uint16 m_nBurstLength;
+    uint16 m_nBurstShots;
 
-    unsigned char m_nCountDownFrames;
+    uint8 m_nCountDownFrames;
     bool m_ArmIKInUse;
     bool m_LookIKInUse;
     bool m_bAimImmediate;
 
-    CTaskSimpleUseGun* Constructor(CEntity *pTargetEntity, CVector vecTarget, unsigned char nCommand, unsigned short nBurstLength = 1, bool bAimImmediate = false);
+    CTaskSimpleUseGun* Constructor(CEntity *pTargetEntity, CVector vecTarget, uint8 nCommand, uint16 nBurstLength = 1, bool bAimImmediate = false);
     bool ControlGunMove(CVector2D* moveSpeed);
     bool PlayerPassiveControlGun();
     static bool RequirePistolWhip(CPed* pPed, CEntity* pTargetEntity);
     bool ControlGun(CPed* pPed, CEntity* target, char nCount);
-    int SkipAim(CPed* pPed);
-    int ClearAnim(CPed* pPed);
+    int32 SkipAim(CPed* pPed);
+    int32 ClearAnim(CPed* pPed);
 };
 
 VALIDATE_SIZE(CTaskSimpleUseGun, 0x3C);

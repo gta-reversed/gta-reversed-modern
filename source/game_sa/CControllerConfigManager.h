@@ -99,8 +99,8 @@ enum eControllerType {
 
 class CControllerKey {
 public:
-    unsigned int keyCode;
-    unsigned int priority;
+    uint32 keyCode;
+    uint32 priority;
 };
 
 class CControllerAction {
@@ -110,19 +110,19 @@ public:
 
 class CControllerConfigManager {
 public:
-    char field_0;
-    char field_1;
-    char field_2;
-    char field_3;
-    DIJOYSTATE2 m_prevPadState;
-    DIJOYSTATE2 m_currPadState;
-    char m_aszEventNames[59][40];
-    char field_B5C[17]; // pad button states
-    char _pad1[3];
+    char              field_0;
+    char              field_1;
+    char              field_2;
+    char              field_3;
+    DIJOYSTATE2       m_prevPadState;
+    DIJOYSTATE2       m_currPadState;
+    char              m_aszEventNames[59][40];
+    char              field_B5C[17]; // pad button states
+    char              _pad1[3];
     CControllerAction m_actions[59];
-    char field_12D0[16];
-    char field_12E0;
-    char _pad2[3];
+    char              field_12D0[16];
+    char              field_12E0;
+    char              _pad2[3];
 
 public:
     static void InjectHooks();
@@ -138,10 +138,10 @@ public:
     static void ReInitControls();
 
     void StoreMouseButtonState(eMouseButtons button, bool state);
-    void UpdateJoyInConfigMenus_ButtonDown(ePadButton button, int padNumber);
-    void AffectControllerStateOn_ButtonDown_DebugStuff(int, eControllerType);
-    void UpdateJoyInConfigMenus_ButtonUp(ePadButton button, int padNumber);
-    void AffectControllerStateOn_ButtonUp_DebugStuff(int, eControllerType);
+    void UpdateJoyInConfigMenus_ButtonDown(ePadButton button, int32 padNumber);
+    void AffectControllerStateOn_ButtonDown_DebugStuff(int32, eControllerType);
+    void UpdateJoyInConfigMenus_ButtonUp(ePadButton button, int32 padNumber);
+    void AffectControllerStateOn_ButtonUp_DebugStuff(int32, eControllerType);
     void ClearSimButtonPressCheckers();
 
     bool GetJoyButtonJustUp();
@@ -151,7 +151,7 @@ public:
     bool GetIsMouseButtonDown(RsKeyCodes key);
     bool GetIsMouseButtonUp(RsKeyCodes key);
     bool GetIsMouseButtonJustUp(RsKeyCodes key);
-    bool GetIsKeyBlank(int a1, eControllerType controller);
+    bool GetIsKeyBlank(int32 a1, eControllerType controller);
     eActionType GetActionType(eControllerAction);
     char* GetControllerSettingTextMouse(eControllerAction action);
     char* GetControllerSettingTextJoystick(eControllerAction action);
@@ -160,7 +160,7 @@ public:
     void MakeControllerActionsBlank();
     void AffectPadFromKeyBoard();
     void AffectPadFromMouse();
-    void DeleteMatchingActionInitiators(eControllerAction action, int a2, eControllerType type);
+    void DeleteMatchingActionInitiators(eControllerAction action, int32 a2, eControllerType type);
 };
 
 VALIDATE_SIZE(CControllerConfigManager, 0x12E4);

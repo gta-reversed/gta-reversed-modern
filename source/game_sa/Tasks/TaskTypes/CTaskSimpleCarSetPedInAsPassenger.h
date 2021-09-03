@@ -6,12 +6,12 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CVehicle.h"
 #include "CTaskUtilityLineUpPedWithCar.h"
 
-class  CTaskSimpleCarSetPedInAsPassenger : public CTaskSimple {
+class CTaskSimpleCarSetPedInAsPassenger : public CTaskSimple {
 public:
     bool m_bIsFinished;
 private:
@@ -19,21 +19,21 @@ private:
 public:
     CAnimBlendAssociation* m_pAnim;
     CVehicle* m_pTargetVehicle;
-    int m_iTargetDoor;
+    int32 m_iTargetDoor;
     CTaskUtilityLineUpPedWithCar* m_pUtility;
     bool m_bWarpingInToCar;
-    unsigned char m_nDoorFlagsToClear;
-    unsigned char m_nNumGettingInToClear;
+    uint8 m_nDoorFlagsToClear;
+    uint8 m_nNumGettingInToClear;
 private:
     char _pad2[1];
 public:
 
-    CTaskSimpleCarSetPedInAsPassenger(CVehicle *pTargetVehicle, int nTargetDoor, CTaskUtilityLineUpPedWithCar *pUtility);
+    CTaskSimpleCarSetPedInAsPassenger(CVehicle *pTargetVehicle, int32 nTargetDoor, CTaskUtilityLineUpPedWithCar *pUtility);
     ~CTaskSimpleCarSetPedInAsPassenger();
 
     CTask* Clone() override;
     eTaskType GetId() override { return TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override { return false; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; }
     bool ProcessPed(CPed* ped) override;
 
 };

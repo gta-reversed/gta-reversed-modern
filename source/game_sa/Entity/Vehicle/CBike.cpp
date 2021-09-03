@@ -12,17 +12,17 @@ void CBike::InjectHooks()
     ReversibleHooks::Install("CBike", "ProcessBuoyancy", 0x6B5FB0, &CBike::ProcessBuoyancy);
 }
 
-// Converted from thiscall void CBike::CBike(int modelIndex,uchar createdBy) 0x6BF430
-CBike::CBike(int modelIndex, unsigned char createdBy) : CVehicle(plugin::dummy) {
-    plugin::CallMethod<0x6BF430, CBike*, int, unsigned char>(this, modelIndex, createdBy);
+// 0x6BF430
+CBike::CBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(plugin::dummy) {
+    plugin::CallMethod<0x6BF430, CBike*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
 
-// Converted from void CBike::ProcessAI(uint &) 0x0
-void CBike::ProcessAI(unsigned int& arg0) {
-    ((void(__thiscall*)(CBike*, unsigned int&))(*(void***)this)[66])(this, arg0);
+// 0x0
+void CBike::ProcessAI(uint32& arg0) {
+    ((void(__thiscall*)(CBike*, uint32&))(*(void***)this)[66])(this, arg0);
 }
 
-// Converted from thiscall void CBike::SetupModelNodes(void) 0x6B5960
+// 0x6B5960
 void CBike::SetupModelNodes() {
     ((void(__thiscall*)(CBike*))0x6B5960)(this);
 }
@@ -32,28 +32,28 @@ void CBike::dmgDrawCarCollidingParticles(CVector const& position, float power, e
     // NOP
 }
 
-// Converted from cdecl bool CBike::DamageKnockOffRider(CVehicle *,float,ushort,CEntity *,CVector &,CVector &) 0x6B5A10
-bool CBike::DamageKnockOffRider(CVehicle* arg0, float arg1, unsigned short arg2, CEntity* arg3, CVector& arg4, CVector& arg5) {
-    return ((bool(__cdecl*)(CVehicle*, float, unsigned short, CEntity*, CVector&, CVector&))0x6B5A10)(arg0, arg1, arg2, arg3, arg4, arg5);
+// 0x6B5A10
+bool CBike::DamageKnockOffRider(CVehicle* arg0, float arg1, uint16 arg2, CEntity* arg3, CVector& arg4, CVector& arg5) {
+    return ((bool(__cdecl*)(CVehicle*, float, uint16, CEntity*, CVector&, CVector&))0x6B5A10)(arg0, arg1, arg2, arg3, arg4, arg5);
 }
 
 // dummy function
 // 0x6B5F40
-CPed* CBike::KnockOffRider(eWeaponType arg0, unsigned char arg1, CPed* arg2, bool arg3) {
+CPed* CBike::KnockOffRider(eWeaponType arg0, uint8 arg1, CPed* arg2, bool arg3) {
     return arg2;
 }
 
-// Converted from thiscall void CBike::SetRemoveAnimFlags(CPed *ped) 0x6B5F50
+// 0x6B5F50
 void CBike::SetRemoveAnimFlags(CPed* ped) {
     ((void(__thiscall*)(CBike*, CPed*))0x6B5F50)(this, ped);
 }
 
-// Converted from thiscall void CBike::ReduceHornCounter(void) 0x6B5F90
+// 0x6B5F90
 void CBike::ReduceHornCounter() {
     ((void(__thiscall*)(CBike*))0x6B5F90)(this);
 }
 
-// Converted from thiscall void CBike::ProcessBuoyancy(void) 0x6B5FB0
+// 0x6B5FB0
 void CBike::ProcessBuoyancy() {
     CVector vecBuoyancyTurnPoint;
     CVector vecBuoyancyForce;
@@ -99,7 +99,7 @@ void CBike::ProcessBuoyancy() {
             vehicleFlags.bEngineOn = false;
         }
 
-        for (int iPassengerInd = 0; iPassengerInd < m_nMaxPassengers; ++iPassengerInd) {
+        for (int32 iPassengerInd = 0; iPassengerInd < m_nMaxPassengers; ++iPassengerInd) {
             auto pCurPassenger = m_apPassengers[iPassengerInd];
             ProcessPedInVehicleBuoyancy(pCurPassenger, false);
         }
@@ -144,12 +144,12 @@ inline void CBike::ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver)
     }
 }
 
-// Converted from thiscall void CBike::ResetSuspension(void) 0x6B6740
+// 0x6B6740
 void CBike::ResetSuspension() {
     ((void(__thiscall*)(CBike*))0x6B6740)(this);
 }
 
-// Converted from thiscall bool CBike::GetAllWheelsOffGround(void) 0x6B6790
+// 0x6B6790
 bool CBike::GetAllWheelsOffGround() {
     return ((bool(__thiscall*)(CBike*))0x6B6790)(this);
 }
@@ -159,48 +159,48 @@ void CBike::DebugCode() {
     // NOP
 }
 
-// Converted from thiscall void CBike::DoSoftGroundResistance(uint &) 0x6B6D40
-void CBike::DoSoftGroundResistance(unsigned int& arg0) {
-    ((void(__thiscall*)(CBike*, unsigned int&))0x6B6D40)(this, arg0);
+// 0x6B6D40
+void CBike::DoSoftGroundResistance(uint32& arg0) {
+    ((void(__thiscall*)(CBike*, uint32&))0x6B6D40)(this, arg0);
 }
 
-// Converted from thiscall void CBike::PlayHornIfNecessary(void) 0x6B7130
+// 0x6B7130
 void CBike::PlayHornIfNecessary() {
     ((void(__thiscall*)(CBike*))0x6B7130)(this);
 }
 
-// Converted from thiscall void CBike::CalculateLeanMatrix(void) 0x6B7150
+// 0x6B7150
 void CBike::CalculateLeanMatrix() {
     ((void(__thiscall*)(CBike*))0x6B7150)(this);
 }
 
-// Converted from cdecl void CBike::ProcessRiderAnims(CPed *rider,CVehicle *vehicle,CRideAnimData *rideData,tBikeHandlingData *handling) 0x6B7280
+// 0x6B7280
 void CBike::ProcessRiderAnims(CPed* rider, CVehicle* vehicle, CRideAnimData* rideData, tBikeHandlingData* handling) {
     ((void(__cdecl*)(CPed*, CVehicle*, CRideAnimData*, tBikeHandlingData*))0x6B7280)(rider, vehicle, rideData, handling);
 }
 
-// Converted from thiscall void CBike::FixHandsToBars(CPed *rider) 0x6B7F90
+// 0x6B7F90
 void CBike::FixHandsToBars(CPed* rider) {
     ((void(__thiscall*)(CBike*, CPed*))0x6B7F90)(this, rider);
 }
 
-// Converted from thiscall void CBike::PlaceOnRoadProperly(void) 0x6BEEB0
+// 0x6BEEB0
 void CBike::PlaceOnRoadProperly() {
     ((void(__thiscall*)(CBike*))0x6BEEB0)(this);
 }
 
-// Converted from thiscall void CBike::GetCorrectedWorldDoorPosition(CVector &out,CVector,CVector) 0x6BF230
+// 0x6BF230
 void CBike::GetCorrectedWorldDoorPosition(CVector& out, CVector arg1, CVector arg2) {
     ((void(__thiscall*)(CBike*, CVector&, CVector, CVector))0x6BF230)(this, out, arg1, arg2);
 }
 
 // 0x6BEA10
-void CBike::BlowUpCar(CEntity* damager, unsigned char bHideExplosion) {
+void CBike::BlowUpCar(CEntity* damager, uint8 bHideExplosion) {
     return BlowUpCar_Reversed(damager, bHideExplosion);
 }
 
-void CBike::BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion) {
-    plugin::CallMethod<0x6BEA10, CBike*, CEntity*, unsigned char>(this, damager, bHideExplosion);
+void CBike::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) {
+    plugin::CallMethod<0x6BEA10, CBike*, CEntity*, uint8>(this, damager, bHideExplosion);
 }
 
 // 0x6B7050

@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CAnimBlendAssociation.h"
 #include "CEntity.h"
@@ -22,7 +22,7 @@ public:
     CAnimBlendAssociation *m_pAnim;
     CEntity *m_pTarget;
     CVector m_vecPosition;
-    unsigned int m_nStartTime;
+    uint32 m_nStartTime;
 
     CTaskSimpleThrowProjectile* Constructor(CEntity* pTarget, CVector Posn);
     bool ControlThrow(bool bUpdateStartTime, CEntity* pEntity, CEntity* pEntity2);

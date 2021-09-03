@@ -1,4 +1,5 @@
 #pragma once
+
 #include "CEventEditableResponse.h"
 #include "CVector.h"
 
@@ -6,20 +7,20 @@ class CVehicle;
 class CEventPotentialWalkIntoVehicle : public CEventEditableResponse {
 public:
     CVehicle* m_vehicle;
-    std::int32_t m_moveState;
+    int32     m_moveState;
 
     static void InjectHooks();
 
-    CEventPotentialWalkIntoVehicle(CVehicle* vehicle, std::int32_t moveState);
+    CEventPotentialWalkIntoVehicle(CVehicle* vehicle, int32 moveState);
     ~CEventPotentialWalkIntoVehicle();
 private:
-    CEventPotentialWalkIntoVehicle* Constructor(CVehicle* vehicle, std::int32_t moveState);
+    CEventPotentialWalkIntoVehicle* Constructor(CVehicle* vehicle, int32 moveState);
 public:
-    eEventType GetEventType() override { return EVENT_POTENTIAL_WALK_INTO_VEHICLE; }
-    bool TakesPriorityOver(CEvent* refEvent) override { return true; }
+    eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_VEHICLE; }
+    bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
     CEventPotentialWalkIntoVehicle* CloneEditable() override { return new CEventPotentialWalkIntoVehicle(m_vehicle, m_moveState); }
-    std::int32_t GetEventPriority() override { return 29; }
-    std::int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 29; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
 private:
     bool AffectsPed_Reversed(CPed* ped);
@@ -31,20 +32,20 @@ class CObject;
 class CEventPotentialWalkIntoObject : public CEventEditableResponse {
 public:
     CObject* m_object;
-    std::int32_t m_moveState;
+    int32 m_moveState;
 
     static void InjectHooks();
 
-    CEventPotentialWalkIntoObject(CObject* object, std::int32_t moveState);
+    CEventPotentialWalkIntoObject(CObject* object, int32 moveState);
     ~CEventPotentialWalkIntoObject();
 private:
-    CEventPotentialWalkIntoObject* Constructor(CObject* object, std::int32_t moveState);
+    CEventPotentialWalkIntoObject* Constructor(CObject* object, int32 moveState);
 public:
-    eEventType GetEventType() override { return EVENT_POTENTIAL_WALK_INTO_OBJECT; }
-    bool TakesPriorityOver(CEvent* refEvent) override { return true; }
+    eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_OBJECT; }
+    bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
     CEventPotentialWalkIntoObject* CloneEditable() override { return new CEventPotentialWalkIntoObject(m_object, m_moveState); }
-    std::int32_t GetEventPriority() override { return 27; }
-    std::int32_t GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 27; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
 private:
     bool AffectsPed_Reversed(CPed* ped);
@@ -57,18 +58,18 @@ public:
     CVector m_firePos;
     float m_fireSize;
     float m_radius;
-    std::int32_t m_moveState;
+    int32 m_moveState;
 
     static void InjectHooks();
 
-    CEventPotentialWalkIntoFire(CVector* firePos, float fireSize, std::int32_t moveState);
+    CEventPotentialWalkIntoFire(CVector* firePos, float fireSize, int32 moveState);
     ~CEventPotentialWalkIntoFire() {}
 private:
-    CEventPotentialWalkIntoFire* Constructor(CVector* firePos, float fireSize, std::int32_t moveState);
+    CEventPotentialWalkIntoFire* Constructor(CVector* firePos, float fireSize, int32 moveState);
 public:
-    eEventType GetEventType() override { return EVENT_POTENTIAL_WALK_INTO_FIRE; }
-    std::int32_t GetEventPriority() override { return 31; }
-    std::int32_t GetLifeTime() override { return 0; }
+    eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_FIRE; }
+    int32 GetEventPriority() const override { return 31; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     CEventPotentialWalkIntoFire* CloneEditable() override { return new CEventPotentialWalkIntoFire(&m_firePos, m_fireSize, m_moveState); }
 private:
@@ -82,25 +83,25 @@ class CEventPotentialWalkIntoPed : public CEventEditableResponse {
 public:
     CVector m_targetPoint;
     CPed* m_ped;
-    std::int32_t m_moveState;
+    int32 m_moveState;
 
     static void InjectHooks();
 
-    CEventPotentialWalkIntoPed(CPed* ped, CVector* targetPoint, std::int32_t moveState);
+    CEventPotentialWalkIntoPed(CPed* ped, CVector* targetPoint, int32 moveState);
     ~CEventPotentialWalkIntoPed();
 private:
-    CEventPotentialWalkIntoPed* Constructor(CPed* ped, CVector* targetPoint, std::int32_t moveState);
+    CEventPotentialWalkIntoPed* Constructor(CPed* ped, CVector* targetPoint, int32 moveState);
 public:
-    eEventType GetEventType() override { return EVENT_POTENTIAL_WALK_INTO_PED; }
-    std::int32_t GetEventPriority() override { return 28; }
-    std::int32_t GetLifeTime() override { return 0; }
+    eEventType GetEventType() const override { return EVENT_POTENTIAL_WALK_INTO_PED; }
+    int32 GetEventPriority() const override { return 28; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
-    CEntity* GetSourceEntity() override { return m_ped; }
-    bool TakesPriorityOver(CEvent* refEvent) override;
+    CEntity* GetSourceEntity() const override { return m_ped; }
+    bool TakesPriorityOver(const CEvent& refEvent) override;
     CEventPotentialWalkIntoPed* CloneEditable() override { return new CEventPotentialWalkIntoPed(m_ped, &m_targetPoint, m_moveState); }
 private:
     bool AffectsPed_Reversed(CPed* ped);
-    bool TakesPriorityOver_Reversed(CEvent* refEvent);
+    bool TakesPriorityOver_Reversed(const CEvent& refEvent);
 };
 
 VALIDATE_SIZE(CEventPotentialWalkIntoPed, 0x28);

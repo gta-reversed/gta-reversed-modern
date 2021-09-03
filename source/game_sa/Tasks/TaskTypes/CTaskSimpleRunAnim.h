@@ -6,38 +6,36 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CTaskSimpleAnim.h"
 #include "CAnimBlendAssociation.h"
 
-
-class  CTaskSimpleRunAnim : public CTaskSimpleAnim {
+class CTaskSimpleRunAnim : public CTaskSimpleAnim {
 public:
-    unsigned int m_nAnimGroup; // see eAnimGroup
-    unsigned int m_nAnimId; // see eAnimID
+    AssocGroupId m_nAnimGroup;
+    AnimationId m_nAnimId;
     float m_fBlendDelta;
-    unsigned short m_nTaskType;
-private:
-    short __pad;
-private:
-    CTaskSimpleRunAnim* Constructor(unsigned int animGroup, unsigned int animID, float fBlendDelta, bool bHoldLastFrame);
-    CTaskSimpleRunAnim* Constructor2(unsigned int animGroup, unsigned int animID, float fBlendDelta, unsigned int nTaskType,
-        char* pTaskName, bool bHoldLastFrame);
-public:
-    CTaskSimpleRunAnim(unsigned int animGroup, unsigned int animID, float fBlendDelta, unsigned int nTaskType,
-        char* pTaskName _IGNORED_, bool bHoldLastFrame);
-    CTaskSimpleRunAnim(unsigned int animGroup, unsigned int animID, float fBlendDelta, bool bHoldLastFrame);
+    uint16 m_nTaskType;
+    char _pad[2];
 
-    static void InjectHooks();
+public:
+    CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, bool bHoldLastFrame);
+    CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, int32 nTaskType, const char* taskName _IGNORED_, bool bHoldLastFrame);
 
     CTask* Clone() override;
     eTaskType GetId() override { return static_cast<eTaskType>(m_nTaskType); }
     bool ProcessPed(CPed* ped) override;
 
+    void StartAnim(CPed* ped);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskSimpleRunAnim* Constructor(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, bool bHoldLastFrame);
+    CTaskSimpleRunAnim* Constructor2(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, int32 nTaskType, const char* taskName _IGNORED_, bool bHoldLastFrame);
+
     CTask* Clone_Reversed();
     bool ProcessPed_Reversed(CPed* ped);
-
-    void StartAnim(CPed* ped);
 };
 
 VALIDATE_SIZE(CTaskSimpleRunAnim, 0x20);

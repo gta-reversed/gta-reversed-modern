@@ -2,10 +2,10 @@
 
 void CTaskComplexWalkRoundObject::InjectHooks()
 {
-    HookInstall(0x655020, &CTaskComplexWalkRoundObject::Constructor);
+    ReversibleHooks::Install("CTaskComplexWalkRoundObject", "CTaskComplexWalkRoundObject", 0x655020, &CTaskComplexWalkRoundObject::Constructor);
 }
 
-CTaskComplexWalkRoundObject::CTaskComplexWalkRoundObject(std::int32_t moveState, CVector* targetPoint, CEntity* object)
+CTaskComplexWalkRoundObject::CTaskComplexWalkRoundObject(int32 moveState, CVector* targetPoint, CEntity* object)
 {
     m_moveState = moveState;
     m_targetPoint = *targetPoint;
@@ -29,7 +29,7 @@ CTaskComplexWalkRoundObject::~CTaskComplexWalkRoundObject()
         CPools::ms_pPointRoutePool->Delete(m_pointRoute);
 }
 
-CTaskComplexWalkRoundObject* CTaskComplexWalkRoundObject::Constructor(std::int32_t moveState, CVector* targetPoint, CEntity* object)
+CTaskComplexWalkRoundObject* CTaskComplexWalkRoundObject::Constructor(int32 moveState, CVector* targetPoint, CEntity* object)
 {
     this->CTaskComplexWalkRoundObject::CTaskComplexWalkRoundObject(moveState, targetPoint, object);
     return this;

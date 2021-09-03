@@ -1,11 +1,9 @@
 #include "StdInc.h"
 
-int& CCredits::m_nCreditsStartTime = *(int*)0xC6E978;
-bool& CCredits::m_bCreditsGoing = *(bool*)0xC6E97C;
+#include "CCredits.h"
 
-//NOTSA
-float CCredits::m_Position = 0.0f;
-float CCredits::m_CurrentOffset = 0.0f;
+uint32& CCredits::CreditsStartTime = *(uint32*)0xC6E978;
+bool& CCredits::bCreditsGoing = *(bool*)0xC6E97C;
 
 void CCredits::InjectHooks() {
     ReversibleHooks::Install("CCredits", "Render", 0x53D5B0, &CCredits::Render);
@@ -18,26 +16,27 @@ void CCredits::InjectHooks() {
 
 // 0x7170E0
 void CCredits::Start() {
-    m_bCreditsGoing = true;
-    m_nCreditsStartTime = CTimer::m_snTimeInMilliseconds;
+    bCreditsGoing = true;
+    CreditsStartTime = CTimer::GetTimeInMS();
 }
 
 // 0x717100
 void CCredits::Stop() {
-    m_bCreditsGoing = false;
+    bCreditsGoing = false;
 }
 
 // 0x53D5B0
 void CCredits::Render() {
-    if (m_bCreditsGoing && !FrontEndMenuManager.m_bMenuActive) {
+    if (bCreditsGoing && !FrontEndMenuManager.m_bMenuActive) {
         RenderCredits();
     }
 }
 
 // 0x5A8660
-void CCredits::PrintCreditText(float scaleX, float scaleY, const char* text, float& position, float currentOffset, bool highlighted) {
-    const float minPosY = 20.0f;
-    float pos = position + SCREEN_HEIGHT + minPosY - currentOffset;
+void CCredits::PrintCreditText(float scaleX, float scaleY, const char* text, uint32& position, float currentOffset, bool highlighted) {
+    const uint32 minPosY = 20;
+    const float    pos = position + SCREEN_HEIGHT + minPosY - currentOffset;
+
     if (pos > minPosY && pos < SCREEN_HEIGHT - minPosY) {
         CFont::SetScale(scaleX, scaleY);
         CFont::SetColor({0, 0, 0, 255});
@@ -50,857 +49,860 @@ void CCredits::PrintCreditText(float scaleX, float scaleY, const char* text, flo
 
         CFont::PrintString((SCREEN_WIDTH / 2.0f - 1), pos - 1.0f, text);
     }
-    position += scaleY * minPosY;
+
+    position += (uint32)scaleY * minPosY;
 }
 
 // 0x5A87C0
-void CCredits::PrintCreditSpace(float spaceSize, float& position) {
-    position = (spaceSize * 25.0f + position);
-}
-
-void CCredits::PrintCreditTextHelper(const char* textKey, float scale, bool highlighted) {
-    auto text = TheText.Get(textKey);
-    CCredits::PrintCreditText(scale, scale, text, CCredits::m_Position, CCredits::m_CurrentOffset, highlighted);
+void CCredits::PrintCreditSpace(float spaceSize, uint32& position) {
+    position += (uint32)(spaceSize * 25.0f);
 }
 
 // 0x5A87F0
 void CCredits::RenderCredits() {
-    static constexpr float ScaleBig = 1.1f;
-    static constexpr float ScaleSmall = 0.78f;
-    static constexpr float magic = 0.0435f;
-    static constexpr float magic_092f = 0.92f;
+    constexpr float SPACE_SMALL  = 0.5f;
+    constexpr float SPACE_NORMAL = 1.0f;
+    constexpr float SPACE_BIG    = 1.5f;
+
+    constexpr float SCALE_SMALL = 0.78f;
+    constexpr float SCALE_BIG = 1.1f;
 
     DefinedState2d();
 
-    m_Position = 0.0f;
-    m_CurrentOffset = float(CTimer::m_snTimeInMilliseconds - CCredits::m_nCreditsStartTime) * magic;
+    uint32 lineOffset = 0;
+    float    scrollOffset = float(CTimer::GetTimeInMS() - CreditsStartTime) * 0.0435f;
     
     CFont::SetBackground(false, false);
-    CFont::SetCentreSize(SCREEN_WIDTH * magic_092f);
-    CFont::SetOrientation(ALIGN_CENTER);
+    CFont::SetCentreSize(SCREEN_WIDTH * 0.92f);
+    CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
     CFont::SetProportional(true);
-    CFont::SetFontStyle(FONT_SUBTITLES);
+    CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
     CFont::SetEdge(0);
     CFont::SetDropColor(CRGBA(0, 0, 255));
 
-    PrintCreditTextHelper("CRED000", ScaleBig, true);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED001", ScaleBig, true);
-    PrintCreditTextHelper("CRED002", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED003", ScaleBig, true);
-    PrintCreditTextHelper("CRED004", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED005", ScaleBig, true);
-    PrintCreditTextHelper("CRED006", ScaleBig, false);
-    PrintCreditTextHelper("CRED007", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED008", ScaleBig, true);
-    PrintCreditTextHelper("CRED009", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRD009A", ScaleBig, true);
-    PrintCreditTextHelper("CRD009B", ScaleBig, false);
-    PrintCreditTextHelper("CRD009C", ScaleBig, false);
-    PrintCreditTextHelper("CRD009D", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED019", ScaleBig, true);
-    PrintCreditTextHelper("CRED020", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED010", ScaleBig, true);
-    PrintCreditTextHelper("CRED011", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED012", ScaleBig, true);
-    PrintCreditTextHelper("CRED013", ScaleBig, false);
-    PrintCreditTextHelper("CRED014", ScaleBig, false);
-    PrintCreditTextHelper("CRD014A", ScaleBig, false);
-    PrintCreditTextHelper("CRED015", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED016", ScaleBig, true);
-    PrintCreditTextHelper("CRD016A", ScaleBig, false);
-    PrintCreditTextHelper("CRED017", ScaleBig, false);
-    PrintCreditTextHelper("CRED018", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED028", ScaleBig, true);
-    PrintCreditTextHelper("CRED029", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED030", ScaleBig, true);
-    PrintCreditTextHelper("CRED031", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED032", ScaleBig, true);
-    PrintCreditTextHelper("CRED033", ScaleBig, false);
-    PrintCreditTextHelper("CRED034", ScaleBig, false);
-    PrintCreditTextHelper("CRED035", ScaleBig, false);
-    PrintCreditTextHelper("CRED036", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED047", ScaleBig, true);
-    PrintCreditTextHelper("CRED048", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED049", ScaleBig, true);
-    PrintCreditTextHelper("CRED050", ScaleBig, false);
-    PrintCreditTextHelper("CRED051", ScaleBig, false);
-    PrintCreditTextHelper("CRED052", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED053", ScaleBig, true);
-    PrintCreditTextHelper("CRED054", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED055", ScaleBig, true);
-    PrintCreditTextHelper("CRED056", ScaleBig, false);
-    PrintCreditTextHelper("CRED057", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED058", ScaleBig, true);
-    PrintCreditTextHelper("CRED059", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED060", ScaleBig, true);
-    PrintCreditTextHelper("CRED061", ScaleBig, false);
-    PrintCreditTextHelper("CRED062", ScaleBig, false);
-    PrintCreditTextHelper("CRED063", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED021", ScaleBig, true);
-    PrintCreditTextHelper("CRED022", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED023", ScaleBig, true);
-    PrintCreditTextHelper("CRED024", ScaleBig, false);
-    PrintCreditTextHelper("CRED025", ScaleBig, false);
-    PrintCreditTextHelper("CRED026", ScaleBig, false);
-    PrintCreditTextHelper("CRED027", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED064", ScaleBig, true);
-    PrintCreditTextHelper("CRED065", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED066", ScaleBig, true);
-    PrintCreditTextHelper("CRED067", ScaleBig, false);
-    PrintCreditTextHelper("CRED068", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED069", ScaleBig, true);
-    PrintCreditTextHelper("CRED070", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED071", ScaleBig, true);
-    PrintCreditTextHelper("CRED072", ScaleBig, false);
-    PrintCreditTextHelper("CRED073", ScaleBig, false);
-    PrintCreditTextHelper("CRED074", ScaleBig, false);
-    PrintCreditTextHelper("CRED075", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED037", ScaleBig, true);
-    PrintCreditTextHelper("CRED038", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED039", ScaleBig, true);
-    PrintCreditTextHelper("CRED040", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED041", ScaleBig, true);
-    PrintCreditTextHelper("CRED042", ScaleBig, false);
-    PrintCreditTextHelper("CRED043", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED044", ScaleBig, true);
-    PrintCreditTextHelper("CRED991", ScaleBig, false);
-    PrintCreditTextHelper("CRED045", ScaleBig, false);
-    PrintCreditTextHelper("CRED046", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED076", ScaleBig, true);
-    PrintCreditTextHelper("CRED077", ScaleBig, false);
-    PrintCreditTextHelper("CRED078", ScaleBig, false);
-    PrintCreditTextHelper("CRED079", ScaleBig, false);
-    PrintCreditTextHelper("CRED080", ScaleBig, false);
-    PrintCreditTextHelper("CRED081", ScaleBig, false);
-    PrintCreditTextHelper("CRED100", ScaleBig, false);
-    PrintCreditTextHelper("CRED082", ScaleBig, false);
-    PrintCreditTextHelper("CRED083", ScaleBig, false);
-    PrintCreditTextHelper("CRED084", ScaleBig, false);
-    PrintCreditTextHelper("CRED085", ScaleBig, false);
-    PrintCreditTextHelper("CRED086", ScaleBig, false);
-    PrintCreditTextHelper("CRED087", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED088", ScaleBig, true);
-    PrintCreditTextHelper("CRED089", ScaleBig, false);
-    PrintCreditTextHelper("CRED090", ScaleBig, false);
-    PrintCreditTextHelper("CRED091", ScaleBig, false);
-    PrintCreditTextHelper("CRED092", ScaleBig, false);
-    PrintCreditTextHelper("CRED093", ScaleBig, false);
-    PrintCreditTextHelper("CRED094", ScaleBig, false);
-    PrintCreditTextHelper("CRED095", ScaleBig, false);
-    PrintCreditTextHelper("CRED096", ScaleBig, false);
-    PrintCreditTextHelper("CRED097", ScaleBig, false);
-    PrintCreditTextHelper("CRED098", ScaleBig, false);
-    PrintCreditTextHelper("CRED099", ScaleBig, false);
-    PrintCreditTextHelper("CRED101", ScaleBig, false);
-    PrintCreditTextHelper("CRED102", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED103", ScaleBig, true);
-    PrintCreditTextHelper("CRED104", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED105", ScaleBig, true);
-    PrintCreditTextHelper("CRED106", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED107", ScaleBig, true);
-    PrintCreditTextHelper("CRED108", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED109", ScaleBig, true);
-    PrintCreditTextHelper("CRED110", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED111", ScaleBig, true);
-    CCredits::m_Position += 25.0f;
-
-    PrintCreditTextHelper("CRED112", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED113", ScaleBig, true);
-    PrintCreditTextHelper("CRED114", ScaleBig, false);
-    PrintCreditTextHelper("CRED115", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED116", ScaleBig, true);
-    PrintCreditTextHelper("CRED117", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED118", ScaleBig, true);
-    PrintCreditTextHelper("CRED997", ScaleBig, false);
-    PrintCreditTextHelper("CRD118A", ScaleBig, false);
-    PrintCreditTextHelper("CRED119", ScaleBig, false);
-    PrintCreditTextHelper("CRED120", ScaleBig, false);
-    PrintCreditTextHelper("CRED996", ScaleBig, false);
-    PrintCreditTextHelper("CRD120A", ScaleBig, false);
-    PrintCreditTextHelper("CRED121", ScaleBig, false);
-    PrintCreditTextHelper("CRD121A", ScaleBig, false);
-    PrintCreditTextHelper("CRED995", ScaleBig, false);
-    PrintCreditTextHelper("CRED122", ScaleBig, false);
-    PrintCreditTextHelper("CRED994", ScaleBig, false);
-    PrintCreditTextHelper("CRED123", ScaleBig, false);
-    PrintCreditTextHelper("CRED124", ScaleBig, false);
-    PrintCreditTextHelper("CRED125", ScaleBig, false);
-    PrintCreditTextHelper("CRED126", ScaleBig, false);
-    PrintCreditTextHelper("CRD126A", ScaleBig, false);
-    PrintCreditTextHelper("CRD126B", ScaleBig, false);
-    PrintCreditTextHelper("CRED127", ScaleBig, false);
-    PrintCreditTextHelper("CRED128", ScaleBig, false);
-    PrintCreditTextHelper("CRED129", ScaleBig, false);
-    PrintCreditTextHelper("CRD129A", ScaleBig, false);
-    PrintCreditTextHelper("CRED130", ScaleBig, false);
-    PrintCreditTextHelper("CRED131", ScaleBig, false);
-    PrintCreditTextHelper("CRED132", ScaleBig, false);
-    PrintCreditTextHelper("CRED133", ScaleBig, false);
-    PrintCreditTextHelper("CRED134", ScaleBig, false);
-    PrintCreditTextHelper("CRED992", ScaleBig, false);
-    PrintCreditTextHelper("CRD134A", ScaleBig, false);
-    PrintCreditTextHelper("CRED135", ScaleBig, false);
-    PrintCreditTextHelper("CRED136", ScaleBig, false);
-    PrintCreditTextHelper("CRD136A", ScaleBig, false);
-    PrintCreditTextHelper("CRED137", ScaleBig, false);
-    PrintCreditTextHelper("CRED138", ScaleBig, false);
-    PrintCreditTextHelper("CRD138A", ScaleBig, false);
-    PrintCreditTextHelper("CRED139", ScaleBig, false);
-    PrintCreditTextHelper("CRED140", ScaleBig, false);
-    PrintCreditTextHelper("CRED141", ScaleBig, false);
-    PrintCreditTextHelper("CRED993", ScaleBig, false);
-    PrintCreditTextHelper("CRED142", ScaleBig, false);
-    PrintCreditTextHelper("CRED143", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED144", ScaleBig, true);
-    PrintCreditTextHelper("CRED145", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED146", ScaleBig, true);
-    PrintCreditTextHelper("CRED147", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED148", ScaleBig, true);
-    PrintCreditTextHelper("CRED149", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED150", ScaleBig, true);
-    PrintCreditTextHelper("CRED151", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED152", ScaleBig, true);
-    PrintCreditTextHelper("CRED153", ScaleBig, false);
-    PrintCreditTextHelper("CRD153A", ScaleBig, false);
-    PrintCreditTextHelper("CRED154", ScaleBig, false);
-    PrintCreditTextHelper("CRD154A", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED155", ScaleBig, true);
-    PrintCreditTextHelper("CRED156", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED157", ScaleBig, true);
-    PrintCreditTextHelper("CRED158", ScaleBig, false);
-    PrintCreditTextHelper("CRED159", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED199", ScaleBig, true);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED200", ScaleBig, true);
-    PrintCreditTextHelper("CRED201", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED202", ScaleBig, true);
-    PrintCreditTextHelper("CRED203", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED204", ScaleBig, true);
-    PrintCreditTextHelper("CRED205", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED206", ScaleBig, true);
-    PrintCreditTextHelper("CRED207", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED208", ScaleBig, true);
-    PrintCreditTextHelper("CRED209", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED210", ScaleBig, true);
-    PrintCreditTextHelper("CRED211", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED212", ScaleBig, true);
-    PrintCreditTextHelper("CRED213", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED214", ScaleBig, true);
-    PrintCreditTextHelper("CRED215", ScaleBig, false);
-    PrintCreditTextHelper("CRED216", ScaleBig, false);
-    PrintCreditTextHelper("CRED217", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED218", ScaleBig, true);
-    PrintCreditTextHelper("CRED219", ScaleBig, false);
-    PrintCreditTextHelper("CRED220", ScaleBig, false);
-    PrintCreditTextHelper("CRED221", ScaleBig, false);
-    PrintCreditTextHelper("CRED222", ScaleBig, false);
-    PrintCreditTextHelper("CRED223", ScaleBig, false);
-    PrintCreditTextHelper("CRED224", ScaleBig, false);
-    PrintCreditTextHelper("CRED225", ScaleBig, false);
-    PrintCreditTextHelper("CRED226", ScaleBig, false);
-    PrintCreditTextHelper("CRED227", ScaleBig, false);
-    PrintCreditTextHelper("CRED228", ScaleBig, false);
-    PrintCreditTextHelper("CRED229", ScaleBig, false);
-    PrintCreditTextHelper("CRED230", ScaleBig, false);
-    PrintCreditTextHelper("CRED231", ScaleBig, false);
-    PrintCreditTextHelper("CRED232", ScaleBig, false);
-    PrintCreditTextHelper("CRED233", ScaleBig, false);
-    PrintCreditTextHelper("CRED234", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED235", ScaleBig, true);
-    PrintCreditTextHelper("CRED236", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED237", ScaleBig, true);
-    PrintCreditTextHelper("CRED238", ScaleBig, false);
-    PrintCreditTextHelper("CRED239", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED240", ScaleBig, true);
-    PrintCreditTextHelper("CRED241", ScaleBig, false);
-    PrintCreditTextHelper("CRED242", ScaleBig, false);
-    PrintCreditTextHelper("CRED243", ScaleBig, false);
-    PrintCreditTextHelper("CRED244", ScaleBig, false);
-    PrintCreditTextHelper("CRED245", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED246", ScaleBig, true);
-    PrintCreditTextHelper("CRED247", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED248", ScaleBig, true);
-    PrintCreditTextHelper("CRED249", ScaleBig, false);
-    PrintCreditTextHelper("CRED250", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED251", ScaleBig, true);
-    PrintCreditTextHelper("CRED252", ScaleBig, false);
-    PrintCreditTextHelper("CRED253", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED254", ScaleBig, true);
-    PrintCreditTextHelper("CRED255", ScaleBig, false);
-    PrintCreditTextHelper("CRED256", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED257", ScaleBig, true);
-    PrintCreditTextHelper("CRED258", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED259", ScaleBig, true);
-    PrintCreditTextHelper("CRED260", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED261", ScaleBig, true);
-    CCredits::m_Position += 25.0f;
-
-    PrintCreditTextHelper("CRED262", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED263", ScaleBig, true);
-    PrintCreditTextHelper("CRED264", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED265", ScaleBig, true);
-    PrintCreditTextHelper("CRED266", ScaleBig, false);
-    PrintCreditTextHelper("CRED267", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED999", ScaleBig, true);
-    CCredits::m_Position += 25.0f;
-
-    PrintCreditTextHelper("CRED998", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED268", ScaleBig, true);
-    PrintCreditTextHelper("CRED269", ScaleBig, false);
-    PrintCreditTextHelper("CRED270", ScaleBig, false);
-    PrintCreditTextHelper("CRED271", ScaleBig, false);
-    PrintCreditTextHelper("CRED272", ScaleBig, false);
-    PrintCreditTextHelper("CRED273", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED274", ScaleBig, true);
-    PrintCreditTextHelper("CRED275", ScaleBig, false);
-    PrintCreditTextHelper("CRED276", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED277", ScaleBig, true);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED278", ScaleBig, true);
-    PrintCreditTextHelper("CRED279", ScaleSmall, false);
-    CCredits::PrintCreditSpace(0.5f, m_Position);
-
-    PrintCreditTextHelper("CRED280", ScaleSmall, false);
-    PrintCreditTextHelper("CRED281", ScaleSmall, false);
-    PrintCreditTextHelper("CRED282", ScaleSmall, false);
-    PrintCreditTextHelper("CRED283", ScaleSmall, false);
-    PrintCreditTextHelper("CRED284", ScaleSmall, false);
-    PrintCreditTextHelper("CRED285", ScaleSmall, false);
-    PrintCreditTextHelper("CRED286", ScaleSmall, false);
-    PrintCreditTextHelper("CRED287", ScaleSmall, false);
-    PrintCreditTextHelper("CRED288", ScaleSmall, false);
-    PrintCreditTextHelper("CRED289", ScaleSmall, false);
-    PrintCreditTextHelper("CRED290", ScaleSmall, false);
-    PrintCreditTextHelper("CRED291", ScaleSmall, false);
-    PrintCreditTextHelper("CRED292", ScaleSmall, false);
-    PrintCreditTextHelper("CRED293", ScaleSmall, false);
-    PrintCreditTextHelper("CRED294", ScaleSmall, false);
-    PrintCreditTextHelper("CRED295", ScaleSmall, false);
-    PrintCreditTextHelper("CRED296", ScaleSmall, false);
-    PrintCreditTextHelper("CRED297", ScaleSmall, false);
-    PrintCreditTextHelper("CRED298", ScaleSmall, false);
-    PrintCreditTextHelper("CRED299", ScaleSmall, false);
-    PrintCreditTextHelper("CRED300", ScaleSmall, false);
-    PrintCreditTextHelper("CRED301", ScaleSmall, false);
-    PrintCreditTextHelper("CRED302", ScaleSmall, false);
-    PrintCreditTextHelper("CRED303", ScaleSmall, false);
-    PrintCreditTextHelper("CRED304", ScaleSmall, false);
-    PrintCreditTextHelper("CRED305", ScaleSmall, false);
-    PrintCreditTextHelper("CRED306", ScaleSmall, false);
-    PrintCreditTextHelper("CRED307", ScaleSmall, false);
-    PrintCreditTextHelper("CRED308", ScaleSmall, false);
-    PrintCreditTextHelper("CRD308A", ScaleSmall, false);
-    PrintCreditTextHelper("CRD308B", ScaleSmall, false);
-    PrintCreditTextHelper("CRD308C", ScaleSmall, false);
-    PrintCreditTextHelper("CRD308D", ScaleSmall, false);
-    PrintCreditTextHelper("CRD308E", ScaleSmall, false);
-    PrintCreditTextHelper("CRD308F", ScaleSmall, false);
-    PrintCreditTextHelper("CRD308G", ScaleSmall, false);
-    PrintCreditTextHelper("CRD308H", ScaleSmall, false);
-    PrintCreditTextHelper("CRD308I", ScaleSmall, false);
-    PrintCreditTextHelper("CRD308J", ScaleSmall, false);
-    PrintCreditTextHelper("CRD308K", ScaleSmall, false);
-    PrintCreditTextHelper("CRD308L", ScaleSmall, false);
-    CCredits::PrintCreditSpace(0.5f, m_Position);
-
-    PrintCreditTextHelper("CRD308M", ScaleSmall, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-    CCredits::PrintCreditSpace(0.5f, m_Position);
-
-    PrintCreditTextHelper("CRD308N", ScaleSmall, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED309", ScaleBig, true);
-    PrintCreditTextHelper("CRED310", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED311", ScaleBig, true);
-    PrintCreditTextHelper("CRED312", ScaleBig, false);
-    PrintCreditTextHelper("CRED313", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED314", ScaleBig, true);
-    PrintCreditTextHelper("CRED315", ScaleSmall, false);
-    PrintCreditTextHelper("CRED316", ScaleSmall, false);
-    PrintCreditTextHelper("CRED317", ScaleSmall, false);
-    PrintCreditTextHelper("CRED318", ScaleSmall, false);
-    PrintCreditTextHelper("CRED319", ScaleSmall, false);
-    PrintCreditTextHelper("CRED320", ScaleSmall, false);
-    PrintCreditTextHelper("CRED321", ScaleSmall, false);
-    PrintCreditTextHelper("CRED322", ScaleSmall, false);
-    PrintCreditTextHelper("CRED323", ScaleSmall, false);
-    PrintCreditTextHelper("CRED324", ScaleSmall, false);
-    PrintCreditTextHelper("CRED325", ScaleSmall, false);
-    PrintCreditTextHelper("CRED326", ScaleSmall, false);
-    PrintCreditTextHelper("CRED327", ScaleSmall, false);
-    PrintCreditTextHelper("CRED328", ScaleSmall, false);
-    PrintCreditTextHelper("CRED329", ScaleSmall, false);
-    PrintCreditTextHelper("CRED330", ScaleSmall, false);
-    PrintCreditTextHelper("CRED331", ScaleSmall, false);
-    PrintCreditTextHelper("CRED332", ScaleSmall, false);
-    PrintCreditTextHelper("CRED333", ScaleSmall, false);
-    PrintCreditTextHelper("CRED334", ScaleSmall, false);
-    PrintCreditTextHelper("CRED335", ScaleSmall, false);
-    PrintCreditTextHelper("CRED336", ScaleSmall, false);
-    PrintCreditTextHelper("CRED337", ScaleSmall, false);
-    PrintCreditTextHelper("CRED338", ScaleSmall, false);
-    PrintCreditTextHelper("CRED339", ScaleSmall, false);
-    PrintCreditTextHelper("CRED340", ScaleSmall, false);
-    PrintCreditTextHelper("CRED341", ScaleSmall, false);
-    PrintCreditTextHelper("CRED342", ScaleSmall, false);
-    PrintCreditTextHelper("CRED343", ScaleSmall, false);
-    PrintCreditTextHelper("CRED344", ScaleSmall, false);
-    PrintCreditTextHelper("CRED345", ScaleSmall, false);
-    PrintCreditTextHelper("CRED346", ScaleSmall, false);
-    PrintCreditTextHelper("CRED347", ScaleSmall, false);
-    PrintCreditTextHelper("CRED348", ScaleSmall, false);
-    PrintCreditTextHelper("CRED349", ScaleSmall, false);
-    PrintCreditTextHelper("CRED350", ScaleSmall, false);
-    PrintCreditTextHelper("CRED351", ScaleSmall, false);
-    PrintCreditTextHelper("CRED352", ScaleSmall, false);
-    PrintCreditTextHelper("CRED353", ScaleSmall, false);
-    PrintCreditTextHelper("CRED354", ScaleSmall, false);
-    PrintCreditTextHelper("CRED355", ScaleSmall, false);
-    PrintCreditTextHelper("CRED356", ScaleSmall, false);
-    PrintCreditTextHelper("CRED357", ScaleSmall, false);
-    PrintCreditTextHelper("CRED358", ScaleSmall, false);
-    PrintCreditTextHelper("CRED359", ScaleSmall, false);
-    PrintCreditTextHelper("CRED360", ScaleSmall, false);
-    PrintCreditTextHelper("CRED361", ScaleSmall, false);
-    PrintCreditTextHelper("CRED362", ScaleSmall, false);
-    PrintCreditTextHelper("CRED363", ScaleSmall, false);
-    PrintCreditTextHelper("CRED364", ScaleSmall, false);
-    PrintCreditTextHelper("CRED365", ScaleSmall, false);
-    PrintCreditTextHelper("CRED366", ScaleSmall, false);
-    PrintCreditTextHelper("CRED367", ScaleSmall, false);
-    PrintCreditTextHelper("CRED368", ScaleSmall, false);
-    PrintCreditTextHelper("CRED369", ScaleSmall, false);
-    PrintCreditTextHelper("CRED370", ScaleSmall, false);
-    PrintCreditTextHelper("CRED371", ScaleSmall, false);
-    PrintCreditTextHelper("CRED372", ScaleSmall, false);
-    PrintCreditTextHelper("CRED373", ScaleSmall, false);
-    PrintCreditTextHelper("CRED374", ScaleSmall, false);
-    PrintCreditTextHelper("CRED375", ScaleSmall, false);
-    PrintCreditTextHelper("CRED376", ScaleSmall, false);
-    PrintCreditTextHelper("CRED377", ScaleSmall, false);
-    PrintCreditTextHelper("CRED378", ScaleSmall, false);
-    PrintCreditTextHelper("CRED379", ScaleSmall, false);
-    PrintCreditTextHelper("CRED380", ScaleSmall, false);
-    PrintCreditTextHelper("CRED381", ScaleSmall, false);
-    PrintCreditTextHelper("CRED382", ScaleSmall, false);
-    PrintCreditTextHelper("CRED383", ScaleSmall, false);
-    PrintCreditTextHelper("CRED384", ScaleSmall, false);
-    PrintCreditTextHelper("CRED385", ScaleSmall, false);
-    PrintCreditTextHelper("CRED386", ScaleSmall, false);
-    PrintCreditTextHelper("CRED387", ScaleSmall, false);
-    PrintCreditTextHelper("CRED388", ScaleSmall, false);
-    PrintCreditTextHelper("CRED389", ScaleSmall, false);
-    PrintCreditTextHelper("CRED390", ScaleSmall, false);
-    PrintCreditTextHelper("CRED391", ScaleSmall, false);
-    PrintCreditTextHelper("CRED392", ScaleSmall, false);
-    PrintCreditTextHelper("CRED393", ScaleSmall, false);
-    PrintCreditTextHelper("CRED394", ScaleSmall, false);
-    PrintCreditTextHelper("CRED395", ScaleSmall, false);
-    PrintCreditTextHelper("CRED396", ScaleSmall, false);
-    PrintCreditTextHelper("CRED397", ScaleSmall, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED398", ScaleBig, true);
-    PrintCreditTextHelper("CRED399", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED400", ScaleBig, true);
-    PrintCreditTextHelper("CRED401", ScaleBig, false);
-    PrintCreditTextHelper("CRED402", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED403", ScaleBig, true);
-    PrintCreditTextHelper("CRED404", ScaleBig, false);
-    PrintCreditTextHelper("CRED405", ScaleBig, false);
-    PrintCreditTextHelper("CRED406", ScaleBig, false);
-    PrintCreditTextHelper("CRED407", ScaleBig, false);
-    PrintCreditTextHelper("CRED408", ScaleBig, false);
-    PrintCreditTextHelper("CRED409", ScaleBig, false);
-    CCredits::PrintCreditSpace(0.5f, m_Position);
-
-    PrintCreditTextHelper("CRED410", ScaleBig, true);
-    PrintCreditTextHelper("CRED411", ScaleBig, false);
-    PrintCreditTextHelper("CRED412", ScaleBig, false);
-    PrintCreditTextHelper("CRED413", ScaleBig, false);
-    PrintCreditTextHelper("CRED414", ScaleBig, false);
-    PrintCreditTextHelper("CRED415", ScaleBig, false);
-    PrintCreditTextHelper("CRED416", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED417", ScaleBig, true);
-    PrintCreditTextHelper("CRED418", ScaleSmall, false);
-    PrintCreditTextHelper("CRED419", ScaleSmall, false);
-    PrintCreditTextHelper("CRED420", ScaleSmall, false);
-    PrintCreditTextHelper("CRED421", ScaleSmall, false);
-    PrintCreditTextHelper("CRED422", ScaleSmall, false);
-    PrintCreditTextHelper("CRED423", ScaleSmall, false);
-    PrintCreditTextHelper("CRED424", ScaleSmall, false);
-    PrintCreditTextHelper("CRED425", ScaleSmall, false);
-    PrintCreditTextHelper("CRED426", ScaleSmall, false);
-    PrintCreditTextHelper("CRED427", ScaleSmall, false);
-    PrintCreditTextHelper("CRED428", ScaleSmall, false);
-    PrintCreditTextHelper("CRED429", ScaleSmall, false);
-    PrintCreditTextHelper("CRED430", ScaleSmall, false);
-    PrintCreditTextHelper("CRED431", ScaleSmall, false);
-    PrintCreditTextHelper("CRED432", ScaleSmall, false);
-    PrintCreditTextHelper("CRED433", ScaleSmall, false);
-    PrintCreditTextHelper("CRED434", ScaleSmall, false);
-    PrintCreditTextHelper("CRED435", ScaleSmall, false);
-    PrintCreditTextHelper("CRED436", ScaleSmall, false);
-    PrintCreditTextHelper("CRED437", ScaleSmall, false);
-    PrintCreditTextHelper("CRED438", ScaleSmall, false);
-    PrintCreditTextHelper("CRED439", ScaleSmall, false);
-    PrintCreditTextHelper("CRED440", ScaleSmall, false);
-    PrintCreditTextHelper("CRED441", ScaleSmall, false);
-    PrintCreditTextHelper("CRED442", ScaleSmall, false);
-    PrintCreditTextHelper("CRED443", ScaleSmall, false);
-    PrintCreditTextHelper("CRED444", ScaleSmall, false);
-    PrintCreditTextHelper("CRED445", ScaleSmall, false);
-    PrintCreditTextHelper("CRED446", ScaleSmall, false);
-    PrintCreditTextHelper("CRED447", ScaleSmall, false);
-    PrintCreditTextHelper("CRED448", ScaleSmall, false);
-    PrintCreditTextHelper("CRED449", ScaleSmall, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED450", ScaleBig, true);
-    PrintCreditTextHelper("CRED451", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED452", ScaleBig, true);
-    PrintCreditTextHelper("CRED453", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED454", ScaleBig, true);
-    PrintCreditTextHelper("CRED455", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRD455A", ScaleBig, true);
-    PrintCreditTextHelper("CRD455B", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRD455C", ScaleBig, true);
-    PrintCreditTextHelper("CRD455D", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED456", ScaleBig, true);
-    PrintCreditTextHelper("CRED457", ScaleSmall, false);
-    PrintCreditTextHelper("CRED458", ScaleSmall, false);
-    PrintCreditTextHelper("CRED459", ScaleSmall, false);
-    PrintCreditTextHelper("CRED460", ScaleSmall, false);
-    PrintCreditTextHelper("CRED461", ScaleSmall, false);
-    PrintCreditTextHelper("CRED462", ScaleSmall, false);
-    PrintCreditTextHelper("CRED463", ScaleSmall, false);
-    PrintCreditTextHelper("CRED464", ScaleSmall, false);
-    PrintCreditTextHelper("CRED465", ScaleSmall, false);
-    PrintCreditTextHelper("CRED466", ScaleSmall, false);
-    PrintCreditTextHelper("CRED467", ScaleSmall, false);
-    PrintCreditTextHelper("CRED468", ScaleSmall, false);
-    PrintCreditTextHelper("CRED469", ScaleSmall, false);
-    PrintCreditTextHelper("CRED470", ScaleSmall, false);
-    PrintCreditTextHelper("CRED471", ScaleSmall, false);
-    PrintCreditTextHelper("CRED472", ScaleSmall, false);
-    PrintCreditTextHelper("CRED473", ScaleSmall, false);
-    PrintCreditTextHelper("CRED474", ScaleSmall, false);
-    PrintCreditTextHelper("CRED475", ScaleSmall, false);
-    PrintCreditTextHelper("CRED476", ScaleSmall, false);
-    PrintCreditTextHelper("CRED477", ScaleSmall, false);
-    PrintCreditTextHelper("CRED478", ScaleSmall, false);
-    PrintCreditTextHelper("CRED479", ScaleSmall, false);
-    PrintCreditTextHelper("CRED480", ScaleSmall, false);
-    PrintCreditTextHelper("CRED481", ScaleSmall, false);
-    PrintCreditTextHelper("CRED482", ScaleSmall, false);
-    PrintCreditTextHelper("CRED483", ScaleSmall, false);
-    PrintCreditTextHelper("CRED484", ScaleSmall, false);
-    PrintCreditTextHelper("CRED485", ScaleSmall, false);
-    PrintCreditTextHelper("CRED486", ScaleSmall, false);
-    PrintCreditTextHelper("CRED487", ScaleSmall, false);
-    PrintCreditTextHelper("CRED488", ScaleSmall, false);
-    PrintCreditTextHelper("CRED489", ScaleSmall, false);
-    PrintCreditTextHelper("CRED490", ScaleSmall, false);
-    PrintCreditTextHelper("CRED491", ScaleSmall, false);
-    PrintCreditTextHelper("CRED492", ScaleSmall, false);
-    PrintCreditTextHelper("CRED493", ScaleSmall, false);
-    PrintCreditTextHelper("CRED494", ScaleSmall, false);
-    PrintCreditTextHelper("CRED495", ScaleSmall, false);
-    PrintCreditTextHelper("CRED496", ScaleSmall, false);
-    PrintCreditTextHelper("CRED497", ScaleSmall, false);
-    PrintCreditTextHelper("CRED498", ScaleSmall, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED499", ScaleBig, true);
-    PrintCreditTextHelper("CRED500", ScaleBig, false);
-    PrintCreditTextHelper("CRED501", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED502", ScaleBig, true);
-    PrintCreditTextHelper("CRED503", ScaleBig, false);
-    PrintCreditTextHelper("CRED504", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED505", ScaleBig, true);
-    PrintCreditTextHelper("CRED506", ScaleBig, false);
-    PrintCreditTextHelper("CRED507", ScaleBig, false);
-    PrintCreditTextHelper("CRED508", ScaleBig, false);
-    PrintCreditTextHelper("CRED509", ScaleBig, false);
-    PrintCreditTextHelper("CRED510", ScaleBig, false);
-    PrintCreditTextHelper("CRED511", ScaleBig, false);
-    PrintCreditTextHelper("CRED512", ScaleBig, false);
-    PrintCreditTextHelper("CRED515", ScaleBig, false);
-    PrintCreditTextHelper("CRED516", ScaleBig, false);
-    PrintCreditTextHelper("CRED517", ScaleBig, false);
-    PrintCreditTextHelper("CRED518", ScaleBig, false);
-    PrintCreditTextHelper("CRED519", ScaleBig, false);
-    PrintCreditTextHelper("CRED520", ScaleBig, false);
-    PrintCreditTextHelper("CRED521", ScaleBig, false);
-    PrintCreditTextHelper("CRED522", ScaleBig, false);
-    PrintCreditTextHelper("CRED523", ScaleBig, false);
-    PrintCreditTextHelper("CRED524", ScaleBig, false);
-    PrintCreditTextHelper("CRED525", ScaleBig, false);
-    PrintCreditTextHelper("CRED526", ScaleBig, false);
-    PrintCreditTextHelper("CRED527", ScaleBig, false);
-    PrintCreditTextHelper("CRED529", ScaleBig, false);
-    PrintCreditTextHelper("CRED530", ScaleBig, false);
-    PrintCreditTextHelper("CRED531", ScaleBig, false);
-    PrintCreditTextHelper("CRED532", ScaleBig, false);
-    PrintCreditTextHelper("CRED533", ScaleBig, false);
-    PrintCreditTextHelper("CRED534", ScaleBig, false);
-    PrintCreditTextHelper("CRED535", ScaleBig, false);
-    PrintCreditTextHelper("CRED536", ScaleBig, false);
-    PrintCreditTextHelper("CRED537", ScaleBig, false);
-    PrintCreditTextHelper("CRED538", ScaleBig, false);
-    PrintCreditTextHelper("CRED539", ScaleBig, false);
-    PrintCreditTextHelper("CRED540", ScaleBig, false);
-    PrintCreditTextHelper("CRED541", ScaleBig, false);
-    PrintCreditTextHelper("CRD541A", ScaleBig, false);
-    PrintCreditTextHelper("CRD541B", ScaleBig, false);
-    PrintCreditTextHelper("CRD541C", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED542", ScaleBig, true);
-    PrintCreditTextHelper("CRED543", ScaleBig, false);
-    PrintCreditTextHelper("CRED544", ScaleBig, false);
-    PrintCreditTextHelper("CRED545", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED600", ScaleBig, true);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED601", ScaleBig, true);
-    PrintCreditTextHelper("CRED602", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED603", ScaleBig, true);
-    PrintCreditTextHelper("CRED604", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED605", ScaleBig, true);
-    PrintCreditTextHelper("CRED606", ScaleBig, false);
-    PrintCreditTextHelper("CRED607", ScaleBig, false);
-    PrintCreditTextHelper("CRED608", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED609", ScaleBig, true);
-    PrintCreditTextHelper("CRED610", ScaleBig, false);
-    PrintCreditTextHelper("CRED611", ScaleBig, false);
-    PrintCreditTextHelper("CRED612", ScaleBig, false);
-    PrintCreditTextHelper("CRED613", ScaleBig, false);
-    PrintCreditTextHelper("CRED614", ScaleBig, false);
-    PrintCreditTextHelper("CRED615", ScaleBig, false);
-    PrintCreditTextHelper("CRED616", ScaleBig, false);
-    PrintCreditTextHelper("CRED617", ScaleBig, false);
-    PrintCreditTextHelper("CRED618", ScaleBig, false);
-    PrintCreditTextHelper("CRED619", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED620", ScaleBig, true);
-    PrintCreditTextHelper("CRED621", ScaleBig, false);
-    PrintCreditTextHelper("CRED622", ScaleBig, false);
-    PrintCreditTextHelper("CRED623", ScaleBig, false);
-    PrintCreditTextHelper("CRED624", ScaleBig, false);
-    PrintCreditTextHelper("CRED625", ScaleBig, false);
-    PrintCreditTextHelper("CRED626", ScaleBig, false);
-    PrintCreditTextHelper("CRED627", ScaleBig, false);
-    PrintCreditTextHelper("CRED628", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED629", ScaleBig, true);
-    PrintCreditTextHelper("CRED630", ScaleBig, false);
-    CCredits::PrintCreditSpace(1.5f, m_Position);
-
-    PrintCreditTextHelper("CRED700", ScaleBig, true);
-    PrintCreditTextHelper("CRED701", ScaleBig, false);
-    PrintCreditTextHelper("CRED702", ScaleBig, false);
-    PrintCreditTextHelper("CRED703", ScaleBig, false);
-    PrintCreditTextHelper("CRED704", ScaleBig, false);
-    PrintCreditTextHelper("CRED705", ScaleBig, false);
-    PrintCreditTextHelper("CRED706", ScaleBig, false);
-    PrintCreditTextHelper("CRED707", ScaleBig, false);
-    PrintCreditTextHelper("CRED708", ScaleBig, false);
-    PrintCreditTextHelper("CRED709", ScaleBig, false);
-    PrintCreditTextHelper("CRED710", ScaleBig, false);
-    PrintCreditTextHelper("CRED711", ScaleBig, false);
-    PrintCreditTextHelper("CRED712", ScaleBig, false);
-    PrintCreditTextHelper("CRED713", ScaleBig, false);
-    PrintCreditTextHelper("CRED714", ScaleBig, false);
-    PrintCreditTextHelper("CRED715", ScaleBig, false);
-    PrintCreditTextHelper("CRED716", ScaleBig, false);
+    const auto PrintCreditText_ = [&](const char* textKey, float scale, bool highlighted) {
+        auto text = TheText.Get(textKey);
+        PrintCreditText(scale, scale, text, lineOffset, scrollOffset, highlighted);
+    };
+
+    PrintCreditText_("CRED000", SCALE_BIG, true);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED001", SCALE_BIG, true);
+    PrintCreditText_("CRED002", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED003", SCALE_BIG, true);
+    PrintCreditText_("CRED004", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED005", SCALE_BIG, true);
+    PrintCreditText_("CRED006", SCALE_BIG, false);
+    PrintCreditText_("CRED007", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED008", SCALE_BIG, true);
+    PrintCreditText_("CRED009", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRD009A", SCALE_BIG, true);
+    PrintCreditText_("CRD009B", SCALE_BIG, false);
+    PrintCreditText_("CRD009C", SCALE_BIG, false);
+    PrintCreditText_("CRD009D", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED019", SCALE_BIG, true);
+    PrintCreditText_("CRED020", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED010", SCALE_BIG, true);
+    PrintCreditText_("CRED011", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED012", SCALE_BIG, true);
+    PrintCreditText_("CRED013", SCALE_BIG, false);
+    PrintCreditText_("CRED014", SCALE_BIG, false);
+    PrintCreditText_("CRD014A", SCALE_BIG, false);
+    PrintCreditText_("CRED015", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED016", SCALE_BIG, true);
+    PrintCreditText_("CRD016A", SCALE_BIG, false);
+    PrintCreditText_("CRED017", SCALE_BIG, false);
+    PrintCreditText_("CRED018", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED028", SCALE_BIG, true);
+    PrintCreditText_("CRED029", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED030", SCALE_BIG, true);
+    PrintCreditText_("CRED031", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED032", SCALE_BIG, true);
+    PrintCreditText_("CRED033", SCALE_BIG, false);
+    PrintCreditText_("CRED034", SCALE_BIG, false);
+    PrintCreditText_("CRED035", SCALE_BIG, false);
+    PrintCreditText_("CRED036", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED047", SCALE_BIG, true);
+    PrintCreditText_("CRED048", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED049", SCALE_BIG, true);
+    PrintCreditText_("CRED050", SCALE_BIG, false);
+    PrintCreditText_("CRED051", SCALE_BIG, false);
+    PrintCreditText_("CRED052", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED053", SCALE_BIG, true);
+    PrintCreditText_("CRED054", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED055", SCALE_BIG, true);
+    PrintCreditText_("CRED056", SCALE_BIG, false);
+    PrintCreditText_("CRED057", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED058", SCALE_BIG, true);
+    PrintCreditText_("CRED059", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED060", SCALE_BIG, true);
+    PrintCreditText_("CRED061", SCALE_BIG, false);
+    PrintCreditText_("CRED062", SCALE_BIG, false);
+    PrintCreditText_("CRED063", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED021", SCALE_BIG, true);
+    PrintCreditText_("CRED022", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED023", SCALE_BIG, true);
+    PrintCreditText_("CRED024", SCALE_BIG, false);
+    PrintCreditText_("CRED025", SCALE_BIG, false);
+    PrintCreditText_("CRED026", SCALE_BIG, false);
+    PrintCreditText_("CRED027", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED064", SCALE_BIG, true);
+    PrintCreditText_("CRED065", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED066", SCALE_BIG, true);
+    PrintCreditText_("CRED067", SCALE_BIG, false);
+    PrintCreditText_("CRED068", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED069", SCALE_BIG, true);
+    PrintCreditText_("CRED070", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED071", SCALE_BIG, true);
+    PrintCreditText_("CRED072", SCALE_BIG, false);
+    PrintCreditText_("CRED073", SCALE_BIG, false);
+    PrintCreditText_("CRED074", SCALE_BIG, false);
+    PrintCreditText_("CRED075", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED037", SCALE_BIG, true);
+    PrintCreditText_("CRED038", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED039", SCALE_BIG, true);
+    PrintCreditText_("CRED040", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED041", SCALE_BIG, true);
+    PrintCreditText_("CRED042", SCALE_BIG, false);
+    PrintCreditText_("CRED043", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED044", SCALE_BIG, true);
+    PrintCreditText_("CRED991", SCALE_BIG, false);
+    PrintCreditText_("CRED045", SCALE_BIG, false);
+    PrintCreditText_("CRED046", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED076", SCALE_BIG, true);
+    PrintCreditText_("CRED077", SCALE_BIG, false);
+    PrintCreditText_("CRED078", SCALE_BIG, false);
+    PrintCreditText_("CRED079", SCALE_BIG, false);
+    PrintCreditText_("CRED080", SCALE_BIG, false);
+    PrintCreditText_("CRED081", SCALE_BIG, false);
+    PrintCreditText_("CRED100", SCALE_BIG, false);
+    PrintCreditText_("CRED082", SCALE_BIG, false);
+    PrintCreditText_("CRED083", SCALE_BIG, false);
+    PrintCreditText_("CRED084", SCALE_BIG, false);
+    PrintCreditText_("CRED085", SCALE_BIG, false);
+    PrintCreditText_("CRED086", SCALE_BIG, false);
+    PrintCreditText_("CRED087", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED088", SCALE_BIG, true);
+    PrintCreditText_("CRED089", SCALE_BIG, false);
+    PrintCreditText_("CRED090", SCALE_BIG, false);
+    PrintCreditText_("CRED091", SCALE_BIG, false);
+    PrintCreditText_("CRED092", SCALE_BIG, false);
+    PrintCreditText_("CRED093", SCALE_BIG, false);
+    PrintCreditText_("CRED094", SCALE_BIG, false);
+    PrintCreditText_("CRED095", SCALE_BIG, false);
+    PrintCreditText_("CRED096", SCALE_BIG, false);
+    PrintCreditText_("CRED097", SCALE_BIG, false);
+    PrintCreditText_("CRED098", SCALE_BIG, false);
+    PrintCreditText_("CRED099", SCALE_BIG, false);
+    PrintCreditText_("CRED101", SCALE_BIG, false);
+    PrintCreditText_("CRED102", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED103", SCALE_BIG, true);
+    PrintCreditText_("CRED104", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED105", SCALE_BIG, true);
+    PrintCreditText_("CRED106", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED107", SCALE_BIG, true);
+    PrintCreditText_("CRED108", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED109", SCALE_BIG, true);
+    PrintCreditText_("CRED110", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED111", SCALE_BIG, true);
+    PrintCreditSpace(SPACE_NORMAL, lineOffset);
+
+    PrintCreditText_("CRED112", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED113", SCALE_BIG, true);
+    PrintCreditText_("CRED114", SCALE_BIG, false);
+    PrintCreditText_("CRED115", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED116", SCALE_BIG, true);
+    PrintCreditText_("CRED117", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED118", SCALE_BIG, true);
+    PrintCreditText_("CRED997", SCALE_BIG, false);
+    PrintCreditText_("CRD118A", SCALE_BIG, false);
+    PrintCreditText_("CRED119", SCALE_BIG, false);
+    PrintCreditText_("CRED120", SCALE_BIG, false);
+    PrintCreditText_("CRED996", SCALE_BIG, false);
+    PrintCreditText_("CRD120A", SCALE_BIG, false);
+    PrintCreditText_("CRED121", SCALE_BIG, false);
+    PrintCreditText_("CRD121A", SCALE_BIG, false);
+    PrintCreditText_("CRED995", SCALE_BIG, false);
+    PrintCreditText_("CRED122", SCALE_BIG, false);
+    PrintCreditText_("CRED994", SCALE_BIG, false);
+    PrintCreditText_("CRED123", SCALE_BIG, false);
+    PrintCreditText_("CRED124", SCALE_BIG, false);
+    PrintCreditText_("CRED125", SCALE_BIG, false);
+    PrintCreditText_("CRED126", SCALE_BIG, false);
+    PrintCreditText_("CRD126A", SCALE_BIG, false);
+    PrintCreditText_("CRD126B", SCALE_BIG, false);
+    PrintCreditText_("CRED127", SCALE_BIG, false);
+    PrintCreditText_("CRED128", SCALE_BIG, false);
+    PrintCreditText_("CRED129", SCALE_BIG, false);
+    PrintCreditText_("CRD129A", SCALE_BIG, false);
+    PrintCreditText_("CRED130", SCALE_BIG, false);
+    PrintCreditText_("CRED131", SCALE_BIG, false);
+    PrintCreditText_("CRED132", SCALE_BIG, false);
+    PrintCreditText_("CRED133", SCALE_BIG, false);
+    PrintCreditText_("CRED134", SCALE_BIG, false);
+    PrintCreditText_("CRED992", SCALE_BIG, false);
+    PrintCreditText_("CRD134A", SCALE_BIG, false);
+    PrintCreditText_("CRED135", SCALE_BIG, false);
+    PrintCreditText_("CRED136", SCALE_BIG, false);
+    PrintCreditText_("CRD136A", SCALE_BIG, false);
+    PrintCreditText_("CRED137", SCALE_BIG, false);
+    PrintCreditText_("CRED138", SCALE_BIG, false);
+    PrintCreditText_("CRD138A", SCALE_BIG, false);
+    PrintCreditText_("CRED139", SCALE_BIG, false);
+    PrintCreditText_("CRED140", SCALE_BIG, false);
+    PrintCreditText_("CRED141", SCALE_BIG, false);
+    PrintCreditText_("CRED993", SCALE_BIG, false);
+    PrintCreditText_("CRED142", SCALE_BIG, false);
+    PrintCreditText_("CRED143", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED144", SCALE_BIG, true);
+    PrintCreditText_("CRED145", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED146", SCALE_BIG, true);
+    PrintCreditText_("CRED147", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED148", SCALE_BIG, true);
+    PrintCreditText_("CRED149", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED150", SCALE_BIG, true);
+    PrintCreditText_("CRED151", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED152", SCALE_BIG, true);
+    PrintCreditText_("CRED153", SCALE_BIG, false);
+    PrintCreditText_("CRD153A", SCALE_BIG, false);
+    PrintCreditText_("CRED154", SCALE_BIG, false);
+    PrintCreditText_("CRD154A", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED155", SCALE_BIG, true);
+    PrintCreditText_("CRED156", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED157", SCALE_BIG, true);
+    PrintCreditText_("CRED158", SCALE_BIG, false);
+    PrintCreditText_("CRED159", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED199", SCALE_BIG, true);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED200", SCALE_BIG, true);
+    PrintCreditText_("CRED201", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED202", SCALE_BIG, true);
+    PrintCreditText_("CRED203", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED204", SCALE_BIG, true);
+    PrintCreditText_("CRED205", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED206", SCALE_BIG, true);
+    PrintCreditText_("CRED207", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED208", SCALE_BIG, true);
+    PrintCreditText_("CRED209", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED210", SCALE_BIG, true);
+    PrintCreditText_("CRED211", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED212", SCALE_BIG, true);
+    PrintCreditText_("CRED213", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED214", SCALE_BIG, true);
+    PrintCreditText_("CRED215", SCALE_BIG, false);
+    PrintCreditText_("CRED216", SCALE_BIG, false);
+    PrintCreditText_("CRED217", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED218", SCALE_BIG, true);
+    PrintCreditText_("CRED219", SCALE_BIG, false);
+    PrintCreditText_("CRED220", SCALE_BIG, false);
+    PrintCreditText_("CRED221", SCALE_BIG, false);
+    PrintCreditText_("CRED222", SCALE_BIG, false);
+    PrintCreditText_("CRED223", SCALE_BIG, false);
+    PrintCreditText_("CRED224", SCALE_BIG, false);
+    PrintCreditText_("CRED225", SCALE_BIG, false);
+    PrintCreditText_("CRED226", SCALE_BIG, false);
+    PrintCreditText_("CRED227", SCALE_BIG, false);
+    PrintCreditText_("CRED228", SCALE_BIG, false);
+    PrintCreditText_("CRED229", SCALE_BIG, false);
+    PrintCreditText_("CRED230", SCALE_BIG, false);
+    PrintCreditText_("CRED231", SCALE_BIG, false);
+    PrintCreditText_("CRED232", SCALE_BIG, false);
+    PrintCreditText_("CRED233", SCALE_BIG, false);
+    PrintCreditText_("CRED234", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED235", SCALE_BIG, true);
+    PrintCreditText_("CRED236", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED237", SCALE_BIG, true);
+    PrintCreditText_("CRED238", SCALE_BIG, false);
+    PrintCreditText_("CRED239", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED240", SCALE_BIG, true);
+    PrintCreditText_("CRED241", SCALE_BIG, false);
+    PrintCreditText_("CRED242", SCALE_BIG, false);
+    PrintCreditText_("CRED243", SCALE_BIG, false);
+    PrintCreditText_("CRED244", SCALE_BIG, false);
+    PrintCreditText_("CRED245", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED246", SCALE_BIG, true);
+    PrintCreditText_("CRED247", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED248", SCALE_BIG, true);
+    PrintCreditText_("CRED249", SCALE_BIG, false);
+    PrintCreditText_("CRED250", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED251", SCALE_BIG, true);
+    PrintCreditText_("CRED252", SCALE_BIG, false);
+    PrintCreditText_("CRED253", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED254", SCALE_BIG, true);
+    PrintCreditText_("CRED255", SCALE_BIG, false);
+    PrintCreditText_("CRED256", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED257", SCALE_BIG, true);
+    PrintCreditText_("CRED258", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED259", SCALE_BIG, true);
+    PrintCreditText_("CRED260", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED261", SCALE_BIG, true);
+    PrintCreditSpace(SPACE_NORMAL, lineOffset);
+
+    PrintCreditText_("CRED262", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED263", SCALE_BIG, true);
+    PrintCreditText_("CRED264", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED265", SCALE_BIG, true);
+    PrintCreditText_("CRED266", SCALE_BIG, false);
+    PrintCreditText_("CRED267", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED999", SCALE_BIG, true);
+    PrintCreditSpace(SPACE_NORMAL, lineOffset);
+
+    PrintCreditText_("CRED998", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED268", SCALE_BIG, true);
+    PrintCreditText_("CRED269", SCALE_BIG, false);
+    PrintCreditText_("CRED270", SCALE_BIG, false);
+    PrintCreditText_("CRED271", SCALE_BIG, false);
+    PrintCreditText_("CRED272", SCALE_BIG, false);
+    PrintCreditText_("CRED273", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED274", SCALE_BIG, true);
+    PrintCreditText_("CRED275", SCALE_BIG, false);
+    PrintCreditText_("CRED276", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED277", SCALE_BIG, true);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED278", SCALE_BIG, true);
+    PrintCreditText_("CRED279", SCALE_SMALL, false);
+    PrintCreditSpace(SPACE_SMALL, lineOffset);
+
+    PrintCreditText_("CRED280", SCALE_SMALL, false);
+    PrintCreditText_("CRED281", SCALE_SMALL, false);
+    PrintCreditText_("CRED282", SCALE_SMALL, false);
+    PrintCreditText_("CRED283", SCALE_SMALL, false);
+    PrintCreditText_("CRED284", SCALE_SMALL, false);
+    PrintCreditText_("CRED285", SCALE_SMALL, false);
+    PrintCreditText_("CRED286", SCALE_SMALL, false);
+    PrintCreditText_("CRED287", SCALE_SMALL, false);
+    PrintCreditText_("CRED288", SCALE_SMALL, false);
+    PrintCreditText_("CRED289", SCALE_SMALL, false);
+    PrintCreditText_("CRED290", SCALE_SMALL, false);
+    PrintCreditText_("CRED291", SCALE_SMALL, false);
+    PrintCreditText_("CRED292", SCALE_SMALL, false);
+    PrintCreditText_("CRED293", SCALE_SMALL, false);
+    PrintCreditText_("CRED294", SCALE_SMALL, false);
+    PrintCreditText_("CRED295", SCALE_SMALL, false);
+    PrintCreditText_("CRED296", SCALE_SMALL, false);
+    PrintCreditText_("CRED297", SCALE_SMALL, false);
+    PrintCreditText_("CRED298", SCALE_SMALL, false);
+    PrintCreditText_("CRED299", SCALE_SMALL, false);
+    PrintCreditText_("CRED300", SCALE_SMALL, false);
+    PrintCreditText_("CRED301", SCALE_SMALL, false);
+    PrintCreditText_("CRED302", SCALE_SMALL, false);
+    PrintCreditText_("CRED303", SCALE_SMALL, false);
+    PrintCreditText_("CRED304", SCALE_SMALL, false);
+    PrintCreditText_("CRED305", SCALE_SMALL, false);
+    PrintCreditText_("CRED306", SCALE_SMALL, false);
+    PrintCreditText_("CRED307", SCALE_SMALL, false);
+    PrintCreditText_("CRED308", SCALE_SMALL, false);
+    PrintCreditText_("CRD308A", SCALE_SMALL, false);
+    PrintCreditText_("CRD308B", SCALE_SMALL, false);
+    PrintCreditText_("CRD308C", SCALE_SMALL, false);
+    PrintCreditText_("CRD308D", SCALE_SMALL, false);
+    PrintCreditText_("CRD308E", SCALE_SMALL, false);
+    PrintCreditText_("CRD308F", SCALE_SMALL, false);
+    PrintCreditText_("CRD308G", SCALE_SMALL, false);
+    PrintCreditText_("CRD308H", SCALE_SMALL, false);
+    PrintCreditText_("CRD308I", SCALE_SMALL, false);
+    PrintCreditText_("CRD308J", SCALE_SMALL, false);
+    PrintCreditText_("CRD308K", SCALE_SMALL, false);
+    PrintCreditText_("CRD308L", SCALE_SMALL, false);
+    PrintCreditSpace(SPACE_SMALL, lineOffset);
+
+    PrintCreditText_("CRD308M", SCALE_SMALL, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+    PrintCreditSpace(SPACE_SMALL, lineOffset);
+
+    PrintCreditText_("CRD308N", SCALE_SMALL, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED309", SCALE_BIG, true);
+    PrintCreditText_("CRED310", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED311", SCALE_BIG, true);
+    PrintCreditText_("CRED312", SCALE_BIG, false);
+    PrintCreditText_("CRED313", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED314", SCALE_BIG, true);
+    PrintCreditText_("CRED315", SCALE_SMALL, false);
+    PrintCreditText_("CRED316", SCALE_SMALL, false);
+    PrintCreditText_("CRED317", SCALE_SMALL, false);
+    PrintCreditText_("CRED318", SCALE_SMALL, false);
+    PrintCreditText_("CRED319", SCALE_SMALL, false);
+    PrintCreditText_("CRED320", SCALE_SMALL, false);
+    PrintCreditText_("CRED321", SCALE_SMALL, false);
+    PrintCreditText_("CRED322", SCALE_SMALL, false);
+    PrintCreditText_("CRED323", SCALE_SMALL, false);
+    PrintCreditText_("CRED324", SCALE_SMALL, false);
+    PrintCreditText_("CRED325", SCALE_SMALL, false);
+    PrintCreditText_("CRED326", SCALE_SMALL, false);
+    PrintCreditText_("CRED327", SCALE_SMALL, false);
+    PrintCreditText_("CRED328", SCALE_SMALL, false);
+    PrintCreditText_("CRED329", SCALE_SMALL, false);
+    PrintCreditText_("CRED330", SCALE_SMALL, false);
+    PrintCreditText_("CRED331", SCALE_SMALL, false);
+    PrintCreditText_("CRED332", SCALE_SMALL, false);
+    PrintCreditText_("CRED333", SCALE_SMALL, false);
+    PrintCreditText_("CRED334", SCALE_SMALL, false);
+    PrintCreditText_("CRED335", SCALE_SMALL, false);
+    PrintCreditText_("CRED336", SCALE_SMALL, false);
+    PrintCreditText_("CRED337", SCALE_SMALL, false);
+    PrintCreditText_("CRED338", SCALE_SMALL, false);
+    PrintCreditText_("CRED339", SCALE_SMALL, false);
+    PrintCreditText_("CRED340", SCALE_SMALL, false);
+    PrintCreditText_("CRED341", SCALE_SMALL, false);
+    PrintCreditText_("CRED342", SCALE_SMALL, false);
+    PrintCreditText_("CRED343", SCALE_SMALL, false);
+    PrintCreditText_("CRED344", SCALE_SMALL, false);
+    PrintCreditText_("CRED345", SCALE_SMALL, false);
+    PrintCreditText_("CRED346", SCALE_SMALL, false);
+    PrintCreditText_("CRED347", SCALE_SMALL, false);
+    PrintCreditText_("CRED348", SCALE_SMALL, false);
+    PrintCreditText_("CRED349", SCALE_SMALL, false);
+    PrintCreditText_("CRED350", SCALE_SMALL, false);
+    PrintCreditText_("CRED351", SCALE_SMALL, false);
+    PrintCreditText_("CRED352", SCALE_SMALL, false);
+    PrintCreditText_("CRED353", SCALE_SMALL, false);
+    PrintCreditText_("CRED354", SCALE_SMALL, false);
+    PrintCreditText_("CRED355", SCALE_SMALL, false);
+    PrintCreditText_("CRED356", SCALE_SMALL, false);
+    PrintCreditText_("CRED357", SCALE_SMALL, false);
+    PrintCreditText_("CRED358", SCALE_SMALL, false);
+    PrintCreditText_("CRED359", SCALE_SMALL, false);
+    PrintCreditText_("CRED360", SCALE_SMALL, false);
+    PrintCreditText_("CRED361", SCALE_SMALL, false);
+    PrintCreditText_("CRED362", SCALE_SMALL, false);
+    PrintCreditText_("CRED363", SCALE_SMALL, false);
+    PrintCreditText_("CRED364", SCALE_SMALL, false);
+    PrintCreditText_("CRED365", SCALE_SMALL, false);
+    PrintCreditText_("CRED366", SCALE_SMALL, false);
+    PrintCreditText_("CRED367", SCALE_SMALL, false);
+    PrintCreditText_("CRED368", SCALE_SMALL, false);
+    PrintCreditText_("CRED369", SCALE_SMALL, false);
+    PrintCreditText_("CRED370", SCALE_SMALL, false);
+    PrintCreditText_("CRED371", SCALE_SMALL, false);
+    PrintCreditText_("CRED372", SCALE_SMALL, false);
+    PrintCreditText_("CRED373", SCALE_SMALL, false);
+    PrintCreditText_("CRED374", SCALE_SMALL, false);
+    PrintCreditText_("CRED375", SCALE_SMALL, false);
+    PrintCreditText_("CRED376", SCALE_SMALL, false);
+    PrintCreditText_("CRED377", SCALE_SMALL, false);
+    PrintCreditText_("CRED378", SCALE_SMALL, false);
+    PrintCreditText_("CRED379", SCALE_SMALL, false);
+    PrintCreditText_("CRED380", SCALE_SMALL, false);
+    PrintCreditText_("CRED381", SCALE_SMALL, false);
+    PrintCreditText_("CRED382", SCALE_SMALL, false);
+    PrintCreditText_("CRED383", SCALE_SMALL, false);
+    PrintCreditText_("CRED384", SCALE_SMALL, false);
+    PrintCreditText_("CRED385", SCALE_SMALL, false);
+    PrintCreditText_("CRED386", SCALE_SMALL, false);
+    PrintCreditText_("CRED387", SCALE_SMALL, false);
+    PrintCreditText_("CRED388", SCALE_SMALL, false);
+    PrintCreditText_("CRED389", SCALE_SMALL, false);
+    PrintCreditText_("CRED390", SCALE_SMALL, false);
+    PrintCreditText_("CRED391", SCALE_SMALL, false);
+    PrintCreditText_("CRED392", SCALE_SMALL, false);
+    PrintCreditText_("CRED393", SCALE_SMALL, false);
+    PrintCreditText_("CRED394", SCALE_SMALL, false);
+    PrintCreditText_("CRED395", SCALE_SMALL, false);
+    PrintCreditText_("CRED396", SCALE_SMALL, false);
+    PrintCreditText_("CRED397", SCALE_SMALL, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED398", SCALE_BIG, true);
+    PrintCreditText_("CRED399", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED400", SCALE_BIG, true);
+    PrintCreditText_("CRED401", SCALE_BIG, false);
+    PrintCreditText_("CRED402", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED403", SCALE_BIG, true);
+    PrintCreditText_("CRED404", SCALE_BIG, false);
+    PrintCreditText_("CRED405", SCALE_BIG, false);
+    PrintCreditText_("CRED406", SCALE_BIG, false);
+    PrintCreditText_("CRED407", SCALE_BIG, false);
+    PrintCreditText_("CRED408", SCALE_BIG, false);
+    PrintCreditText_("CRED409", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_SMALL, lineOffset);
+
+    PrintCreditText_("CRED410", SCALE_BIG, true);
+    PrintCreditText_("CRED411", SCALE_BIG, false);
+    PrintCreditText_("CRED412", SCALE_BIG, false);
+    PrintCreditText_("CRED413", SCALE_BIG, false);
+    PrintCreditText_("CRED414", SCALE_BIG, false);
+    PrintCreditText_("CRED415", SCALE_BIG, false);
+    PrintCreditText_("CRED416", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED417", SCALE_BIG, true);
+    PrintCreditText_("CRED418", SCALE_SMALL, false);
+    PrintCreditText_("CRED419", SCALE_SMALL, false);
+    PrintCreditText_("CRED420", SCALE_SMALL, false);
+    PrintCreditText_("CRED421", SCALE_SMALL, false);
+    PrintCreditText_("CRED422", SCALE_SMALL, false);
+    PrintCreditText_("CRED423", SCALE_SMALL, false);
+    PrintCreditText_("CRED424", SCALE_SMALL, false);
+    PrintCreditText_("CRED425", SCALE_SMALL, false);
+    PrintCreditText_("CRED426", SCALE_SMALL, false);
+    PrintCreditText_("CRED427", SCALE_SMALL, false);
+    PrintCreditText_("CRED428", SCALE_SMALL, false);
+    PrintCreditText_("CRED429", SCALE_SMALL, false);
+    PrintCreditText_("CRED430", SCALE_SMALL, false);
+    PrintCreditText_("CRED431", SCALE_SMALL, false);
+    PrintCreditText_("CRED432", SCALE_SMALL, false);
+    PrintCreditText_("CRED433", SCALE_SMALL, false);
+    PrintCreditText_("CRED434", SCALE_SMALL, false);
+    PrintCreditText_("CRED435", SCALE_SMALL, false);
+    PrintCreditText_("CRED436", SCALE_SMALL, false);
+    PrintCreditText_("CRED437", SCALE_SMALL, false);
+    PrintCreditText_("CRED438", SCALE_SMALL, false);
+    PrintCreditText_("CRED439", SCALE_SMALL, false);
+    PrintCreditText_("CRED440", SCALE_SMALL, false);
+    PrintCreditText_("CRED441", SCALE_SMALL, false);
+    PrintCreditText_("CRED442", SCALE_SMALL, false);
+    PrintCreditText_("CRED443", SCALE_SMALL, false);
+    PrintCreditText_("CRED444", SCALE_SMALL, false);
+    PrintCreditText_("CRED445", SCALE_SMALL, false);
+    PrintCreditText_("CRED446", SCALE_SMALL, false);
+    PrintCreditText_("CRED447", SCALE_SMALL, false);
+    PrintCreditText_("CRED448", SCALE_SMALL, false);
+    PrintCreditText_("CRED449", SCALE_SMALL, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED450", SCALE_BIG, true);
+    PrintCreditText_("CRED451", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED452", SCALE_BIG, true);
+    PrintCreditText_("CRED453", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED454", SCALE_BIG, true);
+    PrintCreditText_("CRED455", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRD455A", SCALE_BIG, true);
+    PrintCreditText_("CRD455B", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRD455C", SCALE_BIG, true);
+    PrintCreditText_("CRD455D", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED456", SCALE_BIG, true);
+    PrintCreditText_("CRED457", SCALE_SMALL, false);
+    PrintCreditText_("CRED458", SCALE_SMALL, false);
+    PrintCreditText_("CRED459", SCALE_SMALL, false);
+    PrintCreditText_("CRED460", SCALE_SMALL, false);
+    PrintCreditText_("CRED461", SCALE_SMALL, false);
+    PrintCreditText_("CRED462", SCALE_SMALL, false);
+    PrintCreditText_("CRED463", SCALE_SMALL, false);
+    PrintCreditText_("CRED464", SCALE_SMALL, false);
+    PrintCreditText_("CRED465", SCALE_SMALL, false);
+    PrintCreditText_("CRED466", SCALE_SMALL, false);
+    PrintCreditText_("CRED467", SCALE_SMALL, false);
+    PrintCreditText_("CRED468", SCALE_SMALL, false);
+    PrintCreditText_("CRED469", SCALE_SMALL, false);
+    PrintCreditText_("CRED470", SCALE_SMALL, false);
+    PrintCreditText_("CRED471", SCALE_SMALL, false);
+    PrintCreditText_("CRED472", SCALE_SMALL, false);
+    PrintCreditText_("CRED473", SCALE_SMALL, false);
+    PrintCreditText_("CRED474", SCALE_SMALL, false);
+    PrintCreditText_("CRED475", SCALE_SMALL, false);
+    PrintCreditText_("CRED476", SCALE_SMALL, false);
+    PrintCreditText_("CRED477", SCALE_SMALL, false);
+    PrintCreditText_("CRED478", SCALE_SMALL, false);
+    PrintCreditText_("CRED479", SCALE_SMALL, false);
+    PrintCreditText_("CRED480", SCALE_SMALL, false);
+    PrintCreditText_("CRED481", SCALE_SMALL, false);
+    PrintCreditText_("CRED482", SCALE_SMALL, false);
+    PrintCreditText_("CRED483", SCALE_SMALL, false);
+    PrintCreditText_("CRED484", SCALE_SMALL, false);
+    PrintCreditText_("CRED485", SCALE_SMALL, false);
+    PrintCreditText_("CRED486", SCALE_SMALL, false);
+    PrintCreditText_("CRED487", SCALE_SMALL, false);
+    PrintCreditText_("CRED488", SCALE_SMALL, false);
+    PrintCreditText_("CRED489", SCALE_SMALL, false);
+    PrintCreditText_("CRED490", SCALE_SMALL, false);
+    PrintCreditText_("CRED491", SCALE_SMALL, false);
+    PrintCreditText_("CRED492", SCALE_SMALL, false);
+    PrintCreditText_("CRED493", SCALE_SMALL, false);
+    PrintCreditText_("CRED494", SCALE_SMALL, false);
+    PrintCreditText_("CRED495", SCALE_SMALL, false);
+    PrintCreditText_("CRED496", SCALE_SMALL, false);
+    PrintCreditText_("CRED497", SCALE_SMALL, false);
+    PrintCreditText_("CRED498", SCALE_SMALL, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED499", SCALE_BIG, true);
+    PrintCreditText_("CRED500", SCALE_BIG, false);
+    PrintCreditText_("CRED501", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED502", SCALE_BIG, true);
+    PrintCreditText_("CRED503", SCALE_BIG, false);
+    PrintCreditText_("CRED504", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED505", SCALE_BIG, true);
+    PrintCreditText_("CRED506", SCALE_BIG, false);
+    PrintCreditText_("CRED507", SCALE_BIG, false);
+    PrintCreditText_("CRED508", SCALE_BIG, false);
+    PrintCreditText_("CRED509", SCALE_BIG, false);
+    PrintCreditText_("CRED510", SCALE_BIG, false);
+    PrintCreditText_("CRED511", SCALE_BIG, false);
+    PrintCreditText_("CRED512", SCALE_BIG, false);
+    PrintCreditText_("CRED515", SCALE_BIG, false);
+    PrintCreditText_("CRED516", SCALE_BIG, false);
+    PrintCreditText_("CRED517", SCALE_BIG, false);
+    PrintCreditText_("CRED518", SCALE_BIG, false);
+    PrintCreditText_("CRED519", SCALE_BIG, false);
+    PrintCreditText_("CRED520", SCALE_BIG, false);
+    PrintCreditText_("CRED521", SCALE_BIG, false);
+    PrintCreditText_("CRED522", SCALE_BIG, false);
+    PrintCreditText_("CRED523", SCALE_BIG, false);
+    PrintCreditText_("CRED524", SCALE_BIG, false);
+    PrintCreditText_("CRED525", SCALE_BIG, false);
+    PrintCreditText_("CRED526", SCALE_BIG, false);
+    PrintCreditText_("CRED527", SCALE_BIG, false);
+    PrintCreditText_("CRED529", SCALE_BIG, false);
+    PrintCreditText_("CRED530", SCALE_BIG, false);
+    PrintCreditText_("CRED531", SCALE_BIG, false);
+    PrintCreditText_("CRED532", SCALE_BIG, false);
+    PrintCreditText_("CRED533", SCALE_BIG, false);
+    PrintCreditText_("CRED534", SCALE_BIG, false);
+    PrintCreditText_("CRED535", SCALE_BIG, false);
+    PrintCreditText_("CRED536", SCALE_BIG, false);
+    PrintCreditText_("CRED537", SCALE_BIG, false);
+    PrintCreditText_("CRED538", SCALE_BIG, false);
+    PrintCreditText_("CRED539", SCALE_BIG, false);
+    PrintCreditText_("CRED540", SCALE_BIG, false);
+    PrintCreditText_("CRED541", SCALE_BIG, false);
+    PrintCreditText_("CRD541A", SCALE_BIG, false);
+    PrintCreditText_("CRD541B", SCALE_BIG, false);
+    PrintCreditText_("CRD541C", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED542", SCALE_BIG, true);
+    PrintCreditText_("CRED543", SCALE_BIG, false);
+    PrintCreditText_("CRED544", SCALE_BIG, false);
+    PrintCreditText_("CRED545", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED600", SCALE_BIG, true);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED601", SCALE_BIG, true);
+    PrintCreditText_("CRED602", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED603", SCALE_BIG, true);
+    PrintCreditText_("CRED604", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED605", SCALE_BIG, true);
+    PrintCreditText_("CRED606", SCALE_BIG, false);
+    PrintCreditText_("CRED607", SCALE_BIG, false);
+    PrintCreditText_("CRED608", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED609", SCALE_BIG, true);
+    PrintCreditText_("CRED610", SCALE_BIG, false);
+    PrintCreditText_("CRED611", SCALE_BIG, false);
+    PrintCreditText_("CRED612", SCALE_BIG, false);
+    PrintCreditText_("CRED613", SCALE_BIG, false);
+    PrintCreditText_("CRED614", SCALE_BIG, false);
+    PrintCreditText_("CRED615", SCALE_BIG, false);
+    PrintCreditText_("CRED616", SCALE_BIG, false);
+    PrintCreditText_("CRED617", SCALE_BIG, false);
+    PrintCreditText_("CRED618", SCALE_BIG, false);
+    PrintCreditText_("CRED619", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED620", SCALE_BIG, true);
+    PrintCreditText_("CRED621", SCALE_BIG, false);
+    PrintCreditText_("CRED622", SCALE_BIG, false);
+    PrintCreditText_("CRED623", SCALE_BIG, false);
+    PrintCreditText_("CRED624", SCALE_BIG, false);
+    PrintCreditText_("CRED625", SCALE_BIG, false);
+    PrintCreditText_("CRED626", SCALE_BIG, false);
+    PrintCreditText_("CRED627", SCALE_BIG, false);
+    PrintCreditText_("CRED628", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED629", SCALE_BIG, true);
+    PrintCreditText_("CRED630", SCALE_BIG, false);
+    PrintCreditSpace(SPACE_BIG, lineOffset);
+
+    PrintCreditText_("CRED700", SCALE_BIG, true);
+    PrintCreditText_("CRED701", SCALE_BIG, false);
+    PrintCreditText_("CRED702", SCALE_BIG, false);
+    PrintCreditText_("CRED703", SCALE_BIG, false);
+    PrintCreditText_("CRED704", SCALE_BIG, false);
+    PrintCreditText_("CRED705", SCALE_BIG, false);
+    PrintCreditText_("CRED706", SCALE_BIG, false);
+    PrintCreditText_("CRED707", SCALE_BIG, false);
+    PrintCreditText_("CRED708", SCALE_BIG, false);
+    PrintCreditText_("CRED709", SCALE_BIG, false);
+    PrintCreditText_("CRED710", SCALE_BIG, false);
+    PrintCreditText_("CRED711", SCALE_BIG, false);
+    PrintCreditText_("CRED712", SCALE_BIG, false);
+    PrintCreditText_("CRED713", SCALE_BIG, false);
+    PrintCreditText_("CRED714", SCALE_BIG, false);
+    PrintCreditText_("CRED715", SCALE_BIG, false);
+    PrintCreditText_("CRED716", SCALE_BIG, false);
 
     CFont::DrawFonts();
     if (TheCamera.m_bWideScreenOn) {
         TheCamera.DrawBordersForWideScreen();
     }
 
-    if (CCredits::m_Position + SCREEN_HEIGHT - CCredits::m_CurrentOffset < -10.0f) {
-        CCredits::m_bCreditsGoing = false;
+    if (lineOffset + SCREEN_HEIGHT - scrollOffset < -10.0f) {
+        bCreditsGoing = false;
     }
 }

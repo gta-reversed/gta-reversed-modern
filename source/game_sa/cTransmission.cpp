@@ -24,7 +24,7 @@ void cTransmission::DisplayGearRatios()
     static constexpr float magic_0 = 1000.0f / 3600.0f;
     static constexpr float magic = magic_0 / 50.0f;
 
-    for (std::uint8_t i = 0; i <= m_nNumberOfGears; i++)
+    for (uint8 i = 0; i <= m_nNumberOfGears; i++)
     {
         tTransmissionGear& gear = m_aGears[i];
         printf(
@@ -42,7 +42,7 @@ void cTransmission::InitGearRatios()
     memset(m_aGears, 0, sizeof(m_aGears));
     float averageHalfGearVelocity = 0.5f * m_fMaxGearVelocity / m_nNumberOfGears;
     float maxGearVelocity = m_fMaxGearVelocity - averageHalfGearVelocity;
-    for (std::uint8_t i = 1; i <= m_nNumberOfGears; i++)
+    for (uint8 i = 1; i <= m_nNumberOfGears; i++)
     {
         static tTransmissionGear* gear = nullptr;
         static tTransmissionGear* previousGear = nullptr;
@@ -68,7 +68,7 @@ void cTransmission::InitGearRatios()
 }
 
 // 0x6D0530
-void cTransmission::CalculateGearForSimpleCar(float speed, uchar& currentGear)
+void cTransmission::CalculateGearForSimpleCar(float speed, uint8& currentGear)
 {
     m_currentVelocity = speed;
     tTransmissionGear& gear = m_aGears[currentGear];
@@ -85,7 +85,7 @@ void cTransmission::CalculateGearForSimpleCar(float speed, uchar& currentGear)
 }
 
 // 0x6D05E0
-float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uchar& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8_t allWheelsOnGround, uint8_t handlingCheat)
+float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uint8& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8 allWheelsOnGround, uint8 handlingCheat)
 {
     static float cheatMultiplier = 0.0f;
     static float driveAcceleration = 0.0f;

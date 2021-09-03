@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "AnimAssociationData.h"
 #include "eAnimBlendCallbackType.h"
 #include "RenderWare.h"
@@ -15,24 +14,23 @@ class CAnimBlendNode;
 class CAnimBlendHierarchy;
 class CAnimBlendStaticAssociation;
 
-enum eAnimationFlags
-{
-    ANIM_FLAG_STARTED = 0x1,
-    ANIM_FLAG_LOOPED = 0x2,
-    ANIM_FLAG_FREEZE_LAST_FRAME = 0x4,
-    ANIM_FLAG_UNLOCK_LAST_FRAME = 0x8, // Animation will be stuck on last frame, if not set
-    ANIM_FLAG_PARTIAL = 0x10,
-    ANIM_FLAG_MOVEMENT = 0x20,
-    ANIM_FLAG_TRANLSATE_Y = 0x40,
-    ANIM_FLAG_TRANLSATE_X = 0x80,
-    ANIM_FLAG_100 = 0x100,
-    ANIM_FLAG_200 = 0x200,
-    ANIM_FLAG_400 = 0x400,
-    ANIM_FLAG_800 = 0x800,
-    ANIM_FLAG_1000 = 0x1000,
+enum eAnimationFlags {
+    ANIM_FLAG_STARTED            = 0x1,
+    ANIM_FLAG_LOOPED             = 0x2,
+    ANIM_FLAG_FREEZE_LAST_FRAME  = 0x4,
+    ANIM_FLAG_UNLOCK_LAST_FRAME  = 0x8, // Animation will be stuck on last frame, if not set
+    ANIM_FLAG_PARTIAL            = 0x10,
+    ANIM_FLAG_MOVEMENT           = 0x20,
+    ANIM_FLAG_TRANLSATE_Y        = 0x40,
+    ANIM_FLAG_TRANLSATE_X        = 0x80,
+    ANIM_FLAG_100                = 0x100,
+    ANIM_FLAG_200                = 0x200,
+    ANIM_FLAG_400                = 0x400,
+    ANIM_FLAG_800                = 0x800,
+    ANIM_FLAG_1000               = 0x1000,
     ANIM_FLAG_FREEZE_TRANSLATION = 0x2000,
-    ANIM_FLAG_BLOCK_REFERENCED = 0x4000,
-    ANIM_FLAG_INDESTRUCTIBLE = 0x8000 // the animation is never destroyed if this flag is set, NO MATTER WHAT
+    ANIM_FLAG_BLOCK_REFERENCED   = 0x4000,
+    ANIM_FLAG_INDESTRUCTIBLE     = 0x8000 // the animation is never destroyed if this flag is set, NO MATTER WHAT
 };
 
 class CDefaultAnimCallback {
@@ -42,32 +40,30 @@ public:
     }
 };
 
-struct SClumpAnimAssoc
-{
-    SClumpAnimAssoc* m_pNext;
-    SClumpAnimAssoc* m_pPrevious;
-    std::uint16_t m_nNumBlendNodes;
-    std::int16_t m_nAnimGroup;
-    CAnimBlendNode* m_pNodeArray;
+struct SClumpAnimAssoc {
+    SClumpAnimAssoc*     m_pNext;
+    SClumpAnimAssoc*     m_pPrevious;
+    uint16               m_nNumBlendNodes;
+    int16                m_nAnimGroup;
+    CAnimBlendNode*      m_pNodeArray;
     CAnimBlendHierarchy* m_pHierarchy;
-    float m_fBlendAmount;
-    float m_fBlendDelta;
-    float m_fCurrentTime;
-    float m_fSpeed;
-    float m_fTimeStep;
-    std::int16_t m_nAnimId;
-    std::uint16_t m_nFlags;
+    float                m_fBlendAmount;
+    float                m_fBlendDelta;
+    float                m_fCurrentTime;
+    float                m_fSpeed;
+    float                m_fTimeStep;
+    int16                m_nAnimId;
+    uint16               m_nFlags;
 };
 
-class CAnimBlendAssociation : public SClumpAnimAssoc
-{
+class CAnimBlendAssociation : public SClumpAnimAssoc {
 public:
     eAnimBlendCallbackType m_nCallbackType;
 
     void(*m_pCallbackFunc)(CAnimBlendAssociation *, void *);
     void *m_pCallbackData;
 
-    void* operator new(unsigned int size);
+    void* operator new(uint32 size);
     void operator delete(void* object);
 
     static void InjectHooks();
@@ -76,9 +72,9 @@ public:
 private:
     CAnimBlendAssociation* Constructor(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy);
 public:
-    void AllocateAnimBlendNodeArray(int count);
+    void AllocateAnimBlendNodeArray(int32 count);
     void FreeAnimBlendNodeArray();
-    CAnimBlendNode* GetNode(int nodeIndex);
+    CAnimBlendNode* GetNode(int32 nodeIndex);
     void Init(RpClump* clump, CAnimBlendHierarchy* hierarchy);
     void Init(CAnimBlendAssociation& source);
     //void Init(CAnimBlendStaticAssociation &source);
@@ -97,5 +93,3 @@ public:
 
 //VTABLE_DESC(CAnimBlendAssociation, 0x85C6D0, 1);
 VALIDATE_SIZE(CAnimBlendAssociation, 0x3C);
-
-//#include "meta/meta.CAnimBlendAssociation.h"

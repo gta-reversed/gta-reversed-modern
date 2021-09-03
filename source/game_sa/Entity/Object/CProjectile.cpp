@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-CProjectile::CProjectile(int dwModelId) : CObject()
+CProjectile::CProjectile(int32 dwModelId) : CObject()
 {
     m_bTunnelTransition = true;
     m_fMass = 1.0F;

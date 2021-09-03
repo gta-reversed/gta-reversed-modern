@@ -7,7 +7,7 @@
 #pragma once
 
 // https://github.com/multitheftauto/mtasa-blue/blob/master/Client/sdk/game/CEntity.h
-enum eEntityStatus : unsigned char {
+enum eEntityStatus : uint8 {
     STATUS_PLAYER = 0,
     STATUS_PLAYER_PLAYBACK_FROM_BUFFER,
     STATUS_SIMPLE,

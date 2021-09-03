@@ -39,8 +39,12 @@ void InjectHooksMain()
     // WaitForDebugger();
 
     CMirrors::InjectHooks();
+    CBrightLights::InjectHooks();
+    CShinyTexts::InjectHooks();
     COnscreenCounterEntry::InjectHooks();
     CPedTaskPair::InjectHooks();
+    CDirectory::InjectHooks();
+    CBulletTraces::InjectHooks();
     CDebug::InjectHooks();
     InjectCommonHooks();
     CGame::InjectHooks();
@@ -369,4 +373,7 @@ void InjectHooksMain()
     CAEWaterCannonAudioEntity::InjectHooks();
     CAETwinLoopSoundEntity::InjectHooks();
     CAEDoorAudioEntity::InjectHooks();
+
+    FxManager_c::InjectHooks();
+    FxSystemBP_c::InjectHooks();
 }

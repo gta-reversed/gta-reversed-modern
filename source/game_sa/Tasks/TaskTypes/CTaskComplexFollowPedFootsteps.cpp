@@ -2,7 +2,7 @@
 
 void CTaskComplexFollowPedFootsteps::InjectHooks()
 {
-    HookInstall(0x694E20, &CTaskComplexFollowPedFootsteps::Constructor);
+    ReversibleHooks::Install("CTaskComplexFollowPedFootsteps", "CTaskComplexFollowPedFootsteps", 0x694E20, &CTaskComplexFollowPedFootsteps::Constructor);
 }
 
 CTaskComplexFollowPedFootsteps::CTaskComplexFollowPedFootsteps(CPed* ped)
@@ -36,9 +36,9 @@ CTaskComplexFollowPedFootsteps::~CTaskComplexFollowPedFootsteps()
     }
 }
 
-bool CTaskComplexFollowPedFootsteps::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* event)
+bool CTaskComplexFollowPedFootsteps::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x694ED0, CTaskComplexFollowPedFootsteps*, CPed*, eAbortPriority, CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x694ED0, CTaskComplexFollowPedFootsteps*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
 }
 
 CTask* CTaskComplexFollowPedFootsteps::CreateNextSubTask(CPed* ped)

@@ -8,7 +8,7 @@ Do not delete this comment block. Respect others' work!
 */
 #include "CTaskComplex.h"
 
-enum eComplexJumpType : unsigned int
+enum eComplexJumpType : uint32
 {
     COMPLEX_JUMP_TYPE_JUMP = 0,
     COMPLEX_JUMP_TYPE_CLIMB = 1
@@ -32,12 +32,12 @@ public:
     CTask* ControlSubTask(CPed* ped) override { return m_pSubTask; }
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
 
     CTask* Clone_Reversed();
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
 
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 };

@@ -6,37 +6,36 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CVector.h"
 #include "eWeaponType.h"
 
 class CEntity;
 
-class  CShotInfo {
+class CShotInfo {
 public:
-    int      m_nWeaponType;
+    int32    m_nWeaponType;
     CVector  m_vecOrigin;
     CVector  m_vecTargetOffset;
     float    m_fRange;
-    CEntity *m_pCreator;
-    int      m_nDestroyTime;
+    CEntity* m_pCreator;
+    int32    m_nDestroyTime;
     bool     m_bExist;
     bool     m_bExecuted;
-private:
-    char _pad2A[2];
-public:
+    char     _pad2A[2];
 
     static float *ms_afRandTable; // static float ms_afRandTable[20]
 
+public:
     static void Initialise();
     // dummy function
     static void Shutdown();
     static bool AddShot(CEntity* creator, eWeaponType weaponType, CVector origin, CVector target);
-    static bool GetFlameThrowerShotPosn(unsigned char shotId, CVector* outPosn);
+    static bool GetFlameThrowerShotPosn(uint8 shotId, CVector* outPosn);
     static void Update();
 };
 
 VALIDATE_SIZE(CShotInfo, 0x2C);
 
-extern unsigned int MAX_SHOT_INFOS; // default 100
+extern uint32 MAX_SHOT_INFOS; // default 100
 extern CShotInfo *aShotInfos; // CShotInfo aShotInfos[MAX_SHOT_INFOS]

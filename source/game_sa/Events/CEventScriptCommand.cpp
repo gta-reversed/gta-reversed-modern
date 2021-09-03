@@ -2,17 +2,17 @@
 
 void CEventScriptCommand::InjectHooks()
 {
-    HookInstall(0x4B0A00, &CEventScriptCommand::Constructor);
-    HookInstall(0x4B0A30, &CEventScriptCommand::GetEventType);
-    HookInstall(0x4B0B20, &CEventScriptCommand::GetEventPriority);
-    HookInstall(0x4B6490, &CEventScriptCommand::Clone);
-    HookInstall(0x4B0AF0, &CEventScriptCommand::AffectsPed);
-    HookInstall(0x4B0BA0, &CEventScriptCommand::TakesPriorityOver);
-    HookInstall(0x4B0AB0, &CEventScriptCommand::IsValid);
-    HookInstall(0x4B0AA0, &CEventScriptCommand::CloneScriptTask);
+    ReversibleHooks::Install("CEventScriptCommand", "Constructor", 0x4B0A00, &CEventScriptCommand::Constructor);
+    ReversibleHooks::Install("CEventScriptCommand", "GetEventType", 0x4B0A30, &CEventScriptCommand::GetEventType);
+    ReversibleHooks::Install("CEventScriptCommand", "GetEventPriority", 0x4B0B20, &CEventScriptCommand::GetEventPriority);
+    ReversibleHooks::Install("CEventScriptCommand", "Clone", 0x4B6490, &CEventScriptCommand::Clone);
+    ReversibleHooks::Install("CEventScriptCommand", "AffectsPed", 0x4B0AF0, &CEventScriptCommand::AffectsPed);
+    ReversibleHooks::Install("CEventScriptCommand", "TakesPriorityOver", 0x4B0BA0, &CEventScriptCommand::TakesPriorityOver);
+    ReversibleHooks::Install("CEventScriptCommand", "IsValid", 0x4B0AB0, &CEventScriptCommand::IsValid);
+    ReversibleHooks::Install("CEventScriptCommand", "CloneScriptTask", 0x4B0AA0, &CEventScriptCommand::CloneScriptTask);
 }
 
-CEventScriptCommand::CEventScriptCommand(std::int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds)
+CEventScriptCommand::CEventScriptCommand(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds)
 {
     m_primaryTaskIndex = primaryTaskIndex;
     m_task = task;
@@ -21,27 +21,23 @@ CEventScriptCommand::CEventScriptCommand(std::int32_t primaryTaskIndex, CTask* t
 
 CEventScriptCommand::~CEventScriptCommand()
 {
-    if (m_task)
-        delete m_task;
+    delete m_task;
 }
 
-CEventScriptCommand* CEventScriptCommand::Constructor(std::int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds)
+CEventScriptCommand* CEventScriptCommand::Constructor(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn< CEventScriptCommand*, 0x4B0A00, CEventScriptCommand*, std::int32_t, CTask*, char>(this, primaryTaskIndex, task, affectsDeadPeds);
+    return plugin::CallMethodAndReturn< CEventScriptCommand*, 0x4B0A00, CEventScriptCommand*, int32, CTask*, char>(this, primaryTaskIndex, task, affectsDeadPeds);
 #else
     this->CEventScriptCommand::CEventScriptCommand(primaryTaskIndex, task, affectsDeadPeds);
     return this;
 #endif
 }
 
-int CEventScriptCommand::GetEventPriority()
+// 0x4B0B20
+int32 CEventScriptCommand::GetEventPriority() const
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<int, 0x4B0B20, CEvent*>(this);
-#else
     return CEventScriptCommand::GetEventPriority_Reversed();
-#endif
 }
 
 CEvent* CEventScriptCommand::Clone()
@@ -62,7 +58,7 @@ bool CEventScriptCommand::AffectsPed(CPed* ped)
 #endif
 }
 
-bool CEventScriptCommand::TakesPriorityOver(CEvent* refEvent)
+bool CEventScriptCommand::TakesPriorityOver(const CEvent& refEvent)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<bool, 0x4B0BA0, CEvent*, CEvent*>(this, refEvent);
@@ -80,22 +76,19 @@ bool CEventScriptCommand::IsValid(CPed* ped)
 #endif
 }
 
+// 0x4B0AA0
 CTask* CEventScriptCommand::CloneScriptTask()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CTask*, 0x4B0AA0, CEvent*>(this);
-#else
     return CEventScriptCommand::CloneScriptTask_Reversed();
-#endif
 }
 
-int CEventScriptCommand::GetEventPriority_Reversed()
+int32 CEventScriptCommand::GetEventPriority_Reversed() const
 {
     if (m_affectsDeadPeds)
         return 75;
     if (!m_task)
         return 53;
-    const std::int32_t taskId = m_task->GetId();
+    const int32 taskId = m_task->GetId();
     if (taskId == TASK_SIMPLE_NAMED_ANIM) {
         CTaskSimpleRunAnim* pTaskRunAnim = static_cast<CTaskSimpleRunAnim*>(m_task);
         if (pTaskRunAnim->m_nFlags & ANIM_FLAG_LOOPED)
@@ -119,12 +112,12 @@ bool CEventScriptCommand::AffectsPed_Reversed(CPed* ped)
     return ped->IsAlive() || m_affectsDeadPeds;
 }
 
-bool CEventScriptCommand::TakesPriorityOver_Reversed(CEvent* refEvent)
+bool CEventScriptCommand::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
-    eEventType refEventType = refEvent->GetEventType();
+    eEventType refEventType = refEvent.GetEventType();
     if (m_affectsDeadPeds && (refEventType == EVENT_DEATH || m_affectsDeadPeds && refEventType == EVENT_DAMAGE))
         return true;
-    return GetEventPriority() >= refEvent->GetEventPriority();
+    return GetEventPriority() >= refEvent.GetEventPriority();
 }
 
 bool CEventScriptCommand::IsValid_Reversed(CPed* ped)

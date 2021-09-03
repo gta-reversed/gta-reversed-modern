@@ -2,10 +2,10 @@
 
 void CEventCreatePartnerTask::InjectHooks()
 {
-    HookInstall(0x5F6190, &CEventCreatePartnerTask::Constructor);
+    ReversibleHooks::Install("CEventCreatePartnerTask", "CEventCreatePartnerTask", 0x5F6190, &CEventCreatePartnerTask::Constructor);
 }
 
-CEventCreatePartnerTask::CEventCreatePartnerTask(std::int32_t randomNumber, CPed* partner, bool leadSpeaker, float distanceMultiplier)
+CEventCreatePartnerTask::CEventCreatePartnerTask(int32 randomNumber, CPed* partner, bool leadSpeaker, float distanceMultiplier)
 {
     m_randomNumber = randomNumber;
     m_leadSpeaker = leadSpeaker;
@@ -21,7 +21,7 @@ CEventCreatePartnerTask::~CEventCreatePartnerTask()
         m_partner->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_partner));
 }
 
-CEventCreatePartnerTask* CEventCreatePartnerTask::Constructor(std::int32_t randomNumber, CPed* partner, bool leadSpeaker, float distanceMultiplier)
+CEventCreatePartnerTask* CEventCreatePartnerTask::Constructor(int32 randomNumber, CPed* partner, bool leadSpeaker, float distanceMultiplier)
 {
     this->CEventCreatePartnerTask::CEventCreatePartnerTask(randomNumber, partner, leadSpeaker, distanceMultiplier);
     return this;

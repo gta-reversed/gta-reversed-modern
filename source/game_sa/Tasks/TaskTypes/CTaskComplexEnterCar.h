@@ -6,7 +6,7 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskComplex.h"
 #include "CPathFind.h"
 #include "CTaskUtilityLineUpPedWithCar.h"
@@ -25,26 +25,26 @@ public:
     CVehicle* m_pTargetVehicle;
     union
     {
-        unsigned char m_nFlags;
+        uint8 m_nFlags;
         struct
         {
-            unsigned char m_bAsDriver : 1;
-            unsigned char m_bQuitAfterOpeningDoor : 1;
-            unsigned char m_bQuitAfterDraggingPedOut : 1;
-            unsigned char m_bCarryOnAfterFallingOff : 1;
+            uint8 m_bAsDriver : 1;
+            uint8 m_bQuitAfterOpeningDoor : 1;
+            uint8 m_bQuitAfterDraggingPedOut : 1;
+            uint8 m_bCarryOnAfterFallingOff : 1;
         };
     };
 private:
     char _pad[3];
 public:
-    int m_nTargetDoor;
-    int m_nTargetDoorOppositeToFlag;
-    int m_nTargetSeat;
-    int m_nDraggedPedDownTime;
-    int m_nMoveState; // see eMoveState
+    int32 m_nTargetDoor;
+    int32 m_nTargetDoorOppositeToFlag;
+    int32 m_nTargetSeat;
+    int32 m_nDraggedPedDownTime;
+    int32 m_nMoveState; // see eMoveState
 
-    unsigned char m_nNumGettingInSet;
-    unsigned char m_nCamMovementChoice;
+    uint8 m_nNumGettingInSet;
+    uint8 m_nCamMovementChoice;
 private:
     char _pad2[2];
 public:
@@ -55,19 +55,19 @@ private:
     char _pad3[3];
 public:
     CPed* m_pDraggedPed;
-    unsigned char m_nDoorFlagsSet; // used for CVehicle::SetGettingInFlags
+    uint8 m_nDoorFlagsSet; // used for CVehicle::SetGettingInFlags
 private:
     char _pad4[3];
 public:
     float m_fCruiseSpeed;
-    int m_nEnterCarStartTime;
+    int32 m_nEnterCarStartTime;
 
     // Shouldn't be used directly, use CTaskComplexEnterCarAsDriver or CTaskComplexEnterCarAsPassenger instead
     CTaskComplexEnterCar(CVehicle* pTargetVehicle, bool bAsDriver, bool bQuitAfterOpeningDoor,
         bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff = false);
     ~CTaskComplexEnterCar();
 
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

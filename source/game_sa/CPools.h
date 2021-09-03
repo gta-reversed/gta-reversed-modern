@@ -6,7 +6,6 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CPool.h"
 #include "CCopPed.h"
 #include "CHeli.h"
@@ -45,14 +44,14 @@ public:
     static void InjectHooks();
 
     // dummy function; returns "-1"
-    static int CheckBuildingAtomics();
+    static int32 CheckBuildingAtomics();
     static void CheckPoolsEmpty();
-    static CObject* GetObject(int handle);
-    static int GetObjectRef(CObject* object);
-    static CPed* GetPed(int handle);
-    static int GetPedRef(CPed* ped);
-    static CVehicle* GetVehicle(int handle);
-    static int GetVehicleRef(CVehicle* vehicle);
+    static CObject* GetObject(int32 handle);
+    static int32 GetObjectRef(CObject* object);
+    static CPed* GetPed(int32 handle);
+    static int32 GetPedRef(CPed* ped);
+    static CVehicle* GetVehicle(int32 handle);
+    static int32 GetVehicleRef(CVehicle* vehicle);
     static void Initialise();
     // returns "true"
     static bool Load();
@@ -62,7 +61,7 @@ public:
     static bool LoadPedPool();
     // returns "true"
     static bool LoadVehiclePool();
-    static void MakeSureSlotInObjectPoolIsEmpty(int slot);
+    static void MakeSureSlotInObjectPoolIsEmpty(int32 slot);
     // returns "true"
     static bool Save();
     // returns "true"

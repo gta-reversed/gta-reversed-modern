@@ -1,11 +1,11 @@
 #include "CEventEditableResponse.h"
 #include "CVehicle.h"
 
-class CEventGotKnockedOverByCar : public CEventEditableResponse
-{
+class CEventGotKnockedOverByCar : public CEventEditableResponse {
 public:
     CVehicle* m_vehicle;
 
+public:
     static void InjectHooks();
 
     CEventGotKnockedOverByCar(CVehicle* vehicle);
@@ -13,11 +13,11 @@ public:
 private:
     CEventGotKnockedOverByCar* Constructor(CVehicle* vehicle);
 public:
-    eEventType GetEventType() override { return EVENT_GOT_KNOCKED_OVER_BY_CAR; }
-    int GetEventPriority() override { return 37; }
-    int GetLifeTime() override { return 0; }
+    eEventType GetEventType() const override { return EVENT_GOT_KNOCKED_OVER_BY_CAR; }
+    int32 GetEventPriority() const override { return 37; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
-    CEntity* GetSourceEntity() override { return m_vehicle ? m_vehicle->m_pDriver : nullptr; }
+    CEntity* GetSourceEntity() const override { return m_vehicle ? m_vehicle->m_pDriver : nullptr; }
     float GetLocalSoundLevel() override { return 55.0f; }
     CEventEditableResponse* CloneEditable() override;
 

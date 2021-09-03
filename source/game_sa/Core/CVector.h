@@ -100,7 +100,7 @@ public:
         return x * x + y * y;
     }
 
-    inline bool IsZero()
+    inline bool IsZero() const
     {
         return x == 0.0F && y == 0.0F && z == 0.0F;
     }

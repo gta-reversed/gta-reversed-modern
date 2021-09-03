@@ -2,11 +2,11 @@
 
 void CEventGunAimedAt::InjectHooks()
 {
-    HookInstall(0x4B0700, &CEventGunAimedAt::Constructor);
-    HookInstall(0x4B4EE0, &CEventGunAimedAt::AffectsPed_Reversed);
-    HookInstall(0x4B09E0, &CEventGunAimedAt::ReportCriminalEvent_Reversed);
-    HookInstall(0x4B0810, &CEventGunAimedAt::TakesPriorityOver_Reversed);
-    HookInstall(0x4B7630, &CEventGunAimedAt::CloneEditable_Reversed);
+    ReversibleHooks::Install("CEventGunAimedAt", "Constructor", 0x4B0700, &CEventGunAimedAt::Constructor);
+    ReversibleHooks::Install("CEventGunAimedAt", "AffectsPed_Reversed", 0x4B4EE0, &CEventGunAimedAt::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventGunAimedAt", "ReportCriminalEvent_Reversed", 0x4B09E0, &CEventGunAimedAt::ReportCriminalEvent_Reversed);
+    ReversibleHooks::Install("CEventGunAimedAt", "TakesPriorityOver_Reversed", 0x4B0810, &CEventGunAimedAt::TakesPriorityOver_Reversed);
+    ReversibleHooks::Install("CEventGunAimedAt", "CloneEditable_Reversed", 0x4B7630, &CEventGunAimedAt::CloneEditable_Reversed);
 }
 
 CEventGunAimedAt::CEventGunAimedAt(CPed* ped)
@@ -51,13 +51,10 @@ void CEventGunAimedAt::ReportCriminalEvent(CPed* ped)
 #endif
 }
 
-bool CEventGunAimedAt::TakesPriorityOver(CEvent* refEvent)
+// 0x4B0810
+bool CEventGunAimedAt::TakesPriorityOver(const CEvent& refEvent)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B0810, CEvent*, CEvent*>(this, refEvent);
-#else
     return CEventGunAimedAt::TakesPriorityOver_Reversed(refEvent);
-#endif
 }
 
 CEventEditableResponse* CEventGunAimedAt::CloneEditable()
@@ -94,12 +91,13 @@ void CEventGunAimedAt::ReportCriminalEvent_Reversed(CPed* ped)
         CPedType::PoliceDontCareAboutCrimesAgainstPedType(ped->m_nPedType);
 }
 
-bool CEventGunAimedAt::TakesPriorityOver_Reversed(CEvent* refEvent)
+bool CEventGunAimedAt::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
     if (m_ped && m_ped->IsPlayer()) {
-        if (refEvent->GetSourceEntity() == m_ped)
-            return GetEventPriority() >= refEvent->GetEventPriority();
-        switch (refEvent->GetEventType())
+        if (refEvent.GetSourceEntity() == m_ped)
+            return GetEventPriority() >= refEvent.GetEventPriority();
+
+        switch (refEvent.GetEventType())
         {
         case EVENT_DAMAGE:
         case EVENT_ACQUAINTANCE_PED_HATE:
@@ -108,7 +106,7 @@ bool CEventGunAimedAt::TakesPriorityOver_Reversed(CEvent* refEvent)
         }
         return CEvent::TakesPriorityOver(refEvent);
     }
-    return GetEventPriority() >= refEvent->GetEventPriority();
+    return GetEventPriority() >= refEvent.GetEventPriority();
 }
 
 CEventEditableResponse* CEventGunAimedAt::CloneEditable_Reversed()

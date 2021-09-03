@@ -68,8 +68,8 @@ void CWaterCannon::Init() {
 }
 
 // 0x72A280
-void CWaterCannon::Update_OncePerFrame(short a1) {
-    plugin::CallMethod<0x72A280, CWaterCannon*, short>(this, a1);
+void CWaterCannon::Update_OncePerFrame(int16 a1) {
+    plugin::CallMethod<0x72A280, CWaterCannon*, int16>(this, a1);
 }
 
 // 0x728C20

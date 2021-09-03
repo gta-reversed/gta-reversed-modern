@@ -2,8 +2,7 @@
 
 class CVehicle;
 
-class CEventVehicleToSteal : public CEvent
-{
+class CEventVehicleToSteal : public CEvent {
 public:
     CVehicle* m_vehicle;
 
@@ -14,9 +13,9 @@ public:
 private:
     CEventVehicleToSteal* Constructor(CVehicle* vehicle);
 public:
-    eEventType GetEventType() override { return EVENT_VEHICLE_TO_STEAL; }
-    int GetEventPriority() override { return 7; }
-    int GetLifeTime() override { return 0; }
+    eEventType GetEventType() const override { return EVENT_VEHICLE_TO_STEAL; }
+    int32 GetEventPriority() const override { return 7; }
+    int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override { return new CEventVehicleToSteal(m_vehicle); }
     bool AffectsPed(CPed* ped) override;
 

@@ -6,14 +6,13 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "FxSphere_c.h"
 #include "FxPlane_c.h"
 
 class FxFrustumInfo_c {
 public:
     FxSphere_c m_sphere;
-	FxPlane_c m_planes[4];
+    FxPlane_c  m_planes[4];
 
     bool IsCollision(FxSphere_c* sphere);
 };

@@ -9,6 +9,6 @@ void CMaths::InjectHooks()
 
 void CMaths::InitMathsTables()
 {
-    for (int i = 0; i < 256; ++i)
+    for (int32 i = 0; i < 256; ++i)
         CMaths::ms_SinTable[i] = sin(static_cast<float>(i) * PI / 128.0F);
 }

@@ -23,8 +23,8 @@ void CPedClothesDesc::Initialise() {
     plugin::CallMethod<0x5A78F0, CPedClothesDesc*>(this);
 }
 
-void CPedClothesDesc::SetModel(unsigned int modelId, eClothesModelPart modelPart) {
-    plugin::CallMethod<0x5A7910, CPedClothesDesc*, unsigned int, eClothesModelPart>(this, modelId, modelPart);
+void CPedClothesDesc::SetModel(uint32 modelId, eClothesModelPart modelPart) {
+    plugin::CallMethod<0x5A7910, CPedClothesDesc*, uint32, eClothesModelPart>(this, modelId, modelPart);
 }
 
 void CPedClothesDesc::SetModel(const char* model, eClothesModelPart modelPart) {
@@ -35,16 +35,16 @@ bool CPedClothesDesc::GetIsWearingBalaclava() {
     return plugin::CallMethodAndReturn<bool, 0x5A7950>(this);
 }
 
-bool CPedClothesDesc::HasVisibleNewHairCut(int arg1) {
-    return plugin::CallMethodAndReturn<bool, 0x5A7970, int>(arg1);
+bool CPedClothesDesc::HasVisibleNewHairCut(int32 arg1) {
+    return plugin::CallMethodAndReturn<bool, 0x5A7970, int32>(arg1);
 }
 
 bool CPedClothesDesc::HasVisibleTattoo() {
     return plugin::CallMethodAndReturn<bool, 0x5A79D0>(this);
 }
 
-void CPedClothesDesc::SetTextureAndModel(unsigned int texture, unsigned int model, eClothesTexturePart texturePart) {
-    plugin::CallMethod<0x5A8050, CPedClothesDesc*, unsigned int, unsigned int, eClothesTexturePart>(this, texture, model, texturePart);
+void CPedClothesDesc::SetTextureAndModel(uint32 texture, uint32 model, eClothesTexturePart texturePart) {
+    plugin::CallMethod<0x5A8050, CPedClothesDesc*, uint32, uint32, eClothesTexturePart>(this, texture, model, texturePart);
 }
 
 void CPedClothesDesc::SetTextureAndModel(const char* textureName, const char* modelName, eClothesTexturePart texturePart) {

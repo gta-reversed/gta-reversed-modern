@@ -7,214 +7,214 @@
 
 #include "StdInc.h"
 
-unsigned int& CTrain::GenTrain_Track = *(unsigned int*)0xC37FFC;
-unsigned int& CTrain::GenTrain_TrainConfig = *(unsigned int*)0xC38000;
-unsigned char& CTrain::GenTrain_Direction = *(unsigned char*)0xC38004;
-unsigned int& CTrain::GenTrain_GenerationNode = *(unsigned int*)0xC38008;
-unsigned int& CTrain::GenTrain_Status = *(unsigned int*)0xC3800C;
+uint32& CTrain::GenTrain_Track = *(uint32*)0xC37FFC;
+uint32& CTrain::GenTrain_TrainConfig = *(uint32*)0xC38000;
+uint8& CTrain::GenTrain_Direction = *(uint8*)0xC38004;
+uint32& CTrain::GenTrain_GenerationNode = *(uint32*)0xC38008;
+uint32& CTrain::GenTrain_Status = *(uint32*)0xC3800C;
 bool& CTrain::bDisableRandomTrains = *(bool*)0xC38010;
 CVector* CTrain::aStationCoors = (CVector*)0x8D48F8;
-unsigned int* NumTrackNodes = (unsigned int*)0xC38014;
+uint32* NumTrackNodes = (uint32*)0xC38014;
 float* arrTotalTrackLength = (float*)0xC37FEC;
 CTrainNode** pTrackNodes = (CTrainNode * *)0xC38024;
 float* StationDist = (float*)0xC38034;
 
 void CTrain::InjectHooks()
 {
-    HookInstall(0x6F86A0, &CTrain::ProcessControl_Reversed);
+    ReversibleHooks::Install("CTrain", "ProcessControl", 0x6F86A0, &CTrain::ProcessControl_Reversed);
 }
 
-// Converted from thiscall void CTrain::CTrain(int modelIndex,uchar createdBy) 0x6F6030
-CTrain::CTrain(int modelIndex, unsigned char createdBy) : CVehicle(plugin::dummy) {
-    plugin::CallMethod<0x6F6030, CTrain*, int, unsigned char>(this, modelIndex, createdBy);
+// 0x6F6030
+CTrain::CTrain(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(plugin::dummy) {
+    plugin::CallMethod<0x6F6030, CTrain*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
 
-// Converted from cdecl void CTrain::ReadAndInterpretTrackFile(char *filename,CTrainNode **nodes,int *lineCount,float *totalDist,int skipStations) 0x6F55D0
-void CTrain::ReadAndInterpretTrackFile(char* filename, CTrainNode** nodes, int* lineCount, float* totalDist, int skipStations) {
-    ((void(__cdecl*)(char*, CTrainNode * *, int*, float*, int))0x6F55D0)(filename, nodes, lineCount, totalDist, skipStations);
+// 0x6F55D0
+void CTrain::ReadAndInterpretTrackFile(char* filename, CTrainNode** nodes, int32* lineCount, float* totalDist, int32 skipStations) {
+    ((void(__cdecl*)(char*, CTrainNode * *, int32*, float*, int32))0x6F55D0)(filename, nodes, lineCount, totalDist, skipStations);
 }
 
-// Converted from cdecl void CTrain::Shutdown(void) 0x6F58D0
+// 0x6F58D0
 void CTrain::Shutdown() {
     ((void(__cdecl*)())0x6F58D0)();
 }
 
-// Converted from cdecl void CTrain::UpdateTrains(void) 0x6F5900
+// 0x6F5900
 void CTrain::UpdateTrains() {
     ((void(__cdecl*)())0x6F5900)();
 }
 
-// Converted from cdecl void ProcessTrainAnnouncements(void) 0x6F5910
+// 0x6F5910
 void ProcessTrainAnnouncements() {
     ((void(__cdecl*)())0x6F5910)();
 }
 
-// Converted from cdecl void PlayAnnouncement(uchar,uchar) 0x6F5920
-void PlayAnnouncement(unsigned char arg0, unsigned char arg1) {
-    ((void(__cdecl*)(unsigned char, unsigned char))0x6F5920)(arg0, arg1);
+// 0x6F5920
+void PlayAnnouncement(uint8 arg0, uint8 arg1) {
+    ((void(__cdecl*)(uint8, uint8))0x6F5920)(arg0, arg1);
 }
 
-// Converted from cdecl void CTrain::FindCoorsFromPositionOnTrack(float railDistance,int trackId,CVector *outCoors) 0x6F59E0
-void CTrain::FindCoorsFromPositionOnTrack(float railDistance, int trackId, CVector* outCoors) {
-    ((void(__cdecl*)(float, int, CVector*))0x6F59E0)(railDistance, trackId, outCoors);
+// 0x6F59E0
+void CTrain::FindCoorsFromPositionOnTrack(float railDistance, int32 trackId, CVector* outCoors) {
+    ((void(__cdecl*)(float, int32, CVector*))0x6F59E0)(railDistance, trackId, outCoors);
 }
 
-// Converted from thiscall bool CTrain::FindMaximumSpeedToStopAtStations(float *speed) 0x6F5BA0
+// 0x6F5BA0
 bool CTrain::FindMaximumSpeedToStopAtStations(float* speed) {
     return ((bool(__thiscall*)(CTrain*, float*))0x6F5BA0)(this, speed);
 }
 
-// Converted from thiscall uint CTrain::FindNumCarriagesPulled(void) 0x6F5CD0
-unsigned int CTrain::FindNumCarriagesPulled() {
-    return ((unsigned int(__thiscall*)(CTrain*))0x6F5CD0)(this);
+// 0x6F5CD0
+uint32 CTrain::FindNumCarriagesPulled() {
+    return ((uint32(__thiscall*)(CTrain*))0x6F5CD0)(this);
 }
 
-// Converted from cdecl void TrainHitStuff(CPtrList &ptrList,CEntity *entity) 0x6F5CF0
+// 0x6F5CF0
 void TrainHitStuff(CPtrList& ptrList, CEntity* entity) {
     ((void(__cdecl*)(CPtrList&, CEntity*))0x6F5CF0)(ptrList, entity);
 }
 
-// Converted from thiscall void CTrain::OpenTrainDoor(float state) 0x6F5D80
+// 0x6F5D80
 void CTrain::OpenTrainDoor(float state) {
     ((void(__thiscall*)(CTrain*, float))0x6F5D80)(this, state);
 }
 
-// Converted from thiscall void CTrain::AddPassenger(CPed *ped) 0x6F5D90
+// 0x6F5D90
 void CTrain::AddPassenger(CPed* ped) {
     ((void(__thiscall*)(CTrain*, CPed*))0x6F5D90)(this, ped);
 }
 
-// Converted from thiscall void CTrain::RemovePassenger(CPed *ped) 0x6F5DA0
+// 0x6F5DA0
 void CTrain::RemovePassenger(CPed* ped) {
     ((void(__thiscall*)(CTrain*, CPed*))0x6F5DA0)(this, ped);
 }
 
-// Converted from cdecl void CTrain::DisableRandomTrains(bool disable) 0x6F5DB0
+// 0x6F5DB0
 void CTrain::DisableRandomTrains(bool disable) {
     ((void(__cdecl*)(bool))0x6F5DB0)(disable);
 }
 
-// Converted from cdecl void CTrain::RemoveOneMissionTrain(CTrain* train) 0x6F5DC0
+// 0x6F5DC0
 void CTrain::RemoveOneMissionTrain(CTrain* train) {
     ((void(__cdecl*)(CTrain*))0x6F5DC0)(train);
 }
 
-// Converted from cdecl void CTrain::ReleaseOneMissionTrain(CTrain* train) 0x6F5DF0
+// 0x6F5DF0
 void CTrain::ReleaseOneMissionTrain(CTrain* train) {
     ((void(__cdecl*)(CTrain*))0x6F5DF0)(train);
 }
 
-// Converted from cdecl void CTrain::SetTrainSpeed(CTrain* train,float speed) 0x6F5E20
+// 0x6F5E20
 void CTrain::SetTrainSpeed(CTrain* train, float speed) {
     ((void(__cdecl*)(CTrain*, float))0x6F5E20)(train, speed);
 }
 
-// Converted from cdecl void CTrain::SetTrainCruiseSpeed(CTrain*,float cruiseSpeed) 0x6F5E50
+// 0x6F5E50
 void CTrain::SetTrainCruiseSpeed(CTrain* arg0, float cruiseSpeed) {
     ((void(__cdecl*)(CTrain*, float))0x6F5E50)(arg0, cruiseSpeed);
 }
 
-// Converted from cdecl CTrain* CTrain::FindCaboose(CTrain* train) 0x6F5E70
+// 0x6F5E70
 CTrain* CTrain::FindCaboose(CTrain* train) {
     return ((CTrain * (__cdecl*)(CTrain*))0x6F5E70)(train);
 }
 
-// Converted from cdecl CTrain* CTrain::FindEngine(CTrain* train) 0x6F5E90
+// 0x6F5E90
 CTrain* CTrain::FindEngine(CTrain* train) {
     return ((CTrain * (__cdecl*)(CTrain*))0x6F5E90)(train);
 }
 
-// Converted from cdecl CTrain* CTrain::FindCarriage(CTrain* train,uchar carriage) 0x6F5EB0
-CTrain* CTrain::FindCarriage(CTrain* train, unsigned char carriage) {
-    return ((CTrain * (__cdecl*)(CTrain*, unsigned char))0x6F5EB0)(train, carriage);
+// 0x6F5EB0
+CTrain* CTrain::FindCarriage(CTrain* train, uint8 carriage) {
+    return ((CTrain * (__cdecl*)(CTrain*, uint8))0x6F5EB0)(train, carriage);
 }
 
-// Converted from thiscall bool CTrain::FindSideStationIsOn(void) 0x6F5EF0
+// 0x6F5EF0
 bool CTrain::FindSideStationIsOn() {
     return ((bool(__thiscall*)(CTrain*))0x6F5EF0)(this);
 }
 
-// Converted from cdecl void CTrain::FindNextStationPositionInDirection(bool clockwiseDirection,float distance,float *distanceToStation,int *numStations) 0x6F5F00
-void CTrain::FindNextStationPositionInDirection(bool clockwiseDirection, float distance, float* distanceToStation, int* numStations) {
-    ((void(__cdecl*)(bool, float, float*, int*))0x6F5F00)(clockwiseDirection, distance, distanceToStation, numStations);
+// 0x6F5F00
+void CTrain::FindNextStationPositionInDirection(bool clockwiseDirection, float distance, float* distanceToStation, int32* numStations) {
+    ((void(__cdecl*)(bool, float, float*, int32*))0x6F5F00)(clockwiseDirection, distance, distanceToStation, numStations);
 }
 
-// Converted from thiscall bool CTrain::IsInTunnel(void) 0x6F6320
+// 0x6F6320
 bool CTrain::IsInTunnel() {
     return ((bool(__thiscall*)(CTrain*))0x6F6320)(this);
 }
 
-// Converted from cdecl void MarkSurroundingEntitiesForCollisionWithTrain(CVector,float,CEntity *,bool) 0x6F6640
+// 0x6F6640
 void MarkSurroundingEntitiesForCollisionWithTrain(CVector arg0, float arg1, CEntity* arg2, bool bOnlyVehicles) {
     ((void(__cdecl*)(CVector, float, CEntity*, bool))0x6F6640)(arg0, arg1, arg2, bOnlyVehicles);
 }
 
-// Converted from thiscall void CTrain::RemoveRandomPassenger(void) 0x6F6850
+// 0x6F6850
 void CTrain::RemoveRandomPassenger() {
     ((void(__thiscall*)(CTrain*))0x6F6850)(this);
 }
 
-// Converted from cdecl void CTrain::RemoveMissionTrains(void) 0x6F6A20
+// 0x6F6A20
 void CTrain::RemoveMissionTrains() {
     ((void(__cdecl*)())0x6F6A20)();
 }
 
-// Converted from cdecl void CTrain::RemoveAllTrains(void) 0x6F6AA0
+// 0x6F6AA0
 void CTrain::RemoveAllTrains() {
     ((void(__cdecl*)())0x6F6AA0)();
 }
 
-// Converted from cdecl void CTrain::ReleaseMissionTrains(void) 0x6F6B60
+// 0x6F6B60
 void CTrain::ReleaseMissionTrains() {
     ((void(__cdecl*)())0x6F6B60)();
 }
 
-// Converted from cdecl int CTrain::FindClosestTrackNode(CVector posn,int *outTrackId) 0x6F6BD0
-int CTrain::FindClosestTrackNode(CVector posn, int* outTrackId) {
-    return ((int(__cdecl*)(CVector, int*))0x6F6BD0)(posn, outTrackId);
+// 0x6F6BD0
+int32 CTrain::FindClosestTrackNode(CVector posn, int32* outTrackId) {
+    return ((int32(__cdecl*)(CVector, int32*))0x6F6BD0)(posn, outTrackId);
 }
 
-// Converted from thiscall void CTrain::FindPositionOnTrackFromCoors(void) 0x6F6CC0
+// 0x6F6CC0
 void CTrain::FindPositionOnTrackFromCoors() {
     ((void(__thiscall*)(CTrain*))0x6F6CC0)(this);
 }
 
-// Converted from cdecl CTrain* CTrain::FindNearestTrain(CVector posn,bool mustBeMainTrain) 0x6F7090
+// 0x6F7090
 CTrain* CTrain::FindNearestTrain(CVector posn, bool mustBeMainTrain) {
     return ((CTrain * (__cdecl*)(CVector, bool))0x6F7090)(posn, mustBeMainTrain);
 }
 
-// Converted from cdecl void CTrain::SetNewTrainPosition(CTrain* train,CVector posn) 0x6F7140
+// 0x6F7140
 void CTrain::SetNewTrainPosition(CTrain* train, CVector posn) {
     ((void(__cdecl*)(CTrain*, CVector))0x6F7140)(train, posn);
 }
 
-// Converted from cdecl bool CTrain::IsNextStationAllowed(CTrain* train) 0x6F7260
+// 0x6F7260
 bool CTrain::IsNextStationAllowed(CTrain* train) {
     return ((bool(__cdecl*)(CTrain*))0x6F7260)(train);
 }
 
-// Converted from cdecl void CTrain::SkipToNextAllowedStation(CTrain* train) 0x6F72F0
+// 0x6F72F0
 void CTrain::SkipToNextAllowedStation(CTrain* train) {
     ((void(__cdecl*)(CTrain*))0x6F72F0)(train);
 }
 
-// Converted from cdecl void CTrain::InitTrains(void) 0x6F7440
+// 0x6F7440
 void CTrain::InitTrains() {
     ((void(__cdecl*)())0x6F7440)();
 }
 
-// Converted from cdecl void CTrain::CreateMissionTrain(CVector posn,bool clockwiseDirection,uint trainType,CTrain**outFirstCarriage,CTrain**outLastCarriage,int nodeIndex,int trackId,bool isMissionTrain) 0x6F7550
-void CTrain::CreateMissionTrain(CVector posn, bool clockwiseDirection, unsigned int trainType, CTrain** outFirstCarriage, CTrain** outLastCarriage, int nodeIndex, int trackId, bool isMissionTrain) {
-    ((void(__cdecl*)(CVector, bool, unsigned int, CTrain * *, CTrain * *, int, int, bool))0x6F7550)(posn, clockwiseDirection, trainType, outFirstCarriage, outLastCarriage, nodeIndex, trackId, isMissionTrain);
+// 0x6F7550
+void CTrain::CreateMissionTrain(CVector posn, bool clockwiseDirection, uint32 trainType, CTrain** outFirstCarriage, CTrain** outLastCarriage, int32 nodeIndex, int32 trackId, bool isMissionTrain) {
+    ((void(__cdecl*)(CVector, bool, uint32, CTrain * *, CTrain * *, int32, int32, bool))0x6F7550)(posn, clockwiseDirection, trainType, outFirstCarriage, outLastCarriage, nodeIndex, trackId, isMissionTrain);
 }
 
-// Converted from cdecl void CTrain::DoTrainGenerationAndRemoval(void) 0x6F7900
+// 0x6F7900
 void CTrain::DoTrainGenerationAndRemoval() {
     ((void(__cdecl*)())0x6F7900)();
 }
 
-// Converted from thiscall void CTrain::AddNearbyPedAsRandomPassenger(void) 0x6F8170
+// 0x6F8170
 void CTrain::AddNearbyPedAsRandomPassenger() {
     ((void(__thiscall*)(CTrain*))0x6F8170)(this);
 }
@@ -242,7 +242,7 @@ void CTrain::ProcessControl_Reversed()
 
     float fTotalTrackLength = arrTotalTrackLength[m_nTrackId];
     CTrainNode* pTrainNodes = pTrackNodes[m_nTrackId];
-    int numTrackNodes = NumTrackNodes[m_nTrackId];
+    int32 numTrackNodes = NumTrackNodes[m_nTrackId];
 
     if (trainFlags.bNotOnARailRoad == 0)
     {
@@ -322,7 +322,7 @@ void CTrain::ProcessControl_Reversed()
                 pPad = pLocalPlayer->GetPadFromPlayer();
             }
 
-            unsigned int numCarriagesPulled = FindNumCarriagesPulled();
+            uint32 numCarriagesPulled = FindNumCarriagesPulled();
             if (!trainFlags.bClockwiseDirection)
             {
                 m_fTrainSpeed = -m_fTrainSpeed;
@@ -334,8 +334,8 @@ void CTrain::ProcessControl_Reversed()
                 bool bIsStreakModel = trainFlags.bIsStreakModel;
                 float fStopAtStationSpeed = static_cast<float>(m_autoPilot.m_nCruiseSpeed);
 
-                unsigned int timeInMilliSeconds = CTimer::m_snTimeInMilliseconds;
-                unsigned int timeAtStation = CTimer::m_snTimeInMilliseconds - m_nTimeWhenStoppedAtStation;
+                uint32 timeInMilliSeconds = CTimer::m_snTimeInMilliseconds;
+                uint32 timeAtStation = CTimer::m_snTimeInMilliseconds - m_nTimeWhenStoppedAtStation;
                 if (timeAtStation >= (bIsStreakModel ? 20000u : 10000u))
                 {
                     if (timeAtStation >= (bIsStreakModel ? 28000u : 18000u))
@@ -535,14 +535,14 @@ void CTrain::ProcessControl_Reversed()
 
                 if (fTheTrainSpeed > 1.0f)
                 {
-                    int nNodeIndex = m_nNodeIndex;
-                    int previousNodeIndex = nNodeIndex - 1;
+                    int32 nNodeIndex = m_nNodeIndex;
+                    int32 previousNodeIndex = nNodeIndex - 1;
                     if (previousNodeIndex < 0)
                     {
                         previousNodeIndex = numTrackNodes;
                     }
 
-                    int previousNodeIndex2 = previousNodeIndex - 1;
+                    int32 previousNodeIndex2 = previousNodeIndex - 1;
                     if (previousNodeIndex2 < 0)
                     {
                         previousNodeIndex2 = numTrackNodes;
@@ -608,7 +608,7 @@ void CTrain::ProcessControl_Reversed()
         }
 
         float fNextNodeTrackLength = 0.0f;
-        int nextNodeIndex = m_nNodeIndex + 1;
+        int32 nextNodeIndex = m_nNodeIndex + 1;
         if (nextNodeIndex < numTrackNodes)
         {
             CTrainNode* pNextTrainNode = &pTrainNodes[nextNodeIndex];
@@ -624,7 +624,7 @@ void CTrain::ProcessControl_Reversed()
         float fCurrentNodeTrackLength = pTheTrainNode->m_nDistanceFromStart / 3.0f;
         while (m_fCurrentRailDistance < fCurrentNodeTrackLength || fNextNodeTrackLength < m_fCurrentRailDistance)
         {
-            int newNodeIndex = m_nNodeIndex - 1; // previous node
+            int32 newNodeIndex = m_nNodeIndex - 1; // previous node
             if (fCurrentNodeTrackLength <= m_fCurrentRailDistance)
             {
                 newNodeIndex = m_nNodeIndex + 1; // next node
@@ -684,7 +684,7 @@ void CTrain::ProcessControl_Reversed()
             nextNodeIndex = 0;
         }
 
-        int trainNodeIndex = m_nNodeIndex;
+        int32 trainNodeIndex = m_nNodeIndex;
         while (fTotalCurrentRailDistance < fCurrentNodeTrackLength || fTotalCurrentRailDistance > fNextNodeTrackLength)
         {
             trainNodeIndex = (trainNodeIndex + 1) % numTrackNodes;
@@ -740,8 +740,8 @@ void CTrain::ProcessControl_Reversed()
 
         CrossProduct(&GetUp(), &GetRight(), &GetForward());
 
-        unsigned char trainNodeLighting = pTheTrainNode->GetLightingFromCollision();;
-        unsigned char trainNextNodeLighting = pNextTrainNode->GetLightingFromCollision();
+        uint8 trainNodeLighting = pTheTrainNode->GetLightingFromCollision();;
+        uint8 trainNextNodeLighting = pNextTrainNode->GetLightingFromCollision();
 
         float fTrainNodeLighting = static_cast<float>(ScaleLighting(trainNodeLighting, 0.5f));
         float fTrainNextNodeLighting = static_cast<float>(ScaleLighting(trainNextNodeLighting, 0.5f));

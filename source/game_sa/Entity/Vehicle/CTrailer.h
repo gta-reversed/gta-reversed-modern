@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CAutomobile.h"
 
 enum eTrailerNodes {
@@ -41,19 +41,19 @@ protected:
     CTrailer(plugin::dummy_func_t) : CAutomobile(plugin::dummy) {}
 public:
     CColPoint m_trailerColPoints[2];
-    float m_trailerColPointValue1;
-    float m_trailerColPointValue2;
-    uint8_t field_9E8[4];
-    float m_trailerTowedRatio;
-    float m_trailerTowedRatio2;
+    float     m_trailerColPointValue1;
+    float     m_trailerColPointValue2;
+    uint8   field_9E8[4];
+    float     m_trailerTowedRatio;
+    float     m_trailerTowedRatio2;
 
     static float& m_fTrailerSuspensionForce; // 1.5
-    static float& m_fTrailerDampingForce; // 0.1
+    static float& m_fTrailerDampingForce;    // 0.1
 
 public:
     static void InjectHooks();
 
-    CTrailer(int modelIndex, unsigned char createdBy);
+    CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy);
 
     bool SetTowLink(CVehicle* targetVehicle, bool arg1) override;
 
