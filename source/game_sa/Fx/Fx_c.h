@@ -56,7 +56,10 @@ public:
     static void InjectHooks();
 
     Fx_c();
+    Fx_c* Constructor();
+
     ~Fx_c();
+    Fx_c* Destructor();
 
     void InitStaticSystems();
     void ExitStaticSystems();

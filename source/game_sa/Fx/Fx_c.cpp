@@ -60,9 +60,19 @@ Fx_c::Fx_c() {
     ((void(__thiscall*)(Fx_c*))0x49E620)(this);
 }
 
+Fx_c* Fx_c::Constructor() {
+    this->Fx_c::Fx_c();
+    return this;
+}
+
 // 0x49E630
 Fx_c::~Fx_c() {
     ((void(__thiscall*)(Fx_c*))0x49E630)(this);
+}
+
+Fx_c* Fx_c::Destructor() {
+    this->Fx_c::~Fx_c();
+    return this;
 }
 
 // 0x49E660
