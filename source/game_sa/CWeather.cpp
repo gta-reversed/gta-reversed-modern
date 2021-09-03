@@ -63,7 +63,7 @@ void CWeather::InjectHooks() {
     ReversibleHooks::Install("CWeather", "ForceWeatherNow", 0x72A4F0, &CWeather::ForceWeatherNow);
 //    ReversibleHooks::Install("CWeather", "ForecastWeather", 0x72A590, &CWeather::ForecastWeather);
     ReversibleHooks::Install("CWeather", "ReleaseWeather", 0x72A510, &CWeather::ReleaseWeather);
-//    ReversibleHooks::Install("CWeather", "RenderRainStreaks", 0x72AF70, &CWeather::RenderRainStreaks);
+    ReversibleHooks::Install("CWeather", "RenderRainStreaks", 0x72AF70, &CWeather::RenderRainStreaks);
     ReversibleHooks::Install("CWeather", "SetWeatherToAppropriateTypeNow", 0x72A790, &CWeather::SetWeatherToAppropriateTypeNow);
 //    ReversibleHooks::Install("CWeather", "Update", 0x72B850, &CWeather::Update);
 //    ReversibleHooks::Install("CWeather", "UpdateInTunnelness", 0x72B630, &CWeather::UpdateInTunnelness);
@@ -140,7 +140,139 @@ void CWeather::ReleaseWeather() {
 
 // 0x72AF70
 void CWeather::RenderRainStreaks() {
-    plugin::Call<0x72AF70>();
+    if (CTimer::m_CodePause)
+        return;
+
+    {
+        const auto strength = (uint32)(64.0f - CTimeCycle::m_FogReduction) * (Rain * 110.0f) / 64.0f;
+        if (CurrentRainParticleStrength < strength) {
+            if (CurrentRainParticleStrength + 1 <= strength)
+                CurrentRainParticleStrength++;
+        } else {
+            if (CurrentRainParticleStrength > 0)
+                CurrentRainParticleStrength--;
+        }
+    }
+
+    if (!CurrentRainParticleStrength)
+        return;
+
+    if (CCullZones::CamNoRain() || CCullZones::PlayerNoRain())
+        return;
+
+    if (UnderWaterness > 0.0f)
+        return;
+
+    if (CGame::currArea)
+        return;
+
+    const CVector camPos = TheCamera.GetPosition();
+    if (camPos.z > 900.0f)
+        return;
+
+    uiTempBufferIndicesStored = 0;
+    uiTempBufferVerticesStored = 0;
+
+    // TODO... (refactor)
+    constexpr auto RAIN_STREAK_COUNT{ 32u };
+
+    // These are arrays of size `RAIN_STREAK_COUNT`
+    // But I'm lazy to cast the properly, sorry
+    int32*& streakPosX = *(int32**)(0xC81420);
+    int32*& streakPosY = *(int32**)(0xC8141C);
+    int32*& streakPosZ = *(int32**)(0xC81418);
+    uint8*& streakStrength = *(uint8**)(0xC81414);
+
+    if (!streakPosX) {
+        // Dont ask, I don't know.
+        // This stuff isn't even freed anywhere..
+        streakPosX     = new int32[RAIN_STREAK_COUNT];
+        streakPosY     = new int32[RAIN_STREAK_COUNT];
+        streakPosZ     = new int32[RAIN_STREAK_COUNT];
+        streakStrength = new uint8[RAIN_STREAK_COUNT];
+
+        for (unsigned i = 0; i < RAIN_STREAK_COUNT; i++) {
+            streakPosX[i] = 0;
+            streakPosY[i] = 0;
+            streakPosZ[i] = 0;
+            streakStrength[i] = (uint8)(CurrentRainParticleStrength * 0.6f);
+        }
+    }
+
+    const auto GetStreakPosition = [&](unsigned i) {
+        return CVector{ (float)(streakPosX[i]), (float)(streakPosY[i]), (float)(streakPosZ[i]) };
+    };
+
+    const auto UpdateStreak = [&](unsigned i) {
+        const CVector posn = GetStreakPosition(i);
+        if (!streakStrength[i] || posn.z <= 0.0f || (camPos - posn).Magnitude() > 8.0f) {
+            const CVector newPosn = CVector::Random(0.0f, 5.0f) + TheCamera.GetForward() * 6.0f + camPos - CVector{2.5f, 2.5f, 2.5f};
+            streakPosX[i] = (int32)(newPosn.x);
+            streakPosY[i] = (int32)(newPosn.y);
+            streakPosZ[i] = (int32)(newPosn.z);
+
+            streakStrength[i] = (uint8)(CurrentRainParticleStrength * 0.6f);
+        }
+    };
+
+    const auto GetRealVertexIndex = [](unsigned i) {
+        return uiTempBufferVerticesStored + i;
+    };
+
+    for (unsigned s = 0; s < RAIN_STREAK_COUNT; s++) {
+        UpdateStreak(s);
+
+        CVector offsets[2]{};
+        offsets[0] = CVector{
+            CGeneral::GetRandomNumberInRange(-0.2f, 0.2f),
+            CGeneral::GetRandomNumberInRange(-0.2f, 0.2f),
+            CGeneral::GetRandomNumberInRange(-0.1f, 0.1f),
+        };
+
+        const float posMul = (s % 2) ? Wind * 0.1f : Wind * Rain * 0.1f;
+        offsets[1] = offsets[0] - WindDir * posMul + CVector{ 0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.1f, 0.5f) };
+
+        const uint8 alphas[]{ streakStrength[s], streakStrength[s] / 2u };
+        for (unsigned v = 0; v < 2; v++) {
+            RxObjSpace3DVertex* vertex = &aTempBufferVertices[GetRealVertexIndex(v)];
+
+            //const RwRGBA color{ 210, 210, 230, alphas[v] }; 
+            const RwRGBA color{ 0xFF, 0, 0, 255 }; // For debug (makes it more visible)
+            RxObjSpace3DVertexSetPreLitColor(vertex, &color);
+
+            const CVector vertPosn = GetStreakPosition(s) + offsets[v];
+            RxObjSpace3DVertexSetPos(vertex, &vertPosn);
+
+            aTempBufferIndices[uiTempBufferIndicesStored + v] = GetRealVertexIndex(v);
+        }
+
+        streakPosZ[s] -= (int32)CGeneral::GetRandomNumberInRange(0.01f, 0.1f);
+        streakStrength[s] = (uint8)std::max(0, (int32)streakStrength[s] - CGeneral::GetRandomNumberInRange(2, 5));
+
+        uiTempBufferVerticesStored += 2;
+        uiTempBufferIndicesStored += 2;
+    }
+
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEFOGTYPE,           (void*)rwFOGTYPELINEAR);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)NULL);
+
+    if (RwIm3DTransform(aTempBufferVertices, uiTempBufferVerticesStored, nullptr, rwIM3D_VERTEXXYZ)) {
+        RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, aTempBufferIndices, uiTempBufferIndicesStored);
+        RwIm3DEnd();
+    }
+
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 }
 
 // 0x72A790
