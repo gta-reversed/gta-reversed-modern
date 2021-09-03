@@ -17,6 +17,8 @@ public:
 public:
     static void InjectHooks();
 
+    static CVector Random(float min, float max);
+
     // Returns length of vector
     float Magnitude();
 
