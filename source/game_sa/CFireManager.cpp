@@ -268,6 +268,9 @@ CFire* CFireManager::GetNextFreeFire(bool bMayExtinguish) {
 
 // 0x539F00
 CFire* CFireManager::StartFire(CVector pos, float size, uint8 unused, CEntity* creator, uint32 nTimeToBurn, int8 nGenerations, uint8 unused_) {
+    if (CWaterLevel::IsPointUnderWaterNoWaves(pos))
+        return;
+
     CFire* fire = GetNextFreeFire(false);
     if (!fire)
         return nullptr;

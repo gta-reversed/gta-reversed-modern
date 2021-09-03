@@ -134,4 +134,7 @@ public:
     */
     static void SyncWater();
     static void WaterLevelInitialise();
+
+    // NOTSA
+    static bool IsPointUnderwaterNoWaves(CVector point);
 };
