@@ -73,10 +73,8 @@ void CExplosion::Initialise() {
 }
 
 // 0x736A50
-bool CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType explosionType, CVector posn, uint32 time, bool bMakeSound, float camShake,
-                              bool bHideExplosion) {
-    return plugin::CallAndReturn<bool, 0x736A50, CEntity*, CEntity*, eExplosionType, CVector const&, uint32, uint8, float, bool>(victim, creator, explosionType, posn, time,
-                                                                                                                                     bMakeSound, camShake, bHideExplosion);
+bool CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType explosionType, const CVector& posn, uint32 time, bool bMakeSound, float camShake, bool bHideExplosion) {
+    return plugin::CallAndReturn<bool, 0x736A50, CEntity*, CEntity*, eExplosionType, const CVector&, uint32, bool, float, bool>(victim, creator, explosionType, posn, time, bMakeSound, camShake, bHideExplosion);
 }
 
 // 0x737620

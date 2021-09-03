@@ -2642,13 +2642,17 @@ void CAutomobile::TankControl()
         }
         return;
     }
+
     if (m_nStatus != STATUS_PLAYER || m_nModelIndex != MODEL_RHINO)
         return;
+
     if (CGameLogic::GameState != GAME_STATE_INITIAL || !m_pDriver || !m_pDriver->IsPlayer())
         return;
+
     CPad* pad = static_cast<CPlayerPed*>(m_pDriver)->GetPadFromPlayer();
     if (!pad)
         return;
+
     CCam& activeCam = TheCamera.GetActiveCamera();
     if (activeCam.m_nMode != MODE_CAM_ON_A_STRING) {
         m_fDoomVerticalRotation -= (pad->GetCarGunLeftRight() * CTimer::ms_fTimeStep * 0.015f) / 128.0f;
@@ -2752,8 +2756,20 @@ void CAutomobile::TankControl()
             CColPoint colPoint;
             CEntity* entity = nullptr;
             CWorld::pIgnoreEntity = this;
-            CWorld::ProcessLineOfSight(newTurretPosition, endPoint, colPoint, entity,
-                true, true, true, true, true, true, false, false);
+            CWorld::ProcessLineOfSight(
+                newTurretPosition,
+                endPoint,
+                colPoint,
+                entity,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                false,
+                false
+            );
             CWorld::pIgnoreEntity = nullptr;
             CVector explosionPos = endPoint;
             if (entity) 
