@@ -11,23 +11,22 @@ int8_t& CMirrors::bRenderingReflection = *(int8_t*)0xC7C728;
 int8_t& CMirrors::d3dRestored = *(int8_t*)0xC7C729;
 CVector& CMirrors::MirrorNormal = *(CVector*)0xC803D8;
 bool& bFudgeNow = *(bool*)0xC7C72A;
-CVector(&Screens8Track)[4][2] = *(CVector(*)[4][2])0x8D5DD8;
+CVector(&Screens8Track)[2][4] = *(CVector(*)[2][4])0x8D5DD8;
 
-/*
-constexpr float MX1 = -1333.453f;
-constexpr float MX2 = -1477.845f;
-
-constexpr float MY1 = -221.89799f;
-constexpr float MY2 = -189.96899f;
-
-constexpr float MZ = 1079.141f;
-constexpr float MZ1 = 1067.141f;
-
-CVector Screens8Track_[4][2] = {
-    CVector{MX1, MY1, MZ}, CVector{MX1, -189.89799f, MZ}, CVector{MX1, -189.89799f, MZ1}, CVector{MX1, MY1, MZ1},
-    CVector{MX2, MY2, MZ}, CVector{MX2, -221.96899f, MZ}, CVector{MX2, -221.96899f, MZ1}, CVector{MX2, MY2, MZ1}
+CVector Screens8Track_[2][4] = {
+    {
+        { -1333.453f, -221.89799f, 1079.141f },
+        { -1333.453f, -189.89799f, 1079.141f },
+        { -1333.453f, -189.89799f, 1067.141f },
+        { -1333.453f, -221.89799f, 1067.141f },
+    },
+    {
+        { -1477.845f, -189.96899f, 1079.141f },
+        { -1477.845f, -221.96899f, 1079.141f },
+        { -1477.845f, -221.96899f, 1067.141f },
+        { -1477.845f, -189.96899f, 1067.141f },
+    }
 };
-*/
 
 void CMirrors::InjectHooks() {
     ReversibleHooks::Install("CMirrors", "Init", 0x723000, &CMirrors::Init);
@@ -90,7 +89,7 @@ void CMirrors::BuildCamMatrix(CMatrix& mat, CVector pointA, CVector pointB) {
 
 // 0x726090
 void CMirrors::RenderMirrorBuffer() {
-    if (!TypeOfMirror)
+    if (TypeOfMirror == 0)
         return;
 
     RwRaster* raster = RwCameraGetRaster(Scene.m_pRwCamera);
@@ -207,10 +206,20 @@ void CMirrors::RenderMirrorBuffer() {
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
 }
 
+// ANDROID 1.0 0x5078B8
+void CMirrors::RenderReflBuffer(bool) {
+
+}
+
+// ANDROID 1.0 0x507B2C
+void CMirrors::RenderReflections() {
+
+}
+
 // 0x7266B0
 void CMirrors::BuildCameraMatrixForScreens(CMatrix & mat) {
-    const uint32_t timeSeconds = (CTimer::m_snTimeInMilliseconds / 1000u) % 32; // Wrapped to (0, 32]
-    const uint32_t timeMsLeftInSecond = CTimer::m_snTimeInMilliseconds % 1000u;
+    const uint32_t timeSeconds = (CTimer::GetTimeInMilliseconds() / 1000) % 32; // Wrapped to (0, 32]
+    const uint32_t timeMsLeftInSecond = CTimer::GetTimeInMilliseconds() % 1000;
     switch (timeSeconds) {
     case 0:
     case 1:
@@ -244,18 +253,19 @@ void CMirrors::BuildCameraMatrixForScreens(CMatrix & mat) {
         break;
     }
     default: {
-        mat.SetRotateZOnly((CTimer::m_snTimeInMilliseconds % 16384) * 0.00038349521f);
+        mat.SetRotateZOnly((CTimer::GetTimeInMilliseconds() % 16384) * 0.00038349521f);
         mat.SetTranslateOnly({ -1397.0, -219.0, 1054.0 });
         break;
     }
     }
 }
 
-// NOTSA, inlined
+// NOTSA, inlined, line 67
 bool CMirrors::IsEitherScreenVisibleToCam() {
     for (int i = 0; i < 2; i++) {
         TheCamera.m_bMirrorActive = false;
-        if (TheCamera.IsSphereVisible(CVector::AverageN(std::begin(Screens8Track[i]), 4), 8.0f)) {
+        auto origin = CVector::AverageN(std::begin(Screens8Track[i]), 4);
+        if (TheCamera.IsSphereVisible(origin, 8.0f)) {
             return false;
         }
     }
@@ -314,13 +324,11 @@ void CMirrors::BeforeConstructRenderList() {
     }
 }
 
-void RenderScene() {
-    plugin::Call<0x53DF40>();
-}
+void RenderScene();
 
 // 0x727140
 void CMirrors::BeforeMainRender() {
-    if (!TypeOfMirror)
+    if (TypeOfMirror == 0)
         return;
 
     RwRaster* prevCamRaster = RwCameraGetRaster(Scene.m_pRwCamera);
@@ -348,4 +356,83 @@ void CMirrors::BeforeMainRender() {
 
         TheCamera.RestoreCameraAfterMirror();
     }
+}
+
+// 0x53DF40
+void RenderScene() {
+    bool underWater = CWeather::UnderWaterness <= 0.0f;;
+
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)nullptr);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+
+    if (CMirrors::TypeOfMirror == 0) {
+        CMovingThings::Render_BeforeClouds();
+        CClouds::Render();
+    }
+
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,  (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,    (void*)rwSHADEMODEGOURAUD);
+
+    CCarFXRenderer::PreRenderUpdate();
+    CRenderer::RenderRoads();
+    CCoronas::RenderReflections();
+    CRenderer::RenderEverythingBarRoads();
+    g_breakMan.Render(false);
+
+    CRenderer::RenderFadingInUnderwaterEntities();
+    if (underWater) {
+        RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)1);
+        CWaterLevel::RenderWater();
+        RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)2);
+    }
+
+    CRenderer::RenderFadingInEntities();
+    if (!CMirrors::bRenderingReflection) {
+        float nearClipPlaneOld = RwCameraGetNearClipPlane(Scene.m_pRwCamera);
+        float farPlane  = RwCameraGetFarClipPlane(Scene.m_pRwCamera);
+
+        float v3;
+        float z = TheCamera.GetActiveCamera().m_vecFront.z;
+        if (z <= 0.0f)
+            v3 = -z;
+        else
+            v3 = 0.0f;
+
+        constexpr float flt_8CD4F0 = 2.0f;
+        constexpr float flt_8CD4EC = 5.9604645e-8f;
+
+        float unknown = ((flt_8CD4F0 * flt_8CD4EC * 0.25 - flt_8CD4F0 * flt_8CD4EC) * v3 + flt_8CD4F0 * flt_8CD4EC) * (farPlane - nearClipPlaneOld);
+
+        RwCameraEndUpdate(Scene.m_pRwCamera);
+        RwCameraSetNearClipPlane(Scene.m_pRwCamera, unknown + nearClipPlaneOld);
+        RwCameraBeginUpdate(Scene.m_pRwCamera);
+        CShadows::UpdateStaticShadows();
+        CShadows::RenderStaticShadows();
+        CShadows::RenderStoredShadows();
+        RwCameraEndUpdate(Scene.m_pRwCamera);
+        RwCameraSetNearClipPlane(Scene.m_pRwCamera, nearClipPlaneOld);
+        RwCameraBeginUpdate(Scene.m_pRwCamera);
+    }
+
+    g_breakMan.Render(true);
+    CPlantMgr::Render();
+
+    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+
+    if (CMirrors::TypeOfMirror == 0) {
+        CClouds::RenderBottomFromHeight();
+        CWeather::RenderRainStreaks();
+        CCoronas::RenderSunReflection();
+    }
+
+    if (underWater) {
+        RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+        CWaterLevel::RenderWater();
+        RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+    }
+
+    _gRenderStencil();
 }

@@ -25,12 +25,18 @@ public:
 
     static void Init();
     static void ShutDown();
-    static void CreateBuffer();
-    static void BuildCamMatrix(CMatrix& mat, CVector pointA, CVector pointB);
-    static void RenderMirrorBuffer();
-    static void BuildCameraMatrixForScreens(CMatrix& mat);
+
     static void BeforeConstructRenderList();
     static void BeforeMainRender();
+
+    static void BuildCamMatrix(CMatrix& mat, CVector pointA, CVector pointB);
+    static void BuildCameraMatrixForScreens(CMatrix& mat);
+
+    static void CreateBuffer();
+
+    static void RenderMirrorBuffer();
+    static void RenderReflBuffer(bool);
+    static void RenderReflections();
 
     // NOTSA
     static bool IsEitherScreenVisibleToCam();

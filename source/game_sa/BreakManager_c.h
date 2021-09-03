@@ -12,7 +12,7 @@ public:
     void           Init();
     void           Exit();
     void           Update(float fTimestep);
-    void           Render(uint8 bState);
+    void           Render(bool bState);
     void           ResetAll();
     BreakObject_c* Add(CObject* pObject, RwV3d* vecPos, float fVelocityRand, bool bSmash);
 };
