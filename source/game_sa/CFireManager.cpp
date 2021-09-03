@@ -54,7 +54,7 @@ void CFireManager::Init() {
     for (CFire& fire : m_aFires) {
         fire.Initialise();
     }
-    m_nMaxFireGenerationsAllowed = 1'000'000 - 1;
+    m_nMaxFireGenerationsAllowed = 1'000'000 - 1; // aka 999'999
 }
 
 // 0x539DD0
