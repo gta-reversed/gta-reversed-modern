@@ -41,6 +41,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "CanIKReachThisTarget", 0x609F80, &CPlayerPed::CanIKReachThisTarget);
     ReversibleHooks::Install("CPlayerPed", "GetPlayerInfoForThisPlayerPed", 0x609FF0, &CPlayerPed::GetPlayerInfoForThisPlayerPed);
     ReversibleHooks::Install("CPlayerPed", "AnnoyPlayerPed", 0x60A040, &CPlayerPed::AnnoyPlayerPed);
+    ReversibleHooks::Install("CPlayerPed", "ClearAdrenaline", 0x60A070, &CPlayerPed::ClearAdrenaline);
 
 }
 
@@ -456,7 +457,12 @@ void CPlayerPed::AnnoyPlayerPed(bool arg0) {
 
 // 0x60A070
 void CPlayerPed::ClearAdrenaline() {
-    plugin::CallMethod<0x60A070, CPlayerPed *>(this);
+    if (m_pPlayerData->m_bAdrenaline) {
+        if (m_pPlayerData->m_nAdrenalineEndTime) {
+            m_pPlayerData->m_nAdrenalineEndTime = 0;
+            CTimer::ms_fTimeScale = 1.0f;
+        }
+    }
 }
 
 // 0x60A0A0
