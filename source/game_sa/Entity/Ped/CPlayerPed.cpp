@@ -31,6 +31,8 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "ReApplyMoveAnims", 0x609650, &CPlayerPed::ReApplyMoveAnims);
     ReversibleHooks::Install("CPlayerPed", "DoesPlayerWantNewWeapon", 0x609710, &CPlayerPed::DoesPlayerWantNewWeapon);
     ReversibleHooks::Install("CPlayerPed", "ProcessPlayerWeapon", 0x6097F0, &CPlayerPed::ProcessPlayerWeapon);
+    ReversibleHooks::Install("CPlayerPed", "PickWeaponAllowedFor2Player", 0x609800, &CPlayerPed::PickWeaponAllowedFor2Player);
+
 }
 
 struct WorkBufferSaveData {
@@ -228,7 +230,8 @@ void CPlayerPed::ProcessPlayerWeapon(CPad* pad) {
 
 // 0x609800
 void CPlayerPed::PickWeaponAllowedFor2Player() {
-    plugin::CallMethod<0x609800, CPlayerPed *>(this);
+    if (!GetWeaponInSlot(m_pPlayerData->m_nChosenWeapon).CanBeUsedFor2Player())
+        m_pPlayerData->m_nChosenWeapon = eWeaponType::WEAPON_UNARMED;
 }
 
 // 0x609830
