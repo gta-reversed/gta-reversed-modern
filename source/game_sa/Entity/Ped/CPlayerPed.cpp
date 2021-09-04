@@ -25,6 +25,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "Save", 0x5D57E0, &CPlayerPed::Save);
     ReversibleHooks::Install("CPlayerPed", "DeactivatePlayerPed", 0x609520, &CPlayerPed::DeactivatePlayerPed);
     ReversibleHooks::Install("CPlayerPed", "ReactivatePlayerPed", 0x609540, &CPlayerPed::ReactivatePlayerPed);
+    ReversibleHooks::Install("CPlayerPed", "GetPadFromPlayer", 0x609560, &CPlayerPed::GetPadFromPlayer);
 }
 
 struct WorkBufferSaveData {
@@ -107,7 +108,15 @@ void CPlayerPed::ReactivatePlayerPed(int playerId) {
 
 // 0x609560
 CPad* CPlayerPed::GetPadFromPlayer() {
-    return plugin::CallMethodAndReturn<CPad*, 0x609560, CPlayerPed *>(this);
+    switch (m_nPedType) {
+    case ePedType::PED_TYPE_PLAYER1:
+        return CPad::GetPad(0);
+
+    case ePedType::PED_TYPE_PLAYER2:
+        return CPad::GetPad(1);
+    }
+    assert(0); // NOTSA
+    return nullptr;
 }
 
 // 0x609590
