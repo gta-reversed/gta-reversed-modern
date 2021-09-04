@@ -39,6 +39,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "FindTargetPriority", 0x609DE0, &CPlayerPed::FindTargetPriority);
     ReversibleHooks::Install("CPlayerPed", "Clear3rdPersonMouseTarget", 0x609DE0, &CPlayerPed::Clear3rdPersonMouseTarget);
     ReversibleHooks::Install("CPlayerPed", "CanIKReachThisTarget", 0x609F80, &CPlayerPed::CanIKReachThisTarget);
+    ReversibleHooks::Install("CPlayerPed", "GetPlayerInfoForThisPlayerPed", 0x609FF0, &CPlayerPed::GetPlayerInfoForThisPlayerPed);
 
 }
 
@@ -424,7 +425,12 @@ bool CPlayerPed::CanIKReachThisTarget(CVector posn, CWeapon* weapon, bool arg2) 
 
 // 0x609FF0
 CPlayerInfo* CPlayerPed::GetPlayerInfoForThisPlayerPed() {
-    return plugin::CallMethodAndReturn<CPlayerInfo*, 0x609FF0, CPlayerPed *>(this);
+    // TODO: Use range for here 
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        if (CWorld::Players[i].m_pPed == this)
+            return &CWorld::Players[i];
+    }
+    return nullptr;
 }
 
 // 0x60A020
