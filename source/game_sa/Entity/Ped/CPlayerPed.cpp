@@ -36,6 +36,8 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "ClearWeaponTarget", 0x609c80, &CPlayerPed::ClearWeaponTarget);
     ReversibleHooks::Install("CPlayerPed", "GetWeaponRadiusOnScreen", 0x609CD0, &CPlayerPed::GetWeaponRadiusOnScreen);
     ReversibleHooks::Install("CPlayerPed", "PedCanBeTargettedVehicleWise", 0x609D90, &CPlayerPed::PedCanBeTargettedVehicleWise);
+    ReversibleHooks::Install("CPlayerPed", "FindTargetPriority", 0x609DE0, &CPlayerPed::FindTargetPriority);
+    ReversibleHooks::Install("CPlayerPed", "Clear3rdPersonMouseTarget", 0x609DE0, &CPlayerPed::Clear3rdPersonMouseTarget);
 
 }
 
@@ -319,7 +321,51 @@ bool CPlayerPed::PedCanBeTargettedVehicleWise(CPed* ped) {
 
 // 0x609DE0
 float CPlayerPed::FindTargetPriority(CEntity* entity) {
-    return plugin::CallMethodAndReturn<float, 0x609DE0, CPlayerPed *, CEntity*>(this, entity);
+    switch (entity->m_nType) {
+    case eEntityType::ENTITY_TYPE_VEHICLE:
+        return 0.1f;
+
+    case eEntityType::ENTITY_TYPE_PED: {
+        auto ped = entity->AsPed();
+
+        if (ped->bThisPedIsATargetPriority)
+            return 1.0f;
+
+        const auto IsSecondaryTaskActive = [ped](eTaskType type) -> bool {
+            return ped->GetIntelligence()->m_TaskMgr.FindActiveTaskByType(type);
+        };
+        if (IsSecondaryTaskActive(eTaskType::TASK_COMPLEX_KILL_PED_ON_FOOT) ||
+            IsSecondaryTaskActive(eTaskType::TASK_COMPLEX_ARREST_PED)
+        ) {
+            return 0.8f;
+        }
+
+        if (CPedGroups::AreInSameGroup(this, ped))
+            return 0.05f;
+
+        if (ped->m_nPedType == ePedType::PED_TYPE_GANG2)
+            return 0.06f;
+
+        if (ped->IsCreatedByMission())
+            return 0.25f;
+
+        return 0.1f;
+    }
+
+    case eEntityType::ENTITY_TYPE_OBJECT: {
+        switch (entity->AsObject()->m_nObjectType) {
+        case eObjectType::OBJECT_MISSION:
+        case eObjectType::OBJECT_MISSION2:
+            return 0.1f;
+
+        default:
+            return 0.0f;
+        }
+    }
+    default: {
+        return 0.1f;
+    }
+    }
 }
 
 // 0x609ED0
