@@ -42,6 +42,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "GetPlayerInfoForThisPlayerPed", 0x609FF0, &CPlayerPed::GetPlayerInfoForThisPlayerPed);
     ReversibleHooks::Install("CPlayerPed", "AnnoyPlayerPed", 0x60A040, &CPlayerPed::AnnoyPlayerPed);
     ReversibleHooks::Install("CPlayerPed", "ClearAdrenaline", 0x60A070, &CPlayerPed::ClearAdrenaline);
+    ReversibleHooks::Install("CPlayerPed", "DisbandPlayerGroup", 0x60A0A0, &CPlayerPed::DisbandPlayerGroup);
 
 }
 
@@ -467,7 +468,12 @@ void CPlayerPed::ClearAdrenaline() {
 
 // 0x60A0A0
 void CPlayerPed::DisbandPlayerGroup() {
-    plugin::CallMethod<0x60A0A0, CPlayerPed *>(this);
+    CPedGroupMembership& membership = GetGroupMembership();
+    const uint32 nMembers = membership.CountMembersExcludingLeader();
+    if (nMembers > 0)
+        Say(nMembers > 1 ? 149 : 150, 0, 1.0f, 0, 0, 0);
+    else
+        membership.RemoveAllFollowers(true);
 }
 
 // 0x60A110

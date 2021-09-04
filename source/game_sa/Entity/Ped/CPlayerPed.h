@@ -100,6 +100,10 @@ public:
     static void ReactivatePlayerPed(int playerId);
     static bool PedCanBeTargettedVehicleWise(CPed* ped);
     static void SetupPlayerPed(int playerId);
+
+    // NOTASA
+    CPedGroup& GetGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
+    CPedGroupMembership& GetGroupMembership() const noexcept { return GetGroup().GetMembership(); }
 };
 
 VALIDATE_SIZE(CPlayerPed, 0x7A4);
