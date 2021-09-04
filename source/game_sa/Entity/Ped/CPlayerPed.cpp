@@ -43,6 +43,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "AnnoyPlayerPed", 0x60A040, &CPlayerPed::AnnoyPlayerPed);
     ReversibleHooks::Install("CPlayerPed", "ClearAdrenaline", 0x60A070, &CPlayerPed::ClearAdrenaline);
     ReversibleHooks::Install("CPlayerPed", "DisbandPlayerGroup", 0x60A0A0, &CPlayerPed::DisbandPlayerGroup);
+    ReversibleHooks::Install("CPlayerPed", "MakeGroupRespondToPlayerTakingDamage", 0x60A110, &CPlayerPed::MakeGroupRespondToPlayerTakingDamage);
 
 }
 
@@ -477,8 +478,17 @@ void CPlayerPed::DisbandPlayerGroup() {
 }
 
 // 0x60A110
-void CPlayerPed::MakeGroupRespondToPlayerTakingDamage(CEventDamage const& damageEvent) {
-    plugin::CallMethod<0x60A110, CPlayerPed *, CEventDamage const&>(this, damageEvent);
+void CPlayerPed::MakeGroupRespondToPlayerTakingDamage(CEventDamage & damageEvent) {
+    auto& group = GetGroup();
+    if (!damageEvent.m_pSourceEntity)
+        return;
+    if (group.GetMembership().CountMembersExcludingLeader() < 1)
+        return;
+    if (!group.m_bMembersEnterLeadersVehicle)
+        return;
+
+    CEventGroupEvent groupEvent(this, damageEvent.Clone());
+    group.GetIntelligence().AddEvent(&groupEvent);
 }
 
 // 0x60A1D0

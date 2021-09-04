@@ -57,7 +57,7 @@ public:
     void AnnoyPlayerPed(bool arg0);
     void ClearAdrenaline();
     void DisbandPlayerGroup();
-    void MakeGroupRespondToPlayerTakingDamage(CEventDamage const& damageEvent);
+    void MakeGroupRespondToPlayerTakingDamage(CEventDamage & damageEvent);
     void TellGroupToStartFollowingPlayer(bool arg0, bool arg1, bool arg2);
     void MakePlayerGroupDisappear();
     void MakePlayerGroupReappear();
