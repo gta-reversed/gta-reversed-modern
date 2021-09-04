@@ -21,16 +21,50 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "SetWantedLevelNoDrop", 0x609F30, &CPlayerPed::SetWantedLevelNoDrop);
     ReversibleHooks::Install("CPlayerPed", "CheatWantedLevel", 0x609F50, &CPlayerPed::CheatWantedLevel);
     ReversibleHooks::Install("CPlayerPed", "DoStuffToGoOnFire", 0x60A020, &CPlayerPed::DoStuffToGoOnFire);
+    ReversibleHooks::Install("CPlayerPed", "Load", 0x5D46E0, &CPlayerPed::Load);
+    ReversibleHooks::Install("CPlayerPed", "Save", 0x5D57E0, &CPlayerPed::Save);
 }
+
+struct WorkBufferSaveData {
+    uint32          saveSize = sizeof(WorkBufferSaveData); // Never read, but written
+    uint32          chaosLevel{};
+    uint32          wantedLevel{};
+    CPedClothesDesc clothesDesc{};
+    uint32          chosenWeapon{};
+};
+VALIDATE_SIZE(WorkBufferSaveData, 132u + 4u);
 
 // 0x5D46E0
 bool CPlayerPed::Load() {
-    return plugin::CallMethodAndReturn<bool, 0x5D46E0>(this);
+    CPed::Load();
+
+    WorkBufferSaveData savedData{};
+    CGenericGameStorage::LoadDataFromWorkBuffer(&savedData, sizeof(WorkBufferSaveData));
+
+    CWanted* wanted = m_pPlayerData->m_pWanted;
+    wanted->m_nChaosLevel = savedData.chaosLevel;
+    wanted->m_nWantedLevel= savedData.wantedLevel;
+
+    m_pPlayerData->m_nChosenWeapon = savedData.chosenWeapon;
+    *m_pPlayerData->m_pPedClothesDesc = savedData.clothesDesc;
+
+    return true;
 }
 
 // 0x5D57E0
 bool CPlayerPed::Save() {
-    return plugin::CallMethodAndReturn<bool, 0x5D57E0>(this);
+    WorkBufferSaveData saveData{};
+
+    CWanted* wanted = m_pPlayerData->m_pWanted;
+    saveData.chaosLevel = wanted->m_nChaosLevel;
+    saveData.wantedLevel = wanted->m_nWantedLevel;
+
+    saveData.chosenWeapon = m_pPlayerData->m_nChosenWeapon;
+    saveData.clothesDesc = *m_pPlayerData->m_pPedClothesDesc;
+
+    CGenericGameStorage::SaveDataToWorkBuffer(&saveData, sizeof(WorkBufferSaveData));
+
+    return true;
 }
 
 // 0x60D5B0
