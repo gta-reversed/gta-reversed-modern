@@ -48,6 +48,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "MakePlayerGroupDisappear", 0x60A440, &CPlayerPed::MakePlayerGroupDisappear);
     ReversibleHooks::Install("CPlayerPed", "MakePlayerGroupReappear", 0x60A4B0, &CPlayerPed::MakePlayerGroupReappear);
     ReversibleHooks::Install("CPlayerPed", "HandleSprintEnergy", 0x60A550, &CPlayerPed::HandleSprintEnergy);
+    ReversibleHooks::Install("CPlayerPed", "GetButtonSprintResults", 0x60A820, &CPlayerPed::GetButtonSprintResults);
 
 }
 
@@ -605,6 +606,24 @@ bool CPlayerPed::HandleSprintEnergy(bool arg0, float adrenalineConsumedPerTimeSt
     return false;
 }
 
+constexpr auto PLAYER_SPRINT_THRESHOLD{ 5.0f }; // 0x8D2458
+constexpr struct tPlayerSprintSet { // From 0x8D2460
+    float field_0;
+    float field_4;
+    float field_8;
+    float field_C;
+    float field_10;
+    float field_14;
+    float field_18;
+    float field_1C;
+} PLAYER_SPRINT_SET[] = {
+    //0x0, 0x4,  0x8,  0xC,  0x10,  0x14, 0x18, 0x1C
+    {4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 1.0f, 0.5f, 0.3f},
+    {4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 0.0f, 0.4f, 1.0f},
+    {4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 1.0f, 0.3f, 0.3f},
+    {4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 0.0f, 0.0f, 1.0f}
+};
+
 // 0x60A610
 float CPlayerPed::ControlButtonSprint(eSprintType sprintType) {
     return plugin::CallMethodAndReturn<float, 0x60A610, CPlayerPed *, eSprintType>(this, sprintType);
@@ -612,7 +631,12 @@ float CPlayerPed::ControlButtonSprint(eSprintType sprintType) {
 
 // 0x60A820
 float CPlayerPed::GetButtonSprintResults(eSprintType sprintType) {
-    return plugin::CallMethodAndReturn<float, 0x60A820, CPlayerPed *, eSprintType>(this, sprintType);
+    if (m_pPlayerData->m_fMoveSpeed <= PLAYER_SPRINT_THRESHOLD) {
+        return m_pPlayerData->m_fMoveSpeed <= 0.0f ? 0.0f : 1.0f;
+    } else {
+        const float progress = std::max(0.0f, m_pPlayerData->m_fMoveSpeed / PLAYER_SPRINT_THRESHOLD - 1.0f);
+        return PLAYER_SPRINT_SET[(unsigned)sprintType].field_1C * progress;
+    }
 }
 
 void CPlayerPed::ResetPlayerBreath() {
