@@ -44,6 +44,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "ClearAdrenaline", 0x60A070, &CPlayerPed::ClearAdrenaline);
     ReversibleHooks::Install("CPlayerPed", "DisbandPlayerGroup", 0x60A0A0, &CPlayerPed::DisbandPlayerGroup);
     ReversibleHooks::Install("CPlayerPed", "MakeGroupRespondToPlayerTakingDamage", 0x60A110, &CPlayerPed::MakeGroupRespondToPlayerTakingDamage);
+    ReversibleHooks::Install("CPlayerPed", "TellGroupToStartFollowingPlayer", 0x60A1D0, &CPlayerPed::TellGroupToStartFollowingPlayer);
 
 }
 
@@ -493,7 +494,56 @@ void CPlayerPed::MakeGroupRespondToPlayerTakingDamage(CEventDamage & damageEvent
 
 // 0x60A1D0
 void CPlayerPed::TellGroupToStartFollowingPlayer(bool arg0, bool arg1, bool arg2) {
-    plugin::CallMethod<0x60A1D0, CPlayerPed *, bool, bool, bool>(this, arg0, arg1, arg2);
+    auto pdata = m_pPlayerData;
+    if (pdata->m_bGroupAlwaysFollow && !arg0)
+        return;
+    if (pdata->m_bGroupNeverFollow && arg0)
+        return;
+
+    CPedGroup& group = GetGroup();
+    CPedGroupIntelligence& groupIntel = group.GetIntelligence();
+    CPedGroupMembership& membership = group.GetMembership();
+    if (!arg2 && !membership.CountMembersExcludingLeader())
+        return;
+
+    group.m_bMembersEnterLeadersVehicle = arg0;
+    groupIntel.SetDefaultTaskAllocatorType(5); // TODO enum probably missing
+    if (arg0) {
+        CEventPlayerCommandToGroup playerCmdEvent;
+        playerCmdEvent.ComputeResponseTaskType(&group);
+        if (playerCmdEvent.WillRespond()) {
+            auto gatherCmdEvent = new CEventPlayerCommandToGroup(ePlayerGroupCommand::PLAYER_GROUP_COMMAND_GATHER);
+            gatherCmdEvent->m_taskId = playerCmdEvent.m_taskId;
+
+            CEventGroupEvent groupEvent(this, gatherCmdEvent);
+            groupIntel.AddEvent(&groupEvent);
+        }
+    }
+
+    if (arg1) {
+        const uint32 nMembers = membership.CountMembersExcludingLeader();
+        if (!nMembers)
+            return;
+
+        if (arg0) {
+            const float distToFurthest = group.FindDistanceToFurthestMember();
+            if (nMembers > 1) {
+                if (distToFurthest >= 3.0f)
+                    Say(distToFurthest >= 10.0f ? 151 : 153);
+                else
+                    Say(155);
+            } else {
+                if (distToFurthest >= 3.0f)
+                    Say(distToFurthest >= 10.0f ? 152 : 154);
+                else
+                    Say(156);
+            }
+        } else if (nMembers > 1) {
+            Say(159);
+        } else {
+            Say(160);
+        }
+    }
 }
 
 // 0x60A440

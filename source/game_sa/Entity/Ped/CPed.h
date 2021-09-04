@@ -510,7 +510,7 @@ public:
     void EnablePedSpeechForScriptSpeech();
     void CanPedHoldConversation();
     void SayScript(int arg0, unsigned char arg1, unsigned char arg2, unsigned char arg3);
-    void Say(unsigned short arg0, unsigned int arg1, float arg2, unsigned char arg3, unsigned char arg4, unsigned char arg5);
+    void Say(unsigned short arg0, unsigned int arg1 = 0, float arg2 = 1.0f, unsigned char arg3 = 0, unsigned char arg4 = 0, unsigned char arg5 = 0);
     void RemoveBodyPart(int boneId, char localDir);
     void SpawnFlyingComponent(int arg0, char arg1);
     bool DoesLOSBulletHitPed(CColPoint& colPoint);
