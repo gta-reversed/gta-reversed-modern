@@ -49,6 +49,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "MakePlayerGroupReappear", 0x60A4B0, &CPlayerPed::MakePlayerGroupReappear);
     ReversibleHooks::Install("CPlayerPed", "HandleSprintEnergy", 0x60A550, &CPlayerPed::HandleSprintEnergy);
     ReversibleHooks::Install("CPlayerPed", "GetButtonSprintResults", 0x60A820, &CPlayerPed::GetButtonSprintResults);
+    ReversibleHooks::Install("CPlayerPed", "HandlePlayerBreath", 0x60A8D0, &CPlayerPed::HandlePlayerBreath);
 
 }
 
@@ -646,7 +647,16 @@ void CPlayerPed::ResetPlayerBreath() {
 
 // 0x60A8D0
 void CPlayerPed::HandlePlayerBreath(bool bDecreaseAir, float fMultiplier) {
-    plugin::CallMethod<0x60A8D0, CPlayerPed *, bool, float>(this, bDecreaseAir, fMultiplier);
+    float& breath = m_pPlayerData->m_fBreath;
+    float  decreaseAmount = CTimer::ms_fTimeStep * fMultiplier;
+    if (!bDecreaseAir || CCheat::m_aCheatsActive[CHEAT_INFINITE_OXYGEN]) {
+        breath += decreaseAmount * 2.0f;
+    } else {
+        if (breath > 0.0f && bDrownsInWater)
+            breath = std::max(0.0f, breath - decreaseAmount);
+        else
+            CWeapon::GenerateDamageEvent(this, this, eWeaponType::WEAPON_DROWNING, decreaseAmount * 3.0f, ePedPieceTypes::PED_PIECE_TORSO, 0);
+    }
 }
 
 // 0x60A9C0
