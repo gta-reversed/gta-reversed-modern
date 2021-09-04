@@ -229,6 +229,10 @@ bool InTwoPlayersMode() {
     return CWorld::Players[0].m_pPed && CWorld::Players[1].m_pPed;
 }
 
+CPlayerInfo& FindPlayerInfo(int playerId) {
+    return CWorld::Players[playerId < 0 ? CWorld::PlayerInFocus : playerId];
+}
+
 CVector Multiply3x3(CMatrix& m, CVector& v) {
     return CVector{
         m.GetRight().x * v.x + m.GetForward().x * v.y + m.GetUp().x * v.z,

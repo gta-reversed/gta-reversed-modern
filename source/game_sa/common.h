@@ -106,6 +106,8 @@ CWanted * FindPlayerWanted(int playerId = -1);
 // 2 players are playing
 bool InTwoPlayersMode();
 
+CPlayerInfo& FindPlayerInfo(int playerId = -1);
+
 CVector Multiply3x3(CMatrix& m, CVector& v);
 CVector Multiply3x3(CVector& v, CMatrix& m);
 

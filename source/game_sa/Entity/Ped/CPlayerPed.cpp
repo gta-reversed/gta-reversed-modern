@@ -47,6 +47,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "TellGroupToStartFollowingPlayer", 0x60A1D0, &CPlayerPed::TellGroupToStartFollowingPlayer);
     ReversibleHooks::Install("CPlayerPed", "MakePlayerGroupDisappear", 0x60A440, &CPlayerPed::MakePlayerGroupDisappear);
     ReversibleHooks::Install("CPlayerPed", "MakePlayerGroupReappear", 0x60A4B0, &CPlayerPed::MakePlayerGroupReappear);
+    ReversibleHooks::Install("CPlayerPed", "HandleSprintEnergy", 0x60A550, &CPlayerPed::HandleSprintEnergy);
 
 }
 
@@ -585,8 +586,23 @@ void CPlayerPed::ResetSprintEnergy()
 }
 
 // 0x60A550
-bool CPlayerPed::HandleSprintEnergy(bool arg0, float arg1) {
-    return plugin::CallMethodAndReturn<bool, 0x60A550, CPlayerPed *, bool, float>(this, arg0, arg1);
+bool CPlayerPed::HandleSprintEnergy(bool arg0, float adrenalineConsumedPerTimeStep) {
+    float& timeCanRun = m_pPlayerData->m_fTimeCanRun;
+    if (arg0) {
+        if (FindPlayerInfo().m_bDoesNotGetTired)
+            return true;
+        if (m_pPlayerData->m_bAdrenaline || adrenalineConsumedPerTimeStep == 0.0f)
+            return true;
+
+        if (timeCanRun > -150.0f) { // TODO: Find out what this magic number is
+            timeCanRun = std::max(-150.0f, timeCanRun - CTimer::ms_fTimeStep * adrenalineConsumedPerTimeStep);
+        }
+    } else {
+        if (CStats::GetFatAndMuscleModifier(STAT_MOD_TIME_CAN_RUN) > timeCanRun) {
+            timeCanRun += CTimer::ms_fTimeStep * adrenalineConsumedPerTimeStep / 2.0f;
+        }
+    }
+    return false;
 }
 
 // 0x60A610
