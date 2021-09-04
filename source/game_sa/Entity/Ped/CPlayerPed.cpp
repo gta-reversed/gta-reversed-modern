@@ -32,6 +32,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "DoesPlayerWantNewWeapon", 0x609710, &CPlayerPed::DoesPlayerWantNewWeapon);
     ReversibleHooks::Install("CPlayerPed", "ProcessPlayerWeapon", 0x6097F0, &CPlayerPed::ProcessPlayerWeapon);
     ReversibleHooks::Install("CPlayerPed", "PickWeaponAllowedFor2Player", 0x609800, &CPlayerPed::PickWeaponAllowedFor2Player);
+    ReversibleHooks::Install("CPlayerPed", "UpdateCameraWeaponModes", 0x609830, &CPlayerPed::UpdateCameraWeaponModes);
 
 }
 
@@ -236,7 +237,31 @@ void CPlayerPed::PickWeaponAllowedFor2Player() {
 
 // 0x609830
 void CPlayerPed::UpdateCameraWeaponModes(CPad* pad) {
-    plugin::CallMethod<0x609830, CPlayerPed *, CPad*>(this, pad);
+    switch (GetActiveWeapon().m_nType) {
+    case eWeaponType::WEAPON_M4:
+        TheCamera.SetNewPlayerWeaponMode(eCamMode::MODE_M16_1STPERSON, 0, 0);
+        break;
+
+    case eWeaponType::WEAPON_SNIPERRIFLE:
+        TheCamera.SetNewPlayerWeaponMode(eCamMode::MODE_SNIPER, 0, 0);
+        break;
+
+    case eWeaponType::WEAPON_RLAUNCHER:
+        TheCamera.SetNewPlayerWeaponMode(eCamMode::MODE_ROCKETLAUNCHER, 0, 0);
+        break;
+
+    case eWeaponType::WEAPON_RLAUNCHER_HS:
+        TheCamera.SetNewPlayerWeaponMode(eCamMode::MODE_ROCKETLAUNCHER_HS, 0, 0);
+        break;
+
+    case eWeaponType::WEAPON_CAMERA:
+        TheCamera.SetNewPlayerWeaponMode(eCamMode::MODE_CAMERA, 0, 0);
+        break;
+
+    default:
+        TheCamera.ClearPlayerWeaponMode();
+        break;
+    }
 }
 
 // 0x6098F0
