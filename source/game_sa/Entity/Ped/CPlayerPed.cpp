@@ -370,7 +370,10 @@ float CPlayerPed::FindTargetPriority(CEntity* entity) {
 
 // 0x609ED0
 void CPlayerPed::Clear3rdPersonMouseTarget() {
-    plugin::CallMethod<0x609ED0, CPlayerPed *>(this);
+    if (m_p3rdPersonMouseTarget) {
+        m_p3rdPersonMouseTarget->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_p3rdPersonMouseTarget));
+        m_p3rdPersonMouseTarget = 0;
+    }
 }
 
 // 0x609EF0
