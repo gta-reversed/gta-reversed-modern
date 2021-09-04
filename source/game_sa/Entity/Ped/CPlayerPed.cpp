@@ -30,6 +30,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "IsHidden", 0x609620, &CPlayerPed::IsHidden);
     ReversibleHooks::Install("CPlayerPed", "ReApplyMoveAnims", 0x609650, &CPlayerPed::ReApplyMoveAnims);
     ReversibleHooks::Install("CPlayerPed", "DoesPlayerWantNewWeapon", 0x609710, &CPlayerPed::DoesPlayerWantNewWeapon);
+    ReversibleHooks::Install("CPlayerPed", "ProcessPlayerWeapon", 0x6097F0, &CPlayerPed::ProcessPlayerWeapon);
 }
 
 struct WorkBufferSaveData {
@@ -222,7 +223,7 @@ bool CPlayerPed::DoesPlayerWantNewWeapon(eWeaponType weaponType, bool arg1) {
 
 // 0x6097F0
 void CPlayerPed::ProcessPlayerWeapon(CPad* pad) {
-    plugin::CallMethod<0x6097F0, CPlayerPed *, CPad*>(this, pad);
+    /* empty */
 }
 
 // 0x609800
