@@ -29,6 +29,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "CanPlayerStartMission", 0x609590, &CPlayerPed::CanPlayerStartMission);
     ReversibleHooks::Install("CPlayerPed", "IsHidden", 0x609620, &CPlayerPed::IsHidden);
     ReversibleHooks::Install("CPlayerPed", "ReApplyMoveAnims", 0x609650, &CPlayerPed::ReApplyMoveAnims);
+    ReversibleHooks::Install("CPlayerPed", "DoesPlayerWantNewWeapon", 0x609710, &CPlayerPed::DoesPlayerWantNewWeapon);
 }
 
 struct WorkBufferSaveData {
@@ -185,7 +186,38 @@ void CPlayerPed::ReApplyMoveAnims() {
 
 // 0x609710
 bool CPlayerPed::DoesPlayerWantNewWeapon(eWeaponType weaponType, bool arg1) {
-    return plugin::CallMethodAndReturn<bool, 0x609710, CPlayerPed *, eWeaponType, bool>(this, weaponType, arg1);
+    // GetPadFromPlayer(); // Called, but not used
+
+    auto weaponSlot = GetWeaponSlot(weaponType);
+    auto weaponInSlotType = GetWeaponInSlot(weaponSlot).m_nType;
+    if (weaponInSlotType == weaponType)
+        return true;
+
+    if (weaponInSlotType == eWeaponType::WEAPON_UNARMED)
+        return true;
+
+    if (arg1)
+        return false;
+
+    if (m_pIntelligence->GetTaskJetPack())
+        return false;
+
+    /* !See comment!
+    if (m_nActiveWeaponSlot == weaponSlot
+        && CWeaponInfo::GetWeaponInfo(weaponInSlotType, GetWeaponSkill(weaponInSlotType))->flags.bAimWithArm   \ One of these two is always false, so
+        && !CWeaponInfo::GetWeaponInfo(weaponInSlotType, GetWeaponSkill(weaponInSlotType))->flags.bAimWithArm) / the whole expression is always false
+        return false;
+    */
+
+    if (m_nActiveWeaponSlot == weaponSlot) {
+        switch (m_nPedState) {
+        case ePedState::PEDSTATE_ATTACK:
+        case ePedState::PEDSTATE_AIMGUN:
+            return false;
+        }
+    }
+
+    return true;
 }
 
 // 0x6097F0

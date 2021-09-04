@@ -532,7 +532,8 @@ public:
     inline CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
     inline CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
     inline CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
-    inline CWeapon& GetActiveWeapon() { return m_aWeapons[m_nActiveWeaponSlot]; }
+    inline CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
+    inline CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
     inline CPlayerPed* AsPlayerPed() { return reinterpret_cast<CPlayerPed*>(this); }
 
     static void* operator new(unsigned int size);
