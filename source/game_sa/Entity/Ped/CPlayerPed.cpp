@@ -34,6 +34,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "PickWeaponAllowedFor2Player", 0x609800, &CPlayerPed::PickWeaponAllowedFor2Player);
     ReversibleHooks::Install("CPlayerPed", "UpdateCameraWeaponModes", 0x609830, &CPlayerPed::UpdateCameraWeaponModes);
     ReversibleHooks::Install("CPlayerPed", "ClearWeaponTarget", 0x609c80, &CPlayerPed::ClearWeaponTarget);
+    ReversibleHooks::Install("CPlayerPed", "GetWeaponRadiusOnScreen", 0x609CD0, &CPlayerPed::GetWeaponRadiusOnScreen);
 
 }
 
@@ -283,7 +284,27 @@ void CPlayerPed::ClearWeaponTarget() {
 
 // 0x609CD0
 float CPlayerPed::GetWeaponRadiusOnScreen() {
-    return plugin::CallMethodAndReturn<float, 0x609CD0, CPlayerPed *>(this);
+    CWeapon& wep = GetActiveWeapon();
+    CWeaponInfo& wepInfo = wep.GetWeaponInfo();
+
+    if (wep.IsTypeMelee())
+        return 0.0f;
+
+    const float accurancyProg = 0.5f / wepInfo.m_fAccuracy;
+    switch (wep.m_nType) {
+    case eWeaponType::WEAPON_SHOTGUN:
+    case eWeaponType::WEAPON_SPAS12_SHOTGUN:
+    case eWeaponType::WEAPON_SAWNOFF_SHOTGUN:
+        return std::max(0.2f, accurancyProg);
+
+    default: {
+        const float rangeProg = std::min(1.0f, 15.0f / wepInfo.m_fWeaponRange);
+        const float radius = (m_pPlayerData->m_fAttackButtonCounter * 0.5f + 1.0f) * rangeProg * accurancyProg;
+        if (bIsDucking)
+            return radius / 2.0f;
+        return radius;
+    }
+    }
 }
 
 // 0x609D90
