@@ -51,6 +51,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "GetButtonSprintResults", 0x60A820, &CPlayerPed::GetButtonSprintResults);
     ReversibleHooks::Install("CPlayerPed", "HandlePlayerBreath", 0x60A8D0, &CPlayerPed::HandlePlayerBreath);
     ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60B460, &CPlayerPed::MakeChangesForNewWeapon);
+    ReversibleHooks::Install("CPlayerPed", "LOSBlockedBetweenPeds", 0x60B550, &CPlayerPed::LOSBlockedBetweenPeds);
 
 }
 
@@ -696,7 +697,26 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
 
 // 0x60B550
 bool LOSBlockedBetweenPeds(CEntity* entity1, CEntity* entity2) {
-    return plugin::CallAndReturn<bool, 0x60B550, CEntity*, CEntity*>(entity1, entity2);
+    CVector origin{};
+    if (entity1->IsPed()) {
+        entity1->AsPed()->GetBonePosition(origin, ePedBones::BONE_NECK, false);
+        if (entity1->AsPed()->bIsDucking)
+            origin.z += 0.35f;
+    } else {
+        origin = entity1->GetPosition();
+    }
+
+    CVector target{};
+    if (entity2->IsPed())
+        entity1->AsPed()->GetBonePosition(target, ePedBones::BONE_NECK, false);
+    else
+        target = entity1->GetPosition();
+
+    CColPoint colPoint;
+    CEntity* hitEntity;
+    if (CWorld::ProcessLineOfSight(origin, target, colPoint, hitEntity, true, false, false, true, false, false, false, true))
+        return hitEntity != entity2;
+    return false;
 }
 
 // 0x60B650
