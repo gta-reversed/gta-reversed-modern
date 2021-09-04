@@ -33,6 +33,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "ProcessPlayerWeapon", 0x6097F0, &CPlayerPed::ProcessPlayerWeapon);
     ReversibleHooks::Install("CPlayerPed", "PickWeaponAllowedFor2Player", 0x609800, &CPlayerPed::PickWeaponAllowedFor2Player);
     ReversibleHooks::Install("CPlayerPed", "UpdateCameraWeaponModes", 0x609830, &CPlayerPed::UpdateCameraWeaponModes);
+    ReversibleHooks::Install("CPlayerPed", "ClearWeaponTarget", 0x609c80, &CPlayerPed::ClearWeaponTarget);
 
 }
 
@@ -271,7 +272,13 @@ void CPlayerPed::ProcessAnimGroups() {
 
 // 0x609C80
 void CPlayerPed::ClearWeaponTarget() {
-    plugin::CallMethod<0x609C80, CPlayerPed *>(this);
+    if (IsPlayer()) {
+        if (m_pTargetedObject)
+            m_pTargetedObject->CleanUpOldReference(&m_pTargetedObject);
+        m_pTargetedObject = nullptr;
+        TheCamera.ClearPlayerWeaponMode();
+        CWeaponEffects::ClearCrossHair(m_nPedType);
+    }
 }
 
 // 0x609CD0
