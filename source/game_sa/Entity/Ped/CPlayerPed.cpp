@@ -288,7 +288,7 @@ void CPlayerPed::ClearWeaponTarget() {
 // 0x609CD0
 float CPlayerPed::GetWeaponRadiusOnScreen() {
     CWeapon& wep = GetActiveWeapon();
-    CWeaponInfo& wepInfo = wep.GetWeaponInfo();
+    CWeaponInfo& wepInfo = wep.GetWeaponInfo(this);
 
     if (wep.IsTypeMelee())
         return 0.0f;
