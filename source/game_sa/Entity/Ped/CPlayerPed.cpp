@@ -27,6 +27,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "ReactivatePlayerPed", 0x609540, &CPlayerPed::ReactivatePlayerPed);
     ReversibleHooks::Install("CPlayerPed", "GetPadFromPlayer", 0x609560, &CPlayerPed::GetPadFromPlayer);
     ReversibleHooks::Install("CPlayerPed", "CanPlayerStartMission", 0x609590, &CPlayerPed::CanPlayerStartMission);
+    ReversibleHooks::Install("CPlayerPed", "IsHidden", 0x609620, &CPlayerPed::IsHidden);
 }
 
 struct WorkBufferSaveData {
@@ -155,7 +156,7 @@ bool CPlayerPed::CanPlayerStartMission() {
 
 // 0x609620
 bool CPlayerPed::IsHidden() {
-    return plugin::CallMethodAndReturn<bool, 0x609620, CPlayerPed *>(this);
+    return bInVehicle && GetLightingTotal() <= 0.05f;
 }
 
 // 0x609650
