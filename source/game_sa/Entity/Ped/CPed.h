@@ -537,6 +537,9 @@ public:
 
     static void* operator new(unsigned int size);
     static void operator delete(void* data);
+
+    // NOTSA
+    bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
 };
 
 VALIDATE_SIZE(CPed, 0x79C);

@@ -36,6 +36,7 @@ public:
     void RemoveInvalidEvents(bool bRemoveNonScriptCommandEvents);
     void Reorganise();
     void Flush(bool bAvoidFlushingTaskComplexBeInGroup);
+    CEvent* GetEventOfType(eEventType type) const noexcept;
 };
 
 VALIDATE_SIZE(CEventGroup, 0x4C);

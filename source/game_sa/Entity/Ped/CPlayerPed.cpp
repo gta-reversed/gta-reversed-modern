@@ -26,6 +26,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "DeactivatePlayerPed", 0x609520, &CPlayerPed::DeactivatePlayerPed);
     ReversibleHooks::Install("CPlayerPed", "ReactivatePlayerPed", 0x609540, &CPlayerPed::ReactivatePlayerPed);
     ReversibleHooks::Install("CPlayerPed", "GetPadFromPlayer", 0x609560, &CPlayerPed::GetPadFromPlayer);
+    ReversibleHooks::Install("CPlayerPed", "CanPlayerStartMission", 0x609590, &CPlayerPed::CanPlayerStartMission);
 }
 
 struct WorkBufferSaveData {
@@ -121,7 +122,35 @@ CPad* CPlayerPed::GetPadFromPlayer() {
 
 // 0x609590
 bool CPlayerPed::CanPlayerStartMission() {
-    return plugin::CallMethodAndReturn<bool, 0x609590, CPlayerPed *>(this);
+    if (CGameLogic::GameState != GAME_STATE_INITIAL)
+        return false;
+
+    if (CGameLogic::IsCoopGameGoingOn())
+        return false;
+
+    if (!IsPedInControl() && !IsStateDriving())
+        return false;
+
+    const auto GetSecondaryTask = [this](eSecondaryTasks task) {
+        return m_pIntelligence->m_TaskMgr.GetTaskSecondary(task);
+    };
+
+    if (GetSecondaryTask(eSecondaryTasks::TASK_SECONDARY_ATTACK))
+        return false;
+
+    if (GetSecondaryTask(eSecondaryTasks::TASK_SECONDARY_SAY))
+        return false;
+
+    if (auto task = GetSecondaryTask(eSecondaryTasks::TASK_SECONDARY_FACIAL_COMPLEX)) {
+        if (task->GetId() == eTaskType::TASK_SIMPLE_CAR_DRIVE)
+            return false;
+    }
+
+    if (!IsAlive())
+        return false;
+
+    return m_pIntelligence->m_eventGroup.GetEventOfType(eEventType::EVENT_SCRIPT_COMMAND);
+   
 }
 
 // 0x609620
