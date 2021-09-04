@@ -40,6 +40,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "Clear3rdPersonMouseTarget", 0x609DE0, &CPlayerPed::Clear3rdPersonMouseTarget);
     ReversibleHooks::Install("CPlayerPed", "CanIKReachThisTarget", 0x609F80, &CPlayerPed::CanIKReachThisTarget);
     ReversibleHooks::Install("CPlayerPed", "GetPlayerInfoForThisPlayerPed", 0x609FF0, &CPlayerPed::GetPlayerInfoForThisPlayerPed);
+    ReversibleHooks::Install("CPlayerPed", "AnnoyPlayerPed", 0x60A040, &CPlayerPed::AnnoyPlayerPed);
 
 }
 
@@ -441,7 +442,16 @@ void CPlayerPed::DoStuffToGoOnFire() {
 
 // 0x60A040
 void CPlayerPed::AnnoyPlayerPed(bool arg0) {
-    plugin::CallMethod<0x60A040, CPlayerPed *, bool>(this, arg0);
+    auto& temper = m_pStats->m_nTemper;
+
+    if (temper < 52) {
+        temper++;
+    } else if (arg0) {
+        if (temper < 55)
+            temper++;
+        else
+            temper = 46;
+    }
 }
 
 // 0x60A070
