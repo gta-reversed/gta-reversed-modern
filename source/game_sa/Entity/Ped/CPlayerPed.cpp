@@ -35,6 +35,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "UpdateCameraWeaponModes", 0x609830, &CPlayerPed::UpdateCameraWeaponModes);
     ReversibleHooks::Install("CPlayerPed", "ClearWeaponTarget", 0x609c80, &CPlayerPed::ClearWeaponTarget);
     ReversibleHooks::Install("CPlayerPed", "GetWeaponRadiusOnScreen", 0x609CD0, &CPlayerPed::GetWeaponRadiusOnScreen);
+    ReversibleHooks::Install("CPlayerPed", "PedCanBeTargettedVehicleWise", 0x609D90, &CPlayerPed::PedCanBeTargettedVehicleWise);
 
 }
 
@@ -309,7 +310,11 @@ float CPlayerPed::GetWeaponRadiusOnScreen() {
 
 // 0x609D90
 bool CPlayerPed::PedCanBeTargettedVehicleWise(CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x609D90, CPed*>(ped);
+    if (ped->bInVehicle) {
+        CVehicle* veh = ped->m_pVehicle;
+        return veh && (veh->IsBike() || veh->vehicleFlags.bVehicleCanBeTargetted);
+    }
+    return true;
 }
 
 // 0x609DE0
