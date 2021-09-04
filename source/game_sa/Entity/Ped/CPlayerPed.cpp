@@ -50,6 +50,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "HandleSprintEnergy", 0x60A550, &CPlayerPed::HandleSprintEnergy);
     ReversibleHooks::Install("CPlayerPed", "GetButtonSprintResults", 0x60A820, &CPlayerPed::GetButtonSprintResults);
     ReversibleHooks::Install("CPlayerPed", "HandlePlayerBreath", 0x60A8D0, &CPlayerPed::HandlePlayerBreath);
+    ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60B460, &CPlayerPed::MakeChangesForNewWeapon);
 
 }
 
@@ -666,7 +667,31 @@ void CPlayerPed::SetRealMoveAnim() {
 
 // 0x60B460
 void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
-    plugin::CallMethod<0x60B460, CPlayerPed *, eWeaponType>(this, weaponType);
+    GetActiveWeapon().StopWeaponEffect();
+    if (m_nPedState == ePedState::PEDSTATE_SNIPER_MODE)
+        TheCamera.ClearPlayerWeaponMode();
+
+    SetCurrentWeapon(weaponType);
+
+    m_pPlayerData->m_nChosenWeapon = m_nActiveWeaponSlot;
+    m_pPlayerData->m_fAttackButtonCounter= 0.0f;
+
+    CWeapon& wep = GetActiveWeapon();
+    CWeaponInfo& wepInfo = wep.GetWeaponInfo(this);
+
+    wep.m_nAmmoInClip = std::min<uint32>(wep.m_nTotalAmmo, (uint32)wepInfo.m_nAmmoClip);
+
+    if (!wepInfo.flags.bCanAim)
+        ClearWeaponTarget();
+
+    if (!wepInfo.flags.bOnlyFreeAim)
+        m_pPlayerData->m_bFreeAiming = false;
+
+
+    if (auto anim = RpAnimBlendClumpGetAssociation(m_pRwClump, AnimationId::ANIM_ID_FIRE))
+        anim->m_nFlags |= 9u; // set 1th and 4th - TODO, use bitfields..
+
+    TheCamera.ClearPlayerWeaponMode();
 }
 
 // 0x60B550
