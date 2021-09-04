@@ -24,6 +24,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "Load", 0x5D46E0, &CPlayerPed::Load);
     ReversibleHooks::Install("CPlayerPed", "Save", 0x5D57E0, &CPlayerPed::Save);
     ReversibleHooks::Install("CPlayerPed", "DeactivatePlayerPed", 0x609520, &CPlayerPed::DeactivatePlayerPed);
+    ReversibleHooks::Install("CPlayerPed", "ReactivatePlayerPed", 0x609540, &CPlayerPed::ReactivatePlayerPed);
 }
 
 struct WorkBufferSaveData {
@@ -100,7 +101,8 @@ void CPlayerPed::DeactivatePlayerPed(int playerId) {
 
 // 0x609540
 void CPlayerPed::ReactivatePlayerPed(int playerId) {
-    plugin::Call<0x609540, int>(playerId);
+    assert(playerId >= 0); // NOTSA
+    CWorld::Add(FindPlayerPed(playerId));
 }
 
 // 0x609560
