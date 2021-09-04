@@ -38,6 +38,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "PedCanBeTargettedVehicleWise", 0x609D90, &CPlayerPed::PedCanBeTargettedVehicleWise);
     ReversibleHooks::Install("CPlayerPed", "FindTargetPriority", 0x609DE0, &CPlayerPed::FindTargetPriority);
     ReversibleHooks::Install("CPlayerPed", "Clear3rdPersonMouseTarget", 0x609DE0, &CPlayerPed::Clear3rdPersonMouseTarget);
+    ReversibleHooks::Install("CPlayerPed", "CanIKReachThisTarget", 0x609F80, &CPlayerPed::CanIKReachThisTarget);
 
 }
 
@@ -414,7 +415,11 @@ void CPlayerPed::CheatWantedLevel(int level) {
 
 // 0x609F80
 bool CPlayerPed::CanIKReachThisTarget(CVector posn, CWeapon* weapon, bool arg2) {
-    return plugin::CallMethodAndReturn<bool, 0x609F80, CPlayerPed *, CVector, CWeapon*, bool>(this, posn, weapon, arg2);
+    if (!weapon->GetWeaponInfo(this).flags.bAimWithArm) {
+        const CVector thisPos = GetPosition();
+        return (posn - thisPos).Magnitude2D() >= thisPos.z - posn.z;
+    }
+    return true;
 }
 
 // 0x609FF0
