@@ -45,6 +45,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "DisbandPlayerGroup", 0x60A0A0, &CPlayerPed::DisbandPlayerGroup);
     ReversibleHooks::Install("CPlayerPed", "MakeGroupRespondToPlayerTakingDamage", 0x60A110, &CPlayerPed::MakeGroupRespondToPlayerTakingDamage);
     ReversibleHooks::Install("CPlayerPed", "TellGroupToStartFollowingPlayer", 0x60A1D0, &CPlayerPed::TellGroupToStartFollowingPlayer);
+    ReversibleHooks::Install("CPlayerPed", "MakePlayerGroupDisappear", 0x60A440, &CPlayerPed::MakePlayerGroupDisappear);
 
 }
 
@@ -548,7 +549,17 @@ void CPlayerPed::TellGroupToStartFollowingPlayer(bool arg0, bool arg1, bool arg2
 
 // 0x60A440
 void CPlayerPed::MakePlayerGroupDisappear() {
-    plugin::CallMethod<0x60A440, CPlayerPed *>(this);
+    CPedGroupMembership& membership = GetGroupMembership();
+    for (int i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
+        if (CPed* member = membership.GetMember(i)) {
+            if (!member->IsCreatedByMission()) {
+                member->m_bCollisionProcessed = false;
+                member->m_bIsVisible = false;
+                abTempNeverLeavesGroup[i] = member->bNeverLeavesGroup;
+                member->bNeverLeavesGroup = true;
+            }
+        }
+    }
 }
 
 // 0x60A4B0
