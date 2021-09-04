@@ -28,6 +28,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "GetPadFromPlayer", 0x609560, &CPlayerPed::GetPadFromPlayer);
     ReversibleHooks::Install("CPlayerPed", "CanPlayerStartMission", 0x609590, &CPlayerPed::CanPlayerStartMission);
     ReversibleHooks::Install("CPlayerPed", "IsHidden", 0x609620, &CPlayerPed::IsHidden);
+    ReversibleHooks::Install("CPlayerPed", "ReApplyMoveAnims", 0x609650, &CPlayerPed::ReApplyMoveAnims);
 }
 
 struct WorkBufferSaveData {
@@ -161,7 +162,25 @@ bool CPlayerPed::IsHidden() {
 
 // 0x609650
 void CPlayerPed::ReApplyMoveAnims() {
-    plugin::CallMethod<0x609650, CPlayerPed *>(this);
+    constexpr AnimationId anims[]{
+        AnimationId::ANIM_ID_WALK,
+        AnimationId::ANIM_ID_RUN,
+        AnimationId::ANIM_ID_SPRINT,
+        AnimationId::ANIM_ID_IDLE,
+        AnimationId::ANIM_ID_WALK_START
+    };
+    for (AnimationId id : anims) {
+        if (CAnimBlendAssociation* anim = RpAnimBlendClumpGetAssociation(m_pRwClump, id)) {
+            if (anim->GetHashKey() != CAnimManager::GetAnimAssociation(m_nAnimGroup, id)->GetHashKey()) {
+                CAnimBlendAssociation* addedAnim = CAnimManager::AddAnimation(m_pRwClump, m_nAnimGroup, id);
+                addedAnim->m_fBlendDelta = anim->m_fBlendDelta;
+                addedAnim->m_fBlendAmount = anim->m_fBlendAmount;
+
+                anim->m_nFlags |= 4u; // TODO
+                anim->m_fBlendDelta = -1000.0f;
+            }
+        }
+    }
 }
 
 // 0x609710
