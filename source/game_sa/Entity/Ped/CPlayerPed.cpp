@@ -53,6 +53,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60B460, &CPlayerPed::MakeChangesForNewWeapon);
     ReversibleHooks::Install("CPlayerPed", "LOSBlockedBetweenPeds", 0x60B550, &CPlayerPed::LOSBlockedBetweenPeds);
     ReversibleHooks::Install("CPlayerPed", "DoesTargetHaveToBeBroken", 0x60C0C0, &CPlayerPed::DoesTargetHaveToBeBroken);
+    ReversibleHooks::Install("CPlayerPed", "SetPlayerMoveBlendRatio", 0x60C520, &CPlayerPed::SetPlayerMoveBlendRatio);
 
 }
 
@@ -757,8 +758,31 @@ void CPlayerPed::KeepAreaAroundPlayerClear() {
 }
 
 // 0x60C520
-void CPlayerPed::SetPlayerMoveBlendRatio(CVector* arg0) {
-    plugin::CallMethod<0x60C520, CPlayerPed *, CVector*>(this, arg0);
+void CPlayerPed::SetPlayerMoveBlendRatio(CVector* point) {
+    float& moveBlendRatio = m_pPlayerData->m_fMoveBlendRatio;
+    if (point) {
+        moveBlendRatio = std::min(2.0f, (*point - GetPosition()).Magnitude2D() * 2.0f);
+    } else {
+        switch (m_nMoveState)
+        {
+        case PEDMOVE_WALK:
+            moveBlendRatio = 1.0;
+            break;
+
+        case PEDMOVE_RUN:
+            moveBlendRatio = 1.8;
+            break;
+
+        case PEDMOVE_SPRINT:
+            moveBlendRatio = 2.5;
+            break;
+
+        default:
+            moveBlendRatio = 0.0;
+            break;
+        }
+    }
+    SetRealMoveAnim();
 }
 
 // 0x60C5F0
