@@ -648,14 +648,14 @@ float CPlayerPed::ControlButtonSprint(eSprintType sprintType) {
 float CPlayerPed::GetButtonSprintResults(eSprintType sprintType) {
     // Forces the compiler to preserve the value of `edx`. 
     // Otherwise it's value is lost when called from 0x60B44C. 
-    // which causes a crash (as it is used to store a pointer to a anim blend assoc)
+    // which causes a crash (as it is used to store a pointer to an anim blend assoc)
     __asm and edx, edx;
 
     if (m_pPlayerData->m_fMoveSpeed <= PLAYER_SPRINT_THRESHOLD) {
         return m_pPlayerData->m_fMoveSpeed <= 0.0f ? 0.0f : 1.0f;
     } else {
         const float progress = std::max(0.0f, m_pPlayerData->m_fMoveSpeed / PLAYER_SPRINT_THRESHOLD - 1.0f);
-        return PLAYER_SPRINT_SET[(unsigned)sprintType].field_1C * progress;
+        return PLAYER_SPRINT_SET[(unsigned)sprintType].field_1C * progress + 1.0f;
     }
 }
 
