@@ -55,6 +55,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "DoesTargetHaveToBeBroken", 0x60C0C0, &CPlayerPed::DoesTargetHaveToBeBroken);
     ReversibleHooks::Install("CPlayerPed", "SetPlayerMoveBlendRatio", 0x60C520, &CPlayerPed::SetPlayerMoveBlendRatio);
     ReversibleHooks::Install("CPlayerPed", "FindPedToAttack", 0x60C5F0, &CPlayerPed::FindPedToAttack);
+    ReversibleHooks::Install("CPlayerPed", "ForceGroupToAlwaysFollow", 0x60C7C0, &CPlayerPed::ForceGroupToAlwaysFollow);
 
 }
 
@@ -832,7 +833,9 @@ CPed* CPlayerPed::FindPedToAttack() {
 
 // 0x60C7C0
 void CPlayerPed::ForceGroupToAlwaysFollow(bool enable) {
-    plugin::CallMethod<0x60C7C0, CPlayerPed *, bool>(this, enable);
+    m_pPlayerData->m_bGroupAlwaysFollow = enable;
+    if (enable)
+        TellGroupToStartFollowingPlayer(true, false, true);
 }
 
 // 0x60C800
