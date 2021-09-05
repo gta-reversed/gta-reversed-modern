@@ -313,6 +313,7 @@
 #include "game_sa\BreakObject_c.h"
 #include "game_sa\BreakManager_c.h"
 #include "game_sa\CRemote.h"
+#include "game_sa\CLines.h"
 #include "game_sa\Animation\AnimAssociationData.h"
 #include "game_sa\Animation\AnimBlendFrameData.h"
 #include "game_sa\Animation\AnimSequenceFrames.h"
@@ -605,3 +606,7 @@
 #include "game_sa\Tasks\TaskTypes\CTaskSimplePause.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleScratchHead.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimplePlayHandSignalAnim.h"
+
+#ifdef EXTRA_DEBUG_FEATURES
+#include "toolsmenu\DebugModules\COcclusionDebugModule.h"
+#endif

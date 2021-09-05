@@ -607,7 +607,19 @@ void CFileLoader::LoadLevel(const char* filename) {
 // IPL -> OCCL
 // 0x5B4C80
 void CFileLoader::LoadOcclusionVolume(const char* line, const char* filename) {
-    plugin::Call<0x5B4C80, const char*, const char*>(line, filename);
+    float fRotY = 0.0F, fRotX = 0.0F;
+    uint32 nFlags = 0;
+    float fCenterX, fCenterY, fBottomZ, fWidth, fLength, fHeight, fRotZ;
+
+    sscanf(line, "%f %f %f %f %f %f %f %f %f %d ", &fCenterX, &fCenterY, &fBottomZ, &fWidth, &fLength, &fHeight, &fRotZ, &fRotY, &fRotX, &nFlags);
+    auto fCenterZ = fHeight * 0.5F + fBottomZ;
+    auto strLen = strlen(filename);
+
+    bool bIsInterior = false;
+    if (filename[strLen - 7] == 'i' && filename[strLen - 6] == 'n' && filename[strLen - 5] == 't')
+        bIsInterior = true;
+
+    COcclusion::AddOne(fCenterX, fCenterY, fCenterZ, fWidth, fLength, fHeight, fRotZ, fRotY, fRotX, nFlags, bIsInterior);
 }
 
 // 0x5B41C0

@@ -560,8 +560,12 @@ int32 CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
             {
                 return RENDERER_INVISIBLE;
             }
-            if (!pEntity->GetIsOnScreen() || pEntity->IsEntityOccluded())
+            if (!pEntity->GetIsOnScreen() || pEntity->IsEntityOccluded()) {
+#ifdef EXTRA_DEBUG_FEATURES
+                ++COcclusionDebugModule::NumEntitiesSkipped;
+#endif
                 return RENDERER_CULLED;
+            }
             if (pEntity->m_bWasPostponed) {
                 pEntity->m_bDistanceFade = false;
                 AddEntityToRenderList(pEntity, (pEntity->GetPosition() - ms_vecCameraPosition).Magnitude());
@@ -601,6 +605,9 @@ int32 CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
                 }
                 if (!pEntity->GetIsOnScreen() || pEntity->IsEntityOccluded())
                 {
+#ifdef EXTRA_DEBUG_FEATURES
+                    ++COcclusionDebugModule::NumEntitiesSkipped;
+#endif
                     return RENDERER_CULLED;
                 }
 

@@ -1116,6 +1116,14 @@ void LittleTest() {
     ++g_nNumIm3dDrawCalls;
 }
 
+bool DoesInfiniteLineTouchScreen(float fX, float fY, float fXDir, float fYDir) {
+    return plugin::CallAndReturn<bool, 0x71DB80, float, float, float, float>(fX, fY, fXDir, fYDir);
+}
+
+bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, float fPointX, float fPointY, float fTolerance) {
+    return (fPointX - fLineX) * fYDir - (fPointY - fLineY) * fXDir >= fTolerance;
+}
+
 // 0x53E230
 void Render2dStuff() {
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)false);

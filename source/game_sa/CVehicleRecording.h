@@ -54,7 +54,11 @@ public:
      * pPlaybackBuffer
      * pVehicleForPlayback*/
 
+public:
+    static void InjectHooks();
+
     static void Init();
+    static void Render();
     /*
      * ChangeCarPlaybackToUseAI(CVehicle*)
      * FindIndexWithFileNameNumber(int32)
