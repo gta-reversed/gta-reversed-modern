@@ -50,14 +50,13 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "HandleSprintEnergy", 0x60A550, &CPlayerPed::HandleSprintEnergy);
     ReversibleHooks::Install("CPlayerPed", "GetButtonSprintResults", 0x60A820, &CPlayerPed::GetButtonSprintResults);
     ReversibleHooks::Install("CPlayerPed", "HandlePlayerBreath", 0x60A8D0, &CPlayerPed::HandlePlayerBreath);
-    ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60B460, &CPlayerPed::MakeChangesForNewWeapon);
-    ReversibleHooks::Install("CPlayerPed", "LOSBlockedBetweenPeds", 0x60B550, &CPlayerPed::LOSBlockedBetweenPeds);
+    ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60B460, static_cast<void(CPlayerPed::*)(eWeaponType)>(&CPlayerPed::MakeChangesForNewWeapon));
     ReversibleHooks::Install("CPlayerPed", "DoesTargetHaveToBeBroken", 0x60C0C0, &CPlayerPed::DoesTargetHaveToBeBroken);
     ReversibleHooks::Install("CPlayerPed", "SetPlayerMoveBlendRatio", 0x60C520, &CPlayerPed::SetPlayerMoveBlendRatio);
     ReversibleHooks::Install("CPlayerPed", "FindPedToAttack", 0x60C5F0, &CPlayerPed::FindPedToAttack);
     ReversibleHooks::Install("CPlayerPed", "ForceGroupToAlwaysFollow", 0x60C7C0, &CPlayerPed::ForceGroupToAlwaysFollow);
     ReversibleHooks::Install("CPlayerPed", "ForceGroupToNeverFollow", 0x60C800, &CPlayerPed::ForceGroupToNeverFollow);
-    ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60D000, &CPlayerPed::MakeChangesForNewWeapon);
+    ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60D000, static_cast<void(CPlayerPed::*)(uint32)>(&CPlayerPed::MakeChangesForNewWeapon));
     ReversibleHooks::Install("CPlayerPed", "EvaluateTarget", 0x60D020, &CPlayerPed::EvaluateTarget);
     ReversibleHooks::Install("CPlayerPed", "PlayerHasJustAttackedSomeone", 0x60D5A0, &CPlayerPed::PlayerHasJustAttackedSomeone);
     ReversibleHooks::Install("CPlayerPed", "SetupPlayerPed", 0x60D790, &CPlayerPed::SetupPlayerPed);
