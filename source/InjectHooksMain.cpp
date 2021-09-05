@@ -382,6 +382,7 @@ void InjectHooksMain()
     CAEWaterCannonAudioEntity::InjectHooks();
     CAETwinLoopSoundEntity::InjectHooks();
     CAEDoorAudioEntity::InjectHooks();
+    CAEWeatherAudioEntity::InjectHooks();
 
     FxManager_c::InjectHooks();
     FxSystemBP_c::InjectHooks();
