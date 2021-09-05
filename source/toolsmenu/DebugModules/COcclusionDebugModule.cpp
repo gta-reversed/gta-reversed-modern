@@ -28,16 +28,15 @@ void COcclusionDebugModule::ProcessImgui() {
 }
 
 void COcclusionDebugModule::ProcessRender() {
-    if (COcclusionDebugModule::DrawActiveOcclusions
-        && COcclusion::NumActiveOccluders > 0) {
-
+    if (COcclusionDebugModule::DrawActiveOcclusions && COcclusion::NumActiveOccluders > 0) {
         CSprite::FlushSpriteBuffer();
-        for (int ind = 0; ind < COcclusion::NumActiveOccluders; ++ind) {
+        for (int32 ind = 0; ind < COcclusion::NumActiveOccluders; ++ind) {
             auto& occl = COcclusion::aActiveOccluders[ind];
             for (auto i = 0; i < occl.m_cLinesCount; ++i) {
                 auto& line = occl.m_aLines[i];
                 const auto vecEnd = line.m_vecOrigin + line.m_vecDirection * line.m_fLength;
-                CLines::ImmediateLine2D(line.m_vecOrigin.x, line.m_vecOrigin.y, vecEnd.x, vecEnd.y, 255, 255, 255, 255, 255, 255, 255, 255);
+                const CRGBA white = {255, 255, 255, 255};
+                CLines::ImmediateLine2D(line.m_vecOrigin, vecEnd, white, white);
             }
         }
     }
