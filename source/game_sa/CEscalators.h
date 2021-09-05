@@ -1,10 +1,12 @@
 #pragma once
 
+#include "CEscalator.h"
+
 #define NUM_ESCALATORS 32
 
 class CEscalators {
 public:
-    static CEscalator(&aEscalators)[NUM_ESCALATORS];
+    static CEscalator (&aEscalators)[NUM_ESCALATORS];
 
 public:
     static void InjectHooks();
@@ -12,6 +14,6 @@ public:
 public:
     static void Shutdown();
     static void Init();
-    static void AddOne(CVector const& vecStart, CVector const& vecBottom, CVector const& vecEnd, CVector const& vecTop, bool bMoveDown, CEntity* pEntity);
+    static void AddOne(const CVector& vecStart, const CVector& vecBottom, const CVector& vecEnd, const CVector& vecTop, bool bMoveDown, CEntity* pEntity);
     static void Update();
 };

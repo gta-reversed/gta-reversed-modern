@@ -27,6 +27,10 @@
 #include "CRadar.h"
 #include "CWaterCannons.h"
 #include "CLines.h"
+#include "CEscalators.h"
+#include "CMovingThings.h"
+#include "CMovingThings.h"
+#include "CPlaneTrails.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
@@ -356,6 +360,7 @@ void InjectHooksMain()
     CWaterCannons::InjectHooks();
     CLines::InjectHooks();
     CSprite::InjectHooks();
+    CPlaneTrails::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

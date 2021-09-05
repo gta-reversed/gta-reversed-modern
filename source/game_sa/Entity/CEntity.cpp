@@ -7,6 +7,10 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
+#include "CEntity.h"
+#include "CPointLights.h"
+#include "CEscalators.h"
+
 void CEntity::InjectHooks()
 {
 //Virtual
