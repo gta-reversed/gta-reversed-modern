@@ -32,6 +32,7 @@
 #include "CMovingThings.h"
 #include "CPlaneTrails.h"
 #include "CGamma.h"
+#include "CCustomBuildingPipeline.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
@@ -362,6 +363,7 @@ void InjectHooksMain()
     CLines::InjectHooks();
     CSprite::InjectHooks();
     CPlaneTrails::InjectHooks();
+    CCustomBuildingPipeline::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();
