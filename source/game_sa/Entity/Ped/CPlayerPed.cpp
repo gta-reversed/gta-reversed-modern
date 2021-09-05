@@ -60,6 +60,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60D000, &CPlayerPed::MakeChangesForNewWeapon);
     ReversibleHooks::Install("CPlayerPed", "EvaluateTarget", 0x60D020, &CPlayerPed::EvaluateTarget);
     ReversibleHooks::Install("CPlayerPed", "PlayerHasJustAttackedSomeone", 0x60D5A0, &CPlayerPed::PlayerHasJustAttackedSomeone);
+    ReversibleHooks::Install("CPlayerPed", "SetupPlayerPed", 0x60D790, &CPlayerPed::SetupPlayerPed);
 
 }
 
@@ -913,7 +914,17 @@ bool CPlayerPed::PlayerHasJustAttackedSomeone() {
 
 // 0x60D790
 void CPlayerPed::SetupPlayerPed(int playerId) {
-    plugin::Call<0x60D790, int>(playerId);
+    auto ped = new CPlayerPed(playerId, false);
+    auto& playerInfo = CWorld::Players[playerId];
+    playerInfo.m_pPed = ped;
+
+    if (playerId == 1)
+        ped->m_nPedType = ePedType::PED_TYPE_PLAYER2;
+
+    ped->SetOrientation(0.0f, 0.0f, 0.0f);
+    CWorld::Add(ped);
+    ped->m_nWeaponAccuracy = 100;
+    playerInfo.m_nPlayerState = ePlayerState::PLAYERSTATE_PLAYING;
 }
 
 // 0x60D850
