@@ -34,6 +34,7 @@
 #include "CGamma.h"
 #include "CCustomBuildingPipeline.h"
 #include "CCustomBuildingDNPipeline.h"
+#include "CPlantMgr.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {

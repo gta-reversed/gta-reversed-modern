@@ -22,7 +22,6 @@
 #include "Base.h"
 #include "game_sa\constants.h"
 #include "game_sa\CConversations.h"
-#include "game_sa\CPlantMgr.h"
 #include "game_sa\CStuntJumpManager.h"
 #include "game_sa\ModelIndices.h"
 #include "game_sa\CPedGeometryAnalyser.h"
