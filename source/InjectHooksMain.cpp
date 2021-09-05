@@ -355,6 +355,7 @@ void InjectHooksMain()
     ModelIndices::InjectHooks();
     CWaterCannons::InjectHooks();
     CLines::InjectHooks();
+    CSprite::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();
