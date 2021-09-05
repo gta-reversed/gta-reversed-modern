@@ -14,7 +14,7 @@ void CEventGroup::InjectHooks()
     Install("CEventGroup", "RemoveInvalidEvents", 0x4AB760, &CEventGroup::RemoveInvalidEvents);
     Install("CEventGroup", "Reorganise", 0x4AB700, &CEventGroup::Reorganise);
     Install("CEventGroup", "Flush", 0x4AB370, &CEventGroup::Flush);
-    Install("CEventGroup", "GetEventOfType", 0x4AB650, &CEventGroup::GetEventOfType);
+    //Install("CEventGroup", "GetEventOfType", 0x4AB650, &CEventGroup::GetEventOfType);
 }
 
 CEventGroup::CEventGroup(CPed* ped)

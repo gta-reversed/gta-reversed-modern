@@ -28,8 +28,11 @@ public:
 
     CPlayerPed(int playerId, bool bGroupCreated);
 
-    bool Load() override;
-    bool Save() override;
+    bool Load_Reversed();
+    bool Save_Reversed();
+
+    bool Load() override { return Load_Reversed(); }
+    bool Save() override { return Save_Reversed(); }
 
     CPad* GetPadFromPlayer();
     bool CanPlayerStartMission();
@@ -80,8 +83,8 @@ public:
     void MakeThisPedJoinOurGroup(CPed* ped);
     bool PlayerWantsToAttack();
     void SetInitialState(bool bGroupCreated);
-    void MakeChangesForNewWeapon(int weaponSlot);
-    void EvaluateTarget(CEntity* target, CEntity** outTarget, float* outTargetPriority, float maxDistance, float arg4, bool arg5);
+    void MakeChangesForNewWeapon(uint32 weaponSlot);
+    void EvaluateTarget(CEntity* target, CEntity *& outTarget, float & outTargetPriority, float maxDistance, float arg4, bool arg5);
     void EvaluateNeighbouringTarget(CEntity* target, CEntity** outTarget, float* outTargetPriority, float maxDistance, float arg4, bool arg5);
     void ProcessGroupBehaviour(CPad* pad);
     // return PlayerWantsToAttack();

@@ -93,6 +93,10 @@ void CAnimBlendAssociation::Start(float currentTime) {
     plugin::CallMethod<0x4CEB70, CAnimBlendAssociation*, float>(this, currentTime);
 }
 
+uint32 CAnimBlendAssociation::GetHashKey() const noexcept {
+    return m_pHierarchy->m_hashKey;
+}
+
 void CAnimBlendAssociation::AllocateAnimBlendNodeArray(int count) {
     plugin::CallMethod<0x4CE9F0, CAnimBlendAssociation*, int>(this, count);
 }

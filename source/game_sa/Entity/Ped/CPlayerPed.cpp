@@ -12,55 +12,56 @@ int& gPlayIdlesAnimBlockIndex = *(int*)0xC0BC10;
 bool& CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = *(bool*)0xC0BC15;
 
 void CPlayerPed::InjectHooks() {
-    ReversibleHooks::Install("CPlayerPed", "ResetSprintEnergy", 0x60A530, &CPlayerPed::ResetSprintEnergy);
-    ReversibleHooks::Install("CPlayerPed", "ResetPlayerBreath", 0x60A8A0, &CPlayerPed::ResetPlayerBreath);
-    ReversibleHooks::Install("CPlayerPed", "RemovePlayerPed", 0x6094A0, &CPlayerPed::RemovePlayerPed);
-    ReversibleHooks::Install("CPlayerPed", "Busted", 0x609EF0, &CPlayerPed::Busted);
-    ReversibleHooks::Install("CPlayerPed", "GetWantedLevel", 0x41BE60, &CPlayerPed::GetWantedLevel);
-    ReversibleHooks::Install("CPlayerPed", "SetWantedLevel", 0x609F10, &CPlayerPed::SetWantedLevel);
-    ReversibleHooks::Install("CPlayerPed", "SetWantedLevelNoDrop", 0x609F30, &CPlayerPed::SetWantedLevelNoDrop);
-    ReversibleHooks::Install("CPlayerPed", "CheatWantedLevel", 0x609F50, &CPlayerPed::CheatWantedLevel);
-    ReversibleHooks::Install("CPlayerPed", "DoStuffToGoOnFire", 0x60A020, &CPlayerPed::DoStuffToGoOnFire);
-    ReversibleHooks::Install("CPlayerPed", "Load", 0x5D46E0, &CPlayerPed::Load);
-    ReversibleHooks::Install("CPlayerPed", "Save", 0x5D57E0, &CPlayerPed::Save);
-    ReversibleHooks::Install("CPlayerPed", "DeactivatePlayerPed", 0x609520, &CPlayerPed::DeactivatePlayerPed);
-    ReversibleHooks::Install("CPlayerPed", "ReactivatePlayerPed", 0x609540, &CPlayerPed::ReactivatePlayerPed);
-    ReversibleHooks::Install("CPlayerPed", "GetPadFromPlayer", 0x609560, &CPlayerPed::GetPadFromPlayer);
-    ReversibleHooks::Install("CPlayerPed", "CanPlayerStartMission", 0x609590, &CPlayerPed::CanPlayerStartMission);
-    ReversibleHooks::Install("CPlayerPed", "IsHidden", 0x609620, &CPlayerPed::IsHidden);
-    ReversibleHooks::Install("CPlayerPed", "ReApplyMoveAnims", 0x609650, &CPlayerPed::ReApplyMoveAnims);
-    ReversibleHooks::Install("CPlayerPed", "DoesPlayerWantNewWeapon", 0x609710, &CPlayerPed::DoesPlayerWantNewWeapon);
-    ReversibleHooks::Install("CPlayerPed", "ProcessPlayerWeapon", 0x6097F0, &CPlayerPed::ProcessPlayerWeapon);
-    ReversibleHooks::Install("CPlayerPed", "PickWeaponAllowedFor2Player", 0x609800, &CPlayerPed::PickWeaponAllowedFor2Player);
-    ReversibleHooks::Install("CPlayerPed", "UpdateCameraWeaponModes", 0x609830, &CPlayerPed::UpdateCameraWeaponModes);
-    ReversibleHooks::Install("CPlayerPed", "ClearWeaponTarget", 0x609c80, &CPlayerPed::ClearWeaponTarget);
-    ReversibleHooks::Install("CPlayerPed", "GetWeaponRadiusOnScreen", 0x609CD0, &CPlayerPed::GetWeaponRadiusOnScreen);
-    ReversibleHooks::Install("CPlayerPed", "PedCanBeTargettedVehicleWise", 0x609D90, &CPlayerPed::PedCanBeTargettedVehicleWise);
-    ReversibleHooks::Install("CPlayerPed", "FindTargetPriority", 0x609DE0, &CPlayerPed::FindTargetPriority);
-    ReversibleHooks::Install("CPlayerPed", "Clear3rdPersonMouseTarget", 0x609DE0, &CPlayerPed::Clear3rdPersonMouseTarget);
-    ReversibleHooks::Install("CPlayerPed", "CanIKReachThisTarget", 0x609F80, &CPlayerPed::CanIKReachThisTarget);
-    ReversibleHooks::Install("CPlayerPed", "GetPlayerInfoForThisPlayerPed", 0x609FF0, &CPlayerPed::GetPlayerInfoForThisPlayerPed);
-    ReversibleHooks::Install("CPlayerPed", "AnnoyPlayerPed", 0x60A040, &CPlayerPed::AnnoyPlayerPed);
-    ReversibleHooks::Install("CPlayerPed", "ClearAdrenaline", 0x60A070, &CPlayerPed::ClearAdrenaline);
-    ReversibleHooks::Install("CPlayerPed", "DisbandPlayerGroup", 0x60A0A0, &CPlayerPed::DisbandPlayerGroup);
-    ReversibleHooks::Install("CPlayerPed", "MakeGroupRespondToPlayerTakingDamage", 0x60A110, &CPlayerPed::MakeGroupRespondToPlayerTakingDamage);
-    ReversibleHooks::Install("CPlayerPed", "TellGroupToStartFollowingPlayer", 0x60A1D0, &CPlayerPed::TellGroupToStartFollowingPlayer);
-    ReversibleHooks::Install("CPlayerPed", "MakePlayerGroupDisappear", 0x60A440, &CPlayerPed::MakePlayerGroupDisappear);
-    ReversibleHooks::Install("CPlayerPed", "MakePlayerGroupReappear", 0x60A4B0, &CPlayerPed::MakePlayerGroupReappear);
-    ReversibleHooks::Install("CPlayerPed", "HandleSprintEnergy", 0x60A550, &CPlayerPed::HandleSprintEnergy);
-    ReversibleHooks::Install("CPlayerPed", "GetButtonSprintResults", 0x60A820, &CPlayerPed::GetButtonSprintResults);
-    ReversibleHooks::Install("CPlayerPed", "HandlePlayerBreath", 0x60A8D0, &CPlayerPed::HandlePlayerBreath);
-    ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60B460, static_cast<void(CPlayerPed::*)(eWeaponType)>(&CPlayerPed::MakeChangesForNewWeapon));
-    ReversibleHooks::Install("CPlayerPed", "LOSBlockedBetweenPeds", 0x60B550, &LOSBlockedBetweenPeds);
-    ReversibleHooks::Install("CPlayerPed", "DoesTargetHaveToBeBroken", 0x60C0C0, &CPlayerPed::DoesTargetHaveToBeBroken);
-    ReversibleHooks::Install("CPlayerPed", "SetPlayerMoveBlendRatio", 0x60C520, &CPlayerPed::SetPlayerMoveBlendRatio);
-    ReversibleHooks::Install("CPlayerPed", "FindPedToAttack", 0x60C5F0, &CPlayerPed::FindPedToAttack);
-    ReversibleHooks::Install("CPlayerPed", "ForceGroupToAlwaysFollow", 0x60C7C0, &CPlayerPed::ForceGroupToAlwaysFollow);
-    ReversibleHooks::Install("CPlayerPed", "ForceGroupToNeverFollow", 0x60C800, &CPlayerPed::ForceGroupToNeverFollow);
-    ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60D000, static_cast<void(CPlayerPed::*)(uint32)>(&CPlayerPed::MakeChangesForNewWeapon));
-    ReversibleHooks::Install("CPlayerPed", "EvaluateTarget", 0x60D020, &CPlayerPed::EvaluateTarget);
-    ReversibleHooks::Install("CPlayerPed", "PlayerHasJustAttackedSomeone", 0x60D5A0, &CPlayerPed::PlayerHasJustAttackedSomeone);
-    ReversibleHooks::Install("CPlayerPed", "SetupPlayerPed", 0x60D790, &CPlayerPed::SetupPlayerPed);
+    using namespace ReversibleHooks;
+    Install("CPlayerPed", "ResetSprintEnergy", 0x60A530, &CPlayerPed::ResetSprintEnergy);
+    Install("CPlayerPed", "ResetPlayerBreath", 0x60A8A0, &CPlayerPed::ResetPlayerBreath);
+    Install("CPlayerPed", "RemovePlayerPed", 0x6094A0, &CPlayerPed::RemovePlayerPed);
+    Install("CPlayerPed", "Busted", 0x609EF0, &CPlayerPed::Busted);
+    Install("CPlayerPed", "GetWantedLevel", 0x41BE60, &CPlayerPed::GetWantedLevel);
+    Install("CPlayerPed", "SetWantedLevel", 0x609F10, &CPlayerPed::SetWantedLevel);
+    Install("CPlayerPed", "SetWantedLevelNoDrop", 0x609F30, &CPlayerPed::SetWantedLevelNoDrop);
+    Install("CPlayerPed", "CheatWantedLevel", 0x609F50, &CPlayerPed::CheatWantedLevel);
+    Install("CPlayerPed", "DoStuffToGoOnFire", 0x60A020, &CPlayerPed::DoStuffToGoOnFire);
+    Install("CPlayerPed", "Load", 0x5D46E0, &CPlayerPed::Load_Reversed);
+    Install("CPlayerPed", "Save", 0x5D57E0, &CPlayerPed::Save_Reversed);
+    Install("CPlayerPed", "DeactivatePlayerPed", 0x609520, &CPlayerPed::DeactivatePlayerPed);
+    Install("CPlayerPed", "ReactivatePlayerPed", 0x609540, &CPlayerPed::ReactivatePlayerPed);
+    Install("CPlayerPed", "GetPadFromPlayer", 0x609560, &CPlayerPed::GetPadFromPlayer);
+    Install("CPlayerPed", "CanPlayerStartMission", 0x609590, &CPlayerPed::CanPlayerStartMission);
+    Install("CPlayerPed", "IsHidden", 0x609620, &CPlayerPed::IsHidden);
+    Install("CPlayerPed", "ReApplyMoveAnims", 0x609650, &CPlayerPed::ReApplyMoveAnims);
+    Install("CPlayerPed", "DoesPlayerWantNewWeapon", 0x609710, &CPlayerPed::DoesPlayerWantNewWeapon);
+    Install("CPlayerPed", "ProcessPlayerWeapon", 0x6097F0, &CPlayerPed::ProcessPlayerWeapon);
+    Install("CPlayerPed", "PickWeaponAllowedFor2Player", 0x609800, &CPlayerPed::PickWeaponAllowedFor2Player);
+    Install("CPlayerPed", "UpdateCameraWeaponModes", 0x609830, &CPlayerPed::UpdateCameraWeaponModes);
+    Install("CPlayerPed", "ClearWeaponTarget", 0x609c80, &CPlayerPed::ClearWeaponTarget);
+    Install("CPlayerPed", "GetWeaponRadiusOnScreen", 0x609CD0, &CPlayerPed::GetWeaponRadiusOnScreen);
+    Install("CPlayerPed", "PedCanBeTargettedVehicleWise", 0x609D90, &CPlayerPed::PedCanBeTargettedVehicleWise);
+    Install("CPlayerPed", "FindTargetPriority", 0x609DE0, &CPlayerPed::FindTargetPriority);
+    Install("CPlayerPed", "Clear3rdPersonMouseTarget", 0x609DE0, &CPlayerPed::Clear3rdPersonMouseTarget);
+    Install("CPlayerPed", "CanIKReachThisTarget", 0x609F80, &CPlayerPed::CanIKReachThisTarget);
+    Install("CPlayerPed", "GetPlayerInfoForThisPlayerPed", 0x609FF0, &CPlayerPed::GetPlayerInfoForThisPlayerPed);
+    Install("CPlayerPed", "AnnoyPlayerPed", 0x60A040, &CPlayerPed::AnnoyPlayerPed);
+    Install("CPlayerPed", "ClearAdrenaline", 0x60A070, &CPlayerPed::ClearAdrenaline);
+    Install("CPlayerPed", "DisbandPlayerGroup", 0x60A0A0, &CPlayerPed::DisbandPlayerGroup);
+    Install("CPlayerPed", "MakeGroupRespondToPlayerTakingDamage", 0x60A110, &CPlayerPed::MakeGroupRespondToPlayerTakingDamage);
+    Install("CPlayerPed", "TellGroupToStartFollowingPlayer", 0x60A1D0, &CPlayerPed::TellGroupToStartFollowingPlayer);
+    Install("CPlayerPed", "MakePlayerGroupDisappear", 0x60A440, &CPlayerPed::MakePlayerGroupDisappear);
+    Install("CPlayerPed", "MakePlayerGroupReappear", 0x60A4B0, &CPlayerPed::MakePlayerGroupReappear);
+    Install("CPlayerPed", "HandleSprintEnergy", 0x60A550, &CPlayerPed::HandleSprintEnergy);
+    Install("CPlayerPed", "GetButtonSprintResults", 0x60A820, &CPlayerPed::GetButtonSprintResults);
+    Install("CPlayerPed", "HandlePlayerBreath", 0x60A8D0, &CPlayerPed::HandlePlayerBreath);
+    Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60B460, static_cast<void(CPlayerPed::*)(eWeaponType)>(&CPlayerPed::MakeChangesForNewWeapon));
+    Install("CPlayerPed", "LOSBlockedBetweenPeds", 0x60B550, &LOSBlockedBetweenPeds);
+    Install("CPlayerPed", "DoesTargetHaveToBeBroken", 0x60C0C0, &CPlayerPed::DoesTargetHaveToBeBroken);
+    Install("CPlayerPed", "SetPlayerMoveBlendRatio", 0x60C520, &CPlayerPed::SetPlayerMoveBlendRatio);
+    Install("CPlayerPed", "FindPedToAttack", 0x60C5F0, &CPlayerPed::FindPedToAttack);
+    Install("CPlayerPed", "ForceGroupToAlwaysFollow", 0x60C7C0, &CPlayerPed::ForceGroupToAlwaysFollow);
+    Install("CPlayerPed", "ForceGroupToNeverFollow", 0x60C800, &CPlayerPed::ForceGroupToNeverFollow);
+    Install("CPlayerPed", "MakeChangesForNewWeapon_BySlot", 0x60D000, static_cast<void(CPlayerPed::*)(uint32)>(&CPlayerPed::MakeChangesForNewWeapon));
+    Install("CPlayerPed", "EvaluateTarget", 0x60D020, &CPlayerPed::EvaluateTarget);
+    Install("CPlayerPed", "PlayerHasJustAttackedSomeone", 0x60D5A0, &CPlayerPed::PlayerHasJustAttackedSomeone);
+    Install("CPlayerPed", "SetupPlayerPed", 0x60D790, &CPlayerPed::SetupPlayerPed);
 
 }
 
@@ -74,7 +75,7 @@ struct WorkBufferSaveData {
 VALIDATE_SIZE(WorkBufferSaveData, 132u + 4u);
 
 // 0x5D46E0
-bool CPlayerPed::Load() {
+bool CPlayerPed::Load_Reversed() {
     CPed::Load();
 
     WorkBufferSaveData savedData{};
@@ -91,7 +92,7 @@ bool CPlayerPed::Load() {
 }
 
 // 0x5D57E0
-bool CPlayerPed::Save() {
+bool CPlayerPed::Save_Reversed() {
     WorkBufferSaveData saveData{};
 
     CWanted* wanted = m_pPlayerData->m_pWanted;
@@ -177,14 +178,15 @@ bool CPlayerPed::CanPlayerStartMission() {
         return false;
 
     if (auto task = GetSecondaryTask(eSecondaryTasks::TASK_SECONDARY_FACIAL_COMPLEX)) {
-        if (task->GetId() == eTaskType::TASK_SIMPLE_CAR_DRIVE)
+        if (task->GetId() == eTaskType::TASK_SIMPLE_CAR_DRIVE) {
             return false;
+        }
     }
 
     if (!IsAlive())
         return false;
 
-    return m_pIntelligence->m_eventGroup.GetEventOfType(eEventType::EVENT_SCRIPT_COMMAND);
+    return !m_pIntelligence->m_eventGroup.GetEventOfType(eEventType::EVENT_SCRIPT_COMMAND);
    
 }
 
@@ -609,6 +611,7 @@ bool CPlayerPed::HandleSprintEnergy(bool arg0, float adrenalineConsumedPerTimeSt
 
         if (timeCanRun > -150.0f) { // TODO: Find out what this magic number is
             timeCanRun = std::max(-150.0f, timeCanRun - CTimer::ms_fTimeStep * adrenalineConsumedPerTimeStep);
+            return true;
         }
     } else {
         if (CStats::GetFatAndMuscleModifier(STAT_MOD_TIME_CAN_RUN) > timeCanRun) {
@@ -643,6 +646,11 @@ float CPlayerPed::ControlButtonSprint(eSprintType sprintType) {
 
 // 0x60A820
 float CPlayerPed::GetButtonSprintResults(eSprintType sprintType) {
+    // Forces the compiler to preserve the value of `edx`. 
+    // Otherwise it's value is lost when called from 0x60B44C. 
+    // which causes a crash (as it is used to store a pointer to a anim blend assoc)
+    __asm and edx, edx;
+
     if (m_pPlayerData->m_fMoveSpeed <= PLAYER_SPRINT_THRESHOLD) {
         return m_pPlayerData->m_fMoveSpeed <= 0.0f ? 0.0f : 1.0f;
     } else {
@@ -666,7 +674,7 @@ void CPlayerPed::HandlePlayerBreath(bool bDecreaseAir, float fMultiplier) {
         if (breath > 0.0f && bDrownsInWater)
             breath = std::max(0.0f, breath - decreaseAmount);
         else
-            CWeapon::GenerateDamageEvent(this, this, eWeaponType::WEAPON_DROWNING, decreaseAmount * 3.0f, ePedPieceTypes::PED_PIECE_TORSO, 0);
+            CWeapon::GenerateDamageEvent(this, this, eWeaponType::WEAPON_DROWNING, (int32)(decreaseAmount * 3.0f), ePedPieceTypes::PED_PIECE_TORSO, 0);
     }
 }
 
@@ -773,19 +781,19 @@ void CPlayerPed::SetPlayerMoveBlendRatio(CVector* point) {
         switch (m_nMoveState)
         {
         case PEDMOVE_WALK:
-            moveBlendRatio = 1.0;
+            moveBlendRatio = 1.0f;
             break;
 
         case PEDMOVE_RUN:
-            moveBlendRatio = 1.8;
+            moveBlendRatio = 1.8f;
             break;
 
         case PEDMOVE_SPRINT:
-            moveBlendRatio = 2.5;
+            moveBlendRatio = 2.5f;
             break;
 
         default:
-            moveBlendRatio = 0.0;
+            moveBlendRatio = 0.0f;
             break;
         }
     }

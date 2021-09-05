@@ -23,3 +23,7 @@ int CPedGroupIntelligence::SetGroupDecisionMakerType(int a2) {
 void CPedGroupIntelligence::SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator) {
     plugin::CallMethod<0x5F7410, CPedGroupIntelligence*, CTaskAllocator*>(this, taskAllocator);
 }
+
+void CPedGroupIntelligence::SetDefaultTaskAllocatorType(int nPedGroupTaskAllocator) {
+    plugin::CallMethod<0x5FBB70, CPedGroupIntelligence*, int>(this, nPedGroupTaskAllocator);
+}
