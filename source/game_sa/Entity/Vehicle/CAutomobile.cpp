@@ -1136,13 +1136,16 @@ void CAutomobile::ResetSuspension()
     }
 }
 
+// 0x6A8500
 void CAutomobile::ProcessFlyingCarStuff()
 {
-    if (m_nStatus != STATUS_PLAYER || m_nStatus == STATUS_HELI || m_nStatus == STATUS_PHYSICS) {
+    if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_HELI || m_nStatus == STATUS_PHYSICS) {
         if (CCheat::m_aCheatsActive[CHEAT_CARS_FLY]
             && m_vecMoveSpeed.Magnitude() > 0.0f
-            && CTimer::ms_fTimeStep > 0.0f) 
-                FlyingControl(FLIGHT_MODEL_PLANE, -10000.0f, -10000.0f, -10000.0f, -10000.0f);
+            && CTimer::ms_fTimeStep > 0.0f
+        ) {
+            FlyingControl(FLIGHT_MODEL_PLANE, -9999.9902F, -9999.9902F, -9999.9902F, -9999.9902F);
+        }
     }
 }
 
