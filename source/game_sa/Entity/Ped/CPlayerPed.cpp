@@ -58,6 +58,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "ForceGroupToAlwaysFollow", 0x60C7C0, &CPlayerPed::ForceGroupToAlwaysFollow);
     ReversibleHooks::Install("CPlayerPed", "ForceGroupToNeverFollow", 0x60C800, &CPlayerPed::ForceGroupToNeverFollow);
     ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60D000, &CPlayerPed::MakeChangesForNewWeapon);
+    ReversibleHooks::Install("CPlayerPed", "EvaluateTarget", 0x60D020, &CPlayerPed::EvaluateTarget);
 
 }
 
@@ -868,9 +869,30 @@ void CPlayerPed::MakeChangesForNewWeapon(uint32 weaponSlot) {
         MakeChangesForNewWeapon(GetWeaponInSlot(weaponSlot).m_nType);
 }
 
+static auto& PLAYER_MAX_TARGET_VIEW_ANGLE = *(float*)0x8D243C; // 140.0f
+
 // 0x60D020
-void CPlayerPed::EvaluateTarget(CEntity* target, CEntity** outTarget, float* outTargetPriority, float maxDistance, float arg4, bool arg5) {
-    plugin::CallMethod<0x60D020, CPlayerPed *, CEntity*, CEntity**, float*, float, float, bool>(this, target, outTarget, outTargetPriority, maxDistance, arg4, arg5);
+void CPlayerPed::EvaluateTarget(CEntity* target, CEntity *& outTarget, float & outTargetPriority, float maxDistance, float compensationRotRad, bool arg5) {
+    const CVector dir = target->GetPosition() - GetPosition();
+    const float dist = dir.Magnitude();
+
+    if (dist > maxDistance)
+        return;
+
+    if (DoesTargetHaveToBeBroken(target, &GetActiveWeapon()))
+        return;
+
+    const float targetAngleDeg = fabs(RWRAD2DEG(CGeneral::LimitRadianAngle(CGeneral::GetATanOf(dir) - compensationRotRad)));
+
+    float viewAngleMultiplier = 1.0f - targetAngleDeg / PLAYER_MAX_TARGET_VIEW_ANGLE;
+    if (dist > 1.0f)
+        viewAngleMultiplier /= sqrt(sqrt(dist)); // Take quad root of dist
+
+    const float targetPriority = FindTargetPriority(target) * viewAngleMultiplier;
+    if (targetPriority > outTargetPriority && !LOSBlockedBetweenPeds(this, target)) {
+        outTarget = target;
+        outTargetPriority = targetPriority;
+    }
 }
 
 // 0x60D1C0

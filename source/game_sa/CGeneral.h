@@ -17,6 +17,7 @@ public:
     static float LimitRadianAngle(float angle);
     static float GetRadianAngleBetweenPoints(float x1, float y1, float x2, float y2);
     static float GetATanOfXY(float x, float y);
+    static float GetATanOf(CVector2D point) { return GetATanOfXY(point.x, point.y); }
     static unsigned int GetNodeHeadingFromVector(float x, float y);
     static bool SolveQuadratic(float a, float b, float c, float& x1, float& x2);
     static float GetAngleBetweenPoints(float x1, float y1, float x2, float y2);
