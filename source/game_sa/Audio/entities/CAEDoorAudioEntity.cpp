@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "Audio/entities/CAEDoorAudioEntity.h"
+#include "CAEDoorAudioEntity.h"
 
 #include "CAEAudioHardware.h"
 #include "CAESoundManager.h"

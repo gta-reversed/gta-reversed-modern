@@ -7,7 +7,7 @@
 #pragma once
 
 #include "CCrimeBeingQd.h"
-#include "Audio/entities/CAEPoliceScannerAudioEntity.h"
+#include "CAEPoliceScannerAudioEntity.h"
 
 #include "eCrimeType.h"
 

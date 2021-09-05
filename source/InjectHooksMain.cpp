@@ -17,8 +17,8 @@
 #include "CAEWMADecoder.h"
 #include "CAEStreamingDecoder.h"
 #include "CAEUserRadioTrackManager.h"
-#include "Audio/entities/CAEWaterCannonAudioEntity.h"
-#include "Audio/entities/CAEDoorAudioEntity.h"
+#include "CAEWaterCannonAudioEntity.h"
+#include "CAEDoorAudioEntity.h"
 
 #include "CDebugMenu.h"
 

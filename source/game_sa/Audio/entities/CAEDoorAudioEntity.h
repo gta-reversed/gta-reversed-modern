@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Audio/entities/CAEAudioEntity.h"
+#include "CAEAudioEntity.h"
 
 class CAEDoorAudioEntity : public CAEAudioEntity {
     uint32 m_nTime;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Audio/entities/CAEAudioEntity.h"
+#include "CAEAudioEntity.h"
 
 class CVector;
 class CWaterCannon;

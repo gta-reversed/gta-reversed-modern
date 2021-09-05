@@ -16,7 +16,7 @@
    m_pBaseAudio is a pointer to audio which created twin sound. For example,
    this could be CAEVehicleAudioEntity for playing skid sounds.              */
 
-#include "Audio/entities/CAEAudioEntity.h"
+#include "CAEAudioEntity.h"
 
 class CAETwinLoopSoundEntity : public CAEAudioEntity {
 public:

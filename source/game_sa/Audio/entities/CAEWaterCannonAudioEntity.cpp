@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "Audio/entities/CAEWaterCannonAudioEntity.h"
+#include "CAEWaterCannonAudioEntity.h"
 #include "CAEAudioHardware.h"
 
 // 0x728A90

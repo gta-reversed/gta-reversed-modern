@@ -7,7 +7,7 @@
 #pragma once
 
 #include "CPhysical.h"
-#include "Audio/entities/CAEVehicleAudioEntity.h"
+#include "CAEVehicleAudioEntity.h"
 #include "tHandlingData.h"
 #include "tFlyingHandlingData.h"
 #include "CAutoPilot.h"

@@ -9,7 +9,7 @@
 #include "List_c.h"
 #include "RenderWare.h"
 #include "CVector.h"
-#include "Audio/entities/CAEFireAudioEntity.h"
+#include "CAEFireAudioEntity.h"
 #include "FxPrtMult_c.h"
 #include "FxSphere_c.h"
 #include "FxBox_c.h"

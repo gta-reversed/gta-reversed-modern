@@ -7,9 +7,9 @@
 #pragma once
 
 #include "CPhysical.h"
-#include "Audio/entities/CAEPedAudioEntity.h"
-#include "Audio/entities/CAEPedSpeechAudioEntity.h"
-#include "Audio/entities/CAEWeaponAudioEntity.h"
+#include "CAEPedAudioEntity.h"
+#include "CAEPedSpeechAudioEntity.h"
+#include "CAEWeaponAudioEntity.h"
 #include "CPedIntelligence.h"
 #include "CPlayerPedData.h"
 #include "AnimBlendFrameData.h"
