@@ -24,6 +24,6 @@ void CPedGroupIntelligence::SetPrimaryTaskAllocator(CTaskAllocator* taskAllocato
     plugin::CallMethod<0x5F7410, CPedGroupIntelligence*, CTaskAllocator*>(this, taskAllocator);
 }
 
-void CPedGroupIntelligence::SetDefaultTaskAllocatorType(int nPedGroupTaskAllocator) {
-    plugin::CallMethod<0x5FBB70, CPedGroupIntelligence*, int>(this, nPedGroupTaskAllocator);
+void CPedGroupIntelligence::SetDefaultTaskAllocatorType(int32 nPedGroupTaskAllocator) {
+    plugin::CallMethod<0x5FBB70, CPedGroupIntelligence*, int32>(this, nPedGroupTaskAllocator);
 }

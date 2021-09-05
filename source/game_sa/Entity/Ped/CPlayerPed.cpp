@@ -133,13 +133,13 @@ void CPlayerPed::RemovePlayerPed(int32 playerId) {
 
 // 0x609520
 void CPlayerPed::DeactivatePlayerPed(int32 playerId) {
-    assert(playerId >= 0); // NOTSA
+    assert(playerId >= 0);
     CWorld::Remove(FindPlayerPed(playerId));
 }
 
 // 0x609540
 void CPlayerPed::ReactivatePlayerPed(int32 playerId) {
-    assert(playerId >= 0); // NOTSA
+    assert(playerId >= 0);
     CWorld::Add(FindPlayerPed(playerId));
 }
 
@@ -152,7 +152,7 @@ CPad* CPlayerPed::GetPadFromPlayer() {
     case ePedType::PED_TYPE_PLAYER2:
         return CPad::GetPad(1);
     }
-    assert(0); // NOTSA
+    assert(0);
     return nullptr;
 }
 
@@ -397,7 +397,7 @@ float CPlayerPed::FindTargetPriority(CEntity* entity) {
 void CPlayerPed::Clear3rdPersonMouseTarget() {
     if (m_p3rdPersonMouseTarget) {
         m_p3rdPersonMouseTarget->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_p3rdPersonMouseTarget));
-        m_p3rdPersonMouseTarget = 0;
+        m_p3rdPersonMouseTarget = nullptr;
     }
 }
 
@@ -512,10 +512,9 @@ void CPlayerPed::MakeGroupRespondToPlayerTakingDamage(CEventDamage & damageEvent
 
 // 0x60A1D0
 void CPlayerPed::TellGroupToStartFollowingPlayer(bool arg0, bool arg1, bool arg2) {
-    auto pdata = m_pPlayerData;
-    if (pdata->m_bGroupAlwaysFollow && !arg0)
+    if (m_pPlayerData->m_bGroupAlwaysFollow && !arg0)
         return;
-    if (pdata->m_bGroupNeverFollow && arg0)
+    if (m_pPlayerData->m_bGroupNeverFollow && arg0)
         return;
 
     CPedGroup& group = GetGroup();
@@ -659,6 +658,7 @@ float CPlayerPed::GetButtonSprintResults(eSprintType sprintType) {
     }
 }
 
+// 0x60A8A0
 void CPlayerPed::ResetPlayerBreath() {
     m_pPlayerData->m_fBreath = CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG);
     m_pPlayerData->m_bRequireHandleBreath = false;
