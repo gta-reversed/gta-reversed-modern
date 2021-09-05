@@ -57,6 +57,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "FindPedToAttack", 0x60C5F0, &CPlayerPed::FindPedToAttack);
     ReversibleHooks::Install("CPlayerPed", "ForceGroupToAlwaysFollow", 0x60C7C0, &CPlayerPed::ForceGroupToAlwaysFollow);
     ReversibleHooks::Install("CPlayerPed", "ForceGroupToNeverFollow", 0x60C800, &CPlayerPed::ForceGroupToNeverFollow);
+    ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60D000, &CPlayerPed::MakeChangesForNewWeapon);
 
 }
 
@@ -862,8 +863,9 @@ void CPlayerPed::SetInitialState(bool bGroupCreated) {
 }
 
 // 0x60D000
-void CPlayerPed::MakeChangesForNewWeapon(int weaponSlot) {
-    plugin::CallMethod<0x60D000, CPlayerPed *, int>(this, weaponSlot);
+void CPlayerPed::MakeChangesForNewWeapon(uint32 weaponSlot) {
+    if (weaponSlot != -1)
+        MakeChangesForNewWeapon(GetWeaponInSlot(weaponSlot).m_nType);
 }
 
 // 0x60D020
