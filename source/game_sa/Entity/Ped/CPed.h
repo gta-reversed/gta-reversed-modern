@@ -61,6 +61,24 @@ enum ePedType : unsigned int {
     PED_TYPE_MISSION8
 };
 
+static bool IsPedTypeGang(ePedType type) {
+    switch (type) {
+        case ePedType::PED_TYPE_GANG1:
+        case ePedType::PED_TYPE_GANG2:
+        case ePedType::PED_TYPE_GANG3:
+        case ePedType::PED_TYPE_GANG4:
+        case ePedType::PED_TYPE_GANG5:
+        case ePedType::PED_TYPE_GANG6:
+        case ePedType::PED_TYPE_GANG7:
+        case ePedType::PED_TYPE_GANG8:
+        case ePedType::PED_TYPE_GANG9:
+        case ePedType::PED_TYPE_GANG10: {
+            return true;
+        }
+    }
+    return false;
+}
+
 enum ePedNode
 {
     PED_NODE_UPPER_TORSO = 1,

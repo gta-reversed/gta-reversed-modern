@@ -54,6 +54,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "LOSBlockedBetweenPeds", 0x60B550, &CPlayerPed::LOSBlockedBetweenPeds);
     ReversibleHooks::Install("CPlayerPed", "DoesTargetHaveToBeBroken", 0x60C0C0, &CPlayerPed::DoesTargetHaveToBeBroken);
     ReversibleHooks::Install("CPlayerPed", "SetPlayerMoveBlendRatio", 0x60C520, &CPlayerPed::SetPlayerMoveBlendRatio);
+    ReversibleHooks::Install("CPlayerPed", "FindPedToAttack", 0x60C5F0, &CPlayerPed::FindPedToAttack);
 
 }
 
@@ -787,7 +788,46 @@ void CPlayerPed::SetPlayerMoveBlendRatio(CVector* point) {
 
 // 0x60C5F0
 CPed* CPlayerPed::FindPedToAttack() {
-    return plugin::CallMethodAndReturn<CPed*, 0x60C5F0, CPlayerPed *>(this);
+    CVector origin = FindPlayerCoors();
+    origin.z = 0.0f;
+
+    CVector end = origin + TheCamera.GetForward() * 100.0f;
+    end.z = 0.0f;
+
+    CPed* closestPed{};
+    float closestDistance = std::numeric_limits<float>::max();
+
+    CPedGroupMembership& membership = GetGroupMembership();
+    for (int i = 0; CPools::ms_pPedPool->GetSize(); i++) {
+        CPed* ped = CPools::ms_pPedPool->GetAt(i);
+        if (!ped)
+            continue;
+        if (ped->IsPlayer())
+            continue;
+        if (!ped->IsAlive())
+            continue;
+        if (membership.IsMember(ped))
+            continue;
+        if (ped->m_nPedType == ePedType::PED_TYPE_GANG2)
+            continue;
+
+        CVector point = ped->GetPosition();
+        point.z = 0.0f;
+
+        float dist = CCollision::DistToLine(origin, end, point);
+        float pointDist = (point - origin).Magnitude2D();
+        if (pointDist > 20.0f)
+            dist += (pointDist - 20.0f) / 5.0f;
+
+        if (IsPedTypeGang(ped->m_nPedType))
+            dist = std::max(0.0f, dist / 2.0f - 2.0f);
+
+        if (dist < closestDistance) {
+            closestDistance = dist;
+            closestPed = ped;
+        }
+    }
+    return closestPed;
 }
 
 // 0x60C7C0
