@@ -163,7 +163,6 @@
 #include "game_sa\CFont.h"
 #include "game_sa\CFormation.h"
 #include "game_sa\CGame.h"
-#include "game_sa\CGamma.h"
 #include "game_sa\CGangInfo.h"
 #include "game_sa\CGangs.h"
 #include "game_sa\CGangWars.h"

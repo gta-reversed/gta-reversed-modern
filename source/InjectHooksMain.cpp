@@ -31,6 +31,7 @@
 #include "CMovingThings.h"
 #include "CMovingThings.h"
 #include "CPlaneTrails.h"
+#include "CGamma.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {

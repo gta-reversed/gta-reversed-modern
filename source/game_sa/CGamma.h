@@ -16,8 +16,8 @@ public:
 public:
     static void InjectHooks();
 
-    static void Init();
-    static void SetGamma(float arg1, bool arg2);
+    void Init();
+    void SetGamma(float arg1, bool arg2);
 };
 
 VALIDATE_SIZE(CGamma, 0x10);
