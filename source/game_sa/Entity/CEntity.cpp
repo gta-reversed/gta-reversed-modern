@@ -10,6 +10,7 @@ Do not delete this comment block. Respect others' work!
 #include "CEntity.h"
 #include "CPointLights.h"
 #include "CEscalators.h"
+#include "CCustomBuildingDNPipeline.h"
 
 void CEntity::InjectHooks()
 {

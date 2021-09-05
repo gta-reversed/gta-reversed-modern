@@ -138,7 +138,6 @@
 #include "game_sa\CCranes.h"
 #include "game_sa\CCreepingFire.h"
 #include "game_sa\CCrimeBeingQd.h"
-#include "game_sa\CCustomBuildingDNPipeline.h"
 #include "game_sa\CCustomCarEnvMapPipeline.h"
 #include "game_sa\CCustomCarPlateMgr.h"
 #include "game_sa\CCutsceneMgr.h"
