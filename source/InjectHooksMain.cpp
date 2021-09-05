@@ -26,6 +26,7 @@
 #include "CTheCarGenerators.h"
 #include "CRadar.h"
 #include "CWaterCannons.h"
+#include "CLines.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
@@ -353,6 +354,7 @@ void InjectHooksMain()
     CTaskComplexJump::InjectHooks();
     ModelIndices::InjectHooks();
     CWaterCannons::InjectHooks();
+    CLines::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();
