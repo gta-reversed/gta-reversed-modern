@@ -52,6 +52,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "HandlePlayerBreath", 0x60A8D0, &CPlayerPed::HandlePlayerBreath);
     ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60B460, &CPlayerPed::MakeChangesForNewWeapon);
     ReversibleHooks::Install("CPlayerPed", "LOSBlockedBetweenPeds", 0x60B550, &CPlayerPed::LOSBlockedBetweenPeds);
+    ReversibleHooks::Install("CPlayerPed", "DoesTargetHaveToBeBroken", 0x60C0C0, &CPlayerPed::DoesTargetHaveToBeBroken);
 
 }
 
@@ -731,7 +732,23 @@ void CPlayerPed::DrawTriangleForMouseRecruitPed() {
 
 // 0x60C0C0
 bool CPlayerPed::DoesTargetHaveToBeBroken(CEntity* entity, CWeapon* weapon) {
-    return plugin::CallMethodAndReturn<bool, 0x60C0C0, CPlayerPed *, CEntity*, CWeapon*>(this, entity, weapon);
+    if (entity->m_bIsVisible)
+        return true;
+
+    if (weapon->GetWeaponInfo(this).m_fTargetRange < (entity->GetPosition() - GetPosition()).Magnitude())
+        return true;
+
+    if (weapon->m_nType == eWeaponType::WEAPON_SPRAYCAN) {
+        if (entity->m_nType == eEntityType::ENTITY_TYPE_BUILDING) {
+            if (CTagManager::IsTag(entity)) {
+                if (CTagManager::GetAlpha(entity) == -1) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return CanIKReachThisTarget(entity->GetPosition(), weapon, false);
 }
 
 // 0x60C1E0
