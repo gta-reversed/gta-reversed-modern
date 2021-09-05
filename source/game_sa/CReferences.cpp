@@ -15,7 +15,7 @@ void CReferences::Init()
 {
     CReferences::pEmptyList = CReferences::aRefs;
 
-    for (int32_t i = 0; i < MAX_NUM_REFERENCES - 1; ++i) {
+    for (int32 i = 0; i < MAX_NUM_REFERENCES - 1; ++i) {
         (&CReferences::aRefs[i])->m_pNext = &CReferences::aRefs[i + 1];
         (&CReferences::aRefs[i])->m_ppEntity = nullptr;
     }
@@ -23,9 +23,9 @@ void CReferences::Init()
     (&CReferences::aRefs[MAX_NUM_REFERENCES - 1])->m_pNext = nullptr;
 }
 
-unsigned int CReferences::ListSize(CReference* ref)
+uint32 CReferences::ListSize(CReference* ref)
 {
-    unsigned int count = 0;
+    uint32 count = 0;
     while (ref) {
         ref = ref->m_pNext;
         ++count;
@@ -52,21 +52,21 @@ void CReferences::RemoveReferencesToPlayer()
 void CReferences::PruneAllReferencesInWorld()
 {
     auto iPedsSize = CPools::ms_pPedPool->GetSize();
-    for (int32_t i = 0; i < iPedsSize; ++i) {
+    for (int32 i = 0; i < iPedsSize; ++i) {
         auto pPed = CPools::ms_pPedPool->GetAt(i);
         if (pPed)
             pPed->PruneReferences();
     }
 
     auto iVehsSize = CPools::ms_pVehiclePool->GetSize();
-    for (int32_t i = 0; i < iVehsSize; ++i) {
+    for (int32 i = 0; i < iVehsSize; ++i) {
         auto pVeh = CPools::ms_pVehiclePool->GetAt(i);
         if (pVeh)
             pVeh->PruneReferences();
     }
 
     auto iObjectsSize = CPools::ms_pObjectPool->GetSize();
-    for (int32_t i = 0; i < iObjectsSize; ++i) {
+    for (int32 i = 0; i < iObjectsSize; ++i) {
         auto pObj = CPools::ms_pObjectPool->GetAt(i);
         if (pObj)
             pObj->PruneReferences();

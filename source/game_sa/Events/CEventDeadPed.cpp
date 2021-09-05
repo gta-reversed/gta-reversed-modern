@@ -7,7 +7,7 @@ void CEventDeadPed::InjectHooks()
     ReversibleHooks::Install("CEventDeadPed", "CloneEditable_Reversed", 0x4B6E70, &CEventDeadPed::CloneEditable_Reversed);
 }
 
-CEventDeadPed::CEventDeadPed(CPed* ped, bool bUnknown, std::uint32_t deathTimeInMs)
+CEventDeadPed::CEventDeadPed(CPed* ped, bool bUnknown, uint32 deathTimeInMs)
 {
     m_ped = ped;
     field_18 = bUnknown;
@@ -22,10 +22,10 @@ CEventDeadPed::~CEventDeadPed()
         m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
 }
 
-CEventDeadPed* CEventDeadPed::Constructor(CPed* ped, bool bUnknown, std::uint32_t deathTimeInMs)
+CEventDeadPed* CEventDeadPed::Constructor(CPed* ped, bool bUnknown, uint32 deathTimeInMs)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventDeadPed*, 0x4ADEA0, CEvent*, CPed*, bool, std::uint32_t>(this, ped, bUnknown, deathTimeInMs);
+    return plugin::CallMethodAndReturn<CEventDeadPed*, 0x4ADEA0, CEvent*, CPed*, bool, uint32>(this, ped, bUnknown, deathTimeInMs);
 #else
     this->CEventDeadPed::CEventDeadPed(ped, bUnknown, deathTimeInMs);
     return this;

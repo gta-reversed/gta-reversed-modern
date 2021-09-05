@@ -5,9 +5,9 @@ class CTaskComplexArrestPed : public CTaskComplex {
 public:
     bool m_subTaskNeedsToBeCreated;
     CPed* m_pedToArrest;
-    std::int32_t field_14;
-    std::int32_t field_18;
-    std::int32_t field_1C;
+    int32 field_14;
+    int32 field_18;
+    int32 field_1C;
     CVehicle* m_vehicle;
 
     static void InjectHooks();
@@ -23,7 +23,7 @@ public:
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
-    CTask* CreateSubTask(std::int32_t taskId, CPed* ped);
+    CTask* CreateSubTask(int32 taskId, CPed* ped);
 
 };
 

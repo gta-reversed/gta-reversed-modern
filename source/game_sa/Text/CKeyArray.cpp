@@ -21,8 +21,8 @@ void CKeyArray::Unload() {
 
 // nSkipBytes always 0
 // 0x69F490
-void CKeyArray::Load(uint32 length, FILESTREAM file, uint32* offset, uint8_t nSkipBytes) {
-    return plugin::CallMethod<0x69F490, CKeyArray*, uint32, FILESTREAM, uint32*, uint8_t>(this, length, file, offset, nSkipBytes);
+void CKeyArray::Load(uint32 length, FILESTREAM file, uint32* offset, uint8 nSkipBytes) {
+    return plugin::CallMethod<0x69F490, CKeyArray*, uint32, FILESTREAM, uint32*, uint8>(this, length, file, offset, nSkipBytes);
 
 #ifdef USE_ORIGINAL_CODE
     // todo: add original code
@@ -38,18 +38,18 @@ void CKeyArray::Load(uint32 length, FILESTREAM file, uint32* offset, uint8_t nSk
 
 // 0x69F540
 void CKeyArray::Update(char* offset) {
-    for (uint32_t i = 0; i < size; ++i) {
-        data[i].string = (GxtChar*)((uint8_t*)offset + (uint32)(data[i].string));
+    for (uint32 i = 0; i < size; ++i) {
+        data[i].string = (GxtChar*)((uint8*)offset + (uint32)(data[i].string));
     }
 }
 
 // 0x69F570
-CKeyEntry* CKeyArray::BinarySearch(uint32 hash, CKeyEntry* entries, short firstIndex, short lastIndex) {
+CKeyEntry* CKeyArray::BinarySearch(uint32 hash, CKeyEntry* entries, int16 firstIndex, int16 lastIndex) {
     if (firstIndex > lastIndex)
         return nullptr;
 
     while (true) {
-        uint16_t middle = (firstIndex + lastIndex) >> 1;
+        uint16 middle = (firstIndex + lastIndex) >> 1;
         auto entryHash = entries[middle].hash;
 
         if (hash == entryHash)

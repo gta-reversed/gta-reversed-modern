@@ -7,7 +7,7 @@ CBulletTrace (&CBulletTraces::aTraces)[16] = *(CBulletTrace(*)[16])0xC7C748;
 void CBulletTraces::InjectHooks()
 {
     ReversibleHooks::Install("CBulletTraces", "Init", 0x721D50, &CBulletTraces::Init);
-    ReversibleHooks::Install("CBulletTraces", "AddTrace", 0x723750, static_cast<void(*)(CVector*, CVector*, float, uint32_t, uint8_t)>(&CBulletTraces::AddTrace));
+    ReversibleHooks::Install("CBulletTraces", "AddTrace", 0x723750, static_cast<void(*)(CVector*, CVector*, float, uint32, uint8)>(&CBulletTraces::AddTrace));
     ReversibleHooks::Install("CBulletTraces", "AddTrace_Wrapper", 0x726AF0, static_cast<void(*)(CVector*, CVector*, eWeaponType, CEntity*)>(&CBulletTraces::AddTrace));
     ReversibleHooks::Install("CBulletTraces", "Render", 0x723C10, &CBulletTraces::Render);
     ReversibleHooks::Install("CBulletTraces", "Update", 0x723FB0, &CBulletTraces::Update);
@@ -39,7 +39,7 @@ CBulletTrace* CBulletTraces::GetFree() {
 }
 
 // 0x723750
-void CBulletTraces::AddTrace(CVector* from, CVector* to, float radius, uint32_t disappearTime, uint8_t alpha)
+void CBulletTraces::AddTrace(CVector* from, CVector* to, float radius, uint32 disappearTime, uint8 alpha)
 {
     if (CBulletTrace* pTrace = GetFree()) {
         pTrace->m_vecStart = *from;
@@ -53,9 +53,9 @@ void CBulletTraces::AddTrace(CVector* from, CVector* to, float radius, uint32_t 
         // (Probably done to keep the amount of traces as low as possible)
         const auto traceIdx = GetTraceIndex(pTrace);
         if (traceIdx < 10) {
-            pTrace->m_nLifeTime = (uint32_t)(traceIdx < 5 ? disappearTime : disappearTime / 2.0f);
+            pTrace->m_nLifeTime = (uint32)(traceIdx < 5 ? disappearTime : disappearTime / 2.0f);
         } else {
-            pTrace->m_nLifeTime = (uint32_t)(disappearTime / 4.0f);
+            pTrace->m_nLifeTime = (uint32)(disappearTime / 4.0f);
         }
     }
     // Play sound front-end

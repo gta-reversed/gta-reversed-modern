@@ -6,7 +6,7 @@
 */
 #pragma once
 
-enum eVehicleClass : char {
+enum eVehicleClass : int8 {
     VEHICLE_CLASS_IGNORE = -1,
     VEHICLE_CLASS_NORMAL = 0,
     VEHICLE_CLASS_POORFAMILY,

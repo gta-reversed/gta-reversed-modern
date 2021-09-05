@@ -7,10 +7,10 @@ public:
     class CEntity* pEntity;
     CVector m_vecPosition;
     CVector m_vecPickupPosition;
-    unsigned int m_nTimePassedSinceLastSubTaskCreatedInMs;
-    int m_nAnimGroupId;
+    uint32 m_nTimePassedSinceLastSubTaskCreatedInMs;
+    int32 m_nAnimGroupId;
     bool m_bAnimBlockReferenced;
-    unsigned char padding[3];
+    uint8 padding[3];
 };
 
 VALIDATE_SIZE(CTaskComplexGoPickUpEntity, 0x34);

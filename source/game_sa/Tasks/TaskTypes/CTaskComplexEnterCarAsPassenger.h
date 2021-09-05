@@ -6,13 +6,13 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskComplexEnterCar.h"
 
 class CTaskComplexEnterCarAsPassenger : public CTaskComplexEnterCar {
 public:
 
-    CTaskComplexEnterCarAsPassenger(CVehicle* pTargetVehicle, int nTargetSeat, bool bCarryOnAfterFallingOff);
+    CTaskComplexEnterCarAsPassenger(CVehicle* pTargetVehicle, int32 nTargetSeat, bool bCarryOnAfterFallingOff);
     ~CTaskComplexEnterCarAsPassenger() {}
 
     CTask* Clone() override;

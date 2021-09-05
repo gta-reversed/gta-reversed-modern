@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVector.h"
 #include "eBirdsBiome.h"
 
@@ -44,21 +43,20 @@ public:
 #pragma pack(pop)
 VALIDATE_SIZE(CBirdColor, 0x3);
 
-enum class eBirdMode : unsigned char
-{
-    BIRD_DRAW_UPDATE = 0x1, // Bird is drawn, but doesn't update position
+enum class eBirdMode : uint8 {
+    BIRD_DRAW_UPDATE   = 0x1, // Bird is drawn, but doesn't update position
     BIRD_DRAW_NOUPDATE = 0x2, // Bird is drawn and updates position
 };
 
 #pragma pack(push, 1)
-class  CBird {
+class CBird {
 public:
     CVector         m_vecPosn;            // Bird position
     CVector         m_vecCurrentVelocity; // Velocity in the current frame
     CVector         m_vecTargetVelocity;  // Velocity (constant if the bird is not flying in circles)
     float           m_fAngle;             // Bird angle
-    unsigned int    m_nUpdateAfterMS;     // Always 0, if a value is written here, bird position isn't updated till CTimer::m_snTimeInMilliseconds is bigger than this value
-    unsigned int    m_nWingStillness;     // How still are the wings
+    uint32          m_nUpdateAfterMS;     // Always 0, if a value is written here, bird position isn't updated till CTimer::m_snTimeInMilliseconds is bigger than this value
+    uint32          m_nWingStillness;     // How still are the wings
     float           m_fSize;              // Bird size
     float           m_fMaxBirdDistance;   // When the bird is in this distance from the camera, it will disappear.
                                           // Used also in rendering process to determine the alpha level of the bird.
@@ -67,20 +65,18 @@ public:
     CBirdColor      m_WingsColor;         // Wing tips color
     bool            m_bCreated;           // This flags indicates if in this index there's a bird created
     bool            m_bMustDoCurves;      // If this flag is true the bird will fly in circles
-private:
-    char _pad41[3];
-public:
+    char            _pad41[3];
 };
 #pragma pack(pop)
 
 VALIDATE_SIZE(CBird, 0x44);
 
-class  CBirds {
+class CBirds {
 public:
-    static bool &bHasBirdBeenShot;
-    static unsigned int &uiNumberOfBirds;
-    static CBird *aBirds;
-    static CVector &vecBirdShotAt;
+    static bool& bHasBirdBeenShot;
+    static uint32& uiNumberOfBirds;
+    static CBird* aBirds;
+    static CVector& vecBirdShotAt;
 
     static float* faCreationCoorsX; // { 0.0f, -1.0f, 2.0f, -3.0f, 1.0f, -2.0f }                     These spawn in a formation like this:
     static float* faCreationCoorsY; // { 0.0f, -1.0f, -2.0f, 1.0f, 1.0f, -2.0f }                                                      4           5
@@ -89,11 +85,11 @@ public:
     static float* faRenderCoorsU;   // { 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.5f }                                                6           3
     static float* faRenderCoorsV;   // { 0.5f, 0.5f, 0.75f, 0.75f, 1.0f, 1.0f, 1.0f, 0.5f }
     static float* faRenderPosY;             // Size: 8
-    static unsigned int* auRenderIndices; // Size: 30
+    static uint32* auRenderIndices; // Size: 30
 
 
     static void Init();
-    static void CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int iBirdCount, eBirdsBiome eBiome, bool bCheckObstacles);
+    static void CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int32 iBirdCount, eBirdsBiome eBiome, bool bCheckObstacles);
     static void Shutdown();
     static void Update();
     static void Render();
@@ -102,4 +98,4 @@ public:
     static void InjectHooks();
 };
 
-constexpr int32_t MAX_BIRDS = 6; // default: 6
+constexpr int32 MAX_BIRDS = 6; // default: 6

@@ -6,14 +6,13 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "RenderWare.h"
 
-class  CSprite
-{
+class CSprite {
 public:
-	static void RenderOneXLUSprite(float x, float y, float z, float halfWidth, float halfHeight, 
-		unsigned char red, unsigned char green, unsigned char blue, short alpha, float rhw, 
-		unsigned char intensity, unsigned char udir, unsigned char vdir);
-	static bool CalcScreenCoors(RwV3d const &posn, RwV3d *out, float *w, float *h, bool checkMaxVisible, bool checkMinVisible);
+    static void InitSpriteBuffer();
+
+    static void RenderOneXLUSprite(float x, float y, float z, float halfWidth, float halfHeight, uint8 red, uint8 green, uint8 blue, int16 alpha, float rhw, uint8 intensity,
+                                   uint8 udir, uint8 vdir);
+    static bool CalcScreenCoors(RwV3d const& posn, RwV3d* out, float* w, float* h, bool checkMaxVisible, bool checkMinVisible);
 };

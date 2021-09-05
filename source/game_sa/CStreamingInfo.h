@@ -24,29 +24,29 @@ enum eStreamingLoadState {
     LOADSTATE_FINISHING = 4
 };
 
-const std::uint32_t STREAMING_SECTOR_SIZE = 2048;
+const uint32 STREAMING_SECTOR_SIZE = 2048;
 
 class CStreamingInfo {
 public:
-    short m_nNextIndex; // ms_pArrayBase array index
-    short m_nPrevIndex; // ms_pArrayBase array index
-    short m_nNextIndexOnCd;
+    int16 m_nNextIndex; // ms_pArrayBase array index
+    int16 m_nPrevIndex; // ms_pArrayBase array index
+    int16 m_nNextIndexOnCd;
     union {
-        unsigned char m_nFlags; // see eStreamingFlags
+        uint8 m_nFlags; // see eStreamingFlags
         struct {
-            unsigned char bUnkn0x1 : 1;
-            unsigned char bGameRequired : 1;
-            unsigned char bMissionRequired : 1;
-            unsigned char bKeepInMemory : 1;
-            unsigned char bPriorityRequest : 1;
-            unsigned char bLoadingScene : 1;
+            uint8 bUnkn0x1 : 1;
+            uint8 bGameRequired : 1;
+            uint8 bMissionRequired : 1;
+            uint8 bKeepInMemory : 1;
+            uint8 bPriorityRequest : 1;
+            uint8 bLoadingScene : 1;
         };
     };
-    unsigned char m_nImgId;
-    unsigned int m_nCdPosn;
-    unsigned int m_nCdSize;     // number of blocks/sectors; m_nCdSize * STREAMING_BLOCK_SIZE = actual size in bytes
-    unsigned char m_nLoadState; // see eStreamingLoadState
-    char __pad[3];
+    uint8  m_nImgId;
+    uint32 m_nCdPosn;
+    uint32 m_nCdSize;    // number of blocks/sectors; m_nCdSize * STREAMING_BLOCK_SIZE = actual size in bytes
+    uint8  m_nLoadState; // see eStreamingLoadState
+    char   __pad[3];
 
     static CStreamingInfo*& ms_pArrayBase;
 
@@ -55,10 +55,10 @@ public:
 
     void Init();
     void AddToList(CStreamingInfo* listStart);
-    uint32_t GetCdPosn();
-    void SetCdPosnAndSize(uint32_t CdPosn, uint32_t CdSize);
-    bool GetCdPosnAndSize(uint32_t& CdPosn, uint32_t& CdSize);
-    uint32_t GetCdSize() { return m_nCdSize; }
+    uint32 GetCdPosn();
+    void SetCdPosnAndSize(uint32 CdPosn, uint32 CdSize);
+    bool GetCdPosnAndSize(uint32& CdPosn, uint32& CdSize);
+    uint32 GetCdSize() { return m_nCdSize; }
     CStreamingInfo* GetNext() { return m_nNextIndex == -1 ? nullptr : &ms_pArrayBase[m_nNextIndex]; }
     CStreamingInfo* GetPrev() { return m_nPrevIndex == -1 ? nullptr : &ms_pArrayBase[m_nPrevIndex]; }
     bool InList();

@@ -8,10 +8,10 @@
 
 class CGamma {
 public:
-    unsigned int field_0;
-    float field_4;
-    float field_8;
-    float field_C;
+    uint32 field_0;
+    float  field_4;
+    float  field_8;
+    float  field_C;
 
 public:
     static void InjectHooks();

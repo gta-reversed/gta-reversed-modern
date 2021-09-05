@@ -1,10 +1,10 @@
 #pragma once
+
 #include "CTaskComplexSequence.h"
 
-class CTaskSequences
-{
+class CTaskSequences {
 public:
-    static std::int32_t& ms_iActiveSequence;
+    static int32& ms_iActiveSequence;
     static CTaskComplexSequence* ms_taskSequence;
     static inline void AddTaskToActiveSequence(CTask* task)
     {

@@ -1,13 +1,13 @@
 #pragma once
+
 #include "CPed.h"
 
-class CAccident
-{
+class CAccident {
 public:
     CPed* m_pPed;
-    unsigned char m_bIsTreated;
-    unsigned char m_bIsRevived;
-    unsigned char _pad6[2];
+    uint8 m_bIsTreated;
+    uint8 m_bIsRevived;
+    uint8 _pad6[2];
 
     CAccident();
     bool IsFree();

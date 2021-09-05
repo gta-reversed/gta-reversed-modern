@@ -16,8 +16,8 @@ CTask* CPedGroupIntelligence::GetTaskScriptCommand(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x5F8690, CPedGroupIntelligence*, CPed*>(this, ped);
 }
 
-int CPedGroupIntelligence::SetGroupDecisionMakerType(int a2) {
-    return plugin::CallMethodAndReturn<int, 0x5F7340, CPedGroupIntelligence*, int>(this, a2);
+int32 CPedGroupIntelligence::SetGroupDecisionMakerType(int32 a2) {
+    return plugin::CallMethodAndReturn<int32, 0x5F7340, CPedGroupIntelligence*, int32>(this, a2);
 }
 
 void CPedGroupIntelligence::SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator) {

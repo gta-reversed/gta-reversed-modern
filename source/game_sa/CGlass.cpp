@@ -62,8 +62,8 @@ void CGlass::FindWindowSectorList(CPtrList& a1, float* a2, CEntity** a3, float a
 }
 
 // 0x71B620
-void CGlass::GeneratePanesForWindow(unsigned int a1, CVector a2, CVector a3, CVector a4, CVector a5, CVector a6, float a7, bool a8, bool a9, int a10, bool a11) {
-    plugin::Call<0x71B620, unsigned int, CVector, CVector, CVector, CVector, CVector, float, bool, bool, int, bool>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
+void CGlass::GeneratePanesForWindow(uint32 a1, CVector a2, CVector a3, CVector a4, CVector a5, CVector a6, float a7, bool a8, bool a9, int32 a10, bool a11) {
+    plugin::Call<0x71B620, uint32, CVector, CVector, CVector, CVector, CVector, float, bool, bool, int32, bool>(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
 }
 
 // 0x71CB70
@@ -97,8 +97,8 @@ void CGlass::WasGlassHitByBullet(CEntity* a1, CVector a2) {
 }
 
 // 0x71BC40
-void CGlass::WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, int bUnknown) {
-    return plugin::Call<0x71BC40, CEntity*, float, CVector, CVector, int>(pEntity, fDamageIntensity, vecMoveSpeed, vecPoint, bUnknown);
+void CGlass::WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, int32 bUnknown) {
+    return plugin::Call<0x71BC40, CEntity*, float, CVector, CVector, int32>(pEntity, fDamageIntensity, vecMoveSpeed, vecPoint, bUnknown);
 }
 
 // 0x71C1A0

@@ -7,7 +7,7 @@
 #pragma once
 
 struct tBikeHandlingData {
-    int m_nVehicleId;
+    int32 m_nVehicleId;
     float m_fLeanFwdCOM;
     float m_fLeanFwdForce;
     float m_fLeanBakCOM;

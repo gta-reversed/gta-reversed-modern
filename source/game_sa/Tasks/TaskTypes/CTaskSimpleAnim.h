@@ -6,11 +6,11 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CAnimBlendAssociation.h"
 
-class  CTaskSimpleAnim : public CTaskSimple {
+class CTaskSimpleAnim : public CTaskSimple {
 public:
     CTaskSimpleAnim(bool bHoldLastFrame);
     ~CTaskSimpleAnim();
@@ -19,20 +19,20 @@ public:
     CAnimBlendAssociation *m_pAnim;
     union
     {
-        unsigned char m_nFlags;
+        uint8 m_nFlags;
         struct
         {
-            unsigned char                        m_bIsFinished : 1;
-            unsigned char                        m_bDontInterrupt : 1;
-            unsigned char                        m_bHoldLastFrame : 1;
+            uint8                        m_bIsFinished : 1;
+            uint8                        m_bDontInterrupt : 1;
+            uint8                        m_bHoldLastFrame : 1;
 
             // These flags are used in CTaskSimpleRunAnim only
-            unsigned char                        m_bDontBlendOut : 1;
+            uint8                        m_bDontBlendOut : 1;
 
             // These flags are used in 	CTaskSimpleRunNamedAnim only
-            unsigned char                        m_bRunInSequence : 1;
-            unsigned char                        m_bOffsetAtEnd : 1;
-            unsigned char                        m_bOffsetAvailable : 1;
+            uint8                        m_bRunInSequence : 1;
+            uint8                        m_bOffsetAtEnd : 1;
+            uint8                        m_bOffsetAvailable : 1;
         };
     };
 private:

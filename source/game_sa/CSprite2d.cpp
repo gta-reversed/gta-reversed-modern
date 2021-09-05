@@ -8,8 +8,8 @@
 #include <GxtChar.h>
 
 // static variables
-int& CSprite2d::nextBufferIndex = *reinterpret_cast<int*>(0xC80458);
-int& CSprite2d::nextBufferVertex = *reinterpret_cast<int*>(0xC8045C);
+int32& CSprite2d::nextBufferIndex = *reinterpret_cast<int32*>(0xC80458);
+int32& CSprite2d::nextBufferVertex = *reinterpret_cast<int32*>(0xC8045C);
 float& CSprite2d::NearScreenZ = *reinterpret_cast<float*>(0xC80460);
 float& CSprite2d::RecipNearClip = *reinterpret_cast<float*>(0xC80464);
 RwD3D9Vertex* CSprite2d::maVertices = reinterpret_cast<RwD3D9Vertex*>(0xC80468);
@@ -41,8 +41,8 @@ void CSprite2d::InjectHooks()
         const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::SetVertices));
     ReversibleHooks::Install("CSprite2d", "SetVertices_CRectCRGBA4ffffffff", 0x727710, static_cast<void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&,
         float, float, float, float, float, float, float, float)>(&CSprite2d::SetVertices));
-    ReversibleHooks::Install("CSprite2d", "SetVertices_iffCRGBA", 0x727890, static_cast<void(*)(int, float*, float*, const CRGBA&)>(&CSprite2d::SetVertices));
-    ReversibleHooks::Install("CSprite2d", "SetVertices_ifCRGBA", 0x727920, static_cast<void(*)(int, float*, CRGBA*)>(&CSprite2d::SetVertices));
+    ReversibleHooks::Install("CSprite2d", "SetVertices_iffCRGBA", 0x727890, static_cast<void(*)(int32, float*, float*, const CRGBA&)>(&CSprite2d::SetVertices));
+    ReversibleHooks::Install("CSprite2d", "SetVertices_ifCRGBA", 0x727920, static_cast<void(*)(int32, float*, CRGBA*)>(&CSprite2d::SetVertices));
     ReversibleHooks::Install("CSprite2d", "SetMaskVertices", 0x7279B0, &CSprite2d::SetMaskVertices);
     ReversibleHooks::Install("CSprite2d", "SetVertices_RwD3D9Vertex", 0x727A00, static_cast<void(*)(RwD3D9Vertex*, const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&,
         float, float, float, float, float, float, float, float)>(&CSprite2d::SetVertices));
@@ -256,9 +256,9 @@ void CSprite2d::SetVertices(const CRect& posn, const CRGBA& color1, const CRGBA&
     SetVertices(maVertices, posn, color1, color2, color3, color4, u1, v1, u2, v2, u3, v3, u4, v4);
 }
 
-void CSprite2d::SetVertices(int numVerts, float* posn, float* texCoors, const CRGBA& color)
+void CSprite2d::SetVertices(int32 numVerts, float* posn, float* texCoors, const CRGBA& color)
 {
-    for (int i = 0; i < numVerts; ++i) {
+    for (int32 i = 0; i < numVerts; ++i) {
         RwIm2DVertexSetScreenX(&maVertices[i], posn[i * 2]);
         RwIm2DVertexSetScreenY(&maVertices[i], posn[i * 2 + 1]);
         RwIm2DVertexSetScreenZ(&maVertices[i], NearScreenZ + 0.0001f);
@@ -269,9 +269,9 @@ void CSprite2d::SetVertices(int numVerts, float* posn, float* texCoors, const CR
     }
 }
 
-void CSprite2d::SetVertices(int numVerts, float* posn, CRGBA* color)
+void CSprite2d::SetVertices(int32 numVerts, float* posn, CRGBA* color)
 {
-    for (int i = 0; i < numVerts; ++i) {
+    for (int32 i = 0; i < numVerts; ++i) {
         RwIm2DVertexSetScreenX(&maVertices[i], posn[i * 2]);
         RwIm2DVertexSetScreenY(&maVertices[i], posn[i * 2 + 1]);
         RwIm2DVertexSetScreenZ(&maVertices[i], NearScreenZ);
@@ -282,9 +282,9 @@ void CSprite2d::SetVertices(int numVerts, float* posn, CRGBA* color)
     }
 }
 
-void CSprite2d::SetMaskVertices(int numVerts, float* posn, float depth)
+void CSprite2d::SetMaskVertices(int32 numVerts, float* posn, float depth)
 {
-    for (int i = 0; i < numVerts; ++i) {
+    for (int32 i = 0; i < numVerts; ++i) {
         RwIm2DVertexSetScreenX(&maVertices[i], posn[i * 2]);
         RwIm2DVertexSetScreenY(&maVertices[i], posn[i * 2 + 1]);
         RwIm2DVertexSetScreenZ(&maVertices[i], depth);
@@ -379,9 +379,9 @@ void CSprite2d::DrawAnyRect(float x1, float y1, float x2, float y2, float x3, fl
 }
 
 // draws a triangle with rotation (degrees)
-void CSprite2d::DrawCircleAtNearClip(const CVector2D& posn, float size, const CRGBA& color, int angle)
+void CSprite2d::DrawCircleAtNearClip(const CVector2D& posn, float size, const CRGBA& color, int32 angle)
 {
-    ((void(__cdecl*)(const CVector2D&, float, const CRGBA&, int))0x727D60)(posn, size, color, angle);
+    ((void(__cdecl*)(const CVector2D&, float, const CRGBA&, int32))0x727D60)(posn, size, color, angle);
     
     /* NOT TESTED
     RwIm2DVertexSetScreenX(&maVertices[0], posn.x);
@@ -397,10 +397,10 @@ void CSprite2d::DrawCircleAtNearClip(const CVector2D& posn, float size, const CR
 
     float posna = 360.f / static_cast<float>(angle);
     float step = posna * DegreesToRadians(1.f) * (256.f / DegreesToRadians(360.f)); // posna * 35 / 45
-    for (int i = 0; i < angle; ++i)
+    for (int32 i = 0; i < angle; ++i)
     {
-        for (int l = 1; l <= 2; ++l) {
-            unsigned char idx = static_cast<unsigned char>(static_cast<float>(i + l - 1) * step);
+        for (int32 l = 1; l <= 2; ++l) {
+            uint8 idx = static_cast<uint8>(static_cast<float>(i + l - 1) * step);
             RwIm2DVertexSetScreenX(&maVertices[l], size * CMaths::ms_SinTable[idx + 64] + posn.x);
             RwIm2DVertexSetScreenY(&maVertices[l], size * CMaths::ms_SinTable[idx] + posn.y);
             RwIm2DVertexSetScreenZ(&maVertices[l], NearScreenZ);
@@ -441,8 +441,8 @@ void CSprite2d::Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, 
 // | +++++++++++--------|
 // ----------------------
 // 0x728640
-void CSprite2d::DrawBarChart(float x, float y, unsigned short width, unsigned char height, float progress,
-    signed char progressAdd, unsigned char drawPercentage, unsigned char drawBlackBorder,
+void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float progress,
+    int8 progressAdd, uint8 drawPercentage, uint8 drawBlackBorder,
     CRGBA color, CRGBA addColor)
 {
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)nullptr);
@@ -509,10 +509,10 @@ void CSprite2d::DrawBarChart(float x, float y, unsigned short width, unsigned ch
         CFont::SetRightJustifyWrap(endX);
         CFont::SetColor({ 0, 0, 0, color.a });
         CFont::SetEdge(0);
-        CFont::SetFontStyle(FONT_SUBTITLES);
+        CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
         CFont::SetScale(height * 0.03f, height / 0.04f);
 
-        auto textX = (uint16_t)unclampedCurrX;
+        auto textX = (uint16)unclampedCurrX;
         if (x + 50.0f <= (float)textX) {
             CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
         }

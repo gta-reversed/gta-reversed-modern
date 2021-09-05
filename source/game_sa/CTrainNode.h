@@ -6,29 +6,29 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVector.h"
 
 class CTrainNode {
 public:
-    short x;
-    short y;
-    short z;
-    unsigned short m_nDistanceFromStart;
-    bool m_nSurfaceLighting;
-    bool m_bSurfLightingFound;
+    int16  x;
+    int16  y;
+    int16  z;
+    uint16 m_nDistanceFromStart;
+    bool   m_nSurfaceLighting;
+    bool   m_bSurfLightingFound;
 
     CTrainNode();
-    void SetX(float X);
-    void SetY(float Y);
-    void SetZ(float Z);
-    float GetX();
-    float GetY();
-    float GetZ();
+
+    void    SetX(float X);
+    void    SetY(float Y);
+    void    SetZ(float Z);
+    float   GetX();
+    float   GetY();
+    float   GetZ();
     CVector GetPosn();
-    void SetDistanceFromStart(float dist);
-    float GetDistanceFromStart();
-    unsigned char GetLightingFromCollision();
+    void    SetDistanceFromStart(float dist);
+    float   GetDistanceFromStart();
+    uint8   GetLightingFromCollision();
 };
 
 VALIDATE_SIZE(CTrainNode, 0xA);

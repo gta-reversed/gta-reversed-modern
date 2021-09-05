@@ -6,19 +6,19 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CEvent.h"
 
 class CPed;
 
-const std::int32_t TOTAL_EVENTS_PER_EVENTGROUP = 16;
+const int32 TOTAL_EVENTS_PER_EVENTGROUP = 16;
 
 class CEventGroup {
 public:
-    CPed *m_pPed;
-    std::int32_t m_count;
-    CEvent *m_events[TOTAL_EVENTS_PER_EVENTGROUP];
+    CPed*   m_pPed;
+    int32   m_count;
+    CEvent* m_events[TOTAL_EVENTS_PER_EVENTGROUP];
 
+public:
     static void InjectHooks();
 
     CEventGroup(CPed* ped);

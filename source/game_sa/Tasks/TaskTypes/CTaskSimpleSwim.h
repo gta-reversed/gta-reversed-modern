@@ -10,7 +10,7 @@ Do not delete this comment block. Respect others' work!
 #include "CVector.h"
 #include "FxSystem_c.h"
 
-enum eSwimState : unsigned short {
+enum eSwimState : uint16 {
     SWIM_TREAD = 0,
     SWIM_SPRINT = 1,
     SWIM_SPRINTING = 2,
@@ -22,7 +22,7 @@ enum eSwimState : unsigned short {
 class CPed;
 class CPlayerPed;
 
-class  CTaskSimpleSwim : public CTaskSimple {
+class CTaskSimpleSwim : public CTaskSimple {
 public:
     bool        m_bFinishedBlending;
     bool        m_bAnimBlockRefAdded;
@@ -39,11 +39,11 @@ public:
     CEntity*    m_pEntity;
     CVector     m_pClimbPos;
     float       m_fAngle;
-    unsigned char m_nSurfaceType;
+    uint8 m_nSurfaceType;
     char        _pad[3];
     float       m_fRandomMoveBlendRatio; // Used in CTaskSimpleSwim::ProcessControlAI
     float       m_fSwimStopTime;
-    unsigned int m_nTimeStep;
+    uint32 m_nTimeStep;
     FxSystem_c *m_pFxSystem; 
     bool m_bTriggerWaterSplash;
     char pad2[3];

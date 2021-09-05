@@ -58,7 +58,14 @@ target_include_directories(gta_reversed PRIVATE
     source/game_sa/
     source/game_sa/Debug/
     source/game_sa/Animation/
+
     source/game_sa/Audio/
+    source/game_sa/Audio/Entities
+    source/game_sa/Audio/Hardware
+    source/game_sa/Audio/Loaders
+    source/game_sa/Audio/Managers
+    source/game_sa/Audio/Utility
+
     source/game_sa/Collision/
     source/game_sa/Core/
     source/game_sa/Entity/

@@ -8,7 +8,7 @@ Do not delete this comment block. Respect others' work!
 */
 #include "CTaskComplex.h"
 
-enum eComplexJumpType : unsigned int
+enum eComplexJumpType : uint32
 {
     COMPLEX_JUMP_TYPE_JUMP = 0,
     COMPLEX_JUMP_TYPE_CLIMB = 1

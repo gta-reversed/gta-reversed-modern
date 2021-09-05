@@ -25,8 +25,8 @@ void CAccidentManager::ReportAccident(CPed* ped)
 {
     if (!ped->IsCreatedBy(PED_MISSION) && ped->bAllowMedicsToReviveMe)
     {
-        int slotIndex = -1;
-        for (int i = 0; i < NUM_ACCIDENTS; i++)
+        int32 slotIndex = -1;
+        for (int32 i = 0; i < NUM_ACCIDENTS; i++)
         {
             if (m_Accidents[i].m_pPed == ped)
                 return;
@@ -46,9 +46,9 @@ void CAccidentManager::ReportAccident(CPed* ped)
 }
 
 // 0x56CEE0
-int CAccidentManager::GetNumberOfFreeAccidents()
+int32 CAccidentManager::GetNumberOfFreeAccidents()
 {
-    int count = 0;
+    int32 count = 0;
 
     for (auto& acc : m_Accidents)
         if (acc.IsFree())

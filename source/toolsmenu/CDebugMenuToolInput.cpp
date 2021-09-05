@@ -2,7 +2,7 @@
 #include <sstream>
 #include "CDebugMenuToolInput.h"
 
-void CDebugMenuToolInput::Initialise(std::int32_t inputBufferCapacity, ToolMap* OriginalMap)
+void CDebugMenuToolInput::Initialise(int32 inputBufferCapacity, ToolMap* OriginalMap)
 {
     m_inputBuffer.reserve(inputBufferCapacity);
     m_originalGristListMap = OriginalMap;
@@ -28,7 +28,7 @@ void CDebugMenuToolInput::Process()
         }
         else {
             m_gristListMap.clear();
-            std::int32_t id = 0;
+            int32 id = 0;
             std::stringstream sstream(m_inputBuffer);
             sstream >> id;
             bool checkWithID = !sstream.fail();

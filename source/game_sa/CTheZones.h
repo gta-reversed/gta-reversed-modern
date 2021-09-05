@@ -20,19 +20,19 @@ public:
     static char* ZonesVisited;
 
     // Number of explored territories
-    static int& ZonesRevealed;
+    static int32& ZonesRevealed;
 
     // Info zones
-    static short& TotalNumberOfNavigationZones;
+    static int16& TotalNumberOfNavigationZones;
     // Count: 380
     static CZone* NavigationZoneArray;
 
     // Map zones
-    static short& TotalNumberOfMapZones;
+    static int16& TotalNumberOfMapZones;
     // Count: 39
     static CZone* MapZoneArray;
 
-    static short& TotalNumberOfZoneInfos;
+    static int16& TotalNumberOfZoneInfos;
 
     static CZoneInfo* ZoneInfoArray;
 
@@ -44,7 +44,7 @@ public:
 
     static void ResetZonesRevealed();
 
-    static void AssignZoneInfoForThisZone(short index);
+    static void AssignZoneInfoForThisZone(int16 index);
 
     static bool ZoneIsEntirelyContainedWithinOtherZone(CZone* pZone1, CZone* pZone2);
 
@@ -64,10 +64,10 @@ public:
     static void FillZonesWithGangColours(bool DisableRadarGangColors);
 
     // Returns pointer to zone by index
-    static CZone* GetNavigationZone(unsigned short index);
+    static CZone* GetNavigationZone(uint16 index);
 
     // Returns pointer to zone by index
-    static CZone* GetMapZone(unsigned short index);
+    static CZone* GetMapZone(uint16 index);
 
     static long double Calc2DDistanceBetween2Zones(CZone* Zone1, CZone* Zone2);
 
@@ -82,12 +82,12 @@ public:
     static void CreateZone(const char* name, eZoneType type, float posX1, float posY1, float posZ1, float posX2, float posY2, float posZ2, eLevelName island, const char* GXT_key);
 
     // Returns 1 if point within the specified zonename otherwise return 0
-    static bool FindZone(CVector* point, int zonename_part1, int zonename_part2, eZoneType type);
+    static bool FindZone(CVector* point, int32 zonename_part1, int32 zonename_part2, eZoneType type);
 
     // Returns pointer to zone by index
-    static short FindZoneByLabel(const char* name, eZoneType type);
+    static int16 FindZoneByLabel(const char* name, eZoneType type);
 
-    static void SetZoneRadarColours(short index, char flag, unsigned char red, unsigned char green, unsigned char blue);
+    static void SetZoneRadarColours(int16 index, char flag, uint8 red, uint8 green, uint8 blue);
 
     // Updates CTheZones info
     static void Update();

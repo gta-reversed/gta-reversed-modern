@@ -12,8 +12,8 @@ void CDirectory::InjectHooks() {
     ReversibleHooks::Install("CDirectory", "ReadDirFile", 0x532350, &CDirectory::ReadDirFile); 
     ReversibleHooks::Install("CDirectory", "WriteDirFile", 0x532410, &CDirectory::WriteDirFile); 
     ReversibleHooks::Install("CDirectory", "FindItem", 0x532450, static_cast<DirectoryInfo*(CDirectory::*)(const char*)>(&CDirectory::FindItem)); 
-    ReversibleHooks::Install("CDirectory", "FindItem_ByName", 0x5324A0, static_cast<bool(CDirectory::*)(const char*, uint32_t&, uint32_t&)>(&CDirectory::FindItem)); 
-    ReversibleHooks::Install("CDirectory", "FindItem_ByHash", 0x5324D0, static_cast<bool(CDirectory::*)(uint32_t, uint32_t&, uint32_t&)>(&CDirectory::FindItem)); 
+    ReversibleHooks::Install("CDirectory", "FindItem_ByName", 0x5324A0, static_cast<bool(CDirectory::*)(const char*, uint32&, uint32&)>(&CDirectory::FindItem));
+    ReversibleHooks::Install("CDirectory", "FindItem_ByHash", 0x5324D0, static_cast<bool(CDirectory::*)(uint32, uint32&, uint32&)>(&CDirectory::FindItem));
 }
 
 // 0x532290
@@ -55,7 +55,7 @@ CDirectory* CDirectory::Destructor() {
 }
 
 // 0x5322F0
-void CDirectory::Init(int32_t capacity, DirectoryInfo* entries) {
+void CDirectory::Init(int32 capacity, DirectoryInfo* entries) {
     m_nCapacity = capacity;
     m_pEntries = entries;
     m_nNumEntries = 0;
@@ -79,7 +79,7 @@ void CDirectory::ReadDirFile(const char* filename) {
         byte unused[4];
         CFileMgr::Read(file, &unused, sizeof(unused));
     }
-    uint32_t nNumEntries{};
+    uint32 nNumEntries{};
     CFileMgr::Read(file, &nNumEntries, sizeof(nNumEntries));
 
     for (size_t i = 0; i < nNumEntries; i++) {
@@ -114,7 +114,7 @@ CDirectory::DirectoryInfo* CDirectory::FindItem(const char* itemName) {
 }
 
 // 0x5324A0
-bool CDirectory::FindItem(const char* name, uint32_t& outOffset, uint32_t& outStreamingSize) {
+bool CDirectory::FindItem(const char* name, uint32& outOffset, uint32& outStreamingSize) {
     if (DirectoryInfo* pInfo = FindItem(name)) {
         outOffset = pInfo->m_nOffset;
         outStreamingSize = pInfo->m_nStreamingSize;
@@ -124,7 +124,7 @@ bool CDirectory::FindItem(const char* name, uint32_t& outOffset, uint32_t& outSt
 }
 
 // 0x5324D0
-bool CDirectory::FindItem(uint32_t hashKey, uint32_t& outOffset, uint32_t& outStreamingSize) {
+bool CDirectory::FindItem(uint32 hashKey, uint32& outOffset, uint32& outStreamingSize) {
     if (m_nNumEntries <= 0)
         return false;
 

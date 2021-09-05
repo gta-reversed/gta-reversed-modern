@@ -6,19 +6,16 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-template <typename T>
-struct SArray /* : public std::vector<T> */ {
-    /* allocator<_Ty>*/ void *allocator; // MSVC 6.0 STL vector
-    /* iterator      */ T *_First;       //
-    /* iterator      */ T *_Last;        //
-    /* iterator      */ T *_End;         //
+template <typename T> struct SArray /* : public std::vector<T> */ {
+    /* allocator<_Ty>*/ void* allocator; // MSVC 6.0 STL vector
+    /* iterator      */ T*    _First;    //
+    /* iterator      */ T*    _Last;     //
+    /* iterator      */ T*    _End;      //
 private:
     SArray() {}
-    SArray(SArray const &) {}
+    SArray(SArray const&) {}
     ~SArray() {}
-    void operator=(SArray const &) {}
+    void operator=(SArray const&) {}
 };
 
-VALIDATE_SIZE(SArray<int>, 0x10);
+VALIDATE_SIZE(SArray<int32>, 0x10);

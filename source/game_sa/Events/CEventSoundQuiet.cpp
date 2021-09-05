@@ -7,7 +7,7 @@ void CEventSoundQuiet::InjectHooks()
     ReversibleHooks::Install("CEventSoundQuiet", "CloneEditable_Reversed", 0x5E0670, &CEventSoundQuiet::CloneEditable_Reversed);
 }
 
-CEventSoundQuiet::CEventSoundQuiet(CEntity* entity, float fLocalSoundLevel, std::uint32_t startTime, CVector& position)
+CEventSoundQuiet::CEventSoundQuiet(CEntity* entity, float fLocalSoundLevel, uint32 startTime, CVector& position)
 {
     m_fLocalSoundLevel = fLocalSoundLevel;
     m_startTimeInMs = startTime;
@@ -27,10 +27,10 @@ CEventSoundQuiet::~CEventSoundQuiet()
         m_entity->CleanUpOldReference(&m_entity);
 }
 
-CEventSoundQuiet* CEventSoundQuiet::Constructor(CEntity* entity, float fLocalSoundLevel, std::uint32_t startTime, CVector& position)
+CEventSoundQuiet* CEventSoundQuiet::Constructor(CEntity* entity, float fLocalSoundLevel, uint32 startTime, CVector& position)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventSoundQuiet*, 0x5E05B0, CEventSoundQuiet*, CEntity*, float, std::uint32_t, CVector&>
+    return plugin::CallMethodAndReturn<CEventSoundQuiet*, 0x5E05B0, CEventSoundQuiet*, CEntity*, float, uint32, CVector&>
         (this, entity, fLocalSoundLevel, startTime, position);
 #else
     this->CEventSoundQuiet::CEventSoundQuiet(entity, fLocalSoundLevel, startTime, position);

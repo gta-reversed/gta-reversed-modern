@@ -4,5 +4,5 @@
 class CTaskComplexCrossRoadLookAndAchieveHeading : public CTaskComplex
 {
 public:
-    CTaskComplexCrossRoadLookAndAchieveHeading* Constructor(unsigned int durationInMs, float fTargetHeading);
+    CTaskComplexCrossRoadLookAndAchieveHeading* Constructor(uint32 durationInMs, float fTargetHeading);
 };

@@ -6,23 +6,23 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CPed.h"
 
-class  CTaskUtilityLineUpPedWithCar
+class CTaskUtilityLineUpPedWithCar
 {
 public:
     CVector vecOffsets;
-    int field_C;
-    int m_nTime;
-    int field_14;
-    int field_18;
+    int32 field_C;
+    int32 m_nTime;
+    int32 field_14;
+    int32 field_18;
 
-    CTaskUtilityLineUpPedWithCar(CVector const& offsets, int nTime, int arg3, int arg4);
-    CVector* GetLocalPositionToOpenCarDoor(int unused, CVehicle* pVehicle, float arg3, CAnimBlendAssociation* pAnimBlendAssoc);
+    CTaskUtilityLineUpPedWithCar(CVector const& offsets, int32 nTime, int32 arg3, int32 arg4);
+    CVector* GetLocalPositionToOpenCarDoor(int32 unused, CVehicle* pVehicle, float arg3, CAnimBlendAssociation* pAnimBlendAssoc);
     void ProcessPed(CPed* pPed, CVehicle* pVehicle, CAnimBlendAssociation* pAnimBlendAssoc);
-    RwV3d* GetPositionToOpenCarDoor(int unused, CVehicle* pVehicle, float arg2, CAnimBlendAssociation* pAnimBlendAssoc);
+    RwV3d* GetPositionToOpenCarDoor(int32 unused, CVehicle* pVehicle, float arg2, CAnimBlendAssociation* pAnimBlendAssoc);
 };
 
 VALIDATE_SIZE(CTaskUtilityLineUpPedWithCar, 0x1C);

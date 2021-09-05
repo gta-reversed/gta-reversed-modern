@@ -6,37 +6,35 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CEntity.h"
 #include "FxSystem_c.h"
 
-class  CFire {
+class CFire {
 public:
     struct {
-        unsigned char bActive : 1;
-        unsigned char bCreatedByScript : 1;
-        unsigned char bMakesNoise : 1;
-        unsigned char bBeingExtinguished : 1;
-        unsigned char bFirstGeneration : 1;
+        uint8 bActive : 1;
+        uint8 bCreatedByScript : 1;
+        uint8 bMakesNoise : 1;
+        uint8 bBeingExtinguished : 1;
+        uint8 bFirstGeneration : 1;
     } m_nFlags;
-private:
-    char _pad0;
-public:
-    short m_nScriptReferenceIndex;
-    CVector m_vecPosition;
-    CEntity *m_pEntityTarget;
-    CEntity *m_pEntityCreator;
-    unsigned int m_nTimeToBurn;
-    float m_fStrength;
-    char m_nNumGenerationsAllowed;
-    unsigned char m_nRemovalDist;
-private:
-    char _pad1[2];
+    char     _pad0;
+    int16    m_nScriptReferenceIndex;
+    CVector  m_vecPosition;
+    CEntity* m_pEntityTarget;
+    CEntity* m_pEntityCreator;
+    uint32   m_nTimeToBurn;
+    float    m_fStrength;
+    char     m_nNumGenerationsAllowed;
+    uint8    m_nRemovalDist;
+    char     _pad1[2];
+
 public:
     FxSystem_c *m_pFxSystem;
 
     CFire();
     ~CFire();
+
     void Initialise();
     void CreateFxSysForStrength(RwV3d* point, RwMatrixTag* matrix);
     void Extinguish();

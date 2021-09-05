@@ -69,7 +69,7 @@ CEventStuckInAir* CEventStuckInAir::Constructor(CPed* ped)
 }
 
 // 0x4B1600
-int CEventStuckInAir::GetEventPriority() const
+int32 CEventStuckInAir::GetEventPriority() const
 {
     return CEventStuckInAir::GetEventPriority_Reversed();
 }
@@ -86,7 +86,7 @@ bool CEventStuckInAir::TakesPriorityOver(const CEvent& refEvent)
     return CEventStuckInAir::TakesPriorityOver_Reversed(refEvent);
 }
 
-int CEventStuckInAir::GetEventPriority_Reversed() const
+int32 CEventStuckInAir::GetEventPriority_Reversed() const
 {
     if (m_ped && m_ped->GetEventHandler().GetCurrentEventType() != EVENT_STUCK_IN_AIR && m_ped->GetEventGroup().m_count > 1)
         return 75;

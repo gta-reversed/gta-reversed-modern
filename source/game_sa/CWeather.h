@@ -7,10 +7,10 @@
 #pragma once
 
 #include "CVector.h"
-#include "CAEWeatherAudioEntity.h"
+#include "Audio/entities/CAEWeatherAudioEntity.h"
 #include "eWeatherType.h"
 
-enum eWeatherRegion : short {
+enum eWeatherRegion : int16 {
     WEATHER_REGION_DEFAULT = 0,
     WEATHER_REGION_LA = 1,
     WEATHER_REGION_SF = 2,
@@ -23,13 +23,13 @@ public:
     static float &TrafficLightsBrightness;
     static bool &bScriptsForceRain;
     static float &Earthquake;
-    static unsigned int &CurrentRainParticleStrength;
-    static unsigned int &LightningStartY; // only initialized (0), not used
-    static unsigned int &LightningStartX; // only initialized (0), not used
-    static int &LightningFlashLastChange;
-    static int &WhenToPlayLightningSound;
-    static unsigned int &LightningDuration;
-    static unsigned int &LightningStart; // frame number
+    static uint32 &CurrentRainParticleStrength;
+    static uint32 &LightningStartY; // only initialized (0), not used
+    static uint32 &LightningStartX; // only initialized (0), not used
+    static int32 &LightningFlashLastChange;
+    static int32 &WhenToPlayLightningSound;
+    static uint32 &LightningDuration;
+    static uint32 &LightningStart; // frame number
     static bool &LightningFlash;
     static bool &LightningBurst;
     static float &HeadLightsSpectrum;
@@ -53,7 +53,7 @@ public:
     static float &CloudCoverage;
     static float &WetRoads;
     static float &InterpolationValue;
-    static unsigned int &WeatherTypeInList;
+    static uint32 &WeatherTypeInList;
     static eWeatherRegion &WeatherRegion;
     static eWeatherType &ForcedWeatherType;
     static eWeatherType &NewWeatherType;
@@ -73,7 +73,7 @@ public:
     static const eWeatherType* FindWeatherTypesList();
     static void ForceWeather(eWeatherType weatherType);
     static void ForceWeatherNow(eWeatherType weatherType);
-    static bool ForecastWeather(eWeatherType weatherType, int numSteps);
+    static bool ForecastWeather(eWeatherType weatherType, int32 numSteps);
     static void ReleaseWeather();
     static void RenderRainStreaks();
     static void SetWeatherToAppropriateTypeNow();

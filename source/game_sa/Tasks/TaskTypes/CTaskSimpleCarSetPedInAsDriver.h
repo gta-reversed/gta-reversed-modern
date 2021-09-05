@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CVehicle.h"
 #include "CTaskUtilityLineUpPedWithCar.h"
@@ -21,8 +21,8 @@ public:
     CVehicle * m_pTargetVehicle;
     CTaskUtilityLineUpPedWithCar* m_pUtility;
     bool m_bWarpingInToCar;
-    unsigned char m_nDoorFlagsToClear;
-    unsigned char m_nNumGettingInToClear;
+    uint8 m_nDoorFlagsToClear;
+    uint8 m_nNumGettingInToClear;
 private:
     char _pad2[1];
 public:

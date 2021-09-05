@@ -6,7 +6,7 @@
 */
 #pragma once
 
-/*enum ePedModel : unsigned int
+/*enum ePedModel : uint32
 {
 	MODEL_NULL,
 	MODEL_MALE01	= 7,

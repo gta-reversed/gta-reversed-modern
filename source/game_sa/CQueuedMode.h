@@ -6,14 +6,12 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-class  CQueuedMode {
+class CQueuedMode {
 public:
-    unsigned short m_nMode;
-    float m_fDuration;
-    unsigned short m_nMinZoom;
-    unsigned short m_nMaxZoom;
+    uint16 m_nMode;
+    float  m_fDuration;
+    uint16 m_nMinZoom;
+    uint16 m_nMaxZoom;
 };
 
 VALIDATE_SIZE(CQueuedMode, 0xC);

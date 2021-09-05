@@ -11,5 +11,5 @@ public:
     ~CData();
 
     void Unload();
-    void Load(uint32 length, FILESTREAM file, uint32* offset, uint8_t nSkipBytes);
+    void Load(uint32 length, FILESTREAM file, uint32* offset, uint8 nSkipBytes);
 };

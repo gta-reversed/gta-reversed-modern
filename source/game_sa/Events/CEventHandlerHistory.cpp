@@ -61,10 +61,10 @@ void CEventHandlerHistory::Flush()
     ClearStoredActiveEvent();
 }
 
-std::int32_t CEventHandlerHistory::GetCurrentEventPriority()
+int32 CEventHandlerHistory::GetCurrentEventPriority()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<std::int32_t, 0x4B8C80, CEventHandlerHistory*>(this);
+    return plugin::CallMethodAndReturn<int32, 0x4B8C80, CEventHandlerHistory*>(this);
 #else
     if (m_tempEvent)
         return m_tempEvent->GetEventPriority();

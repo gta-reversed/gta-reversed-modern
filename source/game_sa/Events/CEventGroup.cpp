@@ -21,7 +21,7 @@ CEventGroup::CEventGroup(CPed* ped)
 {
     m_pPed = ped;
     m_count = 0;
-    for (std::int32_t i = 0; i < TOTAL_EVENTS_PER_EVENTGROUP; i++) {
+    for (int32 i = 0; i < TOTAL_EVENTS_PER_EVENTGROUP; i++) {
         m_events[i] = nullptr;
     }
 }
@@ -101,10 +101,10 @@ CEvent* CEventGroup::Add(CEvent* event, bool bValid)
 bool CEventGroup::HasScriptCommandOfTaskType(eTaskType taskId)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AB840, CEventGroup*, int>(this, taskId);
+    return plugin::CallMethodAndReturn<bool, 0x4AB840, CEventGroup*, int32>(this, taskId);
 #else
     if (m_count > 0) {
-        for (std::int32_t i = 0; i < m_count; i++) {
+        for (int32 i = 0; i < m_count; i++) {
             CEvent* event = m_events[i];
             if (event && event->GetEventType() == EVENT_SCRIPT_COMMAND) {
                 auto theEvent = static_cast<CEventScriptCommand*>(event);
@@ -124,7 +124,7 @@ bool CEventGroup::HasEventOfType(CEvent* event)
     return plugin::CallMethodAndReturn<bool, 0x4AB5E0, CEventGroup*, CEvent*>(this, event);
 #else
     if (m_count > 0) {
-        for (std::int32_t i = 0; i < m_count; i++) {
+        for (int32 i = 0; i < m_count; i++) {
             if (event->GetEventType() == m_events[i]->GetEventType())
                 return true;
         }
@@ -140,10 +140,10 @@ CEvent* CEventGroup::GetHighestPriorityEvent()
 #else
     CEvent* theEvent = nullptr;
     if (m_count > 0) {
-        std::int32_t highestPriority = -1;
-        for (std::int32_t i = 0; i < m_count; i++) {
+        int32 highestPriority = -1;
+        for (int32 i = 0; i < m_count; i++) {
             CEvent* event = m_events[i];
-            std::int32_t eventPriority = event->GetEventPriority();
+            int32 eventPriority = event->GetEventPriority();
             bool bIsPriorityGreater = false;
             if (event->GetEventType() == EVENT_SCRIPT_COMMAND) {
                 if (eventPriority > highestPriority)
@@ -169,7 +169,7 @@ void CEventGroup::TickEvents()
     plugin::CallMethod<0x4AB6D0, CEventGroup*>(this);
 #else
     if (m_count > 0) {
-        for (std::int32_t i = 0; i < m_count; i++) {
+        for (int32 i = 0; i < m_count; i++) {
             m_events[i]->m_nTimeActive++;
         }
     }
@@ -182,7 +182,7 @@ bool CEventGroup::HasEvent(CEvent* event)
     return plugin::CallMethodAndReturn<bool, 0x4AB6A0, CEventGroup*, CEvent*>(this, event);
 #else
     if (m_count > 0) {
-        for (std::int32_t i = 0; i < m_count; i++) {
+        for (int32 i = 0; i < m_count; i++) {
             if (event == m_events[i])
                 return true;
         }
@@ -197,7 +197,7 @@ void CEventGroup::Remove(CEvent* event)
     plugin::CallMethod<0x4AB5A0, CEventGroup*, CEvent*>(this, event);
 #else
     if (event && m_count > 0) {
-        for (std::int32_t i = 0; i < m_count; i++) {
+        for (int32 i = 0; i < m_count; i++) {
             if (event == m_events[i]) {
                 m_events[i] = nullptr;
                 delete event;
@@ -214,7 +214,7 @@ void CEventGroup::RemoveInvalidEvents(bool bRemoveNonScriptCommandEvents)
     plugin::CallMethod<0x4AB760, CEventGroup*, bool>(this, bRemoveNonScriptCommandEvents);
 #else
     if (m_count > 0) {
-        for (std::int32_t i = 0; i < m_count; i++) {
+        for (int32 i = 0; i < m_count; i++) {
             CEvent* event = m_events[i];
             if (event) {
                 if (!event->IsValid(m_pPed) || bRemoveNonScriptCommandEvents && event->GetEventType() != EVENT_SCRIPT_COMMAND) {
@@ -233,9 +233,9 @@ void CEventGroup::Reorganise()
     plugin::CallMethod<0x4AB700, CEventGroup*>(this);
 #else
     CEvent* theEvents[TOTAL_EVENTS_PER_EVENTGROUP];
-    std::int32_t eventCount = 0;
+    int32 eventCount = 0;
     if (m_count > 0) {
-        for (std::int32_t i = 0; i < m_count; i++) {
+        for (int32 i = 0; i < m_count; i++) {
             CEvent* event = m_events[i];
             if (event) {
                 theEvents[eventCount++] = event;
@@ -245,7 +245,7 @@ void CEventGroup::Reorganise()
     }
     m_count = eventCount;
     if (m_count > 0) {
-        for (std::int32_t i = 0; i < m_count; i++) {
+        for (int32 i = 0; i < m_count; i++) {
             m_events[i] = theEvents[i];
         }
     }
@@ -259,7 +259,7 @@ void CEventGroup::Flush(bool bAvoidFlushingTaskComplexBeInGroup)
 #else
     CEvent* eventScriptcommand = nullptr;
     if (bAvoidFlushingTaskComplexBeInGroup && m_count > 0) {
-        for (std::int32_t i = 0; i < m_count; i++) {
+        for (int32 i = 0; i < m_count; i++) {
             CEvent* event = m_events[i];
             if (event->GetEventType() == EVENT_SCRIPT_COMMAND) {
                 auto theEvent = static_cast<CEventScriptCommand*>(event);
@@ -272,7 +272,7 @@ void CEventGroup::Flush(bool bAvoidFlushingTaskComplexBeInGroup)
         }
     }
     if (m_count > 0) {
-        for (std::int32_t i = 0; i < m_count; i++) {
+        for (int32 i = 0; i < m_count; i++) {
             CEvent* event = m_events[i];
             if (event) {
                 delete event;

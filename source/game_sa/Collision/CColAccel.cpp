@@ -2,15 +2,15 @@
 
 CColAccelColBound*& CColAccel::m_colBounds = *(CColAccelColBound**)0xBC4090;
 IplDef*& CColAccel::m_iplDefs = *(IplDef**)0xBC4094;
-int32_t*& CColAccel::m_iSectionSize = *(int32_t**)0xBC4098;
-int32_t& CColAccel::m_iCachingColSize = *(int32_t*)0xBC409C;
+int32*& CColAccel::m_iSectionSize = *(int32**)0xBC4098;
+int32& CColAccel::m_iCachingColSize = *(int32*)0xBC409C;
 eColAccelState& CColAccel::m_iCacheState = *(eColAccelState*)0xBC40A0;
 CColAccelColEntry*& CColAccel::mp_caccColItems = *(CColAccelColEntry**)0xBC40A4;
-int32_t& CColAccel::m_iNumColItems = *(int32_t*)0xBC40A8;
+int32& CColAccel::m_iNumColItems = *(int32*)0xBC40A8;
 CColAccelIPLEntry*& CColAccel::mp_caccIPLItems = *(CColAccelIPLEntry**)0xBC40AC;
-int32_t& CColAccel::m_iNumIPLItems = *(int32_t*)0xBC40B0;
-int32_t& CColAccel::m_iNumSections = *(int32_t*)0xBC40B4;
-int32_t& CColAccel::m_iNumColBounds = *(int32_t*)0xBC40B8;
+int32& CColAccel::m_iNumIPLItems = *(int32*)0xBC40B0;
+int32& CColAccel::m_iNumSections = *(int32*)0xBC40B4;
+int32& CColAccel::m_iNumColBounds = *(int32*)0xBC40B8;
 char const* CColAccel::mp_cCacheName = *(char const**)0x8D0F84; // MODELS\CINFO.BIN
 
 void CColAccel::InjectHooks()
@@ -37,14 +37,14 @@ void CColAccel::endCache()
 {
     if (CColAccel::m_iCacheState == eColAccelState::COLACCEL_STARTED) {
         auto* pFile = CFileMgr::OpenFileForWriting(CColAccel::mp_cCacheName);
-        CFileMgr::Write(pFile, &CColAccel::m_iNumColItems, sizeof(int32_t));
+        CFileMgr::Write(pFile, &CColAccel::m_iNumColItems, sizeof(int32));
         CFileMgr::Write(pFile, CColAccel::mp_caccColItems, sizeof(CColAccelColEntry) * CColAccel::m_iNumColItems);
-        CFileMgr::Write(pFile, &CColAccel::m_iNumSections, sizeof(int32_t));
-        CFileMgr::Write(pFile, CColAccel::m_iSectionSize, sizeof(int32_t) * CColAccel::m_iNumSections);
+        CFileMgr::Write(pFile, &CColAccel::m_iNumSections, sizeof(int32));
+        CFileMgr::Write(pFile, CColAccel::m_iSectionSize, sizeof(int32) * CColAccel::m_iNumSections);
         CFileMgr::Write(pFile, CColAccel::m_iplDefs, sizeof(IplDef) * TOTAL_IPL_MODEL_IDS);
-        CFileMgr::Write(pFile, &CColAccel::m_iNumColBounds, sizeof(int32_t));
+        CFileMgr::Write(pFile, &CColAccel::m_iNumColBounds, sizeof(int32));
         CFileMgr::Write(pFile, CColAccel::m_colBounds, sizeof(CColAccelColBound) * CColAccel::m_iNumColBounds);
-        CFileMgr::Write(pFile, &CColAccel::m_iNumIPLItems, sizeof(int32_t));
+        CFileMgr::Write(pFile, &CColAccel::m_iNumIPLItems, sizeof(int32));
         CFileMgr::Write(pFile, CColAccel::mp_caccIPLItems, sizeof(CColAccelIPLEntry) * CColAccel::m_iNumIPLItems);
         CFileMgr::CloseFile(pFile);
     }
@@ -127,17 +127,17 @@ void CColAccel::getColDef(ColDef& colDef)
     ++CColAccel::m_iNumColBounds;
 }
 
-void CColAccel::setIplDef(int iplIndex, IplDef iplDef)
+void CColAccel::setIplDef(int32 iplIndex, IplDef iplDef)
 {
     CColAccel::m_iplDefs[iplIndex] = iplDef;
 }
 
-IplDef CColAccel::getIplDef(int iplIndex)
+IplDef CColAccel::getIplDef(int32 iplIndex)
 {
     return CColAccel::m_iplDefs[iplIndex];
 }
 
-void CColAccel::cacheIPLSection(CEntity** ppEntities, int entitiesCount)
+void CColAccel::cacheIPLSection(CEntity** ppEntities, int32 entitiesCount)
 {
     if (CColAccel::isCacheLoading())
     {
@@ -172,7 +172,7 @@ void CColAccel::cacheIPLSection(CEntity** ppEntities, int entitiesCount)
     }
 }
 
-void CColAccel::addIPLEntity(CEntity** ppEntities, int entitiesCount, int entityIndex)
+void CColAccel::addIPLEntity(CEntity** ppEntities, int32 entitiesCount, int32 entityIndex)
 {
     if (CColAccel::m_iCacheState != eColAccelState::COLACCEL_STARTED)
         return;
@@ -225,7 +225,7 @@ void CColAccel::addIPLEntity(CEntity** ppEntities, int entitiesCount, int entity
 void CColAccel::startCache()
 {
     CColAccel::m_iCachingColSize = CPools::ms_pColModelPool->GetSize();
-    CColAccel::m_iSectionSize = new int32_t[64];
+    CColAccel::m_iSectionSize = new int32[64];
     CColAccel::m_iplDefs = new IplDef[TOTAL_IPL_MODEL_IDS]();
     CColAccel::m_colBounds = new CColAccelColBound[TOTAL_IPL_MODEL_IDS]();
 }

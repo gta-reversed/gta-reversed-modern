@@ -10,13 +10,13 @@ public:
     AnimationId            m_nAnimId;
     AssocGroupId           m_nAnimGroup;
     CAnimBlendAssociation* m_pAnim;
-    int                    m_nTotalDownTime; // TODO: uint32?
-    uint32_t               m_nCurrentDownTime;
+    int32                    m_nTotalDownTime; // TODO: uint32?
+    uint32               m_nCurrentDownTime;
 
-    static unsigned int& m_nMaxPlayerDownTime;
+    static uint32& m_nMaxPlayerDownTime;
 
 public:
-    CTaskSimpleFall(AnimationId nAnimId, AssocGroupId nAnimGroup, int nDownTime);
+    CTaskSimpleFall(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime);
     ~CTaskSimpleFall() override;
 
     eTaskType GetId() override { return TASK_SIMPLE_FALL; }
@@ -35,7 +35,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskSimpleFall* Constructor(AnimationId nAnimId, AssocGroupId nAnimGroup, int nDownTime);
+    CTaskSimpleFall* Constructor(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime);
 };
 
 VALIDATE_SIZE(CTaskSimpleFall, 0x20);

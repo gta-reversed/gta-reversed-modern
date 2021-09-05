@@ -70,7 +70,7 @@ void CPedModelInfo::CreateHitColModelSkinned(RpClump* pClump)
 
     pColModel->AllocateData(12, 0, 0, 0, 0, false);
     RwMatrixInvert(CGame::m_pWorkingMatrix1, RwFrameGetMatrix(RpClumpGetFrame(pClump)));
-    for (int32_t i = 0; i < NUM_PED_COL_NODE_INFOS; ++i) {
+    for (int32 i = 0; i < NUM_PED_COL_NODE_INFOS; ++i) {
         auto& pSphere = pColModel->m_pColData->m_pSpheres[i];
         auto& pNodeInfo = CPedModelInfo::m_pColNodeInfos[i];
         memcpy(CGame::m_pWorkingMatrix2, CGame::m_pWorkingMatrix1, sizeof(RwMatrix));
@@ -103,7 +103,7 @@ CColModel* CPedModelInfo::AnimatePedColModelSkinned(RpClump* pClump)
 
     auto pHierarchy = GetAnimHierarchyFromSkinClump(pClump);
     RwMatrixInvert(CGame::m_pWorkingMatrix1, RwFrameGetMatrix(RpClumpGetFrame(pClump)));
-    for (int32_t i = 0; i < NUM_PED_COL_NODE_INFOS; ++i) {
+    for (int32 i = 0; i < NUM_PED_COL_NODE_INFOS; ++i) {
         auto& pSphere = m_pHitColModel->m_pColData->m_pSpheres[i];
         auto& pNodeInfo = CPedModelInfo::m_pColNodeInfos[i];
         memcpy(CGame::m_pWorkingMatrix2, CGame::m_pWorkingMatrix1, sizeof(RwMatrix));
@@ -136,7 +136,7 @@ CColModel* CPedModelInfo::AnimatePedColModelSkinnedWorld(RpClump* pClump)
         CPedModelInfo::CreateHitColModelSkinned(pClump);
 
     auto pHierarchy = GetAnimHierarchyFromSkinClump(pClump);
-    for (int32_t i = 0; i < NUM_PED_COL_NODE_INFOS; ++i) {
+    for (int32 i = 0; i < NUM_PED_COL_NODE_INFOS; ++i) {
         auto& pSphere = m_pHitColModel->m_pColData->m_pSpheres[i];
         auto& pNodeInfo = CPedModelInfo::m_pColNodeInfos[i];
 

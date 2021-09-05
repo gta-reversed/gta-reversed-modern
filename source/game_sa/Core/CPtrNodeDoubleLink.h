@@ -6,21 +6,19 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-class  CPtrNodeDoubleLink {
+class CPtrNodeDoubleLink {
 public:
-    void *pItem;
-    CPtrNodeDoubleLink *pNext;
-    CPtrNodeDoubleLink *pPrev;
+    void*               pItem;
+    CPtrNodeDoubleLink* pNext;
+    CPtrNodeDoubleLink* pPrev;
 
     inline CPtrNodeDoubleLink(void* item) { pItem = item; }
 
 public:
     static void InjectHooks();
 
-    static void* operator new(unsigned int size);
-    static void operator delete(void* ptr, size_t sz);
+    static void* operator new(uint32 size);
+    static void  operator delete(void* ptr, size_t sz);
 
     void AddToList(class CPtrListDoubleLink* list);
 };

@@ -196,7 +196,7 @@ void CCutsceneObject::RemoveLighting_Reversed(bool bRemove)
 void CCutsceneObject::SetupCarPipeAtomicsForClump(unsigned modelId, RpClump* pClump)
 {
     static bool bCarPipeAtomicsInitialized = false;
-    static uint32_t anHashKeys[NUM_CUTSCENE_VEHS];
+    static uint32 anHashKeys[NUM_CUTSCENE_VEHS];
 
     if (!bCarPipeAtomicsInitialized)
     {

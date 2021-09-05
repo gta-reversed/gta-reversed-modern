@@ -5,18 +5,17 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CDecision.h"
 #include "eDecisionMakerEvents.h"
 
-class CDecisionMaker
-{
+class CDecisionMaker {
 public:
     CDecision m_decision[DM_TOTAL_NUM_EVENTS];
 
     inline CDecisionMaker() { // @0x4650A0
-        for (unsigned int i = 0; i < DM_TOTAL_NUM_EVENTS; ++i) {
-            //m_decision[i].SetDefault();
+        for (uint32 i = 0; i < DM_TOTAL_NUM_EVENTS; ++i) {
+            // m_decision[i].SetDefault();
         }
     }
 };

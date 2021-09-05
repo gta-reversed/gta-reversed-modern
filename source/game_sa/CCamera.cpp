@@ -206,8 +206,8 @@ float CCamera::Find3rdPersonQuickAimPitch() {
 }
 
 // 0x50AD90
-unsigned int CCamera::GetCutSceneFinishTime() {
-    return plugin::CallMethodAndReturn<unsigned int, 0x50AD90, CCamera*>(this);
+uint32 CCamera::GetCutSceneFinishTime() {
+    return plugin::CallMethodAndReturn<uint32, 0x50AD90, CCamera*>(this);
 }
 
 // 0x50ADE0
@@ -217,7 +217,7 @@ bool CCamera::GetFading() {
 
 // TODO: eFadingDirection
 // 0x50ADF0
-int CCamera::GetFadingDirection() {
+int32 CCamera::GetFadingDirection() {
     if (m_bFading)
         return m_nFadeInOutFlag == 1;
     else
@@ -230,8 +230,8 @@ bool CCamera::Get_Just_Switched_Status() {
 }
 
 // 0x50AE20
-int CCamera::GetScreenFadeStatus() {
-    return plugin::CallMethodAndReturn<int, 0x50AE20, CCamera*>(this);
+int32 CCamera::GetScreenFadeStatus() {
+    return plugin::CallMethodAndReturn<int32, 0x50AE20, CCamera*>(this);
 }
 
 // 0x50AE50
@@ -255,7 +255,7 @@ bool CCamera::GetLookingForwardFirstPerson() {
 }
 
 // 0x50AF00
-void CCamera::GetArrPosForVehicleType(eVehicleType type, int* arrPos) {
+void CCamera::GetArrPosForVehicleType(eVehicleType type, int32* arrPos) {
     switch (type) {
     case VEHICLE_MTRUCK:
         *arrPos = 0;
@@ -362,7 +362,7 @@ void CCamera::SetCamPositionForFixedMode(CVector const* fixedModeSource, CVector
 }
 
 // 0x50BF00
-void CCamera::SetFadeColour(unsigned char red, unsigned char green, unsigned char blue) {
+void CCamera::SetFadeColour(uint8 red, uint8 green, uint8 blue) {
     m_bFadeTargetIsSplashScreen = false;
     if (red == 2 && green == 2 && blue == 2) {
         m_bFadeTargetIsSplashScreen = true;
@@ -375,7 +375,7 @@ void CCamera::SetFadeColour(unsigned char red, unsigned char green, unsigned cha
 
 // TODO: eBlurType
 // 0x50BF40
-void CCamera::SetMotionBlur(unsigned char red, unsigned char green, unsigned char blue, int value, unsigned int blurType) {
+void CCamera::SetMotionBlur(uint8 red, uint8 green, uint8 blue, int32 value, uint32 blurType) {
     m_nBlurRed = red;
     m_nBlurGreen = green;
     m_nBlurBlue = blue;
@@ -384,7 +384,7 @@ void CCamera::SetMotionBlur(unsigned char red, unsigned char green, unsigned cha
 }
 
 // 0x50BF80
-void CCamera::SetMotionBlurAlpha(int alpha) {
+void CCamera::SetMotionBlurAlpha(int32 alpha) {
     m_nMotionBlurAddAlpha = alpha;
 }
 
@@ -395,7 +395,7 @@ void CCamera::SetNearClipScript(float nearClip) {
 }
 
 // 0x50BFB0
-void CCamera::SetNewPlayerWeaponMode(short mode, short maxZoom, short minZoom) {
+void CCamera::SetNewPlayerWeaponMode(int16 mode, int16 maxZoom, int16 minZoom) {
     m_PlayerWeaponMode.m_nMode     = mode;
     m_PlayerWeaponMode.m_nMaxZoom  = maxZoom;
     m_PlayerWeaponMode.m_nMinZoom  = minZoom;
@@ -408,7 +408,7 @@ bool CCamera::Using1stPersonWeaponMode() {
 }
 
 // 0x50C030
-void CCamera::SetParametersForScriptInterpolation(float interpolationToStopMoving, float interpolationToCatchUp, unsigned int timeForInterpolation) {
+void CCamera::SetParametersForScriptInterpolation(float interpolationToStopMoving, float interpolationToCatchUp, uint32 timeForInterpolation) {
     m_nScriptTimeForInterpolation = timeForInterpolation;
     m_bScriptParametersSetForInterPol = true;
     m_fScriptPercentageInterToStopMoving = interpolationToStopMoving * 0.01f;
@@ -439,14 +439,14 @@ void CCamera::SetWideScreenOff() {
 
 // zoomMode : value between 0 - 2
 // 0x50C160
-void CCamera::SetZoomValueFollowPedScript(short zoomMode) {
-    return plugin::CallMethod<0x50C160, CCamera*, short>(this, zoomMode);
+void CCamera::SetZoomValueFollowPedScript(int16 zoomMode) {
+    return plugin::CallMethod<0x50C160, CCamera*, int16>(this, zoomMode);
 }
 
 // zoomMode : 0- ZOOM_ONE , 1- ZOOM_TWO , 2- ZOOM_THREE
 // 0x50C1B0
-void CCamera::SetZoomValueCamStringScript(short zoomMode) {
-    return plugin::CallMethod<0x50C1B0, CCamera*, short>(this, zoomMode);
+void CCamera::SetZoomValueCamStringScript(int16 zoomMode) {
+    return plugin::CallMethod<0x50C1B0, CCamera*, int16>(this, zoomMode);
 }
 
 // 0x50C260
@@ -490,18 +490,18 @@ void CCamera::UpdateTargetEntity() {
 }
 
 // 0x50C7C0
-void CCamera::TakeControl(CEntity* target, eCamMode modeToGoTo, eSwitchType switchType, int whoIsInControlOfTheCamera) {
-    plugin::CallMethod<0x50C7C0, CCamera*, CEntity*, eCamMode, eSwitchType, int>(this, target, modeToGoTo, switchType, whoIsInControlOfTheCamera);
+void CCamera::TakeControl(CEntity* target, eCamMode modeToGoTo, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
+    plugin::CallMethod<0x50C7C0, CCamera*, CEntity*, eCamMode, eSwitchType, int32>(this, target, modeToGoTo, switchType, whoIsInControlOfTheCamera);
 }
 
 // 0x50C8B0
-void CCamera::TakeControlNoEntity(CVector const* fixedModeVector, eSwitchType switchType, int whoIsInControlOfTheCamera) {
-    plugin::CallMethod<0x50C8B0, CCamera*, CVector const*, eSwitchType, int>(this, fixedModeVector, switchType, whoIsInControlOfTheCamera);
+void CCamera::TakeControlNoEntity(CVector const* fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
+    plugin::CallMethod<0x50C8B0, CCamera*, CVector const*, eSwitchType, int32>(this, fixedModeVector, switchType, whoIsInControlOfTheCamera);
 }
 
 // 0x50C910
-void CCamera::TakeControlAttachToEntity(CEntity* target, CEntity* attached, CVector* attachedCamOffset, CVector* attachedCamLookAt, float attachedCamAngle, eSwitchType switchType, int whoIsInControlOfTheCamera) {
-    plugin::CallMethod<0x50C910, CCamera*, CEntity*, CEntity*, CVector*, CVector*, float, eSwitchType, int>(this, target, attached, attachedCamOffset, attachedCamLookAt, attachedCamAngle, switchType, whoIsInControlOfTheCamera);
+void CCamera::TakeControlAttachToEntity(CEntity* target, CEntity* attached, CVector* attachedCamOffset, CVector* attachedCamLookAt, float attachedCamAngle, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
+    plugin::CallMethod<0x50C910, CCamera*, CEntity*, CEntity*, CVector*, CVector*, float, eSwitchType, int32>(this, target, attached, attachedCamOffset, attachedCamLookAt, attachedCamAngle, switchType, whoIsInControlOfTheCamera);
 }
 
 // 0x50CAE0
@@ -529,7 +529,7 @@ void CCamera::SetNearClipBasedOnPedCollision(float arg2) {
 
 // TODO: eAimingType
 // 0x50CBF0
-void CCamera::SetColVarsAimWeapon(int aimingType) {
+void CCamera::SetColVarsAimWeapon(int32 aimingType) {
     if (aimingType <= 3) {
         switch (aimingType) {
         case 0u:
@@ -551,8 +551,8 @@ void CCamera::SetColVarsAimWeapon(int aimingType) {
 }
 
 // 0x50CC50
-void CCamera::SetColVarsPed(ePedType pedType, int nCamPedZoom) {
-    plugin::Call<0x50CC50, ePedType, int>(pedType, nCamPedZoom);
+void CCamera::SetColVarsPed(ePedType pedType, int32 nCamPedZoom) {
+    plugin::Call<0x50CC50, ePedType, int32>(pedType, nCamPedZoom);
 }
 
 // 0x50CD30
@@ -628,8 +628,8 @@ void CCamera::VectorTrackLinear(CVector* trackLinearStartPoint, CVector* trackLi
 }
 
 // 0x50D240
-void CCamera::AddShakeSimple(float duration, int type, float intensity) {
-    plugin::CallMethod<0x50D240, CCamera*, float, int, float>(this, duration, type, intensity);
+void CCamera::AddShakeSimple(float duration, int32 type, float intensity) {
+    plugin::CallMethod<0x50D240, CCamera*, float, int32, float>(this, duration, type, intensity);
 }
 
 // 0x50D280
@@ -786,8 +786,8 @@ bool CCamera::ConeCastCollisionResolve(CVector* source, CVector* center, CVector
 }
 
 // 0x51E560
-bool CCamera::TryToStartNewCamMode(int camSequence) {
-    return plugin::CallMethodAndReturn<bool, 0x51E560, CCamera*, int>(this, camSequence);
+bool CCamera::TryToStartNewCamMode(int32 camSequence) {
+    return plugin::CallMethodAndReturn<bool, 0x51E560, CCamera*, int32>(this, camSequence);
 }
 
 // 0x520190
@@ -822,13 +822,13 @@ void CCamera::Enable1rstPersonWeaponsCamera() {
 }
 
 // 0x50CB60
-void CCamera::SetCamCollisionVarDataSet(int index) {
-    plugin::Call<0x50CB60, int>(index);
+void CCamera::SetCamCollisionVarDataSet(int32 index) {
+    plugin::Call<0x50CB60, int32>(index);
 }
 
 // 0x50CCA0
-void CCamera::SetColVarsVehicle(eVehicleType vehicleType, int camVehicleZoom) {
-    plugin::Call<0x50CCA0, eVehicleType, int>(vehicleType, camVehicleZoom);
+void CCamera::SetColVarsVehicle(eVehicleType vehicleType, int32 camVehicleZoom) {
+    plugin::Call<0x50CCA0, eVehicleType, int32>(vehicleType, camVehicleZoom);
 }
 
 // 0x50A970

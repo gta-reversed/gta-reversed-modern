@@ -54,12 +54,12 @@ void CMemoryMgr::ReleaseScratchPad()
     // Empty body
 }
 
-std::uint8_t *CMemoryMgr::MallocAlign(size_t size, uintptr_t align)
+uint8 *CMemoryMgr::MallocAlign(size_t size, uintptr_t align)
 {
 #if defined(USE_GTASA_ALLOCATOR) || defined(USE_DEFAULT_FUNCTIONS)
-    return plugin::CallAndReturn<std::uint8_t*, 0x72F4C0, size_t, uintptr_t>(size, align);
+    return plugin::CallAndReturn<uint8*, 0x72F4C0, size_t, uintptr_t>(size, align);
 #else
-    std::uint8_t *ptr = (std::uint8_t *) malloc(size + align)
+    uint8 *ptr = (uint8 *) malloc(size + align)
     if (ptr == nullptr)
         return nullptr;
 

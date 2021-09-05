@@ -6,9 +6,7 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-enum  eWeaponFlags : unsigned int {
+enum eWeaponFlags : uint32 {
     WEAPON_CANAIM = 0x1,
     WEAPON_AIMWITHARM = 0x2,
     WEAPON_1STPERSON = 0x4,

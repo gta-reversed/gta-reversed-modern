@@ -19,8 +19,8 @@ void CQuadBike::InjectHooks() {
 }
 
 // 0x6CE370
-CQuadBike::CQuadBike(int modelIndex, eVehicleCreatedBy createdBy) :CAutomobile(plugin::dummy) {
-    plugin::CallMethod<0x6CE370, CQuadBike*, int, eVehicleCreatedBy>(this, modelIndex, createdBy);
+CQuadBike::CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy) :CAutomobile(plugin::dummy) {
+    plugin::CallMethod<0x6CE370, CQuadBike*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
 
 // 0x6CDC30
@@ -56,12 +56,12 @@ void CQuadBike::PreRender_Reversed() {
 }
 
 // 0x6CE460
-bool CQuadBike::ProcessAI(unsigned int& extraHandlingFlags) {
+bool CQuadBike::ProcessAI(uint32& extraHandlingFlags) {
     return ProcessAI_Reversed(extraHandlingFlags);
 }
 
-bool CQuadBike::ProcessAI_Reversed(unsigned int& extraHandlingFlags) {
-    return plugin::CallMethodAndReturn<bool, 0x6CE460, CQuadBike*, unsigned int>(this, extraHandlingFlags);
+bool CQuadBike::ProcessAI_Reversed(uint32& extraHandlingFlags) {
+    return plugin::CallMethodAndReturn<bool, 0x6CE460, CQuadBike*, uint32>(this, extraHandlingFlags);
 }
 
 // 0x6CDCC0
@@ -74,21 +74,21 @@ void CQuadBike::ProcessControl_Reversed() {
 }
 
 // 0x6CE020
-void CQuadBike::ProcessControlInputs(unsigned char playerNum) {
+void CQuadBike::ProcessControlInputs(uint8 playerNum) {
     ProcessControlInputs_Reversed(playerNum);
 }
 
-void CQuadBike::ProcessControlInputs_Reversed(unsigned char playerNum) {
-    plugin::CallMethod<0x6CE020, CQuadBike*, unsigned char>(this, playerNum);
+void CQuadBike::ProcessControlInputs_Reversed(uint8 playerNum) {
+    plugin::CallMethod<0x6CE020, CQuadBike*, uint8>(this, playerNum);
 }
 
 // 0x6CE280
-void CQuadBike::ProcessDrivingAnims(CPed* driver, unsigned char bBlend) {
+void CQuadBike::ProcessDrivingAnims(CPed* driver, uint8 bBlend) {
     ProcessDrivingAnims_Reversed(driver, bBlend);
 }
 
-void CQuadBike::ProcessDrivingAnims_Reversed(CPed* driver, unsigned char bBlend) {
-    plugin::CallMethod<0x6CE280, CQuadBike*, CPed*, unsigned char>(this, driver, bBlend);
+void CQuadBike::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend) {
+    plugin::CallMethod<0x6CE280, CQuadBike*, CPed*, uint8>(this, driver, bBlend);
 }
 
 // 0x6CE270

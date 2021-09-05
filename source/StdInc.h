@@ -19,6 +19,7 @@
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
+#include "Base.h"
 #include "game_sa\constants.h"
 #include "game_sa\CConversations.h"
 #include "game_sa\CPlantMgr.h"
@@ -326,20 +327,7 @@
 #include "game_sa\Animation\CAnimBlock.h"
 #include "game_sa\Animation\CAnimManager.h"
 #include "game_sa\Audio\CAudioEngine.h"
-#include "game_sa\Audio\CAEAudioEntity.h"
-#include "game_sa\Audio\CAEDoorAudioEntity.h"
-#include "game_sa\Audio\CAEExplosionAudioEntity.h"
-#include "game_sa\Audio\CAEFireAudioEntity.h"
-#include "game_sa\Audio\CAEPedAudioEntity.h"
-#include "game_sa\Audio\CAEPedSpeechAudioEntity.h"
-#include "game_sa\Audio\CAEPoliceScannerAudioEntity.h"
-#include "game_sa\Audio\CAERadioTrackManager.h"
 #include "game_sa\Audio\CAESound.h"
-#include "game_sa\Audio\CAETwinLoopSoundEntity.h"
-#include "game_sa\Audio\CAEVehicleAudioEntity.h"
-#include "game_sa\Audio\CAEWeaponAudioEntity.h"
-#include "game_sa\Audio\CAEWeatherAudioEntity.h"
-#include "game_sa\Audio\CAEPedSpeechAudioEntity.h"
 #include "game_sa\Audio\CAudioZones.h"
 #include "game_sa\Collision\CCollisionEventScanner.h"
 #include "game_sa\Collision\CBoundingBox.h"

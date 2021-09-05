@@ -24,7 +24,7 @@ public:
     CEvent* GetCurrentEvent() {
         return m_tempEvent ? m_tempEvent : m_nonTempEvent;
     };
-    int32_t GetCurrentEventPriority();
+    int32 GetCurrentEventPriority();
     CEvent* GetStoredActiveEvent() {
         return m_storedActiveEvent;
     }

@@ -17,8 +17,8 @@
 #include "CAEWMADecoder.h"
 #include "CAEStreamingDecoder.h"
 #include "CAEUserRadioTrackManager.h"
-#include "CAEWaterCannonAudioEntity.h"
-#include "CAEDoorAudioEntity.h"
+#include "Audio/entities/CAEWaterCannonAudioEntity.h"
+#include "Audio/entities/CAEDoorAudioEntity.h"
 
 #include "CDebugMenu.h"
 
@@ -38,6 +38,8 @@ void InjectHooksMain()
 {
     // WaitForDebugger();
 
+    Fx_c::InjectHooks();
+    CBrightLights::InjectHooks();
     CShinyTexts::InjectHooks();
     COnscreenCounterEntry::InjectHooks();
     CPedTaskPair::InjectHooks();
@@ -371,4 +373,7 @@ void InjectHooksMain()
     CAEWaterCannonAudioEntity::InjectHooks();
     CAETwinLoopSoundEntity::InjectHooks();
     CAEDoorAudioEntity::InjectHooks();
+
+    FxManager_c::InjectHooks();
+    FxSystemBP_c::InjectHooks();
 }

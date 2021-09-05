@@ -16,12 +16,12 @@ bool CCustomCarPlateMgr::Shutdown() {
 }
 
 
-bool CCustomCarPlateMgr::GeneratePlateText(char* plateTextBuf, int length)
+bool CCustomCarPlateMgr::GeneratePlateText(char* plateTextBuf, int32 length)
 {
-    return plugin::CallAndReturn<bool, 0x6FD5B0, char*, int>(plateTextBuf, length);
+    return plugin::CallAndReturn<bool, 0x6FD5B0, char*, int32>(plateTextBuf, length);
 }
 
-RpMaterial* CCustomCarPlateMgr::SetupClump(RpClump* clump, char* plateText, unsigned char plateType)
+RpMaterial* CCustomCarPlateMgr::SetupClump(RpClump* clump, char* plateText, uint8 plateType)
 {
-    return plugin::CallAndReturn<RpMaterial*, 0x6FE0F0, RpClump*, char*, unsigned char>(clump, plateText, plateType);
+    return plugin::CallAndReturn<RpMaterial*, 0x6FE0F0, RpClump*, char*, uint8>(clump, plateText, plateType);
 }

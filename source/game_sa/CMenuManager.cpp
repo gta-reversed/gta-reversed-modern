@@ -11,7 +11,7 @@ CMenuManager& FrontEndMenuManager = *(CMenuManager*)0xBA6748;
 bool& CMenuManager::bInvertMouseX = *(bool*)0xBA6744;
 bool& CMenuManager::bInvertMouseY = *(bool*)0xBA6745;
 
-int& CMenuManager::nLastMenuPage = *(int*)0x8CDFF0;
+int32& CMenuManager::nLastMenuPage = *(int32*)0x8CDFF0;
 
 void CMenuManager::InjectHooks()
 {
@@ -83,8 +83,8 @@ void CMenuManager::MessageScreen(const char* pKey, bool bRenderBig, bool bWithin
     return plugin::CallMethod<0x579330, CMenuManager*, const char*, bool, bool>(this, pKey, bRenderBig, bWithinFrame);
 }
 
-void CMenuManager::DrawWindow(const CRect& coords, const char* pKey, unsigned char nColour, CRGBA backColor, bool Unused, bool bBackground) {
-    ((void(__thiscall*)(CMenuManager*, const CRect&, const char*, unsigned char, CRGBA, bool, bool))0x573EE0)(this, coords, pKey, nColour, backColor, Unused, bBackground);
+void CMenuManager::DrawWindow(const CRect& coords, const char* pKey, uint8 nColour, CRGBA backColor, bool Unused, bool bBackground) {
+    ((void(__thiscall*)(CMenuManager*, const CRect&, const char*, uint8, CRGBA, bool, bool))0x573EE0)(this, coords, pKey, nColour, backColor, Unused, bBackground);
 }
 
 char CMenuManager::SwitchToNewScreen(char page) {

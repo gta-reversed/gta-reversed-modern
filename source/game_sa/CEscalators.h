@@ -1,5 +1,5 @@
 #pragma once
-#include "PluginBase.h"
+
 #define NUM_ESCALATORS 32
 
 class CEscalators {

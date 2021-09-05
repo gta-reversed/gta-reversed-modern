@@ -10,7 +10,7 @@
 #include "CAnimBlendAssociation.h"
 #include "CEntity.h"
 
-enum eFightAttackType : char {
+enum eFightAttackType : int8 {
     FIGHT_ATTACK_HIT_1 = 0,
     FIGHT_ATTACK_HIT_2 = 1,
     FIGHT_ATTACK_HIT_3 = 2,
@@ -20,21 +20,21 @@ enum eFightAttackType : char {
 
 class CMeleeInfo {
 public:
-    int            m_dwAnimGroup;
+    int32            m_dwAnimGroup;
     float          m_fRanges;
     float          m_fHit[5];
     float          m_fChain[5];
     float          m_fRadius[5];
     float          m_fGroundLoop;
-    int            ABlockHit;
-    int            ABlockChain;
+    int32            ABlockHit;
+    int32            ABlockChain;
     char           m_nHitLevel;
     char           __pad0[3];
-    int            damage;
-    int            field_58;
-    int            hit[5];
-    int            altHit[5];
-    unsigned short m_wFlags;
+    int32            damage;
+    int32            field_58;
+    int32            hit[5];
+    int32            altHit[5];
+    uint16 m_wFlags;
     char           __pad1[2];
 };
 
@@ -46,9 +46,9 @@ public:
     bool                   m_bIsInControl;
     bool                   m_bAnimsReferenced;
     char                   _pad;
-    unsigned int           m_nRequiredAnimGroup;
-    unsigned short         m_nIdlePeriod;
-    unsigned short         m_nIdleCounter;
+    uint32           m_nRequiredAnimGroup;
+    uint16         m_nIdlePeriod;
+    uint16         m_nIdleCounter;
     char                   m_nContinueStrike;
     char                   m_nChainCounter;
     char                   _pad2[2];
@@ -57,17 +57,17 @@ public:
     CAnimBlendAssociation* m_pIdleAnim;
     char                   m_nComboSet;
     eFightAttackType       m_nCurrentMove;
-    unsigned char          m_nNextCommand;
-    unsigned char          m_nLastCommand;
+    uint8          m_nNextCommand;
+    uint8          m_nLastCommand;
 
     static CMeleeInfo* m_aComboData; // m_aComboData[12];
 
 public:
-    CTaskSimpleFight* Constructor(CEntity* pTargetEntity, int nCommand, unsigned int nIdlePeriod = 10000);
-    bool ControlFight(CEntity* pEntity, unsigned char command);
+    CTaskSimpleFight* Constructor(CEntity* pTargetEntity, int32 nCommand, uint32 nIdlePeriod = 10000);
+    bool ControlFight(CEntity* pEntity, uint8 command);
     bool IsComboSet();
     bool IsHitComboSet();
-    int GetComboAnimGroupID();
+    int32 GetComboAnimGroupID();
     static void LoadMeleeData();
 };
 

@@ -10,7 +10,7 @@ void CEventAttractor::InjectHooks()
 
 void CEventScriptedAttractor::InjectHooks()
 {
-    ReversibleHooks::Install("CEventScriptedAttractor::Constructor", "", 0x5FEF40, &CEventScriptedAttractor::Constructor);
+    ReversibleHooks::Install("CEventScriptedAttractor", "CEventScriptedAttractor", 0x5FEF40, &CEventScriptedAttractor::Constructor);
 }
 
 CEventAttractor::CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor)
@@ -83,7 +83,7 @@ bool CEventAttractor::AffectsPed_Reversed(CPed* ped)
                 if (CGeneral::GetRandomNumberInRange(0, 100) >= pedAttractor.field_36)
                     return true;
                 if (!g_ikChainMan->IsLooking(ped)) {
-                    std::uint32_t time = CGeneral::GetRandomNumberInRange(2000, 4000);
+                    uint32 time = CGeneral::GetRandomNumberInRange(2000, 4000);
                     CVector point = m_entity->GetMatrix() * m_2dEffect->m_vecPosn;
                     g_ikChainMan->LookAt("CEventAttractor", ped, 0, time, BONE_UNKNOWN, &point, false, 0.25f, 500, 3, false);
                 }
@@ -104,7 +104,7 @@ bool CEventAttractor::IsEffectActive(CEntity* entity, C2dEffect const* effect)
     return plugin::CallAndReturn<bool, 0x4AF460, CEntity*, C2dEffect const*>(entity, effect);
 #else
     auto modelInfo = CModelInfo::GetModelInfo(entity->m_nModelIndex);
-    for (std::int32_t i = 0; i < modelInfo->m_n2dfxCount; i++) {
+    for (int32 i = 0; i < modelInfo->m_n2dfxCount; i++) {
         if (effect->m_nType == EFFECT_ATTRACTOR && effect == modelInfo->Get2dEffect(i))
             return true;
     }

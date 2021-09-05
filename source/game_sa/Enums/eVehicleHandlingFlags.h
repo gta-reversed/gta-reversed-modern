@@ -6,9 +6,7 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-enum  eVehicleHandlingFlags : unsigned int {
+enum eVehicleHandlingFlags : uint32 {
     VEHICLE_HANDLING_1G_BOOST = 0x1,
     VEHICLE_HANDLING_2G_BOOST = 0x2,
     VEHICLE_HANDLING_NPC_ANTI_ROLL = 0x4,

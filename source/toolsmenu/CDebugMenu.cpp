@@ -14,7 +14,7 @@ CDebugMenuToolInput CDebugMenu::m_vehicleToolInput;
 CDebugMenuToolInput CDebugMenu::m_pedToolInput;
 CDebugMenuToolInput CDebugMenu::m_missionToolInput;
 bool CDebugMenu::m_bStartMission = false;
-std::int32_t CDebugMenu::m_missionToStartId = 0;
+int32 CDebugMenu::m_missionToStartId = 0;
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
 CSprite2d CDebugMenu::m_mouseSprite;
@@ -387,7 +387,7 @@ void CDebugMenu::ProcessCheatTool() {
     }
 }
 
-void CDebugMenu::SpawnPed(std::int32_t modelID, CVector position) {
+void CDebugMenu::SpawnPed(int32 modelID, CVector position) {
     CStreaming::RequestModel(modelID, STREAMING_MISSION_REQUIRED | STREAMING_KEEP_IN_MEMORY);
     CStreaming::LoadAllRequestedModels(false);
     CPed* ped = new CCivilianPed(CPopulation::IsFemale(modelID) ? PED_TYPE_CIVFEMALE : PED_TYPE_CIVMALE, modelID);
@@ -429,9 +429,9 @@ void CDebugMenu::ProcessPedTool() {
     ImGui::TextUnformatted("Name");
     ImGui::NextColumn();
     ImGui::Separator();
-    static std::int32_t selectedId = -1;
+    static int32 selectedId = -1;
     for (const auto& x : m_pedToolInput.GetGridListMap()) {
-        const std::int32_t id = x.first;
+        const int32 id = x.first;
         const std::string& name = x.second;
         ImGui::PushID(id);
 
@@ -500,9 +500,9 @@ void CDebugMenu::ProcessVehicleTool() {
     ImGui::TextUnformatted("Name");
     ImGui::NextColumn();
     ImGui::Separator();
-    static std::int32_t selectedId = -1;
+    static int32 selectedId = -1;
     for (const auto& x : m_vehicleToolInput.GetGridListMap()) {
-        const std::int32_t id = x.first;
+        const int32 id = x.first;
         const std::string& name = x.second;
         ImGui::PushID(id);
 
@@ -536,7 +536,7 @@ void CDebugMenu::InitializeAndStartNewScript() {
     CGameLogic::ClearSkip(false);
 }
 
-bool CDebugMenu::StartMission(std::int32_t missionId, bool bDoMissionCleanUp) {
+bool CDebugMenu::StartMission(int32 missionId, bool bDoMissionCleanUp) {
     if (!m_bStartMission && CTheScripts::IsPlayerOnAMission()) {
         if (CCutsceneMgr::ms_cutsceneLoadStatus == 2) {
             CCutsceneMgr::DeleteCutsceneData();
@@ -634,9 +634,9 @@ void CDebugMenu::ProcessMissionTool() {
     ImGui::TextUnformatted("Name");
     ImGui::NextColumn();
     ImGui::Separator();
-    static std::int32_t selectedId = -1;
+    static int32 selectedId = -1;
     for (const auto& x : m_missionToolInput.GetGridListMap()) {
-        const std::int32_t id = x.first;
+        const int32 id = x.first;
         const std::string& name = x.second;
         ImGui::PushID(id);
 
@@ -904,7 +904,7 @@ void CDebugMenu::Shutdown() {
         ImGui::DestroyContext();
 
     m_mouseSprite.Delete();
-    std::int32_t slot = CTxdStore::FindTxdSlot("imgui_mouse");
+    int32 slot = CTxdStore::FindTxdSlot("imgui_mouse");
     if (slot != -1)
         CTxdStore::RemoveTxdSlot(slot);
 }

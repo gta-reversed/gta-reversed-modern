@@ -6,8 +6,8 @@ Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
-std::int32_t CWorld::TOTAL_PLAYERS = 2;
-int &CWorld::ms_iProcessLineNumCrossings = *(int *)0xB7CD60;
+int32 CWorld::TOTAL_PLAYERS = 2;
+int32 &CWorld::ms_iProcessLineNumCrossings = *(int32 *)0xB7CD60;
 float &CWorld::fWeaponSpreadRate = *(float *)0xB7CD64;
 CEntity *&CWorld::pIgnoreEntity = *(CEntity **)0xB7CD68;
 bool &CWorld::bSecondShift = *(bool *)0xB7CD6C;
@@ -19,7 +19,7 @@ bool &CWorld::bIncludeDeadPeds = *(bool *)0xB7CD71;
 bool &CWorld::bNoMoreCollisionTorque = *(bool *)0xB7CD72;
 bool &CWorld::bDoingCarCollisions = *(bool *)0xB7CD73;
 char &CWorld::PlayerInFocus = *(char *)0xB7CD74;
-unsigned short&CWorld::ms_nCurrentScanCode = *(unsigned short*)0xB7CD78;
+uint16&CWorld::ms_nCurrentScanCode = *(uint16*)0xB7CD78;
 CPlayerInfo *CWorld::Players = (CPlayerInfo *)0xB7CD98;
 CSector *CWorld::ms_aSectors = (CSector *)0xB7D0B8;
 CRepeatSector(&CWorld::ms_aRepeatSectors)[MAX_REPEAT_SECTORS] = *(CRepeatSector(*)[MAX_REPEAT_SECTORS])0xB992B8;
@@ -29,13 +29,13 @@ CPtrListDoubleLink &CWorld::ms_listObjectsWithControlCode = *(CPtrListDoubleLink
 CColPoint *CWorld::m_aTempColPts = (CColPoint *)0xB9ACD0;
 CVector &CWorld::SnookerTableMax = *(CVector *)0x8CDEF4;
 CVector &CWorld::SnookerTableMin = *(CVector *)0x8CDF00;
-unsigned int &FilledColPointIndex = *(unsigned int*)0xB7CD7C;
+uint32 &FilledColPointIndex = *(uint32*)0xB7CD7C;
 CColPoint *gaTempSphereColPoints = (CColPoint *)0xB9B250;
-short &TAG_SPRAYING_INCREMENT_VAL = *(short *)0x8CDEF0;
+int16 &TAG_SPRAYING_INCREMENT_VAL = *(int16 *)0x8CDEF0;
 
 void CWorld::InjectHooks() {
-    ReversibleHooks::Install("", "RemoveFallenPeds", 0x565CB0, &RemoveFallenPeds);
-    ReversibleHooks::Install("", "RemoveFallenCars", 0x565E80, &RemoveFallenCars);
+    ReversibleHooks::Install("CWorld", "RemoveFallenPeds", 0x565CB0, &RemoveFallenPeds);
+    ReversibleHooks::Install("CWorld", "RemoveFallenCars", 0x565E80, &RemoveFallenCars);
     ReversibleHooks::Install("CWorld", "Remove", 0x563280, &CWorld::Remove);
     ReversibleHooks::Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
 }
@@ -89,13 +89,13 @@ void CWorld::ClearScanCodes() {
 }
 
 // 0x563500
-void CWorld::FindObjectsInRangeSectorList(CPtrList& arg0, CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities) {
-    plugin::Call<0x563500, CPtrList&, CVector const&, float, bool, short*, short, CEntity**>(arg0, point, radius, b2D, outCount, maxCount, outEntities);
+void CWorld::FindObjectsInRangeSectorList(CPtrList& arg0, CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities) {
+    plugin::Call<0x563500, CPtrList&, CVector const&, float, bool, int16*, int16, CEntity**>(arg0, point, radius, b2D, outCount, maxCount, outEntities);
 }
 
 // 0x5635C0
-void CWorld::FindObjectsOfTypeInRangeSectorList(unsigned int modelId, CPtrList& ptrList, CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities) {
-    plugin::Call<0x5635C0, unsigned int, CPtrList&, CVector const&, float, bool, short*, short, CEntity**>(modelId, ptrList, point, radius, b2D, outCount, maxCount, outEntities);
+void CWorld::FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& ptrList, CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities) {
+    plugin::Call<0x5635C0, uint32, CPtrList&, CVector const&, float, bool, int16*, int16, CEntity**>(modelId, ptrList, point, radius, b2D, outCount, maxCount, outEntities);
 }
 
 // 0x5636A0
@@ -114,8 +114,8 @@ void CWorld::TestForBuildingsOnTopOfEachOther(CPtrList& ptrList) {
 }
 
 // 0x5639D0
-void CWorld::TestForUnusedModels(CPtrList& ptrList, int* models) {
-    plugin::Call<0x5639D0, CPtrList&, int*>(ptrList, models);
+void CWorld::TestForUnusedModels(CPtrList& ptrList, int32* models) {
+    plugin::Call<0x5639D0, CPtrList&, int32*>(ptrList, models);
 }
 
 // 0x563A10
@@ -139,13 +139,13 @@ bool CWorld::CameraToIgnoreThisObject(CEntity* entity) {
 }
 
 // 0x563FA0
-int CWorld::FindPlayerSlotWithPedPointer(void* ptr) {
-    return plugin::CallAndReturn<int, 0x563FA0, void*>(ptr);
+int32 CWorld::FindPlayerSlotWithPedPointer(void* ptr) {
+    return plugin::CallAndReturn<int32, 0x563FA0, void*>(ptr);
 }
 
 // 0x563FD0
-int CWorld::FindPlayerSlotWithRemoteVehiclePointer(void* ptr) {
-    return plugin::CallAndReturn<int, 0x563FD0, void*>(ptr);
+int32 CWorld::FindPlayerSlotWithRemoteVehiclePointer(void* ptr) {
+    return plugin::CallAndReturn<int32, 0x563FD0, void*>(ptr);
 }
 
 // 0x564000
@@ -224,43 +224,43 @@ bool CWorld::GetIsLineOfSightSectorListClear(CPtrList& ptrList, CColLine const& 
 }
 
 // 0x564A20
-void CWorld::FindObjectsInRange(CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
-    plugin::Call<0x564A20, CVector const&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool>(point, radius, b2D, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
+void CWorld::FindObjectsInRange(CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
+    plugin::Call<0x564A20, CVector const&, float, bool, int16*, int16, CEntity**, bool, bool, bool, bool, bool>(point, radius, b2D, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
 }
 
 // 0x564C70
-void CWorld::FindObjectsOfTypeInRange(unsigned int modelId, CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
-    plugin::Call<0x564C70, unsigned int, CVector const&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool>(modelId, point, radius, b2D, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
+void CWorld::FindObjectsOfTypeInRange(uint32 modelId, CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
+    plugin::Call<0x564C70, uint32, CVector const&, float, bool, int16*, int16, CEntity**, bool, bool, bool, bool, bool>(modelId, point, radius, b2D, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
 }
 
 // 0x564ED0
-void CWorld::FindLodOfTypeInRange(unsigned int modelId, CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities) {
-    plugin::Call<0x564ED0, unsigned int, CVector const&, float, bool, short*, short, CEntity**>(modelId, point, radius, b2D, outCount, maxCount, outEntities);
+void CWorld::FindLodOfTypeInRange(uint32 modelId, CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities) {
+    plugin::Call<0x564ED0, uint32, CVector const&, float, bool, int16*, int16, CEntity**>(modelId, point, radius, b2D, outCount, maxCount, outEntities);
 }
 
 // 0x565000
-void CWorld::FindObjectsKindaCollidingSectorList(CPtrList& ptrList, CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities) {
-    plugin::Call<0x565000, CPtrList&, CVector const&, float, bool, short*, short, CEntity**>(ptrList, point, radius, b2D, outCount, maxCount, outEntities);
+void CWorld::FindObjectsKindaCollidingSectorList(CPtrList& ptrList, CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities) {
+    plugin::Call<0x565000, CPtrList&, CVector const&, float, bool, int16*, int16, CEntity**>(ptrList, point, radius, b2D, outCount, maxCount, outEntities);
 }
 
 // 0x5650E0
-void CWorld::FindObjectsIntersectingCubeSectorList(CPtrList& ptrList, CVector const& cornerA, CVector const& cornerB, short* outCount, short maxCount, CEntity** outEntities) {
-    plugin::Call<0x5650E0, CPtrList&, CVector const&, CVector const&, short*, short, CEntity**>(ptrList, cornerA, cornerB, outCount, maxCount, outEntities);
+void CWorld::FindObjectsIntersectingCubeSectorList(CPtrList& ptrList, CVector const& cornerA, CVector const& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities) {
+    plugin::Call<0x5650E0, CPtrList&, CVector const&, CVector const&, int16*, int16, CEntity**>(ptrList, cornerA, cornerB, outCount, maxCount, outEntities);
 }
 
 // 0x565200
-void CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrList, CBox const& box, CMatrix const& transform, CVector const& point, short* outCount, short maxCount, CEntity** outEntities) {
-    plugin::Call<0x565200, CPtrList&, CBox const&, CMatrix const&, CVector const&, short*, short, CEntity**>(ptrList, box, transform, point, outCount, maxCount, outEntities);
+void CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrList, CBox const& box, CMatrix const& transform, CVector const& point, int16* outCount, int16 maxCount, CEntity** outEntities) {
+    plugin::Call<0x565200, CPtrList&, CBox const&, CMatrix const&, CVector const&, int16*, int16, CEntity**>(ptrList, box, transform, point, outCount, maxCount, outEntities);
 }
 
 // 0x565300
-void CWorld::FindMissionEntitiesIntersectingCubeSectorList(CPtrList& ptrList, CVector const& cornerA, CVector const& cornerB, short* outCount, short maxCount, CEntity** outEntities, bool vehiclesList, bool pedsList, bool objectsList) {
-    plugin::Call<0x565300, CPtrList&, CVector const&, CVector const&, short*, short, CEntity**, bool, bool, bool>(ptrList, cornerA, cornerB, outCount, maxCount, outEntities, vehiclesList, pedsList, objectsList);
+void CWorld::FindMissionEntitiesIntersectingCubeSectorList(CPtrList& ptrList, CVector const& cornerA, CVector const& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehiclesList, bool pedsList, bool objectsList) {
+    plugin::Call<0x565300, CPtrList&, CVector const&, CVector const&, int16*, int16, CEntity**, bool, bool, bool>(ptrList, cornerA, cornerB, outCount, maxCount, outEntities, vehiclesList, pedsList, objectsList);
 }
 
 // 0x565450
-void CWorld::FindNearestObjectOfTypeSectorList(int modelId, CPtrList& ptrList, CVector const& point, float radius, bool b2D, CEntity** outEntities, float* outDistance) {
-    plugin::Call<0x565450, int, CPtrList&, CVector const&, float, bool, CEntity**, float*>(modelId, ptrList, point, radius, b2D, outEntities, outDistance);
+void CWorld::FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList, CVector const& point, float radius, bool b2D, CEntity** outEntities, float* outDistance) {
+    plugin::Call<0x565450, int32, CPtrList&, CVector const&, float, bool, CEntity**, float*>(modelId, ptrList, point, radius, b2D, outEntities, outDistance);
 }
 
 // 0x565510
@@ -293,7 +293,7 @@ void CWorld::RemoveFallenPeds() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x565CB0>();
 #else
-    for (int i = CPools::ms_pPedPool->GetSize(); i; i--)
+    for (int32 i = CPools::ms_pPedPool->GetSize(); i; i--)
     {
         CPed* pPed = CPools::ms_pPedPool->GetAt(i - 1);
         if (!pPed)
@@ -327,7 +327,7 @@ void CWorld::RemoveFallenCars() {
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::Call<0x565E80>();
 #else
-    for (int i = CPools::ms_pVehiclePool->GetSize(); i; i--)
+    for (int32 i = CPools::ms_pVehiclePool->GetSize(); i; i--)
     {
         CVehicle* pVeh = CPools::ms_pVehiclePool->GetAt(i - 1);
         if (!pVeh)
@@ -471,28 +471,28 @@ bool CWorld::GetIsLineOfSightSectorClear(CSector& sector, CRepeatSector& repeatS
 }
 
 // 0x568B80
-void CWorld::FindObjectsKindaColliding(CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
-    plugin::Call<0x568B80, CVector const&, float, bool, short*, short, CEntity**, bool, bool, bool, bool, bool>(point, radius, b2D, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
+void CWorld::FindObjectsKindaColliding(CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
+    plugin::Call<0x568B80, CVector const&, float, bool, int16*, int16, CEntity**, bool, bool, bool, bool, bool>(point, radius, b2D, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
 }
 
 // 0x568DD0
-void CWorld::FindObjectsIntersectingCube(CVector const& cornerA, CVector const& cornerB, short* outCount, short maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
-    plugin::Call<0x568DD0, CVector const&, CVector const&, short*, short, CEntity**, bool, bool, bool, bool, bool>(cornerA, cornerB, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
+void CWorld::FindObjectsIntersectingCube(CVector const& cornerA, CVector const& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
+    plugin::Call<0x568DD0, CVector const&, CVector const&, int16*, int16, CEntity**, bool, bool, bool, bool, bool>(cornerA, cornerB, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
 }
 
 // 0x568FF0
-void CWorld::FindObjectsIntersectingAngledCollisionBox(CBox const& box, CMatrix const& transform, CVector const& point, float x1, float y1, float x2, float y2, short* outCount, short maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
-    plugin::Call<0x568FF0, CBox const&, CMatrix const&, CVector const&, float, float, float, float, short*, short, CEntity**, bool, bool, bool, bool, bool>(box, transform, point, x1, y1, x2, y2, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
+void CWorld::FindObjectsIntersectingAngledCollisionBox(CBox const& box, CMatrix const& transform, CVector const& point, float x1, float y1, float x2, float y2, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
+    plugin::Call<0x568FF0, CBox const&, CMatrix const&, CVector const&, float, float, float, float, int16*, int16, CEntity**, bool, bool, bool, bool, bool>(box, transform, point, x1, y1, x2, y2, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
 }
 
 // 0x569240
-void CWorld::FindMissionEntitiesIntersectingCube(CVector const& cornerA, CVector const& cornerB, short* outCount, short maxCount, CEntity** outEntities, bool vehicles, bool peds, bool objects) {
-    plugin::Call<0x569240, CVector const&, CVector const&, short*, short, CEntity**, bool, bool, bool>(cornerA, cornerB, outCount, maxCount, outEntities, vehicles, peds, objects);
+void CWorld::FindMissionEntitiesIntersectingCube(CVector const& cornerA, CVector const& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehicles, bool peds, bool objects) {
+    plugin::Call<0x569240, CVector const&, CVector const&, int16*, int16, CEntity**, bool, bool, bool>(cornerA, cornerB, outCount, maxCount, outEntities, vehicles, peds, objects);
 }
 
 // 0x5693F0
-void CWorld::FindNearestObjectOfType(int modelId, CVector const& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
-    plugin::Call<0x5693F0, int, CVector const&, float, bool, bool, bool, bool, bool, bool>(modelId, point, radius, b2D, buildings, vehicles, peds, objects, dummies);
+void CWorld::FindNearestObjectOfType(int32 modelId, CVector const& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
+    plugin::Call<0x5693F0, int32, CVector const&, float, bool, bool, bool, bool, bool, bool>(modelId, point, radius, b2D, buildings, vehicles, peds, objects, dummies);
 }
 
 // 0x569660
@@ -526,8 +526,8 @@ CEntity* CWorld::TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius
 }
 
 // 0x56A0D0
-void CWorld::ClearExcitingStuffFromArea(CVector const& point, float radius, unsigned char bRemoveProjectilesAndShadows) {
-    plugin::Call<0x56A0D0, CVector const&, float, unsigned char>(point, radius, bRemoveProjectilesAndShadows);
+void CWorld::ClearExcitingStuffFromArea(CVector const& point, float radius, uint8 bRemoveProjectilesAndShadows) {
+    plugin::Call<0x56A0D0, CVector const&, float, uint8>(point, radius, bRemoveProjectilesAndShadows);
 }
 
 // 0x56A490
@@ -574,26 +574,26 @@ void CWorld::IncrementCurrentScanCode()
 }
 
 // 0x407250
-short GetCurrentScanCode() {
-    return plugin::CallAndReturn<short, 0x407250>();
+int16 GetCurrentScanCode() {
+    return plugin::CallAndReturn<int16, 0x407250>();
 }
 
 // 0x407260
-CSector* GetSector(int x, int y) {
-    return plugin::CallAndReturn<CSector*, 0x407260, int, int>(x, y);
+CSector* GetSector(int32 x, int32 y) {
+    return plugin::CallAndReturn<CSector*, 0x407260, int32, int32>(x, y);
 }
 
 // 0x4072A0
-CRepeatSector* GetRepeatSector(int x, int y) {
-    return plugin::CallAndReturn<CRepeatSector*, 0x4072A0, int, int>(x, y);
+CRepeatSector* GetRepeatSector(int32 x, int32 y) {
+    return plugin::CallAndReturn<CRepeatSector*, 0x4072A0, int32, int32>(x, y);
 }
 
 // 0x4072C0
-CPtrListSingleLink& CWorld::GetLodPtrList(std::int32_t x, std::int32_t y) {
-    x = clamp<std::int32_t>(x, 0, MAX_LOD_PTR_LISTS_X - 1);
-    y = clamp<std::int32_t>(y, 0, MAX_LOD_PTR_LISTS_Y - 1);
+CPtrListSingleLink& CWorld::GetLodPtrList(int32 x, int32 y) {
+    x = clamp<int32>(x, 0, MAX_LOD_PTR_LISTS_X - 1);
+    y = clamp<int32>(y, 0, MAX_LOD_PTR_LISTS_Y - 1);
     return ms_aLodPtrLists[y][x];
-    //return plugin::CallAndReturn<CPtrListSingleLink*, 0x4072C0, std::int32_t, std::int32_t>(x, y);
+    //return plugin::CallAndReturn<CPtrListSingleLink*, 0x4072C0, int32, int32>(x, y);
 }
 
 // 0x4072E0
@@ -601,7 +601,7 @@ void SetNextScanCode() {
     plugin::Call<0x4072E0>();
 }
 
-double ScaleLighting(unsigned char lighting, float fScale)
+double ScaleLighting(uint8 lighting, float fScale)
 {
-    return plugin::CallAndReturn<double, 0x59F0C0, unsigned char, float> (lighting, fScale);
+    return plugin::CallAndReturn<double, 0x59F0C0, uint8, float> (lighting, fScale);
 }

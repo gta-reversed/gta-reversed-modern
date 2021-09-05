@@ -7,10 +7,10 @@ class CTaskSimpleGiveCPR : public CTaskSimple {
 public:
     union {
         struct {
-            unsigned int bNoHealthValue : 1;
-            unsigned int bAnimationFinished : 1;
+            uint32 bNoHealthValue : 1;
+            uint32 bAnimationFinished : 1;
         };
-        unsigned int m_nFlags;
+        uint32 m_nFlags;
     };
     CAccident* m_pAccident;
     CAnimBlendAssociation* m_pAnim;
