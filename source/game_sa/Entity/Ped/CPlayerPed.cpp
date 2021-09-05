@@ -59,6 +59,7 @@ void CPlayerPed::InjectHooks() {
     ReversibleHooks::Install("CPlayerPed", "ForceGroupToNeverFollow", 0x60C800, &CPlayerPed::ForceGroupToNeverFollow);
     ReversibleHooks::Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60D000, &CPlayerPed::MakeChangesForNewWeapon);
     ReversibleHooks::Install("CPlayerPed", "EvaluateTarget", 0x60D020, &CPlayerPed::EvaluateTarget);
+    ReversibleHooks::Install("CPlayerPed", "PlayerHasJustAttackedSomeone", 0x60D5A0, &CPlayerPed::PlayerHasJustAttackedSomeone);
 
 }
 
@@ -907,7 +908,7 @@ void CPlayerPed::ProcessGroupBehaviour(CPad* pad) {
 
 // 0x60D5A0
 bool CPlayerPed::PlayerHasJustAttackedSomeone() {
-    return plugin::CallMethodAndReturn<bool, 0x60D5A0, CPlayerPed *>(this);
+    return PlayerWantsToAttack();
 }
 
 // 0x60D790
