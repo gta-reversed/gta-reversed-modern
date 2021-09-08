@@ -77,6 +77,8 @@ void COnscreenTimer::SetClockBeepCountdownSecs(uint32 varId, uint32 time) {
 // uint16 -> eOnscreenCounter
 // 0x44CDA0
 void COnscreenTimer::AddCounter(uint32 varId, eOnscreenCounter type, char* gxt, uint16 counterIndex) {
+    assert(counterIndex < COnscreenTimer::NUM_COUNTERS);
+
     COnscreenCounterEntry* counter = &m_aCounters[counterIndex];
     if (counter->m_nVarId != 0)
         return;

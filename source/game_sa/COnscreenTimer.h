@@ -14,8 +14,10 @@
 
 class COnscreenTimer {
 public:
+    static constexpr uint16 NUM_COUNTERS = 4;
+
     COnscreenTimerEntry   m_Clock;
-    COnscreenCounterEntry m_aCounters[4];
+    COnscreenCounterEntry m_aCounters[NUM_COUNTERS];
     bool                  m_bDisplay;
     bool                  m_bPaused;
 
