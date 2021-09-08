@@ -9,6 +9,9 @@
 #include "COnscreenTimerEntry.h"
 #include "COnscreenCounterEntry.h"
 
+#include "CHudColours.h"
+#include "eOnscreenCounter.h"
+
 class COnscreenTimer {
 public:
     COnscreenTimerEntry   m_Clock;
@@ -17,18 +20,27 @@ public:
     bool                  m_bPaused;
 
 public:
-    void AddClock(uint32 varId, char* gxt, bool bTimerDirection);
-    void AddCounter(int32 varId, int16 type, char* gxt, uint16 counterIndex);
-    //! unused
-    void  AddCounterCounter(uint32 varId, uint32 maxValue, char* gxt, uint16 lineId);
-    int32 ClearClock(uint32 varId);
-    void  ClearCounter(uint32 varId);
-    void  Init();
-    void  Process();
-    void  ProcessForDisplay();
-    void  SetClockBeepCountdownSecs(uint32 varID, uint32 time);
-    //! unused
-    void SetCounterColourID(uint32 varID, uint8 ColourID);
-    void SetCounterFlashWhenFirstDisplayed(uint32 varId, uint8 bFlashWhenFirstDisplayed);
+    static void InjectHooks();
+
+    void Init();
+
+#if ANDROID
+    void Load();
+    void Save();
+#endif
+
+    void AddClock(uint32 varId, char* gxt, eTimerDirection nTimerDirection);
+    void ClearClock(uint32 varId);
+    void SetClockBeepCountdownSecs(uint32 varId, uint32 time);
+
+    void AddCounter(uint32 varId, eOnscreenCounter type, char* gxt, uint16 counterIndex);
+    void AddCounterCounter(uint32 varId, uint32 maxValue, char* gxt, uint16 lineId);
+    void ClearCounter(uint32 varId);
+    void SetCounterColourID(uint32 varId, eHudColours colorId);
+    void SetCounterFlashWhenFirstDisplayed(uint32 varId, bool bFlashWhenFirstDisplayed);
+
+    void Process();
+    void ProcessForDisplay();
 };
+
 VALIDATE_SIZE(COnscreenTimer, 0x154);

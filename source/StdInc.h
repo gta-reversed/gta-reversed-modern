@@ -277,7 +277,6 @@
 #include "game_sa\CTrafficLights.h"
 #include "game_sa\CTxdStore.h"
 #include "game_sa\CUpsideDownCarCheck.h"
-#include "game_sa\CUserDisplay.h"
 #include "game_sa\CVisibilityPlugins.h"
 #include "game_sa\CWanted.h"
 #include "game_sa\CWeapon.h"

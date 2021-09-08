@@ -35,6 +35,11 @@
 #include "CCustomBuildingPipeline.h"
 #include "CCustomBuildingDNPipeline.h"
 #include "CPlantMgr.h"
+#include "COnscreenCounterEntry.h"
+#include "CUserDisplay.h"
+#include "CCurrentVehicle.h"
+#include "CPlaceName.h"
+#include "COnscreenTimer.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
@@ -368,6 +373,10 @@ void InjectHooksMain()
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
     CCustomBuildingDNPipeline::InjectHooks();
+    CCurrentVehicle::InjectHooks();
+    CPlaceName::InjectHooks();
+    CUserDisplay::InjectHooks();
+    COnscreenTimer::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();
