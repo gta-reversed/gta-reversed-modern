@@ -4,6 +4,7 @@
 
 #include "COcclusion.h"
 #include "COccluder.h"
+#include "CLines.h"
 
 #include "imgui.h"
 

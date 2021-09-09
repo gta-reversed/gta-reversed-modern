@@ -2,8 +2,6 @@
 
 class CLines {
 public:
-    static void InjectHooks();
-
     static void RenderLineNoClipping(float startX, float startY, float startZ, float endX, float endY, float endZ, uint32 startColor, uint32 endColor);
     static void RenderLineWithClipping(float startX, float startY, float startZ, float endX, float endY, float endZ, uint32 startColor, uint32 endColor);
     static void ImmediateLine2D(int startX, int startY, int endX, int endY, uint8 startR, uint8 startG, uint8 startB, uint8 startA, uint8 endR, uint8 endG, uint8 endB, uint8 endA);

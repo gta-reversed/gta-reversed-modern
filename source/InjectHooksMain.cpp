@@ -368,7 +368,6 @@ void InjectHooksMain()
     CTaskComplexJump::InjectHooks();
     ModelIndices::InjectHooks();
     CWaterCannons::InjectHooks();
-    CLines::InjectHooks();
     CSprite::InjectHooks();
     CPlaneTrails::InjectHooks();
     CCustomBuildingPipeline::InjectHooks();
