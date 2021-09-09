@@ -7,6 +7,10 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
+#include "CRenderer.h"
+
+#include "COcclusion.h"
+
 int32 MAX_INVISIBLE_ENTITY_PTRS = 150;
 int32 MAX_VISIBLE_ENTITY_PTRS = 1000;
 int32 MAX_VISIBLE_LOD_PTRS = 1000;

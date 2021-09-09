@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "COccluder.h"
+#include "COcclusion.h"
 
 void COccluder::InjectHooks()
 {

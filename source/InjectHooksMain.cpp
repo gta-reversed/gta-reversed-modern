@@ -27,6 +27,9 @@
 #include "CRadar.h"
 #include "CWaterCannons.h"
 #include "CLines.h"
+#include "COcclusion.h"
+#include "COccluder.h"
+#include "CActiveOccluder.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {

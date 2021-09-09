@@ -30,7 +30,7 @@ void COcclusion::InjectHooks()
     ReversibleHooks::Install("COcclusion", "AddOne", 0x71DCD0, &COcclusion::AddOne);
     ReversibleHooks::Install("COcclusion", "IsPositionOccluded", 0x7200B0, &COcclusion::IsPositionOccluded);
     ReversibleHooks::Install("COcclusion", "OccluderHidesBehind", 0x71E080 , &COcclusion::OccluderHidesBehind);
-    ReversibleHooks::Install("COcclusion", "ProcessBeforeRendering", 0x7201C0, &COcclusion::ProcessBeforeRendering);
+    // ReversibleHooks::Install("COcclusion", "ProcessBeforeRendering", 0x7201C0, &COcclusion::ProcessBeforeRendering);
 }
 
 // 0x71DCA0
@@ -181,6 +181,9 @@ bool COcclusion::IsPositionOccluded(CVector vecPos, float fRadius)
 // 0x7201C0
 void COcclusion::ProcessBeforeRendering()
 {
+    return plugin::Call<0x7201C0>();
+
+    /*
     NumActiveOccluders = 0;
     if (!CGame::currArea) {
         auto listCur = ListWalkThroughFA;
@@ -273,4 +276,5 @@ void COcclusion::ProcessBeforeRendering()
             }
         }
     }
+    */
 }
