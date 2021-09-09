@@ -3,6 +3,8 @@
 #ifdef EXTRA_DEBUG_FEATURES
 
 #include "COcclusion.h"
+#include "COccluder.h"
+
 #include "imgui.h"
 
 bool COcclusionDebugModule::DrawActiveOcclusions = false;

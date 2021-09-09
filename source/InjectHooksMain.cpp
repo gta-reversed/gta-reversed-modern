@@ -255,6 +255,8 @@ void InjectHooksMain()
     C2dEffect::InjectHooks();
     CCustomRoadsignMgr::InjectHooks();
     COcclusion::InjectHooks();
+    COccluder::InjectHooks();
+    CActiveOccluder::InjectHooks();
     CGarage::InjectHooks();
     CGarages::InjectHooks();
     CPostEffects::InjectHooks();

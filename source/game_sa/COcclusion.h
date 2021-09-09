@@ -1,57 +1,14 @@
 #pragma once
 
-#include "CVector2D.h"
 #include "CVector.h"
 
-struct CActiveOccluderLine {
-    CVector2D m_vecOrigin;
-    CVector2D m_vecDirection;
-    float     m_fLength;
-};
-VALIDATE_SIZE(CActiveOccluderLine, 0x14);
-
-struct CActiveOccluder {
-    CActiveOccluderLine m_aLines[6];
-    int16               m_wDepth;
-    uint8               m_cLinesCount;
-    uint8               m_cNumVectors;
-    CVector             m_aVectors[3];
-    float               m_afRadiuses[3];
-
-public:
-    bool IsPointWithinOcclusionArea(float fX, float fY, float fRadius);
-    bool IsPointBehindOccluder(CVector vecPos, float fRadius);
-};
-VALIDATE_SIZE(CActiveOccluder, 0xAC);
-
-struct COccluder {
-    int16 m_wMidX;
-    int16 m_wMidY;
-    int16 m_wMidZ;
-    int16 m_wLength;
-    int16 m_wWidth;
-    int16 m_wHeight;
-    uint8 m_cRotZ;
-    uint8 m_cRotY;
-    uint8 m_cRotX;
-    char  _pad;
-    struct {
-        int16 m_nNextIndex : 15;
-        int16 m_bFarAway : 1;
-    };
-
-public:
-    bool ProcessOneOccluder(CActiveOccluder* pActiveOccluder);
-    bool ProcessLineSegment(int32 iInd1, int32 iInd2, CActiveOccluder* pActiveOccluder);
-    bool NearCamera();
-};
-VALIDATE_SIZE(COccluder, 0x12);
+#include "COccluder.h"
 
 class COcclusion {
 public:
-    static constexpr int32 MAX_INTERIOR_OCCLUDERS = 40;
-    static constexpr int32 MAX_MAP_OCCLUDERS = 1000;
-    static constexpr int32 MAX_ACTIVE_OCCLUDERS = 28;
+    static constexpr int32 MAX_INTERIOR_OCCLUDERS            = 40;
+    static constexpr int32 MAX_MAP_OCCLUDERS                 = 1000;
+    static constexpr int32 MAX_ACTIVE_OCCLUDERS              = 28;
     static constexpr int32 NUM_OCCLUDERS_PROCESSED_PER_FRAME = 16;
 
     static COccluder (&aInteriorOccluders)[MAX_INTERIOR_OCCLUDERS];
