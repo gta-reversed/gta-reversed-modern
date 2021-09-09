@@ -4,6 +4,7 @@
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
+#pragma once
 
 #include "CPlaneTrail.h"
 
@@ -11,10 +12,14 @@
 
 class CPlaneTrails {
 public:
-    // count: NUM_PLANE_TRAILS (3)
-    static CPlaneTrail* aArray;
+    static CPlaneTrail (&aArray)[NUM_PLANE_TRAILS];
 
+public:
+    static void InjectHooks();
+
+public:
     static void Init();
-    static void Update();
+    static void Render();
     static void RegisterPoint(CVector point, uint32 trailIndex);
+    static void Update();
 };

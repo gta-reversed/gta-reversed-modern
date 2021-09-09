@@ -27,6 +27,14 @@
 #include "CRadar.h"
 #include "CWaterCannons.h"
 #include "CLines.h"
+#include "CEscalators.h"
+#include "CMovingThings.h"
+#include "CMovingThings.h"
+#include "CPlaneTrails.h"
+#include "CGamma.h"
+#include "CCustomBuildingPipeline.h"
+#include "CCustomBuildingDNPipeline.h"
+#include "CPlantMgr.h"
 #include "COcclusion.h"
 #include "COccluder.h"
 #include "CActiveOccluder.h"
@@ -362,6 +370,10 @@ void InjectHooksMain()
     CWaterCannons::InjectHooks();
     CLines::InjectHooks();
     CSprite::InjectHooks();
+    CPlaneTrails::InjectHooks();
+    CCustomBuildingPipeline::InjectHooks();
+    CCustomBuildingRenderer::InjectHooks();
+    CCustomBuildingDNPipeline::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();
@@ -382,6 +394,7 @@ void InjectHooksMain()
     CAEWaterCannonAudioEntity::InjectHooks();
     CAETwinLoopSoundEntity::InjectHooks();
     CAEDoorAudioEntity::InjectHooks();
+    CAEWeatherAudioEntity::InjectHooks();
 
     FxManager_c::InjectHooks();
     FxSystemBP_c::InjectHooks();

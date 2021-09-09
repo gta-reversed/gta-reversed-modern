@@ -14,9 +14,9 @@ void CLines::RenderLineNoClipping(float startX, float startY, float startZ, floa
     plugin::Call<0x6FF460, float, float, float, float, float, float, uint32, uint32>(startX, startY, startZ, endX, endY, endZ, startColor, endColor);
 }
 
-// 0x4F2864
+// 0x6FF4F0
 void CLines::RenderLineWithClipping(float startX, float startY, float startZ, float endX, float endY, float endZ, uint32 startColor, uint32 endColor) {
-    plugin::Call<0x4F2864, float, float, float, float, float, float, uint32, uint32>(startX, startY, startZ, endX, endY, endZ, startColor, endColor);
+    plugin::Call<0x6FF4F0, float, float, float, float, float, float, uint32, uint32>(startX, startY, startZ, endX, endY, endZ, startColor, endColor);
 }
 
 // 0x6FF790

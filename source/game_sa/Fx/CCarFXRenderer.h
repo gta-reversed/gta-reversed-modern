@@ -8,7 +8,7 @@ public:
 public:
     static void InjectHooks();
 
-    static void Initialise();
+    static bool Initialise();
     static void Shutdown();
     static void PreRenderUpdate();
 
