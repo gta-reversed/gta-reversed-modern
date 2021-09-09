@@ -23,8 +23,8 @@ struct COccluder {
 public:
     static void InjectHooks();
 
-    bool ProcessOneOccluder(CActiveOccluder* pActiveOccluder);
-    bool ProcessLineSegment(int32 iInd1, int32 iInd2, CActiveOccluder* pActiveOccluder);
-    bool NearCamera();
+    bool ProcessOneOccluder(CActiveOccluder* activeOccluder);
+    bool ProcessLineSegment(int32 iInd1, int32 iInd2, CActiveOccluder* activeOccluder);
+    bool NearCamera() const;
 };
 VALIDATE_SIZE(COccluder, 0x12);

@@ -10,26 +10,26 @@ void COccluder::InjectHooks()
 }
 
 // 0x71E5D0
-bool COccluder::ProcessOneOccluder(CActiveOccluder* pActiveOccluder)
+bool COccluder::ProcessOneOccluder(CActiveOccluder* activeOccluder)
 {
-    pActiveOccluder->m_cLinesCount = 0;
-    auto vecPos = CVector(m_wMidX / 4.0F, m_wMidY / 4.0F, m_wMidZ / 4.0F);
+    activeOccluder->m_cLinesCount = 0;
+    auto vecPos = CVector(m_wMidX, m_wMidY, m_wMidZ) / 4.0F;
     float temp1, temp2;
 
     if (!CalcScreenCoors(vecPos, &COcclusion::gCenterOnScreen, &temp1, &temp2) || COcclusion::gCenterOnScreen.z < -150.0F || COcclusion::gCenterOnScreen.z > 300.0F)
         return false;
 
-    auto fMagnitude = CVector(m_wWidth / 4.0F, m_wLength / 4.0F, m_wHeight / 4.0F).Magnitude();
-    pActiveOccluder->m_wDepth = COcclusion::gCenterOnScreen.z - fMagnitude;
+    auto fMagnitude = (CVector(m_wWidth, m_wLength, m_wHeight)  / 4.0F ).Magnitude();
+    activeOccluder->m_wDepth = COcclusion::gCenterOnScreen.z - fMagnitude;
 
     auto matRotX = CMatrix();
     auto matRotY = CMatrix();
     auto matRotZ = CMatrix();;
     auto matTransform = CMatrix();
 
-    matRotX.SetRotateX(m_cRotX * PI / 128.0F);
-    matRotY.SetRotateY(m_cRotY * PI / 128.0F);
-    matRotZ.SetRotateZ(m_cRotZ * PI / 128.0F);
+    matRotX.SetRotateX(static_cast<float>(m_cRotX) * PI / 128.0F);
+    matRotY.SetRotateY(static_cast<float>(m_cRotY) * PI / 128.0F);
+    matRotZ.SetRotateZ(static_cast<float>(m_cRotZ) * PI / 128.0F);
     matTransform = (matRotY * matRotX) * matRotZ;
 
     COcclusion::gMinXInOccluder = 999999.88F;
@@ -37,16 +37,20 @@ bool COccluder::ProcessOneOccluder(CActiveOccluder* pActiveOccluder)
     COcclusion::gMaxXInOccluder = -999999.88F;
     COcclusion::gMaxYInOccluder = -999999.88F;
 
-    if (   m_wLength * 0.25F != 0.0F
-        && m_wWidth  * 0.25F != 0.0F
-        && m_wHeight * 0.25F != 0.0F) {
-        auto vecWidth = CVector(m_wWidth / 8.0F, 0.0F, 0.0F);
+    auto fLength = static_cast<float>(m_wLength);
+    auto fWidth = static_cast<float>(m_wWidth);
+    auto fHeight = static_cast<float>(m_wHeight);
+
+    if (   fLength / 4.0F != 0.0F
+        && fWidth  / 4.0F != 0.0F
+        && fHeight / 4.0F != 0.0F) {
+        auto vecWidth = CVector(fWidth / 8.0F, 0.0F, 0.0F);
         auto vecTransWidth = matTransform * vecWidth;
 
-        auto vecLength = CVector(0.0F, m_wLength / 8.0F, 0.0F);
+        auto vecLength = CVector(0.0F, fLength / 8.0F, 0.0F);
         auto vecTransLength = matTransform * vecLength;
 
-        auto vecHeight = CVector(0.0F, 0.0F, m_wHeight / 8.0F);
+        auto vecHeight = CVector(0.0F, 0.0F, fHeight / 8.0F);
         auto vecTransHeight = matTransform * vecHeight;
 
         CVector aVecArr[6]{
@@ -81,31 +85,31 @@ bool COccluder::ProcessOneOccluder(CActiveOccluder* pActiveOccluder)
         }
 
         // Between two differently facing sides we see an edge, so process those
-        if (   (abOnScreen[0] == abOnScreen[2] || !ProcessLineSegment(0, 4, pActiveOccluder))
-            && (abOnScreen[0] == abOnScreen[3] || !ProcessLineSegment(2, 6, pActiveOccluder))
-            && (abOnScreen[0] == abOnScreen[4] || !ProcessLineSegment(0, 2, pActiveOccluder))
-            && (abOnScreen[0] == abOnScreen[5] || !ProcessLineSegment(4, 6, pActiveOccluder))
-            && (abOnScreen[1] == abOnScreen[2] || !ProcessLineSegment(1, 5, pActiveOccluder))
-            && (abOnScreen[1] == abOnScreen[3] || !ProcessLineSegment(3, 7, pActiveOccluder))
-            && (abOnScreen[1] == abOnScreen[4] || !ProcessLineSegment(1, 3, pActiveOccluder))
-            && (abOnScreen[1] == abOnScreen[5] || !ProcessLineSegment(5, 7, pActiveOccluder))
-            && (abOnScreen[2] == abOnScreen[4] || !ProcessLineSegment(0, 1, pActiveOccluder))
-            && (abOnScreen[3] == abOnScreen[4] || !ProcessLineSegment(2, 3, pActiveOccluder))
-            && (abOnScreen[3] == abOnScreen[5] || !ProcessLineSegment(6, 7, pActiveOccluder))
-            && (abOnScreen[2] == abOnScreen[5] || !ProcessLineSegment(4, 5, pActiveOccluder))
+        if (   (abOnScreen[0] == abOnScreen[2] || !ProcessLineSegment(0, 4, activeOccluder))
+            && (abOnScreen[0] == abOnScreen[3] || !ProcessLineSegment(2, 6, activeOccluder))
+            && (abOnScreen[0] == abOnScreen[4] || !ProcessLineSegment(0, 2, activeOccluder))
+            && (abOnScreen[0] == abOnScreen[5] || !ProcessLineSegment(4, 6, activeOccluder))
+            && (abOnScreen[1] == abOnScreen[2] || !ProcessLineSegment(1, 5, activeOccluder))
+            && (abOnScreen[1] == abOnScreen[3] || !ProcessLineSegment(3, 7, activeOccluder))
+            && (abOnScreen[1] == abOnScreen[4] || !ProcessLineSegment(1, 3, activeOccluder))
+            && (abOnScreen[1] == abOnScreen[5] || !ProcessLineSegment(5, 7, activeOccluder))
+            && (abOnScreen[2] == abOnScreen[4] || !ProcessLineSegment(0, 1, activeOccluder))
+            && (abOnScreen[3] == abOnScreen[4] || !ProcessLineSegment(2, 3, activeOccluder))
+            && (abOnScreen[3] == abOnScreen[5] || !ProcessLineSegment(6, 7, activeOccluder))
+            && (abOnScreen[2] == abOnScreen[5] || !ProcessLineSegment(4, 5, activeOccluder))
             && SCREEN_WIDTH * 0.15F <= COcclusion::gMaxXInOccluder - COcclusion::gMinXInOccluder
             && SCREEN_HEIGHT * 0.1F <= COcclusion::gMaxYInOccluder - COcclusion::gMinYInOccluder) {
 
-            pActiveOccluder->m_cNumVectors = 0;
+            activeOccluder->m_cNumVectors = 0;
             for (auto i = 0; i < 6; ++i) {
                 if (abOnScreen[i]) {
                     auto vecNormalised = CVector(aVecArr[i]);
                     vecNormalised.Normalise();
                     auto vecScreenPos = vecPos + aVecArr[i];
 
-                    pActiveOccluder->m_aVectors[pActiveOccluder->m_cNumVectors] = vecNormalised;
-                    pActiveOccluder->m_afRadiuses[pActiveOccluder->m_cNumVectors] = DotProduct(vecScreenPos, vecNormalised);
-                    ++pActiveOccluder->m_cNumVectors;
+                    activeOccluder->m_aVectors[activeOccluder->m_cNumVectors] = vecNormalised;
+                    activeOccluder->m_afRadiuses[activeOccluder->m_cNumVectors] = DotProduct(vecScreenPos, vecNormalised);
+                    ++activeOccluder->m_cNumVectors;
                 }
             }
             return true;
@@ -115,25 +119,25 @@ bool COccluder::ProcessOneOccluder(CActiveOccluder* pActiveOccluder)
     }
 
     CVector vec1, vec2;
-    if (m_wLength * 0.25F == 0.0F) {
-        auto vecWidth = CVector(m_wWidth / 8.0F, 0.0F, 0.0F);
+    if (fLength / 4.0F == 0.0F) {
+        auto vecWidth = CVector(fWidth / 8.0F, 0.0F, 0.0F);
         vec1 = matTransform * vecWidth;
 
-        auto vecHeight = CVector(0.0F, 0.0F, m_wHeight / 8.0F);
+        auto vecHeight = CVector(0.0F, 0.0F, fHeight / 8.0F);
         vec2 = matTransform * vecHeight;
     }
-    else if (m_wWidth * 0.25F == 0.0F) {
-        auto vecLength = CVector(0.0F, m_wLength / 8.0F, 0.0F);
+    else if (fWidth / 4.0F == 0.0F) {
+        auto vecLength = CVector(0.0F, fLength / 8.0F, 0.0F);
         vec1 = matTransform * vecLength;
 
-        auto vecHeight = CVector(0.0F, 0.0F, m_wHeight / 8.0F);
+        auto vecHeight = CVector(0.0F, 0.0F, fHeight / 8.0F);
         vec2 = matTransform * vecHeight;
     }
-    else if (m_wHeight * 0.25F == 0.0F) {
-        auto vecLength = CVector(0.0F, m_wLength / 8.0F, 0.0F);
+    else if (fHeight / 4.0F == 0.0F) {
+        auto vecLength = CVector(0.0F, fLength / 8.0F, 0.0F);
         vec1 = matTransform * vecLength;
 
-        auto vecWidth = CVector(m_wWidth / 8.0F, 0.0F, 0.0F);
+        auto vecWidth = CVector(fWidth / 8.0F, 0.0F, 0.0F);
         vec2 = matTransform * vecWidth;
     }
 
@@ -146,19 +150,19 @@ bool COccluder::ProcessOneOccluder(CActiveOccluder* pActiveOccluder)
         COcclusion::gOccluderCoorsValid[i] = CalcScreenCoors(COcclusion::gOccluderCoors[i], &COcclusion::gOccluderCoorsOnScreen[i], &temp1, &temp2);
     }
 
-    if (   !ProcessLineSegment(0, 1, pActiveOccluder)
-        && !ProcessLineSegment(1, 2, pActiveOccluder)
-        && !ProcessLineSegment(2, 3, pActiveOccluder)
-        && !ProcessLineSegment(3, 0, pActiveOccluder)
+    if (   !ProcessLineSegment(0, 1, activeOccluder)
+        && !ProcessLineSegment(1, 2, activeOccluder)
+        && !ProcessLineSegment(2, 3, activeOccluder)
+        && !ProcessLineSegment(3, 0, activeOccluder)
         && SCREEN_WIDTH  * 0.1F  <= COcclusion::gMaxXInOccluder - COcclusion::gMinXInOccluder
         && SCREEN_HEIGHT * 0.07F <= COcclusion::gMaxYInOccluder - COcclusion::gMinYInOccluder){
 
         auto vecCross = CrossProduct(vec1, vec2);
         vecCross.Normalise();
 
-        pActiveOccluder->m_aVectors[0] = vecCross;
-        pActiveOccluder->m_afRadiuses[0] = DotProduct(vecCross, vecPos);
-        pActiveOccluder->m_cNumVectors = 1;
+        activeOccluder->m_aVectors[0] = vecCross;
+        activeOccluder->m_afRadiuses[0] = DotProduct(vecCross, vecPos);
+        activeOccluder->m_cNumVectors = 1;
 
         return true;
     }
@@ -167,7 +171,7 @@ bool COccluder::ProcessOneOccluder(CActiveOccluder* pActiveOccluder)
 }
 
 // 0x71E130
-bool COccluder::ProcessLineSegment(int32 iIndFrom, int32 iIndTo, CActiveOccluder* pActiveOccluder)
+bool COccluder::ProcessLineSegment(int32 iIndFrom, int32 iIndTo, CActiveOccluder* activeOccluder)
 {
     if (!COcclusion::gOccluderCoorsValid[iIndFrom] && !COcclusion::gOccluderCoorsValid[iIndTo])
         return true;
@@ -222,7 +226,7 @@ bool COccluder::ProcessLineSegment(int32 iIndFrom, int32 iIndTo, CActiveOccluder
         fYSize = -fYSize;
     }
 
-    auto& pCurLine = pActiveOccluder->m_aLines[pActiveOccluder->m_cLinesCount];
+    auto& pCurLine = activeOccluder->m_aLines[activeOccluder->m_cLinesCount];
     pCurLine.m_fLength = CVector2D(fXSize, fYSize).Magnitude();
 
     auto fRecip = 1.0F / pCurLine.m_fLength;
@@ -230,7 +234,7 @@ bool COccluder::ProcessLineSegment(int32 iIndFrom, int32 iIndTo, CActiveOccluder
     pCurLine.m_vecDirection.Set(fRecip * fXSize, fRecip * fYSize);
 
     if (DoesInfiniteLineTouchScreen(fFromX, fFromY, pCurLine.m_vecDirection.x, pCurLine.m_vecDirection.y)) {
-        ++pActiveOccluder->m_cLinesCount;
+        ++activeOccluder->m_cLinesCount;
         return false;
     }
 
@@ -238,9 +242,12 @@ bool COccluder::ProcessLineSegment(int32 iIndFrom, int32 iIndTo, CActiveOccluder
 }
 
 // 0x71F960
-bool COccluder::NearCamera()
+bool COccluder::NearCamera() const
 {
-    auto fSize = std::max(m_wLength / 4.0F, m_wWidth / 4.0F);
+    auto fSize = std::max(
+        static_cast<float>(m_wLength) / 4.0F,
+        static_cast<float>(m_wWidth) / 4.0F
+    );
     const auto& vecCamPos = TheCamera.GetPosition();
     auto vecPos = CVector(m_wMidX, m_wMidY, m_wMidZ) / 4.0F;
 
