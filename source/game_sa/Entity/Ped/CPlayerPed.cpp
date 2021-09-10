@@ -204,14 +204,14 @@ void CPlayerPed::ReApplyMoveAnims() {
         AnimationId::ANIM_ID_IDLE,
         AnimationId::ANIM_ID_WALK_START
     };
-    for (AnimationId id : anims) {
+    for (const AnimationId& id : anims) {
         if (CAnimBlendAssociation* anim = RpAnimBlendClumpGetAssociation(m_pRwClump, id)) {
             if (anim->GetHashKey() != CAnimManager::GetAnimAssociation(m_nAnimGroup, id)->GetHashKey()) {
                 CAnimBlendAssociation* addedAnim = CAnimManager::AddAnimation(m_pRwClump, m_nAnimGroup, id);
                 addedAnim->m_fBlendDelta = anim->m_fBlendDelta;
                 addedAnim->m_fBlendAmount = anim->m_fBlendAmount;
 
-                anim->m_nFlags |= 4u; // TODO
+                anim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
                 anim->m_fBlendDelta = -1000.0f;
             }
         }
