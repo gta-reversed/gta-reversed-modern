@@ -1,5 +1,8 @@
 #include "StdInc.h"
-#include "eCrimeType.h"
+
+#include "CTaskSimplePlayerOnFoot.h"
+
+#include "CTaskComplexUseGoggles.h"
 
 int32& gLastRandomNumberForIdleAnimationID = *reinterpret_cast<int32*>(0x8D2FEC);
 uint32& gLastTouchTimeDelta = *reinterpret_cast<uint32*>(0xC19664);
@@ -391,14 +394,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 }
                 else if (weaponType > WEAPON_CAMERA&& weaponType <= WEAPON_INFRARED && !pTaskManager->m_aPrimaryTasks[3])
                 {
-                    CTaskComplexUseGoggles* pCTaskComplexUseGoggles = nullptr;
-                    CTask* pNewTask = static_cast<CTask*>(CTask::operator new(12));
-                    if (pNewTask)
-                    {
-                        pCTaskComplexUseGoggles = static_cast<CTaskComplexUseGoggles*>(pNewTask);
-                        pCTaskComplexUseGoggles->Constructor();
-                    }
-
+                    auto* pCTaskComplexUseGoggles = new CTaskComplexUseGoggles();
                     pTaskManager->SetTask(pCTaskComplexUseGoggles, 3, 0);
                     pPlayerPed->m_pPlayerData->m_bDontAllowWeaponChange = true;
                 }

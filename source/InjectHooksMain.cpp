@@ -37,6 +37,7 @@
 #include "CPlantMgr.h"
 
 #include "CTaskSimpleFight.h"
+#include "CTaskComplexUseGoggles.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
@@ -371,6 +372,7 @@ void InjectHooksMain()
     CCustomBuildingRenderer::InjectHooks();
     CCustomBuildingDNPipeline::InjectHooks();
     CTaskSimpleFight::InjectHooks();
+    CTaskComplexUseGoggles::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

@@ -538,7 +538,6 @@
 #include "game_sa\Tasks\TaskTypes\CTaskComplexGoToPointAndStandStill.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexGoToPointAndStandStillTimed.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexJump.h"
-#include "game_sa\Tasks\TaskTypes\CTaskComplexUseGoggles.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexGoPickUpEntity.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexBeCop.h"
 #include "game_sa\Tasks\TaskTypes\CTaskComplexWanderCop.h"
