@@ -69,32 +69,25 @@ void COcclusion::AddOne(float centerX, float centerY, float centerZ, float width
     auto fRotX = DegreesToRadians(CGeneral::LimitAngle(rotX) + 180.0F);
     const auto fTwoPiToChar = 256.0F / TWO_PI;
 
-    if (isInterior)
-    {
+    const auto UpdateOccluder = [&](COccluder& occluder) {
+        occluder.m_wMidX   = static_cast<int16>(centerX * 4.0F);
+        occluder.m_wMidY   = static_cast<int16>(centerY * 4.0F);
+        occluder.m_wMidZ   = static_cast<int16>(centerZ * 4.0F);
+        occluder.m_wWidth  = static_cast<int16>((float)iWidth * 4.0F);
+        occluder.m_wLength = static_cast<int16>((float)iLength * 4.0F);
+        occluder.m_wHeight = static_cast<int16>((float)iHeight * 4.0F);
+        occluder.m_cRotZ   = static_cast<uint8>(fRotZ * fTwoPiToChar);
+        occluder.m_cRotY   = static_cast<uint8>(fRotY * fTwoPiToChar);
+        occluder.m_cRotX   = static_cast<uint8>(fRotX * fTwoPiToChar);
+    };
+
+    if (isInterior) {
         auto& occluder = aInteriorOccluders[NumInteriorOcculdersOnMap];
-        occluder.m_wMidX = centerX * 4.0F;
-        occluder.m_wMidY = centerY * 4.0F;
-        occluder.m_wMidZ = centerZ * 4.0F;
-        occluder.m_wWidth = iWidth * 4.0F;
-        occluder.m_wLength = iLength * 4.0F;
-        occluder.m_wHeight = iHeight * 4.0F;
-        occluder.m_cRotZ = fRotZ * fTwoPiToChar;
-        occluder.m_cRotY = fRotY * fTwoPiToChar;
-        occluder.m_cRotX = fRotX * fTwoPiToChar;
-        ++NumInteriorOcculdersOnMap;
-    }
-    else
-    {
+        UpdateOccluder(occluder);
+        NumInteriorOcculdersOnMap++;
+    } else {
         auto& occluder = aOccluders[NumOccludersOnMap];
-        occluder.m_wMidX = centerX * 4.0F;
-        occluder.m_wMidY = centerY * 4.0F;
-        occluder.m_wMidZ = centerZ * 4.0F;
-        occluder.m_wWidth = iWidth * 4.0F;
-        occluder.m_wLength = iLength * 4.0F;
-        occluder.m_wHeight = iHeight * 4.0F;
-        occluder.m_cRotZ = fRotZ * fTwoPiToChar;
-        occluder.m_cRotY = fRotY * fTwoPiToChar;
-        occluder.m_cRotX = fRotX * fTwoPiToChar;
+        UpdateOccluder(occluder);
 
         if (flags)
             occluder.m_bFarAway = true;
@@ -103,7 +96,7 @@ void COcclusion::AddOne(float centerX, float centerY, float centerZ, float width
 
         occluder.m_nNextIndex = FarAwayList;
         FarAwayList = NumOccludersOnMap;
-        ++NumOccludersOnMap;
+        NumOccludersOnMap++;
     }
 }
 
