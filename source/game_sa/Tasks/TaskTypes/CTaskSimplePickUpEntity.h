@@ -14,7 +14,7 @@ public:
     ~CTaskSimplePickUpEntity();
 
     CTask* Clone() override;
-    eTaskType GetId() override;
+    eTaskType GetTaskType() override;
 
 private:
     friend void InjectHooksMain();

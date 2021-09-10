@@ -16,7 +16,7 @@ public:
     ~CTaskComplexEnterCarAsDriver() {}
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_COMPLEX_ENTER_CAR_AS_DRIVER; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_ENTER_CAR_AS_DRIVER; }
 
     CTask* Clone_Reversed();
 

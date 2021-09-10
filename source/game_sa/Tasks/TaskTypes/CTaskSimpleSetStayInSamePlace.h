@@ -15,7 +15,7 @@ public:
     static void InjectHooks();
 
     CTask* Clone() override { return new CTaskSimpleSetStayInSamePlace(m_bStayInSamePlace); }
-    eTaskType GetId() override { return TASK_SIMPLE_SET_STAY_IN_SAME_PLACE; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_SET_STAY_IN_SAME_PLACE; }
     bool ProcessPed(CPed* ped) override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }
 

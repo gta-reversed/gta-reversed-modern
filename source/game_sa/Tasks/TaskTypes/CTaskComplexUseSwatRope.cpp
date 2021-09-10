@@ -110,7 +110,7 @@ bool CTaskComplexUseSwatRope::MakeAbortable_Reversed(CPed* ped, eAbortPriority p
 
 CTask* CTaskComplexUseSwatRope::CreateNextSubTask_Reversed(CPed* ped)
 {
-    eTaskType subTaskType = m_pSubTask->GetId();
+    eTaskType subTaskType = m_pSubTask->GetTaskType();
 
     if (subTaskType == TASK_NONE || subTaskType == TASK_SIMPLE_PAUSE)
         return CreateSubTask(TASK_FINISHED, ped);
@@ -141,7 +141,7 @@ CTask* CTaskComplexUseSwatRope::ControlSubTask_Reversed(CPed* ped)
                 return nullptr;
             }
 
-    eTaskType subTaskType = m_pSubTask->GetId();
+    eTaskType subTaskType = m_pSubTask->GetTaskType();
 
     if (subTaskType == TASK_SIMPLE_PAUSE || subTaskType == TASK_SIMPLE_ABSEIL)
     {

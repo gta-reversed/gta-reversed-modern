@@ -59,7 +59,7 @@ public:
     CTaskComplexWander* Constructor(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
 
     // original virtual functions
-    eTaskType GetId() override;
+    eTaskType GetTaskType() override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

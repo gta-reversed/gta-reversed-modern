@@ -62,7 +62,7 @@ CTask* CTaskComplexJump::CreateFirstSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexJump::CreateNextSubTask_Reversed(CPed* ped)
 {
-    eTaskType subTaskType = m_pSubTask->GetId();
+    eTaskType subTaskType = m_pSubTask->GetTaskType();
 
     if (subTaskType == TASK_SIMPLE_CLIMB)
         return CreateSubTask(ped->bIsInTheAir ? TASK_COMPLEX_IN_AIR_AND_LAND : TASK_FINISHED, ped);
@@ -155,7 +155,7 @@ CTask* CTaskComplexJump::CreateSubTask(eTaskType taskType, CPed* ped)
         return pTask;
     }
     case TASK_SIMPLE_CLIMB:
-        if (m_pSubTask && m_pSubTask->GetId() == TASK_SIMPLE_JUMP)
+        if (m_pSubTask && m_pSubTask->GetTaskType() == TASK_SIMPLE_JUMP)
         {
             auto pJumpTask = reinterpret_cast<CTaskSimpleJump*>(m_pSubTask);
             return new CTaskSimpleClimb(
@@ -175,7 +175,7 @@ CTask* CTaskComplexJump::CreateSubTask(eTaskType taskType, CPed* ped)
     {
         auto pNewTask = new CTaskComplexInAirAndLand(true, false);
 
-        if (m_pSubTask->GetId() == TASK_SIMPLE_CLIMB && reinterpret_cast<CTaskSimpleClimb*>(m_pSubTask)->m_bInvalidClimb)
+        if (m_pSubTask->GetTaskType() == TASK_SIMPLE_CLIMB && reinterpret_cast<CTaskSimpleClimb*>(m_pSubTask)->m_bInvalidClimb)
             pNewTask->m_bInvalidClimb = true;
 
         return pNewTask;

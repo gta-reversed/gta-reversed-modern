@@ -29,7 +29,7 @@ private:
 	CTaskSimpleStandStill* Constructor(int32 nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
 public:
     CTask* Clone()  override;
-    eTaskType GetId() override { return TASK_SIMPLE_STAND_STILL; };
+    eTaskType GetTaskType() override { return TASK_SIMPLE_STAND_STILL; };
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 

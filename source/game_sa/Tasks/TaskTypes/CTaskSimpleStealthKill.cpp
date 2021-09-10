@@ -126,7 +126,7 @@ bool CTaskSimpleStealthKill::MakeAbortable_Reversed(class CPed* ped, eAbortPrior
 }
 
 // 0x622670
-eTaskType CTaskSimpleStealthKill::GetId()
+eTaskType CTaskSimpleStealthKill::GetTaskType()
 {
     return CTaskSimpleStealthKill::GetId_Reversed();
 }

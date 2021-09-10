@@ -45,7 +45,7 @@ public:
     CTaskComplexLeaveCar* Constructor(CVehicle* pTargetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut);
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_COMPLEX_LEAVE_CAR; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_LEAVE_CAR; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

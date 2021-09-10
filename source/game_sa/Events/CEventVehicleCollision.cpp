@@ -95,7 +95,7 @@ bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
 
     CTask* pActiveTask = ped->GetTaskManager().GetActiveTask();
     if (pActiveTask) {
-        if (pActiveTask->GetId() == TASK_COMPLEX_WALK_ROUND_CAR) {
+        if (pActiveTask->GetTaskType() == TASK_COMPLEX_WALK_ROUND_CAR) {
             auto pTaskWalkRoundCar = reinterpret_cast<CTaskComplexWalkRoundCar*>(pActiveTask);
             CVehicle* walkRoundVehicle = pTaskWalkRoundCar->m_vehicle;
             if (walkRoundVehicle == m_vehicle)
@@ -108,7 +108,7 @@ bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
         }
         else {
             auto pTaskHitPedWithCar = reinterpret_cast<CTaskComplexHitPedWithCar*>(pActiveTask);
-            if (pActiveTask->GetId() == TASK_COMPLEX_HIT_PED_WITH_CAR && pTaskHitPedWithCar->m_vehicle == m_vehicle)
+            if (pActiveTask->GetTaskType() == TASK_COMPLEX_HIT_PED_WITH_CAR && pTaskHitPedWithCar->m_vehicle == m_vehicle)
                 return false;
         }
     }

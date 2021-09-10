@@ -14,7 +14,7 @@ public:
 
     bool ProcessPed(class CPed* ped) override;
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_SIMPLE_ACHIEVE_HEADING; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_ACHIEVE_HEADING; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
 };
 

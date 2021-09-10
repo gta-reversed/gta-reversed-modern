@@ -24,7 +24,7 @@ private:
 public:
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_COMPLEX_MEDIC_TREAT_INJURED_PED; };
+    eTaskType GetTaskType() override { return TASK_COMPLEX_MEDIC_TREAT_INJURED_PED; };
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

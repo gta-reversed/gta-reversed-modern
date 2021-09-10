@@ -447,7 +447,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                         CTask* pSecondaryTask = pTaskManager->GetTaskSecondary(0);
                         if (pSecondaryTask)
                         {
-                            if (pSecondaryTask->GetId() == TASK_SIMPLE_USE_GUN)
+                            if (pSecondaryTask->GetTaskType() == TASK_SIMPLE_USE_GUN)
                             {
                                 CTaskSimpleUseGun* pTaskUseGun = pIntelligence->GetTaskUseGun();
                                 if (pTaskUseGun)
@@ -500,7 +500,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                             CTask* pTaskSecondary = pTaskManager->GetTaskSecondary(0);
                             if (pTaskSecondary)
                             {
-                                if (pTaskSecondary->GetId() == TASK_SIMPLE_USE_GUN)
+                                if (pTaskSecondary->GetTaskType() == TASK_SIMPLE_USE_GUN)
                                 {
                                     if (pIntelligence->GetTaskUseGun())
                                     {
@@ -531,7 +531,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                             if (pTaskManager->GetTaskSecondary(0) || !pPad->WeaponJustDown(pPlayerPed))
                             {
                                 CTask* pTaskSecondary = pTaskManager->GetTaskSecondary(0);
-                                if (pTaskSecondary && pTaskSecondary->GetId() != TASK_SIMPLE_THROW)
+                                if (pTaskSecondary && pTaskSecondary->GetTaskType() != TASK_SIMPLE_THROW)
                                 {
                                     pTaskSecondary->MakeAbortable(pPlayerPed, ABORT_PRIORITY_URGENT, nullptr);
                                 }
@@ -778,7 +778,7 @@ PED_WEAPON_AIMING_CODE:
                 pTargetedEntity = (CPed*)pPlayerPed->m_pTargetedObject;
                 if (pTargetedEntity && pTargetedEntity->m_nType == ENTITY_TYPE_PED && pIntelligence->IsInSeeingRange(pPlayerPed->GetPosition())) {
                     CTask* pActivePrimaryTask = pIntelligence->GetActivePrimaryTask();
-                    if (!pActivePrimaryTask || pActivePrimaryTask->GetId() != TASK_COMPLEX_REACT_TO_GUN_AIMED_AT)
+                    if (!pActivePrimaryTask || pActivePrimaryTask->GetTaskType() != TASK_COMPLEX_REACT_TO_GUN_AIMED_AT)
                     {
                         if (pActiveWeapon->m_nType != WEAPON_PISTOL_SILENCED)
                         {
@@ -1353,7 +1353,7 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
                     if (pPlayerPed->m_pIntelligence->m_TaskMgr.GetActiveTask())
                     {
                         CTask* pActiveTask = pPlayerPed->m_pIntelligence->m_TaskMgr.GetActiveTask();
-                        if (pActiveTask->GetId() != TASK_COMPLEX_JUMP)
+                        if (pActiveTask->GetTaskType() != TASK_COMPLEX_JUMP)
                             pPlayerPed->m_pIntelligence->m_TaskMgr.SetTask(new CTaskComplexJump(COMPLEX_JUMP_TYPE_JUMP), 3, 0);
                     }
                 }

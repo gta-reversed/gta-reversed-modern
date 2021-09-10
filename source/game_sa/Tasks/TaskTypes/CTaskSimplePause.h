@@ -13,7 +13,7 @@ public:
     ~CTaskSimplePause();
 
     CTask* Clone() override;
-    eTaskType GetId() override {
+    eTaskType GetTaskType() override {
         return TASK_SIMPLE_PAUSE;
     };
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;

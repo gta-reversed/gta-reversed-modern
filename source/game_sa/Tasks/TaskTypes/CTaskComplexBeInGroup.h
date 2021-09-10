@@ -17,7 +17,7 @@ public:
     ~CTaskComplexBeInGroup() { }
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_COMPLEX_BE_IN_GROUP; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_BE_IN_GROUP; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

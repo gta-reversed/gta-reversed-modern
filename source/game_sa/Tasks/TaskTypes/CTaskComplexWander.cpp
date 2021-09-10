@@ -3,7 +3,7 @@
 void CTaskComplexWander::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexWander", "CTaskComplexWander", 0x66F450, &CTaskComplexWander::Constructor);
-    ReversibleHooks::Install("CTaskComplexWander", "GetId", 0x460CD0, &CTaskComplexWander::GetId_Reversed);
+    ReversibleHooks::Install("CTaskComplexWander", "GetTaskType", 0x460CD0, &CTaskComplexWander::GetId_Reversed);
     ReversibleHooks::Install("CTaskComplexWander", "CreateNextSubTask", 0x674140, &CTaskComplexWander::CreateNextSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexWander", "CreateFirstSubTask", 0x6740E0, &CTaskComplexWander::CreateFirstSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexWander", "ControlSubTask", 0x674C30, &CTaskComplexWander::ControlSubTask_Reversed);
@@ -39,7 +39,7 @@ CTaskComplexWander* CTaskComplexWander::Constructor(int32 moveState, uint8 dir, 
     return this;
 }
 
-eTaskType CTaskComplexWander::GetId()
+eTaskType CTaskComplexWander::GetTaskType()
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
     return ((eTaskType(__thiscall*)(CTask*))0x460CD0)(this);
@@ -97,7 +97,7 @@ void CTaskComplexWander::UpdatePathNodes(CPed* pPed, int8 dir, CNodeAddress* ori
 CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
 {
     bool bTheTaskIDIs181 = false;
-    int32 taskId = m_pSubTask->GetId();
+    int32 taskId = m_pSubTask->GetTaskType();
     if (taskId > TASK_SIMPLE_SCRATCH_HEAD)
     {
         int32 theTaskID = taskId - TASK_COMPLEX_LEAVE_CAR;
@@ -253,7 +253,7 @@ CTask* CTaskComplexWander::CreateFirstSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped)
 {
-    int32 subTaskId = m_pSubTask->GetId();
+    int32 subTaskId = m_pSubTask->GetTaskType();
     if (subTaskId == TASK_COMPLEX_LEAVE_CAR || subTaskId == TASK_SIMPLE_CAR_DRIVE_TIMED)
     {
         return m_pSubTask;
@@ -501,7 +501,7 @@ void CTaskComplexWander::ScanForBlockedNodes(CPed* pPed)
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x674560, CTaskComplexWander*, CPed*>(this, pPed);
 #else
-    if (m_pSubTask->GetId() == TASK_SIMPLE_GO_TO_POINT && m_NextNode.m_wAreaId != -1)
+    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT && m_NextNode.m_wAreaId != -1)
     {
         if (ScanForBlockedNode(pPed, &m_NextNode))
         {

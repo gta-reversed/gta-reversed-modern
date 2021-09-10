@@ -27,7 +27,7 @@ public:
 
     static void InjectHooks();
 
-    eTaskType GetId() override { return TASK_COMPLEX_JUMP; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_JUMP; }
     CTask* Clone() override;
     CTask* ControlSubTask(CPed* ped) override { return m_pSubTask; }
     CTask* CreateFirstSubTask(CPed* ped) override;

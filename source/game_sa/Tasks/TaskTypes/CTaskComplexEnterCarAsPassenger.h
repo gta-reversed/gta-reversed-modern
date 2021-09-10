@@ -16,7 +16,7 @@ public:
     ~CTaskComplexEnterCarAsPassenger() {}
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_COMPLEX_ENTER_CAR_AS_PASSENGER; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_ENTER_CAR_AS_PASSENGER; }
 };
 
 VALIDATE_SIZE(CTaskComplexEnterCarAsPassenger, 0x50);

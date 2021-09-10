@@ -14,7 +14,7 @@ private:
     CTaskComplexPartnerDeal* Constructor(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, CVector point);
 public:
     CTask* Clone() override { return new CTaskComplexPartnerDeal(m_commandName, m_partner, m_leadSpeaker, m_distanceMultiplier, m_point); }
-    eTaskType GetId() override { return TASK_COMPLEX_PARTNER_DEAL; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_PARTNER_DEAL; }
     CTask* CreateFirstSubTask(CPed* ped) override;
     void StreamRequiredAnims() override;
     virtual CTaskComplexSequence* GetPartnerSequence();

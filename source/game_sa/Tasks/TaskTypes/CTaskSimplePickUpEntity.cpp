@@ -4,7 +4,7 @@ void CTaskSimplePickUpEntity::InjectHooks() {
     ReversibleHooks::Install("CTaskSimplePickUpEntity", "Constructor_1", 0x691870, (CTaskSimplePickUpEntity*(CTaskSimplePickUpEntity::*)(CEntity*, CVector*, char, uint8, CAnimBlock*, CAnimBlendHierarchy*, int32, float)) & CTaskSimplePickUpEntity::Constructor);
     ReversibleHooks::Install("CTaskSimplePickUpEntity", "Constructor_2", 0x6917B0, (CTaskSimplePickUpEntity * (CTaskSimplePickUpEntity::*)(CEntity*, CVector*, char, uint8, AnimationId, AssocGroupId, float)) & CTaskSimplePickUpEntity::Constructor);
     ReversibleHooks::Install("CTaskSimplePickUpEntity", "Clone", 0x692A90, &CTaskSimplePickUpEntity::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimplePickUpEntity", "GetId", 0x691810, &CTaskSimplePickUpEntity::GetId_Reversed);
+    ReversibleHooks::Install("CTaskSimplePickUpEntity", "GetTaskType", 0x691810, &CTaskSimplePickUpEntity::GetId_Reversed);
 }
 
 CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags,
@@ -39,7 +39,7 @@ CTask* CTaskSimplePickUpEntity::Clone() {
 }
 
 // 0x691810
-eTaskType CTaskSimplePickUpEntity::GetId() {
+eTaskType CTaskSimplePickUpEntity::GetTaskType() {
     return CTaskSimplePickUpEntity::GetId_Reversed();
 }
 

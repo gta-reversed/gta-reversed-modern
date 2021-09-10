@@ -227,7 +227,7 @@ bool CEventDamage::AffectsPed_Reversed(CPed* ped) {
         if (m_pSourceEntity) {
             if (m_pSourceEntity->m_nType == ENTITY_TYPE_PED) {
                 CTask* pActiveTask = pPedSourceEntity->m_pIntelligence->m_TaskMgr.GetActiveTask();
-                if (pActiveTask && pActiveTask->GetId() == TASK_SIMPLE_STEALTH_KILL) {
+                if (pActiveTask && pActiveTask->GetTaskType() == TASK_SIMPLE_STEALTH_KILL) {
                     CVector vecDirection = m_pSourceEntity->GetPosition() - ped->GetPosition();
                     vecDirection.Normalise();
                     if (ped->m_pIntelligence->CanSeeEntityWithLights(m_pSourceEntity, 0) <= 0.0f
@@ -265,7 +265,7 @@ bool CEventDamage::AffectsPedGroup_Reversed(CPedGroup* pedGroup) {
     CTask* pActiveTask = pPed->m_pIntelligence->m_TaskMgr.GetActiveTask();
     if (!pActiveTask)
         return true;
-    if (pActiveTask->GetId() != TASK_SIMPLE_STEALTH_KILL)
+    if (pActiveTask->GetTaskType() != TASK_SIMPLE_STEALTH_KILL)
         return true;
     for (size_t memberId = 0; memberId < 8; memberId++) {
         CPed* pGroupMember = pedGroup->m_groupMembership.GetMember(memberId);
@@ -510,7 +510,7 @@ void CEventDamage::ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
         ped->GetBonePosition(*(RwV3d*)&bonePosition, BONE_HEAD, false);
         CTask* pSimplestActiveTask = ped->m_pIntelligence->m_TaskMgr.GetSimplestActiveTask();
         if (ped->GetPosition().z - 0.2f > bonePosition.z
-            && pSimplestActiveTask && (pSimplestActiveTask->GetId() == TASK_SIMPLE_FALL || pSimplestActiveTask->GetId() == TASK_SIMPLE_GET_UP))
+            && pSimplestActiveTask && (pSimplestActiveTask->GetTaskType() == TASK_SIMPLE_FALL || pSimplestActiveTask->GetTaskType() == TASK_SIMPLE_GET_UP))
         {
             m_bKnockOffPed = true;
             m_nAnimID = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIM_FLAG_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT;
@@ -758,7 +758,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
     ped->GetBonePosition(*(RwV3d*)&bonePosition, BONE_HEAD, false);
     if (bonePosition.z < ped->GetPosition().z && !ped->IsPlayer()
         && pSimplestActiveTask
-        && (pSimplestActiveTask->GetId() == TASK_SIMPLE_FALL|| pSimplestActiveTask->GetId() == TASK_SIMPLE_GET_UP))
+        && (pSimplestActiveTask->GetTaskType() == TASK_SIMPLE_FALL|| pSimplestActiveTask->GetTaskType() == TASK_SIMPLE_GET_UP))
     {
         m_bKnockOffPed = true;
         m_nAnimID = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIM_FLAG_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT;

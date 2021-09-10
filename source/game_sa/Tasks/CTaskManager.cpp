@@ -72,7 +72,7 @@ CTask* CTaskManager::GetActiveTask() {
 CTask* CTaskManager::FindActiveTaskByType(int32 taskType) {
     // First try current active task, and its sub-tasks
     for (CTask* task = GetActiveTask(); task; task = task->GetSubTask()) {
-        if (task->GetId() == taskType) {
+        if (task->GetTaskType() == taskType) {
             return task;
         }
     }
@@ -81,7 +81,7 @@ CTask* CTaskManager::FindActiveTaskByType(int32 taskType) {
     CTask* lastFound = nullptr;
     for (int32 i = 0; i < TASK_SECONDARY_MAX; i++) {
         for (CTask* sub = GetTaskSecondary(i); sub; sub = sub->GetSubTask()) {
-            if (sub->GetId() == taskType) {
+            if (sub->GetTaskType() == taskType) {
                 lastFound = sub;
                 break; /* break inner */
             }
@@ -95,7 +95,7 @@ CTask* CTaskManager::FindActiveTaskByType(int32 taskType) {
 // 0x6817D0
 CTask* CTaskManager::FindTaskByType(int32 taskIndex, int32 taskId) {
     for (CTask* task = GetPrimaryTask(taskIndex); task; task = task->GetSubTask()) {
-        if (task->GetId() == taskId) {
+        if (task->GetTaskType() == taskId) {
             return task;
         }
     }

@@ -210,7 +210,7 @@ CTask* CPedIntelligence::FindTaskByType(int32 taskId) {
 CTaskSimpleFight* CPedIntelligence::GetTaskFighting() {
     CTaskManager* pTaskManager = &m_TaskMgr;
     CTask* pTaskSecondary = pTaskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
-    if (pTaskSecondary && pTaskSecondary->GetId() == TASK_SIMPLE_FIGHT)
+    if (pTaskSecondary && pTaskSecondary->GetTaskType() == TASK_SIMPLE_FIGHT)
     {
         return (CTaskSimpleFight*)pTaskSecondary;
     }
@@ -220,7 +220,7 @@ CTaskSimpleFight* CPedIntelligence::GetTaskFighting() {
 // 0x600F70
 CTaskSimpleUseGun* CPedIntelligence::GetTaskUseGun() {
     CTask* pTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
-    if (pTask && pTask->GetId() == TASK_SIMPLE_USE_GUN)
+    if (pTask && pTask->GetTaskType() == TASK_SIMPLE_USE_GUN)
     {
         return (CTaskSimpleUseGun*)pTask;
     }
@@ -230,7 +230,7 @@ CTaskSimpleUseGun* CPedIntelligence::GetTaskUseGun() {
 // 0x600FB0
 CTaskSimpleThrowProjectile* CPedIntelligence::GetTaskThrow() {
     CTask* pTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
-    if (pTask && pTask->GetId() == TASK_SIMPLE_THROW)
+    if (pTask && pTask->GetTaskType() == TASK_SIMPLE_THROW)
     {
         return (CTaskSimpleThrowProjectile*)pTask;
     }
@@ -243,7 +243,7 @@ CTask* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) 
     CTask* pTaskSecondary = pTaskManager->GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
     if (pTaskSecondary)
     {
-        if (pTaskSecondary->GetId() == TASK_SIMPLE_HOLD_ENTITY)
+        if (pTaskSecondary->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY)
         {
             return pTaskSecondary;
         }
@@ -255,8 +255,8 @@ CTask* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) 
 
     CTask* pActiveSimplestTask = pTaskManager->GetSimplestActiveTask();
     if (!pActiveSimplestTask
-        || pActiveSimplestTask->GetId() != TASK_SIMPLE_PICKUP_ENTITY
-        && pActiveSimplestTask->GetId() != TASK_SIMPLE_PUTDOWN_ENTITY)
+        || pActiveSimplestTask->GetTaskType() != TASK_SIMPLE_PICKUP_ENTITY
+        && pActiveSimplestTask->GetTaskType() != TASK_SIMPLE_PUTDOWN_ENTITY)
     {
         return nullptr;
     }
@@ -266,7 +266,7 @@ CTask* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) 
 // 0x601070
 CTaskSimpleSwim* CPedIntelligence::GetTaskSwim() {
     CTask* pTask = m_TaskMgr.GetSimplestActiveTask();
-    if (pTask && pTask->GetId() == TASK_SIMPLE_SWIM)
+    if (pTask && pTask->GetTaskType() == TASK_SIMPLE_SWIM)
     {
         return (CTaskSimpleSwim*)pTask;
     }
@@ -277,7 +277,7 @@ CTaskSimpleSwim* CPedIntelligence::GetTaskSwim() {
 CTaskSimpleDuck* CPedIntelligence::GetTaskDuck(bool bIgnoreCheckingForSimplestActiveTask) {
     CTaskManager* pTaskManager = &m_TaskMgr;
     CTask* pSecondaryTask = (CTask*)pTaskManager->GetTaskSecondary(TASK_SECONDARY_DUCK);
-    if (pSecondaryTask && pSecondaryTask->GetId() == TASK_SIMPLE_DUCK)
+    if (pSecondaryTask && pSecondaryTask->GetTaskType() == TASK_SIMPLE_DUCK)
     {
         return (CTaskSimpleDuck*)pSecondaryTask;
     }
@@ -288,7 +288,7 @@ CTaskSimpleDuck* CPedIntelligence::GetTaskDuck(bool bIgnoreCheckingForSimplestAc
     }
 
     CTask* pActiveSimplestTask = pTaskManager->GetSimplestActiveTask();
-    if (!pActiveSimplestTask || pActiveSimplestTask->GetId() != TASK_SIMPLE_DUCK)
+    if (!pActiveSimplestTask || pActiveSimplestTask->GetTaskType() != TASK_SIMPLE_DUCK)
     {
         return nullptr;
     }
@@ -300,7 +300,7 @@ CTaskSimpleJetPack* CPedIntelligence::GetTaskJetPack() {
     if (m_pPed->IsPlayer())
     {
         CTask* pTask = m_TaskMgr.GetSimplestActiveTask();
-        if (pTask && pTask->GetId() == TASK_SIMPLE_JETPACK)
+        if (pTask && pTask->GetTaskType() == TASK_SIMPLE_JETPACK)
         {
             return (CTaskSimpleJetPack*)pTask;
         }
@@ -311,7 +311,7 @@ CTaskSimpleJetPack* CPedIntelligence::GetTaskJetPack() {
 // 0x601150
 CTaskSimpleInAir* CPedIntelligence::GetTaskInAir() {
     CTask* pTask = m_TaskMgr.GetSimplestActiveTask();
-    if (pTask && pTask->GetId() == TASK_SIMPLE_IN_AIR)
+    if (pTask && pTask->GetTaskType() == TASK_SIMPLE_IN_AIR)
     {
         return (CTaskSimpleInAir*)pTask;
     }
@@ -321,7 +321,7 @@ CTaskSimpleInAir* CPedIntelligence::GetTaskInAir() {
 // 0x601180
 CTaskSimpleClimb* CPedIntelligence::GetTaskClimb() {
     auto pTask = (CTaskSimpleClimb*)m_TaskMgr.GetSimplestActiveTask();
-    if (pTask && pTask->GetId() == TASK_SIMPLE_CLIMB)
+    if (pTask && pTask->GetTaskType() == TASK_SIMPLE_CLIMB)
     {
         return pTask;
     }
@@ -375,7 +375,7 @@ void CPedIntelligence::SetTaskDuckSecondary(uint16 nLengthOfDuck) {
 
     if (pSecondaryTask)
     {
-        if (pSecondaryTask->GetId() == TASK_SIMPLE_DUCK)
+        if (pSecondaryTask->GetTaskType() == TASK_SIMPLE_DUCK)
         {
             auto pDuckTask = (CTaskSimpleDuck*)pSecondaryTask;
             if (pDuckTask->m_nDuckControlType == DUCK_SCRIPT_CONTROLLED)
@@ -394,7 +394,7 @@ void CPedIntelligence::SetTaskDuckSecondary(uint16 nLengthOfDuck) {
     pTaskManager->SetTaskSecondary(pTaskSimpleDuck, TASK_SECONDARY_DUCK);
 
     CTask* pSecondaryAttackTask = pTaskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
-    if (pSecondaryAttackTask && pSecondaryAttackTask->GetId() == TASK_SIMPLE_USE_GUN)
+    if (pSecondaryAttackTask && pSecondaryAttackTask->GetTaskType() == TASK_SIMPLE_USE_GUN)
     {
         auto pTaskUseGun = (CTaskSimpleUseGun*)pSecondaryAttackTask;
         pTaskUseGun->ClearAnim(m_pPed);
@@ -424,7 +424,7 @@ void CPedIntelligence::ClearTaskDuckSecondary() {
         CTask* pTask = pTaskManager->GetTaskSecondary(0);
         if (pTask)
         {
-            if (pTask->GetId() == TASK_SIMPLE_USE_GUN)
+            if (pTask->GetTaskType() == TASK_SIMPLE_USE_GUN)
             {
                 if (pTaskManager->GetTaskSecondary(0))
                 {
@@ -445,7 +445,7 @@ void CPedIntelligence::ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryT
             if (!m_eventGroup.HasScriptCommandOfTaskType(TASK_SIMPLE_CAR_DRIVE))
             {
                 CTask* pDriveTask = nullptr;
-                if (m_TaskMgr.m_aPrimaryTasks[TASK_PRIMARY_DEFAULT]->GetId() == TASK_SIMPLE_CAR_DRIVE)
+                if (m_TaskMgr.m_aPrimaryTasks[TASK_PRIMARY_DEFAULT]->GetTaskType() == TASK_SIMPLE_CAR_DRIVE)
                 {
                     pDriveTask = static_cast<CTask*>(new CTaskSimpleCarDriveTimed(m_pPed->m_pVehicle, 0));
                 }
@@ -501,14 +501,14 @@ void CPedIntelligence::ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryT
 void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
     CTask* pPrimaryTask = m_TaskMgr.m_aPrimaryTasks[TASK_PRIMARY_PRIMARY];
     CTaskComplex* pTaskComplexBeInGroup = nullptr;
-    if (pPrimaryTask && pPrimaryTask->GetId() == TASK_COMPLEX_BE_IN_GROUP)
+    if (pPrimaryTask && pPrimaryTask->GetTaskType() == TASK_COMPLEX_BE_IN_GROUP)
     {
         pTaskComplexBeInGroup = (CTaskComplex*)pPrimaryTask->Clone();
     }
 
     CTaskSimpleHoldEntity* pTaskSimpleHoldEntity = nullptr;
     CTask* pSecondaryTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
-    if (pSecondaryTask && pSecondaryTask->GetId() == TASK_SIMPLE_HOLD_ENTITY)
+    if (pSecondaryTask && pSecondaryTask->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY)
     {
         pTaskSimpleHoldEntity = (CTaskSimpleHoldEntity*)pSecondaryTask;
     }
@@ -517,7 +517,7 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
     bool bIsEntityVisible = false;
     CObject* pObjectToHold = nullptr;
     CTaskSimpleHoldEntity* pTaskSimpleHoldEntityCloned = nullptr;
-    if (pTaskSimpleHoldEntity && pTaskSimpleHoldEntity->GetId() == TASK_SIMPLE_HOLD_ENTITY)
+    if (pTaskSimpleHoldEntity && pTaskSimpleHoldEntity->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY)
     {
         pObjectToHold = (CObject*)pTaskSimpleHoldEntity->m_pEntityToHold;
         if (pObjectToHold)
@@ -533,7 +533,7 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
 
     CTaskComplexFacial* pTaskComplexFacialCloned = nullptr;
     CTask* pTaskComplexFacial = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_FACIAL_COMPLEX);
-    if (pTaskComplexFacial && pTaskComplexFacial->GetId() == TASK_COMPLEX_FACIAL)
+    if (pTaskComplexFacial && pTaskComplexFacial->GetTaskType() == TASK_COMPLEX_FACIAL)
     {
         pTaskComplexFacialCloned = static_cast<CTaskComplexFacial*>(pTaskComplexFacial->Clone());
     }
@@ -639,7 +639,7 @@ void CPedIntelligence::ProcessAfterPreRender() {
         if (pSimpleTask->SetPedPosition(m_pPed))
         {
             CTask* pSecondaryAttackTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
-            if (pSecondaryAttackTask && pSecondaryAttackTask->GetId() == TASK_SIMPLE_HOLD_ENTITY)
+            if (pSecondaryAttackTask && pSecondaryAttackTask->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY)
             {
                 CTaskSimpleHoldEntity* pTaskSimpleHoldEntity = (CTaskSimpleHoldEntity*)pSecondaryAttackTask;
                 pTaskSimpleHoldEntity->SetPedPosition(m_pPed);
@@ -648,7 +648,7 @@ void CPedIntelligence::ProcessAfterPreRender() {
     }
 
     CTask* pSecondaryAttackTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
-    if (pSecondaryAttackTask && pSecondaryAttackTask->GetId() == TASK_SIMPLE_USE_GUN)
+    if (pSecondaryAttackTask && pSecondaryAttackTask->GetTaskType() == TASK_SIMPLE_USE_GUN)
     {
         CTaskSimpleUseGun* pTaskUseGun = (CTaskSimpleUseGun*)pSecondaryAttackTask;
         pTaskUseGun->SetPedPosition(m_pPed);
@@ -801,7 +801,7 @@ bool CPedIntelligence::TestForStealthKill(CPed* pTarget, bool bFullTest) {
     CTask* pActiveTask = pTarget->GetTaskManager().GetActiveTask();
     if (pActiveTask)
     {
-        if (pActiveTask->GetId() == TASK_COMPLEX_KILL_PED_ON_FOOT)
+        if (pActiveTask->GetTaskType() == TASK_COMPLEX_KILL_PED_ON_FOOT)
         {
             auto pTaskComplexKillPedOnFoot = (CTaskComplexKillPedOnFoot*)pActiveTask;
             if (pTaskComplexKillPedOnFoot->m_target == m_pPed)
@@ -923,7 +923,7 @@ bool CPedIntelligence::IsPedGoingForCarDoor() {
     CTaskSimple* pActiveSimplestTask = (CTaskSimple*)m_TaskMgr.GetSimplestActiveTask();
     if (pActiveSimplestTask)
     {
-        if (pActiveSimplestTask->GetId() == TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL)
+        if (pActiveSimplestTask->GetTaskType() == TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL)
         {
             return true;
         }
@@ -931,13 +931,13 @@ bool CPedIntelligence::IsPedGoingForCarDoor() {
         CTask* pParentTask = pActiveSimplestTask->m_pParentTask;
         if (pParentTask)
         {
-            if (pParentTask->GetId() == TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL)
+            if (pParentTask->GetTaskType() == TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL)
             {
                 return true;
             }
 
             CTask* pGrandParentTask = pParentTask->m_pParentTask;
-            if (pGrandParentTask && pGrandParentTask->GetId() == TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL)
+            if (pGrandParentTask && pGrandParentTask->GetTaskType() == TASK_COMPLEX_GO_TO_CAR_DOOR_AND_STAND_STILL)
             {
                 return true;
             }

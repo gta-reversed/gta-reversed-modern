@@ -19,7 +19,7 @@ public:
     static void InjectHooks();
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_COMPLEX_DRIVE_FIRE_TRUCK; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_DRIVE_FIRE_TRUCK; }
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
