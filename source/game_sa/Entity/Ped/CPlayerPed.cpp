@@ -707,7 +707,7 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
 
 
     if (auto anim = RpAnimBlendClumpGetAssociation(m_pRwClump, AnimationId::ANIM_ID_FIRE))
-        anim->m_nFlags |= 9u; // set 1th and 4th - TODO, use bitfields..
+        anim->m_nFlags |= ANIM_FLAG_STARTED & ANIM_FLAG_UNLOCK_LAST_FRAME;
 
     TheCamera.ClearPlayerWeaponMode();
 }
