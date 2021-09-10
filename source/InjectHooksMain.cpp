@@ -36,6 +36,8 @@
 #include "CCustomBuildingDNPipeline.h"
 #include "CPlantMgr.h"
 
+#include "CTaskSimpleFight.h"
+
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
         printf("Debugger not present\n");
@@ -368,6 +370,7 @@ void InjectHooksMain()
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
     CCustomBuildingDNPipeline::InjectHooks();
+    CTaskSimpleFight::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

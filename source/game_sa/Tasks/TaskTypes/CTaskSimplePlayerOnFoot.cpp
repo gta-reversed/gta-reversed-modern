@@ -369,13 +369,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 }
                 else
                 {
-                    CTask* pNewTask = static_cast<CTask*>(CTask::operator new(40));
-                    CTaskSimpleFight* pTaskSimpleFight = nullptr;
-                    if (pNewTask)
-                    {
-                        pTaskSimpleFight = static_cast<CTaskSimpleFight*>(pNewTask);
-                        pTaskSimpleFight->Constructor(pPlayerPed->m_pTargetedObject, fightCommand, 2000u);
-                    }
+                    auto* pTaskSimpleFight = new CTaskSimpleFight(pPlayerPed->m_pTargetedObject, fightCommand, 2000u);
 
                     pTaskManager->SetTaskSecondary(pTaskSimpleFight, 0);
                 }
