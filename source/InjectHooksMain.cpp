@@ -38,6 +38,7 @@
 
 #include "CTaskSimpleFight.h"
 #include "CTaskComplexUseGoggles.h"
+#include "CTaskSimpleUseGun.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
@@ -373,6 +374,7 @@ void InjectHooksMain()
     CCustomBuildingDNPipeline::InjectHooks();
     CTaskSimpleFight::InjectHooks();
     CTaskComplexUseGoggles::InjectHooks();
+    CTaskSimpleUseGun::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();
