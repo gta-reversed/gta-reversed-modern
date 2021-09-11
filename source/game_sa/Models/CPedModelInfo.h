@@ -5,46 +5,42 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CClumpModelInfo.h"
 #include "CColModel.h"
 
 struct tPedColNodeInfo {
-private:
-    int m_nPad;
-public:
-    int m_nBoneID; // see ePedBones
-    int m_nFlags;
+    char    _pad[4];
+    int32   m_nBoneID; // see ePedBones
+    int32   m_nFlags;
     CVector m_vecCenter;
-    float m_fRadius;
+    float   m_fRadius;
 };
 
-class  CPedModelInfo : public CClumpModelInfo {
+class CPedModelInfo : public CClumpModelInfo {
 public:
     CPedModelInfo() : CClumpModelInfo(), m_pHitColModel(nullptr) {}
     ~CPedModelInfo() { if (m_pHitColModel) delete m_pHitColModel; }
 public:
-    int m_nAnimType;
-    unsigned int m_nPedType;
-    unsigned int m_nStatType;
-    unsigned short m_nCarsCanDriveMask;
-    unsigned short m_nPedFlags;
-    CColModel *m_pHitColModel;
-    unsigned char m_nRadio1;
-    unsigned char m_nRadio2;
-    unsigned char m_nRace;
-private:
-    char __pad;
-public:
-    short m_nPedAudioType;
-    short m_nVoiceMin;
-    short m_nVoiceMax;
-    short m_nVoiceId;
+    int32      m_nAnimType;
+    uint32     m_nPedType;
+    uint32     m_nStatType;
+    uint16     m_nCarsCanDriveMask;
+    uint16     m_nPedFlags;
+    CColModel* m_pHitColModel;
+    uint8      m_nRadio1;
+    uint8      m_nRadio2;
+    uint8      m_nRace;
+    char       _pad;
+    int16      m_nPedAudioType;
+    int16      m_nVoiceMin;
+    int16      m_nVoiceMax;
+    int16      m_nVoiceId;
 
 public:
-    static constexpr int NUM_PED_NAME_ID_ASSOC = 13;
+    static constexpr int32 NUM_PED_NAME_ID_ASSOC = 13;
     static RwObjectNameIdAssocation (&m_pPedIds)[NUM_PED_NAME_ID_ASSOC];
-    static constexpr int NUM_PED_COL_NODE_INFOS = 12;
+    static constexpr int32 NUM_PED_COL_NODE_INFOS = 12;
     static tPedColNodeInfo(&m_pColNodeInfos)[NUM_PED_COL_NODE_INFOS];
 
 public:

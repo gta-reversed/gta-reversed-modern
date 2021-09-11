@@ -6,13 +6,13 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskComplex.h"
 #include "CTaskTimer.h"
 #include "CAnimBlock.h"
 #include "CObject.h"
 
-enum eSunbatherType : unsigned int
+enum eSunbatherType : uint32
 {
     SUNBATHER_MALE_1 = 0,
     SUNBATHER_MALE_2,
@@ -21,7 +21,7 @@ enum eSunbatherType : unsigned int
     SUNBATHER_FEMALE_3,
 };
 
-class  CTaskComplexSunbathe : public CTaskComplex {
+class CTaskComplexSunbathe : public CTaskComplex {
 public:
     bool                m_bStartStanding;
     bool                m_bBathing;
@@ -35,8 +35,8 @@ public:
     eSunbatherType      m_SunbatherType;
     CAnimBlock*         m_pBeachAnimBlock;
     CAnimBlock*         m_pSunbatheAnimBlock;
-    int               m_BeachAnimBlockIndex;
-    int               m_SunbatheAnimBlockIndex;
+    int32               m_BeachAnimBlockIndex;
+    int32               m_SunbatheAnimBlockIndex;
     CObject*            m_pTowel;
 
     CTaskComplexSunbathe(CObject* pTowel, bool bStartStanding);

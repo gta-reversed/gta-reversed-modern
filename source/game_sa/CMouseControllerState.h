@@ -2,14 +2,14 @@
 
 class CMouseControllerState {
 public:
-    unsigned char lmb;
-    unsigned char rmb;
-    unsigned char mmb;
-    unsigned char wheelUp;
-    unsigned char wheelDown;
-    unsigned char bmx1;
-    unsigned char bmx2;
-    char __align;
+    uint8 lmb;
+    uint8 rmb;
+    uint8 mmb;
+    uint8 wheelUp;
+    uint8 wheelDown;
+    uint8 bmx1;
+    uint8 bmx2;
+    char  __align;
     float Z;
     float X;
     float Y;

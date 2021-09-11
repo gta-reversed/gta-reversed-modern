@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
 #define WIN32_LEAN_AND_MEAN
 
 #include <Windows.h>
@@ -47,7 +45,7 @@ private:
     };
 
 private:
-    friend void InjectHooksMain(void);
+    friend void InjectHooksMain();
     static void InjectHooks();
 
     CAEWaveDecoder* Constructor(CAEDataStream* dataStream);

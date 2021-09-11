@@ -11,13 +11,13 @@
 
 class CKeyGen {
 public:
-    static const unsigned int keyTable[256];
+    static const uint32 keyTable[256];
 
 public:
     static void InjectHooks();
 
-    static unsigned int AppendStringToKey(unsigned int key, const char* str);
-    static unsigned int GetKey(const char* str);
-    static unsigned int GetKey(const char* str, int size);
-    static unsigned int GetUppercaseKey(const char* str);
+    static uint32 AppendStringToKey(uint32 key, const char* str);
+    static uint32 GetKey(const char* str);
+    static uint32 GetKey(const char* str, int32 size);
+    static uint32 GetUppercaseKey(const char* str);
 };

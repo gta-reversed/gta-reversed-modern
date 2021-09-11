@@ -17,7 +17,7 @@ public:
     CEntity* m_pEntity;
     CAESound m_tempSound;
 
-    static int8_t*& m_pAudioEventVolumes;
+    static int8*& m_pAudioEventVolumes;
 
 protected:
     CAEAudioEntity();

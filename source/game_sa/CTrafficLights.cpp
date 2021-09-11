@@ -1,15 +1,15 @@
 #include "StdInc.h"
 
-uint8_t(&CTrafficLights::aTrafficLightColoursR)[3] = *(uint8_t(*)[3])0x8A6214;
-uint8_t(&CTrafficLights::aTrafficLightColoursG)[3] = *(uint8_t(*)[3])0x8A6218;
-uint8_t(&CTrafficLights::aTrafficLightColoursB)[3] = *(uint8_t(*)[3])0xA9AD94;
+uint8(&CTrafficLights::aTrafficLightColoursR)[3] = *(uint8(*)[3])0x8A6214;
+uint8(&CTrafficLights::aTrafficLightColoursG)[3] = *(uint8(*)[3])0x8A6218;
+uint8(&CTrafficLights::aTrafficLightColoursB)[3] = *(uint8(*)[3])0xA9AD94;
 float& CTrafficLights::fLightMult = *(float*)0x8A621C;
 
 CVector& CTrafficLights::vecTrafficLights5_1 = *(CVector*)0xA9ADD4;
 CVector& CTrafficLights::vecTrafficLights5_2 = *(CVector*)0xA9ADC8;
 CVector& CTrafficLights::vecTrafficLights_1 = *(CVector*)0xA9ADBC;
 CVector& CTrafficLights::vecTrafficLights_2 = *(CVector*)0xA9ADB0;
-uint32_t& CTrafficLights::uiPedLightFlags = *(uint32_t*)0xA9ADE0;
+uint32& CTrafficLights::uiPedLightFlags = *(uint32*)0xA9ADE0;
 
 void CTrafficLights::InjectHooks()
 {
@@ -142,7 +142,7 @@ bool CTrafficLights::ShouldCarStopForBridge(CVehicle* pVehicle)
     return false;
 }
 
-int CTrafficLights::FindTrafficLightType(CEntity* pEntity)
+int32 CTrafficLights::FindTrafficLightType(CEntity* pEntity)
 {
     auto pHeading = CTrafficLights::FindOrientationForTrafficLightType(pEntity);
     return CTrafficLights::FindTrafficLightTypeFromOrientation(pHeading);
@@ -154,7 +154,7 @@ float CTrafficLights::FindOrientationForTrafficLightType(CEntity* pEntity)
     return RadiansToDegrees(CGeneral::GetATanOfXY(pMat.GetForward().x, pMat.GetForward().y));
 }
 
-int CTrafficLights::FindTrafficLightTypeFromOrientation(float fOrientation)
+int32 CTrafficLights::FindTrafficLightTypeFromOrientation(float fOrientation)
 {
     if ((fOrientation <= 60.0F || fOrientation >= 150.0F)
         && (fOrientation <= 240.0F || fOrientation >= 330.0F))
@@ -180,7 +180,7 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
         iLightColorBase = eBrightLightColor::BRIGHTLIGHT_GREEN_SMALL;
     }
 
-    int iLightState;
+    int32 iLightState;
     if (CTrafficLights::FindTrafficLightType(pEntity) == eTrafficLightsDirection::DIR_NORTH_SOUTH)
         iLightState = CTrafficLights::LightForCars1_Visual();
     else
@@ -190,14 +190,14 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
     bool bSameDir = DotProduct(TheCamera.m_mCameraMatrix.GetForward(), pEntMat.GetForward()) > 0.0F;
 
     CVector vecCenter(0.0F, 0.0F, 0.0F);
-    for (int32_t iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
+    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
         auto pEffect = pModelInfo->Get2dEffect(iFxInd);
         if (pEffect->m_nType != e2dEffectType::EFFECT_LIGHT)
             continue;
 
         auto vecLightPos = pEntity->GetMatrix() * pEffect->m_vecPosn;
         vecCenter += vecLightPos;
-        int iColorState = eTrafficLightsState::LIGHT_GREEN;
+        int32 iColorState = eTrafficLightsState::LIGHT_GREEN;
         if (pEffect->light.m_color.red > 200) {
             if (pEffect->light.m_color.green > 100)
                 iColorState = eTrafficLightsState::LIGHT_YELLOW;
@@ -211,11 +211,11 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
         auto fBrightness = CTimeCycle::m_CurrentColours.m_fSpriteBrightness * 0.07F;
         auto fSize = CTimeCycle::m_CurrentColours.m_fSpriteSize * 0.175F;
 
-        CCoronas::RegisterCorona(reinterpret_cast<uint32_t>(pEntity) + iFxInd,
+        CCoronas::RegisterCorona(reinterpret_cast<uint32>(pEntity) + iFxInd,
                                  nullptr,
-                                 static_cast<unsigned char>(aTrafficLightColoursR[iColorState] * fBrightness),
-                                 static_cast<unsigned char>(aTrafficLightColoursG[iColorState] * fBrightness),
-                                 static_cast<unsigned char>(aTrafficLightColoursB[iColorState] * fBrightness),
+                                 static_cast<uint8>(aTrafficLightColoursR[iColorState] * fBrightness),
+                                 static_cast<uint8>(aTrafficLightColoursG[iColorState] * fBrightness),
+                                 static_cast<uint8>(aTrafficLightColoursB[iColorState] * fBrightness),
                                  255,
                                  vecLightPos,
                                  fSize,
@@ -247,9 +247,9 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
         vecCenter /= pModelInfo->m_n2dfxCount;
         if (iLightState < eTrafficLightsState::LIGHT_OFF) {
             if (CWeather::TrafficLightsBrightness > 0.5F) {
-                auto ucRed =   std::max(CTrafficLights::aTrafficLightColoursR[iLightState], uint8_t(50));
-                auto ucGreen = std::max(CTrafficLights::aTrafficLightColoursG[iLightState], uint8_t(50));
-                auto ucBlue =  std::max(CTrafficLights::aTrafficLightColoursB[iLightState], uint8_t(50));
+                auto ucRed =   std::max(CTrafficLights::aTrafficLightColoursR[iLightState], uint8(50));
+                auto ucGreen = std::max(CTrafficLights::aTrafficLightColoursG[iLightState], uint8(50));
+                auto ucBlue =  std::max(CTrafficLights::aTrafficLightColoursB[iLightState], uint8(50));
 
                 CPointLights::AddLight(ePointLightType::PLTYPE_POINTLIGHT,
                                        vecCenter,
@@ -265,11 +265,11 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
 
             if (CWeather::TrafficLightsBrightness > 0.05F) {
                 auto fColMult = CTimeCycle::m_CurrentColours.m_fLightsOnGroundBrightness * CWeather::TrafficLightsBrightness / 80.0F;
-                uint8_t ucRed = static_cast<uint8_t>(CTrafficLights::aTrafficLightColoursR[iLightState] * fColMult);
-                uint8_t ucGreen = static_cast<uint8_t>(CTrafficLights::aTrafficLightColoursG[iLightState] * fColMult);
-                uint8_t ucBlue = static_cast<uint8_t>(CTrafficLights::aTrafficLightColoursB[iLightState] * fColMult);
+                uint8 ucRed = static_cast<uint8>(CTrafficLights::aTrafficLightColoursR[iLightState] * fColMult);
+                uint8 ucGreen = static_cast<uint8>(CTrafficLights::aTrafficLightColoursG[iLightState] * fColMult);
+                uint8 ucBlue = static_cast<uint8>(CTrafficLights::aTrafficLightColoursB[iLightState] * fColMult);
 
-                CShadows::StoreStaticShadow(reinterpret_cast<uint32_t>(pEntity),
+                CShadows::StoreStaticShadow(reinterpret_cast<uint32>(pEntity),
                                             eShadowType::SHADOW_ADDITIVE,
                                             gpShadowExplosionTex,
                                             &vecCenter,
@@ -385,7 +385,7 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
     }
 }
 
-bool CTrafficLights::IsMITrafficLight(int modelIndex)
+bool CTrafficLights::IsMITrafficLight(int32 modelIndex)
 {
     return modelIndex == ModelIndices::MI_TRAFFICLIGHTS
         || modelIndex == ModelIndices::MI_TRAFFICLIGHTS_VERTICAL
@@ -398,7 +398,7 @@ bool CTrafficLights::IsMITrafficLight(int modelIndex)
         || modelIndex == ModelIndices::MI_TRAFFICLIGHTS_GAY;
 }
 
-unsigned char CTrafficLights::LightForPeds()
+uint8 CTrafficLights::LightForPeds()
 {
     auto uiMaskedTime = (CTimer::m_snTimeInMilliseconds / 2) & 0x3FFF;
     if (uiMaskedTime < 12000)
@@ -410,7 +410,7 @@ unsigned char CTrafficLights::LightForPeds()
     return eTrafficLightsState::LIGHT_YELLOW;
 }
 
-unsigned char CTrafficLights::LightForCars1()
+uint8 CTrafficLights::LightForCars1()
 {
     if (CGameLogic::LaRiotsActiveHere() || CCheat::m_aCheatsActive[eCheats::CHEAT_BGREEN_LIGHTS_CHEAT])
         return eTrafficLightsState::LIGHT_GREEN;
@@ -425,7 +425,7 @@ unsigned char CTrafficLights::LightForCars1()
     return eTrafficLightsState::LIGHT_RED;
 }
 
-unsigned char CTrafficLights::LightForCars2()
+uint8 CTrafficLights::LightForCars2()
 {
     if (CGameLogic::LaRiotsActiveHere() || CCheat::m_aCheatsActive[eCheats::CHEAT_BGREEN_LIGHTS_CHEAT])
         return eTrafficLightsState::LIGHT_GREEN;
@@ -443,7 +443,7 @@ unsigned char CTrafficLights::LightForCars2()
     return eTrafficLightsState::LIGHT_RED;
 }
 
-unsigned char CTrafficLights::LightForCars1_Visual()
+uint8 CTrafficLights::LightForCars1_Visual()
 {
     if (CGameLogic::LaRiotsActiveHere()) {
         if ((CTimer::m_snTimeInMilliseconds / 1024) & 1)
@@ -455,7 +455,7 @@ unsigned char CTrafficLights::LightForCars1_Visual()
     return CTrafficLights::LightForCars1();
 }
 
-unsigned char CTrafficLights::LightForCars2_Visual()
+uint8 CTrafficLights::LightForCars2_Visual()
 {
     if (CGameLogic::LaRiotsActiveHere()) {
         if ((CTimer::m_snTimeInMilliseconds / 1024) & 1)

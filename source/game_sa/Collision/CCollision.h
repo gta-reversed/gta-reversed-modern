@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CColModel.h"
 #include "CColPoint.h"
 #include "CStoredCollPoly.h"
@@ -44,11 +43,11 @@ public:
     static bool IsStoredPolyStillValidVerticalLine(CVector const& lineOrigin, float lineDist, CColPoint& colPoint, CStoredCollPoly* collPoly);
     static void GetBoundingBoxFromTwoSpheres(CColBox* bbox, CColSphere* sphere1, CColSphere* sphere2);
     static bool IsThisVehicleSittingOnMe(CVehicle* vehicle, CVehicle* vehicleOnMe);
-    static bool CheckCameraCollisionPeds(int sectorX, int sectorY, CVector* pos, CVector* dir, float* arg4);
+    static bool CheckCameraCollisionPeds(int32 sectorX, int32 sectorY, CVector* pos, CVector* dir, float* arg4);
     static bool CheckPeds(CVector* pos, CVector* dir, float* arg2);
     static bool SphereCastVsBBox(CColSphere* sphere1, CColSphere* sphere2, CColBox* box);
     static bool RayPolyPOP(CVector* arg0, CVector* arg1, CColTriangle* arg2, CVector* arg3, CVector* arg4);
-    static int GetPrincipleAxis(CVector* vec);
+    static int32 GetPrincipleAxis(CVector* vec);
     static bool PointInPoly(CVector* point, CColTriangle* tri, CVector* arg2, CVector* triVerts);
     static void Closest3(CVector* arg0, CVector* arg1);
     static bool SphereCastVersusVsPoly(CColSphere* sphere1, CColSphere* sphere2, CColTriangle* tri, CColTrianglePlane* triPlane, CompressedVector* verts);
@@ -68,16 +67,16 @@ public:
     static void ClosestPointOnLine(CVector* arg0, CVector* arg1, CVector* arg2, CVector* arg3);
     static void ClosestPointsOnPoly(CColTriangle* arg0, CVector* arg1, CVector* arg2, CVector* arg3);
     static void ClosestPointOnPoly(CColTriangle* arg0, CVector* arg1, CVector* arg2);
-    static bool SphereCastVsCaches(CColSphere* sphere, CVector* arg1, int arg2, CColCacheEntry* arg3, int* arg4, CColCacheEntry* arg5);
+    static bool SphereCastVsCaches(CColSphere* sphere, CVector* arg1, int32 arg2, CColCacheEntry* arg3, int32* arg4, CColCacheEntry* arg5);
     static void CalculateTrianglePlanes(CColModel* colModel);
     static void RemoveTrianglePlanes(CColModel* colModel);
     // returns number of resulting collision points
-    static int ProcessColModels(CMatrix const& transform1, CColModel& colModel1, CMatrix const& transform2, CColModel& colModel2, CColPoint* colPoint1, CColPoint* colPoint2, float* maxTouchDistance, bool arg7);
+    static int32 ProcessColModels(CMatrix const& transform1, CColModel& colModel1, CMatrix const& transform2, CColModel& colModel2, CColPoint* colPoint1, CColPoint* colPoint2, float* maxTouchDistance, bool arg7);
     static bool SphereCastVsEntity(CColSphere* sphere1, CColSphere* sphere2, CEntity* entity);
     static bool SphereVsEntity(CColSphere* sphere, CEntity* entity);
-    static bool CheckCameraCollisionBuildings(int sectorX, int sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5);
-    static bool CheckCameraCollisionVehicles(int sectorX, int sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5, CVector* arg6);
-    static bool CheckCameraCollisionObjects(int sectorX, int sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5);
+    static bool CheckCameraCollisionBuildings(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5);
+    static bool CheckCameraCollisionVehicles(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5, CVector* arg6);
+    static bool CheckCameraCollisionObjects(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5);
     static bool BuildCacheOfCameraCollision(CColSphere* sphere1, CColSphere* sphere2);
     static bool CameraConeCastVsWorldCollision(CColSphere* sphere1, CColSphere* sphere2, float* arg2, float arg3);
 };

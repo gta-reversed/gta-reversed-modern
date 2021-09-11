@@ -6,13 +6,9 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-
-class  CCamPathSplines
-{
+class CCamPathSplines {
 public:
-	float *m_pArrPathData;
+    float* m_pArrPathData;
 };
 
 VALIDATE_SIZE(CCamPathSplines, 4);

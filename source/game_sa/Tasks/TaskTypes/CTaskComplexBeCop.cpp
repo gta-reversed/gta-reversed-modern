@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-eTaskType CTaskComplexBeCop::GetId()
+eTaskType CTaskComplexBeCop::GetTaskType()
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
     return ((eTaskType(__thiscall*)(CTask*))plugin::GetVMT(this, 4))(this);

@@ -6,7 +6,7 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CTaskTimer.h"
 
@@ -20,13 +20,13 @@ enum eFacialExpression
     ANIM_FACGUM = 0x8,
 };
 
-class  CTaskSimpleFacial : public CTaskSimple {
+class CTaskSimpleFacial : public CTaskSimple {
 public:
     CTaskTimer m_Timer;
     eFacialExpression m_nFacialExpression;
-    int m_nDuration;
+    int32 m_nDuration;
 
-    CTaskSimpleFacial(eFacialExpression nFacialExpress,int nDuration);
+    CTaskSimpleFacial(eFacialExpression nFacialExpress,int32 nDuration);
 };
 
 VALIDATE_SIZE(CTaskSimpleFacial, 0x1C);

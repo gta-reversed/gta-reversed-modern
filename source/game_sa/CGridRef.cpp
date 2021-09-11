@@ -13,23 +13,23 @@ void CGridRef::Init() {
 
 // unused
 // 0x71D670
-void CGridRef::GetAreaName(unsigned char a1, unsigned char a2) {
+void CGridRef::GetAreaName(uint8 a1, uint8 a2) {
 
 }
 
 // unused
-void CGridRef::GetArtistBugstarID(unsigned char a1, unsigned char a2) {
+void CGridRef::GetArtistBugstarID(uint8 a1, uint8 a2) {
 
 }
 
 // unused
 // 0x71D5A0
-void CGridRef::GetGridRefPositions(CVector a1, unsigned char* a2, unsigned char* a3) {
+void CGridRef::GetGridRefPositions(CVector a1, uint8* a2, uint8* a3) {
 
 }
 
 // unused
 // 0x71D5E0
-void CGridRef::GetGridRefPositions(unsigned char* a1, unsigned char* a2) {
+void CGridRef::GetGridRefPositions(uint8* a1, uint8* a2) {
 
 }

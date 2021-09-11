@@ -23,7 +23,7 @@ public:
     float m_fRotation;
     AnimationId  m_nAnimId;
     AssocGroupId m_nAnimGroupId;
-    int m_animFlags; // m_pAnimBlendAssociation flags
+    int32 m_animFlags; // m_pAnimBlendAssociation flags
     CAnimBlock* m_pAnimBlock;
     CAnimBlendHierarchy* m_pAnimBlendHierarchy; // If set, m_animID and m_groupID are ignored in StartAnim method
     bool m_bEntityDropped; 
@@ -34,13 +34,13 @@ public:
 
 public:
     CTaskSimpleHoldEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, bool bDisAllowDroppingOnAnimEnd);
-    CTaskSimpleHoldEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, char* pAnimName, char* pAnimBlockName, int animFlags);
-    CTaskSimpleHoldEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int animFlags);
+    CTaskSimpleHoldEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, char* pAnimName, char* pAnimBlockName, int32 animFlags);
+    CTaskSimpleHoldEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int32 animFlags);
     ~CTaskSimpleHoldEntity();
 
     // original virtual functions
     CTask* Clone() override;
-    eTaskType GetId() override;
+    eTaskType GetTaskType() override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(class CPed* ped) override;
     bool SetPedPosition(class CPed* ped) override;
@@ -58,8 +58,8 @@ private:
     static void InjectHooks();
 
     CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, bool bDisAllowDroppingOnAnimEnd);
-    CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, char* pAnimName, char* pAnimBlockName, int animFlags);
-    CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int animFlags);
+    CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, char* pAnimName, char* pAnimBlockName, int32 animFlags);
+    CTaskSimpleHoldEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int32 animFlags);
 
     // reversed virtual functions
     CTask* Clone_Reversed();

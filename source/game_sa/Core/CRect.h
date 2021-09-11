@@ -6,39 +6,39 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVector2D.h"
 
 /* CRect class describes a rectangle.
 
-	A(left;top)_____________________→
-	|                               |
-	|                               |
-	|                               |
-	|_________________B(right;bottom)
-	↓
+        A(left;top)_____________________→
+        |                               |
+        |                               |
+        |                               |
+        |_________________B(right;bottom)
+        ↓
 */
 
-class  CRect
-{
+class CRect {
 public:
-	float left;          // x1
-	float bottom;        // y1
-	float right;         // x2
-	float top;           // y2
+    float left;   // x1
+    float bottom; // y1
+    float right;  // x2
+    float top;    // y2
 
-	CRect(float fLeft, float fTop, float fRight, float fBottom);
-	CRect();
-
+public:
     static void InjectHooks();
-	bool IsFlipped() const;
-	void Restrict(CRect const& restriction);
-	void Resize(float resizeX, float resizeY);
-	bool IsPointInside(CVector2D const& point) const;
-	bool IsPointInside(CVector2D const& point, float tolerance) const;
-	void SetFromCenter(float x, float y, float size);
-	void GetCenter(float *x, float *y) const;
-	void StretchToPoint(float x, float y);
+
+    CRect(float fLeft, float fTop, float fRight, float fBottom);
+    CRect();
+
+    bool IsFlipped() const;
+    void Restrict(CRect const& restriction);
+    void Resize(float resizeX, float resizeY);
+    bool IsPointInside(CVector2D const& point) const;
+    bool IsPointInside(CVector2D const& point, float tolerance) const;
+    void SetFromCenter(float x, float y, float size);
+    void GetCenter(float* x, float* y) const;
+    void StretchToPoint(float x, float y);
 
     inline CVector2D GetCenter() const { return CVector2D((right + left) * 0.5F, (top + bottom) * 0.5F); }
 };

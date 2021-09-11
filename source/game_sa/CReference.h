@@ -6,14 +6,10 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-
-class  CReference
-{
+class CReference {
 public:
-	class CReference *m_pNext;
-	class CEntity **m_ppEntity;
+    class CReference* m_pNext;
+    class CEntity**   m_ppEntity;
 };
 
 VALIDATE_SIZE(CReference, 8);

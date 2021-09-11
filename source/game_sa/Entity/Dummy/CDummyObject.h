@@ -5,11 +5,10 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CDummy.h"
 
-
-class  CDummyObject : public CDummy {
+class CDummyObject : public CDummy {
 public:
     CDummyObject() : CDummy() {}
     explicit CDummyObject(CObject* pObj);
@@ -18,8 +17,7 @@ public:
     static void InjectHooks();
 
     CObject* CreateObject();
-    void UpdateFromObject(CObject* pObject);
+    void     UpdateFromObject(CObject* pObject);
 };
-
 
 VALIDATE_SIZE(CDummyObject, 0x38);

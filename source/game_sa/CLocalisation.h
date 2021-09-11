@@ -6,12 +6,11 @@
 */
 #pragma once
 
-
-class  CLocalisation {
+class CLocalisation {
 public:
-    static bool &nastyGame;
-    static bool &germanGame;
-    static bool &frenchGame;
+    static bool& nastyGame;
+    static bool& germanGame;
+    static bool& frenchGame;
 
 public:
     static void InjectHooks();

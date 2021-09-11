@@ -6,13 +6,13 @@ void CTaskComplexGoToPointAndStandStill::InjectHooks()
     ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "Clone", 0x66CEA0, &CTaskComplexGoToPointAndStandStill::Clone_Reversed);
     ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "CreateNextSubTask", 0x66DBA0, &CTaskComplexGoToPointAndStandStill::CreateNextSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "CreateFirstSubTask", 0x66DC40, &CTaskComplexGoToPointAndStandStill::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "CreateFirstSubTask_ped", 0x6682D0, (CTask*(CTaskComplexGoToPointAndStandStill::*)(int, CPed*)) & CTaskComplexGoToPointAndStandStill::CreateFirstSubTask);
+    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "CreateFirstSubTask_ped", 0x6682D0, (CTask*(CTaskComplexGoToPointAndStandStill::*)(int32, CPed*)) & CTaskComplexGoToPointAndStandStill::CreateFirstSubTask);
     ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "ControlSubTask", 0x668570, &CTaskComplexGoToPointAndStandStill::ControlSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "GoToPoint", 0x46FE60, &CTaskComplexGoToPointAndStandStill::GoToPoint);
     ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "SelectMoveState", 0x668250, &CTaskComplexGoToPointAndStandStill::SelectMoveState);
 }
 
-CTaskComplexGoToPointAndStandStill::CTaskComplexGoToPointAndStandStill(int moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint)
+CTaskComplexGoToPointAndStandStill::CTaskComplexGoToPointAndStandStill(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint)
 {
     m_moveState = moveState;
     m_nFlags = 0;
@@ -49,10 +49,10 @@ CTaskComplexGoToPointAndStandStill::~CTaskComplexGoToPointAndStandStill()
     // nothing here
 }
 
-CTaskComplexGoToPointAndStandStill* CTaskComplexGoToPointAndStandStill::Constructor(int moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint)
+CTaskComplexGoToPointAndStandStill* CTaskComplexGoToPointAndStandStill::Constructor(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn< CTaskComplexGoToPointAndStandStill*, 0x668120, CTask*, int, const CVector &, float, float, bool, bool>
+    return plugin::CallMethodAndReturn< CTaskComplexGoToPointAndStandStill*, 0x668120, CTask*, int32, const CVector &, float, float, bool, bool>
         (this, moveState, targetPoint, fRadius, fMoveStateRadius, bUnknown, bGoToPoint);
 #else
     this->CTaskComplexGoToPointAndStandStill::CTaskComplexGoToPointAndStandStill(moveState, targetPoint, fRadius, fMoveStateRadius, bUnknown, bGoToPoint);
@@ -103,7 +103,7 @@ CTask* CTaskComplexGoToPointAndStandStill::Clone_Reversed()
 
 CTask* CTaskComplexGoToPointAndStandStill::CreateNextSubTask_Reversed(CPed* ped)
 {
-    switch (m_pSubTask->GetId())
+    switch (m_pSubTask->GetTaskType())
     {
     case TASK_SIMPLE_STAND_STILL:
         return CreateFirstSubTask(TASK_FINISHED, ped);
@@ -133,7 +133,7 @@ CTask* CTaskComplexGoToPointAndStandStill::ControlSubTask_Reversed(CPed* ped)
         if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr))
             return CreateFirstSubTask(ped);
     }
-    else if (m_pSubTask->GetId() == TASK_SIMPLE_GO_TO_POINT) {
+    else if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT) {
         auto pGotoPointTask = static_cast<CTaskSimpleGoToPoint*>(m_pSubTask);
         if (m_moveState == PEDMOVE_RUN)
             SelectMoveState(pGotoPointTask, ped, m_fMoveStateRadius, 100000000.0f);
@@ -177,10 +177,10 @@ void CTaskComplexGoToPointAndStandStill::SelectMoveState(CTaskSimpleGoToPoint* p
 #endif
 }
 
-CTask* CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(int taskId, CPed* ped)
+CTask* CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(int32 taskId, CPed* ped)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn <CTask*, 0x6682D0, CTask*, int, CPed *>(this, taskId, ped);
+    return plugin::CallMethodAndReturn <CTask*, 0x6682D0, CTask*, int32, CPed *>(this, taskId, ped);
 #else
     if (taskId > TASK_COMPLEX_LEAVE_CAR) {
         if (taskId != TASK_SIMPLE_GO_TO_POINT)
@@ -205,7 +205,7 @@ CTask* CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(int taskId, CPed* 
     case TASK_SIMPLE_PAUSE:
         return new CTaskSimplePause(1);
     case TASK_SIMPLE_STAND_STILL: {
-        if (m_bGoToPoint && m_pSubTask && m_pSubTask->GetId() == TASK_SIMPLE_GO_TO_POINT) {
+        if (m_bGoToPoint && m_pSubTask && m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT) {
             CVector vecDistance = m_vecTargetPoint - ped->GetPosition(); 
             float fDotProduct = DotProduct(&vecDistance, &ped->GetForward());
             float fBlendDelta = 8.0f;

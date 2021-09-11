@@ -93,24 +93,24 @@ void CControllerConfigManager::StoreMouseButtonState(eMouseButtons button, bool 
 }
 
 // 0x52DAB0
-void CControllerConfigManager::UpdateJoyInConfigMenus_ButtonDown(ePadButton button, int padNumber) {
-    plugin::CallMethod<0x52DAB0, CControllerConfigManager*, ePadButton, int>(this, button, padNumber);
+void CControllerConfigManager::UpdateJoyInConfigMenus_ButtonDown(ePadButton button, int32 padNumber) {
+    plugin::CallMethod<0x52DAB0, CControllerConfigManager*, ePadButton, int32>(this, button, padNumber);
 }
 
 // unused
 // 0x52DC10
-void CControllerConfigManager::AffectControllerStateOn_ButtonDown_DebugStuff(int, eControllerType) {
+void CControllerConfigManager::AffectControllerStateOn_ButtonDown_DebugStuff(int32, eControllerType) {
     // NOP
 }
 
 // 0x52DC20
-void CControllerConfigManager::UpdateJoyInConfigMenus_ButtonUp(ePadButton button, int padNumber) {
-    plugin::CallMethod<0x52DC20, CControllerConfigManager*, ePadButton, int>(this, button, padNumber);
+void CControllerConfigManager::UpdateJoyInConfigMenus_ButtonUp(ePadButton button, int32 padNumber) {
+    plugin::CallMethod<0x52DC20, CControllerConfigManager*, ePadButton, int32>(this, button, padNumber);
 }
 
 // unused
 // 0x52DD80
-void CControllerConfigManager::AffectControllerStateOn_ButtonUp_DebugStuff(int, eControllerType) {
+void CControllerConfigManager::AffectControllerStateOn_ButtonUp_DebugStuff(int32, eControllerType) {
     // NOP
 }
 
@@ -157,8 +157,8 @@ bool CControllerConfigManager::GetIsMouseButtonJustUp(RsKeyCodes key) {
 
 // unused
 // 0x52F2A0
-bool CControllerConfigManager::GetIsKeyBlank(int a1, eControllerType controller) {
-    return plugin::CallMethodAndReturn<bool, 0x52F2A0, CControllerConfigManager*, int, eControllerType>(this, a1, controller);
+bool CControllerConfigManager::GetIsKeyBlank(int32 a1, eControllerType controller) {
+    return plugin::CallMethodAndReturn<bool, 0x52F2A0, CControllerConfigManager*, int32, eControllerType>(this, a1, controller);
 }
 
 // 0x52F2F0
@@ -262,6 +262,6 @@ void CControllerConfigManager::AffectPadFromMouse() {
 }
 
 // 0x531C90
-void CControllerConfigManager::DeleteMatchingActionInitiators(eControllerAction action, int a2, eControllerType type) {
-    plugin::CallMethod<0x531C90, CControllerConfigManager*, eControllerAction, int, eControllerType>(this, action, a2, type);
+void CControllerConfigManager::DeleteMatchingActionInitiators(eControllerAction action, int32 a2, eControllerType type) {
+    plugin::CallMethod<0x531C90, CControllerConfigManager*, eControllerAction, int32, eControllerType>(this, action, a2, type);
 }

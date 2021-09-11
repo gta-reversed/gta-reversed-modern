@@ -6,17 +6,17 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CAnimBlendAssociation.h"
 
 
-class  CTaskSimpleChoking : public CTaskSimple {
+class CTaskSimpleChoking : public CTaskSimple {
 public:
     CPed*      m_pAttacker;
     CAnimBlendAssociation*                      m_pAnim;
-    unsigned int                      m_nTimeRemaining;
-    unsigned int                      m_nTimeStarted;
+    uint32                      m_nTimeRemaining;
+    uint32                      m_nTimeStarted;
     bool                       m_bIsTeargas;
     bool                        m_bIsFinished;
 

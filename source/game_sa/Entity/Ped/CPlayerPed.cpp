@@ -8,7 +8,7 @@ Do not delete this comment block. Respect others' work!
 #include "StdInc.h"
 
 char* abTempNeverLeavesGroup = (char*)0xC0BC08;
-int& gPlayIdlesAnimBlockIndex = *(int*)0xC0BC10;
+int32& gPlayIdlesAnimBlockIndex = *(int32*)0xC0BC10;
 bool& CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = *(bool*)0xC0BC15;
 
 void CPlayerPed::InjectHooks() {
@@ -34,12 +34,12 @@ bool CPlayerPed::Save() {
 }
 
 // 0x60D5B0
-CPlayerPed::CPlayerPed(int playerId, bool bGroupCreated) : CPed(plugin::dummy) {
-    plugin::CallMethod<0x60D5B0, CPlayerPed *, int, bool>(this, playerId, bGroupCreated);
+CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(plugin::dummy) {
+    plugin::CallMethod<0x60D5B0, CPlayerPed *, int32, bool>(this, playerId, bGroupCreated);
 }
 
 // 0x6094A0
-void CPlayerPed::RemovePlayerPed(int playerId) {
+void CPlayerPed::RemovePlayerPed(int32 playerId) {
     CPed* playerPed = CWorld::Players[playerId].m_pPed;
     CPlayerInfo* pPlayerInfo = &CWorld::Players[playerId];
     if (playerPed)
@@ -58,13 +58,13 @@ void CPlayerPed::RemovePlayerPed(int playerId) {
 }
 
 // 0x609520
-void CPlayerPed::DeactivatePlayerPed(int playerId) {
-    plugin::Call<0x609520, int>(playerId);
+void CPlayerPed::DeactivatePlayerPed(int32 playerId) {
+    plugin::Call<0x609520, int32>(playerId);
 }
 
 // 0x609540
-void CPlayerPed::ReactivatePlayerPed(int playerId) {
-    plugin::Call<0x609540, int>(playerId);
+void CPlayerPed::ReactivatePlayerPed(int32 playerId) {
+    plugin::Call<0x609540, int32>(playerId);
 }
 
 // 0x609560
@@ -146,7 +146,7 @@ void CPlayerPed::Busted() {
 }
 
 // 0x41BE60
-unsigned int CPlayerPed::GetWantedLevel() {
+uint32 CPlayerPed::GetWantedLevel() {
     CWanted* pWanted = GetWanted();
     if (pWanted) {
         return pWanted->m_nWantedLevel;
@@ -156,19 +156,19 @@ unsigned int CPlayerPed::GetWantedLevel() {
 }
 
 // 0x609F10
-void CPlayerPed::SetWantedLevel(int level) {
+void CPlayerPed::SetWantedLevel(int32 level) {
     CWanted* pWanted = GetWanted();
     pWanted->SetWantedLevel(level);
 }
 
 // 0x609F30
-void CPlayerPed::SetWantedLevelNoDrop(int level) {
+void CPlayerPed::SetWantedLevelNoDrop(int32 level) {
     CWanted* pWanted = GetWanted();
     pWanted->SetWantedLevelNoDrop(level);
 }
 
 // 0x609F50
-void CPlayerPed::CheatWantedLevel(int level) {
+void CPlayerPed::CheatWantedLevel(int32 level) {
     CWanted* pWanted = GetWanted();
     pWanted->CheatWantedLevel(level);
 }
@@ -326,8 +326,8 @@ void CPlayerPed::SetInitialState(bool bGroupCreated) {
 }
 
 // 0x60D000
-void CPlayerPed::MakeChangesForNewWeapon(int weaponSlot) {
-    plugin::CallMethod<0x60D000, CPlayerPed *, int>(this, weaponSlot);
+void CPlayerPed::MakeChangesForNewWeapon(int32 weaponSlot) {
+    plugin::CallMethod<0x60D000, CPlayerPed *, int32>(this, weaponSlot);
 }
 
 // 0x60D020
@@ -351,8 +351,8 @@ bool CPlayerPed::PlayerHasJustAttackedSomeone() {
 }
 
 // 0x60D790
-void CPlayerPed::SetupPlayerPed(int playerId) {
-    plugin::Call<0x60D790, int>(playerId);
+void CPlayerPed::SetupPlayerPed(int32 playerId) {
+    plugin::Call<0x60D790, int32>(playerId);
 }
 
 // 0x60D850

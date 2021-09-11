@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CRGBA.h"
 #include "CVector.h"
 #include "CMatrix.h"
@@ -21,33 +21,34 @@ enum e3dMarkerType {
     MARKER3D_NA = 257
 };
 
-class  C3dMarker {
+class C3dMarker {
 public:
-    CMatrix         m_mat;
-    RpAtomic       *m_pAtomic;
-    RpMaterial     *m_pMaterial;
-    unsigned short  m_nType; // see e3dMarkerType
-    bool            m_bIsUsed;
-    bool            m_bMustBeRenderedThisFrame;
-    int             m_nIdentifier;
-    CRGBA           m_colour;
-    short           m_nPulsePeriod;
-    short           m_nRotateRate;
-    int             m_nStartTime;
-    float           m_fPulseFraction;
-    float           m_fStdSize;
-    float           m_fSize;
-    float           m_fBrightness;
-    float           m_fCameraRange;
-    CVector         m_vecNormal;
-    short           m_nLastMapReadX; // float casted to short
-    short           m_nLastMapReadY; // float casted to short
-    float           m_fLastMapReadResultZ;
-    float           m_fRoofHeight;
-    CVector         m_vecLastPosition;
-    int             m_nOnScreenTestTime;
+    CMatrix     m_mat;
+    RpAtomic*   m_pAtomic;
+    RpMaterial* m_pMaterial;
+    uint16      m_nType; // see e3dMarkerType
+    bool        m_bIsUsed;
+    bool        m_bMustBeRenderedThisFrame;
+    int32       m_nIdentifier;
+    CRGBA       m_colour;
+    int16       m_nPulsePeriod;
+    int16       m_nRotateRate;
+    int32       m_nStartTime;
+    float       m_fPulseFraction;
+    float       m_fStdSize;
+    float       m_fSize;
+    float       m_fBrightness;
+    float       m_fCameraRange;
+    CVector     m_vecNormal;
+    int16       m_nLastMapReadX; // float casted to int16
+    int16       m_nLastMapReadY; // float casted to int16
+    float       m_fLastMapReadResultZ;
+    float       m_fRoofHeight;
+    CVector     m_vecLastPosition;
+    int32       m_nOnScreenTestTime;
 
-    bool AddMarker(unsigned int id, unsigned short type, float size, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha, unsigned short pulsePeriod, float pulseFraction, short rotateRate);
+public:
+    bool AddMarker(uint32 id, uint16 type, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
     void DeleteMarkerObject();
     bool IsZCoordinateUpToDate();
     void Render();

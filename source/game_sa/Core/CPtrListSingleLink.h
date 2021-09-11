@@ -5,11 +5,11 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CPtrList.h"
 #include "CPtrNodeSingleLink.h"
 
-class  CPtrListSingleLink : public CPtrList {
+class CPtrListSingleLink : public CPtrList {
 public:
     inline CPtrNodeSingleLink *GetNode() {
         return reinterpret_cast<CPtrNodeSingleLink *>(pNode);

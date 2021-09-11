@@ -25,22 +25,22 @@ public:
 
     static bool Initialise();
     static bool Shutdown();
-    static bool GeneratePlateText(char* plateTextBuf, int length);
-    static unsigned char GetMapRegionPlateDesign();
-    static bool LoadPlatecharsetDat(char const* filename, unsigned char* data, int arg2, int arg3);
-    static RpMaterial* SetupMaterialPlatebackTexture(RpMaterial* material, unsigned char plateType);
-    static RwTexture* CreatePlateTexture(char* text, unsigned char plateType);
-    static bool SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMaterial* plateMaterial, unsigned char plateType);
-    static RpMaterial* SetupMaterialPlateTexture(RpMaterial* material, char* plateText, unsigned char plateType);
-    static RpMaterial* SetupClump(RpClump* clump, char* plateText, unsigned char plateType);
+    static bool GeneratePlateText(char* plateTextBuf, int32 length);
+    static uint8 GetMapRegionPlateDesign();
+    static bool LoadPlatecharsetDat(char const* filename, uint8* data, int32 arg2, int32 arg3);
+    static RpMaterial* SetupMaterialPlatebackTexture(RpMaterial* material, uint8 plateType);
+    static RwTexture* CreatePlateTexture(char* text, uint8 plateType);
+    static bool SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMaterial* plateMaterial, uint8 plateType);
+    static RpMaterial* SetupMaterialPlateTexture(RpMaterial* material, char* plateText, uint8 plateType);
+    static RpMaterial* SetupClump(RpClump* clump, char* plateText, uint8 plateType);
 };
 
-extern unsigned char*& CharsetLockedData;
+extern uint8*& CharsetLockedData;
 extern RpMaterial*& CurrentLicensePlateMaterial;
 extern char& CurrentLicensePlateType;
 
 #ifdef _MSC_VER
-void GetCharacterPositionInCharSet(char c, unsigned int& outColumn, unsigned int& outRow);
+void GetCharacterPositionInCharSet(char c, uint32& outColumn, uint32& outRow);
 #endif
 
 bool RenderLicenseplateTextToRaster(char* text, RwRaster* charsetRaster, void* palette, RwRaster* resultRaster);

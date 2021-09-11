@@ -90,7 +90,7 @@ CTask* CTaskComplexFallAndGetUp::CreateFirstSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexFallAndGetUp::CreateNextSubTask_Reversed(CPed* ped)
 {
-    auto subTaskType = m_pSubTask->GetId();
+    auto subTaskType = m_pSubTask->GetTaskType();
 
     if (subTaskType == TASK_SIMPLE_FALL)
         return CreateSubTask(TASK_SIMPLE_GET_UP);
@@ -143,7 +143,7 @@ CTask* CTaskComplexFallAndGetUp::CreateSubTask(eTaskType taskType)
 // 0x6787D0
 bool CTaskComplexFallAndGetUp::IsFalling()
 {
-    return m_pSubTask->GetId() == TASK_SIMPLE_FALL;
+    return m_pSubTask->GetTaskType() == TASK_SIMPLE_FALL;
 }
 
 // 0x6787A0

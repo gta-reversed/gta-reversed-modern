@@ -14,15 +14,15 @@ public:
     AssocGroupId m_nAnimGroup;
     AnimationId m_nAnimId;
     float m_fBlendDelta;
-    unsigned short m_nTaskType;
+    uint16 m_nTaskType;
     char _pad[2];
 
 public:
     CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, bool bHoldLastFrame);
-    CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, int nTaskType, const char* taskName _IGNORED_, bool bHoldLastFrame);
+    CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, int32 nTaskType, const char* taskName _IGNORED_, bool bHoldLastFrame);
 
     CTask* Clone() override;
-    eTaskType GetId() override { return static_cast<eTaskType>(m_nTaskType); }
+    eTaskType GetTaskType() override { return static_cast<eTaskType>(m_nTaskType); }
     bool ProcessPed(CPed* ped) override;
 
     void StartAnim(CPed* ped);
@@ -32,7 +32,7 @@ private:
     static void InjectHooks();
 
     CTaskSimpleRunAnim* Constructor(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, bool bHoldLastFrame);
-    CTaskSimpleRunAnim* Constructor2(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, int nTaskType, const char* taskName _IGNORED_, bool bHoldLastFrame);
+    CTaskSimpleRunAnim* Constructor2(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, int32 nTaskType, const char* taskName _IGNORED_, bool bHoldLastFrame);
 
     CTask* Clone_Reversed();
     bool ProcessPed_Reversed(CPed* ped);

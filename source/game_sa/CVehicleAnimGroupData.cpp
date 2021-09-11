@@ -20,8 +20,8 @@ CVehicleAnimGroup::CVehicleAnimGroup() : m_animFlags(), m_specialFlags(), m_gene
         m_aVecDoorOffsets[i] = CVector(0.0F, 0.0F, 0.0F); //BUG? The 2 last entires in the array aren't initialized to 0
 }
 
-void CVehicleAnimGroup::InitAnimGroup(unsigned char firstGroup, unsigned char secondGroup, int animFlags,
-                                      int animSpecialFlags, sVehAnimGroupGeneralTiming* generalTiming, sVehAnimGroupInOutTiming* startTiming,
+void CVehicleAnimGroup::InitAnimGroup(uint8 firstGroup, uint8 secondGroup, int32 animFlags,
+                                      int32 animSpecialFlags, sVehAnimGroupGeneralTiming* generalTiming, sVehAnimGroupInOutTiming* startTiming,
                                       sVehAnimGroupInOutTiming* endTiming)
 {
     m_ucFirstGroup = firstGroup;
@@ -244,7 +244,7 @@ void CVehicleAnimGroupData::GetInOutTimings(AssocGroupId groupId, eInOutTimingMo
 }
 
 // 0x639FC0
-int CVehicleAnimGroupData::GetGroupForAnim(AssocGroupId groupId, AnimationId animId)
+int32 CVehicleAnimGroupData::GetGroupForAnim(AssocGroupId groupId, AnimationId animId)
 {
     return CVehicleAnimGroupData::GetVehicleAnimGroup(groupId).GetGroup(animId);
 }

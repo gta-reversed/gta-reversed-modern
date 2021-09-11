@@ -5,10 +5,10 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CPtrListDoubleLink.h"
 
-class  CSector {
+class CSector {
 public:
     CPtrListDoubleLink m_buildings;
     CPtrListDoubleLink m_dummies;

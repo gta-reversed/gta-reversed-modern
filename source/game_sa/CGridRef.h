@@ -14,8 +14,8 @@ public:
     static void InjectHooks();
 
     static void Init();
-    static void GetAreaName(unsigned char a1, unsigned char a2);
-    static void GetArtistBugstarID(unsigned char a1, unsigned char a2);
-    static void GetGridRefPositions(CVector a1, unsigned char* a2, unsigned char* a3);
-    static void GetGridRefPositions(unsigned char* a1, unsigned char* a2);
+    static void GetAreaName(uint8 a1, uint8 a2);
+    static void GetArtistBugstarID(uint8 a1, uint8 a2);
+    static void GetGridRefPositions(CVector a1, uint8* a2, uint8* a3);
+    static void GetGridRefPositions(uint8* a1, uint8* a2);
 };

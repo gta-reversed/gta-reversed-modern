@@ -73,7 +73,7 @@ CTask* CTaskComplexDriveFireTruck::Clone_Reversed()
 
 CTask* CTaskComplexDriveFireTruck::CreateNextSubTask_Reversed(CPed* ped)
 {
-    eTaskType subTaskType = m_pSubTask->GetId();
+    eTaskType subTaskType = m_pSubTask->GetTaskType();
 
     if (subTaskType == TASK_COMPLEX_CAR_DRIVE_WANDER)
         return CreateSubTask(TASK_FINISHED, ped);
@@ -104,7 +104,7 @@ CTask* CTaskComplexDriveFireTruck::CreateFirstSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexDriveFireTruck::ControlSubTask_Reversed(CPed* ped)
 {
-    eTaskType subTaskId = m_pSubTask->GetId();
+    eTaskType subTaskId = m_pSubTask->GetTaskType();
 
     if (!m_pVehicle || !ped->bInVehicle)
         return CreateFirstSubTask(ped);

@@ -57,7 +57,7 @@ CTask* CTaskComplexGetUpAndStandStill::CreateFirstSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexGetUpAndStandStill::CreateNextSubTask_Reversed(CPed* ped)
 {
-    auto subTaskType = m_pSubTask->GetId();
+    auto subTaskType = m_pSubTask->GetTaskType();
 
     if (subTaskType == TASK_SIMPLE_STAND_STILL)
         return CreateSubTask(TASK_FINISHED);

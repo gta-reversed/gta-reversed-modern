@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "RenderWare.h"
 
 class CAnimBlendNode;
@@ -14,18 +13,18 @@ class CAnimBlendHierarchy;
 
 class AnimAssociationData {
 public:
-    RwLLLink m_link;
-    unsigned short m_nNumBlendNodes;
-    unsigned short m_nAnimGroup;
-    CAnimBlendNode *m_pNodeArray;
-    CAnimBlendHierarchy *m_pHierarchy;
-    float m_fBlendAmount;
-    float m_fBlendDelta;
-    float m_fCurrentTime;
-    float m_fSpeed;
-    float fTimeStep;
-    short m_nAnimId;
-    unsigned short m_nFlags;
+    RwLLLink             m_link;
+    uint16               m_nNumBlendNodes;
+    uint16               m_nAnimGroup;
+    CAnimBlendNode*      m_pNodeArray;
+    CAnimBlendHierarchy* m_pHierarchy;
+    float                m_fBlendAmount;
+    float                m_fBlendDelta;
+    float                m_fCurrentTime;
+    float                m_fSpeed;
+    float                fTimeStep;
+    int16                m_nAnimId;
+    uint16               m_nFlags;
 };
 
 VALIDATE_SIZE(AnimAssociationData, 0x2C);

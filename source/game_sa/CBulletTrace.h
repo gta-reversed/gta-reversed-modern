@@ -8,7 +8,7 @@
 
 #include "CVector.h"
 
-class  CBulletTrace {
+class CBulletTrace {
 public:
     CVector m_vecStart;
     CVector m_vecEnd;
@@ -29,7 +29,7 @@ public:
 
     // NOTSA
     CVector GetDirection() const noexcept { return m_vecEnd - m_vecStart; }
-    uint32_t GetRemainingLifetime() const noexcept { return CTimer::GetTimeInMS() - m_nCreationTime; }
+    uint32 GetRemainingLifetime() const noexcept { return CTimer::GetTimeInMS() - m_nCreationTime; }
 };
 
 VALIDATE_SIZE(CBulletTrace, 0x2C);

@@ -1,6 +1,6 @@
 #pragma once
 
-uint64_t GetOSWPerformanceTime();
-int64_t GetOSWPerformanceFrequency();
+uint64 GetOSWPerformanceTime();
+int64 GetOSWPerformanceFrequency();
 
 bool IsWin7OrGreater();

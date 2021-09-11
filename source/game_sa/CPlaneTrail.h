@@ -5,13 +5,13 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CVector.h"
 
-class  CPlaneTrail {
+class CPlaneTrail {
 public:
     CVector m_avecPosn[16];
-    unsigned int m_anTime[16];
+    uint32 m_anTime[16];
 
     void Init();
     void Render(float intensity);

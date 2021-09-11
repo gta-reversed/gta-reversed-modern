@@ -15,14 +15,14 @@ void CTaskComplexMedicTreatInjuredPed::InjectHooks()
     ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "ControlSubTask", 0x65ABF0, &CTaskComplexMedicTreatInjuredPed::ControlSubTask_Reversed);
 }
 
-CTaskComplexMedicTreatInjuredPed* CTaskComplexMedicTreatInjuredPed::Constructor(CVehicle* vehicle, CPed* ped, unsigned char isDriver)
+CTaskComplexMedicTreatInjuredPed* CTaskComplexMedicTreatInjuredPed::Constructor(CVehicle* vehicle, CPed* ped, uint8 isDriver)
 {
     this->CTaskComplexMedicTreatInjuredPed::CTaskComplexMedicTreatInjuredPed(vehicle, ped, isDriver);
     return this;
 }
 
 // 0x658BA0
-CTaskComplexMedicTreatInjuredPed::CTaskComplexMedicTreatInjuredPed(CVehicle* vehicle, CPed* ped, unsigned char isDriver) : CTaskComplex()
+CTaskComplexMedicTreatInjuredPed::CTaskComplexMedicTreatInjuredPed(CVehicle* vehicle, CPed* ped, uint8 isDriver) : CTaskComplex()
 {
     m_pVehicle = vehicle;
     m_pPartnerMedic = ped;
@@ -89,7 +89,7 @@ CTask* CTaskComplexMedicTreatInjuredPed::CreateDealWithNextAccidentTask(CPed* pe
     {
         m_pAccident->m_bIsTreated = true;
         FindAccidentPosition(ped, m_pAccident->m_pPed);
-        if (m_pSubTask && m_pSubTask->GetId() == TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL)
+        if (m_pSubTask && m_pSubTask->GetTaskType() == TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL)
         {
             auto subTask = reinterpret_cast<CTaskComplexGoToPointAndStandStill*>(m_pSubTask);
             subTask->GoToPoint(m_vecAccidentPosition, 0.5F, 2.0F, false);
@@ -161,7 +161,7 @@ CTask* CTaskComplexMedicTreatInjuredPed::CreateFirstSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexMedicTreatInjuredPed::CreateNextSubTask_Reversed(CPed* ped)
 {
-    eTaskType subTaskId = m_pSubTask->GetId();
+    eTaskType subTaskId = m_pSubTask->GetTaskType();
 
     if (subTaskId == TASK_COMPLEX_TREAT_ACCIDENT)
     {
@@ -220,7 +220,7 @@ CTask* CTaskComplexMedicTreatInjuredPed::CreateNextSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexMedicTreatInjuredPed::ControlSubTask_Reversed(CPed* ped)
 {
-    eTaskType subTaskId = m_pSubTask->GetId();
+    eTaskType subTaskId = m_pSubTask->GetTaskType();
 
     if (subTaskId == TASK_SIMPLE_CAR_DRIVE)
     {
@@ -230,7 +230,7 @@ CTask* CTaskComplexMedicTreatInjuredPed::ControlSubTask_Reversed(CPed* ped)
         if (!m_bLeftCarOnce && m_pPartnerMedic)
         {
             auto partnerTask = m_pPartnerMedic->GetTaskManager().GetActiveTask();
-            if (partnerTask && partnerTask->GetId() == TASK_COMPLEX_MEDIC_TREAT_INJURED_PED)
+            if (partnerTask && partnerTask->GetTaskType() == TASK_COMPLEX_MEDIC_TREAT_INJURED_PED)
             {
                 CTaskComplexMedicTreatInjuredPed* taskTreat = reinterpret_cast<CTaskComplexMedicTreatInjuredPed*>(partnerTask);
                 if (taskTreat->m_pAccident && taskTreat->m_pAccident->m_pPed)

@@ -9,20 +9,20 @@ public:
 public:
     CVehicle* m_pVehicle;
     float m_fSpeed;
-    int field_14;
-    int field_18;
-    unsigned char field_1C;
-    unsigned char m_nbTrafficBehavior;
-    unsigned char m_nbDriverBehavior;
-    unsigned char field_1F;
-    unsigned char m_bSavedVehicleBehavior;
-    unsigned char _pad_21[3];
+    int32 field_14;
+    int32 field_18;
+    uint8 field_1C;
+    uint8 m_nbTrafficBehavior;
+    uint8 m_nbDriverBehavior;
+    uint8 field_1F;
+    uint8 m_bSavedVehicleBehavior;
+    uint8 _pad_21[3];
 
-    CTaskComplexCarDrive(CVehicle* vehicle, float arg2, int arg3, int arg4);
+    CTaskComplexCarDrive(CVehicle* vehicle, float arg2, int32 arg3, int32 arg4);
     ~CTaskComplexCarDrive();
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_COMPLEX_CAR_DRIVE; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_CAR_DRIVE; }
 
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

@@ -5,8 +5,8 @@ class CTaskComplexDriveFireTruck : public CTaskComplex
 {
 public:
     CVehicle* m_pVehicle;
-    unsigned char m_bIsDriver;
-    unsigned char _pad_11[3];
+    uint8 m_bIsDriver;
+    uint8 _pad_11[3];
     CPed* m_pPartnerFireman;
     CFire* m_pFire;
 
@@ -19,7 +19,7 @@ public:
     static void InjectHooks();
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_COMPLEX_DRIVE_FIRE_TRUCK; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_DRIVE_FIRE_TRUCK; }
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

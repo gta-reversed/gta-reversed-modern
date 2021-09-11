@@ -7,9 +7,9 @@
 #include "StdInc.h"
 
 bool& CHeli::bPoliceHelisAllowed = *(bool*)0x8D338C;
-unsigned int& CHeli::TestForNewRandomHelisTimer = *(unsigned int*)0xC1C960;
+uint32& CHeli::TestForNewRandomHelisTimer = *(uint32*)0xC1C960;
 CHeli** CHeli::pHelis = (CHeli**)0xC1C964;
-unsigned int& CHeli::NumberOfSearchLights = *(unsigned int*)0xC1C96C;
+uint32& CHeli::NumberOfSearchLights = *(uint32*)0xC1C96C;
 bool& CHeli::bHeliControlsCheat = *(bool*)0xC1C970;
 tHeliLight* CHeli::HeliSearchLights = (tHeliLight*)0xC1C990;
 
@@ -18,8 +18,8 @@ void CHeli::InjectHooks() {
 }
 
 // 0x6C4190
-CHeli::CHeli(int modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(plugin::dummy) {
-    plugin::CallMethod<0x6C4190, CHeli*, int, eVehicleCreatedBy>(this, modelIndex, createdBy);
+CHeli::CHeli(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(plugin::dummy) {
+    plugin::CallMethod<0x6C4190, CHeli*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
 
 // 0x6C4560
@@ -28,8 +28,8 @@ void CHeli::InitHelis() {
 }
 
 // 0x6C45B0
-void CHeli::AddHeliSearchLight(CVector const& origin, CVector const& target, float targetRadius, float power, unsigned int coronaIndex, unsigned char unknownFlag, unsigned char drawShadow) {
-    ((void(__cdecl*)(CVector const&, CVector const&, float, float, unsigned int, unsigned char, unsigned char))0x6C45B0)(origin, target, targetRadius, power, coronaIndex, unknownFlag, drawShadow);
+void CHeli::AddHeliSearchLight(CVector const& origin, CVector const& target, float targetRadius, float power, uint32 coronaIndex, uint8 unknownFlag, uint8 drawShadow) {
+    ((void(__cdecl*)(CVector const&, CVector const&, float, float, uint32, uint8, uint8))0x6C45B0)(origin, target, targetRadius, power, coronaIndex, unknownFlag, drawShadow);
 }
 
 // 0x6C4640
@@ -53,9 +53,9 @@ void CHeli::SpecialHeliPreRender() {
 }
 
 // 0x6C4760
-CVector CHeli::FindSwatPositionRelativeToHeli(int swatNumber) {
+CVector CHeli::FindSwatPositionRelativeToHeli(int32 swatNumber) {
     CVector result;
-    ((void(__thiscall*)(CHeli*, CVector*, int))0x6C4760)(this, &result, swatNumber);
+    ((void(__thiscall*)(CHeli*, CVector*, int32))0x6C4760)(this, &result, swatNumber);
     return result;
 }
 
@@ -65,8 +65,8 @@ void CHeli::SwitchPoliceHelis(bool enable) {
 }
 
 // 0x6C58E0
-void CHeli::SearchLightCone(int coronaIndex, CVector origin, CVector target, float targetRadius, float power, unsigned char unknownFlag, unsigned char drawShadow, CVector* arg7, CVector* arg8, CVector* arg9, bool arg10, float baseRadius) {
-    ((void(__cdecl*)(int, CVector, CVector, float, float, unsigned char, unsigned char, CVector*, CVector*, CVector*, bool, float))0x6C58E0)(coronaIndex, origin, target, targetRadius, power, unknownFlag, drawShadow, arg7, arg8, arg9, arg10, baseRadius);
+void CHeli::SearchLightCone(int32 coronaIndex, CVector origin, CVector target, float targetRadius, float power, uint8 unknownFlag, uint8 drawShadow, CVector* arg7, CVector* arg8, CVector* arg9, bool arg10, float baseRadius) {
+    ((void(__cdecl*)(int32, CVector, CVector, float, float, uint8, uint8, CVector*, CVector*, CVector*, bool, float))0x6C58E0)(coronaIndex, origin, target, targetRadius, power, unknownFlag, drawShadow, arg7, arg8, arg9, arg10, baseRadius);
 }
 
 // 0x6C6520
@@ -95,12 +95,12 @@ void CHeli::RenderAllHeliSearchLights() {
 }
 
 // 0x6C6D30
-void CHeli::BlowUpCar(CEntity* damager, unsigned char bHideExplosion) {
+void CHeli::BlowUpCar(CEntity* damager, uint8 bHideExplosion) {
     return BlowUpCar_Reversed(damager, bHideExplosion);
 }
 
-void CHeli::BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion) {
-    plugin::CallMethod<0x6C6D30, CHeli*, CEntity*, unsigned char>(this, damager, bHideExplosion);
+void CHeli::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) {
+    plugin::CallMethod<0x6C6D30, CHeli*, CEntity*, uint8>(this, damager, bHideExplosion);
 }
 
 // 0x6C4530

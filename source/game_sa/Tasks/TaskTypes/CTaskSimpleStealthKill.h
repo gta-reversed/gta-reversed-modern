@@ -25,7 +25,7 @@ public:
 
     bool ProcessPed(CPed* ped) override;
     CTask* Clone() override;
-    eTaskType GetId() override;
+    eTaskType GetTaskType() override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     void ManageAnim(CPed* ped);
 

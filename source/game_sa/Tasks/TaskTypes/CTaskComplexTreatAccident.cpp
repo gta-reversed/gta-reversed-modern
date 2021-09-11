@@ -57,7 +57,7 @@ CTask* CTaskComplexTreatAccident::Clone()
 
 CTask* CTaskComplexTreatAccident::CreateNextSubTask_Reversed(CPed* ped)
 {
-    eTaskType subTaskId = m_pSubTask->GetId();
+    eTaskType subTaskId = m_pSubTask->GetTaskType();
 
     if (subTaskId == TASK_SIMPLE_GIVE_CPR || subTaskId == TASK_NONE)
         return CreateSubTask(TASK_FINISHED, ped);

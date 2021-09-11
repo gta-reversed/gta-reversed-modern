@@ -24,7 +24,7 @@ void CTaskManager::InjectHooks()
     ReversibleHooks::Install("CTaskManager", "FlushImmediately", 0x6818A0, &CTaskManager::FlushImmediately);
     ReversibleHooks::Install("CTaskManager", "SetNextSubTask", 0x681920, &CTaskManager::SetNextSubTask);
     ReversibleHooks::Install("CTaskManager", "GetSimplestTask_task", 0x681970, (CTaskSimple*(*)(CTask*))&CTaskManager::GetSimplestTask);
-    ReversibleHooks::Install("CTaskManager", "GetSimplestTask_tasK_index", 0x681A00, (CTaskSimple*(CTaskManager::*)(int))&CTaskManager::GetSimplestTask);
+    ReversibleHooks::Install("CTaskManager", "GetSimplestTask_tasK_index", 0x681A00, (CTaskSimple*(CTaskManager::*)(int32))&CTaskManager::GetSimplestTask);
     ReversibleHooks::Install("CTaskManager", "StopTimers", 0x6819A0, &CTaskManager::StopTimers);
     ReversibleHooks::Install("CTaskManager", "GetSimplestActiveTask", 0x6819D0, &CTaskManager::GetSimplestActiveTask);
     ReversibleHooks::Install("CTaskManager", "AddSubTasks", 0x681A30, &CTaskManager::AddSubTasks);
@@ -69,19 +69,19 @@ CTask* CTaskManager::GetActiveTask() {
 }
 
 // 0x681740
-CTask* CTaskManager::FindActiveTaskByType(int taskType) {
+CTask* CTaskManager::FindActiveTaskByType(int32 taskType) {
     // First try current active task, and its sub-tasks
     for (CTask* task = GetActiveTask(); task; task = task->GetSubTask()) {
-        if (task->GetId() == taskType) {
+        if (task->GetTaskType() == taskType) {
             return task;
         }
     }
 
     // Traverse all secondary tasks and their subtasks, and return last match
     CTask* lastFound = nullptr;
-    for (int i = 0; i < TASK_SECONDARY_MAX; i++) {
+    for (int32 i = 0; i < TASK_SECONDARY_MAX; i++) {
         for (CTask* sub = GetTaskSecondary(i); sub; sub = sub->GetSubTask()) {
-            if (sub->GetId() == taskType) {
+            if (sub->GetTaskType() == taskType) {
                 lastFound = sub;
                 break; /* break inner */
             }
@@ -93,9 +93,9 @@ CTask* CTaskManager::FindActiveTaskByType(int taskType) {
 }
 
 // 0x6817D0
-CTask* CTaskManager::FindTaskByType(int taskIndex, int taskId) {
+CTask* CTaskManager::FindTaskByType(int32 taskIndex, int32 taskId) {
     for (CTask* task = GetPrimaryTask(taskIndex); task; task = task->GetSubTask()) {
-        if (task->GetId() == taskId) {
+        if (task->GetTaskType() == taskId) {
             return task;
         }
     }
@@ -103,7 +103,7 @@ CTask* CTaskManager::FindTaskByType(int taskIndex, int taskId) {
 }
 
 // 0x681810
-CTask* CTaskManager::GetTaskSecondary(int taskIndex) {
+CTask* CTaskManager::GetTaskSecondary(int32 taskIndex) {
     return m_aSecondaryTasks[taskIndex];
 }
 
@@ -206,7 +206,7 @@ CTask* CTaskManager::GetSimplestActiveTask() {
 }
 
 // 0x681A00
-CTaskSimple* CTaskManager::GetSimplestTask(int taskIndex) {
+CTaskSimple* CTaskManager::GetSimplestTask(int32 taskIndex) {
     return GetSimplestTask(GetPrimaryTask(taskIndex));
 }
 
@@ -250,7 +250,7 @@ void CTaskManager::ParentsControlChildren(CTaskComplex* pTask) {
 }
 
 // 0x681AF0
-void CTaskManager::SetTask(CTask* task, int taskIndex, bool unused) {
+void CTaskManager::SetTask(CTask* task, int32 taskIndex, bool unused) {
     CTask* primaryTask = nullptr;
     if (!task)
     {
@@ -290,7 +290,7 @@ void CTaskManager::SetTask(CTask* task, int taskIndex, bool unused) {
 }
 
 // 0x681B60
-void CTaskManager::SetTaskSecondary(CTask* pTask, int taskIndex) {
+void CTaskManager::SetTaskSecondary(CTask* pTask, int32 taskIndex) {
     CTask* pCurrentSecondaryTask = m_aSecondaryTasks[taskIndex];
     if (pCurrentSecondaryTask == pTask)
         return;
@@ -334,7 +334,7 @@ void CTaskManager::ClearTaskEventResponse() {
 // 0x681C10
 void CTaskManager::ManageTasks()
 {
-    int iTaskIndex = 0;
+    int32 iTaskIndex = 0;
 
     while (!m_aPrimaryTasks[iTaskIndex])
     {
@@ -356,7 +356,7 @@ void CTaskManager::ManageTasks()
         }
 
         // TODO: magic number and pSimplestTask is shadow local variable
-        for (int i = 0; i < 11; i++)
+        for (int32 i = 0; i < 11; i++)
         {
             ParentsControlChildren((CTaskComplex*)m_aPrimaryTasks[iTaskIndex]);
             CTask* pSimplestTask = GetSimplestTask(m_aPrimaryTasks[iTaskIndex]);

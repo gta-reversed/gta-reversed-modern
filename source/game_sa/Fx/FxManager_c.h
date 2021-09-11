@@ -22,7 +22,7 @@ public:
     TList_c<FxSystem_c>     m_fxSystems;
     FxEmitterPrt_c*         m_pFxEmitters;
     TList_c<FxEmitterPrt_c> m_fxEmitterParticles;
-    int                     m_nFxTxdIndex;
+    int32                     m_nFxTxdIndex;
     RwV3d*                  m_pWindDir;
     float*                  m_pfWindSpeed;
     FxFrustumInfo_c         m_frustum;
@@ -49,14 +49,14 @@ public:
     bool LoadFxProject(const char* filename);
     void UnloadFxProject();
 
-    FxSystemBP_c* LoadFxSystemBP(char* filename, int file);
+    FxSystemBP_c* LoadFxSystemBP(char* filename, int32 file);
     FxSystemBP_c* FindFxSystemBP(const char* name);
 
     FxFrustumInfo_c* GetFrustumInfo();
     void CalcFrustumInfo(RwCamera* camera);
 
     void ReturnParticle(FxEmitterPrt_c* emitter);
-    FxEmitterPrt_c* GetParticle(signed char arg0);
+    FxEmitterPrt_c* GetParticle(int8 arg0);
     void FreeUpParticle();
 
     void Render(RwCamera* camera, uint8 arg1);

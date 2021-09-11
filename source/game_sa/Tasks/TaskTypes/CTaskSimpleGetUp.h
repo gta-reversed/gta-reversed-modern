@@ -4,9 +4,9 @@
 
 class CTaskSimpleGetUp : public CTaskSimple {
 public:
-    unsigned char m_bIsFinished;
-    unsigned char m_bAnimFinished;
-    unsigned char _pad_A[2];
+    uint8 m_bIsFinished;
+    uint8 m_bAnimFinished;
+    uint8 _pad_A[2];
     CAnimBlendAssociation* m_pAnim;
 
 public:
@@ -14,7 +14,7 @@ public:
     ~CTaskSimpleGetUp() override;
 
     CTask* Clone() override { return new CTaskSimpleGetUp(); }
-    eTaskType GetId() override { return TASK_SIMPLE_GET_UP; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_GET_UP; }
     bool ProcessPed(class CPed* ped) override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
 

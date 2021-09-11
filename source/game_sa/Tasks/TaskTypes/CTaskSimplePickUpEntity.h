@@ -9,18 +9,18 @@ public:
     CVector m_vecPickupPosition;
 
 public:
-    CTaskSimplePickUpEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int animFlags, float fMovePedUntilAnimProgress);
+    CTaskSimplePickUpEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int32 animFlags, float fMovePedUntilAnimProgress);
     CTaskSimplePickUpEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, float fMovePedUntilAnimProgress);
     ~CTaskSimplePickUpEntity();
 
     CTask* Clone() override;
-    eTaskType GetId() override;
+    eTaskType GetTaskType() override;
 
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskSimplePickUpEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int animFlags, float fMovePedUntilAnimProgress);
+    CTaskSimplePickUpEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int32 animFlags, float fMovePedUntilAnimProgress);
     CTaskSimplePickUpEntity* Constructor(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, float fMovePedUntilAnimProgress);
 
     CTask* Clone_Reversed();

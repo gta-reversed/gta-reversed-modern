@@ -47,13 +47,13 @@ CHudColours* CHudColours::Destructor() {
 
 // Setup the color in color table. "color" parameter - index of color in the table.
 // 0x58FD20
-void CHudColours::SetRGBAValue(eHudColours colorIndex, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha) {
+void CHudColours::SetRGBAValue(eHudColours colorIndex, uint8 red, uint8 green, uint8 blue, uint8 alpha) {
     m_aColours[colorIndex] = CRGBA(red, green, blue, alpha);
 }
 
 // Get color from color table as integer value. "color" parameter - index of color in the table.
 // 0x58FD50
-unsigned int CHudColours::GetIntColour(eHudColours colorIndex) {
+uint32 CHudColours::GetIntColour(eHudColours colorIndex) {
     return m_aColours[colorIndex].ToInt();
 }
 
@@ -65,7 +65,7 @@ CRGBA CHudColours::GetRGB(eHudColours colorIndex) {
 
 // Get color RGBA. "color" parameter - index of color in the table.
 // 0x58FEE0
-CRGBA CHudColours::GetRGBA(eHudColours index, unsigned char alpha) {
+CRGBA CHudColours::GetRGBA(eHudColours index, uint8 alpha) {
     auto color = m_aColours[index];
     return CRGBA(color.r, color.g, color.b, alpha);
 }

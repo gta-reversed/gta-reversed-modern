@@ -6,12 +6,12 @@
 */
 #include "StdInc.h"
 
-unsigned int MAX_POINTLIGHTS = 32;
+uint32 MAX_POINTLIGHTS = 32;
 
-unsigned int& CPointLights::NumLights = *(unsigned int*)0xC3F0D0;
+uint32& CPointLights::NumLights = *(uint32*)0xC3F0D0;
 CPointLight* CPointLights::aLights = (CPointLight*)0xC3F0E0;
 float* CPointLights::aCachedMapReadResults = (float*)0xC3F050;
-unsigned int& CPointLights::NextCachedValue = *(unsigned int*)0xC3F0D4;
+uint32& CPointLights::NextCachedValue = *(uint32*)0xC3F0D4;
 CVector* CPointLights::aCachedMapReads = (CVector*)0xC3F6E0;
 
 // 0x6FFB40
@@ -40,8 +40,8 @@ bool CPointLights::ProcessVerticalLineUsingCache(CVector point, float* outZ) {
 }
 
 // 0x7000E0
-void CPointLights::AddLight(unsigned char lightType, CVector point, CVector direction, float radius, float red, float green, float blue, unsigned char fogType, bool generateExtraShadows, CEntity* entityAffected) {
-    plugin::Call<0x7000E0, unsigned char, CVector, CVector, float, float, float, float, unsigned char, bool, CEntity*>(lightType, point, direction, radius, red, green, blue, fogType, generateExtraShadows, entityAffected);
+void CPointLights::AddLight(uint8 lightType, CVector point, CVector direction, float radius, float red, float green, float blue, uint8 fogType, bool generateExtraShadows, CEntity* entityAffected) {
+    plugin::Call<0x7000E0, uint8, CVector, CVector, float, float, float, float, uint8, bool, CEntity*>(lightType, point, direction, radius, red, green, blue, fogType, generateExtraShadows, entityAffected);
 }
 
 // 0x7002D0

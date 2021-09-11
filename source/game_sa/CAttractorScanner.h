@@ -6,20 +6,19 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CTaskTimer.h"
 #include "Plugins\TwoDEffectPlugin\C2dEffect.h"
 
-class  CAttractorScanner {
+class CAttractorScanner {
 public:
-    char field_0;
-    char _pad[3];
+    char       field_0;
+    char       _pad[3];
     CTaskTimer field_4;
-    C2dEffect *m_pEffectInUse;
-    int field_14;
-    int field_18[10];
-    int field_40[10];
-    int field_68[10];
+    C2dEffect* m_pEffectInUse;
+    int32      field_14;
+    int32      field_18[10];
+    int32      field_40[10];
+    int32      field_68[10];
 
     void Clear();
 };

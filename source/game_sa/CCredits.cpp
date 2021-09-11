@@ -2,7 +2,7 @@
 
 #include "CCredits.h"
 
-uint32_t& CCredits::CreditsStartTime = *(uint32_t*)0xC6E978;
+uint32& CCredits::CreditsStartTime = *(uint32*)0xC6E978;
 bool& CCredits::bCreditsGoing = *(bool*)0xC6E97C;
 
 void CCredits::InjectHooks() {
@@ -33,8 +33,8 @@ void CCredits::Render() {
 }
 
 // 0x5A8660
-void CCredits::PrintCreditText(float scaleX, float scaleY, const char* text, uint32_t& position, float currentOffset, bool highlighted) {
-    const uint32_t minPosY = 20;
+void CCredits::PrintCreditText(float scaleX, float scaleY, const char* text, uint32& position, float currentOffset, bool highlighted) {
+    const uint32 minPosY = 20;
     const float    pos = position + SCREEN_HEIGHT + minPosY - currentOffset;
 
     if (pos > minPosY && pos < SCREEN_HEIGHT - minPosY) {
@@ -50,12 +50,12 @@ void CCredits::PrintCreditText(float scaleX, float scaleY, const char* text, uin
         CFont::PrintString((SCREEN_WIDTH / 2.0f - 1), pos - 1.0f, text);
     }
 
-    position += (uint32_t)scaleY * minPosY;
+    position += (uint32)scaleY * minPosY;
 }
 
 // 0x5A87C0
-void CCredits::PrintCreditSpace(float spaceSize, uint32_t& position) {
-    position += (uint32_t)(spaceSize * 25.0f);
+void CCredits::PrintCreditSpace(float spaceSize, uint32& position) {
+    position += (uint32)(spaceSize * 25.0f);
 }
 
 // 0x5A87F0
@@ -69,7 +69,7 @@ void CCredits::RenderCredits() {
 
     DefinedState2d();
 
-    uint32_t lineOffset = 0;
+    uint32 lineOffset = 0;
     float    scrollOffset = float(CTimer::GetTimeInMS() - CreditsStartTime) * 0.0435f;
     
     CFont::SetBackground(false, false);

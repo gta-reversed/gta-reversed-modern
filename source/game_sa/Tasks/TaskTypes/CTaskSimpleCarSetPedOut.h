@@ -6,29 +6,29 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CVehicle.h"
 
 class CTaskSimpleCarSetPedOut : public CTaskSimple {
 public:
     CVehicle* m_pTargetVehicle;
-    int m_nTargetDoor; 
+    int32 m_nTargetDoor;
     bool m_bSwitchOffEngine; 
     bool m_bWarpingOutOfCar;
     bool m_bFallingOutOfCar;	// jumping or falling off car or bike
     bool m_bKnockedOffBike;
-    unsigned char m_nDoorFlagsToClear;
-    unsigned char m_nNumGettingInToClear;
+    uint8 m_nDoorFlagsToClear;
+    uint8 m_nNumGettingInToClear;
 private:
     char pad[2];
 public:
 
-	CTaskSimpleCarSetPedOut(CVehicle *pTargetVehicle, int nTargetDoor, bool bSwitchOffEngine);
+	CTaskSimpleCarSetPedOut(CVehicle *pTargetVehicle, int32 nTargetDoor, bool bSwitchOffEngine);
     ~CTaskSimpleCarSetPedOut();
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_SIMPLE_CAR_SET_PED_OUT; };
+    eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_SET_PED_OUT; };
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; }
     bool ProcessPed(CPed* ped) override;
 

@@ -1,15 +1,15 @@
-#pragma once 
+#pragma once
+
 #include "CEventEditableResponse.h"
 
 class CEntity;
 class CVehicle;
-enum eWeaponType : uint32_t;
+enum eWeaponType : uint32;
 
-class CEventVehicleDamage : public CEventEditableResponse
-{
+class CEventVehicleDamage : public CEventEditableResponse {
 public:
-    CVehicle* m_vehicle;
-    CEntity* m_attacker;
+    CVehicle*   m_vehicle;
+    CEntity*    m_attacker;
     eWeaponType m_weaponType;
 
     static void InjectHooks();
@@ -19,8 +19,8 @@ public:
 private:
     CEventVehicleDamage* Constructor(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType);
 public:
-    int32_t GetEventPriority() const override { return 49; }
-    int GetLifeTime() override { return 0; }
+    int32 GetEventPriority() const override { return 49; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     bool IsCriminalEvent() override;
     void ReportCriminalEvent(CPed* ped) override;

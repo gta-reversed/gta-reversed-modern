@@ -6,19 +6,15 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-class  CAnimBlock {
+class CAnimBlock {
 public:
-
- 	char szName[16];
- 	bool bLoaded;
- 	char pad;
- 	short usRefs;
- 	int startAnimation;
- 	int animationCount;
- 	int animationStyle;
-
+    char  szName[16];
+    bool  bLoaded;
+    char  pad;
+    int16 usRefs;
+    int32 startAnimation;
+    int32 animationCount;
+    int32 animationStyle;
 };
 
-VALIDATE_SIZE(CAnimBlock,0x20);
+VALIDATE_SIZE(CAnimBlock, 0x20);

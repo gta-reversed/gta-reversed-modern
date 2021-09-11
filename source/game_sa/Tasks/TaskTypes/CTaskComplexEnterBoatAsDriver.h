@@ -6,11 +6,11 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskComplex.h"
 #include "CVehicle.h"
 
-class  CTaskComplexEnterBoatAsDriver : public CTaskComplex {
+class CTaskComplexEnterBoatAsDriver : public CTaskComplex {
 public:
     CVehicle* m_pTargetVehicle;
 

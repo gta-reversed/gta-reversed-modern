@@ -13,8 +13,7 @@
 #include "CFileObjectInstance.h"
 #include "CFileMgr.h"
 
-
-enum eSection : unsigned char {
+enum eSection : uint8 {
     UNDEFINED = 0,
     OBJECT = 1,
     TIME_OBJECT = 3,
@@ -28,7 +27,7 @@ enum eSection : unsigned char {
     TXD_PARENT = 11,
 };
 
-enum eIDE : unsigned char {
+enum eIDE : uint8 {
     IDE_NONE,
     IDE_OBJS,
     IDE_MLO, // ?
@@ -43,7 +42,7 @@ enum eIDE : unsigned char {
     IDE_TXDP,
 };
 
-enum eIPL : unsigned char {
+enum eIPL : uint8 {
     IPL_NONE,
     IPL_PATH,
     IPL_INST,
@@ -72,54 +71,54 @@ public:
     static void SaveTexDictionary(RwTexDictionary* dictionary, const char* filename);
     static RwTexDictionary* LoadTexDictionary(const char* filename);
 
-    static int LoadAnimatedClumpObject(const char* line);
-    static bool LoadAtomicFile(RwStream* stream, unsigned int modelId);
+    static int32 LoadAnimatedClumpObject(const char* line);
+    static bool LoadAtomicFile(RwStream* stream, uint32 modelId);
     static void LoadAtomicFile(const char* filename);
     static RpClump* LoadAtomicFile2Return(const char* filename);
 
     static char* LoadLine(FILESTREAM file);
-    static char* LoadLine(char** outLine, int& outSize);
+    static char* LoadLine(char** outLine, int32& outSize);
 
     static void LoadAudioZone(const char* line);
-    static void LoadBoundingBox(unsigned char* data, CBoundingBox& outBoundBox);
-    static void LoadCarGenerator(struct CFileCarGenerator* carGen, int iplId);
-    static void LoadCarGenerator(const char* line, int iplId);
-    static void LoadCarPathNode(const char* line, int objModelIndex, int pathEntryIndex, bool a4);
+    static void LoadBoundingBox(uint8* data, CBoundingBox& outBoundBox);
+    static void LoadCarGenerator(struct CFileCarGenerator* carGen, int32 iplId);
+    static void LoadCarGenerator(const char* line, int32 iplId);
+    static void LoadCarPathNode(const char* line, int32 objModelIndex, int32 pathEntryIndex, bool a4);
 
-    static bool StartLoadClumpFile(RwStream* stream, unsigned int modelIndex);
-    static bool FinishLoadClumpFile(RwStream* stream, unsigned int modelIndex);
-    static bool LoadClumpFile(RwStream* stream, unsigned int modelIndex);
+    static bool StartLoadClumpFile(RwStream* stream, uint32 modelIndex);
+    static bool FinishLoadClumpFile(RwStream* stream, uint32 modelIndex);
+    static bool LoadClumpFile(RwStream* stream, uint32 modelIndex);
     static void LoadClumpFile(const char* filename);
-    static int LoadClumpObject(const char* line);
+    static int32 LoadClumpObject(const char* line);
 
-    static bool LoadCollisionFile(unsigned char* data, unsigned int dataSize, unsigned char colId);
-    static bool LoadCollisionFile(const char* filename, unsigned char colId);
-    static bool LoadCollisionFileFirstTime(unsigned char* data, unsigned int dataSize, unsigned char colId);
-    static void LoadCollisionModel(unsigned char* data, CColModel& outColModel);
-    static void LoadCollisionModelVer2(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName);
-    static void LoadCollisionModelVer3(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName);
-    static void LoadCollisionModelVer4(unsigned char* data, unsigned int dataSize, CColModel& outColModel, const char* modelName);
+    static bool LoadCollisionFile(uint8* data, uint32 dataSize, uint8 colId);
+    static bool LoadCollisionFile(const char* filename, uint8 colId);
+    static bool LoadCollisionFileFirstTime(uint8* data, uint32 dataSize, uint8 colId);
+    static void LoadCollisionModel(uint8* data, CColModel& outColModel);
+    static void LoadCollisionModelVer2(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName);
+    static void LoadCollisionModelVer3(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName);
+    static void LoadCollisionModelVer4(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName);
 
     static void LoadCullZone(const char* line);
     static void LoadEntryExit(const char* line);
     static void LoadGarage(const char* line);
     static void LoadLevel(const char* filename);
 
-    static int LoadObject(const char* line);
+    static int32 LoadObject(const char* line);
     static void Load2dEffect(const char* line);
     static CEntity* LoadObjectInstance(CFileObjectInstance* objInstance, const char* modelName);
     static CEntity* LoadObjectInstance(const char* line);
     static void LoadOcclusionVolume(const char* line, const char* filename);
-    static int LoadPathHeader(const char* line, int& outPathType);
-    static int LoadPedObject(const char* line);
-    static void LoadPedPathNode(const char* line, int objModelIndex, int pathEntryIndex);
+    static int32 LoadPathHeader(const char* line, int32& outPathType);
+    static int32 LoadPedObject(const char* line);
+    static void LoadPedPathNode(const char* line, int32 objModelIndex, int32 pathEntryIndex);
     static void LoadPickup(const char* line);
     static void LoadStuntJump(const char* line);
-    static int LoadTXDParent(const char* line);
+    static int32 LoadTXDParent(const char* line);
     static void LoadTimeCyclesModifier(const char* line);
-    static int LoadTimeObject(const char* line);
-    static int LoadVehicleObject(const char* line);
-    static int LoadWeaponObject(const char* line);
+    static int32 LoadTimeObject(const char* line);
+    static int32 LoadVehicleObject(const char* line);
+    static int32 LoadWeaponObject(const char* line);
     static void LoadZone(const char* line);
     static void LoadScene(const char* filename);
     static void LoadObjectTypes(const char* filename);
@@ -132,7 +131,7 @@ public:
 };
 
 // global variable to be used in a callback
-extern unsigned int& gAtomicModelId;
+extern uint32& gAtomicModelId;
 
 const char* GetFilename(const char* filepath);
 void LoadingScreenLoadingFile(const char* str);

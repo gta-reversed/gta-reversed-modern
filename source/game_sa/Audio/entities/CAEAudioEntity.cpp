@@ -7,6 +7,6 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-int8_t*& CAEAudioEntity::m_pAudioEventVolumes = *reinterpret_cast<int8_t**>(0xBD00F8);
+int8*& CAEAudioEntity::m_pAudioEventVolumes = *reinterpret_cast<int8**>(0xBD00F8);
 
 CAEAudioEntity::CAEAudioEntity() : m_tempSound() {}

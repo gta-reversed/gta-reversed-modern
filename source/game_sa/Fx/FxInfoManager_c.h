@@ -6,23 +6,19 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
 class FxInfoManager_c {
 public:
-    unsigned int m_nNumInfos;
-    void *m_pInfos;
-    unsigned char m_nFirstMovementInfo;
-    unsigned char m_nFirstRenderInfo;
-private:
-    char _padA[2];
-public:
-    short m_nLodStart;
-    short m_nLodEnd;
-    bool m_bHasFlatParticleEmitter;
-    bool m_bHasHeatHazeParticleEmitter;
-    char field_12;
-    char field_13;
+    uint32 m_nNumInfos;
+    void*  m_pInfos;
+    uint8  m_nFirstMovementInfo;
+    uint8  m_nFirstRenderInfo;
+    char   _padA[2];
+    int16  m_nLodStart;
+    int16  m_nLodEnd;
+    bool   m_bHasFlatParticleEmitter;
+    bool   m_bHasHeatHazeParticleEmitter;
+    char   field_12;
+    char   field_13;
 };
 
 VALIDATE_SIZE(FxInfoManager_c, 0x14);

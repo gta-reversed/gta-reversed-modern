@@ -7,7 +7,7 @@ public:
     CTaskSimpleNone() : CTaskSimple() {}
     ~CTaskSimpleNone() override {}
     CTask* Clone() override { return new CTaskSimpleNone(); }
-    eTaskType GetId() override { return TASK_NONE; }
+    eTaskType GetTaskType() override { return TASK_NONE; }
     bool ProcessPed(CPed* ped) override { return true; }
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }
 };

@@ -6,34 +6,28 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CRunningScript.h"
 
-enum eScriptResourceType
-{
+enum eScriptResourceType {
     RESOURCETYPE_ANIMATION = 1,
     RESOURCETYPE_MODEL_OR_SPECIAL_CHAR,
     RESOURCETYPE_DECISION_MAKER
 };
 
-
-class  CScriptResourceManager {
+class CScriptResourceManager {
 public:
-
     struct {
-        int m_nModelId;
-        void *m_pThread;
-        unsigned short type; //see eScriptResourceType
+        int32  m_nModelId;
+        void*  m_pThread;
+        uint16 type; // see eScriptResourceType
     } m_aScriptResources[75];
 
     //! see eScriptResourceType
-     void AddToResourceManager(int modelID, unsigned int ResourceType, CRunningScript *pScript);
+    void AddToResourceManager(int32 modelID, uint32 ResourceType, CRunningScript* pScript);
     //! see eScriptResourceType
-     bool HasResourceBeenRequested(int ModelId, unsigned int a4);
+    bool HasResourceBeenRequested(int32 ModelId, uint32 a4);
     //! see eScriptResourceType
-     bool RemoveFromResourceManager(int modelID, unsigned int ResourceType, CRunningScript *pScript);
+    bool RemoveFromResourceManager(int32 modelID, uint32 ResourceType, CRunningScript* pScript);
 };
 
-VALIDATE_SIZE(CScriptResourceManager,0x384);
-
-//#include "meta/meta.CScriptResourceManager.h"
+VALIDATE_SIZE(CScriptResourceManager, 0x384);

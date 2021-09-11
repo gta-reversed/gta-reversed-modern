@@ -24,7 +24,7 @@ void CSimpleVariablesSaveStructure::Construct() {
     char dots[8];
     AsciiToGxtChar("...'", dots); // dot dot dot apostrophe
     TextCopy(m_szSaveName, saveName);
-    unsigned int strLen = GxtCharStrlen(m_szSaveName);
+    uint32 strLen = GxtCharStrlen(m_szSaveName);
     if (strLen > SAVEGAME_MAX_NAME_LEN) {
         TextCopy(&m_szSaveName[SAVEGAME_MAX_NAME_LEN - 3 - 1], dots);
     }
@@ -96,7 +96,7 @@ void CSimpleVariablesSaveStructure::Construct() {
 }
 
 // 0x5D1EA0
-void CSimpleVariablesSaveStructure::Extract(unsigned int& versionId) const {
+void CSimpleVariablesSaveStructure::Extract(uint32& versionId) const {
     versionId = m_nVersionId;
 
     gbLARiots = m_bLARiots;

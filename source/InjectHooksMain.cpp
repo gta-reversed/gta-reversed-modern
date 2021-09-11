@@ -26,6 +26,20 @@
 #include "CTheCarGenerators.h"
 #include "CRadar.h"
 #include "CWaterCannons.h"
+#include "CLines.h"
+#include "CEscalators.h"
+#include "CMovingThings.h"
+#include "CMovingThings.h"
+#include "CPlaneTrails.h"
+#include "CGamma.h"
+#include "CCustomBuildingPipeline.h"
+#include "CCustomBuildingDNPipeline.h"
+#include "CPlantMgr.h"
+
+#include "CTaskSimpleFight.h"
+#include "CTaskComplexUseGoggles.h"
+#include "CTaskSimpleUseGun.h"
+#include "CTaskSimpleThrowProjectile.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
@@ -38,6 +52,7 @@ void InjectHooksMain()
 {
     // WaitForDebugger();
 
+    Fx_c::InjectHooks();
     CBrightLights::InjectHooks();
     CShinyTexts::InjectHooks();
     COnscreenCounterEntry::InjectHooks();
@@ -352,6 +367,16 @@ void InjectHooksMain()
     CTaskComplexJump::InjectHooks();
     ModelIndices::InjectHooks();
     CWaterCannons::InjectHooks();
+    CLines::InjectHooks();
+    CSprite::InjectHooks();
+    CPlaneTrails::InjectHooks();
+    CCustomBuildingPipeline::InjectHooks();
+    CCustomBuildingRenderer::InjectHooks();
+    CCustomBuildingDNPipeline::InjectHooks();
+    CTaskSimpleFight::InjectHooks();
+    CTaskComplexUseGoggles::InjectHooks();
+    CTaskSimpleUseGun::InjectHooks();
+    CTaskSimpleThrowProjectile::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();
@@ -372,6 +397,7 @@ void InjectHooksMain()
     CAEWaterCannonAudioEntity::InjectHooks();
     CAETwinLoopSoundEntity::InjectHooks();
     CAEDoorAudioEntity::InjectHooks();
+    CAEWeatherAudioEntity::InjectHooks();
 
     FxManager_c::InjectHooks();
     FxSystemBP_c::InjectHooks();

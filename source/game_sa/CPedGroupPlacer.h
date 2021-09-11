@@ -6,12 +6,11 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVector.h"
 
-enum ePedType : unsigned int;
+enum ePedType : uint32;
 
-enum  ePedGroupPlacerType {
+enum ePedGroupPlacerType {
     GROUP_PLACER_FORMATION1 = 0,
     GROUP_PLACER_FORMATION2 = 0x1, //!< same as FORMATION1
     GROUP_PLACER_CHAT1 = 0x2,
@@ -19,18 +18,16 @@ enum  ePedGroupPlacerType {
     GROUP_PLACER_RANDOM = 0x4
 };
 
-class  CPedGroupPlacer {
+class CPedGroupPlacer {
 public:
     //! 1
-     static int const &ms_minGangSize;
+    static int32 const& ms_minGangSize;
     //! 5
-     static int const &ms_maxGangSize;
+    static int32 const& ms_maxGangSize;
 
-     bool PlaceChatGroup(ePedType pedtype, int numOfPeds, CVector const *origin, int unused);
-     bool PlaceFormationGroup(ePedType pedtype, int numOfPeds, CVector const *origin, int unused);
+    bool PlaceChatGroup(ePedType pedtype, int32 numOfPeds, CVector const* origin, int32 unused);
+    bool PlaceFormationGroup(ePedType pedtype, int32 numOfPeds, CVector const* origin, int32 unused);
     //! see ePedGroupPlacerType
-     bool PlaceGroup(ePedType pedtype, int numOfPeds, CVector const *origin, int nGroupPlacerType);
-     bool PlaceRandomGroup(ePedType pedtype, int numOfPeds, CVector *origin, int unused);
+    bool PlaceGroup(ePedType pedtype, int32 numOfPeds, CVector const* origin, int32 nGroupPlacerType);
+    bool PlaceRandomGroup(ePedType pedtype, int32 numOfPeds, CVector* origin, int32 unused);
 };
-
-//#include "meta/meta.CPedGroupPlacer.h"

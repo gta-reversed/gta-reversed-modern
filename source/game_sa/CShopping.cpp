@@ -38,7 +38,7 @@ void CShopping::InjectHooks() {
 
 // Used only in CShopping::LoadStats()
 // 0x49ABD0
-int GetChangingStatIndex(const char* stat) {
+int32 GetChangingStatIndex(const char* stat) {
     if (!strcmp("-", stat))
         return -1;
     if (!strcmp("fat", stat))
@@ -58,23 +58,23 @@ int GetChangingStatIndex(const char* stat) {
 }
 
 // 0x
-void CShopping::AddPriceModifier(char const* a1, char const* a2, int a3) {
-    plugin::Call<0x0, char const*, char const*, int>(a1, a2, a3);
+void CShopping::AddPriceModifier(char const* a1, char const* a2, int32 a3) {
+    plugin::Call<0x0, char const*, char const*, int32>(a1, a2, a3);
 }
 
 // 0x
-void CShopping::AddPriceModifier(unsigned int a1, int a2) {
-    plugin::Call<0x0, unsigned int, int>(a1, a2);
+void CShopping::AddPriceModifier(uint32 a1, int32 a2) {
+    plugin::Call<0x0, uint32, int32>(a1, a2);
 }
 
 // 0x49BF70
-void CShopping::Buy(unsigned int a1, int a2) {
-    plugin::Call<0x49BF70, unsigned int, int>(a1, a2);
+void CShopping::Buy(uint32 a1, int32 a2) {
+    plugin::Call<0x49BF70, uint32, int32>(a1, a2);
 }
 
 // 0x
-void CShopping::FindItem(unsigned int a1) {
-    plugin::Call<0x0, unsigned int>(a1);
+void CShopping::FindItem(uint32 a1) {
+    plugin::Call<0x0, uint32>(a1);
 }
 
 // 0x49AE70
@@ -89,23 +89,23 @@ void CShopping::FindSectionInSection(FILE* file, char const* sectionName, char c
 }
 
 // 0x49ADE0
-void CShopping::GetExtraInfo(unsigned int a1, int a2) {
-    plugin::Call<0x49ADE0, unsigned int, int>(a1, a2);
+void CShopping::GetExtraInfo(uint32 a1, int32 a2) {
+    plugin::Call<0x49ADE0, uint32, int32>(a1, a2);
 }
 
 // 0x49AB10
-int CShopping::GetItemIndex(unsigned int a1) {
-    return plugin::CallAndReturn<int, 0x49AB10, unsigned int>(a1);
+int32 CShopping::GetItemIndex(uint32 a1) {
+    return plugin::CallAndReturn<int32, 0x49AB10, uint32>(a1);
 }
 
 // 0x49AB30
-void CShopping::GetKey(char const* modelName, int index) {
-    plugin::Call<0x49AB30, char const*, int>(modelName, index);
+void CShopping::GetKey(char const* modelName, int32 index) {
+    plugin::Call<0x49AB30, char const*, int32>(modelName, index);
 }
 
 // 0x
-void CShopping::GetNameTag(unsigned int a1) {
-    plugin::Call<0x0, unsigned int>(a1);
+void CShopping::GetNameTag(uint32 a1) {
+    plugin::Call<0x0, uint32>(a1);
 }
 
 // 0x49AF10
@@ -114,8 +114,8 @@ void CShopping::GetNextSection(FILE* file) {
 }
 
 // 0x49AD50
-void CShopping::GetPrice(unsigned int itemId) {
-    plugin::Call<0x49AD50, unsigned int>(itemId);
+void CShopping::GetPrice(uint32 itemId) {
+    plugin::Call<0x49AD50, uint32>(itemId);
 }
 
 // 0x49AAD0
@@ -124,18 +124,18 @@ void CShopping::GetPriceSectionFromName(char const* name) {
 }
 
 // 0x49B5E0
-void CShopping::HasPlayerBought(unsigned int a1) {
-    plugin::Call<0x49B5E0, unsigned int>(a1);
+void CShopping::HasPlayerBought(uint32 a1) {
+    plugin::Call<0x49B5E0, uint32>(a1);
 }
 
 // 0x
-void CShopping::IncrementStat(int a1, int a2) {
-    plugin::Call<0x0, int, int>(a1, a2);
+void CShopping::IncrementStat(int32 a1, int32 a2) {
+    plugin::Call<0x0, int32, int32>(a1, a2);
 }
 
 // 0x
-void CShopping::IncrementStat2(int a1, int a2) {
-    plugin::Call<0x0, int, int>(a1, a2);
+void CShopping::IncrementStat2(int32 a1, int32 a2) {
+    plugin::Call<0x0, int32, int32>(a1, a2);
 }
 
 // 0x49C290
@@ -179,8 +179,8 @@ void CShopping::RemovePriceModifier(char const* a1, char const* a2) {
 }
 
 // 0x
-void CShopping::RemovePriceModifier(unsigned int a1) {
-    plugin::Call<0x0, unsigned int>(a1);
+void CShopping::RemovePriceModifier(uint32 a1) {
+    plugin::Call<0x0, uint32>(a1);
 }
 
 // 0x49B240
@@ -205,8 +205,8 @@ void CShopping::SetCurrentProperty() {
 }
 
 // 0x49B610
-void CShopping::SetPlayerHasBought(unsigned int a1) {
-    plugin::Call<0x49B610, unsigned int>(a1);
+void CShopping::SetPlayerHasBought(uint32 a1) {
+    plugin::Call<0x49B610, uint32>(a1);
 }
 
 // 0x49B640
@@ -225,6 +225,6 @@ void CShopping::StoreVehicleMods() {
 }
 
 // 0x
-void CShopping::UpdateStats(int a1, bool a2) {
-    plugin::Call<0x0, int, bool>(a1, a2);
+void CShopping::UpdateStats(int32 a1, bool a2) {
+    plugin::Call<0x0, int32, bool>(a1, a2);
 }

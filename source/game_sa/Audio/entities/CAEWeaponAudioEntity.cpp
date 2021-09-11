@@ -7,7 +7,7 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-// Converted from thiscall void CAEWeaponAudioEntity::CAEWeaponAudioEntity(void)	0x507560
+// Converted from thiscall void CAEWeaponAudioEntity::CAEWeaponAudioEntity()	0x507560
 CAEWeaponAudioEntity::CAEWeaponAudioEntity() {
     plugin::CallMethod<0x507560, CAEWeaponAudioEntity*>(this);
 }
@@ -22,17 +22,17 @@ void CAEWeaponAudioEntity::WeaponFire(eWeaponType weaptype, CPhysical* entity, i
     plugin::CallMethod<0x504F80, CAEWeaponAudioEntity*, eWeaponType, CPhysical*, int32>(this, weaptype, entity, AudioEventId);
 }
 
-// Converted from thiscall void CAEWeaponAudioEntity::Terminate(void)	0x503480
+// Converted from thiscall void CAEWeaponAudioEntity::Terminate()	0x503480
 void CAEWeaponAudioEntity::Terminate() {
     plugin::CallMethod<0x503480, CAEWeaponAudioEntity*>(this);
 }
 
-// Converted from thiscall void CAEWeaponAudioEntity::StopFlameThrowerIdleGasLoop(void)	0x5034E0
+// Converted from thiscall void CAEWeaponAudioEntity::StopFlameThrowerIdleGasLoop()	0x5034E0
 void CAEWeaponAudioEntity::StopFlameThrowerIdleGasLoop() {
     plugin::CallMethod<0x5034E0, CAEWeaponAudioEntity*>(this);
 }
 
-// Converted from thiscall void CAEWeaponAudioEntity::Reset(void)	0x503490
+// Converted from thiscall void CAEWeaponAudioEntity::Reset()	0x503490
 void CAEWeaponAudioEntity::Reset() {
     plugin::CallMethod<0x503490, CAEWeaponAudioEntity*>(this);
 }
@@ -95,7 +95,7 @@ void CAEWeaponAudioEntity::PlayCameraSound(CPhysical* entity, int32 AudioEventId
     plugin::CallMethod<0x5046F0, CAEWeaponAudioEntity*, CPhysical*, int32, float>(this, entity, AudioEventId, audability);
 }
 
-// Converted from thiscall void CAEWeaponAudioEntity::Initialise(void)	0x503450
+// Converted from thiscall void CAEWeaponAudioEntity::Initialise()	0x503450
 void CAEWeaponAudioEntity::Initialise() {
     plugin::CallMethod<0x503450, CAEWeaponAudioEntity*>(this);
 }

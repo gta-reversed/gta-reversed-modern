@@ -8,7 +8,7 @@
 
 class CCredits {
 public:
-    static uint32_t& CreditsStartTime;
+    static uint32& CreditsStartTime;
     static bool& bCreditsGoing;
 
 public:
@@ -18,7 +18,7 @@ public:
     static void Stop();
 
     static void Render();
-    static void PrintCreditText(float scaleX, float scaleY, const char* text, uint32_t& position, float currentOffset, bool highlighted);
-    static inline void PrintCreditSpace(float spaceSize, uint32_t& position);
+    static void PrintCreditText(float scaleX, float scaleY, const char* text, uint32& position, float currentOffset, bool highlighted);
+    static inline void PrintCreditSpace(float spaceSize, uint32& position);
     static void RenderCredits();
 };

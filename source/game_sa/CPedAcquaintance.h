@@ -10,11 +10,11 @@ class CAcquaintance {
 public:
     static void InjectHooks();
 
-    unsigned int GetAcquaintances(unsigned int acquaintanceID);
-    void SetAcquaintances(int acquaintanceId, unsigned int value);
-    void ClearAcquaintances(unsigned int acquaintanceId);
-    void SetAsAcquaintance(unsigned int acquaintanceId, unsigned int pedTypeBitNum);
-    void ClearAsAcquaintance(unsigned int acquaintanceId, unsigned int pedTypeBitNum);
+    uint32 GetAcquaintances(uint32 acquaintanceID);
+    void SetAcquaintances(int32 acquaintanceId, uint32 value);
+    void ClearAcquaintances(uint32 acquaintanceId);
+    void SetAsAcquaintance(uint32 acquaintanceId, uint32 pedTypeBitNum);
+    void ClearAsAcquaintance(uint32 acquaintanceId, uint32 pedTypeBitNum);
 };
 
 // This structure stores information about how a ped of given pedtype (each entry in PedRelationship[32]
@@ -31,11 +31,11 @@ public:
 // https://gtamods.com/wiki/Saves_(GTA_SA)#Block_19:_Ped_Relationships
 class CPedAcquaintance : public CAcquaintance {
 public:
-    unsigned int m_nRespect;
-    unsigned int m_nLike;
-    unsigned int m_nIgnore;
-    unsigned int m_nDislike;
-    unsigned int m_nHate;
+    uint32 m_nRespect;
+    uint32 m_nLike;
+    uint32 m_nIgnore;
+    uint32 m_nDislike;
+    uint32 m_nHate;
 
 public:
     static void InjectHooks();

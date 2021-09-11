@@ -6,25 +6,22 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CPed.h"
 #include "CPedGroupMembership.h"
 
-class  CPedList {
+class CPedList {
 public:
-    int m_nCount;
-    CPed *m_apPeds[30];
+    int32 m_nCount;
+    CPed* m_apPeds[30];
 
-     void BuildListFromGroup_NoLeader(CPedGroupMembership *pedGroupMemberShip);
-     void BuildListFromGroup_NotInCar_NoLeader(CPedGroupMembership *pedGroupMembership);
-     void BuildListOfPedsOfPedType(int pedtype);
-     void Empty();
-     void ExtractPedsWithGuns(CPedList *pedlist);
-     void FillUpHoles();
-     void RemovePedsAttackingPedType(int pedtype);
-     void RemovePedsThatDontListenToPlayer();
+    void BuildListFromGroup_NoLeader(CPedGroupMembership* pedGroupMemberShip);
+    void BuildListFromGroup_NotInCar_NoLeader(CPedGroupMembership* pedGroupMembership);
+    void BuildListOfPedsOfPedType(int32 pedtype);
+    void Empty();
+    void ExtractPedsWithGuns(CPedList* pedlist);
+    void FillUpHoles();
+    void RemovePedsAttackingPedType(int32 pedtype);
+    void RemovePedsThatDontListenToPlayer();
 };
 
 VALIDATE_SIZE(CPedList, 0x7C);
-
-//#include "meta/meta.CPedList.h"
