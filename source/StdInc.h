@@ -584,7 +584,6 @@
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleStandStill.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleStealthKill.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleSwim.h"
-#include "game_sa\Tasks\TaskTypes\CTaskSimpleThrowProjectile.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleTriggerLookAt.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleUninterruptable.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleUseGun.h"

@@ -3,6 +3,8 @@
 #include "CTaskSimplePlayerOnFoot.h"
 
 #include "CTaskComplexUseGoggles.h"
+#include "CTaskSimpleUseGun.h"
+#include "CTaskSimpleThrowProjectile.h"
 
 int32& gLastRandomNumberForIdleAnimationID = *reinterpret_cast<int32*>(0x8D2FEC);
 uint32& gLastTouchTimeDelta = *reinterpret_cast<uint32*>(0xC19664);
@@ -520,14 +522,8 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                             }
                             else
                             {
-                                CTask* pNewTask = static_cast<CTask*>(CTask::operator new(36));
-                                CTaskSimpleThrowProjectile* pTaskSimpleThrowProjectile = nullptr;
-                                if (pNewTask)
-                                {
-                                    pTaskSimpleThrowProjectile = static_cast<CTaskSimpleThrowProjectile*>(pNewTask);
-                                    pTaskSimpleThrowProjectile->Constructor(nullptr, CVector(0, 0, 0));
-                                    pTaskManager->SetTaskSecondary(pTaskSimpleThrowProjectile, 0);
-                                }
+                                auto* pTaskSimpleThrowProjectile = new CTaskSimpleThrowProjectile(nullptr, CVector(0, 0, 0));
+                                pTaskManager->SetTaskSecondary(pTaskSimpleThrowProjectile, 0);
                             }
                         }
                         break;
