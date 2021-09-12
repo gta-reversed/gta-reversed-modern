@@ -5,9 +5,11 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-#include "CWaterCannons.h"
+
 #include "CAutomobile.h"
 
+#include "CWaterCannons.h"
+#include "CSkidmarks.h"
 
 bool& CAutomobile::m_sAllTaxiLights = *(bool*)0xC1BFD0;
 CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;

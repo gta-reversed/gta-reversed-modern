@@ -1,7 +1,6 @@
 #pragma once
 
-enum class eSkidMarkType
-{
+enum class eSkidMarkType {
     DEFALT = 0,
     SANDY,
     MUDDY,
@@ -15,17 +14,19 @@ enum class eSkidmarkState : uint8 {
 };
 
 constexpr auto SKIDMARK_NUM_PARTS{ 16u };
-struct CSkidmark
-{
+/*
+ * Doesn't exists in Android IDB
+ */
+struct CSkidmark {
     CVector        m_vPosn[SKIDMARK_NUM_PARTS];
     float          m_partDirX[SKIDMARK_NUM_PARTS];
     float          m_partDirY[SKIDMARK_NUM_PARTS];
-    uint32         m_id;                           // Unique ID, usually the vehicle pointer
-    uint32         m_lastDisappearTimeUpdateMs;    // Last time it got updated
-    uint32         m_fadeBeginMs;                  // Begins fading at this tick
-    uint32         m_disappearAtMs;                // Should disappear by this tick
-    eSkidMarkType  m_type;
-    uint16         m_nNumParts; // Number of parts. The 0th 'part' isn't actually considered a part, so this number never exeeds 15
+    uint32         m_nId;                       // Unique ID, usually the vehicle pointer
+    uint32         m_lastDisappearTimeUpdateMs; // Last time it got updated
+    uint32         m_fadeBeginMs;               // Begins fading at this tick
+    uint32         m_disappearAtMs;             // Should disappear by this tick
+    eSkidMarkType  m_nType;
+    uint16         m_nNumParts;                 // Number of parts. The 0th 'part' isn't actually considered a part, so this number never exeeds 15
     eSkidmarkState m_nState;
     bool           m_bActive;
 
@@ -37,10 +38,12 @@ struct CSkidmark
         const float radius = (GetLastPartPosn() - center).Magnitude();
         return { center, radius };
     }
-    void RegisterNewPart(CVector posn, CVector2D dir, float length, bool& bloodState);
-    void Init(uint32_t id, CVector posn, eSkidMarkType type, bool& bloodState);
+
+    void Init(uint32_t id, CVector posn, eSkidMarkType type, const bool* bloodState);
     void Update();
     void Render() const;
+    void RegisterNewPart(CVector posn, CVector2D dir, float length, bool* bloodState);
+
     CRGBA GetColor() const;
 };
 VALIDATE_SIZE(CSkidmark, 0x158);

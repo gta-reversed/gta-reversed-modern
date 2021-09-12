@@ -36,6 +36,7 @@
 #include "CCustomBuildingDNPipeline.h"
 #include "CPlantMgr.h"
 #include "CPedType.h"
+#include "CSkidmarks.h"
 
 #include "CTaskSimpleFight.h"
 #include "CTaskComplexUseGoggles.h"
@@ -51,7 +52,7 @@ void WaitForDebugger() {
 
 void InjectHooksMain()
 {
-     //WaitForDebugger();
+    // WaitForDebugger();
 
     Fx_c::InjectHooks();
     CBrightLights::InjectHooks();

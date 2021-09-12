@@ -1,71 +1,31 @@
 #include "StdInc.h"
+
 #include "CSkidmark.h"
 
-void CSkidmark::RegisterNewPart(CVector posn, CVector2D dir, float length, bool& bloodState) {
-    if ((m_type == eSkidMarkType::BLOODY) == bloodState) {
-        m_bActive = true;
-        if (CTimer::GetTimeInMilliseconds() - m_lastDisappearTimeUpdateMs <= 100) {
-            m_vPosn[m_nNumParts] = posn; // Update existing, because of low delta time
-        } else {
-            if (m_nNumParts >= SKIDMARK_NUM_PARTS - 1) { // The 0th "part" isn't considered as an actual part, so at most we can have this many
-                m_lastDisappearTimeUpdateMs = CTimer::GetTimeInMilliseconds();
-                m_nState = eSkidmarkState::DISAPPEARING;
-                m_fadeBeginMs = CTimer::GetTimeInMilliseconds() + 10'000;
-                m_disappearAtMs = CTimer::GetTimeInMilliseconds() + 20'000;
-                bloodState = false;
-            } else {
-                m_nNumParts++;
-                m_vPosn[m_nNumParts] = posn;
+#include "CSkidmarks.h"
+#include "CCustomBuildingDNPipeline.h"
 
-                const CVector prevPosn = m_vPosn[m_nNumParts - 1];
-                CVector2D dirToPrevPart = {
-                    posn.y - prevPosn.y, // Swapped intentionally
-                    prevPosn.x - posn.x
-                };
-
-                dirToPrevPart.Normalise();
-                dir.Normalise();
-
-                const float absSqMag = 1.0f + fabs(dirToPrevPart.x * dir.x + dirToPrevPart.y * dir.y);
-                m_partDirX[m_nNumParts] = absSqMag * dirToPrevPart.x * length / 2.0f;
-                m_partDirY[m_nNumParts] = absSqMag * dirToPrevPart.y * length / 2.0f;
-
-                if (m_nNumParts == 1) {
-                    m_partDirX[0] = m_partDirX[1];
-                    m_partDirY[0] = m_partDirY[1];
-                }
-
-                if (m_nNumParts > 8)
-                    bloodState = false;
-            }
-        }
-    } else {
-        m_nState = eSkidmarkState::DISAPPEARING;
-        m_fadeBeginMs = CTimer::GetTimeInMilliseconds() + 10'000;
-        m_disappearAtMs = CTimer::GetTimeInMilliseconds() + 20'000;
-    }
-}
-
-void CSkidmark::Init(uint32_t id, CVector posn, eSkidMarkType type, bool& bloodState) {
-    m_id = id;
-    m_vPosn[0] = posn;
-    m_partDirY[0] = 0.0f;
+void CSkidmark::Init(uint32 id, CVector posn, eSkidMarkType type, const bool* bloodState) {
+    m_nId         = id;
+    m_vPosn[0]    = posn;
     m_partDirX[0] = 0.0f;
-    m_bActive = true;
-    m_nState = eSkidmarkState::JUST_UPDATED;
-    m_lastDisappearTimeUpdateMs = CTimer::GetTimeInMilliseconds() - 1'000;
-    m_nNumParts = 0;
-    m_type = bloodState ? eSkidMarkType::BLOODY : type;
+    m_partDirY[0] = 0.0f;
+    m_bActive     = true;
+    m_nState      = eSkidmarkState::JUST_UPDATED;
+    m_nNumParts   = 0;
+    m_nType       = bloodState ? eSkidMarkType::BLOODY : type;
+    m_lastDisappearTimeUpdateMs = CTimer::GetTimeInMS() - 1'000;
 }
 
+// see CSkidmarks::Update
 void CSkidmark::Update() {
-    const auto timeMS = CTimer::GetTimeInMilliseconds();
+    const auto timeMS = CTimer::GetTimeInMS();
     switch (m_nState) {
     case eSkidmarkState::JUST_UPDATED: {
         if (m_bActive)
             break;
 
-        const auto UpdateTime = [this, timeMS](uint32_t low, uint32_t high) {
+        const auto UpdateTime = [this, timeMS](uint32 low, uint32 high) {
             m_fadeBeginMs += timeMS + low;
             m_disappearAtMs += timeMS + high;
         };
@@ -90,7 +50,7 @@ void CSkidmark::Update() {
 
 CRGBA CSkidmark::GetColor() const {
     const auto GetBaseColor = [this]() -> CRGBA {
-        switch (m_type) {
+        switch (m_nType) {
         case eSkidMarkType::DEFALT:
             return { 0, 0, 0, 255 };
 
@@ -104,16 +64,16 @@ CRGBA CSkidmark::GetColor() const {
             return { 32, 0, 0, 255 };
 
         default: {
-            assert(0); // NOTSA
+            assert(0);
             return {};
         }
         }
     };
 
     const auto GetAlpha = [this]() -> uint8 {
-        if (m_nState == eSkidmarkState::JUST_UPDATED || CTimer::GetTimeInMilliseconds() < m_fadeBeginMs)
+        if (m_nState == eSkidmarkState::JUST_UPDATED || CTimer::GetTimeInMS() < m_fadeBeginMs)
             return (uint8)255;
-        return (255 * (m_disappearAtMs - CTimer::GetTimeInMilliseconds())) / (m_disappearAtMs - m_fadeBeginMs);
+        return (255 * (m_disappearAtMs - CTimer::GetTimeInMS())) / (m_disappearAtMs - m_fadeBeginMs);
     };
 
     // TODO: This balance param stuff is probably inlined
@@ -124,6 +84,7 @@ CRGBA CSkidmark::GetColor() const {
     return balancedColor;
 }
 
+// see CSkidmarks::Render
 void CSkidmark::Render() const {
     if (m_nState == eSkidmarkState::INACTIVE)
         return;
@@ -165,8 +126,55 @@ void CSkidmark::Render() const {
     }
 
     LittleTest();
+
     if (RwIm3DTransform(aTempBufferVertices, 2 * m_nNumParts + 2, nullptr, rwIM3D_VERTEXUV)) {
         RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, CSkidmarks::m_aIndices, 6 * m_nNumParts);
         RwIm3DEnd();
+    }
+}
+
+// see CSkidmarks::RegisterOne
+void CSkidmark::RegisterNewPart(CVector posn, CVector2D dir, float length, bool* bloodState) {
+    if ((m_nType == eSkidMarkType::BLOODY) == *bloodState) {
+        m_bActive = true;
+        if (CTimer::GetTimeInMS() - m_lastDisappearTimeUpdateMs <= 100) {
+            m_vPosn[m_nNumParts] = posn; // Update existing, because of low delta time
+        } else {
+            if (m_nNumParts >= SKIDMARK_NUM_PARTS - 1) { // The 0th "part" isn't considered as an actual part, so at most we can have this many
+                m_lastDisappearTimeUpdateMs = CTimer::GetTimeInMS();
+                m_nState = eSkidmarkState::DISAPPEARING;
+                m_fadeBeginMs = CTimer::GetTimeInMS() + 10'000;
+                m_disappearAtMs = CTimer::GetTimeInMS() + 20'000;
+                *bloodState = false;
+            } else {
+                m_nNumParts++;
+                m_vPosn[m_nNumParts] = posn;
+
+                const CVector prevPosn = m_vPosn[m_nNumParts - 1];
+                CVector2D dirToPrevPart = {
+                    posn.y - prevPosn.y, // Swapped intentionally
+                    prevPosn.x - posn.x
+                };
+
+                dirToPrevPart.Normalise();
+                dir.Normalise();
+
+                const float absSqMag = 1.0f + fabs(dirToPrevPart.x * dir.x + dirToPrevPart.y * dir.y);
+                m_partDirX[m_nNumParts] = absSqMag * dirToPrevPart.x * length / 2.0f;
+                m_partDirY[m_nNumParts] = absSqMag * dirToPrevPart.y * length / 2.0f;
+
+                if (m_nNumParts == 1) {
+                    m_partDirX[0] = m_partDirX[1];
+                    m_partDirY[0] = m_partDirY[1];
+                }
+
+                if (m_nNumParts > 8)
+                    *bloodState = false;
+            }
+        }
+    } else {
+        m_nState = eSkidmarkState::DISAPPEARING;
+        m_fadeBeginMs = CTimer::GetTimeInMS() + 10'000;
+        m_disappearAtMs = CTimer::GetTimeInMS() + 20'000;
     }
 }

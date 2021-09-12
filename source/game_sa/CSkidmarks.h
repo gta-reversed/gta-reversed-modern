@@ -15,13 +15,14 @@ public:
 public:
     static void InjectHooks();
 
-    static void Clear();
     static void Init();
-    static void RegisterOne(uint32_t index, const CVector& posn, float dirX, float dirY, const bool* surfaceType, bool& bloodState, float length);
-    static CSkidmark* FindById(uint32_t id);
-    static CSkidmark* GetNextFree(bool forceFree);
-    static void RegisterOne(uint32_t index, const CVector& posn, float dirX, float dirY, eSkidMarkType type, bool& bloodState, float length);
-    static void Render();
     static void Shutdown();
+    static void Clear();
     static void Update();
+    static void Render();
+    static void RegisterOne(uint32 index, const CVector& posn, float dirX, float dirY, eSkidMarkType type, bool* bloodState, float length);
+    static void RegisterOne(uint32 index, const CVector& posn, float dirX, float dirY, bool* isSandy, bool* bloodState, float length);
+
+    static CSkidmark* FindById(uint32 id);
+    static CSkidmark* GetNextFree(bool forceFree);
 };
