@@ -35,6 +35,7 @@
 #include "CCustomBuildingPipeline.h"
 #include "CCustomBuildingDNPipeline.h"
 #include "CPlantMgr.h"
+#include "CPedType.h"
 
 #include "CTaskSimpleFight.h"
 #include "CTaskComplexUseGoggles.h"

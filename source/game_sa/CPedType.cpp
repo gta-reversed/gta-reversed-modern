@@ -1,9 +1,10 @@
 #include "StdInc.h"
 
+#include "CPedType.h"
+
 constexpr uint32 PED_TYPES_COUNT = 32;
 
-// 0xC0BBE8
-CPedAcquaintance* CPedType::ms_apPedTypes = {};
+CAcquaintance*& CPedType::ms_apPedTypes = *(CAcquaintance**)0xC0BBE8;
 
 // 0x8D23B8
 constexpr const char* aPedTypeNames[PED_TYPES_COUNT] = {
@@ -13,51 +14,31 @@ constexpr const char* aPedTypeNames[PED_TYPES_COUNT] = {
 };
 
 void CPedType::InjectHooks() {
-    ReversibleHooks::Install("CPedType", "Initialise", 0x608E40, &CPedType::Initialise);
-    ReversibleHooks::Install("CPedType", "Shutdown", 0x608B00, &CPedType::Shutdown);
-    ReversibleHooks::Install("CPedType", "Save", 0x5D3CD0, &CPedType::Save);
-    ReversibleHooks::Install("CPedType", "Load", 0x5D3D10, &CPedType::Load);
-    ReversibleHooks::Install("CPedType", "LoadPedData", 0x608B30, &CPedType::LoadPedData);
-    ReversibleHooks::Install("CPedType", "FindPedType", 0x608790, &CPedType::FindPedType);
-    ReversibleHooks::Install("CPedType", "GetPedFlag", 0x608830, &CPedType::GetPedFlag);
-    ReversibleHooks::Install("CPedType", "GetPedTypeAcquaintances_1", 0x6089B0, static_cast<CPedAcquaintance*(*)(ePedType)>(&CPedType::GetPedTypeAcquaintances));
-    ReversibleHooks::Install("CPedType", "GetPedTypeAcquaintances_2", 0x6089D0, static_cast<CPedAcquaintance*(*)(int32, ePedType)>(&CPedType::GetPedTypeAcquaintances));
-    ReversibleHooks::Install("CPedType", "SetPedTypeAsAcquaintance", 0x608E20, &CPedType::SetPedTypeAsAcquaintance);
-    ReversibleHooks::Install("CPedType", "ClearPedTypeAcquaintances", 0x608A20, &CPedType::ClearPedTypeAcquaintances);
-    ReversibleHooks::Install("CPedType", "ClearPedTypeAsAcquaintance", 0x6089F0, &CPedType::ClearPedTypeAsAcquaintance);
-    ReversibleHooks::Install("CPedType", "PoliceDontCareAboutCrimesAgainstPedType", 0x608A40, &CPedType::PoliceDontCareAboutCrimesAgainstPedType);
+    using namespace ReversibleHooks;
+    Install("CPedType", "Initialise", 0x608E40, &CPedType::Initialise);
+    Install("CPedType", "Shutdown", 0x608B00, &CPedType::Shutdown);
+    Install("CPedType", "Save", 0x5D3CD0, &CPedType::Save);
+    Install("CPedType", "Load", 0x5D3D10, &CPedType::Load);
+    Install("CPedType", "LoadPedData", 0x608B30, &CPedType::LoadPedData);
+    Install("CPedType", "FindPedType", 0x608790, &CPedType::FindPedType);
+    Install("CPedType", "GetPedFlag", 0x608830, &CPedType::GetPedFlag);
+    Install("CPedType", "GetPedTypeAcquaintances_1", 0x6089B0, static_cast<CAcquaintance*(*)(ePedType)>(&CPedType::GetPedTypeAcquaintances));
+    Install("CPedType", "GetPedTypeAcquaintances_2", 0x6089D0, static_cast<CAcquaintance*(*)(AcquaintanceId, ePedType)>(&CPedType::GetPedTypeAcquaintances));  // todo: breaks ReversibleHooks
+    Install("CPedType", "SetPedTypeAsAcquaintance", 0x608E20, &CPedType::SetPedTypeAsAcquaintance);
+    Install("CPedType", "ClearPedTypeAcquaintances", 0x608A20, &CPedType::ClearPedTypeAcquaintances);
+    Install("CPedType", "ClearPedTypeAsAcquaintance", 0x6089F0, &CPedType::ClearPedTypeAsAcquaintance);
+    Install("CPedType", "PoliceDontCareAboutCrimesAgainstPedType", 0x608A40, &CPedType::PoliceDontCareAboutCrimesAgainstPedType);
 }
 
 // 0x608E40
 void CPedType::Initialise() {
-    ms_apPedTypes = new CPedAcquaintance[PED_TYPES_COUNT]();
+    ms_apPedTypes = new CAcquaintance[PED_TYPES_COUNT]();
     LoadPedData();
 }
 
 // 0x608B00
 void CPedType::Shutdown() {
     delete[] ms_apPedTypes;
-}
-
-// 0x5D3CD0
-void CPedType::Save() {
-    for (uint32 i = 0; i < PED_TYPES_COUNT; ++i ) {
-        for (uint32 acquaintanceId = 0; acquaintanceId < 5; ++acquaintanceId) {
-            uint32 pSource = ms_apPedTypes[i].GetAcquaintances(acquaintanceId);
-            CGenericGameStorage::SaveDataToWorkBuffer(&pSource, 4);
-        }
-    }
-}
-
-// 0x5D3D10
-void CPedType::Load(int32 a2) {
-    for (uint32 i = 0; i < PED_TYPES_COUNT; ++i ) {
-        for (uint32 acquaintanceId = 0; acquaintanceId < 5; ++acquaintanceId) {
-            uint32 value;
-            CGenericGameStorage::LoadDataFromWorkBuffer(&value, sizeof(int32));
-            ms_apPedTypes[i].SetAcquaintances(acquaintanceId, value);
-        }
-    }
 }
 
 // 0x608B30
@@ -105,6 +86,27 @@ void CPedType::LoadPedData() {
     CFileMgr::CloseFile(file);
 }
 
+// 0x5D3D10
+void CPedType::Load() {
+    for (uint32 i = 0; i < PED_TYPES_COUNT; ++i ) {
+        for (auto id = 0; id < 5; ++id) {
+            uint32 value;
+            CGenericGameStorage::LoadDataFromWorkBuffer(&value, sizeof(uint32));
+            ms_apPedTypes[i].SetAcquaintances(id, value);
+        }
+    }
+}
+
+// 0x5D3CD0
+void CPedType::Save() {
+    for (uint32 i = 0; i < PED_TYPES_COUNT; ++i ) {
+        for (auto id = 0; id < 5; ++id) {
+            uint32 value = ms_apPedTypes[i].GetAcquaintances(id);
+            CGenericGameStorage::SaveDataToWorkBuffer(&value, 4);
+        }
+    }
+}
+
 // 0x608790
 ePedType CPedType::FindPedType(const char* pedTypeName) {
     for (int16 pedType = 0; pedType < PED_TYPES_COUNT; pedType++) {
@@ -133,30 +135,29 @@ uint32 CPedType::GetPedFlag(ePedType pedType) {
 }
 
 // 0x6089B0
-CPedAcquaintance* CPedType::GetPedTypeAcquaintances(ePedType pedType) {
+CAcquaintance* CPedType::GetPedTypeAcquaintances(ePedType pedType) {
     return &ms_apPedTypes[static_cast<int32>(pedType)];
 }
 
 // 0x6089D0
-CPedAcquaintance* CPedType::GetPedTypeAcquaintances(int32 acquaintanceId, ePedType pedType) {
-    auto index = acquaintanceId + static_cast<int32>(pedType);
-    return &ms_apPedTypes[index];
+CAcquaintance* CPedType::GetPedTypeAcquaintances(AcquaintanceId id, ePedType pedType) {
+    return plugin::CallAndReturn<CAcquaintance*, 0x6089D0, AcquaintanceId, ePedType>(id, pedType);
 }
 
 // 0x608E20
-void CPedType::SetPedTypeAsAcquaintance(int32 acquaintanceId, ePedType pedType, int32 pedTypeBitNum) {
-    ms_apPedTypes[pedType].SetAsAcquaintance(acquaintanceId, pedTypeBitNum);
+void CPedType::SetPedTypeAsAcquaintance(AcquaintanceId id, ePedType pedType, int32 pedTypeBitNum) {
+    GetPedTypeAcquaintances(pedType)->SetAsAcquaintance(id, pedTypeBitNum);
 }
 
 // 0x608A20
-void CPedType::ClearPedTypeAcquaintances(int32 acquaintanceId) {
-    auto pedType = ms_apPedTypes[acquaintanceId];
-    pedType.ClearAcquaintances(acquaintanceId);
+void CPedType::ClearPedTypeAcquaintances(AcquaintanceId id) {
+    auto pedType = ms_apPedTypes[id];
+    pedType.ClearAcquaintances(id);
 }
 
 // 0x6089F0
-void CPedType::ClearPedTypeAsAcquaintance(int32 acquaintanceId, ePedType pedType, int32 pedTypeBitNum) {
-    ms_apPedTypes[pedType].ClearAsAcquaintance(acquaintanceId, pedTypeBitNum);
+void CPedType::ClearPedTypeAsAcquaintance(AcquaintanceId id, ePedType pedType, int32 pedTypeBitNum) {
+    ms_apPedTypes[pedType].ClearAsAcquaintance(id, pedTypeBitNum);
 }
 
 // 0x608A40

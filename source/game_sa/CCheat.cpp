@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
+#include "CCheat.h"
+
 #include "CTaskSimpleJetPack.h"
+#include "CPedType.h"
 
 void (*(&CCheat::m_aCheatFunctions)[TOTAL_CHEATS])() = *reinterpret_cast<void (*(*)[TOTAL_CHEATS])()>(0x8A5B58);
 int32 (&CCheat::m_aCheatHashKeys)[TOTAL_CHEATS] = *reinterpret_cast<int32 (*)[TOTAL_CHEATS]>(0x8A5CC8);

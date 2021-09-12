@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "CEventGunAimedAt.h"
+
+#include "CPedType.h"
+
 void CEventGunAimedAt::InjectHooks()
 {
     ReversibleHooks::Install("CEventGunAimedAt", "Constructor", 0x4B0700, &CEventGunAimedAt::Constructor);

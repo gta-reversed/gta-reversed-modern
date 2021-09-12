@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "CEventDamage.h"
+
+#include "CPedType.h"
+
 void CEventDamage::InjectHooks() {
     ReversibleHooks::Install("CEventDamage", "CEventDamage", 0x4B33B0, (CEventDamage*(CEventDamage::*)(CEventDamage*)) & CEventDamage::Constructor);
     ReversibleHooks::Install("CEventDamage", "CEventDamage_1", 0x4AD830, (CEventDamage * (CEventDamage::*)(CEntity*, uint32, eWeaponType, ePedPieceTypes, uint8, bool, bool)) & CEventDamage::Constructor);

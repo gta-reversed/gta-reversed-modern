@@ -291,7 +291,7 @@ public:
     AnimBlendFrameData* m_apBones[TOTAL_PED_NODES]; // for Index, see ePedNode
     AssocGroupId        m_nAnimGroup;
     CVector2D           m_vecAnimMovingShiftLocal;
-    CPedAcquaintance    m_acquaintance;
+    CAcquaintance m_acquaintance;
     RpClump*            m_pWeaponObject;
     RwFrame*            m_pGunflashObject;
     RwObject*           m_pGogglesObject;

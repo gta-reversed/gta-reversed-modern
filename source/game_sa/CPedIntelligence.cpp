@@ -7,6 +7,10 @@
 
 #include "StdInc.h"
 
+#include "CPedIntelligence.h"
+
+#include "CPedType.h"
+
 float& CPedIntelligence::STEALTH_KILL_RANGE = *reinterpret_cast<float*>(0x8D2398); // 2.5f
 float& CPedIntelligence::LIGHT_AI_LEVEL_MAX = *reinterpret_cast<float*>(0x8D2380); // 0.3f
 float& CPedIntelligence::flt_8D2384 = *reinterpret_cast<float*>(0x8D2384); // 30.0f
