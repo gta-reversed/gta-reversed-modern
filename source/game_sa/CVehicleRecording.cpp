@@ -4,9 +4,21 @@ int32& CVehicleRecording::NumPlayBackFiles = *(int32*)0x97F630;
 CPath(&CVehicleRecording::StreamingArray)[TOTAL_RRR_MODEL_IDS] = *(CPath(*)[TOTAL_RRR_MODEL_IDS])0x97D880;
 bool(&CVehicleRecording::bUseCarAI)[TOTAL_VEHICLE_RECORDS] = *(bool(*)[TOTAL_VEHICLE_RECORDS])0x97D6C0;
 
+void CVehicleRecording::InjectHooks() {
+    ReversibleHooks::Install("CVehicleRecording", "Render", 0x459F70, &CVehicleRecording::Render);
+}
+
 void CVehicleRecording::Init()
 {
     plugin::Call<0x459390>();
+}
+
+void CVehicleRecording::Render()
+{
+//NOTSA: Originally an empty function, called late in rendering pipeline, used for debug stuff
+#ifdef EXTRA_DEBUG_FEATURES
+    COcclusionDebugModule::ProcessRender();
+#endif
 }
 
 bool CVehicleRecording::HasRecordingFileBeenLoaded(int32 rrrNumber)

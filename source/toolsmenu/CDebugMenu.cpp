@@ -812,7 +812,7 @@ void CDebugMenu::ProcessHooksTool() {
 void CDebugMenu::ProcessExtraDebugFeatures() {
     if (ImGui::BeginTabBar("Modules")) {
         if (ImGui::BeginTabItem("Occlussion")) {
-            // COcclusionDebugModule::ProcessImgui();
+            COcclusionDebugModule::ProcessImgui();
             ImGui::EndTabItem();
         }
 

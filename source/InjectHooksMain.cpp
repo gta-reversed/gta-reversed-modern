@@ -36,6 +36,9 @@
 #include "CCustomBuildingDNPipeline.h"
 #include "CPlantMgr.h"
 #include "CPedType.h"
+#include "COcclusion.h"
+#include "COccluder.h"
+#include "CActiveOccluder.h"
 
 #include "CTaskSimpleFight.h"
 #include "CTaskComplexUseGoggles.h"
@@ -53,6 +56,7 @@ void InjectHooksMain()
 {
     // WaitForDebugger();
 
+    CVehicleRecording::InjectHooks();
     Fx_c::InjectHooks();
     CBrightLights::InjectHooks();
     CShinyTexts::InjectHooks();
@@ -268,6 +272,8 @@ void InjectHooksMain()
     C2dEffect::InjectHooks();
     CCustomRoadsignMgr::InjectHooks();
     COcclusion::InjectHooks();
+    COccluder::InjectHooks();
+    CActiveOccluder::InjectHooks();
     CGarage::InjectHooks();
     CGarages::InjectHooks();
     CPostEffects::InjectHooks();
@@ -368,7 +374,6 @@ void InjectHooksMain()
     CTaskComplexJump::InjectHooks();
     ModelIndices::InjectHooks();
     CWaterCannons::InjectHooks();
-    CLines::InjectHooks();
     CSprite::InjectHooks();
     CPlaneTrails::InjectHooks();
     CCustomBuildingPipeline::InjectHooks();

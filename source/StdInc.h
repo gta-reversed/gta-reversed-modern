@@ -28,7 +28,6 @@
 #include "game_sa\CDebug.h"
 #include "game_sa\CPostEffects.h"
 #include "game_sa\CMemoryMgr.h"
-#include "game_sa\COcclusion.h"
 #include "game_sa\CCullZones.h"
 #include "game_sa\CGlass.h"
 #include "game_sa\CGridRef.h"
@@ -593,3 +592,7 @@
 #include "game_sa\Tasks\TaskTypes\CTaskSimplePause.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimpleScratchHead.h"
 #include "game_sa\Tasks\TaskTypes\CTaskSimplePlayHandSignalAnim.h"
+
+#ifdef EXTRA_DEBUG_FEATURES
+#include "toolsmenu\DebugModules\COcclusionDebugModule.h"
+#endif

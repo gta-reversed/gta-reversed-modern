@@ -2,13 +2,6 @@
 
 #include "CLines.h"
 
-void CLines::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CLines", "RenderLineNoClipping", 0x6FF460, &CLines::RenderLineNoClipping);
-    // Install("CLines", "RenderLineWithClipping", 0x4F2864, &CLines::RenderLineWithClipping);
-    // Install("CLines", "ImmediateLine2D", 0x6FF790, &CLines::ImmediateLine2D);
-}
-
 // 0x6FF460
 void CLines::RenderLineNoClipping(float startX, float startY, float startZ, float endX, float endY, float endZ, uint32 startColor, uint32 endColor) {
     plugin::Call<0x6FF460, float, float, float, float, float, float, uint32, uint32>(startX, startY, startZ, endX, endY, endZ, startColor, endColor);
