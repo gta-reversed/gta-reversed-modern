@@ -1,28 +1,26 @@
 #include "StdInc.h"
 
+#include "CTaskSimplePutDownEntity.h"
 
 void CTaskSimplePutDownEntity::InjectHooks() {
     ReversibleHooks::Install("CTaskSimplePutDownEntity", "CTaskSimplePutDownEntity", 0x691990, &CTaskSimplePutDownEntity::Constructor);
     ReversibleHooks::Install("CTaskSimplePutDownEntity", "Clone", 0x692B70, &CTaskSimplePutDownEntity::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimplePutDownEntity", "GetId", 0x691900, &CTaskSimplePutDownEntity::GetId_Reversed);
+    ReversibleHooks::Install("CTaskSimplePutDownEntity", "GetTaskType", 0x691900, &CTaskSimplePutDownEntity::GetId_Reversed);
 }
 
-CTaskSimplePutDownEntity::CTaskSimplePutDownEntity() : CTaskSimpleHoldEntity(nullptr, nullptr, PED_NODE_RIGHT_HAND, HOLD_ENTITY_FLAG_1, ANIM_ID_NO_ANIMATION_SET, 0, false) {
+CTaskSimplePutDownEntity::CTaskSimplePutDownEntity() : CTaskSimpleHoldEntity(nullptr, nullptr, PED_NODE_RIGHT_HAND, HOLD_ENTITY_FLAG_1, ANIM_ID_NO_ANIMATION_SET, ANIM_GROUP_DEFAULT, false) {
     m_fPutDownHeightZ = 0.6f;
 }
 
-CTaskSimplePutDownEntity::CTaskSimplePutDownEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags,
-    int animId, int groupId, bool bDisAllowDroppingOnAnimEnd, float fPutDownHeightZ) : CTaskSimpleHoldEntity(pEntityToHold, pPosition, boneFrameId, boneFlags, animId, groupId, bDisAllowDroppingOnAnimEnd) {
+CTaskSimplePutDownEntity::CTaskSimplePutDownEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, bool bDisAllowDroppingOnAnimEnd, float fPutDownHeightZ) : CTaskSimpleHoldEntity(pEntityToHold, pPosition, boneFrameId, boneFlags, animId, groupId, bDisAllowDroppingOnAnimEnd) {
     m_fPutDownHeightZ = fPutDownHeightZ;
 }
 
-CTaskSimplePutDownEntity::CTaskSimplePutDownEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags,
-    char* pAnimName, char* pAnimBlockName, int animFlags, float fPutDownHeightZ) : CTaskSimpleHoldEntity(pEntityToHold, pPosition, boneFrameId, boneFlags, pAnimName, pAnimBlockName, animFlags) {
+CTaskSimplePutDownEntity::CTaskSimplePutDownEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, char* pAnimName, char* pAnimBlockName, int32 animFlags, float fPutDownHeightZ) : CTaskSimpleHoldEntity(pEntityToHold, pPosition, boneFrameId, boneFlags, pAnimName, pAnimBlockName, animFlags) {
     m_fPutDownHeightZ = fPutDownHeightZ;
 }
 
-CTaskSimplePutDownEntity::CTaskSimplePutDownEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, unsigned char boneFlags,
-    CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int animFlags, float fPutDownHeightZ) : CTaskSimpleHoldEntity(pEntityToHold, pPosition, boneFrameId, boneFlags, pAnimBlock, pAnimHierarchy, animFlags) {
+CTaskSimplePutDownEntity::CTaskSimplePutDownEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int32 animFlags, float fPutDownHeightZ) : CTaskSimpleHoldEntity(pEntityToHold, pPosition, boneFrameId, boneFlags, pAnimBlock, pAnimHierarchy, animFlags) {
     m_fPutDownHeightZ = fPutDownHeightZ;
 }
 
@@ -30,29 +28,20 @@ CTaskSimplePutDownEntity::~CTaskSimplePutDownEntity() {
     // nothing here
 }
 
+// 0x691990
 CTaskSimplePutDownEntity* CTaskSimplePutDownEntity::Constructor() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CTaskSimplePutDownEntity*, 0x691990, CTaskSimplePutDownEntity*>(this);
-#else
     this->CTaskSimplePutDownEntity::CTaskSimplePutDownEntity();
     return this;
-#endif
 }
 
+// 0x692B70
 CTask* CTaskSimplePutDownEntity::Clone() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CTask*, 0x692B70, CTask*>(this);
-#else
     return CTaskSimplePutDownEntity::Clone_Reversed();
-#endif
 }
 
-eTaskType CTaskSimplePutDownEntity::GetId() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn <eTaskType, 0x691900, CTask*>(this);
-#else
+// 0x691900
+eTaskType CTaskSimplePutDownEntity::GetTaskType() {
     return CTaskSimplePutDownEntity::GetId_Reversed();
-#endif
 }
 
 CTask* CTaskSimplePutDownEntity::Clone_Reversed() {

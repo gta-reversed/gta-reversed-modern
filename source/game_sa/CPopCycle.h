@@ -5,11 +5,11 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CZoneInfo.h"
 #include "CZone.h"
 
-enum ePedType : unsigned int;
+enum ePedType : uint32;
 
 // used in CPopCycle::m_nPercTypeGroup
 enum ePopcycleGroupPerc {
@@ -35,8 +35,7 @@ enum ePopcycleGroupPerc {
 };
 
 // used in CPopulation::m_TranslationArray
-enum ePopcycleGroup
-{
+enum ePopcycleGroup {
     POPCYCLE_GROUP_WORKERS = 0,
     POPCYCLE_GROUP_BUSINESS,
     POPCYCLE_GROUP_CLUBBERS,
@@ -170,58 +169,49 @@ enum ePopcycleCarGroup {
     POPCYCLE_TOTAL_CARGROUPS
 };
 
-
-class CPopCycle
-{
+class CPopCycle {
 public:
+    static float&      m_NumOther_Cars;
+    static float&      m_NumCops_Cars;
+    static float&      m_NumGangs_Cars;
+    static float&      m_NumDealers_Cars;
+    static float&      m_NumOther_Peds;
+    static float&      m_NumCops_Peds;
+    static float&      m_NumGangs_Peds;
+    static float&      m_fPercOther;
+    static float&      m_fPercCops;
+    static float&      m_fPercGangs;
+    static float&      m_fPercDealers;
+    static bool&       m_bCurrentZoneIsGangArea;
+    static float&      m_fCurrentZoneDodgyness;
+    static CZone*&     m_pCurrZone;
+    static CZoneInfo*& m_pCurrZoneInfo;
+    static int32&      m_nCurrentZoneType;
+    static int32&      m_nCurrentTimeOfWeek;
+    static int32&      m_nCurrentTimeIndex;
+    static char*       m_nPercTypeGroup; // char m_nPercTypeGroup[8640]; // see ePopcycleGroupPerc
+    static uint8*      m_nPercOther;     // uint8 m_nPercOther[480];
+    static uint8*      m_nPercCops;      // uint8 m_nPercCops[480];
+    static uint8*      m_nPercGang;      // uint8 m_nPercGang[480];
+    static uint8*      m_nPercDealers;   // uint8 m_nPercDealers[480];
+    static uint8*      m_nMaxNumCars;    // uint8 m_nMaxNumCars[480];
+    static uint8*      m_nMaxNumPeds;    // uint8 m_nMaxNumPeds[480];
+    static float&      m_NumDealers_Peds;
 
-	static float& m_NumOther_Cars;
-	static float& m_NumCops_Cars;
-	static float& m_NumGangs_Cars;
-	static float& m_NumDealers_Cars;
-	static float& m_NumOther_Peds;
-	static float& m_NumCops_Peds;
-	static float& m_NumGangs_Peds;
-	static float& m_fPercOther;
-	static float& m_fPercCops;
-	static float& m_fPercGangs;
-	static float& m_fPercDealers;
-	static bool& m_bCurrentZoneIsGangArea;
-	static float& m_fCurrentZoneDodgyness;
-	static CZone*& m_pCurrZone;
-	static CZoneInfo*& m_pCurrZoneInfo;
-	static int& m_nCurrentZoneType;
-	static int& m_nCurrentTimeOfWeek;
-	static int& m_nCurrentTimeIndex;
-	static char* m_nPercTypeGroup;				// char m_nPercTypeGroup[8640]; // see ePopcycleGroupPerc
-	static unsigned char* m_nPercOther;				// unsigned char m_nPercOther[480];
-	static unsigned char* m_nPercCops;			// unsigned char m_nPercCops[480];
-	static unsigned char* m_nPercGang;	// unsigned char m_nPercGang[480];
-	static unsigned char* m_nPercDealers;				// unsigned char m_nPercDealers[480];
-	static unsigned char* m_nMaxNumCars;			 // unsigned char m_nMaxNumCars[480];
-	static unsigned char* m_nMaxNumPeds;			 // unsigned char m_nMaxNumPeds[480];
-	static float& m_NumDealers_Peds;
-
-
-
-	static bool FindNewPedType(ePedType* arg1, int* modelindex, bool arg3, bool arg4);
-	static float GetCurrentPercOther_Peds();
-	static void Initialise();
-	static bool IsPedAppropriateForCurrentZone(int modelindex);
-	static bool IsPedInGroup(int modelIndex, int PopCycle_Group);
-	static bool PedIsAcceptableInCurrentZone(int modelIndex);
-	static int PickARandomGroupOfOtherPeds();
-    static std::int32_t PickPedMIToStreamInForCurrentZone();
-	static void PlayerKilledADealer();
-	static void Update();
-	static void UpdateAreaDodgyness();
-	static void UpdateDealerStrengths();
-	static void UpdatePercentages();
-    static char GetCurrentPercTypeGroup(int groupId, unsigned char zonePopulationType)
-    {
-        return m_nPercTypeGroup[720 * m_nCurrentTimeIndex +
-                                360 * m_nCurrentTimeOfWeek +
-                                18 * zonePopulationType + groupId];
+    static bool  FindNewPedType(ePedType* arg1, int32* modelindex, bool arg3, bool arg4);
+    static float GetCurrentPercOther_Peds();
+    static void  Initialise();
+    static bool  IsPedAppropriateForCurrentZone(int32 modelindex);
+    static bool  IsPedInGroup(int32 modelIndex, int32 PopCycle_Group);
+    static bool  PedIsAcceptableInCurrentZone(int32 modelIndex);
+    static int32 PickARandomGroupOfOtherPeds();
+    static int32 PickPedMIToStreamInForCurrentZone();
+    static void  PlayerKilledADealer();
+    static void  Update();
+    static void  UpdateAreaDodgyness();
+    static void  UpdateDealerStrengths();
+    static void  UpdatePercentages();
+    static char  GetCurrentPercTypeGroup(int32 groupId, uint8 zonePopulationType) {
+        return m_nPercTypeGroup[720 * m_nCurrentTimeIndex + 360 * m_nCurrentTimeOfWeek + 18 * zonePopulationType + groupId];
     }
-
 };

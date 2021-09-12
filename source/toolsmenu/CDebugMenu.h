@@ -4,31 +4,36 @@
 #include "CDebugMenuToolInput.h"
 #include "CVector.h"
 
-class CDebugMenu
-{
+class CDebugMenu {
 private:
     static CDebugMenuToolInput m_vehicleToolInput;
     static CDebugMenuToolInput m_pedToolInput;
     static CDebugMenuToolInput m_missionToolInput;
     static bool m_bStartMission;
-    static std::int32_t m_missionToStartId;
+    static int32 m_missionToStartId;
     static bool m_imguiInitialised;
     static bool m_showMenu;
+    static bool m_showFPS;
+    static bool m_showExtraDebugFeatures;
     static CSprite2d m_mouseSprite;
 
     static void ImguiDisplayFramePerSecond();
+    static void ImguiDisplayExtraDebugFeatures();
     static void ImguiDisplayPlayerInfo();
     static void ProcessCheatTool();
-    static void SpawnPed(std::int32_t modelID, CVector position);
+    static void SpawnPed(int32 modelID, CVector position);
     static void ProcessPedTool();
     static void ShowPlayerInfo();
     static void ProcessVehicleTool();
     static void InitializeAndStartNewScript();
-    static bool StartMission(std::int32_t missionId, bool bDoMissionCleanUp = true);
+    static bool StartMission(int32 missionId, bool bDoMissionCleanUp = true);
     static void ProcessMissionTool();
     static void ProcessRenderTool();
     static void PostFxTool();
     static void ProcessHooksTool();
+#ifdef EXTRA_DEBUG_FEATURES
+    static void ProcessExtraDebugFeatures();
+#endif
     //static void ToggleHook();
 public:
     static ImGuiIO* io;

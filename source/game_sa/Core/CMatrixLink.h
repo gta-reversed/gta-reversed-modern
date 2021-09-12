@@ -6,28 +6,25 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CMatrix.h"
 
 class CPlaceable;
 
-class  CMatrixLink : public CMatrix {
+class CMatrixLink : public CMatrix {
 public:
     CMatrixLink() : CMatrix() {}
     CMatrixLink(float fScale) : CMatrix() { SetScale(fScale); }
 
 public:
-    CPlaceable *m_pOwner;
-    CMatrixLink *m_pPrev;
-    CMatrixLink *m_pNext;
+    CPlaceable*  m_pOwner;
+    CMatrixLink* m_pPrev;
+    CMatrixLink* m_pNext;
 
 public:
     static void InjectHooks();
 
-    inline void Insert(CMatrixLink *pWhere);
+    inline void Insert(CMatrixLink* pWhere);
     inline void Remove();
 };
 
 VALIDATE_SIZE(CMatrixLink, 0x54);
-
-//#include "meta/meta.CMatrixLink.h"

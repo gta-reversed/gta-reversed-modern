@@ -6,14 +6,14 @@
 class CTaskSimplePause : public CTaskSimple {
 public:
     CTaskTimer m_timer;
-    int m_nTime;
+    int32 m_nTime;
 
 public:
-    CTaskSimplePause(int time);
+    CTaskSimplePause(int32 time);
     ~CTaskSimplePause();
 
     CTask* Clone() override;
-    eTaskType GetId() override {
+    eTaskType GetTaskType() override {
         return TASK_SIMPLE_PAUSE;
     };
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
@@ -25,7 +25,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskSimplePause* Constructor(int time);
+    CTaskSimplePause* Constructor(int32 time);
 
 };
 

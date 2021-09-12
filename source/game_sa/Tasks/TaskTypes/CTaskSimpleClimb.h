@@ -6,12 +6,12 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CAnimBlendAssociation.h"
 #include "CEntity.h"
 
-enum eClimbHeights : char
+enum eClimbHeights : int8
 {
     CLIMB_NOT_READY = 0,
     CLIMB_GRAB,
@@ -22,7 +22,7 @@ enum eClimbHeights : char
     CLIMB_FINISHED_V
 };
 
-class  CTaskSimpleClimb : public CTaskSimple {
+class CTaskSimpleClimb : public CTaskSimple {
 public:
     bool m_bIsFinished;
     bool m_bChangeAnimation;
@@ -31,32 +31,32 @@ public:
     bool m_bInvalidClimb;
     char m_nHeightForAnim;
     char m_nHeightForPos;
-    unsigned char m_nSurfaceType;
+    uint8 m_nSurfaceType;
     char m_nFallAfterVault;
     float m_fHandholdHeading;
     CVector m_vecHandholdPos;
     CEntity* m_pClimbEnt;
-    short m_nGetToPosCounter;
+    int16 m_nGetToPosCounter;
     CAnimBlendAssociation* m_pAnim;
 
 private:
-    CTaskSimpleClimb* Constructor(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, unsigned char nSurfaceType, eClimbHeights nHeight, bool bForceClimb);
+    CTaskSimpleClimb* Constructor(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb);
 public:
-    CTaskSimpleClimb(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, unsigned char nSurfaceType, eClimbHeights nHeight, bool bForceClimb);
+    CTaskSimpleClimb(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb);
     ~CTaskSimpleClimb() override;
 
     CTask* Clone() override { return new CTaskSimpleClimb(m_pClimbEnt, m_vecHandholdPos, m_fHandholdHeading, m_nSurfaceType, (eClimbHeights)m_nHeightForAnim, m_bForceClimb); }
     bool ProcessPed(CPed* ped) override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
-    eTaskType GetId() override { return TASK_SIMPLE_CLIMB; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_CLIMB; }
 
     bool ProcessPed_Reversed(CPed* ped);
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
 
-    static CEntity* TestForClimb(CPed* pPed, CVector& climbPos, float& fAngle, unsigned char& nSurfaceType, bool theBool);
+    static CEntity* TestForClimb(CPed* pPed, CVector& climbPos, float& fAngle, uint8& nSurfaceType, bool theBool);
     //returns bool or CEntity*
-    static void* ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CVector& climbPos, float& pAngle, unsigned char& pSurfaceType, bool flag1, bool bStandUp, bool bVault);
-    static CEntity* ScanToGrab(CPed* ped, CVector& climbPos, float& pAngle, unsigned char& pSurfaceType, bool flag1, bool bStandUp, bool bVault, CVector* pedPosition);
+    static void* ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CVector& climbPos, float& pAngle, uint8& pSurfaceType, bool flag1, bool bStandUp, bool bVault);
+    static CEntity* ScanToGrab(CPed* ped, CVector& climbPos, float& pAngle, uint8& pSurfaceType, bool flag1, bool bStandUp, bool bVault, CVector* pedPosition);
     static bool CreateColModel();
     static void Shutdown();
     bool TestForStandUp(CPed* ped, CVector* point, float fAngle);

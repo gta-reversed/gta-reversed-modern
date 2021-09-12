@@ -6,7 +6,7 @@ Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
-void* CTask::operator new(uint32_t size) {
+void* CTask::operator new(uint32 size) {
     return CPools::ms_pTaskPool->New();
 }
 

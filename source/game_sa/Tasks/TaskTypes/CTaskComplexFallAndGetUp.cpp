@@ -14,20 +14,20 @@ void CTaskComplexFallAndGetUp::InjectHooks()
     ReversibleHooks::Install("CTaskComplexFallAndGetUp", "MakeAbortable", 0x6787F0, &CTaskComplexFallAndGetUp::MakeAbortable_Reversed);
 }
 
-CTaskComplexFallAndGetUp* CTaskComplexFallAndGetUp::Constructor(eAnimID nFallAnimId, eAnimGroup nFallAnimGroup, int nFallDownTime)
+CTaskComplexFallAndGetUp* CTaskComplexFallAndGetUp::Constructor(AnimationId nFallAnimId, AssocGroupId nFallAnimGroup, int32 nFallDownTime)
 {
     this->CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(nFallAnimId, nFallAnimGroup, nFallDownTime);
     return this;
 }
 
-CTaskComplexFallAndGetUp* CTaskComplexFallAndGetUp::Constructor2(int nDir, int nFallDownTime)
+CTaskComplexFallAndGetUp* CTaskComplexFallAndGetUp::Constructor2(int32 nDir, int32 nFallDownTime)
 {
     this->CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(nDir, nFallDownTime);
     return this;
 }
 
 // 0x6786C0
-CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(eAnimID nFallAnimId, eAnimGroup nFallAnimGroup, int nFallDownTime)
+CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(AnimationId nFallAnimId, AssocGroupId nFallAnimGroup, int32 nFallDownTime)
 {
     m_nFallAnimId = nFallAnimId;
     m_nFallAnimGroup = nFallAnimGroup;
@@ -35,7 +35,7 @@ CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(eAnimID nFallAnimId, eAnimGro
 }
 
 // 0x678700
-CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(int nDir, int nFallDownTime)
+CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(int32 nDir, int32 nFallDownTime)
 {
     m_nFallDownTime = nFallDownTime;
     m_nFallAnimGroup = ANIM_GROUP_DEFAULT;
@@ -90,7 +90,7 @@ CTask* CTaskComplexFallAndGetUp::CreateFirstSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexFallAndGetUp::CreateNextSubTask_Reversed(CPed* ped)
 {
-    auto subTaskType = m_pSubTask->GetId();
+    auto subTaskType = m_pSubTask->GetTaskType();
 
     if (subTaskType == TASK_SIMPLE_FALL)
         return CreateSubTask(TASK_SIMPLE_GET_UP);
@@ -143,11 +143,11 @@ CTask* CTaskComplexFallAndGetUp::CreateSubTask(eTaskType taskType)
 // 0x6787D0
 bool CTaskComplexFallAndGetUp::IsFalling()
 {
-    return m_pSubTask->GetId() == TASK_SIMPLE_FALL;
+    return m_pSubTask->GetTaskType() == TASK_SIMPLE_FALL;
 }
 
 // 0x6787A0
-void CTaskComplexFallAndGetUp::SetDownTime(int nTime)
+void CTaskComplexFallAndGetUp::SetDownTime(int32 nTime)
 {
     m_nFallDownTime = nTime;
     if (IsFalling())

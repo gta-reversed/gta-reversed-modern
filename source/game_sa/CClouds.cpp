@@ -4,11 +4,11 @@
 // bool& CClouds::m_bVolumetricCloudHeightSwitch; // unused
 // float& CClouds::m_fVolumetricCloudWindMoveFactor; // unused
 float& CClouds::m_fVolumetricCloudMaxDistance = *reinterpret_cast<float*>(0xC6AA58);
-unsigned int& CClouds::m_VolumetricCloudsUsedNum = *reinterpret_cast<unsigned int*>(0xC6AA5C);
+uint32& CClouds::m_VolumetricCloudsUsedNum = *reinterpret_cast<uint32*>(0xC6AA5C);
 
 float& CClouds::ms_cameraRoll = *reinterpret_cast<float*>(0xC6AA64);
 
-int& CClouds::IndividualRotation = *reinterpret_cast<int*>(0xC6AA6C);
+int32& CClouds::IndividualRotation = *reinterpret_cast<int32*>(0xC6AA6C);
 float& CClouds::CloudRotation = *reinterpret_cast<float*>(0xC6AA70);
 
 tVolumetricClouds& CClouds::ms_vc = *reinterpret_cast<tVolumetricClouds*>(0xC6AAB0);
@@ -25,7 +25,7 @@ RwTexture* (&gpCloudTex)[2] = *reinterpret_cast<RwTexture* (*)[2]>(0xC6AA78);
 float& flt_C6E954 = *reinterpret_cast<float*>(0xC6E954); // see CClouds::RenderBottomFromHeight, CClouds::MovingFogRender
 float& flt_C6E970 = *reinterpret_cast<float*>(0xC6E970); // see CClouds::VolumetricCloudsRender
 
-int& dword_C6E974 = *reinterpret_cast<int*>(0xC6E974); // see CClouds::VolumetricCloudsRender
+int32& dword_C6E974 = *reinterpret_cast<int32*>(0xC6E974); // see CClouds::VolumetricCloudsRender
 
 void CClouds::InjectHooks() {
     ReversibleHooks::Install("CClouds", "Init", 0x7138D0, &CClouds::Init);
@@ -69,7 +69,7 @@ void CClouds::Init() {
 // 0x712FF0
 void CClouds::Update() {
     CloudRotation = std::sin(TheCamera.m_fOrientation - 0.85f) * CWeather::Wind * 0.001f + CClouds::CloudRotation;
-    IndividualRotation += (int)((CTimer::ms_fTimeStep * CWeather::Wind * 0.5f + 0.3f) * 60.0f);
+    IndividualRotation += (int32)((CTimer::ms_fTimeStep * CWeather::Wind * 0.5f + 0.3f) * 60.0f);
 }
 
 // 0x712FA0
@@ -85,10 +85,10 @@ void CClouds::Shutdown() {
 }
 
 // 0x713060
-void CClouds::SetUpOneSkyPoly(CVector vert1pos, CVector vert2pos, CVector vert3pos, CVector vert4pos, unsigned char topRed, unsigned char topGreen, unsigned char topBlue,
-                              unsigned char bottomRed, unsigned char bottomGreen, unsigned char bottomBlue) {
-    unsigned short uiStartVertex = uiTempBufferVerticesStored;
-    unsigned short iStartIndex = uiTempBufferIndicesStored;
+void CClouds::SetUpOneSkyPoly(CVector vert1pos, CVector vert2pos, CVector vert3pos, CVector vert4pos, uint8 topRed, uint8 topGreen, uint8 topBlue,
+                              uint8 bottomRed, uint8 bottomGreen, uint8 bottomBlue) {
+    uint16 uiStartVertex = uiTempBufferVerticesStored;
+    uint16 iStartIndex = uiTempBufferIndicesStored;
 
     RwIm3DVertexSetRGBA(&aTempBufferVertices[uiStartVertex + 0], topRed, topGreen, topBlue, 0xFF);
     RwIm3DVertexSetPos(&aTempBufferVertices[uiStartVertex + 0], vert1pos.x, vert1pos.y, vert1pos.z);
@@ -135,7 +135,7 @@ void CClouds::MovingFogInit() {
 
 // 0x713760
 void CClouds::MovingFog_Create(CVector* posn) {
-    int slotId = MovingFog_GetFirstFreeSlot();
+    int32 slotId = MovingFog_GetFirstFreeSlot();
 
     if (slotId == -1) {
         return;
@@ -154,7 +154,7 @@ void CClouds::MovingFog_Create(CVector* posn) {
 
 // unused
 // 0x713730
-void CClouds::MovingFog_Delete(int fogSlotIndex) {
+void CClouds::MovingFog_Delete(int32 fogSlotIndex) {
     fogSlotIndex = clamp(fogSlotIndex, 0, MAX_MOVING_FOG - 1);
     ms_mf.m_bFogSlots[fogSlotIndex] = false;
 }
@@ -165,7 +165,7 @@ void CClouds::MovingFog_Update() {
         return;
 
     CVector camPos = TheCamera.GetPosition();
-    for (int i = 0; i < MAX_MOVING_FOG; i++) {
+    for (int32 i = 0; i < MAX_MOVING_FOG; i++) {
         CVector& fogPosn = ms_mf.m_vecPosn[i];
         CVector offset = fogPosn - camPos;
         if (!ms_mf.m_bFogSlots[i]) {
@@ -198,8 +198,8 @@ CVector CClouds::MovingFog_GetWind() {
 
 // unused
 // 0x713710
-int CClouds::MovingFog_GetFirstFreeSlot() {
-    int result = 0;
+int32 CClouds::MovingFog_GetFirstFreeSlot() {
+    int32 result = 0;
     while (CClouds::ms_mf.m_bFogSlots[result]) {
         if (++result >= MAX_MOVING_FOG)
             return -1;
@@ -231,18 +231,18 @@ void CClouds::MovingFogRender() {
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpCloudTex[1]->raster);
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 
-    int red = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomRed + 132, 255), green = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomGreen + 132, 255),
+    int32 red = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomRed + 132, 255), green = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomGreen + 132, 255),
         blue = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomBlue + 132, 255);
 
-    int numVerts = 0;
-    for (int i = 0; i < MAX_MOVING_FOG; i++) {
+    int32 numVerts = 0;
+    for (int32 i = 0; i < MAX_MOVING_FOG; i++) {
         if (!ms_mf.m_bFogSlots[i])
             continue;
         float halfSize = ms_mf.m_fSize[i] * 0.5f;
         CVector up1 = up * halfSize, right1 = right * halfSize;
 
-        int alpha = static_cast<int>(CWeather::Foggyness_SF * ms_mf.m_fIntensity[i] * CurrentFogIntensity);
-        for (int l = 0; l < 6; l++) {
+        int32 alpha = static_cast<int32>(CWeather::Foggyness_SF * ms_mf.m_fIntensity[i] * CurrentFogIntensity);
+        for (int32 l = 0; l < 6; l++) {
             float u = 0.f, v = 0.f;
             CVector pos = ms_mf.m_vecPosn[i];
 
@@ -538,7 +538,7 @@ void CClouds::VolumetricCloudsInit() {
     ms_vc.m_fCloudUCoords[17] = 0.0f;
     ms_vc.m_fCloudVCoords[17] = 1.0f;
 
-    for (int i = 0; i < MAX_VOLUMETRIC_CLOUDS; ++i) {
+    for (int32 i = 0; i < MAX_VOLUMETRIC_CLOUDS; ++i) {
         ms_vc.m_bSlots[i] = false;
         ms_vc.m_bInsideVisibilityRange[i] = 0;
     }
@@ -551,7 +551,7 @@ void CClouds::VolumetricClouds_Create(CVector* posn) {
 }
 
 // 0x7135F0
-void CClouds::VolumetricClouds_Delete(int vcSlotIndex) {
+void CClouds::VolumetricClouds_Delete(int32 vcSlotIndex) {
     vcSlotIndex = clamp(vcSlotIndex, 0, MAX_VOLUMETRIC_CLOUDS - 1);
     ms_vc.m_bSlots[vcSlotIndex] = false;
     ms_vc.m_bInsideVisibilityRange[vcSlotIndex] = false;
@@ -560,8 +560,8 @@ void CClouds::VolumetricClouds_Delete(int vcSlotIndex) {
 // unused
 // inlined into VolumetricClouds_Create
 // 0x7135C0
-int CClouds::VolumetricClouds_GetFirstFreeSlot() {
-    for (int i = 0; i < CClouds::m_VolumetricCloudsUsedNum; i++) {
+int32 CClouds::VolumetricClouds_GetFirstFreeSlot() {
+    for (int32 i = 0; i < CClouds::m_VolumetricCloudsUsedNum; i++) {
         if (!ms_vc.m_bSlots[i])
             return i;
     }

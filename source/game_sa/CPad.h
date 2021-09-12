@@ -12,7 +12,7 @@
 #include "CMouseControllerState.h"
 #include "CControllerState.h"
 
-enum ePadButton : unsigned int {
+enum ePadButton : uint32 {
     LEFTSTICKX,     // Left / Right	GO_LEFT / GO_RIGHT
     LEFTSTICKY,     // Forward / Backward	GO_FORWARD / GO_BACK
     RIGHTSTICKX,    // Special CTRL Left / Special CTRL Right	PED_1RST_PERSON_LOOK_LEFT / PED_1RST_PERSON_LOOK_RIGHT
@@ -45,49 +45,49 @@ class CPad {
 public:
     CControllerState NewState;
     CControllerState OldState;
-    short SteeringLeftRightBuffer[10];
-    int DrunkDrivingBufferUsed;
+    int16            SteeringLeftRightBuffer[10];
+    int32            DrunkDrivingBufferUsed;
     CControllerState PCTempKeyState;
     CControllerState PCTempJoyState;
     CControllerState PCTempMouseState;
-    char Phase;
-    char _pad109;
-    short Mode;
-    short ShakeDur;
+    char             Phase;
+    char             _pad109;
+    int16            Mode;
+    int16            ShakeDur;
 
     union {
         struct {
-            unsigned short unk1 : 1; // eCamMode::MODE_1STPERSON leftover?
-            unsigned short unk2 : 1; // unused
-            unsigned short bPlayerAwaitsInGarage : 1;
-            unsigned short bPlayerOnInteriorTransition : 1;
-            unsigned short unk3 : 1; // unused
-            unsigned short bPlayerSafe : 1;
-            unsigned short bPlayerTalksOnPhone : 1; // bPlayerSafeForPhoneCall?
-            unsigned short bPlayerSafeForCutscene : 1;
-            unsigned short bPlayerSkipsToDestination : 1; // bPlayerSafeForDestination?
+            uint16 unk1 : 1; // eCamMode::MODE_1STPERSON leftover?
+            uint16 unk2 : 1; // unused
+            uint16 bPlayerAwaitsInGarage : 1;
+            uint16 bPlayerOnInteriorTransition : 1;
+            uint16 unk3 : 1; // unused
+            uint16 bPlayerSafe : 1;
+            uint16 bPlayerTalksOnPhone : 1; // bPlayerSafeForPhoneCall?
+            uint16 bPlayerSafeForCutscene : 1;
+            uint16 bPlayerSkipsToDestination : 1; // bPlayerSafeForDestination?
         };
-        unsigned short DisablePlayerControls;
+        uint16 DisablePlayerControls;
     };
 
-    char ShakeFreq;
-    char bHornHistory[5];
-    char iCurrHornHistory;
-    char JustOutOfFrontEnd;
-    char bApplyBrakes;
-    char bDisablePlayerEnterCar;
-    char bDisablePlayerDuck;
-    char bDisablePlayerFireWeapon;
-    char bDisablePlayerFireWeaponWithL1;
-    char bDisablePlayerCycleWeapon;
-    char bDisablePlayerJump;
-    char bDisablePlayerDisplayVitalStats;
-    int LastTimeTouched;
-    int AverageWeapon;
-    int AverageEntries;
-    int NoShakeBeforeThis;
-    char NoShakeFreq;
-    char _pad131[3];
+    char  ShakeFreq;
+    char  bHornHistory[5];
+    char  iCurrHornHistory;
+    char  JustOutOfFrontEnd;
+    char  bApplyBrakes;
+    char  bDisablePlayerEnterCar;
+    char  bDisablePlayerDuck;
+    char  bDisablePlayerFireWeapon;
+    char  bDisablePlayerFireWeaponWithL1;
+    char  bDisablePlayerCycleWeapon;
+    char  bDisablePlayerJump;
+    char  bDisablePlayerDisplayVitalStats;
+    int32 LastTimeTouched;
+    int32 AverageWeapon;
+    int32 AverageEntries;
+    int32 NoShakeBeforeThis;
+    char  NoShakeFreq;
+    char  _pad131[3];
 
 public:
     // Static variables
@@ -111,25 +111,25 @@ public:
 
     static void Initialise();
     void SetTouched();
-    unsigned int GetTouchedTimeDelta();
-    void Update(int pad);
+    uint32 GetTouchedTimeDelta();
+    void Update(int32 pad);
     void UpdateMouse();
     void ReconcileTwoControllersInput(CControllerState const& controllerA, CControllerState const& controllerB);
-    void SetDrunkInputDelay(int delay);
-    void StartShake(short time, unsigned char frequency, unsigned int arg2);
-    void StartShake_Distance(short time, unsigned char frequency, float x, float y, float z);
+    void SetDrunkInputDelay(int32 delay);
+    void StartShake(int16 time, uint8 frequency, uint32 arg2);
+    void StartShake_Distance(int16 time, uint8 frequency, float x, float y, float z);
     void StartShake_Train(float x, float y);
     void ProcessPCSpecificStuff();
-    void StopShaking(short arg0);
-    static CPad* GetPad(int padNumber);
-    int16_t GetCarGunLeftRight();
-    int16_t GetCarGunUpDown();
-    short GetSteeringLeftRight();
-    short GetSteeringUpDown();
-    short GetPedWalkLeftRight();
-    short GetPedWalkUpDown();
-    short GetPedWalkLeftRight(CPed* pPed);
-    short GetPedWalkUpDown(CPed* pPed);
+    void StopShaking(int16 arg0);
+    static CPad* GetPad(int32 padNumber);
+    int16 GetCarGunLeftRight();
+    int16 GetCarGunUpDown();
+    int16 GetSteeringLeftRight();
+    int16 GetSteeringUpDown();
+    int16 GetPedWalkLeftRight();
+    int16 GetPedWalkUpDown();
+    int16 GetPedWalkLeftRight(CPed* pPed);
+    int16 GetPedWalkUpDown(CPed* pPed);
     bool GetLookLeft();
     bool GetLookRight();
     bool GetLookBehindForCar();
@@ -137,15 +137,15 @@ public:
     bool GetHorn();
     bool HornJustDown();
     bool GetHydraulicJump();
-    short GetCarGunFired();
-    short CarGunJustDown();
-    short GetHandBrake();
-    short GetBrake();
+    int16 GetCarGunFired();
+    int16 CarGunJustDown();
+    int16 GetHandBrake();
+    int16 GetBrake();
     bool GetExitVehicle();
     bool ExitVehicleJustDown();
-    unsigned char GetMeleeAttack(bool bCheckButtonCircleStateOnly);
-    unsigned char MeleeAttackJustDown(bool bCheckButtonCircleStateOnly);
-    short GetAccelerate();
+    uint8 GetMeleeAttack(bool bCheckButtonCircleStateOnly);
+    uint8 MeleeAttackJustDown(bool bCheckButtonCircleStateOnly);
+    int16 GetAccelerate();
     bool GetAccelerateJustDown();
     bool NextStationJustUp();
     bool LastStationJustUp();
@@ -160,7 +160,7 @@ public:
     bool SprintJustDown();
     bool ShiftTargetLeftJustDown();
     bool ShiftTargetRightJustDown();
-    short GetDisplayVitalStats(class CPed* ped);
+    int16 GetDisplayVitalStats(class CPed* ped);
     bool CollectPickupJustDown();
     bool GetForceCameraBehindPlayer();
     bool SniperZoomIn();
@@ -176,15 +176,15 @@ public:
     static void UpdatePads();
     bool WeaponJustDown(CPed* pPed);
     bool GetEnterTargeting();
-    int GetWeapon(CPed* pPed);
-    short AimWeaponLeftRight(CPed* pPed);
-    short AimWeaponUpDown(CPed* pPed);
-    bool IsStandardKeyJustDown(std::uint8_t key);
+    int32 GetWeapon(CPed* pPed);
+    int16 AimWeaponLeftRight(CPed* pPed);
+    int16 AimWeaponUpDown(CPed* pPed);
+    bool IsStandardKeyJustDown(uint8 key);
     bool IsCtrlJustDown();
-    bool IsStandardKeyPressed(std::uint8_t key);
+    bool IsStandardKeyPressed(uint8 key);
     bool IsCtrlPressed();
     bool isEnterJustPressed();
-    bool isStandardKeyJustPressed(std::uint8_t key);
+    bool isStandardKeyJustPressed(uint8 key);
     bool isMenuKeyJustPressed();
     bool isTabJustPressed();
 };

@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
 
-CTaskComplexObserveTrafficLightsAndAchieveHeading* CTaskComplexObserveTrafficLightsAndAchieveHeading::Constructor(unsigned int durationInMs, float fTargetHeading)
+CTaskComplexObserveTrafficLightsAndAchieveHeading* CTaskComplexObserveTrafficLightsAndAchieveHeading::Constructor(uint32 durationInMs, float fTargetHeading)
 {
     return plugin::CallMethodAndReturn< CTaskComplexObserveTrafficLightsAndAchieveHeading*, 0x631910, 
-        CTaskComplexObserveTrafficLightsAndAchieveHeading*, unsigned int, float>(this, durationInMs, fTargetHeading);
+        CTaskComplexObserveTrafficLightsAndAchieveHeading*, uint32, float>(this, durationInMs, fTargetHeading);
 }

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-CTaskSimpleCarSetPedOut::CTaskSimpleCarSetPedOut(CVehicle* pTargetVehicle, int nTargetDoor, bool bSwitchOffEngine)
+CTaskSimpleCarSetPedOut::CTaskSimpleCarSetPedOut(CVehicle* pTargetVehicle, int32 nTargetDoor, bool bSwitchOffEngine)
 {
     m_nTargetDoor = nTargetDoor;
     m_pTargetVehicle = pTargetVehicle;

@@ -6,35 +6,35 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskComplex.h"
 #include "eWeaponType.h"
 #include "CVehicle.h"
 
-class  CTaskComplexDie : public CTaskComplex {
+class CTaskComplexDie : public CTaskComplex {
 public:
     eWeaponType m_nWeaponType; // Means Of Death
-    int m_animGroup;
-    int m_animID;
+    int32 m_animGroup;
+    int32 m_animID;
     float m_fBlendDelta;
     float  m_fAnimSpeed;
 
     union
     {
-        unsigned int m_nFlags;
+        uint32 m_nFlags;
         struct
         {
-            unsigned int bBeingKilledByStealth : 1;
-            unsigned int bFallingToDeath : 1;
-            unsigned int bFallToDeathOverRailing : 1;
+            uint32 bBeingKilledByStealth : 1;
+            uint32 bFallingToDeath : 1;
+            uint32 bFallToDeathOverRailing : 1;
 
         };
     };
-    int nFallToDeathDir;
+    int32 nFallToDeathDir;
 
 
-    CTaskComplexDie(eWeaponType nWeaponType/*=WEAPONTYPE_UNARMED*/, int animGroup/*ANIM_STD_PED*/, int animID/*ANIM_STD_KO_FRONT*/,
-        float fBlendDelta, float fAnimSpeed, bool bBeingKilledByStealth, bool bFallingToDeath, int nFallToDeathDir, bool bFallToDeathOverRailing);
+    CTaskComplexDie(eWeaponType nWeaponType/*=WEAPONTYPE_UNARMED*/, int32 animGroup/*ANIM_STD_PED*/, int32 animID/*ANIM_STD_KO_FRONT*/,
+        float fBlendDelta, float fAnimSpeed, bool bBeingKilledByStealth, bool bFallingToDeath, int32 nFallToDeathDir, bool bFallToDeathOverRailing);
 
 };
 

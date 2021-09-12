@@ -1,27 +1,26 @@
 #pragma once
-#include "PluginBase.h"
+
 #include "CVector.h"
 
-struct CByteCompressedVector
-{
-    int8_t x;
-    int8_t y;
-    int8_t z;
+struct CByteCompressedVector {
+    int8 x;
+    int8 y;
+    int8 z;
 
-    CByteCompressedVector(){}
-    CByteCompressedVector(CVector const& vec)
-    {
-        x = static_cast<int8_t>(vec.x * 127.0F);
-        y = static_cast<int8_t>(vec.y * 127.0F);
-        z = static_cast<int8_t>(vec.z * 127.0F);
+    CByteCompressedVector() {}
+    CByteCompressedVector(CVector const& vec) {
+        x = static_cast<int8>(vec.x * 127.0F);
+        y = static_cast<int8>(vec.y * 127.0F);
+        z = static_cast<int8>(vec.z * 127.0F);
     }
-    inline CVector Decompress() const { return CVector(x, y, z) / 127.0F; }
+    inline CVector Decompress() const {
+        return CVector(x, y, z) / 127.0F;
+    }
 };
 
-class CCompressedMatrixNotAligned
-{
+class CCompressedMatrixNotAligned {
 public:
-    CVector m_vecPos;
+    CVector               m_vecPos;
     CByteCompressedVector m_vecRight;
     CByteCompressedVector m_vecForward;
 

@@ -10,13 +10,17 @@
 #include <windows.h>
 #include <sstream>
 
+#include "toolsmenu\DebugModules\Collision\Collision.h"
+
 CDebugMenuToolInput CDebugMenu::m_vehicleToolInput;
 CDebugMenuToolInput CDebugMenu::m_pedToolInput;
 CDebugMenuToolInput CDebugMenu::m_missionToolInput;
 bool CDebugMenu::m_bStartMission = false;
-std::int32_t CDebugMenu::m_missionToStartId = 0;
+int32 CDebugMenu::m_missionToStartId = 0;
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
+bool CDebugMenu::m_showFPS = false;
+bool CDebugMenu::m_showExtraDebugFeatures = false;
 CSprite2d CDebugMenu::m_mouseSprite;
 ImGuiIO* CDebugMenu::io = {};
 
@@ -155,12 +159,27 @@ void CDebugMenu::ImguiInputUpdate() {
 }
 
 void CDebugMenu::ImguiDisplayFramePerSecond() {
+    if (!m_showFPS)
+        return;
+
     // Top-left framerate display overlay window.
     ImGui::SetNextWindowPos(ImVec2(10, 10));
-    bool open = true;
-    ImGui::Begin("FPS", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+    ImGui::Begin("FPS", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
     ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
     ImGui::End();
+}
+
+void CDebugMenu::ImguiDisplayExtraDebugFeatures() {
+    if (!m_showExtraDebugFeatures)
+        return;
+
+#ifdef EXTRA_DEBUG_FEATURES
+    ImGui::SetNextWindowCollapsed(true, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(484, 420), ImGuiCond_FirstUseEver);
+    ImGui::Begin("Extra debug", nullptr);
+    ProcessExtraDebugFeatures();
+    ImGui::End();
+#endif
 }
 
 void CDebugMenu::ImGuiDrawMouse() {
@@ -387,7 +406,7 @@ void CDebugMenu::ProcessCheatTool() {
     }
 }
 
-void CDebugMenu::SpawnPed(std::int32_t modelID, CVector position) {
+void CDebugMenu::SpawnPed(int32 modelID, CVector position) {
     CStreaming::RequestModel(modelID, STREAMING_MISSION_REQUIRED | STREAMING_KEEP_IN_MEMORY);
     CStreaming::LoadAllRequestedModels(false);
     CPed* ped = new CCivilianPed(CPopulation::IsFemale(modelID) ? PED_TYPE_CIVFEMALE : PED_TYPE_CIVMALE, modelID);
@@ -429,9 +448,9 @@ void CDebugMenu::ProcessPedTool() {
     ImGui::TextUnformatted("Name");
     ImGui::NextColumn();
     ImGui::Separator();
-    static std::int32_t selectedId = -1;
+    static int32 selectedId = -1;
     for (const auto& x : m_pedToolInput.GetGridListMap()) {
-        const std::int32_t id = x.first;
+        const int32 id = x.first;
         const std::string& name = x.second;
         ImGui::PushID(id);
 
@@ -500,9 +519,9 @@ void CDebugMenu::ProcessVehicleTool() {
     ImGui::TextUnformatted("Name");
     ImGui::NextColumn();
     ImGui::Separator();
-    static std::int32_t selectedId = -1;
+    static int32 selectedId = -1;
     for (const auto& x : m_vehicleToolInput.GetGridListMap()) {
-        const std::int32_t id = x.first;
+        const int32 id = x.first;
         const std::string& name = x.second;
         ImGui::PushID(id);
 
@@ -536,7 +555,7 @@ void CDebugMenu::InitializeAndStartNewScript() {
     CGameLogic::ClearSkip(false);
 }
 
-bool CDebugMenu::StartMission(std::int32_t missionId, bool bDoMissionCleanUp) {
+bool CDebugMenu::StartMission(int32 missionId, bool bDoMissionCleanUp) {
     if (!m_bStartMission && CTheScripts::IsPlayerOnAMission()) {
         if (CCutsceneMgr::ms_cutsceneLoadStatus == 2) {
             CCutsceneMgr::DeleteCutsceneData();
@@ -634,9 +653,9 @@ void CDebugMenu::ProcessMissionTool() {
     ImGui::TextUnformatted("Name");
     ImGui::NextColumn();
     ImGui::Separator();
-    static std::int32_t selectedId = -1;
+    static int32 selectedId = -1;
     for (const auto& x : m_missionToolInput.GetGridListMap()) {
-        const std::int32_t id = x.first;
+        const int32 id = x.first;
         const std::string& name = x.second;
         ImGui::PushID(id);
 
@@ -664,24 +683,27 @@ void CDebugMenu::ProcessMissionTool() {
 }
 
 void CDebugMenu::PostFxTool() {
-    ImGui::Checkbox("In Cutscene", &CPostEffects::m_bInCutscene);
-    ImGui::Checkbox("Skip Post Process", &CPostEffects::m_bDisableAllPostEffect);
+    ImGui::Checkbox("In Cutscene",            &CPostEffects::m_bInCutscene);
+    ImGui::Checkbox("Skip Post Process",      &CPostEffects::m_bDisableAllPostEffect);
     ImGui::Checkbox("Save Photo From Script", &CPostEffects::m_bSavePhotoFromScript);
-    ImGui::Checkbox("Radiosity", &CPostEffects::m_bRadiosity);
-    ImGui::Checkbox("Night Vision", &CPostEffects::m_bNightVision);
-    ImGui::Checkbox("Infrared Vision", &CPostEffects::m_bInfraredVision);
-    ImGui::Checkbox("Grain", &CPostEffects::m_bGrainEnable);
-    ImGui::Checkbox("Heat Haze FX", &CPostEffects::m_bHeatHazeFX);
-    ImGui::Checkbox("Darkness Filter", &CPostEffects::m_bDarknessFilter);
-    ImGui::Checkbox("CCTV", &CPostEffects::m_bCCTV);
-    ImGui::Checkbox("SpeedFX Test Mode", &CPostEffects::m_bSpeedFXTestMode);
-    ImGui::Checkbox("Fog", &CPostEffects::m_bFog);
-    ImGui::Checkbox("Water Depth Darkness", &CPostEffects::m_bWaterDepthDarkness);
+    ImGui::Checkbox("Radiosity",              &CPostEffects::m_bRadiosity);
+    ImGui::Checkbox("Night Vision",           &CPostEffects::m_bNightVision);
+    ImGui::Checkbox("Infrared Vision",        &CPostEffects::m_bInfraredVision);
+    ImGui::Checkbox("Grain",                  &CPostEffects::m_bGrainEnable);
+    ImGui::Checkbox("Heat Haze FX",           &CPostEffects::m_bHeatHazeFX);
+    ImGui::Checkbox("Darkness Filter",        &CPostEffects::m_bDarknessFilter);
+    ImGui::Checkbox("CCTV",                   &CPostEffects::m_bCCTV);
+    ImGui::Checkbox("SpeedFX Test Mode",      &CPostEffects::m_bSpeedFXTestMode);
+    ImGui::Checkbox("Fog",                    &CPostEffects::m_bFog);
+    ImGui::Checkbox("Water Depth Darkness",   &CPostEffects::m_bWaterDepthDarkness);
 }
 
 void CDebugMenu::ProcessRenderTool() {
     if (ImGui::CollapsingHeader("Post Processing")) {
         PostFxTool();
+    }
+    if (ImGui::CollapsingHeader("Collision")) {
+        CollisionDebugModule::ProcessImgui();
     }
 }
 
@@ -786,6 +808,19 @@ void CDebugMenu::ProcessHooksTool() {
     ImGui::EndChild();
 }
 
+#ifdef EXTRA_DEBUG_FEATURES
+void CDebugMenu::ProcessExtraDebugFeatures() {
+    if (ImGui::BeginTabBar("Modules")) {
+        if (ImGui::BeginTabItem("Occlussion")) {
+            // COcclusionDebugModule::ProcessImgui();
+            ImGui::EndTabItem();
+        }
+
+        ImGui::EndTabBar();
+    }
+}
+#endif
+
 void CDebugMenu::ImguiDisplayPlayerInfo() {
     if (CTimer::GetIsPaused()) {
         return;
@@ -827,6 +862,14 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
                 ProcessHooksTool();
                 ImGui::EndTabItem();
             }
+            if (ImGui::BeginTabItem("Other")) {
+                ImGui::Checkbox("Display FPS window", &CDebugMenu::m_showFPS);
+#ifdef EXTRA_DEBUG_FEATURES
+                ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
+#endif
+                ImGui::EndTabItem();
+            }
+
             ImGui::EndTabBar();
         }
         ImGui::End();
@@ -881,14 +924,13 @@ void CDebugMenu::ImguiDrawLoop() {
     DebugCode();
     ReversibleHooks::CheckAll();
 
-    if (!m_showMenu)
-        return;
 
     io->DeltaTime = CTimer::ms_fTimeStep * 0.02f;
 
     ImGui_ImplRW_NewFrame();
     ImGui::NewFrame();
 
+    CDebugMenu::ImguiDisplayExtraDebugFeatures();
     ImguiDisplayPlayerInfo();
     ImguiDisplayFramePerSecond();
 
@@ -904,7 +946,7 @@ void CDebugMenu::Shutdown() {
         ImGui::DestroyContext();
 
     m_mouseSprite.Delete();
-    std::int32_t slot = CTxdStore::FindTxdSlot("imgui_mouse");
+    int32 slot = CTxdStore::FindTxdSlot("imgui_mouse");
     if (slot != -1)
         CTxdStore::RemoveTxdSlot(slot);
 }

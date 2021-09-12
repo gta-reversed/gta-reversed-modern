@@ -12,7 +12,7 @@ class CSpecialFX {
 public:
     static bool& bVideoCam;
     static bool& bLiftCam;
-    static unsigned int& SnapShotFrames;
+    static uint32& SnapShotFrames;
     static bool& bSnapShotActive;
 
 public:

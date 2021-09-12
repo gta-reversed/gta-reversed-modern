@@ -12,6 +12,7 @@ void UnHook(const std::string& className, const char* functionName)
 {
     if (className.empty())
         return;
+
     const auto& allHooks = GetAllHooks();
     if (functionName) {
         for (auto& classHooks : allHooks) {
@@ -48,7 +49,7 @@ void CheckAll() {
 }
 
 namespace detail {
-void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, unsigned int installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault)
+void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault)
 {
     assert(!GetHook(sIdentifier, sFuncName));
 
@@ -58,7 +59,7 @@ void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, u
         usedVector.back()->Switch();
 }
 
-void HookInstallVirtual(const std::string& sIdentifier, const std::string& sFuncName, void* libVTableAddress, const std::vector<uint32_t>& vecAddressesToHook)
+void HookInstallVirtual(const std::string& sIdentifier, const std::string& sFuncName, void* libVTableAddress, const std::vector<uint32>& vecAddressesToHook)
 {
     assert(!GetHook(sIdentifier, sFuncName));
     m_HooksMap[sIdentifier].emplace_back(std::make_shared<SVirtualReversibleHook>(sIdentifier, sFuncName, libVTableAddress, vecAddressesToHook));

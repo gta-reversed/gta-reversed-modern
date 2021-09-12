@@ -6,26 +6,26 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimpleAnim.h"
 #include "CAnimBlendHierarchy.h"
 #include "CTaskTimer.h"
 #include "CVector.h"
 
-class  CTaskSimpleRunNamedAnim : public CTaskSimpleAnim {
+class CTaskSimpleRunNamedAnim : public CTaskSimpleAnim {
 public:
     char                 m_animName[24];
     char                 m_animGroupName[16];
     float                m_fBlendDelta;
     CAnimBlendHierarchy* m_pAnimHierarchy;
-    int                  m_nTime;
+    int32                  m_nTime;
     CTaskTimer           m_timer;
     CVector              m_vecOffsetAtEnd;
-    unsigned int         m_nFlags;
-    short                m_nAnimId;
+    uint32         m_nFlags;
+    int16                m_nAnimId;
 
-    CTaskSimpleRunNamedAnim(const char* pAnimName, const char* pAnimGroupName, int flags, float fBlendDelta,
-        int nTime, bool bDontInterrupt, bool bRunInSequence, bool bOffsetPed, bool bHoldLastFrame);
+    CTaskSimpleRunNamedAnim(const char* pAnimName, const char* pAnimGroupName, int32 flags, float fBlendDelta,
+        int32 nTime, bool bDontInterrupt, bool bRunInSequence, bool bOffsetPed, bool bHoldLastFrame);
 
 
 };

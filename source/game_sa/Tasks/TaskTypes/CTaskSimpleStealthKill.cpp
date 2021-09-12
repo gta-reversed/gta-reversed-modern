@@ -11,23 +11,23 @@ void CTaskSimpleStealthKill::InjectHooks()
     ReversibleHooks::Install("CTaskSimpleStealthKill", "FinishAnimStealthKillCB", 0x622790, &CTaskSimpleStealthKill::FinishAnimStealthKillCB);
 }
 
-CTaskSimpleStealthKill::CTaskSimpleStealthKill(bool bKeepTargetAlive, CPed* pTarget, int nAssocGroupId)
+CTaskSimpleStealthKill::CTaskSimpleStealthKill(bool keepTargetAlive, CPed* target, AssocGroupId groupId)
 {
-    m_bKeepTargetAlive = bKeepTargetAlive;
-    m_pTarget = pTarget;
-    m_nAssocGroupId = nAssocGroupId;
+    m_bKeepTargetAlive = keepTargetAlive;
+    m_pTarget = target;
+    m_nAssocGroupId = groupId;
     m_bIsAborting = false;
     m_bIsFinished = false;
     m_pAnim = nullptr;
     m_nTime = 0;
-    if (pTarget)
-        pTarget->RegisterReference(reinterpret_cast<CEntity**>(&m_pTarget));
+    if (target)
+        target->RegisterReference(reinterpret_cast<CEntity**>(&m_pTarget));
 }
 
 // 0x6225F0
-CTaskSimpleStealthKill* CTaskSimpleStealthKill::Constructor(bool bKeepTargetAlive, CPed* pTarget, int nAssocGroupId)
+CTaskSimpleStealthKill* CTaskSimpleStealthKill::Constructor(bool keepTargetAlive, CPed* target, AssocGroupId groupId)
 {
-    this->CTaskSimpleStealthKill::CTaskSimpleStealthKill(bKeepTargetAlive, pTarget, nAssocGroupId);
+    this->CTaskSimpleStealthKill::CTaskSimpleStealthKill(keepTargetAlive, target, groupId);
     return this;
 }
 
@@ -126,7 +126,7 @@ bool CTaskSimpleStealthKill::MakeAbortable_Reversed(class CPed* ped, eAbortPrior
 }
 
 // 0x622670
-eTaskType CTaskSimpleStealthKill::GetId()
+eTaskType CTaskSimpleStealthKill::GetTaskType()
 {
     return CTaskSimpleStealthKill::GetId_Reversed();
 }
@@ -168,7 +168,7 @@ void CTaskSimpleStealthKill::ManageAnim(CPed* ped)
     }
     else
     {
-        m_nTime += static_cast<std::uint32_t>(CTimer::ms_fTimeStep * 0.02f * 1000.0f);
+        m_nTime += CTimer::GetTimeStepInMS();
         if (m_nTime > 10000)
             m_bIsAborting = true;
     }

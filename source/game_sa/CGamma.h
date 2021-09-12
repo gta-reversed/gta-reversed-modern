@@ -8,16 +8,16 @@
 
 class CGamma {
 public:
-    unsigned int field_0;
-    float field_4;
-    float field_8;
-    float field_C;
+    uint32 field_0;
+    float  field_4;
+    float  field_8;
+    float  field_C;
 
 public:
     static void InjectHooks();
 
-    static void Init();
-    static void SetGamma(float arg1, bool arg2);
+    void Init();
+    void SetGamma(float arg1, bool arg2);
 };
 
 VALIDATE_SIZE(CGamma, 0x10);

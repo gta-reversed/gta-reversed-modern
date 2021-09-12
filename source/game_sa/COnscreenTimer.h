@@ -6,32 +6,29 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "COnscreenTimerEntry.h"
 #include "COnscreenCounterEntry.h"
 
-class  COnscreenTimer {
+class COnscreenTimer {
 public:
-	COnscreenTimerEntry m_Clock;
-	COnscreenCounterEntry m_aCounters[4];
-	bool m_bDisplay;
-	bool m_bPaused;
+    COnscreenTimerEntry   m_Clock;
+    COnscreenCounterEntry m_aCounters[4];
+    bool                  m_bDisplay;
+    bool                  m_bPaused;
 
-     void AddClock(unsigned int varId, char *gxt, bool bTimerDirection);
-     void AddCounter(int varId, short type, char *gxt, unsigned short counterIndex);
+public:
+    void AddClock(uint32 varId, char* gxt, bool bTimerDirection);
+    void AddCounter(int32 varId, int16 type, char* gxt, uint16 counterIndex);
     //! unused
-     void AddCounterCounter(unsigned int varId, unsigned int maxValue, char *gxt, unsigned short lineId);
-     int ClearClock(unsigned int varId);
-     void ClearCounter(unsigned int varId);
-     void Init();
-     void Process();
-     void ProcessForDisplay();
-     void SetClockBeepCountdownSecs(unsigned int varID, unsigned int time);
+    void  AddCounterCounter(uint32 varId, uint32 maxValue, char* gxt, uint16 lineId);
+    int32 ClearClock(uint32 varId);
+    void  ClearCounter(uint32 varId);
+    void  Init();
+    void  Process();
+    void  ProcessForDisplay();
+    void  SetClockBeepCountdownSecs(uint32 varID, uint32 time);
     //! unused
-     void SetCounterColourID(unsigned int varID, unsigned char ColourID);
-     void SetCounterFlashWhenFirstDisplayed(unsigned int varId, unsigned char bFlashWhenFirstDisplayed);
+    void SetCounterColourID(uint32 varID, uint8 ColourID);
+    void SetCounterFlashWhenFirstDisplayed(uint32 varId, uint8 bFlashWhenFirstDisplayed);
 };
 VALIDATE_SIZE(COnscreenTimer, 0x154);
-
-//#include "meta/meta.COnscreenTimer.h"
-

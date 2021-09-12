@@ -55,7 +55,7 @@ void CMotionBlurStreaks::Render()
     }
 }
 
-void CMotionBlurStreaks::RegisterStreak(unsigned int id, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha, CVector leftPoint, CVector rightPoint)
+void CMotionBlurStreaks::RegisterStreak(uint32 id, uint8 red, uint8 green, uint8 blue, uint8 alpha, CVector leftPoint, CVector rightPoint)
 {
     for (auto& pStreak : CMotionBlurStreaks::aStreaks) {
         if (pStreak.m_nId != id)

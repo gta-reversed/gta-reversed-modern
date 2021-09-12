@@ -4,18 +4,22 @@
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
-#include "PluginBase.h"
+#pragma once
+
 #include "CPlaneTrail.h"
 
 #define NUM_PLANE_TRAILS 3
 
-class  CPlaneTrails
-{
+class CPlaneTrails {
 public:
-	// count: NUM_PLANE_TRAILS (3)
-	static CPlaneTrail *aArray;
+    static CPlaneTrail (&aArray)[NUM_PLANE_TRAILS];
 
-	static void Init();
-	static void Update();
-	static void RegisterPoint(CVector point, unsigned int trailIndex);
+public:
+    static void InjectHooks();
+
+public:
+    static void Init();
+    static void Render();
+    static void RegisterPoint(CVector point, uint32 trailIndex);
+    static void Update();
 };

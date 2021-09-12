@@ -11,14 +11,14 @@ void CTaskSimpleLand::InjectHooks()
     ReversibleHooks::Install("CTaskSimpleLand", "ProcessPed", 0x67D380, &CTaskSimpleLand::ProcessPed_Reversed);
 }
 
-CTaskSimpleLand* CTaskSimpleLand::Constructor(eAnimID nAnimId)
+CTaskSimpleLand* CTaskSimpleLand::Constructor(AnimationId nAnimId)
 {
     this->CTaskSimpleLand::CTaskSimpleLand(nAnimId);
     return this;
 }
 
 // 0x678E90
-CTaskSimpleLand::CTaskSimpleLand(eAnimID nAnimId)
+CTaskSimpleLand::CTaskSimpleLand(AnimationId nAnimId)
 {
     m_nAnimId = nAnimId;
     bIsFinished = false;
@@ -48,14 +48,11 @@ bool CTaskSimpleLand::MakeAbortable(CPed* ped, eAbortPriority priority, const CE
 
 bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped)
 {
-    if (bIsFinished)
-    {
+    if (bIsFinished) {
         ped->bIsLanding = false;
-        if (!bNoAnimation)
-        {
-            unsigned int aAnimIds[3] = { ANIM_ID_WALK, ANIM_ID_RUN, ANIM_ID_SPRINT };
-            for (auto animId : aAnimIds)
-            {
+        if (!bNoAnimation) {
+            AnimationId aAnimIds[3] = {ANIM_ID_WALK, ANIM_ID_RUN, ANIM_ID_SPRINT};
+            for (auto animId : aAnimIds) {
                 m_pAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, animId);
                 if (m_pAnim)
                     m_pAnim->SetCurrentTime(0.0F);
@@ -65,29 +62,23 @@ bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped)
         }
 
         return true;
-    }
-    else
-    {
-        if (!m_pAnim && !bNoAnimation)
-        {
+    } else {
+        if (!m_pAnim && !bNoAnimation) {
             m_pAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, m_nAnimId, 100.0F);
             m_pAnim->SetFinishCallback(CTaskSimpleLand::FinishAnimCB, this);
         }
 
-        if (bPedNotUpdated)
-        {
-            if (!(ped->GetUp().z == 1.0F && ped->m_vecTurnSpeed.IsZero()))
-            {
+        if (bPedNotUpdated) {
+            if (!(ped->GetUp().z == 1.0F && ped->m_vecTurnSpeed.IsZero())) {
                 ped->m_vecTurnSpeed.Set(0.0F, 0.0F, 0.0F);
                 ped->SetHeading(ped->m_fCurrentRotation);
             }
 
             ped->bIsLanding = true;
 
-            if (ped->IsPlayer())
-            {
+            if (ped->IsPlayer()) {
                 if (ped->m_nMoveState == PEDMOVE_SPRINT && ped->AsPlayerPed()->GetPadFromPlayer()->GetSprint())
-                    m_pAnim->m_fSpeed = 2.0F;   // possible bug, m_pAnim can be null here
+                    m_pAnim->m_fSpeed = 2.0F; // possible bug, m_pAnim can be null here
 
                 if (m_nAnimId != ANIM_ID_IDLE_TIRED)
                     m_pAnim->m_fSpeed *= CStats::GetFatAndMuscleModifier(STAT_MOD_2);
@@ -96,7 +87,6 @@ bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped)
             bPedNotUpdated = false;
             if (bNoAnimation)
                 bIsFinished = true;
-
         }
 
         return false;

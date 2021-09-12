@@ -6,46 +6,45 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CPool.h"
 
-class  COctTree {
+class COctTree {
 protected:
     COctTree(plugin::dummy_func_t) {}
-public:
-    unsigned int level;
-    bool         lastStep; // no childrens
-private:
-    char _pad09;
-public:
-    short        childrens[8]; // pool slot IDs,  -1 - empty
-private:
-    char _pad1A[2];
-public:
-    unsigned int redComponent;
-    unsigned int greenComponent;
-    unsigned int blueComponent;
 
-    static bool &ms_bFailed;
-    static unsigned int &ms_level;
-    static CPool<COctTree> &ms_octTreePool;
+public:
+    uint32 level;
+    bool   lastStep; // no childrens
+    char   _pad09;
+    int16  childrens[8]; // pool slot IDs,  -1 - empty
+    char   _pad1A[2];
+    uint32 redComponent;
+    uint32 greenComponent;
+    uint32 blueComponent;
 
-    //vtable
+    static bool&            ms_bFailed;
+    static uint32&          ms_level;
+    static CPool<COctTree>& ms_octTreePool;
 
-    bool InsertTree(unsigned char colorRed, unsigned char colorGreen, unsigned char colorBlue);
-    void FillPalette(unsigned char* colors);
+public:
+    // vtable
+
+    bool InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue);
+    void FillPalette(uint8* colors);
+
+    static void* operator new(uint32 size);
+    static void  operator delete(void* data);
 
     COctTree();
     ~COctTree();
-    unsigned int FindNearestColour(unsigned char colorRed, unsigned char colorGreen, unsigned char colorBlue);
-    void InitPool(void* data, int dataSize);
-    unsigned int NoOfChildren();
-    void ReduceTree();
-    void RemoveChildren();
-    void ShutdownPool();
-    void empty();
-    static void operator delete(void* data);
-    static void* operator new(unsigned int size);
+
+    uint32 FindNearestColour(uint8 colorRed, uint8 colorGreen, uint8 colorBlue);
+    void   InitPool(void* data, int32 dataSize);
+    uint32 NoOfChildren();
+    void   ReduceTree();
+    void   RemoveChildren();
+    void   ShutdownPool();
+    void   empty();
 
 private:
     virtual void virtual_dummy() {}
@@ -53,4 +52,4 @@ private:
 
 VALIDATE_SIZE(COctTree, 0x28);
 
-extern COctTree *&gpTmpOctTree;
+extern COctTree*& gpTmpOctTree;

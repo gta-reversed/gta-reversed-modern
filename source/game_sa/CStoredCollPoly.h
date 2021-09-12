@@ -6,16 +6,13 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVector.h"
 
-class  CStoredCollPoly {
+class CStoredCollPoly {
 public:
     CVector      m_aMeshVertices[3]; // triangle vertices
     bool         m_bIsActual;
-private:
-    unsigned char m_ucPad[3];
-public:
+    char         _pad[3];
     tColLighting m_nLighting;
 };
 

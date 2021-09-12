@@ -14,7 +14,7 @@ float CEventGlobalGroup::GetSoundLevel(CEntity* entity, CVector& position)
 #else
     float soundLevel = 0.0f;
     if (m_count > 0) {
-        for (std::int32_t i = 0; i < m_count; i++) {
+        for (int32 i = 0; i < m_count; i++) {
             CEvent* event = m_events[i];
             if (event->GetSourceEntity() == entity || !entity) {
                 float eventSoundLevel = event->GetSoundLevel(entity, position);
@@ -34,7 +34,7 @@ void CEventGlobalGroup::AddEventsToPed(CPed* ped)
 #else
     if (m_count > 0) {
         CEventGroup& pedEventGroup = ped->GetEventGroup();
-        for (std::int32_t i = 0; i < m_count; i++) {
+        for (int32 i = 0; i < m_count; i++) {
             CEvent* event = m_events[i];
             CEvent* clonedEvent = event->Clone();
             pedEventGroup.Add(clonedEvent, false);
@@ -51,7 +51,7 @@ void CEventGlobalGroup::AddEventsToGroup(CPedGroup* pedGroup)
 #else
     if (m_count > 0) {
         CPedGroupIntelligence& groupIntelligence = pedGroup->GetIntelligence();
-        for (std::int32_t i = 0; i < m_count; i++) {
+        for (int32 i = 0; i < m_count; i++) {
             CEvent* event = m_events[i];
             CEvent* clonedEvent = event->Clone();
             groupIntelligence.AddEvent(clonedEvent);

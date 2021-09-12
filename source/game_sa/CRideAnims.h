@@ -2,18 +2,16 @@
 
 #include "AnimationEnums.h"
 
-enum eRideAnim : unsigned char
-{
+enum eRideAnim : uint8 {
     RIDE_IDLE = 0,
     RIDE_LOOK_LEFT = 1,
     RIDE_LOOK_RIGHT = 2,
     RIDE_LOOK_BACK = 3
 };
 
-class CRideAnims
-{
+class CRideAnims {
 public:
-    eAnimID m_aAnims[4]; // Access with eRideAnim index
+    AnimationId m_aAnims[4]; // Access with eRideAnim index
 };
 
 extern CRideAnims& aDriveAnimIdsLow;     // {ANIM_ID_CAR_LSIT, ANIM_ID_DRIVE_LO_L, ANIM_ID_DRIVE_LO_R, ANIM_ID_CAR_LB}

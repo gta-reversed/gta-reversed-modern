@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "ListItem_c.h"
 #include "FxSphere_c.h"
 
@@ -15,26 +15,35 @@ class FxSystem_c;
 
 class FxSystemBP_c : public ListItem_c {
 public:
-    unsigned int m_nNameKey;
-    float m_fLength;
-    float m_fLoopIntervalMin;
-    float m_fLoopLength;
-    short m_nCullDist;
-    unsigned char m_nPlayMode;
-    unsigned char m_nNumEmitters;
-    void **m_emittersList;
-    FxSphere_c *m_pBoundingSphere;
+    uint32      m_nNameKey;
+    float       m_fLength;
+    float       m_fLoopIntervalMin;
+    float       m_fLoopLength;
+    int16       m_nCullDist;
+    uint8       m_nPlayMode;
+    uint8       m_nNumEmitters;
+    void**      m_emittersList;
+    FxSphere_c* m_pBoundingSphere;
+
+public:
+    static void InjectHooks();
 
     FxSystemBP_c();
+    FxSystemBP_c* Constructor();
+
     ~FxSystemBP_c();
-    static void* operator new(unsigned int size);
+    FxSystemBP_c* Destructor();
+
+    static void* operator new(uint32 size);
+
+    void Load(char* filename, int32 file, int32 version);
+
     void Unload();
-    unsigned int Update(float arg0);
-    void Render(RwCamera* camera, float arg1, unsigned char arg2);
+    void Update(float arg0);
+    void Render(RwCamera* camera, float dayNightBalance, bool bHeatHaze);
     bool FreePrtFromSystem(FxSystem_c* system);
     FxSphere_c* GetBoundingSphere();
     void SetBoundingSphere(RwV3d* center, float radius);
-    void Load(char* filename, int file, int version);
 };
 
 VALIDATE_SIZE(FxSystemBP_c, 0x24);

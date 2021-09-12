@@ -58,7 +58,14 @@ target_include_directories(gta_reversed PRIVATE
     source/game_sa/
     source/game_sa/Debug/
     source/game_sa/Animation/
+
     source/game_sa/Audio/
+    source/game_sa/Audio/Entities
+    source/game_sa/Audio/Hardware
+    source/game_sa/Audio/Loaders
+    source/game_sa/Audio/Managers
+    source/game_sa/Audio/Utility
+
     source/game_sa/Collision/
     source/game_sa/Core/
     source/game_sa/Entity/
@@ -80,7 +87,12 @@ target_include_directories(gta_reversed PRIVATE
     libs/imgui/misc/cpp/
 )
 target_link_libraries(gta_reversed ogg ${OGG_LIBRARY} imgui vorbisfile)
-target_compile_definitions(gta_reversed PRIVATE NOMINMAX _CRT_SECURE_NO_WARNINGS USE_GTASA_ALLOCATOR)
+target_compile_definitions(gta_reversed PRIVATE
+    _CRT_SECURE_NO_WARNINGS
+    NOMINMAX
+    USE_GTASA_ALLOCATOR
+    EXTRA_DEBUG_FEATURES
+)
 
 foreach(_header IN ITEMS ${_headerfiles_list})
     get_filename_component(_header_path "${_header}" PATH)

@@ -6,16 +6,12 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-class  CGangInfo {
+class CGangInfo {
     PLUGIN_NO_DEFAULT_CONSTRUCTION(CGangInfo)
 
 public:
-    signed char m_nPedModelOverride;
-    int m_nGangWeapons[3];
+    int8 m_nPedModelOverride;
+    int32       m_nGangWeapons[3];
 };
 
 VALIDATE_SIZE(CGangInfo, 0x10);
-
-//#include "meta/meta.CGangInfo.h"

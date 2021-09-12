@@ -7,7 +7,7 @@
 #pragma once
 
 struct tCarGenPlateText {
-    int m_nCarGenId; // -1 - empty
+    int32 m_nCarGenId; // -1 - empty
     char m_szPlateText[12];
 };
 
@@ -15,17 +15,17 @@ VALIDATE_SIZE(tCarGenPlateText, 0x10);
 
 class CSpecialPlateHandler {
 public:
-    static constexpr unsigned int PLATES_COUNT = 15;
+    static constexpr uint32 PLATES_COUNT = 15;
     tCarGenPlateText m_plateTextEntries[PLATES_COUNT];
-    unsigned int m_nCount;
+    uint32 m_nCount;
 
 public:
     static void InjectHooks();
 
     void Init();
-    void Find(int carGenId, char* outText);
-    void Add(int carGenId, const char* plateText);
-    void Remove(int plateTextId);
+    void Find(int32 carGenId, char* outText);
+    void Add(int32 carGenId, const char* plateText);
+    void Remove(int32 plateTextId);
 };
 
 VALIDATE_SIZE(CSpecialPlateHandler, 0xF4);

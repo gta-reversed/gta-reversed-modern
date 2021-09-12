@@ -11,12 +11,12 @@ Do not delete this comment block. Respect others' work!
 
 class CTaskComplexUseMobilePhone : public CTaskComplex {
 public:
-    int m_nDuration;
+    int32 m_nDuration;
     CTaskTimer m_timer;
     bool m_bIsAborting;
     bool m_bQuit;
 
-    CTaskComplexUseMobilePhone(int nDuration);
+    CTaskComplexUseMobilePhone(int32 nDuration);
 };
 
 VALIDATE_SIZE(CTaskComplexUseMobilePhone, 0x20);

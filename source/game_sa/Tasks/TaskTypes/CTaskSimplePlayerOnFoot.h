@@ -9,18 +9,19 @@ Do not delete this comment block. Respect others' work!
 #include "CTaskSimple.h"
 #include "CAnimBlendAssociation.h"
 
-extern int& gLastRandomNumberForIdleAnimationID;
-extern unsigned int& gLastTouchTimeDelta;
+extern int32& gLastRandomNumberForIdleAnimationID;
+extern uint32& gLastTouchTimeDelta;
 extern float& gDuckAnimBlendData;
 extern bool& gbUnknown_8D2FE8;
 
 class CPed;
+
 class CTaskSimplePlayerOnFoot : public CTaskSimple {
 public:
-    int          m_nAnimationBlockIndex;
-    unsigned int m_nFrameCounter;
-    int          m_nTimer;
-    int          dword_14;           // always 0
+    int32          m_nAnimationBlockIndex;
+    uint32 m_nFrameCounter;
+    int32          m_nTimer;
+    int32          dword_14;           // always 0
     CEntity*     m_pLookingAtEntity; // always 0
 
 public:
@@ -37,7 +38,7 @@ public:
     void PlayerControlFighter(CPlayerPed* pPlayerPed);
     void PlayerControlZeldaWeapon(CPlayerPed* pPlayerPed);
     void PlayerControlDucked(CPed* pPed);
-    int PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAndDucking);
+    int32 PlayerControlZelda(CPed* pPed, bool bAvoidJumpingAndDucking);
 };
 
 VALIDATE_SIZE(CTaskSimplePlayerOnFoot, 0x1C);

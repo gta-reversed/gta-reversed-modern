@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-unsigned int &CTaskSimpleFall::m_nMaxPlayerDownTime = *reinterpret_cast<unsigned int*>(0x8D2EF4);
+uint32 &CTaskSimpleFall::m_nMaxPlayerDownTime = *reinterpret_cast<uint32*>(0x8D2EF4);
 
 void CTaskSimpleFall::InjectHooks()
 {
@@ -13,14 +13,14 @@ void CTaskSimpleFall::InjectHooks()
     ReversibleHooks::Install("CTaskSimpleFall", "MakeAbortable", 0x678370, &CTaskSimpleFall::MakeAbortable_Reversed);
 }
 
-CTaskSimpleFall* CTaskSimpleFall::Constructor(eAnimID nAnimId, eAnimGroup nAnimGroup, int nDownTime)
+CTaskSimpleFall* CTaskSimpleFall::Constructor(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime)
 {
     this->CTaskSimpleFall::CTaskSimpleFall(nAnimId, nAnimGroup, nDownTime);
     return this;
 }
 
 // 0x6782C0
-CTaskSimpleFall::CTaskSimpleFall(eAnimID nAnimId, eAnimGroup nAnimGroup, int nDownTime)
+CTaskSimpleFall::CTaskSimpleFall(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime)
 {
     m_nAnimId = nAnimId;
     m_nAnimGroup = nAnimGroup;
@@ -57,7 +57,7 @@ bool CTaskSimpleFall::ProcessPed_Reversed(CPed* ped)
 
     if (m_bIsFinished && (ped->bIsStanding || ped->bIsDrowning))
     {
-        unsigned int nTimeStep = CTimer::GetTimeStepInMilliseconds();
+        uint32 nTimeStep = CTimer::GetTimeStepInMS();
         if (m_nCurrentDownTime <= nTimeStep)
         {
             m_nCurrentDownTime = 0;

@@ -24,7 +24,7 @@ public:
     CTask* ControlSubTask_Reversed(CPed* ped);
     CTask* Clone_Reversed();
 
-    eTaskType GetId() override { return TASK_COMPLEX_TREAT_ACCIDENT; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_TREAT_ACCIDENT; }
 
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
     float ComputeHeading(CPed* ped);

@@ -1,27 +1,27 @@
 #pragma once
 
-enum ePedType : unsigned int;
+enum ePedType : uint32;
 
 class CPedType {
 public:
-    static CPedAcquaintance* ms_apPedTypes;
+    static CAcquaintance*& ms_apPedTypes;
 
 public:
     static void InjectHooks();
 
     static void Initialise();
     static void Shutdown();
-    static void Save();
-    static void Load(int a2);
     static void LoadPedData();
+    static void Load();
+    static void Save();
 
     static ePedType FindPedType(const char* pedTypeName);
-    static unsigned int GetPedFlag(ePedType pedType);
-    static CPedAcquaintance* GetPedTypeAcquaintances(ePedType pedType);
-    static CPedAcquaintance* GetPedTypeAcquaintances(int acquaintanceId, ePedType pedType);
-    static void SetPedTypeAsAcquaintance(int acquaintanceId, ePedType pedType, int pedTypeBitNum);
-    static void ClearPedTypeAcquaintances(int acquaintanceId);
-    static void ClearPedTypeAsAcquaintance(int acquaintanceId, ePedType pedType, int pedTypeBitNum);
+    static uint32 GetPedFlag(ePedType pedType);
+    static CAcquaintance* GetPedTypeAcquaintances(ePedType pedType);
+    static CAcquaintance* GetPedTypeAcquaintances(AcquaintanceId id, ePedType pedType);
+    static void SetPedTypeAsAcquaintance(AcquaintanceId id, ePedType pedType, int32 pedTypeBitNum);
+    static void ClearPedTypeAcquaintances(AcquaintanceId id);
+    static void ClearPedTypeAsAcquaintance(AcquaintanceId id, ePedType pedType, int32 pedTypeBitNum);
 
     static bool PoliceDontCareAboutCrimesAgainstPedType(ePedType pedType);
 };

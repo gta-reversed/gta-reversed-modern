@@ -4,7 +4,7 @@ void CTaskComplexUseSequence::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexUseSequence", "CTaskComplexUseSequence", 0x635450, &CTaskComplexUseSequence::Constructor);
     ReversibleHooks::Install("CTaskComplexUseSequence", "Clone", 0x637100, &CTaskComplexUseSequence::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSequence", "GetId", 0x635490, &CTaskComplexUseSequence::GetId_Reversed);
+    ReversibleHooks::Install("CTaskComplexUseSequence", "GetTaskType", 0x635490, &CTaskComplexUseSequence::GetId_Reversed);
     ReversibleHooks::Install("CTaskComplexUseSequence", "MakeAbortable", 0x639730, &CTaskComplexUseSequence::MakeAbortable_Reversed);
     ReversibleHooks::Install("CTaskComplexUseSequence", "CreateNextSubTask", 0x6354A0, &CTaskComplexUseSequence::CreateNextSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexUseSequence", "CreateFirstSubTask", 0x6354D0, &CTaskComplexUseSequence::CreateFirstSubTask_Reversed);
@@ -48,7 +48,7 @@ CTask* CTaskComplexUseSequence::Clone()
 }
 
 // 0x635490
-eTaskType CTaskComplexUseSequence::GetId()
+eTaskType CTaskComplexUseSequence::GetTaskType()
 {
     return GetId_Reversed();
 }
@@ -132,7 +132,7 @@ CTask* CTaskComplexUseSequence::CreateFirstSubTask_Reversed(CPed* ped)
     }
 
     if (m_nEndTaskIndex != -1) {
-        if (firstSubTask && firstSubTask->GetId() == TASK_COMPLEX_USE_SEQUENCE) {
+        if (firstSubTask && firstSubTask->GetTaskType() == TASK_COMPLEX_USE_SEQUENCE) {
             auto pTaskComplexUseSequence = (CTaskComplexUseSequence*)firstSubTask;
             pTaskComplexUseSequence->m_nCurrentTaskIndex = m_nEndTaskIndex;
             pTaskComplexUseSequence->m_nEndTaskIndex = -1;

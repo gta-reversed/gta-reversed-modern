@@ -6,7 +6,6 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CPhysical.h"
 #include "CObjectData.h"
 
@@ -25,162 +24,160 @@ class CDummyObject;
 class CObject : public CPhysical {
 public:
     CObject();
-    CObject(int modelId, bool bCreate);
+    CObject(int32 modelId, bool bCreate);
     CObject(CDummyObject* pDummyObj);
     ~CObject();
-    static void* operator new(unsigned int size);
-    static void* operator new(unsigned int size, int iPoolRef);
-    static void operator delete(void* pObj);
+    static void* operator new(uint32 size);
+    static void* operator new(uint32 size, int32 iPoolRef);
+    static void  operator delete(void* pObj);
+
 public:
-    CPtrNodeDoubleLink *m_pControlCodeList;
-    unsigned char       m_nObjectType; // see enum eObjectType
-    unsigned char       m_nBonusValue;
-    unsigned short      m_wCostValue;
+    CPtrNodeDoubleLink* m_pControlCodeList;
+    uint8               m_nObjectType; // see enum eObjectType
+    uint8               m_nBonusValue;
+    uint16              m_wCostValue;
     union {
-        struct 
-        {
-            unsigned int bIsPickup : 1;
-            unsigned int b0x02 : 1;
-            unsigned int bPickupPropertyForSale : 1;
-            unsigned int bPickupInShopOutOfStock : 1;
-            unsigned int bGlassBroken : 1;
-            unsigned int b0x20 : 1;
-            unsigned int bIsExploded : 1;
-            unsigned int bChangesVehColor : 1;
+        struct {
+            uint32 bIsPickup : 1;
+            uint32 b0x02 : 1;
+            uint32 bPickupPropertyForSale : 1;
+            uint32 bPickupInShopOutOfStock : 1;
+            uint32 bGlassBroken : 1;
+            uint32 b0x20 : 1;
+            uint32 bIsExploded : 1;
+            uint32 bChangesVehColor : 1;
 
-            unsigned int bIsLampPost : 1;
-            unsigned int bIsTargatable : 1;
-            unsigned int bIsBroken : 1;
-            unsigned int bTrainCrossEnabled : 1;
-            unsigned int bIsPhotographed : 1;
-            unsigned int bIsLiftable : 1;
-            unsigned int bIsDoorMoving : 1;
-            unsigned int bIsDoorOpen : 1;
+            uint32 bIsLampPost : 1;
+            uint32 bIsTargatable : 1;
+            uint32 bIsBroken : 1;
+            uint32 bTrainCrossEnabled : 1;
+            uint32 bIsPhotographed : 1;
+            uint32 bIsLiftable : 1;
+            uint32 bIsDoorMoving : 1;
+            uint32 bIsDoorOpen : 1;
 
-            unsigned int bHasNoModel : 1;
-            unsigned int bIsScaled : 1;
-            unsigned int bCanBeAttachedToMagnet : 1;
-            unsigned int bDamaged : 1;
-            unsigned int b0x100000 : 1;
-            unsigned int b0x200000 : 1;
-            unsigned int bFadingIn : 1; // works only for objects with type 2 (OBJECT_MISSION)
-            unsigned int bAffectedByColBrightness : 1;
+            uint32 bHasNoModel : 1;
+            uint32 bIsScaled : 1;
+            uint32 bCanBeAttachedToMagnet : 1;
+            uint32 bDamaged : 1;
+            uint32 b0x100000 : 1;
+            uint32 b0x200000 : 1;
+            uint32 bFadingIn : 1; // works only for objects with type 2 (OBJECT_MISSION)
+            uint32 bAffectedByColBrightness : 1;
 
-            unsigned int b0x01000000 : 1;
-            unsigned int bDoNotRender : 1;
-            unsigned int bFadingIn2 : 1;
-            unsigned int b0x08000000 : 1;
-            unsigned int b0x10000000 : 1;
-            unsigned int b0x20000000 : 1;
-            unsigned int b0x40000000 : 1;
-            unsigned int b0x80000000 : 1;
+            uint32 b0x01000000 : 1;
+            uint32 bDoNotRender : 1;
+            uint32 bFadingIn2 : 1;
+            uint32 b0x08000000 : 1;
+            uint32 b0x10000000 : 1;
+            uint32 b0x20000000 : 1;
+            uint32 b0x40000000 : 1;
+            uint32 b0x80000000 : 1;
         } objectFlags;
-        unsigned int m_nObjectFlags;
+        uint32 m_nObjectFlags;
     };
-    unsigned char   m_nColDamageEffect; // see eObjectColDamageEffect
-    unsigned char   m_nSpecialColResponseCase; // see eObjectSpecialColResponseCases
-    char field_146;
-    char            m_nGarageDoorGarageIndex;
-    unsigned char   m_nLastWeaponDamage;
-    tColLighting    m_nColLighting;
-    short           m_nRefModelIndex;
-    unsigned char   m_nCarColor[4]; // this is used for detached car parts
-    int             m_dwRemovalTime; // time when this object must be deleted
-    float           m_fHealth;
-    float           m_fDoorStartAngle; // this is used for door objects
-    float           m_fScale;
-    CObjectData    *m_pObjectInfo;
-    class CFire     *m_pFire; // CFire *
-    short           m_wScriptTriggerIndex;
-    short           m_wRemapTxd; // this is used for detached car parts
-    RwTexture      *m_pRemapTexture; // this is used for detached car parts
-    CDummyObject   *m_pDummyObject; // used for dynamic objects like garage doors, train crossings etc.
-    uint32_t        m_dwBurnTime; // time when particles must be stopped
-    float           m_fBurnDamage;
+    uint8         m_nColDamageEffect;        // see eObjectColDamageEffect
+    uint8         m_nSpecialColResponseCase; // see eObjectSpecialColResponseCases
+    char          field_146;
+    char          m_nGarageDoorGarageIndex;
+    uint8         m_nLastWeaponDamage;
+    tColLighting  m_nColLighting;
+    int16         m_nRefModelIndex;
+    uint8         m_nCarColor[4];  // this is used for detached car parts
+    int32         m_dwRemovalTime; // time when this object must be deleted
+    float         m_fHealth;
+    float         m_fDoorStartAngle; // this is used for door objects
+    float         m_fScale;
+    CObjectData*  m_pObjectInfo;
+    class CFire*  m_pFire; // CFire *
+    int16         m_wScriptTriggerIndex;
+    int16         m_wRemapTxd;     // this is used for detached car parts
+    RwTexture*    m_pRemapTexture; // this is used for detached car parts
+    CDummyObject* m_pDummyObject;  // used for dynamic objects like garage doors, train crossings etc.
+    uint32      m_dwBurnTime;    // time when particles must be stopped
+    float         m_fBurnDamage;
 
-
-    static unsigned short& nNoTempObjects;
-    static float& fDistToNearestTree;
-    static bool& bAircraftCarrierSamSiteDisabled;
-    static bool& bArea51SamSiteDisabled;
+    static uint16& nNoTempObjects;
+    static float&  fDistToNearestTree;
+    static bool&   bAircraftCarrierSamSiteDisabled;
+    static bool&   bArea51SamSiteDisabled;
 
 public:
     static void InjectHooks();
 
-    //Virtual
-    void SetIsStatic(bool isStatic) override;
-    void CreateRwObject() override;
-    void ProcessControl() override;
-    void Teleport(CVector destination, bool resetRotation) override;
-    void SpecialEntityPreCollisionStuff(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck) override;
-    unsigned char SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2) override;
-    void PreRender() override;
-    void Render() override;
-    bool SetupLighting() override;
-    void RemoveLighting(bool bRemove) override;
+    // Virtual
+    void  SetIsStatic(bool isStatic) override;
+    void  CreateRwObject() override;
+    void  ProcessControl() override;
+    void  Teleport(CVector destination, bool resetRotation) override;
+    void  SpecialEntityPreCollisionStuff(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck) override;
+    uint8 SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2) override;
+    void  PreRender() override;
+    void  Render() override;
+    bool  SetupLighting() override;
+    void  RemoveLighting(bool bRemove) override;
 
 private:
     // Virtual implementations
-    void SetIsStatic_Reversed(bool isStatic);
-    void CreateRwObject_Reversed();
-    void ProcessControl_Reversed();
-    void Teleport_Reversed(CVector destination, bool resetRotation);
-    void SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck);
-    unsigned char SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2);
-    void PreRender_Reversed();
-    void Render_Reversed();
-    bool SetupLighting_Reversed();
-    void RemoveLighting_Reversed(bool bRemove);
+    void  SetIsStatic_Reversed(bool isStatic);
+    void  CreateRwObject_Reversed();
+    void  ProcessControl_Reversed();
+    void  Teleport_Reversed(CVector destination, bool resetRotation);
+    void  SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck);
+    uint8 SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2);
+    void  PreRender_Reversed();
+    void  Render_Reversed();
+    bool  SetupLighting_Reversed();
+    void  RemoveLighting_Reversed(bool bRemove);
 
 public:
     bool Load();
     bool Save();
 
-    void ProcessGarageDoorBehaviour();
-    bool CanBeDeleted();
-    void SetRelatedDummy(CDummyObject* relatedDummy);
-    bool TryToExplode();
-    void SetObjectTargettable(unsigned char targetable);
-    bool CanBeTargetted();
-    void RefModelInfo(int modelIndex);
-    void SetRemapTexture(RwTexture* remapTexture, short txdIndex);
-    float GetRopeHeight();
-    void SetRopeHeight(float height);
+    void     ProcessGarageDoorBehaviour();
+    bool     CanBeDeleted();
+    void     SetRelatedDummy(CDummyObject* relatedDummy);
+    bool     TryToExplode();
+    void     SetObjectTargettable(uint8 targetable);
+    bool     CanBeTargetted();
+    void     RefModelInfo(int32 modelIndex);
+    void     SetRemapTexture(RwTexture* remapTexture, int16 txdIndex);
+    float    GetRopeHeight();
+    void     SetRopeHeight(float height);
     CEntity* GetObjectCarriedWithRope();
-    void ReleaseObjectCarriedWithRope();
-    void AddToControlCodeList();
-    void RemoveFromControlCodeList();
-    void ResetDoorAngle();
-    void LockDoor();
-    void Init();
-    void DoBurnEffect();
-    void GetLightingFromCollisionBelow();
-    void ProcessSamSiteBehaviour();
-    void ProcessTrainCrossingBehaviour();
-    void ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection, CEntity* damager, eWeaponType weaponType);
-    void Explode();
-    void ObjectFireDamage(float damage, CEntity* damager);
+    void     ReleaseObjectCarriedWithRope();
+    void     AddToControlCodeList();
+    void     RemoveFromControlCodeList();
+    void     ResetDoorAngle();
+    void     LockDoor();
+    void     Init();
+    void     DoBurnEffect();
+    void     GetLightingFromCollisionBelow();
+    void     ProcessSamSiteBehaviour();
+    void     ProcessTrainCrossingBehaviour();
+    void     ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection, CEntity* damager, eWeaponType weaponType);
+    void     Explode();
+    void     ObjectFireDamage(float damage, CEntity* damager);
 
     void GrabObjectToCarryWithRope(CPhysical* attachTo);
     bool CanBeUsedToTakeCoverBehind();
-    void ProcessControlLogic();    
+    void ProcessControlLogic();
 
-// Static
+    // Static
 public:
-    static class CObject* Create(int modelIndex, bool bUnused);
+    static class CObject* Create(int32 modelIndex, bool bUnused);
     static class CObject* Create(CDummyObject* dummyObject);
 
     static void SetMatrixForTrainCrossing(CMatrix* matrix, float fAngle);
-    static void TryToFreeUpTempObjects(int numObjects);
+    static void TryToFreeUpTempObjects(int32 numObjects);
     static void DeleteAllTempObjects();
     static void DeleteAllMissionObjects();
     static void DeleteAllTempObjectsInArea(CVector point, float radius);
 
-    //Helpers
+    // Helpers
     inline bool IsTemporary() const { return m_nObjectType == eObjectType::OBJECT_TEMPORARY; }
     inline bool IsMissionObject() const { return m_nObjectType == eObjectType::OBJECT_MISSION || m_nObjectType == eObjectType::OBJECT_MISSION2; }
-    inline bool IsCraneMovingPart() const
-    {
+    inline bool IsCraneMovingPart() const {
         return m_nModelIndex == ModelIndices::MI_CRANE_MAGNET
             || m_nModelIndex == ModelIndices::MI_CRANE_HARNESS
             || m_nModelIndex == ModelIndices::MI_MINI_MAGNET

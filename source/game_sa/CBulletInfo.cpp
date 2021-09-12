@@ -26,7 +26,7 @@ void CBulletInfo::Shutdown() {
 
 // 0x736010
 bool CBulletInfo::AddBullet(CEntity* creator, eWeaponType weaponType, CVector pos, CVector velocity) {
-    return plugin::CallAndReturn<int8_t, 0x736010, CEntity*, eWeaponType, CVector, CVector>(creator, weaponType, pos, velocity);
+    return plugin::CallAndReturn<int8, 0x736010, CEntity*, eWeaponType, CVector, CVector>(creator, weaponType, pos, velocity);
 }
 
 // 0x7360D0

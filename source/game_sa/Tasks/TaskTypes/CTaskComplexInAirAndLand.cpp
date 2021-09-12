@@ -2,7 +2,7 @@
 
 void CTaskComplexInAirAndLand::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskComplexInAirAndLand", "Constructor", 0x678C80, &CTaskComplexInAirAndLand::Constructor);
+    ReversibleHooks::Install("CTaskComplexInAirAndLand", "CTaskComplexInAirAndLand", 0x678C80, &CTaskComplexInAirAndLand::Constructor);
     //VTABLE
     ReversibleHooks::Install("CTaskComplexInAirAndLand", "CreateFirstSubTask", 0x67CC30, &CTaskComplexInAirAndLand::CreateFirstSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexInAirAndLand", "CreateNextSubTask", 0x67CCB0, &CTaskComplexInAirAndLand::CreateNextSubTask_Reversed);
@@ -48,7 +48,7 @@ CTask* CTaskComplexInAirAndLand::CreateFirstSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped)
 {
-    switch (m_pSubTask->GetId())
+    switch (m_pSubTask->GetTaskType())
     {
     case TASK_SIMPLE_GET_UP:
     case TASK_SIMPLE_LAND:
@@ -70,7 +70,7 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped)
                 pSubTask->m_pAnim = nullptr;
             }
 
-            return new CTaskSimpleLand(ped->m_vecMoveSpeed.z < -0.1F ? ANIM_ID_KO_SKID_BACK : (eAnimID)-1);
+            return new CTaskSimpleLand(ped->m_vecMoveSpeed.z < -0.1F ? ANIM_ID_KO_SKID_BACK : (AnimationId)-1);
         }
         else if (pSubTask->m_pAnim && pSubTask->m_pAnim->m_nAnimId == ANIM_ID_FALL_FALL)
         {
@@ -94,7 +94,7 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped)
         }
         else
         {
-            eAnimID landAnimId;
+            AnimationId landAnimId;
 
             if (!ped->IsPlayer())
                 landAnimId = ANIM_ID_FALL_LAND;
@@ -135,7 +135,7 @@ CTask* CTaskComplexInAirAndLand::ControlSubTask_Reversed(CPed* ped)
 {
     if (!m_bUsingFallGlide
         && m_pSubTask
-        && m_pSubTask->GetId() == TASK_SIMPLE_IN_AIR)
+        && m_pSubTask->GetTaskType() == TASK_SIMPLE_IN_AIR)
     {
         auto pSubTask = reinterpret_cast<CTaskSimpleInAir*>(m_pSubTask);
 

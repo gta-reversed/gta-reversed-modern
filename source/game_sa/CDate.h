@@ -6,26 +6,22 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-class  CDate {
+class CDate {
 public:
-    int seconds;
-    int minutes;
-    int hours;
-    int day;
-    int month;
-    int year;
+    int32 seconds;
+    int32 minutes;
+    int32 hours;
+    int32 day;
+    int32 month;
+    int32 year;
 
-     CDate();
+    CDate();
 
-     bool operator<(CDate const &rhs);
-     bool operator==(CDate const &rhs);
-     bool operator>(CDate const &rhs);
+    bool operator<(CDate const& rhs);
+    bool operator==(CDate const& rhs);
+    bool operator>(CDate const& rhs);
 
-     void PopulateDateFields(char const &seconds, char const &minutes, char const &hours, char const &day, char const &month, short year);
+    void PopulateDateFields(char const& seconds, char const& minutes, char const& hours, char const& day, char const& month, int16 year);
 };
 
 VALIDATE_SIZE(CDate, 0x18);
-
-//#include "meta/meta.CDate.h"

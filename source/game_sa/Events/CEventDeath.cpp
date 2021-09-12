@@ -6,7 +6,7 @@ void CEventDeath::InjectHooks()
     ReversibleHooks::Install("CEventDeath", "Clone_Reversed", 0x4B6E30, &CEventDeath::Clone_Reversed);
 }
 
-CEventDeath::CEventDeath(bool bDrowning, unsigned int deathTimeInMs)
+CEventDeath::CEventDeath(bool bDrowning, uint32 deathTimeInMs)
 {
     m_bDrowning = bDrowning;
     m_deathTimeInMs = deathTimeInMs;

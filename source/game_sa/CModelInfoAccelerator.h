@@ -5,34 +5,33 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
 
 class CBaseModelInfo;
 
-class  CModelInfoAccelerator {
+class CModelInfoAccelerator {
 public:
     CModelInfoAccelerator() { CModelInfoAccelerator::Init(); }
     ~CModelInfoAccelerator() {}
 
 public:
-    unsigned short* m_pIDs;
-    unsigned short  m_nNumIDs;
-    char            m_szFilePath[20];
-    char field_1A;
-    bool m_bFileRead;
+    uint16* m_pIDs;
+    uint16  m_nNumIDs;
+    char    m_szFilePath[20];
+    char    field_1A;
+    bool    m_bFileRead;
 
 public:
-    static constexpr int BUFFER_SIZE = 41100;
+    static constexpr int32 BUFFER_SIZE = 41100;
 
 public:
     static void InjectHooks();
 
     void Init();
-    void AddModelInfoId(unsigned short modelId);
-    unsigned short GetNextModelInfoId();
+    void AddModelInfoId(uint16 modelId);
+    uint16 GetNextModelInfoId();
     void AllocModelInfoIds();
     void FreeModelInfoIds();
-    void GetEntry(CBaseModelInfo** arg0, int* arg1, char* arg2);
+    void GetEntry(CBaseModelInfo** arg0, int32* arg1, char* arg2);
     void End(char* arg0);
     bool GetModelInfoIdFile();
     void EndOfLoadPhase();

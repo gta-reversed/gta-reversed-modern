@@ -6,26 +6,26 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CAnimBlendAssociation.h"
 #include "CEntity.h"
 
 
-class  CTaskSimpleIKChain : public CTaskSimple {
+class CTaskSimpleIKChain : public CTaskSimple {
 public:
-    int		m_time;
-    int		m_blendTime;
+    int32		m_time;
+    int32		m_blendTime;
     void* 	m_pIKChain;
-    short		m_slotID;
-    short 		m_pivotBoneTag;
-    short 		m_effectorBoneTag;
+    int16		m_slotID;
+    int16 		m_pivotBoneTag;
+    int16 		m_effectorBoneTag;
 private:
     char _pad[2];
 public:
     RwV3d		m_effectorVec;
     CEntity*	m_pEntity;
-    int		m_offsetBoneTag;
+    int32		m_offsetBoneTag;
     RwV3d		m_offsetPos;
     float 		m_speed;
     bool		m_bEntityExist;
@@ -34,13 +34,13 @@ private:
 public:
     // blending info
     float		m_blend;
-    int		m_endTime;
+    int32		m_endTime;
     float		m_targetBlend;
-    int		m_targetTime;
-    int		m_isBlendingOut;
+    int32		m_targetTime;
+    int32		m_isBlendingOut;
 
-    CTaskSimpleIKChain(char* _IGNORED_ idString ,int effectorBoneTag,RwV3d effectorVec,int pivotBoneTag,
-        CEntity* pEntity,int offsetBoneTag, RwV3d offsetPos,float speed,int time,int blendTime);
+    CTaskSimpleIKChain(char* _IGNORED_ idString ,int32 effectorBoneTag,RwV3d effectorVec,int32 pivotBoneTag,
+        CEntity* pEntity,int32 offsetBoneTag, RwV3d offsetPos,float speed,int32 time,int32 blendTime);
 };
 
 VALIDATE_SIZE(CTaskSimpleIKChain, 0x58);

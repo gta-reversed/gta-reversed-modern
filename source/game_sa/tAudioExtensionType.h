@@ -1,12 +1,9 @@
 #pragma once
 
-#include "PluginBase.h"
-
 #include "eAudioFileType.h"
 
-struct tAudioExtensionType
-{
-    char extension[8];
+struct tAudioExtensionType {
+    char           extension[8];
     eAudioFileType type;
 };
 

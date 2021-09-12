@@ -1,27 +1,25 @@
 #pragma once
+
 #include "CTaskSimple.h"
 #include "CAnimBlendAssociation.h"
 
-class CTaskSimpleFall : public CTaskSimple
-{
+class CTaskSimpleFall : public CTaskSimple {
 public:
-    unsigned char m_bIsFinished;
-    unsigned char _pad_9[3];
-    eAnimID m_nAnimId;
-    eAnimGroup m_nAnimGroup;
+    bool                   m_bIsFinished;
+    char                   _pad_9[3];
+    AnimationId            m_nAnimId;
+    AssocGroupId           m_nAnimGroup;
     CAnimBlendAssociation* m_pAnim;
-    int m_nTotalDownTime;
-    uint32_t m_nCurrentDownTime;
+    int32                    m_nTotalDownTime; // TODO: uint32?
+    uint32               m_nCurrentDownTime;
 
-private:
-    CTaskSimpleFall* Constructor(eAnimID nAnimId, eAnimGroup nAnimGroup, int nDownTime);
+    static uint32& m_nMaxPlayerDownTime;
+
 public:
-    CTaskSimpleFall(eAnimID nAnimId, eAnimGroup nAnimGroup, int nDownTime);
+    CTaskSimpleFall(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime);
     ~CTaskSimpleFall() override;
 
-    static void InjectHooks();
-
-    eTaskType GetId() override { return TASK_SIMPLE_FALL; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_FALL; }
     CTask* Clone() override { return new CTaskSimpleFall(m_nAnimId, m_nAnimGroup, m_nTotalDownTime); }
     bool ProcessPed(CPed* ped) override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
@@ -33,7 +31,11 @@ public:
     void ProcessFall(CPed* ped);
     static void FinishFallAnimCB(CAnimBlendAssociation* pAnim, void* data); // data is CTaskSimpleFall
 
-    static unsigned int &m_nMaxPlayerDownTime;
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskSimpleFall* Constructor(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime);
 };
 
 VALIDATE_SIZE(CTaskSimpleFall, 0x20);

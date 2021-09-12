@@ -42,14 +42,14 @@ void CTaskSimpleClimb::InjectHooks()
     ReversibleHooks::Install("CTaskSimpleClimb", "MakeAbortable", 0x67A280, &CTaskSimpleClimb::MakeAbortable_Reversed);
 }
 
-CTaskSimpleClimb* CTaskSimpleClimb::Constructor(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, unsigned char nSurfaceType, eClimbHeights nHeight, bool bForceClimb)
+CTaskSimpleClimb* CTaskSimpleClimb::Constructor(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb)
 {
     this->CTaskSimpleClimb::CTaskSimpleClimb(pClimbEnt, vecTarget, fHeading, nSurfaceType, nHeight, bForceClimb);
     return this;
 }
 
 // 0x67A110
-CTaskSimpleClimb::CTaskSimpleClimb(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, unsigned char nSurfaceType, eClimbHeights nHeight, bool bForceClimb)
+CTaskSimpleClimb::CTaskSimpleClimb(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb)
 {
     m_bIsFinished = false;
     m_bChangeAnimation = false;
@@ -195,7 +195,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped)
 
                 if (!(m_pAnim->m_nFlags & ANIM_FLAG_STARTED) || m_pAnim->m_nAnimId == ANIM_ID_CLIMB_IDLE)
                 {
-                    m_nGetToPosCounter += CTimer::GetTimeStepInMilliseconds();
+                    m_nGetToPosCounter += CTimer::GetTimeStepInMS();
                     if (m_nGetToPosCounter > 1000 || m_pAnim->m_nAnimId == ANIM_ID_CLIMB_IDLE && m_nGetToPosCounter > 500)
                     {
                         m_bInvalidClimb = true;
@@ -352,7 +352,7 @@ bool CTaskSimpleClimb::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
 }
 
 // 0x6803A0
-CEntity* CTaskSimpleClimb::TestForClimb(CPed* pPed, CVector& climbPos, float& fAngle, unsigned char& nSurfaceType, bool theBool)
+CEntity* CTaskSimpleClimb::TestForClimb(CPed* pPed, CVector& climbPos, float& fAngle, uint8& nSurfaceType, bool theBool)
 {
     auto pEntity = (CEntity*)ScanToGrab(pPed, climbPos, fAngle, nSurfaceType, theBool, false, false, 0);
 
@@ -370,7 +370,7 @@ CEntity* CTaskSimpleClimb::TestForClimb(CPed* pPed, CVector& climbPos, float& fA
         point += CVector(-ms_fAtEdgeOffsetHorz * sin(angle), ms_fAtEdgeOffsetHorz * cos(angle), ms_fAtEdgeOffsetVert);
 
         CVector v;
-        unsigned char surfaceType2;
+        uint8 surfaceType2;
         if (!ScanToGrab(pPed, v, angle, surfaceType2, false, true, false, &point))
         {
             return pEntity;
@@ -382,7 +382,7 @@ CEntity* CTaskSimpleClimb::TestForClimb(CPed* pPed, CVector& climbPos, float& fA
 }
 
 // 0x67DE10
-void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CVector& targetPos, float& fAngle, unsigned char& nSurfaceType, bool flag1, bool bStandUp, bool bVault)
+void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CVector& targetPos, float& fAngle, uint8& nSurfaceType, bool flag1, bool bStandUp, bool bVault)
 {
     if (!tempMatrix_Initialized)
     {
@@ -425,7 +425,7 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
             if (DistanceBetweenPoints(ped->GetMatrix() * pColmodel->GetBoundCenter(), pEntity->GetBoundCentre()) >= CModelInfo::GetModelInfo(pEntity->m_nModelIndex)->GetColModel()->GetBoundRadius() + pColmodel->GetBoundRadius())
                 continue;
 
-            int numSpheres = -1;
+            int32 numSpheres = -1;
             if (pEntity->IsVehicle() && pEntity->AsVehicle()->IsBoat())
             {
                 numSpheres = pEntity->GetColModel()->m_pColData->m_nNumSpheres;
@@ -441,7 +441,7 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
 
                     return pEntity;
                 }
-                unsigned char nColSphereIndex = CWorld::m_aTempColPts->m_nPieceTypeA;
+                uint8 nColSphereIndex = CWorld::m_aTempColPts->m_nPieceTypeA;
 
                 if (nColSphereIndex == 0
                     || nColSphereIndex == 1
@@ -466,7 +466,7 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
                     continue;
                 }
 
-                int fatModifier = ped->m_pPlayerData && !ped->GetIntelligence()->GetTaskSwim() ? (int)CStats::GetFatAndMuscleModifier(STAT_MOD_0) : 0;
+                int32 fatModifier = ped->m_pPlayerData && !ped->GetIntelligence()->GetTaskSwim() ? (int32)CStats::GetFatAndMuscleModifier(STAT_MOD_0) : 0;
 
                 if (!flag1 || fatModifier >= 1)
                 {
@@ -558,7 +558,7 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
 }
 
 // 0x67FD30
-CEntity* CTaskSimpleClimb::ScanToGrab(CPed* ped, CVector& climbPos, float& fAngle, unsigned char& pSurfaceType, bool flag1, bool bStandUp, bool bVault, CVector* pedPosition)
+CEntity* CTaskSimpleClimb::ScanToGrab(CPed* ped, CVector& climbPos, float& fAngle, uint8& pSurfaceType, bool flag1, bool bStandUp, bool bVault, CVector* pedPosition)
 {
     if (!ms_ClimbColModel.m_pColData)
         CreateColModel();
@@ -574,22 +574,22 @@ CEntity* CTaskSimpleClimb::ScanToGrab(CPed* ped, CVector& climbPos, float& fAngl
 
     auto outPoint = *ped->m_matrix * ms_ClimbColModel.GetBoundCenter();
 
-    int x1 = (int)floorf((outPoint.x - ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
-    int x2 = (int)floorf((outPoint.x + ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
-    int y1 = (int)floorf((outPoint.y - ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
-    int y2 = (int)floorf((outPoint.y + ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
+    int32 x1 = (int32)floorf((outPoint.x - ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
+    int32 x2 = (int32)floorf((outPoint.x + ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
+    int32 y1 = (int32)floorf((outPoint.y - ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
+    int32 y2 = (int32)floorf((outPoint.y + ms_ClimbColModel.GetBoundRadius()) * 0.02F + 60.0F);
 
     CWorld::IncrementCurrentScanCode();
 
-    for (int y = y1; y <= y2; y++)
-        for (int x = x1; x <= x2; x++)
+    for (int32 y = y1; y <= y2; y++)
+        for (int32 x = x1; x <= x2; x++)
         {
             auto scanResult1 = ScanToGrabSectorList(&GetSector(x, y)->m_buildings, ped, climbPos, fAngle, pSurfaceType, flag1, bStandUp, bVault);
             auto scanResult2 = ScanToGrabSectorList(&GetRepeatSector(x, y)->m_lists[REPEATSECTOR_OBJECTS], ped, climbPos, fAngle, pSurfaceType, flag1, bStandUp, bVault);
             if (!scanResult2)
                 scanResult2 = ScanToGrabSectorList(&GetRepeatSector(x, y)->m_lists[REPEATSECTOR_VEHICLES], ped, climbPos, fAngle, pSurfaceType, flag1, bStandUp, bVault);
 
-            if ((int)(scanResult1) == 1 || (int)(scanResult2) == 1)
+            if ((int32)(scanResult1) == 1 || (int32)(scanResult2) == 1)
                 return nullptr;
 
             auto pEntity = (CEntity*)(scanResult2 ? scanResult2 : scanResult1);
@@ -714,7 +714,7 @@ bool CTaskSimpleClimb::TestForStandUp(CPed* ped, CVector* point, float fAngle)
 {
     CVector v;
     float angle;
-    unsigned char nSurfaceType;
+    uint8 nSurfaceType;
     CVector pedPos = *point + CVector(-ms_fAtEdgeOffsetHorz * sin(fAngle), ms_fAtEdgeOffsetHorz * cos(fAngle), ms_fAtEdgeOffsetVert);
     return !ScanToGrab(ped, v, angle, nSurfaceType, false, true, false, &pedPos);
 }
@@ -724,7 +724,7 @@ bool CTaskSimpleClimb::TestForVault(CPed* ped, CVector* point, float fAngle)
 {
     CVector v;
     float angle;
-    unsigned char nSurfaceType;
+    uint8 nSurfaceType;
     CVector pedPos = *point + CVector(-ms_fAtEdgeOffsetHorz * sin(fAngle), ms_fAtEdgeOffsetHorz * cos(fAngle), ms_fAtEdgeOffsetVert);
     return m_pClimbEnt->m_nType != ENTITY_TYPE_VEHICLE && !ScanToGrab(ped, v, angle, nSurfaceType, false, false, true, &pedPos);
 }

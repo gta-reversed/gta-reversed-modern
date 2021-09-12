@@ -6,35 +6,31 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CLink.h"
 
-template<typename T>
-class CLinkList {
+template <typename T> class CLinkList {
 public:
-    CLink<T> usedListHead;
-    CLink<T> usedListTail;
-    CLink<T> freeListHead;
-    CLink<T> freeListTail;
+    CLink<T>  usedListHead;
+    CLink<T>  usedListTail;
+    CLink<T>  freeListHead;
+    CLink<T>  freeListTail;
     CLink<T>* links;
 
-    void* operator new(unsigned int size)
-    {
-        return ((void* (__cdecl*)(unsigned int))0x821195)(size);
+    void* operator new(uint32 size) {
+        return ((void*(__cdecl*)(uint32))0x821195)(size);
     }
 
-    void operator delete(void* object)
-    {
+    void operator delete(void* object) {
         ((void(__cdecl*)(void*))0x8213AE)(object);
     }
 
-    void Init(int count) {
+    void Init(int32 count) {
         usedListHead.next = &usedListTail;
         usedListTail.prev = &usedListHead;
         freeListHead.next = &freeListTail;
         freeListTail.prev = &freeListHead;
         links = new CLink<T>[count];
-        for (int i = count - 1; i >= 0; i--) {
+        for (int32 i = count - 1; i >= 0; i--) {
             freeListHead.Insert(&links[i]);
         }
     }
@@ -44,8 +40,7 @@ public:
         links = nullptr;
     }
 
-    CLink<T>* Insert(T const& data)
-    {
+    CLink<T>* Insert(T const& data) {
         CLink<T>* link = freeListHead.next;
         if (link == &freeListTail)
             return nullptr;
@@ -55,8 +50,7 @@ public:
         return link;
     }
 
-    CLink<T>* InsertSorted(T const& data)
-    {
+    CLink<T>* InsertSorted(T const& data) {
         CLink<T>* i = nullptr;
         for (i = usedListHead.next; i != &usedListTail; i = i->next) {
             if (i->data.m_distance >= data.m_distance)
@@ -71,18 +65,16 @@ public:
         return link;
     }
 
-    void Clear() 
-    {
+    void Clear() {
         for (CLink<T>* link = usedListHead.next; link != &usedListTail; link = usedListHead.next) {
             Remove(link);
         }
     }
 
-    void Remove(CLink<T>* link) 
-    {
+    void Remove(CLink<T>* link) {
         link->Remove();
         freeListHead.Insert(link);
     }
 };
 
-VALIDATE_SIZE(CLinkList<void *>, 0x34);
+VALIDATE_SIZE(CLinkList<void*>, 0x34);

@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "CEventEditableResponse.h"
+
+#include "CPedType.h"
+
 void CEventEditableResponse::InjectHooks() {
     ReversibleHooks::Install("CEventEditableResponse", "Constructor", 0x4AC450, &CEventEditableResponse::Constructor);
     ReversibleHooks::Install("CEventEditableResponse", "Clone_Reversed", 0x420ED0, &CEventEditableResponse::Clone_Reversed);
@@ -16,27 +20,27 @@ void CEventEditableResponse::InjectHooks() {
 
 void CEventSpecial::InjectHooks()
 {
-    ReversibleHooks::Install("CEventSpecial::Constructor", "", 0x4B1AE0, &CEventSpecial::Constructor);
+    ReversibleHooks::Install("CEventSpecial", "CEventSpecial", 0x4B1AE0, &CEventSpecial::Constructor);
 }
 
 void CEventFireNearby::InjectHooks()
 {
-    ReversibleHooks::Install("CEventFireNearby::Constructor", "", 0x4B1F10, &CEventFireNearby::Constructor);
-    ReversibleHooks::Install("CEventFireNearby::AffectsPed_Reversed", "", 0x4B1F90, &CEventFireNearby::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventFireNearby", "CEventFireNearby", 0x4B1F10, &CEventFireNearby::Constructor);
+    ReversibleHooks::Install("CEventFireNearby", "AffectsPed", 0x4B1F90, &CEventFireNearby::AffectsPed_Reversed);
 }
 
 void CEventDanger::InjectHooks()
 {
-    ReversibleHooks::Install("CEventDanger::Constructor", "", 0x4B2600, &CEventDanger::Constructor);
-    ReversibleHooks::Install("CEventDanger::AffectsPed_Reversed", "", 0x4B5470, &CEventDanger::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventDanger::AffectsPedGroup_Reversed", "", 0x4B54E0, &CEventDanger::AffectsPedGroup_Reversed);
-    ReversibleHooks::Install("CEventDanger::GetSourceEntity_Reversed", "", 0x4B2700, &CEventDanger::GetSourceEntity_Reversed);
+    ReversibleHooks::Install("CEventDanger", "CEventDanger", 0x4B2600, &CEventDanger::Constructor);
+    ReversibleHooks::Install("CEventDanger", "AffectsPed", 0x4B5470, &CEventDanger::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventDanger", "AffectsPedGroup", 0x4B54E0, &CEventDanger::AffectsPedGroup_Reversed);
+    ReversibleHooks::Install("CEventDanger", "GetSourceEntity", 0x4B2700, &CEventDanger::GetSourceEntity_Reversed);
 }
 
 void CEventSeenPanickedPed::InjectHooks()
 {
-    ReversibleHooks::Install("CEventSeenPanickedPed::Constructor", "", 0x4B2080, &CEventSeenPanickedPed::Constructor);
-    ReversibleHooks::Install("CEventSeenPanickedPed::AffectsPed_Reversed", "", 0x4B53C0, &CEventSeenPanickedPed::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventSeenPanickedPed", "CEventSeenPanickedPed", 0x4B2080, &CEventSeenPanickedPed::Constructor);
+    ReversibleHooks::Install("CEventSeenPanickedPed", "AffectsPed", 0x4B53C0, &CEventSeenPanickedPed::AffectsPed_Reversed);
 }
 
 CEventEditableResponse::CEventEditableResponse() {
@@ -105,7 +109,7 @@ void CEventEditableResponse::InformVehicleOccupants(CPed* ped) {
             pDriver->m_pIntelligence->m_eventGroup.Add(pClonedEvent, false);
             delete pClonedEvent;
         }
-        for (unsigned char i = 0; i < pVehicle->m_nMaxPassengers; i++) {
+        for (uint8 i = 0; i < pVehicle->m_nMaxPassengers; i++) {
             CPed* pPassenger = pVehicle->m_apPassengers[i];
             if (pPassenger && pPassenger != ped) {
                 auto pClonedEvent = static_cast<CEventEditableResponse*>(Clone());
@@ -125,7 +129,7 @@ void CEventEditableResponse::InformRespectedFriends(CPed* ped) {
 #else
     if (!m_bAddToEventGroup)
         return;
-    unsigned int numPedsToScan = ped->m_pIntelligence->m_nDmNumPedsToScan;
+    uint32 numPedsToScan = ped->m_pIntelligence->m_nDmNumPedsToScan;
     if (!numPedsToScan)
         return;
     CEntity** pEntities = ped->m_pIntelligence->m_entityScanner.m_apEntities;
@@ -142,10 +146,10 @@ void CEventEditableResponse::InformRespectedFriends(CPed* ped) {
                 continue;
         }
         else {
-            unsigned int pedAcquaintances = ped->m_acquaintance.GetAcquaintances(0);
+            uint32 pedAcquaintances = ped->m_acquaintance.GetAcquaintances(0);
             bool bFlagSet = pedAcquaintances & CPedType::GetPedFlag(pEntityPed->m_nPedType);
             if (pEntityPed->IsPlayer()) {
-                unsigned int entityAcquaintances = pEntityPed->m_acquaintance.GetAcquaintances(0);
+                uint32 entityAcquaintances = pEntityPed->m_acquaintance.GetAcquaintances(0);
                 bFlagSet = entityAcquaintances & CPedType::GetPedFlag(ped->m_nPedType);
             }
             if (!bFlagSet)
@@ -200,7 +204,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPed* ped, bool bDecisionMa
     plugin::CallMethod<0x4B56C0, CEventEditableResponse*, CPed*, bool>(this, ped, bDecisionMakerTypeInGroup);
 #else
     if (m_taskId == TASK_NONE) {
-        int eventSourceType = CEventSource::ComputeEventSourceType(*this, *ped);
+        int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *ped);
         CDecisionMakerTypes::GetInstance()->MakeDecision(ped, GetEventType(), eventSourceType, ped->bInVehicle,
             TASK_SIMPLE_INFORM_RESPECTED_FRIENDS, 
             TASK_SIMPLE_INFORM_GROUP, 
@@ -228,7 +232,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
             }
         }
         if (pMember) {
-            int eventSourceType = CEventSource::ComputeEventSourceType(*this, *pMember);
+            int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *pMember);
             m_taskId = CDecisionMakerTypes::GetInstance()->MakeDecision(pedGroup, GetEventType(), eventSourceType, pMember->bInVehicle,
                 TASK_SIMPLE_INFORM_GROUP,
                 TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
@@ -241,7 +245,7 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
         pGroupLeader = pedGroup->m_groupMembership.GetLeader();
         if (m_taskId == TASK_NONE && pGroupLeader) {
             if (pGroupLeader->IsPlayer()) {
-                int eventSourceType = CEventSource::ComputeEventSourceType(*this, *pGroupLeader);
+                int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *pGroupLeader);
                 m_taskId = CDecisionMakerTypes::GetInstance()->MakeDecision(pedGroup, GetEventType(), eventSourceType, pGroupLeader->bInVehicle,
                     TASK_SIMPLE_INFORM_GROUP,
                     TASK_SIMPLE_INFORM_RESPECTED_FRIENDS,
@@ -253,13 +257,13 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
 #endif
 }
 
-bool CEventEditableResponse::ComputeResponseTaskOfType(CPed* ped, int taskId) {
+bool CEventEditableResponse::ComputeResponseTaskOfType(CPed* ped, int32 taskId) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B5730, CEventEditableResponse*, CPed*, int>(this, ped, taskId);
+    return plugin::CallMethodAndReturn<bool, 0x4B5730, CEventEditableResponse*, CPed*, int32>(this, ped, taskId);
 #else
-    short outTaskId = -1;
-    short unknownId = -1;
-    int eventSourceType = CEventSource::ComputeEventSourceType(*this, *ped);
+    int16 outTaskId = -1;
+    int16 unknownId = -1;
+    int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *ped);
     CDecisionMakerTypes::GetInstance()->MakeDecision(ped, GetEventType(), eventSourceType, ped->bInVehicle,
         -1, -1, -1, taskId, false, &outTaskId, &unknownId);
     return taskId == outTaskId;

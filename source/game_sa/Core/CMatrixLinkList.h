@@ -1,5 +1,5 @@
 #pragma once
-#include "PluginBase.h"
+
 #include "CMatrixLink.h"
 
 class CMatrixLinkList {
@@ -7,28 +7,28 @@ public:
     CMatrixLinkList();
 
 public:
-    CMatrixLink m_head;
-    CMatrixLink m_tail;
-    CMatrixLink m_allocatedListHead;
-    CMatrixLink m_allocatedListTail;
-    CMatrixLink m_freeListHead;
-    CMatrixLink m_freeListTail;
+    CMatrixLink  m_head;
+    CMatrixLink  m_tail;
+    CMatrixLink  m_allocatedListHead;
+    CMatrixLink  m_allocatedListTail;
+    CMatrixLink  m_freeListHead;
+    CMatrixLink  m_freeListTail;
     CMatrixLink* m_pObjects;
 
 public:
     static void InjectHooks();
 
 public:
-    void Init(int count);
-    void Shutdown();
+    void         Init(int32 count);
+    void         Shutdown();
     CMatrixLink* AddToList1();
     CMatrixLink* AddToList2();
-    inline void MoveToList1(CMatrixLink* pMat);
-    inline void MoveToList2(CMatrixLink* pMat);
-    inline void MoveToFreeList(CMatrixLink* pMat);
-    int GetNumFree();
-    int GetNumUsed1();
-    int GetNumUsed2();
+    inline void  MoveToList1(CMatrixLink* pMat);
+    inline void  MoveToList2(CMatrixLink* pMat);
+    inline void  MoveToFreeList(CMatrixLink* pMat);
+    int32        GetNumFree();
+    int32        GetNumUsed1();
+    int32        GetNumUsed2();
 
 public:
     inline bool IsFull() { return m_freeListHead.m_pNext == &m_freeListTail; }

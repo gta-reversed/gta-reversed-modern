@@ -3,7 +3,7 @@
 bool& CSpecialFX::bVideoCam = *(bool*)0xC7C70C;
 bool& CSpecialFX::bLiftCam = *(bool*)0xC7C70D;
 bool& CSpecialFX::bSnapShotActive = *(bool*)0xC7C714;
-unsigned int& CSpecialFX::SnapShotFrames = *(unsigned int*)0xC7C710;
+uint32& CSpecialFX::SnapShotFrames = *(uint32*)0xC7C710;
 
 RwTexture*& gpFinishFlagTex = *reinterpret_cast<RwTexture**>(0xC7C718);
 

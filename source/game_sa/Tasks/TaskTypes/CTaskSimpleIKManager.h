@@ -6,11 +6,11 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimpleIKChain.h"
 
 
-class  CTaskSimpleIKManager : public CTaskSimple {
+class CTaskSimpleIKManager : public CTaskSimple {
 public:
     CTaskSimpleIKChain * m_pIKChainTasks[4];
     bool m_bAborting;

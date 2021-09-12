@@ -8,7 +8,7 @@ void CHandObject::InjectHooks()
     ReversibleHooks::Install("CHandObject", "Render", 0x59EE80, &CHandObject::Render_Reversed);
 }
 
-CHandObject::CHandObject(int handModelIndex, CPed* pPed, bool bLeftHand) : CObject()
+CHandObject::CHandObject(int32 handModelIndex, CPed* pPed, bool bLeftHand) : CObject()
 {
     auto* pAnimHierarchy = GetAnimHierarchyFromSkinClump(pPed->m_pRwClump);
     m_pPed = pPed;
@@ -82,7 +82,7 @@ void CHandObject::PreRender_Reversed()
             *RwMatrixGetUp(pBoneMat) = { 0.0F, 0.0F, 0.0F };
             *RwMatrixGetRight(pBoneMat) = { 0.0F, 0.0F, 0.0F };
 
-            const auto unFlags = static_cast<uint32_t>(pAnimHierarchy->pNodeInfo[nBoneInd].flags);
+            const auto unFlags = static_cast<uint32>(pAnimHierarchy->pNodeInfo[nBoneInd].flags);
             if ((unFlags & rpHANIMPUSHPARENTMATRIX) != 0)
                 ++iStackCounter;
             else if ((unFlags & rpHANIMPOPPARENTMATRIX) != 0)

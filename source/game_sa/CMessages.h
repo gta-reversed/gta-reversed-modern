@@ -6,7 +6,7 @@
 */
 #pragma once
 
-enum eMessageStyle : unsigned short {
+enum eMessageStyle : uint16 {
     STYLE_MIDDLE,                // InTheMiddle
     STYLE_BOTTOM_RIGHT,          // AtTheBottomRight
     STYLE_WHITE_MIDDLE,          // WhiteText_InTheMiddle
@@ -17,15 +17,15 @@ enum eMessageStyle : unsigned short {
 };
 
 struct tMessage {
-    char* m_pText;
-    unsigned short m_wFlag;
-    char _pad1[2];
-    unsigned int m_dwTime;
-    unsigned int m_dwStartTime;
-    int m_dwNumber[6];
-    char* m_pString;
-    unsigned char m_bPreviousBrief;
-    char _pad2[3];
+    char*  m_pText;
+    uint16 m_wFlag;
+    char   _pad1[2];
+    uint32 m_dwTime;
+    uint32 m_dwStartTime;
+    int32  m_dwNumber[6];
+    char*  m_pString;
+    uint8  m_bPreviousBrief;
+    char   _pad2[3];
 };
 
 struct tBigMessage {
@@ -35,7 +35,7 @@ struct tBigMessage {
 
 struct tPreviousBrief {
     char* m_pText;
-    int m_nNumber[6];
+    int32 m_nNumber[6];
     char* m_pString;
 };
 
@@ -51,32 +51,32 @@ public:
 public:
     static void InjectHooks();
 
-    static unsigned int GetStringLength(char* string);
-    static void StringCopy(char* dest, char* src, unsigned short len);
-    static unsigned char StringCompare(char* str1, char* str2, unsigned short len);
-    static void CutString(int count, char* str, char** dest);
+    static uint32 GetStringLength(char* string);
+    static void StringCopy(char* dest, char* src, uint16 len);
+    static uint8 StringCompare(char* str1, char* str2, uint16 len);
+    static void CutString(int32 count, char* str, char** dest);
     static void ClearMessages(bool flag);
     static void ClearSmallMessagesOnly();
-    static void AddToPreviousBriefArray(char* text, int n1, int n2, int n3, int n4, int n5, int n6, char* string);
+    static void AddToPreviousBriefArray(char* text, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* string);
     static void ClearPreviousBriefArray();
-    static void InsertNumberInString(char* src, int n1, int n2, int n3, int n4, int n5, int n6, char* dst);
+    static void InsertNumberInString(char* src, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* dst);
     static void InsertStringInString(char* src, char* string);
     static void InsertPlayerControlKeysInString(char* string);
-    static void AddMessageWithNumber(char* text, unsigned int time, unsigned short flag, int n1, int n2, int n3, int n4, int n5, int n6, bool bPreviousBrief);
-    static void AddMessageJumpQWithNumber(char* text, unsigned int time, unsigned short flag, int n1, int n2, int n3, int n4, int n5, int n6, bool bPreviousBrief);
-    static void AddBigMessageWithNumber(char* text, unsigned int time, eMessageStyle style, int n1, int n2, int n3, int n4, int n5, int n6);
-    static void AddBigMessageWithNumberQ(char* text, unsigned int time, eMessageStyle style, int n1, int n2, int n3, int n4, int n5, int n6);
-    static void AddMessageWithString(char* text, unsigned int time, unsigned short flag, char* string, bool bPreviousBrief);
-    static void AddMessageJumpQWithString(char* text, unsigned int time, unsigned short flag, char* string, bool bPreviousBrief);
+    static void AddMessageWithNumber(char* text, uint32 time, uint16 flag, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, bool bPreviousBrief);
+    static void AddMessageJumpQWithNumber(char* text, uint32 time, uint16 flag, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, bool bPreviousBrief);
+    static void AddBigMessageWithNumber(char* text, uint32 time, eMessageStyle style, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6);
+    static void AddBigMessageWithNumberQ(char* text, uint32 time, eMessageStyle style, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6);
+    static void AddMessageWithString(char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief);
+    static void AddMessageJumpQWithString(char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief);
     static void ClearThisPrint(char* text);
     static void ClearThisBigPrint(char* text);
     static void ClearThisPrintBigNow(eMessageStyle style);
     static void Init();
-    static void ClearAllMessagesDisplayedByGame(uint8_t unk);
+    static void ClearAllMessagesDisplayedByGame(uint8 unk);
     static void Process();
     static void Display(bool flag);
-    static void AddMessage(char* text, unsigned int time, unsigned short flag, bool bPreviousBrief);
-    static void AddMessageJumpQ(char* text, unsigned int time, unsigned short flag, bool bPreviousBrief);
-    static void AddBigMessage(char* text, unsigned int time, eMessageStyle style);
-    static void AddBigMessageQ(char* text, unsigned int time, eMessageStyle style);
+    static void AddMessage(char* text, uint32 time, uint16 flag, bool bPreviousBrief);
+    static void AddMessageJumpQ(char* text, uint32 time, uint16 flag, bool bPreviousBrief);
+    static void AddBigMessage(char* text, uint32 time, eMessageStyle style);
+    static void AddBigMessageQ(char* text, uint32 time, eMessageStyle style);
 };

@@ -136,8 +136,8 @@ bool CCollision::IsThisVehicleSittingOnMe(CVehicle* vehicle, CVehicle* vehicleOn
 }
 
 // 0x415320
-bool CCollision::CheckCameraCollisionPeds(int sectorX, int sectorY, CVector* pos, CVector* dir, float* arg4) {
-    return plugin::CallAndReturn<bool, 0x415320, int, int, CVector*, CVector*, float*>(sectorX, sectorY, pos, dir, arg4);
+bool CCollision::CheckCameraCollisionPeds(int32 sectorX, int32 sectorY, CVector* pos, CVector* dir, float* arg4) {
+    return plugin::CallAndReturn<bool, 0x415320, int32, int32, CVector*, CVector*, float*>(sectorX, sectorY, pos, dir, arg4);
 }
 
 // 0x4154A0
@@ -161,8 +161,8 @@ bool CCollision::RayPolyPOP(CVector* arg0, CVector* arg1, CColTriangle* arg2, CV
 }
 
 // 0x4156D0
-int CCollision::GetPrincipleAxis(CVector* vec) {
-    return plugin::CallAndReturn<int, 0x4156D0, CVector*>(vec);
+int32 CCollision::GetPrincipleAxis(CVector* vec) {
+    return plugin::CallAndReturn<int32, 0x4156D0, CVector*>(vec);
 }
 
 // 0x415730
@@ -293,8 +293,8 @@ void CCollision::ClosestPointOnPoly(CColTriangle* arg0, CVector* arg1, CVector* 
 }
 
 // 0x4181B0
-bool CCollision::SphereCastVsCaches(CColSphere* sphere, CVector* arg1, int arg2, CColCacheEntry* arg3, int* arg4, CColCacheEntry* arg5) {
-    return plugin::CallAndReturn<bool, 0x4181B0, CColSphere*, CVector*, int, CColCacheEntry*, int*, CColCacheEntry*>(sphere, arg1, arg2, arg3, arg4, arg5);
+bool CCollision::SphereCastVsCaches(CColSphere* sphere, CVector* arg1, int32 arg2, CColCacheEntry* arg3, int32* arg4, CColCacheEntry* arg5) {
+    return plugin::CallAndReturn<bool, 0x4181B0, CColSphere*, CVector*, int32, CColCacheEntry*, int32*, CColCacheEntry*>(sphere, arg1, arg2, arg3, arg4, arg5);
 }
 
 // 0x418580
@@ -308,8 +308,8 @@ void CCollision::RemoveTrianglePlanes(CColModel* colModel) {
 }
 
 // 0x4185C0
-int CCollision::ProcessColModels(CMatrix const& transform1, CColModel& colModel1, CMatrix const& transform2, CColModel& colModel2, CColPoint* colPoint1, CColPoint* colPoint2, float* maxTouchDistance, bool arg7) {
-    return plugin::CallAndReturn<int, 0x4185C0, CMatrix const&, CColModel&, CMatrix const&, CColModel&, CColPoint*, CColPoint*, float*, bool>(transform1, colModel1, transform2, colModel2, colPoint1, colPoint2, maxTouchDistance, arg7);
+int32 CCollision::ProcessColModels(CMatrix const& transform1, CColModel& colModel1, CMatrix const& transform2, CColModel& colModel2, CColPoint* colPoint1, CColPoint* colPoint2, float* maxTouchDistance, bool arg7) {
+    return plugin::CallAndReturn<int32, 0x4185C0, CMatrix const&, CColModel&, CMatrix const&, CColModel&, CColPoint*, CColPoint*, float*, bool>(transform1, colModel1, transform2, colModel2, colPoint1, colPoint2, maxTouchDistance, arg7);
 }
 
 // 0x419F00
@@ -323,18 +323,18 @@ bool CCollision::SphereVsEntity(CColSphere* sphere, CEntity* entity) {
 }
 
 // 0x41A820
-bool CCollision::CheckCameraCollisionBuildings(int sectorX, int sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5) {
-    return plugin::CallAndReturn<bool, 0x41A820, int, int, CColBox*, CColSphere*, CColSphere*, CColSphere*>(sectorX, sectorY, arg2, arg3, arg4, arg5);
+bool CCollision::CheckCameraCollisionBuildings(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5) {
+    return plugin::CallAndReturn<bool, 0x41A820, int32, int32, CColBox*, CColSphere*, CColSphere*, CColSphere*>(sectorX, sectorY, arg2, arg3, arg4, arg5);
 }
 
 // 0x41A990
-bool CCollision::CheckCameraCollisionVehicles(int sectorX, int sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5, CVector* arg6) {
-    return plugin::CallAndReturn<bool, 0x41A990, int, int, CColBox*, CColSphere*, CColSphere*, CColSphere*, CVector*>(sectorX, sectorY, arg2, arg3, arg4, arg5, arg6);
+bool CCollision::CheckCameraCollisionVehicles(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5, CVector* arg6) {
+    return plugin::CallAndReturn<bool, 0x41A990, int32, int32, CColBox*, CColSphere*, CColSphere*, CColSphere*, CVector*>(sectorX, sectorY, arg2, arg3, arg4, arg5, arg6);
 }
 
 // 0x41AB20
-bool CCollision::CheckCameraCollisionObjects(int sectorX, int sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5) {
-    return plugin::CallAndReturn<bool, 0x41AB20, int, int, CColBox*, CColSphere*, CColSphere*, CColSphere*>(sectorX, sectorY, arg2, arg3, arg4, arg5);
+bool CCollision::CheckCameraCollisionObjects(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5) {
+    return plugin::CallAndReturn<bool, 0x41AB20, int32, int32, CColBox*, CColSphere*, CColSphere*, CColSphere*>(sectorX, sectorY, arg2, arg3, arg4, arg5);
 }
 
 // 0x41AC40

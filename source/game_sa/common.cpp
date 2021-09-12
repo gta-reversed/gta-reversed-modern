@@ -8,8 +8,8 @@ Do not delete this comment block. Respect others' work!
 #include "GxtChar.h"
 #include "CDebugMenu.h"
 
-int& g_nNumIm3dDrawCalls = *(int*)0xB73708;
-int gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
+int32& g_nNumIm3dDrawCalls = *(int32*)0xB73708;
+int32 gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
 char *gString = (char *)0xB71670;
 
 float &GAME_GRAVITY = *(float *)0x863984;
@@ -17,7 +17,7 @@ float &GAME_GRAVITY = *(float *)0x863984;
 char(&PC_Scratch)[16384] = *(char(*)[16384])0xC8E0C8;
 
 RpLight* (&ObjectAffectingLights)[6] = *reinterpret_cast<RpLight* (*)[6]>(0xC886F0);
-int& numExtraDirectionalLights = *reinterpret_cast<int*>(0xC88708);
+int32& numExtraDirectionalLights = *reinterpret_cast<int32*>(0xC88708);
 
 RwV3d& sun2Dir = *reinterpret_cast<RwV3d*>(0xB7CB14);
 
@@ -39,7 +39,7 @@ RwRGBAReal (&DirectAmbientLight)[2] = *reinterpret_cast<RwRGBAReal (*)[2]>(0xC88
 
 float& gfLaRiotsLightMult = *(float*)0x8CD060; // 1.0f
 
-unsigned int &ClumpOffset = *(unsigned int *)0xB5F878;
+uint32 &ClumpOffset = *(uint32 *)0xB5F878;
 
 // used to convert 0-255 to 0.0f-1.0f, also see RwRGBARealFromRwRGBAMacro
 float& flt_859A3C = *(float*)0x859A3C; // 1.0f / 255.0f = 0.0039215689f
@@ -130,19 +130,19 @@ void InjectCommonHooks()
 }
 
 // 0x56E010
-CVector FindPlayerCoors(int playerId) {
+CVector FindPlayerCoors(int32 playerId) {
     if (CEntity* e = FindPlayerEntity(playerId))
         return e->GetPosition();
     return {};
 }
 
 // 0x56E090
-CVector& FindPlayerSpeed(int playerId) {
+CVector& FindPlayerSpeed(int32 playerId) {
     return static_cast<CPhysical*>(FindPlayerEntity(playerId))->m_vecMoveSpeed;
 }
 
 // 0x56E120
-CEntity* FindPlayerEntity(int playerId) {
+CEntity* FindPlayerEntity(int32 playerId) {
     if (auto player = FindPlayerPed(playerId)) {
         if (player->bInVehicle && player->m_pVehicle) 
             return player->m_pVehicle;
@@ -152,7 +152,7 @@ CEntity* FindPlayerEntity(int playerId) {
 }
 
 // 0x56E160
-CTrain* FindPlayerTrain(int playerId) {
+CTrain* FindPlayerTrain(int32 playerId) {
     auto vehicle = FindPlayerVehicle(playerId);
     if (vehicle && vehicle->IsTrain())
         return vehicle->AsTrain();
@@ -161,7 +161,7 @@ CTrain* FindPlayerTrain(int playerId) {
 }
 
 // 0x56E250
-CVector const& FindPlayerCentreOfWorld(int playerId) {
+CVector const& FindPlayerCentreOfWorld(int32 playerId) {
     if (CCarCtrl::bCarsGeneratedAroundCamera)
         return TheCamera.GetPosition();
     if (CVehicle* veh = FindPlayerVehicle(playerId, true))
@@ -170,17 +170,17 @@ CVector const& FindPlayerCentreOfWorld(int playerId) {
 }
 
 // 0x56E320
-CVector const& FindPlayerCentreOfWorld_NoSniperShift(int playerId) {
-    return ((CVector const&(__cdecl*)(int))0x56E320)(playerId);
+CVector const& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId) {
+    return ((CVector const&(__cdecl*)(int32))0x56E320)(playerId);
 }
 
 // 0x56E400
-CVector FindPlayerCentreOfWorld_NoInteriorShift(int playerId) {
-    return ((CVector(__cdecl*)(int))0x56E400)(playerId);
+CVector FindPlayerCentreOfWorld_NoInteriorShift(int32 playerId) {
+    return ((CVector(__cdecl*)(int32))0x56E400)(playerId);
 }
 
 // 0x56E450
-float FindPlayerHeading(int playerId) {
+float FindPlayerHeading(int32 playerId) {
     if (CVehicle* veh = FindPlayerVehicle(playerId, true))
         return veh->GetHeading();
     return FindPlayerPed(playerId)->GetHeading();
@@ -198,13 +198,13 @@ float FindPlayerHeight() {
 }
 
 // 0x56E210
-CPlayerPed* FindPlayerPed(int playerId) {
+CPlayerPed* FindPlayerPed(int32 playerId) {
     return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_pPed;
 }
 
 // Returns player vehicle
 // 0x56E0D0
-CVehicle* FindPlayerVehicle(int playerId, bool bIncludeRemote) {
+CVehicle* FindPlayerVehicle(int32 playerId, bool bIncludeRemote) {
     CPlayerPed* player = FindPlayerPed(playerId);
     if (!player || !player->bInVehicle)
         return nullptr;
@@ -219,7 +219,7 @@ CVehicle* FindPlayerVehicle(int playerId, bool bIncludeRemote) {
 }
 
 // 0x56E230
-CWanted* FindPlayerWanted(int playerId) {
+CWanted* FindPlayerWanted(int32 playerId) {
     return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_PlayerData.m_pWanted;
 }
 
@@ -229,6 +229,8 @@ bool InTwoPlayersMode() {
     return CWorld::Players[0].m_pPed && CWorld::Players[1].m_pPed;
 }
 
+// NOTE: This function doesn't add m.GetPosition() like
+//       MultiplyMatrixWithVector @ 0x59C890 does.
 CVector Multiply3x3(CMatrix& m, CVector& v) {
     return CVector{
         m.GetRight().x * v.x + m.GetForward().x * v.y + m.GetUp().x * v.z,
@@ -250,13 +252,13 @@ void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const
 }
 
 // 0x54EEA0
-void TransformVectors(RwV3d* vecsOut, int numVectors, CMatrix const& matrix, RwV3d const* vecsin) {
-    plugin::Call<0x54EEA0, RwV3d*, int, CMatrix const&, RwV3d const*>(vecsOut, numVectors, matrix, vecsin);
+void TransformVectors(RwV3d* vecsOut, int32 numVectors, CMatrix const& matrix, RwV3d const* vecsin) {
+    plugin::Call<0x54EEA0, RwV3d*, int32, CMatrix const&, RwV3d const*>(vecsOut, numVectors, matrix, vecsin);
 }
 
 // 0x54EE30
-void TransformVectors(RwV3d* vecsOut, int numVectors, CSimpleTransform const& transform, RwV3d const* vecsin) {
-    plugin::Call<0x54EE30, RwV3d*, int, CSimpleTransform const&, RwV3d const*>(vecsOut, numVectors, transform, vecsin);
+void TransformVectors(RwV3d* vecsOut, int32 numVectors, CSimpleTransform const& transform, RwV3d const* vecsin) {
+    plugin::Call<0x54EE30, RwV3d*, int32, CSimpleTransform const&, RwV3d const*>(vecsOut, numVectors, transform, vecsin);
 }
 
 // 0x4D62A0
@@ -306,7 +308,7 @@ void DestroyDebugFont() {
 
 // unused
 // 0x734630
-void ObrsPrintfString(char const* arg0, short arg1, short arg2) {
+void ObrsPrintfString(char const* arg0, int16 arg1, int16 arg2) {
     // NOP
 }
 
@@ -318,9 +320,9 @@ void FlushObrsPrintfs() {
 // 0x734650
 void DefinedState() {
     CRGBA rgbaFog(
-        (uint8_t)CTimeCycle::m_CurrentColours.m_nSkyBottomRed,
-        (uint8_t)CTimeCycle::m_CurrentColours.m_nSkyBottomGreen,
-        (uint8_t)CTimeCycle::m_CurrentColours.m_nSkyBottomBlue
+        (uint8)CTimeCycle::m_CurrentColours.m_nSkyBottomRed,
+        (uint8)CTimeCycle::m_CurrentColours.m_nSkyBottomGreen,
+        (uint8)CTimeCycle::m_CurrentColours.m_nSkyBottomBlue
     );
 
     RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,       (void*)true);
@@ -571,8 +573,8 @@ bool RpGeometryReplaceOldMaterialWithNewMaterial(RpGeometry* geometry, RpMateria
 }
 
 // 0x734E50
-RwTexture* RwTexDictionaryFindHashNamedTexture(RwTexDictionary* txd, unsigned int hash) {
-    return ((RwTexture* (__cdecl *)(RwTexDictionary*, unsigned int))0x734E50)(txd, hash);
+RwTexture* RwTexDictionaryFindHashNamedTexture(RwTexDictionary* txd, uint32 hash) {
+    return ((RwTexture* (__cdecl *)(RwTexDictionary*, uint32))0x734E50)(txd, hash);
 }
 
 // 0x734FC0
@@ -639,7 +641,7 @@ void SetLightsWithTimeOfDayColour(RpWorld* world) {
 
 // unused
 // 0x735720
-void LightsEnable(int arg0) {
+void LightsEnable(int32 arg0) {
     // NOP
 }
 
@@ -779,7 +781,7 @@ void ActivateDirectional() {
 
 // unused
 // 0x735C90
-void SetAmbientColoursToIndicateRoadGroup(int arg0) {
+void SetAmbientColoursToIndicateRoadGroup(int32 arg0) {
     AmbientLightColour.red = IndicateR[arg0 % 7] * flt_859A3C;
     AmbientLightColour.green = IndicateG[arg0 % 7] * flt_859A3C;
     AmbientLightColour.blue = IndicateB[arg0 % 7] * flt_859A3C;
@@ -899,8 +901,8 @@ CAnimBlendClumpData* RpAnimBlendAllocateData(RpClump* clump) {
 }
 
 // 0x4D6790
-CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump* clump, CAnimBlendAssociation* association, unsigned int flags, float startTime, float blendAmount) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6790, RpClump*, CAnimBlendAssociation*, unsigned int, float, float>(clump, association, flags, startTime, blendAmount);
+CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump* clump, CAnimBlendAssociation* association, uint32 flags, float startTime, float blendAmount) {
+    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6790, RpClump*, CAnimBlendAssociation*, uint32, float, float>(clump, association, flags, startTime, blendAmount);
 }
 
 // 0x4D6BE0
@@ -914,8 +916,8 @@ void RpAnimBlendClumpFillFrameArray(RpClump* clump, AnimBlendFrameData** frameDa
 }
 
 // 0x4D6400
-AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, unsigned int id) {
-    return plugin::CallAndReturn<AnimBlendFrameData*, 0x4D6400, RpClump*, unsigned int>(clump, id);
+AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, uint32 id) {
+    return plugin::CallAndReturn<AnimBlendFrameData*, 0x4D6400, RpClump*, uint32>(clump, id);
 }
 
 // 0x4D62A0
@@ -924,8 +926,8 @@ AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, char const* name) 
 }
 
 // 0x4D6370
-AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, unsigned int key) {
-    return plugin::CallAndReturn<AnimBlendFrameData*, 0x4D6370, RpClump*, unsigned int>(clump, key);
+AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, uint32 key) {
+    return plugin::CallAndReturn<AnimBlendFrameData*, 0x4D6370, RpClump*, uint32>(clump, key);
 }
 
 // 0x4D68E0
@@ -938,9 +940,10 @@ CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, char const
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6870, RpClump*, char const*>(clump, name);
 }
 
+// AnimationId animId
 // 0x4D68B0
-CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, unsigned int animId) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D68B0, RpClump*, unsigned int>(clump, animId);
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, uint32 animId) {
+    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D68B0, RpClump*, uint32>(clump, animId);
 }
 
 // 0x4D15E0
@@ -949,8 +952,8 @@ CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump) {
 }
 
 // 0x4D6A70
-CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump, unsigned int flags) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6A70, RpClump*, unsigned int>(clump, flags);
+CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump, uint32 flags) {
+    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6A70, RpClump*, uint32>(clump, flags);
 }
 
 // 0x4D6910
@@ -959,8 +962,8 @@ CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation(RpClump* clump, CAnimB
 }
 
 // 0x4D6A30
-CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation_N(RpClump* clump, int n) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6A30, RpClump*, int>(clump, n);
+CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation_N(RpClump* clump, int32 n) {
+    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6A30, RpClump*, int32>(clump, n);
 }
 
 // 0x4D69A0
@@ -969,23 +972,23 @@ CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation(RpClump* clump)
 }
 
 // 0x4D69F0
-CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation_N(RpClump* clump, int n) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D69F0, RpClump*, int>(clump, n);
+CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation_N(RpClump* clump, int32 n) {
+    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D69F0, RpClump*, int32>(clump, n);
 }
 
 // 0x4D6B60
-unsigned int RpAnimBlendClumpGetNumAssociations(RpClump* clump) {
-    return plugin::CallAndReturn<unsigned int, 0x4D6B60, RpClump*>(clump);
+uint32 RpAnimBlendClumpGetNumAssociations(RpClump* clump) {
+    return plugin::CallAndReturn<uint32, 0x4D6B60, RpClump*>(clump);
 }
 
 // 0x4D6BB0
-unsigned int RpAnimBlendClumpGetNumNonPartialAssociations(RpClump* clump) {
-    return plugin::CallAndReturn<unsigned int, 0x4D6BB0, RpClump*>(clump);
+uint32 RpAnimBlendClumpGetNumNonPartialAssociations(RpClump* clump) {
+    return plugin::CallAndReturn<uint32, 0x4D6BB0, RpClump*>(clump);
 }
 
 // 0x4D6B80
-unsigned int RpAnimBlendClumpGetNumPartialAssociations(RpClump* clump) {
-    return plugin::CallAndReturn<unsigned int, 0x4D6B80, RpClump*>(clump);
+uint32 RpAnimBlendClumpGetNumPartialAssociations(RpClump* clump) {
+    return plugin::CallAndReturn<uint32, 0x4D6B80, RpClump*>(clump);
 }
 
 // 0x4D6C30
@@ -1014,13 +1017,13 @@ void RpAnimBlendClumpRemoveAllAssociations(RpClump* clump) {
 }
 
 // 0x4D6820
-void RpAnimBlendClumpRemoveAssociations(RpClump* clump, unsigned int flags) {
-    plugin::Call<0x4D6820, RpClump*, unsigned int>(clump, flags);
+void RpAnimBlendClumpRemoveAssociations(RpClump* clump, uint32 flags) {
+    plugin::Call<0x4D6820, RpClump*, uint32>(clump, flags);
 }
 
 // 0x4D67E0
-void RpAnimBlendClumpSetBlendDeltas(RpClump* clump, unsigned int flags, float delta) {
-    plugin::Call<0x4D67E0, RpClump*, unsigned int, float>(clump, flags, delta);
+void RpAnimBlendClumpSetBlendDeltas(RpClump* clump, uint32 flags, float delta) {
+    plugin::Call<0x4D67E0, RpClump*, uint32, float>(clump, flags, delta);
 }
 
 // 0x4D6B30
@@ -1054,8 +1057,8 @@ CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* asso
 }
 
 // 0x4D6AD0
-CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association, unsigned int flags) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6AD0, CAnimBlendAssociation*, unsigned int>(association, flags);
+CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association, uint32 flags) {
+    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6AD0, CAnimBlendAssociation*, uint32>(association, flags);
 }
 
 // 0x4D60C0
@@ -1176,7 +1179,7 @@ std::wstring UTF8ToUnicode(const std::string &str)
 {
     std::wstring out;
 
-    int size = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str.data(), str.length(), nullptr, 0);
+    int32 size = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str.data(), str.length(), nullptr, 0);
     if (size)
     {
         std::vector<wchar_t> temp;
@@ -1197,7 +1200,7 @@ std::string UnicodeToUTF8(const std::wstring &str)
 {
     std::string out;
 
-    int size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, str.data(), str.length(), nullptr, 0, nullptr, nullptr);
+    int32 size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, str.data(), str.length(), nullptr, 0, nullptr, nullptr);
     if (size)
     {
         std::vector<char> temp;
@@ -1213,10 +1216,10 @@ std::string UnicodeToUTF8(const std::wstring &str)
     return out;
 }
 
-int WindowsCharset = static_cast<int>(GetACP());
+int32 WindowsCharset = static_cast<int32>(GetACP());
 
-unsigned short& uiTempBufferIndicesStored = *(unsigned short*)0xC4B954;
-unsigned short& uiTempBufferVerticesStored = *(unsigned short*)0xC4B950;
+uint16& uiTempBufferIndicesStored = *(uint16*)0xC4B954;
+uint16& uiTempBufferVerticesStored = *(uint16*)0xC4B950;
 RxVertexIndex(&aTempBufferIndices)[TOTAL_TEMP_BUFFER_INDICES] = *(RxVertexIndex(*)[TOTAL_TEMP_BUFFER_INDICES])0xC4B958;
 RxObjSpace3DVertex(&aTempBufferVertices)[TOTAL_TEMP_BUFFER_VERTICES] = *(RxObjSpace3DVertex(*)[TOTAL_TEMP_BUFFER_VERTICES])0xC4D958; // size 1024 - after this there are 2 more arrays like this, both sized 512
 RwD3D9Vertex(&aRadiosityVertexBuffer)[TOTAL_RADIOSITY_VERTEX_BUFFER] = *reinterpret_cast<RwD3D9Vertex(*)[TOTAL_RADIOSITY_VERTEX_BUFFER]>(0xC5F958);

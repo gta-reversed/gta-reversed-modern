@@ -6,12 +6,12 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CAnimBlendAssociation.h"
 #include "CVector2D.h"
 
-enum eDuckControlTypes : unsigned char
+enum eDuckControlTypes : uint8
 {
     DUCK_STANDALONE = 0,	// duck anim removed when task removed
     DUCK_STANDALONE_WEAPON_CROUCH,// duck anim removed when task removed
@@ -20,11 +20,11 @@ enum eDuckControlTypes : unsigned char
     DUCK_SCRIPT_CONTROLLED,
 };
 
-class  CTaskSimpleDuck : public CTaskSimple {
+class CTaskSimpleDuck : public CTaskSimple {
 public:
-    unsigned int m_nStartTime;
-    unsigned short m_nLengthOfDuck;
-    short m_nShotWhizzingCounter;
+    uint32 m_nStartTime;
+    uint16 m_nLengthOfDuck;
+    int16 m_nShotWhizzingCounter;
     CAnimBlendAssociation *m_pDuckAnim; 
     CAnimBlendAssociation *m_pMoveAnim;
   
@@ -35,10 +35,10 @@ public:
     bool m_bIsInControl;	// if duck task is being controlled by another task then it requires continuous control
   
     CVector2D m_vecMoveCommand; 
-    unsigned char m_nDuckControlType;
-    unsigned char m_nCountDownFrames;
+    uint8 m_nDuckControlType;
+    uint8 m_nCountDownFrames;
 
-    CTaskSimpleDuck * Constructor (eDuckControlTypes DuckControlType, unsigned short nLengthOfDuck, short nUseShotsWhizzingEvents = -1);
+    CTaskSimpleDuck * Constructor (eDuckControlTypes DuckControlType, uint16 nLengthOfDuck, int16 nUseShotsWhizzingEvents = -1);
     static bool CanPedDuck(CPed* pPed);
     bool ControlDuckMove(float moveSpeedX, float moveSpeedY);
     bool IsTaskInUseByOtherTasks(); 

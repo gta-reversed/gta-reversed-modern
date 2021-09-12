@@ -79,8 +79,8 @@ void CReplay::StorePedAnimation() {
 }
 
 // 0x
-void CReplay::StorePedUpdate(CPed* ped, int a2) {
-    plugin::Call<0x0, CPed*, int>(ped, a2);
+void CReplay::StorePedUpdate(CPed* ped, int32 a2) {
+    plugin::Call<0x0, CPed*, int32>(ped, a2);
 }
 
 // 0x45B4D0
@@ -144,13 +144,13 @@ bool CReplay::ShouldStandardCameraBeProcessed() {
 }
 
 // 0x
-void CReplay::FindPoolIndexForPed(int a1) {
-    plugin::Call<0x0, int>(a1);
+void CReplay::FindPoolIndexForPed(int32 a1) {
+    plugin::Call<0x0, int32>(a1);
 }
 
 // 0x
-void CReplay::FindPoolIndexForVehicle(int a1) {
-    plugin::Call<0x0, int>(a1);
+void CReplay::FindPoolIndexForVehicle(int32 a1) {
+    plugin::Call<0x0, int32>(a1);
 }
 
 // 0x45CA70
@@ -169,13 +169,13 @@ void CReplay::ProcessLookAroundCam() {
 }
 
 // 0x
-void CReplay::CanWeFindPoolIndexForPed(int a1) {
-    plugin::Call<0x0, int>(a1);
+void CReplay::CanWeFindPoolIndexForPed(int32 a1) {
+    plugin::Call<0x0, int32>(a1);
 }
 
 // 0x
-void CReplay::CanWeFindPoolIndexForVehicle(int a1) {
-    plugin::Call<0x0, int>(a1);
+void CReplay::CanWeFindPoolIndexForVehicle(int32 a1) {
+    plugin::Call<0x0, int32>(a1);
 }
 
 // 0x0
@@ -229,8 +229,8 @@ void CReplay::PlayBackThisFrameInterpolation() {
 }
 
 // 0x460350
-void CReplay::FastForwardToTime(unsigned int a1) {
-    plugin::Call<0x460350, unsigned int>(a1);
+void CReplay::FastForwardToTime(uint32 a1) {
+    plugin::Call<0x460350, uint32>(a1);
 }
 
 // 0x4604A0
@@ -239,18 +239,18 @@ void CReplay::PlayBackThisFrame() {
 }
 
 // 0x45C850
-void CReplay::FindSizeOfPacket(unsigned short id) {
-    plugin::Call<0x45C850, unsigned short>(id);
+void CReplay::FindSizeOfPacket(uint16 id) {
+    plugin::Call<0x45C850, uint16>(id);
 }
 
 // 0x
-bool CReplay::IsThisVehicleUsedInRecording(int a1) {
-    return plugin::CallAndReturn<bool, 0x0, int>(a1);
+bool CReplay::IsThisVehicleUsedInRecording(int32 a1) {
+    return plugin::CallAndReturn<bool, 0x0, int32>(a1);
 }
 
 // 0x
-bool CReplay::IsThisPedUsedInRecording(int a1) {
-    return plugin::CallAndReturn<bool, 0x0, int>(a1);
+bool CReplay::IsThisPedUsedInRecording(int32 a1) {
+    return plugin::CallAndReturn<bool, 0x0, int32>(a1);
 }
 
 // 0x45D6C0

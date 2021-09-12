@@ -8,8 +8,8 @@
 */
 
 // 0x5A81E0
-void CClothes::ConstructPedModel(unsigned int modelid, CPedClothesDesc& newclothes, CPedClothesDesc const* oldclothes, bool bCutscenePlayer) {
-    plugin::Call<0x5A81E0, unsigned int, CPedClothesDesc&, CPedClothesDesc const*, bool>(modelid, newclothes, oldclothes, bCutscenePlayer);
+void CClothes::ConstructPedModel(uint32 modelid, CPedClothesDesc& newclothes, CPedClothesDesc const* oldclothes, bool bCutscenePlayer) {
+    plugin::Call<0x5A81E0, uint32, CPedClothesDesc&, CPedClothesDesc const*, bool>(modelid, newclothes, oldclothes, bCutscenePlayer);
 }
 
 // 0x5A8120 
@@ -28,8 +28,8 @@ void CClothes::RebuildPlayer(CPlayerPed* player, bool bIgnoreFatAndMuscle) {
 }
 
 // 0x5A8270 
-void CClothes::RebuildCutscenePlayer(CPlayerPed* player, int modelid) {
-    plugin::Call<0x5A8270, CPlayerPed*, int>(player, modelid);
+void CClothes::RebuildCutscenePlayer(CPlayerPed* player, int32 modelid) {
+    plugin::Call<0x5A8270, CPlayerPed*, int32>(player, modelid);
 }
 
 // 0x5A7B30 
@@ -43,25 +43,25 @@ void CClothes::Init() {
 }
 
 // 0x5A7EA0 
-eClothesModelPart CClothes::GetTextureDependency(int eClothesTexturePart) {
+eClothesModelPart CClothes::GetTextureDependency(int32 eClothesTexturePart) {
     eClothesModelPart result;
-    plugin::CallAndReturn<eClothesModelPart, 0x5A7EA0, eClothesModelPart*, int>(&result, eClothesTexturePart);
+    plugin::CallAndReturn<eClothesModelPart, 0x5A7EA0, eClothesModelPart*, int32>(&result, eClothesTexturePart);
     return result;
 }
 
 // 0x5A7FB0 
-int CClothes::GetPlayerMotionGroupToLoad() {
-    return plugin::CallAndReturn<int, 0x5A7FB0>();
+int32 CClothes::GetPlayerMotionGroupToLoad() {
+    return plugin::CallAndReturn<int32, 0x5A7FB0>();
 }
 
 // 0x5A7F30 
-eClothesTexturePart CClothes::GetDependentTexture(int eClothesModelPart) {
+eClothesTexturePart CClothes::GetDependentTexture(int32 eClothesModelPart) {
     eClothesTexturePart result;
-    plugin::CallAndReturn<eClothesTexturePart, 0x5A7F30, eClothesTexturePart*, int>(&result, eClothesModelPart);
+    plugin::CallAndReturn<eClothesTexturePart, 0x5A7F30, eClothesTexturePart*, int32>(&result, eClothesModelPart);
     return result;
 }
 
 // 0x5A81B0
-int CClothes::GetDefaultPlayerMotionGroup() {
-    return plugin::CallAndReturn<int, 0x5A81B0>();
+int32 CClothes::GetDefaultPlayerMotionGroup() {
+    return plugin::CallAndReturn<int32, 0x5A81B0>();
 }

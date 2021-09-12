@@ -18,7 +18,7 @@ class CPlayerInfo;
 class CPlayerPed : public CPed {
 public:
     CPed* m_p3rdPersonMouseTarget;
-    int field_7A0;
+    int32 field_7A0;
 
     // did we display "JCK_HLP" message
     static bool& bHasDisplayedPlayerQuitEnterCarHelpText;
@@ -26,7 +26,7 @@ public:
 public:
     static void InjectHooks();
 
-    CPlayerPed(int playerId, bool bGroupCreated);
+    CPlayerPed(int32 playerId, bool bGroupCreated);
 
     bool Load() override;
     bool Save() override;
@@ -47,10 +47,10 @@ public:
     void Clear3rdPersonMouseTarget();
     // GetWanted()->m_nWantedLevel = 0;
     void Busted();
-    unsigned int GetWantedLevel();
-    void SetWantedLevel(int level);
-    void SetWantedLevelNoDrop(int level);
-    void CheatWantedLevel(int level);
+    uint32 GetWantedLevel();
+    void SetWantedLevel(int32 level);
+    void SetWantedLevelNoDrop(int32 level);
+    void CheatWantedLevel(int32 level);
     bool CanIKReachThisTarget(CVector posn, CWeapon* weapon, bool arg2);
     CPlayerInfo* GetPlayerInfoForThisPlayerPed();
     void DoStuffToGoOnFire();
@@ -80,7 +80,7 @@ public:
     void MakeThisPedJoinOurGroup(CPed* ped);
     bool PlayerWantsToAttack();
     void SetInitialState(bool bGroupCreated);
-    void MakeChangesForNewWeapon(int weaponSlot);
+    void MakeChangesForNewWeapon(int32 weaponSlot);
     void EvaluateTarget(CEntity* target, CEntity** outTarget, float* outTargetPriority, float maxDistance, float arg4, bool arg5);
     void EvaluateNeighbouringTarget(CEntity* target, CEntity** outTarget, float* outTargetPriority, float maxDistance, float arg4, bool arg5);
     void ProcessGroupBehaviour(CPad* pad);
@@ -95,16 +95,16 @@ public:
         return m_pPlayerData ? m_pPlayerData->m_pWanted : nullptr;
     }
 
-    static void RemovePlayerPed(int playerId);
-    static void DeactivatePlayerPed(int playerId);
-    static void ReactivatePlayerPed(int playerId);
+    static void RemovePlayerPed(int32 playerId);
+    static void DeactivatePlayerPed(int32 playerId);
+    static void ReactivatePlayerPed(int32 playerId);
     static bool PedCanBeTargettedVehicleWise(CPed* ped);
-    static void SetupPlayerPed(int playerId);
+    static void SetupPlayerPed(int32 playerId);
 };
 
 VALIDATE_SIZE(CPlayerPed, 0x7A4);
 
 extern char* abTempNeverLeavesGroup; // char abTempNeverLeavesGroup[7];
-extern int& gPlayIdlesAnimBlockIndex;
+extern int32& gPlayIdlesAnimBlockIndex;
 
 bool LOSBlockedBetweenPeds(CEntity* entity1, CEntity* entity2);

@@ -1,8 +1,6 @@
 #pragma once
-#include "PluginBase.h"
 
-enum eAdhesionGroup
-{
+enum eAdhesionGroup {
     ADHESION_GROUP_RUBBER = 0,
     ADHESION_GROUP_HARD,
     ADHESION_GROUP_ROAD,
@@ -11,8 +9,7 @@ enum eAdhesionGroup
     ADHESION_GROUP_WET,
 };
 
-enum eFrictionEffect
-{
+enum eFrictionEffect {
     FRICTION_EFFECT_NONE = 0,
     FRICTION_EFFECT_SPARKS,
     FRICTION_EFFECT_MORE // not sure what this is, but it's probably not used
@@ -23,60 +20,60 @@ class SurfaceInfo_c {
 public:
     char tyreGrip;
     char wetGrip;
-    __int16 pad;
+    char _pad[2];
     union {
         struct {
-            unsigned int ucAdhesionGroup : 3;
-            unsigned int ucSkidmarkType : 2;
-            unsigned int ucFrictionEffect : 3;
+            uint32 ucAdhesionGroup : 3;
+            uint32 ucSkidmarkType : 2;
+            uint32 ucFrictionEffect : 3;
 
-            unsigned int ucBulletFX : 3;
-            unsigned int bIsSoftLand : 1;
-            unsigned int bIsSeeThrough : 1;
-            unsigned int bIsShootThrough : 1;
-            unsigned int bIsSand : 1;
-            unsigned int bIsWater : 1;
+            uint32 ucBulletFX : 3;
+            uint32 bIsSoftLand : 1;
+            uint32 bIsSeeThrough : 1;
+            uint32 bIsShootThrough : 1;
+            uint32 bIsSand : 1;
+            uint32 bIsWater : 1;
 
-            unsigned int bIsShallowWater : 1;
-            unsigned int bIsBeach : 1;
-            unsigned int bIsSteepSlope : 1;
-            unsigned int bIsGlass : 1;
-            unsigned int bIsStairs : 1;
-            unsigned int bIsSkateable : 1;
-            unsigned int bIsPavement : 1;
-            unsigned int ucRoughness : 2;
-            unsigned int ucFlammability : 2;
-            unsigned int bCreatesSparks : 1;
-            unsigned int bCantSprintOn : 1;
-            unsigned int bLeavesFootsteps : 1;
-            unsigned int bProducesFootDust : 1;
-            unsigned int bMakesCarDirty : 1;
+            uint32 bIsShallowWater : 1;
+            uint32 bIsBeach : 1;
+            uint32 bIsSteepSlope : 1;
+            uint32 bIsGlass : 1;
+            uint32 bIsStairs : 1;
+            uint32 bIsSkateable : 1;
+            uint32 bIsPavement : 1;
+            uint32 ucRoughness : 2;
+            uint32 ucFlammability : 2;
+            uint32 bCreatesSparks : 1;
+            uint32 bCantSprintOn : 1;
+            uint32 bLeavesFootsteps : 1;
+            uint32 bProducesFootDust : 1;
+            uint32 bMakesCarDirty : 1;
 
-            unsigned int bMakesCarClean : 1;
-            unsigned int bCreatesWheelGrass : 1;
-            unsigned int bCreatesWheelGravel : 1;
-            unsigned int bCreatesWheelMud : 1;
-            unsigned int bCreatesWheelDust : 1;
-            unsigned int bCreatesWheelSand : 1;
-            unsigned int bCreatesWheelSpray : 1;
-            unsigned int bCreatesPlants : 1;
+            uint32 bMakesCarClean : 1;
+            uint32 bCreatesWheelGrass : 1;
+            uint32 bCreatesWheelGravel : 1;
+            uint32 bCreatesWheelMud : 1;
+            uint32 bCreatesWheelDust : 1;
+            uint32 bCreatesWheelSand : 1;
+            uint32 bCreatesWheelSpray : 1;
+            uint32 bCreatesPlants : 1;
 
-            unsigned int bCreatesObjects : 1;
-            unsigned int bCanClimb : 1;
-            unsigned int bIsAudioConcrete : 1;
-            unsigned int bIsAudioGrass : 1;
-            unsigned int bIsAudioSand : 1;
-            unsigned int bIsAudioGravel : 1;
-            unsigned int bIsAudioWood : 1;
-            unsigned int bIsAudioWater : 1;
+            uint32 bCreatesObjects : 1;
+            uint32 bCanClimb : 1;
+            uint32 bIsAudioConcrete : 1;
+            uint32 bIsAudioGrass : 1;
+            uint32 bIsAudioSand : 1;
+            uint32 bIsAudioGravel : 1;
+            uint32 bIsAudioWood : 1;
+            uint32 bIsAudioWater : 1;
 
-            unsigned int bIsAudioMetal : 1;
-            unsigned int bIsAudioLongGrass : 1;
-            unsigned int bIsAudioTile : 1;
-            unsigned int bPad : 13;
+            uint32 bIsAudioMetal : 1;
+            uint32 bIsAudioLongGrass : 1;
+            uint32 bIsAudioTile : 1;
+            uint32 bPad : 13;
         };
-        unsigned int m_nFlags1;
-        unsigned int m_nFlags2;
+        uint32 m_nFlags1;
+        uint32 m_nFlags2;
     };
 };
 #pragma pack(pop)

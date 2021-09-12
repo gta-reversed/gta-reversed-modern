@@ -4,10 +4,10 @@ void CTaskComplexSequence::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexSequence", "CTaskComplexSequence", 0x632BD0, &CTaskComplexSequence::Constructor);
     ReversibleHooks::Install("CTaskComplexSequence", "Clone", 0x5F6710, &CTaskComplexSequence::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexSequence", "GetId", 0x632C60, &CTaskComplexSequence::GetId_Reversed);
+    ReversibleHooks::Install("CTaskComplexSequence", "GetTaskType", 0x632C60, &CTaskComplexSequence::GetId_Reversed);
     ReversibleHooks::Install("CTaskComplexSequence", "MakeAbortable", 0x632C00, &CTaskComplexSequence::MakeAbortable_Reversed);
     ReversibleHooks::Install("CTaskComplexSequence", "CreateNextSubTask", 0x638A40, &CTaskComplexSequence::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexSequence", "CreateNextSubTask_ped", 0x632C70, (CTask*(CTaskComplexSequence::*)(CPed*, int&, int&))&CTaskComplexSequence::CreateNextSubTask);
+    ReversibleHooks::Install("CTaskComplexSequence", "CreateNextSubTask_ped", 0x632C70, (CTask*(CTaskComplexSequence::*)(CPed*, int32&, int32&))&CTaskComplexSequence::CreateNextSubTask);
     ReversibleHooks::Install("CTaskComplexSequence", "CreateFirstSubTask", 0x638A60, &CTaskComplexSequence::CreateFirstSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexSequence", "ControlSubTask", 0x632D00, &CTaskComplexSequence::ControlSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexSequence", "AddTask", 0x632D10, &CTaskComplexSequence::AddTask);
@@ -41,7 +41,7 @@ CTask* CTaskComplexSequence::Clone()
 }
 
 // 0x632C60
-eTaskType CTaskComplexSequence::GetId()
+eTaskType CTaskComplexSequence::GetTaskType()
 {
     return GetId_Reversed();
 }
@@ -125,10 +125,10 @@ void CTaskComplexSequence::AddTask(CTask* pTask)
 }
 
 // 0x632C70
-CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped, int& taskIndex, int& repeatCount)
+CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped, int32& taskIndex, int32& repeatCount)
 {
     CTask* nextSubTask = nullptr;
-    int incrementedTaskIndex = taskIndex + 1;
+    int32 incrementedTaskIndex = taskIndex + 1;
     taskIndex = incrementedTaskIndex;
 
     if (m_bRepeatSequence) {
@@ -140,7 +140,7 @@ CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped, int& taskIndex, int& r
         // Value of bRepeatSequence can be 0 or 1, this means that if we are
         // within this code block, then `pNextSubTask = m_aTasks[*pTaskIndex]->Clone()`
         // will always execute.
-        int bRepeatSequence = m_bRepeatSequence;
+        int32 bRepeatSequence = m_bRepeatSequence;
         if (bRepeatSequence == 1 || repeatCount != bRepeatSequence) {
             nextSubTask = m_aTasks[taskIndex]->Clone();
         }

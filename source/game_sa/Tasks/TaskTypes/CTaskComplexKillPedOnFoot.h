@@ -6,46 +6,46 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskComplex.h"
 #include "CTaskTimer.h"
 #include "CTaskComplex.h"
 
 class CTaskComplexKillPedOnFoot : public CTaskComplex {
 public:
-    std::uint8_t m_bit_1 : 1;
-    std::uint8_t m_bit_2 : 1;
-    std::uint8_t m_bit_3 : 1;
-    std::uint8_t m_bit_4 : 1;
-    std::uint8_t m_bit_5 : 1;
-    std::uint8_t m_bit_6 : 1;
-    std::uint8_t m_bit_7 : 1;
-    std::uint8_t m_bit_8 : 1;
-    std::uint8_t _pad0[3];
+    uint8 m_bit_1 : 1;
+    uint8 m_bit_2 : 1;
+    uint8 m_bit_3 : 1;
+    uint8 m_bit_4 : 1;
+    uint8 m_bit_5 : 1;
+    uint8 m_bit_6 : 1;
+    uint8 m_bit_7 : 1;
+    uint8 m_bit_8 : 1;
+    uint8 _pad0[3];
     CPed* m_target;
-    std::uint32_t m_pedFlags;
-    std::int32_t m_actionDelay;
-    std::int32_t m_actionChance;
-    std::uint8_t field_20;
-    std::uint8_t _pad1[3];
-    std::uint32_t m_startTime;
-    std::uint32_t m_time;
+    uint32 m_pedFlags;
+    int32 m_actionDelay;
+    int32 m_actionChance;
+    uint8 field_20;
+    uint8 _pad1[3];
+    uint32 m_startTime;
+    uint32 m_time;
     CTaskTimer m_timer;
 
     static void InjectHooks();
 
-    CTaskComplexKillPedOnFoot(CPed* target, std::int32_t time, std::uint32_t pedFlags, std::int32_t delay, std::int32_t chance, std::int8_t a7);
+    CTaskComplexKillPedOnFoot(CPed* target, int32 time, uint32 pedFlags, int32 delay, int32 chance, int8 a7);
     ~CTaskComplexKillPedOnFoot();
 private:
-    CTaskComplexKillPedOnFoot* Constructor(CPed* target, std::int32_t time, std::uint32_t pedFlags, std::int32_t delay, std::int32_t chance, std::int8_t a7);
+    CTaskComplexKillPedOnFoot* Constructor(CPed* target, int32 time, uint32 pedFlags, int32 delay, int32 chance, int8 a7);
 public:
     CTask* Clone() override { return new CTaskComplexKillPedOnFoot(m_target, m_time, m_pedFlags, m_actionDelay, m_actionChance, field_20); }
-    eTaskType GetId() override { return TASK_COMPLEX_KILL_PED_ON_FOOT; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_KILL_PED_ON_FOOT; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
-    void* CreateSubTask(std::int32_t taskId, CPed* ped);
+    void* CreateSubTask(int32 taskId, CPed* ped);
 };
 
 VALIDATE_SIZE(CTaskComplexKillPedOnFoot, 0x38);

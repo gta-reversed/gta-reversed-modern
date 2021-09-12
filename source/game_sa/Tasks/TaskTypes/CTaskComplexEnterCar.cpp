@@ -38,7 +38,7 @@ CTaskComplexEnterCar::~CTaskComplexEnterCar()
 
 bool CTaskComplexEnterCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x63A730, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x63A730, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
 }
 
 CTask* CTaskComplexEnterCar::CreateNextSubTask(CPed* ped)

@@ -32,29 +32,29 @@ public:
     static CVector& vec2PlayerStartLocation;
     static bool& bPlayersCanBeInSeparateCars;
 
-    static int& TimeOfLastEvent;
+    static int32& TimeOfLastEvent;
     static eGameState& GameState;
     static bool& bPlayersCannotTargetEachOther;
-    static int& ActivePlayers; // unused
+    static int32& ActivePlayers; // unused
     static float& m_96A890;
-    static int& nPrintFocusHelpTimer;
-    static int& nPrintFocusHelpCounter;
+    static int32& nPrintFocusHelpTimer;
+    static int32& nPrintFocusHelpCounter;
     static bool& bScriptCoopGameGoingOn;
 
     static bool& SkipToBeFinishedByScript;
     static CVehicle*& SkipVehicle;
-    static unsigned int& SkipTimer;
+    static uint32& SkipTimer;
     static eSkipState& SkipState;
-    static int& SkipDestinationOrientation;
-    static int& SkipDestination;
+    static int32& SkipDestinationOrientation;
+    static int32& SkipDestination;
 
-    static int& NumAfterDeathStartPoints;
+    static int32& NumAfterDeathStartPoints;
 
     static bool& bPenaltyForDeathApplies;
     static bool& bPenaltyForArrestApplies;
     static bool& bLimitPlayerDistance;
     static float& MaxPlayerDistance;
-    static int& n2PlayerPedInFocus;
+    static int32& n2PlayerPedInFocus;
 
 public:
     static void InjectHooks();
@@ -74,16 +74,16 @@ public:
     static bool LaRiotsActiveHere();
     static void Save();
     static void Load();
-    static void PassTime(unsigned int time);
+    static void PassTime(uint32 time);
     static void Remove2ndPlayerIfPresent();
     static void ResetStuffUponResurrection();
     static void RestorePedsWeapons(CPed* ped);
     static void RestorePlayerStuffDuringResurrection(CPlayerPed* player, float x, float y, float z, float playerStartHeading);
-    static void SetPlayerWantedLevelForForbiddenTerritories(unsigned short townNumber);
-    static void SetUpSkip(int fX, int fY, int fZ, float fAngle, bool bAfterMission, CEntity* vehicle, bool bFinishedByScript);
+    static void SetPlayerWantedLevelForForbiddenTerritories(uint16 townNumber);
+    static void SetUpSkip(int32 fX, int32 fY, int32 fZ, float fAngle, bool bAfterMission, CEntity* vehicle, bool bFinishedByScript);
     static void SkipCanBeActivated();
     static void SortOutStreamingAndMemory(CVector const& translation, float angle);
-    static void StopPlayerMovingFromDirection(int playerId, CVector direction);
+    static void StopPlayerMovingFromDirection(int32 playerId, CVector direction);
     static void Update();
     static void UpdateSkip();
 };

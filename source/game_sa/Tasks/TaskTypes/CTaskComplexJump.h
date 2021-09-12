@@ -8,7 +8,7 @@ Do not delete this comment block. Respect others' work!
 */
 #include "CTaskComplex.h"
 
-enum eComplexJumpType : unsigned int
+enum eComplexJumpType : uint32
 {
     COMPLEX_JUMP_TYPE_JUMP = 0,
     COMPLEX_JUMP_TYPE_CLIMB = 1
@@ -27,7 +27,7 @@ public:
 
     static void InjectHooks();
 
-    eTaskType GetId() override { return TASK_COMPLEX_JUMP; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_JUMP; }
     CTask* Clone() override;
     CTask* ControlSubTask(CPed* ped) override { return m_pSubTask; }
     CTask* CreateFirstSubTask(CPed* ped) override;

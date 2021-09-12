@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 
-CTaskComplexEnterCarAsPassenger::CTaskComplexEnterCarAsPassenger(CVehicle* pTargetVehicle, int nTargetSeat, bool bCarryOnAfterFallingOff) :
+CTaskComplexEnterCarAsPassenger::CTaskComplexEnterCarAsPassenger(CVehicle* pTargetVehicle, int32 nTargetSeat, bool bCarryOnAfterFallingOff) :
     CTaskComplexEnterCar(pTargetVehicle, false, false, false, bCarryOnAfterFallingOff)
 {
     m_nTargetSeat = nTargetSeat;

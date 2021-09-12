@@ -32,10 +32,10 @@ void CDebug::DebugDisplayTextBuffer()
 {
     CFont::SetBackground(0, 0);
     CFont::SetBackgroundColor(CRGBA(0, 0, 0, 128));
-    CFont::SetOrientation(ALIGN_LEFT);
+    CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
     CFont::SetProportional(true);
     CFont::SetDropShadowPosition(0);
-    CFont::SetFontStyle(FONT_SUBTITLES);
+    CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
     CFont::SetColor(CRGBA(225, 225, 225, 255));
     CFont::SetDropShadowPosition(2);
     CFont::SetDropColor(CRGBA(0, 0, 0, 255));

@@ -5,7 +5,7 @@ void CTaskComplexPartnerGreet::InjectHooks()
     ReversibleHooks::Install("CTaskComplexPartnerGreet", "CTaskComplexPartnerGreet", 0x684210, &CTaskComplexPartnerGreet::Constructor);
 }
 
-CTaskComplexPartnerGreet::CTaskComplexPartnerGreet(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, std::int32_t handShakeType, CVector point) :
+CTaskComplexPartnerGreet::CTaskComplexPartnerGreet(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, int32 handShakeType, CVector point) :
     CTaskComplexPartner(commandName, partner, leadSpeaker, distanceMultiplier, true, 1, point)
 {
     m_handShakeType = handShakeType;
@@ -13,7 +13,7 @@ CTaskComplexPartnerGreet::CTaskComplexPartnerGreet(const char* commandName, CPed
     strcpy(m_animBlockName, "gangs");
 }
 
-CTaskComplexPartnerGreet* CTaskComplexPartnerGreet::Constructor(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, std::int32_t handShakeType, CVector point)
+CTaskComplexPartnerGreet* CTaskComplexPartnerGreet::Constructor(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, int32 handShakeType, CVector point)
 {
     this->CTaskComplexPartnerGreet::CTaskComplexPartnerGreet(commandName, partner, leadSpeaker, distanceMultiplier, handShakeType, point);
     return this;
