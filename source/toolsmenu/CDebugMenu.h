@@ -4,8 +4,7 @@
 #include "CDebugMenuToolInput.h"
 #include "CVector.h"
 
-class CDebugMenu
-{
+class CDebugMenu {
 private:
     static CDebugMenuToolInput m_vehicleToolInput;
     static CDebugMenuToolInput m_pedToolInput;
@@ -14,9 +13,12 @@ private:
     static int32 m_missionToStartId;
     static bool m_imguiInitialised;
     static bool m_showMenu;
+    static bool m_showFPS;
+    static bool m_showExtraDebugFeatures;
     static CSprite2d m_mouseSprite;
 
     static void ImguiDisplayFramePerSecond();
+    static void ImguiDisplayExtraDebugFeatures();
     static void ImguiDisplayPlayerInfo();
     static void ProcessCheatTool();
     static void SpawnPed(int32 modelID, CVector position);
@@ -29,6 +31,9 @@ private:
     static void ProcessRenderTool();
     static void PostFxTool();
     static void ProcessHooksTool();
+#ifdef EXTRA_DEBUG_FEATURES
+    static void ProcessExtraDebugFeatures();
+#endif
     //static void ToggleHook();
 public:
     static ImGuiIO* io;

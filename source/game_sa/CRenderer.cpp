@@ -7,6 +7,12 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
+#include "CRenderer.h"
+
+#ifdef EXTRA_DEBUG_FEATURES
+#include "toolsmenu\DebugModules\Collision\Collision.h"
+#endif
+
 int32 MAX_INVISIBLE_ENTITY_PTRS = 150;
 int32 MAX_VISIBLE_ENTITY_PTRS = 1000;
 int32 MAX_VISIBLE_LOD_PTRS = 1000;
@@ -412,8 +418,12 @@ void CRenderer::RenderFirstPersonVehicle() {
         CRenderer::RenderOneNonRoad(CRenderer::m_pFirstPersonVehicle);
         RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
         if (bRestoreAlphaTest)
-            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)0);
+            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)nullptr);
     }
+
+#ifdef EXTRA_DEBUG_FEATURES
+    CollisionDebugModule::ProcessRender();
+#endif
 }
 
 // 0x553E40
