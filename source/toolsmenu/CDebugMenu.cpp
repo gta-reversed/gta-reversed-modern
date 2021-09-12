@@ -1,14 +1,17 @@
 #include "StdInc.h"
 
 #include "CDebugMenu.h"
-#include "imgui.h"
-#include "imgui_impl_rw.h"
-#include "imgui_stdlib.h"
-#include "imgui_internal.h"
-#include "CDebugMenuToolInput.h"
 
-#include <windows.h>
+#include <imgui.h>
+#include <imgui_impl_win32.h>
+#include <imgui_impl_dx9.h>
+#include <imgui_stdlib.h>
+#include <imgui_internal.h>
+
+#include <Windows.h>
 #include <sstream>
+
+#include "CDebugMenuToolInput.h"
 
 #include "toolsmenu\DebugModules\Collision\Collision.h"
 
@@ -24,6 +27,8 @@ bool CDebugMenu::m_showExtraDebugFeatures = false;
 CSprite2d CDebugMenu::m_mouseSprite;
 ImGuiIO* CDebugMenu::io = {};
 
+static ImVec2 m_MousePos;
+
 // https://stackoverflow.com/a/19839371
 bool findStringCaseInsensitive(const std::string& strHaystack, const std::string& strNeedle) {
     auto it = std::search(
@@ -33,6 +38,7 @@ bool findStringCaseInsensitive(const std::string& strHaystack, const std::string
     );
     return (it != strHaystack.end());
 }
+
 
 void CDebugMenu::ImguiInitialise() {
     if (m_imguiInitialised) {
@@ -46,16 +52,23 @@ void CDebugMenu::ImguiInitialise() {
     io->WantCaptureKeyboard = true;
     io->WantSetMousePos = true;
     io->ConfigFlags = ImGuiConfigFlags_NavEnableSetMousePos;
-    io->DisplaySize = ImVec2((float)RsGlobal.maximumWidth, (float)RsGlobal.maximumHeight);
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    // HWND& hwnd = *(HWND*)0xC97C1C;
-    // ImGui_ImplWin32_Init(hwnd);
-    ImGui_ImplRW_Init(GetD3DDevice());
+    io->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    ImGui_ImplWin32_Init(*(HWND*)0xC97C1C);
+    ImGui_ImplDX9_Init(GetD3DDevice());
+
     printf("Imgui initialized\n");
 
-    // Mouse
-    int txd = CTxdStore::AddTxdSlot("imgui_mouse");
+    LoadMouseSprite();
+
+    m_vehicleToolInput.Initialise(256, &m_vehiclesMap);
+    m_pedToolInput.Initialise(256, &m_pedsMap);
+    m_missionToolInput.Initialise(256, &m_missionsMap);
+    m_imguiInitialised = true;
+}
+
+void CDebugMenu::LoadMouseSprite() {
+    auto txd = CTxdStore::AddTxdSlot("imgui_mouse");
     if (CTxdStore::LoadTxd(txd, "models\\fronten_pc.txd")) {
         CTxdStore::AddRef(txd);
         CTxdStore::PushCurrentTxd();
@@ -65,35 +78,6 @@ void CDebugMenu::ImguiInitialise() {
         printf("Failed to load fronten_pc.txd\n");
     }
     CTxdStore::PopCurrentTxd();
-
-    // Keyboard section
-    io->KeyMap[ImGuiKey_Tab] = VK_TAB;
-    io->KeyMap[ImGuiKey_LeftArrow] = VK_LEFT;
-    io->KeyMap[ImGuiKey_RightArrow] = VK_RIGHT;
-    io->KeyMap[ImGuiKey_UpArrow] = VK_UP;
-    io->KeyMap[ImGuiKey_DownArrow] = VK_DOWN;
-    io->KeyMap[ImGuiKey_PageUp] = VK_PRIOR;
-    io->KeyMap[ImGuiKey_PageDown] = VK_NEXT;
-    io->KeyMap[ImGuiKey_Home] = VK_HOME;
-    io->KeyMap[ImGuiKey_End] = VK_END;
-    io->KeyMap[ImGuiKey_Insert] = VK_INSERT;
-    io->KeyMap[ImGuiKey_Delete] = VK_DELETE;
-    io->KeyMap[ImGuiKey_Backspace] = VK_BACK;
-    io->KeyMap[ImGuiKey_Space] = VK_SPACE;
-    io->KeyMap[ImGuiKey_Enter] = VK_RETURN;
-    io->KeyMap[ImGuiKey_Escape] = VK_ESCAPE;
-    io->KeyMap[ImGuiKey_KeyPadEnter] = VK_RETURN;
-    io->KeyMap[ImGuiKey_A] = 'A';
-    io->KeyMap[ImGuiKey_C] = 'C';
-    io->KeyMap[ImGuiKey_V] = 'V';
-    io->KeyMap[ImGuiKey_X] = 'X';
-    io->KeyMap[ImGuiKey_Y] = 'Y';
-    io->KeyMap[ImGuiKey_Z] = 'Z';
-
-    m_vehicleToolInput.Initialise(256, &m_vehiclesMap);
-    m_pedToolInput.Initialise(256, &m_pedsMap);
-    m_missionToolInput.Initialise(256, &m_missionsMap);
-    m_imguiInitialised = true;
 }
 
 void CDebugMenu::ImguiInputUpdate() {
@@ -924,10 +908,9 @@ void CDebugMenu::ImguiDrawLoop() {
     DebugCode();
     ReversibleHooks::CheckAll();
 
-
     io->DeltaTime = CTimer::ms_fTimeStep * 0.02f;
 
-    ImGui_ImplRW_NewFrame();
+    ImGui_ImplDX9_NewFrame();
     ImGui::NewFrame();
 
     CDebugMenu::ImguiDisplayExtraDebugFeatures();
@@ -950,7 +933,6 @@ void CDebugMenu::Shutdown() {
     if (slot != -1)
         CTxdStore::RemoveTxdSlot(slot);
 }
-
 
 CDebugMenuToolInput::ToolMap CDebugMenu::m_vehiclesMap{
     { 400, "Landstalker" },

@@ -1,10 +1,25 @@
 #pragma once
 
-#include "imgui.h"
+#include <imgui.h>
+
 #include "CDebugMenuToolInput.h"
 #include "CVector.h"
 
 class CDebugMenu {
+public:
+    static ImGuiIO* io;
+    static void ImguiInitialise();
+    static void ImguiInputUpdate();
+    static void ImguiDrawLoop();
+    static void ImGuiDrawMouse();
+    static void Shutdown();
+
+    static bool Visible() { return m_showMenu; }
+
+    static CDebugMenuToolInput::ToolMap m_vehiclesMap;
+    static CDebugMenuToolInput::ToolMap m_pedsMap;
+    static CDebugMenuToolInput::ToolMap m_missionsMap;
+
 private:
     static CDebugMenuToolInput m_vehicleToolInput;
     static CDebugMenuToolInput m_pedToolInput;
@@ -35,19 +50,7 @@ private:
     static void ProcessExtraDebugFeatures();
 #endif
     //static void ToggleHook();
-public:
-    static ImGuiIO* io;
-    static void ImguiInitialise();
-    static void ImguiInputUpdate();
-    static void ImguiDrawLoop();
-    static void ImGuiDrawMouse();
-    static void Shutdown();
-
-    static bool Visible() { return m_showMenu; }
-
-    static CDebugMenuToolInput::ToolMap m_vehiclesMap;
-    static CDebugMenuToolInput::ToolMap m_pedsMap;
-    static CDebugMenuToolInput::ToolMap m_missionsMap;
+    static void LoadMouseSprite();
 };
 
 bool findStringCaseInsensitive(const std::string& strHaystack, const std::string& strNeedle);
