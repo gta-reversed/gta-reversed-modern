@@ -36,8 +36,8 @@ void COcclusion::InjectHooks()
 // 0x71DCA0
 void COcclusion::Init()
 {
-    NumOccludersOnMap         = 0;
-    NumInteriorOcculdersOnMap = 0;
+    NumOccludersOnMap         =  0;
+    NumInteriorOcculdersOnMap =  0;
     FarAwayList               = -1;
     NearbyList                = -1;
     ListWalkThroughFA         = -1;
@@ -45,7 +45,7 @@ void COcclusion::Init()
 }
 
 // 0x71DCD0
-void COcclusion::AddOne(float centerX, float centerY, float centerZ, float width, float length, float height, float rotZ, float rotY, float rotX, uint32 flags, bool isInterior)
+void COcclusion::AddOne(float centerX, float centerY, float centerZ, float width, float length, float height, float rotX, float rotY, float rotZ, uint32 flags, bool isInterior)
 {
     int32 numMissingDimensions = 0;
 
@@ -64,9 +64,9 @@ void COcclusion::AddOne(float centerX, float centerY, float centerZ, float width
         return;
 
     // Get the angles in [0 : 360] space and convert to radians
-    auto fRotZ = DegreesToRadians(CGeneral::LimitAngle(rotZ) + 180.0F);
-    auto fRotY = DegreesToRadians(CGeneral::LimitAngle(rotY) + 180.0F);
     auto fRotX = DegreesToRadians(CGeneral::LimitAngle(rotX) + 180.0F);
+    auto fRotY = DegreesToRadians(CGeneral::LimitAngle(rotY) + 180.0F);
+    auto fRotZ = DegreesToRadians(CGeneral::LimitAngle(rotZ) + 180.0F);
     const auto fTwoPiToChar = 256.0F / TWO_PI;
 
     const auto UpdateOccluder = [&](COccluder& occluder) {
@@ -76,9 +76,9 @@ void COcclusion::AddOne(float centerX, float centerY, float centerZ, float width
         occluder.m_wWidth  = static_cast<int16>((float)iWidth * 4.0F);
         occluder.m_wLength = static_cast<int16>((float)iLength * 4.0F);
         occluder.m_wHeight = static_cast<int16>((float)iHeight * 4.0F);
+        occluder.m_cRotX   = static_cast<uint8>(fRotX * fTwoPiToChar);
         occluder.m_cRotZ   = static_cast<uint8>(fRotZ * fTwoPiToChar);
         occluder.m_cRotY   = static_cast<uint8>(fRotY * fTwoPiToChar);
-        occluder.m_cRotX   = static_cast<uint8>(fRotX * fTwoPiToChar);
     };
 
     if (isInterior) {
@@ -118,8 +118,8 @@ bool COcclusion::OccluderHidesBehind(CActiveOccluder* first, CActiveOccluder* se
                 secondLine.m_vecDirection.y,
                 firstLine.m_vecOrigin.x,
                 firstLine.m_vecOrigin.y,
-                0.0)) {
-
+                0.0f)
+            ) {
                 return false;
             }
 
@@ -130,8 +130,8 @@ bool COcclusion::OccluderHidesBehind(CActiveOccluder* first, CActiveOccluder* se
                 secondLine.m_vecDirection.y,
                 firstLine.m_vecOrigin.x + (firstLine.m_fLength * firstLine.m_vecDirection.x),
                 firstLine.m_vecOrigin.y + (firstLine.m_fLength * firstLine.m_vecDirection.y),
-                0.0)) {
-
+                0.0f)
+            ) {
                 return false;
             }
         }
