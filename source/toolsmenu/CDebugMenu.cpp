@@ -10,6 +10,8 @@
 #include <windows.h>
 #include <sstream>
 
+#include "toolsmenu\DebugModules\Collision\Collision.h"
+
 CDebugMenuToolInput CDebugMenu::m_vehicleToolInput;
 CDebugMenuToolInput CDebugMenu::m_pedToolInput;
 CDebugMenuToolInput CDebugMenu::m_missionToolInput;
@@ -681,24 +683,27 @@ void CDebugMenu::ProcessMissionTool() {
 }
 
 void CDebugMenu::PostFxTool() {
-    ImGui::Checkbox("In Cutscene", &CPostEffects::m_bInCutscene);
-    ImGui::Checkbox("Skip Post Process", &CPostEffects::m_bDisableAllPostEffect);
+    ImGui::Checkbox("In Cutscene",            &CPostEffects::m_bInCutscene);
+    ImGui::Checkbox("Skip Post Process",      &CPostEffects::m_bDisableAllPostEffect);
     ImGui::Checkbox("Save Photo From Script", &CPostEffects::m_bSavePhotoFromScript);
-    ImGui::Checkbox("Radiosity", &CPostEffects::m_bRadiosity);
-    ImGui::Checkbox("Night Vision", &CPostEffects::m_bNightVision);
-    ImGui::Checkbox("Infrared Vision", &CPostEffects::m_bInfraredVision);
-    ImGui::Checkbox("Grain", &CPostEffects::m_bGrainEnable);
-    ImGui::Checkbox("Heat Haze FX", &CPostEffects::m_bHeatHazeFX);
-    ImGui::Checkbox("Darkness Filter", &CPostEffects::m_bDarknessFilter);
-    ImGui::Checkbox("CCTV", &CPostEffects::m_bCCTV);
-    ImGui::Checkbox("SpeedFX Test Mode", &CPostEffects::m_bSpeedFXTestMode);
-    ImGui::Checkbox("Fog", &CPostEffects::m_bFog);
-    ImGui::Checkbox("Water Depth Darkness", &CPostEffects::m_bWaterDepthDarkness);
+    ImGui::Checkbox("Radiosity",              &CPostEffects::m_bRadiosity);
+    ImGui::Checkbox("Night Vision",           &CPostEffects::m_bNightVision);
+    ImGui::Checkbox("Infrared Vision",        &CPostEffects::m_bInfraredVision);
+    ImGui::Checkbox("Grain",                  &CPostEffects::m_bGrainEnable);
+    ImGui::Checkbox("Heat Haze FX",           &CPostEffects::m_bHeatHazeFX);
+    ImGui::Checkbox("Darkness Filter",        &CPostEffects::m_bDarknessFilter);
+    ImGui::Checkbox("CCTV",                   &CPostEffects::m_bCCTV);
+    ImGui::Checkbox("SpeedFX Test Mode",      &CPostEffects::m_bSpeedFXTestMode);
+    ImGui::Checkbox("Fog",                    &CPostEffects::m_bFog);
+    ImGui::Checkbox("Water Depth Darkness",   &CPostEffects::m_bWaterDepthDarkness);
 }
 
 void CDebugMenu::ProcessRenderTool() {
     if (ImGui::CollapsingHeader("Post Processing")) {
         PostFxTool();
+    }
+    if (ImGui::CollapsingHeader("Collision")) {
+        CollisionDebugModule::ProcessImgui();
     }
 }
 

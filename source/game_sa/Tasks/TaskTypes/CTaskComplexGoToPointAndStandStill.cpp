@@ -103,7 +103,7 @@ CTask* CTaskComplexGoToPointAndStandStill::Clone_Reversed()
 
 CTask* CTaskComplexGoToPointAndStandStill::CreateNextSubTask_Reversed(CPed* ped)
 {
-    switch (m_pSubTask->GetId())
+    switch (m_pSubTask->GetTaskType())
     {
     case TASK_SIMPLE_STAND_STILL:
         return CreateFirstSubTask(TASK_FINISHED, ped);
@@ -133,7 +133,7 @@ CTask* CTaskComplexGoToPointAndStandStill::ControlSubTask_Reversed(CPed* ped)
         if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr))
             return CreateFirstSubTask(ped);
     }
-    else if (m_pSubTask->GetId() == TASK_SIMPLE_GO_TO_POINT) {
+    else if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT) {
         auto pGotoPointTask = static_cast<CTaskSimpleGoToPoint*>(m_pSubTask);
         if (m_moveState == PEDMOVE_RUN)
             SelectMoveState(pGotoPointTask, ped, m_fMoveStateRadius, 100000000.0f);
@@ -205,7 +205,7 @@ CTask* CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(int32 taskId, CPed
     case TASK_SIMPLE_PAUSE:
         return new CTaskSimplePause(1);
     case TASK_SIMPLE_STAND_STILL: {
-        if (m_bGoToPoint && m_pSubTask && m_pSubTask->GetId() == TASK_SIMPLE_GO_TO_POINT) {
+        if (m_bGoToPoint && m_pSubTask && m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT) {
             CVector vecDistance = m_vecTargetPoint - ped->GetPosition(); 
             float fDotProduct = DotProduct(&vecDistance, &ped->GetForward());
             float fBlendDelta = 8.0f;

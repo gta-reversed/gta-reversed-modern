@@ -33,7 +33,7 @@ private:
     CTaskComplexGoToPointAndStandStill* Constructor(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint);
 public:
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL; };
+    eTaskType GetTaskType() override { return TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL; };
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

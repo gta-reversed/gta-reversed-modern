@@ -22,7 +22,7 @@ public:
     ~CTaskComplexCarDrive();
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_COMPLEX_CAR_DRIVE; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_CAR_DRIVE; }
 
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

@@ -40,7 +40,7 @@ private:
     CTaskComplexKillPedOnFoot* Constructor(CPed* target, int32 time, uint32 pedFlags, int32 delay, int32 chance, int8 a7);
 public:
     CTask* Clone() override { return new CTaskComplexKillPedOnFoot(m_target, m_time, m_pedFlags, m_actionDelay, m_actionChance, field_20); }
-    eTaskType GetId() override { return TASK_COMPLEX_KILL_PED_ON_FOOT; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_KILL_PED_ON_FOOT; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

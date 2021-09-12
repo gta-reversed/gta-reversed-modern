@@ -73,7 +73,8 @@ bool CEventAttractor::AffectsPed_Reversed(CPed* ped)
             CTask* activeTask = ped->GetTaskManager().GetActiveTask();
             if (!activeTask
                 || m_bAvoidLookingAtAttractor
-                || activeTask->GetId() != TASK_COMPLEX_USE_EFFECT
+                ||
+                activeTask->GetTaskType() != TASK_COMPLEX_USE_EFFECT
                 && (pedAttractor.m_nAttractorType != PED_ATTRACTOR_SHELTER || CWeather::IsRainy()))
             {
                 if (m_bAvoidLookingAtAttractor)

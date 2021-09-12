@@ -13,7 +13,7 @@
 #include "CPedIntelligence.h"
 #include "CPlayerPedData.h"
 #include "AnimBlendFrameData.h"
-#include "CPedAcquaintance.h"
+#include "CAcquaintance.h"
 #include "CPedIK.h"
 #include "CWeapon.h"
 #include "CVector2D.h"
@@ -61,25 +61,26 @@ enum ePedType : uint32 {
     PED_TYPE_MISSION8
 };
 
-enum ePedNode {
-    PED_NODE_UPPER_TORSO = 1,
-    PED_NODE_HEAD,
-    PED_NODE_LEFT_ARM,
-    PED_NODE_RIGHT_ARM,
-    PED_NODE_LEFT_HAND,
-    PED_NODE_RIGHT_HAND,
-    PED_NODE_LEFT_LEG,
-    PED_NODE_RIGHT_LEG,
-    PED_NODE_LEFT_FOOT,
-    PED_NODE_RIGHT_FOOT,
-    PED_NODE_RIGHT_LOWER_LEG,
-    PED_NODE_LEFT_LOWER_LEG,
-    PED_NODE_LEFT_LOWER_ARM,
-    PED_NODE_RIGHT_LOWER_ARM,
-    PED_NODE_LEFT_CLAVICLE,
-    PED_NODE_RIGHT_CLAVICLE,
-    PED_NODE_NECK,
-    PED_NODE_JAW,
+enum ePedNode : int32 {
+    PED_NODE_UPPER_TORSO     = 1,
+    PED_NODE_HEAD            = 2,
+    PED_NODE_LEFT_ARM        = 3,
+    PED_NODE_RIGHT_ARM       = 4,
+    PED_NODE_LEFT_HAND       = 5,
+    PED_NODE_RIGHT_HAND      = 6,
+    PED_NODE_LEFT_LEG        = 7,
+    PED_NODE_RIGHT_LEG       = 8,
+    PED_NODE_LEFT_FOOT       = 9,
+    PED_NODE_RIGHT_FOOT      = 10,
+    PED_NODE_RIGHT_LOWER_LEG = 11,
+    PED_NODE_LEFT_LOWER_LEG  = 12,
+    PED_NODE_LEFT_LOWER_ARM  = 13,
+    PED_NODE_RIGHT_LOWER_ARM = 14,
+    PED_NODE_LEFT_CLAVICLE   = 15,
+    PED_NODE_RIGHT_CLAVICLE  = 16,
+    PED_NODE_NECK            = 17,
+    PED_NODE_JAW             = 18,
+
     TOTAL_PED_NODES
 };
 
@@ -291,7 +292,7 @@ public:
     AnimBlendFrameData* m_apBones[TOTAL_PED_NODES]; // for Index, see ePedNode
     AssocGroupId        m_nAnimGroup;
     CVector2D           m_vecAnimMovingShiftLocal;
-    CPedAcquaintance    m_acquaintance;
+    CAcquaintance m_acquaintance;
     RpClump*            m_pWeaponObject;
     RwFrame*            m_pGunflashObject;
     RwObject*           m_pGogglesObject;

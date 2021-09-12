@@ -36,7 +36,7 @@ public:
 private:
     CTaskComplexPartner* Constructor(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, bool makePedAlwaysFacePartner, int8 updateDirectionCount, CVector point);
 public:
-    eTaskType GetId() override { return TASK_COMPLEX_PARTNER; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_PARTNER; }
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

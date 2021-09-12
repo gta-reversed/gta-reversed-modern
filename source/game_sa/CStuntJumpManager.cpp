@@ -11,7 +11,7 @@ bool CStuntJumpManager::m_bActive;
 // 0xA9A891
 bool CStuntJumpManager::m_bHitReward;
 // 0xA9A894
-int32 CStuntJumpManager::m_iTimer;
+uint32 CStuntJumpManager::m_iTimer;
 // 0xA9A898 int32
 eJumpState CStuntJumpManager::m_jumpState;
 // 0xA9A89C
@@ -58,7 +58,7 @@ void CStuntJumpManager::ShutdownForRestart() {
 // 0x5D5570
 void CStuntJumpManager::Save() {
     CGenericGameStorage::SaveDataToWorkBuffer(&m_iNumJumps, sizeof(m_iNumJumps));
-    for (uint32 i = 0; i < STUNT_JUMP_COUNT; i++) {
+    for (auto i = 0; i < STUNT_JUMP_COUNT; i++) {
         CStuntJump* jump = mp_poolStuntJumps->GetAt(i);
         if (jump) {
             CGenericGameStorage::SaveDataToWorkBuffer(jump, sizeof(CStuntJump));
@@ -116,7 +116,7 @@ void CStuntJumpManager::Update() {
             playerVehicle->m_nNumEntitiesCollided != 0 &&
             playerVehicle->m_vecMoveSpeed.Magnitude() * 50.0f >= 20.0f
         ) {
-            for (uint32 jumpIndex = 0; jumpIndex < STUNT_JUMP_COUNT; jumpIndex++) {
+            for (auto jumpIndex = 0; jumpIndex < STUNT_JUMP_COUNT; jumpIndex++) {
                 CStuntJump* jump = mp_poolStuntJumps->GetAt(jumpIndex);
                 if (!jump)
                     continue;
@@ -170,7 +170,7 @@ void CStuntJumpManager::Update() {
         if (mp_Active->end.IsPointWithin(point))
             m_bHitReward = true;
 
-        int32 time;
+        uint32 time;
         if (bFailed) {
             m_jumpState = eJumpState::END_POINT_INTERSECTED;
             time = 0;
@@ -178,7 +178,7 @@ void CStuntJumpManager::Update() {
             time = m_iTimer;
         }
 
-        m_iTimer = int32(CTimer::ms_fTimeStep * 0.02f * 1000.0f) + time;
+        m_iTimer = CTimer::GetTimeStepInMS() + time;
         if (m_iTimer > 1000 && time <= 1000) {
             auto vehicle = FindPlayerVehicle(-1, false);
             if (vehicle) {
@@ -191,7 +191,7 @@ void CStuntJumpManager::Update() {
         break;
     }
     case eJumpState::END_POINT_INTERSECTED: {
-        m_iTimer += int32(CTimer::ms_fTimeStep * 0.02f * 1000.0f);
+        m_iTimer += CTimer::GetTimeStepInMS();
         if (m_iTimer < 300)
             return;
 
@@ -246,7 +246,7 @@ void CStuntJumpManager::Render() {
 
 // NOTSA
 void ResetAllJumps() {
-    for (uint32 jumpIndex = 0; jumpIndex < STUNT_JUMP_COUNT; jumpIndex++) {
+    for (auto jumpIndex = 0; jumpIndex < STUNT_JUMP_COUNT; jumpIndex++) {
         CStuntJump* jump = CStuntJumpManager::mp_poolStuntJumps->GetAt(jumpIndex);
         if (!jump)
             continue;

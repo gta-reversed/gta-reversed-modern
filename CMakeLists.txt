@@ -88,10 +88,10 @@ target_include_directories(gta_reversed PRIVATE
 )
 target_link_libraries(gta_reversed ogg ${OGG_LIBRARY} imgui vorbisfile)
 target_compile_definitions(gta_reversed PRIVATE
-        _CRT_SECURE_NO_WARNINGS
-        NOMINMAX
-        USE_GTASA_ALLOCATOR
-        EXTRA_DEBUG_FEATURES
+    _CRT_SECURE_NO_WARNINGS
+    NOMINMAX
+    USE_GTASA_ALLOCATOR
+    EXTRA_DEBUG_FEATURES
 )
 
 foreach(_header IN ITEMS ${_headerfiles_list})

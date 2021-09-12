@@ -69,7 +69,7 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped)
             if (!ped->m_pAttachedTo && m_vehicle && m_vehicle->IsVehicleTypeValid() && !m_vehicle->IsFakeAircraft()) {
                 bool isGoToPointTask = false;
                 CVector targetPos;
-                if (goToTask->GetId() == TASK_SIMPLE_GO_TO_POINT) {
+                if (goToTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT) {
                     targetPos = goToTask->m_vecTargetPoint;
                     isGoToPointTask = true;
                 }
@@ -134,8 +134,8 @@ bool CEventPotentialWalkIntoObject::AffectsPed_Reversed(CPed* ped)
             if (length.x >= 0.01f && length.y >= 0.01f && length.z >= 0.01f) {
                 CTask* activeTask = ped->GetTaskManager().GetActiveTask();
                 if (activeTask) {
-                    assert(activeTask->GetId() != TASK_COMPLEX_AVOID_ENTITY); // unused task
-                    if (activeTask->GetId() == TASK_COMPLEX_WALK_ROUND_OBJECT) {
+                    assert(activeTask->GetTaskType() != TASK_COMPLEX_AVOID_ENTITY); // unused task
+                    if (activeTask->GetTaskType() == TASK_COMPLEX_WALK_ROUND_OBJECT) {
                         auto taskWalkRoundObject = reinterpret_cast<CTaskComplexWalkRoundObject*>(activeTask);
                         if (taskWalkRoundObject->m_object == m_object)
                             return false;
@@ -243,7 +243,7 @@ bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped)
             if (!thisPedPartnerTask)
                 thisPedPartnerTask = m_ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
             if (thisPedPartnerTask) {
-                if (partnerTask->GetId() == thisPedPartnerTask->GetId())
+                if (partnerTask->GetTaskType() == thisPedPartnerTask->GetTaskType())
                     return false;
             }
         }

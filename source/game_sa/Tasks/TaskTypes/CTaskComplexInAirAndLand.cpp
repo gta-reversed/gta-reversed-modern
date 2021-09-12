@@ -48,7 +48,7 @@ CTask* CTaskComplexInAirAndLand::CreateFirstSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped)
 {
-    switch (m_pSubTask->GetId())
+    switch (m_pSubTask->GetTaskType())
     {
     case TASK_SIMPLE_GET_UP:
     case TASK_SIMPLE_LAND:
@@ -135,7 +135,7 @@ CTask* CTaskComplexInAirAndLand::ControlSubTask_Reversed(CPed* ped)
 {
     if (!m_bUsingFallGlide
         && m_pSubTask
-        && m_pSubTask->GetId() == TASK_SIMPLE_IN_AIR)
+        && m_pSubTask->GetTaskType() == TASK_SIMPLE_IN_AIR)
     {
         auto pSubTask = reinterpret_cast<CTaskSimpleInAir*>(m_pSubTask);
 

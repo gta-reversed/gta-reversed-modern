@@ -92,12 +92,12 @@ bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped)
                     if (!victimPartnerTask)
                         victimPartnerTask = m_victim->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
                     if (victimPartnerTask) {
-                        if (pedPartnerTask->GetId() == victimPartnerTask->GetId())
+                        if (pedPartnerTask->GetTaskType() == victimPartnerTask->GetTaskType())
                             return false;
                     }
                 }
                 CTask* pedActiveTask = ped->GetTaskManager().GetActiveTask();
-                if (pedActiveTask && pedActiveTask->GetId() == TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING
+                if (pedActiveTask && pedActiveTask->GetTaskType() == TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING
                     && reinterpret_cast<CTaskComplexAvoidOtherPedWhileWandering*>(pedActiveTask)->m_ped == m_victim)
                 {
                     return false;

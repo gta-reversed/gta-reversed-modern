@@ -360,7 +360,7 @@ void CAutomobile::ProcessControl()
             if (m_nStatus == STATUS_PLAYER && !m_pHandlingData->m_bIsBus)
             {
                 if (m_dwBusDoorTimerEnd) {
-                    uint32 timeStep = static_cast<uint32>(CTimer::ms_fTimeStep * 0.02f * 1000.0f);
+                    uint32 timeStep = CTimer::GetTimeStepInMS();
                     if (m_dwBusDoorTimerEnd <= timeStep)
                         m_dwBusDoorTimerEnd = 0;
                     else

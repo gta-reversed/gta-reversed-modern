@@ -35,9 +35,15 @@
 #include "CCustomBuildingPipeline.h"
 #include "CCustomBuildingDNPipeline.h"
 #include "CPlantMgr.h"
+#include "CPedType.h"
 #include "COcclusion.h"
 #include "COccluder.h"
 #include "CActiveOccluder.h"
+
+#include "CTaskSimpleFight.h"
+#include "CTaskComplexUseGoggles.h"
+#include "CTaskSimpleUseGun.h"
+#include "CTaskSimpleThrowProjectile.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
@@ -373,6 +379,10 @@ void InjectHooksMain()
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
     CCustomBuildingDNPipeline::InjectHooks();
+    CTaskSimpleFight::InjectHooks();
+    CTaskComplexUseGoggles::InjectHooks();
+    CTaskSimpleUseGun::InjectHooks();
+    CTaskSimpleThrowProjectile::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();

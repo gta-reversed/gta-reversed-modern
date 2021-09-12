@@ -18,7 +18,7 @@ private:
     CTaskComplexArrestPed* Constructor(CPed* ped);
 public:
     CTask* Clone() override { return new CTaskComplexArrestPed(m_pedToArrest); }
-    eTaskType GetId() override { return TASK_COMPLEX_ARREST_PED; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_ARREST_PED; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

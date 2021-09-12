@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "CEventGunAimedAt.h"
+
+#include "CPedType.h"
+
 void CEventGunAimedAt::InjectHooks()
 {
     ReversibleHooks::Install("CEventGunAimedAt", "Constructor", 0x4B0700, &CEventGunAimedAt::Constructor);
@@ -71,7 +75,7 @@ bool CEventGunAimedAt::AffectsPed_Reversed(CPed* ped)
     if (ped->IsPlayer())
         return false;
     CTask* activeTask = ped->GetTaskManager().GetActiveTask();
-    if (activeTask && activeTask->GetId() == TASK_COMPLEX_REACT_TO_GUN_AIMED_AT)
+    if (activeTask && activeTask->GetTaskType() == TASK_COMPLEX_REACT_TO_GUN_AIMED_AT)
         return false;
     if (m_ped && ped->GetIntelligence()->IsInSeeingRange(m_ped->GetPosition()) && ped->IsAlive()) {
         if (CPedGroups::AreInSameGroup(ped, m_ped))

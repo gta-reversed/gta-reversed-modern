@@ -107,7 +107,7 @@ bool CEventGroup::HasScriptCommandOfTaskType(eTaskType taskId)
             CEvent* event = m_events[i];
             if (event && event->GetEventType() == EVENT_SCRIPT_COMMAND) {
                 auto theEvent = static_cast<CEventScriptCommand*>(event);
-                if (theEvent->m_task && theEvent->m_task->GetId() == taskId) {
+                if (theEvent->m_task && theEvent->m_task->GetTaskType() == taskId) {
                     return true;
                 }
             }
@@ -262,7 +262,7 @@ void CEventGroup::Flush(bool bAvoidFlushingTaskComplexBeInGroup)
             CEvent* event = m_events[i];
             if (event->GetEventType() == EVENT_SCRIPT_COMMAND) {
                 auto theEvent = static_cast<CEventScriptCommand*>(event);
-                if (theEvent->m_task && theEvent->m_task->GetId() == TASK_COMPLEX_BE_IN_GROUP) {
+                if (theEvent->m_task && theEvent->m_task->GetTaskType() == TASK_COMPLEX_BE_IN_GROUP) {
                     eventScriptcommand = m_events[i];
                     m_events[i] = nullptr;
                     break;

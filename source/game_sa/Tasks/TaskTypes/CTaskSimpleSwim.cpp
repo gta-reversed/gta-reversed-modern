@@ -6,7 +6,7 @@ float& CTaskSimpleSwim::SWIM_STOP_TIME = *reinterpret_cast<float*>(0x8D2FC0);
 void CTaskSimpleSwim::InjectHooks() {
     ReversibleHooks::Install("CTaskSimpleSwim", "CTaskSimpleSwim", 0x688930, &CTaskSimpleSwim::Constructor);
     ReversibleHooks::Install("CTaskSimpleSwim", "Clone", 0x68B050, &CTaskSimpleSwim::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleSwim", "GetId", 0x6889F0, &CTaskSimpleSwim::GetId_Reversed);
+    ReversibleHooks::Install("CTaskSimpleSwim", "GetTaskType", 0x6889F0, &CTaskSimpleSwim::GetId_Reversed);
     ReversibleHooks::Install("CTaskSimpleSwim", "ProcessPed", 0x68B1C0, &CTaskSimpleSwim::ProcessPed_Reversed);
     ReversibleHooks::Install("CTaskSimpleSwim", "MakeAbortable", 0x68B100, &CTaskSimpleSwim::MakeAbortable_Reversed);
     ReversibleHooks::Install("CTaskSimpleSwim", "ApplyRollAndPitch", 0x68A8E0, &CTaskSimpleSwim::ApplyRollAndPitch);
@@ -73,7 +73,7 @@ CTask* CTaskSimpleSwim::Clone() {
 #endif
 }
 
-eTaskType CTaskSimpleSwim::GetId() {
+eTaskType CTaskSimpleSwim::GetTaskType() {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn <eTaskType, 0x6889F0, CTask*>(this);
 #else

@@ -17,7 +17,7 @@ private:
     CTaskSimplePutDownEntity* Constructor();
 public:
     CTask* Clone() override;
-    eTaskType GetId() override;
+    eTaskType GetTaskType() override;
 
     CTask* Clone_Reversed();
     eTaskType GetId_Reversed() { return TASK_SIMPLE_PUTDOWN_ENTITY; };

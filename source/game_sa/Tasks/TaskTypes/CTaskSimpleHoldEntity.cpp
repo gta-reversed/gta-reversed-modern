@@ -6,7 +6,7 @@ void CTaskSimpleHoldEntity::InjectHooks() {
     Install("CTaskSimpleHoldEntity", "Constructor_2", 0x691470, (CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, char, uint8, char*, char*, int32)) & CTaskSimpleHoldEntity::Constructor);
     Install("CTaskSimpleHoldEntity", "Constructor_3", 0x691550, (CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, char, uint8, CAnimBlock*, CAnimBlendHierarchy*, int32)) & CTaskSimpleHoldEntity::Constructor);
     Install("CTaskSimpleHoldEntity", "Clone", 0x6929B0, &CTaskSimpleHoldEntity::Clone_Reversed);
-    Install("CTaskSimpleHoldEntity", "GetId", 0x691460, &CTaskSimpleHoldEntity::GetId_Reversed);
+    Install("CTaskSimpleHoldEntity", "GetTaskType", 0x691460, &CTaskSimpleHoldEntity::GetId_Reversed);
     Install("CTaskSimpleHoldEntity", "MakeAbortable", 0x693BD0, &CTaskSimpleHoldEntity::MakeAbortable_Reversed);
     Install("CTaskSimpleHoldEntity", "ProcessPed", 0x693C40, &CTaskSimpleHoldEntity::ProcessPed_Reversed);
     Install("CTaskSimpleHoldEntity", "SetPedPosition", 0x6940A0, &CTaskSimpleHoldEntity::SetPedPosition_Reversed);
@@ -150,7 +150,7 @@ CTask* CTaskSimpleHoldEntity::Clone() {
 #endif
 }
 
-eTaskType CTaskSimpleHoldEntity::GetId() {
+eTaskType CTaskSimpleHoldEntity::GetTaskType() {
 #ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethodAndReturn<eTaskType, 0x691460, CTaskSimpleHoldEntity*>(this);
 #else
@@ -213,9 +213,9 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(class CPed* ped) {
     CTaskManager* pTaskManager = &ped->m_pIntelligence->m_TaskMgr;
     if (m_bEntityRequiresProcessing) {
         m_bEntityRequiresProcessing = false;
-        if (GetId() == TASK_SIMPLE_PUTDOWN_ENTITY && !m_pEntityToHold && !m_pAnimBlendHierarchy && !m_nAnimGroupId) {
+        if (GetTaskType() == TASK_SIMPLE_PUTDOWN_ENTITY && !m_pEntityToHold && !m_pAnimBlendHierarchy && !m_nAnimGroupId) {
             auto pHoldEntityTask = (CTaskSimpleHoldEntity*)pTaskManager->GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
-            if (pHoldEntityTask && pHoldEntityTask->GetId() == TASK_SIMPLE_HOLD_ENTITY &&
+            if (pHoldEntityTask && pHoldEntityTask->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY &&
                 pHoldEntityTask->m_pEntityToHold && pHoldEntityTask->m_nAnimGroupId)
             {
                 CEntity* pEntitToHold = pHoldEntityTask->m_pEntityToHold;
@@ -268,11 +268,11 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(class CPed* ped) {
 
     if (m_pEntityToHold) {
         CEntity* pEntityToHold = m_pEntityToHold;
-        eTaskType taskId = GetId();
+        eTaskType taskId = GetTaskType();
         if (taskId != TASK_SIMPLE_HOLD_ENTITY) {
             if (taskId != TASK_SIMPLE_PICKUP_ENTITY) {
                 auto pTaskHoldEntity = static_cast<CTaskSimpleHoldEntity*>(pTaskManager->GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM));
-                if (pTaskHoldEntity && pTaskHoldEntity->GetId() == TASK_SIMPLE_HOLD_ENTITY)
+                if (pTaskHoldEntity && pTaskHoldEntity->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY)
                     pTaskHoldEntity->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
             }
             else
@@ -308,7 +308,7 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(class CPed* ped) {
 
 bool CTaskSimpleHoldEntity::SetPedPosition_Reversed(class CPed* ped) {
     bool bUpdateEntityToHoldPosition = false;
-    if (GetId() == TASK_SIMPLE_PICKUP_ENTITY)
+    if (GetTaskType() == TASK_SIMPLE_PICKUP_ENTITY)
     {
         auto pPickupEntityTask = static_cast<CTaskSimplePickUpEntity*>(this);
         if (!m_pAnimBlendAssociation || pPickupEntityTask->m_fMovePedUntilAnimProgress > m_pAnimBlendAssociation->m_fCurrentTime)
@@ -317,7 +317,7 @@ bool CTaskSimpleHoldEntity::SetPedPosition_Reversed(class CPed* ped) {
     }
     else {
         auto pPutDownEntityTask = static_cast<CTaskSimplePutDownEntity*>(this);
-        if (GetId() != TASK_SIMPLE_PUTDOWN_ENTITY || m_bEntityRequiresProcessing
+        if (GetTaskType() != TASK_SIMPLE_PUTDOWN_ENTITY || m_bEntityRequiresProcessing
             || m_pAnimBlendAssociation && pPutDownEntityTask->m_fPutDownHeightZ >= m_pAnimBlendAssociation->m_fCurrentTime)
         {
             bUpdateEntityToHoldPosition = true;
@@ -411,7 +411,7 @@ void CTaskSimpleHoldEntity::FinishAnimHoldEntityCB(CAnimBlendAssociation* pAnimA
     }
     else
     {
-        if (pTaskHoldEntity->GetId() == TASK_SIMPLE_PICKUP_ENTITY && pAnimAssoc->m_fBlendAmount > 0.0f) {
+        if (pTaskHoldEntity->GetTaskType() == TASK_SIMPLE_PICKUP_ENTITY && pAnimAssoc->m_fBlendAmount > 0.0f) {
             CEntity* pEntityToHold = pTaskHoldEntity->m_pEntityToHold;
             if (pEntityToHold) {
                 pEntityToHold->CleanUpOldReference(&pTaskHoldEntity->m_pEntityToHold);
@@ -444,10 +444,10 @@ void CTaskSimpleHoldEntity::StartAnim(CPed* pPed) {
         }
         m_pAnimBlendAssociation = CAnimManager::BlendAnimation(pPed->m_pRwClump, m_nAnimGroupId, m_nAnimId, 4.0f);
         m_pAnimBlendAssociation->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
-        if (GetId() == TASK_SIMPLE_HOLD_ENTITY)
+        if (GetTaskType() == TASK_SIMPLE_HOLD_ENTITY)
             m_pAnimBlendAssociation->m_nFlags |= ANIM_FLAG_400;
     }
-    if (GetId() == TASK_SIMPLE_PICKUP_ENTITY)
+    if (GetTaskType() == TASK_SIMPLE_PICKUP_ENTITY)
         m_pAnimBlendAssociation->SetFinishCallback(CTaskSimpleHoldEntity::FinishAnimHoldEntityCB, this);
     else
         m_pAnimBlendAssociation->SetDeleteCallback(CTaskSimpleHoldEntity::FinishAnimHoldEntityCB, this);
@@ -551,7 +551,7 @@ void CTaskSimpleHoldEntity::ChoosePutDownHeight(CPed* pPed) {
                 m_nAnimGroupId = ANIM_GROUP_CARRY;
         }
     }
-    if (GetId() == TASK_SIMPLE_PUTDOWN_ENTITY) {
+    if (GetTaskType() == TASK_SIMPLE_PUTDOWN_ENTITY) {
         auto pTaskPutDownEntity = static_cast<CTaskSimplePutDownEntity*>(this);
         if (m_nAnimGroupId == ANIM_GROUP_CARRY105)
             pTaskPutDownEntity->m_fPutDownHeightZ = 0.433333f;

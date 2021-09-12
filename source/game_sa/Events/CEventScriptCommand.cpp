@@ -88,7 +88,7 @@ int32 CEventScriptCommand::GetEventPriority_Reversed() const
         return 75;
     if (!m_task)
         return 53;
-    const int32 taskId = m_task->GetId();
+    const int32 taskId = m_task->GetTaskType();
     if (taskId == TASK_SIMPLE_NAMED_ANIM) {
         CTaskSimpleRunAnim* pTaskRunAnim = static_cast<CTaskSimpleRunAnim*>(m_task);
         if (pTaskRunAnim->m_nFlags & ANIM_FLAG_LOOPED)

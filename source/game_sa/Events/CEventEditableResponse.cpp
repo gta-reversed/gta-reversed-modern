@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "CEventEditableResponse.h"
+
+#include "CPedType.h"
+
 void CEventEditableResponse::InjectHooks() {
     ReversibleHooks::Install("CEventEditableResponse", "Constructor", 0x4AC450, &CEventEditableResponse::Constructor);
     ReversibleHooks::Install("CEventEditableResponse", "Clone_Reversed", 0x420ED0, &CEventEditableResponse::Clone_Reversed);

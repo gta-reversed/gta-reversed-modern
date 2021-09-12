@@ -30,11 +30,11 @@ public:
     virtual class CTask* Clone() = 0;
     virtual class CTask* GetSubTask() = 0;
     virtual bool IsSimple() = 0;
-    virtual eTaskType GetId() = 0;
+    virtual eTaskType GetTaskType() = 0;
     virtual void StopTimer(const CEvent* event);
     virtual bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) = 0;
 
     static bool IsGoToTask(CTask* task);
 };
 
-VALIDATE_SIZE(CTask, 8);
+VALIDATE_SIZE(CTask, 0x8);

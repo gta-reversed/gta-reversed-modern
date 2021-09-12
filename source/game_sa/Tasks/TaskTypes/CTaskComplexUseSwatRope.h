@@ -20,7 +20,7 @@ public:
     static void InjectHooks();
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_COMPLEX_USE_SWAT_ROPE; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_USE_SWAT_ROPE; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

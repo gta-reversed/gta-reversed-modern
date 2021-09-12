@@ -29,7 +29,7 @@ private:
     CTaskSimpleGoToPoint* Constructor(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6);
 public:
     CTask* Clone();
-    eTaskType GetId() override { return TASK_SIMPLE_GO_TO_POINT; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_GO_TO_POINT; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 private:

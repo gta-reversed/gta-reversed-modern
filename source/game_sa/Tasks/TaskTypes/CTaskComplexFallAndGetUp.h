@@ -15,7 +15,7 @@ public:
 
 
     CTask* Clone() override { return new CTaskComplexFallAndGetUp(m_nFallAnimId, m_nFallAnimGroup, m_nFallDownTime); }
-    eTaskType GetId() override { return TASK_COMPLEX_FALL_AND_GET_UP; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_FALL_AND_GET_UP; }
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

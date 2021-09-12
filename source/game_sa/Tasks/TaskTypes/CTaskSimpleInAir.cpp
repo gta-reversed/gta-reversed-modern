@@ -118,7 +118,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
     {
         if (!bUsingFallGlide)
         {
-            if (m_pParentTask && m_pParentTask->m_pParentTask && m_pParentTask->m_pParentTask->GetId() == TASK_COMPLEX_JUMP)
+            if (m_pParentTask && m_pParentTask->m_pParentTask && m_pParentTask->m_pParentTask->GetTaskType() == TASK_COMPLEX_JUMP)
             {
                 float moveSpeedForward = DotProduct(ped->GetForward(), ped->m_vecMoveSpeed);
                 float maxMoveSpeedForward = 0.1F * 0.5F;
@@ -192,7 +192,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
     {
         if (!(
             m_pParentTask
-            && m_pParentTask->GetId() == TASK_COMPLEX_IN_AIR_AND_LAND
+            && m_pParentTask->GetTaskType() == TASK_COMPLEX_IN_AIR_AND_LAND
             && reinterpret_cast<CTaskComplexInAirAndLand*>(m_pParentTask)->m_bInvalidClimb
             ))
         {
