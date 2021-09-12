@@ -13,7 +13,7 @@
 #include "CPedIntelligence.h"
 #include "CPlayerPedData.h"
 #include "AnimBlendFrameData.h"
-#include "CPedAcquaintance.h"
+#include "CAcquaintance.h"
 #include "CPedIK.h"
 #include "CWeapon.h"
 #include "CVector2D.h"
