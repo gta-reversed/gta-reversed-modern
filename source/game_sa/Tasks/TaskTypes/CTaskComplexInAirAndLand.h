@@ -1,21 +1,18 @@
 #pragma once
+
 #include "CTaskComplex.h"
 
-class CTaskComplexInAirAndLand : public CTaskComplex
-{
+class CTaskComplexInAirAndLand : public CTaskComplex {
 public:
     uint8 m_bUsingJumpGlide;
     uint8 m_bUsingFallGlide;
     uint8 m_bInvalidClimb;
     uint8 _pad;
 
-private:
-    CTaskComplexInAirAndLand* Constructor(bool bUsingJumpGlide, bool bUsingFallGlide);
+
 public:
     CTaskComplexInAirAndLand(bool bUsingJumpGlide, bool bUsingFallGlide);
     ~CTaskComplexInAirAndLand() override {}
-
-    static void InjectHooks();
 
     CTask* Clone() override { return new CTaskComplexInAirAndLand(m_bUsingJumpGlide, m_bUsingFallGlide); }
     eTaskType GetTaskType() override { return TASK_COMPLEX_IN_AIR_AND_LAND; }
@@ -26,6 +23,12 @@ public:
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskComplexInAirAndLand* Constructor(bool bUsingJumpGlide, bool bUsingFallGlide);
 };
 
 VALIDATE_SIZE(CTaskComplexInAirAndLand, 0x10);
