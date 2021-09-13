@@ -4,9 +4,9 @@
 
 class CTaskComplexFallAndGetUp : public CTaskComplex {
 public:
-    AnimationId m_nFallAnimId;
+    AnimationId  m_nFallAnimId;
     AssocGroupId m_nFallAnimGroup;
-    int32 m_nFallDownTime;
+    int32        m_nFallDownTime;
 
 public:
     CTaskComplexFallAndGetUp(AnimationId nFallAnimId, AssocGroupId nFallAnimGroup, int32 nFallDownTime);
@@ -28,10 +28,10 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-    
+
     CTaskComplexFallAndGetUp* Constructor(AnimationId nFallAnimId, AssocGroupId nFallAnimGroup, int32 nFallDownTime);
     CTaskComplexFallAndGetUp* Constructor2(int32 nDir, int32 nFallDownTime);
-    
+
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);
