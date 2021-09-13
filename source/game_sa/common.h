@@ -103,8 +103,6 @@ CPlayerPed * FindPlayerPed(int32 playerId = -1);
 CVehicle* FindPlayerVehicle(int32 playerId = -1, bool bIncludeRemote = false);
 // returns player wanted
 CWanted * FindPlayerWanted(int32 playerId = -1);
-// 2 players are playing
-bool InTwoPlayersMode();
 
 CVector Multiply3x3(CMatrix& m, CVector& v);
 CVector Multiply3x3(CVector& v, CMatrix& m);

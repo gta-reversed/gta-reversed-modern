@@ -61,7 +61,6 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "FindPlayerPed", 0x56E210, &FindPlayerPed);
     ReversibleHooks::Install("common", "FindPlayerVehicle", 0x56E0D0, &FindPlayerVehicle);
     ReversibleHooks::Install("common", "FindPlayerWanted", 0x56E230, &FindPlayerWanted);
-    ReversibleHooks::Install("common", "InTwoPlayersMode", 0x441390, &InTwoPlayersMode);
 
     ReversibleHooks::Install("common", "MakeUpperCase", 0x7186E0, &MakeUpperCase);
     ReversibleHooks::Install("common", "GetEventGlobalGroup", 0x4ABA50, &GetEventGlobalGroup);
@@ -223,11 +222,6 @@ CWanted* FindPlayerWanted(int32 playerId) {
     return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_PlayerData.m_pWanted;
 }
 
-// TODO: Rename CGameLogic::IsCoopGameGoingOn
-// 0x441390
-bool InTwoPlayersMode() {
-    return CWorld::Players[0].m_pPed && CWorld::Players[1].m_pPed;
-}
 
 // NOTE: This function doesn't add m.GetPosition() like
 //       MultiplyMatrixWithVector @ 0x59C890 does.
