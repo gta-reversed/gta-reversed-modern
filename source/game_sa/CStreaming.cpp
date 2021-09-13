@@ -2709,7 +2709,7 @@ void CStreaming::StreamCopModels(int32 level) {
     if (CGame::currArea)
         return;
     if (FindPlayerWanted(-1) && FindPlayerWanted(-1)->m_nWantedLevel < 3 && level && !m_bDisableCopBikes) {
-        const uint32 timeInMs = CTimer::m_snTimeInMilliseconds;
+        const uint32 timeInMs = CTimer::GetTimeInMS();
         if (ms_nTimePassedSinceLastCopBikeStreamedIn < timeInMs) {
             m_bCopBikeLoaded = !m_bCopBikeLoaded;
             ms_nTimePassedSinceLastCopBikeStreamedIn = timeInMs + CGeneral::GetRandomNumberInRange(30000, 50000);

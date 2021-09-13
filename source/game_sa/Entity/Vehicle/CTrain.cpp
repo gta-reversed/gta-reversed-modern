@@ -334,8 +334,8 @@ void CTrain::ProcessControl_Reversed()
                 bool bIsStreakModel = trainFlags.bIsStreakModel;
                 float fStopAtStationSpeed = static_cast<float>(m_autoPilot.m_nCruiseSpeed);
 
-                uint32 timeInMilliSeconds = CTimer::m_snTimeInMilliseconds;
-                uint32 timeAtStation = CTimer::m_snTimeInMilliseconds - m_nTimeWhenStoppedAtStation;
+                uint32 timeInMilliSeconds = CTimer::GetTimeInMS();
+                uint32 timeAtStation = CTimer::GetTimeInMS() - m_nTimeWhenStoppedAtStation;
                 if (timeAtStation >= (bIsStreakModel ? 20000u : 10000u))
                 {
                     if (timeAtStation >= (bIsStreakModel ? 28000u : 18000u))

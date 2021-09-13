@@ -188,7 +188,7 @@ void CDarkel::ResetOnPlayerDeath() {
     if (CDarkel::Status == DARKEL_STATUS_1 || CDarkel::Status == DARKEL_STATUS_4) {
         CDarkel::Status = DARKEL_STATUS_3;
         CPopulation::m_AllRandomPedsThisType = -1;
-        CDarkel::TimeOfFrenzyStart = CTimer::m_snTimeInMilliseconds;
+        CDarkel::TimeOfFrenzyStart = CTimer::GetTimeInMS();
         CDarkel::DealWithWeaponChangeAtEndOfFrenzy();
     }
 }
@@ -197,13 +197,13 @@ void CDarkel::ResetOnPlayerDeath() {
 void CDarkel::FailKillFrenzy() {
     if (CDarkel::Status == DARKEL_STATUS_4) {
         CGameLogic::GameState = GAME_STATE_TITLE;
-        CGameLogic::TimeOfLastEvent = CTimer::m_snTimeInMilliseconds;
+        CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
     }
     CHud::SetHelpMessage(nullptr, true, false, false);
     if (CDarkel::Status == DARKEL_STATUS_1 || CDarkel::Status == DARKEL_STATUS_4) {
         CDarkel::Status = DARKEL_STATUS_3;
         CPopulation::m_AllRandomPedsThisType = -1;
-        CDarkel::TimeOfFrenzyStart = CTimer::m_snTimeInMilliseconds;
+        CDarkel::TimeOfFrenzyStart = CTimer::GetTimeInMS();
         CDarkel::DealWithWeaponChangeAtEndOfFrenzy();
     }
 }

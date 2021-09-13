@@ -15,7 +15,7 @@ CEventDeath::CEventDeath(bool bDrowning, uint32 deathTimeInMs)
 CEventDeath::CEventDeath(bool bDrowning)
 {
     m_bDrowning = bDrowning;
-    m_deathTimeInMs = CTimer::m_snTimeInMilliseconds;
+    m_deathTimeInMs = CTimer::GetTimeInMS();
 }
 
 CEventDeath::~CEventDeath()

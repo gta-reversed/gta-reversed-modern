@@ -255,7 +255,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* pPed)
 
         if (m_nSwimState == SWIM_UNDERWATER_SPRINTING) {
             CPedDamageResponseCalculator damageCalculator(nullptr, CTimer::ms_fTimeStep, WEAPON_DROWNING, PED_PIECE_TORSO, false);
-            CEventDamage eventDamage(nullptr, CTimer::m_snTimeInMilliseconds, WEAPON_DROWNING, PED_PIECE_TORSO, 0, 0, pPed->bInVehicle);
+            CEventDamage eventDamage(nullptr, CTimer::GetTimeInMS(), WEAPON_DROWNING, PED_PIECE_TORSO, 0, 0, pPed->bInVehicle);
             if (eventDamage.AffectsPed(pPed))
                 damageCalculator.ComputeDamageResponse(pPed, &eventDamage.m_damageResponse, true);
             else

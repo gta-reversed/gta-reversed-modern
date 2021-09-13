@@ -634,8 +634,8 @@ void CCamera::AddShakeSimple(float duration, int32 type, float intensity) {
 
 // 0x50D280
 void CCamera::LerpFOV(float zoomInFactor, float zoomOutFactor, float timeLimit, bool bEase) {
-    m_fStartZoomTime = float(CTimer::m_snTimeInMilliseconds);
-    m_fEndZoomTime = float(CTimer::m_snTimeInMilliseconds) + timeLimit;
+    m_fStartZoomTime = float(CTimer::GetTimeInMS());
+    m_fEndZoomTime = float(CTimer::GetTimeInMS()) + timeLimit;
 
     m_nZoomMode = bEase; // TODO: Rename
     m_fZoomInFactor = zoomInFactor;

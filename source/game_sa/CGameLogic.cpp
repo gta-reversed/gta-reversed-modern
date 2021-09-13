@@ -90,7 +90,7 @@ void CGameLogic::FindCityClosestToPoint(float x, float y) {
 void CGameLogic::ForceDeathRestart() {
     CWorld::Players[CWorld::PlayerInFocus].m_nPlayerState = PLAYERSTATE_HAS_DIED;
     CGameLogic::GameState = GAME_STATE_LOGO;
-    CGameLogic::TimeOfLastEvent = CTimer::m_snTimeInMilliseconds - 3001;
+    CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS() - 3001;
     TheCamera.SetFadeColour(0, 0, 0);
     TheCamera.Fade(4.0f, eFadeFlag::FADE_IN);
 }

@@ -1043,7 +1043,7 @@ void CEntity::ModifyMatrixForCrane()
         return;
 
     auto tempMat = CMatrix(pRwMat, 0);
-    auto fRot = (CTimer::m_snTimeInMilliseconds & 0x3FF) * (PI / 512.26F);
+    auto fRot = (CTimer::GetTimeInMS() & 0x3FF) * (PI / 512.26F);
     tempMat.SetRotateZOnly(fRot);
     tempMat.UpdateRW();
     CEntity::UpdateRwFrame();
@@ -1495,9 +1495,9 @@ void CEntity::ModifyMatrixForTreeInWind()
 
     float fWindOffset;
     if (CWeather::Wind >= 0.5F) {
-        auto uiOffset1 = (((m_nRandomSeed + CTimer::m_snTimeInMilliseconds * 8) & 0xFFFF) / 4096) & 0xF;
+        auto uiOffset1 = (((m_nRandomSeed + CTimer::GetTimeInMS() * 8) & 0xFFFF) / 4096) & 0xF;
         auto uiOffset2 = (uiOffset1 + 1) & 0xF;
-        auto fContrib = static_cast<float>(((m_nRandomSeed + CTimer::m_snTimeInMilliseconds * 8) & 0xFFF)) / 4096.0F;
+        auto fContrib = static_cast<float>(((m_nRandomSeed + CTimer::GetTimeInMS() * 8) & 0xFFF)) / 4096.0F;
 
         fWindOffset = (1.0F - fContrib) * CWeather::saTreeWindOffsets[uiOffset1];
         fWindOffset += 1.0F + fContrib * CWeather::saTreeWindOffsets[uiOffset2];
@@ -1506,7 +1506,7 @@ void CEntity::ModifyMatrixForTreeInWind()
 
     }
     else {
-        auto uiTimeOffset = (reinterpret_cast<uint32>(this) + CTimer::m_snTimeInMilliseconds) & 0xFFF;
+        auto uiTimeOffset = (reinterpret_cast<uint32>(this) + CTimer::GetTimeInMS()) & 0xFFF;
         
         fWindOffset = sin(uiTimeOffset * 0.0015332032F) * 0.005F;
         if (CWeather::Wind >= 0.2F)
@@ -1533,7 +1533,7 @@ void CEntity::ModifyMatrixForBannerInWind()
         return;
 
     auto vecPos = CVector2D(GetPosition());
-    auto uiOffset = static_cast<uint16>(16 * (CTimer::m_snTimeInMilliseconds + (static_cast<uint16>(vecPos.x + vecPos.y) * 64)));
+    auto uiOffset = static_cast<uint16>(16 * (CTimer::GetTimeInMS() + (static_cast<uint16>(vecPos.x + vecPos.y) * 64)));
 
     auto fWind = 0.2F;
     if (CWeather::Wind >= 0.1F) {
@@ -1982,18 +1982,18 @@ void CEntity::ProcessLightsForEntity()
 
             case e2dCoronaFlashType::FLASH_RANDOM:
             case e2dCoronaFlashType::FLASH_RANDOM_WHEN_WET:
-                if ((CTimer::m_snTimeInMilliseconds ^ uiRand) & 0x60)
+                if ((CTimer::GetTimeInMS() ^ uiRand) & 0x60)
                     bDoColorLight = true;
                 else
                     bDoNoColorLight = true;
 
-                if ((uiRand ^ (CTimer::m_snTimeInMilliseconds / 4096)) & 0x3)
+                if ((uiRand ^ (CTimer::GetTimeInMS() / 4096)) & 0x3)
                     bDoColorLight = true;
 
                 break;
 
             case e2dCoronaFlashType::FLASH_ANIM_SPEED_4X:
-                if (((CTimer::m_snTimeInMilliseconds + iFxInd * 256) & 0x200) == 0)
+                if (((CTimer::GetTimeInMS() + iFxInd * 256) & 0x200) == 0)
                     bUpdateCoronaCoors = true;
                 else
                     bDoColorLight = true;
@@ -2001,7 +2001,7 @@ void CEntity::ProcessLightsForEntity()
                 break;
 
             case e2dCoronaFlashType::FLASH_ANIM_SPEED_2X:
-                if (((CTimer::m_snTimeInMilliseconds + iFxInd * 512) & 0x400) == 0)
+                if (((CTimer::GetTimeInMS() + iFxInd * 512) & 0x400) == 0)
                     bUpdateCoronaCoors = true;
                 else
                     bDoColorLight = true;
@@ -2009,7 +2009,7 @@ void CEntity::ProcessLightsForEntity()
                 break;
 
             case e2dCoronaFlashType::FLASH_ANIM_SPEED_1X:
-                if (((CTimer::m_snTimeInMilliseconds + iFxInd * 1024) & 0x800) == 0)
+                if (((CTimer::GetTimeInMS() + iFxInd * 1024) & 0x800) == 0)
                     bUpdateCoronaCoors = true;
                 else
                     bDoColorLight = true;
@@ -2022,19 +2022,19 @@ void CEntity::ProcessLightsForEntity()
                     break;
                 }
 
-                if ((CTimer::m_snTimeInMilliseconds ^ (uiRand * 8)) & 0x60)
+                if ((CTimer::GetTimeInMS() ^ (uiRand * 8)) & 0x60)
                     bDoColorLight = true;
                 else
                     bDoNoColorLight = true;
 
-                if ((uiRand ^ (CTimer::m_snTimeInMilliseconds / 4096)) & 0x3)
+                if ((uiRand ^ (CTimer::GetTimeInMS() / 4096)) & 0x3)
                     bDoColorLight = true;
 
                 break;
 
             case e2dCoronaFlashType::FLASH_TRAINCROSSING:
                 if (IsObject() && static_cast<CObject*>(this)->objectFlags.bTrainCrossEnabled) {
-                    if (CTimer::m_snTimeInMilliseconds & 0x400)
+                    if (CTimer::GetTimeInMS() & 0x400)
                         bDoColorLight = true;
 
                     if (iFxInd & 1)
@@ -2047,7 +2047,7 @@ void CEntity::ProcessLightsForEntity()
                 break;
 
             case e2dCoronaFlashType::FLASH_UNUSED:
-                if (CBridge::ShouldLightsBeFlashing() && (CTimer::m_snTimeInMilliseconds & 0x1FF) < 0x3C)
+                if (CBridge::ShouldLightsBeFlashing() && (CTimer::GetTimeInMS() & 0x1FF) < 0x3C)
                     bDoColorLight = true;
 
                 break;
@@ -2065,7 +2065,7 @@ void CEntity::ProcessLightsForEntity()
 
                 bDoColorLight = true;
 
-                uiOffset = CTimer::m_snTimeInMilliseconds + 3333 * (iFlashType - 11);
+                uiOffset = CTimer::GetTimeInMS() + 3333 * (iFlashType - 11);
                 uiOffset += static_cast<uint32>(vecPos.x * 20.0F);
                 uiOffset += static_cast<uint32>(vecPos.y * 10.0F);
 
@@ -2098,7 +2098,7 @@ void CEntity::ProcessLightsForEntity()
         if (CGameLogic::LaRiotsActiveHere()) {
             bool bLightsOn = bDoColorLight;
             bLightsOn &= !IsVehicle();
-            bLightsOn &= ((uiRand & 3) == 0 || (uiRand & 3) == 1 && (CTimer::m_snTimeInMilliseconds ^ (uiRand * 8)) & 0x60);
+            bLightsOn &= ((uiRand & 3) == 0 || (uiRand & 3) == 1 && (CTimer::GetTimeInMS() ^ (uiRand * 8)) & 0x60);
 
             if (bLightsOn) {
                 bDoColorLight = false;

@@ -187,7 +187,7 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_nHandlingFlagsIntValue = static_cast<eVehicleHandlingFlags>(0);
     m_autoPilot.m_nCarMission = MISSION_NONE;
     m_autoPilot.m_nTempAction = 0;
-    m_autoPilot.m_nTimeToStartMission = CTimer::m_snTimeInMilliseconds;
+    m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMS();
     m_autoPilot.carCtrlFlags.bAvoidLevelTransitions = false;
     m_nRemapTxd = -1;
     m_nPreviousRemapTxd = -1;
@@ -204,7 +204,7 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_nHasslePosId = 0;
     m_nVehicleWeaponInUse = 0;
     m_fDirtLevel = (float)((rand() % 15));
-    m_nCreationTime = CTimer::m_snTimeInMilliseconds;
+    m_nCreationTime = CTimer::GetTimeInMS();
     CVehicle::SetCollisionLighting(0x48);
 }
 
@@ -1054,7 +1054,7 @@ bool CVehicle::CanPedJumpOutCar_Reversed(CPed* ped)
     const auto fHorSpeedSquared = m_vecMoveSpeed.SquaredMagnitude2D();
     if (!IsPlane()
         && !IsHeli()
-        && (!IsAutomobile() || m_matrix->GetUp().z >= 0.3F || m_nLastCollisionTime <= CTimer::m_snTimeInMilliseconds - 1000))
+        && (!IsAutomobile() || m_matrix->GetUp().z >= 0.3F || m_nLastCollisionTime <= CTimer::GetTimeInMS() - 1000))
     {
         return fHorSpeedSquared >= 0.1F && fHorSpeedSquared <= 0.5F;
     }
@@ -2123,7 +2123,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
                 else
                 {
                     auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::ms_fTimeStep, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, false);
-                    auto damageEvent = CEventDamage(this, CTimer::m_snTimeInMilliseconds, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
+                    auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
                     if (damageEvent.AffectsPed(m_pDriver))
                         pedDamageResponseCalc.ComputeDamageResponse(m_pDriver, &damageEvent.m_damageResponse, true);
                     else
@@ -2171,9 +2171,9 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
             CPhysical::ApplyMoveForce(vecMoveForceUsed);
 
             if (m_f2ndSteerAngle == 0.0F) {
-                m_f2ndSteerAngle = CTimer::m_snTimeInMilliseconds + 300.0F;
+                m_f2ndSteerAngle = CTimer::GetTimeInMS() + 300.0F;
             }
-            else if (m_f2ndSteerAngle <= CTimer::m_snTimeInMilliseconds) {
+            else if (m_f2ndSteerAngle <= CTimer::GetTimeInMS()) {
                 m_f2ndSteerAngle = 0.0F;
             }
         }

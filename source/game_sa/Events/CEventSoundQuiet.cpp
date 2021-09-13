@@ -17,7 +17,7 @@ CEventSoundQuiet::CEventSoundQuiet(CEntity* entity, float fLocalSoundLevel, uint
         m_entity->RegisterReference(&m_entity);
     if (m_startTimeInMs != -1)
         return;
-    m_startTimeInMs = CTimer::m_snTimeInMilliseconds;
+    m_startTimeInMs = CTimer::GetTimeInMS();
     m_position = m_entity->GetPosition();
 }
 

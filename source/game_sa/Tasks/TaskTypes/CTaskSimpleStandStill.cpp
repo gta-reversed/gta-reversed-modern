@@ -71,7 +71,7 @@ bool CTaskSimpleStandStill::MakeAbortable_Reversed(CPed* ped, eAbortPriority pri
 {
     if (priority)
         return true;
-    m_timer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+    m_timer.m_nStartTime = CTimer::GetTimeInMS();
     m_timer.m_nInterval = -1;
     m_timer.m_bStarted = true;
     return true;

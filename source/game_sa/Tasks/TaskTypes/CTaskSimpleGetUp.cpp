@@ -80,7 +80,7 @@ bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
                 const auto eventDamage = static_cast<const CEventDamage*>(event);
                 if (eventDamage->m_damageResponse.m_bHealthZero && eventDamage->m_bAddToEventGroup)
                     bFatalDamage = true;
-                else if (CTimer::m_snTimeInMilliseconds - eventDamage->m_nStartTime > CTimer::GetTimeStepInMS() * 3.0F)
+                else if (CTimer::GetTimeInMS() - eventDamage->m_nStartTime > CTimer::GetTimeStepInMS() * 3.0F)
                     bTooMuchTimePassed = true;
             }
             else if (event->GetEventPriority() < 61)
@@ -178,7 +178,7 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
     }
 
     CPedDamageResponseCalculator damageResponseCalculator(pVeh, fDamage, WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, false);
-    CEventDamage eventDamage(pVeh, CTimer::m_snTimeInMilliseconds, WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
+    CEventDamage eventDamage(pVeh, CTimer::GetTimeInMS(), WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
 
     if (eventDamage.AffectsPed(ped))
         damageResponseCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);

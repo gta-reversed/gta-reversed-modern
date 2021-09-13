@@ -19,8 +19,8 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
     m_nPathFindNodesCount = 0;
     m_pTargetCar = nullptr;
 
-    m_nTimeToStartMission = CTimer::m_snTimeInMilliseconds;
-    m_nTimeSwitchedToRealPhysics = CTimer::m_snTimeInMilliseconds;
+    m_nTimeToStartMission = CTimer::GetTimeInMS();
+    m_nTimeSwitchedToRealPhysics = CTimer::GetTimeInMS();
     _someStartTime = 0;
 
     m_nStraightLineDistance = 20;

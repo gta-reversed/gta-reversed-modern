@@ -37,7 +37,7 @@ CWaterCannon* CWaterCannon::Destructor() {
 void CWaterCannon::Init() {
     m_nId = 0;
     m_nSectionsCount = 0;
-    m_nCreationTime = CTimer::m_snTimeInMilliseconds;
+    m_nCreationTime = CTimer::GetTimeInMS();
     m_anSectionState[0] = '\0';
 
     m_auRenderIndices[0] = 0;

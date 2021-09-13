@@ -123,7 +123,7 @@ CTask* CTaskComplexWanderCop::CreateNextSubTask_Reversed(CPed* ped)
 
     if (m_pSubTask->GetTaskType() == TASK_COMPLEX_POLICE_PURSUIT)
     {
-        m_nSubTaskCreatedTimer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+        m_nSubTaskCreatedTimer.m_nStartTime = CTimer::GetTimeInMS();
         m_nSubTaskCreatedTimer.m_nInterval = 3000;
         m_nSubTaskCreatedTimer.m_bStarted = 1;
         if (m_pTaskComplexMoveGoToPointAndStandStill)
@@ -228,7 +228,7 @@ void CTaskComplexWanderCop::ScanForStuff_Reversed(CPed* ped)
     CCopPed* pPed = (CCopPed*)ped;
     if (!m_nScanForStuffTimer.m_bStarted)
     {
-        m_nScanForStuffTimer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+        m_nScanForStuffTimer.m_nStartTime = CTimer::GetTimeInMS();
         m_nScanForStuffTimer.m_nInterval = 50;
         m_nScanForStuffTimer.m_bStarted = 1;
     }
@@ -236,23 +236,23 @@ void CTaskComplexWanderCop::ScanForStuff_Reversed(CPed* ped)
     {
         if (m_nScanForStuffTimer.m_bStopped)
         {
-            m_nScanForStuffTimer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+            m_nScanForStuffTimer.m_nStartTime = CTimer::GetTimeInMS();
             m_nScanForStuffTimer.m_bStopped = 0;
         }
 
-        if (CTimer::m_snTimeInMilliseconds >= (m_nScanForStuffTimer.m_nStartTime + m_nScanForStuffTimer.m_nInterval))
+        if (CTimer::GetTimeInMS() >= (m_nScanForStuffTimer.m_nStartTime + m_nScanForStuffTimer.m_nInterval))
         {
             m_nScanForStuffTimer.m_nInterval = 50;
-            m_nScanForStuffTimer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+            m_nScanForStuffTimer.m_nStartTime = CTimer::GetTimeInMS();
             m_nScanForStuffTimer.m_bStarted = 1;
 
-            if (CTimer::m_snTimeInMilliseconds >= m_nTimePassedSinceLastLookedForCarAlarmsAndStolenCopCars)
+            if (CTimer::GetTimeInMS() >= m_nTimePassedSinceLastLookedForCarAlarmsAndStolenCopCars)
             {
                 LookForCarAlarms(pPed);
                 LookForStolenCopCars(pPed);
             }
 
-            if (CTimer::m_snTimeInMilliseconds >= m_nTimePassedSinceLastLookedForCriminals)
+            if (CTimer::GetTimeInMS() >= m_nTimePassedSinceLastLookedForCriminals)
             {
                 LookForCriminals(pPed);
             }
@@ -344,7 +344,7 @@ void CTaskComplexWanderCop::LookForCriminals(CCopPed* pPed)
     pCriminalPed->GetEventGroup().Add(&eventPedToFlee, false);
 
     // 30 seconds wait for next check
-    m_nTimePassedSinceLastLookedForCriminals = CTimer::m_snTimeInMilliseconds + 30000;
+    m_nTimePassedSinceLastLookedForCriminals = CTimer::GetTimeInMS() + 30000;
     m_pLastCriminalPedLookedFor = pCriminalPed;
 #endif
 }

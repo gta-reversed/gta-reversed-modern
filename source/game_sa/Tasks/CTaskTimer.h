@@ -35,7 +35,7 @@ public:
 
     inline bool Start(int32 time) {
         if (time >= 0) {
-            m_nStartTime = CTimer::m_snTimeInMilliseconds;
+            m_nStartTime = CTimer::GetTimeInMS();
             m_nInterval = time;
             m_bStarted = true;
             return true;
@@ -46,7 +46,7 @@ public:
     inline bool Stop() {
         if (m_bStarted) {
             m_bStopped = true;
-            m_nInterval -= CTimer::m_snTimeInMilliseconds - m_nStartTime;
+            m_nInterval -= CTimer::GetTimeInMS() - m_nStartTime;
             return true;
         }
         return false;
@@ -55,7 +55,7 @@ public:
     inline bool Reset() {
         if (m_bStarted) {
             if (m_bStopped) {
-                m_nStartTime = CTimer::m_snTimeInMilliseconds;
+                m_nStartTime = CTimer::GetTimeInMS();
                 m_bStopped = false;
             }
             return true;

@@ -1035,7 +1035,7 @@ void CCheat::WeaponSkillsCheat() {
 // 0x438ff0
 void CCheat::SuicideCheat() {
     CPedDamageResponseCalculator damageCalculator(nullptr, 1000.0f, WEAPON_UNARMED, PED_PIECE_TORSO, false);
-    CEventDamage damageEvent(nullptr, CTimer::m_snTimeInMilliseconds, WEAPON_UNARMED, PED_PIECE_TORSO, 0, false, false);
+    CEventDamage damageEvent(nullptr, CTimer::GetTimeInMS(), WEAPON_UNARMED, PED_PIECE_TORSO, 0, false, false);
     CPlayerPed* pPlayer = FindPlayerPed(-1);
     if (damageEvent.AffectsPed(pPlayer))
         damageCalculator.ComputeDamageResponse(pPlayer, &damageEvent.m_damageResponse, true);

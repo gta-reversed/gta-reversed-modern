@@ -566,7 +566,7 @@ void CObject::PreRender_Reversed()
     if (objectFlags.bAffectedByColBrightness)
         CObject::GetLightingFromCollisionBelow();
 
-    if (m_dwBurnTime > CTimer::m_snTimeInMilliseconds)
+    if (m_dwBurnTime > CTimer::GetTimeInMS())
         CObject::DoBurnEffect();
 
     if (!m_pAttachedTo)
@@ -1022,7 +1022,7 @@ void CObject::ProcessSamSiteBehaviour() {
             if (vecShootDir.Magnitude2D() >= 120.0F)
                 return;
 
-            if (fabs(fAngleDiff) >= 0.1F || CTimer::m_snTimeInMilliseconds / 4000 == CTimer::m_snPreviousTimeInMilliseconds / 4000)
+            if (fabs(fAngleDiff) >= 0.1F || CTimer::GetTimeInMS() / 4000 == CTimer::m_snPreviousTimeInMilliseconds / 4000)
                 return;
 
             auto vecRocketDir = m_matrix->GetForward() + m_matrix->GetUp();
@@ -1293,7 +1293,7 @@ void CObject::ObjectFireDamage(float damage, CEntity* damager) {
     if (m_nModelIndex == ModelIndices::MI_GRASSPLANT)
     {
         m_fBurnDamage = 1.0F - (m_fHealth / 2000.0F);
-        m_dwBurnTime = CTimer::m_snTimeInMilliseconds + 3000;
+        m_dwBurnTime = CTimer::GetTimeInMS() + 3000;
     }
 
     if (m_fHealth != 0.0F)

@@ -147,7 +147,7 @@ void CTaskSimpleStealthKill::ManageAnim(CPed* ped)
         {
             m_pAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, m_nAssocGroupId, ANIM_ID_KILL_KNIFE_PED_DIE, 8.0f);
             CPedDamageResponseCalculator damageCalculator(ped, CPedDamageResponseCalculator::ms_damageFactor, m_pTarget->GetActiveWeapon().m_nType, PED_PIECE_TORSO, false);
-            CEventDamage eventDamage(m_pTarget, CTimer::m_snTimeInMilliseconds, m_pTarget->GetActiveWeapon().m_nType, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
+            CEventDamage eventDamage(m_pTarget, CTimer::GetTimeInMS(), m_pTarget->GetActiveWeapon().m_nType, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
             if (eventDamage.AffectsPed(ped))
             {
                 damageCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);

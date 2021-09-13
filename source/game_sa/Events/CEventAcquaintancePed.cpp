@@ -112,7 +112,7 @@ CEventAcquaintancePedHateBadlyLit::CEventAcquaintancePedHateBadlyLit(CPed* ped, 
     m_startTimeInMs = startTimeInMs;
     m_point = point;
     if (startTimeInMs == -1) {
-        m_startTimeInMs = CTimer::m_snTimeInMilliseconds;
+        m_startTimeInMs = CTimer::GetTimeInMS();
         m_point = ped->GetPosition();
     }
 }

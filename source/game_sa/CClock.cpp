@@ -37,7 +37,7 @@ void CClock::Initialise(uint32 millisecondsPerGameMinute) {
     ms_nMillisecondsPerGameMinute = millisecondsPerGameMinute;
     ms_nGameClockMonth = 1;
     ms_nGameClockDays = 1;
-    ms_nLastClockTick = CTimer::m_snTimeInMilliseconds;
+    ms_nLastClockTick = CTimer::GetTimeInMS();
     ms_nGameClockHours = 12;
     ms_nGameClockMinutes = 0;
     ms_nGameClockSeconds = 0;
@@ -47,14 +47,14 @@ void CClock::Initialise(uint32 millisecondsPerGameMinute) {
 
 /// @brief Updates the game clock. (0x52CF10)
 void CClock::Update() {
-    if (ms_nMillisecondsPerGameMinute < (CTimer::m_snTimeInMilliseconds - ms_nLastClockTick) || CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK]) {
+    if (ms_nMillisecondsPerGameMinute < (CTimer::GetTimeInMS() - ms_nLastClockTick) || CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK]) {
         if (!CCheat::m_aCheatsActive[CHEAT_ALWAYS_MIDNIGHT] && !CCheat::m_aCheatsActive[CHEAT_STOP_GAME_CLOCK_ORANGE_SKY]) {
             // next minute
             ms_nGameClockMinutes++;
             ms_nLastClockTick += ms_nMillisecondsPerGameMinute;
 
             if (CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK])
-                ms_nLastClockTick = CTimer::m_snTimeInMilliseconds;
+                ms_nLastClockTick = CTimer::GetTimeInMS();
 
             // next hour
             if (ms_nGameClockMinutes >= 60) {
@@ -83,7 +83,7 @@ void CClock::Update() {
             }
         }
     }
-    ms_nGameClockSeconds = (CTimer::m_snTimeInMilliseconds - ms_nLastClockTick) * 60 / ms_nMillisecondsPerGameMinute;
+    ms_nGameClockSeconds = (CTimer::GetTimeInMS() - ms_nLastClockTick) * 60 / ms_nMillisecondsPerGameMinute;
 }
 
 /// @brief Number of minutes remaining to specific time. (0x52CEB0)
@@ -197,7 +197,7 @@ void CClock::OffsetClockByADay(uint32 timeDirection) {
 /// @param minutes Minute to be set.
 /// @param days Day to be set.
 void CClock::SetGameClock(uint8 hours, uint8 minutes, uint8 day) {
-    ms_nLastClockTick = CTimer::m_snTimeInMilliseconds;
+    ms_nLastClockTick = CTimer::GetTimeInMS();
     ms_nGameClockHours = hours;
     ms_nGameClockMinutes = minutes;
 

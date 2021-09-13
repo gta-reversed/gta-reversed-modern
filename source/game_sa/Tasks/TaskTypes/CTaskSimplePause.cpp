@@ -40,7 +40,7 @@ CTask* CTaskSimplePause::Clone()
 
 bool CTaskSimplePause::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    m_timer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+    m_timer.m_nStartTime = CTimer::GetTimeInMS();
     m_timer.m_nInterval = -1;
     m_timer.m_bStarted = true;
     return true;

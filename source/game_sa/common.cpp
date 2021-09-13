@@ -720,7 +720,7 @@ void SetAmbientAndDirectionalColours(float lighting) {
 // unused
 // 0x735AB0
 void SetFlashyColours(float lighting) {
-    if ((CTimer::m_snTimeInMilliseconds & 0x100) != 0) {
+    if ((CTimer::GetTimeInMS() & 0x100) != 0) {
         AmbientLightColour.red = 1.0f;
         AmbientLightColour.green = 1.0f;
         AmbientLightColour.blue = 1.0f;
@@ -737,7 +737,7 @@ void SetFlashyColours(float lighting) {
 // unused
 // 0x735B40
 void SetFlashyColours_Mild(float lighting) {
-    if ((CTimer::m_snTimeInMilliseconds & 0x100) != 0) {
+    if ((CTimer::GetTimeInMS() & 0x100) != 0) {
         AmbientLightColour.red = 1.0f;
         AmbientLightColour.green = 1.0f;
         AmbientLightColour.blue = 1.0f;
