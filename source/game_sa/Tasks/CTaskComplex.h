@@ -14,13 +14,10 @@ class CTaskComplex : public CTask {
 public:
     CTask* m_pSubTask;
 
+public:
     CTaskComplex();
     ~CTaskComplex();
 
-private:
-    CTaskComplex* Constructor();
-
-public:
     CTask* GetSubTask() override;
     bool IsSimple() override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
@@ -29,6 +26,9 @@ public:
     virtual CTask* CreateNextSubTask(CPed* ped) = 0;
     virtual CTask* CreateFirstSubTask(CPed* ped) = 0;
     virtual CTask* ControlSubTask(CPed* ped) = 0;
+
+private:
+    CTaskComplex* Constructor();
 
     CTask* GetSubTask_Reversed() { return m_pSubTask; }
     bool IsSimple_Reversed() { return false; }

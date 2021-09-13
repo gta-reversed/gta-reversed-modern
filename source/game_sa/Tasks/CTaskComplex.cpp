@@ -6,39 +6,42 @@
 */
 #include "StdInc.h"
 
-CTaskComplex::CTaskComplex() {
+#include "CTaskComplex.h"
+
+// 0x61A3B0
+CTaskComplex::CTaskComplex() : CTask() {
     m_pSubTask = nullptr;
 }
 
 CTaskComplex::~CTaskComplex() {
-    if (m_pSubTask)
-        delete m_pSubTask;
+    delete m_pSubTask;
     m_pSubTask = nullptr;
 }
 
-CTaskComplex* CTaskComplex::Constructor()
-{
-    return plugin::CallMethodAndReturn<CTaskComplex*, 0x61A3B0, CTaskComplex*>(this);
+CTaskComplex* CTaskComplex::Constructor() {
+    this->CTaskComplex::CTaskComplex();
+    return this;
 }
 
+// 0x421190
 CTask* CTaskComplex::GetSubTask() {
-    return ((CTask * (__thiscall*)(CTask*))0x421190)(this);
+    return GetSubTask_Reversed();
 }
 
 // 0x4211A0
 bool CTaskComplex::IsSimple() {
-    return CTaskComplex::IsSimple_Reversed();
+    return IsSimple_Reversed();
 }
 
 // 0x4211B0
-bool CTaskComplex::MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) {
+bool CTaskComplex::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return CTaskComplex::MakeAbortable_Reversed(ped, priority, event);
 }
 
-void CTaskComplex::SetSubTask(CTask* subTask){
+void CTaskComplex::SetSubTask(CTask* subTask) {
     ((void(__thiscall*)(CTaskComplex*, CTask*))0x61A430)(this, subTask);
 }
 
-bool CTaskComplex::MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event) {
+bool CTaskComplex::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return m_pSubTask->MakeAbortable(ped, priority, event);
 }
