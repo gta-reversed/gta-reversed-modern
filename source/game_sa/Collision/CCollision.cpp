@@ -11,8 +11,81 @@ CLinkList<CCollisionData*>& CCollision::ms_colModelCache = *(CLinkList<CCollisio
 
 void CCollision::InjectHooks()
 {
-    ReversibleHooks::Install("CCollision", "CalculateTrianglePlanes_colData", 0x416330, static_cast<void(*)(CCollisionData*)>(&CCollision::CalculateTrianglePlanes));
-    ReversibleHooks::Install("CCollision", "RemoveTrianglePlanes_colData", 0x416400, static_cast<void(*)(CCollisionData*)>(&CCollision::RemoveTrianglePlanes));
+    using namespace ReversibleHooks;
+
+    //Install("CCollision", "Update", 0x411E20, &CCollision::Update);
+    //Install("CCollision", "SortOutCollisionAfterLoad", 0x411E30, &CCollision::SortOutCollisionAfterLoad);
+    //Install("CCollision", "TestSphereSphere", 0x411E70, &CCollision::TestSphereSphere);
+    //Install("CCollision", "CalculateColPointInsideBox", 0x411EC0, &CCollision::CalculateColPointInsideBox);
+    //Install("CCollision", "TestSphereBox", 0x4120C0, &CCollision::TestSphereBox);
+    //Install("CCollision", "ProcessSphereBox", 0x412130, &CCollision::ProcessSphereBox);
+    //Install("CCollision", "PointInTriangle", 0x412700, &CCollision::PointInTriangle);
+    //Install("CCollision", "DistToLineSqr", 0x412850, &CCollision::DistToLineSqr);
+    Install("CCollision", "DistToMathematicalLine", 0x412970, &CCollision::DistToMathematicalLine);
+    //Install("CCollision", "DistToMathematicalLine2D", 0x412A30, &CCollision::DistToMathematicalLine2D);
+    //Install("CCollision", "DistAlongLine2D", 0x412A80, &CCollision::DistAlongLine2D);
+    //Install("CCollision", "ProcessLineSphere", 0x412AA0, &CCollision::ProcessLineSphere);
+    //Install("CCollision", "TestLineBox_DW", 0x412C70, &CCollision::TestLineBox_DW);
+    //Install("CCollision", "TestLineBox", 0x413070, &CCollision::TestLineBox);
+    //Install("CCollision", "TestVerticalLineBox", 0x413080, &CCollision::TestVerticalLineBox);
+    //Install("CCollision", "ProcessLineBox", 0x413100, &CCollision::ProcessLineBox);
+    //Install("CCollision", "Test2DLineAgainst2DLine", 0x4138D0, &CCollision::Test2DLineAgainst2DLine);
+    //Install("CCollision", "colPoint1", 0x413960, &ProcessDiscCollision);
+    //Install("CCollision", "TestLineTriangle", 0x413AC0, &CCollision::TestLineTriangle);
+    //Install("CCollision", "ProcessLineTriangle", 0x4140F0, &CCollision::ProcessLineTriangle);
+    //Install("CCollision", "ProcessVerticalLineTriangle", 0x4147E0, &CCollision::ProcessVerticalLineTriangle);
+    //Install("CCollision", "IsStoredPolyStillValidVerticalLine", 0x414D70, &CCollision::IsStoredPolyStillValidVerticalLine);
+    //Install("CCollision", "GetBoundingBoxFromTwoSpheres", 0x415230, &CCollision::GetBoundingBoxFromTwoSpheres);
+    //Install("CCollision", "IsThisVehicleSittingOnMe", 0x4152C0, &CCollision::IsThisVehicleSittingOnMe);
+    //Install("CCollision", "CheckCameraCollisionPeds", 0x415320, &CCollision::CheckCameraCollisionPeds);
+    //Install("CCollision", "CheckPeds", 0x4154A0, &CCollision::CheckPeds);
+    //Install("CCollision", "ResetMadeInvisibleObjects", 0x415540, &ResetMadeInvisibleObjects);
+    //Install("CCollision", "SphereCastVsBBox", 0x415590, &CCollision::SphereCastVsBBox);
+    //Install("CCollision", "RayPolyPOP", 0x415620, &CCollision::RayPolyPOP);
+    //Install("CCollision", "GetPrincipleAxis", 0x4156D0, &CCollision::GetPrincipleAxis);
+    //Install("CCollision", "PointInPoly", 0x415730, &CCollision::PointInPoly);
+    //Install("CCollision", "Closest3", 0x415950, &CCollision::Closest3);
+    //Install("CCollision", "ClosestSquaredDistanceBetweenFiniteLines", 0x415A40, &ClosestSquaredDistanceBetweenFiniteLines);
+    //Install("CCollision", "SphereCastVersusVsPoly", 0x415CF0, &CCollision::SphereCastVersusVsPoly);
+    //Install("CCollision", "Init", 0x416260, &CCollision::Init);
+    //Install("CCollision", "Shutdown", 0x4162E0, &CCollision::Shutdown);
+    Install("CCollision", "CalculateTrianglePlanes_colData", 0x416330, static_cast<void(*)(CCollisionData*)>(&CCollision::CalculateTrianglePlanes));
+    Install("CCollision", "RemoveTrianglePlanes_colData", 0x416400, static_cast<void(*)(CCollisionData*)>(&CCollision::RemoveTrianglePlanes));
+    //Install("CCollision", "ProcessSphereSphere", 0x416450, &CCollision::ProcessSphereSphere);
+    //Install("CCollision", "TestSphereTriangle", 0x4165B0, &CCollision::TestSphereTriangle);
+    //Install("CCollision", "ProcessSphereTriangle", 0x416BA0, &CCollision::ProcessSphereTriangle);
+    //Install("CCollision", "TestLineSphere", 0x417470, &CCollision::TestLineSphere);
+    //Install("CCollision", "DistToLine", 0x417610, &CCollision::DistToLine);
+    //Install("CCollision", "TestLineOfSight", 0x417730, &CCollision::TestLineOfSight);
+    //Install("CCollision", "ProcessLineOfSight", 0x417950, &CCollision::ProcessLineOfSight);
+    //Install("CCollision", "ProcessVerticalLine", 0x417BF0, &CCollision::ProcessVerticalLine);
+    //Install("CCollision", "SphereCastVsSphere", 0x417F20, &CCollision::SphereCastVsSphere);
+    //Install("CCollision", "ClosestPointOnLine", 0x417FD0, &CCollision::ClosestPointOnLine);
+    //Install("CCollision", "ClosestPointsOnPoly", 0x418100, &CCollision::ClosestPointsOnPoly);
+    //Install("CCollision", "ClosestPointOnPoly", 0x418150, &CCollision::ClosestPointOnPoly);
+    //Install("CCollision", "SphereCastVsCaches", 0x4181B0, &CCollision::SphereCastVsCaches);
+    //Install("CCollision", "CalculateTrianglePlanes_colModel", 0x416330, static_cast<void(*)(CColModel*)>(&CCollision::CalculateTrianglePlanes));
+    //Install("CCollision", "RemoveTrianglePlanes_colModel", 0x416400, static_cast<void(*)(CColModel*)>(&CCollision::RemoveTrianglePlanes));
+    //Install("CCollision", "ProcessColModels", 0x4185C0, &CCollision::ProcessColModels);
+    //Install("CCollision", "SphereCastVsEntity", 0x419F00, &CCollision::SphereCastVsEntity);
+    //Install("CCollision", "SphereVsEntity", 0x41A5A0, &CCollision::SphereVsEntity);
+    //Install("CCollision", "CheckCameraCollisionBuildings", 0x41A820, &CCollision::CheckCameraCollisionBuildings);
+    //Install("CCollision", "CheckCameraCollisionVehicles", 0x41A990, &CCollision::CheckCameraCollisionVehicles);
+    //Install("CCollision", "CheckCameraCollisionObjects", 0x41AB20, &CCollision::CheckCameraCollisionObjects);
+    //Install("CCollision", "BuildCacheOfCameraCollision", 0x41AC40, &CCollision::BuildCacheOfCameraCollision);
+    //Install("CCollision", "CameraConeCastVsWorldCollision", 0x41B000, &CCollision::CameraConeCastVsWorldCollision);
+}
+
+void CCollision::Tests() {
+    {
+        CVector lineStart{ (float)rand(), (float)rand(), (float)rand() };
+        CVector lineEnd{ (float)rand(), (float)rand(), (float)rand() };
+        CVector point{ (float)rand(), (float)rand(), (float)rand()};
+        const auto gta = [&]() {
+            return plugin::CallAndReturn<float, 0x412970, CVector const*, CVector const*, CVector const*>(&lineStart, &lineEnd, &point);
+        };
+        assert(gta() == DistToMathematicalLine(&lineStart, &lineEnd, &point));
+    }
 }
 
 // 0x411E20
@@ -57,7 +130,16 @@ float CCollision::DistToLineSqr(CVector const* lineStart, CVector const* lineEnd
 
 // 0x412970
 float CCollision::DistToMathematicalLine(CVector const* lineStart, CVector const* lineEnd, CVector const* point) {
-    return plugin::CallAndReturn<float, 0x412970, CVector const*, CVector const*, CVector const*>(lineStart, lineEnd, point);
+    //return plugin::CallAndReturn<float, 0x412970, CVector const*, CVector const*, CVector const*>(lineStart, lineEnd, point);
+
+    // Make points to be in a "line space" where `lineStart` is the origin
+    const CVector u = *lineEnd - *lineStart; // End of line in "line space"
+    const CVector v = *point - *lineStart;   // Point in "line space"
+
+    const float t = std::pow(DotProduct(u, v), 2.0f) / u.SquaredMagnitude();
+
+    const float distSq = v.SquaredMagnitude() - t;
+    return distSq > 0.0f ? std::sqrt(distSq) : 0.0f;
 }
 
 // 0x412A30
