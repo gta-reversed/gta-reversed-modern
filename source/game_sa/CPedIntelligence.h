@@ -26,9 +26,12 @@
 
 enum eEventType;
 
+class CPed;
+class CEntity;
+
 class CPedIntelligence {
 public:
-    class CPed*      m_pPed;
+    CPed*            m_pPed;
     CTaskManager     m_TaskMgr;
     CEventHandler    m_eventHandler;
     CEventGroup      m_eventGroup;
@@ -58,7 +61,7 @@ public:
     int32            m_AnotherStaticCounter;
     int32            m_StaticCounter;
     CVector          m_vecLastPedPosDuringDamageEntity;
-    class CEntity*   m_apInterestingEntities[3];
+    CEntity*         m_apInterestingEntities[3];
 
     static float& STEALTH_KILL_RANGE;
     static float& LIGHT_AI_LEVEL_MAX;
@@ -77,14 +80,14 @@ public:
     void RestorePedDecisionMakerType();
     void SetHearingRange(float range);
     void SetSeeingRange(float range);
-    bool IsInHearingRange(CVector const& posn);
-    bool IsInSeeingRange(CVector const& posn);
+    bool IsInHearingRange(const CVector& posn);
+    bool IsInSeeingRange(const CVector& posn);
     bool FindRespectedFriendInInformRange();
     bool IsRespondingToEvent(eEventType eventType);
-    void AddTaskPhysResponse(CTask* pTask, int32 unUsed);
-    void AddTaskEventResponseTemp(CTask* pTask, int32 unUsed);
-    void AddTaskEventResponseNonTemp(CTask* pTask, int32 unUsed);
-    void AddTaskPrimaryMaybeInGroup(CTask* pTask, bool bAffectsPed);
+    void AddTaskPhysResponse(CTask* task, int32 unUsed);
+    void AddTaskEventResponseTemp(CTask* task, int32 unUsed);
+    void AddTaskEventResponseNonTemp(CTask* task, int32 unUsed);
+    void AddTaskPrimaryMaybeInGroup(CTask* task, bool bAffectsPed);
     CTask* FindTaskByType(int32 taskId);
     CTaskSimpleFight* GetTaskFighting();
     CTaskSimpleUseGun* GetTaskUseGun();
@@ -105,16 +108,16 @@ public:
     void ProcessAfterProcCol();
     void ProcessAfterPreRender();
     void ProcessEventHandler();
-    bool IsFriendlyWith(CPed* pPed);
-    bool IsThreatenedBy(CPed const& ped);
+    bool IsFriendlyWith(const CPed& ped) const;
+    bool IsThreatenedBy(const CPed& ped) const;
     bool Respects(CPed* pPed);
     bool IsInACarOrEnteringOne();
-    static bool AreFriends(CPed* ped1, CPed* ped2);
+    static bool AreFriends(const CPed& ped1, const CPed& ped2);
     bool IsPedGoingSomewhereOnFoot();
     int32 GetMoveStateFromGoToTask();
     void FlushIntelligence();
     bool TestForStealthKill(CPed* pTarget, bool bFullTest);
-    void RecordEventForScript(int32 EventID, int32 EventPriority);
+    void RecordEventForScript(int32 eventId, int32 eventPriority);
     bool HasInterestingEntites();
     bool IsInterestingEntity(CEntity* pEntity);
     void LookAtInterestingEntities();
