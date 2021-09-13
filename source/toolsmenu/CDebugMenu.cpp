@@ -39,7 +39,6 @@ bool findStringCaseInsensitive(const std::string& strHaystack, const std::string
     return (it != strHaystack.end());
 }
 
-
 void CDebugMenu::ImguiInitialise() {
     if (m_imguiInitialised) {
         return;
@@ -85,61 +84,61 @@ void CDebugMenu::ImguiInputUpdate() {
         return;
 
     // Update display size, in case of window resize after imgui was already initialized
-    io->DisplaySize = ImVec2((float)RsGlobal.maximumWidth, (float)RsGlobal.maximumHeight);
+    io->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    // Partially taken from https://github.com/Juarez12/re3/blob/f1a7aeaa0f574813ed3cec8a085e2f310aa3a366/src/imgui/ImGuiIII.cpp
+    // Partially taken from https://github.com/GTAModding/re3/blob/f1a7aeaa0f574813ed3cec8a085e2f310aa3a366/src/imgui/ImGuiIII.cpp
 
-    static BYTE KeyStates[256];
+    const auto UpdateKeyboard = []() {
+        static BYTE KeyStates[256];
 
-    GetKeyboardState(KeyStates);
+        GetKeyboardState(KeyStates);
 
-    for (int i = 0; i < 256; i++) {
-        if (KeyStates[i] & 0x80 && !io->KeysDown[i]) {
-            io->KeysDown[i] = true;
+        for (int i = 0; i < 256; i++) {
+            if (KeyStates[i] & 0x80 && !io->KeysDown[i]) {
+                io->KeysDown[i] = true;
 
-            char res[2] = {0};
-            if (ToAscii(i, MapVirtualKey(i, 0), (const BYTE*)KeyStates, (LPWORD)res, 0) == 1) {
-                io->AddInputCharactersUTF8(res);
-            }
-        } else if (!(KeyStates[i] & 0x80) && io->KeysDown[i])
-            io->KeysDown[i] = false;
-    }
+                char res[2] = {0};
+                if (ToAscii(i, MapVirtualKey(i, 0), (const BYTE*)KeyStates, (LPWORD)res, 0) == 1) {
+                    io->AddInputCharactersUTF8(res);
+                }
+            } else if (!(KeyStates[i] & 0x80) && io->KeysDown[i])
+                io->KeysDown[i] = false;
+        }
 
-    io->KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
-    io->KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
-    io->KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
-    io->KeySuper = false;
+        io->KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
+        io->KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+        io->KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
+        io->KeySuper = false;
+    };
 
-    // Mouse
+    const auto UpdateMouse = []() {
+        CPad* pad = CPad::GetPad(0);
+        pad->DisablePlayerControls = true;
 
-    CPad* pad = CPad::GetPad(0);
-    pad->DisablePlayerControls = true;
+        m_MousePos.x += CPad::NewMouseControllerState.X;
+        m_MousePos.y -= CPad::NewMouseControllerState.Y;
 
-    m_MousePos.x += CPad::NewMouseControllerState.X;
-    m_MousePos.y -= CPad::NewMouseControllerState.Y;
+        m_MousePos.x = clamp(m_MousePos.x, 0.0f, SCREEN_WIDTH);
+        m_MousePos.y = clamp(m_MousePos.y, 0.0f, SCREEN_HEIGHT);
 
-    if (m_MousePos.x < 0.0f)
-        m_MousePos.x = 0.0f;
-    if (m_MousePos.y < 0.0f)
-        m_MousePos.y = 0.0f;
-    if (m_MousePos.x >= (float)RsGlobal.maximumWidth)
-        m_MousePos.x = (float)RsGlobal.maximumWidth;
-    if (m_MousePos.y >= (float)RsGlobal.maximumHeight)
-        m_MousePos.y = (float)RsGlobal.maximumHeight;
+        io->MousePos = ImVec2(m_MousePos.x, m_MousePos.y);
 
-    if (CPad::NewMouseControllerState.wheelDown)
-        io->MouseWheel -= (20.0F * io->DeltaTime);
+        if (CPad::NewMouseControllerState.wheelDown)
+            io->MouseWheel -= (20.0F * io->DeltaTime);
 
-    if (CPad::NewMouseControllerState.wheelUp)
-        io->MouseWheel += (20.0F * io->DeltaTime);
+        if (CPad::NewMouseControllerState.wheelUp)
+            io->MouseWheel += (20.0F * io->DeltaTime);
 
-    io->MousePos = ImVec2(m_MousePos.x, m_MousePos.y);
-    io->MouseDown[0] = CPad::NewMouseControllerState.lmb;
-    io->MouseDown[1] = CPad::NewMouseControllerState.mmb;
-    io->MouseDown[2] = CPad::NewMouseControllerState.rmb;
+        io->MouseDown[0] = CPad::NewMouseControllerState.lmb;
+        io->MouseDown[1] = CPad::NewMouseControllerState.mmb;
+        io->MouseDown[2] = CPad::NewMouseControllerState.rmb;
 
-    CPad::NewMouseControllerState.X = 0.0f;
-    CPad::NewMouseControllerState.Y = 0.0f;
+        CPad::NewMouseControllerState.X = 0.0f;
+        CPad::NewMouseControllerState.Y = 0.0f;
+    };
+
+    UpdateKeyboard();
+    UpdateMouse();
 }
 
 void CDebugMenu::ImguiDisplayFramePerSecond() {
