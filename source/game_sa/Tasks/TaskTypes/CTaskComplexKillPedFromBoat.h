@@ -6,16 +6,15 @@
 */
 #pragma once
 
-
 #include "CTaskComplex.h"
 #include "CPed.h"
 
 class CTaskComplexKillPedFromBoat : public CTaskComplex {
 public:
-	CPed *pPed;
+    CPed* m_pPed;
 
-	CTaskComplexKillPedFromBoat(CPed* ped);
+public:
+    CTaskComplexKillPedFromBoat(CPed* ped);
 };
 
 VALIDATE_SIZE(CTaskComplexKillPedFromBoat, 0x10);
-
