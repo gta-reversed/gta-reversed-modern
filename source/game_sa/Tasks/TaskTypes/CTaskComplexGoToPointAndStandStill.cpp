@@ -155,7 +155,7 @@ CTask* CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(int32 taskId, CPed
         if (taskId != TASK_SIMPLE_GO_TO_POINT)
             return nullptr;
 
-        CTaskSimpleGoToPoint* gotoPointTask = new CTaskSimpleGoToPoint(m_moveState, m_vecTargetPoint, m_fRadius, false, m_b01);
+        auto* gotoPointTask = new CTaskSimpleGoToPoint(m_moveState, m_vecTargetPoint, m_fRadius, false, m_b01);
         if (m_b04)
             gotoPointTask->gotoPointFlags.m_b05 = true;
 
@@ -170,10 +170,7 @@ CTask* CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(int32 taskId, CPed
 
     switch (taskId) {
     case TASK_COMPLEX_LEAVE_CAR: {
-        auto pTaskLeaveCar = (CTaskComplexLeaveCar*)CTask::operator new(0x34);
-        if (!pTaskLeaveCar)
-            return nullptr;
-        return pTaskLeaveCar->Constructor(ped->m_pVehicle, 0, 0, true, false);
+        return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0, true, false);
     }
     case TASK_SIMPLE_PAUSE:
         return new CTaskSimplePause(1);

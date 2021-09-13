@@ -417,13 +417,7 @@ CTask* CTaskComplexWander::CreateSubTask(CPed* ped, int32 taskId)
         {
         case TASK_COMPLEX_LEAVE_CAR:
         {
-            auto pTaskComplexLeaveCar = (CTaskComplexLeaveCar*)CTask::operator new(52);
-            if (pTaskComplexLeaveCar)
-            {
-                pTaskComplexLeaveCar->Constructor(ped->m_pVehicle, 0, 0, true, false);
-                return pTaskComplexLeaveCar;
-            }
-            break;
+            return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0, true, false);
         }
         case TASK_COMPLEX_OBSERVE_TRAFFIC_LIGHTS_AND_ACHIEVE_HEADING:
         {
