@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleStandStill.h"
+
 void CTaskSimpleStandStill::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleStandStill", "CTaskSimpleStandStill", 0x62F310, &CTaskSimpleStandStill::Constructor);

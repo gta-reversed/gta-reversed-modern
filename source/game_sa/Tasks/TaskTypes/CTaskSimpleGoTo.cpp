@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleGoTo.h"
+
 float& CTaskSimpleGoTo::ms_fLookAtThresholdDotProduct = *(float*)0xC18D48;
 
 void CTaskSimpleGoTo::InjectHooks() {

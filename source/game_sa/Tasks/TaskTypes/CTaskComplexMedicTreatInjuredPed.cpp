@@ -1,5 +1,18 @@
 #include "StdInc.h"
 
+#include "CTaskComplexMedicTreatInjuredPed.h"
+
+#include "CTaskComplexTreatAccident.h"
+#include "CTaskSimpleStandStill.h"
+#include "CTaskComplexEnterCarAsPassenger.h"
+#include "CTaskComplexEnterCarAsDriver.h"
+#include "CTaskComplexLeaveCar.h"
+#include "CTaskSimpleCarDrive.h"
+#include "CTaskComplexDriveToPoint.h"
+#include "CTaskComplexDriveWander.h"
+#include "CTaskComplexGoToPointAndStandStill.h"
+#include "CTaskComplexWanderMedic.h"
+#include "CTaskComplexGoToPointAndStandStill.h"
 
 void CTaskComplexMedicTreatInjuredPed::InjectHooks()
 {

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimplePickUpEntity.h"
+
 void CTaskSimplePickUpEntity::InjectHooks() {
     ReversibleHooks::Install("CTaskSimplePickUpEntity", "Constructor_1", 0x691870, (CTaskSimplePickUpEntity*(CTaskSimplePickUpEntity::*)(CEntity*, CVector*, char, uint8, CAnimBlock*, CAnimBlendHierarchy*, int32, float)) & CTaskSimplePickUpEntity::Constructor);
     ReversibleHooks::Install("CTaskSimplePickUpEntity", "Constructor_2", 0x6917B0, (CTaskSimplePickUpEntity * (CTaskSimplePickUpEntity::*)(CEntity*, CVector*, char, uint8, AnimationId, AssocGroupId, float)) & CTaskSimplePickUpEntity::Constructor);

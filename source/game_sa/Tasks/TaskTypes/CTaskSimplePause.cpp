@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimplePause.h"
+
 void CTaskSimplePause::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimplePause", "CTaskSimplePause", 0x48E750, &CTaskSimplePause::Constructor);

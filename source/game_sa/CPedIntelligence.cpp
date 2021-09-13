@@ -4,12 +4,19 @@
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
-
 #include "StdInc.h"
 
 #include "CPedIntelligence.h"
 
 #include "CPedType.h"
+#include "CTaskSimpleCarDriveTimed.h"
+#include "CTaskSimpleStandStill.h"
+#include "CTaskComplexFacial.h"
+#include "CTaskComplexEnterCar.h"
+#include "CTaskSimpleGoTo.h"
+#include "CTaskComplexKillPedOnFoot.h"
+#include "CTaskSimplePlayerOnFoot.h"
+#include "CTaskComplexWander.h"
 
 float& CPedIntelligence::STEALTH_KILL_RANGE = *reinterpret_cast<float*>(0x8D2398); // 2.5f
 float& CPedIntelligence::LIGHT_AI_LEVEL_MAX = *reinterpret_cast<float*>(0x8D2380); // 0.3f

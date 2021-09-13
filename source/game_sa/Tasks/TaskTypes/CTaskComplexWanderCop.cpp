@@ -1,5 +1,10 @@
 #include "StdInc.h"
 
+#include "CTaskComplexWanderCop.h"
+
+#include "CTaskSimpleStandStill.h"
+#include "CTaskComplexPolicePursuit.h"
+
 void CTaskComplexWanderCop::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexWanderCop", "CTaskComplexWanderCop", 0x460C80, &CTaskComplexWanderCop::Constructor);

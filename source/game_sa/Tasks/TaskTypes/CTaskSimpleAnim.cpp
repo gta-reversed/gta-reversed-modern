@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleAnim.h"
+
 void CTaskSimpleAnim::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleAnim", "MakeAbortable", 0x61A790, &CTaskSimpleAnim::MakeAbortable_Reversed);

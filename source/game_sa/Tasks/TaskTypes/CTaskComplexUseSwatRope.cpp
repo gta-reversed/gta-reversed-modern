@@ -1,5 +1,19 @@
 #include "StdInc.h"
 
+#include "CTaskComplexUseSwatRope.h"
+
+#include "CTaskComplexTreatAccident.h"
+#include "CTaskSimpleStandStill.h"
+#include "CTaskComplexEnterCarAsPassenger.h"
+#include "CTaskComplexEnterCarAsDriver.h"
+#include "CTaskComplexLeaveCar.h"
+#include "CTaskSimpleCarDrive.h"
+#include "CTaskComplexGoToPointAndStandStill.h"
+#include "CTaskComplexWanderMedic.h"
+#include "CTaskSimpleAbseil.h"
+#include "CTaskSimplePause.h"
+#include "CTaskSimpleNone.h"
+
 void CTaskComplexUseSwatRope::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexUseSwatRope", "Constructor", 0x659470, &CTaskComplexUseSwatRope::Constructor);

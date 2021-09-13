@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleStealthKill.h"
+
 void CTaskSimpleStealthKill::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleStealthKill", "ProcessPed_Reversed", 0x62E540, &CTaskSimpleStealthKill::ProcessPed_Reversed);

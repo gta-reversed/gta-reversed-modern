@@ -1,5 +1,10 @@
 #include "StdInc.h"
 
+#include "CTaskComplexGetUpAndStandStill.h"
+
+#include "CTaskSimpleStandStill.h"
+#include "CTaskSimpleGetUp.h"
+
 void CTaskComplexGetUpAndStandStill::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexGetUpAndStandStill", "Constructor", 0x678130, &CTaskComplexGetUpAndStandStill::Constructor);

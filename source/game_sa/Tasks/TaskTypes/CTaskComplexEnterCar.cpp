@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskComplexEnterCar.h"
+
 CTaskComplexEnterCar::CTaskComplexEnterCar(CVehicle* pTargetVehicle, bool bAsDriver, bool bQuitAfterOpeningDoor,
     bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff)
 {

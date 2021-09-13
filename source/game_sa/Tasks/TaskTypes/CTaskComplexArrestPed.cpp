@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskComplexArrestPed.h"
+
 void CTaskComplexArrestPed::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexArrestPed", "CTaskComplexArrestPed", 0x68B990, &CTaskComplexArrestPed::Constructor);

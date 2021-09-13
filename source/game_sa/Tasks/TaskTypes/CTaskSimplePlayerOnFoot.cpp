@@ -2,9 +2,12 @@
 
 #include "CTaskSimplePlayerOnFoot.h"
 
-#include "CTaskComplexUseGoggles.h"
 #include "CTaskSimpleUseGun.h"
 #include "CTaskSimpleThrowProjectile.h"
+
+#include "CTaskComplexJump.h"
+#include "CTaskComplexUseGoggles.h"
+#include "CTaskSimpleStealthKill.h"
 
 int32& gLastRandomNumberForIdleAnimationID = *reinterpret_cast<int32*>(0x8D2FEC);
 uint32& gLastTouchTimeDelta = *reinterpret_cast<uint32*>(0xC19664);

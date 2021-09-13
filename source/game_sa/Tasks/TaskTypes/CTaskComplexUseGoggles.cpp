@@ -2,6 +2,9 @@
 
 #include "CTaskComplexUseGoggles.h"
 
+#include "CTaskSimpleRunAnim.h"
+#include "CTaskSimplePlayerOnFoot.h"
+
 // 0x634EF0
 CTaskComplexUseGoggles::CTaskComplexUseGoggles() : CTaskComplex() {
     // NOP

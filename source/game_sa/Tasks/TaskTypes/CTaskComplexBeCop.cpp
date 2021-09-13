@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskComplexBeCop.h"
+
 eTaskType CTaskComplexBeCop::GetTaskType()
 {
 #ifdef USE_DEFAULT_FUNCTIONS 

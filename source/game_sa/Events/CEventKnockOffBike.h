@@ -1,3 +1,5 @@
+#pragma once
+
 #include "CEvent.h"
 #include "CVector.h"
 

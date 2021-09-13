@@ -1,5 +1,10 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleHoldEntity.h"
+
+#include "CTaskSimplePickUpEntity.h"
+#include "CTaskSimplePutDownEntity.h"
+
 void CTaskSimpleHoldEntity::InjectHooks() {
     using namespace ReversibleHooks;
     Install("CTaskSimpleHoldEntity", "Constructor_1", 0x6913A0, (CTaskSimpleHoldEntity*(CTaskSimpleHoldEntity::*)(CEntity*, CVector*, char, uint8, AnimationId, AssocGroupId, bool)) & CTaskSimpleHoldEntity::Constructor);

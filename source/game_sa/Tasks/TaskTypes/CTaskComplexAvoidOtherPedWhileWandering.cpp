@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskComplexAvoidOtherPedWhileWandering.h"
+
 void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexAvoidOtherPedWhileWandering", "CTaskComplexAvoidOtherPedWhileWandering", 0x66A100, &CTaskComplexAvoidOtherPedWhileWandering::Constructor);

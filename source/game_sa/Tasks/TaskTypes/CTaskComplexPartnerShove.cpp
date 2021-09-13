@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskComplexPartnerShove.h"
+
 void CTaskComplexPartnerShove::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexPartnerShove", "CTaskComplexPartnerShove", 0x6846F0, &CTaskComplexPartnerShove::Constructor);

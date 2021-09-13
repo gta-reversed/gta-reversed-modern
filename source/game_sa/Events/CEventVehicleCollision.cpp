@@ -1,5 +1,11 @@
 #include "StdInc.h"
 
+#include "CEventVehicleCollision.h"
+
+#include "CTaskSimpleGoTo.h"
+#include "CTaskComplexWalkRoundCar.h"
+#include "CTaskComplexHitPedWithCar.h"
+
 void CEventVehicleCollision::InjectHooks()
 {
     ReversibleHooks::Install("CEventVehicleCollision", "Constructor",0x4AC840, &CEventVehicleCollision::Constructor);

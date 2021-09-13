@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskComplexPartnerChat.h"
+
 void CTaskComplexPartnerChat::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexPartnerChat", "CTaskComplexPartnerChat", 0x684290, &CTaskComplexPartnerChat::Constructor);

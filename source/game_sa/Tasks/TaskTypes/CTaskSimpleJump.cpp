@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleJump.h"
+
 void CTaskSimpleJump::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleJump", "Constructor", 0x679AA0, &CTaskSimpleJump::Constructor);

@@ -1,5 +1,22 @@
 #include "StdInc.h"
 
+#include "CTaskComplexWander.h"
+
+#include "CTaskSimpleCarDriveTimed.h"
+#include "CTaskSimpleScratchHead.h"
+#include "CTaskSimpleStandStill.h"
+#include "CTaskSimpleGoToPoint.h"
+#include "CTaskSimpleRunAnim.h"
+
+#include "CTaskComplexObserveTrafficLightsAndAchieveHeading.h"
+#include "CTaskComplexCrossRoadLookAndAchieveHeading.h"
+#include "CTaskComplexWanderProstitute.h"
+#include "CTaskComplexWanderStandard.h"
+#include "CTaskComplexWanderCriminal.h"
+#include "CTaskComplexWanderMedic.h"
+#include "CTaskComplexWanderCop.h"
+#include "CTaskComplexLeaveCar.h"
+
 void CTaskComplexWander::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexWander", "CTaskComplexWander", 0x66F450, &CTaskComplexWander::Constructor);

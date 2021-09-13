@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleFall.h"
+
 uint32 &CTaskSimpleFall::m_nMaxPlayerDownTime = *reinterpret_cast<uint32*>(0x8D2EF4);
 
 void CTaskSimpleFall::InjectHooks()

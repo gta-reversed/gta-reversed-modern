@@ -1,5 +1,12 @@
 #include "StdInc.h"
 
+#include "CTaskComplexJump.h"
+
+#include "CTaskSimpleJump.h"
+#include "CTaskSimpleHitHead.h"
+#include "CTaskComplexInAirAndLand.h"
+#include "CTaskSimpleClimb.h"
+
 void CTaskComplexJump::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexJump", "Constructor", 0x67A030, &CTaskComplexJump::Constructor);

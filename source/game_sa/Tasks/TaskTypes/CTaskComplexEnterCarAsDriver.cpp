@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskComplexEnterCarAsDriver.h"
+
 CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* pTargetVehicle)
     : CTaskComplexEnterCar(pTargetVehicle, true, false, false, false)
 {

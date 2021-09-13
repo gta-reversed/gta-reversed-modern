@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleUninterruptable.h"
+
 void CTaskSimpleUninterruptable::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleUninterruptable", "Constructor", 0x43E2E0, &CTaskSimpleUninterruptable::Constructor);

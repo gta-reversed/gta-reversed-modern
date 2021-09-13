@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleDuck.h"
+
 CTaskSimpleDuck* CTaskSimpleDuck::Constructor(eDuckControlTypes DuckControlType, uint16 nLengthOfDuck, int16 nUseShotsWhizzingEvents)
 {
     return plugin::CallMethodAndReturn<CTaskSimpleDuck*, 0x691FC0, CTaskSimpleDuck*, eDuckControlTypes, uint16, int16>

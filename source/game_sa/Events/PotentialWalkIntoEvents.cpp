@@ -1,5 +1,14 @@
 #include "StdInc.h"
 
+#include "PotentialWalkIntoEvents.h"
+
+#include "CTaskComplexEnterCarAsDriver.h"
+#include "CTaskSimpleGoTo.h"
+#include "CTaskComplexWalkRoundCar.h"
+#include "CTaskComplexWalkRoundObject.h"
+#include "CTaskComplexFollowPedFootsteps.h"
+#include "CTaskComplexKillPedOnFoot.h"
+
 void CEventPotentialWalkIntoVehicle::InjectHooks()
 {
     ReversibleHooks::Install("CEventPotentialWalkIntoVehicle", "CEventPotentialWalkIntoVehicle", 0x4AE320, &CEventPotentialWalkIntoVehicle::Constructor);

@@ -3,6 +3,7 @@
 #include "CEventDamage.h"
 
 #include "CPedType.h"
+#include "CTaskComplexKillPedOnFoot.h"
 
 void CEventDamage::InjectHooks() {
     using namespace ReversibleHooks;

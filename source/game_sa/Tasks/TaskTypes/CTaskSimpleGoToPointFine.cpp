@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleGoToPointFine.h"
+
 void CTaskSimpleGoToPointFine::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleGoToPointFine", "CTaskSimpleGoToPointFine", 0x65EEB0, &CTaskSimpleGoToPointFine::Constructor);

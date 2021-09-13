@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskComplexLeaveCar.h"
+
 CTaskComplexLeaveCar::CTaskComplexLeaveCar(CVehicle* pTargetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut)
 {
     m_nTargetDoor = nTargetDoor;

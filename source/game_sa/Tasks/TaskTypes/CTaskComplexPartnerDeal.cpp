@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskComplexPartnerDeal.h"
+
 void CTaskComplexPartnerDeal::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexPartnerDeal", "CTaskComplexPartnerDeal", 0x684190, &CTaskComplexPartnerDeal::Constructor);

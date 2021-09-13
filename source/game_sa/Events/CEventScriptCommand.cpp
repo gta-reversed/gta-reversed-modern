@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "CEventScriptCommand.h"
+
+#include "CTaskSimpleRunAnim.h"
+
 void CEventScriptCommand::InjectHooks()
 {
     ReversibleHooks::Install("CEventScriptCommand", "Constructor", 0x4B0A00, &CEventScriptCommand::Constructor);

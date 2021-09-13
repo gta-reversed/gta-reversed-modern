@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleGiveCPR.h"
+
 void CTaskSimpleGiveCPR::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleGiveCPR", "Constructor", 0x658860, &CTaskSimpleGiveCPR::Constructor);

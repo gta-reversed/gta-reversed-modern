@@ -1,5 +1,15 @@
 #include "StdInc.h"
 
+#include "LeaderEvents.h"
+// #include "CEventLeaderEnteredCarAsDriver.h"
+// #include "CEventLeaderExitedCarAsDriver.h"
+// #include "CEventLeaderQuitEnteringCarAsDriver.h"
+// #include "CEventAreaCodes.h"
+// #include "CEventLeaderEntryExit.h"
+
+#include "CTaskComplexKillPedOnFoot.h"
+#include "CTaskComplexArrestPed.h"
+
 void CEventLeaderEnteredCarAsDriver::InjectHooks()
 {
     ReversibleHooks::Install("CEventLeaderEnteredCarAsDriver", "CEventLeaderEnteredCarAsDriver", 0x48E1C0, &CEventLeaderEnteredCarAsDriver::Constructor);
