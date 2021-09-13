@@ -216,13 +216,8 @@ CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
                 return CreateSubTask(ped, TASK_SIMPLE_GO_TO_POINT);
             }
 
-            auto pTaskCrossRoadAndHeading = (CTaskComplexCrossRoadLookAndAchieveHeading*)CTask::operator new(20);
-            if (pTaskCrossRoadAndHeading)
-            {
-                float fTargetHeading = ComputeTargetHeading(ped);
-                pTaskCrossRoadAndHeading->Constructor(2000, fTargetHeading);
-                return (CTask*)pTaskCrossRoadAndHeading;
-            }
+            float fTargetHeading = ComputeTargetHeading(ped);
+            return new CTaskComplexCrossRoadLookAndAchieveHeading(2000, fTargetHeading);
         }
         else
         {
@@ -425,7 +420,7 @@ CTask* CTaskComplexWander::CreateSubTask(CPed* ped, int32 taskId)
             auto pTaskComplexLeaveCar = (CTaskComplexLeaveCar*)CTask::operator new(52);
             if (pTaskComplexLeaveCar)
             {
-                pTaskComplexLeaveCar->Constructor(ped->m_pVehicle, 0, 0, 1, 0);
+                pTaskComplexLeaveCar->Constructor(ped->m_pVehicle, 0, 0, true, false);
                 return pTaskComplexLeaveCar;
             }
             break;
@@ -443,14 +438,7 @@ CTask* CTaskComplexWander::CreateSubTask(CPed* ped, int32 taskId)
         }
         case TASK_COMPLEX_CROSS_ROAD_LOOK_AND_ACHIEVE_HEADING:
         {
-            auto pTaskCrossRoadAndAchieveHeading = (CTaskComplexCrossRoadLookAndAchieveHeading*)CTask::operator new(20);
-            if (pTaskCrossRoadAndAchieveHeading)
-            {
-                float fTargetHeading = ComputeTargetHeading(ped);
-                pTaskCrossRoadAndAchieveHeading->Constructor(2000, fTargetHeading);;
-                return pTaskCrossRoadAndAchieveHeading;
-            }
-            break;
+            return new CTaskComplexCrossRoadLookAndAchieveHeading(2000, ComputeTargetHeading(ped));
         }
         case TASK_SIMPLE_SCRATCH_HEAD:
         {
