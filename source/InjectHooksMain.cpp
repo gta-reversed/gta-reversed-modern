@@ -155,6 +155,7 @@ void InjectHooksMain()
 {
     // WaitForDebugger();
 
+    CEventHandler::InjectHooks();
     CVehicleRecording::InjectHooks();
     Fx_c::InjectHooks();
     CBrightLights::InjectHooks();
