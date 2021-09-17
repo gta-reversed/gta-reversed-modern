@@ -220,6 +220,9 @@ void CDebugMenu::ProcessRenderTool() {
     if (ImGui::CollapsingHeader("Collision")) {
         CollisionDebugModule::ProcessImgui();
     }
+    if (ImGui::CollapsingHeader("Text")) {
+        TextDebugModule::ProcessImgui();
+    }
 }
 
 // TODO: The code is a mess, clean it up

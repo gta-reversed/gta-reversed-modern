@@ -18,8 +18,8 @@ CText& TheText = *(CText*)0xC1B340;
 // 0xC1AEB8
 char GxtErrorString[32];
 
-// 0x56D3A4
-static constexpr uint8 FrenchUpperCaseTable[] = {
+// 0x8D2FB8
+static constexpr uint8 UpperCaseTable[] = {
     0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F,
     0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x41, 0x41, 0x41, 0x41, 0x84, 0x85, 0x45, 0x45, 0x45,
     0x45, 0x49, 0x49, 0x49, 0x49, 0x4F, 0x4F, 0x4F, 0x4F, 0x55, 0x55, 0x55, 0x55, 0xAD, 0xAD, 0xAF,
@@ -28,7 +28,10 @@ static constexpr uint8 FrenchUpperCaseTable[] = {
     0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF,
     0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF,
     0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF,
+};
 
+// 0x8D3038
+static constexpr uint8 FrenchUpperCaseTable[] = {
     0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F,
     0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88,
     0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F, 0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0xAD, 0xAD, 0xAF,
@@ -37,28 +40,51 @@ static constexpr uint8 FrenchUpperCaseTable[] = {
     0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF,
     0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF,
     0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF,
-    };
+};
+
+static constexpr uint8 UpperCaseTableX[128] = {
+    128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143,
+    144, 145, 146, 147, 148, 149, 150, 128, 129, 130, 131, 132, 133, 134, 135, 136,
+    137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 173, 173, 175,
+    176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191,
+    192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
+    208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
+    224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
+    240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255
+};
+
+static constexpr uint8 FrenchUpperCaseTableX[128] = {
+    128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143,
+    144, 145, 146, 147, 148, 149, 150, 65,  65,  65,  65,  132, 133, 69,  69,  69,
+    69,  73,  73,  73,  73,  79,  79,  79,  79,  85,  85,  85,  85,  173, 173, 175,
+    176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191,
+    192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
+    208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
+    224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
+    240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255
+};
 
 void CText::InjectHooks() {
-    //    ReversibleHooks::Install("CMissionTextOffsets", "Load", 0x69F670, &CMissionTextOffsets::Load);
+    using namespace ReversibleHooks;
+    // Install("CMissionTextOffsets", "Load", 0x69F670, &CMissionTextOffsets::Load);
 
-    ReversibleHooks::Install("CData", "Unload", 0x69F640, &CData::Unload);
-    //    ReversibleHooks::Install("CData", "Load", 0x69F5D0, &CData::Load);
+    Install("CData", "Unload", 0x69F640, &CData::Unload);
+    // Install("CData", "Load", 0x69F5D0, &CData::Load);
 
-    ReversibleHooks::Install("CKeyArray", "Unload", 0x69F510, &CKeyArray::Unload);
-    //    ReversibleHooks::Install("CKeyArray", "Load", 0x69F490, &CKeyArray::Load);
-    ReversibleHooks::Install("CKeyArray", "BinarySearch", 0x69F570, &CKeyArray::BinarySearch);
-    ReversibleHooks::Install("CKeyArray", "Search", 0x6A0000, &CKeyArray::Search);
+    Install("CKeyArray", "Unload", 0x69F510, &CKeyArray::Unload);
+    // Install("CKeyArray", "Load", 0x69F490, &CKeyArray::Load);
+    Install("CKeyArray", "BinarySearch", 0x69F570, &CKeyArray::BinarySearch);
+    Install("CKeyArray", "Search", 0x6A0000, &CKeyArray::Search);
 
-    ReversibleHooks::Install("CText", "CText", 0x6A00F0, &CText::Constructor);
-    ReversibleHooks::Install("CText", "~CText", 0x6A0140, &CText::Destructor);
-    ReversibleHooks::Install("CText", "Get", 0x6A0050, &CText::Get);
-    ReversibleHooks::Install("CText", "GetNameOfLoadedMissionText", 0x69FBD0, &CText::GetNameOfLoadedMissionText);
-    //    ReversibleHooks::Install("CText", "ReadChunkHeader", 0x69F940, &CText::ReadChunkHeader);
-    //    ReversibleHooks::Install("CText", "LoadMissionPackText", 0x69F9A0, &CText::LoadMissionPackText);
-    //    ReversibleHooks::Install("CText", "LoadMissionText", 0x69FBF0, &CText::LoadMissionText);
-    ReversibleHooks::Install("CText", "Load", 0x6A01A0, &CText::Load);
-    ReversibleHooks::Install("CText", "Unload", 0x69FF20, &CText::Unload);
+    Install("CText", "CText", 0x6A00F0, &CText::Constructor);
+    Install("CText", "~CText", 0x6A0140, &CText::Destructor);
+    Install("CText", "Get", 0x6A0050, &CText::Get);
+    Install("CText", "GetNameOfLoadedMissionText", 0x69FBD0, &CText::GetNameOfLoadedMissionText);
+    // Install("CText", "ReadChunkHeader", 0x69F940, &CText::ReadChunkHeader);
+    // Install("CText", "LoadMissionPackText", 0x69F9A0, &CText::LoadMissionPackText);
+    // Install("CText", "LoadMissionText", 0x69FBF0, &CText::LoadMissionText);
+    Install("CText", "Load", 0x6A01A0, &CText::Load);
+    Install("CText", "Unload", 0x69FF20, &CText::Unload);
 }
 
 // 0x6A00F0
@@ -113,25 +139,25 @@ void CText::Load(bool bKeepMissionPack) {
     case eLanguage::AMERICAN:
         sprintf(filename, "AMERICAN.GXT");
         break;
-        case eLanguage::FRENCH:
-            sprintf(filename, "FRENCH.GXT");
-            break;
-            case eLanguage::GERMAN:
-                sprintf(filename, "GERMAN.GXT");
-                break;
-                case eLanguage::ITALIAN:
-                    sprintf(filename, "ITALIAN.GXT");
-                    break;
-                    case eLanguage::SPANISH:
-                        sprintf(filename, "SPANISH.GXT");
-                        break;
+    case eLanguage::FRENCH:
+        sprintf(filename, "FRENCH.GXT");
+        break;
+    case eLanguage::GERMAN:
+        sprintf(filename, "GERMAN.GXT");
+        break;
+    case eLanguage::ITALIAN:
+        sprintf(filename, "ITALIAN.GXT");
+        break;
+    case eLanguage::SPANISH:
+        sprintf(filename, "SPANISH.GXT");
+        break;
 #ifdef MORE_LANGUAGES
-                        case eLanguage::RUSSIAN:
-                            sprintf(filename, "RUSSIAN.GXT");
-                            break;
-                            case eLanguage::JAPANESE:
-                                sprintf(filename, "JAPANESE.GXT");
-                                break;
+    case eLanguage::RUSSIAN:
+        sprintf(filename, "RUSSIAN.GXT");
+        break;
+    case eLanguage::JAPANESE:
+        sprintf(filename, "JAPANESE.GXT");
+        break;
 #endif
     }
 
@@ -148,20 +174,20 @@ void CText::Load(bool bKeepMissionPack) {
     bool bTDAT = false;
     ChunkHeader header{};
     while (!bTKEY || !bTDAT) {
-        ReadChunkHeader(&header, file, &offset, 0);
+        ReadChunkHeader(&header, file, &offset, false);
         if (header.size == 0)
             continue;
 
         if (strncmp(header.magic, CHUNK_TABL, sizeof(header.magic)) == 0) {
-            m_MissionTextOffsets.Load(header.size, file, &offset, 0x58000); // todo: magic
+            m_MissionTextOffsets.Load(header.size, file, &offset, 0x58000); // todo: magic. Android have different value 0x64000
             m_bIsMissionTextOffsetsLoaded = true;
         }
         else if (strncmp(header.magic, CHUNK_TKEY, sizeof(header.magic)) == 0) {
-            m_MainKeyArray.Load(header.size, file, &offset, 0);
+            m_MainKeyArray.Load(header.size, file, &offset, false);
             bTKEY = true;
         }
         else if (strncmp(header.magic, CHUNK_TDAT, sizeof(header.magic)) == 0) {
-            m_MainText.Load(header.size, file, &offset, 0);
+            m_MainText.Load(header.size, file, &offset, false);
             bTDAT = true;
         }
         else {
@@ -170,7 +196,7 @@ void CText::Load(bool bKeepMissionPack) {
         }
     }
 
-    m_MainKeyArray.Update(m_MainText.data);
+    m_MainKeyArray.Update(m_MainText.m_data);
     CFileMgr::CloseFile(file);
 
     const auto text = TheText.Get("CDERROR");
@@ -236,13 +262,19 @@ void CText::GetNameOfLoadedMissionText(char* outStr) {
 }
 
 // 0x69F940
-bool CText::ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint32* offset, uint8 nSkipBytes) {
-    return plugin::CallMethodAndReturn<bool, 0x69F940, CText*, ChunkHeader*, FILESTREAM, uint32*, uint8>(this, header, file, offset, nSkipBytes);
+bool CText::ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint32* offset, uint8 unknown) {
+    for (uint32 i = 0; i < sizeof(ChunkHeader); ++i) {
+        if (sizeof(uint8) != CFileMgr::Read(file, (uint8 *)header + i, sizeof(uint8))) {
+            return false;
+        }
+        ++*offset;
+    }
+    return true;
 
 #ifdef USE_ORIGINAL_CODE
     // Taken from re3. That not same as original, but do same thing
     char* _header = (char*)header;
-    for (int32 i = 0; i < sizeof(ChunkHeader); i++) {
+    for (int i = 0; i < sizeof(ChunkHeader); i++) {
         CFileMgr::Read(file, &_header[i], 1);
         (*offset)++;
     }
@@ -250,6 +282,7 @@ bool CText::ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint32* offset
     return true;
 #else
     // re3: original code loops 8 times to read 1 byte with CFileMgr::Read, that's retarded
+    // Same as in Android 2.0
     CFileMgr::Read(file, header, sizeof(ChunkHeader));
     *offset += sizeof(ChunkHeader);
 
@@ -259,36 +292,35 @@ bool CText::ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint32* offset
 
 // unused
 // 0x69F750
-char CText::GetUpperCase(char unk) {
+char CText::GetUpperCase(char c) const {
     switch (m_nLangCode) {
     case 'e': // english
-    if (unk > 0x7A)
-        return unk;
+        if (c >= 'a' && c <= 'z')
+            return c - 32;
+        break;
 
-    return unk - 0x20;
+    case 'f':
+        if (c >= 'a' && c <= 'z')
+            return c - 32;
+
+        if (c >= 128 && c <= 255)
+            return FrenchUpperCaseTable[c - 128];
+        break;
 
     case 'g': // german
     case 'i': // italian
     case 's': // spanish
-    if (unk <= 0x7A)
-        return unk - 0x20;
+        if (c >= 'a' && c <= 'z')
+            return c - 32;
 
-    if (unk > 0xFF)
-        return unk;
+        if (c >= 128 && c <= 255)
+            return UpperCaseTable[c - 128];
+        break;
 
-    return FrenchUpperCaseTable[unk];
-
-    case 'f':
-        if (unk <= 0x7A)
-            return unk - 0x20;
-
-        if (unk > 0xFF)
-            return unk;
-
-        return FrenchUpperCaseTable[unk - 0x80];
+    default:
+        break;
     }
-
-    return unk;
+    return c;
 }
 
 CText* CText::Constructor() {

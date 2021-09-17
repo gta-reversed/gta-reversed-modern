@@ -8,18 +8,22 @@ struct CKeyEntry {
 // TKEY block
 class CKeyArray {
 public:
-    CKeyEntry* data;
-    uint32   size;
+    CKeyEntry* m_data;
+    uint32     m_size;
 
 public:
     CKeyArray();
     ~CKeyArray();
 
+    bool Load(uint32 length, FILESTREAM file, uint32* offset, uint8 unknown);
     void Unload();
-    void Load(uint32 length, FILESTREAM file, uint32* offset, uint8 nSkipBytes);
 
     void /* inline */ Update(char* offset);
-
-    CKeyEntry* BinarySearch(uint32 key, CKeyEntry* entries, int16 firstIndex, int16 lastIndex);
     char* Search(const char* key, bool* found);
+
+private:
+    CKeyEntry* BinarySearch(uint32 key, CKeyEntry* entries, int16 firstIndex, int16 lastIndex);
+
+private:
+    friend class CText; // InjectHooks()
 };
