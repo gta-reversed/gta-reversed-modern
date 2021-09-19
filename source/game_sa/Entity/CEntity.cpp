@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
@@ -12,6 +12,7 @@ Do not delete this comment block. Respect others' work!
 #include "CEscalators.h"
 #include "CCustomBuildingDNPipeline.h"
 #include "COcclusion.h"
+#include "CMotionBlurStreaks.h"
 
 void CEntity::InjectHooks()
 {
@@ -704,13 +705,7 @@ void CEntity::PreRender_Reversed()
             auto vecStreakStart = vecPos - vecScaledCam;
             auto vecStreakEnd = vecPos + vecScaledCam;
             if (CVector2D(pObject->m_vecMoveSpeed).Magnitude() > 0.03F) {
-                CMotionBlurStreaks::RegisterStreak(reinterpret_cast<uint32>(this),
-                                                   100,
-                                                   100,
-                                                   100,
-                                                   255,
-                                                   vecStreakStart,
-                                                   vecStreakEnd);
+                CMotionBlurStreaks::RegisterStreak(reinterpret_cast<uint32>(this), 100, 100, 100, 255, vecStreakStart, vecStreakEnd);
             }
         }
         else if (m_nModelIndex == eModelID::MODEL_MOLOTOV) {
@@ -721,13 +716,7 @@ void CEntity::PreRender_Reversed()
             if (CVector2D(pObject->m_vecMoveSpeed).Magnitude() > 0.03F) {
                 float fWaterLevel;
                 if (!CWaterLevel::GetWaterLevelNoWaves(vecPos.x, vecPos.y, vecPos.z, &fWaterLevel, nullptr, nullptr) || vecPos.z > fWaterLevel) {
-                    CMotionBlurStreaks::RegisterStreak(reinterpret_cast<uint32>(this),
-                                                   255,
-                                                   160,
-                                                   100,
-                                                   255,
-                                                   vecStreakStart,
-                                                   vecStreakEnd);
+                    CMotionBlurStreaks::RegisterStreak(reinterpret_cast<uint32>(this), 255, 160, 100, 255, vecStreakStart, vecStreakEnd);
                 }
             }
         }

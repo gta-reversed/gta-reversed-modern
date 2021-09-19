@@ -181,7 +181,6 @@
 #include "game_sa\CMirrors.h"
 #include "game_sa\CMissionCleanup.h"
 #include "game_sa\CModelInfoAccelerator.h"
-#include "game_sa\CMotionBlurStreaks.h"
 #include "game_sa\CNodeAddress.h"
 #include "game_sa\CObjectData.h"
 #include "game_sa\CObjectSaveStructure.h"

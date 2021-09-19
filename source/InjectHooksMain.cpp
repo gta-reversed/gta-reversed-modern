@@ -39,6 +39,7 @@
 #include "COcclusion.h"
 #include "COccluder.h"
 #include "CActiveOccluder.h"
+#include "CMotionBlurStreaks.h"
 
 #include "CTaskSimpleAbseil.h"
 #include "CTaskComplexWanderCop.h"
