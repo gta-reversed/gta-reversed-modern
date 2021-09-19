@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
@@ -90,8 +90,8 @@ void CTimer::Initialise()
     m_sbEnableTimeDebug = false;
     game_FPS = 0.0f;
 
-    ms_fTimeScale = 1.0;
-    ms_fSlowMotionScale = -1.0;
+    ms_fTimeScale = 1.0f;
+    ms_fSlowMotionScale = -1.0f;
     ms_fTimeStep = 1.0f;
     ms_fOldTimeStep = 1.0f;
     // unused dword_B7CB60 = 0xBF800000;
@@ -227,11 +227,6 @@ void CTimer::UpdateVariables(float timeStep)
 
     ms_fOldTimeStep = ms_fTimeStep;
     ms_fTimeStep = clamp<float>(ms_fTimeStepNonClipped, 0.00001f, 3.0f);
-}
-
-void CTimer::UpdateTimeStep(float fTimeStep)
-{
-    ms_fTimeStep = std::max(fTimeStep, 0.00001f);
 }
 
 // 0x561B10
