@@ -4,75 +4,67 @@
 
 void CTaskSimpleGoToPointFine::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleGoToPointFine", "CTaskSimpleGoToPointFine", 0x65EEB0, &CTaskSimpleGoToPointFine::Constructor);
-    ReversibleHooks::Install("CTaskSimpleGoToPointFine", "Clone", 0x662040, &CTaskSimpleGoToPointFine::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPointFine", "MakeAbortable", 0x663500, &CTaskSimpleGoToPointFine::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPointFine", "ProcessPed", 0x663540, &CTaskSimpleGoToPointFine::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPointFine", "SetBlendedMoveAnim", 0x65EF80, &CTaskSimpleGoToPointFine::SetBlendedMoveAnim);
+    using namespace ReversibleHooks;
+    Install("CTaskSimpleGoToPointFine", "CTaskSimpleGoToPointFine", 0x65EEB0, &CTaskSimpleGoToPointFine::Constructor);
+    Install("CTaskSimpleGoToPointFine", "Clone", 0x662040, &CTaskSimpleGoToPointFine::Clone_Reversed);
+    Install("CTaskSimpleGoToPointFine", "MakeAbortable", 0x663500, &CTaskSimpleGoToPointFine::MakeAbortable_Reversed);
+    Install("CTaskSimpleGoToPointFine", "ProcessPed", 0x663540, &CTaskSimpleGoToPointFine::ProcessPed_Reversed);
+    Install("CTaskSimpleGoToPointFine", "SetBlendedMoveAnim", 0x65EF80, &CTaskSimpleGoToPointFine::SetBlendedMoveAnim);
+    Install("CTaskSimpleGoToPointFine", "Finish", 0x65EF00, &CTaskSimpleGoToPointFine::Finish);
+    Install("CTaskSimpleGoToPointFine", "SetTargetPos", 0x65F330, &CTaskSimpleGoToPointFine::SetTargetPos);
+    Install("CTaskSimpleGoToPointFine", "BaseRatio", 0x65EF30, &CTaskSimpleGoToPointFine::BaseRatio);
 }
 
-CTaskSimpleGoToPointFine::CTaskSimpleGoToPointFine(float fBlend, CVector targetPoint, float fRadius, int32 unused) :
+// 0x65EEB0
+CTaskSimpleGoToPointFine::CTaskSimpleGoToPointFine(float moveRatio, CVector targetPoint, float fRadius, CEntity* entity) :
     CTaskSimpleGoTo(PEDMOVE_WALK, targetPoint, fRadius)
 {
-    m_fBlend = fBlend;
+    SetMoveRatio(moveRatio);
 }
 
-CTaskSimpleGoToPointFine::~CTaskSimpleGoToPointFine()
+// 0x65EEB0
+CTaskSimpleGoToPointFine* CTaskSimpleGoToPointFine::Constructor(float moveRatio, CVector targetPoint, float fRadius, CEntity* entity)
 {
-    // nothing here
-}
-
-CTaskSimpleGoToPointFine* CTaskSimpleGoToPointFine::Constructor(float fBlend, CVector targetPoint, float fRadius, int32 unused)
-{
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTaskSimpleGoToPointFine*, 0x65EEB0, CTask*, float, CVector, float, int32>
-        (this, fBlend, targetPoint, fRadius, unused);
-#else
-    this->CTaskSimpleGoToPointFine::CTaskSimpleGoToPointFine(fBlend, targetPoint, fRadius, unused);
+    this->CTaskSimpleGoToPointFine::CTaskSimpleGoToPointFine(moveRatio, targetPoint, fRadius, entity);
     return this;
-#endif
 }
 
+// 0x662040
 CTask* CTaskSimpleGoToPointFine::Clone()
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTask*, 0x662040, CTask*>(this);
-#else
     return CTaskSimpleGoToPointFine::Clone_Reversed();
-#endif
 }
 
+// 0x663500
 bool CTaskSimpleGoToPointFine::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<bool, 0x663500, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
-#else
     return CTaskSimpleGoToPointFine::MakeAbortable_Reversed(ped, priority, event);
-#endif
 }
 
+// 0x663540
 bool CTaskSimpleGoToPointFine::ProcessPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<bool, 0x663540, CTask*, CPed*>(this, ped);
-#else
     return CTaskSimpleGoToPointFine::ProcessPed_Reversed(ped);
-#endif
 }
 
 CTask* CTaskSimpleGoToPointFine::Clone_Reversed()
 {
-    return new CTaskSimpleGoToPointFine(m_fBlend, m_vecTargetPoint, m_fRadius, 0);
+    return new CTaskSimpleGoToPointFine(m_fMoveRatio, m_vecTargetPoint, m_fRadius, nullptr);
 }
 
 bool CTaskSimpleGoToPointFine::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
     QuitIK(ped);
+    Finish(ped);
+    return true;
+}
+
+// 0x65EF00
+void CTaskSimpleGoToPointFine::Finish(CPed* ped) {
     ped->SetMoveState(PEDMOVE_STILL);
     ped->SetMoveAnim();
     ped->SetMoveState(static_cast<eMoveState>(m_moveState));
     ped->SetMoveAnim();
-    return true;
 }
 
 bool CTaskSimpleGoToPointFine::ProcessPed_Reversed(CPed* ped)
@@ -80,135 +72,154 @@ bool CTaskSimpleGoToPointFine::ProcessPed_Reversed(CPed* ped)
     CVector2D vecDistance = m_vecTargetPoint - ped->GetPosition();
     if (m_fRadius * m_fRadius >= vecDistance.SquaredMagnitude() || HasCircledTarget(ped)) {
         QuitIK(ped);
-        ped->SetMoveState(PEDMOVE_STILL);
-        ped->SetMoveAnim();
-        ped->SetMoveState(static_cast<eMoveState>(m_moveState));
-        ped->SetMoveAnim();
+        Finish(ped);
         return true;
     }
     SetBlendedMoveAnim(ped);
-    float fAngleInRadians = CGeneral::GetRadianAngleBetweenPoints(vecDistance.x, vecDistance.y, 0.0f, 0.0f);
+    const float fAngleInRadians = CGeneral::GetRadianAngleBetweenPoints(vecDistance.x, vecDistance.y, 0.0f, 0.0f);
     ped->m_fAimingRotation = CGeneral::LimitRadianAngle(fAngleInRadians);
     SetUpIK(ped);
     return false;
 }
 
+// todo: IDA code, BaseRatio can be used
+// 0x65EF80
 void CTaskSimpleGoToPointFine::SetBlendedMoveAnim(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethod<0x65EF80, CTask*, CPed*>(this, ped);
-#else
-    auto pIdleAnimAssoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_IDLE);
-    auto pWalkAnimAssoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_WALK);
-    auto pRunAnimAssoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_RUN);
-    auto pSprintAnimAssoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_SPRINT);
+    auto idleAnimAssoc       = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_IDLE);
+    auto walkAnimAssoc       = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_WALK);
+    auto runAnimAssoc        = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_RUN);
+    auto sprintAnimAssoc     = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_SPRINT);
     auto pIdleTiredAnimAssoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_IDLE_TIRED);
+
     if (ped->bIsDucking && ped->m_pIntelligence->GetTaskDuck(false)) {
-        float fMoveSpeedY = m_fBlend * 0.5f;
-        if (fMoveSpeedY > 1.0f)
-            fMoveSpeedY = 1.0f;
-        CTaskSimpleDuck * pDuckTask = ped->m_pIntelligence->GetTaskDuck(false);
-        pDuckTask->ControlDuckMove(0.0, -fMoveSpeedY);
+        float fMoveSpeedY = m_fMoveRatio * 0.5f;
+        fMoveSpeedY = std::min(fMoveSpeedY, 1.0f);
+        CTaskSimpleDuck* duckTask = ped->m_pIntelligence->GetTaskDuck(false);
+        duckTask->ControlDuckMove(0.0f, -fMoveSpeedY);
         return;
     }
+
     if (ped->bResetWalkAnims) {
-        if (pWalkAnimAssoc)
-            pWalkAnimAssoc->SetCurrentTime(0.0f);
-        if (pRunAnimAssoc)
-            pRunAnimAssoc->SetCurrentTime(0.0f);
-        if (pSprintAnimAssoc)
-            pSprintAnimAssoc->SetCurrentTime(0.0f);
+        if (walkAnimAssoc)
+            walkAnimAssoc->SetCurrentTime(0.0f);
+        if (runAnimAssoc)
+            runAnimAssoc->SetCurrentTime(0.0f);
+        if (sprintAnimAssoc)
+            sprintAnimAssoc->SetCurrentTime(0.0f);
         ped->bResetWalkAnims = false;
     }
-    if (m_fBlend == 0.0f) {
-        if (!pIdleAnimAssoc)
+
+    if (m_fMoveRatio == 0.0f) {
+        if (!idleAnimAssoc) {
             CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 4.0f);
-        if (pWalkAnimAssoc)
-            delete pWalkAnimAssoc;
-        if (pRunAnimAssoc)
-            delete pRunAnimAssoc;
-        if (pSprintAnimAssoc)
-            delete pSprintAnimAssoc;
+        }
+
+        delete walkAnimAssoc;
+        delete runAnimAssoc;
+        delete sprintAnimAssoc;
         ped->m_nMoveState = PEDMOVE_STILL;
         m_moveState = PEDMOVE_STILL;
         return;
     }
-    if (pIdleAnimAssoc) {
-        if (pWalkAnimAssoc)
-            pWalkAnimAssoc->SetCurrentTime(0.0f);
-        if (pRunAnimAssoc)
-            pRunAnimAssoc->SetCurrentTime(0.0f);
-        delete pIdleAnimAssoc;
+
+    if (idleAnimAssoc) {
+        if (walkAnimAssoc)
+            walkAnimAssoc->SetCurrentTime(0.0f);
+        if (runAnimAssoc)
+            runAnimAssoc->SetCurrentTime(0.0f);
+        delete idleAnimAssoc;
     }
+
     if (pIdleTiredAnimAssoc) {
         pIdleTiredAnimAssoc->m_fBlendDelta = -4.0f;
         delete pIdleTiredAnimAssoc;
     }
+
     eMoveState moveState = PEDMOVE_WALK;
-    if (m_fBlend > 1.0f) {
-        if (m_fBlend > 2.0f) {
-            if (m_fBlend > 3.0f)
+    if (m_fMoveRatio > 1.0f) {
+        if (m_fMoveRatio > 2.0f) {
+            if (m_fMoveRatio > 3.0f)
                 return;
-            if (pWalkAnimAssoc)
-                delete pWalkAnimAssoc;
-            if (!pRunAnimAssoc) {
-                pRunAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_RUN);
-                pRunAnimAssoc->m_fBlendAmount = 0.0f;
-                pRunAnimAssoc->m_fSpeed = 1.0f;
+
+            delete walkAnimAssoc;
+            if (!runAnimAssoc) {
+                runAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_RUN);
+                runAnimAssoc->m_fBlendAmount = 0.0f;
+                runAnimAssoc->m_fSpeed = 1.0f;
             }
-            pRunAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
-            pRunAnimAssoc->m_fBlendDelta = 0.0f;
-            pRunAnimAssoc->m_fBlendAmount = 3.0f - m_fBlend;
-            if (!pSprintAnimAssoc)
+            runAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
+            runAnimAssoc->m_fBlendDelta = 0.0f;
+            runAnimAssoc->m_fBlendAmount = 3.0f - m_fMoveRatio;
+            if (!sprintAnimAssoc)
             {
-                pSprintAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_SPRINT);
-                pSprintAnimAssoc->m_fBlendAmount = 0.0f;
-                pSprintAnimAssoc->m_fSpeed = 1.0f;
+                sprintAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_SPRINT);
+                sprintAnimAssoc->m_fBlendAmount = 0.0f;
+                sprintAnimAssoc->m_fSpeed = 1.0f;
             }
-            pSprintAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
-            pSprintAnimAssoc->m_fBlendDelta = 0.0f;
+            sprintAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
+            sprintAnimAssoc->m_fBlendDelta = 0.0f;
             moveState = PEDMOVE_SPRINT;
-            pSprintAnimAssoc->m_fBlendAmount = m_fBlend - 2.0f;
+            sprintAnimAssoc->m_fBlendAmount = m_fMoveRatio - 2.0f;
         }
         else {
-            if (!pWalkAnimAssoc) {
-                pWalkAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_WALK);
-                pWalkAnimAssoc->m_fBlendAmount = 0.0f;
-                pWalkAnimAssoc->m_fSpeed = 1.0f;
+            if (!walkAnimAssoc) {
+                walkAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_WALK);
+                walkAnimAssoc->m_fBlendAmount = 0.0f;
+                walkAnimAssoc->m_fSpeed = 1.0f;
             }
-            pWalkAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
-            pWalkAnimAssoc->m_fBlendDelta = 0.0f;
-            pWalkAnimAssoc->m_fBlendAmount = 2.0f - m_fBlend;
-            if (!pRunAnimAssoc)
+            walkAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
+            walkAnimAssoc->m_fBlendDelta = 0.0f;
+            walkAnimAssoc->m_fBlendAmount = 2.0f - m_fMoveRatio;
+            if (!runAnimAssoc)
             {
-                pRunAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_RUN);
-                pRunAnimAssoc->m_fBlendAmount = 0.0f;
-                pRunAnimAssoc->m_fSpeed = 1.0f;
+                runAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_RUN);
+                runAnimAssoc->m_fBlendAmount = 0.0f;
+                runAnimAssoc->m_fSpeed = 1.0f;
             }
-            pRunAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
-            pRunAnimAssoc->m_fBlendDelta = 0.0f;
-            pRunAnimAssoc->m_fBlendAmount = m_fBlend - 1.0f;
-            if (pSprintAnimAssoc)
-                delete pSprintAnimAssoc;
+            runAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
+            runAnimAssoc->m_fBlendDelta = 0.0f;
+            runAnimAssoc->m_fBlendAmount = m_fMoveRatio - 1.0f;
+            delete sprintAnimAssoc;
             moveState = PEDMOVE_RUN;
         }
     }
     else {
-        if (!pWalkAnimAssoc) {
-            pWalkAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_WALK);
-            pWalkAnimAssoc->m_fBlendAmount = 0.0f;
-            pWalkAnimAssoc->m_fSpeed = 1.0f;
+        if (!walkAnimAssoc) {
+            walkAnimAssoc = CAnimManager::AddAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_WALK);
+            walkAnimAssoc->m_fBlendAmount = 0.0f;
+            walkAnimAssoc->m_fSpeed = 1.0f;
         }
-        pWalkAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
-        pWalkAnimAssoc->m_fBlendAmount = 1.0f;
-        pWalkAnimAssoc->m_fBlendDelta = 0.0f;
-        if (pRunAnimAssoc)
-            delete pRunAnimAssoc;
-        if (pSprintAnimAssoc)
-            delete pSprintAnimAssoc;
+        walkAnimAssoc->m_nFlags |= ANIM_FLAG_STARTED;
+        walkAnimAssoc->m_fBlendAmount = 1.0f;
+        walkAnimAssoc->m_fBlendDelta = 0.0f;
+        delete runAnimAssoc;
+        delete sprintAnimAssoc;
     }
     ped->SetMoveState(moveState);
     ped->m_nSwimmingMoveState = moveState;
     m_moveState = moveState;
-#endif
+}
+
+// 0x65F330
+void CTaskSimpleGoToPointFine::SetTargetPos(CVector posn) {
+    if (m_vecTargetPoint != posn || m_fRadius != 0.5f) {
+        m_fRadius = 0.5f;
+        m_vecTargetPoint = posn;
+        m_GoToFlags &= 0xD0 | 0x20; // todo: flags
+    }
+}
+
+// 0x65EF30
+float CTaskSimpleGoToPointFine::BaseRatio(eMoveState moveState) {
+    switch (moveState) {
+    case PEDMOVE_WALK:
+        return 1.0f;
+    case PEDMOVE_RUN:
+        return 2.0f;
+    case PEDMOVE_SPRINT:
+        return 3.0f;
+    default:
+        return 0.0f;
+    }
 }
