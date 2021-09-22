@@ -421,14 +421,7 @@ CTask* CTaskComplexWander::CreateSubTask(CPed* ped, int32 taskId)
         }
         case TASK_COMPLEX_OBSERVE_TRAFFIC_LIGHTS_AND_ACHIEVE_HEADING:
         {
-            auto pTaskTrafficLightAndAchieveHeading = (CTaskComplexObserveTrafficLightsAndAchieveHeading*)CTask::operator new(20);
-            if (pTaskTrafficLightAndAchieveHeading)
-            {
-                float fTargetHeading = ComputeTargetHeading(ped);
-                pTaskTrafficLightAndAchieveHeading->Constructor(2000, fTargetHeading);
-                return pTaskTrafficLightAndAchieveHeading;
-            }
-            break;
+            return new CTaskComplexObserveTrafficLightsAndAchieveHeading(2000, ComputeTargetHeading(ped));
         }
         case TASK_COMPLEX_CROSS_ROAD_LOOK_AND_ACHIEVE_HEADING:
         {
