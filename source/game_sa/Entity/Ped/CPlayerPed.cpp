@@ -354,11 +354,8 @@ float CPlayerPed::FindTargetPriority(CEntity* entity) {
         if (ped->bThisPedIsATargetPriority)
             return 1.0f;
 
-        const auto IsSecondaryTaskActive = [ped](eTaskType type) -> bool {
-            return ped->GetIntelligence()->m_TaskMgr.FindActiveTaskByType(type);
-        };
-        if (IsSecondaryTaskActive(eTaskType::TASK_COMPLEX_KILL_PED_ON_FOOT) ||
-            IsSecondaryTaskActive(eTaskType::TASK_COMPLEX_ARREST_PED)
+        if (ped->GetTaskManager().FindActiveTaskByType(eTaskType::TASK_COMPLEX_KILL_PED_ON_FOOT) ||
+            ped->GetTaskManager().FindActiveTaskByType(eTaskType::TASK_COMPLEX_ARREST_PED)
         ) {
             return 0.8f;
         }
