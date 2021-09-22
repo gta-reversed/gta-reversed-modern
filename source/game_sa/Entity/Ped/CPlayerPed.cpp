@@ -321,7 +321,7 @@ float CPlayerPed::GetWeaponRadiusOnScreen() {
     case eWeaponType::WEAPON_SHOTGUN:
     case eWeaponType::WEAPON_SPAS12_SHOTGUN:
     case eWeaponType::WEAPON_SAWNOFF_SHOTGUN:
-        return std::max(0.2f, accuracyProg);
+        return std::max(0.2f, accuracyProg); // here they multiply *accuracyProg * 1.0f* :thinking
 
     default: {
         const float rangeProg = std::min(1.0f, 15.0f / wepInfo.m_fWeaponRange);
