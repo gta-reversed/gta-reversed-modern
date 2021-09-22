@@ -492,7 +492,7 @@ void CPlayerPed::DisbandPlayerGroup() {
 }
 
 // 0x60A110
-void CPlayerPed::MakeGroupRespondToPlayerTakingDamage(CEventDamage & damageEvent) {
+void CPlayerPed::MakeGroupRespondToPlayerTakingDamage(CEventDamage& damageEvent) {
     auto& group = GetGroup();
     if (!damageEvent.m_pSourceEntity)
         return;
@@ -752,7 +752,7 @@ bool CPlayerPed::DoesTargetHaveToBeBroken(CEntity* entity, CWeapon* weapon) {
     if (weapon->m_nType == eWeaponType::WEAPON_SPRAYCAN) {
         if (entity->m_nType == eEntityType::ENTITY_TYPE_BUILDING) {
             if (CTagManager::IsTag(entity)) {
-                if (CTagManager::GetAlpha(entity) == -1) {
+                if (CTagManager::GetAlpha(entity) == 255) { // they probably used -1
                     return true;
                 }
             }
@@ -918,7 +918,7 @@ bool CPlayerPed::PlayerHasJustAttackedSomeone() {
 // 0x60D790
 void CPlayerPed::SetupPlayerPed(int32 playerId) {
     auto ped = new CPlayerPed(playerId, false);
-    auto& playerInfo = CWorld::Players[playerId];
+    auto& playerInfo = FindPlayerInfo(playerId);
     playerInfo.m_pPed = ped;
 
     if (playerId == 1)
