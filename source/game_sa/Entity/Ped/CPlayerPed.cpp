@@ -154,7 +154,7 @@ CPad* CPlayerPed::GetPadFromPlayer() {
     case ePedType::PED_TYPE_PLAYER2:
         return CPad::GetPad(1);
     }
-    assert(0);
+    assert(0); // shouldn't happen
     return nullptr;
 }
 
