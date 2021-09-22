@@ -7,7 +7,7 @@
 
 #include "StdInc.h"
 
-bool (&abTempNeverLeavesGroup)[7] = (bool (*)[7])0xC0BC08;
+bool (&abTempNeverLeavesGroup)[7] = *(bool (*)[7])0xC0BC08;
 int32& gPlayIdlesAnimBlockIndex = *(int32*)0xC0BC10;
 bool& CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = *(bool*)0xC0BC15;
 
@@ -116,20 +116,20 @@ CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(plugin::dummy)
 
 // 0x6094A0
 void CPlayerPed::RemovePlayerPed(int32 playerId) {
-    CPed* playerPed = CWorld::Players[playerId].m_pPed;
-    CPlayerInfo* pPlayerInfo = &CWorld::Players[playerId];
-    if (playerPed)
+    CPed* player = FindPlayerPed(playerId);
+    CPlayerInfo* playerInfo = &FindPlayerInfo(playerId);
+    if (player)
     {
-        CVehicle* playerVehicle = playerPed->m_pVehicle;
-        if (playerVehicle && playerVehicle->m_pDriver == playerPed)
+        CVehicle* playerVehicle = player->m_pVehicle;
+        if (playerVehicle && playerVehicle->m_pDriver == player)
         {
             playerVehicle->m_nStatus = STATUS_PHYSICS;
             playerVehicle->m_fGasPedal = 0.0f;
             playerVehicle->m_fBreakPedal = 0.1f;
         }
-        CWorld::Remove(static_cast<CEntity*>(playerPed));
-        delete playerPed;
-        pPlayerInfo->m_pPed = nullptr;
+        CWorld::Remove(static_cast<CEntity*>(player));
+        delete player;
+        playerInfo->m_pPed = nullptr;
     }
 }
 
