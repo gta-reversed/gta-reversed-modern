@@ -111,7 +111,7 @@ public:
 
 VALIDATE_SIZE(CPlayerPed, 0x7A4);
 
-extern char* abTempNeverLeavesGroup; // char abTempNeverLeavesGroup[7];
+extern bool (&abTempNeverLeavesGroup)[7];
 extern int32& gPlayIdlesAnimBlockIndex;
 
 bool LOSBlockedBetweenPeds(CEntity* entity1, CEntity* entity2);
