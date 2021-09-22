@@ -15,6 +15,7 @@ class CAnimBlendHierarchy;
 class CAnimBlendStaticAssociation;
 
 enum eAnimationFlags {
+    ANIM_FLAG_DEFAULT            = 0x0,
     ANIM_FLAG_STARTED            = 0x1,
     ANIM_FLAG_LOOPED             = 0x2,
     ANIM_FLAG_FREEZE_LAST_FRAME  = 0x4,
