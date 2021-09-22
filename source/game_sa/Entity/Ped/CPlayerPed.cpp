@@ -398,17 +398,17 @@ void CPlayerPed::Clear3rdPersonMouseTarget() {
 
 // 0x609EF0
 void CPlayerPed::Busted() {
-    CWanted* pWanted = GetWanted();
-    if (pWanted) {
-        pWanted->m_nChaosLevel = 0;
+    CWanted* wanted = GetWanted();
+    if (wanted) {
+        wanted->m_nChaosLevel = 0;
     }
 }
 
 // 0x41BE60
 uint32 CPlayerPed::GetWantedLevel() {
-    CWanted* pWanted = GetWanted();
-    if (pWanted) {
-        return pWanted->m_nWantedLevel;
+    CWanted* wanted = GetWanted();
+    if (wanted) {
+        return wanted->m_nWantedLevel;
     }
 
     return 0;
@@ -416,20 +416,20 @@ uint32 CPlayerPed::GetWantedLevel() {
 
 // 0x609F10
 void CPlayerPed::SetWantedLevel(int32 level) {
-    CWanted* pWanted = GetWanted();
-    pWanted->SetWantedLevel(level);
+    CWanted* wanted = GetWanted();
+    wanted->SetWantedLevel(level);
 }
 
 // 0x609F30
 void CPlayerPed::SetWantedLevelNoDrop(int32 level) {
-    CWanted* pWanted = GetWanted();
-    pWanted->SetWantedLevelNoDrop(level);
+    CWanted* wanted = GetWanted();
+    wanted->SetWantedLevelNoDrop(level);
 }
 
 // 0x609F50
 void CPlayerPed::CheatWantedLevel(int32 level) {
-    CWanted* pWanted = GetWanted();
-    pWanted->CheatWantedLevel(level);
+    CWanted* wanted = GetWanted();
+    wanted->CheatWantedLevel(level);
 }
 
 // 0x609F80
