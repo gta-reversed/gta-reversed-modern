@@ -169,17 +169,13 @@ bool CPlayerPed::CanPlayerStartMission() {
     if (!IsPedInControl() && !IsStateDriving())
         return false;
 
-    const auto GetSecondaryTask = [this](eSecondaryTasks task) {
-        return m_pIntelligence->m_TaskMgr.GetTaskSecondary(task);
-    };
-
-    if (GetSecondaryTask(eSecondaryTasks::TASK_SECONDARY_ATTACK))
+    if (GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_ATTACK))
         return false;
 
-    if (GetSecondaryTask(eSecondaryTasks::TASK_SECONDARY_SAY))
+    if (GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_SAY))
         return false;
 
-    if (auto task = GetSecondaryTask(eSecondaryTasks::TASK_SECONDARY_FACIAL_COMPLEX)) {
+    if (auto task = GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_FACIAL_COMPLEX)) {
         if (task->GetId() == eTaskType::TASK_SIMPLE_CAR_DRIVE) {
             return false;
         }
@@ -188,7 +184,7 @@ bool CPlayerPed::CanPlayerStartMission() {
     if (!IsAlive())
         return false;
 
-    return !m_pIntelligence->m_eventGroup.GetEventOfType(eEventType::EVENT_SCRIPT_COMMAND);
+    return !GetEventGroup().GetEventOfType(eEventType::EVENT_SCRIPT_COMMAND);
    
 }
 
