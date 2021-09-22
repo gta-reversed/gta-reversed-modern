@@ -74,6 +74,7 @@ struct WorkBufferSaveData {
 };
 VALIDATE_SIZE(WorkBufferSaveData, 132u + 4u);
 
+// calls of LoadDataFromWorkBuffer are optimized
 // 0x5D46E0
 bool CPlayerPed::Load_Reversed() {
     CPed::Load();
@@ -91,6 +92,7 @@ bool CPlayerPed::Load_Reversed() {
     return true;
 }
 
+// calls of SaveDataToWorkBuffer are optimized
 // 0x5D57E0
 bool CPlayerPed::Save_Reversed() {
     WorkBufferSaveData saveData{};
