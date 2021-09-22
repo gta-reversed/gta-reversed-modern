@@ -445,8 +445,8 @@ bool CPlayerPed::CanIKReachThisTarget(CVector posn, CWeapon* weapon, bool arg2) 
 CPlayerInfo* CPlayerPed::GetPlayerInfoForThisPlayerPed() {
     // TODO: Use range for here 
     for (int i = 0; i < MAX_PLAYERS; i++) {
-        if (CWorld::Players[i].m_pPed == this)
-            return &CWorld::Players[i];
+        if (FindPlayerPed(i) == this)
+            return &FindPlayerInfo(i);
     }
     return nullptr;
 }
