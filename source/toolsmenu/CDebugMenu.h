@@ -16,16 +16,7 @@ public:
 
     static bool Visible() { return m_showMenu; }
 
-    static CDebugMenuToolInput::ToolMap m_vehiclesMap;
-    static CDebugMenuToolInput::ToolMap m_pedsMap;
-    static CDebugMenuToolInput::ToolMap m_missionsMap;
-
 private:
-    static CDebugMenuToolInput m_vehicleToolInput;
-    static CDebugMenuToolInput m_pedToolInput;
-    static CDebugMenuToolInput m_missionToolInput;
-    static bool m_bStartMission;
-    static int32 m_missionToStartId;
     static bool m_imguiInitialised;
     static bool m_showMenu;
     static bool m_showFPS;
@@ -35,14 +26,9 @@ private:
     static void ImguiDisplayFramePerSecond();
     static void ImguiDisplayExtraDebugFeatures();
     static void ImguiDisplayPlayerInfo();
-    static void ProcessCheatTool();
-    static void SpawnPed(int32 modelID, CVector position);
-    static void ProcessPedTool();
+
     static void ShowPlayerInfo();
-    static void ProcessVehicleTool();
-    static void InitializeAndStartNewScript();
-    static bool StartMission(int32 missionId, bool bDoMissionCleanUp = true);
-    static void ProcessMissionTool();
+
     static void ProcessRenderTool();
     static void PostFxTool();
     static void ProcessHooksTool();
