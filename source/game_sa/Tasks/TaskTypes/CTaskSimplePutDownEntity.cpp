@@ -12,20 +12,22 @@ CTaskSimplePutDownEntity::CTaskSimplePutDownEntity() : CTaskSimpleHoldEntity(nul
     m_fPutDownHeightZ = 0.6f;
 }
 
-CTaskSimplePutDownEntity::CTaskSimplePutDownEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, bool bDisAllowDroppingOnAnimEnd, float fPutDownHeightZ) : CTaskSimpleHoldEntity(pEntityToHold, pPosition, boneFrameId, boneFlags, animId, groupId, bDisAllowDroppingOnAnimEnd) {
+CTaskSimplePutDownEntity::CTaskSimplePutDownEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, bool bDisAllowDroppingOnAnimEnd, float fPutDownHeightZ)
+    : CTaskSimpleHoldEntity(entityToHold, posn, boneFrameId, boneFlags, animId, groupId, bDisAllowDroppingOnAnimEnd)
+{
     m_fPutDownHeightZ = fPutDownHeightZ;
 }
 
-CTaskSimplePutDownEntity::CTaskSimplePutDownEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, char* pAnimName, char* pAnimBlockName, int32 animFlags, float fPutDownHeightZ) : CTaskSimpleHoldEntity(pEntityToHold, pPosition, boneFrameId, boneFlags, pAnimName, pAnimBlockName, animFlags) {
+CTaskSimplePutDownEntity::CTaskSimplePutDownEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, const char* animName, const char* animBlockName, eAnimationFlags animFlags, float fPutDownHeightZ)
+    : CTaskSimpleHoldEntity(entityToHold, posn, boneFrameId, boneFlags, animName, animBlockName, animFlags)
+{
     m_fPutDownHeightZ = fPutDownHeightZ;
 }
 
-CTaskSimplePutDownEntity::CTaskSimplePutDownEntity(CEntity* pEntityToHold, CVector* pPosition, char boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, int32 animFlags, float fPutDownHeightZ) : CTaskSimpleHoldEntity(pEntityToHold, pPosition, boneFrameId, boneFlags, pAnimBlock, pAnimHierarchy, animFlags) {
+CTaskSimplePutDownEntity::CTaskSimplePutDownEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, eAnimationFlags animFlags, float fPutDownHeightZ)
+    : CTaskSimpleHoldEntity(entityToHold, posn, boneFrameId, boneFlags, pAnimBlock, pAnimHierarchy, animFlags)
+{
     m_fPutDownHeightZ = fPutDownHeightZ;
-}
-
-CTaskSimplePutDownEntity::~CTaskSimplePutDownEntity() {
-    // nothing here
 }
 
 // 0x691990
@@ -46,13 +48,28 @@ eTaskType CTaskSimplePutDownEntity::GetTaskType() {
 
 CTask* CTaskSimplePutDownEntity::Clone_Reversed() {
     if (m_pAnimBlendHierarchy) {
-        return new CTaskSimplePutDownEntity(m_pEntityToHold, &m_vecPosition, m_bBoneFrameId, m_bBoneFlags, m_pAnimBlock, 
-            m_pAnimBlendHierarchy, m_animFlags, m_fPutDownHeightZ);
+        return new CTaskSimplePutDownEntity(
+            m_pEntityToHold,
+            &m_vecPosition,
+            m_nBoneFrameId,
+            m_bBoneFlags,
+            m_pAnimBlock,
+            m_pAnimBlendHierarchy,
+            static_cast<eAnimationFlags>(m_animFlags),
+            m_fPutDownHeightZ
+        );
     }
     else {
-        return new CTaskSimplePutDownEntity(m_pEntityToHold, &m_vecPosition, m_bBoneFrameId, m_bBoneFlags, m_nAnimId, m_nAnimGroupId, 
-            false, m_fPutDownHeightZ);
+        return new CTaskSimplePutDownEntity(
+            m_pEntityToHold,
+            &m_vecPosition,
+            m_nBoneFrameId,
+            m_bBoneFlags,
+            m_nAnimId,
+            m_nAnimGroupId,
+            false,
+            m_fPutDownHeightZ
+        );
     }
     return nullptr;
 }
-
