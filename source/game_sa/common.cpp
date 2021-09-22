@@ -229,6 +229,7 @@ bool InTwoPlayersMode() {
     return CWorld::Players[0].m_pPed && CWorld::Players[1].m_pPed;
 }
 
+// NOTSA, inlined
 CPlayerInfo& FindPlayerInfo(int playerId) {
     return CWorld::Players[playerId < 0 ? CWorld::PlayerInFocus : playerId];
 }

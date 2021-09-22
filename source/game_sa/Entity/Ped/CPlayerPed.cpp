@@ -1,13 +1,13 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
 
-char* abTempNeverLeavesGroup = (char*)0xC0BC08;
+bool (&abTempNeverLeavesGroup)[7] = *(bool (*)[7])0xC0BC08;
 int32& gPlayIdlesAnimBlockIndex = *(int32*)0xC0BC10;
 bool& CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = *(bool*)0xC0BC15;
 
@@ -74,6 +74,7 @@ struct WorkBufferSaveData {
 };
 VALIDATE_SIZE(WorkBufferSaveData, 132u + 4u);
 
+// calls of LoadDataFromWorkBuffer are optimized
 // 0x5D46E0
 bool CPlayerPed::Load_Reversed() {
     CPed::Load();
@@ -91,6 +92,7 @@ bool CPlayerPed::Load_Reversed() {
     return true;
 }
 
+// calls of SaveDataToWorkBuffer are optimized
 // 0x5D57E0
 bool CPlayerPed::Save_Reversed() {
     WorkBufferSaveData saveData{};
@@ -114,20 +116,20 @@ CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(plugin::dummy)
 
 // 0x6094A0
 void CPlayerPed::RemovePlayerPed(int32 playerId) {
-    CPed* playerPed = CWorld::Players[playerId].m_pPed;
-    CPlayerInfo* pPlayerInfo = &CWorld::Players[playerId];
-    if (playerPed)
+    CPed* player = FindPlayerPed(playerId);
+    CPlayerInfo* playerInfo = &FindPlayerInfo(playerId);
+    if (player)
     {
-        CVehicle* playerVehicle = playerPed->m_pVehicle;
-        if (playerVehicle && playerVehicle->m_pDriver == playerPed)
+        CVehicle* playerVehicle = player->m_pVehicle;
+        if (playerVehicle && playerVehicle->m_pDriver == player)
         {
             playerVehicle->m_nStatus = STATUS_PHYSICS;
             playerVehicle->m_fGasPedal = 0.0f;
             playerVehicle->m_fBreakPedal = 0.1f;
         }
-        CWorld::Remove(static_cast<CEntity*>(playerPed));
-        delete playerPed;
-        pPlayerInfo->m_pPed = nullptr;
+        CWorld::Remove(static_cast<CEntity*>(player));
+        delete player;
+        playerInfo->m_pPed = nullptr;
     }
 }
 
@@ -152,7 +154,7 @@ CPad* CPlayerPed::GetPadFromPlayer() {
     case ePedType::PED_TYPE_PLAYER2:
         return CPad::GetPad(1);
     }
-    assert(0);
+    assert(0); // shouldn't happen
     return nullptr;
 }
 
@@ -167,17 +169,13 @@ bool CPlayerPed::CanPlayerStartMission() {
     if (!IsPedInControl() && !IsStateDriving())
         return false;
 
-    const auto GetSecondaryTask = [this](eSecondaryTasks task) {
-        return m_pIntelligence->m_TaskMgr.GetTaskSecondary(task);
-    };
-
-    if (GetSecondaryTask(eSecondaryTasks::TASK_SECONDARY_ATTACK))
+    if (GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_ATTACK))
         return false;
 
-    if (GetSecondaryTask(eSecondaryTasks::TASK_SECONDARY_SAY))
+    if (GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_SAY))
         return false;
 
-    if (auto task = GetSecondaryTask(eSecondaryTasks::TASK_SECONDARY_FACIAL_COMPLEX)) {
+    if (auto task = GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_FACIAL_COMPLEX)) {
         if (task->GetId() == eTaskType::TASK_SIMPLE_CAR_DRIVE) {
             return false;
         }
@@ -186,7 +184,7 @@ bool CPlayerPed::CanPlayerStartMission() {
     if (!IsAlive())
         return false;
 
-    return !m_pIntelligence->m_eventGroup.GetEventOfType(eEventType::EVENT_SCRIPT_COMMAND);
+    return !GetEventGroup().GetEventOfType(eEventType::EVENT_SCRIPT_COMMAND);
    
 }
 
@@ -204,14 +202,14 @@ void CPlayerPed::ReApplyMoveAnims() {
         AnimationId::ANIM_ID_IDLE,
         AnimationId::ANIM_ID_WALK_START
     };
-    for (AnimationId id : anims) {
+    for (const AnimationId& id : anims) {
         if (CAnimBlendAssociation* anim = RpAnimBlendClumpGetAssociation(m_pRwClump, id)) {
             if (anim->GetHashKey() != CAnimManager::GetAnimAssociation(m_nAnimGroup, id)->GetHashKey()) {
                 CAnimBlendAssociation* addedAnim = CAnimManager::AddAnimation(m_pRwClump, m_nAnimGroup, id);
                 addedAnim->m_fBlendDelta = anim->m_fBlendDelta;
                 addedAnim->m_fBlendAmount = anim->m_fBlendAmount;
 
-                anim->m_nFlags |= 4u; // TODO
+                anim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
                 anim->m_fBlendDelta = -1000.0f;
             }
         }
@@ -318,16 +316,16 @@ float CPlayerPed::GetWeaponRadiusOnScreen() {
     if (wep.IsTypeMelee())
         return 0.0f;
 
-    const float accurancyProg = 0.5f / wepInfo.m_fAccuracy;
+    const float accuracyProg = 0.5f / wepInfo.m_fAccuracy;
     switch (wep.m_nType) {
     case eWeaponType::WEAPON_SHOTGUN:
     case eWeaponType::WEAPON_SPAS12_SHOTGUN:
     case eWeaponType::WEAPON_SAWNOFF_SHOTGUN:
-        return std::max(0.2f, accurancyProg);
+        return std::max(0.2f, accuracyProg); // here they multiply *accuracyProg * 1.0f* :thinking
 
     default: {
         const float rangeProg = std::min(1.0f, 15.0f / wepInfo.m_fWeaponRange);
-        const float radius = (m_pPlayerData->m_fAttackButtonCounter * 0.5f + 1.0f) * rangeProg * accurancyProg;
+        const float radius = (m_pPlayerData->m_fAttackButtonCounter * 0.5f + 1.0f) * rangeProg * accuracyProg;
         if (bIsDucking)
             return radius / 2.0f;
         return radius;
@@ -356,11 +354,8 @@ float CPlayerPed::FindTargetPriority(CEntity* entity) {
         if (ped->bThisPedIsATargetPriority)
             return 1.0f;
 
-        const auto IsSecondaryTaskActive = [ped](eTaskType type) -> bool {
-            return ped->GetIntelligence()->m_TaskMgr.FindActiveTaskByType(type);
-        };
-        if (IsSecondaryTaskActive(eTaskType::TASK_COMPLEX_KILL_PED_ON_FOOT) ||
-            IsSecondaryTaskActive(eTaskType::TASK_COMPLEX_ARREST_PED)
+        if (ped->GetTaskManager().FindActiveTaskByType(eTaskType::TASK_COMPLEX_KILL_PED_ON_FOOT) ||
+            ped->GetTaskManager().FindActiveTaskByType(eTaskType::TASK_COMPLEX_ARREST_PED)
         ) {
             return 0.8f;
         }
@@ -403,17 +398,17 @@ void CPlayerPed::Clear3rdPersonMouseTarget() {
 
 // 0x609EF0
 void CPlayerPed::Busted() {
-    CWanted* pWanted = GetWanted();
-    if (pWanted) {
-        pWanted->m_nChaosLevel = 0;
+    CWanted* wanted = GetWanted();
+    if (wanted) {
+        wanted->m_nChaosLevel = 0;
     }
 }
 
 // 0x41BE60
 uint32 CPlayerPed::GetWantedLevel() {
-    CWanted* pWanted = GetWanted();
-    if (pWanted) {
-        return pWanted->m_nWantedLevel;
+    CWanted* wanted = GetWanted();
+    if (wanted) {
+        return wanted->m_nWantedLevel;
     }
 
     return 0;
@@ -421,20 +416,20 @@ uint32 CPlayerPed::GetWantedLevel() {
 
 // 0x609F10
 void CPlayerPed::SetWantedLevel(int32 level) {
-    CWanted* pWanted = GetWanted();
-    pWanted->SetWantedLevel(level);
+    CWanted* wanted = GetWanted();
+    wanted->SetWantedLevel(level);
 }
 
 // 0x609F30
 void CPlayerPed::SetWantedLevelNoDrop(int32 level) {
-    CWanted* pWanted = GetWanted();
-    pWanted->SetWantedLevelNoDrop(level);
+    CWanted* wanted = GetWanted();
+    wanted->SetWantedLevelNoDrop(level);
 }
 
 // 0x609F50
 void CPlayerPed::CheatWantedLevel(int32 level) {
-    CWanted* pWanted = GetWanted();
-    pWanted->CheatWantedLevel(level);
+    CWanted* wanted = GetWanted();
+    wanted->CheatWantedLevel(level);
 }
 
 // 0x609F80
@@ -450,8 +445,8 @@ bool CPlayerPed::CanIKReachThisTarget(CVector posn, CWeapon* weapon, bool arg2) 
 CPlayerInfo* CPlayerPed::GetPlayerInfoForThisPlayerPed() {
     // TODO: Use range for here 
     for (int i = 0; i < MAX_PLAYERS; i++) {
-        if (CWorld::Players[i].m_pPed == this)
-            return &CWorld::Players[i];
+        if (FindPlayerPed(i) == this)
+            return &FindPlayerInfo(i);
     }
     return nullptr;
 }
@@ -497,7 +492,7 @@ void CPlayerPed::DisbandPlayerGroup() {
 }
 
 // 0x60A110
-void CPlayerPed::MakeGroupRespondToPlayerTakingDamage(CEventDamage & damageEvent) {
+void CPlayerPed::MakeGroupRespondToPlayerTakingDamage(CEventDamage& damageEvent) {
     auto& group = GetGroup();
     if (!damageEvent.m_pSourceEntity)
         return;
@@ -707,7 +702,7 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
 
 
     if (auto anim = RpAnimBlendClumpGetAssociation(m_pRwClump, AnimationId::ANIM_ID_FIRE))
-        anim->m_nFlags |= 9u; // set 1th and 4th - TODO, use bitfields..
+        anim->m_nFlags |= ANIM_FLAG_STARTED & ANIM_FLAG_UNLOCK_LAST_FRAME;
 
     TheCamera.ClearPlayerWeaponMode();
 }
@@ -757,7 +752,7 @@ bool CPlayerPed::DoesTargetHaveToBeBroken(CEntity* entity, CWeapon* weapon) {
     if (weapon->m_nType == eWeaponType::WEAPON_SPRAYCAN) {
         if (entity->m_nType == eEntityType::ENTITY_TYPE_BUILDING) {
             if (CTagManager::IsTag(entity)) {
-                if (CTagManager::GetAlpha(entity) == -1) {
+                if (CTagManager::GetAlpha(entity) == 255) { // they probably used -1
                     return true;
                 }
             }
@@ -923,7 +918,7 @@ bool CPlayerPed::PlayerHasJustAttackedSomeone() {
 // 0x60D790
 void CPlayerPed::SetupPlayerPed(int32 playerId) {
     auto ped = new CPlayerPed(playerId, false);
-    auto& playerInfo = CWorld::Players[playerId];
+    auto& playerInfo = FindPlayerInfo(playerId);
     playerInfo.m_pPed = ped;
 
     if (playerId == 1)
