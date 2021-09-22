@@ -40,6 +40,7 @@
 #include "COccluder.h"
 #include "CActiveOccluder.h"
 #include "CMotionBlurStreaks.h"
+#include "CGroupEventHandler.h"
 
 #include "CTaskSimpleAbseil.h"
 #include "CTaskComplexWanderCop.h"
@@ -156,6 +157,7 @@ void InjectHooksMain()
 {
     // WaitForDebugger();
 
+    CGroupEventHandler::InjectHooks();
     CEventHandler::InjectHooks();
     CVehicleRecording::InjectHooks();
     Fx_c::InjectHooks();
