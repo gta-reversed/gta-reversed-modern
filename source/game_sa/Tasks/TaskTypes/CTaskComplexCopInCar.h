@@ -6,23 +6,22 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CTaskComplex.h"
 #include "CVehicle.h"
 #include "CPed.h"
 
-class CTaskComplexCopInCar: public CTaskComplex{
+class CTaskComplexCopInCar : public CTaskComplex {
 public:
-    CVehicle* m_pVehicle;
-    CPed* m_pCop1;
-    CPed* m_pCop2;
+    CVehicle*  m_pVehicle;
+    CPed*      m_pCop1;
+    CPed*      m_pCop2;
     CTaskTimer m_timer1;
     CTaskTimer m_timer2;
-    unsigned char m_nFlags;
-    char __flags[3];
+    uint8      m_nFlags;
+    char       _flags[3];
 
-    CTaskComplexCopInCar(CVehicle* pVeh, CPed* pCop1, CPed* pCop2, bool arg3);
+public:
+    CTaskComplexCopInCar(CVehicle* vehicle, CPed* cop1, CPed* cop2, bool arg3);
 };
 
 VALIDATE_SIZE(CTaskComplexCopInCar, 0x34);
-

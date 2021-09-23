@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CVector.h"
 #include "CEntity.h"
 #include "CVehicle.h"
@@ -15,9 +15,7 @@
 class CPedPlacement {
 public:
      static bool FindZCoorForPed(CVector *pos);
-     static bool IsPositionClearForPed(CVector const *pos, float radius, int maxNumObjects, CEntity **pObjectList, unsigned char bCheckVehicles, unsigned char bCheckPeds, unsigned char bCheckObjects);
+     static bool IsPositionClearForPed(CVector const *pos, float radius, int32 maxNumObjects, CEntity **pObjectList, uint8 bCheckVehicles, uint8 bCheckPeds, uint8 bCheckObjects);
      static CVehicle *IsPositionClearOfCars(CVector const *pos);
      static CVehicle *IsPositionClearOfCars(CPed const *ped);
 };
-
-//#include "meta/meta.CPedPlacement.h"

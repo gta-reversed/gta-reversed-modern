@@ -3,13 +3,13 @@
 class C2dEffect;
 class CEntity;
 
-class CEventAttractor : public CEventEditableResponse
-{
+class CEventAttractor : public CEventEditableResponse {
 public:
     C2dEffect* m_2dEffect;
-    CEntity* m_entity;
-    bool m_bAvoidLookingAtAttractor;
+    CEntity*   m_entity;
+    bool       m_bAvoidLookingAtAttractor;
 
+public:
     static void InjectHooks();
 
     CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor);
@@ -17,9 +17,9 @@ public:
 private:
     CEventAttractor* Constructor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor);
 public:
-    eEventType GetEventType() override { return EVENT_ATTRACTOR; }
-    int GetEventPriority() override { return 0; }
-    int GetLifeTime() override { return 0; }
+    eEventType GetEventType() const override { return EVENT_ATTRACTOR; }
+    int32 GetEventPriority() const override { return 0; }
+    int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override;
     CEventEditableResponse* CloneEditable() override;
 
@@ -40,7 +40,7 @@ public:
 private:
     CEventScriptedAttractor* Constructor(C2dEffect* the2dEffect, CEntity* entity, bool bAvoidLookingAtAttractor);
 public:
-    eEventType GetEventType() override { return EVENT_SCRIPTED_ATTRACTOR; }
+    eEventType GetEventType() const override { return EVENT_SCRIPTED_ATTRACTOR; }
     CEventScriptedAttractor* CloneEditable() override { return new CEventScriptedAttractor(m_2dEffect, m_entity, false); }
 
 };

@@ -8,7 +8,7 @@
 
 #include "CPed.h"
 
-enum eCopType : unsigned int {
+enum eCopType : uint32 {
     COP_TYPE_CITYCOP,
     COP_TYPE_LAPDM1,
     COP_TYPE_SWAT1,
@@ -24,7 +24,7 @@ public:
     char     field_79D;
     char     _pad[2];
     eCopType m_copType;
-    int      field_7A4;
+    int32    field_7A4;
     CCopPed* m_pCopPartner;
     CPed*    m_apCriminalsToKill[5];
     char     field_7C0;
@@ -34,7 +34,7 @@ public:
 
     void SetPartner(CCopPed* partner);
     void AddCriminalToKill(CPed* criminal);
-    void RemoveCriminalToKill(CPed* likeUnused, int criminalIdx);
+    void RemoveCriminalToKill(CPed* likeUnused, int32 criminalIdx);
     void ClearCriminalsToKill();
 };
 

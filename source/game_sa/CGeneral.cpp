@@ -20,7 +20,7 @@ void CGeneral::InjectHooks() {
     ReversibleHooks::Install("CGeneral", "GetNodeHeadingFromVector", 0x53CDC0, &CGeneral::GetNodeHeadingFromVector);
     ReversibleHooks::Install("CGeneral", "SolveQuadratic", 0x53CE30, &CGeneral::SolveQuadratic);
     ReversibleHooks::Install("CGeneral", "GetAngleBetweenPoints", 0x53CEA0, &CGeneral::GetAngleBetweenPoints);
-    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, (int (*)(const int, const int)) & CGeneral::GetRandomNumberInRange);
+    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, (int32 (*)(const int32, const int32)) & CGeneral::GetRandomNumberInRange);
     ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_float", 0x41BD90, (float (*)(const float, const float)) & CGeneral::GetRandomNumberInRange);
 }
 
@@ -78,6 +78,8 @@ float CGeneral::GetATanOfXY(float x, float y) {
     if (x == 0.0f && y == 0.0f)
         return 0.0f;
 
+    // Wikipedia explains this function in great detail: https://en.wikipedia.org/wiki/Atan2
+
     float xabs = abs(x);
     float yabs = abs(y);
 
@@ -109,7 +111,7 @@ float CGeneral::GetATanOfXY(float x, float y) {
 }
 
 // 0x53CDC0
-unsigned int CGeneral::GetNodeHeadingFromVector(float x, float y) {
+uint32 CGeneral::GetNodeHeadingFromVector(float x, float y) {
     float angle = GetRadianAngleBetweenPoints(x, y, 0.0f, 0.0f);
     if (angle < 0.0f)
         angle += TWO_PI;
@@ -119,7 +121,7 @@ unsigned int CGeneral::GetNodeHeadingFromVector(float x, float y) {
     if (angle >= TWO_PI)
         angle -= TWO_PI;
 
-    return (int)floor(angle / RWDEG2RAD(45.0f));
+    return (int32)floor(angle / RWDEG2RAD(45.0f));
 }
 
 // 0x53CE30
@@ -146,11 +148,11 @@ float CGeneral::GetAngleBetweenPoints(float x1, float y1, float x2, float y2) {
  * @return Integer between min and max, exclusive.
  * @addr   0x407180
  */
-int CGeneral::GetRandomNumberInRange(const int min, const int max) {
+int32 CGeneral::GetRandomNumberInRange(const int32 min, const int32 max) {
 #ifdef BETTER_RNG
     // TODO: Use better RNG
 #else
-    return min + static_cast<int>(rand() * RAND_MAX_INT_RECIPROCAL * (max - min));
+    return min + static_cast<int32>(rand() * RAND_MAX_INT_RECIPROCAL * (max - min));
 #endif
 }
 

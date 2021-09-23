@@ -1,8 +1,10 @@
 #include "StdInc.h"
 
+#include "CTaskComplexPartnerDeal.h"
+
 void CTaskComplexPartnerDeal::InjectHooks()
 {
-    HookInstall(0x684190, &CTaskComplexPartnerDeal::Constructor);
+    ReversibleHooks::Install("CTaskComplexPartnerDeal", "CTaskComplexPartnerDeal", 0x684190, &CTaskComplexPartnerDeal::Constructor);
 }
 
 CTaskComplexPartnerDeal::CTaskComplexPartnerDeal(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, CVector point) :

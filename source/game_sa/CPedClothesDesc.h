@@ -6,17 +6,17 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "eClothesModelPart.h"
 #include "eClothesTexturePart.h"
 
 class CPedClothesDesc {
 public:
-    unsigned int m_anModelKeys[10];
-    unsigned int m_anTextureKeys[18];
+    uint32 m_anModelKeys[10];
+    uint32 m_anTextureKeys[18];
     float m_fFatStat;
     float m_fMuscleStat;
 
+public:
     static void InjectHooks();
 
     CPedClothesDesc();
@@ -24,12 +24,12 @@ public:
 
     void Initialise();
 
-    void SetModel(unsigned int modelId, eClothesModelPart modelPart);
+    void SetModel(uint32 modelId, eClothesModelPart modelPart);
     void SetModel(char const* model, eClothesModelPart modelPart);
     bool GetIsWearingBalaclava();
-    bool HasVisibleNewHairCut(int arg1);
+    bool HasVisibleNewHairCut(int32 arg1);
     bool HasVisibleTattoo();
-    void SetTextureAndModel(unsigned int texture, unsigned int model, eClothesTexturePart texturePart);
+    void SetTextureAndModel(uint32 texture, uint32 model, eClothesTexturePart texturePart);
     void SetTextureAndModel(char const* textureName, char const* modelName, eClothesTexturePart texturePart);
 };
 

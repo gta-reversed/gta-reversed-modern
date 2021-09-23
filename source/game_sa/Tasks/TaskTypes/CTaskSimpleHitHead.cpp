@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleHitHead.h"
+
 void CTaskSimpleHitHead::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleHitHead", "Constructor", 0x653060, &CTaskSimpleHitHead::Constructor);
@@ -30,9 +32,9 @@ CTaskSimpleHitHead::~CTaskSimpleHitHead()
 }
 
 // 0x6530F0
-bool CTaskSimpleHitHead::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleHitHead::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return MakeAbortable_Reversed(ped, priority, _event);
+    return MakeAbortable_Reversed(ped, priority, event);
 }
 
 // 0x657A10
@@ -49,7 +51,7 @@ void CTaskSimpleHitHead::FinishAnimCB(CAnimBlendAssociation* pAnim, void* data)
     pTask->m_bIsFinished = true;
 }
 
-bool CTaskSimpleHitHead::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleHitHead::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
     if (priority == ABORT_PRIORITY_URGENT || priority == ABORT_PRIORITY_IMMEDIATE)
     {

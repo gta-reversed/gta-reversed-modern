@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
-CTaskSimpleCarSetPedInAsPassenger::CTaskSimpleCarSetPedInAsPassenger(CVehicle* pTargetVehicle, int nTargetDoor, CTaskUtilityLineUpPedWithCar* pUtility)
+#include "CTaskSimpleCarSetPedInAsPassenger.h"
+
+CTaskSimpleCarSetPedInAsPassenger::CTaskSimpleCarSetPedInAsPassenger(CVehicle* pTargetVehicle, int32 nTargetDoor, CTaskUtilityLineUpPedWithCar* pUtility)
 {
     m_iTargetDoor = nTargetDoor;
     m_bIsFinished = 0;

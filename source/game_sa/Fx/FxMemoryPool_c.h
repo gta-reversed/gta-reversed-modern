@@ -6,18 +6,26 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "RenderWare.h"
 #include "CVector.h"
 
-class  FxMemoryPool_c
-{
+class FxMemoryPool_c {
 public:
-	char *data;
-	unsigned int size;
-	unsigned int position;
+    char*  m_pData;
+    uint32 m_nSize;
+    uint32 m_nPosition;
 
-	void Optimise();
+public:
+    static void InjectHooks();
+
+    FxMemoryPool_c() = default; // 0x4A9C10
+    ~FxMemoryPool_c() = default; // 0x4A9C20
+
+    void  Init();
+    void  Exit();
+    void  Reset();
+    void* GetMem(int32 size, int32 align);
+    void  Optimise();
 };
 
 VALIDATE_SIZE(FxMemoryPool_c, 0xC);

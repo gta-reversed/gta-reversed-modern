@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CVehicle.h"
 #include "CDoor.h"
 #include "CTrainNode.h"
@@ -43,58 +43,50 @@ class CTrain : public CVehicle {
 protected:
     CTrain(plugin::dummy_func_t) : CVehicle(plugin::dummy) {}
 public:
-    short             m_nNodeIndex;
-private:
-    char _pad1[2];
-public:
-    float             m_fTrainSpeed; // 1.0 - train derails
-    float             m_fCurrentRailDistance;
-    float             m_fLength;
-    float             m_fTrainGas; // gas pedal pressed: 255.0, moving forward: 0.0, moving back: -255.0
-    float             m_fTrainBrake; // 255.0 - braking
-    union
-    {
-        struct 
-        {
-             unsigned short b01 : 1; // initialised with 1
-             unsigned short bStoppedAtStation : 1;
-             unsigned short bPassengersCanEnterAndLeave : 1;
-             unsigned short bIsFrontCarriage : 1;
-             unsigned short bIsLastCarriage : 1;
-             unsigned short bMissionTrain : 1;
-             unsigned short bClockwiseDirection : 1;
-             unsigned short bStopsAtStations : 1;
+    int16    m_nNodeIndex;
+    char     _pad1[2];
+    float    m_fTrainSpeed; // 1.0 - train derails
+    float    m_fCurrentRailDistance;
+    float    m_fLength;
+    float    m_fTrainGas;   // gas pedal pressed: 255.0, moving forward: 0.0, moving back: -255.0
+    float    m_fTrainBrake; // 255.0 - braking
+    union {
+        struct {
+            uint16 b01 : 1; // initialised with 1
+            uint16 bStoppedAtStation : 1;
+            uint16 bPassengersCanEnterAndLeave : 1;
+            uint16 bIsFrontCarriage : 1;
+            uint16 bIsLastCarriage : 1;
+            uint16 bMissionTrain : 1;
+            uint16 bClockwiseDirection : 1;
+            uint16 bStopsAtStations : 1;
 
-             unsigned short bNotOnARailRoad : 1;
-             unsigned short bForceSlowDown : 1;
-             unsigned short bIsStreakModel : 1;
+            uint16 bNotOnARailRoad : 1;
+            uint16 bForceSlowDown : 1;
+            uint16 bIsStreakModel : 1;
         } trainFlags;
-        unsigned short m_nTrainFlags;
+        uint16 m_nTrainFlags;
     };
-private:
-    char _pad5BA[2];
-public:
-    int               m_nTimeWhenStoppedAtStation;
-    char              m_nTrackId;
-private:
-    char _pad5C1[3];
-public:
-    int               m_nTimeWhenCreated;
-    short field_5C8; // initialized with 0, not referenced
-    unsigned char     m_nPassengersGenerationState; // see eTrainPassengersGenerationState
-    unsigned char     m_nNumPassengersToLeave : 4; // 0 to 4
-    unsigned char     m_nNumPassengersToEnter : 4; // 0 to 4
-    CPed             *m_pTemporaryPassenger; // we tell peds to enter train and then delete them
-    CTrain           *m_pPrevCarriage;
-    CTrain           *m_pNextCarriage;
-    CDoor             m_aDoors[6];
-    RwFrame          *m_aTrainNodes[TRAIN_NUM_NODES];
+    char     _pad5BA[2];
+    int32    m_nTimeWhenStoppedAtStation;
+    char     m_nTrackId;
+    char     _pad5C1[3];
+    int32    m_nTimeWhenCreated;
+    int16    field_5C8;                    // initialized with 0, not referenced
+    uint8    m_nPassengersGenerationState; // see eTrainPassengersGenerationState
+    uint8    m_nNumPassengersToLeave : 4;  // 0 to 4
+    uint8    m_nNumPassengersToEnter : 4;  // 0 to 4
+    CPed*    m_pTemporaryPassenger;        // we tell peds to enter train and then delete them
+    CTrain*  m_pPrevCarriage;
+    CTrain*  m_pNextCarriage;
+    CDoor    m_aDoors[6];
+    RwFrame* m_aTrainNodes[TRAIN_NUM_NODES];
 
-    static unsigned int& GenTrain_Track;
-    static unsigned int& GenTrain_TrainConfig;
-    static unsigned char& GenTrain_Direction;
-    static unsigned int& GenTrain_GenerationNode;
-    static unsigned int& GenTrain_Status;
+    static uint32& GenTrain_Track;
+    static uint32& GenTrain_TrainConfig;
+    static uint8& GenTrain_Direction;
+    static uint32& GenTrain_GenerationNode;
+    static uint32& GenTrain_Status;
     static bool& bDisableRandomTrains;
 
     static CVector *aStationCoors; // { 1741.0, -1954.0, 15.0
@@ -112,10 +104,10 @@ public:
     // reversed virtual functions
     void ProcessControl_Reversed();
 
-    CTrain(int modelIndex, eVehicleCreatedBy createdBy);
+    CTrain(int32 modelIndex, eVehicleCreatedBy createdBy);
 
     bool FindMaximumSpeedToStopAtStations(float* speed);
-    unsigned int FindNumCarriagesPulled();
+    uint32 FindNumCarriagesPulled();
     void OpenTrainDoor(float state); // dummy function
     void AddPassenger(CPed* ped); // dummy function
     void RemovePassenger(CPed* ped); // dummy function
@@ -125,10 +117,10 @@ public:
     void FindPositionOnTrackFromCoors();
     void AddNearbyPedAsRandomPassenger();
 
-    static void ReadAndInterpretTrackFile(char* filename, CTrainNode** nodes, int* lineCount, float* totalDist, int skipStations);
+    static void ReadAndInterpretTrackFile(char* filename, CTrainNode** nodes, int32* lineCount, float* totalDist, int32 skipStations);
     static void Shutdown();
     static void UpdateTrains(); // dummy function
-    static void FindCoorsFromPositionOnTrack(float railDistance, int trackId, CVector* outCoors); // dummy function
+    static void FindCoorsFromPositionOnTrack(float railDistance, int32 trackId, CVector* outCoors); // dummy function
     static void DisableRandomTrains(bool disable);
     static void RemoveOneMissionTrain(CTrain* train);
     static void ReleaseOneMissionTrain(CTrain* train);
@@ -136,29 +128,29 @@ public:
     static void SetTrainCruiseSpeed(CTrain* arg0, float cruiseSpeed);
     static CTrain* FindCaboose(CTrain* train);
     static CTrain* FindEngine(CTrain* train);
-    static CTrain* FindCarriage(CTrain* train, unsigned char carriage);
-    static void FindNextStationPositionInDirection(bool clockwiseDirection, float distance, float* distanceToStation, int* numStations);
+    static CTrain* FindCarriage(CTrain* train, uint8 carriage);
+    static void FindNextStationPositionInDirection(bool clockwiseDirection, float distance, float* distanceToStation, int32* numStations);
     static void RemoveMissionTrains();
     static void RemoveAllTrains();
     static void ReleaseMissionTrains();
-    static int FindClosestTrackNode(CVector posn, int* outTrackId);
+    static int32 FindClosestTrackNode(CVector posn, int32* outTrackId);
     static CTrain* FindNearestTrain(CVector posn, bool mustBeMainTrain);
     static void SetNewTrainPosition(CTrain* train, CVector posn);
     static bool IsNextStationAllowed(CTrain* train);
     static void SkipToNextAllowedStation(CTrain* train);
     static void InitTrains();
-    static void CreateMissionTrain(CVector posn, bool clockwiseDirection, unsigned int trainType, CTrain**outFirstCarriage, CTrain**outLastCarriage, int nodeIndex, int trackId, bool isMissionTrain);
+    static void CreateMissionTrain(CVector posn, bool clockwiseDirection, uint32 trainType, CTrain**outFirstCarriage, CTrain**outLastCarriage, int32 nodeIndex, int32 trackId, bool isMissionTrain);
     static void DoTrainGenerationAndRemoval();
 };
 
 VALIDATE_SIZE(CTrain, 0x6AC);
 
-extern unsigned int *NumTrackNodes; // unsigned int NumTrackNodes[4]
+extern uint32 *NumTrackNodes; // uint32 NumTrackNodes[4]
 extern float* arrTotalTrackLength; // float arrTotalTrackLength[4]
 extern CTrainNode **pTrackNodes; // CTrainNode *pTrackNodes[4]
 extern float *StationDist; // float StationDist[6]
 
 void ProcessTrainAnnouncements(); // dummy function
-void PlayAnnouncement(unsigned char arg0, unsigned char arg1);
+void PlayAnnouncement(uint8 arg0, uint8 arg1);
 void TrainHitStuff(CPtrList& ptrList, CEntity* entity);
 void MarkSurroundingEntitiesForCollisionWithTrain(CVector arg0, float arg1, CEntity* arg2, bool bOnlyVehicles);

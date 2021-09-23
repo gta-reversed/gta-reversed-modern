@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "CRegisteredMotionBlurStreak.h"
+
+#include "CMotionBlurStreaks.h"
+
 void CRegisteredMotionBlurStreak::InjectHooks()
 {
     ReversibleHooks::Install("CRegisteredMotionBlurStreak", "Update", 0x721EE0, &CRegisteredMotionBlurStreak::Update);
@@ -9,7 +13,7 @@ void CRegisteredMotionBlurStreak::InjectHooks()
 void CRegisteredMotionBlurStreak::Update()
 {
     bool bAlive = false;
-    for (int32_t i = 2; i >= 1; --i) {
+    for (int32 i = 2; i >= 1; --i) {
         m_avecLeftPoints[i] = m_avecLeftPoints[i - 1];
         m_avecRightPoints[i] = m_avecRightPoints[i - 1];
         m_acRenderHistory[i] = m_acRenderHistory[i - 1];
@@ -24,7 +28,7 @@ void CRegisteredMotionBlurStreak::Update()
 
 void CRegisteredMotionBlurStreak::Render()
 {
-    for (int32_t iInd = 0; iInd < 2; ++iInd) {
+    for (int32 iInd = 0; iInd < 2; ++iInd) {
         auto iAlpha = 255 - (iInd * 85);
         if (!m_acRenderHistory[0] || !m_acRenderHistory[iInd + 1])
             continue;

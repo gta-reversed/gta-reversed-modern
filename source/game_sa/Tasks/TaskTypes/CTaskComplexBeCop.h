@@ -3,7 +3,7 @@
 
 class CTaskComplexBeCop : public CTaskComplexWanderCop
 {
-    eTaskType GetId() override;
+    eTaskType GetTaskType() override;
 
     eTaskType GetId_Reversed();
 };

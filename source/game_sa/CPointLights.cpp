@@ -6,45 +6,45 @@
 */
 #include "StdInc.h"
 
-unsigned int MAX_POINTLIGHTS = 32;
+uint32 MAX_POINTLIGHTS = 32;
 
-unsigned int& CPointLights::NumLights = *(unsigned int*)0xC3F0D0;
+uint32& CPointLights::NumLights = *(uint32*)0xC3F0D0;
 CPointLight* CPointLights::aLights = (CPointLight*)0xC3F0E0;
 float* CPointLights::aCachedMapReadResults = (float*)0xC3F050;
-unsigned int& CPointLights::NextCachedValue = *(unsigned int*)0xC3F0D4;
+uint32& CPointLights::NextCachedValue = *(uint32*)0xC3F0D4;
 CVector* CPointLights::aCachedMapReads = (CVector*)0xC3F6E0;
 
-// Converted from cdecl void CPointLights::Init(void) 0x6FFB40
+// 0x6FFB40
 void CPointLights::Init() {
     plugin::Call<0x6FFB40>();
 }
 
-// Converted from cdecl float CPointLights::GenerateLightsAffectingObject(CVector const*point,float *totalLighting,CEntity *entity) 0x6FFBB0
+// 0x6FFBB0
 float CPointLights::GenerateLightsAffectingObject(CVector const* point, float* totalLighting, CEntity* entity) {
     return plugin::CallAndReturn<float, 0x6FFBB0, CVector const*, float*, CEntity*>(point, totalLighting, entity);
 }
 
-// Converted from cdecl float CPointLights::GetLightMultiplier(CVector const*point) 0x6FFE70
+// 0x6FFE70
 float CPointLights::GetLightMultiplier(CVector const* point) {
     return plugin::CallAndReturn<float, 0x6FFE70, CVector const*>(point);
 }
 
-// Converted from cdecl void CPointLights::RemoveLightsAffectingObject(void) 0x6FFFE0
+// 0x6FFFE0
 void CPointLights::RemoveLightsAffectingObject() {
     plugin::Call<0x6FFFE0>();
 }
 
-// Converted from cdecl bool CPointLights::ProcessVerticalLineUsingCache(CVector point,float *outZ) 0x6FFFF0
+// 0x6FFFF0
 bool CPointLights::ProcessVerticalLineUsingCache(CVector point, float* outZ) {
     return plugin::CallAndReturn<bool, 0x6FFFF0, CVector, float*>(point, outZ);
 }
 
-// Converted from cdecl void CPointLights::AddLight(uchar lightType,CVector point,CVector direction,float radius,float red,float green,float blue,uchar fogType,bool generateExtraShadows,CEntity *entityAffected) 0x7000E0
-void CPointLights::AddLight(unsigned char lightType, CVector point, CVector direction, float radius, float red, float green, float blue, unsigned char fogType, bool generateExtraShadows, CEntity* entityAffected) {
-    plugin::Call<0x7000E0, unsigned char, CVector, CVector, float, float, float, float, unsigned char, bool, CEntity*>(lightType, point, direction, radius, red, green, blue, fogType, generateExtraShadows, entityAffected);
+// 0x7000E0
+void CPointLights::AddLight(uint8 lightType, CVector point, CVector direction, float radius, float red, float green, float blue, uint8 fogType, bool generateExtraShadows, CEntity* entityAffected) {
+    plugin::Call<0x7000E0, uint8, CVector, CVector, float, float, float, float, uint8, bool, CEntity*>(lightType, point, direction, radius, red, green, blue, fogType, generateExtraShadows, entityAffected);
 }
 
-// Converted from cdecl void CPointLights::RenderFogEffect(void) 0x7002D0
+// 0x7002D0
 void CPointLights::RenderFogEffect() {
     plugin::Call<0x7002D0>();
 }

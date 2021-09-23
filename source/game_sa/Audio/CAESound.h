@@ -11,7 +11,7 @@
 class CAEAudioEntity;
 class CEntity;
 
-enum eSoundEnvironment : unsigned short {
+enum eSoundEnvironment : uint16 {
     SOUND_FRONT_END                        = 0x1,
     SOUND_UNCANCELLABLE                    = 0x2,
     SOUND_REQUEST_UPDATES                  = 0x4,
@@ -27,116 +27,111 @@ enum eSoundEnvironment : unsigned short {
     SOUND_FORCED_FRONT                     = 0x1000
 };
 
-enum eSoundState : short {
-    SOUND_ACTIVE = 0,
+enum eSoundState : int16 {
+    SOUND_ACTIVE  = 0,
     SOUND_STOPPED = 1,
 };
 
 class CAESound {
 public:
-    short                 m_nBankSlotId;
-    short                 m_nSoundIdInSlot;
-    CAEAudioEntity*       m_pBaseAudio;
-    CEntity*              m_pPhysicalEntity;
-    unsigned int          m_nEvent; // see eAudioEvents
-    float                 m_fMaxVolume;
-    float                 m_fVolume;
-    float                 m_fSoundDistance;
-    float                 m_fSpeed;
-    float                 m_fSpeedVariability;
-    CVector               m_vecCurrPosn;
-    CVector               m_vecPrevPosn;
-    int                   m_nLastFrameUpdate;
-    int                   m_nCurrTimeUpdate;
-    int                   m_nPrevTimeUpdate;
-    float                 m_fCurrCamDist;
-    float                 m_fPrevCamDist;
-    float                 m_fTimeScale;
-    char                  m_nIgnoredServiceCycles; // Seemingly never used, but CAESoundManager::Service still checks for that
-    char field_55;
+    int16           m_nBankSlotId;
+    int16           m_nSoundIdInSlot;
+    CAEAudioEntity* m_pBaseAudio;
+    CEntity*        m_pPhysicalEntity;
+    uint32          m_nEvent; // see eAudioEvents
+    float           m_fMaxVolume;
+    float           m_fVolume;
+    float           m_fSoundDistance;
+    float           m_fSpeed;
+    float           m_fSpeedVariability;
+    CVector         m_vecCurrPosn;
+    CVector         m_vecPrevPosn;
+    int32           m_nLastFrameUpdate;
+    int32           m_nCurrTimeUpdate;
+    int32           m_nPrevTimeUpdate;
+    float           m_fCurrCamDist;
+    float           m_fPrevCamDist;
+    float           m_fTimeScale;
+    char            m_nIgnoredServiceCycles; // Seemingly never used, but CAESoundManager::Service still checks for that
+    char            field_55;
     union {
-        unsigned short m_nEnvironmentFlags;
+        uint16 m_nEnvironmentFlags;
         struct {
-            unsigned short m_bFrontEnd : 1;
-            unsigned short m_bUncancellable : 1;
-            unsigned short m_bRequestUpdates : 1;
-            unsigned short m_bPlayPhysically : 1;
-            unsigned short m_bUnpausable : 1;
-            unsigned short m_bStartPercentage : 1;
-            unsigned short m_bMusicMastered : 1;
-            unsigned short m_bLifespanTiedToPhysicalEntity : 1;
+            uint16 m_bFrontEnd : 1;
+            uint16 m_bUncancellable : 1;
+            uint16 m_bRequestUpdates : 1;
+            uint16 m_bPlayPhysically : 1;
+            uint16 m_bUnpausable : 1;
+            uint16 m_bStartPercentage : 1;
+            uint16 m_bMusicMastered : 1;
+            uint16 m_bLifespanTiedToPhysicalEntity : 1;
 
-            unsigned short m_bUnduckable : 1;
-            unsigned short m_bUncompressable : 1;
-            unsigned short m_bRolledOff : 1;
-            unsigned short m_bSmoothDucking : 1;
-            unsigned short m_bForcedFront : 1;
+            uint16 m_bUnduckable : 1;
+            uint16 m_bUncompressable : 1;
+            uint16 m_bRolledOff : 1;
+            uint16 m_bSmoothDucking : 1;
+            uint16 m_bForcedFront : 1;
         };
     };
-    unsigned short        m_nIsUsed;
-    short                 m_bWasServiced;
-    short                 m_nCurrentPlayPosition;
-    short                 m_nHasStarted;
-    float                 m_fFinalVolume;
-    float                 m_fFrequency;
-    short                 m_nPlayingState; // see eSoundState
-    char field_6A[2];
-    float                 m_fSoundHeadRoom;
-    short                 m_nSoundLength;
-    short field_72;
+    uint16 m_nIsUsed;
+    int16  m_bWasServiced;
+    int16  m_nCurrentPlayPosition;
+    int16  m_nHasStarted;
+    float  m_fFinalVolume;
+    float  m_fFrequency;
+    int16  m_nPlayingState; // see eSoundState
+    char   field_6A[2];
+    float  m_fSoundHeadRoom;
+    int16  m_nSoundLength;
+    int16  field_72;
+
+    static constexpr float fSlowMoFrequencyScalingFactor = 0.5F;
 
 public:
     static void InjectHooks();
 
     CAESound() { m_pPhysicalEntity = nullptr; }
     CAESound(CAESound& sound);
-    CAESound(short bankSlotId, short sfxId, CAEAudioEntity* baseAudio, CVector posn,
-             float volume, float fDistance, float speed, float timeScale, unsigned char ignoredServiceCycles,
-             eSoundEnvironment environmentFlags, float speedVariability);
+    CAESound(int16 bankSlotId, int16 sfxId, CAEAudioEntity* baseAudio, CVector posn, float volume, float fDistance, float speed, float timeScale, uint8 ignoredServiceCycles, eSoundEnvironment environmentFlags, float speedVariability);
     ~CAESound();
 
     CAESound& operator=(CAESound const& sound);
 
-    void Initialise(short bankSlotId, short sfxId, CAEAudioEntity *baseAudio, CVector posn,
-                    float volume, float maxDistance, float speed, float timeScale, unsigned char ignoredServiceCycles,
-                    eSoundEnvironment environmentFlags, float speedVariability, short currPlayPosn);
+    void Initialise(int16 bankSlotId, int16 sfxId, CAEAudioEntity* baseAudio, CVector posn, float volume, float maxDistance, float speed, float timeScale, uint8 ignoredServiceCycles, eSoundEnvironment environmentFlags, float speedVariability, int16 currPlayPosn);
 
-    void UnregisterWithPhysicalEntity();
-    void StopSound();
-    bool GetUncancellable() const { return m_bUncancellable; }
-    bool GetFrontEnd() const { return m_bFrontEnd; }
-    bool GetRequestUpdates() const { return m_bRequestUpdates; }
-    bool GetUnpausable() const { return m_bUnpausable; }
-    bool GetPlayPhysically() const { return m_bPlayPhysically; };
-    bool GetStartPercentage() const { return m_bStartPercentage; }
-    bool GetMusicMastered() const { return m_bMusicMastered; }
-    bool GetLifespanTiedToPhysicalEntity() const { return m_bLifespanTiedToPhysicalEntity; }
-    bool GetUnduckable() const { return m_bUnduckable; }
-    bool GetUncompressable() const { return m_bUncompressable; }
-    bool GetRolledOff() const { return m_bRolledOff; }
-    bool GetSmoothDucking() const { return m_bSmoothDucking; }
-    bool GetForcedFront() const { return m_bForcedFront; }
-    void SetIndividualEnvironment(unsigned short envFlag, unsigned short bEnabled); // pass eSoundEnvironment as envFlag
-    void UpdatePlayTime(short soundLength, short loopStartTime, short playProgress);
-    void GetRelativePosition(CVector *outPosn);
-    void CalculateFrequency();
-    void UpdateFrequency();
+    void  UnregisterWithPhysicalEntity();
+    void  StopSound();
+    bool  GetUncancellable() const { return m_bUncancellable; }
+    bool  GetFrontEnd() const { return m_bFrontEnd; }
+    bool  GetRequestUpdates() const { return m_bRequestUpdates; }
+    bool  GetUnpausable() const { return m_bUnpausable; }
+    bool  GetPlayPhysically() const { return m_bPlayPhysically; };
+    bool  GetStartPercentage() const { return m_bStartPercentage; }
+    bool  GetMusicMastered() const { return m_bMusicMastered; }
+    bool  GetLifespanTiedToPhysicalEntity() const { return m_bLifespanTiedToPhysicalEntity; }
+    bool  GetUnduckable() const { return m_bUnduckable; }
+    bool  GetUncompressable() const { return m_bUncompressable; }
+    bool  GetRolledOff() const { return m_bRolledOff; }
+    bool  GetSmoothDucking() const { return m_bSmoothDucking; }
+    bool  GetForcedFront() const { return m_bForcedFront; }
+    void  SetIndividualEnvironment(uint16 envFlag, uint16 bEnabled); // pass eSoundEnvironment as envFlag
+    void  UpdatePlayTime(int16 soundLength, int16 loopStartTime, int16 playProgress);
+    void  GetRelativePosition(CVector* outPosn);
+    void  CalculateFrequency();
+    void  UpdateFrequency();
     float GetRelativePlaybackFrequencyWithDoppler();
     float GetSlowMoFrequencyScalingFactor();
-    void NewVPSLentry();
-    void RegisterWithPhysicalEntity(CEntity *entity);
-    void StopSoundAndForget();
-    void SetPosition(CVector vecPos);
-    void CalculateVolume();
-    void UpdateParameters(short curPlayPos);
-    void SoundHasFinished();
+    void  NewVPSLentry();
+    void  RegisterWithPhysicalEntity(CEntity* entity);
+    void  StopSoundAndForget();
+    void  SetPosition(CVector vecPos);
+    void  CalculateVolume();
+    void  UpdateParameters(int16 curPlayPos);
+    void  SoundHasFinished();
 
 public:
     bool IsUsed() const { return m_nIsUsed; }
     bool WasServiced() const { return m_bWasServiced; }
 
-public:
-    static constexpr float fSlowMoFrequencyScalingFactor = 0.5F;
 };
 VALIDATE_SIZE(CAESound, 0x74);
-

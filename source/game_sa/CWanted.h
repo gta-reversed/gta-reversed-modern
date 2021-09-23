@@ -14,50 +14,50 @@
 class CPed;
 class CCopPed;
 
-class  CWanted {
+class CWanted {
 public:
-    unsigned int   m_nChaosLevel;
-    unsigned int   m_nChaosLevelBeforeParole;
-    unsigned int   m_nLastTimeWantedDecreased;
-    unsigned int   m_nLastTimeWantedLevelChanged;
-    unsigned int   m_nTimeOfParole;
-    float          m_fMultiplier;                     // New crimes have their wanted level contribution multiplied by this
-    unsigned char  m_nCopsInPursuit;
-    unsigned char  m_nMaxCopsInPursuit;
-    unsigned char  m_nMaxCopCarsInPursuit;
-    unsigned char  m_nCopsBeatingSuspect;
-    unsigned short m_nChanceOnRoadBlock;
+    uint32 m_nChaosLevel;
+    uint32 m_nChaosLevelBeforeParole;
+    uint32 m_nLastTimeWantedDecreased;
+    uint32 m_nLastTimeWantedLevelChanged;
+    uint32 m_nTimeOfParole;
+    float  m_fMultiplier; // New crimes have their wanted level contribution multiplied by this
+    uint8  m_nCopsInPursuit;
+    uint8  m_nMaxCopsInPursuit;
+    uint8  m_nMaxCopCarsInPursuit;
+    uint8  m_nCopsBeatingSuspect;
+    uint16 m_nChanceOnRoadBlock;
 
     union {
         struct {
-            unsigned char m_bPoliceBackOff : 1;       // If this is set the police will leave player alone (for cut-scenes)
-            unsigned char m_bPoliceBackOffGarage : 1; // If this is set the police will leave player alone (for garages)
-            unsigned char m_bEverybodyBackOff : 1;    // If this is set then everybody (including police) will leave the player alone (for cut-scenes)
-            unsigned char m_bSwatRequired : 1;        // These three booleans are needed so that the
-            unsigned char m_bFbiRequired : 1;         // streaming required vehicle stuff can be overrided
-            unsigned char m_bArmyRequired : 1;
-            // unsigned char m_b6 : 1;
-            // unsigned char m_b7 : 1;
-            // unsigned char m_b8 : 1;
+            uint8 m_bPoliceBackOff : 1;       // If this is set the police will leave player alone (for cut-scenes)
+            uint8 m_bPoliceBackOffGarage : 1; // If this is set the police will leave player alone (for garages)
+            uint8 m_bEverybodyBackOff : 1;    // If this is set then everybody (including police) will leave the player alone (for cut-scenes)
+            uint8 m_bSwatRequired : 1;        // These three booleans are needed so that the
+            uint8 m_bFbiRequired : 1;         // streaming required vehicle stuff can be overrided
+            uint8 m_bArmyRequired : 1;
+            // uint8 m_b6 : 1;
+            // uint8 m_b7 : 1;
+            // uint8 m_b8 : 1;
         };
-        unsigned char m_nFlags;
+        uint8 m_nFlags;
     };
 
-    char            _pad1F;
+    char _pad1F;
 
-    unsigned int    m_nCurrentChaseTime;
-    unsigned int    m_nCurrentChaseTimeCounter;
-    unsigned int    m_nTimeCounting;
-    unsigned int    m_nWantedLevel;
-    unsigned int    m_nWantedLevelBeforeParole;
-    CCrimeBeingQd   m_CrimesBeingQd[16];
-    CCopPed*        m_pCopsInPursuit[10];
+    uint32                      m_nCurrentChaseTime;
+    uint32                      m_nCurrentChaseTimeCounter;
+    uint32                      m_nTimeCounting;
+    uint32                      m_nWantedLevel;
+    uint32                      m_nWantedLevelBeforeParole;
+    CCrimeBeingQd               m_CrimesBeingQd[16];
+    CCopPed*                    m_pCopsInPursuit[10];
     CAEPoliceScannerAudioEntity m_PoliceScannerAudio;
-    bool            m_bLeavePlayerAlone;
-    char            _pad299[3];
+    bool                        m_bLeavePlayerAlone;
+    char                        _pad299[3];
 
-    static unsigned int &MaximumWantedLevel; // default 6
-    static unsigned int MaximumChaosLevel;
+    static uint32 &MaximumWantedLevel; // default 6
+    static uint32 MaximumChaosLevel;
     static bool &bUseNewsHeliInAdditionToPolice;
 
 public:
@@ -68,34 +68,34 @@ public:
     static void InitialiseStaticVariables();
 
     void UpdateWantedLevel();
-    static void SetMaximumWantedLevel(int level);
+    static void SetMaximumWantedLevel(int32 level);
     bool AreMiamiViceRequired();
     bool AreSwatRequired() const;
     bool AreFbiRequired() const;
     bool AreArmyRequired() const;
-    int NumOfHelisRequired();
+    int32 NumOfHelisRequired();
     // dummy function
     static void ResetPolicePursuit();
     void ClearQdCrimes();
-    bool AddCrimeToQ(eCrimeType crimeType, int crimeId, const CVector& posn, bool bAlreadyReported, bool bPoliceDontReallyCare);
+    bool AddCrimeToQ(eCrimeType crimeType, int32 crimeId, const CVector& posn, bool bAlreadyReported, bool bPoliceDontReallyCare);
     void ReportCrimeNow(eCrimeType crimeType, const CVector& posn, bool bPoliceDontReallyCare);
-    static void RemovePursuitCop(CCopPed* cop, CCopPed** copsArray, unsigned char& copsCounter);
+    static void RemovePursuitCop(CCopPed* cop, CCopPed** copsArray, uint8& copsCounter);
     bool IsInPursuit(CCopPed* cop);
     static void UpdateEachFrame();
     void RegisterCrime(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare);
     void RegisterCrime_Immediately(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare);
-    void SetWantedLevel(unsigned int level);
-    void CheatWantedLevel(unsigned int level);
-    void SetWantedLevelNoDrop(unsigned int level);
+    void SetWantedLevel(uint32 level);
+    void CheatWantedLevel(uint32 level);
+    void SetWantedLevelNoDrop(uint32 level);
     void ClearWantedLevelAndGoOnParole();
-    static int WorkOutPolicePresence(CVector posn, float radius);
+    static int32 WorkOutPolicePresence(CVector posn, float radius);
     void UpdateCrimesQ();
-    bool IsClosestCop(CPed* ped, int numCopsToCheck);
+    bool IsClosestCop(CPed* ped, int32 numCopsToCheck);
     static CCopPed* ComputePursuitCopToDisplace(CCopPed* cop, CCopPed** copsArray);
     void RemovePursuitCop(CCopPed* cop);
     void RemoveExcessPursuitCops();
     void Update();
-    static bool CanCopJoinPursuit(CCopPed* target, unsigned char maxCopsCount, CCopPed** copsArray, unsigned char& copsCounter);
+    static bool CanCopJoinPursuit(CCopPed* target, uint8 maxCopsCount, CCopPed** copsArray, uint8& copsCounter);
     bool CanCopJoinPursuit(CCopPed* cop);
     bool SetPursuitCop(CCopPed* cop);
 };

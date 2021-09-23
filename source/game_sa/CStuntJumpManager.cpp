@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-static constexpr unsigned short STUNT_JUMP_COUNT = 256;
+static constexpr uint16 STUNT_JUMP_COUNT = 256;
 
 // 0xA9A888
 CPool<CStuntJump>* CStuntJumpManager::mp_poolStuntJumps{};
@@ -11,13 +11,13 @@ bool CStuntJumpManager::m_bActive;
 // 0xA9A891
 bool CStuntJumpManager::m_bHitReward;
 // 0xA9A894
-int CStuntJumpManager::m_iTimer;
-// 0xA9A898 int
+uint32 CStuntJumpManager::m_iTimer;
+// 0xA9A898 int32
 eJumpState CStuntJumpManager::m_jumpState;
 // 0xA9A89C
-int CStuntJumpManager::m_iNumJumps;
+int32 CStuntJumpManager::m_iNumJumps;
 // 0xA9A8A0
-unsigned int CStuntJumpManager::m_iNumCompleted;
+uint32 CStuntJumpManager::m_iNumCompleted;
 
 
 void CStuntJumpManager::InjectHooks() {
@@ -58,7 +58,7 @@ void CStuntJumpManager::ShutdownForRestart() {
 // 0x5D5570
 void CStuntJumpManager::Save() {
     CGenericGameStorage::SaveDataToWorkBuffer(&m_iNumJumps, sizeof(m_iNumJumps));
-    for (unsigned int i = 0; i < STUNT_JUMP_COUNT; i++) {
+    for (auto i = 0; i < STUNT_JUMP_COUNT; i++) {
         CStuntJump* jump = mp_poolStuntJumps->GetAt(i);
         if (jump) {
             CGenericGameStorage::SaveDataToWorkBuffer(jump, sizeof(CStuntJump));
@@ -67,10 +67,10 @@ void CStuntJumpManager::Save() {
 }
 
 // 0x5D5920
-void CStuntJumpManager::Load(int a1, int a2) {
-    unsigned int jumpCount;
+void CStuntJumpManager::Load(int32 a1, int32 a2) {
+    uint32 jumpCount;
     CGenericGameStorage::LoadDataFromWorkBuffer(&jumpCount, sizeof(jumpCount));
-    for (unsigned int i = 0; i < jumpCount; i++) {
+    for (uint32 i = 0; i < jumpCount; i++) {
         CStuntJump* jump = mp_poolStuntJumps->New();
         CGenericGameStorage::LoadDataFromWorkBuffer(jump, sizeof(CStuntJump));
         m_iNumJumps++;
@@ -78,7 +78,7 @@ void CStuntJumpManager::Load(int a1, int a2) {
 }
 
 // 0x49CB40
-void CStuntJumpManager::AddOne(const CBoundingBox& start, const CBoundingBox& end, const CVector& cameraPosn, int reward) {
+void CStuntJumpManager::AddOne(const CBoundingBox& start, const CBoundingBox& end, const CVector& cameraPosn, int32 reward) {
     if (mp_poolStuntJumps) {
         CStuntJump* jump = mp_poolStuntJumps->New();
         if (jump) {
@@ -116,7 +116,7 @@ void CStuntJumpManager::Update() {
             playerVehicle->m_nNumEntitiesCollided != 0 &&
             playerVehicle->m_vecMoveSpeed.Magnitude() * 50.0f >= 20.0f
         ) {
-            for (unsigned int jumpIndex = 0; jumpIndex < STUNT_JUMP_COUNT; jumpIndex++) {
+            for (auto jumpIndex = 0; jumpIndex < STUNT_JUMP_COUNT; jumpIndex++) {
                 CStuntJump* jump = mp_poolStuntJumps->GetAt(jumpIndex);
                 if (!jump)
                     continue;
@@ -170,7 +170,7 @@ void CStuntJumpManager::Update() {
         if (mp_Active->end.IsPointWithin(point))
             m_bHitReward = true;
 
-        int time;
+        uint32 time;
         if (bFailed) {
             m_jumpState = eJumpState::END_POINT_INTERSECTED;
             time = 0;
@@ -178,7 +178,7 @@ void CStuntJumpManager::Update() {
             time = m_iTimer;
         }
 
-        m_iTimer = int(CTimer::ms_fTimeStep * 0.02f * 1000.0f) + time;
+        m_iTimer = CTimer::GetTimeStepInMS() + time;
         if (m_iTimer > 1000 && time <= 1000) {
             auto vehicle = FindPlayerVehicle(-1, false);
             if (vehicle) {
@@ -191,7 +191,7 @@ void CStuntJumpManager::Update() {
         break;
     }
     case eJumpState::END_POINT_INTERSECTED: {
-        m_iTimer += int(CTimer::ms_fTimeStep * 0.02f * 1000.0f);
+        m_iTimer += CTimer::GetTimeStepInMS();
         if (m_iTimer < 300)
             return;
 
@@ -209,7 +209,7 @@ void CStuntJumpManager::Update() {
 
         CStats::IncrementStat(STAT_UNIQUE_JUMPS_DONE, 1.0f);
 
-        int reward = m_iNumCompleted == m_iNumJumps ? 10000 : mp_Active->reward;
+        int32 reward = m_iNumCompleted == m_iNumJumps ? 10000 : mp_Active->reward;
         playerInfo->m_nMoney += reward;
 
         AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE, 0.0f, 1.0f);
@@ -246,7 +246,7 @@ void CStuntJumpManager::Render() {
 
 // NOTSA
 void ResetAllJumps() {
-    for (unsigned int jumpIndex = 0; jumpIndex < STUNT_JUMP_COUNT; jumpIndex++) {
+    for (auto jumpIndex = 0; jumpIndex < STUNT_JUMP_COUNT; jumpIndex++) {
         CStuntJump* jump = CStuntJumpManager::mp_poolStuntJumps->GetAt(jumpIndex);
         if (!jump)
             continue;

@@ -2,16 +2,16 @@
 
 void CEventHandlerHistory::InjectHooks()
 {
-    HookInstall(0x4BC550, &CEventHandlerHistory::ClearAllEvents);
-    HookInstall(0x4B8C60, &CEventHandlerHistory::ClearNonTempEvent);
-    HookInstall(0x4B8C40, &CEventHandlerHistory::ClearTempEvent);
-    HookInstall(0x4B8CA0, &CEventHandlerHistory::GetCurrentEvent);
-    HookInstall(0x4B8C80, &CEventHandlerHistory::GetCurrentEventPriority);
-    HookInstall(0x4B8B90, &CEventHandlerHistory::IsRespondingToEvent);
-    HookInstall(0x4BC4B0, &CEventHandlerHistory::RecordCurrentEvent);
-    HookInstall(0x4B8BF0, &CEventHandlerHistory::StoreActiveEvent);
-    HookInstall(0x4BC580, &CEventHandlerHistory::TakesPriorityOverCurrentEvent);
-    HookInstall(0x4B8C20, &CEventHandlerHistory::TickStoredEvent);
+    ReversibleHooks::Install("CEventHandlerHistory", "ClearAllEvents", 0x4BC550, &CEventHandlerHistory::ClearAllEvents);
+    ReversibleHooks::Install("CEventHandlerHistory", "ClearNonTempEvent", 0x4B8C60, &CEventHandlerHistory::ClearNonTempEvent);
+    ReversibleHooks::Install("CEventHandlerHistory", "ClearTempEvent", 0x4B8C40, &CEventHandlerHistory::ClearTempEvent);
+    ReversibleHooks::Install("CEventHandlerHistory", "GetCurrentEvent", 0x4B8CA0, &CEventHandlerHistory::GetCurrentEvent);
+    ReversibleHooks::Install("CEventHandlerHistory", "GetCurrentEventPriority", 0x4B8C80, &CEventHandlerHistory::GetCurrentEventPriority);
+    ReversibleHooks::Install("CEventHandlerHistory", "IsRespondingToEvent", 0x4B8B90, &CEventHandlerHistory::IsRespondingToEvent);
+    ReversibleHooks::Install("CEventHandlerHistory", "RecordCurrentEvent", 0x4BC4B0, &CEventHandlerHistory::RecordCurrentEvent);
+    ReversibleHooks::Install("CEventHandlerHistory", "StoreActiveEvent", 0x4B8BF0, &CEventHandlerHistory::StoreActiveEvent);
+    ReversibleHooks::Install("CEventHandlerHistory", "TakesPriorityOverCurrentEvent", 0x4BC580, &CEventHandlerHistory::TakesPriorityOverCurrentEvent);
+    ReversibleHooks::Install("CEventHandlerHistory", "TickStoredEvent", 0x4B8C20, &CEventHandlerHistory::TickStoredEvent);
 }
 
 CEventHandlerHistory::~CEventHandlerHistory()
@@ -61,10 +61,10 @@ void CEventHandlerHistory::Flush()
     ClearStoredActiveEvent();
 }
 
-std::int32_t CEventHandlerHistory::GetCurrentEventPriority()
+int32 CEventHandlerHistory::GetCurrentEventPriority()
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<std::int32_t, 0x4B8C80, CEventHandlerHistory*>(this);
+    return plugin::CallMethodAndReturn<int32, 0x4B8C80, CEventHandlerHistory*>(this);
 #else
     if (m_tempEvent)
         return m_tempEvent->GetEventPriority();
@@ -96,7 +96,7 @@ void CEventHandlerHistory::RecordCurrentEvent(CPed* ped, CEvent& event)
     plugin::CallMethod<0x4BC4B0, CEventHandlerHistory*, CPed*, CEvent&>(this, ped, event);
 #else
     if (event.GetEventType() != EVENT_SCRIPT_COMMAND) {
-        if (CEventHandler::IsTemporaryEvent(&event)) {
+        if (CEventHandler::IsTemporaryEvent(event)) {
             if (m_nonTempEvent) {
                 StoreActiveEvent();
                 m_nonTempEvent = nullptr;
@@ -131,14 +131,14 @@ bool CEventHandlerHistory::TakesPriorityOverCurrentEvent(CEvent& event)
     return plugin::CallMethodAndReturn<bool, 0x4BC580, CEventHandlerHistory*, CEvent&>(this, event);
 #else
     if (m_nonTempEvent)
-        return event.TakesPriorityOver(m_nonTempEvent);
+        return event.TakesPriorityOver(*m_nonTempEvent);
     if (!m_tempEvent)
         return true;
-    if (CEventHandler::IsTemporaryEvent(&event))
-        return event.TakesPriorityOver(m_tempEvent);
-    if (!event.TakesPriorityOver(m_tempEvent))
+    if (CEventHandler::IsTemporaryEvent(event))
+        return event.TakesPriorityOver(*m_tempEvent);
+    if (!event.TakesPriorityOver(*m_tempEvent))
         return false;
-    if (!m_storedActiveEvent || event.TakesPriorityOver(m_storedActiveEvent))
+    if (!m_storedActiveEvent || event.TakesPriorityOver(*m_storedActiveEvent))
         return true;
     return false;
 #endif

@@ -9,27 +9,27 @@ Do not delete this comment block. Respect others' work!
 #include "CSpecialPlateHandler.h"
 #include "CCarGenerator.h"
 
-static constexpr int NUM_CAR_GENERATORS = 500;
+static constexpr int32 NUM_CAR_GENERATORS = 500;
 
 class CTheCarGenerators {
 public:
-    static unsigned char& GenerateEvenIfPlayerIsCloseCounter;
-    static unsigned char& ProcessCounter;
-    static unsigned int& NumOfCarGenerators;
+    static uint8& GenerateEvenIfPlayerIsCloseCounter;
+    static uint8& ProcessCounter;
+    static uint32& NumOfCarGenerators;
     static CSpecialPlateHandler& m_SpecialPlateHandler;
     static CCarGenerator(&CarGeneratorArray)[NUM_CAR_GENERATORS];
 
 public:
     static void InjectHooks();
 
-    static signed int CreateCarGenerator(CVector posn, float angle, int modelId, short color1, short color2, uchar forceSpawn, uchar alarmChances, uchar doorLockChances,
-                                         ushort minDelay, ushort maxDelay, uchar iplId, bool ignorePopulationLimit);
+    static signed int CreateCarGenerator(CVector posn, float angle, int32 modelId, int16 color1, int16 color2, uint8 forceSpawn, uint8 alarmChances, uint8 doorLockChances,
+                                         uint16 minDelay, uint16 maxDelay, uint8 iplId, bool ignorePopulationLimit);
     static void Init();
     static void Load();
     static void Process();
-    static void RemoveCarGenerators(unsigned char IplID);
+    static void RemoveCarGenerators(uint8 IplID);
     static void Save();
 
-    static CCarGenerator* Get(unsigned short index);
-    static int GetIndex(CCarGenerator* pCarGen);
+    static CCarGenerator* Get(uint16 index);
+    static int32 GetIndex(CCarGenerator* pCarGen);
 };

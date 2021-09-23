@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
-uint32_t& CWaterLevel::m_nWaterConfiguration = *(uint32_t*)0xC228A0;
-uint32_t& CWaterLevel::m_nWaterTimeOffset = *(uint32_t*)0xC228A4;
+uint32& CWaterLevel::m_nWaterConfiguration = *(uint32*)0xC228A0;
+uint32& CWaterLevel::m_nWaterTimeOffset = *(uint32*)0xC228A4;
 float* CWaterLevel::faWaveMultipliersX = (float*)0x8D38C8;
 float* CWaterLevel::faWaveMultipliersY = (float*)0x8D38E8;
 
@@ -35,7 +35,7 @@ void CWaterLevel::AddWaveToResult(float x, float y, float* pfWaterLevel, float f
     }*/
 }
 
-void CWaterLevel::CalculateWavesOnlyForCoordinate(int x, int y, float fUnkn1, float fUnkn2, float* fOutWave)
+void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float fUnkn1, float fUnkn2, float* fOutWave)
 {
     if (x < 0)
         x = -x;
@@ -50,13 +50,13 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int x, int y, float fUnkn1, fl
     auto fX = static_cast<float>(x);
     auto fY = static_cast<float>(y);
 
-    auto iTimeOffset = CTimer::m_snTimeInMilliseconds - CWaterLevel::m_nWaterTimeOffset;
+    auto iTimeOffset = CTimer::GetTimeInMS() - CWaterLevel::m_nWaterTimeOffset;
     const auto fTwoPiToChar = 256.0F / TWO_PI;
 
     const auto fLowFreqOffsetMult = TWO_PI / 5000.0F;
     const auto fLowFreqMult = TWO_PI / 64.0F;
     auto fIndex = (static_cast<float>(iTimeOffset % 5000U) * fLowFreqOffsetMult + (fX + fY) * fLowFreqMult) * fTwoPiToChar;
-    unsigned char uiIndex = static_cast<unsigned char>(fIndex) + 1;
+    uint8 uiIndex = static_cast<uint8>(fIndex) + 1;
     float fLowFreqWaves = CMaths::ms_SinTable[uiIndex] * 2.0F * fWaveMultiplier * fUnkn1;
     *fOutWave += fLowFreqWaves;
 
@@ -64,14 +64,14 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int x, int y, float fUnkn1, fl
     const auto fMidFreqXMult = TWO_PI / 26.0F;
     const auto fMidFreqYMult = TWO_PI / 52.0F;
     fIndex = (static_cast<float>(iTimeOffset % 3500U) * fMidFreqOffsetMult + (fX * fMidFreqXMult) + (fY * fMidFreqYMult)) * fTwoPiToChar;
-    uiIndex = static_cast<unsigned char>(fIndex) + 1;
+    uiIndex = static_cast<uint8>(fIndex) + 1;
     float fMidFreqWaves = CMaths::ms_SinTable[uiIndex] * 1.0F * fWaveMultiplier * fUnkn2;
     *fOutWave += fMidFreqWaves;
 
     const auto fHighFreqOffsetMult = TWO_PI / 3000.0F;
     const auto fHighFreqYMult = TWO_PI / 20.0F;
     fIndex = (static_cast<float>(iTimeOffset % 3000U) * fHighFreqOffsetMult + (fY * fHighFreqYMult)) * fTwoPiToChar;
-    uiIndex = static_cast<unsigned char>(fIndex) + 1;
+    uiIndex = static_cast<uint8>(fIndex) + 1;
     float fHighFreqWaves = CMaths::ms_SinTable[uiIndex] * 0.5F * fWaveMultiplier * fUnkn2;
     *fOutWave += fHighFreqWaves;
 }
@@ -82,7 +82,7 @@ bool CWaterLevel::GetWaterDepth(CVector const& vecPos, float* pOutWaterDepth, fl
         (vecPos, pOutWaterDepth, pOutWaterLevel, pOutGroundLevel);
 }
 
-bool CWaterLevel::GetWaterLevel(float x, float y, float z, float* pOutWaterLevel, unsigned char bTouchingWater, CVector* pVecNormals)
+bool CWaterLevel::GetWaterLevel(float x, float y, float z, float* pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals)
 {
     float fUnkn1, fUnkn2;
     if (!CWaterLevel::GetWaterLevelNoWaves(x, y, z, pOutWaterLevel, &fUnkn1, &fUnkn2))
@@ -103,7 +103,7 @@ bool CWaterLevel::GetWaterLevelNoWaves(float x, float y, float z, float* pOutWat
 
 void CWaterLevel::SyncWater()
 {
-    CWaterLevel::m_nWaterTimeOffset = CTimer::m_snTimeInMilliseconds;
+    CWaterLevel::m_nWaterTimeOffset = CTimer::GetTimeInMS();
 }
 
 // 0x6EAE80

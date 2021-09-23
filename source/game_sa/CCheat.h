@@ -14,17 +14,17 @@ struct Cheat {
     DWORD installAddress;
     void* method;
     const std::string methodName;
-    unsigned int hash;
+    uint32 hash;
     eCheats type;
 };
 
 class CCheat {
 public:
-    static constexpr unsigned short CHEAT_STRING_SIZE = 30;
-    static constexpr unsigned short CHEAT_MIN_HASH_SIZE = 6;
+    static constexpr uint16 CHEAT_STRING_SIZE = 30;
+    static constexpr uint16 CHEAT_MIN_HASH_SIZE = 6;
 
     static void (*(&m_aCheatFunctions)[TOTAL_CHEATS])();
-    static int (&m_aCheatHashKeys)[TOTAL_CHEATS];    // static int m_aCheatHashKeys[TOTAL_CHEATS]
+    static int32 (&m_aCheatHashKeys)[TOTAL_CHEATS];    // static int32 m_aCheatHashKeys[TOTAL_CHEATS]
     static char (&m_CheatString)[CHEAT_STRING_SIZE]; // static char m_CheatString[CHEAT_STRING_SIZE]
     static bool (&m_aCheatsActive)[TOTAL_CHEATS];    // static bool m_aCheatsActive[TOTAL_CHEATS]
     static bool &m_bHasPlayerCheated;

@@ -5,13 +5,13 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CVector.h"
 #include "CRGBA.h"
 
 class CRegisteredMotionBlurStreak {
 public:
-    int     m_nId;
+    uint32  m_nId;
     CRGBA   m_color;
     CVector m_avecLeftPoints[3];
     CVector m_avecRightPoints[3];

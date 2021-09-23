@@ -1,5 +1,5 @@
 #include "StdInc.h"
 
-int CEventSource::ComputeEventSourceType(CEvent* event, CPed* ped) {
-    return plugin::CallAndReturn<int, 0x4ABAC0, CEvent*, CPed*>(event, ped);
+int32 CEventSource::ComputeEventSourceType(const CEvent& event, const CPed& ped) {
+    return plugin::CallAndReturn<int32, 0x4ABAC0, const CEvent&, const CPed&>(event, ped);
 }

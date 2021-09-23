@@ -4,11 +4,11 @@ float& CEventGunShot::ms_fGunShotSenseRangeForRiot2 = *(float*)0x8A625C;
 
 void CEventGunShot::InjectHooks()
 {
-    HookInstall(0x4AC610, &CEventGunShot::Constructor);
-    HookInstall(0x4B2CD0, &CEventGunShot::AffectsPed_Reversed);
-    HookInstall(0x4AC810, &CEventGunShot::IsCriminalEvent_Reversed);
-    HookInstall(0x4AC780, &CEventGunShot::TakesPriorityOver_Reversed);
-    HookInstall(0x4B6B20, &CEventGunShot::CloneEditable_Reversed);
+    ReversibleHooks::Install("CEventGunShot", "Constructor", 0x4AC610, &CEventGunShot::Constructor);
+    ReversibleHooks::Install("CEventGunShot", "AffectsPed_Reversed", 0x4B2CD0, &CEventGunShot::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventGunShot", "IsCriminalEvent_Reversed", 0x4AC810, &CEventGunShot::IsCriminalEvent_Reversed);
+    ReversibleHooks::Install("CEventGunShot", "TakesPriorityOver_Reversed", 0x4AC780, &CEventGunShot::TakesPriorityOver_Reversed);
+    ReversibleHooks::Install("CEventGunShot", "CloneEditable_Reversed", 0x4B6B20, &CEventGunShot::CloneEditable_Reversed);
 }
 
 CEventGunShot::CEventGunShot(CEntity* entity, CVector startPoint, CVector endPoint, bool bHasNoSound)
@@ -38,40 +38,28 @@ CEventGunShot* CEventGunShot::Constructor(CEntity* entity, CVector startPoint, C
 #endif
 }
 
+// 0x4B2CD0
 bool CEventGunShot::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B2CD0, CEvent*, CPed*>(this, ped);
-#else
     return CEventGunShot::AffectsPed_Reversed(ped);
-#endif
 }
 
+// 0x4AC810
 bool CEventGunShot::IsCriminalEvent()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AC810, CEvent*>(this);
-#else
     return CEventGunShot::IsCriminalEvent_Reversed();
-#endif
 }
 
-bool CEventGunShot::TakesPriorityOver(CEvent* refEvent)
+// 0x4AC780
+bool CEventGunShot::TakesPriorityOver(const CEvent& refEvent)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AC780, CEvent*, CEvent*>(this, refEvent);
-#else
     return CEventGunShot::TakesPriorityOver_Reversed(refEvent);
-#endif
 }
 
+// 0x4B6B20
 CEventEditableResponse* CEventGunShot::CloneEditable()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventEditableResponse*, 0x4B6B20, CEvent*>(this);
-#else
     return CEventGunShot::CloneEditable_Reversed();
-#endif
 }
 
 
@@ -119,12 +107,12 @@ bool CEventGunShot::IsCriminalEvent_Reversed()
     return m_entity && m_entity->m_nType == ENTITY_TYPE_PED && static_cast<CPed*>(m_entity)->IsPlayer();
 }
 
-bool CEventGunShot::TakesPriorityOver_Reversed(CEvent* refEvent)
+bool CEventGunShot::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
-    if (refEvent->GetEventType() == GetEventType()) {
+    if (refEvent.GetEventType() == GetEventType()) {
         bool bIsPlayer = false;
         bool otherPedIsPlayer = false;
-        auto refEventGunShot = static_cast<CEventGunShot*>(refEvent);
+        const auto refEventGunShot = static_cast<const CEventGunShot*>(&refEvent);
         CPed* ped = static_cast<CPed*>(m_entity);
         if (m_entity && m_entity->m_nType == ENTITY_TYPE_PED)
             bIsPlayer = ped->IsPlayer();
@@ -133,7 +121,7 @@ bool CEventGunShot::TakesPriorityOver_Reversed(CEvent* refEvent)
             otherPedIsPlayer = otherPed->IsPlayer();
         return bIsPlayer && !otherPedIsPlayer;
     }
-    return GetEventPriority() >= refEvent->GetEventPriority();
+    return GetEventPriority() >= refEvent.GetEventPriority();
 }
 
 CEventEditableResponse* CEventGunShot::CloneEditable_Reversed()

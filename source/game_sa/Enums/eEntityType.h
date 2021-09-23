@@ -7,7 +7,7 @@
 #pragma once
 
 /* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/sdk/game/CEntity.h */
-enum eEntityType : unsigned char {
+enum eEntityType : uint8 {
     ENTITY_TYPE_NOTHING = 0,
     ENTITY_TYPE_BUILDING,
     ENTITY_TYPE_VEHICLE,

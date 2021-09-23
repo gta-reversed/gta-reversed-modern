@@ -37,7 +37,7 @@ CVector::CVector(float X, float Y, float Z)
 
 
 // Returns length of vector
-float CVector::Magnitude()
+float CVector::Magnitude() const
 {
     return sqrt(x * x + y * y + z * z);
 }

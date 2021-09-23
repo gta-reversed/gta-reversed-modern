@@ -1,12 +1,16 @@
 #include "StdInc.h"
 
+#include "CEventVehicleDamage.h"
+
+#include "CPedType.h"
+
 void CEventVehicleDamage::InjectHooks()
 {
-    HookInstall(0x4B18D0, &CEventVehicleDamage::Constructor);
-    HookInstall(0x4B1A00, &CEventVehicleDamage::AffectsPed_Reversed);
-    HookInstall(0x4B1A90, &CEventVehicleDamage::IsCriminalEvent_Reversed);
-    HookInstall(0x4B50B0, &CEventVehicleDamage::ReportCriminalEvent_Reversed);
-    HookInstall(0x4B1A70, &CEventVehicleDamage::GetSourceEntity_Reversed);
+    ReversibleHooks::Install("CEventVehicleDamage", "Constructor", 0x4B18D0, &CEventVehicleDamage::Constructor);
+    ReversibleHooks::Install("CEventVehicleDamage", "AffectsPed_Reversed", 0x4B1A00, &CEventVehicleDamage::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventVehicleDamage", "IsCriminalEvent_Reversed", 0x4B1A90, &CEventVehicleDamage::IsCriminalEvent_Reversed);
+    ReversibleHooks::Install("CEventVehicleDamage", "ReportCriminalEvent_Reversed", 0x4B50B0, &CEventVehicleDamage::ReportCriminalEvent_Reversed);
+    ReversibleHooks::Install("CEventVehicleDamage", "GetSourceEntity_Reversed", 0x4B1A70, &CEventVehicleDamage::GetSourceEntity_Reversed);
 }
 
 CEventVehicleDamage::CEventVehicleDamage(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType)
@@ -57,22 +61,16 @@ bool CEventVehicleDamage::IsCriminalEvent()
 #endif
 }
 
+// 0x4B50B0
 void CEventVehicleDamage::ReportCriminalEvent(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethod<0x4B50B0, CEvent*, CPed*>(this, ped);
-#else
     return CEventVehicleDamage::ReportCriminalEvent_Reversed(ped);
-#endif
 }
 
-CEntity* CEventVehicleDamage::GetSourceEntity()
+// 0x4B1A70
+CEntity* CEventVehicleDamage::GetSourceEntity() const
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEntity*, 0x4B1A70, CEvent*>(this);
-#else
     return CEventVehicleDamage::GetSourceEntity_Reversed();
-#endif
 }
 
 bool CEventVehicleDamage::AffectsPed_Reversed(CPed* ped)
@@ -109,7 +107,7 @@ void CEventVehicleDamage::ReportCriminalEvent_Reversed(CPed* ped)
     }
 }
 
-CEntity* CEventVehicleDamage::GetSourceEntity_Reversed()
+CEntity* CEventVehicleDamage::GetSourceEntity_Reversed() const
 {
     if (m_attacker && m_attacker->m_nType == ENTITY_TYPE_VEHICLE) {
         CVehicle* vehicle = static_cast<CVehicle*>(m_attacker);

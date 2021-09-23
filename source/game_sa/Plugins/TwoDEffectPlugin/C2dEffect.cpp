@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
-unsigned int& C2dEffect::g2dEffectPluginOffset = *(unsigned int*)0xC3A1E0;
-unsigned int& C2dEffect::ms_nTxdSlot = *(unsigned int*)0x8D4948;
+uint32& C2dEffect::g2dEffectPluginOffset = *(uint32*)0xC3A1E0;
+uint32& C2dEffect::ms_nTxdSlot = *(uint32*)0x8D4948;
 
 void C2dEffect::InjectHooks()
 {
@@ -54,7 +54,7 @@ void C2dEffect::Shutdown()
     }
 }
 
-int C2dEffect::Roadsign_GetNumLinesFromFlags(CRoadsignAttrFlags flags)
+int32 C2dEffect::Roadsign_GetNumLinesFromFlags(CRoadsignAttrFlags flags)
 {
     switch (flags.m_nNumOfLines) {
     case 1:
@@ -68,7 +68,7 @@ int C2dEffect::Roadsign_GetNumLinesFromFlags(CRoadsignAttrFlags flags)
     return 4;
 }
 
-int C2dEffect::Roadsign_GetNumLettersFromFlags(CRoadsignAttrFlags flags)
+int32 C2dEffect::Roadsign_GetNumLettersFromFlags(CRoadsignAttrFlags flags)
 {
     switch (flags.m_nSymbolsPerLine) {
     case 1:
@@ -82,7 +82,7 @@ int C2dEffect::Roadsign_GetNumLettersFromFlags(CRoadsignAttrFlags flags)
     return 16;
 }
 
-int C2dEffect::Roadsign_GetPaletteIDFromFlags(CRoadsignAttrFlags flags)
+int32 C2dEffect::Roadsign_GetPaletteIDFromFlags(CRoadsignAttrFlags flags)
 {
 
     switch (flags.m_nTextColor) {
@@ -130,7 +130,7 @@ void C2dEffect::DestroyAtomic(RpAtomic* pAtomic)
     RpAtomicDestroy(pAtomic);
 }
 
-unsigned int RpGeometryGet2dFxCount(RpGeometry* pGeometry)
+uint32 RpGeometryGet2dFxCount(RpGeometry* pGeometry)
 {
     auto plugin = C2DEFFECTPLG(pGeometry, m_pEffectEntries);
     if (!plugin)
@@ -139,7 +139,7 @@ unsigned int RpGeometryGet2dFxCount(RpGeometry* pGeometry)
     return plugin->m_nObjCount;
 }
 
-C2dEffect* RpGeometryGet2dFxAtIndex(RpGeometry* pGeometry, int iEffectInd)
+C2dEffect* RpGeometryGet2dFxAtIndex(RpGeometry* pGeometry, int32 iEffectInd)
 {
     auto plugin = C2DEFFECTPLG(pGeometry, m_pEffectEntries);
     return &plugin->m_pObjects[iEffectInd];
@@ -159,7 +159,7 @@ void* t2dEffectPluginDestructor(void* object, RwInt32 offsetInObject, RwInt32 si
 
     // It's the same as CModelInfo::ms_2dFXInfoStore cleaning, maybe the plugin has CStore inside too?
     // Dunno how that would work, as the size is decided at runtime, easy with some manual memory tricks tho.
-    for (uint32_t i = 0; i < plugin->m_nObjCount; ++i) {
+    for (uint32 i = 0; i < plugin->m_nObjCount; ++i) {
         auto& pEffect = plugin->m_pObjects[i];
         pEffect.Shutdown();
     }

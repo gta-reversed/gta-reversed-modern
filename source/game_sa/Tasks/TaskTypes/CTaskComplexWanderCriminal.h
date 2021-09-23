@@ -4,5 +4,5 @@
 class CTaskComplexWanderCriminal : public CTaskComplexWander
 {
 public:
-    CTaskComplexWanderCriminal* Constructor(int MoveState, unsigned char Dir, bool bWanderSensibly);
+    CTaskComplexWanderCriminal* Constructor(int32 MoveState, uint8 Dir, bool bWanderSensibly);
 };

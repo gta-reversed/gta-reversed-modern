@@ -1,41 +1,40 @@
-#pragma once 
+#pragma once
+
 #include "CEvent.h"
 
 class CVehicle;
 class CVector;
 
-enum eVehicleEvadeType
-{
+enum eVehicleEvadeType {
     VEHICLE_EVADE_NONE = 0,
     VEHICLE_EVADE_BY_HITSIDE = 1
 };
 
-class CEventVehicleCollision : public CEvent
-{
+class CEventVehicleCollision : public CEvent {
 public:
-    std::int16_t m_pieceType;
-    std::int16_t m_evadeType;
-    float m_fDamageIntensity;
+    int16     m_pieceType;
+    int16     m_evadeType;
+    float     m_fDamageIntensity;
     CVehicle* m_vehicle;
-    CVector m_collisionImpactVelocity;
-    CVector m_collisionPosition;
-    std::int8_t m_moveState;
-    std::int8_t field_31;
-    std::int8_t field_32[2];
+    CVector   m_collisionImpactVelocity;
+    CVector   m_collisionPosition;
+    int8      m_moveState;
+    int8      field_31;
+    int8      field_32[2];
 
     static void InjectHooks();
 
-    CEventVehicleCollision(std::int16_t pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, std::int8_t moveState, std::int16_t evadeType);
+    CEventVehicleCollision(int16 pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, int8 moveState, int16 evadeType);
     ~CEventVehicleCollision();
 private:
-    CEventVehicleCollision* Constructor(std::int16_t pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, std::int8_t moveState, std::int16_t evadeType);
+    CEventVehicleCollision* Constructor(int16 pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, int8 moveState, int16 evadeType);
 public:
-    eEventType GetEventType() override { return EVENT_VEHICLE_COLLISION; }
-    int GetEventPriority() override { return 58; }
-    int GetLifeTime() override { return 0; }
+    eEventType GetEventType() const override { return EVENT_VEHICLE_COLLISION; }
+    int32 GetEventPriority() const override { return 58; }
+    int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override;
-    bool TakesPriorityOver(CEvent* refEvent) override { return true; }
+    bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
 
     CEvent* Clone_Reversed();
     bool AffectsPed_Reversed(CPed* ped);

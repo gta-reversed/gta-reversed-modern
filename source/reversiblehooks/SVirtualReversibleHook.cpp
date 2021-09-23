@@ -1,15 +1,15 @@
 #include "StdInc.h"
 
-SVirtualReversibleHook::SVirtualReversibleHook(std::string id, std::string name, void* libFuncAddress, const std::vector<uint32_t>& vecAddressesToHook) :
+SVirtualReversibleHook::SVirtualReversibleHook(std::string id, std::string name, void* libFuncAddress, const std::vector<uint32>& vecAddressesToHook) :
     SReversibleHook(id, name, eReversibleHookType::Virtual)
 {
     assert(vecAddressesToHook.size() > 0);
 
-    m_LibFunctionAddress = reinterpret_cast<uint32_t>(libFuncAddress);
+    m_LibFunctionAddress = reinterpret_cast<uint32>(libFuncAddress);
 
     DWORD dwProtectInitial[2] = { 0 };
     VirtualProtect((void*)vecAddressesToHook[0], 4, PAGE_EXECUTE_READWRITE, &dwProtectInitial[0]);
-    m_OriginalFunctionAddress = *reinterpret_cast<uint32_t*>(vecAddressesToHook[0]);
+    m_OriginalFunctionAddress = *reinterpret_cast<uint32*>(vecAddressesToHook[0]);
     VirtualProtect((void*)vecAddressesToHook[0], 4, dwProtectInitial[0], &dwProtectInitial[1]);
 
     m_bIsHooked = false;

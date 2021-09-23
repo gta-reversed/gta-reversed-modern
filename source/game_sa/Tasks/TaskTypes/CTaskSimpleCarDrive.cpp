@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleCarDrive.h"
+
 CTaskSimpleCarDrive* CTaskSimpleCarDrive::Constructor(CVehicle* pVehicle, CTaskUtilityLineUpPedWithCar* pUtilityTask, bool bUpdateCurrentVehicle)
 {
     return plugin::CallMethodAndReturn<CTaskSimpleCarDrive*, 0x63C340, CTaskSimpleCarDrive*, CVehicle*, CTaskUtilityLineUpPedWithCar*, bool>(this, pVehicle, pUtilityTask, bUpdateCurrentVehicle);
@@ -20,7 +22,7 @@ CTask* CTaskSimpleCarDrive::Clone()
     return plugin::CallMethodAndReturn<CTask*, 0x63DC20, CTaskSimpleCarDrive*>(this);
 }
 
-bool CTaskSimpleCarDrive::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleCarDrive::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x63DC20, CTaskSimpleCarDrive*, CPed*, eAbortPriority, CEvent*>(this, ped, priority, _event);
+    return plugin::CallMethodAndReturn<bool, 0x63DC20, CTaskSimpleCarDrive*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
 }

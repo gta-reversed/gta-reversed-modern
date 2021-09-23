@@ -6,23 +6,18 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-template<typename T>
-class CLink {
+template <typename T> class CLink {
 public:
-    T data;
+    T         data;
     CLink<T>* prev;
     CLink<T>* next;
 
-    void Remove () 
-    {
+    void Remove() {
         next->prev = prev;
         prev->next = next;
     }
 
-    void Insert(CLink<T>* link) 
-    {
+    void Insert(CLink<T>* link) {
         link->next = next;
         next->prev = link;
         link->prev = this;
@@ -30,4 +25,4 @@ public:
     }
 };
 
-VALIDATE_SIZE(CLink<void *>, 0xC);
+VALIDATE_SIZE(CLink<void*>, 0xC);

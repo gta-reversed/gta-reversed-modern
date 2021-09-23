@@ -6,76 +6,77 @@
 */
 #include "StdInc.h"
 
+#include "CSprite2d.h"
+
+#include "GxtChar.h"
+
 // static variables
-int& CSprite2d::nextBufferIndex = *reinterpret_cast<int*>(0xC80458);
-int& CSprite2d::nextBufferVertex = *reinterpret_cast<int*>(0xC8045C);
-float& CSprite2d::NearScreenZ = *reinterpret_cast<float*>(0xC80460);
-float& CSprite2d::RecipNearClip = *reinterpret_cast<float*>(0xC80464);
-RwD3D9Vertex* CSprite2d::maVertices = reinterpret_cast<RwD3D9Vertex*>(0xC80468);
+int32& CSprite2d::nextBufferIndex = *(int32*)0xC80458;
+int32& CSprite2d::nextBufferVertex = *(int32*)0xC8045C;
+float& CSprite2d::NearScreenZ = *(float*)0xC80460;
+float& CSprite2d::RecipNearClip = *(float*)0xC80464;
+RwIm2DVertex* CSprite2d::maVertices = (RwIm2DVertex*)0xC80468;
 
-void CSprite2d::InjectHooks()
-{
-    ReversibleHooks::Install("CSprite2d", "CSprite2d", 0x727230, &CSprite2d::Constructor);
-    ReversibleHooks::Install("CSprite2d", "~CSprite2d", 0x7281E0, &CSprite2d::Destructor);
-    
-    ReversibleHooks::Install("CSprite2d", "Delete", 0x727240, &CSprite2d::Delete);
-    ReversibleHooks::Install("CSprite2d", "SetTexture", 0x727270, static_cast<void(CSprite2d::*)(char*)>(&CSprite2d::SetTexture));
-    ReversibleHooks::Install("CSprite2d", "SetTexture_mask", 0x7272B0, static_cast<void(CSprite2d::*)(char*, char*)>(&CSprite2d::SetTexture));
-    ReversibleHooks::Install("CSprite2d", "SetAddressingUV", 0x7272E0, &CSprite2d::SetAddressingUV);
-    ReversibleHooks::Install("CSprite2d", "SetAddressing", 0x727320, &CSprite2d::SetAddressing);
-    ReversibleHooks::Install("CSprite2d", "SetRenderState", 0x727B30, &CSprite2d::SetRenderState);
-    ReversibleHooks::Install("CSprite2d", "Draw_ffffCRGBA", 0x7282C0, static_cast<void(CSprite2d::*)(float, float, float, float, const CRGBA&)>(&CSprite2d::Draw));
-    ReversibleHooks::Install("CSprite2d", "Draw_CRectCRGBA", 0x728350, static_cast<void(CSprite2d::*)(const CRect&, const CRGBA&)>(&CSprite2d::Draw));
-    ReversibleHooks::Install("CSprite2d", "DrawWithBilinearOffset", 0x7283B0, &CSprite2d::DrawWithBilinearOffset);
-    ReversibleHooks::Install("CSprite2d", "Draw_CRectCRGBA4", 0x7284B0, static_cast<void(CSprite2d::*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::Draw));
-    ReversibleHooks::Install("CSprite2d", "Draw_ffffffffCRGBA", 0x728520, static_cast<void(CSprite2d::*)(float, float, float, float, float, float, float, float, const CRGBA&)>(&CSprite2d::Draw));
-    
-    ReversibleHooks::Install("CSprite2d", "SetRecipNearClip", 0x727260, &CSprite2d::SetRecipNearClip);
-    ReversibleHooks::Install("CSprite2d", "InitPerFrame", 0x727350, &CSprite2d::InitPerFrame);
-    ReversibleHooks::Install("CSprite2d", "IsVertexBufferEmpty", 0x727390, &CSprite2d::IsVertexBufferEmpty);
-    ReversibleHooks::Install("CSprite2d", "IsVertexBufferFull", 0x7273A0, &CSprite2d::IsVertexBufferFull);
-    ReversibleHooks::Install("CSprite2d", "RenderVertexBuffer", 0x7273D0, &CSprite2d::RenderVertexBuffer);
-    ReversibleHooks::Install("CSprite2d", "SetVertices_CRectCRGBA4", 0x727420, static_cast<void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::SetVertices));
-    ReversibleHooks::Install("CSprite2d", "SetVertices_ffffffffCRGBA", 0x727590, static_cast<void(*)(float, float, float, float, float, float, float, float, const CRGBA&,
-        const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::SetVertices));
-    ReversibleHooks::Install("CSprite2d", "SetVertices_CRectCRGBA4ffffffff", 0x727710, static_cast<void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&,
-        float, float, float, float, float, float, float, float)>(&CSprite2d::SetVertices));
-    ReversibleHooks::Install("CSprite2d", "SetVertices_iffCRGBA", 0x727890, static_cast<void(*)(int, float*, float*, const CRGBA&)>(&CSprite2d::SetVertices));
-    ReversibleHooks::Install("CSprite2d", "SetVertices_ifCRGBA", 0x727920, static_cast<void(*)(int, float*, CRGBA*)>(&CSprite2d::SetVertices));
-    ReversibleHooks::Install("CSprite2d", "SetMaskVertices", 0x7279B0, &CSprite2d::SetMaskVertices);
-    ReversibleHooks::Install("CSprite2d", "SetVertices_RwD3D9Vertex", 0x727A00, static_cast<void(*)(RwD3D9Vertex*, const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&,
-        float, float, float, float, float, float, float, float)>(&CSprite2d::SetVertices));
-    ReversibleHooks::Install("CSprite2d", "DrawRect_CRect_CRGBA", 0x727B60, static_cast<void(*)(const CRect&, const CRGBA&)>(&CSprite2d::DrawRect));
-    ReversibleHooks::Install("CSprite2d", "DrawTxRect", 0x727BE0, &CSprite2d::DrawTxRect);
-    ReversibleHooks::Install("CSprite2d", "DrawRect_CRect_CRGBA4", 0x727C10, static_cast<void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::DrawRect));
-    ReversibleHooks::Install("CSprite2d", "DrawRectXLU", 0x727C50, &CSprite2d::DrawRectXLU);
-    ReversibleHooks::Install("CSprite2d", "DrawAnyRect", 0x727CC0, &CSprite2d::DrawAnyRect);
-    // ReversibleHooks::Install("CSprite2d", "DrawCircleAtNearClip", 0x727D60, &CSprite2d::DrawCircleAtNearClip);
-}
+void CSprite2d::InjectHooks() {
+    using namespace ReversibleHooks;
+    Install("CSprite2d", "CSprite2d", 0x727230, &CSprite2d::Constructor);
+    Install("CSprite2d", "~CSprite2d", 0x7281E0, &CSprite2d::Destructor);
 
-CSprite2d* CSprite2d::Constructor()
-{
-    this->CSprite2d::CSprite2d();
-    return this;
-}
+    Install("CSprite2d", "Delete", 0x727240, &CSprite2d::Delete);
+    Install("CSprite2d", "SetTexture", 0x727270, static_cast<void(CSprite2d::*)(char*)>(&CSprite2d::SetTexture));
+    Install("CSprite2d", "SetTexture_mask", 0x7272B0, static_cast<void(CSprite2d::*)(char*, char*)>(&CSprite2d::SetTexture));
+    Install("CSprite2d", "SetAddressingUV", 0x7272E0, &CSprite2d::SetAddressingUV);
+    Install("CSprite2d", "SetAddressing", 0x727320, &CSprite2d::SetAddressing);
+    Install("CSprite2d", "SetRenderState", 0x727B30, &CSprite2d::SetRenderState);
+    Install("CSprite2d", "Draw_ffffCRGBA", 0x7282C0, static_cast<void(CSprite2d::*)(float, float, float, float, const CRGBA&)>(&CSprite2d::Draw));
+    Install("CSprite2d", "Draw_CRectCRGBA", 0x728350, static_cast<void(CSprite2d::*)(const CRect&, const CRGBA&)>(&CSprite2d::Draw));
+    Install("CSprite2d", "DrawWithBilinearOffset", 0x7283B0, &CSprite2d::DrawWithBilinearOffset);
+    Install("CSprite2d", "Draw_CRectCRGBA4", 0x7284B0, static_cast<void(CSprite2d::*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::Draw));
+    Install("CSprite2d", "Draw_ffffffffCRGBA", 0x728520, static_cast<void(CSprite2d::*)(float, float, float, float, float, float, float, float, const CRGBA&)>(&CSprite2d::Draw));
 
-CSprite2d* CSprite2d::Destructor()
-{
-    this->CSprite2d::~CSprite2d();
-    return this;
+    Install("CSprite2d", "SetRecipNearClip", 0x727260, &CSprite2d::SetRecipNearClip);
+    Install("CSprite2d", "InitPerFrame", 0x727350, &CSprite2d::InitPerFrame);
+    Install("CSprite2d", "IsVertexBufferEmpty", 0x727390, &CSprite2d::IsVertexBufferEmpty);
+    Install("CSprite2d", "IsVertexBufferFull", 0x7273A0, &CSprite2d::IsVertexBufferFull);
+    Install("CSprite2d", "RenderVertexBuffer", 0x7273D0, &CSprite2d::RenderVertexBuffer);
+    Install("CSprite2d", "SetVertices_CRectCRGBA4", 0x727420, static_cast<void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::SetVertices));
+    Install("CSprite2d", "SetVertices_ffffffffCRGBA", 0x727590, static_cast<void(*)(float, float, float, float, float, float, float, float, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::SetVertices));
+    Install("CSprite2d", "SetVertices_CRectCRGBA4ffffffff", 0x727710, static_cast<void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&, float, float, float, float, float, float, float, float)>(&CSprite2d::SetVertices));
+    Install("CSprite2d", "SetVertices_iffCRGBA", 0x727890, static_cast<void(*)(int32, float*, float*, const CRGBA&)>(&CSprite2d::SetVertices));
+    Install("CSprite2d", "SetVertices_ifCRGBA", 0x727920, static_cast<void(*)(int32, float*, CRGBA*)>(&CSprite2d::SetVertices));
+    Install("CSprite2d", "SetMaskVertices", 0x7279B0, &CSprite2d::SetMaskVertices);
+    Install("CSprite2d", "SetVertices_RwD3D9Vertex", 0x727A00, static_cast<void(*)(RwD3D9Vertex*, const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&, float, float, float, float, float, float, float, float)>(&CSprite2d::SetVertices));
+    Install("CSprite2d", "DrawRect_CRect_CRGBA", 0x727B60, static_cast<void(*)(const CRect&, const CRGBA&)>(&CSprite2d::DrawRect));
+    Install("CSprite2d", "DrawTxRect", 0x727BE0, &CSprite2d::DrawTxRect);
+    Install("CSprite2d", "DrawRect_CRect_CRGBA4", 0x727C10, static_cast<void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::DrawRect));
+    Install("CSprite2d", "DrawRectXLU", 0x727C50, &CSprite2d::DrawRectXLU);
+    Install("CSprite2d", "DrawAnyRect", 0x727CC0, &CSprite2d::DrawAnyRect);
+    Install("CSprite2d", "Draw2DPolygon", 0x7285B0, &CSprite2d::Draw2DPolygon);
+    Install("CSprite2d", "DrawBarChart", 0x728640, &CSprite2d::DrawBarChart);
+    // Install("CSprite2d", "DrawCircleAtNearClip", 0x727D60, &CSprite2d::DrawCircleAtNearClip);
 }
 
 CSprite2d::CSprite2d()
 {
     m_pTexture = nullptr;
 }
-
-CSprite2d::~CSprite2d()
+CSprite2d* CSprite2d::Constructor()
 {
+    this->CSprite2d::CSprite2d();
+    return this;
+}
+
+CSprite2d::~CSprite2d() {
     Delete();
+}
+CSprite2d* CSprite2d::Destructor()
+{
+    this->CSprite2d::~CSprite2d();
+    return this;
 }
 
 // delete this sprite (similar to destructor)
+// 0x727240
 void CSprite2d::Delete()
 {
     if (m_pTexture) {
@@ -85,6 +86,7 @@ void CSprite2d::Delete()
 }
 
 // set texture by name from current txd
+// 0x727270
 void CSprite2d::SetTexture(char* name)
 {
     Delete();
@@ -93,12 +95,14 @@ void CSprite2d::SetTexture(char* name)
 }
 
 // set texture by name from current txd (+alpha mask name)
+// 0x7272B0
 void CSprite2d::SetTexture(char* name, char* maskName)
 {
     if (name && maskName)
         m_pTexture = RwTextureRead(name, maskName);
 }
 
+// 0x7272E0
 void CSprite2d::SetAddressingUV(RwTextureAddressMode modeU, RwTextureAddressMode modeV)
 {
     if (m_pTexture) {
@@ -107,13 +111,15 @@ void CSprite2d::SetAddressingUV(RwTextureAddressMode modeU, RwTextureAddressMode
     }
 }
 
+// 0x727320
 void CSprite2d::SetAddressing(RwTextureAddressMode modeUV)
 {
     if (m_pTexture)
         RwTextureSetAddressing(m_pTexture, modeUV);
 }
 
-// sets sprite texture as current for device rendering
+// Sets sprite texture as current for device rendering
+// 0x727B30
 void CSprite2d::SetRenderState()
 {
     if (m_pTexture)
@@ -122,7 +128,7 @@ void CSprite2d::SetRenderState()
         RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
 }
 
-// draw this sprite
+// Draw this sprite
 void CSprite2d::Draw(float x, float y, float width, float height, const CRGBA& color)
 {
     CRect posn(x, y, x + width, y + height);
@@ -134,10 +140,10 @@ void CSprite2d::Draw(const CRect& posn, const CRGBA& color)
     Draw(posn, color, color, color, color);
 }
 
-void CSprite2d::DrawWithBilinearOffset(const CRect &posn, const CRGBA &color)
+void CSprite2d::DrawWithBilinearOffset(const CRect& posn, const CRGBA& color)
 {
     SetVertices(posn, color, color, color, color);
-    RwRaster *raster = RwTextureGetRaster(m_pTexture);
+    RwRaster* raster = RwTextureGetRaster(m_pTexture);
     OffsetTexCoordForBilinearFiltering(static_cast<float>(RwRasterGetWidth(raster)), static_cast<float>(RwRasterGetHeight(raster)));
     SetRenderState();
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, CSprite2d::maVertices, 4);
@@ -167,16 +173,17 @@ void CSprite2d::Draw(float x1, float y1, float x2, float y2, float x3, float y3,
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
 }
 
-// static functions
+// 0x727260
 void CSprite2d::SetRecipNearClip()
 {
+    // NOP
 }
 
 void CSprite2d::InitPerFrame()
 {
     nextBufferVertex = 0;
     nextBufferIndex = 0;
-    RecipNearClip = 1.0f / Scene.m_pRwCamera->nearPlane;
+    RecipNearClip = 1.0f / RwCameraGetNearClipPlane(Scene.m_pRwCamera);
     NearScreenZ = RWSRCGLOBAL(dOpenDevice).zBufferNear;
 }
 
@@ -212,8 +219,7 @@ void CSprite2d::SetVertices(const CRect& posn, const CRGBA& color1, const CRGBA&
         1.f + offset, 1.f + offset);
 }
 
-void CSprite2d::SetVertices(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color1, const CRGBA& color2,
-    const CRGBA& color3, const CRGBA& color4)
+void CSprite2d::SetVertices(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4)
 {
     RwIm2DVertexSetScreenX(&maVertices[0], x3);
     RwIm2DVertexSetScreenY(&maVertices[0], y3);
@@ -254,9 +260,11 @@ void CSprite2d::SetVertices(const CRect& posn, const CRGBA& color1, const CRGBA&
     SetVertices(maVertices, posn, color1, color2, color3, color4, u1, v1, u2, v2, u3, v3, u4, v4);
 }
 
-void CSprite2d::SetVertices(int numVerts, float* posn, float* texCoors, const CRGBA& color)
+// Clang-Tidy: Pointer parameter 'posn' can be pointer to const
+// Clang-Tidy: Pointer parameter 'texCoors' can be pointer to const
+void CSprite2d::SetVertices(int32 numVerts, float* posn, float* texCoors, const CRGBA& color)
 {
-    for (int i = 0; i < numVerts; ++i) {
+    for (int32 i = 0; i < numVerts; ++i) {
         RwIm2DVertexSetScreenX(&maVertices[i], posn[i * 2]);
         RwIm2DVertexSetScreenY(&maVertices[i], posn[i * 2 + 1]);
         RwIm2DVertexSetScreenZ(&maVertices[i], NearScreenZ + 0.0001f);
@@ -267,9 +275,10 @@ void CSprite2d::SetVertices(int numVerts, float* posn, float* texCoors, const CR
     }
 }
 
-void CSprite2d::SetVertices(int numVerts, float* posn, CRGBA* color)
+// Clang-Tidy: Pointer parameter 'posn' can be pointer to const
+void CSprite2d::SetVertices(int32 numVerts, float* posn, CRGBA* color)
 {
-    for (int i = 0; i < numVerts; ++i) {
+    for (int32 i = 0; i < numVerts; ++i) {
         RwIm2DVertexSetScreenX(&maVertices[i], posn[i * 2]);
         RwIm2DVertexSetScreenY(&maVertices[i], posn[i * 2 + 1]);
         RwIm2DVertexSetScreenZ(&maVertices[i], NearScreenZ);
@@ -280,9 +289,10 @@ void CSprite2d::SetVertices(int numVerts, float* posn, CRGBA* color)
     }
 }
 
-void CSprite2d::SetMaskVertices(int numVerts, float* posn, float depth)
+// Clang-Tidy: Pointer parameter 'posn' can be pointer to const
+void CSprite2d::SetMaskVertices(int32 numVerts, float* posn, float depth)
 {
-    for (int i = 0; i < numVerts; ++i) {
+    for (int32 i = 0; i < numVerts; ++i) {
         RwIm2DVertexSetScreenX(&maVertices[i], posn[i * 2]);
         RwIm2DVertexSetScreenY(&maVertices[i], posn[i * 2 + 1]);
         RwIm2DVertexSetScreenZ(&maVertices[i], depth);
@@ -291,7 +301,7 @@ void CSprite2d::SetMaskVertices(int numVerts, float* posn, float depth)
     }
 }
 
-void CSprite2d::SetVertices(RwD3D9Vertex* vertices, const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4,
+void CSprite2d::SetVertices(RwIm2DVertex* vertices, const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4,
     float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4)
 {
     RwIm2DVertexSetScreenX(&vertices[0], posn.left);
@@ -328,58 +338,52 @@ void CSprite2d::SetVertices(RwD3D9Vertex* vertices, const CRect& posn, const CRG
 }
 
 // draws non-textured rectangle
-void CSprite2d::DrawRect(const CRect& posn, const CRGBA& color)
-{
+void CSprite2d::DrawRect(const CRect& posn, const CRGBA& color) {
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
     SetVertices(posn, color, color, color, color);
     if (color.a == 255)
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, reinterpret_cast<void*>(FALSE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
     else
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, reinterpret_cast<void*>(TRUE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, reinterpret_cast<void*>(FALSE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
 }
 
-//this could be used for drawing textured rectangle (use SetRenderState() before this)
-void CSprite2d::DrawTxRect(const CRect& posn, const CRGBA& color)
-{
+// this could be used for drawing textured rectangle (use SetRenderState() before this)
+void CSprite2d::DrawTxRect(const CRect& posn, const CRGBA& color) {
     CSprite2d::SetVertices(posn, color, color, color, color);
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
 }
 
 // draw non-textured rectangle, with setupable corners' colors.
-void CSprite2d::DrawRect(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4)
-{
+void CSprite2d::DrawRect(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4) {
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
     SetVertices(posn, color1, color2, color3, color4);
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
 }
 
 // draws non-textured rectangle with default blending states
-void CSprite2d::DrawRectXLU(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4)
-{
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, reinterpret_cast<void*>(TRUE));
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, reinterpret_cast<void*>(rwBLENDSRCALPHA));
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, reinterpret_cast<void*>(rwBLENDINVSRCALPHA));
+void CSprite2d::DrawRectXLU(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4) {
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
     DrawRect(posn, color1, color2, color3, color4);
 }
 
 // draws rectangle, texture could be set with SetRenderState().
-void CSprite2d::DrawAnyRect(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color1, const CRGBA& color2,
-    const CRGBA& color3, const CRGBA& color4)
-{
+void CSprite2d::DrawAnyRect(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4) {
     SetVertices(x1, y1, x2, y2, x3, y3, x4, y4, color1, color2, color3, color4);
-    if (color1.a == 0xFF && color2.a == 0xFF && color3.a == 0xFF && color4.a == 0xFF)
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, reinterpret_cast<void*>(FALSE));
+    if (color1.a == 255 && color2.a == 255 && color3.a == 255 && color4.a == 255)
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
     else
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, reinterpret_cast<void*>(TRUE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
 }
 
 // draws a triangle with rotation (degrees)
-void CSprite2d::DrawCircleAtNearClip(const CVector2D& posn, float size, const CRGBA& color, int angle)
+void CSprite2d::DrawCircleAtNearClip(const CVector2D& posn, float size, const CRGBA& color, int32 angle)
 {
-    ((void(__cdecl*)(const CVector2D&, float, const CRGBA&, int))0x727D60)(posn, size, color, angle);
+    ((void(__cdecl*)(const CVector2D&, float, const CRGBA&, int32))0x727D60)(posn, size, color, angle);
     
     /* NOT TESTED
     RwIm2DVertexSetScreenX(&maVertices[0], posn.x);
@@ -395,10 +399,10 @@ void CSprite2d::DrawCircleAtNearClip(const CVector2D& posn, float size, const CR
 
     float posna = 360.f / static_cast<float>(angle);
     float step = posna * DegreesToRadians(1.f) * (256.f / DegreesToRadians(360.f)); // posna * 35 / 45
-    for (int i = 0; i < angle; ++i)
+    for (int32 i = 0; i < angle; ++i)
     {
-        for (int l = 1; l <= 2; ++l) {
-            unsigned char idx = static_cast<unsigned char>(static_cast<float>(i + l - 1) * step);
+        for (int32 l = 1; l <= 2; ++l) {
+            uint8 idx = static_cast<uint8>(static_cast<float>(i + l - 1) * step);
             RwIm2DVertexSetScreenX(&maVertices[l], size * CMaths::ms_SinTable[idx + 64] + posn.x);
             RwIm2DVertexSetScreenY(&maVertices[l], size * CMaths::ms_SinTable[idx] + posn.y);
             RwIm2DVertexSetScreenZ(&maVertices[l], NearScreenZ);
@@ -429,28 +433,105 @@ void CSprite2d::AddToBuffer(CRect  const& posn, CRGBA  const& color, float u1, f
 }
 
 // non-textured polygon
-void CSprite2d::Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, CRGBA  const& color)
+// 0x7285B0
+void CSprite2d::Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color)
 {
-    ((void(__cdecl*)(float, float, float, float, float, float, float, float, CRGBA  const&))0x7285B0)(x1, y1, x2, y2, x3, y3, x4, y4, color);
+    SetVertices(x1, y1, x2, y2, x3, y3, x4, y4, color, color, color, color);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)nullptr);
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,     (void*)rwSHADEMODENASHADEMODE);
+
+    if (color.a == 255)
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+    else
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+
+    RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
 }
 
 // draws progress line. Progress is a value in ranges 0 - 100.
-void CSprite2d::DrawBarChart(float x, float y, unsigned short width, unsigned char height, float progress,
-    signed char progressAdd, unsigned char drawPercentage, unsigned char drawBlackBorder,
+// ----------------------
+// | +++++++++++--------|
+// ----------------------
+// 0x728640
+void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float progress,
+    int8 progressAdd, uint8 drawPercentage, uint8 drawBlackBorder,
     CRGBA color, CRGBA addColor)
 {
-    ((void(__cdecl*)(float, float, unsigned short, unsigned char, float, signed char, unsigned char,
-        unsigned char, CRGBA, CRGBA))0x728640)(x, y, width, height, progress, progressAdd, drawPercentage,
-            drawBlackBorder, color, addColor);
-}
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)nullptr);
+    RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEFLAT);
 
-#define DrawBarChart(x, y, width, height, progress, progressAdd, drawPercentage, \
-    drawBlackBorder, color, addColor) ((void (__cdecl *)(float, float, unsigned short,\
-    unsigned char, float, signed char, unsigned char, unsigned char, int, int))0x728640)\
-    (x, y, width, height, progress, progressAdd, drawPercentage, drawBlackBorder, color,\
-    addColor);
+    progress = std::max(0.0f, progress);
 
-void Draw()
-{
-    DrawBarChart(300.0, 100.0, 300, 50, 60.0, 0, false, true, 0xFF0000FF, 0);
+    const float endX = x + (float)width;
+    const float unclampedCurrX = x + (float)width * progress / 100.0f;
+    const float currX = std::min(unclampedCurrX, endX);
+
+    // Progress rect
+    DrawRect({
+        x,
+        y,
+        currX,
+        y + height
+    }, color);
+
+    // Background (from currX to endX)
+    CRGBA loadingBarBgColor = color / 2.0f;
+    loadingBarBgColor.a = color.a;
+    DrawRect({
+        currX,
+        y,
+        endX,
+        y + height
+    }, loadingBarBgColor);
+
+    if (progressAdd) {
+        addColor.a = color.a;
+        DrawRect({
+            std::max<float>(x - 1.0f, currX - (x - 1.0f)),
+            y,
+            currX,
+            y + height
+        }, addColor);
+    }
+
+    if (drawBlackBorder) {
+        const float w = 2 * SCREEN_WIDTH_UNIT, h = 2 * SCREEN_HEIGHT_UNIT;
+        const CRect rects[] = {
+            //left,     top,              right,    bottom
+            { x,        y,                endX,     y + h      },       // Top
+            { x,        y + height - h,   endX,     y + height },       // Bottom
+            { x,        y,                x + w,    y + height },       // Left
+            { endX - w, y,                endX,     y + height }        // Right
+        };
+
+        for (const CRect& rect : rects) {
+            DrawRect(rect, { 0, 0, 0, color.a });
+        }
+    }
+
+    // unused
+    if (drawPercentage) {
+        char text[12];
+        sprintf(text, "%d%%", (unsigned)progress);
+        
+        GxtChar gxtText[12];
+        AsciiToGxtChar(text, gxtText);
+
+        CFont::SetWrapx(x);
+        CFont::SetRightJustifyWrap(endX);
+        CFont::SetColor({ 0, 0, 0, color.a });
+        CFont::SetEdge(0);
+        CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
+        CFont::SetScale(height * 0.03f, height / 0.04f);
+
+        auto textX = (uint16)unclampedCurrX;
+        if (x + 50.0f <= (float)textX) {
+            CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
+        }
+        else {
+            CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
+            textX += 5;
+        }
+        CFont::PrintString((float)textX, y + 2.0f, gxtText);
+    }
 }

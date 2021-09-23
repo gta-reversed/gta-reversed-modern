@@ -1,5 +1,11 @@
 #include "StdInc.h"
 
+#include "CTaskComplexTreatAccident.h"
+
+#include "CTaskSimpleGiveCPR.h"
+#include "CTaskSimpleNone.h"
+#include "CTaskSimpleAchieveHeading.h"
+
 void CTaskComplexTreatAccident::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexTreatAccident", "Constructor", 0x658AB0, &CTaskComplexTreatAccident::Constructor);
@@ -57,7 +63,7 @@ CTask* CTaskComplexTreatAccident::Clone()
 
 CTask* CTaskComplexTreatAccident::CreateNextSubTask_Reversed(CPed* ped)
 {
-    eTaskType subTaskId = m_pSubTask->GetId();
+    eTaskType subTaskId = m_pSubTask->GetTaskType();
 
     if (subTaskId == TASK_SIMPLE_GIVE_CPR || subTaskId == TASK_NONE)
         return CreateSubTask(TASK_FINISHED, ped);
@@ -68,7 +74,7 @@ CTask* CTaskComplexTreatAccident::CreateNextSubTask_Reversed(CPed* ped)
 
         if (targetPed && !targetPed->bFadeOut)
         {
-            targetPed->m_nDeathTime = CTimer::m_snTimeInMilliseconds;
+            targetPed->m_nDeathTime = CTimer::GetTimeInMS();
             auto newSubTask = CreateSubTask(TASK_SIMPLE_GIVE_CPR, ped);
             ped->m_fCurrentRotation = ComputeHeading(ped);
             ped->m_fAimingRotation = ped->m_fCurrentRotation;
@@ -87,7 +93,7 @@ CTask* CTaskComplexTreatAccident::CreateFirstSubTask_Reversed(CPed* ped)
 
     if (targetPed && !targetPed->bFadeOut)
     {
-        targetPed->m_nDeathTime = CTimer::m_snTimeInMilliseconds;
+        targetPed->m_nDeathTime = CTimer::GetTimeInMS();
         ped->Say(232, 0, 1.0F, false, false, false);
         g_ikChainMan->LookAt("TaskTreatAccident", ped, targetPed, 5000, BONE_HEAD, nullptr, true, 0.25F, 500, 3, false);
         return CreateSubTask(TASK_SIMPLE_ACHIEVE_HEADING, ped);

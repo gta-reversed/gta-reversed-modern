@@ -223,7 +223,7 @@ void CBaseModelInfo::DeleteCollisionModel()
     m_pColModel = nullptr;
 }
 
-C2dEffect *CBaseModelInfo::Get2dEffect(int index)
+C2dEffect *CBaseModelInfo::Get2dEffect(int32 index)
 {
     auto uiStoredEffectsCount = m_n2dfxCount;
     RpGeometry* pGeometry = nullptr;
@@ -258,7 +258,7 @@ void CBaseModelInfo::Add2dEffect(C2dEffect *effect)
     }
 }
 
-void SetBaseModelInfoFlags(CBaseModelInfo* modelInfo, unsigned int dwFlags)
+void SetBaseModelInfoFlags(CBaseModelInfo* modelInfo, uint32 dwFlags)
 {
     auto flagsStruct = sItemDefinitionFlags(dwFlags);
     modelInfo->bDrawLast = flagsStruct.bDrawLast | flagsStruct.bDrawLast;

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleGiveCPR.h"
+
 void CTaskSimpleGiveCPR::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleGiveCPR", "Constructor", 0x658860, &CTaskSimpleGiveCPR::Constructor);
@@ -46,9 +48,9 @@ bool CTaskSimpleGiveCPR::ProcessPed(CPed* ped)
 }
 
 // 0x6589B0
-bool CTaskSimpleGiveCPR::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleGiveCPR::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return MakeAbortable_Reversed(ped, priority, _event);
+    return MakeAbortable_Reversed(ped, priority, event);
 }
 
 CTask* CTaskSimpleGiveCPR::Clone_Reversed()
@@ -80,9 +82,9 @@ bool CTaskSimpleGiveCPR::ProcessPed_Reversed(CPed* ped)
     }
 }
 
-bool CTaskSimpleGiveCPR::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleGiveCPR::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    eEventType eventType = _event->GetEventType();
+    eEventType eventType = event->GetEventType();
 
     if (priority == ABORT_PRIORITY_IMMEDIATE
         || eventType == EVENT_DEATH

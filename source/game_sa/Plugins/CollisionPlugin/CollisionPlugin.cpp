@@ -37,15 +37,15 @@ static RwStream* ClumpCollisionStreamRead(RwStream* stream, RwInt32 binaryLength
     RwStreamRead(stream, &PC_Scratch, binaryLength);
     CColModel* model = new CColModel();
 
-    switch (*(unsigned int*)PC_Scratch) {
+    switch (*(uint32*)PC_Scratch) {
     case make_fourcc4("COLL"):
-        CFileLoader::LoadCollisionModel((unsigned char*)(&PC_Scratch[32]), *model);
+        CFileLoader::LoadCollisionModel((uint8*)(&PC_Scratch[32]), *model);
         break;
     case make_fourcc4("COL2"):
-        CFileLoader::LoadCollisionModelVer2((unsigned char*)(&PC_Scratch[32]), (PC_Scratch[4] - 24), *model, nullptr);
+        CFileLoader::LoadCollisionModelVer2((uint8*)(&PC_Scratch[32]), (PC_Scratch[4] - 24), *model, nullptr);
         break;
     case make_fourcc4("COL3"):
-        CFileLoader::LoadCollisionModelVer3((unsigned char*)(&PC_Scratch[32]), (PC_Scratch[4] - 24), *model, nullptr);
+        CFileLoader::LoadCollisionModelVer3((uint8*)(&PC_Scratch[32]), (PC_Scratch[4] - 24), *model, nullptr);
         break;
     }
 

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleSetStayInSamePlace.h"
+
 void CTaskSimpleSetStayInSamePlace::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleSetStayInSamePlace", "Constructor", 0x62F590, &CTaskSimpleSetStayInSamePlace::Constructor);

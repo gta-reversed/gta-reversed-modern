@@ -9,7 +9,7 @@
 #include "CVector.h"
 #include "CRGBA.h"
 
-enum e2dEffectType : unsigned char {
+enum e2dEffectType : uint8 {
     EFFECT_LIGHT,
     EFFECT_PARTICLE,
     EFFECT_ATTRACTOR = 3,
@@ -22,7 +22,7 @@ enum e2dEffectType : unsigned char {
     EFFECT_ESCALATOR,
 };
 
-enum ePedAttractorType : unsigned char {
+enum ePedAttractorType : uint8 {
     PED_ATTRACTOR_ATM            = 0, // Ped uses ATM(at day time only)
     PED_ATTRACTOR_SEAT           = 1, // Ped sits(at day time only)
     PED_ATTRACTOR_STOP           = 2, // Ped stands(at day time only)
@@ -36,7 +36,7 @@ enum ePedAttractorType : unsigned char {
 };
 
 // From https://gtamods.com/wiki/2d_Effect_(RW_Section)
-enum e2dCoronaFlashType : unsigned char {
+enum e2dCoronaFlashType : uint8 {
     FLASH_DEFAULT         = 0,
     FLASH_RANDOM          = 1,
     FLASH_RANDOM_WHEN_WET = 2,
@@ -60,27 +60,27 @@ struct tEffectLight {
     float  m_fCoronaSize;
     float  m_fShadowSize;
     union {
-        unsigned short m_nFlags;
+        uint16 m_nFlags;
         struct {
-            unsigned short m_bCheckObstacles : 1;
-            unsigned short m_nFogType : 2;
-            unsigned short m_bWithoutCorona : 1;
-            unsigned short m_bOnlyLongDistance : 1;
-            unsigned short m_bAtDay : 1;
-            unsigned short m_bAtNight : 1;
-            unsigned short m_bBlinking1 : 1;
+            uint16 m_bCheckObstacles : 1;
+            uint16 m_nFogType : 2;
+            uint16 m_bWithoutCorona : 1;
+            uint16 m_bOnlyLongDistance : 1;
+            uint16 m_bAtDay : 1;
+            uint16 m_bAtNight : 1;
+            uint16 m_bBlinking1 : 1;
 
-            unsigned short m_bOnlyFromBelow : 1;
-            unsigned short m_bBlinking2 : 1;
-            unsigned short m_bUpdateHeightAboveGround : 1;
-            unsigned short m_bCheckDirection : 1;
-            unsigned short m_bBlinking3 : 1;
+            uint16 m_bOnlyFromBelow : 1;
+            uint16 m_bBlinking2 : 1;
+            uint16 m_bUpdateHeightAboveGround : 1;
+            uint16 m_bCheckDirection : 1;
+            uint16 m_bBlinking3 : 1;
         };
     };
     e2dCoronaFlashType m_nCoronaFlashType;
     bool               m_bCoronaEnableReflection;
-    unsigned char      m_nCoronaFlareType;
-    unsigned char      m_nShadowColorMultiplier;
+    uint8      m_nCoronaFlareType;
+    uint8      m_nShadowColorMultiplier;
     char               m_nShadowZDistance;
     char               offsetX;
     char               offsetY;
@@ -88,8 +88,8 @@ struct tEffectLight {
     // char               _pad2E[2];
     RwTexture*         m_pCoronaTex;
     RwTexture*         m_pShadowTex;
-    int                field_38;
-    int                field_3C;
+    int32                field_38;
+    int32                field_3C;
 };
 VALIDATE_SIZE(tEffectLight, 0x30);
 
@@ -103,9 +103,9 @@ struct tEffectPedAttractor {
     RwV3d             m_vecUseDir;
     RwV3d             m_vecForwardDir;
     ePedAttractorType m_nAttractorType;
-    unsigned char     m_nPedExistingProbability;
-    unsigned char     field_36;
-    unsigned char     m_nFlags;
+    uint8     m_nPedExistingProbability;
+    uint8     field_36;
+    uint8     m_nFlags;
     char              m_szScriptName[8];
 };
 VALIDATE_SIZE(tEffectPedAttractor, 0x30);
@@ -115,27 +115,27 @@ struct tEffectEnEx {
     RwV2d         m_vecRadius;
     RwV3d         m_vecExitPosn;
     float         m_fExitAngle;
-    short         m_nInteriorId;
-    unsigned char m_nFlags1;
-    unsigned char m_nSkyColor;
+    int16         m_nInteriorId;
+    uint8 m_nFlags1;
+    uint8 m_nSkyColor;
     char          m_szInteriorName[8];
-    unsigned char m_nTimeOn;
-    unsigned char m_nTimeOff;
+    uint8 m_nTimeOn;
+    uint8 m_nTimeOff;
     union {
-        unsigned char m_nFlags2;
+        uint8 m_nFlags2;
         struct {
-            unsigned char bUnkn0x1 : 1;
-            unsigned char bUnkn0x2 : 1;
-            unsigned char bTimedEffect : 1; // 0x4
+            uint8 bUnkn0x1 : 1;
+            uint8 bUnkn0x2 : 1;
+            uint8 bTimedEffect : 1; // 0x4
         };
     };
 };
 VALIDATE_SIZE(tEffectEnEx, 0x2C);
 
 struct CRoadsignAttrFlags {
-    unsigned short m_nNumOfLines : 2;
-    unsigned short m_nSymbolsPerLine : 2;
-    unsigned short m_nTextColor : 2;
+    uint16 m_nNumOfLines : 2;
+    uint16 m_nSymbolsPerLine : 2;
+    uint16 m_nTextColor : 2;
 };
 VALIDATE_SIZE(CRoadsignAttrFlags, 0x2);
 
@@ -151,7 +151,7 @@ VALIDATE_SIZE(tEffectRoadsign, 0x20);
 
 struct tEffectCoverPoint {
     RwV2d         m_vecDirection;
-    unsigned char m_nType;
+    uint8 m_nType;
     // char _pad19[3];
 };
 VALIDATE_SIZE(tEffectCoverPoint, 0xC);
@@ -160,7 +160,7 @@ struct tEffectEscalator {
     RwV3d         m_vecBottom;
     RwV3d         m_vecTop;
     RwV3d         m_vecEnd;
-    unsigned char m_nDirection; // 0 - down, 1 - up
+    uint8 m_nDirection; // 0 - down, 1 - up
     // char          _pad35[3];
 };
 VALIDATE_SIZE(tEffectEscalator, 0x28);
@@ -176,23 +176,23 @@ class C2dEffect {
         tEffectPedAttractor pedAttractor;
         tEffectEnEx         enEx;
         tEffectRoadsign     roadsign;
-        std::int32_t        iSlotMachineIndex;
+        int32        iSlotMachineIndex;
         tEffectCoverPoint   coverPoint;
         tEffectEscalator    escalator;
     };
 
 public:
-    static unsigned int& g2dEffectPluginOffset;
-    static unsigned int& ms_nTxdSlot;
+    static uint32& g2dEffectPluginOffset;
+    static uint32& ms_nTxdSlot;
 
 public:
     static void InjectHooks();
 
     void Shutdown();
 
-    static int Roadsign_GetNumLinesFromFlags(CRoadsignAttrFlags flags);
-    static int Roadsign_GetNumLettersFromFlags(CRoadsignAttrFlags flags);
-    static int Roadsign_GetPaletteIDFromFlags(CRoadsignAttrFlags flags);
+    static int32 Roadsign_GetNumLinesFromFlags(CRoadsignAttrFlags flags);
+    static int32 Roadsign_GetNumLettersFromFlags(CRoadsignAttrFlags flags);
+    static int32 Roadsign_GetPaletteIDFromFlags(CRoadsignAttrFlags flags);
 
     static bool PluginAttach();
     static void DestroyAtomic(RpAtomic* pAtomic);
@@ -201,7 +201,7 @@ VALIDATE_SIZE(C2dEffect, 0x40);
 
 // RW PLUGIN
 struct t2dEffectPluginEntry {
-    unsigned int m_nObjCount;
+    uint32 m_nObjCount;
     C2dEffect m_pObjects[16]; // Size not real, it's decided on runtime, 16 is written here only to see the objects in debugger without issues
 };
 struct t2dEffectPlugin {
@@ -216,8 +216,8 @@ VALIDATE_SIZE(t2dEffectPlugin, 0x4);
     (RWPLUGINOFFSETCONST(t2dEffectPlugin, geometry, C2dEffect::g2dEffectPluginOffset)->var)
 
 // Own function names, we don't seem to have symbols for those
-unsigned int RpGeometryGet2dFxCount(RpGeometry* pGeometry);
-C2dEffect* RpGeometryGet2dFxAtIndex(RpGeometry* pGeometry, int iEffectInd);
+uint32 RpGeometryGet2dFxCount(RpGeometry* pGeometry);
+C2dEffect* RpGeometryGet2dFxAtIndex(RpGeometry* pGeometry, int32 iEffectInd);
 
 void* t2dEffectPluginConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
 void* t2dEffectPluginDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);

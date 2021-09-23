@@ -5,13 +5,11 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CDummy.h"
 
-
-class  CDummyPed : public CDummy {
+class CDummyPed : public CDummy {
 public:
 };
-
 
 VALIDATE_SIZE(CDummyPed, 0x38);

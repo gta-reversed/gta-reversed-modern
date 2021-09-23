@@ -11,8 +11,8 @@
 #include "CMissionTextOffsets.h"
 
 struct ChunkHeader {
-    char magic[4];
-    int  size;
+    char  magic[4];
+    int32 size;
 };
 
 VALIDATE_SIZE(ChunkHeader, 0x8);
@@ -25,7 +25,7 @@ class CText {
     CKeyArray           m_MissionKeyArray;
     CData               m_MissionText;
 
-    uchar               m_nLangCode;
+    uint8             m_nLangCode;
     bool                m_bIsMissionTextOffsetsLoaded;
     bool                m_bCdErrorLoaded;
     bool                m_bIsMissionPackLoaded;
@@ -49,7 +49,7 @@ class CText {
     void LoadMissionPackText();
 
   private:
-    bool ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint* offset, uchar nSkipBytes);
+    bool ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint32* offset, uint8 nSkipBytes);
     char GetUpperCase(char unk);
 
   private:

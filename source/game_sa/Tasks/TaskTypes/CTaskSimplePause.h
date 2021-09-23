@@ -1,26 +1,32 @@
 #pragma once
+
 #include "CTaskSimple.h"
 #include "CTaskTimer.h"
 
-class CTaskSimplePause : public CTaskSimple 
-{
+class CTaskSimplePause : public CTaskSimple {
 public:
     CTaskTimer m_timer;
-    int m_nTime;
+    int32 m_nTime;
 
-    static void InjectHooks();
-    CTaskSimplePause(int time);
-    ~CTaskSimplePause();
-private:
-    CTaskSimplePause* Constructor(int time);
 public:
+    CTaskSimplePause(int32 time);
+    ~CTaskSimplePause();
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_SIMPLE_PAUSE; };
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event);
+    eTaskType GetTaskType() override {
+        return TASK_SIMPLE_PAUSE;
+    };
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed(CPed* ped) override;
     bool ProcessPed_Reversed(CPed* ped);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskSimplePause* Constructor(int32 time);
+
 };
 
 VALIDATE_SIZE(CTaskSimplePause, 0x18);

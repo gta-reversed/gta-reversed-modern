@@ -5,11 +5,11 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CClumpModelInfo.h"
 #include "eWeaponType.h"
 
-class  CWeaponModelInfo : public CClumpModelInfo {
+class CWeaponModelInfo : public CClumpModelInfo {
 public:
     CWeaponModelInfo() : CClumpModelInfo() {}
 public:

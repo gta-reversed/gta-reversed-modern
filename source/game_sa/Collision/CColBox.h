@@ -6,18 +6,18 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CBox.h"
 #include "CColPoint.h"
 
 class CColBox : public CBox {
 public:
-	unsigned char m_nMaterial;
-	unsigned char m_nFlags;
-    tColLighting  m_nLighting;
-	unsigned char m_nBrightness;
+    uint8        m_nMaterial;
+    uint8        m_nFlags;
+    tColLighting m_nLighting;
+    uint8        m_nBrightness;
 
-	void Set(CVector  const& sup, CVector  const& inf, unsigned char material , unsigned char flags, unsigned char lighting);
+public:
+    void     Set(CVector const& sup, CVector const& inf, uint8 material, uint8 flags, uint8 lighting);
     CColBox& operator=(CColBox const& right);
 };
 

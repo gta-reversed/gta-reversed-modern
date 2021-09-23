@@ -5,14 +5,13 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
 
-class  CPtrNode {
+class CPtrNode {
 public:
-    void *pItem;
-    CPtrNode *pNext;
+    void*     pItem;
+    CPtrNode* pNext;
 
-    inline CPtrNode(void *item) : pItem(item) {}
+    inline CPtrNode(void* item) : pItem(item) {}
 };
 
 VALIDATE_SIZE(CPtrNode, 8);

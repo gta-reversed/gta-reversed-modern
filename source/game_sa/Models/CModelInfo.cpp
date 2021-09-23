@@ -8,7 +8,7 @@ Do not delete this comment block. Respect others' work!
 #include "StdInc.h"
 
 CBaseModelInfo *(&CModelInfo::ms_modelInfoPtrs)[NUM_MODEL_INFOS] = *(CBaseModelInfo*(*)[NUM_MODEL_INFOS])0xA9B0C8;
-int& CModelInfo::ms_lastPositionSearched = *(int*)0xAAE948;
+int32& CModelInfo::ms_lastPositionSearched = *(int32*)0xAAE948;
 
 CStore<CAtomicModelInfo, CModelInfo::NUM_ATOMIC_MODEL_INFOS>& CModelInfo::ms_atomicModelInfoStore = *(CStore<CAtomicModelInfo, NUM_ATOMIC_MODEL_INFOS>*)0xAAE950;
 CStore<CDamageAtomicModelInfo, CModelInfo::NUM_DAMAGE_ATOMIC_MODEL_INFOS>& CModelInfo::ms_damageAtomicModelInfoStore = *(CStore<CDamageAtomicModelInfo, NUM_DAMAGE_ATOMIC_MODEL_INFOS>*)0xB1BF58;
@@ -29,8 +29,8 @@ void CModelInfo::InjectHooks()
 
     ReversibleHooks::Install("CModelInfo", "GetModelInfoUInt16", 0x4C59F0, &CModelInfo::GetModelInfoUInt16);
     ReversibleHooks::Install("CModelInfo", "GetModelInfoFromHashKey", 0x4C59B0, &CModelInfo::GetModelInfoFromHashKey);
-    ReversibleHooks::Install("CModelInfo", "GetModelInfo_full", 0x4C5940, (CBaseModelInfo * (*)(char const*, int*)) & CModelInfo::GetModelInfo);
-    ReversibleHooks::Install("CModelInfo", "GetModelInfo_minmax", 0x4C5A20, (CBaseModelInfo*(*)(char const*, int, int))&CModelInfo::GetModelInfo);
+    ReversibleHooks::Install("CModelInfo", "GetModelInfo_full", 0x4C5940, (CBaseModelInfo * (*)(char const*, int32*)) & CModelInfo::GetModelInfo);
+    ReversibleHooks::Install("CModelInfo", "GetModelInfo_minmax", 0x4C5A20, (CBaseModelInfo*(*)(char const*, int32, int32))&CModelInfo::GetModelInfo);
 
     ReversibleHooks::Install("CModelInfo", "AddAtomicModel", 0x4C6620, &CModelInfo::AddAtomicModel);
     ReversibleHooks::Install("CModelInfo", "AddDamageAtomicModel", 0x4C6650, &CModelInfo::AddDamageAtomicModel);
@@ -60,41 +60,41 @@ void CModelInfo::InjectHooks()
 void CModelInfo::ReInit2dEffects()
 {
     ms_2dFXInfoStore.m_nCount = 0;
-    for (int32_t i = 0; i < NUM_MODEL_INFOS; ++i)
+    for (int32 i = 0; i < NUM_MODEL_INFOS; ++i)
         CModelInfo::GetModelInfo(i)->Init2dEffects();
 }
 
 // 0x4C63E0
 void CModelInfo::ShutDown()
 {
-    for (uint32_t i = 0; i < ms_atomicModelInfoStore.m_nCount; ++i)
+    for (uint32 i = 0; i < ms_atomicModelInfoStore.m_nCount; ++i)
         ms_atomicModelInfoStore.GetItemAtIndex(i).Shutdown();
 
-    for (uint32_t i = 0; i < ms_damageAtomicModelInfoStore.m_nCount; ++i)
+    for (uint32 i = 0; i < ms_damageAtomicModelInfoStore.m_nCount; ++i)
         ms_damageAtomicModelInfoStore.GetItemAtIndex(i).Shutdown();
 
-    for (uint32_t i = 0; i < ms_lodAtomicModelInfoStore.m_nCount; ++i)
+    for (uint32 i = 0; i < ms_lodAtomicModelInfoStore.m_nCount; ++i)
         ms_lodAtomicModelInfoStore.GetItemAtIndex(i).Shutdown();
 
-    for (uint32_t i = 0; i < ms_timeModelInfoStore.m_nCount; ++i)
+    for (uint32 i = 0; i < ms_timeModelInfoStore.m_nCount; ++i)
         ms_timeModelInfoStore.GetItemAtIndex(i).Shutdown();
 
-    for (uint32_t i = 0; i < ms_lodTimeModelInfoStore.m_nCount; ++i)
+    for (uint32 i = 0; i < ms_lodTimeModelInfoStore.m_nCount; ++i)
         ms_lodTimeModelInfoStore.GetItemAtIndex(i).Shutdown();
 
-    for (uint32_t i = 0; i < ms_weaponModelInfoStore.m_nCount; ++i)
+    for (uint32 i = 0; i < ms_weaponModelInfoStore.m_nCount; ++i)
         ms_weaponModelInfoStore.GetItemAtIndex(i).Shutdown();
 
-    for (uint32_t i = 0; i < ms_clumpModelInfoStore.m_nCount; ++i)
+    for (uint32 i = 0; i < ms_clumpModelInfoStore.m_nCount; ++i)
         ms_clumpModelInfoStore.GetItemAtIndex(i).Shutdown();
 
-    for (uint32_t i = 0; i < ms_vehicleModelInfoStore.m_nCount; ++i)
+    for (uint32 i = 0; i < ms_vehicleModelInfoStore.m_nCount; ++i)
         ms_vehicleModelInfoStore.GetItemAtIndex(i).Shutdown();
 
-    for (uint32_t i = 0; i < ms_pedModelInfoStore.m_nCount; ++i)
+    for (uint32 i = 0; i < ms_pedModelInfoStore.m_nCount; ++i)
         ms_pedModelInfoStore.GetItemAtIndex(i).Shutdown();
 
-    for (uint32_t i = 0; i < ms_2dFXInfoStore.m_nCount; ++i) {
+    for (uint32 i = 0; i < ms_2dFXInfoStore.m_nCount; ++i) {
         auto& pEffect = ms_2dFXInfoStore.GetItemAtIndex(i);
         pEffect.Shutdown();
     }
@@ -112,7 +112,7 @@ void CModelInfo::ShutDown()
 }
 
 // 0x4C6620
-CAtomicModelInfo* CModelInfo::AddAtomicModel(int index)
+CAtomicModelInfo* CModelInfo::AddAtomicModel(int32 index)
 {
     auto& pInfo = ms_atomicModelInfoStore.AddItem();
     pInfo.Init();
@@ -121,7 +121,7 @@ CAtomicModelInfo* CModelInfo::AddAtomicModel(int index)
 }
 
 // 0x4C6650
-CDamageAtomicModelInfo* CModelInfo::AddDamageAtomicModel(int index)
+CDamageAtomicModelInfo* CModelInfo::AddDamageAtomicModel(int32 index)
 {
     auto& pInfo = ms_damageAtomicModelInfoStore.AddItem();
     pInfo.Init();
@@ -130,7 +130,7 @@ CDamageAtomicModelInfo* CModelInfo::AddDamageAtomicModel(int index)
 }
 
 // 0x4C6680
-CLodAtomicModelInfo* CModelInfo::AddLodAtomicModel(int index)
+CLodAtomicModelInfo* CModelInfo::AddLodAtomicModel(int32 index)
 {
     auto& pInfo =  ms_lodAtomicModelInfoStore.AddItem();
     pInfo.Init();
@@ -139,7 +139,7 @@ CLodAtomicModelInfo* CModelInfo::AddLodAtomicModel(int index)
 }
 
 // 0x4C66B0
-CTimeModelInfo* CModelInfo::AddTimeModel(int index)
+CTimeModelInfo* CModelInfo::AddTimeModel(int32 index)
 {
     auto& pInfo = ms_timeModelInfoStore.AddItem();
     pInfo.Init();
@@ -148,7 +148,7 @@ CTimeModelInfo* CModelInfo::AddTimeModel(int index)
 }
 
 // 0x4C66E0
-CLodTimeModelInfo* CModelInfo::AddLodTimeModel(int index)
+CLodTimeModelInfo* CModelInfo::AddLodTimeModel(int32 index)
 {
     auto& pInfo = ms_lodTimeModelInfoStore.AddItem();
     pInfo.Init();
@@ -157,7 +157,7 @@ CLodTimeModelInfo* CModelInfo::AddLodTimeModel(int index)
 }
 
 // 0x4C6710
-CWeaponModelInfo* CModelInfo::AddWeaponModel(int index)
+CWeaponModelInfo* CModelInfo::AddWeaponModel(int32 index)
 {
     auto& pInfo = ms_weaponModelInfoStore.AddItem();
     pInfo.Init();
@@ -166,7 +166,7 @@ CWeaponModelInfo* CModelInfo::AddWeaponModel(int index)
 }
 
 // 0x4C6740
-CClumpModelInfo* CModelInfo::AddClumpModel(int index)
+CClumpModelInfo* CModelInfo::AddClumpModel(int32 index)
 {
     auto& pInfo = ms_clumpModelInfoStore.AddItem();
     pInfo.Init();
@@ -175,7 +175,7 @@ CClumpModelInfo* CModelInfo::AddClumpModel(int index)
 }
 
 // 0x4C6770
-CVehicleModelInfo* CModelInfo::AddVehicleModel(int index)
+CVehicleModelInfo* CModelInfo::AddVehicleModel(int32 index)
 {
     auto& pInfo = ms_vehicleModelInfoStore.AddItem();
     pInfo.Init();
@@ -184,7 +184,7 @@ CVehicleModelInfo* CModelInfo::AddVehicleModel(int index)
 }
 
 // 0x4C67A0
-CPedModelInfo* CModelInfo::AddPedModel(int index)
+CPedModelInfo* CModelInfo::AddPedModel(int32 index)
 {
     auto& pInfo = ms_pedModelInfoStore.AddItem();
     pInfo.Init();
@@ -249,7 +249,7 @@ void CModelInfo::Initialise()
 }
 
 // 0x4C5940
-CBaseModelInfo* CModelInfo::GetModelInfo(const char* name, int* index)
+CBaseModelInfo* CModelInfo::GetModelInfo(const char* name, int32* index)
 {
     auto iKey = CKeyGen::GetUppercaseKey(name);
     auto iCurInd = CModelInfo::ms_lastPositionSearched;
@@ -288,9 +288,9 @@ CBaseModelInfo* CModelInfo::GetModelInfo(const char* name, int* index)
 }
 
 // 0x4C59B0
-CBaseModelInfo* CModelInfo::GetModelInfoFromHashKey(unsigned int uiHash, int* index)
+CBaseModelInfo* CModelInfo::GetModelInfoFromHashKey(uint32 uiHash, int32* index)
 {
-    for (int32_t i = 0; i < NUM_MODEL_INFOS; ++i) {
+    for (int32 i = 0; i < NUM_MODEL_INFOS; ++i) {
         auto pInfo = CModelInfo::GetModelInfo(i);
         if (pInfo && pInfo->m_nKey == uiHash) {
             if (index)
@@ -304,9 +304,9 @@ CBaseModelInfo* CModelInfo::GetModelInfoFromHashKey(unsigned int uiHash, int* in
 }
 
 // 0x4C59F0
-CBaseModelInfo* CModelInfo::GetModelInfoUInt16(const char* name, unsigned short* pOutIndex)
+CBaseModelInfo* CModelInfo::GetModelInfoUInt16(const char* name, uint16* pOutIndex)
 {
-    int modelId = 0;
+    int32 modelId = 0;
     auto result = CModelInfo::GetModelInfo(name, &modelId);
     if (pOutIndex)
         *pOutIndex = modelId;
@@ -315,13 +315,13 @@ CBaseModelInfo* CModelInfo::GetModelInfoUInt16(const char* name, unsigned short*
 }
 
 // 0x4C5A20
-CBaseModelInfo* CModelInfo::GetModelInfo(char const* name, int minIndex, int maxIndex)
+CBaseModelInfo* CModelInfo::GetModelInfo(char const* name, int32 minIndex, int32 maxIndex)
 {
     auto iKey = CKeyGen::GetUppercaseKey(name);
     if (minIndex > maxIndex)
         return nullptr;
 
-    for (int32_t i = minIndex; i <= maxIndex; ++i) {
+    for (int32 i = minIndex; i <= maxIndex; ++i) {
         auto pInfo = CModelInfo::GetModelInfo(i);
         if (pInfo && pInfo->m_nKey == iKey)
             return pInfo;
@@ -330,14 +330,14 @@ CBaseModelInfo* CModelInfo::GetModelInfo(char const* name, int minIndex, int max
     return nullptr;
 }
 
-// Converted from stdcall void* CModelInfo::Get2dEffectStore(void) 0x4C5A60
+// 0x4C5A60
 CStore<C2dEffect, CModelInfo::NUM_2DFX_INFOS>* CModelInfo::Get2dEffectStore()
 {
     return ((CStore<C2dEffect, NUM_2DFX_INFOS>* (__cdecl *)())0x4C5A60)();
 }
 
 // 0x4C5A70
-bool CModelInfo::IsBoatModel(int index)
+bool CModelInfo::IsBoatModel(int32 index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
     if (!pInfo)
@@ -350,7 +350,7 @@ bool CModelInfo::IsBoatModel(int index)
 }
 
 // 0x4C5AA0
-bool CModelInfo::IsCarModel(int index)
+bool CModelInfo::IsCarModel(int32 index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
     if (!pInfo)
@@ -363,7 +363,7 @@ bool CModelInfo::IsCarModel(int index)
 }
 
 // 0x4C5AD0
-bool CModelInfo::IsTrainModel(int index)
+bool CModelInfo::IsTrainModel(int32 index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
     if (!pInfo)
@@ -376,7 +376,7 @@ bool CModelInfo::IsTrainModel(int index)
 }
 
 // 0x4C5B00
-bool CModelInfo::IsHeliModel(int index)
+bool CModelInfo::IsHeliModel(int32 index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
     if (!pInfo)
@@ -389,7 +389,7 @@ bool CModelInfo::IsHeliModel(int index)
 }
 
 // 0x4C5B30
-bool CModelInfo::IsPlaneModel(int index)
+bool CModelInfo::IsPlaneModel(int32 index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
     if (!pInfo)
@@ -402,7 +402,7 @@ bool CModelInfo::IsPlaneModel(int index)
 }
 
 // 0x4C5B60
-bool CModelInfo::IsBikeModel(int index)
+bool CModelInfo::IsBikeModel(int32 index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
     if (!pInfo)
@@ -415,7 +415,7 @@ bool CModelInfo::IsBikeModel(int index)
 }
 
 // 0x4C5B90
-bool CModelInfo::IsFakePlaneModel(int index)
+bool CModelInfo::IsFakePlaneModel(int32 index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
     if (!pInfo)
@@ -428,7 +428,7 @@ bool CModelInfo::IsFakePlaneModel(int index)
 }
 
 // 0x4C5BC0
-bool CModelInfo::IsMonsterTruckModel(int index)
+bool CModelInfo::IsMonsterTruckModel(int32 index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
     if (!pInfo)
@@ -441,7 +441,7 @@ bool CModelInfo::IsMonsterTruckModel(int index)
 }
 
 // 0x4C5BF0
-bool CModelInfo::IsQuadBikeModel(int index)
+bool CModelInfo::IsQuadBikeModel(int32 index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
     if (!pInfo)
@@ -454,7 +454,7 @@ bool CModelInfo::IsQuadBikeModel(int index)
 }
 
 // 0x4C5C20
-bool CModelInfo::IsBmxModel(int index)
+bool CModelInfo::IsBmxModel(int32 index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
     if (!pInfo)
@@ -467,7 +467,7 @@ bool CModelInfo::IsBmxModel(int index)
 }
 
 // 0x4C5C50
-bool CModelInfo::IsTrailerModel(int index)
+bool CModelInfo::IsTrailerModel(int32 index)
 {
     auto pInfo = CModelInfo::GetModelInfo(index);
     if (!pInfo)
@@ -480,7 +480,7 @@ bool CModelInfo::IsTrailerModel(int index)
 }
 
 // 0x4C5C80
-int CModelInfo::IsVehicleModelType(int index)
+int32 CModelInfo::IsVehicleModelType(int32 index)
 {
     if (index >= NUM_MODEL_INFOS)
         return -1;

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-constexpr unsigned short PED_STATS_COUNT = 43;
+constexpr uint16 PED_STATS_COUNT = 43;
 
 CPedStat*& CPedStats::ms_apPedStats = *(CPedStat**)0xC0BBEC;
 
@@ -14,7 +14,7 @@ void CPedStats::InjectHooks() {
 // 0x5BF9D0
 void CPedStats::Initialise() {
     ms_apPedStats = new CPedStat[PED_STATS_COUNT]();
-    for (unsigned short statIndex = 0; statIndex < PED_STATS_COUNT; statIndex++) {
+    for (uint16 statIndex = 0; statIndex < PED_STATS_COUNT; statIndex++) {
         ms_apPedStats[statIndex].m_nId = 0;
         ms_apPedStats[statIndex].m_fFleeDistance = 20.0f;
         ms_apPedStats[statIndex].m_fHeadingChangeRate = 15.0f;
@@ -38,7 +38,7 @@ void CPedStats::Shutdown() {
 
 // 0x5BB890
 void CPedStats::LoadPedStats() {
-    unsigned short statIndex = 0;
+    uint16 statIndex = 0;
     FILESTREAM file = CFileMgr::OpenFile("DATA\\PEDSTATS.DAT", "r");
     for (char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
         if (!*line || *line == '#') {
@@ -48,14 +48,14 @@ void CPedStats::LoadPedStats() {
         char   name[24];
         float  fleeDistance;
         float  headingChangeRate;
-        int    fear;
-        int    temper;
-        int    lawfulness;
-        int    sexiness;
+        int32    fear;
+        int32    temper;
+        int32    lawfulness;
+        int32    sexiness;
         float  attackStrength;
         float  defendWeakness;
-        int    shootingRate;
-        int    defaultDecisionMaker;
+        int32    shootingRate;
+        int32    defaultDecisionMaker;
 
         sscanf(
             line,
@@ -93,7 +93,7 @@ void CPedStats::LoadPedStats() {
 
 // 0x6088D0
 ePedStats CPedStats::GetPedStatType(const char* statName) {
-  unsigned short statIndex = 0;
+  uint16 statIndex = 0;
   while (strcmp(ms_apPedStats[statIndex].m_acName, statName) != 0) {
     if (++statIndex >= PED_STATS_COUNT)
       return ePedStats::SENSIBLE_GUY;
@@ -104,7 +104,7 @@ ePedStats CPedStats::GetPedStatType(const char* statName) {
 // unused
 // 0x608860
 CPedStat* CPedStats::GetPedStatInfo(const char* statName) {
-    for (unsigned short statIndex = 0; statIndex < PED_STATS_COUNT; statIndex++) {
+    for (uint16 statIndex = 0; statIndex < PED_STATS_COUNT; statIndex++) {
         if (strcmp(ms_apPedStats[statIndex].m_acName, statName) != 0) {
             return &ms_apPedStats[statIndex];
         }
@@ -114,7 +114,7 @@ CPedStat* CPedStats::GetPedStatInfo(const char* statName) {
 
 // unused
 // 0x5DE7C0
-CPedStat* CPedStats::GetPedStatByArrayIndex(unsigned int statIndex) {
+CPedStat* CPedStats::GetPedStatByArrayIndex(uint32 statIndex) {
     return &ms_apPedStats[statIndex];
 }
 

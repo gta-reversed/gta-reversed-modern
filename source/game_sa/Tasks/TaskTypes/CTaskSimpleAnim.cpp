@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleAnim.h"
+
 void CTaskSimpleAnim::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleAnim", "MakeAbortable", 0x61A790, &CTaskSimpleAnim::MakeAbortable_Reversed);
@@ -29,11 +31,11 @@ CTaskSimpleAnim::~CTaskSimpleAnim()
     m_pAnim = nullptr;
 }
 
-bool CTaskSimpleAnim::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleAnim::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return CTaskSimpleAnim::MakeAbortable_Reversed(ped, priority, _event);
+    return CTaskSimpleAnim::MakeAbortable_Reversed(ped, priority, event);
 }
-bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
     bool bSkipBlend = false;
     auto fBlend = -4.0F;
@@ -44,17 +46,17 @@ bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
     }
     else if (m_bDontInterrupt)
     {
-        if (_event && _event->GetEventType() != eEventType::EVENT_SCRIPT_COMMAND)
+        if (event && event->GetEventType() != eEventType::EVENT_SCRIPT_COMMAND)
             return false;
     }
-    else if (_event)
+    else if (event)
     {
-        if (_event->GetEventType() == eEventType::EVENT_SCRIPT_COMMAND)
+        if (event->GetEventType() == eEventType::EVENT_SCRIPT_COMMAND)
         {
-            auto* pEvent = static_cast<CEventScriptCommand*>(_event);
+            const auto* pEvent = static_cast<const CEventScriptCommand*>(event);
             if (pEvent->m_task)
             {
-                if (pEvent->m_task->GetId() == eTaskType::TASK_SIMPLE_NAMED_ANIM)
+                if (pEvent->m_task->GetTaskType() == eTaskType::TASK_SIMPLE_NAMED_ANIM)
                 {
                     if (m_pAnim)
                         m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
@@ -75,7 +77,7 @@ bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
                 if (m_pAnim->m_nFlags & ANIM_FLAG_PARTIAL)
                     m_pAnim->m_fBlendDelta = fBlend;
                 else
-                    CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, eAnimID::ANIM_ID_IDLE, -fBlend);
+                    CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, AnimationId::ANIM_ID_IDLE, -fBlend);
             }
         }
     }

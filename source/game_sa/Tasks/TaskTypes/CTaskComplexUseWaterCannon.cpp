@@ -1,5 +1,10 @@
 #include "StdInc.h"
 
+#include "CTaskComplexUseWaterCannon.h"
+
+#include "CTaskSimpleCarDrive.h"
+#include "CTaskSimpleCarDriveTimed.h"
+
 void CTaskComplexUseWaterCannon::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexUseWaterCannon", "Constructor", 0x659780, &CTaskComplexUseWaterCannon::Constructor);
@@ -68,7 +73,7 @@ CTask* CTaskComplexUseWaterCannon::CreateFirstSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexUseWaterCannon::ControlSubTask_Reversed(CPed* ped)
 {
-    if (m_pSubTask->GetId() == TASK_SIMPLE_CAR_DRIVE)
+    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_CAR_DRIVE)
     {
         if (ped->m_pVehicle->m_nStatus == STATUS_PHYSICS && m_pFire->m_nFlags.bActive)
             ped->m_pVehicle->AsAutomobile()->FireTruckControl(m_pFire);

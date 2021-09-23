@@ -6,15 +6,14 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CVector.h"
 
 class CSphere {
 public:
-	CVector m_vecCenter;
-	float m_fRadius;
+    CVector m_vecCenter;
+    float   m_fRadius;
 
-	void Set(float radius, CVector  const& center);
+    void Set(float radius, CVector const& center);
 };
 
 VALIDATE_SIZE(CSphere, 0x10);

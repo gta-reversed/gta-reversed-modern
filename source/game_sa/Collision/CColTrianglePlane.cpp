@@ -23,7 +23,7 @@ void CColTrianglePlane::Set(CompressedVector const* vertices, CColTriangle& tria
     auto vecCross = CrossProduct(vecCsubA, vecBsubA);
     vecCross.Normalise();
     m_normal = CompressUnitVector(vecCross);
-    m_nDistance = static_cast<uint16_t>(DotProduct(vecA, vecCross) * 128.0F);
+    m_nDistance = static_cast<uint16>(DotProduct(vecA, vecCross) * 128.0F);
 
     const auto normXOrient = fabs(vecCross.x);
     const auto normYOrient = fabs(vecCross.y);

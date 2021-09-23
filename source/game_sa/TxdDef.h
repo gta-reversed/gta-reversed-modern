@@ -11,9 +11,9 @@
 class TxdDef {
 public:
     RwTexDictionary* m_pRwDictionary;
-    int16_t m_wRefsCount;
-    int16_t m_wParentIndex;
-    uint32_t m_hash;
+    int16            m_wRefsCount;
+    int16            m_wParentIndex;
+    uint32           m_hash;
 };
 
 VALIDATE_SIZE(TxdDef, 0xC);

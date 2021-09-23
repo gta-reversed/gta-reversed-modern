@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleGetUp.h"
+
 CColPoint(&CTaskSimpleGetUp::m_aColPoints)[32] = *reinterpret_cast<CColPoint(*)[32]>(0xC18F98);
 
 void CTaskSimpleGetUp::InjectHooks()
@@ -39,9 +41,9 @@ bool CTaskSimpleGetUp::ProcessPed(CPed* ped)
 }
 
 // 0x677FE0
-bool CTaskSimpleGetUp::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleGetUp::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return MakeAbortable_Reversed(ped, priority, _event);
+    return MakeAbortable_Reversed(ped, priority, event);
 }
 
 bool CTaskSimpleGetUp::ProcessPed_Reversed(CPed* ped)
@@ -63,7 +65,7 @@ bool CTaskSimpleGetUp::ProcessPed_Reversed(CPed* ped)
     return false;
 }
 
-bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
 
     if (priority == ABORT_PRIORITY_URGENT)
@@ -71,17 +73,17 @@ bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
         bool bTooMuchTimePassed = false;
         bool bFatalDamage = false;
 
-        if (_event)
+        if (event)
         {
-            if (_event->GetEventType() == EVENT_DAMAGE)
+            if (event->GetEventType() == EVENT_DAMAGE)
             {
-                auto eventDamage = reinterpret_cast<CEventDamage*>(_event);
+                const auto eventDamage = static_cast<const CEventDamage*>(event);
                 if (eventDamage->m_damageResponse.m_bHealthZero && eventDamage->m_bAddToEventGroup)
                     bFatalDamage = true;
-                else if (CTimer::m_snTimeInMilliseconds - eventDamage->m_nStartTime > CTimer::GetTimeStepInMilliseconds() * 3.0F)
+                else if (CTimer::GetTimeInMS() - eventDamage->m_nStartTime > CTimer::GetTimeStepInMS() * 3.0F)
                     bTooMuchTimePassed = true;
             }
-            else if (_event->GetEventPriority() < 61)
+            else if (event->GetEventPriority() < 61)
                 return false;
         }
 
@@ -176,7 +178,7 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
     }
 
     CPedDamageResponseCalculator damageResponseCalculator(pVeh, fDamage, WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, false);
-    CEventDamage eventDamage(pVeh, CTimer::m_snTimeInMilliseconds, WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
+    CEventDamage eventDamage(pVeh, CTimer::GetTimeInMS(), WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
 
     if (eventDamage.AffectsPed(ped))
         damageResponseCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);

@@ -1,23 +1,23 @@
 #include "StdInc.h"
 
-uint8_t CClock::daysInMonth[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // 0x8CCF24
+uint8 CClock::daysInMonth[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // 0x8CCF24
 
 bool& CClock::bClockHasBeenStored = *reinterpret_cast<bool*>(0xB70144);
-uint16_t& CClock::ms_Stored_nGameClockSeconds = *reinterpret_cast<uint16_t*>(0xB70148);
-uint8_t& CClock::ms_Stored_nGameClockMinutes = *reinterpret_cast<uint8_t*>(0xB7014A);
-uint8_t& CClock::ms_Stored_nGameClockHours = *reinterpret_cast<uint8_t*>(0xB7014B);
-uint8_t& CClock::ms_Stored_nGameClockDays = *reinterpret_cast<uint8_t*>(0xB7014C);
-uint8_t& CClock::ms_Stored_nGameClockMonths = *reinterpret_cast<uint8_t*>(0xB7014D);
+uint16& CClock::ms_Stored_nGameClockSeconds = *reinterpret_cast<uint16*>(0xB70148);
+uint8& CClock::ms_Stored_nGameClockMinutes = *reinterpret_cast<uint8*>(0xB7014A);
+uint8& CClock::ms_Stored_nGameClockHours = *reinterpret_cast<uint8*>(0xB7014B);
+uint8& CClock::ms_Stored_nGameClockDays = *reinterpret_cast<uint8*>(0xB7014C);
+uint8& CClock::ms_Stored_nGameClockMonths = *reinterpret_cast<uint8*>(0xB7014D);
 
-uint8_t& CClock::CurrentDay = *reinterpret_cast<uint8_t*>(0xB7014E);
-uint16_t& CClock::ms_nGameClockSeconds = *reinterpret_cast<uint16_t*>(0xB70150);
-uint8_t& CClock::ms_nGameClockMinutes = *reinterpret_cast<uint8_t*>(0xB70152);
-uint8_t& CClock::ms_nGameClockHours = *reinterpret_cast<uint8_t*>(0xB70153);
-uint8_t& CClock::ms_nGameClockDays = *reinterpret_cast<uint8_t*>(0xB70154);
-uint8_t& CClock::ms_nGameClockMonth = *reinterpret_cast<uint8_t*>(0xB70155);
+uint8& CClock::CurrentDay = *reinterpret_cast<uint8*>(0xB7014E);
+uint16& CClock::ms_nGameClockSeconds = *reinterpret_cast<uint16*>(0xB70150);
+uint8& CClock::ms_nGameClockMinutes = *reinterpret_cast<uint8*>(0xB70152);
+uint8& CClock::ms_nGameClockHours = *reinterpret_cast<uint8*>(0xB70153);
+uint8& CClock::ms_nGameClockDays = *reinterpret_cast<uint8*>(0xB70154);
+uint8& CClock::ms_nGameClockMonth = *reinterpret_cast<uint8*>(0xB70155);
 
-uint32_t& CClock::ms_nLastClockTick = *reinterpret_cast<uint32_t*>(0xB70158);
-uint32_t& CClock::ms_nMillisecondsPerGameMinute = *reinterpret_cast<uint32_t*>(0xB7015C);
+uint32& CClock::ms_nLastClockTick = *reinterpret_cast<uint32*>(0xB70158);
+uint32& CClock::ms_nMillisecondsPerGameMinute = *reinterpret_cast<uint32*>(0xB7015C);
 
 void CClock::InjectHooks() {
     ReversibleHooks::Install("CClock", "Initialise", 0x52CD90, &CClock::Initialise);
@@ -33,11 +33,11 @@ void CClock::InjectHooks() {
 
 /// @brief Initializes the clock. (0x52CD90)
 /// @param millisecondsPerGameMinute Number of milliseconds per one game minute.
-void CClock::Initialise(uint32_t millisecondsPerGameMinute) {
+void CClock::Initialise(uint32 millisecondsPerGameMinute) {
     ms_nMillisecondsPerGameMinute = millisecondsPerGameMinute;
     ms_nGameClockMonth = 1;
     ms_nGameClockDays = 1;
-    ms_nLastClockTick = CTimer::m_snTimeInMilliseconds;
+    ms_nLastClockTick = CTimer::GetTimeInMS();
     ms_nGameClockHours = 12;
     ms_nGameClockMinutes = 0;
     ms_nGameClockSeconds = 0;
@@ -47,14 +47,14 @@ void CClock::Initialise(uint32_t millisecondsPerGameMinute) {
 
 /// @brief Updates the game clock. (0x52CF10)
 void CClock::Update() {
-    if (ms_nMillisecondsPerGameMinute < (CTimer::m_snTimeInMilliseconds - ms_nLastClockTick) || CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK]) {
+    if (ms_nMillisecondsPerGameMinute < (CTimer::GetTimeInMS() - ms_nLastClockTick) || CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK]) {
         if (!CCheat::m_aCheatsActive[CHEAT_ALWAYS_MIDNIGHT] && !CCheat::m_aCheatsActive[CHEAT_STOP_GAME_CLOCK_ORANGE_SKY]) {
             // next minute
             ms_nGameClockMinutes++;
             ms_nLastClockTick += ms_nMillisecondsPerGameMinute;
 
             if (CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK])
-                ms_nLastClockTick = CTimer::m_snTimeInMilliseconds;
+                ms_nLastClockTick = CTimer::GetTimeInMS();
 
             // next hour
             if (ms_nGameClockMinutes >= 60) {
@@ -83,14 +83,14 @@ void CClock::Update() {
             }
         }
     }
-    ms_nGameClockSeconds = (CTimer::m_snTimeInMilliseconds - ms_nLastClockTick) * 60 / ms_nMillisecondsPerGameMinute;
+    ms_nGameClockSeconds = (CTimer::GetTimeInMS() - ms_nLastClockTick) * 60 / ms_nMillisecondsPerGameMinute;
 }
 
 /// @brief Number of minutes remaining to specific time. (0x52CEB0)
 /// @param hours Hour
 /// @param minutes Minute
 /// @returns Minutes remaining to Hour:Minute
-uint16_t CClock::GetGameClockMinutesUntil(uint8_t hours, uint8_t minutes) {
+uint16 CClock::GetGameClockMinutesUntil(uint8 hours, uint8 minutes) {
     auto now = ms_nGameClockHours * 60 + ms_nGameClockMinutes;
     auto then = hours * 60 + minutes;
 
@@ -104,7 +104,7 @@ uint16_t CClock::GetGameClockMinutesUntil(uint8_t hours, uint8_t minutes) {
 /// @param from Hour for *from*
 /// @param to Hour for *to*
 /// @returns True if the parameters ensure the check, false otherwise.
-bool CClock::GetIsTimeInRange(uint8_t from, uint8_t to) {
+bool CClock::GetIsTimeInRange(uint8 from, uint8 to) {
     if (from > to)
         return ms_nGameClockHours >= from || ms_nGameClockHours < to;
     else
@@ -156,7 +156,7 @@ void CClock::NormaliseGameClock() {
 
 /// @brief Sets new day. (0x52D0B0)
 /// @param timeDirection 0 for previous day, non-zero value for next day.
-void CClock::OffsetClockByADay(uint32_t timeDirection) {
+void CClock::OffsetClockByADay(uint32 timeDirection) {
     if (timeDirection == 0) {
         ms_nGameClockDays--;
 
@@ -196,8 +196,8 @@ void CClock::OffsetClockByADay(uint32_t timeDirection) {
 /// @param hours Hour to be set.
 /// @param minutes Minute to be set.
 /// @param days Day to be set.
-void CClock::SetGameClock(uint8_t hours, uint8_t minutes, uint8_t day) {
-    ms_nLastClockTick = CTimer::m_snTimeInMilliseconds;
+void CClock::SetGameClock(uint8 hours, uint8 minutes, uint8 day) {
+    ms_nLastClockTick = CTimer::GetTimeInMS();
     ms_nGameClockHours = hours;
     ms_nGameClockMinutes = minutes;
 
@@ -227,4 +227,9 @@ void CClock::RestoreClock() {
     ms_nGameClockHours = ms_Stored_nGameClockHours;
     ms_nGameClockMinutes = ms_Stored_nGameClockMinutes;
     ms_nGameClockSeconds = ms_Stored_nGameClockSeconds;
+}
+
+// NOTSA
+uint32 CClock::GetMinutesToday() {
+    return ms_nGameClockMinutes + 60 * ms_nGameClockHours + (unsigned)((float)ms_nGameClockSeconds / 60.0f);
 }

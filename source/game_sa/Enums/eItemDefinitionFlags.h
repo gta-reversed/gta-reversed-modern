@@ -29,36 +29,36 @@ enum eItemDefinitionFlags {
 
 struct sItemDefinitionFlags {
     union {
-        unsigned int dwFlags;
+        uint32 dwFlags;
         struct {
-            unsigned int bIsRoad             : 1;
-            unsigned int bPad1               : 1;
-            unsigned int bDrawLast           : 1;
-            unsigned int bAdditive           : 1;
-            unsigned int bPad2               : 1;
-            unsigned int bAnimSomething      : 1;
-            unsigned int bNoZBufferWrite     : 1;
-            unsigned int bDontReceiveShadows : 1;
+            uint32 bIsRoad             : 1;
+            uint32 bPad1               : 1;
+            uint32 bDrawLast           : 1;
+            uint32 bAdditive           : 1;
+            uint32 bPad2               : 1;
+            uint32 bAnimSomething      : 1;
+            uint32 bNoZBufferWrite     : 1;
+            uint32 bDontReceiveShadows : 1;
 
-            unsigned int bPad3                    : 1;
-            unsigned int bIsGlassType1            : 1;
-            unsigned int bIsGlassType2            : 1;
-            unsigned int bIsGarageDoor            : 1;
-            unsigned int bIsDamageable            : 1;
-            unsigned int bIsTree                  : 1;
-            unsigned int bIsPalm                  : 1;
-            unsigned int bDoesNotCollideWithFlyer : 1;
+            uint32 bPad3                    : 1;
+            uint32 bIsGlassType1            : 1;
+            uint32 bIsGlassType2            : 1;
+            uint32 bIsGarageDoor            : 1;
+            uint32 bIsDamageable            : 1;
+            uint32 bIsTree                  : 1;
+            uint32 bIsPalm                  : 1;
+            uint32 bDoesNotCollideWithFlyer : 1;
 
-            unsigned int bIsExplosive_Unused     : 1;
-            unsigned int bIsCopBodyPart_Unused   : 1;
-            unsigned int bPad4                   : 1;
-            unsigned int bIsUnknown              : 1;
-            unsigned int bIsTag                  : 1;
-            unsigned int bDisableBackfaceCulling : 1;
-            unsigned int bisBreakableStatue      : 1;
+            uint32 bIsExplosive_Unused     : 1;
+            uint32 bIsCopBodyPart_Unused   : 1;
+            uint32 bPad4                   : 1;
+            uint32 bIsUnknown              : 1;
+            uint32 bIsTag                  : 1;
+            uint32 bDisableBackfaceCulling : 1;
+            uint32 bisBreakableStatue      : 1;
         };
     };
 
-    inline sItemDefinitionFlags(unsigned int flags) : dwFlags(flags) {}
+    inline sItemDefinitionFlags(uint32 flags) : dwFlags(flags) {}
 };
 VALIDATE_SIZE(sItemDefinitionFlags, 0x4);

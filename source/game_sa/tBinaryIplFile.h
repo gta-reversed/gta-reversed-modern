@@ -6,27 +6,19 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CFileObjectInstance.h"
 
 struct tBinaryIplFile {
-    char           fourcc[4]; // "bnry"
-    unsigned short numInstances;
-private:
-    char _unused06[14];
-public:
-    unsigned short numCarGenerators;
-private:
-    char _unused16[6];
-public:
-    unsigned int   instancesOffset; // file offset to CFileObjectInstance structures
-private:
-    char _unused20[28];
-public:
-    unsigned int   carGeneratorsOffset;
-private:
-    char _unused40[12];
-public:
+    char   fourcc[4]; // "bnry"
+    uint16 numInstances;
+    char   _unused06[14];
+    uint16 numCarGenerators;
+    char   _unused16[6];
+    uint32 instancesOffset; // file offset to CFileObjectInstance structures
+    char   _unused20[28];
+    uint32 carGeneratorsOffset;
+    char   _unused40[12];
 };
 
 VALIDATE_SIZE(tBinaryIplFile, 0x4C);

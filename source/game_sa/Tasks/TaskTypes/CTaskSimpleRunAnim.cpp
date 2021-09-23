@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleRunAnim.h"
+
 void CTaskSimpleRunAnim::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleRunAnim", "Constructor", 0x61A8B0, &CTaskSimpleRunAnim::Constructor);
@@ -10,32 +12,32 @@ void CTaskSimpleRunAnim::InjectHooks()
     ReversibleHooks::Install("CTaskSimpleRunAnim", "ProcessPed", 0x61BAC0, &CTaskSimpleRunAnim::ProcessPed_Reversed);
 }
 
-CTaskSimpleRunAnim* CTaskSimpleRunAnim::Constructor(unsigned int animGroup, unsigned int animID, float fBlendDelta, bool bHoldLastFrame)
+CTaskSimpleRunAnim* CTaskSimpleRunAnim::Constructor(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, bool bHoldLastFrame)
 {
-    this->CTaskSimpleRunAnim::CTaskSimpleRunAnim(animGroup, animID, fBlendDelta, bHoldLastFrame);
+    this->CTaskSimpleRunAnim::CTaskSimpleRunAnim(animGroup, animId, fBlendDelta, bHoldLastFrame);
     return this;
 }
 
-CTaskSimpleRunAnim* CTaskSimpleRunAnim::Constructor2(unsigned int animGroup, unsigned int animID, float fBlendDelta, unsigned int nTaskType, char* pTaskName, bool bHoldLastFrame)
+CTaskSimpleRunAnim* CTaskSimpleRunAnim::Constructor2(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, int32 nTaskType, const char* taskName, bool bHoldLastFrame)
 {
-    this->CTaskSimpleRunAnim::CTaskSimpleRunAnim(animGroup, animID, fBlendDelta, nTaskType, pTaskName, bHoldLastFrame);
+    this->CTaskSimpleRunAnim::CTaskSimpleRunAnim(animGroup, animId, fBlendDelta, nTaskType, taskName, bHoldLastFrame);
     return this;
 }
 
 // 0x61A900
-CTaskSimpleRunAnim::CTaskSimpleRunAnim(unsigned int animGroup, unsigned int animID, float fBlendDelta, unsigned int nTaskType, char* pTaskName _IGNORED_, bool bHoldLastFrame) : CTaskSimpleAnim(bHoldLastFrame)
+CTaskSimpleRunAnim::CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, int32 nTaskType, const char* taskName _IGNORED_, bool bHoldLastFrame) : CTaskSimpleAnim(bHoldLastFrame)
 {
     m_nAnimGroup = animGroup;
-    m_nAnimId = animID;
+    m_nAnimId = animId;
     m_fBlendDelta = fBlendDelta;
     m_nTaskType = nTaskType;
 }
 
 // 0x61A8B0
-CTaskSimpleRunAnim::CTaskSimpleRunAnim(unsigned int animGroup, unsigned int animID, float fBlendDelta, bool bHoldLastFrame) : CTaskSimpleAnim(bHoldLastFrame)
+CTaskSimpleRunAnim::CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, bool bHoldLastFrame) : CTaskSimpleAnim(bHoldLastFrame)
 {
     m_nAnimGroup = animGroup;
-    m_nAnimId = animID;
+    m_nAnimId = animId;
     m_fBlendDelta = fBlendDelta;
     m_nTaskType = TASK_SIMPLE_ANIM;
 }

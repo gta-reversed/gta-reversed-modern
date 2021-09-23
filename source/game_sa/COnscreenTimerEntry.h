@@ -6,20 +6,17 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-class  COnscreenTimerEntry {
+class COnscreenTimerEntry {
 public:
-    unsigned int  m_nVarId;
-    char          m_szDescriptionTextKey[10];
-    char          m_szDisplayedText[42]; // possibly 2b padding?
-    bool          m_bEnabled;
-    unsigned char m_nTimerDirection;
-    unsigned int  m_nClockBeepCountdownSecs;
+    uint32 m_nVarId;
+    char   m_szDescriptionTextKey[10];
+    char   m_szDisplayedText[42]; // possibly 2b padding?
+    bool   m_bEnabled;
+    uint8  m_nTimerDirection;
+    uint32 m_nClockBeepCountdownSecs;
 
-     void Process();
+    void Process();
     //! unused
-     void ProcessForDisplayClock();
+    void ProcessForDisplayClock();
 };
 VALIDATE_SIZE(COnscreenTimerEntry, 0x40);
-//#include "meta/meta.COnscreenTimerEntry.h"

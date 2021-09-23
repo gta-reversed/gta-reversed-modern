@@ -1,11 +1,14 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
-
 #include "StdInc.h"
+
+#include "CPed.h"
+
+#include "CPedType.h"
 
 void CPed::InjectHooks() {
     // Constructors
@@ -31,7 +34,7 @@ void CPed::InjectHooks() {
     ReversibleHooks::Install("CPed", "ClearWeapons", 0x5E6320, &CPed::ClearWeapons);
     // ReversibleHooks::Install("CPed", "ClearWeapon", 0x5E62B0, &CPed::ClearWeapon);
     // ReversibleHooks::Install("CPed", "SetCurrentWeapon", 0x5E6280, static_cast<void(CPed::*)(eWeaponType)>(&CPed::SetCurrentWeapon));
-    // ReversibleHooks::Install("CPed", "SetCurrentWeapon", 0x5E61F0, static_cast<void(CPed::*)(int32_t)>(&CPed::SetCurrentWeapon));
+    // ReversibleHooks::Install("CPed", "SetCurrentWeapon", 0x5E61F0, static_cast<void(CPed::*)(int32)>(&CPed::SetCurrentWeapon));
     // ReversibleHooks::Install("CPed", "GiveWeapon", 0x5E6080, &CPed::GiveWeapon);
     // ReversibleHooks::Install("CPed", "TakeOffGoggles", 0x5E6010, &CPed::TakeOffGoggles);
     // ReversibleHooks::Install("CPed", "AddWeaponModel", 0x5E5ED0, &CPed::AddWeaponModel);
@@ -74,11 +77,11 @@ void CPed::InjectHooks() {
     // ReversibleHooks::Install("CPed", "GetPedTalking", 0x5EFF50, &CPed::GetPedTalking);
     ReversibleHooks::Install("CPed", "GiveWeaponWhenJoiningGang", 0x5E8BE0, &CPed::GiveWeaponWhenJoiningGang);
     // ReversibleHooks::Install("CPed", "GiveDelayedWeapon", 0x5E89B0, &CPed::GiveDelayedWeapon);
-    ReversibleHooks::Install("CPed", "GetWeaponSkill", 0x5E6580, static_cast<char(CPed::*)()>(&CPed::GetWeaponSkill));
+    ReversibleHooks::Install("CPed", "GetWeaponSkill", 0x5E6580, static_cast<eWeaponSkill(CPed::*)()>(&CPed::GetWeaponSkill));
     // ReversibleHooks::Install("CPed", "PreRenderAfterTest", 0x5E65A0, &CPed::PreRenderAfterTest);
     // ReversibleHooks::Install("CPed", "SetIdle", 0x5E7980, &CPed::SetIdle);
-    // ReversibleHooks::Install("CPed", "SetLook", 0x5E79B0, static_cast<int32_t(CPed::*)(float)>(&CPed::SetLook));
-    // ReversibleHooks::Install("CPed", "SetLook", 0x5E7A60, static_cast<int32_t(CPed::*)(CEntity *)>(&CPed::SetLook));
+    // ReversibleHooks::Install("CPed", "SetLook", 0x5E79B0, static_cast<int32(CPed::*)(float)>(&CPed::SetLook));
+    // ReversibleHooks::Install("CPed", "SetLook", 0x5E7A60, static_cast<int32(CPed::*)(CEntity *)>(&CPed::SetLook));
     // ReversibleHooks::Install("CPed", "Look", 0x5E7B20, &CPed::Look);
     ReversibleHooks::Install("CPed", "ReplaceWeaponForScriptedCutscene", 0x5E6530, &CPed::ReplaceWeaponForScriptedCutscene);
     ReversibleHooks::Install("CPed", "RemoveWeaponForScriptedCutscene", 0x5E6550, &CPed::RemoveWeaponForScriptedCutscene);
@@ -98,9 +101,9 @@ void CPed::InjectHooks() {
     // ReversibleHooks::Install("CPed", "IsPedShootable", 0x5DEFD0, &CPed::IsPedShootable);
     // ReversibleHooks::Install("CPed", "GetLocalDirection", 0x5DEF60, &CPed::GetLocalDirection);
     // ReversibleHooks::Install("CPed", "ClearAimFlag", 0x5DEF20, &CPed::ClearAimFlag);
-    // ReversibleHooks::Install("CPed", "SetAimFlag", 0x5DEED0, static_cast<int8_t(CPed::*)(CEntity *)>(&CPed::SetAimFlag));
-    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEE40, static_cast<int8_t(CPed::*)(CEntity *, bool, bool)>(&CPed::SetLookFlag));
-    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEDC0, static_cast<int8_t(CPed::*)(float, bool, bool)>(&CPed::SetLookFlag));
+    // ReversibleHooks::Install("CPed", "SetAimFlag", 0x5DEED0, static_cast<int8(CPed::*)(CEntity *)>(&CPed::SetAimFlag));
+    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEE40, static_cast<int8(CPed::*)(CEntity *, bool, bool)>(&CPed::SetLookFlag));
+    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEDC0, static_cast<int8(CPed::*)(float, bool, bool)>(&CPed::SetLookFlag));
     // ReversibleHooks::Install("CPed", "CanUseTorsoWhenLooking", 0x5DED90, &CPed::CanUseTorsoWhenLooking);
     // ReversibleHooks::Install("CPed", "PedIsReadyForConversation", 0x43ABA0, &CPed::PedIsReadyForConversation);
     // ReversibleHooks::Install("CPed", "CreateDeadPedMoney", 0x4590F0, &CPed::CreateDeadPedMoney);
@@ -167,65 +170,65 @@ plugin::dummy, plugin::dummy, plugin::dummy }
     ((void(__thiscall *)(CPed*, ePedType))0x5E8030)(this, pedtype);
 }
 
-// Converted from thiscall void* CPed::operator new(uint size) 0x5E4720
-void* CPed::operator new(unsigned int size) {
-    return ((void* (__cdecl *)(unsigned int))0x5E4720)(size);
+// 0x5E4720
+void* CPed::operator new(uint32 size) {
+    return ((void* (__cdecl *)(uint32))0x5E4720)(size);
 }
 
-// Converted from thiscall void CPed::operator delete(void *data) 0x5E4760
+// 0x5E4760
 void CPed::operator delete(void* data) {
     ((void(__cdecl *)(void*))0x5E4760)(data);
 }
 
-// Converted from void CPed::SetMoveAnim(void) 0x5E4A00
+// 0x5E4A00
 void CPed::SetMoveAnim()
 {
     ((void(__thiscall *)(CPed*))(*(void ***)this)[24])(this);
 }
 
-// Converted from bool CPed::Save(void) 0x5D5730
+// 0x5D5730
 bool CPed::Save()
 {
     return ((bool(__thiscall *)(CPed*))(*(void ***)this)[25])(this);
 }
 
-// Converted from bool CPed::Load(void) 0x5D4640
+// 0x5D4640
 bool CPed::Load()
 {
-    return ((bool(__thiscall *)(CPed*))(*(void ***)this)[26])(this);
+    return plugin::CallMethodAndReturn<bool, 0x5D4640, CPed*>(this);
 }
 
-// Converted from thiscall bool CPed::PedIsInvolvedInConversation(void) 0x43AB90
+// 0x43AB90
 bool CPed::PedIsInvolvedInConversation()
 {
     return ((bool(__thiscall *)(CPed*))0x43AB90)(this);
 }
 
-// Converted from thiscall bool CPed::PedIsReadyForConversation(bool) 0x43ABA0
+// 0x43ABA0
 bool CPed::PedIsReadyForConversation(bool arg0)
 {
     return ((bool(__thiscall *)(CPed*, bool))0x43ABA0)(this, arg0);
 }
 
-// Converted from thiscall bool CPed::PedCanPickUpPickUp(void) 0x455560
+// 0x455560
 bool CPed::PedCanPickUpPickUp()
 {
     return ((bool(__thiscall *)(CPed*))0x455560)(this);
 }
 
-// Converted from thiscall void CPed::CreateDeadPedMoney(void) 0x4590F0
+// 0x4590F0
 void CPed::CreateDeadPedMoney()
 {
     ((void(__thiscall *)(CPed*))0x4590F0)(this);
 }
 
-// Converted from thiscall void CPed::CreateDeadPedPickupCoors(float *pX,float *pY,float *pZ) 0x459180
+// 0x459180
 void CPed::CreateDeadPedPickupCoors(float* pX, float* pY, float* pZ)
 {
     ((void(__thiscall *)(CPed*, float*, float*, float*))0x459180)(this, pX, pY, pZ);
 }
 
-// Converted from thiscall void CPed::CreateDeadPedWeaponPickups(void) 0x4591D0
+// 0x4591D0
 void CPed::CreateDeadPedWeaponPickups()
 {
     ((void(__thiscall *)(CPed*))0x4591D0)(this);
@@ -240,83 +243,83 @@ void CPed::Initialise() {
 // unused
 // 0x5DEBC0
 void CPed::SetPedStats(ePedStats statsType) {
-    // auto index = static_cast<int>(statsType);
+    // auto index = static_cast<int32>(statsType);
     // m_pStats = &CPedStats::ms_apPedStats[index];
 }
 
-// Converted from thiscall void CPed::Update(void) 0x5DEBE0
+// 0x5DEBE0
 void CPed::Update()
 {
     ((void(__thiscall *)(CPed*))0x5DEBE0)(this);
 }
 
-// Converted from thiscall void CPed::SetMoveState(eMoveState moveState) 0x5DEC00
+// 0x5DEC00
 void CPed::SetMoveState(eMoveState moveState)
 {
     ((void(__thiscall *)(CPed*, eMoveState))0x5DEC00)(this, moveState);
 }
 
-// Converted from thiscall void CPed::SetMoveAnimSpeed(CAnimBlendAssociation *association) 0x5DEC10
+// 0x5DEC10
 void CPed::SetMoveAnimSpeed(CAnimBlendAssociation* association)
 {
     ((void(__thiscall *)(CPed*, CAnimBlendAssociation*))0x5DEC10)(this, association);
 }
 
-// Converted from thiscall void CPed::StopNonPartialAnims(void) 0x5DED10
+// 0x5DED10
 void CPed::StopNonPartialAnims()
 {
     ((void(__thiscall *)(CPed*))0x5DED10)(this);
 }
 
-// Converted from thiscall void CPed::RestartNonPartialAnims(void) 0x5DED50
+// 0x5DED50
 void CPed::RestartNonPartialAnims()
 {
     ((void(__thiscall *)(CPed*))0x5DED50)(this);
 }
 
-// Converted from thiscall bool CPed::CanUseTorsoWhenLooking(void) 0x5DED90
+// 0x5DED90
 bool CPed::CanUseTorsoWhenLooking()
 {
     return ((bool(__thiscall *)(CPed*))0x5DED90)(this);
 }
 
-// Converted from thiscall void CPed::SetLookFlag(float lookHeading,bool likeUnused,bool) 0x5DEDC0
+// 0x5DEDC0
 void CPed::SetLookFlag(float lookHeading, bool likeUnused, bool arg2)
 {
     ((void(__thiscall *)(CPed*, float, bool, bool))0x5DEDC0)(this, lookHeading, likeUnused, arg2);
 }
 
-// Converted from thiscall void CPed::SetLookFlag(CEntity *lookingTo,bool likeUnused,bool) 0x5DEE40
+// 0x5DEE40
 void CPed::SetLookFlag(CEntity* lookingTo, bool likeUnused, bool arg2)
 {
     ((void(__thiscall *)(CPed*, CEntity*, bool, bool))0x5DEE40)(this, lookingTo, likeUnused, arg2);
 }
 
-// Converted from thiscall void CPed::SetAimFlag(CEntity *aimingTo) 0x5DEED0
+// 0x5DEED0
 void CPed::SetAimFlag(CEntity* aimingTo)
 {
     ((void(__thiscall *)(CPed*, CEntity*))0x5DEED0)(this, aimingTo);
 }
 
-// Converted from thiscall void CPed::ClearAimFlag(void) 0x5DEF20
+// 0x5DEF20
 void CPed::ClearAimFlag()
 {
     ((void(__thiscall *)(CPed*))0x5DEF20)(this);
 }
 
-// Converted from thiscall int CPed::GetLocalDirection(CVector2D const&) 0x5DEF60
-int CPed::GetLocalDirection(CVector2D const& arg0)
+// 0x5DEF60
+int32 CPed::GetLocalDirection(CVector2D const& arg0)
 {
-    return ((int(__thiscall *)(CPed*, CVector2D const&))0x5DEF60)(this, arg0);
+    return ((int32(__thiscall *)(CPed*, CVector2D const&))0x5DEF60)(this, arg0);
 }
 
-// Converted from thiscall bool CPed::IsPedShootable(void) 0x5DEFD0
+// 0x5DEFD0
 bool CPed::IsPedShootable()
 {
     return ((bool(__thiscall *)(CPed*))0x5DEFD0)(this);
 }
 
-// Converted from thiscall bool CPed::UseGroundColModel(void) 0x5DEFE0
+// 0x5DEFE0
 bool CPed::UseGroundColModel()
 {
     return ((bool(__thiscall *)(CPed*))0x5DEFE0)(this);
@@ -334,7 +337,7 @@ bool CPed::CanPedReturnToState()
         m_nPedState != PEDSTATE_LOOK_ENTITY;
 }
 
-// Converted from thiscall bool CPed::CanSetPedState(void) 0x5DF030
+// 0x5DF030
 bool CPed::CanSetPedState()
 {
     return ((bool(__thiscall *)(CPed*))0x5DF030)(this);
@@ -364,66 +367,66 @@ bool CPed::CanStrafeOrMouseControl()
         m_nPedState == PEDSTATE_ANSWER_MOBILE;
 }
 
-// Converted from thiscall bool CPed::CanBeDeleted(void) 0x5DF100
+// 0x5DF100
 bool CPed::CanBeDeleted()
 {
     return ((bool(__thiscall *)(CPed*))0x5DF100)(this);
 }
 
-// Converted from thiscall bool CPed::CanBeDeletedEvenInVehicle(void) 0x5DF150
+// 0x5DF150
 bool CPed::CanBeDeletedEvenInVehicle()
 {
     return ((bool(__thiscall *)(CPed*))0x5DF150)(this);
 }
 
-// Converted from thiscall void CPed::RemoveGogglesModel(void) 0x5DF170
+// 0x5DF170
 void CPed::RemoveGogglesModel()
 {
     ((void(__thiscall *)(CPed*))0x5DF170)(this);
 }
 
-int CPed::GetWeaponSlot(eWeaponType weaponType)
+int32 CPed::GetWeaponSlot(eWeaponType weaponType)
 {
-    return CWeaponInfo::GetWeaponInfo(weaponType, 1)->m_nSlot;
+    return CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nSlot;
 }
 
-// Converted from thiscall void CPed::GrantAmmo(eWeaponType weaponType,uint ammo) 0x5DF220
-void CPed::GrantAmmo(eWeaponType weaponType, unsigned int ammo)
+// 0x5DF220
+void CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo)
 {
-    ((void(__thiscall *)(CPed*, eWeaponType, unsigned int))0x5DF220)(this, weaponType, ammo);
+    ((void(__thiscall *)(CPed*, eWeaponType, uint32))0x5DF220)(this, weaponType, ammo);
 }
 
-// Converted from thiscall void CPed::SetAmmo(eWeaponType weaponType,uint ammo) 0x5DF290
-void CPed::SetAmmo(eWeaponType weaponType, unsigned int ammo)
+// 0x5DF290
+void CPed::SetAmmo(eWeaponType weaponType, uint32 ammo)
 {
-    ((void(__thiscall *)(CPed*, eWeaponType, unsigned int))0x5DF290)(this, weaponType, ammo);
+    ((void(__thiscall *)(CPed*, eWeaponType, uint32))0x5DF290)(this, weaponType, ammo);
 }
 
-// Converted from thiscall bool CPed::DoWeHaveWeaponAvailable(eWeaponType weaponType) 0x5DF300
+// 0x5DF300
 bool CPed::DoWeHaveWeaponAvailable(eWeaponType weaponType)
 {
     return ((bool(__thiscall *)(CPed*, eWeaponType))0x5DF300)(this, weaponType);
 }
 
-// Converted from thiscall bool CPed::DoGunFlash(int,bool) 0x5DF340
-bool CPed::DoGunFlash(int arg0, bool arg1)
+// 0x5DF340
+bool CPed::DoGunFlash(int32 arg0, bool arg1)
 {
-    return ((bool(__thiscall *)(CPed*, int, bool))0x5DF340)(this, arg0, arg1);
+    return ((bool(__thiscall *)(CPed*, int32, bool))0x5DF340)(this, arg0, arg1);
 }
 
-// Converted from thiscall void CPed::SetGunFlashAlpha(bool rightHand) 0x5DF400
+// 0x5DF400
 void CPed::SetGunFlashAlpha(bool rightHand)
 {
     ((void(__thiscall *)(CPed*, bool))0x5DF400)(this, rightHand);
 }
 
-// Converted from thiscall void CPed::ResetGunFlashAlpha(void) 0x5DF4E0
+// 0x5DF4E0
 void CPed::ResetGunFlashAlpha()
 {
     ((void(__thiscall *)(CPed*))0x5DF4E0)(this);
 }
 
-// Converted from thiscall float CPed::GetBikeRidingSkill(void) 0x5DF510
+// 0x5DF510
 float CPed::GetBikeRidingSkill()
 {
     return ((float(__thiscall *)(CPed*))0x5DF510)(this);
@@ -435,10 +438,10 @@ void CPed::ShoulderBoneRotation(RpClump* clump)
     plugin::Call<0x5DF560, RpClump*>(clump);
 }
 
-// Converted from thiscall void CPed::SetLookTimer(uint time) 0x5DF8D0
-void CPed::SetLookTimer(unsigned int time)
+// 0x5DF8D0
+void CPed::SetLookTimer(uint32 time)
 {
-    ((void(__thiscall *)(CPed*, unsigned int))0x5DF8D0)(this, time);
+    ((void(__thiscall *)(CPed*, uint32))0x5DF8D0)(this, time);
 }
 
 // 0x5DF8F0
@@ -447,49 +450,49 @@ bool CPed::IsPlayer() const
     return m_nPedType == PED_TYPE_PLAYER1 || m_nPedType == PED_TYPE_PLAYER2;
 }
 
-// Converted from thiscall void CPed::SetPedPositionInCar(void) 0x5DF910
+// 0x5DF910
 void CPed::SetPedPositionInCar()
 {
     ((void(__thiscall *)(CPed*))0x5DF910)(this);
 }
 
-// Converted from thiscall void CPed::RestoreHeadingRate(void) 0x5DFD60
+// 0x5DFD60
 void CPed::RestoreHeadingRate()
 {
     ((void(__thiscall *)(CPed*))0x5DFD60)(this);
 }
 
-// Converted from cdecl void CPed::RestoreHeadingRateCB(CAnimBlendAssociation *,void *data) 0x5DFD70
+// 0x5DFD70
 void CPed::RestoreHeadingRateCB(CAnimBlendAssociation* association, void* data)
 {
     ((void(__cdecl *)(CAnimBlendAssociation*, void*))0x5DFD70)(association, data);
 }
 
-// Converted from thiscall void CPed::SetRadioStation(void) 0x5DFD90
+// 0x5DFD90
 void CPed::SetRadioStation()
 {
     ((void(__thiscall*)(CPed*))0x5DFD90)(this);
 }
 
-// Converted from thiscall void CPed::PositionAttachedPed(void) 0x5DFDF0
+// 0x5DFDF0
 void CPed::PositionAttachedPed()
 {
     ((void(__thiscall *)(CPed*))0x5DFDF0)(this);
 }
 
-// Converted from thiscall void CPed::Undress(char *modelName) 0x5E00F0
+// 0x5E00F0
 void CPed::Undress(char* modelName)
 {
     ((void(__thiscall *)(CPed*, char*))0x5E00F0)(this, modelName);
 }
 
-// Converted from thiscall void CPed::Dress(void) 0x5E0130
+// 0x5E0130
 void CPed::Dress()
 {
     ((void(__thiscall *)(CPed*))0x5E0130)(this);
 }
 
-// Converted from thiscall bool CPed::IsAlive(void) 0x5E0170
+// 0x5E0170
 // Checks if the Pedestrian is still alive.
 bool CPed::IsAlive()
 {
@@ -508,109 +511,109 @@ void CPed::UpdateStatLeavingVehicle()
     // NOP
 }
 
-// Converted from thiscall void CPed::GetTransformedBonePosition(RwV3d &inOffsetOutPosn,uint boneId,bool updateSkinBones) 0x5E01C0
-void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, unsigned int boneId, bool updateSkinBones)
+// 0x5E01C0
+void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, uint32 boneId, bool updateSkinBones)
 {
-    ((void(__thiscall *)(CPed*, RwV3d&, unsigned int, bool))0x5E01C0)(this, inOffsetOutPosn, boneId, updateSkinBones);
+    ((void(__thiscall *)(CPed*, RwV3d&, uint32, bool))0x5E01C0)(this, inOffsetOutPosn, boneId, updateSkinBones);
 }
 
-// Converted from thiscall void CPed::ReleaseCoverPoint(void) 0x5E0270
+// 0x5E0270
 void CPed::ReleaseCoverPoint()
 {
     ((void(__thiscall *)(CPed*))0x5E0270)(this);
 }
 
-// Converted from thiscall CTask* CPed::GetHoldingTask(void) 0x5E0290
+// 0x5E0290
 CTask* CPed::GetHoldingTask()
 {
     return ((CTask* (__thiscall *)(CPed*))0x5E0290)(this);
 }
 
-// Converted from thiscall CEntity* CPed::GetEntityThatThisPedIsHolding(void) 0x5E02E0
+// 0x5E02E0
 CEntity* CPed::GetEntityThatThisPedIsHolding()
 {
     return ((CEntity* (__thiscall *)(CPed*))0x5E02E0)(this);
 }
 
-// Converted from thiscall void CPed::DropEntityThatThisPedIsHolding(uchar) 0x5E0360
-void CPed::DropEntityThatThisPedIsHolding(unsigned char arg0)
+// 0x5E0360
+void CPed::DropEntityThatThisPedIsHolding(uint8 arg0)
 {
-    ((void(__thiscall *)(CPed*, unsigned char))0x5E0360)(this, arg0);
+    ((void(__thiscall *)(CPed*, uint8))0x5E0360)(this, arg0);
 }
 
-// Converted from thiscall bool CPed::CanThrowEntityThatThisPedIsHolding(void) 0x5E0400
+// 0x5E0400
 bool CPed::CanThrowEntityThatThisPedIsHolding()
 {
     return ((bool(__thiscall *)(CPed*))0x5E0400)(this);
 }
 
-// Converted from thiscall bool CPed::IsPlayingHandSignal(void) 0x5E0460
+// 0x5E0460
 bool CPed::IsPlayingHandSignal()
 {
     return ((bool(__thiscall *)(CPed*))0x5E0460)(this);
 }
 
-// Converted from thiscall void CPed::StopPlayingHandSignal(void) 0x5E0480
+// 0x5E0480
 void CPed::StopPlayingHandSignal()
 {
     ((void(__thiscall *)(CPed*))0x5E0480)(this);
 }
 
-// Converted from thiscall float CPed::GetWalkAnimSpeed(void) 0x5E04B0
+// 0x5E04B0
 float CPed::GetWalkAnimSpeed()
 {
     return ((float(__thiscall *)(CPed*))0x5E04B0)(this);
 }
 
-// Converted from thiscall void CPed::SetPedDefaultDecisionMaker(void) 0x5E06E0
+// 0x5E06E0
 void CPed::SetPedDefaultDecisionMaker()
 {
     ((void(__thiscall *)(CPed*))0x5E06E0)(this);
 }
 
-// Converted from thiscall bool CPed::CanSeeEntity(CEntity *entity,float limitAngle) 0x5E0730
+// 0x5E0730
 bool CPed::CanSeeEntity(CEntity* entity, float limitAngle)
 {
     return ((bool(__thiscall *)(CPed*, CEntity*, float))0x5E0730)(this, entity, limitAngle);
 }
 
-// Converted from thiscall bool CPed::PositionPedOutOfCollision(int,CVehicle *,bool) 0x5E0820
-bool CPed::PositionPedOutOfCollision(int exitDoor, CVehicle* vehicke, bool findClosestNode)
+// 0x5E0820
+bool CPed::PositionPedOutOfCollision(int32 exitDoor, CVehicle* vehicke, bool findClosestNode)
 {
-    return ((bool(__thiscall *)(CPed*, int, CVehicle*, bool))0x5E0820)(this, exitDoor, vehicke, findClosestNode);
+    return ((bool(__thiscall *)(CPed*, int32, CVehicle*, bool))0x5E0820)(this, exitDoor, vehicke, findClosestNode);
 }
 
-// Converted from thiscall bool CPed::PositionAnyPedOutOfCollision(void) 0x5E13C0
+// 0x5E13C0
 bool CPed::PositionAnyPedOutOfCollision()
 {
     return ((bool(__thiscall *)(CPed*))0x5E13C0)(this);
 }
 
-// Converted from thiscall bool CPed::OurPedCanSeeThisEntity(CEntity *entity,bool isSpotted) 0x5E1660
+// 0x5E1660
 bool CPed::OurPedCanSeeThisEntity(CEntity* entity, bool isSpotted)
 {
     return ((bool(__thiscall *)(CPed*, CEntity*, bool))0x5E1660)(this, entity, isSpotted);
 }
 
-// Converted from thiscall void CPed::SortPeds(CPed** pedList,int,int) 0x5E17E0
-void CPed::SortPeds(CPed** pedList, int arg1, int arg2)
+// 0x5E17E0
+void CPed::SortPeds(CPed** pedList, int32 arg1, int32 arg2)
 {
-    ((void(__thiscall *)(CPed*, CPed**, int, int))0x5E17E0)(this, pedList, arg1, arg2);
+    ((void(__thiscall *)(CPed*, CPed**, int32, int32))0x5E17E0)(this, pedList, arg1, arg2);
 }
 
-// Converted from thiscall float CPed::WorkOutHeadingForMovingFirstPerson(float heading) 0x5E1A00
+// 0x5E1A00
 float CPed::WorkOutHeadingForMovingFirstPerson(float heading)
 {
     return ((float(__thiscall *)(CPed*, float))0x5E1A00)(this, heading);
 }
 
-// Converted from thiscall void CPed::UpdatePosition(void) 0x5E1B10
+// 0x5E1B10
 void CPed::UpdatePosition()
 {
     ((void(__thiscall *)(CPed*))0x5E1B10)(this);
 }
 
-// Converted from thiscall void CPed::ProcessBuoyancy(void) 0x5E1FA0
+// 0x5E1FA0
 void CPed::ProcessBuoyancy()
 {
     if (bInVehicle)
@@ -760,57 +763,57 @@ bool CPed::IsPedInControl()
     return false;
 }
 
-// Converted from thiscall void CPed::RemoveWeaponModel(int modelIndex) 0x5E3990
-void CPed::RemoveWeaponModel(int modelIndex)
+// 0x5E3990
+void CPed::RemoveWeaponModel(int32 modelIndex)
 {
-    ((void(__thiscall *)(CPed*, int))0x5E3990)(this, modelIndex);
+    ((void(__thiscall *)(CPed*, int32))0x5E3990)(this, modelIndex);
 }
 
-// Converted from thiscall void CPed::AddGogglesModel(int modelIndex,bool *pGogglesType) 0x5E3A90
-void CPed::AddGogglesModel(int modelIndex, bool* pGogglesType)
+// 0x5E3A90
+void CPed::AddGogglesModel(int32 modelIndex, bool* pGogglesType)
 {
-    ((void(__thiscall *)(CPed*, int, bool*))0x5E3A90)(this, modelIndex, pGogglesType);
+    ((void(__thiscall *)(CPed*, int32, bool*))0x5E3A90)(this, modelIndex, pGogglesType);
 }
 
-// Converted from thiscall void CPed::PutOnGoggles(void) 0x5E3AE0
+// 0x5E3AE0
 void CPed::PutOnGoggles()
 {
     ((void(__thiscall *)(CPed*))0x5E3AE0)(this);
 }
 
-char CPed::GetWeaponSkill()
+eWeaponSkill CPed::GetWeaponSkill()
 {
     return GetWeaponSkill(m_aWeapons[m_nActiveWeaponSlot].m_nType);
 }
 
-char CPed::GetWeaponSkill(eWeaponType weaponType)
+eWeaponSkill CPed::GetWeaponSkill(eWeaponType weaponType)
 {
     if ( weaponType < WEAPON_PISTOL || weaponType > WEAPON_TEC9 )
-        return 1;
+        return eWeaponSkill::WEAPSKILL_STD;
 
     if (!m_nPedType || m_nPedType == PED_TYPE_PLAYER2)
     {
-        int skillStat = CWeaponInfo::GetSkillStatIndex(weaponType);
-        CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, WEAPON_GOLFCLUB);
+        int32 skillStat = CWeaponInfo::GetSkillStatIndex(weaponType);
+        CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_PRO);
         float golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_nReqStatLevel);
         if (golfClubStatLevel <= CStats::GetStatValue((eStats)skillStat))
-            return 2;
+            return eWeaponSkill::WEAPSKILL_PRO;
 
-        CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, WEAPON_BRASSKNUCKLE);
+        CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD);
         float brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_nReqStatLevel);
         if (brassKnuckleStatLevel > CStats::GetStatValue((eStats)skillStat))
-            return 0;
+            return eWeaponSkill::WEAPSKILL_POOR;
 
-        return 1;
+        return eWeaponSkill::WEAPSKILL_STD;
     }
 
     if (weaponType != WEAPON_PISTOL || m_nPedType != PED_TYPE_COP)
         return m_nWeaponSkill;
 
-    return 3;
+    return eWeaponSkill::WEAPSKILL_COP;
 }
 
-// Converted from thiscall void CPed::SetWeaponSkill(eWeaponType weaponType,char skill) 0x5E3C10
+// 0x5E3C10
 void CPed::SetWeaponSkill(eWeaponType weaponType, char skill)
 {
     ((void(__thiscall *)(CPed*, eWeaponType, char))0x5E3C10)(this, weaponType, skill);
@@ -828,88 +831,88 @@ void CPed::ClearLook()
     ClearLookFlag();
 }
 
-// Converted from thiscall bool CPed::TurnBody(void) 0x5E4000
+// 0x5E4000
 bool CPed::TurnBody()
 {
     return ((bool(__thiscall *)(CPed*))0x5E4000)(this);
 }
 
-// Converted from thiscall bool CPed::IsPointerValid(void) 0x5E4220
+// 0x5E4220
 bool CPed::IsPointerValid()
 {
     return ((bool(__thiscall *)(CPed*))0x5E4220)(this);
 }
 
-// Converted from thiscall void CPed::GetBonePosition(RwV3d &outPosition,uint boneId,bool updateSkinBones) 0x5E4280
-void CPed::GetBonePosition(RwV3d& outPosition, unsigned int boneId, bool updateSkinBones)
+// 0x5E4280
+void CPed::GetBonePosition(RwV3d& outPosition, uint32 boneId, bool updateSkinBones)
 {
-    ((void(__thiscall *)(CPed*, RwV3d&, unsigned int, bool))0x5E4280)(this, outPosition, boneId, updateSkinBones);
+    ((void(__thiscall *)(CPed*, RwV3d&, uint32, bool))0x5E4280)(this, outPosition, boneId, updateSkinBones);
 }
 
-// Converted from thiscall CObject* CPed::GiveObjectToPedToHold(int modelIndex,uchar replace) 0x5E4390
-CObject* CPed::GiveObjectToPedToHold(int modelIndex, unsigned char replace)
+// 0x5E4390
+CObject* CPed::GiveObjectToPedToHold(int32 modelIndex, uint8 replace)
 {
-    return ((CObject* (__thiscall *)(CPed*, int, unsigned char))0x5E4390)(this, modelIndex, replace);
+    return ((CObject* (__thiscall *)(CPed*, int32, uint8))0x5E4390)(this, modelIndex, replace);
 }
 
-// Converted from thiscall void CPed::SetPedState(ePedState pedState) 0x5E4500
+// 0x5E4500
 void CPed::SetPedState(ePedState pedState)
 {
     ((void(__thiscall *)(CPed*, ePedState))0x5E4500)(this, pedState);
 }
 
-// Converted from thiscall void CPed::SetCharCreatedBy(uchar createdBy) 0x5E47E0
-void CPed::SetCharCreatedBy(unsigned char createdBy)
+// 0x5E47E0
+void CPed::SetCharCreatedBy(uint8 createdBy)
 {
-    ((void(__thiscall *)(CPed*, unsigned char))0x5E47E0)(this, createdBy);
+    ((void(__thiscall *)(CPed*, uint8))0x5E47E0)(this, createdBy);
 }
 
-// Converted from thiscall void CPed::CalculateNewVelocity(void) 0x5E4C50
+// 0x5E4C50
 void CPed::CalculateNewVelocity()
 {
     ((void(__thiscall *)(CPed*))0x5E4C50)(this);
 }
 
-// Converted from thiscall void CPed::CalculateNewOrientation(void) 0x5E52E0
+// 0x5E52E0
 void CPed::CalculateNewOrientation()
 {
     ((void(__thiscall *)(CPed*))0x5E52E0)(this);
 }
 
-// Converted from thiscall void CPed::ClearAll(void) 0x5E5320
+// 0x5E5320
 void CPed::ClearAll()
 {
     ((void(__thiscall *)(CPed*))0x5E5320)(this);
 }
 
-// Converted from thiscall void CPed::DoFootLanded(bool leftFoot,uchar) 0x5E5380
-void CPed::DoFootLanded(bool leftFoot, unsigned char arg1)
+// 0x5E5380
+void CPed::DoFootLanded(bool leftFoot, uint8 arg1)
 {
-    ((void(__thiscall *)(CPed*, bool, unsigned char))0x5E5380)(this, leftFoot, arg1);
+    ((void(__thiscall *)(CPed*, bool, uint8))0x5E5380)(this, leftFoot, arg1);
 }
 
-// Converted from thiscall void CPed::PlayFootSteps(void) 0x5E57F0
+// 0x5E57F0
 void CPed::PlayFootSteps()
 {
     ((void(__thiscall *)(CPed*))0x5E57F0)(this);
 }
 
-// Converted from thiscall void CPed::AddWeaponModel(int modelIndex) 0x5E5ED0
-void CPed::AddWeaponModel(int modelIndex)
+// 0x5E5ED0
+void CPed::AddWeaponModel(int32 modelIndex)
 {
-    ((void(__thiscall *)(CPed*, int))0x5E5ED0)(this, modelIndex);
+    ((void(__thiscall *)(CPed*, int32))0x5E5ED0)(this, modelIndex);
 }
 
-// Converted from thiscall void CPed::TakeOffGoggles(void) 0x5E6010
+// 0x5E6010
 void CPed::TakeOffGoggles()
 {
     ((void(__thiscall *)(CPed*))0x5E6010)(this);
 }
 
-// Converted from thiscall void CPed::GiveWeapon(eWeaponType weaponType,uint ammo,bool likeUnused) 0x5E6080
-void CPed::GiveWeapon(eWeaponType weaponType, unsigned int ammo, bool likeUnused)
+// 0x5E6080
+void CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused)
 {
-    ((void(__thiscall *)(CPed*, eWeaponType, unsigned int, bool))0x5E6080)(this, weaponType, ammo, likeUnused);
+    ((void(__thiscall *)(CPed*, eWeaponType, uint32, bool))0x5E6080)(this, weaponType, ammo, likeUnused);
 }
 
 // NOTSA
@@ -950,25 +953,25 @@ void CPed::GiveWeaponSet3() {
     GiveWeapon(WEAPON_RLAUNCHER_HS, 200, true);
 }
 
-// Converted from thiscall void CPed::SetCurrentWeapon(int slot) 0x5E61F0
-void CPed::SetCurrentWeapon(int slot)
+// 0x5E61F0
+void CPed::SetCurrentWeapon(int32 slot)
 {
-    ((void(__thiscall *)(CPed*, int))0x5E61F0)(this, slot);
+    ((void(__thiscall *)(CPed*, int32))0x5E61F0)(this, slot);
 }
 
-// Converted from thiscall void CPed::SetCurrentWeapon(eWeaponType weaponType) 0x5E6280
+// 0x5E6280
 void CPed::SetCurrentWeapon(eWeaponType weaponType)
 {
     ((void(__thiscall *)(CPed*, eWeaponType))0x5E6280)(this, weaponType);
 }
 
-// Converted from thiscall void CPed::ClearWeapon(eWeaponType weaponType) 0x5E62B0
+// 0x5E62B0
 void CPed::ClearWeapon(eWeaponType weaponType)
 {
     ((void(__thiscall*)(CPed*, eWeaponType))0x5E62B0)(this, weaponType);
 }
 
-// Converted from thiscall void CPed::ClearWeapons(void) 0x5E6320
+// 0x5E6320
 // Clears every weapon from the pedestrian.
 void CPed::ClearWeapons()
 {
@@ -978,124 +981,124 @@ void CPed::ClearWeapons()
     {
         m_aWeapon.Shutdown();
     }
-    CWeaponInfo* getWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_UNARMED, 1);
+    CWeaponInfo* getWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_UNARMED, eWeaponSkill::WEAPSKILL_STD);
     SetCurrentWeapon(getWeaponInfo->m_nSlot);
 }
 
-// Converted from thiscall void CPed::RemoveWeaponWhenEnteringVehicle(int) 0x5E6370
-void CPed::RemoveWeaponWhenEnteringVehicle(int arg0)
+// 0x5E6370
+void CPed::RemoveWeaponWhenEnteringVehicle(int32 arg0)
 {
-    ((void(__thiscall *)(CPed*, int))0x5E6370)(this, arg0);
+    ((void(__thiscall *)(CPed*, int32))0x5E6370)(this, arg0);
 }
 
-// Converted from thiscall void CPed::ReplaceWeaponWhenExitingVehicle(void) 0x5E6490
+// 0x5E6490
 void CPed::ReplaceWeaponWhenExitingVehicle()
 {
     ((void(__thiscall *)(CPed*))0x5E6490)(this);
 }
 
-// Converted from thiscall void CPed::ReplaceWeaponForScriptedCutscene(void) 0x5E6530
+// 0x5E6530
 void CPed::ReplaceWeaponForScriptedCutscene()
 {
     m_nSavedWeapon = m_aWeapons[m_nActiveWeaponSlot].m_nType;
     SetCurrentWeapon(0);
 }
 
-// Converted from thiscall void CPed::RemoveWeaponForScriptedCutscene(void) 0x5E6550
+// 0x5E6550
 void CPed::RemoveWeaponForScriptedCutscene()
 {
     if (m_nSavedWeapon != WEAPON_UNIDENTIFIED)
     {
-        CWeaponInfo* weaponInfo = CWeaponInfo::GetWeaponInfo(m_nSavedWeapon, 1);
+        CWeaponInfo* weaponInfo = CWeaponInfo::GetWeaponInfo(m_nSavedWeapon, eWeaponSkill::WEAPSKILL_STD);
         CPed::SetCurrentWeapon(weaponInfo->m_nSlot);
         m_nSavedWeapon = WEAPON_UNIDENTIFIED;
     }
 }
 
-// Converted from thiscall void CPed::PreRenderAfterTest(void) 0x5E65A0
+// 0x5E65A0
 void CPed::PreRenderAfterTest()
 {
     ((void(__thiscall *)(CPed*))0x5E65A0)(this);
 }
 
-// Converted from thiscall void CPed::SetIdle(void) 0x5E7980
+// 0x5E7980
 void CPed::SetIdle()
 {
     ((void(__thiscall *)(CPed*))0x5E7980)(this);
 }
 
-// Converted from thiscall void CPed::SetLook(float heading) 0x5E79B0
+// 0x5E79B0
 void CPed::SetLook(float heading)
 {
     ((void(__thiscall *)(CPed*, float))0x5E79B0)(this, heading);
 }
 
-// Converted from thiscall void CPed::SetLook(CEntity *entity) 0x5E7A60
+// 0x5E7A60
 void CPed::SetLook(CEntity* entity)
 {
     ((void(__thiscall *)(CPed*, CEntity*))0x5E7A60)(this, entity);
 }
 
-// Converted from thiscall void CPed::Look(void) 0x5E7B20
+// 0x5E7B20
 void CPed::Look()
 {
     ((void(__thiscall *)(CPed*))0x5E7B20)(this);
 }
 
-// Converted from thiscall CEntity* CPed::AttachPedToEntity(CEntity *entity,CVector offset,ushort,float,eWeaponType weaponType) 0x5E7CB0
-CEntity* CPed::AttachPedToEntity(CEntity* entity, CVector offset, unsigned short arg2, float arg3, eWeaponType weaponType)
+// 0x5E7CB0
+CEntity* CPed::AttachPedToEntity(CEntity* entity, CVector offset, uint16 arg2, float arg3, eWeaponType weaponType)
 {
-    return ((CEntity* (__thiscall *)(CPed*, CEntity*, CVector, unsigned short, float, eWeaponType))0x5E7CB0)(this, entity, offset, arg2, arg3, weaponType);
+    return ((CEntity* (__thiscall *)(CPed*, CEntity*, CVector, uint16, float, eWeaponType))0x5E7CB0)(this, entity, offset, arg2, arg3, weaponType);
 }
 
-// Converted from thiscall CEntity* CPed::AttachPedToBike(CEntity *entity,CVector offset,ushort,float,float,eWeaponType weaponType) 0x5E7E60
-CEntity* CPed::AttachPedToBike(CEntity* entity, CVector offset, unsigned short arg2, float arg3, float arg4, eWeaponType weaponType)
+// 0x5E7E60
+CEntity* CPed::AttachPedToBike(CEntity* entity, CVector offset, uint16 arg2, float arg3, float arg4, eWeaponType weaponType)
 {
-    return ((CEntity* (__thiscall *)(CPed*, CEntity*, CVector, unsigned short, float, float, eWeaponType))0x5E7E60)(this, entity, offset, arg2, arg3, arg4, weaponType);
+    return ((CEntity* (__thiscall *)(CPed*, CEntity*, CVector, uint16, float, float, eWeaponType))0x5E7E60)(this, entity, offset, arg2, arg3, arg4, weaponType);
 }
 
-// Converted from thiscall void CPed::DettachPedFromEntity(void) 0x5E7EC0
+// 0x5E7EC0
 void CPed::DettachPedFromEntity()
 {
     ((void(__thiscall *)(CPed*))0x5E7EC0)(this);
 }
 
-// Converted from thiscall void CPed::SetAimFlag(float heading) 0x5E8830
+// 0x5E8830
 void CPed::SetAimFlag(float heading)
 {
     ((void(__thiscall *)(CPed*, float))0x5E8830)(this, heading);
 }
 
-// Converted from thiscall bool CPed::CanWeRunAndFireWithWeapon(void) 0x5E88E0
+// 0x5E88E0
 bool CPed::CanWeRunAndFireWithWeapon()
 {
     return ((bool(__thiscall *)(CPed*))0x5E88E0)(this);
 }
 
-// Converted from thiscall void CPed::RequestDelayedWeapon(void) 0x5E8910
+// 0x5E8910
 void CPed::RequestDelayedWeapon()
 {
     ((void(__thiscall *)(CPed*))0x5E8910)(this);
 }
 
-// Converted from thiscall void CPed::GiveDelayedWeapon(eWeaponType weaponType,uint ammo) 0x5E89B0
-void CPed::GiveDelayedWeapon(eWeaponType weaponType, unsigned int ammo)
+// 0x5E89B0
+void CPed::GiveDelayedWeapon(eWeaponType weaponType, uint32 ammo)
 {
-    ((void(__thiscall *)(CPed*, eWeaponType, unsigned int))0x5E89B0)(this, weaponType, ammo);
+    ((void(__thiscall *)(CPed*, eWeaponType, uint32))0x5E89B0)(this, weaponType, ammo);
 }
 
-// Converted from cdecl bool IsPedPointerValid(CPed *ped) 0x5E8A30
+// 0x5E8A30
 bool IsPedPointerValid(CPed* ped)
 {
     return ((bool(__cdecl *)(CPed*))0x5E8A30)(ped);
 }
 
-// Converted from thiscall void CPed::GiveWeaponAtStartOfFight(void) 0x5E8AB0
+// 0x5E8AB0
 void CPed::GiveWeaponAtStartOfFight()
 {
     if (m_nCreatedBy != PED_MISSION && GetActiveWeapon().m_nType == eWeaponType::WEAPON_UNARMED)
     {
-        const auto GiveRandomWeaponByType = [this](eWeaponType type, uint16_t maxRandom)
+        const auto GiveRandomWeaponByType = [this](eWeaponType type, uint16 maxRandom)
         {
             if ((m_nRandomSeed & 0x3FFu) >= maxRandom)
                 return;
@@ -1138,128 +1141,128 @@ void CPed::GiveWeaponWhenJoiningGang()
     if (m_aWeapons[m_nActiveWeaponSlot].m_nType == WEAPON_UNARMED && m_nDelayedWeapon == WEAPON_UNIDENTIFIED) {
         if (CCheat::m_aCheatsActive[eCheats::CHEAT_NO_ONE_CAN_STOP_US]) {
             GiveDelayedWeapon(WEAPON_AK47, 200);
-            SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(WEAPON_AK47, 1)->m_nSlot);
+            SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(WEAPON_AK47, eWeaponSkill::WEAPSKILL_STD)->m_nSlot);
         }
         else {
             CWeaponInfo* pWeaponInfo = nullptr;
             if (CCheat::m_aCheatsActive[eCheats::CHEAT_ROCKET_MAYHEM]) {
                 GiveDelayedWeapon(WEAPON_RLAUNCHER, 200);
-                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, 1);
+                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, eWeaponSkill::WEAPSKILL_STD);
             }
             else {
                 CPed::GiveDelayedWeapon(WEAPON_PISTOL, 200);
-                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_PISTOL, 1);
+                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_PISTOL, eWeaponSkill::WEAPSKILL_STD);
             }
             CPed::SetCurrentWeapon(pWeaponInfo->m_nSlot);
         }
     }
 }
 
-// Converted from thiscall bool CPed::GetPedTalking(void) 0x5EFF50
+// 0x5EFF50
 bool CPed::GetPedTalking()
 {
     return ((bool(__thiscall *)(CPed*))0x5EFF50)(this);
 }
 
-// Converted from thiscall void CPed::DisablePedSpeech(short) 0x5EFF60
-void CPed::DisablePedSpeech(short arg0)
+// 0x5EFF60
+void CPed::DisablePedSpeech(int16 arg0)
 {
-    ((void(__thiscall *)(CPed*, short))0x5EFF60)(this, arg0);
+    ((void(__thiscall *)(CPed*, int16))0x5EFF60)(this, arg0);
 }
 
-// Converted from thiscall void CPed::EnablePedSpeech(void) 0x5EFF70
+// 0x5EFF70
 void CPed::EnablePedSpeech()
 {
     ((void(__thiscall *)(CPed*))0x5EFF70)(this);
 }
 
-// Converted from thiscall void CPed::DisablePedSpeechForScriptSpeech(short) 0x5EFF80
-void CPed::DisablePedSpeechForScriptSpeech(short arg0)
+// 0x5EFF80
+void CPed::DisablePedSpeechForScriptSpeech(int16 arg0)
 {
-    ((void(__thiscall *)(CPed*, short))0x5EFF80)(this, arg0);
+    ((void(__thiscall *)(CPed*, int16))0x5EFF80)(this, arg0);
 }
 
-// Converted from thiscall void CPed::EnablePedSpeechForScriptSpeech(void) 0x5EFF90
+// 0x5EFF90
 void CPed::EnablePedSpeechForScriptSpeech()
 {
     ((void(__thiscall *)(CPed*))0x5EFF90)(this);
 }
 
-// Converted from thiscall void CPed::CanPedHoldConversation(void) 0x5EFFA0
+// 0x5EFFA0
 void CPed::CanPedHoldConversation()
 {
     ((void(__thiscall *)(CPed*))0x5EFFA0)(this);
 }
 
-// Converted from thiscall void CPed::SayScript(int,uchar,uchar,uchar) 0x5EFFB0
-void CPed::SayScript(int arg0, unsigned char arg1, unsigned char arg2, unsigned char arg3)
+// 0x5EFFB0
+void CPed::SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3)
 {
-    ((void(__thiscall *)(CPed*, int, unsigned char, unsigned char, unsigned char))0x5EFFB0)(this, arg0, arg1, arg2, arg3);
+    ((void(__thiscall *)(CPed*, int32, uint8, uint8, uint8))0x5EFFB0)(this, arg0, arg1, arg2, arg3);
 }
 
-// Converted from thiscall void CPed::Say(ushort,uint,float,uchar,uchar,uchar) 0x5EFFE0
-void CPed::Say(unsigned short arg0, unsigned int arg1, float arg2, unsigned char arg3, unsigned char arg4, unsigned char arg5)
+// 0x5EFFE0
+void CPed::Say(uint16 arg0, uint32 arg1, float arg2, uint8 arg3, uint8 arg4, uint8 arg5)
 {
-    ((void(__thiscall *)(CPed*, unsigned short, unsigned int, float, unsigned char, unsigned char, unsigned char))0x5EFFE0)(this, arg0, arg1, arg2, arg3, arg4, arg5);
+    ((void(__thiscall *)(CPed*, uint16, uint32, float, uint8, uint8, uint8))0x5EFFE0)(this, arg0, arg1, arg2, arg3, arg4, arg5);
 }
 
-// Converted from cdecl RwObject* SetPedAtomicVisibilityCB(RwObject *rwObject,void *data) 0x5F0060
+// 0x5F0060
 RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data)
 {
     return ((RwObject* (__cdecl *)(RwObject*, void*))0x5F0060)(rwObject, data);
 }
 
-// Converted from thiscall void CPed::RemoveBodyPart(int boneId,char localDir) 0x5F0140
-void CPed::RemoveBodyPart(int boneId, char localDir)
+// 0x5F0140
+void CPed::RemoveBodyPart(int32 boneId, char localDir)
 {
-    ((void(__thiscall *)(CPed*, int, char))0x5F0140)(this, boneId, localDir);
+    ((void(__thiscall *)(CPed*, int32, char))0x5F0140)(this, boneId, localDir);
 }
 
-// Converted from thiscall void CPed::SpawnFlyingComponent(int,char) 0x5F0190
-void CPed::SpawnFlyingComponent(int arg0, char arg1)
+// 0x5F0190
+void CPed::SpawnFlyingComponent(int32 arg0, char arg1)
 {
-    ((void(__thiscall *)(CPed*, int, char))0x5F0190)(this, arg0, arg1);
+    ((void(__thiscall *)(CPed*, int32, char))0x5F0190)(this, arg0, arg1);
 }
 
-// Converted from thiscall bool CPed::DoesLOSBulletHitPed(CColPoint &colPoint) 0x5F01A0
+// 0x5F01A0
 bool CPed::DoesLOSBulletHitPed(CColPoint& colPoint)
 {
     return ((bool(__thiscall *)(CPed*, CColPoint&))0x5F01A0)(this, colPoint);
 }
 
-// Converted from thiscall void CPed::RemoveWeaponAnims(int likeUnused,float blendDelta) 0x5F0250
-void CPed::RemoveWeaponAnims(int likeUnused, float blendDelta)
+// 0x5F0250
+void CPed::RemoveWeaponAnims(int32 likeUnused, float blendDelta)
 {
-    ((void(__thiscall *)(CPed*, int, float))0x5F0250)(this, likeUnused, blendDelta);
+    ((void(__thiscall *)(CPed*, int32, float))0x5F0250)(this, likeUnused, blendDelta);
 }
 
-// Converted from thiscall bool CPed::IsPedHeadAbovePos(float zPos) 0x5F02C0
+// 0x5F02C0
 bool CPed::IsPedHeadAbovePos(float zPos)
 {
     return ((bool(__thiscall *)(CPed*, float))0x5F02C0)(this, zPos);
 }
 
-// Converted from thiscall void CPed::KillPedWithCar(CVehicle *car,float,bool) 0x5F0360
+// 0x5F0360
 void CPed::KillPedWithCar(CVehicle* car, float fDamageIntensity, bool bPlayDeadAnimation)
 {
     ((void(__thiscall *)(CPed*, CVehicle*, float, bool))0x5F0360)(this, car, fDamageIntensity, bPlayDeadAnimation);
 }
 
-// Converted from thiscall void CPed::MakeTyresMuddySectorList(CPtrList &ptrList) 0x6AE0D0
+// 0x6AE0D0
 void CPed::MakeTyresMuddySectorList(CPtrList& ptrList)
 {
     ((void(__thiscall *)(CPed*, CPtrList&))0x6AE0D0)(this, ptrList);
 }
 
-// Converted from thiscall void CPed::DeadPedMakesTyresBloody(void) 0x6B4200
+// 0x6B4200
 void CPed::DeadPedMakesTyresBloody()
 {
     ((void(__thiscall *)(CPed*))0x6B4200)(this);
 }
 
-void CPed::SetModelIndex(unsigned int modelIndex)
+void CPed::SetModelIndex(uint32 modelIndex)
 {
-    ((void(__thiscall *)(CPed*, unsigned int))0x5E4880)(this, modelIndex);
+    ((void(__thiscall *)(CPed*, uint32))0x5E4880)(this, modelIndex);
 }
 
 bool CPed::IsInVehicleThatHasADriver()

@@ -5,21 +5,20 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
 
-class  CLoadedCarGroup {
+class CLoadedCarGroup {
 public:
-    short m_members[22]; // model ids
-    short field_2C;
+    int16 m_members[22]; // model ids
+    int16 field_2C;
 
-	void SortBasedOnUsage();
-    int RemoveMember(int modelindex);
-    int PickRandomCar(bool arg1, bool arg2);
-    int PickLeastUsedModel(int minRefs);
-    int GetMember(int count);
-    int CountMembers();
-    void Clear();
-    void AddMember(int member);
+    void  SortBasedOnUsage();
+    int32 RemoveMember(int32 modelindex);
+    int32 PickRandomCar(bool arg1, bool arg2);
+    int32 PickLeastUsedModel(int32 minRefs);
+    int32 GetMember(int32 count);
+    int32 CountMembers();
+    void  Clear();
+    void  AddMember(int32 member);
 };
 
 VALIDATE_SIZE(CLoadedCarGroup, 0x2E);

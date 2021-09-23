@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
-unsigned int &CTaskSimpleFall::m_nMaxPlayerDownTime = *reinterpret_cast<unsigned int*>(0x8D2EF4);
+#include "CTaskSimpleFall.h"
+
+uint32 &CTaskSimpleFall::m_nMaxPlayerDownTime = *reinterpret_cast<uint32*>(0x8D2EF4);
 
 void CTaskSimpleFall::InjectHooks()
 {
@@ -13,14 +15,14 @@ void CTaskSimpleFall::InjectHooks()
     ReversibleHooks::Install("CTaskSimpleFall", "MakeAbortable", 0x678370, &CTaskSimpleFall::MakeAbortable_Reversed);
 }
 
-CTaskSimpleFall* CTaskSimpleFall::Constructor(eAnimID nAnimId, eAnimGroup nAnimGroup, int nDownTime)
+CTaskSimpleFall* CTaskSimpleFall::Constructor(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime)
 {
     this->CTaskSimpleFall::CTaskSimpleFall(nAnimId, nAnimGroup, nDownTime);
     return this;
 }
 
 // 0x6782C0
-CTaskSimpleFall::CTaskSimpleFall(eAnimID nAnimId, eAnimGroup nAnimGroup, int nDownTime)
+CTaskSimpleFall::CTaskSimpleFall(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime)
 {
     m_nAnimId = nAnimId;
     m_nAnimGroup = nAnimGroup;
@@ -45,9 +47,9 @@ bool CTaskSimpleFall::ProcessPed(CPed* ped)
 }
 
 // 0x678370
-bool CTaskSimpleFall::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleFall::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return MakeAbortable_Reversed(ped, priority, _event);
+    return MakeAbortable_Reversed(ped, priority, event);
 }
 
 bool CTaskSimpleFall::ProcessPed_Reversed(CPed* ped)
@@ -57,7 +59,7 @@ bool CTaskSimpleFall::ProcessPed_Reversed(CPed* ped)
 
     if (m_bIsFinished && (ped->bIsStanding || ped->bIsDrowning))
     {
-        unsigned int nTimeStep = CTimer::GetTimeStepInMilliseconds();
+        uint32 nTimeStep = CTimer::GetTimeStepInMS();
         if (m_nCurrentDownTime <= nTimeStep)
         {
             m_nCurrentDownTime = 0;
@@ -89,7 +91,7 @@ bool CTaskSimpleFall::ProcessPed_Reversed(CPed* ped)
     return false;
 }
 
-bool CTaskSimpleFall::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event)
+bool CTaskSimpleFall::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
     auto pFallAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FALL_FRONT);
     if (!pFallAnim)
@@ -112,12 +114,12 @@ bool CTaskSimpleFall::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
 
     if (priority == ABORT_PRIORITY_URGENT)
     {
-        if (_event)
+        if (event)
         {
-            auto eventType = _event->GetEventType();
+            auto eventType = event->GetEventType();
             if (eventType == EVENT_DAMAGE && ped->m_fHealth < 1.0F
                 || eventType == EVENT_IN_WATER
-                || _event->GetEventPriority() == 71
+                || event->GetEventPriority() == 71
                 || eventType == EVENT_STUCK_IN_AIR
                 )
             {

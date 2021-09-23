@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-int& CPlane::GenPlane_ModelIndex = *(int*)0xC1CAD8;
-unsigned int& CPlane::GenPlane_Status = *(unsigned int*)0xC1CADC;
-unsigned int& CPlane::GenPlane_LastTimeGenerated = *(unsigned int*)0xC1CAE0;
+int32& CPlane::GenPlane_ModelIndex = *(int32*)0xC1CAD8;
+uint32& CPlane::GenPlane_Status = *(uint32*)0xC1CADC;
+uint32& CPlane::GenPlane_LastTimeGenerated = *(uint32*)0xC1CAE0;
 
 bool& CPlane::GenPlane_Active = *(bool*)0x8D33BC;               // true
 float& CPlane::ANDROM_COL_ANGLE_MULT = *(float*)0x8D33C0;       // 0.00015
@@ -24,18 +24,18 @@ void CPlane::InjectHooks() {
 
 }
 
-CPlane::CPlane(int modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(plugin::dummy)
+CPlane::CPlane(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(plugin::dummy)
 {
-    plugin::CallMethod<0x6C8E20, CPlane*, int, eVehicleCreatedBy>(this, modelIndex, createdBy);
+    plugin::CallMethod<0x6C8E20, CPlane*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
 
 // 0x6CCCF0
-void CPlane::BlowUpCar(CEntity* damager, unsigned char bHideExplosion) {
+void CPlane::BlowUpCar(CEntity* damager, uint8 bHideExplosion) {
     return BlowUpCar_Reversed(damager, bHideExplosion);
 }
 
-void CPlane::BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion) {
-    plugin::CallMethod<0x6CCCF0, CPlane*, CEntity*, unsigned char>(this, damager, bHideExplosion);
+void CPlane::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) {
+    plugin::CallMethod<0x6CCCF0, CPlane*, CEntity*, uint8>(this, damager, bHideExplosion);
 }
 
 // 0x6CABB0

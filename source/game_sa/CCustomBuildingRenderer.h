@@ -1,10 +1,19 @@
 #pragma once
 
-#include <PluginBase.h>
-#include <RenderWare.h>
+#include "RenderWare.h"
 
 class CCustomBuildingRenderer {
 public:
-    static bool IsCBPCPipelineAttached(RpAtomic* pAtomic);
-    static void AtomicSetup(RpAtomic* pAtomic);
+    static void InjectHooks();
+
+    CCustomBuildingRenderer();
+    ~CCustomBuildingRenderer();
+
+    static bool Initialise();
+    static void Shutdown();
+    static bool PluginAttach();
+    static void AtomicSetup(RpAtomic* atomic);
+    static bool IsCBPCPipelineAttached(RpAtomic* atomic);
+    static void UpdateDayNightBalanceParam();
+    static void Update();
 };

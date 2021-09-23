@@ -61,7 +61,7 @@ ListItem_c* List_c::GetTail()
 
 
 // EU-1.00 @ 0x004A8E70
-ListItem_c * List_c::RemoveHead(void) {
+ListItem_c * List_c::RemoveHead() {
     //return plugin::CallMethodAndReturn<ListItem_c *, 0x004A8E70, List_c *>(this);
     if (!m_pHead)
         return nullptr;
@@ -101,7 +101,7 @@ void List_c::RemoveAll()
     m_nCount = 0;
 }
 
-uint32_t List_c::GetNumItems()
+uint32 List_c::GetNumItems()
 {
     return m_nCount;
 }
@@ -181,13 +181,13 @@ ListItem_c * List_c::GetPrev(ListItem_c * pItem) {
 
 // US-1.00 @ 0x004A9010
 // EU-1.00 @ 0x004A9010
-ListItem_c * List_c::GetItemOffset(bool bFromHead, int iOffset) {
+ListItem_c * List_c::GetItemOffset(bool bFromHead, int32 iOffset) {
     if (bFromHead)
     {
         auto* result = GetHead();
         if (iOffset > 0 && result)
         {
-            int32_t iCounter = 0;
+            int32 iCounter = 0;
             while (iCounter < iOffset && result)
             {
                 ++iCounter;
@@ -201,7 +201,7 @@ ListItem_c * List_c::GetItemOffset(bool bFromHead, int iOffset) {
         auto* result = GetTail();
         if (iOffset > 0 && result)
         {
-            int32_t iCounter = 0;
+            int32 iCounter = 0;
             while (iCounter < iOffset && result)
             {
                 ++iCounter;

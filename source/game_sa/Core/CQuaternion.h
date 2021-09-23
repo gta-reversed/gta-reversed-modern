@@ -6,19 +6,18 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "RenderWare.h"
 #include "CVector.h"
 
-class  CQuaternion {
-public:
-    CQuaternion();
+class CQuaternion {
 public:
     CVector imag;
-    float real;
+    float   real;
 
 public:
     static void InjectHooks();
+
+    CQuaternion();
 
     // Quat to matrix
     void Get(RwMatrixTag* out);
@@ -51,7 +50,7 @@ public:
     void Conjugate();
 
     // Squared length of a quat
-    float GetLengthSquared(void);
+    float GetLengthSquared();
 
     // Add right to the quat
     void operator+=(CQuaternion const& right);

@@ -43,8 +43,8 @@ class CTaskSimpleJetPack : public CTaskSimple {
 
     CVector      m_vecTargetPos;
     float        m_fCruiseHeight;
-    int          m_nHoverTime;
-    unsigned int m_nStartHover;
+    int32          m_nHoverTime;
+    uint32 m_nStartHover;
     CEntity*     m_pTargetEnt;
 
     FxSystem_c* m_pFxSysL;
@@ -67,13 +67,13 @@ class CTaskSimpleJetPack : public CTaskSimple {
   public:
     static void InjectHooks();
 
-    CTaskSimpleJetPack(const CVector* pVecTargetPos = nullptr, float fCruiseHeight = 10.0f, int nHoverTime = 0, CEntity* entity = nullptr);
-    CTaskSimpleJetPack* Constructor(const CVector* pVecTargetPos, float fCruiseHeight, int nHoverTime, CEntity* entity);
+    CTaskSimpleJetPack(const CVector* pVecTargetPos = nullptr, float fCruiseHeight = 10.0f, int32 nHoverTime = 0, CEntity* entity = nullptr);
+    CTaskSimpleJetPack* Constructor(const CVector* pVecTargetPos, float fCruiseHeight, int32 nHoverTime, CEntity* entity);
 
     ~CTaskSimpleJetPack() override;
 
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) override;
-    eTaskType GetId() override { return TASK_SIMPLE_JETPACK; }
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() override { return TASK_SIMPLE_JETPACK; }
     CTask* Clone() override;
     bool ProcessPed(CPed* ped) override;
 
@@ -86,7 +86,7 @@ class CTaskSimpleJetPack : public CTaskSimple {
     void DoJetPackEffect(CPed* ped);
 
   private:
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* event);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     CTask* Clone_Reversed();
 };
 

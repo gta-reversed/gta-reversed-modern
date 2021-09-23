@@ -6,13 +6,13 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CTaskTimer.h"
 
-class  CTaskSimpleStandStill : public CTaskSimple {
+class CTaskSimpleStandStill : public CTaskSimple {
 public:
-    int m_nTime;
+    int32 m_nTime;
     CTaskTimer m_timer;
     bool m_bLooped;
     bool m_bUseAnimIdleStance;
@@ -23,18 +23,18 @@ public:
 
     static void InjectHooks();
 
-    CTaskSimpleStandStill(int nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
+    CTaskSimpleStandStill(int32 nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
     ~CTaskSimpleStandStill();
 private:
-	CTaskSimpleStandStill* Constructor(int nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
+	CTaskSimpleStandStill* Constructor(int32 nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
 public:
     CTask* Clone()  override;
-    eTaskType GetId() override { return TASK_SIMPLE_STAND_STILL; };
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent* _event) override;
+    eTaskType GetTaskType() override { return TASK_SIMPLE_STAND_STILL; };
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
     CTask* Clone_Reversed();
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent* _event);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);
 };
 

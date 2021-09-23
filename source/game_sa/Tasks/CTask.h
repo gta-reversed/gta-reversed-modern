@@ -8,17 +8,20 @@
 
 #include "eTaskType.h"
 
-enum eAbortPriority : int {
+enum eAbortPriority : int32 {
     ABORT_PRIORITY_LEISURE = 0,
     ABORT_PRIORITY_URGENT,
     ABORT_PRIORITY_IMMEDIATE
 };
 
+class CEvent;
+class CPed;
+
 class CTask {
 public:
     class CTask* m_pParentTask;
 
-    void* operator new(unsigned int size);
+    void* operator new(uint32 size);
     void operator delete(void* object);
 
     CTask();
@@ -27,11 +30,11 @@ public:
     virtual class CTask* Clone() = 0;
     virtual class CTask* GetSubTask() = 0;
     virtual bool IsSimple() = 0;
-    virtual eTaskType GetId() = 0;
-    virtual void StopTimer(class CEvent* _event);
-    virtual bool MakeAbortable(class CPed* ped, eAbortPriority priority, class CEvent* _event) = 0;
+    virtual eTaskType GetTaskType() = 0;
+    virtual void StopTimer(const CEvent* event);
+    virtual bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) = 0;
 
-    static bool IsGoToTask(CTask* pTask);
+    static bool IsGoToTask(CTask* task);
 };
 
-VALIDATE_SIZE(CTask, 8);
+VALIDATE_SIZE(CTask, 0x8);

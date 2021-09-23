@@ -6,7 +6,7 @@
 */
 #pragma once
 
-enum eRadioID : char {
+enum eRadioID : int8 {
     RADIO_PLAYBACK_FM = 1,
     RADIO_K_ROSE,
     RADIO_K_DST,

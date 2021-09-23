@@ -2,9 +2,9 @@
 
 void CEventVehicleOnFire::InjectHooks()
 {
-    HookInstall(0x4B10C0, &CEventVehicleOnFire::Constructor);
-    HookInstall(0x4B4FD0, &CEventVehicleOnFire::AffectsPed_Reversed);
-    HookInstall(0x4B7740, &CEventVehicleOnFire::CloneEditable_Reversed);
+    ReversibleHooks::Install("CEventVehicleOnFire", "Constructor", 0x4B10C0, &CEventVehicleOnFire::Constructor);
+    ReversibleHooks::Install("CEventVehicleOnFire", "AffectsPed_Reversed", 0x4B4FD0, &CEventVehicleOnFire::AffectsPed_Reversed);
+    ReversibleHooks::Install("CEventVehicleOnFire", "CloneEditable_Reversed", 0x4B7740, &CEventVehicleOnFire::CloneEditable_Reversed);
 }
 
 CEventVehicleOnFire::CEventVehicleOnFire(CVehicle* vehicle)

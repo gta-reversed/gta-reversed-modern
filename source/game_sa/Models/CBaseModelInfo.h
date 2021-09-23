@@ -13,7 +13,7 @@
 
 #include "eModelID.h"
 
-enum ModelInfoType : unsigned char {
+enum ModelInfoType : uint8 {
     MODEL_INFO_ATOMIC = 1,
     MODEL_INFO_TIME = 3,
     MODEL_INFO_WEAPON = 4,
@@ -23,7 +23,7 @@ enum ModelInfoType : unsigned char {
     MODEL_INFO_LOD = 8
 };
 
-enum eModelInfoSpecialType : unsigned char {
+enum eModelInfoSpecialType : uint8 {
     TREE = 1,
     PALM = 2,
     GLASS_TYPE_1 = 4,
@@ -41,57 +41,57 @@ class CTimeInfo;
 // originally an abstract class
 class CBaseModelInfo {
 public:
-    unsigned int   m_nKey;
-    unsigned short m_nRefCount;
-    short          m_nTxdIndex;
-    unsigned char  m_nAlpha;
-    unsigned char  m_n2dfxCount;
-    short          m_n2dEffectIndex;
-    short          m_nObjectInfoIndex;
+    uint32 m_nKey;
+    uint16 m_nRefCount;
+    int16  m_nTxdIndex;
+    uint8  m_nAlpha;
+    uint8  m_n2dfxCount;
+    int16  m_n2dEffectIndex;
+    int16  m_nObjectInfoIndex;
     union {
-        unsigned short m_nFlags;
+        uint16 m_nFlags;
         struct {
-            unsigned char m_nFlagsUpperByte;
-            unsigned char m_nFlagsLowerByte;
+            uint8 m_nFlagsUpperByte;
+            uint8 m_nFlagsLowerByte;
         };
         struct {
             /* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CModelInfoSA.h */
-            unsigned char bHasBeenPreRendered : 1; // we use this because we need to apply changes only once
-            unsigned char bDrawLast : 1;
-            unsigned char bAdditiveRender : 1;
-            unsigned char bDontWriteZBuffer : 1;
-            unsigned char bDontCastShadowsOn : 1;
-            unsigned char bDoWeOwnTheColModel : 1;
-            unsigned char bIsBackfaceCulled : 1;
-            unsigned char bIsLod : 1;
+            uint8 bHasBeenPreRendered : 1; // we use this because we need to apply changes only once
+            uint8 bDrawLast : 1;
+            uint8 bAdditiveRender : 1;
+            uint8 bDontWriteZBuffer : 1;
+            uint8 bDontCastShadowsOn : 1;
+            uint8 bDoWeOwnTheColModel : 1;
+            uint8 bIsBackfaceCulled : 1;
+            uint8 bIsLod : 1;
 
             union {
                 struct { // Atomic flags
-                    unsigned char bIsRoad : 1;
-                    unsigned char : 1;
-                    unsigned char bDontCollideWithFlyer : 1;
-                    unsigned char nSpecialType : 4;
-                    unsigned char bWetRoadReflection : 1;
+                    uint8 bIsRoad : 1;
+                    uint8 : 1;
+                    uint8 bDontCollideWithFlyer : 1;
+                    uint8 nSpecialType : 4;
+                    uint8 bWetRoadReflection : 1;
                 };
                 struct { // Vehicle flags
-                    unsigned char bUsesVehDummy : 1;
-                    unsigned char : 1;
-                    unsigned char nCarmodId : 5;
-                    unsigned char bUseCommonVehicleDictionary : 1;
+                    uint8 bUsesVehDummy : 1;
+                    uint8 : 1;
+                    uint8 nCarmodId : 5;
+                    uint8 bUseCommonVehicleDictionary : 1;
                 };
                 struct { // Clump flags
-                    unsigned char bHasAnimBlend : 1;
-                    unsigned char bHasComplexHierarchy : 1;
-                    unsigned char bAnimSomething : 1;
-                    unsigned char bOwnsCollisionModel : 1;
-                    unsigned char : 3;
-                    unsigned char bTagDisabled : 1;
+                    uint8 bHasAnimBlend : 1;
+                    uint8 bHasComplexHierarchy : 1;
+                    uint8 bAnimSomething : 1;
+                    uint8 bOwnsCollisionModel : 1;
+                    uint8 : 3;
+                    uint8 bTagDisabled : 1;
                 };
             };
         };
     };
-    CColModel* m_pColModel;      // 20
-    float      m_fDrawDistance;  // 24
+    CColModel* m_pColModel;     // 20
+    float      m_fDrawDistance; // 24
     union {
         struct RwObject* m_pRwObject;
         struct RpClump*  m_pRwClump;
@@ -113,7 +113,7 @@ public:
     virtual void Init();
     virtual void Shutdown();
     virtual void DeleteRwObject() = 0;
-    virtual unsigned int GetRwModelType() = 0;
+    virtual uint32 GetRwModelType() = 0;
     virtual struct RwObject* CreateInstance() = 0;
     virtual struct RwObject* CreateInstance(RwMatrix* matrix) = 0;
     virtual void SetAnimFile(char const* filename);
@@ -142,7 +142,7 @@ public:
     void Init2dEffects();
     void DeleteCollisionModel();
     // index is a number of effect (max number is (m_n2dfxCount - 1))
-    C2dEffect* Get2dEffect(int index);
+    C2dEffect* Get2dEffect(int32 index);
     void Add2dEffect(C2dEffect* effect);
 
     // Those further ones are completely inlined in final version, not present at all in android version;
@@ -155,7 +155,7 @@ public:
     inline bool IsBackfaceCulled() { return bIsBackfaceCulled; }
     inline bool IsLod() { return bIsLod; }
     inline bool IsRoad() { return bIsRoad; }
-    inline void SetHasBeenPreRendered(int bPreRendered) { bHasBeenPreRendered = bPreRendered; }
+    inline void SetHasBeenPreRendered(int32 bPreRendered) { bHasBeenPreRendered = bPreRendered; }
     inline void SetIsLod(bool bLod) { bIsLod = bLod; }
     inline void SetOwnsColModel(bool bOwns) { bDoWeOwnTheColModel = bOwns; }
     inline void IncreaseAlpha() {
@@ -181,4 +181,4 @@ public:
 };
 VALIDATE_SIZE(CBaseModelInfo, 0x20);
 
-void SetBaseModelInfoFlags(CBaseModelInfo* modelInfo, unsigned int dwFlags);
+void SetBaseModelInfoFlags(CBaseModelInfo* modelInfo, uint32 dwFlags);

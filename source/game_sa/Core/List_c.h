@@ -6,16 +6,14 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "ListItem_c.h"
 
 /**
- * Double linked list base implemantation
- * 
+ * Double linked list base implementation
+ *
  * NOTE: You should not use this class directly, use TList_c template instead.
  */
-class List_c
-{
+class List_c {
 public:
     List_c() : m_pHead(nullptr), m_pTail(nullptr), m_nCount(0) {}
     ~List_c() {}
@@ -23,7 +21,7 @@ public:
 public:
     ListItem_c* m_pHead;
     ListItem_c* m_pTail;
-    uint32_t m_nCount;
+    uint32    m_nCount;
 
 public:
     static void InjectHooks();
@@ -44,7 +42,7 @@ public:
     void RemoveAll();
 
     // Get number of items in the list
-    uint32_t GetNumItems();
+    uint32 GetNumItems();
 
     // Append item to the list
     void AppendItem(ListItem_c* pItem);
@@ -68,55 +66,42 @@ public:
     ListItem_c* GetPrev(ListItem_c* pItem);
 
     // Get N-th item from list head/tail
-    ListItem_c* GetItemOffset(bool bFromHead, int iOffset);
+    ListItem_c* GetItemOffset(bool bFromHead, int32 iOffset);
 };
-
 
 /**
  * Double linked list template wrapper
  * (not an original game class name)
  */
-template <
-    typename ItemType
->
-class TList_c : public List_c
-{
+template <typename ItemType> class TList_c : public List_c {
 public:
-    ItemType* GetHead()
-    {
+    ItemType* GetHead() {
         return static_cast<ItemType*>(List_c::GetHead());
     }
 
-    ItemType* GetTail()
-    {
+    ItemType* GetTail() {
         return static_cast<ItemType*>(List_c::GetTail());
     }
 
-    ItemType* RemoveHead()
-    {
+    ItemType* RemoveHead() {
         return static_cast<ItemType*>(List_c::RemoveHead());
     }
 
-    ItemType* RemoveTail()
-    {
+    ItemType* RemoveTail() {
         return static_cast<ItemType*>(List_c::RemoveTail());
     }
 
-    ItemType* GetNext(ItemType* pItem)
-    {
+    ItemType* GetNext(ItemType* pItem) {
         return static_cast<ItemType*>(List_c::GetNext(pItem));
     }
 
-    ItemType* GetPrev(ItemType* pItem)
-    {
+    ItemType* GetPrev(ItemType* pItem) {
         return static_cast<ItemType*>(List_c::GetPrev(pItem));
     }
 
-    ItemType* GetItemOffset(bool bFromHead, int iOffset)
-    {
+    ItemType* GetItemOffset(bool bFromHead, int32 iOffset) {
         return static_cast<ItemType*>(List_c::GetItemOffset(bFromHead, iOffset));
     }
 };
-
 
 VALIDATE_SIZE(List_c, 0xC);

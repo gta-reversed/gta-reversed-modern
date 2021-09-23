@@ -6,11 +6,9 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
 class CAutomobile;
 
-enum  eDamageState {
+enum eDamageState {
     DAMSTATE_OK = 0,
     DAMSTATE_OPENED = 1,
     DAMSTATE_DAMAGED = 2,
@@ -18,7 +16,7 @@ enum  eDamageState {
     DAMSTATE_NOTPRESENT = 4
 };
 
-enum  tComponent {
+enum tComponent {
     COMPONENT_WHEEL_LF = 1,
     COMPONENT_WHEEL_RF = 2,
     COMPONENT_WHEEL_LR = 3,
@@ -38,7 +36,7 @@ enum  tComponent {
     COMPONENT_BUMP_REAR = 17
 };
 
-enum  tComponentGroup {
+enum tComponentGroup {
     COMPGROUP_PANEL = 0,
     COMPGROUP_WHEEL = 1,
     COMPGROUP_DOOR = 2,
@@ -56,7 +54,7 @@ enum eWheelStatus {
     WHEEL_STATUS_4
 };
 
-enum  ePanels {
+enum ePanels {
     WING_FRONT_LEFT = 0,
     WING_FRONT_RIGHT = 1,
     WINDSCREEN = 4,
@@ -73,79 +71,79 @@ enum eDoors {
     DOOR_RIGHT_REAR,
 };
 
-enum  eLights {
+enum eLights {
     LIGHT_FRONT_LEFT = 0,
     LIGHT_FRONT_RIGHT = 1,
     LIGHT_REAR_RIGHT = 2,
     LIGHT_REAR_LEFT = 3
 };
 
-class  CDamageManager {
+class CDamageManager {
 public:
     float m_fWheelDamageEffect;
-    unsigned char m_nEngineStatus;
+    uint8 m_nEngineStatus;
     union {
-        unsigned char m_anWheelsStatus[4]; // see eWheelStatus
+        uint8 m_anWheelsStatus[4]; // see eWheelStatus
     };
     union {
-        unsigned char m_anDoorsStatus[6];
+        uint8 m_anDoorsStatus[6];
         struct {
-            unsigned char m_nBonnetStatus;
-            unsigned char m_nBootStatus;
-            unsigned char m_nLeftFrontDoorStatus;
-            unsigned char m_nRightFrontDoorStatus;
-            unsigned char m_nLeftRearDoorStatus;
-            unsigned char m_nRightRearDoorStatus;
+            uint8 m_nBonnetStatus;
+            uint8 m_nBootStatus;
+            uint8 m_nLeftFrontDoorStatus;
+            uint8 m_nRightFrontDoorStatus;
+            uint8 m_nLeftRearDoorStatus;
+            uint8 m_nRightRearDoorStatus;
         };
     };
     union {
-        unsigned int m_nLightsStatus;
+        uint32 m_nLightsStatus;
         struct {
-            unsigned int m_nLeftFrontLightStatus : 2;
-            unsigned int m_nRightFrontLightStatus : 2;
-            unsigned int m_nRightRearLightStatus : 2;
-            unsigned int m_nLeftRearLightStatus : 2;
+            uint32 m_nLeftFrontLightStatus : 2;
+            uint32 m_nRightFrontLightStatus : 2;
+            uint32 m_nRightRearLightStatus : 2;
+            uint32 m_nLeftRearLightStatus : 2;
         };
     };
-    unsigned int m_nPanelsStatus;
+    uint32 m_nPanelsStatus;
 
     //funcs
 
     // damageCompId - eLights/ePanel/... id for this component
-    bool GetComponentGroup(tComponent component, tComponentGroup* group, unsigned char* damageCompId);
+    bool GetComponentGroup(tComponent component, tComponentGroup* group, uint8* damageCompId);
     void ResetDamageStatus();
-    void SetLightStatus(eLights light, unsigned int status);
-    unsigned int GetLightStatus(eLights light);
-    void SetPanelStatus(int panel, unsigned int status);
-    unsigned int GetPanelStatus(int arg0);
-    void SetWheelStatus(int wheel, unsigned int status);
-    unsigned int GetWheelStatus(int wheel);
-    void SetDoorStatus(eDoors door, unsigned int status);
-    void SetDoorStatus(int doorNodeIndex, unsigned int status);
-    unsigned int GetDoorStatus(int doorNodeIndex);
-    unsigned int GetDoorStatus(eDoors door);
+    void SetLightStatus(eLights light, uint32 status);
+    uint32 GetLightStatus(eLights light);
+    void SetPanelStatus(int32 panel, uint32 status);
+    uint32 GetPanelStatus(int32 arg0);
+    void SetWheelStatus(int32 wheel, uint32 status);
+    uint32 GetWheelStatus(int32 wheel);
+    void SetDoorStatus(eDoors door, uint32 status);
+    void SetDoorStatus(int32 doorNodeIndex, uint32 status);
+    uint32 GetDoorStatus(int32 doorNodeIndex);
+    uint32 GetDoorStatus(eDoors door);
     // Status is a value between 0-250
-    void SetEngineStatus(unsigned int status);
+    void SetEngineStatus(uint32 status);
     // Status is a value between 0-250
-    unsigned int GetEngineStatus();
-    void SetAeroplaneCompStatus(int component, unsigned int status);
-    unsigned int GetAeroplaneCompStatus(int component);
+    uint32 GetEngineStatus();
+    void SetAeroplaneCompStatus(int32 component, uint32 status);
+    uint32 GetAeroplaneCompStatus(int32 component);
     // damageCompId - eLights/ePanel/... id for this component
-    bool ProgressDoorDamage(unsigned char damageCompId, CAutomobile* car);
+    bool ProgressDoorDamage(uint8 damageCompId, CAutomobile* car);
     // Empty function
     bool ProgressEngineDamage(float arg0);
     // Set next level of damage to panel
-    bool ProgressPanelDamage(unsigned char panel);
+    bool ProgressPanelDamage(uint8 panel);
     // Set next level of damage to panel
-    bool ProgressWheelDamage(unsigned char wheel);
+    bool ProgressWheelDamage(uint8 wheel);
     // Set next level of damage to aeroplane component
-    bool ProgressAeroplaneDamage(unsigned char component);
+    bool ProgressAeroplaneDamage(uint8 component);
     bool ApplyDamage(CAutomobile* car, tComponent component, float intensity, float arg3);
     void FuckCarCompletely(bool skipWheels);
     // returns -1 if no node for this panel
-    int GetCarNodeIndexFromPanel(ePanels panel);
+    int32 GetCarNodeIndexFromPanel(ePanels panel);
     // returns -1 if no node for this door
-    int GetCarNodeIndexFromDoor(eDoors door);
+    int32 GetCarNodeIndexFromDoor(eDoors door);
     void Reset();
 };
 

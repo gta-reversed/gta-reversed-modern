@@ -35,50 +35,50 @@ enum eResourceFirstID {
 };
 
 struct tRwStreamInitializeData {
-    unsigned char* m_pBuffer;
-    unsigned int m_uiBufferSize;
+    uint8* m_pBuffer;
+    uint32 m_uiBufferSize;
 };
 
 VALIDATE_SIZE(tRwStreamInitializeData, 0x8);
 
 struct tStreamingFileDesc {
-    char m_szName[40];
-    bool m_bNotPlayerImg;
-    char __pad[3];
-    int m_StreamHandle;
+    char  m_szName[40];
+    bool  m_bNotPlayerImg;
+    char  __pad[3];
+    int32 m_StreamHandle;
 };
 
 VALIDATE_SIZE(tStreamingFileDesc, 0x30);
 
 struct tStreamingChannel {
-    int modelIds[16];
-    int modelStreamingBufferOffsets[16];
+    int32               modelIds[16];
+    int32               modelStreamingBufferOffsets[16];
     eStreamingLoadState LoadStatus;
-    int iLoadingLevel; // the value gets modified, but it's not used
-    int offsetAndHandle;
-    int sectorCount;
-    int totalTries;
-    eCdStreamStatus m_nCdStreamStatus;
+    int32               iLoadingLevel; // the value gets modified, but it's not used
+    int32               offsetAndHandle;
+    int32               sectorCount;
+    int32               totalTries;
+    eCdStreamStatus     m_nCdStreamStatus;
 };
 
 VALIDATE_SIZE(tStreamingChannel, 0x98);
 
 class CStreaming {
 public:
-    static const std::int32_t TOTAL_SPECIAL_MODELS = 10;
-    static const std::int32_t TOTAL_CLOTHES_MODELS = 10;
-    static const std::int32_t TOTAL_CUTSCENE_MODELS = 20;
-    static const std::int32_t SPECIAL_MODELS_RESOURCE_ID = 290;
-    static const std::int32_t CLOTHES_MODELS_RESOURCE_ID = 384;
-    static const std::int32_t CUTSCENE_MODELS_RESOURCE_ID = 300;
-    static unsigned int& ms_memoryAvailable;
-    static int& desiredNumVehiclesLoaded;
+    static const int32 TOTAL_SPECIAL_MODELS = 10;
+    static const int32 TOTAL_CLOTHES_MODELS = 10;
+    static const int32 TOTAL_CUTSCENE_MODELS = 20;
+    static const int32 SPECIAL_MODELS_RESOURCE_ID = 290;
+    static const int32 CLOTHES_MODELS_RESOURCE_ID = 384;
+    static const int32 CUTSCENE_MODELS_RESOURCE_ID = 300;
+    static uint32& ms_memoryAvailable;
+    static int32& desiredNumVehiclesLoaded;
     static bool& ms_bLoadVehiclesInLoadScene;
-    static int* ms_aDefaultCopCarModel; // static int ms_aDefaultCopCarModel[4]
-    static int& ms_DefaultCopBikeModel;
-    static int* ms_aDefaultCopModel; // static int ms_aDefaultCopModel[4]
-    static int& ms_DefaultCopBikerModel;
-    static std::uint32_t& ms_nTimePassedSinceLastCopBikeStreamedIn;
+    static int32* ms_aDefaultCopCarModel; // static int32 ms_aDefaultCopCarModel[4]
+    static int32& ms_DefaultCopBikeModel;
+    static int32* ms_aDefaultCopModel; // static int32 ms_aDefaultCopModel[4]
+    static int32& ms_DefaultCopBikerModel;
+    static uint32& ms_nTimePassedSinceLastCopBikeStreamedIn;
     static signed int* ms_aDefaultAmbulanceModel;  // static signed int ms_aDefaultAmbulanceModel[4]
     static signed int* ms_aDefaultMedicModel;      // static signed int ms_aDefaultMedicModel[4]
     static signed int* ms_aDefaultFireEngineModel; // static signed int ms_aDefaultFireEngineModel[4]
@@ -91,32 +91,32 @@ public:
     static signed int& ms_channelError;
     static bool& m_bHarvesterModelsRequested;
     static bool& m_bStreamHarvesterModelsThisFrame;
-    static unsigned int& ms_numPriorityRequests;
+    static uint32& ms_numPriorityRequests;
     //! // initialized to -1 and never used
-    static int& ms_lastCullZone;
-    static unsigned short& ms_loadedGangCars;
-    static unsigned short& ms_loadedGangs;
-    static int& ms_numPedsLoaded;
-    static int* ms_pedsLoaded; // static unsigned int* ms_pedsLoaded[8]
-    static std::int32_t* ms_NextPedToLoadFromGroup;
-    static int& ms_currentZoneType;
+    static int32& ms_lastCullZone;
+    static uint16& ms_loadedGangCars;
+    static uint16& ms_loadedGangs;
+    static int32& ms_numPedsLoaded;
+    static int32* ms_pedsLoaded; // static uint32* ms_pedsLoaded[8]
+    static int32* ms_NextPedToLoadFromGroup;
+    static int32& ms_currentZoneType;
     static CLoadedCarGroup& ms_vehiclesLoaded;
     static CStreamingInfo*& ms_pEndRequestedList;
     static CStreamingInfo*& ms_pStartRequestedList;
     static CStreamingInfo*& ms_pEndLoadedList;
     static CStreamingInfo*& ms_startLoadedList;
     //! initialized but not used?
-    static int& ms_lastImageRead;
+    static int32& ms_lastImageRead;
     //! initialized but never used?
     static signed int* ms_imageOffsets; // static signed int ms_imageOffsets[6]
     static bool& ms_bEnableRequestListPurge;
-    static unsigned int& ms_streamingBufferSize;
-    static std::uint8_t** ms_pStreamingBuffer;
-    static unsigned int& ms_memoryUsed;
-    static int& ms_numModelsRequested;
+    static uint32& ms_streamingBufferSize;
+    static uint8** ms_pStreamingBuffer;
+    static uint32& ms_memoryUsed;
+    static int32& ms_numModelsRequested;
     static CStreamingInfo* ms_aInfoForModel; // static CStreamingInfo ms_aInfoForModel[26316]
     static bool& ms_disableStreaming;
-    static int& ms_bIsInitialised;
+    static int32& ms_bIsInitialised;
     static bool& m_bBoatsNeeded;
     static bool& ms_bLoadingScene;
     static bool& m_bCopBikeLoaded;
@@ -131,42 +131,42 @@ public:
 
     static CLink<CEntity*>* AddEntity(CEntity* pEntity);
     //! return StreamingFile Index in CStreaming::ms_files
-    static int AddImageToList(char const* pFileName, bool bNotPlayerImg);
-    static void AddLodsToRequestList(CVector const& point, unsigned int streamingFlags);
-    static void AddModelsToRequestList(CVector const& point, unsigned int streamingFlags);
-    static bool AddToLoadedVehiclesList(std::int32_t modelId);
-    static bool AreAnimsUsedByRequestedModels(int animModelId);
-    static bool AreTexturesUsedByRequestedModels(int txdModelId);
-    static void ClearFlagForAll(unsigned int streamingFlag);
-    static void ClearSlots(int totalSlots);
-    static bool ConvertBufferToObject(unsigned char* pFileBuffer, int modelId);
+    static int32 AddImageToList(char const* pFileName, bool bNotPlayerImg);
+    static void AddLodsToRequestList(CVector const& point, uint32 streamingFlags);
+    static void AddModelsToRequestList(CVector const& point, uint32 streamingFlags);
+    static bool AddToLoadedVehiclesList(int32 modelId);
+    static bool AreAnimsUsedByRequestedModels(int32 animModelId);
+    static bool AreTexturesUsedByRequestedModels(int32 txdModelId);
+    static void ClearFlagForAll(uint32 streamingFlag);
+    static void ClearSlots(int32 totalSlots);
+    static bool ConvertBufferToObject(uint8* pFileBuffer, int32 modelId);
     static void DeleteAllRwObjects();
-    static bool DeleteLeastUsedEntityRwObject(bool bNotOnScreen, unsigned int streamingFlags);
+    static bool DeleteLeastUsedEntityRwObject(bool bNotOnScreen, uint32 streamingFlags);
     static void DeleteRwObjectsAfterDeath(CVector const& point);
-    static void DeleteRwObjectsBehindCamera(std::int32_t memoryToCleanInBytes);
-    static bool DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, std::int32_t memoryToCleanInBytes);
-    static void DeleteRwObjectsInSectorList(CPtrList& list, std::int32_t sectorX, std::int32_t sectorY);
-    static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList& list, std::int32_t memoryToCleanInBytes);
-    static bool RemoveReferencedTxds(std::int32_t memoryToCleanInBytes);
+    static void DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes);
+    static bool DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, int32 memoryToCleanInBytes);
+    static void DeleteRwObjectsInSectorList(CPtrList& list, int32 sectorX, int32 sectorY);
+    static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList& list, int32 memoryToCleanInBytes);
+    static bool RemoveReferencedTxds(int32 memoryToCleanInBytes);
     static void DisableCopBikes(bool bDisable);
     //! RandFactor : random number between 1-7
-    static std::int32_t FindMIPedSlotForInterior(std::int32_t randFactor);
-    static void FinishLoadingLargeFile(unsigned char* pFileBuffer, int modelId);
+    static int32 FindMIPedSlotForInterior(int32 randFactor);
+    static void FinishLoadingLargeFile(uint8* pFileBuffer, int32 modelId);
     static void FlushChannels();
     static void FlushRequestList();
     // Sets value of two global vars, the value is then set to false in CStreaming::RequestModelStream
     // It has no affect on the game, so let's leave it
-    static void ForceLayerToRead(int arg1);
-    static std::int32_t GetDefaultCabDriverModel();
-    static int GetDefaultCopCarModel(int ignoreLvpd1Model);
-    static std::int32_t GetDefaultCopModel();
-    static int GetDefaultFiremanModel();
-    static int GetDefaultMedicModel();
+    static void ForceLayerToRead(int32 arg1);
+    static int32 GetDefaultCabDriverModel();
+    static int32 GetDefaultCopCarModel(int32 ignoreLvpd1Model);
+    static int32 GetDefaultCopModel();
+    static int32 GetDefaultFiremanModel();
+    static int32 GetDefaultMedicModel();
     //! unused
     static signed int GetDiscInDrive();
-    static int GetNextFileOnCd(unsigned int streamLastPosn, bool bNotPriority);
-    static bool HasSpecialCharLoaded(std::int32_t slot);
-    static bool HasVehicleUpgradeLoaded(std::int32_t modelId);
+    static int32 GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority);
+    static bool HasSpecialCharLoaded(int32 slot);
+    static bool HasVehicleUpgradeLoaded(int32 modelId);
     //! does nothing (NOP)
     static void IHaveUsedStreamingMemory();
     //! does nothing (NOP)
@@ -176,14 +176,14 @@ public:
     static void InitImageList();
     static void InstanceLoadedModels(CVector const& point);
     static void InstanceLoadedModelsInSectorList(CPtrList& list);
-    static bool IsCarModelNeededInCurrentZone(int modelId);
+    static bool IsCarModelNeededInCurrentZone(int32 modelId);
     //! unused
     static bool IsInitialised();
-    static bool IsObjectInCdImage(int modelId);
+    static bool IsObjectInCdImage(int32 modelId);
     static bool IsVeryBusy();
     static void Load();
     static void LoadAllRequestedModels(bool bOnlyPriorityRequests);
-    static void LoadCdDirectory(const char* filename, std::int32_t archiveId);
+    static void LoadCdDirectory(const char* filename, int32 archiveId);
     static void LoadCdDirectory();
     static void LoadInitialPeds();
     //! does nothing (NOP)
@@ -194,64 +194,64 @@ public:
     static void LoadSceneCollision(CVector const& point);
     //! unused
     static void LoadZoneVehicle(const CVector& point);
-    static void MakeSpaceFor(int memoryToCleanInBytes);
-    static void PossiblyStreamCarOutAfterCreation(int modelId);
-    static void ProcessEntitiesInSectorList(CPtrList& list, float posX, float posY, float minX, float minY, float maxX, float maxY, float radius, std::int32_t streamingflags);
-    static void ProcessEntitiesInSectorList(CPtrList& list, std::int32_t streamingFlags);
-    static bool ProcessLoadingChannel(int channelIndex);
+    static void MakeSpaceFor(int32 memoryToCleanInBytes);
+    static void PossiblyStreamCarOutAfterCreation(int32 modelId);
+    static void ProcessEntitiesInSectorList(CPtrList& list, float posX, float posY, float minX, float minY, float maxX, float maxY, float radius, int32 streamingflags);
+    static void ProcessEntitiesInSectorList(CPtrList& list, int32 streamingFlags);
+    static bool ProcessLoadingChannel(int32 channelIndex);
     static void PurgeRequestList();
     static void ReInit();
     static void ReadIniFile();
     static void ReclassifyLoadedCars();
     static void RemoveAllUnusedModels();
     static void RemoveBigBuildings();
-    static void RemoveBuildingsNotInArea(int areaCode);
-    static void RemoveCarModel(int modelId);
+    static void RemoveBuildingsNotInArea(int32 areaCode);
+    static void RemoveCarModel(int32 modelId);
     static void RemoveCurrentZonesModels();
     static void RemoveDodgyPedsFromRandomSlots();
     static void RemoveEntity(CLink<CEntity*>* streamingLink);
     static void RemoveInappropriatePedModels();
-    static bool RemoveLeastUsedModel(unsigned int streamingFlags);
-    static bool CarIsCandidateForRemoval(std::int32_t modelId);
+    static bool RemoveLeastUsedModel(uint32 streamingFlags);
+    static bool CarIsCandidateForRemoval(int32 modelId);
     static bool RemoveLoadedVehicle();
-    static bool ZoneModelIsCandidateForRemoval(std::int32_t modelId);
+    static bool ZoneModelIsCandidateForRemoval(int32 modelId);
     static bool RemoveLoadedZoneModel();
-    static void RemoveModel(int modelId);
-    static void RemoveTxdModel(int modelId);
+    static void RemoveModel(int32 modelId);
+    static void RemoveTxdModel(int32 modelId);
     //! does nothing (NOP)
     static void RemoveUnusedModelsInLoadedList();
     static void RenderEntity(CLink<CEntity*>* streamingLink);
     static void RequestBigBuildings(CVector const& point);
-    static void RequestFile(int modelId, int posn, int size, int imgId, int streamingFlags);
+    static void RequestFile(int32 modelId, int32 posn, int32 size, int32 imgId, int32 streamingFlags);
     //! unused
-    static void RequestFilesInChannel(int channelId);
-    static void RequestModel(int dwModelId, unsigned int streamingFlags); // see eStreamingFlags
-    static void RequestModelStream(int channelId);
+    static void RequestFilesInChannel(int32 channelId);
+    static void RequestModel(int32 dwModelId, uint32 streamingFlags); // see eStreamingFlags
+    static void RequestModelStream(int32 channelId);
     //! unused
-    static void RequestPlayerSection(int modelId, char const* string, int streamingFlags);
-    static void RequestSpecialChar(int modelId, char const* name, int flags);
-    static void RequestSpecialModel(int modelId, char const* name, int flags);
-    static void RequestTxdModel(int slot, int streamingFlags);
-    static void RequestVehicleUpgrade(std::int32_t modelId, std::uint32_t streamingFlags);
-    static void RetryLoadFile(int channelId);
+    static void RequestPlayerSection(int32 modelId, char const* string, int32 streamingFlags);
+    static void RequestSpecialChar(int32 modelId, char const* name, int32 flags);
+    static void RequestSpecialModel(int32 modelId, char const* name, int32 flags);
+    static void RequestTxdModel(int32 slot, int32 streamingFlags);
+    static void RequestVehicleUpgrade(int32 modelId, uint32 streamingFlags);
+    static void RetryLoadFile(int32 channelId);
     static void Save();
     static void SetLoadVehiclesInLoadScene(bool bEnable);
-    static void SetMissionDoesntRequireAnim(int slot);
-    static void SetMissionDoesntRequireModel(int modelId);
-    static void SetMissionDoesntRequireSpecialChar(int slot);
-    static void SetModelIsDeletable(int modelId);
-    static void SetModelTxdIsDeletable(int modelId);
+    static void SetMissionDoesntRequireAnim(int32 slot);
+    static void SetMissionDoesntRequireModel(int32 modelId);
+    static void SetMissionDoesntRequireSpecialChar(int32 slot);
+    static void SetModelIsDeletable(int32 modelId);
+    static void SetModelTxdIsDeletable(int32 modelId);
     //! unused
-    static void SetSpecialCharIsDeletable(int slot);
+    static void SetSpecialCharIsDeletable(int32 slot);
     static void Shutdown();
     static void StartRenderEntities();
     static bool StreamAmbulanceAndMedic(bool bStreamForAccident);
-    static void StreamCopModels(int level);
+    static void StreamCopModels(int32 level);
     static bool StreamFireEngineAndFireman(bool bStreamForFire);
     static void StreamOneNewCar();
     //! interiorType : 0 - house , 1 - shop , 2 - office
-    static void StreamPedsForInterior(int interiorType);
-    static void StreamPedsIntoRandomSlots(int* modelArray);
+    static void StreamPedsForInterior(int32 interiorType);
+    static void StreamPedsIntoRandomSlots(int32* modelArray);
     static void StreamVehiclesAndPeds();
     static void StreamVehiclesAndPeds_Always(CVector const& unused);
     static void StreamZoneModels(CVector const& unused);
@@ -259,7 +259,7 @@ public:
     static void Update();
     //! unused
     static void UpdateForAnimViewer();
-    static bool WeAreTryingToPhaseVehicleOut(int modelId);
+    static bool WeAreTryingToPhaseVehicleOut(int32 modelId);
 
 public:
     // NOTSA functions

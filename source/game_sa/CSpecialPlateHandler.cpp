@@ -20,7 +20,7 @@ void CSpecialPlateHandler::Init() {
 
 // Writes plate text to outText if exists, "\0" otherwise.
 // 0x6F2D30
-void CSpecialPlateHandler::Find(int carGenId, char* outText) {
+void CSpecialPlateHandler::Find(int32 carGenId, char* outText) {
     outText[0] = '\0';
     if (m_nCount == 0)
         return;
@@ -34,7 +34,7 @@ void CSpecialPlateHandler::Find(int carGenId, char* outText) {
 }
 
 // 0x6F2D90
-void CSpecialPlateHandler::Add(int carGenId, const char* text) {
+void CSpecialPlateHandler::Add(int32 carGenId, const char* text) {
     if (m_nCount != PLATES_COUNT) {
         auto plateEntry = m_plateTextEntries[m_nCount];
         plateEntry.m_nCarGenId = carGenId;
@@ -45,7 +45,7 @@ void CSpecialPlateHandler::Add(int carGenId, const char* text) {
 
 // unused
 // 0x6F2DD0
-void CSpecialPlateHandler::Remove(int plateTextId) {
+void CSpecialPlateHandler::Remove(int32 plateTextId) {
     if (plateTextId >= 0 && m_nCount) {
         tCarGenPlateText* plateText = &m_plateTextEntries[plateTextId];
         plateText->m_nCarGenId = -1;
