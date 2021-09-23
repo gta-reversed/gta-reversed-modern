@@ -6,16 +6,29 @@ class CPlaceName {
 public:
     CZone* m_pZone;
     uint16 m_nAdditionalTimer;
-    char   _pad[2];
 
 public:
     static void InjectHooks();
 
+    CPlaceName();
+
     void Init();
-    void Clear();
-    const char* GetForMap(float x, float y);
+    static const char* GetForMap(float x, float y);
     void Process();
     inline void Display() const;
+    void ProcessAfterFrontEndShutDown();
+
+    static CVector CalcPosition() {
+        CVector posn;
+        auto player = FindPlayerPed();
+        if (player->bInVehicle) {
+            posn = player->m_pVehicle->GetPosition();
+        } else {
+            posn = player->GetPosition();
+            CEntryExitManager::GetPositionRelativeToOutsideWorld(posn);
+        }
+        return posn;
+    }
 };
 
 VALIDATE_SIZE(CPlaceName, 0x8);

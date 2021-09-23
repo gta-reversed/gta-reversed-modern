@@ -12,7 +12,7 @@ CCurrentVehicle::CCurrentVehicle() {
     Init();
 }
 
-// 0x571E90
+// 0x572030
 void CCurrentVehicle::Init() {
     m_pVehicle = nullptr;
 }
