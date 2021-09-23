@@ -7,7 +7,7 @@ void CTaskSimpleJetPack::InjectHooks() {
 }
 
 // 0x67B4E0
-CTaskSimpleJetPack::CTaskSimpleJetPack(const CVector* pVecTargetPos, float fCruiseHeight, int nHoverTime, CEntity* entity) : CTaskSimple() {
+CTaskSimpleJetPack::CTaskSimpleJetPack(const CVector* pVecTargetPos, float fCruiseHeight, int32 nHoverTime, CEntity* entity) : CTaskSimple() {
     m_bIsFinished = false;
     m_bAddedIdleAnim = false;
     m_bAnimsReferenced = false;
@@ -45,7 +45,7 @@ CTaskSimpleJetPack::CTaskSimpleJetPack(const CVector* pVecTargetPos, float fCrui
     m_fxKeyTime = 0.0f; // Izzotop: this one is not initialized, let's do this (used in DoJetPackEffect)
 }
 
-CTaskSimpleJetPack* CTaskSimpleJetPack::Constructor(const CVector* pVecTargetPos, float fCruiseHeight, int nHoverTime, CEntity* entity) {
+CTaskSimpleJetPack* CTaskSimpleJetPack::Constructor(const CVector* pVecTargetPos, float fCruiseHeight, int32 nHoverTime, CEntity* entity) {
     this->CTaskSimpleJetPack::CTaskSimpleJetPack(pVecTargetPos, fCruiseHeight, nHoverTime, entity);
     return this;
 }

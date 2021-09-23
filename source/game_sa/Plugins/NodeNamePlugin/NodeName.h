@@ -33,7 +33,7 @@ void InjectHooks();
  * @return  true if plugin was successfully attached
  * @addr    0x72FAB0
  */
-_NODENAMEPLUGINAPI RwBool NodeNamePluginAttach(void);
+_NODENAMEPLUGINAPI RwBool NodeNamePluginAttach();
 
 /**
  * Get node name for RwFrame

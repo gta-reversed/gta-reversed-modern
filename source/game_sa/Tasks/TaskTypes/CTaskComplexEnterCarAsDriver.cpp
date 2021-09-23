@@ -1,23 +1,19 @@
 #include "StdInc.h"
 
-CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* pTargetVehicle)
-    : CTaskComplexEnterCar(pTargetVehicle, true, false, false, false)
-{
+#include "CTaskComplexEnterCarAsDriver.h"
+
+// 0x6402F0
+CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* pTargetVehicle) : CTaskComplexEnterCar(pTargetVehicle, true, false, false, false) {
     // empty
 }
 
-CTask* CTaskComplexEnterCarAsDriver::Clone()
-{
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTask*, 0x643780, CTask*>(this);
-#else
+// 0x643780
+CTask* CTaskComplexEnterCarAsDriver::Clone() {
     return CTaskComplexEnterCarAsDriver::Clone_Reversed();
-#endif
 }
 
-CTask* CTaskComplexEnterCarAsDriver::Clone_Reversed()
-{
-    auto pClonedTask = new CTaskComplexEnterCarAsDriver(m_pTargetVehicle);
-    pClonedTask->m_nMoveState = m_nMoveState;
-    return pClonedTask;
+CTask* CTaskComplexEnterCarAsDriver::Clone_Reversed() {
+    auto clonedTask = new CTaskComplexEnterCarAsDriver(m_pTargetVehicle);
+    clonedTask->m_nMoveState = m_nMoveState;
+    return clonedTask;
 }

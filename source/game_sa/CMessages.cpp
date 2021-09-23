@@ -33,25 +33,25 @@ void CMessages::InjectHooks() {
 
 // Returns length of a string
 // 0x69DB50
-unsigned int CMessages::GetStringLength(char* string) {
-    return plugin::CallAndReturn<unsigned int, 0x69DB50, char*>(string);
+uint32 CMessages::GetStringLength(char* string) {
+    return plugin::CallAndReturn<uint32, 0x69DB50, char*>(string);
 }
 
 // Copies string src to dest
 // 0x69DB70
-void CMessages::StringCopy(char* dest, char* src, unsigned short len) {
-    plugin::Call<0x69DB70, char*, char*, unsigned short>(dest, src, len);
+void CMessages::StringCopy(char* dest, char* src, uint16 len) {
+    plugin::Call<0x69DB70, char*, char*, uint16>(dest, src, len);
 }
 
 // Compares 2 strings
 // 0x69DBD0
-unsigned char CMessages::StringCompare(char* str1, char* str2, unsigned short len) {
-    return plugin::CallAndReturn<unsigned char, 0x69DBD0, char*, char*, unsigned short>(str1, str2, len);
+uint8 CMessages::StringCompare(char* str1, char* str2, uint16 len) {
+    return plugin::CallAndReturn<uint8, 0x69DBD0, char*, char*, uint16>(str1, str2, len);
 }
 
 // 0x69DC50
-void CMessages::CutString(int count, char* str, char** dest) {
-    plugin::Call<0x69DC50, int, char*, char**>(count, str, dest);
+void CMessages::CutString(int32 count, char* str, char** dest) {
+    plugin::Call<0x69DC50, int32, char*, char**>(count, str, dest);
 }
 
 // Removes registered messages
@@ -68,8 +68,8 @@ void CMessages::ClearSmallMessagesOnly() {
 
 // Adds message to previous brief
 // 0x69DD50
-void CMessages::AddToPreviousBriefArray(char* text, int n1, int n2, int n3, int n4, int n5, int n6, char* string) {
-    plugin::Call<0x69DD50, char*, int, int, int, int, int, int, char*>(text, n1, n2, n3, n4, n5, n6, string);
+void CMessages::AddToPreviousBriefArray(char* text, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* string) {
+    plugin::Call<0x69DD50, char*, int32, int32, int32, int32, int32, int32, char*>(text, n1, n2, n3, n4, n5, n6, string);
 }
 
 // Removes messages from previous brief
@@ -80,8 +80,8 @@ void CMessages::ClearPreviousBriefArray() {
 
 // Inserts numbers into string
 // 0x69DE90
-void CMessages::InsertNumberInString(char* src, int n1, int n2, int n3, int n4, int n5, int n6, char* dst) {
-    plugin::Call<0x69DE90, char*, int, int, int, int, int, int, char*>(src, n1, n2, n3, n4, n5, n6, dst);
+void CMessages::InsertNumberInString(char* src, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* dst) {
+    plugin::Call<0x69DE90, char*, int32, int32, int32, int32, int32, int32, char*>(src, n1, n2, n3, n4, n5, n6, dst);
 }
 
 // Inserts string into src
@@ -98,38 +98,38 @@ void CMessages::InsertPlayerControlKeysInString(char* string) {
 
 // Adds message with numbers to queue
 // 0x69E360
-void CMessages::AddMessageWithNumber(char* text, unsigned int time, unsigned short flag, int n1, int n2, int n3, int n4, int n5, int n6, bool bPreviousBrief) {
-    plugin::Call<0x69E360, char*, unsigned int, unsigned short, int, int, int, int, int, int, bool>(text, time, flag, n1, n2, n3, n4, n5, n6, bPreviousBrief);
+void CMessages::AddMessageWithNumber(char* text, uint32 time, uint16 flag, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, bool bPreviousBrief) {
+    plugin::Call<0x69E360, char*, uint32, uint16, int32, int32, int32, int32, int32, int32, bool>(text, time, flag, n1, n2, n3, n4, n5, n6, bPreviousBrief);
 }
 
 // Adds message with numbers and shows it instantly
 // 0x69E4E0
-void CMessages::AddMessageJumpQWithNumber(char* text, unsigned int time, unsigned short flag, int n1, int n2, int n3, int n4, int n5, int n6, bool bPreviousBrief) {
-    plugin::Call<0x69E4E0, char*, unsigned int, unsigned short, int, int, int, int, int, int, bool>(text, time, flag, n1, n2, n3, n4, n5, n6, bPreviousBrief);
+void CMessages::AddMessageJumpQWithNumber(char* text, uint32 time, uint16 flag, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, bool bPreviousBrief) {
+    plugin::Call<0x69E4E0, char*, uint32, uint16, int32, int32, int32, int32, int32, int32, bool>(text, time, flag, n1, n2, n3, n4, n5, n6, bPreviousBrief);
 }
 
 // Adds big message with numbers and shows it instantly
 // 0x69E5F0
-void CMessages::AddBigMessageWithNumber(char* text, unsigned int time, eMessageStyle style, int n1, int n2, int n3, int n4, int n5, int n6) {
-    plugin::Call<0x69E5F0, char*, unsigned int, eMessageStyle, int, int, int, int, int, int>(text, time, style, n1, n2, n3, n4, n5, n6);
+void CMessages::AddBigMessageWithNumber(char* text, uint32 time, eMessageStyle style, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6) {
+    plugin::Call<0x69E5F0, char*, uint32, eMessageStyle, int32, int32, int32, int32, int32, int32>(text, time, style, n1, n2, n3, n4, n5, n6);
 }
 
 // Adds big message with numbers to queue
 // 0x69E6E0
-void CMessages::AddBigMessageWithNumberQ(char* text, unsigned int time, eMessageStyle style, int n1, int n2, int n3, int n4, int n5, int n6) {
-    plugin::Call<0x69E6E0, char*, unsigned int, eMessageStyle, int, int, int, int, int, int>(text, time, style, n1, n2, n3, n4, n5, n6);
+void CMessages::AddBigMessageWithNumberQ(char* text, uint32 time, eMessageStyle style, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6) {
+    plugin::Call<0x69E6E0, char*, uint32, eMessageStyle, int32, int32, int32, int32, int32, int32>(text, time, style, n1, n2, n3, n4, n5, n6);
 }
 
 // Adds message with string to queue
 // 0x69E800
-void CMessages::AddMessageWithString(char* text, unsigned int time, unsigned short flag, char* string, bool bPreviousBrief) {
-    plugin::Call<0x69E800, char*, unsigned int, unsigned short, char*, bool>(text, time, flag, string, bPreviousBrief);
+void CMessages::AddMessageWithString(char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief) {
+    plugin::Call<0x69E800, char*, uint32, uint16, char*, bool>(text, time, flag, string, bPreviousBrief);
 }
 
 // Adds message with string and shows it instantly
 // 0x69E950
-void CMessages::AddMessageJumpQWithString(char* text, unsigned int time, unsigned short flag, char* string, bool bPreviousBrief) {
-    plugin::Call<0x69E950, char*, unsigned int, unsigned short, char*, bool>(text, time, flag, string, bPreviousBrief);
+void CMessages::AddMessageJumpQWithString(char* text, uint32 time, uint16 flag, char* string, bool bPreviousBrief) {
+    plugin::Call<0x69E950, char*, uint32, uint16, char*, bool>(text, time, flag, string, bPreviousBrief);
 }
 
 // Removes small message with this text
@@ -158,8 +158,8 @@ void CMessages::Init() {
 
 // Removes all displayed messages
 // 0x69EDC0
-void CMessages::ClearAllMessagesDisplayedByGame(uint8_t unk) {
-    plugin::Call<0x69EDC0, uint8_t>(unk);
+void CMessages::ClearAllMessagesDisplayedByGame(uint8 unk) {
+    plugin::Call<0x69EDC0, uint8>(unk);
 }
 
 // Processing messages. This is called from CWorld::Process
@@ -176,24 +176,24 @@ void CMessages::Display(bool flag) {
 
 // Adds message to queue
 // 0x69F0B0
-void CMessages::AddMessage(char* text, unsigned int time, unsigned short flag, bool bPreviousBrief) {
-    plugin::Call<0x69F0B0, char*, unsigned int, unsigned short, bool>(text, time, flag, bPreviousBrief);
+void CMessages::AddMessage(char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
+    plugin::Call<0x69F0B0, char*, uint32, uint16, bool>(text, time, flag, bPreviousBrief);
 }
 
 // Adds message and shows it instantly
 // 0x69F1E0
-void CMessages::AddMessageJumpQ(char* text, unsigned int time, unsigned short flag, bool bPreviousBrief) {
-    plugin::Call<0x69F1E0, char*, unsigned int, unsigned short, bool>(text, time, flag, bPreviousBrief);
+void CMessages::AddMessageJumpQ(char* text, uint32 time, uint16 flag, bool bPreviousBrief) {
+    plugin::Call<0x69F1E0, char*, uint32, uint16, bool>(text, time, flag, bPreviousBrief);
 }
 
 // Adds big message and shows it instantly
 // 0x69F2B0
-void CMessages::AddBigMessage(char* text, unsigned int time, eMessageStyle style) {
-    plugin::Call<0x69F2B0, char*, unsigned int, eMessageStyle>(text, time, style);
+void CMessages::AddBigMessage(char* text, uint32 time, eMessageStyle style) {
+    plugin::Call<0x69F2B0, char*, uint32, eMessageStyle>(text, time, style);
 }
 
 // Adds big message to queue
 // 0x69F370
-void CMessages::AddBigMessageQ(char* text, unsigned int time, eMessageStyle style) {
-    plugin::Call<0x69F370, char*, unsigned int, eMessageStyle>(text, time, style);
+void CMessages::AddBigMessageQ(char* text, uint32 time, eMessageStyle style) {
+    plugin::Call<0x69F370, char*, uint32, eMessageStyle>(text, time, style);
 }

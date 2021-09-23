@@ -35,7 +35,7 @@ bool CEventHitByWaterCannon::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->IsAlive()) {
         CTask* task = ped->GetTaskManager().GetActiveTask();
-        if (!task || task->GetId() != TASK_COMPLEX_FALL_AND_GET_UP)
+        if (!task || task->GetTaskType() != TASK_COMPLEX_FALL_AND_GET_UP)
             return true;
     }
     return false;

@@ -13,52 +13,52 @@
 struct CFileCarGenerator {
     CVector m_vecPosn;
     float   m_fAngle;
-    int     m_nModelId;
-    int     m_nPrimaryColor;
-    int     m_nSecondaryColor;
+    int32   m_nModelId;
+    int32   m_nPrimaryColor;
+    int32   m_nSecondaryColor;
     union {
         struct {
-            unsigned int m_bForceSpawn : 1;            // & 1
-            unsigned int m_bIgnorePopulationLimit : 1; // & 2
+            uint32 m_bForceSpawn : 1;            // & 1
+            uint32 m_bIgnorePopulationLimit : 1; // & 2
         };
-        unsigned int m_nFlags;
+        uint32 m_nFlags;
     };
-    int     m_nAlarmChance;
-    int     m_nDoorLockChance;
-    int     m_nMinDelay;
-    int     m_nMaxDelay;
+    int32 m_nAlarmChance;
+    int32 m_nDoorLockChance;
+    int32 m_nMinDelay;
+    int32 m_nMaxDelay;
 };
 
 VALIDATE_SIZE(CFileCarGenerator, 0x30);
 
 class CCarGenerator {
 public:
-    signed short     m_nModelId;
-    signed char      m_nPrimaryColor;
-    signed char      m_nSecondaryColor;
+    int16            m_nModelId;
+    int8             m_nPrimaryColor;
+    int8             m_nSecondaryColor;
     CompressedVector m_vecPosn;
     char             m_nAngle;
-    unsigned char    m_nAlarmChance;    // in percentage 0-100
-    unsigned char    m_nDoorLockChance; // in percentage 0-100
+    uint8            m_nAlarmChance;    // in percentage 0-100
+    uint8            m_nDoorLockChance; // in percentage 0-100
 
     union {
         struct {
-            unsigned char bWaitUntilFarFromPlayer : 1;
-            unsigned char bHighPriority : 1;
-            unsigned char bActive : 1;
-            unsigned char bPlayerHasAlreadyOwnedCar : 1;
-            unsigned char bIgnorePopulationLimit : 1;
+            uint8 bWaitUntilFarFromPlayer : 1;
+            uint8 bHighPriority : 1;
+            uint8 bActive : 1;
+            uint8 bPlayerHasAlreadyOwnedCar : 1;
+            uint8 bIgnorePopulationLimit : 1;
         };
-        unsigned char m_nFlags;
+        uint8 m_nFlags;
     };
-    unsigned short   m_nMinDelay;
-    unsigned short   m_nMaxDelay;
+    uint16 m_nMinDelay;
+    uint16 m_nMaxDelay;
     // char             _pad12[2];
-    unsigned int     m_nNextGenTime;
-    signed short     m_nVehicleHandle;
-    signed short     m_nGenerateCount; // (0) Don't Spawn , (1 - 32767) Spawn X number of times , (-1) Always Spawn.
-    unsigned char    m_nIplId;
-    bool             m_bIsUsed;
+    uint32       m_nNextGenTime;
+    int16        m_nVehicleHandle;
+    int16        m_nGenerateCount; // (0) Don't Spawn , (1 - 32767) Spawn X number of times , (-1) Always Spawn.
+    uint8        m_nIplId;
+    bool         m_bIsUsed;
     // char             _pad1E[2];
 
 public:
@@ -68,17 +68,17 @@ public:
 public:
     static void InjectHooks();
 
-    bool CheckForBlockage(int modelId);
+    bool CheckForBlockage(int32 modelId);
     bool CheckIfWithinRangeOfAnyPlayers();
     void DoInternalProcessing();
     void Process();
-    void Setup(const CVector& posn, float angle, int modelId, short color1, short color2, uint8_t bForceSpawn,
-               uint8_t alarmChance, uint8_t doorLockChance, uint16_t minDelay, uint16_t maxDelay,
-               uint8_t iplId, bool ignorePopulationLimit);
+    void Setup(const CVector& posn, float angle, int32 modelId, int16 color1, int16 color2, uint8 bForceSpawn,
+               uint8 alarmChance, uint8 doorLockChance, uint16 minDelay, uint16 maxDelay,
+               uint8 iplId, bool ignorePopulationLimit);
     void SwitchOff();
     void SwitchOn();
 
-    static unsigned int CalcNextGen();
+    static uint32 CalcNextGen();
 };
 
 VALIDATE_SIZE(CCarGenerator, 0x20);

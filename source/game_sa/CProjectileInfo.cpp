@@ -35,8 +35,8 @@ void CProjectileInfo::Shutdown() {
 }
 
 // 0x737BF0
-CProjectileInfo* CProjectileInfo::GetProjectileInfo(int32_t infoId) {
-    return plugin::CallAndReturn<CProjectileInfo*, 0x737BF0, int32_t>(infoId);
+CProjectileInfo* CProjectileInfo::GetProjectileInfo(int32 infoId) {
+    return plugin::CallAndReturn<CProjectileInfo*, 0x737BF0, int32>(infoId);
 }
 
 // 0x737C00
@@ -81,8 +81,8 @@ bool CProjectileInfo::RemoveIfThisIsAProjectile(CObject* object) {
 
 // Methods
 // 0x737B80
-void CProjectileInfo::RemoveFXSystem(uint8_t bInstantly) {
-    plugin::CallMethod<0x737B80, uint8_t>(bInstantly);
+void CProjectileInfo::RemoveFXSystem(uint8 bInstantly) {
+    plugin::CallMethod<0x737B80, uint8>(bInstantly);
 }
 
 // Virtual methods

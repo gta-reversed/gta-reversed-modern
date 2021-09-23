@@ -6,29 +6,29 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CVector.h"
 
-class  CGangWarsSaveStructure {
+class CGangWarsSaveStructure {
 public:
     bool bGangWarsActive;
 private:
     char _pad1[3];
 public:
-    unsigned int State;
-    unsigned int TimeStarted;
-    unsigned int GangWarZoneInfoIndex;
-    unsigned int GangWarNavigationZoneIndex;
+    uint32 State;
+    uint32 TimeStarted;
+    uint32 GangWarZoneInfoIndex;
+    uint32 GangWarNavigationZoneIndex;
     CVector CoorsOfPlayerAtStartOfWar;
-    unsigned int Gang1;
-    unsigned int Gang2;
-    unsigned int WarFerocity;
-    unsigned int LastTimeInArea;
-    unsigned int State2;
+    uint32 Gang1;
+    uint32 Gang2;
+    uint32 WarFerocity;
+    uint32 LastTimeInArea;
+    uint32 State2;
     float TimeTillNextAttack;
     CVector PointOfAttack;
-    unsigned int FightTimer;
-    unsigned int RadarBlip;
+    uint32 FightTimer;
+    uint32 RadarBlip;
     bool bPlayerIsCloseby;
 private:
     char _pad4D[3];
@@ -41,5 +41,3 @@ public:
 };
 
 VALIDATE_SIZE(CGangWarsSaveStructure, 0x58);
-
-//#include "meta/meta.CGangWarsSaveStructure.h"

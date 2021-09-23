@@ -8,11 +8,11 @@
 
 #include "CVehicle.h"
 
-#define UPSIDE_DOWN_CAR_CHECK_SIZE    6
+#define UPSIDE_DOWN_CAR_CHECK_SIZE 6
 
 struct UpsideDownCar {
-    int m_nCarHandle;
-    int m_nTime;
+    int32 m_nCarHandle;
+    int32 m_nTime;
 };
 
 class CUpsideDownCarCheck {
@@ -22,15 +22,13 @@ public:
 public:
     static void InjectHooks();
 
-    void Init();
+    void        Init();
     static bool IsCarUpsideDown(CVehicle const* vehicle);
-    bool AreAnyCarsUpsideDown();
-    void UpdateTimers();
-    void AddCarToCheck(int carHandle);
-    void RemoveCarFromCheck(int carHandle);
-    bool HasCarBeenUpsideDownForAWhile(int carHandle);
+    bool        AreAnyCarsUpsideDown();
+    void        UpdateTimers();
+    void        AddCarToCheck(int32 carHandle);
+    void        RemoveCarFromCheck(int32 carHandle);
+    bool        HasCarBeenUpsideDownForAWhile(int32 carHandle);
 };
 
 VALIDATE_SIZE(CUpsideDownCarCheck, 0x30);
-
-//#include "meta/meta.CUpsideDownCarCheck.h"

@@ -7,8 +7,8 @@ void CPedScriptedTaskRecordData::InjectHooks()
     ReversibleHooks::Install("CPedScriptedTaskRecordData", "Constructor",0x608330, &CPedScriptedTaskRecordData::Constructor);
     ReversibleHooks::Install("CPedScriptedTaskRecordData", "AssociateWithTask",0x608520, &CPedScriptedTaskRecordData::AssociateWithTask);
     ReversibleHooks::Install("CPedScriptedTaskRecordData", "AssociateWithEvent",0x608500, &CPedScriptedTaskRecordData::AssociateWithEvent);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Set_CEventScriptCommand",0x608390, (void(CPedScriptedTaskRecordData::*)(CPed*, int, CEventScriptCommand*)) & CPedScriptedTaskRecordData::Set);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Set_CTask",0x6083E0, (void(CPedScriptedTaskRecordData::*)(CPed*, int, CTask*)) & CPedScriptedTaskRecordData::Set);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Set_CEventScriptCommand",0x608390, (void(CPedScriptedTaskRecordData::*)(CPed*, int32, CEventScriptCommand*)) & CPedScriptedTaskRecordData::Set);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Set_CTask",0x6083E0, (void(CPedScriptedTaskRecordData::*)(CPed*, int32, CTask*)) & CPedScriptedTaskRecordData::Set);
     ReversibleHooks::Install("CPedScriptedTaskRecordData", "SetAsGroupTask",0x6084A0, &CPedScriptedTaskRecordData::SetAsGroupTask);
     ReversibleHooks::Install("CPedScriptedTaskRecordData", "SetAsAttractorScriptTask",0x608440, &CPedScriptedTaskRecordData::SetAsAttractorScriptTask);
     ReversibleHooks::Install("CPedScriptedTaskRecordData", "Flush",0x608350, &CPedScriptedTaskRecordData::Flush);
@@ -18,7 +18,7 @@ void CPedScriptedTaskRecord::InjectHooks()
 {
     ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetRecordAssociatedWithEvent", 0x608580, &CPedScriptedTaskRecord::GetRecordAssociatedWithEvent);
     ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetStatus_", 0x608750, (eScriptedTaskStatus(*)(CPed*)) & CPedScriptedTaskRecord::GetStatus);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetStatus_opcode", 0x608710, (eScriptedTaskStatus(*)(CPed*, int)) & CPedScriptedTaskRecord::GetStatus);
+    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetStatus_opcode", 0x608710, (eScriptedTaskStatus(*)(CPed*, int32)) & CPedScriptedTaskRecord::GetStatus);
     ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetVacantSlot", 0x608540, &CPedScriptedTaskRecord::GetVacantSlot);
     ReversibleHooks::Install("CPedScriptedTaskRecordData", "Process", 0x6085E0, &CPedScriptedTaskRecord::Process);
 }
@@ -55,7 +55,7 @@ void CPedScriptedTaskRecordData::AssociateWithEvent(CEventScriptCommand* event)
 }
 
 // 0x608390
-void CPedScriptedTaskRecordData::Set(CPed* ped, int opcode, CEventScriptCommand* event)
+void CPedScriptedTaskRecordData::Set(CPed* ped, int32 opcode, CEventScriptCommand* event)
 {
     Flush();
     m_ped = ped;
@@ -67,7 +67,7 @@ void CPedScriptedTaskRecordData::Set(CPed* ped, int opcode, CEventScriptCommand*
 }
 
 // 0x6083E0
-void CPedScriptedTaskRecordData::Set(CPed* ped, int opcode, CTask* task)
+void CPedScriptedTaskRecordData::Set(CPed* ped, int32 opcode, CTask* task)
 {
     Flush();
     m_ped = ped;
@@ -79,7 +79,7 @@ void CPedScriptedTaskRecordData::Set(CPed* ped, int opcode, CTask* task)
 }
 
 // 0x6084A0
-void CPedScriptedTaskRecordData::SetAsGroupTask(CPed* ped, int opcode, CTask* task)
+void CPedScriptedTaskRecordData::SetAsGroupTask(CPed* ped, int32 opcode, CTask* task)
 {
     Flush();
     m_ped = ped;
@@ -91,7 +91,7 @@ void CPedScriptedTaskRecordData::SetAsGroupTask(CPed* ped, int opcode, CTask* ta
 }
 
 // 0x608440
-void CPedScriptedTaskRecordData::SetAsAttractorScriptTask(CPed* ped, int opcode, CTask* task)
+void CPedScriptedTaskRecordData::SetAsAttractorScriptTask(CPed* ped, int32 opcode, CTask* task)
 {
     Flush();
     m_ped = ped;
@@ -135,7 +135,7 @@ eScriptedTaskStatus CPedScriptedTaskRecord::GetStatus(CPed* ped)
 }
 
 // 0x608710
-eScriptedTaskStatus CPedScriptedTaskRecord::GetStatus(CPed* ped, int opcode)
+eScriptedTaskStatus CPedScriptedTaskRecord::GetStatus(CPed* ped, int32 opcode)
 {
     for (auto & taskRecordData : ms_scriptedTasks) {
         if ((opcode == -1 || taskRecordData.m_opcode == opcode) && taskRecordData.m_ped == ped)
@@ -145,9 +145,9 @@ eScriptedTaskStatus CPedScriptedTaskRecord::GetStatus(CPed* ped, int opcode)
 }
 
 // 0x608540
-int CPedScriptedTaskRecord::GetVacantSlot()
+int32 CPedScriptedTaskRecord::GetVacantSlot()
 {
-    for (int i = 0; i < TOTAL_SCRIPTED_TASKS; i++) {
+    for (int32 i = 0; i < TOTAL_SCRIPTED_TASKS; i++) {
         CPedScriptedTaskRecordData& taskRecordData = ms_scriptedTasks[i];
         if (!taskRecordData.m_event && !taskRecordData.m_task && !taskRecordData.m_ped)
             return i;

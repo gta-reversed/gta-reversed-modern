@@ -1,7 +1,9 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleGangDriveBy.h"
+
 CTaskSimpleGangDriveBy::CTaskSimpleGangDriveBy(CEntity* target, const CVector* targetPos, float abortRange,
-    std::int8_t frequencyPercentage, std::int8_t drivebyStyle, bool seatRHS)
+    int8 frequencyPercentage, int8 drivebyStyle, bool seatRHS)
 {
     m_bSeatRHS = seatRHS;
     m_nDrivebyStyle = drivebyStyle;
@@ -48,7 +50,7 @@ CTask* CTaskSimpleGangDriveBy::Clone()
 
 bool CTaskSimpleGangDriveBy::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-    return plugin::CallMethodAndReturn<bool, 0x62D290, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x62D290, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
 }
 
 bool CTaskSimpleGangDriveBy::ProcessPed(CPed* ped)

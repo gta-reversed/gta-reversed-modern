@@ -129,12 +129,12 @@ void CPhysical::Add_Reversed()
     {
         CRect boundRect;
         GetBoundRect(&boundRect);
-        std::int32_t startSectorX = CWorld::GetSectorX(boundRect.left);
-        std::int32_t startSectorY = CWorld::GetSectorY(boundRect.top);
-        std::int32_t endSectorX = CWorld::GetSectorX(boundRect.right);
-        std::int32_t endSectorY = CWorld::GetSectorY(boundRect.bottom);
-        for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-            for (std::int32_t sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+        int32 startSectorX = CWorld::GetSectorX(boundRect.left);
+        int32 startSectorY = CWorld::GetSectorY(boundRect.top);
+        int32 endSectorX = CWorld::GetSectorX(boundRect.right);
+        int32 endSectorY = CWorld::GetSectorY(boundRect.bottom);
+        for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+            for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 CPtrListDoubleLink* pDoubleLinkList = nullptr;
                 CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
                 switch (m_nType)
@@ -302,9 +302,9 @@ void CPhysical::ProcessCollision_Reversed()
                 pWheelsCollisionPositions = pAutomobile->m_vWheelCollisionPos;
             }
             CCollisionData* pColData = GetColModel()->m_pColData;
-            int collisionIndex = 0;
+            int32 collisionIndex = 0;
             while (true) {
-                int colLinesCount = pColData->m_nNumLines;
+                int32 colLinesCount = pColData->m_nNumLines;
                 if (pColData->bUsesDisks)
                     colLinesCount = 0;
                 if (collisionIndex >= colLinesCount) {
@@ -356,7 +356,7 @@ void CPhysical::ProcessCollision_Reversed()
         CMatrix oldEntityMatrix(*m_matrix);
         bool bProcessCollisionBeforeSettingTimeStep = false;
         bool bUnknown = false;
-        unsigned char collisionSteps = SpecialEntityCalcCollisionSteps(&bProcessCollisionBeforeSettingTimeStep, &bUnknown);
+        uint8 collisionSteps = SpecialEntityCalcCollisionSteps(&bProcessCollisionBeforeSettingTimeStep, &bUnknown);
         float fStep = fOldTimeStep / collisionSteps;
         if (bProcessCollisionBeforeSettingTimeStep)
         {
@@ -393,7 +393,7 @@ void CPhysical::ProcessCollision_Reversed()
         CPed* pPed = static_cast<CPed*>(this);
         if (collisionSteps > 1u)
         {
-            for (unsigned char stepIndex = 1; stepIndex < collisionSteps; stepIndex++)
+            for (uint8 stepIndex = 1; stepIndex < collisionSteps; stepIndex++)
             {
                 CTimer::UpdateTimeStep(stepIndex * fStep);
                 ApplySpeed();
@@ -510,17 +510,17 @@ bool CPhysical::TestCollision_Reversed(bool bApplySpeed) {
     return bCheckCollision;
 }
 
-int CPhysical::ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint) {
+int32 CPhysical::ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint) {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((int (__thiscall*)(CPhysical*, CPhysical*, CColPoint*))0x546D00)(this, entity, colpoint);
+    return ((int32 (__thiscall*)(CPhysical*, CPhysical*, CColPoint*))0x546D00)(this, entity, colpoint);
 #else
     return CPhysical::ProcessEntityCollision_Reversed(entity, colpoint);
 #endif
 }
 
-int CPhysical::ProcessEntityCollision_Reversed(CPhysical* entity, CColPoint* colpoint) {
+int32 CPhysical::ProcessEntityCollision_Reversed(CPhysical* entity, CColPoint* colpoint) {
     CColModel* pColModel = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->GetColModel();
-    int totalColPointsToProcess = CCollision::ProcessColModels(*m_matrix, *pColModel, entity->GetMatrix(), *entity->GetColModel(), colpoint, nullptr, nullptr, false);
+    int32 totalColPointsToProcess = CCollision::ProcessColModels(*m_matrix, *pColModel, entity->GetMatrix(), *entity->GetColModel(), colpoint, nullptr, nullptr, false);
     if (totalColPointsToProcess > 0) {
         AddCollisionRecord(entity);
         if (!entity->IsBuilding())
@@ -581,12 +581,12 @@ void CPhysical::ProcessShift_Reversed()
             physicalFlags.bProcessingShift = true;
         }
 
-        std::int32_t startSectorX = CWorld::GetSectorX(boundingBox.left);
-        std::int32_t startSectorY = CWorld::GetSectorY(boundingBox.top);
-        std::int32_t endSectorX = CWorld::GetSectorX(boundingBox.right);
-        std::int32_t endSectorY = CWorld::GetSectorY(boundingBox.bottom);
-        for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-            for (std::int32_t sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+        int32 startSectorX = CWorld::GetSectorX(boundingBox.left);
+        int32 startSectorY = CWorld::GetSectorY(boundingBox.top);
+        int32 endSectorX = CWorld::GetSectorX(boundingBox.right);
+        int32 endSectorY = CWorld::GetSectorY(boundingBox.bottom);
+        for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+            for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 if (ProcessShiftSectorList(sectorX, sectorY))
                     bShifted = true;
             }
@@ -596,12 +596,12 @@ void CPhysical::ProcessShift_Reversed()
         if (bShifted || m_nType == ENTITY_TYPE_VEHICLE) {
             CWorld::IncrementCurrentScanCode();
             bool bShifted2 = false;
-            std::int32_t startSectorX = CWorld::GetSectorX(boundingBox.left);
-            std::int32_t startSectorY = CWorld::GetSectorY(boundingBox.top);
-            std::int32_t endSectorX = CWorld::GetSectorX(boundingBox.right);
-            std::int32_t endSectorY = CWorld::GetSectorY(boundingBox.bottom);
-            for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-                for (std::int32_t sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            int32 startSectorX = CWorld::GetSectorX(boundingBox.left);
+            int32 startSectorY = CWorld::GetSectorY(boundingBox.top);
+            int32 endSectorX = CWorld::GetSectorX(boundingBox.right);
+            int32 endSectorY = CWorld::GetSectorY(boundingBox.bottom);
+            for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+                for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                     if (ProcessCollisionSectorList(sectorX, sectorY)) {
                         if (!CWorld::bSecondShift) {
                             *(CMatrix*)m_matrix = oldEntityMatrix;
@@ -640,12 +640,12 @@ void CPhysical::RemoveAndAdd()
         CEntryInfoNode* pEntryInfoNode = m_pCollisionList.m_pNode;
         CRect boundRect;
         GetBoundRect(&boundRect);
-        std::int32_t startSectorX = CWorld::GetSectorX(boundRect.left);
-        std::int32_t startSectorY = CWorld::GetSectorY(boundRect.top);
-        std::int32_t endSectorX = CWorld::GetSectorX(boundRect.right);
-        std::int32_t endSectorY = CWorld::GetSectorY(boundRect.bottom);
-        for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-            for (std::int32_t sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+        int32 startSectorX = CWorld::GetSectorX(boundRect.left);
+        int32 startSectorY = CWorld::GetSectorY(boundRect.top);
+        int32 endSectorX = CWorld::GetSectorX(boundRect.right);
+        int32 endSectorY = CWorld::GetSectorY(boundRect.bottom);
+        for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+            for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
                 CPtrListDoubleLink* pDoubleLinkList = nullptr;
                 CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
                 switch (m_nType)
@@ -1021,7 +1021,7 @@ void CPhysical::AddCollisionRecord(CEntity* collidedEntity)
     ((void(__thiscall*)(CPhysical*, CEntity*))0x543490)(this, collidedEntity);
 #else
     physicalFlags.bOnSolidSurface = true;
-    m_nLastCollisionTime = CTimer::m_snTimeInMilliseconds;
+    m_nLastCollisionTime = CTimer::GetTimeInMS();
     if (m_nType == ENTITY_TYPE_VEHICLE)
     {
         CVehicle* pVehicle = static_cast<CVehicle*>(this);
@@ -1037,7 +1037,7 @@ void CPhysical::AddCollisionRecord(CEntity* collidedEntity)
 
     if (physicalFlags.bCanBeCollidedWith)
     {
-        for (unsigned int i = 0; i < m_nNumEntitiesCollided; i++)
+        for (uint32 i = 0; i < m_nNumEntitiesCollided; i++)
         {
             if (m_apCollidedEntities[i] == collidedEntity)
                 return;
@@ -1059,7 +1059,7 @@ bool CPhysical::GetHasCollidedWith(CEntity* entity)
     if (!physicalFlags.bCanBeCollidedWith || m_nNumEntitiesCollided <= 0)
         return false;
 
-    for (unsigned int i = 0; i < m_nNumEntitiesCollided; i++)
+    for (uint32 i = 0; i < m_nNumEntitiesCollided; i++)
     {
         if (m_apCollidedEntities[i] == entity)
             return true;
@@ -1076,7 +1076,7 @@ bool CPhysical::GetHasCollidedWithAnyObject()
     if (!physicalFlags.bCanBeCollidedWith || m_nNumEntitiesCollided <= 0)
         return false;
 
-    for (unsigned int i = 0; i < m_nNumEntitiesCollided; i++)
+    for (uint32 i = 0; i < m_nNumEntitiesCollided; i++)
     {
         CEntity* pCollidedEntity = m_apCollidedEntities[i];
         if (pCollidedEntity && pCollidedEntity->m_nType == ENTITY_TYPE_OBJECT)
@@ -1326,10 +1326,10 @@ void CPhysical::RemoveRefsToEntity(CEntity* entity)
 #ifdef USE_DEFAULT_FUNCTIONS
     ((void(__thiscall*)(CPhysical*, CEntity*))0x544280)(this, entity);
 #else
-    unsigned char collidedEntityIndex = m_nNumEntitiesCollided;
+    uint8 collidedEntityIndex = m_nNumEntitiesCollided;
     while (collidedEntityIndex < m_nNumEntitiesCollided); {
         if (m_apCollidedEntities[collidedEntityIndex] == entity) {
-            for (unsigned short i = collidedEntityIndex; i < m_nNumEntitiesCollided - 1; ++i) {
+            for (uint16 i = collidedEntityIndex; i < m_nNumEntitiesCollided - 1; ++i) {
                 m_apCollidedEntities[i] = m_apCollidedEntities[i + 1];
             }
             m_nNumEntitiesCollided--;
@@ -1351,7 +1351,7 @@ void CPhysical::DettachEntityFromEntity(float x, float y, float z, bool bApplyTu
         CColModel* pColModel = CEntity::GetColModel();
         CCollisionData* pColData = pColModel->m_pColData;
         if (pColData) {
-            unsigned char nNumLines = pColData->m_nNumLines;
+            uint8 nNumLines = pColData->m_nNumLines;
             pColData->m_nNumLines = 0;
             CColModel* pAttachedToColModel = m_pAttachedTo->GetColModel();
             CMatrix& attachedToMatrix = m_pAttachedTo->GetMatrix();
@@ -1661,7 +1661,7 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, floa
     float fSquaredMagnitude = vecCrossProduct.SquaredMagnitude();
     float fCollisionMass = 1.0f / (fSquaredMagnitude / m_fTurnMass + 1.0f / m_fMass);
 
-    unsigned short entityAltCol = ALT_ENITY_COL_DEFAULT;
+    uint16 entityAltCol = ALT_ENITY_COL_DEFAULT;
     float fMoveSpeedLimit = CTimer::ms_fTimeStep * 0.008f;
     if (m_nType == ENTITY_TYPE_OBJECT)
     {
@@ -1675,7 +1675,7 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, floa
             if (!physicalFlags.bSubmergedInWater)
             {
                 float fMoveSpeedLimitMultiplier = 0.0f;
-                unsigned int vehicleClass = pVehicle->m_vehicleType;
+                uint32 vehicleClass = pVehicle->m_vehicleType;
                 if (vehicleClass != VEHICLE_BIKE || (m_nStatus != STATUS_ABANDONED) && m_nStatus != STATUS_WRECKED)
                 {
                     if (vehicleClass == VEHICLE_BOAT)
@@ -1894,7 +1894,7 @@ bool CPhysical::ApplyFriction(float fFriction, CColPoint* pColPoint)
         vecSpeedCrossProduct.Cross(pColPoint->m_vecNormal, m_vecMoveSpeed);
         vecSpeedCrossProduct.Normalise();
 
-        for (int i = 0; i < 8; i++)
+        for (int32 i = 0; i < 8; i++)
         {
             float fRandom = CGeneral::GetRandomNumberInRange(-0.2f, 0.2f);
             CVector origin = pColPoint->m_vecPoint + (vecSpeedCrossProduct * fRandom);
@@ -2125,10 +2125,10 @@ bool CPhysical::ApplyFriction(CPhysical* pEntity, float fFriction, CColPoint* pC
 #endif
 }
 
-bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
+bool CPhysical::ProcessShiftSectorList(int32 sectorX, int32 sectorY)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall*)(CPhysical*, int, int))0x546670)(this, sectorX, sectorY);
+    return ((bool(__thiscall*)(CPhysical*, int32, int32))0x546670)(this, sectorX, sectorY);
 #else
     CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[m_nModelIndex];
     float fBoundingSphereRadius = pModelInfo->GetColModel()->GetBoundRadius();
@@ -2142,8 +2142,8 @@ bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
     CSector* pSector = GetSector(sectorX, sectorY);
     CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
 
-    int totalAcceptableColPoints = 0;
-    int scanListIndex = 4;
+    int32 totalAcceptableColPoints = 0;
+    int32 scanListIndex = 4;
     do
     {
         CPtrListDoubleLink* pDoubleLinkList = nullptr;
@@ -2206,7 +2206,7 @@ bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
                             {
                                 if (m_pAttachedTo)
                                 {
-                                    unsigned char attachedEntityType = m_pAttachedTo->m_nType;
+                                    uint8 attachedEntityType = m_pAttachedTo->m_nType;
                                     if (attachedEntityType > ENTITY_TYPE_BUILDING && attachedEntityType < ENTITY_TYPE_DUMMY
                                         && m_pAttachedTo->physicalFlags.bDisableCollisionForce)
                                     {
@@ -2252,15 +2252,15 @@ bool CPhysical::ProcessShiftSectorList(int sectorX, int sectorY)
                         {
 
                             pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
-                            int totalColPointsToProcess = ProcessEntityCollision(pEntity, colPoints);
+                            int32 totalColPointsToProcess = ProcessEntityCollision(pEntity, colPoints);
                             if (totalColPointsToProcess > 0)
                             {
-                                for (int colpointIndex = 0; colpointIndex < totalColPointsToProcess; colpointIndex++)
+                                for (int32 colpointIndex = 0; colpointIndex < totalColPointsToProcess; colpointIndex++)
                                 {
                                     CColPoint* pColPoint = &colPoints[colpointIndex];
                                     if (pColPoint->m_fDepth > 0.0f)
                                     {
-                                        unsigned char pieceTypeB = pColPoint->m_nPieceTypeB;
+                                        uint8 pieceTypeB = pColPoint->m_nPieceTypeB;
                                         if (pieceTypeB < 13 || pieceTypeB > 16)
                                         {
                                             totalAcceptableColPoints++;
@@ -2442,7 +2442,7 @@ void CPhysical::PositionAttachedEntity()
     if (!bUpdateSpeed)
     {
         if (m_pAttachedTo->m_nModelIndex == MODEL_DUMPER) {
-            short wMiscComponentAngle = pAttachedToAutmobile->m_wMiscComponentAngle;
+            int16 wMiscComponentAngle = pAttachedToAutmobile->m_wMiscComponentAngle;
             if (wMiscComponentAngle && wMiscComponentAngle != pAttachedToAutmobile->m_wMiscComponentAnglePrev) {
                 bDettachEntity = true;
             }
@@ -3040,7 +3040,7 @@ bool CPhysical::ApplyCollision(CEntity* pTheEntity, CColPoint* pColPoint, float*
                         pEntity->SetIsStatic(false);
                     }
 
-                    int entityModelIndex = pEntity->m_nModelIndex;
+                    int32 entityModelIndex = pEntity->m_nModelIndex;
                     if (entityModelIndex != ModelIndices::MI_FIRE_HYDRANT || pEntityObject->objectFlags.bIsExploded)
                     {
                         if (entityModelIndex != ModelIndices::MI_PARKINGMETER && entityModelIndex != ModelIndices::MI_PARKINGMETER2 || pEntityObject->objectFlags.bIsExploded)
@@ -3752,7 +3752,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
                     pEntity->SetIsStatic(false);
                 }
 
-                int entityModelIndex = pEntity->m_nModelIndex;
+                int32 entityModelIndex = pEntity->m_nModelIndex;
                 if (entityModelIndex != MODEL_FIRE_HYDRANT || pEntityObject->objectFlags.bIsExploded)
                 {
                     if (entityModelIndex != ModelIndices::MI_PARKINGMETER && entityModelIndex != ModelIndices::MI_PARKINGMETER2 || pEntityObject->objectFlags.bIsExploded)
@@ -4243,10 +4243,10 @@ bool CPhysical::ApplySoftCollision(CPhysical* pEntity, CColPoint* pColPoint, flo
 #endif
 }
 
-bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
+bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall*)(CPhysical*, int, int))0x54BA60)(this, sectorX, sectorY);
+    return ((bool(__thiscall*)(CPhysical*, int32, int32))0x54BA60)(this, sectorX, sectorY);
 #else
     static CColPoint colPoints[32];
 
@@ -4271,7 +4271,7 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
     CSector* pSector = GetSector(sectorX, sectorY);
     CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
 
-    int scanListIndex = 4;
+    int32 scanListIndex = 4;
     do
     {
         CPtrListDoubleLink* pDoubleLinkList = nullptr;
@@ -4402,7 +4402,7 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
                     pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
                     if (!bCollisionDisabled) // if collision is enabled then
                     {
-                        int totalColPointsToProcess = ProcessEntityCollision(pPhysicalEntity, &colPoints[0]);
+                        int32 totalColPointsToProcess = ProcessEntityCollision(pPhysicalEntity, &colPoints[0]);
                         if (physicalFlags.b17 && !bCollidedEntityCollisionIgnored && totalColPointsToProcess > 0)
                         {
                             return true;
@@ -4419,19 +4419,19 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
                 {
                     pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
 
-                    int totalAcceptableColPoints = 0;
+                    int32 totalAcceptableColPoints = 0;
                     float fThisMaxDamageIntensity = 0.0;
                     CVector vecMoveSpeed = CVector(0.0f, 0.0f, 0.0f);
                     CVector vecTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
 
-                    int totalColPointsToProcess = ProcessEntityCollision(pPhysicalEntity, &colPoints[0]);
+                    int32 totalColPointsToProcess = ProcessEntityCollision(pPhysicalEntity, &colPoints[0]);
                     if (totalColPointsToProcess > 0)
                     {
                         if (m_bHasContacted)
                         {
                             if (totalColPointsToProcess > 0)
                             {
-                                for (int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+                                for (int32 colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
                                 {
                                     CColPoint* pColPoint = &colPoints[colPointIndex];
                                     if (bThisOrCollidedEntityStuck
@@ -4464,7 +4464,7 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
                         }
                         else
                         {
-                            for (int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+                            for (int32 colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
                             {
                                 CColPoint* pColPoint = &colPoints[colPointIndex];
                                 if (bThisOrCollidedEntityStuck
@@ -4624,8 +4624,8 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
                 {
                     pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
 
-                    int totalAcceptableColPoints = 0;
-                    int totalColPointsToProcess = ProcessEntityCollision(pPhysicalEntity, &colPoints[0]);
+                    int32 totalAcceptableColPoints = 0;
+                    int32 totalColPointsToProcess = ProcessEntityCollision(pPhysicalEntity, &colPoints[0]);
                     if (totalColPointsToProcess > 0)
                     {
                         fThisMaxDamageIntensity = 0.0;
@@ -4634,7 +4634,7 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
                         {
                             if (totalColPointsToProcess > 0)
                             {
-                                for (int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+                                for (int32 colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
                                 {
                                     CColPoint* pColPoint = &colPoints[colPointIndex];
                                     if (bThisOrCollidedEntityStuck
@@ -4673,7 +4673,7 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
                             m_vecFrictionTurnSpeed = CVector(0.0f, 0.0f, 0.0f);
                             if (totalColPointsToProcess > 0)
                             {
-                                for (int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+                                for (int32 colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
                                 {
                                     CColPoint* pColPoint = &colPoints[colPointIndex];
                                     if (bThisOrCollidedEntityStuck
@@ -4745,7 +4745,7 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
 
                                 if (totalColPointsToProcess > 0)
                                 {
-                                    for (int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+                                    for (int32 colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
                                     {
                                         CColPoint* pColPoint = &colPoints[colPointIndex];
                                         if (bThisOrCollidedEntityStuck
@@ -4809,7 +4809,7 @@ bool CPhysical::ProcessCollisionSectorList(int sectorX, int sectorY)
                             }
                             else if (totalColPointsToProcess > 0)
                             {
-                                for (int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+                                for (int32 colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
                                 {
                                     CColPoint* pColPoint = &colPoints[colPointIndex];
                                     if (bThisOrCollidedEntityStuck
@@ -4989,7 +4989,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSecto
     float fBoundingRadius = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->GetColModel()->GetBoundRadius();
     CPtrListDoubleLink* pDoubleLinkList = nullptr;
   
-    int scanListIndex = 2;
+    int32 scanListIndex = 2;
     while (1)
     {
         switch (--scanListIndex)
@@ -5016,7 +5016,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSecto
     CEntity* pEntity = nullptr;
     CPhysical* pPhysicalEntity = nullptr;
 
-    int totalColPointsToProcess = 0;
+    int32 totalColPointsToProcess = 0;
 
     CPtrNodeDoubleLink* pNode = pDoubleLinkList->GetNode();
     while (pNode)
@@ -5060,7 +5060,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSecto
     {
         if (totalColPointsToProcess > 0)
         {
-            for( int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+            for( int32 colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
             {
                 CColPoint* pColPoint = &colPoints[colPointIndex];
                 if (ApplyCollision(pEntity, pColPoint, &fThisDamageIntensity, &fEntityDamageIntensity))
@@ -5081,7 +5081,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSecto
 
         if (totalColPointsToProcess > 0)
         {
-            for (int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+            for (int32 colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
             {
                 CColPoint* pColPoint = &colPoints[colPointIndex];
                 if (ApplyCollision(pEntity, pColPoint, &fThisDamageIntensity, &fEntityDamageIntensity))
@@ -5118,7 +5118,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSecto
 
             if (totalColPointsToProcess > 0)
             {
-                for (int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+                for (int32 colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
                 {
                     CColPoint* pColPoint = &colPoints[colPointIndex];
                     if (ApplyCollision(pEntity, pColPoint, &fThisDamageIntensity, &fEntityDamageIntensity))
@@ -5144,7 +5144,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSecto
         }
         else if (totalColPointsToProcess > 0)
         {
-            for (int colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
+            for (int32 colPointIndex = 0; colPointIndex < totalColPointsToProcess; colPointIndex++)
             {
                 CColPoint* pColPoint = &colPoints[colPointIndex];
                 if (ApplyCollision(pEntity, pColPoint, &fThisDamageIntensity, &fEntityDamageIntensity))
@@ -5309,12 +5309,12 @@ bool CPhysical::CheckCollision()
 
     CRect boundRect;
     GetBoundRect(&boundRect);
-    std::int32_t startSectorX = CWorld::GetSectorX(boundRect.left);
-    std::int32_t startSectorY = CWorld::GetSectorY(boundRect.top);
-    std::int32_t endSectorX = CWorld::GetSectorX(boundRect.right);
-    std::int32_t endSectorY = CWorld::GetSectorY(boundRect.bottom);
-    for (std::int32_t sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-        for (std::int32_t sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+    int32 startSectorX = CWorld::GetSectorX(boundRect.left);
+    int32 startSectorY = CWorld::GetSectorY(boundRect.top);
+    int32 endSectorX = CWorld::GetSectorX(boundRect.right);
+    int32 endSectorY = CWorld::GetSectorY(boundRect.bottom);
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             if (ProcessCollisionSectorList(sectorX, sectorY))
                 return true;
         }

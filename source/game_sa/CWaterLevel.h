@@ -2,18 +2,16 @@
 
 class CVector;
 
-struct CRenPar
-{
+struct CRenPar {
     float z;
     float u;
     float waveHeight;
     float velocity;
 };
 
-struct CWaterVertex
-{
-    uint16_t x;
-    uint16_t y;
+struct CWaterVertex {
+    uint16  x;
+    uint16  y;
     CRenPar renPar;
 };
 
@@ -47,9 +45,9 @@ public:
     * m_nNumOfWaterQuads
     * m_nNumOfWaterTriangles
     */
-    static uint32_t m_nNumOfWaterVertices;
-    static uint32_t& m_nWaterConfiguration;
-    static uint32_t& m_nWaterTimeOffset;
+    static uint32 m_nNumOfWaterVertices;
+    static uint32& m_nWaterConfiguration;
+    static uint32& m_nWaterTimeOffset;
     static float* faWaveMultipliersX;
     static float* faWaveMultipliersY;
 
@@ -69,19 +67,19 @@ public:
     static void InjectHooks();
 
     /*
-    * AddToQuadsAndTrianglesList(int, int, int, unsigned int)
-    * AddWaterLevelQuad(int, int, CRenPar, int, int, CRenPar, int, int, CRenPar, int, int, CRenPar, unsigned int)
-    * AddWaterLevelTriangle(int, int, CRenPar, int, int, CRenPar, int, int, CRenPar, unsigned int)
+    * AddToQuadsAndTrianglesList(int32, int32, int32, uint32)
+    * AddWaterLevelQuad(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, uint32)
+    * AddWaterLevelTriangle(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, uint32)
     */
-    static int AddWaterLevelVertex(int x, int y, CRenPar renPar);
+    static int32 AddWaterLevelVertex(int32 x, int32 y, CRenPar renPar);
     static void AddWaveToResult(float x, float y, float* pfWaterLevel, float fUnkn1, float fUnkn2, CVector* pVecNormal);
-    static void CalculateWavesOnlyForCoordinate(int x, int y, float fUnkn1, float fUnkn2, float* fOutWave);
+    static void CalculateWavesOnlyForCoordinate(int32 x, int32 y, float fUnkn1, float fUnkn2, float* fOutWave);
     /*
-    * static void AddWaveToResult(float x, float y, float z, float* pLevel, unsigned char bTouchingWater, CVector* normalVec);
-    * AddWaveToResult(int, int, float*, float, float)
-    * BlockHit(int, int)
-    * CalculateWavesForCoordinate(int, int, float, float, float*, float*, float*, CVector*)
-    * ChangeWaterConfiguration(int)
+    * static void AddWaveToResult(float x, float y, float z, float* pLevel, uint8 bTouchingWater, CVector* normalVec);
+    * AddWaveToResult(int32, int32, float*, float, float)
+    * BlockHit(int32, int32)
+    * CalculateWavesForCoordinate(int32, int32, float, float, float*, float*, float*, CVector*)
+    * ChangeWaterConfiguration(int32)
     * CreateBeachToy(CVector const&, eBeachToy)
     * FillQuadsAndTrianglesList()
     * FindNearestWaterAndItsFlow()
@@ -91,42 +89,42 @@ public:
     *
     */
     static bool GetWaterDepth(CVector const& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel);
-    static bool GetWaterLevel(float x, float y, float z, float * pOutWaterLevel, unsigned char bTouchingWater, CVector* pVecNormals);
+    static bool GetWaterLevel(float x, float y, float z, float * pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals);
     static bool GetWaterLevelNoWaves(float x, float y, float z, float* pOutWaterLevel, float* fUnkn1, float* fUnkn2);
     /*
     * HandleBeachToysStuff()
-    * IsLocationOutOfWorldBounds_WS(CVector const&, int)
-    * MarkQuadsAndPolysToBeRendered(int, int, bool)
+    * IsLocationOutOfWorldBounds_WS(CVector const&, int32)
+    * MarkQuadsAndPolysToBeRendered(int32, int32, bool)
     */
     static void PreRenderWater();
     /* RenderAndEmptyRenderBuffer()
     * RenderBoatWakes()
-    * RenderDetailedSeaBedSegment(int, int, float, float, float, float)
-    * RenderFlatWaterRectangle(int, int, int, int, CRenPar, CRenPar, CRenPar, CRenPar)
-    * RenderFlatWaterRectangle_OneLayer(int, int, int, int, CRenPar, CRenPar, CRenPar, CRenPar, int)
-    * RenderFlatWaterTriangle(int, int, CRenPar, int, int, CRenPar, int, int, CRenPar)
-    * RenderFlatWaterTriangle_OneLayer(int, int, CRenPar, int, int, CRenPar, int, int, CRenPar, int)
-    * RenderHighDetailWaterRectangle(int, int, int, int, CRenPar, CRenPar, CRenPar, CRenPar)
-    * RenderHighDetailWaterRectangle_OneLayer(int, int, int, int, CRenPar, CRenPar, CRenPar, CRenPar, int, int, int, int, int)
-    * RenderHighDetailWaterTriangle(int, int, CRenPar, int, int, CRenPar, int, int, CRenPar)
-    * RenderHighDetailWaterTriangle_OneLayer(int, int, CRenPar, int, int, CRenPar, int, int, CRenPar, int, int, int, int)
-    * RenderSeaBedSegment(int, int, float, float, float, float)
+    * RenderDetailedSeaBedSegment(int32, int32, float, float, float, float)
+    * RenderFlatWaterRectangle(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
+    * RenderFlatWaterRectangle_OneLayer(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar, int32)
+    * RenderFlatWaterTriangle(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar)
+    * RenderFlatWaterTriangle_OneLayer(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, int32)
+    * RenderHighDetailWaterRectangle(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
+    * RenderHighDetailWaterRectangle_OneLayer(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar, int32, int32, int32, int32, int32)
+    * RenderHighDetailWaterTriangle(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar)
+    * RenderHighDetailWaterTriangle_OneLayer(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, int32, int32)
+    * RenderSeaBedSegment(int32, int32, float, float, float, float)
     * RenderShipsOnHorizon()
     * RenderTransparentWater()
     * RenderWakeSegment(CVector2D&, CVector2D&, CVector2D&, CVector2D&, float&, float&, float&, float&, float&)
     */
     static void RenderWater();
     /* RenderWaterFog()
-    * RenderWaterRectangle(int, int, int, int, CRenPar, CRenPar, CRenPar, CRenPar)
-    * RenderWaterTriangle(int, int, CRenPar, int, int, CRenPar, int, int, CRenPar)
+    * RenderWaterRectangle(int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
+    * RenderWaterTriangle(int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar)
     * ScanThroughBlocks()
     * SetCameraRange()
-    * SetUpWaterFog(int, int, int, int)
+    * SetUpWaterFog(int32, int32, int32, int32)
     * Shutdown()
-    * SplitWaterRectangleAlongXLine(int, int, int, int, int, CRenPar, CRenPar, CRenPar, CRenPar)
-    * SplitWaterRectangleAlongYLine(int, int, int, int, int, CRenPar, CRenPar, CRenPar, CRenPar)
-    * SplitWaterTriangleAlongXLine(int, int, int, CRenPar, int, int, CRenPar, int, int, CRenPar)
-    * SplitWaterTriangleAlongYLine(int, int, int, CRenPar, int, int, CRenPar, int, int, CRenPar)
+    * SplitWaterRectangleAlongXLine(int32, int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
+    * SplitWaterRectangleAlongYLine(int32, int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar)
+    * SplitWaterTriangleAlongXLine(int32, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar)
+    * SplitWaterTriangleAlongYLine(int32, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar)
     * TestLineAgainstWater(CVector, CVector, CVector*)
     * TestQuadToGetWaterLevel(CWaterQuad*, float, float, float, float*, float*, float*)
     * TestTriangleToGetWaterLevel(CWaterTriangle*, float, float, float, float*, float*, float*)

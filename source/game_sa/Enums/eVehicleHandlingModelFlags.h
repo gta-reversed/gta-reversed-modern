@@ -6,7 +6,7 @@
 */
 #pragma once
 
-enum eVehicleHandlingModelFlags : unsigned int {
+enum eVehicleHandlingModelFlags : uint32 {
     VEHICLE_HANDLING_MODEL_NONE = 0x0,
     VEHICLE_HANDLING_MODEL_IS_VAN = 0x1,
     VEHICLE_HANDLING_MODEL_IS_BUS = 0x2,

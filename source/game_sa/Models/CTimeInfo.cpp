@@ -29,7 +29,7 @@ CTimeInfo* CTimeInfo::FindOtherTimeModel(const char* modelName) {
         strncpy(daySuffix, "_nt", 4);
     }
 
-    int index = 0;
+    int32 index = 0;
     CBaseModelInfo* modelInfo = CModelInfo::GetModelInfoFromHashKey(CKeyGen::GetUppercaseKey(timeSwitchModelName), &index);
     CTimeInfo* timeInfo = modelInfo ? modelInfo->GetTimeInfo() : nullptr;
 

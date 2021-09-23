@@ -6,7 +6,7 @@
 */
 #include "StdInc.h"
 
-unsigned int MAX_NUM_WEAPON_CROSSHAIRS = 2;
+uint32 MAX_NUM_WEAPON_CROSSHAIRS = 2;
 CWeaponEffects* gCrossHair = (CWeaponEffects*)0xC8A838;
 RwTexture*& gpCrossHairTex = *(RwTexture * *)0xC8A818;
 RwTexture** gpCrossHairTexFlight = (RwTexture * *)0xC8A810;
@@ -32,18 +32,18 @@ void CWeaponEffects::Shutdown() {
 }
 
 // 0x742BD0
-bool CWeaponEffects::IsLockedOn(int crosshairId) {
-    return plugin::CallAndReturn<bool, 0x742BD0, int>(crosshairId);
+bool CWeaponEffects::IsLockedOn(int32 crosshairId) {
+    return plugin::CallAndReturn<bool, 0x742BD0, int32>(crosshairId);
 }
 
 // 0x742BF0
-void CWeaponEffects::MarkTarget(int crosshairId, CVector posn, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha, float size, unsigned char arg7) {
-    plugin::Call<0x742BF0, int, CVector, unsigned char, unsigned char, unsigned char, unsigned char, float, unsigned char>(crosshairId, posn, red, green, blue, alpha, size, arg7);
+void CWeaponEffects::MarkTarget(int32 crosshairId, CVector posn, uint8 red, uint8 green, uint8 blue, uint8 alpha, float size, uint8 arg7) {
+    plugin::Call<0x742BF0, int32, CVector, uint8, uint8, uint8, uint8, float, uint8>(crosshairId, posn, red, green, blue, alpha, size, arg7);
 }
 
 // 0x742C60
-void CWeaponEffects::ClearCrossHair(int crosshairId) {
-    plugin::Call<0x742C60, int>(crosshairId);
+void CWeaponEffects::ClearCrossHair(int32 crosshairId) {
+    plugin::Call<0x742C60, int32>(crosshairId);
 }
 
 // 0x742C80
@@ -52,8 +52,8 @@ void CWeaponEffects::ClearCrossHairs() {
 }
 
 // 0x742CA0
-void CWeaponEffects::ClearCrossHairImmediately(int crosshairId) {
-    plugin::Call<0x742CA0, int>(crosshairId);
+void CWeaponEffects::ClearCrossHairImmediately(int32 crosshairId) {
+    plugin::Call<0x742CA0, int32>(crosshairId);
 }
 
 // 0x742CC0

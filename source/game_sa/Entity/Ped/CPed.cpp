@@ -1,11 +1,14 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
-
 #include "StdInc.h"
+
+#include "CPed.h"
+
+#include "CPedType.h"
 
 void CPed::InjectHooks() {
     // Constructors
@@ -31,7 +34,7 @@ void CPed::InjectHooks() {
     ReversibleHooks::Install("CPed", "ClearWeapons", 0x5E6320, &CPed::ClearWeapons);
     // ReversibleHooks::Install("CPed", "ClearWeapon", 0x5E62B0, &CPed::ClearWeapon);
     // ReversibleHooks::Install("CPed", "SetCurrentWeapon", 0x5E6280, static_cast<void(CPed::*)(eWeaponType)>(&CPed::SetCurrentWeapon));
-    // ReversibleHooks::Install("CPed", "SetCurrentWeapon", 0x5E61F0, static_cast<void(CPed::*)(int32_t)>(&CPed::SetCurrentWeapon));
+    // ReversibleHooks::Install("CPed", "SetCurrentWeapon", 0x5E61F0, static_cast<void(CPed::*)(int32)>(&CPed::SetCurrentWeapon));
     // ReversibleHooks::Install("CPed", "GiveWeapon", 0x5E6080, &CPed::GiveWeapon);
     // ReversibleHooks::Install("CPed", "TakeOffGoggles", 0x5E6010, &CPed::TakeOffGoggles);
     // ReversibleHooks::Install("CPed", "AddWeaponModel", 0x5E5ED0, &CPed::AddWeaponModel);
@@ -77,8 +80,8 @@ void CPed::InjectHooks() {
     ReversibleHooks::Install("CPed", "GetWeaponSkill", 0x5E6580, static_cast<eWeaponSkill(CPed::*)()>(&CPed::GetWeaponSkill));
     // ReversibleHooks::Install("CPed", "PreRenderAfterTest", 0x5E65A0, &CPed::PreRenderAfterTest);
     // ReversibleHooks::Install("CPed", "SetIdle", 0x5E7980, &CPed::SetIdle);
-    // ReversibleHooks::Install("CPed", "SetLook", 0x5E79B0, static_cast<int32_t(CPed::*)(float)>(&CPed::SetLook));
-    // ReversibleHooks::Install("CPed", "SetLook", 0x5E7A60, static_cast<int32_t(CPed::*)(CEntity *)>(&CPed::SetLook));
+    // ReversibleHooks::Install("CPed", "SetLook", 0x5E79B0, static_cast<int32(CPed::*)(float)>(&CPed::SetLook));
+    // ReversibleHooks::Install("CPed", "SetLook", 0x5E7A60, static_cast<int32(CPed::*)(CEntity *)>(&CPed::SetLook));
     // ReversibleHooks::Install("CPed", "Look", 0x5E7B20, &CPed::Look);
     ReversibleHooks::Install("CPed", "ReplaceWeaponForScriptedCutscene", 0x5E6530, &CPed::ReplaceWeaponForScriptedCutscene);
     ReversibleHooks::Install("CPed", "RemoveWeaponForScriptedCutscene", 0x5E6550, &CPed::RemoveWeaponForScriptedCutscene);
@@ -98,9 +101,9 @@ void CPed::InjectHooks() {
     // ReversibleHooks::Install("CPed", "IsPedShootable", 0x5DEFD0, &CPed::IsPedShootable);
     // ReversibleHooks::Install("CPed", "GetLocalDirection", 0x5DEF60, &CPed::GetLocalDirection);
     // ReversibleHooks::Install("CPed", "ClearAimFlag", 0x5DEF20, &CPed::ClearAimFlag);
-    // ReversibleHooks::Install("CPed", "SetAimFlag", 0x5DEED0, static_cast<int8_t(CPed::*)(CEntity *)>(&CPed::SetAimFlag));
-    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEE40, static_cast<int8_t(CPed::*)(CEntity *, bool, bool)>(&CPed::SetLookFlag));
-    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEDC0, static_cast<int8_t(CPed::*)(float, bool, bool)>(&CPed::SetLookFlag));
+    // ReversibleHooks::Install("CPed", "SetAimFlag", 0x5DEED0, static_cast<int8(CPed::*)(CEntity *)>(&CPed::SetAimFlag));
+    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEE40, static_cast<int8(CPed::*)(CEntity *, bool, bool)>(&CPed::SetLookFlag));
+    // ReversibleHooks::Install("CPed", "SetLookFlag", 0x5DEDC0, static_cast<int8(CPed::*)(float, bool, bool)>(&CPed::SetLookFlag));
     // ReversibleHooks::Install("CPed", "CanUseTorsoWhenLooking", 0x5DED90, &CPed::CanUseTorsoWhenLooking);
     // ReversibleHooks::Install("CPed", "PedIsReadyForConversation", 0x43ABA0, &CPed::PedIsReadyForConversation);
     // ReversibleHooks::Install("CPed", "CreateDeadPedMoney", 0x4590F0, &CPed::CreateDeadPedMoney);
@@ -168,8 +171,8 @@ plugin::dummy, plugin::dummy, plugin::dummy }
 }
 
 // 0x5E4720
-void* CPed::operator new(unsigned int size) {
-    return ((void* (__cdecl *)(unsigned int))0x5E4720)(size);
+void* CPed::operator new(uint32 size) {
+    return ((void* (__cdecl *)(uint32))0x5E4720)(size);
 }
 
 // 0x5E4760
@@ -192,7 +195,7 @@ bool CPed::Save()
 // 0x5D4640
 bool CPed::Load()
 {
-    return ((bool(__thiscall *)(CPed*))(*(void ***)this)[26])(this);
+    return plugin::CallMethodAndReturn<bool, 0x5D4640, CPed*>(this);
 }
 
 // 0x43AB90
@@ -240,7 +243,7 @@ void CPed::Initialise() {
 // unused
 // 0x5DEBC0
 void CPed::SetPedStats(ePedStats statsType) {
-    // auto index = static_cast<int>(statsType);
+    // auto index = static_cast<int32>(statsType);
     // m_pStats = &CPedStats::ms_apPedStats[index];
 }
 
@@ -305,9 +308,9 @@ void CPed::ClearAimFlag()
 }
 
 // 0x5DEF60
-int CPed::GetLocalDirection(CVector2D const& arg0)
+int32 CPed::GetLocalDirection(CVector2D const& arg0)
 {
-    return ((int(__thiscall *)(CPed*, CVector2D const&))0x5DEF60)(this, arg0);
+    return ((int32(__thiscall *)(CPed*, CVector2D const&))0x5DEF60)(this, arg0);
 }
 
 // 0x5DEFD0
@@ -382,21 +385,21 @@ void CPed::RemoveGogglesModel()
     ((void(__thiscall *)(CPed*))0x5DF170)(this);
 }
 
-int CPed::GetWeaponSlot(eWeaponType weaponType)
+int32 CPed::GetWeaponSlot(eWeaponType weaponType)
 {
     return CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nSlot;
 }
 
 // 0x5DF220
-void CPed::GrantAmmo(eWeaponType weaponType, unsigned int ammo)
+void CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo)
 {
-    ((void(__thiscall *)(CPed*, eWeaponType, unsigned int))0x5DF220)(this, weaponType, ammo);
+    ((void(__thiscall *)(CPed*, eWeaponType, uint32))0x5DF220)(this, weaponType, ammo);
 }
 
 // 0x5DF290
-void CPed::SetAmmo(eWeaponType weaponType, unsigned int ammo)
+void CPed::SetAmmo(eWeaponType weaponType, uint32 ammo)
 {
-    ((void(__thiscall *)(CPed*, eWeaponType, unsigned int))0x5DF290)(this, weaponType, ammo);
+    ((void(__thiscall *)(CPed*, eWeaponType, uint32))0x5DF290)(this, weaponType, ammo);
 }
 
 // 0x5DF300
@@ -406,9 +409,9 @@ bool CPed::DoWeHaveWeaponAvailable(eWeaponType weaponType)
 }
 
 // 0x5DF340
-bool CPed::DoGunFlash(int arg0, bool arg1)
+bool CPed::DoGunFlash(int32 arg0, bool arg1)
 {
-    return ((bool(__thiscall *)(CPed*, int, bool))0x5DF340)(this, arg0, arg1);
+    return ((bool(__thiscall *)(CPed*, int32, bool))0x5DF340)(this, arg0, arg1);
 }
 
 // 0x5DF400
@@ -436,9 +439,9 @@ void CPed::ShoulderBoneRotation(RpClump* clump)
 }
 
 // 0x5DF8D0
-void CPed::SetLookTimer(unsigned int time)
+void CPed::SetLookTimer(uint32 time)
 {
-    ((void(__thiscall *)(CPed*, unsigned int))0x5DF8D0)(this, time);
+    ((void(__thiscall *)(CPed*, uint32))0x5DF8D0)(this, time);
 }
 
 // 0x5DF8F0
@@ -509,9 +512,9 @@ void CPed::UpdateStatLeavingVehicle()
 }
 
 // 0x5E01C0
-void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, unsigned int boneId, bool updateSkinBones)
+void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, uint32 boneId, bool updateSkinBones)
 {
-    ((void(__thiscall *)(CPed*, RwV3d&, unsigned int, bool))0x5E01C0)(this, inOffsetOutPosn, boneId, updateSkinBones);
+    ((void(__thiscall *)(CPed*, RwV3d&, uint32, bool))0x5E01C0)(this, inOffsetOutPosn, boneId, updateSkinBones);
 }
 
 // 0x5E0270
@@ -533,9 +536,9 @@ CEntity* CPed::GetEntityThatThisPedIsHolding()
 }
 
 // 0x5E0360
-void CPed::DropEntityThatThisPedIsHolding(unsigned char arg0)
+void CPed::DropEntityThatThisPedIsHolding(uint8 arg0)
 {
-    ((void(__thiscall *)(CPed*, unsigned char))0x5E0360)(this, arg0);
+    ((void(__thiscall *)(CPed*, uint8))0x5E0360)(this, arg0);
 }
 
 // 0x5E0400
@@ -575,9 +578,9 @@ bool CPed::CanSeeEntity(CEntity* entity, float limitAngle)
 }
 
 // 0x5E0820
-bool CPed::PositionPedOutOfCollision(int exitDoor, CVehicle* vehicke, bool findClosestNode)
+bool CPed::PositionPedOutOfCollision(int32 exitDoor, CVehicle* vehicke, bool findClosestNode)
 {
-    return ((bool(__thiscall *)(CPed*, int, CVehicle*, bool))0x5E0820)(this, exitDoor, vehicke, findClosestNode);
+    return ((bool(__thiscall *)(CPed*, int32, CVehicle*, bool))0x5E0820)(this, exitDoor, vehicke, findClosestNode);
 }
 
 // 0x5E13C0
@@ -593,9 +596,9 @@ bool CPed::OurPedCanSeeThisEntity(CEntity* entity, bool isSpotted)
 }
 
 // 0x5E17E0
-void CPed::SortPeds(CPed** pedList, int arg1, int arg2)
+void CPed::SortPeds(CPed** pedList, int32 arg1, int32 arg2)
 {
-    ((void(__thiscall *)(CPed*, CPed**, int, int))0x5E17E0)(this, pedList, arg1, arg2);
+    ((void(__thiscall *)(CPed*, CPed**, int32, int32))0x5E17E0)(this, pedList, arg1, arg2);
 }
 
 // 0x5E1A00
@@ -761,15 +764,15 @@ bool CPed::IsPedInControl()
 }
 
 // 0x5E3990
-void CPed::RemoveWeaponModel(int modelIndex)
+void CPed::RemoveWeaponModel(int32 modelIndex)
 {
-    ((void(__thiscall *)(CPed*, int))0x5E3990)(this, modelIndex);
+    ((void(__thiscall *)(CPed*, int32))0x5E3990)(this, modelIndex);
 }
 
 // 0x5E3A90
-void CPed::AddGogglesModel(int modelIndex, bool* pGogglesType)
+void CPed::AddGogglesModel(int32 modelIndex, bool* pGogglesType)
 {
-    ((void(__thiscall *)(CPed*, int, bool*))0x5E3A90)(this, modelIndex, pGogglesType);
+    ((void(__thiscall *)(CPed*, int32, bool*))0x5E3A90)(this, modelIndex, pGogglesType);
 }
 
 // 0x5E3AE0
@@ -790,7 +793,7 @@ eWeaponSkill CPed::GetWeaponSkill(eWeaponType weaponType)
 
     if (!m_nPedType || m_nPedType == PED_TYPE_PLAYER2)
     {
-        int skillStat = CWeaponInfo::GetSkillStatIndex(weaponType);
+        int32 skillStat = CWeaponInfo::GetSkillStatIndex(weaponType);
         CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_PRO);
         float golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_nReqStatLevel);
         if (golfClubStatLevel <= CStats::GetStatValue((eStats)skillStat))
@@ -841,15 +844,15 @@ bool CPed::IsPointerValid()
 }
 
 // 0x5E4280
-void CPed::GetBonePosition(RwV3d& outPosition, unsigned int boneId, bool updateSkinBones)
+void CPed::GetBonePosition(RwV3d& outPosition, uint32 boneId, bool updateSkinBones)
 {
-    ((void(__thiscall *)(CPed*, RwV3d&, unsigned int, bool))0x5E4280)(this, outPosition, boneId, updateSkinBones);
+    ((void(__thiscall *)(CPed*, RwV3d&, uint32, bool))0x5E4280)(this, outPosition, boneId, updateSkinBones);
 }
 
 // 0x5E4390
-CObject* CPed::GiveObjectToPedToHold(int modelIndex, unsigned char replace)
+CObject* CPed::GiveObjectToPedToHold(int32 modelIndex, uint8 replace)
 {
-    return ((CObject* (__thiscall *)(CPed*, int, unsigned char))0x5E4390)(this, modelIndex, replace);
+    return ((CObject* (__thiscall *)(CPed*, int32, uint8))0x5E4390)(this, modelIndex, replace);
 }
 
 // 0x5E4500
@@ -859,9 +862,9 @@ void CPed::SetPedState(ePedState pedState)
 }
 
 // 0x5E47E0
-void CPed::SetCharCreatedBy(unsigned char createdBy)
+void CPed::SetCharCreatedBy(uint8 createdBy)
 {
-    ((void(__thiscall *)(CPed*, unsigned char))0x5E47E0)(this, createdBy);
+    ((void(__thiscall *)(CPed*, uint8))0x5E47E0)(this, createdBy);
 }
 
 // 0x5E4C50
@@ -883,9 +886,9 @@ void CPed::ClearAll()
 }
 
 // 0x5E5380
-void CPed::DoFootLanded(bool leftFoot, unsigned char arg1)
+void CPed::DoFootLanded(bool leftFoot, uint8 arg1)
 {
-    ((void(__thiscall *)(CPed*, bool, unsigned char))0x5E5380)(this, leftFoot, arg1);
+    ((void(__thiscall *)(CPed*, bool, uint8))0x5E5380)(this, leftFoot, arg1);
 }
 
 // 0x5E57F0
@@ -895,9 +898,9 @@ void CPed::PlayFootSteps()
 }
 
 // 0x5E5ED0
-void CPed::AddWeaponModel(int modelIndex)
+void CPed::AddWeaponModel(int32 modelIndex)
 {
-    ((void(__thiscall *)(CPed*, int))0x5E5ED0)(this, modelIndex);
+    ((void(__thiscall *)(CPed*, int32))0x5E5ED0)(this, modelIndex);
 }
 
 // 0x5E6010
@@ -907,9 +910,9 @@ void CPed::TakeOffGoggles()
 }
 
 // 0x5E6080
-void CPed::GiveWeapon(eWeaponType weaponType, unsigned int ammo, bool likeUnused)
+void CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused)
 {
-    ((void(__thiscall *)(CPed*, eWeaponType, unsigned int, bool))0x5E6080)(this, weaponType, ammo, likeUnused);
+    ((void(__thiscall *)(CPed*, eWeaponType, uint32, bool))0x5E6080)(this, weaponType, ammo, likeUnused);
 }
 
 // NOTSA
@@ -951,9 +954,9 @@ void CPed::GiveWeaponSet3() {
 }
 
 // 0x5E61F0
-void CPed::SetCurrentWeapon(int slot)
+void CPed::SetCurrentWeapon(int32 slot)
 {
-    ((void(__thiscall *)(CPed*, int))0x5E61F0)(this, slot);
+    ((void(__thiscall *)(CPed*, int32))0x5E61F0)(this, slot);
 }
 
 // 0x5E6280
@@ -983,9 +986,9 @@ void CPed::ClearWeapons()
 }
 
 // 0x5E6370
-void CPed::RemoveWeaponWhenEnteringVehicle(int arg0)
+void CPed::RemoveWeaponWhenEnteringVehicle(int32 arg0)
 {
-    ((void(__thiscall *)(CPed*, int))0x5E6370)(this, arg0);
+    ((void(__thiscall *)(CPed*, int32))0x5E6370)(this, arg0);
 }
 
 // 0x5E6490
@@ -1043,15 +1046,15 @@ void CPed::Look()
 }
 
 // 0x5E7CB0
-CEntity* CPed::AttachPedToEntity(CEntity* entity, CVector offset, unsigned short arg2, float arg3, eWeaponType weaponType)
+CEntity* CPed::AttachPedToEntity(CEntity* entity, CVector offset, uint16 arg2, float arg3, eWeaponType weaponType)
 {
-    return ((CEntity* (__thiscall *)(CPed*, CEntity*, CVector, unsigned short, float, eWeaponType))0x5E7CB0)(this, entity, offset, arg2, arg3, weaponType);
+    return ((CEntity* (__thiscall *)(CPed*, CEntity*, CVector, uint16, float, eWeaponType))0x5E7CB0)(this, entity, offset, arg2, arg3, weaponType);
 }
 
 // 0x5E7E60
-CEntity* CPed::AttachPedToBike(CEntity* entity, CVector offset, unsigned short arg2, float arg3, float arg4, eWeaponType weaponType)
+CEntity* CPed::AttachPedToBike(CEntity* entity, CVector offset, uint16 arg2, float arg3, float arg4, eWeaponType weaponType)
 {
-    return ((CEntity* (__thiscall *)(CPed*, CEntity*, CVector, unsigned short, float, float, eWeaponType))0x5E7E60)(this, entity, offset, arg2, arg3, arg4, weaponType);
+    return ((CEntity* (__thiscall *)(CPed*, CEntity*, CVector, uint16, float, float, eWeaponType))0x5E7E60)(this, entity, offset, arg2, arg3, arg4, weaponType);
 }
 
 // 0x5E7EC0
@@ -1079,9 +1082,9 @@ void CPed::RequestDelayedWeapon()
 }
 
 // 0x5E89B0
-void CPed::GiveDelayedWeapon(eWeaponType weaponType, unsigned int ammo)
+void CPed::GiveDelayedWeapon(eWeaponType weaponType, uint32 ammo)
 {
-    ((void(__thiscall *)(CPed*, eWeaponType, unsigned int))0x5E89B0)(this, weaponType, ammo);
+    ((void(__thiscall *)(CPed*, eWeaponType, uint32))0x5E89B0)(this, weaponType, ammo);
 }
 
 // 0x5E8A30
@@ -1095,7 +1098,7 @@ void CPed::GiveWeaponAtStartOfFight()
 {
     if (m_nCreatedBy != PED_MISSION && GetActiveWeapon().m_nType == eWeaponType::WEAPON_UNARMED)
     {
-        const auto GiveRandomWeaponByType = [this](eWeaponType type, uint16_t maxRandom)
+        const auto GiveRandomWeaponByType = [this](eWeaponType type, uint16 maxRandom)
         {
             if ((m_nRandomSeed & 0x3FFu) >= maxRandom)
                 return;
@@ -1162,9 +1165,9 @@ bool CPed::GetPedTalking()
 }
 
 // 0x5EFF60
-void CPed::DisablePedSpeech(short arg0)
+void CPed::DisablePedSpeech(int16 arg0)
 {
-    ((void(__thiscall *)(CPed*, short))0x5EFF60)(this, arg0);
+    ((void(__thiscall *)(CPed*, int16))0x5EFF60)(this, arg0);
 }
 
 // 0x5EFF70
@@ -1174,9 +1177,9 @@ void CPed::EnablePedSpeech()
 }
 
 // 0x5EFF80
-void CPed::DisablePedSpeechForScriptSpeech(short arg0)
+void CPed::DisablePedSpeechForScriptSpeech(int16 arg0)
 {
-    ((void(__thiscall *)(CPed*, short))0x5EFF80)(this, arg0);
+    ((void(__thiscall *)(CPed*, int16))0x5EFF80)(this, arg0);
 }
 
 // 0x5EFF90
@@ -1192,15 +1195,15 @@ void CPed::CanPedHoldConversation()
 }
 
 // 0x5EFFB0
-void CPed::SayScript(int arg0, unsigned char arg1, unsigned char arg2, unsigned char arg3)
+void CPed::SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3)
 {
-    ((void(__thiscall *)(CPed*, int, unsigned char, unsigned char, unsigned char))0x5EFFB0)(this, arg0, arg1, arg2, arg3);
+    ((void(__thiscall *)(CPed*, int32, uint8, uint8, uint8))0x5EFFB0)(this, arg0, arg1, arg2, arg3);
 }
 
 // 0x5EFFE0
-void CPed::Say(unsigned short arg0, unsigned int arg1, float arg2, unsigned char arg3, unsigned char arg4, unsigned char arg5)
+void CPed::Say(uint16 arg0, uint32 arg1, float arg2, uint8 arg3, uint8 arg4, uint8 arg5)
 {
-    ((void(__thiscall *)(CPed*, unsigned short, unsigned int, float, unsigned char, unsigned char, unsigned char))0x5EFFE0)(this, arg0, arg1, arg2, arg3, arg4, arg5);
+    ((void(__thiscall *)(CPed*, uint16, uint32, float, uint8, uint8, uint8))0x5EFFE0)(this, arg0, arg1, arg2, arg3, arg4, arg5);
 }
 
 // 0x5F0060
@@ -1210,15 +1213,15 @@ RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data)
 }
 
 // 0x5F0140
-void CPed::RemoveBodyPart(int boneId, char localDir)
+void CPed::RemoveBodyPart(int32 boneId, char localDir)
 {
-    ((void(__thiscall *)(CPed*, int, char))0x5F0140)(this, boneId, localDir);
+    ((void(__thiscall *)(CPed*, int32, char))0x5F0140)(this, boneId, localDir);
 }
 
 // 0x5F0190
-void CPed::SpawnFlyingComponent(int arg0, char arg1)
+void CPed::SpawnFlyingComponent(int32 arg0, char arg1)
 {
-    ((void(__thiscall *)(CPed*, int, char))0x5F0190)(this, arg0, arg1);
+    ((void(__thiscall *)(CPed*, int32, char))0x5F0190)(this, arg0, arg1);
 }
 
 // 0x5F01A0
@@ -1228,9 +1231,9 @@ bool CPed::DoesLOSBulletHitPed(CColPoint& colPoint)
 }
 
 // 0x5F0250
-void CPed::RemoveWeaponAnims(int likeUnused, float blendDelta)
+void CPed::RemoveWeaponAnims(int32 likeUnused, float blendDelta)
 {
-    ((void(__thiscall *)(CPed*, int, float))0x5F0250)(this, likeUnused, blendDelta);
+    ((void(__thiscall *)(CPed*, int32, float))0x5F0250)(this, likeUnused, blendDelta);
 }
 
 // 0x5F02C0
@@ -1257,9 +1260,9 @@ void CPed::DeadPedMakesTyresBloody()
     ((void(__thiscall *)(CPed*))0x6B4200)(this);
 }
 
-void CPed::SetModelIndex(unsigned int modelIndex)
+void CPed::SetModelIndex(uint32 modelIndex)
 {
-    ((void(__thiscall *)(CPed*, unsigned int))0x5E4880)(this, modelIndex);
+    ((void(__thiscall *)(CPed*, uint32))0x5E4880)(this, modelIndex);
 }
 
 bool CPed::IsInVehicleThatHasADriver()

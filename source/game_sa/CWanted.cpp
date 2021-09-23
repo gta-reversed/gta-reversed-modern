@@ -6,9 +6,9 @@
 */
 #include "StdInc.h"
 
-unsigned int& CWanted::MaximumWantedLevel = *(unsigned int*)0x8CDEE4;
+uint32& CWanted::MaximumWantedLevel = *(uint32*)0x8CDEE4;
 // 0x8CDEE8
-unsigned int CWanted::MaximumChaosLevel = 9200; // original name nMaximumWantedLevel
+uint32 CWanted::MaximumChaosLevel = 9200; // original name nMaximumWantedLevel
 bool& CWanted::bUseNewsHeliInAdditionToPolice = *(bool*)0xB7CB8C;
 
 void CWanted::InjectHooks()
@@ -26,7 +26,7 @@ void CWanted::InjectHooks()
     ReversibleHooks::Install("CWanted", "CheatWantedLevel", 0x562540, &CWanted::CheatWantedLevel);
     ReversibleHooks::Install("CWanted", "SetWantedLevelNoDrop", 0x562570, &CWanted::SetWantedLevelNoDrop);
     ReversibleHooks::Install("CWanted", "ClearWantedLevelAndGoOnParole", 0x5625A0, &CWanted::ClearWantedLevelAndGoOnParole);
-    ReversibleHooks::Install("CWanted", "CanCopJoinPursuit_func", 0x562F60, static_cast<bool (*)(CCopPed*, unsigned char, CCopPed**, unsigned char&)>(CWanted::CanCopJoinPursuit));
+    ReversibleHooks::Install("CWanted", "CanCopJoinPursuit_func", 0x562F60, static_cast<bool (*)(CCopPed*, uint8, CCopPed**, uint8&)>(CWanted::CanCopJoinPursuit));
     // ReversibleHooks::Install("CWanted", "CanCopJoinPursuit_method", 0x562FB0, static_cast<bool (CWanted::*)(CCopPed*)>(&CWanted::CanCopJoinPursuit));
 }
 
@@ -75,7 +75,7 @@ void CWanted::UpdateWantedLevel() {
     //plugin::CallMethod<0x561C90, CWanted*>(this);
     m_nChaosLevel = std::min(m_nChaosLevel, MaximumChaosLevel);
 
-    unsigned int wantedLevel = m_nWantedLevel;
+    uint32 wantedLevel = m_nWantedLevel;
 
     if (m_nChaosLevel > 4800) {
         CStats::IncrementStat(eStats::STAT_TOTAL_NUMBER_OF_WANTED_STARS_ATTAINED, (float)(6 - wantedLevel));
@@ -130,7 +130,7 @@ void CWanted::UpdateWantedLevel() {
     }
 
     if (wantedLevel != m_nWantedLevel)
-        m_nLastTimeWantedLevelChanged = CTimer::m_snTimeInMilliseconds;
+        m_nLastTimeWantedLevelChanged = CTimer::GetTimeInMS();
 
     if (m_bEverybodyBackOff || m_bPoliceBackOff || m_bPoliceBackOffGarage) {
         m_nMaxCopCarsInPursuit = 0;
@@ -141,7 +141,7 @@ void CWanted::UpdateWantedLevel() {
 
 // Set Maximum Wanted Level
 // 0x561E70
-void CWanted::SetMaximumWantedLevel(int level)
+void CWanted::SetMaximumWantedLevel(int32 level)
 {
     switch (level)
     {
@@ -205,8 +205,8 @@ bool CWanted::AreArmyRequired() const
 }
 
 // 0x561FA0
-int CWanted::NumOfHelisRequired() {
-    return plugin::CallMethodAndReturn<int, 0x561FA0, CWanted*>(this);
+int32 CWanted::NumOfHelisRequired() {
+    return plugin::CallMethodAndReturn<int32, 0x561FA0, CWanted*>(this);
 }
 
 // 0x561FD0
@@ -227,8 +227,8 @@ void CWanted::ClearQdCrimes() {
 }
 
 // 0x562000
-bool CWanted::AddCrimeToQ(eCrimeType crimeType, int crimeId, const CVector& posn, bool bAlreadyReported, bool bPoliceDontReallyCare) {
-    return plugin::CallMethodAndReturn<bool, 0x562000, CWanted*, eCrimeType, int, const CVector&, bool, bool>(this, crimeType, crimeId, posn, bAlreadyReported, bPoliceDontReallyCare);
+bool CWanted::AddCrimeToQ(eCrimeType crimeType, int32 crimeId, const CVector& posn, bool bAlreadyReported, bool bPoliceDontReallyCare) {
+    return plugin::CallMethodAndReturn<bool, 0x562000, CWanted*, eCrimeType, int32, const CVector&, bool, bool>(this, crimeType, crimeId, posn, bAlreadyReported, bPoliceDontReallyCare);
 }
 
 // 0x562120
@@ -237,8 +237,8 @@ void CWanted::ReportCrimeNow(eCrimeType crimeType, const CVector& posn, bool bPo
 }
 
 // 0x562300
-void CWanted::RemovePursuitCop(CCopPed* cop, CCopPed** copsArray, unsigned char& copsCounter) {
-    plugin::Call<0x562300, CCopPed*, CCopPed**, unsigned char&>(cop, copsArray, copsCounter);
+void CWanted::RemovePursuitCop(CCopPed* cop, CCopPed** copsArray, uint8& copsCounter) {
+    plugin::Call<0x562300, CCopPed*, CCopPed**, uint8&>(cop, copsArray, copsCounter);
 }
 
 // 0x562330
@@ -268,11 +268,11 @@ void CWanted::RegisterCrime_Immediately(eCrimeType crimeType, const CVector& pos
 }
 
 // 0x562470
-void CWanted::SetWantedLevel(unsigned int level) {
+void CWanted::SetWantedLevel(uint32 level) {
     if (CCheat::m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE])
         return;
 
-    unsigned int newLevel = std::min(level, MaximumWantedLevel);
+    uint32 newLevel = std::min(level, MaximumWantedLevel);
 
     ClearQdCrimes();
 
@@ -303,7 +303,7 @@ void CWanted::SetWantedLevel(unsigned int level) {
 }
 
 // 0x562540
-void CWanted::CheatWantedLevel(unsigned int level) {
+void CWanted::CheatWantedLevel(uint32 level) {
     if (level > MaximumWantedLevel) {
         SetMaximumWantedLevel(level);
     }
@@ -313,7 +313,7 @@ void CWanted::CheatWantedLevel(unsigned int level) {
 }
 
 // 0x562570
-void CWanted::SetWantedLevelNoDrop(unsigned int level) {
+void CWanted::SetWantedLevelNoDrop(uint32 level) {
     if (m_nWantedLevel < m_nWantedLevelBeforeParole)
         SetWantedLevel(m_nWantedLevelBeforeParole);
 
@@ -327,19 +327,19 @@ void CWanted::ClearWantedLevelAndGoOnParole() {
     auto playerWanted = FindPlayerWanted(-1);
     m_nChaosLevelBeforeParole = playerWanted->m_nChaosLevel;
     m_nWantedLevelBeforeParole = playerWanted->m_nWantedLevel;
-    m_nTimeOfParole = CTimer::m_snTimeInMilliseconds;
+    m_nTimeOfParole = CTimer::GetTimeInMS();
     m_nChaosLevel = 0;
     m_nWantedLevel = 0;
 }
 
 // 0x5625F0
-int CWanted::WorkOutPolicePresence(CVector posn, float radius) {
-    return plugin::CallAndReturn<int, 0x5625F0, CVector, float>(posn, radius);
+int32 CWanted::WorkOutPolicePresence(CVector posn, float radius) {
+    return plugin::CallAndReturn<int32, 0x5625F0, CVector, float>(posn, radius);
 }
 
 // 0x5627D0
-bool CWanted::IsClosestCop(CPed* ped, int numCopsToCheck) {
-    return plugin::CallMethodAndReturn<bool, 0x5627D0, CWanted*, CPed*, int>(this, ped, numCopsToCheck);
+bool CWanted::IsClosestCop(CPed* ped, int32 numCopsToCheck) {
+    return plugin::CallMethodAndReturn<bool, 0x5627D0, CWanted*, CPed*, int32>(this, ped, numCopsToCheck);
 }
 
 // 0x562B00
@@ -363,7 +363,7 @@ void CWanted::Update() {
 }
 
 // 0x562F60
-bool CWanted::CanCopJoinPursuit(CCopPed* target, unsigned char maxCopsCount, CCopPed** copsArray, unsigned char& copsCounter) {
+bool CWanted::CanCopJoinPursuit(CCopPed* target, uint8 maxCopsCount, CCopPed** copsArray, uint8& copsCounter) {
     if (!maxCopsCount)
         return false;
 

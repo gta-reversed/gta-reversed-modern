@@ -26,6 +26,126 @@
 #include "CTheCarGenerators.h"
 #include "CRadar.h"
 #include "CWaterCannons.h"
+#include "CLines.h"
+#include "CEscalators.h"
+#include "CMovingThings.h"
+#include "CMovingThings.h"
+#include "CPlaneTrails.h"
+#include "CGamma.h"
+#include "CCustomBuildingPipeline.h"
+#include "CCustomBuildingDNPipeline.h"
+#include "CPlantMgr.h"
+#include "CPedType.h"
+#include "COcclusion.h"
+#include "COccluder.h"
+#include "CActiveOccluder.h"
+#include "CMotionBlurStreaks.h"
+#include "CGroupEventHandler.h"
+#include "CFireManager.h"
+
+#include "CTaskSimpleAbseil.h"
+#include "CTaskComplexWanderCop.h"
+#include "CTaskComplexUseMobilePhone.h"
+#include "CTaskSimpleStandStill.h"
+#include "CTaskSimpleCarDrive.h"
+#include "CTaskSimpleScratchHead.h"
+#include "CTaskSimpleChoking.h"
+#include "CTaskComplexPartnerChat.h"
+#include "CTaskSimpleUseGun.h"
+#include "CTaskSimpleGangDriveBy.h"
+#include "CTaskComplexObserveTrafficLightsAndAchieveHeading.h"
+#include "CTaskSimpleInAir.h"
+#include "CTaskComplexHitPedWithCar.h"
+#include "CTaskSimplePlayerOnFoot.h"
+#include "CTaskComplexFollowPedFootsteps.h"
+#include "CTaskComplexGetUpAndStandStill.h"
+#include "CTaskComplexGoPickUpEntity.h"
+#include "CTaskSimpleDie.h"
+#include "CTaskComplexPolicePursuit.h"
+#include "CTaskSimpleFacial.h"
+#include "CTaskComplexCopInCar.h"
+#include "CTaskComplexFacial.h"
+#include "CTaskComplexInAirAndLand.h"
+#include "CTaskSimpleGetUp.h"
+#include "CTaskSimpleUninterruptable.h"
+#include "CTaskComplexFallAndGetUp.h"
+#include "CTaskSimpleTriggerLookAt.h"
+#include "CTaskSimpleHitHead.h"
+#include "CTaskUtilityLineUpPedWithCar.h"
+#include "CTaskSimpleLand.h"
+#include "CTaskSimpleJetPack.h"
+#include "CTaskSimpleSetStayInSamePlace.h"
+#include "CTaskSimpleJump.h"
+#include "CTaskSimpleFall.h"
+#include "CTaskSimpleClimb.h"
+#include "CTaskComplexPlayHandSignalAnim.h"
+#include "CTaskComplexWaitForPed.h"
+#include "CTaskComplexJump.h"
+#include "CTaskComplexWanderStandard.h"
+#include "CTaskSimpleIKLookAt.h"
+#include "CTaskComplexSunbathe.h"
+#include "CTaskComplexEnterCar.h"
+#include "CTaskSimpleTogglePedThreatScanner.h"
+#include "CTaskComplexUseGoggles.h"
+#include "CTaskComplexCrossRoadLookAndAchieveHeading.h"
+#include "CTaskComplexGoToPointAndStandStill.h"
+#include "CTaskSimpleAchieveHeading.h"
+#include "CTaskSimpleIKChain.h"
+#include "CTaskSimpleGiveCPR.h"
+#include "CTaskSimpleCarSetPedInAsPassenger.h"
+#include "CTaskComplexDriveFireTruck.h"
+#include "CTaskSimpleSwim.h"
+#include "CTaskComplexWalkRoundObject.h"
+#include "CTaskSimplePause.h"
+#include "CTaskComplexEnterCarAsPassenger.h"
+#include "CTaskComplexEnterCarAsDriver.h"
+#include "CTaskSimpleNone.h"
+#include "CTaskComplexKillPedOnFoot.h"
+#include "CTaskSimpleThrowProjectile.h"
+#include "CTaskSimpleGoToPoint.h"
+#include "CTaskComplexWanderMedic.h"
+#include "CTaskSimpleCarDriveTimed.h"
+#include "CTaskComplexDriveWander.h"
+#include "CTaskSimpleStealthKill.h"
+#include "CTaskSimpleCarSetPedOut.h"
+#include "CTaskSimpleAnim.h"
+#include "CTaskSimpleRunAnim.h"
+#include "CTaskComplexWanderCriminal.h"
+#include "CTaskComplexWanderProstitute.h"
+#include "CTaskComplexPartnerGreet.h"
+#include "CTaskComplexWalkRoundCar.h"
+#include "CTaskSimpleDuck.h"
+#include "CTaskComplexMedicTreatInjuredPed.h"
+#include "CTaskSimplePlayHandSignalAnim.h"
+#include "CTaskComplexCarDrive.h"
+#include "CTaskComplexKillPedFromBoat.h"
+#include "CTaskComplexLeaveCar.h"
+#include "CTaskComplexTreatAccident.h"
+#include "CTaskComplexGoToPointAndStandStillTimed.h"
+#include "CTaskComplexPartnerShove.h"
+#include "CTaskSimpleRunNamedAnim.h"
+#include "CTaskComplexProstituteSolicit.h"
+#include "CTaskSimpleHoldEntity.h"
+#include "CTaskSimpleGoTo.h"
+#include "CTaskComplexPartner.h"
+#include "CTaskSimpleCarSetPedInAsDriver.h"
+#include "CTaskComplexWander.h"
+#include "CTaskSimplePutDownEntity.h"
+#include "CTaskComplexUseSwatRope.h"
+#include "CTaskSimpleGoToPointFine.h"
+#include "CTaskSimpleIKManager.h"
+#include "CTaskComplexDie.h"
+#include "CTaskComplexEnterBoatAsDriver.h"
+#include "CTaskSimpleFight.h"
+#include "CTaskComplexUseWaterCannon.h"
+#include "CTaskComplexDriveToPoint.h"
+#include "CTaskSimpleSlideToCoord.h"
+#include "CTaskComplexPartnerDeal.h"
+#include "CTaskSimplePickUpEntity.h"
+#include "CTaskComplexBeInGroup.h"
+#include "CTaskComplexBeCop.h"
+#include "CTaskComplexAvoidOtherPedWhileWandering.h"
+#include "CTaskComplexArrestPed.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
@@ -39,6 +159,10 @@ void InjectHooksMain()
     // WaitForDebugger();
 
     CFireManager::InjectHooks();
+    CGroupEventHandler::InjectHooks();
+    CEventHandler::InjectHooks();
+    CVehicleRecording::InjectHooks();
+    Fx_c::InjectHooks();
     CBrightLights::InjectHooks();
     CShinyTexts::InjectHooks();
     COnscreenCounterEntry::InjectHooks();
@@ -253,6 +377,8 @@ void InjectHooksMain()
     C2dEffect::InjectHooks();
     CCustomRoadsignMgr::InjectHooks();
     COcclusion::InjectHooks();
+    COccluder::InjectHooks();
+    CActiveOccluder::InjectHooks();
     CGarage::InjectHooks();
     CGarages::InjectHooks();
     CPostEffects::InjectHooks();
@@ -353,6 +479,19 @@ void InjectHooksMain()
     CTaskComplexJump::InjectHooks();
     ModelIndices::InjectHooks();
     CWaterCannons::InjectHooks();
+    CSprite::InjectHooks();
+    CPlaneTrails::InjectHooks();
+    CCustomBuildingPipeline::InjectHooks();
+    CCustomBuildingRenderer::InjectHooks();
+    CCustomBuildingDNPipeline::InjectHooks();
+    CTaskSimpleFight::InjectHooks();
+    CTaskComplexUseGoggles::InjectHooks();
+    CTaskSimpleUseGun::InjectHooks();
+    CTaskSimpleThrowProjectile::InjectHooks();
+    CTaskSequences::InjectHooks();
+    CTaskSimpleDie::InjectHooks();
+    CTaskComplexObserveTrafficLightsAndAchieveHeading::InjectHooks();
+    CTaskComplexPolicePursuit::InjectHooks();
 
     CAEVehicleAudioEntity::InjectHooks();
     CAESoundManager::InjectHooks();
@@ -373,4 +512,8 @@ void InjectHooksMain()
     CAEWaterCannonAudioEntity::InjectHooks();
     CAETwinLoopSoundEntity::InjectHooks();
     CAEDoorAudioEntity::InjectHooks();
+    CAEWeatherAudioEntity::InjectHooks();
+
+    FxManager_c::InjectHooks();
+    FxSystemBP_c::InjectHooks();
 }

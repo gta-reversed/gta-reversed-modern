@@ -6,7 +6,7 @@ void CAnimBlendSequence::InjectHooks()
     ReversibleHooks::Install("CAnimBlendSequence", "GetCompressedFrame", 0x4CF220, &CAnimBlendSequence::GetCompressedFrame);
 }
 
-CAnimSequenceRootFrameUncompressed* CAnimBlendSequence::GetUncompressedFrame(int iFrame)
+CAnimSequenceRootFrameUncompressed* CAnimBlendSequence::GetUncompressedFrame(int32 iFrame)
 {
     if (m_isRoot)
         return &static_cast<CAnimSequenceRootFrameUncompressed*>(m_pFrames)[iFrame];
@@ -15,7 +15,7 @@ CAnimSequenceRootFrameUncompressed* CAnimBlendSequence::GetUncompressedFrame(int
     return reinterpret_cast<CAnimSequenceRootFrameUncompressed*>(&pData[iFrame]);
 }
 
-CAnimSequenceRootFrameCompressed* CAnimBlendSequence::GetCompressedFrame(int iFrame)
+CAnimSequenceRootFrameCompressed* CAnimBlendSequence::GetCompressedFrame(int32 iFrame)
 {
     if (m_isRoot)
         return &static_cast<CAnimSequenceRootFrameCompressed*>(m_pFrames)[iFrame];

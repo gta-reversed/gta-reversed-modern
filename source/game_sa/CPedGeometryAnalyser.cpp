@@ -24,9 +24,9 @@ void CPedGeometryAnalyser::InjectHooks() {
 //    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityBoundingSphere", 0x5F3C20, &CPedGeometryAnalyser::ComputeEntityBoundingSphere);
 //    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeMoveDirToAvoidEntity", 0x0, &CPedGeometryAnalyser::ComputeMoveDirToAvoidEntity);
 //    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityDirs", 0x5F1500, &CPedGeometryAnalyser::ComputeEntityDirs);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityHitSide", 0x0, static_cast<int (*)()>(&CPedGeometryAnalyser::ComputeEntityHitSide));
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityHitSide", 0x0, static_cast<int (*)()>(&CPedGeometryAnalyser::ComputeEntityHitSide));
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityHitSide", 0x0, static_cast<int (*)()>(&CPedGeometryAnalyser::ComputeEntityHitSide));
+//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityHitSide", 0x0, static_cast<int32 (*)()>(&CPedGeometryAnalyser::ComputeEntityHitSide));
+//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityHitSide", 0x0, static_cast<int32 (*)()>(&CPedGeometryAnalyser::ComputeEntityHitSide));
+//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityHitSide", 0x0, static_cast<int32 (*)()>(&CPedGeometryAnalyser::ComputeEntityHitSide));
 //    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputePedHitSide", 0x0, &CPedGeometryAnalyser::ComputePedHitSide);
 //    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputePedHitSide", 0x0, &CPedGeometryAnalyser::ComputePedHitSide);
 //    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputePedShotSide", 0x5F13F0, &CPedGeometryAnalyser::ComputePedShotSide);
@@ -66,7 +66,7 @@ void CPedGeometryAnalyser::CanPedTargetPoint(const CPed& ped, const CVector& a2,
 
 // 0x5F1E30
 // unused
-int CPedGeometryAnalyser::ComputeBuildingHitPoints(const CVector& a1, const CVector& a2) {
+int32 CPedGeometryAnalyser::ComputeBuildingHitPoints(const CVector& a1, const CVector& a2) {
     CEntity *outEntity;
     CColPoint v4;
 
@@ -193,8 +193,8 @@ void CPedGeometryAnalyser::ComputeEntityBoundingSphere(const CPed& ped, CEntity&
 }
 
 // 0x5F3730
-int CPedGeometryAnalyser::ComputeMoveDirToAvoidEntity(const CPed& ped, CEntity& entity, CVector& posn) {
-    return plugin::CallAndReturn<int, 0x5F3730, const CPed&, CEntity&, CVector&>(ped, entity, posn);
+int32 CPedGeometryAnalyser::ComputeMoveDirToAvoidEntity(const CPed& ped, CEntity& entity, CVector& posn) {
+    return plugin::CallAndReturn<int32, 0x5F3730, const CPed&, CEntity&, CVector&>(ped, entity, posn);
 }
 
 // 0x5F1500
@@ -203,44 +203,44 @@ CVector* CPedGeometryAnalyser::ComputeEntityDirs(const CEntity& entity, CVector*
 }
 
 // 0x5F3BC0
-int CPedGeometryAnalyser::ComputeEntityHitSide(const CPed& ped, CEntity& entity) {
+int32 CPedGeometryAnalyser::ComputeEntityHitSide(const CPed& ped, CEntity& entity) {
     auto posn = ped.GetPosition();
     return ComputeEntityHitSide(posn, entity);
 }
 
 // 0x5F1450
-int CPedGeometryAnalyser::ComputeEntityHitSide(const CVector& point1, const CVector* point2, const float* x) {
-    return plugin::CallAndReturn<int, 0x5F1450, const CVector&, const CVector*, const float*>(point1, point2, x);
+int32 CPedGeometryAnalyser::ComputeEntityHitSide(const CVector& point1, const CVector* point2, const float* x) {
+    return plugin::CallAndReturn<int32, 0x5F1450, const CVector&, const CVector*, const float*>(point1, point2, x);
 }
 
 // 0x5F3AC0
-int CPedGeometryAnalyser::ComputeEntityHitSide(const CVector& point, CEntity& entity) {
-    return plugin::CallAndReturn<int, 0x5F3AC0, const CVector&, CEntity&>(point, entity);
+int32 CPedGeometryAnalyser::ComputeEntityHitSide(const CVector& point, CEntity& entity) {
+    return plugin::CallAndReturn<int32, 0x5F3AC0, const CVector&, CEntity&>(point, entity);
 }
 
 // 0x5F3640
-int CPedGeometryAnalyser::ComputePedHitSide(const CPed& ped, const CPhysical& physical) {
+int32 CPedGeometryAnalyser::ComputePedHitSide(const CPed& ped, const CPhysical& physical) {
     return ComputePedHitSide(ped, physical.m_vecMoveSpeed);
 }
 
 // 0x5F1E70
-int CPedGeometryAnalyser::ComputePedHitSide(const CPed& ped, const CVector& posn) {
-    return plugin::CallAndReturn<int, 0x5F1E70, const CPed&, const CVector&>(ped, posn);
+int32 CPedGeometryAnalyser::ComputePedHitSide(const CPed& ped, const CVector& posn) {
+    return plugin::CallAndReturn<int32, 0x5F1E70, const CPed&, const CVector&>(ped, posn);
 }
 
 // 0x5F13F0
-int CPedGeometryAnalyser::ComputePedShotSide(const CPed& ped, const CVector& posn) {
-    return plugin::CallAndReturn<int, 0x5F13F0, const CPed&, const CVector&>(ped, posn);
+int32 CPedGeometryAnalyser::ComputePedShotSide(const CPed& ped, const CVector& posn) {
+    return plugin::CallAndReturn<int32, 0x5F13F0, const CPed&, const CVector&>(ped, posn);
 }
 
 // 0x5F6110
-int CPedGeometryAnalyser::ComputeRouteRoundEntityBoundingBox(const CPed& ped, CEntity& entity, const CVector& posn, CPointRoute& pointRoute, int a5) {
+int32 CPedGeometryAnalyser::ComputeRouteRoundEntityBoundingBox(const CPed& ped, CEntity& entity, const CVector& posn, CPointRoute& pointRoute, int32 a5) {
     return ComputeRouteRoundEntityBoundingBox(ped, ped.GetPosition(), entity, posn, pointRoute, a5);
 }
 
 // 0x5F3DD0
-int CPedGeometryAnalyser::ComputeRouteRoundEntityBoundingBox(const CPed& ped, const CVector& a2, CEntity& entity, const CVector& a4, CPointRoute& pointRoute, int a6){
-    return plugin::CallAndReturn<int, 0x5F3DD0, const CPed&, const CVector&, CEntity&, const CVector&, CPointRoute&, int>(ped, a2, entity, a4, pointRoute, a6);
+int32 CPedGeometryAnalyser::ComputeRouteRoundEntityBoundingBox(const CPed& ped, const CVector& a2, CEntity& entity, const CVector& a4, CPointRoute& pointRoute, int32 a6){
+    return plugin::CallAndReturn<int32, 0x5F3DD0, const CPed&, const CVector&, CEntity&, const CVector&, CPointRoute&, int32>(ped, a2, entity, a4, pointRoute, a6);
 }
 
 // 0x5F1890
@@ -274,8 +274,8 @@ bool CPedGeometryAnalyser::IsInAir(const CPed& ped) {
 }
 
 // 0x5F2F70
-bool CPedGeometryAnalyser::IsWanderPathClear(const CVector& a1, const CVector& a2, float a3, int a4) {
-    return plugin::CallAndReturn<bool, 0x5F2F70, const CVector&, const CVector&, float, int>(a1, a2, a3, a4);
+bool CPedGeometryAnalyser::IsWanderPathClear(const CVector& a1, const CVector& a2, float a3, int32 a4) {
+    return plugin::CallAndReturn<bool, 0x5F2F70, const CVector&, const CVector&, float, int32>(a1, a2, a3, a4);
 }
 
 // 0x5F3880

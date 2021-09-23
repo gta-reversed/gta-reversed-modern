@@ -15,7 +15,7 @@ public:
     static void InjectHooks();
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_COMPLEX_USE_WATER_CANNON; }
+    eTaskType GetTaskType() override { return TASK_COMPLEX_USE_WATER_CANNON; }
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

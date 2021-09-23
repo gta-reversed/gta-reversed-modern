@@ -6,26 +6,26 @@
 */
 #include "StdInc.h"
 
-unsigned int MAX_COLLECTED_PICKUPS = 20;
-unsigned int MAX_PICKUP_MESSAGES = 16;
-unsigned int MAX_NUM_PICKUPS = 620;
+uint32 MAX_COLLECTED_PICKUPS = 20;
+uint32 MAX_PICKUP_MESSAGES = 16;
+uint32 MAX_NUM_PICKUPS = 620;
 
-unsigned char& CPickups::DisplayHelpMessage = *(unsigned char*)0x8A5F48;
-int& CPickups::PlayerOnWeaponPickup = *(int*)0x97D640;
-int& CPickups::StaticCamStartTime = *(int*)0x978618;
+uint8& CPickups::DisplayHelpMessage = *(uint8*)0x8A5F48;
+int32& CPickups::PlayerOnWeaponPickup = *(int32*)0x97D640;
+int32& CPickups::StaticCamStartTime = *(int32*)0x978618;
 CVector* CPickups::StaticCamCoors = (CVector*)0x97D660;
 CVehicle*& CPickups::pPlayerVehicle = *(CVehicle * *)0x97861C;
 bool& CPickups::bPickUpcamActivated = *(bool*)0x978620;
-unsigned short& CPickups::CollectedPickUpIndex = *(unsigned short*)0x978624;
-int* CPickups::aPickUpsCollected = (int*)0x978628;
-unsigned short& CPickups::NumMessages = *(unsigned short*)0x978678;
+uint16& CPickups::CollectedPickUpIndex = *(uint16*)0x978624;
+int32* CPickups::aPickUpsCollected = (int32*)0x978628;
+uint16& CPickups::NumMessages = *(uint16*)0x978678;
 tPickupMessage* CPickups::aMessages = (tPickupMessage*)0x978680;
 CPickup* CPickups::aPickUps = (CPickup*)0x9788C0;
-int& CollectPickupBuffer = *(int*)0x97D644;
+int32& CollectPickupBuffer = *(int32*)0x97D644;
 
 // 0x455240
-void CPickups::AddToCollectedPickupsArray(int handle) {
-    plugin::Call<0x455240, int>(handle);
+void CPickups::AddToCollectedPickupsArray(int32 handle) {
+    plugin::Call<0x455240, int32>(handle);
 }
 
 // 0x458A80
@@ -34,8 +34,8 @@ void CPickups::CreatePickupCoorsCloseToCoors(float in_x, float in_y, float in_z,
 }
 
 // 0x458970
-void CPickups::CreateSomeMoney(CVector coors, int amount) {
-    plugin::Call<0x458970, CVector, int>(coors, amount);
+void CPickups::CreateSomeMoney(CVector coors, int32 amount) {
+    plugin::Call<0x458970, CVector, int32>(coors, amount);
 }
 
 // 0x4590C0
@@ -69,33 +69,33 @@ CPickup* CPickups::FindPickUpForThisObject(CObject* object) {
 }
 
 // 0x456F20
-int CPickups::GenerateNewOne(CVector coors, unsigned int modelId, unsigned char pickupType, unsigned int ammo, unsigned int moneyPerDay, bool isEmpty, char* message) {
-    return plugin::CallAndReturn<int, 0x456F20, CVector, unsigned int, unsigned char, unsigned int, unsigned int, bool, char*>(coors, modelId, pickupType, ammo, moneyPerDay, isEmpty, message);
+int32 CPickups::GenerateNewOne(CVector coors, uint32 modelId, uint8 pickupType, uint32 ammo, uint32 moneyPerDay, bool isEmpty, char* message) {
+    return plugin::CallAndReturn<int32, 0x456F20, CVector, uint32, uint8, uint32, uint32, bool, char*>(coors, modelId, pickupType, ammo, moneyPerDay, isEmpty, message);
 }
 
 // 0x457380
-int CPickups::GenerateNewOne_WeaponType(CVector coors, eWeaponType weaponType, unsigned char pickupType, unsigned int ammo, bool isEmpty, char* message) {
-    return plugin::CallAndReturn<int, 0x457380, CVector, eWeaponType, unsigned char, unsigned int, bool, char*>(coors, weaponType, pickupType, ammo, isEmpty, message);
+int32 CPickups::GenerateNewOne_WeaponType(CVector coors, eWeaponType weaponType, uint8 pickupType, uint32 ammo, bool isEmpty, char* message) {
+    return plugin::CallAndReturn<int32, 0x457380, CVector, eWeaponType, uint8, uint32, bool, char*>(coors, weaponType, pickupType, ammo, isEmpty, message);
 }
 
 // 0x4552A0
-int CPickups::GetActualPickupIndex(int pickupIndex) {
-    return plugin::CallAndReturn<int, 0x4552A0, int>(pickupIndex);
+int32 CPickups::GetActualPickupIndex(int32 pickupIndex) {
+    return plugin::CallAndReturn<int32, 0x4552A0, int32>(pickupIndex);
 }
 
 // 0x456A30
-int CPickups::GetNewUniquePickupIndex(int pickupIndex) {
-    return plugin::CallAndReturn<int, 0x456A30, int>(pickupIndex);
+int32 CPickups::GetNewUniquePickupIndex(int32 pickupIndex) {
+    return plugin::CallAndReturn<int32, 0x456A30, int32>(pickupIndex);
 }
 
 // 0x455280
-int CPickups::GetUniquePickupIndex(int pickupIndex) {
-    return plugin::CallAndReturn<int, 0x455280, int>(pickupIndex);
+int32 CPickups::GetUniquePickupIndex(int32 pickupIndex) {
+    return plugin::CallAndReturn<int32, 0x455280, int32>(pickupIndex);
 }
 
 // 0x4564F0
-bool CPickups::GivePlayerGoodiesWithPickUpMI(unsigned short modelId, int playerId) {
-    return plugin::CallAndReturn<bool, 0x4564F0, unsigned short, int>(modelId, playerId);
+bool CPickups::GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId) {
+    return plugin::CallAndReturn<bool, 0x4564F0, uint16, int32>(modelId, playerId);
 }
 
 // 0x454A70
@@ -104,8 +104,8 @@ void CPickups::Init() {
 }
 
 // 0x454B40
-bool CPickups::IsPickUpPickedUp(int pickupHandle) {
-    return plugin::CallAndReturn<bool, 0x454B40, int>(pickupHandle);
+bool CPickups::IsPickUpPickedUp(int32 pickupHandle) {
+    return plugin::CallAndReturn<bool, 0x454B40, int32>(pickupHandle);
 }
 
 // 0x5D35A0
@@ -114,13 +114,13 @@ bool CPickups::Load() {
 }
 
 // 0x454AC0
-int CPickups::ModelForWeapon(eWeaponType weaponType) {
-    return plugin::CallAndReturn<int, 0x454AC0, eWeaponType>(weaponType);
+int32 CPickups::ModelForWeapon(eWeaponType weaponType) {
+    return plugin::CallAndReturn<int32, 0x454AC0, eWeaponType>(weaponType);
 }
 
 // 0x455200
-void CPickups::PassTime(unsigned int time) {
-    plugin::Call<0x455200, unsigned int>(time);
+void CPickups::PassTime(uint32 time) {
+    plugin::Call<0x455200, uint32>(time);
 }
 
 // 0x455390
@@ -154,8 +154,8 @@ void CPickups::RemoveMissionPickUps() {
 }
 
 // 0x4573D0
-void CPickups::RemovePickUp(int pickupHandle) {
-    plugin::Call<0x4573D0, int>(pickupHandle);
+void CPickups::RemovePickUp(int32 pickupHandle) {
+    plugin::Call<0x4573D0, int32>(pickupHandle);
 }
 
 // 0x456D30
@@ -189,8 +189,8 @@ bool CPickups::TestForPickupsInBubble(CVector posn, float radius) {
 }
 
 // 0x4555A0
-bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, unsigned char pickupType, unsigned int ammo, bool _IGNORED_ arg4) {
-    return plugin::CallAndReturn<bool, 0x4555A0, CVector, eWeaponType, unsigned char, unsigned int, bool>(posn, weaponType, pickupType, ammo, arg4);
+bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, uint8 pickupType, uint32 ammo, bool _IGNORED_ arg4) {
+    return plugin::CallAndReturn<bool, 0x4555A0, CVector, eWeaponType, uint8, uint32, bool>(posn, weaponType, pickupType, ammo, arg4);
 }
 
 // 0x458DE0
@@ -199,13 +199,13 @@ void CPickups::Update() {
 }
 
 // 0x455680
-void CPickups::UpdateMoneyPerDay(int pickupHandle, unsigned short money) {
-    plugin::Call<0x455680, int, unsigned short>(pickupHandle, money);
+void CPickups::UpdateMoneyPerDay(int32 pickupHandle, uint16 money) {
+    plugin::Call<0x455680, int32, uint16>(pickupHandle, money);
 }
 
 // 0x454AE0
-int CPickups::WeaponForModel(int modelId) {
-    return plugin::CallAndReturn<int, 0x454AE0, int>(modelId);
+int32 CPickups::WeaponForModel(int32 modelId) {
+    return plugin::CallAndReturn<int32, 0x454AE0, int32>(modelId);
 }
 
 // 0x454B70

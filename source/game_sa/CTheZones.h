@@ -11,92 +11,47 @@
 
 class CTheZones {
 public:
-    // Variables
-
     static eLevelName& m_CurrLevel;
+    static char*       ZonesVisited;                 // Explored territories. Count: 100
+    static int32&      ZonesRevealed;                // Number of explored territories
+    static int16&      TotalNumberOfNavigationZones; // Info zones
+    static CZone*      NavigationZoneArray;          // Count: 380
+    static int16&      TotalNumberOfMapZones;        // Map zones
+    static CZone*      MapZoneArray;                 // Count: 39
+    static int16&      TotalNumberOfZoneInfos;
+    static CZoneInfo*  ZoneInfoArray;
 
-    // Explored territories
-    // Count: 100
-    static char* ZonesVisited;
-
-    // Number of explored territories
-    static int& ZonesRevealed;
-
-    // Info zones
-    static short& TotalNumberOfNavigationZones;
-    // Count: 380
-    static CZone* NavigationZoneArray;
-
-    // Map zones
-    static short& TotalNumberOfMapZones;
-    // Count: 39
-    static CZone* MapZoneArray;
-
-    static short& TotalNumberOfZoneInfos;
-
-    static CZoneInfo* ZoneInfoArray;
-
-    // Functions
-
+public:
     static void InjectHooks();
 
     static void InitZonesPopulationSettings();
-
     static void ResetZonesRevealed();
-
-    static void AssignZoneInfoForThisZone(short index);
-
-    static bool ZoneIsEntirelyContainedWithinOtherZone(CZone* pZone1, CZone* pZone2);
-
+    static void AssignZoneInfoForThisZone(int16 index);
+    static bool ZoneIsEntirelyContainedWithinOtherZone(CZone* zone1, CZone* zone2);
     static bool GetCurrentZoneLockedOrUnlocked(float posx, float posy);
-
     // Returns true if point lies within zone
-    static bool PointLiesWithinZone(CVector const* pPoint, CZone* pZone);
-
+    static bool PointLiesWithinZone(const CVector* point, CZone* zone);
     // Returns eLevelName from position
     static eLevelName GetLevelFromPosition(CVector const& point);
-
     // Returns pointer to zone by a point
     static CZone* FindSmallestZoneForPosition(const CVector& point, bool FindOnlyZonesType0);
-
-    static CZoneExtraInfo* GetZoneInfo(const CVector& point, CZone** outzone);
-
-    static void FillZonesWithGangColours(bool DisableRadarGangColors);
-
+    static CZoneExtraInfo* GetZoneInfo(const CVector& point, CZone** outZone);
+    static void FillZonesWithGangColours(bool disableRadarGangColors);
     // Returns pointer to zone by index
-    static CZone* GetNavigationZone(unsigned short index);
-
+    static CZone* GetNavigationZone(uint16 index);
     // Returns pointer to zone by index
-    static CZone* GetMapZone(unsigned short index);
+    static CZone* GetMapZone(uint16 index);
+    static long double Calc2DDistanceBetween2Zones(CZone* zone1, CZone* zone2);
 
-    static long double Calc2DDistanceBetween2Zones(CZone* Zone1, CZone* Zone2);
-
-public:
-    // Initializes CTheZones
     static void Init();
-
-    // Unlock the current zone
     static void SetCurrentZoneAsUnlocked();
-
-    // Creates a zone
     static void CreateZone(const char* name, eZoneType type, float posX1, float posY1, float posZ1, float posX2, float posY2, float posZ2, eLevelName island, const char* GXT_key);
+    static bool FindZone(CVector* point, int32 zonename_part1, int32 zonename_part2, eZoneType type);
+    static int16 FindZoneByLabel(const char* name, eZoneType type);
+    static void SetZoneRadarColours(int16 index, char flag, uint8 red, uint8 green, uint8 blue);
 
-    // Returns 1 if point within the specified zonename otherwise return 0
-    static bool FindZone(CVector* point, int zonename_part1, int zonename_part2, eZoneType type);
-
-    // Returns pointer to zone by index
-    static short FindZoneByLabel(const char* name, eZoneType type);
-
-    static void SetZoneRadarColours(short index, char flag, unsigned char red, unsigned char green, unsigned char blue);
-
-    // Updates CTheZones info
     static void Update();
-
-    // Save CTheZones info
     static void Save();
-
-    // Load CTheZones info
     static void Load();
-
     static void PostZoneCreation();
 };

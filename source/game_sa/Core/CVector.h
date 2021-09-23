@@ -5,7 +5,9 @@ https://github.com/DK22Pac/plugin-sdk
 Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
+#include "PluginBase.h" // !!!
+
 #include "RenderWare.h"
 
 class CVector : public RwV3d {
@@ -18,7 +20,7 @@ public:
     static void InjectHooks();
 
     // Returns length of vector
-    float Magnitude();
+    float Magnitude() const;
 
     // Returns length of 2d vector
     float Magnitude2D();
@@ -76,7 +78,7 @@ public:
         return x * x + y * y;
     }
 
-    inline bool IsZero()
+    inline bool IsZero() const
     {
         return x == 0.0F && y == 0.0F && z == 0.0F;
     }

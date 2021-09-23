@@ -5,24 +5,22 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CPlayerPed.h"
 #include "CPedClothesDesc.h"
 
-
-class  CClothes
-{
-public:	
-	//funcs
-	static void ConstructPedModel(unsigned int modelid, CPedClothesDesc& newclothes, CPedClothesDesc const* oldclothes, bool bCutscenePlayer);
-    static void RequestMotionGroupAnims();
-    static void RebuildPlayerIfNeeded(CPlayerPed* player);
-    static void RebuildPlayer(CPlayerPed* player, bool bIgnoreFatAndMuscle);
-    static void RebuildCutscenePlayer(CPlayerPed* player, int modelid);
-    static void LoadClothesFile();
-    static void Init();
-    static eClothesModelPart GetTextureDependency(int eClothesTexturePart);
-    static int GetPlayerMotionGroupToLoad();
-    static eClothesTexturePart GetDependentTexture(int eClothesModelPart);
-    static int GetDefaultPlayerMotionGroup();
+class CClothes {
+public:
+    // funcs
+    static void                ConstructPedModel(uint32 modelid, CPedClothesDesc& newclothes, CPedClothesDesc const* oldclothes, bool bCutscenePlayer);
+    static void                RequestMotionGroupAnims();
+    static void                RebuildPlayerIfNeeded(CPlayerPed* player);
+    static void                RebuildPlayer(CPlayerPed* player, bool bIgnoreFatAndMuscle);
+    static void                RebuildCutscenePlayer(CPlayerPed* player, int32 modelid);
+    static void                LoadClothesFile();
+    static void                Init();
+    static eClothesModelPart   GetTextureDependency(int32 eClothesTexturePart);
+    static int32               GetPlayerMotionGroupToLoad();
+    static eClothesTexturePart GetDependentTexture(int32 eClothesModelPart);
+    static int32               GetDefaultPlayerMotionGroup();
 };

@@ -107,17 +107,17 @@ void CEventAcquaintancePedHateBadlyLit::InjectHooks()
     ReversibleHooks::Install("CEventAcquaintancePedHateBadlyLit", "AffectsPed", 0x4AFA90, &CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed);
 }
 
-CEventAcquaintancePedHateBadlyLit::CEventAcquaintancePedHateBadlyLit(CPed* ped, std::int32_t startTimeInMs, const CVector& point) : CEventAcquaintancePed(ped)
+CEventAcquaintancePedHateBadlyLit::CEventAcquaintancePedHateBadlyLit(CPed* ped, int32 startTimeInMs, const CVector& point) : CEventAcquaintancePed(ped)
 {
     m_startTimeInMs = startTimeInMs;
     m_point = point;
     if (startTimeInMs == -1) {
-        m_startTimeInMs = CTimer::m_snTimeInMilliseconds;
+        m_startTimeInMs = CTimer::GetTimeInMS();
         m_point = ped->GetPosition();
     }
 }
 
-CEventAcquaintancePedHateBadlyLit* CEventAcquaintancePedHateBadlyLit::Constructor(CPed* ped, std::int32_t startTimeInMs, const CVector& point)
+CEventAcquaintancePedHateBadlyLit* CEventAcquaintancePedHateBadlyLit::Constructor(CPed* ped, int32 startTimeInMs, const CVector& point)
 {
     this->CEventAcquaintancePedHateBadlyLit::CEventAcquaintancePedHateBadlyLit(ped, startTimeInMs, point);
     return this;

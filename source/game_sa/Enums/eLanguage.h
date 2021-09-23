@@ -1,6 +1,6 @@
 #pragma once
 
-enum class eLanguage : unsigned char {
+enum class eLanguage : uint8 {
     AMERICAN = 0,
     FRENCH   = 1,
     GERMAN   = 2,

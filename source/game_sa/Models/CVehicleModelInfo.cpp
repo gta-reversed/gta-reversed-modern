@@ -10,14 +10,14 @@ CVehicleModelInfo::CLinkedUpgradeList& CVehicleModelInfo::ms_linkedUpgrades = *(
 RwTexture* &CVehicleModelInfo::ms_pRemapTexture = *(RwTexture**)0xB4E47C;
 RwTexture* &CVehicleModelInfo::ms_pLightsTexture = *(RwTexture**)0xB4E68C;
 RwTexture* &CVehicleModelInfo::ms_pLightsOnTexture = *(RwTexture**)0xB4E690;
-unsigned char (&CVehicleModelInfo::ms_currentCol)[NUM_CURRENT_COLORS] = *(unsigned char(*)[NUM_CURRENT_COLORS])0xB4E3F0;
+uint8 (&CVehicleModelInfo::ms_currentCol)[NUM_CURRENT_COLORS] = *(uint8(*)[NUM_CURRENT_COLORS])0xB4E3F0;
 CRGBA (&CVehicleModelInfo::ms_vehicleColourTable)[NUM_VEHICLE_COLORS] = *(CRGBA(*)[NUM_VEHICLE_COLORS])0xB4E480;
 char (&CVehicleModelInfo::ms_compsUsed)[NUM_COMPS_USAGE] = *(char(*)[NUM_COMPS_USAGE])0xB4E478;
 char (&CVehicleModelInfo::ms_compsToUse)[NUM_COMPS_USAGE] = *(char(*)[NUM_COMPS_USAGE])0x8A6458;
-short(&CVehicleModelInfo::ms_numWheelUpgrades)[NUM_WHEELS] = *(short(*)[NUM_WHEELS])0xB4E470;
-int (&CVehicleModelInfo::ms_wheelFrameIDs)[NUM_WHEELS] = *(int(*)[NUM_WHEELS])0x8A7770;
-short(&CVehicleModelInfo::ms_upgradeWheels)[NUM_WHEEL_UPGRADES][NUM_WHEELS] = *(short(*)[NUM_WHEEL_UPGRADES][NUM_WHEELS])0xB4E3F8;
-unsigned char(&CVehicleModelInfo::ms_lightsOn)[NUM_LIGHTS] = *(unsigned char(*)[NUM_LIGHTS])0xB4E3E8;
+int16(&CVehicleModelInfo::ms_numWheelUpgrades)[NUM_WHEELS] = *(int16(*)[NUM_WHEELS])0xB4E470;
+int32 (&CVehicleModelInfo::ms_wheelFrameIDs)[NUM_WHEELS] = *(int32(*)[NUM_WHEELS])0x8A7770;
+int16(&CVehicleModelInfo::ms_upgradeWheels)[NUM_WHEEL_UPGRADES][NUM_WHEELS] = *(int16(*)[NUM_WHEEL_UPGRADES][NUM_WHEELS])0xB4E3F8;
+uint8(&CVehicleModelInfo::ms_lightsOn)[NUM_LIGHTS] = *(uint8(*)[NUM_LIGHTS])0xB4E3E8;
 RwObjectNameIdAssocation* (&CVehicleModelInfo::ms_vehicleDescs)[NUM_VEHICLE_MODEL_DESCS] = *(RwObjectNameIdAssocation*(*)[NUM_VEHICLE_MODEL_DESCS])0x8A7740;
 
 RwTextureCallBackFind & CVehicleModelInfo::SavedTextureFindCallback = *(RwTextureCallBackFind*)0xB4E6A0;
@@ -132,7 +132,7 @@ CVehicleModelInfo::CVehicleModelInfo() : CClumpModelInfo()
     m_nFlags = 0;
     m_dwAnimBlockIndex = -1;
     memset(m_anUpgrades, 0xFF, sizeof(m_anUpgrades));
-    for (int i = 0; i < 4; ++i)
+    for (int32 i = 0; i < 4; ++i)
         m_anRemapTxds[i] = -1;
 }
 
@@ -297,7 +297,7 @@ void CVehicleModelInfo::SetAtomicRenderCallbacks()
         RpClumpForAllAtomics(m_pRwClump, CVehicleModelInfo::SetAtomicRendererCB, m_pRwClump);
 }
 
-void CVehicleModelInfo::SetVehicleComponentFlags(RwFrame* component, unsigned int flags)
+void CVehicleModelInfo::SetVehicleComponentFlags(RwFrame* component, uint32 flags)
 {
     tVehicleComponentFlagsUnion flagsUnion;
     flagsUnion.m_nFlags = flags;
@@ -333,7 +333,7 @@ void CVehicleModelInfo::SetVehicleComponentFlags(RwFrame* component, unsigned in
         RwFrameForAllObjects(component, CVehicleModelInfo::SetAtomicFlagCB, (void*)eAtomicComponentFlag::ATOMIC_HAS_ALPHA);
 }
 
-void CVehicleModelInfo::GetWheelPosn(int wheel, CVector& outVec, bool local)
+void CVehicleModelInfo::GetWheelPosn(int32 wheel, CVector& outVec, bool local)
 {
     auto pFrame = CClumpModelInfo::GetFrameFromId(m_pRwClump, CVehicleModelInfo::ms_wheelFrameIDs[wheel]);
 
@@ -353,7 +353,7 @@ void CVehicleModelInfo::GetWheelPosn(int wheel, CVector& outVec, bool local)
     }
 }
 
-bool CVehicleModelInfo::GetOriginalCompPosition(CVector& outVec, int component)
+bool CVehicleModelInfo::GetOriginalCompPosition(CVector& outVec, int32 component)
 {
     auto pFrame = CClumpModelInfo::GetFrameFromId(m_pRwClump, component);
     if (!pFrame)
@@ -363,7 +363,7 @@ bool CVehicleModelInfo::GetOriginalCompPosition(CVector& outVec, int component)
     return true;
 }
 
-int CVehicleModelInfo::ChooseComponent()
+int32 CVehicleModelInfo::ChooseComponent()
 {
     auto result = CVehicleModelInfo::ms_compsToUse[0];
     if (result != -2) {
@@ -375,7 +375,7 @@ int CVehicleModelInfo::ChooseComponent()
         return ::ChooseComponent(m_extraComps.nExtraARule, m_extraComps.nExtraAComp);
     }
     else if (CGeneral::GetRandomNumberInRange(0, 3) < 2) {
-        int anVariations[6];
+        int32 anVariations[6];
         auto numComps = GetListOfComponentsNotUsedByRules(m_extraComps.m_nComps, m_pVehicleStruct->m_nNumExtras, anVariations);
         if (numComps)
             return anVariations[CGeneral::GetRandomNumberInRange(0, numComps)];
@@ -384,7 +384,7 @@ int CVehicleModelInfo::ChooseComponent()
     return -1;
 }
 
-int CVehicleModelInfo::ChooseSecondComponent()
+int32 CVehicleModelInfo::ChooseSecondComponent()
 {
     auto result = CVehicleModelInfo::ms_compsToUse[1];
     if (result != -2) {
@@ -396,7 +396,7 @@ int CVehicleModelInfo::ChooseSecondComponent()
         return ::ChooseComponent(m_extraComps.nExtraBRule, m_extraComps.nExtraBComp);
     }
     else if (CGeneral::GetRandomNumberInRange(0, 3) < 2) {
-        int anVariations[6];
+        int32 anVariations[6];
         auto numComps = GetListOfComponentsNotUsedByRules(m_extraComps.m_nComps, m_pVehicleStruct->m_nNumExtras, anVariations);
         if (numComps)
             return anVariations[CGeneral::GetRandomNumberInRange(0, numComps)];
@@ -410,7 +410,7 @@ bool CVehicleModelInfo::IsUpgradeAvailable(eVehicleUpgradePosn upgrade)
     return m_pVehicleStruct->m_aUpgrades[upgrade].m_nParentComponentId >= 0;
 }
 
-void CVehicleModelInfo::SetVehicleColour(unsigned char prim, unsigned char sec, unsigned char tert, unsigned char quat)
+void CVehicleModelInfo::SetVehicleColour(uint8 prim, uint8 sec, uint8 tert, uint8 quat)
 {
     CVehicleModelInfo::ms_currentCol[0] = prim;
     CVehicleModelInfo::ms_currentCol[1] = sec;
@@ -424,7 +424,7 @@ void CVehicleModelInfo::SetVehicleColour(unsigned char prim, unsigned char sec, 
 }
 
 // 0x4C8500
-void CVehicleModelInfo::ChooseVehicleColour(unsigned char& prim, unsigned char& sec, unsigned char& tert, unsigned char& quat, int variationShift)
+void CVehicleModelInfo::ChooseVehicleColour(uint8& prim, uint8& sec, uint8& tert, uint8& quat, int32 variationShift)
 {
     if (!m_nNumColorVariations || CCheat::m_aCheatsActive[eCheats::CHEAT_BLACK_TRAFFIC]) {
         prim = 0;
@@ -472,10 +472,10 @@ void CVehicleModelInfo::ChooseVehicleColour(unsigned char& prim, unsigned char& 
 }
 
 // 0x4C86B0
-int CVehicleModelInfo::GetNumRemaps()
+int32 CVehicleModelInfo::GetNumRemaps()
 {
     auto iCount = 0;
-    for (int i = 0; i < 4; ++i) {
+    for (int32 i = 0; i < 4; ++i) {
         if (m_anRemapTxds[i] == -1)
             break;
 
@@ -486,7 +486,7 @@ int CVehicleModelInfo::GetNumRemaps()
 }
 
 // 0x4C86D0
-void CVehicleModelInfo::AddRemap(int txd)
+void CVehicleModelInfo::AddRemap(int32 txd)
 {
     auto numRemaps = CVehicleModelInfo::GetNumRemaps();
     m_anRemapTxds[numRemaps] = txd;
@@ -536,7 +536,7 @@ void CVehicleModelInfo::ReduceMaterialsInVehicle()
 
     // CTimer::GetCurrentTimeInCycles(); // unused code used for performance diagnostics i guess
     RpClumpForAllAtomics(m_pRwClump, CVehicleModelInfo::StoreAtomicUsedMaterialsCB, &matList);
-    for (int32_t i = 0; i < m_pVehicleStruct->m_nNumExtras; ++i)
+    for (int32 i = 0; i < m_pVehicleStruct->m_nNumExtras; ++i)
         StoreAtomicUsedMaterialsCB(m_pVehicleStruct->m_apExtras[i], &matList);
 
     // CTimer::GetCurrentTimeInCycles();
@@ -568,14 +568,14 @@ void CVehicleModelInfo::DisableEnvMap()
 
 void CVehicleModelInfo::SetEnvMapCoeff(float coeff)
 {
-    auto iUsedCoeff = static_cast<int32_t>(floor(coeff * 1000.0F));
+    auto iUsedCoeff = static_cast<int32>(floor(coeff * 1000.0F));
     if (!m_pRwObject)
         return;
 
     RpClumpForAllAtomics(m_pRwClump, CVehicleModelInfo::SetEnvMapCoeffAtomicCB, (void*)iUsedCoeff);
 }
 
-int CVehicleModelInfo::GetNumDoors()
+int32 CVehicleModelInfo::GetNumDoors()
 {
     return m_nNumDoors;
 }
@@ -735,13 +735,13 @@ void CVehicleModelInfo::SetupLightFlags(CVehicle* vehicle)
     CVehicleModelInfo::ms_lightsOn[3] = vehicle->m_renderLights.m_bRightRear;
 }
 
-int CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(int modelId)
+int32 CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(int32 modelId)
 {
     auto pModelInfo = CModelInfo::GetModelInfo(modelId)->AsVehicleModelInfoPtr();
     if (pModelInfo->IsBoat() || pModelInfo->IsTrailer())
         return 0;
 
-    int iDoorsNum;
+    int32 iDoorsNum;
     switch (modelId) {
     case -1:
         iDoorsNum = 3;
@@ -805,7 +805,7 @@ RpMaterial* CVehicleModelInfo::SetEditableMaterialsCB(RpMaterial* material, void
     }
 
     if (RpMaterialGetTexture(material) == CVehicleModelInfo::ms_pLightsTexture) {
-        int iLightIndex = -1;
+        int32 iLightIndex = -1;
         if (color == CRGBA(255, 175, 0, 0))
             iLightIndex = 0;
         else if (color == CRGBA(0, 255, 200, 0))
@@ -837,7 +837,7 @@ RpMaterial* CVehicleModelInfo::SetEditableMaterialsCB(RpMaterial* material, void
         }
     }
     else {
-        int iColorIndex;
+        int32 iColorIndex;
         if (color == CRGBA(60, 255, 0, 0))
             iColorIndex = CVehicleModelInfo::ms_currentCol[0];
         else if (color == CRGBA(255, 0, 175, 0))
@@ -933,7 +933,7 @@ void CVehicleModelInfo::ResetEditableMaterials(RpClump* clump)
 {
     auto pEntry = gRestoreEntries;
     while (pEntry->m_pAddress) {
-        *(uint32_t*)pEntry->m_pAddress = (uint32_t)pEntry->m_pValue;
+        *(uint32*)pEntry->m_pAddress = (uint32)pEntry->m_pValue;
         pEntry++;
     }
 }
@@ -956,7 +956,7 @@ RpAtomic* CVehicleModelInfo::HideDamagedAtomicCB(RpAtomic* atomic, void* data)
 
 RpAtomic* CVehicleModelInfo::HideAllComponentsAtomicCB(RpAtomic* atomic, void* data)
 {
-    auto uiData = reinterpret_cast<uint32_t>(data);
+    auto uiData = reinterpret_cast<uint32>(data);
     auto checkedFlags = uiData & CVisibilityPlugins::GetAtomicId(atomic);
     if (checkedFlags)
         RpAtomicSetFlags(atomic, 0);
@@ -1097,30 +1097,30 @@ RpAtomic* CVehicleModelInfo::SetAtomicRendererCB_Train(RpAtomic* atomic, void* d
 
 RwObject* CVehicleModelInfo::SetAtomicFlagCB(RwObject* object, void* data)
 {
-    CVisibilityPlugins::SetAtomicFlag(reinterpret_cast<RpAtomic*>(object), (uint16_t)data);
+    CVisibilityPlugins::SetAtomicFlag(reinterpret_cast<RpAtomic*>(object), (uint16)data);
     return object;
 }
 
 RwObject* CVehicleModelInfo::ClearAtomicFlagCB(RwObject* object, void* data)
 {
-    CVisibilityPlugins::ClearAtomicFlag(reinterpret_cast<RpAtomic*>(object), (uint16_t)data);
+    CVisibilityPlugins::ClearAtomicFlag(reinterpret_cast<RpAtomic*>(object), (uint16)data);
     return object;
 }
 
 // 0x4C8700
-void CVehicleModelInfo::AddWheelUpgrade(int wheelSetNumber, int modelId)
+void CVehicleModelInfo::AddWheelUpgrade(int32 wheelSetNumber, int32 modelId)
 {
     auto iUpgradesNum = CVehicleModelInfo::ms_numWheelUpgrades[wheelSetNumber];
     CVehicleModelInfo::ms_upgradeWheels[wheelSetNumber][iUpgradesNum] = modelId;
     CVehicleModelInfo::ms_numWheelUpgrades[wheelSetNumber] = iUpgradesNum + 1;
 }
 
-int CVehicleModelInfo::GetWheelUpgrade(int wheelSetNumber, int wheelUpgradeNumber)
+int32 CVehicleModelInfo::GetWheelUpgrade(int32 wheelSetNumber, int32 wheelUpgradeNumber)
 {
     return CVehicleModelInfo::ms_upgradeWheels[wheelSetNumber][wheelUpgradeNumber];
 }
 
-int CVehicleModelInfo::GetNumWheelUpgrades(int wheelSetNumber)
+int32 CVehicleModelInfo::GetNumWheelUpgrades(int32 wheelSetNumber)
 {
     return CVehicleModelInfo::ms_numWheelUpgrades[wheelSetNumber];
 }
@@ -1128,7 +1128,7 @@ int CVehicleModelInfo::GetNumWheelUpgrades(int wheelSetNumber)
 void CVehicleModelInfo::DeleteVehicleColourTextures()
 {}
 
-void CVehicleModelInfo::SetDirtTextures(CVehicleModelInfo* info, int dirtLevel)
+void CVehicleModelInfo::SetDirtTextures(CVehicleModelInfo* info, int32 dirtLevel)
 {
     for (auto i = 0; i < CCarFXRenderer::NUM_DIRT_TEXTURES; ++i)
         if (info->m_apDirtMaterials[i])
@@ -1158,7 +1158,7 @@ RpMaterial* CVehicleModelInfo::GetMatFXEffectMaterialCB(RpMaterial* material, vo
 
 RpMaterial* CVehicleModelInfo::SetEnvironmentMapCB(RpMaterial* material, void* data)
 {
-    if ((uint16_t)data == 0xFFFF) {
+    if ((uint16)data == 0xFFFF) {
         RpMatFXMaterialSetEffects(material, RpMatFXMaterialFlags::rpMATFXEFFECTNULL);
         return material;
     }
@@ -1179,7 +1179,7 @@ RpMaterial* CVehicleModelInfo::SetEnvMapCoeffCB(RpMaterial* material, void* data
     if (RpMatFXMaterialGetEffects(material) != RpMatFXMaterialFlags::rpMATFXEFFECTENVMAP)
         return material;
 
-    auto uiCoeff = reinterpret_cast<int32_t>(data);
+    auto uiCoeff = reinterpret_cast<int32>(data);
     float fCoeff = static_cast<float>(uiCoeff) / 1000.0F;
     RpMatFXMaterialSetEnvMapCoefficient(material, fCoeff);
     return material;
@@ -1210,7 +1210,7 @@ RpAtomic* CVehicleModelInfo::SetEnvMapCoeffAtomicCB(RpAtomic* atomic, void* data
     return atomic;
 }
 
-void CVehicleModelInfo::AssignRemapTxd(const char* name, std::int16_t txdSlot)
+void CVehicleModelInfo::AssignRemapTxd(const char* name, int16 txdSlot)
 {
     auto iLen = strlen(name);
     if (!isdigit(name[iLen - 1]))
@@ -1237,10 +1237,10 @@ RpAtomic* CVehicleModelInfo::StoreAtomicUsedMaterialsCB(RpAtomic* atomic, void* 
     if (CVisibilityPlugins::GetAtomicId(atomic) & eAtomicComponentFlag::ATOMIC_DISABLE_REFLECTIONS)
         return atomic;
 
-    for (int32_t i = 0; i < pMeshHeader->numMeshes; ++i) {
+    for (int32 i = 0; i < pMeshHeader->numMeshes; ++i) {
         auto pMesh = RpGeometryGetMesh(pGeometry, i);
         // auto pMat = matList->materials; // Unused code i guess
-        // for (int32_t iMat = 0; iMat < matList->numMaterials; ++iMat)
+        // for (int32 iMat = 0; iMat < matList->numMaterials; ++iMat)
         //     pMat++;
 
         _rpMaterialListAppendMaterial(matList, pMesh->material);
@@ -1323,7 +1323,7 @@ void CVehicleModelInfo::LoadVehicleColours()
         }
 
         if (iLastMode == eCarColLineType::GLOBAL_RGB) {
-            uint32_t red, green, blue;
+            uint32 red, green, blue;
             sscanf(buffer, "%d %d %d", &red, &green, &blue);
             pCurColor->Set(red, green, blue, 255);
             auto pLineEnd = pLineStart;
@@ -1334,7 +1334,7 @@ void CVehicleModelInfo::LoadVehicleColours()
             continue;
         }
 
-        uint32_t colorBuffer[8][4];
+        uint32 colorBuffer[8][4];
         if (iLastMode == eCarColLineType::CAR_2COL)
         {
             char modelName[64];
@@ -1361,7 +1361,7 @@ void CVehicleModelInfo::LoadVehicleColours()
             auto iNumVariations = (iNumRead - 1) / 2;
             pModelInfo->m_nNumColorVariations = iNumVariations;
 
-            for (int32_t i = 0; i < iNumVariations; ++i) {
+            for (int32 i = 0; i < iNumVariations; ++i) {
                 pModelInfo->m_anPrimaryColors[i]    = colorBuffer[i][0];
                 pModelInfo->m_anSecondaryColors[i]  = colorBuffer[i][1];
                 pModelInfo->m_anTertiaryColors[i]   = 0;
@@ -1413,7 +1413,7 @@ void CVehicleModelInfo::LoadVehicleColours()
             auto iNumVariations = (iNumRead - 1) / 4;
             pModelInfo->m_nNumColorVariations = iNumVariations;
 
-            for (int32_t i = 0; i < iNumVariations; ++i) {
+            for (int32 i = 0; i < iNumVariations; ++i) {
                 pModelInfo->m_anPrimaryColors[i]    = colorBuffer[i][0];
                 pModelInfo->m_anSecondaryColors[i]  = colorBuffer[i][1];
                 pModelInfo->m_anTertiaryColors[i]   = colorBuffer[i][2];
@@ -1430,7 +1430,7 @@ void CVehicleModelInfo::LoadVehicleColours()
 
 void CVehicleModelInfo::LoadVehicleUpgrades()
 {
-    for (int i = 0; i < NUM_WHEELS; ++i)
+    for (int32 i = 0; i < NUM_WHEELS; ++i)
         CVehicleModelInfo::ms_numWheelUpgrades[i] = 0;;
 
     auto pDatFile = CFileMgr::OpenFile("DATA\\CARMODS.DAT", "r");
@@ -1458,7 +1458,7 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
 
         switch (iLineType) {
         case eCarModsLineType::LINK: {
-            int32_t iModelId1 = -1, iModelId2 = -1;
+            int32 iModelId1 = -1, iModelId2 = -1;
             auto pToken = strtok(pLine, " \t,");
             if (pToken) {
                 auto pModel1 = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(pToken, &iModelId1));
@@ -1478,7 +1478,7 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
             if (!pToken)
                 break;
 
-            int32_t iModelId = -1;
+            int32 iModelId = -1;
             auto pModelInfo = CModelInfo::GetModelInfo(pToken, &iModelId)->AsVehicleModelInfoPtr();
             auto pNextToken = strtok(nullptr, " \t,");
             auto pUpgrade = pModelInfo->m_anUpgrades;
@@ -1502,7 +1502,7 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
         }
 
         case eCarModsLineType::WHEEL: {
-            int32_t iModelId = -1, iWheelSet;
+            int32 iModelId = -1, iWheelSet;
             sscanf(pLine, "%d", &iWheelSet);
             strtok(pLine, " \t,");
             char* pToken;
@@ -1532,19 +1532,19 @@ void CVehicleModelInfo::LoadEnvironmentMaps()
     CTxdStore::PopCurrentTxd();
 }
 
-void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(std::int16_t upgrade1, std::int16_t upgrade2)
+void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(int16 upgrade1, int16 upgrade2)
 {
     m_anUpgrade1[m_nLinksCount] = upgrade1;
     m_anUpgrade2[m_nLinksCount] = upgrade2;
     ++m_nLinksCount;
 }
 
-std::int16_t CVehicleModelInfo::CLinkedUpgradeList::FindOtherUpgrade(std::int16_t upgrade)
+int16 CVehicleModelInfo::CLinkedUpgradeList::FindOtherUpgrade(int16 upgrade)
 {
     if (!m_nLinksCount)
         return -1;
 
-    for (int32_t i = m_nLinksCount - 1; i >= 0; --i) {
+    for (int32 i = m_nLinksCount - 1; i >= 0; --i) {
         if (m_anUpgrade1[i] == upgrade)
             return m_anUpgrade2[i];
 
@@ -1570,7 +1570,7 @@ CVehicleModelInfo::CVehicleStructure::CVehicleStructure() : m_aUpgrades()
 
 CVehicleModelInfo::CVehicleStructure::~CVehicleStructure()
 {
-    for (int32_t i = 0; i < m_nNumExtras; ++i) {
+    for (int32 i = 0; i < m_nNumExtras; ++i) {
         auto pAtomic = m_apExtras[i];
         auto pFrame = RpAtomicGetFrame(pAtomic);
         RpAtomicDestroy(pAtomic);
@@ -1578,7 +1578,7 @@ CVehicleModelInfo::CVehicleStructure::~CVehicleStructure()
     }
 }
 
-void* CVehicleModelInfo::CVehicleStructure::operator new(unsigned int size)
+void* CVehicleModelInfo::CVehicleStructure::operator new(uint32 size)
 {
     return CVehicleModelInfo::CVehicleStructure::m_pInfoPool->New();
 }
@@ -1588,7 +1588,7 @@ void CVehicleModelInfo::CVehicleStructure::operator delete(void* data)
     CVehicleModelInfo::CVehicleStructure::m_pInfoPool->Delete(reinterpret_cast<CVehicleModelInfo::CVehicleStructure*>(data));
 }
 
-bool IsValidCompRule(int nRule)
+bool IsValidCompRule(int32 nRule)
 {
     return nRule != eComponentsRules::ONLY_WHEN_RAINING
         || CWeather::OldWeatherType == eWeatherType::WEATHER_RAINY_COUNTRYSIDE
@@ -1597,7 +1597,7 @@ bool IsValidCompRule(int nRule)
         || CWeather::NewWeatherType == eWeatherType::WEATHER_RAINY_SF;
 }
 
-int ChooseComponent(int rule, int comps)
+int32 ChooseComponent(int32 rule, int32 comps)
 {
     if (rule == eComponentsRules::ALLOW_ALWAYS || rule == eComponentsRules::ONLY_WHEN_RAINING) {
         auto iNumComps = CountCompsInRule(comps);
@@ -1619,9 +1619,9 @@ int ChooseComponent(int rule, int comps)
         return -1;
 }
 
-int CountCompsInRule(int comps)
+int32 CountCompsInRule(int32 comps)
 {
-    int result = 0;
+    int32 result = 0;
     while (comps) {
         if ((comps & 0xF) != 0xF)
             ++result;
@@ -1632,9 +1632,9 @@ int CountCompsInRule(int comps)
     return result;
 }
 
-int GetListOfComponentsNotUsedByRules(unsigned int compRules, int numExtras, int* outList)
+int32 GetListOfComponentsNotUsedByRules(uint32 compRules, int32 numExtras, int32* outList)
 {
-    int iCompsList[]{ 0, 1, 2, 3, 4, 5 };
+    int32 iCompsList[]{ 0, 1, 2, 3, 4, 5 };
     tVehicleCompsUnion comps;
     comps.m_nComps = compRules;
 
@@ -1667,7 +1667,7 @@ int GetListOfComponentsNotUsedByRules(unsigned int compRules, int numExtras, int
     }
 
     auto iNumComps = 0;
-    for (int i = 0; i < numExtras; ++i) {
+    for (int32 i = 0; i < numExtras; ++i) {
         if (iCompsList[i] == 0xF)
             continue;
 

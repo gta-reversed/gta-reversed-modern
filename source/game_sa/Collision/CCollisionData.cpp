@@ -126,7 +126,7 @@ void CCollisionData::Copy(CCollisionData const& src)
         if (src.m_nNumTriangles)
         {
             // Get number of vertices
-            unsigned short iHighestVertInd = 0;
+            uint16 iHighestVertInd = 0;
             for (auto i = 0; i < src.m_nNumTriangles; ++i)
                 iHighestVertInd = std::max({iHighestVertInd,
                                         src.m_pTriangles[i].m_nVertA,
@@ -161,8 +161,8 @@ void CCollisionData::Copy(CCollisionData const& src)
         if (src.m_nNumShadowTriangles)
         {
             // Get number of vertices
-            unsigned short iHighestVertInd = 0;
-            for (uint32_t i = 0; i < src.m_nNumShadowTriangles; ++i)
+            uint16 iHighestVertInd = 0;
+            for (uint32 i = 0; i < src.m_nNumShadowTriangles; ++i)
                 iHighestVertInd = std::max({ iHighestVertInd,
                                         src.m_pShadowTriangles[i].m_nVertA,
                                         src.m_pShadowTriangles[i].m_nVertB,
@@ -179,7 +179,7 @@ void CCollisionData::Copy(CCollisionData const& src)
             m_pShadowTriangles = static_cast<CColTriangle*>(CMemoryMgr::Malloc(m_nNumShadowTriangles * sizeof(CColTriangle)));
         }
     }
-    for (uint32_t i = 0; i < m_nNumShadowTriangles; ++i)
+    for (uint32 i = 0; i < m_nNumShadowTriangles; ++i)
         m_pShadowTriangles[i] = src.m_pShadowTriangles[i];
 }
 
@@ -197,12 +197,12 @@ void CCollisionData::RemoveTrianglePlanes()
     m_pTrianglePlanes = nullptr;
 }
 
-void CCollisionData::GetTrianglePoint(CVector& outVec, int vertId)
+void CCollisionData::GetTrianglePoint(CVector& outVec, int32 vertId)
 {
     outVec = UncompressVector(m_pVertices[vertId]);
 }
 
-void CCollisionData::GetShadTrianglePoint(CVector& outVec, int vertId)
+void CCollisionData::GetShadTrianglePoint(CVector& outVec, int32 vertId)
 {
     outVec = UncompressVector(m_pShadowVertices[vertId]);
 }
@@ -210,7 +210,7 @@ void CCollisionData::GetShadTrianglePoint(CVector& outVec, int vertId)
 void CCollisionData::SetLinkPtr(CLink<CCollisionData*>* link)
 {
     // Original calculation method:
-    // const auto dwLinkAddress = (reinterpret_cast<uint32_t>(&m_pTrianglePlanes[m_nNumTriangles]) + 3) & 0xFFFFFFFC; // 4 bytes aligned address
+    // const auto dwLinkAddress = (reinterpret_cast<uint32>(&m_pTrianglePlanes[m_nNumTriangles]) + 3) & 0xFFFFFFFC; // 4 bytes aligned address
 
     auto* pLinkPtr = static_cast<void*>(&m_pTrianglePlanes[m_nNumTriangles]);
     auto space = sizeof(CColTrianglePlane);
@@ -221,7 +221,7 @@ void CCollisionData::SetLinkPtr(CLink<CCollisionData*>* link)
 CLink<CCollisionData*>* CCollisionData::GetLinkPtr()
 {
     // Original calculation method:
-    // const auto dwLinkAddress = (reinterpret_cast<uint32_t>(&m_pTrianglePlanes[m_nNumTriangles]) + 3) & 0xFFFFFFFC; // 4 bytes aligned address
+    // const auto dwLinkAddress = (reinterpret_cast<uint32>(&m_pTrianglePlanes[m_nNumTriangles]) + 3) & 0xFFFFFFFC; // 4 bytes aligned address
 
     auto* pLinkPtr = static_cast<void*>(&m_pTrianglePlanes[m_nNumTriangles]);
     auto space = sizeof(CColTrianglePlane);

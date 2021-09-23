@@ -42,16 +42,16 @@ public:
 public:
     static void InjectHooks();
 
-    CTaskManager(CPed* ped);
+    explicit CTaskManager(CPed* ped);
     ~CTaskManager();
 
     CTaskManager* Constructor(CPed* ped);
     CTaskManager* Destructor();
 
     CTask* GetActiveTask();
-    CTask* FindActiveTaskByType(int taskType);
-    CTask* FindTaskByType(int taskIndex, int taskType);
-    CTask* GetTaskSecondary(int taskIndex);
+    CTask* FindActiveTaskByType(int32 taskType);
+    CTask* FindTaskByType(int32 taskIndex, int32 taskType);
+    CTask* GetTaskSecondary(int32 taskIndex);
 
     bool HasPrimaryTask(const CTask* task);
     bool HasTaskSecondary(const CTask* task);
@@ -59,21 +59,22 @@ public:
     void Flush();
     void FlushImmediately();
 
-    void SetNextSubTask(CTaskComplex* pTask);
+    void SetNextSubTask(CTaskComplex* task);
 
     static CTaskSimple* GetSimplestTask(CTask* task);
     void StopTimers(const CEvent* event);
     CTask* GetSimplestActiveTask();
-    CTaskSimple* GetSimplestTask(int taskIndex);
+    CTaskSimple* GetSimplestTask(int32 taskIndex);
 
     void AddSubTasks(CTaskComplex* task);
-    void ParentsControlChildren(CTaskComplex* pTask);
-    void SetTask(CTask* task, int taskIndex, bool unused = false);
-    void SetTaskSecondary(CTask* task, int taskIndex);
+    void ParentsControlChildren(CTaskComplex* task);
+    void SetTask(CTask* task, int32 taskIndex, bool unused = false);
+    void SetTaskSecondary(CTask* task, int32 taskIndex);
     void ClearTaskEventResponse();
     void ManageTasks();
 
-    CTask* GetPrimaryTask(int32_t taskIndex) {
+    // GetTaskPrimary. Why they doesn't have version for *primary tasks*? :thinking
+    CTask* GetPrimaryTask(int32 taskIndex) {
         return m_aPrimaryTasks[taskIndex];
     }
 };

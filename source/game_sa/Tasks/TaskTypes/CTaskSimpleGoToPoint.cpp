@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleGoToPoint.h"
+
+#include "CTaskSimpleStandStill.h"
+
 void CTaskSimpleGoToPoint::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleGoToPoint", "CTaskSimpleGoToPoint", 0x667CD0, &CTaskSimpleGoToPoint::Constructor);
@@ -9,7 +13,7 @@ void CTaskSimpleGoToPoint::InjectHooks()
     ReversibleHooks::Install("CTaskSimpleGoToPoint", "UpdatePoint", 0x645700, &CTaskSimpleGoToPoint::UpdatePoint);
 }
 
-CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(int moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) :
+CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) :
     CTaskSimpleGoTo(moveState, targetPoint, fRadius)
 {
     m_GoToPointFlags = 0;
@@ -22,10 +26,10 @@ CTaskSimpleGoToPoint::~CTaskSimpleGoToPoint()
     // nothing here
 }
 
-CTaskSimpleGoToPoint* CTaskSimpleGoToPoint::Constructor(int moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6)
+CTaskSimpleGoToPoint* CTaskSimpleGoToPoint::Constructor(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTaskSimpleGoToPoint*, 0x667CD0, CTaskSimpleGoToPoint*, int, const CVector&, float, bool, bool>
+    return plugin::CallMethodAndReturn<CTaskSimpleGoToPoint*, 0x667CD0, CTaskSimpleGoToPoint*, int32, const CVector&, float, bool, bool>
         (this, moveState, targetPoint, fRadius, bMoveTowardsTargetPoint, a6);
 #else
     this->CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(moveState, targetPoint, fRadius, bMoveTowardsTargetPoint, a6);
@@ -45,7 +49,7 @@ CTask* CTaskSimpleGoToPoint::Clone()
 bool CTaskSimpleGoToPoint::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<bool, 0x667D60, CTask*, CPed*, int, const CEvent*>(this, ped, priority, event);
+    return plugin::CallMethodAndReturn<bool, 0x667D60, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
 #else
     return CTaskSimpleGoToPoint::MakeAbortable_Reversed(ped, priority, event);
 #endif
@@ -131,7 +135,7 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
                                 auto pAnimStaticAssoc1 = pAnimGroup->GetAnimation(1);
                                 auto pAnimStaticAssoc2 = pAnimGroup->GetAnimation(2);
                                 if (pAnimStaticAssoc1->m_pHierarchy != pAnimStaticAssoc2->m_pHierarchy &&
-                                    pPlayer->ControlButtonSprint((eSprintType)0) >= 1.0f) {
+                                    pPlayer->ControlButtonSprint(SPRINT_GROUND) >= 1.0f) {
                                     ped->SetMoveState(PEDMOVE_SPRINT);
                                     bSprinting = true;
                                 }

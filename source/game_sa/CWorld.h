@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CPlayerInfo.h"
 #include "CColPoint.h"
 #include "CStoredCollPoly.h"
@@ -16,22 +16,22 @@
 #include "CPed.h"
 #include "CVehicle.h"
 
-constexpr std::int32_t MAX_PLAYERS = 2;
-constexpr std::int32_t MAX_WORLD_UNITS = 6000;
-constexpr std::int32_t MAX_SECTORS_X = 120;
-constexpr std::int32_t MAX_SECTORS_Y = 120;
-constexpr std::int32_t MAX_SECTORS = MAX_SECTORS_X * MAX_SECTORS_Y;
-constexpr std::int32_t MAX_REPEAT_SECTORS_X = 16;
-constexpr std::int32_t MAX_REPEAT_SECTORS_Y = 16;
-constexpr std::int32_t MAX_REPEAT_SECTORS = MAX_REPEAT_SECTORS_X * MAX_REPEAT_SECTORS_Y;
-constexpr std::int32_t MAX_LOD_PTR_LISTS_X = 30; 
-constexpr std::int32_t MAX_LOD_PTR_LISTS_Y = 30;
-constexpr std::int32_t MAX_LOD_PTR_LISTS = MAX_LOD_PTR_LISTS_X * MAX_LOD_PTR_LISTS_Y;
+constexpr int32 MAX_PLAYERS = 2;
+constexpr int32 MAX_WORLD_UNITS = 6000;
+constexpr int32 MAX_SECTORS_X = 120;
+constexpr int32 MAX_SECTORS_Y = 120;
+constexpr int32 MAX_SECTORS = MAX_SECTORS_X * MAX_SECTORS_Y;
+constexpr int32 MAX_REPEAT_SECTORS_X = 16;
+constexpr int32 MAX_REPEAT_SECTORS_Y = 16;
+constexpr int32 MAX_REPEAT_SECTORS = MAX_REPEAT_SECTORS_X * MAX_REPEAT_SECTORS_Y;
+constexpr int32 MAX_LOD_PTR_LISTS_X = 30;
+constexpr int32 MAX_LOD_PTR_LISTS_Y = 30;
+constexpr int32 MAX_LOD_PTR_LISTS = MAX_LOD_PTR_LISTS_X * MAX_LOD_PTR_LISTS_Y;
 
 class CWorld {
 public:
-    static std::int32_t TOTAL_PLAYERS;
-    static int &ms_iProcessLineNumCrossings;
+    static int32 TOTAL_PLAYERS;
+    static int32 &ms_iProcessLineNumCrossings;
     static float &fWeaponSpreadRate;
     // entity to ignore
     static CEntity *&pIgnoreEntity;
@@ -45,7 +45,7 @@ public:
     static bool &bDoingCarCollisions;
     // Current player
     static char &PlayerInFocus;
-    static unsigned short &ms_nCurrentScanCode;
+    static uint16 &ms_nCurrentScanCode;
     // Player data array for 2 players
     static CPlayerInfo *Players; // static CPlayerInfo Players[MAX_PLAYERS]
     // Use GetSector() to access this array
@@ -72,20 +72,20 @@ public:
     static void ProcessForAnimViewer();
     static void ProcessPedsAfterPreRender();
     static void ClearScanCodes();
-    static void FindObjectsInRangeSectorList(CPtrList& arg0, CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities);
-    static void FindObjectsOfTypeInRangeSectorList(unsigned int modelId, CPtrList& ptrList, CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities);
+    static void FindObjectsInRangeSectorList(CPtrList& arg0, CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities);
+    static void FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& ptrList, CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities);
     static bool ProcessVerticalLineSectorList_FillGlobeColPoints(CPtrList& ptrList, CColLine const& colLine, CEntity*& outEntity, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly);
     static void RemoveStaticObjects();
     static void TestForBuildingsOnTopOfEachOther(CPtrList& ptrList);
-    static void TestForUnusedModels(CPtrList& ptrList, int* models);
+    static void TestForUnusedModels(CPtrList& ptrList, int32* models);
     static void RemoveEntityInsteadOfProcessingIt(CEntity* entity);
     static void CallOffChaseForAreaSectorListVehicles(CPtrList& ptrList, float x1, float y1, float x2, float y2, float arg5, float arg6, float arg7, float arg8);
     static void CallOffChaseForAreaSectorListPeds(CPtrList& ptrList, float x1, float y1, float x2, float y2, float arg5, float arg6, float arg7, float arg8);
     static bool CameraToIgnoreThisObject(CEntity* entity);
     // returns player ID (0 or 1), -1 - not found
-    static int FindPlayerSlotWithPedPointer(void* ptr);
+    static int32 FindPlayerSlotWithPedPointer(void* ptr);
     // returns player ID (0 or 1), -1 - not found
-    static int FindPlayerSlotWithRemoteVehiclePointer(void* ptr);
+    static int32 FindPlayerSlotWithRemoteVehiclePointer(void* ptr);
     // returns player ID (0 or 1)
     static void FindPlayerSlotWithVehiclePointer(CEntity* vehiclePtr);
     static void ShutDown();
@@ -95,14 +95,14 @@ public:
     static void CastShadow(float x1, float y1, float x2, float y2);
     static void ProcessAttachedEntities();
     static bool GetIsLineOfSightSectorListClear(CPtrList& ptrList, CColLine const& colLine, bool doSeeThroughCheck, bool doCameraIgnoreCheck);
-    static void FindObjectsInRange(CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
-    static void FindObjectsOfTypeInRange(unsigned int modelId, CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
-    static void FindLodOfTypeInRange(unsigned int modelId, CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities);
-    static void FindObjectsKindaCollidingSectorList(CPtrList& ptrList, CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities);
-    static void FindObjectsIntersectingCubeSectorList(CPtrList& ptrList, CVector const& cornerA, CVector const& cornerB, short* outCount, short maxCount, CEntity** outEntities);
-    static void FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrList, CBox const& box, CMatrix const& transform, CVector const& point, short* outCount, short maxCount, CEntity** outEntities);
-    static void FindMissionEntitiesIntersectingCubeSectorList(CPtrList& ptrList, CVector const& cornerA, CVector const& cornerB, short* outCount, short maxCount, CEntity** outEntities, bool vehiclesList, bool pedsList, bool objectsList);
-    static void FindNearestObjectOfTypeSectorList(int modelId, CPtrList& ptrList, CVector const& point, float radius, bool b2D, CEntity** outEntities, float* outDistance);
+    static void FindObjectsInRange(CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
+    static void FindObjectsOfTypeInRange(uint32 modelId, CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
+    static void FindLodOfTypeInRange(uint32 modelId, CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities);
+    static void FindObjectsKindaCollidingSectorList(CPtrList& ptrList, CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities);
+    static void FindObjectsIntersectingCubeSectorList(CPtrList& ptrList, CVector const& cornerA, CVector const& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities);
+    static void FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrList, CBox const& box, CMatrix const& transform, CVector const& point, int16* outCount, int16 maxCount, CEntity** outEntities);
+    static void FindMissionEntitiesIntersectingCubeSectorList(CPtrList& ptrList, CVector const& cornerA, CVector const& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehiclesList, bool pedsList, bool objectsList);
+    static void FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList, CVector const& point, float radius, bool b2D, CEntity** outEntities, float* outDistance);
     static void RemoveReferencesToDeletedObject(CEntity* entity);
     static void SetPedsOnFire(float x1, float y1, float x2, float y2, CEntity* fireCreator);
     static void SetPedsChoking(float x1, float y1, float x2, float y2, CEntity* gasCreator);
@@ -130,11 +130,11 @@ public:
     static void TriggerExplosionSectorList(CPtrList& ptrList, CVector const& point, float radius, float visibleDistance, CEntity* victim, CEntity* creator, bool processVehicleBombTimer, float damage);
     static void Process();
     static bool GetIsLineOfSightSectorClear(CSector& sector, CRepeatSector& repeatSector, CColLine const& colLine, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doIgnoreCameraCheck);
-    static void FindObjectsKindaColliding(CVector const& point, float radius, bool b2D, short* outCount, short maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
-    static void FindObjectsIntersectingCube(CVector const& cornerA, CVector const& cornerB, short* outCount, short maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
-    static void FindObjectsIntersectingAngledCollisionBox(CBox const& box, CMatrix const& transform, CVector const& point, float x1, float y1, float x2, float y2, short* outCount, short maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
-    static void FindMissionEntitiesIntersectingCube(CVector const& cornerA, CVector const& cornerB, short* outCount, short maxCount, CEntity** outEntities, bool vehicles, bool peds, bool objects);
-    static void FindNearestObjectOfType(int modelId, CVector const& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
+    static void FindObjectsKindaColliding(CVector const& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
+    static void FindObjectsIntersectingCube(CVector const& cornerA, CVector const& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
+    static void FindObjectsIntersectingAngledCollisionBox(CBox const& box, CMatrix const& transform, CVector const& point, float x1, float y1, float x2, float y2, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
+    static void FindMissionEntitiesIntersectingCube(CVector const& cornerA, CVector const& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehicles, bool peds, bool objects);
+    static void FindNearestObjectOfType(int32 modelId, CVector const& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static float FindGroundZForCoord(float x, float y);
     static float FindGroundZFor3DCoord(float x, float y, float z, bool* outResult, CEntity** outEntity);
     static float FindRoofZFor3DCoord(float x, float y, float z, bool* outResult);
@@ -142,7 +142,7 @@ public:
     static void RepositionOneObject(CEntity* object);
     // returns entity
     static CEntity* TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity* arg2, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doCameraIgnoreCheck);
-    static void ClearExcitingStuffFromArea(CVector const& point, float radius, unsigned char bRemoveProjectilesAndShadows);
+    static void ClearExcitingStuffFromArea(CVector const& point, float radius, uint8 bRemoveProjectilesAndShadows);
     static bool GetIsLineOfSightClear(CVector const& origin, CVector const& target, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck);
     static bool ProcessLineOfSightSector(CSector& sector, CRepeatSector& repeatSector, CColLine const& colLine, CColPoint& outColPoint, float& maxTouchDistance, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck, bool doShootThroughCheck);
     static void TriggerExplosion(CVector const& point, float radius, float visibleDistance, CEntity* victim, CEntity* creator, bool processVehicleBombTimer, float damage);
@@ -150,7 +150,7 @@ public:
     static void RepositionCertainDynamicObjects();
     static bool ProcessLineOfSight(CVector const& origin, CVector const& target, CColPoint& outColPoint, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck, bool doShootThroughCheck);
     static void IncrementCurrentScanCode();
-    static CPtrListSingleLink& GetLodPtrList(std::int32_t x, std::int32_t y);
+    static CPtrListSingleLink& GetLodPtrList(int32 x, int32 y);
 
     static CPlayerInfo& GetFocusedPlayerInfo() { return Players[PlayerInFocus]; }
 
@@ -160,17 +160,17 @@ public:
     static float GetSectorfX(float x) { return GetHalfMapSectorX(x) + (MAX_SECTORS_X / 2); }
     static float GetSectorfY(float y) { return GetHalfMapSectorY(y) + (MAX_SECTORS_Y / 2); }
     // returns sector index in range 0 to 120 (covers full map) 
-    static std::int32_t GetSectorX(float x) { return static_cast<std::int32_t>(std::floor(GetSectorfX(x))); }
-    static std::int32_t GetSectorY(float y) { return static_cast<std::int32_t>(std::floor(GetSectorfY(y))); }
-    static float GetSectorPosX(std::int32_t sector)
+    static int32 GetSectorX(float x) { return static_cast<int32>(std::floor(GetSectorfX(x))); }
+    static int32 GetSectorY(float y) { return static_cast<int32>(std::floor(GetSectorfY(y))); }
+    static float GetSectorPosX(int32 sector)
     {
-        const std::int32_t HalfOfTotalSectorsX = MAX_SECTORS_Y / 2;
+        const int32 HalfOfTotalSectorsX = MAX_SECTORS_Y / 2;
         const float fTotalMapUnitsX = MAX_WORLD_UNITS / MAX_SECTORS_Y;
         return (sector - HalfOfTotalSectorsX) * fTotalMapUnitsX + (fTotalMapUnitsX / 2);
     }
-    static float GetSectorPosY(std::int32_t sector)
+    static float GetSectorPosY(int32 sector)
     {
-        const std::int32_t HalfOfTotalSectorsY = MAX_SECTORS_Y / 2;
+        const int32 HalfOfTotalSectorsY = MAX_SECTORS_Y / 2;
         const float fTotalMapUnitsY = MAX_WORLD_UNITS / MAX_SECTORS_Y;
         return (sector - HalfOfTotalSectorsY) * fTotalMapUnitsY + (fTotalMapUnitsY / 2);
     }
@@ -181,29 +181,29 @@ public:
     static float GetLodSectorfX(float fSector) { return GetHalfMapLodSectorX(fSector) + (MAX_LOD_PTR_LISTS_X / 2); }
     static float GetLodSectorfY(float fSector) { return GetHalfMapLodSectorY(fSector) + (MAX_LOD_PTR_LISTS_Y / 2); }
     // returns sector index in range 0 to 30 (covers full map) 
-    static std::int32_t GetLodSectorX(float fSector) { return static_cast<std::int32_t>(std::floor(GetLodSectorfX(fSector))); }
-    static std::int32_t GetLodSectorY(float fSector) { return static_cast<std::int32_t>(std::floor(GetLodSectorfY(fSector)));  }
-    static float GetLodSectorPosX(std::int32_t sector)
+    static int32 GetLodSectorX(float fSector) { return static_cast<int32>(std::floor(GetLodSectorfX(fSector))); }
+    static int32 GetLodSectorY(float fSector) { return static_cast<int32>(std::floor(GetLodSectorfY(fSector)));  }
+    static float GetLodSectorPosX(int32 sector)
     {
-        const std::int32_t HalfOfTotalSectorsX = MAX_LOD_PTR_LISTS_X / 2;
+        const int32 HalfOfTotalSectorsX = MAX_LOD_PTR_LISTS_X / 2;
         const float fTotalMapUnitsX = MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_X;
         return (sector - HalfOfTotalSectorsX) * fTotalMapUnitsX + (fTotalMapUnitsX / 2);
     }
-    static float GetLodSectorPosY(std::int32_t sector)
+    static float GetLodSectorPosY(int32 sector)
     {
-        const std::int32_t HalfOfTotalSectorsY = MAX_LOD_PTR_LISTS_Y / 2;
+        const int32 HalfOfTotalSectorsY = MAX_LOD_PTR_LISTS_Y / 2;
         const float fTotalMapUnitsY = MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_Y;
         return (sector - HalfOfTotalSectorsY) * fTotalMapUnitsY + (fTotalMapUnitsY / 2);
     }
 };
 
-extern unsigned int &FilledColPointIndex;
+extern uint32 &FilledColPointIndex;
 extern CColPoint *gaTempSphereColPoints; // CColPoint gaTempSphereColPoints[32]
-extern short &TAG_SPRAYING_INCREMENT_VAL; // default 8
+extern int16 &TAG_SPRAYING_INCREMENT_VAL; // default 8
 
-short GetCurrentScanCode();
-CSector* GetSector(int x, int y);
-CRepeatSector* GetRepeatSector(int x, int y);
+int16 GetCurrentScanCode();
+CSector* GetSector(int32 x, int32 y);
+CRepeatSector* GetRepeatSector(int32 x, int32 y);
 void SetNextScanCode();
 
-double ScaleLighting(unsigned char lighting, float fScale);
+double ScaleLighting(uint8 lighting, float fScale);

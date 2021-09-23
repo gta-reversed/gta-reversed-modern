@@ -1,47 +1,45 @@
 #include "StdInc.h"
 
-void CTaskComplexFallAndGetUp::InjectHooks()
-{
+#include "CTaskComplexFallAndGetUp.h"
+#include "CTaskSimpleFall.h"
+#include "CTaskSimpleGetUp.h"
+
+void CTaskComplexFallAndGetUp::InjectHooks() {
     ReversibleHooks::Install("CTaskComplexFallAndGetUp", "Constructor", 0x6786C0, &CTaskComplexFallAndGetUp::Constructor);
     ReversibleHooks::Install("CTaskComplexFallAndGetUp", "Constructor2", 0x678700, &CTaskComplexFallAndGetUp::Constructor2);
     ReversibleHooks::Install("CTaskComplexFallAndGetUp", "CreateSubTask", 0x678900, &CTaskComplexFallAndGetUp::CreateSubTask);
     ReversibleHooks::Install("CTaskComplexFallAndGetUp", "IsFalling", 0x6787D0, &CTaskComplexFallAndGetUp::IsFalling);
     ReversibleHooks::Install("CTaskComplexFallAndGetUp", "SetDownTime", 0x6787A0, &CTaskComplexFallAndGetUp::SetDownTime);
-    //VTABLE
+    // VTABLE
     ReversibleHooks::Install("CTaskComplexFallAndGetUp", "CreateFirstSubTask", 0x678870, &CTaskComplexFallAndGetUp::CreateFirstSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexFallAndGetUp", "CreateNextSubTask", 0x67CB70, &CTaskComplexFallAndGetUp::CreateNextSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexFallAndGetUp", "ControlSubTask", 0x6788F0, &CTaskComplexFallAndGetUp::ControlSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexFallAndGetUp", "MakeAbortable", 0x6787F0, &CTaskComplexFallAndGetUp::MakeAbortable_Reversed);
 }
 
-CTaskComplexFallAndGetUp* CTaskComplexFallAndGetUp::Constructor(AnimationId nFallAnimId, AssocGroupId nFallAnimGroup, int32 nFallDownTime)
-{
+CTaskComplexFallAndGetUp* CTaskComplexFallAndGetUp::Constructor(AnimationId nFallAnimId, AssocGroupId nFallAnimGroup, int32 nFallDownTime) {
     this->CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(nFallAnimId, nFallAnimGroup, nFallDownTime);
     return this;
 }
 
-CTaskComplexFallAndGetUp* CTaskComplexFallAndGetUp::Constructor2(int32 nDir, int32 nFallDownTime)
-{
+CTaskComplexFallAndGetUp* CTaskComplexFallAndGetUp::Constructor2(int32 nDir, int32 nFallDownTime) {
     this->CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(nDir, nFallDownTime);
     return this;
 }
 
 // 0x6786C0
-CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(AnimationId nFallAnimId, AssocGroupId nFallAnimGroup, int32 nFallDownTime)
-{
-    m_nFallAnimId = nFallAnimId;
+CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(AnimationId nFallAnimId, AssocGroupId nFallAnimGroup, int32 nFallDownTime) {
+    m_nFallAnimId    = nFallAnimId;
     m_nFallAnimGroup = nFallAnimGroup;
-    m_nFallDownTime = nFallDownTime;
+    m_nFallDownTime  = nFallDownTime;
 }
 
 // 0x678700
-CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(int32 nDir, int32 nFallDownTime)
-{
+CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(int32 nDir, int32 nFallDownTime) {
     m_nFallDownTime = nFallDownTime;
     m_nFallAnimGroup = ANIM_GROUP_DEFAULT;
 
-    switch (nDir)
-    {
+    switch (nDir) {
     case 0:
         m_nFallAnimId = ANIM_ID_KO_SKID_FRONT;
         break;
@@ -60,37 +58,31 @@ CTaskComplexFallAndGetUp::CTaskComplexFallAndGetUp(int32 nDir, int32 nFallDownTi
 }
 
 // 0x678870
-CTask* CTaskComplexFallAndGetUp::CreateFirstSubTask(CPed* ped)
-{
+CTask* CTaskComplexFallAndGetUp::CreateFirstSubTask(CPed* ped) {
     return CreateFirstSubTask_Reversed(ped);
 }
 
 // 0x67CB70
-CTask* CTaskComplexFallAndGetUp::CreateNextSubTask(CPed* ped)
-{
+CTask* CTaskComplexFallAndGetUp::CreateNextSubTask(CPed* ped) {
     return CreateNextSubTask_Reversed(ped);
 }
 
 // 0x6788F0
-CTask* CTaskComplexFallAndGetUp::ControlSubTask(CPed* ped)
-{
+CTask* CTaskComplexFallAndGetUp::ControlSubTask(CPed* ped) {
     return ControlSubTask_Reversed(ped);
 }
 
 // 0x6787F0
-bool CTaskComplexFallAndGetUp::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
+bool CTaskComplexFallAndGetUp::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return MakeAbortable_Reversed(ped, priority, event);
 }
 
-CTask* CTaskComplexFallAndGetUp::CreateFirstSubTask_Reversed(CPed* ped)
-{
+CTask* CTaskComplexFallAndGetUp::CreateFirstSubTask_Reversed(CPed* ped) {
     return CreateSubTask(TASK_SIMPLE_FALL);
 }
 
-CTask* CTaskComplexFallAndGetUp::CreateNextSubTask_Reversed(CPed* ped)
-{
-    auto subTaskType = m_pSubTask->GetId();
+CTask* CTaskComplexFallAndGetUp::CreateNextSubTask_Reversed(CPed* ped) {
+    auto subTaskType = m_pSubTask->GetTaskType();
 
     if (subTaskType == TASK_SIMPLE_FALL)
         return CreateSubTask(TASK_SIMPLE_GET_UP);
@@ -101,21 +93,18 @@ CTask* CTaskComplexFallAndGetUp::CreateNextSubTask_Reversed(CPed* ped)
     return nullptr;
 }
 
-CTask* CTaskComplexFallAndGetUp::ControlSubTask_Reversed(CPed* ped)
-{
+CTask* CTaskComplexFallAndGetUp::ControlSubTask_Reversed(CPed* ped) {
     return m_pSubTask;
 }
 
-bool CTaskComplexFallAndGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
+bool CTaskComplexFallAndGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority == ABORT_PRIORITY_IMMEDIATE)
         return m_pSubTask->MakeAbortable(ped, priority, event);
 
     if (ped->m_nPedState == PEDSTATE_ARRESTED || ped->bIsBeingArrested)
         return false;
 
-    if (priority == ABORT_PRIORITY_LEISURE)
-    {
+    if (priority == ABORT_PRIORITY_LEISURE) {
         if (IsFalling())
             return false;
         else
@@ -126,10 +115,8 @@ bool CTaskComplexFallAndGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority 
 }
 
 // 0x678900
-CTask* CTaskComplexFallAndGetUp::CreateSubTask(eTaskType taskType)
-{
-    switch (taskType)
-    {
+CTask* CTaskComplexFallAndGetUp::CreateSubTask(eTaskType taskType) {
+    switch (taskType) {
     case TASK_SIMPLE_FALL:
         return new CTaskSimpleFall(m_nFallAnimId, m_nFallAnimGroup, m_nFallDownTime);
     case TASK_SIMPLE_GET_UP:
@@ -141,20 +128,16 @@ CTask* CTaskComplexFallAndGetUp::CreateSubTask(eTaskType taskType)
 }
 
 // 0x6787D0
-bool CTaskComplexFallAndGetUp::IsFalling()
-{
-    return m_pSubTask->GetId() == TASK_SIMPLE_FALL;
+bool CTaskComplexFallAndGetUp::IsFalling() {
+    return m_pSubTask->GetTaskType() == TASK_SIMPLE_FALL;
 }
 
 // 0x6787A0
-void CTaskComplexFallAndGetUp::SetDownTime(int32 nTime)
-{
+void CTaskComplexFallAndGetUp::SetDownTime(int32 nTime) {
     m_nFallDownTime = nTime;
-    if (IsFalling())
-    {
+    if (IsFalling()) {
         auto pFallTask = reinterpret_cast<CTaskSimpleFall*>(m_pSubTask);
         pFallTask->m_nTotalDownTime = nTime;
         pFallTask->m_nCurrentDownTime = nTime;
     }
 }
-

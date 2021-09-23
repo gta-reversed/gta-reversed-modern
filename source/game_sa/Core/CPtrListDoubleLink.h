@@ -5,13 +5,13 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CPtrList.h"
 #include "CPtrNodeDoubleLink.h"
 
-class  CPtrListDoubleLink : public CPtrList {
+class CPtrListDoubleLink : public CPtrList {
 public:
-    inline CPtrNodeDoubleLink *GetNode() {
+    inline CPtrNodeDoubleLink* GetNode() {
         return reinterpret_cast<CPtrNodeDoubleLink *>(pNode);
     }
 

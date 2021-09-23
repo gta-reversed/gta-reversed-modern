@@ -6,12 +6,11 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CPed.h"
 
-class  CCivilianPed : public CPed {
+class CCivilianPed : public CPed {
 public:
-    CCivilianPed(ePedType pedType, unsigned int modelIndex);
+    CCivilianPed(ePedType pedType, uint32 modelIndex);
 };
 
 VALIDATE_SIZE(CCivilianPed, 0x79C);

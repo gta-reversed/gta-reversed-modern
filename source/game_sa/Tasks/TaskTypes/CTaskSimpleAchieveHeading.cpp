@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleAchieveHeading.h"
+
 CTaskSimpleAchieveHeading::CTaskSimpleAchieveHeading(float fAngle, float arg2, float arg3)
 {
     plugin::CallMethodAndReturn< CTaskSimpleAchieveHeading*, 0x667E20, CTaskSimpleAchieveHeading*, float, float, float>(this, fAngle, arg2, arg3);

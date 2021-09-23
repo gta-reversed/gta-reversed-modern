@@ -1,5 +1,10 @@
 #include "StdInc.h"
 
+#include "CTaskComplexWanderCop.h"
+
+#include "CTaskSimpleStandStill.h"
+#include "CTaskComplexPolicePursuit.h"
+
 void CTaskComplexWanderCop::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexWanderCop", "CTaskComplexWanderCop", 0x460C80, &CTaskComplexWanderCop::Constructor);
@@ -14,7 +19,7 @@ void CTaskComplexWanderCop::InjectHooks()
     ReversibleHooks::Install("CTaskComplexWanderCop", "ShouldPursuePlayer", 0x66B160, &CTaskComplexWanderCop::ShouldPursuePlayer);
 }
 
-CTaskComplexWanderCop::CTaskComplexWanderCop(int moveState, unsigned char dir) : CTaskComplexWander(moveState, dir, true, 0.5) {
+CTaskComplexWanderCop::CTaskComplexWanderCop(int32 moveState, uint8 dir) : CTaskComplexWander(moveState, dir, true, 0.5) {
     m_pTaskComplexMoveGoToPointAndStandStill = 0;
     m_nScanForStuffTimer.m_nStartTime = 0;
     m_nScanForStuffTimer.m_nInterval = 0;
@@ -35,9 +40,9 @@ CTaskComplexWanderCop::~CTaskComplexWanderCop() {
         delete pTask;
 }
 
-CTaskComplexWanderCop* CTaskComplexWanderCop::Constructor(int moveState, unsigned char dir) {
+CTaskComplexWanderCop* CTaskComplexWanderCop::Constructor(int32 moveState, uint8 dir) {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTaskComplexWanderCop*, 0x460C80, CTaskComplexWanderCop*, int, unsigned char>(this, moveState, dir);
+    return plugin::CallMethodAndReturn<CTaskComplexWanderCop*, 0x460C80, CTaskComplexWanderCop*, int32, uint8>(this, moveState, dir);
 #else
     this->CTaskComplexWanderCop::CTaskComplexWanderCop(moveState, dir);
     return this;
@@ -80,10 +85,10 @@ CTask* CTaskComplexWanderCop::ControlSubTask(CPed* ped)
 #endif
 }
 
-int CTaskComplexWanderCop::GetWanderType()
+int32 CTaskComplexWanderCop::GetWanderType()
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return ((int(__thiscall*)(CTaskComplex*))0x460D50)(this);
+    return ((int32(__thiscall*)(CTaskComplex*))0x460D50)(this);
 #else
     return CTaskComplexWanderCop::GetWanderType_Reversed();
 #endif
@@ -116,9 +121,9 @@ CTask* CTaskComplexWanderCop::CreateNextSubTask_Reversed(CPed* ped)
         return nullptr;
     }
 
-    if (m_pSubTask->GetId() == TASK_COMPLEX_POLICE_PURSUIT)
+    if (m_pSubTask->GetTaskType() == TASK_COMPLEX_POLICE_PURSUIT)
     {
-        m_nSubTaskCreatedTimer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+        m_nSubTaskCreatedTimer.m_nStartTime = CTimer::GetTimeInMS();
         m_nSubTaskCreatedTimer.m_nInterval = 3000;
         m_nSubTaskCreatedTimer.m_bStarted = 1;
         if (m_pTaskComplexMoveGoToPointAndStandStill)
@@ -133,7 +138,7 @@ CTask* CTaskComplexWanderCop::CreateNextSubTask_Reversed(CPed* ped)
     else
     {
         CTask* pTaskGotoStandStill = (CTask*)m_pTaskComplexMoveGoToPointAndStandStill;
-        if (pTaskGotoStandStill && m_pSubTask->GetId() == pTaskGotoStandStill->GetId())
+        if (pTaskGotoStandStill && m_pSubTask->GetTaskType() == pTaskGotoStandStill->GetTaskType())
         {
             return nullptr;
         }
@@ -192,7 +197,7 @@ CTask* CTaskComplexWanderCop::ControlSubTask_Reversed(CPed* ped)
     }
     if (!ShouldPursuePlayer(pPed))
     {
-        if (m_pSubTask->GetId() == TASK_COMPLEX_POLICE_PURSUIT)
+        if (m_pSubTask->GetTaskType() == TASK_COMPLEX_POLICE_PURSUIT)
         {
             return m_pSubTask;
         }
@@ -223,31 +228,31 @@ void CTaskComplexWanderCop::ScanForStuff_Reversed(CPed* ped)
     CCopPed* pPed = (CCopPed*)ped;
     if (!m_nScanForStuffTimer.m_bStarted)
     {
-        m_nScanForStuffTimer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+        m_nScanForStuffTimer.m_nStartTime = CTimer::GetTimeInMS();
         m_nScanForStuffTimer.m_nInterval = 50;
         m_nScanForStuffTimer.m_bStarted = 1;
     }
-    if (GetId() != TASK_COMPLEX_POLICE_PURSUIT && m_nScanForStuffTimer.m_bStarted)
+    if (GetTaskType() != TASK_COMPLEX_POLICE_PURSUIT && m_nScanForStuffTimer.m_bStarted)
     {
         if (m_nScanForStuffTimer.m_bStopped)
         {
-            m_nScanForStuffTimer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+            m_nScanForStuffTimer.m_nStartTime = CTimer::GetTimeInMS();
             m_nScanForStuffTimer.m_bStopped = 0;
         }
 
-        if (CTimer::m_snTimeInMilliseconds >= (m_nScanForStuffTimer.m_nStartTime + m_nScanForStuffTimer.m_nInterval))
+        if (CTimer::GetTimeInMS() >= (m_nScanForStuffTimer.m_nStartTime + m_nScanForStuffTimer.m_nInterval))
         {
             m_nScanForStuffTimer.m_nInterval = 50;
-            m_nScanForStuffTimer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+            m_nScanForStuffTimer.m_nStartTime = CTimer::GetTimeInMS();
             m_nScanForStuffTimer.m_bStarted = 1;
 
-            if (CTimer::m_snTimeInMilliseconds >= m_nTimePassedSinceLastLookedForCarAlarmsAndStolenCopCars)
+            if (CTimer::GetTimeInMS() >= m_nTimePassedSinceLastLookedForCarAlarmsAndStolenCopCars)
             {
                 LookForCarAlarms(pPed);
                 LookForStolenCopCars(pPed);
             }
 
-            if (CTimer::m_snTimeInMilliseconds >= m_nTimePassedSinceLastLookedForCriminals)
+            if (CTimer::GetTimeInMS() >= m_nTimePassedSinceLastLookedForCriminals)
             {
                 LookForCriminals(pPed);
             }
@@ -262,7 +267,7 @@ void CTaskComplexWanderCop::LookForCarAlarms(CCopPed* pPed)
 #else
     CVehicle* pPlayerVehicle = FindPlayerVehicle(-1, 0);
     if (pPlayerVehicle && pPlayerVehicle->IsAutomobile()) {
-        short alaramState = pPlayerVehicle->m_nAlarmState;
+        int16 alaramState = pPlayerVehicle->m_nAlarmState;
         if (alaramState) {
             if (alaramState != -1 && pPlayerVehicle->m_nStatus != STATUS_WRECKED) {
                 CVector distance = pPlayerVehicle->GetPosition() - pPed->GetPosition();
@@ -303,17 +308,17 @@ void CTaskComplexWanderCop::LookForCriminals(CCopPed* pPed)
     plugin::CallMethod<0x66B300, CTaskComplexWanderCop*, CPed*>(this, pPed);
 #else
     CPed* pCriminalPed = nullptr;
-    for (int entityIndex = 0; entityIndex < 16; entityIndex++)
+    for (int32 entityIndex = 0; entityIndex < 16; entityIndex++)
     {
         pCriminalPed = (CPed*)pPed->m_pIntelligence->m_entityScanner.m_apEntities[entityIndex];
         if (pCriminalPed)
         {
-            int pedType = pCriminalPed->m_nPedType;
+            int32 pedType = pCriminalPed->m_nPedType;
             if (pedType >= PED_TYPE_GANG1 && pedType <= PED_TYPE_GANG10
                 || pedType == PED_TYPE_CRIMINAL && pCriminalPed != m_pLastCriminalPedLookedFor)
             {
                 CTask* pActiveTask = pCriminalPed->m_pIntelligence->m_TaskMgr.GetActiveTask();
-                if (pActiveTask && pActiveTask->GetId() == GetId())
+                if (pActiveTask && pActiveTask->GetTaskType() == GetTaskType())
                 {
                     CVector distance = (pCriminalPed->GetPosition() - pPed->GetPosition());
                     if (10.0f * 10.0f > distance.SquaredMagnitude())
@@ -339,7 +344,7 @@ void CTaskComplexWanderCop::LookForCriminals(CCopPed* pPed)
     pCriminalPed->GetEventGroup().Add(&eventPedToFlee, false);
 
     // 30 seconds wait for next check
-    m_nTimePassedSinceLastLookedForCriminals = CTimer::m_snTimeInMilliseconds + 30000;
+    m_nTimePassedSinceLastLookedForCriminals = CTimer::GetTimeInMS() + 30000;
     m_pLastCriminalPedLookedFor = pCriminalPed;
 #endif
 }
@@ -352,7 +357,7 @@ bool CTaskComplexWanderCop::ShouldPursuePlayer(CCopPed* pPed)
     CWanted* pWantedPlayer = FindPlayerWanted(-1);
     if (pWantedPlayer->m_nWantedLevel > 0)
     {
-        if (!m_pSubTask || m_pSubTask->GetId() != TASK_COMPLEX_POLICE_PURSUIT)
+        if (!m_pSubTask || m_pSubTask->GetTaskType() != TASK_COMPLEX_POLICE_PURSUIT)
         {
             if (pWantedPlayer->CanCopJoinPursuit(pPed))
             {

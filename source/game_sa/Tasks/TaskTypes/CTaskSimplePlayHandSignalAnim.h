@@ -16,7 +16,7 @@ public:
     ~CTaskSimplePlayHandSignalAnim();
 
     CTask* Clone() override;
-    eTaskType GetId() override;
+    eTaskType GetTaskType() override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 

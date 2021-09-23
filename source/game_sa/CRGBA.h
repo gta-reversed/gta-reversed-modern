@@ -29,7 +29,7 @@ public:
     void Set(CRGBA const& rhs, uint8 alpha);
     void Set(RwRGBA const& rwcolor);
 
-    CRGBA ToRGB() const;
+    CRGBA  ToRGB() const;
     uint32 ToInt() const;
     uint32 ToIntARGB() const;
     RwRGBA ToRwRGBA() const;
@@ -37,27 +37,27 @@ public:
     void FromRwRGBA(RwRGBA const& rwcolor);
     void FromARGB(uint32 intValue);
 
-    void Invert();
+    void  Invert();
     CRGBA Inverted() const;
 
-    bool operator==(CRGBA const& rhs) const;
+    bool   operator==(CRGBA const& rhs) const;
     CRGBA& operator=(CRGBA const& rhs);
 
     CRGBA operator*(float mult) {
         return {
-            (uint8_t)((float)r * mult),
-            (uint8_t)((float)g * mult),
-            (uint8_t)((float)b * mult),
-            (uint8_t)((float)a * mult)
+            (uint8)((float)r * mult),
+            (uint8)((float)g * mult),
+            (uint8)((float)b * mult),
+            (uint8)((float)a * mult)
         };
     }
 
     CRGBA operator*(float mult) const {
         return {
-            (uint8_t)((float)r * mult),
-            (uint8_t)((float)g * mult),
-            (uint8_t)((float)b * mult),
-            (uint8_t)((float)a * mult)
+            (uint8)((float)r * mult),
+            (uint8)((float)g * mult),
+            (uint8)((float)b * mult),
+            (uint8)((float)a * mult)
         };
     }
 

@@ -13,7 +13,7 @@
 
 enum ePedPieceTypes;
 
-enum eWeaponState : uint32_t {
+enum eWeaponState : uint32 {
     WEAPONSTATE_READY = 0,
     WEAPONSTATE_FIRING,
     WEAPONSTATE_RELOADING,
@@ -29,13 +29,13 @@ class CWeapon {
 public:
     eWeaponType  m_nType;
     eWeaponState m_nState;
-    uint32_t     m_nAmmoInClip;
-    uint32_t     m_nTotalAmmo;
-    uint32_t     m_nTimeForNextShot;
-    uint8_t      field_14;
-    uint8_t      m_bNoModel;
-    uint8_t      field_16;
-    uint8_t      field_17;
+    uint32       m_nAmmoInClip;
+    uint32       m_nTotalAmmo;
+    uint32       m_nTimeForNextShot;
+    uint8        field_14;
+    uint8        m_bNoModel;
+    uint8        field_16;
+    uint8        field_17;
     FxSystem_c*  m_pFxSystem; // flamethrower, spraycan, extinguisher particle
 
     static float&     ms_fExtinguisherAimAngle; // default -0.34907 rad. (-pi/8)
@@ -45,9 +45,9 @@ public:
 
 public:
     CWeapon(plugin::dummy_func_t) {}
-    CWeapon(eWeaponType weaponType, int32_t ammo);
+    CWeapon(eWeaponType weaponType, int32 ammo);
 
-    void Initialise(eWeaponType weaponType, int32_t ammo, CPed* owner);
+    void Initialise(eWeaponType weaponType, int32 ammo, CPed* owner);
     static void InitialiseWeapons();
     void Shutdown();
     static void ShutdownWeapons();
@@ -63,9 +63,9 @@ public:
 
     bool HasWeaponAmmoToBeUsed();
     void StopWeaponEffect();
-    void DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoint, CVector* endPoint, CColPoint* colPoint, int32_t arg5);
+    void DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoint, CVector* endPoint, CColPoint* colPoint, int32 arg5);
     bool TakePhotograph(CEntity* owner, CVector* point);
-    void SetUpPelletCol(int32_t numPellets, CEntity* owner, CEntity* victim, CVector& point, CColPoint& colPoint, CMatrix& outMatrix);
+    void SetUpPelletCol(int32 numPellets, CEntity* owner, CEntity* victim, CVector& point, CColPoint& colPoint, CMatrix& outMatrix);
     bool CanBeUsedFor2Player();
 
     // outX and outY will be placed in [-1;1] ranges
@@ -83,7 +83,7 @@ public:
     void Update(CPed* owner);
     static void UpdateWeapons();
 
-    static void GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32_t damageFactor, ePedPieceTypes pedPiece, int32_t direction);
+    static void GenerateDamageEvent(CPed* victim, CEntity* creator, eWeaponType weaponType, int32 damageFactor, ePedPieceTypes pedPiece, int32 direction);
     static bool CanBeUsedFor2Player(eWeaponType weaponType);
     static float TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner);
     static void DoDoomAiming(CEntity* owner, CVector* start, CVector* end);
@@ -95,13 +95,13 @@ public:
     static CEntity* PickTargetForHeatSeekingMissile(CVector origin, CVector direction, float distanceMultiplier, CEntity* ignoreEntity, bool fromVehicle, CEntity* lastEntity);
     static bool ProcessLineOfSight(CVector const& startPoint, CVector const& endPoint, CColPoint& outColPoint, CEntity*& outEntity, eWeaponType weaponType, CEntity* arg5, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool arg11, bool doIgnoreCameraCheck);
 
-    inline CWeaponInfo& GetWeaponInfo(CPed* owner = nullptr);
+    CWeaponInfo& GetWeaponInfo(CPed* owner = nullptr);
 
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CWeapon* Constructor(eWeaponType weaponType, int32_t ammo);
+    CWeapon* Constructor(eWeaponType weaponType, int32 ammo);
 };
 
 VALIDATE_SIZE(CWeapon, 0x1C);
@@ -110,9 +110,9 @@ extern float &fPlayerAimScale; // default 0.75
 extern float &fPlayerAimScaleDist; // default 5.0
 extern float &fPlayerAimRotRate; // default 0.0062832
 extern float &SHOTGUN_SPREAD_RATE; // default 0.05
-extern uint32_t &SHOTGUN_NUM_PELLETS; // default 15
-extern uint32_t &SPAS_NUM_PELLETS; // default 4
+extern uint32 &SHOTGUN_NUM_PELLETS; // default 15
+extern uint32 &SPAS_NUM_PELLETS; // default 4
 extern float &PELLET_COL_SCALE_RATIO_MULT; // default 1.3
 extern float *fReloadAnimSampleFraction; // default { 0.5, 0.7, 0.75, 0.75, 0.7 }
 
-void FireOneInstantHitRound(CVector* startPoint, CVector* endPoint, int32_t intensity);
+void FireOneInstantHitRound(CVector* startPoint, CVector* endPoint, int32 intensity);

@@ -1,8 +1,14 @@
 #include "StdInc.h"
 
+#include "CEventKnockOffBike.h"
+
+#include "EntityCollisionEvents.h"
+#include "CTaskComplexEnterCar.h"
+#include "CTaskSimpleCarSetPedOut.h"
+
 void CEventKnockOffBike::InjectHooks()
 {
-    HookInstall(0x4AFCF0, (CEventKnockOffBike * (CEventKnockOffBike::*)(CVehicle*, CVector*, CVector*, float, float, std::uint8_t, std::uint8_t, std::int32_t, CPed*, bool, bool)) & CEventKnockOffBike::Constructor);
+    HookInstall(0x4AFCF0, (CEventKnockOffBike * (CEventKnockOffBike::*)(CVehicle*, CVector*, CVector*, float, float, uint8, uint8, int32, CPed*, bool, bool)) & CEventKnockOffBike::Constructor);
     HookInstall(0x4AFC70, (CEventKnockOffBike * (CEventKnockOffBike::*)()) & CEventKnockOffBike::Constructor);
     HookInstall(0x4AFEE0, &CEventKnockOffBike::AffectsPed_Reversed);
     HookInstall(0x4B4E80, &CEventKnockOffBike::ReportCriminalEvent_Reversed);
@@ -13,7 +19,7 @@ void CEventKnockOffBike::InjectHooks()
     HookInstall(0x4B4AC0, &CEventKnockOffBike::SetPedSafePosition);
 }
 
-CEventKnockOffBike::CEventKnockOffBike(CVehicle* vehicle, CVector* moveSpeed, CVector* collisionImpactVelocity, float damageIntensity, float a6, std::uint8_t knockOffType, std::uint8_t knockOffDirection, std::int32_t time, CPed* ped, bool isVictimDriver, bool forceKnockOff)
+CEventKnockOffBike::CEventKnockOffBike(CVehicle* vehicle, CVector* moveSpeed, CVector* collisionImpactVelocity, float damageIntensity, float a6, uint8 knockOffType, uint8 knockOffDirection, int32 time, CPed* ped, bool isVictimDriver, bool forceKnockOff)
 {
     m_moveSpeed = *moveSpeed;
     m_collisionImpactVelocity = *collisionImpactVelocity;
@@ -55,7 +61,7 @@ CEventKnockOffBike::~CEventKnockOffBike()
         m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
 }
 
-CEventKnockOffBike* CEventKnockOffBike::Constructor(CVehicle* vehicle, CVector* moveSpeed, CVector* collisionImpactVelocity, float damageIntensity, float a6, std::uint8_t knockOffType, std::uint8_t knockOffDirection, std::int32_t time, CPed* ped, bool isVictimDriver, bool forceKnockOff)
+CEventKnockOffBike* CEventKnockOffBike::Constructor(CVehicle* vehicle, CVector* moveSpeed, CVector* collisionImpactVelocity, float damageIntensity, float a6, uint8 knockOffType, uint8 knockOffDirection, int32 time, CPed* ped, bool isVictimDriver, bool forceKnockOff)
 {
     this->CEventKnockOffBike::CEventKnockOffBike(vehicle, moveSpeed, collisionImpactVelocity, damageIntensity, a6, knockOffType, knockOffDirection, time, ped, isVictimDriver, forceKnockOff);
     return this;
@@ -164,12 +170,12 @@ void CEventKnockOffBike::SetPedOutCar(CPed* ped)
 #endif
 }
 
-std::int32_t CEventKnockOffBike::CalcForcesAndAnims(CPed* ped)
+int32 CEventKnockOffBike::CalcForcesAndAnims(CPed* ped)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<std::int32_t, 0x4B0020, CEventKnockOffBike*, CPed*>(this, ped);
+    return plugin::CallMethodAndReturn<int32, 0x4B0020, CEventKnockOffBike*, CPed*>(this, ped);
 #else
-    std::uint8_t numContactWheels = 0;
+    uint8 numContactWheels = 0;
     float massRatio = ped->m_fMass / m_vehicle->m_fMass;
     if (m_vehicle->m_vehicleType == VEHICLE_BIKE)
         numContactWheels = static_cast<CBike*>(m_vehicle)->m_nNumContactWheels;
@@ -236,7 +242,7 @@ std::int32_t CEventKnockOffBike::CalcForcesAndAnims(CPed* ped)
             randomNum = 6.0f;
         ped->m_vecMoveSpeed.z += CGeneral::GetRandomNumberInRange(3.0f, randomNum) / 70.0f;
         ped->m_pEntityIgnoredCollision = m_vehicle;
-        std::int32_t animId = ANIM_ID_KO_SKID_BACK;
+        int32 animId = ANIM_ID_KO_SKID_BACK;
         switch (m_knockOffDirection)
         {
         case 0:
@@ -271,7 +277,7 @@ std::int32_t CEventKnockOffBike::CalcForcesAndAnims(CPed* ped)
         force.z = CGeneral::GetRandomNumberInRange(3.0f, 5.0f);
         ped->ApplyMoveForce(force);
         ped->m_pEntityIgnoredCollision = m_vehicle;
-        std::int32_t animId = ANIM_ID_KO_SKID_BACK;
+        int32 animId = ANIM_ID_KO_SKID_BACK;
         switch (m_knockOffDirection)
         {
         case 0:

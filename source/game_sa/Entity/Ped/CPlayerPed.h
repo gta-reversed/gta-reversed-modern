@@ -18,7 +18,7 @@ class CPlayerInfo;
 class CPlayerPed : public CPed {
 public:
     CPed* m_p3rdPersonMouseTarget;
-    int field_7A0;
+    int32 field_7A0;
 
     // did we display "JCK_HLP" message
     static bool& bHasDisplayedPlayerQuitEnterCarHelpText;
@@ -26,10 +26,13 @@ public:
 public:
     static void InjectHooks();
 
-    CPlayerPed(int playerId, bool bGroupCreated);
+    CPlayerPed(int32 playerId, bool bGroupCreated);
 
-    bool Load() override;
-    bool Save() override;
+    bool Load_Reversed();
+    bool Save_Reversed();
+
+    bool Load() override { return Load_Reversed(); }
+    bool Save() override { return Save_Reversed(); }
 
     CPad* GetPadFromPlayer();
     bool CanPlayerStartMission();
@@ -47,17 +50,17 @@ public:
     void Clear3rdPersonMouseTarget();
     // GetWanted()->m_nWantedLevel = 0;
     void Busted();
-    unsigned int GetWantedLevel();
-    void SetWantedLevel(int level);
-    void SetWantedLevelNoDrop(int level);
-    void CheatWantedLevel(int level);
+    uint32 GetWantedLevel();
+    void SetWantedLevel(int32 level);
+    void SetWantedLevelNoDrop(int32 level);
+    void CheatWantedLevel(int32 level);
     bool CanIKReachThisTarget(CVector posn, CWeapon* weapon, bool arg2);
     CPlayerInfo* GetPlayerInfoForThisPlayerPed();
     void DoStuffToGoOnFire();
     void AnnoyPlayerPed(bool arg0);
     void ClearAdrenaline();
     void DisbandPlayerGroup();
-    void MakeGroupRespondToPlayerTakingDamage(CEventDamage const& damageEvent);
+    void MakeGroupRespondToPlayerTakingDamage(CEventDamage & damageEvent);
     void TellGroupToStartFollowingPlayer(bool arg0, bool arg1, bool arg2);
     void MakePlayerGroupDisappear();
     void MakePlayerGroupReappear();
@@ -80,8 +83,8 @@ public:
     void MakeThisPedJoinOurGroup(CPed* ped);
     bool PlayerWantsToAttack();
     void SetInitialState(bool bGroupCreated);
-    void MakeChangesForNewWeapon(int weaponSlot);
-    void EvaluateTarget(CEntity* target, CEntity** outTarget, float* outTargetPriority, float maxDistance, float arg4, bool arg5);
+    void MakeChangesForNewWeapon(uint32 weaponSlot);
+    void EvaluateTarget(CEntity* target, CEntity *& outTarget, float & outTargetPriority, float maxDistance, float arg4, bool arg5);
     void EvaluateNeighbouringTarget(CEntity* target, CEntity** outTarget, float* outTargetPriority, float maxDistance, float arg4, bool arg5);
     void ProcessGroupBehaviour(CPad* pad);
     // return PlayerWantsToAttack();
@@ -95,16 +98,20 @@ public:
         return m_pPlayerData ? m_pPlayerData->m_pWanted : nullptr;
     }
 
-    static void RemovePlayerPed(int playerId);
-    static void DeactivatePlayerPed(int playerId);
-    static void ReactivatePlayerPed(int playerId);
+    static void RemovePlayerPed(int32 playerId);
+    static void DeactivatePlayerPed(int32 playerId);
+    static void ReactivatePlayerPed(int32 playerId);
     static bool PedCanBeTargettedVehicleWise(CPed* ped);
     static void SetupPlayerPed(int playerId);
+
+    // NOTASA
+    CPedGroup& GetGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
+    CPedGroupMembership& GetGroupMembership() const noexcept { return GetGroup().GetMembership(); }
 };
 
 VALIDATE_SIZE(CPlayerPed, 0x7A4);
 
-extern char* abTempNeverLeavesGroup; // char abTempNeverLeavesGroup[7];
-extern int& gPlayIdlesAnimBlockIndex;
+extern bool (&abTempNeverLeavesGroup)[7];
+extern int32& gPlayIdlesAnimBlockIndex;
 
 bool LOSBlockedBetweenPeds(CEntity* entity1, CEntity* entity2);

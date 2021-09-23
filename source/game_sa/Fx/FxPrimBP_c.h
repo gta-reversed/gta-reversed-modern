@@ -6,21 +6,20 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "RenderWare.h"
 #include "List_c.h"
 #include "FxInfoManager_c.h"
 
 class FxPrimBP_c {
 public:
-    char field_4;
-    unsigned char m_nSrcBlendId;
-    unsigned char m_nDstBlendId;
-    unsigned char m_nAlphaOn;
-    void* m_pMatrixBuffered;
-    RwTexture* m_apTextures[4];
-    int field_1C;
-    List_c m_emitterPrts;
+    char            field_4;
+    uint8           m_nSrcBlendId;
+    uint8           m_nDstBlendId;
+    uint8           m_nAlphaOn;
+    void*           m_pMatrixBuffered;
+    RwTexture*      m_apTextures[4];
+    int32           field_1C;
+    List_c          m_emitterPrts;
     FxInfoManager_c m_fxInfoManager;
 
     virtual ~FxPrimBP_c() {}

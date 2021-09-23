@@ -53,7 +53,7 @@ const char gta_empty_string[4] = {0, 0, 0, 0};
 #define SCREEN_SCALE_AR(a) (a)
 #endif
 
-extern int gDefaultTaskTime;
+extern int32 gDefaultTaskTime;
 
 extern char *gString; // char gString[200]
 
@@ -63,10 +63,10 @@ extern char(&PC_Scratch)[16384];
 
 extern float& gfLaRiotsLightMult;
 
-const unsigned int rwVENDORID_ROCKSTAR = 0x0253F2;
-extern unsigned int &ClumpOffset;
+const uint32 rwVENDORID_ROCKSTAR = 0x0253F2;
+extern uint32 &ClumpOffset;
 
-#define RpClumpGetAnimBlendClumpData(clump) (*(CAnimBlendClumpData **)(((unsigned int)(clump) + ClumpOffset)))
+#define RpClumpGetAnimBlendClumpData(clump) (*(CAnimBlendClumpData **)(((uint32)(clump) + ClumpOffset)))
 
 #define RpGeometryGetMesh(_geometry, _index) (&((RpMesh*)(((char*)(_geometry)->mesh) + sizeof(RpMeshHeader) + ((_geometry)->mesh->firstMeshOffset)))[_index])
 
@@ -81,37 +81,37 @@ constexpr float COS_PI = -1.0f; // std::cos(PI);
 void InjectCommonHooks();
 
 // returns player coors
-CVector FindPlayerCoors(int playerId = -1);
+CVector FindPlayerCoors(int32 playerId = -1);
 // returns player speed
-CVector& FindPlayerSpeed(int playerId = -1);
+CVector& FindPlayerSpeed(int32 playerId = -1);
 // returns player ped or player vehicle if he's driving
-CEntity * FindPlayerEntity(int playerId = -1);
+CEntity * FindPlayerEntity(int32 playerId = -1);
 // returns player train
-CTrain* FindPlayerTrain(int playerId = -1);
+CTrain* FindPlayerTrain(int32 playerId = -1);
 // gets player coords
-CVector const& FindPlayerCentreOfWorld(int playerId = -1);
+CVector const& FindPlayerCentreOfWorld(int32 playerId = -1);
 // gets player coords with skipping sniper shift
-CVector const& FindPlayerCentreOfWorld_NoSniperShift(int playerId = -1);
+CVector const& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId = -1);
 // returns player coords with skipping interior shift
-CVector FindPlayerCentreOfWorld_NoInteriorShift(int playerId = -1);
+CVector FindPlayerCentreOfWorld_NoInteriorShift(int32 playerId = -1);
 // returns player angle in radians
-float FindPlayerHeading(int playerId = -1);
+float FindPlayerHeading(int32 playerId = -1);
 // returns Z coord for active player
 float FindPlayerHeight();
 // returns player ped
-CPlayerPed * FindPlayerPed(int playerId = -1);
-CVehicle* FindPlayerVehicle(int playerId = -1, bool bIncludeRemote = false);
+CPlayerPed * FindPlayerPed(int32 playerId = -1);
+CVehicle* FindPlayerVehicle(int32 playerId = -1, bool bIncludeRemote = false);
 // returns player wanted
-CWanted * FindPlayerWanted(int playerId = -1);
-// 2 players are playing
-bool InTwoPlayersMode();
+CWanted * FindPlayerWanted(int32 playerId = -1);
+
+CPlayerInfo& FindPlayerInfo(int playerId = -1);
 
 CVector Multiply3x3(CMatrix& m, CVector& v);
 CVector Multiply3x3(CVector& v, CMatrix& m);
 
 void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos);
-void TransformVectors(RwV3d* vecsOut, int numVectors, CMatrix const& matrix, RwV3d const* vecsin);
-void TransformVectors(RwV3d* vecsOut, int numVectors, CSimpleTransform const& transform, RwV3d const* vecsin);
+void TransformVectors(RwV3d* vecsOut, int32 numVectors, CMatrix const& matrix, RwV3d const* vecsin);
+void TransformVectors(RwV3d* vecsOut, int32 numVectors, CSimpleTransform const& transform, RwV3d const* vecsin);
 
 // Converts degrees to radians
 // keywords: 0.017453292 flt_8595EC
@@ -162,7 +162,7 @@ extern constexpr bool make_fourcc4(const char* line, const char abcd[4]) {
            line[3] == abcd[3];
 }
 
-extern constexpr unsigned int make_fourcc4(const char fourcc[4]) {
+extern constexpr uint32 make_fourcc4(const char fourcc[4]) {
     return fourcc[0] << 0 |
            fourcc[1] << 8 |
            fourcc[2] << 16 |
@@ -180,7 +180,7 @@ void CreateDebugFont();
 // dummy function
 void DestroyDebugFont();
 // dummy function
-void ObrsPrintfString(char const* arg0, short arg1, short arg2);
+void ObrsPrintfString(char const* arg0, int16 arg1, int16 arg2);
 // dummy function
 void FlushObrsPrintfs();
 void DefinedState();
@@ -211,14 +211,14 @@ bool SetFilterModeOnAtomicsTextures(RpAtomic* atomic, RwTextureFilterMode filter
 RpAtomic* forceLinearFilteringAtomicsCB(RpAtomic* atomic, void* data);
 bool SetFilterModeOnClumpsTextures(RpClump* clump, RwTextureFilterMode filtering);
 bool RpGeometryReplaceOldMaterialWithNewMaterial(RpGeometry* geometry, RpMaterial* oldMaterial, RpMaterial* newMaterial);
-RwTexture* RwTexDictionaryFindHashNamedTexture(RwTexDictionary* txd, unsigned int hash);
+RwTexture* RwTexDictionaryFindHashNamedTexture(RwTexDictionary* txd, uint32 hash);
 RpClump* RpClumpGetBoundingSphere(RpClump* clump, RwSphere* bound, bool arg2);
 void SkinGetBonePositions(RpClump* clump);
 void SkinSetBonePositions(RpClump* clump);
 void SkinGetBonePositionsToTable(RpClump* clump, RwV3d* table);
 void SetLightsWithTimeOfDayColour(RpWorld* world);
 // dummy function
-void LightsEnable(int arg0);
+void LightsEnable(int32 arg0);
 void LightsDestroy(RpWorld* world);
 // lighting = [0.0f;1.0f]
 void WorldReplaceNormalLightsWithScorched(RpWorld* world, float lighting);
@@ -236,7 +236,7 @@ void SetBrightMarkerColours(float lighting);
 void ReSetAmbientAndDirectionalColours();
 void DeActivateDirectional();
 void ActivateDirectional();
-void SetAmbientColoursToIndicateRoadGroup(int arg0);
+void SetAmbientColoursToIndicateRoadGroup(int32 arg0);
 void SetFullAmbient();
 void SetAmbientColours();
 void SetAmbientColours(RwRGBAReal* color);
@@ -256,38 +256,38 @@ void RemoveRefsForAtomic(RpClump* clump);
 bool IsGlassModel(CEntity* pEntity);
 
 CAnimBlendClumpData* RpAnimBlendAllocateData(RpClump* clump);
-CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump* clump, CAnimBlendAssociation* association, unsigned int flags, float startTime, float blendAmount);
+CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump* clump, CAnimBlendAssociation* association, uint32 flags, float startTime, float blendAmount);
 CAnimBlendAssociation* RpAnimBlendClumpExtractAssociations(RpClump* clump);
 void RpAnimBlendClumpFillFrameArray(RpClump* clump, AnimBlendFrameData** frameData);
-AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, unsigned int id);
+AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, uint32 id);
 AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, char const* name);
-AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, unsigned int key);
+AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, uint32 key);
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, bool arg1, CAnimBlendHierarchy* hierarchy);
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, char const* name);
-CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, unsigned int animId);
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, uint32 animId);
 CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump);
-CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump, unsigned int flags);
+CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump, uint32 flags);
 CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation(RpClump* clump, CAnimBlendAssociation** pAssociation, float* blendAmount);
-CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation_N(RpClump* clump, int n);
+CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation_N(RpClump* clump, int32 n);
 CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation(RpClump* clump);
-CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation_N(RpClump* clump, int n);
-unsigned int RpAnimBlendClumpGetNumAssociations(RpClump* clump);
-unsigned int RpAnimBlendClumpGetNumNonPartialAssociations(RpClump* clump);
-unsigned int RpAnimBlendClumpGetNumPartialAssociations(RpClump* clump);
+CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation_N(RpClump* clump, int32 n);
+uint32 RpAnimBlendClumpGetNumAssociations(RpClump* clump);
+uint32 RpAnimBlendClumpGetNumNonPartialAssociations(RpClump* clump);
+uint32 RpAnimBlendClumpGetNumPartialAssociations(RpClump* clump);
 void RpAnimBlendClumpGiveAssociations(RpClump* clump, CAnimBlendAssociation* association);
 void RpAnimBlendClumpInit(RpClump* clump);
 bool RpAnimBlendClumpIsInitialized(RpClump* clump);
 void RpAnimBlendClumpPauseAllAnimations(RpClump* clump);
 void RpAnimBlendClumpRemoveAllAssociations(RpClump* clump);
-void RpAnimBlendClumpRemoveAssociations(RpClump* clump, unsigned int flags);
-void RpAnimBlendClumpSetBlendDeltas(RpClump* clump, unsigned int flags, float delta);
+void RpAnimBlendClumpRemoveAssociations(RpClump* clump, uint32 flags);
+void RpAnimBlendClumpSetBlendDeltas(RpClump* clump, uint32 flags, float delta);
 void RpAnimBlendClumpUnPauseAllAnimations(RpClump* clump);
 void RpAnimBlendClumpUpdateAnimations(RpClump* clump, float step, bool onScreen);
 RtAnimAnimation* RpAnimBlendCreateAnimationForHierarchy(RpHAnimHierarchy* hierarchy);
 char* RpAnimBlendFrameGetName(RwFrame* frame);
 void RpAnimBlendFrameSetName(RwFrame* frame, char* name);
 CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association);
-CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association, unsigned int flags);
+CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association, uint32 flags);
 void RpAnimBlendKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2, float time, void* customData);
 bool RpAnimBlendPluginAttach();
 
@@ -298,6 +298,8 @@ void Render2dStuff();
 void WriteRaster(RwRaster* raster, char const* path);
 bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos, float* pScreenX, float* pScreenY);
 bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos);
+bool DoesInfiniteLineTouchScreen(float fX, float fY, float fXDir, float fYDir);
+bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, float fPointX, float fPointY, float fTolerance);
 
 void LittleTest();
 
@@ -306,13 +308,13 @@ std::wstring UTF8ToUnicode(const std::string& str);
 /* Convert Windows Unicode to UTF-8. Free pointer using delete[] */
 std::string UnicodeToUTF8(const std::wstring& str);
 
-extern int WindowsCharset;
+extern int32 WindowsCharset;
 
-extern unsigned short& uiTempBufferIndicesStored;
-extern unsigned short& uiTempBufferVerticesStored;
-constexpr int32_t TOTAL_TEMP_BUFFER_INDICES = 4096;
+extern uint16& uiTempBufferIndicesStored;
+extern uint16& uiTempBufferVerticesStored;
+constexpr int32 TOTAL_TEMP_BUFFER_INDICES = 4096;
 extern RxVertexIndex (&aTempBufferIndices)[TOTAL_TEMP_BUFFER_INDICES]; // size 4096
-constexpr int32_t TOTAL_TEMP_BUFFER_VERTICES = 2048;
+constexpr int32 TOTAL_TEMP_BUFFER_VERTICES = 2048;
 extern RxObjSpace3DVertex (&aTempBufferVertices)[TOTAL_TEMP_BUFFER_VERTICES];
-constexpr int32_t TOTAL_RADIOSITY_VERTEX_BUFFER = 1532;
+constexpr int32 TOTAL_RADIOSITY_VERTEX_BUFFER = 1532;
 extern RwD3D9Vertex (&aRadiosityVertexBuffer)[TOTAL_RADIOSITY_VERTEX_BUFFER];

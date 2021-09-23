@@ -13,13 +13,13 @@ void CBike::InjectHooks()
 }
 
 // 0x6BF430
-CBike::CBike(int modelIndex, eVehicleCreatedBy createdBy) : CVehicle(plugin::dummy) {
-    plugin::CallMethod<0x6BF430, CBike*, int, eVehicleCreatedBy>(this, modelIndex, createdBy);
+CBike::CBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(plugin::dummy) {
+    plugin::CallMethod<0x6BF430, CBike*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
 
 // 0x0
-void CBike::ProcessAI(unsigned int& arg0) {
-    ((void(__thiscall*)(CBike*, unsigned int&))(*(void***)this)[66])(this, arg0);
+void CBike::ProcessAI(uint32& arg0) {
+    ((void(__thiscall*)(CBike*, uint32&))(*(void***)this)[66])(this, arg0);
 }
 
 // 0x6B5960
@@ -33,13 +33,13 @@ void CBike::dmgDrawCarCollidingParticles(CVector const& position, float power, e
 }
 
 // 0x6B5A10
-bool CBike::DamageKnockOffRider(CVehicle* arg0, float arg1, unsigned short arg2, CEntity* arg3, CVector& arg4, CVector& arg5) {
-    return ((bool(__cdecl*)(CVehicle*, float, unsigned short, CEntity*, CVector&, CVector&))0x6B5A10)(arg0, arg1, arg2, arg3, arg4, arg5);
+bool CBike::DamageKnockOffRider(CVehicle* arg0, float arg1, uint16 arg2, CEntity* arg3, CVector& arg4, CVector& arg5) {
+    return ((bool(__cdecl*)(CVehicle*, float, uint16, CEntity*, CVector&, CVector&))0x6B5A10)(arg0, arg1, arg2, arg3, arg4, arg5);
 }
 
 // dummy function
 // 0x6B5F40
-CPed* CBike::KnockOffRider(eWeaponType arg0, unsigned char arg1, CPed* arg2, bool arg3) {
+CPed* CBike::KnockOffRider(eWeaponType arg0, uint8 arg1, CPed* arg2, bool arg3) {
     return arg2;
 }
 
@@ -99,7 +99,7 @@ void CBike::ProcessBuoyancy() {
             vehicleFlags.bEngineOn = false;
         }
 
-        for (int iPassengerInd = 0; iPassengerInd < m_nMaxPassengers; ++iPassengerInd) {
+        for (int32 iPassengerInd = 0; iPassengerInd < m_nMaxPassengers; ++iPassengerInd) {
             auto pCurPassenger = m_apPassengers[iPassengerInd];
             ProcessPedInVehicleBuoyancy(pCurPassenger, false);
         }
@@ -125,7 +125,7 @@ inline void CBike::ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver)
     if (IsAnyWheelMakingContactWithGround()) {
         if (!pPed->IsPlayer()) {
             auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::ms_fTimeStep, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, false);
-            auto damageEvent = CEventDamage(this, CTimer::m_snTimeInMilliseconds, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
+            auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
             if (damageEvent.AffectsPed(pPed))
                 pedDamageResponseCalc.ComputeDamageResponse(pPed, &damageEvent.m_damageResponse, true);
             else
@@ -160,8 +160,8 @@ void CBike::DebugCode() {
 }
 
 // 0x6B6D40
-void CBike::DoSoftGroundResistance(unsigned int& arg0) {
-    ((void(__thiscall*)(CBike*, unsigned int&))0x6B6D40)(this, arg0);
+void CBike::DoSoftGroundResistance(uint32& arg0) {
+    ((void(__thiscall*)(CBike*, uint32&))0x6B6D40)(this, arg0);
 }
 
 // 0x6B7130
@@ -195,12 +195,12 @@ void CBike::GetCorrectedWorldDoorPosition(CVector& out, CVector arg1, CVector ar
 }
 
 // 0x6BEA10
-void CBike::BlowUpCar(CEntity* damager, unsigned char bHideExplosion) {
+void CBike::BlowUpCar(CEntity* damager, uint8 bHideExplosion) {
     return BlowUpCar_Reversed(damager, bHideExplosion);
 }
 
-void CBike::BlowUpCar_Reversed(CEntity* damager, unsigned char bHideExplosion) {
-    plugin::CallMethod<0x6BEA10, CBike*, CEntity*, unsigned char>(this, damager, bHideExplosion);
+void CBike::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) {
+    plugin::CallMethod<0x6BEA10, CBike*, CEntity*, uint8>(this, damager, bHideExplosion);
 }
 
 // 0x6B7050

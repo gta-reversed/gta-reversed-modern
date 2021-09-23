@@ -6,40 +6,40 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CEntity.h"
 #include "FxSystem_c.h"
 
-class  CFire {
+class CFire {
 public:
     struct {
-        unsigned char bActive : 1;
-        unsigned char bCreatedByScript : 1;
-        unsigned char bMakesNoise : 1;
-        unsigned char bBeingExtinguished : 1;
-        unsigned char bFirstGeneration : 1;
+        uint8 bActive : 1;
+        uint8 bCreatedByScript : 1;
+        uint8 bMakesNoise : 1;
+        uint8 bBeingExtinguished : 1;
+        uint8 bFirstGeneration : 1;
     } m_nFlags;
-private:
-    char _pad0;
+    char        _pad0;
+    int16       m_nScriptReferenceIndex;
+    CVector     m_vecPosition;
+    CEntity*    m_pEntityTarget;
+    CEntity*    m_pEntityCreator;
+    uint32      m_nTimeToBurn;
+    float       m_fStrength;
+    uint8       m_nNumGenerationsAllowed;
+    uint8       m_nRemovalDist;
+    FxSystem_c* m_pFxSystem;
+
 public:
-    short m_nScriptReferenceIndex;
-    CVector m_vecPosition;
-    CEntity *m_pEntityTarget;
-    CEntity *m_pEntityCreator;
-    unsigned int m_nTimeToBurn;
-    float m_fStrength;
-    uint8_t m_nNumGenerationsAllowed;
-    unsigned char m_nRemovalDist;
     FxSystem_c *m_pFxSystem;
 
-    CFire() = default;
-    ~CFire() = default;
+    CFire();
+    ~CFire();
 
     void Initialise();
     void Start(CEntity* pCreator, CVector pos, uint32_t nTimeToBurn, uint8_t nGens);
     void Start(CEntity* pCreator, CEntity* pTarget, uint32_t nTimeToBurn, uint8_t nGens);
     void Start(CVector pos, float fStrength, CEntity* pTarget, uint8_t nGens); /* For script */
-    void CreateFxSysForStrength(const CVector& point, RwMatrixTag* m);
+    void CreateFxSysForStrength(const CVector&* point, RwMatrixTag* matrix);
     void Extinguish();
     void ExtinguishWithWater(float fWaterStrength);
     void ProcessFire();
@@ -53,4 +53,5 @@ public:
     void SetTarget(CEntity* pTarget);
     void SetCreator(CEntity* pCreator);
 };
+
 VALIDATE_SIZE(CFire, 0x28);

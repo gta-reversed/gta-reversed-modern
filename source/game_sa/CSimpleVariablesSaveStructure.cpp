@@ -24,7 +24,7 @@ void CSimpleVariablesSaveStructure::Construct() {
     char dots[8];
     AsciiToGxtChar("...'", dots); // dot dot dot apostrophe
     TextCopy(m_szSaveName, saveName);
-    unsigned int strLen = GxtCharStrlen(m_szSaveName);
+    uint32 strLen = GxtCharStrlen(m_szSaveName);
     if (strLen > SAVEGAME_MAX_NAME_LEN) {
         TextCopy(&m_szSaveName[SAVEGAME_MAX_NAME_LEN - 3 - 1], dots);
     }
@@ -57,7 +57,7 @@ void CSimpleVariablesSaveStructure::Construct() {
     m_nStoredGameMinutes = CClock::ms_Stored_nGameClockMinutes;
     m_bClockHasBeenStored = CClock::bClockHasBeenStored;
 
-    m_nTimeInMilliseconds = CTimer::m_snTimeInMilliseconds;
+    m_nTimeInMilliseconds = CTimer::GetTimeInMS();
     m_fTimeScale = CTimer::ms_fTimeScale;
     m_fTimeStep = CTimer::ms_fTimeStep;
     m_fTimeStepNonClipped = CTimer::ms_fTimeStepNonClipped;
@@ -96,7 +96,7 @@ void CSimpleVariablesSaveStructure::Construct() {
 }
 
 // 0x5D1EA0
-void CSimpleVariablesSaveStructure::Extract(unsigned int& versionId) const {
+void CSimpleVariablesSaveStructure::Extract(uint32& versionId) const {
     versionId = m_nVersionId;
 
     gbLARiots = m_bLARiots;

@@ -6,13 +6,12 @@ class CPed;
 class CPedGroup;
 class CDecisionMaker;
 
-class CDecisionMakerTypesFileLoader
-{
+class CDecisionMakerTypesFileLoader {
 public:
     static void InjectHooks();
 
-    static void GetPedDMName(std::int32_t index, char* name);
-    static void GetGrpDMName(std::int32_t index, char* name);
+    static void GetPedDMName(int32 index, char* name);
+    static void GetGrpDMName(int32 index, char* name);
     static void LoadDefaultDecisionMaker();
     static void LoadDecisionMaker(const char* filepath, eDecisionTypes decisionMakerType, bool bUseMissionCleanup);
     static void LoadDecisionMaker(const char* filepath, CDecisionMaker* decisionMaker);
@@ -25,10 +24,8 @@ public:
     static void AddDecisionMaker(CDecisionMakerTypes* decisionMakerTypes, CDecisionMaker* decisionMaker, eDecisionTypes decisionMakerType, bool bUseMissionCleanup);
     static CDecisionMakerTypes* GetInstance();
 
-    void MakeDecision(CPed* ped, int eventType, int eventSourceType, bool bIsPedInVehicle, int taskId1,
-        int taskId2, int taskId3, int taskId4, bool bDecisionMakerTypeInGroup, short* taskId, short* field_10);
-    int MakeDecision(CPedGroup* pPedGroup, int eventType, int eventSourceType, bool bIsPedInVehicle, int taskId1,
-        int taskId2, int taskId3, int taskId4);
-    void AddEventResponse(std::int32_t decisionMakerIndex, std::int32_t eventType, std::int32_t taskId, float* responseChances, std::int32_t* flags);
-    void FlushDecisionMakerEventResponse(std::int32_t decisionMakerIndex, std::int32_t eventId);
+    void MakeDecision(CPed* ped, int32 eventType, int32 eventSourceType, bool bIsPedInVehicle, int32 taskId1, int32 taskId2, int32 taskId3, int32 taskId4, bool bDecisionMakerTypeInGroup, int16* taskId, int16* field_10);
+    int32 MakeDecision(CPedGroup* pPedGroup, int32 eventType, int32 eventSourceType, bool bIsPedInVehicle, int32 taskId1, int32 taskId2, int32 taskId3, int32 taskId4);
+    void AddEventResponse(int32 decisionMakerIndex, int32 eventType, int32 taskId, float* responseChances, int32* flags);
+    void FlushDecisionMakerEventResponse(int32 decisionMakerIndex, int32 eventId);
 };

@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CTaskSimple.h"
 #include "CVehicle.h"
 #include "CTaskUtilityLineUpPedWithCar.h"
@@ -21,8 +21,8 @@ public:
     CVehicle * m_pTargetVehicle;
     CTaskUtilityLineUpPedWithCar* m_pUtility;
     bool m_bWarpingInToCar;
-    unsigned char m_nDoorFlagsToClear;
-    unsigned char m_nNumGettingInToClear;
+    uint8 m_nDoorFlagsToClear;
+    uint8 m_nNumGettingInToClear;
 private:
     char _pad2[1];
 public:
@@ -31,7 +31,7 @@ public:
     ~CTaskSimpleCarSetPedInAsDriver();
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; }
     bool ProcessPed(CPed* ped) override;
 

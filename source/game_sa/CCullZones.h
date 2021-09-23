@@ -4,7 +4,7 @@
 
 // https://gtamods.com/wiki/CULL
 
-enum eZoneAttributes : uint16_t {
+enum eZoneAttributes : uint16 {
     NONE = 0x0,
 
     // Camera close in into player using closest third-person view camera mode,
@@ -55,14 +55,14 @@ enum eZoneAttributes : uint16_t {
 };
 
 struct CZoneDef {
-    short x;
-    short y;
-    short field_4;
-    short widthY;
-    short widthX;
-    short field_A;
-    short bottomZ;
-    short topZ;
+    int16 x;
+    int16 y;
+    int16 field_4;
+    int16 widthY;
+    int16 widthX;
+    int16 field_A;
+    int16 bottomZ;
+    int16 topZ;
 
     // 0x72D850
     bool IsPointWithin(const CVector& point) const {
@@ -113,11 +113,11 @@ public:
     static CCullZoneReflection (&aMirrorAttributeZones)[72];
     static CCullZone (&aTunnelAttributeZones)[40];
     static CCullZone (&aAttributeZones)[1300];
-    static int& CurrentFlags_Player;
-    static int& CurrentFlags_Camera;
-    static int& NumTunnelAttributeZones;
-    static int& NumMirrorAttributeZones;
-    static int& NumAttributeZones;
+    static int32& CurrentFlags_Player;
+    static int32& CurrentFlags_Camera;
+    static int32& NumTunnelAttributeZones;
+    static int32& NumMirrorAttributeZones;
+    static int32& NumAttributeZones;
     static bool& bMilitaryZonesDisabled;
 
 public:
@@ -126,8 +126,8 @@ public:
     static void Init();
     static void Update();
 
-    static void AddCullZone(const CVector& center, float zero1, float fWidthY, float fBottomZ, float fWidthX, float zero2, float fTopZ, uint16_t flags);
-    static void AddTunnelAttributeZone(const CVector& center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, uint16_t flags);
+    static void AddCullZone(const CVector& center, float zero1, float fWidthY, float fBottomZ, float fWidthX, float zero2, float fTopZ, uint16 flags);
+    static void AddTunnelAttributeZone(const CVector& center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, uint16 flags);
     static void AddMirrorAttributeZone(const CVector& center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, eZoneAttributes flags, float cm, float vX, float vY, float vZ);
 
     static bool InRoomForAudio();

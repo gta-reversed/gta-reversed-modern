@@ -37,7 +37,7 @@ CWaterCannon* CWaterCannon::Destructor() {
 void CWaterCannon::Init() {
     m_nId = 0;
     m_nSectionsCount = 0;
-    m_nCreationTime = CTimer::m_snTimeInMilliseconds;
+    m_nCreationTime = CTimer::GetTimeInMS();
     m_anSectionState[0] = '\0';
 
     m_auRenderIndices[0] = 0;
@@ -68,8 +68,8 @@ void CWaterCannon::Init() {
 }
 
 // 0x72A280
-void CWaterCannon::Update_OncePerFrame(short a1) {
-    plugin::CallMethod<0x72A280, CWaterCannon*, short>(this, a1);
+void CWaterCannon::Update_OncePerFrame(int16 a1) {
+    plugin::CallMethod<0x72A280, CWaterCannon*, int16>(this, a1);
 }
 
 // 0x728C20

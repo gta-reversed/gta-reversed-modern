@@ -14,9 +14,9 @@ class CGame {
 public:
     //! Current number of area
     static char(&aDatFile)[32]; // static char aDatFile[32]
-    static int &currLevel;
-    static unsigned char &bMissionPackGame;
-    static int &currArea;
+    static int32 &currLevel;
+    static uint8 &bMissionPackGame;
+    static int32 &currArea;
     static RwMatrix *&m_pWorkingMatrix1;
     static RwMatrix *&m_pWorkingMatrix2;
 
@@ -49,7 +49,7 @@ public:
     static void TidyUpMemory(bool a1, bool clearD3Dmem);
 };
 
-extern int &gameTxdSlot;
+extern int32 &gameTxdSlot;
 extern bool& gbLARiots;
 extern bool& gbLARiots_NoPoliceCars;
 

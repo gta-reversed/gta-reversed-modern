@@ -6,11 +6,11 @@
 */
 #pragma once
 
-#include "PluginBase.h"
+
 #include "CVector.h"
 
-struct  tFlyingHandlingData {
-    int m_nVehicleId;
+struct tFlyingHandlingData {
+    int32 m_nVehicleId;
     float m_fThrust;
     float m_fThrustFallOff;
     float m_fYaw;

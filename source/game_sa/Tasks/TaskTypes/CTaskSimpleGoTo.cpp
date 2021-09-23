@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleGoTo.h"
+
 float& CTaskSimpleGoTo::ms_fLookAtThresholdDotProduct = *(float*)0xC18D48;
 
 void CTaskSimpleGoTo::InjectHooks() {
@@ -9,7 +11,7 @@ void CTaskSimpleGoTo::InjectHooks() {
     ReversibleHooks::Install("CTaskSimpleGoTo", "QuitIK", 0x667CA0, &CTaskSimpleGoTo::QuitIK);
 }
 
-CTaskSimpleGoTo::CTaskSimpleGoTo(int moveState, const CVector& targetPoint, float fRadius) 
+CTaskSimpleGoTo::CTaskSimpleGoTo(int32 moveState, const CVector& targetPoint, float fRadius)
 {
     m_moveState = moveState;
     m_vecTargetPoint = targetPoint;
@@ -22,10 +24,10 @@ CTaskSimpleGoTo::~CTaskSimpleGoTo()
     // nothing here
 }
 
-CTaskSimpleGoTo* CTaskSimpleGoTo::Constructor(int moveState, const CVector& targetPoint, float fRadius) 
+CTaskSimpleGoTo* CTaskSimpleGoTo::Constructor(int32 moveState, const CVector& targetPoint, float fRadius)
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTaskSimpleGoTo*, 0x6679C0, CTask*, int, const CVector&, float>
+    return plugin::CallMethodAndReturn<CTaskSimpleGoTo*, 0x6679C0, CTask*, int32, const CVector&, float>
         (this, moveState, targetPoint, fRadius);
 #else
     this->CTaskSimpleGoTo::CTaskSimpleGoTo(moveState, targetPoint, fRadius);
@@ -65,9 +67,7 @@ void CTaskSimpleGoTo::SetUpIK(CPed* pPed)
         && !g_ikChainMan->GetLookAtEntity(pPed)
         && !pPed->m_pIntelligence->m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_IK)
         && (pPed != FindPlayerPed(-1) || CPad::GetPad(0)->DisablePlayerControls)) {
-        if (!m_pParentTask ||
-            m_pParentTask->GetId() != TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING &&
-            m_pParentTask->GetId() != TASK_COMPLEX_AVOID_ENTITY) {
+        if (!m_pParentTask || m_pParentTask->GetTaskType() != TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING && m_pParentTask->GetTaskType() != TASK_COMPLEX_AVOID_ENTITY) {
             CVector vecDistance = m_vecTargetPoint - pPed->GetPosition();
             if (vecDistance.SquaredMagnitude() > 9.0f) {
                 CVector direction(vecDistance);

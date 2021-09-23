@@ -10,8 +10,8 @@ bool CPedPlacement::FindZCoorForPed(CVector* pos) {
     return plugin::CallAndReturn<bool, 0x616920, CVector*>(pos);
 }
 
-bool CPedPlacement::IsPositionClearForPed(CVector const* pos, float radius, int maxNumObjects, CEntity** pObjectList, unsigned char bCheckVehicles, unsigned char bCheckPeds, unsigned char bCheckObjects) {
-    return plugin::CallAndReturn<bool, 0x616860, CVector const*, float, int, CEntity**, unsigned char, unsigned char, unsigned char>(pos, radius, maxNumObjects, pObjectList, bCheckVehicles, bCheckPeds, bCheckObjects);
+bool CPedPlacement::IsPositionClearForPed(CVector const* pos, float radius, int32 maxNumObjects, CEntity** pObjectList, uint8 bCheckVehicles, uint8 bCheckPeds, uint8 bCheckObjects) {
+    return plugin::CallAndReturn<bool, 0x616860, CVector const*, float, int32, CEntity**, uint8, uint8, uint8>(pos, radius, maxNumObjects, pObjectList, bCheckVehicles, bCheckPeds, bCheckObjects);
 }
 
 CVehicle* CPedPlacement::IsPositionClearOfCars(CVector const* pos) {

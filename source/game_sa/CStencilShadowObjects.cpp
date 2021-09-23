@@ -13,8 +13,8 @@ void CStencilShadowObjects::UpdateHierarchy(CStencilShadowObject** firstAvailabl
 }
 
 // 0x711760
-void CStencilShadowObjects::RegisterStencilShadows(RwV3d* cameraPos, int flagDoNotCreateNew) {
-    plugin::Call<0x711760, RwV3d*, int>(cameraPos, flagDoNotCreateNew);
+void CStencilShadowObjects::RegisterStencilShadows(RwV3d* cameraPos, int32 flagDoNotCreateNew) {
+    plugin::Call<0x711760, RwV3d*, int32>(cameraPos, flagDoNotCreateNew);
 }
 
 // 0x854B60

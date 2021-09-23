@@ -6,12 +6,11 @@
 */
 #pragma once
 
-#include "PluginBase.h"
 #include "CObject.h"
 
 class CProjectile : public CObject {
 public:
-    CProjectile(int dwModelId);
+    CProjectile(int32 dwModelId);
 };
 
 VALIDATE_SIZE(CProjectile, 0x17C);

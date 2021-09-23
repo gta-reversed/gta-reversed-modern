@@ -1,6 +1,14 @@
+/*
+    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
+*/
 #pragma once
 
 #include "CFire.h"
+
+#define MAX_NUM_FIRES 60
 
 class CFireManager {
 public:
@@ -54,6 +62,7 @@ private:
     CFire& Get(size_t idx) { return m_aFires[idx]; }
     auto GetIndexOf(CFire const* fire) const { return std::distance(std::begin(m_aFires), fire); }
 };
+
 VALIDATE_SIZE(CFireManager, 0x964);
 
 extern CFireManager& gFireManager;

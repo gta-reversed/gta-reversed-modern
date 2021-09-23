@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-unsigned int CDamageManager::GetWheelStatus(int wheel)
+uint32 CDamageManager::GetWheelStatus(int32 wheel)
 {
-    return ((unsigned int(__thiscall*)(CDamageManager*, int))0x6C21B0)(this, wheel);
+    return ((uint32(__thiscall*)(CDamageManager*, int32))0x6C21B0)(this, wheel);
 }
 
 void CDamageManager::SetEngineStatus(uint32_t status) {

@@ -12,8 +12,8 @@ FxSphere_c::FxSphere_c() {
 }
 
 // 0x4A9F80
-void* FxSphere_c::operator new(unsigned int size, int notAligned) {
-    return ((void* (__cdecl*)(unsigned int, int))0x4A9F80)(size, notAligned);
+void* FxSphere_c::operator new(uint32 size, int32 notAligned) {
+    return ((void* (__cdecl*)(uint32, int32))0x4A9F80)(size, notAligned);
 }
 
 // 0x4A9FB0

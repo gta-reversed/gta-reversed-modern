@@ -33,28 +33,28 @@ void CExplosion::Shutdown() {
 }
 
 // 0x736900
-uint8_t CExplosion::GetExplosionActiveCounter(uint8_t id) {
-    return plugin::CallAndReturn<uint8_t, 0x736900, uint8_t>(id);
+uint8 CExplosion::GetExplosionActiveCounter(uint8 id) {
+    return plugin::CallAndReturn<uint8, 0x736900, uint8>(id);
 }
 
 // 0x736910
-void CExplosion::ResetExplosionActiveCounter(uint8_t id) {
-    plugin::Call<0x736910, uint8_t>(id);
+void CExplosion::ResetExplosionActiveCounter(uint8 id) {
+    plugin::Call<0x736910, uint8>(id);
 }
 
 // 0x736920
-bool CExplosion::DoesExplosionMakeSound(uint8_t id) {
-    return plugin::CallAndReturn<bool, 0x736920, uint8_t>(id);
+bool CExplosion::DoesExplosionMakeSound(uint8 id) {
+    return plugin::CallAndReturn<bool, 0x736920, uint8>(id);
 }
 
 // 0x736930
-unsigned int CExplosion::GetExplosionType(uint8_t id) {
-    return plugin::CallAndReturn<unsigned int, 0x736930, uint8_t>(id);
+uint32 CExplosion::GetExplosionType(uint8 id) {
+    return plugin::CallAndReturn<uint32, 0x736930, uint8>(id);
 }
 
 // 0x736940
-CVector* CExplosion::GetExplosionPosition(uint8_t id) {
-    return plugin::CallAndReturn<CVector*, 0x736940, uint8_t>(id);
+CVector* CExplosion::GetExplosionPosition(uint8 id) {
+    return plugin::CallAndReturn<CVector*, 0x736940, uint8>(id);
 }
 
 // 0x736950
@@ -73,10 +73,8 @@ void CExplosion::Initialise() {
 }
 
 // 0x736A50
-bool CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType explosionType, CVector posn, unsigned int time, bool bMakeSound, float camShake,
-                              bool bHideExplosion) {
-    return plugin::CallAndReturn<bool, 0x736A50, CEntity*, CEntity*, eExplosionType, CVector const&, uint32_t, uint8_t, float, bool>(victim, creator, explosionType, posn, time,
-                                                                                                                                     bMakeSound, camShake, bHideExplosion);
+bool CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType explosionType, const CVector& posn, uint32 time, bool bMakeSound, float camShake, bool bHideExplosion) {
+    return plugin::CallAndReturn<bool, 0x736A50, CEntity*, CEntity*, eExplosionType, const CVector&, uint32, bool, float, bool>(victim, creator, explosionType, posn, time, bMakeSound, camShake, bHideExplosion);
 }
 
 // 0x737620

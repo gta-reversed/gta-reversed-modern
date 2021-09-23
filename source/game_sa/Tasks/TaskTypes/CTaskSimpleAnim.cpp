@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleAnim.h"
+
 void CTaskSimpleAnim::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleAnim", "MakeAbortable", 0x61A790, &CTaskSimpleAnim::MakeAbortable_Reversed);
@@ -54,7 +56,7 @@ bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
             const auto* pEvent = static_cast<const CEventScriptCommand*>(event);
             if (pEvent->m_task)
             {
-                if (pEvent->m_task->GetId() == eTaskType::TASK_SIMPLE_NAMED_ANIM)
+                if (pEvent->m_task->GetTaskType() == eTaskType::TASK_SIMPLE_NAMED_ANIM)
                 {
                     if (m_pAnim)
                         m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;

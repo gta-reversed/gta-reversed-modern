@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-int32_t& numBBFailed = *(int32_t*)0xB71808;
+int32& numBBFailed = *(int32*)0xB71808;
 
 CBoundingBox::CBoundingBox()
 {

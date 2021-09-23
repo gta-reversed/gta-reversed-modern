@@ -5,10 +5,10 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "CPtrNode.h"
 
-class  CPtrList {
+class CPtrList {
 public:
     CPtrNode* pNode;
     inline CPtrNode *GetNode() {
@@ -20,11 +20,11 @@ public:
     }
 
     // get elements count
-    unsigned int CountElements();
+    uint32 CountElements();
     
     /*
-    unsigned int CountElements() {
-        unsigned int counter;
+    uint32 CountElements() {
+        uint32 counter;
         CPtrNode *currNode = GetNode();
         for (counter = 0; currNode; ++counter)
             currNode = currNode->pNext;

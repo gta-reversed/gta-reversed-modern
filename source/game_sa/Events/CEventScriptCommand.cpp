@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "CEventScriptCommand.h"
+
+#include "CTaskSimpleRunAnim.h"
+
 void CEventScriptCommand::InjectHooks()
 {
     ReversibleHooks::Install("CEventScriptCommand", "Constructor", 0x4B0A00, &CEventScriptCommand::Constructor);
@@ -12,7 +16,7 @@ void CEventScriptCommand::InjectHooks()
     ReversibleHooks::Install("CEventScriptCommand", "CloneScriptTask", 0x4B0AA0, &CEventScriptCommand::CloneScriptTask);
 }
 
-CEventScriptCommand::CEventScriptCommand(std::int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds)
+CEventScriptCommand::CEventScriptCommand(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds)
 {
     m_primaryTaskIndex = primaryTaskIndex;
     m_task = task;
@@ -24,10 +28,10 @@ CEventScriptCommand::~CEventScriptCommand()
     delete m_task;
 }
 
-CEventScriptCommand* CEventScriptCommand::Constructor(std::int32_t primaryTaskIndex, CTask* task, bool affectsDeadPeds)
+CEventScriptCommand* CEventScriptCommand::Constructor(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds)
 {
 #ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn< CEventScriptCommand*, 0x4B0A00, CEventScriptCommand*, std::int32_t, CTask*, char>(this, primaryTaskIndex, task, affectsDeadPeds);
+    return plugin::CallMethodAndReturn< CEventScriptCommand*, 0x4B0A00, CEventScriptCommand*, int32, CTask*, char>(this, primaryTaskIndex, task, affectsDeadPeds);
 #else
     this->CEventScriptCommand::CEventScriptCommand(primaryTaskIndex, task, affectsDeadPeds);
     return this;
@@ -35,7 +39,7 @@ CEventScriptCommand* CEventScriptCommand::Constructor(std::int32_t primaryTaskIn
 }
 
 // 0x4B0B20
-int CEventScriptCommand::GetEventPriority() const
+int32 CEventScriptCommand::GetEventPriority() const
 {
     return CEventScriptCommand::GetEventPriority_Reversed();
 }
@@ -82,13 +86,13 @@ CTask* CEventScriptCommand::CloneScriptTask()
     return CEventScriptCommand::CloneScriptTask_Reversed();
 }
 
-int CEventScriptCommand::GetEventPriority_Reversed() const
+int32 CEventScriptCommand::GetEventPriority_Reversed() const
 {
     if (m_affectsDeadPeds)
         return 75;
     if (!m_task)
         return 53;
-    const std::int32_t taskId = m_task->GetId();
+    const int32 taskId = m_task->GetTaskType();
     if (taskId == TASK_SIMPLE_NAMED_ANIM) {
         CTaskSimpleRunAnim* pTaskRunAnim = static_cast<CTaskSimpleRunAnim*>(m_task);
         if (pTaskRunAnim->m_nFlags & ANIM_FLAG_LOOPED)

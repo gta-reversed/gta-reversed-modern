@@ -12,7 +12,7 @@ public:
 
     static void Init();
     static void Update();
-    static void AddTrace(CVector* from, CVector* to, float radius, uint32_t disappearTime, uint8_t alpha);
+    static void AddTrace(CVector* from, CVector* to, float radius, uint32 disappearTime, uint8 alpha);
     static void AddTrace(CVector* from, CVector* to, eWeaponType weaponType, CEntity* fromEntity);
     static void Render();
 

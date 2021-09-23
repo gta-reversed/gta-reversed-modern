@@ -24,14 +24,14 @@ public:
 
     // original virtual functions
     CTask* Clone() override;
-    eTaskType GetId() override;
+    eTaskType GetTaskType() override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
 
     void AddTask(CTask* pTask);
-    CTask* CreateNextSubTask(CPed* ped, int& taskIndex, int& repeatCount);
+    CTask* CreateNextSubTask(CPed* ped, int32& taskIndex, int32& repeatCount);
     void Flush();
 
 private:

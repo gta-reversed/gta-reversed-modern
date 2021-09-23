@@ -1,6 +1,6 @@
 #pragma once
 
-enum eWeatherType : short {
+enum eWeatherType : int16 {
     WEATHER_UNDEFINED = -1,
 
     WEATHER_EXTRASUNNY_LA = 0,

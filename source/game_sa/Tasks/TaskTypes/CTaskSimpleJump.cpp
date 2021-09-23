@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleJump.h"
+
 void CTaskSimpleJump::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleJump", "Constructor", 0x679AA0, &CTaskSimpleJump::Constructor);
@@ -129,7 +131,7 @@ bool CTaskSimpleJump::CheckIfJumpBlocked(CPed* ped)
     CVector savedPedPosition = ped->GetPosition();
     ped->SetPosn((*ped->m_matrix) * CVector(0.0F, 0.0F, 0.75F));
 
-    for (unsigned int i = 0; i < pedColData->m_nNumSpheres; i++)
+    for (uint32 i = 0; i < pedColData->m_nNumSpheres; i++)
         pedColData->m_pSpheres[i].m_fRadius = 0.3F;
 
     if (ped->TestCollision(false))
@@ -137,7 +139,7 @@ bool CTaskSimpleJump::CheckIfJumpBlocked(CPed* ped)
 
     ped->SetPosn(savedPedPosition);
 
-    for (unsigned int i = 0; i < pedColData->m_nNumSpheres; i++)
+    for (uint32 i = 0; i < pedColData->m_nNumSpheres; i++)
         pedColData->m_pSpheres[i].m_fRadius = 0.35F;
 
     return m_bIsJumpBlocked;

@@ -1,10 +1,12 @@
 #include "StdInc.h"
 
+#include "CTaskSimplePlayHandSignalAnim.h"
+
 void CTaskSimplePlayHandSignalAnim::InjectHooks()
 {
 // VIRTUAL
     ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "Clone", 0x61B980, &CTaskSimplePlayHandSignalAnim::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "GetId", 0x61AEA0, &CTaskSimplePlayHandSignalAnim::GetId_Reversed);
+    ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "GetTaskType", 0x61AEA0, &CTaskSimplePlayHandSignalAnim::GetId_Reversed);
     ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "MakeAbortable", 0x61AF50, &CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed);
     ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "ProcessPed", 0x61BDA0, &CTaskSimplePlayHandSignalAnim::ProcessPed_Reversed);
 // CLASS
@@ -46,7 +48,7 @@ CTask* CTaskSimplePlayHandSignalAnim::Clone_Reversed()
     return new CTaskSimplePlayHandSignalAnim(m_nAnimationBlockIndex, m_fBlendFactor, m_bUseFatHands, m_bHoldLastFrame);
 }
 
-eTaskType CTaskSimplePlayHandSignalAnim::GetId()
+eTaskType CTaskSimplePlayHandSignalAnim::GetTaskType()
 {
     return CTaskSimplePlayHandSignalAnim::GetId_Reversed();
 }

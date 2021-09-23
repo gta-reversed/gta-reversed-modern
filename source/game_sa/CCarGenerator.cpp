@@ -3,6 +3,7 @@
 #include "CCarGenerator.h"
 
 #include "CTheCarGenerators.h"
+#include "COcclusion.h"
 
 bool& CCarGenerator::m_bHotdogVendorPositionOffsetInitialized = *reinterpret_cast<bool*>(0xC2B974);
 CVector& CCarGenerator::m_HotdogVendorPositionOffset = *reinterpret_cast<CVector*>(0xC2B968);
@@ -20,18 +21,18 @@ void CCarGenerator::InjectHooks()
 }
 
 // 0x6F32E0
-bool CCarGenerator::CheckForBlockage(int modelId)
+bool CCarGenerator::CheckForBlockage(int32 modelId)
 {
     auto pCarColModel = CModelInfo::GetModelInfo(modelId)->GetColModel();
     float radius = pCarColModel ? pCarColModel->GetBoundRadius() : 2.0f;
 
-    short entityCount;
+    int16 entityCount;
     CEntity* pObjectList[8];
 
     CVector posn = UncompressLargeVector(m_vecPosn);
     CWorld::FindObjectsKindaColliding(posn, radius, true, &entityCount, 8, pObjectList, false, true, true, false, false);
 
-    for (int i = 0; i < entityCount; i++)
+    for (int32 i = 0; i < entityCount; i++)
     {
         auto pEntityColModel = CModelInfo::GetModelInfo(pObjectList[i]->m_nModelIndex)->GetColModel();
 
@@ -103,13 +104,13 @@ bool CCarGenerator::CheckIfWithinRangeOfAnyPlayers()
 // 0x6F34D0
 void CCarGenerator::DoInternalProcessing()
 {
-    int actualModelId;
+    int32 actualModelId;
     CVehicle* pVeh;
     float baseZ;
     CColPoint colPoint;
     CEntity* pEntity;
     tCarGenPlateText plate{};
-    int tractorDriverPedType;
+    int32 tractorDriverPedType;
 
     bool nightTime = CClock::ms_nGameClockHours > 21 || CClock::ms_nGameClockHours < 7;
     if (!bIgnorePopulationLimit
@@ -339,7 +340,7 @@ void CCarGenerator::Process()
     if (m_nVehicleHandle == -1 &&
         (
             CTheCarGenerators::GenerateEvenIfPlayerIsCloseCounter
-            || m_nNextGenTime <= CTimer::m_snTimeInMilliseconds
+            || m_nNextGenTime <= CTimer::GetTimeInMS()
         )
             && m_nGenerateCount != 0
             && CheckIfWithinRangeOfAnyPlayers()
@@ -365,17 +366,17 @@ void CCarGenerator::Process()
 }
 
 // 0x6F2E50
-void CCarGenerator::Setup(const CVector& posn, float angle, int modelId, short color1, short color2, uint8_t bForceSpawn,
-                          uint8_t alarmChance, uint8_t doorLockChance, uint16_t minDelay, uint16_t maxDelay,
-                          uint8_t iplId, bool ignorePopulationLimit)
+void CCarGenerator::Setup(const CVector& posn, float angle, int32 modelId, int16 color1, int16 color2, uint8 bForceSpawn,
+                          uint8 alarmChance, uint8 doorLockChance, uint16 minDelay, uint16 maxDelay,
+                          uint8 iplId, bool ignorePopulationLimit)
 {
     constexpr float magic = 256.0f / 360.0f; // 0x8722E8 original expression 128.0f / 180.0f
 
     m_vecPosn = CompressLargeVector(posn);
     m_nAngle = (char)(angle * magic);
     m_nModelId = modelId;
-    m_nPrimaryColor = (uint8_t)(color1);
-    m_nSecondaryColor = (uint8_t)(color2);;
+    m_nPrimaryColor = (uint8)(color1);
+    m_nSecondaryColor = (uint8)(color2);;
 
     bWaitUntilFarFromPlayer = false;
     bIgnorePopulationLimit = ignorePopulationLimit;
@@ -389,7 +390,7 @@ void CCarGenerator::Setup(const CVector& posn, float angle, int modelId, short c
     m_nIplId = iplId;
 
     m_nVehicleHandle = -1;
-    m_nNextGenTime = CTimer::m_snTimeInMilliseconds + 1;
+    m_nNextGenTime = CTimer::GetTimeInMS() + 1;
     m_nGenerateCount = 0;
     m_bIsUsed = true;
 }
@@ -408,7 +409,7 @@ void CCarGenerator::SwitchOn()
 }
 
 // 0x6F2E40
-unsigned int CCarGenerator::CalcNextGen()
+uint32 CCarGenerator::CalcNextGen()
 {
-    return CTimer::m_snTimeInMilliseconds + 4;
+    return CTimer::GetTimeInMS() + 4;
 }

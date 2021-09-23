@@ -11,7 +11,7 @@ void CPtrNodeSingleLink::AddToList(CPtrListSingleLink* list)
     list->pNode = reinterpret_cast<CPtrNode*>(this);
 }
 
-void* CPtrNodeSingleLink::operator new(unsigned int size)
+void* CPtrNodeSingleLink::operator new(uint32 size)
 {
     return CPools::ms_pPtrNodeSingleLinkPool->New();
 }

@@ -5,15 +5,15 @@ float& CDraw::ms_fLODDistance = *(float *)0xC3EF98;
 float& CDraw::ms_fFarClipZ = *(float *)0xC3EF9C;
 float& CDraw::ms_fNearClipZ = *(float *)0xC3EFA0;
 float& CDraw::ms_fAspectRatio = *(float *)0xC3EFA4;
-uint8_t& CDraw::FadeRed = *(uint8_t*)0xC3EFA8;
-uint8_t& CDraw::FadeGreen = *(uint8_t*)0xC3EFA9;
-uint8_t& CDraw::FadeBlue = *(uint8_t*)0xC3EFAA;
-uint8_t& CDraw::FadeValue = *(uint8_t*)0xC3EFAB;
+uint8& CDraw::FadeRed = *(uint8*)0xC3EFA8;
+uint8& CDraw::FadeGreen = *(uint8*)0xC3EFA9;
+uint8& CDraw::FadeBlue = *(uint8*)0xC3EFAA;
+uint8& CDraw::FadeValue = *(uint8*)0xC3EFAB;
 
 bool& JustLoadedDontFadeInYet = *(bool*)0xC16EDC;
 bool& StillToFadeOut = *(bool*)0xC16EDD;
-uint32_t& FadeTimer = *(uint32_t*)0xC16EE0;
-uint32_t& FadeOutTime = *(uint32_t*)0x8D2BD4;
+uint32& FadeTimer = *(uint32*)0xC16EE0;
+uint32& FadeOutTime = *(uint32*)0x8D2BD4;
 
 void CDraw::InjectHooks() {
     ReversibleHooks::Install("CDraw", "SetFOV", 0x6FF410, &CDraw::SetFOV);
@@ -42,12 +42,12 @@ void DoFade() {
         return;
 
     if (JustLoadedDontFadeInYet) {
-        FadeTimer = CTimer::m_snTimeInMilliseconds;
+        FadeTimer = CTimer::GetTimeInMS();
         JustLoadedDontFadeInYet = false;
     }
 
     if (StillToFadeOut) {
-        if (CTimer::m_snTimeInMilliseconds - FadeTimer <= FadeOutTime) {
+        if (CTimer::GetTimeInMS() - FadeTimer <= FadeOutTime) {
             TheCamera.SetFadeColour(0, 0, 0);
             TheCamera.Fade(0.0f, eFadeFlag::FADE_IN);
             TheCamera.ProcessFade();
@@ -68,7 +68,7 @@ void DoFade() {
                 (CDraw::FadeRed   * CDraw::FadeValue) / CDraw::FadeValue,
                 (CDraw::FadeGreen * CDraw::FadeValue) / CDraw::FadeValue,
                 (CDraw::FadeBlue  * CDraw::FadeValue) / CDraw::FadeValue,
-                std::max<uint8_t>(0, CDraw::FadeValue)
+                std::max<uint8>(0, CDraw::FadeValue)
             );
         }
 

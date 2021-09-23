@@ -4,8 +4,8 @@ void CAnimBlendAssociation::InjectHooks() {
     ReversibleHooks::Install("CAnimBlendAssociation", "CAnimBlendAssociation", 0x4CEFC0, &CAnimBlendAssociation::Constructor);
 }
 
-void* CAnimBlendAssociation::operator new(unsigned int size) {
-    return ((CAnimBlendAssociation * (__cdecl*)(unsigned int))0x82119A)(size);
+void* CAnimBlendAssociation::operator new(uint32 size) {
+    return ((CAnimBlendAssociation * (__cdecl*)(uint32))0x82119A)(size);
 }
 
 void CAnimBlendAssociation::operator delete(void* object) {
@@ -93,8 +93,12 @@ void CAnimBlendAssociation::Start(float currentTime) {
     plugin::CallMethod<0x4CEB70, CAnimBlendAssociation*, float>(this, currentTime);
 }
 
-void CAnimBlendAssociation::AllocateAnimBlendNodeArray(int count) {
-    plugin::CallMethod<0x4CE9F0, CAnimBlendAssociation*, int>(this, count);
+uint32 CAnimBlendAssociation::GetHashKey() const noexcept {
+    return m_pHierarchy->m_hashKey;
+}
+
+void CAnimBlendAssociation::AllocateAnimBlendNodeArray(int32 count) {
+    plugin::CallMethod<0x4CE9F0, CAnimBlendAssociation*, int32>(this, count);
 }
 
 void CAnimBlendAssociation::SetBlend(float blendAmount, float blendDelta) {

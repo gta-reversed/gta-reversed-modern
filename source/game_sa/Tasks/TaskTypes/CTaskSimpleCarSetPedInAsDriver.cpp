@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleCarSetPedInAsDriver.h"
+
 CTaskSimpleCarSetPedInAsDriver::CTaskSimpleCarSetPedInAsDriver(CVehicle* pTargetVehicle, CTaskUtilityLineUpPedWithCar* pUtility)
 {
     m_bIsFinished = 0;

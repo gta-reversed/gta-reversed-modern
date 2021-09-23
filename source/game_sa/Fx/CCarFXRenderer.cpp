@@ -1,6 +1,13 @@
 #include "StdInc.h"
 
+#include "CCarFXRenderer.h"
+
 RwTexture* (&CCarFXRenderer::ms_aDirtTextures)[NUM_DIRT_TEXTURES] = *(RwTexture*(*)[NUM_DIRT_TEXTURES])0xC02BD0;
+
+// 0x5D5AC0
+bool CCarFXRenderer::Initialise() {
+    return plugin::CallAndReturn<bool, 0x5D5AC0>();
+}
 
 bool CCarFXRenderer::IsCCPCPipelineAttached(RpAtomic* pAtomic)
 {
