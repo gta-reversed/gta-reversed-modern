@@ -73,7 +73,7 @@ class CTaskSimpleJetPack : public CTaskSimple {
     ~CTaskSimpleJetPack() override;
 
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
-    eTaskType GetId() override { return TASK_SIMPLE_JETPACK; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_JETPACK; }
     CTask* Clone() override;
     bool ProcessPed(CPed* ped) override;
 

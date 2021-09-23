@@ -20,18 +20,26 @@ public:
 public:
     static void InjectHooks();
 
-    static void Init();
-    static CPedGroup& GetGroup(int32 groupId) { return ms_groups[groupId]; }
-    //! return the index of the added group , return -1 if failed.
-    static signed int AddGroup();
-    static bool AreInSameGroup(CPed* ped1, CPed* ped2);
-    static void CleanUpForShutDown();
-    static signed int GetGroupId(CPedGroup* pedgrp);
-    static CPedGroup* GetPedsGroup(CPed* ped);
-    static bool IsGroupLeader(CPed* ped);
-    static bool IsInPlayersGroup(CPed* ped);
-    static void Process();
-    static void RegisterKillByPlayer();
-    static void RemoveAllFollowersFromGroup(int32 groupID);
+    static int32 AddGroup();
     static void RemoveGroup(int32 groupID);
+    static void RemoveAllFollowersFromGroup(int32 groupId);
+
+    static void Init();
+
+    static void RegisterKillByPlayer();
+
+    static void CleanUpForShutDown();
+
+    static bool IsGroupLeader(CPed* ped);
+
+    static CPedGroup* GetPedsGroup(CPed* ped);
+    static int32 GetGroupId(CPedGroup* pedGroup);
+
+    static void Process();
+
+    static bool AreInSameGroup(const CPed* ped1, const CPed* ped2);
+    static bool IsInPlayersGroup(CPed* ped);
+
+    // inlined
+    static CPedGroup& GetGroup(int32 groupId) { return ms_groups[groupId]; }
 };

@@ -231,7 +231,7 @@ void CBirds::Update()
         if (!pBird.m_bCreated)
             continue;
 
-        if (pBird.m_eBirdMode != eBirdMode::BIRD_DRAW_UPDATE || pBird.m_nUpdateAfterMS > CTimer::m_snTimeInMilliseconds)
+        if (pBird.m_eBirdMode != eBirdMode::BIRD_DRAW_UPDATE || pBird.m_nUpdateAfterMS > CTimer::GetTimeInMS())
             continue;
 
         if (pBird.m_bMustDoCurves) {
@@ -273,7 +273,7 @@ void CBirds::Render()
 
         if (pBird.m_eBirdMode == eBirdMode::BIRD_DRAW_NOUPDATE || pBird.m_eBirdMode == eBirdMode::BIRD_DRAW_UPDATE) {
             auto& vecPos = matBirdTransform.GetPosition();
-            auto uiTime = CTimer::m_snTimeInMilliseconds + uiWingMoveTimeOffset;
+            auto uiTime = CTimer::GetTimeInMS() + uiWingMoveTimeOffset;
             vecPos.z += sin((float)(uiTime % pBird.m_nWingStillness) * (TWO_PI / (float)pBird.m_nWingStillness)) * 0.1F;
         }
 
@@ -296,7 +296,7 @@ void CBirds::Render()
                     aTempBufferIndices[uiTempBufferIndicesStored + iIndice + 30] = uiVertInd + 8;
                 }
 
-                auto uiTime = CTimer::m_snTimeInMilliseconds + uiWingMoveTimeOffset;
+                auto uiTime = CTimer::GetTimeInMS() + uiWingMoveTimeOffset;
                 auto fSin1 = -sin((float)((uiTime + pBird.m_nWingStillness / 6) % pBird.m_nWingStillness) * TWO_PI / (float)pBird.m_nWingStillness);
                 auto fSin2 = -sin((float)((uiTime + pBird.m_nWingStillness) % pBird.m_nWingStillness) * TWO_PI / (float)pBird.m_nWingStillness);
 

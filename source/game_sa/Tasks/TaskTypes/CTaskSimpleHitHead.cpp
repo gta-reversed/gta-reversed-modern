@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleHitHead.h"
+
 void CTaskSimpleHitHead::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleHitHead", "Constructor", 0x653060, &CTaskSimpleHitHead::Constructor);

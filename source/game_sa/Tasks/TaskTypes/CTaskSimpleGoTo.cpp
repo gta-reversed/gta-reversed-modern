@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleGoTo.h"
+
 float& CTaskSimpleGoTo::ms_fLookAtThresholdDotProduct = *(float*)0xC18D48;
 
 void CTaskSimpleGoTo::InjectHooks() {
@@ -65,9 +67,7 @@ void CTaskSimpleGoTo::SetUpIK(CPed* pPed)
         && !g_ikChainMan->GetLookAtEntity(pPed)
         && !pPed->m_pIntelligence->m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_IK)
         && (pPed != FindPlayerPed(-1) || CPad::GetPad(0)->DisablePlayerControls)) {
-        if (!m_pParentTask ||
-            m_pParentTask->GetId() != TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING &&
-            m_pParentTask->GetId() != TASK_COMPLEX_AVOID_ENTITY) {
+        if (!m_pParentTask || m_pParentTask->GetTaskType() != TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING && m_pParentTask->GetTaskType() != TASK_COMPLEX_AVOID_ENTITY) {
             CVector vecDistance = m_vecTargetPoint - pPed->GetPosition();
             if (vecDistance.SquaredMagnitude() > 9.0f) {
                 CVector direction(vecDistance);

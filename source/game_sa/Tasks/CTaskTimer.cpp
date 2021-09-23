@@ -16,9 +16,9 @@ bool CTaskTimer::IsOutOfTime() {
         return false;
 
     if (m_bStopped) {
-        m_nStartTime = CTimer::m_snTimeInMilliseconds;
+        m_nStartTime = CTimer::GetTimeInMS();
         m_bStopped = false;
     }
 
-    return CTimer::m_snTimeInMilliseconds >= (m_nStartTime + m_nInterval);
+    return CTimer::GetTimeInMS() >= (m_nStartTime + m_nInterval);
 }

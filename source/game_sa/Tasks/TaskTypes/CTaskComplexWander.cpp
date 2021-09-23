@@ -1,9 +1,26 @@
 #include "StdInc.h"
 
+#include "CTaskComplexWander.h"
+
+#include "CTaskSimpleCarDriveTimed.h"
+#include "CTaskSimpleScratchHead.h"
+#include "CTaskSimpleStandStill.h"
+#include "CTaskSimpleGoToPoint.h"
+#include "CTaskSimpleRunAnim.h"
+
+#include "CTaskComplexObserveTrafficLightsAndAchieveHeading.h"
+#include "CTaskComplexCrossRoadLookAndAchieveHeading.h"
+#include "CTaskComplexWanderProstitute.h"
+#include "CTaskComplexWanderStandard.h"
+#include "CTaskComplexWanderCriminal.h"
+#include "CTaskComplexWanderMedic.h"
+#include "CTaskComplexWanderCop.h"
+#include "CTaskComplexLeaveCar.h"
+
 void CTaskComplexWander::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexWander", "CTaskComplexWander", 0x66F450, &CTaskComplexWander::Constructor);
-    ReversibleHooks::Install("CTaskComplexWander", "GetId", 0x460CD0, &CTaskComplexWander::GetId_Reversed);
+    ReversibleHooks::Install("CTaskComplexWander", "GetTaskType", 0x460CD0, &CTaskComplexWander::GetId_Reversed);
     ReversibleHooks::Install("CTaskComplexWander", "CreateNextSubTask", 0x674140, &CTaskComplexWander::CreateNextSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexWander", "CreateFirstSubTask", 0x6740E0, &CTaskComplexWander::CreateFirstSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexWander", "ControlSubTask", 0x674C30, &CTaskComplexWander::ControlSubTask_Reversed);
@@ -39,7 +56,7 @@ CTaskComplexWander* CTaskComplexWander::Constructor(int32 moveState, uint8 dir, 
     return this;
 }
 
-eTaskType CTaskComplexWander::GetId()
+eTaskType CTaskComplexWander::GetTaskType()
 {
 #ifdef USE_DEFAULT_FUNCTIONS 
     return ((eTaskType(__thiscall*)(CTask*))0x460CD0)(this);
@@ -97,7 +114,7 @@ void CTaskComplexWander::UpdatePathNodes(CPed* pPed, int8 dir, CNodeAddress* ori
 CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
 {
     bool bTheTaskIDIs181 = false;
-    int32 taskId = m_pSubTask->GetId();
+    int32 taskId = m_pSubTask->GetTaskType();
     if (taskId > TASK_SIMPLE_SCRATCH_HEAD)
     {
         int32 theTaskID = taskId - TASK_COMPLEX_LEAVE_CAR;
@@ -199,13 +216,8 @@ CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
                 return CreateSubTask(ped, TASK_SIMPLE_GO_TO_POINT);
             }
 
-            auto pTaskCrossRoadAndHeading = (CTaskComplexCrossRoadLookAndAchieveHeading*)CTask::operator new(20);
-            if (pTaskCrossRoadAndHeading)
-            {
-                float fTargetHeading = ComputeTargetHeading(ped);
-                pTaskCrossRoadAndHeading->Constructor(2000, fTargetHeading);
-                return (CTask*)pTaskCrossRoadAndHeading;
-            }
+            float fTargetHeading = ComputeTargetHeading(ped);
+            return new CTaskComplexCrossRoadLookAndAchieveHeading(2000, fTargetHeading);
         }
         else
         {
@@ -253,7 +265,7 @@ CTask* CTaskComplexWander::CreateFirstSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped)
 {
-    int32 subTaskId = m_pSubTask->GetId();
+    int32 subTaskId = m_pSubTask->GetTaskType();
     if (subTaskId == TASK_COMPLEX_LEAVE_CAR || subTaskId == TASK_SIMPLE_CAR_DRIVE_TIMED)
     {
         return m_pSubTask;
@@ -405,35 +417,15 @@ CTask* CTaskComplexWander::CreateSubTask(CPed* ped, int32 taskId)
         {
         case TASK_COMPLEX_LEAVE_CAR:
         {
-            auto pTaskComplexLeaveCar = (CTaskComplexLeaveCar*)CTask::operator new(52);
-            if (pTaskComplexLeaveCar)
-            {
-                pTaskComplexLeaveCar->Constructor(ped->m_pVehicle, 0, 0, 1, 0);
-                return pTaskComplexLeaveCar;
-            }
-            break;
+            return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0, true, false);
         }
         case TASK_COMPLEX_OBSERVE_TRAFFIC_LIGHTS_AND_ACHIEVE_HEADING:
         {
-            auto pTaskTrafficLightAndAchieveHeading = (CTaskComplexObserveTrafficLightsAndAchieveHeading*)CTask::operator new(20);
-            if (pTaskTrafficLightAndAchieveHeading)
-            {
-                float fTargetHeading = ComputeTargetHeading(ped);
-                pTaskTrafficLightAndAchieveHeading->Constructor(2000, fTargetHeading);
-                return pTaskTrafficLightAndAchieveHeading;
-            }
-            break;
+            return new CTaskComplexObserveTrafficLightsAndAchieveHeading(2000, ComputeTargetHeading(ped));
         }
         case TASK_COMPLEX_CROSS_ROAD_LOOK_AND_ACHIEVE_HEADING:
         {
-            auto pTaskCrossRoadAndAchieveHeading = (CTaskComplexCrossRoadLookAndAchieveHeading*)CTask::operator new(20);
-            if (pTaskCrossRoadAndAchieveHeading)
-            {
-                float fTargetHeading = ComputeTargetHeading(ped);
-                pTaskCrossRoadAndAchieveHeading->Constructor(2000, fTargetHeading);;
-                return pTaskCrossRoadAndAchieveHeading;
-            }
-            break;
+            return new CTaskComplexCrossRoadLookAndAchieveHeading(2000, ComputeTargetHeading(ped));
         }
         case TASK_SIMPLE_SCRATCH_HEAD:
         {
@@ -501,7 +493,7 @@ void CTaskComplexWander::ScanForBlockedNodes(CPed* pPed)
 #ifdef USE_DEFAULT_FUNCTIONS
     plugin::CallMethod<0x674560, CTaskComplexWander*, CPed*>(this, pPed);
 #else
-    if (m_pSubTask->GetId() == TASK_SIMPLE_GO_TO_POINT && m_NextNode.m_wAreaId != -1)
+    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT && m_NextNode.m_wAreaId != -1)
     {
         if (ScanForBlockedNode(pPed, &m_NextNode))
         {

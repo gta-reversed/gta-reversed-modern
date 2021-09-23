@@ -28,7 +28,7 @@ public:
     static CStuntJump*        mp_Active;
     static bool               m_bActive;
     static bool               m_bHitReward;
-    static int32              m_iTimer;
+    static uint32             m_iTimer;
     static eJumpState         m_jumpState;
     static int32              m_iNumJumps;
     static uint32             m_iNumCompleted;

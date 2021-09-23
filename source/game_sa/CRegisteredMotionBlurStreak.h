@@ -11,7 +11,7 @@
 
 class CRegisteredMotionBlurStreak {
 public:
-    int32   m_nId;
+    uint32  m_nId;
     CRGBA   m_color;
     CVector m_avecLeftPoints[3];
     CVector m_avecRightPoints[3];

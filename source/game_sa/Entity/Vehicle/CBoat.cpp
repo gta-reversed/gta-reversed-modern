@@ -56,7 +56,7 @@ CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy
     m_fMovingHiRotation = 0.0;
     m_fPropSpeed = 0.0;
     m_fPropRotation = 0.0;
-    m_nAttackPlayerTime = CTimer::m_snTimeInMilliseconds;
+    m_nAttackPlayerTime = CTimer::GetTimeInMS();
     CVehicle::SetModelIndex(modelIndex);
     CBoat::SetupModelNodes();
 
@@ -451,8 +451,8 @@ void CBoat::ProcessControl_Reversed() {
             if (iCarMission == eCarMission::MISSION_ATTACKPLAYER
                 || (iCarMission >= eCarMission::MISSION_RAMPLAYER_FARAWAY && iCarMission <= eCarMission::MISSION_BLOCKPLAYER_CLOSE)) {
 
-                if (static_cast<uint32>(CTimer::m_snTimeInMilliseconds) > m_nAttackPlayerTime)
-                    m_nAttackPlayerTime = rand() % 4096 + CTimer::m_snTimeInMilliseconds + 4500;
+                if (static_cast<uint32>(CTimer::GetTimeInMS()) > m_nAttackPlayerTime)
+                    m_nAttackPlayerTime = rand() % 4096 + CTimer::GetTimeInMS() + 4500;
             }
         }
     }
@@ -761,7 +761,7 @@ inline void CBoat::ProcessBoatNodeRendering(eBoatNodes eNode, float fRotation, R
 
 void CBoat::Render_Reversed()
 {
-    m_nTimeTillWeNeedThisCar = CTimer::m_snTimeInMilliseconds + 3000;
+    m_nTimeTillWeNeedThisCar = CTimer::GetTimeInMS() + 3000;
     if (CCheat::m_aCheatsActive[eCheats::CHEAT_INVISIBLE_CAR])
         return;
 
@@ -995,7 +995,7 @@ void CBoat::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion)
     pObject->m_nObjectType = eObjectType::OBJECT_TEMPORARY;
     pObject->SetIsStatic(false);
     pObject->objectFlags.bIsPickup = false;
-    pObject->m_dwRemovalTime = CTimer::m_snTimeInMilliseconds + 20000;
+    pObject->m_dwRemovalTime = CTimer::GetTimeInMS() + 20000;
 
     pObject->m_vecMoveSpeed = m_vecMoveSpeed;
     if (GetUp().z <= 0.0F)

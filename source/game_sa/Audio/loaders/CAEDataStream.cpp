@@ -146,7 +146,7 @@ size_t CAEDataStream::FillBuffer(void* dest, size_t size) {
     size = CFileMgr::Read(m_pFileHandle, dest, sizeToRead);
 
     if (m_bIsEncrypted)
-        CAEStreamTransformer::instance.TransformBuffer(dest, size, m_nCurrentPosition);
+        AEStreamTransformer.TransformBuffer(dest, size, m_nCurrentPosition);
 
     m_nCurrentPosition += static_cast<uint32>(size);
     return size;

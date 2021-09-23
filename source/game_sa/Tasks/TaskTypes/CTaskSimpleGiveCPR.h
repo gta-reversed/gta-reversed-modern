@@ -20,7 +20,7 @@ public:
     CTaskSimpleGiveCPR(CAccident* pAccident);
     ~CTaskSimpleGiveCPR() override;
 
-    eTaskType GetId() override { return TASK_SIMPLE_GIVE_CPR; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_GIVE_CPR; }
 
     CTask* Clone() override;
     bool ProcessPed(CPed* ped) override;

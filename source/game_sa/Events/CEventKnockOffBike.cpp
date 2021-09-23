@@ -1,5 +1,11 @@
 #include "StdInc.h"
 
+#include "CEventKnockOffBike.h"
+
+#include "EntityCollisionEvents.h"
+#include "CTaskComplexEnterCar.h"
+#include "CTaskSimpleCarSetPedOut.h"
+
 void CEventKnockOffBike::InjectHooks()
 {
     HookInstall(0x4AFCF0, (CEventKnockOffBike * (CEventKnockOffBike::*)(CVehicle*, CVector*, CVector*, float, float, uint8, uint8, int32, CPed*, bool, bool)) & CEventKnockOffBike::Constructor);

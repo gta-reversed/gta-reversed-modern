@@ -360,7 +360,7 @@ void CAutomobile::ProcessControl()
             if (m_nStatus == STATUS_PLAYER && !m_pHandlingData->m_bIsBus)
             {
                 if (m_dwBusDoorTimerEnd) {
-                    uint32 timeStep = static_cast<uint32>(CTimer::ms_fTimeStep * 0.02f * 1000.0f);
+                    uint32 timeStep = CTimer::GetTimeStepInMS();
                     if (m_dwBusDoorTimerEnd <= timeStep)
                         m_dwBusDoorTimerEnd = 0;
                     else
@@ -613,7 +613,7 @@ void CAutomobile::ProcessControl()
     m_fWheelSpinForAudio *= riseFallWheelSpinRate;
     m_fWheelSpinForAudio += (1.0f - riseFallWheelSpinRate) * wheelSpinRate;
 
-    if ((CTimer::m_snTimeInMilliseconds & 0x7FF) > 800) {
+    if ((CTimer::GetTimeInMS() & 0x7FF) > 800) {
         if (roughnessShake >= 0.29f)
             suspensionShake = 0.0f;
         roughnessShake = 0.0f;
@@ -1136,13 +1136,16 @@ void CAutomobile::ResetSuspension()
     }
 }
 
+// 0x6A8500
 void CAutomobile::ProcessFlyingCarStuff()
 {
-    if (m_nStatus != STATUS_PLAYER || m_nStatus == STATUS_HELI || m_nStatus == STATUS_PHYSICS) {
+    if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_HELI || m_nStatus == STATUS_PHYSICS) {
         if (CCheat::m_aCheatsActive[CHEAT_CARS_FLY]
             && m_vecMoveSpeed.Magnitude() > 0.0f
-            && CTimer::ms_fTimeStep > 0.0f) 
-                FlyingControl(FLIGHT_MODEL_PLANE, -10000.0f, -10000.0f, -10000.0f, -10000.0f);
+            && CTimer::ms_fTimeStep > 0.0f
+        ) {
+            FlyingControl(FLIGHT_MODEL_PLANE, -9999.9902F, -9999.9902F, -9999.9902F, -9999.9902F);
+        }
     }
 }
 
@@ -2464,7 +2467,7 @@ inline void CAutomobile::ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver)
             static_cast<CPlayerPed*>(pPed)->HandlePlayerBreath(true, 1.0F);
         else {
             auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::ms_fTimeStep, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, false);
-            auto damageEvent = CEventDamage(this, CTimer::m_snTimeInMilliseconds, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
+            auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
             if (damageEvent.AffectsPed(pPed))
                 pedDamageResponseCalc.ComputeDamageResponse(pPed, &damageEvent.m_damageResponse, true);
             else
@@ -2630,14 +2633,14 @@ void CAutomobile::TankControl()
 {
     if (m_nModelIndex == MODEL_RCTIGER && m_nStatus  == STATUS_HELI) {
         if (CPad::GetPad(0)->CarGunJustDown()) {
-            if (CTimer::m_snTimeInMilliseconds > m_nGunFiringTime + TIGER_GUNFIRE_RATE) {
+            if (CTimer::GetTimeInMS() > m_nGunFiringTime + TIGER_GUNFIRE_RATE) {
                 CWeapon minigun(WEAPON_MINIGUN, 5000);
                 CVector point = *m_matrix * TIGER_GUN_POS + CTimer::ms_fTimeStep * m_vecMoveSpeed;
                 minigun.FireInstantHit(this, &point, &point, nullptr, nullptr, nullptr, false, true);
                 CVector2D direction(0.0f, 0.1f);
                 minigun.AddGunshell(this, point, direction, 0.025f);
                 AudioEngine.ReportWeaponEvent(AE_WEAPON_FIRE, WEAPON_MINIGUN, this);
-                m_nGunFiringTime = CTimer::m_snTimeInMilliseconds;
+                m_nGunFiringTime = CTimer::GetTimeInMS();
             }
         }
         return;
@@ -2710,8 +2713,8 @@ void CAutomobile::TankControl()
     
     if (pad->CarGunJustDown()) {
         CPlayerInfo& playerInfo = CWorld::GetFocusedPlayerInfo();
-        if (CTimer::m_snTimeInMilliseconds > playerInfo.m_nLastTimeBigGunFired + 800) {
-            playerInfo.m_nLastTimeBigGunFired = CTimer::m_snTimeInMilliseconds;
+        if (CTimer::GetTimeInMS() > playerInfo.m_nLastTimeBigGunFired + 800) {
+            playerInfo.m_nLastTimeBigGunFired = CTimer::GetTimeInMS();
             CVector point;
             point.x = sin(-m_fDoomVerticalRotation);
             point.y = cos(m_fDoomVerticalRotation);
@@ -3009,7 +3012,7 @@ void CAutomobile::FireTruckControl(CFire* fire)
             else
                 m_fDoomVerticalRotation += timeStep;
         }
-        m_fDoomHorizontalRotation = sin((CTimer::m_snTimeInMilliseconds & 0xFFF) * TWO_PI * 0.00024414f) * 0.15f;
+        m_fDoomHorizontalRotation = sin((CTimer::GetTimeInMS() & 0xFFF) * TWO_PI * 0.00024414f) * 0.15f;
     }
     else {
         CCam& activeCam = TheCamera.GetActiveCamera();

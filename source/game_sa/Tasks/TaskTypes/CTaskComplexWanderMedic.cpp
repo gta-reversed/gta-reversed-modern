@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskComplexWanderMedic.h"
+
 CTaskComplexWanderMedic* CTaskComplexWanderMedic::Constructor(int32 MoveState, uint8 Dir, bool bWanderSensibly)
 {
     return plugin::CallMethodAndReturn<CTaskComplexWanderMedic*, 0x658770, CTaskComplexWanderMedic*, int32, uint8, bool>

@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "CEventVehicleToSteal.h"
+
+#include "CTaskComplexEnterCar.h"
+
 void CEventVehicleToSteal::InjectHooks()
 {
     ReversibleHooks::Install("CEventVehicleToSteal", "Constructor", 0x4AF670, &CEventVehicleToSteal::Constructor);

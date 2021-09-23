@@ -374,10 +374,10 @@ bool CEventOnFire::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->m_pFire && !ped->physicalFlags.bFireProof) {
         CTask* activeTask = ped->GetTaskManager().GetActiveTask();
-        if (activeTask && activeTask->GetId() == TASK_COMPLEX_ON_FIRE)
+        if (activeTask && activeTask->GetTaskType() == TASK_COMPLEX_ON_FIRE)
             return false;
         CTask* partialAnimTask = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
-        if (partialAnimTask && partialAnimTask->GetId() == TASK_SIMPLE_PLAYER_ON_FIRE)
+        if (partialAnimTask && partialAnimTask->GetTaskType() == TASK_SIMPLE_PLAYER_ON_FIRE)
             return false;
         return ped->IsAlive(); 
     }

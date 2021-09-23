@@ -50,7 +50,7 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float fUnkn1
     auto fX = static_cast<float>(x);
     auto fY = static_cast<float>(y);
 
-    auto iTimeOffset = CTimer::m_snTimeInMilliseconds - CWaterLevel::m_nWaterTimeOffset;
+    auto iTimeOffset = CTimer::GetTimeInMS() - CWaterLevel::m_nWaterTimeOffset;
     const auto fTwoPiToChar = 256.0F / TWO_PI;
 
     const auto fLowFreqOffsetMult = TWO_PI / 5000.0F;
@@ -103,7 +103,7 @@ bool CWaterLevel::GetWaterLevelNoWaves(float x, float y, float z, float* pOutWat
 
 void CWaterLevel::SyncWater()
 {
-    CWaterLevel::m_nWaterTimeOffset = CTimer::m_snTimeInMilliseconds;
+    CWaterLevel::m_nWaterTimeOffset = CTimer::GetTimeInMS();
 }
 
 // 0x6EAE80

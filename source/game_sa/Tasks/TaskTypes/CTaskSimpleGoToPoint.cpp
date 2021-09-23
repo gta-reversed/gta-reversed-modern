@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleGoToPoint.h"
+
+#include "CTaskSimpleStandStill.h"
+
 void CTaskSimpleGoToPoint::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleGoToPoint", "CTaskSimpleGoToPoint", 0x667CD0, &CTaskSimpleGoToPoint::Constructor);

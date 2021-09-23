@@ -1,30 +1,35 @@
+#pragma once
+
 #include "CTaskComplex.h"
 
 class CPointRoute;
+
 class CTaskComplexFollowPedFootsteps : public CTaskComplex {
 public:
-    CPed* m_targetPed;
-    uint32 m_subTaskCreateCheckTimer;
-    uint32 m_lineOfSightCheckTimer;
+    CPed*        m_targetPed;
+    uint32       m_subTaskCreateCheckTimer;
+    uint32       m_lineOfSightCheckTimer;
     CPointRoute* m_pointRoute;
-    int16 m_moveState;
-    uint8 m_updateGoToPoint : 1;
+    int16        m_moveState;
+    uint8        m_updateGoToPoint : 1;
 
-    static void InjectHooks();
-
+public:
     CTaskComplexFollowPedFootsteps(CPed* ped);
     ~CTaskComplexFollowPedFootsteps();
-private:
-    CTaskComplexFollowPedFootsteps* Constructor(CPed* ped);
-public:
+
     CTask* Clone() override { return new CTaskComplexFollowPedFootsteps(m_targetPed); }
-    eTaskType GetId() override { return TASK_COMPLEX_FOLLOW_PED_FOOTSTEPS; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
-    CTask* CreateNextSubTask(CPed* ped) override;
-    CTask* CreateFirstSubTask(CPed* ped) override;
-    CTask* ControlSubTask(CPed* ped) override;
+    eTaskType GetTaskType() override { return TASK_COMPLEX_FOLLOW_PED_FOOTSTEPS; }
+    bool           MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    CTask*         CreateNextSubTask(CPed* ped) override;
+    CTask*         CreateFirstSubTask(CPed* ped) override;
+    CTask*         ControlSubTask(CPed* ped) override;
     virtual CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskComplexFollowPedFootsteps* Constructor(CPed* ped);
 };
 
 VALIDATE_SIZE(CTaskComplexFollowPedFootsteps, 0x20);

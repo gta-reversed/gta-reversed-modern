@@ -1,13 +1,15 @@
 #include "StdInc.h"
 
+#include "CTaskComplexBeInGroup.h"
+
 CTaskComplexBeInGroup::CTaskComplexBeInGroup(int32 groupId, bool isLeader)
 {
-    m_groupId = groupId;
-    m_ped = 0;
-    m_mainTask = nullptr;
-    m_secondaryTask = nullptr;
-    m_isLeader = isLeader;
-    m_mainTaskId = TASK_NONE;
+    m_groupId           = groupId;
+    m_ped               = 0;
+    m_mainTask          = nullptr;
+    m_secondaryTask     = nullptr;
+    m_isLeader          = isLeader;
+    m_mainTaskId        = TASK_NONE;
     m_secondaryTaskSlot = -1;
 }
 

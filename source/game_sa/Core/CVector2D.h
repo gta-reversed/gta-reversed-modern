@@ -80,6 +80,26 @@ inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {
     return CVector2D(vecOne.x - vecTwo.x, vecOne.y - vecTwo.y);
 }
 
+inline CVector2D operator+(const CVector2D& vecOne, const CVector2D& vecTwo) {
+    return CVector2D(vecOne.x + vecTwo.x, vecOne.y + vecTwo.y);
+}
+
+inline CVector2D operator*(const CVector2D& vecOne, const CVector2D& vecTwo) {
+    return CVector2D(vecOne.x * vecTwo.x, vecOne.y * vecTwo.y);
+}
+
+inline CVector2D operator*(const CVector2D& vec, float multiplier) {
+    return CVector2D(vec.x * multiplier, vec.y * multiplier);
+}
+
+inline CVector2D operator/(const CVector2D& vec, float dividend) {
+    return CVector2D(vec.x / dividend, vec.y / dividend);
+}
+
+inline CVector2D operator*(float multiplier, const CVector2D& vec) {
+    return CVector2D(vec.x * multiplier, vec.y * multiplier);
+}
+
 inline float DistanceBetweenPoints2D(const CVector2D& pointOne, const CVector2D& pointTwo) {
     return (pointTwo - pointOne).Magnitude();
 }

@@ -1,5 +1,13 @@
 #include "StdInc.h"
-#include "eCrimeType.h"
+
+#include "CTaskSimplePlayerOnFoot.h"
+
+#include "CTaskSimpleUseGun.h"
+#include "CTaskSimpleThrowProjectile.h"
+
+#include "CTaskComplexJump.h"
+#include "CTaskComplexUseGoggles.h"
+#include "CTaskSimpleStealthKill.h"
 
 int32& gLastRandomNumberForIdleAnimationID = *reinterpret_cast<int32*>(0x8D2FEC);
 uint32& gLastTouchTimeDelta = *reinterpret_cast<uint32*>(0xC19664);
@@ -369,13 +377,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 }
                 else
                 {
-                    CTask* pNewTask = static_cast<CTask*>(CTask::operator new(40));
-                    CTaskSimpleFight* pTaskSimpleFight = nullptr;
-                    if (pNewTask)
-                    {
-                        pTaskSimpleFight = static_cast<CTaskSimpleFight*>(pNewTask);
-                        pTaskSimpleFight->Constructor(pPlayerPed->m_pTargetedObject, fightCommand, 2000u);
-                    }
+                    auto* pTaskSimpleFight = new CTaskSimpleFight(pPlayerPed->m_pTargetedObject, fightCommand, 2000u);
 
                     pTaskManager->SetTaskSecondary(pTaskSimpleFight, 0);
                 }
@@ -397,14 +399,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                 }
                 else if (weaponType > WEAPON_CAMERA&& weaponType <= WEAPON_INFRARED && !pTaskManager->m_aPrimaryTasks[3])
                 {
-                    CTaskComplexUseGoggles* pCTaskComplexUseGoggles = nullptr;
-                    CTask* pNewTask = static_cast<CTask*>(CTask::operator new(12));
-                    if (pNewTask)
-                    {
-                        pCTaskComplexUseGoggles = static_cast<CTaskComplexUseGoggles*>(pNewTask);
-                        pCTaskComplexUseGoggles->Constructor();
-                    }
-
+                    auto* pCTaskComplexUseGoggles = new CTaskComplexUseGoggles();
                     pTaskManager->SetTask(pCTaskComplexUseGoggles, 3, 0);
                     pPlayerPed->m_pPlayerData->m_bDontAllowWeaponChange = true;
                 }
@@ -447,7 +442,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                         CTask* pSecondaryTask = pTaskManager->GetTaskSecondary(0);
                         if (pSecondaryTask)
                         {
-                            if (pSecondaryTask->GetId() == TASK_SIMPLE_USE_GUN)
+                            if (pSecondaryTask->GetTaskType() == TASK_SIMPLE_USE_GUN)
                             {
                                 CTaskSimpleUseGun* pTaskUseGun = pIntelligence->GetTaskUseGun();
                                 if (pTaskUseGun)
@@ -462,14 +457,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                         }
                         else
                         {
-                            CTask* pNewTask = static_cast<CTask*>(CTask::operator new(60));
-                            CTaskSimpleUseGun* pTaskUseGun = nullptr;
-                            if (pNewTask)
-                            {
-                                pTaskUseGun = static_cast<CTaskSimpleUseGun*>(pNewTask);
-                                pTaskUseGun->Constructor(pTargetedObject, CVector(0.0f, 0.0f, 0.f), gunCommand[0], 1, false);
-                            }
-
+                            auto* pTaskUseGun = new CTaskSimpleUseGun(pTargetedObject, CVector(0.0f, 0.0f, 0.f), gunCommand[0], 1, false);
                             pTaskManager->SetTaskSecondary(pTaskUseGun, 0);
                             pPlayerPed->m_pPlayerData->m_fAttackButtonCounter = 0;
                         }
@@ -500,7 +488,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                             CTask* pTaskSecondary = pTaskManager->GetTaskSecondary(0);
                             if (pTaskSecondary)
                             {
-                                if (pTaskSecondary->GetId() == TASK_SIMPLE_USE_GUN)
+                                if (pTaskSecondary->GetTaskType() == TASK_SIMPLE_USE_GUN)
                                 {
                                     if (pIntelligence->GetTaskUseGun())
                                     {
@@ -516,14 +504,8 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                             }
                             else
                             {
-                                CTask* pNewTask = static_cast<CTask*>(CTask::operator new(60));
-                                CTaskSimpleUseGun* pTaskUseGun = nullptr;
-                                if (pNewTask)
-                                {
-                                    pTaskUseGun = static_cast<CTaskSimpleUseGun*>(pNewTask);
-                                    pTaskUseGun->Constructor(pPlayerPed->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), gunCommand[0], 1, false);
-                                    pTaskManager->SetTaskSecondary(pTaskUseGun, 0);
-                                }
+                                auto* pTaskUseGun = new CTaskSimpleUseGun(pPlayerPed->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), gunCommand[0], 1, false);
+                                pTaskManager->SetTaskSecondary(pTaskUseGun, 0);
                             }
                         }
                         else
@@ -531,7 +513,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                             if (pTaskManager->GetTaskSecondary(0) || !pPad->WeaponJustDown(pPlayerPed))
                             {
                                 CTask* pTaskSecondary = pTaskManager->GetTaskSecondary(0);
-                                if (pTaskSecondary && pTaskSecondary->GetId() != TASK_SIMPLE_THROW)
+                                if (pTaskSecondary && pTaskSecondary->GetTaskType() != TASK_SIMPLE_THROW)
                                 {
                                     pTaskSecondary->MakeAbortable(pPlayerPed, ABORT_PRIORITY_URGENT, nullptr);
                                 }
@@ -543,14 +525,8 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
                             }
                             else
                             {
-                                CTask* pNewTask = static_cast<CTask*>(CTask::operator new(36));
-                                CTaskSimpleThrowProjectile* pTaskSimpleThrowProjectile = nullptr;
-                                if (pNewTask)
-                                {
-                                    pTaskSimpleThrowProjectile = static_cast<CTaskSimpleThrowProjectile*>(pNewTask);
-                                    pTaskSimpleThrowProjectile->Constructor(nullptr, CVector(0, 0, 0));
-                                    pTaskManager->SetTaskSecondary(pTaskSimpleThrowProjectile, 0);
-                                }
+                                auto* pTaskSimpleThrowProjectile = new CTaskSimpleThrowProjectile(nullptr, CVector(0, 0, 0));
+                                pTaskManager->SetTaskSecondary(pTaskSimpleThrowProjectile, 0);
                             }
                         }
                         break;
@@ -678,12 +654,8 @@ PED_WEAPON_AIMING_CODE:
         }
         if (!pTaskManager->GetTaskSecondary(0))
         {
-            pNewSimpleUseGunTask = (CTaskSimpleUseGun*)CTask::operator new(60);
-            if (pNewSimpleUseGunTask)
-            {
-                firingPoint.Set(0.0f, 0.0f, 0.0f);
-                pNewSimpleUseGunTask->Constructor(pPlayerPed->m_pTargetedObject, CVector(0.0, 0.0, 0.0), 1, 1, false);
-            }
+            firingPoint.Set(0.0f, 0.0f, 0.0f);
+            auto* pNewSimpleUseGunTask = new CTaskSimpleUseGun(pPlayerPed->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), 1, 1, false);
 
             pTaskManager->SetTaskSecondary(pNewSimpleUseGunTask, 0);
             goto MAKE_PLAYER_LOOK_AT_ENTITY;
@@ -778,7 +750,7 @@ PED_WEAPON_AIMING_CODE:
                 pTargetedEntity = (CPed*)pPlayerPed->m_pTargetedObject;
                 if (pTargetedEntity && pTargetedEntity->m_nType == ENTITY_TYPE_PED && pIntelligence->IsInSeeingRange(pPlayerPed->GetPosition())) {
                     CTask* pActivePrimaryTask = pIntelligence->GetActivePrimaryTask();
-                    if (!pActivePrimaryTask || pActivePrimaryTask->GetId() != TASK_COMPLEX_REACT_TO_GUN_AIMED_AT)
+                    if (!pActivePrimaryTask || pActivePrimaryTask->GetTaskType() != TASK_COMPLEX_REACT_TO_GUN_AIMED_AT)
                     {
                         if (pActiveWeapon->m_nType != WEAPON_PISTOL_SILENCED)
                         {
@@ -866,12 +838,8 @@ PED_WEAPON_AIMING_CODE:
     }
     else
     {
-        pNewSimpleUseGunTask = (CTaskSimpleUseGun*)CTask::operator new(60);
-        if (pNewSimpleUseGunTask)
-        {
-            firingPoint.Set(0.0f, 0.0f, 0.0f);
-            pNewSimpleUseGunTask->Constructor(pPlayerPed->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), 1, 1, false);
-        }
+        firingPoint.Set(0.0f, 0.0f, 0.0f);
+        auto* pNewSimpleUseGunTask = new CTaskSimpleUseGun(pPlayerPed->m_pTargetedObject, CVector(0.0f, 0.0f, 0.0f), 1, 1, false);
         pTaskManager->SetTaskSecondary(pNewSimpleUseGunTask, 0);
     }
 
@@ -1353,7 +1321,7 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
                     if (pPlayerPed->m_pIntelligence->m_TaskMgr.GetActiveTask())
                     {
                         CTask* pActiveTask = pPlayerPed->m_pIntelligence->m_TaskMgr.GetActiveTask();
-                        if (pActiveTask->GetId() != TASK_COMPLEX_JUMP)
+                        if (pActiveTask->GetTaskType() != TASK_COMPLEX_JUMP)
                             pPlayerPed->m_pIntelligence->m_TaskMgr.SetTask(new CTaskComplexJump(COMPLEX_JUMP_TYPE_JUMP), 3, 0);
                     }
                 }

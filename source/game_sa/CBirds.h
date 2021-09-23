@@ -55,7 +55,7 @@ public:
     CVector         m_vecCurrentVelocity; // Velocity in the current frame
     CVector         m_vecTargetVelocity;  // Velocity (constant if the bird is not flying in circles)
     float           m_fAngle;             // Bird angle
-    uint32          m_nUpdateAfterMS;     // Always 0, if a value is written here, bird position isn't updated till CTimer::m_snTimeInMilliseconds is bigger than this value
+    uint32          m_nUpdateAfterMS;     // Always 0, if a value is written here, bird position isn't updated till CTimer::GetTimeInMS() is bigger than this value
     uint32          m_nWingStillness;     // How still are the wings
     float           m_fSize;              // Bird size
     float           m_fMaxBirdDistance;   // When the bird is in this distance from the camera, it will disappear.

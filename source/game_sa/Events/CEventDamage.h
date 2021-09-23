@@ -14,7 +14,7 @@ public:
     uint32         m_nStartTime;
     eWeaponType    m_weaponType;
     ePedPieceTypes m_pedPieceType;
-    char           m_ucDirection;
+    uint8          m_ucDirection;
     union {
         struct {
             uint8 m_b01 : 1;
@@ -34,7 +34,7 @@ public:
     CPedDamageResponse m_damageResponse;
 
 public:
-    CEventDamage(CEventDamage* pCopyFrom);
+    CEventDamage(const CEventDamage& event);
     CEventDamage(CEntity* source, uint32 startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, uint8 direction, bool a7, bool bPedInVehicle);
     ~CEventDamage();
 
@@ -52,9 +52,9 @@ public:
     bool CanBeInterruptedBySameEvent() override;
     CEventEditableResponse* CloneEditable() override;
 
-    void From(CEventDamage* pCopyFrom);
+    void From(const CEventDamage& event);
     void ProcessDamage(CPed* ped);
-    void ComputeBodyPartToRemove(int32* pBoneFrameId);
+    void ComputeBodyPartToRemove(int32& boneFrameId);
     void ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable);
     void ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable);
 
@@ -62,7 +62,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CEventDamage* Constructor(CEventDamage* pCopyFrom);
+    CEventDamage* Constructor(const CEventDamage& event);
     CEventDamage* Constructor(CEntity * source, uint32 startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, uint8 direction, bool a7, bool bPedInVehicle);
 
     eEventType GetEventType_Reversed() const { return EVENT_DAMAGE; }

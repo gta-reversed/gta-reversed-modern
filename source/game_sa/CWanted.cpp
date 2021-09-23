@@ -130,7 +130,7 @@ void CWanted::UpdateWantedLevel() {
     }
 
     if (wantedLevel != m_nWantedLevel)
-        m_nLastTimeWantedLevelChanged = CTimer::m_snTimeInMilliseconds;
+        m_nLastTimeWantedLevelChanged = CTimer::GetTimeInMS();
 
     if (m_bEverybodyBackOff || m_bPoliceBackOff || m_bPoliceBackOffGarage) {
         m_nMaxCopCarsInPursuit = 0;
@@ -327,7 +327,7 @@ void CWanted::ClearWantedLevelAndGoOnParole() {
     auto playerWanted = FindPlayerWanted(-1);
     m_nChaosLevelBeforeParole = playerWanted->m_nChaosLevel;
     m_nWantedLevelBeforeParole = playerWanted->m_nWantedLevel;
-    m_nTimeOfParole = CTimer::m_snTimeInMilliseconds;
+    m_nTimeOfParole = CTimer::GetTimeInMS();
     m_nChaosLevel = 0;
     m_nWantedLevel = 0;
 }

@@ -22,15 +22,15 @@ bool CEventInAir::AffectsPed_Reversed(CPed* ped)
 {
     CTask* activeTask = ped->GetTaskManager().GetActiveTask();
     if (activeTask
-        && (activeTask->GetId() == TASK_COMPLEX_USE_SWAT_ROPE
-            || activeTask->GetId() == TASK_COMPLEX_DIVE_FROM_ATTACHED_ENTITY_AND_GET_UP
-            || activeTask->GetId() == TASK_COMPLEX_IN_AIR_AND_LAND))
+        && (activeTask->GetTaskType() == TASK_COMPLEX_USE_SWAT_ROPE
+            || activeTask->GetTaskType() == TASK_COMPLEX_DIVE_FROM_ATTACHED_ENTITY_AND_GET_UP
+            ||
+                       activeTask->GetTaskType() == TASK_COMPLEX_IN_AIR_AND_LAND))
     {
         return false;
     }
     CTask* simplestActiveTask = ped->GetTaskManager().GetSimplestActiveTask();
-    if (simplestActiveTask &&
-        simplestActiveTask->GetId() == TASK_SIMPLE_FALL ||
+    if (simplestActiveTask && simplestActiveTask->GetTaskType() == TASK_SIMPLE_FALL ||
         ped->m_pDamageEntity ||
         !ped->m_bUsesCollision ||
         ped->m_pAttachedTo ||

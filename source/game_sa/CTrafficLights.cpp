@@ -356,7 +356,7 @@ void CTrafficLights::DisplayActualLight(CEntity* pEntity)
                                  60.0F);
 
     }
-    else if (iPedLightState == eTrafficLightsState::LIGHT_GREEN || CTimer::m_snTimeInMilliseconds & 0x100) {
+    else if (iPedLightState == eTrafficLightsState::LIGHT_GREEN || CTimer::GetTimeInMS() & 0x100) {
         // Ped lights are composed of 2 images side by side, we want to draw only the required half
         auto vecMidPoint = (vecCorner1 + vecCorner2) * 0.5F;
 
@@ -400,7 +400,7 @@ bool CTrafficLights::IsMITrafficLight(int32 modelIndex)
 
 uint8 CTrafficLights::LightForPeds()
 {
-    auto uiMaskedTime = (CTimer::m_snTimeInMilliseconds / 2) & 0x3FFF;
+    auto uiMaskedTime = (CTimer::GetTimeInMS() / 2) & 0x3FFF;
     if (uiMaskedTime < 12000)
         return eTrafficLightsState::LIGHT_RED;
 
@@ -415,7 +415,7 @@ uint8 CTrafficLights::LightForCars1()
     if (CGameLogic::LaRiotsActiveHere() || CCheat::m_aCheatsActive[eCheats::CHEAT_BGREEN_LIGHTS_CHEAT])
         return eTrafficLightsState::LIGHT_GREEN;
 
-    auto uiMaskedTime = (CTimer::m_snTimeInMilliseconds / 2) & 0x3FFF;
+    auto uiMaskedTime = (CTimer::GetTimeInMS() / 2) & 0x3FFF;
     if (uiMaskedTime < 5000)
         return eTrafficLightsState::LIGHT_GREEN;
 
@@ -430,7 +430,7 @@ uint8 CTrafficLights::LightForCars2()
     if (CGameLogic::LaRiotsActiveHere() || CCheat::m_aCheatsActive[eCheats::CHEAT_BGREEN_LIGHTS_CHEAT])
         return eTrafficLightsState::LIGHT_GREEN;
 
-    auto uiMaskedTime = (CTimer::m_snTimeInMilliseconds / 2) & 0x3FFF;
+    auto uiMaskedTime = (CTimer::GetTimeInMS() / 2) & 0x3FFF;
     if (uiMaskedTime < 6000)
         return eTrafficLightsState::LIGHT_RED;
 
@@ -446,7 +446,7 @@ uint8 CTrafficLights::LightForCars2()
 uint8 CTrafficLights::LightForCars1_Visual()
 {
     if (CGameLogic::LaRiotsActiveHere()) {
-        if ((CTimer::m_snTimeInMilliseconds / 1024) & 1)
+        if ((CTimer::GetTimeInMS() / 1024) & 1)
             return eTrafficLightsState::LIGHT_OFF;
         else
             return eTrafficLightsState::LIGHT_YELLOW;
@@ -458,7 +458,7 @@ uint8 CTrafficLights::LightForCars1_Visual()
 uint8 CTrafficLights::LightForCars2_Visual()
 {
     if (CGameLogic::LaRiotsActiveHere()) {
-        if ((CTimer::m_snTimeInMilliseconds / 1024) & 1)
+        if ((CTimer::GetTimeInMS() / 1024) & 1)
             return eTrafficLightsState::LIGHT_OFF;
         else
             return eTrafficLightsState::LIGHT_YELLOW;

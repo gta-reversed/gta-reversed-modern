@@ -125,7 +125,7 @@ inline void CBike::ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver)
     if (IsAnyWheelMakingContactWithGround()) {
         if (!pPed->IsPlayer()) {
             auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::ms_fTimeStep, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, false);
-            auto damageEvent = CEventDamage(this, CTimer::m_snTimeInMilliseconds, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
+            auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
             if (damageEvent.AffectsPed(pPed))
                 pedDamageResponseCalc.ComputeDamageResponse(pPed, &damageEvent.m_damageResponse, true);
             else

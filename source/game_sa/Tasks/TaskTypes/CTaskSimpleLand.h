@@ -20,7 +20,7 @@ public:
     CTaskSimpleLand(AnimationId nAnimId);
     ~CTaskSimpleLand() override;
 
-    eTaskType GetId() override { return TASK_SIMPLE_LAND; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_LAND; }
     CTask* Clone() override { return new CTaskSimpleLand(m_nAnimId); }
     bool ProcessPed(CPed* ped) override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;

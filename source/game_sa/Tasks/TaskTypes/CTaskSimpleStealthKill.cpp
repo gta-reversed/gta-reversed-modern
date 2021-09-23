@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleStealthKill.h"
+
 void CTaskSimpleStealthKill::InjectHooks()
 {
     ReversibleHooks::Install("CTaskSimpleStealthKill", "ProcessPed_Reversed", 0x62E540, &CTaskSimpleStealthKill::ProcessPed_Reversed);
@@ -126,7 +128,7 @@ bool CTaskSimpleStealthKill::MakeAbortable_Reversed(class CPed* ped, eAbortPrior
 }
 
 // 0x622670
-eTaskType CTaskSimpleStealthKill::GetId()
+eTaskType CTaskSimpleStealthKill::GetTaskType()
 {
     return CTaskSimpleStealthKill::GetId_Reversed();
 }
@@ -145,7 +147,7 @@ void CTaskSimpleStealthKill::ManageAnim(CPed* ped)
         {
             m_pAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, m_nAssocGroupId, ANIM_ID_KILL_KNIFE_PED_DIE, 8.0f);
             CPedDamageResponseCalculator damageCalculator(ped, CPedDamageResponseCalculator::ms_damageFactor, m_pTarget->GetActiveWeapon().m_nType, PED_PIECE_TORSO, false);
-            CEventDamage eventDamage(m_pTarget, CTimer::m_snTimeInMilliseconds, m_pTarget->GetActiveWeapon().m_nType, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
+            CEventDamage eventDamage(m_pTarget, CTimer::GetTimeInMS(), m_pTarget->GetActiveWeapon().m_nType, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
             if (eventDamage.AffectsPed(ped))
             {
                 damageCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
@@ -168,7 +170,7 @@ void CTaskSimpleStealthKill::ManageAnim(CPed* ped)
     }
     else
     {
-        m_nTime += static_cast<uint32>(CTimer::ms_fTimeStep * 0.02f * 1000.0f);
+        m_nTime += CTimer::GetTimeStepInMS();
         if (m_nTime > 10000)
             m_bIsAborting = true;
     }

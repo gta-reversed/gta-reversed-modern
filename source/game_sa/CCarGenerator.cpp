@@ -3,6 +3,7 @@
 #include "CCarGenerator.h"
 
 #include "CTheCarGenerators.h"
+#include "COcclusion.h"
 
 bool& CCarGenerator::m_bHotdogVendorPositionOffsetInitialized = *reinterpret_cast<bool*>(0xC2B974);
 CVector& CCarGenerator::m_HotdogVendorPositionOffset = *reinterpret_cast<CVector*>(0xC2B968);
@@ -339,7 +340,7 @@ void CCarGenerator::Process()
     if (m_nVehicleHandle == -1 &&
         (
             CTheCarGenerators::GenerateEvenIfPlayerIsCloseCounter
-            || m_nNextGenTime <= CTimer::m_snTimeInMilliseconds
+            || m_nNextGenTime <= CTimer::GetTimeInMS()
         )
             && m_nGenerateCount != 0
             && CheckIfWithinRangeOfAnyPlayers()
@@ -389,7 +390,7 @@ void CCarGenerator::Setup(const CVector& posn, float angle, int32 modelId, int16
     m_nIplId = iplId;
 
     m_nVehicleHandle = -1;
-    m_nNextGenTime = CTimer::m_snTimeInMilliseconds + 1;
+    m_nNextGenTime = CTimer::GetTimeInMS() + 1;
     m_nGenerateCount = 0;
     m_bIsUsed = true;
 }
@@ -410,5 +411,5 @@ void CCarGenerator::SwitchOn()
 // 0x6F2E40
 uint32 CCarGenerator::CalcNextGen()
 {
-    return CTimer::m_snTimeInMilliseconds + 4;
+    return CTimer::GetTimeInMS() + 4;
 }

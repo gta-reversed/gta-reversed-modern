@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
@@ -65,6 +65,16 @@ public:
     // funcs
     CColourSet(int32 weatherId, int32 timeId);
     void Interpolate(CColourSet* a, CColourSet* b, float factor_a, float factor_b, bool bIgnoreSky);
+
+    // helpers
+    CRGBA GetSkyBottom(uint8 alpha = 255) const {
+        return {
+            (uint8)m_nSkyBottomRed,
+            (uint8)m_nSkyBottomGreen,
+            (uint8)m_nSkyBottomBlue,
+            alpha
+        };
+    }
 };
 
 VALIDATE_SIZE(CColourSet, 0xAC);

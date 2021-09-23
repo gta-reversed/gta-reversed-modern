@@ -57,7 +57,7 @@ void CSimpleVariablesSaveStructure::Construct() {
     m_nStoredGameMinutes = CClock::ms_Stored_nGameClockMinutes;
     m_bClockHasBeenStored = CClock::bClockHasBeenStored;
 
-    m_nTimeInMilliseconds = CTimer::m_snTimeInMilliseconds;
+    m_nTimeInMilliseconds = CTimer::GetTimeInMS();
     m_fTimeScale = CTimer::ms_fTimeScale;
     m_fTimeStep = CTimer::ms_fTimeStep;
     m_fTimeStepNonClipped = CTimer::ms_fTimeStepNonClipped;

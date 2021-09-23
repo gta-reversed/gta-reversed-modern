@@ -103,8 +103,6 @@ CPlayerPed * FindPlayerPed(int32 playerId = -1);
 CVehicle* FindPlayerVehicle(int32 playerId = -1, bool bIncludeRemote = false);
 // returns player wanted
 CWanted * FindPlayerWanted(int32 playerId = -1);
-// 2 players are playing
-bool InTwoPlayersMode();
 
 CPlayerInfo& FindPlayerInfo(int playerId = -1);
 
@@ -300,6 +298,8 @@ void Render2dStuff();
 void WriteRaster(RwRaster* raster, char const* path);
 bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos, float* pScreenX, float* pScreenY);
 bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos);
+bool DoesInfiniteLineTouchScreen(float fX, float fY, float fXDir, float fYDir);
+bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, float fPointX, float fPointY, float fTolerance);
 
 void LittleTest();
 

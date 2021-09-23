@@ -11,7 +11,7 @@ public:
     ~CTaskSimpleTogglePedThreatScanner() {}
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_SIMPLE_TOGGLE_PED_THREAT_SCANNER; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_TOGGLE_PED_THREAT_SCANNER; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; }
     bool ProcessPed(CPed* ped) override;
 };

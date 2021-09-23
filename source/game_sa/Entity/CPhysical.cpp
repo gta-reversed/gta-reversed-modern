@@ -1021,7 +1021,7 @@ void CPhysical::AddCollisionRecord(CEntity* collidedEntity)
     ((void(__thiscall*)(CPhysical*, CEntity*))0x543490)(this, collidedEntity);
 #else
     physicalFlags.bOnSolidSurface = true;
-    m_nLastCollisionTime = CTimer::m_snTimeInMilliseconds;
+    m_nLastCollisionTime = CTimer::GetTimeInMS();
     if (m_nType == ENTITY_TYPE_VEHICLE)
     {
         CVehicle* pVehicle = static_cast<CVehicle*>(this);

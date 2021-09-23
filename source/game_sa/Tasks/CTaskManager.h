@@ -42,7 +42,7 @@ public:
 public:
     static void InjectHooks();
 
-    CTaskManager(CPed* ped);
+    explicit CTaskManager(CPed* ped);
     ~CTaskManager();
 
     CTaskManager* Constructor(CPed* ped);
@@ -59,7 +59,7 @@ public:
     void Flush();
     void FlushImmediately();
 
-    void SetNextSubTask(CTaskComplex* pTask);
+    void SetNextSubTask(CTaskComplex* task);
 
     static CTaskSimple* GetSimplestTask(CTask* task);
     void StopTimers(const CEvent* event);
@@ -67,12 +67,13 @@ public:
     CTaskSimple* GetSimplestTask(int32 taskIndex);
 
     void AddSubTasks(CTaskComplex* task);
-    void ParentsControlChildren(CTaskComplex* pTask);
+    void ParentsControlChildren(CTaskComplex* task);
     void SetTask(CTask* task, int32 taskIndex, bool unused = false);
     void SetTaskSecondary(CTask* task, int32 taskIndex);
     void ClearTaskEventResponse();
     void ManageTasks();
 
+    // GetTaskPrimary. Why they doesn't have version for *primary tasks*? :thinking
     CTask* GetPrimaryTask(int32 taskIndex) {
         return m_aPrimaryTasks[taskIndex];
     }

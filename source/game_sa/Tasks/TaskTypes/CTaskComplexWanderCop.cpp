@@ -1,5 +1,10 @@
 #include "StdInc.h"
 
+#include "CTaskComplexWanderCop.h"
+
+#include "CTaskSimpleStandStill.h"
+#include "CTaskComplexPolicePursuit.h"
+
 void CTaskComplexWanderCop::InjectHooks()
 {
     ReversibleHooks::Install("CTaskComplexWanderCop", "CTaskComplexWanderCop", 0x460C80, &CTaskComplexWanderCop::Constructor);
@@ -116,9 +121,9 @@ CTask* CTaskComplexWanderCop::CreateNextSubTask_Reversed(CPed* ped)
         return nullptr;
     }
 
-    if (m_pSubTask->GetId() == TASK_COMPLEX_POLICE_PURSUIT)
+    if (m_pSubTask->GetTaskType() == TASK_COMPLEX_POLICE_PURSUIT)
     {
-        m_nSubTaskCreatedTimer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+        m_nSubTaskCreatedTimer.m_nStartTime = CTimer::GetTimeInMS();
         m_nSubTaskCreatedTimer.m_nInterval = 3000;
         m_nSubTaskCreatedTimer.m_bStarted = 1;
         if (m_pTaskComplexMoveGoToPointAndStandStill)
@@ -133,7 +138,7 @@ CTask* CTaskComplexWanderCop::CreateNextSubTask_Reversed(CPed* ped)
     else
     {
         CTask* pTaskGotoStandStill = (CTask*)m_pTaskComplexMoveGoToPointAndStandStill;
-        if (pTaskGotoStandStill && m_pSubTask->GetId() == pTaskGotoStandStill->GetId())
+        if (pTaskGotoStandStill && m_pSubTask->GetTaskType() == pTaskGotoStandStill->GetTaskType())
         {
             return nullptr;
         }
@@ -192,7 +197,7 @@ CTask* CTaskComplexWanderCop::ControlSubTask_Reversed(CPed* ped)
     }
     if (!ShouldPursuePlayer(pPed))
     {
-        if (m_pSubTask->GetId() == TASK_COMPLEX_POLICE_PURSUIT)
+        if (m_pSubTask->GetTaskType() == TASK_COMPLEX_POLICE_PURSUIT)
         {
             return m_pSubTask;
         }
@@ -223,31 +228,31 @@ void CTaskComplexWanderCop::ScanForStuff_Reversed(CPed* ped)
     CCopPed* pPed = (CCopPed*)ped;
     if (!m_nScanForStuffTimer.m_bStarted)
     {
-        m_nScanForStuffTimer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+        m_nScanForStuffTimer.m_nStartTime = CTimer::GetTimeInMS();
         m_nScanForStuffTimer.m_nInterval = 50;
         m_nScanForStuffTimer.m_bStarted = 1;
     }
-    if (GetId() != TASK_COMPLEX_POLICE_PURSUIT && m_nScanForStuffTimer.m_bStarted)
+    if (GetTaskType() != TASK_COMPLEX_POLICE_PURSUIT && m_nScanForStuffTimer.m_bStarted)
     {
         if (m_nScanForStuffTimer.m_bStopped)
         {
-            m_nScanForStuffTimer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+            m_nScanForStuffTimer.m_nStartTime = CTimer::GetTimeInMS();
             m_nScanForStuffTimer.m_bStopped = 0;
         }
 
-        if (CTimer::m_snTimeInMilliseconds >= (m_nScanForStuffTimer.m_nStartTime + m_nScanForStuffTimer.m_nInterval))
+        if (CTimer::GetTimeInMS() >= (m_nScanForStuffTimer.m_nStartTime + m_nScanForStuffTimer.m_nInterval))
         {
             m_nScanForStuffTimer.m_nInterval = 50;
-            m_nScanForStuffTimer.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+            m_nScanForStuffTimer.m_nStartTime = CTimer::GetTimeInMS();
             m_nScanForStuffTimer.m_bStarted = 1;
 
-            if (CTimer::m_snTimeInMilliseconds >= m_nTimePassedSinceLastLookedForCarAlarmsAndStolenCopCars)
+            if (CTimer::GetTimeInMS() >= m_nTimePassedSinceLastLookedForCarAlarmsAndStolenCopCars)
             {
                 LookForCarAlarms(pPed);
                 LookForStolenCopCars(pPed);
             }
 
-            if (CTimer::m_snTimeInMilliseconds >= m_nTimePassedSinceLastLookedForCriminals)
+            if (CTimer::GetTimeInMS() >= m_nTimePassedSinceLastLookedForCriminals)
             {
                 LookForCriminals(pPed);
             }
@@ -313,7 +318,7 @@ void CTaskComplexWanderCop::LookForCriminals(CCopPed* pPed)
                 || pedType == PED_TYPE_CRIMINAL && pCriminalPed != m_pLastCriminalPedLookedFor)
             {
                 CTask* pActiveTask = pCriminalPed->m_pIntelligence->m_TaskMgr.GetActiveTask();
-                if (pActiveTask && pActiveTask->GetId() == GetId())
+                if (pActiveTask && pActiveTask->GetTaskType() == GetTaskType())
                 {
                     CVector distance = (pCriminalPed->GetPosition() - pPed->GetPosition());
                     if (10.0f * 10.0f > distance.SquaredMagnitude())
@@ -339,7 +344,7 @@ void CTaskComplexWanderCop::LookForCriminals(CCopPed* pPed)
     pCriminalPed->GetEventGroup().Add(&eventPedToFlee, false);
 
     // 30 seconds wait for next check
-    m_nTimePassedSinceLastLookedForCriminals = CTimer::m_snTimeInMilliseconds + 30000;
+    m_nTimePassedSinceLastLookedForCriminals = CTimer::GetTimeInMS() + 30000;
     m_pLastCriminalPedLookedFor = pCriminalPed;
 #endif
 }
@@ -352,7 +357,7 @@ bool CTaskComplexWanderCop::ShouldPursuePlayer(CCopPed* pPed)
     CWanted* pWantedPlayer = FindPlayerWanted(-1);
     if (pWantedPlayer->m_nWantedLevel > 0)
     {
-        if (!m_pSubTask || m_pSubTask->GetId() != TASK_COMPLEX_POLICE_PURSUIT)
+        if (!m_pSubTask || m_pSubTask->GetTaskType() != TASK_COMPLEX_POLICE_PURSUIT)
         {
             if (pWantedPlayer->CanCopJoinPursuit(pPed))
             {

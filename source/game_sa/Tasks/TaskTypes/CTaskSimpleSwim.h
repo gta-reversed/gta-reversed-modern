@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
@@ -11,12 +11,12 @@ Do not delete this comment block. Respect others' work!
 #include "FxSystem_c.h"
 
 enum eSwimState : uint16 {
-    SWIM_TREAD = 0,
-    SWIM_SPRINT = 1,
-    SWIM_SPRINTING = 2,
-    SWIM_DIVE_UNDERWATER = 3,
+    SWIM_TREAD                = 0,
+    SWIM_SPRINT               = 1,
+    SWIM_SPRINTING            = 2,
+    SWIM_DIVE_UNDERWATER      = 3,
     SWIM_UNDERWATER_SPRINTING = 4,
-    SWIM_BACK_TO_SURFACE = 5
+    SWIM_BACK_TO_SURFACE      = 5
 };
 
 class CPed;
@@ -39,25 +39,25 @@ public:
     CEntity*    m_pEntity;
     CVector     m_pClimbPos;
     float       m_fAngle;
-    uint8 m_nSurfaceType;
+    uint8       m_nSurfaceType;
     char        _pad[3];
     float       m_fRandomMoveBlendRatio; // Used in CTaskSimpleSwim::ProcessControlAI
     float       m_fSwimStopTime;
-    uint32 m_nTimeStep;
-    FxSystem_c *m_pFxSystem; 
-    bool m_bTriggerWaterSplash;
-    char pad2[3];
+    uint32      m_nTimeStep;
+    FxSystem_c* m_pFxSystem;
+    bool        m_bTriggerWaterSplash;
+    char        pad2[3];
 
     static float &SWIM_DIVE_UNDER_ANGLE;
     static float &SWIM_STOP_TIME;
 
 public:
     CTaskSimpleSwim(CVector* pPosition, CPed* pPed);
-    ~CTaskSimpleSwim();
+    ~CTaskSimpleSwim() override;
 
     // original virtual functions
     CTask* Clone() override;
-    eTaskType GetId() override;
+    eTaskType GetTaskType() override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed *pPed) override;
 

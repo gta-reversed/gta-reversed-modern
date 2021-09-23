@@ -701,9 +701,9 @@ void CPostEffects::InfraredVisionStoreAndSetLightsForHeatObjects(CPed* ped) {
     auto alpha = (RwUInt8)m_fInfraredVisionHeatObjectCol.alpha;
 
     if (ped->m_nPedState == PEDSTATE_DEAD) {
-        int32 v8 = CTimer::m_snTimeInMilliseconds - ped->m_nDeathTime;
+        int32 v8 = CTimer::GetTimeInMS() - ped->m_nDeathTime;
         if (v8 < 0)
-            v8 = ped->m_nDeathTime - CTimer::m_snTimeInMilliseconds;
+            v8 = ped->m_nDeathTime - CTimer::GetTimeInMS();
 
         float v6 = (float)v8 * 0.0001f;
         m_fInfraredVisionHeatObjectCol.red = m_fInfraredVisionHeatObjectCol.red - v6;

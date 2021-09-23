@@ -13,7 +13,28 @@ public:
     uint8 m_nThunderFrequencyVariationCounter;
     char  _pad7D[3];
 
+    static float& m_sfRainVolume;
+
 public:
+    CAEWeatherAudioEntity();
+    ~CAEWeatherAudioEntity();
+
+    static void StaticInitialise();
+    static void StaticReset();
+
+    void AddAudioEvent(eAudioEvents event);
+    void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
+    void Service();
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CAEWeatherAudioEntity* Constructor();
+    CAEWeatherAudioEntity* Destructor();
+    void UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos);
 };
 
 VALIDATE_SIZE(CAEWeatherAudioEntity, 0x80);
+
+void WeatherAudioEntityTestCode();

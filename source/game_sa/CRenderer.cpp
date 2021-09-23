@@ -7,6 +7,14 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
+#include "CRenderer.h"
+
+#include "COcclusion.h"
+
+#ifdef EXTRA_DEBUG_FEATURES
+#include "toolsmenu\DebugModules\Collision\Collision.h"
+#endif
+
 int32 MAX_INVISIBLE_ENTITY_PTRS = 150;
 int32 MAX_VISIBLE_ENTITY_PTRS = 1000;
 int32 MAX_VISIBLE_LOD_PTRS = 1000;
@@ -412,8 +420,12 @@ void CRenderer::RenderFirstPersonVehicle() {
         CRenderer::RenderOneNonRoad(CRenderer::m_pFirstPersonVehicle);
         RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
         if (bRestoreAlphaTest)
-            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)0);
+            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)nullptr);
     }
+
+#ifdef EXTRA_DEBUG_FEATURES
+    CollisionDebugModule::ProcessRender();
+#endif
 }
 
 // 0x553E40
@@ -560,8 +572,12 @@ int32 CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
             {
                 return RENDERER_INVISIBLE;
             }
-            if (!pEntity->GetIsOnScreen() || pEntity->IsEntityOccluded())
+            if (!pEntity->GetIsOnScreen() || pEntity->IsEntityOccluded()) {
+#ifdef EXTRA_DEBUG_FEATURES
+                ++COcclusionDebugModule::NumEntitiesSkipped;
+#endif
                 return RENDERER_CULLED;
+            }
             if (pEntity->m_bWasPostponed) {
                 pEntity->m_bDistanceFade = false;
                 AddEntityToRenderList(pEntity, (pEntity->GetPosition() - ms_vecCameraPosition).Magnitude());
@@ -601,6 +617,9 @@ int32 CRenderer::SetupEntityVisibility(CEntity* pEntity, float* outDistance) {
                 }
                 if (!pEntity->GetIsOnScreen() || pEntity->IsEntityOccluded())
                 {
+#ifdef EXTRA_DEBUG_FEATURES
+                    ++COcclusionDebugModule::NumEntitiesSkipped;
+#endif
                     return RENDERER_CULLED;
                 }
 

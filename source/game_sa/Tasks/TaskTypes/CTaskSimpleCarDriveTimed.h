@@ -17,7 +17,7 @@ public:
 
     bool ProcessPed(class CPed* ped) override;
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_SIMPLE_CAR_DRIVE_TIMED; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_DRIVE_TIMED; }
 };
 
 VALIDATE_SIZE(CTaskSimpleCarDriveTimed, 0x70);

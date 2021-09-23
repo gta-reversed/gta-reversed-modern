@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CTaskSimpleCarSetPedInAsPassenger.h"
+
 CTaskSimpleCarSetPedInAsPassenger::CTaskSimpleCarSetPedInAsPassenger(CVehicle* pTargetVehicle, int32 nTargetDoor, CTaskUtilityLineUpPedWithCar* pUtility)
 {
     m_iTargetDoor = nTargetDoor;

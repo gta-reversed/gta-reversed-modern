@@ -33,7 +33,7 @@ public:
     float                  field_158;
 
 public:
-    void AddAudioEvent(int32 audioEventVolumeIndex, float a3, float a4, int32 argC, int32 a5, int32 a7, int32 a8);
+    void AddAudioEvent(int32 audioEventVolumeIndex, float arg2, float arg3, CPhysical* physical, uint8 arg5, int32 arg7, uint32 arg8);
 };
 
 VALIDATE_SIZE(CAEPedAudioEntity, 0x15C);

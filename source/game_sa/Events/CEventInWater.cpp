@@ -34,7 +34,7 @@ bool CEventInWater::TakesPriorityOver(const CEvent& refEvent)
 bool CEventInWater::AffectsPed_Reversed(CPed* ped)
 {
     CTask* task = ped->GetTaskManager().GetActiveTask();
-    if (!ped->IsPlayer() && task && task->GetId() == TASK_COMPLEX_IN_WATER)
+    if (!ped->IsPlayer() && task && task->GetTaskType() == TASK_COMPLEX_IN_WATER)
         return false;
     return ped->IsAlive();
 }

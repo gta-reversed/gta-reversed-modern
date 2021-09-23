@@ -27,7 +27,7 @@ public:
     static void InjectHooks();
 
     CTask* Clone() override;
-    eTaskType GetId() override { return TASK_SIMPLE_JUMP; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_JUMP; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 

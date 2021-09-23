@@ -61,7 +61,6 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "FindPlayerPed", 0x56E210, &FindPlayerPed);
     ReversibleHooks::Install("common", "FindPlayerVehicle", 0x56E0D0, &FindPlayerVehicle);
     ReversibleHooks::Install("common", "FindPlayerWanted", 0x56E230, &FindPlayerWanted);
-    ReversibleHooks::Install("common", "InTwoPlayersMode", 0x441390, &InTwoPlayersMode);
 
     ReversibleHooks::Install("common", "MakeUpperCase", 0x7186E0, &MakeUpperCase);
     ReversibleHooks::Install("common", "GetEventGlobalGroup", 0x4ABA50, &GetEventGlobalGroup);
@@ -223,11 +222,6 @@ CWanted* FindPlayerWanted(int32 playerId) {
     return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_PlayerData.m_pWanted;
 }
 
-// TODO: Rename CGameLogic::IsCoopGameGoingOn
-// 0x441390
-bool InTwoPlayersMode() {
-    return CWorld::Players[0].m_pPed && CWorld::Players[1].m_pPed;
-}
 
 // NOTSA, inlined
 CPlayerInfo& FindPlayerInfo(int playerId) {
@@ -725,7 +719,7 @@ void SetAmbientAndDirectionalColours(float lighting) {
 // unused
 // 0x735AB0
 void SetFlashyColours(float lighting) {
-    if ((CTimer::m_snTimeInMilliseconds & 0x100) != 0) {
+    if ((CTimer::GetTimeInMS() & 0x100) != 0) {
         AmbientLightColour.red = 1.0f;
         AmbientLightColour.green = 1.0f;
         AmbientLightColour.blue = 1.0f;
@@ -742,7 +736,7 @@ void SetFlashyColours(float lighting) {
 // unused
 // 0x735B40
 void SetFlashyColours_Mild(float lighting) {
-    if ((CTimer::m_snTimeInMilliseconds & 0x100) != 0) {
+    if ((CTimer::GetTimeInMS() & 0x100) != 0) {
         AmbientLightColour.red = 1.0f;
         AmbientLightColour.green = 1.0f;
         AmbientLightColour.blue = 1.0f;
@@ -1119,6 +1113,18 @@ bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos)
 // 0x541330
 void LittleTest() {
     ++g_nNumIm3dDrawCalls;
+}
+
+// used only in COccluder::ProcessLineSegment
+// 0x71DB80
+bool DoesInfiniteLineTouchScreen(float fX, float fY, float fXDir, float fYDir) {
+    return plugin::CallAndReturn<bool, 0x71DB80, float, float, float, float>(fX, fY, fXDir, fYDir);
+}
+
+// Used only in COcclusion, COccluder, CActiveOccluder
+// 0x71E050
+bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, float fPointX, float fPointY, float fTolerance) {
+    return (fPointX - fLineX) * fYDir - (fPointY - fLineY) * fXDir >= fTolerance;
 }
 
 // 0x53E230

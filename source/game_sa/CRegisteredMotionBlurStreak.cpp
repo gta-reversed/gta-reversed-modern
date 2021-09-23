@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "CRegisteredMotionBlurStreak.h"
+
+#include "CMotionBlurStreaks.h"
+
 void CRegisteredMotionBlurStreak::InjectHooks()
 {
     ReversibleHooks::Install("CRegisteredMotionBlurStreak", "Update", 0x721EE0, &CRegisteredMotionBlurStreak::Update);
