@@ -356,7 +356,7 @@ int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* pTarget, float 
 
 // 0x53AF00
 void CFireManager::Update() {
-    if (CReplay::Mode == 1)
+    if (CReplay::Mode == REPLAY_MODE_1)
         return;
 
     for (CFire& fire : m_aFires) {
@@ -394,7 +394,7 @@ void CFireManager::Update() {
     }
 
     auto nFires = (int32)GetNumOfFires();
-    bool firesVisited[60] = {false}; // Lookup table to see if a fire's strength was already included into a group of fires
+    bool firesVisited[MAX_NUM_FIRES] = { false }; // Lookup table to see if a fire's strength was already included into a group of fires
     while (nFires > 0) {
         // Repeat until there are no active fires left 
         // Find strongest un-visited fire, and sum of the strength of all fires within 6.0 units of it 
@@ -402,7 +402,7 @@ void CFireManager::Update() {
 
         // Find strongest fire, which hasn't yet been visited
         CFire* pStrongest{};
-        for (size_t i = 0; i < 60; i++) {
+        for (size_t i = 0; i < MAX_NUM_FIRES; i++) {
             CFire& fire = Get(i);
             if (firesVisited[i] || !fire.IsActive())
                 continue;
@@ -413,7 +413,7 @@ void CFireManager::Update() {
         // Sum up strengths of all fires (that haven't yet been visited) within 6.0 units range
         float fCombinedStrength{};
         int32 nCombinedCeilStrength{};
-        for (size_t i = 0; i < 60; i++) {
+        for (size_t i = 0; i < MAX_NUM_FIRES; i++) {
             CFire& fire = Get(i);
             if (firesVisited[i] || !fire.IsActive())
                 continue;
