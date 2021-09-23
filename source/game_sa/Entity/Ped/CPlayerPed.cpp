@@ -49,7 +49,7 @@ void CPlayerPed::InjectHooks() {
     Install("CPlayerPed", "MakePlayerGroupDisappear", 0x60A440, &CPlayerPed::MakePlayerGroupDisappear);
     Install("CPlayerPed", "MakePlayerGroupReappear", 0x60A4B0, &CPlayerPed::MakePlayerGroupReappear);
     Install("CPlayerPed", "HandleSprintEnergy", 0x60A550, &CPlayerPed::HandleSprintEnergy);
-    Install("CPlayerPed", "GetButtonSprintResults", 0x60A820, &CPlayerPed::GetButtonSprintResults);
+    // Install("CPlayerPed", "GetButtonSprintResults", 0x60A820, &CPlayerPed::GetButtonSprintResults);
     Install("CPlayerPed", "HandlePlayerBreath", 0x60A8D0, &CPlayerPed::HandlePlayerBreath);
     Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60B460, static_cast<void(CPlayerPed::*)(eWeaponType)>(&CPlayerPed::MakeChangesForNewWeapon));
     Install("CPlayerPed", "LOSBlockedBetweenPeds", 0x60B550, &LOSBlockedBetweenPeds);
@@ -626,30 +626,36 @@ constexpr struct tPlayerSprintSet { // From 0x8D2460
     float field_18;
     float field_1C;
 } PLAYER_SPRINT_SET[] = {
-    //0x0, 0x4,  0x8,  0xC,  0x10,  0x14, 0x18, 0x1C
-    {4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 1.0f, 0.5f, 0.3f},
-    {4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 0.0f, 0.4f, 1.0f},
-    {4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 1.0f, 0.3f, 0.3f},
-    {4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 0.0f, 0.0f, 1.0f}
+    // 0x0, 0x4,  0x8,  0xC,  0x10,  0x14, 0x18, 0x1C
+    { 4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 1.0f, 0.5f, 0.3f }, // GROUND
+    { 4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 0.0f, 0.4f, 1.0f }, // BMX
+    { 4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 1.0f, 0.3f, 0.3f }, // WATER
+    { 4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 0.0f, 0.0f, 1.0f }  // UNDERWATER
 };
+
+
+
 
 // 0x60A610
 float CPlayerPed::ControlButtonSprint(eSprintType sprintType) {
     return plugin::CallMethodAndReturn<float, 0x60A610, CPlayerPed *, eSprintType>(this, sprintType);
 }
 
+// Reverse CPlayerPed::SetRealMoveAnim before hooking this func
 // 0x60A820
 float CPlayerPed::GetButtonSprintResults(eSprintType sprintType) {
-    // Forces the compiler to preserve the value of `edx`. 
+    return plugin::CallMethodAndReturn<float, 0x60A820, CPlayerPed *, eSprintType>(this, sprintType);
+
+    // Forces the compiler to preserve the value of `edx`.
     // Otherwise it's value is lost when called from 0x60B44C. 
     // which causes a crash (as it is used to store a pointer to an anim blend assoc)
-    __asm and edx, edx;
+    __asm { and edx, edx };
 
     if (m_pPlayerData->m_fMoveSpeed <= PLAYER_SPRINT_THRESHOLD) {
         return m_pPlayerData->m_fMoveSpeed <= 0.0f ? 0.0f : 1.0f;
     } else {
         const float progress = std::max(0.0f, m_pPlayerData->m_fMoveSpeed / PLAYER_SPRINT_THRESHOLD - 1.0f);
-        return PLAYER_SPRINT_SET[(unsigned)sprintType].field_1C * progress + 1.0f;
+        return PLAYER_SPRINT_SET[sprintType].field_1C * progress + 1.0f;
     }
 }
 

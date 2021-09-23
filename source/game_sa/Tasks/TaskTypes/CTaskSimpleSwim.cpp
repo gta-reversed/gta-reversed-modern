@@ -404,7 +404,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* pPed)
                 }
                 if (pPlayerPed->m_pPlayerData)
                 {
-                    float buttonSprintResults = pPlayerPed->GetButtonSprintResults((eSprintType)2);
+                    float buttonSprintResults = pPlayerPed->GetButtonSprintResults(SPRINT_WATER);
                     pAnimAssociation->m_fSpeed = static_cast <float> (std::max(1.0f, buttonSprintResults));
                 }
                 else if (m_fAnimSpeed > 1.0)
@@ -445,7 +445,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* pPed)
         {
             if ((m_AnimID == ANIM_ID_SWIM_UNDER || m_AnimID == ANIM_ID_SWIM_GLIDE) && m_fStateChanger >= 0.0f)
             {
-                if (pPlayerPed->m_pPlayerData && pPlayerPed->GetButtonSprintResults((eSprintType)3) >= 1.0f)
+                if (pPlayerPed->m_pPlayerData && pPlayerPed->GetButtonSprintResults(SPRINT_UNDERWATER) >= 1.0f)
                 {
                     CAnimBlendAssociation* pAnimAssociation = RpAnimBlendClumpGetAssociation(pPlayerPed->m_pRwClump, ANIM_ID_SWIM_UNDER);
                     if (!pAnimAssociation
@@ -457,8 +457,8 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* pPed)
                     if (pAnimAssociation->m_pHierarchy->m_fTotalTime == pAnimAssociation->m_fCurrentTime)
                     {
                         pAnimAssociation->Start(0.0f);
-                        float buttonSprintResults = pPlayerPed->GetButtonSprintResults((eSprintType)3);
-                        pAnimAssociation->m_fSpeed = static_cast <float> (std::max(0.69999999f, buttonSprintResults));
+                        float buttonSprintResults = pPlayerPed->GetButtonSprintResults(SPRINT_UNDERWATER);
+                        pAnimAssociation->m_fSpeed = static_cast <float> (std::max(0.7f, buttonSprintResults));
                     }
                     m_AnimID = ANIM_ID_SWIM_UNDER;
                 }
@@ -1188,7 +1188,7 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
                     m_fRotationX = atan2(fWaterLevel1 - fWaterLevel2, 2.0f) * 1.0f;
             }
         }
-        if (pPed->ControlButtonSprint(static_cast<eSprintType>(2)) < 1.0f)
+        if (pPed->ControlButtonSprint(SPRINT_WATER) < 1.0f)
         {
             m_nSwimState = static_cast<eSwimState>(pPed->m_pPlayerData->m_fMoveBlendRatio > 0.5f);
         }
@@ -1336,7 +1336,7 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
         // BUG: it should be m_fTimeCanRun <= 0.1f
         if (pPed->m_pPlayerData->m_fTimeCanRun <= 0.0f)
             pPed->m_pPlayerData->m_fTimeCanRun = 0.1f;
-        pPed->ControlButtonSprint(static_cast<eSprintType>(3));
+        pPed->ControlButtonSprint(SPRINT_UNDERWATER);
         break;
     }
     }

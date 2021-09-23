@@ -1277,7 +1277,7 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
                         pPlayerPed->m_nMoveState = PEDMOVE_RUN;
                     }
                 }
-                else if (pPlayerPed->ControlButtonSprint((eSprintType)0) >= 1.0)
+                else if (pPlayerPed->ControlButtonSprint(SPRINT_GROUND) >= 1.0)
                 {
                     pPlayerPed->m_nMoveState = PEDMOVE_SPRINT;
                 }
