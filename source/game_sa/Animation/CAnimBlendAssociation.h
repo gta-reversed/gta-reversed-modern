@@ -90,6 +90,7 @@ public:
     bool UpdateBlend(float blendDeltaMult);
     bool UpdateTime(float unused1, float unused2);
     void UpdateTimeStep(float speedMult, float timeMult);
+    uint32 GetHashKey() const noexcept;
 };
 
 //VTABLE_DESC(CAnimBlendAssociation, 0x85C6D0, 1);

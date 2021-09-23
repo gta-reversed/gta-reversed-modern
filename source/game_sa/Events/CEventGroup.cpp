@@ -13,7 +13,8 @@ void CEventGroup::InjectHooks()
     Install("CEventGroup", "Remove", 0x4AB5A0, &CEventGroup::Remove);
     Install("CEventGroup", "RemoveInvalidEvents", 0x4AB760, &CEventGroup::RemoveInvalidEvents);
     Install("CEventGroup", "Reorganise", 0x4AB700, &CEventGroup::Reorganise);
-    Install("CEventGroup", "Flush", 0x4AB370, &CEventGroup::Flush);   
+    Install("CEventGroup", "Flush", 0x4AB370, &CEventGroup::Flush);
+    //Install("CEventGroup", "GetEventOfType", 0x4AB650, &CEventGroup::GetEventOfType);
 }
 
 CEventGroup::CEventGroup(CPed* ped)
@@ -285,4 +286,9 @@ void CEventGroup::Flush(bool bAvoidFlushingTaskComplexBeInGroup)
         m_count = 1;
     }
 #endif
+}
+
+// 0x4AB650
+CEvent* CEventGroup::GetEventOfType(eEventType type) const noexcept {
+    return plugin::CallMethodAndReturn<CEvent*, 0x4AB650, const CEventGroup*, eEventType>(this, type);
 }

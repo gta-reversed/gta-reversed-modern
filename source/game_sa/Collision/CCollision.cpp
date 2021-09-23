@@ -253,8 +253,8 @@ bool CCollision::TestLineSphere(CColLine const& line, CColSphere const& sphere) 
 }
 
 // 0x417610
-float CCollision::DistToLine(CVector const* lineStart, CVector const* lineEnd, CVector const* point) {
-    return plugin::CallAndReturn<float, 0x417610, CVector const*, CVector const*, CVector const*>(lineStart, lineEnd, point);
+float CCollision::DistToLine(CVector const& lineStart, CVector const& lineEnd, CVector const& point) {
+    return plugin::CallAndReturn<float, 0x417610, CVector const&, CVector const&, CVector const&>(lineStart, lineEnd, point);
 }
 
 // 0x417730

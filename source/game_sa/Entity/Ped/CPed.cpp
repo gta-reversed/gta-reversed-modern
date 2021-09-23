@@ -195,7 +195,7 @@ bool CPed::Save()
 // 0x5D4640
 bool CPed::Load()
 {
-    return ((bool(__thiscall *)(CPed*))(*(void ***)this)[26])(this);
+    return plugin::CallMethodAndReturn<bool, 0x5D4640, CPed*>(this);
 }
 
 // 0x43AB90

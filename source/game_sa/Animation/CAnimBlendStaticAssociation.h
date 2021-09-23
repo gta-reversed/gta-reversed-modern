@@ -27,6 +27,8 @@ public:
     void AllocateSequenceArray(int32 count);
     void FreeSequenceArray();
     void Init(RpClump* clump, CAnimBlendHierarchy* hierarchy);
+
+    auto GetHashKey() const noexcept { return m_pHierarchy->m_hashKey; }
 };
 
 VTABLE_DESC(CAnimBlendStaticAssociation, 0x85C6CC, 1);

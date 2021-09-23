@@ -104,6 +104,8 @@ CVehicle* FindPlayerVehicle(int32 playerId = -1, bool bIncludeRemote = false);
 // returns player wanted
 CWanted * FindPlayerWanted(int32 playerId = -1);
 
+CPlayerInfo& FindPlayerInfo(int playerId = -1);
+
 CVector Multiply3x3(CMatrix& m, CVector& v);
 CVector Multiply3x3(CVector& v, CMatrix& m);
 

@@ -78,6 +78,8 @@ float CGeneral::GetATanOfXY(float x, float y) {
     if (x == 0.0f && y == 0.0f)
         return 0.0f;
 
+    // Wikipedia explains this function in great detail: https://en.wikipedia.org/wiki/Atan2
+
     float xabs = abs(x);
     float yabs = abs(y);
 

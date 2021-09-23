@@ -28,8 +28,11 @@ public:
 
     CPlayerPed(int32 playerId, bool bGroupCreated);
 
-    bool Load() override;
-    bool Save() override;
+    bool Load_Reversed();
+    bool Save_Reversed();
+
+    bool Load() override { return Load_Reversed(); }
+    bool Save() override { return Save_Reversed(); }
 
     CPad* GetPadFromPlayer();
     bool CanPlayerStartMission();
@@ -57,7 +60,7 @@ public:
     void AnnoyPlayerPed(bool arg0);
     void ClearAdrenaline();
     void DisbandPlayerGroup();
-    void MakeGroupRespondToPlayerTakingDamage(CEventDamage const& damageEvent);
+    void MakeGroupRespondToPlayerTakingDamage(CEventDamage & damageEvent);
     void TellGroupToStartFollowingPlayer(bool arg0, bool arg1, bool arg2);
     void MakePlayerGroupDisappear();
     void MakePlayerGroupReappear();
@@ -80,8 +83,8 @@ public:
     void MakeThisPedJoinOurGroup(CPed* ped);
     bool PlayerWantsToAttack();
     void SetInitialState(bool bGroupCreated);
-    void MakeChangesForNewWeapon(int32 weaponSlot);
-    void EvaluateTarget(CEntity* target, CEntity** outTarget, float* outTargetPriority, float maxDistance, float arg4, bool arg5);
+    void MakeChangesForNewWeapon(uint32 weaponSlot);
+    void EvaluateTarget(CEntity* target, CEntity *& outTarget, float & outTargetPriority, float maxDistance, float arg4, bool arg5);
     void EvaluateNeighbouringTarget(CEntity* target, CEntity** outTarget, float* outTargetPriority, float maxDistance, float arg4, bool arg5);
     void ProcessGroupBehaviour(CPad* pad);
     // return PlayerWantsToAttack();
@@ -99,12 +102,16 @@ public:
     static void DeactivatePlayerPed(int32 playerId);
     static void ReactivatePlayerPed(int32 playerId);
     static bool PedCanBeTargettedVehicleWise(CPed* ped);
-    static void SetupPlayerPed(int32 playerId);
+    static void SetupPlayerPed(int playerId);
+
+    // NOTASA
+    CPedGroup& GetGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
+    CPedGroupMembership& GetGroupMembership() const noexcept { return GetGroup().GetMembership(); }
 };
 
 VALIDATE_SIZE(CPlayerPed, 0x7A4);
 
-extern char* abTempNeverLeavesGroup; // char abTempNeverLeavesGroup[7];
+extern bool (&abTempNeverLeavesGroup)[7];
 extern int32& gPlayIdlesAnimBlockIndex;
 
 bool LOSBlockedBetweenPeds(CEntity* entity1, CEntity* entity2);

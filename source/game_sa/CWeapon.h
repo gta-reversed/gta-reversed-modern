@@ -95,7 +95,7 @@ public:
     static CEntity* PickTargetForHeatSeekingMissile(CVector origin, CVector direction, float distanceMultiplier, CEntity* ignoreEntity, bool fromVehicle, CEntity* lastEntity);
     static bool ProcessLineOfSight(CVector const& startPoint, CVector const& endPoint, CColPoint& outColPoint, CEntity*& outEntity, eWeaponType weaponType, CEntity* arg5, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool arg11, bool doIgnoreCameraCheck);
 
-    inline CWeaponInfo& GetWeaponInfo(CPed* owner = nullptr);
+    CWeaponInfo& GetWeaponInfo(CPed* owner = nullptr);
 
 private:
     friend void InjectHooksMain();

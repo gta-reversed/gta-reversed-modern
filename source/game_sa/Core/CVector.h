@@ -20,7 +20,7 @@ public:
     static void InjectHooks();
 
     // Returns length of vector
-    float Magnitude();
+    float Magnitude() const;
 
     // Returns length of 2d vector
     float Magnitude2D();

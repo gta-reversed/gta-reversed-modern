@@ -61,6 +61,24 @@ enum ePedType : uint32 {
     PED_TYPE_MISSION8
 };
 
+static bool IsPedTypeGang(ePedType type) {
+    switch (type) {
+        case ePedType::PED_TYPE_GANG1:
+        case ePedType::PED_TYPE_GANG2:
+        case ePedType::PED_TYPE_GANG3:
+        case ePedType::PED_TYPE_GANG4:
+        case ePedType::PED_TYPE_GANG5:
+        case ePedType::PED_TYPE_GANG6:
+        case ePedType::PED_TYPE_GANG7:
+        case ePedType::PED_TYPE_GANG8:
+        case ePedType::PED_TYPE_GANG9:
+        case ePedType::PED_TYPE_GANG10: {
+            return true;
+        }
+    }
+    return false;
+}
+
 enum ePedNode : int32 {
     PED_NODE_UPPER_TORSO     = 1,
     PED_NODE_HEAD            = 2,
@@ -513,7 +531,7 @@ public:
     void EnablePedSpeechForScriptSpeech();
     void CanPedHoldConversation();
     void SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3);
-    void Say(uint16 arg0, uint32 arg1, float arg2, uint8 arg3, uint8 arg4, uint8 arg5);
+    void Say(uint16 arg0, uint32 arg1 = 0, float arg2 = 1.0f, uint8 arg3 = 0, uint8 arg4 = 0, uint8 arg5 = 0);
     void RemoveBodyPart(int32 boneId, char localDir);
     void SpawnFlyingComponent(int32 arg0, char arg1);
     bool DoesLOSBulletHitPed(CColPoint& colPoint);
@@ -526,7 +544,8 @@ public:
     bool IsInVehicleThatHasADriver();
 
     inline uint8 GetCreatedBy() { return m_nCreatedBy; }
-    inline bool IsCreatedBy(ePedCreatedBy v) { return v == m_nCreatedBy; }
+    inline bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
+    inline bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
     inline CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
     inline int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
     inline CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
@@ -535,11 +554,11 @@ public:
     inline CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
     inline CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
     inline CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
-    inline CWeapon& GetActiveWeapon() { return m_aWeapons[m_nActiveWeaponSlot]; }
+    inline CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
+    inline CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
     inline CPlayerPed* AsPlayerPed() { return reinterpret_cast<CPlayerPed*>(this); }
+  
+    bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
 };
-
-VALIDATE_SIZE(CPed, 0x79C);
-
-bool IsPedPointerValid(CPed* ped);
 RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);
+bool IsPedPointerValid(CPed* ped);

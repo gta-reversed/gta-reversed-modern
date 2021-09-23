@@ -223,6 +223,11 @@ CWanted* FindPlayerWanted(int32 playerId) {
 }
 
 
+// NOTSA, inlined
+CPlayerInfo& FindPlayerInfo(int playerId) {
+    return CWorld::Players[playerId < 0 ? CWorld::PlayerInFocus : playerId];
+}
+
 // NOTE: This function doesn't add m.GetPosition() like
 //       MultiplyMatrixWithVector @ 0x59C890 does.
 CVector Multiply3x3(CMatrix& m, CVector& v) {
