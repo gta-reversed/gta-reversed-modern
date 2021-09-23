@@ -3030,7 +3030,7 @@ void CStreaming::StreamVehiclesAndPeds_Always(CVector const& unused) {
         }
     }
     if (bStream) {
-        if (!(CTimer::m_FrameCounter & 0x3F) && CPopulation::m_AppropriateLoadedCars.CountMembers() < 3)
+        if (!(CTimer::GetFrameCounter() & 0x3F) && CPopulation::m_AppropriateLoadedCars.CountMembers() < 3)
             StreamOneNewCar();
         StreamZoneModels_Gangs(CVector());
         if (CPopCycle::m_pCurrZoneInfo) {
@@ -3255,7 +3255,7 @@ void CStreaming::StreamZoneModels_Gangs(CVector const& unused) {
 // 0x40E670
 void CStreaming::Update() {
     g_LoadMonitor.m_numModelsRequest = ms_numModelsRequested;
-    if (CTimer::m_UserPause || CTimer::m_CodePause)
+    if (CTimer::GetIsPaused())
         return;
 
     float fDistanceZ = TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
@@ -3268,7 +3268,7 @@ void CStreaming::Update() {
             AddModelsToRequestList(TheCamera.GetPosition(), 0);
         }
     }
-    if ((CTimer::m_FrameCounter & 0x7F) == 106) {
+    if ((CTimer::GetFrameCounter() & 0x7F) == 106) {
         m_bBoatsNeeded = false;
         if (TheCamera.GetPosition().z < 500.0f)
             m_bBoatsNeeded = ThePaths.IsWaterNodeNearby(TheCamera.GetPosition(), 80.0f);

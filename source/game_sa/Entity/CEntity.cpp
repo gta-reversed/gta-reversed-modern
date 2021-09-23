@@ -968,7 +968,7 @@ RpMaterial* MaterialUpdateUVAnimCB(RpMaterial* material, void* data)
     if (!RpMaterialUVAnimExists(material))
         return material;
 
-    auto fTimeStep = CTimer::ms_fTimeStep / 50.0F;
+    auto fTimeStep = CTimer::GetTimeStepInSeconds();
     RpMaterialUVAnimAddAnimTime(material, fTimeStep);
     RpMaterialUVAnimApplyUpdate(material);
     return material;
@@ -1705,14 +1705,14 @@ void CEntity::UpdateAnim()
     float fStep;
     if (IsObject() && static_cast<CObject*>(this)->m_nObjectType == eObjectType::OBJECT_TYPE_CUTSCENE) {
         bOnScreen = true;
-        fStep = CTimer::ms_fTimeStepNonClipped / 50.0F;
+        fStep = CTimer::GetTimeStepNonClippedInSeconds();
     }
     else {
         if (!m_bOffscreen)
             m_bOffscreen = !CEntity::GetIsOnScreen();
 
         bOnScreen = !m_bOffscreen;
-        fStep = CTimer::ms_fTimeStep / 50.0F;
+        fStep = CTimer::GetTimeStepInSeconds();
     }
 
     RpAnimBlendClumpUpdateAnimations(m_pRwClump, fStep, bOnScreen);
@@ -2137,11 +2137,11 @@ void CEntity::ProcessLightsForEntity()
                 if (pEffect->light.m_bBlinking1)
                     fBrightness = (1.0F - (rand() % 32) * 0.012F) * fIntensity;
 
-                if (pEffect->light.m_bBlinking2 && (CTimer::m_FrameCounter + uiRand) & 3)
+                if (pEffect->light.m_bBlinking2 && (CTimer::GetFrameCounter() + uiRand) & 3)
                     fBrightness = 0.0F;
 
-                if (pEffect->light.m_bBlinking3 && (CTimer::m_FrameCounter + uiRand) & 0x3F) {
-                    if (((CTimer::m_FrameCounter + uiRand) & 0x3F) == 1)
+                if (pEffect->light.m_bBlinking3 && (CTimer::GetFrameCounter() + uiRand) & 0x3F) {
+                    if (((CTimer::GetFrameCounter() + uiRand) & 0x3F) == 1)
                         fBrightness *= 0.5F;
                     else
                         fBrightness = 0.0F;

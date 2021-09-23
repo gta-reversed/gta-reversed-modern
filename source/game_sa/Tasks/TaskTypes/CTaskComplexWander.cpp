@@ -326,10 +326,10 @@ void CTaskComplexWander::UpdateDir_Reversed(CPed* pPed)
             CPathNode* pPathNode = &pPathNodes[m_NextNode.m_wNodeId];
             if (pPathNode)
             {
-                if (pPathNode->m_nNumLinks >= 3 && CTimer::m_FrameCounter != m_nLastUpdateDirFrameCount && m_bWanderSensibly)
+                if (pPathNode->m_nNumLinks >= 3 && CTimer::GetFrameCounter() != m_nLastUpdateDirFrameCount && m_bWanderSensibly)
                 {
-                    m_nLastUpdateDirFrameCount = CTimer::m_FrameCounter;
-                    uint8 remainder = (3 * CTimer::m_FrameCounter + pPed->m_nRandomSeed) % 100;
+                    m_nLastUpdateDirFrameCount = CTimer::GetFrameCounter();
+                    uint8 remainder = (3 * CTimer::GetFrameCounter() + pPed->m_nRandomSeed) % 100;
                     if (remainder <= 90u)
                     {
                         if (remainder > 80u)

@@ -140,11 +140,11 @@ CTask* CTaskComplexUseSwatRope::ControlSubTask_Reversed(CPed* ped) {
         if (ped->GetPosition().z - 2.0F < groundCoord.z && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr))
             return CreateSubTask(TASK_NONE, ped);
 
-        m_fCoorAlongRope += CTimer::ms_fTimeStep * 0.003F;
+        m_fCoorAlongRope += CTimer::GetTimeStep() * 0.003F;
         CVector posn;
         if (CRopes::FindCoorsAlongRope(m_nRopeId, m_fCoorAlongRope, &posn, nullptr)) {
             ped->SetPosn(posn);
-            ped->m_fAimingRotation = ped->m_fCurrentRotation - CTimer::ms_fTimeStep * 0.05F;
+            ped->m_fAimingRotation = ped->m_fCurrentRotation - CTimer::GetTimeStep() * 0.05F;
             ped->m_vecMoveSpeed.z = -0.03f;
             ped->Say(177, 0, 1.0F, false, false, false);
         }

@@ -123,7 +123,7 @@ bool cBuoyancy::ProcessBuoyancyBoat(CVehicle* pVehicle, float fBuoyancy, CVector
                 continue;
 
             auto fAddedDistToSurface = SimpleSumBuoyancyData(&vecCurPoint, eState);
-            auto fCurBuoyancy = CTimer::ms_fTimeStep * m_fBuoyancy;
+            auto fCurBuoyancy = CTimer::GetTimeStep() * m_fBuoyancy;
             auto fPointContribution = fCurBuoyancy * (fAddedDistToSurface * fBoatHeightRatio);
 
             CVector vecOffset(fCurrentX, fCurrentY, 0.0F);
@@ -159,7 +159,7 @@ bool cBuoyancy::CalcBuoyancyForce(CPhysical* pEntity, CVector* vecBuoyancyTurnPo
         return false;
 
     *vecBuoyancyTurnPoint = Multiply3x3(m_EntityMatrix, m_vecTurnPoint);
-    auto fCurrentBuoyancy = m_fEntityWaterImmersion * m_fBuoyancy * CTimer::ms_fTimeStep;
+    auto fCurrentBuoyancy = m_fEntityWaterImmersion * m_fBuoyancy * CTimer::GetTimeStep();
     vecBuoyancyForce->Set(0.0F, 0.0F, fCurrentBuoyancy);
 
     float fMoveForceZ = pEntity->m_fMass * pEntity->m_vecMoveSpeed.z;

@@ -8,7 +8,7 @@ class CPlayerSkin {
 public:
     static int32&    m_txdSlot;
     static float&    m_Angle;
-    static float&    m_C3F04C;
+    static uint32&   m_C3F04C;
     static RpClump*& m_Clump;
 
 public:

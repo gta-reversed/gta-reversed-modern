@@ -66,7 +66,7 @@ bool CTaskSimpleStealthKill::ProcessPed_Reversed(CPed* ped) {
         ped->m_fAimingRotation = atan2(-distance.x, distance.y);
     }
     else {
-        magnitude = std::min(CTimer::ms_fTimeStep * 0.05f, magnitude);
+        magnitude = std::min(CTimer::GetTimeStep() * 0.05f, magnitude);
         ped->m_vecAnimMovingShiftLocal.y = magnitude;
         ped->m_vecAnimMovingShiftLocal.x = 0.0f;
         ped->m_fAimingRotation = atan2(-distance.x, distance.y);

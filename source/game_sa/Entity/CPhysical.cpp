@@ -351,7 +351,7 @@ void CPhysical::ProcessCollision_Reversed()
             }
         }
         CVector vecOldMoveSpeed = m_vecMoveSpeed;
-        float fOldTimeStep = CTimer::ms_fTimeStep;
+        float fOldTimeStep = CTimer::GetTimeStep();
         float fOldElasticity = m_fElasticity;
         CMatrix oldEntityMatrix(*m_matrix);
         bool bProcessCollisionBeforeSettingTimeStep = false;
@@ -563,9 +563,9 @@ void CPhysical::ProcessShift_Reversed()
             }
             if ((m_nType == ENTITY_TYPE_PED && bSomeSpecificFlagsSet) || CWorld::bSecondShift)
             {
-                float fMoveSpeedShift = pow(CPhysical::PHYSICAL_SHIFT_SPEED_DAMP, CTimer::ms_fTimeStep);
+                float fMoveSpeedShift = pow(CPhysical::PHYSICAL_SHIFT_SPEED_DAMP, CTimer::GetTimeStep());
                 m_vecMoveSpeed *= fMoveSpeedShift;
-                float fTurnSpeedShift = pow(CPhysical::PHYSICAL_SHIFT_SPEED_DAMP, CTimer::ms_fTimeStep);
+                float fTurnSpeedShift = pow(CPhysical::PHYSICAL_SHIFT_SPEED_DAMP, CTimer::GetTimeStep());
                 m_vecTurnSpeed *= fTurnSpeedShift;
             }
         }
@@ -874,7 +874,7 @@ void CPhysical::ApplyMoveSpeed()
     if (physicalFlags.bDontApplySpeed || physicalFlags.bDisableMoveForce)
         ResetMoveSpeed();
     else
-        GetPosition() += CTimer::ms_fTimeStep * m_vecMoveSpeed;
+        GetPosition() += CTimer::GetTimeStep() * m_vecMoveSpeed;
 }
 
 void CPhysical::ApplyTurnSpeed()
@@ -887,7 +887,7 @@ void CPhysical::ApplyTurnSpeed()
     }
     else
     {
-        CVector vecTurnSpeedTimeStep = CTimer::ms_fTimeStep * m_vecTurnSpeed;
+        CVector vecTurnSpeedTimeStep = CTimer::GetTimeStep() * m_vecTurnSpeed;
         CVector vecCrossProduct;
         CrossProduct(&vecCrossProduct, &vecTurnSpeedTimeStep, &GetRight());
         GetRight() += vecCrossProduct;
@@ -911,13 +911,13 @@ void CPhysical::ApplyGravity()
 #else
     if (physicalFlags.bApplyGravity && !physicalFlags.bDisableMoveForce) {
         if (physicalFlags.bInfiniteMass) {
-            float fMassTimeStep = CTimer::ms_fTimeStep * m_fMass;
+            float fMassTimeStep = CTimer::GetTimeStep() * m_fMass;
             CVector point = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
             CVector force (0.0f, 0.0f, fMassTimeStep * -0.008f);
             ApplyForce(force, point, true);
         }
         else if (m_bUsesCollision) {
-            m_vecMoveSpeed.z -= CTimer::ms_fTimeStep * 0.008f;
+            m_vecMoveSpeed.z -= CTimer::GetTimeStep() * 0.008f;
         }
     }
 #endif
@@ -1206,7 +1206,7 @@ bool CPhysical::ApplySoftCollision(CEntity* pEntity, CColPoint* pColPoint, float
             fDepth = pColPoint->m_fDepth;
         }
 
-        *pDamageIntensity = fDepth * CTimer::ms_fTimeStep * CPhysical::SOFTCOL_DEPTH_MULT * fCollisionMass * 0.008f;
+        *pDamageIntensity = fDepth * CTimer::GetTimeStep() * CPhysical::SOFTCOL_DEPTH_MULT * fCollisionMass * 0.008f;
         if (fSpeedDotProduct >= 0.0f)
         {
             *pDamageIntensity = 0.0f;
@@ -1216,7 +1216,7 @@ bool CPhysical::ApplySoftCollision(CEntity* pEntity, CColPoint* pColPoint, float
     }
     else
     {
-        *pDamageIntensity = pColPoint->m_fDepth * CTimer::ms_fTimeStep * CPhysical::SOFTCOL_DEPTH_MULT * fCollisionMass * 0.008f;
+        *pDamageIntensity = pColPoint->m_fDepth * CTimer::GetTimeStep() * CPhysical::SOFTCOL_DEPTH_MULT * fCollisionMass * 0.008f;
         if (fSpeedDotProduct < 0.0f)
         {
             *pDamageIntensity = *pDamageIntensity - CPhysical::SOFTCOL_CARLINE_SPEED_MULT * fCollisionMass * fSpeedDotProduct;
@@ -1247,8 +1247,8 @@ bool CPhysical::ApplySpringCollision(float fSuspensionForceLevel, CVector& direc
     float fSpringStress = 1.0f - fSpringLength;
     if (fSpringStress <= 0.0f)
         return true;
-    float fTimeStep = CTimer::ms_fTimeStep;
-    if (CTimer::ms_fTimeStep >= 3.0f)
+    float fTimeStep = CTimer::GetTimeStep();
+    if (CTimer::GetTimeStep() >= 3.0f)
         fTimeStep = 3.0f;
     fSpringForceDampingLimit = fSpringStress * m_fMass * fSuspensionForceLevel * 0.016f * fTimeStep * fSuspensionBias;
     ApplyForce((-1.0f * fSpringForceDampingLimit) * direction, collisionPoint, true);
@@ -1265,8 +1265,8 @@ bool CPhysical::ApplySpringCollisionAlt(float fSuspensionForceLevel, CVector& di
         return true;
     if (DotProduct(direction, normal) > 0.0f)
         normal *= -1.0f;
-    float fTimeStep = CTimer::ms_fTimeStep;
-    if (CTimer::ms_fTimeStep >= 3.0f)
+    float fTimeStep = CTimer::GetTimeStep();
+    if (CTimer::GetTimeStep() >= 3.0f)
         fTimeStep = 3.0f;
     fSpringForceDampingLimit = fSpringStress * (fTimeStep * m_fMass) * fSuspensionForceLevel * fSuspensionBias * 0.016f;
     if (physicalFlags.bMakeMassTwiceAsBig)
@@ -1283,8 +1283,8 @@ bool CPhysical::ApplySpringDampening(float fDampingForce, float fSpringForceDamp
     float fCollisionPosDotProduct = DotProduct(collisionPos, direction);
     CVector vecCollisionPointSpeed = GetSpeed(collisionPoint);
     float fCollisionPointSpeedDotProduct = DotProduct(vecCollisionPointSpeed, direction);
-    float fTimeStep = CTimer::ms_fTimeStep;
-    if (CTimer::ms_fTimeStep >= 3.0f)
+    float fTimeStep = CTimer::GetTimeStep();
+    if (CTimer::GetTimeStep() >= 3.0f)
         fTimeStep = 3.0f;
     float fDampingForceTimeStep = fTimeStep * fDampingForce;
     if (physicalFlags.bMakeMassTwiceAsBig)
@@ -1591,12 +1591,12 @@ void CPhysical::ApplyAirResistance()
             }
         }
 
-        m_vecMoveSpeed *= pow(1.0f - fSpeedMagnitude, CTimer::ms_fTimeStep);
+        m_vecMoveSpeed *= pow(1.0f - fSpeedMagnitude, CTimer::GetTimeStep());
         m_vecTurnSpeed *= 0.99f;
     }
     else
     {
-        float fAirResistanceTimeStep = pow(m_fAirResistance, CTimer::ms_fTimeStep);
+        float fAirResistanceTimeStep = pow(m_fAirResistance, CTimer::GetTimeStep());
         m_vecMoveSpeed *= fAirResistanceTimeStep;
         m_vecTurnSpeed *= fAirResistanceTimeStep;
     }
@@ -1662,7 +1662,7 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* pEntity, CColPoint* pColPoint, floa
     float fCollisionMass = 1.0f / (fSquaredMagnitude / m_fTurnMass + 1.0f / m_fMass);
 
     uint16 entityAltCol = ALT_ENITY_COL_DEFAULT;
-    float fMoveSpeedLimit = CTimer::ms_fTimeStep * 0.008f;
+    float fMoveSpeedLimit = CTimer::GetTimeStep() * 0.008f;
     if (m_nType == ENTITY_TYPE_OBJECT)
     {
         entityAltCol = ALT_ENITY_COL_OBJECT;
@@ -1839,7 +1839,7 @@ bool CPhysical::ApplyFriction(float fFriction, CColPoint* pColPoint)
             CVector vecMoveDirection = vecSpeedDifference / fMoveSpeedMagnitude;
 
             float fSpeed = -fMoveSpeedMagnitude;
-            float fForce = -(CTimer::ms_fTimeStep / m_fMass * fFriction);
+            float fForce = -(CTimer::GetTimeStep() / m_fMass * fFriction);
             if (fSpeed < fForce)
             {
                 fSpeed = fForce;
@@ -1930,7 +1930,7 @@ bool CPhysical::ApplyFriction(CPhysical* pEntity, float fFriction, CColPoint* pC
         if (fThisSpeedMagnitude > fSpeed) {
             float fThisSpeed = fThisMass * (fSpeed - fThisSpeedMagnitude);
             float fEntitySpeed = fEntityMass * (fSpeed - fEntitySpeedMagnitude);
-            float fFrictionTimeStep = -(CTimer::ms_fTimeStep * fFriction);
+            float fFrictionTimeStep = -(CTimer::GetTimeStep() * fFriction);
             if (fThisSpeed < fFrictionTimeStep)
             {
                 fThisSpeed = fFrictionTimeStep;
@@ -1980,7 +1980,7 @@ bool CPhysical::ApplyFriction(CPhysical* pEntity, float fFriction, CColPoint* pC
         if (fThisSpeedMagnitude > fSpeed) {
             float fThisSpeed = fThisMass * (fSpeed - fThisSpeedMagnitude);
             float fEntitySpeed = fEntityCollisionMass * (fSpeed - fEntitySpeedMagnitude);
-            float fFrictionTimeStep = CTimer::ms_fTimeStep * fFriction;
+            float fFrictionTimeStep = CTimer::GetTimeStep() * fFriction;
             float fFrictionTimeStepNegative = -fFrictionTimeStep;
             if (fThisSpeed < fFrictionTimeStepNegative)
             {
@@ -2101,7 +2101,7 @@ bool CPhysical::ApplyFriction(CPhysical* pEntity, float fFriction, CColPoint* pC
     if (fThisSpeedMagnitude > fSpeed) {
         float fThisSpeed = (fSpeed - fThisSpeedMagnitude) * fThisCollisionMass;
         float fEntitySpeed = (fSpeed - fEntitySpeedMagnitude) * fEntityMass;
-        float fFrictionTimeStep = CTimer::ms_fTimeStep * fFriction;
+        float fFrictionTimeStep = CTimer::GetTimeStep() * fFriction;
         float fNegativeFrictionTimeStep = -fFrictionTimeStep;
         if (fThisSpeed < fNegativeFrictionTimeStep)
         {
@@ -2346,7 +2346,7 @@ bool CPhysical::ProcessShiftSectorList(int32 sectorX, int32 sectorY)
         vecShift.z = 0.0;
     }
 
-    m_vecMoveSpeed += vecShift * 0.0080000004f * CTimer::ms_fTimeStep;
+    m_vecMoveSpeed += vecShift * 0.0080000004f * CTimer::GetTimeStep();
     return true;
 #endif
 }
@@ -2358,7 +2358,7 @@ void CPhysical::PlacePhysicalRelativeToOtherPhysical(CPhysical* relativeToPhysic
     ((void(__cdecl*)(CPhysical*, CPhysical*, CVector))0x546DB0)(relativeToPhysical, physicalToPlace, offset);
 #else
     CVector vecRelativePosition = *relativeToPhysical->m_matrix * offset;
-    vecRelativePosition += (CTimer::ms_fTimeStep * 0.9f) * relativeToPhysical->m_vecMoveSpeed;
+    vecRelativePosition += (CTimer::GetTimeStep() * 0.9f) * relativeToPhysical->m_vecMoveSpeed;
     CWorld::Remove(physicalToPlace);
     *(CMatrix*)physicalToPlace->m_matrix = *relativeToPhysical->m_matrix;
     physicalToPlace->GetPosition() = vecRelativePosition;
@@ -2505,8 +2505,8 @@ void CPhysical::PositionAttachedEntity()
             vecMoveSpeed *= 2.0f / sqrt(fSquaredMagnitude);
 
         float fTimeStep = 1.0f;
-        if (CTimer::ms_fTimeStep >= 1.0f)
-            fTimeStep = CTimer::ms_fTimeStep;
+        if (CTimer::GetTimeStep() >= 1.0f)
+            fTimeStep = CTimer::GetTimeStep();
 
         vecMoveSpeed *= 1.0f / fTimeStep;
         CVector vecMoveSpeedDifference = vecMoveSpeed - m_vecMoveSpeed;
@@ -2542,7 +2542,7 @@ void CPhysical::ApplySpeed()
     ((void(__thiscall*)(CPhysical*))0x547B80)(this);
 #else
     CObject* pObject = static_cast<CObject*>(this);
-    float fOldTimeStep = CTimer::ms_fTimeStep;
+    float fOldTimeStep = CTimer::GetTimeStep();
     if (physicalFlags.bDisableZ) {
         if (physicalFlags.bApplyGravity) {
             if (fOldTimeStep * m_vecMoveSpeed.z + GetPosition().z < CWorld::SnookerTableMin.z) {
@@ -2572,7 +2572,7 @@ void CPhysical::ApplySpeed()
             fTimeStepX = (CWorld::SnookerTableMax.x - GetPosition().x) / m_vecMoveSpeed.x;
         }
         
-        float fNewPositionY = CTimer::ms_fTimeStep * m_vecMoveSpeed.y + GetPosition().y;
+        float fNewPositionY = CTimer::GetTimeStep() * m_vecMoveSpeed.y + GetPosition().y;
         if (fNewPositionY <= CWorld::SnookerTableMax.y || m_vecMoveSpeed.y <= 0.0f) {
             if (fNewPositionY >= CWorld::SnookerTableMin.y || m_vecMoveSpeed.y >= 0.0f) {
                 // nothing
@@ -2696,7 +2696,7 @@ void CPhysical::ApplySpeed()
 
     float fNewTimeStep = -1000.0f;
     float fTheDoorAngle  = DegreesToRadians(108.0f) + fDoorStartAngle;
-    float fHeadingTimeStep = CTimer::ms_fTimeStep * m_vecTurnSpeed.z + fHeading;
+    float fHeadingTimeStep = CTimer::GetTimeStep() * m_vecTurnSpeed.z + fHeading;
     if (m_vecTurnSpeed.z <= 0.0f || fHeadingTimeStep <= DegreesToRadians(108.0f) + fDoorStartAngle) {
         if (m_vecTurnSpeed.z < 0.0f) {
             float fTheDoorAngle = fDoorStartAngle - DegreesToRadians(108.0f);
@@ -2708,7 +2708,7 @@ void CPhysical::ApplySpeed()
     {
         fNewTimeStep = (fTheDoorAngle - fHeading) / m_vecTurnSpeed.z;
     }
-    if (-CTimer::ms_fTimeStep <= fNewTimeStep) {
+    if (-CTimer::GetTimeStep() <= fNewTimeStep) {
         CTimer::UpdateTimeStep(fNewTimeStep);
         ApplyTurnSpeed();
         m_vecTurnSpeed.z = -0.2f * m_vecTurnSpeed.z;
@@ -2770,8 +2770,8 @@ void CPhysical::ApplyFriction()
         colPoint.m_vecPoint.z = vecPosition.z - fSphereRadius;
         colPoint.m_vecNormal = CVector (0.0f, 0.0f, 1.0f);
 
-        ApplyFriction(CTimer::ms_fTimeStep * 0.001f, &colPoint);
-        m_vecTurnSpeed.z = pow(0.98f, CTimer::ms_fTimeStep) * m_vecTurnSpeed.z;
+        ApplyFriction(CTimer::GetTimeStep() * 0.001f, &colPoint);
+        m_vecTurnSpeed.z = pow(0.98f, CTimer::GetTimeStep()) * m_vecTurnSpeed.z;
     }
 
     m_vecMoveSpeed += m_vecFrictionMoveSpeed;
@@ -2785,7 +2785,7 @@ void CPhysical::ApplyFriction()
         && fabs(GetUp().z) < 0.707f
         && 0.05f * 0.05f > m_vecMoveSpeed.SquaredMagnitude() && 0.01f * 0.01f > m_vecTurnSpeed.SquaredMagnitude())
     {                                    
-        m_vecMoveSpeed *= pow(0.5f, CTimer::ms_fTimeStep);
+        m_vecMoveSpeed *= pow(0.5f, CTimer::GetTimeStep());
     }
 #endif
 }

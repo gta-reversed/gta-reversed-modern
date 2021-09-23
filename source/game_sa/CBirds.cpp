@@ -144,7 +144,7 @@ void CBirds::Update()
         && CBirds::uiNumberOfBirds < MAX_BIRDS
         && CClock::ms_nGameClockHours < 22U
         && CClock::ms_nGameClockHours > 5U
-        && (CTimer::m_FrameCounter & 0x1FF) == MAX_BIRDS) {
+        && (CTimer::GetFrameCounter() & 0x1FF) == MAX_BIRDS) {
 
         auto iNumBirdsToCreate = (uint32)CGeneral::GetRandomNumberInRange(1, MAX_BIRDS + 1 - CBirds::uiNumberOfBirds);
         eBirdsBiome eBiome = eBirdsBiome::BIOME_WATER;
@@ -218,7 +218,7 @@ void CBirds::Update()
         }
     }
 
-    int32 iBirdIndex = CTimer::m_FrameCounter % MAX_BIRDS;
+    int32 iBirdIndex = CTimer::GetFrameCounter() % MAX_BIRDS;
     auto& pCheckedBird = CBirds::aBirds[iBirdIndex];
     if (pCheckedBird.m_bCreated && DistanceBetweenPoints2D(CVector2D(pCheckedBird.m_vecPosn), CVector2D(vecCamPos)) > pCheckedBird.m_fMaxBirdDistance)
     {
@@ -235,7 +235,7 @@ void CBirds::Update()
             continue;
 
         if (pBird.m_bMustDoCurves) {
-            auto fCircleProgress = CTimer::ms_fTimeStep / 500.0F;
+            auto fCircleProgress = CTimer::GetTimeStep() / 500.0F; // todo: GetTimeStepInMS?
             auto vecCurTarget = CVector2D(pBird.m_vecTargetVelocity);
             auto fSinAngle = sin(fCircleProgress);
             auto fCosAngle = cos(fCircleProgress);
@@ -244,7 +244,7 @@ void CBirds::Update()
             pBird.m_vecTargetVelocity.y = fCosAngle * vecCurTarget.y - fSinAngle * vecCurTarget.x;
         }
 
-        auto fTimeStep = CTimer::ms_fTimeStep / 50.0F;
+        auto fTimeStep = CTimer::GetTimeStepInSeconds();
         auto fLerp = std::min(fTimeStep * 0.5F, 1.0F);
         pBird.m_vecCurrentVelocity = Lerp(pBird.m_vecCurrentVelocity, pBird.m_vecTargetVelocity, fLerp);
         pBird.m_vecPosn += (fTimeStep * pBird.m_vecCurrentVelocity);

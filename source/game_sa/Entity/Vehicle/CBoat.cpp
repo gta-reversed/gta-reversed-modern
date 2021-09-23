@@ -229,12 +229,12 @@ void CBoat::PruneWakeTrail()
         if (fPointLifeTime <= 0.0F)
             break;
 
-        if (fPointLifeTime <= CTimer::ms_fTimeStep) {
+        if (fPointLifeTime <= CTimer::GetTimeStep()) {
             m_afWakePointLifeTime[iInd] = 0.0F;
             break;
         }
 
-        m_afWakePointLifeTime[iInd] -= CTimer::ms_fTimeStep;
+        m_afWakePointLifeTime[iInd] -= CTimer::GetTimeStep();
     }
 
     if (iInd >= 32)
@@ -515,14 +515,14 @@ void CBoat::ProcessControl_Reversed() {
             fROCPropSpeed *= 5.0F;
 
         if (m_fGasPedal == 0.0F)
-            m_fPropSpeed += (fSTDPropSpeed - m_fPropSpeed) * CTimer::ms_fTimeStep * fROCPropSpeed;
+            m_fPropSpeed += (fSTDPropSpeed - m_fPropSpeed) * CTimer::GetTimeStep() * fROCPropSpeed;
         else if (m_fGasPedal < 0.0F) {
             fSTDPropSpeed = (CPlane::PLANE_STD_PROP_SPEED - 0.05F) * m_fGasPedal + CPlane::PLANE_STD_PROP_SPEED;
-            m_fPropSpeed += (fSTDPropSpeed - m_fPropSpeed) * CTimer::ms_fTimeStep * fROCPropSpeed;
+            m_fPropSpeed += (fSTDPropSpeed - m_fPropSpeed) * CTimer::GetTimeStep() * fROCPropSpeed;
         }
         else {
             fSTDPropSpeed = (CPlane::PLANE_MAX_PROP_SPEED - CPlane::PLANE_STD_PROP_SPEED) * m_fGasPedal + CPlane::PLANE_STD_PROP_SPEED;
-            m_fPropSpeed += (fSTDPropSpeed - m_fPropSpeed) * CTimer::ms_fTimeStep * fROCPropSpeed;
+            m_fPropSpeed += (fSTDPropSpeed - m_fPropSpeed) * CTimer::GetTimeStep() * fROCPropSpeed;
         }
     }
     else if (m_fPropSpeed > 0.0F)
@@ -591,7 +591,7 @@ void CBoat::ProcessControl_Reversed() {
                     }
                 }
 
-                m_fBurningTimer += (CTimer::ms_fTimeStep * 20.0F);
+                m_fBurningTimer += (CTimer::GetTimeStep() * 20.0F);
                 if (m_fBurningTimer > 5000.0F)
                     this->BlowUpCar(m_pWhoDestroyedMe, false);
             }
@@ -649,7 +649,7 @@ void CBoat::PreRender_Reversed()
     auto fPropSpeed = std::min(1.0F, m_fPropSpeed * (32.0F / TWO_PI));
     auto ucTransparency = static_cast<RwUInt8>((1.0F - fPropSpeed) * 255.0F);
 
-    m_fPropRotation += m_fPropSpeed * CTimer::ms_fTimeStep;
+    m_fPropRotation += m_fPropSpeed * CTimer::GetTimeStep();
     while (m_fPropRotation > TWO_PI)
         m_fPropRotation -= TWO_PI;
 
@@ -696,7 +696,7 @@ void CBoat::PreRender_Reversed()
                 RpAtomicRenderMacro(pFirstObj);
             }
         }
-        m_fMovingHiRotation += CTimer::ms_fTimeStep / 50.0F;
+        m_fMovingHiRotation += CTimer::GetTimeStepInSeconds();
     }
 
     m_vecBoatMoveForce = m_vecMoveSpeed + m_vecFrictionMoveSpeed;
@@ -907,7 +907,7 @@ void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum)
     if (CCamera::m_bUseMouse3rdPerson && CVehicle::m_bEnableMouseSteering) {
         auto bChangedInput = CVehicle::m_nLastControlInput != eControllerType::CONTROLLER_MOUSE || pPad->GetSteeringLeftRight();
         if (CPad::NewMouseControllerState.X == 0.0F && bChangedInput) { // No longer using mouse controls
-            m_fRawSteerAngle += (static_cast<float>(-pPad->GetSteeringLeftRight()) * (1.0F / 128.0F) - m_fRawSteerAngle) * 0.2F * CTimer::ms_fTimeStep;
+            m_fRawSteerAngle += (static_cast<float>(-pPad->GetSteeringLeftRight()) * (1.0F / 128.0F) - m_fRawSteerAngle) * 0.2F * CTimer::GetTimeStep();
             CVehicle::m_nLastControlInput = eControllerType::CONTROLLER_KEYBOARD1;
         }
         else if (m_fRawSteerAngle != 0.0F || m_fRawSteerAngle != 0.0F) {
@@ -916,11 +916,11 @@ void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum)
                 m_fRawSteerAngle += CPad::NewMouseControllerState.X * -0.0035F;
 
             if (fabs(m_fRawSteerAngle) < 0.5 || pPad->NewState.m_bVehicleMouseLook)
-                m_fRawSteerAngle *= pow(0.985F, CTimer::ms_fTimeStep);
+                m_fRawSteerAngle *= pow(0.985F, CTimer::GetTimeStep());
         }
     }
     else {
-        m_fRawSteerAngle += (static_cast<float>(-pPad->GetSteeringLeftRight()) * (1.0F / 128.0F) - m_fRawSteerAngle) * 0.2F * CTimer::ms_fTimeStep;
+        m_fRawSteerAngle += (static_cast<float>(-pPad->GetSteeringLeftRight()) * (1.0F / 128.0F) - m_fRawSteerAngle) * 0.2F * CTimer::GetTimeStep();
         CVehicle::m_nLastControlInput = eControllerType::CONTROLLER_KEYBOARD1;
     }
 

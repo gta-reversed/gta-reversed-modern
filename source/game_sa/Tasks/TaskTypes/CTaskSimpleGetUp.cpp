@@ -131,7 +131,7 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
             || pEntity->AsVehicle()->m_vehicleType == VEHICLE_BIKE
             || pEntity->AsVehicle()->m_vehicleSubType == VEHICLE_QUAD
             || !IsVehiclePointerValid(pEntity->AsVehicle())
-            || (ped->m_nRandomSeed + CTimer::m_FrameCounter - 3) % 8 == 0
+            || (ped->m_nRandomSeed + CTimer::GetFrameCounter() - 3) % 8 == 0
             || CCollision::ProcessColModels(
                 ped->GetMatrix(),
                 *CModelInfo::GetModelInfo(ped->m_nModelIndex)->m_pColModel,
@@ -164,8 +164,8 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
 
     if (ped->IsPlayer())
     {
-        if (CTimer::ms_fTimeStep > 0.0F)
-            fDamage = CTimer::ms_fTimeStep;
+        if (CTimer::GetTimeStep() > 0.0F)
+            fDamage = CTimer::GetTimeStep();
         else
             return false;
     }

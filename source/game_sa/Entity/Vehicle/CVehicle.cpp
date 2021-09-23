@@ -515,7 +515,7 @@ uint8 CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollision
     if (physicalFlags.bDisableCollisionForce)
         return 1;
 
-    const auto fMoveSquared = m_vecMoveSpeed.SquaredMagnitude() * pow(CTimer::ms_fTimeStep, 2.0F);
+    const auto fMoveSquared = m_vecMoveSpeed.SquaredMagnitude() * pow(CTimer::GetTimeStep(), 2.0F);
     if (fMoveSquared < 0.16F)
         return 1;
 
@@ -533,9 +533,9 @@ uint8 CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollision
         fMove *= (10.0F / 2.0F);
 
     auto& pBnd = CEntity::GetColModel()->GetBoundingBox();
-    auto fLongestDir = fabs(DotProduct(m_vecMoveSpeed, GetForward()) * CTimer::ms_fTimeStep / pBnd.GetLength());
-    fLongestDir = std::max(fLongestDir, fabs(DotProduct(m_vecMoveSpeed, GetRight()) * CTimer::ms_fTimeStep / pBnd.GetWidth()));
-    fLongestDir = std::max(fLongestDir, fabs(DotProduct(m_vecMoveSpeed, GetUp()) * CTimer::ms_fTimeStep / pBnd.GetHeight()));
+    auto fLongestDir = fabs(DotProduct(m_vecMoveSpeed, GetForward()) * CTimer::GetTimeStep() / pBnd.GetLength());
+    fLongestDir = std::max(fLongestDir, fabs(DotProduct(m_vecMoveSpeed, GetRight()) * CTimer::GetTimeStep() / pBnd.GetWidth()));
+    fLongestDir = std::max(fLongestDir, fabs(DotProduct(m_vecMoveSpeed, GetUp()) * CTimer::GetTimeStep() / pBnd.GetHeight()));
 
     if (IsBike())
         fLongestDir *= 1.5F;
@@ -1067,13 +1067,13 @@ bool CVehicle::CanPedJumpOutCar_Reversed(CPed* ped)
 
     m_vecTurnSpeed *= 0.9F; //BUG(PRONE): We are modifying vehicle move and turn speeds in function that seems that it should be const
     auto const fMoveSpeedSquared = m_vecMoveSpeed.SquaredMagnitude();
-    if (fMoveSpeedSquared / 100.0F > pow(CTimer::ms_fTimeStep, 2.0F) * pow(0.008F, 2.0F))
+    if (fMoveSpeedSquared / 100.0F > pow(CTimer::GetTimeStep(), 2.0F) * pow(0.008F, 2.0F))
     {
         m_vecMoveSpeed *= 0.9F;
         return false;
     }
 
-    auto fMoveMult = CTimer::ms_fTimeStep / sqrt(fMoveSpeedSquared) * 0.016F;
+    auto fMoveMult = CTimer::GetTimeStep() / sqrt(fMoveSpeedSquared) * 0.016F;
     fMoveMult = std::max(0.0F, 1.0F - fMoveMult);
     m_vecMoveSpeed *= fMoveMult;
     return false;
@@ -1519,7 +1519,7 @@ void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData* boatHandling, float f
     fSpeedMult = fabs(fSpeedMult);
     fSpeedMult = 1.0F / fSpeedMult;
 
-    float fUsedTimeStep = CTimer::ms_fTimeStep * 0.5F;
+    float fUsedTimeStep = CTimer::GetTimeStep() * 0.5F;
     auto vecSpeedMult = Pow(boatHandling->m_vecMoveRes * fSpeedMult, fUsedTimeStep);
 
     CVector vecMoveSpeedMatrixDotProduct = Multiply3x3(m_vecMoveSpeed, GetMatrix());
@@ -1926,7 +1926,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
     if (bDriving && thrust == 0.0f)
         bDriving = false;
 
-    adhesion *= CTimer::ms_fTimeStep;
+    adhesion *= CTimer::GetTimeStep();
     if (*wheelState != WHEEL_STATE_NORMAL) {
         bAlreadySkidding = true;
         adhesion *= m_pHandlingData->m_fTractionLoss;
@@ -2104,7 +2104,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
     bool bOnWater = false;
     vehicleFlags.bIsDrowning = false;
-    if (CTimer::ms_fTimeStep * m_fMass * 0.0008F >= vecBuoyancyForce.z) {
+    if (CTimer::GetTimeStep() * m_fMass * 0.0008F >= vecBuoyancyForce.z) {
         physicalFlags.bSubmergedInWater = false;
     }
     else {
@@ -2122,7 +2122,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
                     static_cast<CPlayerPed*>(m_pDriver)->HandlePlayerBreath(true, 1.0F);
                 else
                 {
-                    auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::ms_fTimeStep, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, false);
+                    auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::GetTimeStep(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, false);
                     auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
                     if (damageEvent.AffectsPed(m_pDriver))
                         pedDamageResponseCalc.ComputeDamageResponse(m_pDriver, &damageEvent.m_damageResponse, true);
@@ -2150,7 +2150,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         CPhysical::ApplyTurnForce(vecBuoyancyForce * 0.4F, vecBuoyancyTurnPoint);
 
     if (m_nModelIndex == eModelID::MODEL_SKIMMER) {
-        auto fCheckedMass = CTimer::ms_fTimeStep * m_fMass;
+        auto fCheckedMass = CTimer::GetTimeStep() * m_fMass;
         if (m_f2ndSteerAngle != 0.0F
             || (GetForward().z < -0.5F
             && GetUp().z > -0.5F
@@ -2180,7 +2180,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     }
 
     if (!bPostCollision && bOnWater && GetUp().z > 0.0F) {
-        auto fMoveForce = m_vecMoveSpeed.SquaredMagnitude() * boatHandling->m_fAqPlaneForce * CTimer::ms_fTimeStep * vecBuoyancyForce.z * 0.5F;
+        auto fMoveForce = m_vecMoveSpeed.SquaredMagnitude() * boatHandling->m_fAqPlaneForce * CTimer::GetTimeStep() * vecBuoyancyForce.z * 0.5F;
         if (m_nModelIndex == eModelID::MODEL_SKIMMER)
             fMoveForce *= (m_fGasPedal + 1.0F);
         else if (m_fGasPedal <= 0.05F)
@@ -2188,7 +2188,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         else
             fMoveForce *= m_fGasPedal;
 
-        auto fMaxMoveForce = CTimer::ms_fTimeStep * boatHandling->m_fAqPlaneLimit * m_fMass / 125.0F;
+        auto fMaxMoveForce = CTimer::GetTimeStep() * boatHandling->m_fAqPlaneLimit * m_fMass / 125.0F;
         fMoveForce = std::min(fMoveForce, fMaxMoveForce);
 
         auto vecUsedMoveForce = GetUp() * fMoveForce;
@@ -2269,16 +2269,16 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
                             vecSteerMoveForce *= CVector(5.0F, 5.0F, 1.0F);
 
                         vecSteerMoveForce.z = std::max(0.0F, vecSteerMoveForce.z);
-                        CPhysical::ApplyMoveForce(vecSteerMoveForce * CTimer::ms_fTimeStep);
+                        CPhysical::ApplyMoveForce(vecSteerMoveForce * CTimer::GetTimeStep());
                     }
                     else {
-                        CPhysical::ApplyMoveForce(vecSteerMoveForce * CTimer::ms_fTimeStep);
+                        CPhysical::ApplyMoveForce(vecSteerMoveForce * CTimer::GetTimeStep());
 
                         auto vecTurnForcePoint = vecTransformedThrustPoint - (GetUp() * boatHandling->m_fThrustAppZ);
-                        CPhysical::ApplyTurnForce(vecSteerMoveForce * CTimer::ms_fTimeStep, vecTurnForcePoint);
+                        CPhysical::ApplyTurnForce(vecSteerMoveForce * CTimer::GetTimeStep(), vecTurnForcePoint);
 
                         auto fTractionSide = -DotProduct(vecSteerMoveForce, GetRight()) * m_pHandlingData->m_fTractionMultiplier;
-                        auto vecTurnForceSide = GetRight() * fTractionSide * CTimer::ms_fTimeStep;
+                        auto vecTurnForceSide = GetRight() * fTractionSide * CTimer::GetTimeStep();
                         CPhysical::ApplyTurnForce(vecTurnForceSide, GetUp());
                     }
 
@@ -2313,12 +2313,12 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
                     CVector vecTractionLoss(-fSteerAngleSin, 0.0F, 0.0F);
                     vecTractionLoss *= fTractionLoss;
                     CVector vecTractionLossTransformed = Multiply3x3(GetMatrix(), vecTractionLoss);
-                    vecTractionLossTransformed *= fThrustDepth * CTimer::ms_fTimeStep;
+                    vecTractionLossTransformed *= fThrustDepth * CTimer::GetTimeStep();
 
                     CPhysical::ApplyMoveForce(vecTractionLossTransformed);
                     CPhysical::ApplyTurnForce(vecTractionLossTransformed, vecTransformedThrustPoint);
 
-                    auto fUsedTimestep = std::max(CTimer::ms_fTimeStep, 0.01F);
+                    auto fUsedTimestep = std::max(CTimer::GetTimeStep(), 0.01F);
                     auto vecTurn = GetRight() * fUsedTimestep / fTraction * fTractionLoss * fSteerAngleSin * -0.75F;
                     CPhysical::ApplyTurnForce(vecTurn, GetUp());
                 }
@@ -2330,7 +2330,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         auto vecCross = CVector();
         vecCross.Cross(GetForward(), CVector(0.0F, 0.0F, 1.0F));
 
-        auto fMult = DotProduct(vecCross, m_vecMoveSpeed) * m_pHandlingData->m_fSuspensionBiasBetweenFrontAndRear * CTimer::ms_fTimeStep * fImmersionDepth * m_fMass * -0.1F;
+        auto fMult = DotProduct(vecCross, m_vecMoveSpeed) * m_pHandlingData->m_fSuspensionBiasBetweenFrontAndRear * CTimer::GetTimeStep() * fImmersionDepth * m_fMass * -0.1F;
         float fXTemp = vecCross.x * 0.3F;
         vecCross.x -= vecCross.y * 0.3F;
         vecCross.y += fXTemp;
@@ -2342,7 +2342,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     if (m_nStatus == eEntityStatus::STATUS_PLAYER && pPad->GetHandBrake()) {
         auto fDirDotProd = DotProduct(m_vecMoveSpeed, GetForward());
         if (fDirDotProd > 0.0F) {
-            auto fMoveForceMult = fDirDotProd * m_pHandlingData->m_fSuspensionLowerLimit * CTimer::ms_fTimeStep * fImmersionDepth * m_fMass * -0.1F;
+            auto fMoveForceMult = fDirDotProd * m_pHandlingData->m_fSuspensionLowerLimit * CTimer::GetTimeStep() * fImmersionDepth * m_fMass * -0.1F;
             auto vecMoveForce = GetForward() * fMoveForceMult;
             CPhysical::ApplyMoveForce(vecMoveForce);
         }
@@ -2353,7 +2353,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     }
 
     if ((m_nModelIndex != eModelID::MODEL_SKIMMER || m_f2ndSteerAngle == 0.0F) && !bCollidedWithWorld) {
-        auto vecTurnRes = Pow(boatHandling->m_vecTurnRes, CTimer::ms_fTimeStep);
+        auto vecTurnRes = Pow(boatHandling->m_vecTurnRes, CTimer::GetTimeStep());
         m_vecTurnSpeed = Multiply3x3(m_vecTurnSpeed, GetMatrix());
         m_vecTurnSpeed.y *= vecTurnRes.y;
         m_vecTurnSpeed.z *= vecTurnRes.z;
@@ -2429,7 +2429,7 @@ void CVehicle::AddExhaustParticles()
         return;
     float fSquaredMagnitude = (TheCamera.GetPosition() - GetPosition()).SquaredMagnitude();
     if (fSquaredMagnitude > 256.0f || fSquaredMagnitude > 64.0f
-        && !((CTimer::m_FrameCounter + static_cast<uint8>(m_nModelIndex)) & 1))
+        && !((CTimer::GetFrameCounter() + static_cast<uint8>(m_nModelIndex)) & 1))
     {
         return;
     }

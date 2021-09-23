@@ -69,7 +69,7 @@ void CClouds::Init() {
 // 0x712FF0
 void CClouds::Update() {
     CloudRotation = std::sin(TheCamera.m_fOrientation - 0.85f) * CWeather::Wind * 0.001f + CClouds::CloudRotation;
-    IndividualRotation += (int32)((CTimer::ms_fTimeStep * CWeather::Wind * 0.5f + 0.3f) * 60.0f);
+    IndividualRotation += (int32)((CTimer::GetTimeStep() * CWeather::Wind * 0.5f + 0.3f) * 60.0f);
 }
 
 // 0x712FA0
@@ -177,9 +177,9 @@ void CClouds::MovingFog_Update() {
         fogPosn.y += CClouds::ms_mf.m_vecWind.y + ms_mf.m_fSpeed[i];
 
         if (offset.Magnitude() <= 60.f) {
-            ms_mf.m_fIntensity[i] = std::min(ms_mf.m_fIntensity[i] + CTimer::ms_fTimeStep, ms_mf.m_fMaxIntensity[i]);
+            ms_mf.m_fIntensity[i] = std::min(ms_mf.m_fIntensity[i] + CTimer::GetTimeStep(), ms_mf.m_fMaxIntensity[i]);
         } else {
-            ms_mf.m_fIntensity[i] -= CTimer::ms_fTimeStep;
+            ms_mf.m_fIntensity[i] -= CTimer::GetTimeStep();
             if (ms_mf.m_fIntensity[i] <= 0.f)
                 MovingFog_Delete(i);
         }
@@ -212,7 +212,7 @@ void CClouds::MovingFogRender() {
     if (CWeather::Foggyness_SF == 0.f || CGame::currArea == AREA_CODE_NORMAL_WORLD || FindPlayerPed(-1)->m_nAreaCode == AREA_CODE_NORMAL_WORLD)
         return;
 
-    float step = CTimer::ms_fTimeStep * (1.f / 300.f);
+    float step = CTimer::GetTimeStep() * (1.f / 300.f);
     if (CCullZones::CamNoRain() && CCullZones::PlayerNoRain())
         CurrentFogIntensity = std::max(CurrentFogIntensity - step, 0.f);
     else

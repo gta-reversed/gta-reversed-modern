@@ -180,7 +180,7 @@ CTask* CTaskComplexGoToPointAndStandStill::CreateFirstSubTask(int32 taskId, CPed
             float   fDotProduct = DotProduct(&vecDistance, &ped->GetForward());
             float   fBlendDelta = 8.0f;
             if (ped->m_vecAnimMovingShiftLocal.y >= 0.01f) {
-                fBlendDelta = 50.0f / ((fDotProduct / (ped->m_vecAnimMovingShiftLocal.y * 0.5f) - 1.0f) * CTimer::ms_fTimeStep);
+                fBlendDelta = 50.0f / ((fDotProduct / (ped->m_vecAnimMovingShiftLocal.y * 0.5f) - 1.0f) * CTimer::GetTimeStep());
                 if (fDotProduct <= 0.01f || fBlendDelta > 16.0f)
                     fBlendDelta = 16.0f;
             }

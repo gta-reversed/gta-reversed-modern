@@ -80,7 +80,7 @@ void CStats::Init() {
     memset(TimesMissionAttempted, 0, sizeof(TimesMissionAttempted));
 
     bStatUpdateMessageDisplayed = false;
-    CTimer::m_snTimeInMilliseconds = 0;
+    CTimer::SetTimeInMS(0);
     for (int32 i = 0; i < 8; i++) {
         LastMissionPassedName[i] = '\0';
     }

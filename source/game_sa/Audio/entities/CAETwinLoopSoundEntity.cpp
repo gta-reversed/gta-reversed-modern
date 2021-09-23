@@ -72,7 +72,7 @@ void CAETwinLoopSoundEntity::UpdateParameters(CAESound* sound, int16 curPlayPos)
             m_pSound2 = nullptr;
     }
 
-    if (sound == m_pSound1 && CTimer::m_snTimeInMillisecondsPauseMode > m_nTimeToSwapSounds)
+    if (sound == m_pSound1 && CTimer::GetTimeInMSPauseMode() > m_nTimeToSwapSounds)
         SwapSounds();
 }
 
@@ -88,7 +88,7 @@ void CAETwinLoopSoundEntity::SwapSounds() {
             m_pSound2->m_fVolume = -100.0f;
             m_bPlayingFirstSound = true;
         }
-        m_nTimeToSwapSounds = CTimer::m_snTimeInMillisecondsPauseMode + CAEAudioUtility::GetRandomNumberInRange(m_nPlayTimeMin, m_nPlayTimeMax);
+        m_nTimeToSwapSounds = CTimer::GetTimeInMSPauseMode() + CAEAudioUtility::GetRandomNumberInRange(m_nPlayTimeMin, m_nPlayTimeMax);
     }
 }
 
@@ -146,7 +146,7 @@ bool CAETwinLoopSoundEntity::IsTwinLoopPlaying() {
 
 // 0x4F2CA0
 bool CAETwinLoopSoundEntity::DoSoundsSwitchThisFrame() {
-    return CTimer::m_snTimeInMillisecondsPauseMode > m_nTimeToSwapSounds;
+    return CTimer::GetTimeInMSPauseMode() > m_nTimeToSwapSounds;
 }
 
 // 0x4F2CB0
@@ -168,7 +168,7 @@ void CAETwinLoopSoundEntity::PlayTwinLoopSound(CVector posn, float volume, float
     sound.m_nCurrentPlayPosition = m_nSoundPlayStart2 == -1 ? CAEAudioUtility::GetRandomNumberInRange(0, 99) : m_nSoundPlayStart2;
     m_pSound2 = AESoundManager.RequestNewSound(&sound);
 
-    m_nTimeToSwapSounds = CTimer::m_snTimeInMillisecondsPauseMode + CAEAudioUtility::GetRandomNumberInRange(m_nPlayTimeMin, m_nPlayTimeMax);
+    m_nTimeToSwapSounds = CTimer::GetTimeInMSPauseMode() + CAEAudioUtility::GetRandomNumberInRange(m_nPlayTimeMin, m_nPlayTimeMax);
     m_bPlayingFirstSound = true;
 }
 

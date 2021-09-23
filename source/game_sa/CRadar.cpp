@@ -471,8 +471,8 @@ void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
     // arrow blips have negative type ids
     CRGBA arrowColor = ArrowBlipColour[-blipId];
 
-    if (CTimer::m_snTimeInMillisecondsPauseMode - legendTraceTimer > 600) {
-        legendTraceTimer = CTimer::m_snTimeInMillisecondsPauseMode;
+    if (CTimer::GetTimeInMSPauseMode() - legendTraceTimer > 600) {
+        legendTraceTimer = CTimer::GetTimeInMSPauseMode();
 
         legendTraceHeight = static_cast<eRadarTraceHeight>((legendTraceHeight + 1) % 3);
     }
@@ -882,8 +882,8 @@ void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float 
 // 0x584960
 void CRadar::DrawYouAreHereSprite(float x, float y)
 {
-    if ((CTimer::m_snTimeInMillisecondsPauseMode - mapYouAreHereTimer) > 700) {
-        mapYouAreHereTimer = CTimer::m_snTimeInMillisecondsPauseMode;
+    if ((CTimer::GetTimeInMSPauseMode() - mapYouAreHereTimer) > 700) {
+        mapYouAreHereTimer = CTimer::GetTimeInMSPauseMode();
         mapYouAreHereDisplay = !mapYouAreHereDisplay;
     }
 

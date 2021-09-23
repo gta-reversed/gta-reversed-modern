@@ -545,7 +545,7 @@ void CPostEffects::NightVision() {
 
     // fix fade-in
     if (m_fNightVisionSwitchOnFXCount > 0.0f) {
-        m_fNightVisionSwitchOnFXCount -= CTimer::ms_fTimeStep;
+        m_fNightVisionSwitchOnFXCount -= CTimer::GetTimeStep();
         if (m_fNightVisionSwitchOnFXCount <= 0.0f) {
             m_fNightVisionSwitchOnFXCount = 0.0f;
         }

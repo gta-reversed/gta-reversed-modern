@@ -188,7 +188,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped)
             {
                 ped->bIsStanding = false;
                 relPosn *= 0.25F;
-                ped->m_vecMoveSpeed = relPosn / CTimer::ms_fTimeStep;
+                ped->m_vecMoveSpeed = relPosn / CTimer::GetTimeStep();
 
                 if (ped->m_vecMoveSpeed.Magnitude() > 0.2F)
                     ped->m_vecMoveSpeed *= 0.2F / ped->m_vecMoveSpeed.Magnitude();
@@ -209,7 +209,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped)
             else
             {
                 ped->bIsStanding = false;
-                ped->m_vecMoveSpeed = relPosn / CTimer::ms_fTimeStep;
+                ped->m_vecMoveSpeed = relPosn / CTimer::GetTimeStep();
                 ped->m_vecMoveSpeed += vecClimbEntSpeed;
 
                 if (!(m_pAnim->m_nFlags & ANIM_FLAG_STARTED) && m_nHeightForAnim == CLIMB_STANDUP)

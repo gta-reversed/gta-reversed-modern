@@ -135,7 +135,7 @@ void CStuntJumpManager::Update() {
                     CStats::IncrementStat(STAT_UNIQUE_JUMPS_FOUND, 1.0f);
                 }
 
-                CTimer::ms_fTimeScale = 0.3f;
+                CTimer::SetTimeScale(0.3f);
                 CVector rotation{0.0f, 0.0f, 0.0f};
                 TheCamera.SetCamPositionForFixedMode(&mp_Active->camera, &rotation);
                 TheCamera.TakeControl(playerVehicle, MODE_FIXED, SWITCHTYPE_JUMPCUT, 1);
@@ -195,7 +195,7 @@ void CStuntJumpManager::Update() {
         if (m_iTimer < 300)
             return;
 
-        CTimer::ms_fTimeScale = 1.0f;
+        CTimer::ResetTimeScale();
         TheCamera.RestoreWithJumpCut();
 
         if (!m_bHitReward || mp_Active->done) {

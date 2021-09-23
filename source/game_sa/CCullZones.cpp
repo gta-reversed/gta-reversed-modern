@@ -197,11 +197,11 @@ eZoneAttributes CCullZones::FindAttributesForCoors(float x, float y) {
 
 // 0x72DEC0
 void CCullZones::Update() {
-    if ((CTimer::m_FrameCounter & 7) == 2) {
+    if ((CTimer::GetFrameCounter() & 7) == 2) {
         auto cameraPosition = TheCamera.GetGameCamPosition();
         CurrentFlags_Camera = FindAttributesForCoors(cameraPosition->x, cameraPosition->y);
     }
-    else if ((CTimer::m_FrameCounter & 7) == 6) {
+    else if ((CTimer::GetFrameCounter() & 7) == 6) {
         CVector posn = FindPlayerCoors();
         CurrentFlags_Player = FindAttributesForCoors(posn.x, posn.y);
         if (!bMilitaryZonesDisabled && (CurrentFlags_Player & eZoneAttributes::MILITARY_ZONE) != 0) {

@@ -3,7 +3,7 @@
 int32& CPlayerSkin::m_txdSlot = *(int32*) 0xC3F03C;
 RpClump*& CPlayerSkin::m_Clump = *(RpClump**)(0xC3F040);
 float& CPlayerSkin::m_Angle = *(float*) 0xC3F048;
-float& CPlayerSkin::m_C3F04C = *(float*) 0xC3F04C; // Rename CPlayerSkin:m_C3F04C
+uint32& CPlayerSkin::m_C3F04C = *(uint32*) 0xC3F04C; // todo: Rename CPlayerSkin:m_C3F04C
 
 void CPlayerSkin::InjectHooks() {
     ReversibleHooks::Install("CPlayerSkin", "Initialise", 0x6FF8A0, &CPlayerSkin::Initialise);
@@ -32,12 +32,12 @@ void CPlayerSkin::RenderFrontendSkinEdit() {
 
     auto* parentFrame = static_cast<RwFrame*>(Scene.m_pRwCamera->object.object.parent);
     RwRGBAReal color{255, 255, 255, 1.0f};
-    if (CTimer::m_snTimeInMillisecondsPauseMode - CPlayerSkin::m_C3F04C > 7) {
+    if (CTimer::GetTimeInMSPauseMode() - CPlayerSkin::m_C3F04C > 7) {
         CPlayerSkin::m_Angle = CPlayerSkin::m_Angle + 2.0f;
         if (CPlayerSkin::m_Angle > 360.0) {
             CPlayerSkin::m_Angle -= 360.0f;
         }
-        CPlayerSkin::m_C3F04C = (float)CTimer::m_snTimeInMillisecondsPauseMode;
+        CPlayerSkin::m_C3F04C = CTimer::GetTimeInMSPauseMode();
     }
     auto* frame = static_cast<RwFrame*>(CPlayerSkin::m_Clump->object.parent);
     RwFrameTransform(frame, &parentFrame->modelling, rwCOMBINEREPLACE);

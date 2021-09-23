@@ -72,6 +72,6 @@ void CSpecialFX::Render2DFXs() {
 void CSpecialFX::ReplayStarted() {
     if (CSpecialFX::bSnapShotActive) {
         CSpecialFX::bSnapShotActive = false;
-        CTimer::ms_fTimeScale = 1.0f;
+        CTimer::ResetTimeScale();
     }
 }

@@ -256,8 +256,8 @@ void CTrain::ProcessControl_Reversed()
             }
             else
             {
-                m_fTrainSpeed *= pow(0.9900000095367432f, CTimer::ms_fTimeStep);
-                m_fCurrentRailDistance += m_fTrainSpeed * CTimer::ms_fTimeStep;
+                m_fTrainSpeed *= pow(0.9900000095367432f, CTimer::GetTimeStep());
+                m_fCurrentRailDistance += m_fTrainSpeed * CTimer::GetTimeStep();
             }
 
             if (trainFlags.b01 && trainFlags.bStoppedAtStation
@@ -477,7 +477,7 @@ void CTrain::ProcessControl_Reversed()
 
             numCarriagesPulled += 3;
 
-            m_fTrainSpeed += m_fTrainGas * 0.00390625f * CTimer::ms_fTimeStep * 0.0020000001f / numCarriagesPulled;
+            m_fTrainSpeed += m_fTrainGas * 0.00390625f * CTimer::GetTimeStep() * 0.002f / numCarriagesPulled;
 
             if (m_fTrainBrake != 0.0f)
             {
@@ -486,7 +486,7 @@ void CTrain::ProcessControl_Reversed()
                 {
                     fTrainSpeed = -fTrainSpeed;
                 }
-                float fBreak = m_fTrainBrake * 0.00390625f * CTimer::ms_fTimeStep * 0.0060000001f / numCarriagesPulled;
+                float fBreak = m_fTrainBrake * 0.00390625f * CTimer::GetTimeStep() * 0.006f / numCarriagesPulled;
                 if (fTrainSpeed >= fBreak)
                 {
                     if (m_fTrainSpeed < 0.0)
@@ -504,13 +504,13 @@ void CTrain::ProcessControl_Reversed()
                 }
             }
 
-            m_fTrainSpeed *= pow(0.999750018119812f, CTimer::ms_fTimeStep);
+            m_fTrainSpeed *= pow(0.999750018119812f, CTimer::GetTimeStep());
             if (!trainFlags.bClockwiseDirection)
             {
                 m_fTrainSpeed = -m_fTrainSpeed;
             }
 
-            m_fCurrentRailDistance += CTimer::ms_fTimeStep * m_fTrainSpeed;
+            m_fCurrentRailDistance += CTimer::GetTimeStep() * m_fTrainSpeed;
 
             if (m_nStatus == STATUS_PLAYER)
             {
@@ -748,7 +748,7 @@ void CTrain::ProcessControl_Reversed()
 
         fTrainNodeLighting += (fTrainNextNodeLighting - fTrainNodeLighting) * fTheDistance;
         m_fContactSurfaceBrightness = fTrainNodeLighting;
-        m_vecMoveSpeed = (1.0f / CTimer::ms_fTimeStep) * (GetPosition() - vecOldTrainPosition);
+        m_vecMoveSpeed = (1.0f / CTimer::GetTimeStep()) * (GetPosition() - vecOldTrainPosition);
 
         float fNewTrainHeading = GetHeading();
         float fHeading = fNewTrainHeading - fOldTrainHeading;
@@ -764,7 +764,7 @@ void CTrain::ProcessControl_Reversed()
             fHeading -= 6.2831855f;
         }
 
-        m_vecTurnSpeed = CVector(0.0f, 0.0f, fHeading / CTimer::ms_fTimeStep);
+        m_vecTurnSpeed = CVector(0.0f, 0.0f, fHeading / CTimer::GetTimeStep());
 
         if (trainFlags.bNotOnARailRoad)
         {
@@ -867,7 +867,7 @@ void CTrain::ProcessControl_Reversed()
         {
             CVector vecPoint = pBoundingBox->m_vecMax.y * GetForward();
             vecPoint += GetPosition();
-            vecPoint += CTimer::ms_fTimeStep * m_vecMoveSpeed;
+            vecPoint += CTimer::GetTimeStep() * m_vecMoveSpeed;
 
             MarkSurroundingEntitiesForCollisionWithTrain(vecPoint, 3.0f, this, false);
         }
@@ -893,8 +893,8 @@ void CTrain::ProcessControl_Reversed()
                 fMaxMovingSpeed = 0.015f;
             }
 
-            float fMaxForceTimeStep = (fMaxForce * CTimer::ms_fTimeStep) * (fMaxForce * CTimer::ms_fTimeStep);
-            float fMaxTorqueTimeStep = (fMaxTorque * CTimer::ms_fTimeStep) * (fMaxTorque * CTimer::ms_fTimeStep);
+            float fMaxForceTimeStep = (fMaxForce * CTimer::GetTimeStep()) * (fMaxForce * CTimer::GetTimeStep());
+            float fMaxTorqueTimeStep = (fMaxTorque * CTimer::GetTimeStep()) * (fMaxTorque * CTimer::GetTimeStep());
 
             m_vecForce = (m_vecForce + m_vecMoveSpeed) * 0.5f;
             m_vecTorque = (m_vecTorque + m_vecTurnSpeed) * 0.5f;
@@ -940,13 +940,13 @@ void CTrain::ProcessControl_Reversed()
             physicalFlags.bTouchingWater = true;
 
             float fTimeStep = 0.0099999998f;
-            if (CTimer::ms_fTimeStep >= 0.0099999998f)
+            if (CTimer::GetTimeStep() >= 0.0099999998f)
             {
-                fTimeStep = CTimer::ms_fTimeStep;
+                fTimeStep = CTimer::GetTimeStep();
             }
 
             float fSpeedFactor = 1.0f - vecOldTrainPosition.z / (fTimeStep * m_fMass * 0.0080000004f) * 0.050000001f;
-            fSpeedFactor = pow(fSpeedFactor, CTimer::ms_fTimeStep);
+            fSpeedFactor = pow(fSpeedFactor, CTimer::GetTimeStep());
 
             m_vecMoveSpeed *= fSpeedFactor;
             m_vecTurnSpeed *= fSpeedFactor;

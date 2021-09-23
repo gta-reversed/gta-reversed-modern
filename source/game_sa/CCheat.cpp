@@ -190,7 +190,7 @@ void CCheat::AddToCheatString(char LastPressedKey) {
 void CCheat::ResetCheats() {
     memset(&m_aCheatsActive, 0, sizeof(m_aCheatsActive));
     CWeather::ReleaseWeather();
-    CTimer::ms_fTimeScale = 1.0f;
+    CTimer::ResetTimeScale();
     m_CheatString[0] = '\0';
     m_bHasPlayerCheated = false;
 }
@@ -407,8 +407,15 @@ void CCheat::ExtraSunnyWeatherCheat() {
 
 // 0x438f90
 void CCheat::FastTimeCheat() {
-    if (CTimer::ms_fTimeScale < 4.0f) {
-        CTimer::ms_fTimeScale += CTimer::ms_fTimeScale;
+    if (CTimer::GetTimeScale() < 4.0f) {
+        CTimer::SetTimeScale(CTimer::GetTimeScale() * 2.0f); // todo: check compiler optimization, should be ms_fTimeScale + ms_fTimeScale
+    }
+}
+
+// 0x438fc0
+void CCheat::SlowTimeCheat() {
+    if (CTimer::GetTimeScale() > 0.25f) {
+        CTimer::SetTimeScale(CTimer::GetTimeScale() / 2.0f);
     }
 }
 
@@ -767,13 +774,6 @@ void CCheat::SkinnyCheat() {
     CPlayerPed* player = FindPlayerPed(-1);
     if (player->m_nPedState != PEDSTATE_DRIVING) {
         CClothes::RebuildPlayer(player, false);
-    }
-}
-
-// 0x438fc0
-void CCheat::SlowTimeCheat() {
-    if (CTimer::ms_fTimeScale > 0.25f) {
-        CTimer::ms_fTimeScale *= 0.5f;
     }
 }
 

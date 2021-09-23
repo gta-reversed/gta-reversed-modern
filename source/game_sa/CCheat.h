@@ -52,6 +52,7 @@ public:
      static void EverybodyAttacksPlayerCheat();
      static void ExtraSunnyWeatherCheat();
      static void FastTimeCheat();
+     static void SlowTimeCheat();
      static void FatCheat();
      static void FlyboyCheat();
      static void FoggyWeatherCheat();
@@ -80,7 +81,6 @@ public:
      static void RiotCheat();
      static void SandstormCheat();
      static void SkinnyCheat();
-     static void SlowTimeCheat();
      static void StaminaCheat();
      static void StockCarCheat();
      static void StockCar2Cheat();

@@ -161,7 +161,7 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
         CVector2D vecDirection(vecDistance);
         vecDirection.Normalise();
         CVector2D vecDistanceToTargetFromLastPoint = m_vecTargetPoint - m_vecLastPedPos;
-        CVector2D vecDistanceToTargetFromPoint = m_vecTargetPoint - (CTimer::ms_fTimeStep * ped->m_vecMoveSpeed + pedPos);
+        CVector2D vecDistanceToTargetFromPoint = m_vecTargetPoint - (CTimer::GetTimeStep() * ped->m_vecMoveSpeed + pedPos);
         m_vecLastPedPos = pedPos;
         if ((vecDistance.SquaredMagnitude() >= m_fRadius * m_fRadius
             || gotoPointFlags.m_b05

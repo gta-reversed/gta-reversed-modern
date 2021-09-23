@@ -70,12 +70,12 @@ bool CTaskSimplePlayerOnFoot::ProcessPed_Reversed(class CPed* ped)
         }
 
         ProcessPlayerWeapon(pPlayerPed);
-        m_nFrameCounter = CTimer::m_FrameCounter;
+        m_nFrameCounter = CTimer::GetFrameCounter();
         return false;
     }
     else
     {
-        m_nFrameCounter = CTimer::m_FrameCounter;
+        m_nFrameCounter = CTimer::GetFrameCounter();
         return false;
     }
 }
@@ -127,7 +127,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* pPlayerPed)
     {
         if (pPad->GetEnterTargeting()
             || TheCamera.m_bJustJumpedOutOf1stPersonBecauseOfTarget
-            || pPad->GetTarget() && m_nFrameCounter < (CTimer::m_FrameCounter - 1))
+            || pPad->GetTarget() && m_nFrameCounter < (CTimer::GetFrameCounter() - 1))
         {
             uint32 weaponId = 0;
             switch (weaponType)
@@ -781,7 +781,7 @@ PED_WEAPON_AIMING_CODE:
         }
         else if (pPad->GetEnterTargeting()
             || TheCamera.m_bJustJumpedOutOf1stPersonBecauseOfTarget
-            || m_nFrameCounter < (uint32)(CTimer::m_FrameCounter - 1))
+            || m_nFrameCounter < (uint32)(CTimer::GetFrameCounter() - 1))
         {
             pPlayerPed->FindWeaponLockOnTarget();
         }
@@ -1242,7 +1242,7 @@ int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPed* pPed, bool bAvoidJumping
 
     if (CGameLogic::IsPlayerAllowedToGoInThisDirection(pPlayerPed, -sin(limitedRadianAngle), cos(limitedRadianAngle), 0.0, 0.0))
     {
-        float fMaximumMoveBlendRatio = CTimer::ms_fTimeStep * 0.07f;
+        float fMaximumMoveBlendRatio = CTimer::GetTimeStep() * 0.07f;
         if (pedMoveBlendRatio - pPlayerData->m_fMoveBlendRatio <= fMaximumMoveBlendRatio)
         {
             if (-fMaximumMoveBlendRatio <= pedMoveBlendRatio - pPlayerData->m_fMoveBlendRatio)

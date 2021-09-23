@@ -114,7 +114,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
         && (m_pAnim->m_fBlendAmount >= 1.0F || m_pAnim->m_fBlendDelta > 0.0F)
         )
     {
-        ped->ApplyMoveForce(0.0F, 0.0F, CTimer::ms_fTimeStep * ped->m_fMass * 0.35F * GAME_GRAVITY);
+        ped->ApplyMoveForce(0.0F, 0.0F, CTimer::GetTimeStep() * ped->m_fMass * 0.35F * GAME_GRAVITY);
     }
     else if (ped->m_vecMoveSpeed.z > 0.0F && !ped->m_vecMoveSpeed.IsZero()
         || !bUsingFallGlide && (ped->m_nPedState == PEDSTATE_DIE || ped->m_nPedState == PEDSTATE_DEAD)

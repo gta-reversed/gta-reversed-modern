@@ -68,7 +68,7 @@ void CBike::ProcessBuoyancy() {
     ApplyMoveForce(vecBuoyancyForce);
     ApplyTurnForce(vecBuoyancyForce, vecBuoyancyTurnPoint);
 
-    auto fTimeStep = std::max(0.01F, CTimer::ms_fTimeStep);
+    auto fTimeStep = std::max(0.01F, CTimer::GetTimeStep());
     auto fUsedMass = m_fMass / 125.0F;
     auto fBuoyancyForceZ = vecBuoyancyForce.z / (fTimeStep * fUsedMass);
 
@@ -79,7 +79,7 @@ void CBike::ProcessBuoyancy() {
         fBuoyancyForceZ *= 1.5F;
 
     auto fBuoyancyForceMult = std::max(0.5F, 1.0F - fBuoyancyForceZ / 20.0F);
-    auto fSpeedMult = pow(fBuoyancyForceMult, CTimer::ms_fTimeStep);
+    auto fSpeedMult = pow(fBuoyancyForceMult, CTimer::GetTimeStep());
     m_vecMoveSpeed *= fSpeedMult;
     m_vecTurnSpeed *= fSpeedMult;
 
@@ -124,7 +124,7 @@ inline void CBike::ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver)
 
     if (IsAnyWheelMakingContactWithGround()) {
         if (!pPed->IsPlayer()) {
-            auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::ms_fTimeStep, eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, false);
+            auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::GetTimeStep(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, false);
             auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
             if (damageEvent.AffectsPed(pPed))
                 pedDamageResponseCalc.ComputeDamageResponse(pPed, &damageEvent.m_damageResponse, true);

@@ -38,7 +38,7 @@ void CDraw::CalculateAspectRatio() {
 
 // 0x53E600
 void DoFade() {
-    if (CTimer::m_UserPause || CTimer::m_CodePause)
+    if (CTimer::GetIsPaused())
         return;
 
     if (JustLoadedDontFadeInYet) {

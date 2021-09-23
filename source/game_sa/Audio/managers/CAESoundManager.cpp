@@ -85,13 +85,13 @@ void CAESoundManager::Service() {
     uint32 timeSinceLastUpdate;
     if (CAESoundManager::IsPaused()) {
         if (m_bPauseTimeInUse)
-            timeSinceLastUpdate = CTimer::m_snTimeInMillisecondsPauseMode - m_nUpdateTime;
+            timeSinceLastUpdate = CTimer::GetTimeInMSPauseMode() - m_nUpdateTime;
         else {
             m_nPauseUpdateTime = m_nUpdateTime;
             timeSinceLastUpdate = 0;
         }
 
-        m_nUpdateTime = CTimer::m_snTimeInMillisecondsPauseMode;
+        m_nUpdateTime = CTimer::GetTimeInMSPauseMode();
         m_bPauseTimeInUse = true;
     } else {
         if (m_bPauseTimeInUse)

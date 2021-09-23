@@ -58,10 +58,10 @@ void CSimpleVariablesSaveStructure::Construct() {
     m_bClockHasBeenStored = CClock::bClockHasBeenStored;
 
     m_nTimeInMilliseconds = CTimer::GetTimeInMS();
-    m_fTimeScale = CTimer::ms_fTimeScale;
-    m_fTimeStep = CTimer::ms_fTimeStep;
-    m_fTimeStepNonClipped = CTimer::ms_fTimeStepNonClipped;
-    m_nFrameCounter = CTimer::m_FrameCounter;
+    m_fTimeScale = CTimer::GetTimeScale();
+    m_fTimeStep = CTimer::GetTimeStep();
+    m_fTimeStepNonClipped = CTimer::GetTimeStepNonClipped();
+    m_nFrameCounter = CTimer::GetFrameCounter();
 
     m_nOldWeatherType = CWeather::OldWeatherType;
     m_nNewWeatherType = CWeather::NewWeatherType;
@@ -124,15 +124,15 @@ void CSimpleVariablesSaveStructure::Extract(uint32& versionId) const {
     CClock::ms_Stored_nGameClockMinutes = m_nStoredGameMinutes;
     CClock::bClockHasBeenStored = m_bClockHasBeenStored != 0;
 
-    CTimer::m_snTimeInMilliseconds = m_nTimeInMilliseconds;
+    CTimer::SetTimeInMS(m_nTimeInMilliseconds);
     if (m_nTimeInMilliseconds > 4140000000) { // UTC time & date: Tue Feb 17 1970 22:00:00
         CClock::ms_nLastClockTick = 1;
-        CTimer::m_snTimeInMilliseconds = 1;
+        CTimer::SetTimeInMS(1);
     }
-    CTimer::ms_fTimeScale = m_fTimeScale;
-    CTimer::ms_fTimeStep = m_fTimeStep;
-    CTimer::ms_fTimeStepNonClipped = m_fTimeStepNonClipped;
-    CTimer::m_FrameCounter = m_nFrameCounter;
+    CTimer::SetTimeScale(m_fTimeScale);
+    CTimer::SetTimeStep(m_fTimeStep);
+    CTimer::SetTimeStepNonClipped(m_fTimeStepNonClipped);
+    CTimer::SetFrameCounter(m_nFrameCounter);
 
     CWeather::OldWeatherType = m_nOldWeatherType;
     CWeather::NewWeatherType = m_nNewWeatherType;

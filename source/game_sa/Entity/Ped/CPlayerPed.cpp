@@ -476,7 +476,7 @@ void CPlayerPed::ClearAdrenaline() {
     if (m_pPlayerData->m_bAdrenaline) {
         if (m_pPlayerData->m_nAdrenalineEndTime) {
             m_pPlayerData->m_nAdrenalineEndTime = 0;
-            CTimer::ms_fTimeScale = 1.0f;
+            CTimer::ResetTimeScale();
         }
     }
 }
@@ -604,12 +604,12 @@ bool CPlayerPed::HandleSprintEnergy(bool arg0, float adrenalineConsumedPerTimeSt
             return true;
 
         if (timeCanRun > -150.0f) { // TODO: Find out what this magic number is
-            timeCanRun = std::max(-150.0f, timeCanRun - CTimer::ms_fTimeStep * adrenalineConsumedPerTimeStep);
+            timeCanRun = std::max(-150.0f, timeCanRun - CTimer::GetTimeStep() * adrenalineConsumedPerTimeStep);
             return true;
         }
     } else {
         if (CStats::GetFatAndMuscleModifier(STAT_MOD_TIME_CAN_RUN) > timeCanRun) {
-            timeCanRun += CTimer::ms_fTimeStep * adrenalineConsumedPerTimeStep / 2.0f;
+            timeCanRun += CTimer::GetTimeStep() * adrenalineConsumedPerTimeStep / 2.0f;
         }
     }
     return false;
@@ -632,9 +632,6 @@ constexpr struct tPlayerSprintSet { // From 0x8D2460
     { 4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 1.0f, 0.3f, 0.3f }, // WATER
     { 4.0f, 0.7f, 0.2f, 5.0f, 10.0f, 0.0f, 0.0f, 1.0f }  // UNDERWATER
 };
-
-
-
 
 // 0x60A610
 float CPlayerPed::ControlButtonSprint(eSprintType sprintType) {
@@ -668,7 +665,7 @@ void CPlayerPed::ResetPlayerBreath() {
 // 0x60A8D0
 void CPlayerPed::HandlePlayerBreath(bool bDecreaseAir, float fMultiplier) {
     float& breath = m_pPlayerData->m_fBreath;
-    float  decreaseAmount = CTimer::ms_fTimeStep * fMultiplier;
+    float  decreaseAmount = CTimer::GetTimeStep() * fMultiplier;
     if (!bDecreaseAir || CCheat::m_aCheatsActive[CHEAT_INFINITE_OXYGEN]) {
         breath += decreaseAmount * 2.0f;
     } else {

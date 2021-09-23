@@ -239,7 +239,7 @@ void CObject::ProcessControl_Reversed()
             m_vecTorque += m_vecTurnSpeed;
             m_vecTorque /= 2.0F;
 
-            const auto fTimeStep = CTimer::ms_fTimeStep * 0.003F;
+            const auto fTimeStep = CTimer::GetTimeStep() * 0.003F;
             if (pow(fTimeStep, 2.0F) <= m_vecForce.SquaredMagnitude()
                 || pow(fTimeStep, 2.0F) <= m_vecTorque.SquaredMagnitude())
             {
@@ -279,7 +279,7 @@ void CObject::ProcessControl_Reversed()
 
         CPhysical::ApplyMoveForce(vecBuoyancyForce);
         CPhysical::ApplyTurnForce(vecBuoyancyForce, vecBuoyancyTurnPoint);
-        const auto fTimeStep = pow(0.97F, CTimer::ms_fTimeStep);
+        const auto fTimeStep = pow(0.97F, CTimer::GetTimeStep());
         m_vecMoveSpeed *= fTimeStep;
         m_vecTurnSpeed *= fTimeStep;
     }
@@ -302,7 +302,7 @@ void CObject::ProcessControl_Reversed()
     if (m_nModelIndex == ModelIndices::MI_RCBOMB)
     {
         CPhysical::ApplyTurnForce(m_vecMoveSpeed * -0.05F, -GetForward());
-        m_vecMoveSpeed *= pow(CTimer::ms_fTimeStep, 1.0F - m_vecMoveSpeed.SquaredMagnitude() * 0.2F);
+        m_vecMoveSpeed *= pow(CTimer::GetTimeStep(), 1.0F - m_vecMoveSpeed.SquaredMagnitude() * 0.2F);
     }
 
     if (m_bIsBIGBuilding)
@@ -327,7 +327,7 @@ void CObject::ProcessControl_Reversed()
         if (fDiff > 0.0F && m_vecTurnSpeed.z < fDoorCutoffSpeed
             || fDiff < 0.0F && m_vecTurnSpeed.z > -fDoorCutoffSpeed)
         {
-            m_vecTurnSpeed.z += CTimer::ms_fTimeStep * fDoorSpeedMult * fDiff;
+            m_vecTurnSpeed.z += CTimer::GetTimeStep() * fDoorSpeedMult * fDiff;
         }
 
         if (fDiff != 0.0F && objectFlags.bIsDoorMoving)
@@ -483,7 +483,7 @@ uint8 CObject::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionB
         || m_pObjectInfo->m_nSpecialColResponseCase == eObjectSpecialColResponseCases::COL_SPECIAL_RESPONSE_GRENADE)
     {
         auto* pColModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
-        const auto fMove = m_vecMoveSpeed.SquaredMagnitude() * pow(CTimer::ms_fTimeStep, 2.0F);
+        const auto fMove = m_vecMoveSpeed.SquaredMagnitude() * pow(CTimer::GetTimeStep(), 2.0F);
         if (fMove >= pow(pColModel->GetBoundRadius(), 2.0F))
             return static_cast<uint8>(ceil(sqrt(fMove) / pColModel->GetBoundRadius()));
 
@@ -497,7 +497,7 @@ uint8 CObject::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionB
             auto pColModel = CEntity::GetColModel();
             auto vecMin = Multiply3x3(GetMatrix(), pColModel->GetBoundingBox().m_vecMin);
             auto vecSpeed = CPhysical::GetSpeed(vecMin);
-            const auto fMove = vecSpeed.SquaredMagnitude() * pow(CTimer::ms_fTimeStep, 2.0F);
+            const auto fMove = vecSpeed.SquaredMagnitude() * pow(CTimer::GetTimeStep(), 2.0F);
             if (fMove >= 0.0225F) // pow(0.15F, 2.0F)
                 return static_cast<uint8>(ceil(sqrt(fMove) / 0.15F));
 
@@ -520,7 +520,7 @@ uint8 CObject::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionB
             vecMax = CPhysical::GetSpeed(vecMax);
 
             auto& vecUsed = vecMin.SquaredMagnitude() >= vecMax.SquaredMagnitude() ? vecMin : vecMax;
-            const auto fMove = vecUsed.SquaredMagnitude() * pow(CTimer::ms_fTimeStep, 2.0F);
+            const auto fMove = vecUsed.SquaredMagnitude() * pow(CTimer::GetTimeStep(), 2.0F);
             if (fMove >= 0.09F)
                 return static_cast<uint8>(ceil(sqrt(fMove) / 0.3F));
 
@@ -534,14 +534,14 @@ uint8 CObject::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionB
             auto* pColModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
             const auto vecSize = pColModel->GetBoundingBox().m_vecMax - pColModel->GetBoundingBox().m_vecMin;
             const auto fEdge = std::max({ vecSize.x, vecSize.y, vecSize.z }) / 2.0F;
-            const auto fMove = m_vecMoveSpeed.SquaredMagnitude() * pow(CTimer::ms_fTimeStep, 2.0F);
+            const auto fMove = m_vecMoveSpeed.SquaredMagnitude() * pow(CTimer::GetTimeStep(), 2.0F);
             if (fMove >= pow(fEdge, 2.0F))
                 return static_cast<uint8>(ceil(sqrt(fMove) / fEdge));
 
             return 1;
         }
 
-        const auto fMove = m_vecMoveSpeed.SquaredMagnitude() * pow(CTimer::ms_fTimeStep, 2.0F);
+        const auto fMove = m_vecMoveSpeed.SquaredMagnitude() * pow(CTimer::GetTimeStep(), 2.0F);
         if (fMove >= 0.09F)
             return static_cast<uint8>(ceil(sqrt(fMove) / 0.3F));
 
@@ -1006,7 +1006,7 @@ void CObject::ProcessSamSiteBehaviour() {
             const auto fAngleDiff = CGeneral::LimitRadianAngle(fAngle - fHeading);
 
             float fNewAngle;
-            const auto fTimeStep = CTimer::ms_fTimeStep / 20.0F;
+            const auto fTimeStep = CTimer::GetTimeStep() / 20.0F;
             if (abs(fAngleDiff) <= fTimeStep)
                 fNewAngle = fAngle;
             else if (fAngleDiff < 0.0F)
@@ -1022,7 +1022,7 @@ void CObject::ProcessSamSiteBehaviour() {
             if (vecShootDir.Magnitude2D() >= 120.0F)
                 return;
 
-            if (fabs(fAngleDiff) >= 0.1F || CTimer::GetTimeInMS() / 4000 == CTimer::m_snPreviousTimeInMilliseconds / 4000)
+            if (fabs(fAngleDiff) >= 0.1F || CTimer::GetTimeInMS() / 4000 == CTimer::GetPreviousTimeInMS() / 4000)
                 return;
 
             auto vecRocketDir = m_matrix->GetForward() + m_matrix->GetUp();
@@ -1032,7 +1032,7 @@ void CObject::ProcessSamSiteBehaviour() {
         }
     }
 
-    fHeading += CTimer::ms_fTimeStep / 200.0F;
+    fHeading += CTimer::GetTimeStep() / 200.0F;
     CPlaceable::SetHeading(fHeading - HALF_PI);
     CEntity::UpdateRW();
     CEntity::UpdateRwFrame();
@@ -1040,7 +1040,7 @@ void CObject::ProcessSamSiteBehaviour() {
 
 // 0x5A0B50
 void CObject::ProcessTrainCrossingBehaviour() {
-    if (!(static_cast<uint8>(CTimer::m_FrameCounter + m_nRandomSeedUpperByte) & 0x10))
+    if (!(static_cast<uint8>(CTimer::GetFrameCounter() + m_nRandomSeedUpperByte) & 0x10))
     {
         const auto& vecPos = GetPosition();
         const auto bWasEnabled = objectFlags.bTrainCrossEnabled;
@@ -1064,7 +1064,7 @@ void CObject::ProcessTrainCrossingBehaviour() {
         return;
 
     const auto fAngle = acos(m_matrix->GetUp().z);
-    const auto fTimeStep = CTimer::ms_fTimeStep / 200.0F;
+    const auto fTimeStep = CTimer::GetTimeStep() / 200.0F;
     if (objectFlags.bTrainCrossEnabled)
         CObject::SetMatrixForTrainCrossing(m_matrix, std::max(0.0F, fAngle - fTimeStep));
     else

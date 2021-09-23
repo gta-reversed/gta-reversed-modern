@@ -81,8 +81,8 @@ void CCutsceneObject::ProcessControl_Reversed()
     }
     else
     {
-        if (CTimer::ms_fTimeStep >= 0.01F)
-            m_vecMoveSpeed *= 1.0F / CTimer::ms_fTimeStep;
+        if (CTimer::GetTimeStep() >= 0.01F)
+            m_vecMoveSpeed *= 1.0F / CTimer::GetTimeStep();
         else
             m_vecMoveSpeed *= 100.0F;
 
@@ -90,7 +90,7 @@ void CCutsceneObject::ProcessControl_Reversed()
             m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
         else
         {
-            m_vForce += m_vecMoveSpeed * CTimer::ms_fTimeStep;
+            m_vForce += m_vecMoveSpeed * CTimer::GetTimeStep();
             m_matrix->SetTranslateOnly(m_vWorldPosition + m_vForce);
         }
     }
@@ -166,7 +166,7 @@ void CCutsceneObject::PreRender_Reversed()
                                     false, nullptr))
     {
         const auto fDayNight = colPoint.m_nLightingB.GetCurrentLighting();
-        m_fContactSurfaceBrightness = lerp(m_fContactSurfaceBrightness, fDayNight, CTimer::ms_fTimeStep / 10.0F);
+        m_fContactSurfaceBrightness = lerp(m_fContactSurfaceBrightness, fDayNight, CTimer::GetTimeStep() / 10.0F);
     }
 }
 

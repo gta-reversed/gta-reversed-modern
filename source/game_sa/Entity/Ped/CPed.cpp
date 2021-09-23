@@ -645,7 +645,7 @@ void CPed::ProcessBuoyancy()
                 if (!pSwimTask)
                     return;
 
-                pSwimTask->m_fSwimStopTime += CTimer::ms_fTimeStep;
+                pSwimTask->m_fSwimStopTime += CTimer::GetTimeStep();
                 return;
             }
         }
@@ -681,7 +681,7 @@ void CPed::ProcessBuoyancy()
     // the movement of ped is downward, preventing particles from being created
     // if ped is standing still and water wave touches him
     if (!physicalFlags.bTouchingWater && m_vecMoveSpeed.z < -0.01F) {
-        auto vecMoveDir = m_vecMoveSpeed * CTimer::ms_fTimeStep * 4.0F;
+        auto vecMoveDir = m_vecMoveSpeed * CTimer::GetTimeStep() * 4.0F;
         auto vecSplashPos = GetPosition() + vecMoveDir;
         float fWaterZ;
         if (CWaterLevel::GetWaterLevel(vecSplashPos.x, vecSplashPos.y, vecSplashPos.z, &fWaterZ, true, nullptr)) {
@@ -695,7 +695,7 @@ void CPed::ProcessBuoyancy()
     physicalFlags.bSubmergedInWater = true;
     ApplyMoveForce(vecBuoyancyForce);
 
-    if (CTimer::ms_fTimeStep / 125.0F < vecBuoyancyForce.z / m_fMass
+    if (CTimer::GetTimeStep() / 125.0F < vecBuoyancyForce.z / m_fMass
         || GetPosition().z + 0.6F < mod_Buoyancy.m_fWaterLevel) {
 
         bIsStanding = false;
@@ -716,7 +716,7 @@ void CPed::ProcessBuoyancy()
                 bPlayerSwimmingOrClimbing = true;
             }
             else {
-                auto fAcceleration = vecBuoyancyForce.z / (CTimer::ms_fTimeStep * m_fMass / 125.0F);
+                auto fAcceleration = vecBuoyancyForce.z / (CTimer::GetTimeStep() * m_fMass / 125.0F);
                 CEventInWater cEvent(fAcceleration);
                 GetEventGroup().Add(&cEvent, false);
             }
@@ -725,7 +725,7 @@ void CPed::ProcessBuoyancy()
                 return;
         }
 
-        float fTimeStep = pow(0.9F, CTimer::ms_fTimeStep);
+        float fTimeStep = pow(0.9F, CTimer::GetTimeStep());
         m_vecMoveSpeed.x *= fTimeStep;
         m_vecMoveSpeed.y *= fTimeStep;
         if (m_vecMoveSpeed.z < 0.0F)
@@ -737,7 +737,7 @@ void CPed::ProcessBuoyancy()
     auto pSwimTask = m_pIntelligence->GetTaskSwim();
     if (bIsStanding && pSwimTask)
     {
-        pSwimTask->m_fSwimStopTime += CTimer::ms_fTimeStep;
+        pSwimTask->m_fSwimStopTime += CTimer::GetTimeStep();
         return;
     }
 
