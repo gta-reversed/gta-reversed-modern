@@ -8,7 +8,7 @@ void CFire::Initialise() {
 
 void CFire::ExtinguishWithWater(float fWaterStrength) {
     const float fOriginalStrength = m_fStrength;
-    m_fStrength -= fWaterStrength * CTimer::ms_fTimeStep / 50.0f;
+    m_fStrength -= fWaterStrength * CTimer::GetTimeStepInSeconds();
 
     /* Create particles */
     CVector particlePos = m_vecPosition + CVector{

@@ -87,7 +87,7 @@ uint32 CFireManager::GetNumOfFires() {
 // 0x538F40
 CFire* CFireManager::FindNearestFire(CVector const& point, bool bCheckIsBeingExtinguished, bool bCheckWasCreatedByScript) {
     float fNearestDist2DSq = std::numeric_limits<float>::max(); // Izzotop :thinking
-    CFire* pNearestFire{};
+    CFire* nearestFire{};
     for (CFire& fire : m_aFires) {
         if (!fire.IsActive())
             continue;
@@ -104,10 +104,10 @@ CFire* CFireManager::FindNearestFire(CVector const& point, bool bCheckIsBeingExt
         const float fDist2DSq = (fire.m_vecPosition - point).SquaredMagnitude2D();
         if (fDist2DSq < fNearestDist2DSq) {
             fNearestDist2DSq = fDist2DSq;
-            pNearestFire = &fire;
+            nearestFire = &fire;
         }
     }
-    return pNearestFire;
+    return nearestFire;
 }
 
 // 0x539340
@@ -291,15 +291,16 @@ CFire* CFireManager::StartFire(CEntity* target, CEntity* creator, float size, ui
         break;
     }
     case eEntityType::ENTITY_TYPE_VEHICLE: {
-        auto pVehTarget = static_cast<CVehicle*>(target);
-        if (pVehTarget->m_pFire)
+        auto vehTarget = static_cast<CVehicle*>(target);
+        if (vehTarget->m_pFire)
             return nullptr;
 
-        if (pVehTarget->IsAutomobile()) {
+        if (vehTarget->IsAutomobile()) {
             if (static_cast<CAutomobile*>(target)->m_damageManager.GetEngineStatus() >= 225)
                 return nullptr;
         }
-        if (pVehTarget->physicalFlags.bFireProof)
+
+        if (vehTarget->physicalFlags.bFireProof)
             return nullptr;
         break;
     }
@@ -317,28 +318,28 @@ CFire* CFireManager::StartFire(CEntity* target, CEntity* creator, float size, ui
 }
 
 // 0x53A270
-int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* pTarget, float _fUnused, uint8 _nUnused, int8 nGenerations, int32 nStrength) {
-    if (pTarget) {
+int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* target, float _fUnused, uint8 _nUnused, int8 nGenerations, int32 nStrength) {
+    if (target) {
         /* Extinguish current fire (if any) of target */
         const auto StopFire = [](CFire* fire) {
             fire->Extinguish();
             fire->createdByScript = false;
         };
-        switch (pTarget->m_nType) {
+        switch (target->m_nType) {
         case eEntityType::ENTITY_TYPE_PED: {
-            auto pPedTarget = static_cast<CPed*>(pTarget);
-            if (pPedTarget->m_pFire)
-                StopFire(pPedTarget->m_pFire);
+            auto pedTarget = static_cast<CPed*>(target);
+            if (pedTarget->m_pFire)
+                StopFire(pedTarget->m_pFire);
             break;
         }
         case eEntityType::ENTITY_TYPE_VEHICLE: {
-            auto pVehTarget = static_cast<CVehicle*>(pTarget);
-            if (pVehTarget->m_pFire)
-                StopFire(pVehTarget->m_pFire);
+            auto vehTarget = static_cast<CVehicle*>(target);
+            if (vehTarget->m_pFire)
+                StopFire(vehTarget->m_pFire);
 
             /* Set engine status for automobiles */
-            if (pVehTarget->IsAutomobile()) {
-                auto& dmgMgr = static_cast<CAutomobile*>(pVehTarget)->m_damageManager;
+            if (vehTarget->IsAutomobile()) {
+                auto& dmgMgr = static_cast<CAutomobile*>(vehTarget)->m_damageManager;
                 if (dmgMgr.GetEngineStatus() >= 225)
                     dmgMgr.SetEngineStatus(215);
             }
@@ -348,7 +349,7 @@ int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* pTarget, float 
     }
 
     if (auto fire = GetNextFreeFire(true)) {
-        fire->Start(pos, (float)nStrength, pTarget, std::min<uint8>((uint8)m_nMaxFireGenerationsAllowed, nGenerations));
+        fire->Start(pos, (float)nStrength, target, std::min<uint8>((uint8)m_nMaxFireGenerationsAllowed, nGenerations));
         return CTheScripts::GetNewUniqueScriptThingIndex(GetIndexOf(fire), 5);
     }
     return -1;
@@ -363,7 +364,7 @@ void CFireManager::Update() {
         fire.ProcessFire();
     }
 
-    if (CGameLogic::LaRiotsActiveHere() && (CTimer::GetTimeInMS() / 500u != CTimer::m_snPreviousTimeInMilliseconds / 500u)) {
+    if (CGameLogic::LaRiotsActiveHere() && (CTimer::GetTimeInMS() / 500u != CTimer::GetPreviousTimeInMS() / 500u)) {
         const float fRandomAngleRad = CGeneral::GetRandomNumberInRange(0.0f, 2 * rwPI);
         const float fRandomDir = CGeneral::GetRandomNumberInRange(35.0f, 60.0f);
         CVector point = TheCamera.GetPosition() + CVector{
@@ -400,14 +401,14 @@ void CFireManager::Update() {
         // Find strongest un-visited fire, and sum of the strength of all fires within 6.0 units of it 
         // Based on this strength possibly create a shadow (if combined strength > 4), and coronas (combined strength > 6)
 
-        // Find strongest fire, which hasn't yet been visited
-        CFire* pStrongest{};
+        // Find the strongest fire, which hasn't yet been visited
+        CFire* strongest{};
         for (size_t i = 0; i < MAX_NUM_FIRES; i++) {
             CFire& fire = Get(i);
             if (firesVisited[i] || !fire.IsActive())
                 continue;
-            if (!pStrongest || pStrongest->m_fStrength < fire.m_fStrength)
-                pStrongest = &fire;
+            if (!strongest || strongest->m_fStrength < fire.m_fStrength)
+                strongest = &fire;
         }
 
         // Sum up strengths of all fires (that haven't yet been visited) within 6.0 units range
@@ -417,7 +418,8 @@ void CFireManager::Update() {
             CFire& fire = Get(i);
             if (firesVisited[i] || !fire.IsActive())
                 continue;
-            if ((fire.m_vecPosition - pStrongest->m_vecPosition).Magnitude2D() < 6.0f) {
+
+            if ((fire.m_vecPosition - strongest->m_vecPosition).Magnitude2D() < 6.0f) {
                 fCombinedStrength += fire.m_fStrength;
                 nCombinedCeilStrength += (int32)std::ceil(fire.m_fStrength);
                 nFires--;
@@ -435,13 +437,13 @@ void CFireManager::Update() {
 
             const float fDir = std::min(7.0f, fCombinedStrength - 6.0f + 3.0f);
 
-            CVector shdwPos = pStrongest->m_vecPosition;
+            CVector shdwPos = strongest->m_vecPosition;
             shdwPos.z += 5.0f;
             const float fColorMult = CGeneral::GetRandomNumberInRange(0.6f, 1.0f);
             {
                 const CRGBA shdwColor = baseColor * fColorMult;
                 CShadows::StoreStaticShadow(
-                    reinterpret_cast<uint32>(pStrongest),
+                    reinterpret_cast<uint32>(strongest),
                     2,
                     gpShadowExplosionTex,
                     &shdwPos,
@@ -465,18 +467,19 @@ void CFireManager::Update() {
                 // Keep in mind, the right line's end is always pointing towards the camera,
                 // so what you see is more like |
 
-                CVector point = pStrongest->m_vecPosition + CVector{ 0.0f, 0.0f, 2.6f };
+                CVector point = strongest->m_vecPosition + CVector{ 0.0f, 0.0f, 2.6f };
                 {
                     CVector camToPointDirNorm = TheCamera.GetPosition() - point;
                     camToPointDirNorm.Normalise();
                     point += camToPointDirNorm * 3.5f;
                 }
-
+                
+                auto strongestId = reinterpret_cast<uint32>(strongest);
                 // Wrapper lambda for code readability
                 const auto RegisterCorona = [&](auto idx, CVector pos, eCoronaFlareType flare = eCoronaFlareType::FLARETYPE_NONE) {
                     const CRGBA crnaColor = baseColor * (fColorMult * 0.8f);
                     CCoronas::RegisterCorona(
-                        reinterpret_cast<uint32>(pStrongest),
+                        strongestId,
                         nullptr,
                         crnaColor.r,
                         crnaColor.g,
@@ -501,21 +504,20 @@ void CFireManager::Update() {
                 };
 
                 // Each corona only differs in position, and ID
-                RegisterCorona(reinterpret_cast<uint32>(pStrongest), point, eCoronaFlareType::FLARETYPE_HEADLIGHTS);
+                RegisterCorona(strongestId, point, eCoronaFlareType::FLARETYPE_HEADLIGHTS);
 
                 point.z += 2.0f;
-                RegisterCorona(reinterpret_cast<uint32>(pStrongest) + 1, point);
-                point.z -= 2.0f;
+                RegisterCorona(strongestId + 1, point);
 
+                point.z -= 2.0f;
                 CVector camRightNorm = TheCamera.GetRight();
                 camRightNorm.z = 0.0f;
                 camRightNorm.Normalise();
-
                 point += camRightNorm * 2.0f;
-                RegisterCorona(reinterpret_cast<uint32>(pStrongest) + 2, point);
+                RegisterCorona(strongestId + 2, point);
 
                 point -= camRightNorm * 4.0f;
-                RegisterCorona(reinterpret_cast<uint32>(pStrongest) + 3, point);
+                RegisterCorona(strongestId + 3, point);
             }
         }
 
