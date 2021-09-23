@@ -17,7 +17,7 @@ public:
 
 public:
     CFireManager();
-    ~CFireManager();
+    ~CFireManager() = default; // 0x538BB0
 
     void Init();
     void Shutdown();

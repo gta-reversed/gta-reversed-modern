@@ -1,32 +1,35 @@
 #include "StdInc.h"
 
+#include "CFireManager.h"
+
 CFireManager& gFireManager = *reinterpret_cast<CFireManager*>(0xB71F80);
 
 void CFireManager::InjectHooks() {
-    ReversibleHooks::Install("CFireManager", "CFireManager", 0x539DA0, &CFireManager::Constructor);
-    ReversibleHooks::Install("CFireManager", "~CFireManager", 0x538BB0, &CFireManager::Destructor);
-    ReversibleHooks::Install("CFireManager", "Init", 0x538BC0, &CFireManager::Init);
-    ReversibleHooks::Install("CFireManager", "Shutdown", 0x539DD0, &CFireManager::Shutdown);
-    ReversibleHooks::Install("CFireManager", "GetNumOfNonScriptFires", 0x538F10, &CFireManager::GetNumOfNonScriptFires);
-    ReversibleHooks::Install("CFireManager", "FindNearestFire", 0x538F40, &CFireManager::FindNearestFire);
-    ReversibleHooks::Install("CFireManager", "PlentyFiresAvailable", 0x539340, &CFireManager::PlentyFiresAvailable);
-    ReversibleHooks::Install("CFireManager", "ExtinguishPoint", 0x539450, &CFireManager::ExtinguishPoint);
-    ReversibleHooks::Install("CFireManager", "ExtinguishPointWithWater", 0x5394C0, &CFireManager::ExtinguishPointWithWater);
-    ReversibleHooks::Install("CFireManager", "IsScriptFireExtinguished", 0x5396E0, &CFireManager::IsScriptFireExtinguished);
-    ReversibleHooks::Install("CFireManager", "RemoveScriptFire", 0x539700, &CFireManager::RemoveScriptFire);
-    ReversibleHooks::Install("CFireManager", "RemoveAllScriptFires", 0x539720, &CFireManager::RemoveAllScriptFires);
-    ReversibleHooks::Install("CFireManager", "ClearAllScriptFireFlags", 0x5397A0, &CFireManager::ClearAllScriptFireFlags);
-    ReversibleHooks::Install("CFireManager", "SetScriptFireAudio", 0x5397B0, &CFireManager::SetScriptFireAudio);
-    ReversibleHooks::Install("CFireManager", "GetScriptFireCoords", 0x5397E0, &CFireManager::GetScriptFireCoords);
-    ReversibleHooks::Install("CFireManager", "GetNumFiresInRange", 0x5397F0, &CFireManager::GetNumFiresInRange);
-    ReversibleHooks::Install("CFireManager", "GetNumFiresInArea", 0x539860, &CFireManager::GetNumFiresInArea);
-    ReversibleHooks::Install("CFireManager", "DestroyAllFxSystems", 0x539D10, &CFireManager::DestroyAllFxSystems);
-    ReversibleHooks::Install("CFireManager", "CreateAllFxSystems", 0x539D50, &CFireManager::CreateAllFxSystems);
-    ReversibleHooks::Install("CFireManager", "GetNextFreeFire", 0x539E50, &CFireManager::GetNextFreeFire);
-    ReversibleHooks::Install("CFireManager", "StartFire_NoTarget", 0x539F00, static_cast<CFire*(CFireManager::*)(CVector, float, uint8, CEntity*, uint32, int8, uint8)>(&CFireManager::StartFire));
-    ReversibleHooks::Install("CFireManager", "StartFire", 0x53A050, static_cast<CFire *(CFireManager::*)(CEntity*, CEntity*, float, uint8, uint32, int8)>(&CFireManager::StartFire));
-    ReversibleHooks::Install("CFireManager", "StartScriptFire", 0x53A270, &CFireManager::StartScriptFire);
-    ReversibleHooks::Install("CFireManager", "Update", 0x53AF00, &CFireManager::Update);
+    using namespace ReversibleHooks;
+    Install("CFireManager", "CFireManager", 0x539DA0, &CFireManager::Constructor);
+    Install("CFireManager", "~CFireManager", 0x538BB0, &CFireManager::Destructor);
+    Install("CFireManager", "Init", 0x538BC0, &CFireManager::Init);
+    Install("CFireManager", "Shutdown", 0x539DD0, &CFireManager::Shutdown);
+    Install("CFireManager", "GetNumOfNonScriptFires", 0x538F10, &CFireManager::GetNumOfNonScriptFires);
+    Install("CFireManager", "FindNearestFire", 0x538F40, &CFireManager::FindNearestFire);
+    Install("CFireManager", "PlentyFiresAvailable", 0x539340, &CFireManager::PlentyFiresAvailable);
+    Install("CFireManager", "ExtinguishPoint", 0x539450, &CFireManager::ExtinguishPoint);
+    Install("CFireManager", "ExtinguishPointWithWater", 0x5394C0, &CFireManager::ExtinguishPointWithWater);
+    Install("CFireManager", "IsScriptFireExtinguished", 0x5396E0, &CFireManager::IsScriptFireExtinguished);
+    Install("CFireManager", "RemoveScriptFire", 0x539700, &CFireManager::RemoveScriptFire);
+    Install("CFireManager", "RemoveAllScriptFires", 0x539720, &CFireManager::RemoveAllScriptFires);
+    Install("CFireManager", "ClearAllScriptFireFlags", 0x5397A0, &CFireManager::ClearAllScriptFireFlags);
+    Install("CFireManager", "SetScriptFireAudio", 0x5397B0, &CFireManager::SetScriptFireAudio);
+    Install("CFireManager", "GetScriptFireCoords", 0x5397E0, &CFireManager::GetScriptFireCoords);
+    Install("CFireManager", "GetNumFiresInRange", 0x5397F0, &CFireManager::GetNumFiresInRange);
+    Install("CFireManager", "GetNumFiresInArea", 0x539860, &CFireManager::GetNumFiresInArea);
+    Install("CFireManager", "DestroyAllFxSystems", 0x539D10, &CFireManager::DestroyAllFxSystems);
+    Install("CFireManager", "CreateAllFxSystems", 0x539D50, &CFireManager::CreateAllFxSystems);
+    Install("CFireManager", "GetNextFreeFire", 0x539E50, &CFireManager::GetNextFreeFire);
+    Install("CFireManager", "StartFire_NoTarget", 0x539F00, static_cast<CFire*(CFireManager::*)(CVector, float, uint8, CEntity*, uint32, int8, uint8)>(&CFireManager::StartFire));
+    Install("CFireManager", "StartFire", 0x53A050, static_cast<CFire *(CFireManager::*)(CEntity*, CEntity*, float, uint8, uint32, int8)>(&CFireManager::StartFire));
+    Install("CFireManager", "StartScriptFire", 0x53A270, &CFireManager::StartScriptFire);
+    Install("CFireManager", "Update", 0x53AF00, &CFireManager::Update);
 }
 
 // 0x539DA0
@@ -34,18 +37,13 @@ CFireManager::CFireManager() {
     Init();
 }
 
-// 0x538BB0
-CFireManager::~CFireManager() {
-    // NOP
+CFireManager* CFireManager::Constructor() {
+    this->CFireManager::CFireManager();
+    return this;
 }
 
 CFireManager* CFireManager::Destructor() {
     this->CFireManager::~CFireManager();
-    return this;
-}
-
-CFireManager* CFireManager::Constructor() {
-    this->CFireManager::CFireManager();
     return this;
 }
 
@@ -60,7 +58,7 @@ void CFireManager::Init() {
 // 0x539DD0
 void CFireManager::Shutdown() {
     for (CFire& fire : m_aFires) {
-        fire.m_nFlags.bCreatedByScript = false;
+        fire.createdByScript = false;
         if (fire.IsActive()) {
             fire.Extinguish();
         }
@@ -71,7 +69,7 @@ void CFireManager::Shutdown() {
 uint32 CFireManager::GetNumOfNonScriptFires() {
     uint32 c = 0;
     for (CFire& fire : m_aFires)
-        if (fire.m_nFlags.bActive && !fire.m_nFlags.bCreatedByScript)
+        if (fire.IsActive() && !fire.IsScript())
             c++;
     return c;
 }
@@ -116,7 +114,7 @@ CFire* CFireManager::FindNearestFire(CVector const& point, bool bCheckIsBeingExt
 bool CFireManager::PlentyFiresAvailable() {
     uint32 c = 0;
     for (CFire& fire : m_aFires) {
-        if (fire.m_nFlags.bActive) 
+        if (fire.IsActive())
             c++;
         if (c >= 6)
             return true;
@@ -133,7 +131,7 @@ void CFireManager::ExtinguishPoint(CVector point, float fRadius) {
         if ((fire.m_vecPosition - point).SquaredMagnitude() > fRadius * fRadius)
             continue;
 
-        fire.m_nFlags.bCreatedByScript = false;
+        fire.createdByScript = false;
         fire.Extinguish();
     }
 }
@@ -162,8 +160,8 @@ bool CFireManager::IsScriptFireExtinguished(int16 id) {
 // 0x539700
 void CFireManager::RemoveScriptFire(uint16_t fireID) {
     CFire& fire = Get(fireID);
-    if (fire.m_nFlags.bCreatedByScript) {
-        fire.m_nFlags.bCreatedByScript = false;
+    if (fire.IsScript()) {
+        fire.createdByScript = false;
         fire.Extinguish();
     }
 }
@@ -171,8 +169,8 @@ void CFireManager::RemoveScriptFire(uint16_t fireID) {
 // 0x539720
 void CFireManager::RemoveAllScriptFires() {
     for (CFire& fire : m_aFires) {
-        if (fire.m_nFlags.bCreatedByScript) {
-            fire.m_nFlags.bCreatedByScript = false;
+        if (fire.IsScript()) {
+            fire.createdByScript = false;
             fire.Extinguish();
         }
     }
@@ -181,13 +179,13 @@ void CFireManager::RemoveAllScriptFires() {
 // 0x5397A0
 void CFireManager::ClearAllScriptFireFlags() {
     for (CFire& fire : m_aFires) {
-        fire.m_nFlags.bCreatedByScript = false;
+        fire.createdByScript = false;
     }
 }
 
 // 0x5397B0
 void CFireManager::SetScriptFireAudio(int16 fireID, bool bFlag) {
-    Get(fireID).m_nFlags.bMakesNoise = bFlag;
+    Get(fireID).makesNoise = bFlag;
 }
 
 // 0x5397E0
@@ -258,7 +256,7 @@ CFire* CFireManager::GetNextFreeFire(bool bMayExtinguish) {
     // So try to extinguish a script / first generation fire
     for (CFire& fire : m_aFires) {
         if (fire.IsFirstGen() || fire.IsScript()) {
-            fire.m_nFlags.bCreatedByScript = false;
+            fire.createdByScript = false;
             fire.Extinguish();
             return &fire;
         }
@@ -268,8 +266,8 @@ CFire* CFireManager::GetNextFreeFire(bool bMayExtinguish) {
 
 // 0x539F00
 CFire* CFireManager::StartFire(CVector pos, float size, uint8 unused, CEntity* creator, uint32 nTimeToBurn, int8 nGenerations, uint8 unused_) {
-    if (CWaterLevel::IsPointUnderWaterNoWaves(pos))
-        return;
+    if (CWaterLevel::IsPointUnderwaterNoWaves(pos))
+        return nullptr;
 
     if (CFire* fire = GetNextFreeFire(false)) {
         fire->Start(creator, pos, nTimeToBurn, std::min<uint8>((uint8)m_nMaxFireGenerationsAllowed, nGenerations));
@@ -324,7 +322,7 @@ int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* pTarget, float 
         /* Extinguish current fire (if any) of target */
         const auto StopFire = [](CFire* fire) {
             fire->Extinguish();
-            fire->m_nFlags.bCreatedByScript = false;
+            fire->createdByScript = false;
         };
         switch (pTarget->m_nType) {
         case eEntityType::ENTITY_TYPE_PED: {

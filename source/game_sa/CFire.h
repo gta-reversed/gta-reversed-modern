@@ -11,13 +11,16 @@
 
 class CFire {
 public:
-    struct {
-        uint8 bActive : 1;
-        uint8 bCreatedByScript : 1;
-        uint8 bMakesNoise : 1;
-        uint8 bBeingExtinguished : 1;
-        uint8 bFirstGeneration : 1;
-    } m_nFlags;
+    union {
+        struct {
+            bool active : 1;
+            bool createdByScript : 1;
+            bool makesNoise : 1;
+            bool beingExtinguished : 1;
+            bool firstGeneration : 1;
+        };
+        uint8 m_nFlags;
+    };
     char        _pad0;
     int16       m_nScriptReferenceIndex;
     CVector     m_vecPosition;
@@ -30,28 +33,27 @@ public:
     FxSystem_c* m_pFxSystem;
 
 public:
-    FxSystem_c *m_pFxSystem;
-
-    CFire();
-    ~CFire();
+    CFire() = default;
+    ~CFire() = default;
 
     void Initialise();
-    void Start(CEntity* pCreator, CVector pos, uint32_t nTimeToBurn, uint8_t nGens);
-    void Start(CEntity* pCreator, CEntity* pTarget, uint32_t nTimeToBurn, uint8_t nGens);
-    void Start(CVector pos, float fStrength, CEntity* pTarget, uint8_t nGens); /* For script */
-    void CreateFxSysForStrength(const CVector&* point, RwMatrixTag* matrix);
+    void Start(CEntity* creator, CVector pos, uint32_t nTimeToBurn, uint8_t nGens);
+    void Start(CEntity* creator, CEntity* target, uint32_t nTimeToBurn, uint8_t nGens);
+    void Start(CVector pos, float fStrength, CEntity* target, uint8_t nGens); /* For script */
+    void CreateFxSysForStrength(const CVector& point, RwMatrixTag* matrix);
     void Extinguish();
     void ExtinguishWithWater(float fWaterStrength);
     void ProcessFire();
-    bool IsActive() const { return m_nFlags.bActive; }
-    bool IsScript() const { return m_nFlags.bCreatedByScript; }
-    bool IsFirstGen() const { return m_nFlags.bFirstGeneration; }
-    bool IsBeingExtinguished() const { return m_nFlags.bBeingExtinguished; }
+
+    bool IsActive() const { return active; }
+    bool IsScript() const { return createdByScript; }
+    bool IsFirstGen() const { return firstGeneration; }
+    bool IsBeingExtinguished() const { return beingExtinguished; }
 
     // NOTSA funcs
     void DestroyFx();
-    void SetTarget(CEntity* pTarget);
-    void SetCreator(CEntity* pCreator);
+    void SetTarget(CEntity* target);
+    void SetCreator(CEntity* creator);
 };
 
 VALIDATE_SIZE(CFire, 0x28);

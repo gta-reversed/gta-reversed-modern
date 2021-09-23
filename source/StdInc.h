@@ -154,8 +154,6 @@
 #include "game_sa\CFileLoader.h"
 #include "game_sa\CFileMgr.h"
 #include "game_sa\CFileObjectInstance.h"
-#include "game_sa\CFire.h"
-#include "game_sa\CFireManager.h"
 #include "game_sa\CFont.h"
 #include "game_sa\CFormation.h"
 #include "game_sa\CGame.h"

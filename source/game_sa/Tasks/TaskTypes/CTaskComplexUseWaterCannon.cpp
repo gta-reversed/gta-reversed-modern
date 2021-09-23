@@ -68,14 +68,14 @@ CTask* CTaskComplexUseWaterCannon::CreateNextSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexUseWaterCannon::CreateFirstSubTask_Reversed(CPed* ped)
 {
-    return new CTaskSimpleCarDrive(ped->m_pVehicle, 0, false);
+    return new CTaskSimpleCarDrive(ped->m_pVehicle, nullptr, false);
 }
 
 CTask* CTaskComplexUseWaterCannon::ControlSubTask_Reversed(CPed* ped)
 {
     if (m_pSubTask->GetTaskType() == TASK_SIMPLE_CAR_DRIVE)
     {
-        if (ped->m_pVehicle->m_nStatus == STATUS_PHYSICS && m_pFire->m_nFlags.bActive)
+        if (ped->m_pVehicle->m_nStatus == STATUS_PHYSICS && m_pFire->IsActive())
             ped->m_pVehicle->AsAutomobile()->FireTruckControl(m_pFire);
         else
             return new CTaskSimpleCarDriveTimed(ped->m_pVehicle, 0);
