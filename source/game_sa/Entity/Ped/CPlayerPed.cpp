@@ -38,7 +38,7 @@ void CPlayerPed::InjectHooks() {
     Install("CPlayerPed", "GetWeaponRadiusOnScreen", 0x609CD0, &CPlayerPed::GetWeaponRadiusOnScreen);
     Install("CPlayerPed", "PedCanBeTargettedVehicleWise", 0x609D90, &CPlayerPed::PedCanBeTargettedVehicleWise);
     Install("CPlayerPed", "FindTargetPriority", 0x609DE0, &CPlayerPed::FindTargetPriority);
-    Install("CPlayerPed", "Clear3rdPersonMouseTarget", 0x609DE0, &CPlayerPed::Clear3rdPersonMouseTarget);
+    Install("CPlayerPed", "Clear3rdPersonMouseTarget", 0x609ED0, &CPlayerPed::Clear3rdPersonMouseTarget);
     Install("CPlayerPed", "CanIKReachThisTarget", 0x609F80, &CPlayerPed::CanIKReachThisTarget);
     Install("CPlayerPed", "GetPlayerInfoForThisPlayerPed", 0x609FF0, &CPlayerPed::GetPlayerInfoForThisPlayerPed);
     Install("CPlayerPed", "AnnoyPlayerPed", 0x60A040, &CPlayerPed::AnnoyPlayerPed);
@@ -176,7 +176,7 @@ bool CPlayerPed::CanPlayerStartMission() {
         return false;
 
     if (auto task = GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_FACIAL_COMPLEX)) {
-        if (task->GetId() == eTaskType::TASK_SIMPLE_CAR_DRIVE) {
+        if (task->GetTaskType() == eTaskType::TASK_SIMPLE_CAR_DRIVE) {
             return false;
         }
     }
