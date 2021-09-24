@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CEventEditableResponse.h"
+#include "EventEditableResponse.h"
 
 enum ePlayerGroupCommand : int32
 {

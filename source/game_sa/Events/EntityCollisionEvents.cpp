@@ -2,9 +2,9 @@
 
 #include "EntityCollisionEvents.h"
 
-#include "CTaskComplexAvoidOtherPedWhileWandering.h"
-#include "CTaskComplexKillPedOnFoot.h"
-#include "CEventKnockOffBike.h"
+#include "TaskComplexAvoidOtherPedWhileWandering.h"
+#include "TaskComplexKillPedOnFoot.h"
+#include "EventKnockOffBike.h"
 
 void CEventPedCollisionWithPed::InjectHooks()
 {
