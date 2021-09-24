@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "COnscreenTimerEntry.h"
+#include "OnscreenTimerEntry.h"
 
 // 0x44CB10
 void COnscreenTimerEntry::Process() {

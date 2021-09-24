@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CUserDisplay.h"
-#include "CCurrentVehicle.h"
-#include "CPlaceName.h"
+#include "UserDisplay.h"
+#include "CurrentVehicle.h"
+#include "PlaceName.h"
 
 CPlaceName& CUserDisplay::PlaceName = *(CPlaceName*)0xBA18F4;
 COnscreenTimer& CUserDisplay::OnscnTimer = *(COnscreenTimer*)0xBA1788;

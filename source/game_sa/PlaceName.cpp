@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CPlaceName.h"
+#include "PlaceName.h"
 
-#include "CEntryExitManager.h"
-#include "CHud.h"
+#include "EntryExitManager.h"
+#include "Hud.h"
 
 void CPlaceName::InjectHooks() {
     ReversibleHooks::Install("CPlaceName", "GetForMap", 0x571D90, &CPlaceName::GetForMap);

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CEntryExitManager.h"
+#include "EntryExitManager.h"
 
 CEntryExit* (&CEntryExitManager::ms_entryExitStack)[4] = *reinterpret_cast<CEntryExit * (*)[4]>(0x96A720);
 bool& CEntryExitManager::ms_bBurglaryHousesEnabled = *reinterpret_cast<bool*>(0x96A730);

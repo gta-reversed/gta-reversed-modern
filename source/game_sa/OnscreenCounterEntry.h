@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CHudColours.h"
+#include "HudColours.h"
 #include "eOnscreenCounter.h"
 
 class COnscreenCounterEntry {

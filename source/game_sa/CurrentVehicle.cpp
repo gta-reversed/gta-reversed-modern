@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CCurrentVehicle.h"
+#include "CurrentVehicle.h"
 
 void CCurrentVehicle::InjectHooks() {
     using namespace ReversibleHooks;

@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
-#include "COnscreenTimer.h"
-#include "COnscreenTimerEntry.h"
+#include "OnscreenTimer.h"
+#include "OnscreenTimerEntry.h"
 
 void COnscreenTimer::InjectHooks() {
     using namespace ReversibleHooks;

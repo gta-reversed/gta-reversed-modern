@@ -9,7 +9,7 @@
 #include "OnscreenTimerEntry.h"
 #include "OnscreenCounterEntry.h"
 
-#include "CHudColours.h"
+#include "HudColours.h"
 #include "eOnscreenCounter.h"
 
 class COnscreenTimer {
