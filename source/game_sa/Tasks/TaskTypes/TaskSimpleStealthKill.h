@@ -6,9 +6,9 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "CTaskSimple.h"
-#include "CPed.h"
-#include "CAnimBlendAssociation.h"
+#include "TaskSimple.h"
+#include "Ped.h"
+#include "AnimBlendAssociation.h"
 
 class CTaskSimpleStealthKill : public CTaskSimple {
 public:

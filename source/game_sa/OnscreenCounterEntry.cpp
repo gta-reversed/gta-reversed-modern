@@ -1,5 +1,5 @@
 #include "StdInc.h"
-#include "COnscreenCounterEntry.h"
+#include "OnscreenCounterEntry.h"
 
 void COnscreenCounterEntry::InjectHooks() {
     ReversibleHooks::Install("COnscreenCounterEntry", "ProcessForDisplayCounter", 0x44CA90, &COnscreenCounterEntry::ProcessForDisplayCounter);

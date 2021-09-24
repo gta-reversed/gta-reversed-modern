@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CTaskComplex.h"
+#include "TaskComplex.h"
 
 class CTaskComplexCrossRoadLookAndAchieveHeading : public CTaskComplex {
 public:

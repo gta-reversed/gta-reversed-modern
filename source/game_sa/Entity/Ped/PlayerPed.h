@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CPed.h"
-#include "CPad.h"
+#include "Ped.h"
+#include "Pad.h"
 
 #include "eWeaponType.h"
 #include "eSprintType.h"

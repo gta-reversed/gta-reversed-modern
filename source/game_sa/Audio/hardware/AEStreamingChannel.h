@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CAEAudioChannel.h"
+#include "AEAudioChannel.h"
 
 struct CAEStreamingDecoder;
 

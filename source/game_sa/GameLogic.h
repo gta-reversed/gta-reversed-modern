@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CVector.h"
+#include "Vector.h"
 
 enum eGameState {
     GAME_STATE_INITIAL = 0,

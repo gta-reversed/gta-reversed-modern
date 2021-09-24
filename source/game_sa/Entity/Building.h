@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CEntity.h"
+#include "Entity.h"
 
 class CBuilding : public CEntity {
 public:

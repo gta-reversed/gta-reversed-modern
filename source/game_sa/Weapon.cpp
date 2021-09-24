@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-//#include "CWeaponInfo.h"
+//#include "WeaponInfo.h"
 
 float& CWeapon::ms_fExtinguisherAimAngle = *(float*)0x8D610C;
 bool& CWeapon::bPhotographHasBeenTaken = *(bool*)0xC8A7C0;

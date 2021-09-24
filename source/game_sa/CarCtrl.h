@@ -6,10 +6,10 @@
 */
 #pragma once
 
-#include "CVehicle.h"
-#include "CPlane.h"
-#include "CHeli.h"
-#include "CPathFind.h"
+#include "Vehicle.h"
+#include "Plane.h"
+#include "Heli.h"
+#include "PathFind.h"
 
 class CCarCtrl {
 public:

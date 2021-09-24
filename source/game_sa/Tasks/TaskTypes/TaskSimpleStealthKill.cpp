@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleStealthKill.h"
+#include "TaskSimpleStealthKill.h"
 
 void CTaskSimpleStealthKill::InjectHooks()
 {

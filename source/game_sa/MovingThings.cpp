@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CMovingThings.h"
-#include "CPlaneTrails.h"
-#include "CEscalators.h"
-#include "CPointLights.h"
+#include "MovingThings.h"
+#include "PlaneTrails.h"
+#include "Escalators.h"
+#include "PointLights.h"
 
 void CMovingThings::InjectHooks() {
     ReversibleHooks::Install("CMovingThings", "Init", 0x717D00, &CMovingThings::Init);

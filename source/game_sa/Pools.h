@@ -6,20 +6,20 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "CPool.h"
-#include "CCopPed.h"
-#include "CHeli.h"
-#include "CBuilding.h"
-#include "CCutsceneObject.h"
-#include "CDummy.h"
-#include "CColModel.h"
-#include "CTask.h"
-#include "CPedIntelligence.h"
-#include "CPtrNodeSingleLink.h"
-#include "CPtrNodeDoubleLink.h"
-#include "CEntryInfoNode.h"
-#include "CPedGeometryAnalyser.h"
-#include "CTaskSimpleSlideToCoord.h"
+#include "Pool.h"
+#include "CopPed.h"
+#include "Heli.h"
+#include "Building.h"
+#include "CutsceneObject.h"
+#include "Dummy.h"
+#include "ColModel.h"
+#include "Task.h"
+#include "PedIntelligence.h"
+#include "PtrNodeSingleLink.h"
+#include "PtrNodeDoubleLink.h"
+#include "EntryInfoNode.h"
+#include "PedGeometryAnalyser.h"
+#include "TaskSimpleSlideToCoord.h"
 
 #ifdef GetObject
 #undef GetObject

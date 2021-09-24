@@ -6,8 +6,8 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "CVector.h"
-#include "CAEExplosionAudioEntity.h"
+#include "Vector.h"
+#include "AEExplosionAudioEntity.h"
 
 enum eExplosionType {
     EXPLOSION_GRENADE,

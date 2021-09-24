@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CVehicle.h"
-#include "CDoor.h"
-#include "CTrainNode.h"
+#include "Vehicle.h"
+#include "Door.h"
+#include "TrainNode.h"
 
 enum eTrainNodes {
     TRAIN_NODE_NONE = 0,

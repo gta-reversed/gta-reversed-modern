@@ -2,8 +2,8 @@
 
 #include "dsound.h"
 
-#include "CAESoundManager.h"
-#include "CVector.h"
+#include "AESoundManager.h"
+#include "Vector.h"
 
 #ifdef PlaySound
 #undef PlaySound

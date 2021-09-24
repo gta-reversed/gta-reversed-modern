@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CTaskComplex.h"
-#include "CVehicle.h"
-#include "CAccident.h"
+#include "TaskComplex.h"
+#include "Vehicle.h"
+#include "Accident.h"
 
 class CTaskComplexMedicTreatInjuredPed : public CTaskComplex {
 public:

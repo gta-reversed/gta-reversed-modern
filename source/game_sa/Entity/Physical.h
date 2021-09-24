@@ -6,14 +6,14 @@
 */
 #pragma once
 
-#include "CEntity.h"
-#include "CColPoint.h"
-#include "CVector.h"
-#include "CQuaternion.h"
-#include "CRealTimeShadow.h"
-#include "CRepeatSector.h"
+#include "Entity.h"
+#include "ColPoint.h"
+#include "Vector.h"
+#include "Quaternion.h"
+#include "RealTimeShadow.h"
+#include "RepeatSector.h"
 #include "eWeaponType.h"
-#include "CEntryInfoList.h"
+#include "EntryInfoList.h"
 
 enum ePhysicalFlags {
     PHYSICAL_b01 = 0x1,

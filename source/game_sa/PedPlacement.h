@@ -7,10 +7,10 @@
 #pragma once
 
 
-#include "CVector.h"
-#include "CEntity.h"
-#include "CVehicle.h"
-#include "CPed.h"
+#include "Vector.h"
+#include "Entity.h"
+#include "Vehicle.h"
+#include "Ped.h"
 
 class CPedPlacement {
 public:

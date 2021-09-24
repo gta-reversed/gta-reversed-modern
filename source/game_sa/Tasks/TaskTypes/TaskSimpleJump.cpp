@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleJump.h"
+#include "TaskSimpleJump.h"
 
 void CTaskSimpleJump::InjectHooks()
 {

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleDuck.h"
+#include "TaskSimpleDuck.h"
 
 CTaskSimpleDuck* CTaskSimpleDuck::Constructor(eDuckControlTypes DuckControlType, uint16 nLengthOfDuck, int16 nUseShotsWhizzingEvents)
 {

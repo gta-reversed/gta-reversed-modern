@@ -1,4 +1,6 @@
-#include "CEvent.h"
+#pragma once
+
+#include "Event.h"
 
 class CEventInWater : public CEvent {
 public:

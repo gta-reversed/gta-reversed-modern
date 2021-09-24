@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CAcquaintance.h"
+#include "Acquaintance.h"
 
 enum {
     ACQUAINTANCE_RESPECT,

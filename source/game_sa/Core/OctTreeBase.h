@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "COctTree.h"
+#include "OctTree.h"
 
 class COctTreeBase : public COctTree {
 public:

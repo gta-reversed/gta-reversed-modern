@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CPool.h"
+#include "Pool.h"
 
 class COctTree {
 protected:

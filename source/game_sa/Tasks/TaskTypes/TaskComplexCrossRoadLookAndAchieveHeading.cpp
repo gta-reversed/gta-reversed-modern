@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CTaskComplexCrossRoadLookAndAchieveHeading.h"
-#include "CTaskSimpleRunAnim.h"
-#include "CTaskSimpleAchieveHeading.h"
+#include "TaskComplexCrossRoadLookAndAchieveHeading.h"
+#include "TaskSimpleRunAnim.h"
+#include "TaskSimpleAchieveHeading.h"
 
 // 0x631AE0
 CTaskComplexCrossRoadLookAndAchieveHeading::CTaskComplexCrossRoadLookAndAchieveHeading(int32 durationInMs, float fTargetHeading) : CTaskComplex() {

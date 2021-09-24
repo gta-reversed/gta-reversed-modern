@@ -6,11 +6,11 @@
 */
 #pragma once
 
-#include "CPlaceable.h"
-#include "CReference.h"
-#include "CRect.h"
-#include "CColModel.h"
-#include "Plugins\TwoDEffectPlugin\C2dEffect.h"
+#include "Placeable.h"
+#include "Reference.h"
+#include "Rect.h"
+#include "ColModel.h"
+#include "Plugins\TwoDEffectPlugin\2dEffect.h"
 
 #include "eEntityType.h"
 #include "eEntityStatus.h"

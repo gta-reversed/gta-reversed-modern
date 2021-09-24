@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexEnterCarAsDriver.h"
+#include "TaskComplexEnterCarAsDriver.h"
 
 // 0x6402F0
 CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* pTargetVehicle) : CTaskComplexEnterCar(pTargetVehicle, true, false, false, false) {

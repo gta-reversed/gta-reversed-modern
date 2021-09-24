@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CTaskComplexWanderCop.h"
+#include "TaskComplexWanderCop.h"
 
-#include "CTaskSimpleStandStill.h"
-#include "CTaskComplexPolicePursuit.h"
+#include "TaskSimpleStandStill.h"
+#include "TaskComplexPolicePursuit.h"
 
 void CTaskComplexWanderCop::InjectHooks()
 {

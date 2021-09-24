@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CVector.h"
+#include "Vector.h"
 
 #include "AnimationEnums.h"
 #include "eWeaponFlags.h"

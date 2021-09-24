@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CEventScriptCommand.h"
+#include "EventScriptCommand.h"
 
-#include "CTaskSimpleRunAnim.h"
+#include "TaskSimpleRunAnim.h"
 
 void CEventScriptCommand::InjectHooks()
 {

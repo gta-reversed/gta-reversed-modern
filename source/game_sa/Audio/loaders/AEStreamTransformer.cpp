@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-#include "CAEStreamTransformer.h"
+#include "AEStreamTransformer.h"
 
 CAEStreamTransformer& AEStreamTransformer = *(CAEStreamTransformer*)0xb612d8;
 

@@ -7,7 +7,7 @@
 #pragma once
 
 
-#include "CFire.h"
+#include "Fire.h"
 
 #define MAX_NUM_FIRES 60
 

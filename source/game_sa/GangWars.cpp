@@ -6,7 +6,7 @@
 */
 #include "StdInc.h"
 
-#include "CGangWars.h"
+#include "GangWars.h"
 
 int32& CGangWars::ZoneInfoForTraining = *reinterpret_cast<int32*>(0x8A5F40); // -1
 int32(&CGangWars::GangRatingStrength)[3] = *reinterpret_cast<int32(*)[3]>(0x96AB2C);

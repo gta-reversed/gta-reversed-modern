@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
-#include "CAEWaterCannonAudioEntity.h"
-#include "CAEAudioHardware.h"
+#include "AEWaterCannonAudioEntity.h"
+#include "AEAudioHardware.h"
 
 // 0x728A90
 CAEWaterCannonAudioEntity::CAEWaterCannonAudioEntity() : CAEAudioEntity() {

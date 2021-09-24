@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CVector.h"
-#include "CQuaternion.h"
+#include "Vector.h"
+#include "Quaternion.h"
 
 class CFileObjectInstance {
 public:

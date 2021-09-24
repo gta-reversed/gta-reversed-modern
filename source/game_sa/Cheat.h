@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CVehicle.h"
+#include "Vehicle.h"
 #include "eCheats.h"
 
 // NOTSA

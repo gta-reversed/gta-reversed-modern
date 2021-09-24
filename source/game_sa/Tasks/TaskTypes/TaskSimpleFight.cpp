@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleFight.h"
+#include "TaskSimpleFight.h"
 
 CMeleeInfo* CTaskSimpleFight::m_aComboData = (CMeleeInfo*)0xC170D0;
 

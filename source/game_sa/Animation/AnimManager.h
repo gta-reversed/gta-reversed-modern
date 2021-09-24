@@ -6,10 +6,10 @@
 */
 #pragma once
 
-#include "CAnimationStyleDescriptor.h"
-#include "CAnimBlendAssocGroup.h"
-#include "CAnimBlendAssociation.h"
-#include "CAnimBlock.h"
+#include "AnimationStyleDescriptor.h"
+#include "AnimBlendAssocGroup.h"
+#include "AnimBlendAssociation.h"
+#include "AnimBlock.h"
 
 class CAnimManager {
 public:

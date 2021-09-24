@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CAEAudioEntity.h"
-#include "CAESound.h"
-#include "CAETwinLoopSoundEntity.h"
+#include "AEAudioEntity.h"
+#include "AESound.h"
+#include "AETwinLoopSoundEntity.h"
 
 class CPed;
 

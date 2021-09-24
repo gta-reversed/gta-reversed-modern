@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CEventDamage.h"
+#include "EventDamage.h"
 
-#include "CPedType.h"
-#include "CTaskComplexKillPedOnFoot.h"
+#include "PedType.h"
+#include "TaskComplexKillPedOnFoot.h"
 
 void CEventDamage::InjectHooks() {
     using namespace ReversibleHooks;

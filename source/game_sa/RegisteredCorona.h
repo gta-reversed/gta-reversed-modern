@@ -6,10 +6,10 @@
 */
 #pragma once
 
-#include "CVector.h"
+#include "Vector.h"
 #include "RenderWare.h"
-#include "CRGBA.h"
-#include "CEntity.h"
+#include "RGBA.h"
+#include "Entity.h"
 
 enum eCoronaType {
     CORONATYPE_SHINYSTAR,

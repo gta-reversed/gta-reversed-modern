@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CFont.h"
+#include "Font.h"
 
 enum eMenuType : uint8 {
     MENU_TYPE_DEFAULT,

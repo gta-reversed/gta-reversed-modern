@@ -6,9 +6,9 @@
 */
 #include "StdInc.h"
 
-#include "CPed.h"
+#include "Ped.h"
 
-#include "CPedType.h"
+#include "PedType.h"
 
 void CPed::InjectHooks() {
     // Constructors

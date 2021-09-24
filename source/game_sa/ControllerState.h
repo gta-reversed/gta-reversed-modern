@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CPad.h"
+#include "Pad.h"
 
 class CPad;
 

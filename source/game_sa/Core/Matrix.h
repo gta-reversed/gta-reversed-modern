@@ -7,7 +7,7 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "CQuaternion.h"
+#include "Quaternion.h"
 
 enum eMatrixEulerFlags : uint32 {
     SWAP_XZ = 0x01,

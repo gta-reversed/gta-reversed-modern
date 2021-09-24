@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CCustomBuildingPipeline.h"
+#include "CustomBuildingPipeline.h"
 
 RxPipeline*& CCustomBuildingPipeline::ObjPipeline = *(RxPipeline**)0xC02C68;
 

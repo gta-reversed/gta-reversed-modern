@@ -2,12 +2,12 @@
 
 #include "PotentialWalkIntoEvents.h"
 
-#include "CTaskComplexEnterCarAsDriver.h"
-#include "CTaskSimpleGoTo.h"
-#include "CTaskComplexWalkRoundCar.h"
-#include "CTaskComplexWalkRoundObject.h"
-#include "CTaskComplexFollowPedFootsteps.h"
-#include "CTaskComplexKillPedOnFoot.h"
+#include "TaskComplexEnterCarAsDriver.h"
+#include "TaskSimpleGoTo.h"
+#include "TaskComplexWalkRoundCar.h"
+#include "TaskComplexWalkRoundObject.h"
+#include "TaskComplexFollowPedFootsteps.h"
+#include "TaskComplexKillPedOnFoot.h"
 
 void CEventPotentialWalkIntoVehicle::InjectHooks()
 {

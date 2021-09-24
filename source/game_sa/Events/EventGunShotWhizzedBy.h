@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CEventGunShot.h"
+#include "EventGunShot.h"
 
 class CEventGunShotWhizzedBy : public CEventGunShot {
 public:

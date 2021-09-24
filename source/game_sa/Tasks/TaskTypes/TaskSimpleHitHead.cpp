@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleHitHead.h"
+#include "TaskSimpleHitHead.h"
 
 void CTaskSimpleHitHead::InjectHooks()
 {

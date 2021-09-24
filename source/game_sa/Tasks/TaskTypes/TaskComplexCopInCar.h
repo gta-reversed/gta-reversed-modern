@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CTaskComplex.h"
-#include "CVehicle.h"
-#include "CPed.h"
+#include "TaskComplex.h"
+#include "Vehicle.h"
+#include "Ped.h"
 
 class CTaskComplexCopInCar : public CTaskComplex {
 public:

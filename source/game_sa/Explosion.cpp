@@ -1,5 +1,5 @@
 #include "StdInc.h"
-#include "CExplosion.h"
+#include "Explosion.h"
 
 void CExplosion::InjectHooks() {
 

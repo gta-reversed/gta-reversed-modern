@@ -8,7 +8,7 @@
 
 #include "RenderWare.h"
 #include "TxdDef.h"
-#include "CPool.h"
+#include "Pool.h"
 
 class CTxdStore {
 public:

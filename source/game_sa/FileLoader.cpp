@@ -6,9 +6,9 @@ Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
-#include "CCarGenerator.h"
-#include "CTheCarGenerators.h"
-#include "COcclusion.h"
+#include "CarGenerator.h"
+#include "TheCarGenerators.h"
+#include "Occlusion.h"
 
 char (&CFileLoader::ms_line)[512] = *reinterpret_cast<char (*)[512]>(0xB71848);
 uint32& gAtomicModelId = *reinterpret_cast<uint32*>(0xB71840);

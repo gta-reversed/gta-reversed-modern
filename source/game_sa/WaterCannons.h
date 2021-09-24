@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CWaterCannon.h"
+#include "WaterCannon.h"
 
 class CVector;
 

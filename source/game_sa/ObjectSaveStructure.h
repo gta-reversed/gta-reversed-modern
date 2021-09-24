@@ -1,5 +1,5 @@
 #pragma once
-#include "CCompressedMatrixNotAligned.h"
+#include "CompressedMatrixNotAligned.h"
 
 class CObjectSaveStructure
 {

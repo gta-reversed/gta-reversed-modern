@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CAEAudioEntity.h"
+#include "AEAudioEntity.h"
 #include "cTransmission.h"
-#include "CAETwinLoopSoundEntity.h"
+#include "AETwinLoopSoundEntity.h"
 
 #include "eAudioEvents.h"
 #include "eRadioID.h"

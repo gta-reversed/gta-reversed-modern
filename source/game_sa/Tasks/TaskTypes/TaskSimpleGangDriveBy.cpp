@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleGangDriveBy.h"
+#include "TaskSimpleGangDriveBy.h"
 
 CTaskSimpleGangDriveBy::CTaskSimpleGangDriveBy(CEntity* target, const CVector* targetPos, float abortRange,
     int8 frequencyPercentage, int8 drivebyStyle, bool seatRHS)

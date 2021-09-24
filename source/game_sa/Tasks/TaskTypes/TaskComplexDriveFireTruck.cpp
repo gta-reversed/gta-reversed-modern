@@ -1,11 +1,11 @@
 #include "StdInc.h"
 
-#include "CTaskComplexDriveFireTruck.h"
+#include "TaskComplexDriveFireTruck.h"
 
-#include "CTaskComplexDriveToPoint.h"
-#include "CTaskComplexDriveWander.h"
-#include "CTaskComplexUseWaterCannon.h"
-#include "CTaskSimpleCarDrive.h"
+#include "TaskComplexDriveToPoint.h"
+#include "TaskComplexDriveWander.h"
+#include "TaskComplexUseWaterCannon.h"
+#include "TaskSimpleCarDrive.h"
 
 void CTaskComplexDriveFireTruck::InjectHooks() {
     using namespace ReversibleHooks;

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CEvent.h"
-#include "CVector.h"
+#include "Event.h"
+#include "Vector.h"
 
 enum eKnockOffType : uint8 {
     KNOCK_OFF_TYPE_NONE = 0,

@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CAEAudioEntity.h"
-#include "CAESound.h"
+#include "AEAudioEntity.h"
+#include "AESound.h"
 
 enum eAudioPedType {
     PED_TYPE_GEN = 0,

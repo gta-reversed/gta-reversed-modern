@@ -6,17 +6,17 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "CPlaceable.h"
-#include "CCam.h"
-#include "CQueuedMode.h"
-#include "CVector.h"
+#include "Placeable.h"
+#include "Cam.h"
+#include "QueuedMode.h"
+#include "Vector.h"
 #include "RenderWare.h"
-#include "CCamPathSplines.h"
-#include "CMatrix.h"
-#include "CVehicle.h"
-#include "CRect.h"
-#include "CPed.h"
-#include "CGarage.h"
+#include "CamPathSplines.h"
+#include "Matrix.h"
+#include "Vehicle.h"
+#include "Rect.h"
+#include "Ped.h"
+#include "Garage.h"
 
 enum class eFadeFlag : uint16 {
     FADE_IN,

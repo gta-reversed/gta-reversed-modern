@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CTaskSimpleGoTo.h"
+#include "TaskSimpleGoTo.h"
 
 class CTaskSimpleGoToPoint : public CTaskSimpleGoTo
 {

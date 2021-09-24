@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexPartnerGreet.h"
+#include "TaskComplexPartnerGreet.h"
 
 void CTaskComplexPartnerGreet::InjectHooks()
 {

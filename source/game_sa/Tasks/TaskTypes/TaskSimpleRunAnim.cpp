@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleRunAnim.h"
+#include "TaskSimpleRunAnim.h"
 
 void CTaskSimpleRunAnim::InjectHooks()
 {

@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CAEAudioEntity.h"
-#include "CAESound.h"
+#include "AEAudioEntity.h"
+#include "AESound.h"
 
 #include "eWeaponType.h"
 

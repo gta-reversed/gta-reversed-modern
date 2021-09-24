@@ -8,7 +8,7 @@
 
 #include "eScriptCommands.h"
 #include "eWeaponType.h"
-#include "CPed.h"
+#include "Ped.h"
 
 enum ePedType : uint32;
 

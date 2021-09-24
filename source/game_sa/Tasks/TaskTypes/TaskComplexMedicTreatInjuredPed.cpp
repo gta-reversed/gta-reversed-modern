@@ -1,18 +1,18 @@
 #include "StdInc.h"
 
-#include "CTaskComplexMedicTreatInjuredPed.h"
+#include "TaskComplexMedicTreatInjuredPed.h"
 
-#include "CTaskComplexTreatAccident.h"
-#include "CTaskSimpleStandStill.h"
-#include "CTaskComplexEnterCarAsPassenger.h"
-#include "CTaskComplexEnterCarAsDriver.h"
-#include "CTaskComplexLeaveCar.h"
-#include "CTaskSimpleCarDrive.h"
-#include "CTaskComplexDriveToPoint.h"
-#include "CTaskComplexDriveWander.h"
-#include "CTaskComplexGoToPointAndStandStill.h"
-#include "CTaskComplexWanderMedic.h"
-#include "CTaskComplexGoToPointAndStandStill.h"
+#include "TaskComplexTreatAccident.h"
+#include "TaskSimpleStandStill.h"
+#include "TaskComplexEnterCarAsPassenger.h"
+#include "TaskComplexEnterCarAsDriver.h"
+#include "TaskComplexLeaveCar.h"
+#include "TaskSimpleCarDrive.h"
+#include "TaskComplexDriveToPoint.h"
+#include "TaskComplexDriveWander.h"
+#include "TaskComplexGoToPointAndStandStill.h"
+#include "TaskComplexWanderMedic.h"
+#include "TaskComplexGoToPointAndStandStill.h"
 
 void CTaskComplexMedicTreatInjuredPed::InjectHooks() {
     ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "Constructor", 0x658BA0, &CTaskComplexMedicTreatInjuredPed::Constructor);

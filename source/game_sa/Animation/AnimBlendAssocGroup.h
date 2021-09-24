@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CAnimBlendAssociation.h"
+#include "AnimBlendAssociation.h"
 #include "RenderWare.h"
-#include "CAnimBlock.h"
+#include "AnimBlock.h"
 
 class CAnimBlendStaticAssociation;
 

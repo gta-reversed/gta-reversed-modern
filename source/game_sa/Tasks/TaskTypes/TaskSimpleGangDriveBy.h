@@ -6,10 +6,10 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "CTaskSimple.h"
-#include "CAnimBlendAssociation.h"
-#include "CEntity.h"
-#include "CWeaponInfo.h"
+#include "TaskSimple.h"
+#include "AnimBlendAssociation.h"
+#include "Entity.h"
+#include "WeaponInfo.h"
 
 class CTaskSimpleGangDriveBy : public CTaskSimple {
 public:

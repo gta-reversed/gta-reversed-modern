@@ -8,13 +8,13 @@ Do not delete this comment block. Respect others' work!
 
 #include <string>
 
-#include "CVector.h"
-#include "CEntity.h"
-#include "CPlayerPed.h"
-#include "CVehicle.h"
-#include "CWeaponInfo.h"
-#include "CAnimBlendAssociation.h"
-#include "CAnimBlendClumpData.h"
+#include "Vector.h"
+#include "Entity.h"
+#include "PlayerPed.h"
+#include "Vehicle.h"
+#include "WeaponInfo.h"
+#include "AnimBlendAssociation.h"
+#include "AnimBlendClumpData.h"
 
 const char gta_empty_string[4] = {0, 0, 0, 0};
 

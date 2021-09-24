@@ -6,8 +6,8 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "CTaskSimple.h"
-#include "CAnimBlendAssociation.h"
+#include "TaskSimple.h"
+#include "AnimBlendAssociation.h"
 
 extern int32& gLastRandomNumberForIdleAnimationID;
 extern uint32& gLastTouchTimeDelta;

@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CTaskSimple.h"
-#include "CVector.h"
+#include "TaskSimple.h"
+#include "Vector.h"
 #include "FxSystem_c.h"
 
 enum eSwimState : uint16 {

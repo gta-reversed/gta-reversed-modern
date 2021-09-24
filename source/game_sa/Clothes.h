@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CPlayerPed.h"
-#include "CPedClothesDesc.h"
+#include "PlayerPed.h"
+#include "PedClothesDesc.h"
 
 class CClothes {
 public:

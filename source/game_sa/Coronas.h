@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CRegisteredCorona.h"
+#include "RegisteredCorona.h"
 
 class CCoronas {
 public:

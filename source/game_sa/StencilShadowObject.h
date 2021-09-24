@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CStencilShadowObjects.h"
+#include "StencilShadowObjects.h"
 
 class CStencilShadowObject {
 public:

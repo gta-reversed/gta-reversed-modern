@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexWanderMedic.h"
+#include "TaskComplexWanderMedic.h"
 
 CTaskComplexWanderMedic* CTaskComplexWanderMedic::Constructor(int32 MoveState, uint8 Dir, bool bWanderSensibly)
 {

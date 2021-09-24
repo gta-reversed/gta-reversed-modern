@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexPartnerShove.h"
+#include "TaskComplexPartnerShove.h"
 
 void CTaskComplexPartnerShove::InjectHooks()
 {

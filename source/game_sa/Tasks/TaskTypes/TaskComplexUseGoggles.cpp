@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CTaskComplexUseGoggles.h"
+#include "TaskComplexUseGoggles.h"
 
-#include "CTaskSimpleRunAnim.h"
-#include "CTaskSimplePlayerOnFoot.h"
+#include "TaskSimpleRunAnim.h"
+#include "TaskSimplePlayerOnFoot.h"
 
 // 0x634EF0
 CTaskComplexUseGoggles::CTaskComplexUseGoggles() : CTaskComplex() {

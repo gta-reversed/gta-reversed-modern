@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CCarGenerator.h"
+#include "CarGenerator.h"
 
-#include "CTheCarGenerators.h"
-#include "COcclusion.h"
+#include "TheCarGenerators.h"
+#include "Occlusion.h"
 
 bool& CCarGenerator::m_bHotdogVendorPositionOffsetInitialized = *reinterpret_cast<bool*>(0xC2B974);
 CVector& CCarGenerator::m_HotdogVendorPositionOffset = *reinterpret_cast<CVector*>(0xC2B968);

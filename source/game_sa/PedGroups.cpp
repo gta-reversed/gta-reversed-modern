@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CPedGroups.h"
+#include "PedGroups.h"
 
 int16 (&CPedGroups::ScriptReferenceIndex)[8] = *reinterpret_cast<int16 (*)[8]>(0xC098D0);
 char (&CPedGroups::ms_activeGroups)[8] = *reinterpret_cast<char (*)[8]>(0xC098E0);

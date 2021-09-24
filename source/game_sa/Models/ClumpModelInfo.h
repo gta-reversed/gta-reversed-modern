@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CBaseModelInfo.h"
+#include "BaseModelInfo.h"
 #include "RwObjectNameIdAssocation.h"
 
 struct RwFrame;

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexWalkRoundObject.h"
+#include "TaskComplexWalkRoundObject.h"
 
 void CTaskComplexWalkRoundObject::InjectHooks() {
     ReversibleHooks::Install("CTaskComplexWalkRoundObject", "CTaskComplexWalkRoundObject", 0x655020, &CTaskComplexWalkRoundObject::Constructor);

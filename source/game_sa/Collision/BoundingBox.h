@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CBox.h"
+#include "Box.h"
 
 class CBoundingBox : public CBox {
 public:

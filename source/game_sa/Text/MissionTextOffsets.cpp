@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CMissionTextOffsets.h"
+#include "MissionTextOffsets.h"
 
 CMissionTextOffsets::CMissionTextOffsets() {
     size = 0;

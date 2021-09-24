@@ -1,5 +1,6 @@
 #pragma once 
-#include "CEventVehicleDamage.h"
+
+#include "EventVehicleDamage.h"
 
 class CEventVehicleDamageWeapon : public CEventVehicleDamage
 {

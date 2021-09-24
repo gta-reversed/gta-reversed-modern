@@ -7,9 +7,9 @@
 #pragma once
 
 #include "IplDef.h"
-#include "CEntity.h"
-#include "CQuadTreeNode.h"
-#include "CEntity.h"
+#include "Entity.h"
+#include "QuadTreeNode.h"
+#include "Entity.h"
 
 class CIplStore {
 public:

@@ -1,5 +1,5 @@
 #pragma once
-#include "CAtomicModelInfo.h"
+#include "AtomicModelInfo.h"
 
 class CLodAtomicModelInfo : public CAtomicModelInfo {
 public:

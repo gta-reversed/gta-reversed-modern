@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CAESound.h"
+#include "AESound.h"
 
 #include "eAudioEvents.h"
 

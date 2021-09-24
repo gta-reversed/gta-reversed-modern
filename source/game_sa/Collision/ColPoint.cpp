@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CColPoint.h"
+#include "ColPoint.h"
 
-#include "CCustomBuildingDNPipeline.h"
+#include "CustomBuildingDNPipeline.h"
 
 float tColLighting::GetCurrentLighting(float fScale) const {
     const auto fDay = static_cast<float>(day) * fScale / 15.0F;

@@ -6,8 +6,8 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "CTaskComplex.h"
-#include "CTaskTimer.h"
+#include "TaskComplex.h"
+#include "TaskTimer.h"
 
 class CTaskComplexUseMobilePhone : public CTaskComplex {
 public:

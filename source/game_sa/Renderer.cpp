@@ -7,12 +7,12 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-#include "CRenderer.h"
+#include "Renderer.h"
 
-#include "COcclusion.h"
+#include "Occlusion.h"
 
 #ifdef EXTRA_DEBUG_FEATURES
-#include "toolsmenu\DebugModules\Collision\Collision.h"
+#include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
 #endif
 
 int32 MAX_INVISIBLE_ENTITY_PTRS = 150;

@@ -7,14 +7,14 @@
 */
 #pragma once
 
-#include "CVector.h"
-#include "CStreamingInfo.h"
+#include "Vector.h"
+#include "StreamingInfo.h"
 #include "RenderWare.h"
-#include "CEntity.h"
-#include "CPtrList.h"
-#include "CLinkList.h"
-#include "CLoadedCarGroup.h"
-#include "CDirectory.h"
+#include "Entity.h"
+#include "PtrList.h"
+#include "LinkList.h"
+#include "LoadedCarGroup.h"
+#include "Directory.h"
 #include "constants.h"
 
 enum eResourceFirstID {

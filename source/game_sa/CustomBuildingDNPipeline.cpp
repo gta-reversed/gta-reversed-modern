@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CCustomBuildingDNPipeline.h"
+#include "CustomBuildingDNPipeline.h"
 
 float& CCustomBuildingDNPipeline::m_fDNBalanceParam = *(float*)0x8D12C0;
 RxPipeline*& CCustomBuildingDNPipeline::ObjPipeline = *(RxPipeline**)0xC02C1C;

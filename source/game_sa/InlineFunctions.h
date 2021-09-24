@@ -6,7 +6,7 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 #include "RenderWare.h"
-#include "Animation\CAnimBlendClumpData.h"
+#include "Animation\AnimBlendClumpData.h"
 
 inline CAnimBlendClumpData * GetAnimClumpData(RpClump * pClump)
 {

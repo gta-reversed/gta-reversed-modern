@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CBox.h"
-#include "CColPoint.h"
+#include "Box.h"
+#include "ColPoint.h"
 
 class CColBox : public CBox {
 public:

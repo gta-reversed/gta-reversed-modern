@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CTaskSimple.h"
-#include "CAnimBlendAssociation.h"
-#include "CEntity.h"
+#include "TaskSimple.h"
+#include "AnimBlendAssociation.h"
+#include "Entity.h"
 
 enum eFightAttackType : int8 {
     FIGHT_ATTACK_HIT_1 = 0,

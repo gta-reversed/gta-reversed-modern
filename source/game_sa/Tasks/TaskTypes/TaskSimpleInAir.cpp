@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleInAir.h"
+#include "TaskSimpleInAir.h"
 
-#include "CTaskComplexInAirAndLand.h"
+#include "TaskComplexInAirAndLand.h"
 
 float CTaskSimpleInAir::ms_fSlowFallThreshold = -0.05F;
 uint32 CTaskSimpleInAir::ms_nMaxSlowFallFrames = 10;

@@ -7,10 +7,10 @@
 #pragma once
 
 
-#include "CTaskSimpleAnim.h"
-#include "CAnimBlendHierarchy.h"
-#include "CTaskTimer.h"
-#include "CVector.h"
+#include "TaskSimpleAnim.h"
+#include "AnimBlendHierarchy.h"
+#include "TaskTimer.h"
+#include "Vector.h"
 
 class CTaskSimpleRunNamedAnim : public CTaskSimpleAnim {
 public:

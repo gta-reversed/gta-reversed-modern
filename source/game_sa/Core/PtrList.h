@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CPtrNode.h"
+#include "PtrNode.h"
 
 class CPtrList {
 public:

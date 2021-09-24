@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CDecision.h"
+#include "Decision.h"
 
 class CPed;
 class CPedGroup;

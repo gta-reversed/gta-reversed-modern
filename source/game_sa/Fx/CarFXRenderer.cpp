@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CCarFXRenderer.h"
+#include "CarFXRenderer.h"
 
 RwTexture* (&CCarFXRenderer::ms_aDirtTextures)[NUM_DIRT_TEXTURES] = *(RwTexture*(*)[NUM_DIRT_TEXTURES])0xC02BD0;
 

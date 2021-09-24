@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexBeCop.h"
+#include "TaskComplexBeCop.h"
 
 eTaskType CTaskComplexBeCop::GetTaskType()
 {

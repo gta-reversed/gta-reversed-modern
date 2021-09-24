@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexPartnerChat.h"
+#include "TaskComplexPartnerChat.h"
 
 void CTaskComplexPartnerChat::InjectHooks()
 {

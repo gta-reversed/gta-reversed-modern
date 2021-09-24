@@ -1,5 +1,7 @@
-#include "CEventEditableResponse.h"
-#include "CVehicle.h"
+#pragma once
+
+#include "EventEditableResponse.h"
+#include "Vehicle.h"
 
 class CEventGotKnockedOverByCar : public CEventEditableResponse {
 public:

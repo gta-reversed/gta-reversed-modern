@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CVector.h"
+#include "Vector.h"
 
 enum eBrightLightColor : uint8 {
     BRIGHTLIGHT_NONE         = 0,

@@ -6,8 +6,8 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "CTaskSimpleAnim.h"
-#include "CAnimBlendAssociation.h"
+#include "TaskSimpleAnim.h"
+#include "AnimBlendAssociation.h"
 
 class CTaskSimpleRunAnim : public CTaskSimpleAnim {
 public:

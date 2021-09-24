@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CVector.h"
+#include "Vector.h"
 
 struct tColLighting {
     uint8 day : 4;

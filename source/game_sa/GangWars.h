@@ -6,10 +6,10 @@
 */
 #pragma once
 
-#include "CZoneInfo.h"
-#include "CZone.h"
-#include "CRadar.h"
-#include "CVector.h"
+#include "ZoneInfo.h"
+#include "Zone.h"
+#include "Radar.h"
+#include "Vector.h"
 
 enum eGangAttackState {
     NO_ATTACK          = 0,

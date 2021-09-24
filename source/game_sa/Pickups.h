@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CPickup.h"
+#include "Pickup.h"
 #include "tPickupMessage.h"
 #include "eWeaponType.h"
 

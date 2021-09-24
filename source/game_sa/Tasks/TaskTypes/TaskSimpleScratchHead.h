@@ -1,5 +1,5 @@
 #pragma once
-#include "CTaskSimple.h"
+#include "TaskSimple.h"
 
 class CTaskSimpleScratchHead : public CTaskSimple
 {

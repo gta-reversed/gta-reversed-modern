@@ -7,17 +7,17 @@
 
 #include "common.h"
 
-#include "CAEUserRadioTrackManager.h"
+#include "AEUserRadioTrackManager.h"
 
-#include "CAEAudioUtility.h"
-#include "CAEDataStream.h"
-#include "CAEMFDecoder.h"
-#include "CAEWaveDecoder.h"
-#include "CAEWMADecoder.h"
-#include "CAEVorbisDecoder.h"
+#include "AEAudioUtility.h"
+#include "AEDataStream.h"
+#include "AEMFDecoder.h"
+#include "AEWaveDecoder.h"
+#include "AEWMADecoder.h"
+#include "AEVorbisDecoder.h"
 
-#include "CFileMgr.h"
-#include "CMenuManager.h"
+#include "FileMgr.h"
+#include "MenuManager.h"
 
 // Instance of CAEUserRadioTrackManager
 CAEUserRadioTrackManager& CAEUserRadioTrackManager::instance = *(CAEUserRadioTrackManager*)0xb6b970;

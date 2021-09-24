@@ -7,9 +7,9 @@
 #pragma once
 
 
-#include "CTaskSimple.h"
-#include "CAnimBlendAssociation.h"
-#include "CVector2D.h"
+#include "TaskSimple.h"
+#include "AnimBlendAssociation.h"
+#include "Vector2D.h"
 
 enum eDuckControlTypes : uint8
 {

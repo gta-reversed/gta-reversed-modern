@@ -7,7 +7,7 @@
 #pragma once
 
 
-#include "CSetPiece.h"
+#include "SetPiece.h"
 
 extern uint32 MAX_SET_PIECES; // default 210
 

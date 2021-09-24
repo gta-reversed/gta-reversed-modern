@@ -8,8 +8,8 @@
 
 
 #include "RenderWare.h"
-#include "CShadowCamera.h"
-#include "CSphere.h"
+#include "ShadowCamera.h"
+#include "Sphere.h"
 
 class CPhysical;
 

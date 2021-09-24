@@ -7,14 +7,14 @@
 #pragma once
 
 
-#include "CPlayerInfo.h"
-#include "CColPoint.h"
-#include "CStoredCollPoly.h"
-#include "CSector.h"
-#include "CRepeatSector.h"
-#include "CPtrListSingleLink.h"
-#include "CPed.h"
-#include "CVehicle.h"
+#include "PlayerInfo.h"
+#include "ColPoint.h"
+#include "StoredCollPoly.h"
+#include "Sector.h"
+#include "RepeatSector.h"
+#include "PtrListSingleLink.h"
+#include "Ped.h"
+#include "Vehicle.h"
 
 constexpr int32 MAX_PLAYERS = 2;
 constexpr int32 MAX_WORLD_UNITS = 6000;

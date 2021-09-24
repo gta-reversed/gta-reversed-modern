@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CGamma.h"
+#include "Gamma.h"
 
 CGamma& gamma = *(CGamma*)0xC92134;
 

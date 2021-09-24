@@ -7,9 +7,9 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "CPlayerPedData.h"
-#include "CVector.h"
-#include "CPlayerPed.h"
+#include "PlayerPedData.h"
+#include "Vector.h"
+#include "PlayerPed.h"
 
 enum ePlayerState : uint8 {
     PLAYERSTATE_PLAYING,

@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CRect.h"
-#include "CVector.h"
-#include "CObject.h"
+#include "Rect.h"
+#include "Vector.h"
+#include "Object.h"
 
 class CPed;
 

@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleHoldEntity.h"
+#include "TaskSimpleHoldEntity.h"
 
-#include "CTaskSimplePickUpEntity.h"
-#include "CTaskSimplePutDownEntity.h"
+#include "TaskSimplePickUpEntity.h"
+#include "TaskSimplePutDownEntity.h"
 
 void CTaskSimpleHoldEntity::InjectHooks() {
     using namespace ReversibleHooks;

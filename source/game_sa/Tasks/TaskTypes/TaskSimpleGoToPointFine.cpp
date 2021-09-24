@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleGoToPointFine.h"
+#include "TaskSimpleGoToPointFine.h"
 
 void CTaskSimpleGoToPointFine::InjectHooks()
 {

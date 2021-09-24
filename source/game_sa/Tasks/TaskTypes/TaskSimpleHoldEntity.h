@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CTaskSimple.h"
+#include "TaskSimple.h"
 
 enum eHoldEntityBoneFlags {
     HOLD_ENTITY_FLAG_1 = 0x1,

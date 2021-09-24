@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CAnimBlendSequence.h"
+#include "AnimBlendSequence.h"
 
 class CAnimBlendHierarchy {
 public:

@@ -1,5 +1,5 @@
 #pragma once
-#include "CTaskComplexWanderCop.h"
+#include "TaskComplexWanderCop.h"
 
 class CTaskComplexBeCop : public CTaskComplexWanderCop
 {

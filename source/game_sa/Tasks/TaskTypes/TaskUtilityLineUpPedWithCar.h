@@ -6,12 +6,10 @@
 */
 #pragma once
 
+#include "TaskSimple.h"
+#include "Ped.h"
 
-#include "CTaskSimple.h"
-#include "CPed.h"
-
-class CTaskUtilityLineUpPedWithCar
-{
+class CTaskUtilityLineUpPedWithCar {
 public:
     CVector vecOffsets;
     int32 field_C;

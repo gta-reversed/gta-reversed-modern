@@ -1,4 +1,4 @@
-#include "CTaskComplexPartner.h"
+#include "TaskComplexPartner.h"
 
 class CTaskComplexPartnerGreet : public CTaskComplexPartner
 {

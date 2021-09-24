@@ -1,5 +1,5 @@
 #pragma once
-#include "CEntityScanner.h"
+#include "EntityScanner.h"
 
 class CPed;
 

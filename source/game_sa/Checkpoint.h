@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CRGBA.h"
-#include "CVector.h"
+#include "RGBA.h"
+#include "Vector.h"
 
 class CCheckpoint {
 public:

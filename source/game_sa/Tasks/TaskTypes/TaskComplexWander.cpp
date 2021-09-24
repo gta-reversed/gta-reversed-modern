@@ -1,21 +1,21 @@
 #include "StdInc.h"
 
-#include "CTaskComplexWander.h"
+#include "TaskComplexWander.h"
 
-#include "CTaskSimpleCarDriveTimed.h"
-#include "CTaskSimpleScratchHead.h"
-#include "CTaskSimpleStandStill.h"
-#include "CTaskSimpleGoToPoint.h"
-#include "CTaskSimpleRunAnim.h"
+#include "TaskSimpleCarDriveTimed.h"
+#include "TaskSimpleScratchHead.h"
+#include "TaskSimpleStandStill.h"
+#include "TaskSimpleGoToPoint.h"
+#include "TaskSimpleRunAnim.h"
 
-#include "CTaskComplexObserveTrafficLightsAndAchieveHeading.h"
-#include "CTaskComplexCrossRoadLookAndAchieveHeading.h"
-#include "CTaskComplexWanderProstitute.h"
-#include "CTaskComplexWanderStandard.h"
-#include "CTaskComplexWanderCriminal.h"
-#include "CTaskComplexWanderMedic.h"
-#include "CTaskComplexWanderCop.h"
-#include "CTaskComplexLeaveCar.h"
+#include "TaskComplexObserveTrafficLightsAndAchieveHeading.h"
+#include "TaskComplexCrossRoadLookAndAchieveHeading.h"
+#include "TaskComplexWanderProstitute.h"
+#include "TaskComplexWanderStandard.h"
+#include "TaskComplexWanderCriminal.h"
+#include "TaskComplexWanderMedic.h"
+#include "TaskComplexWanderCop.h"
+#include "TaskComplexLeaveCar.h"
 
 void CTaskComplexWander::InjectHooks()
 {

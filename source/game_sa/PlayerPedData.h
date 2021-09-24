@@ -7,10 +7,10 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "CWanted.h"
-#include "CPedClothesDesc.h"
-#include "CVector.h"
-#include "CVector2D.h"
+#include "Wanted.h"
+#include "PedClothesDesc.h"
+#include "Vector.h"
+#include "Vector2D.h"
 
 class CEntity;
 class CPed;

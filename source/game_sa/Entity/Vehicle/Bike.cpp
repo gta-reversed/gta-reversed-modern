@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-#include "CBike.h"
+#include "Bike.h"
 
 void CBike::InjectHooks()
 {

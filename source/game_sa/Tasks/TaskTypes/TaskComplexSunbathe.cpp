@@ -1,3 +1,3 @@
 #include "StdInc.h"
 
-#include "CTaskComplexSunbathe.h"
+#include "TaskComplexSunbathe.h"

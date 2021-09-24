@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CAEAudioEntity.h"
+#include "AEAudioEntity.h"
 
 class CAEWeatherAudioEntity : public CAEAudioEntity {
 public:

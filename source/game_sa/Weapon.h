@@ -8,8 +8,8 @@
 
 #include "eWeaponType.h"
 #include "FxSystem_c.h"
-#include "CVector2D.h"
-#include "CColPoint.h"
+#include "Vector2D.h"
+#include "ColPoint.h"
 
 enum ePedPieceTypes;
 

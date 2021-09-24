@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CAutomobile.h"
-#include "CRideAnimData.h"
+#include "Automobile.h"
+#include "RideAnimData.h"
 
 enum eQuadBikeNodes {
     QUAD_NODE_NONE = 0,

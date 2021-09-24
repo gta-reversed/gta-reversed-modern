@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexArrestPed.h"
+#include "TaskComplexArrestPed.h"
 
 void CTaskComplexArrestPed::InjectHooks() {
     using namespace ReversibleHooks;

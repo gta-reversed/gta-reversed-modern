@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CPedTaskPair.h"
-#include "CPed.h"
-#include "CTask.h"
+#include "PedTaskPair.h"
+#include "Ped.h"
+#include "Task.h"
 
 class CGroupEventHandler;
 class CPedGroupDefaultTaskAllocator;

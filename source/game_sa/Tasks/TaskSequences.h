@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CTaskComplexSequence.h"
+#include "TaskComplexSequence.h"
 
 class CTaskSequences {
 public:

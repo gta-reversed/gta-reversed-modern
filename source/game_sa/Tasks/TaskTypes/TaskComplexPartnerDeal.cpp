@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexPartnerDeal.h"
+#include "TaskComplexPartnerDeal.h"
 
 void CTaskComplexPartnerDeal::InjectHooks()
 {

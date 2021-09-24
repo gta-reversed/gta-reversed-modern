@@ -1,5 +1,5 @@
 #pragma once
-#include "CTaskSimpleRunAnim.h"
+#include "TaskSimpleRunAnim.h"
 #include "AnimationEnums.h"
 
 class CTaskSimpleAbseil : public CTaskSimpleRunAnim

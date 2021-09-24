@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CPed.h"
+#include "Ped.h"
 
 enum eCopType : uint32 {
     COP_TYPE_CITYCOP,

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleDie.h"
+#include "TaskSimpleDie.h"
 
 // 0x62FA00
 CTaskSimpleDie::CTaskSimpleDie(AssocGroupId animGroupId, AnimationId animId, float blendDelta, float animSpeed) : CTaskSimple() {

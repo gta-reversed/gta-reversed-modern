@@ -6,7 +6,7 @@
 */
 #include "StdInc.h"
 
-#include "CTaskComplex.h"
+#include "TaskComplex.h"
 
 // 0x61A3B0
 CTaskComplex::CTaskComplex() : CTask() {

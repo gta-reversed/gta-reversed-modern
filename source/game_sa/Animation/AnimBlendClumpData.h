@@ -7,7 +7,7 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "CVector.h"
+#include "Vector.h"
 #include "AnimBlendFrameData.h"
 
 class CAnimBlendClumpData {

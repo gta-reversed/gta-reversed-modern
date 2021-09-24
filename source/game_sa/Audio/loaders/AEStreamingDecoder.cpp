@@ -1,6 +1,6 @@
 #include "StdInc.h" // TODO: Remove
 
-#include "CAEStreamingDecoder.h"
+#include "AEStreamingDecoder.h"
 
 // 0x4f2810
 CAEStreamingDecoder::CAEStreamingDecoder(CAEDataStream* dataStream) {

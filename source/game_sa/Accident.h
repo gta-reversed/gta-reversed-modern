@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CPed.h"
+#include "Ped.h"
 
 class CAccident {
 public:

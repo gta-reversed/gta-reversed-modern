@@ -7,11 +7,11 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "CBoundingBox.h"
-#include "CColModel.h"
-#include "CEntity.h"
-#include "CFileObjectInstance.h"
-#include "CFileMgr.h"
+#include "BoundingBox.h"
+#include "ColModel.h"
+#include "Entity.h"
+#include "FileObjectInstance.h"
+#include "FileMgr.h"
 
 enum eSection : uint8 {
     UNDEFINED = 0,

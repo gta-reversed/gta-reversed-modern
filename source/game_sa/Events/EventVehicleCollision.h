@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CEvent.h"
+#include "Event.h"
 
 class CVehicle;
 class CVector;

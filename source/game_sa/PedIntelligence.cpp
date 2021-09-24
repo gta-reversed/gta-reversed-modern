@@ -6,17 +6,17 @@
 */
 #include "StdInc.h"
 
-#include "CPedIntelligence.h"
+#include "PedIntelligence.h"
 
-#include "CPedType.h"
-#include "CTaskSimpleCarDriveTimed.h"
-#include "CTaskSimpleStandStill.h"
-#include "CTaskComplexFacial.h"
-#include "CTaskComplexEnterCar.h"
-#include "CTaskSimpleGoTo.h"
-#include "CTaskComplexKillPedOnFoot.h"
-#include "CTaskSimplePlayerOnFoot.h"
-#include "CTaskComplexWander.h"
+#include "PedType.h"
+#include "TaskSimpleCarDriveTimed.h"
+#include "TaskSimpleStandStill.h"
+#include "TaskComplexFacial.h"
+#include "TaskComplexEnterCar.h"
+#include "TaskSimpleGoTo.h"
+#include "TaskComplexKillPedOnFoot.h"
+#include "TaskSimplePlayerOnFoot.h"
+#include "TaskComplexWander.h"
 
 float& CPedIntelligence::STEALTH_KILL_RANGE = *reinterpret_cast<float*>(0x8D2398); // 2.5f
 float& CPedIntelligence::LIGHT_AI_LEVEL_MAX = *reinterpret_cast<float*>(0x8D2380); // 0.3f

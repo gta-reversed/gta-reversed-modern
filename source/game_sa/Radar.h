@@ -6,10 +6,10 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "CVector.h"
-#include "CRGBA.h"
-#include "CVector2D.h"
-#include "CSprite2d.h"
+#include "Vector.h"
+#include "RGBA.h"
+#include "Vector2D.h"
+#include "Sprite2d.h"
 
 // Thanks to Wesser for radar-related things
 enum eBlipAppearance {

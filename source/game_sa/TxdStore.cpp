@@ -6,7 +6,7 @@ Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
-#include "CTxdStore.h"
+#include "TxdStore.h"
 
 CPool<TxdDef>*& CTxdStore::ms_pTxdPool = *reinterpret_cast<CPool<TxdDef>**>(0xC8800C);
 RwTexDictionary*& CTxdStore::ms_pStoredTxd = *reinterpret_cast<RwTexDictionary**>(0xC88010);

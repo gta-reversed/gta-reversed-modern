@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CClumpModelInfo.h"
-#include "CColModel.h"
+#include "ClumpModelInfo.h"
+#include "ColModel.h"
 
 struct tPedColNodeInfo {
     char    _pad[4];

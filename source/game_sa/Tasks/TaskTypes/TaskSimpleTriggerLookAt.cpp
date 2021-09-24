@@ -1,3 +1,3 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleTriggerLookAt.h"
+#include "TaskSimpleTriggerLookAt.h"

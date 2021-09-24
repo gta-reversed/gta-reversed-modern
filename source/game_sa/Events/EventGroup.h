@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CEvent.h"
+#include "Event.h"
 
 class CPed;
 

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleAchieveHeading.h"
+#include "TaskSimpleAchieveHeading.h"
 
 CTaskSimpleAchieveHeading::CTaskSimpleAchieveHeading(float fAngle, float arg2, float arg3)
 {

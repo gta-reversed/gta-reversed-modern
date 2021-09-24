@@ -7,8 +7,8 @@
 #pragma once
 
 
-#include "CTaskComplexWander.h"
-#include "CTaskTimer.h"
+#include "TaskComplexWander.h"
+#include "TaskTimer.h"
 
 class CTaskComplexWanderStandard : public CTaskComplexWander {
 public:

@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CVector2D.h"
+#include "Vector2D.h"
 
 /* CRect class describes a rectangle.
 

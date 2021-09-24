@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CCheckpoint.h"
+#include "Checkpoint.h"
 
 extern uint32 MAX_NUM_CHECKPOINTS; // default 32
 

@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CVehicle.h"
-#include "CBaseModelInfo.h"
-#include "CPtrListDoubleLink.h"
+#include "Vehicle.h"
+#include "BaseModelInfo.h"
+#include "PtrListDoubleLink.h"
 
 enum eRendererVisiblity {
     RENDERER_INVISIBLE = 0,

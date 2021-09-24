@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CDirectory.h"
+#include "Directory.h"
 
 
 void CDirectory::InjectHooks() {

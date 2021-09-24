@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CStencilShadowObject.h"
+#include "StencilShadowObject.h"
 
 class CStencilShadowObject;
 

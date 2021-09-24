@@ -6,7 +6,7 @@
 */
 #include "StdInc.h"
 
-#include "CRadar.h"
+#include "Radar.h"
 
 float& CRadar::m_fRadarOrientation = *(float*)0xBA8310;
 float& CRadar::m_radarRange = *(float*)0xBA8314;

@@ -8,7 +8,7 @@
 #pragma once
 
 #include "renderware.h"  // important
-#include "CPedClothesDesc.h"
+#include "PedClothesDesc.h"
 
 class CClothesBuilder {
 public:

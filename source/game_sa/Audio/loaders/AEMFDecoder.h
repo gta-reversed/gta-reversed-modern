@@ -3,7 +3,7 @@
 #include <mfidl.h>
 #include <mfreadwrite.h>
 
-#include "CAEStreamingDecoder.h"
+#include "AEStreamingDecoder.h"
 
 class CAEMFDecoder : public CAEStreamingDecoder {
 private:

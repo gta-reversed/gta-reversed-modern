@@ -1,9 +1,9 @@
 #pragma once
 
-#include "CVector.h"
-#include "CVehicle.h"
-#include "CPed.h"
-#include "CNodeAddress.h"
+#include "Vector.h"
+#include "Vehicle.h"
+#include "Ped.h"
+#include "NodeAddress.h"
 
 class CRoadBlocks {
 public:

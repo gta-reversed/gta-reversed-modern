@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CTaskComplex.h"
-#include "CPed.h"
+#include "TaskComplex.h"
+#include "Ped.h"
 
 class CTaskComplexKillPedFromBoat : public CTaskComplex {
 public:

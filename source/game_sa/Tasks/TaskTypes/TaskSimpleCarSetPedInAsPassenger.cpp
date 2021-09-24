@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleCarSetPedInAsPassenger.h"
+#include "TaskSimpleCarSetPedInAsPassenger.h"
 
 CTaskSimpleCarSetPedInAsPassenger::CTaskSimpleCarSetPedInAsPassenger(CVehicle* pTargetVehicle, int32 nTargetDoor, CTaskUtilityLineUpPedWithCar* pUtility)
 {

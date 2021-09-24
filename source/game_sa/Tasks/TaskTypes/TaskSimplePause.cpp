@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimplePause.h"
+#include "TaskSimplePause.h"
 
 void CTaskSimplePause::InjectHooks()
 {

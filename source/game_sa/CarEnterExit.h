@@ -6,10 +6,10 @@
 */
 #pragma once
 
-#include "CVehicle.h"
-#include "CVector.h"
-#include "CPed.h"
-#include "CTask.h"
+#include "Vehicle.h"
+#include "Vector.h"
+#include "Ped.h"
+#include "Task.h"
 
 class CCarEnterExit {
 public:

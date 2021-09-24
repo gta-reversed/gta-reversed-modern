@@ -6,10 +6,9 @@
 */
 #pragma once
 
-
-#include "CTaskSimple.h"
-#include "CVehicle.h"
-#include "CTaskUtilityLineUpPedWithCar.h"
+#include "TaskSimple.h"
+#include "Vehicle.h"
+#include "TaskUtilityLineUpPedWithCar.h"
 
 class CTaskSimpleCarSetPedInAsPassenger : public CTaskSimple {
 public:

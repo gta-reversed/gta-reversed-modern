@@ -6,7 +6,7 @@
 */
 #include "StdInc.h"
 
-#include "CKeyGen.h"
+#include "KeyGen.h"
 
 #include <cctype> // toupper
 

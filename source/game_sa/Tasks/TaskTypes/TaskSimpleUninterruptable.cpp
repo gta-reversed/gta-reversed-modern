@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleUninterruptable.h"
+#include "TaskSimpleUninterruptable.h"
 
 void CTaskSimpleUninterruptable::InjectHooks()
 {

@@ -7,10 +7,10 @@ Do not delete this comment block. Respect others' work!
 #pragma once
 
 
-#include "CTaskComplex.h"
-#include "CTaskTimer.h"
-#include "CAnimBlock.h"
-#include "CObject.h"
+#include "TaskComplex.h"
+#include "TaskTimer.h"
+#include "AnimBlock.h"
+#include "Object.h"
 
 enum eSunbatherType : uint32
 {

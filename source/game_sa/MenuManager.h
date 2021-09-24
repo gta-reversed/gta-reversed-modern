@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CVector2D.h"
-#include "CSprite2d.h"
+#include "Vector2D.h"
+#include "Sprite2d.h"
 #include "eLanguage.h"
 
 // Menu entries action to perform

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CGroupEventHandler.h"
+#include "GroupEventHandler.h"
 
 void CGroupEventHandler::InjectHooks() {
     using namespace ReversibleHooks;

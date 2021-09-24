@@ -1,11 +1,12 @@
-#include "CEventGroup.h"
+#pragma once
+
+#include "EventGroup.h"
 
 class CEntity;
 class CPed;
 class CPedGroup;
 
-class CEventGlobalGroup : public CEventGroup
-{
+class CEventGlobalGroup : public CEventGroup {
 public:
     static void InjectHooks();
 

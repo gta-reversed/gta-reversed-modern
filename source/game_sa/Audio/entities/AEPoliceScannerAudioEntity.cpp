@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CAEPoliceScannerAudioEntity.h"
+#include "AEPoliceScannerAudioEntity.h"
 
-#include "CAEAudioHardware.h"
+#include "AEAudioHardware.h"
 
 #define NUM_POLICE_SCANNER_SLOTS 5
 

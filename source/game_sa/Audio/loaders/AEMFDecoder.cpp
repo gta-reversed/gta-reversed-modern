@@ -6,7 +6,7 @@
 
 #include "StdInc.h" // TODO: Remove
 
-#include "CAEMFDecoder.h"
+#include "AEMFDecoder.h"
 
 #include <propvarutil.h>    // todo: cross-platform
 

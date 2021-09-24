@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CSimpleTransform.h"
-#include "CMatrixLink.h"
+#include "SimpleTransform.h"
+#include "MatrixLink.h"
 
 class CPlaceable {
 protected:

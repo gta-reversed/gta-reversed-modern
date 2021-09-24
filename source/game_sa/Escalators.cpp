@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
-#include "CEscalators.h"
-#include "CEscalator.h"
+#include "Escalators.h"
+#include "Escalator.h"
 
 CEscalator(&CEscalators::aEscalators)[NUM_ESCALATORS] = *(CEscalator(*)[NUM_ESCALATORS])0xC6E9A8;
 

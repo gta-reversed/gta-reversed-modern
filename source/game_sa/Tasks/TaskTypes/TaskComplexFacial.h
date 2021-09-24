@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CTaskComplex.h"
-#include "CTaskSimpleFacial.h"
+#include "TaskComplex.h"
+#include "TaskSimpleFacial.h"
 
 class CTaskComplexFacial : public CTaskComplex {
 public:

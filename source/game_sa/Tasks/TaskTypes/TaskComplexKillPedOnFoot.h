@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CTaskComplex.h"
-#include "CTaskTimer.h"
-#include "CTaskComplex.h"
+#include "TaskComplex.h"
+#include "TaskTimer.h"
+#include "TaskComplex.h"
 
 class CTaskComplexKillPedOnFoot : public CTaskComplex {
 public:

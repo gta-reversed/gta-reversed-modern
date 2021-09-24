@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CSprite2d.h"
+#include "Sprite2d.h"
 
 enum DRAW_FADE_STATE {
 

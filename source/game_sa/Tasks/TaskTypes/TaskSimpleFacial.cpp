@@ -1,3 +1,3 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleFacial.h"
+#include "TaskSimpleFacial.h"

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CEventEditableResponse.h"
-#include "CPed.h"
+#include "EventEditableResponse.h"
+#include "Ped.h"
 
 class CEventGunShot : public CEventEditableResponse {
 public:

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleUseGun.h"
+#include "TaskSimpleUseGun.h"
 
 // 0x61DE60
 CTaskSimpleUseGun::CTaskSimpleUseGun(CEntity* targetEntity, CVector vecTarget, uint8 nCommand, uint16 nBurstLength, bool bAimImmediate) : CTaskSimple() {

@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CSprite2d.h"
+#include "Sprite2d.h"
 
 class CLoadingScreen {
 public:

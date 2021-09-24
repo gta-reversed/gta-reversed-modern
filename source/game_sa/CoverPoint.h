@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CVector.h"
+#include "Vector.h"
 
 class CEntity;
 class CPed;

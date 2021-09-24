@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CVector.h"
+#include "Vector.h"
 #include "eWeaponType.h"
-#include "CEntity.h"
+#include "Entity.h"
 
 class CBulletInfo {
 public:

@@ -7,8 +7,8 @@
 #pragma once
 
 
-#include "CTaskSimple.h"
-#include "CTaskTimer.h"
+#include "TaskSimple.h"
+#include "TaskTimer.h"
 
 class CTaskSimpleStandStill : public CTaskSimple {
 public:

@@ -1,5 +1,5 @@
 #include "StdInc.h"
-#include "CTimeInfo.h"
+#include "TimeInfo.h"
 
 void CTimeInfo::InjectHooks() {
     ReversibleHooks::Install("CTimeInfo", "FindOtherTimeModel", 0x4C47E0, &CTimeInfo::FindOtherTimeModel);

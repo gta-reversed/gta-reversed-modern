@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleGiveCPR.h"
+#include "TaskSimpleGiveCPR.h"
 
 void CTaskSimpleGiveCPR::InjectHooks()
 {

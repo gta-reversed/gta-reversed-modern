@@ -1,10 +1,10 @@
 #include "StdInc.h"
 
-#include "CTaskComplexInAirAndLand.h"
-#include "CTaskSimpleGetUp.h"
-#include "CTaskSimpleFall.h"
-#include "CTaskSimpleLand.h"
-#include "CTaskSimpleClimb.h"
+#include "TaskComplexInAirAndLand.h"
+#include "TaskSimpleGetUp.h"
+#include "TaskSimpleFall.h"
+#include "TaskSimpleLand.h"
+#include "TaskSimpleClimb.h"
 
 void CTaskComplexInAirAndLand::InjectHooks() {
     ReversibleHooks::Install("CTaskComplexInAirAndLand", "CTaskComplexInAirAndLand", 0x678C80, &CTaskComplexInAirAndLand::Constructor);

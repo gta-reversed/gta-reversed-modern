@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CVehicle.h"
-#include "CVector.h"
+#include "Vehicle.h"
+#include "Vector.h"
 
 #define STUCK_CAR_CHECK_SIZE 16
 

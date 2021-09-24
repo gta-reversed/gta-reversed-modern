@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimplePlayHandSignalAnim.h"
+#include "TaskSimplePlayHandSignalAnim.h"
 
 void CTaskSimplePlayHandSignalAnim::InjectHooks()
 {

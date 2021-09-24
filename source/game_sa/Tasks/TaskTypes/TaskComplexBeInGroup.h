@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CTaskComplex.h"
+#include "TaskComplex.h"
 
 class CTaskComplexBeInGroup : public CTaskComplex {
     int32  m_groupId;

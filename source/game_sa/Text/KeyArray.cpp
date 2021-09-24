@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CKeyArray.h"
+#include "KeyArray.h"
 #include "GxtChar.h"
 
 CKeyArray::CKeyArray() {

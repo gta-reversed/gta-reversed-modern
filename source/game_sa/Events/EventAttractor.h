@@ -1,4 +1,4 @@
-#include "CEventEditableResponse.h"
+#include "EventEditableResponse.h"
 
 class C2dEffect;
 class CEntity;

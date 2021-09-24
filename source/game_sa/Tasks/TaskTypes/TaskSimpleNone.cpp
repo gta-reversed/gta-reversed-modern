@@ -1,3 +1,3 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleNone.h"
+#include "TaskSimpleNone.h"

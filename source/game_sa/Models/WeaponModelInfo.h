@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CClumpModelInfo.h"
+#include "ClumpModelInfo.h"
 #include "eWeaponType.h"
 
 class CWeaponModelInfo : public CClumpModelInfo {

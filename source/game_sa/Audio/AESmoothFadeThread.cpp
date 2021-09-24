@@ -1,8 +1,8 @@
 #include "StdInc.h"
-#include "CAESmoothFadeThread.h"
+#include "AESmoothFadeThread.h"
 
-#include "CAEAudioChannel.h"
-#include "CAEAudioUtility.h"
+#include "AEAudioChannel.h"
+#include "AEAudioUtility.h"
 
 CAESmoothFadeThread& AESmoothFadeThread = *(CAESmoothFadeThread*)0xB608D0;
 

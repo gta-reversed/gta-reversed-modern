@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CPtrList.h"
-#include "CPtrNodeDoubleLink.h"
+#include "PtrList.h"
+#include "PtrNodeDoubleLink.h"
 
 class CPtrListDoubleLink : public CPtrList {
 public:

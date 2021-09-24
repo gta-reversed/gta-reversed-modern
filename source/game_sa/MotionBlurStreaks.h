@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CRegisteredMotionBlurStreak.h"
+#include "RegisteredMotionBlurStreak.h"
 
 class CMotionBlurStreaks {
 public:

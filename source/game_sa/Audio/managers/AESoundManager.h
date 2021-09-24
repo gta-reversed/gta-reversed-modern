@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CAESound.h"
-#include "CPhysical.h"
+#include "AESound.h"
+#include "Physical.h"
 
 static constexpr int32 MAX_NUM_SOUNDS = 300;
 static constexpr int32 MAX_NUM_AUDIO_CHANNELS = 64;

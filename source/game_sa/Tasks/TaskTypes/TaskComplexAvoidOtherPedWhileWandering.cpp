@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexAvoidOtherPedWhileWandering.h"
+#include "TaskComplexAvoidOtherPedWhileWandering.h"
 
 void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
     using namespace ReversibleHooks;

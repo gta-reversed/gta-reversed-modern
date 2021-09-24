@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CTaskComplexUseWaterCannon.h"
+#include "TaskComplexUseWaterCannon.h"
 
-#include "CTaskSimpleCarDrive.h"
-#include "CTaskSimpleCarDriveTimed.h"
+#include "TaskSimpleCarDrive.h"
+#include "TaskSimpleCarDriveTimed.h"
 
 void CTaskComplexUseWaterCannon::InjectHooks()
 {

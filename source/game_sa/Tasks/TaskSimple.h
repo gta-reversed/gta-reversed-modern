@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CTask.h"
+#include "Task.h"
 
 class CTaskSimple : public CTask {
 public:

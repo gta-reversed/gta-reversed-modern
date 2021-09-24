@@ -7,8 +7,8 @@
 #pragma once
 
 #include "CompressedVector.h"
-#include "CVector.h"
-#include "CNodeAddress.h"
+#include "Vector.h"
+#include "NodeAddress.h"
 
 #define NUM_PATH_MAP_AREAS 64
 #define NUM_PATH_INTERIOR_AREAS 8

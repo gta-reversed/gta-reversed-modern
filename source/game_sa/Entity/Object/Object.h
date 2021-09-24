@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CPhysical.h"
-#include "CObjectData.h"
+#include "Physical.h"
+#include "ObjectData.h"
 
 enum eObjectType {
     OBJECT_UNKNOWN = 0,

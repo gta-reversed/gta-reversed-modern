@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CVector.h"
+#include "Vector.h"
 
 struct CByteCompressedVector {
     int8 x;

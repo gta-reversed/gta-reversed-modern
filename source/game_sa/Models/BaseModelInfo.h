@@ -7,9 +7,9 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "CColModel.h"
-#include "CKeyGen.h"
-#include "Plugins\TwoDEffectPlugin\C2dEffect.h"
+#include "ColModel.h"
+#include "KeyGen.h"
+#include "Plugins\TwoDEffectPlugin\2dEffect.h"
 
 #include "eModelID.h"
 

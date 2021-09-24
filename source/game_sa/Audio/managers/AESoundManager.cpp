@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CAESoundManager.h"
+#include "AESoundManager.h"
 
-#include "CAEAudioEnvironment.h"
-#include "CAEAudioHardware.h"
+#include "AEAudioEnvironment.h"
+#include "AEAudioHardware.h"
 
 CAESoundManager& AESoundManager = *(CAESoundManager*)0xB62CB0;
 

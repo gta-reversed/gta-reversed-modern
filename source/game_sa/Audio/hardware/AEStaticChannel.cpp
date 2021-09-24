@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CAEStaticChannel.h"
+#include "AEStaticChannel.h"
 
-#include "CAESmoothFadeThread.h"
+#include "AESmoothFadeThread.h"
 
 void CAEStaticChannel::InjectHooks() {
     ReversibleHooks::Install("CAEStaticChannel", "IsSoundPlaying", 0x4F0F40, &CAEStaticChannel::IsSoundPlaying_Reversed);

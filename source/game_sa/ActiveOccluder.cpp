@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CActiveOccluder.h"
+#include "ActiveOccluder.h"
 
 void CActiveOccluder::InjectHooks()
 {

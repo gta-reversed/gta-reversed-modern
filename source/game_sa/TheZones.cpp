@@ -7,7 +7,7 @@
 
 #include "StdInc.h"
 
-#include "CTheZones.h"
+#include "TheZones.h"
 
 // Variables
 eLevelName& CTheZones::m_CurrLevel = *(eLevelName*)0xBA6718;

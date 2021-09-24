@@ -7,7 +7,7 @@
 #pragma once
 
 
-#include "CAutomobile.h"
+#include "Automobile.h"
 
 enum eTrailerNodes {
     TRAILER_NODE_NONE = 0,

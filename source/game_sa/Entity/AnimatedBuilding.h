@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CBuilding.h"
+#include "Building.h"
 
 class CAnimatedBuilding : public CBuilding {
 public:

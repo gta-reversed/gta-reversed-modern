@@ -1,5 +1,5 @@
 #pragma once
-#include "CAEAudioChannel.h"
+#include "AEAudioChannel.h"
 
 class CAEStaticChannel : public CAEAudioChannel {
 public:

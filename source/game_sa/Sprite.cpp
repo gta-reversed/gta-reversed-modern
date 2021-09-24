@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CSprite.h"
+#include "Sprite.h"
 
 float& CSprite::m_f2DNearScreenZ = *(float*)0xC4B8D8;
 float& CSprite::m_f2DFarScreenZ = *(float*)0xC4B8D4;

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CPedType.h"
+#include "PedType.h"
 
 constexpr uint32 PED_TYPES_COUNT = 32;
 

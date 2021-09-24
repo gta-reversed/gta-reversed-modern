@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CVector.h"
+#include "Vector.h"
 
 constexpr auto MAX_SHINYTEXTS{32u};
 

@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CAEDoorAudioEntity.h"
+#include "AEDoorAudioEntity.h"
 
-#include "CAEAudioHardware.h"
-#include "CAESoundManager.h"
+#include "AEAudioHardware.h"
+#include "AESoundManager.h"
 
 // 0x447030
 CAEDoorAudioEntity::CAEDoorAudioEntity() : CAEAudioEntity() {

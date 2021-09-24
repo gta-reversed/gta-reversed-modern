@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CAEAudioHardware.h"
+#include "AEAudioHardware.h"
 
 CAEAudioHardware& AEAudioHardware = *reinterpret_cast<CAEAudioHardware*>(0xB5F8B8);
 

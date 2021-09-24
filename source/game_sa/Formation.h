@@ -6,12 +6,12 @@
 */
 #pragma once
 
-#include "CPed.h"
-#include "CVector.h"
-#include "CPointList.h"
-#include "CMatrix.h"
-#include "CPedList.h"
-#include "CVehicle.h"
+#include "Ped.h"
+#include "Vector.h"
+#include "PointList.h"
+#include "Matrix.h"
+#include "PedList.h"
+#include "Vehicle.h"
 
 class CFormation {
 public:

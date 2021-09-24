@@ -1,10 +1,10 @@
 #include "StdInc.h"
 
-#include "CTaskComplexTreatAccident.h"
+#include "TaskComplexTreatAccident.h"
 
-#include "CTaskSimpleGiveCPR.h"
-#include "CTaskSimpleNone.h"
-#include "CTaskSimpleAchieveHeading.h"
+#include "TaskSimpleGiveCPR.h"
+#include "TaskSimpleNone.h"
+#include "TaskSimpleAchieveHeading.h"
 
 void CTaskComplexTreatAccident::InjectHooks()
 {

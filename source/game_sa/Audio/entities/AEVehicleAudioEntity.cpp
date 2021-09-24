@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CAEAudioHardware.h"
-#include "CAEAudioUtility.h"
-#include "CAESoundManager.h"
+#include "AEAudioHardware.h"
+#include "AEAudioUtility.h"
+#include "AESoundManager.h"
 
 CPed*&                  CAEVehicleAudioEntity::s_pPlayerAttachedForRadio = *(CPed**)0xB6B98C;
 CPed*&                  CAEVehicleAudioEntity::s_pPlayerDriver = *(CPed**)0xB6B990;

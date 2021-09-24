@@ -7,8 +7,8 @@
 #pragma once
 
 #include "CompressedVector.h"
-#include "CVector.h"
-#include "CColTriangle.h"
+#include "Vector.h"
+#include "ColTriangle.h"
 
 enum eTrianglePlaneOrientation : uint8 {
     POS_X = 0,

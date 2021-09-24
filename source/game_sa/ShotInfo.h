@@ -7,7 +7,7 @@
 #pragma once
 
 
-#include "CVector.h"
+#include "Vector.h"
 #include "eWeaponType.h"
 
 class CEntity;

@@ -6,11 +6,11 @@
 */
 #pragma once
 
-#include "CVehicle.h"
-#include "CDoor.h"
-#include "CBouncingPanel.h"
-#include "CDamageManager.h"
-#include "CColPoint.h"
+#include "Vehicle.h"
+#include "Door.h"
+#include "BouncingPanel.h"
+#include "DamageManager.h"
+#include "ColPoint.h"
 #include "eSurfaceType.h"
 
 class CObject;

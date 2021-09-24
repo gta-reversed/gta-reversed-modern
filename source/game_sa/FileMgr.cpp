@@ -10,7 +10,7 @@
 #include <Windows.h>
 #include <ShlObj.h>
 
-#include "CFileMgr.h"
+#include "FileMgr.h"
 
 #include "HookSystem.h"
 

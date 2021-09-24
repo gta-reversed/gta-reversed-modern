@@ -1,5 +1,5 @@
 #include "StdInc.h"
-#include "CProjectileInfo.h"
+#include "ProjectileInfo.h"
 
 void CProjectileInfo::InjectHooks() {
 

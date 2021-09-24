@@ -8,9 +8,9 @@
 
 #include "rw/skeleton.h"
 
-#include "CKeyboardState.h"
-#include "CMouseControllerState.h"
-#include "CControllerState.h"
+#include "KeyboardState.h"
+#include "MouseControllerState.h"
+#include "ControllerState.h"
 
 enum ePadButton : uint32 {
     LEFTSTICKX,     // Left / Right	GO_LEFT / GO_RIGHT

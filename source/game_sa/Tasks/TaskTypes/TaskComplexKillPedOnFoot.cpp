@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexKillPedOnFoot.h"
+#include "TaskComplexKillPedOnFoot.h"
 
 void CTaskComplexKillPedOnFoot::InjectHooks() {
     ReversibleHooks::Install("CTaskComplexKillPedOnFoot", "CTaskComplexKillPedOnFoot", 0x620E30, &CTaskComplexKillPedOnFoot::Constructor);

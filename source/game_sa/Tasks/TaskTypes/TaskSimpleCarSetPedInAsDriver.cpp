@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleCarSetPedInAsDriver.h"
+#include "TaskSimpleCarSetPedInAsDriver.h"
 
 CTaskSimpleCarSetPedInAsDriver::CTaskSimpleCarSetPedInAsDriver(CVehicle* pTargetVehicle, CTaskUtilityLineUpPedWithCar* pUtility)
 {

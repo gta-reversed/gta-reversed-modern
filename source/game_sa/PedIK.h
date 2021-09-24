@@ -7,7 +7,7 @@
 #pragma once
 
 #include "AnimBlendFrameData.h"
-#include "CVector.h"
+#include "Vector.h"
 
 class CPed;
 

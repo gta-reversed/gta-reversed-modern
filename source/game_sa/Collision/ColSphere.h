@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CSphere.h"
+#include "Sphere.h"
 
 class CColSphere : public CSphere {
 public:

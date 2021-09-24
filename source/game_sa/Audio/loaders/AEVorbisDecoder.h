@@ -2,7 +2,7 @@
 
 #include "vorbis/vorbisfile.h"
 
-#include "CAEStreamingDecoder.h"
+#include "AEStreamingDecoder.h"
 
 class CAEVorbisDecoder : public CAEStreamingDecoder {
 public:

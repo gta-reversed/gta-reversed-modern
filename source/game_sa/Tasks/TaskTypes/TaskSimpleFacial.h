@@ -7,8 +7,8 @@ Do not delete this comment block. Respect others' work!
 #pragma once
 
 
-#include "CTaskSimple.h"
-#include "CTaskTimer.h"
+#include "TaskSimple.h"
+#include "TaskTimer.h"
 
 enum eFacialExpression
 {

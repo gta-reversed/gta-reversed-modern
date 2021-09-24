@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CPed.h"
+#include "Ped.h"
 
 class CEmergencyPed : public CPed {
 public:

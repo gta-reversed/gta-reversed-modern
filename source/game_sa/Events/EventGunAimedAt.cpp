@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CEventGunAimedAt.h"
+#include "EventGunAimedAt.h"
 
-#include "CPedType.h"
+#include "PedType.h"
 
 void CEventGunAimedAt::InjectHooks()
 {

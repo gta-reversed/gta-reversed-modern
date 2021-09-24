@@ -6,15 +6,15 @@
 */
 #pragma once
 
-#include "CBaseModelInfo.h"
-#include "CAtomicModelInfo.h"
-#include "CDamageAtomicModelInfo.h"
-#include "CLodAtomicModelInfo.h"
-#include "CVehicleModelInfo.h"
-#include "CWeaponModelInfo.h"
-#include "CTimeModelInfo.h"
-#include "CLodTimeModelInfo.h"
-#include "CPedModelInfo.h"
+#include "BaseModelInfo.h"
+#include "AtomicModelInfo.h"
+#include "DamageAtomicModelInfo.h"
+#include "LodAtomicModelInfo.h"
+#include "VehicleModelInfo.h"
+#include "WeaponModelInfo.h"
+#include "TimeModelInfo.h"
+#include "LodTimeModelInfo.h"
+#include "PedModelInfo.h"
 
 enum eModelInfoType : uint8 {
     MODEL_INFO_TYPE_ATOMIC = 1,

@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CBaseModelInfo.h"
+#include "BaseModelInfo.h"
 
 struct tVehicleComponentFlag {
     const char* m_ucName;

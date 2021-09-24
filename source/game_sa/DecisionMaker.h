@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CDecision.h"
+#include "Decision.h"
 #include "eDecisionMakerEvents.h"
 
 class CDecisionMaker {

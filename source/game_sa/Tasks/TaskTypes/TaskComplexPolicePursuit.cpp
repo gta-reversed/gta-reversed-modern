@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexPolicePursuit.h"
+#include "TaskComplexPolicePursuit.h"
 
 // 0x68BA70
 CTaskComplexPolicePursuit::CTaskComplexPolicePursuit() : CTaskComplex() {

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimplePutDownEntity.h"
+#include "TaskSimplePutDownEntity.h"
 
 void CTaskSimplePutDownEntity::InjectHooks() {
     ReversibleHooks::Install("CTaskSimplePutDownEntity", "CTaskSimplePutDownEntity", 0x691990, &CTaskSimplePutDownEntity::Constructor);

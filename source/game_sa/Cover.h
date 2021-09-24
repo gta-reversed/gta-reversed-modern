@@ -6,12 +6,12 @@
 */
 #pragma once
 
-#include "CEntity.h"
-#include "CVector.h"
-#include "CColTriangle.h"
-#include "CCoverPoint.h"
-#include "CBuilding.h"
-#include "CPtrListDoubleLink.h"
+#include "Entity.h"
+#include "Vector.h"
+#include "ColTriangle.h"
+#include "CoverPoint.h"
+#include "Building.h"
+#include "PtrListDoubleLink.h"
 
 class CPed;
 

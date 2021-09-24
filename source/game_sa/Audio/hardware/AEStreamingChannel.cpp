@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CAEStreamingChannel.h"
+#include "AEStreamingChannel.h"
 
 // 0x4F1800
 CAEStreamingChannel::CAEStreamingChannel(IDirectSound* directSound, uint16 channelId) : CAEAudioChannel(directSound, channelId, 48000, 16) {

@@ -7,7 +7,7 @@
 
 #include "StdInc.h"
 
-#include "CTaskManager.h"
+#include "TaskManager.h"
 
 void CTaskManager::InjectHooks()
 {

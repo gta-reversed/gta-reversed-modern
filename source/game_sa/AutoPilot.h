@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CVector.h"
-#include "CPathFind.h"
+#include "Vector.h"
+#include "PathFind.h"
 #include "eCarMission.h"
 
 enum eCarDrivingStyle : int8

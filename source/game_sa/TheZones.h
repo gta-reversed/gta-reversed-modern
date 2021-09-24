@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CVector.h"
-#include "CZone.h"
+#include "Vector.h"
+#include "Zone.h"
 
 class CTheZones {
 public:

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleThrowProjectile.h"
+#include "TaskSimpleThrowProjectile.h"
 
 // 0x61F660
 CTaskSimpleThrowProjectile::CTaskSimpleThrowProjectile(CEntity* target, CVector posn) : CTaskSimple() {

@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CTaskSimple.h"
-#include "CVector.h"
-#include "CAnimBlendAssociation.h"
+#include "TaskSimple.h"
+#include "Vector.h"
+#include "AnimBlendAssociation.h"
 #include "FxSystem_c.h"
 
 class CPed;

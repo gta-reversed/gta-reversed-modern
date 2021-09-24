@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CTaskComplex.h"
-#include "CVehicle.h"
+#include "TaskComplex.h"
+#include "Vehicle.h"
 
 class CTaskComplexEnterBoatAsDriver : public CTaskComplex {
 public:

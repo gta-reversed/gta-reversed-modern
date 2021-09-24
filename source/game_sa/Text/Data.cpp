@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CData.h"
+#include "Data.h"
 
 CData::CData() {
     data = nullptr;

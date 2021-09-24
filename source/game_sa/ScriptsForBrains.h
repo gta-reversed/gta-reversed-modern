@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CEntity.h"
-#include "CObject.h"
-#include "CVector.h"
+#include "Entity.h"
+#include "Object.h"
+#include "Vector.h"
 
 struct tScriptForBrains {
     int16  m_nIMGindex;

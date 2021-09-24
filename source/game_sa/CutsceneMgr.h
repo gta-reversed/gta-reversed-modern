@@ -6,10 +6,10 @@
 */
 #pragma once
 
-#include "CCutsceneObject.h"
-#include "CDirectory.h"
+#include "CutsceneObject.h"
+#include "Directory.h"
 #include "FxSystem_c.h"
-#include "CAnimBlendAssocGroup.h"
+#include "AnimBlendAssocGroup.h"
 
 struct tCutsceneParticleEffect {
     char        m_szEffectName[32];

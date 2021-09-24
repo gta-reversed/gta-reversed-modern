@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CVehicle.h"
-#include "CDoor.h"
+#include "Vehicle.h"
+#include "Door.h"
 #include "tBoatHandlingData.h"
 
 enum eBoatNodes {

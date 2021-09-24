@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CPed.h"
-#include "CGangInfo.h"
+#include "Ped.h"
+#include "GangInfo.h"
 
 enum eGangID {
     GANG_BALLAS = 0,

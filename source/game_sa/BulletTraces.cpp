@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CBulletTraces.h"
+#include "BulletTraces.h"
 
 CBulletTrace (&CBulletTraces::aTraces)[16] = *(CBulletTrace(*)[16])0xC7C748;
 

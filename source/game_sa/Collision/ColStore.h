@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CRect.h"
-#include "CVector.h"
-#include "CPool.h"
+#include "Rect.h"
+#include "Vector.h"
+#include "Pool.h"
 
 // thanks to jte for reversing this
 struct ColDef {

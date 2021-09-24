@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CRect.h"
-#include "CPtrListSingleLink.h"
-#include "CPool.h"
+#include "Rect.h"
+#include "PtrListSingleLink.h"
+#include "Pool.h"
 
 /*
 node level 2

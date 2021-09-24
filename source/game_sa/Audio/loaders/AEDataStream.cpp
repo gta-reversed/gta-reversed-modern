@@ -2,9 +2,9 @@
 
 #include "common.h"
 
-#include "CAEDataStream.h"
-#include "CAEStreamTransformer.h"
-#include "CFileMgr.h"
+#include "AEDataStream.h"
+#include "AEStreamTransformer.h"
+#include "FileMgr.h"
 
 // originally startPosition and length is int32
 // 0x4dc620

@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CVector.h"
-#include "CRGBA.h"
+#include "Vector.h"
+#include "RGBA.h"
 
 enum eWeaponEffectsLockTexture {
     WEAPONEFFECTS_LOCK_ON = 0,

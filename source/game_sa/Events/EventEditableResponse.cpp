@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CEventEditableResponse.h"
+#include "EventEditableResponse.h"
 
-#include "CPedType.h"
+#include "PedType.h"
 
 void CEventEditableResponse::InjectHooks() {
     ReversibleHooks::Install("CEventEditableResponse", "Constructor", 0x4AC450, &CEventEditableResponse::Constructor);

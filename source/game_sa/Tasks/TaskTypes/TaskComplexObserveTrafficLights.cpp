@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CTaskComplexObserveTrafficLights.h"
-#include "CTaskSimpleRunAnim.h"
-#include "CTaskSimpleStandStill.h"
+#include "TaskComplexObserveTrafficLights.h"
+#include "TaskSimpleRunAnim.h"
+#include "TaskSimpleStandStill.h"
 
 // 0x631790
 CTaskComplexObserveTrafficLights::CTaskComplexObserveTrafficLights() : CTaskComplex() {

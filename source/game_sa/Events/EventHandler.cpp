@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CEventHandler.h"
+#include "EventHandler.h"
 
-#include "CTaskSimpleStandStill.h"
+#include "TaskSimpleStandStill.h"
 
 void CEventHandler::InjectHooks() {
     using namespace ReversibleHooks;

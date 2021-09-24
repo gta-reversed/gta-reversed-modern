@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CLines.h"
+#include "Lines.h"
 
 // 0x6FF460
 void CLines::RenderLineNoClipping(float startX, float startY, float startZ, float endX, float endY, float endZ, uint32 startColor, uint32 endColor) {

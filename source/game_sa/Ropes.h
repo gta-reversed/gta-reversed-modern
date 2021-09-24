@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CRope.h"
+#include "Rope.h"
 
 class CRopes {
 public:

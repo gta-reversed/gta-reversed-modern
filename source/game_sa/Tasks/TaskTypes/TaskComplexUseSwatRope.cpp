@@ -1,10 +1,10 @@
 #include "StdInc.h"
 
-#include "CTaskComplexUseSwatRope.h"
+#include "TaskComplexUseSwatRope.h"
 
-#include "CTaskSimpleAbseil.h"
-#include "CTaskSimplePause.h"
-#include "CTaskSimpleNone.h"
+#include "TaskSimpleAbseil.h"
+#include "TaskSimplePause.h"
+#include "TaskSimpleNone.h"
 
 void CTaskComplexUseSwatRope::InjectHooks() {
     ReversibleHooks::Install("CTaskComplexUseSwatRope", "Constructor", 0x659470, &CTaskComplexUseSwatRope::Constructor);

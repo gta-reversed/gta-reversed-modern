@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CEntity.h"
+#include "Entity.h"
 #include "FxSystem_c.h"
 
 class CFire {

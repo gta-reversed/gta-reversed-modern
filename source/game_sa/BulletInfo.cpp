@@ -1,5 +1,5 @@
 #include "StdInc.h"
-#include "CBulletInfo.h"
+#include "BulletInfo.h"
 
 void CBulletInfo::InjectHooks() {
 

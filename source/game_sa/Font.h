@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CRGBA.h"
-#include "CRect.h"
-#include "CSprite2d.h"
+#include "RGBA.h"
+#include "Rect.h"
+#include "Sprite2d.h"
 
 // todo: move
 struct CFontChar {

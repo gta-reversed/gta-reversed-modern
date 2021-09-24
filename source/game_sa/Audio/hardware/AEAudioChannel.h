@@ -2,7 +2,7 @@
 
 #include "dsound.h"
 
-#include "CVector.h"
+#include "Vector.h"
 
 #pragma pack(push, 1)
 class CAEAudioChannel {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CVector.h"
+#include "Vector.h"
 
-#include "COccluder.h"
+#include "Occluder.h"
 
 class COcclusion {
 public:

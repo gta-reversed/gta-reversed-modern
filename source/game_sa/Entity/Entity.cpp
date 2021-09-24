@@ -6,13 +6,13 @@
 */
 #include "StdInc.h"
 
-#include "CEntity.h"
+#include "Entity.h"
 
-#include "CPointLights.h"
-#include "CEscalators.h"
-#include "CCustomBuildingDNPipeline.h"
-#include "COcclusion.h"
-#include "CMotionBlurStreaks.h"
+#include "PointLights.h"
+#include "Escalators.h"
+#include "CustomBuildingDNPipeline.h"
+#include "Occlusion.h"
+#include "MotionBlurStreaks.h"
 
 void CEntity::InjectHooks()
 {

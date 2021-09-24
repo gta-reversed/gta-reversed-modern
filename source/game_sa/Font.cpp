@@ -6,7 +6,7 @@
 */
 #include "StdInc.h"
 
-#include "CFont.h"
+#include "Font.h"
 
 #include "eLanguage.h"
 

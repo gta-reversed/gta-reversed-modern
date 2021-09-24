@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CCredits.h"
+#include "Credits.h"
 
 uint32& CCredits::CreditsStartTime = *(uint32*)0xC6E978;
 bool& CCredits::bCreditsGoing = *(bool*)0xC6E97C;

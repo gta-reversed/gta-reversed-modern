@@ -6,7 +6,7 @@
 */
 #include "StdInc.h"
 
-#include "CTaskSimpleClimb.h"
+#include "TaskSimpleClimb.h"
 
 bool& CTaskSimpleClimb::tempMatrix_Initialized = *reinterpret_cast<bool*>(0xC19630);
 CMatrix& CTaskSimpleClimb::tempMatrix = *reinterpret_cast<CMatrix*>(0xC195E8);

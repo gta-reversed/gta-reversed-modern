@@ -6,7 +6,7 @@
 */
 #include "StdInc.h"
 
-#include "CSprite2d.h"
+#include "Sprite2d.h"
 
 #include "GxtChar.h"
 

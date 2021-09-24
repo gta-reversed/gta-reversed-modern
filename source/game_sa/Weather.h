@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CVector.h"
-#include "CAEWeatherAudioEntity.h"
+#include "Vector.h"
+#include "AEWeatherAudioEntity.h"
 #include "eWeatherType.h"
 
 enum eWeatherRegion : int16 {

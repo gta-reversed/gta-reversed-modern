@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CEscalator.h"
+#include "Escalator.h"
 
 #define NUM_ESCALATORS 32
 

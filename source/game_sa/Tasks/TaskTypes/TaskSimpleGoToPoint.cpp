@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleGoToPoint.h"
+#include "TaskSimpleGoToPoint.h"
 
-#include "CTaskSimpleStandStill.h"
+#include "TaskSimpleStandStill.h"
 
 void CTaskSimpleGoToPoint::InjectHooks()
 {

@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CTaskComplex.h"
-#include "CPathFind.h"
-#include "CTaskUtilityLineUpPedWithCar.h"
+#include "TaskComplex.h"
+#include "PathFind.h"
+#include "TaskUtilityLineUpPedWithCar.h"
 
 enum eTargetDoor {
     TARGET_DOOR_FRONT_LEFT  = 0,

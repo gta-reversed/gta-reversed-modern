@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CEventVehicleToSteal.h"
+#include "EventVehicleToSteal.h"
 
-#include "CTaskComplexEnterCar.h"
+#include "TaskComplexEnterCar.h"
 
 void CEventVehicleToSteal::InjectHooks()
 {

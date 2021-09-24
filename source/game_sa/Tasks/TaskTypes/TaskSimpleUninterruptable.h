@@ -1,8 +1,8 @@
 #pragma once
-#include "CTaskSimple.h"
 
-class CTaskSimpleUninterruptable : public CTaskSimple
-{
+#include "TaskSimple.h"
+
+class CTaskSimpleUninterruptable : public CTaskSimple {
 private:
     CTaskSimpleUninterruptable* Constructor();
 public:

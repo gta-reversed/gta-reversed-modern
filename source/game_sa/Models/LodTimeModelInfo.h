@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CAtomicModelInfo.h"
-#include "CTimeInfo.h"
+#include "AtomicModelInfo.h"
+#include "TimeInfo.h"
 
 class CLodTimeModelInfo : public CLodAtomicModelInfo {
 public:

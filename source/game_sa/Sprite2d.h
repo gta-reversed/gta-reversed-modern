@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CRect.h"
-#include "CRGBA.h"
-#include "CVector2D.h"
+#include "Rect.h"
+#include "RGBA.h"
+#include "Vector2D.h"
 #include "RenderWare.h"
 
 #define NUM_SPRITE_VERTICES 8

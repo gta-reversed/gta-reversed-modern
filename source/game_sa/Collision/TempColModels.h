@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CColModel.h"
+#include "ColModel.h"
 
 class CTempColModels {
 public:

@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CObject.h"
+#include "Object.h"
 
 class CHandObject : public CObject {
 public:

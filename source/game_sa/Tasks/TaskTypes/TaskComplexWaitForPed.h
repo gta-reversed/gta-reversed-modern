@@ -1,5 +1,5 @@
-#include "CTaskComplex.h"
-#include "CTaskTimer.h"
+#include "TaskComplex.h"
+#include "TaskTimer.h"
 
 class CPed;
 

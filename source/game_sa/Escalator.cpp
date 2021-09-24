@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CEscalator.h"
+#include "Escalator.h"
 
 void CEscalator::SwitchOff() {
     plugin::CallMethod<0x717860, CEscalator*>(this);

@@ -1,11 +1,11 @@
 #include "StdInc.h"
 
-#include "CTaskComplexGoToPointAndStandStill.h"
+#include "TaskComplexGoToPointAndStandStill.h"
 
-#include "CTaskSimpleGoToPoint.h"
-#include "CTaskComplexLeaveCar.h"
-#include "CTaskSimplePause.h"
-#include "CTaskSimpleStandStill.h"
+#include "TaskSimpleGoToPoint.h"
+#include "TaskComplexLeaveCar.h"
+#include "TaskSimplePause.h"
+#include "TaskSimpleStandStill.h"
 
 void CTaskComplexGoToPointAndStandStill::InjectHooks() {
     ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "CTaskComplexGoToPointAndStandStill", 0x668120, &CTaskComplexGoToPointAndStandStill::Constructor);

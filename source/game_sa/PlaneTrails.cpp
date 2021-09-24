@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CPlaneTrails.h"
+#include "PlaneTrails.h"
 
 CPlaneTrail (&CPlaneTrails::aArray)[NUM_PLANE_TRAILS] = *(CPlaneTrail(*)[NUM_PLANE_TRAILS])0xC713A8;
 

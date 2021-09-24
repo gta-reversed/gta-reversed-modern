@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CTaskComplexObserveTrafficLightsAndAchieveHeading.h"
+#include "TaskComplexObserveTrafficLightsAndAchieveHeading.h"
 
-#include "CTaskComplexObserveTrafficLights.h"
-#include "CTaskSimpleAchieveHeading.h"
+#include "TaskComplexObserveTrafficLights.h"
+#include "TaskSimpleAchieveHeading.h"
 
 // 0x631910
 CTaskComplexObserveTrafficLightsAndAchieveHeading::CTaskComplexObserveTrafficLightsAndAchieveHeading(int32 durationInMs, float targetHeading) : CTaskComplex() {

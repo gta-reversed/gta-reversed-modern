@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CBike.h"
-#include "CAnimBlendAssociation.h"
+#include "Bike.h"
+#include "AnimBlendAssociation.h"
 
 enum eBmxNodes {
     BMX_NODE_NONE = 0,

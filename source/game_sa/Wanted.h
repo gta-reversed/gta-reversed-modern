@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CCrimeBeingQd.h"
-#include "CAEPoliceScannerAudioEntity.h"
+#include "CrimeBeingQd.h"
+#include "AEPoliceScannerAudioEntity.h"
 
 #include "eCrimeType.h"
 

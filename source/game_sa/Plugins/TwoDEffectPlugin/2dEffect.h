@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CVector.h"
-#include "CRGBA.h"
+#include "Vector.h"
+#include "RGBA.h"
 
 enum e2dEffectType : uint8 {
     EFFECT_LIGHT,

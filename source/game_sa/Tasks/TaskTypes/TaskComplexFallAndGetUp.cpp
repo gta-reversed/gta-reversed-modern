@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CTaskComplexFallAndGetUp.h"
-#include "CTaskSimpleFall.h"
-#include "CTaskSimpleGetUp.h"
+#include "TaskComplexFallAndGetUp.h"
+#include "TaskSimpleFall.h"
+#include "TaskSimpleGetUp.h"
 
 void CTaskComplexFallAndGetUp::InjectHooks() {
     ReversibleHooks::Install("CTaskComplexFallAndGetUp", "Constructor", 0x6786C0, &CTaskComplexFallAndGetUp::Constructor);

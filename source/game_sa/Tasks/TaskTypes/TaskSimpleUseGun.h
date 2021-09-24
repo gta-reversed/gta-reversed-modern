@@ -6,13 +6,12 @@
 */
 #pragma once
 
-
-#include "CTaskSimple.h"
-#include "CVector.h"
-#include "CVector2D.h"
-#include "CWeaponInfo.h"
-#include "CAnimBlendAssociation.h"
-#include "CEntity.h"
+#include "TaskSimple.h"
+#include "Vector.h"
+#include "Vector2D.h"
+#include "WeaponInfo.h"
+#include "AnimBlendAssociation.h"
+#include "Entity.h"
 
 class CTaskSimpleUseGun : public CTaskSimple {
 public:

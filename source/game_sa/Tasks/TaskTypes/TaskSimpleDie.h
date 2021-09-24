@@ -1,4 +1,4 @@
-#include "CTaskSimple.h"
+#include "TaskSimple.h"
 
 class CAnimBlendHierarchy;
 class CAnimBlendAssociation;

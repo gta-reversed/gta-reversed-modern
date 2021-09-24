@@ -11,7 +11,7 @@
 #include <Windows.h>
 #include <sstream>
 
-#include "toolsmenu\DebugModules\Collision\Collision.h"
+#include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
 #include "toolsmenu\DebugModules\Cheat\CheatDebugModule.h"
 #include "toolsmenu\DebugModules\Vehicle\VehicleDebugModule.h"
 #include "toolsmenu\DebugModules\Ped\PedDebugModule.h"

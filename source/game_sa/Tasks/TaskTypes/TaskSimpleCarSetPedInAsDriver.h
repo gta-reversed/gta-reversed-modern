@@ -7,9 +7,9 @@
 #pragma once
 
 
-#include "CTaskSimple.h"
-#include "CVehicle.h"
-#include "CTaskUtilityLineUpPedWithCar.h"
+#include "TaskSimple.h"
+#include "Vehicle.h"
+#include "TaskUtilityLineUpPedWithCar.h"
 
 class CTaskSimpleCarSetPedInAsDriver : public CTaskSimple {
 public:

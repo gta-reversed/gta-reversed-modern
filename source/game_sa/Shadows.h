@@ -8,10 +8,10 @@
 
 
 #include "RenderWare.h"
-#include "CVector.h"
-#include "CRealTimeShadow.h"
-#include "CPolyBunch.h"
-#include "CPtrList.h"
+#include "Vector.h"
+#include "RealTimeShadow.h"
+#include "PolyBunch.h"
+#include "PtrList.h"
 
 /*
  Shadow rectangle:

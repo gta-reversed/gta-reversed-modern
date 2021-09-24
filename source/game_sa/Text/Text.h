@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CData.h"
-#include "CKeyArray.h"
-#include "CMissionTextOffsets.h"
+#include "Data.h"
+#include "KeyArray.h"
+#include "MissionTextOffsets.h"
 
 struct ChunkHeader {
     char  magic[4];

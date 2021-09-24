@@ -1,8 +1,8 @@
 #include "StdInc.h" // TODO: Remove
 
-#include "CAEWMADecoder.h"
+#include "AEWMADecoder.h"
 
-#include "CMemoryMgr.h"
+#include "MemoryMgr.h"
 
 // WMA functions
 HRESULT(__stdcall*& CAEWMADecoder::WMCreateSyncReader)(IUnknown*, DWORD, IWMSyncReader**) = *(HRESULT(__stdcall**)(IUnknown*, DWORD, IWMSyncReader**))0xb6bad8;

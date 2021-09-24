@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CVector2D.h"
-#include "CVector.h"
+#include "Vector2D.h"
+#include "Vector.h"
 
 struct CActiveOccluderLine {
     CVector2D m_vecOrigin;

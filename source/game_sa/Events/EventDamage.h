@@ -1,10 +1,10 @@
 #pragma once
 
-#include "CPedDamageResponse.h"
-#include "Entity\CEntity.h"
+#include "PedDamageResponse.h"
+#include "Entity.h"
 #include "Enums\eWeaponType.h"
 #include "Enums\eEventType.h"
-#include "CEvent.h"
+#include "Event.h"
 
 enum ePedPieceTypes;
 

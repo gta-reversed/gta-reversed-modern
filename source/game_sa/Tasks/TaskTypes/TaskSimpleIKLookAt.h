@@ -7,9 +7,9 @@ Do not delete this comment block. Respect others' work!
 #pragma once
 
 
-#include "CTaskSimple.h"
-#include "CAnimBlendAssociation.h"
-#include "CTaskSimpleIKChain.h"
+#include "TaskSimple.h"
+#include "AnimBlendAssociation.h"
+#include "TaskSimpleIKChain.h"
 
 
 class CTaskSimpleIKLookAt : public CTaskSimpleIKChain {

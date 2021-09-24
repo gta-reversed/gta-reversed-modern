@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CLink.h"
+#include "Link.h"
 
 template <typename T> class CLinkList {
 public:

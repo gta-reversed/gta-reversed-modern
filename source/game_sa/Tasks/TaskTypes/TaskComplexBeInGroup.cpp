@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexBeInGroup.h"
+#include "TaskComplexBeInGroup.h"
 
 CTaskComplexBeInGroup::CTaskComplexBeInGroup(int32 groupId, bool isLeader)
 {

@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
-#include "CWaterCannons.h"
-#include "CWaterCannon.h"
+#include "WaterCannons.h"
+#include "WaterCannon.h"
 
 CWaterCannon (&CWaterCannons::aCannons)[3] = *(CWaterCannon (*)[3])0xC80740;
 

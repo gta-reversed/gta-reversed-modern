@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleLand.h"
+#include "TaskSimpleLand.h"
 
 void CTaskSimpleLand::InjectHooks()
 {

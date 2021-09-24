@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CVector.h"
+#include "Vector.h"
 
 #define MAX_MOVING_FOG 350
 #define MAX_VOLUMETRIC_CLOUDS 180

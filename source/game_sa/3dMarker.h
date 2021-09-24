@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CRGBA.h"
-#include "CVector.h"
-#include "CMatrix.h"
+#include "RGBA.h"
+#include "Vector.h"
+#include "Matrix.h"
 
 enum e3dMarkerType {
     MARKER3D_ARROW = 0,

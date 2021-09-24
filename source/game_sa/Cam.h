@@ -7,7 +7,7 @@ Do not delete this comment block. Respect others' work!
 #pragma once
 
 #include "eCamMode.h"
-#include "CVector.h"
+#include "Vector.h"
 
 /* http://code.google.com/p/mtasa-blue/source/browse/tags/1.3.4/MTA10/game_sa/CCamSA.h */
 

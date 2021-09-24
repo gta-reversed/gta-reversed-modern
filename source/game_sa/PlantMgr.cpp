@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CPlantMgr.h"
+#include "PlantMgr.h"
 
 RwTexture* (&CPlantMgr::PC_PlantTextureTab0)[4] = *(RwTexture * (*)[4])0xC039A0;
 RwTexture* (&CPlantMgr::PC_PlantTextureTab1)[4] = *(RwTexture * (*)[4])0xC039B0;

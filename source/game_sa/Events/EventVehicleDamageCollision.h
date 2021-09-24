@@ -1,4 +1,6 @@
-#include "CEventVehicleDamage.h"
+#pragma once
+
+#include "EventVehicleDamage.h"
 
 class CEventVehicleDamageCollision : public CEventVehicleDamage
 {

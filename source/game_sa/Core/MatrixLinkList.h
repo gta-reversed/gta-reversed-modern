@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CMatrixLink.h"
+#include "MatrixLink.h"
 
 class CMatrixLinkList {
 public:

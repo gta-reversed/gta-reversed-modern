@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CDummy.h"
+#include "Dummy.h"
 
 class CDummyPed : public CDummy {
 public:

@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CCustomBuildingRenderer.h"
+#include "CustomBuildingRenderer.h"
 
-#include "CCustomBuildingDNPipeline.h"
-#include "CCustomBuildingPipeline.h"
+#include "CustomBuildingDNPipeline.h"
+#include "CustomBuildingPipeline.h"
 
 void CCustomBuildingRenderer::InjectHooks() {
     using namespace ReversibleHooks;

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleStandStill.h"
+#include "TaskSimpleStandStill.h"
 
 void CTaskSimpleStandStill::InjectHooks()
 {

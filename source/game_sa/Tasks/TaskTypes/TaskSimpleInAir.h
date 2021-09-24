@@ -7,11 +7,11 @@
 #pragma once
 
 
-#include "CTaskSimple.h"
-#include "CTaskTimer.h"
-#include "CVector.h"
-#include "CAnimBlendAssociation.h"
-#include "CEntity.h"
+#include "TaskSimple.h"
+#include "TaskTimer.h"
+#include "Vector.h"
+#include "AnimBlendAssociation.h"
+#include "Entity.h"
 
 class CTaskSimpleInAir : public CTaskSimple {
 public:

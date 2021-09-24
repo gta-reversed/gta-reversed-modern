@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CQuadBike.h"
+#include "QuadBike.h"
 
 void CQuadBike::InjectHooks() {
 //    ReversibleHooks::Install("CQuadBike", "CQuadBike", 0x6CE370, &CQuadBike::Constructor);

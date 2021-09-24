@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CText.h"
+#include "Text.h"
 
 struct tTextOffset {
     char   szMissionName[8];

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "eEventType.h"
-#include "CPed.h"
+#include "Ped.h"
 
 class CPed;
 class CPedGroup;

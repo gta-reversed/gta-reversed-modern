@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CAEWeatherAudioEntity.h"
+#include "AEWeatherAudioEntity.h"
 
-#include "CAEAudioHardware.h"
-#include "CAEAudioUtility.h"
+#include "AEAudioHardware.h"
+#include "AEAudioUtility.h"
 
 float& CAEWeatherAudioEntity::m_sfRainVolume = *(float*)0x8CC30C; // -100.0f
 

@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CPtrListDoubleLink.h"
+#include "PtrListDoubleLink.h"
 
 class CSector {
 public:

@@ -1,10 +1,10 @@
 #include "StdInc.h"
 
-#include "CEventKnockOffBike.h"
+#include "EventKnockOffBike.h"
 
 #include "EntityCollisionEvents.h"
-#include "CTaskComplexEnterCar.h"
-#include "CTaskSimpleCarSetPedOut.h"
+#include "TaskComplexEnterCar.h"
+#include "TaskSimpleCarSetPedOut.h"
 
 void CEventKnockOffBike::InjectHooks()
 {

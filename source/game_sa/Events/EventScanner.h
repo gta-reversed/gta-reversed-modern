@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CTaskTimer.h"
-#include "CAttractorScanner.h"
+#include "TaskTimer.h"
+#include "AttractorScanner.h"
 
 class CPed;
 

@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CAEAudioEntity.h"
+#include "AEAudioEntity.h"
 
 class FxSystem_c;
 

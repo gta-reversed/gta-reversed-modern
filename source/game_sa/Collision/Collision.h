@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CColModel.h"
-#include "CColPoint.h"
-#include "CStoredCollPoly.h"
+#include "ColModel.h"
+#include "ColPoint.h"
+#include "StoredCollPoly.h"
 
 class CEntity;
 class CVehicle;

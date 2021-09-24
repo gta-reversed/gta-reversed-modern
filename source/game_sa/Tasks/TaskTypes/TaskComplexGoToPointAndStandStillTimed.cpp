@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexGoToPointAndStandStillTimed.h"
+#include "TaskComplexGoToPointAndStandStillTimed.h"
 
 void CTaskComplexGoToPointAndStandStillTimed::InjectHooks() {
     ReversibleHooks::Install("CTaskComplexGoToPointAndStandStillTimed", "CTaskComplexGoToPointAndStandStillTimed", 0x6685E0, &CTaskComplexGoToPointAndStandStillTimed::Constructor);

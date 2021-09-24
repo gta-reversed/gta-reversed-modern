@@ -1,5 +1,5 @@
 #include "StdInc.h"
-#include "CModelInfo.h"
+#include "ModelInfo.h"
 
 void CTimeModelInfo::InjectHooks() {
     ReversibleHooks::Install("CTimeModelInfo", "GetModelType", 0x4C5660, &CTimeModelInfo::GetModelType_Reversed);

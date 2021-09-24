@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CEvent.h"
-#include "CPed.h"
+#include "Event.h"
+#include "Ped.h"
 
 class CEventPedToChase : public CEvent {
 public:

@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "C3dMarker.h"
+#include "3dMarker.h"
 
 struct tUser3dMarker {
     bool    m_bIsUsed;

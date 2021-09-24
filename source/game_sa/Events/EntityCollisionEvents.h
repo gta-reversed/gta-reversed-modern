@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CEvent.h"
-#include "CVector.h"
+#include "Event.h"
+#include "Vector.h"
 
 class CPed;
 class CObject;

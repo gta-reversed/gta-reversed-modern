@@ -6,11 +6,11 @@
 */
 #pragma once
 
-#include "CEntryExit.h"
-#include "CVector.h"
-#include "CVector2D.h"
-#include "CEntity.h"
-#include "CQuadTreeNode.h"
+#include "EntryExit.h"
+#include "Vector.h"
+#include "Vector2D.h"
+#include "Entity.h"
+#include "QuadTreeNode.h"
 
 class CEntryExitManager {
 public:

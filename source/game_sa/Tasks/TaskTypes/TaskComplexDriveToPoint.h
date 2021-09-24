@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CTaskComplexCarDrive.h"
-#include "CVehicle.h"
+#include "TaskComplexCarDrive.h"
+#include "Vehicle.h"
 
 class CTaskComplexDriveToPoint : public CTaskComplexCarDrive {
 public:

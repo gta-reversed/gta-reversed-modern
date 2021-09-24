@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleGoTo.h"
+#include "TaskSimpleGoTo.h"
 
 float& CTaskSimpleGoTo::ms_fLookAtThresholdDotProduct = *(float*)0xC18D48;
 

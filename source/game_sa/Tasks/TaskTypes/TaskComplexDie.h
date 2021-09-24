@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "CTaskComplex.h"
+#include "TaskComplex.h"
 #include "eWeaponType.h"
-#include "CVehicle.h"
+#include "Vehicle.h"
 
 class CTaskComplexDie : public CTaskComplex {
 public:

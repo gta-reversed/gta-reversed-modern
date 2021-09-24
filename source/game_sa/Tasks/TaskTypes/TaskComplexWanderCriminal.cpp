@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskComplexWanderCriminal.h"
+#include "TaskComplexWanderCriminal.h"
 
 CTaskComplexWanderCriminal* CTaskComplexWanderCriminal::Constructor(int32 MoveState, uint8 Dir, bool bWanderSensibly)
 {

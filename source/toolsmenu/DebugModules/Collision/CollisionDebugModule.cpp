@@ -3,9 +3,9 @@
 
 #include <imgui.h>
 
-#include "Collision.h"
+#include "CollisionDebugModule.h"
 
-#include "CLines.h"
+#include "Lines.h"
 
 namespace CollisionDebugModule {
 

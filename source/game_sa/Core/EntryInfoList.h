@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CEntryInfoNode.h"
+#include "EntryInfoNode.h"
 
 class CEntryInfoList {
 public:

@@ -7,8 +7,8 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "CColModel.h"
-#include "CEntity.h"
+#include "ColModel.h"
+#include "Entity.h"
 
 class CGame {
 public:

@@ -7,8 +7,8 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "CPool.h"
-#include "CObject.h"
+#include "Pool.h"
+#include "Object.h"
 
 struct CustomEnvMapPipeMaterialData {
 public:

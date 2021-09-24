@@ -6,18 +6,18 @@
 */
 #pragma once
 
-#include "CRunningScript.h"
-#include "CPed.h"
-#include "CVehicle.h"
-#include "CObject.h"
-#include "CMissionCleanup.h"
-#include "CBuilding.h"
-#include "CSprite2d.h"
-#include "CStreamedScripts.h"
-#include "CScriptResourceManager.h"
-#include "CStuckCarCheck.h"
-#include "CUpsideDownCarCheck.h"
-#include "CScriptsForBrains.h"
+#include "RunningScript.h"
+#include "Ped.h"
+#include "Vehicle.h"
+#include "Object.h"
+#include "MissionCleanup.h"
+#include "Building.h"
+#include "Sprite2d.h"
+#include "StreamedScripts.h"
+#include "ScriptResourceManager.h"
+#include "StuckCarCheck.h"
+#include "UpsideDownCarCheck.h"
+#include "ScriptsForBrains.h"
 
 struct tBuildingSwap {
     CBuilding* m_pCBuilding;

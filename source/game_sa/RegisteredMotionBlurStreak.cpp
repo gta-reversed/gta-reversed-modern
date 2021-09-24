@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CRegisteredMotionBlurStreak.h"
+#include "RegisteredMotionBlurStreak.h"
 
-#include "CMotionBlurStreaks.h"
+#include "MotionBlurStreaks.h"
 
 void CRegisteredMotionBlurStreak::InjectHooks()
 {

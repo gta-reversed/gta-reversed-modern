@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CSimpleVariablesSaveStructure.h"
+#include "SimpleVariablesSaveStructure.h"
 #include "GxtChar.h"
 
 #define SAVEGAME_MAX_NAME_LEN 22

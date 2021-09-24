@@ -6,11 +6,11 @@
 */
 #pragma once
 
-#include "CPedGroupMembership.h"
-#include "CPedGroupIntelligence.h"
-#include "CVector.h"
-#include "CPed.h"
-#include "CVehicle.h"
+#include "PedGroupMembership.h"
+#include "PedGroupIntelligence.h"
+#include "Vector.h"
+#include "Ped.h"
+#include "Vehicle.h"
 
 class CPedGroup {
     PLUGIN_NO_DEFAULT_CONSTRUCTION(CPedGroup)

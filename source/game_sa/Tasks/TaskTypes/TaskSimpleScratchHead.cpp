@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleScratchHead.h"
+#include "TaskSimpleScratchHead.h"
 
 CTaskSimpleScratchHead* CTaskSimpleScratchHead::Constructor()
 {

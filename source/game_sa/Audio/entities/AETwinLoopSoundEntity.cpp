@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
-#include "CAEAudioUtility.h"
-#include "CAESoundManager.h"
+#include "AEAudioUtility.h"
+#include "AESoundManager.h"
 
 // 0x4F63B0
 CAETwinLoopSoundEntity::CAETwinLoopSoundEntity() : CAEAudioEntity() {

@@ -1,6 +1,6 @@
 #include "StdInc.h" // TODO: Remove
 
-#include "CAEVorbisDecoder.h"
+#include "AEVorbisDecoder.h"
 
 ov_callbacks CAEVorbisDecoder::staticCallbacks = {
     &CAEVorbisDecoder::ReadCallback,

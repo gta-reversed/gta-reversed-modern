@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CVector2D.h"
-#include "CVector.h"
-#include "CActiveOccluder.h"
+#include "Vector2D.h"
+#include "Vector.h"
+#include "ActiveOccluder.h"
 
 struct COccluder {
     int16 m_wMidX;

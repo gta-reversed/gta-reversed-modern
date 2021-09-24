@@ -6,13 +6,13 @@
 */
 #pragma once
 
-#include "CClumpModelInfo.h"
+#include "ClumpModelInfo.h"
 #include "RenderWare.h"
-#include "CVector.h"
-#include "CQuaternion.h"
+#include "Vector.h"
+#include "Quaternion.h"
 #include "RwObjectNameIdAssocation.h"
-#include "CRGBA.h"
-#include "CPool.h"
+#include "RGBA.h"
+#include "Pool.h"
 
 #include "eVehicleClass.h"
 

@@ -7,7 +7,7 @@ Do not delete this comment block. Respect others' work!
 #pragma once
 
 
-#include "CTaskSimpleIKChain.h"
+#include "TaskSimpleIKChain.h"
 
 
 class CTaskSimpleIKManager : public CTaskSimple {

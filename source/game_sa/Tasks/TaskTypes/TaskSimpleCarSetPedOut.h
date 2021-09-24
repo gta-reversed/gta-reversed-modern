@@ -7,8 +7,8 @@
 #pragma once
 
 
-#include "CTaskSimple.h"
-#include "CVehicle.h"
+#include "TaskSimple.h"
+#include "Vehicle.h"
 
 class CTaskSimpleCarSetPedOut : public CTaskSimple {
 public:

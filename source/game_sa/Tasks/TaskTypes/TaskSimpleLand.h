@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CTaskSimple.h"
+#include "TaskSimple.h"
 
 class CTaskSimpleLand : public CTaskSimple {
     CAnimBlendAssociation* m_pAnim;

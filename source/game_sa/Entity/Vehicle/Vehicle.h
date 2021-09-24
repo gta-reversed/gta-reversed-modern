@@ -6,20 +6,20 @@
 */
 #pragma once
 
-#include "CPhysical.h"
-#include "CAEVehicleAudioEntity.h"
+#include "Physical.h"
+#include "AEVehicleAudioEntity.h"
 #include "tHandlingData.h"
 #include "tFlyingHandlingData.h"
-#include "CAutoPilot.h"
+#include "AutoPilot.h"
 #include "eVehicleHandlingFlags.h"
-#include "CStoredCollPoly.h"
-#include "CVehicleModelInfo.h"
+#include "StoredCollPoly.h"
+#include "VehicleModelInfo.h"
 #include "tBoatHandlingData.h"
-#include "CPtrList.h"
-#include "CRideAnimData.h"
-#include "CDamageManager.h"
+#include "PtrList.h"
+#include "RideAnimData.h"
+#include "DamageManager.h"
 #include "FxSystem_c.h"
-#include "CFire.h"
+#include "Fire.h"
 
 /*  Thanks to MTA team for https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CVehicleSA.cpp */
 

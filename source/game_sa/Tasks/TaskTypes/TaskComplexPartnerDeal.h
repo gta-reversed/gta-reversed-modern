@@ -1,5 +1,5 @@
 #pragma once 
-#include "CTaskComplexPartner.h"
+#include "TaskComplexPartner.h"
 
 class CTaskComplexPartnerDeal : public CTaskComplexPartner
 {

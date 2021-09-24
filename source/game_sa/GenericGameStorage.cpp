@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CSimpleVariablesSaveStructure.h"
+#include "SimpleVariablesSaveStructure.h"
 
 /*
     Plugin-SDK (Grand Theft Auto San Andreas) source file

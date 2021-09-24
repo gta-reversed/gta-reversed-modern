@@ -7,7 +7,7 @@ Do not delete this comment block. Respect others' work!
 
 #include "StdInc.h"
 
-#include "CAnimManager.h"
+#include "AnimManager.h"
 
 CAnimationStyleDescriptor* CAnimManager::ms_aAnimAssocDefinitions = (CAnimationStyleDescriptor*)0x8AA5A8;
 CAnimBlendAssocGroup*& CAnimManager::ms_aAnimAssocGroups = *(CAnimBlendAssocGroup**)0xB4EA34;

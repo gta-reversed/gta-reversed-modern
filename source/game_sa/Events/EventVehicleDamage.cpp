@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-#include "CEventVehicleDamage.h"
+#include "EventVehicleDamage.h"
 
-#include "CPedType.h"
+#include "PedType.h"
 
 void CEventVehicleDamage::InjectHooks()
 {

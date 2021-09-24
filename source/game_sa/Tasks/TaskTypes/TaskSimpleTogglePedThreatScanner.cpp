@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleTogglePedThreatScanner.h"
+#include "TaskSimpleTogglePedThreatScanner.h"
 
 CTaskSimpleTogglePedThreatScanner::CTaskSimpleTogglePedThreatScanner(bool bScanAllowedScriptPed, bool bScanAllowedInVehicle, bool bScanAllowedScriptedTask)
 {

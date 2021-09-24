@@ -1,8 +1,8 @@
 #pragma once
 
-#include "CBoundingBox.h"
-#include "CVector.h"
-#include "CPool.h"
+#include "BoundingBox.h"
+#include "Vector.h"
+#include "Pool.h"
 
 enum class eJumpState : uint8 {
     START_POINT_INTERSECTED,

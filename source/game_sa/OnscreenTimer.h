@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "COnscreenTimerEntry.h"
-#include "COnscreenCounterEntry.h"
+#include "OnscreenTimerEntry.h"
+#include "OnscreenCounterEntry.h"
 
 class COnscreenTimer {
 public:

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CTaskSimpleSetStayInSamePlace.h"
+#include "TaskSimpleSetStayInSamePlace.h"
 
 void CTaskSimpleSetStayInSamePlace::InjectHooks()
 {

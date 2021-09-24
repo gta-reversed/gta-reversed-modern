@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CTimer.h"
+#include "Timer.h"
 
 class CTaskTimer {
 public:

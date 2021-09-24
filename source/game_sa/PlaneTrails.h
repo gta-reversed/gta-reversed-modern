@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CPlaneTrail.h"
+#include "PlaneTrail.h"
 
 #define NUM_PLANE_TRAILS 3
 

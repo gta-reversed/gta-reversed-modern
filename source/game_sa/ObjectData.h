@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CVector.h"
+#include "Vector.h"
 #include "FxSystem_c.h"
 
 enum eObjectColDamageEffect : uint8 {
