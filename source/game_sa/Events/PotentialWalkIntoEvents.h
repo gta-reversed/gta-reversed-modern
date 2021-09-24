@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CEventEditableResponse.h"
-#include "CVector.h"
+#include "EventEditableResponse.h"
+#include "Vector.h"
 
 class CVehicle;
 class CEventPotentialWalkIntoVehicle : public CEventEditableResponse {

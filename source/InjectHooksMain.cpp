@@ -1,45 +1,150 @@
 #include "StdInc.h"
 
-#include "CSimpleVariablesSaveStructure.h"
+#include "SimpleVariablesSaveStructure.h"
 
 // Audio
-#include "CAEAudioChannel.h"
-#include "CAEAudioEnvironment.h"
-#include "CAEAudioHardware.h"
-#include "CAEAudioUtility.h"
-#include "CAEDataStream.h"
-#include "CAEMFDecoder.h"
-#include "CAESmoothFadeThread.h"
-#include "CAESoundManager.h"
-#include "CAEStaticChannel.h"
-#include "CAEVorbisDecoder.h"
-#include "CAEWaveDecoder.h"
-#include "CAEWMADecoder.h"
-#include "CAEStreamingDecoder.h"
-#include "CAEUserRadioTrackManager.h"
-#include "CAEWaterCannonAudioEntity.h"
-#include "CAEDoorAudioEntity.h"
+#include "AEAudioChannel.h"
+#include "AEAudioEnvironment.h"
+#include "AEAudioHardware.h"
+#include "AEAudioUtility.h"
+#include "AEDataStream.h"
+#include "AEMFDecoder.h"
+#include "AESmoothFadeThread.h"
+#include "AESoundManager.h"
+#include "AEStaticChannel.h"
+#include "AEVorbisDecoder.h"
+#include "AEWaveDecoder.h"
+#include "AEWMADecoder.h"
+#include "AEStreamingDecoder.h"
+#include "AEUserRadioTrackManager.h"
+#include "AEWaterCannonAudioEntity.h"
+#include "AEDoorAudioEntity.h"
 
 #include "CDebugMenu.h"
 
-#include "CCarGenerator.h"
-#include "CTheCarGenerators.h"
-#include "CRadar.h"
-#include "CWaterCannons.h"
-#include "CLines.h"
-#include "CEscalators.h"
-#include "CMovingThings.h"
-#include "CMovingThings.h"
-#include "CPlaneTrails.h"
-#include "CGamma.h"
-#include "CCustomBuildingPipeline.h"
-#include "CCustomBuildingDNPipeline.h"
-#include "CPlantMgr.h"
-#include "COnscreenCounterEntry.h"
-#include "CUserDisplay.h"
-#include "CCurrentVehicle.h"
-#include "CPlaceName.h"
-#include "COnscreenTimer.h"
+#include "CarGenerator.h"
+#include "TheCarGenerators.h"
+#include "Radar.h"
+#include "WaterCannons.h"
+#include "Lines.h"
+#include "Escalators.h"
+#include "MovingThings.h"
+#include "MovingThings.h"
+#include "PlaneTrails.h"
+#include "Gamma.h"
+#include "CustomBuildingPipeline.h"
+#include "CustomBuildingDNPipeline.h"
+#include "PlantMgr.h"
+#include "PedType.h"
+#include "Occlusion.h"
+#include "Occluder.h"
+#include "ActiveOccluder.h"
+#include "MotionBlurStreaks.h"
+#include "GroupEventHandler.h"
+
+#include "TaskSimpleAbseil.h"
+#include "TaskComplexWanderCop.h"
+#include "TaskComplexUseMobilePhone.h"
+#include "TaskSimpleStandStill.h"
+#include "TaskSimpleCarDrive.h"
+#include "TaskSimpleScratchHead.h"
+#include "TaskSimpleChoking.h"
+#include "TaskComplexPartnerChat.h"
+#include "TaskSimpleUseGun.h"
+#include "TaskSimpleGangDriveBy.h"
+#include "TaskComplexObserveTrafficLightsAndAchieveHeading.h"
+#include "TaskSimpleInAir.h"
+#include "TaskComplexHitPedWithCar.h"
+#include "TaskSimplePlayerOnFoot.h"
+#include "TaskComplexFollowPedFootsteps.h"
+#include "TaskComplexGetUpAndStandStill.h"
+#include "TaskComplexGoPickUpEntity.h"
+#include "TaskSimpleDie.h"
+#include "TaskComplexPolicePursuit.h"
+#include "TaskSimpleFacial.h"
+#include "TaskComplexCopInCar.h"
+#include "TaskComplexFacial.h"
+#include "TaskComplexInAirAndLand.h"
+#include "TaskSimpleGetUp.h"
+#include "TaskSimpleUninterruptable.h"
+#include "TaskComplexFallAndGetUp.h"
+#include "TaskSimpleTriggerLookAt.h"
+#include "TaskSimpleHitHead.h"
+#include "TaskUtilityLineUpPedWithCar.h"
+#include "TaskSimpleLand.h"
+#include "TaskSimpleJetPack.h"
+#include "TaskSimpleSetStayInSamePlace.h"
+#include "TaskSimpleJump.h"
+#include "TaskSimpleFall.h"
+#include "TaskSimpleClimb.h"
+#include "TaskComplexPlayHandSignalAnim.h"
+#include "TaskComplexWaitForPed.h"
+#include "TaskComplexJump.h"
+#include "TaskComplexWanderStandard.h"
+#include "TaskSimpleIKLookAt.h"
+#include "TaskComplexSunbathe.h"
+#include "TaskComplexEnterCar.h"
+#include "TaskSimpleTogglePedThreatScanner.h"
+#include "TaskComplexUseGoggles.h"
+#include "TaskComplexCrossRoadLookAndAchieveHeading.h"
+#include "TaskComplexGoToPointAndStandStill.h"
+#include "TaskSimpleAchieveHeading.h"
+#include "TaskSimpleIKChain.h"
+#include "TaskSimpleGiveCPR.h"
+#include "TaskSimpleCarSetPedInAsPassenger.h"
+#include "TaskComplexDriveFireTruck.h"
+#include "TaskSimpleSwim.h"
+#include "TaskComplexWalkRoundObject.h"
+#include "TaskSimplePause.h"
+#include "TaskComplexEnterCarAsPassenger.h"
+#include "TaskComplexEnterCarAsDriver.h"
+#include "TaskSimpleNone.h"
+#include "TaskComplexKillPedOnFoot.h"
+#include "TaskSimpleThrowProjectile.h"
+#include "TaskSimpleGoToPoint.h"
+#include "TaskComplexWanderMedic.h"
+#include "TaskSimpleCarDriveTimed.h"
+#include "TaskComplexDriveWander.h"
+#include "TaskSimpleStealthKill.h"
+#include "TaskSimpleCarSetPedOut.h"
+#include "TaskSimpleAnim.h"
+#include "TaskSimpleRunAnim.h"
+#include "TaskComplexWanderCriminal.h"
+#include "TaskComplexWanderProstitute.h"
+#include "TaskComplexPartnerGreet.h"
+#include "TaskComplexWalkRoundCar.h"
+#include "TaskSimpleDuck.h"
+#include "TaskComplexMedicTreatInjuredPed.h"
+#include "TaskSimplePlayHandSignalAnim.h"
+#include "TaskComplexCarDrive.h"
+#include "TaskComplexKillPedFromBoat.h"
+#include "TaskComplexLeaveCar.h"
+#include "TaskComplexTreatAccident.h"
+#include "TaskComplexGoToPointAndStandStillTimed.h"
+#include "TaskComplexPartnerShove.h"
+#include "TaskSimpleRunNamedAnim.h"
+#include "TaskComplexProstituteSolicit.h"
+#include "TaskSimpleHoldEntity.h"
+#include "TaskSimpleGoTo.h"
+#include "TaskComplexPartner.h"
+#include "TaskSimpleCarSetPedInAsDriver.h"
+#include "TaskComplexWander.h"
+#include "TaskSimplePutDownEntity.h"
+#include "TaskComplexUseSwatRope.h"
+#include "TaskSimpleGoToPointFine.h"
+#include "TaskSimpleIKManager.h"
+#include "TaskComplexDie.h"
+#include "TaskComplexEnterBoatAsDriver.h"
+#include "TaskSimpleFight.h"
+#include "TaskComplexUseWaterCannon.h"
+#include "TaskComplexDriveToPoint.h"
+#include "TaskSimpleSlideToCoord.h"
+#include "TaskComplexPartnerDeal.h"
+#include "TaskSimplePickUpEntity.h"
+#include "TaskComplexBeInGroup.h"
+#include "TaskComplexBeCop.h"
+#include "TaskComplexAvoidOtherPedWhileWandering.h"
+#include "TaskComplexArrestPed.h"
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
@@ -52,6 +157,9 @@ void InjectHooksMain()
 {
     // WaitForDebugger();
 
+    CGroupEventHandler::InjectHooks();
+    CEventHandler::InjectHooks();
+    CVehicleRecording::InjectHooks();
     Fx_c::InjectHooks();
     CBrightLights::InjectHooks();
     CShinyTexts::InjectHooks();
@@ -267,6 +375,8 @@ void InjectHooksMain()
     C2dEffect::InjectHooks();
     CCustomRoadsignMgr::InjectHooks();
     COcclusion::InjectHooks();
+    COccluder::InjectHooks();
+    CActiveOccluder::InjectHooks();
     CGarage::InjectHooks();
     CGarages::InjectHooks();
     CPostEffects::InjectHooks();
@@ -367,12 +477,19 @@ void InjectHooksMain()
     CTaskComplexJump::InjectHooks();
     ModelIndices::InjectHooks();
     CWaterCannons::InjectHooks();
-    CLines::InjectHooks();
     CSprite::InjectHooks();
     CPlaneTrails::InjectHooks();
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
     CCustomBuildingDNPipeline::InjectHooks();
+    CTaskSimpleFight::InjectHooks();
+    CTaskComplexUseGoggles::InjectHooks();
+    CTaskSimpleUseGun::InjectHooks();
+    CTaskSimpleThrowProjectile::InjectHooks();
+    CTaskSequences::InjectHooks();
+    CTaskSimpleDie::InjectHooks();
+    CTaskComplexObserveTrafficLightsAndAchieveHeading::InjectHooks();
+    CTaskComplexPolicePursuit::InjectHooks();
     CCurrentVehicle::InjectHooks();
     CPlaceName::InjectHooks();
     CUserDisplay::InjectHooks();

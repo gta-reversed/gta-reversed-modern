@@ -6,6 +6,9 @@
 */
 #pragma once
 
-enum eSprintType {
-
+enum eSprintType : uint32 {
+    SPRINT_GROUND     = 0,
+    SPRINT_BMX        = 1,
+    SPRINT_WATER      = 2,
+    SPRINT_UNDERWATER = 3,
 };
