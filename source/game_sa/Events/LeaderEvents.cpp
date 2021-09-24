@@ -1,14 +1,14 @@
 #include "StdInc.h"
 
 #include "LeaderEvents.h"
-// #include "CEventLeaderEnteredCarAsDriver.h"
-// #include "CEventLeaderExitedCarAsDriver.h"
-// #include "CEventLeaderQuitEnteringCarAsDriver.h"
-// #include "CEventAreaCodes.h"
-// #include "CEventLeaderEntryExit.h"
+// #include "EventLeaderEnteredCarAsDriver.h"
+// #include "EventLeaderExitedCarAsDriver.h"
+// #include "EventLeaderQuitEnteringCarAsDriver.h"
+// #include "EventAreaCodes.h"
+// #include "EventLeaderEntryExit.h"
 
-#include "CTaskComplexKillPedOnFoot.h"
-#include "CTaskComplexArrestPed.h"
+#include "TaskComplexKillPedOnFoot.h"
+#include "TaskComplexArrestPed.h"
 
 void CEventLeaderEnteredCarAsDriver::InjectHooks()
 {

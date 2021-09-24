@@ -1,5 +1,5 @@
-#include "CEventEditableResponse.h"
-#include "CPed.h"
+#include "EventEditableResponse.h"
+#include "Ped.h"
 
 class CEventHealthLow : public CEventEditableResponse {
 public:
