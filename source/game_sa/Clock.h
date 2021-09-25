@@ -38,6 +38,10 @@ public:
     static void StoreClock();
     static void RestoreClock();
 
-    // NOTSA
-    static uint32 GetMinutesToday();
+    // inlined and may have not original names
+    static uint8  GetGameClockMinutes()   { return ms_nGameClockMinutes; } // 0x4410C0
+    static uint8  GetGameClockHours()     { return ms_nGameClockHours; }   // 0x43A690
+    static uint16 GetGameClockSeconds()   { return ms_nGameClockSeconds; } // 0x55F460
+
+    static float GetMinutesToday() { return float(ms_nGameClockMinutes + 60 * ms_nGameClockHours) + (float)ms_nGameClockSeconds * (1.0f / 60.0f); } // 0x55F470
 };

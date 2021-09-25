@@ -858,15 +858,20 @@ void SetLightsForNightVision() {
 // 0x6FAB30
 float GetDayNightBalance() {
     const auto minutes = CClock::GetMinutesToday();
-    if (minutes < 360)
+
+    if (minutes < 360.0f)
         return 1.0f;
-    if (minutes < 420)
-        return (float)(420 - minutes) / 60.0f;
-    if (minutes < 1200)
+
+    if (minutes < 420.0f)
+        return (420.0f - minutes) * (1.0f / 60.0f);
+
+    if (minutes < 1200.0f)
         return 0.0f;
-    if (minutes >= 1260)
+
+    if (minutes >= 1260.0f)
         return 1.0f;
-    return 1.0f - (float)(1260 - minutes) / 60.0f;
+
+    return 1.0f - (1260.0f - minutes) * (1.0f / 60.0f);
 }
 
 // 0x7226D0

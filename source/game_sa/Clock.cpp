@@ -31,8 +31,11 @@ void CClock::InjectHooks() {
     ReversibleHooks::Install("CClock", "RestoreClock", 0x52D070, &CClock::RestoreClock);
 }
 
-/// @brief Initializes the clock. (0x52CD90)
-/// @param millisecondsPerGameMinute Number of milliseconds per one game minute.
+/*
+ * @brief Initializes the clock.
+ * @param millisecondsPerGameMinute Number of milliseconds per one game minute.
+ * @addr  0x52CD90
+ */
 void CClock::Initialise(uint32 millisecondsPerGameMinute) {
     ms_nMillisecondsPerGameMinute = millisecondsPerGameMinute;
     ms_nGameClockMonth = 1;
@@ -45,7 +48,10 @@ void CClock::Initialise(uint32 millisecondsPerGameMinute) {
     CurrentDay = 4;
 }
 
-/// @brief Updates the game clock. (0x52CF10)
+/*
+ * @brief Updates the game clock.
+ * @addr  0x52CF10
+ */
 void CClock::Update() {
     if (ms_nMillisecondsPerGameMinute < (CTimer::GetTimeInMS() - ms_nLastClockTick) || CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK]) {
         if (!CCheat::m_aCheatsActive[CHEAT_ALWAYS_MIDNIGHT] && !CCheat::m_aCheatsActive[CHEAT_STOP_GAME_CLOCK_ORANGE_SKY]) {
@@ -86,10 +92,13 @@ void CClock::Update() {
     ms_nGameClockSeconds = (CTimer::GetTimeInMS() - ms_nLastClockTick) * 60 / ms_nMillisecondsPerGameMinute;
 }
 
-/// @brief Number of minutes remaining to specific time. (0x52CEB0)
-/// @param hours Hour
-/// @param minutes Minute
-/// @returns Minutes remaining to Hour:Minute
+/*
+ * @brief   Number of minutes remaining to specific time.
+ * @param   hours Hour
+ * @param   minutes Minute
+ * @returns Minutes remaining to Hour:Minute
+ * @addr    0x52CEB0
+ */
 uint16 CClock::GetGameClockMinutesUntil(uint8 hours, uint8 minutes) {
     auto now = ms_nGameClockHours * 60 + ms_nGameClockMinutes;
     auto then = hours * 60 + minutes;
@@ -100,10 +109,13 @@ uint16 CClock::GetGameClockMinutesUntil(uint8 hours, uint8 minutes) {
     return then - now;
 }
 
-/// @brief Checks if the current hour is greater than or equal to from and less than *to*. (0x52CEE0)
-/// @param from Hour for *from*
-/// @param to Hour for *to*
-/// @returns True if the parameters ensure the check, false otherwise.
+/*
+ * @brief   Checks if the current hour is greater than or equal to from and less than *to*.
+ * @param   from Hour for *from*
+ * @param   to Hour for *to*
+ * @returns True if the parameters ensure the check, false otherwise.
+ * @addr    0x52CEE0
+ */
 bool CClock::GetIsTimeInRange(uint8 from, uint8 to) {
     if (from > to)
         return ms_nGameClockHours >= from || ms_nGameClockHours < to;
@@ -111,7 +123,10 @@ bool CClock::GetIsTimeInRange(uint8 from, uint8 to) {
         return ms_nGameClockHours >= from && ms_nGameClockHours < to;
 }
 
-/// @brief Normalizes the game clock. For example hour of 24 means new day and hour 1. (0x52CDE0)
+/*
+ * @brief Normalizes the game clock. For example hour of 24 means new day and hour 1.
+ * @addr  0x52CDE0
+ */
 void CClock::NormaliseGameClock() {
     if (ms_nGameClockSeconds >= 60) {
         auto leftMins = ms_nGameClockSeconds / 60;
@@ -154,8 +169,11 @@ void CClock::NormaliseGameClock() {
         ms_nGameClockMonth = 1;
 }
 
-/// @brief Sets new day. (0x52D0B0)
-/// @param timeDirection 0 for previous day, non-zero value for next day.
+/*
+ * @brief Sets new day.
+ * @param timeDirection 0 for previous day, non-zero value for next day.
+ * @addr  0x52D0B0
+ */
 void CClock::OffsetClockByADay(uint32 timeDirection) {
     if (timeDirection == 0) {
         ms_nGameClockDays--;
@@ -192,10 +210,13 @@ void CClock::OffsetClockByADay(uint32 timeDirection) {
     }
 }
 
-/// @brief Sets the game clock. (0x52D150)
-/// @param hours Hour to be set.
-/// @param minutes Minute to be set.
-/// @param days Day to be set.
+/*
+ * @brief Sets the game clock.
+ * @param hours Hour to be set.
+ * @param minutes Minute to be set.
+ * @param days Day to be set.
+ * @addr  0x52D150
+ */
 void CClock::SetGameClock(uint8 hours, uint8 minutes, uint8 day) {
     ms_nLastClockTick = CTimer::GetTimeInMS();
     ms_nGameClockHours = hours;
@@ -210,26 +231,28 @@ void CClock::SetGameClock(uint8 hours, uint8 minutes, uint8 day) {
     NormaliseGameClock();
 }
 
-/// @brief Stores the clock state for loading afterwards. (0x52D020)
+
+/*
+ * @brief Stores the clock state for loading afterwards.
+ * @addr 0x52D020
+ */
 void CClock::StoreClock() {
-    ms_Stored_nGameClockMonths = ms_nGameClockMonth;
-    ms_Stored_nGameClockDays = ms_nGameClockDays;
-    ms_Stored_nGameClockHours = ms_nGameClockHours;
+    ms_Stored_nGameClockMonths  = ms_nGameClockMonth;
+    ms_Stored_nGameClockDays    = ms_nGameClockDays;
+    ms_Stored_nGameClockHours   = ms_nGameClockHours;
     ms_Stored_nGameClockMinutes = ms_nGameClockMinutes;
     ms_Stored_nGameClockSeconds = ms_nGameClockSeconds;
     bClockHasBeenStored = true;
 }
 
-/// @brief Loads the last saved clock state. (0x52D070)
+/*
+ * @brief Loads the last saved clock state.
+ * @addr  0x52D070
+ */
 void CClock::RestoreClock() {
-    ms_nGameClockMonth = ms_Stored_nGameClockMonths;
-    ms_nGameClockDays = ms_Stored_nGameClockDays;
-    ms_nGameClockHours = ms_Stored_nGameClockHours;
+    ms_nGameClockMonth   = ms_Stored_nGameClockMonths;
+    ms_nGameClockDays    = ms_Stored_nGameClockDays;
+    ms_nGameClockHours   = ms_Stored_nGameClockHours;
     ms_nGameClockMinutes = ms_Stored_nGameClockMinutes;
     ms_nGameClockSeconds = ms_Stored_nGameClockSeconds;
-}
-
-// NOTSA
-uint32 CClock::GetMinutesToday() {
-    return ms_nGameClockMinutes + 60 * ms_nGameClockHours + (unsigned)((float)ms_nGameClockSeconds / 60.0f);
 }
