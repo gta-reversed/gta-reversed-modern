@@ -389,6 +389,10 @@
 #include "game_sa\Entity\Vehicle\Trailer.h"
 #include "game_sa\Entity\Vehicle\Train.h"
 #include "game_sa\Entity\Vehicle\Vehicle.h"
+
+#include "game_sa\Audio\config\eAudioBank.h"
+#include "game_sa\Audio\config\eAudioSlot.h"
+#include "game_sa\Audio\config\eSFX.h"
 #include "game_sa\Enums\eCheats.h"
 #include "game_sa\Enums\AnimationEnums.h"
 #include "game_sa\Enums\eAnimBlendCallbackType.h"

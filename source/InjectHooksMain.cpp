@@ -20,6 +20,7 @@
 #include "AEWaterCannonAudioEntity.h"
 #include "AEDoorAudioEntity.h"
 #include "AEStreamThread.h"
+#include "AEFrontendAudioEntity.h"
 
 #include "CDebugMenu.h"
 
@@ -515,6 +516,7 @@ void InjectHooksMain()
     CAEDoorAudioEntity::InjectHooks();
     CAEWeatherAudioEntity::InjectHooks();
     CAEStreamThread::InjectHooks();
+    CAEFrontendAudioEntity::InjectHooks();
 
     FxManager_c::InjectHooks();
     FxSystemBP_c::InjectHooks();

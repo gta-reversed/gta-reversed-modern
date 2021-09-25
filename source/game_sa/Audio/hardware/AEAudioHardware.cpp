@@ -80,3 +80,7 @@ int16 CAEAudioHardware::AllocateChannels(uint16 numChannels) {
     m_wNumAvailableChannels -= numChannels;
     return slot;
 }
+
+void CAEAudioHardware::LoadSound(uint16 bank, uint16 sound, int16 slot) {
+    return plugin::CallMethod<0x4D8ED0, CAEAudioHardware*, uint16, uint16, int16>(this, bank, sound, slot);
+}
