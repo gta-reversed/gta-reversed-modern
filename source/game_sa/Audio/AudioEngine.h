@@ -36,7 +36,7 @@ public:
     CAudioEngine();
     ~CAudioEngine();
 
-    void IsLoadingTuneActive();
+    bool IsLoadingTuneActive();
     void ResetStatistics();
     void Restart();
     void SetMusicMasterVolume(int8);

@@ -517,6 +517,7 @@ void InjectHooksMain()
     CAEWeatherAudioEntity::InjectHooks();
     CAEStreamThread::InjectHooks();
     CAEFrontendAudioEntity::InjectHooks();
+    CAEWeaponAudioEntity::InjectHooks();
 
     FxManager_c::InjectHooks();
     FxSystemBP_c::InjectHooks();
