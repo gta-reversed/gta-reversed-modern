@@ -8,21 +8,25 @@
 
 #include "Task.h"
 
+class CPed;
+
 class CTaskSimple : public CTask {
 public:
-    static void InjectHooks();
-
     CTaskSimple();
-    ~CTaskSimple();
+    ~CTaskSimple() override = default;
 
     CTask* GetSubTask() override;
     bool IsSimple() override;
-    virtual bool ProcessPed(class CPed* ped) = 0;
-    virtual bool SetPedPosition(class CPed* ped);
+    virtual bool ProcessPed(CPed* ped) = 0;
+    virtual bool SetPedPosition(CPed* ped);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
 
     CTask* GetSubTask_Reversed() { return nullptr; }
     bool IsSimple_Reversed() { return true; }
-    bool SetPedPosition_Reversed(class CPed* ped) { return false; };
+    bool SetPedPosition_Reversed(CPed* ped) { return false; };
 };
 
 VALIDATE_SIZE(CTaskSimple, 8);

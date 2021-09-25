@@ -188,7 +188,7 @@ void CPedScriptedTaskRecord::Process()
                     CTaskManager& taskManager = taskRecordData.m_ped->GetTaskManager();
                     if (taskManager.GetActiveTask() == taskRecordData.m_task)
                         taskRecordData.m_status = eScriptedTaskStatus::TASK_ASSOCIATED;
-                    else if (taskManager.HasPrimaryTask(taskRecordData.m_task))
+                    else if (taskManager.HasTaskPrimary(taskRecordData.m_task))
                         taskRecordData.m_status = eScriptedTaskStatus::PRIMARY;
                     else if (taskManager.HasTaskSecondary(taskRecordData.m_task))
                         taskRecordData.m_status = eScriptedTaskStatus::SECONDARY;
