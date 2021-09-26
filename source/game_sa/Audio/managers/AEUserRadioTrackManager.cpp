@@ -19,8 +19,7 @@
 #include "FileMgr.h"
 #include "MenuManager.h"
 
-// Instance of CAEUserRadioTrackManager
-CAEUserRadioTrackManager& CAEUserRadioTrackManager::instance = *(CAEUserRadioTrackManager*)0xb6b970;
+CAEUserRadioTrackManager& AEUserRadioTrackManager = *(CAEUserRadioTrackManager*)0xB6B970;
 
 #if 0
 // This is the default list
