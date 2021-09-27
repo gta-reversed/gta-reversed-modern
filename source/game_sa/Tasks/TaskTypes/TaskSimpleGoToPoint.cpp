@@ -132,8 +132,8 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
                         if (!pTask || !pTask->m_pAnimBlendAssociation) {
                             CAnimBlendAssocGroup* pAnimGroup = &CAnimManager::ms_aAnimAssocGroups[ped->m_nAnimGroup];
                             if (!ped->m_pPlayerData->m_bPlayerSprintDisabled && !g_surfaceInfos->CantSprintOn(ped->m_nContactSurface)) {
-                                auto pAnimStaticAssoc1 = pAnimGroup->GetAnimation(1);
-                                auto pAnimStaticAssoc2 = pAnimGroup->GetAnimation(2);
+                                auto pAnimStaticAssoc1 = pAnimGroup->GetAnimation(ANIM_ID_RUN);
+                                auto pAnimStaticAssoc2 = pAnimGroup->GetAnimation(ANIM_ID_SPRINT);
                                 if (pAnimStaticAssoc1->m_pHierarchy != pAnimStaticAssoc2->m_pHierarchy &&
                                     pPlayer->ControlButtonSprint(SPRINT_GROUND) >= 1.0f) {
                                     ped->SetMoveState(PEDMOVE_SPRINT);

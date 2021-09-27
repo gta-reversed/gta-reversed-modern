@@ -538,22 +538,11 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
 
     if (bSetPrimaryDefaultTask)
     {
-        if (m_pPed->IsPlayer())
-        {
-            /*
-            auto pTaskSimplePlayerOnFoot = new CTaskSimplePlayerOnFoot();
-            m_TaskMgr.SetTask(pTaskSimplePlayerOnFoot, TASK_PRIMARY_DEFAULT, false);
+        if (m_pPed->IsPlayer()) {
+            auto taskSimplePlayerOnFoot = new CTaskSimplePlayerOnFoot();
+            m_TaskMgr.SetTask(taskSimplePlayerOnFoot, TASK_PRIMARY_DEFAULT, false);
             return;
-            */
-            auto pTaskSimplePlayerOnFoot = (CTaskSimplePlayerOnFoot*)CTask::operator new(28);
-            if (pTaskSimplePlayerOnFoot)
-            {
-                pTaskSimplePlayerOnFoot->Constructor();
-                m_TaskMgr.SetTask(pTaskSimplePlayerOnFoot, TASK_PRIMARY_DEFAULT, false);
-                return;
-            }
-        }
-        else
+        } else
         {
             if (m_pPed->m_nCreatedBy != PED_MISSION)
             {
