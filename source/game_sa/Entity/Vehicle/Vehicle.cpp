@@ -1551,6 +1551,17 @@ void CVehicle::SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha)
     ((void(__cdecl*)(RpAtomic*, int32))0x6D2960)(atomic, alpha);
 }
 
+CVehicleModelInfo* CVehicle::GetVehicleModelInfo() {
+    return CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
+}
+
+CVector CVehicle::GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace) {
+    CVector pos = GetVehicleModelInfo()->GetModelDummyPosition(dummy);
+    if (bWorldSpace)
+        pos = GetMatrix() * pos; // transform to world-space
+    return pos;
+}
+
 // 0x6D2980
 void CVehicle::UpdateClumpAlpha()
 {

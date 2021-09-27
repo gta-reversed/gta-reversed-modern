@@ -45,6 +45,7 @@
 #include "ActiveOccluder.h"
 #include "MotionBlurStreaks.h"
 #include "GroupEventHandler.h"
+#include "FireManager.h"
 
 #include "TaskSimpleAbseil.h"
 #include "TaskComplexWanderCop.h"
@@ -161,6 +162,7 @@ void InjectHooksMain()
 {
     // WaitForDebugger();
 
+    CFire::InjectHooks();
     CFireManager::InjectHooks();
     CTask::InjectHooks();
     CTaskSimple::InjectHooks();

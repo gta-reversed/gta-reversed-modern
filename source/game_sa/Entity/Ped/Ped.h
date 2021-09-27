@@ -543,6 +543,7 @@ public:
     void SetModelIndex(uint32 modelIndex);
     bool IsInVehicleThatHasADriver();
 
+    CVehicle* GetVehicleIfInOne() { return bInVehicle ? m_pVehicle : nullptr; }
     inline uint8 GetCreatedBy() { return m_nCreatedBy; }
     inline bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
     inline bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }

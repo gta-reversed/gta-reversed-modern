@@ -1,9 +1,42 @@
 #include "StdInc.h"
 
 #include "Fire.h"
+#include "FireManager.h"
+
+void CFire::InjectHooks() {
+    using namespace ReversibleHooks;
+    Install("CFire", "Constructor", 0x539D90, &CFire::Constructor);
+    Install("CFire", "Initialise", 0x538B30, &CFire::Initialise);
+    Install("CFire", "CreateFxSysForStrength", 0x539360, &CFire::CreateFxSysForStrength);
+    Install("CFire", "Extinguish", 0x5393F0, &CFire::Extinguish);
+    Install("CFire", "ProcessFire", 0x53A570, &CFire::ProcessFire);
+}
+
+CFire::CFire() {
+    Initialise();
+}
+
+CFire* CFire::Constructor() {
+    this->CFire::CFire();
+    return this;
+}
 
 void CFire::Initialise() {
-    return plugin::CallMethod<0x538B30, CFire*>(this);
+    // Originally m_nFlags = (m_nFlags & 0xF4) | 0x14; - Clear 1st, 2nd, 4th and set 3rd, 5th bits (1-based numbering)
+    active = false;
+    createdByScript = false;
+    makesNoise = true;
+    beingExtinguished = false;
+    firstGeneration = true;
+    m_vecPosition = CVector{};
+    m_nScriptReferenceIndex = 1;
+    m_nTimeToBurn = 0;
+    m_pEntityTarget = nullptr;
+    m_pEntityCreator = nullptr;
+    m_fStrength = 1.0f;
+    m_pFxSystem = nullptr;
+    m_nNumGenerationsAllowed = 100;
+    m_nRemovalDist = 60;
 }
 
 void CFire::ExtinguishWithWater(float fWaterStrength) {
@@ -138,25 +171,6 @@ void CFire::Start(CVector pos, float fStrength, CEntity* target, uint8_t nGens) 
     CreateFxSysForStrength(target ? pos : target->GetPosition(), nullptr);
 }
 
-void CFire::CreateFxSysForStrength(const CVector& point, RwMatrixTag* matrix) {
-    plugin::CallMethod<0x539360, CFire*, const CVector&, RwMatrixTag*>(this, point, matrix);
-}
-
-void CFire::Extinguish() {
-    plugin::CallMethod<0x5393F0, CFire*>(this);
-}
-
-void CFire::ProcessFire() {
-    plugin::CallMethod<0x53A570, CFire*>(this);
-}
-
-void CFire::DestroyFx() {
-    if (m_pFxSystem) {
-        g_fxMan.DestroyFxSystem(m_pFxSystem);   
-        m_pFxSystem = nullptr;
-    }
-}
-
 void CFire::SetTarget(CEntity* target) {
     if (m_pEntityTarget)
         m_pEntityTarget->CleanUpOldReference(&m_pEntityTarget); /* Assume old target's m_pFire is not pointing to `*this` */
@@ -173,4 +187,190 @@ void CFire::SetCreator(CEntity* creator) {
     m_pEntityCreator = creator; /* assign, even if its null, to clear it */
     if (creator)
         creator->RegisterReference(&m_pEntityCreator);
+}
+
+void CFire::CreateFxSysForStrength(const CVector& point, RwMatrixTag* matrix) {
+    DestroyFx();
+    m_pFxSystem = g_fxMan.CreateFxSystem(GetFireParticleNameForStrength(), const_cast<CVector*>(&point), matrix, true); // TODO: Make CreateFxSys take const CVector&
+    if (m_pFxSystem)
+        m_pFxSystem->Play();
+}
+
+void CFire::Extinguish() {
+    if (!active)
+        return;
+
+    m_nTimeToBurn = 0;
+
+    // Originally m_nFlags = (m_nFlags & 0xF6) | 0x10; - Clear 1st and 4th, set 5th
+    active = false;
+    beingExtinguished = false;
+    firstGeneration = true;
+
+    DestroyFx();
+
+    if (m_pEntityTarget) {
+        switch (m_pEntityTarget->m_nType) {
+        case eEntityType::ENTITY_TYPE_PED: {
+            static_cast<CPed*>(m_pEntityTarget)->m_pFire = nullptr;
+            break;
+        }
+        case eEntityType::ENTITY_TYPE_VEHICLE: {
+            static_cast<CVehicle*>(m_pEntityTarget)->m_pFire = nullptr;
+            break;
+        }
+        }
+        m_pEntityTarget->CleanUpOldReference(&m_pEntityTarget);
+        m_pEntityTarget = nullptr;
+    }
+}
+
+void CFire::ProcessFire() {
+    {
+        const float fNewStrength = std::min(3.0f, m_fStrength + CTimer::ms_fTimeStep / 500.0f); // Limited to 3.0f
+        if ((uint32_t)m_fStrength == (uint32_t)fNewStrength)
+            m_fStrength = fNewStrength; // Not sure why they do this, probably just some hack
+    }
+
+    if (m_pEntityTarget) {
+        m_vecPosition = m_pEntityTarget->GetPosition();
+
+        switch (m_pEntityTarget->m_nType) {
+        case eEntityType::ENTITY_TYPE_PED: {
+            auto pTargetPed = static_cast<CPed*>(m_pEntityTarget);
+
+            if (pTargetPed->m_pFire != this) {
+                Extinguish();
+                return;
+            }
+
+            switch (pTargetPed->m_nPedState) {
+            case ePedState::PEDSTATE_DIE:
+            case ePedState::PEDSTATE_DEAD: {
+                m_vecPosition.z -= 1.0f; /* probably because ped is laying on the ground */
+                break;
+            }
+            }
+
+            if (auto vehicle = pTargetPed->GetVehicleIfInOne()) {
+                if (!ModelIndices::IsFireTruck(vehicle->m_nModelIndex) && vehicle->IsAutomobile()) {
+                    vehicle->m_fHealth = 75.0f;
+                }
+            } else if (!pTargetPed->IsPlayer() && !pTargetPed->IsAlive()) {
+                pTargetPed->physicalFlags.bDestroyed = true;
+            }
+
+            break;
+        }
+        case eEntityType::ENTITY_TYPE_VEHICLE: {
+            auto pTargetVeh = static_cast<CVehicle*>(m_pEntityTarget);
+
+            if (pTargetVeh->m_pFire != this) {
+                Extinguish();
+                return;
+            }
+
+            if (!createdByScript) {
+                pTargetVeh->InflictDamage(m_pEntityCreator, eWeaponType::WEAPON_FLAMETHROWER, CTimer::ms_fTimeStep * 1.2f, CVector{});
+            }
+
+            if (pTargetVeh->IsAutomobile()) {
+                m_vecPosition = pTargetVeh->GetDummyPosition(eVehicleDummies::DUMMY_LIGHT_FRONT_MAIN) + CVector{0.0f, 0.0f, 0.15f};
+            }
+            break;
+        }
+        }
+        if (m_pFxSystem) {
+            auto targetPhysical = static_cast<CPhysical*>(m_pEntityTarget);
+            m_pFxSystem->SetOffsetPos(m_vecPosition + CTimer::ms_fTimeStep * 2.0f * targetPhysical->m_vecMoveSpeed);
+        }
+    }
+
+    CPlayerPed* player = FindPlayerPed();
+    if (!m_pEntityTarget || !m_pEntityTarget->IsVehicle()) {
+        // Check if we can set player's ped on fire
+        if (!FindPlayerVehicle() && !player->m_pFire && /* not already on fire */
+            !player->physicalFlags.bFireProof && !player->m_pAttachedTo) {
+            if ((player->GetPosition(), m_vecPosition).SquaredMagnitude() < 1.2f) { /* Note: Squared distance */
+                player->DoStuffToGoOnFire();
+                gFireManager.StartFire(player, m_pEntityCreator, 0.8f, true, 7000, 100);
+            }
+        }
+    }
+
+    if (rand() % 32 == 0) {
+        for (int i = CPools::ms_pVehiclePool->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
+            CVehicle* vehicle = CPools::ms_pVehiclePool->GetAt(i);
+            if (!vehicle)
+                continue;
+            if (DistanceBetweenPoints(vehicle->GetPosition(), m_vecPosition) >= 2.0f)
+                continue;
+            if (vehicle->IsBMX()) {
+                player->DoStuffToGoOnFire();
+                gFireManager.StartFire(player, m_pEntityCreator, 0.8f, true, 7000, 100);
+                vehicle->BurstTyre(vehicle->FindTyreNearestPoint(m_vecPosition.x, m_vecPosition.y) + 13, false); // TODO: What's this 13?
+            } else {
+                gFireManager.StartFire(vehicle, m_pEntityCreator, 0.8f, true, 7000, 100);
+            }
+        }
+    }
+
+    if (rand() % 4 == 0) {
+        for (int i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
+            CObject* pObj = CPools::ms_pObjectPool->GetAt(i);
+            if (!pObj)
+                continue;
+            if (DistanceBetweenPoints(pObj->GetPosition(), m_vecPosition) >= 3.0f)
+                continue;
+            pObj->ObjectFireDamage(CTimer::ms_fTimeStep * 8.0f, m_pEntityCreator);
+        }
+    }
+
+    if (m_nNumGenerationsAllowed > 0 && rand() % 128 == 0) {
+        if (gFireManager.GetNumOfFires() < 25) {
+            const CVector dir{ CGeneral::GetRandomNumberInRange(-1.0f, 1.0f), CGeneral::GetRandomNumberInRange(-1.0f, 1.0f), 0.0f };
+            CCreepingFire::TryToStartFireAtCoors(m_vecPosition + dir * CGeneral::GetRandomNumberInRange(2.0f, 3.0f), m_nNumGenerationsAllowed, false, IsScript(), 10.0f);
+        }
+    }
+
+    if (m_fStrength <= 2.0f && m_nNumGenerationsAllowed && rand() % 16 == 0) {
+        CFire& nearby = gFireManager.GetRandomFire();
+        if (&nearby != this && nearby.active && !nearby.createdByScript && nearby.m_fStrength <= 1.0f) {
+            if (DistanceBetweenPoints(nearby.m_vecPosition, m_vecPosition) < 3.5f) {
+                nearby.m_vecPosition = nearby.m_vecPosition * 0.3f + m_vecPosition * 0.7f;
+                m_fStrength += 1.0f;
+                m_nTimeToBurn = std::max(m_nTimeToBurn, CTimer::m_snTimeInMilliseconds + 7000);
+                CreateFxSysForStrength(m_vecPosition, nullptr);
+                m_nNumGenerationsAllowed = std::max(m_nNumGenerationsAllowed, nearby.m_nNumGenerationsAllowed);
+                nearby.Extinguish();
+            }
+        }
+    }
+
+    if (m_pFxSystem) {
+        float unused;
+        const float fFractPart = std::modf(m_fStrength, &unused); // R* way: m_fStrength - (float)(int)m_fStrength
+        m_pFxSystem->SetConstTime(true, std::min(CTimer::GetTimeInMS() / 3500.0f, fFractPart));
+    }
+
+    if (createdByScript || (HasTimeToBurn() && IsNotInRemovalDistance())) {
+        const float fColorRG = (float)(rand() % 128) / 512.0f; // todo: GetRandomNumberInRange
+        CPointLights::AddLight(ePointLightType::PLTYPE_POINTLIGHT, m_vecPosition, CVector{}, 8.0f, fColorRG, fColorRG, 0.0f, 0, false, nullptr);
+    } else {
+        if (m_fStrength <= 1.0f) {
+            Extinguish();
+        } else {
+            m_fStrength -= 1.0f;
+            m_nTimeToBurn = CTimer::m_snTimeInMilliseconds + 7000;
+            CreateFxSysForStrength(m_vecPosition, nullptr);
+        }
+    }
+}
+
+bool CFire::HasTimeToBurn() const {
+    return CTimer::GetTimeInMS() < m_nTimeToBurn;
+}
+
+bool CFire::IsNotInRemovalDistance() const {
+    return m_nRemovalDist > (TheCamera.GetPosition() - m_vecPosition).Magnitude();
 }

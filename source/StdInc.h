@@ -154,8 +154,6 @@
 #include "game_sa\FileLoader.h"
 #include "game_sa\FileMgr.h"
 #include "game_sa\FileObjectInstance.h"
-#include "game_sa\Fire.h"
-#include "game_sa\FireManager.h"
 #include "game_sa\Font.h"
 #include "game_sa\Formation.h"
 #include "game_sa\Game.h"

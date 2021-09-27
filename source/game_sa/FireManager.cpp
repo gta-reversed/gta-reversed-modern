@@ -523,3 +523,8 @@ void CFireManager::Update() {
 
     }
 }
+
+// NOTSA
+CFire& CFireManager::GetRandomFire() {
+    return m_aFires[CGeneral::GetRandomNumberInRange(0, std::size(m_aFires))];
+}

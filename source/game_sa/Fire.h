@@ -33,27 +33,46 @@ public:
     FxSystem_c* m_pFxSystem;
 
 public:
-    CFire() = default;
+    static void InjectHooks();
+
+    CFire();
     ~CFire() = default;
+    CFire* Constructor();
 
     void Initialise();
-    void Start(CEntity* creator, CVector pos, uint32_t nTimeToBurn, uint8_t nGens);
-    void Start(CEntity* creator, CEntity* target, uint32_t nTimeToBurn, uint8_t nGens);
-    void Start(CVector pos, float fStrength, CEntity* target, uint8_t nGens); /* For script */
+    void Start(CEntity* creator, CVector pos, uint32 nTimeToBurn, uint8 nGens);
+    void Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 nGens);
+    void Start(CVector pos, float fStrength, CEntity* target, uint8 nGens); /* For script */
     void CreateFxSysForStrength(const CVector& point, RwMatrixTag* matrix);
     void Extinguish();
     void ExtinguishWithWater(float fWaterStrength);
     void ProcessFire();
 
+    // Inlined
     bool IsActive() const { return active; }
     bool IsScript() const { return createdByScript; }
     bool IsFirstGen() const { return firstGeneration; }
     bool IsBeingExtinguished() const { return beingExtinguished; }
 
-    // NOTSA funcs
-    void DestroyFx();
+    // NOTSA funcs:
+    auto GetFireParticleNameForStrength() const {
+        if (m_fStrength > 1.0f)
+            return (m_fStrength > 2.0f) ? "fire_large" : "fire_med";
+        else
+            return "fire";
+    };
+
+    void DestroyFx() {
+        if (m_pFxSystem) {
+            m_pFxSystem->Kill();
+            m_pFxSystem = nullptr;
+        }
+    }
     void SetTarget(CEntity* target);
     void SetCreator(CEntity* creator);
+
+    bool HasTimeToBurn() const;
+    bool IsNotInRemovalDistance() const;
 };
 
 VALIDATE_SIZE(CFire, 0x28);
