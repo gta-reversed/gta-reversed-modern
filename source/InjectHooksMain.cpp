@@ -22,6 +22,7 @@
 #include "AEStreamThread.h"
 #include "AEFrontendAudioEntity.h"
 #include "AEScriptAudioEntity.h"
+#include "AERadioTrackManager.h"
 
 #include "CDebugMenu.h"
 
@@ -520,6 +521,7 @@ void InjectHooksMain()
     CAEFrontendAudioEntity::InjectHooks();
     CAEWeaponAudioEntity::InjectHooks();
     CAEScriptAudioEntity::InjectHooks();
+    CAERadioTrackManager::InjectHooks();
 
     FxManager_c::InjectHooks();
     FxSystemBP_c::InjectHooks();

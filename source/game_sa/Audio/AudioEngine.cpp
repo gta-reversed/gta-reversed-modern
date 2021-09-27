@@ -1,5 +1,8 @@
 #include "StdInc.h"
+
 #include "AudioEngine.h"
+
+// #include "AEAmbienceTrackManager.h"
 
 CAudioEngine& AudioEngine = *reinterpret_cast<CAudioEngine*>(0xB6BC90);
 
@@ -52,4 +55,9 @@ void CAudioEngine::ReportFrontendAudioEvent(eAudioEvents audioEventId, float a2,
 
 bool CAudioEngine::IsLoadingTuneActive() {
     return plugin::CallMethodAndReturn<bool, 0x506D90, CAudioEngine*>(this);
+}
+
+bool CAudioEngine::IsAmbienceRadioActive() {
+    return plugin::CallMethodAndReturn<bool, 0x507280, CAudioEngine*>(this);
+    // return AEAmbienceTrackManager.IsAmbienceRadioActive();
 }

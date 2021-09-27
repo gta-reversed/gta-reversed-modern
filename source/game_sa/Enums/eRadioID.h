@@ -6,19 +6,21 @@
 */
 #pragma once
 
+// Genre-based names
 enum eRadioID : int8 {
-    RADIO_PLAYBACK_FM = 1,
-    RADIO_K_ROSE,
-    RADIO_K_DST,
-    RADIO_BOUNCE_FM,
-    RADIO_SF_UR,
-    RADIO_LOS_SANTOS,
-    RADIO_RADIO_X,
-    RADIO_CSR_103_9,
-    RADIO_K_JAH_WEST,
-    RADIO_MASTER_SOUNDS_98_3,
-    RADIO_WCTR,
+    RADIO_EMERGENCY_AA,    // AA
+    RADIO_CLASSIC_HIP_HOP, // Playback FM
+    RADIO_COUNTRY,         // K-Rose
+    RADIO_CLASSIC_ROCK,    // K-DST
+    RADIO_DISCO_FUNK,      // Bounce FM
+    RADIO_HOUSE_CLASSICS,  // San Fierro Underground Radio aka SF-UR
+    RADIO_MODERN_HIP_HOP,  // Radio Los Santos
+    RADIO_MODERN_ROCK,     // Radio X
+    RADIO_NEW_JACK_SWING,  // CSR 103.9
+    RADIO_REGGAE,          // K-Jah West
+    RADIO_RARE_GROOVE,     // Master Sounds 98.3
+    RADIO_TALK,            // WCTR
     RADIO_USER_TRACKS,
-    RADIO_NONE,
-    RADIO_COUNT
+    RADIO_OFF,
+    RADIO_COUNT,
 };
