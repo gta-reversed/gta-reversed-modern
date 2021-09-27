@@ -93,7 +93,7 @@ void CAEAudioChannel::SetFrequencyScalingFactor_Reversed(float factor) {
 }
 
 // 0x4D7950
-void CAEAudioChannel::SetPosition(CVector* vecPos) {
+void CAEAudioChannel::SetPosition(CVector* vecPos) const {
     if (!m_pDirectSoundBuffer)
         return;
 
@@ -125,7 +125,7 @@ void CAEAudioChannel::SetVolume(float volume) {
 }
 
 // 0x4D79A0
-int32 CAEAudioChannel::GetCurrentPlaybackPosition() {
+int32 CAEAudioChannel::GetCurrentPlaybackPosition() const {
     if (!m_pDirectSoundBuffer)
         return 0;
 
@@ -135,12 +135,12 @@ int32 CAEAudioChannel::GetCurrentPlaybackPosition() {
 }
 
 // 0x4D79D0
-uint32 CAEAudioChannel::ConvertFromBytesToMS(uint32 bytes) {
+uint32 CAEAudioChannel::ConvertFromBytesToMS(uint32 bytes) const {
     return CAEAudioUtility::ConvertFromBytesToMS(bytes, m_nBufferFrequency, m_wFrequencyMult);
 }
 
 // 0x4D79F0
-uint32 CAEAudioChannel::ConvertFromMsToBytes(uint32 ms) {
+uint32 CAEAudioChannel::ConvertFromMsToBytes(uint32 ms) const {
     return CAEAudioUtility::ConvertFromMSToBytes(ms, m_nBufferFrequency, m_wFrequencyMult);
 }
 
@@ -168,7 +168,7 @@ void CAEAudioChannel::UpdateStatus() {
 }
 
 // 0x4D7A10
-bool CAEAudioChannel::Lost() {
+bool CAEAudioChannel::Lost() const {
     while (m_pDirectSoundBuffer->Restore() == DSERR_BUFFERLOST) // BUG: Infinite loop if we don't restore
         Sleep(10);
 

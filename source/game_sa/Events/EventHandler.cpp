@@ -569,10 +569,10 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
     m_sayTask = nullptr;
     m_partialAnimTask = nullptr;
 
-    CTask* task1 = m_ped->m_pIntelligence->m_TaskMgr.GetActiveTask();
+    CTask* task1 = m_ped->GetTaskManager().GetActiveTask();
     CTask* task2 = nullptr;
     if (task1)
-        task2 = m_ped->m_pIntelligence->m_TaskMgr.GetSimplestActiveTask();
+        task2 = m_ped->GetTaskManager().GetSimplestActiveTask();
 
     printf("event: %d task1: %d task2: %d\n", event->GetEventType(), task1->GetTaskType(), task2->GetTaskType()); // NOTSA
 

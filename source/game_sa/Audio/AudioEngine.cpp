@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "AudioEngine.h"
+
+// #include "AEAmbienceTrackManager.h"
+
 CAudioEngine& AudioEngine = *reinterpret_cast<CAudioEngine*>(0xB6BC90);
 
 void CAudioEngine::ReportCollision(CEntity* pEntity1, CEntity* pEntity2, int32 surface1, int32 surface2, CColPoint* pColPoint, CVector* normal, float fCollisionImpact1,
@@ -47,4 +51,13 @@ void CAudioEngine::RetuneRadio(int8 radioId) {
 // 0x506EA0
 void CAudioEngine::ReportFrontendAudioEvent(eAudioEvents audioEventId, float a2, float a3) {
     plugin::CallMethod<0x506EA0, CAudioEngine*, int32, float, float>(this, audioEventId, a2, a3);
+}
+
+bool CAudioEngine::IsLoadingTuneActive() {
+    return plugin::CallMethodAndReturn<bool, 0x506D90, CAudioEngine*>(this);
+}
+
+bool CAudioEngine::IsAmbienceRadioActive() {
+    return plugin::CallMethodAndReturn<bool, 0x507280, CAudioEngine*>(this);
+    // return AEAmbienceTrackManager.IsAmbienceRadioActive();
 }

@@ -19,6 +19,10 @@
 #include "AEUserRadioTrackManager.h"
 #include "AEWaterCannonAudioEntity.h"
 #include "AEDoorAudioEntity.h"
+#include "AEStreamThread.h"
+#include "AEFrontendAudioEntity.h"
+#include "AEScriptAudioEntity.h"
+#include "AERadioTrackManager.h"
 
 #include "CDebugMenu.h"
 
@@ -158,6 +162,8 @@ void InjectHooksMain()
     // WaitForDebugger();
 
     CFireManager::InjectHooks();
+    CTask::InjectHooks();
+    CTaskSimple::InjectHooks();
     CGroupEventHandler::InjectHooks();
     CEventHandler::InjectHooks();
     CVehicleRecording::InjectHooks();
@@ -512,6 +518,11 @@ void InjectHooksMain()
     CAETwinLoopSoundEntity::InjectHooks();
     CAEDoorAudioEntity::InjectHooks();
     CAEWeatherAudioEntity::InjectHooks();
+    CAEStreamThread::InjectHooks();
+    CAEFrontendAudioEntity::InjectHooks();
+    CAEWeaponAudioEntity::InjectHooks();
+    CAEScriptAudioEntity::InjectHooks();
+    CAERadioTrackManager::InjectHooks();
 
     FxManager_c::InjectHooks();
     FxSystemBP_c::InjectHooks();

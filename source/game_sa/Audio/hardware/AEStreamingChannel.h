@@ -33,7 +33,7 @@ public:
 
     void   Service() override;
     bool   IsSoundPlaying() override;
-    uint16 GetPlayTime() override;
+    int16  GetPlayTime() override;
     uint16 GetLength() override;
     void   Play(int16, int8, float) override;
     void   SynchPlayback() override;
@@ -55,6 +55,7 @@ public:
     void   SetBassEQ(IDirectSoundFXParamEq* paramEq, float gain);
     void   SetReady();
     void   PrepareStream(CAEStreamingDecoder* stream, int8 arg2, bool bStopCurrent);
+    void   Pause();
 
 private:
     friend void InjectHooksMain();
@@ -64,13 +65,12 @@ private:
     CAEStreamingChannel* Destructor();
 
     void  Service_Reversed();
-    bool IsSoundPlaying_Reversed();
+    bool  IsSoundPlaying_Reversed();
     int32 GetPlayTime_Reversed();
     int32 GetLength_Reversed();
-    void Play_Reversed(int16 a2,  char a3, float a4);
+    void  Play_Reversed(int16 a2,  char a3, float a4);
     void  Stop_Reversed();
-    void SetFrequencyScalingFactor_Reversed(float a2);
-    void  Pause();
+    void  SetFrequencyScalingFactor_Reversed(float a2);
 };
 
 VALIDATE_SIZE(CAEStreamingChannel, 0x60098);

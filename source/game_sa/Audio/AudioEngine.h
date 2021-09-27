@@ -36,7 +36,7 @@ public:
     CAudioEngine();
     ~CAudioEngine();
 
-    void IsLoadingTuneActive();
+    bool IsLoadingTuneActive();
     void ResetStatistics();
     void Restart();
     void SetMusicMasterVolume(int8);
@@ -95,7 +95,7 @@ public:
     void Shutdown();
     void Reset();
     void DoesAmbienceTrackOverrideRadio();
-    void IsAmbienceRadioActive();
+    bool IsAmbienceRadioActive();
     void PreloadMissionAudio(uint8, int32);
     void GetMissionAudioLoadingStatus(uint8);
     void PlayLoadedMissionAudio(uint8);

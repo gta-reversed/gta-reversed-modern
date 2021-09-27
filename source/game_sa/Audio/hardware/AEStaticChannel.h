@@ -28,7 +28,7 @@ public:
     // VIRTUAL
     void   Service() override { assert(false); /* Needs reversing */ };
     bool   IsSoundPlaying() override;
-    uint16 GetPlayTime() override;
+    int16  GetPlayTime() override;
     uint16 GetLength() override;
     void   Play(int16, int8, float) override { assert(false); /* Needs reversing */ };
     void   SynchPlayback() override;
@@ -43,7 +43,7 @@ private:
 
     void   Service_Reversed();
     bool   IsSoundPlaying_Reversed();
-    uint16 GetPlayTime_Reversed();
+    int16  GetPlayTime_Reversed();
     uint16 GetLength_Reversed();
     void   Play_Reversed(int16, int8, float);
     void   SynchPlayback_Reversed();

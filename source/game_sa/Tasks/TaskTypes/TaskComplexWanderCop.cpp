@@ -317,7 +317,7 @@ void CTaskComplexWanderCop::LookForCriminals(CCopPed* pPed)
             if (pedType >= PED_TYPE_GANG1 && pedType <= PED_TYPE_GANG10
                 || pedType == PED_TYPE_CRIMINAL && pCriminalPed != m_pLastCriminalPedLookedFor)
             {
-                CTask* pActiveTask = pCriminalPed->m_pIntelligence->m_TaskMgr.GetActiveTask();
+                CTask* pActiveTask = pCriminalPed->GetTaskManager().GetActiveTask();
                 if (pActiveTask && pActiveTask->GetTaskType() == GetTaskType())
                 {
                     CVector distance = (pCriminalPed->GetPosition() - pPed->GetPosition());
