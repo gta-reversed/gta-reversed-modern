@@ -161,6 +161,7 @@ void InjectHooksMain()
 {
     // WaitForDebugger();
 
+    CFireManager::InjectHooks();
     CTask::InjectHooks();
     CTaskSimple::InjectHooks();
     CGroupEventHandler::InjectHooks();

@@ -52,6 +52,15 @@ public:
         };
     }
 
+    CRGBA operator*(float mult) const {
+        return {
+            (uint8)((float)r * mult),
+            (uint8)((float)g * mult),
+            (uint8)((float)b * mult),
+            (uint8)((float)a * mult)
+        };
+    }
+
     CRGBA operator/(float divisor) {
         return *this * (1 / divisor);
     }
