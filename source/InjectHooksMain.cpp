@@ -23,6 +23,8 @@
 #include "AEFrontendAudioEntity.h"
 #include "AEScriptAudioEntity.h"
 #include "AERadioTrackManager.h"
+// #include "AEAmbienceTrackManager.h"
+#include "AECutsceneTrackManager.h"
 
 #include "CDebugMenu.h"
 
@@ -523,6 +525,8 @@ void InjectHooksMain()
     CAEWeaponAudioEntity::InjectHooks();
     CAEScriptAudioEntity::InjectHooks();
     CAERadioTrackManager::InjectHooks();
+    // CAEAmbienceTrackManager::InjectHooks();
+    CAECutsceneTrackManager::InjectHooks();
 
     FxManager_c::InjectHooks();
     FxSystemBP_c::InjectHooks();

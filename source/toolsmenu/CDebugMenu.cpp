@@ -16,6 +16,7 @@
 #include "toolsmenu\DebugModules\Vehicle\VehicleDebugModule.h"
 #include "toolsmenu\DebugModules\Ped\PedDebugModule.h"
 #include "toolsmenu\DebugModules\Script\MissionDebugModule.h"
+#include "toolsmenu\DebugModules\Audio\CutsceneTrackManagerDebugModule.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -328,6 +329,11 @@ void CDebugMenu::ProcessExtraDebugFeatures() {
     if (ImGui::BeginTabBar("Modules")) {
         if (ImGui::BeginTabItem("Occlussion")) {
             COcclusionDebugModule::ProcessImgui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Audio")) {
+            CutsceneTrackManagerDebugModule::ProcessImgui();
             ImGui::EndTabItem();
         }
 

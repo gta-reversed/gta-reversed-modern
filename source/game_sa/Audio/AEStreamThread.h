@@ -21,7 +21,7 @@ public:
     uint32                m_iTrackId;
     uint32                field_1C;
     uint32                m_iNextTrackId;
-    bool                  m_bIsUserTrackD;
+    int8                  field_24;
     char                  field_25;
     char                  field_26;
     char                  field_27;
