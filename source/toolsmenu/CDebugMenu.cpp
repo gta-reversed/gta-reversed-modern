@@ -17,6 +17,7 @@
 #include "toolsmenu\DebugModules\Ped\PedDebugModule.h"
 #include "toolsmenu\DebugModules\Script\MissionDebugModule.h"
 #include "toolsmenu\DebugModules\Audio\CutsceneTrackManagerDebugModule.h"
+#include "toolsmenu\DebugModules\Audio\AmbienceTrackManagerDebugModule.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -333,7 +334,12 @@ void CDebugMenu::ProcessExtraDebugFeatures() {
         }
 
         if (ImGui::BeginTabItem("Audio")) {
+            ImGui::Text("Cutscene Track Manager");
             CutsceneTrackManagerDebugModule::ProcessImgui();
+
+            ImGui::NewLine();
+            ImGui::Text("Ambience Track Manager");
+            AmbienceTrackManagerDebugModule::ProcessImgui();
             ImGui::EndTabItem();
         }
 
