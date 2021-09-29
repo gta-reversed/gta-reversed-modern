@@ -342,12 +342,12 @@ float CAEAudioHardware::GetEffectsFaderScalingFactor() const {
     return m_fEffectsFaderScalingFactor;
 }
 
-// 0x4D95B0, maybe wrong
+// 0x4D95A0
 void CAEAudioHardware::SetNonStreamFaderScalingFactor(float factor) {
     m_fNonStreamFaderScalingFactor = factor;
 }
 
-// 0x4D95A0, maybe wrong
+// 0x4D95B0
 void CAEAudioHardware::SetStreamFaderScalingFactor(float factor) {
     m_fStreamFaderScalingFactor = factor;
 }

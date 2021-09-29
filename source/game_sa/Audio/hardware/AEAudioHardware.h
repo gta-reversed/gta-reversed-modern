@@ -57,8 +57,8 @@ public:
     float                   m_fEffectMasterScalingFactor;
     float                   m_fMusicFaderScalingFactor;
     float                   m_fEffectsFaderScalingFactor;
-    float                   m_fStreamFaderScalingFactor;    // +0x0420
-    float                   m_fNonStreamFaderScalingFactor; // +0x0424
+    float                   m_fNonStreamFaderScalingFactor;
+    float                   m_fStreamFaderScalingFactor;
     float                   field_428;
     float                   field_42C;
     int16                   m_aBankSlotIds[MAX_NUM_SOUNDS];
