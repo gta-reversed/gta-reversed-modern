@@ -9,6 +9,7 @@ void CAECollisionAudioEntity::InjectHooks() {
     using namespace ReversibleHooks;
     // Install("CAECollisionAudioEntity", "Initialise", 0x5B9BD0, &CAECollisionAudioEntity::Initialise);
     Install("CAECollisionAudioEntity", "InitialisePostLoading", 0x4DA050, &CAECollisionAudioEntity::InitialisePostLoading);
+    // Install("CAECollisionAudioEntity", "AddCollisionSoundToList", 0x4DAAC0, &CAECollisionAudioEntity::AddCollisionSoundToList);
     // Install("CAECollisionAudioEntity", "Reset", 0x4DA320, &CAECollisionAudioEntity::Reset);
     // Install("CAECollisionAudioEntity", "ReportGlassCollisionEvent", 0x4DA070, &CAECollisionAudioEntity::ReportGlassCollisionEvent);
     // Install("CAECollisionAudioEntity", "ReportWaterSplash", 0x4DA190, &CAECollisionAudioEntity::ReportWaterSplash);
@@ -30,13 +31,18 @@ void CAECollisionAudioEntity::Initialise() {
 
 // 0x4DA050
 void CAECollisionAudioEntity::InitialisePostLoading() {
-    AEAudioHardware.LoadSoundBank(39, 2);
+    AEAudioHardware.LoadSoundBank(39, SLOT_LOADING_TUNE_LEFT);
     AEAudioHardware.LoadSoundBank(27, 3);
 }
 
 // 0x4DA320
 void CAECollisionAudioEntity::Reset() {
     plugin::CallMethod<0x4DA320, CAECollisionAudioEntity*>(this);
+}
+
+// 0x4DAAC0
+void CAECollisionAudioEntity::AddCollisionSoundToList(CEntity* entity1, CEntity* entity2, uint8 a3, uint8 a4, CAESound* sound, int32 a6) {
+    plugin::CallMethod<0x4DAAC0, CAECollisionAudioEntity*, CEntity*, CEntity*, uint8, uint8, CAESound*, int32>(this, entity1, entity2, a3, a4, sound, a6);
 }
 
 // 0x4DA830
@@ -160,4 +166,9 @@ void CAECollisionAudioEntity::ReportBulletHit(CEntity* entity, uint8 surface, CV
 
         PlayBulletHitCollisionSound(surface, posn, colPoint);
     }
+}
+
+// 0x4DA2C0
+void CAECollisionAudioEntity::Service() {
+    plugin::CallMethod<0x4DA2C0, CAECollisionAudioEntity*>(this);
 }

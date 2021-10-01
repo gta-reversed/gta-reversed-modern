@@ -36,10 +36,10 @@ public:
     uint8                   field_7F;
     int32                   m_nLastTimeHornPlayed;
     float                   m_fVolume;
-    float                   field_88;
+    float                   m_fSpeed;
     float                   field_8C;
     CAudioLink              wavLinks[MISSION_AUDIO_COUNT];
-    int32                   m_pEntity;
+    CPhysical*              m_Physical;
     CAEDoorAudioEntity      m_GarageAudio;
     CAEExplosionAudioEntity m_explosionAudio;
 
@@ -70,6 +70,7 @@ public:
     void ReportMissionAudioEvent(eAudioEvents eventId, CVector& posn);
 
     void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
+    void Service();
 
 private:
     friend void InjectHooksMain();

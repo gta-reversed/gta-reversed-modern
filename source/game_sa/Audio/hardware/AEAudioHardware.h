@@ -126,7 +126,7 @@ public:
     void GetVirtualChannelSoundLengths(int16* outArr);
     void GetVirtualChannelSoundLoopStartTimes(int16* outArr);
 
-    void PlayTrack(uint32, int32, uint32, char, bool, bool);
+    void PlayTrack(uint32 trackId, int32 nextTrackId, uint32 a3, char a4, bool isUserTrack, bool nextIsUserTrack);
     void StartTrackPlayback() const;
     void StopTrack();
 

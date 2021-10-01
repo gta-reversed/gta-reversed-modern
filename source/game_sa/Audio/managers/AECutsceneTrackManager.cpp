@@ -41,7 +41,7 @@ void CAECutsceneTrackManager::PlayPreloadedCutsceneTrack() {
 
 // 0x4DBE80
 void CAECutsceneTrackManager::StopCutsceneTrack() {
-    if (m_nStatus <= S3)
+    if (m_nStatus <= STATE_PLAYING)
         m_nStatus = S4;
 
     m_bPlayRequest = false;
@@ -61,8 +61,8 @@ uint8 CAECutsceneTrackManager::GetCutsceneTrackStatus() const {
         return S1;
     case S2:
         return S2;
-    case S3:
-        return S3;
+    case STATE_PLAYING:
+        return STATE_PLAYING;
     case S4:
     case S5:
     case S6:
@@ -98,11 +98,11 @@ void CAECutsceneTrackManager::Service(int32 trackPlayTime) {
     case S2:
         if (m_bPlayRequest) {
             StartTrackPlayback();
-            m_nStatus = S3;
+            m_nStatus = STATE_PLAYING;
             m_bPlayRequest = false;
         }
         break;
-    case S3:
+    case STATE_PLAYING:
         CheckForPause();
         if (m_nTrackPlayTime == -6) {
             m_nStatus = S8;
@@ -144,8 +144,7 @@ void CAECutsceneTrackManager::PreloadCutsceneTrack(int16 trackId, bool wait) {
     m_nStatus = S0;
     if (wait) {
         do {
-            auto trackPlayTime = AEAudioHardware.GetTrackPlayTime();
-            Service(trackPlayTime);
+            Service(AEAudioHardware.GetTrackPlayTime());
             AEAudioHardware.Service();
         } while (m_nStatus != S2);
     }

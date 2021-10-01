@@ -437,7 +437,7 @@ void CAERadioTrackManager::PlayRadioAnnouncement(uint32) {
 
 // 0x4EB550
 void CAERadioTrackManager::StartRadio(tVehicleAudioSettings* settings) {
-    plugin::CallMethod<0x4EB550, tVehicleAudioSettings*>(settings);
+    plugin::CallMethod<0x4EB550, CAERadioTrackManager*, tVehicleAudioSettings*>(this, settings);
 }
 
 // 0x4EB3C0
@@ -563,7 +563,7 @@ int8 CAERadioTrackManager::ChooseTalkRadioShow() {
 
 // 0x4E96C0
 void CAERadioTrackManager::AddMusicTrackIndexToHistory(RadioStationId id, int8 trackIndex) {
-    plugin::CallMethod<0x4E96C0, int8, int8>(id, trackIndex);
+    plugin::CallMethod<0x4E96C0, CAERadioTrackManager*, int8, int8>(this, id, trackIndex);
 }
 
 // 0x4E9720
@@ -606,7 +606,7 @@ void CAERadioTrackManager::CheckForPause() {
 
 // 0x4EB9A0
 void CAERadioTrackManager::Service(int32 playTime) {
-    plugin::CallMethod<0x4EB9A0, int32>(playTime);
+    plugin::CallMethod<0x4EB9A0, CAERadioTrackManager*, int32>(this, playTime);
 }
 
 // 0x5D40E0

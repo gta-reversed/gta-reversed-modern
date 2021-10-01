@@ -14,6 +14,7 @@ public:
     char _pad7D[3];
 
 public:
+    static void StaticInitialise();
 };
 
 VALIDATE_SIZE(CAEExplosionAudioEntity, 0x80);

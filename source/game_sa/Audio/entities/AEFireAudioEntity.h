@@ -15,6 +15,9 @@ public:
     CAESound*   field_7C;
     CAESound*   field_80;
     FxSystem_c* field_84;
+
+public:
+    static void StaticInitialise();
 };
 
 VALIDATE_SIZE(CAEFireAudioEntity, 0x88);

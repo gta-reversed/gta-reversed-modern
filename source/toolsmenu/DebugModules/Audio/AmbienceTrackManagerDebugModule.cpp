@@ -17,7 +17,7 @@ void ProcessImgui() {
     ImGui::Text("Track Play Time %d",                AEAmbienceTrackManager.m_nTrackPlayTime);
     ImGui::Text("Time In Ms %d",                     AEAmbienceTrackManager.m_nTimeInMs);
     ImGui::InputFloat("Volume %f",                  &AEAmbienceTrackManager.m_nVolume);
-    ImGui::InputFloat("Frequency %f",               &AEAmbienceTrackManager.m_fFreqFactor);
+    ImGui::SliderFloat("Frequency %f",              &AEAmbienceTrackManager.m_fFreqFactor, 0.0f, 1.0f);
     ImGui::InputInt("Track Id %d",                  &AEAmbienceTrackManager.m_nTrackId);
     ImGui::Text("dword24 %d",                        AEAmbienceTrackManager.dword24);
     ImGui::Text("byte28 %d",                         AEAmbienceTrackManager.byte28);

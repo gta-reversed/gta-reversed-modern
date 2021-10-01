@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "AEScriptAudioEntity.h"
+#include "AESoundManager.h"
 
 // 0x5074D0
 CAEScriptAudioEntity::CAEScriptAudioEntity() {
@@ -36,7 +37,7 @@ void CAEScriptAudioEntity::ClearMissionAudio(uint8 sampleId) {
 
 // 0x4EBFE0
 bool CAEScriptAudioEntity::IsMissionAudioSampleFinished(uint8 sampleId) {
-    return plugin::CallMethodAndReturn<bool, 0x4EBFE0, uint8>(sampleId);
+    return plugin::CallMethodAndReturn<bool, 0x4EBFE0, CAEScriptAudioEntity*, uint8>(this, sampleId);
 }
 
 // 0x4EBF60
@@ -98,6 +99,15 @@ void CAEScriptAudioEntity::ReportMissionAudioEvent(eAudioEvents eventId, CVector
 // 0x4EC970
 void CAEScriptAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
     plugin::CallMethod<0x4EC970, CAEScriptAudioEntity*, CAESound*, int16>(this, sound, curPlayPos);
+}
+
+// 0x4EC900
+void CAEScriptAudioEntity::Service() {
+    CVector posn = {-1000.0f, -1000.0f, -1000.0f};
+    if (m_Physical) {
+        if (!AESoundManager.AreSoundsOfThisEventPlayingForThisEntity(AE_CAS4_FH, this))
+            PlayResidentSoundEvent(40, 44, 0, 1019, posn, m_Physical, 0.0f, 1.0f, 0, 2.5f);
+    }
 }
 
 void CAEScriptAudioEntity::InjectHooks() {

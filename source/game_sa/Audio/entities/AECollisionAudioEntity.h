@@ -38,6 +38,8 @@ public:
     static void InitialisePostLoading();
     void Reset();
 
+    void AddCollisionSoundToList(CEntity* entity1, CEntity* entity2, uint8 a3, uint8 a4, CAESound* sound, int32 a6);
+
     int8 GetCollisionSoundStatus(CEntity* a1, CEntity* a2, uint8 a3, uint8 a4, int32* a5);
 
     void PlayLoopingCollisionSound(CEntity* entity1, CEntity* entity2, uint8 a3, uint8 a4, float a5, CVector& posn, uint8 a7);
@@ -52,6 +54,8 @@ public:
     void ReportObjectDestruction(CEntity* entity);
     void ReportCollision(CEntity* entity1, CEntity* entity2, uint8 surfaceA, uint8 surfaceB, CVector& colPoint, CVector* normal, float collisionImpact1, float collisionImpact2, bool bOnlyPlayOneShotCollisionSound, bool unknown);
     void ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn, float colPoint);
+
+    void Service();
 };
 
 VALIDATE_SIZE(CAECollisionAudioEntity, 0x1978);
