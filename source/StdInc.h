@@ -100,7 +100,7 @@
 #include "game_sa\InlineFunctions.h"
 #include "HookSystem.h"
 #include "reversiblehooks\ReversibleHooks.h"
-#include "game_sa\dStreamInfo.h"
+#include "game_sa\CdStreamInfo.h"
 #include "game_sa\Plugins\TwoDEffectPlugin\2dEffect.h"
 #include "game_sa\3dMarker.h"
 #include "game_sa\3dMarkers.h"
