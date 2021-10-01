@@ -135,7 +135,7 @@ public:
     CVector             m_vecLastCollisionPosn;
     uint16              m_nPieceType;
     int16               field_FA;
-    class CPhysical*    m_pAttachedTo;
+    CPhysical*          m_pAttachedTo;
     CVector             m_vecAttachOffset;
     CVector             m_vecAttachedEntityRotation;
     CQuaternion         m_qAttachedEntityRotation;
@@ -160,7 +160,7 @@ public:
     // originally virtual functions
     void Add() override;
     void Remove() override;
-    CRect* GetBoundRect(CRect* pRect) override;
+    CRect* GetBoundRect(CRect* rect) override;
     void ProcessControl() override;
     void ProcessCollision() override;
     void ProcessShift() override;
@@ -222,7 +222,7 @@ public:
     bool ApplySoftCollision(CPhysical* physical, CColPoint& colPoint, float& thisDamageIntensity, float& entityDamageIntensity);
 
     bool ProcessCollisionSectorList(int32 sectorX, int32 sectorY);
-    bool ProcessCollisionSectorList_SimpleCar(CRepeatSector* pRepeatSector);
+    bool ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector);
     void AttachEntityToEntity(CPhysical* entity, CVector offset, CVector rotation);
     void AttachEntityToEntity(CPhysical* pEntityAttachTo, CVector* vecAttachOffset, CQuaternion* attachRotation);
     bool CheckCollision();
@@ -239,7 +239,7 @@ public:
 
 // HELPERS
 public:
-    inline bool IsImmovable()const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
+    bool IsImmovable()const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
 
 private:
     friend void InjectHooksMain();
@@ -247,7 +247,7 @@ private:
 
     void Add_Reversed();
     void Remove_Reversed();
-    CRect* GetBoundRect_Reversed(CRect* pRect);
+    CRect* GetBoundRect_Reversed(CRect* rect);
     void ProcessControl_Reversed();
     void ProcessCollision_Reversed();
     void ProcessShift_Reversed();
