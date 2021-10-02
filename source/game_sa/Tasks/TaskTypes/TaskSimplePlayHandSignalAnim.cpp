@@ -2,6 +2,8 @@
 
 #include "TaskSimplePlayHandSignalAnim.h"
 
+#include "IKChainManager_c.h"
+
 void CTaskSimplePlayHandSignalAnim::InjectHooks()
 {
 // VIRTUAL
@@ -72,7 +74,7 @@ bool CTaskSimplePlayHandSignalAnim::ProcessPed(CPed* ped)
 }
 bool CTaskSimplePlayHandSignalAnim::ProcessPed_Reversed(CPed* ped)
 {
-    if (g_ikChainMan->IsArmPointing(1, ped) || m_bIsFinished)
+    if (g_ikChainMan.IsArmPointing(1, ped) || m_bIsFinished)
         return true;
 
     if (!m_pAnim)
@@ -92,7 +94,7 @@ void CTaskSimplePlayHandSignalAnim::StartAnim(CPed* pPed)
 
     // Pointing / weapon logic
     if (pPed->GetEntityThatThisPedIsHolding()
-        || g_ikChainMan->IsArmPointing(0, pPed)
+        || g_ikChainMan.IsArmPointing(0, pPed)
         || pPed->GetActiveWeapon().m_nType != eWeaponType::WEAPON_UNARMED)
     {
         m_pAnim = CAnimManager::BlendAnimation(pPed->m_pRwClump, AssocGroupId::ANIM_GROUP_HANDSIGNALL, animId, m_fBlendFactor);

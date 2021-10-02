@@ -8,6 +8,7 @@
 
 #include "PedIntelligence.h"
 
+#include "IKChainManager_c.h"
 #include "PedType.h"
 #include "TaskSimpleCarDriveTimed.h"
 #include "TaskSimpleStandStill.h"
@@ -845,7 +846,7 @@ void CPedIntelligence::LookAtInterestingEntities() {
     if (!bInterestingEntityExists)
         return;
 
-    if (g_ikChainMan->IsLooking(m_pPed) || !m_pPed->GetIsOnScreen() || CGeneral::GetRandomNumberInRange(0, 100) != 50)
+    if (g_ikChainMan.IsLooking(m_pPed) || !m_pPed->GetIsOnScreen() || CGeneral::GetRandomNumberInRange(0, 100) != 50)
         return;
 
     CEntity* outEntities[1024];
@@ -866,14 +867,15 @@ void CPedIntelligence::LookAtInterestingEntities() {
     if (!interestingEntityCount)
         return;
 
-    uint32 randomInterestingEntityIndex = CGeneral::GetRandomNumberInRange(0, interestingEntityCount);
-    uint32 randomTime = CGeneral::GetRandomNumberInRange(3000, 5000);
+    const int32 randomInterestingEntityIndex = CGeneral::GetRandomNumberInRange(0, interestingEntityCount);
+    const int32 randomTime = CGeneral::GetRandomNumberInRange(3000, 5000);
     CPed* interestingEntity1 = (CPed*)outEntities[randomInterestingEntityIndex];
 
-    RwV3d position = { 0.0f, 0.0f, 0.0f };
-    g_ikChainMan->LookAt(
+    CVector position = { 0.0f, 0.0f, 0.0f };
+    g_ikChainMan.LookAt(
         "InterestingEntities",
-        m_pPed, interestingEntity1,
+        m_pPed,
+        interestingEntity1,
         randomTime,
         BONE_UNKNOWN,
         &position,

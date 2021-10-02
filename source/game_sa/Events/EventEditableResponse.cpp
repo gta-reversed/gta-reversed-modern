@@ -3,6 +3,7 @@
 #include "EventEditableResponse.h"
 
 #include "PedType.h"
+#include "IKChainManager_c.h"
 
 void CEventEditableResponse::InjectHooks() {
     ReversibleHooks::Install("CEventEditableResponse", "Constructor", 0x4AC450, &CEventEditableResponse::Constructor);
@@ -191,10 +192,10 @@ void CEventEditableResponse::TriggerLookAt(CPed* ped) {
     if (pSourceEntity) {
         if (pSourceEntity->m_nType == ENTITY_TYPE_PED) {
             CPed* pTargetPed = static_cast<CPed*>(pSourceEntity);
-            g_ikChainMan->LookAt("CEventEditableResponse", ped, pTargetPed, 2000, BONE_HEAD, nullptr, true, 0.25f, 500, 3, false);
+            g_ikChainMan.LookAt("CEventEditableResponse", ped, pTargetPed, 2000, BONE_HEAD, nullptr, true, 0.25f, 500, 3, false);
             return;
         }
-        g_ikChainMan->LookAt("CEventEditableResponse", ped, pSourceEntity, 2000, BONE_UNKNOWN, nullptr, true, 0.25f, 500, 3, false);
+        g_ikChainMan.LookAt("CEventEditableResponse", ped, pSourceEntity, 2000, BONE_UNKNOWN, nullptr, true, 0.25f, 500, 3, false);
     }
 #endif
 }

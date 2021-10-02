@@ -83,7 +83,6 @@
 #include "game_sa\Events\EventHandler.h"
 #include "game_sa\Events\EventScanner.h"
 #include "game_sa\Events\Event.h"
-#include "game_sa\IKChainManager_c.h"
 #include "game_sa\Crime.h"
 #include "game_sa\SurfaceInfo_c.h"
 #include "game_sa\SurfaceInfos_c.h"

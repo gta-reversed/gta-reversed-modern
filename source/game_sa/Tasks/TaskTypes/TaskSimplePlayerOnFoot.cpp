@@ -8,6 +8,7 @@
 #include "TaskComplexJump.h"
 #include "TaskComplexUseGoggles.h"
 #include "TaskSimpleStealthKill.h"
+#include "IKChainManager_c.h"
 
 int32& gLastRandomNumberForIdleAnimationID = *reinterpret_cast<int32*>(0x8D2FEC);
 uint32& gLastTouchTimeDelta = *reinterpret_cast<uint32*>(0xC19664);
@@ -702,8 +703,8 @@ MAKE_PLAYER_LOOK_AT_ENTITY:
     playerData->m_bHaveTargetSelected = player->m_pTargetedObject ? true : false;
     CPed* targetedObject = player->m_pTargetedObject->AsPed();
     const auto AbortLookingIfPossible = [&]() {
-        if (m_pLookingAtEntity && g_ikChainMan->IsLooking(player) && g_ikChainMan->GetLookAtEntity(player) == m_pLookingAtEntity) {
-            g_ikChainMan->AbortLookAt(player, 250);
+        if (m_pLookingAtEntity && g_ikChainMan.IsLooking(player) && g_ikChainMan.GetLookAtEntity(player) == m_pLookingAtEntity) {
+            g_ikChainMan.AbortLookAt(player, 250);
         }
         m_pLookingAtEntity = targetedObject;
     };
@@ -727,12 +728,12 @@ MAKE_PLAYER_LOOK_AT_ENTITY:
     CVector distance = targetedObject->GetPosition() - player->GetPosition();
     if (DotProduct(distance, player->GetForwardVector()) <= 0.0f) {
         return AbortLookingIfPossible();
-    } else if (!g_ikChainMan->IsLooking(player) || (g_ikChainMan->GetLookAtEntity(player) != (CEntity*)targetedObject)) {
+    } else if (!g_ikChainMan.IsLooking(player) || (g_ikChainMan.GetLookAtEntity(player) != (CEntity*)targetedObject)) {
         auto pedBoneId = BONE_UNKNOWN;
         if (targetedObject->m_nType == ENTITY_TYPE_PED) {
             pedBoneId = BONE_HEAD;
         }
-        g_ikChainMan->LookAt("ProcPlyrWeapon", player, targetedObject, gDefaultTaskTime, pedBoneId, nullptr, false, 0.25f, 500, 3, false);
+        g_ikChainMan.LookAt("ProcPlyrWeapon", player, targetedObject, gDefaultTaskTime, pedBoneId, nullptr, false, 0.25f, 500, 3, false);
     }
 
     m_pLookingAtEntity = targetedObject;
