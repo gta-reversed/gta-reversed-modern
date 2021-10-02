@@ -297,8 +297,6 @@
 #include "game_sa\GameLogic.h"
 #include "game_sa\Maths.h"
 #include "game_sa\TagManager.h"
-#include "game_sa\BreakObject_c.h"
-#include "game_sa\BreakManager_c.h"
 #include "game_sa\Remote.h"
 #include "game_sa\Animation\AnimAssociationData.h"
 #include "game_sa\Animation\AnimBlendFrameData.h"

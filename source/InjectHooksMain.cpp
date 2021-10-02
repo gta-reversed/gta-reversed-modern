@@ -52,6 +52,7 @@
 #include "GroupEventHandler.h"
 #include "SimpleVariablesSaveStructure.h"
 #include "IKChainManager_c.h"
+#include "BreakManager_c.h"
 
 #include "TaskSimpleAbseil.h"
 #include "TaskComplexWanderCop.h"
@@ -170,6 +171,7 @@ void InjectHooksMain()
     InjectCommonHooks();
     CPad::InjectHooks();
 
+    BreakManager_c::InjectHooks();
     IKChainManager_c::InjectHooks();
     CFireManager::InjectHooks();
     CGroupEventHandler::InjectHooks();
