@@ -213,6 +213,7 @@ void CDebugMenu::PostFxTool() {
     ImGui::Checkbox("SpeedFX Test Mode",      &CPostEffects::m_bSpeedFXTestMode);
     ImGui::Checkbox("Fog",                    &CPostEffects::m_bFog);
     ImGui::Checkbox("Water Depth Darkness",   &CPostEffects::m_bWaterDepthDarkness);
+    ImGui::Checkbox("Color Correction",       &CPostEffects::m_bColorEnable);
 }
 
 void CDebugMenu::ProcessRenderTool() {

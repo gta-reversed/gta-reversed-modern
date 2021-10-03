@@ -186,7 +186,7 @@ public:
     static void Grain(int32 strength, bool a2);
     static void SpeedFX(float speed);
     static void DarknessFilter(int32 a1);
-    static void ColourFilter(int32 pass1, int32 pass2);
+    static void ColourFilter(RwRGBA pass1, RwRGBA pass2);
     static void Radiosity(int32 a1, int32 a2, int32 a3, int32 a4);
 
     static void Render();

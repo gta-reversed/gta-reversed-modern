@@ -169,7 +169,7 @@ void CPostEffects::InjectHooks() {
     // Install("CPostEffects", "Grain", 0x7037C0, &CPostEffects::Grain);
     // Install("CPostEffects", "SpeedFX", 0x7030A0, &CPostEffects::SpeedFX);
     // Install("CPostEffects", "DarknessFilter", 0x702F00, &CPostEffects::DarknessFilter);
-    // Install("CPostEffects", "ColourFilter", 0x703650, &CPostEffects::ColourFilter);
+    Install("CPostEffects", "ColourFilter", 0x703650, &CPostEffects::ColourFilter);
     // Install("CPostEffects", "Radiosity", 0x702080, &CPostEffects::Radiosity);
     // Install("CPostEffects", "Render", 0x7046E0, &CPostEffects::Render);
 }
@@ -198,26 +198,57 @@ void CPostEffects::DoScreenModeDependentInitializations() {
 void CPostEffects::SetupBackBufferVertex() {
     return plugin::Call<0x7043D0>();
 
-    // untested
     RwRaster* raster = RwCameraGetRaster(Scene.m_pRwCamera);
     // https://www.felixcloutier.com/x86/fyl2x
     // FYL2X — Compute y ∗ log2x
     // log(2.0) = 0.69314718055994528623
 
     // get maximum 2^N dimensions
-    int32 width = (int32)log2((float)RwRasterGetWidth(raster));
-    width = (int32)pow(2.0f, width);
+    float width  = (int32)pow(2.0f, (int32)log2((float)RwRasterGetWidth(raster)));
+    float height = (int32)pow(2.0f, (int32)log2((float)RwRasterGetHeight(raster)));
 
-    int32 height = (int32)log2((float)RwRasterGetHeight(raster));
-    height = (int32)pow(2.0f, height);
+    const auto InitVertices = [=]() {
+        cc_vertices[0].x = 0.0f;
+        cc_vertices[0].y = 0.0f;
+        cc_vertices[0].z = RwIm2DGetNearScreenZ();
+        cc_vertices[0].rhw = 1.0f / RwCameraGetNearClipPlane(Scene.m_pRwCamera);
+        cc_vertices[0].u = 0.5f / width;
+        cc_vertices[0].v = 0.5f / height;
+
+        cc_vertices[1].x = 0.0f;
+        cc_vertices[1].y = height;
+        cc_vertices[1].z = RwIm2DGetNearScreenZ();
+        cc_vertices[1].rhw = 1.0f / RwCameraGetNearClipPlane(Scene.m_pRwCamera);
+        cc_vertices[1].u = 0.5f / width;
+        cc_vertices[1].v = (height + 0.5f) / height;
+
+        cc_vertices[2].x = width;
+        cc_vertices[2].y = height;
+        cc_vertices[2].z = RwIm2DGetNearScreenZ();
+        cc_vertices[3].y = 0.0f;
+        cc_vertices[2].rhw = 1.0f / RwCameraGetNearClipPlane(Scene.m_pRwCamera);
+        cc_vertices[2].u = (width + 0.5f) / width;
+        cc_vertices[2].v = (height + 0.5f) / height;
+
+        cc_vertices[3].x = width;
+        cc_vertices[3].z = RwIm2DGetNearScreenZ();
+        cc_vertices[3].u = (width + 0.5f) / width;
+        cc_vertices[3].v = 0.5f / height;
+        cc_vertices[3].rhw = 1.0f / RwCameraGetNearClipPlane(Scene.m_pRwCamera);
+
+        if (pRasterFrontBuffer) {
+            DoScreenModeDependentInitializations();
+        }
+    };
 
     if (pRasterFrontBuffer) {
         if (width != RwRasterGetWidth(pRasterFrontBuffer) || height != RwRasterGetHeight(pRasterFrontBuffer)) {
-            // cc_vertices = nullptr; // see LABEL_7
-
-            RwRasterDestroy(pRasterFrontBuffer);
-            pRasterFrontBuffer = nullptr;
+            InitVertices();
+            return;
         }
+
+        RwRasterDestroy(pRasterFrontBuffer);
+        pRasterFrontBuffer = nullptr;
     }
 
     pRasterFrontBuffer = RasterCreatePostEffects({0, 0, 64, 64});
@@ -227,42 +258,7 @@ void CPostEffects::SetupBackBufferVertex() {
         pRasterFrontBuffer = nullptr;
     }
 
-    /* unused
-    LABEL_7:
-    dword_C400DC = 0;
-    dword_C400E0 = RwIm2DGetNearScreenZ();
-
-    v10 = 1.0 / RwCameraGetNearClipPlane(Scene.m_pRwCamera);
-
-    dword_C400F4 = 0;
-    flt_C400E4 = v10;
-    flt_C400EC = 0.5 / width;
-    flt_C400F0 = 0.5f / height;
-    flt_C400F8 = height;
-    dword_C400FC = RwIm2DGetNearScreenZ();
-
-    flt_C40100 = 1.0 / Scene.m_pRwCamera->nearPlane;
-    flt_C40108 = 0.5 / width;
-    flt_C4010C = (height + 0.5) / height;
-    flt_C40110 = width;
-    flt_C40114 = height;
-    dword_C40118 = RwIm2DGetNearScreenZ();
-
-    dword_C40130 = 0;
-    flt_C4011C = v10;
-    flt_C40124 = (width + 0.5f) / width;
-    flt_C40128 = (height + 0.5) / height;
-    flt_C4012C = width;
-    dword_C40134 = RwIm2DGetNearScreenZ();
-
-    dword_C40140 = (width + 0.5f) / width;
-    dword_C40144 = 0.5f / height;
-    flt_C40138 = v10;
-    */
-
-    if (pRasterFrontBuffer) {
-        DoScreenModeDependentInitializations();
-    }
+    InitVertices();
 }
 
 // 0x7046A0
@@ -737,11 +733,7 @@ void CPostEffects::DarknessFilter(int32 a1) {
 }
 
 // 0x703650
-void CPostEffects::ColourFilter(int32 pass1, int32 pass2) {
-    plugin::Call<0x703650>();
-    return;
-
-    // result not equal to original function
+void CPostEffects::ColourFilter(RwRGBA pass1, RwRGBA pass2) {
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     (void*)rwFILTERNEAREST);
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)FALSE);
@@ -751,16 +743,16 @@ void CPostEffects::ColourFilter(int32 pass1, int32 pass2) {
     RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDONE);
 
-    dword_C400E8 = pass1 | ((pass1 | ((pass1 | (pass1 << 8)) << 8)) << 8);
-    dword_C40104 = dword_C400E8;
-    dword_C40120 = dword_C400E8;
-    dword_C4013C = dword_C400E8;
+    RwIm2DVertexSetRealRGBA(&cc_vertices[0], pass1.red, pass1.green, pass1.blue, pass1.alpha);
+    RwIm2DVertexSetRealRGBA(&cc_vertices[1], pass1.red, pass1.green, pass1.blue, pass1.alpha);
+    RwIm2DVertexSetRealRGBA(&cc_vertices[2], pass1.red, pass1.green, pass1.blue, pass1.alpha);
+    RwIm2DVertexSetRealRGBA(&cc_vertices[3], pass1.red, pass1.green, pass1.blue, pass1.alpha);
     RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, cc_vertices, 4, cc_indices, 6);
 
-    dword_C400E8 = pass2 | ((pass2 | ((pass2 | (pass2 << 8)) << 8)) << 8);
-    dword_C40104 = dword_C400E8;
-    dword_C40120 = dword_C400E8;
-    dword_C4013C = dword_C400E8;
+    RwIm2DVertexSetRealRGBA(&cc_vertices[0], pass2.red, pass2.green, pass2.blue, pass2.alpha);
+    RwIm2DVertexSetRealRGBA(&cc_vertices[1], pass2.red, pass2.green, pass2.blue, pass2.alpha);
+    RwIm2DVertexSetRealRGBA(&cc_vertices[2], pass2.red, pass2.green, pass2.blue, pass2.alpha);
+    RwIm2DVertexSetRealRGBA(&cc_vertices[3], pass2.red, pass2.green, pass2.blue, pass2.alpha);
     RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, cc_vertices, 4, cc_indices, 6);
 
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
