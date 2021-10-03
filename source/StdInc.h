@@ -31,7 +31,6 @@
 #include "game_sa\CullZones.h"
 #include "game_sa\Glass.h"
 #include "game_sa\GridRef.h"
-#include "game_sa\Buoyancy.h"
 #include "game_sa\VehicleScanner.h"
 #include "game_sa\PlayerRelationshipRecorder.h"
 #include "game_sa\LoadMonitor.h"

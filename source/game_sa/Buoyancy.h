@@ -6,6 +6,7 @@ class CEntity;
 class CPhysical;
 class CVehicle;
 
+// todo: Rename to tWaterLevel
 enum class eBuoyancyPointState : int32 {
     COMPLETELY_ABOVE_WATER = 0x0,
     COLLIDING_WITH_WATER   = 0x1,
@@ -33,8 +34,8 @@ public:
     float   m_fWaterLevel;       // Z coordinate of water at entity position
     float   m_fUnkn2;            // 104
     float   m_fBuoyancy;         // 108
-    CVector m_vecBoundingMax;    // Max bounding of the entity, doesn't neccesarily match its collision as it's modified a bit
-    CVector m_vecBoundingMin;    // Min bounding of the entity, doesn't neccesarily match its collision as it's modified a bit
+    CVector m_vecBoundingMax;    // Max bounding of the entity, doesn't necessarily match its collision as it's modified a bit
+    CVector m_vecBoundingMin;    // Min bounding of the entity, doesn't necessarily match its collision as it's modified a bit
     float   m_fNumCheckedPoints; // How many points have been checked to calculate the buoyancy force, 9 points are checked at most for entity, used to keep track of incremental
                                  // average calculation
     uint32  field_8C;
@@ -64,7 +65,12 @@ public:
     static float(*afBoatVolumeDistribution)[3];          // 3x3 array of buoyancy modifiers for other boats
     static float(*afBoatVolumeDistributionCat)[3];       // Catamaran volume distribution, unused in game, as there is no matching vehicle
 
+public:
     static void InjectHooks();
+
+    cBuoyancy() = default; // 0x6C2740
+    ~cBuoyancy() = default; // 0x6C2B80
+
     bool ProcessBuoyancy(CPhysical* pEntity, float fBuoyancy, CVector* pVecTurnSpeed, CVector* pBuoyancy);
     bool ProcessBuoyancyBoat(CVehicle* pVehicle, float fBuoyancy, CVector* vecBuoyancyTurnPoint, CVector* vecBuoyancyForce, bool bUnderwater);
     bool CalcBuoyancyForce(CPhysical* pEntity, CVector* pVecTurnSpeed, CVector* pBuoyancy);

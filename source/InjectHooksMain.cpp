@@ -53,7 +53,9 @@
 #include "SimpleVariablesSaveStructure.h"
 #include "IKChainManager_c.h"
 #include "BreakManager_c.h"
+#include "Buoyancy.h"
 
+// Tasks
 #include "TaskSimpleAbseil.h"
 #include "TaskComplexWanderCop.h"
 #include "TaskComplexUseMobilePhone.h"
@@ -595,6 +597,7 @@ void InjectHooksMain()
     const auto Fx = []() {
         FxManager_c::InjectHooks();
         FxSystemBP_c::InjectHooks();
+        // FxSystem_c::InjectHooks();
     };
 
     Audio();

@@ -9,6 +9,7 @@
 #include "Object.h"
 #include "Radar.h"
 #include "BreakManager_c.h"
+#include "Buoyancy.h"
 
 uint16& CObject::nNoTempObjects = *(uint16*)(0xBB4A70);
 float& CObject::fDistToNearestTree = *(float*)0x8D0A20;

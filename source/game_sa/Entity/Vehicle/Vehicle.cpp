@@ -6,6 +6,10 @@
 */
 #include "StdInc.h"
 
+#include "Vehicle.h"
+
+#include "Buoyancy.h"
+
 float& CVehicle::WHEELSPIN_TARGET_RATE = *(float*)0x8D3498;
 float& CVehicle::WHEELSPIN_INAIR_TARGET_RATE = *(float*)0x8D349C;
 float& CVehicle::WHEELSPIN_RISE_RATE = *(float*)0x8D34A0;
