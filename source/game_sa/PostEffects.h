@@ -143,8 +143,8 @@ public:
 
     static void DrawQuad(float x1, float y1, float x2, float y2, char red, uint32 green, uint32 blue, uint8 alpha, RwRaster* raster);
     static void DrawQuadSetDefaultUVs();
-    static void DrawQuadSetPixelUVs(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8);
-    static void DrawQuadSetUVs(float a1, float a2, float a3, float a4, float a5, float a6, float a7, float a8);
+    static void DrawQuadSetPixelUVs(float u0, float v0, float u1, float v1, float u3, float v3, float u2, float v2);
+    static void DrawQuadSetUVs(float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4);
 
     static void FilterFX_RestoreDayNightBalance();
     static void FilterFX_StoreAndSetDayNightBalance();
@@ -154,7 +154,7 @@ public:
     static void ImmediateModeRenderStatesStore();
     static void ImmediateModeRenderStatesReStore();
 
-    static void RasterCreatePostEffects(RwRect rect);
+    static RwRaster* RasterCreatePostEffects(RwRect rect);
 
     static void ScriptCCTVSwitch(bool enable);
     static void ScriptDarknessFilterSwitch(bool enable, int32 alpha);
@@ -174,7 +174,7 @@ public:
     static void NightVision();
     static void NightVisionSetLights();
 
-    static void SetFilterMainColour(RwRGBA a1, RwRGBA a2);
+    static void SetFilterMainColour(RwRaster* raster, RwRGBA color);
     static void InfraredVision(RwRGBA color, RwRGBA colorMain);
     static void InfraredVisionSetLightsForDefaultObjects();
     static void InfraredVisionSetLightsForHeatObjects();
