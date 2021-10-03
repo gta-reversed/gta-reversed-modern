@@ -430,21 +430,16 @@ void CPedIntelligence::ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryT
         {
             if (!m_eventGroup.HasScriptCommandOfTaskType(TASK_SIMPLE_CAR_DRIVE))
             {
-                CTask* pDriveTask = nullptr;
+                CTask* driveTask = nullptr;
                 if (m_TaskMgr.m_aPrimaryTasks[TASK_PRIMARY_DEFAULT]->GetTaskType() == TASK_SIMPLE_CAR_DRIVE)
                 {
-                    pDriveTask = static_cast<CTask*>(new CTaskSimpleCarDriveTimed(m_pPed->m_pVehicle, 0));
+                    driveTask = static_cast<CTask*>(new CTaskSimpleCarDriveTimed(m_pPed->m_pVehicle, 0));
                 }
                 else
                 {
-                    auto pTaskSimpleCarDrive = (CTaskSimpleCarDrive*)CTask::operator new(96);
-                    if (pTaskSimpleCarDrive)
-                    {
-                        pTaskSimpleCarDrive->Constructor(m_pPed->m_pVehicle, nullptr, false);
-                    }
-                    pDriveTask = static_cast<CTask*>(pTaskSimpleCarDrive);
+                    driveTask = new CTaskSimpleCarDrive(m_pPed->m_pVehicle, nullptr, false);
                 }
-                CEventScriptCommand eventScriptCommand(TASK_PRIMARY_PRIMARY, pDriveTask, false);
+                CEventScriptCommand eventScriptCommand(TASK_PRIMARY_PRIMARY, driveTask, false);
                 m_eventGroup.Add(&eventScriptCommand, false);
             }
         }

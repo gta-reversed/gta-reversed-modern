@@ -752,7 +752,7 @@ void CFont::PrintString(float x, float y, const char* text)
             rt.top += 1.0f;
             rt.bottom -= 1.0f;
 
-            FrontEndMenuManager.DrawWindow(rt, '\0', 0, m_FontBackgroundColor, false, true);
+            FrontEndMenuManager.DrawWindow(rt, nullptr, 0, m_FontBackgroundColor, false, true);
         } else {
             CSprite2d::DrawRect(rt, m_FontBackgroundColor);
         }

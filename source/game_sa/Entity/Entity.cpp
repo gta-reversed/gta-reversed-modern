@@ -506,6 +506,7 @@ uint8 CEntity::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionB
     return 1;
 }
 
+// 0x535FA0
 void CEntity::PreRender()
 {
     CEntity::PreRender_Reversed();
@@ -533,7 +534,7 @@ void CEntity::PreRender_Reversed()
             CCustomBuildingDNPipeline::PreRenderUpdate(pAtomicInfo->m_pRwAtomic, false);
         }
         else if (pModelInfo->GetModelType() == MODEL_INFO_CLUMP) {
-            RpClumpForAllAtomics(pModelInfo->m_pRwClump, CCustomBuildingDNPipeline::PreRenderUpdateRpAtomicCB, false);
+            RpClumpForAllAtomics(pModelInfo->m_pRwClump, CCustomBuildingDNPipeline::PreRenderUpdateRpAtomicCB, reinterpret_cast<void*>(false));
         }
     }
 

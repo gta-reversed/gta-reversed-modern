@@ -160,12 +160,14 @@ group ""
             "%{cfg.targetdir}/ogg.lib", "%{cfg.targetdir}/vorbis.lib", "%{cfg.targetdir}/vorbisfile.lib", 
             "%{cfg.targetdir}/vorbisenc.lib",  "%{cfg.targetdir}/imgui.lib", "libs/dxsdk/d3d9.lib", "libs/dxsdk/dinput.lib"
         }
-        language "C++"
+
+        cppdialect "C++20"        
+
         kind "SharedLib"
         targetname "gta_reversed"
         targetextension ".asi"
         pchheader "StdInc.h"
-        pchsource "source/StdInc.cpp"           
+        pchsource "source/StdInc.cpp"   
         files {
             "source/StdInc.h",
             "source/StdInc.cpp",

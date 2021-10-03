@@ -38,7 +38,7 @@ static int32* gRadarTextures = (int32*)0xBA8478;
 
 // name, maskName
 // 0x8d0720
-char* CRadar::RadarBlipFileNames[][2] = {
+const char* CRadar::RadarBlipFileNames[][2] = {
     nullptr,               nullptr,
     nullptr,               nullptr,
     "radar_centre",        nullptr,
