@@ -82,15 +82,14 @@ void CFont::InjectHooks() {
     Install("CFont", "PrintString", 0x71A700, &CFont::PrintString);
     Install("CFont", "PrintStringFromBottom", 0x71A820, &CFont::PrintStringFromBottom);
     Install("CFont", "GetCharacterSize", 0x719750, &CFont::GetCharacterSize);
-
-    Install("", "ReadFontsDat", 0x7187C0, &ReadFontsDat);
+    Install("CFont", "LoadFontValues", 0x7187C0, &CFont::LoadFontValues);
     // Install("", "GetScriptLetterSize", 0x719670, &GetScriptLetterSize);
     // Install("", "GetIDforPropVal", 0x7192C0, &GetIDforPropVal);
     Install("", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
 }
 
 // 0x7187C0
-void ReadFontsDat() {
+void CFont::LoadFontValues() {
     CFileMgr::SetDir(gta_empty_string);
     auto file = CFileMgr::OpenFile("DATA\\FONTS.DAT", "rb");
 
@@ -158,7 +157,7 @@ void CFont::Initialise() {
     Sprite[0].SetTexture("font2", "font2m");
     Sprite[1].SetTexture("font1", "font1m");
 
-    ReadFontsDat();
+    LoadFontValues();
 
     SetScale(1.0f, 1.0f);
     SetSlantRefPoint(SCREEN_WIDTH, 0.0f);
