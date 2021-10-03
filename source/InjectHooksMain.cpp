@@ -414,6 +414,7 @@ void InjectHooksMain()
         CAEPedlessSpeechAudioEntity::InjectHooks();
         CAEPoliceScannerAudioEntity::InjectHooks();
         CAudioEngine::InjectHooks();
+        CAEFireAudioEntity::InjectHooks();
     };
 
     const auto Tasks = []() {
