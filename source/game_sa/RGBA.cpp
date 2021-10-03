@@ -6,6 +6,8 @@
 */
 #include "StdInc.h"
 
+#include "RGBA.h"
+
 CRGBA::CRGBA(uint8 red, uint8 green, uint8 blue) {
     Set(red, green, blue, 255);
 }
@@ -79,6 +81,15 @@ void CRGBA::FromARGB(uint32 intValue) {
     r = (intValue >> 16) & 0xFF;
     g = (intValue >> 8) & 0xFF;
     b = intValue & 0xFF;
+}
+
+CRGBA CRGBA::FromInt32(int32 red, int32 green, int32 blue, int32 alpha) {
+    return {
+        static_cast<uint8>(red),
+        static_cast<uint8>(green),
+        static_cast<uint8>(blue),
+        static_cast<uint8>(alpha),
+    };
 }
 
 void CRGBA::Invert() {
