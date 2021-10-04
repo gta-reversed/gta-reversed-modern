@@ -10,11 +10,19 @@
 
 class CAEExplosionAudioEntity : public CAEAudioEntity {
 public:
-    char field_7C;
-    char _pad7D[3];
+    uint32 m_Speed;
 
 public:
+    static void InjectHooks();
+
+    CAEExplosionAudioEntity();
+    ~CAEExplosionAudioEntity() = default;
+
     static void StaticInitialise();
+
+    void AddAudioEvent(eAudioEvents audioEvent, CVector& posn, float volume);
+    void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
+    void UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos);
 };
 
 VALIDATE_SIZE(CAEExplosionAudioEntity, 0x80);
