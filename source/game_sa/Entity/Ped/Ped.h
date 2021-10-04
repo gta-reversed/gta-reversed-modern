@@ -559,6 +559,10 @@ public:
     inline CPlayerPed* AsPlayerPed() { return reinterpret_cast<CPlayerPed*>(this); }
   
     bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
+    // NOTSA
+    bool IsInVehicleAsPassenger() const noexcept {
+        return bInVehicle && bInVehicle && m_pVehicle && m_pVehicle->m_pDriver != this;
+    }
 };
 RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);
 bool IsPedPointerValid(CPed* ped);

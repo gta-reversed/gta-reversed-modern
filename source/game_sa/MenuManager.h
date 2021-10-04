@@ -159,7 +159,7 @@ public:
     float     m_fStatsScrollSpeed;
     char      field_8;
     char      field_9[23];
-    char      field_20;
+    bool      m_PrefsUseVibration;
     bool      m_bHudOn;
     char      field_22[2];
     int32     m_nRadarMode;

@@ -129,6 +129,19 @@ public:
     void Process();
     CTask* GetActivePrimaryTask();
     float GetPedFOVRange();
+
+    // NOTSA
+    bool IsUsingGun() {
+        if (GetTaskUseGun()) {
+            return true;
+        }
+        if (auto simplestTask = m_TaskMgr.GetSimplestActiveTask()) {
+            if (simplestTask->GetTaskType() == TASK_SIMPLE_GANG_DRIVEBY) {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 VALIDATE_SIZE(CPedIntelligence, 0x294);
