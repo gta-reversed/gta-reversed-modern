@@ -138,6 +138,7 @@
 #include "TaskComplexPartnerShove.h"
 #include "TaskSimpleRunNamedAnim.h"
 #include "TaskComplexProstituteSolicit.h"
+#include "TaskComplexStuckInAir.h"
 #include "TaskSimpleHoldEntity.h"
 #include "TaskSimpleGoTo.h"
 #include "TaskComplexPartner.h"
@@ -501,6 +502,7 @@ void InjectHooksMain()
         CTaskComplexPartnerShove::InjectHooks();
         // CTaskSimpleRunNamedAnim::InjectHooks();
         // CTaskComplexProstituteSolicit::InjectHooks();
+        CTaskComplexStuckInAir::InjectHooks();
         CTaskSimpleHoldEntity::InjectHooks();
         CTaskSimpleGoTo::InjectHooks();
         CTaskComplexPartner::InjectHooks();
