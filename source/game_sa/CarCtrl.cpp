@@ -12,7 +12,7 @@ uint32& CCarCtrl::NumParkedCars = *(uint32*)0x9690A0;
 uint32& CCarCtrl::NumAmbulancesOnDuty = *(uint32*)0x9690A8;
 uint32& CCarCtrl::NumFireTrucksOnDuty = *(uint32*)0x9690AC;
 uint32& CCarCtrl::MaxNumberOfCarsInUse = *(uint32*)0x8A5B24;
-bool& CCarCtrl::bCarsGeneratedAroundCamera = *(bool*)0x56E250;
+bool& CCarCtrl::bCarsGeneratedAroundCamera = *(bool*)0x9690C1;
 
 void CCarCtrl::InjectHooks()
 {

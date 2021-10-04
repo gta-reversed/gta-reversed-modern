@@ -89,9 +89,9 @@ CEntity * FindPlayerEntity(int32 playerId = -1);
 // returns player train
 CTrain* FindPlayerTrain(int32 playerId = -1);
 // gets player coords
-CVector const& FindPlayerCentreOfWorld(int32 playerId = -1);
+const CVector& FindPlayerCentreOfWorld(int32 playerId = -1);
 // gets player coords with skipping sniper shift
-CVector const& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId = -1);
+const CVector& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId = -1);
 // returns player coords with skipping interior shift
 CVector FindPlayerCentreOfWorld_NoInteriorShift(int32 playerId = -1);
 // returns player angle in radians

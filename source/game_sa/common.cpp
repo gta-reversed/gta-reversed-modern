@@ -160,16 +160,18 @@ CTrain* FindPlayerTrain(int32 playerId) {
 }
 
 // 0x56E250
-CVector const& FindPlayerCentreOfWorld(int32 playerId) {
+const CVector& FindPlayerCentreOfWorld(int32 playerId) {
     if (CCarCtrl::bCarsGeneratedAroundCamera)
         return TheCamera.GetPosition();
-    if (CVehicle* veh = FindPlayerVehicle(playerId, true))
-        return veh->GetPosition();
+
+    if (CVehicle* vehicle = FindPlayerVehicle(playerId, true))
+        return vehicle->GetPosition();
+
     return FindPlayerPed(playerId)->GetPosition();
 }
 
 // 0x56E320
-CVector const& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId) {
+const CVector& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId) {
     return ((CVector const&(__cdecl*)(int32))0x56E320)(playerId);
 }
 
