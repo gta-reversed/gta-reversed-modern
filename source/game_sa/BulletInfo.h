@@ -22,13 +22,22 @@ public:
     int16       m_nDamage;
     char        _pad2A[2];
 
+    static CBulletInfo(&aBulletInfos)[8];
+    static CVector& PlayerSniperBulletStart;
+    static CVector& PlayerSniperBulletEnd;
+
 public:
     static void InjectHooks();
 
     static void Initialise();
     static void Shutdown();
-    static bool AddBullet(CEntity* creator, eWeaponType weaponType, CVector position, CVector velocity);
+    static void AddBullet(CEntity* creator, eWeaponType weaponType, CVector pos, CVector velocity);
     static void Update();
+
+private:
+    // NOTSA
+    static CBulletInfo* GetFree();
+    bool IsTimeToBeDestroyed() const noexcept { return (float)CTimer::GetTimeInMS() > m_nDestroyTime; }
 };
 
 VALIDATE_SIZE(CBulletInfo, 0x2C);

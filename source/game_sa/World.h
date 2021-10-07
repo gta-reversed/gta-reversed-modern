@@ -183,17 +183,19 @@ public:
     // returns sector index in range 0 to 30 (covers full map) 
     static int32 GetLodSectorX(float fSector) { return static_cast<int32>(std::floor(GetLodSectorfX(fSector))); }
     static int32 GetLodSectorY(float fSector) { return static_cast<int32>(std::floor(GetLodSectorfY(fSector)));  }
-    static float GetLodSectorPosX(int32 sector)
-    {
+    static float GetLodSectorPosX(int32 sector) {
         const int32 HalfOfTotalSectorsX = MAX_LOD_PTR_LISTS_X / 2;
         const float fTotalMapUnitsX = MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_X;
         return (sector - HalfOfTotalSectorsX) * fTotalMapUnitsX + (fTotalMapUnitsX / 2);
     }
-    static float GetLodSectorPosY(int32 sector)
-    {
+    static float GetLodSectorPosY(int32 sector) {
         const int32 HalfOfTotalSectorsY = MAX_LOD_PTR_LISTS_Y / 2;
         const float fTotalMapUnitsY = MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_Y;
         return (sector - HalfOfTotalSectorsY) * fTotalMapUnitsY + (fTotalMapUnitsY / 2);
+    }
+    static bool IsInWorldBounds(CVector2D pos) { // NOTSA
+        return    pos.x > -3000.0f && pos.x < 3000.0f
+               && pos.y > -3000.0f && pos.y < 3000.0f;
     }
 };
 
