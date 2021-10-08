@@ -12,9 +12,9 @@ void CPtrListDoubleLink::Flush() {
     if (!m_node)
         return;
 
-    CPtrNodeDoubleLink* pCurNode;
-    while ((pCurNode = GetNode()))
-        CPtrListDoubleLink::DeleteNode(pCurNode);
+    CPtrNodeDoubleLink* curNode;
+    while ((curNode = GetNode()))
+        CPtrListDoubleLink::DeleteNode(curNode);
 }
 
 CPtrNodeDoubleLink* CPtrListDoubleLink::AddItem(void* item) {
@@ -27,14 +27,14 @@ void CPtrListDoubleLink::DeleteItem(void* item) {
     if (!m_node)
         return;
 
-    auto* pCurNode = GetNode();
-    while (pCurNode->m_item != item) {
-        pCurNode = reinterpret_cast<CPtrNodeDoubleLink*>(pCurNode->m_next);
-        if (!pCurNode)
+    auto* curNode = GetNode();
+    while (curNode->m_item != item) {
+        curNode = reinterpret_cast<CPtrNodeDoubleLink*>(curNode->m_next);
+        if (!curNode)
             return;
     }
 
-    CPtrListDoubleLink::DeleteNode(pCurNode);
+    CPtrListDoubleLink::DeleteNode(curNode);
 }
 
 void CPtrListDoubleLink::DeleteNode(CPtrNodeDoubleLink* node) {
