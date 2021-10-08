@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
@@ -714,18 +714,19 @@ int32 CRenderer::SetupBigBuildingVisibility(CEntity* entity, float* outDistance)
 // 0x5535D0
 void CRenderer::ScanSectorList_ListModels(int32 sectorX, int32 sectorY) {
     SetupScanLists(sectorX, sectorY);
-    CPtrListDoubleLink** pScanLists = reinterpret_cast<CPtrListDoubleLink**>(&PC_Scratch);
+    auto** pScanLists = reinterpret_cast<CPtrListDoubleLink**>(&PC_Scratch);
     for (int32 scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
-        CPtrListDoubleLink* pDoubleLinkList = pScanLists[scanListIndex];
-        if (pDoubleLinkList) {
-            for (auto pDoubleLinkNode = pDoubleLinkList->GetNode(); pDoubleLinkNode; pDoubleLinkNode = pDoubleLinkNode->pNext) {
-                CEntity* entity = reinterpret_cast<CEntity*>(pDoubleLinkNode->pItem);
-                if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
-                    entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
-                    if (entity->m_nAreaCode == CGame::currArea || entity->m_nAreaCode == AREA_CODE_13) {
-                        *gpOutEntitiesForGetObjectsInFrustum = entity;
-                        gpOutEntitiesForGetObjectsInFrustum++;
-                    }
+        CPtrListDoubleLink* doubleLinkList = pScanLists[scanListIndex];
+        if (!doubleLinkList)
+            continue;
+
+        for (auto node = doubleLinkList->GetNode(); node; node = node->m_next) {
+            CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
+            if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
+                entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                if (entity->m_nAreaCode == CGame::currArea || entity->m_nAreaCode == AREA_CODE_13) {
+                    *gpOutEntitiesForGetObjectsInFrustum = entity;
+                    gpOutEntitiesForGetObjectsInFrustum++;
                 }
             }
         }
@@ -736,19 +737,20 @@ void CRenderer::ScanSectorList_ListModels(int32 sectorX, int32 sectorY) {
 void CRenderer::ScanSectorList_ListModelsVisible(int32 sectorX, int32 sectorY) {
     SetupScanLists(sectorX, sectorY);
     CEntity** pEntity = gpOutEntitiesForGetObjectsInFrustum;
-    CPtrListDoubleLink** pScanLists = reinterpret_cast<CPtrListDoubleLink**>(&PC_Scratch);
+    auto** pScanLists = reinterpret_cast<CPtrListDoubleLink**>(&PC_Scratch);
     for (int32 scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
-        CPtrListDoubleLink* pDoubleLinkList = pScanLists[scanListIndex];
-        if (pDoubleLinkList) {
-            for (auto pDoubleLinkNode = pDoubleLinkList->GetNode(); pDoubleLinkNode; pDoubleLinkNode = pDoubleLinkNode->pNext) {
-                CEntity* entity = reinterpret_cast<CEntity*>(pDoubleLinkNode->pItem);
-                if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
-                    entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
-                    if (entity->m_nAreaCode == CGame::currArea || entity->m_nAreaCode == AREA_CODE_13) {
-                        if (entity->IsVisible()) {
-                            *gpOutEntitiesForGetObjectsInFrustum = entity;
-                            gpOutEntitiesForGetObjectsInFrustum++;
-                        }
+        CPtrListDoubleLink* doubleLinkList = pScanLists[scanListIndex];
+        if (!doubleLinkList)
+            continue;
+
+        for (auto node = doubleLinkList->GetNode(); node; node = node->m_next) {
+            auto* entity = reinterpret_cast<CEntity*>(node->m_item);
+            if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
+                entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                if (entity->m_nAreaCode == CGame::currArea || entity->m_nAreaCode == AREA_CODE_13) {
+                    if (entity->IsVisible()) {
+                        *gpOutEntitiesForGetObjectsInFrustum = entity;
+                        gpOutEntitiesForGetObjectsInFrustum++;
                     }
                 }
             }
@@ -774,8 +776,8 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
         if (pDoubleLinkList) {
             CPtrNodeDoubleLink* pDoubleLinkNode = pDoubleLinkList->GetNode();
             while (pDoubleLinkNode) {
-                CEntity* entity = reinterpret_cast<CEntity*>(pDoubleLinkNode->pItem);
-                pDoubleLinkNode = pDoubleLinkNode->pNext;
+                CEntity* entity = reinterpret_cast<CEntity*>(pDoubleLinkNode->m_item);
+                pDoubleLinkNode = pDoubleLinkNode->m_next;
                 if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
                     entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
                     entity->m_bOffscreen = false;
@@ -870,8 +872,8 @@ void CRenderer::ScanBigBuildingList(int32 sectorX, int32 sectorY) {
         {
             bRequestModel = true;
         }
-        for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->pNext) {
-            CEntity* entity = reinterpret_cast<CEntity*>(pNode->pItem);
+        for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+            auto* entity = reinterpret_cast<CEntity*>(node->m_item);
             if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
                 entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
                 float fDistance = 0.0f;
@@ -908,8 +910,8 @@ bool CRenderer::ShouldModelBeStreamed(CEntity* entity, CVector const& point, flo
 
 // 0x555680
 void CRenderer::ScanPtrList_RequestModels(CPtrList& list) {
-    for (auto pNode = list.GetNode(); pNode; pNode = pNode->pNext) {
-        CEntity* entity = reinterpret_cast<CEntity*>(pNode->pItem);
+    for (auto node = list.GetNode(); node; node = node->m_next) {
+        auto* entity = reinterpret_cast<CEntity*>(node->m_item);
         if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
             entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
             if (CRenderer::ShouldModelBeStreamed(entity, CRenderer::ms_vecCameraPosition, CRenderer::ms_fFarClipPlane))

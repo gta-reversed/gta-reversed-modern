@@ -400,9 +400,9 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
 
     CEntity* pCollidedEntity = nullptr;
 
-    for (auto pNode = sectorList->GetNode(); pNode; pNode = pNode->pNext)
+    for (auto pNode = sectorList->GetNode(); pNode; pNode = pNode->m_next)
     {
-        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->pItem);
+        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->m_item);
 
         if (pEntity->m_nScanCode == CWorld::ms_nCurrentScanCode)
             continue;
