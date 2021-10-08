@@ -30,3 +30,8 @@ bool CPlantMgr::Initialise() {
 void CPlantMgr::Update(const CVector& cameraPosition) {
     return plugin::Call<0x5DCFA0, const CVector&>(cameraPosition);
 }
+
+// 0x5DBAE0
+void CPlantMgr::Render() {
+    plugin::Call<0x5DBAE0>();
+}

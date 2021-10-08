@@ -13,10 +13,10 @@ class CMirrors {
 public:
     static RwRaster*& pBuffer;
     static RwRaster*& pZBuffer;
-    static uint32&    TypeOfMirror;
     static bool&      bRenderingReflection;
     static bool&      d3dRestored;
-    static uint32&    MirrorFlags;
+    static int8&      TypeOfMirror;
+    static int8&      MirrorFlags;
     static float&     MirrorV;
     static CVector&   MirrorNormal;
 
@@ -41,6 +41,3 @@ public:
     // NOTSA
     static bool IsEitherScreenVisibleToCam();
 };
-
-extern bool& bFudgeNow;
-extern CVector (&Screens8Track)[4][2];

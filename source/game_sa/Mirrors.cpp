@@ -1,19 +1,23 @@
 #include "StdInc.h"
 
-#include "CMirrors.h"
+#include "Mirrors.h"
 
-int32_t& CMirrors::MirrorFlags = *(int32_t*)0xC7C618;
-float& CMirrors::MirrorV = *(float*)0xC7C61C;
+#include "MovingThings.h"
+#include "BreakManager_c.h"
+#include "PlantMgr.h"
+
+
 RwRaster*& CMirrors::pBuffer = *(RwRaster**)0xC7C71C;
 RwRaster*& CMirrors::pZBuffer = *(RwRaster**)0xC7C720;
-int32_t& CMirrors::TypeOfMirror = *(int32_t*)0xC7C724;
-int8_t& CMirrors::bRenderingReflection = *(int8_t*)0xC7C728;
-int8_t& CMirrors::d3dRestored = *(int8_t*)0xC7C729;
+bool& CMirrors::bRenderingReflection = *(bool*)0xC7C728;
+bool& CMirrors::d3dRestored = *(bool*)0xC7C729;
+int8& CMirrors::TypeOfMirror = *(int8*)0xC7C724;
+int8& CMirrors::MirrorFlags = *(int8*)0xC7C618;
 CVector& CMirrors::MirrorNormal = *(CVector*)0xC803D8;
-bool& bFudgeNow = *(bool*)0xC7C72A;
-CVector(&Screens8Track)[2][4] = *(CVector(*)[2][4])0x8D5DD8;
+float& CMirrors::MirrorV = *(float*)0xC7C61C;
 
-CVector Screens8Track_[2][4] = {
+bool& bFudgeNow = *(bool*)0xC7C72A;
+CVector Screens8Track[2][4] = { // 0x8D5DD8
     {
         { -1333.453f, -221.89799f, 1079.141f },
         { -1333.453f, -189.89799f, 1079.141f },
@@ -29,14 +33,15 @@ CVector Screens8Track_[2][4] = {
 };
 
 void CMirrors::InjectHooks() {
-    ReversibleHooks::Install("CMirrors", "Init", 0x723000, &CMirrors::Init);
-    ReversibleHooks::Install("CMirrors", "ShutDown", 0x723050, &CMirrors::ShutDown);
-    ReversibleHooks::Install("CMirrors", "CreateBuffer", 0x7230A0, &CMirrors::CreateBuffer);
-    ReversibleHooks::Install("CMirrors", "BuildCamMatrix", 0x723150, &CMirrors::BuildCamMatrix);
-    ReversibleHooks::Install("CMirrors", "RenderMirrorBuffer", 0x726090, &CMirrors::RenderMirrorBuffer);
-    ReversibleHooks::Install("CMirrors", "BuildCameraMatrixForScreens", 0x7266B0, &CMirrors::BuildCameraMatrixForScreens);
-    ReversibleHooks::Install("CMirrors", "BeforeConstructRenderList", 0x726DF0, &CMirrors::BeforeConstructRenderList);
-    ReversibleHooks::Install("CMirrors", "BeforeMainRender", 0x727140, &CMirrors::BeforeMainRender);
+    using namespace ReversibleHooks;
+    Install("CMirrors", "Init", 0x723000, &CMirrors::Init);
+    Install("CMirrors", "ShutDown", 0x723050, &CMirrors::ShutDown);
+    Install("CMirrors", "CreateBuffer", 0x7230A0, &CMirrors::CreateBuffer);
+    Install("CMirrors", "BuildCamMatrix", 0x723150, &CMirrors::BuildCamMatrix);
+    Install("CMirrors", "RenderMirrorBuffer", 0x726090, &CMirrors::RenderMirrorBuffer);
+    Install("CMirrors", "BuildCameraMatrixForScreens", 0x7266B0, &CMirrors::BuildCameraMatrixForScreens);
+    Install("CMirrors", "BeforeConstructRenderList", 0x726DF0, &CMirrors::BeforeConstructRenderList);
+    Install("CMirrors", "BeforeMainRender", 0x727140, &CMirrors::BeforeMainRender);
 }
 
 // 0x723000
@@ -185,7 +190,7 @@ void CMirrors::RenderMirrorBuffer() {
 
         RxObjSpace3DVertex vertices[4];
         for (int i = 0; i < 4; i++) {
-            RwIm3DVertexSetRGBA(&vertices[i], 0xFF, 0xFF, 0xFF, 0xFF);
+            RwIm3DVertexSetRGBA(&vertices[i], 255, 255, 255, 255);
             RwV3dAssign(RwIm3DVertexGetPos(&vertices[i]), &pos[i]);
             RwIm3DVertexSetU(&vertices[i], uvs[i].x);
             RwIm3DVertexSetV(&vertices[i], uvs[i].y);
@@ -218,8 +223,9 @@ void CMirrors::RenderReflections() {
 
 // 0x7266B0
 void CMirrors::BuildCameraMatrixForScreens(CMatrix & mat) {
-    const uint32_t timeSeconds = (CTimer::GetTimeInMilliseconds() / 1000) % 32; // Wrapped to (0, 32]
-    const uint32_t timeMsLeftInSecond = CTimer::GetTimeInMilliseconds() % 1000;
+    const uint32 timeSeconds = (CTimer::GetTimeInMS() / 1000) % 32; // Wrapped to (0, 32]
+    const uint32 timeMsLeftInSecond = CTimer::GetTimeInMS() % 1000;
+
     switch (timeSeconds) {
     case 0:
     case 1:
@@ -253,8 +259,8 @@ void CMirrors::BuildCameraMatrixForScreens(CMatrix & mat) {
         break;
     }
     default: {
-        mat.SetRotateZOnly((CTimer::GetTimeInMilliseconds() % 16384) * 0.00038349521f);
-        mat.SetTranslateOnly({ -1397.0, -219.0, 1054.0 });
+        mat.SetRotateZOnly((CTimer::GetTimeInMS() % 16384) * 0.00038349521f);
+        mat.SetTranslateOnly({ -1397.0f, -219.0f, 1054.0f });
         break;
     }
     }
@@ -286,24 +292,24 @@ void CMirrors::BeforeConstructRenderList() {
                 return false;
         }
 
-        CCullZoneReflection* pMirrorAttrs = CCullZones::FindMirrorAttributesForCoors_(TheCamera.GetPosition());
-        if (!pMirrorAttrs)
+        CCullZoneReflection* mirrorAttrs = CCullZones::FindMirrorAttributesForCoors_(TheCamera.GetPosition());
+        if (!mirrorAttrs)
             return false;
 
-        if (pMirrorAttrs->flags & CAM_STAIRS_FOR_PLAYER) {
+        if (mirrorAttrs->flags & CAM_STAIRS_FOR_PLAYER) {
             if (!IsEitherScreenVisibleToCam())
                 return false;
         }
 
         // Actually update cam
 
-        MirrorV = pMirrorAttrs->cm;
+        MirrorV = mirrorAttrs->cm;
         MirrorNormal = CVector{
-            (float)pMirrorAttrs->vx,
-            (float)pMirrorAttrs->vy,
-            (float)pMirrorAttrs->vz,
+            (float)mirrorAttrs->vx,
+            (float)mirrorAttrs->vy,
+            (float)mirrorAttrs->vz,
         } / 100.0f;
-        MirrorFlags = pMirrorAttrs->flags;
+        MirrorFlags = mirrorAttrs->flags;
 
         TypeOfMirror = (fabs(MirrorNormal.z) <= 0.7f) ? 1 : 2;
         CreateBuffer();
@@ -331,7 +337,7 @@ void CMirrors::BeforeMainRender() {
     if (TypeOfMirror == 0)
         return;
 
-    RwRaster* prevCamRaster = RwCameraGetRaster(Scene.m_pRwCamera);
+    RwRaster* prevCamRaster  = RwCameraGetRaster(Scene.m_pRwCamera);
     RwRaster* prevCamZRaster = RwCameraGetZRaster(Scene.m_pRwCamera);
 
     RwCameraSetRaster(Scene.m_pRwCamera, pBuffer);
@@ -434,5 +440,5 @@ void RenderScene() {
         RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
     }
 
-    _gRenderStencil();
+    gRenderStencil();
 }
