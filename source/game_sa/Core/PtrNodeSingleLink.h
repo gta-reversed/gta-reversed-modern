@@ -8,8 +8,8 @@
 
 class CPtrNodeSingleLink {
 public:
-    void*               pItem;
-    CPtrNodeSingleLink* pNext;
+    void*               m_item;
+    CPtrNodeSingleLink* m_next;
 
 public:
     static void InjectHooks();
@@ -17,7 +17,7 @@ public:
     static void* operator new(uint32 size);
     static void  operator delete(void* data);
 
-    inline CPtrNodeSingleLink(void* item) : pItem(item) {}
+    CPtrNodeSingleLink(void* item) : m_item(item) {}
 
     void AddToList(class CPtrListSingleLink* list);
 };

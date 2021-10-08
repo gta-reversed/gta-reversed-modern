@@ -817,8 +817,8 @@ void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
 
 // 0x409940
 bool CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, int32 memoryToCleanInBytes) {
-    for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->pNext) {
-        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->pItem);
+    for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->m_next) {
+        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->m_item);
         if (pEntity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
             pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
             const int32 modelId = pEntity->m_nModelIndex;
@@ -841,8 +841,8 @@ bool CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, int32 m
 
 // 0x407A70
 void CStreaming::DeleteRwObjectsInSectorList(CPtrList& list, int32 sectorX, int32 sectorY) {
-    for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->pNext) {
-        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->pItem);
+    for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->m_next) {
+        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->m_item);
         if (sectorX < 0 || pEntity->LivesInThisNonOverlapSector(sectorX, sectorY)) {
             if (!pEntity->m_bImBeingRendered && !pEntity->m_bStreamingDontDelete)
                 pEntity->DeleteRwObject();
@@ -852,8 +852,8 @@ void CStreaming::DeleteRwObjectsInSectorList(CPtrList& list, int32 sectorX, int3
 
 // 0x4099E0
 bool CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList& list, int32 memoryToCleanInBytes) {
-    for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->pNext) {
-        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->pItem);
+    for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->m_next) {
+        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->m_item);
         if (pEntity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
             pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
             const int32 modelId = pEntity->m_nModelIndex;
@@ -2176,8 +2176,8 @@ void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, float posX, float p
 {
     CVector2D position(posX, posY);
     float squaredRadius = radius * radius;
-    for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->pNext) {
-        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->pItem);
+    for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->m_next) {
+        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->m_item);
         if (pEntity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
             pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
             uint16 modelId = pEntity->m_nModelIndex;
@@ -2211,8 +2211,8 @@ void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, float posX, float p
 // 0x40C450
 void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, int32 streamingFlags)
 {
-    for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->pNext) {
-        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->pItem);
+    for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->m_next) {
+        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->m_item);
         if (pEntity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
             pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
             uint16 modelId = pEntity->m_nModelIndex;
@@ -2558,8 +2558,8 @@ void CStreaming::InstanceLoadedModels(CVector const& point) {
 
 void CStreaming::InstanceLoadedModelsInSectorList(CPtrList& list)
 {
-    for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->pNext) {
-        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->pItem);
+    for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->m_next) {
+        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->m_item);
         if ((pEntity->m_nAreaCode == CGame::currArea || pEntity->m_nAreaCode == AREA_CODE_13) && !pEntity->m_pRwObject)
             pEntity->CreateRwObject();
     }

@@ -1553,5 +1553,5 @@ bool IsObjectPointerValid(CObject* object) {
     if (object->m_bIsBIGBuilding)
         return true;
 
-    return object->m_pCollisionList.m_pNode != nullptr;
+    return object->m_pCollisionList.m_node != nullptr;
 }
