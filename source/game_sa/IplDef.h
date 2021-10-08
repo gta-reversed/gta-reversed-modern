@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CRect.h"
+#include "Rect.h"
 
 class IplDef {
 public:

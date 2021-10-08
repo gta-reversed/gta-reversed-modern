@@ -118,19 +118,27 @@ group "Dependencies"
             ["Sources/*"] = {"libs/imgui/**.c*",},
             ["*"] = {"premake5.lua", "CMakeLists.txt"}
         }
-        includedirs { "libs/imgui", "libs/imgui/misc/cpp" }
+        includedirs { "libs/imgui", "libs/imgui/backends", "libs/imgui/misc/cpp" }
         language "C++"
         kind "StaticLib"
         targetname "imgui" 
 
         local filePaths = {
             "imconfig.h", "imgui.h", "imgui_internal.h", "imstb_rectpack.h", "imstb_textedit.h", "imstb_truetype.h", 
-            "imgui.cpp", "imgui_draw.cpp",  "imgui_widgets.cpp"
+            "imgui.cpp", "imgui_draw.cpp", "imgui_widgets.cpp", "imgui_tables.cpp"
         }
         for i, fileName in pairs(filePaths) do 
             filePaths[i] = "libs/imgui/"..fileName
         end 
-        files { "libs/imgui/misc/cpp/imgui_stdlib.h", "libs/imgui/misc/cpp/imgui_stdlib.cpp", table.unpack(filePaths) }      
+        files {
+            "libs/imgui/backends/imgui_impl_win32.h",
+            "libs/imgui/backends/imgui_impl_win32.cpp",
+            "libs/imgui/backends/imgui_impl_dx9.h",
+            "libs/imgui/backends/imgui_impl_dx9.cpp",
+            "libs/imgui/misc/cpp/imgui_stdlib.h",
+            "libs/imgui/misc/cpp/imgui_stdlib.cpp",
+            table.unpack(filePaths),
+        }
 
 group ""
     project "gta_reversed"
@@ -139,19 +147,27 @@ group ""
             ["Sources/*"] = {"source/**.c*",},
             ["*"] = {"premake5.lua", "CMakeLists.txt"}
         }
-        defines { "NOMINMAX", "USE_GTASA_ALLOCATOR" }
-        includedirs { "source", "source/**", "libs/vorbis/include", "libs/ogg/include", "libs/imgui", "libs/imgui/misc/cpp", "libs/dxsdk"}
+        defines { "NOMINMAX", "USE_GTASA_ALLOCATOR", "EXTRA_DEBUG_FEATURES" }
+        includedirs {
+            "source", "source/**",
+            "libs/vorbis/include",
+            "libs/ogg/include",
+            "libs/imgui", "libs/imgui/backends", "libs/imgui/misc/cpp",
+            "libs/dxsdk"
+        }
         links { "ogg", "vorbis", "vorbisenc", "vorbisfile", "imgui" }
         libdirs { 
             "%{cfg.targetdir}/ogg.lib", "%{cfg.targetdir}/vorbis.lib", "%{cfg.targetdir}/vorbisfile.lib", 
             "%{cfg.targetdir}/vorbisenc.lib",  "%{cfg.targetdir}/imgui.lib", "libs/dxsdk/d3d9.lib", "libs/dxsdk/dinput.lib"
         }
-        language "C++"
+
+        cppdialect "C++20"        
+
         kind "SharedLib"
         targetname "gta_reversed"
         targetextension ".asi"
         pchheader "StdInc.h"
-        pchsource "source/StdInc.cpp"           
+        pchsource "source/StdInc.cpp"   
         files {
             "source/StdInc.h",
             "source/StdInc.cpp",
