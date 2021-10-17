@@ -78,7 +78,7 @@ public:
     float          field_804;
     float          m_intertiaValue1;
     float          m_intertiaValue2;
-    int32          m_wheelSkidmarkType[4];
+    eSkidMarkType  m_wheelSkidmarkType[4];
     bool           m_wheelSkidmarkBloodState[4];
     bool           m_wheelSkidmarkMuddy[4];
     float          m_wheelRotation[4];
@@ -164,7 +164,7 @@ public:
     uint8       m_nWheelsOnGround;
     uint8       m_wheelsOnGrounPrev;
     char        field_963;
-    float       field_964;
+    float       m_fSomeGasPedalStuff;
     tWheelState m_aWheelState[4];
     FxSystem_c* m_exhaustNitroFxSystem[2];
     uint8       m_harvesterParticleCounter;
@@ -311,7 +311,7 @@ public:
     void SetRandomDamage(bool arg0);
     // Make a vehicle fully damaged
     void SetTotalDamage(bool arg0);
-    // if(m_nHornCounter) m_nHornCounter--;
+    // if(m_nHornTimeEndMs) m_nHornTimeEndMs--;
     void ReduceHornCounter();
     // Apply custom car plate texture to vehicle
     void CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model);

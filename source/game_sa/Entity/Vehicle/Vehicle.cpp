@@ -166,8 +166,8 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_nGunFiringTime = 0;
     m_nCopsInCarTimer = 0;
     m_nUsedForCover = 0;
-    m_nHornCounter = 0;
-    field_518 = 0;
+    m_nHornTimeEndMs = 0;
+    m_nRandomIdRelatedToSiren = 0;
     m_nCarHornTimer = 0;
     field_4EC = 0;
     m_pTractor = nullptr;

@@ -90,8 +90,8 @@ public:
     uint8         m_nNumWheelsOnGround;
     char          field_806;
     char          field_807;
-    int32         field_808;
-    uint32        m_anWheelState[2]; // enum tWheelState
+    float         m_fSomeGasPedalStuff;
+    tWheelState   m_anWheelState[2]; // enum tWheelState
 
 public:
     static void InjectHooks();
