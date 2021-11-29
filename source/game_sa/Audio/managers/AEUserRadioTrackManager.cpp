@@ -397,7 +397,7 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path)
 
     if (FAILED(shellLink->QueryInterface(IID_IPersistFile, (void**)&persistFile))) {
         shellLink->Release();
-        return nullptr;
+        return std::wstring();
     }
 
     wchar_t*         target = new wchar_t[MAX_PATH];
