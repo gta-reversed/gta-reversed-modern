@@ -291,35 +291,33 @@ bool CStreaming::AreAnimsUsedByRequestedModels(int32 animModelId) {
 
 // 0x409A90
 bool CStreaming::AreTexturesUsedByRequestedModels(int32 txdModelId) {
-    auto pStreamingInfo = ms_pStartRequestedList->GetNext();
-    for (; pStreamingInfo != ms_pEndRequestedList; pStreamingInfo = pStreamingInfo->GetNext()) {
-        int32 modelId = pStreamingInfo - ms_aInfoForModel;
-        if (modelId < RESOURCE_ID_TXD) {
+    for (auto info = ms_pStartRequestedList->GetNext(); info != ms_pEndRequestedList; info = info->GetNext()) {
+        int32 modelId = info - ms_aInfoForModel;
+        if (modelId < RESOURCE_ID_TXD/*model is DFF*/) {
             if (CModelInfo::ms_modelInfoPtrs[modelId]->m_nTxdIndex == txdModelId)
                 return true;
-        }
-        else if (modelId < RESOURCE_ID_COL) {
+        } else if (modelId < RESOURCE_ID_COL/*model is TXD*/) {
             if (CTxdStore::GetParentTxdSlot(modelId - RESOURCE_ID_TXD) == txdModelId)
                 return true;
         }
     }
-    if (pStreamingInfo == ms_pEndRequestedList) {
-        for (int32 i = 0; i < 16; i++) {
-            for (int32 channelId = 0; channelId < 2; channelId++) {
-                int32 modelId = ms_channel[channelId].modelIds[i];
-                if (modelId != -1) {
-                    if (modelId < RESOURCE_ID_TXD) {
-                        if (CModelInfo::ms_modelInfoPtrs[modelId]->m_nTxdIndex == txdModelId)
-                            return true;
-                    }
-                    else if (modelId < RESOURCE_ID_COL) {
-                        if (CTxdStore::GetParentTxdSlot(modelId - RESOURCE_ID_TXD) == txdModelId)
-                            return true;
-                    }
+
+    for (int32 channelId = 0; channelId < 2; channelId++) {
+        tStreamingChannel& channel = ms_channel[channelId];
+        for (int32 model : channel.modelIds) {
+            if (model != -1) {
+                if (model < RESOURCE_ID_TXD/*model is DFF*/) {
+                    if (CModelInfo::ms_modelInfoPtrs[model]->m_nTxdIndex == txdModelId)
+                        return true;
+                }
+                else if (model < RESOURCE_ID_COL/*model is TXD*/) {
+                    if (CTxdStore::GetParentTxdSlot(model - RESOURCE_ID_TXD) == txdModelId)
+                        return true;
                 }
             }
         }
     }
+
     return false;
 }
 
