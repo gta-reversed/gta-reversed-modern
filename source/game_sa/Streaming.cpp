@@ -862,20 +862,21 @@ void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
 bool CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, int32 memoryToCleanInBytes) {
     for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->m_next) {
         CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->m_item);
-        if (pEntity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
-            pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
-            const int32 modelId = pEntity->m_nModelIndex;
-            if (!pEntity->m_bImBeingRendered && !pEntity->m_bStreamingDontDelete
-                && pEntity->m_pRwObject
-                && ms_aInfoForModel[modelId].InList()
-                && FindPlayerPed(-1)->m_pContactEntity != pEntity)
-            {
-                pEntity->DeleteRwObject();
-                if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount) {
-                    RemoveModel(modelId);
-                    if (static_cast<int32>(ms_memoryUsed) < memoryToCleanInBytes)
-                        return true;
-                }
+        if (pEntity->m_nScanCode == CWorld::ms_nCurrentScanCode)
+            continue;
+        pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+
+        const int32 modelId = pEntity->m_nModelIndex;
+        if (!pEntity->m_bImBeingRendered && !pEntity->m_bStreamingDontDelete
+            && pEntity->m_pRwObject
+            && ms_aInfoForModel[modelId].InList()
+            && FindPlayerPed(-1)->m_pContactEntity != pEntity)
+        {
+            pEntity->DeleteRwObject();
+            if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount) {
+                RemoveModel(modelId);
+                if (static_cast<int32>(ms_memoryUsed) < memoryToCleanInBytes)
+                    return true;
             }
         }
     }
