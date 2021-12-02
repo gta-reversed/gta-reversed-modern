@@ -685,17 +685,18 @@ bool CStreaming::DeleteLeastUsedEntityRwObject(bool bNotOnScreen, uint32 streami
 }
 
 // 0x409210
+// Deletes all RW objects more than 3 sectors (on each axis) away from the given point's sector
 void CStreaming::DeleteRwObjectsAfterDeath(CVector const& point) {
-    int32 pointX = CWorld::GetSectorX(point.x);
-    int32 pointY = CWorld::GetSectorY(point.y);
-    for (int32 sectorX = 0; sectorX < MAX_SECTORS_X; ++sectorX) {
-        if (fabs(pointX - sectorX) > 3.0f) {
-            for (int32 sectorY = 0; sectorY < MAX_SECTORS_Y; ++sectorY) {
-                if (fabs(pointY - sectorY) > 3.0f) {
-                    CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
-                    CSector* pSector = GetSector(sectorX, sectorY);
+    const int32 pointSecX = CWorld::GetSectorX(point.x),
+                pointSecY = CWorld::GetSectorY(point.y);
+    for (int32 sx = 0; sx < MAX_SECTORS_X; ++sx) {
+        if (abs(pointSecX - sx) > 3) {
+            for (int32 sy = 0; sy < MAX_SECTORS_Y; ++sy) {
+                if (abs(pointSecY - sy) > 3) {
+                    CRepeatSector* pRepeatSector = GetRepeatSector(sx, sy);
+                    CSector* pSector = GetSector(sx, sy);
                     DeleteRwObjectsInSectorList(pSector->m_buildings, -1, -1);
-                    DeleteRwObjectsInSectorList(pRepeatSector->m_lists[REPEATSECTOR_OBJECTS], -1, -1);
+                    DeleteRwObjectsInSectorList(pRepeatSector->GetList(REPEATSECTOR_OBJECTS), -1, -1);
                     DeleteRwObjectsInSectorList(pSector->m_dummies, -1, -1);
                 }
             }
