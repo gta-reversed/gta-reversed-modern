@@ -705,30 +705,32 @@ void CStreaming::DeleteRwObjectsAfterDeath(CVector const& point) {
 }
 
 // 0x40D7C0
+// TODO: Decode this, no clue whats going on here..
 void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
     if (static_cast<int32>(CStreaming::ms_memoryUsed) < memoryToCleanInBytes)
         return;
 
     const CVector& cameraPos = TheCamera.GetPosition();
-    int32 pointX = CWorld::GetSectorX(cameraPos.x);
-    int32 pointY = CWorld::GetSectorY(cameraPos.y);
-    const CVector2D& cameraForward = TheCamera.GetForward();
-    if (fabs(cameraForward.y) < fabs(cameraForward.x)) {
-        int32 sectorStartY = std::max(pointY - 10, 0);
-        int32 sectorEndY = std::min(pointY + 10, MAX_SECTORS_Y - 1);
+    const int32 pointSecX = CWorld::GetSectorX(cameraPos.x),
+                pointSecY = CWorld::GetSectorY(cameraPos.y);
+    const CVector2D& camFwd = TheCamera.GetForward();
+    if (fabs(camFwd.y) < fabs(camFwd.x)) {
+        int32 sectorStartY = std::max(pointSecY - 10, 0);
+        int32 sectorEndY = std::min(pointSecY + 10, MAX_SECTORS_Y - 1);
         int32 sectorStartX = 0;
         int32 sectorEndX = 0;
         int32 factorX = 0;
-        if (cameraForward.x <= 0.0f) {
-            sectorStartX = std::min(pointX + 10, MAX_SECTORS_X - 1);
-            sectorEndX = std::min(pointX + 2, MAX_SECTORS_X - 1);
+
+        if (camFwd.x <= 0.0f) {
+            sectorStartX = std::min(pointSecX + 10, MAX_SECTORS_X - 1);
+            sectorEndX = std::min(pointSecX + 2, MAX_SECTORS_X - 1);
             factorX = -1;
-        }
-        else {
-            sectorStartX = std::max(pointX - 10, 0);
-            sectorEndX = std::max(pointX - 2, 0);
+        } else {
+            sectorStartX = std::max(pointSecX - 10, 0);
+            sectorEndX = std::max(pointSecX - 2, 0);
             factorX = 1;
         }
+
         CWorld::IncrementCurrentScanCode();
         for (int32 sectorX = sectorStartX; sectorX != sectorEndX; sectorX += factorX) {
             for (int32 sectorY = sectorStartY; sectorY <= sectorEndY; sectorY++) {
@@ -742,16 +744,17 @@ void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
                 }
             }
         }
-        if (cameraForward.x <= 0.0f) {
-            sectorEndX = std::min(pointX + 2, MAX_SECTORS_X - 1);
-            sectorStartX = std::max(pointX - 10, 0);
+
+        if (camFwd.x <= 0.0f) {
+            sectorEndX = std::min(pointSecX + 2, MAX_SECTORS_X - 1);
+            sectorStartX = std::max(pointSecX - 10, 0);
             factorX = -1;
-        }
-        else {
-            sectorEndX = std::max(pointX - 2, 0);
-            sectorStartX = std::min(pointX + 10, MAX_SECTORS_X - 1);
+        } else {
+            sectorEndX = std::max(pointSecX - 2, 0);
+            sectorStartX = std::min(pointSecX + 10, MAX_SECTORS_X - 1);
             factorX = 1;
         }
+
         CWorld::IncrementCurrentScanCode();
         for (int32 sectorX = sectorStartX; sectorX != sectorEndX; sectorX -= factorX) {
             for (int32 sectorY = sectorStartY; sectorY <= sectorEndY; sectorY++) {
@@ -765,6 +768,7 @@ void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
                 }
             }
         }
+
         CWorld::IncrementCurrentScanCode();
         for (int32 sectorX = sectorStartX; sectorX != sectorEndX; sectorX -= factorX) {
             for (int32 sectorY = sectorStartY; sectorY <= sectorEndY; sectorY++) {
@@ -780,20 +784,20 @@ void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
         }
     }
     else {
-        int32 sectorStartX = std::max(pointX - 10, 0);
-        int32 sectorEndX = std::min(pointX + 10, MAX_SECTORS_X - 1);
+        int32 sectorStartX = std::max(pointSecX - 10, 0);
+        int32 sectorEndX = std::min(pointSecX + 10, MAX_SECTORS_X - 1);
         int32 sectorStartY = 0;
         int32 sectorEndY = 0;
         int32 factorY = 0;
-        if (cameraForward.y <= 0.0f) {
-            sectorEndY = std::min(pointY + 2, MAX_SECTORS_Y - 1);
-            sectorStartY = std::min(pointY + 10, MAX_SECTORS_Y - 1);
+        if (camFwd.y <= 0.0f) {
+            sectorEndY = std::min(pointSecY + 2, MAX_SECTORS_Y - 1);
+            sectorStartY = std::min(pointSecY + 10, MAX_SECTORS_Y - 1);
             factorY = -1;
         }
         else  {
             factorY = 1;
-            sectorStartY = std::max(pointY - 10, 0);
-            sectorEndY = std::max(pointY - 2, 0);
+            sectorStartY = std::max(pointSecY - 10, 0);
+            sectorEndY = std::max(pointSecY - 2, 0);
         }
         CWorld::IncrementCurrentScanCode();
         for (int32 sectorY = sectorStartY; sectorY != sectorEndY; sectorY += factorY) {
@@ -808,14 +812,14 @@ void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
                 }
             }
         }
-        if (cameraForward.y <= 0.0f) {
-            sectorEndY = std::min(pointY + 2, MAX_SECTORS_Y - 1);
-            sectorStartY = std::max(pointY - 10, 0);
+        if (camFwd.y <= 0.0f) {
+            sectorEndY = std::min(pointSecY + 2, MAX_SECTORS_Y - 1);
+            sectorStartY = std::max(pointSecY - 10, 0);
             factorY = -1;
         }
         else {
-            sectorEndY = std::max(pointY - 2, 0);
-            sectorStartY = std::min(pointY + 10, MAX_SECTORS_Y - 1);
+            sectorEndY = std::max(pointSecY - 2, 0);
+            sectorStartY = std::min(pointSecY + 10, MAX_SECTORS_Y - 1);
             factorY = 1;
         }
         CWorld::IncrementCurrentScanCode();
@@ -847,6 +851,7 @@ void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
             }
         }
     }
+
     while ((static_cast<int32>(ms_memoryUsed) >= memoryToCleanInBytes)) {
         if (!RemoveLeastUsedModel(0))
             break;
