@@ -269,24 +269,23 @@ void CStreaming::AddModelsToRequestList(CVector const& point, uint32 streamingFl
 
 // 0x407AD0
 bool CStreaming::AreAnimsUsedByRequestedModels(int32 animModelId) {
-    auto pStreamingInfo = ms_pStartRequestedList->GetNext();
-    for (; pStreamingInfo != ms_pEndRequestedList; pStreamingInfo = pStreamingInfo->GetNext()) {
-        int32 modelId = pStreamingInfo - ms_aInfoForModel;
-        if (modelId < RESOURCE_ID_TXD && CModelInfo::ms_modelInfoPtrs[modelId]->GetAnimFileIndex() == animModelId)
+    for (auto info = ms_pStartRequestedList->GetNext(); info != ms_pEndRequestedList; info = info->GetNext()) {
+        const int32 modelId = info - ms_aInfoForModel;
+        if (modelId < RESOURCE_ID_TXD /*model is DFF*/ && CModelInfo::ms_modelInfoPtrs[modelId]->GetAnimFileIndex() == animModelId)
             return true;
     }
-    if (pStreamingInfo == ms_pEndRequestedList) {
-        for (int32 i = 0; i < 16; i++) {
-            for (int32 channelId = 0; channelId < 2; channelId++) {
-                int32 modelId = ms_channel[channelId].modelIds[i];
-                if (modelId != -1 && modelId < RESOURCE_ID_TXD &&
-                    CModelInfo::ms_modelInfoPtrs[modelId]->GetAnimFileIndex() == animModelId)
-                {
-                    return true;
-                }
+
+    for (int32 channelId = 0; channelId < 2; channelId++) {
+        tStreamingChannel& channel = ms_channel[channelId];
+        for (int32 model : channel.modelIds) {
+            if (model != -1 && model < RESOURCE_ID_TXD /*model is DFF*/ &&
+                CModelInfo::ms_modelInfoPtrs[model]->GetAnimFileIndex() == animModelId)
+            {
+                return true;
             }
-        }
+        }   
     }
+
     return false;
 }
 
