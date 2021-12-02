@@ -949,14 +949,14 @@ bool CStreaming::IsVeryBusy() {
 }
 
 // 0x5D29E0
-void CStreaming::Load()
-{
-    uint8 data;
+void CStreaming::Load() {
     for (int32 i = 0; i < RESOURCE_ID_TOTAL; i++) {
         CStreamingInfo& streamingInfo = ms_aInfoForModel[i];
-        CGenericGameStorage::LoadDataFromWorkBuffer(&data, 1u);
-        if (streamingInfo.m_nLoadState == LOADSTATE_LOADED && data != 0xFFu)
-            streamingInfo.m_nFlags |= data;
+
+        uint8 flags;
+        CGenericGameStorage::LoadDataFromWorkBuffer(&flags, 1u);
+        if (streamingInfo.m_nLoadState == LOADSTATE_LOADED && flags != 0xFFu)
+            streamingInfo.m_nFlags |= flags;
     }
 }
 
