@@ -324,8 +324,7 @@ bool CStreaming::AreTexturesUsedByRequestedModels(int32 txdModelId) {
 // 0x407A40
 void CStreaming::ClearFlagForAll(uint32 streamingFlag) {
     for (int32 i = 0; i < RESOURCE_ID_TOTAL; i++) {
-        CStreamingInfo& streamingInfo = ms_aInfoForModel[i];
-        streamingInfo.m_nFlags &= ~streamingFlag;
+        ms_aInfoForModel[i].m_nFlags &= ~streamingFlag;
     }
 }
 
