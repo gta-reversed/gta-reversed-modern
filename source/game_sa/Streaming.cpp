@@ -156,9 +156,12 @@ void CStreaming::InjectHooks()
 
 // 0x409650
 CLink<CEntity*>* CStreaming::AddEntity(CEntity* pEntity) {
-    if (pEntity->m_nType == ENTITY_TYPE_PED || pEntity->m_nType == ENTITY_TYPE_VEHICLE)
+    switch (pEntity->GetType()) {
+    case eEntityType::ENTITY_TYPE_PED:
+    case eEntityType::ENTITY_TYPE_VEHICLE:
         return nullptr;
-
+    }
+    
     CLink<CEntity*>* link = ms_rwObjectInstances.Insert(pEntity);
     if (!link) {
         CLink<CEntity*>* previousLink = ms_rwObjectInstances.usedListTail.prev;
