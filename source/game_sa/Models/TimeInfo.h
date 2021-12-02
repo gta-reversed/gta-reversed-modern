@@ -23,6 +23,8 @@ public:
     uint8 GetTimeOff() const { return m_nTimeOff; }
 
     void SetTimes(uint8 timeOn, uint8 timeOff) { m_nTimeOn = timeOn; m_nTimeOff = timeOff; }
+
+    bool IsVisibleNow() const noexcept { return CClock::GetIsTimeInRange(GetTimeOn(), GetTimeOff()); }
 };
 
 VALIDATE_SIZE(CTimeInfo, 0x4);

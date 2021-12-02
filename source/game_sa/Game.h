@@ -47,6 +47,8 @@ public:
     static void DrasticTidyUpMemory(bool a1);
     static void FinalShutdown();
     static void TidyUpMemory(bool a1, bool clearD3Dmem);
+
+    static bool IsInNormalWorld() { return currArea == eAreaCodes::AREA_CODE_NORMAL_WORLD; }
 };
 
 extern int32 &gameTxdSlot;

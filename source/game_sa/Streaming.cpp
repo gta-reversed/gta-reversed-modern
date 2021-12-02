@@ -196,60 +196,72 @@ void CStreaming::AddImageToList(char const* pFileName, bool bNotPlayerImg) {
 // 0x40C520
 void CStreaming::AddLodsToRequestList(CVector const& point, uint32 streamingFlags) {
     CWorld::IncrementCurrentScanCode();
+
     float minX = point.x - CRenderer::ms_fFarClipPlane;
     float maxX = point.x + CRenderer::ms_fFarClipPlane;
     float minY = point.y - CRenderer::ms_fFarClipPlane;
     float maxY = point.y + CRenderer::ms_fFarClipPlane;
+
     int32 startSectorX = std::max(CWorld::GetLodSectorX(minX), 0);
     int32 startSectorY = std::max(CWorld::GetLodSectorY(minY), 0);
     int32 endSectorX = std::min(CWorld::GetLodSectorX(maxX), MAX_LOD_PTR_LISTS_X - 1);
     int32 endSectorY = std::min(CWorld::GetLodSectorY(maxY), MAX_LOD_PTR_LISTS_Y - 1);
-    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
-            CPtrList& lodList = CWorld::GetLodPtrList(sectorX, sectorY);
-            ProcessEntitiesInSectorList(lodList, point.x, point.y, minX, minY, maxX, maxY, CRenderer::ms_fFarClipPlane, streamingFlags);
+
+    for (int32 sy = startSectorY; sy <= endSectorY; ++sy) {
+        for (int32 sx = startSectorX; sx <= endSectorX; ++sx) {
+            ProcessEntitiesInSectorList(CWorld::GetLodPtrList(sx, sy), point.x, point.y, minX, minY, maxX, maxY, CRenderer::ms_fFarClipPlane, streamingFlags);
         }
     }
 }
 
 // 0x40D3F0
 void CStreaming::AddModelsToRequestList(CVector const& point, uint32 streamingFlags) {
-    float fRadius = 80.0f;
-    if (CGame::currArea)
-        fRadius = 40.0f;
     CWorld::IncrementCurrentScanCode();
-    const float minX = point.x - fRadius;
-    const float maxX = point.x + fRadius;
-    const float minY = point.y - fRadius;
-    const float maxY = point.y + fRadius;
-    const int32 radius = static_cast<int32>(CWorld::GetHalfMapSectorX(fRadius));
-    const int32 squaredRadius1 = (radius - 1) * (radius - 1);
-    const int32 squaredRadius2 = (radius + 2) * (radius + 2);
+
+    const float fRadius = CGame::IsInNormalWorld() ? 80.0f : 40.0f;
+
+    // Defines a rectangle outside of which models won't be loaded.
+    const auto min = point - CVector2D{ fRadius, fRadius },
+               max = point + CVector2D{ fRadius, fRadius };
+
+    const auto noCheckRadius = static_cast<int32>(CWorld::GetHalfMapSectorX(fRadius));
+
+    // Smaller radius, models in it are loaded regardless if they're in the rectangle
+    // defined by `min` `max` or in `fRadius`.
+    const int32 radiusInnerSq = (noCheckRadius - 1) * (noCheckRadius - 1);
+
+    // Bigger radius, models in it are loaded only if in the above mentioned
+    // rectangle and radius.
+    const int32 radiusOuterSq = (noCheckRadius + 2) * (noCheckRadius + 2);
+
     const int32 pointX = CWorld::GetSectorX(point.x);
     const int32 pointY = CWorld::GetSectorY(point.y);
-    int32 startSectorX = std::max(CWorld::GetSectorX(minX), 0);
-    int32 startSectorY = std::max(CWorld::GetSectorY(minY), 0);
-    int32 endSectorX = std::min(CWorld::GetSectorX(maxX), MAX_SECTORS_X - 1);
-    int32 endSectorY = std::min(CWorld::GetSectorY(maxY), MAX_SECTORS_Y - 1);
+
+    int32 startSectorX = std::max(CWorld::GetSectorX(min.x), 0);
+    int32 startSectorY = std::max(CWorld::GetSectorY(min.y), 0);
+    int32 endSectorX = std::min(CWorld::GetSectorX(max.x), MAX_SECTORS_X - 1);
+    int32 endSectorY = std::min(CWorld::GetSectorY(max.y), MAX_SECTORS_Y - 1);
+
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-        const int32 distanceY = sectorY - pointY;
-        const int32 squaredDistanceY = distanceY * distanceY;
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
             CSector* pSector = GetSector(sectorX, sectorY);
+
+            const int32 distanceY = sectorY - pointY;
+            const int32 squaredDistanceY = distanceY * distanceY;
             const int32 distanceX = sectorX - pointX;
-            const int32 dotProduct = distanceX * distanceX + squaredDistanceY;
-            if (dotProduct > squaredRadius1) {
-                if (dotProduct <= squaredRadius2) {
-                    ProcessEntitiesInSectorList(pSector->m_buildings, point.x, point.y, minX, minY, maxX, maxY, fRadius, streamingFlags);
-                    ProcessEntitiesInSectorList(pRepeatSector->m_lists[REPEATSECTOR_PEDS], point.x, point.y, minX, minY, maxX, maxY, fRadius, streamingFlags);
-                    ProcessEntitiesInSectorList(pSector->m_dummies, point.x, point.y, minX, minY, maxX, maxY, fRadius, streamingFlags);
-                }
-            }
-            else {
+            const int32 pointSectorDistSq = distanceX * distanceX + squaredDistanceY;
+
+            if (pointSectorDistSq <= radiusInnerSq) {
                 ProcessEntitiesInSectorList(pSector->m_buildings, streamingFlags);
-                ProcessEntitiesInSectorList(pRepeatSector->m_lists[REPEATSECTOR_PEDS], streamingFlags);
+                ProcessEntitiesInSectorList(pRepeatSector->GetList(REPEATSECTOR_PEDS), streamingFlags);
                 ProcessEntitiesInSectorList(pSector->m_dummies, streamingFlags);
+            } else {
+                if (pointSectorDistSq <= radiusOuterSq) {
+                    ProcessEntitiesInSectorList(pSector->m_buildings, point.x, point.y, min.x, min.y, max.x, max.y, fRadius, streamingFlags);
+                    ProcessEntitiesInSectorList(pRepeatSector->GetList(REPEATSECTOR_PEDS), point.x, point.y, min.x, min.y, max.x, max.y, fRadius, streamingFlags);
+                    ProcessEntitiesInSectorList(pSector->m_dummies, point.x, point.y, min.x, min.y, max.x, max.y, fRadius, streamingFlags);
+                }
             }
         }
     }
@@ -2174,65 +2186,78 @@ void CStreaming::MakeSpaceFor(int32 memoryToCleanInBytes)
 }
 
 // 0x40C270
-void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, float posX, float posY, float minX, float minY, float maxX, float maxY, float radius, int32 streamingflags)
-{
+// Similar to the other overload but also checks if model is:
+// - In the rectangle defined by `minX, minY`, `maxX, maxY`
+// - In the radius of min(radius, <model draw distance> * <cam lod dist multiplier>)
+void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, float posX, float posY, float minX, float minY, float maxX, float maxY, float radius, int32 streamingflags) {
     CVector2D position(posX, posY);
-    float squaredRadius = radius * radius;
     for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->m_next) {
         CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->m_item);
-        if (pEntity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
-            pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
-            uint16 modelId = pEntity->m_nModelIndex;
-            if (ms_aInfoForModel[modelId].m_nLoadState != LOADSTATE_LOADED && !pEntity->m_bStreamingDontDelete) {
-                if ((pEntity->m_nAreaCode == CGame::currArea || pEntity->m_nAreaCode == AREA_CODE_13)
-                    && !pEntity->m_bDontStream && pEntity->m_bIsVisible)
-                {
-                    CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
-                    CTimeInfo* timeInfo = pModelInfo->GetTimeInfo();
-                    if (!timeInfo || CClock::GetIsTimeInRange(timeInfo->GetTimeOn(), timeInfo->GetTimeOff())) {
-                        float drawDistanceRadius = TheCamera.m_fLODDistMultiplier * pModelInfo->m_fDrawDistance;
-                        float squaredDrawDistanceRadius = drawDistanceRadius * drawDistanceRadius;
-                        if (squaredRadius >= squaredDrawDistanceRadius)
-                            squaredRadius = squaredDrawDistanceRadius;
-                        const CVector& entityPos = pEntity->GetPosition();
-                        if (entityPos.x > minX&& entityPos.x < maxX && entityPos.y > minY&& entityPos.y < maxY) {
-                            CVector2D distance = position - entityPos;
-                            if (distance.SquaredMagnitude() < squaredRadius) {
-                                if (pModelInfo->m_pRwObject && !pEntity->m_pRwObject)
-                                    pEntity->CreateRwObject();
-                                RequestModel(pEntity->m_nModelIndex, streamingflags);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+
+        if (pEntity->m_nScanCode == CWorld::ms_nCurrentScanCode)
+            continue;
+        pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+
+        const uint16 modelId = pEntity->m_nModelIndex;
+        if (CStreaming::ms_aInfoForModel[modelId].m_nLoadState == LOADSTATE_LOADED)
+            continue;
+        if (pEntity->m_bStreamingDontDelete)
+            continue;
+        if (pEntity->m_nAreaCode != CGame::currArea && pEntity->m_nAreaCode != AREA_CODE_13)
+            continue;
+        if (pEntity->m_bDontStream || !pEntity->m_bIsVisible)
+            continue;
+
+        // Check time for models visible only in specific time intervals
+        CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
+        CTimeInfo* pTimeInfo = pModelInfo->GetTimeInfo();
+        if (pTimeInfo && !pTimeInfo->IsVisibleNow())
+            continue;
+
+        const CVector& entityPos = pEntity->GetPosition();
+        if (!IsPointInRect2D(entityPos, { minX, minY }, { maxX, maxY }))
+            continue;
+
+        const float drawDistanceRadius = TheCamera.m_fLODDistMultiplier * pModelInfo->m_fDrawDistance;
+        if (!IsPointInCircle2D(entityPos, position, std::min(drawDistanceRadius, radius)))
+            continue;
+
+        if (pModelInfo->m_pRwObject && !pEntity->m_pRwObject)
+            pEntity->CreateRwObject();
+        RequestModel(pEntity->m_nModelIndex, streamingflags);    
     }
 }
 
 // 0x40C450
-void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, int32 streamingFlags)
-{
+// Load all required models in the given sector list
+// unlike the above function (other overload) this one doesn't do radius checks
+// just requests all models necessary (if they meet the conditions).
+void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, int32 streamingFlags) {
     for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->m_next) {
         CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->m_item);
-        if (pEntity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
-            pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
-            uint16 modelId = pEntity->m_nModelIndex;
-            if (CStreaming::ms_aInfoForModel[modelId].m_nLoadState != LOADSTATE_LOADED && !pEntity->m_bStreamingDontDelete) {
-                if ((pEntity->m_nAreaCode == CGame::currArea || pEntity->m_nAreaCode == AREA_CODE_13)
-                    && !pEntity->m_bDontStream && pEntity->m_bIsVisible)
-                {
-                    CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
-                    CTimeInfo* pTimeInfo = pModelInfo->GetTimeInfo();
-                    if (!pTimeInfo || CClock::GetIsTimeInRange(pTimeInfo->GetTimeOn(), pTimeInfo->GetTimeOff()))
-                    {
-                        if (pModelInfo->m_pRwObject && !pEntity->m_pRwObject)
-                            pEntity->CreateRwObject();
-                        RequestModel(pEntity->m_nModelIndex, streamingFlags);
-                    }
-                }
-            }
-        }
+        if (pEntity->m_nScanCode == CWorld::ms_nCurrentScanCode)
+            continue;
+        pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+
+        const uint16 modelId = pEntity->m_nModelIndex;
+        if (CStreaming::ms_aInfoForModel[modelId].m_nLoadState == LOADSTATE_LOADED)
+            continue;
+        if (pEntity->m_bStreamingDontDelete)
+            continue;
+        if (pEntity->m_nAreaCode != CGame::currArea && pEntity->m_nAreaCode != AREA_CODE_13)
+            continue;
+        if (pEntity->m_bDontStream || !pEntity->m_bIsVisible)
+            continue;
+
+        // Check time for models visible only in specific time intervals
+        CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
+        CTimeInfo* pTimeInfo = pModelInfo->GetTimeInfo();
+        if (pTimeInfo && !CClock::GetIsTimeInRange(pTimeInfo->GetTimeOn(), pTimeInfo->GetTimeOff()))
+            continue;
+
+        if (pModelInfo->m_pRwObject && !pEntity->m_pRwObject)
+            pEntity->CreateRwObject();
+        RequestModel(pEntity->m_nModelIndex, streamingFlags);
     }
 }
 
