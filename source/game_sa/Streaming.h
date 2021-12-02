@@ -156,7 +156,7 @@ public:
     static void DeleteRwObjectsAfterDeath(CVector const& point);
     static void DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes);
     static bool DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, int32 memoryToCleanInBytes);
-    static void DeleteRwObjectsInSectorList(CPtrList& list, int32 sectorX, int32 sectorY);
+    static void DeleteRwObjectsInSectorList(CPtrList& list, int32 sectorX = -1, int32 sectorY = -1);
     static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList& list, int32 memoryToCleanInBytes);
     static bool RemoveReferencedTxds(int32 memoryToCleanInBytes);
     static void DisableCopBikes(bool bDisable);

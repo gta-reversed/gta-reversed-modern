@@ -634,9 +634,9 @@ void CStreaming::DeleteAllRwObjects() {
         for (int32 sy = 0; sy < MAX_SECTORS_Y; ++sy) {
             CRepeatSector* pRepeatSector = GetRepeatSector(sx, sy);
             CSector* pSector = GetSector(sx, sy);
-            DeleteRwObjectsInSectorList(pSector->m_buildings, -1, -1);
-            DeleteRwObjectsInSectorList(pRepeatSector->m_lists[REPEATSECTOR_OBJECTS], -1, -1);
-            DeleteRwObjectsInSectorList(pSector->m_dummies, -1, -1);
+            DeleteRwObjectsInSectorList(pSector->m_buildings);
+            DeleteRwObjectsInSectorList(pRepeatSector->m_lists[REPEATSECTOR_OBJECTS]);
+            DeleteRwObjectsInSectorList(pSector->m_dummies);
         }
     }
 }
@@ -695,9 +695,9 @@ void CStreaming::DeleteRwObjectsAfterDeath(CVector const& point) {
                 if (abs(pointSecY - sy) > 3) {
                     CRepeatSector* pRepeatSector = GetRepeatSector(sx, sy);
                     CSector* pSector = GetSector(sx, sy);
-                    DeleteRwObjectsInSectorList(pSector->m_buildings, -1, -1);
-                    DeleteRwObjectsInSectorList(pRepeatSector->GetList(REPEATSECTOR_OBJECTS), -1, -1);
-                    DeleteRwObjectsInSectorList(pSector->m_dummies, -1, -1);
+                    DeleteRwObjectsInSectorList(pSector->m_buildings);
+                    DeleteRwObjectsInSectorList(pRepeatSector->GetList(REPEATSECTOR_OBJECTS));
+                    DeleteRwObjectsInSectorList(pSector->m_dummies);
                 }
             }
         }
