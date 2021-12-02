@@ -15,7 +15,7 @@ signed int* CStreaming::ms_aDefaultMedicModel = reinterpret_cast<signed int*>(0x
 signed int* CStreaming::ms_aDefaultFireEngineModel = reinterpret_cast<signed int*>(0x8A5AD4);
 signed int* CStreaming::ms_aDefaultFiremanModel = reinterpret_cast<signed int*>(0x8A5AE4);
 CDirectory*& CStreaming::ms_pExtraObjectsDir = *reinterpret_cast<CDirectory**>(0x8E48D0);
-tStreamingFileDesc* CStreaming::ms_files = reinterpret_cast<tStreamingFileDesc*>(0x8E48D8);
+tStreamingFileDesc (&CStreaming::ms_files)[TOTAL_IMG_ARCHIVES] = *(tStreamingFileDesc(*)[TOTAL_IMG_ARCHIVES])0x8E48D8;
 bool& CStreaming::ms_bLoadingBigModel = *reinterpret_cast<bool*>(0x8E4A58);
 // There are only two channels within CStreaming::ms_channel
 tStreamingChannel* CStreaming::ms_channel = reinterpret_cast<tStreamingChannel*>(0x8E4A60);
@@ -179,20 +179,18 @@ CLink<CEntity*>* CStreaming::AddEntity(CEntity* pEntity) {
 }
 
 // 0x407610
-int32 CStreaming::AddImageToList(char const* pFileName, bool bNotPlayerImg) {
-    // find a free slot
-    int32 fileIndex = 0;
-    for (; fileIndex < TOTAL_IMG_ARCHIVES; fileIndex++) {
-        if (!ms_files[fileIndex].m_szName[0])
-            break;
+void CStreaming::AddImageToList(char const* pFileName, bool bNotPlayerImg) {
+    for (tStreamingFileDesc& file : ms_files) {
+        if (!file.IsInUse()) {
+            // Not in use, so make entry
+            file = { pFileName, bNotPlayerImg };
+
+            // Success
+            return;
+        }
     }
-    if (fileIndex == TOTAL_IMG_ARCHIVES)
-        return 0;
-    // free slot found, load the IMG file
-    strcpy(ms_files[fileIndex].m_szName, pFileName);
-    ms_files[fileIndex].m_StreamHandle = CdStreamOpen(pFileName);
-    ms_files[fileIndex].m_bNotPlayerImg = bNotPlayerImg;
-    return fileIndex;
+    // If it reaches this point it failed to find an empty file slot
+    assert(0); // NOTSA
 }
 
 // 0x40C520

@@ -194,6 +194,7 @@ public:
     bool IsEntityOccluded();
     bool IsCurrentAreaOrBarberShopInterior();
     void UpdateRW();
+    eEntityType GetType() const noexcept { return m_nType; }
 
 public:
     // Rw callbacks

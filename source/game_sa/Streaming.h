@@ -42,7 +42,18 @@ struct tRwStreamInitializeData {
 VALIDATE_SIZE(tRwStreamInitializeData, 0x8);
 
 struct tStreamingFileDesc {
-    char  m_szName[40];
+    tStreamingFileDesc(const char* name, bool bNotPlayerImg) :
+        m_bNotPlayerImg(bNotPlayerImg),
+        m_StreamHandle(CdStreamOpen(name))
+    {
+        strncpy(m_szName, name, std::size(m_szName));
+    }
+
+    bool IsInUse() const noexcept {
+        return m_szName[0];
+    }
+
+    char  m_szName[40]; // If this string is empty (eg.: first elem in array is NULL) the entry isnt in use
     bool  m_bNotPlayerImg;
     char  __pad[3];
     int32 m_StreamHandle;
@@ -84,7 +95,7 @@ public:
     static signed int* ms_aDefaultFireEngineModel; // static signed int ms_aDefaultFireEngineModel[4]
     static signed int* ms_aDefaultFiremanModel;    // static signed int ms_aDefaultFiremanModel[4]
     static CDirectory*& ms_pExtraObjectsDir;
-    static tStreamingFileDesc* ms_files; // static tStreamingFileDesc ms_files[8]
+    static tStreamingFileDesc (&ms_files)[TOTAL_IMG_ARCHIVES];
     static bool& ms_bLoadingBigModel;
     // There are only two channels within CStreaming::ms_channel
     static tStreamingChannel* ms_channel; // static tStreamingChannel ms_channel[2]
@@ -131,7 +142,7 @@ public:
 
     static CLink<CEntity*>* AddEntity(CEntity* pEntity);
     //! return StreamingFile Index in CStreaming::ms_files
-    static int32 AddImageToList(char const* pFileName, bool bNotPlayerImg);
+    static void AddImageToList(char const* pFileName, bool bNotPlayerImg);
     static void AddLodsToRequestList(CVector const& point, uint32 streamingFlags);
     static void AddModelsToRequestList(CVector const& point, uint32 streamingFlags);
     static bool AddToLoadedVehiclesList(int32 modelId);
