@@ -966,63 +966,63 @@ void CStreaming::Load() {
 // 0x40EA10
 void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests)
 {
-    if (!m_bLoadingAllRequestedModels)
+    if (m_bLoadingAllRequestedModels)
+        return;
+    m_bLoadingAllRequestedModels = true;
+
+    FlushChannels();
+    int32 numModelsToLoad = 2 * ms_numModelsRequested >= 10 ? 2 * ms_numModelsRequested : 10;
+
+    int32 chIdx = 0;
+    while (true)
     {
-        m_bLoadingAllRequestedModels = true;
-        FlushChannels();
-        int32 numModelsToLoad = 10;
-        if (2 * ms_numModelsRequested >= 10)
-            numModelsToLoad = 2 * ms_numModelsRequested;
+        const tStreamingChannel& ch1 = ms_channel[0];
+        const tStreamingChannel& ch2 = ms_channel[1];
 
-        int32 channelId = 0;
-        while (true)
+        if (ms_pEndRequestedList->GetPrev() == ms_pStartRequestedList /*empty request list*/
+            && ch1.LoadStatus == LOADSTATE_NOT_LOADED
+            && ch2.LoadStatus == LOADSTATE_NOT_LOADED
+            || numModelsToLoad <= 0)
         {
-            const tStreamingChannel& firstChannel = ms_channel[0];
-            const tStreamingChannel& secondChannel = ms_channel[1];
-            if (ms_pEndRequestedList->GetPrev() == ms_pStartRequestedList
-                && firstChannel.LoadStatus == LOADSTATE_NOT_LOADED
-                && secondChannel.LoadStatus == LOADSTATE_NOT_LOADED
-                || numModelsToLoad <= 0)
-            {
-                break;
-            }
-
-            if (ms_bLoadingBigModel)
-            {
-                channelId = 0;
-            }
-
-            tStreamingChannel& channel = ms_channel[channelId];
-            if (channel.LoadStatus != LOADSTATE_NOT_LOADED) {
-                CdStreamSync(channelId);
-                channel.iLoadingLevel = 100;
-            }
-            if (channel.LoadStatus == LOADSTATE_LOADED) {
-                ProcessLoadingChannel(channelId);
-                if (channel.LoadStatus == LOADSTATE_REQUESTED)
-                    ProcessLoadingChannel(channelId);
-            }
-
-            if (bOnlyPriorityRequests && !ms_numPriorityRequests)
-            {
-                break;
-            }
-
-            if (!ms_bLoadingBigModel) {
-                tStreamingChannel& otherChannel = ms_channel[1 - channelId];
-                if (otherChannel.LoadStatus == LOADSTATE_NOT_LOADED)
-                    RequestModelStream(1 - channelId);
-                if (channel.LoadStatus == LOADSTATE_NOT_LOADED && !ms_bLoadingBigModel)
-                    RequestModelStream(channelId);
-            }
-            if (firstChannel.LoadStatus == LOADSTATE_NOT_LOADED && secondChannel.LoadStatus == LOADSTATE_NOT_LOADED)
-                break;
-            channelId = 1 - channelId;
-            --numModelsToLoad;
+            break;
         }
-        FlushChannels();
-        m_bLoadingAllRequestedModels = false;
+
+        if (ms_bLoadingBigModel)
+            chIdx = 0;
+
+        tStreamingChannel& channel = ms_channel[chIdx];
+        if (channel.LoadStatus != LOADSTATE_NOT_LOADED) {
+            CdStreamSync(chIdx);
+            channel.iLoadingLevel = 100;
+        }
+
+        if (channel.LoadStatus == LOADSTATE_LOADED) {
+            ProcessLoadingChannel(chIdx);
+            if (channel.LoadStatus == LOADSTATE_REQUESTED)
+                ProcessLoadingChannel(chIdx);
+        }
+
+        if (bOnlyPriorityRequests && ms_numPriorityRequests == 0)
+            break;
+
+        if (!ms_bLoadingBigModel) {
+            tStreamingChannel& otherChannel = ms_channel[1 - chIdx];
+
+            if (otherChannel.LoadStatus == LOADSTATE_NOT_LOADED)
+                RequestModelStream(1 - chIdx);
+
+            if (channel.LoadStatus == LOADSTATE_NOT_LOADED && !ms_bLoadingBigModel)
+                RequestModelStream(chIdx);
+        }
+
+        if (ch1.LoadStatus == LOADSTATE_NOT_LOADED && ch2.LoadStatus == LOADSTATE_NOT_LOADED)
+            break;
+
+        chIdx = 1 - chIdx; // Switch to other channel
+        --numModelsToLoad;
     }
+    FlushChannels();
+    m_bLoadingAllRequestedModels = false;
 }
 
 // 0x5B6170
@@ -1413,6 +1413,7 @@ void CStreaming::FlushChannels()
     }
     if (ms_channel[0].LoadStatus == LOADSTATE_REQUESTED)
         ProcessLoadingChannel(0);
+
     if (ms_channel[1].LoadStatus == LOADSTATE_LOADED)
     {
         CdStreamSync(1u);
