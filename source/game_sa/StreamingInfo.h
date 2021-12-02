@@ -63,6 +63,16 @@ public:
     CStreamingInfo* GetPrev() { return m_nPrevIndex == -1 ? nullptr : &ms_pArrayBase[m_nPrevIndex]; }
     bool InList();
     void RemoveFromList();
+
+    bool IsLoadedOrBeingRead() const noexcept {
+        switch (m_nLoadState) {
+        case eStreamingLoadState::LOADSTATE_LOADED:
+        case eStreamingLoadState::LOADSTATE_READING:
+            return true;
+        default:
+            return false;
+        }
+    }
 };
 
 VALIDATE_SIZE(CStreamingInfo, 0x14);

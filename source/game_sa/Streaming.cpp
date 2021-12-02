@@ -344,64 +344,70 @@ void CStreaming::ClearSlots(int32 totalSlots) {
 // 0x408E20
 int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
     uint32 nextRequestModelPos = UINT32_MAX;
-    uint32 firstRequestModelPos = UINT32_MAX;
+    uint32 firstRequestModelCdPos = UINT32_MAX;
     int32 firstRequestModelId = -1;
     int32 nextRequestModelId = -1;
-    auto pStreamingInfo = ms_pStartRequestedList->GetNext();
-    for (; pStreamingInfo != ms_pEndRequestedList; pStreamingInfo = pStreamingInfo->GetNext()) {
-        int32 modelId = pStreamingInfo - ms_aInfoForModel;
-        if (!bNotPriority || !ms_numPriorityRequests || pStreamingInfo->m_nFlags & STREAMING_PRIORITY_REQUEST) {
-            if (modelId < RESOURCE_ID_TXD) {
+    CStreamingInfo* info = ms_pStartRequestedList->GetNext();
+    for (; info != ms_pEndRequestedList; info = info->GetNext()) {
+        const int32 modelId = info - ms_aInfoForModel;
+        if (!bNotPriority || ms_numPriorityRequests == 0 || info->m_nFlags & STREAMING_PRIORITY_REQUEST) {
+            // Additional conditions for some model types (DFF, TXD, IFP)
+            if (modelId < RESOURCE_ID_TXD/*model is DFF*/) {
                 CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
-                int16 txdIndex = pModelInfo->m_nTxdIndex;
-                uint8 txdLoadState = ms_aInfoForModel[txdIndex + RESOURCE_ID_TXD].m_nLoadState;
-                if (txdLoadState != LOADSTATE_LOADED && txdLoadState != LOADSTATE_READING) {
-                    RequestModel(txdIndex + RESOURCE_ID_TXD, ms_aInfoForModel[modelId].m_nFlags);
+
+                // Make sure TXD will be loaded for this model
+                const int16 txdIndex = pModelInfo->m_nTxdIndex;
+                if (!ms_aInfoForModel[txdIndex + RESOURCE_ID_TXD].IsLoadedOrBeingRead()) {
+                    RequestModel(txdIndex + RESOURCE_ID_TXD, ms_aInfoForModel[modelId].m_nFlags); // Request TXD for this DFF
                     continue;
                 }
-                int32 animFileIndex = pModelInfo->GetAnimFileIndex();
+
+                // Check if it has an anim (IFP), if so, make sure it gets loaded
+                const int32 animFileIndex = pModelInfo->GetAnimFileIndex();
                 if (animFileIndex != -1) {
-                    int32 animModelId = animFileIndex + RESOURCE_ID_IFP;
-                    uint8 animLoadState = ms_aInfoForModel[animModelId].m_nLoadState;
-                    if (animLoadState != LOADSTATE_LOADED && animLoadState != LOADSTATE_READING) {
+                    const int32 animModelId = animFileIndex + RESOURCE_ID_IFP;
+                    if (!ms_aInfoForModel[animModelId].IsLoadedOrBeingRead()) {
                         RequestModel(animModelId, STREAMING_KEEP_IN_MEMORY);
                         continue;
                     }
                 }
             }
-            else if (modelId < RESOURCE_ID_COL) {
+            else if (modelId < RESOURCE_ID_COL/*model is TXD*/) {
+                // Make sure parent is/will be loaded
                 TxdDef* pTexDictionary = CTxdStore::ms_pTxdPool->GetAt(modelId - RESOURCE_ID_TXD);
-                int16 parentIndex = pTexDictionary->m_wParentIndex;
+                const int16 parentIndex = pTexDictionary->m_wParentIndex;
                 if (parentIndex != -1) {
-                    int32 txdModelId = parentIndex + RESOURCE_ID_TXD;
-                    uint8 loadState = ms_aInfoForModel[txdModelId].m_nLoadState;
-                    if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_READING) {
-                        RequestModel(txdModelId, STREAMING_KEEP_IN_MEMORY);
+                    const int32 parentModelIdx = parentIndex + RESOURCE_ID_TXD;
+                    if (!ms_aInfoForModel[parentModelIdx].IsLoadedOrBeingRead()) {
+                        RequestModel(parentModelIdx, STREAMING_KEEP_IN_MEMORY);
                         continue;
                     }
                 }
             }
-            else if ((modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR)
-                && (CCutsceneMgr::ms_cutsceneProcessing || ms_aInfoForModel[MODEL_MALE01].m_nLoadState != LOADSTATE_LOADED))
+            else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR/*model is IFP*/)
             {
-                continue;
+                if (CCutsceneMgr::ms_cutsceneProcessing || ms_aInfoForModel[MODEL_MALE01].m_nLoadState != LOADSTATE_LOADED) {
+                    // Skip in this case
+                    continue;
+                }
             }
-            const uint32 modelPos = ms_aInfoForModel[modelId].GetCdPosn();
-            if (modelPos < firstRequestModelPos) {
-                firstRequestModelPos = modelPos;
-                firstRequestModelId = pStreamingInfo - ms_aInfoForModel;
+
+            const uint32 modelCdPos = ms_aInfoForModel[modelId].GetCdPosn();
+            if (modelCdPos < firstRequestModelCdPos) {
+                firstRequestModelCdPos = modelCdPos;
+                firstRequestModelId = modelId;
             }
-            if (modelPos < nextRequestModelPos && modelPos >= streamLastPosn) {
-                nextRequestModelPos = modelPos;
-                nextRequestModelId = pStreamingInfo - ms_aInfoForModel;
+            if (modelCdPos < nextRequestModelPos && modelCdPos >= streamLastPosn) {
+                nextRequestModelPos = modelCdPos;
+                nextRequestModelId = modelId;
             }
         }
     }
-    int32 nextModelId = nextRequestModelId;
-    if (nextModelId == -1)
-        nextModelId = firstRequestModelId;
-    if (nextModelId != -1 || !ms_numPriorityRequests)
+
+    const int32 nextModelId = nextRequestModelId == -1 ? firstRequestModelId : nextRequestModelId;
+    if (nextModelId != -1 || ms_numPriorityRequests == 0)
         return nextModelId;
+
     ms_numPriorityRequests = 0;
     return nextModelId;
 }
