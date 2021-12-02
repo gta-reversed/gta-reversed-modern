@@ -920,20 +920,20 @@ bool CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList& list, int32 m
 }
 
 // 0x40D2F0
+// The naming seems to be incorrect. In fact it only removes TXDs with `STREAMING_LOADING_SCENE` not set and no references.
 bool CStreaming::RemoveReferencedTxds(int32 memoryToCleanInBytes)
 {
-    auto streamingInfo = ms_pEndLoadedList->GetPrev();
-    while (streamingInfo != CStreaming::ms_startLoadedList) {
-        auto previousStreamingInfo = streamingInfo->GetPrev();
-        const int32 modelId = streamingInfo - CStreaming::ms_aInfoForModel;
-        if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL && !(streamingInfo->m_nFlags & STREAMING_LOADING_SCENE)) {
+    for (auto info = ms_pEndLoadedList->GetPrev(); info != CStreaming::ms_startLoadedList; info = info->GetPrev()) {
+        const int32 modelId = info - CStreaming::ms_aInfoForModel;
+        if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL/*model is TXD*/
+            && !(info->m_nFlags & STREAMING_LOADING_SCENE)
+        ) {
             if (!CTxdStore::GetNumRefs(modelId - RESOURCE_ID_TXD)) {
                 CStreaming::RemoveModel(modelId);
                 if (static_cast<int32>(CStreaming::ms_memoryUsed) < memoryToCleanInBytes)
                     return true;
             }
         }
-        streamingInfo = previousStreamingInfo;
     }
     return false;
 }
