@@ -645,39 +645,37 @@ void CStreaming::DeleteAllRwObjects() {
 bool CStreaming::DeleteLeastUsedEntityRwObject(bool bNotOnScreen, uint32 streamingFlags) {
     const float fCameraFarPlane = TheCamera.m_pRwCamera->farPlane;
     CPlayerPed* pPlayer = FindPlayerPed(-1);
-    auto previousLink = ms_rwObjectInstances.usedListTail.prev;
-    while (previousLink != &ms_rwObjectInstances.usedListHead) {
-        CEntity* pEntity = previousLink->data;
-        previousLink = previousLink->prev;
-        if (!pEntity->m_bImBeingRendered && !pEntity->m_bStreamingDontDelete) {
-            const int32 modelId = pEntity->m_nModelIndex;
-            auto pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
-            float drawDistanceRadius = TheCamera.m_fLODDistMultiplier * pBaseModelInfo->m_fDrawDistance;
-            if (pEntity->m_bIsBIGBuilding)
-                drawDistanceRadius *= CRenderer::ms_lowLodDistScale;
-            CVector entityPos = pEntity->GetPosition();
-            if (pEntity->m_pLod)
-                entityPos = pEntity->m_pLod->GetPosition();
-            const float fMagnitude = (entityPos - TheCamera.GetPosition()).Magnitude();
-            CEntity* pEntityLastLod = pEntity;
-            for (CEntity* pEntityLod = pEntity->m_pLod; pEntityLod; pEntityLod = pEntityLod->m_pLod) {
-                pEntityLastLod = pEntityLod;
-            }
-            float fModelRadius = pBaseModelInfo->GetColModel()->GetBoundRadius();
-            if (ms_bLoadingScene
-                || bNotOnScreen && !pEntityLastLod->GetIsOnScreen()
-                || pEntity->m_nAreaCode != CGame::currArea && pEntity->m_nAreaCode != AREA_CODE_13
-                || drawDistanceRadius + 50.0f < fMagnitude
-                || fModelRadius + fCameraFarPlane < fMagnitude)
-            {
-                CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
-                if (streamingInfo.InList() && !(streamingFlags & streamingInfo.m_nFlags)) {
-                    if (!pPlayer || pPlayer->bInVehicle || pPlayer->m_pContactEntity != pEntity) {
-                        pEntity->DeleteRwObject();
-                        if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount) {
-                            RemoveModel(modelId);
-                            return true;
-                        }
+
+    for (auto prevLink = ms_rwObjectInstances.usedListTail.prev; prevLink != &ms_rwObjectInstances.usedListHead; prevLink = prevLink->prev) {
+        CEntity* pEntity = prevLink->data;
+        
+        if (pEntity->m_bImBeingRendered || pEntity->m_bStreamingDontDelete)
+            continue;
+
+        const int32 modelId = pEntity->m_nModelIndex;
+        const auto pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
+        float drawDistanceRadius = TheCamera.m_fLODDistMultiplier * pBaseModelInfo->m_fDrawDistance;
+        if (pEntity->m_bIsBIGBuilding)
+            drawDistanceRadius *= CRenderer::ms_lowLodDistScale;
+
+        const CVector entityPos = pEntity->m_pLod ? pEntity->m_pLod->GetPosition() : pEntity->GetPosition();
+        const float fEntityToCamDist = DistanceBetweenPoints(TheCamera.GetPosition(), entityPos);
+        CEntity* const pEntityLastLod = pEntity->FindLastLOD();
+
+        const float fModelRadius = pBaseModelInfo->GetColModel()->GetBoundRadius();
+        if (ms_bLoadingScene
+            || bNotOnScreen && !pEntityLastLod->GetIsOnScreen()
+            || pEntity->m_nAreaCode != CGame::currArea && pEntity->m_nAreaCode != AREA_CODE_13
+            || drawDistanceRadius + 50.0f < fEntityToCamDist
+            || fModelRadius + fCameraFarPlane < fEntityToCamDist)
+        {
+            CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
+            if (streamingInfo.InList() && !(streamingFlags & streamingInfo.m_nFlags)) {
+                if (!pPlayer || pPlayer->bInVehicle || pPlayer->m_pContactEntity != pEntity) {
+                    pEntity->DeleteRwObject();
+                    if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount) {
+                        RemoveModel(modelId);
+                        return true;
                     }
                 }
             }

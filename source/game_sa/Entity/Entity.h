@@ -196,6 +196,8 @@ public:
     void UpdateRW();
     eEntityType GetType() const noexcept { return m_nType; }
 
+    // Always returns a non-null value. In case there's no LOD object it returns `this`.
+    CEntity* FindLastLOD() noexcept;
 public:
     // Rw callbacks
     static RpAtomic* SetAtomicAlphaCB(RpAtomic* pAtomic, void* pData);

@@ -2466,6 +2466,13 @@ void CEntity::UpdateRW() {
         m_placement.UpdateRwMatrix(pRwMatrix);
 }
 
+CEntity* CEntity::FindLastLOD() noexcept {
+    CEntity* it = this;
+    while (it)
+        it = it->m_pLod;
+    return it;
+}
+
 RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* pAtomic, void* pData)
 {
     auto pGeometry = RpAtomicGetGeometry(pAtomic);
