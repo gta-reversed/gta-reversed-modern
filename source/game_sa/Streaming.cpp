@@ -413,20 +413,17 @@ int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
 }
 
 // 0x407F00
-bool CStreaming::HasSpecialCharLoaded(int32 slot)
-{
+bool CStreaming::HasSpecialCharLoaded(int32 slot) {
     return ms_aInfoForModel[slot + SPECIAL_MODELS_RESOURCE_ID].m_nLoadState == LOADSTATE_LOADED;
 }
 
 // 0x407820
-bool CStreaming::HasVehicleUpgradeLoaded(int32 modelId)
-{
+bool CStreaming::HasVehicleUpgradeLoaded(int32 modelId) {
     if (ms_aInfoForModel[modelId].m_nLoadState != LOADSTATE_LOADED)
         return false;
-    int16 otherUpgradeModelId = CVehicleModelInfo::ms_linkedUpgrades.FindOtherUpgrade(modelId);
-    if(otherUpgradeModelId == -1)
-        return true;
-    return ms_aInfoForModel[otherUpgradeModelId].m_nLoadState == LOADSTATE_LOADED;
+
+    const int16 otherUpgradeModelId = CVehicleModelInfo::ms_linkedUpgrades.FindOtherUpgrade(modelId);
+    return otherUpgradeModelId == -1 || ms_aInfoForModel[otherUpgradeModelId].m_nLoadState == LOADSTATE_LOADED;
 }
 
 // 0x40C6B0
