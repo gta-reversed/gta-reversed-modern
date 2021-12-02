@@ -1,5 +1,11 @@
 #include "StdInc.h"
 
+#include "EntityCollisionEvents.h"
+
+#include "TaskComplexAvoidOtherPedWhileWandering.h"
+#include "TaskComplexKillPedOnFoot.h"
+#include "EventKnockOffBike.h"
+
 void CEventPedCollisionWithPed::InjectHooks()
 {
     ReversibleHooks::Install("CEventPedCollisionWithPed", "CEventPedCollisionWithPed", 0x4AC990, &CEventPedCollisionWithPed::Constructor);

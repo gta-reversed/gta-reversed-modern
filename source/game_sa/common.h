@@ -8,13 +8,13 @@ Do not delete this comment block. Respect others' work!
 
 #include <string>
 
-#include "CVector.h"
-#include "CEntity.h"
-#include "CPlayerPed.h"
-#include "CVehicle.h"
-#include "CWeaponInfo.h"
-#include "CAnimBlendAssociation.h"
-#include "CAnimBlendClumpData.h"
+#include "Vector.h"
+#include "Entity.h"
+#include "PlayerPed.h"
+#include "Vehicle.h"
+#include "WeaponInfo.h"
+#include "AnimBlendAssociation.h"
+#include "AnimBlendClumpData.h"
 
 const char gta_empty_string[4] = {0, 0, 0, 0};
 
@@ -89,9 +89,9 @@ CEntity * FindPlayerEntity(int32 playerId = -1);
 // returns player train
 CTrain* FindPlayerTrain(int32 playerId = -1);
 // gets player coords
-CVector const& FindPlayerCentreOfWorld(int32 playerId = -1);
+const CVector& FindPlayerCentreOfWorld(int32 playerId = -1);
 // gets player coords with skipping sniper shift
-CVector const& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId = -1);
+const CVector& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId = -1);
 // returns player coords with skipping interior shift
 CVector FindPlayerCentreOfWorld_NoInteriorShift(int32 playerId = -1);
 // returns player angle in radians
@@ -103,8 +103,8 @@ CPlayerPed * FindPlayerPed(int32 playerId = -1);
 CVehicle* FindPlayerVehicle(int32 playerId = -1, bool bIncludeRemote = false);
 // returns player wanted
 CWanted * FindPlayerWanted(int32 playerId = -1);
-// 2 players are playing
-bool InTwoPlayersMode();
+
+CPlayerInfo& FindPlayerInfo(int playerId = -1);
 
 CVector Multiply3x3(CMatrix& m, CVector& v);
 CVector Multiply3x3(CVector& v, CMatrix& m);

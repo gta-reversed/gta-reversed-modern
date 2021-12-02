@@ -54,7 +54,7 @@ void Fx_c::InjectHooks() {
     // Install("Fx_c", "TriggerBulletSplash", 0x4A10E0, &Fx_c::TriggerBulletSplash);
     // Install("Fx_c", "TriggerFootSplash", 0x4A1150, &Fx_c::TriggerFootSplash);
 
-    Install("Fx_c", "RenderAddTri", 0x4A1410, &RenderAddTri);
+    Install("Fx_c", "RenderAddTri", 0x4A1410, &RenderAddTri_);
     Install("Fx_c", "RenderEnd", 0x4A1600, &RenderEnd);
     Install("Fx_c", "RenderBegin", 0x4A13B0, &RenderBegin);
 }
@@ -306,20 +306,45 @@ void RenderBegin(RwRaster* newRaster, RwMatrix* transform, uint32 transformRende
         RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)newRaster);
 }
 
+// Wrapper for original func
+// 0x4A1410
+void RenderAddTri_(
+    float x1, float y1, float z1,
+    float x2, float y2, float z2,
+    float x3, float y3, float z3,
+    float u1, float v1,
+    float u2, float v2,
+    float u3, float v3,
+    int32 r1, int32 g1, int32 b1, int32 a1,
+    int32 r2, int32 g2, int32 b2, int32 a2,
+    int32 r3, int32 g3, int32 b3, int32 a3
+) {
+    RenderAddTri(
+        { x1, y1, z1 },
+        { x2, y2, z2 },
+        { x3, y3, z3 },
+        { u1, v1 },
+        { u2, v2 },
+        { u3, v3 },
+        CRGBA().FromInt32(r1, g1, b1, a1),
+        CRGBA().FromInt32(r2, g2, b2, a2),
+        CRGBA().FromInt32(r3, g3, b3, a3)
+    );
+}
+
 // TODO: I honestly think this should be a class method...
 // Although originally it wasnt.
 // NOTE: Method signature changed to use CVector + RwTexCoords instead of raw values for convenience.
-// 0x4A1410
-void RenderAddTri(CVector pos1, CVector pos2, CVector pos3, RwTexCoords coord1, RwTexCoords coord2, RwTexCoords coord3, uint8 r1, uint8 g1, uint8 b1, uint8 a1, uint8 r2, uint8 g2, uint8 b2, uint8 a2, uint8 r3, uint8 g3, uint8 b3, uint8 a3) {
+void RenderAddTri(CVector pos1, CVector pos2, CVector pos3, RwTexCoords coord1, RwTexCoords coord2, RwTexCoords coord3, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3) {
     const auto GetVertex = [](unsigned i) {
         return &g_fx.m_pVerts[i];
     };
 
     const CVector pos[] = { pos1, pos2, pos3 };
     const RwRGBA color[] = {
-        {r1,  g1,  b1,  a1},
-        {r2,  g2,  b2,  a2},
-        {r3,  g3,  b3,  a3},
+        { color1.ToRwRGBA() },
+        { color2.ToRwRGBA() },
+        { color3.ToRwRGBA() },
     };
     for (unsigned i = 0; i < 3; i++) {
         RxObjSpace3DVertexSetPos(GetVertex(i), &pos[i]);
@@ -338,7 +363,7 @@ void RenderAddTri(CVector pos1, CVector pos2, CVector pos3, RwTexCoords coord1, 
     g_fx.m_nVerticesCount2 += 3;
     g_fx.m_nVerticesCount++;
 
-    if (g_fx.m_nVerticesCount2 >= 2045 || g_fx.m_nVerticesCount >= 4095) {
+    if (g_fx.m_nVerticesCount2 >= TOTAL_TEMP_BUFFER_VERTICES - 3 || g_fx.m_nVerticesCount >= TOTAL_TEMP_BUFFER_INDICES - 1) {
         RenderEnd(); // Render vertices to free up vertex buffer
     }
 }
@@ -367,3 +392,4 @@ void RotateVecIntoVec(RwV3d* vectorsOut, RwV3d* vectorsIn, RwV3d* dir) {
 void RotateVecAboutVec(RwV3d* out, RwV3d* arg1, RwV3d* arg2, float angle) {
     ((void(__cdecl*)(RwV3d*, RwV3d*, RwV3d*, float))0x4A1780)(out, arg1, arg2, angle);
 }
+

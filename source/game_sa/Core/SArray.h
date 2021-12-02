@@ -11,10 +11,11 @@ template <typename T> struct SArray /* : public std::vector<T> */ {
     /* iterator      */ T*    _First;    //
     /* iterator      */ T*    _Last;     //
     /* iterator      */ T*    _End;      //
-private:
+public:
     SArray() {}
     SArray(SArray const&) {}
     ~SArray() {}
+
     void operator=(SArray const&) {}
 };
 

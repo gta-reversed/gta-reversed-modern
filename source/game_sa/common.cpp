@@ -61,7 +61,6 @@ void InjectCommonHooks()
     ReversibleHooks::Install("common", "FindPlayerPed", 0x56E210, &FindPlayerPed);
     ReversibleHooks::Install("common", "FindPlayerVehicle", 0x56E0D0, &FindPlayerVehicle);
     ReversibleHooks::Install("common", "FindPlayerWanted", 0x56E230, &FindPlayerWanted);
-    ReversibleHooks::Install("common", "InTwoPlayersMode", 0x441390, &InTwoPlayersMode);
 
     ReversibleHooks::Install("common", "MakeUpperCase", 0x7186E0, &MakeUpperCase);
     ReversibleHooks::Install("common", "GetEventGlobalGroup", 0x4ABA50, &GetEventGlobalGroup);
@@ -161,16 +160,18 @@ CTrain* FindPlayerTrain(int32 playerId) {
 }
 
 // 0x56E250
-CVector const& FindPlayerCentreOfWorld(int32 playerId) {
+const CVector& FindPlayerCentreOfWorld(int32 playerId) {
     if (CCarCtrl::bCarsGeneratedAroundCamera)
         return TheCamera.GetPosition();
-    if (CVehicle* veh = FindPlayerVehicle(playerId, true))
-        return veh->GetPosition();
+
+    if (CVehicle* vehicle = FindPlayerVehicle(playerId, true))
+        return vehicle->GetPosition();
+
     return FindPlayerPed(playerId)->GetPosition();
 }
 
 // 0x56E320
-CVector const& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId) {
+const CVector& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId) {
     return ((CVector const&(__cdecl*)(int32))0x56E320)(playerId);
 }
 
@@ -223,10 +224,10 @@ CWanted* FindPlayerWanted(int32 playerId) {
     return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_PlayerData.m_pWanted;
 }
 
-// TODO: Rename CGameLogic::IsCoopGameGoingOn
-// 0x441390
-bool InTwoPlayersMode() {
-    return CWorld::Players[0].m_pPed && CWorld::Players[1].m_pPed;
+
+// NOTSA, inlined
+CPlayerInfo& FindPlayerInfo(int playerId) {
+    return CWorld::Players[playerId < 0 ? CWorld::PlayerInFocus : playerId];
 }
 
 // NOTE: This function doesn't add m.GetPosition() like
@@ -720,7 +721,7 @@ void SetAmbientAndDirectionalColours(float lighting) {
 // unused
 // 0x735AB0
 void SetFlashyColours(float lighting) {
-    if ((CTimer::m_snTimeInMilliseconds & 0x100) != 0) {
+    if ((CTimer::GetTimeInMS() & 0x100) != 0) {
         AmbientLightColour.red = 1.0f;
         AmbientLightColour.green = 1.0f;
         AmbientLightColour.blue = 1.0f;
@@ -737,7 +738,7 @@ void SetFlashyColours(float lighting) {
 // unused
 // 0x735B40
 void SetFlashyColours_Mild(float lighting) {
-    if ((CTimer::m_snTimeInMilliseconds & 0x100) != 0) {
+    if ((CTimer::GetTimeInMS() & 0x100) != 0) {
         AmbientLightColour.red = 1.0f;
         AmbientLightColour.green = 1.0f;
         AmbientLightColour.blue = 1.0f;
@@ -859,15 +860,20 @@ void SetLightsForNightVision() {
 // 0x6FAB30
 float GetDayNightBalance() {
     const auto minutes = CClock::GetMinutesToday();
-    if (minutes < 360)
+
+    if (minutes < 360.0f)
         return 1.0f;
-    if (minutes < 420)
-        return (float)(420 - minutes) / 60.0f;
-    if (minutes < 1200)
+
+    if (minutes < 420.0f)
+        return (420.0f - minutes) * (1.0f / 60.0f);
+
+    if (minutes < 1200.0f)
         return 0.0f;
-    if (minutes >= 1260)
+
+    if (minutes >= 1260.0f)
         return 1.0f;
-    return 1.0f - (float)(1260 - minutes) / 60.0f;
+
+    return 1.0f - (1260.0f - minutes) * (1.0f / 60.0f);
 }
 
 // 0x7226D0

@@ -8,7 +8,7 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "CMenuManager.h"
+#include "MenuManager.h"
 
 namespace JPegPlugin
 {

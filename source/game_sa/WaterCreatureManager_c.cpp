@@ -123,7 +123,7 @@ void WaterCreatureManager_c::Update(float fTimestep)
 {
     if (FindPlayerPed(0)->m_pPlayerData->m_nWaterCoverPerc > 50)
     {
-        const auto nCurTime = CTimer::m_snTimeInMilliseconds;
+        const auto nCurTime = CTimer::GetTimeInMS();
         if (nCurTime - m_nLastCreationCheckTime > 1000 && m_freeList.GetNumItems() > 0)
         {
             m_nLastCreationCheckTime = nCurTime;
