@@ -630,10 +630,10 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
 
 // 0x4090A0
 void CStreaming::DeleteAllRwObjects() {
-    for (int32 sectorX = 0; sectorX < MAX_SECTORS_X; ++sectorX) {
-        for (int32 sectorY = 0; sectorY < MAX_SECTORS_Y; ++sectorY) {
-            CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
-            CSector* pSector = GetSector(sectorX, sectorY);
+    for (int32 sx = 0; sx < MAX_SECTORS_X; ++sx) {
+        for (int32 sy = 0; sy < MAX_SECTORS_Y; ++sy) {
+            CRepeatSector* pRepeatSector = GetRepeatSector(sx, sy);
+            CSector* pSector = GetSector(sx, sy);
             DeleteRwObjectsInSectorList(pSector->m_buildings, -1, -1);
             DeleteRwObjectsInSectorList(pRepeatSector->m_lists[REPEATSECTOR_OBJECTS], -1, -1);
             DeleteRwObjectsInSectorList(pSector->m_dummies, -1, -1);
