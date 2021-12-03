@@ -216,7 +216,7 @@ public:
     static void ReclassifyLoadedCars();
     static void RemoveAllUnusedModels();
     static void RemoveBigBuildings();
-    static void RemoveBuildingsNotInArea(int32 areaCode);
+    static void RemoveBuildingsNotInArea(eAreaCodes areaCode);
     static void RemoveCarModel(int32 modelId);
     static void RemoveCurrentZonesModels();
     static void RemoveDodgyPedsFromRandomSlots();

@@ -1924,7 +1924,7 @@ void CStreaming::RemoveBigBuildings() {
 }
 
 // 0x4094B0
-void CStreaming::RemoveBuildingsNotInArea(int32 areaCode) {
+void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
     for (int32 i = CPools::ms_pBuildingPool->GetSize() - 1; i >= 0; i--) {
         CBuilding* pBuilding = CPools::ms_pBuildingPool->GetAt(i);
         if (pBuilding && pBuilding->m_pRwObject) {
