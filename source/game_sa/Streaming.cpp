@@ -1588,33 +1588,36 @@ void CStreaming::RequestModelStream(int32 chIdx)
 }
 
 // 0x40B450
-void CStreaming::RequestSpecialChar(int32 modelId, char const* name, int32 flags)
-{
+void CStreaming::RequestSpecialChar(int32 modelId, char const* name, int32 flags) {
     return RequestSpecialModel(modelId + SPECIAL_MODELS_RESOURCE_ID, name, flags);
 }
 
 // 0x409D10
+// TODO: Document this function...
 void CStreaming::RequestSpecialModel(int32 modelId, char const* name, int32 flags)
 {
-    CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
+    CBaseModelInfo* modelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CStreamingInfo& streamingInfo = CStreaming::ms_aInfoForModel[modelId];
     uint32 CdPosn, CdSize;
-    if (CKeyGen::GetUppercaseKey(name) == pModelInfo->m_nKey && streamingInfo.GetCdPosnAndSize(CdPosn, CdSize)) {
+    if (CKeyGen::GetUppercaseKey(name) == modelInfo->m_nKey && streamingInfo.GetCdPosnAndSize(CdPosn, CdSize)) {
         RequestModel(modelId, flags);
         return;
     }
-    if (pModelInfo->m_nRefCount > 0) {
+
+    if (modelInfo->m_nRefCount > 0) {
         for (int32 i = CPools::ms_pPedPool->GetSize() - 1; i >= 0; i--) {
-            if (pModelInfo->m_nRefCount <= 0)
+            if (modelInfo->m_nRefCount <= 0)
                 break;
+
             CPed* pPed = CPools::ms_pPedPool->GetAt(i);
             if (pPed && pPed->m_nModelIndex == modelId && !pPed->IsPlayer() && pPed->CanBeDeletedEvenInVehicle()) {
                 CTheScripts::RemoveThisPed(pPed);
             }
         }
         for (int32 i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
-            if (pModelInfo->m_nRefCount <= 0)
+            if (modelInfo->m_nRefCount <= 0)
                 break;
+
             CObject* pObject = CPools::ms_pObjectPool->GetAt(i);
             if (pObject && pObject->m_nModelIndex == modelId && pObject->CanBeDeleted()) {
                 CWorld::Remove(pObject);
@@ -1623,30 +1626,32 @@ void CStreaming::RequestSpecialModel(int32 modelId, char const* name, int32 flag
             }
         }
     }
-    const auto modelNameKey = pModelInfo->m_nKey;
-    pModelInfo->SetModelName(name);
+    const auto modelNameKey = modelInfo->m_nKey;
+    modelInfo->SetModelName(name);
     CBaseModelInfo* pFoundModelInfo = nullptr;
+
     for (int32 i = 0; i < 1001; i++) {
         CBaseModelInfo* pTheModelInfo = CModelInfo::ms_modelInfoPtrs[i];
         if (pTheModelInfo && modelNameKey == pTheModelInfo->m_nKey) {
             pFoundModelInfo = pTheModelInfo;
         }
     }
+
     if (pFoundModelInfo && pFoundModelInfo->m_nTxdIndex != -1 && CTxdStore::ms_pTxdPool->GetAt(pFoundModelInfo->m_nTxdIndex)) {
         CTxdStore::AddRef(pFoundModelInfo->m_nTxdIndex);
         RemoveModel(modelId);
         CTxdStore::RemoveRefWithoutDelete(pFoundModelInfo->m_nTxdIndex);
-    }
-    else {
+    } else {
         RemoveModel(modelId);
     }
     uint32 outOffset, outStreamingSize;
     CStreaming::ms_pExtraObjectsDir->FindItem(name, outOffset, outStreamingSize);
-    pModelInfo->ClearTexDictionary();
+    modelInfo->ClearTexDictionary();
     if (CTxdStore::FindTxdSlot(name) == -1)
-        pModelInfo->SetTexDictionary("generic");
+        modelInfo->SetTexDictionary("generic");
     else
-        pModelInfo->SetTexDictionary(name);
+        modelInfo->SetTexDictionary(name);
+
     // The first 3 bytes of outOffset is used for m_nCdPosn and
     // the remaining 1 byte is used for m_nImgId
     // outOffset & 0xFFFFF = returns the first 3 bytes and ignores the last one
