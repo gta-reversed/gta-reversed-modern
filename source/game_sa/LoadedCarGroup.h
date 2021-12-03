@@ -15,8 +15,8 @@ public:
     int32 RemoveMember(int32 modelindex);
     int32 PickRandomCar(bool arg1, bool arg2);
     int32 PickLeastUsedModel(int32 minRefs);
-    int32 GetMember(int32 count);
-    int32 CountMembers();
+    int32 GetMember(int32 count) const;
+    int32 CountMembers() const;
     void  Clear();
     void  AddMember(int32 member);
 };

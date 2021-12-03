@@ -1880,25 +1880,20 @@ void CStreaming::ReadIniFile() {
 
 // 0x40AFA0
 void CStreaming::ReclassifyLoadedCars() {
-    CLoadedCarGroup appropriateCarGroup{};
-    CLoadedCarGroup inAppropriateCarGroup{};
-    memcpy(&appropriateCarGroup, &CPopulation::m_AppropriateLoadedCars, sizeof(CLoadedCarGroup));
-    memcpy(&inAppropriateCarGroup, &CPopulation::m_InAppropriateLoadedCars, sizeof(CLoadedCarGroup));
+    CLoadedCarGroup appropriateCarGroup = CPopulation::m_AppropriateLoadedCars;
+    CLoadedCarGroup inAppropriateCarGroup = CPopulation::m_InAppropriateLoadedCars;
+
     CPopulation::m_AppropriateLoadedCars.Clear();
     CPopulation::m_InAppropriateLoadedCars.Clear();
-    for (int32 i = 0; i < appropriateCarGroup.CountMembers(); i++) {
-        int32 modelId = appropriateCarGroup.GetMember(i);
-        CLoadedCarGroup* carGroup = &CPopulation::m_AppropriateLoadedCars;
-        if (!IsCarModelNeededInCurrentZone(modelId))
-            carGroup = &CPopulation::m_InAppropriateLoadedCars;
-        carGroup->AddMember(modelId);
-    }
-    for (int32 i = 0; i < inAppropriateCarGroup.CountMembers(); i++) {
-        int32 modelId = inAppropriateCarGroup.GetMember(i);
-        CLoadedCarGroup* carGroup = &CPopulation::m_AppropriateLoadedCars;
-        if (!IsCarModelNeededInCurrentZone(modelId))
-            carGroup = &CPopulation::m_InAppropriateLoadedCars;
-        carGroup->AddMember(modelId);
+
+    for (auto& group : { appropriateCarGroup, inAppropriateCarGroup }) {
+        for (int32 i = 0; i < group.CountMembers(); i++) {
+            int32 modelId = group.GetMember(i);
+            if (IsCarModelNeededInCurrentZone(modelId))
+                CPopulation::m_AppropriateLoadedCars.AddMember(modelId);
+            else
+                CPopulation::m_InAppropriateLoadedCars.AddMember(modelId);
+        }
     }
 }
 
