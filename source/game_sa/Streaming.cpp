@@ -1405,6 +1405,7 @@ void CStreaming::FlushChannels()
 {
     if (ms_channel[1].LoadStatus == LOADSTATE_REQUESTED)
         ProcessLoadingChannel(1);
+
     if (ms_channel[0].LoadStatus == LOADSTATE_LOADED)
     {
         CdStreamSync(0);
@@ -1613,85 +1614,97 @@ void CStreaming::RequestSpecialModel(int32 modelId, char const* name, int32 flag
 }
 
 // 0x40E170
-bool CStreaming::ProcessLoadingChannel(int32 channelIndex)
+bool CStreaming::ProcessLoadingChannel(int32 chIdx)
 {
-    tStreamingChannel& streamingChannel = ms_channel[channelIndex];
-    const eCdStreamStatus streamStatus = CdStreamGetStatus(channelIndex);
-    if (streamStatus != eCdStreamStatus::READING_SUCCESS) {
-        if (streamStatus == eCdStreamStatus::READING)
-            return false;
-        if (streamStatus == eCdStreamStatus::WAITING_TO_READ)
-            return false;
-        streamingChannel.m_nCdStreamStatus = streamStatus;
-        streamingChannel.LoadStatus = LOADSTATE_READING;
+    tStreamingChannel& ch = ms_channel[chIdx];
 
-        bool isChannelErrorFree = ms_channelError == -1;
-        if (!isChannelErrorFree)
+    const eCdStreamStatus streamStatus = CdStreamGetStatus(chIdx);
+    if (streamStatus != eCdStreamStatus::READING_SUCCESS) {
+        switch (streamStatus) {
+        case eCdStreamStatus::READING:
+        case eCdStreamStatus::WAITING_TO_READ:
             return false;
-        ms_channelError = channelIndex;
-        RetryLoadFile(channelIndex);
+        }
+
+        // At this point the stream status is anything but READING_SUCCESS, READING, WAITING_TO_READ
+        // Which leaves us with FAILURE, that is, if the enum has no more entries but only these 4.
+        ch.m_nCdStreamStatus = streamStatus;
+        ch.LoadStatus = LOADSTATE_READING;
+
+        if (ms_channelError != -1)
+            return false; // Channel has errors
+
+        ms_channelError = chIdx;
+        RetryLoadFile(chIdx);
         return true;
     }
 
-    bool isRequested = streamingChannel.LoadStatus == LOADSTATE_REQUESTED;
-    streamingChannel.LoadStatus = LOADSTATE_NOT_LOADED; // 0;
-    if (!isRequested) {
-        int32 numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
-        for (int32 modelIndex = 0; modelIndex < numberOfModelIds; modelIndex++) {
-            int32 modelId = streamingChannel.modelIds[modelIndex];
-            if (modelId != -1) {
-                CBaseModelInfo* baseModelInfo = CModelInfo::GetModelInfo(modelId);
-                CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
-                int32 nCdSize = streamingInfo.GetCdSize();
+    const bool isRequested = ch.LoadStatus == LOADSTATE_REQUESTED;
+    ch.LoadStatus = LOADSTATE_NOT_LOADED;
+    if (isRequested) {
+        int32 bufferOffset = ch.modelStreamingBufferOffsets[0];
+        uint8* pFileContents = reinterpret_cast<uint8*>(&ms_pStreamingBuffer[chIdx][STREAMING_SECTOR_SIZE * bufferOffset]);
+        FinishLoadingLargeFile(pFileContents, ch.modelIds[0]);
+        ch.modelIds[0] = -1;
+    } else {
+        const int32 numberOfModelIds = std::size(ch.modelIds);
+        for (int32 chModelIter = 0; chModelIter < numberOfModelIds; chModelIter++) {
+            const int32 modelId = ch.modelIds[chModelIter];
+            if (modelId == -1)
+                continue;
 
-                if (modelId >= RESOURCE_ID_TXD
-                    || baseModelInfo->GetModelType() != MODEL_INFO_VEHICLE
-                    || ms_vehiclesLoaded.CountMembers() < desiredNumVehiclesLoaded
-                    || RemoveLoadedVehicle()
-                    || streamingInfo.m_nFlags & (STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED))
-                {
-                    if (modelId < RESOURCE_ID_IPL || modelId >= RESOURCE_ID_DAT)
-                        MakeSpaceFor(nCdSize * STREAMING_SECTOR_SIZE);
+            CBaseModelInfo* baseModelInfo = CModelInfo::GetModelInfo(modelId);
+            CStreamingInfo& info = ms_aInfoForModel[modelId];
 
-                    int32 bufferOffset = streamingChannel.modelStreamingBufferOffsets[modelIndex];
-                    uint8* pFileBuffer = reinterpret_cast <uint8*> (&ms_pStreamingBuffer[channelIndex][STREAMING_SECTOR_SIZE * bufferOffset]);
+            if (modelId >= RESOURCE_ID_TXD /*model is NOT DFF*/
+                || baseModelInfo->GetModelType() != MODEL_INFO_VEHICLE /* It's a DFF, check if its a vehicle */
+                || ms_vehiclesLoaded.CountMembers() < desiredNumVehiclesLoaded /* It's a vehicle, so lets check if we can load more */
+                || RemoveLoadedVehicle() /* no, so try to remove one, and load this in its place */
+                || info.m_nFlags & (STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED) /* failed, lets check if its absolutely mission critical */
+            ) {
+                if (modelId < RESOURCE_ID_IPL || modelId >= RESOURCE_ID_DAT/*model is NOT IPL*/)
+                    MakeSpaceFor(info.GetCdSize() * STREAMING_SECTOR_SIZE);
 
-                    ConvertBufferToObject(pFileBuffer, modelId);
+                const int32 bufferOffsetInSectors = ch.modelStreamingBufferOffsets[chModelIter];
+                uint8* pFileBuffer = reinterpret_cast <uint8*> (&ms_pStreamingBuffer[chIdx][STREAMING_SECTOR_SIZE * bufferOffsetInSectors]);
 
-                    if (streamingInfo.m_nLoadState == LOADSTATE_FINISHING) {
-                        streamingChannel.LoadStatus = LOADSTATE_REQUESTED;
-                        streamingChannel.modelStreamingBufferOffsets[modelIndex] = bufferOffset;
-                        streamingChannel.modelIds[modelIndex] = modelId;
-                        if (modelIndex == 0)
-                            continue;
-                    }
-                    streamingChannel.modelIds[modelIndex] = -1;
+                ConvertBufferToObject(pFileBuffer, modelId);
+
+                if (info.m_nLoadState == LOADSTATE_FINISHING) {
+                    ch.LoadStatus = LOADSTATE_REQUESTED;
+                    ch.modelStreamingBufferOffsets[chModelIter] = bufferOffsetInSectors;
+                    ch.modelIds[chModelIter] = modelId;
+                    if (chModelIter == 0)
+                        continue;
                 }
-                else {
-                    int32 modelTxdIndex = baseModelInfo->m_nTxdIndex;
-                    RemoveModel(modelId);
-                    if (streamingInfo.m_nFlags & (STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED))
-                        RequestModel(modelId, streamingInfo.m_nFlags);
-                    else if (!CTxdStore::GetNumRefs(modelTxdIndex))
-                        RemoveTxdModel(modelTxdIndex);
-                }
+                ch.modelIds[chModelIter] = -1;
+            } else {
+                // I think at this point it's guaranteed to be a vehicle (thus its a DFF),
+                // with `STREAMING_MISSION_REQUIRED` `STREAMING_GAME_REQUIRED` flags unset.
+
+                const int32 modelTxdIdx = baseModelInfo->m_nTxdIndex;
+                RemoveModel(modelId);
+
+                if (info.m_nFlags & (STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED)) {
+                    // Re-request it.
+                    // I think this code is unreachable, because
+                    // if any of the 2 flags (above) is set the `else` branch is never executed.
+                    RequestModel(modelId, info.m_nFlags); 
+                } else if (!CTxdStore::GetNumRefs(modelTxdIdx))
+                    RemoveTxdModel(modelTxdIdx); // Unload TXD, as it has no refs
             }
         }
     }
-    else {
-        int32 bufferOffset = streamingChannel.modelStreamingBufferOffsets[0];
-        uint8* pFileContents = reinterpret_cast<uint8*>(&ms_pStreamingBuffer[channelIndex][STREAMING_SECTOR_SIZE * bufferOffset]);
-        FinishLoadingLargeFile(pFileContents, streamingChannel.modelIds[0]);
-        streamingChannel.modelIds[0] = -1;
-    }
+
     if (ms_bLoadingBigModel) {
-        if (streamingChannel.LoadStatus != LOADSTATE_REQUESTED) {
+        if (ch.LoadStatus != LOADSTATE_REQUESTED) {
             ms_bLoadingBigModel = false;
             for (int32 i = 0; i < 16; i++) {
                 ms_channel[1].modelIds[i] = -1;
             }
         }
     }
+
     return true;
 }
 
