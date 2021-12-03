@@ -1028,20 +1028,22 @@ void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests)
 // 0x5B6170
 void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
 {
-    FILE* file = CFileMgr::OpenFile(filename, "rb");
-    if (!file)
+    FILE* imgFile = CFileMgr::OpenFile(filename, "rb");
+    if (!imgFile)
         return;
 
     int32 previousModelId = -1;
     char version[4];
     int32 entryCount;
-    CFileMgr::Read(file, &version, 4u);
-    CFileMgr::Read(file, &entryCount, 4u);
+    CFileMgr::Read(imgFile, &version, 4u);
+    CFileMgr::Read(imgFile, &entryCount, 4u);
     for (int32 i = 0; i < entryCount; i++) {
         CDirectory::DirectoryInfo entryInfo{};
-        CFileMgr::Read(file, &entryInfo, sizeof(CDirectory::DirectoryInfo));
-        if (entryInfo.m_nStreamingSize > ms_streamingBufferSize)
-            ms_streamingBufferSize = entryInfo.m_nStreamingSize;
+        CFileMgr::Read(imgFile, &entryInfo, sizeof(CDirectory::DirectoryInfo));
+
+        ms_streamingBufferSize = std::max(ms_streamingBufferSize, (uint32)entryInfo.m_nStreamingSize);
+
+        // Find extension from name
         const int32 nameSize = sizeof(CDirectory::DirectoryInfo::m_szName);
         entryInfo.m_szName[nameSize - 1] = 0;
         char* pExtension = strchr(entryInfo.m_szName, '.');
@@ -1051,67 +1053,78 @@ void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
             continue;
         }
         *pExtension = 0;
+
+        const auto ExtensionIs = [=](const char what[]) {
+            return _memicmp(pExtension + 1, what, strlen(what)) == 0;
+        };
+
         int32 modelId = -1;
-        if (!_memicmp(pExtension + 1, "DFF", 3u)) {
+        if (ExtensionIs("DFF")) {
             if (!CModelInfo::GetModelInfo(entryInfo.m_szName, &modelId)) {
                 entryInfo.m_nOffset |= archiveId << 24;
                 CStreaming::ms_pExtraObjectsDir->AddItem(entryInfo);
                 previousModelId = -1;
                 continue;
             }
-        }
-        else if (!_memicmp(pExtension + 1, "TXD", 3u)) {
+
+        } else if (ExtensionIs("TXD")) {
             int32 txdSlot = CTxdStore::FindTxdSlot(entryInfo.m_szName);
             if (txdSlot == -1) {
                 txdSlot = CTxdStore::AddTxdSlot(entryInfo.m_szName);
                 CVehicleModelInfo::AssignRemapTxd(entryInfo.m_szName, txdSlot);
             }
             modelId = txdSlot + RESOURCE_ID_TXD;
-        }
-        else if (!_memicmp(pExtension + 1, "COL", 3u)) {
+
+        } else if (ExtensionIs("COL")) {
             int32 colSlot = CColStore::FindColSlot();
             if (colSlot == -1)
                 colSlot = CColStore::AddColSlot(entryInfo.m_szName);
             modelId = colSlot + RESOURCE_ID_COL;
-        }
-        else if (!_memicmp(pExtension + 1, "IPL", 3u)) {
+
+        } else if (ExtensionIs("IPL")) {
             int32 iplSlot = CIplStore::FindIplSlot(entryInfo.m_szName);
             if (iplSlot == -1)
                 iplSlot = CIplStore::AddIplSlot(entryInfo.m_szName);
             modelId = iplSlot + RESOURCE_ID_IPL;
-        }
-        else if (!_memicmp(pExtension + 1, "DAT", 3u)) {
-            sscanf(&entryInfo.m_szName[5], "%d", &modelId);
+
+        } else if (ExtensionIs("DAT")) {
+            // Extract nodes file sector from name
+            sscanf(&entryInfo.m_szName[sizeof("nodes") - 1], "%d", &modelId);
             modelId += RESOURCE_ID_DAT;
-        }
-        else if (!_memicmp(pExtension + 1, "IFP", 3u)) {
+
+        } else if (ExtensionIs("IFP")) {
             modelId = CAnimManager::RegisterAnimBlock(entryInfo.m_szName) + RESOURCE_ID_IFP;
-        }
-        else if (!_memicmp(pExtension + 1, "RRR", 3u)) {
+
+        } else if (ExtensionIs("RRR")) {
             modelId = CVehicleRecording::RegisterRecordingFile(entryInfo.m_szName) + RESOURCE_ID_RRR;
-        }
-        else if (!_memicmp(pExtension + 1, "SCM", 3u)) {
+
+        } else if (ExtensionIs("SCM")) {
             modelId = CTheScripts::StreamedScripts.RegisterScript(entryInfo.m_szName) + RESOURCE_ID_SCM;
-        }
-        else {
-            *pExtension = '.';
+
+        } else {
+            *pExtension = '.'; // Unnecessary because extension is limited to this scope only.
             previousModelId = -1;
             continue;
         }
+
         uint32 cdPos, cdSize;
         CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
         if (!streamingInfo.GetCdPosnAndSize(cdPos, cdSize)) {
             streamingInfo.m_nImgId = archiveId;
+
             if (entryInfo.m_nSizeInArchive)
                 entryInfo.m_nStreamingSize = entryInfo.m_nSizeInArchive;
+
             streamingInfo.SetCdPosnAndSize(entryInfo.m_nOffset, entryInfo.m_nStreamingSize);
             streamingInfo.m_nFlags = 0;
+
             if (previousModelId != -1)
                 ms_aInfoForModel[previousModelId].m_nNextIndexOnCd = modelId;
+
             previousModelId = modelId;
         }
     }
-    CFileMgr::CloseFile(file);
+    CFileMgr::CloseFile(imgFile);
 }
 
 // 0x5B82C0

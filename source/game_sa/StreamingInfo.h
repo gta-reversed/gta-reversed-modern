@@ -30,7 +30,7 @@ class CStreamingInfo {
 public:
     int16 m_nNextIndex; // ms_pArrayBase array index
     int16 m_nPrevIndex; // ms_pArrayBase array index
-    int16 m_nNextIndexOnCd;
+    int16 m_nNextIndexOnCd; // ModelId after this file in the containing image file
     union {
         uint8 m_nFlags; // see eStreamingFlags
         struct {
