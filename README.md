@@ -31,7 +31,7 @@ Using other plugins is strongly discouraged as the compact version doesn't like 
 
 You can either build with **Premake5** or **CMake**; that's up to you.
 
-First of all; clone the project, including the submodules:
+First clone the project, including the submodules:
 ```shell
 git clone --recurse-submodules https://github.com/Updated-Classic/gta-reversed-modern.git
 ```
