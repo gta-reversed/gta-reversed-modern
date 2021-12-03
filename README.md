@@ -9,7 +9,7 @@ Building this project will result in a DLL file that can be injected into GTA:SA
 The progress of reversed classes can be tracked [here](docs/ReversedClasses.MD). (needs to be updated)
 
 ### Coding Guidelines 
-Before you start writing code, please make sure to read the [coding guidelines](docs/CodingGuidelines.MD) for this project. (outdated and 🤮)
+Before you start writing code, please make sure to read the [coding guidelines](docs/CodingGuidelines.MD) for this project.
 
 ### Requirements
 
