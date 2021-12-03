@@ -1281,25 +1281,30 @@ void CStreaming::RequestFilesInChannel(int32 chIdx) {
 // 0x4087E0
 void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
 {
-    CStreamingInfo& modelStreamingInfo = ms_aInfoForModel[modelId];
-    char loadState = modelStreamingInfo.m_nLoadState;
-    if (loadState == LOADSTATE_REQUESTED)
-    {
-        if ((streamingFlags & STREAMING_PRIORITY_REQUEST) && !(modelStreamingInfo.m_nFlags & STREAMING_PRIORITY_REQUEST))
+    CStreamingInfo& info = ms_aInfoForModel[modelId];
+    auto loadState = info.m_nLoadState;
+    switch (info.m_nLoadState) {
+    case eStreamingLoadState::LOADSTATE_REQUESTED: {
+        if ((streamingFlags & STREAMING_PRIORITY_REQUEST) && !(info.m_nFlags & STREAMING_PRIORITY_REQUEST))
         {
             ++ms_numPriorityRequests;
-            modelStreamingInfo.m_nFlags |= STREAMING_PRIORITY_REQUEST;
+            info.m_nFlags |= STREAMING_PRIORITY_REQUEST;
         }
+        break;
     }
-    else if (loadState)
-    {
+    case eStreamingLoadState::LOADSTATE_NOT_LOADED:
+        break;
+    default: {
         streamingFlags &= ~STREAMING_PRIORITY_REQUEST;
+        break;
     }
+    }
+    info.m_nFlags |= streamingFlags;
 
-    modelStreamingInfo.m_nFlags |= streamingFlags;
-    if (loadState == LOADSTATE_LOADED) {
-        if (modelStreamingInfo.InList()) {
-            modelStreamingInfo.RemoveFromList();
+    switch (info.m_nLoadState) {
+    case eStreamingLoadState::LOADSTATE_LOADED: {
+        if (info.InList()) {
+            info.RemoveFromList();
             if (modelId < RESOURCE_ID_TXD) {
                 CBaseModelInfo* modelInfo = CModelInfo::GetModelInfo(modelId);
                 size_t modelType = modelInfo->GetModelType();
@@ -1309,37 +1314,52 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
                 }
             }
 
-            if (!(modelStreamingInfo.m_nFlags & (STREAMING_GAME_REQUIRED | STREAMING_MISSION_REQUIRED)))
-                modelStreamingInfo.AddToList(ms_startLoadedList);
+            if (!(info.m_nFlags & (STREAMING_GAME_REQUIRED | STREAMING_MISSION_REQUIRED)))
+                info.AddToList(ms_startLoadedList);
         }
+        break;
     }
-    else if (loadState != LOADSTATE_READING && loadState != LOADSTATE_REQUESTED && loadState != LOADSTATE_FINISHING) {
-        if (loadState == LOADSTATE_NOT_LOADED) {
-            if (modelId >= RESOURCE_ID_TXD) {
-                if (modelId < RESOURCE_ID_COL) {
-                    int32 txdEntryParentIndex = CTxdStore::GetParentTxdSlot(modelId - RESOURCE_ID_TXD);
-                    if (txdEntryParentIndex != -1)
-                        RequestTxdModel(txdEntryParentIndex, streamingFlags);
-                }
+    case eStreamingLoadState::LOADSTATE_READING:
+    case eStreamingLoadState::LOADSTATE_REQUESTED:
+    case eStreamingLoadState::LOADSTATE_FINISHING:
+        break;
+
+    case eStreamingLoadState::LOADSTATE_NOT_LOADED: {
+        if (modelId >= RESOURCE_ID_TXD) {
+            if (modelId < RESOURCE_ID_COL) {
+                // Model is TXD
+                int32 txdEntryParentIndex = CTxdStore::GetParentTxdSlot(modelId - RESOURCE_ID_TXD);
+                if (txdEntryParentIndex != -1)
+                    RequestTxdModel(txdEntryParentIndex, streamingFlags);
             }
-            else
-            {
-                CBaseModelInfo* modelInfo = CModelInfo::GetModelInfo(modelId);
-                RequestTxdModel(modelInfo->m_nTxdIndex, streamingFlags);
-                int32 animFileIndex = modelInfo->GetAnimFileIndex();
-                if (animFileIndex != -1)
-                    RequestModel(animFileIndex + RESOURCE_ID_IFP, STREAMING_KEEP_IN_MEMORY);
-            }
-            modelStreamingInfo.AddToList(ms_pStartRequestedList);
-            ++ms_numModelsRequested;
-            if (streamingFlags & STREAMING_PRIORITY_REQUEST)
-                ++ms_numPriorityRequests;
+        } else {
+            // Model is DFF
+
+            CBaseModelInfo* modelInfo = CModelInfo::GetModelInfo(modelId);
+            RequestTxdModel(modelInfo->m_nTxdIndex, streamingFlags);
+
+            const int32 animFileIndex = modelInfo->GetAnimFileIndex();
+            if (animFileIndex != -1)
+                RequestModel(animFileIndex + RESOURCE_ID_IFP, STREAMING_KEEP_IN_MEMORY);
         }
-        modelStreamingInfo.m_nFlags = streamingFlags;
-        modelStreamingInfo.m_nLoadState = LOADSTATE_REQUESTED;// requested, loading
+
+        info.AddToList(ms_pStartRequestedList);
+
+        ++ms_numModelsRequested;
+        if (streamingFlags & STREAMING_PRIORITY_REQUEST)
+            ++ms_numPriorityRequests;
+
+        // Fallthrough 
+        __fallthrough;
+    }
+    default: {
+        info.m_nFlags = streamingFlags;
+        info.m_nLoadState = LOADSTATE_REQUESTED; // requested, loading
+    }
     }
 }
 
+// TODO: Make more of these functions, really makes the code cleaner.
 // 0x407100
 void CStreaming::RequestTxdModel(int32 slot, int32 streamingFlags) {
     RequestModel(slot + RESOURCE_ID_TXD, streamingFlags);
