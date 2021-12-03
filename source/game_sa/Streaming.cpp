@@ -1269,14 +1269,11 @@ void CStreaming::RequestFile(int32 modelId, int32 posn, int32 size, int32 imgId,
 }
 
 // 0x409050
-void CStreaming::RequestFilesInChannel(int32 channelId) {
-    const tStreamingChannel& channel = ms_channel[channelId];
-    for (int32 i = 0; i < 16; i++) {
-        const int32 modelId = channel.modelIds[i];
+void CStreaming::RequestFilesInChannel(int32 chIdx) {
+    for (auto modelId : ms_channel[chIdx].modelIds) {
         if (modelId != -1) {
-            int32 flags = ms_aInfoForModel[modelId].m_nFlags;
             RemoveModel(modelId);
-            RequestModel(modelId, flags);
+            RequestModel(modelId, ms_aInfoForModel[modelId].m_nFlags);
         }
     }
 }
