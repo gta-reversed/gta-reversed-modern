@@ -1235,8 +1235,7 @@ void CStreaming::PossiblyStreamCarOutAfterCreation(int32 modelId) {
 }
 
 // 0x4096D0
-void CStreaming::RenderEntity(CLink<CEntity*>* streamingLink)
-{
+void CStreaming::RenderEntity(CLink<CEntity*>* streamingLink) {
     if (streamingLink && streamingLink != ms_renderEntityLink) {
         streamingLink->Remove();
         ms_renderEntityLink->Insert(streamingLink);
@@ -1256,17 +1255,15 @@ void CStreaming::RequestBigBuildings(CVector const& point) {
 }
 
 // 0x40A080
-void CStreaming::RequestFile(int32 modelId, int32 posn, int32 size, int32 imgId, int32 streamingFlags)
-{
-    auto& streamingInfo = ms_aInfoForModel[modelId];
+void CStreaming::RequestFile(int32 modelId, int32 posn, int32 size, int32 imgId, int32 streamingFlags) {
+    auto& info = ms_aInfoForModel[modelId];
     const uint32 blockOffset = (imgId << 24) | posn;
-    if (streamingInfo.GetCdSize() && streamingInfo.GetCdPosn() == blockOffset && streamingInfo.GetCdSize() == size) {
+    if (info.GetCdSize() && info.GetCdPosn() == blockOffset && info.GetCdSize() == size) {
         RequestModel(modelId, streamingFlags);
-    }
-    else {
+    } else {
         RemoveModel(modelId);
-        streamingInfo.SetCdPosnAndSize(blockOffset & 0xFFFFFF, size);
-        streamingInfo.m_nImgId = imgId;
+        info.SetCdPosnAndSize(blockOffset & 0xFFFFFF, size);
+        info.m_nImgId = imgId;
         RequestModel(modelId, streamingFlags);
     }
 }
