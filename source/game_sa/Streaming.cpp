@@ -1167,18 +1167,21 @@ void CStreaming::LoadInitialWeapons() {
 
 // 0x40EB70
 void CStreaming::LoadScene(CVector const& point) {
-    eLevelName level = CTheZones::GetLevelFromPosition(point);
-    CVector playerPosition;
     ms_bLoadingScene = true;
-    if (CWorld::Players[0].m_pPed)
-        playerPosition = FindPlayerCoors(-1);
-    auto streamingInfo = ms_pEndRequestedList->GetPrev();
-    while (streamingInfo != ms_pStartRequestedList) {
-        auto previousStreamingInfo = streamingInfo->GetPrev();
-        if (!(streamingInfo->m_nFlags & STREAMING_DONTREMOVE_IN_LOADSCENE))
-            RemoveModel(streamingInfo - ms_aInfoForModel);
-        streamingInfo = previousStreamingInfo;
+
+    CVector playerPosition = FindPlayerCoors(0);
+
+    // Can't use a simple `for` loop here, because model is unlinked when removed.
+    {
+        CStreamingInfo* iter = ms_pEndRequestedList->GetPrev();
+        while (iter != ms_pStartRequestedList) {
+            const auto next = iter->GetPrev();
+            if (!iter->DontRemoveInLoadScene())
+                RemoveModel(iter - ms_aInfoForModel);
+            iter = next;
+        }
     }
+
     CRenderer::m_loadingPriority = false;
     DeleteAllRwObjects();
     RequestBigBuildings(point);
@@ -1187,7 +1190,7 @@ void CStreaming::LoadScene(CVector const& point) {
     AddModelsToRequestList(point, STREAMING_LOADING_SCENE);
     CRadar::StreamRadarSections(point);
     ThePaths.LoadSceneForPathNodes(point);
-    if (!CGame::currArea) {
+    if (CGame::currArea == eAreaCodes::AREA_CODE_NORMAL_WORLD) {
         if (ms_bLoadVehiclesInLoadScene) {
             if (CTheZones::GetZoneInfo(point, nullptr) != CTheZones::GetZoneInfo(playerPosition, nullptr)) {
                 for (int32 i = 0; i < 5; i++) {
@@ -1195,7 +1198,7 @@ void CStreaming::LoadScene(CVector const& point) {
                 }
             }
         }
-        StreamCopModels(level);
+        StreamCopModels(CTheZones::GetLevelFromPosition(point));
     }
     LoadAllRequestedModels(false);
     InstanceLoadedModels(point);

@@ -73,6 +73,12 @@ public:
             return false;
         }
     }
-};
 
+    bool DontRemoveInLoadScene() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_DONTREMOVE_IN_LOADSCENE; }
+    bool IsGameRequired() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_GAME_REQUIRED; }
+    bool IsMissionRequired() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_MISSION_REQUIRED; }
+    bool DoKeepInMemory() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_KEEP_IN_MEMORY; }
+    bool IsPriorityRequest() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_PRIORITY_REQUEST; }
+    bool IsLoadingScene() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_LOADING_SCENE; }
+};
 VALIDATE_SIZE(CStreamingInfo, 0x14);
