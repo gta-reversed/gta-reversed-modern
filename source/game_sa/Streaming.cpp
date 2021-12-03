@@ -1150,7 +1150,7 @@ void CStreaming::LoadCdDirectory()
 
 // 0x40D3D0
 void CStreaming::LoadInitialPeds() {
-    RequestModel(MODEL_MALE01, STREAMING_GAME_REQUIRED);
+    RequestModel(MODEL_MALE01, STREAMING_GAME_REQUIRED); // Without this model the game basically crashes, it has to be loaded at all times.
     StreamCopModels(LEVEL_NAME_LOS_SANTOS);
 }
 
