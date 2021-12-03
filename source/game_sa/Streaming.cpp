@@ -1219,8 +1219,7 @@ void CStreaming::LoadSceneCollision(CVector const& point) {
 void CStreaming::LoadZoneVehicle(const CVector& point) {
     if (CPopCycle::m_pCurrZoneInfo) {
         CTheZones::GetZoneInfo(point, nullptr); // called but return value is ignored
-        int32 carGroupId = CPopCycle::PickARandomGroupOfOtherPeds();
-        int32 modelId = CCarCtrl::ChooseCarModelToLoad(carGroupId);
+        const auto modelId = CCarCtrl::ChooseCarModelToLoad(CPopCycle::PickARandomGroupOfOtherPeds());
         if (modelId >= 0)
             RequestModel(modelId, STREAMING_KEEP_IN_MEMORY);
     }
