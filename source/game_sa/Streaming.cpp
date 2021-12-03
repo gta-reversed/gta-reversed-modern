@@ -2307,46 +2307,53 @@ void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, int32 streamingFlag
 }
 
 // 0x4076C0
-void CStreaming::RetryLoadFile(int32 channelId) {
+void CStreaming::RetryLoadFile(int32 chIdx) {
     printf("CStreaming::RetryLoadFile called!\n"); // NOTSA
 
-    if (CStreaming::ms_channelError == -1)
+    if (ms_channelError == -1)
         return CLoadingScreen::Continue();
 
-    // CLoadingScreen::Pause(); // empty function
-    if (CStreaming::ms_channelError == -1)
+    CLoadingScreen::Pause(); // empty function
+    if (ms_channelError == -1)
         return;
 
-    tStreamingChannel& streamingChannel = CStreaming::ms_channel[channelId];
+    tStreamingChannel& streamingChannel = CStreaming::ms_channel[chIdx];
     while (true) {
         bool bStreamRead = false;
-        const eStreamingLoadState loadState = streamingChannel.LoadStatus;
-        if (loadState == LOADSTATE_NOT_LOADED) {
-            bStreamRead = true;
-        }
-        else if (loadState == LOADSTATE_LOADED) {
-            if (CStreaming::ProcessLoadingChannel(channelId)) {
+        switch (streamingChannel.LoadStatus) {
+        case eStreamingLoadState::LOADSTATE_LOADED: {
+            if (ProcessLoadingChannel(chIdx)) {
                 if (streamingChannel.LoadStatus == LOADSTATE_REQUESTED)
-                    CStreaming::ProcessLoadingChannel(channelId);
-                CStreaming::ms_channelError = -1;
+                    ProcessLoadingChannel(chIdx);
+
+                ms_channelError = -1; // Clear error code
                 return CLoadingScreen::Continue();
             }
+            break;
         }
-        else if (loadState == LOADSTATE_READING) {
+        case eStreamingLoadState::LOADSTATE_READING: {
             streamingChannel.totalTries++;
-            eCdStreamStatus streamStatus = CdStreamGetStatus(channelId);
-            if (streamStatus != eCdStreamStatus::READING && streamStatus != eCdStreamStatus::WAITING_TO_READ)
-                bStreamRead = true;
-            else if (streamStatus == eCdStreamStatus::READING && CdStreamGetStatus(channelId) != eCdStreamStatus::READING)
-                bStreamRead = true;
+
+            // Keep in mind that `CdStreamGetStatus` changes the stream status.
+            const eCdStreamStatus status = CdStreamGetStatus(chIdx);
+            if ((status == eCdStreamStatus::READING || status == eCdStreamStatus::WAITING_TO_READ) &&
+                (status != eCdStreamStatus::READING || CdStreamGetStatus(chIdx) != eCdStreamStatus::READING)
+            ) {
+                break; // Otherwise fallthrough, and do stream read
+            }
+            // TODO: Fallthru. Use [[fallthrough]]; from c++17
+            __fallthrough;
         }
-        if (bStreamRead) {
-            uint8* pBuffer = CStreaming::ms_pStreamingBuffer[channelId];
-            CdStreamRead(channelId, pBuffer, streamingChannel.offsetAndHandle, streamingChannel.sectorCount);
+        case eStreamingLoadState::LOADSTATE_NOT_LOADED: {
+            uint8* pBuffer = ms_pStreamingBuffer[chIdx];
+            CdStreamRead(chIdx, pBuffer, streamingChannel.offsetAndHandle, streamingChannel.sectorCount);
             streamingChannel.LoadStatus = LOADSTATE_LOADED;
             streamingChannel.iLoadingLevel = -600;
+            break;
         }
-        if (CStreaming::ms_channelError == -1)
+        }
+
+        if (ms_channelError == -1)
             return CLoadingScreen::Continue();
     }
 }

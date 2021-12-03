@@ -128,15 +128,16 @@ eCdStreamStatus __cdecl CdStreamGetStatus(int32 streamId)
     if (gStreamingInitialized) {
         if (stream.bInUse)
             return eCdStreamStatus::READING;
+
         if (stream.nSectorsToRead)
             return eCdStreamStatus::WAITING_TO_READ;
+
         if (stream.status != eCdStreamStatus::READING_SUCCESS) {
             const eCdStreamStatus status = stream.status;
             stream.status = eCdStreamStatus::READING_SUCCESS;
             return status;
         }
-    }
-    else if (gOverlappedIO) {
+    } else if (gOverlappedIO) {
         if (WaitForSingleObjectEx(stream.hFile, 0, 1) != WAIT_OBJECT_0)
             return eCdStreamStatus::READING;
     }
