@@ -1392,23 +1392,25 @@ void CStreaming::FinishLoadingLargeFile(uint8* pFileBuffer, int32 modelId)
     CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
     if (streamingInfo.m_nLoadState == LOADSTATE_FINISHING) {
-        uint32 bufferSize = streamingInfo.GetCdSize() * STREAMING_SECTOR_SIZE;
+        const uint32 bufferSize = streamingInfo.GetCdSize() * STREAMING_SECTOR_SIZE;
         tRwStreamInitializeData rwStreamInitializationData = { pFileBuffer, bufferSize };
         RwStream* pRwStream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitializationData);
+
         bool bLoaded = false;
-        if (modelId >= RESOURCE_ID_DFF && modelId < RESOURCE_ID_TXD) {
+        if (modelId >= RESOURCE_ID_DFF && modelId < RESOURCE_ID_TXD/*model is DFF*/) {
             CTxdStore::SetCurrentTxd(pBaseModelInfo->m_nTxdIndex);
+
             bLoaded = CFileLoader::FinishLoadClumpFile(pRwStream, modelId);
             if (bLoaded)
                 bLoaded = AddToLoadedVehiclesList(modelId);
             pBaseModelInfo->RemoveRef();
             CTxdStore::RemoveRefWithoutDelete(pBaseModelInfo->m_nTxdIndex);
-            int32 animFileIndex = pBaseModelInfo->GetAnimFileIndex();
+
+            const int32 animFileIndex = pBaseModelInfo->GetAnimFileIndex();
             if (animFileIndex != -1) {
                 CAnimManager::RemoveAnimBlockRefWithoutDelete(animFileIndex);
             }
-        }
-        else if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL) {
+        } else if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL/*model is TXD*/) {
             CTxdStore::AddRef(modelId - RESOURCE_ID_TXD);
             bLoaded = CTxdStore::FinishLoadTxd(modelId - RESOURCE_ID_TXD, pRwStream);
             CTxdStore::RemoveRefWithoutDelete(modelId - RESOURCE_ID_TXD);
@@ -1416,15 +1418,15 @@ void CStreaming::FinishLoadingLargeFile(uint8* pFileBuffer, int32 modelId)
         else
             assert(modelId < RESOURCE_ID_COL && "FinishLoadingLargeFile: model id is out of range");
         RwStreamClose(pRwStream, &pFileBuffer);
+
         streamingInfo.m_nLoadState = LOADSTATE_LOADED;
         ms_memoryUsed += bufferSize;
         if (!bLoaded) {
             RemoveModel(modelId);
             RequestModel(modelId, streamingInfo.m_nFlags);
         }
-    }
-    else {
-        if (modelId < RESOURCE_ID_TXD)
+    } else {
+        if (modelId < RESOURCE_ID_TXD/*model is DFF*/)
             pBaseModelInfo->RemoveRef();
     }
 }
