@@ -1821,7 +1821,7 @@ void CStreaming::ReadIniFile() {
             {
                 if (!_stricmp(attribute, "devkit_memory"))
                 {
-                    CStreaming::ms_memoryAvailable = atoi(value) << 10;
+                    CStreaming::ms_memoryAvailable = atoi(value) * 1024; // kB => bytes conversion
                     bHasDevkitMemory = true;
                 }
                 else if (!_stricmp(attribute, "vehicles"))
