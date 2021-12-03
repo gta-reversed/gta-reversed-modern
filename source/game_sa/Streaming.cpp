@@ -1457,41 +1457,50 @@ void CStreaming::FlushChannels()
 }
 
 // 0x40CBA0
-void CStreaming::RequestModelStream(int32 channelId)
+// TODO: Document this function.. I'm really unsure what it does exactly
+void CStreaming::RequestModelStream(int32 chIdx)
 {
-    uint32 CdStreamLastPosn = CdStreamGetLastPosn();
-    int32 modelId = GetNextFileOnCd(CdStreamLastPosn, true);
+    int32 modelId = GetNextFileOnCd(CdStreamGetLastPosn(), true);
     if (modelId == -1)
         return;
-    tStreamingChannel& channel = ms_channel[channelId];
+
+    tStreamingChannel& ch = ms_channel[chIdx];
     uint32 posn = 0;
-    uint32 size = 0;
+    uint32 sizeInSectors = 0;
     CStreamingInfo* streamingInfo = &ms_aInfoForModel[modelId];
-    while (!(streamingInfo->m_nFlags & (STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED)))
-    {
-        if (modelId < RESOURCE_ID_TXD || modelId >= RESOURCE_ID_COL || AreTexturesUsedByRequestedModels(modelId - RESOURCE_ID_TXD))
-        {
-            if (modelId < RESOURCE_ID_IFP || modelId >= RESOURCE_ID_RRR || AreAnimsUsedByRequestedModels(modelId - RESOURCE_ID_IFP))
+    while (!streamingInfo->IsRequiredToBeKept()) {
+        // Remove unused TXDs or IFPs from stream.
+        if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL /*model is TXD*/) {
+            if (AreTexturesUsedByRequestedModels(modelId - RESOURCE_ID_TXD))
                 break;
+        } else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR /*model is IFP*/) {
+            if (AreAnimsUsedByRequestedModels(modelId - RESOURCE_ID_IFP))
+                break;
+        } else /*model is neither TXD or IFP*/ {
+            break;
         }
+
         RemoveModel(modelId);
-        streamingInfo->GetCdPosnAndSize(posn, size);
-        modelId = GetNextFileOnCd(size + posn, true);
+
+        streamingInfo->GetCdPosnAndSize(posn, sizeInSectors);
+        modelId = GetNextFileOnCd(sizeInSectors + posn, true);
         if (modelId == -1)
             return;
         streamingInfo = &ms_aInfoForModel[modelId];
     }
     if (modelId == -1)
         return;
-    streamingInfo->GetCdPosnAndSize(posn, size);
-    if (size > ms_streamingBufferSize) {
-        if (channelId == 1 || ms_channel[1].LoadStatus)
+
+    streamingInfo->GetCdPosnAndSize(posn, sizeInSectors);
+    if (sizeInSectors > ms_streamingBufferSize) {
+        if (chIdx == 1 || ms_channel[1].LoadStatus != eStreamingLoadState::LOADSTATE_NOT_LOADED)
             return;
         ms_bLoadingBigModel = true;
     }
 
     uint32 sectorCount = 0;
-    bool isPreviousModelBig = false;
+    const bool isThisModelBig = sizeInSectors > 200;
+    bool isPreviousModelBig = false; // All models with the size > 200 (in sectors) are considered big
     bool isPreviousModelPed = false;
     const int32 numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
     int32 modelIndex = 0;
@@ -1499,77 +1508,81 @@ void CStreaming::RequestModelStream(int32 channelId)
         streamingInfo = &ms_aInfoForModel[modelId];
         if (streamingInfo->m_nLoadState != LOADSTATE_REQUESTED)
             break;
+
         if (streamingInfo->GetCdSize())
-            size = streamingInfo->GetCdSize();
+            sizeInSectors = streamingInfo->GetCdSize();
+
         if (ms_numPriorityRequests && !(streamingInfo->m_nFlags & STREAMING_PRIORITY_REQUEST))
             break;
-        if (modelId >= RESOURCE_ID_TXD) {
-            if (modelId < RESOURCE_ID_IFP || modelId >= RESOURCE_ID_RRR) {
-                if (isPreviousModelBig && size > 200)
+
+        if (modelId >= RESOURCE_ID_TXD/*model is NOT DFF*/) {
+            if (modelId < RESOURCE_ID_IFP || modelId >= RESOURCE_ID_RRR/*model is NOT IFP*/) {
+                if (isPreviousModelBig && isThisModelBig)
                     break;
-            }
-            else if (CCutsceneMgr::ms_cutsceneProcessing || ms_aInfoForModel[MODEL_MALE01].m_nLoadState != LOADSTATE_LOADED)
-            {
+            } else if (CCutsceneMgr::ms_cutsceneProcessing || ms_aInfoForModel[MODEL_MALE01].m_nLoadState != LOADSTATE_LOADED) {
                 break;
             }
-        }
-        else
-        {
+        } else /*Model is DFF*/ {
             CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
+
             if (isPreviousModelPed && pBaseModelInfo->GetModelType() == MODEL_INFO_PED)
                 break;
+
             if (isPreviousModelBig && pBaseModelInfo->GetModelType() == MODEL_INFO_VEHICLE)
                 break;
-            uint8 loadState = ms_aInfoForModel[pBaseModelInfo->m_nTxdIndex + RESOURCE_ID_TXD].m_nLoadState;
-            if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_READING)
-            {
-                break;
-            }
+
+            if (!ms_aInfoForModel[pBaseModelInfo->m_nTxdIndex + RESOURCE_ID_TXD].IsLoadedOrBeingRead())
+                break; // TXD not yet loaded
+
+            
             int32 animFileIndex = pBaseModelInfo->GetAnimFileIndex();
             if (animFileIndex != -1)
             {
-                uint8 loadState = ms_aInfoForModel[animFileIndex + RESOURCE_ID_IFP].m_nLoadState;
-                if (loadState != LOADSTATE_LOADED && loadState != LOADSTATE_READING)
-                    break;
+                if (!ms_aInfoForModel[animFileIndex + RESOURCE_ID_IFP].IsLoadedOrBeingRead())
+                    break; // IFP not loaded yet
             }
         }
-        channel.modelStreamingBufferOffsets[modelIndex] = sectorCount;
-        channel.modelIds[modelIndex] = modelId;
+        ch.modelStreamingBufferOffsets[modelIndex] = sectorCount;
+        ch.modelIds[modelIndex] = modelId;
 
-        sectorCount += size;
-        if (sectorCount > ms_streamingBufferSize&& modelIndex > 0) {
-            sectorCount -= size;
+        sectorCount += sizeInSectors;
+        if (sectorCount > ms_streamingBufferSize && modelIndex > 0) {
+            sectorCount -= sizeInSectors;
             break;
         }
+
         CBaseModelInfo* pBaseModelInfo = CModelInfo::GetModelInfo(modelId);
-        if (modelId >= RESOURCE_ID_TXD) {
-            if (size > 200)
+        if (modelId >= RESOURCE_ID_TXD/*model is NOT DFF*/) {
+            if (isThisModelBig)
                 isPreviousModelBig = true;
-        }
-        else {
-            if (pBaseModelInfo->GetModelType() == MODEL_INFO_PED)
+        } else /*model is DFF*/ {
+            switch (pBaseModelInfo->GetModelType()) {
+            case ModelInfoType::MODEL_INFO_PED:
                 isPreviousModelPed = true;
-            if (pBaseModelInfo->GetModelType() == MODEL_INFO_VEHICLE)
+                break;
+            case ModelInfoType::MODEL_INFO_VEHICLE:
                 isPreviousModelBig = true;
+                break;
+            }
         }
         streamingInfo->m_nLoadState = LOADSTATE_READING;
         streamingInfo->RemoveFromList();
         ms_numModelsRequested--;
-        if (streamingInfo->m_nFlags & STREAMING_PRIORITY_REQUEST) {
+        if (streamingInfo->IsPriorityRequest()) {
             streamingInfo->m_nFlags &= ~STREAMING_PRIORITY_REQUEST;
             ms_numPriorityRequests--;
         }
         modelId = streamingInfo->m_nNextIndexOnCd;
     }
     for (int32 i = modelIndex; i < numberOfModelIds; i++) {
-        channel.modelIds[i] = -1;
+        ch.modelIds[i] = -1;
     }
-    CdStreamRead(channelId, ms_pStreamingBuffer[channelId], posn, sectorCount);
-    channel.LoadStatus = LOADSTATE_LOADED;
-    channel.iLoadingLevel = 0;
-    channel.sectorCount = sectorCount;
-    channel.offsetAndHandle = posn;
-    channel.totalTries = 0;
+    CdStreamRead(chIdx, ms_pStreamingBuffer[chIdx], posn, sectorCount);
+    ch.LoadStatus = LOADSTATE_LOADED;
+    ch.iLoadingLevel = 0;
+    ch.sectorCount = sectorCount;
+    ch.offsetAndHandle = posn;
+    ch.totalTries = 0;
     if (m_bModelStreamNotLoaded)
         m_bModelStreamNotLoaded = false;
 }

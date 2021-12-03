@@ -80,5 +80,6 @@ public:
     bool DoKeepInMemory() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_KEEP_IN_MEMORY; }
     bool IsPriorityRequest() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_PRIORITY_REQUEST; }
     bool IsLoadingScene() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_LOADING_SCENE; }
+    bool IsRequiredToBeKept() const noexcept { return IsGameRequired() || IsMissionRequired() || DoKeepInMemory(); }
 };
 VALIDATE_SIZE(CStreamingInfo, 0x14);
