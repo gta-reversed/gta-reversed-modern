@@ -78,7 +78,6 @@ void CVehicle::InjectHooks()
 // CLASS
     ReversibleHooks::Install("CVehicle", "Shutdown", 0x6D0B40, &CVehicle::Shutdown);
     ReversibleHooks::Install("CVehicle", "GetRemapIndex", 0x6D0B70, &CVehicle::GetRemapIndex);
-    ReversibleHooks::Install("CVehicle", "SetRemapTexDictionary", 0x6D0BC0, &CVehicle::SetRemapTexDictionary);
     ReversibleHooks::Install("CVehicle", "SetRemap", 0x6D0C00, &CVehicle::SetRemap);
     ReversibleHooks::Install("CVehicle", "SetCollisionLighting", 0x6D0CA0, &CVehicle::SetCollisionLighting);
     ReversibleHooks::Install("CVehicle", "UpdateLightingFromStoredPolys", 0x6D0CC0, &CVehicle::UpdateLightingFromStoredPolys);
@@ -299,7 +298,7 @@ void CVehicle::SetModelIndex_Reversed(uint32 index)
 {
     CEntity::SetModelIndex(index);
     auto pVehModelInfo = reinterpret_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(index));
-    CVehicle::CustomCarPlate_TextureCreate(pVehModelInfo);
+    CustomCarPlate_TextureCreate(pVehModelInfo);
 
     for (size_t i = 0; i <= 1; ++i)
         m_anExtras[i] = CVehicleModelInfo::ms_compsUsed[i];
@@ -559,9 +558,9 @@ void CVehicle::PreRender()
 void CVehicle::PreRender_Reversed()
 {
     if (!IsTrain())
-        CVehicle::CalculateLightingFromCollision();
+        CalculateLightingFromCollision();
 
-    CVehicle::PreRenderDriverAndPassengers();
+    PreRenderDriverAndPassengers();
     if (CModelInfo::GetModelInfo(m_nModelIndex)->m_n2dfxCount)
         CEntity::ProcessLightsForEntity();
 
@@ -637,7 +636,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint3
         iCheckedDoor = static_cast<eDoors>(fTime);
     }
 
-    if (this->IsDoorMissing(iCheckedDoor))
+    if (IsDoorMissing(iCheckedDoor))
         return;
 
     float fAnimStart, fAnimEnd;
@@ -650,15 +649,15 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint3
         {
         CVehicleAnimGroupData::GetInOutTimings(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup), eInOutTimingMode::OPEN_OUT, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, false);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, false);
         else if (fTime > fAnimEnd)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         else if (fTime > fAnimStart && fTime < fAnimEnd)
         {
             const auto fNewRatio = invLerp(fAnimStart, fAnimEnd, fTime);
-            const auto fCurRatio = this->GetDooorAngleOpenRatio(iCheckedDoor);
+            const auto fCurRatio = GetDooorAngleOpenRatio(iCheckedDoor);
             if (fCurRatio < fNewRatio)
-                this->OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
+                OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
         }
 
         return;
@@ -671,15 +670,15 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint3
     {
         CVehicleAnimGroupData::GetInOutTimings(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup), eInOutTimingMode::CLOSE_OUT, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         else if (fTime > fAnimEnd)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
         else if (fTime > fAnimStart && fTime < fAnimEnd)
         {
             const auto fNewRatio = 1.0F - invLerp(fAnimStart, fAnimEnd, fTime);
-            const auto fCurRatio = this->GetDooorAngleOpenRatio(iCheckedDoor);
+            const auto fCurRatio = GetDooorAngleOpenRatio(iCheckedDoor);
             if (fCurRatio < fNewRatio)
-                this->OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
+                OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
         }
 
         return;
@@ -692,15 +691,15 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint3
         {
         CVehicleAnimGroupData::GetInOutTimings(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup), eInOutTimingMode::CLOSE_IN, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         else if (fTime > fAnimEnd)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
         else if (fTime > fAnimStart && fTime < fAnimEnd)
         {
             const auto fNewRatio = 1.0F - invLerp(fAnimStart, fAnimEnd, fTime);
-            const auto fCurRatio = this->GetDooorAngleOpenRatio(iCheckedDoor);
+            const auto fCurRatio = GetDooorAngleOpenRatio(iCheckedDoor);
             if (fCurRatio < fNewRatio)
-                this->OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
+                OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
         }
 
         return;
@@ -713,15 +712,15 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint3
         {
         CVehicleAnimGroupData::GetInOutTimings(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup), eInOutTimingMode::OPEN_IN, &fAnimStart, &fAnimEnd);
         if (fTime < fAnimStart)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
         else if (fTime > fAnimEnd)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         else if (fTime > fAnimStart && fTime < fAnimEnd)
         {
             const auto fNewRatio = invLerp(fAnimStart, fAnimEnd, fTime);
-            const auto fCurRatio = this->GetDooorAngleOpenRatio(iCheckedDoor);
+            const auto fCurRatio = GetDooorAngleOpenRatio(iCheckedDoor);
             if (fCurRatio < fNewRatio)
-                this->OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
+                OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
         }
 
         return;
@@ -730,22 +729,22 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint3
     case ANIM_ID_CAR_JACKEDLHS:
     case ANIM_ID_CAR_JACKEDRHS:
         if (fTime < 0.1F)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
         else if (fTime > 0.4F)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         else if (fTime > 0.1F && fTime < 0.4F)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, (fTime - 0.1F) * (10.0F / 3.0F), true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, (fTime - 0.1F) * (10.0F / 3.0F), true);
 
         return;
 
     case ANIM_ID_CAR_FALLOUT_LHS:
     case ANIM_ID_CAR_FALLOUT_RHS:
         if (fTime < 0.1F)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
         else if (fTime > 0.4F)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         else if (fTime > 0.1F && fTime < 0.4F)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, (fTime - 0.1F) * (10.0F / 3.0F), true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, (fTime - 0.1F) * (10.0F / 3.0F), true);
 
         return;
 
@@ -763,7 +762,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint3
         case ANIM_GROUP_MTRKCARANIMS:
         case ANIM_GROUP_STDTALLCARAMIMS:
         case ANIM_GROUP_BFINJCARAMIMS:
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         }
 
         return;
@@ -791,15 +790,15 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint3
         }
 
         if (fTime < fAnimStart)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
         else if (fTime > fAnimEnd)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 1.0F, true);
         else if (fTime > fAnimStart && fTime < fAnimEnd)
         {
             const auto fNewRatio = invLerp(fAnimStart, fAnimEnd, fTime);
-            const auto fCurRatio = this->GetDooorAngleOpenRatio(iCheckedDoor);
+            const auto fCurRatio = GetDooorAngleOpenRatio(iCheckedDoor);
             if (fCurRatio < fNewRatio)
-                this->OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
+                OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
         }
 
         return;
@@ -828,19 +827,19 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint3
         }
 
         if (fTime > fAnimEnd2)
-            this->OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
+            OpenDoor(ped, doorComponentId, iCheckedDoor, 0.0F, true);
         else if (fTime > fAnimStart && fTime < fAnimEnd) {
             const auto fNewRatio = invLerp(fAnimStart, 0.2F, fTime);
-            const auto fCurRatio = this->GetDooorAngleOpenRatio(iCheckedDoor);
+            const auto fCurRatio = GetDooorAngleOpenRatio(iCheckedDoor);
             if (fCurRatio < fNewRatio)
-                this->OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
+                OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
         }
         else if (fTime > fAnimEnd && fTime < fAnimEnd2)
         {
             const auto fNewRatio = 1.0F - invLerp(fAnimEnd, fAnimEnd2, fTime);
-            const auto fCurRatio = this->GetDooorAngleOpenRatio(iCheckedDoor);
+            const auto fCurRatio = GetDooorAngleOpenRatio(iCheckedDoor);
             if (fCurRatio > fNewRatio)
-                this->OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
+                OpenDoor(ped, doorComponentId, iCheckedDoor, fNewRatio, true);
         }
 
         return;
@@ -912,7 +911,6 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend)
         if (RpAnimBlendClumpGetAssociation(driver->m_pRwClump, AnimationId::ANIM_ID_CAR_SIT))
         {
             CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_IDLE], 4.0F);
-
         }
         return;
     }
@@ -921,8 +919,8 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend)
         return;
 
     if (pLookBackAnim
-        && TheCamera.GetActiveCamera().m_nMode == eCamMode::MODE_1STPERSON
-        && TheCamera.GetActiveCamera().m_nDirectionWasLooking == eLookingDirection::LOOKING_DIRECTION_BEHIND)
+        && CCamera::GetActiveCamera().m_nMode == eCamMode::MODE_1STPERSON
+        && CCamera::GetActiveCamera().m_nDirectionWasLooking == eLookingDirection::LOOKING_DIRECTION_BEHIND)
     {
         pLookBackAnim->m_fBlendDelta = -1000.0F;
     }
@@ -941,8 +939,8 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend)
         && GetVehicleAppearance() != VEHICLE_APPEARANCE_HELI
         && GetVehicleAppearance() != VEHICLE_APPEARANCE_PLANE)
     {
-        if ((TheCamera.GetActiveCamera().m_nMode != eCamMode::MODE_1STPERSON
-            || TheCamera.GetActiveCamera().m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_BEHIND)
+        if ((CCamera::GetActiveCamera().m_nMode != eCamMode::MODE_1STPERSON
+            || CCamera::GetActiveCamera().m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_BEHIND)
             && (!pLookBackAnim || pLookBackAnim->m_fBlendAmount < 1.0F && pLookBackAnim->m_fBlendDelta <= 0.0F))
         {
             CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_BACK], 4.0F);
@@ -997,7 +995,7 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend)
     }
 
     if (pLookBackAnim)
-        pLookBackAnim->m_fBlendDelta = -4.0F;;
+        pLookBackAnim->m_fBlendDelta = -4.0F;
 }
 
 // 0x871F54
@@ -1066,7 +1064,7 @@ bool CVehicle::CanPedJumpOutCar_Reversed(CPed* ped)
     if (fHorSpeedSquared >= 0.1F)
         return true;
 
-    if (this->CanPedStepOutCar(false))
+    if (CanPedStepOutCar(false))
         return false;
 
     m_vecTurnSpeed *= 0.9F; //BUG(PRONE): We are modifying vehicle move and turn speeds in function that seems that it should be const
@@ -1148,7 +1146,7 @@ bool CVehicle::Load_Reversed()
 // 0x6D0B40
 void CVehicle::Shutdown()
 {
-    for (auto& specialColModel : CVehicle::m_aSpecialColModel)
+    for (auto& specialColModel : m_aSpecialColModel)
         if (specialColModel.m_pColData)
             specialColModel.RemoveCollisionVolumes();
 }
@@ -1167,6 +1165,7 @@ int32 CVehicle::GetRemapIndex()
     return -1;
 }
 
+// unused, arg0 should be const char*
 // 0x6D0BC0
 void CVehicle::SetRemapTexDictionary(int32 txdId)
 {
@@ -1456,10 +1455,11 @@ bool CVehicle::IsLawEnforcementVehicle()
     return ((bool(__thiscall*)(CVehicle*))0x6D2370)(this);
 }
 
+// unused
 // 0x6D2450
 bool CVehicle::ShufflePassengersToMakeSpace()
 {
-    return ((bool(__thiscall*)(CVehicle*))0x6D2450)(this);
+    return true;
 }
 
 // 0x6D2460
@@ -2164,8 +2164,8 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
             && GetUp().z > -0.5F
             && m_vecMoveSpeed.z < -0.15F
             && fCheckedMass * 0.01F / 125.0F < vecBuoyancyForce.z
-            && vecBuoyancyForce.z < fCheckedMass * 0.4F / 125.0F)) {
-
+            && vecBuoyancyForce.z < fCheckedMass * 0.4F / 125.0F)
+        ) {
             bOnWater = false;
 
             auto fTurnForceMult = GetForward().z * m_fTurnMass * -0.00017F * vecBuoyancyForce.z;
@@ -2357,7 +2357,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     }
 
     if (bOnWater && !bPostCollision && !bCollidedWithWorld) {
-        CVehicle::ApplyBoatWaterResistance(boatHandling, fImmersionDepth);
+        ApplyBoatWaterResistance(boatHandling, fImmersionDepth);
     }
 
     if ((m_nModelIndex != eModelID::MODEL_SKIMMER || m_f2ndSteerAngle == 0.0F) && !bCollidedWithWorld) {
@@ -2448,7 +2448,7 @@ void CVehicle::AddExhaustParticles()
     CMatrix entityMatrix (*m_matrix);
     bool bHasDoubleExhaust = m_pHandlingData->m_bDoubleExhaust;
     if (m_vehicleSubType == VEHICLE_BIKE) {
-        CBike* pBike = static_cast<CBike*>(this);
+        auto* pBike = static_cast<CBike*>(this);
         pBike->CalculateLeanMatrix();
         entityMatrix = pBike->m_mLeanMatrix;
         switch (m_nModelIndex)
@@ -2661,7 +2661,7 @@ void CVehicle::DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2)
         RxObjSpace3DVertexSetPos(&vertices[i], &posn[i]);
     }
 
-    if (RwIm3DTransform(vertices, std::size(vertices), 0, rwIM3D_VERTEXRGBA | rwIM3D_VERTEXXYZ))
+    if (RwIm3DTransform(vertices, std::size(vertices), nullptr, rwIM3D_VERTEXRGBA | rwIM3D_VERTEXXYZ))
     {
         RxVertexIndex indices[] = { 0, 1, 4, 1, 3, 4, 2, 3, 4, 0, 2, 4 };
         RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, indices, std::size(indices));
