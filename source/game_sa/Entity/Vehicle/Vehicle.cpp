@@ -1941,6 +1941,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
     }
 
     *wheelState = WHEEL_STATE_NORMAL;
+
     if (contactSpeedRight != 0.0f) {
         right = -(contactSpeedRight / wheelsOnGround);
         if (wheelStatus == WHEEL_STATUS_BURST) {
@@ -1948,6 +1949,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
             right += fwdspeed * CGeneral::GetRandomNumberInRange(-fBurstTyreMod, fBurstTyreMod) ;
         }
     }
+
     if (bDriving) {
         fwd = thrust;
         right = clamp<float>(right, -adhesion, adhesion);
@@ -1959,12 +1961,14 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
                 brake = gHandlingDataMgr.fWheelFriction * 0.6f / (m_pHandlingData->m_fMass + 200.0f);
             else if (IsPlane())
                 brake = 0.0f;
-            else if (brake < 500.0f)
-                brake = 0.1f * gHandlingDataMgr.fWheelFriction / m_pHandlingData->m_fMass;
-            else if (m_nModelIndex == MODEL_RCBANDIT)
-                brake = 0.2f * gHandlingDataMgr.fWheelFriction / m_pHandlingData->m_fMass;
-            else
+            else {
                 brake = gHandlingDataMgr.fWheelFriction / m_pHandlingData->m_fMass;
+
+                if (brake > 500.0f)
+                    brake *= 0.1f;
+                else if(m_nModelIndex == MODEL_RCBANDIT)
+                    brake *= 0.2f;
+            }
         }
         if (brake > adhesion) {
             if (fabs(contactSpeedFwd) > 0.005f)
