@@ -1708,16 +1708,17 @@ bool CStreaming::ProcessLoadingChannel(int32 chIdx)
     tStreamingChannel& ch = ms_channel[chIdx];
 
     const eCdStreamStatus streamStatus = CdStreamGetStatus(chIdx);
-    if (streamStatus != eCdStreamStatus::READING_SUCCESS) {
-        switch (streamStatus) {
-        case eCdStreamStatus::READING:
-        case eCdStreamStatus::WAITING_TO_READ:
-            return false; // Not ready yet.
-        }
+    switch (streamStatus) {
+    case eCdStreamStatus::READING_SUCCESS:
+        break;
 
-        // At this point the stream status is anything but READING_SUCCESS, READING, WAITING_TO_READ
-        // Which leaves us with FAILURE. (That is, if the enum has no more entries but only these 4)
-        // So lets retry reading.
+    case eCdStreamStatus::READING:
+    case eCdStreamStatus::WAITING_TO_READ:
+        return false; // Not ready yet.
+
+    case eCdStreamStatus::READING_FAILURE: {
+        // Retry
+
         ch.m_nCdStreamStatus = streamStatus;
         ch.LoadStatus = eChannelState::ERR;
 
@@ -1728,6 +1729,7 @@ bool CStreaming::ProcessLoadingChannel(int32 chIdx)
         RetryLoadFile(chIdx);
 
         return true;
+    }
     }
 
     const bool isStarted = ch.LoadStatus == eChannelState::STARTED;
