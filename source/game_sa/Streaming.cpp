@@ -1285,10 +1285,11 @@ void CStreaming::RequestFilesInChannel(int32 chIdx) {
 void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
 {
     CStreamingInfo& info = ms_aInfoForModel[modelId];
-    auto loadState = info.m_nLoadState;
+    
     switch (info.m_nLoadState) {
     case eStreamingLoadState::LOADSTATE_REQUESTED: {
-        if ((streamingFlags & STREAMING_PRIORITY_REQUEST) && !(info.m_nFlags & STREAMING_PRIORITY_REQUEST))
+        // Model already requested, just add priority request flag if necessary
+        if ((streamingFlags & STREAMING_PRIORITY_REQUEST) && !(info.m_nFlags & STREAMING_PRIORITY_REQUEST)) // Is priority request
         {
             ++ms_numPriorityRequests;
             info.m_nFlags |= STREAMING_PRIORITY_REQUEST;
@@ -1297,8 +1298,9 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
     }
     case eStreamingLoadState::LOADSTATE_NOT_LOADED:
         break;
+
     default: {
-        streamingFlags &= ~STREAMING_PRIORITY_REQUEST;
+        streamingFlags &= ~STREAMING_PRIORITY_REQUEST; // Remove flag otherwise
         break;
     }
     }
@@ -1308,12 +1310,12 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
     case eStreamingLoadState::LOADSTATE_LOADED: {
         if (info.InList()) {
             info.RemoveFromList();
-            if (modelId < RESOURCE_ID_TXD) {
-                CBaseModelInfo* modelInfo = CModelInfo::GetModelInfo(modelId);
-                size_t modelType = modelInfo->GetModelType();
-                if (modelType == MODEL_INFO_TYPE_PED || modelType == MODEL_INFO_TYPE_VEHICLE)
-                {
+            if (modelId < RESOURCE_ID_TXD/*model is DFF*/) {
+                switch (CModelInfo::GetModelInfo(modelId)->GetModelType()) {
+                case eModelInfoType::MODEL_INFO_TYPE_PED:
+                case eModelInfoType::MODEL_INFO_TYPE_VEHICLE: {
                     return;
+                }
                 }
             }
 
