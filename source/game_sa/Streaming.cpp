@@ -2393,13 +2393,12 @@ void CStreaming::RetryLoadFile(int32 chIdx) {
     if (ms_channelError == -1)
         return;
 
-    tStreamingChannel& streamingChannel = CStreaming::ms_channel[chIdx];
+    tStreamingChannel& ch = CStreaming::ms_channel[chIdx];
     while (true) {
-        bool bStreamRead = false;
-        switch (streamingChannel.LoadStatus) {
+        switch (ch.LoadStatus) {
         case eChannelState::READING: {
             if (ProcessLoadingChannel(chIdx)) {
-                if (streamingChannel.LoadStatus == eChannelState::STARTED)
+                if (ch.LoadStatus == eChannelState::STARTED)
                     ProcessLoadingChannel(chIdx);
 
                 ms_channelError = -1; // Clear error code
@@ -2408,7 +2407,7 @@ void CStreaming::RetryLoadFile(int32 chIdx) {
             break;
         }
         case eChannelState::ERR: {
-            streamingChannel.totalTries++;
+            ch.totalTries++;
 
             // Keep in mind that `CdStreamGetStatus` changes the stream status.
             const eCdStreamStatus status = CdStreamGetStatus(chIdx);
@@ -2417,14 +2416,14 @@ void CStreaming::RetryLoadFile(int32 chIdx) {
             ) {
                 break; // Otherwise fallthrough, and do stream read
             }
-            // TODO: Fallthru. Use [[fallthrough]]; from c++17
-            __fallthrough;
+
+            [[fallthrough]];
         }
         case eChannelState::IDLE: {
             uint8* pBuffer = ms_pStreamingBuffer[chIdx];
-            CdStreamRead(chIdx, pBuffer, streamingChannel.offsetAndHandle, streamingChannel.sectorCount);
-            streamingChannel.LoadStatus = eChannelState::READING;
-            streamingChannel.iLoadingLevel = -600;
+            CdStreamRead(chIdx, pBuffer, ch.offsetAndHandle, ch.sectorCount);
+            ch.LoadStatus = eChannelState::READING;
+            ch.iLoadingLevel = -600;
             break;
         }
         }

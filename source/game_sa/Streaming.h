@@ -21,7 +21,7 @@ enum class eChannelState
 {
     IDLE = 0,
     READING = 1,
-    STARTED = 2,
+    STARTED = 2, // NOTE: This one seems to be related to big models in some way..
     ERR = 3, // Also called ERROR, but that's a `windgi.h` macro
 };
 
