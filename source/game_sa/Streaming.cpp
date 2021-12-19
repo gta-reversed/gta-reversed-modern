@@ -1257,6 +1257,7 @@ void CStreaming::RequestBigBuildings(CVector const& point) {
 }
 
 // 0x40A080
+// Request model @ `posn` with size `size` in the img `imgId`.
 void CStreaming::RequestFile(int32 modelId, int32 posn, int32 size, int32 imgId, int32 streamingFlags) {
     auto& info = ms_aInfoForModel[modelId];
     const uint32 blockOffset = (imgId << 24) | posn;
