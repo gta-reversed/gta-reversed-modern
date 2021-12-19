@@ -1961,9 +1961,8 @@ void CStreaming::RemoveCarModel(int32 modelId) {
     CPopulation::m_AppropriateLoadedCars.RemoveMember(modelId);
     CPopulation::m_InAppropriateLoadedCars.RemoveMember(modelId);
     CPopulation::m_LoadedBoats.RemoveMember(modelId);
-    for (int32 i = 0; i < 11; i++) {
-        CLoadedCarGroup& carGroup = CPopulation::m_LoadedGangCars[i];
-        carGroup.RemoveMember(modelId);
+    for (CLoadedCarGroup& group : CPopulation::m_LoadedGangCars) {
+        group.RemoveMember(modelId);
     }
     ms_vehiclesLoaded.RemoveMember(modelId);
     CPopulation::RemoveSpecificDriverModelsForCar(modelId);
