@@ -2111,14 +2111,8 @@ bool CStreaming::RemoveLeastUsedModel(uint32 streamingFlags) {
 }
 
 bool CStreaming::CarIsCandidateForRemoval(int32 modelId) {
-    CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
-    if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount
-        && !(streamingInfo.m_nFlags & (STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED))
-        && streamingInfo.m_nLoadState == LOADSTATE_LOADED)
-    {
-        return true;
-    }
-    return false;
+    CStreamingInfo& info = ms_aInfoForModel[modelId];
+    return CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount == 0 && !info.IsMissionOrGameRequired() && info.IsLoaded();
 }
 
 // 0x40C020

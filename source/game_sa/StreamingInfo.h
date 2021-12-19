@@ -73,6 +73,7 @@ public:
             return false;
         }
     }
+    bool IsLoaded() const { return m_nLoadState == eStreamingLoadState::LOADSTATE_LOADED; }
 
     bool DontRemoveInLoadScene() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_DONTREMOVE_IN_LOADSCENE; }
     bool IsGameRequired() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_GAME_REQUIRED; }
@@ -81,5 +82,6 @@ public:
     bool IsPriorityRequest() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_PRIORITY_REQUEST; }
     bool IsLoadingScene() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_LOADING_SCENE; }
     bool IsRequiredToBeKept() const noexcept { return IsGameRequired() || IsMissionRequired() || DoKeepInMemory(); }
+    bool IsMissionOrGameRequired() const noexcept { return IsGameRequired() || IsGameRequired(); }
 };
 VALIDATE_SIZE(CStreamingInfo, 0x14);
