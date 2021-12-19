@@ -1636,10 +1636,12 @@ void CStreaming::RequestSpecialModel(int32 modelId, char const* name, int32 flag
     CStreamingInfo& streamingInfo = CStreaming::ms_aInfoForModel[modelId];
     uint32 CdPosn, CdSize;
     if (CKeyGen::GetUppercaseKey(name) == modelInfo->m_nKey && streamingInfo.GetCdPosnAndSize(CdPosn, CdSize)) {
+        // Model already on cd, ready to be requested.
         RequestModel(modelId, flags);
         return;
     }
 
+    // Make sure model isn't used anywhere
     if (modelInfo->m_nRefCount > 0) {
         for (int32 i = CPools::ms_pPedPool->GetSize() - 1; i >= 0; i--) {
             if (modelInfo->m_nRefCount <= 0)
@@ -1650,6 +1652,7 @@ void CStreaming::RequestSpecialModel(int32 modelId, char const* name, int32 flag
                 CTheScripts::RemoveThisPed(pPed);
             }
         }
+
         for (int32 i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
             if (modelInfo->m_nRefCount <= 0)
                 break;
@@ -1662,17 +1665,19 @@ void CStreaming::RequestSpecialModel(int32 modelId, char const* name, int32 flag
             }
         }
     }
+
     const auto modelNameKey = modelInfo->m_nKey;
     modelInfo->SetModelName(name);
     CBaseModelInfo* pFoundModelInfo = nullptr;
 
-    for (int32 i = 0; i < 1001; i++) {
+    for (int32 i = 0; i <= 1000; i++) {
         CBaseModelInfo* pTheModelInfo = CModelInfo::ms_modelInfoPtrs[i];
         if (pTheModelInfo && modelNameKey == pTheModelInfo->m_nKey) {
             pFoundModelInfo = pTheModelInfo;
         }
     }
 
+    // Remove TXD ref (if any)
     if (pFoundModelInfo && pFoundModelInfo->m_nTxdIndex != -1 && CTxdStore::ms_pTxdPool->GetAt(pFoundModelInfo->m_nTxdIndex)) {
         CTxdStore::AddRef(pFoundModelInfo->m_nTxdIndex);
         RemoveModel(modelId);
@@ -1680,13 +1685,12 @@ void CStreaming::RequestSpecialModel(int32 modelId, char const* name, int32 flag
     } else {
         RemoveModel(modelId);
     }
+
+    // Find model in extra objects directory(also called `img`) and grab its posn(offset), and size
     uint32 outOffset, outStreamingSize;
     CStreaming::ms_pExtraObjectsDir->FindItem(name, outOffset, outStreamingSize);
     modelInfo->ClearTexDictionary();
-    if (CTxdStore::FindTxdSlot(name) == -1)
-        modelInfo->SetTexDictionary("generic");
-    else
-        modelInfo->SetTexDictionary(name);
+    modelInfo->SetTexDictionary(CTxdStore::FindTxdSlot(name) == -1 ? "generic" : name);
 
     // The first 3 bytes of outOffset is used for m_nCdPosn and
     // the remaining 1 byte is used for m_nImgId
