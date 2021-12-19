@@ -2061,27 +2061,27 @@ bool CStreaming::RemoveLeastUsedModel(uint32 streamingFlags) {
     for (; streamingInfo != ms_startLoadedList; streamingInfo = streamingInfo->GetPrev()) {
         const int32 modelId = streamingInfo - ms_aInfoForModel;
         if (!(streamingFlags & streamingInfo->m_nFlags)) {
-            if (modelId >= RESOURCE_ID_DFF && modelId < RESOURCE_ID_TXD) {
+            if (modelId >= RESOURCE_ID_DFF && modelId < RESOURCE_ID_TXD/*model is DFF*/) {
                 if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount) {
                     RemoveModel(modelId);
                     return true;
                 }
             }
-            else if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL) {
+            else if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL/*model is TXD*/) {
                 const int32 txdId = modelId - RESOURCE_ID_TXD;
                 if (!CTxdStore::GetNumRefs(txdId) && !AreTexturesUsedByRequestedModels(txdId)) {
                     RemoveModel(modelId);
                     return true;
                 }
             }
-            else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR) {
+            else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR/*model is IFP*/) {
                 const int32 animBlockId = modelId - RESOURCE_ID_IFP;
                 if (!CAnimManager::GetNumRefsToAnimBlock(animBlockId) && !AreAnimsUsedByRequestedModels(animBlockId)) {
                     RemoveModel(modelId);
                     return true;
                 }
             }
-            else if (modelId >= RESOURCE_ID_SCM) {
+            else if (modelId >= RESOURCE_ID_SCM/*model is SCM*/) {
                 const int32 scmId = modelId - RESOURCE_ID_SCM;
                 if (!CTheScripts::StreamedScripts.m_aScripts[scmId].m_nStatus) {
                     RemoveModel(modelId);
@@ -2090,16 +2090,20 @@ bool CStreaming::RemoveLeastUsedModel(uint32 streamingFlags) {
             }
         }
     }
-    if (TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM) > 50.0f
-        && (ms_numPedsLoaded > 4 && RemoveLoadedZoneModel() || ms_vehiclesLoaded.CountMembers() > 4 && RemoveLoadedVehicle())
-        || !ms_bLoadingScene
-        && (DeleteLeastUsedEntityRwObject(false, streamingFlags)
-            || ms_numPedsLoaded > 4 && RemoveLoadedZoneModel()
-            || (ms_vehiclesLoaded.CountMembers() > 7 || CGame::currArea && ms_vehiclesLoaded.CountMembers() > 4)
-            && RemoveLoadedVehicle())
+
+    if (TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM) > 50.0f && (
+                ms_numPedsLoaded > 4 && RemoveLoadedZoneModel() || ms_vehiclesLoaded.CountMembers() > 4 && RemoveLoadedVehicle()
+            )
+        || !ms_bLoadingScene && (
+                DeleteLeastUsedEntityRwObject(false, streamingFlags)
+                || ms_numPedsLoaded > 4 && RemoveLoadedZoneModel()
+                || (ms_vehiclesLoaded.CountMembers() > 7 || CGame::currArea != AREA_CODE_NORMAL_WORLD && ms_vehiclesLoaded.CountMembers() > 4) && RemoveLoadedVehicle()
+            )
         || DeleteLeastUsedEntityRwObject(true, streamingFlags)
-        || (ms_vehiclesLoaded.CountMembers() > 7 || CGame::currArea && ms_vehiclesLoaded.CountMembers() > 4)
-        && RemoveLoadedVehicle() || ms_numPedsLoaded > 4 && RemoveLoadedZoneModel())
+        || (
+                ms_vehiclesLoaded.CountMembers() > 7 || CGame::currArea != AREA_CODE_NORMAL_WORLD && ms_vehiclesLoaded.CountMembers() > 4
+            ) && RemoveLoadedVehicle()
+        || ms_numPedsLoaded > 4 && RemoveLoadedZoneModel())
     {
         return true;
     }
