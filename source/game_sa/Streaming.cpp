@@ -642,6 +642,7 @@ void CStreaming::DeleteAllRwObjects() {
 }
 
 // 0x409760
+// Function name is a little misleading, as it deletes the first entity it can.
 bool CStreaming::DeleteLeastUsedEntityRwObject(bool bNotOnScreen, uint32 streamingFlags) {
     const float fCameraFarPlane = TheCamera.m_pRwCamera->farPlane;
     CPlayerPed* pPlayer = FindPlayerPed(-1);
@@ -1171,7 +1172,7 @@ void CStreaming::LoadScene(CVector const& point) {
 
     CVector playerPosition = FindPlayerCoors(0);
 
-    // Can't use a simple `for` loop here, because model is unlinked when removed.
+    // Can't use a simple `for` loop here, because model is unlinked (thus the iterator is invalidated) when removed.
     {
         CStreamingInfo* iter = ms_pEndRequestedList->GetPrev();
         while (iter != ms_pStartRequestedList) {
@@ -1244,6 +1245,7 @@ void CStreaming::RenderEntity(CLink<CEntity*>* streamingLink) {
 }
 
 // 0x409430
+// Load big buildings around `point`
 void CStreaming::RequestBigBuildings(CVector const& point) {
     for (int32 i = CPools::ms_pBuildingPool->GetSize() - 1; i >= 0; i--) {
         CBuilding* pBuilding = CPools::ms_pBuildingPool->GetAt(i);
