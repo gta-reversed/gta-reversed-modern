@@ -17,8 +17,8 @@ enum eStreamingFlags {
 };
 
 enum eStreamingLoadState {
-    LOADSTATE_NOT_LOADED = 0,
-    LOADSTATE_LOADED = 1,
+    LOADSTATE_NOT_LOADED = 0, // Channel has nothing to do
+    LOADSTATE_LOADED = 1,     // `RequestModelStream` was called, and there are models to be read
     LOADSTATE_REQUESTED = 2,
     LOADSTATE_READING = 3,
     LOADSTATE_FINISHING = 4

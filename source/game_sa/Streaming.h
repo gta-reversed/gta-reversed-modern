@@ -17,6 +17,14 @@
 #include "Directory.h"
 #include "constants.h"
 
+enum class eChannelState
+{
+    IDLE = 0,
+    READING = 1,
+    STARTED = 2,
+    ERR = 3, // Also called ERROR, but that's a `windgi.h` macro
+};
+
 enum eResourceFirstID {
     // First ID of the resource
     RESOURCE_ID_DFF = 0,                                            // default: 0
@@ -64,7 +72,7 @@ VALIDATE_SIZE(tStreamingFileDesc, 0x30);
 struct tStreamingChannel {
     int32               modelIds[16];
     int32               modelStreamingBufferOffsets[16];
-    eStreamingLoadState LoadStatus;
+    eChannelState LoadStatus;
     int32               iLoadingLevel; // the value gets modified, but it's not used
     int32               offsetAndHandle;
     int32               sectorCount;

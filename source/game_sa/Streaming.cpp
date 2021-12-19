@@ -981,8 +981,8 @@ void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests)
         const tStreamingChannel& ch2 = ms_channel[1];
 
         if (ms_pEndRequestedList->GetPrev() == ms_pStartRequestedList /*empty request list*/
-            && ch1.LoadStatus == LOADSTATE_NOT_LOADED
-            && ch2.LoadStatus == LOADSTATE_NOT_LOADED
+            && ch1.LoadStatus == eChannelState::IDLE
+            && ch2.LoadStatus == eChannelState::IDLE
             || numModelsToLoad <= 0)
         {
             break;
@@ -992,14 +992,14 @@ void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests)
             chIdx = 0;
 
         tStreamingChannel& channel = ms_channel[chIdx];
-        if (channel.LoadStatus != LOADSTATE_NOT_LOADED) {
+        if (channel.LoadStatus != eChannelState::IDLE) {
             CdStreamSync(chIdx);
             channel.iLoadingLevel = 100;
         }
 
-        if (channel.LoadStatus == LOADSTATE_LOADED) {
+        if (channel.LoadStatus == eChannelState::READING) {
             ProcessLoadingChannel(chIdx);
-            if (channel.LoadStatus == LOADSTATE_REQUESTED)
+            if (channel.LoadStatus == eChannelState::STARTED)
                 ProcessLoadingChannel(chIdx);
         }
 
@@ -1009,14 +1009,14 @@ void CStreaming::LoadAllRequestedModels(bool bOnlyPriorityRequests)
         if (!ms_bLoadingBigModel) {
             tStreamingChannel& otherChannel = ms_channel[1 - chIdx];
 
-            if (otherChannel.LoadStatus == LOADSTATE_NOT_LOADED)
+            if (otherChannel.LoadStatus == eChannelState::IDLE)
                 RequestModelStream(1 - chIdx);
 
-            if (channel.LoadStatus == LOADSTATE_NOT_LOADED && !ms_bLoadingBigModel)
+            if (channel.LoadStatus == eChannelState::IDLE && !ms_bLoadingBigModel)
                 RequestModelStream(chIdx);
         }
 
-        if (ch1.LoadStatus == LOADSTATE_NOT_LOADED && ch2.LoadStatus == LOADSTATE_NOT_LOADED)
+        if (ch1.LoadStatus == eChannelState::IDLE && ch2.LoadStatus == eChannelState::IDLE)
             break;
 
         chIdx = 1 - chIdx; // Switch to other channel
@@ -1439,25 +1439,25 @@ void CStreaming::FinishLoadingLargeFile(uint8* pFileBuffer, int32 modelId)
 // 0x40E460
 void CStreaming::FlushChannels()
 {
-    if (ms_channel[1].LoadStatus == LOADSTATE_REQUESTED)
+    if (ms_channel[1].LoadStatus == eChannelState::STARTED)
         ProcessLoadingChannel(1);
 
-    if (ms_channel[0].LoadStatus == LOADSTATE_LOADED)
+    if (ms_channel[0].LoadStatus == eChannelState::READING)
     {
         CdStreamSync(0);
         ms_channel[0].iLoadingLevel = 100;
         ProcessLoadingChannel(0);
     }
-    if (ms_channel[0].LoadStatus == LOADSTATE_REQUESTED)
+    if (ms_channel[0].LoadStatus == eChannelState::STARTED)
         ProcessLoadingChannel(0);
 
-    if (ms_channel[1].LoadStatus == LOADSTATE_LOADED)
+    if (ms_channel[1].LoadStatus == eChannelState::READING)
     {
         CdStreamSync(1u);
         ms_channel[1].iLoadingLevel = 100;
         ProcessLoadingChannel(1);
     }
-    if (ms_channel[1].LoadStatus == LOADSTATE_REQUESTED)
+    if (ms_channel[1].LoadStatus == eChannelState::STARTED)
         ProcessLoadingChannel(1);;
 }
 
@@ -1508,7 +1508,7 @@ void CStreaming::RequestModelStream(int32 chIdx)
     if (nThisModelSizeInSectors > ms_streamingBufferSize) {
         // A model is considered "big" if it doesn't fit into a single channels buffer
         // In which case it has to be loaded entirely by channel 0 by using both channel's buffers.
-        if (chIdx == 1 || ms_channel[1].LoadStatus != eStreamingLoadState::LOADSTATE_NOT_LOADED)
+        if (chIdx == 1 || ms_channel[1].LoadStatus != eChannelState::IDLE)
             return;
         ms_bLoadingBigModel = true;
     }
@@ -1614,7 +1614,7 @@ void CStreaming::RequestModelStream(int32 chIdx)
     }
 
     CdStreamRead(chIdx, ms_pStreamingBuffer[chIdx], posn, nSectorsToRead); // Request models to be read
-    ch.LoadStatus = LOADSTATE_LOADED;
+    ch.LoadStatus = eChannelState::READING;
     ch.iLoadingLevel = 0;
     ch.sectorCount = nSectorsToRead; // Set how many sectors to read
     ch.offsetAndHandle = posn; // And from where to read
@@ -1712,33 +1712,36 @@ bool CStreaming::ProcessLoadingChannel(int32 chIdx)
         switch (streamStatus) {
         case eCdStreamStatus::READING:
         case eCdStreamStatus::WAITING_TO_READ:
-            return false;
+            return false; // Not ready yet.
         }
 
         // At this point the stream status is anything but READING_SUCCESS, READING, WAITING_TO_READ
-        // Which leaves us with FAILURE, that is, if the enum has no more entries but only these 4.
+        // Which leaves us with FAILURE. (That is, if the enum has no more entries but only these 4)
+        // So lets retry reading.
         ch.m_nCdStreamStatus = streamStatus;
-        ch.LoadStatus = LOADSTATE_READING;
+        ch.LoadStatus = eChannelState::ERR;
 
         if (ms_channelError != -1)
-            return false; // Channel has errors
+            return false;
 
         ms_channelError = chIdx;
         RetryLoadFile(chIdx);
+
         return true;
     }
 
-    const bool isRequested = ch.LoadStatus == LOADSTATE_REQUESTED;
-    ch.LoadStatus = LOADSTATE_NOT_LOADED;
-    if (isRequested) {
+    const bool isStarted = ch.LoadStatus == eChannelState::STARTED;
+    ch.LoadStatus = eChannelState::IDLE;
+    if (isStarted) {
+        // It's a large model so finish loading it
         int32 bufferOffset = ch.modelStreamingBufferOffsets[0];
         uint8* pFileContents = reinterpret_cast<uint8*>(&ms_pStreamingBuffer[chIdx][STREAMING_SECTOR_SIZE * bufferOffset]);
         FinishLoadingLargeFile(pFileContents, ch.modelIds[0]);
         ch.modelIds[0] = -1;
     } else {
-        const int32 numberOfModelIds = std::size(ch.modelIds);
-        for (int32 chModelIter = 0; chModelIter < numberOfModelIds; chModelIter++) {
-            const int32 modelId = ch.modelIds[chModelIter];
+        // Load models individually
+        for (int32 i = 0; i < std::size(ch.modelIds); i++) {
+            const int32 modelId = ch.modelIds[i];
             if (modelId == -1)
                 continue;
 
@@ -1749,24 +1752,25 @@ bool CStreaming::ProcessLoadingChannel(int32 chIdx)
                 || baseModelInfo->GetModelType() != MODEL_INFO_VEHICLE /* It's a DFF, check if its a vehicle */
                 || ms_vehiclesLoaded.CountMembers() < desiredNumVehiclesLoaded /* It's a vehicle, so lets check if we can load more */
                 || RemoveLoadedVehicle() /* no, so try to remove one, and load this in its place */
-                || info.m_nFlags & (STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED) /* failed, lets check if its absolutely mission critical */
+                || info.IsMissionOrGameRequired() /* failed, lets check if its absolutely mission critical */
             ) {
                 if (modelId < RESOURCE_ID_IPL || modelId >= RESOURCE_ID_DAT/*model is NOT IPL*/)
-                    MakeSpaceFor(info.GetCdSize() * STREAMING_SECTOR_SIZE);
+                    MakeSpaceFor(info.GetCdSize() * STREAMING_SECTOR_SIZE); // IPL's dont require any memory themselves
 
-                const int32 bufferOffsetInSectors = ch.modelStreamingBufferOffsets[chModelIter];
+                const int32 bufferOffsetInSectors = ch.modelStreamingBufferOffsets[i];
                 uint8* pFileBuffer = reinterpret_cast <uint8*> (&ms_pStreamingBuffer[chIdx][STREAMING_SECTOR_SIZE * bufferOffsetInSectors]);
 
+                // Actually load the model into memory
                 ConvertBufferToObject(pFileBuffer, modelId);
 
                 if (info.m_nLoadState == LOADSTATE_FINISHING) {
-                    ch.LoadStatus = LOADSTATE_REQUESTED;
-                    ch.modelStreamingBufferOffsets[chModelIter] = bufferOffsetInSectors;
-                    ch.modelIds[chModelIter] = modelId;
-                    if (chModelIter == 0)
+                    ch.LoadStatus = eChannelState::STARTED;
+                    ch.modelStreamingBufferOffsets[i] = bufferOffsetInSectors;
+                    ch.modelIds[i] = modelId;
+                    if (i == 0)
                         continue;
                 }
-                ch.modelIds[chModelIter] = -1;
+                ch.modelIds[i] = -1;
             } else {
                 // I think at this point it's guaranteed to be a vehicle (thus its a DFF),
                 // with `STREAMING_MISSION_REQUIRED` `STREAMING_GAME_REQUIRED` flags unset.
@@ -1774,10 +1778,10 @@ bool CStreaming::ProcessLoadingChannel(int32 chIdx)
                 const int32 modelTxdIdx = baseModelInfo->m_nTxdIndex;
                 RemoveModel(modelId);
 
-                if (info.m_nFlags & (STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED)) {
+                if (info.IsMissionOrGameRequired()) {
                     // Re-request it.
                     // I think this code is unreachable, because
-                    // if any of the 2 flags (above) is set the `else` branch is never executed.
+                    // if any of the 2 flags (above) is set this code is never reached.
                     RequestModel(modelId, info.m_nFlags); 
                 } else if (!CTxdStore::GetNumRefs(modelTxdIdx))
                     RemoveTxdModel(modelTxdIdx); // Unload TXD, as it has no refs
@@ -1786,7 +1790,7 @@ bool CStreaming::ProcessLoadingChannel(int32 chIdx)
     }
 
     if (ms_bLoadingBigModel) {
-        if (ch.LoadStatus != LOADSTATE_REQUESTED) {
+        if (ch.LoadStatus != eChannelState::STARTED) {
             ms_bLoadingBigModel = false;
             for (int32 i = 0; i < 16; i++) {
                 ms_channel[1].modelIds[i] = -1;
@@ -2391,9 +2395,9 @@ void CStreaming::RetryLoadFile(int32 chIdx) {
     while (true) {
         bool bStreamRead = false;
         switch (streamingChannel.LoadStatus) {
-        case eStreamingLoadState::LOADSTATE_LOADED: {
+        case eChannelState::READING: {
             if (ProcessLoadingChannel(chIdx)) {
-                if (streamingChannel.LoadStatus == LOADSTATE_REQUESTED)
+                if (streamingChannel.LoadStatus == eChannelState::STARTED)
                     ProcessLoadingChannel(chIdx);
 
                 ms_channelError = -1; // Clear error code
@@ -2401,7 +2405,7 @@ void CStreaming::RetryLoadFile(int32 chIdx) {
             }
             break;
         }
-        case eStreamingLoadState::LOADSTATE_READING: {
+        case eChannelState::ERR: {
             streamingChannel.totalTries++;
 
             // Keep in mind that `CdStreamGetStatus` changes the stream status.
@@ -2414,10 +2418,10 @@ void CStreaming::RetryLoadFile(int32 chIdx) {
             // TODO: Fallthru. Use [[fallthrough]]; from c++17
             __fallthrough;
         }
-        case eStreamingLoadState::LOADSTATE_NOT_LOADED: {
+        case eChannelState::IDLE: {
             uint8* pBuffer = ms_pStreamingBuffer[chIdx];
             CdStreamRead(chIdx, pBuffer, streamingChannel.offsetAndHandle, streamingChannel.sectorCount);
-            streamingChannel.LoadStatus = LOADSTATE_LOADED;
+            streamingChannel.LoadStatus = eChannelState::READING;
             streamingChannel.iLoadingLevel = -600;
             break;
         }
@@ -2434,17 +2438,21 @@ void CStreaming::LoadRequestedModels()
     static int32 currentChannel = 0;
     if (ms_bLoadingBigModel)
         currentChannel = 0;
+
     const tStreamingChannel& channel = ms_channel[currentChannel];
-    if (channel.LoadStatus != LOADSTATE_NOT_LOADED)
+    if (channel.LoadStatus != eChannelState::IDLE)
         ProcessLoadingChannel(currentChannel);
+
     if (!ms_bLoadingBigModel) {
         const int32 otherChannelId = 1 - currentChannel;
-        if (ms_channel[otherChannelId].LoadStatus == LOADSTATE_NOT_LOADED)
+        if (ms_channel[otherChannelId].LoadStatus == eChannelState::IDLE)
             RequestModelStream(otherChannelId);
-        if (channel.LoadStatus == LOADSTATE_NOT_LOADED && !ms_bLoadingBigModel)
+
+        if (channel.LoadStatus == eChannelState::IDLE && !ms_bLoadingBigModel)
             RequestModelStream(currentChannel);
     }
-    if (channel.LoadStatus != LOADSTATE_REQUESTED)
+
+    if (channel.LoadStatus != eChannelState::STARTED)
         currentChannel = 1 - currentChannel;
 }
 
@@ -2605,7 +2613,7 @@ void CStreaming::Init2()
     m_bHarvesterModelsRequested = false;
     for (int32 channelId = 0; channelId < 2; channelId++) {
         tStreamingChannel& streamingChannel = ms_channel[channelId];
-        streamingChannel.LoadStatus = LOADSTATE_NOT_LOADED;
+        streamingChannel.LoadStatus = eChannelState::IDLE;
         for (int32 i = 0; i < 16; i++) {
             streamingChannel.modelIds[i] = -1;
         }
