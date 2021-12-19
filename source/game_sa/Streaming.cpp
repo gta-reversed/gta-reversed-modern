@@ -1767,7 +1767,7 @@ void CStreaming::PurgeRequestList() {
     auto streamingInfo = ms_pEndRequestedList->GetPrev();
     while (streamingInfo != ms_pStartRequestedList) {
         auto previousStreamingInfo = streamingInfo->GetPrev();
-        if (!(streamingInfo->m_nFlags & (STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED)))
+        if (!streamingInfo->DoKeepInMemory() && !streamingInfo->IsPriorityRequest())
             RemoveModel(streamingInfo - ms_aInfoForModel);
         streamingInfo = previousStreamingInfo;
     }
