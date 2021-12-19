@@ -2124,20 +2124,21 @@ bool CStreaming::RemoveLoadedVehicle() {
             return true;
         }
     }
-    int32 numBoatsNeeded = 0;
-    if (CStreaming::m_bBoatsNeeded)
-        numBoatsNeeded = 2;
-    if (numBoatsNeeded < CPopulation::m_LoadedBoats.CountMembers()) {
-        for (int32 i = 0; i < CPopulation::m_LoadedBoats.CountMembers(); i++) {
-            int32 modelId = CPopulation::m_LoadedBoats.GetMember(i);
-            if (CarIsCandidateForRemoval(modelId)) {
-                RemoveModel(modelId);
-                return true;
+
+    {
+        const auto numBoatsNeeded = CStreaming::m_bBoatsNeeded ? 2 : 0;
+        if (numBoatsNeeded < CPopulation::m_LoadedBoats.CountMembers()) {
+            for (int32 i = 0; i < CPopulation::m_LoadedBoats.CountMembers(); i++) {
+                int32 modelId = CPopulation::m_LoadedBoats.GetMember(i);
+                if (CarIsCandidateForRemoval(modelId)) {
+                    RemoveModel(modelId);
+                    return true;
+                }
             }
         }
     }
-    CLoadedCarGroup appropriateLoadedCars{};
-    memcpy(&appropriateLoadedCars, &CPopulation::m_AppropriateLoadedCars, sizeof(CLoadedCarGroup));
+
+    auto appropriateLoadedCars = CPopulation::m_AppropriateLoadedCars;
     appropriateLoadedCars.SortBasedOnUsage();
     for (int32 i = 0; i < appropriateLoadedCars.CountMembers(); i++) {
         int32 modelId = appropriateLoadedCars.GetMember(i);
