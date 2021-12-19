@@ -2460,11 +2460,11 @@ void CStreaming::LoadRequestedModels()
 // 0x40E4E0
 void CStreaming::FlushRequestList()
 {
-    auto streamingInfo = ms_pStartRequestedList->GetNext();
-    while (streamingInfo != ms_pEndRequestedList) {
-        auto nextStreamingInfo = streamingInfo->GetNext();
-        RemoveModel(streamingInfo - ms_aInfoForModel);
-        streamingInfo = nextStreamingInfo;
+    // Have to do it like this, because current iterator is invalidated when `RemoveModel` is called
+    for (auto it = ms_pStartRequestedList->GetNext(); it != ms_pEndRequestedList;) {
+        auto next = it->GetNext();
+        RemoveModel(next - ms_aInfoForModel);
+        it = next;
     }
     FlushChannels();
 }
