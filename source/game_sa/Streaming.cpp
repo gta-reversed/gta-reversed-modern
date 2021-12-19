@@ -2179,44 +2179,37 @@ void CStreaming::RemoveModel(int32 modelId)
     CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];;
     if (streamingInfo.m_nLoadState == LOADSTATE_NOT_LOADED)
         return;
+
     if (streamingInfo.m_nLoadState == LOADSTATE_LOADED) {
-        if (modelId >= RESOURCE_ID_DFF && modelId < RESOURCE_ID_TXD) {
+        if (modelId >= RESOURCE_ID_DFF && modelId < RESOURCE_ID_TXD/*model is DFF*/) {
             CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
             pModelInfo->DeleteRwObject();
             if (pModelInfo->GetModelType() == MODEL_INFO_PED) {
-                int32 numPedsLoaded = ms_numPedsLoaded;
                 for (int32 i = 0; i < TOTAL_LOADED_PEDS; i++) {
                     if (ms_pedsLoaded[i] == modelId) {
                         ms_pedsLoaded[i] = -1;
-                        numPedsLoaded--;
+                        ms_numPedsLoaded--;
                     }
                 }
-                ms_numPedsLoaded = numPedsLoaded;
-            }
-            else if (pModelInfo->GetModelType() == MODEL_INFO_VEHICLE) {
+            } else if (pModelInfo->GetModelType() == MODEL_INFO_VEHICLE) {
                 RemoveCarModel(modelId);
             }
-        }
-        else if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL) {
+        } else if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL/*model is TXD*/) {
             CTxdStore::RemoveTxd(modelId - RESOURCE_ID_TXD);
-        }
-        else if (modelId >= RESOURCE_ID_COL && modelId < RESOURCE_ID_IPL) {
+        } else if (modelId >= RESOURCE_ID_COL && modelId < RESOURCE_ID_IPL/*model is COL*/) {
             CColStore::RemoveCol(modelId - RESOURCE_ID_COL);
-        }
-        else if (modelId >= RESOURCE_ID_IPL && modelId < RESOURCE_ID_DAT) {
+        } else if (modelId >= RESOURCE_ID_IPL && modelId < RESOURCE_ID_DAT/*model is IPL*/) {
             CIplStore::RemoveIpl(modelId - RESOURCE_ID_IPL);
-        }
-        else if (modelId >= RESOURCE_ID_DAT && modelId < RESOURCE_ID_IFP) {
+        } else if (modelId >= RESOURCE_ID_DAT && modelId < RESOURCE_ID_IFP/*model is DAT*/) {
             ThePaths.UnLoadPathFindData(modelId - RESOURCE_ID_DAT);
-        }
-        else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR) {
+        } else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR/*model is IFP*/) {
             CAnimManager::RemoveAnimBlock(modelId - RESOURCE_ID_IFP);
-        }
-        else if (modelId >= RESOURCE_ID_SCM) {
+        } else if (modelId >= RESOURCE_ID_SCM/*model is SCM*/) {
             CTheScripts::StreamedScripts.RemoveStreamedScriptFromMemory(modelId - RESOURCE_ID_SCM);
         }
         ms_memoryUsed -= STREAMING_SECTOR_SIZE * streamingInfo.GetCdSize();
     }
+
     if (streamingInfo.m_nNextIndex == -1) {
         if (streamingInfo.m_nLoadState == LOADSTATE_READING) {
             for (int32 i = 0; i < 16; i++) {
@@ -2226,8 +2219,7 @@ void CStreaming::RemoveModel(int32 modelId)
                 }
             }
         }
-    }
-    else {
+    } else {
         if (streamingInfo.m_nLoadState == LOADSTATE_REQUESTED) {
             ms_numModelsRequested--;
             if (streamingInfo.m_nFlags & STREAMING_PRIORITY_REQUEST) {
@@ -2237,20 +2229,22 @@ void CStreaming::RemoveModel(int32 modelId)
         }
         streamingInfo.RemoveFromList();
     }
+
     if (streamingInfo.m_nLoadState == LOADSTATE_FINISHING) {
-        if (modelId < RESOURCE_ID_TXD)
+        if (modelId < RESOURCE_ID_TXD/*model is DFF*/)
             RpClumpGtaCancelStream();
-        else if (modelId < RESOURCE_ID_COL)
+        else if (modelId < RESOURCE_ID_COL/*model is TXD*/)
             CTxdStore::RemoveTxd(modelId - RESOURCE_ID_TXD);
-        else if (modelId < RESOURCE_ID_IPL)
+        else if (modelId < RESOURCE_ID_IPL/*model is COL*/)
             CColStore::RemoveCol(modelId - RESOURCE_ID_COL);
-        else if (modelId < RESOURCE_ID_DAT)
+        else if (modelId < RESOURCE_ID_DAT/*model is IPL*/)
             CIplStore::RemoveIpl(modelId - RESOURCE_ID_IPL);
-        else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR)
+        else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR/*model is IFP*/)
             CAnimManager::RemoveAnimBlock(modelId - RESOURCE_ID_IFP);
-        else if (modelId >= RESOURCE_ID_SCM)
+        else if (modelId >= RESOURCE_ID_SCM/*model is SCM*/)
             CTheScripts::StreamedScripts.RemoveStreamedScriptFromMemory(modelId - RESOURCE_ID_SCM);
     }
+
     streamingInfo.m_nLoadState = LOADSTATE_NOT_LOADED;
 }
 
