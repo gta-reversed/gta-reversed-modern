@@ -1462,7 +1462,8 @@ void CStreaming::FlushChannels()
 }
 
 // 0x40CBA0
-// TODO: Document this function.. I'm really unsure what it does exactly
+// Starts reading at most 16 models at a time.
+// Removes all unused and not required IFP/TXDs from the `cd` up to the first model that has to be loaded.
 void CStreaming::RequestModelStream(int32 chIdx)
 {
     int32 modelId = GetNextFileOnCd(CdStreamGetLastPosn(), true);
@@ -1471,10 +1472,12 @@ void CStreaming::RequestModelStream(int32 chIdx)
 
     tStreamingChannel& ch = ms_channel[chIdx];
     uint32 posn = 0;
-    uint32 sizeInSectors = 0;
+    uint32 nThisModelSizeInSectors = 0;
     CStreamingInfo* streamingInfo = &ms_aInfoForModel[modelId];
+
+    // Find first model that has to be loaded
     while (!streamingInfo->IsRequiredToBeKept()) {
-        // Remove unused TXDs or IFPs from stream.
+        // In case of TXD/IFP's check if they're used at all, if not remove them.
         if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL /*model is TXD*/) {
             if (AreTexturesUsedByRequestedModels(modelId - RESOURCE_ID_TXD))
                 break;
@@ -1482,111 +1485,139 @@ void CStreaming::RequestModelStream(int32 chIdx)
             if (AreAnimsUsedByRequestedModels(modelId - RESOURCE_ID_IFP))
                 break;
         } else /*model is neither TXD or IFP*/ {
-            break;
+            break; // No checks needed
         }
+
+        // TXD/IFP unused, so remove it, and find the next file on cd
 
         RemoveModel(modelId);
 
-        streamingInfo->GetCdPosnAndSize(posn, sizeInSectors);
-        modelId = GetNextFileOnCd(sizeInSectors + posn, true);
+        streamingInfo->GetCdPosnAndSize(posn, nThisModelSizeInSectors); // Grab posn and size of this model
+        modelId = GetNextFileOnCd(posn + nThisModelSizeInSectors, true); // Find where the next file is after it
         if (modelId == -1)
-            return;
-        streamingInfo = &ms_aInfoForModel[modelId];
+            return; // No more models...
+        streamingInfo = &ms_aInfoForModel[modelId]; // Grab next file's modelinfo
     }
-    if (modelId == -1)
-        return;
+    /*if (modelId == -1)
+        return;*/
 
-    streamingInfo->GetCdPosnAndSize(posn, sizeInSectors);
-    if (sizeInSectors > ms_streamingBufferSize) {
+    // Grab cd posn and size for this model
+    streamingInfo->GetCdPosnAndSize(posn, nThisModelSizeInSectors);
+
+    // Check if its big
+    if (nThisModelSizeInSectors > ms_streamingBufferSize) {
+        // A model is considered "big" if it doesn't fit into a single channels buffer
+        // In which case it has to be loaded entirely by channel 0 by using both channel's buffers.
         if (chIdx == 1 || ms_channel[1].LoadStatus != eStreamingLoadState::LOADSTATE_NOT_LOADED)
             return;
         ms_bLoadingBigModel = true;
     }
 
-    uint32 sectorCount = 0;
-    const bool isThisModelBig = sizeInSectors > 200;
-    bool isPreviousModelBig = false; // All models with the size > 200 (in sectors) are considered big
+    // Find all (but at most 16) consecutive models starting at `posn` and load them in one go
+    uint32 nSectorsToRead = 0; // The no. of sectors to be loaded starting at `posn`
+    bool isPreviousModelBigOrVeh = false;
     bool isPreviousModelPed = false;
-    const int32 numberOfModelIds = sizeof(tStreamingChannel::modelIds) / sizeof(tStreamingChannel::modelIds[0]);
-    int32 modelIndex = 0;
-    for (; modelIndex < numberOfModelIds; modelIndex++) {
+    int32 i = 0;
+    for (; i < std::size(ch.modelIds); i++) {
         streamingInfo = &ms_aInfoForModel[modelId];
+
         if (streamingInfo->m_nLoadState != LOADSTATE_REQUESTED)
-            break;
+            break; // Model not requested, so no need to load it. 
 
         if (streamingInfo->GetCdSize())
-            sizeInSectors = streamingInfo->GetCdSize();
+            nThisModelSizeInSectors = streamingInfo->GetCdSize();
 
-        if (ms_numPriorityRequests && !(streamingInfo->m_nFlags & STREAMING_PRIORITY_REQUEST))
-            break;
+        const bool isThisModelBig = nThisModelSizeInSectors > 200;
+
+        if (ms_numPriorityRequests && !streamingInfo->IsPriorityRequest())
+            break; // There are priority requests, but this isnt one of them
 
         if (modelId >= RESOURCE_ID_TXD/*model is NOT DFF*/) {
             if (modelId < RESOURCE_ID_IFP || modelId >= RESOURCE_ID_RRR/*model is NOT IFP*/) {
-                if (isPreviousModelBig && isThisModelBig)
+                if (isPreviousModelBigOrVeh && isThisModelBig)
+                    break; // Do not load a big model/car and a big model after each other 
+            } else /*model is IFP*/ {
+                if (CCutsceneMgr::ms_cutsceneProcessing || ms_aInfoForModel[MODEL_MALE01].m_nLoadState != LOADSTATE_LOADED)
                     break;
-            } else if (CCutsceneMgr::ms_cutsceneProcessing || ms_aInfoForModel[MODEL_MALE01].m_nLoadState != LOADSTATE_LOADED) {
-                break;
             }
-        } else /*Model is DFF*/ {
+        } else /*model is DFF*/ {
             CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
 
             if (isPreviousModelPed && pBaseModelInfo->GetModelType() == MODEL_INFO_PED)
-                break;
+                break; // Dont load two peds after each other
 
-            if (isPreviousModelBig && pBaseModelInfo->GetModelType() == MODEL_INFO_VEHICLE)
-                break;
+            if (isPreviousModelBigOrVeh && pBaseModelInfo->GetModelType() == MODEL_INFO_VEHICLE)
+                break; // Dont load two vehicles / big model + vehicle after each other
 
+            // Check if TXD and/or IFP is loaded for this model.
+            // If not we can't load the model yet.
+
+            // Check TXD
             if (!ms_aInfoForModel[pBaseModelInfo->m_nTxdIndex + RESOURCE_ID_TXD].IsLoadedOrBeingRead())
-                break; // TXD not yet loaded
+                break;
 
-            
+            // Check IFP (if any)
             int32 animFileIndex = pBaseModelInfo->GetAnimFileIndex();
             if (animFileIndex != -1)
             {
                 if (!ms_aInfoForModel[animFileIndex + RESOURCE_ID_IFP].IsLoadedOrBeingRead())
-                    break; // IFP not loaded yet
+                    break;
             }
         }
-        ch.modelStreamingBufferOffsets[modelIndex] = sectorCount;
-        ch.modelIds[modelIndex] = modelId;
 
-        sectorCount += sizeInSectors;
-        if (sectorCount > ms_streamingBufferSize && modelIndex > 0) {
-            sectorCount -= sizeInSectors;
+        // At this point we've made sure the model can be loaded
+        // so let's add it to the channel.
+
+        // Set offset where the model's data begins at
+        ch.modelStreamingBufferOffsets[i] = nSectorsToRead;
+
+        // Set the corresponding modelid
+        ch.modelIds[i] = modelId;
+
+        // Check if all the stuff we intend to load fits into one channel's buffer
+        // If not and this isn't the first model we want to load break.
+        // TODO: Why is it okay if it's the first model?
+        if (nSectorsToRead + nThisModelSizeInSectors > ms_streamingBufferSize && i > 0)
             break;
-        }
+
+        nSectorsToRead += nThisModelSizeInSectors;
 
         CBaseModelInfo* pBaseModelInfo = CModelInfo::GetModelInfo(modelId);
         if (modelId >= RESOURCE_ID_TXD/*model is NOT DFF*/) {
             if (isThisModelBig)
-                isPreviousModelBig = true;
+                isPreviousModelBigOrVeh = true;
         } else /*model is DFF*/ {
             switch (pBaseModelInfo->GetModelType()) {
             case ModelInfoType::MODEL_INFO_PED:
                 isPreviousModelPed = true;
                 break;
             case ModelInfoType::MODEL_INFO_VEHICLE:
-                isPreviousModelBig = true;
+                isPreviousModelBigOrVeh = true; // I guess all vehicles are considered big?
                 break;
             }
         }
+
+        // Modify the state of models
         streamingInfo->m_nLoadState = LOADSTATE_READING;
-        streamingInfo->RemoveFromList();
+        streamingInfo->RemoveFromList(); // Remove from cd
         ms_numModelsRequested--;
         if (streamingInfo->IsPriorityRequest()) {
-            streamingInfo->m_nFlags &= ~STREAMING_PRIORITY_REQUEST;
+            streamingInfo->m_nFlags &= ~STREAMING_PRIORITY_REQUEST; // Remove priority request flag, as its not a request anymore.
             ms_numPriorityRequests--;
         }
         modelId = streamingInfo->m_nNextIndexOnCd;
     }
-    for (int32 i = modelIndex; i < numberOfModelIds; i++) {
+
+    // Set remaining (if any) models to `-1`
+    for (int32 i = i; i < std::size(ch.modelIds); i++) {
         ch.modelIds[i] = -1;
     }
-    CdStreamRead(chIdx, ms_pStreamingBuffer[chIdx], posn, sectorCount);
+
+    CdStreamRead(chIdx, ms_pStreamingBuffer[chIdx], posn, nSectorsToRead); // Request models to be read
     ch.LoadStatus = LOADSTATE_LOADED;
     ch.iLoadingLevel = 0;
-    ch.sectorCount = sectorCount;
-    ch.offsetAndHandle = posn;
+    ch.sectorCount = nSectorsToRead; // Set how many sectors to read
+    ch.offsetAndHandle = posn; // And from where to read
     ch.totalTries = 0;
     if (m_bModelStreamNotLoaded)
         m_bModelStreamNotLoaded = false;

@@ -145,7 +145,7 @@ eCdStreamStatus __cdecl CdStreamGetStatus(int32 streamId)
 }
 
 // When CdStreamRead is called, it will update CdStream information for the channel and
-// signal gStreamSemaphore, so the secondary thread `CdStreamThread` can start reading the model
+// signal gStreamSemaphore, so the secondary thread `CdStreamThread` can start reading the models.
 // If this function is called with the same channelId/streamId whilst CdStreamThread is still reading the previous model
 // for the channel, then it will return false.
 // When CdStreamThread is done reading the model, then CdStreamThread will set `stream.nSectorsToRead` and `stream.bInUse` to 0,
