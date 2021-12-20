@@ -265,7 +265,7 @@ public:
     static void Shutdown();
     static void StartRenderEntities();
     static bool StreamAmbulanceAndMedic(bool bStreamForAccident);
-    static void StreamCopModels(int32 level);
+    static void StreamCopModels(eLevelName level);
     static bool StreamFireEngineAndFireman(bool bStreamForFire);
     static void StreamOneNewCar();
     //! interiorType : 0 - house , 1 - shop , 2 - office
