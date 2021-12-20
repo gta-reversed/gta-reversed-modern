@@ -2512,11 +2512,18 @@ bool CStreaming::AddToLoadedVehiclesList(int32 modelId)
 int32 CStreaming::GetDefaultCabDriverModel()
 {
     static int32 randomIndex = 0;
-    const int32 defaultCabDriverModels[7] = { MODEL_BMOCD, MODEL_WMYCD1, MODEL_SBMOCD,
-        MODEL_SWMOCD, MODEL_VBMOCD , MODEL_VWMYCD, -1 };
+    const int32 defaultCabDriverModels[7] = {
+        MODEL_BMOCD,
+        MODEL_WMYCD1,
+        MODEL_SBMOCD,
+        MODEL_SWMOCD,
+        MODEL_VBMOCD,
+        MODEL_VWMYCD,
+        -1
+    };
     const int32 modelId = defaultCabDriverModels[randomIndex];
-    if (!CStreaming::ms_aInfoForModel[modelId].m_nLoadState) {
-        if (CTheZones::m_CurrLevel)
+    if (CStreaming::ms_aInfoForModel[modelId].m_nLoadState == eStreamingLoadState::LOADSTATE_NOT_LOADED) {
+        if (CTheZones::m_CurrLevel != eLevelName::LEVEL_NAME_COUNTRY_SIDE)
             randomIndex = CGeneral::GetRandomNumberInRange(0, 2 * CTheZones::m_CurrLevel);
         return defaultCabDriverModels[randomIndex];
     }
