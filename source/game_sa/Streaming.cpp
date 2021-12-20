@@ -3524,24 +3524,32 @@ void CStreaming::Update() {
     if (CTimer::GetIsPaused())
         return;
 
-    float fDistanceZ = TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
-    if (!ms_disableStreaming && !CRenderer::m_loadingPriority) {
-        if (fDistanceZ >= 50.0) {
-            if (!CGame::currArea)
-                AddLodsToRequestList(TheCamera.GetPosition(), 0);
-        }
-        else if (CRenderer::ms_bRenderOutsideTunnels) {
-            AddModelsToRequestList(TheCamera.GetPosition(), 0);
+    {
+        const float fCamDistanceToGroundZ = TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
+        if (!ms_disableStreaming && !CRenderer::m_loadingPriority) {
+            if (fCamDistanceToGroundZ >= 50.0) {
+                if (CGame::currArea == eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+                    AddLodsToRequestList(TheCamera.GetPosition(), 0);
+                }
+            }
+            else if (CRenderer::ms_bRenderOutsideTunnels) {
+                AddModelsToRequestList(TheCamera.GetPosition(), 0);
+            }
         }
     }
-    if ((CTimer::GetFrameCounter() & 0x7F) == 106) {
+
+    if (CTimer::GetFrameCounter() % 128 == 106) {
         m_bBoatsNeeded = false;
         if (TheCamera.GetPosition().z < 500.0f)
             m_bBoatsNeeded = ThePaths.IsWaterNodeNearby(TheCamera.GetPosition(), 80.0f);
     }
-    if (!ms_disableStreaming && !CCutsceneMgr::ms_cutsceneProcessing && !CGame::currArea
-        && CReplay::Mode != REPLAY_MODE_1 && fDistanceZ < 50.0f)
-    {
+
+    if (!ms_disableStreaming
+        && !CCutsceneMgr::ms_cutsceneProcessing
+        && CGame::currArea == eAreaCodes::AREA_CODE_NORMAL_WORLD
+        && CReplay::Mode != REPLAY_MODE_1
+        && fCamDistanceToGroundZ < 50.0f
+    ) {
         StreamVehiclesAndPeds_Always(FindPlayerCoors(-1));
         if (!IsVeryBusy()) {
             StreamVehiclesAndPeds();
@@ -3549,15 +3557,16 @@ void CStreaming::Update() {
         }
     }
     LoadRequestedModels();
+
     CVector playerPos = FindPlayerCoors(-1);
-    CVehicle* pRemoveVehicle = CWorld::Players[0].m_pRemoteVehicle;
-    if (pRemoveVehicle) {
+    if (CVehicle* pRemoteVehicle = CWorld::Players[0].m_pRemoteVehicle) {
         CColStore::AddCollisionNeededAtPosn(playerPos);
-        CColStore::LoadCollision(pRemoveVehicle->GetPosition(), false);
-        CColStore::EnsureCollisionIsInMemory(pRemoveVehicle->GetPosition());
         CIplStore::AddIplsNeededAtPosn(playerPos);
-        CIplStore::LoadIpls(pRemoveVehicle->GetPosition(), false);
-        CIplStore::EnsureIplsAreInMemory(pRemoveVehicle->GetPosition());
+
+        CColStore::LoadCollision(pRemoteVehicle->GetPosition(), false);
+        CColStore::EnsureCollisionIsInMemory(pRemoteVehicle->GetPosition());
+        CIplStore::LoadIpls(pRemoteVehicle->GetPosition(), false);
+        CIplStore::EnsureIplsAreInMemory(pRemoteVehicle->GetPosition());
     }
     else {
         CColStore::LoadCollision(playerPos, false);
@@ -3565,6 +3574,7 @@ void CStreaming::Update() {
         CIplStore::LoadIpls(playerPos, false);
         CIplStore::EnsureIplsAreInMemory(playerPos);
     }
+
     if (ms_bEnableRequestListPurge)
         PurgeRequestList();
 }
