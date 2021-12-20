@@ -477,7 +477,7 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
         if ((pTxdDef && !pTxdDef->m_pRwDictionary) || /*check TXD (if any)*/
             animFileIndex != -1 && !CAnimManager::ms_aAnimBlocks[animFileIndex].bLoaded /*check anim (if any)*/
         ) {
-            // TXD or IFP not loaded, rerequest model. (I dont think this is supposed to happen at all)
+            // TXD or IFP not loaded, re-request model. (I don't think this is supposed to happen at all)
             RemoveModel(modelId);
             RequestModel(modelId, streamingInfo.m_nFlags);
             RwStreamClose(pRwStream, &rwStreamInitData);
@@ -494,14 +494,15 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
             RwChunkHeaderInfo chunkHeaderInfo;
             RwStreamReadChunkHeaderInfo(pRwStream, &chunkHeaderInfo);
 
+            // Read UV Anim dict (if any)
             RtDict* pRtDictionary = nullptr;
             if (chunkHeaderInfo.type == rwID_UVANIMDICT) {
                 pRtDictionary = RtDictSchemaStreamReadDict(&RpUVAnimDictSchema, pRwStream);
                 RtDictSchemaSetCurrentDict(&RpUVAnimDictSchema, pRtDictionary);
             }
+
             RwStreamClose(pRwStream, &rwStreamInitData);
 
-            // Load atomic file, we need a separate stream for it (presumeably to not mess up the cursor pos)
             // TODO: It seems like this stream is never closed...
             RwStream* pRwStream2 = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitData);
             bFileLoaded = CFileLoader::LoadAtomicFile(pRwStream2, modelId);
