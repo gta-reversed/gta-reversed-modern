@@ -3073,44 +3073,52 @@ void CStreaming::StreamOneNewCar() {
         if (carModelId < 0)
             return;
     }
-    
+
     RequestModel(carModelId, STREAMING_KEEP_IN_MEMORY);
     CPopulation::LoadSpecificDriverModelsForCar(carModelId);
 }
 
 // 0x40BBB0
 void CStreaming::StreamPedsForInterior(int32 interiorType) {
-    if (interiorType == 0) {
-        int32 numHusbands = CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_HUSBANDS, 0);
-        int32 randomHusband = rand() % numHusbands;
-        int32 random = CGeneral::GetRandomNumberInRange(3, 9);
-        int32 randomWife = std::max(0, randomHusband - random);
-        int32 numWives = CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_WIVES, 0);
+    switch (interiorType) {
+    case 0: { // Household?
+        const int32 rndHusband = rand() % CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_HUSBANDS, 0); // Choose a random husband
+
+        const int32 numWives = CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_WIVES, 0);
+        int32 randomWife = std::max(0, rndHusband - CGeneral::GetRandomNumberInRange(3, 9));
         if (numWives - 1 < randomWife)
             randomWife = numWives - 1;
+
+        ClearSlots(2); // Clear 2 ped slots
+
+        // Load husband
         ePopcyclePedGroup husbandGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_HUSBANDS, CPopulation::CurrentWorldZone);
-        int32 husbandModelId = CPopulation::GetPedGroupModelId(husbandGroupId, randomHusband);
-        ePopcyclePedGroup wifeGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_WIVES, CPopulation::CurrentWorldZone);
-        int32 wifeModelId = CPopulation::GetPedGroupModelId(wifeGroupId, randomWife);
-        ClearSlots(2);
+        int32 husbandModelId = CPopulation::GetPedGroupModelId(husbandGroupId, rndHusband);
         RequestModel(husbandModelId, STREAMING_KEEP_IN_MEMORY);
         ms_pedsLoaded[0] = husbandModelId;
         ms_numPedsLoaded++;
+
+        // Load wife
+        ePopcyclePedGroup wifeGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_WIVES, CPopulation::CurrentWorldZone);
+        int32 wifeModelId = CPopulation::GetPedGroupModelId(wifeGroupId, randomWife);
         RequestModel(wifeModelId, STREAMING_KEEP_IN_MEMORY);
         ms_pedsLoaded[1] = wifeModelId;
         ms_numPedsLoaded++;
+
+        break;
     }
-    else if (interiorType == 1) {
-        int32 numPeds = CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_SHOPKEEPERS, 0);
+    case 1: { // Shop?
         ePopcyclePedGroup groupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_SHOPKEEPERS, CPopulation::CurrentWorldZone);
-        int32 modelId = CPopulation::GetPedGroupModelId(groupId, rand() % numPeds);
+        int32 modelId = CPopulation::GetPedGroupModelId(groupId, rand() % CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_SHOPKEEPERS, 0));
         ClearSlots(1);
         RequestModel(modelId, STREAMING_KEEP_IN_MEMORY);
         ms_pedsLoaded[0] = modelId;
         ms_numPedsLoaded++;
+        break;
     }
-    else if (interiorType == 2) {
+    case 2: { // Office?
         ClearSlots(TOTAL_LOADED_PEDS);
+
         int32 numPeds = CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_OFFICE_WORKERS, 0);
         int32 random = CGeneral::GetRandomNumberInRange(0, numPeds);
         ePopcyclePedGroup groupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_OFFICE_WORKERS, CPopulation::CurrentWorldZone);
@@ -3120,6 +3128,8 @@ void CStreaming::StreamPedsForInterior(int32 interiorType) {
             ms_pedsLoaded[i] = modelId;
             ms_numPedsLoaded++;
         }
+        break;
+    }
     }
 }
 
