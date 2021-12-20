@@ -657,8 +657,9 @@ bool CStreaming::DeleteLeastUsedEntityRwObject(bool bNotOnScreen, uint32 streami
     const float fCameraFarPlane = TheCamera.m_pRwCamera->farPlane;
     CPlayerPed* pPlayer = FindPlayerPed(-1);
 
-    for (auto prevLink = ms_rwObjectInstances.usedListTail.prev; prevLink != &ms_rwObjectInstances.usedListHead; prevLink = prevLink->prev) {
+    for (auto prevLink = ms_rwObjectInstances.usedListTail.prev; prevLink != &ms_rwObjectInstances.usedListHead;) {
         CEntity* pEntity = prevLink->data;
+        prevLink = prevLink->prev; // Has to be set here, because at the end of the loop it might be invalid.
         
         if (pEntity->m_bImBeingRendered || pEntity->m_bStreamingDontDelete)
             continue;

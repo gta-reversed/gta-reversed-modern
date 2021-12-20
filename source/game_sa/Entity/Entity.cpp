@@ -2468,8 +2468,7 @@ void CEntity::UpdateRW() {
 
 CEntity* CEntity::FindLastLOD() noexcept {
     CEntity* it = this;
-    while (it)
-        it = it->m_pLod;
+    for (; it->m_pLod; it = it->m_pLod);
     return it;
 }
 
