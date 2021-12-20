@@ -270,7 +270,7 @@ public:
     static void StreamOneNewCar();
     //! interiorType : 0 - house , 1 - shop , 2 - office
     static void StreamPedsForInterior(int32 interiorType);
-    static void StreamPedsIntoRandomSlots(int32* modelArray);
+    static void StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]);
     static void StreamVehiclesAndPeds();
     static void StreamVehiclesAndPeds_Always(CVector const& unused);
     static void StreamZoneModels(CVector const& unused);

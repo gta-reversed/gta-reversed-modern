@@ -3134,22 +3134,29 @@ void CStreaming::StreamPedsForInterior(int32 interiorType) {
 }
 
 // 0x40BDA0
-void CStreaming::StreamPedsIntoRandomSlots(int32* modelArray) {
+// Load peds into ped slots.
+// Input array special values:
+// * -1 - Don't change slot (If there's a ped in that slot it remains loaded)
+// * -2 - Unload model from slot (If there's any)
+// * Positive values - Load given model into slot
+void CStreaming::StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]) {
     for (int32 i = 0; i < TOTAL_LOADED_PEDS; i++) {
         int32 modelId = ms_pedsLoaded[i];
         int32 pedModelId = modelArray[i];
         if (pedModelId >= 0) {
+            // Load model into slot
             if (modelId >= 0) {
+                // Unload model from slot
                 SetModelIsDeletable(modelId);
                 SetModelTxdIsDeletable(modelId);
                 ms_pedsLoaded[i] = -1;
                 ms_numPedsLoaded--;
             }
+            // Load model into slot
             RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY);
             ms_pedsLoaded[i] = pedModelId;
             ms_numPedsLoaded++;
-        }
-        else if (pedModelId == -2) {
+        } else if (pedModelId == -2) { // Unload model from slot
             if (modelId >= 0) {
                 SetModelIsDeletable(modelId);
                 SetModelTxdIsDeletable(modelId);
