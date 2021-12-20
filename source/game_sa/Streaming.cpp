@@ -199,6 +199,8 @@ uint32 CStreaming::AddImageToList(char const* pFileName, bool bNotPlayerImg) {
     }
     // If it reaches this point it failed to find an empty file slot
     assert(0); // NOTSA
+
+    return 0;
 }
 
 // 0x40C520
