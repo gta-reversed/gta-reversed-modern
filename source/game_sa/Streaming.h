@@ -116,7 +116,7 @@ public:
     static uint16& ms_loadedGangCars;
     static uint16& ms_loadedGangs;
     static int32& ms_numPedsLoaded;
-    static int32* ms_pedsLoaded; // static uint32* ms_pedsLoaded[8]
+    static int32(&ms_pedsLoaded)[8];
     static int32* ms_NextPedToLoadFromGroup;
     static int32& ms_currentZoneType;
     static CLoadedCarGroup& ms_vehiclesLoaded;

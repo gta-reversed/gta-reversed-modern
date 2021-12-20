@@ -30,9 +30,12 @@ bool& CStreaming::m_bStreamHarvesterModelsThisFrame = *reinterpret_cast<bool*>(0
 uint32& CStreaming::ms_numPriorityRequests = *reinterpret_cast<uint32*>(0x8E4BA0);
 int32& CStreaming::ms_lastCullZone = *reinterpret_cast<int32*>(0x8E4BA4);
 uint16& CStreaming::ms_loadedGangCars = *reinterpret_cast<uint16*>(0x8E4BA8);
+
+// Bitfield of gangs loaded. Each gang is a bit. (0th bit being BALLAS, following the ordering in POPCYCLE_GROUP_BALLAS) 
 uint16& CStreaming::ms_loadedGangs = *reinterpret_cast<uint16*>(0x8E4BAC);
+
 int32& CStreaming::ms_numPedsLoaded = *reinterpret_cast<int32*>(0x8E4BB0);
-int32* CStreaming::ms_pedsLoaded = reinterpret_cast<int32*>(0x8E4C00);
+int32(&CStreaming::ms_pedsLoaded)[8] = *(int32(*)[8])0x8E4C00;
 int32* CStreaming::ms_NextPedToLoadFromGroup = reinterpret_cast<int32*>(0x8E4BB8);
 int32& CStreaming::ms_currentZoneType = *reinterpret_cast<int32*>(0x8E4C20);
 CLoadedCarGroup& CStreaming::ms_vehiclesLoaded = *reinterpret_cast<CLoadedCarGroup*>(0x8E4C24);
@@ -3311,116 +3314,99 @@ void CStreaming::StreamZoneModels(CVector const& unused) {
     if (CPopCycle::m_pCurrZoneInfo->zonePopulationType == ms_currentZoneType) {
         if (timeBeforeNextLoad >= 0) {
             timeBeforeNextLoad--;
-        }
-        else {
-            int32 pedId = 0;
-            int32 modelId = 0;
-            for (; pedId < TOTAL_LOADED_PEDS; pedId++) {
-                modelId = ms_pedsLoaded[pedId];
-                if (modelId == -1)
-                    break;
-                if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount)
-                    break;
-            }
-            if (pedId != TOTAL_LOADED_PEDS) {
+        } else {
+            const auto slot = std::find_if(std::begin(ms_pedsLoaded), std::end(ms_pedsLoaded),
+                [](auto model) { return model == -1 || CModelInfo::ms_modelInfoPtrs[model]->m_nRefCount == 0; }
+            );
+            if (slot != std::end(ms_pedsLoaded)) {
                 int32 pedModelId = CPopCycle::PickPedMIToStreamInForCurrentZone();
-                if (pedModelId != modelId && pedModelId >= 0) {
+                if (pedModelId != *slot && pedModelId >= 0) {
                     RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
-                    ms_aInfoForModel[pedModelId].m_nFlags &= ~STREAMING_GAME_REQUIRED;
+                    ms_aInfoForModel[pedModelId].m_nFlags &= ~STREAMING_GAME_REQUIRED; // Ok???? Y?
                     if (ms_numPedsLoaded == TOTAL_LOADED_PEDS) {
-                        SetModelIsDeletable(modelId);
-                        SetModelTxdIsDeletable(modelId);
-                        ms_pedsLoaded[pedId] = -1;
-                    }
-                    else {
+                        SetModelIsDeletable(*slot);
+                        SetModelTxdIsDeletable(*slot);
+                       *slot = -1;
+                    } else {
                         ++ms_numPedsLoaded;
                     }
+
                     int32 freeSlot = 0;
-                    for (; ms_pedsLoaded[freeSlot] >= 0; freeSlot++) {
-                    }
+                    for (; ms_pedsLoaded[freeSlot] >= 0; freeSlot++); // Find free slot
                     ms_pedsLoaded[freeSlot] = pedModelId;
+
                     timeBeforeNextLoad = 300;
                 }
             }
         }
-    }
-    else {
+    } else {
         int32 numPedsToLoad = ms_numPedsLoaded;
-        for (int32 i = 0; i < TOTAL_LOADED_PEDS; i++) {
-            int32 modelId = ms_pedsLoaded[i];
-            if (modelId >= 0) {
-                SetModelIsDeletable(modelId);
-                SetModelTxdIsDeletable(modelId);
-                ms_pedsLoaded[i] = -1;
+
+        // Unload all models from slots
+        for (auto& model : ms_pedsLoaded) {
+            if (model >= 0) {
+                SetModelIsDeletable(model);
+                SetModelTxdIsDeletable(model);
+                model = -1;
             }
         }
         ms_numPedsLoaded = 0;
+
         ms_currentZoneType = CPopCycle::m_pCurrZoneInfo->zonePopulationType;
-        if (numPedsToLoad < 4)
-            numPedsToLoad = 4;
-        if (numPedsToLoad > 0) {
-            for (int32 i = 0; i < numPedsToLoad; i++) {
-                int32 pedModelId = CPopCycle::PickPedMIToStreamInForCurrentZone();
-                if (pedModelId < 0) {
-                    ms_pedsLoaded[i] = -1;
-                }
-                else {
-                    RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
-                    ms_aInfoForModel[pedModelId].m_nFlags &= ~STREAMING_GAME_REQUIRED;
-                    ms_pedsLoaded[i] = pedModelId;
-                    ms_numPedsLoaded++;
-                }
+
+        numPedsToLoad = std::max(numPedsToLoad, 4); // Loads back the same count of models as before unloading them, but at least 4.
+        for (int32 i = 0; i < numPedsToLoad; i++) {
+            int32 pedModelId = CPopCycle::PickPedMIToStreamInForCurrentZone();
+            if (pedModelId < 0) {
+                ms_pedsLoaded[i] = -1;
+            } else {
+                RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
+                ms_aInfoForModel[pedModelId].m_nFlags &= ~STREAMING_GAME_REQUIRED;
+                ms_pedsLoaded[i] = pedModelId;
+                ms_numPedsLoaded++;
             }
         }
+
         timeBeforeNextLoad = 300;
     }
+
     static int32 timeBeforeNextGangLoad = 0;
     if (timeBeforeNextGangLoad >= 0) {
         timeBeforeNextGangLoad--;
-    }
-    else if (timeBeforeNextGangLoad < 0) {
+    } else /*if (timeBeforeNextGangLoad < 0) - unnecessary*/ {
         timeBeforeNextGangLoad = 550;
+
         const int32 currentGangMemberToLoadSlot = CurrentGangMemberToLoad;
         const int32 nextGangMemberToLoadSlot = CurrentGangMemberToLoad + 1;
-        const int32 nextGangMemberToLoadAnySlot = (CurrentGangMemberToLoad + 1) % 21;
+        const int32 nextGangMemberToLoadAnySlot = (CurrentGangMemberToLoad + 1) % 21; // TODO: Magic number
         CurrentGangMemberToLoad = nextGangMemberToLoadAnySlot;
-        for (int32 groupId = 0; groupId < TOTAL_GANGS; groupId++) {
-            const ePopcycleGroup popcycleGroup = static_cast<ePopcycleGroup>(groupId + POPCYCLE_GROUP_BALLAS);
+        for (int32 gangId = 0; gangId < TOTAL_GANGS; gangId++) {
+            const ePopcycleGroup popcycleGroup = static_cast<ePopcycleGroup>(gangId + POPCYCLE_GROUP_BALLAS);
             const ePopcyclePedGroup pedGroupId = CPopulation::GetPedGroupId(popcycleGroup, 0);
-            const uint16 gang = 1 << groupId;
-            if (gang & ms_loadedGangs) {
-                const int32 numPedsInGroup = CPopulation::GetNumPedsInGroup(pedGroupId);
-                const int32 currentGangMemberSlot = currentGangMemberToLoadSlot % numPedsInGroup;
-                const int32 nextGangMemberSlot = nextGangMemberToLoadSlot % numPedsInGroup;
-                const int32 nextGangMemberSlot1 = nextGangMemberToLoadAnySlot % numPedsInGroup;
-                const int32 nextGangMemberSlot2 = (nextGangMemberToLoadAnySlot + 1) % numPedsInGroup;
-                for (int32 slot = 0; slot < numPedsInGroup; slot++) {
-                    bool bRequestModel = false;
-                    if (slot == currentGangMemberSlot || slot == nextGangMemberSlot) {
+            if (ms_loadedGangs & (1 << gangId)) {
+                const int32 nPedsInGang = CPopulation::GetNumPedsInGroup(pedGroupId);
+                const int32 currGangMemberSlot = currentGangMemberToLoadSlot % nPedsInGang;
+                const int32 nextGangMemberSlot = nextGangMemberToLoadSlot % nPedsInGang;
+                const int32 nextGangMemberSlot1 = nextGangMemberToLoadAnySlot % nPedsInGang;
+                const int32 nextGangMemberSlot2 = (nextGangMemberToLoadAnySlot + 1) % nPedsInGang;
+                for (int32 slot = 0; slot < nPedsInGang; slot++) {
+                    if (slot == currGangMemberSlot || slot == nextGangMemberSlot) {
                         if (slot == nextGangMemberSlot1) {
-                            if (slot != currentGangMemberSlot && slot != nextGangMemberSlot) {
+                            if (slot != currGangMemberSlot && slot != nextGangMemberSlot) {
                                 const int32 modelId = CPopulation::GetPedGroupModelId(pedGroupId, slot);
                                 RequestModel(modelId, STREAMING_GAME_REQUIRED);
+                                continue;
                             }
-                        }
-                        else if (slot == nextGangMemberSlot2) {
-                            bRequestModel = true;
-                        }
-                        else {
+                        } else if (slot != nextGangMemberSlot2) {
                             const int32 modelId = CPopulation::GetPedGroupModelId(pedGroupId, slot);
                             SetModelIsDeletable(modelId);
                             SetModelTxdIsDeletable(modelId);
+                            continue;
                         }
-                    }
-                    else {
-                        bRequestModel = true;
-                    }
-                    if (bRequestModel) {
+                    } else {
                         if (slot == nextGangMemberSlot1 || slot == nextGangMemberSlot2) {
-                            if (slot != currentGangMemberSlot && slot != nextGangMemberSlot) {
-                                const int32 modelId = CPopulation::GetPedGroupModelId(pedGroupId, slot);
-                                RequestModel(modelId, STREAMING_GAME_REQUIRED);
-                            }
+                            const int32 modelId = CPopulation::GetPedGroupModelId(pedGroupId, slot);
+                            RequestModel(modelId, STREAMING_GAME_REQUIRED);
                         }
                     }
                 }
