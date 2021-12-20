@@ -2564,16 +2564,22 @@ int32 CStreaming::GetDefaultCopCarModel(int32 ignoreLvpd1Model) {
 }
 
 // 0x407C00
+// Returns a loaded cop model.
 int32 CStreaming::GetDefaultCopModel()
 {
+    // Try current level's model
     const int32 modelId = ms_aDefaultCopModel[CTheZones::m_CurrLevel];
     if (ms_aInfoForModel[modelId].m_nLoadState == LOADSTATE_LOADED)
         return modelId;
+
+    // Try all other level's model
     for (int32 i = 0; i < 4; i++) {
         const int32 copModelId = ms_aDefaultCopModel[i];
         if (ms_aInfoForModel[copModelId].m_nLoadState == LOADSTATE_LOADED)
             return copModelId;
     }
+
+    // No cop model loaded
     return -1;
 }
 
