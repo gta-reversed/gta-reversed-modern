@@ -2472,34 +2472,39 @@ void CStreaming::FlushRequestList()
 // 0x408000
 bool CStreaming::AddToLoadedVehiclesList(int32 modelId)
 {
-    auto pVehicleModelInfo = reinterpret_cast<CVehicleModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelId]);
+    auto pVehicleModelInfo = static_cast<CVehicleModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelId]);
     pVehicleModelInfo->m_nTimesUsed = 0;
-    CLoadedCarGroup* pLoadedCarGroup = nullptr;
-    const int32 numBoats = CPopulation::m_nNumCarsInGroup[POPCYCLE_CARGROUP_BOATS];
-    for (int32 i = 0; i < numBoats; i++) {
-        if (CPopulation::m_CarGroups[POPCYCLE_CARGROUP_BOATS][i] == modelId) {
-            pLoadedCarGroup = &CPopulation::m_LoadedBoats;
-            break;
+
+    // Add it to the appropriate car group
+    {
+        CLoadedCarGroup* pLoadedCarGroup = nullptr;
+        for (int32 i = 0; i < CPopulation::m_nNumCarsInGroup[POPCYCLE_CARGROUP_BOATS]; i++) {
+            if (CPopulation::m_CarGroups[POPCYCLE_CARGROUP_BOATS][i] == modelId) {
+                pLoadedCarGroup = &CPopulation::m_LoadedBoats;
+                break;
+            }
         }
+        if (!pLoadedCarGroup) {
+            pLoadedCarGroup = &CPopulation::m_AppropriateLoadedCars;
+            if (!IsCarModelNeededInCurrentZone(modelId))
+                pLoadedCarGroup = &CPopulation::m_InAppropriateLoadedCars;
+        }
+        pLoadedCarGroup->AddMember(modelId);
     }
-    if (!pLoadedCarGroup) {
-        pLoadedCarGroup = &CPopulation::m_AppropriateLoadedCars;
-        if (!IsCarModelNeededInCurrentZone(modelId))
-            pLoadedCarGroup = &CPopulation::m_InAppropriateLoadedCars;
-    }
-    pLoadedCarGroup->AddMember(modelId);
+
+    // Add it to gang's loaded vehicles
     for (int32 gangId = 0; gangId < TOTAL_GANGS; gangId++) {
         const int32 groupId = gangId + POPCYCLE_CARGROUP_BALLAS;
-        const uint16 numCarsInGroup = CPopulation::m_nNumCarsInGroup[groupId];
-        for (int32 i = 0; i < numCarsInGroup; i++) {
-            const int32 vehicleModelId = CPopulation::m_CarGroups[groupId][i];
-            if (vehicleModelId == modelId) {
+        for (int32 i = 0; i < CPopulation::m_nNumCarsInGroup[groupId]; i++) {
+            if (CPopulation::m_CarGroups[groupId][i] == modelId) {
                 CPopulation::m_LoadedGangCars[gangId].AddMember(modelId);
                 break;
             }
         }
     }
+
     ms_vehiclesLoaded.AddMember(modelId);
+
     return true;
 }
 
