@@ -2844,12 +2844,11 @@ void CStreaming::SetMissionDoesntRequireSpecialChar(int32 slot) {
 void CStreaming::SetModelIsDeletable(int32 modelId) {
     CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
     streamingInfo.m_nFlags &= ~STREAMING_GAME_REQUIRED;
-    if (!(streamingInfo.m_nFlags & STREAMING_MISSION_REQUIRED)) {
-        if (streamingInfo.m_nLoadState == LOADSTATE_LOADED) {
+    if (!streamingInfo.IsMissionRequired()) {
+        if (streamingInfo.IsLoaded()) {
             if (!streamingInfo.InList())
                 streamingInfo.AddToList(ms_startLoadedList);
-        }
-        else if (!(streamingInfo.m_nFlags & STREAMING_KEEP_IN_MEMORY)) {
+        } else if (!streamingInfo.DoKeepInMemory()) {
             RemoveModel(modelId);
         }
     }
