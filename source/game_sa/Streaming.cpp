@@ -2471,7 +2471,7 @@ void CStreaming::FlushRequestList()
     // Have to do it like this, because current iterator is invalidated when `RemoveModel` is called
     for (auto it = ms_pStartRequestedList->GetNext(); it != ms_pEndRequestedList;) {
         auto next = it->GetNext();
-        RemoveModel(next - ms_aInfoForModel);
+        RemoveModel(it - ms_aInfoForModel);
         it = next;
     }
     FlushChannels();
