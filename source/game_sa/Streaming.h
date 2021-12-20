@@ -150,7 +150,7 @@ public:
 
     static CLink<CEntity*>* AddEntity(CEntity* pEntity);
     //! return StreamingFile Index in CStreaming::ms_files
-    static void AddImageToList(char const* pFileName, bool bNotPlayerImg);
+    static uint32 AddImageToList(char const* pFileName, bool bNotPlayerImg);
     static void AddLodsToRequestList(CVector const& point, uint32 streamingFlags);
     static void AddModelsToRequestList(CVector const& point, uint32 streamingFlags);
     static bool AddToLoadedVehiclesList(int32 modelId);

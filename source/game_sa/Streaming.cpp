@@ -187,14 +187,14 @@ CLink<CEntity*>* CStreaming::AddEntity(CEntity* pEntity) {
 }
 
 // 0x407610
-void CStreaming::AddImageToList(char const* pFileName, bool bNotPlayerImg) {
-    for (tStreamingFileDesc& file : ms_files) {
-        if (!file.IsInUse()) {
+uint32 CStreaming::AddImageToList(char const* pFileName, bool bNotPlayerImg) {
+    for (auto i = 0u; i < std::size(ms_files); i++) {
+        if (!ms_files[i].IsInUse()) {
             // Not in use, so make entry
-            file = { pFileName, bNotPlayerImg };
+            ms_files[i] = {pFileName, bNotPlayerImg};
 
             // Success
-            return;
+            return i;
         }
     }
     // If it reaches this point it failed to find an empty file slot
