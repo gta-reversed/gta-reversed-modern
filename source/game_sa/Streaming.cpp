@@ -370,64 +370,65 @@ int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
     uint32 firstRequestModelCdPos = UINT32_MAX;
     int32 firstRequestModelId = -1;
     int32 nextRequestModelId = -1;
-    CStreamingInfo* info = ms_pStartRequestedList->GetNext();
-    for (; info != ms_pEndRequestedList; info = info->GetNext()) {
+    for (auto info = ms_pStartRequestedList->GetNext(); info != ms_pEndRequestedList; info = info->GetNext()) {
         const auto modelId = GetModelFromInfo(info);
-        if (!bNotPriority || ms_numPriorityRequests == 0 || info->IsPriorityRequest()) {
-            // Additional conditions for some model types (DFF, TXD, IFP)
-            switch (GetModelType((modelId))) {
-            case eModelType::DFF: {
-                CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
+        if (bNotPriority && ms_numPriorityRequests != 0 && !info->IsPriorityRequest())
+            continue;
 
-                // Make sure TXD will be loaded for this model
-                const auto txdModel = TXDToModelId(pModelInfo->m_nTxdIndex);
-                if (!CStreaming::GetInfo(txdModel).IsLoadedOrBeingRead()) {
-                    RequestModel(txdModel, GetInfo(modelId).m_nFlags); // Request TXD for this DFF
+        // Additional conditions for some model types (DFF, TXD, IFP)
+        switch (GetModelType((modelId))) {
+        case eModelType::DFF: {
+            CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
+
+            // Make sure TXD will be loaded for this model
+            const auto txdModel = TXDToModelId(pModelInfo->m_nTxdIndex);
+            if (!CStreaming::GetInfo(txdModel).IsLoadedOrBeingRead()) {
+                RequestModel(txdModel, GetInfo(modelId).m_nFlags); // Request TXD for this DFF
+                continue;
+            }
+
+            // Check if it has an anim (IFP), if so, make sure it gets loaded
+            const int32 animFileIndex = pModelInfo->GetAnimFileIndex();
+            if (animFileIndex != -1) {
+                const int32 animModelId = animFileIndex + RESOURCE_ID_IFP;
+                if (!GetInfo(animModelId).IsLoadedOrBeingRead()) {
+                    RequestModel(animModelId, STREAMING_KEEP_IN_MEMORY);
                     continue;
                 }
-
-                // Check if it has an anim (IFP), if so, make sure it gets loaded
-                const int32 animFileIndex = pModelInfo->GetAnimFileIndex();
-                if (animFileIndex != -1) {
-                    const int32 animModelId = animFileIndex + RESOURCE_ID_IFP;
-                    if (!GetInfo(animModelId).IsLoadedOrBeingRead()) {
-                        RequestModel(animModelId, STREAMING_KEEP_IN_MEMORY);
-                        continue;
-                    }
-                }
-                break;
             }
-            case eModelType::TXD: {
-                // Make sure parent is/will be loaded
-                TxdDef* pTexDictionary = CTxdStore::ms_pTxdPool->GetAt(ModelIdToTXD(modelId));
-                const int16 parentIndex = pTexDictionary->m_wParentIndex;
-                if (parentIndex != -1) {
-                    const int32 parentModelIdx = parentIndex + RESOURCE_ID_TXD;
-                    if (!GetInfo(parentModelIdx).IsLoadedOrBeingRead()) {
-                        RequestModel(parentModelIdx, STREAMING_KEEP_IN_MEMORY);
-                        continue;
-                    }
-                }
-                break;
-            }
-            case eModelType::IFP: {
-                if (CCutsceneMgr::ms_cutsceneProcessing || GetInfo(MODEL_MALE01).m_nLoadState != LOADSTATE_LOADED) {
-                    // Skip in this case
+            break;
+        }
+        case eModelType::TXD: {
+            // Make sure parent is/will be loaded
+            TxdDef* pTexDictionary = CTxdStore::ms_pTxdPool->GetAt(ModelIdToTXD(modelId));
+            const int16 parentIndex = pTexDictionary->m_wParentIndex;
+            if (parentIndex != -1) {
+                const int32 parentModelIdx = parentIndex + RESOURCE_ID_TXD;
+                if (!GetInfo(parentModelIdx).IsLoadedOrBeingRead()) {
+                    RequestModel(parentModelIdx, STREAMING_KEEP_IN_MEMORY);
                     continue;
                 }
-                break;
             }
+            break;
+        }
+        case eModelType::IFP: {
+            if (CCutsceneMgr::ms_cutsceneProcessing || GetInfo(MODEL_MALE01).m_nLoadState != LOADSTATE_LOADED) {
+                // Skip in this case
+                continue;
             }
+            break;
+        }
+        }
 
-            const uint32 modelCdPos = GetInfo(modelId).GetCdPosn();
-            if (modelCdPos < firstRequestModelCdPos) {
-                firstRequestModelCdPos = modelCdPos;
-                firstRequestModelId = modelId;
-            }
-            if (modelCdPos < nextRequestModelPos && modelCdPos >= streamLastPosn) {
-                nextRequestModelPos = modelCdPos;
-                nextRequestModelId = modelId;
-            }
+        const uint32 modelCdPos = GetInfo(modelId).GetCdPosn();
+        if (modelCdPos < firstRequestModelCdPos) {
+            firstRequestModelCdPos = modelCdPos;
+            firstRequestModelId = modelId;
+        }
+
+        if (modelCdPos < nextRequestModelPos && modelCdPos >= streamLastPosn) {
+            nextRequestModelPos = modelCdPos;
+            nextRequestModelId = modelId;
         }
     }
 
