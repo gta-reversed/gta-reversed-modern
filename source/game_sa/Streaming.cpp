@@ -8,12 +8,12 @@ int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84
 bool& CStreaming::ms_bLoadVehiclesInLoadScene = *reinterpret_cast<bool*>(0x8A5A88);
 
 // Default models for each level (see eLevelNames)
-int32* CStreaming::ms_aDefaultCopCarModel = reinterpret_cast<int32*>(0x8A5A8C);
-int32* CStreaming::ms_aDefaultCopModel = reinterpret_cast<int32*>(0x8A5AA0);
-signed int* CStreaming::ms_aDefaultAmbulanceModel = reinterpret_cast<signed int*>(0x8A5AB4);
-signed int* CStreaming::ms_aDefaultMedicModel = reinterpret_cast<signed int*>(0x8A5AC4);
-signed int* CStreaming::ms_aDefaultFireEngineModel = reinterpret_cast<signed int*>(0x8A5AD4);
-signed int* CStreaming::ms_aDefaultFiremanModel = reinterpret_cast<signed int*>(0x8A5AE4);
+int32(&CStreaming::ms_aDefaultCopCarModel)[4] = *(int32(*)[4])0x8A5A8C;
+int32(&CStreaming::ms_aDefaultCopModel)[4] = *(int32(*)[4])0x8A5AA0;
+int32(&CStreaming::ms_aDefaultAmbulanceModel)[4] = *(int32(*)[4])0x8A5AB4;
+int32(&CStreaming::ms_aDefaultMedicModel)[4] = *(int32(*)[4])0x8A5AC4;
+int32(&CStreaming::ms_aDefaultFireEngineModel)[4] = *(int32(*)[4])0x8A5AD4;
+int32(&CStreaming::ms_aDefaultFiremanModel)[4] = *(int32(*)[4])0x8A5AE4;
 
 // Default models for current level
 int32& CStreaming::ms_DefaultCopBikeModel = *reinterpret_cast<int32*>(0x8A5A9C);
@@ -24,7 +24,7 @@ CDirectory*& CStreaming::ms_pExtraObjectsDir = *reinterpret_cast<CDirectory**>(0
 tStreamingFileDesc (&CStreaming::ms_files)[TOTAL_IMG_ARCHIVES] = *(tStreamingFileDesc(*)[TOTAL_IMG_ARCHIVES])0x8E48D8;
 bool& CStreaming::ms_bLoadingBigModel = *reinterpret_cast<bool*>(0x8E4A58);
 // There are only two channels within CStreaming::ms_channel
-tStreamingChannel* CStreaming::ms_channel = reinterpret_cast<tStreamingChannel*>(0x8E4A60);
+tStreamingChannel(&CStreaming::ms_channel)[2] = *(tStreamingChannel(*)[2])0x8E4A60;
 signed int& CStreaming::ms_channelError = *reinterpret_cast<signed int*>(0x8E4B90);
 bool& CStreaming::m_bHarvesterModelsRequested = *reinterpret_cast<bool*>(0x8E4B9C);
 bool& CStreaming::m_bStreamHarvesterModelsThisFrame = *reinterpret_cast<bool*>(0x8E4B9D);
@@ -45,13 +45,13 @@ CStreamingInfo*& CStreaming::ms_pStartRequestedList = *reinterpret_cast<CStreami
 CStreamingInfo*& CStreaming::ms_pEndLoadedList = *reinterpret_cast<CStreamingInfo**>(0x8E4C5C);
 CStreamingInfo*& CStreaming::ms_startLoadedList = *reinterpret_cast<CStreamingInfo**>(0x8E4C60);
 int32& CStreaming::ms_lastImageRead = *reinterpret_cast<int32*>(0x8E4C64);
-signed int* CStreaming::ms_imageOffsets = reinterpret_cast<signed int*>(0x8E4C8C);
+int32(&CStreaming::ms_imageOffsets)[6] = *(int32(*)[6])0x8E4C8C;
 bool& CStreaming::ms_bEnableRequestListPurge = *reinterpret_cast<bool*>(0x8E4CA4);
 uint32& CStreaming::ms_streamingBufferSize = *reinterpret_cast<uint32*>(0x8E4CA8);
 uint8** CStreaming::ms_pStreamingBuffer = reinterpret_cast<uint8**>(0x8E4CAC);
 uint32& CStreaming::ms_memoryUsed = *reinterpret_cast<uint32*>(0x8E4CB4);
 int32& CStreaming::ms_numModelsRequested = *reinterpret_cast<int32*>(0x8E4CB8);
-CStreamingInfo* CStreaming::ms_aInfoForModel = reinterpret_cast<CStreamingInfo*>(0x8E4CC0);
+CStreamingInfo(&CStreaming::ms_aInfoForModel)[26316] = *(CStreamingInfo(*)[26316])0x8E4CC0;
 bool& CStreaming::ms_disableStreaming = *reinterpret_cast<bool*>(0x9654B0);
 int32& CStreaming::ms_bIsInitialised = *reinterpret_cast<int32*>(0x9654B8);
 bool& CStreaming::m_bBoatsNeeded = *reinterpret_cast<bool*>(0x9654BC);

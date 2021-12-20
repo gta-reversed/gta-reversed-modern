@@ -198,20 +198,20 @@ public:
     static uint32& ms_memoryAvailable;
     static int32& desiredNumVehiclesLoaded;
     static bool& ms_bLoadVehiclesInLoadScene;
-    static int32* ms_aDefaultCopCarModel; // static int32 ms_aDefaultCopCarModel[4]
+    static int32(&ms_aDefaultCopCarModel)[4];
     static int32& ms_DefaultCopBikeModel;
-    static int32* ms_aDefaultCopModel; // static int32 ms_aDefaultCopModel[4]
+    static int32(&ms_aDefaultCopModel)[4];
     static int32& ms_DefaultCopBikerModel;
     static uint32& ms_nTimePassedSinceLastCopBikeStreamedIn;
-    static signed int* ms_aDefaultAmbulanceModel;  // static signed int ms_aDefaultAmbulanceModel[4]
-    static signed int* ms_aDefaultMedicModel;      // static signed int ms_aDefaultMedicModel[4]
-    static signed int* ms_aDefaultFireEngineModel; // static signed int ms_aDefaultFireEngineModel[4]
-    static signed int* ms_aDefaultFiremanModel;    // static signed int ms_aDefaultFiremanModel[4]
+    static int32(&ms_aDefaultAmbulanceModel)[4];
+    static int32(&ms_aDefaultMedicModel)[4];
+    static int32(&ms_aDefaultFireEngineModel)[4];
+    static int32(&ms_aDefaultFiremanModel)[4];
     static CDirectory*& ms_pExtraObjectsDir;
     static tStreamingFileDesc (&ms_files)[TOTAL_IMG_ARCHIVES];
     static bool& ms_bLoadingBigModel;
     // There are only two channels within CStreaming::ms_channel
-    static tStreamingChannel* ms_channel; // static tStreamingChannel ms_channel[2]
+    static tStreamingChannel(&ms_channel)[2];
     static signed int& ms_channelError;
     static bool& m_bHarvesterModelsRequested;
     static bool& m_bStreamHarvesterModelsThisFrame;
@@ -232,13 +232,13 @@ public:
     //! initialized but not used?
     static int32& ms_lastImageRead;
     //! initialized but never used?
-    static signed int* ms_imageOffsets; // static signed int ms_imageOffsets[6]
+    static int32(&ms_imageOffsets)[6];
     static bool& ms_bEnableRequestListPurge;
     static uint32& ms_streamingBufferSize;
     static uint8** ms_pStreamingBuffer;
     static uint32& ms_memoryUsed;
     static int32& ms_numModelsRequested;
-    static CStreamingInfo* ms_aInfoForModel; // static CStreamingInfo ms_aInfoForModel[26316]
+    static CStreamingInfo(&ms_aInfoForModel)[26316];
     static bool& ms_disableStreaming;
     static int32& ms_bIsInitialised;
     static bool& m_bBoatsNeeded;
