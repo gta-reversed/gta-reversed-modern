@@ -441,7 +441,7 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
     CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
     CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
 
-    const int32 bufferSize = streamingInfo.GetCdSize() * STREAMING_SECTOR_SIZE;
+    const auto bufferSize = streamingInfo.GetCdSize() * STREAMING_SECTOR_SIZE;
     tRwStreamInitializeData rwStreamInitData = { pFileBuffer, bufferSize };
 
     // Make RW stream from memory
@@ -1525,7 +1525,7 @@ void CStreaming::RequestModelStream(int32 chIdx)
     uint32 nSectorsToRead = 0; // The no. of sectors to be loaded starting at `posn`
     bool isPreviousModelBigOrVeh = false;
     bool isPreviousModelPed = false;
-    int32 i = 0;
+    uint32 i = 0;
     for (; i < std::size(ch.modelIds); i++) {
         streamingInfo = &ms_aInfoForModel[modelId];
 
@@ -1617,8 +1617,8 @@ void CStreaming::RequestModelStream(int32 chIdx)
     }
 
     // Set remaining (if any) models to `-1`
-    for (int32 i = i; i < std::size(ch.modelIds); i++) {
-        ch.modelIds[i] = -1;
+    for (uint32 x = i; x < std::size(ch.modelIds); x++) {
+        ch.modelIds[x] = -1;
     }
 
     CdStreamRead(chIdx, ms_pStreamingBuffer[chIdx], posn, nSectorsToRead); // Request models to be read
@@ -1750,7 +1750,7 @@ bool CStreaming::ProcessLoadingChannel(int32 chIdx)
         ch.modelIds[0] = -1;
     } else {
         // Load models individually
-        for (int32 i = 0; i < std::size(ch.modelIds); i++) {
+        for (uint32 i = 0; i < std::size(ch.modelIds); i++) {
             const int32 modelId = ch.modelIds[i];
             if (modelId == -1)
                 continue;
@@ -1900,19 +1900,19 @@ void CStreaming::ReadIniFile() {
                 }
                 else if (!_stricmp(attribute, "pe_leftx"))
                 {
-                    CPostEffects::m_colourLeftUOffset = atoi(value);
+                    CPostEffects::m_colourLeftUOffset = (float)atoi(value);
                 }
                 else if (!_stricmp(attribute, "pe_rightx"))
                 {
-                    CPostEffects::m_colourRightUOffset = atoi(value);
+                    CPostEffects::m_colourRightUOffset = (float)atoi(value);
                 }
                 else if (!_stricmp(attribute, "pe_topy"))
                 {
-                    CPostEffects::m_colourTopVOffset = atoi(value);
+                    CPostEffects::m_colourTopVOffset = (float)atoi(value);
                 }
                 else if (!_stricmp(attribute, "pe_bottomy"))
                 {
-                    CPostEffects::m_colourBottomVOffset = atoi(value);
+                    CPostEffects::m_colourBottomVOffset = (float)atoi(value);
                 }
                 else if (!_stricmp(attribute, "pe_bRadiosity"))
                 {
@@ -3524,17 +3524,15 @@ void CStreaming::Update() {
     if (CTimer::GetIsPaused())
         return;
 
-    {
-        const float fCamDistanceToGroundZ = TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
-        if (!ms_disableStreaming && !CRenderer::m_loadingPriority) {
-            if (fCamDistanceToGroundZ >= 50.0) {
-                if (CGame::currArea == eAreaCodes::AREA_CODE_NORMAL_WORLD) {
-                    AddLodsToRequestList(TheCamera.GetPosition(), 0);
-                }
+    const float fCamDistanceToGroundZ = TheCamera.GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
+    if (!ms_disableStreaming && !CRenderer::m_loadingPriority) {
+        if (fCamDistanceToGroundZ >= 50.0) {
+            if (CGame::currArea == eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+                AddLodsToRequestList(TheCamera.GetPosition(), 0);
             }
-            else if (CRenderer::ms_bRenderOutsideTunnels) {
-                AddModelsToRequestList(TheCamera.GetPosition(), 0);
-            }
+        }
+        else if (CRenderer::ms_bRenderOutsideTunnels) {
+            AddModelsToRequestList(TheCamera.GetPosition(), 0);
         }
     }
 
