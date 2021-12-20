@@ -3276,26 +3276,28 @@ void CStreaming::StreamVehiclesAndPeds() {
 
 // 0x40B650
 void CStreaming::StreamVehiclesAndPeds_Always(CVector const& unused) {
-    bool bStream = false;
-    CVehicle* pVehicle = FindPlayerVehicle(-1, false);
-    if (!pVehicle) {
-        bStream = true;
-    }
-    else if (pVehicle->m_vehicleSubType != VEHICLE_PLANE) {
-        if (pVehicle->m_vehicleSubType != VEHICLE_HELI || pVehicle->m_vecMoveSpeed.Magnitude2D() <= 0.1f) {
-            bStream = true;
+    if (CVehicle* pVehicle = FindPlayerVehicle(-1, false)) {
+        switch (pVehicle->m_vehicleSubType) {
+        case VEHICLE_PLANE:
+            return;
+
+        case VEHICLE_HELI: {
+            if (pVehicle->m_vecMoveSpeed.Magnitude2D() > 0.1f)
+                return;
+        }
         }
     }
-    if (bStream) {
-        if (!(CTimer::GetFrameCounter() & 0x3F) && CPopulation::m_AppropriateLoadedCars.CountMembers() < 3)
-            StreamOneNewCar();
-        StreamZoneModels_Gangs(CVector());
-        if (CPopCycle::m_pCurrZoneInfo) {
-            static int32 lastZonePopulationType = 0;
-            if (CPopCycle::m_pCurrZoneInfo->zonePopulationType != lastZonePopulationType) {
-                ReclassifyLoadedCars();
-                lastZonePopulationType = CPopCycle::m_pCurrZoneInfo->zonePopulationType;
-            }
+
+    if (CTimer::GetFrameCounter() % 64 == 0 && CPopulation::m_AppropriateLoadedCars.CountMembers() < 3)
+        StreamOneNewCar();
+
+    StreamZoneModels_Gangs({});
+
+    if (CPopCycle::m_pCurrZoneInfo) {
+        static int32 lastZonePopulationType = 0;
+        if (CPopCycle::m_pCurrZoneInfo->zonePopulationType != lastZonePopulationType) {
+            ReclassifyLoadedCars();
+            lastZonePopulationType = CPopCycle::m_pCurrZoneInfo->zonePopulationType;
         }
     }
 }
