@@ -603,9 +603,9 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
         break;
     }
     case eModelType::IFP: {
-        if (!(streamingInfo.m_nFlags & (STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED))
-            && !AreAnimsUsedByRequestedModels(ModelIdToIFP(modelId)))
-        {
+        if (!streamingInfo.IsRequiredToBeKept()
+            && !AreAnimsUsedByRequestedModels(ModelIdToIFP(modelId))
+        ) {
             // Not required anymore, unload
             RemoveModel(modelId);
             RwStreamClose(pRwStream, &rwStreamInitData);
@@ -632,36 +632,36 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
 
     RwStreamClose(pRwStream, &rwStreamInitData);
 
-    if (modelId >= RESOURCE_ID_TXD) {
-        if (!(modelId >= RESOURCE_ID_COL && (modelId < RESOURCE_ID_IFP || modelId >= RESOURCE_ID_RRR)
-            && modelId < RESOURCE_ID_SCM || streamingInfo.m_nFlags & (STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED))
-        ) {
-            // This stmt is only reached if
-            // Model type is SCM/IFP/TXD OR it's not a DFF and MISSION_REQUIRED or GAME_REQUIRED flags are set.
+    switch (GetModelType(modelId)) {
+    case eModelType::SCM:
+    case eModelType::IFP:
+    case eModelType::TXD: {
+        if (!streamingInfo.IsMissionOrGameRequired())
             streamingInfo.AddToList(pStartLoadedListStreamingInfo);
-        }
-    } else {
+        break;
+    }
+    case eModelType::DFF: {
         // Model is a DFF
         switch (pBaseModelInfo->GetModelType()) {
         case eModelInfoType::MODEL_INFO_TYPE_VEHICLE:
         case eModelInfoType::MODEL_INFO_TYPE_PED:
             break;
         default: {
-            // Model type is not vehicle/ped
-            CBaseModelInfo* pAsAtomicModelInfo = pBaseModelInfo->AsAtomicModelInfoPtr();
-            if (pAsAtomicModelInfo) {
+            if (CBaseModelInfo* pAsAtomicModelInfo = pBaseModelInfo->AsAtomicModelInfoPtr()) {
                 // TODO: What the fuck...
                 // From what I understand its either -1 or -0, which, when casted to uint8, becomes 128 or 129
                 // Doesnt make a lot of sense to me
                 pAsAtomicModelInfo->m_nAlpha = -((streamingInfo.m_nFlags & (STREAMING_LOADING_SCENE | STREAMING_MISSION_REQUIRED)) != 0);
             }
 
-            if (!(streamingInfo.m_nFlags & (STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED)))
+            if (!streamingInfo.IsMissionOrGameRequired())
                 streamingInfo.AddToList(pStartLoadedListStreamingInfo);
 
             break;
         }
         }
+        break;
+    }
     }
 
     if (streamingInfo.m_nLoadState != LOADSTATE_FINISHING) {
