@@ -1300,7 +1300,7 @@ void CStreaming::RequestBigBuildings(CVector const& point) {
 
 // 0x40A080
 // Request model @ `posn` with size `size` in the img `imgId`.
-void CStreaming::RequestFile(int32 modelId, int32 posn, int32 size, int32 imgId, int32 streamingFlags) {
+void CStreaming::RequestFile(uint32 modelId, int32 posn, uint32 size, int32 imgId, uint32 streamingFlags) {
     auto& info = GetInfo(modelId);
     const uint32 blockOffset = (imgId << 24) | posn;
     if (info.GetCdSize() && info.GetCdPosn() == blockOffset && info.GetCdSize() == size) {

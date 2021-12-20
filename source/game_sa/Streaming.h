@@ -347,7 +347,7 @@ public:
     static void RemoveUnusedModelsInLoadedList();
     static void RenderEntity(CLink<CEntity*>* streamingLink);
     static void RequestBigBuildings(CVector const& point);
-    static void RequestFile(int32 modelId, int32 posn, int32 size, int32 imgId, int32 streamingFlags);
+    static void RequestFile(uint32 modelId, int32 posn, uint32 size, int32 imgId, uint32 streamingFlags);
     //! unused
     static void RequestFilesInChannel(int32 channelId);
     static void RequestModel(int32 dwModelId, uint32 streamingFlags); // see eStreamingFlags
