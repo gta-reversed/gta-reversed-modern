@@ -215,15 +215,15 @@ uint32 CStreaming::AddImageToList(char const* pFileName, bool bNotPlayerImg) {
 void CStreaming::AddLodsToRequestList(CVector const& point, uint32 streamingFlags) {
     CWorld::IncrementCurrentScanCode();
 
-    float minX = point.x - CRenderer::ms_fFarClipPlane;
-    float maxX = point.x + CRenderer::ms_fFarClipPlane;
-    float minY = point.y - CRenderer::ms_fFarClipPlane;
-    float maxY = point.y + CRenderer::ms_fFarClipPlane;
+    const float minX = point.x - CRenderer::ms_fFarClipPlane;
+    const float maxX = point.x + CRenderer::ms_fFarClipPlane;
+    const float minY = point.y - CRenderer::ms_fFarClipPlane;
+    const float maxY = point.y + CRenderer::ms_fFarClipPlane;
 
-    int32 startSectorX = std::max(CWorld::GetLodSectorX(minX), 0);
-    int32 startSectorY = std::max(CWorld::GetLodSectorY(minY), 0);
-    int32 endSectorX = std::min(CWorld::GetLodSectorX(maxX), MAX_LOD_PTR_LISTS_X - 1);
-    int32 endSectorY = std::min(CWorld::GetLodSectorY(maxY), MAX_LOD_PTR_LISTS_Y - 1);
+    const int32 startSectorX = std::max(CWorld::GetLodSectorX(minX), 0);
+    const int32 startSectorY = std::max(CWorld::GetLodSectorY(minY), 0);
+    const int32 endSectorX = std::min(CWorld::GetLodSectorX(maxX), MAX_LOD_PTR_LISTS_X - 1);
+    const int32 endSectorY = std::min(CWorld::GetLodSectorY(maxY), MAX_LOD_PTR_LISTS_Y - 1);
 
     for (int32 sy = startSectorY; sy <= endSectorY; ++sy) {
         for (int32 sx = startSectorX; sx <= endSectorX; ++sx) {
