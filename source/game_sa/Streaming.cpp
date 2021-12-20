@@ -354,11 +354,10 @@ void CStreaming::ClearFlagForAll(uint32 streamingFlag) {
 
 // 0x40BAA0
 void CStreaming::ClearSlots(int32 totalSlots) {
-    for (int32 i = 0; i < totalSlots; ++i) {
-        int32 modelId = ms_pedsLoaded[i];
+    for (auto& modelId : ms_pedsLoaded) {
         if (modelId >= 0) {
             SetModelAndItsTxdDeletable(modelId);
-            ms_pedsLoaded[i] = -1;
+            modelId = -1;
             ms_numPedsLoaded--;
         }
     }
