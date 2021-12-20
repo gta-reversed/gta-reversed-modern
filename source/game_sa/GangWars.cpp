@@ -277,8 +277,8 @@ void CGangWars::TellGangMembersTo(bool bIsGangWarEnding) {
 }
 
 // 0x443D50
-void CGangWars::TellStreamingWhichGangsAreNeeded(int32* GangsBitFlags) {
-    plugin::Call<0x443D50, int32*>(GangsBitFlags);
+void CGangWars::TellStreamingWhichGangsAreNeeded(uint32 * GangsBitFlags) {
+    plugin::Call<0x443D50, uint32*>(GangsBitFlags);
 }
 
 // 0x446610
