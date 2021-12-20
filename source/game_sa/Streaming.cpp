@@ -2869,7 +2869,7 @@ void CStreaming::SetSpecialCharIsDeletable(int32 slot) {
 
 // 0x4084B0
 void CStreaming::Shutdown() {
-    CMemoryMgr::FreeAlign(ms_pStreamingBuffer);
+    CMemoryMgr::FreeAlign(ms_pStreamingBuffer[0]);
     ms_streamingBufferSize = 0;
     delete ms_pExtraObjectsDir;
 }
