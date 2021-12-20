@@ -395,6 +395,9 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 #ifdef EXTRA_DEBUG_FEATURES
                 ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
 #endif
+                if (ImGui::Button("Streamer: Reinit")) {
+                    CStreaming::ReInit();
+                }
                 ImGui::EndTabItem();
             }
 
