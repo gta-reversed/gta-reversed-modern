@@ -25,7 +25,7 @@ enum class eChannelState
     ERR = 3, // Also called ERROR, but that's a `windgi.h` macro
 };
 
-enum eResourceFirstID {
+enum eResourceFirstID : uint32 {
     // First ID of the resource
     RESOURCE_ID_DFF = 0,                                            // default: 0
     RESOURCE_ID_TXD = RESOURCE_ID_DFF + TOTAL_DFF_MODEL_IDS,        // default: 20000
@@ -60,56 +60,62 @@ enum class eModelType {
 
 // Helper functions to deal with modelID's
 
+
+inline bool IsModelDFF(uint32 model) { return eResourceFirstID::RESOURCE_ID_DFF <= model && model < eResourceFirstID::RESOURCE_ID_TXD; }
+inline bool IsModelTXD(uint32 model) { return eResourceFirstID::RESOURCE_ID_TXD <= model && model < eResourceFirstID::RESOURCE_ID_COL; }
+inline bool IsModelCOL(uint32 model) { return eResourceFirstID::RESOURCE_ID_COL <= model && model < eResourceFirstID::RESOURCE_ID_IPL; }
+inline bool IsModelIPL(uint32 model) { return eResourceFirstID::RESOURCE_ID_IPL <= model && model < eResourceFirstID::RESOURCE_ID_DAT; }
+inline bool IsModelDAT(uint32 model) { return eResourceFirstID::RESOURCE_ID_DAT <= model && model < eResourceFirstID::RESOURCE_ID_IFP; }
+inline bool IsModelIFP(uint32 model) { return eResourceFirstID::RESOURCE_ID_IFP <= model && model < eResourceFirstID::RESOURCE_ID_RRR; }
+inline bool IsModelRRR(uint32 model) { return eResourceFirstID::RESOURCE_ID_RRR <= model && model < eResourceFirstID::RESOURCE_ID_SCM; }
+inline bool IsModelSCM(uint32 model) { return eResourceFirstID::RESOURCE_ID_SCM <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_1; }
+inline bool IsModelInternal1(uint32 model) { return eResourceFirstID::RESOURCE_ID_INTERNAL_1 <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_2; }
+inline bool IsModelInternal2(uint32 model) { return eResourceFirstID::RESOURCE_ID_INTERNAL_2 <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_3; }
+inline bool IsModelInternal3(uint32 model) { return eResourceFirstID::RESOURCE_ID_INTERNAL_3 <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_4; }
+inline bool IsModelInternal4(uint32 model) { return eResourceFirstID::RESOURCE_ID_INTERNAL_4 <= model && model < eResourceFirstID::RESOURCE_ID_TOTAL; }
+
 eModelType GetModelType(uint32 model) {
-    if (eResourceFirstID::RESOURCE_ID_DFF <= model && model < eResourceFirstID::RESOURCE_ID_TXD)
+    if (IsModelDFF(model))
         return eModelType::DFF;
 
-    if (eResourceFirstID::RESOURCE_ID_TXD <= model && model < eResourceFirstID::RESOURCE_ID_COL)
+    else if (IsModelTXD(model))
         return eModelType::TXD;
 
-    if (eResourceFirstID::RESOURCE_ID_COL <= model && model < eResourceFirstID::RESOURCE_ID_IPL)
+    else if (IsModelCOL(model))
         return eModelType::COL;
 
-    if (eResourceFirstID::RESOURCE_ID_IPL <= model && model < eResourceFirstID::RESOURCE_ID_DAT)
+    else if (IsModelIPL(model))
         return eModelType::IPL;
 
-    if (eResourceFirstID::RESOURCE_ID_DAT <= model && model < eResourceFirstID::RESOURCE_ID_IFP)
+    else if (IsModelDAT(model))
         return eModelType::DAT;
 
-    if (eResourceFirstID::RESOURCE_ID_IFP <= model && model < eResourceFirstID::RESOURCE_ID_RRR)
+    else if (IsModelIFP(model))
         return eModelType::IFP;
 
-    if (eResourceFirstID::RESOURCE_ID_RRR <= model && model < eResourceFirstID::RESOURCE_ID_SCM)
+    else if (IsModelRRR(model))
         return eModelType::RRR;
 
-    if (eResourceFirstID::RESOURCE_ID_SCM <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_1)
+    else if (IsModelSCM(model))
         return eModelType::SCM;
 
-    if (eResourceFirstID::RESOURCE_ID_INTERNAL_1 <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_2)
+    else if (IsModelInternal1(model))
         return eModelType::INTERNAL_1;
 
-    if (eResourceFirstID::RESOURCE_ID_INTERNAL_2 <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_3)
+    else if (IsModelInternal2(model))
         return eModelType::INTERNAL_2;
 
-    if (eResourceFirstID::RESOURCE_ID_INTERNAL_3 <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_4)
+    else if (IsModelInternal3(model))
         return eModelType::INTERNAL_3;
 
-    if (eResourceFirstID::RESOURCE_ID_INTERNAL_4 <= model && model < eResourceFirstID::RESOURCE_ID_TOTAL)
+    else if (IsModelInternal4(model))
         return eModelType::INTERNAL_4;
-}
 
-inline bool IsModelDFF(uint32 model) { return GetModelType(model) == eModelType::DFF; }
-inline bool IsModelTXD(uint32 model) { return GetModelType(model) == eModelType::TXD; }
-inline bool IsModelCOL(uint32 model) { return GetModelType(model) == eModelType::COL; }
-inline bool IsModelIPL(uint32 model) { return GetModelType(model) == eModelType::IPL; }
-inline bool IsModelDAT(uint32 model) { return GetModelType(model) == eModelType::DAT; }
-inline bool IsModelIFP(uint32 model) { return GetModelType(model) == eModelType::IFP; }
-inline bool IsModelRRR(uint32 model) { return GetModelType(model) == eModelType::RRR; }
-inline bool IsModelSCM(uint32 model) { return GetModelType(model) == eModelType::SCM; }
-inline bool IsModelInternal1(uint32 model) { return GetModelType(model) == eModelType::INTERNAL_1; }
-inline bool IsModelInternal2(uint32 model) { return GetModelType(model) == eModelType::INTERNAL_2; }
-inline bool IsModelInternal3(uint32 model) { return GetModelType(model) == eModelType::INTERNAL_3; }
-inline bool IsModelInternal4(uint32 model) { return GetModelType(model) == eModelType::INTERNAL_4; }
+    else {
+        assert(0); // NOTSA
+        return (eModelType)-1;
+    }
+}
 
 // Turn relative IDs into absolute ones.
 inline uint32 DFFToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_DFF + relativeId; }
