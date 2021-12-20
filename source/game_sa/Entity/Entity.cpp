@@ -2450,7 +2450,7 @@ bool CEntity::IsEntityOccluded()
     return false;
 }
 
-bool CEntity::IsCurrentAreaOrBarberShopInterior()
+bool CEntity::IsInCurrentAreaOrBarberShopInterior()
 {
     return m_nAreaCode == CGame::currArea || m_nAreaCode == AREA_CODE_13;
 }

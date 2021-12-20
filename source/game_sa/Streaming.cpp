@@ -710,7 +710,7 @@ bool CStreaming::DeleteLeastUsedEntityRwObject(bool bNotOnScreen, uint32 streami
         const float fModelRadius = pBaseModelInfo->GetColModel()->GetBoundRadius();
         if (ms_bLoadingScene
             || bNotOnScreen && !pEntityLastLod->GetIsOnScreen()
-            || !pEntity->IsCurrentAreaOrBarberShopInterior()
+            || !pEntity->IsInCurrentAreaOrBarberShopInterior()
             || drawDistanceRadius + 50.0f < fEntityToCamDist
             || fModelRadius + fCameraFarPlane < fEntityToCamDist)
         {
@@ -2022,7 +2022,7 @@ void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
     for (int32 i = CPools::ms_pBuildingPool->GetSize() - 1; i >= 0; i--) {
         CBuilding* pBuilding = CPools::ms_pBuildingPool->GetAt(i);
         if (pBuilding && pBuilding->m_pRwObject) {
-            if (!pBuilding->IsCurrentAreaOrBarberShopInterior()) {
+            if (!pBuilding->IsInCurrentAreaOrBarberShopInterior()) {
                 if (!pBuilding->m_bImBeingRendered && !pBuilding->m_bIsBIGBuilding)
                     pBuilding->DeleteRwObject();
             }
@@ -2031,7 +2031,7 @@ void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
     for (int32 i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
         CObject* pObject = CPools::ms_pObjectPool->GetAt(i);
         if (pObject && pObject->m_pRwObject) {
-            if (pObject->IsCurrentAreaOrBarberShopInterior()) {
+            if (pObject->IsInCurrentAreaOrBarberShopInterior()) {
                 if (!pObject->m_bImBeingRendered && pObject->m_nObjectType == eObjectType::OBJECT_GAME)
                     pObject->DeleteRwObject();
             }
@@ -2040,7 +2040,7 @@ void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
     for (int32 i = CPools::ms_pDummyPool->GetSize() - 1; i >= 0; i--) {
         CDummy* pDummy = CPools::ms_pDummyPool->GetAt(i);
         if (pDummy && pDummy->m_pRwObject) {
-            if (pDummy->IsCurrentAreaOrBarberShopInterior()) {
+            if (pDummy->IsInCurrentAreaOrBarberShopInterior()) {
                 if (!pDummy->m_bImBeingRendered)
                     pDummy->DeleteRwObject();
             }
@@ -2401,7 +2401,7 @@ void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, float posX, float p
             continue;
         if (pEntity->m_bStreamingDontDelete)
             continue;
-        if (!pEntity->IsCurrentAreaOrBarberShopInterior())
+        if (!pEntity->IsInCurrentAreaOrBarberShopInterior())
             continue;
         if (pEntity->m_bDontStream || !pEntity->m_bIsVisible)
             continue;
@@ -2442,7 +2442,7 @@ void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, int32 streamingFlag
             continue;
         if (pEntity->m_bStreamingDontDelete)
             continue;
-        if (!pEntity->IsCurrentAreaOrBarberShopInterior())
+        if (!pEntity->IsInCurrentAreaOrBarberShopInterior())
             continue;
         if (pEntity->m_bDontStream || !pEntity->m_bIsVisible)
             continue;
@@ -2815,7 +2815,7 @@ void CStreaming::InstanceLoadedModelsInSectorList(CPtrList& list)
 {
     for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->m_next) {
         CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->m_item);
-        if (pEntity->IsCurrentAreaOrBarberShopInterior() && !pEntity->m_pRwObject)
+        if (pEntity->IsInCurrentAreaOrBarberShopInterior() && !pEntity->m_pRwObject)
             pEntity->CreateRwObject();
     }
 }

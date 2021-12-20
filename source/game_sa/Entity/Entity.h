@@ -192,7 +192,7 @@ public:
     void ProcessLightsForEntity();
     void RemoveEscalatorsForEntity();
     bool IsEntityOccluded();
-    bool IsCurrentAreaOrBarberShopInterior();
+    bool IsInCurrentAreaOrBarberShopInterior();
     void UpdateRW();
     eEntityType GetType() const noexcept { return m_nType; }
 
