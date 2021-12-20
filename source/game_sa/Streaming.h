@@ -112,18 +112,32 @@ inline bool IsModelInternal3(uint32 model) { return GetModelType(model) == eMode
 inline bool IsModelInternal4(uint32 model) { return GetModelType(model) == eModelType::INTERNAL_4; }
 
 // Turn relative IDs into absolute ones.
-inline uint32 ToDFFModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_DFF + relativeId; }
-inline uint32 ToTXDModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_TXD + relativeId; }
-inline uint32 ToCOLModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_COL + relativeId; }
-inline uint32 ToIPLModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_IPL + relativeId; }
-inline uint32 ToDATModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_DAT + relativeId; }
-inline uint32 ToIFPModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_IFP + relativeId; }
-inline uint32 ToRRRModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_RRR + relativeId; }
-inline uint32 ToSCMModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_SCM + relativeId; }
-inline uint32 ToInternal1ModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_1 + relativeId; }
-inline uint32 ToInternal2ModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_2 + relativeId; }
-inline uint32 ToInternal3ModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_3 + relativeId; }
-inline uint32 ToInternal4ModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_4 + relativeId; }
+inline uint32 DFFToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_DFF + relativeId; }
+inline uint32 TXDToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_TXD + relativeId; }
+inline uint32 COLToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_COL + relativeId; }
+inline uint32 IPLToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_IPL + relativeId; }
+inline uint32 DATToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_DAT + relativeId; }
+inline uint32 IFPToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_IFP + relativeId; }
+inline uint32 RRRToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_RRR + relativeId; }
+inline uint32 SCMToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_SCM + relativeId; }
+inline uint32 Internal1ToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_1 + relativeId; }
+inline uint32 Internal2ToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_2 + relativeId; }
+inline uint32 Internal3ToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_3 + relativeId; }
+inline uint32 Internal4ToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_4 + relativeId; }
+
+// Turn absolute IDs into relative ones
+inline uint32 ModelIdToDFF(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_DFF; }
+inline uint32 ModelIdToTXD(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_TXD; }
+inline uint32 ModelIdToCOL(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_COL; }
+inline uint32 ModelIdToIPL(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_IPL; }
+inline uint32 ModelIdToDAT(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_DAT; }
+inline uint32 ModelIdToIFP(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_IFP; }
+inline uint32 ModelIdToRRR(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_RRR; }
+inline uint32 ModelIdToSCM(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_SCM; }
+inline uint32 ModelIdToInternal1(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_1; }
+inline uint32 ModelIdToInternal2(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_2; }
+inline uint32 ModelIdToInternal3(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_3; }
+inline uint32 ModelIdToInternal4(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_4; }
 
 struct tRwStreamInitializeData {
     uint8* m_pBuffer;
