@@ -3170,33 +3170,34 @@ void CStreaming::StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]) 
 // 0x40B700
 void CStreaming::StreamVehiclesAndPeds() {
     StreamCopModels(CTheZones::m_CurrLevel);
+
+    // The stuff below (where `FindPlayerWanted` is repeatedly called) IMHO are inlined.
     CWanted* pWanted = FindPlayerWanted(-1);
     if (pWanted->AreSwatRequired()) {
         RequestModel(MODEL_ENFORCER, STREAMING_GAME_REQUIRED);
         RequestModel(MODEL_SWAT, STREAMING_GAME_REQUIRED);
-    }
-    else {
+    } else {
         SetModelIsDeletable(MODEL_ENFORCER);
         if (ms_aInfoForModel[MODEL_ENFORCER].m_nLoadState != LOADSTATE_LOADED)
             SetModelIsDeletable(MODEL_SWAT);
     }
+
     pWanted = FindPlayerWanted(-1);
     if (pWanted->AreFbiRequired()) {
         RequestModel(MODEL_FBIRANCH, STREAMING_GAME_REQUIRED);
         RequestModel(MODEL_FBI, STREAMING_GAME_REQUIRED);
-    }
-    else {
+    } else {
         SetModelIsDeletable(MODEL_FBIRANCH);
         if (ms_aInfoForModel[MODEL_FBIRANCH].m_nLoadState != LOADSTATE_LOADED)
             SetModelIsDeletable(MODEL_FBI);
     }
+
     pWanted = FindPlayerWanted(-1);
     if (pWanted->AreArmyRequired()) {
         RequestModel(MODEL_RHINO, STREAMING_GAME_REQUIRED);
         RequestModel(MODEL_BARRACKS, STREAMING_GAME_REQUIRED);
         RequestModel(MODEL_ARMY, STREAMING_GAME_REQUIRED);
-    }
-    else {
+    } else {
         SetModelIsDeletable(MODEL_BARRACKS);
         SetModelIsDeletable(MODEL_RHINO);
         if (ms_aInfoForModel[MODEL_BARRACKS].m_nLoadState != LOADSTATE_LOADED
@@ -3205,12 +3206,12 @@ void CStreaming::StreamVehiclesAndPeds() {
             SetModelIsDeletable(MODEL_ARMY);
         }
     }
+
     pWanted = FindPlayerWanted(-1);
     if (pWanted->NumOfHelisRequired() <= 0) {
         SetModelIsDeletable(MODEL_VCNMAV);
         SetModelIsDeletable(MODEL_POLMAV);
-    }
-    else {
+    } else {
         RequestModel(MODEL_POLMAV, STREAMING_GAME_REQUIRED);
         pWanted = FindPlayerWanted(-1);
         if (pWanted->NumOfHelisRequired() > 1 && CWanted::bUseNewsHeliInAdditionToPolice)
@@ -3218,31 +3219,33 @@ void CStreaming::StreamVehiclesAndPeds() {
         else
             SetModelIsDeletable(MODEL_VCNMAV);
     }
+
     int32 pedGroupId = -1;
     if (CPopCycle::m_NumDealers_Peds > 0.03f) {
         if (CWeather::WeatherRegion == WEATHER_REGION_SF) {
             pedGroupId = POPCYCLE_PEDGROUP_BUSINESS_LA;
-        }
-        else if (CPopCycle::m_pCurrZoneInfo)
-        {
+        } else if (CPopCycle::m_pCurrZoneInfo) {
             uint8 currenZoneFlags = CPopCycle::m_pCurrZoneInfo->Flags2;
             if (currenZoneFlags & 1)
                 pedGroupId = 0;
+            else if (currenZoneFlags & 2)
+                pedGroupId = 1;
             else
-                pedGroupId = POPCYCLE_PEDGROUP_WORKERS_VG - ((currenZoneFlags & 2) != 0);
+                pedGroupId = 2;
         }
     }
+
     ePopcyclePedGroup dealerGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_DEALERS, 0);
     for (int32 i = 0; i < CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_DEALERS, 0); i++) {
         if (i == pedGroupId) {
             RequestModel(CPopulation::GetPedGroupModelId(dealerGroupId, i), STREAMING_GAME_REQUIRED);
-        }
-        else {
+        } else {
             int32 modelId = CPopulation::GetPedGroupModelId(dealerGroupId, i);
             SetModelIsDeletable(modelId);
         }
         dealerGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_DEALERS, 0);
     }
+
     static int32 framesBeforeStreamingNextNewCar = 0;
     if (framesBeforeStreamingNextNewCar >= 0) {
         --framesBeforeStreamingNextNewCar;
@@ -3251,6 +3254,7 @@ void CStreaming::StreamVehiclesAndPeds() {
         StreamOneNewCar();
         framesBeforeStreamingNextNewCar = 350;
     }
+
     if (m_bStreamHarvesterModelsThisFrame) {
         RequestModel(ModelIndices::MI_HARVESTERBODYPART1, STREAMING_GAME_REQUIRED);
         RequestModel(ModelIndices::MI_HARVESTERBODYPART2, STREAMING_GAME_REQUIRED);
@@ -3258,8 +3262,7 @@ void CStreaming::StreamVehiclesAndPeds() {
         RequestModel(ModelIndices::MI_HARVESTERBODYPART4, STREAMING_GAME_REQUIRED);
         m_bHarvesterModelsRequested = true;
         m_bStreamHarvesterModelsThisFrame = false;
-    }
-    else {
+    } else {
         if (m_bHarvesterModelsRequested) {
             RemoveModel(ModelIndices::MI_HARVESTERBODYPART1);
             RemoveModel(ModelIndices::MI_HARVESTERBODYPART2);
