@@ -283,7 +283,7 @@ void CStreaming::AddModelsToRequestList(CVector const& point, uint32 streamingFl
 // 0x407AD0
 bool CStreaming::AreAnimsUsedByRequestedModels(int32 animModelId) {
     for (auto info = ms_pStartRequestedList->GetNext(); info != ms_pEndRequestedList; info = info->GetNext()) {
-        const int32 modelId = info - ms_aInfoForModel;
+        const auto modelId = GetModelFromInfo(info);
         if (IsModelDFF(modelId) && CModelInfo::ms_modelInfoPtrs[modelId]->GetAnimFileIndex() == animModelId)
             return true;
     }
@@ -307,7 +307,7 @@ bool CStreaming::AreTexturesUsedByRequestedModels(int32 txdModelId) {
     for (auto info = ms_pStartRequestedList->GetNext(); info != ms_pEndRequestedList; info = info->GetNext()) {
         switch (GetModelType(GetModelFromInfo(info))) {
         case eModelType::DFF: {
-            if (CModelInfo::ms_modelInfoPtrs[(info - ms_aInfoForModel)]->m_nTxdIndex == txdModelId)
+            if (CModelInfo::ms_modelInfoPtrs[GetModelFromInfo(info)]->m_nTxdIndex == txdModelId)
                 return true;
             break;
         }
@@ -369,7 +369,7 @@ int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
     int32 nextRequestModelId = -1;
     CStreamingInfo* info = ms_pStartRequestedList->GetNext();
     for (; info != ms_pEndRequestedList; info = info->GetNext()) {
-        const int32 modelId = info - ms_aInfoForModel;
+        const auto modelId = GetModelFromInfo(info);
         if (!bNotPriority || ms_numPriorityRequests == 0 || info->IsPriorityRequest()) {
             // Additional conditions for some model types (DFF, TXD, IFP)
             switch (GetModelType((modelId))) {
@@ -1217,7 +1217,7 @@ void CStreaming::LoadScene(CVector const& point) {
         while (iter != ms_pStartRequestedList) {
             const auto next = iter->GetPrev();
             if (!iter->DontRemoveInLoadScene())
-                RemoveModel(iter - ms_aInfoForModel);
+                RemoveModel(GetModelFromInfo(iter));
             iter = next;
         }
     }
@@ -1854,7 +1854,7 @@ void CStreaming::PurgeRequestList() {
     while (streamingInfo != ms_pStartRequestedList) {
         auto previousStreamingInfo = streamingInfo->GetPrev();
         if (!streamingInfo->DoKeepInMemory() && !streamingInfo->IsPriorityRequest())
-            RemoveModel(streamingInfo - ms_aInfoForModel);
+            RemoveModel(GetModelFromInfo(streamingInfo));
         streamingInfo = previousStreamingInfo;
     }
 }
@@ -2140,7 +2140,7 @@ void CStreaming::RemoveInappropriatePedModels() {
 bool CStreaming::RemoveLeastUsedModel(uint32 streamingFlags) {
     auto streamingInfo = ms_pEndLoadedList->GetPrev();
     for (; streamingInfo != ms_startLoadedList; streamingInfo = streamingInfo->GetPrev()) {
-        const int32 modelId = GetModelFromInfo(streamingInfo);
+        const auto modelId = GetModelFromInfo(streamingInfo);
         if (!(streamingFlags & streamingInfo->m_nFlags)) {
             switch (GetModelType(modelId)) {
             case eModelType::DFF: {
@@ -2537,7 +2537,7 @@ void CStreaming::FlushRequestList()
     // Have to do it like this, because current iterator is invalidated when `RemoveModel` is called
     for (auto it = ms_pStartRequestedList->GetNext(); it != ms_pEndRequestedList;) {
         auto next = it->GetNext();
-        RemoveModel(it - ms_aInfoForModel);
+        RemoveModel(GetModelFromInfo(it));
         it = next;
     }
     FlushChannels();
@@ -3397,7 +3397,7 @@ void CStreaming::StreamZoneModels(CVector const& unused) {
         if (timeBeforeNextLoad >= 0) {
             timeBeforeNextLoad--;
         } else {
-            const auto slot = std::find_if(std::begin(ms_pedsLoaded), std::end(ms_pedsLoaded),
+           const auto slot = std::ranges::find_if(ms_pedsLoaded,
                 [](auto model) { return model == -1 || CModelInfo::ms_modelInfoPtrs[model]->m_nRefCount == 0; }
             );
             if (slot != std::end(ms_pedsLoaded)) {
@@ -3405,6 +3405,7 @@ void CStreaming::StreamZoneModels(CVector const& unused) {
                 if (pedModelId != *slot && pedModelId >= 0) {
                     RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
                     ms_aInfoForModel[pedModelId].m_nFlags &= ~STREAMING_GAME_REQUIRED; // Ok???? Y?
+
                     if (ms_numPedsLoaded == TOTAL_LOADED_PEDS) {
                         SetModelAndItsTxdDeletable(*slot);
                        *slot = -1;
@@ -3461,7 +3462,7 @@ void CStreaming::StreamZoneModels(CVector const& unused) {
         const int32 nextGangMemberToLoadAnySlot = (CurrentGangMemberToLoad + 1) % 21; // TODO: Magic number
         CurrentGangMemberToLoad = nextGangMemberToLoadAnySlot;
         for (int32 gangId = 0; gangId < TOTAL_GANGS; gangId++) {
-            const ePopcycleGroup popcycleGroup = static_cast<ePopcycleGroup>(gangId + POPCYCLE_GROUP_BALLAS);
+            const auto popcycleGroup = static_cast<ePopcycleGroup>(gangId + POPCYCLE_GROUP_BALLAS);
             const ePopcyclePedGroup pedGroupId = CPopulation::GetPedGroupId(popcycleGroup, 0);
             if (ms_loadedGangs & (1 << gangId)) {
                 const int32 nPedsInGang = CPopulation::GetNumPedsInGroup(pedGroupId);
