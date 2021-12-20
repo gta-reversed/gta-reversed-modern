@@ -2992,6 +2992,7 @@ bool CStreaming::StreamFireEngineAndFireman(bool bStreamForFire) {
 void CStreaming::StreamOneNewCar() {
     if (!CPopCycle::m_pCurrZoneInfo)
         return;
+
     bool bCheatActive = false;
     int32 carGroupId = 0;
     if (CCheat::m_aCheatsActive[CHEAT_BEACH_PARTY]) {
@@ -3018,6 +3019,7 @@ void CStreaming::StreamOneNewCar() {
         carGroupId = POPCYCLE_CARGROUP_CHEAT4;
         bCheatActive = true;
     }
+
     if (bCheatActive) {
         int32 carModelId = CCarCtrl::ChooseCarModelToLoad(carGroupId);
         if (carModelId < 0)
@@ -3026,44 +3028,52 @@ void CStreaming::StreamOneNewCar() {
         CPopulation::LoadSpecificDriverModelsForCar(carModelId);
         return;
     }
-    if (m_bBoatsNeeded && (CPopulation::m_LoadedBoats.CountMembers() < 2 ||
-        CPopulation::m_LoadedBoats.CountMembers() <= 2 && (rand() % 8) == 3)) {
-        int32 carModelId = CCarCtrl::ChooseCarModelToLoad(POPCYCLE_CARGROUP_BOATS);
-        if (carModelId >= 0) {
-            RequestModel(carModelId, STREAMING_KEEP_IN_MEMORY);
-            CPopulation::LoadSpecificDriverModelsForCar(carModelId);
+
+    // Load a boat if less than 2. If there's exactly 2 maybe load one.
+    if (m_bBoatsNeeded && (
+            CPopulation::m_LoadedBoats.CountMembers() < 2 ||                    // Load one
+            CPopulation::m_LoadedBoats.CountMembers() <= 2 && (rand() % 8) == 3 // Maybe load one (1 in 8 chance)
+        )
+    ) {
+        int32 boatModelId = CCarCtrl::ChooseCarModelToLoad(POPCYCLE_CARGROUP_BOATS);
+        if (boatModelId >= 0) {
+            RequestModel(boatModelId, STREAMING_KEEP_IN_MEMORY);
+            CPopulation::LoadSpecificDriverModelsForCar(boatModelId);
             return;
         }
     }
+
+    // Try loading either `MODEL_TAXI` or `MODEL_CABBIE`
     int32 carModelId = -1;
     if (ms_aInfoForModel[MODEL_TAXI].m_nLoadState != LOADSTATE_LOADED
-        && ms_aInfoForModel[MODEL_CABBIE].m_nLoadState != LOADSTATE_LOADED) {
+        && ms_aInfoForModel[MODEL_CABBIE].m_nLoadState != LOADSTATE_LOADED
+    ) {
         static int32 lastCarModelStreamedIn = MODEL_TAXI;
         if (lastCarModelStreamedIn == MODEL_TAXI) {
-            if (!IsCarModelNeededInCurrentZone(MODEL_CABBIE)) {
-                if (IsCarModelNeededInCurrentZone(MODEL_TAXI)) {
-                    carModelId = MODEL_TAXI;
-                    lastCarModelStreamedIn = carModelId;
-                }
+            if (!IsCarModelNeededInCurrentZone(MODEL_CABBIE) && IsCarModelNeededInCurrentZone(MODEL_TAXI)) {
+                carModelId = MODEL_TAXI;
+                lastCarModelStreamedIn = MODEL_TAXI;
             }
-        }
-        else {
+        } else {
+            // Possibly dead code? Once `lastCarModelStreamedIn` is set as `MODEL_TAXI` it wont change.
+            // Maybe default value for `lastCarModelStreamedIn` isn't `MODEL_TAXI`?
             if (IsCarModelNeededInCurrentZone(MODEL_TAXI)) {
                 carModelId = MODEL_TAXI;
-                lastCarModelStreamedIn = carModelId;
-            }
-            else if (IsCarModelNeededInCurrentZone(MODEL_CABBIE)) {
+                lastCarModelStreamedIn = MODEL_TAXI;
+            } else if (IsCarModelNeededInCurrentZone(MODEL_CABBIE)) {
                 carModelId = MODEL_CABBIE;
-                lastCarModelStreamedIn = carModelId;
+                lastCarModelStreamedIn = MODEL_CABBIE;
             }
         }
     }
+
     if (carModelId < 0) {
         int32 carGroupId = CPopCycle::PickARandomGroupOfOtherPeds();
         carModelId = CCarCtrl::ChooseCarModelToLoad(carGroupId);
         if (carModelId < 0)
             return;
     }
+    
     RequestModel(carModelId, STREAMING_KEEP_IN_MEMORY);
     CPopulation::LoadSpecificDriverModelsForCar(carModelId);
 }
