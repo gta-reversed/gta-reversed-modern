@@ -357,8 +357,7 @@ void CStreaming::ClearSlots(int32 totalSlots) {
     for (int32 i = 0; i < totalSlots; ++i) {
         int32 modelId = ms_pedsLoaded[i];
         if (modelId >= 0) {
-            SetModelIsDeletable(modelId);
-            SetModelTxdIsDeletable(modelId);
+            SetModelAndItsTxdDeletable(modelId);
             ms_pedsLoaded[i] = -1;
             ms_numPedsLoaded--;
         }
@@ -2066,8 +2065,7 @@ void CStreaming::RemoveCurrentZonesModels() {
     for (int32 i = 0; i < TOTAL_LOADED_PEDS; i++) {
         int32 modelId = ms_pedsLoaded[i];
         if (modelId >= 0) {
-            SetModelIsDeletable(modelId);
-            SetModelTxdIsDeletable(modelId);
+            SetModelAndItsTxdDeletable(modelId);
             ms_pedsLoaded[i] = -1;
         }
     }
@@ -2079,8 +2077,7 @@ void CStreaming::RemoveCurrentZonesModels() {
         for (int32 i = 0; i < 5; i++) {
             int32 modelId = CPopulation::GetPedGroupModelId(pedGroupId, i);
             if (modelId != CPopulation::m_defaultCarGroupModelId) {
-                SetModelIsDeletable(modelId);
-                SetModelTxdIsDeletable(modelId);
+                SetModelAndItsTxdDeletable(modelId);
             }
         }
     }
@@ -2100,8 +2097,7 @@ void CStreaming::RemoveDodgyPedsFromRandomSlots() {
         case MODEL_VHFYST3:
         case MODEL_SBFYSTR:
         case MODEL_SWFYSTR:
-            SetModelIsDeletable(modelId);
-            SetModelTxdIsDeletable(modelId);
+            SetModelAndItsTxdDeletable(modelId);
             ms_pedsLoaded[i] = -1;
             ms_numPedsLoaded--;
             break;
@@ -2125,8 +2121,7 @@ void CStreaming::RemoveInappropriatePedModels() {
         for (int32 i = 0; i < TOTAL_LOADED_PEDS; i++) {
             int32 modelId = ms_pedsLoaded[i];
             if (modelId >= 0 && !CPopCycle::IsPedAppropriateForCurrentZone(modelId)) {
-                SetModelIsDeletable(modelId);
-                SetModelTxdIsDeletable(modelId);
+                SetModelAndItsTxdDeletable(modelId);
                 ms_pedsLoaded[i] = -1;
                 ms_numPedsLoaded--;
             }
@@ -2136,8 +2131,7 @@ void CStreaming::RemoveInappropriatePedModels() {
         for (int32 i = 0; i < TOTAL_LOADED_PEDS; i++) {
             int32 modelId = ms_pedsLoaded[i];
             if (modelId >= 0) {
-                SetModelIsDeletable(modelId);
-                SetModelTxdIsDeletable(modelId);
+                SetModelAndItsTxdDeletable(modelId);
                 ms_pedsLoaded[i] = -1;
             }
         }
@@ -2954,6 +2948,11 @@ void CStreaming::SetModelTxdIsDeletable(int32 modelId) {
     SetModelIsDeletable(CModelInfo::ms_modelInfoPtrs[modelId]->m_nTxdIndex + RESOURCE_ID_TXD);
 }
 
+void CStreaming::SetModelAndItsTxdDeletable(int32 modelId) {
+    SetModelIsDeletable(modelId);
+    SetModelTxdIsDeletable(modelId);
+}
+
 // 0x40B470
 void CStreaming::SetSpecialCharIsDeletable(int32 slot) {
     SetModelIsDeletable(slot + SPECIAL_MODELS_RESOURCE_ID);
@@ -2962,6 +2961,8 @@ void CStreaming::SetSpecialCharIsDeletable(int32 slot) {
 // 0x4084B0
 void CStreaming::Shutdown() {
     CMemoryMgr::FreeAlign(ms_pStreamingBuffer[0]);
+    ms_pStreamingBuffer[0] = nullptr;
+    ms_pStreamingBuffer[1] = nullptr;
     ms_streamingBufferSize = 0;
     delete ms_pExtraObjectsDir;
 }
@@ -2977,14 +2978,12 @@ bool CStreaming::StreamAmbulanceAndMedic(bool bStreamForAccident) {
     {
         // Medic model + txd
         for (int32 i = 1; i < 4; i++) {
-            SetModelIsDeletable(ms_aDefaultMedicModel[i]);
-            SetModelTxdIsDeletable(ms_aDefaultMedicModel[i]);
+            SetModelAndItsTxdDeletable(ms_aDefaultMedicModel[i]);
         }
 
         // Ambulance model + txd
         for (int32 i = 1; i < 4; i++) {
-            SetModelIsDeletable(ms_aDefaultAmbulanceModel[i]);
-            SetModelTxdIsDeletable(ms_aDefaultAmbulanceModel[i]);
+            SetModelAndItsTxdDeletable(ms_aDefaultAmbulanceModel[i]);
         }
     }
 
@@ -3035,11 +3034,9 @@ void CStreaming::StreamCopModels(eLevelName level) {
         for (int32 i = 0; i < 4; i++) {
             if (i != level) {
                 if (level != 4) {
-                    SetModelIsDeletable(ms_aDefaultCopModel[i]);
-                    SetModelTxdIsDeletable(ms_aDefaultCopModel[i]);
+                    SetModelAndItsTxdDeletable(ms_aDefaultCopModel[i]);
                 }
-                SetModelIsDeletable(ms_aDefaultCopCarModel[i]);
-                SetModelTxdIsDeletable(ms_aDefaultCopCarModel[i]);
+                SetModelAndItsTxdDeletable(ms_aDefaultCopCarModel[i]);
             }
         }
     }
@@ -3054,14 +3051,12 @@ bool CStreaming::StreamFireEngineAndFireman(bool bStreamForFire) {
     {
         // Fireman model + txd
         for (int32 i = 1; i < 4; i++) {
-            SetModelIsDeletable(ms_aDefaultFiremanModel[i]);
-            SetModelTxdIsDeletable(ms_aDefaultFiremanModel[i]);
+            SetModelAndItsTxdDeletable(ms_aDefaultFiremanModel[i]);
         }
 
         // Fire truck model + txd
         for (int32 i = 1; i < 4; i++) {
-            SetModelIsDeletable(ms_aDefaultFireEngineModel[i]);
-            SetModelTxdIsDeletable(ms_aDefaultFireEngineModel[i]);
+            SetModelAndItsTxdDeletable(ms_aDefaultFireEngineModel[i]);
         }
     }
 
@@ -3242,8 +3237,7 @@ void CStreaming::StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]) 
             // Load model into slot
             if (modelId >= 0) {
                 // Unload model from slot
-                SetModelIsDeletable(modelId);
-                SetModelTxdIsDeletable(modelId);
+                SetModelAndItsTxdDeletable(modelId);
                 ms_pedsLoaded[i] = -1;
                 ms_numPedsLoaded--;
             }
@@ -3253,8 +3247,7 @@ void CStreaming::StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]) 
             ms_numPedsLoaded++;
         } else if (pedModelId == -2) { // Unload model from slot
             if (modelId >= 0) {
-                SetModelIsDeletable(modelId);
-                SetModelTxdIsDeletable(modelId);
+                SetModelAndItsTxdDeletable(modelId);
                 ms_pedsLoaded[i] = -1;
                 ms_numPedsLoaded--;
             }
@@ -3416,8 +3409,7 @@ void CStreaming::StreamZoneModels(CVector const& unused) {
                     RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
                     ms_aInfoForModel[pedModelId].m_nFlags &= ~STREAMING_GAME_REQUIRED; // Ok???? Y?
                     if (ms_numPedsLoaded == TOTAL_LOADED_PEDS) {
-                        SetModelIsDeletable(*slot);
-                        SetModelTxdIsDeletable(*slot);
+                        SetModelAndItsTxdDeletable(*slot);
                        *slot = -1;
                     } else {
                         ++ms_numPedsLoaded;
@@ -3437,8 +3429,7 @@ void CStreaming::StreamZoneModels(CVector const& unused) {
         // Unload all models from slots
         for (auto& model : ms_pedsLoaded) {
             if (model >= 0) {
-                SetModelIsDeletable(model);
-                SetModelTxdIsDeletable(model);
+                SetModelAndItsTxdDeletable(model);
                 model = -1;
             }
         }
@@ -3491,8 +3482,7 @@ void CStreaming::StreamZoneModels(CVector const& unused) {
                             }
                         } else if (slot != nextGangMemberSlot2) {
                             const int32 modelId = CPopulation::GetPedGroupModelId(pedGroupId, slot);
-                            SetModelIsDeletable(modelId);
-                            SetModelTxdIsDeletable(modelId);
+                            SetModelAndItsTxdDeletable(modelId);
                             continue;
                         }
                     } else {
@@ -3537,8 +3527,7 @@ void CStreaming::StreamZoneModels_Gangs(CVector const& unused) {
                 // Unload all models of this gang
                 for (int32 i = 0; i < CPopulation::GetNumPedsInGroup(pedGroupId); ++i) {
                     int32 modelId = CPopulation::GetPedGroupModelId(pedGroupId, i);
-                    SetModelIsDeletable(modelId);
-                    SetModelTxdIsDeletable(modelId);
+                    SetModelAndItsTxdDeletable(modelId);
                 }
                 ms_loadedGangs &= ~gangBit;
             }
@@ -3593,8 +3582,7 @@ void CStreaming::StreamZoneModels_Gangs(CVector const& unused) {
                         }
 
                         if (!bKeepCarModel) {
-                            SetModelIsDeletable(gangCarModelId);
-                            SetModelTxdIsDeletable(gangCarModelId);
+                            SetModelAndItsTxdDeletable(gangCarModelId);
                         }
                     }
                 }

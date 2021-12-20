@@ -345,6 +345,7 @@ public:
     static void SetMissionDoesntRequireSpecialChar(int32 slot);
     static void SetModelIsDeletable(int32 modelId);
     static void SetModelTxdIsDeletable(int32 modelId);
+    static void SetModelAndItsTxdDeletable(int32 modelId);
     //! unused
     static void SetSpecialCharIsDeletable(int32 slot);
     static void Shutdown();
