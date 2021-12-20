@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "Radar.h"
+#include <ranges>
 
 uint32& CStreaming::ms_memoryAvailable = *reinterpret_cast<uint32*>(0x8A5A80);
 int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84);
@@ -194,19 +195,16 @@ CLink<CEntity*>* CStreaming::AddEntity(CEntity* pEntity) {
 
 // 0x407610
 uint32 CStreaming::AddImageToList(char const* pFileName, bool bNotPlayerImg) {
-    for (auto i = 0u; i < std::size(ms_files); i++) {
-        if (!ms_files[i].IsInUse()) {
-            // Not in use, so make entry
-            ms_files[i] = {pFileName, bNotPlayerImg};
+    const auto entry = std::ranges::find_if(ms_files,
+        [](const auto& en) { return !en.IsInUse(); }
+    );
 
-            // Success
-            return i;
-        }
-    }
-    // If it reaches this point it failed to find an empty file slot
-    assert(0); // NOTSA
+    if (entry == std::end(ms_files))
+        return 0; // No entry found
 
-    return 0;
+    *entry = { pFileName, bNotPlayerImg }; // Set entry details
+
+    return std::distance(ms_files, entry); // Return file index
 }
 
 // 0x40C520
