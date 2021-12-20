@@ -1317,7 +1317,7 @@ void CStreaming::RequestFile(int32 modelId, int32 posn, int32 size, int32 imgId,
 
 // 0x409050
 void CStreaming::RequestFilesInChannel(int32 chIdx) {
-    for (auto modelId : ms_channel[chIdx].modelIds) {
+    for (const auto modelId : ms_channel[chIdx].modelIds) {
         if (modelId != -1) {
             RemoveModel(modelId);
             RequestModel(modelId, GetInfo(modelId).m_nFlags);
