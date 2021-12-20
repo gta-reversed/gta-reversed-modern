@@ -2911,24 +2911,32 @@ bool CStreaming::StreamAmbulanceAndMedic(bool bStreamForAccident) {
 }
 
 // 0x40A150
-void CStreaming::StreamCopModels(int32 level) {
-    if (CGame::currArea)
+void CStreaming::StreamCopModels(eLevelName level) {
+    if (CGame::currArea != eAreaCodes::AREA_CODE_NORMAL_WORLD)
         return;
-    if (FindPlayerWanted(-1) && FindPlayerWanted(-1)->m_nWantedLevel < 3 && level && !m_bDisableCopBikes) {
+
+    // Maybe load a cop bike..
+    if (FindPlayerWanted(-1) && FindPlayerWanted(-1)->m_nWantedLevel < 3
+        && level != eLevelName::LEVEL_NAME_COUNTRY_SIDE
+        && !m_bDisableCopBikes
+    ) {
         const uint32 timeInMs = CTimer::GetTimeInMS();
         if (ms_nTimePassedSinceLastCopBikeStreamedIn < timeInMs) {
             m_bCopBikeLoaded = !m_bCopBikeLoaded;
             ms_nTimePassedSinceLastCopBikeStreamedIn = timeInMs + CGeneral::GetRandomNumberInRange(30000, 50000);
         }
+
         if (m_bCopBikeLoaded)
-            level = 4;
-    }
-    else {
+            level = (eLevelName)4; // Not sure, dont ask..
+    } else {
         m_bCopBikeLoaded = false;
     }
+
     const CStreamingInfo& copModelInfo = ms_aInfoForModel[ms_aDefaultCopModel[level]];
     const CStreamingInfo& copCarModelInfo = ms_aInfoForModel[ms_aDefaultCopCarModel[level]];
-    if (copModelInfo.m_nLoadState == LOADSTATE_LOADED && copCarModelInfo.m_nLoadState == LOADSTATE_LOADED) {
+    if (copModelInfo.m_nLoadState == LOADSTATE_LOADED
+        && copCarModelInfo.m_nLoadState == LOADSTATE_LOADED
+    ) {
         for (int32 i = 0; i < 4; i++) {
             if (i != level) {
                 if (level != 4) {
