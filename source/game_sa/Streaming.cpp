@@ -2752,28 +2752,40 @@ bool CStreaming::IsCarModelNeededInCurrentZone(int32 modelId) {
     CZoneInfo* pCurrentZoneInfo = CPopCycle::m_pCurrZoneInfo;
     if (!CPopCycle::m_pCurrZoneInfo)
         return false;
+
+    // Check cheats
     if (CCheat::m_aCheatsActive[CHEAT_BEACH_PARTY])
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_BEACHFOLK, modelId);
+
     if (CCheat::m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC])
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_FARMERS, modelId);
+
     if (CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC])
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT1, modelId);
+
     if (CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC])
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT2, modelId);
+
     if (CCheat::m_aCheatsActive[CHEAT_NINJA_THEME])
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT3, modelId);
+
     if (CCheat::m_aCheatsActive[CHEAT_FUNHOUSE_THEME])
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT4, modelId);
+
+    // Check in current popcycle
     for (int32 groupId = 0; groupId < POPCYCLE_TOTAL_GROUP_PERCS; groupId++) {
         if (CPopCycle::GetCurrentPercTypeGroup(groupId, pCurrentZoneInfo->zonePopulationType) &&
             CPopulation::DoesCarGroupHaveModelId(groupId, modelId)) {
             return true;
         }
     }
+
+    // Check gangs
     for (int32 groupId = 0; groupId < TOTAL_GANGS; groupId++) {
-        if (pCurrentZoneInfo->GangDensity[groupId] && CPopulation::DoesCarGroupHaveModelId(groupId, modelId))
+        if (pCurrentZoneInfo->GangDensity[groupId] != 0 && CPopulation::DoesCarGroupHaveModelId(groupId, modelId))
             return true;
     }
+
     return false;
 }
 
