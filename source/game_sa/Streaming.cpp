@@ -2953,25 +2953,38 @@ void CStreaming::StreamCopModels(eLevelName level) {
 }
 
 // 0x40A400
+// Same as `StreamAmbulanceAndMedic` but for firetruck and fireman
 bool CStreaming::StreamFireEngineAndFireman(bool bStreamForFire) {
-    for (int32 i = 1; i < 4; i++) {
-        SetModelIsDeletable(ms_aDefaultFiremanModel[i]);
-        SetModelTxdIsDeletable(ms_aDefaultFiremanModel[i]);
+    // Set models for each zone but LEVEL_NAME_COUNTRY_SIDE as deletable
+    {
+        // Fireman model + txd
+        for (int32 i = 1; i < 4; i++) {
+            SetModelIsDeletable(ms_aDefaultFiremanModel[i]);
+            SetModelTxdIsDeletable(ms_aDefaultFiremanModel[i]);
+        }
+
+        // Fire truck model + txd
+        for (int32 i = 1; i < 4; i++) {
+            SetModelIsDeletable(ms_aDefaultFireEngineModel[i]);
+            SetModelTxdIsDeletable(ms_aDefaultFireEngineModel[i]);
+        }
     }
-    for (int32 i = 1; i < 4; i++) {
-        SetModelIsDeletable(ms_aDefaultFireEngineModel[i]);
-        SetModelTxdIsDeletable(ms_aDefaultFireEngineModel[i]);
-    }
-    if (!CTheZones::m_CurrLevel || !bStreamForFire)
-        return false;
+
+    if (CTheZones::m_CurrLevel == eLevelName::LEVEL_NAME_COUNTRY_SIDE || !bStreamForFire)
+        return false; // Models for `LEVEL_NAME_COUNTRY_SIDE` are always loaded (I guess so, since they arent set as deletable above)
+
+    // Load firemand and firetruck for current level
+    // TODO: Maybe this could be done with a loop? This doesn't look to readable...
     int32 firemanModel = ms_aDefaultFiremanModel[CTheZones::m_CurrLevel];
     int32 fireTruckModel = ms_aDefaultFireEngineModel[CTheZones::m_CurrLevel];
     RequestModel(firemanModel, STREAMING_KEEP_IN_MEMORY);
     RequestModel(fireTruckModel, STREAMING_KEEP_IN_MEMORY);
     const CStreamingInfo& firemanInfo = ms_aInfoForModel[firemanModel];
     const CStreamingInfo& fireTruckInfo = ms_aInfoForModel[fireTruckModel];
+
     if (firemanInfo.m_nLoadState != LOADSTATE_LOADED || fireTruckInfo.m_nLoadState != LOADSTATE_LOADED)
         return false;
+
     return true;
 }
 
