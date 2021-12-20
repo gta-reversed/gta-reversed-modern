@@ -2717,8 +2717,9 @@ void CStreaming::InitImageList() {
 // 0x4084F0
 void CStreaming::InstanceLoadedModels(CVector const& point) {
     float fRadius = 80.0f;
-    if (CGame::currArea)
+    if (CGame::currArea != eAreaCodes::AREA_CODE_NORMAL_WORLD)
         fRadius = 40.0f;
+
     const float minX = point.x - fRadius;
     const float maxX = point.x + fRadius;
     const float minY = point.y - fRadius;
