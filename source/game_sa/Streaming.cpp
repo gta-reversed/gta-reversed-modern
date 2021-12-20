@@ -2816,16 +2816,17 @@ void CStreaming::SetMissionDoesntRequireAnim(int32 slot) {
 }
 
 // 0x409C90
+// Set model and it's TXD as not required by mission
+// If model/it's TXD is `!IsGameRequired() && !DoKeepInMemory()` model is removed.
 void CStreaming::SetMissionDoesntRequireModel(int32 modelId) {
     for (int32 i = modelId; ; i = CModelInfo::ms_modelInfoPtrs[i]->m_nTxdIndex + RESOURCE_ID_TXD) {
         CStreamingInfo& streamingInfo = CStreaming::ms_aInfoForModel[i];
         streamingInfo.m_nFlags &= ~STREAMING_MISSION_REQUIRED;
-        if (!(streamingInfo.m_nFlags & STREAMING_GAME_REQUIRED)) {
-            if (streamingInfo.m_nLoadState == LOADSTATE_LOADED) {
+        if (!streamingInfo.IsGameRequired()) {
+            if (streamingInfo.IsLoaded()) {
                 if (!streamingInfo.InList())
                     streamingInfo.AddToList(ms_startLoadedList);
-            }
-            else if (!(streamingInfo.m_nFlags & STREAMING_KEEP_IN_MEMORY)) {
+            } else if (!streamingInfo.DoKeepInMemory()) {
                 RemoveModel(i);
             }
         }
