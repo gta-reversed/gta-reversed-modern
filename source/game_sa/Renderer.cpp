@@ -813,8 +813,7 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
                         if (CStreaming::ms_disableStreaming || !entity->GetIsOnScreen() || ms_bInTheSky)
                             break;
                         if (bRequestModel) {
-                            auto pStreamingInfo = &CStreaming::ms_aInfoForModel[entity->m_nModelIndex];
-                            if (pStreamingInfo->m_nLoadState == LOADSTATE_LOADED) {
+                            if (CStreaming::GetInfo(entity->m_nModelIndex).IsLoaded()){
                                 CStreaming::RequestModel(entity->m_nModelIndex, 0);
                                 break;
                             }

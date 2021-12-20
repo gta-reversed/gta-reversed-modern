@@ -74,7 +74,7 @@ inline bool IsModelInternal2(uint32 model) { return eResourceFirstID::RESOURCE_I
 inline bool IsModelInternal3(uint32 model) { return eResourceFirstID::RESOURCE_ID_INTERNAL_3 <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_4; }
 inline bool IsModelInternal4(uint32 model) { return eResourceFirstID::RESOURCE_ID_INTERNAL_4 <= model && model < eResourceFirstID::RESOURCE_ID_TOTAL; }
 
-eModelType GetModelType(uint32 model) {
+inline eModelType GetModelType(uint32 model) {
     if (IsModelDFF(model))
         return eModelType::DFF;
 
@@ -253,6 +253,7 @@ public:
 public:
     static void InjectHooks();
 
+    static CStreamingInfo& GetInfo(uint32 modelId);
     static CLink<CEntity*>* AddEntity(CEntity* pEntity);
     //! return StreamingFile Index in CStreaming::ms_files
     static uint32 AddImageToList(char const* pFileName, bool bNotPlayerImg);

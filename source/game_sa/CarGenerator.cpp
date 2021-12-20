@@ -133,7 +133,7 @@ void CCarGenerator::DoInternalProcessing()
     }
     else
     {
-        if (m_nModelId == MODEL_INVALID || CStreaming::ms_aInfoForModel[-m_nModelId].m_nLoadState != LOADSTATE_LOADED)
+        if (m_nModelId == MODEL_INVALID || !CStreaming::GetInfo(-m_nModelId).IsLoaded())
         {
             CTheZones::GetZoneInfo(FindPlayerCoors(-1), nullptr);
             actualModelId = CPopulation::m_AppropriateLoadedCars.PickRandomCar(true, true);
@@ -164,10 +164,10 @@ void CCarGenerator::DoInternalProcessing()
         }
     }
 
-    if (CStreaming::ms_aInfoForModel[actualModelId].m_nLoadState != LOADSTATE_LOADED ||
+    if (CStreaming::GetInfo(actualModelId).m_nLoadState != LOADSTATE_LOADED ||
         actualModelId == MODEL_HOTDOG &&
         m_nModelId == MODEL_HOTDOG &&
-        CStreaming::ms_aInfoForModel[MODEL_BMOCHIL].m_nLoadState != LOADSTATE_LOADED
+        CStreaming::GetInfo(MODEL_BMOCHIL).m_nLoadState != LOADSTATE_LOADED
     )
         return;
 
@@ -298,7 +298,7 @@ void CCarGenerator::DoInternalProcessing()
     if (tractorDriverPedType != -1)
         CCarCtrl::SetUpDriverAndPassengersForVehicle(pVeh, tractorDriverPedType, 0, false, false, 99);
 
-    if (actualModelId == MODEL_HOTDOG && m_nModelId == MODEL_HOTDOG && CStreaming::ms_aInfoForModel[MODEL_BMOCHIL].m_nLoadState == LOADSTATE_LOADED)
+    if (actualModelId == MODEL_HOTDOG && m_nModelId == MODEL_HOTDOG && CStreaming::GetInfo(MODEL_BMOCHIL).m_nLoadState == LOADSTATE_LOADED)
     {
         CPed* ped = CPopulation::AddPed(ePedType::PED_TYPE_CIVMALE, MODEL_BMOCHIL, pVeh->GetPosition() - pVeh->GetRight() * 3.0f, false);
         if (ped)

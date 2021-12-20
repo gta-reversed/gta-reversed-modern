@@ -164,9 +164,9 @@ void CColStore::EnsureCollisionIsInMemory(CVector const& pos)
         if (!pDef || !pDef->m_bCollisionIsRequired)
             continue;
 
-        auto* pStreamingInfo = &CStreaming::ms_aInfoForModel[RESOURCE_ID_COL + i];
-        if (pDef->m_Area.IsPointInside(pos, -110.0F) && pStreamingInfo->m_nLoadState != LOADSTATE_LOADED)
-        {
+        if (pDef->m_Area.IsPointInside(pos, -110.0F)
+            && CStreaming::GetInfo(COLToModelId(i)).m_nLoadState != LOADSTATE_LOADED
+        ) {
             CStreaming::RequestModel(RESOURCE_ID_COL + i, STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY);
             if (!TheCamera.GetScreenFadeStatus())
                 FrontEndMenuManager.MessageScreen("LOADCOL", false, false);
@@ -347,8 +347,7 @@ void CColStore::RemoveAllCollision()
         if (!pDef)
             continue;
 
-        auto* pStreamingInfo = &CStreaming::ms_aInfoForModel[RESOURCE_ID_COL + i];
-        if (!pStreamingInfo->bMissionRequired && !pStreamingInfo->bGameRequired)
+        if (!CStreaming::GetInfo(COLToModelId(i)).IsMissionOrGameRequired())
             CStreaming::RemoveModel(RESOURCE_ID_COL + i);
     }
 }
