@@ -2878,16 +2878,26 @@ void CStreaming::StartRenderEntities() {
 
 // 0x40A2A0
 bool CStreaming::StreamAmbulanceAndMedic(bool bStreamForAccident) {
-    for (int32 i = 1; i < 4; i++) {
-        SetModelIsDeletable(ms_aDefaultMedicModel[i]);
-        SetModelTxdIsDeletable(ms_aDefaultMedicModel[i]);
+    // Set models for each zone but LEVEL_NAME_COUNTRY_SIDE as deletable
+    {
+        // Medic model + txd
+        for (int32 i = 1; i < 4; i++) {
+            SetModelIsDeletable(ms_aDefaultMedicModel[i]);
+            SetModelTxdIsDeletable(ms_aDefaultMedicModel[i]);
+        }
+
+        // Ambulance model + txd
+        for (int32 i = 1; i < 4; i++) {
+            SetModelIsDeletable(ms_aDefaultAmbulanceModel[i]);
+            SetModelTxdIsDeletable(ms_aDefaultAmbulanceModel[i]);
+        }
     }
-    for (int32 i = 1; i < 4; i++) {
-        SetModelIsDeletable(ms_aDefaultAmbulanceModel[i]);
-        SetModelTxdIsDeletable(ms_aDefaultAmbulanceModel[i]);
-    }
-    if (!CTheZones::m_CurrLevel || !bStreamForAccident)
-        return false;
+
+    if (CTheZones::m_CurrLevel == eLevelName::LEVEL_NAME_COUNTRY_SIDE || !bStreamForAccident)
+        return false; // Models for `LEVEL_NAME_COUNTRY_SIDE` are always loaded (I guess so, since they arent set as deletable above)
+
+    // Load medic and ambulance model for current level
+    // TODO: Maybe this could be done with a loop? This doesn't look to readable...
     int32 medicModel = ms_aDefaultMedicModel[CTheZones::m_CurrLevel];
     int32 ambulanceModel = ms_aDefaultAmbulanceModel[CTheZones::m_CurrLevel];
     RequestModel(medicModel, STREAMING_KEEP_IN_MEMORY);
@@ -2896,6 +2906,7 @@ bool CStreaming::StreamAmbulanceAndMedic(bool bStreamForAccident) {
     const CStreamingInfo& ambulanceInfo = ms_aInfoForModel[ambulanceModel];
     if (medicInfo.m_nLoadState != LOADSTATE_LOADED || ambulanceInfo.m_nLoadState != LOADSTATE_LOADED)
         return false;
+
     return true;
 }
 
