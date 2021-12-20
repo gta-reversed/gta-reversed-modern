@@ -389,7 +389,7 @@ int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
             // Check if it has an anim (IFP), if so, make sure it gets loaded
             const int32 animFileIndex = pModelInfo->GetAnimFileIndex();
             if (animFileIndex != -1) {
-                const int32 animModelId = animFileIndex + RESOURCE_ID_IFP;
+                const int32 animModelId = IFPToModelId(animFileIndex);
                 if (!GetInfo(animModelId).IsLoadedOrBeingRead()) {
                     RequestModel(animModelId, STREAMING_KEEP_IN_MEMORY);
                     continue;
@@ -402,7 +402,7 @@ int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
             TxdDef* pTexDictionary = CTxdStore::ms_pTxdPool->GetAt(ModelIdToTXD(modelId));
             const int16 parentIndex = pTexDictionary->m_wParentIndex;
             if (parentIndex != -1) {
-                const int32 parentModelIdx = parentIndex + RESOURCE_ID_TXD;
+                const int32 parentModelIdx = TXDToModelId(parentIndex);
                 if (!GetInfo(parentModelIdx).IsLoadedOrBeingRead()) {
                     RequestModel(parentModelIdx, STREAMING_KEEP_IN_MEMORY);
                     continue;
@@ -1116,19 +1116,19 @@ void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
                 txdSlot = CTxdStore::AddTxdSlot(entryInfo.m_szName);
                 CVehicleModelInfo::AssignRemapTxd(entryInfo.m_szName, txdSlot);
             }
-            modelId = txdSlot + RESOURCE_ID_TXD;
+            modelId = TXDToModelId(txdSlot);
 
         } else if (ExtensionIs("COL")) {
             int32 colSlot = CColStore::FindColSlot();
             if (colSlot == -1)
                 colSlot = CColStore::AddColSlot(entryInfo.m_szName);
-            modelId = colSlot + RESOURCE_ID_COL;
+            modelId = COLToModelId(colSlot);
 
         } else if (ExtensionIs("IPL")) {
             int32 iplSlot = CIplStore::FindIplSlot(entryInfo.m_szName);
             if (iplSlot == -1)
                 iplSlot = CIplStore::AddIplSlot(entryInfo.m_szName);
-            modelId = iplSlot + RESOURCE_ID_IPL;
+            modelId = IPLToModelId(iplSlot);
 
         } else if (ExtensionIs("DAT")) {
             // Extract nodes file sector from name
@@ -1136,14 +1136,13 @@ void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
             modelId += RESOURCE_ID_DAT;
 
         } else if (ExtensionIs("IFP")) {
-            modelId = CAnimManager::RegisterAnimBlock(entryInfo.m_szName) + RESOURCE_ID_IFP;
+            modelId = IFPToModelId(CAnimManager::RegisterAnimBlock(entryInfo.m_szName));
 
         } else if (ExtensionIs("RRR")) {
-            modelId = CVehicleRecording::RegisterRecordingFile(entryInfo.m_szName) + RESOURCE_ID_RRR;
+            modelId = RRRToModelId(CVehicleRecording::RegisterRecordingFile(entryInfo.m_szName));
 
         } else if (ExtensionIs("SCM")) {
-            modelId = CTheScripts::StreamedScripts.RegisterScript(entryInfo.m_szName) + RESOURCE_ID_SCM;
-
+            modelId = SCMToModelId(CTheScripts::StreamedScripts.RegisterScript(entryInfo.m_szName));
         } else {
             *pExtension = '.'; // Unnecessary because extension is limited to this scope only.
             previousModelId = -1;
@@ -1385,7 +1384,7 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
 
             const int32 animFileIndex = modelInfo->GetAnimFileIndex();
             if (animFileIndex != -1)
-                RequestModel(animFileIndex + RESOURCE_ID_IFP, STREAMING_KEEP_IN_MEMORY);
+                RequestModel(IFPToModelId(animFileIndex), STREAMING_KEEP_IN_MEMORY);
             break;
         }
         }
@@ -1408,7 +1407,7 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
 // TODO: Make more of these functions, really makes the code cleaner.
 // 0x407100
 void CStreaming::RequestTxdModel(int32 slot, int32 streamingFlags) {
-    RequestModel(slot + RESOURCE_ID_TXD, streamingFlags);
+    RequestModel(TXDToModelId(slot), streamingFlags);
 }
 
 // 0x408C70
@@ -1876,7 +1875,7 @@ void CStreaming::ReInit() {
     }
 
     for (int32 scmId = 0; scmId < TOTAL_SCM_MODEL_IDS; scmId++) {
-        RemoveModel(scmId + RESOURCE_ID_SCM);
+        RemoveModel(SCMToModelId(scmId));
     }
     ms_disableStreaming = false;
     ms_currentZoneType = -1;
@@ -2369,7 +2368,7 @@ void CStreaming::RemoveUnusedModelsInLoadedList() {
 // 0x40C180
 void CStreaming::RemoveTxdModel(int32 modelId)
 {
-    RemoveModel(modelId + RESOURCE_ID_TXD);
+    RemoveModel(TXDToModelId(modelId));
 }
 
 // 0x40E120
@@ -2712,7 +2711,7 @@ void CStreaming::Init2()
         }
     }
     for (int32 i = 0; i < TOTAL_DFF_MODEL_IDS; i++) {
-        const int32 modelId = i + RESOURCE_ID_DFF;
+        const int32 modelId = DFFToModelId(i);
         auto pBaseModelnfo = CModelInfo::ms_modelInfoPtrs[modelId];
         CStreamingInfo& streamingInfo = GetInfo(modelId);
         if (pBaseModelnfo && pBaseModelnfo->m_pRwObject) {
@@ -2725,7 +2724,7 @@ void CStreaming::Init2()
         }
     }
     for (int32 i = 0; i < TOTAL_TXD_MODEL_IDS; i++) {
-        const int32 modelId = i + RESOURCE_ID_TXD;
+        const int32 modelId = TXDToModelId(i);
         CStreamingInfo& streamingInfo = GetInfo(modelId);
         TxdDef* pTxd = CTxdStore::ms_pTxdPool->GetAt(i);
         if (pTxd && pTxd->m_pRwDictionary) {
@@ -2880,7 +2879,7 @@ void CStreaming::SetLoadVehiclesInLoadScene(bool bEnable) {
 
 // 0x48B570
 void CStreaming::SetMissionDoesntRequireAnim(int32 slot) {
-    SetMissionDoesntRequireModel(slot + RESOURCE_ID_IFP);
+    SetMissionDoesntRequireModel(IFPToModelId(slot));
 }
 
 // 0x409C90
@@ -2900,10 +2899,10 @@ void CStreaming::SetMissionDoesntRequireModel(int32 nDFForTXDModel) {
 
     ProcessOne(nDFForTXDModel);
     if (IsModelDFF(nDFForTXDModel)) 
-        ProcessOne(CModelInfo::ms_modelInfoPtrs[nDFForTXDModel]->m_nTxdIndex + RESOURCE_ID_TXD); // Process TXD of DFF
+        ProcessOne(CModelInfo::ms_modelInfoPtrs[nDFForTXDModel]->TXDToModelId(m_nTxdIndex)); // Process TXD of DFF
 
     /* Origianl code:
-    for (int32 i = modelId; ; i = CModelInfo::ms_modelInfoPtrs[i]->m_nTxdIndex + RESOURCE_ID_TXD) {
+    for (int32 i = modelId; ; i = CModelInfo::ms_modelInfoPtrs[i]->TXDToModelId(m_nTxdIndex)) {
         CStreamingInfo& streamingInfo = CStreaming::GetInfo(i);
         streamingInfo.m_nFlags &= ~STREAMING_MISSION_REQUIRED;
         if (!streamingInfo.IsGameRequired()) {
@@ -2941,7 +2940,7 @@ void CStreaming::SetModelIsDeletable(int32 modelId) {
 
 // 0x409C70
 void CStreaming::SetModelTxdIsDeletable(int32 modelId) {
-    SetModelIsDeletable(CModelInfo::ms_modelInfoPtrs[modelId]->m_nTxdIndex + RESOURCE_ID_TXD);
+    SetModelIsDeletable(CModelInfo::ms_modelInfoPtrs[modelId]->TXDToModelId(m_nTxdIndex));
 }
 
 void CStreaming::SetModelAndItsTxdDeletable(int32 modelId) {
