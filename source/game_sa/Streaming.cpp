@@ -2894,9 +2894,25 @@ void CStreaming::SetMissionDoesntRequireAnim(int32 slot) {
 }
 
 // 0x409C90
-// Set model and it's TXD as not required by mission
-// If model/it's TXD is `!IsGameRequired() && !DoKeepInMemory()` model is removed.
-void CStreaming::SetMissionDoesntRequireModel(int32 modelId) {
+void CStreaming::SetMissionDoesntRequireModel(int32 nDFForTXDModel) {
+    const auto ProcessOne = [](auto modelId) {
+        CStreamingInfo& streamingInfo = CStreaming::ms_aInfoForModel[modelId];
+        streamingInfo.m_nFlags &= ~STREAMING_MISSION_REQUIRED;
+        if (!streamingInfo.IsGameRequired()) {
+            if (streamingInfo.IsLoaded()) {
+                if (!streamingInfo.InList())
+                    streamingInfo.AddToList(ms_startLoadedList);
+            } else if (!streamingInfo.DoKeepInMemory()) {
+                RemoveModel(modelId);
+            }
+        }
+    };
+
+    ProcessOne(nDFForTXDModel);
+    if (IsModelDFF(nDFForTXDModel)) 
+        ProcessOne(CModelInfo::ms_modelInfoPtrs[nDFForTXDModel]->m_nTxdIndex + RESOURCE_ID_TXD); // Process TXD of DFF
+
+    /* Origianl code:
     for (int32 i = modelId; ; i = CModelInfo::ms_modelInfoPtrs[i]->m_nTxdIndex + RESOURCE_ID_TXD) {
         CStreamingInfo& streamingInfo = CStreaming::ms_aInfoForModel[i];
         streamingInfo.m_nFlags &= ~STREAMING_MISSION_REQUIRED;
@@ -2911,6 +2927,7 @@ void CStreaming::SetMissionDoesntRequireModel(int32 modelId) {
         if (i >= RESOURCE_ID_TXD)
             break;
     }
+    */
 }
 
 // 0x40B490
