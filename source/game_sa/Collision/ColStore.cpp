@@ -165,7 +165,7 @@ void CColStore::EnsureCollisionIsInMemory(CVector const& pos)
             continue;
 
         if (pDef->m_Area.IsPointInside(pos, -110.0F)
-            && CStreaming::GetInfo(COLToModelId(i)).m_nLoadState != LOADSTATE_LOADED
+            && !CStreaming::GetInfo(COLToModelId(i)).IsLoaded()
         ) {
             CStreaming::RequestModel(RESOURCE_ID_COL + i, STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY);
             if (!TheCamera.GetScreenFadeStatus())

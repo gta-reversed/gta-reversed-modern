@@ -17,14 +17,14 @@ enum eStreamingFlags {
 };
 
 enum eStreamingLoadState {
-    LOADSTATE_NOT_LOADED = 0, // Channel has nothing to do
-    LOADSTATE_LOADED = 1,     // `RequestModelStream` was called, and there are models to be read
+    LOADSTATE_NOT_LOADED = 0,
+    LOADSTATE_LOADED = 1,    
     LOADSTATE_REQUESTED = 2,
     LOADSTATE_READING = 3,
     LOADSTATE_FINISHING = 4
 };
 
-const uint32 STREAMING_SECTOR_SIZE = 2048;
+constexpr auto STREAMING_SECTOR_SIZE = 2048u;
 
 class CStreamingInfo {
 public:
@@ -74,6 +74,9 @@ public:
         }
     }
     bool IsLoaded() const { return m_nLoadState == eStreamingLoadState::LOADSTATE_LOADED; }
+    bool IsRequested() const { return m_nLoadState == eStreamingLoadState::LOADSTATE_REQUESTED; }
+    bool IsBeingRead() const { return m_nLoadState == eStreamingLoadState::LOADSTATE_READING; }
+    bool IsLoadingFinishing() const { return m_nLoadState == eStreamingLoadState::LOADSTATE_FINISHING; }
 
     bool DontRemoveInLoadScene() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_DONTREMOVE_IN_LOADSCENE; }
     bool IsGameRequired() const noexcept { return m_nFlags & eStreamingFlags::STREAMING_GAME_REQUIRED; }

@@ -164,10 +164,10 @@ void CCarGenerator::DoInternalProcessing()
         }
     }
 
-    if (CStreaming::GetInfo(actualModelId).m_nLoadState != LOADSTATE_LOADED ||
+    if (!CStreaming::GetInfo(actualModelId).IsLoaded() ||
         actualModelId == MODEL_HOTDOG &&
         m_nModelId == MODEL_HOTDOG &&
-        CStreaming::GetInfo(MODEL_BMOCHIL).m_nLoadState != LOADSTATE_LOADED
+        !CStreaming::GetInfo(MODEL_BMOCHIL).IsLoaded()
     )
         return;
 
@@ -298,7 +298,7 @@ void CCarGenerator::DoInternalProcessing()
     if (tractorDriverPedType != -1)
         CCarCtrl::SetUpDriverAndPassengersForVehicle(pVeh, tractorDriverPedType, 0, false, false, 99);
 
-    if (actualModelId == MODEL_HOTDOG && m_nModelId == MODEL_HOTDOG && CStreaming::GetInfo(MODEL_BMOCHIL).m_nLoadState == LOADSTATE_LOADED)
+    if (actualModelId == MODEL_HOTDOG && m_nModelId == MODEL_HOTDOG && CStreaming::GetInfo(MODEL_BMOCHIL).IsLoaded())
     {
         CPed* ped = CPopulation::AddPed(ePedType::PED_TYPE_CIVMALE, MODEL_BMOCHIL, pVeh->GetPosition() - pVeh->GetRight() * 3.0f, false);
         if (ped)
