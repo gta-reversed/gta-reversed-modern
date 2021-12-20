@@ -373,7 +373,7 @@ int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
     CStreamingInfo* info = ms_pStartRequestedList->GetNext();
     for (; info != ms_pEndRequestedList; info = info->GetNext()) {
         const int32 modelId = info - ms_aInfoForModel;
-        if (!bNotPriority || ms_numPriorityRequests == 0 || info->m_nFlags & STREAMING_PRIORITY_REQUEST) {
+        if (!bNotPriority || ms_numPriorityRequests == 0 || info->IsPriorityRequest()) {
             // Additional conditions for some model types (DFF, TXD, IFP)
             switch (GetModelType((modelId))) {
             case eModelType::DFF: {
@@ -554,7 +554,7 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
             }
         }
 
-        if (!(streamingInfo.m_nFlags & (STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED))
+        if (!streamingInfo.IsRequiredToBeKept()
             && !AreTexturesUsedByRequestedModels(modelTxdIndex))
         {
             // Model not needed anymore, unload
@@ -906,7 +906,7 @@ void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
 // 0x409940
 bool CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, int32 memoryToCleanInBytes) {
     for (CPtrNode* pNode = list.GetNode(); pNode; pNode = pNode->m_next) {
-        CEntity* pEntity = reinterpret_cast<CEntity*>(pNode->m_item);
+        CEntity* pEntity = static_cast<CEntity*>(pNode->m_item);
         if (pEntity->m_nScanCode == CWorld::ms_nCurrentScanCode)
             continue;
         pEntity->m_nScanCode = CWorld::ms_nCurrentScanCode;
@@ -1330,8 +1330,8 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
     
     switch (info.m_nLoadState) {
     case eStreamingLoadState::LOADSTATE_REQUESTED: {
-        // Model already requested, just add priority request flag if necessary
-        if ((streamingFlags & STREAMING_PRIORITY_REQUEST) && !(info.m_nFlags & STREAMING_PRIORITY_REQUEST)) // Is priority request
+        // Model already requested, just set priority request flag if not set already
+        if ((streamingFlags & STREAMING_PRIORITY_REQUEST) && !info.IsPriorityRequest())
         {
             ++ms_numPriorityRequests;
             info.m_nFlags |= STREAMING_PRIORITY_REQUEST;
@@ -1352,7 +1352,7 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
     case eStreamingLoadState::LOADSTATE_LOADED: {
         if (info.InList()) {
             info.RemoveFromList();
-            if (IsModelDFF(modelId)/) {
+            if (IsModelDFF(modelId)) {
                 switch (CModelInfo::GetModelInfo(modelId)->GetModelType()) {
                 case eModelInfoType::MODEL_INFO_TYPE_PED:
                 case eModelInfoType::MODEL_INFO_TYPE_VEHICLE: {
@@ -1361,7 +1361,7 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
                 }
             }
 
-            if (!(info.m_nFlags & (STREAMING_GAME_REQUIRED | STREAMING_MISSION_REQUIRED)))
+            if (!info.IsMissionOrGameRequired())
                 info.AddToList(ms_startLoadedList);
         }
         break;
@@ -1871,7 +1871,7 @@ void CStreaming::ReInit() {
     for (int32 modelId = 0; modelId < RESOURCE_ID_TOTAL; modelId++)
     {
         CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
-        if (streamingInfo.m_nFlags & STREAMING_MISSION_REQUIRED)
+        if (streamingInfo.IsMissionRequired())
             SetMissionDoesntRequireModel(modelId);
     }
 
@@ -2328,7 +2328,7 @@ void CStreaming::RemoveModel(int32 modelId)
     } else {
         if (streamingInfo.m_nLoadState == LOADSTATE_REQUESTED) {
             ms_numModelsRequested--;
-            if (streamingInfo.m_nFlags & STREAMING_PRIORITY_REQUEST) {
+            if (streamingInfo.IsPriorityRequest()) {
                 streamingInfo.m_nFlags &= ~STREAMING_PRIORITY_REQUEST;
                 ms_numPriorityRequests--;
             }
