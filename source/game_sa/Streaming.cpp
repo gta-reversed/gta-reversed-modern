@@ -162,12 +162,18 @@ void CStreaming::InjectHooks()
     Install("CStreaming", "WeAreTryingToPhaseVehicleOut",0x407F80, &CStreaming::WeAreTryingToPhaseVehicleOut);
 }
 
+uint32 GetModelFromInfo(CStreamingInfo* info) {
+    return info - CStreaming::ms_aInfoForModel;
+}
+
 // 0x409650
 CLink<CEntity*>* CStreaming::AddEntity(CEntity* pEntity) {
     switch (pEntity->GetType()) {
     case eEntityType::ENTITY_TYPE_PED:
     case eEntityType::ENTITY_TYPE_VEHICLE:
         return nullptr;
+    default:
+        break;
     }
     
     CLink<CEntity*>* link = ms_rwObjectInstances.Insert(pEntity);
@@ -281,14 +287,14 @@ void CStreaming::AddModelsToRequestList(CVector const& point, uint32 streamingFl
 bool CStreaming::AreAnimsUsedByRequestedModels(int32 animModelId) {
     for (auto info = ms_pStartRequestedList->GetNext(); info != ms_pEndRequestedList; info = info->GetNext()) {
         const int32 modelId = info - ms_aInfoForModel;
-        if (modelId < RESOURCE_ID_TXD /*model is DFF*/ && CModelInfo::ms_modelInfoPtrs[modelId]->GetAnimFileIndex() == animModelId)
+        if (IsModelDFF(modelId) && CModelInfo::ms_modelInfoPtrs[modelId]->GetAnimFileIndex() == animModelId)
             return true;
     }
 
     for (int32 channelId = 0; channelId < 2; channelId++) {
         tStreamingChannel& channel = ms_channel[channelId];
         for (int32 model : channel.modelIds) {
-            if (model != -1 && model < RESOURCE_ID_TXD /*model is DFF*/ &&
+            if (model != -1 && IsModelDFF(model) &&
                 CModelInfo::ms_modelInfoPtrs[model]->GetAnimFileIndex() == animModelId)
             {
                 return true;
@@ -302,13 +308,17 @@ bool CStreaming::AreAnimsUsedByRequestedModels(int32 animModelId) {
 // 0x409A90
 bool CStreaming::AreTexturesUsedByRequestedModels(int32 txdModelId) {
     for (auto info = ms_pStartRequestedList->GetNext(); info != ms_pEndRequestedList; info = info->GetNext()) {
-        int32 modelId = info - ms_aInfoForModel;
-        if (modelId < RESOURCE_ID_TXD/*model is DFF*/) {
-            if (CModelInfo::ms_modelInfoPtrs[modelId]->m_nTxdIndex == txdModelId)
+        switch (GetModelType(GetModelFromInfo(info))) {
+        case eModelType::DFF: {
+            if (CModelInfo::ms_modelInfoPtrs[(info - ms_aInfoForModel)]->m_nTxdIndex == txdModelId)
                 return true;
-        } else if (modelId < RESOURCE_ID_COL/*model is TXD*/) {
-            if (CTxdStore::GetParentTxdSlot(modelId - RESOURCE_ID_TXD) == txdModelId)
+            break;
+        }
+        case eModelType::TXD: {
+            if (CTxdStore::GetParentTxdSlot(info - ms_aInfoForModel - RESOURCE_ID_TXD) == txdModelId)
                 return true;
+            break;
+        }
         }
     }
 
@@ -316,13 +326,17 @@ bool CStreaming::AreTexturesUsedByRequestedModels(int32 txdModelId) {
         tStreamingChannel& channel = ms_channel[channelId];
         for (int32 model : channel.modelIds) {
             if (model != -1) {
-                if (model < RESOURCE_ID_TXD/*model is DFF*/) {
+                switch (GetModelType(model)) {
+                case eModelType::DFF: {
                     if (CModelInfo::ms_modelInfoPtrs[model]->m_nTxdIndex == txdModelId)
                         return true;
+                    break;
                 }
-                else if (model < RESOURCE_ID_COL/*model is TXD*/) {
+                case eModelType::TXD: {
                     if (CTxdStore::GetParentTxdSlot(model - RESOURCE_ID_TXD) == txdModelId)
                         return true;
+                    break;
+                }
                 }
             }
         }
@@ -362,7 +376,8 @@ int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
         const int32 modelId = info - ms_aInfoForModel;
         if (!bNotPriority || ms_numPriorityRequests == 0 || info->m_nFlags & STREAMING_PRIORITY_REQUEST) {
             // Additional conditions for some model types (DFF, TXD, IFP)
-            if (modelId < RESOURCE_ID_TXD/*model is DFF*/) {
+            switch (GetModelType((modelId))) {
+            case eModelType::DFF: {
                 CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
 
                 // Make sure TXD will be loaded for this model
@@ -381,8 +396,9 @@ int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
                         continue;
                     }
                 }
+                break;
             }
-            else if (modelId < RESOURCE_ID_COL/*model is TXD*/) {
+            case eModelType::TXD: {
                 // Make sure parent is/will be loaded
                 TxdDef* pTexDictionary = CTxdStore::ms_pTxdPool->GetAt(modelId - RESOURCE_ID_TXD);
                 const int16 parentIndex = pTexDictionary->m_wParentIndex;
@@ -393,13 +409,15 @@ int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
                         continue;
                     }
                 }
+                break;
             }
-            else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR/*model is IFP*/)
-            {
+            case eModelType::IFP: {
                 if (CCutsceneMgr::ms_cutsceneProcessing || ms_aInfoForModel[MODEL_MALE01].m_nLoadState != LOADSTATE_LOADED) {
                     // Skip in this case
                     continue;
                 }
+                break;
+            }
             }
 
             const uint32 modelCdPos = ms_aInfoForModel[modelId].GetCdPosn();
@@ -450,7 +468,8 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
     // TODO: The _ prefix seems to indicate its "private" (maybe), perhaps it was some kind of macro originally?
     RwStream* pRwStream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitData);
 
-    if (modelId >= RESOURCE_ID_DFF && modelId < RESOURCE_ID_TXD /*model is DFF*/) {
+    switch (GetModelType(modelId)) {
+    case eModelType::DFF: {
 
         // Check if TXD and IFP are loaded
         const int32 animFileIndex = pBaseModelInfo->GetAnimFileIndex();
@@ -520,8 +539,9 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
             return false;
         }
 
+        break;
     }
-    else if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL/*model is TXD*/) {
+    case eModelType::TXD: {
         const int32 modelTxdIndex = modelId - RESOURCE_ID_TXD;
         const TxdDef* pTxdDef = CTxdStore::ms_pTxdPool->GetAt(modelTxdIndex);
         if (pTxdDef) {
@@ -558,27 +578,32 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
             RwStreamClose(pRwStream, &rwStreamInitData);
             return false;
         }
+        
+        break;
     }
-    else if (modelId >= RESOURCE_ID_COL && modelId < RESOURCE_ID_IPL/*model is COL*/) {
+    case eModelType::COL: {
         if (!CColStore::LoadCol(modelId - RESOURCE_ID_COL, pFileBuffer, bufferSize)) {
             RemoveModel(modelId);
             RequestModel(modelId, streamingInfo.m_nFlags);
             RwStreamClose(pRwStream, &rwStreamInitData);
             return false;
         }
+        break;
     }
-    else if (modelId >= RESOURCE_ID_IPL && modelId < RESOURCE_ID_DAT/*model is IPL*/) {
+    case eModelType::IPL: {
         if (!CIplStore::LoadIpl(modelId - RESOURCE_ID_IPL, pFileBuffer, bufferSize)) {
             RemoveModel(modelId);
             RequestModel(modelId, streamingInfo.m_nFlags);
             RwStreamClose(pRwStream, &rwStreamInitData);
             return false;
         }
+        break;
     }
-    else if (modelId >= RESOURCE_ID_DAT && modelId < RESOURCE_ID_IFP/*model is DAT*/) {
+    case eModelType::DAT: {
         ThePaths.LoadPathFindData(pRwStream, modelId - RESOURCE_ID_DAT);
+        break;
     }
-    else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR/*model is IFP*/) {
+    case eModelType::IFP: {
         if (!(streamingInfo.m_nFlags & (STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED | STREAMING_GAME_REQUIRED))
             && !AreAnimsUsedByRequestedModels(modelId - RESOURCE_ID_IFP))
         {
@@ -590,13 +615,22 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
         // Still required, load
         CAnimManager::LoadAnimFile(pRwStream, true, nullptr);
         CAnimManager::CreateAnimAssocGroups();
+
+        break;
     }
-    else if (modelId >= RESOURCE_ID_RRR && modelId < RESOURCE_ID_SCM/*model is RRR*/) {
+    case eModelType::RRR: {
         CVehicleRecording::Load(pRwStream, modelId - RESOURCE_ID_RRR, bufferSize);
+        break;
     }
-    else if (modelId >= RESOURCE_ID_SCM/*model is SCM*/) {
+    case eModelType::SCM: {
         CTheScripts::StreamedScripts.LoadStreamedScript(pRwStream, modelId - RESOURCE_ID_SCM);
+        break;
     }
+    default: 
+        assert(0); // NOTSA
+        break;
+    }
+
     RwStreamClose(pRwStream, &rwStreamInitData);
 
     if (modelId >= RESOURCE_ID_TXD) {
@@ -937,9 +971,7 @@ bool CStreaming::RemoveReferencedTxds(int32 memoryToCleanInBytes)
 {
     for (auto info = ms_pEndLoadedList->GetPrev(); info != CStreaming::ms_startLoadedList; info = info->GetPrev()) {
         const int32 modelId = info - CStreaming::ms_aInfoForModel;
-        if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL/*model is TXD*/
-            && !(info->m_nFlags & STREAMING_LOADING_SCENE)
-        ) {
+        if (IsModelTXD(modelId) && info->IsLoadingScene()) {
             if (!CTxdStore::GetNumRefs(modelId - RESOURCE_ID_TXD)) {
                 CStreaming::RemoveModel(modelId);
                 if (static_cast<int32>(CStreaming::ms_memoryUsed) < memoryToCleanInBytes)
@@ -1321,7 +1353,7 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
     case eStreamingLoadState::LOADSTATE_LOADED: {
         if (info.InList()) {
             info.RemoveFromList();
-            if (modelId < RESOURCE_ID_TXD/*model is DFF*/) {
+            if (IsModelDFF(modelId)/) {
                 switch (CModelInfo::GetModelInfo(modelId)->GetModelType()) {
                 case eModelInfoType::MODEL_INFO_TYPE_PED:
                 case eModelInfoType::MODEL_INFO_TYPE_VEHICLE: {
@@ -1341,24 +1373,23 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
         break;
 
     case eStreamingLoadState::LOADSTATE_NOT_LOADED: {
-        if (modelId >= RESOURCE_ID_TXD) {
-            if (modelId < RESOURCE_ID_COL) {
-                // Model is TXD
-                int32 txdEntryParentIndex = CTxdStore::GetParentTxdSlot(modelId - RESOURCE_ID_TXD);
-                if (txdEntryParentIndex != -1)
-                    RequestTxdModel(txdEntryParentIndex, streamingFlags);
-            }
-        } else {
-            // Model is DFF
-
+        switch (GetModelType(modelId)) {
+        case eModelType::TXD: {
+            int32 txdEntryParentIndex = CTxdStore::GetParentTxdSlot(modelId - RESOURCE_ID_TXD);
+            if (txdEntryParentIndex != -1)
+                RequestTxdModel(txdEntryParentIndex, streamingFlags);
+            break;
+        }
+        case eModelType::DFF: {
             CBaseModelInfo* modelInfo = CModelInfo::GetModelInfo(modelId);
             RequestTxdModel(modelInfo->m_nTxdIndex, streamingFlags);
 
             const int32 animFileIndex = modelInfo->GetAnimFileIndex();
             if (animFileIndex != -1)
                 RequestModel(animFileIndex + RESOURCE_ID_IFP, STREAMING_KEEP_IN_MEMORY);
+            break;
         }
-
+        }
         info.AddToList(ms_pStartRequestedList);
 
         ++ms_numModelsRequested;
@@ -1413,7 +1444,8 @@ void CStreaming::FinishLoadingLargeFile(uint8* pFileBuffer, int32 modelId)
         RwStream* pRwStream = _rwStreamInitialize(&gRwStream, 0, rwSTREAMMEMORY, rwSTREAMREAD, &rwStreamInitializationData);
 
         bool bLoaded = false;
-        if (modelId >= RESOURCE_ID_DFF && modelId < RESOURCE_ID_TXD/*model is DFF*/) {
+        switch (GetModelType(modelId)) {
+        case eModelType::DFF: {
             CTxdStore::SetCurrentTxd(pBaseModelInfo->m_nTxdIndex);
 
             bLoaded = CFileLoader::FinishLoadClumpFile(pRwStream, modelId);
@@ -1426,13 +1458,19 @@ void CStreaming::FinishLoadingLargeFile(uint8* pFileBuffer, int32 modelId)
             if (animFileIndex != -1) {
                 CAnimManager::RemoveAnimBlockRefWithoutDelete(animFileIndex);
             }
-        } else if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL/*model is TXD*/) {
+            break;
+        }
+        case eModelType::TXD: {
             CTxdStore::AddRef(modelId - RESOURCE_ID_TXD);
             bLoaded = CTxdStore::FinishLoadTxd(modelId - RESOURCE_ID_TXD, pRwStream);
             CTxdStore::RemoveRefWithoutDelete(modelId - RESOURCE_ID_TXD);
+            break;
         }
-        else
+        default: {
             assert(modelId < RESOURCE_ID_COL && "FinishLoadingLargeFile: model id is out of range");
+            break;
+        }
+        }
         RwStreamClose(pRwStream, &pFileBuffer);
 
         streamingInfo.m_nLoadState = LOADSTATE_LOADED;
@@ -1442,7 +1480,7 @@ void CStreaming::FinishLoadingLargeFile(uint8* pFileBuffer, int32 modelId)
             RequestModel(modelId, streamingInfo.m_nFlags);
         }
     } else {
-        if (modelId < RESOURCE_ID_TXD/*model is DFF*/)
+        if (IsModelDFF(modelId))
             pBaseModelInfo->RemoveRef();
     }
 }
@@ -1489,10 +1527,10 @@ void CStreaming::RequestModelStream(int32 chIdx)
     // Find first model that has to be loaded
     while (!streamingInfo->IsRequiredToBeKept()) {
         // In case of TXD/IFP's check if they're used at all, if not remove them.
-        if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL /*model is TXD*/) {
+        if (IsModelTXD(modelId)) {
             if (AreTexturesUsedByRequestedModels(modelId - RESOURCE_ID_TXD))
                 break;
-        } else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR /*model is IFP*/) {
+        } else if (IsModelIFP(modelId)) {
             if (AreAnimsUsedByRequestedModels(modelId - RESOURCE_ID_IFP))
                 break;
         } else /*model is neither TXD or IFP*/ {
@@ -1543,15 +1581,7 @@ void CStreaming::RequestModelStream(int32 chIdx)
         if (ms_numPriorityRequests && !streamingInfo->IsPriorityRequest())
             break; // There are priority requests, but this isnt one of them
 
-        if (modelId >= RESOURCE_ID_TXD/*model is NOT DFF*/) {
-            if (modelId < RESOURCE_ID_IFP || modelId >= RESOURCE_ID_RRR/*model is NOT IFP*/) {
-                if (isPreviousModelBigOrVeh && isThisModelBig)
-                    break; // Do not load a big model/car and a big model after each other 
-            } else /*model is IFP*/ {
-                if (CCutsceneMgr::ms_cutsceneProcessing || ms_aInfoForModel[MODEL_MALE01].m_nLoadState != LOADSTATE_LOADED)
-                    break;
-            }
-        } else /*model is DFF*/ {
+        if (IsModelDFF(modelId)) {
             CBaseModelInfo* pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
 
             if (isPreviousModelPed && pBaseModelInfo->GetModelType() == MODEL_INFO_PED)
@@ -1574,6 +1604,14 @@ void CStreaming::RequestModelStream(int32 chIdx)
                 if (!ms_aInfoForModel[animFileIndex + RESOURCE_ID_IFP].IsLoadedOrBeingRead())
                     break;
             }
+        } else {
+            if (IsModelIFP(modelId)) {
+                if (CCutsceneMgr::ms_cutsceneProcessing || ms_aInfoForModel[MODEL_MALE01].m_nLoadState != LOADSTATE_LOADED)
+                    break;
+            } else {
+                if (isPreviousModelBigOrVeh && isThisModelBig)
+                    break; // Do not load a big model/car and a big model after each other 
+            }
         }
 
         // At this point we've made sure the model can be loaded
@@ -1594,10 +1632,7 @@ void CStreaming::RequestModelStream(int32 chIdx)
         nSectorsToRead += nThisModelSizeInSectors;
 
         CBaseModelInfo* pBaseModelInfo = CModelInfo::GetModelInfo(modelId);
-        if (modelId >= RESOURCE_ID_TXD/*model is NOT DFF*/) {
-            if (isThisModelBig)
-                isPreviousModelBigOrVeh = true;
-        } else /*model is DFF*/ {
+        if (IsModelDFF(modelId)) {
             switch (pBaseModelInfo->GetModelType()) {
             case ModelInfoType::MODEL_INFO_PED:
                 isPreviousModelPed = true;
@@ -1606,6 +1641,9 @@ void CStreaming::RequestModelStream(int32 chIdx)
                 isPreviousModelBigOrVeh = true; // I guess all vehicles are considered big?
                 break;
             }
+        } else {
+            if (isThisModelBig)
+                isPreviousModelBigOrVeh = true;
         }
 
         // Modify the state of models
@@ -1761,13 +1799,13 @@ bool CStreaming::ProcessLoadingChannel(int32 chIdx)
             CBaseModelInfo* baseModelInfo = CModelInfo::GetModelInfo(modelId);
             CStreamingInfo& info = ms_aInfoForModel[modelId];
 
-            if (modelId >= RESOURCE_ID_TXD /*model is NOT DFF*/
+            if (!IsModelDFF(modelId)
                 || baseModelInfo->GetModelType() != MODEL_INFO_VEHICLE /* It's a DFF, check if its a vehicle */
                 || ms_vehiclesLoaded.CountMembers() < desiredNumVehiclesLoaded /* It's a vehicle, so lets check if we can load more */
                 || RemoveLoadedVehicle() /* no, so try to remove one, and load this in its place */
                 || info.IsMissionOrGameRequired() /* failed, lets check if its absolutely mission critical */
             ) {
-                if (modelId < RESOURCE_ID_IPL || modelId >= RESOURCE_ID_DAT/*model is NOT IPL*/)
+                if (!IsModelIPL(modelId))
                     MakeSpaceFor(info.GetCdSize() * STREAMING_SECTOR_SIZE); // IPL's dont require any memory themselves
 
                 const int32 bufferOffsetInSectors = ch.modelStreamingBufferOffsets[i];
@@ -1959,7 +1997,7 @@ void CStreaming::RemoveAllUnusedModels() {
     for (int32 i = 0; i < 50; i++) {
         RemoveLoadedVehicle();
     }
-    for (int32 modelId = 1000; modelId < RESOURCE_ID_TXD; modelId++) {
+    for (int32 modelId = 1000; IsModelDFF(modelId); modelId++) {
         CStreamingInfo& streamingInfo = ms_aInfoForModel[modelId];
         if (streamingInfo.m_nLoadState == LOADSTATE_LOADED && !CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount) {
             RemoveModel(modelId);
@@ -2111,34 +2149,40 @@ void CStreaming::RemoveInappropriatePedModels() {
 bool CStreaming::RemoveLeastUsedModel(uint32 streamingFlags) {
     auto streamingInfo = ms_pEndLoadedList->GetPrev();
     for (; streamingInfo != ms_startLoadedList; streamingInfo = streamingInfo->GetPrev()) {
-        const int32 modelId = streamingInfo - ms_aInfoForModel;
+        const int32 modelId = GetModelFromInfo(streamingInfo);
         if (!(streamingFlags & streamingInfo->m_nFlags)) {
-            if (modelId >= RESOURCE_ID_DFF && modelId < RESOURCE_ID_TXD/*model is DFF*/) {
+            switch (GetModelType(modelId)) {
+            case eModelType::DFF: {
                 if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount) {
                     RemoveModel(modelId);
                     return true;
                 }
+                break;
             }
-            else if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL/*model is TXD*/) {
+            case eModelType::TXD: {
                 const int32 txdId = modelId - RESOURCE_ID_TXD;
                 if (!CTxdStore::GetNumRefs(txdId) && !AreTexturesUsedByRequestedModels(txdId)) {
                     RemoveModel(modelId);
                     return true;
                 }
+                break;
             }
-            else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR/*model is IFP*/) {
+            case eModelType::IFP: {
                 const int32 animBlockId = modelId - RESOURCE_ID_IFP;
                 if (!CAnimManager::GetNumRefsToAnimBlock(animBlockId) && !AreAnimsUsedByRequestedModels(animBlockId)) {
                     RemoveModel(modelId);
                     return true;
                 }
+                break;
             }
-            else if (modelId >= RESOURCE_ID_SCM/*model is SCM*/) {
+            case eModelType::SCM: {
                 const int32 scmId = modelId - RESOURCE_ID_SCM;
                 if (!CTheScripts::StreamedScripts.m_aScripts[scmId].m_nStatus) {
                     RemoveModel(modelId);
                     return true;
                 }
+                break;
+            }
             }
         }
     }
@@ -2229,31 +2273,51 @@ void CStreaming::RemoveModel(int32 modelId)
         return;
 
     if (streamingInfo.m_nLoadState == LOADSTATE_LOADED) {
-        if (modelId >= RESOURCE_ID_DFF && modelId < RESOURCE_ID_TXD/*model is DFF*/) {
+        switch (GetModelType((modelId))) {
+        case eModelType::DFF: {
             CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
             pModelInfo->DeleteRwObject();
-            if (pModelInfo->GetModelType() == MODEL_INFO_PED) {
+            switch (pModelInfo->GetModelType()) {
+            case MODEL_INFO_PED: {
                 for (int32 i = 0; i < TOTAL_LOADED_PEDS; i++) {
                     if (ms_pedsLoaded[i] == modelId) {
                         ms_pedsLoaded[i] = -1;
                         ms_numPedsLoaded--;
                     }
                 }
-            } else if (pModelInfo->GetModelType() == MODEL_INFO_VEHICLE) {
-                RemoveCarModel(modelId);
+                break;
             }
-        } else if (modelId >= RESOURCE_ID_TXD && modelId < RESOURCE_ID_COL/*model is TXD*/) {
+            case MODEL_INFO_VEHICLE: {
+                RemoveCarModel(modelId);
+                break;
+            }
+            }
+            break;
+        } 
+        case eModelType::TXD: {
             CTxdStore::RemoveTxd(modelId - RESOURCE_ID_TXD);
-        } else if (modelId >= RESOURCE_ID_COL && modelId < RESOURCE_ID_IPL/*model is COL*/) {
+            break;
+        } 
+        case eModelType::COL: {
             CColStore::RemoveCol(modelId - RESOURCE_ID_COL);
-        } else if (modelId >= RESOURCE_ID_IPL && modelId < RESOURCE_ID_DAT/*model is IPL*/) {
+            break;
+        } 
+        case eModelType::IPL: {
             CIplStore::RemoveIpl(modelId - RESOURCE_ID_IPL);
-        } else if (modelId >= RESOURCE_ID_DAT && modelId < RESOURCE_ID_IFP/*model is DAT*/) {
+            break;
+        } 
+        case eModelType::DAT: {
             ThePaths.UnLoadPathFindData(modelId - RESOURCE_ID_DAT);
-        } else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR/*model is IFP*/) {
+            break;
+        } 
+        case eModelType::IFP: {
             CAnimManager::RemoveAnimBlock(modelId - RESOURCE_ID_IFP);
-        } else if (modelId >= RESOURCE_ID_SCM/*model is SCM*/) {
+            break;
+        } 
+        case eModelType::SCM: {
             CTheScripts::StreamedScripts.RemoveStreamedScriptFromMemory(modelId - RESOURCE_ID_SCM);
+            break;
+        }
         }
         ms_memoryUsed -= STREAMING_SECTOR_SIZE * streamingInfo.GetCdSize();
     }
@@ -2279,18 +2343,26 @@ void CStreaming::RemoveModel(int32 modelId)
     }
 
     if (streamingInfo.m_nLoadState == LOADSTATE_FINISHING) {
-        if (modelId < RESOURCE_ID_TXD/*model is DFF*/)
+        switch (GetModelType((modelId))) {
+        case eModelType::DFF:
             RpClumpGtaCancelStream();
-        else if (modelId < RESOURCE_ID_COL/*model is TXD*/)
+            break;
+        case eModelType::TXD:
             CTxdStore::RemoveTxd(modelId - RESOURCE_ID_TXD);
-        else if (modelId < RESOURCE_ID_IPL/*model is COL*/)
+            break;
+        case eModelType::COL:
             CColStore::RemoveCol(modelId - RESOURCE_ID_COL);
-        else if (modelId < RESOURCE_ID_DAT/*model is IPL*/)
+            break;
+        case eModelType::IPL:
             CIplStore::RemoveIpl(modelId - RESOURCE_ID_IPL);
-        else if (modelId >= RESOURCE_ID_IFP && modelId < RESOURCE_ID_RRR/*model is IFP*/)
+            break;
+        case eModelType::IFP:
             CAnimManager::RemoveAnimBlock(modelId - RESOURCE_ID_IFP);
-        else if (modelId >= RESOURCE_ID_SCM/*model is SCM*/)
+            break;
+        case eModelType::SCM:
             CTheScripts::StreamedScripts.RemoveStreamedScriptFromMemory(modelId - RESOURCE_ID_SCM);
+            break;
+        }
     }
 
     streamingInfo.m_nLoadState = LOADSTATE_NOT_LOADED;
