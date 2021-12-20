@@ -323,9 +323,8 @@ bool CStreaming::AreTexturesUsedByRequestedModels(int32 txdModelId) {
         }
     }
 
-    for (int32 channelId = 0; channelId < 2; channelId++) {
-        tStreamingChannel& channel = ms_channel[channelId];
-        for (int32 model : channel.modelIds) {
+    for (auto& ch : ms_channel) {
+        for (const auto model : ch.modelIds) {
             if (model != -1) {
                 switch (GetModelType(model)) {
                 case eModelType::DFF: {
