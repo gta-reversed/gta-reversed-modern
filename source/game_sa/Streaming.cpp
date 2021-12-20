@@ -248,23 +248,22 @@ void CStreaming::AddModelsToRequestList(CVector const& point, uint32 streamingFl
     // rectangle and radius.
     const int32 radiusOuterSq = (noCheckRadius + 2) * (noCheckRadius + 2);
 
-    const int32 pointX = CWorld::GetSectorX(point.x);
-    const int32 pointY = CWorld::GetSectorY(point.y);
+    const int32 pointSectorX = CWorld::GetSectorX(point.x);
+    const int32 pointSectorY = CWorld::GetSectorY(point.y);
 
-    int32 startSectorX = std::max(CWorld::GetSectorX(min.x), 0);
-    int32 startSectorY = std::max(CWorld::GetSectorY(min.y), 0);
-    int32 endSectorX = std::min(CWorld::GetSectorX(max.x), MAX_SECTORS_X - 1);
-    int32 endSectorY = std::min(CWorld::GetSectorY(max.y), MAX_SECTORS_Y - 1);
+    const int32 startSectorX = std::max(CWorld::GetSectorX(min.x), 0);
+    const int32 startSectorY = std::max(CWorld::GetSectorY(min.y), 0);
+    const int32 endSectorX = std::min(CWorld::GetSectorX(max.x), MAX_SECTORS_X - 1);
+    const int32 endSectorY = std::min(CWorld::GetSectorY(max.y), MAX_SECTORS_Y - 1);
 
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             CRepeatSector* pRepeatSector = GetRepeatSector(sectorX, sectorY);
             CSector* pSector = GetSector(sectorX, sectorY);
 
-            const int32 distanceY = sectorY - pointY;
-            const int32 squaredDistanceY = distanceY * distanceY;
-            const int32 distanceX = sectorX - pointX;
-            const int32 pointSectorDistSq = distanceX * distanceX + squaredDistanceY;
+            const int32 distanceY = sectorY - pointSectorY;
+            const int32 distanceX = sectorX - pointSectorX;
+            const int32 pointSectorDistSq = distanceX * distanceX + distanceY * distanceY;
 
             if (pointSectorDistSq <= radiusInnerSq) {
                 ProcessEntitiesInSectorList(pSector->m_buildings, streamingFlags);
