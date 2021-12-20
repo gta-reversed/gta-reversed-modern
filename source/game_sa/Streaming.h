@@ -50,21 +50,23 @@ struct tRwStreamInitializeData {
 VALIDATE_SIZE(tRwStreamInitializeData, 0x8);
 
 struct tStreamingFileDesc {
+    tStreamingFileDesc() = default;
+
     tStreamingFileDesc(const char* name, bool bNotPlayerImg) :
         m_bNotPlayerImg(bNotPlayerImg),
         m_StreamHandle(CdStreamOpen(name))
     {
-        strncpy(m_szName, name, std::size(m_szName));
+        strncpy_s(m_szName, name, std::size(m_szName));
     }
 
     bool IsInUse() const noexcept {
         return m_szName[0];
     }
 
-    char  m_szName[40]; // If this string is empty (eg.: first elem in array is NULL) the entry isnt in use
-    bool  m_bNotPlayerImg;
-    char  __pad[3];
-    int32 m_StreamHandle;
+    char  m_szName[40]{}; // If this string is empty (eg.: first elem in array is NULL) the entry isnt in use
+    bool  m_bNotPlayerImg{};
+    char  __pad[3]{};
+    int32 m_StreamHandle{-1};
 };
 
 VALIDATE_SIZE(tStreamingFileDesc, 0x30);
