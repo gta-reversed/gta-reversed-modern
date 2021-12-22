@@ -64,6 +64,12 @@ public:
     bool InList();
     void RemoveFromList();
 
+    void SetFlags(uint32 flags) { m_nFlags |= flags; }
+    void ClearFlags(uint32 flags) { m_nFlags &= ~flags; }
+    auto GetFlags() const noexcept { return m_nFlags; }
+    void ClearAllFlags() noexcept { m_nFlags = 0; } // Clears all flags
+    bool AreAnyFlagsSetOutOf(uint32 flags) const noexcept { return GetFlags() & flags; } // Checks if any flags in `flags` are set
+
     bool IsLoadedOrBeingRead() const noexcept {
         switch (m_nLoadState) {
         case eStreamingLoadState::LOADSTATE_LOADED:

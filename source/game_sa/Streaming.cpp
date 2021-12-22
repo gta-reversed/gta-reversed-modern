@@ -348,7 +348,7 @@ bool CStreaming::AreTexturesUsedByRequestedModels(int32 txdModelId) {
 // 0x407A40
 void CStreaming::ClearFlagForAll(uint32 streamingFlag) {
     for (int32 i = 0; i < RESOURCE_ID_TOTAL; i++) {
-        GetInfo(i).m_nFlags &= ~streamingFlag;
+        GetInfo(i).ClearFlags(streamingFlag);
     }
 }
 
@@ -382,7 +382,7 @@ int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
             // Make sure TXD will be loaded for this model
             const auto txdModel = TXDToModelId(pModelInfo->m_nTxdIndex);
             if (!CStreaming::GetInfo(txdModel).IsLoadedOrBeingRead()) {
-                RequestModel(txdModel, GetInfo(modelId).m_nFlags); // Request TXD for this DFF
+                RequestModel(txdModel, GetInfo(modelId).GetFlags()); // Request TXD for this DFF
                 continue;
             }
 
@@ -479,7 +479,7 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
         ) {
             // TXD or IFP not loaded, re-request model. (I don't think this is supposed to happen at all)
             RemoveModel(modelId);
-            RequestModel(modelId, streamingInfo.m_nFlags);
+            RequestModel(modelId, streamingInfo.GetFlags());
             RwStreamClose(pRwStream, &rwStreamInitData);
             return false;
         }
@@ -524,7 +524,7 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
                 if (!AddToLoadedVehiclesList(modelId))
                 {
                     RemoveModel(modelId);
-                    RequestModel(modelId, streamingInfo.m_nFlags);
+                    RequestModel(modelId, streamingInfo.GetFlags());
                     RwStreamClose(pRwStream, &rwStreamInitData);
                     return false;
                 }
@@ -534,7 +534,7 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
         if (!bFileLoaded)
         {
             RemoveModel(modelId);
-            RequestModel(modelId, streamingInfo.m_nFlags);
+            RequestModel(modelId, streamingInfo.GetFlags());
             RwStreamClose(pRwStream, &rwStreamInitData);
             return false;
         }
@@ -549,7 +549,7 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
             if (parentTXDIdx != -1 && !CTxdStore::GetTxd(parentTXDIdx)) {
                 // Parent not loaded, re-request..
                 RemoveModel(modelId);
-                RequestModel(modelId, streamingInfo.m_nFlags);
+                RequestModel(modelId, streamingInfo.GetFlags());
                 RwStreamClose(pRwStream, &rwStreamInitData);
                 return false;
             }
@@ -574,7 +574,7 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
         }
         if (!bTxdLoaded) {
             RemoveModel(modelId);
-            RequestModel(modelId, streamingInfo.m_nFlags);
+            RequestModel(modelId, streamingInfo.GetFlags());
             RwStreamClose(pRwStream, &rwStreamInitData);
             return false;
         }
@@ -584,7 +584,7 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
     case eModelType::COL: {
         if (!CColStore::LoadCol(ModelIdToCOL(modelId), pFileBuffer, bufferSize)) {
             RemoveModel(modelId);
-            RequestModel(modelId, streamingInfo.m_nFlags);
+            RequestModel(modelId, streamingInfo.GetFlags());
             RwStreamClose(pRwStream, &rwStreamInitData);
             return false;
         }
@@ -593,7 +593,7 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
     case eModelType::IPL: {
         if (!CIplStore::LoadIpl(ModelIdToIPL(modelId), pFileBuffer, bufferSize)) {
             RemoveModel(modelId);
-            RequestModel(modelId, streamingInfo.m_nFlags);
+            RequestModel(modelId, streamingInfo.GetFlags());
             RwStreamClose(pRwStream, &rwStreamInitData);
             return false;
         }
@@ -652,7 +652,7 @@ bool CStreaming::ConvertBufferToObject(uint8* pFileBuffer, int32 modelId)
                 // TODO: What the fuck...
                 // From what I understand its either -1 or -0, which, when casted to uint8, becomes 128 or 129
                 // Doesnt make a lot of sense to me
-                pAsAtomicModelInfo->m_nAlpha = -((streamingInfo.m_nFlags & (STREAMING_LOADING_SCENE | STREAMING_MISSION_REQUIRED)) != 0);
+                pAsAtomicModelInfo->m_nAlpha = -((streamingInfo.GetFlags() & (STREAMING_LOADING_SCENE | STREAMING_MISSION_REQUIRED)) != 0);
             }
 
             if (!streamingInfo.IsMissionOrGameRequired())
@@ -716,7 +716,7 @@ bool CStreaming::DeleteLeastUsedEntityRwObject(bool bNotOnScreen, uint32 streami
             || fModelRadius + fCameraFarPlane < fEntityToCamDist)
         {
             CStreamingInfo& streamingInfo = GetInfo(modelId);
-            if (streamingInfo.InList() && !(streamingFlags & streamingInfo.m_nFlags)) {
+            if (streamingInfo.InList() && !streamingInfo.AreAnyFlagsSetOutOf(streamingFlags)) {
                 if (!pPlayer || pPlayer->bInVehicle || pPlayer->m_pContactEntity != pEntity) {
                     pEntity->DeleteRwObject();
                     if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount) {
@@ -999,7 +999,7 @@ void CStreaming::Load() {
         uint8 flags;
         CGenericGameStorage::LoadDataFromWorkBuffer(&flags, sizeof(flags));
         if (info.IsLoaded() && flags != 0xFFu)
-            info.m_nFlags |= flags;
+            info.SetFlags(flags);
     }
 }
 
@@ -1158,7 +1158,7 @@ void CStreaming::LoadCdDirectory(const char* filename, int32 archiveId)
                 entryInfo.m_nStreamingSize = entryInfo.m_nSizeInArchive;
 
             streamingInfo.SetCdPosnAndSize(entryInfo.m_nOffset, entryInfo.m_nStreamingSize);
-            streamingInfo.m_nFlags = 0;
+            streamingInfo.ClearAllFlags();
 
             if (previousModelId != -1)
                 GetInfo(previousModelId).m_nNextIndexOnCd = modelId;
@@ -1317,7 +1317,7 @@ void CStreaming::RequestFilesInChannel(int32 chIdx) {
     for (const auto modelId : ms_channel[chIdx].modelIds) {
         if (modelId != -1) {
             RemoveModel(modelId);
-            RequestModel(modelId, GetInfo(modelId).m_nFlags);
+            RequestModel(modelId, GetInfo(modelId).GetFlags());
         }
     }
 }
@@ -1333,7 +1333,7 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
         if ((streamingFlags & STREAMING_PRIORITY_REQUEST) && !info.IsPriorityRequest())
         {
             ++ms_numPriorityRequests;
-            info.m_nFlags |= STREAMING_PRIORITY_REQUEST;
+            info.SetFlags(STREAMING_PRIORITY_REQUEST);
         }
         break;
     }
@@ -1345,7 +1345,7 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
         break;
     }
     }
-    info.m_nFlags |= streamingFlags;
+    info.SetFlags(streamingFlags);
 
     switch (info.m_nLoadState) {
     case eStreamingLoadState::LOADSTATE_LOADED: {
@@ -1398,7 +1398,7 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
         __fallthrough;
     }
     default: {
-        info.m_nFlags = streamingFlags;
+        info.SetFlags(streamingFlags);
         info.m_nLoadState = LOADSTATE_REQUESTED; // requested, loading
     }
     }
@@ -1450,6 +1450,7 @@ void CStreaming::FinishLoadingLargeFile(uint8* pFileBuffer, int32 modelId)
             if (bLoaded)
                 bLoaded = AddToLoadedVehiclesList(modelId);
             pBaseModelInfo->RemoveRef();
+
             CTxdStore::RemoveRefWithoutDelete(pBaseModelInfo->m_nTxdIndex);
 
             const int32 animFileIndex = pBaseModelInfo->GetAnimFileIndex();
@@ -1475,7 +1476,7 @@ void CStreaming::FinishLoadingLargeFile(uint8* pFileBuffer, int32 modelId)
         ms_memoryUsed += bufferSize;
         if (!bLoaded) {
             RemoveModel(modelId);
-            RequestModel(modelId, streamingInfo.m_nFlags);
+            RequestModel(modelId, streamingInfo.GetFlags());
         }
     } else {
         if (IsModelDFF(modelId))
@@ -1649,7 +1650,7 @@ void CStreaming::RequestModelStream(int32 chIdx)
         streamingInfo->RemoveFromList(); // Remove from cd
         ms_numModelsRequested--;
         if (streamingInfo->IsPriorityRequest()) {
-            streamingInfo->m_nFlags &= ~STREAMING_PRIORITY_REQUEST; // Remove priority request flag, as its not a request anymore.
+            streamingInfo->ClearFlags(STREAMING_PRIORITY_REQUEST); // Remove priority request flag, as its not a request anymore.
             ms_numPriorityRequests--;
         }
         modelId = streamingInfo->m_nNextIndexOnCd;
@@ -1831,7 +1832,7 @@ bool CStreaming::ProcessLoadingChannel(int32 chIdx)
                     // Re-request it.
                     // I think this code is unreachable, because
                     // if any of the 2 flags (above) is set this code is never reached.
-                    RequestModel(modelId, info.m_nFlags); 
+                    RequestModel(modelId, info.GetFlags());
                 } else if (!CTxdStore::GetNumRefs(modelTxdIdx))
                     RemoveTxdModel(modelTxdIdx); // Unload TXD, as it has no refs
             }
@@ -1999,7 +2000,7 @@ void CStreaming::RemoveAllUnusedModels() {
         CStreamingInfo& streamingInfo = GetInfo(modelId);
         if (streamingInfo.IsLoaded() && !CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount) {
             RemoveModel(modelId);
-            streamingInfo.m_nFlags = 0;
+            streamingInfo.ClearAllFlags();
         }
     }
 }
@@ -2143,7 +2144,7 @@ bool CStreaming::RemoveLeastUsedModel(uint32 streamingFlags) {
     auto streamingInfo = ms_pEndLoadedList->GetPrev();
     for (; streamingInfo != ms_startLoadedList; streamingInfo = streamingInfo->GetPrev()) {
         const auto modelId = GetModelFromInfo(streamingInfo);
-        if (!(streamingFlags & streamingInfo->m_nFlags)) {
+        if (!(streamingFlags & streamingInfo->GetFlags())) {
             switch (GetModelType(modelId)) {
             case eModelType::DFF: {
                 if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount) {
@@ -2328,7 +2329,7 @@ void CStreaming::RemoveModel(int32 modelId)
         if (streamingInfo.IsRequested()) {
             ms_numModelsRequested--;
             if (streamingInfo.IsPriorityRequest()) {
-                streamingInfo.m_nFlags &= ~STREAMING_PRIORITY_REQUEST;
+                streamingInfo.ClearFlags(STREAMING_PRIORITY_REQUEST);
                 ms_numPriorityRequests--;
             }
         }
@@ -2716,8 +2717,8 @@ void CStreaming::Init2()
         CStreamingInfo& streamingInfo = GetInfo(modelId);
         if (pBaseModelnfo && pBaseModelnfo->m_pRwObject) {
             auto pAtomicModelInfo = pBaseModelnfo->AsAtomicModelInfoPtr();
-            streamingInfo.m_nFlags = 0;
-            streamingInfo.m_nFlags |= STREAMING_GAME_REQUIRED;
+            streamingInfo.ClearAllFlags();
+            streamingInfo.SetFlags(STREAMING_GAME_REQUIRED);
             streamingInfo.m_nLoadState = LOADSTATE_LOADED;
             if (pAtomicModelInfo)
                 pAtomicModelInfo->m_nAlpha = 255;
@@ -2886,7 +2887,7 @@ void CStreaming::SetMissionDoesntRequireAnim(int32 slot) {
 void CStreaming::SetMissionDoesntRequireModel(int32 nDFForTXDModel) {
     const auto ProcessOne = [](auto modelId) {
         CStreamingInfo& streamingInfo = CStreaming::GetInfo(modelId);
-        streamingInfo.m_nFlags &= ~STREAMING_MISSION_REQUIRED;
+        streamingInfo.ClearFlags(STREAMING_MISSION_REQUIRED);
         if (!streamingInfo.IsGameRequired()) {
             if (streamingInfo.IsLoaded()) {
                 if (!streamingInfo.InList())
@@ -2899,7 +2900,7 @@ void CStreaming::SetMissionDoesntRequireModel(int32 nDFForTXDModel) {
 
     ProcessOne(nDFForTXDModel);
     if (IsModelDFF(nDFForTXDModel)) 
-        ProcessOne(CModelInfo::ms_modelInfoPtrs[nDFForTXDModel]->TXDToModelId(m_nTxdIndex)); // Process TXD of DFF
+        ProcessOne(TXDToModelId(CModelInfo::ms_modelInfoPtrs[nDFForTXDModel]->m_nTxdIndex)); // Process TXD of DFF
 
     /* Origianl code:
     for (int32 i = modelId; ; i = CModelInfo::ms_modelInfoPtrs[i]->TXDToModelId(m_nTxdIndex)) {
@@ -2927,7 +2928,7 @@ void CStreaming::SetMissionDoesntRequireSpecialChar(int32 slot) {
 // 0x409C10
 void CStreaming::SetModelIsDeletable(int32 modelId) {
     CStreamingInfo& streamingInfo = GetInfo(modelId);
-    streamingInfo.m_nFlags &= ~STREAMING_GAME_REQUIRED;
+    streamingInfo.ClearFlags(STREAMING_GAME_REQUIRED);
     if (!streamingInfo.IsMissionRequired()) {
         if (streamingInfo.IsLoaded()) {
             if (!streamingInfo.InList())
@@ -2940,7 +2941,7 @@ void CStreaming::SetModelIsDeletable(int32 modelId) {
 
 // 0x409C70
 void CStreaming::SetModelTxdIsDeletable(int32 modelId) {
-    SetModelIsDeletable(CModelInfo::ms_modelInfoPtrs[modelId]->TXDToModelId(m_nTxdIndex));
+    SetModelIsDeletable(TXDToModelId(CModelInfo::ms_modelInfoPtrs[modelId]->m_nTxdIndex));
 }
 
 void CStreaming::SetModelAndItsTxdDeletable(int32 modelId) {
@@ -3399,7 +3400,7 @@ void CStreaming::StreamZoneModels(CVector const& unused) {
                 int32 pedModelId = CPopCycle::PickPedMIToStreamInForCurrentZone();
                 if (pedModelId != *slot && pedModelId >= 0) {
                     RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
-                    GetInfo(pedModelId).m_nFlags &= ~STREAMING_GAME_REQUIRED; // Ok???? Y?
+                    GetInfo(pedModelId).ClearFlags(STREAMING_GAME_REQUIRED); // Ok???? Y?
 
                     if (ms_numPedsLoaded == TOTAL_LOADED_PEDS) {
                         SetModelAndItsTxdDeletable(*slot);
@@ -3437,7 +3438,7 @@ void CStreaming::StreamZoneModels(CVector const& unused) {
                 ms_pedsLoaded[i] = -1;
             } else {
                 RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
-                GetInfo(pedModelId).m_nFlags &= ~STREAMING_GAME_REQUIRED;
+                GetInfo(pedModelId).ClearFlags(STREAMING_GAME_REQUIRED);
                 ms_pedsLoaded[i] = pedModelId;
                 ms_numPedsLoaded++;
             }
