@@ -1760,6 +1760,8 @@ void CStreaming::RequestSpecialModel(int32 modelId, char const* name, int32 flag
 }
 
 // 0x40E170
+// If the channel is done reading (`CdStreamGetStatus(chIdx)` == READING_SUCCESS) then loads all the read models
+// using either `ConvertBufferToObject` or `FinishLoadingLargeFile` (in case of big models)
 bool CStreaming::ProcessLoadingChannel(int32 chIdx)
 {
     tStreamingChannel& ch = ms_channel[chIdx];
