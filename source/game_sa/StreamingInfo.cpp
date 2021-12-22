@@ -24,6 +24,9 @@ void CStreamingInfo::Init() {
 }
 
 // 0x407480
+// Used to adding `info` to a linked list
+// This is done with the help of `m_nNextIndex` and `m_nPrevIndex`
+// which are just `indices` into `ms_aInfoForModel`.
 void CStreamingInfo::AddToList(CStreamingInfo* listStart) {
     m_nNextIndex = listStart->m_nNextIndex;
     m_nPrevIndex = static_cast<ptrdiff_t>(listStart - ms_pArrayBase);
