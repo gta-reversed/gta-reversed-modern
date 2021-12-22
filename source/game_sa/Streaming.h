@@ -84,10 +84,6 @@ inline bool IsModelDAT(uint32 model) { return eResourceFirstID::RESOURCE_ID_DAT 
 inline bool IsModelIFP(uint32 model) { return eResourceFirstID::RESOURCE_ID_IFP <= model && model < eResourceFirstID::RESOURCE_ID_RRR; }
 inline bool IsModelRRR(uint32 model) { return eResourceFirstID::RESOURCE_ID_RRR <= model && model < eResourceFirstID::RESOURCE_ID_SCM; }
 inline bool IsModelSCM(uint32 model) { return eResourceFirstID::RESOURCE_ID_SCM <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_1; }
-inline bool IsModelInternal1(uint32 model) { return eResourceFirstID::RESOURCE_ID_INTERNAL_1 <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_2; }
-inline bool IsModelInternal2(uint32 model) { return eResourceFirstID::RESOURCE_ID_INTERNAL_2 <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_3; }
-inline bool IsModelInternal3(uint32 model) { return eResourceFirstID::RESOURCE_ID_INTERNAL_3 <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_4; }
-inline bool IsModelInternal4(uint32 model) { return eResourceFirstID::RESOURCE_ID_INTERNAL_4 <= model && model < eResourceFirstID::RESOURCE_ID_TOTAL; }
 
 inline eModelType GetModelType(uint32 model) {
     if (IsModelDFF(model))
@@ -114,18 +110,6 @@ inline eModelType GetModelType(uint32 model) {
     else if (IsModelSCM(model))
         return eModelType::SCM;
 
-    else if (IsModelInternal1(model))
-        return eModelType::INTERNAL_1;
-
-    else if (IsModelInternal2(model))
-        return eModelType::INTERNAL_2;
-
-    else if (IsModelInternal3(model))
-        return eModelType::INTERNAL_3;
-
-    else if (IsModelInternal4(model))
-        return eModelType::INTERNAL_4;
-
     else {
         assert(0); // NOTSA
         return (eModelType)-1;
@@ -141,10 +125,6 @@ inline uint32 DATToModelId(uint32 relativeId) { return (uint32)eResourceFirstID:
 inline uint32 IFPToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_IFP + relativeId; }
 inline uint32 RRRToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_RRR + relativeId; }
 inline uint32 SCMToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_SCM + relativeId; }
-inline uint32 Internal1ToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_1 + relativeId; }
-inline uint32 Internal2ToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_2 + relativeId; }
-inline uint32 Internal3ToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_3 + relativeId; }
-inline uint32 Internal4ToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_4 + relativeId; }
 
 // Turn absolute IDs into relative ones
 inline uint32 ModelIdToDFF(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_DFF; }
@@ -155,10 +135,6 @@ inline uint32 ModelIdToDAT(uint32 absId) { return absId - (uint32)eResourceFirst
 inline uint32 ModelIdToIFP(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_IFP; }
 inline uint32 ModelIdToRRR(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_RRR; }
 inline uint32 ModelIdToSCM(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_SCM; }
-inline uint32 ModelIdToInternal1(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_1; }
-inline uint32 ModelIdToInternal2(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_2; }
-inline uint32 ModelIdToInternal3(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_3; }
-inline uint32 ModelIdToInternal4(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_INTERNAL_4; }
 
 struct tRwStreamInitializeData {
     uint8* m_pBuffer;
