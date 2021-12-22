@@ -1485,28 +1485,37 @@ void CStreaming::FinishLoadingLargeFile(uint8* pFileBuffer, int32 modelId)
 }
 
 // 0x40E460
+// Finishes loading all channels. (So both channels will be `IDLE` after it returns)
+// Blocking. (Calls `CdStreamSync`)
 void CStreaming::FlushChannels()
 {
+    // Big model. Finish loading it.
     if (ms_channel[1].LoadStatus == eChannelState::STARTED)
         ProcessLoadingChannel(1);
 
+    // Force finish loading channel 0 by using `CdStreamSync`.
     if (ms_channel[0].LoadStatus == eChannelState::READING)
     {
         CdStreamSync(0);
         ms_channel[0].iLoadingLevel = 100;
         ProcessLoadingChannel(0);
     }
+
+    // Big model again. Finish loading it.
     if (ms_channel[0].LoadStatus == eChannelState::STARTED)
         ProcessLoadingChannel(0);
 
+    // Force finish loading channel 1 by using `CdStreamSync`.
     if (ms_channel[1].LoadStatus == eChannelState::READING)
     {
         CdStreamSync(1u);
         ms_channel[1].iLoadingLevel = 100;
         ProcessLoadingChannel(1);
     }
+
+    // Big model again. Finish loading it.
     if (ms_channel[1].LoadStatus == eChannelState::STARTED)
-        ProcessLoadingChannel(1);;
+        ProcessLoadingChannel(1);
 }
 
 // 0x40CBA0
