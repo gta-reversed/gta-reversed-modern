@@ -269,6 +269,7 @@ public:
     static void InjectHooks();
 
     static CStreamingInfo& GetInfo(uint32 modelId);
+    static bool IsRequestListEmpty();
     static CLink<CEntity*>* AddEntity(CEntity* pEntity);
     //! return StreamingFile Index in CStreaming::ms_files
     static uint32 AddImageToList(char const* pFileName, bool bNotPlayerImg);

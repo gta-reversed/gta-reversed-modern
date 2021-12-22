@@ -40,8 +40,8 @@ constexpr auto STREAMING_SECTOR_SIZE = 2048u;
 
 class CStreamingInfo {
 public:
-    int16 m_nNextIndex; // ms_pArrayBase array index
-    int16 m_nPrevIndex; // ms_pArrayBase array index
+    int16 m_nNextIndex;     // ms_pArrayBase array index
+    int16 m_nPrevIndex;     // ms_pArrayBase array index
     int16 m_nNextIndexOnCd; // ModelId after this file in the containing image file
     union {
         uint8 m_nFlags; // see eStreamingFlags
@@ -54,11 +54,10 @@ public:
             uint8 bLoadingScene : 1;
         };
     };
-    uint8  m_nImgId;
-    uint32 m_nCdPosn;
-    uint32 m_nCdSize;    // number of blocks/sectors; m_nCdSize * STREAMING_BLOCK_SIZE = actual size in bytes
-    uint8  m_nLoadState; // see eStreamingLoadState
-    char   __pad[3];
+    uint8  m_nImgId;        // Index into CStreaming::ms_files
+    uint32 m_nCdPosn;       // Position in directory (in sectors)
+    uint32 m_nCdSize;       // Size of resource (in sectors); m_nCdSize * STREAMING_BLOCK_SIZE = actual size in bytes
+    uint32 m_nLoadState;    // See eStreamingLoadState
 
     static CStreamingInfo*& ms_pArrayBase;
 
@@ -70,6 +69,7 @@ public:
     uint32 GetCdPosn();
     void SetCdPosnAndSize(uint32 CdPosn, uint32 CdSize);
     bool GetCdPosnAndSize(uint32& CdPosn, uint32& CdSize);
+    bool HasCdPosnAndSize() const noexcept { return m_nCdSize != 0; }
     uint32 GetCdSize() { return m_nCdSize; }
     CStreamingInfo* GetNext() { return m_nNextIndex == -1 ? nullptr : &ms_pArrayBase[m_nNextIndex]; }
     CStreamingInfo* GetPrev() { return m_nPrevIndex == -1 ? nullptr : &ms_pArrayBase[m_nPrevIndex]; }

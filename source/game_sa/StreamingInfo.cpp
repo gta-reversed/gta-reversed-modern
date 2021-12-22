@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-CStreamingInfo*& CStreamingInfo::ms_pArrayBase = *reinterpret_cast<CStreamingInfo**>(0x9654B4);
+CStreamingInfo*& CStreamingInfo::ms_pArrayBase = *reinterpret_cast<CStreamingInfo**>(0x9654B4); // Just a pointer to `CStreaming::ms_aInfoForModel`
 
 void CStreamingInfo::InjectHooks() {
     ReversibleHooks::Install("CStreamingInfo", "Init", 0x407460, &CStreamingInfo::Init);
@@ -47,7 +47,7 @@ void CStreamingInfo::SetCdPosnAndSize(uint32 CdPosn, uint32 CdSize) {
 
 // 0x4075A0
 bool CStreamingInfo::GetCdPosnAndSize(uint32& CdPosn, uint32& CdSize) {
-    if (!m_nCdSize)
+    if (!HasCdPosnAndSize())
         return false;
     CdPosn = GetCdPosn();
     CdSize = m_nCdSize;
