@@ -17,11 +17,23 @@ enum eStreamingFlags {
 };
 
 enum eStreamingLoadState {
+    // Model isn't loaded
     LOADSTATE_NOT_LOADED = 0,
-    LOADSTATE_LOADED = 1,    
+
+    // Model is loaded
+    LOADSTATE_LOADED = 1,
+
+    // Model in request list, but not yet in loading channel (TODO: Verify this)
     LOADSTATE_REQUESTED = 2,
+
+    // Model is being read
     LOADSTATE_READING = 3,
-    LOADSTATE_FINISHING = 4
+
+    // If the model is a `big` one this state is used to indicate
+    // that the model's first half has been loaded and is yet to be
+    // finished by loading the second half.
+    // When it has been loaded the state is set to `LOADED`
+    LOADSTATE_FINISHING = 4 
 };
 
 constexpr auto STREAMING_SECTOR_SIZE = 2048u;
