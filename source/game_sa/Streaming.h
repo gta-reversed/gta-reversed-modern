@@ -19,10 +19,25 @@
 
 enum class eChannelState
 {
+    // Doing nothing
     IDLE = 0,
+
+    // Currently reading model(s)
     READING = 1,
-    STARTED = 2, // NOTE: This one seems to be related to big models in some way..
-    ERR = 3, // Also called ERROR, but that's a `windgi.h` macro
+
+    // A big model (also called a large file) is loaded in steps:
+    // First, the variable `ms_bLoadingBigModel` is set to `true` in `RequestModelStream`.
+    // When the first half is finished loading, and `ProcessLoadingChannel` is called
+    // `ConvertBufferToObject` will be called by it, which will set the model's load state to
+    // `LOADSTATE_FINISHING`. When the latter function returns the former checks if
+    // the model's loadstate is `FINISHING`, if it is the channel's state is set to
+    // `STARTED` to indicate a large model's loading has started and is yet to be finished.
+    // Loading a large model is finished when `ProcessLoadingChannel`.
+    // (In which case it's state still should be `STARTED`)
+    STARTED = 2,
+
+    // Also called ERROR, but that's a `windgi.h` macro
+    ERR = 3, 
 };
 
 enum eResourceFirstID : uint32 {
