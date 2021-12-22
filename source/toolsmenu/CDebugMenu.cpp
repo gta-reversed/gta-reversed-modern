@@ -18,6 +18,7 @@
 #include "toolsmenu\DebugModules\Script\MissionDebugModule.h"
 #include "toolsmenu\DebugModules\Audio\CutsceneTrackManagerDebugModule.h"
 #include "toolsmenu\DebugModules\Audio\AmbienceTrackManagerDebugModule.h"
+#include "toolsmenu\DebugModules\CStreamingDebugModule.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -344,6 +345,11 @@ void CDebugMenu::ProcessExtraDebugFeatures() {
             ImGui::EndTabItem();
         }
 
+        if (ImGui::BeginTabItem("Streaming")) {
+            CStreamingDebugModule::ProcessImGUI();
+            ImGui::EndTabItem();
+        }
+
         ImGui::EndTabBar();
     }
 }
@@ -395,7 +401,7 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 #ifdef EXTRA_DEBUG_FEATURES
                 ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
 #endif
-                if (ImGui::Button("Streamer: Reinit")) {
+                if (ImGui::Button("Streamer: ReInit")) {
                     CStreaming::ReInit();
                 }
                 ImGui::EndTabItem();
