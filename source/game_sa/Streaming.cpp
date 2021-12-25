@@ -358,7 +358,8 @@ void CStreaming::ClearFlagForAll(uint32 streamingFlag) {
 
 // 0x40BAA0
 void CStreaming::ClearSlots(int32 totalSlots) {
-    for (auto& modelId : ms_pedsLoaded) {
+    for (auto i = 0; i < totalSlots; i++) {
+        auto& modelId = ms_pedsLoaded[i];
         if (modelId >= 0) {
             SetModelAndItsTxdDeletable(modelId);
             modelId = -1;
@@ -440,7 +441,7 @@ int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
         return nextModelId;
 
     ms_numPriorityRequests = 0;
-    return nextModelId;
+    return -1;
 }
 
 // 0x407F00
