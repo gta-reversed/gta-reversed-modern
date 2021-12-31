@@ -16,10 +16,10 @@ enum eCarPlateType {
 
 class CCustomCarPlateMgr {
 public:
-    static RwTexture*& pCharsetTex;
-    static RwTexture** pPlatebackTexTab; // static RwTexture *pPlatebackTexTab[3]
+    static inline RwTexture*& pCharsetTex = *(RwTexture**)0xC3EF5C;
+    static inline RwTexture* (&pPlatebackTexTab)[3] = *(RwTexture*(*)[3])0xC3EF60;
     static void** pPalette1555Tab;       // static void *pPalette1555Tab[3] - unused array
-
+    static inline RwUInt8*& pCharsetLockedData = *(RwUInt8**)0x6FD597;
 public:
     static void InjectHooks();
 

@@ -1,13 +1,39 @@
 #include "StdInc.h"
+#include <format>
 
 void CCustomCarPlateMgr::InjectHooks() {
-//    ReversibleHooks::Install("CCustomCarPlateMgr", "Initialise", 0x6FD500, &CCustomCarPlateMgr::Initialise);
+    ReversibleHooks::Install("CCustomCarPlateMgr", "Initialise", 0x6FD500, &CCustomCarPlateMgr::Initialise);
 //    ReversibleHooks::Install("CCustomCarPlateMgr", "Shutdown", 0x6FD720, &CCustomCarPlateMgr::Shutdown);
 }
 
 // 0x6FD500
 bool CCustomCarPlateMgr::Initialise() {
-    return plugin::CallAndReturn<bool, 0x6FD500>();
+    {
+        const auto txd = CTxdStore::FindTxdSlot("vehicle");
+        CTxdStore::PushCurrentTxd();
+        CTxdStore::SetCurrentTxd(txd);
+    }
+
+    const auto FindTXDAndSetFlags = [](const char* name, RwTextureFilterMode filterMode) {
+        const auto tex =RwTextureRead(name, nullptr);
+        RwTextureSetAddressingU(tex, rwFILTERMIPNEAREST);
+        RwTextureSetAddressingV(tex, rwFILTERMIPNEAREST);
+        RwTextureSetFilterMode(tex, filterMode);
+        return tex;
+    };
+
+    pCharsetTex = FindTXDAndSetFlags("platecharset", RwTextureFilterMode::rwFILTERNEAREST);
+
+    const char* texNames[] = {"plateback1", "plateback2", "plateback3"};
+    for (uint32 i = 0; i < std::size(texNames); i++) {
+        pPlatebackTexTab[i] = FindTXDAndSetFlags(texNames[i], RwTextureFilterMode::rwFILTERLINEAR);
+    }
+
+    CTxdStore::PopCurrentTxd();
+
+    pCharsetLockedData = RwRasterLock(RwTextureGetRaster(pCharsetTex), 0, rwRASTERLOCKREAD);
+
+    return !!pCharsetLockedData;
 }
 
 // 0x6FD720
