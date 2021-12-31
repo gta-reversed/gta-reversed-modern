@@ -3,7 +3,7 @@
 
 void CCustomCarPlateMgr::InjectHooks() {
     ReversibleHooks::Install("CCustomCarPlateMgr", "Initialise", 0x6FD500, &CCustomCarPlateMgr::Initialise);
-//    ReversibleHooks::Install("CCustomCarPlateMgr", "Shutdown", 0x6FD720, &CCustomCarPlateMgr::Shutdown);
+    ReversibleHooks::Install("CCustomCarPlateMgr", "Shutdown", 0x6FD720, &CCustomCarPlateMgr::Shutdown);
 }
 
 // 0x6FD500
@@ -37,8 +37,24 @@ bool CCustomCarPlateMgr::Initialise() {
 }
 
 // 0x6FD720
-bool CCustomCarPlateMgr::Shutdown() {
-    return plugin::CallAndReturn<bool, 0x6FD720>();
+void CCustomCarPlateMgr::Shutdown() {
+    if (pCharsetTex) {
+        RwRasterUnlock(RwTextureGetRaster(pCharsetTex));
+        pCharsetLockedData = nullptr;
+
+        RwTextureDestroy(pCharsetTex);
+        pCharsetTex = nullptr;
+    }
+
+    for (auto& tex : pPlatebackTexTab) {
+        if (tex) {
+            RwTextureDestroy(tex);
+            tex = nullptr;
+        }
+    }
+
+    if (const auto slot = CTxdStore::FindTxdSlot("vehicle"); slot != -1)
+        CTxdStore::RemoveTxd(slot);
 }
 
 
