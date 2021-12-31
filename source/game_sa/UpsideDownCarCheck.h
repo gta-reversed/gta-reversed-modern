@@ -12,7 +12,7 @@
 
 struct UpsideDownCar {
     int32 m_nCarHandle;
-    int32 m_nTime;
+    uint32 m_nTime;
 };
 
 class CUpsideDownCarCheck {
@@ -23,7 +23,7 @@ public:
     static void InjectHooks();
 
     void        Init();
-    static bool IsCarUpsideDown(CVehicle const* vehicle);
+    static bool IsCarUpsideDown(CVehicle* vehicle);
     bool        AreAnyCarsUpsideDown();
     void        UpdateTimers();
     void        AddCarToCheck(int32 carHandle);
