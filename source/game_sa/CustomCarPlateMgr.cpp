@@ -3,7 +3,15 @@
 
 void CCustomCarPlateMgr::InjectHooks() {
     ReversibleHooks::Install("CCustomCarPlateMgr", "Initialise", 0x6FD500, &CCustomCarPlateMgr::Initialise);
+    // ReversibleHooks::Install("CCustomCarPlateMgr", "GeneratePlateText", 0x6FD5B0, &CCustomCarPlateMgr::GeneratePlateText);
     ReversibleHooks::Install("CCustomCarPlateMgr", "Shutdown", 0x6FD720, &CCustomCarPlateMgr::Shutdown);
+    // ReversibleHooks::Install("CCustomCarPlateMgr", "GetMapRegionPlateDesign", 0x6FD7A0, &CCustomCarPlateMgr::GetMapRegionPlateDesign);
+    // ReversibleHooks::Install("CCustomCarPlateMgr", "LoadPlatecharsetDat", 0x6FDC00, &CCustomCarPlateMgr::LoadPlatecharsetDat);
+    // ReversibleHooks::Install("CCustomCarPlateMgr", "SetupMaterialPlatebackTexture", 0x6FDE50, &CCustomCarPlateMgr::SetupMaterialPlatebackTexture);
+    // ReversibleHooks::Install("CCustomCarPlateMgr", "CreatePlateTexture", 0x6FDEA0, &CCustomCarPlateMgr::CreatePlateTexture);
+    // ReversibleHooks::Install("CCustomCarPlateMgr", "SetupClumpAfterVehicleUpgrade", 0x6FDFE0, &CCustomCarPlateMgr::SetupClumpAfterVehicleUpgrade);
+    // ReversibleHooks::Install("CCustomCarPlateMgr", "SetupMaterialPlateTexture", 0x6FE020, &CCustomCarPlateMgr::SetupMaterialPlateTexture);
+    // ReversibleHooks::Install("CCustomCarPlateMgr", "SetupClump", 0x6FE0F0, &CCustomCarPlateMgr::SetupClump);
 }
 
 // 0x6FD500
@@ -57,13 +65,37 @@ void CCustomCarPlateMgr::Shutdown() {
         CTxdStore::RemoveTxd(slot);
 }
 
-
-bool CCustomCarPlateMgr::GeneratePlateText(char* plateTextBuf, int32 length)
-{
-    return plugin::CallAndReturn<bool, 0x6FD5B0, char*, int32>(plateTextBuf, length);
+// 0x6FD7A0
+int8_t CCustomCarPlateMgr::GetMapRegionPlateDesign() {
+    return plugin::CallAndReturn<int8_t, 0x6FD7A0>();
 }
 
-RpMaterial* CCustomCarPlateMgr::SetupClump(RpClump* clump, char* plateText, uint8 plateType)
-{
-    return plugin::CallAndReturn<RpMaterial*, 0x6FE0F0, RpClump*, char*, uint8>(clump, plateText, plateType);
+// 0x6FDC00
+int8_t CCustomCarPlateMgr::LoadPlatecharsetDat(char const* filename, uint8_t* data) {
+    return plugin::CallAndReturn<int8_t, 0x6FDC00, char const*, uint8_t*>(filename, data);
+}
+
+// 0x6FDE50
+RpMaterial* CCustomCarPlateMgr::SetupMaterialPlatebackTexture(RpMaterial* material, uint8_t plateType) {
+    return plugin::CallAndReturn<RpMaterial*, 0x6FDE50, RpMaterial*, uint8_t>(material, plateType);
+}
+
+// 0x6FDEA0
+RwTexture* CCustomCarPlateMgr::CreatePlateTexture(char* text, uint8_t plateType) {
+    return plugin::CallAndReturn<RwTexture*, 0x6FDEA0, char*, uint8_t>(text, plateType);
+}
+
+// 0x6FDFE0
+int8_t CCustomCarPlateMgr::SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMaterial* plateMaterial, uint8_t plateType) {
+    return plugin::CallAndReturn<int8_t, 0x6FDFE0, RpClump*, RpMaterial*, uint8_t>(clump, plateMaterial, plateType);
+}
+
+// 0x6FE020
+RwTexture* CCustomCarPlateMgr::SetupMaterialPlateTexture(RpMaterial* material, char* plateText, uint8_t plateType) {
+    return plugin::CallAndReturn<RwTexture*, 0x6FE020, RpMaterial*, char*, uint8_t>(material, plateText, plateType);
+}
+
+// 0x6FE0F0
+RpMaterial* CCustomCarPlateMgr::SetupClump(RpClump* clump, char* plateText, uint8_t plateType) {
+    return plugin::CallAndReturn<RpMaterial*, 0x6FE0F0, RpClump*, char*, uint8_t>(clump, plateText, plateType);
 }

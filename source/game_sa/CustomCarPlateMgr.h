@@ -24,15 +24,15 @@ public:
     static void InjectHooks();
 
     static bool Initialise();
-    static bool Shutdown();
-    static bool GeneratePlateText(char* plateTextBuf, int32 length);
-    static uint8 GetMapRegionPlateDesign();
-    static bool LoadPlatecharsetDat(char const* filename, uint8* data, int32 arg2, int32 arg3);
-    static RpMaterial* SetupMaterialPlatebackTexture(RpMaterial* material, uint8 plateType);
-    static RwTexture* CreatePlateTexture(char* text, uint8 plateType);
-    static bool SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMaterial* plateMaterial, uint8 plateType);
-    static RpMaterial* SetupMaterialPlateTexture(RpMaterial* material, char* plateText, uint8 plateType);
-    static RpMaterial* SetupClump(RpClump* clump, char* plateText, uint8 plateType);
+    static int8_t GeneratePlateText(char* buf, int32_t len);
+    static void Shutdown();
+    static int8_t GetMapRegionPlateDesign();
+    static int8_t LoadPlatecharsetDat(char const* filename, uint8_t* data);
+    static RpMaterial* SetupMaterialPlatebackTexture(RpMaterial* material, uint8_t plateType);
+    static RwTexture* CreatePlateTexture(char* text, uint8_t plateType);
+    static int8_t SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMaterial* plateMaterial, uint8_t plateType);
+    static RwTexture* SetupMaterialPlateTexture(RpMaterial* material, char* plateText, uint8_t plateType);
+    static RpMaterial* SetupClump(RpClump* clump, char* plateText, uint8_t plateType);
 };
 
 extern uint8*& CharsetLockedData;
