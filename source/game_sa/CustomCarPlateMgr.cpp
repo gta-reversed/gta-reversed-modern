@@ -8,7 +8,7 @@ void CCustomCarPlateMgr::InjectHooks() {
     ReversibleHooks::Install("CCustomCarPlateMgr", "GetMapRegionPlateDesign", 0x6FD7A0, &CCustomCarPlateMgr::GetMapRegionPlateDesign);
     // ReversibleHooks::Install("CCustomCarPlateMgr", "LoadPlatecharsetDat", 0x6FDC00, &CCustomCarPlateMgr::LoadPlatecharsetDat);
     ReversibleHooks::Install("CCustomCarPlateMgr", "SetupMaterialPlatebackTexture", 0x6FDE50, &CCustomCarPlateMgr::SetupMaterialPlatebackTexture);
-    // ReversibleHooks::Install("CCustomCarPlateMgr", "CreatePlateTexture", 0x6FDEA0, &CCustomCarPlateMgr::CreatePlateTexture);
+    ReversibleHooks::Install("CCustomCarPlateMgr", "CreatePlateTexture", 0x6FDEA0, &CCustomCarPlateMgr::CreatePlateTexture);
     // ReversibleHooks::Install("CCustomCarPlateMgr", "SetupClumpAfterVehicleUpgrade", 0x6FDFE0, &CCustomCarPlateMgr::SetupClumpAfterVehicleUpgrade);
     // ReversibleHooks::Install("CCustomCarPlateMgr", "SetupMaterialPlateTexture", 0x6FE020, &CCustomCarPlateMgr::SetupMaterialPlateTexture);
     // ReversibleHooks::Install("CCustomCarPlateMgr", "SetupClump", 0x6FE0F0, &CCustomCarPlateMgr::SetupClump);
@@ -85,14 +85,38 @@ int8_t CCustomCarPlateMgr::LoadPlatecharsetDat(char const* filename, uint8_t* da
     return plugin::CallAndReturn<int8_t, 0x6FDC00, char const*, uint8_t*>(filename, data);
 }
 
+auto ResolvePlateType(uint8 plateType) {
+    return plateType == -1 ? CCustomCarPlateMgr::GetMapRegionPlateDesign() : plateType;
+}
+
 // 0x6FDE50
 void CCustomCarPlateMgr::SetupMaterialPlatebackTexture(RpMaterial* material, uint8_t plateType) {
-    RpMaterialSetTexture(material, pPlatebackTexTab[plateType == -1 ? GetMapRegionPlateDesign() : plateType]);
+    RpMaterialSetTexture(material, pPlatebackTexTab[ResolvePlateType(plateType)]);
 }
 
 // 0x6FDEA0
 RwTexture* CCustomCarPlateMgr::CreatePlateTexture(char* text, uint8_t plateType) {
-    return plugin::CallAndReturn<RwTexture*, 0x6FDEA0, char*, uint8_t>(text, plateType);
+    const auto plateRaster = RwRasterCreate(64, 16, 32, 0x604); // TODO: Figure out flags
+    if (!plateRaster)
+        return nullptr;
+
+    if (!RwTextureGetRaster(pCharsetTex)) {
+        RwRasterDestroy(plateRaster);
+        return nullptr;
+    }
+
+    if (!RenderLicenseplateTextToRaster(text, RwTextureGetRaster(pCharsetTex), pPalette1555Tab[ResolvePlateType(plateType)], plateRaster)) {
+        RwRasterDestroy(plateRaster);
+        return nullptr;
+    }
+
+    if (const auto plateTex = RwTextureCreate(plateRaster)) {
+        RwTextureSetName(plateTex, text);
+        RwTextureSetFilterMode(plateTex, rwFILTERNEAREST);
+        return plateTex;
+    }
+
+    return nullptr;
 }
 
 // 0x6FDFE0

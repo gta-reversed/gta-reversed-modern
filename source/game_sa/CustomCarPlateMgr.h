@@ -17,8 +17,8 @@ enum eCarPlateType {
 class CCustomCarPlateMgr {
 public:
     static inline RwTexture*& pCharsetTex = *(RwTexture**)0xC3EF5C;
-    static inline RwTexture* (&pPlatebackTexTab)[3] = *(RwTexture*(*)[3])0xC3EF60;
-    static void** pPalette1555Tab;       // static void *pPalette1555Tab[3] - unused array
+    static inline RwTexture* (&pPlatebackTexTab)[3] = *(RwTexture * (*)[3])0xC3EF60;
+    static inline void* (&pPalette1555Tab)[3] = *(void*(*)[3])0xC3EF6C;
     static inline RwUInt8*& pCharsetLockedData = *(RwUInt8**)0x6FD597;
 public:
     static void InjectHooks();
@@ -28,16 +28,12 @@ public:
     static void Shutdown();
     static int8_t GetMapRegionPlateDesign();
     static int8_t LoadPlatecharsetDat(char const* filename, uint8_t* data);
-    static RpMaterial* SetupMaterialPlatebackTexture(RpMaterial* material, uint8_t plateType);
+    static void SetupMaterialPlatebackTexture(RpMaterial* material, uint8_t plateType);
     static RwTexture* CreatePlateTexture(char* text, uint8_t plateType);
     static int8_t SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMaterial* plateMaterial, uint8_t plateType);
     static RwTexture* SetupMaterialPlateTexture(RpMaterial* material, char* plateText, uint8_t plateType);
     static RpMaterial* SetupClump(RpClump* clump, char* plateText, uint8_t plateType);
 };
-
-extern uint8*& CharsetLockedData;
-extern RpMaterial*& CurrentLicensePlateMaterial;
-extern char& CurrentLicensePlateType;
 
 #ifdef _MSC_VER
 void GetCharacterPositionInCharSet(char c, uint32& outColumn, uint32& outRow);
