@@ -521,7 +521,8 @@ void CWorld::RepositionOneObject(CEntity* object) {
 }
 
 // 0x569E20
-CEntity* CWorld::TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity* arg2, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doCameraIgnoreCheck) {
+CEntity* CWorld::TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity* arg2, bool buildings, bool vehicles, bool peds, bool objects, bool dummies,
+                                        bool doCameraIgnoreCheck) {
     return plugin::CallAndReturn<CEntity*, 0x569E20, CVector, float, CEntity*, bool, bool, bool, bool, bool, bool>(sphereCenter, sphereRadius, arg2, buildings, vehicles, peds, objects, dummies, doCameraIgnoreCheck);
 }
 

@@ -141,7 +141,8 @@ public:
     static float FindLowestZForCoord(float x, float y);
     static void RepositionOneObject(CEntity* object);
     // returns entity
-    static CEntity* TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity* arg2, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doCameraIgnoreCheck);
+    static CEntity* TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity* arg2, bool buildings, bool vehicles, bool peds, bool objects, bool dummies,
+                                           bool doCameraIgnoreCheck);
     static void ClearExcitingStuffFromArea(CVector const& point, float radius, uint8 bRemoveProjectilesAndShadows);
     static bool GetIsLineOfSightClear(CVector const& origin, CVector const& target, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck);
     static bool ProcessLineOfSightSector(CSector& sector, CRepeatSector& repeatSector, CColLine const& colLine, CColPoint& outColPoint, float& maxTouchDistance, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck, bool doShootThroughCheck);

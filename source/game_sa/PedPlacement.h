@@ -14,8 +14,9 @@
 
 class CPedPlacement {
 public:
-     static bool FindZCoorForPed(CVector *pos);
-     static bool IsPositionClearForPed(CVector const *pos, float radius, int32 maxNumObjects, CEntity **pObjectList, uint8 bCheckVehicles, uint8 bCheckPeds, uint8 bCheckObjects);
-     static CVehicle *IsPositionClearOfCars(CVector const *pos);
-     static CVehicle *IsPositionClearOfCars(CPed const *ped);
+    static void InjectHooks();
+    static bool FindZCoorForPed(CVector& inoutPos);
+    static bool IsPositionClearForPed(CVector const& pos, float radius, int32 maxHitEntities, CEntity **outHitEntities, bool bCheckVehicles, bool bCheckPeds, bool bCheckObjects);
+    static CVehicle *IsPositionClearOfCars(CVector const *pos);
+    static CVehicle *IsPositionClearOfCars(CPed const *ped);
 };

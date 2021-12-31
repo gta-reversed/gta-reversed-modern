@@ -136,7 +136,7 @@ CTask* CTaskComplexUseSwatRope::ControlSubTask_Reversed(CPed* ped) {
 
     if (subTaskType == TASK_SIMPLE_PAUSE || subTaskType == TASK_SIMPLE_ABSEIL) {
         CVector groundCoord = ped->GetPosition();
-        CPedPlacement::FindZCoorForPed(&groundCoord);
+        CPedPlacement::FindZCoorForPed(groundCoord);
         if (ped->GetPosition().z - 2.0F < groundCoord.z && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr))
             return CreateSubTask(TASK_NONE, ped);
 
