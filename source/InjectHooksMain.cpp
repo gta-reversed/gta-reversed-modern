@@ -170,10 +170,10 @@ void WaitForDebugger() {
 
 void InjectHooksMain()
 {
-    // WaitForDebugger();
+    WaitForDebugger();
     InjectCommonHooks();
     CPad::InjectHooks();
-
+    CWindModifiers::InjectHooks();
     CPtrList::InjectHooks();
     BreakManager_c::InjectHooks();
     IKChainManager_c::InjectHooks();

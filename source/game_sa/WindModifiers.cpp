@@ -5,14 +5,61 @@ CWindModifier (&CWindModifiers::Array)[MAX_NUM_MODIFIERS] = *(CWindModifier(*)[M
 
 void CWindModifiers::InjectHooks() {
     using namespace ReversibleHooks;
-    //Install("CWindModifiers", "FindWindModifier", 0x0, &CWindModifiers::FindWindModifier);
-    //Install("CWindModifiers", "RegisterOne", 0x0, &CWindModifiers::RegisterOne);
+    Install("CWindModifiers", "FindWindModifier", 0x72C950, &CWindModifiers::FindWindModifier);
+    Install("CWindModifiers", "RegisterOne", 0x72C8B0, &CWindModifiers::RegisterOne);
 }
 
-void CWindModifiers::FindWindModifier(CVector vecPos, float* pOutX, float* pOutY) {
-    plugin::Call<0x72C950, CVector, float*, float*>(vecPos, pOutX, pOutY);
+bool CWindModifiers::FindWindModifier(CVector vecPos, float* pOutX, float* pOutY) {
+    if (!Number)
+        return false;
+
+    float posX{}, posY{};
+    bool appliedAny{};
+    for (auto i = 0; i < Number; i++) {
+        const auto& wm = Array[i];
+        if (!wm.m_iActive)
+            continue;
+
+        const auto absZDist = fabs(vecPos.z + 15.f - wm.m_vecPos.z);
+        if (absZDist >= 40.0f)
+            continue;
+
+        const auto diff = vecPos - wm.m_vecPos;
+        const auto dist = diff.Magnitude();
+        if (dist >= 50.f)
+            continue;
+
+        const float distProg = dist >= 20.f ? 1.f - invLerp(20.f, 50.f, dist) : 1.f;
+        const float distZProg = 1.f - invLerp(0.f, 40.f, absZDist);
+        const float power = distZProg * (distProg * wm.m_fPower) / 5.f;
+
+        // NOTE: Possible bug? They don't seem to re-use the last value, but rather overwrite it..
+        //       shouldn't they add up all the values or something?
+        posX = diff.x / dist * power;
+        posY = diff.y / dist * power;
+
+        appliedAny = true;
+    }
+
+    if (!appliedAny)
+        return false;
+
+    const float rnd = 1.0f + (float)(rand() % 32 - 16) / 2000.f;
+    *pOutX += posX * rnd;
+    *pOutY += posY * rnd;
+
+    return true;
 }
 
 void CWindModifiers::RegisterOne(CVector vecPos, int32 iActive, float fPower) {
-    plugin::Call<0x72C8B0, CVector, int32, float>(vecPos, iActive, fPower);
+    if (Number < MAX_NUM_MODIFIERS) {
+        if (DistanceBetweenPoints(vecPos, TheCamera.GetPosition()) < 200.0f) {
+            Array[Number] = {
+                .m_vecPos = vecPos,
+                .m_iActive = iActive,
+                .m_fPower = fPower
+            };
+            Number++;
+        }
+    }
 }
