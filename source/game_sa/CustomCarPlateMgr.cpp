@@ -5,7 +5,7 @@ void CCustomCarPlateMgr::InjectHooks() {
     ReversibleHooks::Install("CCustomCarPlateMgr", "Initialise", 0x6FD500, &CCustomCarPlateMgr::Initialise);
     // ReversibleHooks::Install("CCustomCarPlateMgr", "GeneratePlateText", 0x6FD5B0, &CCustomCarPlateMgr::GeneratePlateText);
     ReversibleHooks::Install("CCustomCarPlateMgr", "Shutdown", 0x6FD720, &CCustomCarPlateMgr::Shutdown);
-    // ReversibleHooks::Install("CCustomCarPlateMgr", "GetMapRegionPlateDesign", 0x6FD7A0, &CCustomCarPlateMgr::GetMapRegionPlateDesign);
+    ReversibleHooks::Install("CCustomCarPlateMgr", "GetMapRegionPlateDesign", 0x6FD7A0, &CCustomCarPlateMgr::GetMapRegionPlateDesign);
     // ReversibleHooks::Install("CCustomCarPlateMgr", "LoadPlatecharsetDat", 0x6FDC00, &CCustomCarPlateMgr::LoadPlatecharsetDat);
     // ReversibleHooks::Install("CCustomCarPlateMgr", "SetupMaterialPlatebackTexture", 0x6FDE50, &CCustomCarPlateMgr::SetupMaterialPlatebackTexture);
     // ReversibleHooks::Install("CCustomCarPlateMgr", "CreatePlateTexture", 0x6FDEA0, &CCustomCarPlateMgr::CreatePlateTexture);
@@ -67,7 +67,16 @@ void CCustomCarPlateMgr::Shutdown() {
 
 // 0x6FD7A0
 int8_t CCustomCarPlateMgr::GetMapRegionPlateDesign() {
-    return plugin::CallAndReturn<int8_t, 0x6FD7A0>();
+    switch (CWeather::WeatherRegion) {
+    case eWeatherRegion::WEATHER_REGION_LA:
+        return 2;
+    case eWeatherRegion::WEATHER_REGION_LV:
+    case eWeatherRegion::WEATHER_REGION_DESERT:
+        return 1;
+    case eWeatherRegion::WEATHER_REGION_DEFAULT:
+    case eWeatherRegion::WEATHER_REGION_SF:
+        return 0;
+    }
 }
 
 // 0x6FDC00
