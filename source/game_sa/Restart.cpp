@@ -7,66 +7,229 @@
 #include "StdInc.h"
 
 bool& CRestart::bOverrideRespawnBasePointForMission = *(bool*)0xA43248;
-CVector* CRestart::OverrideRespawnBasePointForMission = (CVector*)0xA4342C;
+CVector& CRestart::OverrideRespawnBasePointForMission = *(CVector*)0xA4342C;
 float& CRestart::OverrideHeading = *(float*)0xA43260;
 bool& CRestart::bOverrideRestart = *(bool*)0xA43264;
-CVector* CRestart::OverridePosition = (CVector*)0xA43408;
+CVector& CRestart::OverridePosition = *(CVector*)0xA43408;
 
 int16& CRestart::NumberOfPoliceRestarts = *(int16*)0xA43268;
-int32& CRestart::PoliceRestartWhenToUse = *(int32*)0xA43270;
-float& CRestart::PoliceRestartHeadings = *(float*)0xA43298;
-CVector* CRestart::PoliceRestartPoints = (CVector*)0xA43390;
-
 int16& CRestart::NumberOfHospitalRestarts = *(int16*)0xA4326C;
-int32& CRestart::HospitalRestartWhenToUse = *(int32*)0xA432C0;
-float& CRestart::HospitalRestartHeadings = *(float*)0xA432E8;
-CVector* CRestart::HospitalRestartPoints = (CVector*)0xA43318;
+
+void CRestart::InjectHooks() {
+    using namespace ReversibleHooks;
+    Install("CRestart", "Initialise", 0x460630, &CRestart::Initialise);
+    Install("CRestart", "AddHospitalRestartPoint", 0x460730, &CRestart::AddHospitalRestartPoint);
+    Install("CRestart", "AddPoliceRestartPoint", 0x460780, &CRestart::AddPoliceRestartPoint);
+    Install("CRestart", "OverrideNextRestart", 0x4607D0, &CRestart::OverrideNextRestart);
+    Install("CRestart", "CancelOverrideRestart", 0x460800, &CRestart::CancelOverrideRestart);
+    Install("CRestart", "ClearRespawnPointForDurationOfMission", 0x460840, &CRestart::ClearRespawnPointForDurationOfMission);
+    Install("CRestart", "FindClosestHospitalRestartPoint", 0x460850, &CRestart::FindClosestHospitalRestartPoint);
+    Install("CRestart", "FindClosestPoliceRestartPoint", 0x460A50, &CRestart::FindClosestPoliceRestartPoint);
+    Install("CRestart", "Save", 0x5D3620, &CRestart::Save);
+}
 
 void CRestart::AddHospitalRestartPoint(CVector const& point, float angle, int32 townId)
 {
-    ((void(__cdecl*)(CVector const&, float, int32))0x460730)(point, angle, townId);
+    HospitalRestartPoints[NumberOfHospitalRestarts] = point;
+    HospitalRestartHeadings[NumberOfHospitalRestarts] = angle;
+    HospitalRestartWhenToUse[NumberOfHospitalRestarts] = townId;
+    NumberOfHospitalRestarts++;
 }
 void CRestart::AddPoliceRestartPoint(CVector const& point, float angle, int32 townId)
 {
-    ((void(__cdecl*)(CVector const&, float, int32))0x460780)(point, angle, townId);
+    PoliceRestartPoints[NumberOfPoliceRestarts] = point;
+    PoliceRestartHeadings[NumberOfPoliceRestarts] = angle;
+    PoliceRestartWhenToUse[NumberOfPoliceRestarts] = townId;
+    NumberOfPoliceRestarts++;
 }
 void CRestart::CancelOverrideRestart()
 {
-    ((void(__cdecl*)())0x460800)();
+    bOverrideRestart = false;
 }
 void CRestart::ClearRespawnPointForDurationOfMission()
 {
-    ((void(__cdecl*)())0x460840)();
+    bOverrideRespawnBasePointForMission = false;
 }
-void CRestart::FindClosestHospitalRestartPoint(CVector point, CVector* storedPoint, float* storedAngle)
+void CRestart::FindClosestHospitalRestartPoint(CVector point, CVector& outPos, float& outAngle)
 {
-    ((void(__cdecl*)(CVector, CVector*, float*))0x460A50)(point, storedPoint, storedAngle);
+    if (bOverrideRestart) {
+        outPos = OverridePosition;
+        outAngle = OverrideHeading;
+        bOverrideRestart = false;
+    }
+    else {
+        if (bOverrideRespawnBasePointForMission) {
+            point = OverrideRespawnBasePointForMission;
+            bOverrideRespawnBasePointForMission = false;
+        }
+
+        if (ScriptExtraHospitalRestartPoint_Radius <= 0.0f ||
+            DistanceBetweenPoints(point, ScriptExtraHospitalRestartPoint_Pos) >= ScriptExtraHospitalRestartPoint_Radius
+            ) {
+            const auto pointLevel = CTheZones::GetLevelFromPosition(point);
+            float closestDist = FLT_MAX;
+            int32 closestIdx = -1;
+            for (auto i = 0u; i < NumberOfHospitalRestarts; i++) {
+                if ((int32)CStats::GetStatValue(STAT_CITY_UNLOCKED) >= HospitalRestartWhenToUse[i]) {
+                    const auto restartPos = HospitalRestartPoints[i];
+                    auto dist = DistanceBetweenPoints(point, restartPos);
+                    if (pointLevel != eLevelName::LEVEL_NAME_COUNTRY_SIDE
+                        && pointLevel != CTheZones::GetLevelFromPosition(restartPos)
+                        ) {
+                        dist *= 6.0f;
+                    }
+                    if (dist < closestDist) {
+                        closestDist = dist;
+                        closestIdx = (int32)i;
+                    }
+                }
+            }
+
+            if (closestIdx >= 0u) {
+                outPos = HospitalRestartPoints[closestIdx];
+                outAngle = HospitalRestartHeadings[closestIdx];
+            }
+        }
+        else {
+            outPos = ScriptExtraHospitalRestartPoint_Pos;
+            outAngle = ScriptExtraHospitalRestartPoint_Angle;
+        }
+    }
 }
-void CRestart::FindClosestPoliceRestartPoint(CVector point, CVector* storedPoint, float* storedAngle)
+void CRestart::FindClosestPoliceRestartPoint(CVector point, CVector& outPos, float& outAngle)
 {
-    ((void(__cdecl*)(CVector, CVector*, float*))0x460850)(point, storedPoint, storedAngle);
+    if (bOverrideRestart) {
+        outPos = OverridePosition;
+        outAngle = OverrideHeading;
+        bOverrideRestart = false;
+    } else {
+        if (bOverrideRespawnBasePointForMission) {
+            point = OverrideRespawnBasePointForMission;
+            bOverrideRespawnBasePointForMission = false;
+        }
+
+        if (ScriptExtraPoliceRestartPoint_Radius <= 0.0f ||
+            DistanceBetweenPoints(point, ScriptExtraPoliceRestartPoint_Pos) >= ScriptExtraPoliceRestartPoint_Radius
+        ) {
+            const auto pointLevel = CTheZones::GetLevelFromPosition(point);
+            float closestDist = FLT_MAX;
+            int32 closestIdx = -1;
+            for (auto i = 0u; i < NumberOfPoliceRestarts; i++) {
+                if ((int32)CStats::GetStatValue(STAT_CITY_UNLOCKED) >= PoliceRestartWhenToUse[i]) {
+                    const auto restartPos = PoliceRestartPoints[i];
+                    auto dist = DistanceBetweenPoints(point, restartPos);
+                    if (pointLevel != eLevelName::LEVEL_NAME_COUNTRY_SIDE
+                        && pointLevel != CTheZones::GetLevelFromPosition(restartPos)
+                    ) {
+                        dist *= 6.0f;
+                    }
+                    if (dist < closestDist) {
+                        closestDist = dist;
+                        closestIdx = (int32)i;
+                    }
+                }
+            }
+
+            if (closestIdx >= 0u) {
+                outPos = PoliceRestartPoints[closestIdx];
+                outAngle = PoliceRestartHeadings[closestIdx];
+            }
+        } else {
+            outPos = ScriptExtraPoliceRestartPoint_Pos;
+            outAngle = ScriptExtraPoliceRestartPoint_Angle;
+        }
+    }
 }
 void CRestart::Initialise()
 {
-    ((void(__cdecl*)())0x460630)();
+    for (auto i = 0u; i < MAX_RESTART_POINTS; i++) {
+        HospitalRestartHeadings[i] = 0.0f;
+        HospitalRestartPoints[i] = CVector{};
+    }
+    NumberOfHospitalRestarts = 0;
+
+    for (auto i = 0u; i < MAX_RESTART_POINTS; i++) {
+        PoliceRestartHeadings[i] = 0.0f;
+        PoliceRestartPoints[i] = CVector{};
+    }
+    NumberOfPoliceRestarts = 0;
+
+    OverridePosition = CVector{};
+    OverrideHeading = 0.0f;
+    bOverrideRestart = false;
+    bFadeInAfterNextDeath = false;
+    byte_A4325C = true;
+    ScriptExtraHospitalRestartPoint_Radius = 0.0f;
+    ScriptExtraPoliceRestartPoint_Radius = 0.0f;
+    bOverrideRespawnBasePointForMission = false;
 }
 void CRestart::Load()
 {
-    ((void(__cdecl*)())0x5D3770)();
+    Initialise();
+
+    CGenericGameStorage::SaveDataToWorkBuffer(&NumberOfHospitalRestarts, 2u);
+    for (auto i = 0; i < NumberOfHospitalRestarts; ++i)
+    {
+        CGenericGameStorage::SaveDataToWorkBuffer(&HospitalRestartPoints[i], 0xCu);
+        CGenericGameStorage::SaveDataToWorkBuffer(&HospitalRestartHeadings[i], 4u);
+        CGenericGameStorage::SaveDataToWorkBuffer(&HospitalRestartWhenToUse[i], 4u);
+    }
+
+    CGenericGameStorage::SaveDataToWorkBuffer(&NumberOfPoliceRestarts, 2u);
+    for (auto j = 0; j < NumberOfPoliceRestarts; ++j)
+    {
+        CGenericGameStorage::SaveDataToWorkBuffer(&PoliceRestartPoints[j], 0xCu);
+        CGenericGameStorage::SaveDataToWorkBuffer(&PoliceRestartHeadings[j], 4u);
+        CGenericGameStorage::SaveDataToWorkBuffer(&PoliceRestartWhenToUse[j], 4u);
+    }
+
+    CGenericGameStorage::SaveDataToWorkBuffer(&bOverrideRestart, 1u);
+    CGenericGameStorage::SaveDataToWorkBuffer(&OverridePosition, 0xCu);
+    CGenericGameStorage::SaveDataToWorkBuffer(&bFadeInAfterNextDeath, 1u);
+    CGenericGameStorage::SaveDataToWorkBuffer(&byte_A4325C, 1u);
+
+    CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraHospitalRestartPoint_Pos, 0xc);
+    CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraHospitalRestartPoint_Radius, 4u);
+    CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraHospitalRestartPoint_Angle, 4u);
+
+    CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraPoliceRestartPoint_Pos, 0xCu);
+    CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraPoliceRestartPoint_Radius, 4u);
+    CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraPoliceRestartPoint_Angle, 4u);
+}
+void CRestart::Save()
+{
+    CGenericGameStorage::SaveDataToWorkBuffer(&NumberOfHospitalRestarts, 2u);
+    for (auto i = 0; i < NumberOfHospitalRestarts; ++i)
+    {
+        CGenericGameStorage::SaveDataToWorkBuffer(&HospitalRestartPoints[i], 0xCu);
+        CGenericGameStorage::SaveDataToWorkBuffer(&HospitalRestartHeadings[i], 4u);
+        CGenericGameStorage::SaveDataToWorkBuffer(&HospitalRestartWhenToUse[i], 4u);
+    }
+
+    CGenericGameStorage::SaveDataToWorkBuffer(&NumberOfPoliceRestarts, 2u);
+    for (auto j = 0; j < NumberOfPoliceRestarts; ++j)
+    {
+        CGenericGameStorage::SaveDataToWorkBuffer(&PoliceRestartPoints[j], 0xCu);
+        CGenericGameStorage::SaveDataToWorkBuffer(&PoliceRestartHeadings[j], 4u);
+        CGenericGameStorage::SaveDataToWorkBuffer(&PoliceRestartWhenToUse[j], 4u);
+    }
+
+    CGenericGameStorage::SaveDataToWorkBuffer(&bOverrideRestart, 1u);
+    CGenericGameStorage::SaveDataToWorkBuffer(&OverridePosition, 0xCu);
+    CGenericGameStorage::SaveDataToWorkBuffer(&bFadeInAfterNextDeath, 1u);
+    CGenericGameStorage::SaveDataToWorkBuffer(&byte_A4325C, 1u);
+
+    CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraHospitalRestartPoint_Pos, 0xc);
+    CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraHospitalRestartPoint_Radius, 4u);
+    CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraHospitalRestartPoint_Angle, 4u);
+
+    CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraPoliceRestartPoint_Pos, 0xCu);
+    CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraPoliceRestartPoint_Radius, 4u);
+    CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraPoliceRestartPoint_Angle, 4u);
 }
 void CRestart::OverrideNextRestart(CVector const& point, float angle)
 {
-    ((void(__cdecl*)(CVector const&, float))0x4607D0)(point, angle);
+    OverridePosition = point;
+    OverrideHeading = angle;
+    bOverrideRestart = true;
 }
-
-/*
-void CRestart::Save()
-{
-    ((void(__cdecl *)())0x460780)();
-}
-
-void CRestart::SetRespawnPointForDurationOfMission(CVector point)
-{
-    ((void(__cdecl *)())0x460780)();
-}
-*/
