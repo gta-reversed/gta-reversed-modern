@@ -3,19 +3,20 @@
 #include "FallingGlassPane.h"
 #include <numeric>
 #include <ranges>
+#include <array>
 namespace rng = std::ranges;
 
-CVector2D (&PanePolyPositions)[4][3] = *(CVector2D(*)[4][3])0x8D5CD8;
+CVector2D (&CGlass::PanePolyPositions)[4][3] = *(CVector2D(*)[4][3])0x8D5CD8;
 int32& CGlass::ReflectionPolyVertexBaseIdx = *(int32*)0xC71B18;
 int32& CGlass::ReflectionPolyIndexBaseIdx = *(int32*)0xC71B1C;
 int32& CGlass::ShatteredVerticesBaseIdx = *(int32*)0xC71B20;
 int32& CGlass::ShatteredIndicesBaseIdx = *(int32*)0xC71B24;
 uint32& CGlass::NumHiLightPolyVertices = *(uint32*)0xC71B28;
 int32& CGlass::NumHiLightPolyIndices = *(int32*)0xC71B2C;
-CVector2D (&PanePolyCenterPositions)[5] = *(CVector2D(*)[5])0xC71B30;
+CVector2D (&CGlass::PanePolyCenterPositions)[5] = *(CVector2D(*)[5])0xC71B30;
 int32 (&CGlass::apEntitiesToBeRendered)[1] = *(int32(*)[1])0xC71B58;
 int32& CGlass::NumGlassEntities = *(int32*)0xC71BD8;
-CFallingGlassPane (&aGlassPanes)[44] = *(CFallingGlassPane(*)[44])0xC71BF8;
+CFallingGlassPane (&CGlass::aGlassPanes)[44] = *(CFallingGlassPane(*)[44])0xC71BF8;
 int32& CGlass::LastColCheckMS = *(int32*)0xC72FA8;
 
 void CGlass::InjectHooks() {
@@ -65,26 +66,29 @@ void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
     }
 
     const auto& triangles = colModel->m_pColData->m_pTriangles;
-    auto FindNextGlassTriangle = [&, idx = 0u]() mutable -> uint32 {
-        for (; idx < colModel->GetTriCount(); idx++) {
-            if (g_surfaceInfos->IsGlass(triangles[idx].m_nMaterial))
-                return idx;
-        }
-        return -1u;
-    };
 
-    const uint32 glassTriIdx[]{ FindNextGlassTriangle(), FindNextGlassTriangle() };
-    if (glassTriIdx[0] == -1u || glassTriIdx[1] == -1u)
+    // Find the triangle of the glass rectangle
+    // They're after each other, so we just have to find the first one here
+    uint32_t glassTriIdx{};
+    for (; glassTriIdx < colModel->GetTriCount(); glassTriIdx++) {
+        if (g_surfaceInfos->IsGlass(triangles[glassTriIdx].m_nMaterial)) {
+            break;
+        }
+    }
+
+    // `glassTriIdx` is the first triangle of the glass rectangle, the second one is the one after it.
+    // So, logically, if `glassTriIdx + 1` is valid, `glassTriIdx` is going to be valid as well.
+    if (glassTriIdx + 1 >= colModel->GetTriCount())
         return;
 
-    colModel->CalculateTrianglePlanes();
+    CCollision::CalculateTrianglePlanes(colModel);
 
     auto& vehMat = (CMatrix&)pVeh->GetMatrix();
 
     // Grab normal and transform it to world space
     const auto normal = Multiply3x3(
         vehMat,
-        colModel->m_pColData->m_pTrianglePlanes[glassTriIdx[0]].GetNormal()
+        colModel->m_pColData->m_pTrianglePlanes[glassTriIdx].GetNormal()
     );
 
     // Calculate direction vectors
@@ -94,7 +98,7 @@ void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
     // Store world space vertex positions of both triangles
     CVector triVertices[6]{};
     for (auto t = 0; t < 2; t++) {
-        const auto& tri = triangles[glassTriIdx[t]];
+        const auto& tri = triangles[glassTriIdx + t];
         for (auto v = 0; v < 3; v++) {
             triVertices[t * 3 + v] = MultiplyMatrixWithVector(
                 vehMat,
@@ -103,36 +107,37 @@ void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
         }
     }
 
-    const auto CalculateDotProducts = [&](float(&out)[6], CVector direction) {
+    // Calculate dot products for both directions
+    // The dot product of the position of a vertex and `right` will give it's "position" on the `right` axis
+    // same goes for `fwd`
+
+    const auto CalculateDotProducts = [&](CVector direction) {
+        std::array<float, 6> out{};
         for (auto i = 0; i < 6; i++) {
             out[i] = DotProduct(triVertices[i], direction);
         }
+        return out;
     };
 
     // Calculate dot products for all vertices on both direction vectors
-    float rightDots[6]{};
-    CalculateDotProducts(rightDots, right);
+    const auto rightDots = CalculateDotProducts(right);
+    const auto fwdDots   = CalculateDotProducts(fwd);
 
-    float fwdDots[6]{};
-    CalculateDotProducts(fwdDots, fwd);
+    const float maxDotFwd   = *rng::max_element(fwdDots);
+    const float maxDotRight = *rng::max_element(rightDots);
 
-    // Find min, max values
-    float maxDotFwd = FLT_MIN, minDotRight = FLT_MAX, minRightFwdDotSum = FLT_MAX;
+    float minRightFwdDotSum = FLT_MAX;
     uint32 minRightFwdDotSumIdx{};
     for (auto i = 0; i < 6; i++) {
         const auto rightDot = rightDots[i], fwdDot = fwdDots[i];
-
-        maxDotFwd = std::max(maxDotFwd, fwdDot);
-        minDotRight = std::min(minDotRight, rightDot);
-
         if (rightDot + fwdDot < minRightFwdDotSum) {
             minRightFwdDotSum = rightDot + fwdDot;
             minRightFwdDotSumIdx = i;
         }
     }
 
-    const struct { float right, fwd; } size{
-        minDotRight - rightDots[minRightFwdDotSumIdx],
+    const struct { float right, fwd; } extent{
+        maxDotRight - rightDots[minRightFwdDotSumIdx],
         maxDotFwd - fwdDots[minRightFwdDotSumIdx]
     };
 
@@ -140,10 +145,10 @@ void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
     GeneratePanesForWindow(
         2,
         blPos,
-        fwd * size.fwd,
-        right * size.right,
+        fwd * extent.fwd,
+        right * extent.right,
         pVeh->m_vecMoveSpeed,
-        blPos + fwd * size.fwd / 2.f + right * size.right / 2.f,
+        blPos + fwd * extent.fwd / 2.f + right * extent.right / 2.f,
         0.1f,
         false,
         false,

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "FallingGlassPane.h"
 #include "Vector2D.h"
 #include "Vector.h"
+#include "FallingGlassPane.h"
 
 class CVehicle;
 class CEntity;
@@ -29,10 +29,10 @@ public:
     static void Init();
     static bool HasGlassBeenShatteredAtCoors(CVector pos);
     static void CarWindscreenShatters(CVehicle* pVeh);
-    static void WasGlassHitByBullet(CEntity* pObj, CVector hitPos);
-    static void WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, bool a5);
-    static void GeneratePanesForWindow(uint32 type, CVector bl_pos, CVector fwd_unnorm, CVector right_unnorm, CVector move_speed, CVector center, float velocityo_center_drag_coeff,
-                                       bool bShatter, bool size_max_1, int32 num_sections, bool a11);
+    static void WasGlassHitByBullet(CEntity* entity, CVector hitPos);
+    static void WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, bool max1PaneSection);
+    static void GeneratePanesForWindow(uint32 type, CVector pos, CVector fwdSize, CVector rightSize, CVector velocity, CVector center, float velocityCenterDragCoeff,
+                                       bool bShatter, bool numSectionsMax1, int32 numSections, bool unk);
     static void Update();
     static void Render();
     static void FindWindowSectorList(CPtrList& objList, float& outDist, CEntity*& outEntity, CVector point);
