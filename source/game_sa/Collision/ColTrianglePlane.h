@@ -29,6 +29,7 @@ public:
     static void InjectHooks();
 
     void GetNormal(CVector& out);
+    CVector GetNormal() const noexcept;
     void Set(CompressedVector const* vertices, CColTriangle& triangle);
 };
 VALIDATE_SIZE(CColTrianglePlane, 0xA);

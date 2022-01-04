@@ -232,7 +232,7 @@ CPlayerInfo& FindPlayerInfo(int playerId) {
 
 // NOTE: This function doesn't add m.GetPosition() like
 //       MultiplyMatrixWithVector @ 0x59C890 does.
-CVector Multiply3x3(CMatrix& m, CVector& v) {
+CVector Multiply3x3(CMatrix& m, const CVector& v) {
     return CVector{
         m.GetRight().x * v.x + m.GetForward().x * v.y + m.GetUp().x * v.z,
         m.GetRight().y * v.x + m.GetForward().y * v.y + m.GetUp().y * v.z,
@@ -241,10 +241,14 @@ CVector Multiply3x3(CMatrix& m, CVector& v) {
 }
 
 // vector by matrix mult, resulting in a vector where each component is the dot product of the in vector and a matrix direction
-CVector Multiply3x3(CVector& v, CMatrix& m) {
+CVector Multiply3x3(const CVector& v, CMatrix& m) {
     return CVector(DotProduct(m.GetRight(), v),
                    DotProduct(m.GetForward(), v),
                    DotProduct(m.GetUp(), v));
+}
+
+CVector MultiplyMatrixWithVector(CMatrix& m, const CVector& v) {
+    return m.GetPosition() + Multiply3x3(m, v);
 }
 
 // 0x54ECE0

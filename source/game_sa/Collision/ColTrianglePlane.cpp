@@ -2,13 +2,17 @@
 
 void CColTrianglePlane::InjectHooks()
 {
-    ReversibleHooks::Install("CColTrianglePlane", "GetNormal", 0x411610, &CColTrianglePlane::GetNormal);
+    ReversibleHooks::Install("CColTrianglePlane", "GetNormal", 0x411610, static_cast<void(CColTrianglePlane::*)(CVector&)>(&CColTrianglePlane::GetNormal));
     ReversibleHooks::Install("CColTrianglePlane", "Set", 0x411660, &CColTrianglePlane::Set);
 }
 
 void CColTrianglePlane::GetNormal(CVector& out)
 {
-    out = UncompressUnitVector(m_normal);
+    out = GetNormal();
+}
+
+CVector CColTrianglePlane::GetNormal() const noexcept {
+    return UncompressUnitVector(m_normal);
 }
 
 void CColTrianglePlane::Set(CompressedVector const* vertices, CColTriangle& triangle)

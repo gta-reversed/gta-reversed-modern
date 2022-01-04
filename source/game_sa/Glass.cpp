@@ -2,6 +2,8 @@
 #include "Glass.h"
 #include "FallingGlassPane.h"
 #include <numeric>
+#include <ranges>
+namespace rng = std::ranges;
 
 CVector2D (&PanePolyPositions)[4][3] = *(CVector2D(*)[4][3])0x8D5CD8;
 int32& CGlass::ReflectionPolyVertexBaseIdx = *(int32*)0xC71B18;
@@ -19,7 +21,7 @@ int32& CGlass::LastColCheckMS = *(int32*)0xC72FA8;
 void CGlass::InjectHooks() {
     ReversibleHooks::Install("CGlass", "Init", 0x71A8D0, &CGlass::Init);
     // ReversibleHooks::Install("CGlass", "HasGlassBeenShatteredAtCoors", 0x71CB70, &CGlass::HasGlassBeenShatteredAtCoors);
-    // ReversibleHooks::Install("CGlass", "CarWindscreenShatters", 0x71C2B0, &CGlass::CarWindscreenShatters);
+    ReversibleHooks::Install("CGlass", "CarWindscreenShatters", 0x71C2B0, &CGlass::CarWindscreenShatters);
     // ReversibleHooks::Install("CGlass", "WasGlassHitByBullet", 0x71C0D0, &CGlass::WasGlassHitByBullet);
     // ReversibleHooks::Install("CGlass", "WindowRespondsToCollision", 0x71BC40, &CGlass::WindowRespondsToCollision);
     // ReversibleHooks::Install("CGlass", "GeneratePanesForWindow", 0x71B620, &CGlass::GeneratePanesForWindow);
@@ -50,13 +52,104 @@ void CGlass::Init() {
 }
 
 // 0x71CB70
+// Unused
 bool CGlass::HasGlassBeenShatteredAtCoors(CVector pos) {
     return plugin::CallAndReturn<bool, 0x71CB70, CVector>(pos);
 }
 
 // 0x71C2B0
 void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
-    plugin::Call<0x71C2B0, CVehicle*>(pVeh);
+    const auto colModel = pVeh->GetColModel();
+    if (!colModel || colModel->GetTriCount() < 2) {
+        return;
+    }
+
+    const auto& triangles = colModel->m_pColData->m_pTriangles;
+    auto FindNextGlassTriangle = [&, idx = 0u]() mutable -> uint32 {
+        for (; idx < colModel->GetTriCount(); idx++) {
+            if (g_surfaceInfos->IsGlass(triangles[idx].m_nMaterial))
+                return idx;
+        }
+        return -1u;
+    };
+
+    const uint32 glassTriIdx[]{ FindNextGlassTriangle(), FindNextGlassTriangle() };
+    if (glassTriIdx[0] == -1u || glassTriIdx[1] == -1u)
+        return;
+
+    colModel->CalculateTrianglePlanes();
+
+    auto& vehMat = (CMatrix&)pVeh->GetMatrix();
+
+    // Grab normal and transform it to world space
+    const auto normal = Multiply3x3(
+        vehMat,
+        colModel->m_pColData->m_pTrianglePlanes[glassTriIdx[0]].GetNormal()
+    );
+
+    // Calculate direction vectors
+    const auto fwd   = Normalized(CrossProduct(vehMat.GetRight(), normal));
+    const auto right = Normalized(CrossProduct(vehMat.GetUp(), normal));
+
+    // Store world space vertex positions of both triangles
+    CVector triVertices[6]{};
+    for (auto t = 0; t < 2; t++) {
+        const auto& tri = triangles[glassTriIdx[t]];
+        for (auto v = 0; v < 3; v++) {
+            triVertices[t * 3 + v] = MultiplyMatrixWithVector(
+                vehMat,
+                UncompressUnitVector(colModel->m_pColData->m_pVertices[tri.m_vertIndices[v]])
+            );
+        }
+    }
+
+    const auto CalculateDotProducts = [&](float(&out)[6], CVector direction) {
+        for (auto i = 0; i < 6; i++) {
+            out[i] = DotProduct(triVertices[i], direction);
+        }
+    };
+
+    // Calculate dot products for all vertices on both direction vectors
+    float rightDots[6]{};
+    CalculateDotProducts(rightDots, right);
+
+    float fwdDots[6]{};
+    CalculateDotProducts(fwdDots, fwd);
+
+    // Find min, max values
+    float maxDotFwd = FLT_MIN, minDotRight = FLT_MAX, minRightFwdDotSum = FLT_MAX;
+    uint32 minRightFwdDotSumIdx{};
+    for (auto i = 0; i < 6; i++) {
+        const auto rightDot = rightDots[i], fwdDot = fwdDots[i];
+
+        maxDotFwd = std::max(maxDotFwd, fwdDot);
+        minDotRight = std::min(minDotRight, rightDot);
+
+        if (rightDot + fwdDot < minRightFwdDotSum) {
+            minRightFwdDotSum = rightDot + fwdDot;
+            minRightFwdDotSumIdx = i;
+        }
+    }
+
+    const struct { float right, fwd; } size{
+        minDotRight - rightDots[minRightFwdDotSumIdx],
+        maxDotFwd - fwdDots[minRightFwdDotSumIdx]
+    };
+
+    const auto blPos = triVertices[minRightFwdDotSumIdx];
+    GeneratePanesForWindow(
+        2,
+        blPos,
+        fwd * size.fwd,
+        right * size.right,
+        pVeh->m_vecMoveSpeed,
+        blPos + fwd * size.fwd / 2.f + right * size.right / 2.f,
+        0.1f,
+        false,
+        false,
+        2,
+        true
+    );
 }
 
 // 0x71C0D0
@@ -69,11 +162,33 @@ void CGlass::WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity,
     return plugin::Call<0x71BC40, CEntity*, float, CVector, CVector, bool>(pEntity, fDamageIntensity, vecMoveSpeed, vecPoint, a5);
 }
 
-// 0x71B620
-void CGlass::GeneratePanesForWindow(uint32 type, CVector bl_pos, CVector fwd_unnorm, CVector right_unnorm, CVector move_speed, CVector center, float velocityo_center_drag_coeff,
-                                    bool bShatter, bool size_max_1, int32 num_sections, bool a11) {
+/*
+ * 0x71B620
+ *
+ * Corners:
+ * TL ----- TR
+ * |  0 | 1 |
+ * | ------ | fwdSize
+ * |  2 | 3 |
+ * BL ----- BR
+ *  rightSize
+ *
+ * - Neither 'size' vectors are normalized!
+ *
+ * type                    - 0, 1, 2 - Undocumented yet
+ * pos                     - BL
+ * fwdSize, rightSize      - As illustrated above
+ * center                  - The centre of the above rectangle (each pane is a piece of it)
+ * velocity                - How fast the panes fly
+ * velocityCenterDragCoeff - Modify the velocity's direction to be more towards the center point
+ * bShatter                - Render shatter polys
+ * numSectionsMax1         - Limit no. of sections to 1 - Unsure what's it use-case as setting `numSections` to 1 achieves the same
+ * numSections             - No. of sections of each axis, the total number of sections will be `numSections ^ 2` (squared)
+**/
+void CGlass::GeneratePanesForWindow(uint32 type, CVector pos, CVector fwdSize, CVector rightSize, CVector velocity, CVector center, float velocityCenterDragCoeff,
+                                    bool bShatter, bool numSectionsMax1, int32 numSections, bool unk) {
     plugin::Call<0x71B620, uint32, CVector, CVector, CVector, CVector, CVector, float, bool, bool, int32, bool>(
-        type, bl_pos, fwd_unnorm, right_unnorm, move_speed, center, velocityo_center_drag_coeff, bShatter, size_max_1, num_sections, a11);
+        type, pos, fwdSize, rightSize, velocity, center, velocityCenterDragCoeff, bShatter, numSectionsMax1, numSections, unk);
 }
 
 // 0x71B0D0
