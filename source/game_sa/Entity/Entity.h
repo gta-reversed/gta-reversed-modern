@@ -16,11 +16,15 @@
 #include "eEntityStatus.h"
 #include "eModelID.h"
 
-class CTrain;
-class CBike;
+class CPhysical;
+class CVehicle;
 class CAutomobile;
-class CDummy;
+class CBike;
+class CTrain;
+class CPed;
+class CObject;
 class CBuilding;
+class CDummy;
 
 class CEntity : public CPlaceable {
 protected:
