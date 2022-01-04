@@ -23,7 +23,7 @@ void CGlass::InjectHooks() {
     // ReversibleHooks::Install("CGlass", "HasGlassBeenShatteredAtCoors", 0x71CB70, &CGlass::HasGlassBeenShatteredAtCoors);
     ReversibleHooks::Install("CGlass", "CarWindscreenShatters", 0x71C2B0, &CGlass::CarWindscreenShatters);
     ReversibleHooks::Install("CGlass", "WasGlassHitByBullet", 0x71C0D0, &CGlass::WasGlassHitByBullet);
-    // ReversibleHooks::Install("CGlass", "WindowRespondsToCollision", 0x71BC40, &CGlass::WindowRespondsToCollision);
+    ReversibleHooks::Install("CGlass", "WindowRespondsToCollision", 0x71BC40, &CGlass::WindowRespondsToCollision);
     // ReversibleHooks::Install("CGlass", "GeneratePanesForWindow", 0x71B620, &CGlass::GeneratePanesForWindow);
     // ReversibleHooks::Install("CGlass", "Update", 0x71B0D0, &CGlass::Update);
     // ReversibleHooks::Install("CGlass", "Render", 0x71CE20, &CGlass::Render);
@@ -98,7 +98,7 @@ void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
         for (auto v = 0; v < 3; v++) {
             triVertices[t * 3 + v] = MultiplyMatrixWithVector(
                 vehMat,
-                UncompressUnitVector(colModel->m_pColData->m_pVertices[tri.m_vertIndices[v]])
+                UncompressVector(colModel->m_pColData->m_pVertices[tri.m_vertIndices[v]])
             );
         }
     }
@@ -177,9 +177,55 @@ void CGlass::WasGlassHitByBullet(CEntity* entity, CVector hitPos) {
     }
 }
 
+template<size_t N>
+std::pair<float, float> FindMinMaxZOfVertices(CVector (&vertices)[N]) {
+    float min = FLT_MAX, max = FLT_MIN;
+    for (const auto& v : vertices) {
+        min = std::min(min, v.z);
+        max = std::max(max, v.z);
+    }
+    return { min, max };
+}
+
 // 0x71BC40
-void CGlass::WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, bool a5) {
-    return plugin::Call<0x71BC40, CEntity*, float, CVector, CVector, bool>(pEntity, fDamageIntensity, vecMoveSpeed, vecPoint, a5);
+void CGlass::WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, bool max1PaneSection) {
+    auto object = pEntity->AsObject();
+    if (!object->objectFlags.b0x20)
+        return;
+
+    object->objectFlags.bGlassBroken = true;
+
+    if (const auto colModel = object->GetColModel(); colModel && colModel->GetTriCount() == 2) {
+        // Object space vertices
+        CVector verticesOS[4]{};
+        for (auto i = 0; i < 4; i++) {
+            verticesOS[i] = UncompressVector(colModel->m_pColData->m_pVertices[i]);
+        }
+
+        const auto [minZ, maxZ] = FindMinMaxZOfVertices(verticesOS);
+        //const auto vert01MaxZ = std::
+
+        uint32 furthestFromV0Idx{};
+        {
+            float max{ FLT_MIN };
+            for (auto i = 1; i < 4; i++) {
+                const auto dist = DistanceBetweenPoints2D(verticesOS[0], verticesOS[i]);
+                if (dist > max) {
+                    max = dist;
+                    furthestFromV0Idx = i;
+                }
+            }
+        }
+
+        // Transform vertices to world space
+        const auto vert01MinZ        = std::min(verticesOS[0].z, verticesOS[1].z);
+        const auto vert0Pos          = Multiply3x3(object->GetMatrix(), { verticesOS[0].x, verticesOS[0].y, vert01MinZ });
+        const auto furthestFromV0Pos = Multiply3x3(object->GetMatrix(), { verticesOS[furthestFromV0Idx].x, verticesOS[furthestFromV0Idx].y, vert01MinZ });
+
+        AudioEngine.ReportGlassCollisionEvent(AE_GLASS_BREAK_FAST, object->GetPosition());
+        GeneratePanesForWindow(fDamageIntensity <= 300.f ? 1 : 0, vert0Pos, { 0.f, 0.f, maxZ - minZ }, furthestFromV0Pos - vert0Pos, vecMoveSpeed, vecPoint, 0.1f, object->objectFlags.bGlassBroken, max1PaneSection, 1, false);
+    }
+
 }
 
 /*
