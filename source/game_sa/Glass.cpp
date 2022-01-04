@@ -22,7 +22,7 @@ void CGlass::InjectHooks() {
     ReversibleHooks::Install("CGlass", "Init", 0x71A8D0, &CGlass::Init);
     // ReversibleHooks::Install("CGlass", "HasGlassBeenShatteredAtCoors", 0x71CB70, &CGlass::HasGlassBeenShatteredAtCoors);
     ReversibleHooks::Install("CGlass", "CarWindscreenShatters", 0x71C2B0, &CGlass::CarWindscreenShatters);
-    // ReversibleHooks::Install("CGlass", "WasGlassHitByBullet", 0x71C0D0, &CGlass::WasGlassHitByBullet);
+    ReversibleHooks::Install("CGlass", "WasGlassHitByBullet", 0x71C0D0, &CGlass::WasGlassHitByBullet);
     // ReversibleHooks::Install("CGlass", "WindowRespondsToCollision", 0x71BC40, &CGlass::WindowRespondsToCollision);
     // ReversibleHooks::Install("CGlass", "GeneratePanesForWindow", 0x71B620, &CGlass::GeneratePanesForWindow);
     // ReversibleHooks::Install("CGlass", "Update", 0x71B0D0, &CGlass::Update);
@@ -153,8 +153,28 @@ void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
 }
 
 // 0x71C0D0
-void CGlass::WasGlassHitByBullet(CEntity* pObj, CVector hitPos) {
-    plugin::Call<0x71C0D0, CEntity*, CVector>(pObj, hitPos);
+void CGlass::WasGlassHitByBullet(CEntity* entity, CVector hitPos) {
+    if (!entity->IsObject())
+        return;
+
+    if (!entity->m_bUsesCollision)
+        return;
+
+    const auto object = entity->AsObject();
+    const auto MI = CModelInfo::GetModelInfo(object->m_nModelIndex)->AsAtomicModelInfoPtr();
+    switch (MI->nSpecialType) {
+    case eModelInfoSpecialType::GLASS_TYPE_1:
+    case eModelInfoSpecialType::GLASS_TYPE_2: {
+        if (object->objectFlags.bGlassBroken) {
+            if (rand() % 4 == 2) {
+                WindowRespondsToCollision(entity, 0.0f, {}, hitPos, false);
+            }
+        } else {
+            object->objectFlags.bGlassBroken = true; // Just mark it as broken
+        }
+        break;
+    }
+    }
 }
 
 // 0x71BC40
