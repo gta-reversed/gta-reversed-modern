@@ -1,6 +1,7 @@
 #include "StdInc.h"
 #include "Glass.h"
 #include "FallingGlassPane.h"
+#include <numeric>
 
 CVector2D (&PanePolyPositions)[4][3] = *(CVector2D(*)[4][3])0x8D5CD8;
 int32& CGlass::ReflectionPolyVertexBaseIdx = *(int32*)0xC71B18;
@@ -16,7 +17,7 @@ CFallingGlassPane (&aGlassPanes)[44] = *(CFallingGlassPane(*)[44])0xC71BF8;
 int32& CGlass::LastColCheckMS = *(int32*)0xC72FA8;
 
 void CGlass::InjectHooks() {
-    // ReversibleHooks::Install("CGlass", "Init", 0x71A8D0, &CGlass::Init);
+    ReversibleHooks::Install("CGlass", "Init", 0x71A8D0, &CGlass::Init);
     // ReversibleHooks::Install("CGlass", "HasGlassBeenShatteredAtCoors", 0x71CB70, &CGlass::HasGlassBeenShatteredAtCoors);
     // ReversibleHooks::Install("CGlass", "CarWindscreenShatters", 0x71C2B0, &CGlass::CarWindscreenShatters);
     // ReversibleHooks::Install("CGlass", "WasGlassHitByBullet", 0x71C0D0, &CGlass::WasGlassHitByBullet);
@@ -38,7 +39,14 @@ void CGlass::InjectHooks() {
 // Static functions
 // 0x71A8D0
 void CGlass::Init() {
-    plugin::Call<0x71A8D0>();
+    for (auto& pane : aGlassPanes) {
+        pane.existFlag = false;
+    }
+
+    for (auto i = 0u; i < std::size(PanePolyPositions); i++) {
+        const auto& poly = PanePolyPositions[i];
+        PanePolyCenterPositions[i] = std::accumulate(std::begin(poly), std::end(poly), CVector2D{}) / (float)std::size(PanePolyPositions);
+    }
 }
 
 // 0x71CB70
