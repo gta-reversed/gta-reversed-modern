@@ -10,6 +10,7 @@ CVector2D (&CGlass::PanePolyPositions)[4][3] = *(CVector2D(*)[4][3])0x8D5CD8;
 int32& CGlass::ReflectionPolyVertexBaseIdx = *(int32*)0xC71B18;
 int32& CGlass::ReflectionPolyIndexBaseIdx = *(int32*)0xC71B1C;
 RxObjSpace3DLitVertex(&CGlass::ReflectionPolyVertexBuffer)[1706] = *(RxObjSpace3DLitVertex(*)[1706])0xC5B158;
+RxObjSpace3DLitVertex(&CGlass::ShatteredPolyVertexBuffer)[512] = *(RxObjSpace3DLitVertex(*)[512])0xC5B158;
 int32& CGlass::ShatteredVerticesBaseIdx = *(int32*)0xC71B20;
 int32& CGlass::ShatteredIndicesBaseIdx = *(int32*)0xC71B24;
 uint32& CGlass::NumHiLightPolyVertices = *(uint32*)0xC71B28;
@@ -31,7 +32,7 @@ void CGlass::InjectHooks() {
     ReversibleHooks::Install("CGlass", "Render", 0x71CE20, &CGlass::Render);
     ReversibleHooks::Install("CGlass", "FindWindowSectorList", 0x71AFC0, &CGlass::FindWindowSectorList);
     ReversibleHooks::Install("CGlass", "RenderReflectionPolys", 0x71AED0, &CGlass::RenderReflectionPolys);
-    // ReversibleHooks::Install("CGlass", "RenderShatteredPolys", 0x71AE30, &CGlass::RenderShatteredPolys);
+    ReversibleHooks::Install("CGlass", "RenderShatteredPolys", 0x71AE30, &CGlass::RenderShatteredPolys);
     // ReversibleHooks::Install("CGlass", "RenderHiLightPolys", 0x71ADA0, &CGlass::RenderHiLightPolys);
     // ReversibleHooks::Install("CGlass", "CalcAlphaWithNormal", 0x71ACF0, &CGlass::CalcAlphaWithNormal);
     // ReversibleHooks::Install("CGlass", "AskForObjectToBeRenderedInGlass", 0x71ACD0, &CGlass::AskForObjectToBeRenderedInGlass);
@@ -429,7 +430,21 @@ void CGlass::RenderReflectionPolys() {
 
 // 0x71AE30
 void CGlass::RenderShatteredPolys() {
-    plugin::Call<0x71AE30>();
+    if (ShatteredVerticesBaseIdx != 1024)
+    {
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)gpCrackedGlassTex->raster);
+        RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+
+        if (RwIm3DTransform(ShatteredPolyVertexBuffer, ShatteredVerticesBaseIdx - 1024, nullptr, rwIM3D_VERTEXUV))
+        {
+            RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, &aTempBufferIndices[2048], ShatteredIndicesBaseIdx - 2048);
+            RwIm3DEnd();
+        }
+
+        ShatteredVerticesBaseIdx = 1024;
+        ShatteredIndicesBaseIdx = 2048;
+    }
 }
 
 // 0x71ADA0

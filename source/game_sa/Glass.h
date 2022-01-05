@@ -14,6 +14,7 @@ public:
     static int32& ReflectionPolyVertexBaseIdx;
     static int32& ReflectionPolyIndexBaseIdx;
     static RxObjSpace3DLitVertex(&ReflectionPolyVertexBuffer)[1706];
+    static RxObjSpace3DLitVertex(&ShatteredPolyVertexBuffer)[512];
     static int32& ShatteredVerticesBaseIdx;
     static int32& ShatteredIndicesBaseIdx;
     static uint32& NumHiLightPolyVertices;
