@@ -30,6 +30,13 @@ public:
     uint8 m_nLighting;
     uint8 m_nLight;
 
+    CColSphere() = default;
+
+    CColSphere(CVector center, float radius) :
+        CSphere{center, radius}
+    {
+    }
+
 public:
     static void InjectHooks();
 

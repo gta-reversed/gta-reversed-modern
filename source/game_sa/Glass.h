@@ -24,13 +24,13 @@ public:
     static CEntity*(&apEntitiesToBeRendered)[32];
     static int32& NumGlassEntities;
     static CFallingGlassPane (&aGlassPanes)[44];
-    static int32& LastColCheckMS;
+    static uint32& LastColCheckMS;
 
 public:
     static void InjectHooks();
 
     static void Init();
-    static bool HasGlassBeenShatteredAtCoors(CVector pos);
+    static bool HasGlassBeenShatteredAtCoors(CVector point);
     static void CarWindscreenShatters(CVehicle* pVeh);
     static void WasGlassHitByBullet(CEntity* entity, CVector hitPos);
     static void WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, bool max1PaneSection);
