@@ -36,7 +36,7 @@ void CGlass::InjectHooks() {
     ReversibleHooks::Install("CGlass", "RenderHiLightPolys", 0x71ADA0, &CGlass::RenderHiLightPolys);
     ReversibleHooks::Install("CGlass", "CalcAlphaWithNormal", 0x71ACF0, &CGlass::CalcAlphaWithNormal);
     ReversibleHooks::Install("CGlass", "AskForObjectToBeRenderedInGlass", 0x71ACD0, &CGlass::AskForObjectToBeRenderedInGlass);
-    // ReversibleHooks::Install("CGlass", "FindFreePane", 0x71ACA0, &CGlass::FindFreePane);
+    ReversibleHooks::Install("CGlass", "FindFreePane", 0x71ACA0, &CGlass::FindFreePane);
     // ReversibleHooks::Install("CGlass", "WindowRespondsToSoftCollision", 0x71AF70, &CGlass::WindowRespondsToSoftCollision);
     // ReversibleHooks::Install("CGlass", "BreakGlassPhysically", 0x71CF50, &CGlass::BreakGlassPhysically);
 }
@@ -486,7 +486,12 @@ void CGlass::AskForObjectToBeRenderedInGlass(CEntity* entity) {
 
 // 0x71ACA0
 CFallingGlassPane* CGlass::FindFreePane() {
-    return plugin::CallAndReturn<CFallingGlassPane*, 0x71ACA0>();
+    for (auto& pane : aGlassPanes) {
+        if (!pane.existFlag) {
+            return &pane;
+        }
+    }
+    return nullptr;
 }
 
 // 0x71AF70
