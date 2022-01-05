@@ -26,7 +26,7 @@ void CGlass::InjectHooks() {
     ReversibleHooks::Install("CGlass", "WasGlassHitByBullet", 0x71C0D0, &CGlass::WasGlassHitByBullet);
     ReversibleHooks::Install("CGlass", "WindowRespondsToCollision", 0x71BC40, &CGlass::WindowRespondsToCollision);
     ReversibleHooks::Install("CGlass", "GeneratePanesForWindow", 0x71B620, &CGlass::GeneratePanesForWindow);
-    // ReversibleHooks::Install("CGlass", "Update", 0x71B0D0, &CGlass::Update);
+    ReversibleHooks::Install("CGlass", "Update", 0x71B0D0, &CGlass::Update);
     // ReversibleHooks::Install("CGlass", "Render", 0x71CE20, &CGlass::Render);
     // ReversibleHooks::Install("CGlass", "FindWindowSectorList", 0x71AFC0, &CGlass::FindWindowSectorList);
     // ReversibleHooks::Install("CGlass", "RenderReflectionPolys", 0x71AED0, &CGlass::RenderReflectionPolys);
@@ -336,7 +336,11 @@ void CGlass::GeneratePanesForWindow(uint32 type, CVector pos, CVector fwd, CVect
 
 // 0x71B0D0
 void CGlass::Update() {
-    plugin::Call<0x71B0D0>();
+    for (auto& pane : aGlassPanes) {
+        if (pane.existFlag) {
+            pane.Update();
+        }
+    }
 }
 
 // 0x71CE20
