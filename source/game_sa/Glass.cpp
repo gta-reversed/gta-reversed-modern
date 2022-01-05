@@ -37,7 +37,7 @@ void CGlass::InjectHooks() {
     ReversibleHooks::Install("CGlass", "CalcAlphaWithNormal", 0x71ACF0, &CGlass::CalcAlphaWithNormal);
     ReversibleHooks::Install("CGlass", "AskForObjectToBeRenderedInGlass", 0x71ACD0, &CGlass::AskForObjectToBeRenderedInGlass);
     ReversibleHooks::Install("CGlass", "FindFreePane", 0x71ACA0, &CGlass::FindFreePane);
-    // ReversibleHooks::Install("CGlass", "WindowRespondsToSoftCollision", 0x71AF70, &CGlass::WindowRespondsToSoftCollision);
+    ReversibleHooks::Install("CGlass", "WindowRespondsToSoftCollision", 0x71AF70, &CGlass::WindowRespondsToSoftCollision);
     // ReversibleHooks::Install("CGlass", "BreakGlassPhysically", 0x71CF50, &CGlass::BreakGlassPhysically);
 }
 
@@ -495,8 +495,11 @@ CFallingGlassPane* CGlass::FindFreePane() {
 }
 
 // 0x71AF70
-void CGlass::WindowRespondsToSoftCollision(CEntity* pEntity, float fDamageIntensity) {
-    plugin::Call<0x71AF70, CEntity*, float>(pEntity, fDamageIntensity);
+void CGlass::WindowRespondsToSoftCollision(CObject* object, float fDamageIntensity) {
+    if (object->m_bUsesCollision && fDamageIntensity > 50.f && !object->objectFlags.bGlassBroken) {
+        AudioEngine.ReportGlassCollisionEvent(AE_GLASS_HIT, object->GetPosition());
+        object->objectFlags.bGlassBroken = true;
+    }
 }
 
 // 0x71CF50
