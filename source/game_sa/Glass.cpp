@@ -28,7 +28,7 @@ void CGlass::InjectHooks() {
     ReversibleHooks::Install("CGlass", "GeneratePanesForWindow", 0x71B620, &CGlass::GeneratePanesForWindow);
     ReversibleHooks::Install("CGlass", "Update", 0x71B0D0, &CGlass::Update);
     ReversibleHooks::Install("CGlass", "Render", 0x71CE20, &CGlass::Render);
-    // ReversibleHooks::Install("CGlass", "FindWindowSectorList", 0x71AFC0, &CGlass::FindWindowSectorList);
+    ReversibleHooks::Install("CGlass", "FindWindowSectorList", 0x71AFC0, &CGlass::FindWindowSectorList);
     // ReversibleHooks::Install("CGlass", "RenderReflectionPolys", 0x71AED0, &CGlass::RenderReflectionPolys);
     // ReversibleHooks::Install("CGlass", "RenderShatteredPolys", 0x71AE30, &CGlass::RenderShatteredPolys);
     // ReversibleHooks::Install("CGlass", "RenderHiLightPolys", 0x71ADA0, &CGlass::RenderHiLightPolys);
@@ -380,7 +380,32 @@ void CGlass::Render() {
 
 // 0x71AFC0
 void CGlass::FindWindowSectorList(CPtrList& objList, float& outDist, CEntity*& outEntity, CVector point) {
-    plugin::Call<0x71AFC0, CPtrList&, float&, CEntity*&, CVector>(objList, outDist, outEntity, point);
+    if (!objList.GetNode())
+        return;
+
+    for (CPtrNode *it = objList.GetNode(); it;) {
+        const auto entity = static_cast<CEntity*>(it->m_item);
+        it = it->GetNext();
+        if (!entity->IsObject())
+            continue;
+        const auto object = entity->AsObject();
+        const auto pAMI = CModelInfo::GetModelInfo(entity->m_nModelIndex)->AsAtomicModelInfoPtr();
+        if (!pAMI)
+            continue;
+        if (object->m_nScanCode == CWorld::ms_nCurrentScanCode)
+            continue;
+        switch (pAMI->nSpecialType) {
+        case eModelInfoSpecialType::GLASS_TYPE_1:
+        case eModelInfoSpecialType::GLASS_TYPE_2: {
+            object->m_nScanCode = CWorld::ms_nCurrentScanCode;
+            if (const auto dist = (object->GetPosition() - point).Magnitude(); dist < outDist) {
+                outEntity = entity;
+                outDist = dist;
+            }
+            break;
+        }
+        }
+    }
 }
 
 // 0x71AED0
