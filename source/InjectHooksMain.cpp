@@ -173,7 +173,7 @@ void InjectHooksMain()
     // WaitForDebugger();
     InjectCommonHooks();
     CPad::InjectHooks();
-    
+    CFallingGlassPane::InjectHooks();
     CPtrList::InjectHooks();
     BreakManager_c::InjectHooks();
     IKChainManager_c::InjectHooks();
