@@ -13,6 +13,7 @@ public:
     static CVector2D (&PanePolyPositions)[4][3];
     static int32& ReflectionPolyVertexBaseIdx;
     static int32& ReflectionPolyIndexBaseIdx;
+    static RxObjSpace3DLitVertex(&ReflectionPolyVertexBuffer)[1706];
     static int32& ShatteredVerticesBaseIdx;
     static int32& ShatteredIndicesBaseIdx;
     static uint32& NumHiLightPolyVertices;
