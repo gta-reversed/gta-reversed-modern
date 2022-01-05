@@ -17,10 +17,10 @@ public:
     static RxObjSpace3DLitVertex(&ShatteredPolyVertexBuffer)[512];
     static int32& ShatteredVerticesBaseIdx;
     static int32& ShatteredIndicesBaseIdx;
-    static uint32& NumHiLightPolyVertices;
-    static int32& NumHiLightPolyIndices;
+    static uint32& H1iLightPolyVerticesIdx;
+    static int32& HiLightPolyIndicesIdx;
     static CVector2D (&PanePolyCenterPositions)[5];
-    static int32 (&apEntitiesToBeRendered)[1];
+    static CEntity*(&apEntitiesToBeRendered)[32];
     static int32& NumGlassEntities;
     static CFallingGlassPane (&aGlassPanes)[44];
     static int32& LastColCheckMS;
@@ -41,8 +41,8 @@ public:
     static void RenderReflectionPolys();
     static void RenderShatteredPolys();
     static void RenderHiLightPolys();
-    static uint8 CalcAlphaWithNormal(CVector* normal);
-    static void AskForObjectToBeRenderedInGlass(CEntity* a1);
+    static uint8 CalcAlphaWithNormal(const CVector& normal);
+    static void AskForObjectToBeRenderedInGlass(CEntity* entity);
     static CFallingGlassPane* FindFreePane();
     static void WindowRespondsToSoftCollision(CEntity* pEntity, float fDamageIntensity);
     static void BreakGlassPhysically(CVector pos, float radius);

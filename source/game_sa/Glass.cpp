@@ -16,7 +16,7 @@ int32& CGlass::ShatteredIndicesBaseIdx = *(int32*)0xC71B24;
 uint32& CGlass::H1iLightPolyVerticesIdx = *(uint32*)0xC71B28;
 int32& CGlass::HiLightPolyIndicesIdx = *(int32*)0xC71B2C;
 CVector2D (&CGlass::PanePolyCenterPositions)[5] = *(CVector2D(*)[5])0xC71B30;
-int32 (&CGlass::apEntitiesToBeRendered)[1] = *(int32(*)[1])0xC71B58;
+CEntity*(&CGlass::apEntitiesToBeRendered)[32] = *(CEntity*(*)[32])0xC71B58;
 int32& CGlass::NumGlassEntities = *(int32*)0xC71BD8;
 CFallingGlassPane (&CGlass::aGlassPanes)[44] = *(CFallingGlassPane(*)[44])0xC71BF8;
 int32& CGlass::LastColCheckMS = *(int32*)0xC72FA8;
@@ -35,7 +35,7 @@ void CGlass::InjectHooks() {
     ReversibleHooks::Install("CGlass", "RenderShatteredPolys", 0x71AE30, &CGlass::RenderShatteredPolys);
     ReversibleHooks::Install("CGlass", "RenderHiLightPolys", 0x71ADA0, &CGlass::RenderHiLightPolys);
     ReversibleHooks::Install("CGlass", "CalcAlphaWithNormal", 0x71ACF0, &CGlass::CalcAlphaWithNormal);
-    // ReversibleHooks::Install("CGlass", "AskForObjectToBeRenderedInGlass", 0x71ACD0, &CGlass::AskForObjectToBeRenderedInGlass);
+    ReversibleHooks::Install("CGlass", "AskForObjectToBeRenderedInGlass", 0x71ACD0, &CGlass::AskForObjectToBeRenderedInGlass);
     // ReversibleHooks::Install("CGlass", "FindFreePane", 0x71ACA0, &CGlass::FindFreePane);
     // ReversibleHooks::Install("CGlass", "WindowRespondsToSoftCollision", 0x71AF70, &CGlass::WindowRespondsToSoftCollision);
     // ReversibleHooks::Install("CGlass", "BreakGlassPhysically", 0x71CF50, &CGlass::BreakGlassPhysically);
@@ -478,8 +478,10 @@ uint8 CGlass::CalcAlphaWithNormal(const CVector& normal) {
 }
 
 // 0x71ACD0
-void CGlass::AskForObjectToBeRenderedInGlass(CEntity* a1) {
-    plugin::Call<0x71ACD0, CEntity*>(a1);
+void CGlass::AskForObjectToBeRenderedInGlass(CEntity* entity) {
+    if (NumGlassEntities < 31) {
+        apEntitiesToBeRendered[NumGlassEntities++] = entity;
+    }
 }
 
 // 0x71ACA0
