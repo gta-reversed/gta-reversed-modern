@@ -34,7 +34,7 @@ void CGlass::InjectHooks() {
     ReversibleHooks::Install("CGlass", "RenderReflectionPolys", 0x71AED0, &CGlass::RenderReflectionPolys);
     ReversibleHooks::Install("CGlass", "RenderShatteredPolys", 0x71AE30, &CGlass::RenderShatteredPolys);
     ReversibleHooks::Install("CGlass", "RenderHiLightPolys", 0x71ADA0, &CGlass::RenderHiLightPolys);
-    // ReversibleHooks::Install("CGlass", "CalcAlphaWithNormal", 0x71ACF0, &CGlass::CalcAlphaWithNormal);
+    ReversibleHooks::Install("CGlass", "CalcAlphaWithNormal", 0x71ACF0, &CGlass::CalcAlphaWithNormal);
     // ReversibleHooks::Install("CGlass", "AskForObjectToBeRenderedInGlass", 0x71ACD0, &CGlass::AskForObjectToBeRenderedInGlass);
     // ReversibleHooks::Install("CGlass", "FindFreePane", 0x71ACA0, &CGlass::FindFreePane);
     // ReversibleHooks::Install("CGlass", "WindowRespondsToSoftCollision", 0x71AF70, &CGlass::WindowRespondsToSoftCollision);
@@ -466,8 +466,15 @@ void CGlass::RenderHiLightPolys() {
 }
 
 // 0x71ACF0
-uint8 CGlass::CalcAlphaWithNormal(CVector* normal) {
-    return plugin::CallAndReturn<uint8, 0x71ACF0, CVector*>(normal);
+uint8 CGlass::CalcAlphaWithNormal(const CVector& normal) {
+    const auto camFwd = TheCamera.GetForward();
+    const auto normal_x_2dot = 2.f * DotProduct(normal, camFwd) * normal;
+    const auto factor = ( // TODO: What the fuck is going on here???
+          camFwd.x - normal_x_2dot.x
+        + camFwd.y - normal_x_2dot.y
+        - camFwd.z + normal_x_2dot.z
+    ) * SQRT_3;
+    return (uint8)(std::pow(factor, 6) * 235.f + 20.f);
 }
 
 // 0x71ACD0
