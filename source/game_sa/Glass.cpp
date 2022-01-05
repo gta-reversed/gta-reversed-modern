@@ -13,8 +13,8 @@ RxObjSpace3DLitVertex(&CGlass::ReflectionPolyVertexBuffer)[1706] = *(RxObjSpace3
 RxObjSpace3DLitVertex(&CGlass::ShatteredPolyVertexBuffer)[512] = *(RxObjSpace3DLitVertex(*)[512])0xC5B158;
 int32& CGlass::ShatteredVerticesBaseIdx = *(int32*)0xC71B20;
 int32& CGlass::ShatteredIndicesBaseIdx = *(int32*)0xC71B24;
-uint32& CGlass::NumHiLightPolyVertices = *(uint32*)0xC71B28;
-int32& CGlass::NumHiLightPolyIndices = *(int32*)0xC71B2C;
+uint32& CGlass::H1iLightPolyVerticesIdx = *(uint32*)0xC71B28;
+int32& CGlass::HiLightPolyIndicesIdx = *(int32*)0xC71B2C;
 CVector2D (&CGlass::PanePolyCenterPositions)[5] = *(CVector2D(*)[5])0xC71B30;
 int32 (&CGlass::apEntitiesToBeRendered)[1] = *(int32(*)[1])0xC71B58;
 int32& CGlass::NumGlassEntities = *(int32*)0xC71BD8;
@@ -33,7 +33,7 @@ void CGlass::InjectHooks() {
     ReversibleHooks::Install("CGlass", "FindWindowSectorList", 0x71AFC0, &CGlass::FindWindowSectorList);
     ReversibleHooks::Install("CGlass", "RenderReflectionPolys", 0x71AED0, &CGlass::RenderReflectionPolys);
     ReversibleHooks::Install("CGlass", "RenderShatteredPolys", 0x71AE30, &CGlass::RenderShatteredPolys);
-    // ReversibleHooks::Install("CGlass", "RenderHiLightPolys", 0x71ADA0, &CGlass::RenderHiLightPolys);
+    ReversibleHooks::Install("CGlass", "RenderHiLightPolys", 0x71ADA0, &CGlass::RenderHiLightPolys);
     // ReversibleHooks::Install("CGlass", "CalcAlphaWithNormal", 0x71ACF0, &CGlass::CalcAlphaWithNormal);
     // ReversibleHooks::Install("CGlass", "AskForObjectToBeRenderedInGlass", 0x71ACD0, &CGlass::AskForObjectToBeRenderedInGlass);
     // ReversibleHooks::Install("CGlass", "FindFreePane", 0x71ACA0, &CGlass::FindFreePane);
@@ -347,8 +347,8 @@ void CGlass::Update() {
 
 // 0x71CE20
 void CGlass::Render() {
-    NumHiLightPolyVertices = 0;
-    NumHiLightPolyIndices = 0;
+    H1iLightPolyVerticesIdx = 0;
+    HiLightPolyIndicesIdx = 0;
 
     ShatteredVerticesBaseIdx = 1024;
     ShatteredIndicesBaseIdx = 2048;
@@ -449,7 +449,20 @@ void CGlass::RenderShatteredPolys() {
 
 // 0x71ADA0
 void CGlass::RenderHiLightPolys() {
-    plugin::Call<0x71ADA0>();
+    if (H1iLightPolyVerticesIdx != 0)
+    {
+        RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)gpShadowExplosionTex->raster);
+
+        if (RwIm3DTransform(aTempBufferVertices, H1iLightPolyVerticesIdx, nullptr, rwIM3D_VERTEXUV)) {
+            RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, aTempBufferIndices, HiLightPolyIndicesIdx);
+            RwIm3DEnd();
+        }
+
+        HiLightPolyIndicesIdx = 0;
+        H1iLightPolyVerticesIdx = 0;
+    }
 }
 
 // 0x71ACF0
