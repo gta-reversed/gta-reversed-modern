@@ -27,7 +27,7 @@ void CGlass::InjectHooks() {
     ReversibleHooks::Install("CGlass", "WindowRespondsToCollision", 0x71BC40, &CGlass::WindowRespondsToCollision);
     ReversibleHooks::Install("CGlass", "GeneratePanesForWindow", 0x71B620, &CGlass::GeneratePanesForWindow);
     ReversibleHooks::Install("CGlass", "Update", 0x71B0D0, &CGlass::Update);
-    // ReversibleHooks::Install("CGlass", "Render", 0x71CE20, &CGlass::Render);
+    ReversibleHooks::Install("CGlass", "Render", 0x71CE20, &CGlass::Render);
     // ReversibleHooks::Install("CGlass", "FindWindowSectorList", 0x71AFC0, &CGlass::FindWindowSectorList);
     // ReversibleHooks::Install("CGlass", "RenderReflectionPolys", 0x71AED0, &CGlass::RenderReflectionPolys);
     // ReversibleHooks::Install("CGlass", "RenderShatteredPolys", 0x71AE30, &CGlass::RenderShatteredPolys);
@@ -345,7 +345,37 @@ void CGlass::Update() {
 
 // 0x71CE20
 void CGlass::Render() {
-    plugin::Call<0x71CE20>();
+    NumHiLightPolyVertices = 0;
+    NumHiLightPolyIndices = 0;
+
+    ShatteredVerticesBaseIdx = 1024;
+    ShatteredIndicesBaseIdx = 2048;
+    ReflectionPolyVertexBaseIdx = 1536;
+    ReflectionPolyIndexBaseIdx = 3072;
+
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEFOGCOLOR, (void*)CTimeCycle::m_CurrentColours.GetSkyBottom(0).ToIntARGB());
+    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+
+    for (auto& pane : aGlassPanes) {
+        if (pane.existFlag) {
+            pane.Render();
+        }
+    }
+
+    RenderHiLightPolys();
+    RenderShatteredPolys();
+    RenderReflectionPolys();
+
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
 }
 
 // 0x71AFC0
