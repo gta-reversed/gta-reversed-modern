@@ -3,6 +3,7 @@
 #include "Vector2D.h"
 #include "Vector.h"
 #include "FallingGlassPane.h"
+#include "Object.h"
 
 class CVehicle;
 class CEntity;
@@ -44,6 +45,6 @@ public:
     static uint8 CalcAlphaWithNormal(const CVector& normal);
     static void AskForObjectToBeRenderedInGlass(CEntity* entity);
     static CFallingGlassPane* FindFreePane();
-    static void WindowRespondsToSoftCollision(CEntity* pEntity, float fDamageIntensity);
+    static void WindowRespondsToSoftCollision(CObject* object, float fDamageIntensity);
     static void BreakGlassPhysically(CVector pos, float radius);
 };

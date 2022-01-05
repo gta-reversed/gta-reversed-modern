@@ -4,6 +4,7 @@
 #include <numeric>
 #include <ranges>
 #include <array>
+#include <Lines.h>
 namespace rng = std::ranges;
 
 CVector2D (&CGlass::PanePolyPositions)[4][3] = *(CVector2D(*)[4][3])0x8D5CD8;
@@ -23,7 +24,7 @@ int32& CGlass::LastColCheckMS = *(int32*)0xC72FA8;
 
 void CGlass::InjectHooks() {
     ReversibleHooks::Install("CGlass", "Init", 0x71A8D0, &CGlass::Init);
-    // ReversibleHooks::Install("CGlass", "HasGlassBeenShatteredAtCoors", 0x71CB70, &CGlass::HasGlassBeenShatteredAtCoors);
+    ReversibleHooks::Install("CGlass", "HasGlassBeenShatteredAtCoors", 0x71CB70, &CGlass::HasGlassBeenShatteredAtCoors);
     ReversibleHooks::Install("CGlass", "CarWindscreenShatters", 0x71C2B0, &CGlass::CarWindscreenShatters);
     ReversibleHooks::Install("CGlass", "WasGlassHitByBullet", 0x71C0D0, &CGlass::WasGlassHitByBullet);
     ReversibleHooks::Install("CGlass", "WindowRespondsToCollision", 0x71BC40, &CGlass::WindowRespondsToCollision);
@@ -56,8 +57,25 @@ void CGlass::Init() {
 
 // 0x71CB70
 // Unused
-bool CGlass::HasGlassBeenShatteredAtCoors(CVector pos) {
-    return plugin::CallAndReturn<bool, 0x71CB70, CVector>(pos);
+bool CGlass::HasGlassBeenShatteredAtCoors(CVector point) {
+    CWorld::IncrementCurrentScanCode();
+    const float minX = point.x - 30.f;
+    const float maxX = point.x + 30.f;
+    const float minY = point.y - 30.f;
+    const float maxY = point.y + 30.f;
+    const int32 startSectorX = std::max(CWorld::GetSectorX(minX), 0);
+    const int32 startSectorY = std::max(CWorld::GetSectorY(minY), 0);
+    const int32 endSectorX = std::min(CWorld::GetSectorX(maxX), MAX_SECTORS_X - 1);
+    const int32 endSectorY = std::min(CWorld::GetSectorY(maxY), MAX_SECTORS_Y - 1);
+    float maxDist = 20.f;
+    CEntity* entity{};
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            FindWindowSectorList(GetRepeatSector(sectorX, sectorY)->m_lists[REPEATSECTOR_OBJECTS], maxDist, entity, point);
+            FindWindowSectorList(GetSector(sectorX, sectorY)->m_dummies, maxDist, entity, point);
+        }
+    }
+    return entity && !entity->IsDummy() && entity->AsObject()->objectFlags.bGlassBroken;
 }
 
 // 0x71C2B0
@@ -249,7 +267,7 @@ void CGlass::WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity,
  * - Neither 'size' vectors are normalized!
  *
  * type                    - 0, 1, 2 - Undocumented yet
- * pos                     - BL
+ * point                     - BL
  * fwd, right      - As illustrated above
  * center                  - The centre of the above rectangle (each pane is a piece of it)
  * velocity                - How fast the panes fly
@@ -276,9 +294,9 @@ void CGlass::GeneratePanesForWindow(uint32 type, CVector pos, CVector fwd, CVect
     //printf("Panes: %u x %u (%.3f x %.3f) \n", countX, countY, sizeX, sizeY);
 
     bool hitGround{};
-    float groundZ = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, &hitGround, nullptr);
+    float groundZ = CWorld::FindGroundZFor3DCoord(point.x, point.y, point.z, &hitGround, nullptr);
     if (!hitGround)
-        groundZ = pos.z - 2.f;
+        groundZ = point.z - 2.f;
 
     if (!countY)
         return;
@@ -296,7 +314,7 @@ void CGlass::GeneratePanesForWindow(uint32 type, CVector pos, CVector fwd, CVect
                     mat.GetForward() = Normalized(CrossProduct(mat.GetRight(), mat.GetUp()));
 
                     const auto paneCenterPos = PanePolyCenterPositions[piece] * CVector2D{ sizeX, sizeY } + CVector2D{(float)posX, (float)posY};
-                    mat.GetPosition() = pos + Normalized(fwd) * paneCenterPos.y + Normalized(right) * paneCenterPos.x;
+                    mat.GetPosition() = point + Normalized(fwd) * paneCenterPos.y + Normalized(right) * paneCenterPos.x;
 
                     {
                         constexpr auto RandomFactor = [] {return (float)((rand() % 128) - 64) * 0.0015f; };
@@ -468,12 +486,12 @@ void CGlass::RenderHiLightPolys() {
 // 0x71ACF0
 uint8 CGlass::CalcAlphaWithNormal(const CVector& normal) {
     const auto camFwd = TheCamera.GetForward();
-    const auto normal_x_2dot = 2.f * DotProduct(normal, camFwd) * normal;
+    const auto fwdOnNormalProj2x = ProjectVector(camFwd, normal) * 2.f;
     const auto factor = ( // TODO: What the fuck is going on here???
-          camFwd.x - normal_x_2dot.x
-        + camFwd.y - normal_x_2dot.y
-        - camFwd.z + normal_x_2dot.z
-    ) * SQRT_3;
+          camFwd.x - fwdOnNormalProj2x.x
+        + camFwd.y - fwdOnNormalProj2x.y
+        - camFwd.z + fwdOnNormalProj2x.z
+    ) / SQRT_3;
     return (uint8)(std::pow(factor, 6) * 235.f + 20.f);
 }
 
@@ -504,5 +522,5 @@ void CGlass::WindowRespondsToSoftCollision(CObject* object, float fDamageIntensi
 
 // 0x71CF50
 void CGlass::BreakGlassPhysically(CVector pos, float radius) {
-    plugin::Call<0x71CF50, CVector, float>(pos, radius);
+    plugin::Call<0x71CF50, CVector, float>(point, radius);
 }

@@ -68,7 +68,7 @@ public:
         x = rwvec.x; y = rwvec.y; z = rwvec.z;
     }
 
-    inline float SquaredMagnitude()
+    inline float SquaredMagnitude() const
     {
         return x*x + y*y + z*z;
     }
@@ -150,4 +150,7 @@ CVector CrossProduct(const CVector& a, const CVector& b);
 float DotProduct(const CVector& v1, const CVector& v2);
 float DotProduct2D(const CVector& v1, const CVector& v2);
 static CVector Normalized(CVector v) { v.Normalise(); return v; }
+static CVector ProjectVector(const CVector& what, const CVector& onto) {
+    return onto * (DotProduct(what, onto) / onto.SquaredMagnitude());
+}
 VALIDATE_SIZE(CVector, 0xC);
