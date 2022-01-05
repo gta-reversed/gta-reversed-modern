@@ -31,7 +31,7 @@ public:
     static void CarWindscreenShatters(CVehicle* pVeh);
     static void WasGlassHitByBullet(CEntity* entity, CVector hitPos);
     static void WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, bool max1PaneSection);
-    static void GeneratePanesForWindow(uint32 type, CVector pos, CVector fwdSize, CVector rightSize, CVector velocity, CVector center, float velocityCenterDragCoeff,
+    static void GeneratePanesForWindow(uint32 type, CVector pos, CVector fwd, CVector right, CVector velocity, CVector center, float velocityCenterDragCoeff,
                                        bool bShatter, bool numSectionsMax1, int32 numSections, bool unk);
     static void Update();
     static void Render();

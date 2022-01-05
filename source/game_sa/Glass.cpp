@@ -25,7 +25,7 @@ void CGlass::InjectHooks() {
     ReversibleHooks::Install("CGlass", "CarWindscreenShatters", 0x71C2B0, &CGlass::CarWindscreenShatters);
     ReversibleHooks::Install("CGlass", "WasGlassHitByBullet", 0x71C0D0, &CGlass::WasGlassHitByBullet);
     ReversibleHooks::Install("CGlass", "WindowRespondsToCollision", 0x71BC40, &CGlass::WindowRespondsToCollision);
-    // ReversibleHooks::Install("CGlass", "GeneratePanesForWindow", 0x71B620, &CGlass::GeneratePanesForWindow);
+    ReversibleHooks::Install("CGlass", "GeneratePanesForWindow", 0x71B620, &CGlass::GeneratePanesForWindow);
     // ReversibleHooks::Install("CGlass", "Update", 0x71B0D0, &CGlass::Update);
     // ReversibleHooks::Install("CGlass", "Render", 0x71CE20, &CGlass::Render);
     // ReversibleHooks::Install("CGlass", "FindWindowSectorList", 0x71AFC0, &CGlass::FindWindowSectorList);
@@ -239,16 +239,16 @@ void CGlass::WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity,
  * Corners:
  * TL ----- TR
  * |  0 | 1 |
- * | ------ | fwdSize
+ * | ------ | fwd
  * |  2 | 3 |
  * BL ----- BR
- *  rightSize
+ *  right
  *
  * - Neither 'size' vectors are normalized!
  *
  * type                    - 0, 1, 2 - Undocumented yet
  * pos                     - BL
- * fwdSize, rightSize      - As illustrated above
+ * fwd, right      - As illustrated above
  * center                  - The centre of the above rectangle (each pane is a piece of it)
  * velocity                - How fast the panes fly
  * velocityCenterDragCoeff - Modify the velocity's direction to be more towards the center point
@@ -256,10 +256,82 @@ void CGlass::WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity,
  * numSectionsMax1         - Limit no. of sections to 1 - Unsure what's it use-case as setting `numSections` to 1 achieves the same
  * numSections             - No. of sections of each axis, the total number of sections will be `numSections ^ 2` (squared)
 **/
-void CGlass::GeneratePanesForWindow(uint32 type, CVector pos, CVector fwdSize, CVector rightSize, CVector velocity, CVector center, float velocityCenterDragCoeff,
+void CGlass::GeneratePanesForWindow(uint32 type, CVector pos, CVector fwd, CVector right, CVector velocity, CVector center, float velocityCenterDragCoeff,
                                     bool bShatter, bool numSectionsMax1, int32 numSections, bool unk) {
-    plugin::Call<0x71B620, uint32, CVector, CVector, CVector, CVector, CVector, float, bool, bool, int32, bool>(
-        type, pos, fwdSize, rightSize, velocity, center, velocityCenterDragCoeff, bShatter, numSectionsMax1, numSections, unk);
+
+    const float totalSizeY = fwd.Magnitude(), totalSizeX = right.Magnitude();
+
+
+    // Calculate no. of sections, and section size
+    const auto CalculateCountOfSectionsAndSizeAxis = [&](auto axisSize) {
+        const auto count = numSectionsMax1 ? 1 : std::min(numSections * (uint32)(axisSize + 0.75f/*make it round upwards*/), 3u);
+        return std::make_pair(count, axisSize / (float)count);
+    };
+
+    const auto [countX, sizeX] = CalculateCountOfSectionsAndSizeAxis(totalSizeX);
+    const auto [countY, sizeY] = CalculateCountOfSectionsAndSizeAxis(totalSizeY);
+
+    //printf("Panes: %u x %u (%.3f x %.3f) \n", countX, countY, sizeX, sizeY);
+
+    bool hitGround{};
+    float groundZ = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, &hitGround, nullptr);
+    if (!hitGround)
+        groundZ = pos.z - 2.f;
+
+    if (!countY)
+        return;
+
+    for (auto posY = 0u; posY < countY; posY++) {
+        for (auto posX = 0u; posX < countX; posX++) {
+            for (auto piece = 0u; piece < 5u; piece++) {
+                if (auto pane = FindFreePane()) {
+                    pane->nPieceIndex = piece;
+
+                    // Calculate matrix
+                    auto& mat = pane->matrix;
+                    mat.GetRight() = Normalized(right) * sizeX;
+                    mat.GetUp() = Normalized(fwd) * sizeY;
+                    mat.GetForward() = Normalized(CrossProduct(mat.GetRight(), mat.GetUp()));
+
+                    const auto paneCenterPos = PanePolyCenterPositions[piece] * CVector2D{ sizeX, sizeY } + CVector2D{(float)posX, (float)posY};
+                    mat.GetPosition() = pos + Normalized(fwd) * paneCenterPos.y + Normalized(right) * paneCenterPos.x;
+
+                    {
+                        constexpr auto RandomFactor = [] {return (float)((rand() % 128) - 64) * 0.0015f; };
+                        pane->velocity = velocity + CVector{ RandomFactor(), RandomFactor(), 0.f };
+                    }
+
+                    if (velocityCenterDragCoeff != 0.0f) {
+                        pane->velocity += Normalized(mat.GetPosition() - center) * velocityCenterDragCoeff;
+                    }
+
+                    {
+                        constexpr auto RandomFactor = [] { return (float)((rand() % 128) - 64) / 500.f; }; // Random number in range (-0.128, 0.128)
+                        pane->randomNumbers = CVector{ RandomFactor(), RandomFactor(), RandomFactor() };
+                    }
+
+                    switch (type) {
+                    case 1: {
+                        pane->createdTime = CTimer::GetTimeInMS() + (uint32)((mat.GetPosition() - center).Magnitude() * 100.f);
+                        break;
+                    }
+                    case 2:
+                    default: {
+                        pane->createdTime = CTimer::GetTimeInMS();
+                        break;
+                    }
+                    }
+
+                    pane->groundZ = groundZ;
+                    pane->bRenderShatter = bShatter;
+                    pane->size = sizeY;
+                    pane->field_6F = unk;
+                    pane->existFlag = true;
+                }
+            }
+
+        }
+    }
 }
 
 // 0x71B0D0
