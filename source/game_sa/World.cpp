@@ -39,36 +39,39 @@ int8& gCurCamColVars = *(int8*)0x8CCB80;
 void CWorld::InjectHooks() {
     HookInstall(0x565CB0, RemoveFallenPeds);
     HookInstall(0x565E80, RemoveFallenCars);
+
+
     using namespace ReversibleHooks;
-    Install("CWorld", "Remove", 0x563280, &CWorld::Remove);
-    Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
-    Install("CWorld", "CastShadowSectorList", 0x563390, &CWorld::CastShadowSectorList);
-    Install("CWorld", "ResetLineTestOptions", 0x5631C0, &CWorld::ResetLineTestOptions);
-    Install("CWorld", "Initialise", 0x5631E0, &CWorld::Initialise);
-    Install("CWorld", "ProcessForAnimViewer", 0x5633D0, &CWorld::ProcessForAnimViewer);
-    Install("CWorld", "ProcessPedsAfterPreRender", 0x563430, &CWorld::ProcessPedsAfterPreRender);
-    Install("CWorld", "FindObjectsInRangeSectorList", 0x563500, &CWorld::FindObjectsInRangeSectorList);
-    Install("CWorld", "FindObjectsOfTypeInRangeSectorList", 0x5635C0, &CWorld::FindObjectsOfTypeInRangeSectorList);
-    Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x563950, static_cast<void(*)(CPtrList&)>(&CWorld::TestForBuildingsOnTopOfEachOther));
-    Install("CWorld", "TestForUnusedModels", 0x5639D0, static_cast<void(*)(CPtrList&, int32*)>(&CWorld::TestForUnusedModels));
-    Install("CWorld", "CameraToIgnoreThisObject", 0x563F40, &CWorld::CameraToIgnoreThisObject);
-    Install("CWorld", "FindPlayerSlotWithPedPointer", 0x563FA0, &CWorld::FindPlayerSlotWithPedPointer);
-    Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x563FD0, &CWorld::FindPlayerSlotWithVehiclePointer);
-    Install("CWorld", "ProcessVerticalLineSector_FillGlobeColPoints", 0x564420, &CWorld::ProcessVerticalLineSector_FillGlobeColPoints);
-    Install("CWorld", "ProcessVerticalLineSector", 0x564500, &CWorld::ProcessVerticalLineSector);
-    Install("CWorld", "CastShadow", 0x564600, &CWorld::CastShadow);
-    Install("CWorld", "GetIsLineOfSightSectorListClear", 0x564600, &CWorld::GetIsLineOfSightSectorListClear);
-    Install("CWorld", "FindObjectsKindaCollidingSectorList", 0x565000, &CWorld::FindObjectsKindaCollidingSectorList);
-    Install("CWorld", "FindObjectsIntersectingCubeSectorList", 0x5650E0, &CWorld::FindObjectsIntersectingCubeSectorList);
-    Install("CWorld", "FindObjectsIntersectingAngledCollisionBoxSectorList", 0x565200, &CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList);
-    Install("CWorld", "ProcessLineOfSightSectorList", 0x566EE0, &CWorld::ProcessLineOfSightSectorList);
-    // Install("CWorld", "FindUnsuspectingTargetPed", 0x566DA0, &CWorld::FindUnsuspectingTargetPed);
-    Install("CWorld", "ProcessVerticalLine", 0x5674E0, &CWorld::ProcessVerticalLine);
-    Install("CWorld", "ProcessVerticalLine_FillGlobeColPoints", 0x567620, &CWorld::ProcessVerticalLine_FillGlobeColPoints);
-    Install("CWorld", "GetIsLineOfSightSectorClear", 0x568AD0, &CWorld::GetIsLineOfSightSectorClear);
-    Install("CWorld", "FindRoofZFor3DCoord", 0x569750, &CWorld::FindRoofZFor3DCoord);
-    Install("CWorld", "FindLowestZForCoord", 0x5697F0, &CWorld::FindLowestZForCoord);
-    Install("CWorld", "FindGroundZFor3DCoord", 0x5696C0, &CWorld::FindGroundZFor3DCoord);
+    Install("CWorld", "Remove", 0x563280, &CWorld::Remove, true);
+    Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart, true);
+    Install("CWorld", "CastShadowSectorList", 0x563390, &CWorld::CastShadowSectorList, true);
+    Install("CWorld", "ResetLineTestOptions", 0x5631C0, &CWorld::ResetLineTestOptions, true);
+    Install("CWorld", "Initialise", 0x5631E0, &CWorld::Initialise, true);
+    Install("CWorld", "ProcessForAnimViewer", 0x5633D0, &CWorld::ProcessForAnimViewer, true);
+    Install("CWorld", "ProcessPedsAfterPreRender", 0x563430, &CWorld::ProcessPedsAfterPreRender, true);
+    Install("CWorld", "FindObjectsInRangeSectorList", 0x563500, &CWorld::FindObjectsInRangeSectorList, true);
+    Install("CWorld", "FindObjectsOfTypeInRangeSectorList", 0x5635C0, &CWorld::FindObjectsOfTypeInRangeSectorList, true);
+    Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x563950, static_cast<void(*)(CPtrList&)>(&CWorld::TestForBuildingsOnTopOfEachOther), true);
+    Install("CWorld", "TestForUnusedModels", 0x5639D0, static_cast<void(*)(CPtrList&, int32*)>(&CWorld::TestForUnusedModels), true);
+    Install("CWorld", "CameraToIgnoreThisObject", 0x563F40, &CWorld::CameraToIgnoreThisObject, true);
+    Install("CWorld", "FindPlayerSlotWithPedPointer", 0x563FA0, &CWorld::FindPlayerSlotWithPedPointer, true);
+    Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x563FD0, &CWorld::FindPlayerSlotWithVehiclePointer, true);
+    Install("CWorld", "ProcessVerticalLineSector_FillGlobeColPoints", 0x564420, &CWorld::ProcessVerticalLineSector_FillGlobeColPoints, true);
+    Install("CWorld", "ProcessVerticalLineSector", 0x564500, &CWorld::ProcessVerticalLineSector, true);
+    Install("CWorld", "CastShadow", 0x564600, &CWorld::CastShadow, true);
+    Install("CWorld", "GetIsLineOfSightSectorListClear", 0x564600, &CWorld::GetIsLineOfSightSectorListClear, true);
+    Install("CWorld", "FindObjectsKindaCollidingSectorList", 0x565000, &CWorld::FindObjectsKindaCollidingSectorList, true);
+    Install("CWorld", "FindObjectsIntersectingCubeSectorList", 0x5650E0, &CWorld::FindObjectsIntersectingCubeSectorList, true);
+    Install("CWorld", "FindObjectsIntersectingAngledCollisionBoxSectorList", 0x565200, &CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList, true);
+    // Install("CWorld", "ProcessLineOfSightSectorList", 0x566EE0, &CWorld::ProcessLineOfSightSectorList, true);
+    // Install("CWorld", "FindUnsuspectingTargetPed", 0x566DA0, &CWorld::FindUnsuspectingTargetPed, true);
+    Install("CWorld", "ProcessVerticalLine", 0x5674E0, &CWorld::ProcessVerticalLine, true);
+    Install("CWorld", "ProcessVerticalLineSectorList", 0x5632B0, &CWorld::ProcessVerticalLineSectorList, true);
+    Install("CWorld", "ProcessVerticalLine_FillGlobeColPoints", 0x567620, &CWorld::ProcessVerticalLine_FillGlobeColPoints, true);
+    Install("CWorld", "GetIsLineOfSightSectorClear", 0x568AD0, &CWorld::GetIsLineOfSightSectorClear, true);
+    Install("CWorld", "FindRoofZFor3DCoord", 0x569750, &CWorld::FindRoofZFor3DCoord, true);
+    Install("CWorld", "FindLowestZForCoord", 0x5697F0, &CWorld::FindLowestZForCoord, true);
+    Install("CWorld", "FindGroundZFor3DCoord", 0x5696C0, &CWorld::FindGroundZFor3DCoord, true);
 }
 
 // 0x5631C0
@@ -109,10 +112,10 @@ void CWorld::Remove(CEntity* entity) {
 
 // 0x5632B0
 bool CWorld::ProcessVerticalLineSectorList(CPtrList& ptrList, const CColLine& colLine, CColPoint& colPoint, float& maxTouchDistance, CEntity*& outEntity, bool doSeeThroughCheck, CStoredCollPoly* collPoly) {
-    float maxTouchDistanceLocal{};
+    auto maxTouchDistanceLocal{maxTouchDistance};
 
     for (CPtrNode* it = ptrList.m_node; it; it = it->m_next) {
-        auto entity = static_cast<CEntity*>(it->m_item);
+        const auto entity = static_cast<CEntity*>(it->m_item);
 
         if (entity->m_nScanCode == ms_nCurrentScanCode || !entity->m_bUsesCollision || entity == pIgnoreEntity)
             continue;
@@ -379,20 +382,24 @@ bool CWorld::ProcessVerticalLineSector_FillGlobeColPoints(CSector& sector, CRepe
 
 // 0x564500
 bool CWorld::ProcessVerticalLineSector(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, CColPoint& outColPoint, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly) {
-    float max{};
+    float max{1.f};
+
+    const auto ProcessSector = [&](auto&& list) { // Wrapper to make code more readable
+        ProcessVerticalLineSectorList(list, colLine, outColPoint, max, outEntity, doSeeThroughCheck, outCollPoly);
+    };
 
     if (buildings)
-        ProcessVerticalLineSectorList(sector.m_buildings, colLine,  outColPoint, max, outEntity, doSeeThroughCheck, outCollPoly);
+        ProcessSector(sector.m_buildings);
     if (vehicles)
-        ProcessVerticalLineSectorList(repeatSector.m_lists[0], colLine, outColPoint, max,  outEntity, doSeeThroughCheck, outCollPoly);
+        ProcessSector(repeatSector.m_lists[REPEATSECTOR_VEHICLES]);
     if (peds)
-        ProcessVerticalLineSectorList(repeatSector.m_lists[1], colLine, outColPoint, max,  outEntity, doSeeThroughCheck, outCollPoly);
+        ProcessSector(repeatSector.m_lists[REPEATSECTOR_PEDS]);
     if (objects)
-        ProcessVerticalLineSectorList(repeatSector.m_lists[2], colLine, outColPoint, max,  outEntity, doSeeThroughCheck, outCollPoly);
+        ProcessSector(repeatSector.m_lists[REPEATSECTOR_OBJECTS]);
     if (dummies)
-        ProcessVerticalLineSectorList(sector.m_dummies, colLine,  outColPoint, max, outEntity, doSeeThroughCheck, outCollPoly);
+        ProcessSector(sector.m_dummies);
 
-    return max < 1.0f;
+    return max < 1.f;
 }
 
 // 0x564600
@@ -739,16 +746,17 @@ bool CWorld::ProcessLineOfSightSectorList(CPtrList& ptrList, const CColLine& col
 }
 
 // 0x5674E0
+// ProcessVerticalLine => ProcessVerticalLineSector => ProcessVerticalLineSectorList => CCollision::ProcessVerticalLine
 bool CWorld::ProcessVerticalLine(const CVector& origin, float distance, CColPoint& outColPoint, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly) {
     IncrementCurrentScanCode();
     ms_iProcessLineNumCrossings = 0;
 
     const int32 secX = GetSectorX(origin.x), secY = GetSectorY(origin.y);
-    CColLine colLine{ origin, CVector{origin.x, origin.y, distance} };
     return ProcessVerticalLineSector(
         *GetSector(secX, secY),
         *GetRepeatSector(secX % MAX_REPEAT_SECTORS_X, secY % MAX_REPEAT_SECTORS_Y),
-        colLine, outColPoint, outEntity, buildings, vehicles, peds, objects, dummies, doSeeThroughCheck, outCollPoly
+        CColLine{ origin, CVector{origin.x, origin.y, distance} },
+        outColPoint, outEntity, buildings, vehicles, peds, objects, dummies, doSeeThroughCheck, outCollPoly
     );
 }
 

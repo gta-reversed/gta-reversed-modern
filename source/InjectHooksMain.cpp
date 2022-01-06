@@ -170,7 +170,7 @@ void WaitForDebugger() {
 
 void InjectHooksMain()
 {
-    // WaitForDebugger();
+    WaitForDebugger();
     InjectCommonHooks();
     CPad::InjectHooks();
 
