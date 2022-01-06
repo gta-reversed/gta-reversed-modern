@@ -93,7 +93,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "CastShadowSectorList", 0x563390, &CWorld::CastShadowSectorList);
     Install("CWorld", "ProcessVerticalLineSectorList", 0x5632B0, &CWorld::ProcessVerticalLineSectorList);
     Install("CWorld", "Remove", 0x563280, &CWorld::Remove);
-    // Install("CWorld", "Add", 0x563220, &CWorld::Add);
+    Install("CWorld", "Add", 0x563220, &CWorld::Add);
     Install("CWorld", "Initialise", 0x5631E0, &CWorld::Initialise);
     Install("CWorld", "ResetLineTestOptions", 0x5631C0, &CWorld::ResetLineTestOptions);
     // Install("CWorld", "CallOffChaseForAreaSectorListPeds", 0x563D00, &CWorld::CallOffChaseForAreaSectorListPeds);
@@ -146,8 +146,14 @@ void CWorld::Initialise() {
 }
 
 // 0x563220
-void CWorld::Add(CEntity* entity) {
-    plugin::Call<0x563220, CEntity*>(entity);
+void CWorld::Add(CPhysical* entity) {
+    entity->UpdateRW();
+    entity->Add();
+    if (!entity->IsBuilding() && !entity->IsDummy()) {
+        if (!entity->IsStatic() && !entity->m_bIsStaticWaitingForCollision) {
+            entity->AddToMovingList();
+        }
+    }
 }
 
 // 0x563280
