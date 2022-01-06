@@ -42,36 +42,36 @@ void CWorld::InjectHooks() {
 
 
     using namespace ReversibleHooks;
-    Install("CWorld", "Remove", 0x563280, &CWorld::Remove, true);
-    Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart, true);
-    Install("CWorld", "CastShadowSectorList", 0x563390, &CWorld::CastShadowSectorList, true);
-    Install("CWorld", "ResetLineTestOptions", 0x5631C0, &CWorld::ResetLineTestOptions, true);
-    Install("CWorld", "Initialise", 0x5631E0, &CWorld::Initialise, true);
-    Install("CWorld", "ProcessForAnimViewer", 0x5633D0, &CWorld::ProcessForAnimViewer, true);
-    Install("CWorld", "ProcessPedsAfterPreRender", 0x563430, &CWorld::ProcessPedsAfterPreRender, true);
-    Install("CWorld", "FindObjectsInRangeSectorList", 0x563500, &CWorld::FindObjectsInRangeSectorList, true);
-    Install("CWorld", "FindObjectsOfTypeInRangeSectorList", 0x5635C0, &CWorld::FindObjectsOfTypeInRangeSectorList, true);
-    Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x563950, static_cast<void(*)(CPtrList&)>(&CWorld::TestForBuildingsOnTopOfEachOther), true);
-    Install("CWorld", "TestForUnusedModels", 0x5639D0, static_cast<void(*)(CPtrList&, int32*)>(&CWorld::TestForUnusedModels), true);
-    Install("CWorld", "CameraToIgnoreThisObject", 0x563F40, &CWorld::CameraToIgnoreThisObject, true);
-    Install("CWorld", "FindPlayerSlotWithPedPointer", 0x563FA0, &CWorld::FindPlayerSlotWithPedPointer, true);
-    Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x563FD0, &CWorld::FindPlayerSlotWithVehiclePointer, true);
-    Install("CWorld", "ProcessVerticalLineSector_FillGlobeColPoints", 0x564420, &CWorld::ProcessVerticalLineSector_FillGlobeColPoints, true);
-    Install("CWorld", "ProcessVerticalLineSector", 0x564500, &CWorld::ProcessVerticalLineSector, true);
-    Install("CWorld", "CastShadow", 0x564600, &CWorld::CastShadow, true);
-    Install("CWorld", "GetIsLineOfSightSectorListClear", 0x564600, &CWorld::GetIsLineOfSightSectorListClear, true);
-    Install("CWorld", "FindObjectsKindaCollidingSectorList", 0x565000, &CWorld::FindObjectsKindaCollidingSectorList, true);
-    Install("CWorld", "FindObjectsIntersectingCubeSectorList", 0x5650E0, &CWorld::FindObjectsIntersectingCubeSectorList, true);
-    Install("CWorld", "FindObjectsIntersectingAngledCollisionBoxSectorList", 0x565200, &CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList, true);
-    // Install("CWorld", "ProcessLineOfSightSectorList", 0x566EE0, &CWorld::ProcessLineOfSightSectorList, true);
-    // Install("CWorld", "FindUnsuspectingTargetPed", 0x566DA0, &CWorld::FindUnsuspectingTargetPed, true);
+    Install("CWorld", "Remove", 0x563280, &CWorld::Remove);
+    Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
+    Install("CWorld", "CastShadowSectorList", 0x563390, &CWorld::CastShadowSectorList);
+    Install("CWorld", "ResetLineTestOptions", 0x5631C0, &CWorld::ResetLineTestOptions);
+    Install("CWorld", "Initialise", 0x5631E0, &CWorld::Initialise);
+    Install("CWorld", "ProcessForAnimViewer", 0x5633D0, &CWorld::ProcessForAnimViewer);
+    Install("CWorld", "ProcessPedsAfterPreRender", 0x563430, &CWorld::ProcessPedsAfterPreRender);
+    Install("CWorld", "FindObjectsInRangeSectorList", 0x563500, &CWorld::FindObjectsInRangeSectorList);
+    Install("CWorld", "FindObjectsOfTypeInRangeSectorList", 0x5635C0, &CWorld::FindObjectsOfTypeInRangeSectorList);
+    Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x563950, static_cast<void(*)(CPtrList&)>(&CWorld::TestForBuildingsOnTopOfEachOther));
+    Install("CWorld", "TestForUnusedModels", 0x5639D0, static_cast<void(*)(CPtrList&, int32*)>(&CWorld::TestForUnusedModels));
+    Install("CWorld", "CameraToIgnoreThisObject", 0x563F40, &CWorld::CameraToIgnoreThisObject);
+    Install("CWorld", "FindPlayerSlotWithPedPointer", 0x563FA0, &CWorld::FindPlayerSlotWithPedPointer);
+    Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x563FD0, &CWorld::FindPlayerSlotWithVehiclePointer);
+    Install("CWorld", "ProcessVerticalLineSector_FillGlobeColPoints", 0x564420, &CWorld::ProcessVerticalLineSector_FillGlobeColPoints);
+    Install("CWorld", "ProcessVerticalLineSector", 0x564500, &CWorld::ProcessVerticalLineSector);
+    Install("CWorld", "CastShadow", 0x564600, &CWorld::CastShadow);
+    Install("CWorld", "GetIsLineOfSightSectorListClear", 0x564600, &CWorld::GetIsLineOfSightSectorListClear);
+    Install("CWorld", "FindObjectsKindaCollidingSectorList", 0x565000, &CWorld::FindObjectsKindaCollidingSectorList);
+    Install("CWorld", "FindObjectsIntersectingCubeSectorList", 0x5650E0, &CWorld::FindObjectsIntersectingCubeSectorList);
+    Install("CWorld", "FindObjectsIntersectingAngledCollisionBoxSectorList", 0x565200, &CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList);
+    // Install("CWorld", "ProcessLineOfSightSectorList", 0x566EE0, &CWorld::ProcessLineOfSightSectorList);
+    // Install("CWorld", "FindUnsuspectingTargetPed", 0x566DA0, &CWorld::FindUnsuspectingTargetPed);
     Install("CWorld", "ProcessVerticalLine", 0x5674E0, &CWorld::ProcessVerticalLine, true);
     Install("CWorld", "ProcessVerticalLineSectorList", 0x5632B0, &CWorld::ProcessVerticalLineSectorList, true);
-    Install("CWorld", "ProcessVerticalLine_FillGlobeColPoints", 0x567620, &CWorld::ProcessVerticalLine_FillGlobeColPoints, true);
-    Install("CWorld", "GetIsLineOfSightSectorClear", 0x568AD0, &CWorld::GetIsLineOfSightSectorClear, true);
-    Install("CWorld", "FindRoofZFor3DCoord", 0x569750, &CWorld::FindRoofZFor3DCoord, true);
-    Install("CWorld", "FindLowestZForCoord", 0x5697F0, &CWorld::FindLowestZForCoord, true);
-    Install("CWorld", "FindGroundZFor3DCoord", 0x5696C0, &CWorld::FindGroundZFor3DCoord, true);
+    Install("CWorld", "ProcessVerticalLine_FillGlobeColPoints", 0x567620, &CWorld::ProcessVerticalLine_FillGlobeColPoints);
+    Install("CWorld", "GetIsLineOfSightSectorClear", 0x568AD0, &CWorld::GetIsLineOfSightSectorClear);
+    Install("CWorld", "FindRoofZFor3DCoord", 0x569750, &CWorld::FindRoofZFor3DCoord);
+    Install("CWorld", "FindLowestZForCoord", 0x5697F0, &CWorld::FindLowestZForCoord);
+    Install("CWorld", "FindGroundZFor3DCoord", 0x5696C0, &CWorld::FindGroundZFor3DCoord);
 }
 
 // 0x5631C0
