@@ -52,7 +52,7 @@ void CWorld::InjectHooks() {
     // Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x5664A0, static_cast<(**)()>(&CWorld::TestForBuildingsOnTopOfEachOther));
     // Install("CWorld", "PrintCarChanges", 0x566420, &CWorld::PrintCarChanges);
     // Install("CWorld", "TestSphereAgainstSectorList", 0x566140, &CWorld::TestSphereAgainstSectorList);
-    // Install("CWorld", "UseDetonator", 0x5660B0, &CWorld::UseDetonator);
+    Install("CWorld", "UseDetonator", 0x5660B0, &CWorld::UseDetonator);
     Install("CWorld", "RemoveFallenCars", 0x565E80, &CWorld::RemoveFallenCars);
     Install("CWorld", "RemoveFallenPeds", 0x565CB0, &CWorld::RemoveFallenPeds);
     // Install("CWorld", "ClearCarsFromArea", 0x566610, &CWorld::ClearCarsFromArea);
@@ -693,8 +693,22 @@ void CWorld::RemoveFallenCars() {
 }
 
 // 0x5660B0
-void CWorld::UseDetonator(CEntity* creator) {
-    plugin::Call<0x5660B0, CEntity*>(creator);
+void CWorld::UseDetonator(CPed* creator) {
+    const auto vehPool = CPools::ms_pVehiclePool;
+    for (auto i = 0; i < vehPool->GetSize(); i++) {
+        if (const auto veh = vehPool->GetAt(i)) {
+            if (veh->m_nBombOnBoard != 3)
+                continue;
+
+            if (veh->m_pWhoInstalledBombOnMe != creator)
+                continue;
+
+            veh->m_nBombOnBoard = 0;
+            veh->m_wBombTimer = 500;
+            veh->m_pWhoDetonatedMe = creator;
+            creator->RegisterReference(reinterpret_cast<CEntity**>(&veh->m_pWhoDetonatedMe));
+        }
+    }
 }
 
 // 0x566140
