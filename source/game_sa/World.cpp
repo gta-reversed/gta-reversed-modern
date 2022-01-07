@@ -45,7 +45,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "StopAllLawEnforcersInTheirTracks", 0x566C10, &CWorld::StopAllLawEnforcersInTheirTracks);
     Install("CWorld", "CallOffChaseForArea", 0x566A60, &CWorld::CallOffChaseForArea);
     Install("CWorld", "ExtinguishAllCarFiresInArea", 0x566950, &CWorld::ExtinguishAllCarFiresInArea);
-    // Install("CWorld", "SetAllCarsCanBeDamaged", 0x5668F0, &CWorld::SetAllCarsCanBeDamaged);
+    Install("CWorld", "SetAllCarsCanBeDamaged", 0x5668F0, &CWorld::SetAllCarsCanBeDamaged);
     Install("CWorld", "ProcessVerticalLine", 0x5674E0, &CWorld::ProcessVerticalLine);
     // Install("CWorld", "ClearPedsFromArea", 0x5667F0, &CWorld::ClearPedsFromArea);
     // Install("CWorld", "TestForUnusedModels", 0x566510, static_cast<void(**)()>(&CWorld::TestForUnusedModels));
@@ -750,7 +750,11 @@ void CWorld::ClearPedsFromArea(float x1, float y1, float z1, float x2, float y2,
 
 // 0x5668F0
 void CWorld::SetAllCarsCanBeDamaged(bool enable) {
-    plugin::Call<0x5668F0, bool>(enable);
+    for (int32 i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
+        if (CVehicle* veh = CPools::ms_pVehiclePool->GetAt(i)) {
+            veh->vehicleFlags.bCanBeDamaged = enable;
+        }
+    }
 }
 
 // 0x566950
