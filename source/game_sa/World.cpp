@@ -48,7 +48,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "SetAllCarsCanBeDamaged", 0x5668F0, &CWorld::SetAllCarsCanBeDamaged);
     Install("CWorld", "ProcessVerticalLine", 0x5674E0, &CWorld::ProcessVerticalLine);
     Install("CWorld", "ClearPedsFromArea", 0x5667F0, &CWorld::ClearPedsFromArea);
-    // Install("CWorld", "TestForUnusedModels", 0x566510, static_cast<void(**)()>(&CWorld::TestForUnusedModels));
+    Install("CWorld", "TestForUnusedModels", 0x566510, static_cast<void(*)()>(&CWorld::TestForUnusedModels));
     // Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x5664A0, static_cast<(**)()>(&CWorld::TestForBuildingsOnTopOfEachOther));
     // Install("CWorld", "PrintCarChanges", 0x566420, &CWorld::PrintCarChanges);
     // Install("CWorld", "TestSphereAgainstSectorList", 0x566140, &CWorld::TestSphereAgainstSectorList);
@@ -734,8 +734,29 @@ void CWorld::TestForBuildingsOnTopOfEachOther() {
 }
 
 // 0x566510
+// Unused - Probably a debug function
 void CWorld::TestForUnusedModels() {
-    plugin::Call<0x566510>();
+    static uint32 usageCounts[TOTAL_DFF_MODEL_IDS]{}; // SA uses a stack-allocated variable, but 80 kB on the stack isn't nice, so we are going to do it this way
+    std::ranges::fill(usageCounts, 0);
+
+    IncrementCurrentScanCode();
+
+    const auto ProcessSectorList = [&](const CPtrList& list) {
+        for (auto node = list.GetNode(); node; node = node->m_next) {
+            const auto object = static_cast<CEntity*>(node->m_item);
+            if (object->m_nScanCode != ms_nCurrentScanCode) {
+                usageCounts[object->m_nModelIndex]++;
+            }
+        }
+    };
+
+    for (auto y = 0; y < MAX_SECTORS_Y; y++) {
+        for (auto x = 0; x < MAX_SECTORS_X; x++) {
+            const auto sector = GetSector(x, y);
+            ProcessSectorList(sector->m_buildings);
+            ProcessSectorList(sector->m_dummies);
+        }
+    }
 }
 
 // 0x566610
