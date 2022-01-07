@@ -16,6 +16,7 @@ void CCollision::InjectHooks()
 {
     ReversibleHooks::Install("CCollision", "CalculateTrianglePlanes_colData", 0x416330, static_cast<void(*)(CCollisionData*)>(&CCollision::CalculateTrianglePlanes));
     ReversibleHooks::Install("CCollision", "RemoveTrianglePlanes_colData", 0x416400, static_cast<void(*)(CCollisionData*)>(&CCollision::RemoveTrianglePlanes));
+    ReversibleHooks::Install("CCollision", "ProcessLineOfSight", 0x417950, &CCollision::ProcessLineOfSight);
 }
 
 // 0x411E20
@@ -267,7 +268,60 @@ bool CCollision::TestLineOfSight(CColLine const& line, CMatrix const& transform,
 
 // 0x417950
 bool CCollision::ProcessLineOfSight(CColLine const& line, CMatrix const& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck, bool doShootThroughCheck) {
-    return plugin::CallAndReturn<bool, 0x417950, CColLine const&, CMatrix const&, CColModel&, CColPoint&, float&, bool, bool>(line, transform, colModel, colPoint, maxTouchDistance, doSeeThroughCheck, doShootThroughCheck);
+    assert(colModel.m_pColData);
+
+    const auto colData = colModel.m_pColData;
+    if (!colData)
+        return false;
+
+    const CMatrix invertedTransform = Invert(const_cast<CMatrix&>(transform)); // Hack: cast away constness. TODO: Fix-up constness of CMatrix methods
+
+    // Transform lime into object space
+    const CColLine line_OS = {
+        MultiplyMatrixWithVector(invertedTransform, line.m_vecStart),
+        MultiplyMatrixWithVector(invertedTransform, line.m_vecEnd),
+    };
+
+    if (!TestLineBox_DW(line_OS, colModel.GetBoundingBox()))
+        return false;
+
+    const auto CheckSeeAndShootThrough = [=](auto material) {
+        return (!doSeeThroughCheck || !g_surfaceInfos->IsSeeThrough(material))
+            && (!doShootThroughCheck || !g_surfaceInfos->IsShootThrough(material));
+    };
+
+    float localMinTouchDist = maxTouchDistance;
+
+    bool results{};
+    for (auto i = 0; i < colData->m_nNumSpheres; i++) {
+        if (const auto& sphere = colData->m_pSpheres[i]; CheckSeeAndShootThrough(sphere.m_nMaterial)) {
+            results |= ProcessLineSphere(line_OS, sphere, colPoint, localMinTouchDist);
+        }
+    }
+
+    for (auto i = 0; i < colData->m_nNumBoxes; i++) {
+        if (const auto& box = colData->m_pBoxes[i]; CheckSeeAndShootThrough(box.m_nMaterial)) {
+            results |= ProcessLineBox(line_OS, box, colPoint, localMinTouchDist);
+        }
+    }
+
+    CalculateTrianglePlanes(colData);
+
+    for (auto i = 0; i < colData->m_nNumTriangles; i++) {
+        if (const auto& tri = colData->m_pTriangles[i]; CheckSeeAndShootThrough(tri.m_nMaterial)) {
+            results |= ProcessLineTriangle(line_OS, colData->m_pVertices, tri, colData->m_pTrianglePlanes[i], colPoint, localMinTouchDist, nullptr);
+            ms_iProcessLineNumCrossings++;
+        }
+    }
+
+    //localMinTouchDist = maxTouchDistance;
+    if (localMinTouchDist < maxTouchDistance) {
+        colPoint.m_vecPoint = MultiplyMatrixWithVector(transform, colPoint.m_vecPoint);
+        colPoint.m_vecNormal = Multiply3x3(transform, colPoint.m_vecNormal);
+        maxTouchDistance = localMinTouchDist;
+        return true;
+    }
+    return false;
 }
 
 // 0x417BF0
