@@ -44,7 +44,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "FindUnsuspectingTargetCar", 0x566C90, &CWorld::FindUnsuspectingTargetCar);
     Install("CWorld", "StopAllLawEnforcersInTheirTracks", 0x566C10, &CWorld::StopAllLawEnforcersInTheirTracks);
     Install("CWorld", "CallOffChaseForArea", 0x566A60, &CWorld::CallOffChaseForArea);
-    // Install("CWorld", "ExtinguishAllCarFiresInArea", 0x566950, &CWorld::ExtinguishAllCarFiresInArea);
+    Install("CWorld", "ExtinguishAllCarFiresInArea", 0x566950, &CWorld::ExtinguishAllCarFiresInArea);
     // Install("CWorld", "SetAllCarsCanBeDamaged", 0x5668F0, &CWorld::SetAllCarsCanBeDamaged);
     Install("CWorld", "ProcessVerticalLine", 0x5674E0, &CWorld::ProcessVerticalLine);
     // Install("CWorld", "ClearPedsFromArea", 0x5667F0, &CWorld::ClearPedsFromArea);
@@ -755,7 +755,13 @@ void CWorld::SetAllCarsCanBeDamaged(bool enable) {
 
 // 0x566950
 void CWorld::ExtinguishAllCarFiresInArea(CVector point, float radius) {
-    plugin::Call<0x566950, CVector, float>(point, radius);
+    for (int32 i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
+        if (CVehicle* veh = CPools::ms_pVehiclePool->GetAt(i)) {
+            if (DistanceBetweenPointsSquared(point, veh->GetPosition()) <= radius * radius) {
+                veh->ExtinguishCarFire();
+            }
+        }
+    }
 }
 
 // 0x566A60
