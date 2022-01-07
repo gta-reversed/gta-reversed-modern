@@ -11,11 +11,11 @@
 class CColSphere : public CSphere {
 public:
     union {
-        uint8 m_nMaterial;
+        uint8 m_nMaterial{};
         uint8 m_nColSlot;
     };
     union {
-        uint8 m_nFlags;
+        uint8 m_nFlags{};
         struct {
             uint8 m_bFlag0x01 : 1;
             uint8 m_bIsSingleColDataAlloc : 1;
@@ -27,11 +27,16 @@ public:
             uint8 m_bFlag0x80 : 1;
         };
     };
-    uint8 m_nLighting;
-    uint8 m_nLight;
+    uint8 m_nLighting{};
+    uint8 m_nLight{};
 
 public:
     static void InjectHooks();
+
+    CColSphere(CVector centre, float radius) :
+        CSphere{centre, radius}
+    {
+    }
 
     void Set(float radius, CVector const& center);
     void Set(float radius, CVector const& center, uint8 material, uint8 flags, uint8 lighting);

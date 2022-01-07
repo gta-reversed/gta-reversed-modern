@@ -50,8 +50,8 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ClearPedsFromArea", 0x5667F0, &CWorld::ClearPedsFromArea);
     Install("CWorld", "TestForUnusedModels", 0x566510, static_cast<void(*)()>(&CWorld::TestForUnusedModels));
     Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x5664A0, static_cast<void(*)()>(&CWorld::TestForBuildingsOnTopOfEachOther));
-    // Install("CWorld", "PrintCarChanges", 0x566420, &CWorld::PrintCarChanges);
-    // Install("CWorld", "TestSphereAgainstSectorList", 0x566140, &CWorld::TestSphereAgainstSectorList);
+    Install("CWorld", "PrintCarChanges", 0x566420, &CWorld::PrintCarChanges);
+    Install("CWorld", "TestSphereAgainstSectorList", 0x566140, &CWorld::TestSphereAgainstSectorList);
     Install("CWorld", "UseDetonator", 0x5660B0, &CWorld::UseDetonator);
     Install("CWorld", "RemoveFallenCars", 0x565E80, &CWorld::RemoveFallenCars);
     Install("CWorld", "RemoveFallenPeds", 0x565CB0, &CWorld::RemoveFallenPeds);
@@ -719,11 +719,57 @@ void CWorld::UseDetonator(CPed* creator) {
 }
 
 // 0x566140
+// Find first entity colliding with the sphere
 CEntity* CWorld::TestSphereAgainstSectorList(CPtrList& ptrList, CVector sphereCenter, float sphereRadius, CEntity* ignoreEntity, bool doCameraIgnoreCheck) {
-    return plugin::CallAndReturn<CEntity*, 0x566140, CPtrList&, CVector, float, CEntity*, bool>(ptrList, sphereCenter, sphereRadius, ignoreEntity, doCameraIgnoreCheck);
+    if (!ptrList.m_node)
+        return nullptr;
+
+    CColModel      sphereColModel{};
+    CCollisionData sphereColData{};
+
+    sphereColModel.m_pColData = &sphereColData;
+    sphereColModel.m_boundBox = { {-sphereRadius, -sphereRadius, -sphereRadius}, {sphereRadius, sphereRadius, sphereRadius} };
+    sphereColModel.m_boundSphere = { {}, sphereRadius };
+
+    CColSphere csphere{ {}, sphereRadius };
+    sphereColData.m_nNumSpheres = 1;
+    sphereColData.m_pSpheres = &csphere;
+
+    CMatrix sphereMatrix{};
+    sphereMatrix.SetTranslate(sphereCenter);
+
+    for (CPtrNode *node = ptrList.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
+        const auto entity = static_cast<CEntity*>(node->m_item);
+        if (entity->m_nScanCode == ms_nCurrentScanCode)
+            continue;
+
+        if (!entity->m_bUsesCollision || ignoreEntity == entity)
+            continue;
+
+        if (doCameraIgnoreCheck && CameraToIgnoreThisObject(entity))
+            continue;
+
+        entity->m_nScanCode = ms_nCurrentScanCode;
+
+        CColModel& entityColModel = *entity->GetColModel();
+
+        if ((entity->GetBoundCentre() - sphereCenter).Magnitude() >= sphereRadius + entityColModel.m_boundSphere.m_fRadius)
+            continue; // Bound spheres not colliding
+
+        if (CCollision::ProcessColModels(sphereMatrix, sphereColModel, entity->GetMatrix(), entityColModel, gaTempSphereColPoints, nullptr, nullptr, false)) {
+            sphereColModel.m_pColData = nullptr; // Make sure CColModel destructor doesn't try our local variable
+            return entity;
+        }
+    }
+
+    sphereColModel.m_pColData = nullptr; // Make sure CColModel destructor doesn't try our local variable
+    return nullptr;
 }
 
 // 0x566420
+// Unused
 void CWorld::PrintCarChanges() {
     plugin::Call<0x566420>();
 }
