@@ -42,7 +42,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ProcessLineOfSightSectorList", 0x566EE0, &CWorld::ProcessLineOfSightSectorList);
     Install("CWorld", "FindUnsuspectingTargetPed", 0x566DA0, &CWorld::FindUnsuspectingTargetPed);
     Install("CWorld", "FindUnsuspectingTargetCar", 0x566C90, &CWorld::FindUnsuspectingTargetCar);
-    // Install("CWorld", "StopAllLawEnforcersInTheirTracks", 0x566C10, &CWorld::StopAllLawEnforcersInTheirTracks);
+    Install("CWorld", "StopAllLawEnforcersInTheirTracks", 0x566C10, &CWorld::StopAllLawEnforcersInTheirTracks);
     // Install("CWorld", "CallOffChaseForArea", 0x566A60, &CWorld::CallOffChaseForArea);
     // Install("CWorld", "ExtinguishAllCarFiresInArea", 0x566950, &CWorld::ExtinguishAllCarFiresInArea);
     // Install("CWorld", "SetAllCarsCanBeDamaged", 0x5668F0, &CWorld::SetAllCarsCanBeDamaged);
@@ -765,7 +765,13 @@ void CWorld::CallOffChaseForArea(float x1, float y1, float x2, float y2) {
 
 // 0x566C10
 void CWorld::StopAllLawEnforcersInTheirTracks() {
-    plugin::Call<0x566C10>();
+    for (int32 i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
+        if (CVehicle* veh = CPools::ms_pVehiclePool->GetAt(i)) {
+            if (veh->vehicleFlags.bIsLawEnforcer) {
+                veh->m_vecMoveSpeed = CVector{};
+            }
+        }
+    }
 }
 
 // 0x566C90
