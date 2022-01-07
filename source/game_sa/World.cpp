@@ -43,7 +43,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "FindUnsuspectingTargetPed", 0x566DA0, &CWorld::FindUnsuspectingTargetPed);
     Install("CWorld", "FindUnsuspectingTargetCar", 0x566C90, &CWorld::FindUnsuspectingTargetCar);
     Install("CWorld", "StopAllLawEnforcersInTheirTracks", 0x566C10, &CWorld::StopAllLawEnforcersInTheirTracks);
-    // Install("CWorld", "CallOffChaseForArea", 0x566A60, &CWorld::CallOffChaseForArea);
+    Install("CWorld", "CallOffChaseForArea", 0x566A60, &CWorld::CallOffChaseForArea);
     // Install("CWorld", "ExtinguishAllCarFiresInArea", 0x566950, &CWorld::ExtinguishAllCarFiresInArea);
     // Install("CWorld", "SetAllCarsCanBeDamaged", 0x5668F0, &CWorld::SetAllCarsCanBeDamaged);
     Install("CWorld", "ProcessVerticalLine", 0x5674E0, &CWorld::ProcessVerticalLine);
@@ -760,7 +760,24 @@ void CWorld::ExtinguishAllCarFiresInArea(CVector point, float radius) {
 
 // 0x566A60
 void CWorld::CallOffChaseForArea(float x1, float y1, float x2, float y2) {
-    plugin::Call<0x566A60, float, float, float, float>(x1, y1, x2, y2);
+    const float minX = x1 - 10.f;
+    const float maxX = x2 + 10.f;
+    const float minY = y1 - 10.f;
+    const float maxY = y2 + 10.f;
+    const int32 startSectorX = GetSectorX(minX);
+    const int32 startSectorY = GetSectorY(minY);
+    const int32 endSectorX = GetSectorX(maxX);
+    const int32 endSectorY = GetSectorY(maxY);
+
+    IncrementCurrentScanCode();
+
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            CRepeatSector* sector = GetRepeatSector(sectorX, sectorY);
+            CallOffChaseForAreaSectorListVehicles(sector->m_lists[REPEATSECTOR_VEHICLES], x1, y1, x2, y2, minX, minY, maxX, maxY);
+            CallOffChaseForAreaSectorListPeds(sector->m_lists[REPEATSECTOR_PEDS], x1, y1, x2, y2, minX, minY, maxX, maxY);
+        }
+    }
 }
 
 // 0x566C10
