@@ -49,7 +49,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ProcessVerticalLine", 0x5674E0, &CWorld::ProcessVerticalLine);
     Install("CWorld", "ClearPedsFromArea", 0x5667F0, &CWorld::ClearPedsFromArea);
     Install("CWorld", "TestForUnusedModels", 0x566510, static_cast<void(*)()>(&CWorld::TestForUnusedModels));
-    // Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x5664A0, static_cast<(**)()>(&CWorld::TestForBuildingsOnTopOfEachOther));
+    Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x5664A0, static_cast<void(*)()>(&CWorld::TestForBuildingsOnTopOfEachOther));
     // Install("CWorld", "PrintCarChanges", 0x566420, &CWorld::PrintCarChanges);
     // Install("CWorld", "TestSphereAgainstSectorList", 0x566140, &CWorld::TestSphereAgainstSectorList);
     Install("CWorld", "UseDetonator", 0x5660B0, &CWorld::UseDetonator);
@@ -730,7 +730,13 @@ void CWorld::PrintCarChanges() {
 
 // 0x5664A0
 void CWorld::TestForBuildingsOnTopOfEachOther() {
-    plugin::Call<0x5664A0>();
+    for (auto y = 0; y < MAX_SECTORS_Y; y++) {
+        for (auto x = 0; x < MAX_SECTORS_X; x++) {
+            const auto sector = GetSector(x, y);
+            TestForBuildingsOnTopOfEachOther(sector->m_buildings);
+            TestForBuildingsOnTopOfEachOther(sector->m_dummies);
+        }
+    }
 }
 
 // 0x566510
