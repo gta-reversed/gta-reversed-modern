@@ -47,7 +47,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ExtinguishAllCarFiresInArea", 0x566950, &CWorld::ExtinguishAllCarFiresInArea);
     Install("CWorld", "SetAllCarsCanBeDamaged", 0x5668F0, &CWorld::SetAllCarsCanBeDamaged);
     Install("CWorld", "ProcessVerticalLine", 0x5674E0, &CWorld::ProcessVerticalLine);
-    // Install("CWorld", "ClearPedsFromArea", 0x5667F0, &CWorld::ClearPedsFromArea);
+    Install("CWorld", "ClearPedsFromArea", 0x5667F0, &CWorld::ClearPedsFromArea);
     // Install("CWorld", "TestForUnusedModels", 0x566510, static_cast<void(**)()>(&CWorld::TestForUnusedModels));
     // Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x5664A0, static_cast<(**)()>(&CWorld::TestForBuildingsOnTopOfEachOther));
     // Install("CWorld", "PrintCarChanges", 0x566420, &CWorld::PrintCarChanges);
@@ -744,8 +744,17 @@ void CWorld::ClearCarsFromArea(float x1, float y1, float z1, float x2, float y2,
 }
 
 // 0x5667F0
-void CWorld::ClearPedsFromArea(float x1, float y1, float z1, float x2, float y2, float z2) {
-    plugin::Call<0x5667F0, float, float, float, float, float, float>(x1, y1, z1, x2, y2, z2);
+void CWorld::ClearPedsFromArea(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+    CBoundingBox box{ {minX, minY, minZ}, {maxX, maxY, maxZ} }; // NOTSA, but makes code cleaner
+    for (int32 i = 0; i < CPools::ms_pPedPool->GetSize(); i++) {
+        if (CPed* ped = CPools::ms_pPedPool->GetAt(i)) {
+            if (!ped->IsPlayer() && ped->CanBeDeleted()) {
+                if (box.IsPointWithin(ped->GetPosition())) {
+                    CPopulation::RemovePed(ped);
+                }
+            }
+        }
+    }
 }
 
 // 0x5668F0
