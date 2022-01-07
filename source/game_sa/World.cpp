@@ -55,7 +55,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "UseDetonator", 0x5660B0, &CWorld::UseDetonator);
     Install("CWorld", "RemoveFallenCars", 0x565E80, &CWorld::RemoveFallenCars);
     Install("CWorld", "RemoveFallenPeds", 0x565CB0, &CWorld::RemoveFallenPeds);
-    // Install("CWorld", "ClearCarsFromArea", 0x566610, &CWorld::ClearCarsFromArea);
+    Install("CWorld", "ClearCarsFromArea", 0x566610, &CWorld::ClearCarsFromArea);
     Install("CWorld", "ProcessVerticalLine_FillGlobeColPoints", 0x567620, &CWorld::ProcessVerticalLine_FillGlobeColPoints);
     // Install("CWorld", "TriggerExplosionSectorList", 0x567750, &CWorld::TriggerExplosionSectorList);
     // Install("CWorld", "Process", 0x5684A0, &CWorld::Process);
@@ -812,8 +812,41 @@ void CWorld::TestForUnusedModels() {
 }
 
 // 0x566610
-void CWorld::ClearCarsFromArea(float x1, float y1, float z1, float x2, float y2, float z2) {
-    plugin::Call<0x566610, float, float, float, float, float, float>(x1, y1, z1, x2, y2, z2);
+void CWorld::ClearCarsFromArea(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) {
+    CBoundingBox box{ {minX, minY, minZ}, {maxX, maxY, maxZ} }; // NOTSA, but makes code cleaner
+    for (int32 i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
+        if (CVehicle* veh = CPools::ms_pVehiclePool->GetAt(i)) {
+            if (veh == FindPlayerPed(-1)->m_pContactEntity && veh->IsBoat())
+                continue;
+
+            if (!box.IsPointWithin(veh->GetPosition()))
+                continue;
+
+            if (veh->vehicleFlags.bIsLocked || !veh->CanBeDeleted())
+                continue;
+
+            if (auto& driver = veh->m_pDriver) { // TODO: Is this some inlined stuff?
+                CPopulation::RemovePed(driver);
+                driver->CleanUpOldReference(reinterpret_cast<CEntity**>(&driver));
+                driver = nullptr;
+            }
+
+
+            for (auto i = 0; i < veh->m_nMaxPassengers; i++) {
+                if (auto psngr = veh->m_apPassengers[i]) {
+                    veh->RemovePassenger(psngr);
+                    CPopulation::RemovePed(psngr);
+                }
+            }
+
+            if (CCarCtrl::IsThisVehicleInteresting(veh))
+                CGarages::StoreCarInNearestImpoundingGarage(veh);
+
+            CCarCtrl::RemoveFromInterestingVehicleList(veh);
+            Remove(veh);
+            delete veh;
+        }
+    }
 }
 
 // 0x5667F0

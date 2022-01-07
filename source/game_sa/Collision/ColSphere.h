@@ -33,6 +33,8 @@ public:
 public:
     static void InjectHooks();
 
+    CColSphere() = default;
+
     CColSphere(CVector centre, float radius) :
         CSphere{centre, radius}
     {
