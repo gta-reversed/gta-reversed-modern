@@ -40,8 +40,8 @@ void CWorld::InjectHooks() {
     using namespace ReversibleHooks;
     // Install("CWorld", "hasCollisionBeenLoaded", 0x410CE0, &CWorld::hasCollisionBeenLoaded);
     Install("CWorld", "ProcessLineOfSightSectorList", 0x566EE0, &CWorld::ProcessLineOfSightSectorList);
-    // Install("CWorld", "FindUnsuspectingTargetPed", 0x566DA0, &CWorld::FindUnsuspectingTargetPed);
-    // Install("CWorld", "FindUnsuspectingTargetCar", 0x566C90, &CWorld::FindUnsuspectingTargetCar);
+    Install("CWorld", "FindUnsuspectingTargetPed", 0x566DA0, &CWorld::FindUnsuspectingTargetPed);
+    Install("CWorld", "FindUnsuspectingTargetCar", 0x566C90, &CWorld::FindUnsuspectingTargetCar);
     // Install("CWorld", "StopAllLawEnforcersInTheirTracks", 0x566C10, &CWorld::StopAllLawEnforcersInTheirTracks);
     // Install("CWorld", "CallOffChaseForArea", 0x566A60, &CWorld::CallOffChaseForArea);
     // Install("CWorld", "ExtinguishAllCarFiresInArea", 0x566950, &CWorld::ExtinguishAllCarFiresInArea);
@@ -770,14 +770,40 @@ void CWorld::StopAllLawEnforcersInTheirTracks() {
 
 // 0x566C90
 CVehicle* CWorld::FindUnsuspectingTargetCar(CVector point, CVector playerPosn) {
-    return plugin::CallAndReturn<CVehicle*, 0x566C90, CVector, CVector>(point, playerPosn);
+    float nearestDist2D = std::numeric_limits<float>::max();
+    CVehicle* nearestVeh{};
+    for (int32 i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
+        CVehicle* veh = CPools::ms_pVehiclePool->GetAt(i);
+        if (!veh)
+            continue;
+
+        if (!veh->IsCreatedBy(eVehicleCreatedBy::RANDOM_VEHICLE) || !veh->IsSubclassAutomobile())
+            continue;
+
+        switch (veh->m_nStatus) {
+        case eEntityStatus::STATUS_PHYSICS:
+        case eEntityStatus::STATUS_SIMPLE:
+            break;
+        default:
+            continue;
+        }
+
+        const float dist2D = DistanceBetweenPoints2D(point, veh->GetPosition());
+        if (dist2D >= nearestDist2D)
+            continue;
+
+        if (DotProduct(playerPosn - veh->GetPosition(), veh->GetForward()) <= 0.0f)
+            continue; // `point` is behind the ped
+
+        nearestVeh = veh;
+        nearestDist2D = dist2D;
+    }
+    return nearestVeh;
 }
 
 // 0x566DA0
 CPed* CWorld::FindUnsuspectingTargetPed(CVector point, CVector playerPosn) {
-    return plugin::CallAndReturn<CPed*, 0x566DA0, CVector, CVector>(point, playerPosn);
-
-    float fNearest2D = std::numeric_limits<float>::max();
+    float nearestDist2D = std::numeric_limits<float>::max();
     CPed* nearestPed{};
     for (int32 i = 0; i < CPools::ms_pPedPool->GetSize(); i++) {
         CPed* ped = CPools::ms_pPedPool->GetAt(i);
@@ -796,16 +822,17 @@ CPed* CWorld::FindUnsuspectingTargetPed(CVector point, CVector playerPosn) {
                 continue;
 
         const CVector pedPos = ped->GetPosition();
-        const float fDist2D = DistanceBetweenPoints2D(CVector2D{ point }, pedPos);
-        if (fDist2D >= fNearest2D)
+        const float dist2D = DistanceBetweenPoints2D(point, pedPos);
+        if (dist2D >= nearestDist2D)
             continue;
 
         if (DotProduct(playerPosn - pedPos, ped->GetForward()) <= 0.0f)
-            continue;
+            continue; // `point` is behind the ped
 
-        nearestPed = ped;
-        fNearest2D = fDist2D;
+        nearestPed    = ped;
+        nearestDist2D = dist2D;
     }
+    return nearestPed;
 }
 
 // 0x566EE0
