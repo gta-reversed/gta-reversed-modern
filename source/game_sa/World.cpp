@@ -39,7 +39,7 @@ int8& gCurCamColVars = *(int8*)0x8CCB80;
 void CWorld::InjectHooks() {
     using namespace ReversibleHooks;
     // Install("CWorld", "hasCollisionBeenLoaded", 0x410CE0, &CWorld::hasCollisionBeenLoaded);
-    // Install("CWorld", "ProcessLineOfSightSectorList", 0x566EE0, &CWorld::ProcessLineOfSightSectorList);
+    Install("CWorld", "ProcessLineOfSightSectorList", 0x566EE0, &CWorld::ProcessLineOfSightSectorList);
     // Install("CWorld", "FindUnsuspectingTargetPed", 0x566DA0, &CWorld::FindUnsuspectingTargetPed);
     // Install("CWorld", "FindUnsuspectingTargetCar", 0x566C90, &CWorld::FindUnsuspectingTargetCar);
     // Install("CWorld", "StopAllLawEnforcersInTheirTracks", 0x566C10, &CWorld::StopAllLawEnforcersInTheirTracks);
@@ -146,12 +146,13 @@ void CWorld::Initialise() {
 }
 
 // 0x563220
-void CWorld::Add(CPhysical* entity) {
+void CWorld::Add(CEntity* entity) {
     entity->UpdateRW();
+    entity->UpdateRwFrame();
     entity->Add();
     if (!entity->IsBuilding() && !entity->IsDummy()) {
         if (!entity->IsStatic() && !entity->m_bIsStaticWaitingForCollision) {
-            entity->AddToMovingList();
+            entity->AsPhysical()->AddToMovingList();
         }
     }
 }
@@ -222,8 +223,8 @@ void CWorld::ProcessForAnimViewer() {
 
 // 0x563430
 void CWorld::ProcessPedsAfterPreRender() {
-    if (!CTimer::bSkipProcessThisFrame)
-        return;
+    if (CTimer::bSkipProcessThisFrame)
+        return; 
 
     for (CPtrNode* it = ms_listMovingEntityPtrs.m_node; it; it = it->m_next) {
         auto entity = static_cast<CEntity*>(it->m_item);
@@ -808,8 +809,175 @@ CPed* CWorld::FindUnsuspectingTargetPed(CVector point, CVector playerPosn) {
 }
 
 // 0x566EE0
-bool CWorld::ProcessLineOfSightSectorList(CPtrList& ptrList, const CColLine& colLine, CColPoint& outColPoint, float& maxTouchDistance, CEntity*& outEntity, bool doSeeThroughCheck, bool doIgnoreCameraCheck, bool doShootThroughCheck) {
-    return plugin::CallAndReturn<bool, 0x566EE0, CPtrList&, const CColLine&, CColPoint&, float&, CEntity*&, bool, bool, bool>(ptrList, colLine, outColPoint, maxTouchDistance, outEntity, doSeeThroughCheck, doIgnoreCameraCheck, doShootThroughCheck);
+bool CWorld::ProcessLineOfSightSectorList(CPtrList& ptrList, const CColLine& colLine, CColPoint& outColPoint, float& minTouchDistance, CEntity*& outEntity, bool doSeeThroughCheck, bool doIgnoreCameraCheck, bool doShootThroughCheck) {
+    if (!ptrList.m_node)
+        return false;
+     
+    float localMinTouchDist = minTouchDistance;
+
+    for (CPtrNode *it = ptrList.m_node; it; it = it->m_next) {
+        //next = it->m_next;
+
+        const auto entity = static_cast<CEntity*>(it->m_item);
+        if (entity->m_nScanCode == ms_nCurrentScanCode || entity == pIgnoreEntity)
+            continue;
+
+        if (doIgnoreCameraCheck && CameraToIgnoreThisObject(entity))
+            continue;
+
+        if (!entity->m_bUsesCollision) {
+            if (!entity->IsPed())
+                continue;
+            if (const auto ped = entity->AsPed(); !bIncludeBikers && !bIncludeDeadPeds)
+                continue;
+        }
+
+        const auto ProcessColModel = [&](CColModel* colModel) {
+            if (!colModel || !colModel->m_pColData)
+                return;
+
+            const auto colData = colModel->m_pColData;
+
+            float makeBiggerBy{};
+
+            if (fWeaponSpreadRate > 0.0f) {
+                makeBiggerBy = (entity->GetPosition() - colLine.m_vecStart).Magnitude() * fWeaponSpreadRate;
+
+                // Make bounding box bigger
+                {
+                    const CVector offsetVec{ makeBiggerBy , makeBiggerBy , makeBiggerBy };
+                    colModel->m_boundBox.m_vecMin -= offsetVec;
+                    colModel->m_boundBox.m_vecMax += offsetVec;
+                }
+
+                // Make spheres bigger
+                colModel->m_boundSphere.m_fRadius += makeBiggerBy;
+
+                if (colData->m_nNumSpheres) {
+                    for (auto i = 0; i < colData->m_nNumSpheres; i++) {
+                        colData->m_pSpheres[i].m_fRadius += makeBiggerBy;
+                    }
+                }
+
+            }
+
+            if (CCollision::ProcessLineOfSight(
+                colLine,
+                entity->GetMatrix(),
+                *colModel,
+                outColPoint,
+                localMinTouchDist,
+                doSeeThroughCheck,
+                doShootThroughCheck)
+            ) {
+                outEntity = entity;
+                ms_iProcessLineNumCrossings += CCollision::ms_iProcessLineNumCrossings;
+            }
+
+            if (makeBiggerBy > 0.0f) {
+                // Undo changes made to the col. model previously
+
+                // Bounding box
+                {
+                    const CVector offsetVec{ makeBiggerBy , makeBiggerBy , makeBiggerBy };
+                    colModel->m_boundBox.m_vecMin += offsetVec;
+                    colModel->m_boundBox.m_vecMax -= offsetVec;
+                }
+
+                // Spheres
+                colModel->m_boundSphere.m_fRadius -= makeBiggerBy;
+
+                if (colData->m_nNumSpheres) {
+                    for (auto i = 0; i < colData->m_nNumSpheres; i++) {
+                        colData->m_pSpheres[i].m_fRadius -= makeBiggerBy;
+                    }
+                }
+            }
+        };
+
+        switch (entity->m_nType) {
+        case eEntityType::ENTITY_TYPE_PED: {
+            const auto ped = entity->AsPed();
+            if (   ped->m_bUsesCollision
+                || ped->m_pAttachedTo
+                || (bIncludeDeadPeds && !ped->IsAlive())
+                || (bIncludeBikers && ped->bTestForShotInVehicle)
+            ) {
+                ProcessColModel(CModelInfo::GetModelInfo(entity->m_nModelIndex)->AsPedModelInfoPtr()->AnimatePedColModelSkinned(entity->m_pRwClump));
+            }
+            break;
+        }
+        case eEntityType::ENTITY_TYPE_VEHICLE: {
+            const auto veh = entity->AsVehicle();
+
+            ProcessColModel(veh->GetColModel());
+
+            if (bIncludeCarTyres)
+                break;
+            
+            // Do car tyre test
+
+            CColModel wheelCol{};
+            CCollisionData colData{};
+            CColSphere colSpheres[6];
+
+            wheelCol.m_pColData = &colData;
+            colData.m_nNumSpheres = std::size(colSpheres);
+            colData.m_pSpheres = colSpheres;
+
+            if (veh->SetUpWheelColModel(&wheelCol)) {
+                CColPoint wheelCP{};
+                float wheelTouchDist = localMinTouchDist;
+                auto& mat = veh->GetMatrix();
+                if (CCollision::ProcessLineOfSight(colLine, mat, wheelCol, wheelCP, wheelTouchDist, false, doShootThroughCheck)) {
+                    ms_iProcessLineNumCrossings += CCollision::ms_iProcessLineNumCrossings;
+
+                    if (wheelTouchDist < localMinTouchDist) {
+                        localMinTouchDist = wheelTouchDist;
+                        outColPoint = wheelCP;
+                    } else {
+                        // Since this col check consists only of checking the wheels
+                        // if `colLine.start` is at the opposite side to the col point 
+                        // will mean that the `line` went thru the vehicle body
+                        // which means there must be a direct hit somewhere with the vehicle's body
+
+                        const auto lineDir = colLine.m_vecEnd - colLine.m_vecStart;
+                        const auto lineDirDot = DotProduct(lineDir, mat.GetRight());
+                        const auto colPointToEntityDot = DotProduct(wheelCP.m_vecPoint - mat.GetPosition(), mat.GetRight());
+                        if (lineDirDot < 0.f && colPointToEntityDot > 0.f  // Line begins at the left, col point is on the right
+                            || lineDirDot > 0.f && colPointToEntityDot < 0.f) // Or the other way around
+                        {
+                            // And the absolute angle between the `line` and the `right` direction vector is less than 45 deg.
+                            // Here they're betting on the fact that the wheel is not too far away from the body itself. (which is true in case of all vanilla models)
+                            // If it is, and the vehicle is small in height this might be incorrect (because the line might go over the body itself, and just hit the wheel)
+                            if (fabs(lineDirDot) / lineDir.Magnitude() > 0.5f) {
+                                localMinTouchDist = wheelTouchDist;
+                                outColPoint = wheelCP;
+                                outEntity = entity;
+                            }
+                        }
+                    }
+                }
+            }
+
+            wheelCol.m_pColData = nullptr; // Otherwise destructor would try to free it
+
+            break;
+        }
+        default: {
+            ProcessColModel(entity->GetColModel());
+            break;
+        }
+        }
+
+        entity->m_nScanCode = ms_nCurrentScanCode; // Placed here, because the above switch has some type dependent conditions
+    }
+
+    if (localMinTouchDist < minTouchDistance) {
+        minTouchDistance = localMinTouchDist;
+        return true;
+    }
+    return false;
 }
 
 // 0x5674E0

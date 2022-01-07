@@ -109,7 +109,7 @@ public:
     static bool SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState);
     static void RemoveFallenPeds();
     static void RemoveFallenCars();
-    static void UseDetonator(CEntity* creator);
+    static void UseDetonator(CPed* creator);
     // returns entity
     static CEntity* TestSphereAgainstSectorList(CPtrList& ptrList, CVector sphereCenter, float sphereRadius, CEntity* ignoreEntity, bool doCameraIgnoreCheck);
     static void PrintCarChanges();
@@ -123,7 +123,7 @@ public:
     static void StopAllLawEnforcersInTheirTracks();
     static CVehicle* FindUnsuspectingTargetCar(CVector point, CVector playerPosn);
     static CPed* FindUnsuspectingTargetPed(CVector point, CVector playerPosn);
-    static bool ProcessLineOfSightSectorList(CPtrList& ptrList, const CColLine& colLine, CColPoint& outColPoint, float& maxTouchDistance, CEntity*& outEntity, bool doSeeThroughCheck, bool doIgnoreCameraCheck, bool doShootThroughCheck);
+    static bool ProcessLineOfSightSectorList(CPtrList& ptrList, const CColLine& colLine, CColPoint& outColPoint, float& minTouchDistance, CEntity*& outEntity, bool doSeeThroughCheck, bool doIgnoreCameraCheck, bool doShootThroughCheck);
     static bool ProcessVerticalLine(const CVector& origin, float distance, CColPoint& outColPoint, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly);
     static bool ProcessVerticalLine_FillGlobeColPoints(const CVector& origin, float distance, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly);
     static void TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point, float radius, float visibleDistance, CEntity* victim, CEntity* creator, bool processVehicleBombTimer, float damage);

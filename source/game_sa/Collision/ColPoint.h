@@ -42,7 +42,7 @@ public:
 
     float        m_fDepth;        // col depth
 
-    void operator=(CColPoint const& right);
+    CColPoint& operator=(CColPoint const&) = default;
 };
 
 VALIDATE_SIZE(CColPoint, 0x2C);
