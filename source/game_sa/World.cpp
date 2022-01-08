@@ -59,7 +59,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "TriggerExplosionSectorList", 0x567750, &CWorld::TriggerExplosionSectorList);
     Install("CWorld", "Process", 0x5684A0, &CWorld::Process);
     Install("CWorld", "SetWorldOnFire", 0x56B910, &CWorld::SetWorldOnFire);
-    // Install("CWorld", "TriggerExplosion", 0x56B790, &CWorld::TriggerExplosion);
+    Install("CWorld", "TriggerExplosion", 0x56B790, &CWorld::TriggerExplosion);
     // Install("CWorld", "ProcessLineOfSightSector", 0x56B5E0, &CWorld::ProcessLineOfSightSector);
     // Install("CWorld", "GetIsLineOfSightClear", 0x56A490, &CWorld::GetIsLineOfSightClear);
     // Install("CWorld", "ClearExcitingStuffFromArea", 0x56A0D0, &CWorld::ClearExcitingStuffFromArea);
@@ -1729,7 +1729,25 @@ bool CWorld::ProcessLineOfSightSector(CSector& sector, CRepeatSector& repeatSect
 
 // 0x56B790
 void CWorld::TriggerExplosion(const CVector& point, float radius, float visibleDistance, CEntity* victim, CEntity* creator, bool processVehicleBombTimer, float damage) {
-    plugin::Call<0x56B790, const CVector&, float, float, CEntity*, CEntity*, bool, float>(point, radius, visibleDistance, victim, creator, processVehicleBombTimer, damage);
+    const int32 startSectorX = GetSectorX(point.x - radius);
+    const int32 startSectorY = GetSectorY(point.y - radius);
+    const int32 endSectorX = GetSectorX(point.x + radius);
+    const int32 endSectorY = GetSectorY(point.y + radius);
+
+    IncrementCurrentScanCode();
+
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            const auto ProcessSector = [&](auto& sector) {
+                TriggerExplosionSectorList(sector, point, radius, visibleDistance, victim, creator, processVehicleBombTimer, damage);
+            };
+
+            auto sector = GetRepeatSector(sectorX, sectorY);
+            ProcessSector(sector->m_lists[REPEATSECTOR_VEHICLES]);
+            ProcessSector(sector->m_lists[REPEATSECTOR_PEDS]);
+            ProcessSector(sector->m_lists[REPEATSECTOR_OBJECTS]);
+        }
+    }
 }
 
 // 0x56B910
