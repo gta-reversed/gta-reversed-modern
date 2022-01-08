@@ -71,7 +71,7 @@ public:
     static void ProcessForAnimViewer();
     static void ProcessPedsAfterPreRender();
     static void ClearScanCodes();
-    static void FindObjectsInRangeSectorList(CPtrList& arg0, const CVector& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities);
+    static void FindObjectsInRangeSectorList(CPtrList& arg0, const CVector& point, float radius, bool b2D, int16 & outCount, int16 maxCount, CEntity** outEntities);
     static void FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& ptrList, const CVector& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities);
     static bool ProcessVerticalLineSectorList_FillGlobeColPoints(CPtrList& ptrList, const CColLine& colLine, CEntity*& outEntity, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly);
     static void RemoveStaticObjects();

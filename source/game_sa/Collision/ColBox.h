@@ -11,12 +11,18 @@
 
 class CColBox : public CBox {
 public:
-    uint8        m_nMaterial;
-    uint8        m_nFlags;
-    tColLighting m_nLighting;
-    uint8        m_nBrightness;
+    uint8        m_nMaterial{0xff};
+    uint8        m_nFlags{};
+    tColLighting m_nLighting{};
+    uint8        m_nBrightness{};
 
 public:
+    CColBox() = default;
+    CColBox(const CBox& box) :
+        CBox(box)
+    {
+    }
+
     void     Set(CVector const& sup, CVector const& inf, uint8 material, uint8 flags, uint8 lighting);
     CColBox& operator=(CColBox const& right);
 };

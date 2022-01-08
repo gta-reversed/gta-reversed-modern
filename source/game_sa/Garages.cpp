@@ -73,3 +73,7 @@ int32 CGarages::FindGarageForObject(CObject* pObject)
 void CGarages::AddOne(float x1, float y1, float z1, float frontX, float frontY, float x2, float y2, float z2, eGarageType type, uint32 a10, char* name, uint32 door) {
     plugin::Call<0x4471E0, float, float, float, float, float, float, float, float, eGarageType, uint32, char*, uint32>(x1, y1, z1, frontX, frontY, x2, y2, z2, type, a10, name, door);
 }
+
+void CGarages::StoreCarInNearestImpoundingGarage(CVehicle* pVehicle) {
+    plugin::Call<0x44A3C0, CVehicle*>(pVehicle);
+}
