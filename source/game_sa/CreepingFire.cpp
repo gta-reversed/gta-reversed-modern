@@ -45,11 +45,11 @@ bool CCreepingFire::TryToStartFireAtCoors(CVector pos, uint8 nGenerations, bool 
     pos.z = cp.m_vecPoint.z;
     status = 6;
 
-    if (CFire* fire = gFireManager.StartFire(pos, 0.8f, true, nullptr, 20'000u, nGenerations, !bScriptFire)) {
-        fire->firstGeneration = false;
-        fire->createdByScript = bScriptFire;
-        return true;
-    }
+    CFire* fire = gFireManager.StartFire(pos, 0.8f, true, nullptr, 20'000u, nGenerations, !bScriptFire);
+    if (!fire)
+        return false;
 
-    return false;
+    fire->firstGeneration = false;
+    fire->createdByScript = bScriptFire;
+    return true;
 }
