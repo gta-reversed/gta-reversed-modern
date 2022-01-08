@@ -49,7 +49,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ProcessVerticalLine", 0x5674E0, &CWorld::ProcessVerticalLine);
     Install("CWorld", "ClearPedsFromArea", 0x5667F0, &CWorld::ClearPedsFromArea);
     Install("CWorld", "TestForUnusedModels", 0x566510, static_cast<void(*)()>(&CWorld::TestForUnusedModels));
-    Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x5664A0, static_cast<void(*)()>(&CWorld::TestForBuildingsOnTopOfEachOther));
+    Install("CWorld", "TestForBuildingsOnTopOfEachOther_Void", 0x5664A0, static_cast<void(*)()>(&CWorld::TestForBuildingsOnTopOfEachOther));
     Install("CWorld", "PrintCarChanges", 0x566420, &CWorld::PrintCarChanges);
     Install("CWorld", "TestSphereAgainstSectorList", 0x566140, &CWorld::TestSphereAgainstSectorList);
     Install("CWorld", "UseDetonator", 0x5660B0, &CWorld::UseDetonator);
@@ -81,7 +81,7 @@ void CWorld::InjectHooks() {
     // Install("CWorld", "SetPedsOnFire", 0x565610, &CWorld::SetPedsOnFire);
     // Install("CWorld", "CallOffChaseForAreaSectorListVehicles", 0x563A80, &CWorld::CallOffChaseForAreaSectorListVehicles);
     // Install("CWorld", "RemoveEntityInsteadOfProcessingIt", 0x563A10, &CWorld::RemoveEntityInsteadOfProcessingIt);
-    Install("CWorld", "TestForUnusedModels", 0x5639D0, static_cast<void(*)(CPtrList&, int32*)>(&CWorld::TestForUnusedModels));
+    Install("CWorld", "TestForUnusedModels_InputArray", 0x5639D0, static_cast<void(*)(CPtrList&, int32*)>(&CWorld::TestForUnusedModels));
     Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x563950, static_cast<void(*)(CPtrList&)>(&CWorld::TestForBuildingsOnTopOfEachOther));
     // Install("CWorld", "RemoveStaticObjects", 0x563840, &CWorld::RemoveStaticObjects);
     // Install("CWorld", "ProcessVerticalLineSectorList_FillGlobeColPoints", 0x5636A0, &CWorld::ProcessVerticalLineSectorList_FillGlobeColPoints);
