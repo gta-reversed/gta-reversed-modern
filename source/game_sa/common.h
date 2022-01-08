@@ -175,7 +175,7 @@ AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, char *name);
 char *MakeUpperCase(char *dest, const char *src);
 bool EndsWith(const char* str, const char* with, bool caseSensitive = true);
 
-class CEventGroup* GetEventGlobalGroup();
+class CEventGlobalGroup* GetEventGlobalGroup();
 // dummy function
 void CreateDebugFont();
 // dummy function

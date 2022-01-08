@@ -97,6 +97,7 @@ public:
     void DeletePlayerSkin();
     void LoadPlayerSkin();
     void Clear();
+    void Process(uint32 playerIdx);
 };
 
 VALIDATE_SIZE(CPlayerInfo, 0x190);

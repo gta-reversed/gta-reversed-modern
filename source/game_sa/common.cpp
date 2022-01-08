@@ -298,13 +298,13 @@ void CreateDebugFont() {
 }
 
 // 0x4ABA50
-CEventGroup* GetEventGlobalGroup() {
-    static CEventGroup*& globalEvents = *(CEventGroup**)0xA9AF6C;
+CEventGlobalGroup* GetEventGlobalGroup() {
+    static CEventGlobalGroup*& globalEvents = *(CEventGlobalGroup**)0xA9AF6C;
 
     if (globalEvents)
         return globalEvents;
 
-    globalEvents = new CEventGroup(nullptr);
+    globalEvents = new CEventGlobalGroup(nullptr);
     return globalEvents;
 }
 

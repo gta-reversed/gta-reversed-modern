@@ -46,8 +46,7 @@ public:
     // Current player
     static int8& PlayerInFocus;
     static uint16& ms_nCurrentScanCode;
-    // Player data array for 2 players
-    static CPlayerInfo* Players; // static CPlayerInfo Players[MAX_PLAYERS]
+    static inline CPlayerInfo(&Players)[MAX_PLAYERS] = *(CPlayerInfo(*)[MAX_PLAYERS])0xB7CD98;
     // Use GetSector() to access this array
     static CSector* ms_aSectors; // static CSector ms_aSectors[MAX_SECTORS] default 120x120
     // Use GetRepeatSector() to access this array

@@ -21,6 +21,10 @@ void CPlayerInfo::Clear() {
     plugin::CallMethod<0x56F330, CPlayerInfo*>(this);
 }
 
+void CPlayerInfo::Process(uint32 playerIdx) {
+    plugin::CallMethod<0x56F8D0, CPlayerInfo*, uint32>(this, playerIdx);
+}
+
 void CPlayerInfo::DeletePlayerSkin() {
     plugin::CallMethod<0x56EA80, CPlayerInfo*>(this);
 }

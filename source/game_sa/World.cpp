@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-
+#include "IKChainManager_c.h"
 #include "World.h"
 
 int32 CWorld::TOTAL_PLAYERS = 2;
@@ -22,7 +22,6 @@ bool& CWorld::bNoMoreCollisionTorque = *(bool*)0xB7CD72;
 bool& CWorld::bDoingCarCollisions = *(bool*)0xB7CD73;
 int8& CWorld::PlayerInFocus = *(int8*)0xB7CD74;
 uint16& CWorld::ms_nCurrentScanCode = *(uint16*)0xB7CD78;
-CPlayerInfo* CWorld::Players = (CPlayerInfo*)0xB7CD98;
 CSector* CWorld::ms_aSectors = (CSector*)0xB7D0B8;
 CRepeatSector (&CWorld::ms_aRepeatSectors)[MAX_REPEAT_SECTORS] = *(CRepeatSector(*)[MAX_REPEAT_SECTORS])0xB992B8;
 CPtrListSingleLink (&CWorld::ms_aLodPtrLists)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X] = *(CPtrListSingleLink(*)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X])0xB99EB8;
@@ -58,6 +57,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ClearCarsFromArea", 0x566610, &CWorld::ClearCarsFromArea);
     Install("CWorld", "ProcessVerticalLine_FillGlobeColPoints", 0x567620, &CWorld::ProcessVerticalLine_FillGlobeColPoints);
     Install("CWorld", "TriggerExplosionSectorList", 0x567750, &CWorld::TriggerExplosionSectorList);
+    Install("CWorld", "Process", 0x5684A0, &CWorld::Process);
     Install("CWorld", "SetWorldOnFire", 0x56B910, &CWorld::SetWorldOnFire);
     // Install("CWorld", "TriggerExplosion", 0x56B790, &CWorld::TriggerExplosion);
     // Install("CWorld", "ProcessLineOfSightSector", 0x56B5E0, &CWorld::ProcessLineOfSightSector);
@@ -1408,7 +1408,209 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
 
 // 0x5684A0
 void CWorld::Process() {
-    plugin::Call<0x5684A0>();
+    const auto IterateMovingList = [&](auto&& fn) {
+        for (CPtrNodeDoubleLink* node = ms_listMovingEntityPtrs.GetNode(), *next{}; node; node = next) {
+            next = node->m_next;
+            fn(static_cast<CEntity*>(node->m_item));
+        }
+    };
+
+    IterateMovingList([&](CEntity* entity) {
+        if (entity->IsPed()) {
+            GetEventGlobalGroup()->AddEventsToPed(entity->AsPed());
+        }
+    });
+
+    for (auto& group : CPedGroups::ms_groups) {
+        GetEventGlobalGroup()->AddEventsToGroup(&group);
+    }
+
+    CInformFriendsEventQueue::Process();
+    CInformGroupEventQueue::Process();
+
+    GetEventGlobalGroup()->Flush(false);
+
+    if ((CTimer::m_FrameCounter % 64) == 0)
+        CReferences::PruneAllReferencesInWorld();
+
+    if (bProcessCutsceneOnly && CCutsceneMgr::ms_running) {
+        for (auto* obj : CCutsceneMgr::ms_pCutsceneObjects) {
+            if (obj && !obj->m_pCollisionList.IsEmpty()) {
+                obj->UpdateAnim();
+                obj->ProcessControl();
+                obj->ProcessCollision();
+                obj->UpdateRW();
+                obj->UpdateRwFrame();
+            }
+        }
+        return;
+    }
+
+    IterateMovingList([&](CEntity* entity) {
+        if (!entity->m_bRemoveFromWorld) {
+            entity->UpdateAnim();
+        }
+    });
+    
+    {
+        const auto ProcessMovingEntity = [](CEntity* entity) {
+            if (entity->m_bRemoveFromWorld) {
+                if (entity->IsPed()) { // Inverted loop compared to original
+                    if (FindPlayerPed() == entity) {
+                        entity->Remove();
+                        if (entity->IsPhysical())
+                            entity->AsPhysical()->RemoveFromMovingList();
+                    } else {
+                        CPopulation::RemovePed(entity->AsPed());
+                    }
+                } else {
+                    entity->Remove();
+                    if (entity->IsPhysical())
+                        entity->AsPhysical()->RemoveFromMovingList();
+                    delete entity;
+                }
+            } else {
+                entity->ProcessControl();
+                if (entity->IsStatic())
+                    entity->AsPhysical()->RemoveFromMovingList();
+            }
+        };
+
+        IterateMovingList(ProcessMovingEntity);
+
+        bForceProcessControl = true;
+        IterateMovingList([&](CEntity* entity) {
+            if (!entity->m_bWasPostponed)
+                ProcessMovingEntity(entity);
+        });
+        bForceProcessControl = false;
+    }
+
+    for (CPtrNodeDoubleLink* node = ms_listObjectsWithControlCode.GetNode(), *next{}; node; node = next) {
+        next = node->m_next;
+        static_cast<CObject*>(node->m_item)->ProcessControlLogic();
+    }
+
+    if (CReplay::Mode == 1) {
+        IterateMovingList([&](CEntity* entity) {
+            entity->m_bIsInSafePosition = true;
+            entity->UpdateRW();
+            entity->UpdateRwFrame();
+        });
+    } else {
+        // Process collision
+        {
+            const auto ProcessMovingEntityCollision = [](CEntity* entity) {
+                if (!entity->m_bIsInSafePosition) {
+                    entity->ProcessCollision();
+                    entity->UpdateRW();
+                    entity->UpdateRwFrame();
+                }
+            };
+
+            const auto ProcessMovingEntityCollisions = [&] {
+                IterateMovingList(ProcessMovingEntityCollision);
+            };
+
+            bNoMoreCollisionTorque = false;
+            ProcessMovingEntityCollisions();
+            bNoMoreCollisionTorque = true;
+
+            // Process entities a few more times..
+            for (auto i = 0; i < 4; i++) {
+                ProcessMovingEntityCollisions();
+            }
+
+            // Mark entities as `stuck` if they're still in unsafe positions
+            IterateMovingList([&](CEntity* entity) {
+                if (!entity->m_bIsInSafePosition) {
+                    entity->m_bIsStuck = true;
+
+                    entity->ProcessCollision();
+                    entity->UpdateRW();
+                    entity->UpdateRwFrame();
+
+                    if (!entity->m_bIsInSafePosition)
+                        entity->m_bIsStuck = true;
+                }
+            });
+        }
+
+        // Process "Shift" (Not sure what that is)
+        {
+            bSecondShift = false;
+
+            IterateMovingList([&](CEntity* entity) {
+                if (!entity->m_bIsInSafePosition) {
+                    entity->ProcessShift();
+                    entity->UpdateRW();
+                    entity->UpdateRwFrame();
+
+                    if (!entity->m_bIsInSafePosition)
+                        entity->m_bIsStuck = true;
+                }
+            });
+
+            bSecondShift = true;
+
+            IterateMovingList([&](CEntity* entity) {
+                if (!entity->m_bIsInSafePosition) {
+                    entity->ProcessShift();
+                    entity->UpdateRW();
+                    entity->UpdateRwFrame();
+
+                    if (!entity->m_bIsInSafePosition) {
+                        entity->m_bIsStuck = true;
+
+                        if (entity->m_nStatus == STATUS_PLAYER) { // Try to unstuck player
+                            const auto physical = entity->AsPhysical();
+                            physical->m_vecMoveSpeed *= std::pow(SQRT_2 / 2, CTimer::GetTimeStepInMS());
+                            physical->ApplyMoveSpeed();
+                            physical->ApplyTurnSpeed();
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    g_LoadMonitor.EndTimer(true);
+    CVehicleRecording::SaveOrRetrieveDataForThisFrame();
+    g_ikChainMan.Update(CTimer::GetTimeStepInSeconds());
+    ProcessAttachedEntities();
+
+    IterateMovingList([&](CEntity* entity) {
+        if (entity->IsPed()) {
+            const auto ped = entity->AsPed();
+            ped->GetIntelligence()->ProcessAfterProcCol();
+            if (const auto attachedTo = ped->m_pAttachedTo) {
+                ped->m_pEntityIgnoredCollision = attachedTo;
+                ped->PositionAttachedPed();
+                ped->UpdateRW();
+                ped->UpdateRwFrame();
+            }
+        }
+    });
+
+    CMessages::Process();
+
+    for (auto i = 0; i < std::size(Players); i++) {
+        if (Players[i].m_pPed)
+            Players[i].Process(i);
+    }
+
+    CPedScriptedTaskRecord::Process();
+
+    CPedGroups::Process();
+
+    switch (CTimer::GetFrameCounter() % 8) {
+    case 1:
+        RemoveFallenPeds();
+        break;
+    case 5:
+        RemoveFallenCars();
+        break;
+    }
 }
 
 // 0x568AD0
