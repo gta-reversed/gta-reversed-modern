@@ -242,26 +242,28 @@ void CWorld::ClearScanCodes() {
 }
 
 // 0x563500
-void CWorld::FindObjectsInRangeSectorList(CPtrList& arg0, const CVector& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities) {
-    for (CPtrNode* it = ms_listMovingEntityPtrs.m_node; it; it = it->m_next) {
+void CWorld::FindObjectsInRangeSectorList(CPtrList& ptrList, const CVector& point, float radius, bool b2D, int16 & outCount, int16 maxCount, CEntity** outEntities) {
+    const auto radiusSq = radius * radius;
+    for (CPtrNode* it = ptrList.m_node, *next{}; it; it = next) {
+        next = it->m_next;
+
         auto entity = static_cast<CEntity*>(it->m_item);
         if (entity->m_nScanCode == ms_nCurrentScanCode)
             continue;
-
         entity->m_nScanCode = ms_nCurrentScanCode;
 
         if (b2D) {
-            if (DistanceBetweenPointsSquared2D(CVector2D{ point }, entity->GetPosition()) > radius)
+            if (DistanceBetweenPointsSquared2D(CVector2D{ point }, entity->GetPosition()) > radiusSq)
                 continue;
         } else {
-            if (DistanceBetweenPointsSquared(point, entity->GetPosition()) > radius)
+            if (DistanceBetweenPointsSquared(point, entity->GetPosition()) > radiusSq)
                 continue;
         }
 
         /* Don't stop if reached max count, because of entity scan code update */
-        if (*outCount < maxCount) {
+        if (outCount < maxCount) {
             if (outEntities)
-                outEntities[*outCount] = entity;
+                outEntities[outCount] = entity;
             outCount++;
         }
     }
