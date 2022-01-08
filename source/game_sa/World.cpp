@@ -60,7 +60,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "Process", 0x5684A0, &CWorld::Process);
     Install("CWorld", "SetWorldOnFire", 0x56B910, &CWorld::SetWorldOnFire);
     Install("CWorld", "TriggerExplosion", 0x56B790, &CWorld::TriggerExplosion);
-    // Install("CWorld", "ProcessLineOfSightSector", 0x56B5E0, &CWorld::ProcessLineOfSightSector);
+    Install("CWorld", "ProcessLineOfSightSector", 0x56B5E0, &CWorld::ProcessLineOfSightSector);
     // Install("CWorld", "GetIsLineOfSightClear", 0x56A490, &CWorld::GetIsLineOfSightClear);
     // Install("CWorld", "ClearExcitingStuffFromArea", 0x56A0D0, &CWorld::ClearExcitingStuffFromArea);
     // Install("CWorld", "TestSphereAgainstWorld", 0x569E20, &CWorld::TestSphereAgainstWorld);
@@ -1722,9 +1722,59 @@ bool CWorld::GetIsLineOfSightClear(const CVector& origin, const CVector& target,
     return plugin::CallAndReturn<bool, 0x56A490, const CVector&, const CVector&, bool, bool, bool, bool, bool, bool, bool>(origin, target, buildings, vehicles, peds, objects, dummies, doSeeThroughCheck, doCameraIgnoreCheck);
 }
 
-// Converted from cdecl bool CWorld::ProcessLineOfSightSector(CSector &sector,CRepeatSector &repeatSector,const CColLine&colLine,CColPoint &outColPoint,float &maxTouchDistance,CEntity *&outEntity,bool buildings, bool vehicles, bool peds, bool objects, bool dummies,bool doSeeThroughCheck,bool doCameraIgnoreCheck,bool doShootThroughCheck) 0x56B5E0
+// 0x56B5E0
 bool CWorld::ProcessLineOfSightSector(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, CColPoint& outColPoint, float& maxTouchDistance, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck, bool doShootThroughCheck) {
-    return plugin::CallAndReturn<bool, 0x56B5E0, CSector&, CRepeatSector&, const CColLine&, CColPoint&, float&, CEntity*&, bool, bool, bool, bool, bool, bool, bool, bool>(sector, repeatSector, colLine, outColPoint, maxTouchDistance, outEntity, buildings, vehicles, peds, objects, dummies, doSeeThroughCheck, doCameraIgnoreCheck, doShootThroughCheck);
+    float localMaxTouchDist = maxTouchDistance;
+
+    const auto bIncludeDeadPeds_Original = bIncludeDeadPeds;
+    const auto bIncludeBikers_Original = bIncludeBikers;
+    const auto fWeaponSpreadRate_Original = fWeaponSpreadRate;
+
+    bIncludeDeadPeds = false;
+    bIncludeBikers = false;
+    fWeaponSpreadRate = 0.f;
+
+    const auto ProcessSector = [&](CPtrList& list, bool doIgnoreCameraCheckForThisSector = false) {
+        CWorld::ProcessLineOfSightSectorList(list, colLine, outColPoint, localMaxTouchDist, outEntity, doSeeThroughCheck, doIgnoreCameraCheckForThisSector, doShootThroughCheck);
+    };
+
+    if (buildings)
+        ProcessSector(sector.m_buildings);
+
+    if (fWeaponSpreadRate_Original > 0.f)
+        fWeaponSpreadRate = fWeaponSpreadRate_Original;
+
+    if (vehicles)
+        ProcessSector(repeatSector.m_lists[REPEATSECTOR_VEHICLES]);
+
+    if (peds) {
+        if (bIncludeDeadPeds_Original)
+            bIncludeDeadPeds = bIncludeDeadPeds_Original;
+
+        if (bIncludeBikers_Original)
+            bIncludeBikers = bIncludeBikers_Original;
+
+        ProcessSector(repeatSector.m_lists[REPEATSECTOR_PEDS]);
+
+        bIncludeDeadPeds = false;
+        bIncludeBikers = false;
+
+    }
+
+    if (objects)
+        ProcessSector(repeatSector.m_lists[REPEATSECTOR_OBJECTS]);
+
+    if (dummies)
+        ProcessSector(sector.m_dummies);
+
+    bIncludeDeadPeds = bIncludeDeadPeds_Original;
+    bIncludeBikers = bIncludeBikers_Original;
+
+    if (localMaxTouchDist < maxTouchDistance) {
+        maxTouchDistance = localMaxTouchDist;
+        return true;
+    }
+    return false;
 }
 
 // 0x56B790
