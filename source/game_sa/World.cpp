@@ -1198,12 +1198,14 @@ void CWorld::Process() {
 
 // 0x568AD0
 bool CWorld::GetIsLineOfSightSectorClear(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doIgnoreCameraCheck){
-    /* No need for `if`'s because of int16 circuit eval */
-    return (!buildings || GetIsLineOfSightSectorListClear(sector.m_buildings, colLine, doSeeThroughCheck, false))
-        && (!vehicles  || GetIsLineOfSightSectorListClear(repeatSector.m_lists[0], colLine, doSeeThroughCheck, false))
-        && (!peds      || GetIsLineOfSightSectorListClear(repeatSector.m_lists[1], colLine, doSeeThroughCheck, false))
-        && (!objects   || GetIsLineOfSightSectorListClear(repeatSector.m_lists[2], colLine, doSeeThroughCheck, false))
-        && (!dummies   || GetIsLineOfSightSectorListClear(sector.m_dummies, colLine, doSeeThroughCheck, false));
+    const auto ProcessSectorList = [&](CPtrList& list, bool doIgnoreCamCheckForThisSector = false) {
+        return GetIsLineOfSightSectorListClear(list, colLine, doSeeThroughCheck, doIgnoreCamCheckForThisSector);
+    };
+    return   (!buildings || ProcessSectorList(sector.m_buildings))
+          && (!vehicles  || ProcessSectorList(repeatSector.m_lists[REPEATSECTOR_VEHICLES]))
+          && (!peds      || ProcessSectorList(repeatSector.m_lists[REPEATSECTOR_PEDS]))
+          && (!objects   || ProcessSectorList(repeatSector.m_lists[REPEATSECTOR_OBJECTS], doIgnoreCameraCheck))
+          && (!dummies   || ProcessSectorList(sector.m_dummies));
 }
 
 // 0x568B80
