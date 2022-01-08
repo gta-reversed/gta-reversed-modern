@@ -716,6 +716,7 @@ void CWorld::UseDetonator(CPed* creator) {
             creator->RegisterReference(reinterpret_cast<CEntity**>(&veh->m_pWhoDetonatedMe));
         }
     }
+    CProjectileInfo::RemoveDetonatorProjectiles();
 }
 
 // 0x566140
