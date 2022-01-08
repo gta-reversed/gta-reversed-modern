@@ -58,8 +58,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ClearCarsFromArea", 0x566610, &CWorld::ClearCarsFromArea);
     Install("CWorld", "ProcessVerticalLine_FillGlobeColPoints", 0x567620, &CWorld::ProcessVerticalLine_FillGlobeColPoints);
     Install("CWorld", "TriggerExplosionSectorList", 0x567750, &CWorld::TriggerExplosionSectorList);
-    // Install("CWorld", "Process", 0x5684A0, &CWorld::Process);
-    // Install("CWorld", "SetWorldOnFire", 0x56B910, &CWorld::SetWorldOnFire);
+    Install("CWorld", "SetWorldOnFire", 0x56B910, &CWorld::SetWorldOnFire);
     // Install("CWorld", "TriggerExplosion", 0x56B790, &CWorld::TriggerExplosion);
     // Install("CWorld", "ProcessLineOfSightSector", 0x56B5E0, &CWorld::ProcessLineOfSightSector);
     // Install("CWorld", "GetIsLineOfSightClear", 0x56A490, &CWorld::GetIsLineOfSightClear);
@@ -1533,7 +1532,11 @@ void CWorld::TriggerExplosion(const CVector& point, float radius, float visibleD
 
 // 0x56B910
 void CWorld::SetWorldOnFire(float x, float y, float z, float radius, CEntity* fireCreator) {
-    plugin::Call<0x56B910, float, float, float, float, CEntity*>(x, y, z, radius, fireCreator);
+    if (TestSphereAgainstWorld({ x, y, z }, radius, nullptr, true, false, false, true, false, false)) {
+        if (!gFireManager.GetNumFiresInRange({ x, y, z }, 2.f)) {
+            gFireManager.StartFire({ x, y, z }, 0.8f, true, nullptr, 0, 7000, true);
+        }
+    }
 }
 
 // 0x56B9C0
