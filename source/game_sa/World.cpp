@@ -109,9 +109,8 @@ void CWorld::InjectHooks() {
     // Install("CWorld", "FindLodOfTypeInRange", 0x564ED0, &CWorld::FindLodOfTypeInRange);
     // Install("CWorld", "FindObjectsOfTypeInRange", 0x564C70, &CWorld::FindObjectsOfTypeInRange);
     // Install("CWorld", "FindObjectsInRange", 0x564A20, &CWorld::FindObjectsInRange);
-    // Install("CWorld", "GetIsLineOfSightSectorListClear", 0x564970, &CWorld::GetIsLineOfSightSectorListClear);
     // Install("CWorld", "ProcessAttachedEntities", 0x5647F0, &CWorld::ProcessAttachedEntities);
-    Install("CWorld", "GetIsLineOfSightSectorListClear", 0x564600, &CWorld::GetIsLineOfSightSectorListClear);
+    Install("CWorld", "GetIsLineOfSightSectorListClear", 0x564970, &CWorld::GetIsLineOfSightSectorListClear);
     Install("CWorld", "ProcessVerticalLineSector", 0x564500, &CWorld::ProcessVerticalLineSector);
     Install("CWorld", "ProcessVerticalLineSector_FillGlobeColPoints", 0x564420, &CWorld::ProcessVerticalLineSector_FillGlobeColPoints);
     Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
@@ -479,20 +478,21 @@ void CWorld::ProcessAttachedEntities() {
 
 // 0x564970
 bool CWorld::GetIsLineOfSightSectorListClear(CPtrList& ptrList, const CColLine& colLine, bool doSeeThroughCheck, bool doCameraIgnoreCheck) {
-    for (CPtrNode* it = ms_listMovingEntityPtrs.m_node; it; it = it->m_next) {
-        auto obj = static_cast<CObject*>(it->m_item);
-        if (obj->m_nScanCode == ms_nCurrentScanCode || !obj->m_bUsesCollision)
+    for (CPtrNode* it = ptrList.m_node; it;) {
+        auto entity = static_cast<CEntity*>(it->m_item);
+        it = it->m_next;
+
+        if (entity->m_nScanCode == ms_nCurrentScanCode || !entity->m_bUsesCollision)
+            continue;
+        entity->m_nScanCode = ms_nCurrentScanCode;
+
+        if (entity == pIgnoreEntity)
             continue;
 
-        obj->m_nScanCode = ms_nCurrentScanCode;
-
-        if (obj == pIgnoreEntity)
+        if (doCameraIgnoreCheck && CameraToIgnoreThisObject(entity))
             continue;
 
-        if (doCameraIgnoreCheck && CameraToIgnoreThisObject(obj))
-            continue;
-
-        if (CCollision::TestLineOfSight(colLine, obj->GetMatrix(), *obj->GetColModel(), doSeeThroughCheck, false))
+        if (CCollision::TestLineOfSight(colLine, entity->GetMatrix(), *entity->GetColModel(), doSeeThroughCheck, false))
             return false;
     }
     return true;
