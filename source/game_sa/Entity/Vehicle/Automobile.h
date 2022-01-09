@@ -11,60 +11,27 @@
 #include "BouncingPanel.h"
 #include "DamageManager.h"
 #include "ColPoint.h"
+
 #include "eSurfaceType.h"
+#include "eCarWheel.h"
+#include "eCarNodes.h"
+
+enum eWheelStatus;
+
+using eWheels = eCarWheel; // todo: maybe wrong, "eWheels" is original enum.
 
 class CObject;
 
-enum eCarNodes {
-    CAR_NODE_NONE = 0,
-    CAR_CHASSIS = 1,
-    CAR_WHEEL_RF = 2,
-    CAR_WHEEL_RM = 3,
-    CAR_WHEEL_RB = 4,
-    CAR_WHEEL_LF = 5,
-    CAR_WHEEL_LM = 6,
-    CAR_WHEEL_LB = 7,
-    CAR_DOOR_RF = 8,
-    CAR_DOOR_RR = 9,
-    CAR_DOOR_LF = 10,
-    CAR_DOOR_LR = 11,
-    CAR_BUMP_FRONT = 12,
-    CAR_BUMP_REAR = 13,
-    CAR_WING_RF = 14,
-    CAR_WING_LF = 15,
-    CAR_BONNET = 16,
-    CAR_BOOT = 17,
-    CAR_WINDSCREEN = 18,
-    CAR_EXHAUST = 19,
-    CAR_MISC_A = 20,
-    CAR_MISC_B = 21,
-    CAR_MISC_C = 22,
-    CAR_MISC_D = 23,
-    CAR_MISC_E = 24,
-    CAR_NUM_NODES
-};
-
-enum eCarWheel {
-    CARWHEEL_FRONT_LEFT = 0,
-    CARWHEEL_REAR_LEFT = 1,
-    CARWHEEL_FRONT_RIGHT = 2,
-    CARWHEEL_REAR_RIGHT = 3
-};
-
-enum eExtraHandlingFlags : uint32
-{
-    EXTRA_HANDLING_PERFECT = 0x1,
-    EXTRA_HANDLING_NITROS = 0x2,
+enum eExtraHandlingFlags : uint32 {
+    EXTRA_HANDLING_PERFECT              = 0x1,
+    EXTRA_HANDLING_NITROS               = 0x2,
     EXTRA_HANDLING_WHEELS_TOUCHING_SAND = 0x8,
-    EXTRA_HANDLING_TAXI_BOOST = 0x10
+    EXTRA_HANDLING_TAXI_BOOST           = 0x10
 };
 
 class FxSystem_c;
 
 class CAutomobile : public CVehicle {
-protected:
-    CAutomobile(plugin::dummy_func_t) : CVehicle(plugin::dummy) {}
-
 public:
     CDamageManager m_damageManager;
     CDoor          m_doors[6];
@@ -182,13 +149,51 @@ public:
     static CMatrix*        matW2B;
 
 public:
-    //vtable
-    void Fix() override;
-    bool SetTowLink(CVehicle* targetVehicle, bool arg1) override;
+    CAutomobile(plugin::dummy_func_t) : CVehicle(plugin::dummy) {}
+    CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines);
 
+    // CPhysical
     void ProcessControl() override;
+
+    // CVehicle
+    void ProcessControlCollisionCheck(bool applySpeed) override;
     void ProcessControlInputs(uint8 playerNum) override;
+    void GetComponentWorldPosition(int32 componentId, CVector& posnOut) override;
+    bool IsComponentPresent(int32 componentId) override;
+    void OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) override;
+    float GetDooorAngleOpenRatio(eDoors door) override;
+    float GetDooorAngleOpenRatio(uint32 door) override;
+    bool IsDoorReady(eDoors door) override;
+    bool IsDoorReady(uint32 door) override;
+    bool IsDoorFullyOpen(eDoors door) override;
+    bool IsDoorFullyOpen(uint32 door) override;
+    bool IsDoorClosed(eDoors door) override;
+    bool IsDoorClosed(uint32 door) override;
+    bool IsDoorMissing(eDoors door) override;
+    bool IsDoorMissing(uint32 door) override;
+    bool IsOpenTopCar() override;
+    void RemoveRefsToVehicle(CEntity* entity) override;
+    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
+    void BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) override;
+    bool SetUpWheelColModel(CColModel* wheelCol) override;
+    bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) override;
+    bool IsRoomForPedToLeaveCar(uint32 arg0, CVector* arg1) override;
+    void SetupSuspensionLines() override;
     CVector AddMovingCollisionSpeed(CVector& point) override;
+    void Fix() override;
+    void SetupDamageAfterLoad() override;
+    void DoBurstAndSoftGroundRatios() override;
+    float GetHeightAboveRoad() override;
+    void PlayCarHorn() override;
+    int32 GetNumContactWheels() override;
+    void VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) override;
+    bool GetTowHitchPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh) override;
+    bool GetTowBarPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh) override;
+    bool SetTowLink(CVehicle* targetVehicle, bool arg1) override;
+    bool BreakTowLink() override;
+    float FindWheelWidth(bool bRear) override;
+    bool Save() override;
+    bool Load() override;
 
     virtual bool ProcessAI(uint32& extraHandlingFlags);
     virtual void ResetSuspension();
@@ -196,26 +201,7 @@ public:
     virtual void DoHoverSuspensionRatios();
     virtual void ProcessSuspension();
 
-private:
-    void Fix_Reversed();
-    bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1);
-    void ProcessControl_Reversed();
-    void ProcessControlInputs_Reversed(uint8 playerNum);
-    CVector AddMovingCollisionSpeed_Reversed(CVector& point);
-    bool ProcessAI_Reversed(uint32& extraHandlingFlags);
-    void ResetSuspension_Reversed();
-    void ProcessFlyingCarStuff_Reversed();
-    void DoHoverSuspensionRatios_Reversed();
-    void ProcessSuspension_Reversed();
-
-public:
-    static void InjectHooks();
-    //funcs
-    CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines);
-
-    void PreRender() override {
-        plugin::CallMethod<0x6AAB50, CAutomobile*>(this);
-    }
+    void PreRender() override { plugin::CallMethod<0x6AAB50, CAutomobile*>(this); }
 
     void SetEngineState(bool state)
     {
@@ -225,21 +211,21 @@ public:
             vehicleFlags.bEngineOn = state;
     }
 
-    inline bool IsAnyWheelMakingContactWithGround() {
+    bool IsAnyWheelMakingContactWithGround() {
         return m_fWheelsSuspensionCompression[0] != 1.0F
             || m_fWheelsSuspensionCompression[1] != 1.0F
             || m_fWheelsSuspensionCompression[2] != 1.0F
             || m_fWheelsSuspensionCompression[3] != 1.0F;
     };
 
-    inline bool IsAnyWheelNotMakingContactWithGround() {
+    bool IsAnyWheelNotMakingContactWithGround() {
         return m_fWheelsSuspensionCompression[0] == 1.0F
             || m_fWheelsSuspensionCompression[1] == 1.0F
             || m_fWheelsSuspensionCompression[2] == 1.0F
             || m_fWheelsSuspensionCompression[3] == 1.0F;
     };
 
-    inline bool IsAnyWheelTouchingSand() {
+    bool IsAnyWheelTouchingSand() {
         for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompression[i] < 1.0f) {
                 if (g_surfaceInfos->GetAdhesionGroup(m_wheelColPoint[i].m_nSurfaceTypeB) == ADHESION_GROUP_SAND)
@@ -249,7 +235,7 @@ public:
         return false;
     }
 
-    inline bool IsAnyWheelTouchingRailTrack() {
+    bool IsAnyWheelTouchingRailTrack() {
         for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompression[i] < 1.0f) {
                 if (m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_RAILTRACK)
@@ -259,7 +245,7 @@ public:
         return false;
     }
 
-    inline bool IsAnyWheelTouchingShallowWaterGround() {
+    bool IsAnyWheelTouchingShallowWaterGround() {
         for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompression[i] < 1.0f && m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_WATER_SHALLOW)
                 return true;
@@ -267,7 +253,7 @@ public:
         return false;
     }
 
-    inline bool IsAnyFrontAndRearWheelTouchingGround() {
+    bool IsAnyFrontAndRearWheelTouchingGround() {
         if (m_fWheelsSuspensionCompression[CARWHEEL_FRONT_LEFT] < 1.0f  || m_fWheelsSuspensionCompression[CARWHEEL_FRONT_RIGHT] < 1.0f) {
             if (m_fWheelsSuspensionCompression[CARWHEEL_REAR_LEFT] < 1.0f || m_fWheelsSuspensionCompression[CARWHEEL_REAR_RIGHT] < 1.0f)
                 return true;
@@ -284,14 +270,14 @@ public:
     }
 
     // check the previous compression state using m_fWheelsSuspensionCompressionPrev
-    inline bool DidAnyWheelTouchShallowWaterGroundPrev() {
+    bool DidAnyWheelTouchShallowWaterGroundPrev() {
         for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompressionPrev[i] < 1.0f && m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_WATER_SHALLOW)
                 return true;
         }
         return false;
     }
-    inline bool DidAnyWheelTouchGroundPrev() {
+    bool DidAnyWheelTouchGroundPrev() {
         for (int32 i = 0; i < 4; i++) {
             if (m_fWheelsSuspensionCompressionPrev[i] < 1.0f)
                 return true;
@@ -325,7 +311,6 @@ public:
     void SetRandomDamage(bool arg0);
     // Make a vehicle fully damaged
     void SetTotalDamage(bool arg0);
-    // if(m_nHornCounter) m_nHornCounter--;
     void ReduceHornCounter();
     // Apply custom car plate texture to vehicle
     void CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model);
@@ -336,7 +321,7 @@ public:
     // Some debug function
     void DebugCode();
     // Repair vehicle's tyre
-    void FixTyre(eWheelStatus wheel);
+    void FixTyre(eWheels wheel);
     // Repair vehicle's door. "nodeIndex" is an index of component in m_modelNodes array
     void FixDoor(int32 nodeIndex, eDoors door);
     // Repair vehicle's panel. "nodeIndex" is an index of component in m_modelNodes array
@@ -344,7 +329,7 @@ public:
     // Enable/disable taxi light for taxi
     void SetTaxiLight(bool enable);
     // Enable taxi light for all taxis (CAutomobile::m_sAllTaxiLights = true;)
-    static void SetAllTaxiLights(bool arg0);
+    static void SetAllTaxiLights(bool enable);
     // Play horn for NPC vehicle (called @CAutomobile::ProcessAI)
     void PlayHornIfNecessary();
     void SetBusDoorTimer(uint32 time, uint8 arg1);
@@ -363,7 +348,7 @@ public:
     // Close all doors
     void CloseAllDoors();
     void DoSoftGroundResistance(uint32& extraHandlingFlags);
-    void ProcessCarWheelPair(int32 leftWheel, int32 rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront);
+    void ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront);
     float GetCarRoll();
     float GetCarPitch();
     bool IsInAir();
@@ -396,6 +381,60 @@ public:
     bool RcbanditCheckHitWheels();
     void FireTruckControl(CFire* fire);
     bool HasCarStoppedBecauseOfLight();
+    CDoor& GetDoor(eDoors door) { return m_doors[(unsigned)door]; }
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    bool ProcessAI_Reversed(uint32& extraHandlingFlags) { return CAutomobile::ProcessAI(extraHandlingFlags); }
+    void ResetSuspension_Reversed() { return CAutomobile::ResetSuspension(); }
+    void ProcessFlyingCarStuff_Reversed() { return CAutomobile::ProcessFlyingCarStuff(); }
+    void DoHoverSuspensionRatios_Reversed() { return CAutomobile::DoHoverSuspensionRatios(); }
+    void ProcessSuspension_Reversed() { return CAutomobile::ProcessSuspension(); }
+
+    // CPhysical
+    void ProcessControl_Reversed() { CAutomobile::ProcessControl(); }
+
+    // CVehicle
+    void ProcessControlCollisionCheck_Reversed(bool applySpeed) { CAutomobile::ProcessControlCollisionCheck(applySpeed); }
+    void ProcessControlInputs_Reversed(uint8 playerNum) { CAutomobile::ProcessControlInputs(playerNum); }
+    void GetComponentWorldPosition_Reversed(int32 componentId, CVector& posnOut) { CAutomobile::GetComponentWorldPosition(componentId, posnOut); }
+    bool IsComponentPresent_Reversed(int32 componentId) { return CAutomobile::IsComponentPresent(componentId); }
+    void OpenDoor_Reversed(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) { CAutomobile::OpenDoor(ped, componentId, door, doorOpenRatio, playSound); }
+    float GetDooorAngleOpenRatio_Reversed(eDoors door) { return CAutomobile::GetDooorAngleOpenRatio(door); }
+    float GetDooorAngleOpenRatio_Reversed(uint32 door) { return CAutomobile::GetDooorAngleOpenRatio(door); }
+    bool IsDoorReady_Reversed(eDoors door) { return CAutomobile::IsDoorReady(door); }
+    bool IsDoorReady_Reversed(uint32 door) { return CAutomobile::IsDoorReady(door); }
+    bool IsDoorFullyOpen_Reversed(eDoors door) { return CAutomobile::IsDoorFullyOpen(door); }
+    bool IsDoorFullyOpen_Reversed(uint32 door) { return CAutomobile::IsDoorFullyOpen(door); }
+    bool IsDoorClosed_Reversed(eDoors door) { return CAutomobile::IsDoorClosed(door); }
+    bool IsDoorClosed_Reversed(uint32 door) { return CAutomobile::IsDoorClosed(door); }
+    bool IsDoorMissing_Reversed(eDoors door) { return CAutomobile::IsDoorMissing(door); }
+    bool IsDoorMissing_Reversed(uint32 door) { return CAutomobile::IsDoorMissing(door); }
+    bool IsOpenTopCar_Reversed() { return CAutomobile::IsOpenTopCar(); }
+    void RemoveRefsToVehicle_Reversed(CEntity* entity) { CAutomobile::RemoveRefsToVehicle(entity); }
+    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) { CAutomobile::BlowUpCar(damager, bHideExplosion); }
+    void BlowUpCarCutSceneNoExtras_Reversed(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) { CAutomobile::BlowUpCarCutSceneNoExtras(bNoCamShake, bNoSpawnFlyingComps, bDetachWheels, bExplosionSound); }
+    bool SetUpWheelColModel_Reversed(CColModel* wheelCol) { return CAutomobile::SetUpWheelColModel(wheelCol); }
+    bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CAutomobile::BurstTyre(tyreComponentId, bPhysicalEffect); }
+    bool IsRoomForPedToLeaveCar_Reversed(uint32 arg0, CVector* arg1) { return CAutomobile::IsRoomForPedToLeaveCar(arg0, arg1); }
+    void SetupSuspensionLines_Reversed() { CAutomobile::SetupSuspensionLines(); }
+    CVector AddMovingCollisionSpeed_Reversed(CVector& point) { return CAutomobile::AddMovingCollisionSpeed(point); }
+    void Fix_Reversed() { CAutomobile::Fix(); }
+    void SetupDamageAfterLoad_Reversed() { CAutomobile::SetupDamageAfterLoad(); }
+    void DoBurstAndSoftGroundRatios_Reversed() { CAutomobile::DoBurstAndSoftGroundRatios(); }
+    float GetHeightAboveRoad_Reversed() { return CAutomobile::GetHeightAboveRoad(); }
+    void PlayCarHorn_Reversed() { CAutomobile::PlayCarHorn(); }
+    int32 GetNumContactWheels_Reversed() { return CAutomobile::GetNumContactWheels(); }
+    void VehicleDamage_Reversed(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { CAutomobile::VehicleDamage(damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon); }
+    bool GetTowHitchPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowHitchPos(posnOut, bCheckModelInfo, veh); }
+    bool GetTowBarPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowBarPos(posnOut, bCheckModelInfo, veh); }
+    bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1) { return CAutomobile::SetTowLink(targetVehicle, arg1); }
+    bool BreakTowLink_Reversed() { return CAutomobile::BreakTowLink(); }
+    float FindWheelWidth_Reversed(bool bRear) { return CAutomobile::FindWheelWidth(bRear); }
+    bool Save_Reversed() { return CAutomobile::Save(); }
+    bool Load_Reversed() { return CAutomobile::Load(); }
 };
 
 VALIDATE_SIZE(CAutomobile, 0x988);

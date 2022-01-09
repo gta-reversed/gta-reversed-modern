@@ -292,7 +292,7 @@ void CQuadBike::ResetSuspension() {
 // 0x6CE340
 void CQuadBike::SetupDamageAfterLoad() {
     if (m_aCarNodes[QUAD_BODY_FRONT])
-        CAutomobile::SetBumperDamage(BUMP_FRONT, false);
+        CAutomobile::SetBumperDamage(FRONT_BUMPER, false);
 
     if (m_aCarNodes[QUAD_BODY_REAR])
         CAutomobile::SetDoorDamage(DOOR_BONNET, false);
