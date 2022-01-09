@@ -4,7 +4,6 @@
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
-
 #include "StdInc.h"
 
 bool (&abTempNeverLeavesGroup)[7] = *(bool (*)[7])0xC0BC08;
@@ -22,8 +21,8 @@ void CPlayerPed::InjectHooks() {
     Install("CPlayerPed", "SetWantedLevelNoDrop", 0x609F30, &CPlayerPed::SetWantedLevelNoDrop);
     Install("CPlayerPed", "CheatWantedLevel", 0x609F50, &CPlayerPed::CheatWantedLevel);
     Install("CPlayerPed", "DoStuffToGoOnFire", 0x60A020, &CPlayerPed::DoStuffToGoOnFire);
-    Install("CPlayerPed", "Load", 0x5D46E0, &CPlayerPed::Load_Reversed);
-    Install("CPlayerPed", "Save", 0x5D57E0, &CPlayerPed::Save_Reversed);
+    // Install("CPlayerPed", "Load", 0x5D46E0, &CPlayerPed::Load_Reversed);
+    // Install("CPlayerPed", "Save", 0x5D57E0, &CPlayerPed::Save_Reversed);
     Install("CPlayerPed", "DeactivatePlayerPed", 0x609520, &CPlayerPed::DeactivatePlayerPed);
     Install("CPlayerPed", "ReactivatePlayerPed", 0x609540, &CPlayerPed::ReactivatePlayerPed);
     Install("CPlayerPed", "GetPadFromPlayer", 0x609560, &CPlayerPed::GetPadFromPlayer);
@@ -75,8 +74,11 @@ struct WorkBufferSaveData {
 VALIDATE_SIZE(WorkBufferSaveData, 132u + 4u);
 
 // calls of LoadDataFromWorkBuffer are optimized
+// todo: fix
 // 0x5D46E0
 bool CPlayerPed::Load_Reversed() {
+    return plugin::CallMethodAndReturn<bool, 0x5D46E0>(this);
+
     CPed::Load();
 
     WorkBufferSaveData savedData{};
@@ -93,8 +95,11 @@ bool CPlayerPed::Load_Reversed() {
 }
 
 // calls of SaveDataToWorkBuffer are optimized
+// todo: fix
 // 0x5D57E0
 bool CPlayerPed::Save_Reversed() {
+    return plugin::CallMethodAndReturn<bool, 0x5D57E0>(this);
+
     WorkBufferSaveData saveData{};
 
     CWanted* wanted = m_pPlayerData->m_pWanted;

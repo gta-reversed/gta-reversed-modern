@@ -8,10 +8,11 @@
 
 class CPtrNode {
 public:
-    void*     pItem;
-    CPtrNode* pNext;
+    void*     m_item;
+    CPtrNode* m_next;
 
-    inline CPtrNode(void* item) : pItem(item) {}
+    CPtrNode(void* item) : m_item(item) {}
+    CPtrNode* GetNext() const { return m_next; }
 };
 
 VALIDATE_SIZE(CPtrNode, 8);

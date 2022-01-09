@@ -131,7 +131,6 @@
 #include "game_sa\Cover.h"
 #include "game_sa\CoverPoint.h"
 #include "game_sa\Cranes.h"
-#include "game_sa\CreepingFire.h"
 #include "game_sa\CrimeBeingQd.h"
 #include "game_sa\CustomCarEnvMapPipeline.h"
 #include "game_sa\CustomCarPlateMgr.h"

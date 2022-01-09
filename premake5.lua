@@ -40,6 +40,7 @@ solution "gta_reversed"
         buildoptions {"/MD"}
         optimize "Full"
     configuration "vs*"
+         flags {"MultiProcessorCompile"}
          linkoptions   { "/ignore:4099" }      
          buildoptions {"/EHsc"}
 

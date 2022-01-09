@@ -2935,10 +2935,10 @@ bool CAutomobile::RcbanditCheck1CarWheels(CPtrList& ptrlist)
     CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
 
     CPtrNode* next = nullptr;
-    for (CPtrNode* node = ptrlist.pNode; node; node = next) {
-        next = node->pNext;
-        CAutomobile* vehicle = (CAutomobile*)node->pItem;
-        if (node->pItem != this && vehicle->IsAutomobile()) {
+    for (CPtrNode* node = ptrlist.m_node; node; node = next) {
+        next = node->m_next;
+        CAutomobile* vehicle = (CAutomobile*)node->m_item;
+        if (node->m_item != this && vehicle->IsAutomobile()) {
             if (!ModelIndices::IsRCBandit(vehicle->m_nModelIndex) && vehicle->m_nScanCode != CWorld::ms_nCurrentScanCode)
                 continue;
             CVector distance = GetPosition() - vehicle->GetPosition();
