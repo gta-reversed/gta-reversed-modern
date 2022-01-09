@@ -61,7 +61,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "SetWorldOnFire", 0x56B910, &CWorld::SetWorldOnFire);
     Install("CWorld", "TriggerExplosion", 0x56B790, &CWorld::TriggerExplosion);
     Install("CWorld", "ProcessLineOfSightSector", 0x56B5E0, &CWorld::ProcessLineOfSightSector);
-    // Install("CWorld", "GetIsLineOfSightClear", 0x56A490, &CWorld::GetIsLineOfSightClear);
+    Install("CWorld", "GetIsLineOfSightClear", 0x56A490, &CWorld::GetIsLineOfSightClear);
     // Install("CWorld", "ClearExcitingStuffFromArea", 0x56A0D0, &CWorld::ClearExcitingStuffFromArea);
     // Install("CWorld", "TestSphereAgainstWorld", 0x569E20, &CWorld::TestSphereAgainstWorld);
     // Install("CWorld", "RepositionOneObject", 0x569850, &CWorld::RepositionOneObject);
@@ -1719,7 +1719,158 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
 
 // 0x56A490
 bool CWorld::GetIsLineOfSightClear(const CVector& origin, const CVector& target, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck) {
-    return plugin::CallAndReturn<bool, 0x56A490, const CVector&, const CVector&, bool, bool, bool, bool, bool, bool, bool>(origin, target, buildings, vehicles, peds, objects, dummies, doSeeThroughCheck, doCameraIgnoreCheck);
+
+    const int32 originSectorX = GetSectorX(origin.x);
+    const int32 originSectorY = GetSectorY(origin.y);
+    const int32 targetSectorX = GetSectorX(target.x);
+    const int32 targetSectorY = GetSectorY(target.y);
+
+    IncrementCurrentScanCode();
+
+    const auto ProcessSector = [&](int32 x, int32 y) {
+        return GetIsLineOfSightSectorClear(
+            *GetSector(x, y),
+            *GetRepeatSector(x, y),
+            { origin, target },
+            buildings, vehicles, peds, objects, dummies, doSeeThroughCheck, doCameraIgnoreCheck
+        );
+    };
+
+    if (originSectorX == targetSectorX && originSectorY == targetSectorY) { // Both in the same sector
+        return ProcessSector(originSectorX, originSectorY); 
+    }
+    else if (originSectorX == targetSectorX) { // Same X for both, iterate on Y
+        if (originSectorY >= targetSectorY) { // origin => target on Y axis
+            for (auto y = originSectorY; y >= targetSectorY; y--) {
+                if (!ProcessSector(originSectorX, y))
+                    return false;
+            }
+        } else { // target => origin on Y axis
+            for (auto y = targetSectorY; y >= originSectorY; y--) {
+                if (!ProcessSector(originSectorX, y))
+                    return false;
+            }
+        }
+    }
+    else if (originSectorY == targetSectorY) { // Same Y for both, iterate on X
+        if (originSectorX >= targetSectorX) { // origin => target on X axis
+            for (auto x = originSectorX; x >= targetSectorX; x--) {
+                if (!ProcessSector(x, originSectorY))
+                    return false;
+            }
+        }
+        else { // target => origin on X axis
+            for (auto x = targetSectorX; x >= originSectorX; x--) {
+                if (!ProcessSector(x, originSectorY))
+                    return false;
+            }
+        }
+    }
+    else {  // Different x and y sectors
+        float displacement = (target.y - origin.y) / (target.x - origin.x);
+
+        // TODO: Make this more readable
+
+        int32 startY, endY, x, y;
+        if (origin.x < target.x) { // Step from left to right
+            startY = originSectorY;
+            endY = GetSectorY((GetSectorPosX(originSectorX + 1) - origin.x) * displacement + origin.y);
+
+            if (originSectorY < endY) {
+                for (y = originSectorY; y <= endY; y++) {
+                    if (!ProcessSector(originSectorX, y))
+                        return false;
+                }
+            }
+            else {
+                for (y = originSectorY; y >= endY; y--) {
+                    if (!ProcessSector(originSectorX, y))
+                        return false;
+                }
+            }
+
+            for (x = originSectorX + 1; x < targetSectorX; x++) {
+                startY = endY;
+                endY = GetSectorY((GetSectorPosX(x + 1) - origin.x) * displacement + origin.y);
+                if (startY < endY) {
+                    for (y = startY; y <= endY; y++) {
+                        if (!ProcessSector(x, y))
+                            return false;
+                    }
+                }
+                else {
+                    for (y = startY; y >= endY; y--) {
+                        if (!ProcessSector(x, y))
+                            return false;
+                    }
+                }
+            }
+
+            startY = endY;
+            endY = targetSectorY;
+
+            if (startY < endY) {
+                for (y = startY; y <= endY; y++) {
+                    if (!ProcessSector(targetSectorX, y))
+                        return false;
+                }
+            }
+            else {
+                for (y = startY; y >= endY; y--) {
+                    if (!ProcessSector(targetSectorX, y))
+                        return false;
+                }
+            }
+        } else { // Step from right to left
+            startY = originSectorY;
+            endY = GetSectorY((GetSectorPosX(originSectorX) - origin.x) * displacement + origin.y);
+            if (startY < endY) {
+                for (y = startY; y <= endY; y++) {
+                    if (!ProcessSector(originSectorX, y))
+                        return false;
+                }
+            }
+            else {
+                for (y = startY; y >= endY; y--) {
+                    if (!ProcessSector(originSectorX, y))
+                        return false;
+                }
+            }
+
+            for (x = originSectorX - 1; x > targetSectorX; x--) {
+                startY = endY;
+                endY = GetSectorY((GetSectorPosX(x) - origin.x) * displacement + origin.y);
+                if (startY < endY) {
+                    for (y = startY; y <= endY; y++) {
+                        if (!ProcessSector(x, y))
+                            return false;
+                    }
+                }
+                else {
+                    for (y = startY; y >= endY; y--) {
+                        if (!ProcessSector(x, y))
+                            return false;
+                    }
+                }
+            }
+
+            startY = endY;
+            endY = targetSectorY;
+            if (startY < endY) {
+                for (y = startY; y <= endY; y++) {
+                    if (!ProcessSector(targetSectorX, y))
+                        return false;
+                }
+            }
+            else {
+                for (y = startY; y >= endY; y--) {
+                    if (!ProcessSector(targetSectorX, y))
+                        return false;
+                }
+            }
+        }
+    }
+    return true;
 }
 
 // 0x56B5E0
