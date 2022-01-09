@@ -116,7 +116,7 @@ void CQuadBike::SetupDamageAfterLoad() {
 
 void CQuadBike::SetupDamageAfterLoad_Reversed() {
     if (m_aCarNodes[QUAD_BODY_FRONT])
-        CAutomobile::SetBumperDamage(BUMP_FRONT, false);
+        CAutomobile::SetBumperDamage(FRONT_BUMPER, false);
 
     if (m_aCarNodes[QUAD_BODY_REAR])
         CAutomobile::SetDoorDamage(DOOR_BONNET, false);

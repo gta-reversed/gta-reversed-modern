@@ -175,6 +175,7 @@ void InjectHooksMain()
     InjectCommonHooks();
     CPad::InjectHooks();
 
+    CDamageManager::InjectHooks();
     CCreepingFire::InjectHooks();
     CPtrList::InjectHooks();
     BreakManager_c::InjectHooks();
