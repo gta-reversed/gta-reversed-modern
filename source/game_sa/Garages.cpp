@@ -77,3 +77,7 @@ void CGarages::AddOne(float x1, float y1, float z1, float frontX, float frontY, 
 void CGarages::StoreCarInNearestImpoundingGarage(CVehicle* pVehicle) {
     plugin::Call<0x44A3C0, CVehicle*>(pVehicle);
 }
+
+bool CGarages::IsPointWithinHideOutGarage(CVector& pos) {
+    return plugin::CallAndReturn<bool, 0x448900, CVector&>(pos);
+}

@@ -132,7 +132,7 @@ public:
     static void FindObjectsIntersectingCube(const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static void FindObjectsIntersectingAngledCollisionBox(CBox const& box, const CMatrix& transform, const CVector& point, float x1, float y1, float x2, float y2, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static void FindMissionEntitiesIntersectingCube(const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehicles, bool peds, bool objects);
-    static void FindNearestObjectOfType(int32 modelId, const CVector& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
+    static CEntity* FindNearestObjectOfType(int32 modelId, const CVector& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static float FindGroundZForCoord(float x, float y);
     static float FindGroundZFor3DCoord(float x, float y, float z, bool* outResult, CEntity** outEntity);
     static float FindRoofZFor3DCoord(float x, float y, float z, bool* outResult);
