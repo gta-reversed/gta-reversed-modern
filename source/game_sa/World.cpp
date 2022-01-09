@@ -63,7 +63,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ProcessLineOfSightSector", 0x56B5E0, &CWorld::ProcessLineOfSightSector);
     Install("CWorld", "GetIsLineOfSightClear", 0x56A490, &CWorld::GetIsLineOfSightClear);
     Install("CWorld", "ClearExcitingStuffFromArea", 0x56A0D0, &CWorld::ClearExcitingStuffFromArea);
-    // Install("CWorld", "TestSphereAgainstWorld", 0x569E20, &CWorld::TestSphereAgainstWorld);
+    Install("CWorld", "TestSphereAgainstWorld", 0x569E20, &CWorld::TestSphereAgainstWorld);
     // Install("CWorld", "RepositionOneObject", 0x569850, &CWorld::RepositionOneObject);
     Install("CWorld", "FindLowestZForCoord", 0x5697F0, &CWorld::FindLowestZForCoord);
     Install("CWorld", "FindRoofZFor3DCoord", 0x569750, &CWorld::FindRoofZFor3DCoord);
@@ -1708,8 +1708,42 @@ void CWorld::RepositionOneObject(CEntity* object) {
 }
 
 // 0x569E20
-CEntity* CWorld::TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity* arg2, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doCameraIgnoreCheck) {
-    return plugin::CallAndReturn<CEntity*, 0x569E20, CVector, float, CEntity*, bool, bool, bool, bool, bool, bool>(sphereCenter, sphereRadius, arg2, buildings, vehicles, peds, objects, dummies, doCameraIgnoreCheck);
+CEntity* CWorld::TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity* ignoreEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doCameraIgnoreCheck) {
+    const int32 startSectorX = GetSectorX(sphereCenter.x - sphereRadius);
+    const int32 startSectorY = GetSectorY(sphereCenter.y - sphereRadius);
+    const int32 endSectorX = GetSectorX(sphereCenter.x + sphereRadius);
+    const int32 endSectorY = GetSectorY(sphereCenter.y + sphereRadius);
+
+    IncrementCurrentScanCode();
+
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            const auto ProcessSector = [&](CPtrList& list, bool doIgnoreCameraCheckForThisSector) {
+                return TestSphereAgainstSectorList(list, sphereCenter, sphereRadius, ignoreEntity, doIgnoreCameraCheckForThisSector);
+            };
+
+            auto sector = GetSector(sectorX, sectorY);
+            auto repeatSector = GetRepeatSector(sectorX, sectorY);
+
+            CEntity* hitEntity{};
+
+            if (buildings && (hitEntity = ProcessSector(sector->m_buildings, false)))
+                return hitEntity;
+
+            if (vehicles && (hitEntity = ProcessSector(repeatSector->m_lists[REPEATSECTOR_VEHICLES], false)))
+                return hitEntity;
+
+            if (peds && (hitEntity = ProcessSector(repeatSector->m_lists[REPEATSECTOR_PEDS], false)))
+                return hitEntity;
+
+            if (objects && (hitEntity = ProcessSector(repeatSector->m_lists[REPEATSECTOR_OBJECTS], doCameraIgnoreCheck)))
+                return hitEntity;
+
+            if (dummies && (hitEntity = ProcessSector(sector->m_dummies, false)))
+                return hitEntity;
+        }
+    }
+    return nullptr;
 }
 
 // 0x56A0D0
