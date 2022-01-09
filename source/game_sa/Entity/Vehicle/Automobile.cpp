@@ -775,11 +775,6 @@ void CAutomobile::ProcessControl()
     }
 }
 
-// 0x6AD690
-void CAutomobile::ProcessControlInputs(uint8 playerNum) {
-    plugin::CallMethod<0x6AD690, CAutomobile*, uint8>(this, playerNum);
-}
-
 CVector CAutomobile::AddMovingCollisionSpeed(CVector& point)
 {
     if (m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_PLANE) {
@@ -1371,6 +1366,12 @@ void CAutomobile::ProcessSuspension()
 void CAutomobile::ProcessControlCollisionCheck(bool applySpeed)
 {
     plugin::CallMethod<0x6A29C0, CAutomobile*, bool>(this, applySpeed);
+}
+
+// 0x6AD690
+void CAutomobile::ProcessControlInputs(uint8 playerNum)
+{
+    plugin::CallMethod<0x6AD690, CAutomobile*, uint8>(this, playerNum);
 }
 
 // 0x6A2210
