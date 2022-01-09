@@ -1564,7 +1564,7 @@ void CWorld::Process() {
 
                         if (entity->m_nStatus == STATUS_PLAYER) { // Try to unstuck player
                             const auto physical = entity->AsPhysical();
-                            physical->m_vecMoveSpeed *= std::pow(SQRT_2 / 2, CTimer::GetTimeStepInMS());
+                            physical->m_vecMoveSpeed *= (float)std::pow(SQRT_2 / 2.f, CTimer::GetTimeStepInMS());
                             physical->ApplyMoveSpeed();
                             physical->ApplyTurnSpeed();
                         }
