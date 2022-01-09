@@ -73,7 +73,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "FindMissionEntitiesIntersectingCube", 0x569240, &CWorld::FindMissionEntitiesIntersectingCube);
     Install("CWorld", "FindObjectsIntersectingAngledCollisionBox", 0x568FF0, &CWorld::FindObjectsIntersectingAngledCollisionBox);
     Install("CWorld", "FindObjectsIntersectingCube", 0x568DD0, &CWorld::FindObjectsIntersectingCube);
-    // Install("CWorld", "FindObjectsKindaColliding", 0x568B80, &CWorld::FindObjectsKindaColliding);
+    Install("CWorld", "FindObjectsKindaColliding", 0x568B80, &CWorld::FindObjectsKindaColliding);
     Install("CWorld", "GetIsLineOfSightSectorClear", 0x568AD0, &CWorld::GetIsLineOfSightSectorClear);
     // Install("CWorld", "SprayPaintWorld", 0x565B70, &CWorld::SprayPaintWorld);
     // Install("CWorld", "SetCarsOnFire", 0x5659F0, &CWorld::SetCarsOnFire);
@@ -1628,7 +1628,35 @@ bool CWorld::GetIsLineOfSightSectorClear(CSector& sector, CRepeatSector& repeatS
 
 // 0x568B80
 void CWorld::FindObjectsKindaColliding(const CVector& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
-    plugin::Call<0x568B80, const CVector&, float, bool, int16*, int16, CEntity**, bool, bool, bool, bool, bool>(point, radius, b2D, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
+    const int32 startSectorX = GetSectorX(point.x - radius);
+    const int32 startSectorY = GetSectorY(point.y - radius);
+    const int32 endSectorX = GetSectorX(point.x + radius);
+    const int32 endSectorY = GetSectorY(point.y + radius);
+
+    IncrementCurrentScanCode();
+
+    CEntity* hitEntity{};
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            const auto ProcessSector = [&](CPtrList& list) {
+                FindObjectsKindaCollidingSectorList(list, point, radius, b2D, outCount, maxCount, outEntities);
+            };
+
+            auto sector = GetSector(sectorX, sectorY);
+            auto repeatSector = GetRepeatSector(sectorX, sectorY);
+
+            if (buildings)
+                ProcessSector(sector->m_buildings);
+            if (vehicles)
+                ProcessSector(repeatSector->m_lists[REPEATSECTOR_VEHICLES]);
+            if (peds)
+                ProcessSector(repeatSector->m_lists[REPEATSECTOR_PEDS]);
+            if (objects)
+                ProcessSector(repeatSector->m_lists[REPEATSECTOR_OBJECTS]);
+            if (dummies)
+                ProcessSector(sector->m_dummies);
+        }
+    }
 }
 
 // 0x568DD0
