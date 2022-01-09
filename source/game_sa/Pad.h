@@ -187,6 +187,9 @@ public:
     bool isStandardKeyJustPressed(uint8 key);
     bool isMenuKeyJustPressed();
     bool isTabJustPressed();
+
+    // NOTSA
+    bool IsSteeringInAnyDirection() { return GetSteeringLeftRight() || GetSteeringUpDown(); }
 };
 
 VALIDATE_SIZE(CPad, 0x134);
