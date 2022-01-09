@@ -8,7 +8,7 @@ CVector& vecQuadResistance = *(CVector*)0x8D3458; // { 0.995f, 0.995f, 1.0f } //
 
 void CQuadBike::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CQuadBike", "CQuadBike", 0x6CE370, &CQuadBike::Constructor);
+    // todo: Install("CQuadBike", "CQuadBike", 0x6CE370, &CQuadBike::Constructor);
     Install("CQuadBike", "Fix", 0x6CE2B0, &CQuadBike::Fix_Reversed);
     Install("CQuadBike", "GetRideAnimData", 0x6CDC90, &CQuadBike::GetRideAnimData_Reversed);
     Install("CQuadBike", "PreRender", 0x6CEAD0, &CQuadBike::PreRender_Reversed);
@@ -23,16 +23,24 @@ void CQuadBike::InjectHooks() {
 }
 
 // 0x6CE370
-CQuadBike::CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, false),
-    m_pHandling(gHandlingDataMgr.GetBikeHandlingPointer(CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr()->m_nHandlingId))
+CQuadBike::CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, false)
 {
+    plugin::CallMethod<0x6CE370, CAutomobile*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
+    return;
+
+    m_sRideAnimData.m_nAnimGroup = ANIM_GROUP_QUAD;
+    m_pHandling = gHandlingDataMgr.GetBikeHandlingPointer(CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr()->m_nHandlingId);
     m_vehicleSubType = VEHICLE_QUAD;
-    m_fSteerAngle = 0.0f;
+
+    field_9AC = 0; // unused
+    field_9B0 = 0; // unused
+    field_9B4 = 0; // unused
+
+    field_9A8 = 1.0f; // unused, initialised there and in SetupSuspensionLines
     SetupSuspensionLines();
-    /* rest of the stuff (below) is done in the header */
-    /* m_nFlags */
-    /* sRideAnimData.group set to 10 */
-    /* other fields 0 */
+
+    m_nQuadFlags &= ~1u; // usless
+    m_fSteerAngle = 0.0f;
 }
 
 CQuadBike* CQuadBike::Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) {
@@ -43,12 +51,12 @@ CQuadBike* CQuadBike::Constructor(int32 modelIndex, eVehicleCreatedBy createdBy)
 // 0x6CE2B0
 void CQuadBike::Fix() {
     for (auto i = 2; i < 6; i++) {
-        m_damageManager.SetDoorStatus(static_cast<eDoors>(i), eDoorState::DOOR_SLAM_SHUT);
+        m_damageManager.SetDoorStatus(static_cast<eDoors>(i), eDoorStatus::DAMSTATE_NOTPRESENT);
     }
     vehicleFlags.bIsDamaged = false;
     RpClumpForAllAtomics(m_pRwClump, CVehicleModelInfo::HideAllComponentsAtomicCB, (void*)2); // TODO Use RpAtomicVisibility::VISIBILITY_DAM instead of `2` here
     for (auto i = 0; i < 4; i++) {
-        m_damageManager.SetWheelStatus(i, eWheelStatus::WHEEL_STATUS_OK);
+        m_damageManager.SetWheelStatus((eCarWheel)i, eCarWheelStatus::WHEEL_STATUS_OK);
     }
 }
 
