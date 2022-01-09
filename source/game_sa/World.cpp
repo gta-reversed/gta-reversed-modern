@@ -69,7 +69,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "FindLowestZForCoord", 0x5697F0, &CWorld::FindLowestZForCoord);
     Install("CWorld", "FindRoofZFor3DCoord", 0x569750, &CWorld::FindRoofZFor3DCoord);
     Install("CWorld", "FindGroundZFor3DCoord", 0x5696C0, &CWorld::FindGroundZFor3DCoord);// Install("CWorld", "FindGroundZForCoord", 0x569660, &CWorld::FindGroundZForCoord);
-    // Install("CWorld", "FindNearestObjectOfType", 0x5693F0, &CWorld::FindNearestObjectOfType);
+    Install("CWorld", "FindNearestObjectOfType", 0x5693F0, &CWorld::FindNearestObjectOfType);
     // Install("CWorld", "FindMissionEntitiesIntersectingCube", 0x569240, &CWorld::FindMissionEntitiesIntersectingCube);
     // Install("CWorld", "FindObjectsIntersectingAngledCollisionBox", 0x568FF0, &CWorld::FindObjectsIntersectingAngledCollisionBox);
     // Install("CWorld", "FindObjectsIntersectingCube", 0x568DD0, &CWorld::FindObjectsIntersectingCube);
@@ -1647,8 +1647,38 @@ void CWorld::FindMissionEntitiesIntersectingCube(const CVector& cornerA, const C
 }
 
 // 0x5693F0
-void CWorld::FindNearestObjectOfType(int32 modelId, const CVector& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
-    plugin::Call<0x5693F0, int32, const CVector&, float, bool, bool, bool, bool, bool, bool>(modelId, point, radius, b2D, buildings, vehicles, peds, objects, dummies);
+CEntity* CWorld::FindNearestObjectOfType(int32 modelId, const CVector& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
+    const int32 startSectorX = GetSectorX(point.x - radius);
+    const int32 startSectorY = GetSectorY(point.y - radius);
+    const int32 endSectorX = GetSectorX(point.x + radius);
+    const int32 endSectorY = GetSectorY(point.y + radius);
+
+    IncrementCurrentScanCode();
+
+    CEntity* hitEntity{};
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            const auto ProcessSector = [&](CPtrList& list) {
+                // Clever trick: re-use `radius` as `outDistance`, so if an entity is hit `radius` is automatically decreased
+                FindNearestObjectOfTypeSectorList(modelId, list, point, radius, b2D, &hitEntity, &radius);
+            };
+
+            auto sector = GetSector(sectorX, sectorY);
+            auto repeatSector = GetRepeatSector(sectorX, sectorY);
+
+            if (buildings)
+                ProcessSector(sector->m_buildings);
+            if (vehicles)
+                ProcessSector(repeatSector->m_lists[REPEATSECTOR_VEHICLES]);
+            if (peds)
+                ProcessSector(repeatSector->m_lists[REPEATSECTOR_PEDS]);
+            if (objects)
+                ProcessSector(repeatSector->m_lists[REPEATSECTOR_OBJECTS]);
+            if (dummies)
+                ProcessSector(sector->m_dummies);
+        }
+    }
+    return hitEntity;
 }
 
 // 0x569660
