@@ -1659,7 +1659,7 @@ float CWorld::FindGroundZForCoord(float x, float y) {
 float CWorld::FindGroundZFor3DCoord(float x, float y, float z, bool* outResult, CEntity** outEntity) {
     CEntity* localOutEntity{};
     CColPoint colPoint;
-    if (ProcessVerticalLine({ x, y, z }, 1000.0f, colPoint, localOutEntity, true, false, false, false, true, false, nullptr)) {
+    if (ProcessVerticalLine({ x, y, z }, -1000.0f, colPoint, localOutEntity, true, false, false, false, true, false, nullptr)) {
         if (outResult)
             *outResult = true;
         if (outEntity)
