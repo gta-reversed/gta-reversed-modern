@@ -241,7 +241,7 @@ void CWorld::ClearScanCodes() {
 }
 
 // 0x563500
-void CWorld::FindObjectsInRangeSectorList(CPtrList& ptrList, const CVector& point, float radius, bool b2D, int16 & outCount, int16 maxCount, CEntity** outEntities) {
+void CWorld::FindObjectsInRangeSectorList(CPtrList& ptrList, const CVector& point, float radius, bool b2D, int16& outCount, int16 maxCount, CEntity** outEntities) {
     const auto radiusSq = radius * radius;
     for (CPtrNode* it = ptrList.m_node, *next{}; it; it = next) {
         next = it->m_next;
@@ -310,6 +310,7 @@ void CWorld::RemoveStaticObjects() {
 
 // 0x563950
 void CWorld::TestForBuildingsOnTopOfEachOther(CPtrList& ptrList) {
+    // todo: add code
     /* nothing meaningful */
 }
 
@@ -632,7 +633,7 @@ bool CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool 
     CEntity* objects[15]{};
     int16 count{};
     FindObjectsInRange(posn, radius, false, &count, std::size(objects), objects, true, false, false, false, false);
-    if (!count)
+    if (count <= 0)
         return 0;
 
     bool hasChangedAlphaTo255{}, hasFoundTag{};
@@ -802,7 +803,7 @@ CEntity* CWorld::TestSphereAgainstSectorList(CPtrList& ptrList, CVector sphereCe
 }
 
 // 0x566420
-// Unused
+// Unused - Probably a debug function
 void CWorld::PrintCarChanges() {
     plugin::Call<0x566420>();
 }
