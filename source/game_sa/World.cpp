@@ -75,7 +75,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "FindObjectsIntersectingCube", 0x568DD0, &CWorld::FindObjectsIntersectingCube);
     Install("CWorld", "FindObjectsKindaColliding", 0x568B80, &CWorld::FindObjectsKindaColliding);
     Install("CWorld", "GetIsLineOfSightSectorClear", 0x568AD0, &CWorld::GetIsLineOfSightSectorClear);
-    // Install("CWorld", "SprayPaintWorld", 0x565B70, &CWorld::SprayPaintWorld);
+    Install("CWorld", "SprayPaintWorld", 0x565B70, &CWorld::SprayPaintWorld);
     // Install("CWorld", "SetCarsOnFire", 0x5659F0, &CWorld::SetCarsOnFire);
     // Install("CWorld", "SetPedsChoking", 0x565800, &CWorld::SetPedsChoking);
     // Install("CWorld", "SetPedsOnFire", 0x565610, &CWorld::SetPedsOnFire);
@@ -629,7 +629,37 @@ void CWorld::SetCarsOnFire(float x1, float y1, float x2, float y2, CEntity* fire
 
 // 0x565B70
 bool CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState) {
-    return plugin::CallAndReturn<bool, 0x565B70, CVector&, CVector&, float, bool>(posn, outDir, radius, processTagAlphaState);
+    CEntity* objects[15]{};
+    int16 count{};
+    FindObjectsInRange(posn, radius, false, &count, std::size(objects), objects, true, false, false, false, false);
+    if (!count)
+        return 0;
+
+    bool hasChangedAlphaTo255{}, hasFoundTag{};
+    for (auto i = 0; i < count; i++) {
+        auto entity = objects[i];
+        if (!CTagManager::IsTag(entity))
+            continue;
+
+        hasFoundTag = true;
+
+        outDir = entity->GetForward();
+
+        // Note: Original code has U.B. if `processTagAlphaState` is false, because `newAlpha` isn't assigned a meaningful value
+        // But the only place this function is called has set `processTagAlphaState` to true, so..
+        uint8 currAlpha = CTagManager::GetAlpha(entity), newAlpha{};
+        if (processTagAlphaState) {
+            newAlpha = std::min<uint8>(255u, currAlpha + (uint8)TAG_SPRAYING_INCREMENT_VAL);
+        }
+
+        if (currAlpha != 255 && newAlpha == 255)
+            hasChangedAlphaTo255 = true;
+
+        CTagManager::SetAlpha(entity, newAlpha);
+    }
+
+    return hasChangedAlphaTo255 ? 2 :
+           hasFoundTag ? 1 : 0;
 }
 
 // 0x565CB0
