@@ -70,7 +70,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "FindRoofZFor3DCoord", 0x569750, &CWorld::FindRoofZFor3DCoord);
     Install("CWorld", "FindGroundZFor3DCoord", 0x5696C0, &CWorld::FindGroundZFor3DCoord);// Install("CWorld", "FindGroundZForCoord", 0x569660, &CWorld::FindGroundZForCoord);
     Install("CWorld", "FindNearestObjectOfType", 0x5693F0, &CWorld::FindNearestObjectOfType);
-    // Install("CWorld", "FindMissionEntitiesIntersectingCube", 0x569240, &CWorld::FindMissionEntitiesIntersectingCube);
+    Install("CWorld", "FindMissionEntitiesIntersectingCube", 0x569240, &CWorld::FindMissionEntitiesIntersectingCube);
     // Install("CWorld", "FindObjectsIntersectingAngledCollisionBox", 0x568FF0, &CWorld::FindObjectsIntersectingAngledCollisionBox);
     // Install("CWorld", "FindObjectsIntersectingCube", 0x568DD0, &CWorld::FindObjectsIntersectingCube);
     // Install("CWorld", "FindObjectsKindaColliding", 0x568B80, &CWorld::FindObjectsKindaColliding);
@@ -1643,7 +1643,28 @@ void CWorld::FindObjectsIntersectingAngledCollisionBox(CBox const& box, const CM
 
 // 0x569240
 void CWorld::FindMissionEntitiesIntersectingCube(const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehicles, bool peds, bool objects) {
-    plugin::Call<0x569240, const CVector&, const CVector&, int16*, int16, CEntity**, bool, bool, bool>(cornerA, cornerB, outCount, maxCount, outEntities, vehicles, peds, objects);
+    const int32 startSectorX = GetSectorX(cornerA.x);
+    const int32 startSectorY = GetSectorY(cornerA.y);
+    const int32 endSectorX = GetSectorX(cornerB.x);
+    const int32 endSectorY = GetSectorY(cornerB.y);
+
+    IncrementCurrentScanCode();
+
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            const auto ProcessSector = [&](CPtrList& list, bool isVehicleList, bool isPedList, bool isObjList) {
+                FindMissionEntitiesIntersectingCubeSectorList(list, cornerA, cornerB, outCount, maxCount, outEntities, isVehicleList, isPedList, isObjList);
+            };
+
+            auto repeatSector = GetRepeatSector(sectorX, sectorY);
+            if (vehicles)
+                ProcessSector(repeatSector->m_lists[REPEATSECTOR_VEHICLES], true, false, false);
+            if (peds)
+                ProcessSector(repeatSector->m_lists[REPEATSECTOR_PEDS], false, true, false);
+            if (objects)
+                ProcessSector(repeatSector->m_lists[REPEATSECTOR_OBJECTS], false, false, true);
+        }
+    }
 }
 
 // 0x5693F0
