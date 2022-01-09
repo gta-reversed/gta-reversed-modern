@@ -71,7 +71,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "FindGroundZFor3DCoord", 0x5696C0, &CWorld::FindGroundZFor3DCoord);// Install("CWorld", "FindGroundZForCoord", 0x569660, &CWorld::FindGroundZForCoord);
     Install("CWorld", "FindNearestObjectOfType", 0x5693F0, &CWorld::FindNearestObjectOfType);
     Install("CWorld", "FindMissionEntitiesIntersectingCube", 0x569240, &CWorld::FindMissionEntitiesIntersectingCube);
-    // Install("CWorld", "FindObjectsIntersectingAngledCollisionBox", 0x568FF0, &CWorld::FindObjectsIntersectingAngledCollisionBox);
+    Install("CWorld", "FindObjectsIntersectingAngledCollisionBox", 0x568FF0, &CWorld::FindObjectsIntersectingAngledCollisionBox);
     // Install("CWorld", "FindObjectsIntersectingCube", 0x568DD0, &CWorld::FindObjectsIntersectingCube);
     // Install("CWorld", "FindObjectsKindaColliding", 0x568B80, &CWorld::FindObjectsKindaColliding);
     Install("CWorld", "GetIsLineOfSightSectorClear", 0x568AD0, &CWorld::GetIsLineOfSightSectorClear);
@@ -1638,7 +1638,34 @@ void CWorld::FindObjectsIntersectingCube(const CVector& cornerA, const CVector& 
 
 // 0x568FF0
 void CWorld::FindObjectsIntersectingAngledCollisionBox(CBox const& box, const CMatrix& transform, const CVector& point, float x1, float y1, float x2, float y2, int16* outCount, int16 maxCount, CEntity** outEntities, bool buildings, bool vehicles, bool peds, bool objects, bool dummies) {
-    plugin::Call<0x568FF0, CBox const&, CMatrix const&, const CVector&, float, float, float, float, int16*, int16, CEntity**, bool, bool, bool, bool, bool>(box, transform, point, x1, y1, x2, y2, outCount, maxCount, outEntities, buildings, vehicles, peds, objects, dummies);
+    const int32 startSectorX = GetSectorX(x1);
+    const int32 startSectorY = GetSectorY(y1);
+    const int32 endSectorX = GetSectorX(x2);
+    const int32 endSectorY = GetSectorY(y2);
+
+    IncrementCurrentScanCode();
+
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            const auto ProcessSector = [&](CPtrList& list) {
+                FindObjectsIntersectingAngledCollisionBoxSectorList(list, box, transform, point, outCount, maxCount, outEntities);
+            };
+
+            auto sector = GetSector(sectorX, sectorY);
+            auto repeatSector = GetRepeatSector(sectorX, sectorY);
+
+            if (buildings)
+                ProcessSector(sector->m_buildings);
+            if (vehicles)
+                ProcessSector(repeatSector->m_lists[REPEATSECTOR_VEHICLES]);
+            if (peds)
+                ProcessSector(repeatSector->m_lists[REPEATSECTOR_PEDS]);
+            if (objects)
+                ProcessSector(repeatSector->m_lists[REPEATSECTOR_OBJECTS]);
+            if (dummies)
+                ProcessSector(sector->m_dummies);
+        }
+    }
 }
 
 // 0x569240
