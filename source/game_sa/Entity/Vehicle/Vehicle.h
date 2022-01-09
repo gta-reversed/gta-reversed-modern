@@ -630,6 +630,8 @@ public:
     void FireFixedMachineGuns();
     void DoDriveByShootings();
 
+    bool IsAnyOfPassengersFollowerOfGroup(CPedGroup&);
+
 // STATIC FUNCS
     static void Shutdown();
     static void SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha);

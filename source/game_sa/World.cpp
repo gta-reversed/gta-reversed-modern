@@ -62,7 +62,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "TriggerExplosion", 0x56B790, &CWorld::TriggerExplosion);
     Install("CWorld", "ProcessLineOfSightSector", 0x56B5E0, &CWorld::ProcessLineOfSightSector);
     Install("CWorld", "GetIsLineOfSightClear", 0x56A490, &CWorld::GetIsLineOfSightClear);
-    // Install("CWorld", "ClearExcitingStuffFromArea", 0x56A0D0, &CWorld::ClearExcitingStuffFromArea);
+    Install("CWorld", "ClearExcitingStuffFromArea", 0x56A0D0, &CWorld::ClearExcitingStuffFromArea);
     // Install("CWorld", "TestSphereAgainstWorld", 0x569E20, &CWorld::TestSphereAgainstWorld);
     // Install("CWorld", "RepositionOneObject", 0x569850, &CWorld::RepositionOneObject);
     Install("CWorld", "FindLowestZForCoord", 0x5697F0, &CWorld::FindLowestZForCoord);
@@ -1714,7 +1714,50 @@ CEntity* CWorld::TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius
 
 // 0x56A0D0
 void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint8 bRemoveProjectilesAndShadows) {
-    plugin::Call<0x56A0D0, const CVector&, float, uint8>(point, radius, bRemoveProjectilesAndShadows);
+    const auto vehPool = CPools::ms_pVehiclePool;
+    const auto playerPed = FindPlayerPed();
+    const auto playerGroup = CPedGroups::GetPedsGroup(playerPed);
+    for (auto i = 0; i < vehPool->GetSize(); i++) {
+        if (const auto veh = vehPool->GetAt(i)) {
+            if (playerGroup && veh->IsAnyOfPassengersFollowerOfGroup(*playerGroup))
+                continue;
+
+            if (playerPed->m_pContactEntity == veh && !veh->IsBoat())
+                continue;
+
+            if (radius * radius <= DistanceBetweenPointsSquared2D(point, veh->GetPosition()))
+                continue;
+
+            if (veh->vehicleFlags.bIsLocked || !veh->CanBeDeleted())
+                continue;
+
+            if (CGarages::IsPointWithinHideOutGarage(veh->GetPosition()))
+                continue;
+
+            // TODO: Below code is inlined. Same code can be found in `ClearCarsFromArea`
+
+            if (auto& driver = veh->m_pDriver) { 
+                CPopulation::RemovePed(driver);
+                driver->CleanUpOldReference(reinterpret_cast<CEntity**>(&driver));
+                driver = nullptr;
+            }
+
+            for (auto i = 0; i < veh->m_nMaxPassengers; i++) {
+                if (auto psngr = veh->m_apPassengers[i]) {
+                    veh->RemovePassenger(psngr);
+                    CPopulation::RemovePed(psngr);
+                }
+            }
+
+            if (CCarCtrl::IsThisVehicleInteresting(veh))
+                CGarages::StoreCarInNearestImpoundingGarage(veh);
+            
+            CCarCtrl::RemoveFromInterestingVehicleList(veh);
+
+            Remove(veh);
+            delete veh;
+        }
+    }
 }
 
 // 0x56A490
