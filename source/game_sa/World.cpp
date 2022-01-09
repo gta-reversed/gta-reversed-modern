@@ -5,6 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+#include <initializer_list>
 #include "IKChainManager_c.h"
 #include "World.h"
 
@@ -64,7 +65,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "GetIsLineOfSightClear", 0x56A490, &CWorld::GetIsLineOfSightClear);
     Install("CWorld", "ClearExcitingStuffFromArea", 0x56A0D0, &CWorld::ClearExcitingStuffFromArea);
     Install("CWorld", "TestSphereAgainstWorld", 0x569E20, &CWorld::TestSphereAgainstWorld);
-    // Install("CWorld", "RepositionOneObject", 0x569850, &CWorld::RepositionOneObject);
+    Install("CWorld", "RepositionOneObject", 0x569850, &CWorld::RepositionOneObject);
     Install("CWorld", "FindLowestZForCoord", 0x5697F0, &CWorld::FindLowestZForCoord);
     Install("CWorld", "FindRoofZFor3DCoord", 0x569750, &CWorld::FindRoofZFor3DCoord);
     Install("CWorld", "FindGroundZFor3DCoord", 0x5696C0, &CWorld::FindGroundZFor3DCoord);// Install("CWorld", "FindGroundZForCoord", 0x569660, &CWorld::FindGroundZForCoord);
@@ -1704,7 +1705,97 @@ float CWorld::FindLowestZForCoord(float x, float y) {
 
 // 0x569850
 void CWorld::RepositionOneObject(CEntity* object) {
-    plugin::Call<0x569850, CEntity*>(object);
+    using namespace ModelIndices;
+
+    // I mean, you can imagine this isn't original code, but we want to make it look readable :)
+    // I mean, they probably used a macro or something... so, who knows :D
+    // Maybe.. maybe they were time travellers and used c++20 ranges, and had a good compiler to mask it away
+    // you never know..
+
+    const auto IsObjectModelAnyOf = [object](std::initializer_list<ModelIndex> models) {
+        return std::ranges::find(models, (ModelIndex)object->m_nModelIndex) != models.end();
+    };
+
+    const auto MI = CModelInfo::GetModelInfo(object->m_nModelIndex);
+    const auto CM = MI->GetColModel();
+
+    // Recalculate position to be on ground level where is `point`
+    const auto RecalcZPosAtPoint = [&](CVector2D point) {
+        auto& pos = object->GetMatrix().GetPosition();
+        pos.z = FindGroundZFor3DCoord(point.x, point.y, pos.z + std::max(2.f, CM->m_boundBox.GetHeight()), nullptr, nullptr) - CM->m_boundBox.m_vecMin.z;
+        object->UpdateRW();
+        object->UpdateRwFrame();
+    };
+
+    if (MI->SwaysInWind() || IsObjectModelAnyOf({
+        MI_PARKINGMETER,
+        MI_PHONEBOOTH1,
+        MI_WASTEBIN,
+        MI_BIN,
+        MI_POSTBOX1,
+        MI_NEWSSTAND,
+        MI_TRAFFICCONE,
+        MI_DUMP1,
+        MI_ROADWORKBARRIER1,
+        MI_ROADBLOCKFUCKEDCAR1,
+        MI_ROADBLOCKFUCKEDCAR2,
+        MI_BUSSIGN1,
+        MI_NOPARKINGSIGN1,
+        MI_PHONESIGN,
+        MI_FIRE_HYDRANT,
+        MI_BOLLARDLIGHT,
+        MI_PARKTABLE,
+        MI_PARKINGMETER2,
+        MI_TELPOLE02,
+        MI_PARKBENCH,
+        MI_BARRIER1
+    })) { 
+        RecalcZPosAtPoint(object->GetPosition());
+    } else if (IsObjectModelAnyOf({
+        MI_SINGLESTREETLIGHTS1,
+        MI_SINGLESTREETLIGHTS2,
+        MI_SINGLESTREETLIGHTS3,
+        MI_TRAFFICLIGHTS_MIAMI,
+        MI_TRAFFICLIGHTS_VEGAS,
+        MI_TRAFFICLIGHTS_TWOVERTICAL,
+        MI_TRAFFICLIGHTS_3,
+        MI_TRAFFICLIGHTS_4,
+        MI_TRAFFICLIGHTS_5,
+        MI_MLAMPPOST,
+        MI_STREETLAMP1,
+        MI_STREETLAMP2
+    })) {
+        if (const auto CD = CM->m_pColData) {
+            if (CD->m_nNumBoxes == 1) {
+                RecalcZPosAtPoint(Multiply3x3(object->GetMatrix(), CD->m_pBoxes[0].GetCenter()));
+            } else if (CD->m_nNumSpheres) {
+                auto point{ object->GetPosition() };
+                point.z = 1000.f;
+
+                for (auto i = 0; i < CD->m_nNumSpheres; i++) {
+                    const auto& sphere = CD->m_pSpheres[i];
+                    if (sphere.m_vecCenter.z < point.z)
+                        point = sphere.m_vecCenter;
+                }
+
+                if (point.z >= 1000.f)
+                    RecalcZPosAtPoint(object->GetPosition());
+                else
+                    RecalcZPosAtPoint(Multiply3x3(object->GetMatrix(), point));
+            }
+        } else {
+            RecalcZPosAtPoint(object->GetPosition());
+        }
+    }
+
+    // This code piece seems quite incomplete, they might've just left it in accidentally?
+    if (object->m_nModelIndex == MI_BUOY) {
+        // Orginally `ProcessVerticalLine` is called, but the result is unused.
+
+        auto& pos = object->GetPosition();
+        auto height = CM->GetBoundingBox().GetHeight();
+        pos.z = 6.f - height / 2.f + height / 5.f;
+    }
 }
 
 // 0x569E20
