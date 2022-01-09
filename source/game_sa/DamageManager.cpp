@@ -84,34 +84,32 @@ bool CDamageManager::ApplyDamage(CAutomobile* vehicle, tComponent compId, float 
     if (fIntensity <= 150.0f)
         return false;
 
-    if (group == COMPGROUP_NA)
-        return true; /* NOTE: Possible mistake by R* here? */
-
     switch (group) {
+    case tComponentGroup::COMPGROUP_PANEL: {
+        if (ProgressPanelDamage((ePanels)relCompIdx))
+            vehicle->SetBumperDamage((ePanels)relCompIdx, false);
+        return true;
+    }
     case tComponentGroup::COMPGROUP_WHEEL: {
         ProgressWheelDamage((eCarWheel)relCompIdx);
         break;
     }
     case tComponentGroup::COMPGROUP_DOOR:
-    case tComponentGroup::COMPGROUP_BOOT:
-    case tComponentGroup::COMPGROUP_BONNET: {
+    case tComponentGroup::COMPGROUP_BONNET:
+    case tComponentGroup::COMPGROUP_BOOT: {
         if (ProgressDoorDamage((eDoors)relCompIdx, vehicle))
             vehicle->SetDoorDamage((eDoors)relCompIdx, false);
-        break;
+        return true;
     }
     case tComponentGroup::COMPGROUP_LIGHT: {
         SetLightStatus((eLights)relCompIdx, eLightsState::VEHICLE_LIGHT_SMASHED);
         if (ProgressPanelDamage((ePanels)relCompIdx))
             vehicle->SetPanelDamage((ePanels)relCompIdx, false);
-        break;
+        return true;
     }
-    case tComponentGroup::COMPGROUP_PANEL: {
-        if (ProgressPanelDamage((ePanels)relCompIdx))
-            vehicle->SetBumperDamage((ePanels)relCompIdx, false);
-        break;
+    default:
+        return true;
     }
-    }
-    return true;
 }
 
 // 0x6C2460
@@ -134,7 +132,8 @@ bool CDamageManager::ProgressWheelDamage(eCarWheel wheel) {
 // 0x6C23C0
 bool CDamageManager::ProgressPanelDamage(ePanels panel) {
     switch (GetPanelStatus(panel)) {
-    case ePanelDamageState::DAMSTATE_DAMAGED: {
+    case ePanelDamageState::DAMSTATE_DAMAGED:
+    {
         switch (panel) {
         case ePanels::WINDSCREEN_PANEL: {
             if (CGeneral::GetRandomNumberInRange(0, 2))
@@ -150,10 +149,12 @@ bool CDamageManager::ProgressPanelDamage(ePanels panel) {
         SetPanelStatus(panel, ePanelDamageState::DAMSTATE_OPENED_DAMAGED);
         return true;
     }
-    case ePanelDamageState::DAMSTATE_OPENED_DAMAGED:
+    case ePanelDamageState::DAMSTATE_OPENED_DAMAGED: {
         return false;
     }
+    }
     SetPanelStatus(panel, (ePanelDamageState)((int)GetPanelStatus(panel) + 1));
+    return true;
 }
 
 // 0x6C23B0
@@ -186,6 +187,12 @@ bool CDamageManager::ProgressDoorDamage(eDoors door, CAutomobile* pAuto) {
     case eDoorStatus::DAMSTATE_NOTPRESENT:
         return false;
     }
+
+    /* this original code replaced by SetDoorStatus in upper switch
+    if (door < 6u)
+        m_aDoorsStatus[door] = status;
+    */
+
     return true;
 }
 
