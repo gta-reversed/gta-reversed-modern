@@ -294,7 +294,12 @@ void CWorld::FindObjectsInRangeSectorList(CPtrList& ptrList, const CVector& poin
 }
 
 // 0x5635C0
-void CWorld::FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& ptrList, const CVector& point, float fRadiusSq, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities) {
+void CWorld::FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& ptrList, const CVector& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities) {
+    const auto IsInRange = [&, radiusSq = radius * radius](CEntity* entity) {
+        if (b2D)
+            return DistanceBetweenPointsSquared2D(point, entity->GetPosition()) <= radiusSq;
+        return DistanceBetweenPointsSquared(point, entity->GetPosition()) <= radiusSq;
+    };
     for (CPtrNode* it = ptrList.m_node, *next{}; it; it = next) {
         next = it->GetNext();
 
@@ -306,14 +311,8 @@ void CWorld::FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& ptrLis
         if (entity->m_nModelIndex != modelId)
             continue;
 
-        if (b2D) {
-            if (DistanceBetweenPointsSquared2D(CVector2D{ point }, entity->GetPosition()) > fRadiusSq)
-                continue;
-        }
-        else {
-            if (DistanceBetweenPoints(point, entity->GetPosition()) > fRadiusSq)
-                continue;
-        }
+        if (!IsInRange(entity))
+            continue;
 
         /* Don't stop if reached max count, because of entity scan code update */
         if (*outCount < maxCount) {
