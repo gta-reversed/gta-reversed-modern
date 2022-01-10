@@ -77,7 +77,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "GetIsLineOfSightSectorClear", 0x568AD0, &CWorld::GetIsLineOfSightSectorClear);
     Install("CWorld", "SprayPaintWorld", 0x565B70, &CWorld::SprayPaintWorld);
     Install("CWorld", "SetCarsOnFire", 0x5659F0, &CWorld::SetCarsOnFire);
-    // Install("CWorld", "SetPedsChoking", 0x565800, &CWorld::SetPedsChoking);
+    Install("CWorld", "SetPedsChoking", 0x565800, &CWorld::SetPedsChoking);
     // Install("CWorld", "SetPedsOnFire", 0x565610, &CWorld::SetPedsOnFire);
     // Install("CWorld", "CallOffChaseForAreaSectorListVehicles", 0x563A80, &CWorld::CallOffChaseForAreaSectorListVehicles);
     // Install("CWorld", "RemoveEntityInsteadOfProcessingIt", 0x563A10, &CWorld::RemoveEntityInsteadOfProcessingIt);
@@ -618,8 +618,36 @@ void CWorld::SetPedsOnFire(float x1, float y1, float x2, float y2, CEntity* fire
 }
 
 // 0x565800
-void CWorld::SetPedsChoking(float x1, float y1, float x2, float y2, CEntity* gasCreator) {
-    plugin::Call<0x565800, float, float, float, float, CEntity*>(x1, y1, x2, y2, gasCreator);
+// NOTE: Radius is treated as a cuboid with the height of 10, width and length of 2 * radius
+void CWorld::SetPedsChoking(float x, float y, float z, float radius, CEntity* gasCreator) {
+    const CVector point{ x, y, z };
+
+    // NOTSA - Originally it was some abs() macro crap, we ain't gonna do it like that
+    const CBoundingBox bb{
+        {x - radius, y - radius, z - 5.f},
+        {x + radius, y + radius, z + 5.f}
+    };
+
+    for (int32 i = CPools::ms_pPedPool->GetSize(); i; i--) {
+        if (CPed* ped = CPools::ms_pPedPool->GetAt(i - 1)) {
+            if (    ped->m_nPedState != PEDSTATE_DEAD
+                && !ped->bInVehicle
+                && !ped->physicalFlags.bFireProof
+                && !ped->m_pFire
+                && !ped->IsCreatedByMission()
+                &&  bb.IsPointWithin(ped->GetPosition())
+            ) {
+                CWeapon::GenerateDamageEvent(
+                    ped,
+                    gasCreator,
+                    eWeaponType::WEAPON_TEARGAS,
+                    1,
+                    ePedPieceTypes::PED_PIECE_TORSO,
+                    ped->GetLocalDirection(ped->GetPosition() - CVector{x, y, z})
+                );   
+            }
+        }
+    }
 }
 
 // 0x5659F0
