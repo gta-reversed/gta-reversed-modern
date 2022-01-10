@@ -1501,10 +1501,10 @@ bool CWorld::ProcessLineOfSightSectorList(CPtrList& ptrList, const CColLine& col
      
     float localMinTouchDist = minTouchDistance;
 
-    for (CPtrNode *it = ptrList.m_node; it; it = it->m_next) {
-        //next = it->m_next;
+    for (CPtrNode* node = ptrList.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
 
-        const auto entity = static_cast<CEntity*>(it->m_item);
+        const auto entity = static_cast<CEntity*>(node->m_item);
         if (entity->m_nScanCode == ms_nCurrentScanCode || entity == pIgnoreEntity)
             continue;
 
