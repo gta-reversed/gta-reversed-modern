@@ -111,7 +111,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "GetIsLineOfSightSectorListClear", 0x564970, &CWorld::GetIsLineOfSightSectorListClear);
     Install("CWorld", "ProcessVerticalLineSector", 0x564500, &CWorld::ProcessVerticalLineSector);
     Install("CWorld", "ProcessVerticalLineSector_FillGlobeColPoints", 0x564420, &CWorld::ProcessVerticalLineSector_FillGlobeColPoints);
-    // Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
+    Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
     Install("CWorld", "ShutDown", 0x564050, &CWorld::ShutDown);
     Install("CWorld", "FindPlayerSlotWithPedPointer", 0x563FA0, &CWorld::FindPlayerSlotWithPedPointer);
     Install("CWorld", "ProcessLineOfSight", 0x56BA00, &CWorld::ProcessLineOfSight);
@@ -621,14 +621,13 @@ void CWorld::ShutDown() {
 
 // 0x564360
 void CWorld::ClearForRestart() {
-    return plugin::Call<0x564360>();
-
     if (CCutsceneMgr::ms_cutsceneLoadStatus == 2)
         CCutsceneMgr::DeleteCutsceneData();
 
     CProjectileInfo::RemoveAllProjectiles();
     CObject::DeleteAllTempObjects();
     CObject::DeleteAllMissionObjects();
+    CPopulation::ConvertAllObjectsToDummyObjects();
 
     const auto DeleteEntitiesInList = [](const CPtrList& list) {
         for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
@@ -642,9 +641,9 @@ void CWorld::ClearForRestart() {
 
     for (auto y = 0; y < MAX_SECTORS_Y; y++) {
         for (auto x = 0; x < MAX_SECTORS_X; x++) {
-            auto& sector = *GetSector(x, y);
-            DeleteEntitiesInList(sector.m_buildings);
-            DeleteEntitiesInList(sector.m_dummies);
+            auto& sector = *GetRepeatSector(x, y);
+            DeleteEntitiesInList(sector.m_lists[REPEATSECTOR_PEDS]);
+            DeleteEntitiesInList(sector.m_lists[REPEATSECTOR_VEHICLES]);
         }
     }
 
@@ -657,9 +656,9 @@ bool CWorld::ProcessVerticalLineSector_FillGlobeColPoints(CSector& sector, CRepe
     bool bSuccess{};
 
     bSuccess |= buildings && ProcessVerticalLineSectorList_FillGlobeColPoints(sector.m_buildings, colLine, outEntity, doSeeThroughCheck, outCollPoly);
-    bSuccess |= vehicles && ProcessVerticalLineSectorList_FillGlobeColPoints(repeatSector.m_lists[0], colLine, outEntity, doSeeThroughCheck, outCollPoly);
-    bSuccess |= peds && ProcessVerticalLineSectorList_FillGlobeColPoints(repeatSector.m_lists[1], colLine, outEntity, doSeeThroughCheck, outCollPoly);
-    bSuccess |= objects && ProcessVerticalLineSectorList_FillGlobeColPoints(repeatSector.m_lists[2], colLine, outEntity, doSeeThroughCheck, outCollPoly);
+    bSuccess |= vehicles && ProcessVerticalLineSectorList_FillGlobeColPoints(repeatSector.m_lists[REPEATSECTOR_VEHICLES], colLine, outEntity, doSeeThroughCheck, outCollPoly);
+    bSuccess |= peds && ProcessVerticalLineSectorList_FillGlobeColPoints(repeatSector.m_lists[REPEATSECTOR_PEDS], colLine, outEntity, doSeeThroughCheck, outCollPoly);
+    bSuccess |= objects && ProcessVerticalLineSectorList_FillGlobeColPoints(repeatSector.m_lists[REPEATSECTOR_OBJECTS], colLine, outEntity, doSeeThroughCheck, outCollPoly);
     bSuccess |= dummies && ProcessVerticalLineSectorList_FillGlobeColPoints(sector.m_dummies, colLine, outEntity, doSeeThroughCheck, outCollPoly);
 
     return bSuccess;
@@ -2938,14 +2937,11 @@ bool CWorld::ProcessLineOfSight(const CVector& origin, const CVector& target, CC
 
 // 0x4072E0
 void CWorld::IncrementCurrentScanCode() {
-    if (CWorld::ms_nCurrentScanCode >= 65535u)
-    {
+    if (CWorld::ms_nCurrentScanCode >= 65535u) {
         CWorld::ClearScanCodes();
         CWorld::ms_nCurrentScanCode = 1;
-    }
-    else
-    {
-        ++CWorld::ms_nCurrentScanCode;
+    } else {
+        CWorld::ms_nCurrentScanCode++;
     }
 }
 
@@ -2968,9 +2964,9 @@ CRepeatSector* GetRepeatSector(int32 x, int32 y) {
 
 // 0x4072C0
 CPtrListSingleLink& CWorld::GetLodPtrList(int32 x, int32 y) {
-    /* todo: add guard?
-    const auto limX = x % MAX_LOD_PTR_LISTS_X;
-    const auto limY = y % MAX_LOD_PTR_LISTS_Y;
+    /* todo: add assert/guard?
+    const auto x1 = x % MAX_LOD_PTR_LISTS_X;
+    const auto y1 = y % MAX_LOD_PTR_LISTS_Y;
     */
     return ms_aLodPtrLists[y][x];
 }
