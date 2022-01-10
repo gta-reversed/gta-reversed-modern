@@ -2146,7 +2146,6 @@ void CWorld::FindObjectsKindaColliding(const CVector& point, float radius, bool 
 
     IncrementCurrentScanCode();
 
-    CEntity* hitEntity{};
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             const auto ProcessSector = [&](CPtrList& list) {
