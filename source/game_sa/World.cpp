@@ -721,15 +721,7 @@ void CWorld::ProcessAttachedEntities() {
                 obj->PositionAttachedEntity();
                 obj->UpdateRW();
                 obj->UpdateRwFrame();
-                obj->UpdateRW();
-                obj->UpdateRwFrame();
-                obj->Add();
-
-                if (!obj->IsBuilding() && !obj->IsDummy()) { // TODO: I think this was meant to be IsPhysical? Maybe CObject had a non-virtual `IsPhysical` as well?
-                    if (!obj->IsStatic()) {
-                        obj->AddToMovingList();
-                    }
-                }
+                Add(obj);
             }
         }
     }
