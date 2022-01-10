@@ -100,7 +100,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "RepositionCertainDynamicObjects", 0x56B9C0, &CWorld::RepositionCertainDynamicObjects);
     Install("CWorld", "CameraToIgnoreThisObject", 0x563F40, &CWorld::CameraToIgnoreThisObject);
     Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x563FD0, &CWorld::FindPlayerSlotWithVehiclePointer);
-    // Install("CWorld", "RemoveReferencesToDeletedObject", 0x565510, &CWorld::RemoveReferencesToDeletedObject);
+    Install("CWorld", "RemoveReferencesToDeletedObject", 0x565510, &CWorld::RemoveReferencesToDeletedObject);
     // Install("CWorld", "FindNearestObjectOfTypeSectorList", 0x565450, &CWorld::FindNearestObjectOfTypeSectorList);
     // Install("CWorld", "FindMissionEntitiesIntersectingCubeSectorList", 0x565300, &CWorld::FindMissionEntitiesIntersectingCubeSectorList);
     Install("CWorld", "FindObjectsIntersectingAngledCollisionBoxSectorList", 0x565200, &CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList);
@@ -668,7 +668,32 @@ void CWorld::FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList,
 
 // 0x565510
 void CWorld::RemoveReferencesToDeletedObject(CEntity* entity) {
-    plugin::Call<0x565510, CEntity*>(entity);
+    for (int32 i = CPools::ms_pPedPool->GetSize(); i; i--) {
+        if (CPed* ped = CPools::ms_pPedPool->GetAt(i - 1)) {
+            if (ped != entity) {
+                ped->RemoveRefsToEntity(entity);
+                if (ped->m_standingOnEntity == entity)
+                    ped->m_standingOnEntity = nullptr;
+            }
+        }
+    }
+
+    for (int32 i = CPools::ms_pVehiclePool->GetSize(); i; i--) {
+        if (CVehicle* veh = CPools::ms_pVehiclePool->GetAt(i - 1)) {
+            if (veh != entity) {
+                veh->RemoveRefsToEntity(entity);
+                veh->RemoveRefsToVehicle(entity);
+            }
+        }
+    }
+
+    for (int32 i = CPools::ms_pObjectPool->GetSize(); i; i--) {
+        if (CObject* obj = CPools::ms_pObjectPool->GetAt(i - 1)) {
+            if (obj != entity) {
+                obj->RemoveRefsToEntity(entity);
+            }
+        }
+    }
 }
 
 // 0x565610
