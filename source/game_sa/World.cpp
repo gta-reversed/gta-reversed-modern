@@ -793,7 +793,7 @@ void CWorld::FindObjectsOfTypeInRange(uint32 modelId, const CVector& point, floa
 
     IncrementCurrentScanCode();
 
-    CEntity* hitEntity{};
+    *outCount = 0;
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             const auto ProcessSector = [&](CPtrList& list) {
