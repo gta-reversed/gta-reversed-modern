@@ -106,7 +106,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "FindLodOfTypeInRange", 0x564ED0, &CWorld::FindLodOfTypeInRange);
     Install("CWorld", "FindObjectsOfTypeInRange", 0x564C70, &CWorld::FindObjectsOfTypeInRange);
     Install("CWorld", "FindObjectsInRange", 0x564A20, &CWorld::FindObjectsInRange);
-    // Install("CWorld", "ProcessAttachedEntities", 0x5647F0, &CWorld::ProcessAttachedEntities);
+    Install("CWorld", "ProcessAttachedEntities", 0x5647F0, &CWorld::ProcessAttachedEntities);
     Install("CWorld", "GetIsLineOfSightSectorListClear", 0x564970, &CWorld::GetIsLineOfSightSectorListClear);
     Install("CWorld", "ProcessVerticalLineSector", 0x564500, &CWorld::ProcessVerticalLineSector);
     Install("CWorld", "ProcessVerticalLineSector_FillGlobeColPoints", 0x564420, &CWorld::ProcessVerticalLineSector_FillGlobeColPoints);
@@ -618,7 +618,37 @@ void CWorld::CastShadow(float x1, float y1, float x2, float y2) {
 
 // 0x5647F0
 void CWorld::ProcessAttachedEntities() {
-    plugin::Call<0x5647F0>();
+    for (int32 i = CPools::ms_pVehiclePool->GetSize(); i; i--) {
+        if (CVehicle* veh = CPools::ms_pVehiclePool->GetAt(i - 1)) {
+            if (const auto attachedTo = veh->m_pAttachedTo) {
+                veh->m_pEntityIgnoredCollision = attachedTo;
+                veh->PositionAttachedEntity();
+                veh->UpdateRW();
+                veh->UpdateRwFrame();
+            }
+        }
+    }
+
+    for (int32 i = CPools::ms_pObjectPool->GetSize(); i; i--) {
+        if (CObject* obj = CPools::ms_pObjectPool->GetAt(i - 1)) {
+            if (const auto attachedTo = obj->m_pAttachedTo) {
+                Remove(obj);
+
+                obj->PositionAttachedEntity();
+                obj->UpdateRW();
+                obj->UpdateRwFrame();
+                obj->UpdateRW();
+                obj->UpdateRwFrame();
+                obj->Add();
+
+                if (!obj->IsBuilding() && !obj->IsDummy()) { // TODO: I think this was meant to be IsPhysical? Maybe CObject had a non-virtual `IsPhysical` as well?
+                    if (!obj->IsStatic()) {
+                        obj->AddToMovingList();
+                    }
+                }
+            }
+        }
+    }
 }
 
 // 0x564970
