@@ -972,7 +972,7 @@ void CRenderer::ScanSectorList_RequestModels(int32 sectorX, int32 sectorY) {
         CSector* sector = GetSector(sectorX, sectorY);
         ScanPtrList_RequestModels(sector->m_buildings);
         ScanPtrList_RequestModels(sector->m_dummies);
-        ScanPtrList_RequestModels(CWorld::ms_aRepeatSectors->m_lists[REPEATSECTOR_OBJECTS]);
+        ScanPtrList_RequestModels(GetRepeatSector(sectorX, sectorY)->m_lists[REPEATSECTOR_OBJECTS]);
     }
 }
 
