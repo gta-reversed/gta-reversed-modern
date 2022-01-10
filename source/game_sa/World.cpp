@@ -430,8 +430,12 @@ int32 CWorld::FindPlayerSlotWithRemoteVehiclePointer(void* vehicle) {
 }
 
 // 0x564000
-void CWorld::FindPlayerSlotWithVehiclePointer(CEntity* vehiclePtr) {
-    plugin::Call<0x564000, CEntity*>(vehiclePtr);
+int32 CWorld::FindPlayerSlotWithVehiclePointer(CEntity* vehiclePtr) {
+    for (int32 i = 0; i < MAX_PLAYERS; i++) {
+        if (FindPlayerVehicle(i) == vehiclePtr)
+            return i;
+    }
+    return -1;
 }
 
 // 0x564050

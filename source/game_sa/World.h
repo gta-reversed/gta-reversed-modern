@@ -78,14 +78,14 @@ public:
     static void TestForUnusedModels(CPtrList& ptrList, int32* models);
     static void RemoveEntityInsteadOfProcessingIt(CEntity* entity);
     static void CallOffChaseForAreaSectorListVehicles(CPtrList& ptrList, float x1, float y1, float x2, float y2, float arg5, float arg6, float arg7, float arg8);
-    static void CallOffChaseForAreaSectorListPeds(CPtrList& ptrList, float x1, float y1, float x2, float y2, float arg5, float arg6, float arg7, float arg8);
+    static void CallOffChaseForAreaSectorListPeds(CPtrList& ptrList, float x1, float y1, float x2, float y2, float minX, float minY, float maxX, float maxY);
     static bool CameraToIgnoreThisObject(CEntity* entity);
     // returns player ID (0 or 1), -1 - not found
     static int32 FindPlayerSlotWithPedPointer(void* ptr);
     // returns player ID (0 or 1), -1 - not found
     static int32 FindPlayerSlotWithRemoteVehiclePointer(void* ptr);
-    // returns player ID (0 or 1)
-    static void FindPlayerSlotWithVehiclePointer(CEntity* vehiclePtr);
+    // returns player ID (0 or 1), -1 - not found
+    static int32 FindPlayerSlotWithVehiclePointer(CEntity* vehiclePtr);
     static void ShutDown();
     static void ClearForRestart();
     static bool ProcessVerticalLineSector_FillGlobeColPoints(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly);
@@ -102,8 +102,8 @@ public:
     static void FindMissionEntitiesIntersectingCubeSectorList(CPtrList& ptrList, const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehiclesList, bool pedsList, bool objectsList);
     static void FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList, const CVector& point, float radius, bool b2D, CEntity** outEntities, float* outDistance);
     static void RemoveReferencesToDeletedObject(CEntity* entity);
-    static void SetPedsOnFire(float x1, float y1, float x2, float y2, CEntity* fireCreator);
-    static void SetPedsChoking(float x1, float y1, float x2, float y2, CEntity* gasCreator);
+    static void SetPedsOnFire(float x, float y, float z, float radius, CEntity* fireCreator);
+    static void SetPedsChoking(float x, float y, float z, float radius, CEntity* gasCreator);
     static void SetCarsOnFire(float x, float y, float z, float radius, CEntity* fireCreator);
     static bool SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState);
     static void RemoveFallenPeds();
