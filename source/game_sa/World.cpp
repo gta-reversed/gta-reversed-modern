@@ -623,10 +623,13 @@ void CWorld::SetPedsChoking(float x1, float y1, float x2, float y2, CEntity* gas
 }
 
 // 0x5659F0
-// NOTE: Radius is treated as a box, not a circle, with `x, y, z` being the center of it.
+// NOTE: Radius is treated as a cuboid with the height of 10, width and length of 2 * radius
 void CWorld::SetCarsOnFire(float x, float y, float z, float radius, CEntity* fireCreator) {
     // NOTSA - Originally it was some abs() macro crap, we ain't gonna do it like that
-    const CBoundingBox bb{ {x - radius, y - radius, z - radius}, {x + radius, y + radius, z + radius} };
+    const CBoundingBox bb{
+        {x - radius, y - radius, z - 5.f},
+        {x + radius, y + radius, z + 5.f}
+    };
     for (int32 i = CPools::ms_pVehiclePool->GetSize(); i; i--) {
         if (CVehicle* vehicle = CPools::ms_pVehiclePool->GetAt(i - 1)) {
             if (vehicle->m_nStatus == eEntityStatus::STATUS_WRECKED)
