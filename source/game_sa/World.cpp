@@ -101,7 +101,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "CameraToIgnoreThisObject", 0x563F40, &CWorld::CameraToIgnoreThisObject);
     Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x563FD0, &CWorld::FindPlayerSlotWithVehiclePointer);
     Install("CWorld", "RemoveReferencesToDeletedObject", 0x565510, &CWorld::RemoveReferencesToDeletedObject);
-    // Install("CWorld", "FindNearestObjectOfTypeSectorList", 0x565450, &CWorld::FindNearestObjectOfTypeSectorList);
+    Install("CWorld", "FindNearestObjectOfTypeSectorList", 0x565450, &CWorld::FindNearestObjectOfTypeSectorList);
     // Install("CWorld", "FindMissionEntitiesIntersectingCubeSectorList", 0x565300, &CWorld::FindMissionEntitiesIntersectingCubeSectorList);
     Install("CWorld", "FindObjectsIntersectingAngledCollisionBoxSectorList", 0x565200, &CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList);
     Install("CWorld", "FindObjectsIntersectingCubeSectorList", 0x5650E0, &CWorld::FindObjectsIntersectingCubeSectorList);
@@ -662,8 +662,25 @@ void CWorld::FindMissionEntitiesIntersectingCubeSectorList(CPtrList& ptrList, co
 }
 
 // 0x565450
-void CWorld::FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList, const CVector& point, float radius, bool b2D, CEntity** outEntities, float* outDistance) {
-    plugin::Call<0x565450, int32, CPtrList&, const CVector&, float, bool, CEntity**, float*>(modelId, ptrList, point, radius, b2D, outEntities, outDistance);
+void CWorld::FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList, const CVector& point, float radius, bool b2D, CEntity *& outEntity, float& outDistance) {
+    for (CPtrNode* node = ptrList.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
+        const auto entity = static_cast<CEntity*>(node->m_item);
+        if (entity->m_nScanCode == GetCurrentScanCode())
+            continue;
+
+        const auto GetDistance = [&] {
+            if (b2D)
+                return DistanceBetweenPoints2D({ point }, { entity->GetPosition() });
+            return DistanceBetweenPoints(point, entity->GetPosition());
+        };
+
+        if (const float dist = GetDistance(); dist <= radius) {
+            outDistance = dist;
+            outEntity   = entity;
+        }
+    }
 }
 
 // 0x565510
