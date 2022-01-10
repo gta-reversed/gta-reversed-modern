@@ -2004,6 +2004,8 @@ void CWorld::Process() {
         static_cast<CObject*>(node->m_item)->ProcessControlLogic();
     }
 
+    g_LoadMonitor.StartTimer(true);
+
     if (CReplay::Mode == REPLAY_MODE_1) {
         IterateMovingList([&](CEntity* entity) {
             entity->m_bIsInSafePosition = true;
@@ -2088,6 +2090,7 @@ void CWorld::Process() {
     }
 
     g_LoadMonitor.EndTimer(true);
+
     CVehicleRecording::SaveOrRetrieveDataForThisFrame();
     // g_ikChainMan.Update(CTimer::GetTimeStepInSeconds());
     ProcessAttachedEntities();
