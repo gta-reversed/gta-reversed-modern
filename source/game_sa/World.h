@@ -196,7 +196,7 @@ public:
 };
 
 extern uint32 &FilledColPointIndex;
-extern CColPoint *gaTempSphereColPoints; // CColPoint gaTempSphereColPoints[32]
+static inline CColPoint (&gaTempSphereColPoints)[32] = *(CColPoint(*)[32])0xB9B250;
 extern int16 &TAG_SPRAYING_INCREMENT_VAL; // default 8
 
 int16 GetCurrentScanCode();

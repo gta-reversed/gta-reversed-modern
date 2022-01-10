@@ -30,7 +30,6 @@ CColPoint* CWorld::m_aTempColPts = (CColPoint*)0xB9ACD0;
 CVector& CWorld::SnookerTableMax = *(CVector*)0x8CDEF4;
 CVector& CWorld::SnookerTableMin = *(CVector*)0x8CDF00;
 uint32& FilledColPointIndex = *(uint32*)0xB7CD7C;
-CColPoint* gaTempSphereColPoints = (CColPoint*)0xB9B250;
 int16& TAG_SPRAYING_INCREMENT_VAL = *(int16*)0x8CDEF0;
 int8& gCurCamColVars = *(int8*)0x8CCB80;
 
@@ -82,7 +81,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "TestForUnusedModels_InputArray", 0x5639D0, static_cast<void(*)(CPtrList&, int32*)>(&CWorld::TestForUnusedModels));
     Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x563950, static_cast<void(*)(CPtrList&)>(&CWorld::TestForBuildingsOnTopOfEachOther));
     Install("CWorld", "RemoveStaticObjects", 0x563840, &CWorld::RemoveStaticObjects);
-    // Install("CWorld", "ProcessVerticalLineSectorList_FillGlobeColPoints", 0x5636A0, &CWorld::ProcessVerticalLineSectorList_FillGlobeColPoints);
+    Install("CWorld", "ProcessVerticalLineSectorList_FillGlobeColPoints", 0x5636A0, &CWorld::ProcessVerticalLineSectorList_FillGlobeColPoints);
     Install("CWorld", "FindObjectsOfTypeInRangeSectorList", 0x5635C0, &CWorld::FindObjectsOfTypeInRangeSectorList);
     Install("CWorld", "FindObjectsInRangeSectorList", 0x563500, &CWorld::FindObjectsInRangeSectorList);
     // Install("CWorld", "ClearScanCodes", 0x563470, &CWorld::ClearScanCodes);
@@ -298,7 +297,45 @@ void CWorld::FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& ptrLis
 
 // 0x5636A0
 bool CWorld::ProcessVerticalLineSectorList_FillGlobeColPoints(CPtrList& ptrList, const CColLine& colLine, CEntity*& outEntity, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly) {
-    return plugin::CallAndReturn<bool, 0x5636A0, CPtrList&, const CColLine&, CEntity*&, bool, CStoredCollPoly*>(ptrList, colLine, outEntity, doSeeThroughCheck, outCollPoly);
+    const auto IsDirectionPointingUpwards = [](float startZ, float endZ) {
+        return endZ >= startZ;
+    };
+
+    const auto  originalLineGoingUpwards = IsDirectionPointingUpwards(colLine.m_vecStart.z, colLine.m_vecEnd.z);
+
+    auto localColLine = colLine;
+
+    bool dontGoToNextNode{};
+    for (CPtrNode* node = ptrList.GetNode(), *next{}; next || dontGoToNextNode;) {
+        if (!dontGoToNextNode) {
+            node = next;
+            next = node->GetNext();
+            localColLine = colLine;
+        }
+
+        dontGoToNextNode = false;
+
+        const auto entity = static_cast<CEntity*>(node->m_item);
+
+        if (entity->m_nScanCode == ms_nCurrentScanCode || !entity->m_bUsesCollision)
+            continue;
+        entity->m_nScanCode = ms_nCurrentScanCode;
+
+        float touchDist{1.f};
+        CColPoint cp{};
+        if (!CCollision::ProcessVerticalLine(localColLine, entity->GetMatrix(), *entity->GetColModel(), cp, touchDist, doSeeThroughCheck, false, nullptr))
+            continue;
+
+        if (FilledColPointIndex < std::size(gaTempSphereColPoints)) { // TODO: Perhaps break if it's full?
+            if (originalLineGoingUpwards == IsDirectionPointingUpwards(cp.m_vecPoint.z, localColLine.m_vecEnd.z) // Still pointing in the same direction
+            ) { 
+                entity->m_nScanCode = ms_nCurrentScanCode - 1;
+                dontGoToNextNode = true;
+                gaTempSphereColPoints[FilledColPointIndex++] = cp;
+            }
+            localColLine.m_vecEnd.z += originalLineGoingUpwards ? 0.1f : -0.1f;
+        }
+    }
 }
 
 // 0x563840
