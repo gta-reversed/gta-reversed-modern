@@ -23,8 +23,6 @@ bool& CWorld::bNoMoreCollisionTorque = *(bool*)0xB7CD72;
 bool& CWorld::bDoingCarCollisions = *(bool*)0xB7CD73;
 int8& CWorld::PlayerInFocus = *(int8*)0xB7CD74;
 uint16& CWorld::ms_nCurrentScanCode = *(uint16*)0xB7CD78;
-CSector* CWorld::ms_aSectors = (CSector*)0xB7D0B8;
-CRepeatSector (&CWorld::ms_aRepeatSectors)[MAX_REPEAT_SECTORS] = *(CRepeatSector(*)[MAX_REPEAT_SECTORS])0xB992B8;
 CPtrListSingleLink (&CWorld::ms_aLodPtrLists)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X] = *(CPtrListSingleLink(*)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X])0xB99EB8;
 CPtrListDoubleLink& CWorld::ms_listMovingEntityPtrs = *(CPtrListDoubleLink*)0xB9ACC8;
 CPtrListDoubleLink& CWorld::ms_listObjectsWithControlCode = *(CPtrListDoubleLink*)0xB9ACCC;
@@ -83,7 +81,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "RemoveEntityInsteadOfProcessingIt", 0x563A10, &CWorld::RemoveEntityInsteadOfProcessingIt);
     Install("CWorld", "TestForUnusedModels_InputArray", 0x5639D0, static_cast<void(*)(CPtrList&, int32*)>(&CWorld::TestForUnusedModels));
     Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x563950, static_cast<void(*)(CPtrList&)>(&CWorld::TestForBuildingsOnTopOfEachOther));
-    // Install("CWorld", "RemoveStaticObjects", 0x563840, &CWorld::RemoveStaticObjects);
+    Install("CWorld", "RemoveStaticObjects", 0x563840, &CWorld::RemoveStaticObjects);
     // Install("CWorld", "ProcessVerticalLineSectorList_FillGlobeColPoints", 0x5636A0, &CWorld::ProcessVerticalLineSectorList_FillGlobeColPoints);
     Install("CWorld", "FindObjectsOfTypeInRangeSectorList", 0x5635C0, &CWorld::FindObjectsOfTypeInRangeSectorList);
     Install("CWorld", "FindObjectsInRangeSectorList", 0x563500, &CWorld::FindObjectsInRangeSectorList);
@@ -305,7 +303,29 @@ bool CWorld::ProcessVerticalLineSectorList_FillGlobeColPoints(CPtrList& ptrList,
 
 // 0x563840
 void CWorld::RemoveStaticObjects() {
-    plugin::Call<0x563840>();
+    const auto ProcessList = [](const CPtrList& list) {
+        for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+            next = node->GetNext();
+
+            const auto entity = static_cast<CEntity*>(node->m_item);
+            Remove(entity);
+            delete entity;
+        }
+    };
+
+    for (auto y = 0; y < MAX_SECTORS_Y; y++) {
+        for (auto x = 0; x < MAX_SECTORS_X; x++) {
+            const auto& sector = *GetSector(x, y);
+            ProcessList(sector.m_buildings);
+            ProcessList(sector.m_dummies);
+        }
+    }
+
+    for (auto y = 0; y < MAX_REPEAT_SECTORS_Y; y++) {
+        for (auto x = 0; x < MAX_REPEAT_SECTORS_X; x++) {
+            ProcessList(GetRepeatSector(x, y)->m_lists[REPEATSECTOR_OBJECTS]);
+        }
+    }
 }
 
 // 0x563950

@@ -48,9 +48,9 @@ public:
     static uint16& ms_nCurrentScanCode;
     static inline CPlayerInfo(&Players)[MAX_PLAYERS] = *(CPlayerInfo(*)[MAX_PLAYERS])0xB7CD98;
     // Use GetSector() to access this array
-    static CSector* ms_aSectors; // static CSector ms_aSectors[MAX_SECTORS] default 120x120
+    static inline CSector(&ms_aSectors)[MAX_SECTORS_Y][MAX_SECTORS_X] = *(CSector(*)[MAX_SECTORS_Y][MAX_SECTORS_X])0xB7D0B8;
     // Use GetRepeatSector() to access this array
-    static CRepeatSector (&ms_aRepeatSectors)[MAX_REPEAT_SECTORS]; // static CRepeatSector ms_aRepeatSectors[MAX_REPEAT_SECTORS] default 16x16
+    static inline CRepeatSector(&ms_aRepeatSectors)[MAX_REPEAT_SECTORS_Y][MAX_REPEAT_SECTORS_X] = *(CRepeatSector(*)[MAX_REPEAT_SECTORS_Y][MAX_REPEAT_SECTORS_X])0xB992B8;
     // Use GetLodPtrList() to access this array
     static CPtrListSingleLink(&ms_aLodPtrLists)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X];
     static CPtrListDoubleLink &ms_listMovingEntityPtrs;
@@ -100,7 +100,7 @@ public:
     static void FindObjectsIntersectingCubeSectorList(CPtrList& ptrList, const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities);
     static void FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrList, CBox const& box, const CMatrix& transform, const CVector& point, int16* outCount, int16 maxCount, CEntity** outEntities);
     static void FindMissionEntitiesIntersectingCubeSectorList(CPtrList& ptrList, const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehiclesList, bool pedsList, bool objectsList);
-    static void FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList, const CVector& point, float radius, bool b2D, CEntity** outEntities, float* outDistance);
+    static void FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList, const CVector& point, float radius, bool b2D, CEntity *& outEntity, float& outDistance);
     static void RemoveReferencesToDeletedObject(CEntity* entity);
     static void SetPedsOnFire(float x, float y, float z, float radius, CEntity* fireCreator);
     static void SetPedsChoking(float x, float y, float z, float radius, CEntity* gasCreator);
