@@ -48,7 +48,7 @@ void CStats::InjectHooks() {
     ReversibleHooks::Install("CStats", "CheckForThreshold", 0x5595F0, &CStats::CheckForThreshold);
     ReversibleHooks::Install("CStats", "IsStatCapped", 0x559630, &CStats::IsStatCapped);
     ReversibleHooks::Install("CStats", "LoadActionReactionStats", 0x5599B0, &CStats::LoadActionReactionStats);
-    ReversibleHooks::Install("CStats", "FindMaxNumberOfGroupMembers", 0x559A50, &CStats::FindMaxNumberOfGroupMembers);
+    // ReversibleHooks::Install("CStats", "FindMaxNumberOfGroupMembers", 0x559A50, &CStats::FindMaxNumberOfGroupMembers);
     ReversibleHooks::Install("CStats", "ProcessReactionStatsOnDecrement", 0x559730, &CStats::ProcessReactionStatsOnDecrement);
     ReversibleHooks::Install("CStats", "DecrementStat", 0x559FA0, &CStats::DecrementStat);
     ReversibleHooks::Install("CStats", "SetNewRecordStat", 0x55C410, &CStats::SetNewRecordStat);
