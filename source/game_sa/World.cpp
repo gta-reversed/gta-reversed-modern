@@ -1116,7 +1116,7 @@ void CWorld::SetCarsOnFire(float x, float y, float z, float radius, CEntity* fir
 bool CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState) {
     CEntity* objects[15]{};
     int16 count{};
-    FindObjectsInRange(posn, radius, false, &count, std::size(objects), objects, true, false, false, false, false);
+    FindObjectsInRange(posn, radius, false, &count, (uint16)std::size(objects), objects, true, false, false, false, false);
     if (!count)
         return 0;
 
@@ -1615,7 +1615,7 @@ bool CWorld::ProcessLineOfSightSectorList(CPtrList& ptrList, const CColLine& col
             CColSphere colSpheres[6];
 
             wheelCol.m_pColData = &colData;
-            colData.m_nNumSpheres = std::size(colSpheres);
+            colData.m_nNumSpheres = (uint16)std::size(colSpheres);
             colData.m_pSpheres = colSpheres;
 
             if (veh->SetUpWheelColModel(&wheelCol)) {
@@ -2113,7 +2113,7 @@ void CWorld::Process() {
 
     CMessages::Process();
 
-    for (auto i = 0; i < std::size(Players); i++) {
+    for (auto i = 0u; i < std::size(Players); i++) {
         if (Players[i].m_pPed)
             Players[i].Process(i);
     }
@@ -2774,7 +2774,7 @@ void CWorld::TriggerExplosion(const CVector& point, float radius, float visibleD
 void CWorld::SetWorldOnFire(float x, float y, float z, float radius, CEntity* fireCreator) {
     if (TestSphereAgainstWorld({ x, y, z }, radius, nullptr, true, false, false, true, false, false)) {
         if (!gFireManager.GetNumFiresInRange({ x, y, z }, 2.f)) {
-            gFireManager.StartFire({ x, y, z }, 0.8f, true, nullptr, 0, 7000, true);
+            gFireManager.StartFire({ x, y, z }, 0.8f, 1u, nullptr, 7000u, 100u, 1u);
         }
     }
 }
