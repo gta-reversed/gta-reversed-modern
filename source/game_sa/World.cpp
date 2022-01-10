@@ -55,7 +55,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ClearCarsFromArea", 0x566610, &CWorld::ClearCarsFromArea);
     Install("CWorld", "ProcessVerticalLine_FillGlobeColPoints", 0x567620, &CWorld::ProcessVerticalLine_FillGlobeColPoints);
     Install("CWorld", "TriggerExplosionSectorList", 0x567750, &CWorld::TriggerExplosionSectorList);
-    Install("CWorld", "Process", 0x5684A0, &CWorld::Process); // Crashes in IKChainManager_c::Update (usually 0x618705). (It is called from CWorld::Process)
+    Install("CWorld", "Process", 0x5684A0, &CWorld::Process);
     Install("CWorld", "SetWorldOnFire", 0x56B910, &CWorld::SetWorldOnFire);
     Install("CWorld", "TriggerExplosion", 0x56B790, &CWorld::TriggerExplosion);
     Install("CWorld", "ProcessLineOfSightSector", 0x56B5E0, &CWorld::ProcessLineOfSightSector);
@@ -1916,10 +1916,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
 }
 
 // 0x5684A0
-// TODO: Fix crash caused by `g_ikChainMan.Update`
 void CWorld::Process() {
-    // return plugin::Call<0x5684A0>();
-
     const auto IterateMovingList = [&](auto&& fn) {
         for (CPtrNodeDoubleLink* node = ms_listMovingEntityPtrs.GetNode(), *next{}; node; node = next) {
             next = node->m_next;
@@ -2005,7 +2002,6 @@ void CWorld::Process() {
     }
 
     g_LoadMonitor.StartTimer(true);
-
     if (CReplay::Mode == REPLAY_MODE_1) {
         IterateMovingList([&](CEntity* entity) {
             entity->m_bIsInSafePosition = true;
@@ -2088,11 +2084,10 @@ void CWorld::Process() {
             });
         }
     }
-
     g_LoadMonitor.EndTimer(true);
 
     CVehicleRecording::SaveOrRetrieveDataForThisFrame();
-    // g_ikChainMan.Update(CTimer::GetTimeStepInSeconds());
+    g_ikChainMan.Update(CTimer::GetTimeStepInSeconds());
     ProcessAttachedEntities();
 
     IterateMovingList([&](CEntity* entity) {

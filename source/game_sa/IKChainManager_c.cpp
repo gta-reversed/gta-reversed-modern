@@ -40,7 +40,7 @@ void IKChainManager_c::Reset() {
 
 // 0x6186D0
 void IKChainManager_c::Update(float a1) {
-    return plugin::CallMethod<0x6186D0, float>(a1);
+    return plugin::CallMethod<0x6186D0, IKChainManager_c*, float>(this, a1);
 }
 
 // 0x618750
