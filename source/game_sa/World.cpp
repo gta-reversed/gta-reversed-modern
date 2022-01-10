@@ -365,6 +365,8 @@ bool CWorld::ProcessVerticalLineSectorList_FillGlobeColPoints(CPtrList& ptrList,
             localColLine.m_vecEnd.z += originalLineGoingUpwards ? 0.1f : -0.1f;
         }
     }
+
+    return FilledColPointIndex > 0;
 }
 
 // 0x563840
