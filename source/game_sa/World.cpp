@@ -2362,18 +2362,18 @@ void CWorld::RepositionOneObject(CEntity* object) {
         return std::ranges::find(models, (ModelIndex)object->m_nModelIndex) != models.end();
     };
 
-    const auto MI = CModelInfo::GetModelInfo(object->m_nModelIndex);
-    const auto CM = MI->GetColModel();
+    const auto modelInfo = CModelInfo::GetModelInfo(object->m_nModelIndex);
+    const auto colModel = modelInfo->GetColModel();
 
     // Recalculate position to be on ground level where is `point`
     const auto RecalcZPosAtPoint = [&](CVector2D point) {
         auto& pos = object->GetMatrix().GetPosition();
-        pos.z = FindGroundZFor3DCoord(point.x, point.y, pos.z + std::max(2.f, CM->m_boundBox.GetHeight()), nullptr, nullptr) - CM->m_boundBox.m_vecMin.z;
+        pos.z = FindGroundZFor3DCoord(point.x, point.y, pos.z + std::max(2.f, colModel->m_boundBox.GetHeight()), nullptr, nullptr) - colModel->m_boundBox.m_vecMin.z;
         object->UpdateRW();
         object->UpdateRwFrame();
     };
 
-    if (MI->SwaysInWind() || IsObjectModelAnyOf({
+    if (modelInfo->SwaysInWind() || IsObjectModelAnyOf({
         MI_PARKINGMETER,
         MI_PHONEBOOTH1,
         MI_WASTEBIN,
@@ -2411,7 +2411,7 @@ void CWorld::RepositionOneObject(CEntity* object) {
         MI_STREETLAMP1,
         MI_STREETLAMP2
     })) {
-        if (const auto CD = CM->m_pColData) {
+        if (const auto CD = colModel->m_pColData) {
             if (CD->m_nNumBoxes == 1) {
                 RecalcZPosAtPoint(Multiply3x3(object->GetMatrix(), CD->m_pBoxes[0].GetCenter()));
             } else if (CD->m_nNumSpheres) {
@@ -2439,7 +2439,7 @@ void CWorld::RepositionOneObject(CEntity* object) {
         // Orginally `ProcessVerticalLine` is called, but the result is unused.
 
         auto& pos = object->GetPosition();
-        auto height = CM->GetBoundingBox().GetHeight();
+        auto height = colModel->GetBoundingBox().GetHeight();
         pos.z = 6.f - height / 2.f + height / 5.f;
     }
 }
