@@ -97,7 +97,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "Initialise", 0x5631E0, &CWorld::Initialise);
     Install("CWorld", "ResetLineTestOptions", 0x5631C0, &CWorld::ResetLineTestOptions);
     Install("CWorld", "CallOffChaseForAreaSectorListPeds", 0x563D00, &CWorld::CallOffChaseForAreaSectorListPeds);
-    // Install("CWorld", "RepositionCertainDynamicObjects", 0x56B9C0, &CWorld::RepositionCertainDynamicObjects);
+    Install("CWorld", "RepositionCertainDynamicObjects", 0x56B9C0, &CWorld::RepositionCertainDynamicObjects);
     Install("CWorld", "CameraToIgnoreThisObject", 0x563F40, &CWorld::CameraToIgnoreThisObject);
     Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x563FD0, &CWorld::FindPlayerSlotWithVehiclePointer);
     // Install("CWorld", "RemoveReferencesToDeletedObject", 0x565510, &CWorld::RemoveReferencesToDeletedObject);
@@ -2427,7 +2427,11 @@ void CWorld::SetWorldOnFire(float x, float y, float z, float radius, CEntity* fi
 
 // 0x56B9C0
 void CWorld::RepositionCertainDynamicObjects() {
-    plugin::Call<0x56B9C0>();
+    for (int32 i = CPools::ms_pDummyPool->GetSize(); i; i--) {
+        if (CDummy* dummy = CPools::ms_pDummyPool->GetAt(i - 1)) {
+            RepositionOneObject(dummy);
+        }
+    }
 }
 
 // 0x56BA00
