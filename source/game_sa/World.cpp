@@ -2127,14 +2127,14 @@ void CWorld::Process() {
 
 // 0x568AD0
 bool CWorld::GetIsLineOfSightSectorClear(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doIgnoreCameraCheck){
-    const auto ProcessSectorList = [&](CPtrList& list, bool doIgnoreCamCheckForThisSector = false) {
+    const auto ProcessSectorList = [&](CPtrList& list, bool doIgnoreCamCheckForThisSector) {
         return GetIsLineOfSightSectorListClear(list, colLine, doSeeThroughCheck, doIgnoreCamCheckForThisSector);
     };
-    return   (!buildings || ProcessSectorList(sector.m_buildings))
-          && (!vehicles  || ProcessSectorList(repeatSector.m_lists[REPEATSECTOR_VEHICLES]))
-          && (!peds      || ProcessSectorList(repeatSector.m_lists[REPEATSECTOR_PEDS]))
+    return   (!buildings || ProcessSectorList(sector.m_buildings, false))
+          && (!vehicles  || ProcessSectorList(repeatSector.m_lists[REPEATSECTOR_VEHICLES], false))
+          && (!peds      || ProcessSectorList(repeatSector.m_lists[REPEATSECTOR_PEDS], false))
           && (!objects   || ProcessSectorList(repeatSector.m_lists[REPEATSECTOR_OBJECTS], doIgnoreCameraCheck))
-          && (!dummies   || ProcessSectorList(sector.m_dummies));
+          && (!dummies   || ProcessSectorList(sector.m_dummies, false));
 }
 
 // 0x568B80
