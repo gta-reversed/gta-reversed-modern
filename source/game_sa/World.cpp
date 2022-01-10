@@ -76,7 +76,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "FindObjectsKindaColliding", 0x568B80, &CWorld::FindObjectsKindaColliding);
     Install("CWorld", "GetIsLineOfSightSectorClear", 0x568AD0, &CWorld::GetIsLineOfSightSectorClear);
     Install("CWorld", "SprayPaintWorld", 0x565B70, &CWorld::SprayPaintWorld);
-    // Install("CWorld", "SetCarsOnFire", 0x5659F0, &CWorld::SetCarsOnFire);
+    Install("CWorld", "SetCarsOnFire", 0x5659F0, &CWorld::SetCarsOnFire);
     // Install("CWorld", "SetPedsChoking", 0x565800, &CWorld::SetPedsChoking);
     // Install("CWorld", "SetPedsOnFire", 0x565610, &CWorld::SetPedsOnFire);
     // Install("CWorld", "CallOffChaseForAreaSectorListVehicles", 0x563A80, &CWorld::CallOffChaseForAreaSectorListVehicles);
@@ -623,8 +623,26 @@ void CWorld::SetPedsChoking(float x1, float y1, float x2, float y2, CEntity* gas
 }
 
 // 0x5659F0
-void CWorld::SetCarsOnFire(float x1, float y1, float x2, float y2, CEntity* fireCreator) {
-    plugin::Call<0x5659F0, float, float, float, float, CEntity*>(x1, y1, x2, y2, fireCreator);
+// NOTE: Radius is treated as a box, not a circle, with `x, y, z` being the center of it.
+void CWorld::SetCarsOnFire(float x, float y, float z, float radius, CEntity* fireCreator) {
+    // NOTSA - Originally it was some abs() macro crap, we ain't gonna do it like that
+    const CBoundingBox bb{ {x - radius, y - radius, z - radius}, {x + radius, y + radius, z + radius} };
+    for (int32 i = CPools::ms_pVehiclePool->GetSize(); i; i--) {
+        if (CVehicle* vehicle = CPools::ms_pVehiclePool->GetAt(i - 1)) {
+            if (vehicle->m_nStatus == eEntityStatus::STATUS_WRECKED)
+                continue;
+
+            if (vehicle->m_pFire)
+                continue; // Already on fire
+
+            if (vehicle->physicalFlags.bFireProof)
+                continue;
+
+            if (bb.IsPointWithin(vehicle->GetPosition())) {
+                gFireManager.StartFire(vehicle, fireCreator, 0.8f, 1, 7000, 100);
+            }
+        }
+    }
 }
 
 // 0x565B70

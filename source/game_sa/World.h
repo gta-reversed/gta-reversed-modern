@@ -104,7 +104,7 @@ public:
     static void RemoveReferencesToDeletedObject(CEntity* entity);
     static void SetPedsOnFire(float x1, float y1, float x2, float y2, CEntity* fireCreator);
     static void SetPedsChoking(float x1, float y1, float x2, float y2, CEntity* gasCreator);
-    static void SetCarsOnFire(float x1, float y1, float x2, float y2, CEntity* fireCreator);
+    static void SetCarsOnFire(float x, float y, float z, float radius, CEntity* fireCreator);
     static bool SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState);
     static void RemoveFallenPeds();
     static void RemoveFallenCars();
