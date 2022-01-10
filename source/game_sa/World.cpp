@@ -164,7 +164,9 @@ void CWorld::Remove(CEntity* entity) {
 bool CWorld::ProcessVerticalLineSectorList(CPtrList& ptrList, const CColLine& colLine, CColPoint& colPoint, float& maxTouchDistance, CEntity*& outEntity, bool doSeeThroughCheck, CStoredCollPoly* collPoly) {
     auto maxTouchDistanceLocal{maxTouchDistance};
 
-    for (CPtrNode* it = ptrList.m_node; it; it = it->m_next) {
+    for (CPtrNode* it = ptrList.m_node, *next{}; it; it = next) {
+        next = it->GetNext();
+
         const auto entity = static_cast<CEntity*>(it->m_item);
 
         if (entity->m_nScanCode == ms_nCurrentScanCode || !entity->m_bUsesCollision || entity == pIgnoreEntity)
@@ -198,7 +200,9 @@ bool CWorld::ProcessVerticalLineSectorList(CPtrList& ptrList, const CColLine& co
 
 // 0x563390
 void CWorld::CastShadowSectorList(CPtrList& ptrList, float, float, float, float) {
-    for (CPtrNode* it = ptrList.m_node; it; it = it->m_next) {
+    for (CPtrNode* it = ptrList.GetNode(), *next{}; it; it = next) {
+        next = it->GetNext();
+
         auto entity = static_cast<CEntity*>(it->m_item);
         if (entity->m_nScanCode != ms_nCurrentScanCode && entity->m_bUsesCollision) {
             entity->m_nScanCode = ms_nCurrentScanCode;
@@ -208,7 +212,9 @@ void CWorld::CastShadowSectorList(CPtrList& ptrList, float, float, float, float)
 
 // 0x5633D0
 void CWorld::ProcessForAnimViewer() {
-    for (CPtrNode* it = ms_listMovingEntityPtrs.m_node; it; it = it->m_next) {
+    for (CPtrNode* it = ms_listMovingEntityPtrs.m_node, *next{}; it; it = next) {
+        next = it->GetNext();
+
         auto entity = static_cast<CEntity*>(it->m_item);
         if (!entity->m_bRemoveFromWorld) {
             entity->UpdateAnim();
@@ -222,7 +228,9 @@ void CWorld::ProcessPedsAfterPreRender() {
     if (CTimer::bSkipProcessThisFrame)
         return; 
 
-    for (CPtrNode* it = ms_listMovingEntityPtrs.m_node; it; it = it->m_next) {
+    for (CPtrNode* it = ms_listMovingEntityPtrs.m_node, *next{}; it; it = next) {
+        next = it->GetNext();
+
         auto entity = static_cast<CEntity*>(it->m_item);
         if (!entity->m_bRemoveFromWorld) {
             if (entity->IsPed()) {
@@ -287,11 +295,12 @@ void CWorld::FindObjectsInRangeSectorList(CPtrList& ptrList, const CVector& poin
 
 // 0x5635C0
 void CWorld::FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& ptrList, const CVector& point, float fRadiusSq, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities) {
-    for (CPtrNode* it = ms_listMovingEntityPtrs.m_node; it; it = it->m_next) {
+    for (CPtrNode* it = ptrList.m_node, *next{}; it; it = next) {
+        next = it->GetNext();
+
         auto entity = static_cast<CEntity*>(it->m_item);
         if (entity->m_nScanCode == ms_nCurrentScanCode)
             continue;
-
         entity->m_nScanCode = ms_nCurrentScanCode;
 
         if (entity->m_nModelIndex != modelId)
@@ -394,11 +403,15 @@ void CWorld::TestForBuildingsOnTopOfEachOther(CPtrList& ptrList) {
 
 // 0x5639D0
 void CWorld::TestForUnusedModels(CPtrList& ptrList, int32* models) {
-    for (CPtrNode* it = ms_listMovingEntityPtrs.m_node; it; it = it->m_next) {
+    for (CPtrNode* it = ptrList.m_node, *next{}; it; it = next) {
+        next = it->GetNext();
+
         auto entity = static_cast<CEntity*>(it->m_item);
+
         if (entity->m_nScanCode == ms_nCurrentScanCode)
             continue;
         entity->m_nScanCode = ms_nCurrentScanCode;
+
         models[entity->m_nModelIndex]++;
     }
 }
@@ -716,9 +729,10 @@ void CWorld::ProcessAttachedEntities() {
 
 // 0x564970
 bool CWorld::GetIsLineOfSightSectorListClear(CPtrList& ptrList, const CColLine& colLine, bool doSeeThroughCheck, bool doCameraIgnoreCheck) {
-    for (CPtrNode* it = ptrList.m_node; it;) {
+    for (CPtrNode* it = ptrList.m_node, *next{}; it; it = next) {
+        next = it->GetNext();
+
         auto entity = static_cast<CEntity*>(it->m_item);
-        it = it->m_next;
 
         if (entity->m_nScanCode == ms_nCurrentScanCode || !entity->m_bUsesCollision)
             continue;
@@ -821,7 +835,9 @@ void CWorld::FindLodOfTypeInRange(uint32 modelId, const CVector& point, float ra
 
 // 0x565000
 void CWorld::FindObjectsKindaCollidingSectorList(CPtrList& ptrList, const CVector& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities) {
-    for (CPtrNode* it = ms_listMovingEntityPtrs.m_node; it; it = it->m_next) {
+    for (CPtrNode* it = ptrList.m_node, *next{}; it; it = next) {
+        next = it->GetNext();
+
         auto entity = static_cast<CEntity*>(it->m_item);
         if (entity->m_nScanCode == ms_nCurrentScanCode)
             continue;
@@ -847,7 +863,9 @@ void CWorld::FindObjectsKindaCollidingSectorList(CPtrList& ptrList, const CVecto
 
 // 0x5650E0
 void CWorld::FindObjectsIntersectingCubeSectorList(CPtrList& ptrList, const CVector& min, const CVector& max, int16* outCount, int16 maxCount, CEntity** outEntities) {
-    for (CPtrNode* it = ms_listMovingEntityPtrs.m_node; it; it = it->m_next) {
+    for (CPtrNode* it = ptrList.m_node, *next{}; it; it = next) {
+        next = it->GetNext();
+
         auto entity = static_cast<CEntity*>(it->m_item);
         if (entity->m_nScanCode == ms_nCurrentScanCode)
             continue;
@@ -864,9 +882,11 @@ void CWorld::FindObjectsIntersectingCubeSectorList(CPtrList& ptrList, const CVec
         // bb.IsPointWithin(pos);
 
         if (pos.x + fBoundRadius >= min.x &&
-            pos.x - fBoundRadius <= max.x && 
+            pos.x - fBoundRadius <= max.x &&
+
             pos.y + fBoundRadius >= min.y && 
-            pos.y - fBoundRadius <= max.y && 
+            pos.y - fBoundRadius <= max.y &&
+
             pos.z + fBoundRadius >= min.z && 
             pos.z - fBoundRadius <= max.z 
         ) {
@@ -881,8 +901,11 @@ void CWorld::FindObjectsIntersectingCubeSectorList(CPtrList& ptrList, const CVec
 
 // 0x565200
 void CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrList, CBox const& box, const CMatrix& transform, const CVector& point, int16* outCount, int16 maxCount, CEntity** outEntities) {
-    for (CPtrNode* it = ms_listMovingEntityPtrs.m_node; it; it = it->m_next) {
+    for (CPtrNode* it = ptrList.m_node, *next{}; it; it = next) {
+        next = it->GetNext();
+
         auto entity = static_cast<CEntity*>(it->m_item);
+
         if (entity->m_nScanCode == ms_nCurrentScanCode)
             continue;
         entity->m_nScanCode = ms_nCurrentScanCode;
