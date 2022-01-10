@@ -55,7 +55,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ClearCarsFromArea", 0x566610, &CWorld::ClearCarsFromArea);
     Install("CWorld", "ProcessVerticalLine_FillGlobeColPoints", 0x567620, &CWorld::ProcessVerticalLine_FillGlobeColPoints);
     Install("CWorld", "TriggerExplosionSectorList", 0x567750, &CWorld::TriggerExplosionSectorList);
-    //Install("CWorld", "Process", 0x5684A0, &CWorld::Process, true); // Unhooked by default, crashes in IkChain.Update
+    Install("CWorld", "Process", 0x5684A0, &CWorld::Process);
     Install("CWorld", "SetWorldOnFire", 0x56B910, &CWorld::SetWorldOnFire);
     Install("CWorld", "TriggerExplosion", 0x56B790, &CWorld::TriggerExplosion);
     Install("CWorld", "ProcessLineOfSightSector", 0x56B5E0, &CWorld::ProcessLineOfSightSector);
@@ -65,7 +65,8 @@ void CWorld::InjectHooks() {
     Install("CWorld", "RepositionOneObject", 0x569850, &CWorld::RepositionOneObject);
     Install("CWorld", "FindLowestZForCoord", 0x5697F0, &CWorld::FindLowestZForCoord);
     Install("CWorld", "FindRoofZFor3DCoord", 0x569750, &CWorld::FindRoofZFor3DCoord);
-    Install("CWorld", "FindGroundZFor3DCoord", 0x5696C0, &CWorld::FindGroundZFor3DCoord);// Install("CWorld", "FindGroundZForCoord", 0x569660, &CWorld::FindGroundZForCoord);
+    Install("CWorld", "FindGroundZFor3DCoord", 0x5696C0, &CWorld::FindGroundZFor3DCoord);
+    Install("CWorld", "FindGroundZForCoord", 0x569660, &CWorld::FindGroundZForCoord);
     Install("CWorld", "FindNearestObjectOfType", 0x5693F0, &CWorld::FindNearestObjectOfType);
     Install("CWorld", "FindMissionEntitiesIntersectingCube", 0x569240, &CWorld::FindMissionEntitiesIntersectingCube);
     Install("CWorld", "FindObjectsIntersectingAngledCollisionBox", 0x568FF0, &CWorld::FindObjectsIntersectingAngledCollisionBox);
@@ -112,7 +113,6 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ProcessVerticalLineSector_FillGlobeColPoints", 0x564420, &CWorld::ProcessVerticalLineSector_FillGlobeColPoints);
     Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
     Install("CWorld", "ShutDown", 0x564050, &CWorld::ShutDown);
-    Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x564000, &CWorld::FindPlayerSlotWithVehiclePointer);
     Install("CWorld", "FindPlayerSlotWithPedPointer", 0x563FA0, &CWorld::FindPlayerSlotWithPedPointer);
     Install("CWorld", "ProcessLineOfSight", 0x56BA00, &CWorld::ProcessLineOfSight);
 }
@@ -2304,7 +2304,10 @@ CEntity* CWorld::FindNearestObjectOfType(int32 modelId, const CVector& point, fl
 
 // 0x569660
 float CWorld::FindGroundZForCoord(float x, float y) {
-    return plugin::CallAndReturn<float, 0x569660, float, float>(x, y);
+    CEntity* hitEntity{};
+    CColPoint cp{};
+    return ProcessVerticalLine({ x, y, 1000.f }, -1000.f, cp, hitEntity, true, false, false, false, true, false, nullptr)
+            ? cp.m_vecPoint.z : 20.f;
 }
 
 // 0x5696C0
