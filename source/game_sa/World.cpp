@@ -112,9 +112,9 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ProcessVerticalLineSector_FillGlobeColPoints", 0x564420, &CWorld::ProcessVerticalLineSector_FillGlobeColPoints);
     Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
     Install("CWorld", "ShutDown", 0x564050, &CWorld::ShutDown);
-    // Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x564000, &CWorld::FindPlayerSlotWithVehiclePointer);
+    Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x564000, &CWorld::FindPlayerSlotWithVehiclePointer);
     Install("CWorld", "FindPlayerSlotWithPedPointer", 0x563FA0, &CWorld::FindPlayerSlotWithPedPointer);
-    // Install("CWorld", "ProcessLineOfSight", 0x56BA00, &CWorld::ProcessLineOfSight);
+    Install("CWorld", "ProcessLineOfSight", 0x56BA00, &CWorld::ProcessLineOfSight);
 }
 
 // 0x5631C0
@@ -2772,7 +2772,140 @@ void CWorld::RepositionCertainDynamicObjects() {
 
 // 0x56BA00
 bool CWorld::ProcessLineOfSight(const CVector& origin, const CVector& target, CColPoint& outColPoint, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck, bool doShootThroughCheck) {
-    return plugin::CallAndReturn<bool, 0x56BA00, const CVector&, const CVector&, CColPoint&, CEntity*&, bool, bool, bool, bool, bool, bool, bool, bool>(origin, target, outColPoint, outEntity, buildings, vehicles, peds, objects, dummies, doSeeThroughCheck, doCameraIgnoreCheck, doShootThroughCheck);
+    const int32 originSectorX = GetSectorX(origin.x);
+    const int32 originSectorY = GetSectorY(origin.y);
+    const int32 targetSectorX = GetSectorX(target.x);
+    const int32 targetSectorY = GetSectorY(target.y);
+
+    IncrementCurrentScanCode();
+
+    float touchDist{1.f};
+    const auto ProcessSector = [&, line = CColLine{origin, target}](int32 x, int32 y) {
+        ProcessLineOfSightSector(
+            *GetSector(x, y),
+            *GetRepeatSector(x, y),
+            line,
+            outColPoint,
+            touchDist,
+            outEntity,
+            buildings,
+            vehicles,
+            peds,
+            objects,
+            dummies,
+            doSeeThroughCheck,
+            doCameraIgnoreCheck,
+            doShootThroughCheck
+        );
+    };
+
+    if (originSectorX == targetSectorX && originSectorY == targetSectorY) { // Both in the same sector
+        ProcessSector(originSectorX, originSectorY);
+    }
+    else if (originSectorX == targetSectorX) { // Same X for both, iterate on Y
+        if (originSectorY >= targetSectorY) { // origin => target on Y axis
+            for (auto y = originSectorY; y >= targetSectorY; y--)
+                ProcessSector(originSectorX, y);
+        }
+        else { // target => origin on Y axis
+            for (auto y = targetSectorY; y >= originSectorY; y--)
+                ProcessSector(originSectorX, y);
+        }
+    }
+    else if (originSectorY == targetSectorY) { // Same Y for both, iterate on X
+        if (originSectorX >= targetSectorX) { // origin => target on X axis
+            for (auto x = originSectorX; x >= targetSectorX; x--)
+                ProcessSector(x, originSectorY);
+        }
+        else { // target => origin on X axis
+            for (auto x = targetSectorX; x >= originSectorX; x--)
+                ProcessSector(x, originSectorY);
+        }
+    }
+    else {  // Different x and y sectors
+        float displacement = (target.y - origin.y) / (target.x - origin.x);
+
+        // TODO: Make this more readable
+        //       Maybe adding some debug module for this might be useful?
+        //       To like draw the sectors iterated or something (Would give us a better understanding of how it works)
+
+        int32 startY, endY, x, y;
+        if (origin.x < target.x) { // Step from left to right
+            startY = originSectorY;
+            endY = GetSectorY((GetSectorPosX(originSectorX + 1) - origin.x) * displacement + origin.y);
+
+            if (originSectorY < endY) {
+                for (y = originSectorY; y <= endY; y++)
+                    ProcessSector(originSectorX, y);
+            }
+            else {
+                for (y = originSectorY; y >= endY; y--)
+                    ProcessSector(originSectorX, y);
+            }
+
+            for (x = originSectorX + 1; x < targetSectorX; x++) {
+                startY = endY;
+                endY = GetSectorY((GetSectorPosX(x + 1) - origin.x) * displacement + origin.y);
+                if (startY < endY) {
+                    for (y = startY; y <= endY; y++)
+                        ProcessSector(x, y);
+                }
+                else {
+                    for (y = startY; y >= endY; y--)
+                        ProcessSector(x, y);
+                }
+            }
+
+            startY = endY;
+            endY = targetSectorY;
+
+            if (startY < endY) {
+                for (y = startY; y <= endY; y++)
+                    ProcessSector(targetSectorX, y);
+            }
+            else {
+                for (y = startY; y >= endY; y--)
+                    ProcessSector(targetSectorX, y);
+            }
+        }
+        else { // Step from right to left
+            startY = originSectorY;
+            endY = GetSectorY((GetSectorPosX(originSectorX) - origin.x) * displacement + origin.y);
+            if (startY < endY) {
+                for (y = startY; y <= endY; y++)
+                    ProcessSector(originSectorX, y);
+            }
+            else {
+                for (y = startY; y >= endY; y--)
+                    ProcessSector(originSectorX, y);
+            }
+
+            for (x = originSectorX - 1; x > targetSectorX; x--) {
+                startY = endY;
+                endY = GetSectorY((GetSectorPosX(x) - origin.x) * displacement + origin.y);
+                if (startY < endY) {
+                    for (y = startY; y <= endY; y++)
+                        ProcessSector(x, y);
+                }
+                else {
+                    for (y = startY; y >= endY; y--)
+                        ProcessSector(x, y);
+                }
+            }
+
+            startY = endY;
+            endY = targetSectorY;
+            if (startY < endY) {
+                for (y = startY; y <= endY; y++)
+                    ProcessSector(targetSectorX, y);
+            }
+            else {
+                for (y = startY; y >= endY; y--)
+                    ProcessSector(targetSectorX, y);
+            }
+        }
+    }
+    return touchDist < 1.f;
 }
 
 void CWorld::IncrementCurrentScanCode() {
