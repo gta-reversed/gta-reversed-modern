@@ -1399,23 +1399,19 @@ void CWorld::ExtinguishAllCarFiresInArea(CVector point, float radius) {
 }
 
 // 0x566A60
-void CWorld::CallOffChaseForArea(float x1, float y1, float x2, float y2) {
-    const float minX = x1 - 10.f;
-    const float maxX = x2 + 10.f;
-    const float minY = y1 - 10.f;
-    const float maxY = y2 + 10.f;
-    const int32 startSectorX = GetSectorX(minX);
-    const int32 startSectorY = GetSectorY(minY);
-    const int32 endSectorX = GetSectorX(maxX);
-    const int32 endSectorY = GetSectorY(maxY);
+void CWorld::CallOffChaseForArea(float minX, float minY, float maxX, float maxY) {
+    const int32 startSectorX = GetSectorX(minX - 10.f);
+    const int32 startSectorY = GetSectorY(minY - 10.f);
+    const int32 endSectorX = GetSectorX(maxX + 10.f);
+    const int32 endSectorY = GetSectorY(maxY + 10.f);
 
     IncrementCurrentScanCode();
 
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             CRepeatSector* sector = GetRepeatSector(sectorX, sectorY);
-            CallOffChaseForAreaSectorListVehicles(sector->m_lists[REPEATSECTOR_VEHICLES], x1, y1, x2, y2, minX, minY, maxX, maxY);
-            CallOffChaseForAreaSectorListPeds(sector->m_lists[REPEATSECTOR_PEDS], x1, y1, x2, y2, minX, minY, maxX, maxY);
+            CallOffChaseForAreaSectorListVehicles(sector->m_lists[REPEATSECTOR_VEHICLES], minX, minY, maxX, maxY, minX, minY, maxX, maxY);
+            CallOffChaseForAreaSectorListPeds(sector->m_lists[REPEATSECTOR_PEDS], minX, minY, maxX, maxY, minX, minY, maxX, maxY);
         }
     }
 }
