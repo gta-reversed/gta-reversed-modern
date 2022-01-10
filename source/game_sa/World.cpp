@@ -2279,7 +2279,7 @@ CEntity* CWorld::FindNearestObjectOfType(int32 modelId, const CVector& point, fl
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             const auto ProcessSector = [&](CPtrList& list) {
                 // Clever trick: re-use `radius` as `outDistance`, so if an entity is hit `radius` is automatically decreased
-                FindNearestObjectOfTypeSectorList(modelId, list, point, radius, b2D, &hitEntity, &radius);
+                FindNearestObjectOfTypeSectorList(modelId, list, point, radius, b2D, hitEntity, radius);
             };
 
             auto sector = GetSector(sectorX, sectorY);
