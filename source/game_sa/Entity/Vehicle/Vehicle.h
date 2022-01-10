@@ -630,7 +630,7 @@ public:
     void FireFixedMachineGuns();
     void DoDriveByShootings();
 
-    bool IsAnyOfPassengersFollowerOfGroup(CPedGroup&);
+    bool IsAnyOfPassengersFollowerOfGroup(CPedGroup& group);
 
 // STATIC FUNCS
     static void Shutdown();

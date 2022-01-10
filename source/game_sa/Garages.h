@@ -126,11 +126,11 @@ public:
     static bool IsPointInAGarageCameraZone(CVector vecPos);
     static bool IsThisCarWithingGarageArea(int16, CEntity* pEntity);
     static void StopCarFromBlowingUp(CAutomobile* pCar);
-    static bool IsPointWithinHideOutGarage(CVector& vecPos);
+    static bool IsPointWithinHideOutGarage(CVector& pos);
     static bool IsPointWithinAnyGarage(CVector& vecPos);
     static int32 CountCarsInHideoutGarage(uint16);
     static void CloseHideOutGaragesBeforeSave();
-    static void StoreCarInNearestImpoundingGarage(CVehicle* pVehicle);
+    static void StoreCarInNearestImpoundingGarage(CVehicle* vehicle);
     static void AllRespraysCloseOrOpen(bool);
 
 public:

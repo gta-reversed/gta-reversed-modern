@@ -234,7 +234,7 @@ CPlayerInfo& FindPlayerInfo(int playerId) {
 //       MultiplyMatrixWithVector @ 0x59C890 does.
 CVector Multiply3x3(const CMatrix& constm, const CVector& v) {
     auto& m = const_cast<CMatrix&>(constm);
-    return CVector{
+    return {
         m.GetRight().x * v.x + m.GetForward().x * v.y + m.GetUp().x * v.z,
         m.GetRight().y * v.x + m.GetForward().y * v.y + m.GetUp().y * v.z,
         m.GetRight().z * v.x + m.GetForward().z * v.y + m.GetUp().z * v.z,
@@ -242,11 +242,13 @@ CVector Multiply3x3(const CMatrix& constm, const CVector& v) {
 }
 
 // vector by matrix mult, resulting in a vector where each component is the dot product of the in vector and a matrix direction
-CVector Multiply3x3(const CVector& v, const CMatrix& m) {
-    // TODO: Make crappy cmatrix accessors const...
-    return CVector(DotProduct(const_cast<CMatrix&>(m).GetRight(), v),
-                   DotProduct(const_cast<CMatrix&>(m).GetForward(), v),
-                   DotProduct(const_cast<CMatrix&>(m).GetUp(), v));
+CVector Multiply3x3(const CVector& v, const CMatrix& constm) {
+    auto& m = const_cast<CMatrix&>(constm);
+    return {
+        DotProduct(m.GetRight(), v),
+        DotProduct(m.GetForward(), v),
+        DotProduct(m.GetUp(), v)
+    };
 }
 
 CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec) {
