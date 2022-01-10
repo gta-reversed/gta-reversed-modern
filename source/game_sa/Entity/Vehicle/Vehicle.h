@@ -520,7 +520,7 @@ public:
     bool IsVehicleNormal();
     void ChangeLawEnforcerState(bool bIsEnforcer);
     bool IsLawEnforcementVehicle();
-    bool ShufflePassengersToMakeSpace();
+    static bool ShufflePassengersToMakeSpace();
     void ExtinguishCarFire();
     void ActivateBomb();
     void ActivateBombWhenEntered();
