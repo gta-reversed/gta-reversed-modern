@@ -55,7 +55,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ClearCarsFromArea", 0x566610, &CWorld::ClearCarsFromArea);
     Install("CWorld", "ProcessVerticalLine_FillGlobeColPoints", 0x567620, &CWorld::ProcessVerticalLine_FillGlobeColPoints);
     Install("CWorld", "TriggerExplosionSectorList", 0x567750, &CWorld::TriggerExplosionSectorList);
-    Install("CWorld", "Process", 0x5684A0, &CWorld::Process);
+    // Install("CWorld", "Process", 0x5684A0, &CWorld::Process); Crashes in IKChainManager_c::Update (usually 0x618705). (It is called from CWorld::Process)
     Install("CWorld", "SetWorldOnFire", 0x56B910, &CWorld::SetWorldOnFire);
     Install("CWorld", "TriggerExplosion", 0x56B790, &CWorld::TriggerExplosion);
     Install("CWorld", "ProcessLineOfSightSector", 0x56B5E0, &CWorld::ProcessLineOfSightSector);
