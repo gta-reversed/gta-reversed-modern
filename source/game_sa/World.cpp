@@ -80,7 +80,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "SetPedsChoking", 0x565800, &CWorld::SetPedsChoking);
     Install("CWorld", "SetPedsOnFire", 0x565610, &CWorld::SetPedsOnFire);
     Install("CWorld", "CallOffChaseForAreaSectorListVehicles", 0x563A80, &CWorld::CallOffChaseForAreaSectorListVehicles);
-    // Install("CWorld", "RemoveEntityInsteadOfProcessingIt", 0x563A10, &CWorld::RemoveEntityInsteadOfProcessingIt);
+    Install("CWorld", "RemoveEntityInsteadOfProcessingIt", 0x563A10, &CWorld::RemoveEntityInsteadOfProcessingIt);
     Install("CWorld", "TestForUnusedModels_InputArray", 0x5639D0, static_cast<void(*)(CPtrList&, int32*)>(&CWorld::TestForUnusedModels));
     Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x563950, static_cast<void(*)(CPtrList&)>(&CWorld::TestForBuildingsOnTopOfEachOther));
     // Install("CWorld", "RemoveStaticObjects", 0x563840, &CWorld::RemoveStaticObjects);
@@ -326,7 +326,16 @@ void CWorld::TestForUnusedModels(CPtrList& ptrList, int32* models) {
 
 // 0x563A10
 void CWorld::RemoveEntityInsteadOfProcessingIt(CEntity* entity) {
-    plugin::Call<0x563A10, CEntity*>(entity);
+    if (entity->IsPed()) {
+        if (FindPlayerPed() == entity) {
+            Remove(entity);
+        } else {
+            CPopulation::RemovePed(entity->AsPed());
+        }
+    } else {
+        Remove(entity);
+        delete entity;
+    }
 }
 
 // 0x563A80
