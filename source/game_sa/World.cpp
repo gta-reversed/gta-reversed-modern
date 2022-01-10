@@ -173,7 +173,6 @@ bool CWorld::ProcessVerticalLineSectorList(CPtrList& ptrList, const CColLine& co
         next = it->GetNext();
 
         const auto entity = static_cast<CEntity*>(it->m_item);
-
         if (entity->m_nScanCode == ms_nCurrentScanCode || !entity->m_bUsesCollision || entity == pIgnoreEntity)
             continue;
 
@@ -279,6 +278,7 @@ void CWorld::FindObjectsInRangeSectorList(CPtrList& ptrList, const CVector& poin
         auto entity = static_cast<CEntity*>(it->m_item);
         if (entity->m_nScanCode == ms_nCurrentScanCode)
             continue;
+
         entity->m_nScanCode = ms_nCurrentScanCode;
 
         if (b2D) {
@@ -311,6 +311,7 @@ void CWorld::FindObjectsOfTypeInRangeSectorList(uint32 modelId, CPtrList& ptrLis
         auto entity = static_cast<CEntity*>(it->m_item);
         if (entity->m_nScanCode == ms_nCurrentScanCode)
             continue;
+
         entity->m_nScanCode = ms_nCurrentScanCode;
 
         if (entity->m_nModelIndex != modelId)
@@ -349,9 +350,9 @@ bool CWorld::ProcessVerticalLineSectorList_FillGlobeColPoints(CPtrList& ptrList,
         dontGoToNextNode = false;
 
         const auto entity = static_cast<CEntity*>(node->m_item);
-
         if (entity->m_nScanCode == ms_nCurrentScanCode || !entity->m_bUsesCollision)
             continue;
+
         entity->m_nScanCode = ms_nCurrentScanCode;
 
         float touchDist{1.f};
@@ -414,9 +415,9 @@ void CWorld::TestForUnusedModels(CPtrList& ptrList, int32* models) {
         next = it->GetNext();
 
         auto entity = static_cast<CEntity*>(it->m_item);
-
         if (entity->m_nScanCode == ms_nCurrentScanCode)
             continue;
+
         entity->m_nScanCode = ms_nCurrentScanCode;
 
         models[entity->m_nModelIndex]++;
@@ -548,9 +549,7 @@ int32 CWorld::FindPlayerSlotWithVehiclePointer(CEntity* vehiclePtr) {
 
 // 0x564050
 // This code is mostly similar to the original
-// 
 void CWorld::ShutDown() {
-
     const auto IterateLodLists = [](auto&& fn) {
         for (auto y = 0; y < MAX_LOD_PTR_LISTS_Y; y++) {
             for (auto x = 0; x < MAX_LOD_PTR_LISTS_X; x++) {
@@ -689,11 +688,11 @@ bool CWorld::ProcessVerticalLineSector(CSector& sector, CRepeatSector& repeatSec
 // 0x564600
 void CWorld::CastShadow(float x1, float y1, float x2, float y2) {
     const size_t fromSecX = std::max(0, GetSectorX(x1)), fromSecY = std::max(0, GetSectorY(y1));
-    const size_t toSexX = std::min(120, GetSectorX(x2)), toSecY = std::min(120, GetSectorY(y2));
+    const size_t toSecX = std::min(120, GetSectorX(x2)), toSecY = std::min(120, GetSectorY(y2));
 
     IncrementCurrentScanCode();
 
-    for (size_t x = fromSecX; x <= toSexX; x++) {
+    for (size_t x = fromSecX; x <= toSecX; x++) {
         for (size_t y = fromSecY; y <= toSecY; y++) {
             CastShadowSectorList(GetSector(x, y)->m_buildings, 0.0f, 0.0f, 0.0f, 0.0f); // todo (Izzotop): Add a comment why these 4 floats are useless
         }
@@ -733,9 +732,9 @@ bool CWorld::GetIsLineOfSightSectorListClear(CPtrList& ptrList, const CColLine& 
         next = it->GetNext();
 
         auto entity = static_cast<CEntity*>(it->m_item);
-
         if (entity->m_nScanCode == ms_nCurrentScanCode || !entity->m_bUsesCollision)
             continue;
+
         entity->m_nScanCode = ms_nCurrentScanCode;
 
         if (entity == pIgnoreEntity)
@@ -904,9 +903,9 @@ void CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrLi
         next = it->GetNext();
 
         auto entity = static_cast<CEntity*>(it->m_item);
-
         if (entity->m_nScanCode == ms_nCurrentScanCode)
             continue;
+
         entity->m_nScanCode = ms_nCurrentScanCode;
 
         CColSphere sphere{};
@@ -973,6 +972,7 @@ void CWorld::FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList,
         const auto entity = static_cast<CEntity*>(node->m_item);
         if (entity->m_nScanCode == GetCurrentScanCode())
             continue;
+
         entity->m_nScanCode = ms_nCurrentScanCode;
 
         const auto GetDistance = [&] {
@@ -1346,7 +1346,6 @@ void CWorld::ClearCarsFromArea(float minX, float minY, float minZ, float maxX, f
                 driver = nullptr;
             }
 
-
             for (auto i = 0; i < veh->m_nMaxPassengers; i++) {
                 if (auto psngr = veh->m_apPassengers[i]) {
                     veh->RemovePassenger(psngr);
@@ -1691,7 +1690,8 @@ bool CWorld::ProcessVerticalLine_FillGlobeColPoints(const CVector& origin, float
     return ProcessVerticalLineSector_FillGlobeColPoints(
         *GetSector(secX, secY),
         *GetRepeatSector(secX % MAX_REPEAT_SECTORS_X, secY % MAX_REPEAT_SECTORS_Y),
-        colLine, outEntity, buildings, vehicles, peds, objects, dummies, doSeeThroughCheck, outCollPoly
+        colLine,
+        outEntity, buildings, vehicles, peds, objects, dummies, doSeeThroughCheck, outCollPoly
     );
 }
 
@@ -1761,7 +1761,6 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
             continue;
 
         const auto entityRelDistToRadiusEnd_Doubled = std::min(1.f, 2.f * (radius - entityToPointDist) / radius);
-
 
         auto impactVelocity = entityToPointDir / std::max(0.01f, entityToPointDist);
         impactVelocity.z = std::max(impactVelocity.z, 0.f);
@@ -1966,16 +1965,12 @@ void CWorld::Process() {
         const auto ProcessMovingEntity = [](CEntity* entity) {
             if (entity->m_bRemoveFromWorld) {
                 if (!entity->IsPed()) {
-                    entity->Remove();
-                    if (entity->IsPhysical())
-                        entity->AsPhysical()->RemoveFromMovingList();
+                    Remove(entity);
                     delete entity;
                 }
 
                 if (FindPlayerPed() == entity) {
-                    entity->Remove();
-                    if (entity->IsPhysical())
-                        entity->AsPhysical()->RemoveFromMovingList();
+                    Remove(entity);
                 }
 
                 CPopulation::RemovePed(entity->AsPed());
