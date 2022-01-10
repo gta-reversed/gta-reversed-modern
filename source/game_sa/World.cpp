@@ -102,7 +102,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x563FD0, &CWorld::FindPlayerSlotWithVehiclePointer);
     Install("CWorld", "RemoveReferencesToDeletedObject", 0x565510, &CWorld::RemoveReferencesToDeletedObject);
     Install("CWorld", "FindNearestObjectOfTypeSectorList", 0x565450, &CWorld::FindNearestObjectOfTypeSectorList);
-    // Install("CWorld", "FindMissionEntitiesIntersectingCubeSectorList", 0x565300, &CWorld::FindMissionEntitiesIntersectingCubeSectorList);
+    Install("CWorld", "FindMissionEntitiesIntersectingCubeSectorList", 0x565300, &CWorld::FindMissionEntitiesIntersectingCubeSectorList);
     Install("CWorld", "FindObjectsIntersectingAngledCollisionBoxSectorList", 0x565200, &CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList);
     Install("CWorld", "FindObjectsIntersectingCubeSectorList", 0x5650E0, &CWorld::FindObjectsIntersectingCubeSectorList);
     Install("CWorld", "FindObjectsKindaCollidingSectorList", 0x565000, &CWorld::FindObjectsKindaCollidingSectorList);
@@ -657,8 +657,43 @@ void CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrLi
 }
 
 // 0x565300
+// Man, sometimes I wonder whoever wrote this code was just drunk
+// Also, seems like namespaces weren't a thing in C++03.. Well, at least to R*.
 void CWorld::FindMissionEntitiesIntersectingCubeSectorList(CPtrList& ptrList, const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehiclesList, bool pedsList, bool objectsList) {
-    plugin::Call<0x565300, CPtrList&, const CVector&, const CVector&, int16*, int16, CEntity**, bool, bool, bool>(ptrList, cornerA, cornerB, outCount, maxCount, outEntities, vehiclesList, pedsList, objectsList);
+    // NOTSA - Easier to do it this way..
+    const CBoundingBox bb{ cornerA, cornerB };
+    for (CPtrNode* node = ptrList.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
+        const auto entity = static_cast<CEntity*>(node->m_item);
+        if (entity->m_nScanCode == GetCurrentScanCode())
+            continue;
+        entity->m_nScanCode = ms_nCurrentScanCode;
+
+        if (vehiclesList) {
+            if (entity->AsVehicle()->GetCreatedBy() != eVehicleCreatedBy::MISSION_VEHICLE)
+                continue;
+        } else if (pedsList) {
+            if (!entity->AsPed()->IsCreatedByMission())
+                continue;
+        } else { // They didn't even bother to use `else if (objectsList)` here xD
+            switch (entity->AsObject()->m_nObjectType) {
+            case eObjectType::OBJECT_MISSION:
+            case eObjectType::OBJECT_MISSION2:
+                break;
+            default:
+                continue;
+            }
+        }
+
+        if (bb.IsPointWithin(entity->GetPosition())) {
+            if (*outCount < maxCount) {
+                outEntities[*outCount++] = entity;
+            } else {
+                break; // NOTSA - But makes sense lol
+            }
+        }
+    }
 }
 
 // 0x565450
@@ -669,6 +704,7 @@ void CWorld::FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList,
         const auto entity = static_cast<CEntity*>(node->m_item);
         if (entity->m_nScanCode == GetCurrentScanCode())
             continue;
+        entity->m_nScanCode = ms_nCurrentScanCode;
 
         const auto GetDistance = [&] {
             if (b2D)
