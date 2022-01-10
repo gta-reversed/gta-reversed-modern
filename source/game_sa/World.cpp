@@ -79,7 +79,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "SetCarsOnFire", 0x5659F0, &CWorld::SetCarsOnFire);
     Install("CWorld", "SetPedsChoking", 0x565800, &CWorld::SetPedsChoking);
     Install("CWorld", "SetPedsOnFire", 0x565610, &CWorld::SetPedsOnFire);
-    // Install("CWorld", "CallOffChaseForAreaSectorListVehicles", 0x563A80, &CWorld::CallOffChaseForAreaSectorListVehicles);
+    Install("CWorld", "CallOffChaseForAreaSectorListVehicles", 0x563A80, &CWorld::CallOffChaseForAreaSectorListVehicles);
     // Install("CWorld", "RemoveEntityInsteadOfProcessingIt", 0x563A10, &CWorld::RemoveEntityInsteadOfProcessingIt);
     Install("CWorld", "TestForUnusedModels_InputArray", 0x5639D0, static_cast<void(*)(CPtrList&, int32*)>(&CWorld::TestForUnusedModels));
     Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x563950, static_cast<void(*)(CPtrList&)>(&CWorld::TestForBuildingsOnTopOfEachOther));
@@ -96,7 +96,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "Add", 0x563220, &CWorld::Add);
     Install("CWorld", "Initialise", 0x5631E0, &CWorld::Initialise);
     Install("CWorld", "ResetLineTestOptions", 0x5631C0, &CWorld::ResetLineTestOptions);
-    // Install("CWorld", "CallOffChaseForAreaSectorListPeds", 0x563D00, &CWorld::CallOffChaseForAreaSectorListPeds);
+    Install("CWorld", "CallOffChaseForAreaSectorListPeds", 0x563D00, &CWorld::CallOffChaseForAreaSectorListPeds);
     // Install("CWorld", "RepositionCertainDynamicObjects", 0x56B9C0, &CWorld::RepositionCertainDynamicObjects);
     Install("CWorld", "CameraToIgnoreThisObject", 0x563F40, &CWorld::CameraToIgnoreThisObject);
     Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x563FD0, &CWorld::FindPlayerSlotWithVehiclePointer);
@@ -335,8 +335,63 @@ void CWorld::CallOffChaseForAreaSectorListVehicles(CPtrList& ptrList, float x1, 
 }
 
 // 0x563D00
-void CWorld::CallOffChaseForAreaSectorListPeds(CPtrList& ptrList, float x1, float y1, float x2, float y2, float arg5, float arg6, float arg7, float arg8) {
-    plugin::Call<0x563D00, CPtrList&, float, float, float, float, float, float, float, float>(ptrList, x1, y1, x2, y2, arg5, arg6, arg7, arg8);
+void CWorld::CallOffChaseForAreaSectorListPeds(CPtrList& ptrList, float x1, float y1, float x2, float y2, float minX, float minY, float maxX, float maxY) {
+    for (CPtrNode* node = ptrList.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
+        const auto veh = static_cast<CVehicle*>(node->m_item);
+        const auto pos = veh->GetPosition();
+        const auto mat = (CMatrix)veh->GetMatrix();
+
+        if (!IsPointWithinBounds2D({ minX, minY }, { maxX, maxY }, { pos }))
+            continue;
+
+        if (!veh->vehicleFlags.bIsLawEnforcer)
+            continue;
+
+        switch (veh->m_autoPilot.m_nCarMission) {
+        case eCarMission::MISSION_RAMPLAYER_FARAWAY:
+        case eCarMission::MISSION_RAMPLAYER_CLOSE:
+        case eCarMission::MISSION_BLOCKPLAYER_FARAWAY:
+        case eCarMission::MISSION_BLOCKPLAYER_CLOSE:
+        case eCarMission::MISSION_3D:
+        case eCarMission::MISSION_3C:
+            break;
+        default:
+            continue;
+        }
+
+        veh->m_autoPilot.m_nTempAction = 1;
+        veh->m_autoPilot.m_nTempActionTime = CTimer::GetTimeInMS() + 2000;
+
+        if (const auto colData = veh->GetColModel()->m_pColData; colData->m_nNumSpheres) {
+            for (auto i = 0; i < colData->m_nNumSpheres; i++) {
+                const auto& sphere    = colData->m_pSpheres[i];
+                const auto  radius    = sphere.m_fRadius;
+                const auto  spherePos = MultiplyMatrixWithVector(mat, sphere.m_vecCenter);
+                if (   (spherePos.x + radius > x1 && spherePos.x - radius < x2)
+                    && (spherePos.y + radius > y1 && spherePos.y - radius < y2)
+                ) {
+                    // R* used a bool variable and then, after the loop they did this
+                    // and didn't break after the sphere has been found.
+
+                    auto& speed = veh->m_vecMoveSpeed;
+
+                    if (pos.x <= (x1 + x2) / 2.f)
+                        speed.x = std::min(speed.x, 0.0f);
+                    else
+                        speed.x = std::max(speed.x, 0.0f);
+
+                    if (pos.y <= (y1 + y2) / 2.f)
+                        speed.y = std::min(speed.y, 0.0f);
+                    else
+                        speed.y = std::max(speed.y, 0.0f);
+
+                    break;
+                }
+            }
+        }
+    }
 }
 
 // 0x563F40

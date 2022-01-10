@@ -111,3 +111,12 @@ inline float DistanceBetweenPointsSquared2D(const CVector2D& pointOne, const CVe
 inline float DotProduct2D(const CVector2D& v1, const CVector2D& v2) {
     return v1.y * v2.y + v1.x * v2.x;
 }
+
+static bool IsPointWithinBounds2D(CVector2D min, CVector2D max, CVector2D point) {
+    return (point.x >= min.x && point.x <= max.x) &&
+           (point.y >= min.y && point.y <= max.y);
+}
+
+static bool IsPointInRectangle2D(CVector2D rectTopLeft, CVector2D rectSize, CVector2D point) {
+    return IsPointWithinBounds2D(rectTopLeft + rectSize, rectTopLeft, point);
+}
