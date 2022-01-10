@@ -546,7 +546,7 @@ void CPhysical::ProcessShift_Reversed()
         CMatrix oldEntityMatrix(*m_matrix);
         ApplySpeed();
         m_matrix->Reorthogonalise();
-        SetNextScanCode();
+        CWorld::IncrementCurrentScanCode();
 
         bool bShifted = false;
         if (m_nType == ENTITY_TYPE_VEHICLE)

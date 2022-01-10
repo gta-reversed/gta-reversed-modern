@@ -111,10 +111,15 @@ void CWorld::InjectHooks() {
     Install("CWorld", "GetIsLineOfSightSectorListClear", 0x564970, &CWorld::GetIsLineOfSightSectorListClear);
     Install("CWorld", "ProcessVerticalLineSector", 0x564500, &CWorld::ProcessVerticalLineSector);
     Install("CWorld", "ProcessVerticalLineSector_FillGlobeColPoints", 0x564420, &CWorld::ProcessVerticalLineSector_FillGlobeColPoints);
-    Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
+    // Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
     Install("CWorld", "ShutDown", 0x564050, &CWorld::ShutDown);
     Install("CWorld", "FindPlayerSlotWithPedPointer", 0x563FA0, &CWorld::FindPlayerSlotWithPedPointer);
     Install("CWorld", "ProcessLineOfSight", 0x56BA00, &CWorld::ProcessLineOfSight);
+
+    Install("CWorld", "GetCurrentScanCode", 0x407250, &GetCurrentScanCode);
+    Install("CWorld", "GetSector", 0x407260, &GetSector);
+    Install("CWorld", "GetRepeatSector", 0x4072A0, &GetRepeatSector);
+    Install("CWorld", "GetLodPtrList", 0x4072C0, &CWorld::GetLodPtrList);
 }
 
 // 0x5631C0
@@ -616,6 +621,8 @@ void CWorld::ShutDown() {
 
 // 0x564360
 void CWorld::ClearForRestart() {
+    return plugin::Call<0x564360>();
+
     if (CCutsceneMgr::ms_cutsceneLoadStatus == 2)
         CCutsceneMgr::DeleteCutsceneData();
 
@@ -2929,6 +2936,7 @@ bool CWorld::ProcessLineOfSight(const CVector& origin, const CVector& target, CC
     return touchDist < 1.f;
 }
 
+// 0x4072E0
 void CWorld::IncrementCurrentScanCode() {
     if (CWorld::ms_nCurrentScanCode >= 65535u)
     {
@@ -2943,30 +2951,28 @@ void CWorld::IncrementCurrentScanCode() {
 
 // 0x407250
 int16 GetCurrentScanCode() {
-    return plugin::CallAndReturn<int16, 0x407250>();
+    return CWorld::ms_nCurrentScanCode;
 }
 
 // 0x407260
 CSector* GetSector(int32 x, int32 y) {
-    return plugin::CallAndReturn<CSector*, 0x407260, int32, int32>(x, y);
+    const auto x1 = clamp<int32>(x, 0, MAX_SECTORS_X - 1);
+    const auto y1 = clamp<int32>(y, 0, MAX_SECTORS_Y - 1);
+    return &CWorld::ms_aSectors[y1][x1];
 }
 
 // 0x4072A0
 CRepeatSector* GetRepeatSector(int32 x, int32 y) {
-    return plugin::CallAndReturn<CRepeatSector*, 0x4072A0, int32, int32>(x, y);
+    return &CWorld::ms_aRepeatSectors[y % MAX_REPEAT_SECTORS_Y][x % MAX_REPEAT_SECTORS_X];
 }
 
 // 0x4072C0
 CPtrListSingleLink& CWorld::GetLodPtrList(int32 x, int32 y) {
-    x = clamp<int32>(x, 0, MAX_LOD_PTR_LISTS_X - 1);
-    y = clamp<int32>(y, 0, MAX_LOD_PTR_LISTS_Y - 1);
+    /* todo: add guard?
+    const auto limX = x % MAX_LOD_PTR_LISTS_X;
+    const auto limY = y % MAX_LOD_PTR_LISTS_Y;
+    */
     return ms_aLodPtrLists[y][x];
-    // return plugin::CallAndReturn<CPtrListSingleLink*, 0x4072C0, int32, int32>(x, y);
-}
-
-// 0x4072E0
-void SetNextScanCode() {
-    plugin::Call<0x4072E0>();
 }
 
 float ScaleLighting(uint8 lighting, float fScale)
