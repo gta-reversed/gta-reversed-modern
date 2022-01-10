@@ -111,7 +111,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "GetIsLineOfSightSectorListClear", 0x564970, &CWorld::GetIsLineOfSightSectorListClear);
     Install("CWorld", "ProcessVerticalLineSector", 0x564500, &CWorld::ProcessVerticalLineSector);
     Install("CWorld", "ProcessVerticalLineSector_FillGlobeColPoints", 0x564420, &CWorld::ProcessVerticalLineSector_FillGlobeColPoints);
-    Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
+    // Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
     Install("CWorld", "ShutDown", 0x564050, &CWorld::ShutDown);
     Install("CWorld", "FindPlayerSlotWithPedPointer", 0x563FA0, &CWorld::FindPlayerSlotWithPedPointer);
     Install("CWorld", "ProcessLineOfSight", 0x56BA00, &CWorld::ProcessLineOfSight);
@@ -616,6 +616,8 @@ void CWorld::ShutDown() {
 
 // 0x564360
 void CWorld::ClearForRestart() {
+    return plugin::Call<0x564360>();
+
     if (CCutsceneMgr::ms_cutsceneLoadStatus == 2)
         CCutsceneMgr::DeleteCutsceneData();
 
