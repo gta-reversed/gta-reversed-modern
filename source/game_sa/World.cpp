@@ -84,7 +84,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ProcessVerticalLineSectorList_FillGlobeColPoints", 0x5636A0, &CWorld::ProcessVerticalLineSectorList_FillGlobeColPoints);
     Install("CWorld", "FindObjectsOfTypeInRangeSectorList", 0x5635C0, &CWorld::FindObjectsOfTypeInRangeSectorList);
     Install("CWorld", "FindObjectsInRangeSectorList", 0x563500, &CWorld::FindObjectsInRangeSectorList);
-    // Install("CWorld", "ClearScanCodes", 0x563470, &CWorld::ClearScanCodes);
+    Install("CWorld", "ClearScanCodes", 0x563470, &CWorld::ClearScanCodes);
     Install("CWorld", "ProcessPedsAfterPreRender", 0x563430, &CWorld::ProcessPedsAfterPreRender);
     Install("CWorld", "ProcessForAnimViewer", 0x5633D0, &CWorld::ProcessForAnimViewer);
     Install("CWorld", "CastShadowSectorList", 0x563390, &CWorld::CastShadowSectorList);
@@ -234,7 +234,27 @@ void CWorld::ProcessPedsAfterPreRender() {
 
 // 0x563470
 void CWorld::ClearScanCodes() {
-    plugin::Call<0x563470>();
+    const auto ProcessList = [](const CPtrList& list) {
+        for (CPtrNode* node = list.GetNode(); node; node = node->GetNext()) {
+            static_cast<CEntity*>(node->m_item)->m_nScanCode = 0;
+        }
+    };
+
+    for (auto y = 0; y < MAX_SECTORS_Y; y++) {
+        for (auto x = 0; x < MAX_SECTORS_X; x++) {
+            const auto& sector = *GetSector(x, y);
+            ProcessList(sector.m_buildings);
+            ProcessList(sector.m_dummies);
+        }
+    }
+
+    for (auto y = 0; y < MAX_REPEAT_SECTORS_Y; y++) {
+        for (auto x = 0; x < MAX_REPEAT_SECTORS_X; x++) {
+            for (const auto& list : GetRepeatSector(x, y)->m_lists) {
+                ProcessList(list);
+            }
+        }
+    }
 }
 
 // 0x563500
