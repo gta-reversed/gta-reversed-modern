@@ -574,7 +574,7 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
 
             if (!entity->m_pRwObject
                 || !entity->m_bIsVisible && (!CMirrors::TypeOfMirror || entity->m_nModelIndex)
-                || !entity->IsCurrentAreaOrBarberShopInterior() && entity->m_nType == ENTITY_TYPE_VEHICLE)
+                || !entity->IsInCurrentAreaOrBarberShopInterior() && entity->m_nType == ENTITY_TYPE_VEHICLE)
             {
                 return RENDERER_INVISIBLE;
             }

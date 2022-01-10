@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "CStreamingDebugModule.h"
+#include "toolsmenu\DebugModules\CStreamingDebugModule.h"
 
 int32& CVehicleRecording::NumPlayBackFiles = *(int32*)0x97F630;
 CPath(&CVehicleRecording::StreamingArray)[TOTAL_RRR_MODEL_IDS] = *(CPath(*)[TOTAL_RRR_MODEL_IDS])0x97D880;
