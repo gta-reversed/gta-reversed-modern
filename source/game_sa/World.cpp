@@ -103,7 +103,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "FindObjectsIntersectingAngledCollisionBoxSectorList", 0x565200, &CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList);
     Install("CWorld", "FindObjectsIntersectingCubeSectorList", 0x5650E0, &CWorld::FindObjectsIntersectingCubeSectorList);
     Install("CWorld", "FindObjectsKindaCollidingSectorList", 0x565000, &CWorld::FindObjectsKindaCollidingSectorList);
-    // Install("CWorld", "FindLodOfTypeInRange", 0x564ED0, &CWorld::FindLodOfTypeInRange);
+    Install("CWorld", "FindLodOfTypeInRange", 0x564ED0, &CWorld::FindLodOfTypeInRange);
     // Install("CWorld", "FindObjectsOfTypeInRange", 0x564C70, &CWorld::FindObjectsOfTypeInRange);
     // Install("CWorld", "FindObjectsInRange", 0x564A20, &CWorld::FindObjectsInRange);
     // Install("CWorld", "ProcessAttachedEntities", 0x5647F0, &CWorld::ProcessAttachedEntities);
@@ -655,7 +655,19 @@ void CWorld::FindObjectsOfTypeInRange(uint32 modelId, const CVector& point, floa
 
 // 0x564ED0
 void CWorld::FindLodOfTypeInRange(uint32 modelId, const CVector& point, float radius, bool b2D, int16* outCount, int16 maxCount, CEntity** outEntities) {
-    plugin::Call<0x564ED0, uint32, const CVector&, float, bool, int16*, int16, CEntity**>(modelId, point, radius, b2D, outCount, maxCount, outEntities);
+    const int32 startSectorX = GetLodSectorX(point.x - radius);
+    const int32 startSectorY = GetLodSectorY(point.y - radius);
+    const int32 endSectorX = GetLodSectorX(point.x + radius);
+    const int32 endSectorY = GetLodSectorY(point.y + radius);
+
+    IncrementCurrentScanCode();
+
+    *outCount = 0;
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            FindObjectsOfTypeInRangeSectorList(modelId, GetLodPtrList(sectorX, sectorY), point, radius, b2D, outCount, maxCount, outEntities);
+        }
+    }
 }
 
 // 0x565000
