@@ -111,7 +111,7 @@ void CWorld::InjectHooks() {
     Install("CWorld", "ProcessVerticalLineSector", 0x564500, &CWorld::ProcessVerticalLineSector);
     Install("CWorld", "ProcessVerticalLineSector_FillGlobeColPoints", 0x564420, &CWorld::ProcessVerticalLineSector_FillGlobeColPoints);
     Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
-    // Install("CWorld", "ShutDown", 0x564050, &CWorld::ShutDown);
+    Install("CWorld", "ShutDown", 0x564050, &CWorld::ShutDown);
     // Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x564000, &CWorld::FindPlayerSlotWithVehiclePointer);
     Install("CWorld", "FindPlayerSlotWithPedPointer", 0x563FA0, &CWorld::FindPlayerSlotWithPedPointer);
     // Install("CWorld", "ProcessLineOfSight", 0x56BA00, &CWorld::ProcessLineOfSight);
@@ -360,6 +360,8 @@ bool CWorld::ProcessVerticalLineSectorList_FillGlobeColPoints(CPtrList& ptrList,
 
 // 0x563840
 void CWorld::RemoveStaticObjects() {
+    // TODO Add Flush() to the lists
+
     const auto ProcessList = [](const CPtrList& list) {
         for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
             next = node->GetNext();
@@ -525,8 +527,76 @@ int32 CWorld::FindPlayerSlotWithVehiclePointer(CEntity* vehiclePtr) {
 }
 
 // 0x564050
+// This code is mostly similar to the original
+// 
 void CWorld::ShutDown() {
-    plugin::Call<0x564050>();
+
+    const auto IterateLodLists = [](auto&& fn) {
+        for (auto y = 0; y < MAX_LOD_PTR_LISTS_Y; y++) {
+            for (auto x = 0; x < MAX_LOD_PTR_LISTS_X; x++) {
+                fn(ms_aLodPtrLists[y][x], x, y, "Lod");
+            }
+        }
+    };
+
+    const auto IterateSectorsLists = [](auto&& fn) {
+        for (auto y = 0; y < MAX_SECTORS_Y; y++) {
+            for (auto x = 0; x < MAX_SECTORS_X; x++) {
+                auto& sector = *GetSector(x, y);
+                fn(sector.m_buildings, x, y, "Buildings");
+                fn(sector.m_dummies, x, y, "Dummies");
+            }
+        }
+    };
+
+    const auto IterateRepeatSectorsLists = [](auto&& fn) {
+        for (auto y = 0; y < MAX_REPEAT_SECTORS_Y; y++) {
+            for (auto x = 0; x < MAX_REPEAT_SECTORS_X; x++) {
+                auto& sector = *GetRepeatSector(x, y);
+                fn(sector.m_lists[REPEATSECTOR_VEHICLES], x, y, "Vehicles");
+                fn(sector.m_lists[REPEATSECTOR_PEDS], x, y, "Peds");
+                fn(sector.m_lists[REPEATSECTOR_OBJECTS], x, y, "Objects");
+            }
+        }
+    };
+
+    // Delete entities
+    {
+        const auto DeleteEntitiesInList = [](const CPtrList& list, int32 x, int32 y, const char* listName) {
+            for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+                next = node->GetNext();
+
+                const auto entity = static_cast<CEntity*>(node->m_item);
+                Remove(entity);
+                delete entity;
+            }
+        };
+        IterateLodLists(DeleteEntitiesInList);
+        IterateRepeatSectorsLists(DeleteEntitiesInList);
+        IterateSectorsLists(DeleteEntitiesInList);
+    }
+
+    // Make sure regular and repeat sectors are empty (And report it if not)
+    {
+        const auto MakeSureListIsEmpty = [](CPtrListDoubleLink& list, int32 x, int32 y, const char* listName) {
+            if (!list.IsEmpty()) {
+                sprintf(gString, "%s overlap list %d,%d not empty\n", listName, x, y);
+                list.Flush();
+            #ifdef _DEBUG
+                printf(gString); // Lets also print this string
+            #endif
+            }
+        };
+        IterateRepeatSectorsLists(MakeSureListIsEmpty);
+        IterateSectorsLists(MakeSureListIsEmpty);
+    }
+
+    ms_listMovingEntityPtrs.Flush();
+    ms_listObjectsWithControlCode.Flush();
+
+    for (auto& v : Players) {
+        v.m_PlayerData.DeAllocateData();
+    }
 }
 
 // 0x564360
