@@ -607,29 +607,22 @@ void CWorld::ClearForRestart() {
     CProjectileInfo::RemoveAllProjectiles();
     CObject::DeleteAllTempObjects();
     CObject::DeleteAllMissionObjects();
-    for (auto& pSector : CWorld::ms_aRepeatSectors) {
-        auto pedNode = pSector.m_lists[eRepeatSectorList::REPEATSECTOR_PEDS].GetNode();
-        while (pedNode) {
-            auto ped = reinterpret_cast<CPed*>(pedNode->m_item);
-            pedNode = pedNode->m_next;
 
-            ped->Remove();
-            if (ped->IsPhysical())
-                ped->RemoveFromMovingList();
+    const auto DeleteEntitiesInList = [](const CPtrList& list) {
+        for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+            next = node->GetNext();
 
-            delete ped;
+            const auto entity = static_cast<CEntity*>(node->m_item);
+            Remove(entity);
+            delete entity;
         }
+    };
 
-        auto vehicleNode = pSector.m_lists[eRepeatSectorList::REPEATSECTOR_VEHICLES].GetNode();
-        while (vehicleNode) {
-            auto vehicle = reinterpret_cast<CVehicle*>(vehicleNode->m_item);
-            vehicleNode = vehicleNode->m_next;
-
-            vehicle->Remove();
-            if (vehicle->IsPhysical())
-                vehicle->RemoveFromMovingList();
-
-            delete vehicle;
+    for (auto y = 0; y < MAX_SECTORS_Y; y++) {
+        for (auto x = 0; x < MAX_SECTORS_X; x++) {
+            auto& sector = *GetSector(x, y);
+            DeleteEntitiesInList(sector.m_buildings);
+            DeleteEntitiesInList(sector.m_dummies);
         }
     }
 
