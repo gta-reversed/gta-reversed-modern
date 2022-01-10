@@ -2931,6 +2931,7 @@ bool CWorld::ProcessLineOfSight(const CVector& origin, const CVector& target, CC
     return touchDist < 1.f;
 }
 
+// 0x4072E0
 void CWorld::IncrementCurrentScanCode() {
     if (CWorld::ms_nCurrentScanCode >= 65535u)
     {
@@ -2964,11 +2965,6 @@ CPtrListSingleLink& CWorld::GetLodPtrList(int32 x, int32 y) {
     y = clamp<int32>(y, 0, MAX_LOD_PTR_LISTS_Y - 1);
     return ms_aLodPtrLists[y][x];
     // return plugin::CallAndReturn<CPtrListSingleLink*, 0x4072C0, int32, int32>(x, y);
-}
-
-// 0x4072E0
-void SetNextScanCode() {
-    plugin::Call<0x4072E0>();
 }
 
 float ScaleLighting(uint8 lighting, float fScale)

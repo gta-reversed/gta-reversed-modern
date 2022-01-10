@@ -202,6 +202,5 @@ extern int16 &TAG_SPRAYING_INCREMENT_VAL; // default 8
 int16 GetCurrentScanCode();
 CSector* GetSector(int32 x, int32 y);
 CRepeatSector* GetRepeatSector(int32 x, int32 y);
-void SetNextScanCode();
 
 float ScaleLighting(uint8 lighting, float fScale);
