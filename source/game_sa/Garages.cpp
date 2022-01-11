@@ -47,9 +47,9 @@ void CGarages::PrintMessages()
 }
 
 // 0x447B80
-void CGarages::TriggerMessage(char* cTagMsg, int16 wMsgMin, uint16 ucTime, int16 wMsgMax)
+void CGarages::TriggerMessage(Const char* cTagMsg, int16 wMsgMin, uint16 ucTime, int16 wMsgMax)
 {
-    plugin::Call<0x447B80, char*, int16, uint16, int16>(cTagMsg, wMsgMin, ucTime, wMsgMax);
+    plugin::Call<0x447B80, const char*, int16, uint16, int16>(cTagMsg, wMsgMin, ucTime, wMsgMax);
 }
 
 // 0x448AF0

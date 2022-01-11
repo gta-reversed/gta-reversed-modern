@@ -145,7 +145,8 @@ enum AssocGroupId : uint32 {
 };
 
 // original name. prev name eAnimID
-enum AnimationId : uint32 {
+enum AnimationId : int32 {
+    ANIM_ID_UNDEFINED = -1,
     ANIM_ID_WALK = 0,
     ANIM_ID_RUN = 1,
     ANIM_ID_SPRINT = 2,

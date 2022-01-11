@@ -5,7 +5,10 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+
 #include "Bike.h"
+
+#include "Buoyancy.h"
 
 void CBike::InjectHooks()
 {

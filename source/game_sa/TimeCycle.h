@@ -134,4 +134,12 @@ public:
     static CRGBA GetCurrentSkyBottomColor() {
         return m_CurrentColours.GetSkyBottom();
     }
+
+    static float SumOfCurrentRGB1() {
+        return m_fCurrentRGB1Blue + m_fCurrentRGB1Green + m_fCurrentRGB1Red;
+    }
+
+    static float SumOfCurrentRGB2() {
+        return m_fCurrentRGB2Blue + m_fCurrentRGB2Green + m_fCurrentRGB2Red;
+    }
 };

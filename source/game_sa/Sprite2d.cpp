@@ -23,8 +23,8 @@ void CSprite2d::InjectHooks() {
     Install("CSprite2d", "~CSprite2d", 0x7281E0, &CSprite2d::Destructor);
 
     Install("CSprite2d", "Delete", 0x727240, &CSprite2d::Delete);
-    Install("CSprite2d", "SetTexture", 0x727270, static_cast<void(CSprite2d::*)(char*)>(&CSprite2d::SetTexture));
-    Install("CSprite2d", "SetTexture_mask", 0x7272B0, static_cast<void(CSprite2d::*)(char*, char*)>(&CSprite2d::SetTexture));
+    Install("CSprite2d", "SetTexture", 0x727270, static_cast<void(CSprite2d::*)(const char*)>(&CSprite2d::SetTexture));
+    Install("CSprite2d", "SetTexture_mask", 0x7272B0, static_cast<void(CSprite2d::*)(const char*, const char*)>(&CSprite2d::SetTexture));
     Install("CSprite2d", "SetAddressingUV", 0x7272E0, &CSprite2d::SetAddressingUV);
     Install("CSprite2d", "SetAddressing", 0x727320, &CSprite2d::SetAddressing);
     Install("CSprite2d", "SetRenderState", 0x727B30, &CSprite2d::SetRenderState);
@@ -87,7 +87,7 @@ void CSprite2d::Delete()
 
 // set texture by name from current txd
 // 0x727270
-void CSprite2d::SetTexture(char* name)
+void CSprite2d::SetTexture(Const char* name)
 {
     Delete();
     if (name)
@@ -96,7 +96,7 @@ void CSprite2d::SetTexture(char* name)
 
 // set texture by name from current txd (+alpha mask name)
 // 0x7272B0
-void CSprite2d::SetTexture(char* name, char* maskName)
+void CSprite2d::SetTexture(Const char* name, Const char* maskName)
 {
     if (name && maskName)
         m_pTexture = RwTextureRead(name, maskName);
@@ -487,7 +487,7 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     if (progressAdd) {
         addColor.a = color.a;
         DrawRect({
-            std::max<float>(x - 1.0f, currX - (x - 1.0f)),
+            std::max<float>(x - 1.0f, currX - progressAdd),
             y,
             currX,
             y + height

@@ -7,6 +7,7 @@
 
 #include "StdInc.h"
 
+#include "LoadingScreen.h"
 
 int32& CLoadingScreen::m_currDisplayedSplash = *(int32*)0x8D093C;
 int32& CLoadingScreen::m_numChunksLoaded = *(int32*)0x8D0940;
@@ -64,8 +65,13 @@ void CLoadingScreen::SetLoadingBarMsg(char const* msg1, char const* msg2) {
 }
 
 // 0x590280
-double CLoadingScreen::GetClockTime(bool bIgnorePauseTime) {
-    return plugin::CallAndReturn<double, 0x590280, bool>(bIgnorePauseTime);
+float CLoadingScreen::GetClockTime(bool bIgnorePauseTime) {
+    return plugin::CallAndReturn<float, 0x590280, bool>(bIgnorePauseTime);
+}
+
+// 0x590310
+void CLoadingScreen::Pause() {
+    // NOP
 }
 
 // 0x590320

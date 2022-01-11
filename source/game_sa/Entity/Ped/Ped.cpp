@@ -9,6 +9,7 @@
 #include "Ped.h"
 
 #include "PedType.h"
+#include "Buoyancy.h"
 
 void CPed::InjectHooks() {
     // Constructors

@@ -36,6 +36,7 @@ public:
 
     void FromRwRGBA(RwRGBA const& rwcolor);
     void FromARGB(uint32 intValue);
+    CRGBA FromInt32(int32 red, int32 green, int32 blue, int32 alpha);
 
     void  Invert();
     CRGBA Inverted() const;

@@ -3,6 +3,7 @@
 #include "EventEditableResponse.h"
 
 #include "PedType.h"
+#include "IKChainManager_c.h"
 
 void CEventEditableResponse::InjectHooks() {
     ReversibleHooks::Install("CEventEditableResponse", "Constructor", 0x4AC450, &CEventEditableResponse::Constructor);
@@ -70,12 +71,9 @@ CEvent* CEventEditableResponse::Clone() {
 #endif
 }
 
-bool CEventEditableResponse::HasEditableResponse() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((bool(__thiscall*)(CEvent*))0x420EF0)(this);
-#else
+// 0x420EF0
+bool CEventEditableResponse::HasEditableResponse() const {
     return CEventEditableResponse::HasEditableResponse_Reversed();
-#endif
 }
 
 CEvent* CEventEditableResponse::Clone_Reversed() {
@@ -123,15 +121,14 @@ void CEventEditableResponse::InformVehicleOccupants(CPed* ped) {
 #endif
 }
 
+// 0x4B2B00
 void CEventEditableResponse::InformRespectedFriends(CPed* ped) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4B2B00, CEventEditableResponse*, CPed*>(this, ped);
-#else
     if (!m_bAddToEventGroup)
         return;
     uint32 numPedsToScan = ped->m_pIntelligence->m_nDmNumPedsToScan;
     if (!numPedsToScan)
         return;
+
     CEntity** pEntities = ped->m_pIntelligence->m_entityScanner.m_apEntities;
     for (size_t entityIndex = 0; entityIndex < numPedsToScan; entityIndex++) {
         CEntity* pEntity = pEntities[entityIndex];
@@ -165,7 +162,6 @@ void CEventEditableResponse::InformRespectedFriends(CPed* ped) {
                 delete pClonedEvent;
         }
     }
-#endif
 }
 
 void CEventEditableResponse::InformGroup(CPed* ped) {
@@ -191,10 +187,10 @@ void CEventEditableResponse::TriggerLookAt(CPed* ped) {
     if (pSourceEntity) {
         if (pSourceEntity->m_nType == ENTITY_TYPE_PED) {
             CPed* pTargetPed = static_cast<CPed*>(pSourceEntity);
-            g_ikChainMan->LookAt("CEventEditableResponse", ped, pTargetPed, 2000, BONE_HEAD, nullptr, true, 0.25f, 500, 3, false);
+            g_ikChainMan.LookAt("CEventEditableResponse", ped, pTargetPed, 2000, BONE_HEAD, nullptr, true, 0.25f, 500, 3, false);
             return;
         }
-        g_ikChainMan->LookAt("CEventEditableResponse", ped, pSourceEntity, 2000, BONE_UNKNOWN, nullptr, true, 0.25f, 500, 3, false);
+        g_ikChainMan.LookAt("CEventEditableResponse", ped, pSourceEntity, 2000, BONE_UNKNOWN, nullptr, true, 0.25f, 500, 3, false);
     }
 #endif
 }

@@ -41,7 +41,8 @@ public:
     static void LoadSplashes(bool bStarting, bool bNvidia);
     static void DisplayMessage(char const* message);
     static void SetLoadingBarMsg(char const* msg1, char const* msg2);
-    static double GetClockTime(bool bIgnorePauseTime);
+    static float GetClockTime(bool bIgnorePauseTime);
+    static void Pause();
     static void Continue();
     static void RenderLoadingBar();
     static void DisplayNextSplash();

@@ -151,3 +151,8 @@ bool CMenuManager::CheckMissionPackValidMenu()
 {
     return plugin::CallMethodAndReturn<bool, 0x57D720, CMenuManager*>(this);
 }
+
+// 0x574630
+void CMenuManager::UnloadTextures() {
+    plugin::CallMethod<0x574630, CMenuManager*>(this);
+}

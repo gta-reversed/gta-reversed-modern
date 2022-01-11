@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "EventAttractor.h"
+
+#include "IKChainManager_c.h"
+
 void CEventAttractor::InjectHooks()
 {
     ReversibleHooks::Install("CEventAttractor", "Constructor", 0x4AF350, &CEventAttractor::Constructor);
@@ -28,32 +32,23 @@ CEventAttractor::~CEventAttractor()
         m_entity->CleanUpOldReference(&m_entity);
 }
 
+// 0x4AF350
 CEventAttractor* CEventAttractor::Constructor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventAttractor*, 0x4AF350, CEvent*, C2dEffect*, CEntity*, bool>(this, effect, entity, bAvoidLookingAtAttractor);
-#else
     this->CEventAttractor::CEventAttractor(effect, entity, bAvoidLookingAtAttractor);
     return this;
-#endif
 }
 
+// 0x4AF4B0
 bool CEventAttractor::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AF4B0, CEvent*, CPed*>(this, ped);
-#else
     return CEventAttractor::AffectsPed_Reversed(ped);
-#endif
 }
 
+// 0x4B7440
 CEventEditableResponse* CEventAttractor::CloneEditable()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventEditableResponse*, 0x4B7440, CEvent*>(this);
-#else
     return CEventAttractor::CloneEditable_Reversed();
-#endif
 }
 
 bool CEventAttractor::AffectsPed_Reversed(CPed* ped)
@@ -83,10 +78,10 @@ bool CEventAttractor::AffectsPed_Reversed(CPed* ped)
                     return false;
                 if (CGeneral::GetRandomNumberInRange(0, 100) >= pedAttractor.field_36)
                     return true;
-                if (!g_ikChainMan->IsLooking(ped)) {
+                if (!g_ikChainMan.IsLooking(ped)) {
                     uint32 time = CGeneral::GetRandomNumberInRange(2000, 4000);
                     CVector point = m_entity->GetMatrix() * m_2dEffect->m_vecPosn;
-                    g_ikChainMan->LookAt("CEventAttractor", ped, 0, time, BONE_UNKNOWN, &point, false, 0.25f, 500, 3, false);
+                    g_ikChainMan.LookAt("CEventAttractor", ped, 0, time, BONE_UNKNOWN, &point, false, 0.25f, 500, 3, false);
                 }
             }     
         }
@@ -99,18 +94,15 @@ CEventEditableResponse* CEventAttractor::CloneEditable_Reversed()
     return new CEventAttractor(m_2dEffect, m_entity, m_bAvoidLookingAtAttractor);
 }
 
+// 0x4AF460
 bool CEventAttractor::IsEffectActive(CEntity* entity, C2dEffect const* effect)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<bool, 0x4AF460, CEntity*, C2dEffect const*>(entity, effect);
-#else
     auto modelInfo = CModelInfo::GetModelInfo(entity->m_nModelIndex);
     for (int32 i = 0; i < modelInfo->m_n2dfxCount; i++) {
         if (effect->m_nType == EFFECT_ATTRACTOR && effect == modelInfo->Get2dEffect(i))
             return true;
     }
     return false;
-#endif
 }
 
 CEventScriptedAttractor::CEventScriptedAttractor(C2dEffect* the2dEffect, CEntity* entity, bool bAvoidLookingAtAttractor) :

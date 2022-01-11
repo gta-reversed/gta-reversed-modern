@@ -1,3 +1,5 @@
+#pragma once
+
 #include "EventEditableResponse.h"
 
 class C2dEffect;

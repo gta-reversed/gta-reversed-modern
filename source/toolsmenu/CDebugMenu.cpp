@@ -16,6 +16,9 @@
 #include "toolsmenu\DebugModules\Vehicle\VehicleDebugModule.h"
 #include "toolsmenu\DebugModules\Ped\PedDebugModule.h"
 #include "toolsmenu\DebugModules\Script\MissionDebugModule.h"
+#include "toolsmenu\DebugModules\Audio\CutsceneTrackManagerDebugModule.h"
+#include "toolsmenu\DebugModules\Audio\AmbienceTrackManagerDebugModule.h"
+#include "toolsmenu\DebugModules\CStreamingDebugModule.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -211,6 +214,7 @@ void CDebugMenu::PostFxTool() {
     ImGui::Checkbox("SpeedFX Test Mode",      &CPostEffects::m_bSpeedFXTestMode);
     ImGui::Checkbox("Fog",                    &CPostEffects::m_bFog);
     ImGui::Checkbox("Water Depth Darkness",   &CPostEffects::m_bWaterDepthDarkness);
+    ImGui::Checkbox("Color Correction",       &CPostEffects::m_bColorEnable);
 }
 
 void CDebugMenu::ProcessRenderTool() {
@@ -331,6 +335,21 @@ void CDebugMenu::ProcessExtraDebugFeatures() {
             ImGui::EndTabItem();
         }
 
+        if (ImGui::BeginTabItem("Audio")) {
+            ImGui::Text("Cutscene Track Manager");
+            CutsceneTrackManagerDebugModule::ProcessImgui();
+
+            ImGui::NewLine();
+            ImGui::Text("Ambience Track Manager");
+            AmbienceTrackManagerDebugModule::ProcessImgui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Streaming")) {
+            CStreamingDebugModule::ProcessImGUI();
+            ImGui::EndTabItem();
+        }
+
         ImGui::EndTabBar();
     }
 }
@@ -382,6 +401,9 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 #ifdef EXTRA_DEBUG_FEATURES
                 ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
 #endif
+                if (ImGui::Button("Streamer: ReInit")) {
+                    CStreaming::ReInit();
+                }
                 ImGui::EndTabItem();
             }
 

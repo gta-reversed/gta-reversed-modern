@@ -128,6 +128,9 @@ public:
 
     // CFont initialisation
     static void Initialise();
+
+    static void LoadFontValues();
+
     // CFont closing
     static void Shutdown();
     // this adds a single character into rendering buffer

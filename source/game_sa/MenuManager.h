@@ -379,6 +379,7 @@ public:
     static double StretchX(float x);
     static double StretchY(float y);
     void MessageScreen(const char* pKey, bool bRenderBig, bool bWithinFrame);
+    void UnloadTextures();
 };
 
 VALIDATE_SIZE(CMenuManager, 0x1B78);

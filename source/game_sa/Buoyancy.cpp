@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Buoyancy.h"
+
 cBuoyancy& mod_Buoyancy = *(cBuoyancy*)0xC1C890;
 float& cBuoyancy::fPointVolMultiplier = *(float*)0x8D32C8;
 CBuoyancyCalcStruct& cBuoyancy::calcStruct = *(CBuoyancyCalcStruct*)0xC1C858;
@@ -35,7 +37,7 @@ bool cBuoyancy::ProcessBuoyancy(CPhysical* pEntity, float fBuoyancy, CVector* ve
     {
         pEntity->GetColModel(); // for some reason, this is here?
 
-        m_bInWater = 1;
+        m_bInWater = true;
         m_fEntityWaterImmersion = (m_fWaterLevel - entityPosition.z + 1.0F) / 1.9F;
         if (m_fEntityWaterImmersion > 1.0F)
         {
@@ -44,7 +46,7 @@ bool cBuoyancy::ProcessBuoyancy(CPhysical* pEntity, float fBuoyancy, CVector* ve
         else if (m_fEntityWaterImmersion < 0.0F) 
         {
             m_fEntityWaterImmersion = 0.0F;
-            m_bInWater = 0;
+            m_bInWater = false;
         }
 
         m_vecTurnPoint = CVector(0.0F, 0.0F, 0.0F);
@@ -247,7 +249,7 @@ void cBuoyancy::PreCalcSetup(CPhysical* pEntity, float fBuoyancy)
     }
 
     // Calculate center offset and "normalized" version of it
-    // (it's not normalised vector, just the offset scaled by multiplicative inverse of it's longest component
+    // (it's not normalized vector, just the offset scaled by multiplicative inverse of it's longest component
     //  so the longest component is equal to 1.0F)
     m_vecCenterOffset = (m_vecBoundingMax - m_vecBoundingMin) * 0.5F;
     float fScale;
@@ -328,11 +330,11 @@ void cBuoyancy::AddSplashParticles(CPhysical* pEntity, CVector vecFrom, CVector 
                 vecPedParticlePos.z += 0.5F;
 
             g_fx.m_pPrtWake->AddParticle(&vecPedParticlePos, &vecPedVelocity, 0.0F, &curParticle, fPedAngle, 1.2F, 0.6F, 0);
-            pPed->m_pedAudio.AddAudioEvent(eAudioEvents::AE_PED_SWIM_WAKE, 0.0F, 1.0F, 0, 0, 0, 0);
+            pPed->m_pedAudio.AddAudioEvent(eAudioEvents::AE_PED_SWIM_WAKE, 0.0F, 1.0F, nullptr, 0, 0, 0);
         }
     }
 
-    AudioEngine.ReportWaterSplash(pEntity, -100.0F, 0);
+    AudioEngine.ReportWaterSplash(pEntity, -100.0F, false);
 }
 
 void cBuoyancy::SimpleCalcBuoyancy(CPhysical* pEntity)

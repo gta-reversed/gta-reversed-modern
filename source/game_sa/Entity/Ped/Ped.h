@@ -328,7 +328,7 @@ public:
     float               m_fHealth;
     float               m_fMaxHealth;
     float               m_fArmour;
-    int32               field_54C;
+    uint32              m_nTimeTillWeNeedThisPed;
     CVector2D           m_vecAnimMovingShift;
     float               m_fCurrentRotation;
     float               m_fAimingRotation;
@@ -542,6 +542,9 @@ public:
     void DeadPedMakesTyresBloody();
     void SetModelIndex(uint32 modelIndex);
     bool IsInVehicleThatHasADriver();
+    void SetArmour(float v) { m_fArmour = v; }
+    void SetWeaponShootingRange(uint8 r) { m_nWeaponShootingRate = r; }
+    void SetWeaponAccuracy(uint8 acc) { m_nWeaponAccuracy = acc; }
 
     CVehicle* GetVehicleIfInOne() { return bInVehicle ? m_pVehicle : nullptr; }
     inline uint8 GetCreatedBy() { return m_nCreatedBy; }

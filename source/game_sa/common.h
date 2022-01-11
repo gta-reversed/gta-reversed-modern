@@ -89,9 +89,9 @@ CEntity * FindPlayerEntity(int32 playerId = -1);
 // returns player train
 CTrain* FindPlayerTrain(int32 playerId = -1);
 // gets player coords
-CVector const& FindPlayerCentreOfWorld(int32 playerId = -1);
+const CVector& FindPlayerCentreOfWorld(int32 playerId = -1);
 // gets player coords with skipping sniper shift
-CVector const& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId = -1);
+const CVector& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId = -1);
 // returns player coords with skipping interior shift
 CVector FindPlayerCentreOfWorld_NoInteriorShift(int32 playerId = -1);
 // returns player angle in radians
@@ -112,6 +112,16 @@ CVector Multiply3x3(CVector& v, CMatrix& m);
 void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos);
 void TransformVectors(RwV3d* vecsOut, int32 numVectors, CMatrix const& matrix, RwV3d const* vecsin);
 void TransformVectors(RwV3d* vecsOut, int32 numVectors, CSimpleTransform const& transform, RwV3d const* vecsin);
+
+// Check point is within 2D rectangle
+static bool IsPointInRect2D(CVector2D point, CVector2D min, CVector2D max) {
+    return point.x >= min.x && point.x <= max.x &&
+           point.y >= min.y && point.y <= max.y;
+}
+
+static bool IsPointInCircle2D(CVector2D point, CVector2D center, float r) {
+    return DistanceBetweenPointsSquared2D(point, center) <= r * r;
+}
 
 // Converts degrees to radians
 // keywords: 0.017453292 flt_8595EC

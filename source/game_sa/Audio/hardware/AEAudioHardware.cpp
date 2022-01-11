@@ -139,7 +139,7 @@ void CAEAudioHardware::SetChannelVolume(int16 channel, uint16 channelId, float v
 // 0x4D88A0
 bool CAEAudioHardware::LoadSoundBank(uint16 bankId, int16 bankSlotId) {
     if (!m_bDisableEffectsLoading) {
-        return plugin::CallMethodAndReturn<bool, 0x4E0670, void*, uint16, int16>(m_pMP3BankLoader, bankId, bankSlotId);
+        return plugin::CallMethodAndReturn<bool, 0x4E0670>(m_pMP3BankLoader, bankId, bankSlotId);
         // todo: return m_pMP3BankLoader->LoadSoundBank(bankId, bankSlotId);
     }
 
@@ -161,7 +161,7 @@ int8 CAEAudioHardware::GetSoundBankLoadingStatus(uint16 bankId, int16 bankSlotId
 // 0x4D8ED0
 bool CAEAudioHardware::LoadSound(uint16 bank, uint16 sound, int16 slot) {
     if (!m_bDisableEffectsLoading) {
-        return plugin::CallMethodAndReturn<bool, 0x4E07A0, void*, uint16, uint16, int16>(m_pMP3BankLoader, bank, sound, slot);
+        return plugin::CallMethodAndReturn<bool, 0x4E07A0>(m_pMP3BankLoader, bank, sound, slot);
         // todo: return m_pMP3BankLoader->LoadSound(bank, sound, slot);
     }
 
@@ -342,12 +342,12 @@ float CAEAudioHardware::GetEffectsFaderScalingFactor() const {
     return m_fEffectsFaderScalingFactor;
 }
 
-// 0x4D95B0, maybe wrong
+// 0x4D95A0
 void CAEAudioHardware::SetNonStreamFaderScalingFactor(float factor) {
     m_fNonStreamFaderScalingFactor = factor;
 }
 
-// 0x4D95A0, maybe wrong
+// 0x4D95B0
 void CAEAudioHardware::SetStreamFaderScalingFactor(float factor) {
     m_fStreamFaderScalingFactor = factor;
 }

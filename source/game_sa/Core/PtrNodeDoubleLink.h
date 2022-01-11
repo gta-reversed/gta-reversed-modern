@@ -8,14 +8,14 @@
 
 class CPtrNodeDoubleLink {
 public:
-    void*               pItem;
-    CPtrNodeDoubleLink* pNext;
-    CPtrNodeDoubleLink* pPrev;
-
-    inline CPtrNodeDoubleLink(void* item) { pItem = item; }
+    void*               m_item;
+    CPtrNodeDoubleLink* m_next;
+    CPtrNodeDoubleLink* m_prev;
 
 public:
     static void InjectHooks();
+
+    CPtrNodeDoubleLink(void* item) { m_item = item; }
 
     static void* operator new(uint32 size);
     static void  operator delete(void* ptr, size_t sz);

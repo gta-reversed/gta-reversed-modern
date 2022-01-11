@@ -109,7 +109,7 @@ void CAEStreamThread::PlayTrack(uint32 iTrackId, int32 iNextTrackId, uint32 a3, 
     m_iTrackId         = iTrackId;
     m_iNextTrackId     = iNextTrackId;
     field_1C           = a3;
-    m_bIsUserTrackD    = a4;
+    field_24           = a4;
     m_bIsUserTrack     = bIsUserTrack;
     m_bNextIsUserTrack = bNextIsUserTrack;
     field_12           = 1;

@@ -182,7 +182,7 @@ public:
     static uint32& mapYouAreHereTimer;
     static bool& mapYouAreHereDisplay;
 
-    static char* RadarBlipFileNames[][2];
+    static const char* RadarBlipFileNames[][2];
 
     // 2990.0 by default
     static float& m_radarRange;

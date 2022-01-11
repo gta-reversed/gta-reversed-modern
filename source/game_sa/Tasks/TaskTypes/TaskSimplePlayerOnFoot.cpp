@@ -8,6 +8,7 @@
 #include "TaskComplexJump.h"
 #include "TaskComplexUseGoggles.h"
 #include "TaskSimpleStealthKill.h"
+#include "IKChainManager_c.h"
 
 int32& gLastRandomNumberForIdleAnimationID = *reinterpret_cast<int32*>(0x8D2FEC);
 uint32& gLastTouchTimeDelta = *reinterpret_cast<uint32*>(0xC19664);
@@ -134,8 +135,9 @@ bool CTaskSimplePlayerOnFoot::ProcessPed(CPed* ped) {
 // 0x6859A0
 void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
 {
-    // return plugin::CallMethod<0x6859A0, CTaskSimplePlayerOnFoot*, CPlayerPed*>(this, player);
+    return plugin::CallMethod<0x6859A0, CTaskSimplePlayerOnFoot*, CPlayerPed*>(this, player);
 
+    /*
     CPlayerPedData* playerData = player->m_pPlayerData;
     CPedIntelligence* intelligence = player->GetIntelligence();
     CTaskManager* taskManager = &player->GetTaskManager();
@@ -276,8 +278,8 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
                 && player->m_nMoveState != PEDMOVE_SPRINT
                 && !taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)
                 && animGroupID != ANIM_GROUP_DEFAULT
-                && CAnimManager::ms_aAnimAssocGroups[animGroupID].m_pAnimBlock
-                && CAnimManager::ms_aAnimAssocGroups[animGroupID].m_pAnimBlock->bLoaded
+                && CAnimManager::GetAnimationBlock(animGroupID)
+                && CAnimManager::GetAnimationBlock(animGroupID)->bLoaded
                 && intelligence->TestForStealthKill(targetEntity, false)
             ) {
                 if (player->bIsDucking) {
@@ -317,7 +319,6 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
                 }
                 player->ClearWeaponTarget();
             } else {
-                CWeapon* activeWeapon = &player->GetActiveWeapon();
                 switch (meleeAttackJustDown) {
                 case 1: {
                     fightCommand = 11;
@@ -325,7 +326,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
                     break;
                 }
                 case 4: {
-                    if (!CWeaponInfo::GetWeaponInfo(activeWeapon->m_nType, eWeaponSkill::WEAPSKILL_STD)->flags.bHeavy) {
+                    if (!CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::WEAPSKILL_STD)->flags.bHeavy) {
                         fightCommand = 12;
                         gunCommand[0] = 12;
                     } else {
@@ -341,7 +342,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
                 }
                 default: {
                     if (   pad->GetMeleeAttack(false)
-                        && activeWeapon->m_nType == WEAPON_CHAINSAW
+                        && player->GetActiveWeapon().m_nType == WEAPON_CHAINSAW
                         && taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)
                     ) {
                         fightCommand = 11;
@@ -670,9 +671,8 @@ PED_WEAPON_AIMING_CODE:
 
     TheCamera.SetNewPlayerWeaponMode(MODE_AIMWEAPON, 0, 0);
 
-    CVector* pTargetedObjectPos = nullptr;
     if (player->m_pTargetedObject) {
-        pTargetedObjectPos = &player->m_pTargetedObject->GetPosition();
+        TheCamera.UpdateAimingCoors(&player->m_pTargetedObject->GetPosition());
     } else {
         CMatrix* playerMatrix = player->m_matrix;
         firingPoint = playerMatrix->GetForward();
@@ -682,10 +682,9 @@ PED_WEAPON_AIMING_CODE:
         firingPoint.z = (sin(player->m_pPlayerData->m_fLookPitch) + firingPoint.z) * 5.0f;
 
         firingPoint += player->GetPosition();
-        pTargetedObjectPos = &firingPoint;
+        TheCamera.UpdateAimingCoors(&firingPoint);
     }
 
-    TheCamera.UpdateAimingCoors(pTargetedObjectPos);
     if (taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK)) {
         if (intelligence->GetTaskUseGun()) {
             auto taskUseGun = (CTaskSimpleUseGun*)taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
@@ -702,8 +701,8 @@ MAKE_PLAYER_LOOK_AT_ENTITY:
     playerData->m_bHaveTargetSelected = player->m_pTargetedObject ? true : false;
     CPed* targetedObject = player->m_pTargetedObject->AsPed();
     const auto AbortLookingIfPossible = [&]() {
-        if (m_pLookingAtEntity && g_ikChainMan->IsLooking(player) && g_ikChainMan->GetLookAtEntity(player) == m_pLookingAtEntity) {
-            g_ikChainMan->AbortLookAt(player, 250);
+        if (m_pLookingAtEntity && g_ikChainMan.IsLooking(player) && g_ikChainMan.GetLookAtEntity(player) == m_pLookingAtEntity) {
+            g_ikChainMan.AbortLookAt(player, 250);
         }
         m_pLookingAtEntity = targetedObject;
     };
@@ -727,15 +726,16 @@ MAKE_PLAYER_LOOK_AT_ENTITY:
     CVector distance = targetedObject->GetPosition() - player->GetPosition();
     if (DotProduct(distance, player->GetForwardVector()) <= 0.0f) {
         return AbortLookingIfPossible();
-    } else if (!g_ikChainMan->IsLooking(player) || (g_ikChainMan->GetLookAtEntity(player) != (CEntity*)targetedObject)) {
+    } else if (!g_ikChainMan.IsLooking(player) || (g_ikChainMan.GetLookAtEntity(player) != (CEntity*)targetedObject)) {
         auto pedBoneId = BONE_UNKNOWN;
         if (targetedObject->m_nType == ENTITY_TYPE_PED) {
             pedBoneId = BONE_HEAD;
         }
-        g_ikChainMan->LookAt("ProcPlyrWeapon", player, targetedObject, gDefaultTaskTime, pedBoneId, nullptr, false, 0.25f, 500, 3, false);
+        g_ikChainMan.LookAt("ProcPlyrWeapon", player, targetedObject, gDefaultTaskTime, pedBoneId, nullptr, false, 0.25f, 500, 3, false);
     }
 
     m_pLookingAtEntity = targetedObject;
+    */
 }
 
 // 0x6872C0
@@ -762,7 +762,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
     uint32      touchTimeDelta = pad->GetTouchedTimeDelta();
     if (touchTimeDelta <= 10000) {
         if (animBlock->bLoaded) {
-            CStreaming::SetModelIsDeletable(m_nAnimationBlockIndex + RESOURCE_ID_IFP);
+            CStreaming::SetModelIsDeletable(IFPToModelId(m_nAnimationBlockIndex));
             CAnimBlendAssociation* animAssoc = nullptr;
             for (animAssoc = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump); animAssoc; animAssoc = RpAnimBlendGetNextAssociation(animAssoc)) {
                 if (animAssoc->m_nFlags & ANIM_FLAG_200) {
@@ -774,7 +774,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
         return;
     }
 
-    CStreaming::RequestModel(m_nAnimationBlockIndex + RESOURCE_ID_IFP, LOADSTATE_REQUESTED);
+    CStreaming::RequestModel(IFPToModelId(m_nAnimationBlockIndex), STREAMING_GAME_REQUIRED);
     if (!animBlock->bLoaded)
         return;
 
@@ -1018,6 +1018,9 @@ int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoi
         pedMoveBlendRatio = 0.0f;
     }
 
+    const float radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -pedWalkLeftRight, pedWalkUpDown) - TheCamera.m_fOrientation;
+    const float limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
+
     if (pad->NewState.m_bPedWalk && pedMoveBlendRatio > 1.0f) {
         pedMoveBlendRatio = 1.0f;
     } else if (pedMoveBlendRatio <= 0.0f) {
@@ -1025,8 +1028,6 @@ int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoi
         goto DONT_MODIFY_MOVE_BLEND_RATIO;
     }
 
-    const float radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -pedWalkLeftRight, pedWalkUpDown) - TheCamera.m_fOrientation;
-    const float limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
     player->m_fAimingRotation = limitedRadianAngle;
 
     if (CGameLogic::IsPlayerAllowedToGoInThisDirection(player, -sin(limitedRadianAngle), cos(limitedRadianAngle), 0.0f, 0.0f)) {
@@ -1107,7 +1108,7 @@ void CTaskSimplePlayerOnFoot::InjectHooks() {
     Install("CTaskSimplePlayerOnFoot", "~CTaskSimplePlayerOnFoot", 0x6857D0, &CTaskSimplePlayerOnFoot::Destructor);
     Install("CTaskSimplePlayerOnFoot", "ProcessPed_Reversed", 0x688810, &CTaskSimplePlayerOnFoot::ProcessPed_Reversed);
     Install("CTaskSimplePlayerOnFoot", "MakeAbortable_Reversed", 0x6857E0, &CTaskSimplePlayerOnFoot::MakeAbortable_Reversed);
-    Install("CTaskSimplePlayerOnFoot", "ProcessPlayerWeapon", 0x6859A0, &CTaskSimplePlayerOnFoot::ProcessPlayerWeapon);
+    // Install("CTaskSimplePlayerOnFoot", "ProcessPlayerWeapon", 0x6859A0, &CTaskSimplePlayerOnFoot::ProcessPlayerWeapon);
     Install("CTaskSimplePlayerOnFoot", "PlayIdleAnimations", 0x6872C0, &CTaskSimplePlayerOnFoot::PlayIdleAnimations);
     Install("CTaskSimplePlayerOnFoot", "PlayerControlZeldaWeapon", 0x687C20, &CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon);
     Install("CTaskSimplePlayerOnFoot", "PlayerControlDucked", 0x687F30, &CTaskSimplePlayerOnFoot::PlayerControlDucked);

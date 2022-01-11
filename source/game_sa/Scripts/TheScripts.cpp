@@ -1,10 +1,12 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+
+#include "TheScripts.h"
 
 bool& CTheScripts::DbgFlag = *reinterpret_cast<bool*>(0x859CF8);
 tScriptParam* CTheScripts::ScriptParams = reinterpret_cast<tScriptParam*>(0xA43C78);
@@ -98,32 +100,32 @@ void CTheScripts::InjectHooks() {
 }
 
 // 0x468D50
-void CTheScripts::Init(char const* datFile) {
-    plugin::Call<0x468D50, char const*>(datFile);
+void CTheScripts::Init() {
+    plugin::Call<0x468D50>();
 }
 
-void CTheScripts::AddToBuildingSwapArray(CBuilding* pBuilding, int32 oldModelId, int32 newModelId) {
-    if (pBuilding->m_nIplIndex)
+void CTheScripts::AddToBuildingSwapArray(CBuilding* building, int32 oldModelId, int32 newModelId) {
+    if (building->m_nIplIndex)
         return;
 
-    for (auto& pSwap : CTheScripts::BuildingSwapArray) {
-        if (pSwap.m_pCBuilding == pBuilding) {
-            if (newModelId == pSwap.m_nOldModelIndex) {
-                pSwap.m_pCBuilding = nullptr;
-                pSwap.m_nOldModelIndex = -1;
-                pSwap.m_nNewModelIndex = -1;
+    for (auto& swap : CTheScripts::BuildingSwapArray) {
+        if (swap.m_pCBuilding == building) {
+            if (newModelId == swap.m_nOldModelIndex) {
+                swap.m_pCBuilding = nullptr;
+                swap.m_nOldModelIndex = -1;
+                swap.m_nNewModelIndex = -1;
             } else
-                pSwap.m_nNewModelIndex = newModelId;
+                swap.m_nNewModelIndex = newModelId;
 
             return;
         }
     }
 
-    for (auto& pSwap : CTheScripts::BuildingSwapArray) {
-        if (!pSwap.m_pCBuilding) {
-            pSwap.m_pCBuilding = pBuilding;
-            pSwap.m_nOldModelIndex = oldModelId;
-            pSwap.m_nNewModelIndex = newModelId;
+    for (auto& swap : CTheScripts::BuildingSwapArray) {
+        if (!swap.m_pCBuilding) {
+            swap.m_pCBuilding = building;
+            swap.m_nOldModelIndex = oldModelId;
+            swap.m_nNewModelIndex = newModelId;
             return;
         }
     }
@@ -170,12 +172,12 @@ CRunningScript* CTheScripts::StartNewScript(uint8* startIP) {
 }
 
 void CTheScripts::UndoBuildingSwaps() {
-    for (auto& pSwap : CTheScripts::BuildingSwapArray) {
-        if (pSwap.m_pCBuilding) {
-            pSwap.m_pCBuilding->ReplaceWithNewModel(pSwap.m_nOldModelIndex);
-            pSwap.m_pCBuilding = nullptr;
-            pSwap.m_nOldModelIndex = -1;
-            pSwap.m_nNewModelIndex = -1;
+    for (auto& swap : CTheScripts::BuildingSwapArray) {
+        if (swap.m_pCBuilding) {
+            swap.m_pCBuilding->ReplaceWithNewModel(swap.m_nOldModelIndex);
+            swap.m_pCBuilding = nullptr;
+            swap.m_nOldModelIndex = -1;
+            swap.m_nNewModelIndex = -1;
         }
     }
 }
@@ -203,4 +205,9 @@ void CTheScripts::StartTestScript() {
 // 0x46A000
 void CTheScripts::Process() {
     plugin::Call<0x46A000>();
+}
+
+// 0x4812D0
+void CTheScripts::UndoEntityInvisibilitySettings() {
+    plugin::Call<0x4812D0>();
 }

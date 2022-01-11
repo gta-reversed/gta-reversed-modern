@@ -17,7 +17,7 @@ CAEWeaponAudioEntity::CAEWeaponAudioEntity() : CAEAudioEntity() {
     Clear();
 
     m_pPed = nullptr;
-    m_bActive = false;
+    m_Physical = nullptr;
 }
 
 // 0x507560
