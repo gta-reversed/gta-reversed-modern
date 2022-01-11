@@ -133,7 +133,7 @@ void CCarGenerator::DoInternalProcessing()
     }
     else
     {
-        if (m_nModelId == MODEL_INVALID || !CStreaming::GetInfo(-m_nModelId).IsLoaded())
+        if (m_nModelId == MODEL_INVALID || !CStreaming::ms_aInfoForModel[-m_nModelId].IsLoaded()) // todo: Figure out what they wanted with negative indexing
         {
             CTheZones::GetZoneInfo(FindPlayerCoors(-1), nullptr);
             actualModelId = CPopulation::m_AppropriateLoadedCars.PickRandomCar(true, true);
