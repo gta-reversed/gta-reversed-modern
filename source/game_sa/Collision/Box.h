@@ -10,8 +10,7 @@
 
 class CBox {
 public:
-    CVector m_vecMin;
-    CVector m_vecMax;
+    CVector m_vecMin{}, m_vecMax{};
 
 public:
     static void InjectHooks();
@@ -21,9 +20,11 @@ public:
     void Recalc();
 
 public:
+    CBox() = default;
+
     CBox(CVector min, CVector max) :
         m_vecMin(min),
-        m_vecMax(max),
+        m_vecMax(max)
     {
 
     }

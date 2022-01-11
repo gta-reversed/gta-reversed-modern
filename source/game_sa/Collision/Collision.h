@@ -27,7 +27,7 @@ public:
     static void SortOutCollisionAfterLoad();
     static bool TestSphereSphere(CColSphere const& sphere1, CColSphere const& sphere2);
     static bool TestSphereBox(CSphere const& sphere, CBox const& box);
-    static bool ProcessSphereBox(CColSphere const& sphere, CColBox const& box, CColPoint& colPoint, float& maxTouchDistance);
+    static bool ProcessSphereBox(CColSphere const & sph, CColBox const& box, CColPoint & point, float & mindistsq);
     static bool PointInTriangle(CVector const& point, CVector const* triPoints);
     static float DistToLineSqr(CVector const* lineStart, CVector const* lineEnd, CVector const* point);
     static float DistToMathematicalLine(CVector const* lineStart, CVector const* lineEnd, CVector const* point);

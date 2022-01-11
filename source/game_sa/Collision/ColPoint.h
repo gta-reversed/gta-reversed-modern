@@ -42,7 +42,7 @@ public:
 
     float        m_fDepth{};        // col depth
 
-    void operator=(CColPoint const& right);
+    CColPoint& operator=(const CColPoint&) = default;
     bool operator==(const CColPoint&) const = default;
 };
 

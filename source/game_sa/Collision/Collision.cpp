@@ -20,8 +20,8 @@ void CCollision::InjectHooks()
     Install("CCollision", "TestSphereSphere", 0x411E70, &CCollision::TestSphereSphere);
     Install("CCollision", "CalculateColPointInsideBox", 0x411EC0, &CalculateColPointInsideBox);
     Install("CCollision", "TestSphereBox", 0x4120C0, &CCollision::TestSphereBox);
-    //Install("CCollision", "ProcessSphereBox", 0x412130, &CCollision::ProcessSphereBox);
-    //Install("CCollision", "PointInTriangle", 0x412700, &CCollision::PointInTriangle);
+    Install("CCollision", "ProcessSphereBox", 0x412130, &CCollision::ProcessSphereBox);
+    Install("CCollision", "PointInTriangle", 0x412700, &CCollision::PointInTriangle);
     //Install("CCollision", "DistToLineSqr", 0x412850, &CCollision::DistToLineSqr);
     Install("CCollision", "DistToMathematicalLine", 0x412970, &CCollision::DistToMathematicalLine);
     //Install("CCollision", "DistToMathematicalLine2D", 0x412A30, &CCollision::DistToMathematicalLine2D);
@@ -124,12 +124,14 @@ void CCollision::Tests() {
         }
     };
 
+    // TestSphereSphere
     {
         auto sp1 = RandomSphere(), sp2 = RandomSphere();
         auto Original = plugin::CallAndReturn<bool, 0x411E70, CColSphere const&, CColSphere const&>;
         Test("TestSphereSphere", Original, TestSphereSphere, std::equal_to<>{}, sp1, sp2);
     }
 
+    // CalculateColPointInsideBox
     {
         const auto Org = [&](auto box, auto point) {
             CColPoint cp{};
@@ -146,9 +148,41 @@ void CCollision::Tests() {
         Test("CalculateColPointInsideBox", Org, Rev, ColPointEq, RandomBox(), RandomVector());
     }
 
+    // TestSphereBox
     {
         const auto Org = plugin::CallAndReturn<bool, 0x4120C0, CSphere const&, CBox const&>;
         Test("TestSphereBox", Org, TestSphereBox, std::equal_to{}, RandomSphere(), RandomBox());
+    }
+
+    // CalculateColPointInsideBox
+    {
+        // both will be of type pair<CColPoint, float> 
+        const auto CmpEq = [&](auto o, auto r) {
+            return o.second == r.second && ColPointEq(o.first, r.first);
+        };
+
+        const auto Org = [&](auto sp, auto box) {
+            CColPoint cp{};
+            float dist{1.f};
+            plugin::Call<0x412130, CColSphere const&, CColBox const&, CColPoint&, float&>(sp, box, cp, dist);
+            return std::make_pair(cp, dist);
+        };
+
+        const auto Rev = [](auto sp, auto box) {
+            CColPoint cp{};
+            float dist{1.f};
+            ProcessSphereBox(sp, box, cp, dist);
+            return std::make_pair(cp, dist);
+        };
+
+        Test("CalculateColPointInsideBox", Org, Rev, CmpEq, RandomSphere(), RandomBox());
+    }
+
+    // PointInTriangle
+    {
+        const CVector tri[3]{ RandomVector(), RandomVector(), RandomVector() };
+        const auto Org = plugin::CallAndReturn<bool, 0x412700, CVector const&, CVector const*>;
+        Test("PointInTriangle", Org, PointInTriangle, std::equal_to{}, RandomVector(), tri);
     }
 }
 
@@ -210,13 +244,226 @@ bool CCollision::TestSphereBox(CSphere const& sphere, CBox const& box) {
 }
 
 // 0x412130
-bool CCollision::ProcessSphereBox(CColSphere const& sphere, CColBox const& box, CColPoint& colPoint, float& maxTouchDistance) {
-    return plugin::CallAndReturn<bool, 0x412130, CColSphere const&, CColBox const&, CColPoint&, float&>(sphere, box, colPoint, maxTouchDistance);
+bool CCollision::ProcessSphereBox(CColSphere const & sph, CColBox const& box, CColPoint & point, float& mindistsq) {
+    // Some of the original code, to give you an idea:
+    /*
+    if (sphere.m_vecCenter.x + sphere.m_fRadius < box.m_vecMin.x)
+        return false;
+
+    if (sphere.m_vecCenter.x + sphere.m_fRadius > box.m_vecMax.x)
+        return false;
+
+    CVector colPos{};
+
+    if (sphere.m_vecCenter.x >= box.m_vecMin.x) {
+        if (sphere.m_vecCenter.x <= box.m_vecMax.x) {
+            if (sphere.m_vecCenter.y + sphere.m_fRadius > box.m_vecMin.y)
+                return false;
+
+            if (sphere.m_vecCenter.y - sphere.m_fRadius > box.m_vecMax.y)
+                return false;
+
+            if (sphere.m_vecCenter.y >= box.m_vecMin.y) {
+                if (sphere.m_vecCenter.y <= box.m_vecMax.y) {
+                    if (sphere.m_vecCenter.z + sphere.m_fRadius > box.m_vecMin.z)
+                        return false;
+
+                    if (sphere.m_vecCenter.z - sphere.m_fRadius > box.m_vecMax.z)
+                        return false;
+
+                    if (sphere.m_vecCenter.z >= box.m_vecMin.z) {
+                        if (sphere.m_vecCenter.z <= box.m_vecMax.z) {
+                            CColPoint boxCP{};
+                            CalculateColPointInsideBox(box, sphere.m_vecCenter, boxCP);
+
+                            colPoint.m_vecPoint = boxCP.m_vecPoint - boxCP.m_vecNormal * sphere.m_fRadius;
+                            colPoint.m_fDepth = boxCP.m_fDepth;
+
+                            colPoint.m_nLightingA = sphere.m_nLighting;
+                            colPoint.m_nSurfaceTypeA = sphere.m_nMaterial;
+
+                            colPoint.m_nLightingB = box.m_nLighting;
+                            colPoint.m_nSurfaceTypeB = box.m_nMaterial;
+
+                            maxTouchDistance = 0.f;
+
+                            return true;
+                        } else {
+                            colPos.x = sphere.m_vecCenter.x;
+                            colPos.y = sphere.m_vecCenter.y;
+                            colPos.z = box.m_vecMax.z;
+                        }
+                    } else {
+                        colPos.x = sphere.m_vecCenter.x;
+                        colPos.y = sphere.m_vecCenter.y;
+                        colPos.z = box.m_vecMin.z;
+                    }
+                } else {
+                    if (sphere.m_vecCenter.z + sphere.m_fRadius > box.m_vecMin.z)
+                        return false;
+
+                    if (sphere.m_vecCenter.z - sphere.m_fRadius > box.m_vecMax.z)
+                        return false;
+
+                    if (sphere.m_vecCenter.z >= box.m_vecMin.z) {
+                        if (sphere.m_vecCenter.z <= box.m_vecMax.z) {
+                            colPos.x = sphere.m_vecCenter.x;
+                            colPos.y = box.m_vecMax.y;
+
+                            if (sphere.m_vecCenter.z > box.m_vecMax.z)
+                                colPos.y = box.m_vecMax.y;
+
+                            if (sphere.m_vecCenter.z <= box.m_vecMax.z) {
+                                colPos.z = sphere.m_vecCenter.z;
+                                colPos.y = box.m_vecMax.y;
+                            } else {
+                                colPos.z = box.m_vecMax.z;
+                            }
+                        } else {
+
+                        }
+                    } else {
+                        colPos.y = box.m_vecMax.y;
+                        colPos.x = sphere.m_vecCenter.x;
+                        colPos.z = box.m_vecMin.z;
+                    }
+                }
+            } else {
+                if (sphere.m_vecCenter.z + sphere.m_fRadius > box.m_vecMin.z)
+                    return false;
+
+                if (sphere.m_vecCenter.z - sphere.m_fRadius > box.m_vecMax.z)
+                    return false;
+
+                if (sphere.m_vecCenter.z)
+            }
+        }
+    }
+    */
+
+	// GTA's code is too complicated, uses a huge 3x3x3 if statement
+	// we can simplify the structure a lot
+
+	// First make sure we have a collision at all
+    if (!TestSphereBox(sph, box))
+        return false;
+
+	// Now find out where the sphere center lies in relation to all the sides
+    // 0 - inside
+    // 1 - below min
+    // 2 - above max
+	int sideX = sph.m_vecCenter.x < box.m_vecMin.x ? 1 :
+	           sph.m_vecCenter.x > box.m_vecMax.x ? 2 :
+	           0;
+	int sideY = sph.m_vecCenter.y < box.m_vecMin.y ? 1 :
+	           sph.m_vecCenter.y > box.m_vecMax.y ? 2 :
+	           0;
+	int sideZ = sph.m_vecCenter.z < box.m_vecMin.z ? 1 :
+	           sph.m_vecCenter.z > box.m_vecMax.z ? 2 :
+	           0;
+
+	if(sideX == 0 && sideY == 0 && sideZ == 0){ // Sphere center is inside the box
+        const auto p{ box.GetCenter() };
+
+		const auto dir = sph.m_vecCenter - p;
+        const auto distSq = dir.SquaredMagnitude();
+		if(distSq < mindistsq){
+            point.m_vecNormal = dir / sqrt(distSq);
+			point.m_vecPoint = sph.m_vecCenter - point.m_vecNormal;
+
+            point.m_nSurfaceTypeA = sph.m_nMaterial;
+            point.m_nLightingA = sph.m_nLighting;
+
+            point.m_nSurfaceTypeB = box.m_nMaterial;
+            point.m_nLightingB = box.m_nLighting;
+
+			// find absolute distance to the closer side in each dimension
+			const float dx = dir.x > 0.0f ?
+				box.m_vecMax.x - sph.m_vecCenter.x :
+				sph.m_vecCenter.x - box.m_vecMin.x;
+
+			const float dy = dir.y > 0.0f ?
+				box.m_vecMax.y - sph.m_vecCenter.y :
+				sph.m_vecCenter.y - box.m_vecMin.y;
+
+			const float dz = dir.z > 0.0f ?
+				box.m_vecMax.z - sph.m_vecCenter.z :
+				sph.m_vecCenter.z - box.m_vecMin.z;
+
+			// collision depth is maximum of that:
+            point.m_fDepth = std::max({ dx, dy, dz });
+
+			return true;
+		}
+	}else{ // Sphere centre is outside.
+		
+		// Position of closest corner:
+        const CVector p{
+            sideX == 1 ? box.m_vecMin.x :
+            sideX == 2 ? box.m_vecMax.x :
+            sph.m_vecCenter.x,
+
+            sideY == 1 ? box.m_vecMin.y :
+            sideY == 2 ? box.m_vecMax.y :
+            sph.m_vecCenter.y,
+
+            sideZ == 1 ? box.m_vecMin.z :
+            sideZ == 2 ? box.m_vecMax.z :
+            sph.m_vecCenter.z,
+        };
+
+        const auto dir = sph.m_vecCenter - p;
+        const auto distSq = dir.SquaredMagnitude();
+        if (distSq < mindistsq) {
+            point.m_vecNormal = dir / sqrt(distSq); // Normalize vector
+            point.m_vecPoint = p;
+
+            point.m_nSurfaceTypeA = sph.m_nMaterial;
+            point.m_nLightingA = sph.m_nLighting;
+
+            point.m_nSurfaceTypeB = box.m_nMaterial;
+            point.m_nLightingB = box.m_nLighting;
+
+			mindistsq = distSq;
+			return true;
+		}
+	}
+	return false;
 }
 
 // 0x412700
 bool CCollision::PointInTriangle(CVector const& point, CVector const* triPoints) {
-    return plugin::CallAndReturn<bool, 0x412700, CVector const&, CVector const*>(point, triPoints);
+    // Make everything relative to 0th vertex of the triangle
+    const auto v1 = triPoints[1] - triPoints[0];
+    const auto v2 = triPoints[2] - triPoints[0];
+    const auto p  = point - triPoints[0];
+
+    // NOTE:
+    // Neither v1 or v2 are normalized, which means the
+    // dot products aren't actual dot products (in math terms)
+    // but the dot product multiplied by the squared magnitude of either vectors.
+    // In order to balance this out in comparasion operations and etc..
+    // they just multiply values by the sq magnitude of v1/v2
+    // they probably wanted to avoid doing `sqrt` and divisions
+    // which is smart.
+
+    const auto v1_dot_v2 = DotProduct(v1, v2);
+
+    const auto v2_dot_p = DotProduct(v2, p);
+    const auto v2_magSq = v2.SquaredMagnitude();
+
+    const auto v1_dot_p = DotProduct(v1, p);
+    const auto v1_magSq = v1.SquaredMagnitude();
+
+    const auto a = (v2_magSq * v1_dot_p) - (v1_dot_v2 * v2_dot_p);
+    if (a >= 0.f) {
+        const auto b = (v1_magSq * v2_dot_p) - (v1_dot_v2 * v1_dot_p);
+        if (b >= 0.f) {
+            const auto c = (v1_magSq * v2_magSq) - (v1_dot_v2 * v1_dot_v2);
+            return c >= (a + b);
+        }
+    }
+    return false;
 }
 
 // 0x412850
@@ -232,7 +479,7 @@ float CCollision::DistToMathematicalLine(CVector const* lineStart, CVector const
     // Simple Pythagorean here, we gotta find side `a`
 
     const auto cSq = p.SquaredMagnitude();
-    const auto bSq = std::pow(DotProduct(p, l), 2) / p.SquaredMagnitude(); // Must divide it by either `l.SquaredMagnitude()` because neither vectors are normalized
+    const auto bSq = (float)std::pow(DotProduct(p, l), 2) / p.SquaredMagnitude(); // Must divide it by either `l.SquaredMagnitude()` because neither vectors are normalized
 
     const auto aSq = cSq - bSq;
     return bSq > 0.0f ? std::sqrt(bSq) : 0.0f; // Little optimization to not call `sqrt` if the dist is 0 (it wont ever be negative)
