@@ -300,11 +300,11 @@ bool CStreaming::AreAnimsUsedByRequestedModels(int32 animModelId) {
         tStreamingChannel& channel = ms_channel[channelId];
         for (int32 model : channel.modelIds) {
             if (model != -1 && IsModelDFF(model) &&
-                CModelInfo::ms_modelInfoPtrs[model]->GetAnimFileIndex() == animModelId)
+                CModelInfo::GetModelInfo(model)->GetAnimFileIndex() == animModelId)
             {
                 return true;
             }
-        }   
+        }
     }
 
     return false;
@@ -315,7 +315,7 @@ bool CStreaming::AreTexturesUsedByRequestedModels(int32 txdModelId) {
     for (auto info = ms_pStartRequestedList->GetNext(); info != ms_pEndRequestedList; info = info->GetNext()) {
         switch (GetModelType(GetModelFromInfo(info))) {
         case eModelType::DFF: {
-            if (CModelInfo::ms_modelInfoPtrs[GetModelFromInfo(info)]->m_nTxdIndex == txdModelId)
+            if (CModelInfo::GetModelInfo([GetModelFromInfo(info)])->m_nTxdIndex == txdModelId)
                 return true;
             break;
         }
@@ -332,7 +332,7 @@ bool CStreaming::AreTexturesUsedByRequestedModels(int32 txdModelId) {
             if (model != -1) {
                 switch (GetModelType(model)) {
                 case eModelType::DFF: {
-                    if (CModelInfo::ms_modelInfoPtrs[model]->m_nTxdIndex == txdModelId)
+                    if (CModelInfo::GetModelInfo(model)->m_nTxdIndex == txdModelId)
                         return true;
                     break;
                 }
@@ -382,7 +382,7 @@ int32 CStreaming::GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority) {
         // Additional conditions for some model types (DFF, TXD, IFP)
         switch (GetModelType((modelId))) {
         case eModelType::DFF: {
-            CBaseModelInfo* pModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
+            CBaseModelInfo* pModelInfo = CModelInfo::GetModelInfo(model);
 
             // Make sure TXD will be loaded for this model
             const auto txdModel = TXDToModelId(pModelInfo->m_nTxdIndex);
@@ -704,7 +704,7 @@ bool CStreaming::DeleteLeastUsedEntityRwObject(bool bNotOnScreen, uint32 streami
             continue;
 
         const int32 modelId = pEntity->m_nModelIndex;
-        const auto pBaseModelInfo = CModelInfo::ms_modelInfoPtrs[modelId];
+        const auto pBaseModelInfo = CModelInfo::GetModelInfo(modelId);
         float drawDistanceRadius = TheCamera.m_fLODDistMultiplier * pBaseModelInfo->m_fDrawDistance;
         if (pEntity->m_bIsBIGBuilding)
             drawDistanceRadius *= CRenderer::ms_lowLodDistScale;
@@ -924,7 +924,7 @@ bool CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, int32 m
             && FindPlayerPed(-1)->m_pContactEntity != pEntity)
         {
             pEntity->DeleteRwObject();
-            if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount) {
+            if (!CModelInfo::GetModelInfo(modelId)->m_nRefCount) {
                 RemoveModel(modelId);
                 if (static_cast<int32>(ms_memoryUsed) < memoryToCleanInBytes)
                     return true;
@@ -960,7 +960,7 @@ bool CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList& list, int32 m
             && GetInfo(modelId).InList())
         {
             pEntity->DeleteRwObject();
-            if (!CModelInfo::ms_modelInfoPtrs[modelId]->m_nRefCount) {
+            if (!CModelInfo::GetModelInfo(modelId)->m_nRefCount) {
                 RemoveModel(modelId);
                 if (static_cast<int32>(ms_memoryUsed) < memoryToCleanInBytes)
                     return true;
@@ -1256,7 +1256,7 @@ void CStreaming::LoadScene(CVector const& point) {
     AddModelsToRequestList(point, STREAMING_LOADING_SCENE);
     CRadar::StreamRadarSections(point);
     ThePaths.LoadSceneForPathNodes(point);
-    if (CGame::currArea == eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+    if (CGame::IsInNormalWorld()) {
         if (ms_bLoadVehiclesInLoadScene) {
             if (CTheZones::GetZoneInfo(point, nullptr) != CTheZones::GetZoneInfo(playerPosition, nullptr)) {
                 for (int32 i = 0; i < 5; i++) {
@@ -2860,7 +2860,7 @@ void CStreaming::InitImageList() {
 // 0x4084F0
 void CStreaming::InstanceLoadedModels(CVector const& point) {
     float fRadius = 80.0f;
-    if (CGame::currArea != eAreaCodes::AREA_CODE_NORMAL_WORLD)
+    if (!CGame::IsInNormalWorld())
         fRadius = 40.0f;
 
     const float minX = point.x - fRadius;
@@ -3077,7 +3077,7 @@ bool CStreaming::StreamAmbulanceAndMedic(bool bStreamForAccident) {
 
 // 0x40A150
 void CStreaming::StreamCopModels(eLevelName level) {
-    if (CGame::currArea != eAreaCodes::AREA_CODE_NORMAL_WORLD)
+    if (!CGame::IsInNormalWorld())
         return;
 
     // Maybe load a cop bike..

@@ -19,7 +19,6 @@ public:
     static CLinkList<CCollisionData*> &ms_colModelCache;
 public:
     static void InjectHooks();
-    static void Tests();
 
     // dummy function
     static void Update();

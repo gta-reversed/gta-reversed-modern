@@ -196,7 +196,7 @@ public:
     void UpdateRW();
     eEntityType GetType() const noexcept { return m_nType; }
 
-    // Always returns a non-null value. In case there's no LOD object `this` is returned. 
+    // Always returns a non-null value. In case there's no LOD object `this` is returned. NOTSA
     CEntity* FindLastLOD() noexcept;
 public:
     // Rw callbacks
