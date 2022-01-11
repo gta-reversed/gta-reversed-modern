@@ -14,7 +14,7 @@ void CCollision::InjectHooks()
     using namespace ReversibleHooks;
 
     Install("CCollision", "Update", 0x411E20, &CCollision::Update);
-    //Install("CCollision", "SortOutCollisionAfterLoad", 0x411E30, &CCollision::SortOutCollisionAfterLoad);
+    Install("CCollision", "SortOutCollisionAfterLoad", 0x411E30, &CCollision::SortOutCollisionAfterLoad);
     //Install("CCollision", "TestSphereSphere", 0x411E70, &CCollision::TestSphereSphere);
     //Install("CCollision", "CalculateColPointInsideBox", 0x411EC0, &CCollision::CalculateColPointInsideBox);
     //Install("CCollision", "TestSphereBox", 0x4120C0, &CCollision::TestSphereBox);
@@ -83,7 +83,8 @@ void CCollision::Update() {
 
 // 0x411E30
 void CCollision::SortOutCollisionAfterLoad() {
-    plugin::Call<0x411E30>();
+    CColStore::LoadCollision(TheCamera.GetPosition(), false);
+    CStreaming::LoadAllRequestedModels(false);
 }
 
 // 0x411E70
