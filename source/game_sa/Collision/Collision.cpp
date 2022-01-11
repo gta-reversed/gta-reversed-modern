@@ -25,7 +25,7 @@ void CCollision::InjectHooks()
     Install("CCollision", "DistToLineSqr", 0x412850, &CCollision::DistToLineSqr);
     Install("CCollision", "DistToMathematicalLine", 0x412970, &CCollision::DistToMathematicalLine);
     Install("CCollision", "DistToMathematicalLine2D", 0x412A30, &CCollision::DistToMathematicalLine2D);
-    //Install("CCollision", "DistAlongLine2D", 0x412A80, &CCollision::DistAlongLine2D);
+    Install("CCollision", "DistAlongLine2D", 0x412A80, &CCollision::DistAlongLine2D);
     //Install("CCollision", "ProcessLineSphere", 0x412AA0, &CCollision::ProcessLineSphere);
     //Install("CCollision", "TestLineBox_DW", 0x412C70, &CCollision::TestLineBox_DW);
     //Install("CCollision", "TestLineBox", 0x413070, &CCollision::TestLineBox);
@@ -537,7 +537,7 @@ float CCollision::DistToMathematicalLine2D(float lineStartX, float lineStartY, f
 
 // 0x412A80
 float CCollision::DistAlongLine2D(float lineX, float lineY, float lineDirX, float lineDirY, float pointX, float pointY) {
-    return plugin::CallAndReturn<float, 0x412A80, float, float, float, float, float, float>(lineX, lineY, lineDirX, lineDirY, pointX, pointY);
+    return (pointX - lineX) * lineDirX + (pointY - lineY) * lineDirY;
 }
 
 // 0x412AA0
