@@ -7,14 +7,12 @@ void CPedClothesDesc::InjectHooks() {
     Install("CPedClothesDesc", "CPedClothesDesc", 0x5A8020, &CPedClothesDesc::Constructor);
     Install("CPedClothesDesc", "Initialise", 0x5A78F0, &CPedClothesDesc::Initialise);
     Install("CPedClothesDesc", "GetIsWearingBalaclava", 0x5A7950, &CPedClothesDesc::GetIsWearingBalaclava);
-    Install("CPedClothesDesc", "HasVisibleNewHairCut", 0x5A7970, &CPedClothesDesc::HasVisibleNewHairCut);
-    Install("CPedClothesDesc", "HasVisibleTattoo", 0x5A79D0, &CPedClothesDesc::HasVisibleTattoo);
+    // Install("CPedClothesDesc", "HasVisibleNewHairCut", 0x5A7970, &CPedClothesDesc::HasVisibleNewHairCut);
+    // Install("CPedClothesDesc", "HasVisibleTattoo", 0x5A79D0, &CPedClothesDesc::HasVisibleTattoo);
 }
 
 CPedClothesDesc::CPedClothesDesc() {
-    std::ranges::fill(m_anTextureKeys, 0);
-    m_fFatStat = 0.0f;
-    m_fMuscleStat = 0.0f;
+    Initialise();
 }
 
 CPedClothesDesc* CPedClothesDesc::Constructor() {
@@ -24,22 +22,28 @@ CPedClothesDesc* CPedClothesDesc::Constructor() {
 
 // 0x5A78F0
 void CPedClothesDesc::Initialise() {
-    plugin::CallMethod<0x5A78F0, CPedClothesDesc*>(this);
+    std::ranges::fill(m_anModelKeys, 0);
+    std::ranges::fill(m_anTextureKeys, 0);
+    m_fFatStat = 0.0f;
+    m_fMuscleStat = 0.0f;
 }
 
 // 0x5A7910
 void CPedClothesDesc::SetModel(uint32 modelId, eClothesModelPart modelPart) {
-    plugin::CallMethod<0x5A7910, CPedClothesDesc*, uint32, eClothesModelPart>(this, modelId, modelPart);
+    m_anModelKeys[modelPart] = modelId;
 }
 
 // 0x5A7920
 void CPedClothesDesc::SetModel(const char* model, eClothesModelPart modelPart) {
-    plugin::CallMethod<0x5A7920, CPedClothesDesc*, const char*, eClothesModelPart>(this, model, modelPart);
+    if (model)
+        m_anModelKeys[modelPart] = CKeyGen::GetUppercaseKey(model);
+    else
+        m_anModelKeys[modelPart] = 0;
 }
 
 // 0x5A7950
 bool CPedClothesDesc::GetIsWearingBalaclava() {
-    return plugin::CallMethodAndReturn<bool, 0x5A7950, CPedClothesDesc*>(this);
+    return m_anModelKeys[9] == CKeyGen::GetUppercaseKey("balaclava");
 }
 
 // 0x5A7970
