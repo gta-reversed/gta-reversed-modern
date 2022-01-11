@@ -22,7 +22,7 @@ void CCollision::InjectHooks()
     Install("CCollision", "TestSphereBox", 0x4120C0, &CCollision::TestSphereBox);
     Install("CCollision", "ProcessSphereBox", 0x412130, &CCollision::ProcessSphereBox);
     Install("CCollision", "PointInTriangle", 0x412700, &CCollision::PointInTriangle);
-    //Install("CCollision", "DistToLineSqr", 0x412850, &CCollision::DistToLineSqr);
+    Install("CCollision", "DistToLineSqr", 0x412850, &CCollision::DistToLineSqr);
     Install("CCollision", "DistToMathematicalLine", 0x412970, &CCollision::DistToMathematicalLine);
     //Install("CCollision", "DistToMathematicalLine2D", 0x412A30, &CCollision::DistToMathematicalLine2D);
     //Install("CCollision", "DistAlongLine2D", 0x412A80, &CCollision::DistAlongLine2D);
@@ -183,6 +183,16 @@ void CCollision::Tests() {
         const CVector tri[3]{ RandomVector(), RandomVector(), RandomVector() };
         const auto Org = plugin::CallAndReturn<bool, 0x412700, CVector const&, CVector const*>;
         Test("PointInTriangle", Org, PointInTriangle, std::equal_to{}, RandomVector(), tri);
+    }
+
+    // DistToLineSqr
+    {
+        const auto Org = plugin::CallAndReturn<float, 0x412850, CVector const*, CVector const*, CVector const*>;
+        const auto ls{ RandomVector() }, le{ RandomVector() }, p{ RandomVector() };
+        const auto CmpEq = [](float org, float rev) {
+            return approxEqual(org, rev, 0.001f);
+        };
+        Test("DistToLineSqr", Org, DistToLineSqr, CmpEq, &ls, &le, &p);
     }
 }
 
@@ -467,8 +477,29 @@ bool CCollision::PointInTriangle(CVector const& point, CVector const* triPoints)
 }
 
 // 0x412850
+// Similar to `DistToMathematicalLine` but if the point on the line would be before `lineStart` or after `lineEnd`
+// the distance returned is the of the point to either lineStart or lineEnd respectively.
 float CCollision::DistToLineSqr(CVector const* lineStart, CVector const* lineEnd, CVector const* point) {
-    return plugin::CallAndReturn<float, 0x412850, CVector const*, CVector const*, CVector const*>(lineStart, lineEnd, point);
+    const auto l = *lineEnd - *lineStart;
+    const auto p = *point - *lineStart;
+    const auto lineMagSq = l.SquaredMagnitude();
+
+    // Simple Pythagorean here, we gotta find side `a`
+
+    const auto dot = DotProduct(p, l);
+    if (dot <= 0.f) // before beginning of line, return distance to beginning
+        return p.SquaredMagnitude();
+
+    if (dot >= lineMagSq) // after end of line, return distance to end
+        return (p - l).SquaredMagnitude();
+
+    // Simple Pythagorean here, we gotta find side `a`
+
+    const auto cSq = p.SquaredMagnitude();
+    const auto bSq = dot * dot / lineMagSq; // Neither vectors were normalized before calculating the dot product, so normalize it now
+
+    const auto aSq = cSq - bSq;
+    return aSq > 0.0f ? std::sqrt(aSq) : 0.0f; // Little optimization to not call `sqrt` if the dist is 0 (it wont ever be negative)
 }
 
 // 0x412970
