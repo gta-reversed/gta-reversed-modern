@@ -201,6 +201,7 @@ CLink<CEntity*>* CStreaming::AddEntity(CEntity* entity) {
     return link;
 }
 
+// Returns file index
 // 0x407610
 uint32 CStreaming::AddImageToList(char const* fileName, bool bNotPlayerImg) {
     const auto entry = std::ranges::find_if(ms_files,
@@ -212,7 +213,7 @@ uint32 CStreaming::AddImageToList(char const* fileName, bool bNotPlayerImg) {
 
     *entry = { fileName, bNotPlayerImg }; // Set entry details
 
-    return std::distance(ms_files, entry); // Return file index
+    return std::distance(ms_files, entry); 
 }
 
 // 0x40C520
