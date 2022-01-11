@@ -13,7 +13,7 @@ void CCollision::InjectHooks()
 {
     using namespace ReversibleHooks;
 
-    //Install("CCollision", "Update", 0x411E20, &CCollision::Update);
+    Install("CCollision", "Update", 0x411E20, &CCollision::Update);
     //Install("CCollision", "SortOutCollisionAfterLoad", 0x411E30, &CCollision::SortOutCollisionAfterLoad);
     //Install("CCollision", "TestSphereSphere", 0x411E70, &CCollision::TestSphereSphere);
     //Install("CCollision", "CalculateColPointInsideBox", 0x411EC0, &CCollision::CalculateColPointInsideBox);
@@ -78,7 +78,7 @@ void CCollision::InjectHooks()
 
 // 0x411E20
 void CCollision::Update() {
-    plugin::Call<0x411E20>();
+    // empty
 }
 
 // 0x411E30
