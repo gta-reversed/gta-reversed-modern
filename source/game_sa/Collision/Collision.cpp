@@ -482,7 +482,7 @@ float CCollision::DistToMathematicalLine(CVector const* lineStart, CVector const
     const auto bSq = (float)std::pow(DotProduct(p, l), 2) / p.SquaredMagnitude(); // Must divide it by either `l.SquaredMagnitude()` because neither vectors are normalized
 
     const auto aSq = cSq - bSq;
-    return bSq > 0.0f ? std::sqrt(bSq) : 0.0f; // Little optimization to not call `sqrt` if the dist is 0 (it wont ever be negative)
+    return aSq > 0.0f ? std::sqrt(aSq) : 0.0f; // Little optimization to not call `sqrt` if the dist is 0 (it wont ever be negative)
 }
 
 // 0x412A30
