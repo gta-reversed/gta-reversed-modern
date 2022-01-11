@@ -4,7 +4,7 @@
 
 void CCopPed::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CCopPed", "CCopPed", 0x5DDC60, &CCopPed::Constructor);
+    // Install("CCopPed", "CCopPed", 0x5DDC60, &CCopPed::Constructor); todo: unhook and test when core components of Ped will be reversed
     Install("CCopPed", "~CCopPed", 0x5DE0D0, &CCopPed::Destructor);
     Install("CCopPed", "SetPartner", 0x5DDE80, &CCopPed::SetPartner);
     Install("CCopPed", "AddCriminalToKill", 0x5DDEB0, &CCopPed::AddCriminalToKill);
