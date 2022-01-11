@@ -30,7 +30,7 @@ void CCollision::InjectHooks()
     Install("CCollision", "TestLineBox_DW", 0x412C70, &CCollision::TestLineBox_DW);
     Install("CCollision", "TestLineBox", 0x413070, &CCollision::TestLineBox);
     Install("CCollision", "TestVerticalLineBox", 0x413080, &CCollision::TestVerticalLineBox);
-    //Install("CCollision", "ProcessLineBox", 0x413100, &CCollision::ProcessLineBox);
+    Install("CCollision", "ProcessLineBox", 0x413100, &CCollision::ProcessLineBox);
     //Install("CCollision", "Test2DLineAgainst2DLine", 0x4138D0, &CCollision::Test2DLineAgainst2DLine);
     //Install("CCollision", "colPoint1", 0x413960, &ProcessDiscCollision);
     //Install("CCollision", "TestLineTriangle", 0x413AC0, &CCollision::TestLineTriangle);
@@ -249,6 +249,31 @@ void CCollision::Tests() {
     {
         const auto Org = plugin::CallAndReturn<bool, 0x413080, CColLine const&, CBox const&>;
         Test("TestVerticalLineBox", Org, TestVerticalLineBox, std::equal_to{}, RandomVerticalLine(), RandomBox());
+    }
+
+    // ProcessLineBox
+    {
+        const auto Org = [&](auto line, auto box) {
+            CColPoint cp{};
+            float depth{ 100.f };
+            const bool s = plugin::CallAndReturn<bool, 0x413100, CColLine const&, CColBox const&, CColPoint&, float&>(line, box, cp, depth);
+            return std::make_tuple(cp, depth, s);
+        };
+
+        const auto Rev = [](auto line, auto box) {
+            CColPoint cp{};
+            float depth{ 100.f };
+            const bool s = ProcessLineBox(line, box, cp, depth);
+            return std::make_tuple(cp, depth, s);
+        };
+
+        const auto CmpEq = [&](auto org, auto rev) {
+            auto [org_cp, org_d, org_s] = org;
+            auto [rev_cp, rev_d, rev_s] = rev;
+            return org_s == rev_s && approxEqual(rev_d, org_d, 0.001f) && ColPointEq(org_cp, rev_cp);
+        };
+
+        Test("ProcessLineSphere", Org, Rev, CmpEq, RandomLine(), RandomBox());
     }
 }
 
@@ -733,7 +758,119 @@ bool CCollision::TestVerticalLineBox(CColLine const& line, CBox const& box) {
 
 // 0x413100
 bool CCollision::ProcessLineBox(CColLine const& line, CColBox const& box, CColPoint& colPoint, float& maxTouchDistance) {
-    return plugin::CallAndReturn<bool, 0x413100, CColLine const&, CColBox const&, CColPoint&, float&>(line, box, colPoint, maxTouchDistance);
+    float mint, t, x, y, z;
+    CVector normal;
+    CVector p;
+
+    mint = 1.0f;
+    // check if points are on opposite sides of min x plane
+    if ((box.m_vecMin.x - line.m_vecEnd.x) * (box.m_vecMin.x - line.m_vecStart.x) < 0.0f) {
+        // parameter along line where we intersect
+        t = (box.m_vecMin.x - line.m_vecStart.x) / (line.m_vecEnd.x - line.m_vecStart.x);
+        // y of intersection
+        y = line.m_vecStart.y + (line.m_vecEnd.y - line.m_vecStart.y) * t;
+        if (y > box.m_vecMin.y && y < box.m_vecMax.y) {
+            // z of intersection
+            z = line.m_vecStart.z + (line.m_vecEnd.z - line.m_vecStart.z) * t;
+            if (z > box.m_vecMin.z && z < box.m_vecMax.z)
+                if (t < mint) {
+                    mint = t;
+                    p = CVector(box.m_vecMin.x, y, z);
+                    normal = CVector(-1.0f, 0.0f, 0.0f);
+                }
+        }
+    }
+
+    // max x plane
+    if ((line.m_vecEnd.x - box.m_vecMax.x) * (line.m_vecStart.x - box.m_vecMax.x) < 0.0f) {
+        t = (line.m_vecStart.x - box.m_vecMax.x) / (line.m_vecStart.x - line.m_vecEnd.x);
+        y = line.m_vecStart.y + (line.m_vecEnd.y - line.m_vecStart.y) * t;
+        if (y > box.m_vecMin.y && y < box.m_vecMax.y) {
+            z = line.m_vecStart.z + (line.m_vecEnd.z - line.m_vecStart.z) * t;
+            if (z > box.m_vecMin.z && z < box.m_vecMax.z)
+                if (t < mint) {
+                    mint = t;
+                    p = CVector(box.m_vecMax.x, y, z);
+                    normal = CVector(1.0f, 0.0f, 0.0f);
+                }
+        }
+    }
+
+    // min y plne
+    if ((box.m_vecMin.y - line.m_vecStart.y) * (box.m_vecMin.y - line.m_vecEnd.y) < 0.0f) {
+        t = (box.m_vecMin.y - line.m_vecStart.y) / (line.m_vecEnd.y - line.m_vecStart.y);
+        x = line.m_vecStart.x + (line.m_vecEnd.x - line.m_vecStart.x) * t;
+        if (x > box.m_vecMin.x && x < box.m_vecMax.x) {
+            z = line.m_vecStart.z + (line.m_vecEnd.z - line.m_vecStart.z) * t;
+            if (z > box.m_vecMin.z && z < box.m_vecMax.z)
+                if (t < mint) {
+                    mint = t;
+                    p = CVector(x, box.m_vecMin.y, z);
+                    normal = CVector(0.0f, -1.0f, 0.0f);
+                }
+        }
+    }
+
+    // max y plane
+    if ((line.m_vecStart.y - box.m_vecMax.y) * (line.m_vecEnd.y - box.m_vecMax.y) < 0.0f) {
+        t = (line.m_vecStart.y - box.m_vecMax.y) / (line.m_vecStart.y - line.m_vecEnd.y);
+        x = line.m_vecStart.x + (line.m_vecEnd.x - line.m_vecStart.x) * t;
+        if (x > box.m_vecMin.x && x < box.m_vecMax.x) {
+            z = line.m_vecStart.z + (line.m_vecEnd.z - line.m_vecStart.z) * t;
+            if (z > box.m_vecMin.z && z < box.m_vecMax.z)
+                if (t < mint) {
+                    mint = t;
+                    p = CVector(x, box.m_vecMax.y, z);
+                    normal = CVector(0.0f, 1.0f, 0.0f);
+                }
+        }
+    }
+
+    // min z plne
+    if ((box.m_vecMin.z - line.m_vecStart.z) * (box.m_vecMin.z - line.m_vecEnd.z) < 0.0f) {
+        t = (box.m_vecMin.z - line.m_vecStart.z) / (line.m_vecEnd.z - line.m_vecStart.z);
+        x = line.m_vecStart.x + (line.m_vecEnd.x - line.m_vecStart.x) * t;
+        if (x > box.m_vecMin.x && x < box.m_vecMax.x) {
+            y = line.m_vecStart.y + (line.m_vecEnd.y - line.m_vecStart.y) * t;
+            if (y > box.m_vecMin.y && y < box.m_vecMax.y)
+                if (t < mint) {
+                    mint = t;
+                    p = CVector(x, y, box.m_vecMin.z);
+                    normal = CVector(0.0f, 0.0f, -1.0f);
+                }
+        }
+    }
+
+    // max z plane
+    if ((line.m_vecStart.z - box.m_vecMax.z) * (line.m_vecEnd.z - box.m_vecMax.z) < 0.0f) {
+        t = (line.m_vecStart.z - box.m_vecMax.z) / (line.m_vecStart.z - line.m_vecEnd.z);
+        x = line.m_vecStart.x + (line.m_vecEnd.x - line.m_vecStart.x) * t;
+        if (x > box.m_vecMin.x && x < box.m_vecMax.x) {
+            y = line.m_vecStart.y + (line.m_vecEnd.y - line.m_vecStart.y) * t;
+            if (y > box.m_vecMin.y && y < box.m_vecMax.y)
+                if (t < mint) {
+                    mint = t;
+                    p = CVector(x, y, box.m_vecMax.z);
+                    normal = CVector(0.0f, 0.0f, 1.0f);
+                }
+        }
+    }
+
+    if (mint >= maxTouchDistance)
+        return false;
+
+    colPoint.m_vecPoint = p;
+    colPoint.m_vecNormal = normal;
+
+    colPoint.m_nSurfaceTypeA = eSurfaceType::SURFACE_DEFAULT;
+    colPoint.m_nLightingA = 0;
+
+    colPoint.m_nSurfaceTypeB = box.m_nMaterial;
+    colPoint.m_nLightingB = box.m_nLighting;
+
+    maxTouchDistance = mint;
+
+    return true;
 }
 
 // 0x4138D0
