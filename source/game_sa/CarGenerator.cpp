@@ -91,7 +91,7 @@ bool CCarGenerator::CheckIfWithinRangeOfAnyPlayers()
         return false;
 
     float posnZ = UncompressLargeVector(m_vecPosn).z;
-    if ((CGame::currArea == AREA_CODE_NORMAL_WORLD && posnZ < 950.0f || CGame::currArea != AREA_CODE_NORMAL_WORLD && posnZ >= 950.0f)
+    if ((CGame::CanSeeOutSideFromCurrArea() && posnZ < 950.0f || !CGame::CanSeeOutSideFromCurrArea() && posnZ >= 950.0f)
         && (relPosn.Magnitude2D() >= TheCamera.m_fGenerationDistMultiplier * 160.0f - 20.0f || bHighPriority)
         && DotProduct2D(FindPlayerSpeed(-1), relPosn) <= 0.0f
     ) {

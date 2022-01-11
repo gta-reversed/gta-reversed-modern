@@ -159,7 +159,6 @@ struct tStreamingFileDesc {
 
     char  m_szName[40]{}; // If this string is empty (eg.: first elem in array is NULL) the entry isnt in use
     bool  m_bNotPlayerImg{};
-    char  __pad[3]{};
     int32 m_StreamHandle{-1};
 };
 
@@ -168,12 +167,20 @@ VALIDATE_SIZE(tStreamingFileDesc, 0x30);
 struct tStreamingChannel {
     int32               modelIds[16];
     int32               modelStreamingBufferOffsets[16];
-    eChannelState LoadStatus;
+    eChannelState       LoadStatus;
     int32               iLoadingLevel; // the value gets modified, but it's not used
     int32               offsetAndHandle;
     int32               sectorCount;
     int32               totalTries;
     eCdStreamStatus     m_nCdStreamStatus;
+
+    bool IsReading() const noexcept {
+        return LoadStatus == eChannelState::READING;
+    }
+    bool IsStarted() const noexcept {
+        return LoadStatus == eChannelState::STARTED;
+    }
+
 };
 
 VALIDATE_SIZE(tStreamingChannel, 0x98);
