@@ -102,7 +102,7 @@ public:
     static void SwitchGangWarsActive();
 
     static void TellGangMembersTo(bool bIsGangWarEnding);
-    static void TellStreamingWhichGangsAreNeeded(int32* GangsBitFlags);
+    static void TellStreamingWhichGangsAreNeeded(uint32* GangsBitFlags);
 
     static void Update();
     static void UpdateTerritoryUnderControlPercentage();

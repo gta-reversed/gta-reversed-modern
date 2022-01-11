@@ -96,7 +96,7 @@ bool CTaskSimpleJump::ProcessPed_Reversed(CPed* ped)
         return this->m_bIsFinished;
     }
 
-    if ((ped->IsPlayer() || m_bCanClimb) && CGame::currArea == AREA_CODE_NORMAL_WORLD)
+    if ((ped->IsPlayer() || m_bCanClimb) && CGame::CanSeeOutSideFromCurrArea())
         m_pClimbEntity = CTaskSimpleClimb::TestForClimb(ped, m_vecClimbPos, m_fClimbAngle, m_nClimbSurfaceType, true);
 
     if (!m_pClimbEntity)

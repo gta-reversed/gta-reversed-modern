@@ -14,7 +14,7 @@ newoption {
     description = "Output directory for the build files"
 }
 if not _OPTIONS["outdir"] then
-    _OPTIONS["outdir"] = "Build"
+    _OPTIONS["outdir"] = "build"
 end
 
 
@@ -28,8 +28,9 @@ solution "gta_reversed"
 
     location( _OPTIONS["outdir"] )
     targetprefix "" -- no 'lib' prefix on gcc
-    targetdir "Bin"
-    implibdir "Bin"
+    targetdir "bin"
+	targetdir("bin/" .. "%{cfg.buildcfg}")
+    implibdir("bin/" .. "%{cfg.buildcfg}")
     
     configuration "Debug*"
         flags { symbols ("On") }
@@ -40,6 +41,7 @@ solution "gta_reversed"
         buildoptions {"/MD"}
         optimize "Full"
     configuration "vs*"
+         flags {"MultiProcessorCompile"}
          linkoptions   { "/ignore:4099" }      
          buildoptions {"/EHsc"}
 

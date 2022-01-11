@@ -28,7 +28,7 @@ public:
     // Normalises a vector
     void Normalise();
 
-    // Normalises a vector and returns length
+    // Normalises a vector and returns length (in-place)
     float NormaliseAndMag();
 
     // Performs cross calculation
@@ -68,7 +68,7 @@ public:
         x = rwvec.x; y = rwvec.y; z = rwvec.z;
     }
 
-    inline float SquaredMagnitude()
+    inline float SquaredMagnitude() const
     {
         return x*x + y*y + z*z;
     }

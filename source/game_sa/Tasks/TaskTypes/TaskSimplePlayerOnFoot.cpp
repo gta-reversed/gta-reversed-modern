@@ -762,7 +762,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
     uint32      touchTimeDelta = pad->GetTouchedTimeDelta();
     if (touchTimeDelta <= 10000) {
         if (animBlock->bLoaded) {
-            CStreaming::SetModelIsDeletable(m_nAnimationBlockIndex + RESOURCE_ID_IFP);
+            CStreaming::SetModelIsDeletable(IFPToModelId(m_nAnimationBlockIndex));
             CAnimBlendAssociation* animAssoc = nullptr;
             for (animAssoc = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump); animAssoc; animAssoc = RpAnimBlendGetNextAssociation(animAssoc)) {
                 if (animAssoc->m_nFlags & ANIM_FLAG_200) {
@@ -774,7 +774,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
         return;
     }
 
-    CStreaming::RequestModel(m_nAnimationBlockIndex + RESOURCE_ID_IFP, LOADSTATE_REQUESTED);
+    CStreaming::RequestModel(IFPToModelId(m_nAnimationBlockIndex), STREAMING_GAME_REQUIRED);
     if (!animBlock->bLoaded)
         return;
 
