@@ -9,6 +9,8 @@
 
 CLinkList<CCollisionData*>& CCollision::ms_colModelCache = *(CLinkList<CCollisionData*>*)0x96592C;
 
+void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint& colPoint); // Forward declaration needed for `InjectHooks`
+
 void CCollision::InjectHooks()
 {
     using namespace ReversibleHooks;
@@ -16,7 +18,7 @@ void CCollision::InjectHooks()
     Install("CCollision", "Update", 0x411E20, &CCollision::Update);
     Install("CCollision", "SortOutCollisionAfterLoad", 0x411E30, &CCollision::SortOutCollisionAfterLoad);
     Install("CCollision", "TestSphereSphere", 0x411E70, &CCollision::TestSphereSphere);
-    //Install("CCollision", "CalculateColPointInsideBox", 0x411EC0, &CCollision::CalculateColPointInsideBox);
+    Install("CCollision", "CalculateColPointInsideBox", 0x411EC0, &CalculateColPointInsideBox);
     //Install("CCollision", "TestSphereBox", 0x4120C0, &CCollision::TestSphereBox);
     //Install("CCollision", "ProcessSphereBox", 0x412130, &CCollision::ProcessSphereBox);
     //Install("CCollision", "PointInTriangle", 0x412700, &CCollision::PointInTriangle);
@@ -85,7 +87,17 @@ void CCollision::Tests() {
     srand(seed);
     std::cout << "CCollision::Tests seed: " << seed << std::endl;
 
-    const auto RandomVector = [](float min, float max) {
+    const auto VectorEq = [](const CVector& lhs, const CVector& rhs) {
+        return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+    };
+
+    const auto ColPointEq = [&](const CColPoint& lhs, const CColPoint& rhs) {
+        return VectorEq(lhs.m_vecPoint, rhs.m_vecPoint)
+            && lhs.m_fDepth == rhs.m_fDepth
+            && VectorEq(lhs.m_vecNormal, rhs.m_vecNormal);
+    };
+
+    const auto RandomVector = [](float min = -100.f, float max = 100.f) {
         return CVector{
             CGeneral::GetRandomNumberInRange(min, max),
             CGeneral::GetRandomNumberInRange(min, max),
@@ -97,8 +109,14 @@ void CCollision::Tests() {
         return CColSphere{ RandomVector(min, max), CGeneral::GetRandomNumberInRange(min, max) };
     };
 
-    const auto Test = [](auto name, auto org, auto rev, auto&&... args) {
-        if (org(args...) != rev(args...)) {
+    const auto RandomBox = [&](float min = -100.f, float max = 100.f) {
+        CColBox cb{ RandomVector(min, max), RandomVector(min, max) };
+        cb.Recalc();
+        return cb;
+    };
+
+    const auto Test = [](auto name, auto org, auto rev, auto cmp, auto&&... args) {
+        if (!cmp(org(args...), rev(args...))) {
             std::cerr << "[CCollision::Tests]: " << name << " failed. " << std::endl;
             assert(0);
         }
@@ -107,7 +125,23 @@ void CCollision::Tests() {
     {
         auto sp1 = RandomSphere(), sp2 = RandomSphere();
         auto Original = plugin::CallAndReturn<bool, 0x411E70, CColSphere const&, CColSphere const&>;
-        Test("TestSphereSphere", Original, TestSphereSphere, sp1, sp2);
+        Test("TestSphereSphere", Original, TestSphereSphere, std::equal_to<>{}, sp1, sp2);
+    }
+
+    {
+        const auto Org = [&](auto box, auto point) {
+            CColPoint cp{};
+            plugin::Call<0x411EC0, CBox const&, CVector const&, CColPoint&>(box, point, cp);
+            return cp;
+        };
+
+        const auto Rev = [](auto box, auto point) {
+            CColPoint cp{};
+            CalculateColPointInsideBox(box, point, cp);
+            return cp;
+        };
+
+        Test("CalculateColPointInsideBox", Org, Rev, ColPointEq, RandomBox(), RandomVector());
     }
 }
 
@@ -129,7 +163,32 @@ bool CCollision::TestSphereSphere(CColSphere const& sphere1, CColSphere const& s
 
 // 0x411EC0
 void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint& colPoint) {
-    plugin::Call<0x411EC0, CBox const&, CVector const&, CColPoint&>(box, point, colPoint);
+    const auto pointToCenter = box.GetCenter() - point;
+
+    // Calculate component-wise distance to the closest corner (either box.min or box.max)
+    #define DoAxis(a) pointToCenter.a <= 0 ? point.a - box.m_vecMin.a : box.m_vecMax.a - point.a
+    const CVector pointToClosest{ DoAxis(x), DoAxis(y), DoAxis(z) };
+    #undef DoAxis
+
+    const auto CalcNormal = [](float a) {
+        return a <= 0.f ? -1.f : 1.f;
+    };
+
+    colPoint = {};
+    colPoint.m_vecPoint = point;
+
+    if (pointToClosest.x >= pointToClosest.y || pointToClosest.x >= pointToClosest.z) {
+        if (pointToClosest.y >= pointToClosest.x || pointToClosest.y >= pointToClosest.z) {
+            colPoint.m_vecNormal.z = CalcNormal(pointToClosest.z);
+            colPoint.m_fDepth = pointToClosest.z;
+        } else {
+            colPoint.m_vecNormal.y = CalcNormal(pointToClosest.y);
+            colPoint.m_fDepth = pointToClosest.y;
+        }
+    } else {
+        colPoint.m_vecNormal.x = CalcNormal(pointToClosest.x);
+        colPoint.m_fDepth = pointToClosest.x;
+    }
 }
 
 // 0x4120C0
