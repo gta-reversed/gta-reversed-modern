@@ -31,7 +31,7 @@ void CCollision::InjectHooks()
     Install("CCollision", "TestLineBox", 0x413070, &CCollision::TestLineBox);
     Install("CCollision", "TestVerticalLineBox", 0x413080, &CCollision::TestVerticalLineBox);
     Install("CCollision", "ProcessLineBox", 0x413100, &CCollision::ProcessLineBox);
-    //Install("CCollision", "Test2DLineAgainst2DLine", 0x4138D0, &CCollision::Test2DLineAgainst2DLine);
+    Install("CCollision", "Test2DLineAgainst2DLine", 0x4138D0, &CCollision::Test2DLineAgainst2DLine);
     //Install("CCollision", "colPoint1", 0x413960, &ProcessDiscCollision);
     //Install("CCollision", "TestLineTriangle", 0x413AC0, &CCollision::TestLineTriangle);
     //Install("CCollision", "ProcessLineTriangle", 0x4140F0, &CCollision::ProcessLineTriangle);
@@ -875,7 +875,11 @@ bool CCollision::ProcessLineBox(CColLine const& line, CColBox const& box, CColPo
 
 // 0x4138D0
 bool CCollision::Test2DLineAgainst2DLine(float line1StartX, float line1StartY, float line1EndX, float line1EndY, float line2StartX, float line2StartY, float line2EndX, float line2EndY) {
-    return plugin::CallAndReturn<bool, 0x4138D0, float, float, float, float, float, float, float, float>(line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY);
+    return ((line2StartX - line1StartX + line2EndX) * line1EndY - (line2StartY - line1StartY + line2EndY) * line1EndX)
+        * ((line2StartX - line1StartX) * line1EndY - (line2StartY - line1StartY) * line1EndX) <= 0.0
+        &&
+        ((line1StartX - line2StartX + line1EndX) * line2EndY - (line1StartY - line2StartY + line1EndY) * line2EndX)
+        * ((line1StartX - line2StartX) * line2EndY - (line1StartY - line2StartY) * line2EndX) <= 0.0;
 }
 
 // 0x413960
