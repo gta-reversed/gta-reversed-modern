@@ -487,7 +487,7 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     if (progressAdd) {
         addColor.a = color.a;
         DrawRect({
-            std::max<float>(x - 1.0f, currX - (x - 1.0f)),
+            std::max<float>(x - 1.0f, currX - progressAdd),
             y,
             currX,
             y + height

@@ -46,15 +46,15 @@ public:
     static CLoadedCarGroup&          m_LoadedBoats;
     static CLoadedCarGroup&          m_InAppropriateLoadedCars;
     static CLoadedCarGroup&          m_AppropriateLoadedCars;
-    static CLoadedCarGroup(&m_LoadedGangCars)[10];
-    static bool&            bZoneChangeHasHappened;
-    static uint8&           m_CountDownToPedsAtStart;
-    static uint32&          ms_nTotalMissionPeds;
-    static uint32&          ms_nTotalPeds;
-    static uint32&          ms_nTotalGangPeds;
-    static uint32&          ms_nTotalCivPeds;
-    static uint32&          ms_nTotalCarPassengerPeds;
-    static uint32&          ms_nNumDealers;
+    static CLoadedCarGroup           (&m_LoadedGangCars)[10];
+    static bool&                     bZoneChangeHasHappened;
+    static uint8&                    m_CountDownToPedsAtStart;
+    static uint32&                   ms_nTotalMissionPeds;
+    static uint32&                   ms_nTotalPeds;
+    static uint32&                   ms_nTotalGangPeds;
+    static uint32&                   ms_nTotalCivPeds;
+    static uint32&                   ms_nTotalCarPassengerPeds;
+    static uint32&                   ms_nNumDealers;
     // static uint32 ms_nNumGang[10]
     static uint32* ms_nNumGang;
     static uint32& ms_nNumEmergency;
@@ -176,6 +176,7 @@ public:
     static void PopulateInterior(int32 numPeds, CVector posn);
     static void Update(bool generatePeds);
     static bool DoesCarGroupHaveModelId(int32 carGroupId, int32 modelId);
+
     static ePopcyclePedGroup GetPedGroupId(ePopcycleGroup popcycleGroup, int32 worldZone) { return static_cast<ePopcyclePedGroup>(m_TranslationArray[popcycleGroup].pedGroupIds[worldZone]); }
     static int32 GetNumPedsInGroup(ePopcycleGroup popcycleGroup, int32 worldZone) { return m_nNumPedsInGroup[GetPedGroupId(popcycleGroup, worldZone)]; }
     static int32 GetNumPedsInGroup(ePopcyclePedGroup pedGroup) { return m_nNumPedsInGroup[pedGroup]; }

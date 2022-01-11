@@ -28,7 +28,7 @@ public:
     // Normalises a vector
     void Normalise();
 
-    // Normalises a vector and returns length
+    // Normalises a vector and returns length (in-place)
     float NormaliseAndMag();
 
     // Performs cross calculation
