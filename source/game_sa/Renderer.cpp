@@ -822,17 +822,15 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
                 if (CStreaming::ms_disableStreaming || !entity->GetIsOnScreen() || ms_bInTheSky)
                     break;
                 if (bRequestModel) {
-                    if (bRequestModel) {
-                        if (CStreaming::GetInfo(entity->m_nModelIndex).IsLoaded()){
+                    if (CStreaming::GetInfo(entity->m_nModelIndex).IsLoaded()){
+                        CStreaming::RequestModel(entity->m_nModelIndex, 0);
+                        break;
+                    } else {
+                        if (!entity->IsEntityOccluded())
+                        {
+                            SetLoadingPriority(1);
                             CStreaming::RequestModel(entity->m_nModelIndex, 0);
                             break;
-                        } else {
-                            if (!entity->IsEntityOccluded())
-                            {
-                                SetLoadingPriority(1);
-                                CStreaming::RequestModel(entity->m_nModelIndex, 0);
-                                break;
-                            }
                         }
                     }
                 }
