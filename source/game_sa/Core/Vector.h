@@ -68,7 +68,7 @@ public:
         x = rwvec.x; y = rwvec.y; z = rwvec.z;
     }
 
-    inline float SquaredMagnitude()
+    inline float SquaredMagnitude() const
     {
         return x*x + y*y + z*z;
     }

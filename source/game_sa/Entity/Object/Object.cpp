@@ -119,7 +119,7 @@ CObject::~CObject()
 {
     if (objectFlags.b0x200000 || objectFlags.b0x100000)
     {
-        const auto iIndex = CTheScripts::ScriptsForBrains.m_aScriptForBrains[m_wScriptTriggerIndex].m_nIMGindex + RESOURCE_ID_SCM;
+        const auto iIndex = SCMToModelId(CTheScripts::ScriptsForBrains.m_aScriptForBrains[m_wScriptTriggerIndex].m_nIMGindex);
         CStreaming::SetMissionDoesntRequireModel(iIndex);
         objectFlags.b0x100000 = false;
         objectFlags.b0x200000 = false;
