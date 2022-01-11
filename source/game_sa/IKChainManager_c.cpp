@@ -40,7 +40,7 @@ void IKChainManager_c::Reset() {
 
 // 0x6186D0
 void IKChainManager_c::Update(float a1) {
-    return plugin::CallMethod<0x6186D0, float>(a1);
+    return plugin::CallMethod<0x6186D0>(this, a1);
 }
 
 // 0x618750
@@ -85,7 +85,7 @@ bool IKChainManager_c::CanAcceptLookAt(CPed* ped) {
 
 // 0x618970
 void IKChainManager_c::LookAt(Const char* name, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, CVector* posn, bool bArg7, float fSpeed, int32 blendTime, int32 a10, bool bForceLooking) {
-    plugin::CallMethod<0x618970, IKChainManager_c*, Const char*, CPed*, CEntity*, int32, int32, CVector*, bool, float, int32, int32, bool>(this, name, ped, targetEntity, time, pedBoneId, posn, bArg7, fSpeed, blendTime, a10, bForceLooking);
+    plugin::CallMethod<0x618970>(this, name, ped, targetEntity, time, pedBoneId, posn, bArg7, fSpeed, blendTime, a10, bForceLooking);
 }
 
 bool IKChainManager_c::IsArmPointing(int32 nSlot, CPed* ped) {

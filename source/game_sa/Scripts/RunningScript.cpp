@@ -232,7 +232,7 @@ void CRunningScript::FlameInAngledAreaCheckCommand(int32 commandId) {
 
 // 0x464F50
 void CRunningScript::GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int32* pModelId) {
-    plugin::CallMethod<0x464F50, ePedType, int32*>(pedType, pModelId);
+    plugin::CallMethod<0x464F50>(this, pedType, pModelId);
 }
 
 // Returns offset of global variable

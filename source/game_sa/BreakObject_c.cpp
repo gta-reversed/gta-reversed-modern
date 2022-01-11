@@ -65,5 +65,5 @@ void BreakObject_c::Update(float timeStep) {
 
 // 0x59E480
 void BreakObject_c::Render(bool a1) {
-    plugin::CallMethod<0x59E480, BreakObject_c*, uint8>(this, a1);
+    plugin::CallMethod<0x59E480>(this, a1);
 }

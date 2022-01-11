@@ -36,7 +36,7 @@ bool CPedClothesDesc::GetIsWearingBalaclava() {
 }
 
 bool CPedClothesDesc::HasVisibleNewHairCut(int32 arg1) {
-    return plugin::CallMethodAndReturn<bool, 0x5A7970, int32>(arg1);
+    return plugin::CallMethodAndReturn<bool, 0x5A7970>(this, arg1);
 }
 
 bool CPedClothesDesc::HasVisibleTattoo() {
