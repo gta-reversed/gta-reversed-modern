@@ -37,7 +37,14 @@ eModelID ResolveModelForCopType(uint32_t typeOrModelID) {
 // 0x5DDC60
 CCopPed::CCopPed(uint32_t copTypeOrModelID) : CPed(ePedType::PED_TYPE_COP), m_nCopTypeOrModelID(copTypeOrModelID) {
     SetModelIndex(ResolveModelForCopType(copTypeOrModelID)); /* R* originally seem to have used this switch to set the model as well, but this is nicer */
+
     switch (copTypeOrModelID) {
+    /* Done in ResolveModelForCopType
+    case eCopType::COP_TYPE_CITYCOP:
+        ...;
+    case eCopType::COP_TYPE_LAPDM1:
+        ...;
+    */
     case eCopType::COP_TYPE_SWAT1:
     case eCopType::COP_TYPE_SWAT2: {
         GiveDelayedWeapon(eWeaponType::WEAPON_MICRO_UZI, 1000);
@@ -66,16 +73,28 @@ CCopPed::CCopPed(uint32_t copTypeOrModelID) : CPed(ePedType::PED_TYPE_COP), m_nC
     default: {
         GiveWeapon(eWeaponType::WEAPON_NIGHTSTICK, 1000, true);
         GiveDelayedWeapon(eWeaponType::WEAPON_PISTOL, 1000);
-        SetCurrentWeapon(eWeaponType::WEAPON_UNARMED); /* See if this is correct */
+        m_nActiveWeaponSlot = 0;
+        SetArmour(0.0f);
+        SetWeaponShootingRange(30);
         SetWeaponAccuracy(60);
         break;
     }
     }
+    m_bDontPursuit = false;
+    field_74C = 0;
+    field_79D = 0;
+    field_7A4 = 0;
+
+    if (m_pTargetedObject)
+        m_pTargetedObject->CleanUpOldReference(&m_pTargetedObject);
+    m_pTargetedObject = 0;
+
     m_pIntelligence->SetDmRadius(60.0f);
     m_pIntelligence->SetNumPedsToScan(8);
     m_pedSpeech.Initialise(this);
-
-    /* rest done by the compiler, set as default value */
+    m_pCopPartner = nullptr;
+    std::ranges::fill(m_apCriminalsToKill, nullptr);
+    field_7C0 = 0;
 }
 
 // 0x5DDC60
@@ -98,8 +117,6 @@ CCopPed* CCopPed::Destructor() {
     return this;
 }
 
-void Test(CEntity** p) {}
-
 // 0x5DDE80
 void CCopPed::SetPartner(CCopPed* partner) {
     if (m_pCopPartner)
@@ -112,10 +129,10 @@ void CCopPed::SetPartner(CCopPed* partner) {
 
 // NOTSA
 void CCopPed::ClearCriminalListFromDeadPeds() {
-    for (CPed*& v : m_apCriminalsToKill) {
-        if (v && v->m_fHealth <= 0.0f) {
-            v->CleanUpOldReference(reinterpret_cast<CEntity**>(&v));
-            v = nullptr;
+    for (CPed*& ped : m_apCriminalsToKill) {
+        if (ped && ped->m_fHealth <= 0.0f) {
+            ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&ped));
+            ped = nullptr;
         }
     }
 }
@@ -124,8 +141,8 @@ void CCopPed::ClearCriminalListFromDeadPeds() {
 bool CCopPed::IsCriminalInList(CPed* criminal) {
     assert(criminal);
 
-    for (CPed* v : m_apCriminalsToKill) {
-        if (v == criminal)
+    for (CPed* ped : m_apCriminalsToKill) {
+        if (ped == criminal)
             return true;
     }
     return false;
@@ -180,7 +197,7 @@ void CCopPed::AddCriminalToKill(CPed* criminal) {
     criminal->bWantedByPolice = true;
     criminal->bCullExtraFarAway = true;
     criminal->m_fRemovalDistMultiplier = 0.3f;
-    criminal->m_nTimeTillWeNeedThisPed = CTimer::GetTimeInMS() + 300000; // 300k
+    criminal->m_nTimeTillWeNeedThisPed = CTimer::GetTimeInMS() + 300'000;
 
     if (CVehicle* crimVeh = criminal->m_pVehicle) {
         crimVeh->m_nExtendedRemovalRange = 255;
@@ -199,13 +216,13 @@ void CCopPed::RemoveCriminalToKill(int32 unk, int32 nCriminalLocalIdx) {
 
 // 0x5DE070
 void CCopPed::ClearCriminalsToKill() {
-    for (CPed*& it : m_apCriminalsToKill) {
-        if (it) {
-            it->m_nTimeTillWeNeedThisPed = CTimer::GetTimeInMS();
-            it->bCullExtraFarAway = false;
-            it->m_fRemovalDistMultiplier = 1.0f;
-            it->CleanUpOldReference(reinterpret_cast<CEntity**>(&it));
-            it = nullptr;
+    for (CPed*& ped : m_apCriminalsToKill) {
+        if (ped) {
+            ped->m_nTimeTillWeNeedThisPed = CTimer::GetTimeInMS();
+            ped->bCullExtraFarAway = false;
+            ped->m_fRemovalDistMultiplier = 1.0f;
+            ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&ped));
+            ped = nullptr;
         }
     }
 }
@@ -245,15 +262,15 @@ void CCopPed::ProcessControl_Reversed() {
             return;
 
         CColPoint colPoint{};
-        CEntity* pHitEntity{};
+        CEntity* hitEntity{};
         CWorld::ProcessLineOfSight(
             *TheCamera.GetGameCamPosition(),
             GetPosition() + CVector{ 0.0f, 0.0f, 0.7f },
             colPoint,
-            pHitEntity,
+            hitEntity,
             true, false, false, false, false, false, false, false
         );
-        if (pHitEntity) {
+        if (hitEntity) {
             FlagToDestroyWhenNextProcessed();
         }
     } else {
