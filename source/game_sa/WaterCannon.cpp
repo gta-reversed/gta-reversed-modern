@@ -157,7 +157,7 @@ void CWaterCannon::PushPeds() {
 
             {
                 CEventHitByWaterCannon event(secPosn, secMoveSpeed);
-                ped->GetIntelligence()->GetEventGroup().Add(&event, false);
+                ped->GetEventGroup().Add(&event, false);
             }
 
             ped->bWasStanding = false;
