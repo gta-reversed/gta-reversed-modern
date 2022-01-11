@@ -26,9 +26,9 @@ void CCollision::InjectHooks()
     Install("CCollision", "DistToMathematicalLine", 0x412970, &CCollision::DistToMathematicalLine);
     Install("CCollision", "DistToMathematicalLine2D", 0x412A30, &CCollision::DistToMathematicalLine2D);
     Install("CCollision", "DistAlongLine2D", 0x412A80, &CCollision::DistAlongLine2D);
-    //Install("CCollision", "ProcessLineSphere", 0x412AA0, &CCollision::ProcessLineSphere);
-    //Install("CCollision", "TestLineBox_DW", 0x412C70, &CCollision::TestLineBox_DW);
-    //Install("CCollision", "TestLineBox", 0x413070, &CCollision::TestLineBox);
+    Install("CCollision", "ProcessLineSphere", 0x412AA0, &CCollision::ProcessLineSphere);
+    Install("CCollision", "TestLineBox_DW", 0x412C70, &CCollision::TestLineBox_DW);
+    Install("CCollision", "TestLineBox", 0x413070, &CCollision::TestLineBox);
     //Install("CCollision", "TestVerticalLineBox", 0x413080, &CCollision::TestVerticalLineBox);
     //Install("CCollision", "ProcessLineBox", 0x413100, &CCollision::ProcessLineBox);
     //Install("CCollision", "Test2DLineAgainst2DLine", 0x4138D0, &CCollision::Test2DLineAgainst2DLine);
@@ -606,13 +606,93 @@ bool CCollision::ProcessLineSphere(CColLine const& line, CColSphere const& spher
 }
 
 // 0x412C70
+// Maybe just adapt the code from: http://www.3dkingdoms.com/weekly/weekly.php?a=3 ? Looks nicer than this one
 bool CCollision::TestLineBox_DW(CColLine const& line, CBox const& box) {
-    return plugin::CallAndReturn<bool, 0x412C70, CColLine const&, CBox const&>(line, box);
+    const auto IsInBox = [bb = CBoundingBox(box)](const CVector& point) {
+        return bb.IsPointWithin(point);
+    };
+
+    // Quick early exit if any of the line vertices are in the box
+    if (IsInBox(line.m_vecStart) || IsInBox(line.m_vecEnd))
+        return true;
+
+    float x, y, z, t;
+
+    // check if points are on opposite sides of min x plane
+    if ((box.m_vecMin.x - line.m_vecEnd.x) * (box.m_vecMin.x - line.m_vecStart.x) < 0.0f) {
+        // parameter along line where we intersect
+        t = (box.m_vecMin.x - line.m_vecStart.x) / (line.m_vecEnd.x - line.m_vecStart.x);
+        // y of intersection
+        y = line.m_vecStart.y + (line.m_vecEnd.y - line.m_vecStart.y) * t;
+        if (y > box.m_vecMin.y && y < box.m_vecMax.y) {
+            // z of intersection
+            z = line.m_vecStart.z + (line.m_vecEnd.z - line.m_vecStart.z) * t;
+            if (z > box.m_vecMin.z && z < box.m_vecMax.z)
+                return true;
+        }
+    }
+
+    // same test with max x plane
+    if ((line.m_vecEnd.x - box.m_vecMax.x) * (line.m_vecStart.x - box.m_vecMax.x) < 0.0f) {
+        t = (line.m_vecStart.x - box.m_vecMax.x) / (line.m_vecStart.x - line.m_vecEnd.x);
+        y = line.m_vecStart.y + (line.m_vecEnd.y - line.m_vecStart.y) * t;
+        if (y > box.m_vecMin.y && y < box.m_vecMax.y) {
+            z = line.m_vecStart.z + (line.m_vecEnd.z - line.m_vecStart.z) * t;
+            if (z > box.m_vecMin.z && z < box.m_vecMax.z)
+                return true;
+        }
+    }
+
+    // min y plne
+    if ((box.m_vecMin.y - line.m_vecStart.y) * (box.m_vecMin.y - line.m_vecEnd.y) < 0.0f) {
+        t = (box.m_vecMin.y - line.m_vecStart.y) / (line.m_vecEnd.y - line.m_vecStart.y);
+        x = line.m_vecStart.x + (line.m_vecEnd.x - line.m_vecStart.x) * t;
+        if (x > box.m_vecMin.x && x < box.m_vecMax.x) {
+            z = line.m_vecStart.z + (line.m_vecEnd.z - line.m_vecStart.z) * t;
+            if (z > box.m_vecMin.z && z < box.m_vecMax.z)
+                return true;
+        }
+    }
+
+    // max y plane
+    if ((line.m_vecStart.y - box.m_vecMax.y) * (line.m_vecEnd.y - box.m_vecMax.y) < 0.0f) {
+        t = (line.m_vecStart.y - box.m_vecMax.y) / (line.m_vecStart.y - line.m_vecEnd.y);
+        x = line.m_vecStart.x + (line.m_vecEnd.x - line.m_vecStart.x) * t;
+        if (x > box.m_vecMin.x && x < box.m_vecMax.x) {
+            z = line.m_vecStart.z + (line.m_vecEnd.z - line.m_vecStart.z) * t;
+            if (z > box.m_vecMin.z && z < box.m_vecMax.z)
+                return true;
+        }
+    }
+
+    // min z plne
+    if ((box.m_vecMin.z - line.m_vecStart.z) * (box.m_vecMin.z - line.m_vecEnd.z) < 0.0f) {
+        t = (box.m_vecMin.z - line.m_vecStart.z) / (line.m_vecEnd.z - line.m_vecStart.z);
+        x = line.m_vecStart.x + (line.m_vecEnd.x - line.m_vecStart.x) * t;
+        if (x > box.m_vecMin.x && x < box.m_vecMax.x) {
+            y = line.m_vecStart.y + (line.m_vecEnd.y - line.m_vecStart.y) * t;
+            if (y > box.m_vecMin.y && y < box.m_vecMax.y)
+                return true;
+        }
+    }
+
+    // max z plane
+    if ((line.m_vecStart.z - box.m_vecMax.z) * (line.m_vecEnd.z - box.m_vecMax.z) < 0.0f) {
+        t = (line.m_vecStart.z - box.m_vecMax.z) / (line.m_vecStart.z - line.m_vecEnd.z);
+        x = line.m_vecStart.x + (line.m_vecEnd.x - line.m_vecStart.x) * t;
+        if (x > box.m_vecMin.x && x < box.m_vecMax.x) {
+            y = line.m_vecStart.y + (line.m_vecEnd.y - line.m_vecStart.y) * t;
+            if (y > box.m_vecMin.y && y < box.m_vecMax.y)
+                return true;
+        }
+    }
+
+    return false;
 }
 
 // 0x413070
 bool CCollision::TestLineBox(CColLine const& line, CBox const& box) {
-    return plugin::CallAndReturn<bool, 0x413070, CColLine const&, CBox const&>(line, box);
+    return TestLineBox_DW(line, box);
 }
 
 // 0x413080
