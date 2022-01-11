@@ -1,21 +1,23 @@
 #pragma once
 
-#include "PluginBase.h"
 #include "BreakObject_c.h"
 
-class BreakManager_c
-{
+class BreakManager_c {
 public:
-    BreakObject_c m_aObjects[512];
+    BreakObject_c m_aObjects[64];
+
 public:
     static void InjectHooks();
 
-    void Init();
-    void Exit();
-    void Update(float fTimestep);
-    void Render(uint8_t bState);
-    void ResetAll();
-    BreakObject_c* Add(CObject* pObject, RwV3d* vecPos, float fVelocityRand, bool bSmash);
+    bool           Init();
+    void           Exit();
+    void           ResetAll();
+    bool           Add(CObject* object, CVector* vecPos, float fVelocityRand, bool bSmash);
+    void           Update(float timeStep);
+    void           Render(uint8 state);
+    BreakObject_c* GetFirstFreeSlot();
 };
+
+VALIDATE_SIZE(BreakManager_c, 0x800);
 
 extern BreakManager_c& g_breakMan;

@@ -6,12 +6,9 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-struct tTransmissionGear
-{
+struct tTransmissionGear {
     float m_maxVelocity;
-    float m_changeUpVelocity; // max velocity needed to change the current gear to higher
+    float m_changeUpVelocity;   // max velocity needed to change the current gear to higher
     float m_changeDownVelocity; // min velocity needed to change the current gear to lower
 };
 

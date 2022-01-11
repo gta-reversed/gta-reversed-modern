@@ -6,29 +6,29 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-#include "CVector.h"
+#include "Vector.h"
 
+struct RpHAnimBlendInterpFrame;
 
-class  AnimBlendFrameData {
+class AnimBlendFrameData {
 public:
     union {
         struct {
-            unsigned char m_bf1 : 1;                                    // doesn't seem to be used
-            unsigned char m_IsIFrameOrientationToAffectedByNodes : 1;   // m_IFrame orientation will be affected
-            unsigned char m_IsIFrameTranslationToAffectedByNodes : 1;   // m_IFrame translation will be affected
-            unsigned char m_bIsInitialized : 1;
-            unsigned char m_bUpdateSkinnedWith3dVelocityExtraction : 1;
-            unsigned char m_bCheckBlendNodeClumpKeyFrames : 1;          // key frames of CAninBlendNode bones will be checked
-            unsigned char m_bIsCompressed : 1;
-            unsigned char m_bUpdatingFrame : 1;                         // doesn't seem to be used
+            uint8 m_bf1 : 1;                                    // doesn't seem to be used
+            uint8 m_IsIFrameOrientationToAffectedByNodes : 1;   // m_IFrame orientation will be affected
+            uint8 m_IsIFrameTranslationToAffectedByNodes : 1;   // m_IFrame translation will be affected
+            uint8 m_bIsInitialized : 1;
+            uint8 m_bUpdateSkinnedWith3dVelocityExtraction : 1;
+            uint8 m_bCheckBlendNodeClumpKeyFrames : 1;          // key frames of CAninBlendNode bones will be checked
+            uint8 m_bIsCompressed : 1;
+            uint8 m_bUpdatingFrame : 1;                         // doesn't seem to be used
         };
-        unsigned char m_nFlags;
+        uint8 m_nFlags;
     };
-    char pad[3];
-    CVector        m_vecOffset;
-    struct RpHAnimBlendInterpFrame *m_pIFrame;
-    unsigned int   m_nNodeId;
+    char                     pad[3];
+    CVector                  m_vecOffset;
+    RpHAnimBlendInterpFrame* m_pIFrame;
+    uint32                   m_nNodeId;
 };
 
 VALIDATE_SIZE(AnimBlendFrameData, 0x18);

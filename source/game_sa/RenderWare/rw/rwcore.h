@@ -2443,6 +2443,9 @@ MACRO_STOP
 #define RwIm2DGetNearScreenZMacro() (RWSRCGLOBAL(dOpenDevice).zBufferNear)
 #define RwIm2DGetNearScreenZ() RwIm2DGetNearScreenZMacro()
 
+#define RwIm2DGetFarScreenZMacro() (RWSRCGLOBAL(dOpenDevice).zBufferFar)
+#define RwIm2DGetFarScreenZ() RwIm2DGetFarScreenZMacro()
+
 #define RwCameraGetNearClipPlaneMacro(_camera) ((_camera)->nearPlane)
 #define RwCameraGetNearClipPlane(_camera) RwCameraGetNearClipPlaneMacro(_camera)
 

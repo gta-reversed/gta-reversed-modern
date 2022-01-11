@@ -6,9 +6,7 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-
-enum  eAnimBlendCallbackType : unsigned int {
+enum eAnimBlendCallbackType : uint32 {
     ANIMBLENDCALLBACK_NONE = 0,
     ANIMBLENDCALLBACK_FINISH = 1,
     ANIMBLENDCALLBACK_DELETE = 2

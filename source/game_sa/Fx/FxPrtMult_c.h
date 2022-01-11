@@ -5,15 +5,15 @@
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-#include "PluginBase.h"
+
 #include "RenderWare.h"
 
 class FxPrtMult_c {
 public:
     RwRGBAReal m_color;
-    float m_fSize;
-    float field_14;
-    float m_fLife;
+    float      m_fSize;
+    float      field_14;
+    float      m_fLife;
 
     FxPrtMult_c();
     FxPrtMult_c(float red, float green, float blue, float alpha, float size, float arg5, float lastFactor);

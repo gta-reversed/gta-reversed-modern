@@ -1,6 +1,6 @@
 #pragma once
 
-enum class ePedStats : unsigned short {
+enum class ePedStats : uint16 {
     PLAYER,
     COP,
     MEDIC,
