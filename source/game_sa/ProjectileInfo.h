@@ -29,8 +29,8 @@ public:
     static void InjectHooks();
 
     static void Initialise();
-    static void RemoveFXSystem(uint8 bInstantly);
     static void Shutdown();
+    void RemoveFXSystem(bool bInstantly);
     static CProjectileInfo* GetProjectileInfo(int32 infoId);
     static void RemoveNotAdd(CEntity* creator, eWeaponType weaponType, CVector posn);
     static bool AddProjectile(CEntity* creator, eWeaponType eWeaponType, CVector posn, float force, CVector* direction, CEntity* victim);

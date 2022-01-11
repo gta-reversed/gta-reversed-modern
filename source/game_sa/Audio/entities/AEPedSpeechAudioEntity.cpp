@@ -218,7 +218,7 @@ int32 CAEPedSpeechAudioEntity::GetRepeatTime(int16 a1) {
 
 // 0x4E4840
 void CAEPedSpeechAudioEntity::LoadAndPlaySpeech(uint32 a2) {
-    plugin::CallMethod<0x4E4840, uint32>(a2);
+    plugin::CallMethod<0x4E4840>(this, a2);
 }
 
 // 0x4E49B0
@@ -228,12 +228,12 @@ int32 CAEPedSpeechAudioEntity::GetNumSlotsPlayingContext(int16 a2) {
 
 // 0x4E49E0
 int32 CAEPedSpeechAudioEntity::GetNextPlayTime(int16 a2) {
-    return plugin::CallMethodAndReturn<int32, 0x4E49E0, int16>(a2);
+    return plugin::CallMethodAndReturn<int32, 0x4E49E0>(this, a2);
 }
 
 // 0x4E4A20
 void CAEPedSpeechAudioEntity::SetNextPlayTime(int16 a2) {
-    plugin::CallMethod<0x4E4A20, int16>(a2);
+    plugin::CallMethod<0x4E4A20>(this, a2);
 }
 
 // 0x4E56D0
@@ -256,7 +256,7 @@ void CAEPedSpeechAudioEntity::DisablePedSpeechForScriptSpeech(int16 a1) {
 
 // 0x4E5730
 int8 CAEPedSpeechAudioEntity::CanPedSayGlobalContext(int16 a2) {
-    return plugin::CallMethodAndReturn<int8, 0x4E5730, int16>(a2);
+    return plugin::CallMethodAndReturn<int8, 0x4E5730>(this, a2);
 }
 
 // 0x4E58C0
@@ -279,17 +279,17 @@ int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeFromModel(eModelID modelId) {
 
 // 0x4E5920
 int16 CAEPedSpeechAudioEntity::GetSoundAndBankIDs(int16 phraseId, int16* a3) {
-    return plugin::CallMethodAndReturn<int16, 0x4E5920, int16, int16*>(phraseId, a3);
+    return plugin::CallMethodAndReturn<int16, 0x4E5920>(this, phraseId, a3);
 }
 
 // 0x4E5F10
 bool CAEPedSpeechAudioEntity::CanWePlayGlobalSpeechContext(int16 a2) {
-    return plugin::CallMethodAndReturn<bool, 0x4E5F10, int16>(a2);
+    return plugin::CallMethodAndReturn<bool, 0x4E5F10>(this, a2);
 }
 
 // 0x4E6550
 int16 CAEPedSpeechAudioEntity::AddSayEvent(int32 a2, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8) {
-    return plugin::CallMethodAndReturn<int16, 0x4E6550, int32, int16, uint32, float, uint8, uint8, uint8>(a2, phraseId, a4, a5, a6, a7, a8);
+    return plugin::CallMethodAndReturn<int16, 0x4E6550>(this, a2, phraseId, a4, a5, a6, a7, a8);
 }
 
 // 0x4E68D0
@@ -326,7 +326,7 @@ void CAEPedSpeechAudioEntity::StopCurrentSpeech() {
 
 // 0x4E4400
 int8 CAEPedSpeechAudioEntity::GetSoundAndBankIDsForScriptedSpeech(int32 a2) {
-    return plugin::CallMethodAndReturn<int8, 0x4E4400, int32>(a2);
+    return plugin::CallMethodAndReturn<int8, 0x4E4400, CAEPedSpeechAudioEntity*, int32>(this, a2);
 }
 
 // 0x4E4200
@@ -341,7 +341,7 @@ bool CAEPedSpeechAudioEntity::GetPedTalking() {
 
 // 0x4E4170
 int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeForSpecialPed(uint32 modelNameHash) {
-    return plugin::CallMethodAndReturn<int8, 0x4E4170, uint32>(modelNameHash);
+    return plugin::CallMethodAndReturn<int8, 0x4E4170, CAEPedSpeechAudioEntity*, uint32>(this, modelNameHash);
 }
 
 // Virtual methods// 0x4E3520
