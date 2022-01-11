@@ -29,7 +29,7 @@ void CCollision::InjectHooks()
     Install("CCollision", "ProcessLineSphere", 0x412AA0, &CCollision::ProcessLineSphere);
     Install("CCollision", "TestLineBox_DW", 0x412C70, &CCollision::TestLineBox_DW);
     Install("CCollision", "TestLineBox", 0x413070, &CCollision::TestLineBox);
-    //Install("CCollision", "TestVerticalLineBox", 0x413080, &CCollision::TestVerticalLineBox);
+    Install("CCollision", "TestVerticalLineBox", 0x413080, &CCollision::TestVerticalLineBox);
     //Install("CCollision", "ProcessLineBox", 0x413100, &CCollision::ProcessLineBox);
     //Install("CCollision", "Test2DLineAgainst2DLine", 0x4138D0, &CCollision::Test2DLineAgainst2DLine);
     //Install("CCollision", "colPoint1", 0x413960, &ProcessDiscCollision);
@@ -117,6 +117,11 @@ void CCollision::Tests() {
 
     const auto RandomLine = [&](float min = -100.f, float max = 100.f) {
         return CColLine{ RandomVector(min, max) , RandomVector(min, max) };
+    };
+
+    const auto RandomVerticalLine = [&](float min = -100.f, float max = 100.f) {
+        const auto pos = RandomVector(min, max);
+        return CColLine{ {pos.x, pos.y, pos.z + fabs(pos.x)}, {pos.x, pos.y, pos.z - fabs(pos.x)} };
     };
 
     const auto Test = [](auto name, auto org, auto rev, auto cmp, auto&&... args) {
@@ -232,6 +237,18 @@ void CCollision::Tests() {
         };
 
         Test("ProcessLineSphere", Org, Rev, CmpEq, RandomLine(), RandomSphere());
+    }
+
+    // TestLineBox
+    {
+        const auto Org = plugin::CallAndReturn<bool, 0x413070, CColLine const&, CBox const&>;
+        Test("TestLineBox", Org, TestLineBox, std::equal_to{}, RandomLine(), RandomBox());
+    }
+
+    // TestVerticalLineBox
+    {
+        const auto Org = plugin::CallAndReturn<bool, 0x413080, CColLine const&, CBox const&>;
+        Test("TestVerticalLineBox", Org, TestVerticalLineBox, std::equal_to{}, RandomVerticalLine(), RandomBox());
     }
 }
 
@@ -697,7 +714,21 @@ bool CCollision::TestLineBox(CColLine const& line, CBox const& box) {
 
 // 0x413080
 bool CCollision::TestVerticalLineBox(CColLine const& line, CBox const& box) {
-    return plugin::CallAndReturn<bool, 0x413080, CColLine const&, CBox const&>(line, box);
+    if (line.m_vecStart.x <= box.m_vecMin.x) return false;
+    if (line.m_vecStart.x >= box.m_vecMax.x) return false;
+
+    if (line.m_vecStart.y <= box.m_vecMin.y) return false;
+    if (line.m_vecStart.y >= box.m_vecMax.y) return false;
+
+    if (line.m_vecStart.z < line.m_vecEnd.z) {
+        if (line.m_vecStart.z > box.m_vecMax.z) return false;
+        if (line.m_vecEnd.z < box.m_vecMin.z) return false;
+    } else {
+        if (line.m_vecEnd.z > box.m_vecMax.z) return false;
+        if (line.m_vecStart.z < box.m_vecMin.z) return false;
+    }
+
+    return true;
 }
 
 // 0x413100
