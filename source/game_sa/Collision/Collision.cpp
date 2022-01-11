@@ -115,6 +115,10 @@ void CCollision::Tests() {
         return cb;
     };
 
+    const auto RandomLine = [&](float min = -100.f, float max = 100.f) {
+        return CColLine{ RandomVector(min, max) , RandomVector(min, max) };
+    };
+
     const auto Test = [](auto name, auto org, auto rev, auto cmp, auto&&... args) {
         const auto orgResult = org(args...);
         const auto revResult = rev(args...);
@@ -203,6 +207,31 @@ void CCollision::Tests() {
             return approxEqual(org, rev, 0.001f);
         };
         Test("DistToLineSqr", Org, DistToMathematicalLine2D, CmpEq, ls.x, ls.y, le.x, le.y, p.x, p.y);
+    }
+
+    // ProcessLineSphere
+    {
+        const auto Org = [&](auto line, auto sp) {
+            CColPoint cp{};
+            float depth{ 100.f };
+            const bool s = plugin::CallAndReturn<bool, 0x412AA0, CColLine const&, CColSphere const&, CColPoint&, float&>(line, sp, cp, depth);
+            return std::make_tuple(cp, depth, s);
+        };
+
+        const auto Rev = [](auto line, auto sp) {
+            CColPoint cp{};
+            float depth{ 100.f };
+            const bool s = ProcessLineSphere(line, sp, cp, depth);
+            return std::make_tuple(cp, depth, s);
+        };
+
+        const auto CmpEq = [&](auto org, auto rev) {
+            auto [org_cp, org_d, org_s] = org;
+            auto [rev_cp, rev_d, rev_s] = rev;
+            return org_s == rev_s && approxEqual(rev_d, org_d, 0.001f) && ColPointEq(org_cp, rev_cp);
+        };
+
+        Test("ProcessLineSphere", Org, Rev, CmpEq, RandomLine(), RandomSphere());
     }
 }
 
@@ -542,7 +571,38 @@ float CCollision::DistAlongLine2D(float lineX, float lineY, float lineDirX, floa
 
 // 0x412AA0
 bool CCollision::ProcessLineSphere(CColLine const& line, CColSphere const& sphere, CColPoint& colPoint, float& depth) {
-    return plugin::CallAndReturn<bool, 0x412AA0, CColLine const&, CColSphere const&, CColPoint&, float&>(line, sphere, colPoint, depth);
+    const auto l      = line.m_vecEnd - line.m_vecStart;
+    const auto lmagsq = l.SquaredMagnitude();
+    const auto s      = sphere.m_vecCenter - line.m_vecStart;
+
+    const auto lsdot  = DotProduct(l, s); // NOTE: Neither vectors are normalized
+
+    // Distance of the projected center of the sphere from lineStart.
+    // Because of the way we multiply it all out it becomes a distance on the 4th power
+    // Must multiply by `lmagsq` to balance out both sides
+    const auto distQc = std::pow(lsdot, 2) - (s.SquaredMagnitude() - std::pow(sphere.m_fRadius, 2)) * lmagsq;
+
+    if (distQc < 0.f)
+        return false;
+
+    const auto t = (lsdot - std::sqrt(distQc)) / lmagsq; // Interpolation on the line
+    if (t < 0.f || t > 1.f || t >= depth)
+        return false;
+
+    colPoint.m_vecPoint = line.m_vecStart + l * t;
+    colPoint.m_vecNormal = Normalized(l - s); // A little different from the original, but same effect
+
+    colPoint.m_nSurfaceTypeB = sphere.m_nMaterial;
+    colPoint.m_nLightingB = sphere.m_nLighting;
+
+    colPoint.m_nSurfaceTypeA = eSurfaceType::SURFACE_DEFAULT;
+    colPoint.m_nLightingA = 0;
+
+    depth = t;
+
+    ms_iProcessLineNumCrossings += 2;
+
+    return true;
 }
 
 // 0x412C70
