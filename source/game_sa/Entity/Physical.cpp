@@ -2060,7 +2060,7 @@ bool CPhysical::ProcessShiftSectorList(int32 sectorX, int32 sectorY)
                     }
                 }
                 if (entity != this
-                    && entity->m_nScanCode != CWorld::ms_nCurrentScanCode
+                    && entity->m_nScanCode != GetCurrentScanCode()
                     && entity->m_bUsesCollision && (!m_bHasHitWall || bProcessEntityCollision))
                 {
                     if (entity->GetIsTouching(vecBoundCentre, fBoundingSphereRadius))
@@ -2122,7 +2122,7 @@ bool CPhysical::ProcessShiftSectorList(int32 sectorX, int32 sectorY)
                         if (bCollidedEntityCollisionIgnored || bCollisionDisabled)
                             continue;
 
-                        entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                        entity->m_nScanCode = GetCurrentScanCode();
                         int32 totalColPointsToProcess = ProcessEntityCollision(entity, colPoints);
                         if (totalColPointsToProcess <= 0)
                             continue;
@@ -4071,7 +4071,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                 thisPed = static_cast<CPed*>(this);
                 thisVehicle = static_cast<CVehicle*>(this);
 
-                if (!entity->m_bUsesCollision || physicalEntity == this || entity->m_nScanCode == CWorld::ms_nCurrentScanCode) {
+                if (!entity->m_bUsesCollision || physicalEntity == this || entity->m_nScanCode == GetCurrentScanCode()) {
                     continue;
                 }
 
@@ -4125,7 +4125,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                 }
 
                 if (!m_bUsesCollision || bCollidedEntityCollisionIgnored || bCollisionDisabled) {
-                    entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                    entity->m_nScanCode = GetCurrentScanCode();
                     if (!bCollisionDisabled) // if collision is enabled then
                     {
                         int32 totalColPointsToProcess = ProcessEntityCollision(physicalEntity, &colPoints[0]);
@@ -4140,7 +4140,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                 }
 
                 if (entity->m_nType == ENTITY_TYPE_BUILDING || physicalEntity->physicalFlags.bCollidable || bCollidedEntityUnableToMove) {
-                    entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                    entity->m_nScanCode = GetCurrentScanCode();
 
                     int32 totalAcceptableColPoints = 0;
                     float fThisMaxDamageIntensity = 0.0f;
@@ -4283,7 +4283,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                         bResult = true;
                     }
                 } else {
-                    entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                    entity->m_nScanCode = GetCurrentScanCode();
 
                     int32 totalAcceptableColPoints = 0;
                     int32 totalColPointsToProcess = ProcessEntityCollision(physicalEntity, &colPoints[0]);
@@ -4596,10 +4596,10 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
 
         if (entity != this
             && !isLampTouchingGround
-            && entity->m_nScanCode != CWorld::ms_nCurrentScanCode)
+            && entity->m_nScanCode != GetCurrentScanCode())
         {
             if (entity->m_bUsesCollision && entity->GetIsTouching(vecBoundingCentre, fBoundingRadius)) {
-                entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                entity->m_nScanCode = GetCurrentScanCode();
                 totalColPointsToProcess = ProcessEntityCollision(physicalEntity, &colPoints[0]);
                 if (totalColPointsToProcess > 0) {
                     break;

@@ -913,10 +913,10 @@ void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
 bool CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, int32 memoryToCleanInBytes) {
     for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
         CEntity* entity = static_cast<CEntity*>(node->m_item);
-        if (entity->m_nScanCode == CWorld::ms_nCurrentScanCode)
+        if (entity->m_nScanCode == GetCurrentScanCode())
             continue;
 
-        entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+        entity->m_nScanCode = GetCurrentScanCode();
 
         const int32 modelId = entity->m_nModelIndex;
         if (!entity->m_bImBeingRendered && !entity->m_bStreamingDontDelete
@@ -950,10 +950,10 @@ void CStreaming::DeleteRwObjectsInSectorList(CPtrList& list, int32 sectorX, int3
 bool CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList& list, int32 memoryToCleanInBytes) {
     for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
         CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
-        if (entity->m_nScanCode == CWorld::ms_nCurrentScanCode)
+        if (entity->m_nScanCode == GetCurrentScanCode())
             continue;
 
-        entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+        entity->m_nScanCode = GetCurrentScanCode();
 
         const int32 modelId = entity->m_nModelIndex;
         if (!entity->m_bImBeingRendered && !entity->m_bStreamingDontDelete
@@ -2476,9 +2476,9 @@ void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, float posX, float p
     for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
         CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
 
-        if (entity->m_nScanCode == CWorld::ms_nCurrentScanCode)
+        if (entity->m_nScanCode == GetCurrentScanCode())
             continue;
-        entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+        entity->m_nScanCode = GetCurrentScanCode();
 
         const uint16 modelId = entity->m_nModelIndex;
         if (CStreaming::GetInfo(modelId).IsLoaded())
@@ -2518,9 +2518,9 @@ void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, float posX, float p
 void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, int32 streamingFlags) {
     for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
         CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
-        if (entity->m_nScanCode == CWorld::ms_nCurrentScanCode)
+        if (entity->m_nScanCode == GetCurrentScanCode())
             continue;
-        entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+        entity->m_nScanCode = GetCurrentScanCode();
 
         const uint16 modelId = entity->m_nModelIndex;
         if (CStreaming::GetInfo(modelId).IsLoaded())
