@@ -276,8 +276,9 @@ void CGangWars::TellGangMembersTo(bool bIsGangWarEnding) {
     plugin::Call<0x444530, bool>(bIsGangWarEnding);
 }
 
+// fix_bugs: originally has int32 type, but changed to unsigned due possible UB 
 // 0x443D50
-void CGangWars::TellStreamingWhichGangsAreNeeded(uint32 * GangsBitFlags) {
+void CGangWars::TellStreamingWhichGangsAreNeeded(uint32* GangsBitFlags) {
     plugin::Call<0x443D50, uint32*>(GangsBitFlags);
 }
 
