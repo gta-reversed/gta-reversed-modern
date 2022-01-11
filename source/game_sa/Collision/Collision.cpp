@@ -24,7 +24,7 @@ void CCollision::InjectHooks()
     Install("CCollision", "PointInTriangle", 0x412700, &CCollision::PointInTriangle);
     Install("CCollision", "DistToLineSqr", 0x412850, &CCollision::DistToLineSqr);
     Install("CCollision", "DistToMathematicalLine", 0x412970, &CCollision::DistToMathematicalLine);
-    //Install("CCollision", "DistToMathematicalLine2D", 0x412A30, &CCollision::DistToMathematicalLine2D);
+    Install("CCollision", "DistToMathematicalLine2D", 0x412A30, &CCollision::DistToMathematicalLine2D);
     //Install("CCollision", "DistAlongLine2D", 0x412A80, &CCollision::DistAlongLine2D);
     //Install("CCollision", "ProcessLineSphere", 0x412AA0, &CCollision::ProcessLineSphere);
     //Install("CCollision", "TestLineBox_DW", 0x412C70, &CCollision::TestLineBox_DW);
@@ -193,6 +193,16 @@ void CCollision::Tests() {
             return approxEqual(org, rev, 0.001f);
         };
         Test("DistToLineSqr", Org, DistToLineSqr, CmpEq, &ls, &le, &p);
+    }
+
+    // DistToMathematicalLine2D
+    {
+        const auto Org = plugin::CallAndReturn<float, 0x412A30, float, float, float, float, float, float>;
+        const auto ls{ RandomVector() }, le{ RandomVector() }, p{ RandomVector() };
+        const auto CmpEq = [](float org, float rev) {
+            return approxEqual(org, rev, 0.001f);
+        };
+        Test("DistToLineSqr", Org, DistToMathematicalLine2D, CmpEq, ls.x, ls.y, le.x, le.y, p.x, p.y);
     }
 }
 
@@ -519,7 +529,10 @@ float CCollision::DistToMathematicalLine(CVector const* lineStart, CVector const
 
 // 0x412A30
 float CCollision::DistToMathematicalLine2D(float lineStartX, float lineStartY, float lineEndX, float lineEndY, float pointX, float pointY) {
-    return plugin::CallAndReturn<float, 0x412A30, float, float, float, float, float, float>(lineStartX, lineStartY, lineEndX, lineEndY, pointX, pointY);
+    const float px{ pointX - lineStartX }, py{ pointY - lineStartY };
+    const auto  dot = px * lineEndX + py * lineEndY;
+    const auto distSq = px * px + py * py - dot * dot;
+    return distSq > 0.f ? std::sqrt(distSq) : 0.f;
 }
 
 // 0x412A80
