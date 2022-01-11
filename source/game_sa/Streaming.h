@@ -385,6 +385,9 @@ public:
     //! unused
     static void UpdateForAnimViewer();
     static bool WeAreTryingToPhaseVehicleOut(int32 modelId);
+
+    // Inlined or NOTSA
+    static bool IsModelLoaded(int32 model) { return ms_aInfoForModel[model].m_nLoadState == eStreamingLoadState::LOADSTATE_LOADED; }
 };
 
 extern RwStream& gRwStream;
