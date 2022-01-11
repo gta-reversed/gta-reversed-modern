@@ -21,11 +21,11 @@ int32& CCarCtrl::LastTimeFireTruckCreated = *(int32*)0x9690B4;
 bool& CCarCtrl::bAllowEmergencyServicesToBeCreated = *(bool*)0x8A5B28;
 bool& CCarCtrl::bCarsGeneratedAroundCamera = *(bool*)0x9690C1;
 int8& CCarCtrl::CountDownToCarsAtStart = *(int8*)0x9690C0;
-float& CCarCtrl::flt_9690BC = *(float*)0x9690BC;
+float& CCarCtrl::TimeNextMadDriverChaseCreated = *(float*)0x9690BC;
 int32& CCarCtrl::SequenceElements = *(int32*)0x969078;
 int32& CCarCtrl::SequenceRandomOffset = *(int32*)0x969074;
 bool& CCarCtrl::bSequenceOtherWay = *(bool*)0x969070;
-int32& CCarCtrl::dword_9690B8 = *(int32*)0x9690B8;
+int32& CCarCtrl::LastTimeLawEnforcerCreated = *(int32*)0x9690B8;
 
 CVehicle* (&apCarsToKeep)[2] = *(CVehicle*(*)[2])0x969084;
 uint32(&aCarsToKeepTime)[2] = *(uint32(*)[2])0x96907C;
@@ -38,7 +38,7 @@ void CCarCtrl::InjectHooks()
     Install("CCarCtrl", "CreateCarForScript", 0x431F80, &CCarCtrl::CreateCarForScript);
     Install("CCarCtrl", "ChooseBoatModel", 0x421970, &CCarCtrl::ChooseBoatModel);
     Install("CCarCtrl", "ChooseCarModelToLoad", 0x421900, &CCarCtrl::ChooseCarModelToLoad);
-    Install("CCarCtrl", "GetNewVehicleDependingOnCarModel", 0x421440, &CCarCtrl::GetNewVehicleDependingOnCarModel);
+    // Install("CCarCtrl", "GetNewVehicleDependingOnCarModel", 0x421440, &CCarCtrl::GetNewVehicleDependingOnCarModel);
     Install("CCarCtrl", "Init", 0x4212E0, &CCarCtrl::Init);
     Install("CCarCtrl", "ReInit", 0x4213B0, &CCarCtrl::ReInit);
     Install("CCarCtrl", "InitSequence", 0x421740, &CCarCtrl::InitSequence);
@@ -83,22 +83,23 @@ int32 CCarCtrl::ChooseModel(int32* arg1) {
 int32 CCarCtrl::ChoosePoliceCarModel(uint32 ignoreLvpd1Model) {
     CWanted* playerWanted = FindPlayerWanted(-1);
     if (playerWanted->AreSwatRequired() 
-        && CStreaming::GetInfo(MODEL_ENFORCER).IsLoaded() 
-        && CStreaming::GetInfo(MODEL_SWAT).IsLoaded())
-    {
+        && CStreaming::IsModelLoaded(MODEL_ENFORCER) 
+        && CStreaming::IsModelLoaded(MODEL_SWAT)
+    ) {
         if (CGeneral::GetRandomNumberInRange(0, 3) == 2)
             return MODEL_ENFORCER; 
     }
     else
     {
         if (playerWanted->AreFbiRequired() 
-            && CStreaming::GetInfo(MODEL_FBIRANCH).IsLoaded()
-            && CStreaming::GetInfo(MODEL_FBI).IsLoaded())
+            && CStreaming::IsModelLoaded(MODEL_FBIRANCH)
+            && CStreaming::IsModelLoaded(MODEL_FBI))
             return MODEL_FBIRANCH; 
+
         if (playerWanted->AreArmyRequired() 
-            && CStreaming::GetInfo(MODEL_RHINO).IsLoaded()
-            && CStreaming::GetInfo(MODEL_BARRACKS).IsLoaded()
-            && CStreaming::GetInfo(MODEL_ARMY).IsLoaded())
+            && CStreaming::IsModelLoaded(MODEL_RHINO)
+            && CStreaming::IsModelLoaded(MODEL_BARRACKS)
+            && CStreaming::IsModelLoaded(MODEL_ARMY))
             return (rand() < 0x3FFF) + MODEL_RHINO;
     }
     return CStreaming::GetDefaultCopCarModel(ignoreLvpd1Model);
@@ -110,7 +111,7 @@ void CCarCtrl::ClearInterestingVehicleList() {
 }
 
 // 0x422760
-void CCarCtrl::ClipTargetOrientationToLink(CVehicle* vehicle, CCarPathLinkAddress arg2, int8 arg3, float* arg4, float arg5, float arg6) {
+void CCarCtrl::ClitargetOrientationToLink(CVehicle* vehicle, CCarPathLinkAddress arg2, int8 arg3, float* arg4, float arg5, float arg6) {
     plugin::Call<0x422760, CVehicle*, CCarPathLinkAddress, int8, float*, float, float>(vehicle, arg2, arg3, arg4, arg5, arg6);
 }
 
@@ -235,18 +236,18 @@ float CCarCtrl::FindMaximumSpeedForThisCarInTraffic(CVehicle* vehicle) {
 }
 
 // 0x42BD20
-void CCarCtrl::FindNodesThisCarIsNearestTo(CVehicle* vehicle, CNodeAddress& NodeAddress1, CNodeAddress& NodeAddress2) {
-    plugin::Call<0x42BD20, CVehicle*, CNodeAddress&, CNodeAddress&>(vehicle, NodeAddress1, NodeAddress2);
+void CCarCtrl::FindNodesThisCarIsNearestTo(CVehicle* vehicle, CNodeAddress& nodeAddress1, CNodeAddress& nodeAddress2) {
+    plugin::Call<0x42BD20, CVehicle*, CNodeAddress&, CNodeAddress&>(vehicle, nodeAddress1, nodeAddress2);
 }
 
 // 0x422090
-int8 CCarCtrl::FindPathDirection(CNodeAddress NodeAddress1, CNodeAddress NodeAddress2, CNodeAddress NodeAddress3, bool* arg4) {
-    return plugin::CallAndReturn<int8, 0x422090, CNodeAddress, CNodeAddress, CNodeAddress, bool*>(NodeAddress1, NodeAddress2, NodeAddress3, arg4);
+int8 CCarCtrl::FindPathDirection(CNodeAddress nodeAddress1, CNodeAddress nodeAddress2, CNodeAddress nodeAddress3, bool* arg4) {
+    return plugin::CallAndReturn<int8, 0x422090, CNodeAddress, CNodeAddress, CNodeAddress, bool*>(nodeAddress1, nodeAddress2, nodeAddress3, arg4);
 }
 
 // 0x422620
-float CCarCtrl::FindPercDependingOnDistToLink(CVehicle* vehicle, CCarPathLinkAddress LinkAddress) {
-    return plugin::CallAndReturn<float, 0x422620, CVehicle*, CCarPathLinkAddress>(vehicle, LinkAddress);
+float CCarCtrl::FindPercDependingOnDistToLink(CVehicle* vehicle, CCarPathLinkAddress linkAddress) {
+    return plugin::CallAndReturn<float, 0x422620, CVehicle*, CCarPathLinkAddress>(vehicle, linkAddress);
 }
 
 // 0x421770
@@ -269,18 +270,18 @@ float CCarCtrl::FindGhostRoadHeight(CVehicle* vehicle) {
 }
 
 // 0x42B270
-void CCarCtrl::FireHeliRocketsAtTarget(CAutomobile* pEntityLauncher, CEntity* pEntity) {
-    plugin::Call<0x42B270, CAutomobile*, CEntity*>(pEntityLauncher, pEntity);
+void CCarCtrl::FireHeliRocketsAtTarget(CAutomobile* entityLauncher, CEntity* pEntity) {
+    plugin::Call<0x42B270, CAutomobile*, CEntity*>(entityLauncher, pEntity);
 }
 
 // 0x429A70
-void CCarCtrl::FlyAIHeliInCertainDirection(CHeli* pHeli, float arg2, float arg3, bool arg4) {
-    plugin::Call<0x429A70, CHeli*, float, float, bool>(pHeli, arg2, arg3, arg4);
+void CCarCtrl::FlyAIHeliInCertainDirection(CHeli* heli, float arg2, float arg3, bool arg4) {
+    plugin::Call<0x429A70, CHeli*, float, float, bool>(heli, arg2, arg3, arg4);
 }
 
 // 0x423940
-void CCarCtrl::FlyAIHeliToTarget_FixedOrientation(CHeli* pHeli, float Orientation, CVector posn) {
-    plugin::Call<0x423940, CHeli*, float, CVector>(pHeli, Orientation, posn);
+void CCarCtrl::FlyAIHeliToTarget_FixedOrientation(CHeli* heli, float Orientation, CVector posn) {
+    plugin::Call<0x423940, CHeli*, float, CVector>(heli, Orientation, posn);
 }
 
 // 0x423000
@@ -314,28 +315,28 @@ void CCarCtrl::GenerateRandomCars() {
 }
 
 // 0x42F3C0
-void CCarCtrl::GetAIHeliToAttackPlayer(CAutomobile* pAutomobile) {
-    plugin::Call<0x42F3C0, CAutomobile*>(pAutomobile);
+void CCarCtrl::GetAIHeliToAttackPlayer(CAutomobile* automobile) {
+    plugin::Call<0x42F3C0, CAutomobile*>(automobile);
 }
 
 // 0x42A730
-void CCarCtrl::GetAIHeliToFlyInDirection(CAutomobile* pAutomobile) {
-    plugin::Call<0x42A730, CAutomobile*>(pAutomobile);
+void CCarCtrl::GetAIHeliToFlyInDirection(CAutomobile* automobile) {
+    plugin::Call<0x42A730, CAutomobile*>(automobile);
 }
 
 // 0x429780
-void CCarCtrl::GetAIPlaneToAttackPlayer(CAutomobile* pAutomobile) {
-    plugin::Call<0x429780, CAutomobile*>(pAutomobile);
+void CCarCtrl::GetAIPlaneToAttackPlayer(CAutomobile* automobile) {
+    plugin::Call<0x429780, CAutomobile*>(automobile);
 }
 
 // 0x429890
-void CCarCtrl::GetAIPlaneToDoDogFight(CAutomobile* pAutomobile) {
-    plugin::Call<0x429890, CAutomobile*>(pAutomobile);
+void CCarCtrl::GetAIPlaneToDoDogFight(CAutomobile* automobile) {
+    plugin::Call<0x429890, CAutomobile*>(automobile);
 }
 
 // 0x42F370
-void CCarCtrl::GetAIPlaneToDoDogFightAgainstPlayer(CAutomobile* pAutomobile) {
-    plugin::Call<0x42F370, CAutomobile*>(pAutomobile);
+void CCarCtrl::GetAIPlaneToDoDogFightAgainstPlayer(CAutomobile* automobile) {
+    plugin::Call<0x42F370, CAutomobile*>(automobile);
 }
 
 // 0x421440
@@ -385,7 +386,7 @@ void CCarCtrl::Init() {
     CountDownToCarsAtStart = 2;
     for (CVehicle*& v : apCarsToKeep)
         v = nullptr; /* null array out */
-    flt_9690BC = CGeneral::GetRandomNumberInRange(600.0f, 1200.0f);
+    TimeNextMadDriverChaseCreated = CGeneral::GetRandomNumberInRange(600.0f, 1200.0f);
     for (auto& group : CPopulation::m_LoadedGangCars) {
         group.Clear();
     }
@@ -418,8 +419,8 @@ bool CCarCtrl::IsAnyoneParking() {
 }
 
 // 0x42DAB0
-bool CCarCtrl::IsThisAnAppropriateNode(CVehicle* vehicle, CNodeAddress NodeAddress1, CNodeAddress NodeAddress2, CNodeAddress NodeAddress3, bool arg5) {
-    return plugin::CallAndReturn<bool, 0x42DAB0, CVehicle*, CNodeAddress, CNodeAddress, CNodeAddress, bool>(vehicle, NodeAddress1, NodeAddress2, NodeAddress3, arg5);
+bool CCarCtrl::IsThisAnAppropriateNode(CVehicle* vehicle, CNodeAddress nodeAddress1, CNodeAddress nodeAddress2, CNodeAddress nodeAddress3, bool arg5) {
+    return plugin::CallAndReturn<bool, 0x42DAB0, CVehicle*, CNodeAddress, CNodeAddress, CNodeAddress, bool>(vehicle, nodeAddress1, nodeAddress2, nodeAddress3, arg5);
 }
 
 // 0x423EA0
@@ -528,30 +529,30 @@ bool CCarCtrl::PickNextNodeToFollowPath(CVehicle* vehicle) {
 }
 
 // 0x429600
-void CCarCtrl::PossiblyFireHSMissile(CVehicle* pEntityLauncher, CEntity* pTargetEntity) {
-    if (!pTargetEntity) {
+void CCarCtrl::PossiblyFireHSMissile(CVehicle* entityLauncher, CEntity* targetEntity) {
+    if (!targetEntity) {
         return;
     }
     if (CTimer::GetTimeInMS() / 2000u == CTimer::GetPreviousTimeInMS() / 2000u) {
         return;
     }
 
-    const CVector launcherPos = pEntityLauncher->GetPosition();
-    const CVector targetPos = pTargetEntity->GetPosition();
+    const CVector launcherPos = entityLauncher->GetPosition();
+    const CVector targetPos = targetEntity->GetPosition();
     CVector dir = targetPos - launcherPos;
     const float dist = dir.Magnitude();
     if (dist < 160.0f && dist > 30.0f) {
-        CMatrix launcherMat = pEntityLauncher->GetMatrix();
+        CMatrix launcherMat = entityLauncher->GetMatrix();
         CVector dirNormalized = dir;
         dir.Normalise();
         if (DotProduct(launcherMat.GetForward(), dirNormalized) > 0.8f) {
             CProjectileInfo::AddProjectile(
-                pEntityLauncher,
+                entityLauncher,
                 eWeaponType::WEAPON_ROCKET_HS,
                 launcherPos + launcherMat.GetForward() * 4.0f - launcherMat.GetUp() * 3.0f,
                 1.0f,
-                &pEntityLauncher->GetMatrix().GetForward(),
-                pTargetEntity
+                &entityLauncher->GetMatrix().GetForward(),
+                targetEntity
             );
         }
     }
@@ -584,8 +585,8 @@ void CCarCtrl::ReInit() {
     NumPermanentVehicles = 0;
     NumAmbulancesOnDuty = 0;
     NumFireTrucksOnDuty = 0;
-    dword_9690B8 = 0;
-    CarDensityMultiplier = 1.0;
+    LastTimeLawEnforcerCreated = 0;
+    CarDensityMultiplier = 1.0f;
     bAllowEmergencyServicesToBeCreated = true;
     CountDownToCarsAtStart = 2;
     for (CVehicle*& v : apCarsToKeep)
@@ -790,8 +791,8 @@ void CCarCtrl::SteerAICarParkPerpendicular(CVehicle* vehicle, float* arg2, float
 }
 
 // 0x4336D0
-void CCarCtrl::SteerAICarTowardsPointInEscort(CVehicle* pVehicle1, CVehicle* pVehicle2, float arg3, float arg4, float* arg5, float* arg6, float* arg7, bool* arg8) {
-    plugin::Call<0x4336D0, CVehicle*, CVehicle*, float, float, float*, float*, float*, bool*>(pVehicle1, pVehicle2, arg3, arg4, arg5, arg6, arg7, arg8);
+void CCarCtrl::SteerAICarTowardsPointInEscort(CVehicle* vehicle1, CVehicle* vehicle2, float arg3, float arg4, float* arg5, float* arg6, float* arg7, bool* arg8) {
+    plugin::Call<0x4336D0, CVehicle*, CVehicle*, float, float, float*, float*, float*, bool*>(vehicle1, vehicle2, arg3, arg4, arg5, arg6, arg7, arg8);
 }
 
 // 0x437C20
@@ -815,8 +816,8 @@ void CCarCtrl::SteerAICarWithPhysicsFollowPreRecordedPath(CVehicle* vehicle, flo
 }
 
 // 0x433280
-void CCarCtrl::SteerAICarWithPhysicsHeadingForTarget(CVehicle* vehicle, CPhysical* pTarget, float arg3, float arg4, float* arg5, float* arg6, float* arg7, bool* arg8) {
-    plugin::Call<0x433280, CVehicle*, CPhysical*, float, float, float*, float*, float*, bool*>(vehicle, pTarget, arg3, arg4, arg5, arg6, arg7, arg8);
+void CCarCtrl::SteerAICarWithPhysicsHeadingForTarget(CVehicle* vehicle, CPhysical* target, float arg3, float arg4, float* arg5, float* arg6, float* arg7, bool* arg8) {
+    plugin::Call<0x433280, CVehicle*, CPhysical*, float, float, float*, float*, float*, bool*>(vehicle, target, arg3, arg4, arg5, arg6, arg7, arg8);
 }
 
 // 0x4335E0
@@ -835,53 +836,53 @@ void CCarCtrl::SteerAICarWithPhysics_OnlyMission(CVehicle* vehicle, float* arg2,
 }
 
 // 0x42AAD0
-void CCarCtrl::SteerAIHeliAsPoliceHeli(CAutomobile* pAutomobile) {
-    plugin::Call<0x42AAD0, CAutomobile*>(pAutomobile);
+void CCarCtrl::SteerAIHeliAsPoliceHeli(CAutomobile* automobile) {
+    plugin::Call<0x42AAD0, CAutomobile*>(automobile);
 }
 
 // 0x42ACB0
-void CCarCtrl::SteerAIHeliFlyingAwayFromPlayer(CAutomobile* pAutomobile) {
-    plugin::Call<0x42ACB0, CAutomobile*>(pAutomobile);
+void CCarCtrl::SteerAIHeliFlyingAwayFromPlayer(CAutomobile* automobile) {
+    plugin::Call<0x42ACB0, CAutomobile*>(automobile);
 }
 
 // 0x4238E0
-void CCarCtrl::SteerAIHeliToCrashAndBurn(CAutomobile* pAutomobile) {
-    plugin::Call<0x4238E0, CAutomobile*>(pAutomobile);
+void CCarCtrl::SteerAIHeliToCrashAndBurn(CAutomobile* automobile) {
+    plugin::Call<0x4238E0, CAutomobile*>(automobile);
 }
 
 // 0x42A750
-void CCarCtrl::SteerAIHeliToFollowEntity(CAutomobile* pAutomobile) {
-    plugin::Call<0x42A750, CAutomobile*>(pAutomobile);
+void CCarCtrl::SteerAIHeliToFollowEntity(CAutomobile* automobile) {
+    plugin::Call<0x42A750, CAutomobile*>(automobile);
 }
 
 // 0x42AEB0
-void CCarCtrl::SteerAIHeliToKeepEntityInView(CAutomobile* pAutomobile) {
-    plugin::Call<0x42AEB0, CAutomobile*>(pAutomobile);
+void CCarCtrl::SteerAIHeliToKeepEntityInView(CAutomobile* automobile) {
+    plugin::Call<0x42AEB0, CAutomobile*>(automobile);
 }
 
 // 0x42AD30
-void CCarCtrl::SteerAIHeliToLand(CAutomobile* pAutomobile) {
-    plugin::Call<0x42AD30, CAutomobile*>(pAutomobile);
+void CCarCtrl::SteerAIHeliToLand(CAutomobile* automobile) {
+    plugin::Call<0x42AD30, CAutomobile*>(automobile);
 }
 
 // 0x42A630
-void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* pAutomobile) {
-    plugin::Call<0x42A630, CAutomobile*>(pAutomobile);
+void CCarCtrl::SteerAIHeliTowardsTargetCoors(CAutomobile* automobile) {
+    plugin::Call<0x42A630, CAutomobile*>(automobile);
 }
 
 // 0x423880
-void CCarCtrl::SteerAIPlaneToCrashAndBurn(CAutomobile* pAutomobile) {
-    plugin::Call<0x423880, CAutomobile*>(pAutomobile);
+void CCarCtrl::SteerAIPlaneToCrashAndBurn(CAutomobile* automobile) {
+    plugin::Call<0x423880, CAutomobile*>(automobile);
 }
 
 // 0x4237F0
-void CCarCtrl::SteerAIPlaneToFollowEntity(CAutomobile* pAutomobile) {
-    plugin::Call<0x4237F0, CAutomobile*>(pAutomobile);
+void CCarCtrl::SteerAIPlaneToFollowEntity(CAutomobile* automobile) {
+    plugin::Call<0x4237F0, CAutomobile*>(automobile);
 }
 
 // 0x423790
-void CCarCtrl::SteerAIPlaneTowardsTargetCoors(CAutomobile* pAutomobile) {
-    plugin::Call<0x423790, CAutomobile*>(pAutomobile);
+void CCarCtrl::SteerAIPlaneTowardsTargetCoors(CAutomobile* automobile) {
+    plugin::Call<0x423790, CAutomobile*>(automobile);
 }
 
 // 0x422590
@@ -900,18 +901,18 @@ void CCarCtrl::SwitchVehicleToRealPhysics(CVehicle* vehicle) {
 }
 
 // 0x425B30
-float CCarCtrl::TestCollisionBetween2MovingRects(CVehicle* pVehicle1, CVehicle* pVehicle2, float arg3, float arg4, CVector* pVector1, CVector* pVector2) {
-    return plugin::CallAndReturn<float, 0x425B30, CVehicle*, CVehicle*, float, float, CVector*, CVector*>(pVehicle1, pVehicle2, arg3, arg4, pVector1, pVector2);
+float CCarCtrl::TestCollisionBetween2MovingRects(CVehicle* vehicle1, CVehicle* vehicle2, float arg3, float arg4, CVector* pVector1, CVector* pVector2) {
+    return plugin::CallAndReturn<float, 0x425B30, CVehicle*, CVehicle*, float, float, CVector*, CVector*>(vehicle1, vehicle2, arg3, arg4, pVector1, pVector2);
 }
 
 // 0x425F70
-float CCarCtrl::TestCollisionBetween2MovingRects_OnlyFrontBumper(CVehicle* pVehicle1, CVehicle* pVehicle2, float arg3, float arg4, CVector* pVector1, CVector* pVector2) {
-    return plugin::CallAndReturn<float, 0x425F70, CVehicle*, CVehicle*, float, float, CVector*, CVector*>(pVehicle1, pVehicle2, arg3, arg4, pVector1, pVector2);
+float CCarCtrl::TestCollisionBetween2MovingRects_OnlyFrontBumper(CVehicle* vehicle1, CVehicle* vehicle2, float arg3, float arg4, CVector* pVector1, CVector* pVector2) {
+    return plugin::CallAndReturn<float, 0x425F70, CVehicle*, CVehicle*, float, float, CVector*, CVector*>(vehicle1, vehicle2, arg3, arg4, pVector1, pVector2);
 }
 
 // 0x429520
-void CCarCtrl::TestWhetherToFirePlaneGuns(CVehicle* vehicle, CEntity* pTarget) {
-    plugin::Call<0x429520, CVehicle*, CEntity*>(vehicle, pTarget);
+void CCarCtrl::TestWhetherToFirePlaneGuns(CVehicle* vehicle, CEntity* target) {
+    plugin::Call<0x429520, CVehicle*, CEntity*>(vehicle, target);
 }
 
 // 0x421FE0
@@ -920,8 +921,8 @@ bool CCarCtrl::ThisVehicleShouldTryNotToTurn(CVehicle* vehicle) {
 }
 
 // 0x429300
-void CCarCtrl::TriggerDogFightMoves(CVehicle* pVehicle1, CVehicle* pVehicle2) {
-    plugin::Call<0x429300, CVehicle*, CVehicle*>(pVehicle1, pVehicle2);
+void CCarCtrl::TriggerDogFightMoves(CVehicle* vehicle1, CVehicle* vehicle2) {
+    plugin::Call<0x429300, CVehicle*, CVehicle*>(vehicle1, vehicle2);
 }
 
 // 0x424000
