@@ -21,10 +21,11 @@ void ProcessImGUI() {
             CGeneral::GetRandomNumberInRange(-3072.0f, 3072.0f),
             CGeneral::GetRandomNumberInRange(-3072.0f, 3072.0f),
         };
+        CStreaming::LoadSceneCollision({ pos.x, pos.y, 100.f }); // Make sure collision is loaded, otherwise `FindGroundZForCoord` wont work
         FindPlayerPed()->Teleport({
             pos.x, 
             pos.y,
-            CWorld::FindGroundZForCoord(pos.x, pos.y)
+            CWorld::FindGroundZForCoord(pos.x, pos.y) + 2.f
         }, true);
     }
 
