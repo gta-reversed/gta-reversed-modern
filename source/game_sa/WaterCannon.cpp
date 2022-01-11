@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "WaterCannon.h"
 
 RxVertexIndex (&CWaterCannon::m_auRenderIndices)[18] = *(RxVertexIndex (*)[18])0xC80700;
@@ -74,7 +75,7 @@ bool CWaterCannon::HasActiveSection() const {
 
 // 0x72A280
 void CWaterCannon::Update_OncePerFrame(short a1) {
-    if (CTimer::GetTimeInMilliseconds() > m_nCreationTime + 150) {
+    if (CTimer::GetTimeInMS() > m_nCreationTime + 150) {
         const auto section = (m_nSectionsCount + 1) % SECTIONS_COUNT;
         m_nSectionsCount = section;
         m_anSectionState[section] = false;
@@ -83,10 +84,10 @@ void CWaterCannon::Update_OncePerFrame(short a1) {
     for (int i = 0; i < SECTIONS_COUNT; i++) {
         if (m_anSectionState[i]) {
             CVector& speed = m_sectionMoveSpeed[i];
-            speed.z -= CTimer::ms_fTimeStep / 250.0f;
+            speed.z -= CTimer::GetTimeStep() / 250.0f;
 
             CVector& point = m_sectionPoint[i];
-            point += speed * CTimer::ms_fTimeStep;
+            point += speed * CTimer::GetTimeStep();
 
             // Originally done in a seprate loop, but we do it here
             gFireManager.ExtinguishPointWithWater(point, 2.0f, 0.5f);
@@ -115,9 +116,10 @@ CBoundingBox CWaterCannon::GetSectionsBoundingBox() const {
 
     // R* originally used 10000 here, but thats bug prone (if map size gets increased)
     CVector min{ FLT_MAX, FLT_MAX, FLT_MAX }, max{ FLT_MIN, FLT_MIN, FLT_MIN };  
-    for (size_t i = 0; i < SECTIONS_COUNT; i++) { // TODO: C++20 ranges here pls
+    for (size_t i = 0; i < SECTIONS_COUNT; i++) {
         if (!IsSectionActive(i))
             continue;
+
         const auto Do = [posn = GetSectionPosn(i)](CVector& out, auto pr) {
             out = CVector{
                 pr(out.x, posn.x),
@@ -125,8 +127,8 @@ CBoundingBox CWaterCannon::GetSectionsBoundingBox() const {
                 pr(out.z, posn.z)
             };
         };
-        Do(min, [](float a, float b) {return std::min(a, b); });
-        Do(max, [](float a, float b) {return std::max(a, b); });
+        Do(min, [](float a, float b) { return std::min(a, b); });
+        Do(max, [](float a, float b) { return std::max(a, b); });
     }
     return { min, max };
 }
@@ -138,6 +140,7 @@ void CWaterCannon::PushPeds() {
         CPed* ped = CPools::ms_pPedPool->GetAt(pedIdx);
         if (!ped)
             continue;
+
         CVector pedPosn = ped->GetPosition();
         if (!sectionsBounding.IsPointWithin(pedPosn))
             continue;
@@ -160,7 +163,7 @@ void CWaterCannon::PushPeds() {
             ped->bWasStanding = false;
             ped->bIsStanding = false;
 
-            ped->ApplyMoveForce({ 0.0f, 0.0f, CTimer::ms_fTimeStep });
+            ped->ApplyMoveForce({ 0.0f, 0.0f, CTimer::GetTimeStep() });
 
             {
                 // TODO: Refactor... Ugly code
@@ -268,7 +271,7 @@ void CWaterCannon::Render() {
                     CVector direction = colPoint.m_vecNormal * 3.0f * CVector::Random(0.2f, 1.8f);
 
                     for (int n = 0; n < 2; n++) {
-                        const float unk = n / (CTimer::ms_fTimeStep / 50 * 1000.0f); // TODO: This 50 divider seems very common..
+                        const float unk = n / CTimer::GetTimeStepInMS();
 
                         g_fx.m_pPrtWatersplash->AddParticle(&colPoint.m_vecPoint, &direction, unk, &prtinfo, -1.0f, 1.2f, 0.6f, 0);
 
