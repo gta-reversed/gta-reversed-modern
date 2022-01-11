@@ -19,7 +19,7 @@ void CCollision::InjectHooks()
     Install("CCollision", "SortOutCollisionAfterLoad", 0x411E30, &CCollision::SortOutCollisionAfterLoad);
     Install("CCollision", "TestSphereSphere", 0x411E70, &CCollision::TestSphereSphere);
     Install("CCollision", "CalculateColPointInsideBox", 0x411EC0, &CalculateColPointInsideBox);
-    //Install("CCollision", "TestSphereBox", 0x4120C0, &CCollision::TestSphereBox);
+    Install("CCollision", "TestSphereBox", 0x4120C0, &CCollision::TestSphereBox);
     //Install("CCollision", "ProcessSphereBox", 0x412130, &CCollision::ProcessSphereBox);
     //Install("CCollision", "PointInTriangle", 0x412700, &CCollision::PointInTriangle);
     //Install("CCollision", "DistToLineSqr", 0x412850, &CCollision::DistToLineSqr);
@@ -116,7 +116,9 @@ void CCollision::Tests() {
     };
 
     const auto Test = [](auto name, auto org, auto rev, auto cmp, auto&&... args) {
-        if (!cmp(org(args...), rev(args...))) {
+        const auto orgResult = org(args...);
+        const auto revResult = rev(args...);
+        if (!cmp(orgResult, revResult)) {
             std::cerr << "[CCollision::Tests]: " << name << " failed. " << std::endl;
             assert(0);
         }
@@ -142,6 +144,11 @@ void CCollision::Tests() {
         };
 
         Test("CalculateColPointInsideBox", Org, Rev, ColPointEq, RandomBox(), RandomVector());
+    }
+
+    {
+        const auto Org = plugin::CallAndReturn<bool, 0x4120C0, CSphere const&, CBox const&>;
+        Test("TestSphereBox", Org, TestSphereBox, std::equal_to{}, RandomSphere(), RandomBox());
     }
 }
 
@@ -193,7 +200,13 @@ void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint
 
 // 0x4120C0
 bool CCollision::TestSphereBox(CSphere const& sphere, CBox const& box) {
-    return plugin::CallAndReturn<bool, 0x4120C0, CSphere const&, CBox const&>(sphere, box);
+    const auto IsValueInRange = [](float min, float max, float val) {
+        return val >= min && val <= max;
+    };
+#define CheckAxis(a) (sphere.m_vecCenter.a + sphere.m_fRadius >= box.m_vecMin.a && \
+                     sphere.m_vecCenter.a - sphere.m_fRadius <= box.m_vecMax.a)
+    return CheckAxis(x) && CheckAxis(y) && CheckAxis(z);
+#undef CheckAxis
 }
 
 // 0x412130
