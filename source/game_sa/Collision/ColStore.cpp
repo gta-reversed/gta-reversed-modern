@@ -164,9 +164,7 @@ void CColStore::EnsureCollisionIsInMemory(CVector const& pos)
         if (!pDef || !pDef->m_bCollisionIsRequired)
             continue;
 
-        if (pDef->m_Area.IsPointInside(pos, -110.0F)
-            && !CStreaming::GetInfo(COLToModelId(i)).IsLoaded()
-        ) {
+        if (pDef->m_Area.IsPointInside(pos, -110.0F) && !CStreaming::GetInfo(COLToModelId(i)).IsLoaded()) {
             CStreaming::RequestModel(RESOURCE_ID_COL + i, STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY);
             if (!TheCamera.GetScreenFadeStatus())
                 FrontEndMenuManager.MessageScreen("LOADCOL", false, false);
