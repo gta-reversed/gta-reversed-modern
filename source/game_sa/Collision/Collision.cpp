@@ -478,8 +478,9 @@ float CCollision::DistToMathematicalLine(CVector const* lineStart, CVector const
 
     // Simple Pythagorean here, we gotta find side `a`
 
-    const auto cSq = p.SquaredMagnitude();
-    const auto bSq = (float)std::pow(DotProduct(p, l), 2) / p.SquaredMagnitude(); // Must divide it by either `l.SquaredMagnitude()` because neither vectors are normalized
+    const auto pMagSq = p.SquaredMagnitude();
+    const auto cSq = pMagSq;
+    const auto bSq = (float)std::pow(DotProduct(p, l), 2) / pMagSq; // Must divide it by either `l.SquaredMagnitude()` because neither vectors are normalized
 
     const auto aSq = cSq - bSq;
     return aSq > 0.0f ? std::sqrt(aSq) : 0.0f; // Little optimization to not call `sqrt` if the dist is 0 (it wont ever be negative)
