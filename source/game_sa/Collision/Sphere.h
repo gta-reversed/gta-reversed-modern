@@ -13,6 +13,13 @@ public:
     CVector m_vecCenter;
     float   m_fRadius;
 
+    CSphere(CVector center, float radius) :
+        m_vecCenter(center),
+        m_fRadius(radius)
+    {
+    }
+
+
     void Set(float radius, CVector const& center);
 };
 

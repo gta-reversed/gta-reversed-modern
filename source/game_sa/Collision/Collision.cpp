@@ -15,7 +15,7 @@ void CCollision::InjectHooks()
 
     Install("CCollision", "Update", 0x411E20, &CCollision::Update);
     Install("CCollision", "SortOutCollisionAfterLoad", 0x411E30, &CCollision::SortOutCollisionAfterLoad);
-    //Install("CCollision", "TestSphereSphere", 0x411E70, &CCollision::TestSphereSphere);
+    Install("CCollision", "TestSphereSphere", 0x411E70, &CCollision::TestSphereSphere);
     //Install("CCollision", "CalculateColPointInsideBox", 0x411EC0, &CCollision::CalculateColPointInsideBox);
     //Install("CCollision", "TestSphereBox", 0x4120C0, &CCollision::TestSphereBox);
     //Install("CCollision", "ProcessSphereBox", 0x412130, &CCollision::ProcessSphereBox);
@@ -74,6 +74,41 @@ void CCollision::InjectHooks()
     //Install("CCollision", "CheckCameraCollisionObjects", 0x41AB20, &CCollision::CheckCameraCollisionObjects);
     //Install("CCollision", "BuildCacheOfCameraCollision", 0x41AC40, &CCollision::BuildCacheOfCameraCollision);
     //Install("CCollision", "CameraConeCastVsWorldCollision", 0x41B000, &CCollision::CameraConeCastVsWorldCollision);
+
+#ifdef _DEBUG
+    Tests();
+#endif
+}
+
+void CCollision::Tests() {
+    const auto seed = time(nullptr);
+    srand(seed);
+    std::cout << "CCollision::Tests seed: " << seed << std::endl;
+
+    const auto RandomVector = [](float min, float max) {
+        return CVector{
+            CGeneral::GetRandomNumberInRange(min, max),
+            CGeneral::GetRandomNumberInRange(min, max),
+            CGeneral::GetRandomNumberInRange(min, max)
+        };
+    };
+
+    const auto RandomSphere = [&](float min = -100.f, float max = 100.f) {
+        return CColSphere{ RandomVector(min, max), CGeneral::GetRandomNumberInRange(min, max) };
+    };
+
+    const auto Test = [](auto name, auto org, auto rev, auto&&... args) {
+        if (org(args...) != rev(args...)) {
+            std::cerr << "[CCollision::Tests]: " << name << " failed. " << std::endl;
+            assert(0);
+        }
+    };
+
+    {
+        auto sp1 = RandomSphere(), sp2 = RandomSphere();
+        auto Original = plugin::CallAndReturn<bool, 0x411E70, CColSphere const&, CColSphere const&>;
+        Test("TestSphereSphere", Original, TestSphereSphere, sp1, sp2);
+    }
 }
 
 // 0x411E20
@@ -89,7 +124,7 @@ void CCollision::SortOutCollisionAfterLoad() {
 
 // 0x411E70
 bool CCollision::TestSphereSphere(CColSphere const& sphere1, CColSphere const& sphere2) {
-    return plugin::CallAndReturn<bool, 0x411E70, CColSphere const&, CColSphere const&>(sphere1, sphere2);
+    return (sphere1.m_vecCenter - sphere2.m_vecCenter).SquaredMagnitude() <= sphere1.m_fRadius + sphere2.m_fRadius;
 }
 
 // 0x411EC0

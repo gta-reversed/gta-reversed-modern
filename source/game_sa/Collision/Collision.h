@@ -20,6 +20,8 @@ public:
 public:
     static void InjectHooks();
 
+    static void Tests();
+
     // dummy function
     static void Update();
     static void SortOutCollisionAfterLoad();
