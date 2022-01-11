@@ -10,7 +10,7 @@
 #include "BaseModelInfo.h"
 #include "PtrListDoubleLink.h"
 
-enum eRendererVisiblity {
+enum eRendererVisibility {
     RENDERER_INVISIBLE = 0,
     RENDERER_VISIBLE,
     RENDERER_CULLED,
@@ -95,8 +95,8 @@ public:
     static void RenderFirstPersonVehicle();
     static bool SetupLightingForEntity(CPhysical* entity);
     static int32 SetupMapEntityVisibility(CEntity* entity, CBaseModelInfo* modelInfo, float distance, bool bIsTimeInRange);
-    static int32 SetupEntityVisibility(CEntity* entity, float* outDistance);
-    static int32 SetupBigBuildingVisibility(CEntity* entity, float* outDistance);
+    static int32 SetupEntityVisibility(CEntity* entity, float& outDistance);
+    static int32 SetupBigBuildingVisibility(CEntity* entity, float& outDistance);
     static void ScanSectorList_ListModels(int32 sectorX, int32 sectorY);
     static void ScanSectorList_ListModelsVisible(int32 sectorX, int32 sectorY);
     static void ScanSectorList(int32 sectorX, int32 sectorY);
@@ -111,6 +111,8 @@ public:
     static void RequestObjectsInFrustum(RwMatrix* transformMatrix, int32 modelRequestFlags);
     static void RequestObjectsInDirection(CVector const& posn, float angle, int32 modelRequestFlags);
     static void SetupScanLists(int32 sectorX, int32 sectorY);
+
+    static void SetLoadingPriority(int8 priority) noexcept { m_loadingPriority = priority; } // 0x407370
 };
 
 extern uint32& gnRendererModelRequestFlags;

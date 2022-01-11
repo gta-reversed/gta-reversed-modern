@@ -32,12 +32,12 @@ bool CUpsideDownCarCheck::AreAnyCarsUpsideDown() {
 
 // 0x4638D0
 void CUpsideDownCarCheck::AddCarToCheck(int32 carHandle) {
-    plugin::CallMethod<0x4638D0, int32>(carHandle);
+    plugin::CallMethod<0x4638D0, CUpsideDownCarCheck*, int32>(this, carHandle);
 }
 
 // 0x463910
 void CUpsideDownCarCheck::RemoveCarFromCheck(int32 carHandle) {
-    plugin::CallMethod<0x463910, int32>(carHandle);
+    plugin::CallMethod<0x463910, CUpsideDownCarCheck*, int32>(this, carHandle);
 }
 
 // 0x463940

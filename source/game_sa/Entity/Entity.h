@@ -192,9 +192,12 @@ public:
     void ProcessLightsForEntity();
     void RemoveEscalatorsForEntity();
     bool IsEntityOccluded();
-    bool IsCurrentAreaOrBarberShopInterior();
+    bool IsInCurrentAreaOrBarberShopInterior();
     void UpdateRW();
+    eEntityType GetType() const noexcept { return m_nType; }
 
+    // Always returns a non-null value. In case there's no LOD object `this` is returned. NOTSA
+    CEntity* FindLastLOD() noexcept;
 public:
     // Rw callbacks
     static RpAtomic* SetAtomicAlphaCB(RpAtomic* pAtomic, void* pData);

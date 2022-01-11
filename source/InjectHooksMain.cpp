@@ -54,6 +54,7 @@
 #include "IKChainManager_c.h"
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
+#include "CreepingFire.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -174,6 +175,9 @@ void InjectHooksMain()
     InjectCommonHooks();
     CPad::InjectHooks();
 
+    CDamageManager::InjectHooks();
+    CCreepingFire::InjectHooks();
+    CPtrList::InjectHooks();
     BreakManager_c::InjectHooks();
     IKChainManager_c::InjectHooks();
     CFireManager::InjectHooks();

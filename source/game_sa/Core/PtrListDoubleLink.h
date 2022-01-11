@@ -11,23 +11,17 @@
 
 class CPtrListDoubleLink : public CPtrList {
 public:
-    inline CPtrNodeDoubleLink* GetNode() {
-        return reinterpret_cast<CPtrNodeDoubleLink *>(pNode);
-    }
+    CPtrListDoubleLink() { m_node->m_item = nullptr; }
+    ~CPtrListDoubleLink() { Flush(); }
 
-    inline ~CPtrListDoubleLink() {
-        Flush();
-    }
-
-    inline CPtrListDoubleLink() { pNode->pItem = nullptr; }
-
-public:
     static void InjectHooks();
 
     void Flush();
     CPtrNodeDoubleLink* AddItem(void* item);
     void DeleteItem(void* item);
     void DeleteNode(CPtrNodeDoubleLink* node); //Most likely inlined in the final exe, this code is used in multiple places
+
+    CPtrNodeDoubleLink* GetNode() { return reinterpret_cast<CPtrNodeDoubleLink *>(m_node); }
 };
 
-VALIDATE_SIZE(CPtrListDoubleLink, 4);
+VALIDATE_SIZE(CPtrListDoubleLink, 0x4);

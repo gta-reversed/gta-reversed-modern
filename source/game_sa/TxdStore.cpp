@@ -266,7 +266,7 @@ void CTxdStore::RemoveRef(int32 index) {
         return;
 
     if (--txd->m_wRefsCount <= 0)
-        CStreaming::RemoveModel(index + RESOURCE_ID_TXD);
+        CStreaming::RemoveModel(TXDToModelId(index));
 }
 
 // remove reference without deleting

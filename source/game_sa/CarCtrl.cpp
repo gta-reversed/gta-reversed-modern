@@ -83,8 +83,8 @@ int32 CCarCtrl::ChooseModel(int32* arg1) {
 int32 CCarCtrl::ChoosePoliceCarModel(uint32 ignoreLvpd1Model) {
     CWanted* playerWanted = FindPlayerWanted(-1);
     if (playerWanted->AreSwatRequired() 
-        && CStreaming::ms_aInfoForModel[MODEL_ENFORCER].m_nLoadState == LOADSTATE_LOADED 
-        && CStreaming::ms_aInfoForModel[MODEL_SWAT].m_nLoadState == LOADSTATE_LOADED)
+        && CStreaming::GetInfo(MODEL_ENFORCER).IsLoaded() 
+        && CStreaming::GetInfo(MODEL_SWAT).IsLoaded())
     {
         if (CGeneral::GetRandomNumberInRange(0, 3) == 2)
             return MODEL_ENFORCER; 
@@ -92,13 +92,13 @@ int32 CCarCtrl::ChoosePoliceCarModel(uint32 ignoreLvpd1Model) {
     else
     {
         if (playerWanted->AreFbiRequired() 
-            && CStreaming::ms_aInfoForModel[MODEL_FBIRANCH].m_nLoadState == LOADSTATE_LOADED
-            && CStreaming::ms_aInfoForModel[MODEL_FBI].m_nLoadState == LOADSTATE_LOADED)
+            && CStreaming::GetInfo(MODEL_FBIRANCH).IsLoaded()
+            && CStreaming::GetInfo(MODEL_FBI).IsLoaded())
             return MODEL_FBIRANCH; 
         if (playerWanted->AreArmyRequired() 
-            && CStreaming::ms_aInfoForModel[MODEL_RHINO].m_nLoadState == LOADSTATE_LOADED
-            && CStreaming::ms_aInfoForModel[MODEL_BARRACKS].m_nLoadState == LOADSTATE_LOADED
-            && CStreaming::ms_aInfoForModel[MODEL_ARMY].m_nLoadState == LOADSTATE_LOADED)
+            && CStreaming::GetInfo(MODEL_RHINO).IsLoaded()
+            && CStreaming::GetInfo(MODEL_BARRACKS).IsLoaded()
+            && CStreaming::GetInfo(MODEL_ARMY).IsLoaded())
             return (rand() < 0x3FFF) + MODEL_RHINO;
     }
     return CStreaming::GetDefaultCopCarModel(ignoreLvpd1Model);

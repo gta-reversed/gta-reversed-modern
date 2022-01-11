@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
@@ -167,10 +167,10 @@ void CWorld::ClearForRestart() {
     CObject::DeleteAllTempObjects();
     CObject::DeleteAllMissionObjects();
     for (auto& pSector : CWorld::ms_aRepeatSectors) {
-        auto pPedNode = pSector.m_lists[eRepeatSectorList::REPEATSECTOR_PEDS].pNode;
+        auto pPedNode = pSector.m_lists[eRepeatSectorList::REPEATSECTOR_PEDS].m_node;
         while (pPedNode) {
-            auto pPed = reinterpret_cast<CPed*>(pPedNode->pItem);
-            pPedNode = pPedNode->pNext;
+            auto pPed = reinterpret_cast<CPed*>(pPedNode->m_item);
+            pPedNode = pPedNode->m_next;
 
             pPed->Remove();
             if (pPed->IsPhysical())
@@ -180,10 +180,10 @@ void CWorld::ClearForRestart() {
                 delete pPed;
         }
 
-        auto pVehNode = pSector.m_lists[eRepeatSectorList::REPEATSECTOR_VEHICLES].pNode;
+        auto pVehNode = pSector.m_lists[eRepeatSectorList::REPEATSECTOR_VEHICLES].m_node;
         while (pVehNode) {
-            auto pVeh = reinterpret_cast<CVehicle*>(pVehNode->pItem);
-            pVehNode = pVehNode->pNext;
+            auto pVeh = reinterpret_cast<CVehicle*>(pVehNode->m_item);
+            pVehNode = pVehNode->m_next;
 
             pVeh->Remove();
             if (pVeh->IsPhysical())
