@@ -293,7 +293,13 @@ void CPlayerInfo::WorkOutEnergyFromHunger() {
 
 // 0x56E5D0
 void CPlayerInfo::ArrestPlayer() {
-    plugin::CallMethod<0x56E5D0, CPlayerInfo*>(this);
+    if (m_nPlayerState == PLAYERSTATE_PLAYING) {
+        m_nPlayerState = PLAYERSTATE_HAS_BEEN_ARRESTED;
+        m_nBustedAudioStatus = 0;
+        CDarkel::ResetOnPlayerDeath();
+        CStats::IncrementStat(STAT_TIMES_BUSTED, 1.0);
+        CGangWars::EndGangWar(false);
+    }
 }
 
 // 0x56E580
