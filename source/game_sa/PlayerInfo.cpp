@@ -17,7 +17,7 @@ void CPlayerInfo::InjectHooks() {
     ReversibleHooks::Install("CPlayerInfo", "LoadPlayerSkin", 0x56F7D0, &CPlayerInfo::LoadPlayerSkin);
     // ReversibleHooks::Install("CPlayerInfo", "FindClosestCarSectorList", 0x56F4E0, &CPlayerInfo::FindClosestCarSectorList);
     ReversibleHooks::Install("CPlayerInfo", "Clear", 0x56F330, &CPlayerInfo::Clear);
-    // ReversibleHooks::Install("CPlayerInfo", "GivePlayerParachute", 0x56EC40, &CPlayerInfo::GivePlayerParachute);
+    ReversibleHooks::Install("CPlayerInfo", "GivePlayerParachute", 0x56EC40, &CPlayerInfo::GivePlayerParachute);
     // ReversibleHooks::Install("CPlayerInfo", "StreamParachuteWeapon", 0x56EB30, &CPlayerInfo::StreamParachuteWeapon);
     // ReversibleHooks::Install("CPlayerInfo", "AddHealth", 0x56EAB0, &CPlayerInfo::AddHealth);
     // ReversibleHooks::Install("CPlayerInfo", "DeletePlayerSkin", 0x56EA80, &CPlayerInfo::DeletePlayerSkin);
@@ -181,7 +181,12 @@ void CPlayerInfo::Clear() {
 
 // 0x56EC40
 void CPlayerInfo::GivePlayerParachute() {
-    plugin::CallMethod<0x56EC40, CPlayerInfo*>(this);
+    if (m_nRequireParachuteTimer) {
+        if (CStreaming::IsModelLoaded(MODEL_GUN_PARA)) {
+            m_pPed->GiveWeapon(WEAPON_PARACHUTE, 1, false);
+            m_pPed->m_nSavedWeapon = WEAPON_PARACHUTE;
+        }
+    }
 }
 
 // 0x56EB30
