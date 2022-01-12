@@ -12,6 +12,13 @@ class CSector {
 public:
     CPtrListDoubleLink m_buildings;
     CPtrListDoubleLink m_dummies;
+
+public:
+    // 0x564040
+    CSector();
+
+    // 0x563130
+    ~CSector();
 };
 
 VALIDATE_SIZE(CSector, 8);
