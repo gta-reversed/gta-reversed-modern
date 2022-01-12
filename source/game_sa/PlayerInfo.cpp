@@ -25,16 +25,7 @@ void CPlayerInfo::InjectHooks() {
     // ReversibleHooks::Install("CPlayerInfo", "MakePlayerSafe", 0x56E870, &CPlayerInfo::MakePlayerSafe);
     // ReversibleHooks::Install("CPlayerInfo", "PlayerFailedCriticalMission", 0x56E830, &CPlayerInfo::PlayerFailedCriticalMission);
     // ReversibleHooks::Install("CPlayerInfo", "WorkOutEnergyFromHunger", 0x56E610, &CPlayerInfo::WorkOutEnergyFromHunger);
-    // ReversibleHooks::Install("CPlayerInfo", "ArrestPlayer", 0x56E5D0, &CPlayerInfo::ArrestPlayer);
-    // ReversibleHooks::Install("CPlayerInfo", "KillPlayer", 0x56E580, &CPlayerInfo::KillPlayer);
-    // ReversibleHooks::Install("CPlayerInfo", "IsRestartingAfterMissionFailed", 0x56E570, &CPlayerInfo::IsRestartingAfterMissionFailed);
-    // ReversibleHooks::Install("CPlayerInfo", "IsRestartingAfterArrest", 0x56E560, &CPlayerInfo::IsRestartingAfterArrest);
-    // ReversibleHooks::Install("CPlayerInfo", "IsRestartingAfterDeath", 0x56E550, &CPlayerInfo::IsRestartingAfterDeath);
-    // ReversibleHooks::Install("CPlayerInfo", "GetPos", 0x56DFB0, &CPlayerInfo::GetPos);
-    // ReversibleHooks::Install("CPlayerInfo", "GetSpeed", 0x56DF50, &CPlayerInfo::GetSpeed);
-    // ReversibleHooks::Install("CPlayerInfo", "IsPlayerInRemoteMode", 0x56DAB0, &CPlayerInfo::IsPlayerInRemoteMode);
-    // ReversibleHooks::Install("CPlayerInfo", "SetLastTargetVehicle", 0x56DA80, &CPlayerInfo::SetLastTargetVehicle);
-    // ReversibleHooks::Install("CPlayerInfo", "Save", 0x5D3AC0, &CPlayerInfo::Save);
+    ReversibleHooks::Install("CPlayerInfo", "Save", 0x5D3AC0, &CPlayerInfo::Save);
 }
 
 // 0x571920
@@ -360,5 +351,35 @@ void CPlayerInfo::SetLastTargetVehicle(CVehicle* targetveh) {
 
 // 0x5D3AC0
 int8_t CPlayerInfo::Save() {
-    return plugin::CallMethodAndReturn<int8_t, 0x5D3AC0, CPlayerInfo*>(this);
+    char buffer[40]{};
+
+    auto PushIntoBuffer = [ptr = buffer]<typename T>(T v, uint32 size = sizeof(T)) mutable {
+        *reinterpret_cast<decltype(v)*>(ptr) = v;
+        ptr += size;
+    };
+
+    PushIntoBuffer(m_nMoney);
+    PushIntoBuffer(m_nCarDensityForCurrentZone);
+    PushIntoBuffer(m_nPlayerState, 2); // For whatever reason this is 2 bytes
+    PushIntoBuffer(m_fRoadDensityAroundPlayer);
+    PushIntoBuffer(m_nDisplayMoney);
+    PushIntoBuffer(m_nNumHoursDidntEat);
+    PushIntoBuffer(m_nCollectablesPickedUp);
+    PushIntoBuffer(m_nTotalNumCollectables);
+    PushIntoBuffer(m_bDoesNotGetTired);
+    PushIntoBuffer(m_bFastReload);
+    PushIntoBuffer(m_bFireProof);
+    PushIntoBuffer(m_nMaxHealth);
+    PushIntoBuffer(m_nMaxArmour);
+    PushIntoBuffer(m_bGetOutOfJailFree);
+    PushIntoBuffer(m_bFreeHealthCare);
+    PushIntoBuffer(m_bCanDoDriveBy);
+    PushIntoBuffer(m_nBustedAudioStatus);
+    PushIntoBuffer(m_nLastBustMessageNumber);
+
+    constexpr auto size{ (uint32)sizeof(buffer) };
+    CGenericGameStorage::SaveDataToWorkBuffer((void*)&size, 4);
+    CGenericGameStorage::SaveDataToWorkBuffer((void*)buffer, size);
+
+    return true;
 }
