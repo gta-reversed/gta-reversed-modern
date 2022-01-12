@@ -18,7 +18,7 @@ void CPlayerInfo::InjectHooks() {
     // ReversibleHooks::Install("CPlayerInfo", "FindClosestCarSectorList", 0x56F4E0, &CPlayerInfo::FindClosestCarSectorList);
     ReversibleHooks::Install("CPlayerInfo", "Clear", 0x56F330, &CPlayerInfo::Clear);
     ReversibleHooks::Install("CPlayerInfo", "GivePlayerParachute", 0x56EC40, &CPlayerInfo::GivePlayerParachute);
-    // ReversibleHooks::Install("CPlayerInfo", "StreamParachuteWeapon", 0x56EB30, &CPlayerInfo::StreamParachuteWeapon);
+    ReversibleHooks::Install("CPlayerInfo", "StreamParachuteWeapon", 0x56EB30, &CPlayerInfo::StreamParachuteWeapon);
     // ReversibleHooks::Install("CPlayerInfo", "AddHealth", 0x56EAB0, &CPlayerInfo::AddHealth);
     // ReversibleHooks::Install("CPlayerInfo", "DeletePlayerSkin", 0x56EA80, &CPlayerInfo::DeletePlayerSkin);
     // ReversibleHooks::Install("CPlayerInfo", "BlowUpRCBuggy", 0x56EA30, &CPlayerInfo::BlowUpRCBuggy);
@@ -190,8 +190,36 @@ void CPlayerInfo::GivePlayerParachute() {
 }
 
 // 0x56EB30
-void CPlayerInfo::StreamParachuteWeapon(bool a2) {
-    plugin::CallMethod<0x56EB30, CPlayerInfo*, bool>(this, a2);
+void CPlayerInfo::StreamParachuteWeapon(bool unk) {
+    if (CGameLogic::IsCoopGameGoingOn()) {
+        if (unk)
+            return;
+    } else {
+        if (m_pPed) {
+            if (const auto veh = m_pPed->m_pVehicle; veh && m_pPed->bInVehicle) {
+                if (veh->IsPlane() || veh->IsHeli()) {
+                    if (m_nRequireParachuteTimer <= CTimer::GetTimeStepInMS()) {
+                        const auto vehToGroundZDist = veh->GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
+                        m_nRequireParachuteTimer = (vehToGroundZDist <= 50.f) ? 0 : 5000;
+                    } else {
+                        m_nRequireParachuteTimer -= CTimer::GetTimeStepInMS();
+                    }
+                }
+            }
+        }
+
+        if (m_nRequireParachuteTimer) {
+            CStreaming::RequestModel(MODEL_GUN_PARA, STREAMING_MISSION_REQUIRED);
+            m_bParachuteReferenced = true;
+            return;
+        }
+    }
+
+    if (m_bParachuteReferenced) {
+        CStreaming::SetModelIsDeletable(MODEL_GUN_PARA);
+        m_bParachuteReferenced = 0;
+        m_nRequireParachuteTimer = 0;
+    }
 }
 
 // 0x56EAB0
