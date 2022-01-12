@@ -21,7 +21,7 @@ void CPlayerInfo::InjectHooks() {
     ReversibleHooks::Install("CPlayerInfo", "StreamParachuteWeapon", 0x56EB30, &CPlayerInfo::StreamParachuteWeapon);
     ReversibleHooks::Install("CPlayerInfo", "AddHealth", 0x56EAB0, &CPlayerInfo::AddHealth);
     ReversibleHooks::Install("CPlayerInfo", "DeletePlayerSkin", 0x56EA80, &CPlayerInfo::DeletePlayerSkin);
-    // ReversibleHooks::Install("CPlayerInfo", "BlowUpRCBuggy", 0x56EA30, &CPlayerInfo::BlowUpRCBuggy);
+    ReversibleHooks::Install("CPlayerInfo", "BlowUpRCBuggy", 0x56EA30, &CPlayerInfo::BlowUpRCBuggy);
     // ReversibleHooks::Install("CPlayerInfo", "MakePlayerSafe", 0x56E870, &CPlayerInfo::MakePlayerSafe);
     // ReversibleHooks::Install("CPlayerInfo", "PlayerFailedCriticalMission", 0x56E830, &CPlayerInfo::PlayerFailedCriticalMission);
     // ReversibleHooks::Install("CPlayerInfo", "WorkOutEnergyFromHunger", 0x56E610, &CPlayerInfo::WorkOutEnergyFromHunger);
@@ -236,7 +236,11 @@ void CPlayerInfo::DeletePlayerSkin() {
 
 // 0x56EA30
 void CPlayerInfo::BlowUpRCBuggy(bool bExplode) {
-    plugin::CallMethod<0x56EA30, CPlayerInfo*, bool>(this, bExplode);
+    if (m_pRemoteVehicle && !m_pRemoteVehicle->m_bRemoveFromWorld) {
+        CRemote::TakeRemoteControlledCarFromPlayer(bExplode);
+        if (bExplode)
+            m_pRemoteVehicle->BlowUpCar(m_pPed, false);
+    }
 }
 
 // 0x56E870
