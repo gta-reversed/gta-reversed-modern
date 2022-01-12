@@ -68,7 +68,7 @@ public:
     uint32         m_nTimeOfLastCarExplosionCaused{};
     uint32         m_nExplosionMultiplier{};
     uint32         m_nHavocCaused{}; // A counter going up when the player does bad stuff.
-    uint16         m_nNumHoursDidntEat{};
+    uint32         m_nNumHoursDidntEat{};
     float          m_fCurrentChaseValue{}; // How 'ill' is the chase at the moment
     bool           m_bDoesNotGetTired{};
     bool           m_bFastReload{};
@@ -97,7 +97,6 @@ public:
     static CEntity* FindObjectToSteal(CPed* this_mpPed);
     static void EvaluateCarPosition(CEntity* car, CPed* this_mpPed, float pedToVehDist, float* outDistance, CVehicle** outVehicle);
 
-    void Destructor();
     void SetPlayerSkin(char const* name);
     void Process(uint32 playerIndex);
     void LoadPlayerSkin();

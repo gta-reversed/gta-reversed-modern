@@ -12,7 +12,6 @@ void CPlayerInfo::InjectHooks() {
     // ReversibleHooks::Install("CPlayerInfo", "EvaluateCarPosition", 0x56DAD0, &CPlayerInfo::EvaluateCarPosition);
 
     // Methods (24x)
-    ReversibleHooks::Install("CPlayerInfo", "Destructor", 0x45B110, &CPlayerInfo::Destructor);
     ReversibleHooks::Install("CPlayerInfo", "SetPlayerSkin", 0x5717F0, &CPlayerInfo::SetPlayerSkin);
     // ReversibleHooks::Install("CPlayerInfo", "Process", 0x56F8D0, &CPlayerInfo::Process);
     ReversibleHooks::Install("CPlayerInfo", "LoadPlayerSkin", 0x56F7D0, &CPlayerInfo::LoadPlayerSkin);
@@ -23,9 +22,18 @@ void CPlayerInfo::InjectHooks() {
     ReversibleHooks::Install("CPlayerInfo", "AddHealth", 0x56EAB0, &CPlayerInfo::AddHealth);
     ReversibleHooks::Install("CPlayerInfo", "DeletePlayerSkin", 0x56EA80, &CPlayerInfo::DeletePlayerSkin);
     ReversibleHooks::Install("CPlayerInfo", "BlowUpRCBuggy", 0x56EA30, &CPlayerInfo::BlowUpRCBuggy);
-    // ReversibleHooks::Install("CPlayerInfo", "MakePlayerSafe", 0x56E870, &CPlayerInfo::MakePlayerSafe);
-    // ReversibleHooks::Install("CPlayerInfo", "PlayerFailedCriticalMission", 0x56E830, &CPlayerInfo::PlayerFailedCriticalMission);
+    ReversibleHooks::Install("CPlayerInfo", "MakePlayerSafe", 0x56E870, &CPlayerInfo::MakePlayerSafe);
+    ReversibleHooks::Install("CPlayerInfo", "PlayerFailedCriticalMission", 0x56E830, &CPlayerInfo::PlayerFailedCriticalMission);
     // ReversibleHooks::Install("CPlayerInfo", "WorkOutEnergyFromHunger", 0x56E610, &CPlayerInfo::WorkOutEnergyFromHunger);
+    ReversibleHooks::Install("CPlayerInfo", "ArrestPlayer", 0x56E5D0, &CPlayerInfo::ArrestPlayer);
+    ReversibleHooks::Install("CPlayerInfo", "KillPlayer", 0x56E580, &CPlayerInfo::KillPlayer);
+    ReversibleHooks::Install("CPlayerInfo", "IsRestartingAfterMissionFailed", 0x56E570, &CPlayerInfo::IsRestartingAfterMissionFailed);
+    ReversibleHooks::Install("CPlayerInfo", "IsRestartingAfterArrest", 0x56E560, &CPlayerInfo::IsRestartingAfterArrest);
+    ReversibleHooks::Install("CPlayerInfo", "IsRestartingAfterDeath", 0x56E550, &CPlayerInfo::IsRestartingAfterDeath);
+    ReversibleHooks::Install("CPlayerInfo", "GetPos", 0x56DFB0, &CPlayerInfo::GetPos_Hook);
+    ReversibleHooks::Install("CPlayerInfo", "GetSpeed", 0x56DF50, &CPlayerInfo::GetSpeed_Hook);
+    ReversibleHooks::Install("CPlayerInfo", "IsPlayerInRemoteMode", 0x56DAB0, &CPlayerInfo::IsPlayerInRemoteMode);
+    ReversibleHooks::Install("CPlayerInfo", "SetLastTargetVehicle", 0x56DA80, &CPlayerInfo::SetLastTargetVehicle);
     ReversibleHooks::Install("CPlayerInfo", "Save", 0x5D3AC0, &CPlayerInfo::Save);
 }
 
