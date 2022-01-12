@@ -244,8 +244,36 @@ void CPlayerInfo::BlowUpRCBuggy(bool bExplode) {
 }
 
 // 0x56E870
-void CPlayerInfo::MakePlayerSafe(bool canMove, float radius) {
-    plugin::CallMethod<0x56E870, CPlayerInfo*, bool>(this, canMove, radius);
+void CPlayerInfo::MakePlayerSafe(bool enable, float radius) {
+    // Not quite SA, but this is the way to do it (instead of copy pasting it twice)
+    auto& phyFlags = m_pPed->physicalFlags;
+    phyFlags.bInvulnerable = enable;
+    phyFlags.bBulletProof = enable;
+    phyFlags.bFireProof = enable;
+    phyFlags.bExplosionProof = enable;
+    phyFlags.bCollisionProof = enable;
+    phyFlags.bMeeleProof = enable;
+    m_PlayerData.m_bCanBeDamaged = !enable;
+    m_PlayerData.m_pWanted->m_bEverybodyBackOff = enable;
+    m_pPed->GetPadFromPlayer()->bPlayerSafe = enable;
+    CWorld::SetAllCarsCanBeDamaged(enable);
+
+    if (enable) {
+        CWorld::StopAllLawEnforcersInTheirTracks();
+
+        m_pPed->ClearAdrenaline();
+        m_PlayerData.m_fTimeCanRun = std::max(m_PlayerData.m_fTimeCanRun, 0.f);
+        m_pPed->GetIntelligence()->ClearTasks(true, false);
+
+        gFireManager.ExtinguishPoint(GetPos(), radius);
+        CExplosion::RemoveAllExplosionsInArea(GetPos(), 4000.f);
+        CProjectileInfo::RemoveAllProjectiles();
+        CWorld::ExtinguishAllCarFiresInArea(GetPos(), radius);
+        CReplay::DisableReplays();
+        m_pPed->ClearWeaponTarget();
+    } else {
+        CReplay::EnableReplays();
+    }
 }
 
 // 0x56E830
