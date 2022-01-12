@@ -77,6 +77,13 @@ public:
     CTask* GetTaskPrimary(int32 taskIndex) noexcept {
         return m_aPrimaryTasks[taskIndex];
     }
+
+    // NOTSA - Check if any of the given tasks is active
+    bool IsAnyTaskActiveByType(std::initializer_list<int32> types) {
+        return std::any_of(types.begin(), types.end(), [this](auto type) {
+            return FindActiveTaskByType(type);
+        });
+    }
 };
 
 VALIDATE_SIZE(CTaskManager, 0x30);

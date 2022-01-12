@@ -209,7 +209,7 @@ int32 CClouds::MovingFog_GetFirstFreeSlot() {
 
 // 0x716C90
 void CClouds::MovingFogRender() {
-    if (CWeather::Foggyness_SF == 0.f || CGame::currArea == AREA_CODE_NORMAL_WORLD || FindPlayerPed(-1)->m_nAreaCode == AREA_CODE_NORMAL_WORLD)
+    if (CWeather::Foggyness_SF == 0.f || CGame::CanSeeOutSideFromCurrArea() || FindPlayerPed(-1)->m_nAreaCode == AREA_CODE_NORMAL_WORLD)
         return;
 
     float step = CTimer::GetTimeStep() * (1.f / 300.f);
