@@ -320,7 +320,7 @@ bool CPlayerInfo::IsRestartingAfterMissionFailed() {
 
 // 0x56E560
 bool CPlayerInfo::IsRestartingAfterArrest() {
-    return plugin::CallMethodAndReturn<bool, 0x56E560, CPlayerInfo*>(this);
+    return this->m_nPlayerState == PLAYERSTATE_HAS_BEEN_ARRESTED;
 }
 
 // 0x56E550
