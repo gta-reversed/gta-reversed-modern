@@ -329,10 +329,11 @@ bool CPlayerInfo::IsRestartingAfterDeath() {
 }
 
 // 0x56DFB0
+// Return vehicle (if in any) or player ped position
 CVector CPlayerInfo::GetPos() {
-    CVector result{};
-    plugin::CallMethodAndReturn<CVector*, 0x56DFB0, CPlayerInfo*, CVector*>(this, &result);
-    return result;
+    if (m_pPed->bInVehicle && m_pPed->m_pVehicle)
+        return m_pPed->m_pVehicle->GetPosition();
+    return m_pPed->GetPosition();
 }
 
 // 0x56DF50
