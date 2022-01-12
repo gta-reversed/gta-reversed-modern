@@ -315,7 +315,7 @@ void CPlayerInfo::KillPlayer() {
 
 // 0x56E570
 bool CPlayerInfo::IsRestartingAfterMissionFailed() {
-    return plugin::CallMethodAndReturn<bool, 0x56E570, CPlayerInfo*>(this);
+    return m_nPlayerState == PLAYERSTATE_FAILED_MISSION;
 }
 
 // 0x56E560
