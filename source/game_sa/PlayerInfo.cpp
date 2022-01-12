@@ -304,7 +304,13 @@ void CPlayerInfo::ArrestPlayer() {
 
 // 0x56E580
 void CPlayerInfo::KillPlayer() {
-    plugin::CallMethod<0x56E580, CPlayerInfo*>(this);
+    if (m_nPlayerState == PLAYERSTATE_PLAYING) {
+        m_nPlayerState = PLAYERSTATE_HAS_DIED;
+        CDarkel::ResetOnPlayerDeath();
+        CMessages::AddBigMessage(TheText.Get("DEAD"), 4000, STYLE_WHITE_MIDDLE);
+        CStats::IncrementStat(STAT_NUMBER_OF_HOSPITAL_VISITS, 1.0);
+        CGangWars::EndGangWar(0);
+    }
 }
 
 // 0x56E570
