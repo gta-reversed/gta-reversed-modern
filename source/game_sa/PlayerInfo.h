@@ -39,7 +39,7 @@ public:
     bool           m_bTaxiTimerScore{};         // If TRUE then add 1 to score for each second that the player is driving a taxi
     bool           m_bTryingToExitCar{};        // if player holds exit car button, want to trigger getout once car slowed enough with a passenger
     CVehicle*      m_pLastTargetVehicle{};      // Last vehicle player tried to enter.
-    ePlayerState   m_nPlayerState{};
+    ePlayerState   m_nPlayerState{ PLAYERSTATE_PLAYING };
     bool           m_bAfterRemoteVehicleExplosion{};
     bool           m_bCreateRemoteVehicleExplosion{};
     bool           m_bFadeAfterRemoteVehicleExplosion{};

@@ -16,7 +16,7 @@ void CPlayerInfo::InjectHooks() {
     // ReversibleHooks::Install("CPlayerInfo", "Process", 0x56F8D0, &CPlayerInfo::Process);
     ReversibleHooks::Install("CPlayerInfo", "LoadPlayerSkin", 0x56F7D0, &CPlayerInfo::LoadPlayerSkin);
     // ReversibleHooks::Install("CPlayerInfo", "FindClosestCarSectorList", 0x56F4E0, &CPlayerInfo::FindClosestCarSectorList);
-    // ReversibleHooks::Install("CPlayerInfo", "Clear", 0x56F330, &CPlayerInfo::Clear);
+    ReversibleHooks::Install("CPlayerInfo", "Clear", 0x56F330, &CPlayerInfo::Clear);
     // ReversibleHooks::Install("CPlayerInfo", "GivePlayerParachute", 0x56EC40, &CPlayerInfo::GivePlayerParachute);
     // ReversibleHooks::Install("CPlayerInfo", "StreamParachuteWeapon", 0x56EB30, &CPlayerInfo::StreamParachuteWeapon);
     // ReversibleHooks::Install("CPlayerInfo", "AddHealth", 0x56EAB0, &CPlayerInfo::AddHealth);
@@ -107,7 +107,76 @@ void CPlayerInfo::FindClosestCarSectorList(CPtrList& ptrList, CPed* this_mp_Ped,
 
 // 0x56F330
 void CPlayerInfo::Clear() {
-    plugin::CallMethod<0x56F330, CPlayerInfo*>(this);
+    // TODO: This should just use the constructor and `swap`,
+    // like to just swap ourselves to a default constructed object
+    // and do all the cleanup in the destructor
+
+    m_pPed = nullptr;
+    m_pRemoteVehicle = nullptr;
+    if (m_pSpecCar) {
+        m_pSpecCar->physicalFlags.bAddMovingCollisionSpeed = false;
+        m_pSpecCar = nullptr;
+    }
+    m_nDisplayMoney = 0;
+    m_nMoney = 0;
+    m_nPlayerState = PLAYERSTATE_PLAYING;
+    m_nCarDensityForCurrentZone = 0;
+    m_fRoadDensityAroundPlayer = 1.0;
+    m_bAfterRemoteVehicleExplosion = 0;
+    m_bCreateRemoteVehicleExplosion = 0;
+    m_bFadeAfterRemoteVehicleExplosion = 0;
+    m_bTryingToExitCar = 0;
+    m_bTaxiTimerScore = 0;
+    m_nTaxiTimer = 0;
+    m_nVehicleTimeCounter = CTimer::m_snTimeInMilliseconds;
+    m_nMaxArmour = 100;
+    m_nMaxHealth = 100;
+    m_bCanDoDriveBy = 1;
+    m_nCollectablesPickedUp = 0;
+    m_nTotalNumCollectables = 3;
+    m_nLastTimeEnergyLost = 0;
+    m_nLastTimeArmourLost = 0;
+    m_nLastTimeBigGunFired = 0;
+    m_nTimesStuckInARow = 0;
+    m_nTimesUpsideDownInARow = 0;
+    m_nCarTwoWheelCounter = 0;
+    m_fCarTwoWheelDist = 0.0;
+    m_nCarLess3WheelCounter = 0;
+    m_nBikeRearWheelCounter = 0;
+    m_fBikeRearWheelDist = 0.0;
+    m_nBikeFrontWheelCounter = 0;
+    m_fBikeFrontWheelDist = 0.0;
+    m_nTempBufferCounter = 0;
+    m_nBestCarTwoWheelsTimeMs = 0;
+    m_fBestCarTwoWheelsDistM = 0.0;
+    m_nBestBikeWheelieTimeMs = 0;
+    m_fBestBikeWheelieDistM = 0.0;
+    m_nBestBikeStoppieTimeMs = 0;
+    m_fBestBikeStoppieDistM = 0.0;
+    m_bDoesNotGetTired = 0;
+    m_bFastReload = 0;
+    m_bFireProof = 0;
+    m_bGetOutOfJailFree = 0;
+    m_bFreeHealthCare = 0;
+    m_nTimeOfLastCarExplosionCaused = 0;
+    m_nExplosionMultiplier = 0;
+    m_nHavocCaused = 0;
+    CWorld::Players[CWorld::PlayerInFocus].m_nNumHoursDidntEat = 0;
+    m_nLastBustMessageNumber = 1;
+    m_fCurrentChaseValue = 0.0;
+    m_nBustedAudioStatus = 0;
+    m_nCrosshairActivated = 0;
+
+    m_nRequireParachuteTimer = 0;
+
+    if (m_bParachuteReferenced) {
+        CGameLogic::IsCoopGameGoingOn();
+        if (m_bParachuteReferenced) {
+            CStreaming::SetModelIsDeletable(MODEL_GUN_PARA);
+            m_bParachuteReferenced = 0;
+            m_nRequireParachuteTimer = 0;
+        }
+    }
 }
 
 // 0x56EC40
