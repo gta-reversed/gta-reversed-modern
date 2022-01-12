@@ -278,7 +278,12 @@ void CPlayerInfo::MakePlayerSafe(bool enable, float radius) {
 
 // 0x56E830
 void CPlayerInfo::PlayerFailedCriticalMission() {
-    plugin::CallMethod<0x56E830, CPlayerInfo*>(this);
+    if (m_nPlayerState == PLAYERSTATE_PLAYING) {
+        m_nPlayerState = PLAYERSTATE_FAILED_MISSION;
+        CGameLogic::GameState = GAME_STATE_TITLE;
+        CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
+        CDarkel::ResetOnPlayerDeath();
+    }
 }
 
 // 0x56E610
