@@ -140,7 +140,7 @@ void CWeather::ReleaseWeather() {
 
 // 0x72AF70
 void CWeather::RenderRainStreaks() {
-    if (CTimer::m_CodePause)
+    if (CTimer::GetIsCodePaused())
         return;
 
     {
@@ -173,18 +173,16 @@ void CWeather::RenderRainStreaks() {
     uiTempBufferIndicesStored = 0;
     uiTempBufferVerticesStored = 0;
 
-    // TODO... (refactor)
+    // (Pirulax) TODO... (refactor)
     constexpr auto RAIN_STREAK_COUNT{ 32u };
 
     // These are arrays of size `RAIN_STREAK_COUNT`
-    // But I'm lazy to cast the properly, sorry
-    int32*& streakPosX = *(int32**)(0xC81420);
-    int32*& streakPosY = *(int32**)(0xC8141C);
-    int32*& streakPosZ = *(int32**)(0xC81418);
-    uint8*& streakStrength = *(uint8**)(0xC81414);
+    static int32* streakPosX;     // 0xC81420;
+    static int32* streakPosY;     // 0xC8141C;
+    static int32* streakPosZ;     // 0xC81418;
+    static uint8* streakStrength; // 0xC81414
 
     if (!streakPosX) {
-        // Dont ask, I don't know.
         // This stuff isn't even freed anywhere..
         streakPosX     = new int32[RAIN_STREAK_COUNT];
         streakPosY     = new int32[RAIN_STREAK_COUNT];
@@ -236,8 +234,8 @@ void CWeather::RenderRainStreaks() {
         for (unsigned v = 0; v < 2; v++) {
             RxObjSpace3DVertex* vertex = &aTempBufferVertices[GetRealVertexIndex(v)];
 
-            //const RwRGBA color{ 210, 210, 230, alphas[v] }; 
-            const RwRGBA color{ 0xFF, 0, 0, 255 }; // For debug (makes it more visible)
+            const RwRGBA color{ 210, 210, 230, alphas[v] }; 
+            // const RwRGBA color{ 255, 0, 0, 255 }; // For debug (makes it more visible)
             RxObjSpace3DVertexSetPreLitColor(vertex, &color);
 
             const CVector vertPosn = GetStreakPosition(s) + offsets[v];
