@@ -337,10 +337,11 @@ CVector CPlayerInfo::GetPos() {
 }
 
 // 0x56DF50
+// Return vehicle (if in any) or player ped move speed
 CVector CPlayerInfo::GetSpeed() {
-    CVector result{};
-    plugin::CallMethodAndReturn<CVector*, 0x56DF50, CPlayerInfo*, CVector*>(this, &result);
-    return result;
+    if (m_pPed->bInVehicle && m_pPed->m_pVehicle)
+        return m_pPed->m_pVehicle->m_vecMoveSpeed;
+    return m_pPed->m_vecMoveSpeed;
 }
 
 // 0x56DAB0
