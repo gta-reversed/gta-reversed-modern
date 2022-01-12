@@ -10,12 +10,12 @@
 
 class CCreepingFire {
 public:
-    static uint8_t(&m_aFireStatus)[32][32];
+    static uint8(&m_aFireStatus)[32][32];
 
 public:
     static void InjectHooks();
 
     static void SetReadyToBurn();
     static void Update();
-    static bool TryToStartFireAtCoors(CVector pos, uint8_t nGenerations, bool a5, bool bScriptFire, float fDistance);
+    static bool TryToStartFireAtCoors(CVector pos, uint8 nGenerations, bool a5, bool bScriptFire, float fDistance);
 };
