@@ -6,14 +6,14 @@
 
 // 0x718600
 void AsciiToGxtChar(const char* src, GxtChar* dst) {
-    for (int i = 0; src[i]; ++i) {
+    for (int32 i = 0; src[i]; ++i) {
         dst[i] = src[i];
         dst[i + 1] = 0;
     }
 }
 
 // 0x69F7E0
-const char* GxtCharToAscii(GxtChar* src, unsigned char start) {
+const char* GxtCharToAscii(GxtChar* src, uint8 start) {
     static char buf[256] = { 0 };
 
     GxtChar* str = src;
@@ -21,7 +21,7 @@ const char* GxtCharToAscii(GxtChar* src, unsigned char start) {
         str = &src[start];
     }
 
-    int i = 0;
+    int32 i = 0;
     while (i < (ARRAY_SIZE(buf) - 1) && (str && str[i])) {
         GxtChar symbol = str[i];
 
@@ -73,8 +73,8 @@ GxtChar* GxtCharStrcat(GxtChar* dst, GxtChar* src) {
     return dst;
 }
 
-unsigned int GxtCharStrlen(const GxtChar* str) {
-    unsigned int len = 0;
+uint32 GxtCharStrlen(const GxtChar* str) {
+    uint32 len = 0;
     while (str[len]) {
         ++len;
     }

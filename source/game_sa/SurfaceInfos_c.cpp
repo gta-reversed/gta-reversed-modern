@@ -60,7 +60,7 @@ void SurfaceInfos_c::LoadAdhesiveLimits()
     return plugin::CallMethod<0x55D0E0, SurfaceInfos_c*>(this);
 }
 
-unsigned int SurfaceInfos_c::GetSurfaceIdFromName(char* cName)
+uint32 SurfaceInfos_c::GetSurfaceIdFromName(char* cName)
 {
     if (!strcmp(cName, SurfaceInfos_c::cDefaultName))
         return SURFACE_DEFAULT;
@@ -441,222 +441,222 @@ void SurfaceInfos_c::Init()
     LoadSurfaceAudioInfos();
 }
 
-eAdhesionGroup SurfaceInfos_c::GetAdhesionGroup(unsigned int surfaceId)
+eAdhesionGroup SurfaceInfos_c::GetAdhesionGroup(uint32 surfaceId)
 {
     return static_cast<eAdhesionGroup>(m_surfaces[surfaceId].ucAdhesionGroup);
 }
 
-float SurfaceInfos_c::GetTyreGrip(unsigned int surfaceId)
+float SurfaceInfos_c::GetTyreGrip(uint32 surfaceId)
 {
     return static_cast<float>(m_surfaces[surfaceId].tyreGrip) * 0.1F;
 }
 
-float SurfaceInfos_c::GetWetMultiplier(unsigned int surfaceId)
+float SurfaceInfos_c::GetWetMultiplier(uint32 surfaceId)
 {
     return static_cast<float>(m_surfaces[surfaceId].wetGrip) * 0.01F * CWeather::WetRoads + 1.0F;
 }
 
-unsigned int SurfaceInfos_c::GetSkidmarkType(unsigned int surfaceId)
+uint32 SurfaceInfos_c::GetSkidmarkType(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].ucSkidmarkType;
 }
 
-eFrictionEffect SurfaceInfos_c::GetFrictionEffect(unsigned int surfaceId)
+eFrictionEffect SurfaceInfos_c::GetFrictionEffect(uint32 surfaceId)
 {
     return static_cast<eFrictionEffect>(m_surfaces[surfaceId].ucFrictionEffect);
 }
 
-unsigned int SurfaceInfos_c::GetBulletFx(unsigned int surfaceId)
+uint32 SurfaceInfos_c::GetBulletFx(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].ucBulletFX;
 }
 
-bool SurfaceInfos_c::IsSoftLanding(unsigned int surfaceId)
+bool SurfaceInfos_c::IsSoftLanding(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsSoftLand;
 }
 
-bool SurfaceInfos_c::IsSeeThrough(unsigned int surfaceId)
+bool SurfaceInfos_c::IsSeeThrough(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsSeeThrough;
 }
 
-bool SurfaceInfos_c::IsShootThrough(unsigned int surfaceId)
+bool SurfaceInfos_c::IsShootThrough(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsShootThrough;
 }
 
-bool SurfaceInfos_c::IsSand(unsigned int surfaceId)
+bool SurfaceInfos_c::IsSand(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsSand;
 }
 
-bool SurfaceInfos_c::IsWater(unsigned int surfaceID)
+bool SurfaceInfos_c::IsWater(uint32 surfaceID)
 {
     return m_surfaces[surfaceID].bIsWater;
 }
 
-bool SurfaceInfos_c::IsShallowWater(unsigned int surfaceId)
+bool SurfaceInfos_c::IsShallowWater(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsShallowWater;
 }
 
-bool SurfaceInfos_c::IsBeach(unsigned int surfaceId)
+bool SurfaceInfos_c::IsBeach(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsBeach;
 }
 
-bool SurfaceInfos_c::IsSteepSlope(unsigned int surfaceId)
+bool SurfaceInfos_c::IsSteepSlope(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsSteepSlope;
 }
 
-bool SurfaceInfos_c::IsGlass(unsigned int surfaceId)
+bool SurfaceInfos_c::IsGlass(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsGlass;
 }
 
-bool SurfaceInfos_c::IsStairs(unsigned int surfaceId)
+bool SurfaceInfos_c::IsStairs(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsStairs;
 }
 
-bool SurfaceInfos_c::IsSkateable(unsigned int surfaceId)
+bool SurfaceInfos_c::IsSkateable(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsSkateable;
 }
 
-bool SurfaceInfos_c::IsPavement(unsigned int surfaceId)
+bool SurfaceInfos_c::IsPavement(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsPavement;
 }
 
-unsigned int SurfaceInfos_c::GetRoughness(unsigned int surfaceId)
+uint32 SurfaceInfos_c::GetRoughness(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].ucRoughness;
 }
 
-unsigned int SurfaceInfos_c::GetFlammability(unsigned int surfaceId)
+uint32 SurfaceInfos_c::GetFlammability(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].ucFlammability;
 }
 
-bool SurfaceInfos_c::CreatesSparks(unsigned int surfaceId)
+bool SurfaceInfos_c::CreatesSparks(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bCreatesSparks;
 }
 
-bool SurfaceInfos_c::CantSprintOn(unsigned int surfaceId)
+bool SurfaceInfos_c::CantSprintOn(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bCantSprintOn;
 }
 
-bool SurfaceInfos_c::LeavesFootsteps(unsigned int surfaceId)
+bool SurfaceInfos_c::LeavesFootsteps(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bLeavesFootsteps;
 }
 
-bool SurfaceInfos_c::ProducesFootDust(unsigned int surfaceId)
+bool SurfaceInfos_c::ProducesFootDust(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bProducesFootDust;
 }
 
-bool SurfaceInfos_c::MakesCarDirty(unsigned int surfaceId)
+bool SurfaceInfos_c::MakesCarDirty(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bMakesCarDirty;
 }
 
-bool SurfaceInfos_c::MakesCarClean(unsigned int surfaceId)
+bool SurfaceInfos_c::MakesCarClean(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bMakesCarClean;
 }
 
-bool SurfaceInfos_c::CreatesWheelGrass(unsigned int surfaceId)
+bool SurfaceInfos_c::CreatesWheelGrass(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bCreatesWheelGrass;
 }
 
-bool SurfaceInfos_c::CreatesWheelGravel(unsigned int surfaceId)
+bool SurfaceInfos_c::CreatesWheelGravel(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bCreatesWheelGravel;
 }
 
-bool SurfaceInfos_c::CreatesWheelMud(unsigned int surfaceId)
+bool SurfaceInfos_c::CreatesWheelMud(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bCreatesWheelMud;
 }
 
-bool SurfaceInfos_c::CreatesWheelDust(unsigned int surfaceId)
+bool SurfaceInfos_c::CreatesWheelDust(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bCreatesWheelDust;
 }
 
-bool SurfaceInfos_c::CreatesWheelSand(unsigned int surfaceId)
+bool SurfaceInfos_c::CreatesWheelSand(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bCreatesWheelSand;
 }
 
-bool SurfaceInfos_c::CreatesWheelSpray(unsigned int surfaceId)
+bool SurfaceInfos_c::CreatesWheelSpray(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bCreatesWheelSpray;
 }
 
-bool SurfaceInfos_c::CreatesPlants(unsigned int surfaceId)
+bool SurfaceInfos_c::CreatesPlants(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bCreatesPlants;
 }
 
-bool SurfaceInfos_c::CreatesObjects(unsigned int surfaceId)
+bool SurfaceInfos_c::CreatesObjects(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bCreatesObjects;
 }
 
-bool SurfaceInfos_c::CanClimb(unsigned int surfaceId)
+bool SurfaceInfos_c::CanClimb(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bCanClimb;
 }
 
-bool SurfaceInfos_c::IsAudioConcrete(unsigned int surfaceId)
+bool SurfaceInfos_c::IsAudioConcrete(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsAudioConcrete;
 }
 
-bool SurfaceInfos_c::IsAudioGrass(unsigned int surfaceId)
+bool SurfaceInfos_c::IsAudioGrass(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsAudioGrass;
 }
 
-bool SurfaceInfos_c::IsAudioSand(unsigned int surfaceId)
+bool SurfaceInfos_c::IsAudioSand(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsAudioSand;
 }
 
-bool SurfaceInfos_c::IsAudioGravel(unsigned int surfaceId)
+bool SurfaceInfos_c::IsAudioGravel(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsAudioGravel;
 }
 
-bool SurfaceInfos_c::IsAudioWood(unsigned int surfaceId)
+bool SurfaceInfos_c::IsAudioWood(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsAudioWood;
 }
 
-bool SurfaceInfos_c::IsAudioWater(unsigned int surfaceId)
+bool SurfaceInfos_c::IsAudioWater(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsAudioWater;
 }
 
-bool SurfaceInfos_c::IsAudioMetal(unsigned int surfaceId)
+bool SurfaceInfos_c::IsAudioMetal(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsAudioMetal;
 }
 
-bool SurfaceInfos_c::IsAudioLongGrass(unsigned int surfaceId)
+bool SurfaceInfos_c::IsAudioLongGrass(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsAudioLongGrass;
 }
 
-bool SurfaceInfos_c::IsAudioTile(unsigned int surfaceId)
+bool SurfaceInfos_c::IsAudioTile(uint32 surfaceId)
 {
     return m_surfaces[surfaceId].bIsAudioTile;
 }

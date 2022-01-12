@@ -9,30 +9,30 @@ void cHandlingDataMgr::InjectHooks(){
     ReversibleHooks::Install("cHandlingDataMgr", "ConvertBikeDataToGameUnits", 0x6F5290, &cHandlingDataMgr::ConvertBikeDataToGameUnits);
 };
 
-tFlyingHandlingData* cHandlingDataMgr::GetFlyingPointer(unsigned char handlingId)
+tFlyingHandlingData* cHandlingDataMgr::GetFlyingPointer(uint8 handlingId)
 {
-    return plugin::CallMethodAndReturn<tFlyingHandlingData*, 0x6F52D0, cHandlingDataMgr*, unsigned char>(this, handlingId);
+    return plugin::CallMethodAndReturn<tFlyingHandlingData*, 0x6F52D0, cHandlingDataMgr*, uint8>(this, handlingId);
 }
 
-tBoatHandlingData* cHandlingDataMgr::GetBoatPointer(unsigned char handlingId)
+tBoatHandlingData* cHandlingDataMgr::GetBoatPointer(uint8 handlingId)
 {
-    return plugin::CallMethodAndReturn<tBoatHandlingData*, 0x6F5300, cHandlingDataMgr*, unsigned char>(this, handlingId);
+    return plugin::CallMethodAndReturn<tBoatHandlingData*, 0x6F5300, cHandlingDataMgr*, uint8>(this, handlingId);
 }
 
-bool cHandlingDataMgr::HasFrontWheelDrive(unsigned char handlingId)
+bool cHandlingDataMgr::HasFrontWheelDrive(uint8 handlingId)
 {
-    return ((bool(__thiscall*)(cHandlingDataMgr*, unsigned char))0x6A0480)(this, handlingId);
+    return ((bool(__thiscall*)(cHandlingDataMgr*, uint8))0x6A0480)(this, handlingId);
 };
 
-bool cHandlingDataMgr::HasRearWheelDrive(unsigned char handlingId)
+bool cHandlingDataMgr::HasRearWheelDrive(uint8 handlingId)
 {
-    return ((bool(__thiscall*)(cHandlingDataMgr*, unsigned char))0x6A04B0)(this, handlingId);
+    return ((bool(__thiscall*)(cHandlingDataMgr*, uint8))0x6A04B0)(this, handlingId);
 }
 
 // get handling id by name
 // 0x6F4FD0
-int cHandlingDataMgr::GetHandlingId(char* name) {
-    return plugin::CallMethodAndReturn<int, 0x6F4FD0, cHandlingDataMgr*, char*>(this, name);
+int32 cHandlingDataMgr::GetHandlingId(char* name) {
+    return plugin::CallMethodAndReturn<int32, 0x6F4FD0, cHandlingDataMgr*, char*>(this, name);
 }
 
 // update some handling variables with some world-specific multipliers

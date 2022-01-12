@@ -60,7 +60,7 @@ bool CEventPlayerCommandToGroup::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
 {
     CPed* leader = pedGroup->GetMembership().GetLeader();
     if (leader && leader->IsPlayer()) {
-        for (std::int32_t i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
+        for (int32 i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
             CPed* member = pedGroup->GetMembership().GetMember(i);
             if (member && member->m_nAreaCode != leader->m_nAreaCode) 
                 return false;
@@ -88,7 +88,7 @@ bool CEventPlayerCommandToGroupAttack::AffectsPedGroup_Reversed(CPedGroup* pedGr
 {
     bool affectsPedGroup = CEventPlayerCommandToGroup::AffectsPedGroup(pedGroup);
     if (affectsPedGroup) {
-        for (std::int32_t i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
+        for (int32 i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
             CPed* member = pedGroup->GetMembership().GetMember(i);
             if (member && !member->bDoesntListenToPlayerGroupCommands)
                 return true;

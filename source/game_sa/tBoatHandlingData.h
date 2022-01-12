@@ -6,19 +6,18 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-#include "CVector.h"
+#include "Vector.h"
 
-struct  tBoatHandlingData {
-    int m_nVehicleId;
-    float m_fThrustY;
-    float m_fThrustZ;
-    float m_fThrustAppZ;
-    float m_fAqPlaneForce;
-    float m_fAqPlaneLimit;
-    float m_fAqPlaneOffset;
-    float m_fWaveAudioMult;
-    float m_fLookLRBehindCamHeight;
+struct tBoatHandlingData {
+    int32   m_nVehicleId;
+    float   m_fThrustY;
+    float   m_fThrustZ;
+    float   m_fThrustAppZ;
+    float   m_fAqPlaneForce;
+    float   m_fAqPlaneLimit;
+    float   m_fAqPlaneOffset;
+    float   m_fWaveAudioMult;
+    float   m_fLookLRBehindCamHeight;
     CVector m_vecMoveRes;
     CVector m_vecTurnRes;
 };

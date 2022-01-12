@@ -6,7 +6,7 @@
 */
 #pragma once
 
-enum eCarMission : char
+enum eCarMission : int8
 {
   MISSION_NONE = 0,
   MISSION_CRUISE = 1,

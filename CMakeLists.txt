@@ -47,10 +47,14 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT gta_reversed)
 
 add_library(gta_reversed MODULE ${_headerfiles_list} ${_sourcefiles_list} .editorconfig)
-set_target_properties(gta_reversed PROPERTIES SUFFIX ".asi")
-if(MSVC)
-    target_compile_options(gta_reversed PRIVATE "/MP")
-endif()
+add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
+set_target_properties(gta_reversed
+    PROPERTIES
+    SUFFIX ".asi"
+    ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+)
 
 target_include_directories(gta_reversed PRIVATE
     source/
@@ -58,7 +62,16 @@ target_include_directories(gta_reversed PRIVATE
     source/game_sa/
     source/game_sa/Debug/
     source/game_sa/Animation/
+    source/game_sa/Attractors/
+
     source/game_sa/Audio/
+    source/game_sa/Audio/Config
+    source/game_sa/Audio/Entities
+    source/game_sa/Audio/Hardware
+    source/game_sa/Audio/Loaders
+    source/game_sa/Audio/Managers
+    source/game_sa/Audio/Utility
+
     source/game_sa/Collision/
     source/game_sa/Core/
     source/game_sa/Entity/
@@ -80,7 +93,13 @@ target_include_directories(gta_reversed PRIVATE
     libs/imgui/misc/cpp/
 )
 target_link_libraries(gta_reversed ogg ${OGG_LIBRARY} imgui vorbisfile)
-target_compile_definitions(gta_reversed PRIVATE NOMINMAX _CRT_SECURE_NO_WARNINGS USE_GTASA_ALLOCATOR)
+target_compile_definitions(gta_reversed PRIVATE
+    _CRT_SECURE_NO_WARNINGS
+    NOMINMAX
+    USE_GTASA_ALLOCATOR
+    EXTRA_DEBUG_FEATURES
+)
+target_compile_features(gta_reversed PRIVATE cxx_std_20)
 
 foreach(_header IN ITEMS ${_headerfiles_list})
     get_filename_component(_header_path "${_header}" PATH)
@@ -106,22 +125,30 @@ list(APPEND _sourcefiles_list StdInc.cpp)
 ############# create the imgui project
 #############################################################################################
 
-set(_src_root_path "${CMAKE_CURRENT_SOURCE_DIR}")
+set(IMGUI_DIR "libs/imgui")
+add_library(imgui STATIC)
 
-set(IMGUI_FILES_1 imconfig.h imgui.cpp imgui.h imgui_demo.cpp imgui_draw.cpp imgui_internal.h imgui_widgets.cpp imstb_rectpack.h imstb_textedit.h imstb_truetype.h)
-set(IMGUI_FILES_2 imgui_stdlib.h imgui_stdlib.cpp)
+target_sources(imgui
+    PRIVATE
+    ${IMGUI_DIR}/imgui_demo.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
+    ${IMGUI_DIR}/imgui.cpp
 
-foreach(_file_name IN ITEMS ${IMGUI_FILES_1})
-    list(APPEND IMGUI_ALL_FILES "libs/imgui/${_file_name}")
-endforeach()
+    PRIVATE
+    ${IMGUI_DIR}/backends/imgui_impl_win32.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_dx9.cpp
 
-foreach(_file_name IN ITEMS ${IMGUI_FILES_2})
-    list(APPEND IMGUI_ALL_FILES "libs/imgui/misc/cpp/${_file_name}")
-endforeach()
-
-add_library(imgui STATIC ${IMGUI_ALL_FILES} )
-target_include_directories(imgui PRIVATE
-    libs/imgui/
-    libs/imgui/misc/cpp/
+    ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
 )
+
+target_include_directories(imgui
+    PUBLIC ${IMGUI_DIR}
+    PUBLIC ${IMGUI_DIR}/backends
+    PUBLIC ${IMGUI_DIR}/misc/
+    PUBLIC ${IMGUI_DIR}/misc/cpp
+    PUBLIC ${IMGUI_DIR}/misc/debuggers
+)
+target_link_libraries(imgui PRIVATE d3d9 ${CMAKE_DL_LIBS})
 target_compile_definitions(imgui PRIVATE _CRT_SECURE_NO_WARNINGS)

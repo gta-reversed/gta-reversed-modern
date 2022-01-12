@@ -6,30 +6,25 @@
 */
 #pragma once
 
-#include "PluginBase.h"
-#include "CRect.h"
+#include "Rect.h"
 
-class  IplDef {
+class IplDef {
 public:
     CRect m_boundBox;
     char  m_szName[16];
-private:
-    short _pad20;
-public:
-    short m_nMinBuildingId;
-    short m_nMaxBuildingId;
-    short m_nMinDummyId;
-    short m_nMaxDummyId;
-    short m_nRelatedIpl; // entity arrays index
+    int16 _pad20;
+    int16 m_nMinBuildingId;
+    int16 m_nMaxBuildingId;
+    int16 m_nMinDummyId;
+    int16 m_nMaxDummyId;
+    int16 m_nRelatedIpl; // entity arrays index
     bool  m_bInterior;
-    char field_2D;
+    char  field_2D;
     bool  m_bLoadRequest;
     bool  m_bDisableDynamicStreaming;
-    char field_30;
-    char field_31;
-private:
-    char _pad32[2];
-public:
+    char  field_30;
+    char  field_31;
+    char  _pad32[2];
 };
 
 VALIDATE_SIZE(IplDef, 0x34);

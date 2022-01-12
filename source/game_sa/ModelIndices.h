@@ -2,7 +2,7 @@
 
 #include "eModelID.h"
 
-typedef unsigned short ModelIndex;
+typedef uint16 ModelIndex;
 
 namespace ModelIndices {
     extern ModelIndex& MI_TRAFFICLIGHTS;
@@ -170,30 +170,30 @@ namespace ModelIndices {
     extern ModelIndex& MI_PUNCHBAG;
     extern ModelIndex& MI_IMY_GRAY_CRATE;
 
-    inline bool IsRhino(int32_t modelId) { return modelId == MODEL_RHINO; }
-    inline bool IsVortex(int32_t modelId) { return modelId == MODEL_VORTEX; }
-    inline bool IsDumper(int32_t modelId) { return modelId == MODEL_DUMPER; }
-    inline bool IsPacker(int32_t modelId) { return modelId == MODEL_PACKER; }
-    inline bool IsDozer(int32_t modelId) { return modelId == MODEL_DOZER; }
-    inline bool IsForklift(int32_t modelId) { return modelId == MODEL_FORKLIFT; }
-    inline bool IsAndromada(int32_t modelId) { return modelId == MODEL_ANDROM; }
-    inline bool IsFireTruckLadder(int32_t modelId) { return modelId == MODEL_FIRELA; }
-    inline bool IsFireTruck(int32_t modelId) { return modelId == MODEL_FIRETRUK; }
-    inline bool IsCementTruck(int32_t modelId) { return modelId == MODEL_CEMENT; }
-    inline bool IsCombineHarvester(int32_t modelId) { return modelId == MODEL_COMBINE; }
+    inline bool IsRhino(int32 modelId) { return modelId == MODEL_RHINO; }
+    inline bool IsVortex(int32 modelId) { return modelId == MODEL_VORTEX; }
+    inline bool IsDumper(int32 modelId) { return modelId == MODEL_DUMPER; }
+    inline bool IsPacker(int32 modelId) { return modelId == MODEL_PACKER; }
+    inline bool IsDozer(int32 modelId) { return modelId == MODEL_DOZER; }
+    inline bool IsForklift(int32 modelId) { return modelId == MODEL_FORKLIFT; }
+    inline bool IsAndromada(int32 modelId) { return modelId == MODEL_ANDROM; }
+    inline bool IsFireTruckLadder(int32 modelId) { return modelId == MODEL_FIRELA; }
+    inline bool IsFireTruck(int32 modelId) { return modelId == MODEL_FIRETRUK; }
+    inline bool IsCementTruck(int32 modelId) { return modelId == MODEL_CEMENT; }
+    inline bool IsCombineHarvester(int32 modelId) { return modelId == MODEL_COMBINE; }
 
-    inline bool IsRCBaron(int32_t modelId) { return modelId == MODEL_RCBARON; }
-    inline bool IsRCBandit(int32_t modelId) { return modelId == MODEL_RCBANDIT; }
-    inline bool IsRCTiger(int32_t modelId) { return modelId == MODEL_RCTIGER; }
-    inline bool IsSandKing(int32_t modelId) { return modelId == MODEL_SANDKING; }
-    inline bool IsBFInjection(int32_t modelId) { return modelId == MODEL_BFINJECT; }
-    inline bool IsSwatVan(int32_t modelId) { return modelId == MODEL_SWATVAN; }
+    inline bool IsRCBaron(int32 modelId) { return modelId == MODEL_RCBARON; }
+    inline bool IsRCBandit(int32 modelId) { return modelId == MODEL_RCBANDIT; }
+    inline bool IsRCTiger(int32 modelId) { return modelId == MODEL_RCTIGER; }
+    inline bool IsSandKing(int32 modelId) { return modelId == MODEL_SANDKING; }
+    inline bool IsBFInjection(int32 modelId) { return modelId == MODEL_BFINJECT; }
+    inline bool IsSwatVan(int32 modelId) { return modelId == MODEL_SWATVAN; }
 
-    inline bool IsSkimmer(int32_t modelId) { return modelId == MODEL_SKIMMER; }
+    inline bool IsSkimmer(int32 modelId) { return modelId == MODEL_SKIMMER; }
 
-    inline bool IsAmphibiousHeli(int32_t modelId) { return modelId == MODEL_SEASPAR || modelId == MODEL_LEVIATHN; }
-    inline bool HasWaterCannon(int32_t modelId) { return modelId == MODEL_FIRETRUK || modelId == MODEL_SWATVAN; }
-    inline bool HasMiscComponent(int32_t modelId) {
+    inline bool IsAmphibiousHeli(int32 modelId) { return modelId == MODEL_SEASPAR || modelId == MODEL_LEVIATHN; }
+    inline bool HasWaterCannon(int32 modelId) { return modelId == MODEL_FIRETRUK || modelId == MODEL_SWATVAN; }
+    inline bool HasMiscComponent(int32 modelId) {
         return modelId == MODEL_PACKER
             || modelId == MODEL_DOZER
             || modelId == MODEL_DUMPER

@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
-SSimpleReversibleHook::SSimpleReversibleHook(std::string id, std::string name, uint32_t installAddress, void* addressToJumpTo, int iJmpCodeSize) :
+SSimpleReversibleHook::SSimpleReversibleHook(std::string id, std::string name, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize) :
     SReversibleHook(id, name, eReversibleHookType::Simple),
-    m_iLibFunctionAddress((uint32_t)addressToJumpTo),
+    m_iLibFunctionAddress((uint32)addressToJumpTo),
     m_iRealHookedAddress(installAddress),
     m_iHookedBytes(iJmpCodeSize)
 {
@@ -34,11 +34,11 @@ SSimpleReversibleHook::SSimpleReversibleHook(std::string id, std::string name, u
     VirtualProtect((void*)installAddress, maxBytesToProtect, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
 
     // workaround for hoodlum crashes due to securom protection.
-    if (*(std::uint8_t*)installAddress == NOP_OPCODE) {
+    if (*(uint8*)installAddress == NOP_OPCODE) {
         bool bJumpFound = false;
-        std::uint32_t i = 0;
+        uint32 i = 0;
         for (; i < 4; i++) {
-            if (*(std::uint8_t*)(installAddress + i) == JUMP_OPCODE) {
+            if (*(uint8*)(installAddress + i) == JUMP_OPCODE) {
                 bJumpFound = true;
                 break;
             }

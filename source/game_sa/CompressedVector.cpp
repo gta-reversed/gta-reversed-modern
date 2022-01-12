@@ -10,13 +10,13 @@ CVector UncompressVector(const CompressedVector& compressedVec) {
 
 CompressedVector CompressVector(const CVector& vec) {
     return {
-        static_cast<int16_t>(vec.x * 128.0f),
-        static_cast<int16_t>(vec.y * 128.0f),
-        static_cast<int16_t>(vec.z * 128.0f)
+        static_cast<int16>(vec.x * 128.0f),
+        static_cast<int16>(vec.y * 128.0f),
+        static_cast<int16>(vec.z * 128.0f)
     };
 }
 
-float UncompressUnitFloat(int16_t val) {
+float UncompressUnitFloat(int16 val) {
     return static_cast<float>(val) / 4096.0f;
 }
 
@@ -30,9 +30,9 @@ CVector UncompressUnitVector(const CompressedVector& compressedVec) {
 
 CompressedVector CompressUnitVector(CVector const& vec) {
     return {
-        static_cast<int16_t>(vec.x * 4096.0f),
-        static_cast<int16_t>(vec.y * 4096.0f),
-        static_cast<int16_t>(vec.z * 4096.0f)
+        static_cast<int16>(vec.x * 4096.0f),
+        static_cast<int16>(vec.y * 4096.0f),
+        static_cast<int16>(vec.z * 4096.0f)
     };
 }
 
@@ -46,8 +46,8 @@ CVector UncompressLargeVector(const CompressedVector& compressedVec) {
 
 CompressedVector CompressLargeVector(const CVector& vec) {
     return {
-        static_cast<int16_t>(vec.x * 8.0f),
-        static_cast<int16_t>(vec.y * 8.0f),
-        static_cast<int16_t>(vec.z * 8.0f)
+        static_cast<int16>(vec.x * 8.0f),
+        static_cast<int16>(vec.y * 8.0f),
+        static_cast<int16>(vec.z * 8.0f)
     };
 }

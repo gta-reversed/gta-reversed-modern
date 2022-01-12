@@ -7,3 +7,4 @@ ColumnLimit: 180
 SortIncludes: false
 AccessModifierOffset: -4
 AllowShortFunctionsOnASingleLine: Empty
+#AlignConsecutiveDeclarations: true

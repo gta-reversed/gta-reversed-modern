@@ -8,7 +8,7 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "CMenuManager.h"
+#include "MenuManager.h"
 
 namespace JPegPlugin
 {
@@ -27,7 +27,7 @@ extern void JPegCompressScreenToFile(RwCamera* camera, char const* path);
 /**
  * Compress camera screen to the given buffer
  */
-extern void JPegCompressScreenToBuffer(char** buffer, unsigned int* size);
+extern void JPegCompressScreenToBuffer(char** buffer, uint32* size);
 
 void JPegDecompressToRaster(RwRaster* raster, struct jpeg_source_mgr& src);
 void JPegDecompressToVramFromBuffer(RwRaster* raster, RwInt8** unk);
