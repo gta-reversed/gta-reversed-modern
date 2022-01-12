@@ -12,7 +12,7 @@ void CPlayerInfo::InjectHooks() {
 
     // Methods (24x)
     // ReversibleHooks::Install("CPlayerInfo", "destructor", 0x45B110, &CPlayerInfo::destructor);
-    // ReversibleHooks::Install("CPlayerInfo", "SetPlayerSkin", 0x5717F0, &CPlayerInfo::SetPlayerSkin);
+    ReversibleHooks::Install("CPlayerInfo", "SetPlayerSkin", 0x5717F0, &CPlayerInfo::SetPlayerSkin);
     // ReversibleHooks::Install("CPlayerInfo", "Process", 0x56F8D0, &CPlayerInfo::Process);
     // ReversibleHooks::Install("CPlayerInfo", "LoadPlayerSkin", 0x56F7D0, &CPlayerInfo::LoadPlayerSkin);
     // ReversibleHooks::Install("CPlayerInfo", "FindClosestCarSectorList", 0x56F4E0, &CPlayerInfo::FindClosestCarSectorList);
@@ -81,7 +81,12 @@ void CPlayerInfo::Destructor() {
 
 // 0x5717F0
 void CPlayerInfo::SetPlayerSkin(char const* name) {
-    plugin::CallMethod<0x5717F0, CPlayerInfo*, char const*>(this, name);
+    strcpy_s(m_szSkinName, name); // NOTSA: They used `strcpy`, we use `_s` for safety
+    if (m_pSkinTexture) {
+        RwTextureDestroy(m_pSkinTexture);
+        m_pSkinTexture = nullptr;
+    }
+    m_pSkinTexture = CPlayerSkin::GetSkinTexture(name);
 }
 
 // 0x56F8D0
