@@ -20,7 +20,7 @@ void CPlayerInfo::InjectHooks() {
     ReversibleHooks::Install("CPlayerInfo", "GivePlayerParachute", 0x56EC40, &CPlayerInfo::GivePlayerParachute);
     ReversibleHooks::Install("CPlayerInfo", "StreamParachuteWeapon", 0x56EB30, &CPlayerInfo::StreamParachuteWeapon);
     ReversibleHooks::Install("CPlayerInfo", "AddHealth", 0x56EAB0, &CPlayerInfo::AddHealth);
-    // ReversibleHooks::Install("CPlayerInfo", "DeletePlayerSkin", 0x56EA80, &CPlayerInfo::DeletePlayerSkin);
+    ReversibleHooks::Install("CPlayerInfo", "DeletePlayerSkin", 0x56EA80, &CPlayerInfo::DeletePlayerSkin);
     // ReversibleHooks::Install("CPlayerInfo", "BlowUpRCBuggy", 0x56EA30, &CPlayerInfo::BlowUpRCBuggy);
     // ReversibleHooks::Install("CPlayerInfo", "MakePlayerSafe", 0x56E870, &CPlayerInfo::MakePlayerSafe);
     // ReversibleHooks::Install("CPlayerInfo", "PlayerFailedCriticalMission", 0x56E830, &CPlayerInfo::PlayerFailedCriticalMission);
@@ -92,10 +92,7 @@ void CPlayerInfo::Process(uint32 playerIndex) {
 
 // 0x56F7D0
 void CPlayerInfo::LoadPlayerSkin() {
-    if (m_pSkinTexture) {
-        RwTextureDestroy(m_pSkinTexture);
-        m_pSkinTexture = nullptr;
-    }
+    DeletePlayerSkin();
     m_pSkinTexture = CPlayerSkin::GetSkinTexture(m_szSkinName);
 }
 
@@ -230,7 +227,11 @@ void CPlayerInfo::AddHealth(int32_t amount) {
 
 // 0x56EA80
 void CPlayerInfo::DeletePlayerSkin() {
-    plugin::CallMethod<0x56EA80, CPlayerInfo*>(this);
+    if (m_pSkinTexture)
+    {
+        RwTextureDestroy(m_pSkinTexture);
+        m_pSkinTexture = nullptr;
+    }
 }
 
 // 0x56EA30
