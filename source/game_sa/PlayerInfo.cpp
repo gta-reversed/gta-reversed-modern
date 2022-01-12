@@ -329,7 +329,7 @@ bool CPlayerInfo::IsRestartingAfterDeath() {
 }
 
 // 0x56DFB0
-// Return vehicle (if in any) or player ped position
+// Return occupied vehicle's (if in any) or player's ped position
 CVector CPlayerInfo::GetPos() {
     if (m_pPed->bInVehicle && m_pPed->m_pVehicle)
         return m_pPed->m_pVehicle->GetPosition();
@@ -337,7 +337,7 @@ CVector CPlayerInfo::GetPos() {
 }
 
 // 0x56DF50
-// Return vehicle (if in any) or player ped move speed
+// Return occupied vehicle's (if in any) or player's ped move speed
 CVector CPlayerInfo::GetSpeed() {
     if (m_pPed->bInVehicle && m_pPed->m_pVehicle)
         return m_pPed->m_pVehicle->m_vecMoveSpeed;
@@ -346,7 +346,7 @@ CVector CPlayerInfo::GetSpeed() {
 
 // 0x56DAB0
 bool CPlayerInfo::IsPlayerInRemoteMode() {
-    return plugin::CallMethodAndReturn<bool, 0x56DAB0, CPlayerInfo*>(this);
+    return m_pRemoteVehicle || m_bAfterRemoteVehicleExplosion;
 }
 
 // 0x56DA80
