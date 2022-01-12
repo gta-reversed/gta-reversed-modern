@@ -145,11 +145,12 @@ void CWaterCannon::PushPeds() {
         if (!sectionsBounding.IsPointWithin(pedPosn))
             continue;
 
-        if (!ped->physicalFlags.bMakeMassTwiceAsBig)
+        if (ped->physicalFlags.bMakeMassTwiceAsBig)
             continue;
 
         for (int i = 0; i < SECTIONS_COUNT; i++) {
             const CVector secPosn = GetSectionPosn(i);
+
             if ((pedPosn - secPosn).SquaredMagnitude() >= 5.0f)
                 continue;
 
@@ -167,7 +168,7 @@ void CWaterCannon::PushPeds() {
 
             {
                 // TODO: Refactor... Ugly code
-                const CVector applyableMoveSpeed = (secMoveSpeed / 10.0f - ped->m_vecMoveSpeed) / 10.0f;
+                const CVector2D applyableMoveSpeed = (secMoveSpeed / 10.0f - ped->m_vecMoveSpeed) / 10.0f;
 
                 // Check if directions are the same (eg, + / +, - / -),
                 // differring sign bits will always yield a negativ result
@@ -181,13 +182,12 @@ void CWaterCannon::PushPeds() {
 
             FxPrtMult_c prtInfo{ 1.0f, 1.0f, 1.0f, 0.6f, 0.75f, 0.0f, 0.2f };
 
-            // TODO: Fix fx crap
-            CVector prtVel = ped->m_vecMoveSpeed * 0.3f;
-            g_fx.m_pPrtSmokeII3expand->AddParticle(&pedPosn, &prtVel, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, false);
+            CVector particleVelocity = ped->m_vecMoveSpeed * 0.3f;
+            g_fx.m_pPrtSmokeII3expand->AddParticle(&pedPosn, &particleVelocity, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, false);
 
-            CVector prtVel2 = ped->m_vecMoveSpeed * -0.3f;
-            prtVel2.z += 0.5f;
-            g_fx.m_pPrtSmokeII3expand->AddParticle(&pedPosn, &prtVel2, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, false);
+            CVector particleVelocity2 = ped->m_vecMoveSpeed * -0.3f;
+            particleVelocity2.z += 0.5f;
+            g_fx.m_pPrtSmokeII3expand->AddParticle(&pedPosn, &particleVelocity2, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, false);
 
             break;
         }
