@@ -325,7 +325,7 @@ bool CPlayerInfo::IsRestartingAfterArrest() {
 
 // 0x56E550
 bool CPlayerInfo::IsRestartingAfterDeath() {
-    return plugin::CallMethodAndReturn<bool, 0x56E550, CPlayerInfo*>(this);
+    return this->m_nPlayerState == PLAYERSTATE_HAS_DIED;
 }
 
 // 0x56DFB0
