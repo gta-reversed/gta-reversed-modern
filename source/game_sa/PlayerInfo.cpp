@@ -351,7 +351,11 @@ bool CPlayerInfo::IsPlayerInRemoteMode() {
 
 // 0x56DA80
 void CPlayerInfo::SetLastTargetVehicle(CVehicle* targetveh) {
-    plugin::CallMethod<0x56DA80, CPlayerInfo*, CVehicle*>(this, targetveh);
+    if (m_pLastTargetVehicle)
+        m_pLastTargetVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pLastTargetVehicle));
+    m_pLastTargetVehicle = targetveh;
+    if (targetveh)
+        targetveh->RegisterReference(reinterpret_cast<CEntity**>(&m_pLastTargetVehicle));
 }
 
 // 0x5D3AC0
