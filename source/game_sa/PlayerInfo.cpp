@@ -3,7 +3,8 @@
 
 void CPlayerInfo::InjectHooks() {
     // Constructors (1x)
-    // ReversibleHooks::Install("CPlayerInfo", "CPlayerInfo", 0x571920, &CPlayerInfo::Constructor);
+    ReversibleHooks::Install("CPlayerInfo", "Constructor", 0x571920, &CPlayerInfo::Constructor);
+    ReversibleHooks::Install("CPlayerInfo", "Destructor", 0x45B110, &CPlayerInfo::Destructor);
 
     // Static functions (3x)
     // ReversibleHooks::Install("CPlayerInfo", "CancelPlayerEnteringCars", 0x56E860, &CPlayerInfo::CancelPlayerEnteringCars);
@@ -11,7 +12,7 @@ void CPlayerInfo::InjectHooks() {
     // ReversibleHooks::Install("CPlayerInfo", "EvaluateCarPosition", 0x56DAD0, &CPlayerInfo::EvaluateCarPosition);
 
     // Methods (24x)
-    // ReversibleHooks::Install("CPlayerInfo", "destructor", 0x45B110, &CPlayerInfo::destructor);
+    ReversibleHooks::Install("CPlayerInfo", "Destructor", 0x45B110, &CPlayerInfo::Destructor);
     ReversibleHooks::Install("CPlayerInfo", "SetPlayerSkin", 0x5717F0, &CPlayerInfo::SetPlayerSkin);
     // ReversibleHooks::Install("CPlayerInfo", "Process", 0x56F8D0, &CPlayerInfo::Process);
     ReversibleHooks::Install("CPlayerInfo", "LoadPlayerSkin", 0x56F7D0, &CPlayerInfo::LoadPlayerSkin);
@@ -29,7 +30,13 @@ void CPlayerInfo::InjectHooks() {
 }
 
 // 0x571920
-CPlayerInfo::CPlayerInfo() {}
+CPlayerInfo::CPlayerInfo() {
+    // Done by the compiler (because we've used init-lists)
+}
+
+CPlayerInfo::~CPlayerInfo() {
+    // Done by the compiler
+}
 
 CVector* CPlayerInfo::GetSpeed_Hook(CVector* out) {
     *out = GetSpeed();
@@ -66,8 +73,9 @@ void CPlayerInfo::EvaluateCarPosition(CEntity* car, CPed* this_mpPed, float pedT
 
 // Methods
 // 0x45B110
-void CPlayerInfo::Destructor() {
-    plugin::CallMethod<0x45B110, CPlayerInfo*>(this);
+CPlayerInfo* CPlayerInfo::Destructor() {
+    this->~CPlayerInfo();
+    return this;
 }
 
 // 0x5717F0

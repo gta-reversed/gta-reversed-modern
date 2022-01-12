@@ -91,6 +91,7 @@ public:
     static void InjectHooks();
 
     CPlayerInfo();
+    ~CPlayerInfo();
 
     static void CancelPlayerEnteringCars(CVehicle* a1);
     static CEntity* FindObjectToSteal(CPed* this_mpPed);
@@ -127,6 +128,7 @@ private:
 
 
     CPlayerInfo* Constructor();
+    CPlayerInfo* Destructor();
 };
 
 VALIDATE_SIZE(CPlayerInfo, 0x190);
