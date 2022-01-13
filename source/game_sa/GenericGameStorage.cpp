@@ -20,16 +20,16 @@ void CGenericGameStorage::InjectHooks() {
     Install("CGenericGameStorage", "CheckSlotDataValid", 0x5D1380, &CGenericGameStorage::CheckSlotDataValid);
     Install("CGenericGameStorage", "LoadDataFromWorkBuffer", 0x5D1300, &CGenericGameStorage::LoadDataFromWorkBuffer);
     Install("CGenericGameStorage", "DoGameSpecificStuffBeforeSave", 0x618F50, &CGenericGameStorage::DoGameSpecificStuffBeforeSave);
-    // Install("CGenericGameStorage", "SaveDataToWorkBuffer", 0x5D1270, &CGenericGameStorage::SaveDataToWorkBuffer);
-    // Install("CGenericGameStorage", "LoadWorkBuffer", 0x5D10B0, &CGenericGameStorage::LoadWorkBuffer);
+    Install("CGenericGameStorage", "SaveDataToWorkBuffer", 0x5D1270, &CGenericGameStorage::SaveDataToWorkBuffer);
+    Install("CGenericGameStorage", "LoadWorkBuffer", 0x5D10B0, &CGenericGameStorage::LoadWorkBuffer);
     Install("CGenericGameStorage", "SaveWorkBuffer", 0x5D0F80, &CGenericGameStorage::SaveWorkBuffer);
-    // Install("CGenericGameStorage", "GetCurrentVersionNumber", 0x5D0F50, &CGenericGameStorage::GetCurrentVersionNumber);
-    // Install("CGenericGameStorage", "MakeValidSaveName", 0x5D0E90, &CGenericGameStorage::MakeValidSaveName);
-    // Install("CGenericGameStorage", "CloseFile", 0x5D0E30, &CGenericGameStorage::CloseFile);
-    // Install("CGenericGameStorage", "OpenFileForWriting", 0x5D0DD0, &CGenericGameStorage::OpenFileForWriting_void_);
-    // Install("CGenericGameStorage", "OpenFileForReading", 0x5D0D20, &CGenericGameStorage::OpenFileForReading);
-    // Install("CGenericGameStorage", "CheckDataNotCorrupt", 0x5D1170, &CGenericGameStorage::CheckDataNotCorrupt);
-    // Install("CGenericGameStorage", "RestoreForStartLoad", 0x619000, &CGenericGameStorage::RestoreForStartLoad);
+    Install("CGenericGameStorage", "GetCurrentVersionNumber", 0x5D0F50, &CGenericGameStorage::GetCurrentVersionNumber);
+    Install("CGenericGameStorage", "MakeValidSaveName", 0x5D0E90, &CGenericGameStorage::MakeValidSaveName);
+    Install("CGenericGameStorage", "CloseFile", 0x5D0E30, &CGenericGameStorage::CloseFile);
+    Install("CGenericGameStorage", "OpenFileForWriting", 0x5D0DD0, &CGenericGameStorage::OpenFileForWriting);
+    Install("CGenericGameStorage", "OpenFileForReading", 0x5D0D20, &CGenericGameStorage::OpenFileForReading);
+    Install("CGenericGameStorage", "CheckDataNotCorrupt", 0x5D1170, &CGenericGameStorage::CheckDataNotCorrupt);
+    Install("CGenericGameStorage", "RestoreForStartLoad", 0x619000, &CGenericGameStorage::RestoreForStartLoad);
 }
 
 // Static functions
@@ -441,7 +441,42 @@ int32 CGenericGameStorage::SaveDataToWorkBuffer(void* data, int32 Size) {
 
 // 0x5D10B0
 bool CGenericGameStorage::LoadWorkBuffer() {
-    return plugin::CallAndReturn<bool, 0x5D10B0>();
+    if (ms_bFailed) {
+        return false;
+    }
+
+    uint32 toReadSize = BUFFER_SIZE;
+    if (ms_FilePos + BUFFER_SIZE > ms_FileSize) {
+        toReadSize = ms_FileSize - ms_FilePos;
+        if (ms_FileSize == ms_FilePos) {
+            return false;
+        } else {
+            if (toReadSize != ((toReadSize + 3) & 0xFFFFFFFC)) { // Not sure, I think it's a check if the read size is 4 byte aligned? 
+                return false;
+            }
+        }
+    }
+
+    assert(ms_FileHandle);
+    assert(ms_WorkBuffer);
+
+    if (!CFileMgr::GetErrorReadWrite(ms_FileHandle)) {
+        if (CFileMgr::Read(ms_FileHandle, ms_WorkBuffer, toReadSize) == toReadSize) {
+            ms_FilePos += toReadSize;
+            ms_WorkBufferSize = toReadSize;
+            ms_WorkBufferPos = 0;
+            return true;
+        }
+    }
+
+    s_PcSaveHelper.error = C_PcSave::eErrorCode::FAILED_TO_READ;
+    if (!CloseFile()) {
+        s_PcSaveHelper.error = C_PcSave::eErrorCode::FAILED_TO_CLOSE;
+    }
+
+    ms_bFailed = true;
+
+    return false;
 }
 
 const char* CGenericGameStorage::GetBlockName(eBlocks block) {
@@ -652,5 +687,5 @@ bool CGenericGameStorage::CheckDataNotCorrupt(int32 slot, const char* fileName) 
 
 // 0x619000
 bool CGenericGameStorage::RestoreForStartLoad() {
-    return plugin::CallAndReturn<bool, 0x619000>();
+    return false;
 }
