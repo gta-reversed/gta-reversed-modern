@@ -19,7 +19,7 @@ void CGenericGameStorage::InjectHooks() {
     Install("CGenericGameStorage", "GenericSave", 0x5D13E0, &CGenericGameStorage::GenericSave);
     Install("CGenericGameStorage", "CheckSlotDataValid", 0x5D1380, &CGenericGameStorage::CheckSlotDataValid);
     Install("CGenericGameStorage", "LoadDataFromWorkBuffer", 0x5D1300, &CGenericGameStorage::LoadDataFromWorkBuffer);
-    // Install("CGenericGameStorage", "DoGameSpecificStuffBeforeSave", 0x618F50, &CGenericGameStorage::DoGameSpecificStuffBeforeSave);
+    Install("CGenericGameStorage", "DoGameSpecificStuffBeforeSave", 0x618F50, &CGenericGameStorage::DoGameSpecificStuffBeforeSave);
     // Install("CGenericGameStorage", "SaveDataToWorkBuffer", 0x5D1270, &CGenericGameStorage::SaveDataToWorkBuffer);
     // Install("CGenericGameStorage", "LoadWorkBuffer", 0x5D10B0, &CGenericGameStorage::LoadWorkBuffer);
     // Install("CGenericGameStorage", "SaveWorkBuffer", 0x5D0F80, &CGenericGameStorage::SaveWorkBuffer);
@@ -419,7 +419,19 @@ bool CGenericGameStorage::LoadDataFromWorkBuffer(void* data, int32 size) {
 
 // 0x618F50
 void CGenericGameStorage::DoGameSpecificStuffBeforeSave() {
-    plugin::Call<0x618F50>();
+    CRopes::Shutdown();
+    CPickups::RemovePickupObjects();
+
+    auto& pinfo = FindPlayerInfo(0);
+    pinfo.m_pPed->m_fHealth = (float)std::min((uint8)200u, pinfo.m_nMaxHealth);
+
+    CGangWars::EndGangWar(false);
+    CStats::IncrementStat(eStats::STAT_SAFEHOUSE_VISITS, 1.f);
+    CGameLogic::PassTime(6 * 60);
+    FindPlayerInfo().m_nNumHoursDidntEat = 0;
+    FindPlayerPed()->ResetSprintEnergy();
+    FindPlayerPed()->SetWantedLevel(0);
+    CGame::TidyUpMemory(true, false);
 }
 
 // 0x5D1270
