@@ -3,6 +3,7 @@
 #include <SimpleVariablesSaveStructure.h>
 #include <TheCarGenerators.h>
 #include <PedType.h>
+#include <C_PcSave.h>
 
 #include <ranges>
 namespace rng = std::ranges;
@@ -16,7 +17,7 @@ void CGenericGameStorage::InjectHooks() {
     Install("CGenericGameStorage", "GetSavedGameDateAndTime", 0x618D00, &CGenericGameStorage::GetSavedGameDateAndTime);
     Install("CGenericGameStorage", "GenericLoad", 0x5D17B0, &CGenericGameStorage::GenericLoad);
     Install("CGenericGameStorage", "GenericSave", 0x5D13E0, &CGenericGameStorage::GenericSave);
-    // Install("CGenericGameStorage", "CheckSlotDataValid", 0x5D1380, &CGenericGameStorage::CheckSlotDataValid);
+    Install("CGenericGameStorage", "CheckSlotDataValid", 0x5D1380, &CGenericGameStorage::CheckSlotDataValid);
     // Install("CGenericGameStorage", "LoadDataFromWorkBuffer", 0x5D1300, &CGenericGameStorage::LoadDataFromWorkBuffer);
     // Install("CGenericGameStorage", "DoGameSpecificStuffBeforeSave", 0x618F50, &CGenericGameStorage::DoGameSpecificStuffBeforeSave);
     // Install("CGenericGameStorage", "SaveDataToWorkBuffer", 0x5D1270, &CGenericGameStorage::SaveDataToWorkBuffer);
@@ -370,7 +371,16 @@ bool CGenericGameStorage::GenericSave() {
 
 // 0x5D1380
 bool CGenericGameStorage::CheckSlotDataValid(int32 slot) {
-    return plugin::CallAndReturn<bool, 0x5D1380>(slot);
+    char fileName[MAX_PATH]{};
+    C_PcSave::GenerateGameFilename(slot, fileName);
+
+    if (CheckDataNotCorrupt(slot, fileName)) {
+        CStreaming::DeleteAllRwObjects();
+        return true;
+    } else {
+        s_PcSaveHelper.error = C_PcSave::eErrorCode::SLOT_INVALID;
+        return false;
+    }
 }
 
 // 0x5D1300
