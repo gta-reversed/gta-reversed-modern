@@ -161,6 +161,7 @@
 #include "TaskComplexBeCop.h"
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
+#include <C_PcSave.h>
 
 void WaitForDebugger() {
     while (!::IsDebuggerPresent()) {
@@ -175,6 +176,7 @@ void InjectHooksMain()
     InjectCommonHooks();
     CPad::InjectHooks();
 
+    C_PcSave::InjectHooks();
     CDamageManager::InjectHooks();
     CCreepingFire::InjectHooks();
     CPtrList::InjectHooks();
