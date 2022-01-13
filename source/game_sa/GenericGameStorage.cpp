@@ -435,8 +435,37 @@ void CGenericGameStorage::DoGameSpecificStuffBeforeSave() {
 }
 
 // 0x5D1270
-int32 CGenericGameStorage::SaveDataToWorkBuffer(void* data, int32 Size) {
-    return plugin::CallAndReturn<int32, 0x5D1270, void*, int32>(data, Size);
+int32 CGenericGameStorage::SaveDataToWorkBuffer(void* data, int32 size) {
+    assert(data);
+
+    if (ms_bFailed) {
+        return false;
+    }
+
+    if (size <= 0) {
+        return true;
+    }
+
+    if (ms_WorkBufferPos + size > BUFFER_SIZE) {
+        // Make space for data
+
+        const auto buffSizeRemaining = BUFFER_SIZE - ms_WorkBufferPos;
+        if (!SaveDataToWorkBuffer(data, buffSizeRemaining)) { // Try writing what we have space for
+            return false;
+        }
+        if (!SaveWorkBuffer(false)) { // Flush data to file
+            return false;
+        }
+
+        // Adjust stuff, and write remaining data (if any) to work buffer
+        data = reinterpret_cast<uint8*>(data) + buffSizeRemaining;
+        size -= buffSizeRemaining;
+    }
+
+    memcpy(&ms_WorkBuffer[ms_WorkBufferPos], data, size);
+    ms_WorkBufferPos += size;
+    
+    return true;
 }
 
 // 0x5D10B0
