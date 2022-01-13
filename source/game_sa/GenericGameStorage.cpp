@@ -553,7 +553,18 @@ uint32 CGenericGameStorage::GetCurrentVersionNumber() {
 
 // 0x5D0E90
 char* CGenericGameStorage::MakeValidSaveName(int32 saveNum) {
-    return plugin::CallAndReturn<char*, 0x5D0E90, int32>(saveNum);
+    char path[MAX_PATH]{};
+    s_PcSaveHelper.GenerateGameFilename(saveNum, path);
+
+    path[257] = 0; // Make sure there's space for the file extension
+
+    strcat_s(path, ".b");
+
+    if (path[0] != '\n' && path[0] != 0) {
+        rng::replace(path, path + strlen(path), '?', ' ');
+    }
+
+    strcpy_s(ms_SaveFileName, path);
 }
 
 // 0x5D0E30
