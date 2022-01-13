@@ -4,7 +4,7 @@
 void CGenericGameStorage::InjectHooks() {
     using namespace ReversibleHooks;
     // Static functions (19x)
-    // Install("CGenericGameStorage", "ReportError", 0x5D08C0, &CGenericGameStorage::ReportError);
+    Install("CGenericGameStorage", "ReportError", 0x5D08C0, &CGenericGameStorage::ReportError);
     // Install("CGenericGameStorage", "DoGameSpecificStuffAfterSucessLoad", 0x618E90, &CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad);
     // Install("CGenericGameStorage", "InitRadioStationPositionList", 0x618E70, &CGenericGameStorage::InitRadioStationPositionList);
     // Install("CGenericGameStorage", "GetSavedGameDateAndTime", 0x618D00, &CGenericGameStorage::GetSavedGameDateAndTime);
@@ -25,11 +25,27 @@ void CGenericGameStorage::InjectHooks() {
     // Install("CGenericGameStorage", "RestoreForStartLoad", 0x619000, &CGenericGameStorage::RestoreForStartLoad);
 }
 
-
 // Static functions
 // 0x5D08C0
 void CGenericGameStorage::ReportError(eBlocks nBlock, eSaveLoadError nError) {
-    plugin::Call<0x5D08C0>(nBlock, nError);
+    char buffer[256]{};
+    const auto GetErrorString = [nError] {
+        switch (nError) {
+        case eSaveLoadError::LOADING:
+            return "Loading error: %s";
+        case eSaveLoadError::SAVING:
+            return "Saving error: %s";
+        case eSaveLoadError::SYNC:
+            return "Loading sync error: %s";
+        default:
+            return "Unknown error: %s";
+        }
+    };
+    sprintf_s(buffer, GetErrorString(), GetBlockName(nBlock));
+
+    // Yes, they don't do anything with `buffer`
+
+    std::cerr << "[CGenericGameStorage]: " << buffer << std::endl; // NOTSA
 }
 
 // 0x618E90
@@ -80,6 +96,67 @@ int32 CGenericGameStorage::SaveDataToWorkBuffer(void* data, int32 Size) {
 // 0x5D10B0
 bool CGenericGameStorage::LoadWorkBuffer() {
     return plugin::CallAndReturn<bool, 0x5D10B0>();
+}
+
+const char* CGenericGameStorage::GetBlockName(eBlocks block) {
+    switch (block) {
+    case eBlocks::SIMPLE_VARIABLES:
+        return "SIMPLE_VARIABLES";
+    case eBlocks::SCRIPTS:
+        return "SCRIPTS";
+    case eBlocks::POOLS:
+        return "POOLS";
+    case eBlocks::GARAGES:
+        return "GARAGES";
+    case eBlocks::GAMELOGIC:
+        return "GAMELOGIC";
+    case eBlocks::PATHS:
+        return "PATHS";
+    case eBlocks::PICKUPS:
+        return "PICKUPS";
+    case eBlocks::PHONEINFO:
+        return "PHONEINFO";
+    case eBlocks::RESTART:
+        return "RESTART";
+    case eBlocks::RADAR:
+        return "RADAR";
+    case eBlocks::ZONES:
+        return "ZONES";
+    case eBlocks::GANGS:
+        return "GANGS";
+    case eBlocks::CAR_GENERATORS:
+        return "CAR GENERATORS";
+    case eBlocks::PED_GENERATORS:
+        return "PED GENERATORS";
+    case eBlocks::AUDIO_SCRIPT_OBJECT:
+        return "AUDIO SCRIPT OBJECT";
+    case eBlocks::PLAYERINFO:
+        return "PLAYERINFO";
+    case eBlocks::STATS:
+        return "STATS";
+    case eBlocks::SET_PIECES:
+        return "SET PIECES";
+    case eBlocks::STREAMING:
+        return "STREAMING";
+    case eBlocks::PED_TYPES:
+        return "PED TYPES";
+    case eBlocks::TAGS:
+        return "TAGS";
+    case eBlocks::IPLS:
+        return "IPLS";
+    case eBlocks::SHOPPING:
+        return "SHOPPING";
+    case eBlocks::GANGWARS:
+        return "GANGWARS";
+    case eBlocks::STUNTJUMPS:
+        return "STUNTJUMPS";
+    case eBlocks::ENTRY_EXITS:
+        return "ENTRY EXITS";
+    case eBlocks::RADIOTRACKS:
+        return "RADIOTRACKS";
+    case eBlocks::USER3DMARKERS:
+        return "USER3DMARKERS";
+    }
 }
 
 // 0x5D0F80

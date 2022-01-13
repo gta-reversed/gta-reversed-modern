@@ -86,4 +86,7 @@ public:
     static bool OpenFileForReading(int32 slot, const char* fileName);
     static bool CheckDataNotCorrupt(int32 slot, const char* fileName);
     static bool RestoreForStartLoad();
+
+private:
+    static const char* GetBlockName(eBlocks);
 };
