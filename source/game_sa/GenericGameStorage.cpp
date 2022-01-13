@@ -619,7 +619,35 @@ bool CGenericGameStorage::OpenFileForReading(const char* fileName, int32 slot) {
 
 // 0x5D1170
 bool CGenericGameStorage::CheckDataNotCorrupt(int32 slot, const char* fileName) {
-    return plugin::CallAndReturn<bool, 0x5D1170>(slot, fileName);
+    ms_bFailed = false;
+    if (!OpenFileForReading(fileName, slot)) {
+        return false;
+    }
+
+    s_PcSaveHelper.error = C_PcSave::eErrorCode::NONE;
+
+    uint32 nCheckSum = 0;
+
+    while (LoadWorkBuffer()) {
+        for (auto i = 0; i != ms_WorkBufferSize; ++i) {
+            nCheckSum += ms_WorkBuffer[i];
+        }
+    }
+
+    if (ms_WorkBufferSize < sizeof(uint32) || s_PcSaveHelper.error != C_PcSave::eErrorCode::NONE) {
+        CloseFile();
+        return false;
+    }
+
+    const auto nFileCheckSum = *(uint32*)(ms_WorkBuffer + ms_WorkBufferSize - sizeof(uint32));
+
+    for (auto i = 0; i < sizeof(uint32); ++i) {
+        nCheckSum -= ms_WorkBuffer[ms_WorkBufferSize - (i + 1)];
+    }
+
+    CloseFile();
+
+    return nCheckSum == nFileCheckSum;
 }
 
 // 0x619000
