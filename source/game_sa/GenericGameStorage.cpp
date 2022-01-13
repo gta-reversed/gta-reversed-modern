@@ -7,7 +7,7 @@ void CGenericGameStorage::InjectHooks() {
     Install("CGenericGameStorage", "ReportError", 0x5D08C0, &CGenericGameStorage::ReportError);
     Install("CGenericGameStorage", "DoGameSpecificStuffAfterSucessLoad", 0x618E90, &CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad);
     Install("CGenericGameStorage", "InitRadioStationPositionList", 0x618E70, &CGenericGameStorage::InitRadioStationPositionList);
-    // Install("CGenericGameStorage", "GetSavedGameDateAndTime", 0x618D00, &CGenericGameStorage::GetSavedGameDateAndTime);
+    Install("CGenericGameStorage", "GetSavedGameDateAndTime", 0x618D00, &CGenericGameStorage::GetSavedGameDateAndTime);
     // Install("CGenericGameStorage", "GenericLoad", 0x5D17B0, &CGenericGameStorage::GenericLoad);
     // Install("CGenericGameStorage", "GenericSave", 0x5D13E0, &CGenericGameStorage::GenericSave);
     // Install("CGenericGameStorage", "CheckSlotDataValid", 0x5D1380, &CGenericGameStorage::CheckSlotDataValid);
@@ -76,7 +76,7 @@ void CGenericGameStorage::InitRadioStationPositionList() {
 
 // 0x618D00
 const char* CGenericGameStorage::GetSavedGameDateAndTime(int32 slot) {
-    return plugin::CallAndReturn<char*, 0x618D00, int32>(slot);
+    return ms_SlotSaveDate[slot];
 }
 
 // 0x5D17B0
