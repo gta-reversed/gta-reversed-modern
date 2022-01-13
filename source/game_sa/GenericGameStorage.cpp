@@ -22,7 +22,7 @@ void CGenericGameStorage::InjectHooks() {
     Install("CGenericGameStorage", "DoGameSpecificStuffBeforeSave", 0x618F50, &CGenericGameStorage::DoGameSpecificStuffBeforeSave);
     // Install("CGenericGameStorage", "SaveDataToWorkBuffer", 0x5D1270, &CGenericGameStorage::SaveDataToWorkBuffer);
     // Install("CGenericGameStorage", "LoadWorkBuffer", 0x5D10B0, &CGenericGameStorage::LoadWorkBuffer);
-    // Install("CGenericGameStorage", "SaveWorkBuffer", 0x5D0F80, &CGenericGameStorage::SaveWorkBuffer);
+    Install("CGenericGameStorage", "SaveWorkBuffer", 0x5D0F80, &CGenericGameStorage::SaveWorkBuffer);
     // Install("CGenericGameStorage", "GetCurrentVersionNumber", 0x5D0F50, &CGenericGameStorage::GetCurrentVersionNumber);
     // Install("CGenericGameStorage", "MakeValidSaveName", 0x5D0E90, &CGenericGameStorage::MakeValidSaveName);
     // Install("CGenericGameStorage", "CloseFile", 0x5D0E30, &CGenericGameStorage::CloseFile);
@@ -349,8 +349,8 @@ bool CGenericGameStorage::GenericSave() {
     }
 
     // TODO: Wat is dis?
-    while (ms_WorkBufferPos + ms_FilePos < 202748 && (202748 - ms_FilePos) >= 50 * 1024) {
-        ms_WorkBufferPos = 50 * 1024;
+    while (ms_WorkBufferPos + ms_FilePos < 202748 && (202748 - ms_FilePos) >= BUFFER_SIZE) {
+        ms_WorkBufferPos = BUFFER_SIZE;
         if (!SaveWorkBuffer(false)) {
             CloseFile();
             return false;
@@ -358,7 +358,7 @@ bool CGenericGameStorage::GenericSave() {
     }
 
     if (SaveWorkBuffer(true)) {
-        strcpy_s(ms_SaveFileNameJustSaved, ms_SaveFileName);
+        strncpy_s(ms_SaveFileNameJustSaved, ms_SaveFileName, std::size(ms_SaveFileNameJustSaved) - 1);
         if (CloseFile()) {
             CPad::UpdatePads();
             return true;
@@ -398,7 +398,7 @@ bool CGenericGameStorage::LoadDataFromWorkBuffer(void* data, int32 size) {
     auto pos = ms_WorkBufferPos;
 
     if (size + pos > ms_WorkBufferSize) {
-        const auto maxSize = 50 * 1024 - pos;
+        const auto maxSize = BUFFER_SIZE - pos;
         if (LoadDataFromWorkBuffer(data, maxSize)) {
             if (LoadWorkBuffer()) {
                 pos = ms_WorkBufferPos;
@@ -509,7 +509,39 @@ const char* CGenericGameStorage::GetBlockName(eBlocks block) {
 
 // 0x5D0F80
 bool CGenericGameStorage::SaveWorkBuffer(bool bIncludeChecksum) {
-    return plugin::CallAndReturn<bool, 0x5D0F80, bool>(bIncludeChecksum);
+    if (ms_bFailed)
+        return false;
+
+    if (ms_WorkBufferPos == 0)
+        return true;
+
+    for (auto i = 0; i < ms_WorkBufferPos; ++i) {
+        ms_CheckSum += ms_WorkBuffer[i];
+    }
+
+    if (bIncludeChecksum) {
+        if (ms_WorkBufferPos > BUFFER_SIZE - sizeof(uint32))
+            SaveWorkBuffer(false);
+        memcpy(&ms_WorkBuffer[ms_WorkBufferPos], &ms_CheckSum, sizeof(uint32));
+        ms_WorkBufferPos += sizeof(uint32);
+    }
+
+    if (CFileMgr::Write(ms_FileHandle, ms_WorkBuffer, ms_WorkBufferPos) == ms_WorkBufferPos) {
+        if (!CFileMgr::GetErrorReadWrite(ms_FileHandle)) {
+            ms_FilePos += ms_WorkBufferPos;
+            ms_WorkBufferPos = 0;
+            return true;
+        }
+    }
+
+    s_PcSaveHelper.error = C_PcSave::eErrorCode::FAILED_TO_WRITE;
+    if (!CloseFile())
+        s_PcSaveHelper.error = C_PcSave::eErrorCode::FAILED_TO_CLOSE;
+
+    strncpy_s(ms_SaveFileNameJustSaved, ms_SaveFileName, std::size(ms_SaveFileNameJustSaved) - 1);
+
+    ms_bFailed = true;
+    return false;
 }
 
 // 0x5D0F50

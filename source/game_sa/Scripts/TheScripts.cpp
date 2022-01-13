@@ -196,8 +196,12 @@ bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle) {
     return plugin::CallAndReturn<bool, 0x4861F0, CVehicle*>(pVehicle);
 }
 
-void CTheScripts::Load() {
-    plugin::Call<0x5D4FD0>();
+bool CTheScripts::Load() {
+    return plugin::CallAndReturn<bool, 0x5D4FD0>();
+}
+
+bool CTheScripts::Save() {
+    return plugin::CallAndReturn<bool, 0x5D4C40>();
 }
 
 // 0x464BB0

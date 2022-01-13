@@ -9,6 +9,10 @@ void CGangs::Initialise() {
     plugin::Call<0x5DE680>();
 }
 
-void CGangs::Load() {
-    plugin::Call<0x5D3A90>();
+bool CGangs::Load() {
+    return plugin::CallAndReturn<bool, 0x5D3A90>();
+}
+
+bool CGangs::Save() {
+    return plugin::CallAndReturn<bool, 0x5D3A60>();
 }

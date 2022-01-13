@@ -69,7 +69,7 @@ public:
     static void PlaceMarkerSet(uint32 id, uint16 type, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
     static void Render();
     // save user 3d markers to save file; always return true
-    static void SaveUser3dMarkers();
+    static bool SaveUser3dMarkers();
     // only set material color (m_user3dMarkerColor) for first material in first atomic; 'data' is unused
     static RpAtomic* User3dMarkerAtomicCB(RpAtomic* atomic, void* _IGNORED_ data);
     static void User3dMarkerDelete(int32 slotIndex);

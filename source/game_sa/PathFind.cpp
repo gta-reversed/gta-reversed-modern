@@ -114,11 +114,11 @@ void CPathFind::PreparePathData() {
     // NOP
 }
 
-void CPathFind::Load() {
+bool CPathFind::Load() {
     return plugin::CallMethodAndReturn<bool, 0x5D3500>(this);
 }
 
-void CPathFind::Save() {
+bool CPathFind::Save() {
     return plugin::CallMethodAndReturn<bool, 0x5D1502>(this);
 }
 

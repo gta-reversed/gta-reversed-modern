@@ -101,7 +101,7 @@ public:
     static void Update();
     static void Shutdown();
 
-    static void Save();
+    static bool Save();
     static bool Load();
     static void TriggerMessage(Const char* cTagMsg, int16 wMsgMin, uint16 ucTime, int16 wMsgMax);
     static void PrintMessages();
