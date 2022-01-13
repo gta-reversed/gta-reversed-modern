@@ -18,7 +18,7 @@ void CGenericGameStorage::InjectHooks() {
     Install("CGenericGameStorage", "GenericLoad", 0x5D17B0, &CGenericGameStorage::GenericLoad);
     Install("CGenericGameStorage", "GenericSave", 0x5D13E0, &CGenericGameStorage::GenericSave);
     Install("CGenericGameStorage", "CheckSlotDataValid", 0x5D1380, &CGenericGameStorage::CheckSlotDataValid);
-    // Install("CGenericGameStorage", "LoadDataFromWorkBuffer", 0x5D1300, &CGenericGameStorage::LoadDataFromWorkBuffer);
+    Install("CGenericGameStorage", "LoadDataFromWorkBuffer", 0x5D1300, &CGenericGameStorage::LoadDataFromWorkBuffer);
     // Install("CGenericGameStorage", "DoGameSpecificStuffBeforeSave", 0x618F50, &CGenericGameStorage::DoGameSpecificStuffBeforeSave);
     // Install("CGenericGameStorage", "SaveDataToWorkBuffer", 0x5D1270, &CGenericGameStorage::SaveDataToWorkBuffer);
     // Install("CGenericGameStorage", "LoadWorkBuffer", 0x5D10B0, &CGenericGameStorage::LoadWorkBuffer);
@@ -385,7 +385,36 @@ bool CGenericGameStorage::CheckSlotDataValid(int32 slot) {
 
 // 0x5D1300
 bool CGenericGameStorage::LoadDataFromWorkBuffer(void* data, int32 size) {
-    return plugin::CallAndReturn<bool, 0x5D1300, void*, int32>(data, size);
+    assert(data);
+
+    if (ms_bFailed) {
+        return false;
+    }
+
+    if (size <= 0) {
+        return true;
+    }
+
+    auto pos = ms_WorkBufferPos;
+
+    if (size + pos > ms_WorkBufferSize) {
+        const auto maxSize = 50 * 1024 - pos;
+        if (LoadDataFromWorkBuffer(data, maxSize)) {
+            if (LoadWorkBuffer()) {
+                pos = ms_WorkBufferPos;
+                data = (byte*)data + maxSize;
+                size -= maxSize;
+            }
+        }
+    }
+
+    assert(ms_WorkBuffer);
+
+    memcpy(data, ms_WorkBuffer + pos, size);
+    ms_WorkBufferPos += size;
+
+    return true;
+
 }
 
 // 0x618F50
