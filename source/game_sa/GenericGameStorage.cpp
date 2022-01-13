@@ -5,7 +5,7 @@ void CGenericGameStorage::InjectHooks() {
     using namespace ReversibleHooks;
     // Static functions (19x)
     Install("CGenericGameStorage", "ReportError", 0x5D08C0, &CGenericGameStorage::ReportError);
-    // Install("CGenericGameStorage", "DoGameSpecificStuffAfterSucessLoad", 0x618E90, &CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad);
+    Install("CGenericGameStorage", "DoGameSpecificStuffAfterSucessLoad", 0x618E90, &CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad);
     // Install("CGenericGameStorage", "InitRadioStationPositionList", 0x618E70, &CGenericGameStorage::InitRadioStationPositionList);
     // Install("CGenericGameStorage", "GetSavedGameDateAndTime", 0x618D00, &CGenericGameStorage::GetSavedGameDateAndTime);
     // Install("CGenericGameStorage", "GenericLoad", 0x5D17B0, &CGenericGameStorage::GenericLoad);
@@ -50,7 +50,23 @@ void CGenericGameStorage::ReportError(eBlocks nBlock, eSaveLoadError nError) {
 
 // 0x618E90
 void CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad() {
-    plugin::Call<0x618E90>();
+    TheText.Load(false);
+    CCollision::SortOutCollisionAfterLoad();
+    CStreaming::LoadSceneCollision(TheCamera.GetPosition());
+    CStreaming::LoadScene(TheCamera.GetPosition());
+    CStreaming::LoadAllRequestedModels(false);
+    CGame::TidyUpMemory(true, false);
+    JustLoadedDontFadeInYet = true;
+    StillToFadeOut = true;
+    TheCamera.Fade(0.f, eFadeFlag::FADE_IN);
+    CTheScripts::Process();
+    CTagManager::UpdateNumTagged();
+    CClothes::RebuildPlayer(FindPlayerPed(0), false);
+    CPopCycle::Update();
+    CStreaming::RemoveInappropriatePedModels();
+    CGangWars::ClearSpecificZonesToTriggerGangWar();
+    CGangWars::bTrainingMission = false;
+    CTheZones::FillZonesWithGangColours(CGangWars::bGangWarsActive);
 }
 
 // 0x618E70
