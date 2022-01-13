@@ -67,7 +67,7 @@ void CStuntJumpManager::Save() {
 }
 
 // 0x5D5920
-void CStuntJumpManager::Load(int32 a1, int32 a2) {
+void CStuntJumpManager::Load() {
     uint32 jumpCount;
     CGenericGameStorage::LoadDataFromWorkBuffer(&jumpCount, sizeof(jumpCount));
     for (uint32 i = 0; i < jumpCount; i++) {

@@ -40,6 +40,8 @@ public:
 
     void   SetAsAcquaintance(AcquaintanceId id, uint32 pedTypeBitNum);
     void   ClearAsAcquaintance(AcquaintanceId id, uint32 pedTypeBitNum);
+
+    static void Load();
 };
 
 VALIDATE_SIZE(CAcquaintance, 0x14);

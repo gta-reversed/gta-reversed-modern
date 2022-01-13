@@ -27,3 +27,7 @@ void C3dMarkers::Shutdown() {
 void C3dMarkers::Render() {
   plugin::Call<0x725040>();
 }
+
+bool C3dMarkers::LoadUser3dMarkers() {
+    return plugin::CallAndReturn<bool, 0x5D42E0>();
+}

@@ -102,7 +102,7 @@ public:
     static void Shutdown();
 
     static void Save();
-    static void Load();
+    static bool Load();
     static void TriggerMessage(Const char* cTagMsg, int16 wMsgMin, uint16 ucTime, int16 wMsgMax);
     static void PrintMessages();
     static int32 FindGarageIndex(char*);

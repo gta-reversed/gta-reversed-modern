@@ -114,6 +114,10 @@ void CPathFind::PreparePathData() {
     // NOP
 }
 
+void CPathFind::Load() {
+    plugin::CallMethod<0x5D3500>(this);
+}
+
 // 0x450A60
 void CPathFind::UpdateStreaming(bool a1) {
     return plugin::CallMethod<0x450A60, CPathFind*, bool>(this, a1);

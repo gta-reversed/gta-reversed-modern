@@ -8,3 +8,7 @@ void CGangs::InjectHooks() {
 void CGangs::Initialise() {
     plugin::Call<0x5DE680>();
 }
+
+void CGangs::Load() {
+    plugin::Call<0x5D3A90>();
+}

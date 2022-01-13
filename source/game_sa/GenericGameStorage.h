@@ -62,6 +62,7 @@ public:
     static inline uint32& ms_FileSize = *(uint32*)0xC16EF8;
     static inline bool& ms_bFailed = *(bool*)0xC16EFC;
     static inline eSlotState(&ms_Slots)[8] = *(eSlotState(*)[8])0xC16EBC;
+    static inline bool& ms_bLoading = *(bool*)0xC16EFD;
     static inline const char ms_BlockTagName[] =  "BLOCK" ;
 
 public:
@@ -83,7 +84,7 @@ public:
     static char* MakeValidSaveName(int32 saveNum);
     static bool CloseFile();
     static bool OpenFileForWriting();
-    static bool OpenFileForReading(int32 slot, const char* fileName);
+    static bool OpenFileForReading(const char* fileName, int32 slot);
     static bool CheckDataNotCorrupt(int32 slot, const char* fileName);
     static bool RestoreForStartLoad();
 

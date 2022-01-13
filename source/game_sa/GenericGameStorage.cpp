@@ -1,5 +1,10 @@
 #include "StdInc.h"
 #include "GenericGameStorage.h"
+#include <SimpleVariablesSaveStructure.h>
+#include <TheCarGenerators.h>
+
+#include <ranges>
+namespace rng = std::ranges;
 
 void CGenericGameStorage::InjectHooks() {
     using namespace ReversibleHooks;
@@ -8,7 +13,7 @@ void CGenericGameStorage::InjectHooks() {
     Install("CGenericGameStorage", "DoGameSpecificStuffAfterSucessLoad", 0x618E90, &CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad);
     Install("CGenericGameStorage", "InitRadioStationPositionList", 0x618E70, &CGenericGameStorage::InitRadioStationPositionList);
     Install("CGenericGameStorage", "GetSavedGameDateAndTime", 0x618D00, &CGenericGameStorage::GetSavedGameDateAndTime);
-    // Install("CGenericGameStorage", "GenericLoad", 0x5D17B0, &CGenericGameStorage::GenericLoad);
+    Install("CGenericGameStorage", "GenericLoad", 0x5D17B0, &CGenericGameStorage::GenericLoad);
     // Install("CGenericGameStorage", "GenericSave", 0x5D13E0, &CGenericGameStorage::GenericSave);
     // Install("CGenericGameStorage", "CheckSlotDataValid", 0x5D1380, &CGenericGameStorage::CheckSlotDataValid);
     // Install("CGenericGameStorage", "LoadDataFromWorkBuffer", 0x5D1300, &CGenericGameStorage::LoadDataFromWorkBuffer);
@@ -81,7 +86,158 @@ const char* CGenericGameStorage::GetSavedGameDateAndTime(int32 slot) {
 
 // 0x5D17B0
 bool CGenericGameStorage::GenericLoad(bool& out_bVariablesLoaded) {
-    return plugin::CallAndReturn<bool, 0x5D17B0>(out_bVariablesLoaded);
+    out_bVariablesLoaded = false;
+
+    ms_bFailed = false;
+    ms_CheckSum = 0;
+    CCheat::ResetCheats();
+    if (!OpenFileForReading(nullptr, 0)) {
+        return false;
+    }
+    ms_bLoading = true;
+
+    CSimpleVariablesSaveStructure varsBackup{};
+
+    for (auto block = 0u; block < (uint32)eBlocks::TOTAL; block++) {
+        char header[std::size(ms_BlockTagName)]{};
+        if (!LoadDataFromWorkBuffer(header, sizeof(header))) {
+            CloseFile();
+            return false;
+        }
+
+        if (std::string_view{header} != ms_BlockTagName) {
+            if (block != 0) {
+                ReportError((eBlocks)(block - 1), eSaveLoadError::LOADING);
+                if (block == 1) {
+                    uint32 version{};
+                    varsBackup.Extract(version); // Restore state
+                }
+            }
+            CloseFile();
+            ms_bLoading = false;
+            return false;
+        }
+
+        switch ((eBlocks)block) {
+        case eBlocks::SIMPLE_VARIABLES: {
+            varsBackup.Construct();
+
+            CSimpleVariablesSaveStructure vars{};
+            if (!LoadDataFromWorkBuffer(&vars, sizeof(vars))) {
+                ms_bFailed = true;
+                break;
+            }
+
+            uint32 varsVer{};
+            vars.Extract(varsVer);
+            if (GetCurrentVersionNumber() != varsVer) {
+                fprintf(stderr, "[error] GenericGameStorage: Loading failed (wrong version number = 0x%08x)!", varsVer); // NOTSA
+                varsBackup.Extract(varsVer); // Restore old satate
+                CloseFile();
+                return false;
+            }
+            break;
+        }
+        case eBlocks::SCRIPTS:
+            CTheScripts::Load();
+            break;
+        case eBlocks::POOLS:
+            if (CPools::Load())
+                CTheScripts::DoScriptSetupAfterPoolsHaveLoaded();
+            break;
+        case eBlocks::GARAGES:
+            CGarages::Load();
+            break;
+        case eBlocks::GAMELOGIC:
+            CGameLogic::Load();
+            break;
+        case eBlocks::PATHS:
+            ThePaths.Load();
+            break;
+        case eBlocks::PICKUPS:
+            CPickups::Load();
+            break;
+        case eBlocks::PHONEINFO: // Unused
+             break;
+        case eBlocks::RESTART:
+            CRestart::Load();
+            break;
+        case eBlocks::RADAR:
+            CRadar::Load();
+            break;
+        case eBlocks::ZONES:
+            CTheZones::Load();
+            break;
+        case eBlocks::GANGS:
+            CGangs::Load();
+            break;
+        case eBlocks::CAR_GENERATORS:
+            CTheCarGenerators::Load();
+            break;
+        case eBlocks::PED_GENERATORS: // Unused
+            break;
+        case eBlocks::AUDIO_SCRIPT_OBJECT: // Unused
+            break;
+        case eBlocks::PLAYERINFO:
+            FindPlayerInfo().Load();
+            break;
+        case eBlocks::STATS:
+            CStats::Load();
+            break;
+        case eBlocks::SET_PIECES:
+            CSetPieces::Load();
+            break;
+        case eBlocks::STREAMING:
+            CStreaming::Load();
+            break;
+        case eBlocks::PED_TYPES:
+            CAcquaintance::Load();
+            break;
+        case eBlocks::TAGS:
+            CTagManager::Load();
+            break;
+        case eBlocks::IPLS:
+            CIplStore::Load();
+            break;
+        case eBlocks::SHOPPING:
+            CShopping::Load();
+            break;
+        case eBlocks::GANGWARS:
+            CGangWars::Load();
+            break;
+        case eBlocks::STUNTJUMPS:
+            CStuntJumpManager::Load();
+            break;
+        case eBlocks::ENTRY_EXITS:
+            CEntryExitManager::Load();
+            break;
+        case eBlocks::RADIOTRACKS:
+            CAERadioTrackManager::Load();
+            break;
+        case eBlocks::USER3DMARKERS:
+            C3dMarkers::LoadUser3dMarkers();
+            break;
+        default:
+            assert(0 && "Invalid block"); // NOTSA
+            break;
+        }
+
+        if (ms_bFailed) {
+            ReportError(eBlocks(block), eSaveLoadError::LOADING);
+            CloseFile();
+            ms_bLoading = false;
+            return false;
+        }
+    }
+
+    ms_bLoading = false;
+    if (!CloseFile()) {
+        return false;
+    }
+
+    DoGameSpecificStuffAfterSucessLoad();
+
+    return true;
 }
 
 // 0x5D13E0
@@ -172,6 +328,8 @@ const char* CGenericGameStorage::GetBlockName(eBlocks block) {
         return "RADIOTRACKS";
     case eBlocks::USER3DMARKERS:
         return "USER3DMARKERS";
+    default:
+        return "UNKNOWN";
     }
 }
 
@@ -201,8 +359,8 @@ bool CGenericGameStorage::OpenFileForWriting() {
 }
 
 // 0x5D0D20
-bool CGenericGameStorage::OpenFileForReading(int32 slot, const char* fileName) {
-    return plugin::CallAndReturn<bool, 0x5D0D20>(slot, fileName);
+bool CGenericGameStorage::OpenFileForReading(const char* fileName, int32 slot) {
+    return plugin::CallAndReturn<bool, 0x5D0D20>(fileName, slot);
 }
 
 // 0x5D1170

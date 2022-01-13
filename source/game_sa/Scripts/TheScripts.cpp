@@ -141,6 +141,10 @@ void CTheScripts::ClearSpaceForMissionEntity(CVector const& pos, CEntity* pEntit
     plugin::Call<0x486B00, CVector const&, CEntity*>(pos, pEntity);
 }
 
+void CTheScripts::DoScriptSetupAfterPoolsHaveLoaded() {
+    plugin::Call<0x5D3390>();
+}
+
 // 0x4839A0
 signed int CTheScripts::GetActualScriptThingIndex(int32 index, uint8 type) {
     return plugin::CallAndReturn<signed int, 0x4839A0, int32, uint8>(index, type);
@@ -190,6 +194,10 @@ bool CTheScripts::IsPlayerOnAMission() {
 // 0x4861F0
 bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle) {
     return plugin::CallAndReturn<bool, 0x4861F0, CVehicle*>(pVehicle);
+}
+
+void CTheScripts::Load() {
+    plugin::Call<0x5D4FD0>();
 }
 
 // 0x464BB0

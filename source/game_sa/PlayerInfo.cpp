@@ -11,6 +11,10 @@ bool CPlayerInfo::IsPlayerInRemoteMode()
     return m_pRemoteVehicle != nullptr;
 }
 
+void CPlayerInfo::Load() {
+    plugin::CallMethod<0x5D3B00>(this);
+}
+
 // 0x56F7D0
 void CPlayerInfo::LoadPlayerSkin() {
     plugin::CallMethod<0x56F7D0, CPlayerInfo*>(this);
