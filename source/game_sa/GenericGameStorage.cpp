@@ -583,7 +583,7 @@ bool CGenericGameStorage::OpenFileForWriting() {
         ms_FilePos = 0;
         ms_WorkBufferPos = 0;
         if (!ms_WorkBuffer)
-            ms_WorkBuffer = new uint8[BUFFER_SIZE];
+            ms_WorkBuffer = new uint8[BUFFER_SIZE + 1];
         return true;
     } else {
         s_PcSaveHelper.error = C_PcSave::eErrorCode::FAILED_TO_OPEN;
@@ -593,7 +593,28 @@ bool CGenericGameStorage::OpenFileForWriting() {
 
 // 0x5D0D20
 bool CGenericGameStorage::OpenFileForReading(const char* fileName, int32 slot) {
-    return plugin::CallAndReturn<bool, 0x5D0D20>(fileName, slot);
+    if (fileName) {
+        strcpy_s(ms_LoadFileName, fileName);
+        C_PcSave::GenerateGameFilename(slot, ms_LoadFileNameWithPath);
+    }
+
+    ms_FileHandle = CFileMgr::OpenFile(ms_LoadFileName, "rb");
+
+    if (ms_FileHandle) {
+        ms_FileSize = CFileMgr::GetFileLength(ms_FileHandle);
+        ms_FilePos = 0;
+        ms_WorkBufferSize = BUFFER_SIZE;
+        ms_WorkBufferPos = BUFFER_SIZE;
+
+        if (!ms_WorkBuffer)
+            ms_WorkBuffer = new uint8[BUFFER_SIZE + 1];
+
+        return true;
+    }
+
+    s_PcSaveHelper.error = C_PcSave::eErrorCode::FAILED_TO_OPEN;
+
+    return false;
 }
 
 // 0x5D1170
