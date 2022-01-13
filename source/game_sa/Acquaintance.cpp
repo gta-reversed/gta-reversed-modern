@@ -58,7 +58,3 @@ void CAcquaintance::SetAsAcquaintance(AcquaintanceId id, uint32 pedTypeBitNum) {
 void CAcquaintance::ClearAsAcquaintance(AcquaintanceId id, uint32 pedTypeBitNum) {
     plugin::CallMethod<0x608980, CAcquaintance*, AcquaintanceId, int32>(this, id, pedTypeBitNum);
 }
-
-void CAcquaintance::Load() {
-    plugin::Call<0x5D3D10>(); // Not sure if this belongs here
-}

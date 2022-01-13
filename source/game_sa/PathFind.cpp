@@ -115,7 +115,11 @@ void CPathFind::PreparePathData() {
 }
 
 void CPathFind::Load() {
-    plugin::CallMethod<0x5D3500>(this);
+    return plugin::CallMethodAndReturn<bool, 0x5D3500>(this);
+}
+
+void CPathFind::Save() {
+    return plugin::CallMethodAndReturn<bool, 0x5D1502>(this);
 }
 
 // 0x450A60

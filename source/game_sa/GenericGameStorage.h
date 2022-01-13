@@ -52,6 +52,7 @@ public:
 public:
     static inline uint32& ms_WorkBufferSize = *(uint32*)0x8D2BE0;
     static inline char(&ms_SaveFileNameJustSaved)[260] = *(char(*)[260])0xC16030;
+    static inline char(&ms_SaveFileName)[256] = *(char(*)[256])0xC16DB8;
     static inline uint32& ms_CheckSum = *(uint32*)0xC16134;
     static inline tSlotSaveDate(&ms_SlotSaveDate)[8] = *(tSlotSaveDate(*)[8])0xC16138;
     static inline tSlotFileName(&ms_SlotFileName)[8] = *(tSlotFileName(*)[8])0xC16368;

@@ -11,8 +11,12 @@ bool CPlayerInfo::IsPlayerInRemoteMode()
     return m_pRemoteVehicle != nullptr;
 }
 
-void CPlayerInfo::Load() {
-    plugin::CallMethod<0x5D3B00>(this);
+bool CPlayerInfo::Load() {
+    return plugin::CallMethodAndReturn<bool, 0x5D3B00>(this);
+}
+
+bool CPlayerInfo::Save() {
+	return plugin::CallMethodAndReturn<bool, 0x5D3AC0>(this);
 }
 
 // 0x56F7D0

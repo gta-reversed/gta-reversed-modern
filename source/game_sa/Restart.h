@@ -33,7 +33,8 @@ public:
     static void FindClosestHospitalRestartPoint(CVector point, CVector* storedPoint, float* storedAngle);
     static void FindClosestPoliceRestartPoint(CVector point, CVector* storedPoint, float* storedAngle);
     static void Initialise();
-    static void Load();
+    static bool Load();
+    static bool Save();
     static void OverrideNextRestart(CVector const& point, float angle);
     // static void Save();
     // static void SetRespawnPointForDurationOfMission(CVector point);

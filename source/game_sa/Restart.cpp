@@ -50,9 +50,11 @@ void CRestart::Initialise()
 {
     ((void(__cdecl*)())0x460630)();
 }
-void CRestart::Load()
-{
-    ((void(__cdecl*)())0x5D3770)();
+bool CRestart::Load() {
+    return plugin::CallAndReturn<bool, 0x5D3770>();
+}
+bool CRestart::Save() {
+    return plugin::CallAndReturn<bool, 0x5D3620>();
 }
 void CRestart::OverrideNextRestart(CVector const& point, float angle)
 {
