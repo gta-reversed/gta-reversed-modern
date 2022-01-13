@@ -578,7 +578,17 @@ bool CGenericGameStorage::CloseFile() {
 
 // 0x5D0DD0
 bool CGenericGameStorage::OpenFileForWriting() {
-    return plugin::CallAndReturn<bool, 0x5D0DD0>();
+    ms_FileHandle = CFileMgr::OpenFile(ms_SaveFileName, "wb");
+    if (ms_FileHandle) {
+        ms_FilePos = 0;
+        ms_WorkBufferPos = 0;
+        if (!ms_WorkBuffer)
+            ms_WorkBuffer = new uint8[BUFFER_SIZE];
+        return true;
+    } else {
+        s_PcSaveHelper.error = C_PcSave::eErrorCode::FAILED_TO_OPEN;
+        return false;
+    }
 }
 
 // 0x5D0D20
