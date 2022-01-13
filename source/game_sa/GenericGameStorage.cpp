@@ -569,7 +569,11 @@ char* CGenericGameStorage::MakeValidSaveName(int32 saveNum) {
 
 // 0x5D0E30
 bool CGenericGameStorage::CloseFile() {
-    return plugin::CallAndReturn<bool, 0x5D0E30>();
+    if (ms_WorkBuffer) {
+        delete[] ms_WorkBuffer;
+        ms_WorkBuffer = nullptr;
+    }
+    return CFileMgr::CloseFile(ms_FileHandle) == 0;
 }
 
 // 0x5D0DD0
