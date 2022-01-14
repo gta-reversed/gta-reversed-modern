@@ -9,27 +9,33 @@
 namespace rng = std::ranges;
 
 void CGenericGameStorage::InjectHooks() {
+    // Can't really test these yet. All mods I have interfere with it (WindowedMode and IMFast)
+    // Also, these functions originally had the file pointer passed to them @ `ebp`
+    // which is non-standard, so.. yeah, not really possible to reverse this garbage
+    // until we reverse everything.
+
     using namespace ReversibleHooks;
+
     // Static functions (19x)
     Install("CGenericGameStorage", "ReportError", 0x5D08C0, &CGenericGameStorage::ReportError);
-    Install("CGenericGameStorage", "DoGameSpecificStuffAfterSucessLoad", 0x618E90, &CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad);
-    Install("CGenericGameStorage", "InitRadioStationPositionList", 0x618E70, &CGenericGameStorage::InitRadioStationPositionList);
-    Install("CGenericGameStorage", "GetSavedGameDateAndTime", 0x618D00, &CGenericGameStorage::GetSavedGameDateAndTime);
-    Install("CGenericGameStorage", "GenericLoad", 0x5D17B0, &CGenericGameStorage::GenericLoad);
-    Install("CGenericGameStorage", "GenericSave", 0x5D13E0, &CGenericGameStorage::GenericSave);
-    Install("CGenericGameStorage", "CheckSlotDataValid", 0x5D1380, &CGenericGameStorage::CheckSlotDataValid);
-    Install("CGenericGameStorage", "LoadDataFromWorkBuffer", 0x5D1300, &CGenericGameStorage::LoadDataFromWorkBuffer);
-    Install("CGenericGameStorage", "DoGameSpecificStuffBeforeSave", 0x618F50, &CGenericGameStorage::DoGameSpecificStuffBeforeSave);
-    Install("CGenericGameStorage", "SaveDataToWorkBuffer", 0x5D1270, &CGenericGameStorage::SaveDataToWorkBuffer);
-    Install("CGenericGameStorage", "LoadWorkBuffer", 0x5D10B0, &CGenericGameStorage::LoadWorkBuffer);
-    Install("CGenericGameStorage", "SaveWorkBuffer", 0x5D0F80, &CGenericGameStorage::SaveWorkBuffer);
-    Install("CGenericGameStorage", "GetCurrentVersionNumber", 0x5D0F50, &CGenericGameStorage::GetCurrentVersionNumber);
-    Install("CGenericGameStorage", "MakeValidSaveName", 0x5D0E90, &CGenericGameStorage::MakeValidSaveName);
-    Install("CGenericGameStorage", "CloseFile", 0x5D0E30, &CGenericGameStorage::CloseFile);
-    Install("CGenericGameStorage", "OpenFileForWriting", 0x5D0DD0, &CGenericGameStorage::OpenFileForWriting);
-    Install("CGenericGameStorage", "OpenFileForReading", 0x5D0D20, &CGenericGameStorage::OpenFileForReading);
-    Install("CGenericGameStorage", "CheckDataNotCorrupt", 0x5D1170, &CGenericGameStorage::CheckDataNotCorrupt);
-    Install("CGenericGameStorage", "RestoreForStartLoad", 0x619000, &CGenericGameStorage::RestoreForStartLoad);
+    Install("CGenericGameStorage", "DoGameSpecificStuffAfterSucessLoad", 0x618E90, &CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad, true);
+    Install("CGenericGameStorage", "InitRadioStationPositionList", 0x618E70, &CGenericGameStorage::InitRadioStationPositionList, true);
+    Install("CGenericGameStorage", "GetSavedGameDateAndTime", 0x618D00, &CGenericGameStorage::GetSavedGameDateAndTime, true);
+    Install("CGenericGameStorage", "GenericLoad", 0x5D17B0, &CGenericGameStorage::GenericLoad, true);
+    Install("CGenericGameStorage", "GenericSave", 0x5D13E0, &CGenericGameStorage::GenericSave, true);
+    Install("CGenericGameStorage", "CheckSlotDataValid", 0x5D1380, &CGenericGameStorage::CheckSlotDataValid, true);
+    Install("CGenericGameStorage", "LoadDataFromWorkBuffer", 0x5D1300, &CGenericGameStorage::LoadDataFromWorkBuffer, true);
+    Install("CGenericGameStorage", "DoGameSpecificStuffBeforeSave", 0x618F50, &CGenericGameStorage::DoGameSpecificStuffBeforeSave, true);
+    Install("CGenericGameStorage", "SaveDataToWorkBuffer", 0x5D1270, &CGenericGameStorage::SaveDataToWorkBuffer, true);
+    Install("CGenericGameStorage", "LoadWorkBuffer", 0x5D10B0, &CGenericGameStorage::LoadWorkBuffer, true);
+    Install("CGenericGameStorage", "SaveWorkBuffer", 0x5D0F80, &CGenericGameStorage::SaveWorkBuffer, true);
+    Install("CGenericGameStorage", "GetCurrentVersionNumber", 0x5D0F50, &CGenericGameStorage::GetCurrentVersionNumber, true);
+    Install("CGenericGameStorage", "MakeValidSaveName", 0x5D0E90, &CGenericGameStorage::MakeValidSaveName, true);
+    Install("CGenericGameStorage", "CloseFile", 0x5D0E30, &CGenericGameStorage::CloseFile, true);
+    Install("CGenericGameStorage", "OpenFileForWriting", 0x5D0DD0, &CGenericGameStorage::OpenFileForWriting, true);
+    Install("CGenericGameStorage", "OpenFileForReading", 0x5D0D20, &CGenericGameStorage::OpenFileForReading, true);
+    Install("CGenericGameStorage", "CheckDataNotCorrupt", 0x5D1170, &CGenericGameStorage::CheckDataNotCorrupt, true);
+    Install("CGenericGameStorage", "RestoreForStartLoad", 0x619000, &CGenericGameStorage::RestoreForStartLoad, true);
 }
 
 // Static functions
@@ -616,7 +622,7 @@ uint32 CGenericGameStorage::GetCurrentVersionNumber() {
 }
 
 // 0x5D0E90
-char* CGenericGameStorage::MakeValidSaveName(int32 saveNum) {
+void CGenericGameStorage::MakeValidSaveName(int32 saveNum) {
     char path[MAX_PATH]{};
     s_PcSaveHelper.GenerateGameFilename(saveNum, path);
 
@@ -624,11 +630,12 @@ char* CGenericGameStorage::MakeValidSaveName(int32 saveNum) {
 
     strcat_s(path, ".b");
 
-    if (path[0] != '\n' && path[0] != 0) {
-        rng::replace(path, path + strlen(path), '?', ' ');
+    for (auto it = path; *it && *it != '\n'; it++) {
+        if (*it == '?')
+            *it = ' ';
     }
 
-    strcpy_s(ms_SaveFileName, path);
+    strcpy_s(ms_SaveFileName, path); 
 }
 
 // 0x5D0E30
@@ -688,12 +695,12 @@ bool CGenericGameStorage::CheckDataNotCorrupt(int32 slot, const char* fileName) 
         return false;
     }
 
-    s_PcSaveHelper.error = C_PcSave::eErrorCode::NONE;
+    //s_PcSaveHelper.error = C_PcSave::eErrorCode::NONE;
 
     uint32 nCheckSum = 0;
 
     while (LoadWorkBuffer()) {
-        for (auto i = 0; i != ms_WorkBufferSize; ++i) {
+         for (auto i = 0; i != ms_WorkBufferSize; ++i) {
             nCheckSum += ms_WorkBuffer[i];
         }
     }
@@ -703,7 +710,7 @@ bool CGenericGameStorage::CheckDataNotCorrupt(int32 slot, const char* fileName) 
         return false;
     }
 
-    const auto nFileCheckSum = *(uint32*)(ms_WorkBuffer + ms_WorkBufferSize - sizeof(uint32));
+    const auto nFileCheckSum = *(uint32*)(&ms_WorkBuffer[ms_WorkBufferSize - sizeof(uint32)]);
 
     for (auto i = 0; i < sizeof(uint32); ++i) {
         nCheckSum -= ms_WorkBuffer[ms_WorkBufferSize - (i + 1)];

@@ -24,13 +24,12 @@ public:
 
     static void SetSaveDirectory(const char* path);
     static void PopulateSlotInfo();
-    static void SaveSlot(int32 slot);
+    static uint32 SaveSlot(int32 slot);
     static bool DeleteSlot(int32 slot);
 
     // Kinda NOTSA - They didn't use templates
-    template<size_t N>
-    static void GenerateGameFilename(int32 slot, char (&out)[N]) {
-        sprintf_s(out, "%s%i%s", SaveFilePathWithName, slot + 1, ".b");
+    static void GenerateGameFilename(int32 slot, char* out) {
+        sprintf(out, "%s%i%s", SaveFilePathWithName, slot + 1, ".b");
     }
     
 public:

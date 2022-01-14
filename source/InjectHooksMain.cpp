@@ -172,10 +172,11 @@ void WaitForDebugger() {
 
 void InjectHooksMain()
 {
-    // WaitForDebugger();
+     WaitForDebugger();
     InjectCommonHooks();
     CPad::InjectHooks();
 
+    CGenericGameStorage::InjectHooks();
     C_PcSave::InjectHooks();
     CDamageManager::InjectHooks();
     CCreepingFire::InjectHooks();

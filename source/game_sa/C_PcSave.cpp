@@ -9,12 +9,14 @@
 namespace fs = std::filesystem;
 
 void C_PcSave::InjectHooks() {
+    // See note in CGenericGameStorage::InjectHooks as to why all this is unhooked by default
+
     using namespace ReversibleHooks;
-    Install("C_PcSave", "SetSaveDirectory", 0x619040, &C_PcSave::SetSaveDirectory);
-    Install("C_PcSave", "DeleteSlot", 0x6190D0, &C_PcSave::DeleteSlot);
-    Install("C_PcSave", "GenerateGameFilename", 0x6190A0, &C_PcSave::GenerateGameFilename<MAX_PATH>);
-    Install("C_PcSave", "PopulateSlotInfo", 0x619140, &C_PcSave::PopulateSlotInfo);
-    Install("C_PcSave", "SaveSlot", 0x619060, &C_PcSave::SaveSlot);
+    Install("C_PcSave", "SetSaveDirectory", 0x619040, &C_PcSave::SetSaveDirectory, true);
+    Install("C_PcSave", "DeleteSlot", 0x6190D0, &C_PcSave::DeleteSlot, true);
+    Install("C_PcSave", "GenerateGameFilename", 0x6190A0, &C_PcSave::GenerateGameFilename, true);
+    Install("C_PcSave", "PopulateSlotInfo", 0x619140, &C_PcSave::PopulateSlotInfo, true);
+    Install("C_PcSave", "SaveSlot", 0x619060, &C_PcSave::SaveSlot, true);
 }
 
 void C_PcSave::SetSaveDirectory(const char* path) {
@@ -40,7 +42,7 @@ void C_PcSave::PopulateSlotInfo(void) {
 			CFileMgr::Seek(file, strlen(CGenericGameStorage::ms_BlockTagName), SEEK_SET);
 			CFileMgr::Read(file, &vars, sizeof(CSimpleVariablesSaveStructure));
 
-			if (strncmp(vars.m_szSaveName, TopLineEmptyFile, strlen(TopLineEmptyFile))) {
+            if (std::string_view{ TopLineEmptyFile } != vars.m_szSaveName) {
 				memcpy(CGenericGameStorage::ms_SlotFileName[i], vars.m_szSaveName, 48); // TODO: why 48?
 				CGenericGameStorage::ms_Slots[i] = CGenericGameStorage::eSlotState::IN_USE;
 				CGenericGameStorage::ms_SlotFileName[i][24] = 0;                        // TODO: Why 24?
@@ -78,6 +80,7 @@ void C_PcSave::PopulateSlotInfo(void) {
 
 bool C_PcSave::DeleteSlot(int32 slot) {
     char path[MAX_PATH]{};
+    s_PcSaveHelper.error = eErrorCode::NONE;
 	GenerateGameFilename(slot, path);
     std::error_code ec{}; // Dont want to be using throwing overload
     return fs::remove(path, ec);
@@ -93,10 +96,10 @@ bool C_PcSave::DeleteSlot(int32 slot) {
     */
 }
 
-void C_PcSave::SaveSlot(int32 slot) {
+uint32 C_PcSave::SaveSlot(int32 slot) {
 	CGenericGameStorage::MakeValidSaveName(slot);
     s_PcSaveHelper.error = eErrorCode::NONE;
 	CFileMgr::SetDirMyDocuments();
 	CGenericGameStorage::DoGameSpecificStuffBeforeSave();
-    CGenericGameStorage::GenericSave();
+    return CGenericGameStorage::GenericSave() ? 0 : 2;
 }
