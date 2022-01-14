@@ -47,10 +47,14 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT gta_reversed)
 
 add_library(gta_reversed MODULE ${_headerfiles_list} ${_sourcefiles_list} .editorconfig)
-set_target_properties(gta_reversed PROPERTIES SUFFIX ".asi")
-if(MSVC)
-    target_compile_options(gta_reversed PRIVATE "/MP")
-endif()
+add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
+set_target_properties(gta_reversed
+    PROPERTIES
+    SUFFIX ".asi"
+    ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+)
 
 target_include_directories(gta_reversed PRIVATE
     source/

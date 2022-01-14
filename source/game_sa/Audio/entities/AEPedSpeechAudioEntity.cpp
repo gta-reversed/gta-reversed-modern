@@ -148,10 +148,9 @@ void CAEPedSpeechAudioEntity::SetUpConversation() {
     plugin::Call<0x4E3A00>();
 }
 
-// todo: dev from 2003 and maybe wrong
 // 0x4E3C60
 int16 CAEPedSpeechAudioEntity::GetAudioPedType(Const char* name) {
-    constexpr const char* aAudioPedTypeNames[] = {
+    constexpr const char* aAudioPedTypeNames[] = { // 0x8C8108
         "PED_TYPE_GEN",
         "PED_TYPE_EMG",
         "PED_TYPE_PLAYER",
@@ -160,9 +159,8 @@ int16 CAEPedSpeechAudioEntity::GetAudioPedType(Const char* name) {
         "PED_TYPE_SPC"
     };
 
-    auto index = 0;
-    for (const auto& pedName : aAudioPedTypeNames) {
-        if (strcmp(name, pedName) != 0) {
+    for (size_t index = 0; const auto& pedName : aAudioPedTypeNames) {
+        if (!strcmp(name, pedName)) {
             return index;
         }
         index++;
@@ -218,7 +216,7 @@ int32 CAEPedSpeechAudioEntity::GetRepeatTime(int16 a1) {
 
 // 0x4E4840
 void CAEPedSpeechAudioEntity::LoadAndPlaySpeech(uint32 a2) {
-    plugin::CallMethod<0x4E4840, uint32>(a2);
+    plugin::CallMethod<0x4E4840>(this, a2);
 }
 
 // 0x4E49B0
@@ -228,12 +226,12 @@ int32 CAEPedSpeechAudioEntity::GetNumSlotsPlayingContext(int16 a2) {
 
 // 0x4E49E0
 int32 CAEPedSpeechAudioEntity::GetNextPlayTime(int16 a2) {
-    return plugin::CallMethodAndReturn<int32, 0x4E49E0, int16>(a2);
+    return plugin::CallMethodAndReturn<int32, 0x4E49E0>(this, a2);
 }
 
 // 0x4E4A20
 void CAEPedSpeechAudioEntity::SetNextPlayTime(int16 a2) {
-    plugin::CallMethod<0x4E4A20, int16>(a2);
+    plugin::CallMethod<0x4E4A20>(this, a2);
 }
 
 // 0x4E56D0
@@ -256,17 +254,16 @@ void CAEPedSpeechAudioEntity::DisablePedSpeechForScriptSpeech(int16 a1) {
 
 // 0x4E5730
 int8 CAEPedSpeechAudioEntity::CanPedSayGlobalContext(int16 a2) {
-    return plugin::CallMethodAndReturn<int8, 0x4E5730, int16>(a2);
+    return plugin::CallMethodAndReturn<int8, 0x4E5730>(this, a2);
 }
 
 // 0x4E58C0
 int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeFromModel(eModelID modelId) {
     CPedModelInfo* info = CModelInfo::GetModelInfo(modelId)->AsPedModelInfoPtr();
-    m_nVoiceType = info->m_nPedAudioType;
-    if (m_nVoiceType < 0 || m_nVoiceType >= 6)
+    if (info->m_nPedAudioType < 0 || info->m_nPedAudioType >= 6)
         return 0;
 
-    if (info->m_nPedAudioType == 5)
+    if (info->m_nPedAudioType == 5) // PED_TYPE_SPC, see GetAudioPedType
         return GetVoiceAndTypeForSpecialPed(info->m_nKey);
 
     m_nVoiceId = info->m_nVoiceId;
@@ -279,22 +276,22 @@ int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeFromModel(eModelID modelId) {
 
 // 0x4E5920
 int16 CAEPedSpeechAudioEntity::GetSoundAndBankIDs(int16 phraseId, int16* a3) {
-    return plugin::CallMethodAndReturn<int16, 0x4E5920, int16, int16*>(phraseId, a3);
+    return plugin::CallMethodAndReturn<int16, 0x4E5920, CAEPedSpeechAudioEntity*, int16, int16*>(this, phraseId, a3);
 }
 
 // 0x4E5F10
 bool CAEPedSpeechAudioEntity::CanWePlayGlobalSpeechContext(int16 a2) {
-    return plugin::CallMethodAndReturn<bool, 0x4E5F10, int16>(a2);
+    return plugin::CallMethodAndReturn<bool, 0x4E5F10, CAEPedSpeechAudioEntity*, int16>(this, a2);
 }
 
 // 0x4E6550
 int16 CAEPedSpeechAudioEntity::AddSayEvent(int32 a2, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8) {
-    return plugin::CallMethodAndReturn<int16, 0x4E6550, int32, int16, uint32, float, uint8, uint8, uint8>(a2, phraseId, a4, a5, a6, a7, a8);
+    return plugin::CallMethodAndReturn<int16, 0x4E6550, CAEPedSpeechAudioEntity*, int32, int16, uint32, float, uint8, uint8>(this, a2, phraseId, a4, a5, a6, a7, a8);
 }
 
 // 0x4E68D0
 void CAEPedSpeechAudioEntity::Initialise(CEntity* ped) {
-    plugin::CallMethod<0x4E68D0, CEntity*>(ped);
+    plugin::CallMethod<0x4E68D0, CAEPedSpeechAudioEntity*, CEntity*>(this, ped);
 }
 
 // 0x4E69E0
@@ -326,7 +323,7 @@ void CAEPedSpeechAudioEntity::StopCurrentSpeech() {
 
 // 0x4E4400
 int8 CAEPedSpeechAudioEntity::GetSoundAndBankIDsForScriptedSpeech(int32 a2) {
-    return plugin::CallMethodAndReturn<int8, 0x4E4400, int32>(a2);
+    return plugin::CallMethodAndReturn<int8, 0x4E4400, CAEPedSpeechAudioEntity*, int32>(this, a2);
 }
 
 // 0x4E4200
@@ -341,7 +338,7 @@ bool CAEPedSpeechAudioEntity::GetPedTalking() {
 
 // 0x4E4170
 int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeForSpecialPed(uint32 modelNameHash) {
-    return plugin::CallMethodAndReturn<int8, 0x4E4170, uint32>(modelNameHash);
+    return plugin::CallMethodAndReturn<int8, 0x4E4170, CAEPedSpeechAudioEntity*, uint32>(this, modelNameHash);
 }
 
 // Virtual methods// 0x4E3520

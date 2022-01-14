@@ -87,8 +87,8 @@ Run console (administrator privileges may be needed) and type these commands:
 
 ```shell
 cd "<GTA SA PATH>\scripts"
-mklink gta_reversed.asi <PROJECT PATH>\Bin\Debug\gta_reversed.asi
-mklink gta_reversed.pdb <PROJECT PATH>\Bin\Debug\gta_reversed.pdb
+mklink gta_reversed.asi <PROJECT PATH>\bin\Debug\gta_reversed.asi
+mklink gta_reversed.pdb <PROJECT PATH>\bin\Debug\gta_reversed.pdb
 ```
     
 ### Credits
