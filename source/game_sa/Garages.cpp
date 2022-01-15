@@ -24,7 +24,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "DeactivateGarage", 0x447CB0, &CGarages::DeactivateGarage);
     ReversibleHooks::Install("CGarages", "Save", 0x5D3160, &CGarages::Save);
     ReversibleHooks::Install("CGarages", "Load", 0x5D3270, &CGarages::Load);
-    // ReversibleHooks::Install("CGarages", "GtGarageNumberByName", 0x447680, &CGarages::GetGarageNumberByName);
+    ReversibleHooks::Install("CGarages", "GetGarageNumberByName", 0x447680, &CGarages::GetGarageNumberByName);
 }
 
 // Static functions
@@ -493,5 +493,10 @@ int16 CGarages::FindGarageForObject(CObject* obj) {
 
 // 0x447680
 int16 CGarages::GetGarageNumberByName(const char* name) {
-    return plugin::CallAndReturn<int16, 0x447680>(name);
+    for (auto i = 0; i < NumGarages; i++) {
+        const auto& v = aGarages[i];
+        if (stricmp(v.m_anName, name) == 0)
+            return i;
+    }
+    return -1;
 }
