@@ -18,12 +18,12 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "TriggerMessage", 0x447B80, &CGarages::TriggerMessage);
     ReversibleHooks::Install("CGarages", "IsCarSprayable", 0x4479A0, &CGarages::IsCarSprayable);
     ReversibleHooks::Install("CGarages", "PrintMessages", 0x447790, &CGarages::PrintMessages);
-    ReversibleHooks::Install("CGarages", "setGarageType", 0x4476D0, &CGarages::SetGarageType);
+    ReversibleHooks::Install("CGarages", "SetGarageType", 0x4476D0, &CGarages::SetGarageType);
     // ReversibleHooks::Install("CGarages", "AddOne", 0x4471E0, &CGarages::AddOne);
     ReversibleHooks::Install("CGarages", "Shutdown", 0x4471B0, &CGarages::Shutdown);
-    // ReversibleHooks::Install("CGarages", "deactivateGarage", 0x447CB0, &CGarages::DeactivateGarage);
+    ReversibleHooks::Install("CGarages", "DeactivateGarage", 0x447CB0, &CGarages::DeactivateGarage);
     // ReversibleHooks::Install("CGarages", "Save", 0x5D3160, &CGarages::Save);
-    // ReversibleHooks::Install("CGarages", "getGarageNumberByName", 0x447680, &CGarages::GetGarageNumberByName);
+    // ReversibleHooks::Install("CGarages", "GtGarageNumberByName", 0x447680, &CGarages::GetGarageNumberByName);
 }
 
 // Static functions
@@ -402,7 +402,7 @@ void CGarages::Shutdown() {
 
 // 0x447CB0
 void CGarages::DeactivateGarage(int16 grgIdx) {
-    plugin::Call<0x447CB0>(grgIdx);
+    aGarages[grgIdx].m_bInactive = true;
 }
 
 // 0x5D3160
