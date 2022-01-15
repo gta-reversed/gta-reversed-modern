@@ -3,7 +3,7 @@
 
 void CGarages::InjectHooks() {
     // Static functions (21x)
-    // ReversibleHooks::Install("CGarages", "Init", 0x447120, &CGarages::Init);
+    ReversibleHooks::Install("CGarages", "Init", 0x447120, &CGarages::Init);
     // ReversibleHooks::Install("CGarages", "CloseHideOutGaragesBeforeSave", 0x44A170, &CGarages::CloseHideOutGaragesBeforeSave);
     // ReversibleHooks::Install("CGarages", "PlayerArrestedOrDied", 0x449E60, &CGarages::PlayerArrestedOrDied);
     // ReversibleHooks::Install("CGarages", "Init_AfterRestart", 0x448B60, &CGarages::Init_AfterRestart);
@@ -29,7 +29,28 @@ void CGarages::InjectHooks() {
 // Static functions
 // 0x447120
 void CGarages::Init() {
-    plugin::Call<0x447120>();
+    NumGarages = 0;
+    MessageEndTime = 0;
+    MessageStartTime = 0;
+    PlayerInGarage = 0;
+    BombsAreFree = 0;
+    CarsCollected = 0;
+    BankVansCollected = 0;
+    PoliceCarsCollected = 0;
+    CarTypesCollected = 0;
+    CrushedCarId = 0;
+    LastTimeHelpMessage = 0;
+    // dword_96BFF8 = 0; - Never refernced
+    CrushedCarId = -1;
+    LastTimeHelpMessage = 0;
+    LastGaragePlayerWasIn = -1;
+    NoResprays = 0;
+
+    for (auto& safeHouseCars : aCarsInSafeHouse) {
+        for (auto& car : safeHouseCars) {
+            car.m_wModelIndex = 0;
+        }
+    }
 }
 
 // 0x44A170
