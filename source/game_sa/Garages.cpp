@@ -226,11 +226,12 @@ bool CGarages::IsGarageDoorClosed(int16 garageId) {
 
 // 0x44C8C0
 void CGarages::Update() {
-    if (CReplay::Mode == 1 || CGameLogic::IsCoopGameGoingOn())
+    if (CReplay::Mode == eReplayMode::REPLAY_MODE_1 || CGameLogic::IsCoopGameGoingOn())
         return;
-
+    
+    uint32 i{};
     for (auto& v : aGarages) {
-        v.Update();
+        v.Update(i++);
     }
 
     static uint32& lastUpdatedGarage = *(uint32*)0x96EA78;
