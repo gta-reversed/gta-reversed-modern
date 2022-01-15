@@ -11,7 +11,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "IsModelIndexADoor", 0x448AF0, &CGarages::IsModelIndexADoor);
     ReversibleHooks::Install("CGarages", "FindSafeHouseIndexForGarageType", 0x4489F0, &CGarages::FindSafeHouseIndexForGarageType);
     ReversibleHooks::Install("CGarages", "IsPointWithinHideOutGarage", 0x448900, &CGarages::IsPointWithinHideOutGarage);
-    // ReversibleHooks::Install("CGarages", "isGarageDoorClosed", 0x447D30, &CGarages::isGarageDoorClosed);
+    ReversibleHooks::Install("CGarages", "isGarageDoorClosed", 0x447D30, &CGarages::IsGarageDoorClosed);
     // ReversibleHooks::Install("CGarages", "Update", 0x44C8C0, &CGarages::Update);
     // ReversibleHooks::Install("CGarages", "activateGarage", 0x447CD0, &CGarages::activateGarage);
     // ReversibleHooks::Install("CGarages", "setTargetCar", 0x447C40, &CGarages::setTargetCar);
@@ -220,8 +220,8 @@ bool CGarages::IsPointWithinHideOutGarage(const CVector & point) {
 }
 
 // 0x447D30
-bool CGarages::isGarageDoorClosed(int16 garageId) {
-    return plugin::CallAndReturn<bool, 0x447D30, int16>(garageId);
+bool CGarages::IsGarageDoorClosed(int16 garageId) {
+    return aGarages[garageId].m_nDoorState == eGarageDoorState::GARAGE_DOOR_CLOSED;
 }
 
 // 0x44C8C0
