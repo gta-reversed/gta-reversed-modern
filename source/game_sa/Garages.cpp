@@ -17,7 +17,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "SetTargetCar", 0x447C40, &CGarages::SetTargetCar);
     ReversibleHooks::Install("CGarages", "TriggerMessage", 0x447B80, &CGarages::TriggerMessage);
     ReversibleHooks::Install("CGarages", "IsCarSprayable", 0x4479A0, &CGarages::IsCarSprayable);
-    // ReversibleHooks::Install("CGarages", "PrintMessages", 0x447790, &CGarages::PrintMessages);
+    ReversibleHooks::Install("CGarages", "PrintMessages", 0x447790, &CGarages::PrintMessages);
     // ReversibleHooks::Install("CGarages", "setGarageType", 0x4476D0, &CGarages::SetGarageType);
     // ReversibleHooks::Install("CGarages", "AddOne", 0x4471E0, &CGarages::AddOne);
     // ReversibleHooks::Install("CGarages", "Shutdown", 0x4471B0, &CGarages::Shutdown);
@@ -317,7 +317,43 @@ bool CGarages::IsCarSprayable(CVehicle* veh) {
 
 // 0x447790
 void CGarages::PrintMessages() {
-    plugin::Call<0x447790>();
+    if (   CTimer::GetTimeInMS() < MessageStartTime
+        || CTimer::GetTimeInMS() >= MessageEndTime
+    ) {
+        // Time over
+        MessageIDString[0] = 0;
+    } else {
+        // Draw it
+
+        CFont::SetScale(SCREEN_HEIGHT_UNIT * 1.4f, SCREEN_WIDTH_UNIT * 0.5f);
+        CFont::SetProportional(true);
+        CFont::SetBackground(false, false);
+        CFont::SetCentreSize(SCREEN_WIDTH - SCREEN_WIDTH_UNIT * 230.f);
+        CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
+        CFont::SetFontStyle(eFontStyle::FONT_MENU);
+        CFont::SetColor(HudColour.GetRGB(eHudColours::HUD_COLOUR_LIGHT_BLUE));
+        CFont::SetEdge(2);
+        CFont::SetDropColor({ 0, 0, 0, 0xFF });
+
+        const auto DrawString = [](const char* text) {
+            CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT_UNIT * 255.f, text);
+        };
+
+        const auto DrawFormattedString = [&](auto... formatArgs) {
+            CMessages::InsertNumberInString(TheText.Get(MessageIDString), formatArgs..., gGxtString);
+            DrawString(gGxtString);
+        };
+
+        if (MessageNumberInString < 0) {
+            if (MessageNumberInString2 < 0) {
+                DrawString(TheText.Get(MessageIDString));
+            } else {
+                DrawFormattedString(MessageNumberInString2, -1, -1, -1, -1, -1);
+            }
+        } else {
+            DrawFormattedString(MessageNumberInString, MessageNumberInString2, -1, -1, -1, -1);
+        }
+    }
 }
 
 // 0x4476D0
