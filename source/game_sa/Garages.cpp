@@ -18,7 +18,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "TriggerMessage", 0x447B80, &CGarages::TriggerMessage);
     ReversibleHooks::Install("CGarages", "IsCarSprayable", 0x4479A0, &CGarages::IsCarSprayable);
     ReversibleHooks::Install("CGarages", "PrintMessages", 0x447790, &CGarages::PrintMessages);
-    // ReversibleHooks::Install("CGarages", "setGarageType", 0x4476D0, &CGarages::SetGarageType);
+    ReversibleHooks::Install("CGarages", "setGarageType", 0x4476D0, &CGarages::SetGarageType);
     // ReversibleHooks::Install("CGarages", "AddOne", 0x4471E0, &CGarages::AddOne);
     // ReversibleHooks::Install("CGarages", "Shutdown", 0x4471B0, &CGarages::Shutdown);
     // ReversibleHooks::Install("CGarages", "deactivateGarage", 0x447CB0, &CGarages::DeactivateGarage);
@@ -358,7 +358,28 @@ void CGarages::PrintMessages() {
 
 // 0x4476D0
 void CGarages::SetGarageType(int16 garageId, eGarageType type, int32 unused) {
-    plugin::Call<0x4476D0, int16, eGarageType, int32>(garageId, type, unused);
+    auto& v = aGarages[garageId];
+    v.m_nType = type;
+    switch (type) {
+    case eGarageType::BOMBSHOP_TIMED:
+    case eGarageType::BOMBSHOP_ENGINE:
+    case eGarageType::BOMBSHOP_REMOTE:
+    case eGarageType::PAYNSPRAY: {
+        v.m_nDoorState = eGarageDoorState::GARAGE_DOOR_CLOSED;
+        v.m_fDoorPosition = 0.f;
+        break;
+    }
+    case eGarageType::BURGLARY: {
+        break; // NOP
+    }
+    default: {
+        if (v.m_nDoorState == eGarageDoorState::GARAGE_DOOR_CLOSED) {
+            v.m_nDoorState = eGarageDoorState::GARAGE_DOOR_OPEN;
+            v.m_fDoorPosition = 1.f;
+        }
+        break;
+    }
+    }
 }
 
 // 0x4471E0
