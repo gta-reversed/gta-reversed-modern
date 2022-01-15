@@ -8,7 +8,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "PlayerArrestedOrDied", 0x449E60, &CGarages::PlayerArrestedOrDied);
     ReversibleHooks::Install("CGarages", "Init_AfterRestart", 0x448B60, &CGarages::Init_AfterRestart);
     ReversibleHooks::Install("CGarages", "AllRespraysCloseOrOpen", 0x448B30, &CGarages::AllRespraysCloseOrOpen);
-    // ReversibleHooks::Install("CGarages", "IsModelIndexADoor", 0x448AF0, &CGarages::IsModelIndexADoor);
+    ReversibleHooks::Install("CGarages", "IsModelIndexADoor", 0x448AF0, &CGarages::IsModelIndexADoor);
     // ReversibleHooks::Install("CGarages", "FindSafeHouseIndexForGarageType", 0x4489F0, &CGarages::FindSafeHouseIndexForGarageType);
     // ReversibleHooks::Install("CGarages", "IsPointWithinHideOutGarage", 0x448900, &CGarages::IsPointWithinHideOutGarage);
     // ReversibleHooks::Install("CGarages", "isGarageDoorClosed", 0x447D30, &CGarages::isGarageDoorClosed);
@@ -132,7 +132,14 @@ void CGarages::AllRespraysCloseOrOpen(bool bOpen) {
 
 // 0x448AF0
 bool CGarages::IsModelIndexADoor(int32 model) {
-    return plugin::CallAndReturn<bool, 0x448AF0, int32>(model);
+    if (model >= 0) {
+        if (const auto MI = CModelInfo::GetModelInfo(model)) {
+            if (const auto AMI = MI->AsAtomicModelInfoPtr()) {
+                return AMI->IsGarageDoor();
+            }
+        }
+    }
+    return false;
 }
 
 // 0x4489F0
