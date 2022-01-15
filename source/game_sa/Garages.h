@@ -16,6 +16,7 @@ class CObject;
 class CVector;
 
 enum eGarageType : uint8 {
+    INVALID = 0,
     ONLY_TARGET_VEH = 1,
     BOMBSHOP_TIMED = 2,
     BOMBSHOP_ENGINE = 3,
@@ -106,7 +107,7 @@ public:
     static void Init_AfterRestart();
     static void AllRespraysCloseOrOpen(bool state);
     static bool IsModelIndexADoor(int32 model);
-    static int32 FindSafeHouseIndexForGarageType(int32 gtype);
+    static int32 FindSafeHouseIndexForGarageType(eGarageType gtype);
     static bool IsPointWithinHideOutGarage(const CVector& point);
     static bool isGarageDoorClosed(int16 garageId);
     static void Update();

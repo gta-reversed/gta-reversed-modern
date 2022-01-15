@@ -5,7 +5,7 @@ void CGarages::InjectHooks() {
     // Static functions (21x)
     ReversibleHooks::Install("CGarages", "Init", 0x447120, &CGarages::Init);
     ReversibleHooks::Install("CGarages", "CloseHideOutGaragesBeforeSave", 0x44A170, &CGarages::CloseHideOutGaragesBeforeSave);
-    // ReversibleHooks::Install("CGarages", "PlayerArrestedOrDied", 0x449E60, &CGarages::PlayerArrestedOrDied);
+    ReversibleHooks::Install("CGarages", "PlayerArrestedOrDied", 0x449E60, &CGarages::PlayerArrestedOrDied);
     // ReversibleHooks::Install("CGarages", "Init_AfterRestart", 0x448B60, &CGarages::Init_AfterRestart);
     // ReversibleHooks::Install("CGarages", "AllRespraysCloseOrOpen", 0x448B30, &CGarages::AllRespraysCloseOrOpen);
     // ReversibleHooks::Install("CGarages", "IsModelIndexADoor", 0x448AF0, &CGarages::IsModelIndexADoor);
@@ -88,7 +88,14 @@ void CGarages::CloseHideOutGaragesBeforeSave() {
 
 // 0x449E60
 void CGarages::PlayerArrestedOrDied() {
-    return plugin::Call<0x449E60>();
+    for (auto& v : aGarages) {
+        if (v.m_nType != eGarageType::INVALID) {
+            v.PlayerArrestedOrDied();
+        }
+    }
+
+    MessageEndTime = 0;
+    MessageStartTime = 0;
 }
 
 // 0x448B60
