@@ -41,7 +41,7 @@ void CFileLoader::InjectHooks() {
     // Install("CFileLoader", "LoadCollisionModelVer3", 0x537CE0, &CFileLoader::LoadCollisionModelVer3);
     // Install("CFileLoader", "LoadCollisionModelVer4", 0x537AE0, &CFileLoader::LoadCollisionModelVer4);
     Install("CFileLoader", "LoadCullZone", 0x5B4B40, &CFileLoader::LoadCullZone);
-    // Install("CFileLoader", "LoadEntryExit", 0x5B8030, &CFileLoader::LoadEntryExit);
+    Install("CFileLoader", "LoadEntryExit", 0x5B8030, &CFileLoader::LoadEntryExit);
     Install("CFileLoader", "LoadGarage", 0x5B4530, &CFileLoader::LoadGarage);
     // Install("CFileLoader", "LoadLevel", 0x5B9030, &CFileLoader::LoadLevel);
     Install("CFileLoader", "LoadObject", 0x5B3C60, &CFileLoader::LoadObject);
@@ -592,7 +592,106 @@ void CFileLoader::LoadCullZone(const char* line) {
 // IPL -> ENEX
 // 0x5B8030
 void CFileLoader::LoadEntryExit(const char* line) {
-    plugin::Call<0x5B8030, const char*>(line);
+    uint32 numOfPeds = 2;
+    uint32 timeOn = 0, timeOff = 24;
+    float enterX, enterY, enterZ;
+    float exitX, exitY, exitZ;
+    float rangeX, rangeY;
+    float enteranceAngle;
+    float unused;
+    float posX, posY, posZ;
+    float exitAngle;
+    int32 area;
+    char interiorName[64]{};
+    uint32 skyColor;
+    uint32 flags;
+
+    (void)sscanf(
+        line,
+        "%f %f %f %f %f %f %f %f %f %f %f %d %d %s %d %d %d %d",
+        &enterX,
+        &enterY,
+        &enterZ,
+        &enteranceAngle,
+        &rangeX,
+        &rangeY,
+        &unused,
+        &posX,
+        &posY,
+        &posZ,
+        &exitAngle,
+        &area,
+        &flags,
+        interiorName,
+        &skyColor,
+        &numOfPeds,
+        &timeOn,
+        &timeOff
+    );
+
+    auto name = strrchr(interiorName, '"');
+    if (name) {
+        *name = 0;
+        name = &interiorName[1];
+    }
+
+    const auto enexPoolIdx = CEntryExitManager::AddOne(
+        enterX,
+        enterY,
+        enterZ,
+        enteranceAngle,
+        rangeX,
+        rangeY,
+        unused,
+        posX,
+        posY,
+        posZ,
+        exitAngle,
+        area,
+        flags,
+        skyColor,
+        timeOn,
+        timeOff,
+        numOfPeds,
+        name
+    );
+    const auto enex = CEntryExitManager::mp_poolEntryExits->GetAt(enexPoolIdx);
+    assert(enex);
+
+    enum Flags {
+        UNKNOWN_INTERIOR,
+        UNKNOWN_PAIRING,
+        CREATE_LINKED_PAIR,
+        REWARD_INTERIOR,
+        USED_REWARD_ENTRANCE,
+        CARS_AND_AIRCRAFT,
+        BIKES_AND_MOTORCYCLES,
+        DISABLE_ONFOOT
+    };
+
+    if (flags & UNKNOWN_INTERIOR)
+        enex->m_nFlags.bUnknownInterior = true;
+
+    if (flags & UNKNOWN_PAIRING)
+        enex->m_nFlags.bUnknownPairing = true;
+
+    if (flags & CREATE_LINKED_PAIR)
+        enex->m_nFlags.bCreateLinkedPair = true;
+
+    if (flags & REWARD_INTERIOR)
+        enex->m_nFlags.bRewardInterior = true;
+
+    if (flags & USED_REWARD_ENTRANCE)
+        enex->m_nFlags.bUsedRewardEntrance = true;
+
+    if (flags & CARS_AND_AIRCRAFT)
+        enex->m_nFlags.bCarsAndAircraft = true;
+
+    if (flags & BIKES_AND_MOTORCYCLES)
+        enex->m_nFlags.bBikesAndMotorcycles = true;
+
+    if (flags & DISABLE_ONFOOT)
+        enex->m_nFlags.bDisableOnFoot = true;
 }
 
 // IPL -> GRGE
