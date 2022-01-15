@@ -16,7 +16,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "ActivateGarage", 0x447CD0, &CGarages::ActivateGarage);
     ReversibleHooks::Install("CGarages", "SetTargetCar", 0x447C40, &CGarages::SetTargetCar);
     ReversibleHooks::Install("CGarages", "TriggerMessage", 0x447B80, &CGarages::TriggerMessage);
-    // ReversibleHooks::Install("CGarages", "IsCarSprayable", 0x4479A0, &CGarages::IsCarSprayable);
+    ReversibleHooks::Install("CGarages", "IsCarSprayable", 0x4479A0, &CGarages::IsCarSprayable);
     // ReversibleHooks::Install("CGarages", "PrintMessages", 0x447790, &CGarages::PrintMessages);
     // ReversibleHooks::Install("CGarages", "setGarageType", 0x4476D0, &CGarages::SetGarageType);
     // ReversibleHooks::Install("CGarages", "AddOne", 0x4471E0, &CGarages::AddOne);
