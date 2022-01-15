@@ -13,8 +13,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "IsPointWithinHideOutGarage", 0x448900, &CGarages::IsPointWithinHideOutGarage);
     ReversibleHooks::Install("CGarages", "isGarageDoorClosed", 0x447D30, &CGarages::IsGarageDoorClosed);
     ReversibleHooks::Install("CGarages", "Update", 0x44C8C0, &CGarages::Update);
-    // ReversibleHooks::Install("CGarages", "activateGarage", 0x447CD0, &CGarages::activateGarage);
-    // ReversibleHooks::Install("CGarages", "setTargetCar", 0x447C40, &CGarages::setTargetCar);
+    ReversibleHooks::Install("CGarages", "activateGarage", 0x447CD0, &CGarages::ActivateGarage);
     // ReversibleHooks::Install("CGarages", "TriggerMessage", 0x447B80, &CGarages::TriggerMessage);
     // ReversibleHooks::Install("CGarages", "IsCarSprayable", 0x4479A0, &CGarages::IsCarSprayable);
     // ReversibleHooks::Install("CGarages", "PrintMessages", 0x447790, &CGarages::PrintMessages);
@@ -257,8 +256,14 @@ void CGarages::Update() {
 }
 
 // 0x447CD0
-void CGarages::ActivateGarage(int16 a1) {
-    return plugin::Call<0x447CD0, int16>(a1);
+void CGarages::ActivateGarage(int16 garageId) {
+    auto& v = aGarages[garageId];
+    v.m_bInactive = false;
+    if (   v.m_nType == eGarageType::UNKN_CLOSESONTOUCH
+        && v.m_nDoorState != eGarageDoorState::GARAGE_DOOR_CLOSED
+    ) {
+        v.m_nDoorState = eGarageDoorState::GARAGE_DOOR_OPENING;
+    }
 }
 
 // 0x447C40
