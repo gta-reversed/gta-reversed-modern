@@ -9,7 +9,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "Init_AfterRestart", 0x448B60, &CGarages::Init_AfterRestart);
     ReversibleHooks::Install("CGarages", "AllRespraysCloseOrOpen", 0x448B30, &CGarages::AllRespraysCloseOrOpen);
     ReversibleHooks::Install("CGarages", "IsModelIndexADoor", 0x448AF0, &CGarages::IsModelIndexADoor);
-    // ReversibleHooks::Install("CGarages", "FindSafeHouseIndexForGarageType", 0x4489F0, &CGarages::FindSafeHouseIndexForGarageType);
+    ReversibleHooks::Install("CGarages", "FindSafeHouseIndexForGarageType", 0x4489F0, &CGarages::FindSafeHouseIndexForGarageType);
     // ReversibleHooks::Install("CGarages", "IsPointWithinHideOutGarage", 0x448900, &CGarages::IsPointWithinHideOutGarage);
     // ReversibleHooks::Install("CGarages", "isGarageDoorClosed", 0x447D30, &CGarages::isGarageDoorClosed);
     // ReversibleHooks::Install("CGarages", "Update", 0x44C8C0, &CGarages::Update);
@@ -144,7 +144,49 @@ bool CGarages::IsModelIndexADoor(int32 model) {
 
 // 0x4489F0
 int32 CGarages::FindSafeHouseIndexForGarageType(eGarageType gtype) {
-    return plugin::CallAndReturn<int32, 0x4489F0, int32>(gtype);
+    switch (gtype)
+    {
+    case SAFEHOUSE_SANTAMARIA:
+        return 1;
+    case SAGEHOUSE_ROCKSHORE:
+        return 2;
+    case SAFEHOUSE_FORTCARSON:
+        return 3;
+    case SAFEHOUSE_VERDANTMEADOWS:
+        return 4;
+    case SAFEHOUSE_DILLIMORE:
+        return 5;
+    case SAFEHOUSE_PRICKLEPINE:
+        return 6;
+    case SAFEHOUSE_WHITEWOOD:
+        return 7;
+    case SAFEHOUSE_PALOMINOCREEK:
+        return 8;
+    case SAFEHOUSE_REDSANDSWEST:
+        return 9;
+    case SAFEHOUSE_ELCORONA:
+        return 10;
+    case SAFEHOUSE_MULHOLLAND:
+        return 11;
+    case IMPOUND_LS:
+        return 12;
+    case IMPOUND_SF:
+        return 13;
+    case IMPOUND_LV:
+        return 14;
+    case SAFEHOUSE_CALTONHEIGHTS:
+        return 15;
+    case SAFEHOUSE_PARADISO:
+        return 16;
+    case SAFEHOUSE_DOHERTY:
+        return 17;
+    case SAFEHOUSE_HASHBURY:
+        return 18;
+    case HANGAR_ABANDONED_AIRPORT:
+        return 19;
+    default:
+        return 0;
+    }
 }
 
 // 0x448900
