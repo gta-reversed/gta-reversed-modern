@@ -66,7 +66,7 @@ public:
             uint8 m_bRespraysAlwaysFree : 1;
         };
     };
-    uint8            m_nOriginalType;
+    eGarageType            m_nOriginalType;
     CAEDoorAudioEntity m_GarageAudio;
 
 public:

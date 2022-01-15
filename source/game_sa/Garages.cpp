@@ -6,7 +6,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "Init", 0x447120, &CGarages::Init);
     ReversibleHooks::Install("CGarages", "CloseHideOutGaragesBeforeSave", 0x44A170, &CGarages::CloseHideOutGaragesBeforeSave);
     ReversibleHooks::Install("CGarages", "PlayerArrestedOrDied", 0x449E60, &CGarages::PlayerArrestedOrDied);
-    // ReversibleHooks::Install("CGarages", "Init_AfterRestart", 0x448B60, &CGarages::Init_AfterRestart);
+    ReversibleHooks::Install("CGarages", "Init_AfterRestart", 0x448B60, &CGarages::Init_AfterRestart);
     // ReversibleHooks::Install("CGarages", "AllRespraysCloseOrOpen", 0x448B30, &CGarages::AllRespraysCloseOrOpen);
     // ReversibleHooks::Install("CGarages", "IsModelIndexADoor", 0x448AF0, &CGarages::IsModelIndexADoor);
     // ReversibleHooks::Install("CGarages", "FindSafeHouseIndexForGarageType", 0x4489F0, &CGarages::FindSafeHouseIndexForGarageType);
@@ -100,7 +100,22 @@ void CGarages::PlayerArrestedOrDied() {
 
 // 0x448B60
 void CGarages::Init_AfterRestart() {
-    return plugin::Call<0x448B60>();
+    if (NumGarages) {
+        for (auto i = 0; i < NumGarages; i++) {
+            auto& v = aGarages[i];
+            v.m_nType = v.m_nOriginalType;
+            v.InitDoorsAtStart();
+            v.m_GarageAudio.Reset();
+        }
+    }
+
+    CGarages::NoResprays = false;
+
+    for (auto& safeHouseCars : aCarsInSafeHouse) { // TODO: Seems like inlined?
+        for (auto& car : safeHouseCars) {
+            car.m_wModelIndex = 0;
+        }
+    }
 }
 
 // 0x448B30

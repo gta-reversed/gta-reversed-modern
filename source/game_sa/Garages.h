@@ -87,7 +87,7 @@ public:
     static inline int32& PoliceCarsCollected = *(int32*)0x96BFFC;
     static inline int32& BankVansCollected = *(int32*)0x96C000;
     static inline int32& CarsCollected = *(int32*)0x96C004;
-    static inline int8& NoResprays = *(int8*)0x96C008;
+    static inline bool& NoResprays = *(bool*)0x96C008;
     static inline int8& RespraysAreFree = *(int8*)0x96C009;
     static inline int8& BombsAreFree = *(int8*)0x96C00A;
     static inline int8& PlayerInGarage = *(int8*)0x96C00B;
