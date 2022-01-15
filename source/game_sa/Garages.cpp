@@ -20,7 +20,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "PrintMessages", 0x447790, &CGarages::PrintMessages);
     ReversibleHooks::Install("CGarages", "setGarageType", 0x4476D0, &CGarages::SetGarageType);
     // ReversibleHooks::Install("CGarages", "AddOne", 0x4471E0, &CGarages::AddOne);
-    // ReversibleHooks::Install("CGarages", "Shutdown", 0x4471B0, &CGarages::Shutdown);
+    ReversibleHooks::Install("CGarages", "Shutdown", 0x4471B0, &CGarages::Shutdown);
     // ReversibleHooks::Install("CGarages", "deactivateGarage", 0x447CB0, &CGarages::DeactivateGarage);
     // ReversibleHooks::Install("CGarages", "Save", 0x5D3160, &CGarages::Save);
     // ReversibleHooks::Install("CGarages", "getGarageNumberByName", 0x447680, &CGarages::GetGarageNumberByName);
@@ -387,6 +387,7 @@ void CGarages::SetGarageType(int16 garageId, eGarageType type, int32 unused) {
 // 0x1	door opens up and rotate
 // 0x2	door goes in
 // 0x4	camera follow players
+// TODO...
 void CGarages::AddOne(float x1, float y1, float z1, float frontX, float frontY, float x2, float y2, float z2, uint8 type, uint32 a10, char* name, uint32 argFlags) {
     return plugin::Call<0x4471E0, float, float, float, float, float, float, float, float, uint8, uint32, char*, uint32>(x1, y1, z1, frontX, frontY, x2, y2, z2,
                                                                                                                                         type, a10, name, argFlags);
@@ -394,7 +395,9 @@ void CGarages::AddOne(float x1, float y1, float z1, float frontX, float frontY, 
 
 // 0x4471B0
 void CGarages::Shutdown() {
-    return plugin::Call<0x4471B0>();
+    for (auto& v : aGarages) {
+        v.m_GarageAudio.Reset();
+    }
 }
 
 // 0x447CB0
