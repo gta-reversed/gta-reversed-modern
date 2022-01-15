@@ -149,3 +149,23 @@ void CSaveGarage::CopyGarageIntoSaveGarage(const CGarage& v) {
     originalType = v.m_nOriginalType;
     strcpy_s(name, v.m_anName);
 }
+
+void CSaveGarage::CopyGarageOutOfSaveGarage(CGarage& v) const {
+    v.m_nType = type;
+    v.m_nDoorState = doorState;
+    v.m_nFlags = flags;
+    v.m_vPosn = pos;
+    v.m_vDirectionA = dirA;
+    v.m_vDirectionB = dirB;
+    v.m_fTopZ = topZ;
+    v.m_fWidth = width;
+    v.m_fHeight = height;
+    v.m_fLeftCoord = leftCoord;
+    v.m_fRightCoord = rightCoord;
+    v.m_fFrontCoord = frontCoord;
+    v.m_fBackCoord = backCoord;
+    v.m_fDoorPosition = doorPos;
+    v.m_dwTimeToOpen = timeToOpen;
+    v.m_nOriginalType = originalType;
+    strcpy_s(v.m_anName, name);
+}

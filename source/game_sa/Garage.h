@@ -197,5 +197,6 @@ struct CSaveGarage {
     eGarageType      originalType{};
 
     void CopyGarageIntoSaveGarage(const CGarage&);
+    void CopyGarageOutOfSaveGarage(CGarage&) const;
 };
 VALIDATE_SIZE(CSaveGarage, 0x50);

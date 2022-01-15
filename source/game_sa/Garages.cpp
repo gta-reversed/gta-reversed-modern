@@ -22,7 +22,8 @@ void CGarages::InjectHooks() {
     // ReversibleHooks::Install("CGarages", "AddOne", 0x4471E0, &CGarages::AddOne);
     ReversibleHooks::Install("CGarages", "Shutdown", 0x4471B0, &CGarages::Shutdown);
     ReversibleHooks::Install("CGarages", "DeactivateGarage", 0x447CB0, &CGarages::DeactivateGarage);
-    // ReversibleHooks::Install("CGarages", "Save", 0x5D3160, &CGarages::Save);
+    ReversibleHooks::Install("CGarages", "Save", 0x5D3160, &CGarages::Save);
+    ReversibleHooks::Install("CGarages", "Load", 0x5D3270, &CGarages::Load);
     // ReversibleHooks::Install("CGarages", "GtGarageNumberByName", 0x447680, &CGarages::GetGarageNumberByName);
 }
 
@@ -445,7 +446,45 @@ bool CGarages::Save() {
 }
 
 bool CGarages::Load() {
-    return plugin::CallAndReturn<bool, 0x5D3270>();
+    const auto LoadDataFromBuffer = []<typename T>(const T & data) {
+        CGenericGameStorage::LoadDataFromWorkBuffer((void*)&data, sizeof(T));
+    };
+
+    LoadDataFromBuffer(NumGarages);
+    LoadDataFromBuffer(BombsAreFree);
+    LoadDataFromBuffer(RespraysAreFree);
+    LoadDataFromBuffer(NoResprays);
+    LoadDataFromBuffer(CarsCollected);
+    LoadDataFromBuffer(BankVansCollected);
+    LoadDataFromBuffer(PoliceCarsCollected);
+
+    for (auto v : CarTypesCollected) {
+        LoadDataFromBuffer(v);
+    }
+
+    LoadDataFromBuffer(LastTimeHelpMessage);
+
+    // NOTE: Here they messsed up the order of loops
+    //       C/C++ is row-major, so, the row loop should've been the outer one..
+    //       This is important, because the array isn't accessed contiguously
+    //       Which means the data isn't saved contiguously either, so watch out for that.
+    for (auto c = 0; c < 4; c++) {
+        for (auto r = 0; r < 20; r++) {
+            LoadDataFromBuffer(aCarsInSafeHouse[r][c]);
+        }
+    }
+
+    for (auto i = 0; i < NumGarages; i++) {
+        CSaveGarage sg{};
+        LoadDataFromBuffer(sg);
+        sg.CopyGarageOutOfSaveGarage(aGarages[i]);
+    }
+
+    MessageEndTime = 0;
+    MessageStartTime = 0;
+    bCamShouldBeOutside = 0;
+
+    return true;
 }
 
 int16 CGarages::FindGarageForObject(CObject* obj) {
