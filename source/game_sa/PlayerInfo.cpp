@@ -1,60 +1,46 @@
 #include "StdInc.h"
+
 #include "PlayerInfo.h"
 
 void CPlayerInfo::InjectHooks() {
-    // Constructors (1x)
-    ReversibleHooks::Install("CPlayerInfo", "Constructor", 0x571920, &CPlayerInfo::Constructor);
-    ReversibleHooks::Install("CPlayerInfo", "Destructor", 0x45B110, &CPlayerInfo::Destructor);
-
-    // Static functions (3x)
-    // ReversibleHooks::Install("CPlayerInfo", "CancelPlayerEnteringCars", 0x56E860, &CPlayerInfo::CancelPlayerEnteringCars);
-    // ReversibleHooks::Install("CPlayerInfo", "FindObjectToSteal", 0x56DBD0, &CPlayerInfo::FindObjectToSteal);
-    // ReversibleHooks::Install("CPlayerInfo", "EvaluateCarPosition", 0x56DAD0, &CPlayerInfo::EvaluateCarPosition);
-
-    // Methods (24x)
-    ReversibleHooks::Install("CPlayerInfo", "SetPlayerSkin", 0x5717F0, &CPlayerInfo::SetPlayerSkin);
-    // ReversibleHooks::Install("CPlayerInfo", "Process", 0x56F8D0, &CPlayerInfo::Process);
-    ReversibleHooks::Install("CPlayerInfo", "LoadPlayerSkin", 0x56F7D0, &CPlayerInfo::LoadPlayerSkin);
-    // ReversibleHooks::Install("CPlayerInfo", "FindClosestCarSectorList", 0x56F4E0, &CPlayerInfo::FindClosestCarSectorList);
-    ReversibleHooks::Install("CPlayerInfo", "Clear", 0x56F330, &CPlayerInfo::Clear);
-    ReversibleHooks::Install("CPlayerInfo", "GivePlayerParachute", 0x56EC40, &CPlayerInfo::GivePlayerParachute);
-    ReversibleHooks::Install("CPlayerInfo", "StreamParachuteWeapon", 0x56EB30, &CPlayerInfo::StreamParachuteWeapon);
-    ReversibleHooks::Install("CPlayerInfo", "AddHealth", 0x56EAB0, &CPlayerInfo::AddHealth);
-    ReversibleHooks::Install("CPlayerInfo", "DeletePlayerSkin", 0x56EA80, &CPlayerInfo::DeletePlayerSkin);
-    ReversibleHooks::Install("CPlayerInfo", "BlowUpRCBuggy", 0x56EA30, &CPlayerInfo::BlowUpRCBuggy);
-    ReversibleHooks::Install("CPlayerInfo", "MakePlayerSafe", 0x56E870, &CPlayerInfo::MakePlayerSafe);
-    ReversibleHooks::Install("CPlayerInfo", "PlayerFailedCriticalMission", 0x56E830, &CPlayerInfo::PlayerFailedCriticalMission);
-    // ReversibleHooks::Install("CPlayerInfo", "WorkOutEnergyFromHunger", 0x56E610, &CPlayerInfo::WorkOutEnergyFromHunger);
-    ReversibleHooks::Install("CPlayerInfo", "ArrestPlayer", 0x56E5D0, &CPlayerInfo::ArrestPlayer);
-    ReversibleHooks::Install("CPlayerInfo", "KillPlayer", 0x56E580, &CPlayerInfo::KillPlayer);
-    ReversibleHooks::Install("CPlayerInfo", "IsRestartingAfterMissionFailed", 0x56E570, &CPlayerInfo::IsRestartingAfterMissionFailed);
-    ReversibleHooks::Install("CPlayerInfo", "IsRestartingAfterArrest", 0x56E560, &CPlayerInfo::IsRestartingAfterArrest);
-    ReversibleHooks::Install("CPlayerInfo", "IsRestartingAfterDeath", 0x56E550, &CPlayerInfo::IsRestartingAfterDeath);
-    ReversibleHooks::Install("CPlayerInfo", "GetPos", 0x56DFB0, &CPlayerInfo::GetPos_Hook);
-    ReversibleHooks::Install("CPlayerInfo", "GetSpeed", 0x56DF50, &CPlayerInfo::GetSpeed_Hook);
-    ReversibleHooks::Install("CPlayerInfo", "IsPlayerInRemoteMode", 0x56DAB0, &CPlayerInfo::IsPlayerInRemoteMode);
-    ReversibleHooks::Install("CPlayerInfo", "SetLastTargetVehicle", 0x56DA80, &CPlayerInfo::SetLastTargetVehicle);
-    ReversibleHooks::Install("CPlayerInfo", "Save", 0x5D3AC0, &CPlayerInfo::Save);
+    using namespace ReversibleHooks;
+    Install("CPlayerInfo", "Constructor", 0x571920, &CPlayerInfo::Constructor);
+    Install("CPlayerInfo", "Destructor", 0x45B110, &CPlayerInfo::Destructor);
+    Install("CPlayerInfo", "CancelPlayerEnteringCars", 0x56E860, &CPlayerInfo::CancelPlayerEnteringCars);
+    // Install("CPlayerInfo", "FindObjectToSteal", 0x56DBD0, &CPlayerInfo::FindObjectToSteal);
+    Install("CPlayerInfo", "EvaluateCarPosition", 0x56DAD0, &CPlayerInfo::EvaluateCarPosition);
+    Install("CPlayerInfo", "SetPlayerSkin", 0x5717F0, &CPlayerInfo::SetPlayerSkin);
+    // Install("CPlayerInfo", "Process", 0x56F8D0, &CPlayerInfo::Process);
+    Install("CPlayerInfo", "LoadPlayerSkin", 0x56F7D0, &CPlayerInfo::LoadPlayerSkin);
+    // Install("CPlayerInfo", "FindClosestCarSectorList", 0x56F4E0, &CPlayerInfo::FindClosestCarSectorList);
+    Install("CPlayerInfo", "Clear", 0x56F330, &CPlayerInfo::Clear);
+    Install("CPlayerInfo", "GivePlayerParachute", 0x56EC40, &CPlayerInfo::GivePlayerParachute);
+    Install("CPlayerInfo", "StreamParachuteWeapon", 0x56EB30, &CPlayerInfo::StreamParachuteWeapon);
+    Install("CPlayerInfo", "AddHealth", 0x56EAB0, &CPlayerInfo::AddHealth);
+    Install("CPlayerInfo", "DeletePlayerSkin", 0x56EA80, &CPlayerInfo::DeletePlayerSkin);
+    Install("CPlayerInfo", "BlowUpRCBuggy", 0x56EA30, &CPlayerInfo::BlowUpRCBuggy);
+    Install("CPlayerInfo", "MakePlayerSafe", 0x56E870, &CPlayerInfo::MakePlayerSafe);
+    Install("CPlayerInfo", "PlayerFailedCriticalMission", 0x56E830, &CPlayerInfo::PlayerFailedCriticalMission);
+    Install("CPlayerInfo", "WorkOutEnergyFromHunger", 0x56E610, &CPlayerInfo::WorkOutEnergyFromHunger);
+    Install("CPlayerInfo", "ArrestPlayer", 0x56E5D0, &CPlayerInfo::ArrestPlayer);
+    Install("CPlayerInfo", "KillPlayer", 0x56E580, &CPlayerInfo::KillPlayer);
+    Install("CPlayerInfo", "IsRestartingAfterMissionFailed", 0x56E570, &CPlayerInfo::IsRestartingAfterMissionFailed);
+    Install("CPlayerInfo", "IsRestartingAfterArrest", 0x56E560, &CPlayerInfo::IsRestartingAfterArrest);
+    Install("CPlayerInfo", "IsRestartingAfterDeath", 0x56E550, &CPlayerInfo::IsRestartingAfterDeath);
+    Install("CPlayerInfo", "GetPos", 0x56DFB0, &CPlayerInfo::GetPos_Hook);
+    Install("CPlayerInfo", "GetSpeed", 0x56DF50, &CPlayerInfo::GetSpeed_Hook);
+    Install("CPlayerInfo", "IsPlayerInRemoteMode", 0x56DAB0, &CPlayerInfo::IsPlayerInRemoteMode);
+    Install("CPlayerInfo", "SetLastTargetVehicle", 0x56DA80, &CPlayerInfo::SetLastTargetVehicle);
+    Install("CPlayerInfo", "Save", 0x5D3AC0, &CPlayerInfo::Save);
 }
 
 // 0x571920
 CPlayerInfo::CPlayerInfo() {
-    // Done by the compiler (because we've used init-lists)
-}
+    m_PlayerData = CPlayerPedData();
 
-CPlayerInfo::~CPlayerInfo() {
-    // Done by the compiler
-}
-
-CVector* CPlayerInfo::GetSpeed_Hook(CVector* out) {
-    *out = GetSpeed();
-    return out;
-}
-
-CVector* CPlayerInfo::GetPos_Hook(CVector* outPos)
-{
-    *outPos = GetPos();
-    return outPos;
+    m_pSkinTexture = nullptr;
+    m_bParachuteReferenced = false;
+    m_nRequireParachuteTimer = 0;
 }
 
 // 0x571920
@@ -63,38 +49,50 @@ CPlayerInfo* CPlayerInfo::Constructor() {
     return this;
 }
 
-// Static functions
-// 0x56E860
-void CPlayerInfo::CancelPlayerEnteringCars(CVehicle* a1) {
-    plugin::Call<0x56E860, CVehicle*>(a1);
-}
-
-// 0x56DBD0
-CEntity* CPlayerInfo::FindObjectToSteal(CPed* this_mpPed) {
-    return plugin::CallAndReturn<CEntity*, 0x56DBD0, CPed*>(this_mpPed);
-}
-
-// 0x56DAD0
-void CPlayerInfo::EvaluateCarPosition(CEntity* car, CPed* this_mpPed, float pedToVehDist, float* outDistance, CVehicle** outVehicle) {
-    plugin::Call<0x56DAD0, CEntity*, CPed*, float, float*, CVehicle**>(car, this_mpPed, pedToVehDist, outDistance, outVehicle);
-}
-
-// Methods
 // 0x45B110
 CPlayerInfo* CPlayerInfo::Destructor() {
     this->~CPlayerInfo();
     return this;
 }
 
-// 0x5717F0
-void CPlayerInfo::SetPlayerSkin(char const* name) {
-    strcpy_s(m_szSkinName, name); // NOTSA: They used `strcpy`, we use `_s` for safety
-    LoadPlayerSkin();
+CVector* CPlayerInfo::GetSpeed_Hook(CVector* out) {
+    *out = GetSpeed();
+    return out;
 }
 
-// 0x56F8D0
-void CPlayerInfo::Process(uint32 playerIndex) {
-    plugin::CallMethod<0x56F8D0, CPlayerInfo*, uint32>(this, playerIndex);
+CVector* CPlayerInfo::GetPos_Hook(CVector* outPos) {
+    *outPos = GetPos();
+    return outPos;
+}
+
+// 0x56E860
+void CPlayerInfo::CancelPlayerEnteringCars(CVehicle* vehicle) {
+    // NOP
+}
+
+// 0x56DBD0
+CEntity* CPlayerInfo::FindObjectToSteal(CPed* ped) {
+    return plugin::CallAndReturn<CEntity*, 0x56DBD0, CPed*>(ped);
+}
+
+// 0x56DAD0
+void CPlayerInfo::EvaluateCarPosition(CEntity* car, CPed* ped, float pedToVehDist, float* outDistance, CVehicle** outVehicle) {
+    const auto forward = ped->GetForward();
+    const auto carPosn = car->GetPosition();
+    const auto pedPosn = ped->GetPosition();
+
+    float atan = CGeneral::GetATanOfXY(forward.x, forward.y) - CGeneral::GetATanOfXY(carPosn.x - pedPosn.x, carPosn.y - pedPosn.y);
+    for (; atan > PI; atan -= TWO_PI) {}
+    for (; atan < -PI; atan += TWO_PI) {}
+
+    if (atan < 0.0f)
+        atan = -atan;
+
+    const auto distance = (1.0f - atan / TWO_PI) * (10.0f - pedToVehDist);
+    if (distance >= *outDistance) {
+        *outDistance = distance;
+        *outVehicle = car->AsVehicle();
+    }
 }
 
 // 0x56F7D0
@@ -103,10 +101,30 @@ void CPlayerInfo::LoadPlayerSkin() {
     m_pSkinTexture = CPlayerSkin::GetSkinTexture(m_szSkinName);
 }
 
+// 0x5717F0
+void CPlayerInfo::SetPlayerSkin(const char* name) {
+    strcpy_s(m_szSkinName, name); // NOTSA: They used `strcpy`, we use `_s` for safety
+    LoadPlayerSkin();
+}
+
+// 0x56DA80
+void CPlayerInfo::SetLastTargetVehicle(CVehicle* vehicle) {
+    if (m_pLastTargetVehicle)
+        m_pLastTargetVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pLastTargetVehicle));
+
+    m_pLastTargetVehicle = vehicle;
+    if (vehicle)
+        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pLastTargetVehicle));
+}
+
+// 0x56F8D0
+void CPlayerInfo::Process(uint32 playerIndex) {
+    plugin::CallMethod<0x56F8D0, CPlayerInfo*, uint32>(this, playerIndex);
+}
+
 // 0x56F4E0
-void CPlayerInfo::FindClosestCarSectorList(CPtrList& ptrList, CPed* this_mp_Ped, float minX, float minY, float maxX, float maxY, float* outVehDist, CVehicle** outVehicle) {
-    plugin::CallMethod<0x56F4E0, CPlayerInfo*, CPtrList&, CPed*, float, float, float, float, float*, CVehicle**>(this, ptrList, this_mp_Ped, minX, minY, maxX, maxY, outVehDist,
-                                                                                                                 outVehicle);
+void CPlayerInfo::FindClosestCarSectorList(CPtrList& ptrList, CPed* ped, float minX, float minY, float maxX, float maxY, float* outVehDist, CVehicle** outVehicle) {
+    plugin::CallMethod<0x56F4E0, CPlayerInfo*, CPtrList&, CPed*, float, float, float, float, float*, CVehicle**>(this, ptrList, ped, minX, minY, maxX, maxY, outVehDist, outVehicle);
 }
 
 // 0x56F330
@@ -125,7 +143,7 @@ void CPlayerInfo::Clear() {
     m_nMoney = 0;
     m_nPlayerState = PLAYERSTATE_PLAYING;
     m_nCarDensityForCurrentZone = 0;
-    m_fRoadDensityAroundPlayer = 1.0;
+    m_fRoadDensityAroundPlayer = 1.0f;
     m_bAfterRemoteVehicleExplosion = 0;
     m_bCreateRemoteVehicleExplosion = 0;
     m_bFadeAfterRemoteVehicleExplosion = 0;
@@ -144,19 +162,19 @@ void CPlayerInfo::Clear() {
     m_nTimesStuckInARow = 0;
     m_nTimesUpsideDownInARow = 0;
     m_nCarTwoWheelCounter = 0;
-    m_fCarTwoWheelDist = 0.0;
+    m_fCarTwoWheelDist = 0.0f;
     m_nCarLess3WheelCounter = 0;
     m_nBikeRearWheelCounter = 0;
-    m_fBikeRearWheelDist = 0.0;
+    m_fBikeRearWheelDist = 0.0f;
     m_nBikeFrontWheelCounter = 0;
-    m_fBikeFrontWheelDist = 0.0;
+    m_fBikeFrontWheelDist = 0.0f;
     m_nTempBufferCounter = 0;
     m_nBestCarTwoWheelsTimeMs = 0;
-    m_fBestCarTwoWheelsDistM = 0.0;
+    m_fBestCarTwoWheelsDistM = 0.0f;
     m_nBestBikeWheelieTimeMs = 0;
-    m_fBestBikeWheelieDistM = 0.0;
+    m_fBestBikeWheelieDistM = 0.0f;
     m_nBestBikeStoppieTimeMs = 0;
-    m_fBestBikeStoppieDistM = 0.0;
+    m_fBestBikeStoppieDistM = 0.0f;
     m_bDoesNotGetTired = 0;
     m_bFastReload = 0;
     m_bFireProof = 0;
@@ -167,7 +185,7 @@ void CPlayerInfo::Clear() {
     m_nHavocCaused = 0;
     CWorld::Players[CWorld::PlayerInFocus].m_nNumHoursDidntEat = 0;
     m_nLastBustMessageNumber = 1;
-    m_fCurrentChaseValue = 0.0;
+    m_fCurrentChaseValue = 0.0f;
     m_nBustedAudioStatus = 0;
     m_nCrosshairActivated = 0;
 
@@ -234,8 +252,7 @@ void CPlayerInfo::AddHealth(int32_t amount) {
 
 // 0x56EA80
 void CPlayerInfo::DeletePlayerSkin() {
-    if (m_pSkinTexture)
-    {
+    if (m_pSkinTexture) {
         RwTextureDestroy(m_pSkinTexture);
         m_pSkinTexture = nullptr;
     }
@@ -295,7 +312,74 @@ void CPlayerInfo::PlayerFailedCriticalMission() {
 
 // 0x56E610
 void CPlayerInfo::WorkOutEnergyFromHunger() {
-    plugin::CallMethod<0x56E610, CPlayerInfo*>(this);
+    static int32 dword_B9B8F4;                // 0xB9B8F4 update last time hungry state RwBool32
+    static int8 lastTimeHungryStateProcessed; // 0xB9B8F2
+    static int8 gLastHungryState;             // 0xB9B8F1
+    static bool bHungryMessageShown;          // 0xB9B8F0
+
+    if (CCheat::m_aCheatsActive[CHEAT_NEVER_GET_HUNGRY]) {
+        return;
+    }
+
+    if ((dword_B9B8F4 & 1) == 0) {
+        dword_B9B8F4 |= 1u;
+        lastTimeHungryStateProcessed = CClock::ms_nGameClockHours;
+    }
+
+    auto pad = CPad::GetPad(0);
+    if (!pad->DisablePlayerControls
+     && !CMenuSystem::num_menus_in_use
+     && !TheCamera.m_bWideScreenOn
+     && !CCutsceneMgr::ms_running
+     && !CGameLogic::IsCoopGameGoingOn()
+     && !m_pRemoteVehicle
+    ) {
+        if (!m_pPed)
+            return;
+
+        if (m_pPed->m_pAttachedTo)
+            return;
+
+        if (CClock::ms_nGameClockHours != lastTimeHungryStateProcessed) {
+            if (!m_nNumHoursDidntEat)
+                gLastHungryState = 0;
+            m_nNumHoursDidntEat += 1;
+        }
+
+        if (m_nNumHoursDidntEat <= 48) {
+            bHungryMessageShown = 0;
+        } else {
+            if (CClock::ms_nGameClockHours == lastTimeHungryStateProcessed)
+                return;
+
+            m_pPed->Say(337, 0, 1.0f, 0, 0, 0);
+            pad->StartShake(400, 110u, 0);
+
+            if (bHungryMessageShown) {
+                bool bDecreaseHealth = false;
+                if (CStats::GetStatValue(STAT_FAT) > 0.0f) {
+                    CStats::DecrementStat(STAT_FAT, 25.0f);
+                    CStats::DisplayScriptStatUpdateMessage(0, STAT_FAT, 25.0f);
+                    bDecreaseHealth = 1;
+                    if (!gLastHungryState)
+                        gLastHungryState = m_nNumHoursDidntEat + 24;
+                }
+                if (CStats::GetStatValue(STAT_MUSCLE) <= 0.0f || m_nNumHoursDidntEat <= gLastHungryState && gLastHungryState) {
+                    if (!bDecreaseHealth)
+                        m_pPed->m_fHealth -= 2.0f;
+                } else {
+                    CStats::DecrementStat(STAT_MUSCLE, 25.0);
+                    CStats::DisplayScriptStatUpdateMessage(0, STAT_MUSCLE, 25.0f);
+                }
+            } else {
+                CHud::SetHelpMessage(TheText.Get("NOTEAT"), 1, 0, 1);
+                bHungryMessageShown = true;
+            }
+        }
+
+        if (CClock::ms_nGameClockHours != lastTimeHungryStateProcessed)
+            lastTimeHungryStateProcessed = CClock::ms_nGameClockHours;
+    }
 }
 
 // 0x56E5D0
@@ -304,7 +388,7 @@ void CPlayerInfo::ArrestPlayer() {
         m_nPlayerState = PLAYERSTATE_HAS_BEEN_ARRESTED;
         m_nBustedAudioStatus = 0;
         CDarkel::ResetOnPlayerDeath();
-        CStats::IncrementStat(STAT_TIMES_BUSTED, 1.0);
+        CStats::IncrementStat(STAT_TIMES_BUSTED, 1.0f);
         CGangWars::EndGangWar(false);
     }
 }
@@ -315,7 +399,7 @@ void CPlayerInfo::KillPlayer() {
         m_nPlayerState = PLAYERSTATE_HAS_DIED;
         CDarkel::ResetOnPlayerDeath();
         CMessages::AddBigMessage(TheText.Get("DEAD"), 4000, STYLE_WHITE_MIDDLE);
-        CStats::IncrementStat(STAT_NUMBER_OF_HOSPITAL_VISITS, 1.0);
+        CStats::IncrementStat(STAT_NUMBER_OF_HOSPITAL_VISITS, 1.0f);
         CGangWars::EndGangWar(0);
     }
 }
@@ -327,12 +411,17 @@ bool CPlayerInfo::IsRestartingAfterMissionFailed() {
 
 // 0x56E560
 bool CPlayerInfo::IsRestartingAfterArrest() {
-    return this->m_nPlayerState == PLAYERSTATE_HAS_BEEN_ARRESTED;
+    return m_nPlayerState == PLAYERSTATE_HAS_BEEN_ARRESTED;
 }
 
 // 0x56E550
 bool CPlayerInfo::IsRestartingAfterDeath() {
-    return this->m_nPlayerState == PLAYERSTATE_HAS_DIED;
+    return m_nPlayerState == PLAYERSTATE_HAS_DIED;
+}
+
+// 0x56DAB0
+bool CPlayerInfo::IsPlayerInRemoteMode() {
+    return m_pRemoteVehicle || m_bAfterRemoteVehicleExplosion;
 }
 
 // 0x56DFB0
@@ -351,51 +440,86 @@ CVector CPlayerInfo::GetSpeed() {
     return m_pPed->m_vecMoveSpeed;
 }
 
-// 0x56DAB0
-bool CPlayerInfo::IsPlayerInRemoteMode() {
-    return m_pRemoteVehicle || m_bAfterRemoteVehicleExplosion;
-}
+class CPlayerInfoSaveStructure {
+    int32        m_nMoney;
+    uint16       m_nCarDensityForCurrentZone;
+    ePlayerState m_nPlayerState;
+    float        m_fRoadDensityAroundPlayer;
+    int32        m_nDisplayMoney;
+    uint8        m_nNumHoursDidntEat;
+    uint32       m_nCollectablesPickedUp;
+    uint32       m_nTotalNumCollectables;
+    bool         m_bDoesNotGetTired;
+    bool         m_bFastReload;
+    bool         m_bFireProof;
+    uint8        m_nMaxHealth;
+    uint8        m_nMaxArmour;
+    bool         m_bGetOutOfJailFree;
+    bool         m_bFreeHealthCare;
+    bool         m_bCanDoDriveBy;
+    uint8        m_nBustedAudioStatus;
+    uint16       m_nLastBustMessageNumber;
 
-// 0x56DA80
-void CPlayerInfo::SetLastTargetVehicle(CVehicle* targetveh) {
-    if (m_pLastTargetVehicle)
-        m_pLastTargetVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pLastTargetVehicle));
-    m_pLastTargetVehicle = targetveh;
-    if (targetveh)
-        targetveh->RegisterReference(reinterpret_cast<CEntity**>(&m_pLastTargetVehicle));
+public:
+    void Construct(CPlayerInfo* info) {
+        m_nMoney =                          info->m_nMoney;
+        m_nCarDensityForCurrentZone =       info->m_nCarDensityForCurrentZone;
+        m_nPlayerState =                    info->m_nPlayerState;
+        m_fRoadDensityAroundPlayer =        info->m_fRoadDensityAroundPlayer;
+        m_nDisplayMoney =                   info->m_nDisplayMoney;
+        m_nNumHoursDidntEat =               info->m_nNumHoursDidntEat;
+        m_nCollectablesPickedUp =           info->m_nCollectablesPickedUp;
+        m_nTotalNumCollectables =           info->m_nTotalNumCollectables;
+        m_bDoesNotGetTired =                info->m_bDoesNotGetTired;
+        m_bFastReload =                     info->m_bFastReload;
+        m_bFireProof =                      info->m_bFireProof;
+        m_nMaxHealth =                      info->m_nMaxHealth;
+        m_nMaxArmour =                      info->m_nMaxArmour;
+        m_bGetOutOfJailFree =               info->m_bGetOutOfJailFree;
+        m_bFreeHealthCare =                 info->m_bFreeHealthCare;
+        m_bCanDoDriveBy =                   info->m_bCanDoDriveBy;
+        m_nBustedAudioStatus =              info->m_nBustedAudioStatus;
+        m_nLastBustMessageNumber =          info->m_nLastBustMessageNumber;
+    }
+
+    void Extract(CPlayerInfo* info) {
+        info->m_nMoney =                    m_nMoney;
+        info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone;
+        info->m_nPlayerState =              m_nPlayerState;
+        info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone;
+        info->m_fRoadDensityAroundPlayer =  m_fRoadDensityAroundPlayer;
+        info->m_nDisplayMoney =             m_nDisplayMoney;
+        info->m_nNumHoursDidntEat =         m_nNumHoursDidntEat;
+        info->m_nCollectablesPickedUp =     m_nCollectablesPickedUp;
+        info->m_nTotalNumCollectables =     m_nTotalNumCollectables;
+        info->m_bDoesNotGetTired =          m_bDoesNotGetTired;
+        info->m_bFastReload =               m_bFastReload;
+        info->m_bFireProof =                m_bFireProof;
+        info->m_nMaxHealth =                m_nMaxHealth;
+        info->m_nMaxArmour =                m_nMaxArmour;
+        info->m_bGetOutOfJailFree =         m_bGetOutOfJailFree;
+        info->m_bFreeHealthCare =           m_bFreeHealthCare;
+        info->m_bCanDoDriveBy =             m_bCanDoDriveBy;
+        info->m_nBustedAudioStatus =        m_nBustedAudioStatus;
+        info->m_nLastBustMessageNumber =    m_nLastBustMessageNumber;
+    }
+};
+
+bool CPlayerInfo::Load() {
+    int32 unused;
+    CPlayerInfoSaveStructure data;
+    CGenericGameStorage::LoadDataFromWorkBuffer(&unused, sizeof(unused));
+    CGenericGameStorage::LoadDataFromWorkBuffer(&data, 40);
+    data.Extract(this);
+    return true;
 }
 
 // 0x5D3AC0
-int8_t CPlayerInfo::Save() {
-    char buffer[40]{};
-
-    auto PushIntoBuffer = [ptr = buffer]<typename T>(T v, uint32 size = sizeof(T)) mutable {
-        *reinterpret_cast<decltype(v)*>(ptr) = v;
-        ptr += size;
-    };
-
-    PushIntoBuffer(m_nMoney);
-    PushIntoBuffer(m_nCarDensityForCurrentZone);
-    PushIntoBuffer(m_nPlayerState, 2); // For whatever reason this is 2 bytes
-    PushIntoBuffer(m_fRoadDensityAroundPlayer);
-    PushIntoBuffer(m_nDisplayMoney);
-    PushIntoBuffer(m_nNumHoursDidntEat);
-    PushIntoBuffer(m_nCollectablesPickedUp);
-    PushIntoBuffer(m_nTotalNumCollectables);
-    PushIntoBuffer(m_bDoesNotGetTired);
-    PushIntoBuffer(m_bFastReload);
-    PushIntoBuffer(m_bFireProof);
-    PushIntoBuffer(m_nMaxHealth);
-    PushIntoBuffer(m_nMaxArmour);
-    PushIntoBuffer(m_bGetOutOfJailFree);
-    PushIntoBuffer(m_bFreeHealthCare);
-    PushIntoBuffer(m_bCanDoDriveBy);
-    PushIntoBuffer(m_nBustedAudioStatus);
-    PushIntoBuffer(m_nLastBustMessageNumber);
-
-    constexpr auto size{ (uint32)sizeof(buffer) };
-    CGenericGameStorage::SaveDataToWorkBuffer((void*)&size, 4);
-    CGenericGameStorage::SaveDataToWorkBuffer((void*)buffer, size);
-
+bool CPlayerInfo::Save() {
+    int unused{ 40 };
+    CPlayerInfoSaveStructure data;
+    data.Construct(this);
+    CGenericGameStorage::SaveDataToWorkBuffer(&unused, sizeof(unused));
+    CGenericGameStorage::SaveDataToWorkBuffer(&data, sizeof(data));
     return true;
 }
