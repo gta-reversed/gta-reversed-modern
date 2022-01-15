@@ -163,16 +163,7 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
 
-void WaitForDebugger() {
-    while (!::IsDebuggerPresent()) {
-        printf("Debugger not present\n");
-        ::Sleep(100);
-    }
-}
-
-void InjectHooksMain()
-{
-    // WaitForDebugger();
+void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
 
