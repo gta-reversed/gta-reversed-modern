@@ -129,3 +129,23 @@ bool CGarage::IsPointInsideGarage(CVector point, float radius) {
 void CGarage::Update(int32 thisGarageId) {
     plugin::CallMethod<0x44AA50, CGarage*>(this, thisGarageId);
 }
+
+void CSaveGarage::CopyGarageIntoSaveGarage(const CGarage& v) {
+    type = v.m_nType;
+    doorState = v.m_nDoorState;
+    flags = v.m_nFlags;
+    pos = v.m_vPosn;
+    dirA = v.m_vDirectionA;
+    dirB = v.m_vDirectionB;
+    topZ = v.m_fTopZ;
+    width = v.m_fWidth;
+    height = v.m_fHeight;
+    leftCoord = v.m_fLeftCoord;
+    rightCoord = v.m_fRightCoord;
+    frontCoord = v.m_fFrontCoord;
+    backCoord = v.m_fBackCoord;
+    doorPos = v.m_fDoorPosition;
+    timeToOpen = v.m_dwTimeToOpen;
+    originalType = v.m_nOriginalType;
+    strcpy_s(name, v.m_anName);
+}

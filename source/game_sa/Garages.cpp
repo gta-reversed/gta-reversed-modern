@@ -247,8 +247,8 @@ void CGarages::Update() {
 
     // Originally they've clearly used an some kind of `abs` macro (probably to "optimize" it)... And failed miserably lol
     const auto camPos = TheCamera.GetPosition();
-    if (   std::abs(garageToCheck.m_fPosMinX - camPos.x) < 40.f
-        && std::abs(garageToCheck.m_fPosMinY - camPos.y) < 40.f
+    if (   std::abs(garageToCheck.m_fLeftCoord - camPos.x) < 40.f
+        && std::abs(garageToCheck.m_fFrontCoord - camPos.y) < 40.f
     ) {
         garageToCheck.TidyUpGarageClose();
     } else {
@@ -404,10 +404,44 @@ void CGarages::Shutdown() {
 void CGarages::DeactivateGarage(int16 grgIdx) {
     aGarages[grgIdx].m_bInactive = true;
 }
-
+// todo: fix Update()
 // 0x5D3160
 bool CGarages::Save() {
-    return plugin::CallAndReturn<bool, 0x5D3160>();
+    const auto SaveToBuffer = []<typename T>(const T& data) {
+        CGenericGameStorage::SaveDataToWorkBuffer((void*)&data, sizeof(T));
+    };
+
+    SaveToBuffer(NumGarages);
+    SaveToBuffer(BombsAreFree);
+    SaveToBuffer(RespraysAreFree);
+    SaveToBuffer(NoResprays);
+    SaveToBuffer(CarsCollected);
+    SaveToBuffer(BankVansCollected);
+    SaveToBuffer(PoliceCarsCollected);
+
+    for (auto v : CarTypesCollected) {
+        SaveToBuffer(v);
+    }
+
+    SaveToBuffer(LastTimeHelpMessage);
+
+    // NOTE: Here they messsed up the order of loops
+    //       C/C++ is row-major, so, the row loop should've been the outer one..
+    //       This is important, because the array isn't accessed contiguously
+    //       Which means the data isn't saved contiguously either, so watch out for that.
+    for (auto c = 0; c < 4; c++) {
+        for (auto r = 0; r < 20; r++) {
+            SaveToBuffer(aCarsInSafeHouse[r][c]); 
+        }
+    }
+
+    for (auto i = 0; i < NumGarages; i++) {
+        CSaveGarage sg{};
+        sg.CopyGarageIntoSaveGarage(aGarages[i]);
+        SaveToBuffer(sg);
+    }
+
+    return true;
 }
 
 bool CGarages::Load() {

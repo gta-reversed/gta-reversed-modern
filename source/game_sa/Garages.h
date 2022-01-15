@@ -24,7 +24,7 @@ public:
     static inline int32& LastTimeHelpMessage = *(int32*)0x96BFE0;
     static inline int8& bCamShouldBeOutside = *(int8*)0x96BFE4;
     static inline int32& CrushedCarId = *(int32*)0x96BFE8;
-    static inline int32& CarTypesCollected = *(int32*)0x96BFEC;
+    static inline int32 (& CarTypesCollected)[4] = *(int32(*)[4])0x96BFEC;
     static inline int32& PoliceCarsCollected = *(int32*)0x96BFFC;
     static inline int32& BankVansCollected = *(int32*)0x96C000;
     static inline int32& CarsCollected = *(int32*)0x96C004;

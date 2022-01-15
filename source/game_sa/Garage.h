@@ -102,10 +102,10 @@ public:
     float     m_fTopZ;
     float     m_fWidth;
     float     m_fHeight;
-    float     m_fPosMinX;
-    float     m_fPosMaxX;
-    float     m_fPosMinY;
-    float     m_fPosMaxY;
+    float     m_fLeftCoord;
+    float     m_fRightCoord;
+    float     m_fFrontCoord;
+    float     m_fBackCoord;
     float     m_fDoorPosition;
     uint32  m_dwTimeToOpen;
     CVehicle* m_pTargetCar;
@@ -178,3 +178,24 @@ private:
     CGarage* Destructor();
 };
 VALIDATE_SIZE(CGarage, 0xD8);
+
+struct CSaveGarage {
+    eGarageType      type{};
+    eGarageDoorState doorState{};
+    uint16           flags{};
+    CVector          pos{};
+    CVector2D        dirA, dirB{};
+    float            topZ{};
+    float            width, height{};
+    float            leftCoord{};
+    float            rightCoord{};
+    float            frontCoord{};
+    float            backCoord{};
+    float            doorPos{};
+    uint32           timeToOpen{};
+    char             name[8]{};
+    eGarageType      originalType{};
+
+    void CopyGarageIntoSaveGarage(const CGarage&);
+};
+VALIDATE_SIZE(CSaveGarage, 0x50);
