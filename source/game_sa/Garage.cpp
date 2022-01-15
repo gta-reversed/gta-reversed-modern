@@ -16,3 +16,11 @@ void CGarage::BuildRotatedDoorMatrix(CEntity* pEntity, float fDoorPosition)
     matrix.GetUp() = CVector(-fSin * vecForward.y, fSin * vecForward.x, fCos);
     matrix.GetRight() = CrossProduct(vecForward, matrix.GetUp());
 }
+
+void CGarage::TidyUpGarage() {
+    plugin::CallMethod<0x449C50>(this);
+}
+
+void CGarage::TidyUpGarageClose() {
+    plugin::CallMethod<0x449D10>(this);
+}

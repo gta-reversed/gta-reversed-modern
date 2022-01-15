@@ -12,7 +12,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "FindSafeHouseIndexForGarageType", 0x4489F0, &CGarages::FindSafeHouseIndexForGarageType);
     ReversibleHooks::Install("CGarages", "IsPointWithinHideOutGarage", 0x448900, &CGarages::IsPointWithinHideOutGarage);
     ReversibleHooks::Install("CGarages", "isGarageDoorClosed", 0x447D30, &CGarages::IsGarageDoorClosed);
-    // ReversibleHooks::Install("CGarages", "Update", 0x44C8C0, &CGarages::Update);
+    ReversibleHooks::Install("CGarages", "Update", 0x44C8C0, &CGarages::Update);
     // ReversibleHooks::Install("CGarages", "activateGarage", 0x447CD0, &CGarages::activateGarage);
     // ReversibleHooks::Install("CGarages", "setTargetCar", 0x447C40, &CGarages::setTargetCar);
     // ReversibleHooks::Install("CGarages", "TriggerMessage", 0x447B80, &CGarages::TriggerMessage);
@@ -226,7 +226,33 @@ bool CGarages::IsGarageDoorClosed(int16 garageId) {
 
 // 0x44C8C0
 void CGarages::Update() {
-    plugin::Call<0x44C8C0>();
+    if (CReplay::Mode == 1 || CGameLogic::IsCoopGameGoingOn())
+        return;
+
+    for (auto& v : aGarages) {
+        v.Update();
+    }
+
+    static uint32& lastUpdatedGarage = *(uint32*)0x96EA78;
+    if (CTimer::GetFrameCounter() % 16 != 12)
+        return;
+
+    auto& garageToCheck = aGarages[lastUpdatedGarage++];
+    if (lastUpdatedGarage >= std::size(aGarages))
+        lastUpdatedGarage = 0;
+
+    if (garageToCheck.m_nType == eGarageType::INVALID)
+        return;
+
+    // Originally they've clearly used an some kind of `abs` macro (probably to "optimize" it)... And failed miserably lol
+    const auto camPos = TheCamera.GetPosition();
+    if (   std::abs(garageToCheck.m_fPosMinX - camPos.x) < 40.f
+        && std::abs(garageToCheck.m_fPosMinY - camPos.y) < 40.f
+    ) {
+        garageToCheck.TidyUpGarageClose();
+    } else {
+        garageToCheck.TidyUpGarage();
+    }
 }
 
 // 0x447CD0

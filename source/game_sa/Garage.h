@@ -43,10 +43,10 @@ public:
     float     m_fTopZ;
     float     m_fWidth;
     float     m_fHeight;
-    float     m_fLeftCoord;
-    float     m_fRightCoord;
-    float     m_fFrontCoord;
-    float     m_fBackCoord;
+    float     m_fPosMinX;
+    float     m_fPosMaxX;
+    float     m_fPosMinY;
+    float     m_fPosMaxY;
     float     m_fDoorPosition;
     uint32  m_dwTimeToOpen;
     CVehicle* m_pTargetCar;
