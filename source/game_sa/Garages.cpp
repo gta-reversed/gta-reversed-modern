@@ -7,7 +7,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "CloseHideOutGaragesBeforeSave", 0x44A170, &CGarages::CloseHideOutGaragesBeforeSave);
     ReversibleHooks::Install("CGarages", "PlayerArrestedOrDied", 0x449E60, &CGarages::PlayerArrestedOrDied);
     ReversibleHooks::Install("CGarages", "Init_AfterRestart", 0x448B60, &CGarages::Init_AfterRestart);
-    // ReversibleHooks::Install("CGarages", "AllRespraysCloseOrOpen", 0x448B30, &CGarages::AllRespraysCloseOrOpen);
+    ReversibleHooks::Install("CGarages", "AllRespraysCloseOrOpen", 0x448B30, &CGarages::AllRespraysCloseOrOpen);
     // ReversibleHooks::Install("CGarages", "IsModelIndexADoor", 0x448AF0, &CGarages::IsModelIndexADoor);
     // ReversibleHooks::Install("CGarages", "FindSafeHouseIndexForGarageType", 0x4489F0, &CGarages::FindSafeHouseIndexForGarageType);
     // ReversibleHooks::Install("CGarages", "IsPointWithinHideOutGarage", 0x448900, &CGarages::IsPointWithinHideOutGarage);
@@ -119,8 +119,15 @@ void CGarages::Init_AfterRestart() {
 }
 
 // 0x448B30
-void CGarages::AllRespraysCloseOrOpen(bool state) {
-    plugin::Call<0x448B30, bool>(state);
+void CGarages::AllRespraysCloseOrOpen(bool bOpen) {
+    if (NumGarages) {
+        for (auto i = 0; i < NumGarages; i++) {
+            auto& v = aGarages[i];
+            if (v.m_nType == eGarageType::PAYNSPRAY) {
+                v.m_nDoorState = bOpen ? eGarageDoorState::GARAGE_DOOR_OPEN : eGarageDoorState::GARAGE_DOOR_CLOSED;
+            }
+        }
+    }
 }
 
 // 0x448AF0
