@@ -14,6 +14,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "IsGarageDoorClosed", 0x447D30, &CGarages::IsGarageDoorClosed);
     ReversibleHooks::Install("CGarages", "Update", 0x44C8C0, &CGarages::Update);
     ReversibleHooks::Install("CGarages", "ActivateGarage", 0x447CD0, &CGarages::ActivateGarage);
+    ReversibleHooks::Install("CGarages", "SetTargetCar", 0x447C40, &CGarages::SetTargetCar);
     // ReversibleHooks::Install("CGarages", "TriggerMessage", 0x447B80, &CGarages::TriggerMessage);
     // ReversibleHooks::Install("CGarages", "IsCarSprayable", 0x4479A0, &CGarages::IsCarSprayable);
     // ReversibleHooks::Install("CGarages", "PrintMessages", 0x447790, &CGarages::PrintMessages);
@@ -268,7 +269,16 @@ void CGarages::ActivateGarage(int16 garageId) {
 
 // 0x447C40
 void CGarages::SetTargetCar(int16 garageId, CVehicle* veh) {
-    plugin::Call<0x447C40, int16, CVehicle*>(garageId, veh);
+    auto& v = aGarages[garageId];
+    if (veh) {
+        v.m_pTargetCar = veh;
+        veh->RegisterReference(reinterpret_cast<CEntity**>(&v.m_pTargetCar));
+        if (v.m_nDoorState == eGarageDoorState::GARAGE_DOOR_CLOSED_DROPPED_CAR)
+            v.m_nDoorState = eGarageDoorState::GARAGE_DOOR_CLOSED;
+    } else {
+        // NOTE/TODO: They forgot to call `UnregisterReference` 
+        v.m_pTargetCar = nullptr; 
+    }
 }
 
 // 0x447B80
