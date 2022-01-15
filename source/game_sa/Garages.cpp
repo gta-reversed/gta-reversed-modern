@@ -282,8 +282,21 @@ void CGarages::SetTargetCar(int16 garageId, CVehicle* veh) {
 }
 
 // 0x447B80
-void CGarages::TriggerMessage(const char * tagMsg, int16 msgMin, uint16 time, int16 msgMax) {
-    return plugin::Call<0x447B80, const char*, int16, uint16, int16>(tagMsg, msgMin, time, msgMax);
+void CGarages::TriggerMessage(const char * tagMsg, int16 numInStr1, uint16 time, int16 numInStr2) {
+    if (   strcmp(tagMsg, MessageIDString) // Different strings
+        || CTimer::GetTimeInMS() < MessageStartTime
+        || CTimer::GetTimeInMS() >= MessageEndTime
+    ) {
+        strcpy_s(MessageIDString, tagMsg);
+        MessageStartTime = CTimer::GetTimeInMS();
+    } else {
+        if (CTimer::GetTimeInMS() - MessageStartTime <= 500)
+            return;
+        MessageStartTime = CTimer::GetTimeInMS() - 500;
+    }
+    MessageEndTime = MessageStartTime + time;
+    MessageNumberInString = numInStr1;
+    MessageNumberInString2 = numInStr2;
 }
 
 // 0x4479A0
