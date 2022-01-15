@@ -10,7 +10,7 @@ void CGarages::InjectHooks() {
     ReversibleHooks::Install("CGarages", "AllRespraysCloseOrOpen", 0x448B30, &CGarages::AllRespraysCloseOrOpen);
     ReversibleHooks::Install("CGarages", "IsModelIndexADoor", 0x448AF0, &CGarages::IsModelIndexADoor);
     ReversibleHooks::Install("CGarages", "FindSafeHouseIndexForGarageType", 0x4489F0, &CGarages::FindSafeHouseIndexForGarageType);
-    // ReversibleHooks::Install("CGarages", "IsPointWithinHideOutGarage", 0x448900, &CGarages::IsPointWithinHideOutGarage);
+    ReversibleHooks::Install("CGarages", "IsPointWithinHideOutGarage", 0x448900, &CGarages::IsPointWithinHideOutGarage);
     // ReversibleHooks::Install("CGarages", "isGarageDoorClosed", 0x447D30, &CGarages::isGarageDoorClosed);
     // ReversibleHooks::Install("CGarages", "Update", 0x44C8C0, &CGarages::Update);
     // ReversibleHooks::Install("CGarages", "activateGarage", 0x447CD0, &CGarages::activateGarage);
@@ -191,7 +191,32 @@ int32 CGarages::FindSafeHouseIndexForGarageType(eGarageType gtype) {
 
 // 0x448900
 bool CGarages::IsPointWithinHideOutGarage(const CVector & point) {
-    return plugin::CallAndReturn < bool, 0x448900, const CVector&> (point);
+    for (auto& v : aGarages) {
+        switch (v.m_nType) { // TODO: Same switch used in CloseHideOutGaragesBeforeSave. This is def. inlined.
+        case eGarageType::SAFEHOUSE_GANTON:
+        case eGarageType::SAFEHOUSE_SANTAMARIA:
+        case eGarageType::SAGEHOUSE_ROCKSHORE:
+        case eGarageType::SAFEHOUSE_FORTCARSON:
+        case eGarageType::SAFEHOUSE_VERDANTMEADOWS:
+        case eGarageType::SAFEHOUSE_DILLIMORE:
+        case eGarageType::SAFEHOUSE_PRICKLEPINE:
+        case eGarageType::SAFEHOUSE_WHITEWOOD:
+        case eGarageType::SAFEHOUSE_PALOMINOCREEK:
+        case eGarageType::SAFEHOUSE_REDSANDSWEST:
+        case eGarageType::SAFEHOUSE_ELCORONA:
+        case eGarageType::SAFEHOUSE_MULHOLLAND:
+        case eGarageType::SAFEHOUSE_CALTONHEIGHTS:
+        case eGarageType::SAFEHOUSE_PARADISO:
+        case eGarageType::SAFEHOUSE_DOHERTY:
+        case eGarageType::SAFEHOUSE_HASHBURY:
+        case eGarageType::HANGAR_ABANDONED_AIRPORT: {
+            if (v.IsPointInsideGarage(point))
+                return true;
+            break;
+        }
+        }
+    }
+    return false;
 }
 
 // 0x447D30
