@@ -4,7 +4,7 @@
 void CGarages::InjectHooks() {
     // Static functions (21x)
     ReversibleHooks::Install("CGarages", "Init", 0x447120, &CGarages::Init);
-    // ReversibleHooks::Install("CGarages", "CloseHideOutGaragesBeforeSave", 0x44A170, &CGarages::CloseHideOutGaragesBeforeSave);
+    ReversibleHooks::Install("CGarages", "CloseHideOutGaragesBeforeSave", 0x44A170, &CGarages::CloseHideOutGaragesBeforeSave);
     // ReversibleHooks::Install("CGarages", "PlayerArrestedOrDied", 0x449E60, &CGarages::PlayerArrestedOrDied);
     // ReversibleHooks::Install("CGarages", "Init_AfterRestart", 0x448B60, &CGarages::Init_AfterRestart);
     // ReversibleHooks::Install("CGarages", "AllRespraysCloseOrOpen", 0x448B30, &CGarages::AllRespraysCloseOrOpen);
@@ -55,7 +55,35 @@ void CGarages::Init() {
 
 // 0x44A170
 void CGarages::CloseHideOutGaragesBeforeSave() {
-    plugin::Call<0x44A170>();
+    for (auto& v : aGarages) {
+        switch (v.m_nType) { // Perhaps this was some kind of function? Like `CGarage::IsHideOutGarage()`?
+        case eGarageType::SAFEHOUSE_GANTON:
+        case eGarageType::SAFEHOUSE_SANTAMARIA:
+        case eGarageType::SAGEHOUSE_ROCKSHORE:
+        case eGarageType::SAFEHOUSE_FORTCARSON:
+        case eGarageType::SAFEHOUSE_VERDANTMEADOWS:
+        case eGarageType::SAFEHOUSE_DILLIMORE:
+        case eGarageType::SAFEHOUSE_PRICKLEPINE:
+        case eGarageType::SAFEHOUSE_WHITEWOOD:
+        case eGarageType::SAFEHOUSE_PALOMINOCREEK:
+        case eGarageType::SAFEHOUSE_REDSANDSWEST:
+        case eGarageType::SAFEHOUSE_ELCORONA:
+        case eGarageType::SAFEHOUSE_MULHOLLAND:
+        case eGarageType::SAFEHOUSE_CALTONHEIGHTS:
+        case eGarageType::SAFEHOUSE_PARADISO:
+        case eGarageType::SAFEHOUSE_DOHERTY:
+        case eGarageType::SAFEHOUSE_HASHBURY:
+        case eGarageType::HANGAR_ABANDONED_AIRPORT: {
+            if (v.m_nDoorState != eGarageDoorState::GARAGE_DOOR_CLOSED) {
+                v.m_nDoorState = eGarageDoorState::GARAGE_DOOR_CLOSED;
+                v.StoreAndRemoveCarsForThisHideOut(GetStoredCarsInSafehouse(FindSafeHouseIndexForGarageType(v.m_nType)), 4);
+                v.RemoveCarsBlockingDoorNotInside();
+                v.m_fDoorPosition = 0.0f;
+            }
+            break;
+        }
+        }
+    }
 }
 
 // 0x449E60
@@ -79,7 +107,7 @@ bool CGarages::IsModelIndexADoor(int32 model) {
 }
 
 // 0x4489F0
-int32 CGarages::FindSafeHouseIndexForGarageType(int32 gtype) {
+int32 CGarages::FindSafeHouseIndexForGarageType(eGarageType gtype) {
     return plugin::CallAndReturn<int32, 0x4489F0, int32>(gtype);
 }
 

@@ -51,8 +51,8 @@ public:
     uint32  m_dwTimeToOpen;
     CVehicle* m_pTargetCar;
     char      m_anName[8];
-    uint8   m_nType;      // see eGarageType
-    uint8   m_nDoorState; // see eGarageDoorState
+    eGarageType   m_nType;      // see eGarageType
+    eGarageDoorState   m_nDoorState; // see eGarageDoorState
     union {
         uint8 m_nFlags;
         struct {
