@@ -301,7 +301,18 @@ void CGarages::TriggerMessage(const char * tagMsg, int16 numInStr1, uint16 time,
 
 // 0x4479A0
 bool CGarages::IsCarSprayable(CVehicle* veh) {
-    return plugin::CallAndReturn<bool, 0x4479A0, CVehicle*>(veh);
+    if (veh->IsLawEnforcementVehicle() || veh->IsSubclassBMX())
+        return false;
+
+    switch (veh->m_nModelIndex) {
+    case eModelID::MODEL_BUS:
+    case eModelID::MODEL_COACH:
+    case eModelID::MODEL_ARTICT1: // TODO: In the source it compares against -2, but the in the ASM comment it says `artict1`.. test it.
+    case eModelID::MODEL_FIRETRUK:
+    case eModelID::MODEL_AMBULAN:
+        return false;
+    }
+    return true;
 }
 
 // 0x447790

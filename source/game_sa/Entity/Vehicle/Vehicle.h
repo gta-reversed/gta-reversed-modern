@@ -643,6 +643,7 @@ public:
     bool IsBike() const { return m_vehicleType == VEHICLE_BIKE; }
     bool IsQuad() const { return m_vehicleType == VEHICLE_QUAD; }
     bool IsSubclassQuad() const { return m_vehicleSubType == VEHICLE_QUAD; }
+    bool IsSubclassBMX() const { return m_vehicleSubType == VEHICLE_BMX; }
     bool IsAutomobile() const { return m_vehicleType == VEHICLE_AUTOMOBILE; }
     bool IsTrain() const { return m_vehicleType == VEHICLE_TRAIN; }
     bool IsMonsterTruck() const { return m_vehicleSubType == VEHICLE_MTRUCK; }
