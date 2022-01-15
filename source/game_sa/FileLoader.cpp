@@ -42,7 +42,7 @@ void CFileLoader::InjectHooks() {
     // Install("CFileLoader", "LoadCollisionModelVer4", 0x537AE0, &CFileLoader::LoadCollisionModelVer4);
     Install("CFileLoader", "LoadCullZone", 0x5B4B40, &CFileLoader::LoadCullZone);
     // Install("CFileLoader", "LoadEntryExit", 0x5B8030, &CFileLoader::LoadEntryExit);
-    // Install("CFileLoader", "LoadGarage", 0x5B4530, &CFileLoader::LoadGarage);
+    Install("CFileLoader", "LoadGarage", 0x5B4530, &CFileLoader::LoadGarage);
     // Install("CFileLoader", "LoadLevel", 0x5B9030, &CFileLoader::LoadLevel);
     Install("CFileLoader", "LoadObject", 0x5B3C60, &CFileLoader::LoadObject);
     Install("CFileLoader", "LoadObjectInstance_inst", 0x538090, static_cast<CEntity* (*)(CFileObjectInstance*, const char*)>(&CFileLoader::LoadObjectInstance));
@@ -598,7 +598,30 @@ void CFileLoader::LoadEntryExit(const char* line) {
 // IPL -> GRGE
 // 0x5B4530
 void CFileLoader::LoadGarage(const char* line) {
-    return plugin::Call<0x5B4530, const char*>(line);
+    uint32 flags;
+    uint32 type;
+    float x1, y1, z1;
+    float x2, y2, z2;
+    float frontX, frontY;
+    char name[128];
+
+    if (sscanf(
+        line,
+        "%f %f %f %f %f %f %f %f %d %d %s",
+        &x1,
+        &y1,
+        &z1,
+        &frontX,
+        &frontY,
+        &x2,
+        &y2,
+        &z2,
+        &flags,
+        &type,
+        &name) == 11
+    ) {
+        CGarages::AddOne(x1, y1, z1, frontX, frontY, x2, y2, z2, (eGarageType)type, 0, name, flags);
+    }
 }
 
 // 0x5B9030
