@@ -7,12 +7,11 @@
 
 // Note: This class is only used by CWeapon::FireSniper
 
-CBulletInfo(&CBulletInfo::aBulletInfos)[8] = *(CBulletInfo(*)[8])0xC88740;
+CBulletInfo (&CBulletInfo::aBulletInfos)[8] = *(CBulletInfo(*)[8])0xC88740;
 CVector& CBulletInfo::PlayerSniperBulletStart = *(CVector*)0xC888A0;
 CVector& CBulletInfo::PlayerSniperBulletEnd = *(CVector*)0xC888AC;
 
-void CBulletInfo::InjectHooks()
-{
+void CBulletInfo::InjectHooks() {
     ReversibleHooks::Install("CBulletInfo", "Initialise", 0x735FD0, &CBulletInfo::Initialise);
     ReversibleHooks::Install("CBulletInfo", "Shutdown", 0x736000, &CBulletInfo::Shutdown);
     ReversibleHooks::Install("CBulletInfo", "AddBullet", 0x736010, &CBulletInfo::AddBullet);
@@ -20,8 +19,7 @@ void CBulletInfo::InjectHooks()
 }
 
 // 0x735FD0
-void CBulletInfo::Initialise()
-{
+void CBulletInfo::Initialise() {
     for (auto& info : aBulletInfos) {
         info.m_bExists = 0;
         info.m_nWeaponType = WEAPON_PISTOL;
@@ -31,8 +29,7 @@ void CBulletInfo::Initialise()
 }
 
 // 0x736000
-void CBulletInfo::Shutdown()
-{
+void CBulletInfo::Shutdown() {
     // NOP
 }
 
@@ -46,8 +43,7 @@ CBulletInfo* CBulletInfo::GetFree() {
 }
 
 // 0x736010
-void CBulletInfo::AddBullet(CEntity* creator, eWeaponType weaponType, CVector posn, CVector velocity)
-{
+void CBulletInfo::AddBullet(CEntity* creator, eWeaponType weaponType, CVector posn, CVector velocity) {
     if (auto info = GetFree()) {
         info->m_pCreator     = creator;
         info->m_nWeaponType  = weaponType;
@@ -60,15 +56,14 @@ void CBulletInfo::AddBullet(CEntity* creator, eWeaponType weaponType, CVector po
 }
 
 // 0x7360D0
-void CBulletInfo::Update()
-{
+void CBulletInfo::Update() {
     for (auto& info : aBulletInfos) {
         if (info.IsTimeToBeDestroyed())
             info.m_bExists = false; /* next line checks */
         if (!info.m_bExists)
             continue;
-        
-        CVector newPosition = info.m_vecPosition + info.m_vecVelocity * (CTimer::ms_fTimeStep / 2.0f);
+
+        CVector newPosition = info.m_vecPosition + info.m_vecVelocity * (CTimer::GetTimeStep() / 2.0f);
         if (!CWorld::IsInWorldBounds(newPosition)) {
             info.m_bExists = false;
             continue;
@@ -76,8 +71,8 @@ void CBulletInfo::Update()
 
         CWorld::bIncludeDeadPeds = true;
         CWorld::bIncludeCarTyres = true;
-        CWorld::bIncludeBikers = true;
-        CWorld::pIgnoreEntity = info.m_pCreator;
+        CWorld::bIncludeBikers   = true;
+        CWorld::pIgnoreEntity    = info.m_pCreator;
 
         CColPoint colPoint;
         CEntity* hitEntity;
@@ -94,7 +89,7 @@ void CBulletInfo::Update()
                     case ePedState::PEDSTATE_DEAD:
                         break;
                     default: { // Not DIE or DEAD
-                        std::cout << "Hit ped\n";
+                        // std::cout << "Hit ped\n";
                         CWeapon::GenerateDamageEvent(
                             hitPed,
                             info.m_pCreator,
@@ -113,25 +108,24 @@ void CBulletInfo::Update()
                     }
                     }
                 }
+
                 if (CLocalisation::Blood()) {
                     g_fx.AddBlood(colPoint.m_vecPoint, colPoint.m_vecNormal, 8, hitPed->m_fContactSurfaceBrightness);
-                    std::cout << "Create blood\n";
+                    // std::cout << "Create blood\n";
                     if (hitPed->m_nPedState == ePedState::PEDSTATE_DEAD) {
-                        const auto anim = RpAnimBlendClumpGetFirstAssociation(hitPed->m_pRwClump, 0x800u)
-                            ? AnimationId::ANIM_ID_FLOOR_HIT_F
-                            : AnimationId::ANIM_ID_FLOOR_HIT;
+                        const auto anim = RpAnimBlendClumpGetFirstAssociation(hitPed->m_pRwClump, ANIM_FLAG_800) ? AnimationId::ANIM_ID_FLOOR_HIT_F : AnimationId::ANIM_ID_FLOOR_HIT;
 
-                        if (auto pAnim = CAnimManager::BlendAnimation(hitPed->m_pRwClump, 0, anim, 8.0f)) {
-                            pAnim->Start(0.0f);
-                            pAnim->SetFlag(eAnimationFlags::ANIM_FLAG_UNLOCK_LAST_FRAME, false);
-                            std::cout << "Blood anim\n";
+                        if (CAnimBlendAssociation* assoc = CAnimManager::BlendAnimation(hitPed->m_pRwClump, 0, anim, 8.0f)) {
+                            assoc->Start(0.0f);
+                            assoc->SetFlag(eAnimationFlags::ANIM_FLAG_UNLOCK_LAST_FRAME, false);
+                            // std::cout << "Blood anim\n";
                         }
                     }
                     newPosition = colPoint.m_vecPoint;
                 }
             }
             case eEntityType::ENTITY_TYPE_VEHICLE: {
-                std::cout << "Hit vehicle\n";
+                // std::cout << "Hit vehicle\n";
                 auto hitVehicle = hitEntity->AsVehicle();
 
                 if (info.m_pCreator && info.m_pCreator->m_nType == eEntityType::ENTITY_TYPE_PED)
@@ -144,23 +138,9 @@ void CBulletInfo::Update()
                 {
                     hitVehicle->InflictDamage(info.m_pCreator, info.m_nWeaponType, info.m_nDamage, colPoint.m_vecPoint);
                     if (info.m_nWeaponType == eWeaponType::WEAPON_FLAMETHROWER) {
-                        gFireManager.StartFire(
-                            hitVehicle,
-                            info.m_pCreator,
-                            0.8f,
-                            true,
-                            7000,
-                            100
-                        );
-                    }
-                    else if (TheCamera.IsSphereVisible(colPoint.m_vecNormal, 1.0f)) {
-                        g_fx.AddBulletImpact(
-                            colPoint.m_vecPoint,
-                            colPoint.m_vecNormal,
-                            colPoint.m_nSurfaceTypeB,
-                            8,
-                            colPoint.m_nLightingB.GetCurrentLighting()
-                        );
+                        gFireManager.StartFire(hitVehicle, info.m_pCreator, 0.8f, true, 7000, 100);
+                    } else if (TheCamera.IsSphereVisible(colPoint.m_vecNormal, 1.0f)) {
+                        g_fx.AddBulletImpact(colPoint.m_vecPoint, colPoint.m_vecNormal, colPoint.m_nSurfaceTypeB, 8, colPoint.m_nLightingB.GetCurrentLighting());
                     }
                     break;
                 }
@@ -170,7 +150,7 @@ void CBulletInfo::Update()
                 case eCarPiece::CAR_PIECE_WHEEL_RR: { /* originally `else` body */
                     hitVehicle->BurstTyre(colPoint.m_nPieceTypeB, true);
                     g_fx.AddTyreBurst(colPoint.m_vecPoint, colPoint.m_vecNormal);
-                    std::cout << "Brust vehicle tyre " << (int)colPoint.m_nPieceTypeB << "\n";
+                    // std::cout << "Brust vehicle tyre " << (int)colPoint.m_nPieceTypeB << "\n";
                     break;
                 }
                 }
@@ -178,31 +158,20 @@ void CBulletInfo::Update()
                 break;
             }
             default: {
-                if (TheCamera.IsSphereVisible(colPoint.m_vecNormal, 1.0f)) {
-                    g_fx.AddBulletImpact(
-                        colPoint.m_vecPoint,
-                        colPoint.m_vecNormal,
-                        colPoint.m_nSurfaceTypeB,
-                        8,
-                        colPoint.m_nLightingB.GetCurrentLighting()
-                    );
-                }
+                if (TheCamera.IsSphereVisible(colPoint.m_vecNormal, 1.0f))
+                    g_fx.AddBulletImpact(colPoint.m_vecPoint, colPoint.m_vecNormal, colPoint.m_nSurfaceTypeB, 8, colPoint.m_nLightingB.GetCurrentLighting());
+
                 if (info.m_pCreator && info.m_pCreator->m_nType == eEntityType::ENTITY_TYPE_PED)
                     if (info.m_pCreator->AsPed()->m_pAttachedTo == hitEntity)
                         break;
+
                 switch (hitEntity->m_nType) {
                 case eEntityType::ENTITY_TYPE_OBJECT: {
-                    std::cout << "Hit object\n";
+                    // std::cout << "Hit object\n";
                     auto hitObject = hitEntity->AsObject();
 
                     const auto DoDamageToObject = [&](float dmg) {
-                        hitObject->ObjectDamage(
-                            dmg,
-                            &colPoint.m_vecPoint,
-                            &colPoint.m_vecNormal,
-                            info.m_pCreator,
-                            info.m_nWeaponType
-                        );
+                        hitObject->ObjectDamage(dmg, &colPoint.m_vecPoint, &colPoint.m_vecNormal, info.m_pCreator, info.m_nWeaponType);
                     };
 
                     if (hitObject->m_nColDamageEffect < 200u) {
@@ -233,7 +202,7 @@ void CBulletInfo::Update()
                     break;
                 }
                 case eEntityType::ENTITY_TYPE_BUILDING: {
-                    std::cout << "Hit building\n";
+                    // std::cout << "Hit building\n";
                     if (info.m_pCreator && info.m_pCreator->IsPed()) {
                         if (auto pPlayerData = info.m_pCreator->AsPed()->m_pPlayerData) {
                             pPlayerData->m_nModelIndexOfLastBuildingShot = hitEntity->m_nModelIndex;
@@ -244,25 +213,17 @@ void CBulletInfo::Update()
                 }
             }
             }
+
             if (info.m_nWeaponType == eWeaponType::WEAPON_SNIPERRIFLE) {
-                std::cout << "Register sniper bullet hit\n";
+                // std::cout << "Register sniper bullet hit\n";
                 CVector dir = newPosition - info.m_vecPosition;
                 dir.Normalise();
                 const float dirDotColPointNorm = DotProduct(dir, colPoint.m_vecNormal);
                 if (dirDotColPointNorm < 0.0f) {
-                    AudioEngine.ReportBulletHit(
-                        hitEntity,
-                        colPoint.
-                        m_nSurfaceTypeB,
-                        colPoint.m_vecPoint,
-                        RWRAD2DEG(asin(-dirDotColPointNorm))
-                    );
+                    AudioEngine.ReportBulletHit(hitEntity, colPoint.m_nSurfaceTypeB, colPoint.m_vecPoint, RWRAD2DEG(asin(-dirDotColPointNorm)));
                 }
             }
-            CGlass::WasGlassHitByBullet(
-                hitEntity,
-                colPoint.m_vecPoint
-            );
+            CGlass::WasGlassHitByBullet(hitEntity, colPoint.m_vecPoint);
         }
 
         CWorld::bIncludeDeadPeds = false;

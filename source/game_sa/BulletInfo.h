@@ -20,7 +20,9 @@ public:
     CVector     m_vecVelocity;
     int16       m_nDamage;
 
-    static CBulletInfo(&aBulletInfos)[8]; // MAX_BULLET_INFOS
+    static constexpr auto MAX_BULLET_INFOS{8u};
+
+    static CBulletInfo(&aBulletInfos)[MAX_BULLET_INFOS];
     static CVector& PlayerSniperBulletStart;
     static CVector& PlayerSniperBulletEnd;
 
