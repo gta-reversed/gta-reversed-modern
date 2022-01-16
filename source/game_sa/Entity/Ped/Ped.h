@@ -391,13 +391,24 @@ public:
 public:
     // class virtual functions
 
+    void SetModelIndex(uint32 modelIndex) override;
+    void DeleteRwObject() override;
     void ProcessControl() override;
+    void Teleport(CVector destination, bool resetRotation) override;
+    void SpecialEntityPreCollisionStuff(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck) override;
+    uint8 SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2) override;
+    void PreRender() override;
+    void Render() override;
+    bool SetupLighting() override;
+    void RemoveLighting(bool bRemove) override;
+    void FlagToDestroyWhenNextProcessed() override;
+    int32 ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint) override;
 
-    // Process applied anim
+    // Process applied anim 0x86C3B4
     virtual void SetMoveAnim();
-    // always returns true
+    // always returns true 0x86C3B8
     virtual bool Save();
-    // always returns true
+    // always returns true 0x86C3BC
     virtual bool Load();
 
     // class functions
@@ -542,7 +553,6 @@ public:
     void KillPedWithCar(CVehicle* car, float fDamageIntensity, bool bPlayDeadAnimation);
     void MakeTyresMuddySectorList(CPtrList& ptrList);
     void DeadPedMakesTyresBloody();
-    void SetModelIndex(uint32 modelIndex);
     bool IsInVehicleThatHasADriver();
     void SetArmour(float v) { m_fArmour = v; }
     void SetWeaponShootingRange(uint8 r) { m_nWeaponShootingRate = r; }
