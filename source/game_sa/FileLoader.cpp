@@ -743,7 +743,7 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
 
         // Extract path after identifier like: <ID> <PATH>
         const auto ExtractPathFor = [&](auto id) {
-            assert(LineBeginsWith(id)); // NOTSA - Function should only be called if that's the case. 
+            assert(LineBeginsWith(name)); // NOTSA - Function should only be called if that's the case. 
             return l + strlen(id) + 1;
         };
 
