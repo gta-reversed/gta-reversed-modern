@@ -31,7 +31,7 @@ public:
     // returns -1 if slot not found
     static int32 FindIplSlot(char const* name);
     static CRect* GetBoundingBox(int32 iplSlotIndex);
-    static int32* GetIplEntityIndexArray(int32 arrayIndex);
+    static CEntity** GetIplEntityIndexArray(int32 arrayIndex);
     static char* GetIplName(int32 iplSlotIndex);
     // returns array index
     static int32 GetNewIplEntityIndexArray(int32 entitiesCount);

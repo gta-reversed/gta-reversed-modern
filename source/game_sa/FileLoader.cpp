@@ -60,7 +60,7 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadVehicleObject", 0x5B6F30, &CFileLoader::LoadVehicleObject);
     Install("CFileLoader", "LoadWeaponObject", 0x5B3FB0, &CFileLoader::LoadWeaponObject);
     Install("CFileLoader", "LoadZone", 0x5B4AB0, &CFileLoader::LoadZone);
-    // Install("CFileLoader", "LoadScene", 0x5B8700, &CFileLoader::LoadScene);
+    Install("CFileLoader", "LoadScene", 0x5B8700, &CFileLoader::LoadScene);
     // Install("CFileLoader", "LoadObjectTypes", 0x5B8400, &CFileLoader::LoadObjectTypes);
     Install("CFileLoader", "FindRelatedModelInfoCB", 0x5B3930, &CFileLoader::FindRelatedModelInfoCB);
     Install("CFileLoader", "SetRelatedModelInfoCB", 0x537150, &CFileLoader::SetRelatedModelInfoCB);
@@ -1327,7 +1327,154 @@ void LinkLods(int32 a1) {
 
 // 0x5B8700
 void CFileLoader::LoadScene(const char* filename) {
-    plugin::Call<0x5B8700, const char*>(filename);
+    gCurrIplInstancesCount = 0;
+
+    enum class SectionID {
+        NONE = 0, // NOTSA - Placeholder value
+
+        PATH = 1,
+        INST = 2,
+        MULT = 3,
+        ZONE = 4,
+        CULL = 5,
+        OCCL = 6,
+        GRGE = 8,
+        ENEX = 9,
+        PICK = 10,
+        CARS = 11,
+        JUMP = 12,
+        TCYC = 13,
+        AUZO = 14,
+    };
+
+    auto sectionId{SectionID::NONE};
+
+    int32 nPathEntryIndex{ -1 }, pathHeaderId{};
+    int32 pathType{};
+
+    auto file = CFileMgr::OpenFile(filename, "rb");
+    for (char* line = LoadLine(file); line; line = LoadLine(file)) {
+        if (!line[0]) // Emtpy line
+            continue;
+
+        const auto LineBeginsWith = [linesv = std::string_view{line}](auto what) {
+            return linesv.starts_with(what);
+        };
+
+        if (LineBeginsWith("#"))
+            continue; // Skip comment
+
+        if (sectionId != SectionID::NONE) {
+            if (LineBeginsWith("end")) {
+                sectionId = SectionID::NONE;
+                continue;
+            }
+
+            switch (sectionId) {
+            case SectionID::INST: {
+                CEntity* pObjInstance = LoadObjectInstance(line);
+                gCurrIplInstances[gCurrIplInstancesCount++] = pObjInstance;
+                break;
+            }
+            case SectionID::ZONE:
+                LoadZone(line);
+                break;
+            case SectionID::CULL:
+                LoadCullZone(line);
+                break;
+            case SectionID::OCCL:
+                LoadOcclusionVolume(line, filename);
+                break;
+            case SectionID::PATH: {
+                // This section doesn't do anything useful.
+                // `LoadPedPathNode` is a NOP basically.
+                // This is a leftover from VC. (Source: https://gta.fandom.com/wiki/Item_Placement#PATH )
+
+                if (nPathEntryIndex == -1) {
+                    pathHeaderId = LoadPathHeader(line, pathType);
+                }
+                else {
+                    switch (pathType) {
+                    case 0:
+                        LoadPedPathNode(line, pathHeaderId, nPathEntryIndex);
+                        break;
+                    case 1:
+                        LoadCarPathNode(line, pathHeaderId, nPathEntryIndex, false);
+                        break;
+                    case 2:
+                        LoadCarPathNode(line, pathHeaderId, nPathEntryIndex, true);
+                        break;
+                    }
+                    if (++nPathEntryIndex == 12)
+                        nPathEntryIndex = -1;
+                }
+                break;
+            }
+            case SectionID::GRGE:
+                LoadGarage(line);
+                break;
+            case SectionID::ENEX:
+                LoadEntryExit(line);
+                break;
+            case SectionID::PICK:
+                LoadPickup(line);
+                break;
+            case SectionID::CARS:
+                LoadCarGenerator(line, 0);
+                break;
+            case SectionID::JUMP:
+                LoadStuntJump(line);
+                break;
+            case SectionID::TCYC:
+                LoadTimeCyclesModifier(line);
+                break;
+            case SectionID::AUZO:
+                LoadAudioZone(line);
+                break;
+            }
+
+            if (sectionId == SectionID::PATH)
+                break; // TODO: Unsure why it stops after a path section.
+
+        } else {
+            const auto FindSectionID = [&] {
+                const struct { std::string_view name; SectionID id; } mapping[]{
+                    {"path", SectionID::PATH},
+                    {"inst", SectionID::INST},
+                    {"mult", SectionID::MULT},
+                    {"zone", SectionID::ZONE},
+                    {"cull", SectionID::CULL},
+                    {"occl", SectionID::OCCL},
+                    {"grge", SectionID::GRGE},
+                    {"enex", SectionID::ENEX},
+                    {"pick", SectionID::PICK},
+                    {"cars", SectionID::CARS},
+                    {"jump", SectionID::JUMP},
+                    {"tcyc", SectionID::TCYC},
+                    {"auzo", SectionID::AUZO},
+                };
+
+                for (const auto& [itname, id] : mapping) {
+                    if (LineBeginsWith(itname)) {
+                        return id;
+                    }
+                }
+
+                return SectionID::NONE; // Possible if the line was empty, let's move on to the next line.
+            };
+            sectionId = FindSectionID();
+        }
+    }
+    CFileMgr::CloseFile(file);
+
+    // This really seems like should be in CIplStore...
+    auto newIPLIndex{ -1 };
+    if (gCurrIplInstancesCount > 0) {
+        newIPLIndex = CIplStore::GetNewIplEntityIndexArray(gCurrIplInstancesCount);
+        std::ranges::copy(gCurrIplInstances, gCurrIplInstances + gCurrIplInstancesCount, CIplStore::GetIplEntityIndexArray(newIPLIndex));
+    }
+    LinkLods(CIplStore::SetupRelatedIpls(filename, newIPLIndex, &gCurrIplInstances[gCurrIplInstancesCount]));
+    CIplStore::RemoveRelatedIpls(newIPLIndex); // I mean this totally makes sense, doesn't it?
 }
 
 // 0x5B8400
