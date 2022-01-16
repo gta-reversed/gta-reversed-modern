@@ -1,5 +1,10 @@
-#include "CEvent.h"
-#include "CVector.h"
+#pragma once
+
+#include "Event.h"
+#include "Vector.h"
+
+class CPed;
+class CObject;
 
 class CEventPedCollisionWithPed : public CEvent {
 public:

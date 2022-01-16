@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "CRGBA.h"
+#include "RGBA.h"
 
 struct tPickupMessage {
     float  x;

@@ -19,6 +19,9 @@ VALIDATE_SIZE(int, 4);
 VALIDATE_SIZE(float, 4);
 VALIDATE_SIZE(long long, 8);
 
+// Use this to add const that wasn't there in the original code
+#define Const const
+
 // Basic types for structures describing
 typedef int8_t    int8;
 typedef int16_t   int16;

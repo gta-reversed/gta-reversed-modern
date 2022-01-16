@@ -2,9 +2,9 @@
 
 #ifdef EXTRA_DEBUG_FEATURES
 
-#include "COcclusion.h"
-#include "COccluder.h"
-#include "CLines.h"
+#include "Occlusion.h"
+#include "Occluder.h"
+#include "Lines.h"
 
 #include "imgui.h"
 
