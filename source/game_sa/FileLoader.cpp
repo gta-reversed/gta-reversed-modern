@@ -43,7 +43,7 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadCullZone", 0x5B4B40, &CFileLoader::LoadCullZone);
     Install("CFileLoader", "LoadEntryExit", 0x5B8030, &CFileLoader::LoadEntryExit);
     Install("CFileLoader", "LoadGarage", 0x5B4530, &CFileLoader::LoadGarage);
-    // Install("CFileLoader", "LoadLevel", 0x5B9030, &CFileLoader::LoadLevel);
+    Install("CFileLoader", "LoadLevel", 0x5B9030, &CFileLoader::LoadLevel);
     Install("CFileLoader", "LoadObject", 0x5B3C60, &CFileLoader::LoadObject);
     Install("CFileLoader", "LoadObjectInstance_inst", 0x538090, static_cast<CEntity* (*)(CFileObjectInstance*, const char*)>(&CFileLoader::LoadObjectInstance));
     Install("CFileLoader", "LoadObjectInstance_file", 0x538690, static_cast<CEntity* (*)(const char*)>(&CFileLoader::LoadObjectInstance));
@@ -724,8 +724,116 @@ void CFileLoader::LoadGarage(const char* line) {
 }
 
 // 0x5B9030
-void CFileLoader::LoadLevel(const char* filename) {
-    return plugin::Call<0x5B9030, const char*>(filename);
+void CFileLoader::LoadLevel(const char* levelFileName) {
+    char pathBuffer[128]{};
+
+    auto pRwCurrTexDict = RwTexDictionaryGetCurrent();
+    if (!pRwCurrTexDict) {
+        pRwCurrTexDict = RwTexDictionaryCreate();
+        RwTexDictionarySetCurrent(pRwCurrTexDict);
+    }
+
+    bool hasLoadedAnyIPLs{};
+
+    const auto f = CFileMgr::OpenFile(levelFileName, "r");
+    for (auto l = LoadLine(f); l; l = LoadLine(f)) {
+        const auto LineBeginsWith = [l](auto what) {
+            return strncmp(what, l, strlen(what));
+        };
+
+        // Extract path after identifier like: <ID> <PATH>
+        const auto ExtractPathFor = [&](auto id) {
+            assert(LineBeginsWith(id)); // NOTSA - Function should only be called if that's the case. 
+            return l + strlen(id) + 1;
+        };
+
+        if (LineBeginsWith("#"))
+            continue; // Skip comment
+
+        if (LineBeginsWith("EXIT"))
+            break; // Done
+
+        if (LineBeginsWith("TEXDICTION")) {
+            // Originally here they've copied the path into a buffer
+            // We ain't gonna do that, there's no point to it
+            const auto path = ExtractPathFor("TEXDICTION");
+
+            LoadingScreenLoadingFile(path);
+
+            const auto txd = CFileLoader::LoadTexDictionary(path);
+            RwTexDictionaryForAllTextures(txd, AddTextureCB, pRwCurrTexDict);
+            RwTexDictionaryDestroy(txd);
+
+        } else if (LineBeginsWith("IPL")) {
+            if (!hasLoadedAnyIPLs) {
+                MatchAllModelStrings();
+
+                LoadingScreenLoadingFile("Object Data");
+                CObjectData::Initialise("DATA\\OBJECT.DAT");
+
+                LoadingScreenLoadingFile("Setup vehicle info data");
+                CVehicleModelInfo::SetupCommonData();
+
+                LoadingScreenLoadingFile("Streaming Init");
+                CStreaming::Init2();
+
+                CLoadingScreen::NewChunkLoaded();
+
+                LoadingScreenLoadingFile("Collision");
+                CColStore::LoadAllBoundingBoxes();
+
+                // TODO: Probably inlined.
+                for (auto mi : CModelInfo::ms_modelInfoPtrs) {
+                    if (mi) {
+                        mi->ConvertAnimFileIndex();
+                    }
+                }
+
+                hasLoadedAnyIPLs = true;
+            }
+
+            // Originally here they've copied the path into a buffer
+            // We ain't gonna do that, there's no point to it
+            const auto path = ExtractPathFor("IPL");
+            LoadingScreenLoadingFile(path);
+            CFileLoader::LoadScene(path);
+        } else {
+            // Deal with the rest (Originally more `else-if`s were used)
+            // Sadly we can't put all of the above in here as well
+            // because they'd need a capturing lambda, and that would require
+            // us to use `std::function` which is just overkill in this case.
+
+            using FnType = void(*)(const char*);
+            const struct { const char* id;  FnType fn; } functions[]{
+                {"IMG", [](const char* path) {
+                    if (path == std::string_view{ "MODELS\\GTA_INT.IMG" }) { // Only allowed to load GTA_INT.IMG
+                        CStreaming::AddImageToList(path, true);
+                    }
+                }},
+                {"COLFILE", [](const char* path) { LoadCollisionFile(path, 0); }},
+                {"MODELFILE", LoadAtomicFile},
+                {"HIERFILE", LoadClumpFile},
+                {"IDE", LoadObjectTypes},
+                //{"SPLASH", [](const char*) {}} - Unused
+            };
+            for (const auto& v : functions) {
+                if (LineBeginsWith(v.id)) {
+                    v.fn(ExtractPathFor(v.id));
+                    break;
+                }
+            }
+        }
+    }
+    CFileMgr::CloseFile(f);
+
+    RwTexDictionarySetCurrent(pRwCurrTexDict);
+    if (hasLoadedAnyIPLs)
+    {
+        CIplStore::LoadAllRemainingIpls();
+        CColStore::BoundingBoxesPostProcess();
+        CTrain::InitTrains();
+        CColStore::RemoveAllCollision();
+    }
 }
 
 // IPL -> OCCL
