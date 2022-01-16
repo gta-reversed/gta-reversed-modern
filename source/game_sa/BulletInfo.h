@@ -16,11 +16,9 @@ public:
     CEntity*    m_pCreator;
     float       m_nDestroyTime;
     bool        m_bExists;
-    char        _pad0D[3];
     CVector     m_vecPosition;
     CVector     m_vecVelocity;
     int16       m_nDamage;
-    char        _pad2A[2];
 
     static CBulletInfo(&aBulletInfos)[8]; // MAX_BULLET_INFOS
     static CVector& PlayerSniperBulletStart;

@@ -23,14 +23,10 @@ void CBulletInfo::InjectHooks()
 void CBulletInfo::Initialise()
 {
     for (auto& info : aBulletInfos) {
-        info = {};
-        /*
-        Original code (We use the constructor for code clarity): 
         info.m_bExists = 0;
         info.m_nWeaponType = WEAPON_PISTOL;
-        info.m_nDestroyTime = 0.0;
+        info.m_nDestroyTime = 0.0f;
         info.m_pCreator = 0;
-        */
     }
 }
 
@@ -52,14 +48,14 @@ CBulletInfo* CBulletInfo::GetFree() {
 // AddBullet
 void CBulletInfo::AddBullet(CEntity* creator, eWeaponType weaponType, CVector posn, CVector velocity)
 {
-    if (auto pInfo = GetFree()) {
-        pInfo->m_pCreator     = creator;
-        pInfo->m_nWeaponType  = weaponType;
-        pInfo->m_nDamage      = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nDamage;
-        pInfo->m_vecPosition  = posn;
-        pInfo->m_vecVelocity  = velocity;
-        pInfo->m_nDestroyTime = (float)(CTimer::GetTimeInMS() + 1000);
-        pInfo->m_bExists      = true;
+    if (auto info = GetFree()) {
+        info->m_pCreator     = creator;
+        info->m_nWeaponType  = weaponType;
+        info->m_nDamage      = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nDamage;
+        info->m_vecPosition  = posn;
+        info->m_vecVelocity  = velocity;
+        info->m_nDestroyTime = (float)(CTimer::GetTimeInMS() + 1000);
+        info->m_bExists      = true;
     }
 }
 
