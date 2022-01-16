@@ -178,6 +178,7 @@ void CCopPed::AddCriminalToKill(CPed* criminal) {
         return;
 
     ClearCriminalListFromDeadPeds();
+
     if (criminal->m_fHealth <= 0.0f)
         return;
 
@@ -240,7 +241,9 @@ void CCopPed::ProcessControl_Reversed() {
             GetIntelligence()->SetPedDecisionMakerType(eDecisionMakerEvents::DM_EVENT_KNOCK_OFF_BIKE);
         }
     }
+
     CPed::ProcessControl();
+
     if (m_bWasPostponed)
         return;
 
@@ -248,6 +251,7 @@ void CCopPed::ProcessControl_Reversed() {
         return;
 
     GetActiveWeapon().Update(this);
+
     if (m_nPedState == ePedState::PEDSTATE_DIE)
         return;
 
@@ -257,6 +261,8 @@ void CCopPed::ProcessControl_Reversed() {
     if (!field_79D)
         return;
 
+    // Never gets here because field_79D is initialized with false
+    // This code will break the police, if you comment checking field_79D.
     if (GetIsOnScreen()) {
         if ((CTimer::GetFrameCounter() + m_nRandomSeed) % 32 != 17) // todo: magic
             return;
