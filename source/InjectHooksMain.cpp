@@ -56,6 +56,7 @@
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
 #include "CreepingFire.h"
+#include "Restart.h"
 #include "C_PcSave.h"
 
 // Tasks
@@ -171,6 +172,7 @@ void InjectHooksMain() {
 
     CGenericGameStorage::InjectHooks();
     C_PcSave::InjectHooks();
+    CRestart::InjectHooks();
     CPlaneTrail::InjectHooks();
     CCopPed::InjectHooks();
     CDamageManager::InjectHooks();

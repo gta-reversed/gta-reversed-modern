@@ -1,41 +1,48 @@
-/*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
-    Authors: GTA Community. See more here
-    https://github.com/DK22Pac/plugin-sdk
-    Do not delete this comment block. Respect others' work!
-*/
 #pragma once
 
 #include "Vector.h"
 
 class CRestart {
 public:
-    static bool&    bOverrideRespawnBasePointForMission;
-    static CVector* OverrideRespawnBasePointForMission;
-    static float&   OverrideHeading;
-    static bool&    bOverrideRestart;
-    static CVector* OverridePosition;
-
-    static int16&   NumberOfPoliceRestarts;
-    static int32&   PoliceRestartWhenToUse; // [10]
-    static float&   PoliceRestartHeadings;  // [10]
-    static CVector* PoliceRestartPoints;    // [10]
-
     static int16&   NumberOfHospitalRestarts;
-    static int32&   HospitalRestartWhenToUse; // [10]
-    static float&   HospitalRestartHeadings;  // [10]
-    static CVector* HospitalRestartPoints;    // [10]
+    static CVector  (&HospitalRestartPoints)[10];
+    static float    (&HospitalRestartHeadings)[10];
+    static int32    (&HospitalRestartWhenToUse)[10];
 
-    static void AddHospitalRestartPoint(CVector const& point, float angle, int32 townId);
-    static void AddPoliceRestartPoint(CVector const& point, float angle, int32 townId);
+    static uint16&  NumberOfPoliceRestarts;
+    static CVector  (&PoliceRestartPoints)[10];
+    static float    (&PoliceRestartHeadings)[10];
+    static int32    (&PoliceRestartWhenToUse)[10];
+
+    static bool&    bOverrideRestart;
+    static CVector& OverridePosition;
+    static float&   OverrideHeading;
+    static bool&    bOverrideRespawnBasePointForMission;
+    static CVector& OverrideRespawnBasePointForMission;
+
+    static bool&    bFadeInAfterNextDeath;
+    static bool&    bFadeInAfterNextArrest;
+
+    static CVector& ExtraHospitalRestartCoors;
+    static float&   ExtraHospitalRestartRadius;
+    static float&   ExtraHospitalRestartHeading;
+
+    static CVector& ExtraPoliceStationRestartCoors;
+    static float&   ExtraPoliceStationRestartRadius;
+    static float&   ExtraPoliceStationRestartHeading;
+
+public:
+    static void InjectHooks();
+
+    static void Initialise();
+    static void AddHospitalRestartPoint(const CVector& point, float angle, int32 townId);
+    static void AddPoliceRestartPoint(const CVector& point, float angle, int32 townId);
     static void CancelOverrideRestart();
+    static void SetRespawnPointForDurationOfMission(CVector point);
     static void ClearRespawnPointForDurationOfMission();
     static void FindClosestHospitalRestartPoint(CVector point, CVector* storedPoint, float* storedAngle);
     static void FindClosestPoliceRestartPoint(CVector point, CVector* storedPoint, float* storedAngle);
-    static void Initialise();
+    static void OverrideNextRestart(const CVector& point, float angle);
     static bool Load();
     static bool Save();
-    static void OverrideNextRestart(CVector const& point, float angle);
-    // static void Save();
-    // static void SetRespawnPointForDurationOfMission(CVector point);
 };
