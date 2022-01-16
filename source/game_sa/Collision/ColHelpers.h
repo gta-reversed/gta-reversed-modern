@@ -118,8 +118,20 @@ namespace V3 {
 
     // Header for V3
     struct Header : V2::Header {
-        uint32 nShdwFace{};
-        uint32 offShdwVert{}, offShdwFace{};
+        uint32 nShdwFaces{};
+        uint32 offShdwVerts{}, offShdwFaces{};
+
+        // Basically just find the highest shadow vertex index
+        uint32 GetNoOfShdwVertices(CCollisionData* cd) {
+            if (!nShdwFaces)
+                return 0;
+
+            uint32 maxVert{};
+            for (auto i = 0u; i < nShdwFaces; i++) {
+                maxVert = *std::ranges::max_element(cd->m_pShadowTriangles[i].m_vertIndices);
+            }
+            return maxVert + 1;
+        }
     };
 };
 namespace V4 {

@@ -95,9 +95,9 @@ public:
     static bool LoadCollisionFile(const char* filename, uint8 colId);
     static bool LoadCollisionFileFirstTime(uint8* data, uint32 dataSize, uint8 colId);
     static void LoadCollisionModel(uint8* data, CColModel& outColModel);
-    static void LoadCollisionModelVer2(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName);
-    static void LoadCollisionModelVer3(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName);
-    static void LoadCollisionModelVer4(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName);
+    static void LoadCollisionModelVer2(uint8* buffer, uint32 fileSize, CColModel& cm, const char* modelName);
+    static void LoadCollisionModelVer3(uint8* buffer, uint32 fileSize, CColModel& cm, const char* modelName);
+    static void LoadCollisionModelVer4(uint8* buffer, uint32 fileSize, CColModel& cm, const char* modelName);
 
     static void LoadCullZone(const char* line);
     static void LoadEntryExit(const char* line);

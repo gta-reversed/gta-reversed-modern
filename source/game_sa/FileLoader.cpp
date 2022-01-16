@@ -537,8 +537,69 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 fileSize, CColMod
 }
 
 // 0x537CE0
-void CFileLoader::LoadCollisionModelVer3(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName) {
-    plugin::Call<0x537CE0, uint8*, uint32, CColModel&, const char*>(data, dataSize, outColModel, modelName);
+void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 fileSize, CColModel& cm, const char* modelName) {
+    using namespace ColHelpers;
+    using namespace ColHelpers::V3;
+
+    auto& h = *reinterpret_cast<V3::Header*>(buffer);
+    cm.m_boundBox = h.bounds.box;
+    cm.m_boundSphere = CColSphere{ h.bounds.sphere };
+    cm.m_boundSphere.m_bNotEmpty = h.flags & 2; // Not empty flag. Still unsure why is this stored in the bound sphere though...
+
+    auto dataSize = fileSize - sizeof(V3::Header);
+    if (!dataSize)
+        return; // No data present, other than the header
+
+    // Here's the meat. We allocate some memory to hold both the file's contents and the CCollisionData struct.
+    // So, memory layout is as follows:
+    //                [              DATA FROM FILE COPIED                  ]
+    // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
+
+    auto p = (uint8*)CMemoryMgr::Malloc(dataSize + sizeof(CCollisionData));
+    cm.m_pColData = new(p) CCollisionData; // R* used a cast here, but that's not really a good idea.
+    memcpy(p + sizeof(CCollisionData), buffer + sizeof(V3::Header), dataSize); // Copy actual data into allocated memory after CCollisionData
+
+    auto cd = cm.m_pColData;
+    cd->m_nNumSpheres = h.nSpheres;
+    cd->m_nNumBoxes = h.nBoxes;
+    cd->m_nNumLines = h.nLines;
+    cd->m_nNumTriangles = h.nFaces;
+    cd->m_nNumShadowTriangles = h.nShdwFaces;
+
+    cd->bUsesDisks = false;
+    cd->bNotEmpty = h.flags & 2;
+
+    // Set given field in `CCollisionData` based on offset in file.
+    // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
+    const auto SetColDataPtr = [&]<typename T>(T& colDataPtr, auto fileOffset) {
+        // Return pointer for offset in allocated memory (relative to where it was in the file)
+        const auto GetDataPtr = [&]() {
+            return reinterpret_cast<T>(
+                p
+                + sizeof(CCollisionData)      // Must offset by this (See memory layout above)
+                + fileOffset
+                + sizeof(FileHeader::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
+                - sizeof(FileHeader)          // Offset includes these headers, but we haven't copied them into our memory
+                - sizeof(V3::Header)
+                );
+        };
+        colDataPtr = fileOffset ? GetDataPtr() : nullptr;
+    };
+
+    SetColDataPtr(cd->m_pSpheres, h.offSpheres);
+    SetColDataPtr(cd->m_pBoxes, h.offBoxes);
+    SetColDataPtr(cd->m_pLines, h.offLines);
+    SetColDataPtr(cd->m_pVertices, h.offVerts);
+    SetColDataPtr(cd->m_pTriangles, h.offFaces);
+    SetColDataPtr(cd->m_pShadowVertices, h.offShdwVerts);
+    SetColDataPtr(cd->m_pShadowTriangles, h.offShdwVerts);
+
+    cd->bHasShadowInfo = h.offShdwFaces && h.offShdwVerts && h.nShdwFaces;
+    cd->m_nNumShadowVertices = cd->bHasShadowInfo ? h.GetNoOfShdwVerts(cd) : 0;
+
+    cd->m_pTrianglePlanes = nullptr;
+
+    cm.m_boundSphere.m_bIsSingleColDataAlloc = true;
 }
 
 // 0x537AE0
