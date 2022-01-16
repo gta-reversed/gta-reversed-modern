@@ -391,6 +391,8 @@ public:
 public:
     // class virtual functions
 
+    void ProcessControl() override;
+
     // Process applied anim
     virtual void SetMoveAnim();
     // always returns true
