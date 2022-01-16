@@ -56,6 +56,8 @@
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
 #include "CreepingFire.h"
+#include "Restart.h"
+#include "BulletInfo.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -163,19 +165,12 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
 
-void WaitForDebugger() {
-    while (!::IsDebuggerPresent()) {
-        printf("Debugger not present\n");
-        ::Sleep(100);
-    }
-}
-
-void InjectHooksMain()
-{
-    // WaitForDebugger();
+void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
 
+    CBulletInfo::InjectHooks();
+    CRestart::InjectHooks();
     CPlaneTrail::InjectHooks();
     CCopPed::InjectHooks();
     CDamageManager::InjectHooks();

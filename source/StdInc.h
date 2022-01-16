@@ -110,7 +110,6 @@
 #include "game_sa\BouncingPanel.h"
 #include "game_sa\Bridge.h"
 #include "game_sa\BrightLights.h"
-#include "game_sa\BulletInfo.h"
 #include "game_sa\BulletTrace.h"
 #include "game_sa\BulletTraces.h"
 #include "game_sa\Cam.h"
