@@ -29,7 +29,7 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadAudioZone", 0x5B4D70, &CFileLoader::LoadAudioZone);
     Install("CFileLoader", "LoadCarGenerator_0", 0x537990, static_cast<void(*)(CFileCarGenerator*, int32)>(&CFileLoader::LoadCarGenerator));
     Install("CFileLoader", "LoadCarGenerator_1", 0x5B4740, static_cast<void(*)(const char*, int32)>(&CFileLoader::LoadCarGenerator));
-    // Install("CFileLoader", "LoadCarPathNode", 0x5B4380, &CFileLoader::LoadCarPathNode);
+    Install("CFileLoader", "LoadCarPathNode", 0x5B4380, &CFileLoader::LoadCarPathNode);
     Install("CFileLoader", "StartLoadClumpFile", 0x5373F0, &CFileLoader::StartLoadClumpFile);
     Install("CFileLoader", "FinishLoadClumpFile", 0x537450, &CFileLoader::FinishLoadClumpFile);
     Install("CFileLoader", "LoadClumpFile", 0x5B3A30, static_cast<void(*)(const char*)>(&CFileLoader::LoadClumpFile));
@@ -244,7 +244,8 @@ void CFileLoader::LoadCarGenerator(const char* line, int32 iplId) {
 
 // 0x5B4380
 void CFileLoader::LoadCarPathNode(const char* line, int32 objModelIndex, int32 pathEntryIndex, bool a4) {
-    plugin::Call<0x5B4380, const char*, int32, int32, bool>(line, objModelIndex, pathEntryIndex, a4);
+    // Loads some data from the line, and calls a function which does nothing, so the whole function.. does nothing.
+    // Leftover from VC
 }
 
 // 0x5373F0
