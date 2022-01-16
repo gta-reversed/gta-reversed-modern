@@ -39,8 +39,8 @@ public:
     static void Init();
     static void Shutdown();
     static void ShutdownForRestart();
-    static void Save();
-    static void Load();
+    static bool Save();
+    static bool Load();
     static void AddOne(const CBoundingBox& start, const CBoundingBox& end, const CVector& cameraPosn, int32 reward);
     static void Update();
 

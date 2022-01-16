@@ -4,7 +4,7 @@ class CGenericGameStorage {
     static constexpr auto BUFFER_SIZE{ (uint32)(50u * 1024u) };
 
     using tSlotSaveDate = char[70];
-    using tSlotFileName = char[260];
+    using tSlotFileName = char[MAX_PATH];
 
     enum class eBlocks {
         SIMPLE_VARIABLES,

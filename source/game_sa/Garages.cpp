@@ -46,12 +46,14 @@ void CGarages::PrintMessages()
     plugin::Call<0x447790>();
 }
 
-bool CGarages::Save() {
-    return plugin::CallAndReturn<bool, 0x5D3160>();
-}
-
+// 0x5D3270
 bool CGarages::Load() {
     return plugin::CallAndReturn<bool, 0x5D3270>();
+}
+
+// 0x5D3160
+bool CGarages::Save() {
+    return plugin::CallAndReturn<bool, 0x5D3160>();
 }
 
 // 0x447B80

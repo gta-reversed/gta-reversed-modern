@@ -1,6 +1,5 @@
 #pragma once
 
-
 // Helper class for CGenericGameStorage
 
 class C_PcSave {
@@ -35,4 +34,5 @@ public:
 public:
     eErrorCode error;
 };
+
 static inline C_PcSave& s_PcSaveHelper = *(C_PcSave*)0xC17034;
