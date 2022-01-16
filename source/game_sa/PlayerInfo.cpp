@@ -4,8 +4,8 @@
 
 void CPlayerInfo::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CPlayerInfo", "Constructor", 0x571920, &CPlayerInfo::Constructor, true);
-    Install("CPlayerInfo", "Destructor", 0x45B110, &CPlayerInfo::Destructor, true);
+    Install("CPlayerInfo", "Constructor", 0x571920, &CPlayerInfo::Constructor);
+    Install("CPlayerInfo", "Destructor", 0x45B110, &CPlayerInfo::Destructor);
     Install("CPlayerInfo", "CancelPlayerEnteringCars", 0x56E860, &CPlayerInfo::CancelPlayerEnteringCars);
     // Install("CPlayerInfo", "FindObjectToSteal", 0x56DBD0, &CPlayerInfo::FindObjectToSteal);
     Install("CPlayerInfo", "EvaluateCarPosition", 0x56DAD0, &CPlayerInfo::EvaluateCarPosition);
@@ -314,7 +314,7 @@ void CPlayerInfo::PlayerFailedCriticalMission() {
 
 // 0x56E610
 void CPlayerInfo::WorkOutEnergyFromHunger() {
-    static int32 bUpdateLastTimeHungry;        // 0xB9B8F4 not original name
+    static int32 bUpdateLastTimeHungry;        // 0xB9B8F4 original name is unknown
     static int8  lastTimeHungryStateProcessed; // 0xB9B8F2
     static int8  gLastHungryState;             // 0xB9B8F1
     static bool  bHungryMessageShown;          // 0xB9B8F0
