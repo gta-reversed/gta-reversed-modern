@@ -52,7 +52,7 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadPathHeader", 0x5B41C0, &CFileLoader::LoadPathHeader);
     Install("CFileLoader", "LoadPedObject", 0x5B7420, &CFileLoader::LoadPedObject);
     Install("CFileLoader", "LoadPedPathNode", 0x5B41F0, &CFileLoader::LoadPedPathNode);
-    // Install("CFileLoader", "LoadPickup", 0x5B47B0, &CFileLoader::LoadPickup);
+    Install("CFileLoader", "LoadPickup", 0x5B47B0, &CFileLoader::LoadPickup);
     Install("CFileLoader", "LoadStuntJump", 0x5B45D0, &CFileLoader::LoadStuntJump);
     Install("CFileLoader", "LoadTXDParent", 0x5B75E0, &CFileLoader::LoadTXDParent);
     Install("CFileLoader", "LoadTimeCyclesModifier", 0x5B81D0, &CFileLoader::LoadTimeCyclesModifier);
@@ -744,7 +744,7 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
 
         // Extract path after identifier like: <ID> <PATH>
         const auto ExtractPathFor = [&](auto id) {
-            assert(LineBeginsWith(id)); // NOTSA - Function should only be called if that's the case. 
+            assert(LineBeginsWith(weaponType)); // NOTSA - Function should only be called if that's the case. 
             return l + strlen(id) + 1;
         };
 
@@ -946,8 +946,116 @@ void CFileLoader::LoadPedPathNode(const char* line, int32 objModelIndex, int32 p
 }
 
 // 0x5B47B0
+// https://gta.fandom.com/wiki/PICK
 void CFileLoader::LoadPickup(const char* line) {
-    plugin::Call<0x5B47B0, const char*>(line);
+    CVector pos{};
+    int32 weaponType{};
+    if (sscanf(line, "%d %f %f %f", &weaponType, &pos.x, &pos.y, &pos.z) == 4) {
+        // TODO: Maybe, some day, use enums here (eModelID for the model, and eWeaponType for the wepID)
+        const auto GetModel = [weaponType] {
+            switch (weaponType) {
+            case 4:
+                return 331;
+            case 5:
+                return 334;
+            case 6:
+                return 335;
+            case 9:
+                return 333;
+            case 10:
+                return 336;
+            case 11:
+                return 337;
+            case 12:
+                return 338;
+            case 13:
+                return 339;
+            case 14:
+                return 341;
+            case 15:
+                return 344;
+            case 16:
+                return 342;
+            case 17:
+                return 363;
+            case 18:
+                return 346;
+            case 19:
+                return 347;
+            case 20:
+                return 348;
+            case 21:
+                return 349;
+            case 22:
+            case 45:
+                return 351;
+            case 23:
+                return 372;
+            case 24:
+                return 352;
+            case 25:
+                return 353;
+            case 26:
+                return 355;
+            case 27:
+                return 356;
+            case 28:
+                return 357;
+            case 29:
+                return 358;
+            case 31:
+                return 361;
+            case 32:
+            case 44:
+                return 362;
+            case 33:
+                return 321;
+            case 34:
+                return 322;
+            case 35:
+                return 323;
+            case 36:
+                return 324;
+            case 37:
+                return 325;
+            case 38:
+                return 326;
+            case 39:
+                return 327;
+            case 40:
+                return 328;
+            case 41:
+                return 330;
+            case 43:
+                return 343;
+            case 46:
+                return 359;
+            case 47:
+                return 360;
+            case 48:
+                return 364;
+            case 49:
+                return 365;
+            case 50:
+                return 366;
+            case 51:
+                return 367;
+            case 52:
+                return 368;
+            case 53:
+                return 369;
+            case 54:
+                return 370;
+            case 55:
+                return 371;
+            default:
+                return -1;
+            }
+        };
+        if (const auto model = GetModel(); model != -1) {
+            CPickups::GenerateNewOne(pos, model, 2, 0, 0, false, nullptr);
+        }
+    }
 }
 
 // 0x5B45D0
