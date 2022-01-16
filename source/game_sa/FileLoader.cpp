@@ -57,7 +57,7 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadTXDParent", 0x5B75E0, &CFileLoader::LoadTXDParent);
     Install("CFileLoader", "LoadTimeCyclesModifier", 0x5B81D0, &CFileLoader::LoadTimeCyclesModifier);
     Install("CFileLoader", "LoadTimeObject", 0x5B3DE0, &CFileLoader::LoadTimeObject);
-    // Install("CFileLoader", "LoadVehicleObject", 0x5B6F30, &CFileLoader::LoadVehicleObject);
+    Install("CFileLoader", "LoadVehicleObject", 0x5B6F30, &CFileLoader::LoadVehicleObject);
     Install("CFileLoader", "LoadWeaponObject", 0x5B3FB0, &CFileLoader::LoadWeaponObject);
     Install("CFileLoader", "LoadZone", 0x5B4AB0, &CFileLoader::LoadZone);
     // Install("CFileLoader", "LoadScene", 0x5B8700, &CFileLoader::LoadScene);
@@ -1200,7 +1200,93 @@ int32 CFileLoader::LoadTimeObject(const char* line) {
 
 // 0x5B6F30
 int32 CFileLoader::LoadVehicleObject(const char* line) {
-    return plugin::CallAndReturn<int32, 0x5B6F30, const char*>(line);
+    int32_t modelId{ -1 };
+    char modelName[24]{};
+    char texName[24]{};
+    char type[8]{};
+    char handlingName[8]{};
+    char gameName[32]{};
+    char anims[16]{};
+    char vehCls[16]{};
+    uint32_t frq{}, flags{};
+    tVehicleCompsUnion vehComps{};
+    uint32_t misc{}; // `m_fBikeSteerAngle` if model type is BMX/Bike, otherwise `m_nWheelModelIndex`
+    float wheelSizeFront{}, wheelSizeRear{};
+    int32_t wheelUpgradeCls{ -1 };
+
+    sscanf(line, "%d %s %s %s %s %s %s %s %d %d %x %d %f %f %d",
+        &modelId,
+        modelName,
+        texName,
+        type,
+        handlingName,
+        gameName,
+        anims,
+        vehCls,
+        &frq,
+        &flags,
+        &vehComps.m_nComps,
+        &misc,
+        &wheelSizeFront,
+        &wheelSizeRear,
+        &wheelUpgradeCls
+    );
+
+    uint16_t nTxdSlot = CTxdStore::FindTxdSlot("vehicle");
+    if (nTxdSlot == -1)
+        nTxdSlot = CTxdStore::AddTxdSlot("vehicle");
+
+    auto pVehModelInfo = CModelInfo::AddVehicleModel(modelId);
+    pVehModelInfo->SetModelName(modelName);
+    pVehModelInfo->SetTexDictionary(texName);
+    CTxdStore::ms_pTxdPool->GetAt(pVehModelInfo->m_nTxdIndex)->m_wParentIndex = nTxdSlot;
+    pVehModelInfo->SetAnimFile(anims);
+
+    // Replace `_` with ` ` (space)
+    std::replace(gameName, gameName + strlen(gameName), '_', ' ');
+    pVehModelInfo->SetGameName(gameName);
+
+    pVehModelInfo->m_nFlags = flags;
+    pVehModelInfo->m_extraComps = vehComps;
+
+
+    // This isn't exactly R* did it, but that code is hot garbage anyways
+    // They've used strcmp all the way, and.. It's bad.
+
+    pVehModelInfo->SetVehicleType(type);
+    switch (pVehModelInfo->m_nVehicleType) {
+    case eVehicleType::VEHICLE_AUTOMOBILE:
+    case eVehicleType::VEHICLE_MTRUCK:
+    case eVehicleType::VEHICLE_QUAD:
+    case eVehicleType::VEHICLE_HELI:
+    case eVehicleType::VEHICLE_PLANE:
+    case eVehicleType::VEHICLE_TRAILER: {
+        pVehModelInfo->SetWheelSizes(wheelSizeFront, wheelSizeRear);
+        pVehModelInfo->m_nWheelModelIndex = misc;
+        break;
+    }
+    case eVehicleType::VEHICLE_FPLANE: {
+        pVehModelInfo->SetWheelSizes(1.0f, 1.0f);
+        pVehModelInfo->m_nWheelModelIndex = misc;
+        break;
+    }
+    case eVehicleType::VEHICLE_BIKE:
+    case eVehicleType::VEHICLE_BMX: {
+        pVehModelInfo->SetWheelSizes(wheelSizeFront, wheelSizeRear);
+        pVehModelInfo->m_fBikeSteerAngle = (float)misc;
+        break;
+    }
+    }
+
+    pVehModelInfo->SetHandlingId(handlingName);
+    pVehModelInfo->m_nWheelUpgradeClass = wheelUpgradeCls;
+
+    pVehModelInfo->SetVehicleClass(vehCls);
+    if (pVehModelInfo->m_nVehicleClass != eVehicleClass::VEHICLE_CLASS_IGNORE) {
+        pVehModelInfo->m_nFrq = frq;
+    }
+
+    return modelId;
 }
 
 // 0x5B3FB0

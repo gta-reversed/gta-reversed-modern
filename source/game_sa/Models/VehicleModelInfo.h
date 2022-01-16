@@ -429,6 +429,23 @@ public:
             || m_nVehicleType == eVehicleType::VEHICLE_BIKE
             || m_nVehicleType == eVehicleType::VEHICLE_QUAD;
     }
+
+    // These were probably inlined:
+    void SetWheelSizes(float front, float rear) {
+        m_fWheelSizeFront = front;
+        m_fWheelSizeRear = rear;
+    }
+    void SetGameName(const char* name) {
+        strcpy_s(m_szGameName, name);
+    }
+    void SetHandlingId(const char* handlingName);
+    void SetVehicleClass(const char* clsName);
+    void SetVehicleType(const char* typeName);
+
+    // Probably NOTSA
+    // Get eVehicleType from string, like : `car`, `mtruck`, etc..
+    static eVehicleType GetVehicleTypeFromName(const char* type);
+    static eVehicleClass GetVehicleClassFromName(const char* clsName);
 };
 VALIDATE_SIZE(CVehicleModelInfo::CVehicleStructure, 0x314);
 VALIDATE_SIZE(CVehicleModelInfo, 0x308);

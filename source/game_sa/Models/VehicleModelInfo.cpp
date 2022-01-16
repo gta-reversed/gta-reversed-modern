@@ -1532,6 +1532,72 @@ void CVehicleModelInfo::LoadEnvironmentMaps()
     CTxdStore::PopCurrentTxd();
 }
 
+void CVehicleModelInfo::SetVehicleClass(const char* clsName) {
+    m_nVehicleClass = GetVehicleClassFromName(clsName);
+}
+
+void CVehicleModelInfo::SetVehicleType(const char* typeName) {
+    m_nVehicleType = GetVehicleTypeFromName(typeName);
+}
+
+eVehicleType CVehicleModelInfo::GetVehicleTypeFromName(const char* typeName) {
+    constexpr struct { std::string_view name; eVehicleType type; } mapping[] = {
+        {"car", eVehicleType::VEHICLE_AUTOMOBILE},
+        {"mtruck", eVehicleType::VEHICLE_MTRUCK},
+        {"quad", eVehicleType::VEHICLE_QUAD},
+        {"heli", eVehicleType::VEHICLE_HELI},
+        {"plane", eVehicleType::VEHICLE_PLANE},
+        {"boat", eVehicleType::VEHICLE_BOAT},
+        {"train", eVehicleType::VEHICLE_TRAIN},
+        {"f_heli", eVehicleType::VEHICLE_FHELI},
+        {"f_plane", eVehicleType::VEHICLE_FPLANE},
+        {"bmx", eVehicleType::VEHICLE_BMX},
+        {"trailer", eVehicleType::VEHICLE_TRAILER},
+    };
+
+    for (const auto& pair : mapping) {
+        if (pair.name == typeName) {
+            return pair.type;
+        }
+    }
+
+    // NOTSA - Something went really wrong
+    DebugBreak();
+    return (eVehicleType)-1;
+}
+
+eVehicleClass CVehicleModelInfo::GetVehicleClassFromName(const char* clsName) {
+    constexpr struct { std::string_view name; eVehicleClass cls; } mapping[] = {
+        {"normal", eVehicleClass::VEHICLE_CLASS_NORMAL},
+        {"poorfamily", eVehicleClass::VEHICLE_CLASS_POORFAMILY},
+        {"richfamily", eVehicleClass::VEHICLE_CLASS_RICHFAMILY},
+        {"executive", eVehicleClass::VEHICLE_CLASS_EXECUTIVE},
+        {"worker", eVehicleClass::VEHICLE_CLASS_WORKER},
+        {"big", eVehicleClass::VEHICLE_CLASS_BIG},
+        {"taxi", eVehicleClass::VEHICLE_CLASS_TAXI},
+        {"moped", eVehicleClass::VEHICLE_CLASS_MOPED},
+        {"motorbike", eVehicleClass::VEHICLE_CLASS_MOTORBIKE},
+        {"leisureboat", eVehicleClass::VEHICLE_CLASS_LEISUREBOAT},
+        {"workerboat", eVehicleClass::VEHICLE_CLASS_WORKERBOAT},
+        {"bicycle", eVehicleClass::VEHICLE_CLASS_BICYCLE},
+        {"ignore", eVehicleClass::VEHICLE_CLASS_IGNORE},
+    };
+
+    for (const auto& pair : mapping) {
+        if (pair.name == clsName) {
+            return pair.cls;
+        }
+    }
+
+    // NOTSA - Something has went really wrong
+    DebugBreak();
+    return (eVehicleClass)-1;
+}
+
+void CVehicleModelInfo::SetHandlingId(const char* handlingName) {
+    m_nHandlingId = gHandlingDataMgr.GetHandlingId(handlingName);
+}
+
 void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(int16 upgrade1, int16 upgrade2)
 {
     m_anUpgrade1[m_nLinksCount] = upgrade1;
