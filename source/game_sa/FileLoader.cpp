@@ -596,11 +596,10 @@ void CFileLoader::LoadEntryExit(const char* line) {
     uint32 numOfPeds = 2;
     uint32 timeOn = 0, timeOff = 24;
     float enterX, enterY, enterZ;
-    float exitX, exitY, exitZ;
     float rangeX, rangeY;
     float enteranceAngle;
     float unused;
-    float posX, posY, posZ;
+    float exitX, exitY, exitZ;
     float exitAngle;
     int32 area;
     char interiorName[64]{};
@@ -617,9 +616,9 @@ void CFileLoader::LoadEntryExit(const char* line) {
         &rangeX,
         &rangeY,
         &unused,
-        &posX,
-        &posY,
-        &posZ,
+        &exitX,
+        &exitY,
+        &exitZ,
         &exitAngle,
         &area,
         &flags,
@@ -644,9 +643,9 @@ void CFileLoader::LoadEntryExit(const char* line) {
         rangeX,
         rangeY,
         unused,
-        posX,
-        posY,
-        posZ,
+        exitX,
+        exitY,
+        exitZ,
         exitAngle,
         area,
         flags,
