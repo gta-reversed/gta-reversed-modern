@@ -61,7 +61,7 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadWeaponObject", 0x5B3FB0, &CFileLoader::LoadWeaponObject);
     Install("CFileLoader", "LoadZone", 0x5B4AB0, &CFileLoader::LoadZone);
     Install("CFileLoader", "LoadScene", 0x5B8700, &CFileLoader::LoadScene);
-    // Install("CFileLoader", "LoadObjectTypes", 0x5B8400, &CFileLoader::LoadObjectTypes);
+    Install("CFileLoader", "LoadObjectTypes", 0x5B8400, &CFileLoader::LoadObjectTypes);
     Install("CFileLoader", "FindRelatedModelInfoCB", 0x5B3930, &CFileLoader::FindRelatedModelInfoCB);
     Install("CFileLoader", "SetRelatedModelInfoCB", 0x537150, &CFileLoader::SetRelatedModelInfoCB);
 }
@@ -742,9 +742,21 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
         };
 
         // Extract path after identifier like: <ID> <PATH>
+        char pathBuffer[MAX_PATH]{};
         const auto ExtractPathFor = [&](auto id) {
-            assert(LineBeginsWith(name)); // NOTSA - Function should only be called if that's the case. 
-            return l + strlen(id) + 1;
+            // Okay, so..
+            // Originally they didn't copy the path into a separate buffer for each "id"
+            // But we are going to, for two reasons:
+            // - Copy is cheap
+            // - Lifetime issue
+            // The latter is the reason why they had to make a copy in the first place.
+            // If we were to just return `l + strlen(id) + 1` we'd depend on the line buffer's content not to change,
+            // but the line is just a static buffer (ms_line) which is modified each time `LoadLine` is called.
+            // So if any of the invoked functions call `LoadLine` the path will no longer be valid
+            // So in order to prevent this nasty bug we're just going to copy it each time.
+
+            strncpy_s(pathBuffer, l + strlen(id) + 1, std::size(pathBuffer) - 1);
+            return pathBuffer;
         };
 
         if (LineBeginsWith("#"))
@@ -1479,7 +1491,7 @@ void CFileLoader::LoadScene(const char* filename) {
 
 // 0x5B8400
 void CFileLoader::LoadObjectTypes(const char* filename) {
-    plugin::Call<0x5B8400, const char*>(filename);
+    
 }
 
 // 0x5B3AC0
