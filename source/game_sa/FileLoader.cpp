@@ -472,9 +472,9 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
 
 // 0x537EE0
 // Load collision V2 file from buffer. Just note that `data` is pointing to after `FileHeader`
-// `fileSize` - <`size` parameter in the header> - 24
+// `dataSize` - <`size` parameter in the header> - 24 (That is, basically `<total size of file> - sizeof(FileHeader)`)
 // `buffer`   - Pointer to data after `FileHeader` (So that's an offset of 32)
-void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 fileSize, CColModel& cm, const char* modelName) {
+void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColModel& cm, const char* modelName) {
     using namespace ColHelpers;
     using namespace ColHelpers::V2;
 
@@ -483,7 +483,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 fileSize, CColMod
     cm.m_boundSphere = CColSphere{ h.bounds.sphere };
     cm.m_boundSphere.m_bNotEmpty = h.flags & 2; // Not empty flag. Still unsure why is this stored in the bound sphere though...
 
-    auto dataSize = fileSize - sizeof(Header);
+    auto dataSize = dataSize - sizeof(Header);
     if (!dataSize)
         return; // No data present, other than the header
 
@@ -538,7 +538,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 fileSize, CColMod
 
 // 0x537CE0
 // Same arguments as above function, but for V3
-void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 fileSize, CColModel& cm, const char* modelName) {
+void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColModel& cm, const char* modelName) {
     using namespace ColHelpers;
     using namespace ColHelpers::V3;
 
@@ -547,7 +547,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 fileSize, CColMod
     cm.m_boundSphere = CColSphere{ h.bounds.sphere };
     cm.m_boundSphere.m_bNotEmpty = h.flags & 2; // Not empty flag. Still unsure why is this stored in the bound sphere though...
 
-    auto dataSize = fileSize - sizeof(V3::Header);
+    auto dataSize = dataSize - sizeof(V3::Header);
     if (!dataSize)
         return; // No data present, other than the header
 
@@ -572,7 +572,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 fileSize, CColMod
 
     // Set given field in `CCollisionData` based on offset in file.
     // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
-    const auto SetColDataPtr = [&]<typename T>(T& colDataPtr, auto fileOffset) {
+    const auto SetColDataPtr = [&]<typename T>(T & colDataPtr, auto fileOffset) {
         // Return pointer for offset in allocated memory (relative to where it was in the file)
         const auto GetDataPtr = [&]() {
             return reinterpret_cast<T>(
@@ -605,7 +605,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 fileSize, CColMod
 
 // 0x537AE0
 // Same shit different packaing of V3, but using V4 header
-void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 fileSize, CColModel& cm, const char* modelName) {
+void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColModel& cm, const char* modelName) {
     using namespace ColHelpers;
     using namespace ColHelpers::V4;
 
@@ -614,7 +614,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 fileSize, CColMod
     cm.m_boundSphere = CColSphere{ h.bounds.sphere };
     cm.m_boundSphere.m_bNotEmpty = h.flags & 2; // Not empty flag. Still unsure why is this stored in the bound sphere though...
 
-    auto dataSize = fileSize - sizeof(V4::Header);
+    auto dataSize = dataSize - sizeof(V4::Header);
     if (!dataSize)
         return; // No data present, other than the header
 
