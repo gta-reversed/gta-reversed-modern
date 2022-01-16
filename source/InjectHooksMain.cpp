@@ -39,6 +39,7 @@
 #include "Escalators.h"
 #include "MovingThings.h"
 #include "MovingThings.h"
+#include "PlaneTrail.h"
 #include "PlaneTrails.h"
 #include "Gamma.h"
 #include "CustomBuildingPipeline.h"
@@ -55,6 +56,7 @@
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
 #include "CreepingFire.h"
+#include "C_PcSave.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -161,23 +163,16 @@
 #include "TaskComplexBeCop.h"
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
-#include <C_PcSave.h>
 
-void WaitForDebugger() {
-    while (!::IsDebuggerPresent()) {
-        printf("Debugger not present\n");
-        ::Sleep(100);
-    }
-}
 
-void InjectHooksMain()
-{
-     WaitForDebugger();
+void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
 
     CGenericGameStorage::InjectHooks();
     C_PcSave::InjectHooks();
+    CPlaneTrail::InjectHooks();
+    CCopPed::InjectHooks();
     CDamageManager::InjectHooks();
     CCreepingFire::InjectHooks();
     CPtrList::InjectHooks();
@@ -383,6 +378,7 @@ void InjectHooksMain()
     CText::InjectHooks();
     ModelIndices::InjectHooks();
     CWaterCannons::InjectHooks();
+    CWaterCannon::InjectHooks();
     CSprite::InjectHooks();
     CPlaneTrails::InjectHooks();
     CCustomBuildingPipeline::InjectHooks();

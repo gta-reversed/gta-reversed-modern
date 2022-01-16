@@ -2450,7 +2450,7 @@ bool CEntity::IsEntityOccluded()
     return false;
 }
 
-bool CEntity::IsCurrentAreaOrBarberShopInterior()
+bool CEntity::IsInCurrentAreaOrBarberShopInterior()
 {
     return m_nAreaCode == CGame::currArea || m_nAreaCode == AREA_CODE_13;
 }
@@ -2464,6 +2464,12 @@ void CEntity::UpdateRW() {
         m_matrix->UpdateRwMatrix(pRwMatrix);
     else
         m_placement.UpdateRwMatrix(pRwMatrix);
+}
+
+CEntity* CEntity::FindLastLOD() noexcept {
+    CEntity* it = this;
+    for (; it->m_pLod; it = it->m_pLod);
+    return it;
 }
 
 RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* pAtomic, void* pData)
