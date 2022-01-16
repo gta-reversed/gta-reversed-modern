@@ -8,6 +8,7 @@
 #include "StdInc.h"
 
 #include "Clothes.h"
+#include "ClothesBuilder.h"
 
 int32& CClothes::ms_clothesImageId = *(int32*)0xBC12F8;
 int32& CClothes::ms_numRuleTags = *(int32*)0xBC12FC;

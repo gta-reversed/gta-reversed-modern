@@ -169,6 +169,8 @@ void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
 
+    CClothesBuilder::InjectHooks();
+    CClothes::InjectHooks();
     CBulletInfo::InjectHooks();
     CRestart::InjectHooks();
     CPlaneTrail::InjectHooks();
