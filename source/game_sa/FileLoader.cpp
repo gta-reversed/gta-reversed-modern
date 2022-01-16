@@ -24,8 +24,8 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadAnimatedClumpObject", 0x5B40C0, &CFileLoader::LoadAnimatedClumpObject);
     Install("CFileLoader", "LoadAtomicFile_stream", 0x5371F0, static_cast<bool(*)(RwStream*, unsigned)>(&CFileLoader::LoadAtomicFile));
     Install("CFileLoader", "LoadAtomicFile", 0x5B39D0, static_cast<void(*)(const char*)>(&CFileLoader::LoadAtomicFile));
-    // Install("CFileLoader", "LoadLine_0", 0x536F80, static_cast<char*(*)(FILESTREAM)>(&CFileLoader::LoadLine));
-    // Install("CFileLoader", "LoadLine_1", 0x536FE0, static_cast<char*(*)(char**, int32&)>(&CFileLoader::LoadLine));
+    Install("CFileLoader", "LoadLine_File", 0x536F80, static_cast<char*(*)(FILESTREAM)>(&CFileLoader::LoadLine));
+    Install("CFileLoader", "LoadLine_Bufer", 0x536FE0, static_cast<char*(*)(char*&, int32&)>(&CFileLoader::LoadLine));
     Install("CFileLoader", "LoadAudioZone", 0x5B4D70, &CFileLoader::LoadAudioZone);
     Install("CFileLoader", "LoadCarGenerator_0", 0x537990, static_cast<void(*)(CFileCarGenerator*, int32)>(&CFileLoader::LoadCarGenerator));
     Install("CFileLoader", "LoadCarGenerator_1", 0x5B4740, static_cast<void(*)(const char*, int32)>(&CFileLoader::LoadCarGenerator));
@@ -180,14 +180,48 @@ RpClump* CFileLoader::LoadAtomicFile2Return(const char* filename) {
     return clump;
 }
 
+// Find first non-null, non-whitespace character
+char* FindFirstNonNullOrWS(char* it) {
+    // Have to cast to uint8, because signed ASCII is retarded
+    for (; *it && (uint8)*it <= (uint8)' '; it++);
+    return it;
+}
+
 // 0x536F80
+// Load line into static buffer (`ms_line`)
 char* CFileLoader::LoadLine(FILESTREAM file) {
-    return plugin::CallAndReturn<char*, 0x536F80, FILESTREAM>(file);
+    if (!CFileMgr::ReadLine(file, ms_line, sizeof(ms_line)))
+        return nullptr;
+
+    // Sanitize it (otherwise random crashes appear)
+    for (char* it = ms_line; *it; it++) {
+        // Have to cast to uint8, because signed ASCII is retarded
+        if ((uint8)*it < (uint8)' ' || *it == ',')
+            *it = ' ';
+    }
+ 
+    return FindFirstNonNullOrWS(ms_line);
 }
 
 // 0x536FE0
-char* CFileLoader::LoadLine(char** outLine, int32& outSize) {
-    return plugin::CallAndReturn<char*, 0x536FE0, char**, int32&>(outLine, outSize);;
+// Load line from a text buffer
+// bufferIt - Iterator into buffer. It is modified by this function to point after the last character of this line
+// buffSize - Size of buffer. It is modified to repesent the size of the buffer remaining after the end of this line
+char* CFileLoader::LoadLine(char*& bufferIt, int32& buffSize) {
+    if (buffSize <= 0 || !*bufferIt)
+        return nullptr;
+
+    // Copy with sanitization (Otherwise random crashes appear)
+    char* copyIt = s_MemoryHeapBuffer;
+    for (; *bufferIt && *bufferIt != '\n' && buffSize != 0; bufferIt++, buffSize--) {
+        // Have to cast to uint8, because signed ASCII is retarded
+        *copyIt++ = ((uint8)*bufferIt < (uint8)' ' || *bufferIt == ',') ? ' ' : *bufferIt; // Replace chars before space and ',' (comma) by space, otherwise copy
+    }
+
+    bufferIt++;    // Make it point after end of line
+    *copyIt = 0;   // Null terminate the copy
+
+    return FindFirstNonNullOrWS(s_MemoryHeapBuffer);
 }
 
 // IPL -> AUZO

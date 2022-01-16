@@ -77,7 +77,7 @@ public:
     static RpClump* LoadAtomicFile2Return(const char* filename);
 
     static char* LoadLine(FILESTREAM file);
-    static char* LoadLine(char** outLine, int32& outSize);
+    static char* LoadLine(char*& outLine, int32& outSize);
 
     static void LoadAudioZone(const char* line);
     static void LoadBoundingBox(uint8* data, CBoundingBox& outBoundBox);
