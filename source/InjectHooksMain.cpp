@@ -56,6 +56,7 @@
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
 #include "CreepingFire.h"
+#include "Restart.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -167,6 +168,7 @@ void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
 
+    CRestart::InjectHooks();
     CPlaneTrail::InjectHooks();
     CCopPed::InjectHooks();
     CDamageManager::InjectHooks();
