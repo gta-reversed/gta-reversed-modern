@@ -11,11 +11,12 @@ Do not delete this comment block. Respect others' work!
 #include "Occlusion.h"
 #include "PedType.h"
 #include "ColHelpers.h"
+#include "PlantMgr.h"
 
-char (&CFileLoader::ms_line)[512] = *reinterpret_cast<char (*)[512]>(0xB71848);
+char(&CFileLoader::ms_line)[512] = *reinterpret_cast<char(*)[512]>(0xB71848);
 uint32& gAtomicModelId = *reinterpret_cast<uint32*>(0xB71840);
 
-char (&colFileReadBuffer)[32768] = *(char (*)[32768])0xBC40D8;
+char(&colFileReadBuffer)[32768] = *(char(*)[32768])0xBC40D8;
 
 
 void CFileLoader::InjectHooks() {
@@ -25,8 +26,8 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadAnimatedClumpObject", 0x5B40C0, &CFileLoader::LoadAnimatedClumpObject);
     Install("CFileLoader", "LoadAtomicFile_stream", 0x5371F0, static_cast<bool(*)(RwStream*, unsigned)>(&CFileLoader::LoadAtomicFile));
     Install("CFileLoader", "LoadAtomicFile", 0x5B39D0, static_cast<void(*)(const char*)>(&CFileLoader::LoadAtomicFile));
-    Install("CFileLoader", "LoadLine_File", 0x536F80, static_cast<char*(*)(FILESTREAM)>(&CFileLoader::LoadLine));
-    Install("CFileLoader", "LoadLine_Bufer", 0x536FE0, static_cast<char*(*)(char*&, int32&)>(&CFileLoader::LoadLine));
+    Install("CFileLoader", "LoadLine_File", 0x536F80, static_cast<char* (*)(FILESTREAM)>(&CFileLoader::LoadLine));
+    Install("CFileLoader", "LoadLine_Bufer", 0x536FE0, static_cast<char* (*)(char*&, int32&)>(&CFileLoader::LoadLine));
     Install("CFileLoader", "LoadAudioZone", 0x5B4D70, &CFileLoader::LoadAudioZone);
     Install("CFileLoader", "LoadCarGenerator_0", 0x537990, static_cast<void(*)(CFileCarGenerator*, int32)>(&CFileLoader::LoadCarGenerator));
     Install("CFileLoader", "LoadCarGenerator_1", 0x5B4740, static_cast<void(*)(const char*, int32)>(&CFileLoader::LoadCarGenerator));
@@ -47,8 +48,8 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadGarage", 0x5B4530, &CFileLoader::LoadGarage);
     Install("CFileLoader", "LoadLevel", 0x5B9030, &CFileLoader::LoadLevel);
     Install("CFileLoader", "LoadObject", 0x5B3C60, &CFileLoader::LoadObject);
-    Install("CFileLoader", "LoadObjectInstance_inst", 0x538090, static_cast<CEntity* (*)(CFileObjectInstance*, const char*)>(&CFileLoader::LoadObjectInstance));
-    Install("CFileLoader", "LoadObjectInstance_file", 0x538690, static_cast<CEntity* (*)(const char*)>(&CFileLoader::LoadObjectInstance));
+    Install("CFileLoader", "LoadObjectInstance_inst", 0x538090, static_cast<CEntity * (*)(CFileObjectInstance*, const char*)>(&CFileLoader::LoadObjectInstance));
+    Install("CFileLoader", "LoadObjectInstance_file", 0x538690, static_cast<CEntity * (*)(const char*)>(&CFileLoader::LoadObjectInstance));
     Install("CFileLoader", "LoadOcclusionVolume", 0x5B4C80, &CFileLoader::LoadOcclusionVolume);
     Install("CFileLoader", "LoadPathHeader", 0x5B41C0, &CFileLoader::LoadPathHeader);
     Install("CFileLoader", "LoadPedObject", 0x5B7420, &CFileLoader::LoadPedObject);
@@ -104,7 +105,7 @@ RwTexDictionary* CFileLoader::LoadTexDictionary(const char* filename) {
 
 // 0x5B40C0
 int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
-    int32  objID{-1};
+    int32  objID{ -1 };
     char modelName[24]{};
     char txdName[24]{};
     char animName[16]{ "null" };
@@ -200,7 +201,7 @@ char* CFileLoader::LoadLine(FILESTREAM file) {
         if ((uint8)*it < (uint8)' ' || *it == ',')
             *it = ' ';
     }
- 
+
     return FindFirstNonNullOrWS(ms_line);
 }
 
@@ -381,9 +382,86 @@ int32 CFileLoader::LoadClumpObject(const char* line) {
     return objId;
 }
 
+
+enum class ColModelVersion {
+    COLL,
+    COL2,
+    COL3,
+    COL4,
+
+    NONE = -1 // Placeholder for invalid values
+};
+
+ColModelVersion GetColModelVersionFromFourCC(const char(&fourcc)[4]) {
+    switch (make_fourcc4(fourcc)) {
+    case make_fourcc4("COLL"):
+        return ColModelVersion::COLL;
+    case make_fourcc4("COL2"):
+        return ColModelVersion::COL2;
+    case make_fourcc4("COL3"):
+        return ColModelVersion::COL3;
+    case make_fourcc4("COL4"):
+        return ColModelVersion::COL4;
+    default:
+        return ColModelVersion::NONE;
+    }
+}
+
 // 0x538440
-bool CFileLoader::LoadCollisionFile(uint8* data, uint32 dataSize, uint8 colId) {
-    return plugin::CallAndReturn<bool, 0x538440, uint8*, uint32, uint8>(data, dataSize, colId);
+// Load one, or multiple, collision models from a single file
+bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
+    using namespace ColHelpers;
+
+    // We've modified the loop condition a little. R* went backwards, and checked if the remaning buffer size is > 8.
+    for (uint32 fileTotalSize{}, buffPos{}; buffPos < buffSize; buffPos += fileTotalSize) {
+        auto& h = *reinterpret_cast<FileHeader*>(buff);
+        fileTotalSize = h.GetTotalSize();
+
+        const auto colModelVer = GetColModelVersionFromFourCC(h.fourcc);
+        if (colModelVer == ColModelVersion::NONE)
+            return true;
+
+        char modelName[22]{};
+        strcpy_s(modelName, h.modelName);
+
+        // TODO: Refactor this to use `CStreaming::IsModelDFF`
+        auto MI = h.modelId < eResourceFirstID::RESOURCE_ID_DFF + TOTAL_DFF_MODEL_IDS ? CModelInfo::GetModelInfo(h.modelId) : nullptr;
+        if (!MI || MI->m_nKey != CKeyGen::GetUppercaseKey(modelName)) {
+            auto colDef = CColStore::ms_pColPool->GetAt(colId); 
+            MI = CModelInfo::GetModelInfo(modelName, colDef->m_nModelIdStart, colDef->m_nModelIdEnd);
+        }
+        if (!MI || MI->m_nFlagsLowerByte > 0) // TODO: Unsure what the fuck this check is, but it doesn't seem too failproof to me..
+            continue;
+
+        if (!MI->GetColModel()) {
+            MI->SetColModel(new CColModel, true);
+        }
+
+        auto& CM = *MI->GetColModel();
+        const auto data = &buff[buffPos + sizeof(FileHeader)];
+        const auto dataSize = fileTotalSize - sizeof(FileHeader); // Remember: `TotalSize` isn't the same as `FileHeader::size` (which contains the total file size - 8)
+        switch (colModelVer) {
+        case ColModelVersion::COLL:
+            LoadCollisionModel(data, CM);
+            break;
+        case ColModelVersion::COL2:
+            LoadCollisionModelVer2(data, dataSize, CM, modelName);
+            break;
+        case ColModelVersion::COL3:
+            LoadCollisionModelVer3(data, dataSize, CM, modelName);
+            break;
+        case ColModelVersion::COL4:
+            LoadCollisionModelVer4(data, dataSize, CM, modelName);
+            break;
+        default:
+            return true;
+        }
+        
+        CM.m_boundSphere.m_nMaterial = colId; // TODO: At this point I'm convinced something is fucked (m_boundSphere should probably be a CSphere instead)
+        if (MI->GetModelType() == eModelInfoType::MODEL_INFO_TYPE_ATOMIC) {
+            CPlantMgr::SetPlantFriendlyFlagInAtomicMI(static_cast<CAtomicModelInfo*>(MI));
+        }
+    }       
 }
 
 // 0x5B4E60

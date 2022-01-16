@@ -18,6 +18,10 @@ struct FileHeader {
     uint32 size{};
     char modelName[22]{};
     uint16 modelId{};
+
+    auto GetTotalSize() {
+        return size + sizeof(fourcc) + sizeof(size); // `size` doesn't include these two by default
+    }
 };
 VALIDATE_SIZE(FileHeader, 0x20);
 
@@ -122,7 +126,7 @@ namespace V3 {
         uint32 offShdwVerts{}, offShdwFaces{};
 
         // Basically just find the highest shadow vertex index
-        uint32 GetNoOfShdwVertices(CCollisionData* cd) {
+        uint32 GetNoOfShdwVerts(CCollisionData* cd) {
             if (!nShdwFaces)
                 return 0;
 
