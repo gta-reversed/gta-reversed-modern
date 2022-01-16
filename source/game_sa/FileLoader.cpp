@@ -21,7 +21,7 @@ void CFileLoader::InjectHooks() {
     using namespace ReversibleHooks;
     Install("CFileLoader", "AddTexDictionaries", 0x5B3910, &CFileLoader::AddTexDictionaries);
     Install("CFileLoader", "LoadTexDictionary", 0x5B3860, &CFileLoader::LoadTexDictionary);
-    // Install("CFileLoader", "LoadAnimatedClumpObject", 0x0, &CFileLoader::LoadAnimatedClumpObject);
+    Install("CFileLoader", "LoadAnimatedClumpObject", 0x5B40C0, &CFileLoader::LoadAnimatedClumpObject);
     Install("CFileLoader", "LoadAtomicFile_stream", 0x5371F0, static_cast<bool(*)(RwStream*, unsigned)>(&CFileLoader::LoadAtomicFile));
     Install("CFileLoader", "LoadAtomicFile", 0x5B39D0, static_cast<void(*)(const char*)>(&CFileLoader::LoadAtomicFile));
     // Install("CFileLoader", "LoadLine_0", 0x536F80, static_cast<char*(*)(FILESTREAM)>(&CFileLoader::LoadLine));
@@ -103,7 +103,25 @@ RwTexDictionary* CFileLoader::LoadTexDictionary(const char* filename) {
 
 // 0x5B40C0
 int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
-    return plugin::CallAndReturn<int32, 0x5B40C0, const char*>(line);
+    int32  objID{-1};
+    char modelName[24]{};
+    char txdName[24]{};
+    char animName[16]{ "null" };
+    float drawDist{ 2000.f };
+    uint32 flags{};
+
+    if (sscanf(line, "%d %s %s %s %f %d", &objID, modelName, txdName, animName, &drawDist, &flags) != 6)
+        return -1;
+
+    auto mi = CModelInfo::AddClumpModel(objID);
+
+    mi->m_nKey = CKeyGen::GetUppercaseKey(modelName);
+    mi->SetTexDictionary(txdName);
+    mi->SetAnimFile(animName);
+    mi->SetClumpModelInfoFlags(flags);
+
+    if (std::string_view{ animName } == "null")
+        mi->bHasBeenPreRendered = true;
 }
 
 // 0x5371F0
