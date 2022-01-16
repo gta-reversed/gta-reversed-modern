@@ -64,7 +64,7 @@ extern uint32 MAX_IPL_INSTANCES;           // default 1000
 
 extern CEntity** ppCurrIplInstance;
 extern uint32& NumIplEntityIndexArrays;
-extern int32** IplEntityIndexArrays; // int32 *IplEntityIndexArrays[40]
+static inline CEntity** (&IplEntityIndexArrays)[40] = *(CEntity * *(*)[40])0x8E3F08;
 extern bool& gbIplsNeededAtPosn;
 extern CVector& gvecIplsNeededAtPosn;
 extern uint32& gCurrIplInstancesCount;

@@ -33,6 +33,21 @@ public:
 public:
     static void InjectHooks();
 
+    CColSphere() = default;
+
+    explicit CColSphere(const CSphere& sp) :
+        CSphere(sp)
+    {
+    }
+
+    CColSphere(CSphere sp, uint8 material, uint8 flags, uint8 lighting) :
+        CSphere(sp),
+        m_nMaterial(material),
+        m_nFlags(flags),
+        m_nLighting(lighting)
+    {
+    }
+
     void Set(float radius, CVector const& center);
     void Set(float radius, CVector const& center, uint8 material, uint8 flags, uint8 lighting);
     bool IntersectRay(CVector const& rayOrigin, CVector const& direction, CVector& intersectPoint1, CVector& intersectPoint2);

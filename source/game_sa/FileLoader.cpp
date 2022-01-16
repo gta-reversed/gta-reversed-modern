@@ -10,6 +10,7 @@ Do not delete this comment block. Respect others' work!
 #include "TheCarGenerators.h"
 #include "Occlusion.h"
 #include "PedType.h"
+#include "ColHelpers.h"
 
 char (&CFileLoader::ms_line)[512] = *reinterpret_cast<char (*)[512]>(0xB71848);
 uint32& gAtomicModelId = *reinterpret_cast<uint32*>(0xB71840);
@@ -37,7 +38,7 @@ void CFileLoader::InjectHooks() {
     // Install("CFileLoader", "LoadCollisionFile_0", 0x538440, static_cast<bool(*)(uint8*, uint32, uint8)>(&CFileLoader::LoadCollisionFile));
     // Install("CFileLoader", "LoadCollisionFile_1", 0x5B4E60, static_cast<bool(*)(const char*, uint8)>(&CFileLoader::LoadCollisionFile));
     // Install("CFileLoader", "LoadCollisionFileFirstTime", 0x5B5000, &CFileLoader::LoadCollisionFileFirstTime);
-    // Install("CFileLoader", "LoadCollisionModel", 0x537580, &CFileLoader::LoadCollisionModel);
+    Install("CFileLoader", "LoadCollisionModel", 0x537580, &CFileLoader::LoadCollisionModel);
     // Install("CFileLoader", "LoadCollisionModelVer2", 0x537EE0, &CFileLoader::LoadCollisionModelVer2);
     // Install("CFileLoader", "LoadCollisionModelVer3", 0x537CE0, &CFileLoader::LoadCollisionModelVer3);
     // Install("CFileLoader", "LoadCollisionModelVer4", 0x537AE0, &CFileLoader::LoadCollisionModelVer4);
@@ -396,8 +397,77 @@ bool CFileLoader::LoadCollisionFileFirstTime(uint8* data, uint32 dataSize, uint8
 }
 
 // 0x537580
-void CFileLoader::LoadCollisionModel(uint8* data, CColModel& outColModel) {
-    plugin::Call<0x537580, uint8*, CColModel&>(data, outColModel);
+// Load collision V1 file from buffer. Just note that `data` is pointing to after `FileHeader`
+void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
+    using namespace ColHelpers;
+    using namespace ColHelpers::V1;
+
+    auto bufferIt = buffer;
+
+    auto& h = *reinterpret_cast<Header*&>(bufferIt)++;
+    cm.m_boundBox = h.bounds.box;
+    cm.m_boundSphere = CColSphere{ h.bounds.sphere };
+    bufferIt += sizeof(Header);
+
+    auto cd = new CCollisionData{};
+    cm.m_pColData = cd;
+
+    // Spheres
+    if (cd->m_nNumSpheres = *reinterpret_cast<uint32*&>(bufferIt)++) {
+        cd->m_pSpheres = (CColSphere*)CMemoryMgr::Malloc(cd->m_nNumSpheres * sizeof(CColSphere));
+        for (auto i = 0u; i < cd->m_nNumSpheres; i++) {
+            cd->m_pSpheres[i] = *reinterpret_cast<TSphere*&>(bufferIt)++;
+        }
+    } else {
+        cd->m_pSpheres = nullptr;
+    }
+
+    // Lines (Unused, so just skip)
+    if (cd->m_nNumLines = *reinterpret_cast<uint32*&>(bufferIt)++)
+        bufferIt += cd->m_nNumLines * 24;
+    cd->m_pLines = nullptr;
+
+    // Boxes
+    if (cd->m_nNumBoxes = *reinterpret_cast<uint32*&>(bufferIt)++) {
+        cd->m_pBoxes = (CColBox*)CMemoryMgr::Malloc(cd->m_nNumBoxes * sizeof(CColBox));
+        for (auto i = 0u; i < cd->m_nNumBoxes; i++) {
+            cd->m_pBoxes[i] = *reinterpret_cast<TBox*&>(bufferIt)++;
+        }
+    } else {
+        cd->m_pBoxes = nullptr;
+    }
+
+    // Vertices
+    if (auto nVertices = *reinterpret_cast<uint32*&>(bufferIt)++) {
+        cd->m_pVertices = (CompressedVector*)CMemoryMgr::Malloc(nVertices * sizeof(CompressedVector));
+
+        // Here they (or the compiler) originally did an unroll (with 4 vertices / iteration)
+        // We are going to let the compiler do that.
+        for (auto i = 0u; i < nVertices; i++) {
+            cd->m_pVertices[i] = CompressVector(*reinterpret_cast<TVertex*&>(bufferIt)++);
+        }
+    } else {
+        cd->m_pVertices = nullptr;
+    }
+
+    // Triangles
+    if (cd->m_nNumTriangles = *reinterpret_cast<uint32*&>(bufferIt)++) {
+        cd->m_pTriangles = (CColTriangle*)CMemoryMgr::Malloc(cd->m_nNumTriangles * sizeof(CColTriangle));
+        for (auto i = 0; i < cd->m_nNumTriangles; i++) {
+            cd->m_pTriangles[i] = *reinterpret_cast<TFace*&>(bufferIt)++;
+        }
+    } else {
+        cd->m_pTriangles = nullptr;
+    }
+
+    cd->bHasShadowInfo = false;
+    cd->m_nNumShadowTriangles = 0;
+    cd->m_nNumShadowVertices = 0;
+    cd->m_pShadowTriangles = nullptr;
+    cd->m_pShadowVertices = nullptr;
+
+    if (cd->m_nNumSpheres || cd->m_nNumBoxes || cd->m_nNumTriangles)
+        cm.m_boundSphere.m_bFlag0x01 = true; // Doesn't make a whole lot of sense, but kay
 }
 
 // 0x537EE0

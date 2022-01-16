@@ -15,7 +15,6 @@ uint32 MAX_IPL_INSTANCES = 1000;
 
 CEntity** ppCurrIplInstance = (CEntity**)0x8E3EFC;
 uint32& NumIplEntityIndexArrays = *(uint32*)0x8E3F00;
-CEntity** (&IplEntityIndexArrays)[40] = *(CEntity**(*)[40])0x8E3F08;
 bool& gbIplsNeededAtPosn = *(bool*)0x8E3FA8;
 CVector& gvecIplsNeededAtPosn = *(CVector*)0x8E3FD0;
 uint32& gCurrIplInstancesCount = *(uint32*)0xBCC0D8;

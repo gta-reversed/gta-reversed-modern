@@ -13,6 +13,11 @@ public:
     CBoundingBox();
     CBoundingBox(CVector vecMin, CVector vecMax);
 
+    CBoundingBox(const CBox& box) :
+        CBox(box)
+    {
+    }
+
     bool IsPointWithin(const CVector& point);
 };
 
