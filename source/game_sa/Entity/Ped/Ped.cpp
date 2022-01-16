@@ -1274,3 +1274,9 @@ bool CPed::IsInVehicleThatHasADriver()
     }
     return false;
 }
+
+// 0x5E8CD0
+void CPed::ProcessControl()
+{
+    plugin::CallMethod<0x5E8CD0, CPed*>(this);
+}
