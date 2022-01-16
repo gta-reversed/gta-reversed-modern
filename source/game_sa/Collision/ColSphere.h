@@ -17,7 +17,7 @@ public:
     union {
         uint8 m_nFlags;
         struct {
-            uint8 m_bFlag0x01 : 1;
+            uint8 m_bNotEmpty : 1;
             uint8 m_bIsSingleColDataAlloc : 1;
             uint8 m_bIsActive : 1;
             uint8 m_bFlag0x08 : 1;

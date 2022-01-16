@@ -19,6 +19,7 @@ struct FileHeader {
     char modelName[22]{};
     uint16 modelId{};
 };
+VALIDATE_SIZE(FileHeader, 0x20);
 
 struct TSurface {
     uint8 material, flag, brightness, light;
@@ -99,10 +100,18 @@ namespace V2 {
     struct Header {
         TBounds bounds{};
 
-        uint16 nSpheres{}, nBoxes{}, nFace{}, nCones{};
+        uint16 nSpheres{}, nBoxes{}, nFaces{}, nLines{};
+
+        // Quote from https://gtamods.com/wiki/Collision_File :
+        // 1 - collision uses cones instead of lines(flag forced to false by engine upon loading)
+        // 2 - not empty(collision model has spheres or boxes or a mesh)
+        // 8 - has face groups(if not empty)
+        // 16 - has shadow mesh(col 3)
         uint32 flags{};
-        uint32 offSpheres{}, offBoxes{}, offCones{}, offVerts{}, offFaces{}, offPlanes{};
+
+        uint32 offSpheres{}, offBoxes{}, offLines{}, offVerts{}, offFaces{}, offPlanes{};
     };
+    VALIDATE_SIZE(Header, 0x4C);
 };
 namespace V3 {
     using namespace V2; // Inhert all other stuff

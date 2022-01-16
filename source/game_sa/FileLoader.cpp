@@ -39,7 +39,7 @@ void CFileLoader::InjectHooks() {
     // Install("CFileLoader", "LoadCollisionFile_1", 0x5B4E60, static_cast<bool(*)(const char*, uint8)>(&CFileLoader::LoadCollisionFile));
     // Install("CFileLoader", "LoadCollisionFileFirstTime", 0x5B5000, &CFileLoader::LoadCollisionFileFirstTime);
     Install("CFileLoader", "LoadCollisionModel", 0x537580, &CFileLoader::LoadCollisionModel);
-    // Install("CFileLoader", "LoadCollisionModelVer2", 0x537EE0, &CFileLoader::LoadCollisionModelVer2);
+    Install("CFileLoader", "LoadCollisionModelVer2", 0x537EE0, &CFileLoader::LoadCollisionModelVer2);
     // Install("CFileLoader", "LoadCollisionModelVer3", 0x537CE0, &CFileLoader::LoadCollisionModelVer3);
     // Install("CFileLoader", "LoadCollisionModelVer4", 0x537AE0, &CFileLoader::LoadCollisionModelVer4);
     Install("CFileLoader", "LoadCullZone", 0x5B4B40, &CFileLoader::LoadCullZone);
@@ -467,12 +467,73 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     cd->m_pShadowVertices = nullptr;
 
     if (cd->m_nNumSpheres || cd->m_nNumBoxes || cd->m_nNumTriangles)
-        cm.m_boundSphere.m_bFlag0x01 = true; // Doesn't make a whole lot of sense, but kay
+        cm.m_boundSphere.m_bNotEmpty = true; // Doesn't make a whole lot of sense, but kay
 }
 
 // 0x537EE0
-void CFileLoader::LoadCollisionModelVer2(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName) {
-    plugin::Call<0x537EE0, uint8*, uint32, CColModel&, const char*>(data, dataSize, outColModel, modelName);
+// Load collision V2 file from buffer. Just note that `data` is pointing to after `FileHeader`
+// `fileSize` - <`size` parameter in the header> - 24
+// `buffer`   - Pointer to data after `FileHeader` (So that's an offset of 32)
+void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 fileSize, CColModel& cm, const char* modelName) {
+    using namespace ColHelpers;
+    using namespace ColHelpers::V2;
+
+    auto& h = *reinterpret_cast<Header*>(buffer);
+    cm.m_boundBox = h.bounds.box;
+    cm.m_boundSphere = CColSphere{ h.bounds.sphere };
+    cm.m_boundSphere.m_bNotEmpty = h.flags & 2; // Not empty flag. Still unsure why is this stored in the bound sphere though...
+
+    auto dataSize = fileSize - sizeof(Header);
+    if (!dataSize)
+        return; // No data present, other than the header
+
+    // Here's the meat. We allocate some memory to hold both the file's contents and the CCollisionData struct.
+    // So, memory layout is as follows:
+    //                [              DATA FROM FILE COPIED                  ]
+    // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
+
+    auto p = (uint8*)CMemoryMgr::Malloc(dataSize + sizeof(CCollisionData));
+    cm.m_pColData = new(p) CCollisionData; // R* used a cast here, but that's not really a good idea.
+    memcpy(p + sizeof(CCollisionData), buffer + sizeof(Header), dataSize); // Copy actual data into allocated memory after CCollisionData
+
+    auto cd = cm.m_pColData;
+    cd->m_nNumSpheres = h.nSpheres;
+    cd->m_nNumBoxes = h.nBoxes;
+    cd->m_nNumLines = h.nLines;
+    cd->m_nNumTriangles = h.nFaces;
+
+    cd->bUsesDisks = false;
+    cd->bHasShadowInfo = false;
+    cd->bNotEmpty = h.flags & 2;
+
+    // Set given field in `CCollisionData` based on offset in file.
+    // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
+    const auto SetColDataPtr = [&]<typename T>(T& colDataPtr, auto fileOffset) {
+        // Return pointer for offset in allocated memory (relative to where it was in the file)
+        const auto GetDataPtr = [&]() {
+            return reinterpret_cast<T>(
+                  p
+                + sizeof(CCollisionData)      // Must offset by this (See memory layout above)
+                + fileOffset
+                + sizeof(FileHeader::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
+                - sizeof(FileHeader)          // Offset includes these headers, but we haven't copied them into our memory
+                - sizeof(Header)     
+            );
+        };
+        colDataPtr = fileOffset ? GetDataPtr() : nullptr;
+    };
+
+    SetColDataPtr(cd->m_pSpheres, h.offSpheres);
+    SetColDataPtr(cd->m_pBoxes, h.offBoxes);
+    SetColDataPtr(cd->m_pLines, h.offLines);
+    SetColDataPtr(cd->m_pVertices, h.offVerts);
+    SetColDataPtr(cd->m_pTriangles, h.offFaces);
+
+    cd->m_pTrianglePlanes = nullptr;
+    cd->m_pShadowVertices = nullptr;
+    cd->m_pShadowTriangles = nullptr;
+    cd->m_nNumShadowVertices = 0;
+    cm.m_boundSphere.m_bIsSingleColDataAlloc = true;
 }
 
 // 0x537CE0
@@ -604,7 +665,7 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
     auto* pColModel = pInfo->GetColModel();
     if (pColModel)
     {
-        if (pColModel->m_boundSphere.m_bFlag0x01)
+        if (pColModel->m_boundSphere.m_bNotEmpty)
         {
             if (pColModel->m_boundSphere.m_nColSlot)
             {

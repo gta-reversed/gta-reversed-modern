@@ -854,7 +854,7 @@ void CObject::Init() {
     {
         CObjectData::SetObjectData(m_nModelIndex, *this);
         auto *pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
-        if (pModelInfo->GetColModel()->m_boundSphere.m_bFlag0x01)
+        if (pModelInfo->GetColModel()->m_boundSphere.m_bNotEmpty)
         {
             CColStore::AddRef(pModelInfo->GetColModel()->m_boundSphere.m_nColSlot);
             objectFlags.bHasNoModel = true;
