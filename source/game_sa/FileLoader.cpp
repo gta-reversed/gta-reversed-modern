@@ -51,7 +51,7 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadOcclusionVolume", 0x5B4C80, &CFileLoader::LoadOcclusionVolume);
     Install("CFileLoader", "LoadPathHeader", 0x5B41C0, &CFileLoader::LoadPathHeader);
     Install("CFileLoader", "LoadPedObject", 0x5B7420, &CFileLoader::LoadPedObject);
-    // Install("CFileLoader", "LoadPedPathNode", 0x5B41F0, &CFileLoader::LoadPedPathNode);
+    Install("CFileLoader", "LoadPedPathNode", 0x5B41F0, &CFileLoader::LoadPedPathNode);
     // Install("CFileLoader", "LoadPickup", 0x5B47B0, &CFileLoader::LoadPickup);
     Install("CFileLoader", "LoadStuntJump", 0x5B45D0, &CFileLoader::LoadStuntJump);
     Install("CFileLoader", "LoadTXDParent", 0x5B75E0, &CFileLoader::LoadTXDParent);
@@ -940,7 +940,9 @@ int32 CFileLoader::LoadPedObject(const char* line) {
 // useless
 // 0x5B41F0
 void CFileLoader::LoadPedPathNode(const char* line, int32 objModelIndex, int32 pathEntryIndex) {
-    plugin::Call<0x5B41F0, const char*, int32, int32>(line, objModelIndex, pathEntryIndex);
+    // This function loads the file, reads some data
+    // and calls `CPathFind::StoreDetachedNodeInfoPed` or `CPathFind::StoreNodeInfoPed`
+    // but both functions are NOPs, so this function basically doesn't do anything useful.
 }
 
 // 0x5B47B0
