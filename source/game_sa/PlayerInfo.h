@@ -11,6 +11,8 @@
 #include "Vector.h"
 #include "PlayerPed.h"
 
+class CPlayerInfoSaveStructure;
+
 enum ePlayerState : uint8 {
     PLAYERSTATE_PLAYING,
     PLAYERSTATE_HAS_DIED,
@@ -101,7 +103,6 @@ public:
     void GivePlayerParachute();
     void StreamParachuteWeapon(bool a2);
     void AddHealth(int32 amount);
-    void DeletePlayerSkin();
     void BlowUpRCBuggy(bool bExplode);
     void MakePlayerSafe(bool canMove, float radius);
     void PlayerFailedCriticalMission();
@@ -109,6 +110,7 @@ public:
     void ArrestPlayer();
     void KillPlayer();
     void LoadPlayerSkin();
+    void DeletePlayerSkin();
     void SetPlayerSkin(const char* name);
     void SetLastTargetVehicle(CVehicle* vehicle);
     bool IsRestartingAfterMissionFailed();
@@ -134,3 +136,70 @@ private:
 };
 
 VALIDATE_SIZE(CPlayerInfo, 0x190);
+
+class CPlayerInfoSaveStructure {
+    int32        m_nMoney;
+    uint16       m_nCarDensityForCurrentZone;
+    ePlayerState m_nPlayerState;
+    float        m_fRoadDensityAroundPlayer;
+    int32        m_nDisplayMoney;
+    uint8        m_nNumHoursDidntEat;
+    uint32       m_nCollectablesPickedUp;
+    uint32       m_nTotalNumCollectables;
+    bool         m_bDoesNotGetTired;
+    bool         m_bFastReload;
+    bool         m_bFireProof;
+    uint8        m_nMaxHealth;
+    uint8        m_nMaxArmour;
+    bool         m_bGetOutOfJailFree;
+    bool         m_bFreeHealthCare;
+    bool         m_bCanDoDriveBy;
+    uint8        m_nBustedAudioStatus;
+    uint16       m_nLastBustMessageNumber;
+
+public:
+    void Construct(CPlayerInfo* info) {
+        m_nMoney =                          info->m_nMoney;
+        m_nCarDensityForCurrentZone =       info->m_nCarDensityForCurrentZone;
+        m_nPlayerState =                    info->m_nPlayerState;
+        m_fRoadDensityAroundPlayer =        info->m_fRoadDensityAroundPlayer;
+        m_nDisplayMoney =                   info->m_nDisplayMoney;
+        m_nNumHoursDidntEat =               info->m_nNumHoursDidntEat;
+        m_nCollectablesPickedUp =           info->m_nCollectablesPickedUp;
+        m_nTotalNumCollectables =           info->m_nTotalNumCollectables;
+        m_bDoesNotGetTired =                info->m_bDoesNotGetTired;
+        m_bFastReload =                     info->m_bFastReload;
+        m_bFireProof =                      info->m_bFireProof;
+        m_nMaxHealth =                      info->m_nMaxHealth;
+        m_nMaxArmour =                      info->m_nMaxArmour;
+        m_bGetOutOfJailFree =               info->m_bGetOutOfJailFree;
+        m_bFreeHealthCare =                 info->m_bFreeHealthCare;
+        m_bCanDoDriveBy =                   info->m_bCanDoDriveBy;
+        m_nBustedAudioStatus =              info->m_nBustedAudioStatus;
+        m_nLastBustMessageNumber =          info->m_nLastBustMessageNumber;
+    }
+
+    void Extract(CPlayerInfo* info) {
+        info->m_nMoney =                    m_nMoney;
+        info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone;
+        info->m_nPlayerState =              m_nPlayerState;
+        info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone;
+        info->m_fRoadDensityAroundPlayer =  m_fRoadDensityAroundPlayer;
+        info->m_nDisplayMoney =             m_nDisplayMoney;
+        info->m_nNumHoursDidntEat =         m_nNumHoursDidntEat;
+        info->m_nCollectablesPickedUp =     m_nCollectablesPickedUp;
+        info->m_nTotalNumCollectables =     m_nTotalNumCollectables;
+        info->m_bDoesNotGetTired =          m_bDoesNotGetTired;
+        info->m_bFastReload =               m_bFastReload;
+        info->m_bFireProof =                m_bFireProof;
+        info->m_nMaxHealth =                m_nMaxHealth;
+        info->m_nMaxArmour =                m_nMaxArmour;
+        info->m_bGetOutOfJailFree =         m_bGetOutOfJailFree;
+        info->m_bFreeHealthCare =           m_bFreeHealthCare;
+        info->m_bCanDoDriveBy =             m_bCanDoDriveBy;
+        info->m_nBustedAudioStatus =        m_nBustedAudioStatus;
+        info->m_nLastBustMessageNumber =    m_nLastBustMessageNumber;
+    }
+};
+
+VALIDATE_SIZE(CPlayerInfoSaveStructure, 0x28);

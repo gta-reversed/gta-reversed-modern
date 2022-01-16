@@ -4,33 +4,34 @@
 
 void CPlayerInfo::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CPlayerInfo", "Constructor", 0x571920, &CPlayerInfo::Constructor);
-    Install("CPlayerInfo", "Destructor", 0x45B110, &CPlayerInfo::Destructor);
+    Install("CPlayerInfo", "Constructor", 0x571920, &CPlayerInfo::Constructor, true);
+    Install("CPlayerInfo", "Destructor", 0x45B110, &CPlayerInfo::Destructor, true);
     Install("CPlayerInfo", "CancelPlayerEnteringCars", 0x56E860, &CPlayerInfo::CancelPlayerEnteringCars);
     // Install("CPlayerInfo", "FindObjectToSteal", 0x56DBD0, &CPlayerInfo::FindObjectToSteal);
     Install("CPlayerInfo", "EvaluateCarPosition", 0x56DAD0, &CPlayerInfo::EvaluateCarPosition);
-    Install("CPlayerInfo", "SetPlayerSkin", 0x5717F0, &CPlayerInfo::SetPlayerSkin);
     // Install("CPlayerInfo", "Process", 0x56F8D0, &CPlayerInfo::Process);
-    Install("CPlayerInfo", "LoadPlayerSkin", 0x56F7D0, &CPlayerInfo::LoadPlayerSkin);
     // Install("CPlayerInfo", "FindClosestCarSectorList", 0x56F4E0, &CPlayerInfo::FindClosestCarSectorList);
     Install("CPlayerInfo", "Clear", 0x56F330, &CPlayerInfo::Clear);
-    Install("CPlayerInfo", "GivePlayerParachute", 0x56EC40, &CPlayerInfo::GivePlayerParachute);
     Install("CPlayerInfo", "StreamParachuteWeapon", 0x56EB30, &CPlayerInfo::StreamParachuteWeapon);
     Install("CPlayerInfo", "AddHealth", 0x56EAB0, &CPlayerInfo::AddHealth);
+    Install("CPlayerInfo", "ArrestPlayer", 0x56E5D0, &CPlayerInfo::ArrestPlayer);
+    Install("CPlayerInfo", "SetPlayerSkin", 0x5717F0, &CPlayerInfo::SetPlayerSkin);
+    Install("CPlayerInfo", "LoadPlayerSkin", 0x56F7D0, &CPlayerInfo::LoadPlayerSkin);
     Install("CPlayerInfo", "DeletePlayerSkin", 0x56EA80, &CPlayerInfo::DeletePlayerSkin);
     Install("CPlayerInfo", "BlowUpRCBuggy", 0x56EA30, &CPlayerInfo::BlowUpRCBuggy);
     Install("CPlayerInfo", "MakePlayerSafe", 0x56E870, &CPlayerInfo::MakePlayerSafe);
     Install("CPlayerInfo", "PlayerFailedCriticalMission", 0x56E830, &CPlayerInfo::PlayerFailedCriticalMission);
     Install("CPlayerInfo", "WorkOutEnergyFromHunger", 0x56E610, &CPlayerInfo::WorkOutEnergyFromHunger);
-    Install("CPlayerInfo", "ArrestPlayer", 0x56E5D0, &CPlayerInfo::ArrestPlayer);
     Install("CPlayerInfo", "KillPlayer", 0x56E580, &CPlayerInfo::KillPlayer);
     Install("CPlayerInfo", "IsRestartingAfterMissionFailed", 0x56E570, &CPlayerInfo::IsRestartingAfterMissionFailed);
     Install("CPlayerInfo", "IsRestartingAfterArrest", 0x56E560, &CPlayerInfo::IsRestartingAfterArrest);
     Install("CPlayerInfo", "IsRestartingAfterDeath", 0x56E550, &CPlayerInfo::IsRestartingAfterDeath);
+    Install("CPlayerInfo", "IsPlayerInRemoteMode", 0x56DAB0, &CPlayerInfo::IsPlayerInRemoteMode);
     Install("CPlayerInfo", "GetPos", 0x56DFB0, &CPlayerInfo::GetPos_Hook);
     Install("CPlayerInfo", "GetSpeed", 0x56DF50, &CPlayerInfo::GetSpeed_Hook);
-    Install("CPlayerInfo", "IsPlayerInRemoteMode", 0x56DAB0, &CPlayerInfo::IsPlayerInRemoteMode);
+    Install("CPlayerInfo", "GivePlayerParachute", 0x56EC40, &CPlayerInfo::GivePlayerParachute);
     Install("CPlayerInfo", "SetLastTargetVehicle", 0x56DA80, &CPlayerInfo::SetLastTargetVehicle);
+    Install("CPlayerInfo", "Load", 0x5D3B00, &CPlayerInfo::Load);
     Install("CPlayerInfo", "Save", 0x5D3AC0, &CPlayerInfo::Save);
 }
 
@@ -77,9 +78,9 @@ CEntity* CPlayerInfo::FindObjectToSteal(CPed* ped) {
 
 // 0x56DAD0
 void CPlayerInfo::EvaluateCarPosition(CEntity* car, CPed* ped, float pedToVehDist, float* outDistance, CVehicle** outVehicle) {
-    const auto forward = ped->GetForward();
     const auto carPosn = car->GetPosition();
     const auto pedPosn = ped->GetPosition();
+    const auto forward = ped->GetForward();
 
     float atan = CGeneral::GetATanOfXY(forward.x, forward.y) - CGeneral::GetATanOfXY(carPosn.x - pedPosn.x, carPosn.y - pedPosn.y);
     for (; atan > PI; atan -= TWO_PI) {}
@@ -99,6 +100,14 @@ void CPlayerInfo::EvaluateCarPosition(CEntity* car, CPed* ped, float pedToVehDis
 void CPlayerInfo::LoadPlayerSkin() {
     DeletePlayerSkin();
     m_pSkinTexture = CPlayerSkin::GetSkinTexture(m_szSkinName);
+}
+
+// 0x56EA80
+void CPlayerInfo::DeletePlayerSkin() {
+    if (m_pSkinTexture) {
+        RwTextureDestroy(m_pSkinTexture);
+        m_pSkinTexture = nullptr;
+    }
 }
 
 // 0x5717F0
@@ -205,8 +214,8 @@ void CPlayerInfo::Clear() {
 void CPlayerInfo::GivePlayerParachute() {
     if (m_nRequireParachuteTimer) {
         if (CStreaming::IsModelLoaded(MODEL_GUN_PARA)) {
-            m_pPed->GiveWeapon(WEAPON_PARACHUTE, 1, false);
-            m_pPed->m_nSavedWeapon = WEAPON_PARACHUTE;
+            m_pPed->GiveWeapon(WEAPON_PARACHUTE, 1, true);
+            m_pPed->SetSavedWeapon(WEAPON_PARACHUTE);
         }
     }
 }
@@ -245,17 +254,9 @@ void CPlayerInfo::StreamParachuteWeapon(bool unk) {
 }
 
 // 0x56EAB0
-void CPlayerInfo::AddHealth(int32_t amount) {
+void CPlayerInfo::AddHealth(int32 amount) {
     const auto newValue = std::min((float)m_nMaxHealth, m_pPed->m_fHealth + (float)amount); // Clamp to m_nMaxHealth
     m_pPed->m_fHealth = std::max(newValue, m_pPed->m_fHealth); // Don't change health to a lower value
-}
-
-// 0x56EA80
-void CPlayerInfo::DeletePlayerSkin() {
-    if (m_pSkinTexture) {
-        RwTextureDestroy(m_pSkinTexture);
-        m_pSkinTexture = nullptr;
-    }
 }
 
 // 0x56EA30
@@ -263,27 +264,28 @@ void CPlayerInfo::BlowUpRCBuggy(bool bExplode) {
     if (m_pRemoteVehicle && !m_pRemoteVehicle->m_bRemoveFromWorld) {
         CRemote::TakeRemoteControlledCarFromPlayer(bExplode);
         if (bExplode)
-            m_pRemoteVehicle->BlowUpCar(m_pPed, false);
+            m_pRemoteVehicle->BlowUpCar(m_pPed, false); // todo: CWorld::Players[CWorld::PlayerInFocus].m_pPed instead m_pPed
     }
 }
 
 // 0x56E870
 void CPlayerInfo::MakePlayerSafe(bool enable, float radius) {
     // Not quite SA, but this is the way to do it (instead of copy pasting it twice)
-    auto& phyFlags = m_pPed->physicalFlags;
-    phyFlags.bInvulnerable = enable;
-    phyFlags.bBulletProof = enable;
-    phyFlags.bFireProof = enable;
-    phyFlags.bExplosionProof = enable;
-    phyFlags.bCollisionProof = enable;
-    phyFlags.bMeeleProof = enable;
+    auto& flags = m_pPed->physicalFlags;
+    flags.bInvulnerable = enable;
+    flags.bBulletProof = enable;
+    flags.bFireProof = enable;
+    flags.bExplosionProof = enable;
+    flags.bCollisionProof = enable;
+    flags.bMeeleProof = enable;
     m_PlayerData.m_bCanBeDamaged = !enable;
     m_PlayerData.m_pWanted->m_bEverybodyBackOff = enable;
     m_pPed->GetPadFromPlayer()->bPlayerSafe = enable;
-    CWorld::SetAllCarsCanBeDamaged(enable);
+    CWorld::SetAllCarsCanBeDamaged(!enable);
 
     if (enable) {
         CWorld::StopAllLawEnforcersInTheirTracks();
+        // todo: CPad::StopPadsShaking();
 
         m_pPed->ClearAdrenaline();
         m_PlayerData.m_fTimeCanRun = std::max(m_PlayerData.m_fTimeCanRun, 0.f);
@@ -312,18 +314,18 @@ void CPlayerInfo::PlayerFailedCriticalMission() {
 
 // 0x56E610
 void CPlayerInfo::WorkOutEnergyFromHunger() {
-    static int32 dword_B9B8F4;                // 0xB9B8F4 update last time hungry state RwBool32
-    static int8 lastTimeHungryStateProcessed; // 0xB9B8F2
-    static int8 gLastHungryState;             // 0xB9B8F1
-    static bool bHungryMessageShown;          // 0xB9B8F0
+    static int32 bUpdateLastTimeHungry;        // 0xB9B8F4 not original name
+    static int8  lastTimeHungryStateProcessed; // 0xB9B8F2
+    static int8  gLastHungryState;             // 0xB9B8F1
+    static bool  bHungryMessageShown;          // 0xB9B8F0
 
     if (CCheat::m_aCheatsActive[CHEAT_NEVER_GET_HUNGRY]) {
         return;
     }
 
-    if ((dword_B9B8F4 & 1) == 0) {
-        dword_B9B8F4 |= 1u;
-        lastTimeHungryStateProcessed = CClock::ms_nGameClockHours;
+    if ((bUpdateLastTimeHungry & 1) == 0) {
+        bUpdateLastTimeHungry |= 1u;
+        lastTimeHungryStateProcessed = CClock::GetGameClockHours();
     }
 
     auto pad = CPad::GetPad(0);
@@ -340,7 +342,7 @@ void CPlayerInfo::WorkOutEnergyFromHunger() {
         if (m_pPed->m_pAttachedTo)
             return;
 
-        if (CClock::ms_nGameClockHours != lastTimeHungryStateProcessed) {
+        if (CClock::GetGameClockHours() != lastTimeHungryStateProcessed) {
             if (!m_nNumHoursDidntEat)
                 gLastHungryState = 0;
             m_nNumHoursDidntEat += 1;
@@ -349,7 +351,7 @@ void CPlayerInfo::WorkOutEnergyFromHunger() {
         if (m_nNumHoursDidntEat <= 48) {
             bHungryMessageShown = 0;
         } else {
-            if (CClock::ms_nGameClockHours == lastTimeHungryStateProcessed)
+            if (CClock::GetGameClockHours() == lastTimeHungryStateProcessed)
                 return;
 
             m_pPed->Say(337, 0, 1.0f, 0, 0, 0);
@@ -360,7 +362,7 @@ void CPlayerInfo::WorkOutEnergyFromHunger() {
                 if (CStats::GetStatValue(STAT_FAT) > 0.0f) {
                     CStats::DecrementStat(STAT_FAT, 25.0f);
                     CStats::DisplayScriptStatUpdateMessage(0, STAT_FAT, 25.0f);
-                    bDecreaseHealth = 1;
+                    bDecreaseHealth = true;
                     if (!gLastHungryState)
                         gLastHungryState = m_nNumHoursDidntEat + 24;
                 }
@@ -377,8 +379,8 @@ void CPlayerInfo::WorkOutEnergyFromHunger() {
             }
         }
 
-        if (CClock::ms_nGameClockHours != lastTimeHungryStateProcessed)
-            lastTimeHungryStateProcessed = CClock::ms_nGameClockHours;
+        if (CClock::GetGameClockHours() != lastTimeHungryStateProcessed)
+            lastTimeHungryStateProcessed = CClock::GetGameClockHours();
     }
 }
 
@@ -440,86 +442,22 @@ CVector CPlayerInfo::GetSpeed() {
     return m_pPed->m_vecMoveSpeed;
 }
 
-class CPlayerInfoSaveStructure {
-    int32        m_nMoney;
-    uint16       m_nCarDensityForCurrentZone;
-    ePlayerState m_nPlayerState;
-    float        m_fRoadDensityAroundPlayer;
-    int32        m_nDisplayMoney;
-    uint8        m_nNumHoursDidntEat;
-    uint32       m_nCollectablesPickedUp;
-    uint32       m_nTotalNumCollectables;
-    bool         m_bDoesNotGetTired;
-    bool         m_bFastReload;
-    bool         m_bFireProof;
-    uint8        m_nMaxHealth;
-    uint8        m_nMaxArmour;
-    bool         m_bGetOutOfJailFree;
-    bool         m_bFreeHealthCare;
-    bool         m_bCanDoDriveBy;
-    uint8        m_nBustedAudioStatus;
-    uint16       m_nLastBustMessageNumber;
-
-public:
-    void Construct(CPlayerInfo* info) {
-        m_nMoney =                          info->m_nMoney;
-        m_nCarDensityForCurrentZone =       info->m_nCarDensityForCurrentZone;
-        m_nPlayerState =                    info->m_nPlayerState;
-        m_fRoadDensityAroundPlayer =        info->m_fRoadDensityAroundPlayer;
-        m_nDisplayMoney =                   info->m_nDisplayMoney;
-        m_nNumHoursDidntEat =               info->m_nNumHoursDidntEat;
-        m_nCollectablesPickedUp =           info->m_nCollectablesPickedUp;
-        m_nTotalNumCollectables =           info->m_nTotalNumCollectables;
-        m_bDoesNotGetTired =                info->m_bDoesNotGetTired;
-        m_bFastReload =                     info->m_bFastReload;
-        m_bFireProof =                      info->m_bFireProof;
-        m_nMaxHealth =                      info->m_nMaxHealth;
-        m_nMaxArmour =                      info->m_nMaxArmour;
-        m_bGetOutOfJailFree =               info->m_bGetOutOfJailFree;
-        m_bFreeHealthCare =                 info->m_bFreeHealthCare;
-        m_bCanDoDriveBy =                   info->m_bCanDoDriveBy;
-        m_nBustedAudioStatus =              info->m_nBustedAudioStatus;
-        m_nLastBustMessageNumber =          info->m_nLastBustMessageNumber;
-    }
-
-    void Extract(CPlayerInfo* info) {
-        info->m_nMoney =                    m_nMoney;
-        info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone;
-        info->m_nPlayerState =              m_nPlayerState;
-        info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone;
-        info->m_fRoadDensityAroundPlayer =  m_fRoadDensityAroundPlayer;
-        info->m_nDisplayMoney =             m_nDisplayMoney;
-        info->m_nNumHoursDidntEat =         m_nNumHoursDidntEat;
-        info->m_nCollectablesPickedUp =     m_nCollectablesPickedUp;
-        info->m_nTotalNumCollectables =     m_nTotalNumCollectables;
-        info->m_bDoesNotGetTired =          m_bDoesNotGetTired;
-        info->m_bFastReload =               m_bFastReload;
-        info->m_bFireProof =                m_bFireProof;
-        info->m_nMaxHealth =                m_nMaxHealth;
-        info->m_nMaxArmour =                m_nMaxArmour;
-        info->m_bGetOutOfJailFree =         m_bGetOutOfJailFree;
-        info->m_bFreeHealthCare =           m_bFreeHealthCare;
-        info->m_bCanDoDriveBy =             m_bCanDoDriveBy;
-        info->m_nBustedAudioStatus =        m_nBustedAudioStatus;
-        info->m_nLastBustMessageNumber =    m_nLastBustMessageNumber;
-    }
-};
-
+// 0x5D3B00
 bool CPlayerInfo::Load() {
-    int32 unused;
+    int32 dataSize;
     CPlayerInfoSaveStructure data;
-    CGenericGameStorage::LoadDataFromWorkBuffer(&unused, sizeof(unused));
-    CGenericGameStorage::LoadDataFromWorkBuffer(&data, 40);
+    CGenericGameStorage::LoadDataFromWorkBuffer(&dataSize, sizeof(dataSize));
+    CGenericGameStorage::LoadDataFromWorkBuffer(&data, sizeof(CPlayerInfoSaveStructure));
     data.Extract(this);
     return true;
 }
 
 // 0x5D3AC0
 bool CPlayerInfo::Save() {
-    int unused{ 40 };
+    int32 dataSize{ sizeof(CPlayerInfoSaveStructure) };
     CPlayerInfoSaveStructure data;
     data.Construct(this);
-    CGenericGameStorage::SaveDataToWorkBuffer(&unused, sizeof(unused));
+    CGenericGameStorage::SaveDataToWorkBuffer(&dataSize, sizeof(dataSize));
     CGenericGameStorage::SaveDataToWorkBuffer(&data, sizeof(data));
     return true;
 }
