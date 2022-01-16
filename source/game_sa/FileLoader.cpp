@@ -9,6 +9,7 @@ Do not delete this comment block. Respect others' work!
 #include "CarGenerator.h"
 #include "TheCarGenerators.h"
 #include "Occlusion.h"
+#include "PedType.h"
 
 char (&CFileLoader::ms_line)[512] = *reinterpret_cast<char (*)[512]>(0xB71848);
 uint32& gAtomicModelId = *reinterpret_cast<uint32*>(0xB71840);
@@ -49,7 +50,7 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadObjectInstance_file", 0x538690, static_cast<CEntity* (*)(const char*)>(&CFileLoader::LoadObjectInstance));
     Install("CFileLoader", "LoadOcclusionVolume", 0x5B4C80, &CFileLoader::LoadOcclusionVolume);
     Install("CFileLoader", "LoadPathHeader", 0x5B41C0, &CFileLoader::LoadPathHeader);
-    // Install("CFileLoader", "LoadPedObject", 0x5B7420, &CFileLoader::LoadPedObject);
+    Install("CFileLoader", "LoadPedObject", 0x5B7420, &CFileLoader::LoadPedObject);
     // Install("CFileLoader", "LoadPedPathNode", 0x5B41F0, &CFileLoader::LoadPedPathNode);
     // Install("CFileLoader", "LoadPickup", 0x5B47B0, &CFileLoader::LoadPickup);
     Install("CFileLoader", "LoadStuntJump", 0x5B45D0, &CFileLoader::LoadStuntJump);
@@ -866,7 +867,74 @@ int32 CFileLoader::LoadPathHeader(const char* line, int32& outPathType) {
 // PEDS
 // 0x5B7420
 int32 CFileLoader::LoadPedObject(const char* line) {
-    return plugin::CallAndReturn<int32, 0x5B7420, const char*>(line);
+    int16 audioPedType;
+    int16 voice2_1;
+    int16 voice_id;
+    int modelId{-1};
+    int radio2;
+    int radio1;
+    int flags;
+    int carsCanDriveMask;
+
+    // TODO: Should probably increase the size of these to avoid possible buffer overflow
+    char animFile[12];
+    char modelName[20];
+    char pedVoiceType[16];
+    char statName[20];
+    char animGroup[20];
+    char pedType[24];
+    char texName[20];
+    char voiceMin[56];
+    char voiceMax[60];
+
+    (void)sscanf(
+        line,
+        "%d %s %s %s %s %s %x %x %s %d %d %s %s %s",
+        &modelId,
+        modelName,
+        texName,
+        pedType,
+        statName,
+        animGroup,
+        &carsCanDriveMask,
+        &flags,
+        animFile,
+        &radio1,
+        &radio2,
+        pedVoiceType,
+        voiceMin,
+        voiceMax
+    );
+
+    const auto FindAnimGroup = [animGroup, nAssocGroups = CAnimManager::ms_numAnimAssocDefinitions] {
+        for (auto i = 0; i < nAssocGroups; i++) {
+            if (CAnimManager::GetAnimGroupName((AssocGroupId)i) == std::string_view{animGroup}) {
+                return i;
+            }
+        }
+        return nAssocGroups;
+    };
+
+    const auto mi = CModelInfo::AddPedModel(modelId);
+
+    mi->m_nKey = CKeyGen::GetUppercaseKey(modelName);
+    mi->SetTexDictionary(texName);
+    mi->SetAnimFile(animFile);
+    mi->SetColModel(&colModelPeds, false);
+    mi->m_nPedType = CPedType::FindPedType(pedType);
+    mi->m_nStatType = CPedStats::GetPedStatType(statName);
+    mi->m_nAnimType = FindAnimGroup();
+    mi->m_nCarsCanDriveMask = carsCanDriveMask;
+    mi->m_nPedFlags = flags;
+    mi->m_nRadio2 = radio2 + 1;
+    mi->m_nRadio1 = radio1 + 1;
+    mi->m_nRace = CPopulation::FindPedRaceFromName(modelName);
+    mi->m_nPedAudioType = CAEPedSpeechAudioEntity::GetAudioPedType(pedVoiceType);
+    mi->m_nVoiceMin = CAEPedSpeechAudioEntity::GetVoice(voiceMin, mi->m_nPedAudioType);
+    mi->m_nVoiceMax = CAEPedSpeechAudioEntity::GetVoice(voiceMax, mi->m_nPedAudioType);
+    mi->m_nVoiceId = mi->m_nVoiceMin;
+
+    return modelId;
 }
 
 // useless
