@@ -57,6 +57,7 @@
 #include "Buoyancy.h"
 #include "CreepingFire.h"
 #include "Restart.h"
+#include "BulletInfo.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -168,6 +169,7 @@ void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
 
+    CBulletInfo::InjectHooks();
     CRestart::InjectHooks();
     CPlaneTrail::InjectHooks();
     CCopPed::InjectHooks();
