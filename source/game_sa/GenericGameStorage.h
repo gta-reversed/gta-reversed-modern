@@ -75,13 +75,13 @@ public:
     static void InjectHooks();
 
     static void ReportError(eBlocks nBlock, eSaveLoadError nError);
+    static void DoGameSpecificStuffBeforeSave();
     static void DoGameSpecificStuffAfterSucessLoad();
     static void InitRadioStationPositionList();
     static bool GenericLoad(bool& outbVariablesLoaded);
     static bool GenericSave();
     static bool CheckSlotDataValid(int32 slot);
     static bool LoadDataFromWorkBuffer(void* data, int32 size);
-    static void DoGameSpecificStuffBeforeSave();
     static int32 SaveDataToWorkBuffer(void* data, int32 Size);
     static bool LoadWorkBuffer();
     static bool SaveWorkBuffer(bool bIncludeChecksum);

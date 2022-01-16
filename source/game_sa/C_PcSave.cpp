@@ -9,23 +9,28 @@
 #include "SimpleVariablesSaveStructure.h"
 #include "GxtChar.h"
 
-namespace fs = std::filesystem;
-
 void C_PcSave::InjectHooks() {
     // See note in CGenericGameStorage::InjectHooks as to why all this is unhooked by default
 
     using namespace ReversibleHooks;
     Install("C_PcSave", "SetSaveDirectory", 0x619040, &C_PcSave::SetSaveDirectory, true);
-    Install("C_PcSave", "DeleteSlot", 0x6190D0, &C_PcSave::DeleteSlot, true);
     Install("C_PcSave", "GenerateGameFilename", 0x6190A0, &C_PcSave::GenerateGameFilename, true);
     Install("C_PcSave", "PopulateSlotInfo", 0x619140, &C_PcSave::PopulateSlotInfo, true);
     Install("C_PcSave", "SaveSlot", 0x619060, &C_PcSave::SaveSlot, true);
+    Install("C_PcSave", "DeleteSlot", 0x6190D0, &C_PcSave::DeleteSlot, true);
 }
 
+// 0x619040
 void C_PcSave::SetSaveDirectory(const char* path) {
-    sprintf_s(SaveFilePathWithName, "%s\\%s", path, "GTASAsf");
+    sprintf_s(DefaultPCSaveFileName, "%s\\%s", path, "GTASAsf");
 }
 
+// 0x6190A0
+void C_PcSave::GenerateGameFilename(int32 slot, char* out) {
+    sprintf(out, "%s%i%s", DefaultPCSaveFileName, slot + 1, ".b");
+}
+
+// 0x619140
 void C_PcSave::PopulateSlotInfo(void) {
 	s_PcSaveHelper.error = eErrorCode::NONE;
 
@@ -81,12 +86,23 @@ void C_PcSave::PopulateSlotInfo(void) {
 	}
 }
 
+// 0x619060
+uint32 C_PcSave::SaveSlot(int32 slot) {
+    CGenericGameStorage::MakeValidSaveName(slot);
+    s_PcSaveHelper.error = eErrorCode::NONE;
+    CFileMgr::SetDirMyDocuments();
+    CGenericGameStorage::DoGameSpecificStuffBeforeSave();
+    return CGenericGameStorage::GenericSave() ? 0 : 2;
+}
+
+// 0x6190D0
 bool C_PcSave::DeleteSlot(int32 slot) {
     char path[MAX_PATH]{};
     s_PcSaveHelper.error = eErrorCode::NONE;
 	GenerateGameFilename(slot, path);
+
     std::error_code ec{}; // Dont want to be using throwing overload
-    return fs::remove(path, ec);
+    return std::filesystem::remove(path, ec);
 
     /* Original code:
 	<delete file function>(path);
@@ -97,12 +113,4 @@ bool C_PcSave::DeleteSlot(int32 slot) {
 	}
 	return true;
     */
-}
-
-uint32 C_PcSave::SaveSlot(int32 slot) {
-	CGenericGameStorage::MakeValidSaveName(slot);
-    s_PcSaveHelper.error = eErrorCode::NONE;
-	CFileMgr::SetDirMyDocuments();
-	CGenericGameStorage::DoGameSpecificStuffBeforeSave();
-    return CGenericGameStorage::GenericSave() ? 0 : 2;
 }

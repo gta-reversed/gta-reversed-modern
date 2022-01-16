@@ -3,9 +3,9 @@
 #include "Gangs.h"
 
 void CGangs::InjectHooks() {
-    ReversibleHooks::Install("CGangs", "Initialise", 0x5DE680, &CGangs::Initialise);
-    ReversibleHooks::Install("CGangs", "Load", 0x5D3A90, &CGangs::Load);
-    ReversibleHooks::Install("CGangs", "Save", 0x5D3A60, &CGangs::Save);
+    // ReversibleHooks::Install("CGangs", "Initialise", 0x5DE680, &CGangs::Initialise);
+    // ReversibleHooks::Install("CGangs", "Load", 0x5D3A90, &CGangs::Load);
+    // ReversibleHooks::Install("CGangs", "Save", 0x5D3A60, &CGangs::Save);
 }
 
 // 0x5DE680

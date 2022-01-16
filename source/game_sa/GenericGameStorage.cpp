@@ -8,6 +8,8 @@
 #include "PedType.h"
 #include "C_PcSave.h"
 
+constexpr uint32 SIZE_OF_ONE_GAME_IN_BYTES = 202748;
+
 void CGenericGameStorage::InjectHooks() {
     // Can't really test these yet. All mods I have interfere with it (WindowedMode and IMFast)
     // Also, these functions originally had the file pointer passed to them @ `ebp`
@@ -16,6 +18,7 @@ void CGenericGameStorage::InjectHooks() {
 
     using namespace ReversibleHooks;
     Install("CGenericGameStorage", "ReportError", 0x5D08C0, &CGenericGameStorage::ReportError);
+    Install("CGenericGameStorage", "DoGameSpecificStuffBeforeSave", 0x618F50, &CGenericGameStorage::DoGameSpecificStuffBeforeSave, true);
     Install("CGenericGameStorage", "DoGameSpecificStuffAfterSucessLoad", 0x618E90, &CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad, true);
     Install("CGenericGameStorage", "InitRadioStationPositionList", 0x618E70, &CGenericGameStorage::InitRadioStationPositionList, true);
     Install("CGenericGameStorage", "GetSavedGameDateAndTime", 0x618D00, &GetSavedGameDateAndTime, true);
@@ -23,7 +26,6 @@ void CGenericGameStorage::InjectHooks() {
     Install("CGenericGameStorage", "GenericSave", 0x5D13E0, &CGenericGameStorage::GenericSave, true);
     Install("CGenericGameStorage", "CheckSlotDataValid", 0x5D1380, &CGenericGameStorage::CheckSlotDataValid, true);
     Install("CGenericGameStorage", "LoadDataFromWorkBuffer", 0x5D1300, &CGenericGameStorage::LoadDataFromWorkBuffer, true);
-    Install("CGenericGameStorage", "DoGameSpecificStuffBeforeSave", 0x618F50, &CGenericGameStorage::DoGameSpecificStuffBeforeSave, true);
     Install("CGenericGameStorage", "SaveDataToWorkBuffer", 0x5D1270, &CGenericGameStorage::SaveDataToWorkBuffer, true);
     Install("CGenericGameStorage", "LoadWorkBuffer", 0x5D10B0, &CGenericGameStorage::LoadWorkBuffer, true);
     Install("CGenericGameStorage", "SaveWorkBuffer", 0x5D0F80, &CGenericGameStorage::SaveWorkBuffer, true);
@@ -58,6 +60,87 @@ void CGenericGameStorage::ReportError(eBlocks nBlock, eSaveLoadError nError) {
     std::cerr << "[CGenericGameStorage]: " << buffer << std::endl; // NOTSA
 }
 
+// part from 0x5D08C0
+const char* CGenericGameStorage::GetBlockName(eBlocks block) {
+    switch (block) {
+    case eBlocks::SIMPLE_VARIABLES:
+        return "SIMPLE_VARIABLES";
+    case eBlocks::SCRIPTS:
+        return "SCRIPTS";
+    case eBlocks::POOLS:
+        return "POOLS";
+    case eBlocks::GARAGES:
+        return "GARAGES";
+    case eBlocks::GAMELOGIC:
+        return "GAMELOGIC";
+    case eBlocks::PATHS:
+        return "PATHS";
+    case eBlocks::PICKUPS:
+        return "PICKUPS";
+    case eBlocks::PHONEINFO:
+        return "PHONEINFO";
+    case eBlocks::RESTART:
+        return "RESTART";
+    case eBlocks::RADAR:
+        return "RADAR";
+    case eBlocks::ZONES:
+        return "ZONES";
+    case eBlocks::GANGS:
+        return "GANGS";
+    case eBlocks::CAR_GENERATORS:
+        return "CAR GENERATORS";
+    case eBlocks::PED_GENERATORS:
+        return "PED GENERATORS";
+    case eBlocks::AUDIO_SCRIPT_OBJECT:
+        return "AUDIO SCRIPT OBJECT";
+    case eBlocks::PLAYERINFO:
+        return "PLAYERINFO";
+    case eBlocks::STATS:
+        return "STATS";
+    case eBlocks::SET_PIECES:
+        return "SET PIECES";
+    case eBlocks::STREAMING:
+        return "STREAMING";
+    case eBlocks::PED_TYPES:
+        return "PED TYPES";
+    case eBlocks::TAGS:
+        return "TAGS";
+    case eBlocks::IPLS:
+        return "IPLS";
+    case eBlocks::SHOPPING:
+        return "SHOPPING";
+    case eBlocks::GANGWARS:
+        return "GANGWARS";
+    case eBlocks::STUNTJUMPS:
+        return "STUNTJUMPS";
+    case eBlocks::ENTRY_EXITS:
+        return "ENTRY EXITS";
+    case eBlocks::RADIOTRACKS:
+        return "RADIOTRACKS";
+    case eBlocks::USER3DMARKERS:
+        return "USER3DMARKERS";
+    default:
+        return "UNKNOWN";
+    }
+}
+
+// 0x618F50
+void CGenericGameStorage::DoGameSpecificStuffBeforeSave() {
+    CRopes::Shutdown();
+    CPickups::RemovePickupObjects();
+
+    auto& pinfo = FindPlayerInfo(0);
+    pinfo.m_pPed->m_fHealth = (float)std::min((uint8)200u, pinfo.m_nMaxHealth);
+
+    CGangWars::EndGangWar(false);
+    CStats::IncrementStat(eStats::STAT_SAFEHOUSE_VISITS, 1.f);
+    CGameLogic::PassTime(6 * 60);
+    FindPlayerInfo().m_nNumHoursDidntEat = 0;
+    FindPlayerPed()->ResetSprintEnergy();
+    FindPlayerPed()->SetWantedLevel(0);
+    CGame::TidyUpMemory(true, false);
+}
+
 // 0x618E90
 void CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad() {
     TheText.Load(false);
@@ -82,11 +165,6 @@ void CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad() {
 // 0x618E70
 void CGenericGameStorage::InitRadioStationPositionList() {
     // NOP
-}
-
-// 0x618D00
-const char* GetSavedGameDateAndTime(int32 slot) {
-    return CGenericGameStorage::ms_SlotSaveDate[slot];
 }
 
 // 0x5D17B0
@@ -137,7 +215,7 @@ bool CGenericGameStorage::GenericLoad(bool& out_bVariablesLoaded) {
             vars.Extract(varsVer);
             if (GetCurrentVersionNumber() != varsVer) {
                 fprintf(stderr, "[error] GenericGameStorage: Loading failed (wrong version number = 0x%08x)!", varsVer); // NOTSA
-                varsBackup.Extract(varsVer); // Restore old satate
+                varsBackup.Extract(varsVer); // Restore old state
                 CloseFile();
                 return false;
             }
@@ -351,8 +429,6 @@ bool CGenericGameStorage::GenericSave() {
         }
     }
 
-    const uint32 SIZE_OF_ONE_GAME_IN_BYTES = 202748; // todo: move
-
     while (ms_WorkBufferPos + ms_FilePos < SIZE_OF_ONE_GAME_IN_BYTES && (SIZE_OF_ONE_GAME_IN_BYTES - ms_FilePos) >= BUFFER_SIZE) {
         ms_WorkBufferPos = BUFFER_SIZE;
         if (!SaveWorkBuffer(false)) {
@@ -391,13 +467,11 @@ bool CGenericGameStorage::CheckSlotDataValid(int32 slot) {
 bool CGenericGameStorage::LoadDataFromWorkBuffer(void* data, int32 size) {
     assert(data);
 
-    if (ms_bFailed) {
+    if (ms_bFailed)
         return false;
-    }
 
-    if (size <= 0) {
+    if (size <= 0)
         return true;
-    }
 
     auto pos = ms_WorkBufferPos;
 
@@ -419,23 +493,6 @@ bool CGenericGameStorage::LoadDataFromWorkBuffer(void* data, int32 size) {
 
     return true;
 
-}
-
-// 0x618F50
-void CGenericGameStorage::DoGameSpecificStuffBeforeSave() {
-    CRopes::Shutdown();
-    CPickups::RemovePickupObjects();
-
-    auto& pinfo = FindPlayerInfo(0);
-    pinfo.m_pPed->m_fHealth = (float)std::min((uint8)200u, pinfo.m_nMaxHealth);
-
-    CGangWars::EndGangWar(false);
-    CStats::IncrementStat(eStats::STAT_SAFEHOUSE_VISITS, 1.f);
-    CGameLogic::PassTime(6 * 60);
-    FindPlayerInfo().m_nNumHoursDidntEat = 0;
-    FindPlayerPed()->ResetSprintEnergy();
-    FindPlayerPed()->SetWantedLevel(0);
-    CGame::TidyUpMemory(true, false);
 }
 
 // 0x5D1270
@@ -507,69 +564,6 @@ bool CGenericGameStorage::LoadWorkBuffer() {
     ms_bFailed = true;
 
     return false;
-}
-
-const char* CGenericGameStorage::GetBlockName(eBlocks block) {
-    switch (block) {
-    case eBlocks::SIMPLE_VARIABLES:
-        return "SIMPLE_VARIABLES";
-    case eBlocks::SCRIPTS:
-        return "SCRIPTS";
-    case eBlocks::POOLS:
-        return "POOLS";
-    case eBlocks::GARAGES:
-        return "GARAGES";
-    case eBlocks::GAMELOGIC:
-        return "GAMELOGIC";
-    case eBlocks::PATHS:
-        return "PATHS";
-    case eBlocks::PICKUPS:
-        return "PICKUPS";
-    case eBlocks::PHONEINFO:
-        return "PHONEINFO";
-    case eBlocks::RESTART:
-        return "RESTART";
-    case eBlocks::RADAR:
-        return "RADAR";
-    case eBlocks::ZONES:
-        return "ZONES";
-    case eBlocks::GANGS:
-        return "GANGS";
-    case eBlocks::CAR_GENERATORS:
-        return "CAR GENERATORS";
-    case eBlocks::PED_GENERATORS:
-        return "PED GENERATORS";
-    case eBlocks::AUDIO_SCRIPT_OBJECT:
-        return "AUDIO SCRIPT OBJECT";
-    case eBlocks::PLAYERINFO:
-        return "PLAYERINFO";
-    case eBlocks::STATS:
-        return "STATS";
-    case eBlocks::SET_PIECES:
-        return "SET PIECES";
-    case eBlocks::STREAMING:
-        return "STREAMING";
-    case eBlocks::PED_TYPES:
-        return "PED TYPES";
-    case eBlocks::TAGS:
-        return "TAGS";
-    case eBlocks::IPLS:
-        return "IPLS";
-    case eBlocks::SHOPPING:
-        return "SHOPPING";
-    case eBlocks::GANGWARS:
-        return "GANGWARS";
-    case eBlocks::STUNTJUMPS:
-        return "STUNTJUMPS";
-    case eBlocks::ENTRY_EXITS:
-        return "ENTRY EXITS";
-    case eBlocks::RADIOTRACKS:
-        return "RADIOTRACKS";
-    case eBlocks::USER3DMARKERS:
-        return "USER3DMARKERS";
-    default:
-        return "UNKNOWN";
-    }
 }
 
 // 0x5D0F80
@@ -667,7 +661,7 @@ bool CGenericGameStorage::OpenFileForReading(const char* fileName, int32 slot) {
     ms_FileHandle = CFileMgr::OpenFile(ms_LoadFileName, "rb");
 
     if (ms_FileHandle) {
-        ms_FileSize = CFileMgr::GetFileLength(ms_FileHandle);
+        ms_FileSize = CFileMgr::GetFileLength(ms_FileHandle); // todo: rename to CFileMgr::GetTotalSize
         ms_FilePos = 0;
         ms_WorkBufferSize = BUFFER_SIZE;
         ms_WorkBufferPos = BUFFER_SIZE;
@@ -689,8 +683,6 @@ bool CGenericGameStorage::CheckDataNotCorrupt(int32 slot, const char* fileName) 
     if (!OpenFileForReading(fileName, slot)) {
         return false;
     }
-
-    //s_PcSaveHelper.error = C_PcSave::eErrorCode::NONE;
 
     uint32 nCheckSum = 0;
 
@@ -719,4 +711,9 @@ bool CGenericGameStorage::CheckDataNotCorrupt(int32 slot, const char* fileName) 
 // 0x619000
 bool CGenericGameStorage::RestoreForStartLoad() {
     return false;
+}
+
+// 0x618D00
+const char* GetSavedGameDateAndTime(int32 slot) {
+    return CGenericGameStorage::ms_SlotSaveDate[slot];
 }

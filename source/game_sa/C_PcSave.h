@@ -17,20 +17,17 @@ public:
     
 public:
     // Eg.: C:/Users/user/Documents/GTA San Andreas User Files/GTASAsf
-    static inline char(&SaveFilePathWithName)[MAX_PATH] = *(char(*)[MAX_PATH])0xC16F18;
+    static inline char (&DefaultPCSaveFileName)[MAX_PATH] = *(char (*)[MAX_PATH])0xC16F18;
+    static inline const char* MarketingPCSaveFileName = "GTASAmf";
 
     static void InjectHooks();
 
     static void SetSaveDirectory(const char* path);
+    static void GenerateGameFilename(int32 slot, char* out);
     static void PopulateSlotInfo();
     static uint32 SaveSlot(int32 slot);
     static bool DeleteSlot(int32 slot);
 
-    // Kinda NOTSA - They didn't use templates
-    static void GenerateGameFilename(int32 slot, char* out) {
-        sprintf(out, "%s%i%s", SaveFilePathWithName, slot + 1, ".b");
-    }
-    
 public:
     eErrorCode error;
 };
