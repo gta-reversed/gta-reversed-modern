@@ -1491,7 +1491,134 @@ void CFileLoader::LoadScene(const char* filename) {
 
 // 0x5B8400
 void CFileLoader::LoadObjectTypes(const char* filename) {
-    
+    /* Unused
+    char filenameCopy[MAX_PATH]{};
+    strcpy(filenameCopy, filename);
+    */
+
+    enum class SectionID {
+        NONE = 0, // NOTSA - Placeholder value
+
+        OBJS = 1,
+        TOBJ = 3,
+        WEAP = 4,
+        HIER = 5,
+        ANIM = 6,
+        CARS = 7,
+        PEDS = 8,
+        PATH = 9,
+        TDFX = 10, // 2DFX (but enum names can't start with a number, so..)
+        TXDP = 11
+    };
+
+    auto sectionId{ SectionID::NONE };
+
+    int32 nPathEntryIndex{ -1 }, pathHeaderId{};
+    int32 pathType{};
+
+    auto file = CFileMgr::OpenFile(filename, "rb");
+    for (const char* line = LoadLine(file); line; line = LoadLine(file)) {
+        if (!line[0])
+            continue;
+
+        const auto LineBeginsWith = [linesv = std::string_view{ line }](auto what) {
+            return linesv.starts_with(what);
+        };
+
+        if (LineBeginsWith("#"))
+            continue;
+
+        if (sectionId != SectionID::NONE) {
+            // Process section
+
+            if (LineBeginsWith("end")) {
+                sectionId = SectionID::NONE;
+                continue;
+            }
+
+            switch (sectionId) {
+            case SectionID::OBJS:
+                LoadObject(line);
+                break;
+            case SectionID::TOBJ:
+                LoadTimeObject(line);
+                break;
+            case SectionID::WEAP:
+                LoadWeaponObject(line);
+                break;
+            case SectionID::HIER:
+                LoadClumpObject(line);
+                break;
+            case SectionID::ANIM:
+                LoadAnimatedClumpObject(line);
+                break;
+            case SectionID::CARS:
+                LoadVehicleObject(line);
+                break;
+            case SectionID::PEDS:
+                LoadPedObject(line);
+                break;
+                // R* does something weird with the object IDs frm the above cases,
+                // but it isn't used, so I wont put it in here, cause it would require jumps..
+            case SectionID::PATH: {
+                // Leftover from VC, as path's are loaded differently in SA.
+                // That is, all this does nothing in the end.
+
+                if (nPathEntryIndex == -1) {
+                    pathHeaderId = LoadPathHeader(line, pathType);
+                } else {
+                    switch (pathType) {
+                    case 0:
+                        LoadPedPathNode(line, pathHeaderId, nPathEntryIndex);
+                        break;
+                    case 1:
+                        LoadCarPathNode(line, pathHeaderId, nPathEntryIndex, false);
+                        break;
+                    case 2:
+                        LoadCarPathNode(line, pathHeaderId, nPathEntryIndex, true);
+                        break;
+                    }
+                    if (++nPathEntryIndex == 12)
+                        nPathEntryIndex = -1;
+                }
+                break;
+            }
+            case SectionID::TDFX:
+                Load2dEffect(line);
+                break;
+            case SectionID::TXDP:
+                LoadTXDParent(line);
+                break;
+            }
+        } else {
+            // Find out next section
+
+            const auto FindSectionID = [&] {
+                const struct { std::string_view name; SectionID id; } mapping[]{
+                    {"objs", SectionID::OBJS},
+                    {"tobj", SectionID::TOBJ},
+                    {"weap", SectionID::WEAP},
+                    {"hier", SectionID::HIER},
+                    {"anim", SectionID::ANIM},
+                    {"cars", SectionID::CARS},
+                    {"peds", SectionID::PEDS},
+                    {"path", SectionID::PATH},
+                    {"2dfx", SectionID::TDFX},
+                    {"txdp", SectionID::TXDP},
+                };
+
+                for (const auto& [name, id] : mapping) {
+                    if (LineBeginsWith(name)) {
+                        return id;
+                    }
+                }
+
+                return SectionID::NONE; // May happen if line was empty. It's fine.
+            };
+            sectionId = FindSectionID();
+        }
+    }
+    CFileMgr::CloseFile(file);
 }
 
 // 0x5B3AC0
