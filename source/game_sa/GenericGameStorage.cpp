@@ -1,12 +1,12 @@
 #include "StdInc.h"
-#include "GenericGameStorage.h"
-#include <SimpleVariablesSaveStructure.h>
-#include <TheCarGenerators.h>
-#include <PedType.h>
-#include <C_PcSave.h>
 
 #include <ranges>
-namespace rng = std::ranges;
+
+#include "GenericGameStorage.h"
+#include "SimpleVariablesSaveStructure.h"
+#include "TheCarGenerators.h"
+#include "PedType.h"
+#include "C_PcSave.h"
 
 void CGenericGameStorage::InjectHooks() {
     // Can't really test these yet. All mods I have interfere with it (WindowedMode and IMFast)
@@ -15,12 +15,10 @@ void CGenericGameStorage::InjectHooks() {
     // until we reverse everything.
 
     using namespace ReversibleHooks;
-
-    // Static functions (19x)
     Install("CGenericGameStorage", "ReportError", 0x5D08C0, &CGenericGameStorage::ReportError);
     Install("CGenericGameStorage", "DoGameSpecificStuffAfterSucessLoad", 0x618E90, &CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad, true);
     Install("CGenericGameStorage", "InitRadioStationPositionList", 0x618E70, &CGenericGameStorage::InitRadioStationPositionList, true);
-    Install("CGenericGameStorage", "GetSavedGameDateAndTime", 0x618D00, &CGenericGameStorage::GetSavedGameDateAndTime, true);
+    Install("CGenericGameStorage", "GetSavedGameDateAndTime", 0x618D00, &GetSavedGameDateAndTime, true);
     Install("CGenericGameStorage", "GenericLoad", 0x5D17B0, &CGenericGameStorage::GenericLoad, true);
     Install("CGenericGameStorage", "GenericSave", 0x5D13E0, &CGenericGameStorage::GenericSave, true);
     Install("CGenericGameStorage", "CheckSlotDataValid", 0x5D1380, &CGenericGameStorage::CheckSlotDataValid, true);
@@ -38,7 +36,6 @@ void CGenericGameStorage::InjectHooks() {
     Install("CGenericGameStorage", "RestoreForStartLoad", 0x619000, &CGenericGameStorage::RestoreForStartLoad, true);
 }
 
-// Static functions
 // 0x5D08C0
 void CGenericGameStorage::ReportError(eBlocks nBlock, eSaveLoadError nError) {
     char buffer[256]{};
@@ -88,8 +85,8 @@ void CGenericGameStorage::InitRadioStationPositionList() {
 }
 
 // 0x618D00
-const char* CGenericGameStorage::GetSavedGameDateAndTime(int32 slot) {
-    return ms_SlotSaveDate[slot];
+const char* GetSavedGameDateAndTime(int32 slot) {
+    return CGenericGameStorage::ms_SlotSaveDate[slot];
 }
 
 // 0x5D17B0
@@ -354,8 +351,9 @@ bool CGenericGameStorage::GenericSave() {
         }
     }
 
-    // TODO: Wat is dis?
-    while (ms_WorkBufferPos + ms_FilePos < 202748 && (202748 - ms_FilePos) >= BUFFER_SIZE) {
+    const uint32 SIZE_OF_ONE_GAME_IN_BYTES = 202748; // todo: move
+
+    while (ms_WorkBufferPos + ms_FilePos < SIZE_OF_ONE_GAME_IN_BYTES && (SIZE_OF_ONE_GAME_IN_BYTES - ms_FilePos) >= BUFFER_SIZE) {
         ms_WorkBufferPos = BUFFER_SIZE;
         if (!SaveWorkBuffer(false)) {
             CloseFile();
@@ -444,13 +442,11 @@ void CGenericGameStorage::DoGameSpecificStuffBeforeSave() {
 int32 CGenericGameStorage::SaveDataToWorkBuffer(void* data, int32 size) {
     assert(data);
 
-    if (ms_bFailed) {
+    if (ms_bFailed)
         return false;
-    }
 
-    if (size <= 0) {
+    if (size <= 0)
         return true;
-    }
 
     if (ms_WorkBufferPos + size > BUFFER_SIZE) {
         // Make space for data
@@ -476,9 +472,8 @@ int32 CGenericGameStorage::SaveDataToWorkBuffer(void* data, int32 size) {
 
 // 0x5D10B0
 bool CGenericGameStorage::LoadWorkBuffer() {
-    if (ms_bFailed) {
+    if (ms_bFailed)
         return false;
-    }
 
     uint32 toReadSize = BUFFER_SIZE;
     if (ms_FilePos + BUFFER_SIZE > ms_FileSize) {

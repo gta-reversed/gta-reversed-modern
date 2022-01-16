@@ -44,6 +44,7 @@ class CGenericGameStorage {
         LOADING,
         SAVING
     };
+
 public:
     enum class eSlotState {
         IN_USE,
@@ -76,7 +77,6 @@ public:
     static void ReportError(eBlocks nBlock, eSaveLoadError nError);
     static void DoGameSpecificStuffAfterSucessLoad();
     static void InitRadioStationPositionList();
-    static const char* GetSavedGameDateAndTime(int32 slot);
     static bool GenericLoad(bool& outbVariablesLoaded);
     static bool GenericSave();
     static bool CheckSlotDataValid(int32 slot);
@@ -96,3 +96,5 @@ public:
 private:
     static const char* GetBlockName(eBlocks);
 };
+
+const char* GetSavedGameDateAndTime(int32 slot);
