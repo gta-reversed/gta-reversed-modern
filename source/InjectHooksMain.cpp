@@ -169,7 +169,7 @@ void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
 
-    CBulletInfo::InjectHooks()
+    CBulletInfo::InjectHooks();
     CRestart::InjectHooks();
     CPlaneTrail::InjectHooks();
     CCopPed::InjectHooks();

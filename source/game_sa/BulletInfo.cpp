@@ -30,10 +30,10 @@ void CBulletInfo::Initialise()
     }
 }
 
-// Shutdown
+// 0x736000
 void CBulletInfo::Shutdown()
 {
-    /* Empty */
+    // NOP
 }
 
 CBulletInfo* CBulletInfo::GetFree() {
@@ -45,7 +45,7 @@ CBulletInfo* CBulletInfo::GetFree() {
     return nullptr;
 }
 
-// AddBullet
+// 0x736010
 void CBulletInfo::AddBullet(CEntity* creator, eWeaponType weaponType, CVector posn, CVector velocity)
 {
     if (auto info = GetFree()) {
@@ -74,10 +74,10 @@ void CBulletInfo::Update()
             continue;
         }
 
-        CWorld::pIgnoreEntity = info.m_pCreator;
         CWorld::bIncludeDeadPeds = true;
         CWorld::bIncludeCarTyres = true;
         CWorld::bIncludeBikers = true;
+        CWorld::pIgnoreEntity = info.m_pCreator;
 
         CColPoint colPoint;
         CEntity* hitEntity;
@@ -268,7 +268,7 @@ void CBulletInfo::Update()
         CWorld::bIncludeDeadPeds = false;
         CWorld::bIncludeCarTyres = false;
         CWorld::bIncludeBikers   = false;
-        CWorld::pIgnoreEntity    = false;
+        CWorld::pIgnoreEntity    = nullptr;
 
         if (info.m_nWeaponType == eWeaponType::WEAPON_SNIPERRIFLE) {
             PlayerSniperBulletStart = info.m_vecPosition;
