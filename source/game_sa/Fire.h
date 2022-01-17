@@ -55,19 +55,8 @@ public:
     bool IsBeingExtinguished() const { return beingExtinguished; }
 
     // NOTSA funcs:
-    auto GetFireParticleNameForStrength() const {
-        if (m_fStrength > 1.0f)
-            return (m_fStrength > 2.0f) ? "fire_large" : "fire_med";
-        else
-            return "fire";
-    };
-
-    void DestroyFx() {
-        if (m_pFxSystem) {
-            m_pFxSystem->Kill();
-            m_pFxSystem = nullptr;
-        }
-    }
+    auto GetFireParticleNameForStrength() const;
+    void DestroyFx();
     void SetTarget(CEntity* target);
     void SetCreator(CEntity* creator);
 
