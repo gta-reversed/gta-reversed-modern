@@ -38,7 +38,7 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadClumpObject", 0x5B4040, &CFileLoader::LoadClumpObject);
     // Install("CFileLoader", "LoadCollisionFile_0", 0x538440, static_cast<bool(*)(uint8*, uint32, uint8)>(&CFileLoader::LoadCollisionFile));
     // Install("CFileLoader", "LoadCollisionFile_1", 0x5B4E60, static_cast<bool(*)(const char*, uint8)>(&CFileLoader::LoadCollisionFile));
-    // Install("CFileLoader", "LoadCollisionFileFirstTime", 0x5B5000, &CFileLoader::LoadCollisionFileFirstTime);
+    Install("CFileLoader", "LoadCollisionFileFirstTime", 0x5B5000, &CFileLoader::LoadCollisionFileFirstTime);
     Install("CFileLoader", "LoadCollisionModel", 0x537580, &CFileLoader::LoadCollisionModel);
     Install("CFileLoader", "LoadCollisionModelVer2", 0x537EE0, &CFileLoader::LoadCollisionModelVer2);
     Install("CFileLoader", "LoadCollisionModelVer3", 0x537CE0, &CFileLoader::LoadCollisionModelVer3);
@@ -485,8 +485,58 @@ bool CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
 }
 
 // 0x5B5000
-bool CFileLoader::LoadCollisionFileFirstTime(uint8* data, uint32 dataSize, uint8 colId) {
-    return plugin::CallAndReturn<bool, 0x5B5000, uint8*, uint32, uint8>(data, dataSize, colId);
+bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8 colId) {
+    using namespace ColHelpers;
+   
+    FileHeader header{};
+
+    // We've modified the loop condition a little. R* went backwards, and checked if the remaning buffer size is > 8.
+    for (uint32 fileTotalSize{}, buffPos{}; buffPos < buffSize; buffPos += fileTotalSize) {
+        auto& h = *reinterpret_cast<FileHeader*>(buff);
+        fileTotalSize = h.GetTotalSize();
+
+        char modelName[22]{};
+        strcpy_s(modelName, h.modelName);
+
+        auto modelId = (int32)h.modelId;
+
+        auto MI = IsModelDFF(modelId) ? CModelInfo::GetModelInfo(modelId) : nullptr;
+        if (!MI || MI->m_nKey != CKeyGen::GetUppercaseKey(modelName))
+            MI = CModelInfo::GetModelInfo(modelName, &modelId);
+
+        if (!MI)
+            continue;
+
+        CColStore::IncludeModelIndex(colId, modelId);
+
+        if (MI->bIsLod)
+            continue;
+
+        auto& CM = *new CColModel;
+
+        const auto data = &buff[buffPos + sizeof(FileHeader)];
+        switch (header.GetVersion()) {
+        case ColModelVersion::COLL:
+            LoadCollisionModel(data, CM);
+            break;
+        case ColModelVersion::COL2:
+            LoadCollisionModelVer2(data, header.GetDataSize(), CM, header.modelName);
+            break;
+        case ColModelVersion::COL3:
+            LoadCollisionModelVer3(data, header.GetDataSize(), CM, header.modelName);
+            break;
+        /*case ColModelVersion::COL4: // This function doesn't process V4
+            LoadCollisionModelVer4(data, dataSize, CM, modelName);
+            break;*/
+        }
+
+        MI->SetColModel(&CM, true);
+
+        // NOTE/TODO:
+        // This cast looks weird, but there's a note about it above `PackedModelStartEnd`s definition.
+        CColAccel::addCacheCol((PackedModelStartEnd)modelId, CM); 
+    }
+    return true;
 }
 
 // 0x537580
