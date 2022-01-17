@@ -6,15 +6,16 @@
 */
 #pragma once
 
-enum eClothesModelPart {
+enum eClothesModelPart : int32 {
     CLOTHES_MODEL_TORSO        = 0,
     CLOTHES_MODEL_HEAD         = 1,
+    CLOTHES_MODEL_HANDS        = 2,
     CLOTHES_MODEL_LEGS         = 3,
-    CLOTHES_MODEL_SHOES        = 4,
+    CLOTHES_MODEL_SHOES        = 4, // FEET
     CLOTHES_MODEL_NECKLACE     = 5,
-    CLOTHES_MODEL_BRACELET     = 6,
+    CLOTHES_MODEL_BRACELET     = 6, // WATCH
     CLOTHES_MODEL_GLASSES      = 7,
     CLOTHES_MODEL_HATS         = 8,
-    CLOTHES_MODEL_SPECIAL      = 9,
+    CLOTHES_MODEL_SPECIAL      = 9, // extra1
     CLOTHES_MODEL_UNAVAILABLE  = 10,
 };

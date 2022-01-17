@@ -15,11 +15,6 @@
 
 class CClothes {
 public:
-    int32 m_aModelKeys[10];
-    int32 m_aTextureKeys[18];
-    int32 m_fFatStat;
-    int32 m_fMuscleStat;
-
     static int32& ms_clothesImageId;
     static int32& ms_numRuleTags;
     static int32 (&ms_clothesRules)[600];

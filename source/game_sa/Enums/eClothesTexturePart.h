@@ -6,7 +6,7 @@
 */
 #pragma once
 
-enum eClothesTexturePart {
+enum eClothesTexturePart : int32 {
     CLOTHES_TEXTURE_TORSO           = 0,
     CLOTHES_TEXTURE_HEAD            = 1,
     CLOTHES_TEXTURE_LEGS            = 2,
@@ -26,4 +26,5 @@ enum eClothesTexturePart {
     CLOTHES_TEXTURE_HATS            = 16,
     CLOTHES_TEXTURE_SPECIAL         = 17,
     CLOTHES_TEXTURE_UNAVAILABLE     = 18,
+    CLOTHES_TEXTURE_TOTAL           = CLOTHES_TEXTURE_UNAVAILABLE
 };

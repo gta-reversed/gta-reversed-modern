@@ -14,7 +14,7 @@ int32& CClothes::ms_clothesImageId = *(int32*)0xBC12F8;
 int32& CClothes::ms_numRuleTags = *(int32*)0xBC12FC;
 int32 (&CClothes::ms_clothesRules)[600] = *(int32(*)[600])0xBC1300;
 
-CPedClothesDesc* (&PlayerClothes) = *(CPedClothesDesc**)0xBC1C78;
+CPedClothesDesc& PlayerClothes = *(CPedClothesDesc*)0xBC1C78;
 
 void CClothes::InjectHooks() {
     using namespace ReversibleHooks;
@@ -25,23 +25,41 @@ void CClothes::InjectHooks() {
     Install("CClothes", "RebuildPlayerIfNeeded", 0x5A8390, &CClothes::RebuildPlayerIfNeeded);
     Install("CClothes", "RebuildPlayer", 0x5A82C0, &CClothes::RebuildPlayer);
     Install("CClothes", "RebuildCutscenePlayer", 0x5A8270, &CClothes::RebuildCutscenePlayer);
+    /* crashes, incompatible registers?
     Install("CClothes", "GetTextureDependency", 0x5A7EA0, &CClothes::GetTextureDependency);
-    Install("CClothes", "GetPlayerMotionGroupToLoad", 0x5A7FB0, &CClothes::GetPlayerMotionGroupToLoad);
     Install("CClothes", "GetDependentTexture", 0x5A7F30, &CClothes::GetDependentTexture);
+    */
+    Install("CClothes", "GetPlayerMotionGroupToLoad", 0x5A7FB0, &CClothes::GetPlayerMotionGroupToLoad);
     Install("CClothes", "GetDefaultPlayerMotionGroup", 0x5A81B0, &CClothes::GetDefaultPlayerMotionGroup);
 }
 
 // 0x5A80D0
 void CClothes::Init() {
-    for (int32 part = 0; part < 18; part++) {
+    for (int32 part = 0; part < CLOTHES_TEXTURE_TOTAL; part++) {
         eClothesModelPart modelPart = GetTextureDependency(static_cast<eClothesTexturePart>(part));
-        PlayerClothes->m_anTextureKeys[part] = 0;
+        PlayerClothes.m_anTextureKeys[part] = 0;
         if (modelPart != CLOTHES_MODEL_UNAVAILABLE)
-            PlayerClothes->m_anModelKeys[modelPart] = 0;
+            PlayerClothes.m_anModelKeys[modelPart] = 0;
     }
     ms_numRuleTags = 0;
     ms_clothesImageId = CStreaming::AddImageToList("MODELS\\PLAYER.IMG", false);
     LoadClothesFile();
+}
+
+// 0x5A7A20
+int32 GetClothesModelFromName(const char* name) {
+    if (!strcmp(name, "torso"))    return CLOTHES_MODEL_TORSO;
+    if (!strcmp(name, "head"))     return CLOTHES_MODEL_HEAD;
+    if (!strcmp(name, "hands"))    return CLOTHES_MODEL_HANDS;
+    if (!strcmp(name, "legs"))     return CLOTHES_MODEL_LEGS;
+    if (!strcmp(name, "feet"))     return CLOTHES_MODEL_SHOES;
+    if (!strcmp(name, "necklace")) return CLOTHES_MODEL_NECKLACE;
+    if (!strcmp(name, "watch"))    return CLOTHES_MODEL_BRACELET;
+    if (!strcmp(name, "glasses"))  return CLOTHES_MODEL_GLASSES;
+    if (!strcmp(name, "hat"))      return CLOTHES_MODEL_HATS;
+    if (!strcmp(name, "extra1"))   return CLOTHES_MODEL_SPECIAL;
+
+    return CLOTHES_MODEL_TORSO;
 }
 
 // 0x5A7B30
@@ -111,7 +129,7 @@ void CClothes::RebuildPlayer(CPlayerPed* player, bool bIgnoreFatAndMuscle) {
         player->m_pPlayerData->m_pPedClothesDesc->m_fFatStat = CStats::GetStatValue(STAT_FAT);
         player->m_pPlayerData->m_pPedClothesDesc->m_fMuscleStat = CStats::GetStatValue(STAT_MUSCLE);
     }
-    CClothes::ConstructPedModel(player->m_nModelIndex, *player->m_pPlayerData->m_pPedClothesDesc, PlayerClothes, 0);
+    CClothes::ConstructPedModel(player->m_nModelIndex, *player->m_pPlayerData->m_pPedClothesDesc, &PlayerClothes, 0);
     player->Dress();
     RpAnimBlendClumpGiveAssociations(player->m_pRwClump, assoc);
     PlayerClothes = player->m_pPlayerData->m_pPedClothesDesc;
@@ -126,8 +144,8 @@ void CClothes::RebuildCutscenePlayer(CPlayerPed* player, int32 modelId) {
 }
 
 // 0x5A7EA0
-eClothesModelPart CClothes::GetTextureDependency(eClothesTexturePart eClothesTexturePart) {
-    switch (eClothesTexturePart) {
+eClothesModelPart CClothes::GetTextureDependency(eClothesTexturePart texturePart) {
+    switch (texturePart) {
     case CLOTHES_TEXTURE_TORSO:
         return CLOTHES_MODEL_TORSO;
 
@@ -161,8 +179,8 @@ eClothesModelPart CClothes::GetTextureDependency(eClothesTexturePart eClothesTex
 }
 
 // 0x5A7F30
-eClothesTexturePart CClothes::GetDependentTexture(eClothesModelPart eClothesModelPart) {
-    switch (eClothesModelPart) {
+eClothesTexturePart CClothes::GetDependentTexture(eClothesModelPart modelPart) {
+    switch (modelPart) {
     case CLOTHES_MODEL_TORSO:
         return CLOTHES_TEXTURE_TORSO;
 
