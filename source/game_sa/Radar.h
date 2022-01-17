@@ -23,7 +23,7 @@ enum eBlipType {
     BLIP_CHAR,          // 2
     BLIP_OBJECT,        // 3
     BLIP_COORD,         // 4 - Checkpoint.
-    BLIP_CONTACTPOINT,  // 5 - Sphere.
+    BLIP_CONTACT_POINT, // 5 - Sphere.
     BLIP_SPOTLIGHT,     // 6
     BLIP_PICKUP,        // 7
     BLIP_AIRSTRIP       // 8

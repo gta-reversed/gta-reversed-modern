@@ -57,6 +57,8 @@
 #include "Buoyancy.h"
 #include "CreepingFire.h"
 #include "Restart.h"
+#include "BulletInfo.h"
+#include "Explosion.h"
 #include "C_PcSave.h"
 
 // Tasks
@@ -172,6 +174,10 @@ void InjectHooksMain() {
 
     CGenericGameStorage::InjectHooks();
     C_PcSave::InjectHooks();
+    CExplosion::InjectHooks();
+    CClothesBuilder::InjectHooks();
+    CClothes::InjectHooks();
+    CBulletInfo::InjectHooks();
     CRestart::InjectHooks();
     CPlaneTrail::InjectHooks();
     CCopPed::InjectHooks();
