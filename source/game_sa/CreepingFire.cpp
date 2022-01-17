@@ -2,7 +2,7 @@
 
 #include "CreepingFire.h"
 
-uint8(&CCreepingFire::m_aFireStatus)[32][32] = *(uint8(*)[32][32])0xB71B68;
+uint8 (&CCreepingFire::m_aFireStatus)[32][32] = *(uint8(*)[32][32])0xB71B68;
 
 void CCreepingFire::InjectHooks() {
     ReversibleHooks::Install("CCreepingFire", "Update", 0x539CE0, &CCreepingFire::Update);
