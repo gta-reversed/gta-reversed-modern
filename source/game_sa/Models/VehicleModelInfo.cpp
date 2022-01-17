@@ -1551,6 +1551,7 @@ eVehicleType CVehicleModelInfo::GetVehicleTypeFromName(const char* typeName) {
         {"train", eVehicleType::VEHICLE_TRAIN},
         {"f_heli", eVehicleType::VEHICLE_FHELI},
         {"f_plane", eVehicleType::VEHICLE_FPLANE},
+        {"bike", eVehicleType::VEHICLE_BIKE},
         {"bmx", eVehicleType::VEHICLE_BMX},
         {"trailer", eVehicleType::VEHICLE_TRAILER},
     };
@@ -1562,7 +1563,7 @@ eVehicleType CVehicleModelInfo::GetVehicleTypeFromName(const char* typeName) {
     }
 
     // NOTSA - Something went really wrong
-    DebugBreak();
+    assert(0);
     return (eVehicleType)-1;
 }
 
