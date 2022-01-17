@@ -16,9 +16,6 @@ Do not delete this comment block. Respect others' work!
 char(&CFileLoader::ms_line)[512] = *reinterpret_cast<char(*)[512]>(0xB71848);
 uint32& gAtomicModelId = *reinterpret_cast<uint32*>(0xB71840);
 
-char(&colFileReadBuffer)[32768] = *(char(*)[32768])0xBC40D8;
-
-
 void CFileLoader::InjectHooks() {
     using namespace ReversibleHooks;
     Install("CFileLoader", "AddTexDictionaries", 0x5B3910, &CFileLoader::AddTexDictionaries);
@@ -443,8 +440,8 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
 
 // 0x5B4E60
 void CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
-    static uint8 buffer[0x8000]; // 32 kB, enough for most models.
-
+    uint8 (&buffer)[0x8000] = *(uint8(*)[0x8000])0xBC40D8; // 32 kB
+    
     using namespace ColHelpers;
 
     FileHeader header{};
