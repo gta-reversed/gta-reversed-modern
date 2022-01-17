@@ -1333,14 +1333,10 @@ int32 CFileLoader::LoadPathHeader(const char* line, int32& outPathType) {
 // PEDS
 // 0x5B7420
 int32 CFileLoader::LoadPedObject(const char* line) {
-    int16 audioPedType;
-    int16 voice2_1;
-    int16 voice_id;
-    int modelId{-1};
-    int radio2;
-    int radio1;
-    int flags;
-    int carsCanDriveMask;
+    eModelID modelId{eModelID::MODEL_INVALID};
+    int32    radio1, radio2;
+    uint32   flags;
+    int32    carsCanDriveMask;
 
     // TODO: Should probably increase the size of these to avoid possible buffer overflow
     char animFile[12];
