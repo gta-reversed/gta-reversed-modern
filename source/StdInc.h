@@ -192,7 +192,6 @@
 #include "game_sa\ControllerState.h"
 #include "game_sa\Pad.h"
 #include "game_sa\PathFind.h"
-#include "game_sa\PedClothesDesc.h"
 #include "game_sa\PedGroup.h"
 #include "game_sa\PedGroupIntelligence.h"
 #include "game_sa\PedGroupMembership.h"

@@ -88,8 +88,8 @@ bool CPlayerPed::Load_Reversed() {
     wanted->m_nChaosLevel = savedData.chaosLevel;
     wanted->m_nWantedLevel= savedData.wantedLevel;
 
-    m_pPlayerData->m_nChosenWeapon = savedData.chosenWeapon;
-    *m_pPlayerData->m_pPedClothesDesc = savedData.clothesDesc;
+    m_pPlayerData->m_nChosenWeapon   = savedData.chosenWeapon;
+    m_pPlayerData->m_pPedClothesDesc = &savedData.clothesDesc;
 
     return true;
 }
@@ -107,7 +107,7 @@ bool CPlayerPed::Save_Reversed() {
     saveData.wantedLevel = wanted->m_nWantedLevel;
 
     saveData.chosenWeapon = m_pPlayerData->m_nChosenWeapon;
-    saveData.clothesDesc = *m_pPlayerData->m_pPedClothesDesc;
+    saveData.clothesDesc  = m_pPlayerData->m_pPedClothesDesc;
 
     CGenericGameStorage::SaveDataToWorkBuffer(&saveData, sizeof(WorkBufferSaveData));
 
