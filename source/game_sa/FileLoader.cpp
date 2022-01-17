@@ -1665,7 +1665,7 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
     char modelName[24]{};
     char texName[24]{};
     char type[8]{};
-    char handlingName[8]{};
+    char handlingName[16]{};
     char gameName[32]{};
     char anims[16]{};
     char vehCls[16]{};
