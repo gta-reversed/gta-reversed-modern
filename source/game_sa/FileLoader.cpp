@@ -398,8 +398,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
         char modelName[22]{};
         strcpy_s(modelName, h.modelName);
 
-        // TODO: Refactor this to use `CStreaming::IsModelDFF`
-        auto MI = h.modelId < eResourceFirstID::RESOURCE_ID_DFF + TOTAL_DFF_MODEL_IDS ? CModelInfo::GetModelInfo(h.modelId) : nullptr;
+        auto MI = IsModelDFF(h.modelId) ? CModelInfo::GetModelInfo(h.modelId) : nullptr;
         if (!MI || MI->m_nKey != CKeyGen::GetUppercaseKey(modelName)) {
             auto colDef = CColStore::ms_pColPool->GetAt(colId); 
             MI = CModelInfo::GetModelInfo(modelName, colDef->m_nModelIdStart, colDef->m_nModelIdEnd);
