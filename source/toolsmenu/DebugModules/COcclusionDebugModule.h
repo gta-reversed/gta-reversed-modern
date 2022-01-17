@@ -8,7 +8,7 @@ public:
     static int NumEntitiesSkipped;
 
 public:
-    static void ProcessImgui();
+    static void ProcessImGui();
     static void ProcessRender();
 };
 #endif

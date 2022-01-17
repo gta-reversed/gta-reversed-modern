@@ -28,40 +28,58 @@ static const CVector TIGER_GUN_POS(0.0f, 0.5f, 0.2f); // 0xC1C208
 
 void CAutomobile::InjectHooks()
 {
-    ReversibleHooks::Install("CAutomobile", "ProcessControl", 0x6B1880, &CAutomobile::ProcessControl_Reversed);
-    ReversibleHooks::Install("CAutomobile", "AddMovingCollisionSpeed", 0x6A1ED0, &CAutomobile::AddMovingCollisionSpeed_Reversed);
-    ReversibleHooks::Install("CAutomobile", "ProcessAI", 0x6B4800, &CAutomobile::ProcessAI_Reversed);
-    ReversibleHooks::Install("CAutomobile", "ResetSuspension", 0x6A2AE0, &CAutomobile::ResetSuspension_Reversed);
-    ReversibleHooks::Install("CAutomobile", "ProcessFlyingCarStuff", 0x6A8500, &CAutomobile::ProcessFlyingCarStuff_Reversed);
-    ReversibleHooks::Install("CAutomobile", "DoHoverSuspensionRatios", 0x6A45C0, &CAutomobile::DoHoverSuspensionRatios_Reversed);
-    ReversibleHooks::Install("CAutomobile", "ProcessSuspension", 0x6AFB10, &CAutomobile::ProcessSuspension_Reversed);
-    ReversibleHooks::Install("CAutomobile", "SetupModelNodes", 0x6A0770, &CAutomobile::SetupModelNodes);
-    ReversibleHooks::Install("CAutomobile", "HydraulicControl", 0x6A07A0, &CAutomobile::HydraulicControl);
-    ReversibleHooks::Install("CAutomobile", "UpdateMovingCollision", 0x6A1460, &CAutomobile::UpdateMovingCollision);
-    ReversibleHooks::Install("CAutomobile", "ProcessBuoyancy", 0x6A8C00, &CAutomobile::ProcessBuoyancy);
-    ReversibleHooks::Install("CAutomobile", "ProcessHarvester", 0x6A9680, &CAutomobile::ProcessHarvester);
-    ReversibleHooks::Install("CAutomobile", "TankControl", 0x6AE850, &CAutomobile::TankControl);
-    ReversibleHooks::Install("CAutomobile", "DoSoftGroundResistance", 0x6A4AF0, &CAutomobile::DoSoftGroundResistance);
-    ReversibleHooks::Install("CAutomobile", "ProcessCarWheelPair", 0x6A4EC0, &CAutomobile::ProcessCarWheelPair);
-    ReversibleHooks::Install("CAutomobile", "PlaceOnRoadProperly", 0x6AF420, &CAutomobile::PlaceOnRoadProperly);
-    ReversibleHooks::Install("CAutomobile", "RcbanditCheck1CarWheels", 0x6B3F70, &CAutomobile::RcbanditCheck1CarWheels);
-    ReversibleHooks::Install("CAutomobile", "RcbanditCheckHitWheels", 0x6B45E0, &CAutomobile::RcbanditCheckHitWheels);
-    ReversibleHooks::Install("CAutomobile", "FireTruckControl", 0x729B60, &CAutomobile::FireTruckControl);
-    ReversibleHooks::Install("CAutomobile", "SetHeliOrientation", 0x6A2450, &CAutomobile::SetHeliOrientation);
-    ReversibleHooks::Install("CAutomobile", "ClearHeliOrientation", 0x6A2460, &CAutomobile::ClearHeliOrientation);
+    using namespace ReversibleHooks;
+    Install("CAutomobile", "ProcessControl", 0x6B1880, &CAutomobile::ProcessControl_Reversed);
+    Install("CAutomobile", "AddMovingCollisionSpeed", 0x6A1ED0, &CAutomobile::AddMovingCollisionSpeed_Reversed);
+    Install("CAutomobile", "ProcessAI", 0x6B4800, &CAutomobile::ProcessAI_Reversed);
+    Install("CAutomobile", "ResetSuspension", 0x6A2AE0, &CAutomobile::ResetSuspension_Reversed);
+    Install("CAutomobile", "ProcessFlyingCarStuff", 0x6A8500, &CAutomobile::ProcessFlyingCarStuff_Reversed);
+    Install("CAutomobile", "DoHoverSuspensionRatios", 0x6A45C0, &CAutomobile::DoHoverSuspensionRatios_Reversed);
+    Install("CAutomobile", "ProcessSuspension", 0x6AFB10, &CAutomobile::ProcessSuspension_Reversed);
+    Install("CAutomobile", "SetupModelNodes", 0x6A0770, &CAutomobile::SetupModelNodes);
+    Install("CAutomobile", "HydraulicControl", 0x6A07A0, &CAutomobile::HydraulicControl);
+    Install("CAutomobile", "UpdateMovingCollision", 0x6A1460, &CAutomobile::UpdateMovingCollision);
+    Install("CAutomobile", "ProcessBuoyancy", 0x6A8C00, &CAutomobile::ProcessBuoyancy);
+    Install("CAutomobile", "ProcessHarvester", 0x6A9680, &CAutomobile::ProcessHarvester);
+    Install("CAutomobile", "TankControl", 0x6AE850, &CAutomobile::TankControl);
+    Install("CAutomobile", "DoSoftGroundResistance", 0x6A4AF0, &CAutomobile::DoSoftGroundResistance);
+    Install("CAutomobile", "ProcessCarWheelPair", 0x6A4EC0, &CAutomobile::ProcessCarWheelPair);
+    Install("CAutomobile", "PlaceOnRoadProperly", 0x6AF420, &CAutomobile::PlaceOnRoadProperly);
+    Install("CAutomobile", "RcbanditCheck1CarWheels", 0x6B3F70, &CAutomobile::RcbanditCheck1CarWheels);
+    Install("CAutomobile", "RcbanditCheckHitWheels", 0x6B45E0, &CAutomobile::RcbanditCheckHitWheels);
+    Install("CAutomobile", "FireTruckControl", 0x729B60, &CAutomobile::FireTruckControl);
+    Install("CAutomobile", "SetHeliOrientation", 0x6A2450, &CAutomobile::SetHeliOrientation);
+    Install("CAutomobile", "ClearHeliOrientation", 0x6A2460, &CAutomobile::ClearHeliOrientation);
+
+    Install("CAutomobile", "GetComponentWorldPosition", 0x6A2210, &CAutomobile::GetComponentWorldPosition_Reversed); 
+    Install("CAutomobile", "IsComponentPresent", 0x6A2250, &CAutomobile::IsComponentPresent_Reversed); 
+    Install("CAutomobile", "GetDooorAngleOpenRatio_enum", 0x6A2270, static_cast<float (CAutomobile::*)(eDoors)>(&CAutomobile::GetDooorAngleOpenRatio_Reversed)); 
+    Install("CAutomobile", "GetDooorAngleOpenRatio_uint", 0x6A62C0, static_cast<float (CAutomobile::*)(uint32)>(&CAutomobile::GetDooorAngleOpenRatio_Reversed)); 
+    Install("CAutomobile", "IsDoorReady_enum", 0x6A2290, static_cast<bool (CAutomobile::*)(eDoors)>(&CAutomobile::IsDoorReady_Reversed)); 
+    Install("CAutomobile", "IsDoorReady_uint", 0x6A6350, static_cast<bool (CAutomobile::*)(uint32)>(&CAutomobile::IsDoorReady_Reversed)); 
+    Install("CAutomobile", "IsDoorFullyOpen_enum", 0x6A22D0, static_cast<bool (CAutomobile::*)(eDoors)>(&CAutomobile::IsDoorFullyOpen_Reversed)); 
+    Install("CAutomobile", "IsDoorFullyOpen_uint", 0x6A63E0, static_cast<bool (CAutomobile::*)(uint32)>(&CAutomobile::IsDoorFullyOpen_Reversed)); 
+    Install("CAutomobile", "IsDoorClosed_enum", 0x6A2310, static_cast<bool (CAutomobile::*)(eDoors)>(&CAutomobile::IsDoorClosed_Reversed)); 
+    Install("CAutomobile", "IsDoorClosed_uint", 0x6A6470, static_cast<bool (CAutomobile::*)(uint32)>(&CAutomobile::IsDoorClosed_Reversed)); 
+    Install("CAutomobile", "IsDoorMissing_enum", 0x6A2330, static_cast<bool (CAutomobile::*)(eDoors)>(&CAutomobile::IsDoorMissing_Reversed)); 
+    Install("CAutomobile", "IsDoorMissing_uint", 0x6A6500, static_cast<bool (CAutomobile::*)(uint32)>(&CAutomobile::IsDoorMissing_Reversed)); 
+    Install("CAutomobile", "IsOpenTopCar", 0x6A2350, &CAutomobile::IsOpenTopCar_Reversed); 
+    Install("CAutomobile", "IsRoomForPedToLeaveCar", 0x6A3850, &CAutomobile::IsRoomForPedToLeaveCar_Reversed); 
+    Install("CAutomobile", "SetupDamageAfterLoad", 0x6B3E90, &CAutomobile::SetupDamageAfterLoad_Reversed); 
+    Install("CAutomobile", "GetHeightAboveRoad", 0x6A62B0, &CAutomobile::GetHeightAboveRoad_Reversed); 
+    Install("CAutomobile", "GetNumContactWheels", 0x6A62A0, &CAutomobile::GetNumContactWheels_Reversed); 
+    // Install("CAutomobile", "GetTowHitchPos, 0x6AF1D0, &CAutomobile::GetTowHitchPos);
+    Install("CAutomobile", "Save", 0x5D47E0, &CAutomobile::Save_Reversed);
+    Install("CAutomobile", "Load", 0x5D2980, &CAutomobile::Load_Reversed);
+    Install("CAutomobile", "ReduceHornCounter", 0x6A29A0, &CAutomobile::ReduceHornCounter);
+    Install("CAutomobile", "FixTyre", 0x6A3580, &CAutomobile::FixTyre);
+    Install("CAutomobile", "SetTaxiLight", 0x6A3740, &CAutomobile::SetTaxiLight);
+    Install("CAutomobile", "SetAllTaxiLights", 0x6A3760, &CAutomobile::SetAllTaxiLights);
 }
 
-CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy) {
+CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy)
+{
     plugin::CallMethod<0x6B0A90, CAutomobile*, int32, eVehicleCreatedBy, bool>(this, modelIndex, createdBy, setupSuspensionLines);
-}
-
-// 0x6B4410
-bool CAutomobile::SetTowLink(CVehicle* targetVehicle, bool arg1) {
-    return SetTowLink_Reversed(targetVehicle, arg1);
-}
-
-bool CAutomobile::SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1) {
-    return plugin::CallMethodAndReturn<bool, 0x6B4410, CAutomobile*, CVehicle*, bool>(this, targetVehicle, arg1);
 }
 
 void CAutomobile::ProcessControl()
@@ -1344,39 +1362,332 @@ void CAutomobile::ProcessSuspension()
     }
 }
 
-void CAutomobile::ProcessControl_Reversed()
+// 0x6A29C0
+void CAutomobile::ProcessControlCollisionCheck(bool applySpeed)
 {
-    return CAutomobile::ProcessControl();
+    plugin::CallMethod<0x6A29C0, CAutomobile*, bool>(this, applySpeed);
 }
 
-CVector CAutomobile::AddMovingCollisionSpeed_Reversed(CVector& point)
+// 0x6AD690
+void CAutomobile::ProcessControlInputs(uint8 playerNum)
 {
-    return CAutomobile::AddMovingCollisionSpeed(point);
+    plugin::CallMethod<0x6AD690, CAutomobile*, uint8>(this, playerNum);
 }
 
-bool CAutomobile::ProcessAI_Reversed(uint32& extraHandlingFlags)
+// 0x6A2210
+void CAutomobile::GetComponentWorldPosition(int32 componentId, CVector& posnOut)
 {
-    return CAutomobile::ProcessAI(extraHandlingFlags);
+    if (m_aCarNodes[componentId])
+        posnOut = RwFrameGetLTM(m_aCarNodes[componentId])->pos;
 }
 
-void CAutomobile::ResetSuspension_Reversed()
+// 0x6A2250
+bool CAutomobile::IsComponentPresent(int32 componentId)
 {
-    return CAutomobile::ResetSuspension();
+    return m_aCarNodes[componentId] != 0;
 }
 
-void CAutomobile::ProcessFlyingCarStuff_Reversed()
+// 0x6A6AE0
+void CAutomobile::OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound)
 {
-    return CAutomobile::ProcessFlyingCarStuff();
+    plugin::CallMethod<0x6A6AE0, CAutomobile*, CPed*, int32, eDoors, float, bool>(this, ped, componentId, door, doorOpenRatio, playSound);
 }
 
-void CAutomobile::DoHoverSuspensionRatios_Reversed()
+// 0x6A2270
+float CAutomobile::GetDooorAngleOpenRatio(eDoors door)
 {
-    return CAutomobile::DoHoverSuspensionRatios();
+    const auto doorId = (int32)door;
+    return m_doors[doorId].GetAngleOpenRatio();
 }
 
-void CAutomobile::ProcessSuspension_Reversed()
+// 0x6A62C0
+float CAutomobile::GetDooorAngleOpenRatio(uint32 door)
 {
-    return CAutomobile::ProcessSuspension();
+    switch (door) {
+    case 8:
+        return GetDooorAngleOpenRatio(DOOR_RIGHT_FRONT);
+    case 9:
+        return GetDooorAngleOpenRatio(DOOR_RIGHT_REAR);
+    case 10:
+        return GetDooorAngleOpenRatio(DOOR_LEFT_FRONT);
+    case 11:
+        return GetDooorAngleOpenRatio(DOOR_LEFT_REAR);
+    case 18:
+        return 0.0f;
+    default:
+        return 0.0f;
+    }
+}
+
+// 0x6A2290
+bool CAutomobile::IsDoorReady(eDoors door)
+{
+    if (m_doors[door].IsClosed())
+        return true;
+
+    if (IsDoorMissing(door))
+        return true;
+
+    return false;
+}
+
+// 0x6A6350
+bool CAutomobile::IsDoorReady(uint32 door)
+{
+    switch (door) {
+    case 8:
+        return IsDoorReady(DOOR_RIGHT_FRONT);
+    case 9:
+        return IsDoorReady(DOOR_RIGHT_REAR);
+    case 10:
+        return IsDoorReady(DOOR_LEFT_FRONT);
+    case 11:
+        return IsDoorReady(DOOR_LEFT_REAR);
+    case 18:
+        return true;
+    default:
+        return false;
+    }
+}
+
+// 0x6A22D0
+bool CAutomobile::IsDoorFullyOpen(eDoors door)
+{
+    if (m_doors[door].IsFullyOpen())
+        return true;
+
+    if (IsDoorMissing(door))
+        return true;
+
+    return false;
+}
+
+// 0x6A63E0
+bool CAutomobile::IsDoorFullyOpen(uint32 door)
+{
+    switch (door) {
+    case 8:
+        return IsDoorFullyOpen(DOOR_RIGHT_FRONT);
+    case 9:
+        return IsDoorFullyOpen(DOOR_RIGHT_REAR);
+    case 10:
+        return IsDoorFullyOpen(DOOR_LEFT_FRONT);
+    case 11:
+        return IsDoorFullyOpen(DOOR_LEFT_REAR);
+    case 18:
+        return false;
+    default:
+        return false;
+    }
+}
+
+// 0x6A2310
+bool CAutomobile::IsDoorClosed(eDoors door)
+{
+    return m_doors[door].IsClosed();
+}
+
+// 0x6A6470
+bool CAutomobile::IsDoorClosed(uint32 door)
+{
+    switch (door) {
+    case 8:
+        return IsDoorClosed(DOOR_RIGHT_FRONT);
+    case 9:
+        return IsDoorClosed(DOOR_RIGHT_REAR);
+    case 10:
+        return IsDoorClosed(DOOR_LEFT_FRONT);
+    case 11:
+        return IsDoorClosed(DOOR_LEFT_REAR);
+    case 18:
+        return false;
+    default:
+        return false;
+    }
+}
+
+// 0x6A2330
+bool CAutomobile::IsDoorMissing(eDoors door)
+{
+    return m_damageManager.GetDoorStatus(door) == 4;
+}
+
+// 0x6A6500
+bool CAutomobile::IsDoorMissing(uint32 door)
+{
+    switch (door) {
+    case 8:
+        return IsDoorMissing(DOOR_RIGHT_FRONT);
+    case 9:
+        return IsDoorMissing(DOOR_RIGHT_REAR);
+    case 10:
+        return IsDoorMissing(DOOR_LEFT_FRONT);
+    case 11:
+        return IsDoorMissing(DOOR_LEFT_REAR);
+    case 18:
+        return true;
+    default:
+        return false;
+    }
+}
+
+// 0x6A2350
+bool CAutomobile::IsOpenTopCar()
+{
+    return m_nModelIndex == MODEL_COMET && m_anExtras[0] && m_anExtras[1]
+        || m_nModelIndex == MODEL_STALLION && m_anExtras[0] && m_anExtras[1];
+}
+
+// 0x6A3030
+void CAutomobile::RemoveRefsToVehicle(CEntity* entity)
+{
+    plugin::CallMethod<0x6A3030, CAutomobile*, CEntity*>(this, entity);
+}
+
+// todo: uint8 bHideExplosion -> bool
+// 0x6B3780
+void CAutomobile::BlowUpCar(CEntity* damager, uint8 bHideExplosion)
+{
+    plugin::CallMethod<0x6B3780, CAutomobile*, CEntity*, uint8>(this, damager, bHideExplosion);
+}
+
+// 0x6B3BB0
+void CAutomobile::BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound)
+{
+    plugin::CallMethod<0x6B3BB0, CAutomobile*, bool, bool, bool, bool>(this, bNoCamShake, bNoSpawnFlyingComps, bDetachWheels, bExplosionSound);
+}
+
+// 0x6A3060
+bool CAutomobile::SetUpWheelColModel(CColModel* wheelCol)
+{
+    return plugin::CallMethodAndReturn<bool, 0x6A3060, CAutomobile*, CColModel*>(this, wheelCol);
+}
+
+// 0x6A32B0
+bool CAutomobile::BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect)
+{
+    return plugin::CallMethodAndReturn<bool, 0x6A32B0, CAutomobile*, uint8, bool>(this, tyreComponentId, bPhysicalEffect);
+}
+
+// 0x6A3850
+bool CAutomobile::IsRoomForPedToLeaveCar(uint32 arg0, CVector* arg1)
+{
+    return true;
+}
+
+// 0x6A65D0
+void CAutomobile::SetupSuspensionLines()
+{
+    plugin::CallMethod<0x6A65D0, CAutomobile*>(this);
+}
+
+// 0x6A3440
+void CAutomobile::Fix()
+{
+    plugin::CallMethod<0x6A3440, CAutomobile*>(this);
+}
+
+// 0x6B3E90
+void CAutomobile::SetupDamageAfterLoad()
+{
+    if (m_aCarNodes[CAR_BUMP_FRONT]) SetBumperDamage(FRONT_BUMPER, false);
+    if (m_aCarNodes[CAR_BUMP_REAR])  SetBumperDamage(REAR_BUMPER, false);
+
+    if (m_aCarNodes[CAR_BONNET])  SetDoorDamage(DOOR_BONNET, false);
+    if (m_aCarNodes[CAR_BOOT])    SetDoorDamage(DOOR_BOOT, false);
+    if (m_aCarNodes[CAR_DOOR_LF]) SetDoorDamage(DOOR_LEFT_FRONT, false);
+    if (m_aCarNodes[CAR_DOOR_RF]) SetDoorDamage(DOOR_RIGHT_FRONT, false);
+    if (m_aCarNodes[CAR_DOOR_LR]) SetDoorDamage(DOOR_LEFT_REAR, false);
+    if (m_aCarNodes[CAR_DOOR_RR]) SetDoorDamage(DOOR_RIGHT_REAR, false);
+
+    if (m_aCarNodes[CAR_WING_LF]) SetPanelDamage(FRONT_LEFT_PANEL, false);
+    if (m_aCarNodes[CAR_WING_RF]) SetPanelDamage(FRONT_RIGHT_PANEL, false);
+}
+
+// 0x6A47F0
+void CAutomobile::DoBurstAndSoftGroundRatios()
+{
+    plugin::CallMethod<0x6A47F0, CAutomobile*>(this);
+}
+
+// 0x6A3770
+void CAutomobile::PlayCarHorn()
+{
+    plugin::CallMethod<0x6A3770, CAutomobile*>(this);
+}
+
+// 0x6A62B0
+float CAutomobile::GetHeightAboveRoad()
+{
+    return m_fFrontHeightAboveRoad;
+}
+
+// 0x6A62A0
+int32 CAutomobile::GetNumContactWheels()
+{
+    return m_nNumContactWheels;
+}
+
+// 0x6A7650
+void CAutomobile::VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon)
+{
+    plugin::CallMethod<0x6A7650, CAutomobile*, float, uint16, CEntity*, CVector*, CVector*, eWeaponType>(this, damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon);
+}
+
+//0x6AF1D0
+bool CAutomobile::GetTowHitchPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh)
+{
+    return plugin::CallMethodAndReturn<bool, 0x6AF1D0, CAutomobile*, CVector&, bool, CVehicle*>(this, posnOut, bCheckModelInfo, veh);
+
+    if (!bCheckModelInfo)
+        return false;
+
+    posnOut.x = 0.0f;
+    posnOut.y = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMax.y - 0.5f;
+    posnOut.z = 0.5 - this->m_fFrontHeightAboveRoad;
+    // todo: MultiplyMatrixWithVector(&posnOut, m_matrix, posnOut);
+
+    return true;
+}
+
+// 0x6AF250
+bool CAutomobile::GetTowBarPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh)
+{
+    return plugin::CallMethodAndReturn<bool, 0x6AF250, CAutomobile*, CVector&, bool, CVehicle*>(this, posnOut, bCheckModelInfo, veh);
+}
+
+// 0x6B4410
+bool CAutomobile::SetTowLink(CVehicle* targetVehicle, bool arg1)
+{
+    return plugin::CallMethodAndReturn<bool, 0x6B4410, CAutomobile*, CVehicle*, bool>(this, targetVehicle, arg1);
+}
+
+// 0x6A4400
+bool CAutomobile::BreakTowLink()
+{
+    return plugin::CallMethodAndReturn<bool, 0x6A4400, CAutomobile*>(this);
+}
+
+// 0x6A6090
+float CAutomobile::FindWheelWidth(bool bRear)
+{
+    return plugin::CallMethodAndReturn<float, 0x6A6090, CAutomobile*>(this);
+}
+
+// 0x5D47E0
+bool CAutomobile::Save()
+{
+  CVehicle::Save();
+  CGenericGameStorage::SaveDataToWorkBuffer(&m_damageManager, sizeof(m_damageManager));
+  return true;
+}
+
+// 0x5D2980
+bool CAutomobile::Load()
+{
+  CVehicle::Load();
+  CGenericGameStorage::LoadDataFromWorkBuffer(&m_damageManager, sizeof(m_damageManager));
+  return true;
 }
 
 void CAutomobile::SetupModelNodes()
@@ -1847,16 +2158,18 @@ void CAutomobile::SetTotalDamage(bool arg0)
     ((void(__thiscall*)(CAutomobile*, bool))0x6A27F0)(this, arg0);
 }
 
+// unused?
 // 0x6A2980
 RpMaterial* DisableMatFx(RpMaterial* material, void* data)
 {
-    return ((RpMaterial * (__cdecl*)(RpMaterial*, void*))0x6A2980)(material, data);
+  RpMatFXMaterialSetEffects(material, rpMATFXEFFECTNULL);
+  return material;
 }
 
 // 0x6A29A0
 void CAutomobile::ReduceHornCounter()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6A29A0)(this);
+    if (m_nHornCounter) m_nHornCounter--;
 }
 
 // 0x6A2F00
@@ -1884,9 +2197,9 @@ void CAutomobile::DebugCode()
 }
 
 // 0x6A3580
-void CAutomobile::FixTyre(eWheelStatus wheel)
+void CAutomobile::FixTyre(eWheels wheel)
 {
-    ((void(__thiscall*)(CAutomobile*, eWheelStatus))0x6A3580)(this, wheel);
+    m_damageManager.SetWheelStatus(wheel, WHEEL_STATUS_OK);
 }
 
 // 0x6A35A0
@@ -1904,13 +2217,13 @@ void CAutomobile::FixPanel(int32 nodeIndex, ePanels panel)
 // 0x6A3740
 void CAutomobile::SetTaxiLight(bool enable)
 {
-    ((void(__thiscall*)(CAutomobile*, bool))0x6A3740)(this, enable);
+    npcFlags.bTaxiLightOn = enable;
 }
 
 // 0x6A3760
-void CAutomobile::SetAllTaxiLights(bool arg0)
+void CAutomobile::SetAllTaxiLights(bool enable)
 {
-    ((void(__cdecl*)(bool))0x6A3760)(arg0);
+    m_sAllTaxiLights = enable;
 }
 
 // 0x6A3820
@@ -2075,7 +2388,7 @@ void CAutomobile::DoSoftGroundResistance(uint32& extraHandlingFlags)
     }
 }
 
-void CAutomobile::ProcessCarWheelPair(int32 leftWheel, int32 rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront)
+void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront)
 {
     bool driveWheels = false;
     if (bFront && gHandlingDataMgr.HasFrontWheelDrive(m_pHandlingData->m_nVehicleId))
@@ -2935,11 +3248,11 @@ bool CAutomobile::RcbanditCheck1CarWheels(CPtrList& ptrlist)
     CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
 
     CPtrNode* next = nullptr;
-    for (CPtrNode* node = ptrlist.pNode; node; node = next) {
-        next = node->pNext;
-        CAutomobile* vehicle = (CAutomobile*)node->pItem;
-        if (node->pItem != this && vehicle->IsAutomobile()) {
-            if (!ModelIndices::IsRCBandit(vehicle->m_nModelIndex) && vehicle->m_nScanCode != CWorld::ms_nCurrentScanCode)
+    for (CPtrNode* node = ptrlist.m_node; node; node = next) {
+        next = node->m_next;
+        CAutomobile* vehicle = (CAutomobile*)node->m_item;
+        if (node->m_item != this && vehicle->IsAutomobile()) {
+            if (!ModelIndices::IsRCBandit(vehicle->m_nModelIndex) && vehicle->m_nScanCode != GetCurrentScanCode())
                 continue;
             CVector distance = GetPosition() - vehicle->GetPosition();
             if (distance.x < 10.0f && distance.y < 10.0f) {
@@ -3105,15 +3418,6 @@ void CAutomobile::FireTruckControl(CFire* fire)
 bool CAutomobile::HasCarStoppedBecauseOfLight()
 {
     return ((bool(__thiscall*)(CAutomobile*))0x44D520)(this);
-}
-
-// 0x6A3440
-void CAutomobile::Fix() {
-    Fix_Reversed();
-}
-
-void CAutomobile::Fix_Reversed() {
-    plugin::CallMethod<0x6A3440, CAutomobile*>(this);
 }
 
 // 0x6A0750

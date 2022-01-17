@@ -81,7 +81,7 @@ void CPhysical::InjectHooks()
 
 CPhysical::CPhysical() : CEntity()
 {
-    m_pCollisionList.m_pNode = nullptr;
+    m_pCollisionList.m_node = nullptr;
     CPlaceable::AllocateStaticMatrix();
     GetMatrix().SetUnity();
 
@@ -153,13 +153,12 @@ void CPhysical::Add_Reversed()
 
             auto newEntityInfoNode = new CEntryInfoNode();
             if (newEntityInfoNode) {
-                auto newDoubleLink = doubleLinkList->AddItem(this);
-                newEntityInfoNode->m_pDoubleLink = newDoubleLink;
-                newEntityInfoNode->m_pRepeatSector = repeatSector;
-                newEntityInfoNode->m_pDoubleLinkList = doubleLinkList;
+                newEntityInfoNode->m_doubleLink = doubleLinkList->AddItem(this);
+                newEntityInfoNode->m_repeatSector = repeatSector;
+                newEntityInfoNode->m_doubleLinkList = doubleLinkList;
             }
-            newEntityInfoNode->AddToList(m_pCollisionList.m_pNode);
-            m_pCollisionList.m_pNode = newEntityInfoNode;
+            newEntityInfoNode->AddToList(m_pCollisionList.m_node);
+            m_pCollisionList.m_node = newEntityInfoNode;
         }
     }
 }
@@ -174,15 +173,16 @@ void CPhysical::Remove_Reversed()
 {
     if (m_bIsBIGBuilding) {
         CEntity::Remove();
-    } else {
-        CEntryInfoNode* entryInfoNode = m_pCollisionList.m_pNode;
-        while (entryInfoNode) {
-            CEntryInfoNode* nextEntryInfoNode = entryInfoNode->m_pNext;
-            entryInfoNode->m_pDoubleLinkList->DeleteNode(entryInfoNode->m_pDoubleLink);
-            m_pCollisionList.DeleteNode(entryInfoNode);
+        return;
+    }
 
-            entryInfoNode = nextEntryInfoNode;
-        }
+    CEntryInfoNode* entryInfoNode = m_pCollisionList.m_node;
+    while (entryInfoNode) {
+        CEntryInfoNode* nextEntryInfoNode = entryInfoNode->m_next;
+        entryInfoNode->m_doubleLinkList->DeleteNode(entryInfoNode->m_doubleLink);
+        m_pCollisionList.DeleteNode(entryInfoNode);
+
+        entryInfoNode = nextEntryInfoNode;
     }
 }
 
@@ -606,7 +606,7 @@ void CPhysical::RemoveAndAdd()
         return;
     }
 
-    CEntryInfoNode* entryInfoNode = m_pCollisionList.m_pNode;
+    CEntryInfoNode* entryInfoNode = m_pCollisionList.m_node;
     CRect boundRect;
     GetBoundRect(&boundRect);
     int32 startSectorX = CWorld::GetSectorX(boundRect.left);
@@ -630,40 +630,39 @@ void CPhysical::RemoveAndAdd()
             }
 
             if (entryInfoNode) {
-                CPtrNodeDoubleLink* pDoubleLink = entryInfoNode->m_pDoubleLink;
-                if (entryInfoNode->m_pDoubleLinkList->pNode == (CPtrNode*)pDoubleLink)
-                    entryInfoNode->m_pDoubleLinkList->pNode = (CPtrNode*)pDoubleLink->pNext;
+                CPtrNodeDoubleLink* doubleLink = entryInfoNode->m_doubleLink;
+                if (entryInfoNode->m_doubleLinkList->m_node == (CPtrNode*)doubleLink)
+                    entryInfoNode->m_doubleLinkList->m_node = (CPtrNode*)doubleLink->m_next;
 
-                CPtrNodeDoubleLink* pDoubleLinkPrevious = pDoubleLink->pPrev;
-                if (pDoubleLinkPrevious)
-                    pDoubleLinkPrevious->pNext = pDoubleLink->pNext;
+                CPtrNodeDoubleLink* doubleLinkPrevious = doubleLink->m_prev;
+                if (doubleLinkPrevious)
+                    doubleLinkPrevious->m_next = doubleLink->m_next;
 
-                CPtrNodeDoubleLink* doubleLinkNext = pDoubleLink->pNext;
+                CPtrNodeDoubleLink* doubleLinkNext = doubleLink->m_next;
                 if (doubleLinkNext)
-                    doubleLinkNext->pPrev = pDoubleLink->pPrev;
+                    doubleLinkNext->m_prev = doubleLink->m_prev;
 
-                pDoubleLink->AddToList(doubleLinkList);
+                doubleLink->AddToList(doubleLinkList);
 
-                entryInfoNode->m_pRepeatSector = repeatSector;
-                entryInfoNode->m_pDoubleLinkList = doubleLinkList;
-                entryInfoNode = entryInfoNode->m_pNext;
+                entryInfoNode->m_repeatSector = repeatSector;
+                entryInfoNode->m_doubleLinkList = doubleLinkList;
+                entryInfoNode = entryInfoNode->m_next;
             } else {
-                auto newDoubleLink = doubleLinkList->AddItem(this);
                 auto newEntityInfoNode = new CEntryInfoNode();
                 if (newEntityInfoNode) {
-                    newEntityInfoNode->m_pDoubleLink = newDoubleLink;
-                    newEntityInfoNode->m_pRepeatSector = repeatSector;
-                    newEntityInfoNode->m_pDoubleLinkList = doubleLinkList;
+                    newEntityInfoNode->m_doubleLink = doubleLinkList->AddItem(this);
+                    newEntityInfoNode->m_repeatSector = repeatSector;
+                    newEntityInfoNode->m_doubleLinkList = doubleLinkList;
                 }
-                newEntityInfoNode->AddToList(m_pCollisionList.m_pNode);
-                m_pCollisionList.m_pNode = newEntityInfoNode;
+                newEntityInfoNode->AddToList(m_pCollisionList.m_node);
+                m_pCollisionList.m_node = newEntityInfoNode;
             }
         }
     }
 
     while (entryInfoNode) {
-        CEntryInfoNode* nextEntryInfoNode = entryInfoNode->m_pNext;
-        entryInfoNode->m_pDoubleLinkList->DeleteNode(entryInfoNode->m_pDoubleLink);
+        CEntryInfoNode* nextEntryInfoNode = entryInfoNode->m_next;
+        entryInfoNode->m_doubleLinkList->DeleteNode(entryInfoNode->m_doubleLink);
         m_pCollisionList.DeleteNode(entryInfoNode);
 
         entryInfoNode = nextEntryInfoNode;
@@ -2042,12 +2041,12 @@ bool CPhysical::ProcessShiftSectorList(int32 sectorX, int32 sectorY)
         {
             do
             {
-                auto* entity = reinterpret_cast<CPhysical*>(node->pItem);
+                auto* entity = reinterpret_cast<CPhysical*>(node->m_item);
                 auto* pPedEntity = static_cast<CPed*>(entity);
                 auto* pVehicleEntity = static_cast<CVehicle*>(entity);
                 auto* pObjectEntity = static_cast<CObject*>(entity);
 
-                node = node->pNext;
+                node = node->m_next;
 
                 bool bProcessEntityCollision = true;
                 if (entity->m_nType != ENTITY_TYPE_BUILDING
@@ -2061,7 +2060,7 @@ bool CPhysical::ProcessShiftSectorList(int32 sectorX, int32 sectorY)
                     }
                 }
                 if (entity != this
-                    && entity->m_nScanCode != CWorld::ms_nCurrentScanCode
+                    && entity->m_nScanCode != GetCurrentScanCode()
                     && entity->m_bUsesCollision && (!m_bHasHitWall || bProcessEntityCollision))
                 {
                     if (entity->GetIsTouching(vecBoundCentre, fBoundingSphereRadius))
@@ -2123,7 +2122,7 @@ bool CPhysical::ProcessShiftSectorList(int32 sectorX, int32 sectorY)
                         if (bCollidedEntityCollisionIgnored || bCollisionDisabled)
                             continue;
 
-                        entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                        entity->m_nScanCode = GetCurrentScanCode();
                         int32 totalColPointsToProcess = ProcessEntityCollision(entity, colPoints);
                         if (totalColPointsToProcess <= 0)
                             continue;
@@ -4060,8 +4059,8 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
             CVehicle* thisVehicle = nullptr;
 
             while (node) {
-                entity = (CEntity*)node->pItem;
-                node = node->pNext;
+                entity = (CEntity*)node->m_item;
+                node = node->m_next;
 
                 physicalEntity = static_cast<CPhysical*>(entity);
                 entityObject = static_cast<CObject*>(entity);
@@ -4072,7 +4071,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                 thisPed = static_cast<CPed*>(this);
                 thisVehicle = static_cast<CVehicle*>(this);
 
-                if (!entity->m_bUsesCollision || physicalEntity == this || entity->m_nScanCode == CWorld::ms_nCurrentScanCode) {
+                if (!entity->m_bUsesCollision || physicalEntity == this || entity->m_nScanCode == GetCurrentScanCode()) {
                     continue;
                 }
 
@@ -4126,7 +4125,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                 }
 
                 if (!m_bUsesCollision || bCollidedEntityCollisionIgnored || bCollisionDisabled) {
-                    entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                    entity->m_nScanCode = GetCurrentScanCode();
                     if (!bCollisionDisabled) // if collision is enabled then
                     {
                         int32 totalColPointsToProcess = ProcessEntityCollision(physicalEntity, &colPoints[0]);
@@ -4141,7 +4140,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                 }
 
                 if (entity->m_nType == ENTITY_TYPE_BUILDING || physicalEntity->physicalFlags.bCollidable || bCollidedEntityUnableToMove) {
-                    entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                    entity->m_nScanCode = GetCurrentScanCode();
 
                     int32 totalAcceptableColPoints = 0;
                     float fThisMaxDamageIntensity = 0.0f;
@@ -4284,7 +4283,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                         bResult = true;
                     }
                 } else {
-                    entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                    entity->m_nScanCode = GetCurrentScanCode();
 
                     int32 totalAcceptableColPoints = 0;
                     int32 totalColPointsToProcess = ProcessEntityCollision(physicalEntity, &colPoints[0]);
@@ -4587,9 +4586,9 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
     CPtrNodeDoubleLink* node = doubleLinkList->GetNode();
     while (node)
     {
-        entity = reinterpret_cast<CEntity*>(node->pItem);
+        entity = reinterpret_cast<CEntity*>(node->m_item);
         physicalEntity = static_cast<CPhysical*>(entity);
-        node = node->pNext;
+        node = node->m_next;
 
         bool isLampTouchingGround = false;
         if (entity->IsObject() && entity->AsObject()->IsFallenLampPost())
@@ -4597,10 +4596,10 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
 
         if (entity != this
             && !isLampTouchingGround
-            && entity->m_nScanCode != CWorld::ms_nCurrentScanCode)
+            && entity->m_nScanCode != GetCurrentScanCode())
         {
             if (entity->m_bUsesCollision && entity->GetIsTouching(vecBoundingCentre, fBoundingRadius)) {
-                entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                entity->m_nScanCode = GetCurrentScanCode();
                 totalColPointsToProcess = ProcessEntityCollision(physicalEntity, &colPoints[0]);
                 if (totalColPointsToProcess > 0) {
                     break;
@@ -4878,13 +4877,13 @@ bool CPhysical::CheckCollision_SimpleCar()
 {
     m_bCollisionProcessed = false;
     CWorld::IncrementCurrentScanCode();
-    CEntryInfoNode* entryInfoNode = m_pCollisionList.m_pNode;
+    CEntryInfoNode* entryInfoNode = m_pCollisionList.m_node;
     if (!entryInfoNode)
         return false;
 
-    while (!ProcessCollisionSectorList_SimpleCar(entryInfoNode->m_pRepeatSector))
+    while (!ProcessCollisionSectorList_SimpleCar(entryInfoNode->m_repeatSector))
     {
-        entryInfoNode = entryInfoNode->m_pNext;
+        entryInfoNode = entryInfoNode->m_next;
         if (!entryInfoNode)
             return false;
     }

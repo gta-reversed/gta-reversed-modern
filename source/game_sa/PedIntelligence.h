@@ -76,6 +76,7 @@ public:
 
     CEntity** GetPedEntities();
     void SetPedDecisionMakerType(int32 newType);
+    auto GetPedDecisionMakerType() const { return m_nDecisionMakerType; }
     void SetPedDecisionMakerTypeInGroup(int32 newType);
     void RestorePedDecisionMakerType();
     void SetHearingRange(float range);
@@ -129,6 +130,9 @@ public:
     void Process();
     CTask* GetActivePrimaryTask();
     float GetPedFOVRange();
+
+    void SetDmRadius(float r) { m_fDmRadius = r; }
+    void SetNumPedsToScan(uint32 n) { m_nDmNumPedsToScan = n; }
 
     // NOTSA
     bool IsUsingGun() {

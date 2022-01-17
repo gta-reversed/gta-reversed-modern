@@ -15,9 +15,12 @@ public:
     CVector();
     CVector(float X, float Y, float Z);
     CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
+    CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
 
 public:
     static void InjectHooks();
+
+    static CVector Random(float min, float max);
 
     // Returns length of vector
     float Magnitude() const;
@@ -28,7 +31,7 @@ public:
     // Normalises a vector
     void Normalise();
 
-    // Normalises a vector and returns length
+    // Normalises a vector and returns length (in-place)
     float NormaliseAndMag();
 
     // Performs cross calculation
@@ -68,12 +71,12 @@ public:
         x = rwvec.x; y = rwvec.y; z = rwvec.z;
     }
 
-    inline float SquaredMagnitude()
+    inline float SquaredMagnitude() const
     {
         return x*x + y*y + z*z;
     }
 
-    inline float SquaredMagnitude2D()
+    inline float SquaredMagnitude2D() 
     {
         return x * x + y * y;
     }

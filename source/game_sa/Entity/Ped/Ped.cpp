@@ -1261,11 +1261,6 @@ void CPed::DeadPedMakesTyresBloody()
     ((void(__thiscall *)(CPed*))0x6B4200)(this);
 }
 
-void CPed::SetModelIndex(uint32 modelIndex)
-{
-    ((void(__thiscall *)(CPed*, uint32))0x5E4880)(this, modelIndex);
-}
-
 bool CPed::IsInVehicleThatHasADriver()
 {
     if (bInVehicle) {
@@ -1273,4 +1268,83 @@ bool CPed::IsInVehicleThatHasADriver()
             return true;
     }
     return false;
+}
+
+// 0x5E4880
+void CPed::SetModelIndex(uint32 modelIndex)
+{
+    plugin::CallMethod<0x5E4880, CPed*, uint32>(this, modelIndex);
+}
+
+// 0x5DEBF0
+void CPed::DeleteRwObject()
+{
+    CEntity::DeleteRwObject();
+}
+
+// 0x5E8CD0
+void CPed::ProcessControl()
+{
+    plugin::CallMethod<0x5E8CD0, CPed*>(this);
+}
+
+// 0x5E4110 todo: CPed::Teleport(CVector)
+void CPed::Teleport(CVector destination, bool resetRotation)
+{
+    plugin::CallMethod<0x5E4110, CPed*, CVector, bool>(this, destination, resetRotation);
+}
+
+// 0x5E3C30
+void CPed::SpecialEntityPreCollisionStuff(CEntity* colEntity,
+                                          bool  bIgnoreStuckCheck,
+                                          bool* bCollisionDisabled,
+                                          bool* bCollidedEntityCollisionIgnored,
+                                          bool* bCollidedEntityUnableToMove,
+                                          bool* bThisOrCollidedEntityStuck)
+{
+    plugin::CallMethod<0x5E3C30, CPed*, CEntity*, bool, bool*, bool*, bool*, bool*>(this, colEntity, bIgnoreStuckCheck, bCollisionDisabled, bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck);
+}
+
+// 0x5E3E90
+uint8 CPed::SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2)
+{
+    return plugin::CallMethodAndReturn<uint8, 0x5E3E90, CPed*, bool*, bool*>(this, bProcessCollisionBeforeSettingTimeStep, unk2);
+}
+
+// 0x5E8A20
+void CPed::PreRender()
+{
+    if (m_nPedState != PEDSTATE_DRIVING)
+        PreRenderAfterTest();
+}
+
+// 0x5E7680
+void CPed::Render()
+{
+    plugin::CallMethod<0x5E7680, CPed*>(this);
+}
+
+// 0x553F00
+bool CPed::SetupLighting()
+{
+  ActivateDirectional();
+  return CRenderer::SetupLightingForEntity(this);
+}
+
+// 0x5533B0
+void CPed::RemoveLighting(bool bRemove)
+{
+    plugin::CallMethod<0x5533B0, CPed*, bool>(this, bRemove);
+}
+
+// 0x5E7B70
+void CPed::FlagToDestroyWhenNextProcessed()
+{
+    plugin::CallMethod<0x5E7B70, CPed*>(this);
+}
+
+// 0x5E2530
+int32 CPed::ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint)
+{
+    return plugin::CallMethodAndReturn<int32, 0x5E2530, CPed*, CPhysical*, CColPoint*>(this, entity, colpoint);
 }
