@@ -63,7 +63,7 @@ struct tStreamingChannel {
 
 VALIDATE_SIZE(tStreamingChannel, 0x98);
 
-bool IsModelDFF(int32 model) {
+static bool IsModelDFF(int32 model) {
     return (uint32)model < RESOURCE_ID_DFF + TOTAL_DFF_MODEL_IDS;
 }
 
