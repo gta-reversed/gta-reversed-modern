@@ -92,7 +92,7 @@ public:
     static int32 LoadClumpObject(const char* line);
 
     static bool LoadCollisionFile(uint8* data, uint32 dataSize, uint8 colId);
-    static bool LoadCollisionFile(const char* filename, uint8 colId);
+    static void LoadCollisionFile(const char* filename, uint8 colId);
     static bool LoadCollisionFileFirstTime(uint8* data, uint32 dataSize, uint8 colId);
     static void LoadCollisionModel(uint8* data, CColModel& outColModel);
     static void LoadCollisionModelVer2(uint8* buffer, uint32 fileSize, CColModel& cm, const char* modelName);

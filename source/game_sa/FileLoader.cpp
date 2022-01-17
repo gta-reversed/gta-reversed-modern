@@ -105,7 +105,7 @@ RwTexDictionary* CFileLoader::LoadTexDictionary(const char* filename) {
 
 // 0x5B40C0
 int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
-    int32  objID{ -1 };
+    eModelID objID{ eModelID::MODEL_INVALID };
     char modelName[24]{};
     char txdName[24]{};
     char animName[16]{ "null" };
@@ -124,6 +124,8 @@ int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
 
     if (std::string_view{ animName } == "null")
         mi->bHasBeenPreRendered = true;
+
+    return objID;
 }
 
 // 0x5371F0
@@ -434,11 +436,13 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
         if (MI->GetModelType() == eModelInfoType::MODEL_INFO_TYPE_ATOMIC) {
             CPlantMgr::SetPlantFriendlyFlagInAtomicMI(static_cast<CAtomicModelInfo*>(MI));
         }
-    }       
+    }
+
+    return true;
 }
 
 // 0x5B4E60
-bool CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
+void CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
     static uint8 buffer[0x8000]; // 32 kB, enough for most models.
 
     using namespace ColHelpers;
@@ -535,6 +539,7 @@ bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8
         // This cast looks weird, but there's a note about it above `PackedModelStartEnd`s definition.
         CColAccel::addCacheCol((PackedModelStartEnd)modelId, CM); 
     }
+
     return true;
 }
 
@@ -625,7 +630,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
     cm.m_boundSphere = CColSphere{ h.bounds.sphere };
     cm.m_boundSphere.m_bNotEmpty = h.flags & 2; // Not empty flag. Still unsure why is this stored in the bound sphere though...
 
-    auto dataSize = dataSize - sizeof(Header);
+    auto dataSizeAfterHeader = dataSize - sizeof(Header);
     if (!dataSize)
         return; // No data present, other than the header
 
@@ -634,14 +639,14 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
     //                [              DATA FROM FILE COPIED                  ]
     // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
 
-    auto p = (uint8*)CMemoryMgr::Malloc(dataSize + sizeof(CCollisionData));
+    auto p = (uint8*)CMemoryMgr::Malloc(dataSizeAfterHeader + sizeof(CCollisionData));
     cm.m_pColData = new(p) CCollisionData; // R* used a cast here, but that's not really a good idea.
-    memcpy(p + sizeof(CCollisionData), buffer + sizeof(Header), dataSize); // Copy actual data into allocated memory after CCollisionData
+    memcpy(p + sizeof(CCollisionData), buffer + sizeof(Header), dataSizeAfterHeader); // Copy actual data into allocated memory after CCollisionData
 
     auto cd = cm.m_pColData;
     cd->m_nNumSpheres = h.nSpheres;
     cd->m_nNumBoxes = h.nBoxes;
-    cd->m_nNumLines = h.nLines;
+    cd->m_nNumLines = (uint8)h.nLines;
     cd->m_nNumTriangles = h.nFaces;
 
     cd->bUsesDisks = false;
@@ -689,8 +694,8 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
     cm.m_boundSphere = CColSphere{ h.bounds.sphere };
     cm.m_boundSphere.m_bNotEmpty = h.flags & 2; // Not empty flag. Still unsure why is this stored in the bound sphere though...
 
-    auto dataSize = dataSize - sizeof(V3::Header);
-    if (!dataSize)
+    auto dataSizeAfterHeader = dataSize - sizeof(V3::Header);
+    if (!dataSizeAfterHeader)
         return; // No data present, other than the header
 
     // Here's the meat. We allocate some memory to hold both the file's contents and the CCollisionData struct.
@@ -698,14 +703,14 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
     //                [              DATA FROM FILE COPIED                  ]
     // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
 
-    auto p = (uint8*)CMemoryMgr::Malloc(dataSize + sizeof(CCollisionData));
+    auto p = (uint8*)CMemoryMgr::Malloc(dataSizeAfterHeader + sizeof(CCollisionData));
     cm.m_pColData = new(p) CCollisionData; // R* used a cast here, but that's not really a good idea.
-    memcpy(p + sizeof(CCollisionData), buffer + sizeof(V3::Header), dataSize); // Copy actual data into allocated memory after CCollisionData
+    memcpy(p + sizeof(CCollisionData), buffer + sizeof(V3::Header), dataSizeAfterHeader); // Copy actual data into allocated memory after CCollisionData
 
     auto cd = cm.m_pColData;
     cd->m_nNumSpheres = h.nSpheres;
     cd->m_nNumBoxes = h.nBoxes;
-    cd->m_nNumLines = h.nLines;
+    cd->m_nNumLines = (uint8)h.nLines;
     cd->m_nNumTriangles = h.nFaces;
     cd->m_nNumShadowTriangles = h.nShdwFaces;
 
@@ -756,8 +761,8 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
     cm.m_boundSphere = CColSphere{ h.bounds.sphere };
     cm.m_boundSphere.m_bNotEmpty = h.flags & 2; // Not empty flag. Still unsure why is this stored in the bound sphere though...
 
-    auto dataSize = dataSize - sizeof(V4::Header);
-    if (!dataSize)
+    auto dataSizeAfterHeader = dataSize - sizeof(V4::Header);
+    if (!dataSizeAfterHeader)
         return; // No data present, other than the header
 
     // Here's the meat. We allocate some memory to hold both the file's contents and the CCollisionData struct.
@@ -765,14 +770,14 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
     //                [              DATA FROM FILE COPIED                  ]
     // CCollisionData | Spheres | Boxes | Suspension Lines | Vertices | Faces
 
-    auto p = (uint8*)CMemoryMgr::Malloc(dataSize + sizeof(CCollisionData));
+    auto p = (uint8*)CMemoryMgr::Malloc(dataSizeAfterHeader + sizeof(CCollisionData));
     cm.m_pColData = new(p) CCollisionData; // R* used a cast here, but that's not really a good idea.
-    memcpy(p + sizeof(CCollisionData), buffer + sizeof(V4::Header), dataSize); // Copy actual data into allocated memory after CCollisionData
+    memcpy(p + sizeof(CCollisionData), buffer + sizeof(V4::Header), dataSizeAfterHeader); // Copy actual data into allocated memory after CCollisionData
 
     auto cd = cm.m_pColData;
     cd->m_nNumSpheres = h.nSpheres;
     cd->m_nNumBoxes = h.nBoxes;
-    cd->m_nNumLines = h.nLines;
+    cd->m_nNumLines = (uint8)h.nLines;
     cd->m_nNumTriangles = h.nFaces;
     cd->m_nNumShadowTriangles = h.nShdwFaces;
 
@@ -791,7 +796,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
                 + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
                 - sizeof(FileHeader)          // Offset includes these headers, but we haven't copied them into our memory
                 - sizeof(V3::Header)
-                );
+            );
         };
         colDataPtr = fileOffset ? GetDataPtr() : nullptr;
     };
