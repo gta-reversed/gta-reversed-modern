@@ -7,7 +7,7 @@
 
 namespace AmbienceTrackManagerDebugModule {
 
-void ProcessImgui() {
+void ProcessImGui() {
     ImGui::Text("Stop %s",                           AEAmbienceTrackManager.m_bStop ? "true" : "false");
     ImGui::Text("Stop Prev %s",                      AEAmbienceTrackManager.m_bStopPrev ? "true" : "false");
     ImGui::Text("b3 %s",                             AEAmbienceTrackManager.m_b3 ? "true" : "false");
