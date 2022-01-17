@@ -22,6 +22,10 @@ void CVector::InjectHooks()
     ReversibleHooks::Install("CVector", "global_DotProduct_vec*vec*", 0x59C6D0, static_cast<float(*)(CVector*, CVector*)>(&DotProduct));
 }
 
+CVector CVector::Random(float min, float max) {
+    const auto Get = [=] { return CGeneral::GetRandomNumberInRange(min, max); };
+    return { Get(), Get(), Get() };
+}
 
 CVector::CVector()
 {

@@ -166,6 +166,9 @@ public:
         else
             m_nAlpha += 16;
     };
+    auto GetModelName() const noexcept {
+        return m_nKey;
+    }
     void SetModelName(const char* modelName) {
         m_nKey = CKeyGen::GetUppercaseKey(modelName);
     }

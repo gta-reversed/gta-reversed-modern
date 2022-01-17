@@ -39,6 +39,7 @@
 #include "Escalators.h"
 #include "MovingThings.h"
 #include "MovingThings.h"
+#include "PlaneTrail.h"
 #include "PlaneTrails.h"
 #include "Gamma.h"
 #include "CustomBuildingPipeline.h"
@@ -55,6 +56,8 @@
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
 #include "CreepingFire.h"
+#include "Restart.h"
+#include "BulletInfo.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -162,19 +165,16 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
 
-void WaitForDebugger() {
-    while (!::IsDebuggerPresent()) {
-        printf("Debugger not present\n");
-        ::Sleep(100);
-    }
-}
-
-void InjectHooksMain()
-{
-    // WaitForDebugger();
+void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
 
+    CClothesBuilder::InjectHooks();
+    CClothes::InjectHooks();
+    CBulletInfo::InjectHooks();
+    CRestart::InjectHooks();
+    CPlaneTrail::InjectHooks();
+    CCopPed::InjectHooks();
     CDamageManager::InjectHooks();
     CCreepingFire::InjectHooks();
     CPtrList::InjectHooks();
@@ -380,6 +380,7 @@ void InjectHooksMain()
     CText::InjectHooks();
     ModelIndices::InjectHooks();
     CWaterCannons::InjectHooks();
+    CWaterCannon::InjectHooks();
     CSprite::InjectHooks();
     CPlaneTrails::InjectHooks();
     CCustomBuildingPipeline::InjectHooks();

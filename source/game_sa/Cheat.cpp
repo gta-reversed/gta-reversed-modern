@@ -836,7 +836,7 @@ void CCheat::TankerCheat() {
     CStreaming::RequestModel(MODEL_PETROTR, 0);
     CStreaming::LoadAllRequestedModels(false);
 
-    if (CStreaming::ms_aInfoForModel[MODEL_PETROTR].m_nLoadState != LOADSTATE_LOADED)
+    if (!CStreaming::GetInfo(MODEL_PETROTR).IsLoaded())
         return;
 
     CTrailer* trailer = new CTrailer(MODEL_PETROTR, RANDOM_VEHICLE);

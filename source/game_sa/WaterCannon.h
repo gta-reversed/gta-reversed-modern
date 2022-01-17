@@ -30,10 +30,18 @@ public:
     CWaterCannon* Destructor();
 
     void Init();
+    bool HasActiveSection() const;
     void Update_OncePerFrame(int16);
     void Update_NewInput(CVector* start, CVector* end);
     void PushPeds();
     void Render();
+
+private:
+    // NOTSA
+    bool IsSectionActive(size_t idx) const;
+    CVector GetSectionPosn(size_t idx) const;
+    CVector GetSectionMoveSpeed(size_t idx) const;
+    CBoundingBox GetSectionsBoundingBox() const;
 };
 
 VALIDATE_SIZE(CWaterCannon, 0x3CC);

@@ -192,9 +192,12 @@ public:
     void ProcessLightsForEntity();
     void RemoveEscalatorsForEntity();
     bool IsEntityOccluded();
-    bool IsCurrentAreaOrBarberShopInterior();
+    bool IsInCurrentAreaOrBarberShopInterior();
     void UpdateRW();
+    eEntityType GetType() const noexcept { return m_nType; }
 
+    // Always returns a non-null value. In case there's no LOD object `this` is returned. NOTSA
+    CEntity* FindLastLOD() noexcept;
 public:
     // Rw callbacks
     static RpAtomic* SetAtomicAlphaCB(RpAtomic* pAtomic, void* pData);
@@ -219,7 +222,7 @@ public:
     inline CDummy* AsDummy() { return reinterpret_cast<CDummy*>(this); }
 
     inline bool IsModelTempCollision() const { return m_nModelIndex >= eModelID::MODEL_TEMPCOL_DOOR1 && m_nModelIndex <= eModelID::MODEL_TEMPCOL_BODYPART2; }
-    inline bool IsStatic() const { return m_bIsStatic || m_bIsStaticWaitingForCollision; }
+    inline bool IsStatic() const { return m_bIsStatic || m_bIsStaticWaitingForCollision; } // 0x4633E0
     inline bool IsRCCar() const { return m_nModelIndex == MODEL_RCBANDIT || m_nModelIndex == MODEL_RCTIGER || m_nModelIndex == MODEL_RCCAM; }
 };
 
