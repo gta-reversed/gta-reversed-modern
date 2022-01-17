@@ -2,6 +2,7 @@
 
 #include "Fire.h"
 #include "FireManager.h"
+#include "CreepingFire.h"
 
 void CFire::InjectHooks() {
     using namespace ReversibleHooks;
