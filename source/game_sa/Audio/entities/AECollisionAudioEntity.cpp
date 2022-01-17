@@ -66,7 +66,7 @@ void CAECollisionAudioEntity::UpdateLoopingCollisionSound() {
 }
 
 // 0x4DB7C0
-void CAECollisionAudioEntity::PlayBulletHitCollisionSound(uint8 surface, CVector& posn, float a3) {
+void CAECollisionAudioEntity::PlayBulletHitCollisionSound(uint8 surface, CVector& posn, float angleWithColPointNorm) {
     if (surface >= 195)
         return;
 
@@ -95,7 +95,7 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(uint8 surface, CVector
     }
     else if (g_surfaceInfos->IsAudioMetal(surface))
     {
-        float probability = (90.0f - a3) * 0.0055555557f; // see BoneNode_c::EulerToQuat
+        float probability = (90.0f - angleWithColPointNorm) * 0.0055555557f; // see BoneNode_c::EulerToQuat
         if (CAEAudioUtility::ResolveProbability(probability))
         {
             do
@@ -159,12 +159,12 @@ void CAECollisionAudioEntity::ReportCollision(CEntity* entity1, CEntity* entity2
 }
 
 // 0x4DBDF0
-void CAECollisionAudioEntity::ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn, float colPoint) {
+void CAECollisionAudioEntity::ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn, float angleWithColPointNorm) {
     if (AEAudioHardware.IsSoundBankLoaded(0x1B, 3)) {
         if (entity && entity->m_nType == ENTITY_TYPE_VEHICLE)
             surface = entity->AsVehicle()->m_vehicleSubType == VEHICLE_BMX ? SURFACE_HAY_BALE | SURFACE_GRASS_SHORT_DRY : SURFACE_CAR;
 
-        PlayBulletHitCollisionSound(surface, posn, colPoint);
+        PlayBulletHitCollisionSound(surface, posn, angleWithColPointNorm);
     }
 }
 

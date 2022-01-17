@@ -46,14 +46,14 @@ public:
     void UpdateLoopingCollisionSound();
 
     void PlayOneShotCollisionSound(CEntity* entity1, CEntity* entity2, uint8 a3, uint8 a4, float a5, CVector& posn);
-    void PlayBulletHitCollisionSound(uint8 surface, CVector& posn, float a3);
+    void PlayBulletHitCollisionSound(uint8 surface, CVector& posn, float angleWithColPointNorm);
 
     void ReportGlassCollisionEvent(int32 glassSoundType, CVector& posn, uint32 time);
     void ReportWaterSplash(CVector posn, float volume);
     void ReportWaterSplash(CPhysical* physical, float height, bool splashMoreThanOnce);
     void ReportObjectDestruction(CEntity* entity);
     void ReportCollision(CEntity* entity1, CEntity* entity2, uint8 surfaceA, uint8 surfaceB, CVector& colPoint, CVector* normal, float collisionImpact1, float collisionImpact2, bool bOnlyPlayOneShotCollisionSound, bool unknown);
-    void ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn, float colPoint);
+    void ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn, float angleWithColPointNorm);
 
     void Service();
 };

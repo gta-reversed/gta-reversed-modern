@@ -222,7 +222,7 @@ public:
     inline CDummy* AsDummy() { return reinterpret_cast<CDummy*>(this); }
 
     inline bool IsModelTempCollision() const { return m_nModelIndex >= eModelID::MODEL_TEMPCOL_DOOR1 && m_nModelIndex <= eModelID::MODEL_TEMPCOL_BODYPART2; }
-    inline bool IsStatic() const { return m_bIsStatic || m_bIsStaticWaitingForCollision; }
+    inline bool IsStatic() const { return m_bIsStatic || m_bIsStaticWaitingForCollision; } // 0x4633E0
     inline bool IsRCCar() const { return m_nModelIndex == MODEL_RCBANDIT || m_nModelIndex == MODEL_RCTIGER || m_nModelIndex == MODEL_RCCAM; }
 };
 
