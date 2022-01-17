@@ -1856,7 +1856,7 @@ RpMaterial* DisableMatFx(RpMaterial* material, void* data)
 // 0x6A29A0
 void CAutomobile::ReduceHornCounter()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6A29A0)(this);
+    if (m_nHornTimeEndMs) m_nHornTimeEndMs--;
 }
 
 // 0x6A2F00

@@ -172,8 +172,8 @@ public:
     CAESound*              m_pSirenSound;
     CAESound*              m_pPoliceSirenSound;
     CAETwinLoopSoundEntity m_twinSkidSound;
-    float m_fPlaneSoundSpeed;
-    float m_fPlaneSoundVolume_Probably;
+    float                  m_fPlaneSoundSpeed;
+    float                  m_fPlaneSoundVolume_Probably;
     float                  field_234;
     float                  field_238;
     float                  field_23C;
@@ -231,7 +231,7 @@ public:
     void PlayerAboutToExitVehicleAsDriver();
     bool CopHeli();
     bool JustFinishedAccelerationLoop();
-    void PlaySkidSound(int16 soundType, float speed, float volume);
+    void PlaySkidSound(int16 soundType, float speed, float volumeDelta);
     void JustWreckedVehicle();
     CVector GetAircraftNearPosition();
     float GetFlyingMetalVolume(CPhysical*);
@@ -341,6 +341,8 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
+    CAEVehicleAudioEntity* Constructor();
+    CAEVehicleAudioEntity* Destructor();
     void UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos);
 };
 VALIDATE_SIZE(CAEVehicleAudioEntity, 0x24C);
