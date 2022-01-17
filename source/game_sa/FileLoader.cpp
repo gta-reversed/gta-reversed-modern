@@ -1180,8 +1180,6 @@ void CFileLoader::LoadGarage(const char* line) {
 
 // 0x5B9030
 void CFileLoader::LoadLevel(const char* levelFileName) {
-    char pathBuffer[128]{};
-
     auto pRwCurrTexDict = RwTexDictionaryGetCurrent();
     if (!pRwCurrTexDict) {
         pRwCurrTexDict = RwTexDictionaryCreate();
@@ -1192,13 +1190,13 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
 
     const auto f = CFileMgr::OpenFile(levelFileName, "r");
     for (auto l = LoadLine(f); l; l = LoadLine(f)) {
-        const auto LineBeginsWith = [l](auto what) {
-            return strncmp(what, l, strlen(what));
+        const auto LineBeginsWith = [lsv = std::string_view{l}](auto what) {
+            return lsv.starts_with(what);
         };
 
         // Extract path after identifier like: <ID> <PATH>
         char pathBuffer[MAX_PATH]{};
-        const auto ExtractPathFor = [&](auto id) {
+        const auto ExtractPathFor = [&](std::string_view id) {
             // Okay, so..
             // Originally they didn't copy the path into a separate buffer for each "id"
             // But we are going to, for two reasons:
@@ -1210,7 +1208,7 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             // So if any of the invoked functions call `LoadLine` the path will no longer be valid
             // So in order to prevent this nasty bug we're just going to copy it each time.
 
-            strncpy_s(pathBuffer, l + strlen(id) + 1, std::size(pathBuffer) - 1);
+            strcpy_s(pathBuffer, l + id.size() + 1);
             return pathBuffer;
         };
 
@@ -1221,17 +1219,17 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             break; // Done
 
         if (LineBeginsWith("TEXDICTION")) {
-            // Originally here they've copied the path into a buffer
-            // We ain't gonna do that, there's no point to it
             const auto path = ExtractPathFor("TEXDICTION");
-
             LoadingScreenLoadingFile(path);
 
-            const auto txd = CFileLoader::LoadTexDictionary(path);
+            const auto txd = LoadTexDictionary(path);
             RwTexDictionaryForAllTextures(txd, AddTextureCB, pRwCurrTexDict);
             RwTexDictionaryDestroy(txd);
 
         } else if (LineBeginsWith("IPL")) {
+            // Have to call this here, because line buffer's content may change after the `if` below
+            const auto path = ExtractPathFor("IPL");
+
             if (!hasLoadedAnyIPLs) {
                 MatchAllModelStrings();
 
@@ -1261,9 +1259,8 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
 
             // Originally here they've copied the path into a buffer
             // We ain't gonna do that, there's no point to it
-            const auto path = ExtractPathFor("IPL");
             LoadingScreenLoadingFile(path);
-            CFileLoader::LoadScene(path);
+            LoadScene(path);
         } else {
             // Deal with the rest (Originally more `else-if`s were used)
             // Sadly we can't put all of the above in here as well
@@ -1271,13 +1268,13 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             // us to use `std::function` which is just overkill in this case.
 
             using FnType = void(*)(const char*);
-            const struct { const char* id;  FnType fn; } functions[]{
+            const struct { std::string_view id;  FnType fn; } functions[]{
                 {"IMG", [](const char* path) {
                     if (path == std::string_view{ "MODELS\\GTA_INT.IMG" }) { // Only allowed to load GTA_INT.IMG
                         CStreaming::AddImageToList(path, true);
                     }
                 }},
-                {"COLFILE", [](const char* path) { LoadCollisionFile(path, 0); }},
+                {"COLFILE", [](const char* path) { LoadCollisionFile(path + 2, 0); }}, // Gotta add 3 to the path, because we have to skip the `0` before the actual path
                 {"MODELFILE", LoadAtomicFile},
                 {"HIERFILE", LoadClumpFile},
                 {"IDE", LoadObjectTypes},
@@ -1285,7 +1282,9 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             };
             for (const auto& v : functions) {
                 if (LineBeginsWith(v.id)) {
-                    v.fn(ExtractPathFor(v.id));
+                    const auto path = ExtractPathFor(v.id);
+                    LoadingScreenLoadingFile(path);
+                    v.fn(path);
                     break;
                 }
             }
