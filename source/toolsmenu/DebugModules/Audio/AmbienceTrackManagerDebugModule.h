@@ -2,7 +2,7 @@
 
 namespace AmbienceTrackManagerDebugModule {
 
-void ProcessImgui();
+void ProcessImGui();
 void ProcessRender();
 
 }

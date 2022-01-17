@@ -8,7 +8,7 @@
 #include "imgui.h"
 
 namespace CStreamingDebugModule {
-void ProcessImGUI() {
+void ProcessImGui() {
     using namespace ImGui;
 
     if (Button("ReInit")) {

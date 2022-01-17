@@ -19,6 +19,7 @@
 #include "toolsmenu\DebugModules\Audio\CutsceneTrackManagerDebugModule.h"
 #include "toolsmenu\DebugModules\Audio\AmbienceTrackManagerDebugModule.h"
 #include "toolsmenu\DebugModules\CStreamingDebugModule.h"
+#include "toolsmenu\DebugModules\CPickupsDebugModule.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -331,22 +332,27 @@ void CDebugMenu::ProcessHooksTool() {
 void CDebugMenu::ProcessExtraDebugFeatures() {
     if (ImGui::BeginTabBar("Modules")) {
         if (ImGui::BeginTabItem("Occlussion")) {
-            COcclusionDebugModule::ProcessImgui();
+            COcclusionDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Audio")) {
             ImGui::Text("Cutscene Track Manager");
-            CutsceneTrackManagerDebugModule::ProcessImgui();
+            CutsceneTrackManagerDebugModule::ProcessImGui();
 
             ImGui::NewLine();
             ImGui::Text("Ambience Track Manager");
-            AmbienceTrackManagerDebugModule::ProcessImgui();
+            AmbienceTrackManagerDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Streaming")) {
-            CStreamingDebugModule::ProcessImGUI();
+            CStreamingDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Pickups")) {
+            CPickupsDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 

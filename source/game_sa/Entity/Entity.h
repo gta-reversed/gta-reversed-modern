@@ -210,7 +210,7 @@ public:
     bool IsDummy() const { return m_nType == ENTITY_TYPE_DUMMY; }
 
     bool IsModelTempCollision() const { return m_nModelIndex >= eModelID::MODEL_TEMPCOL_DOOR1 && m_nModelIndex <= eModelID::MODEL_TEMPCOL_BODYPART2; }
-    bool IsStatic() const { return m_bIsStatic || m_bIsStaticWaitingForCollision; }
+    bool IsStatic() const { return m_bIsStatic || m_bIsStaticWaitingForCollision; } // 0x4633E0
     bool IsRCCar() const { return m_nModelIndex == MODEL_RCBANDIT || m_nModelIndex == MODEL_RCTIGER || m_nModelIndex == MODEL_RCCAM; }
 
     CPhysical*   AsPhysical() { return reinterpret_cast<CPhysical*>(this); }
@@ -224,10 +224,10 @@ public:
     CDummy*      AsDummy() { return reinterpret_cast<CDummy*>(this); }
     
     auto GetType() const noexcept { return m_nType; }
-	void SetType(eEntityType type) { m_nType = type; }
+	  void SetType(eEntityType type) { m_nType = type; }
     
-	auto GetStatus() const noexcept { return m_nStatus; }
-	void SetStatus(eEntityStatus status) { m_nStatus = status; }
+    auto GetStatus() const noexcept { return m_nStatus; }
+    void SetStatus(eEntityStatus status) { m_nStatus = status; }
 };
 
 VALIDATE_SIZE(CEntity, 0x38);
