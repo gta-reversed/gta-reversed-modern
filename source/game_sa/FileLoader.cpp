@@ -382,33 +382,8 @@ int32 CFileLoader::LoadClumpObject(const char* line) {
     return objId;
 }
 
-
-enum class ColModelVersion {
-    COLL,
-    COL2,
-    COL3,
-    COL4,
-
-    NONE = -1 // Placeholder for invalid values
-};
-
-ColModelVersion GetColModelVersionFromFourCC(const char(&fourcc)[4]) {
-    switch (make_fourcc4(fourcc)) {
-    case make_fourcc4("COLL"):
-        return ColModelVersion::COLL;
-    case make_fourcc4("COL2"):
-        return ColModelVersion::COL2;
-    case make_fourcc4("COL3"):
-        return ColModelVersion::COL3;
-    case make_fourcc4("COL4"):
-        return ColModelVersion::COL4;
-    default:
-        return ColModelVersion::NONE;
-    }
-}
-
 // 0x538440
-// Load one, or multiple, collision models from a single file
+// Load one, or multiple, collision models from the given buffer
 bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
     using namespace ColHelpers;
 
@@ -417,8 +392,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
         auto& h = *reinterpret_cast<FileHeader*>(buff);
         fileTotalSize = h.GetTotalSize();
 
-        const auto colModelVer = GetColModelVersionFromFourCC(h.fourcc);
-        if (colModelVer == ColModelVersion::NONE)
+        if (h.GetVersion() == ColModelVersion::NONE)
             return true;
 
         char modelName[22]{};
@@ -430,7 +404,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
             auto colDef = CColStore::ms_pColPool->GetAt(colId); 
             MI = CModelInfo::GetModelInfo(modelName, colDef->m_nModelIdStart, colDef->m_nModelIdEnd);
         }
-        if (!MI || MI->m_nFlagsLowerByte > 0) // TODO: Unsure what the fuck this check is, but it doesn't seem too failproof to me..
+        if (!MI || MI->bIsLod) // TODO: Unsure what the fuck this check is, but it doesn't seem too failproof to me..
             continue;
 
         if (!MI->GetColModel()) {
@@ -439,25 +413,25 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
 
         auto& CM = *MI->GetColModel();
         const auto data = &buff[buffPos + sizeof(FileHeader)];
-        const auto dataSize = fileTotalSize - sizeof(FileHeader); // Remember: `TotalSize` isn't the same as `FileHeader::size` (which contains the total file size - 8)
-        switch (colModelVer) {
+        switch (h.GetVersion()) {
         case ColModelVersion::COLL:
             LoadCollisionModel(data, CM);
             break;
         case ColModelVersion::COL2:
-            LoadCollisionModelVer2(data, dataSize, CM, modelName);
+            LoadCollisionModelVer2(data, h.GetDataSize(), CM, modelName);
             break;
         case ColModelVersion::COL3:
-            LoadCollisionModelVer3(data, dataSize, CM, modelName);
+            LoadCollisionModelVer3(data, h.GetDataSize(), CM, modelName);
             break;
         case ColModelVersion::COL4:
-            LoadCollisionModelVer4(data, dataSize, CM, modelName);
+            LoadCollisionModelVer4(data, h.GetDataSize(), CM, modelName);
             break;
         default:
             return true;
         }
         
         CM.m_boundSphere.m_nMaterial = colId; // TODO: At this point I'm convinced something is fucked (m_boundSphere should probably be a CSphere instead)
+
         if (MI->GetModelType() == eModelInfoType::MODEL_INFO_TYPE_ATOMIC) {
             CPlantMgr::SetPlantFriendlyFlagInAtomicMI(static_cast<CAtomicModelInfo*>(MI));
         }
@@ -466,7 +440,48 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
 
 // 0x5B4E60
 bool CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
-    return plugin::CallAndReturn<bool, 0x5B4E60, const char*, uint8>(filename, colId);
+    static uint8 buffer[0x8000]; // 32 kB, enough for most models.
+
+    using namespace ColHelpers;
+
+    FileHeader header{};
+
+    auto f = CFileMgr::OpenFile(filename, "rb");
+    while (CFileMgr::Read(f, &header.info, sizeof(header.info))) {
+        // Read remaining header info. This is stupid, no idea why it's read separately like this.
+        CFileMgr::Read(f, &header.info + 1, sizeof(FileHeader) - sizeof(FileHeader::FileInfo));
+
+        assert(std::size(buffer) >= header.GetDataSize()); // Just some sanity check to avoid unfixable bugs
+
+        // Read actual data
+        CFileMgr::Read(f, buffer, header.GetDataSize());
+
+        const auto MI = CModelInfo::GetModelInfo(header.modelName, nullptr);
+        if (!MI || MI->bIsLod)
+            continue;
+
+        if (!MI->GetColModel()) // TODO: Perhaps this should be in `CModelInfo` ? Like `GetColModel(bool bCreate = false)` or something
+            MI->SetColModel(new CColModel, true);
+
+        auto& CM = *MI->GetColModel();
+        switch (header.GetVersion()) {
+        case ColModelVersion::COLL:
+            LoadCollisionModel(buffer, CM);
+            break;
+        case ColModelVersion::COL2:
+            LoadCollisionModelVer2(buffer, header.GetDataSize(), CM, header.modelName);
+            break;
+        case ColModelVersion::COL3:
+            LoadCollisionModelVer3(buffer, header.GetDataSize(), CM, header.modelName);
+            break;
+        /*case ColModelVersion::COL4: // This function doesn't process V4
+            LoadCollisionModelVer4(data, dataSize, CM, modelName);
+            break;*/
+        }
+
+        CM.m_boundSphere.m_nMaterial = colId;
+    }
+    CFileMgr::CloseFile(f);
 }
 
 // 0x5B5000
@@ -591,10 +606,10 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
         const auto GetDataPtr = [&]() {
             return reinterpret_cast<T>(
                   p
-                + sizeof(CCollisionData)      // Must offset by this (See memory layout above)
+                + sizeof(CCollisionData)                // Must offset by this (See memory layout above)
                 + fileOffset
-                + sizeof(FileHeader::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
-                - sizeof(FileHeader)          // Offset includes these headers, but we haven't copied them into our memory
+                + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
+                - sizeof(FileHeader)                    // Offset includes these headers, but we haven't copied them into our memory
                 - sizeof(Header)     
             );
         };
@@ -657,7 +672,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
                 p
                 + sizeof(CCollisionData)      // Must offset by this (See memory layout above)
                 + fileOffset
-                + sizeof(FileHeader::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
+                + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
                 - sizeof(FileHeader)          // Offset includes these headers, but we haven't copied them into our memory
                 - sizeof(V3::Header)
                 );
@@ -724,7 +739,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
                 p
                 + sizeof(CCollisionData)      // Must offset by this (See memory layout above)
                 + fileOffset
-                + sizeof(FileHeader::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
+                + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
                 - sizeof(FileHeader)          // Offset includes these headers, but we haven't copied them into our memory
                 - sizeof(V3::Header)
                 );

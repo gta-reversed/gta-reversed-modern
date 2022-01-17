@@ -12,18 +12,51 @@
 // The term `Face` and `Tri` are interchangable. (Mean the same thing)
 
 namespace ColHelpers {
+enum class ColModelVersion {
+    COLL,
+    COL2,
+    COL3,
+    COL4,
+
+    NONE = -1 // Placeholder for invalid values (not that it should ever happen)
+};
+
 // Top-most header for every file
 struct FileHeader {
-    char fourcc[4]{}; // Not null terminated. Either: COLL, COL2, COL3, COL4
-    uint32 size{};
+    struct FileInfo {
+        char fourcc[4]{}; // Not null terminated. Either: COLL, COL2, COL3, COL4
+        uint32 size{};
+    } info;
+
     char modelName[22]{};
     uint16 modelId{};
 
+    // Total col data size, including header
     auto GetTotalSize() {
-        return size + sizeof(fourcc) + sizeof(size); // `size` doesn't include these two by default
+        return info.size + sizeof(FileInfo); // `size` doesn't `FileInfo`s size 
+    }
+
+    // Size of data after header
+    auto GetDataSize() {
+        return GetTotalSize() - sizeof(FileHeader);
+    }
+
+    // Get version based on fourcc
+    auto GetVersion() {
+        switch (make_fourcc4(info.fourcc)) {
+        case make_fourcc4("COLL"):
+            return ColModelVersion::COLL;
+        case make_fourcc4("COL2"):
+            return ColModelVersion::COL2;
+        case make_fourcc4("COL3"):
+            return ColModelVersion::COL3;
+        case make_fourcc4("COL4"):
+            return ColModelVersion::COL4;
+        default:
+            return ColModelVersion::NONE;
+        }
     }
 };
-VALIDATE_SIZE(FileHeader, 0x20);
 
 struct TSurface {
     uint8 material, flag, brightness, light;
