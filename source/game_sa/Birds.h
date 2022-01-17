@@ -93,7 +93,7 @@ public:
     static void Shutdown();
     static void Update();
     static void Render();
-    static void HandleGunShot(CVector const* pointA, CVector const* pointB);
+    static void HandleGunShot(const CVector* pointA, const CVector* pointB);
 
     static void InjectHooks();
 };

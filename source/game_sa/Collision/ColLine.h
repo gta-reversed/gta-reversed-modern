@@ -15,10 +15,13 @@ public:
     CVector m_vecEnd;
     float   m_fEndSize;
 
-    CColLine(CVector const& start, CVector const& end);
-    void Set(CVector const& start, CVector const& end);
-
+public:
     static void InjectHooks();
+
+    CColLine() {};
+    CColLine(const CVector& start, const CVector& end);
+
+    void Set(const CVector& start, const CVector& end);
 };
 
 VALIDATE_SIZE(CColLine, 0x20);

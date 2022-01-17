@@ -48,12 +48,17 @@ public:
     {
     }
 
-    void Set(float radius, CVector const& center);
-    void Set(float radius, CVector const& center, uint8 material, uint8 flags, uint8 lighting);
-    bool IntersectRay(CVector const& rayOrigin, CVector const& direction, CVector& intersectPoint1, CVector& intersectPoint2);
-    bool IntersectEdge(CVector const& startPoint, CVector const& endPoint, CVector& intersectPoint1, CVector& intersectPoint2);
-    bool IntersectSphere(CColSphere const& right);
-    bool IntersectPoint(CVector const& point);
+    CColSphere(float radius, const CVector& center) : 
+        CSphere(radius, center)
+    {
+    };
+
+    void Set(float radius, const CVector& center);
+    void Set(float radius, const CVector& center, uint8 material, uint8 flags, uint8 lighting);
+    bool IntersectRay(const CVector& rayOrigin, const CVector& direction, CVector& intersectPoint1, CVector& intersectPoint2);
+    bool IntersectEdge(const CVector& startPoint, const CVector& endPoint, CVector& intersectPoint1, CVector& intersectPoint2);
+    bool IntersectSphere(const CColSphere& right);
+    bool IntersectPoint(const CVector& point);
 };
 
 VALIDATE_SIZE(CColSphere, 0x14);
