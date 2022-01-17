@@ -22,7 +22,7 @@ enum eCopType : uint32 {
 class CCopPed : public CPed {
 public:
     bool     m_bDontPursuit;
-    char     field_79D;
+    bool     field_79D;
     uint32   m_nCopTypeOrModelID; /* if it's a valid eCopType then eCopType, otherwise a modelID */
     uint32   field_7A4;
     CCopPed* m_pCopPartner;

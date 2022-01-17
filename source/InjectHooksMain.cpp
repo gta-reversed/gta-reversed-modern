@@ -56,6 +56,8 @@
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
 #include "CreepingFire.h"
+#include "Restart.h"
+#include "BulletInfo.h"
 #include "FireManager.h"
 
 // Tasks
@@ -164,20 +166,15 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
 
-void WaitForDebugger() {
-    while (!::IsDebuggerPresent()) {
-        printf("Debugger not present\n");
-        ::Sleep(100);
-    }
-}
-
-void InjectHooksMain()
-{
-    // WaitForDebugger();
+void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
 
-    CFire::InjectHooks();
+	CFire::InjectHooks();
+    CClothesBuilder::InjectHooks();
+    CClothes::InjectHooks();
+    CBulletInfo::InjectHooks();
+    CRestart::InjectHooks();
     CPlaneTrail::InjectHooks();
     CCopPed::InjectHooks();
     CDamageManager::InjectHooks();
@@ -385,6 +382,7 @@ void InjectHooksMain()
     CText::InjectHooks();
     ModelIndices::InjectHooks();
     CWaterCannons::InjectHooks();
+    CWaterCannon::InjectHooks();
     CSprite::InjectHooks();
     CPlaneTrails::InjectHooks();
     CCustomBuildingPipeline::InjectHooks();

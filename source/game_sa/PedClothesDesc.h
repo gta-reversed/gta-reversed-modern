@@ -22,6 +22,12 @@ public:
     CPedClothesDesc();
     CPedClothesDesc* Constructor();
 
+    // todo: ugly?
+    CPedClothesDesc& operator=(const CPedClothesDesc* rhs) {
+        memcpy(this, &rhs, sizeof(CPedClothesDesc));
+        return *this;
+    }
+
     void Initialise();
 
     void SetModel(uint32 modelId, eClothesModelPart modelPart);
