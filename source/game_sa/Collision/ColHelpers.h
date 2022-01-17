@@ -53,6 +53,7 @@ struct FileHeader {
         case make_fourcc4("COL4"):
             return ColModelVersion::COL4;
         default:
+            assert(0); // NOTSA - Shouldn't happen.
             return ColModelVersion::NONE;
         }
     }
@@ -119,8 +120,8 @@ namespace V2 {
     };
 
     struct TBounds {
-        CSphere      sphere{};
         CBoundingBox box{};
+        CSphere      sphere{};
     };
 
     struct TFaceGroup {
@@ -137,7 +138,8 @@ namespace V2 {
     struct Header {
         TBounds bounds{};
 
-        uint16 nSpheres{}, nBoxes{}, nFaces{}, nLines{};
+        uint16 nSpheres{}, nBoxes{}, nFaces{};
+        uint8  nLines{};
 
         // Quote from https://gtamods.com/wiki/Collision_File :
         // 1 - collision uses cones instead of lines(flag forced to false by engine upon loading)
@@ -147,9 +149,13 @@ namespace V2 {
         uint32 flags{};
 
         uint32 offSpheres{}, offBoxes{}, offLines{}, offVerts{}, offFaces{}, offPlanes{};
+
+        bool IsEmpty() const { return !(flags & 2); }
+        bool HasFaceGroups() const { return flags & 8; }
     };
     VALIDATE_SIZE(Header, 0x4C);
 };
+
 namespace V3 {
     using namespace V2; // Inhert all other stuff
 
@@ -169,6 +175,8 @@ namespace V3 {
             }
             return maxVert + 1;
         }
+
+        bool HasShadowMesh() { return flags & 16; }
     };
 };
 namespace V4 {

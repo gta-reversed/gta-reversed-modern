@@ -625,11 +625,13 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
     auto& h = *reinterpret_cast<Header*>(buffer);
     cm.m_boundBox = h.bounds.box;
     cm.m_boundSphere = CColSphere{ h.bounds.sphere };
-    cm.m_boundSphere.m_bNotEmpty = h.flags & 2; // Not empty flag. Still unsure why is this stored in the bound sphere though...
+    cm.m_boundSphere.m_bNotEmpty = !h.IsEmpty();
 
     auto dataSizeAfterHeader = dataSize - sizeof(Header);
-    if (!dataSize)
+    if (!dataSizeAfterHeader) {
+        assert(h.IsEmpty()); // Make sure flag says its empty as well, otherwise something went wrong.
         return; // No data present, other than the header
+    }
 
     // Here's the meat. We allocate some memory to hold both the file's contents and the CCollisionData struct.
     // So, memory layout is as follows:
@@ -648,7 +650,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
 
     cd->bUsesDisks = false;
     cd->bHasShadowInfo = false;
-    cd->bNotEmpty = h.flags & 2;
+    cd->bNotEmpty = h.HasFaceGroups();
 
     // Set given field in `CCollisionData` based on offset in file.
     // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
@@ -689,11 +691,13 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
     auto& h = *reinterpret_cast<V3::Header*>(buffer);
     cm.m_boundBox = h.bounds.box;
     cm.m_boundSphere = CColSphere{ h.bounds.sphere };
-    cm.m_boundSphere.m_bNotEmpty = h.flags & 2; // Not empty flag. Still unsure why is this stored in the bound sphere though...
+    cm.m_boundSphere.m_bNotEmpty = !h.IsEmpty();
 
     auto dataSizeAfterHeader = dataSize - sizeof(V3::Header);
-    if (!dataSizeAfterHeader)
+    if (!dataSizeAfterHeader) {
+        assert(h.IsEmpty()); // Make sure flag says its empty as well, otherwise something went wrong.
         return; // No data present, other than the header
+    }
 
     // Here's the meat. We allocate some memory to hold both the file's contents and the CCollisionData struct.
     // So, memory layout is as follows:
@@ -712,7 +716,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
     cd->m_nNumShadowTriangles = h.nShdwFaces;
 
     cd->bUsesDisks = false;
-    cd->bNotEmpty = h.flags & 2;
+    cd->bNotEmpty = h.HasFaceGroups();
 
     // Set given field in `CCollisionData` based on offset in file.
     // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
@@ -726,7 +730,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
                 + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
                 - sizeof(FileHeader)          // Offset includes these headers, but we haven't copied them into our memory
                 - sizeof(V3::Header)
-                );
+            );
         };
         colDataPtr = fileOffset ? GetDataPtr() : nullptr;
     };
@@ -756,11 +760,13 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
     auto& h = *reinterpret_cast<V4::Header*>(buffer);
     cm.m_boundBox = h.bounds.box;
     cm.m_boundSphere = CColSphere{ h.bounds.sphere };
-    cm.m_boundSphere.m_bNotEmpty = h.flags & 2; // Not empty flag. Still unsure why is this stored in the bound sphere though...
+    cm.m_boundSphere.m_bNotEmpty = !h.IsEmpty();
 
     auto dataSizeAfterHeader = dataSize - sizeof(V4::Header);
-    if (!dataSizeAfterHeader)
+    if (!dataSizeAfterHeader) {
+        assert(h.IsEmpty());
         return; // No data present, other than the header
+    }
 
     // Here's the meat. We allocate some memory to hold both the file's contents and the CCollisionData struct.
     // So, memory layout is as follows:
@@ -779,7 +785,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
     cd->m_nNumShadowTriangles = h.nShdwFaces;
 
     cd->bUsesDisks = false;
-    cd->bNotEmpty = h.flags & 2;
+    cd->bNotEmpty = h.HasFaceGroups();
 
     // Set given field in `CCollisionData` based on offset in file.
     // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
