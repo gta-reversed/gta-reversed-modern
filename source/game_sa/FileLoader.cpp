@@ -118,7 +118,7 @@ int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
 
     mi->m_nKey = CKeyGen::GetUppercaseKey(modelName);
     mi->SetTexDictionary(txdName);
-    mi->m_fDrawDistance = drawDist;
+    mi->m_fDrawDistance = drawDist; // if you forgot to add this line here, you will meet with UB on closing game, have a nice day
     mi->SetAnimFile(animName);
     SetClumpModelInfoFlags(mi, flags);
 
