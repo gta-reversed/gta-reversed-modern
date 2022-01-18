@@ -258,7 +258,12 @@ bool CGarages::IsCarSprayable(CVehicle* vehicle) {
     switch (vehicle->m_nModelIndex) {
     case eModelID::MODEL_BUS:
     case eModelID::MODEL_COACH:
-    case eModelID::MODEL_ARTICT1: // TODO: In the source it compares against -2, but the in the ASM comment it says `artict1`.. test it.
+    /* TODO:
+    * In the source it compares against -2, but the in the ASM comment it says `artict1`
+    * artict1 is Articulated Trailer which by logic cannot to sprayed due big size, but who know..
+    * original code also disallow artict1 to be sprayed (tested)
+    */
+    case eModelID::MODEL_ARTICT1: // 
     case eModelID::MODEL_FIRETRUK:
     case eModelID::MODEL_AMBULAN:
         return false;
@@ -314,16 +319,18 @@ void CGarages::DeactivateGarage(int16 garageId) {
 }
 
 // 0x447C40
-void CGarages::SetTargetCar(int16 garageId, CVehicle* veh) {
-    auto& v = aGarages[garageId];
-    if (veh) {
-        v.m_pTargetCar = veh;
-        veh->RegisterReference(reinterpret_cast<CEntity**>(&v.m_pTargetCar));
-        if (v.m_nDoorState == eGarageDoorState::GARAGE_DOOR_CLOSED_DROPPED_CAR)
-            v.m_nDoorState = eGarageDoorState::GARAGE_DOOR_CLOSED;
+void CGarages::SetTargetCar(int16 garageId, CVehicle* vehicle) {
+    auto& garage = aGarages[garageId];
+    if (vehicle) {
+        garage.m_pTargetCar = vehicle;
+        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&garage.m_pTargetCar));
+        if (garage.m_nDoorState == eGarageDoorState::GARAGE_DOOR_CLOSED_DROPPED_CAR)
+            garage.m_nDoorState = eGarageDoorState::GARAGE_DOOR_CLOSED;
     } else {
-        // NOTE/TODO: They forgot to call `UnregisterReference` 
-        v.m_pTargetCar = nullptr; 
+#if FIX_BUGS
+        // NOTE/TODO: They forgot to call `UnregisterReference`
+#endif
+        garage.m_pTargetCar = nullptr;
     }
 }
 

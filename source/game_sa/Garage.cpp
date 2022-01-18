@@ -1,44 +1,26 @@
 #include "StdInc.h"
 
+#include "Garage.h"
+
 void CGarage::InjectHooks()
 {
-    ReversibleHooks::Install("CGarage", "BuildRotatedDoorMatrix", 0x4479F0, &CGarage::BuildRotatedDoorMatrix);
-
-    // Constructors (1x)
-    // ReversibleHooks::Install("CGarage", "CGarage", 0x4470E0, &CGarage::Constructor);
-
-    // Destructors (1x)
-    // ReversibleHooks::Install("CGarage", "~CGarage", 0x447110, &CGarage::Destructor);
-
-
-    // Methods (15x)    
-    // ReversibleHooks::Install("CGarage", "TidyUpGarageClose", 0x449D10, &CGarage::TidyUpGarageClose);
-    // ReversibleHooks::Install("CGarage", "TidyUpGarage", 0x449C50, &CGarage::TidyUpGarage);
-    // ReversibleHooks::Install("CGarage", "StoreAndRemoveCarsForThisHideOut", 0x449900, &CGarage::StoreAndRemoveCarsForThisHideOut);
-    // ReversibleHooks::Install("CGarage", "RemoveCarsBlockingDoorNotInside", 0x449690, &CGarage::RemoveCarsBlockingDoorNotInside);
-    // ReversibleHooks::Install("CGarage", "IsEntityTouching3D", 0x448EE0, &CGarage::IsEntityTouching3D);
-    // ReversibleHooks::Install("CGarage", "IsEntityEntirelyOutside", 0x448D30, &CGarage::IsEntityEntirelyOutside);
-    // ReversibleHooks::Install("CGarage", "IsStaticPlayerCarEntirelyInside", 0x44A830, &CGarage::IsStaticPlayerCarEntirelyInside);
-    // ReversibleHooks::Install("CGarage", "IsEntityEntirelyInside3D", 0x448BE0, &CGarage::IsEntityEntirelyInside3D);
-    // ReversibleHooks::Install("CGarage", "IsPointInsideGarage", 0x448740, static_cast<bool(CGarage::*)(CVector)>(&CGarage::IsPointInsideGarage));
-    // ReversibleHooks::Install("CGarage", "PlayerArrestedOrDied", 0x4486C0, &CGarage::PlayerArrestedOrDied);
-    // ReversibleHooks::Install("CGarage", "Close", 0x447D70, &CGarage::Close);
-    // ReversibleHooks::Install("CGarage", "Open", 0x447D50, &CGarage::Open);
-    // ReversibleHooks::Install("CGarage", "InitDoorsAtStart", 0x447600, &CGarage::InitDoorsAtStart);
-    // ReversibleHooks::Install("CGarage", "IsPointInsideGarage", 0x4487D0, static_cast<bool(CGarage::*)(CVector, float)>(&CGarage::IsPointInsideGarage));
-    // ReversibleHooks::Install("CGarage", "Update", 0x44AA50, &CGarage::Update);
-}
-
-// 0x4470E0
-CGarage* CGarage::Constructor() {
-    this->CGarage::CGarage();
-    return this;
-}
-
-// 0x447110
-CGarage* CGarage::Destructor() {
-    this->CGarage::~CGarage();
-    return this;
+    using namespace ReversibleHooks;
+    Install("CGarage", "BuildRotatedDoorMatrix", 0x4479F0, &CGarage::BuildRotatedDoorMatrix);
+    // Install("CGarage", "TidyUpGarageClose", 0x449D10, &CGarage::TidyUpGarageClose);
+    // Install("CGarage", "TidyUpGarage", 0x449C50, &CGarage::TidyUpGarage);
+    // Install("CGarage", "StoreAndRemoveCarsForThisHideOut", 0x449900, &CGarage::StoreAndRemoveCarsForThisHideOut);
+    // Install("CGarage", "RemoveCarsBlockingDoorNotInside", 0x449690, &CGarage::RemoveCarsBlockingDoorNotInside);
+    // Install("CGarage", "IsEntityTouching3D", 0x448EE0, &CGarage::IsEntityTouching3D);
+    // Install("CGarage", "IsEntityEntirelyOutside", 0x448D30, &CGarage::IsEntityEntirelyOutside);
+    // Install("CGarage", "IsStaticPlayerCarEntirelyInside", 0x44A830, &CGarage::IsStaticPlayerCarEntirelyInside);
+    // Install("CGarage", "IsEntityEntirelyInside3D", 0x448BE0, &CGarage::IsEntityEntirelyInside3D);
+    // Install("CGarage", "IsPointInsideGarage", 0x448740, static_cast<bool(CGarage::*)(CVector)>(&CGarage::IsPointInsideGarage));
+    // Install("CGarage", "PlayerArrestedOrDied", 0x4486C0, &CGarage::PlayerArrestedOrDied);
+    // Install("CGarage", "OpenThisGarage", 0x447D50, &CGarage::OpenThisGarage);
+    // Install("CGarage", "CloseThisGarage", 0x447D70, &CGarage::CloseThisGarage);
+    // Install("CGarage", "InitDoorsAtStart", 0x447600, &CGarage::InitDoorsAtStart);
+    // Install("CGarage", "IsPointInsideGarage", 0x4487D0, static_cast<bool(CGarage::*)(CVector, float)>(&CGarage::IsPointInsideGarage));
+    // Install("CGarage", "Update", 0x44AA50, &CGarage::Update);
 }
 
 void CGarage::BuildRotatedDoorMatrix(CEntity* pEntity, float fDoorPosition)
@@ -105,14 +87,14 @@ uint8 CGarage::PlayerArrestedOrDied() {
     return plugin::CallMethodAndReturn<uint8, 0x4486C0, CGarage*>(this);
 }
 
-// 0x447D70
-void CGarage::Close() {
-    plugin::CallMethod<0x447D70, CGarage*>(this);
+// 0x447D50
+void CGarage::OpenThisGarage() {
+    return plugin::CallMethod<0x447D50, CGarage*>(this);
 }
 
-// 0x447D50
-int8_t CGarage::Open() {
-    return plugin::CallMethodAndReturn<int8_t, 0x447D50, CGarage*>(this);
+// 0x447D70
+void CGarage::CloseThisGarage() {
+    plugin::CallMethod<0x447D70, CGarage*>(this);
 }
 
 // 0x447600
@@ -126,46 +108,46 @@ bool CGarage::IsPointInsideGarage(CVector point, float radius) {
 }
 
 // 0x44AA50
-void CGarage::Update(int32 thisGarageId) {
-    plugin::CallMethod<0x44AA50, CGarage*>(this, thisGarageId);
+void CGarage::Update(int32 garageId) {
+    plugin::CallMethod<0x44AA50, CGarage*>(this, garageId);
 }
 
-void CSaveGarage::CopyGarageIntoSaveGarage(const CGarage& v) {
-    type = v.m_nType;
-    doorState = v.m_nDoorState;
-    flags = v.m_nFlags;
-    pos = v.m_vPosn;
-    dirA = v.m_vDirectionA;
-    dirB = v.m_vDirectionB;
-    topZ = v.m_fTopZ;
-    width = v.m_fWidth;
-    height = v.m_fHeight;
-    leftCoord = v.m_fLeftCoord;
-    rightCoord = v.m_fRightCoord;
-    frontCoord = v.m_fFrontCoord;
-    backCoord = v.m_fBackCoord;
-    doorPos = v.m_fDoorPosition;
-    timeToOpen = v.m_dwTimeToOpen;
-    originalType = v.m_nOriginalType;
-    strcpy_s(name, v.m_anName);
+void CSaveGarage::CopyGarageIntoSaveGarage(const CGarage& g) {
+    type         = g.m_nType;
+    doorState    = g.m_nDoorState;
+    flags        = g.m_nFlags;
+    pos          = g.m_vPosn;
+    dirA         = g.m_vDirectionA;
+    dirB         = g.m_vDirectionB;
+    topZ         = g.m_fTopZ;
+    width        = g.m_fWidth;
+    height       = g.m_fHeight;
+    leftCoord    = g.m_fLeftCoord;
+    rightCoord   = g.m_fRightCoord;
+    frontCoord   = g.m_fFrontCoord;
+    backCoord    = g.m_fBackCoord;
+    doorPos      = g.m_fDoorPosition;
+    timeToOpen   = g.m_dwTimeToOpen;
+    originalType = g.m_nOriginalType;
+    strcpy_s(name, g.m_anName);
 }
 
-void CSaveGarage::CopyGarageOutOfSaveGarage(CGarage& v) const {
-    v.m_nType = type;
-    v.m_nDoorState = doorState;
-    v.m_nFlags = flags;
-    v.m_vPosn = pos;
-    v.m_vDirectionA = dirA;
-    v.m_vDirectionB = dirB;
-    v.m_fTopZ = topZ;
-    v.m_fWidth = width;
-    v.m_fHeight = height;
-    v.m_fLeftCoord = leftCoord;
-    v.m_fRightCoord = rightCoord;
-    v.m_fFrontCoord = frontCoord;
-    v.m_fBackCoord = backCoord;
-    v.m_fDoorPosition = doorPos;
-    v.m_dwTimeToOpen = timeToOpen;
-    v.m_nOriginalType = originalType;
-    strcpy_s(v.m_anName, name);
+void CSaveGarage::CopyGarageOutOfSaveGarage(CGarage& g) const {
+    g.m_nType         = type;
+    g.m_nDoorState    = doorState;
+    g.m_nFlags        = flags;
+    g.m_vPosn         = pos;
+    g.m_vDirectionA   = dirA;
+    g.m_vDirectionB   = dirB;
+    g.m_fTopZ         = topZ;
+    g.m_fWidth        = width;
+    g.m_fHeight       = height;
+    g.m_fLeftCoord    = leftCoord;
+    g.m_fRightCoord   = rightCoord;
+    g.m_fFrontCoord   = frontCoord;
+    g.m_fBackCoord    = backCoord;
+    g.m_fDoorPosition = doorPos;
+    g.m_dwTimeToOpen  = timeToOpen;
+    g.m_nOriginalType = originalType;
+    strcpy_s(g.m_anName, name);
 }

@@ -62,39 +62,35 @@ enum eGarageDoorState : uint8 {
 };
 
 struct CStoredCar {
-    CVector  m_vPosn;
-    uint32 m_dwHandlingFlags;
-    uint8  m_nStoredCarFlags;
-    uint8  _pad0;
-    uint16 m_wModelIndex;
-    int16  m_awCarMods[15];
-    uint8  m_nPrimaryColor;
-    uint8  m_nSecondaryColor;
-    uint8  m_nTertiaryColor;
-    uint8  m_nQuaternaryColor;
-    uint8  m_nRadiostation;
-    uint8  m_anCompsToUse[2];
-    uint8  m_nBombType;
-    uint8  m_nPaintjob;
-    uint8  m_nNitroBoosts;
-    uint8  m_nPackedForwardX;
-    uint8  m_nPackedForwardY;
-    uint8  m_nPackedForwardZ;
-    uint8  _pad1;
+    CVector m_vPosn;
+    uint32  m_dwHandlingFlags;
+    uint8   m_nStoredCarFlags;
+    uint8   _pad0;
+    uint16  m_wModelIndex;
+    int16   m_awCarMods[15];
+    uint8   m_nPrimaryColor;
+    uint8   m_nSecondaryColor;
+    uint8   m_nTertiaryColor;
+    uint8   m_nQuaternaryColor;
+    uint8   m_nRadiostation;
+    uint8   m_anCompsToUse[2];
+    uint8   m_nBombType;
+    uint8   m_nPaintjob;
+    uint8   m_nNitroBoosts;
+    uint8   m_nPackedForwardX;
+    uint8   m_nPackedForwardY;
+    uint8   m_nPackedForwardZ;
+    uint8   _pad1;
 
 public:
     static void InjectHooks();
 
+    void      StoreCar(CVehicle* vehicle);
     CVehicle* RestoreCar();
-    void      StoreCar(CVehicle* pVehicle);
 };
 VALIDATE_SIZE(CStoredCar, 0x40);
 
 class CGarage {
-public:
-    CGarage() = default;
-    ~CGarage() = default;
-
 public:
     CVector   m_vPosn;
     CVector2D m_vDirectionA;
@@ -131,6 +127,9 @@ public:
 public:
     static void InjectHooks();
 
+    CGarage() = default; // 0x4470E0
+    ~CGarage() = default; // 0x447110
+
     void TidyUpGarageClose();
     void TidyUpGarage();
     void StoreAndRemoveCarsForThisHideOut(CStoredCar* car, int32 maxSlot);
@@ -141,37 +140,37 @@ public:
     bool IsEntityEntirelyInside3D(CEntity* entity, float radius);
     bool IsPointInsideGarage(CVector point);
     uint8 PlayerArrestedOrDied();
-    void Close();
-    int8_t Open();
+    void OpenThisGarage();
+    void CloseThisGarage();
     void InitDoorsAtStart();
     bool IsPointInsideGarage(CVector point, float radius);
-    void Update(int32 thisGarageId);
+    void Update(int32 garageId);
 
-    bool RightModTypeForThisGarage(CVehicle* pVehicle);
+    bool RightModTypeForThisGarage(CVehicle* vehicle);
     void OpenThisGarage();
     void CloseThisGarage();
     float CalcDistToGarageRectangleSquared(float, float);
-    void NeatlyLineUpStoredCars(CStoredCar* pCar);
-    bool RestoreCarsForThisHideOut(CStoredCar* pCar);
-    bool RestoreCarsForThisImpoundingGarage(CStoredCar* pCar);
+    void NeatlyLineUpStoredCars(CStoredCar* car);
+    bool RestoreCarsForThisHideOut(CStoredCar* car);
+    bool RestoreCarsForThisImpoundingGarage(CStoredCar* car);
     int32 FindMaxNumStoredCarsForGarage();
     bool IsPlayerOutsideGarage(float fRadius);
     bool IsPlayerEntirelyInsideGarage();
     bool EntityHasASpehereWayOutsideGarage(CEntity* pEntity, float fRadius);
-    bool IsAnyOtherCarTouchingGarage(CVehicle* pIgnoredVehicle);
-    void ThrowCarsNearDoorOutOfGarage(CVehicle* pIgnoredVehicle);
-    bool IsAnyOtherPedTouchingGarage(CPed* pIgnoredPed);
+    bool IsAnyOtherCarTouchingGarage(CVehicle* ignoredVehicle);
+    void ThrowCarsNearDoorOutOfGarage(CVehicle* ignoredVehicle);
+    bool IsAnyOtherPedTouchingGarage(CPed* ignoredVehicle);
     bool IsAnyCarBlockingDoor();
-    int32 CountCarsWithCenterPointWithinGarage(CVehicle* pIgnoredVeh);
-    void StoreAndRemoveCarsForThisImpoundingGarage(CStoredCar* pStoredCar, int32 iMaxSlot);
-    void CenterCarInGarage(CVehicle* pVehicle);
+    int32 CountCarsWithCenterPointWithinGarage(CVehicle* ignoredVehicle);
+    void StoreAndRemoveCarsForThisImpoundingGarage(CStoredCar* storedCar, int32 iMaxSlot);
+    void CenterCarInGarage(CVehicle* vehicle);
     void FindDoorsWithGarage(CObject** ppFirstDoor, CObject** ppSecondDoor);
     bool SlideDoorOpen();
     bool SlideDoorClosed();
     bool IsGarageEmpty();
 
 public:
-    static void BuildRotatedDoorMatrix(CEntity* pEntity, float fDoorPosition);
+    static void BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition);
 
 private:
     CGarage* Constructor();
@@ -196,7 +195,7 @@ struct CSaveGarage {
     char             name[8]{};
     eGarageType      originalType{};
 
-    void CopyGarageIntoSaveGarage(const CGarage&);
-    void CopyGarageOutOfSaveGarage(CGarage&) const;
+    void CopyGarageIntoSaveGarage(const CGarage& garage);
+    void CopyGarageOutOfSaveGarage(CGarage& garage) const;
 };
 VALIDATE_SIZE(CSaveGarage, 0x50);
