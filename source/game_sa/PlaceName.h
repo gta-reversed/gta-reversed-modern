@@ -19,15 +19,14 @@ public:
     void ProcessAfterFrontEndShutDown();
 
     static CVector CalcPosition() {
-        CVector posn;
         auto player = FindPlayerPed();
         if (player->bInVehicle) {
-            posn = player->m_pVehicle->GetPosition();
+            return player->m_pVehicle->GetPosition();
         } else {
-            posn = player->GetPosition();
+            auto& posn = player->GetPosition();
             CEntryExitManager::GetPositionRelativeToOutsideWorld(posn);
+            return posn;
         }
-        return posn;
     }
 };
 

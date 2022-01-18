@@ -19,23 +19,16 @@ void CCurrentVehicle::Init() {
 
 // 0x571EA0
 void CCurrentVehicle::Display() const {
-    char* name = nullptr;
     if (m_pVehicle) {
         auto modelInfo = static_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(m_pVehicle->m_nModelIndex));
-        auto gameName = modelInfo->m_szGameName;
-        name = TheText.Get(gameName);
+        CHud::SetVehicleName(TheText.Get(modelInfo->m_szGameName));
+    } else {
+        CHud::SetVehicleName(nullptr);
     }
-    CHud::SetVehicleName(name);
 }
 
 // 0x572040
 void CCurrentVehicle::Process() {
-    auto player = FindPlayerPed();
-    if (player->bInVehicle) {
-        m_pVehicle = player->m_pVehicle;
-    } else {
-        m_pVehicle = nullptr;
-    }
-
+    m_pVehicle = FindPlayerVehicle(-1, false);
     Display();
 }

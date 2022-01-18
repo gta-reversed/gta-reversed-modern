@@ -62,8 +62,7 @@ void CPlaceName::Process() {
 // 0x571E60
 void CPlaceName::Display() const {
     if (m_pZone) {
-        const char* name = m_pZone->GetTranslatedName();
-        CHud::SetZoneName(const_cast<char*>(name), false);
+        CHud::SetZoneName(const_cast<char*>(m_pZone->GetTranslatedName()), false);
     } else {
         CHud::SetZoneName(nullptr, false);
     }
