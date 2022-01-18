@@ -344,12 +344,12 @@ CControllerState& CPad::ReconcileTwoControllersInput(CControllerState& out, cons
 
 // 0x53F200
 void CPad::SetTouched() {
-    LastTimeTouched = CTimer::m_snTimeInMilliseconds;
+    LastTimeTouched = CTimer::GetTimeInMS();
 }
 
 // 0x53F210
 uint32 CPad::GetTouchedTimeDelta() const {
-    return CTimer::m_snTimeInMilliseconds - LastTimeTouched;
+    return CTimer::GetTimeInMS() - LastTimeTouched;
 }
 
 // 0x53F920
@@ -497,6 +497,7 @@ int16 CPad::CarGunJustDown() const {
 
         if (!bDisablePlayerFireWeaponWithL1 && IsLeftShoulder1Pressed())
             return 2;
+        break;
     }
     case 3:
         return IsRightShoulder1Pressed();
@@ -959,6 +960,8 @@ bool CPad::WeaponJustDown(CPed* ped) const {
 
         if (ped && (ped->m_pAttachedTo || ped->GetIntelligence()->IsUsingGun()))
             return true;
+
+        break;
     }
     case 2:
         return IsCrossPressed();
@@ -1038,13 +1041,6 @@ int16 CPad::AimWeaponUpDown(CPed* ped) const {
     return bInvertLook4Pad ? -GetRightStickY() : GetRightStickY();
 }
 
-// unused
-// 0x541320
-int32 CPad::sub_541320() {
-    return AverageWeapon / AverageEntries;
-}
-
-// unused
 int32 CPad::sub_541290() {
     if (DisablePlayerControls || bDisablePlayerFireWeapon) {
         AverageWeapon = 0;
@@ -1074,19 +1070,6 @@ int32 CPad::sub_541290() {
     }
 }
 
-// unused
-// 0x541170
-bool CPad::sub_541170() const noexcept {
-    return !DisablePlayerControls && NewState.DPadLeft != 0;
-}
-
-// unused
-// 0x541150
-bool CPad::sub_541150() const noexcept {
-    return !DisablePlayerControls && NewState.DPadRight != 0;
-}
-
-// unused
 // 0x540A40
 bool CPad::sub_540A40() {
     static int16 word_B73704 = *(int16*)0xB73704;
@@ -1101,7 +1084,6 @@ bool CPad::sub_540A40() {
     }
 }
 
-// unused
 // 0x540A10
 bool CPad::sub_540A10() {
     static int16 word_B73700 = *(int16*)0xB73700;
@@ -1116,7 +1098,6 @@ bool CPad::sub_540A10() {
     }
 }
 
-// unused
 // 0x5409E0
 bool CPad::sub_5409E0() {
     static int16 word_B736FC = *(int16*)0xB736FC;
@@ -1131,7 +1112,6 @@ bool CPad::sub_5409E0() {
     }
 }
 
-// unused
 // 0x5409B0
 bool CPad::sub_5409B0() {
     static int16 word_B736F8 = *(int16*)0xB736F8;
@@ -1146,7 +1126,6 @@ bool CPad::sub_5409B0() {
     }
 }
 
-// unused
 // 0x540980
 bool CPad::sub_540980() {
     static int16 word_B736F4 = *(int16*)0xB736F4;
@@ -1161,7 +1140,6 @@ bool CPad::sub_540980() {
     }
 }
 
-// unused
 // 0x540950
 bool CPad::sub_540950() {
     static int16 word_B736F0 = *(int16*)0xB736F0;
@@ -1176,7 +1154,6 @@ bool CPad::sub_540950() {
     }
 }
 
-// unused
 // 0x540530
 bool CPad::sub_540530() const noexcept {
     switch (Mode) {
@@ -1188,6 +1165,8 @@ bool CPad::sub_540530() const noexcept {
 
         if (OldState.Select == 0)
             return true;
+
+        break;
     }
     case 1: {
         if (NewState.DPadUp && OldState.DPadUp == 0)
@@ -1198,17 +1177,4 @@ bool CPad::sub_540530() const noexcept {
     default:
         return false;
     }
-}
-
-// unused
-// maybe wrong
-// 0x5404F0
-bool CPad::sub_5404F0() const noexcept {
-    return Mode == 1 && IsDPadDownPressed();
-}
-
-// unused
-// 0x53FB60
-bool CPad::IsPhaseEqual11() const noexcept {
-    return Phase == 11;
 }

@@ -99,7 +99,7 @@ public:
     uint32   LastTimeTouched;
     int32    AverageWeapon;
     int32    AverageEntries;
-    uint32   NoShakeBeforeThis;
+    float    NoShakeBeforeThis;
     char     NoShakeFreq;
     char    _pad131[3];
 
@@ -273,7 +273,15 @@ public:
     int16 GetRightStickX() const noexcept                     { return BUTTON_IS_DOWN(RightStickX); }
     int16 GetRightStickY() const noexcept                     { return BUTTON_IS_DOWN(RightStickY); }
 
-    int32 sub_541320();
+    bool f0x57C3A0()                                          { return !NewState.ButtonCross && OldState.ButtonCross; }                                         // 0x57C3A0
+    bool f0x541170() const noexcept                           { return !DisablePlayerControls && NewState.DPadLeft != 0; }                                      // 0x541170
+    bool f0x541150() const noexcept                           { return !DisablePlayerControls && NewState.DPadRight != 0; }                                     // 0x541150
+    bool f0x57C380()                                          { return NewState.DPadLeft != 0; }                                                                // 0x57C380
+    bool f0x57C390()                                          { return NewState.DPadRight != 0; }                                                               // 0x57C390
+    // PAD END
+
+    bool IsSteeringInAnyDirection() { return GetSteeringLeftRight() || GetSteeringUpDown(); }
+    int32 sub_541320() { return AverageWeapon / AverageEntries; } // 0x541320
     int32 sub_541290();
     bool sub_541170() const noexcept;
     bool sub_541150() const noexcept;
@@ -284,8 +292,8 @@ public:
     static bool sub_540980();
     static bool sub_540950();
     bool sub_540530() const noexcept;
-    bool sub_5404F0() const noexcept;
-    bool IsPhaseEqual11() const noexcept;
+    bool sub_5404F0() const noexcept { return Mode == 1 && IsDPadDownPressed(); } // 0x5404F0, maybe wrong
+    bool IsPhaseEqual11() const noexcept { return Phase == 11; } // 0x53FB60
 
     // 0x4E7F20 thiscall
     bool IsRadioTrackSkipPressed() { return NewState.m_bRadioTrackSkip && !OldState.m_bRadioTrackSkip; }
@@ -293,26 +301,22 @@ public:
         return !NewKeyState.enter && OldKeyState.enter || !NewKeyState.extenter && OldKeyState.extenter;
     };
     static bool f0x57C360() { return NewKeyState.back && !OldKeyState.back; }
-    bool f0x57C380() { return NewState.DPadLeft != 0; }
-    bool f0x57C390() { return NewState.DPadRight != 0; }
-    bool f0x57C3A0() { return !NewState.ButtonCross && OldState.ButtonCross; }
+    
     static bool f0x57C3C0() { return !NewMouseControllerState.lmb && OldMouseControllerState.lmb;}
     static bool f0x57C3E0() { return NewMouseControllerState.mmb && !OldMouseControllerState.mmb;}
     static bool f0x57C400() { return NewMouseControllerState.wheelUp && !OldMouseControllerState.wheelUp;}
     static bool f0x57C420() { return NewMouseControllerState.wheelDown && !OldMouseControllerState.wheelDown;}
     static bool f0x57C440() { return NewMouseControllerState.bmx1 && !OldMouseControllerState.bmx1;}
     static bool f0x57C460() { return NewMouseControllerState.bmx2 && !OldMouseControllerState.bmx2; }
-
     static bool f0x45AF70() { return NewMouseControllerState.lmb; }
     static bool f0x45AF80() { return NewMouseControllerState.rmb; }
     bool f0x45AF90() {
         NewState.LeftStickX = NewMouseControllerState.X;
         NewState.RightStickX = NewMouseControllerState.Y;
     }
-    bool f0x4D5970() { return NewState.LeftShoulder1 == 0; }
-    static bool f0x57C330() {
-        return !NewKeyState.enter && OldKeyState.enter || !NewKeyState.extenter && OldKeyState.extenter;
-    }
+
+    bool f0x4D5970()        { return NewState.LeftShoulder1 == 0; }
+    static bool f0x57C330() { return !NewKeyState.enter && OldKeyState.enter || !NewKeyState.extenter && OldKeyState.extenter; }
 
     static bool f0x53ED70(int8 pad) { padNumber = pad; }
     static bool f0x53ED80(int8 a1) { *(char*)0xB73401 = a1; } // see .cpp
