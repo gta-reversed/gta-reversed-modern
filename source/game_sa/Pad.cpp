@@ -156,11 +156,7 @@ void CPad::Clear(bool enablePlayerControls, bool resetPhase) {
     }
     ShakeFreq = 0;
     ShakeDur = 0;
-
-    for (auto& buf : SteeringLeftRightBuffer) {
-        buf = 0;
-    }
-
+    std::ranges::fill(SteeringLeftRightBuffer, 0);
     DrunkDrivingBufferUsed = 0;
     if (enablePlayerControls) {
         DisablePlayerControls = 0;
@@ -174,11 +170,7 @@ void CPad::Clear(bool enablePlayerControls, bool resetPhase) {
     }
     JustOutOfFrontEnd = 0;
     bApplyBrakes = false;
-
-    for (auto& history : bHornHistory) {
-        history = 0;
-    }
-
+    std::ranges::fill(bHornHistory, 0);
     iCurrHornHistory = 0;
     AverageWeapon = 0;
     AverageEntries = 0;
@@ -358,12 +350,12 @@ void CPad::StartShake(int16 time, uint8 freq, uint32 shakeDelayMs) {
         return;
 
     if (freq) {
-        if (CTimer::m_snTimeInMilliseconds >= NoShakeBeforeThis || freq > NoShakeFreq) {
+        if (CTimer::GetTimeInMS() >= NoShakeBeforeThis || freq > NoShakeFreq) {
             if (ShakeDur) {
                 ShakeDur = time;
                 ShakeFreq = freq;
             }
-            NoShakeBeforeThis = shakeDelayMs + CTimer::m_snTimeInMilliseconds;
+            NoShakeBeforeThis = shakeDelayMs + CTimer::GetTimeInMS();
             NoShakeFreq = freq;
         }
     } else {
@@ -403,7 +395,7 @@ void CPad::StartShake_Train(const CVector2D& point) {
     auto fDistSq = DistanceBetweenPointsSquared(TheCamera.GetPosition(), point);
     if (ShakeDur < 100 && fDistSq < 4900.0f) {
         ShakeDur = 100;
-        ShakeFreq = static_cast<char>(70.0f - sqrt(fDistSq) + 30.0f);
+        ShakeFreq = static_cast<uint8>(70.0f - sqrt(fDistSq) + 30.0f);
     }
 }
 */
@@ -476,6 +468,8 @@ int16 CPad::GetCarGunFired() const {
 
         if (!bDisablePlayerFireWeaponWithL1 && BUTTON_IS_DOWN(LeftShoulder1))
             return 2;
+
+        break;
     }
     case 3:
         return NewState.RightShoulder1;
@@ -497,6 +491,7 @@ int16 CPad::CarGunJustDown() const {
 
         if (!bDisablePlayerFireWeaponWithL1 && IsLeftShoulder1Pressed())
             return 2;
+
         break;
     }
     case 3:
