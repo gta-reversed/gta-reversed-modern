@@ -14,17 +14,17 @@
 #include "FileMgr.h"
 
 enum eSection : uint8 {
-    UNDEFINED = 0,
-    OBJECT = 1,
-    TIME_OBJECT = 3,
-    WEAPON_OBJECT = 4,
-    CLUMP_OBJECT = 5,
+    UNDEFINED             = 0,
+    OBJECT                = 1,
+    TIME_OBJECT           = 3,
+    WEAPON_OBJECT         = 4,
+    CLUMP_OBJECT          = 5,
     ANIMATED_CLUMP_OBJECT = 6,
-    VEHICLE_OBJECT = 7,
-    PED_OBJECT = 8,
-    PATH_NODE = 9,
-    TWO_D_EFFECT = 10,
-    TXD_PARENT = 11,
+    VEHICLE_OBJECT        = 7,
+    PED_OBJECT            = 8,
+    PATH_NODE             = 9,
+    TWO_D_EFFECT          = 10,
+    TXD_PARENT            = 11,
 };
 
 enum eIDE : uint8 {
@@ -62,7 +62,7 @@ enum eIPL : uint8 {
 
 class CFileLoader {
 public:
-    static char (&ms_line)[512]; // static char ms_line[512]
+    static char (&ms_line)[512];
 
 public:
     static void InjectHooks();

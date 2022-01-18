@@ -243,7 +243,7 @@ void CFileLoader::LoadAudioZone(const char* line) {
         return;
     }
 
-    sscanf(line, "%s %d %d %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &radius);
+    (void)sscanf(line, "%s %d %d %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &radius);
     CAudioZones::RegisterAudioSphere(name, id, enabled != 0, x1, y1, z1, radius);
 }
 
@@ -347,6 +347,61 @@ bool CFileLoader::FinishLoadClumpFile(RwStream* stream, uint32 modelIndex) {
 // 0x5372D0
 bool CFileLoader::LoadClumpFile(RwStream* stream, uint32 modelIndex) {
     return plugin::CallAndReturn<bool, 0x5372D0, RwStream*, uint32>(stream, modelIndex);
+
+        // fails, hook not needed
+    auto modelInfo = static_cast<CClumpModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelIndex]);
+
+    if ((modelInfo->m_nFlags & 0x200) != 0) { // todo: m_nFlags & 0x200
+        RpClump* parentClump = RpClumpCreate();
+        RwFrame* parentFrame = RwFrameCreate();
+        RpClumpSetFrame(parentClump, parentFrame);
+        if (!RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr)) {
+            modelInfo->SetClump(parentClump);
+            return true;
+        }
+
+        while (true) {
+            RpClump* childClump = RpClumpStreamRead(stream);
+            if (!childClump)
+                return false;
+
+            RwFrame* childFrame = _rwFrameCloneAndLinkClones(RpClumpGetFrame(childClump));
+            RwFrameAddChild(parentFrame, childFrame);
+            RpClumpForAllAtomics(childClump, CloneAtomicToClumpCB, parentClump);
+            RpClumpDestroy(childClump);
+
+            if (!RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr)) {
+                modelInfo->SetClump(parentClump);
+                return true;
+            }
+        }
+    }
+
+    if (!RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr))
+        return false;
+
+    bool isVehicle = modelInfo->GetModelType() == MODEL_INFO_VEHICLE;
+    if (isVehicle) {
+        CCollisionPlugin::SetModelInfo(modelInfo);
+        CVehicleModelInfo::UseCommonVehicleTexDicationary();
+    }
+
+    RpClump* clump = RpClumpStreamRead(stream);
+
+    if (isVehicle) {
+        CCollisionPlugin::SetModelInfo(nullptr);
+        CVehicleModelInfo::StopUsingCommonVehicleTexDicationary();
+    }
+
+    if (!clump)
+        return false;
+
+    modelInfo->SetClump(clump);
+
+    if (modelIndex == MODEL_JOURNEY)
+        static_cast<CVehicleModelInfo*>(modelInfo)->m_nNumDoors = 2;
+
+    return true;
 }
 
 // 0x5B3A30
@@ -1033,11 +1088,10 @@ void CFileLoader::LoadCullZone(const char* line) {
 void CFileLoader::LoadEntryExit(const char* line) {
     uint32 numOfPeds = 2;
     uint32 timeOn = 0, timeOff = 24;
-    float enterX, enterY, enterZ;
-    float rangeX, rangeY;
+    CVector enter, exit;
+    CVector2D range;
     float enteranceAngle;
     float unused;
-    float exitX, exitY, exitZ;
     float exitAngle;
     int32 area;
     char interiorName[64]{};
@@ -1047,16 +1101,11 @@ void CFileLoader::LoadEntryExit(const char* line) {
     (void)sscanf(
         line,
         "%f %f %f %f %f %f %f %f %f %f %f %d %d %s %d %d %d %d",
-        &enterX,
-        &enterY,
-        &enterZ,
+        &enter.x, &enter.y, &enter.z,
         &enteranceAngle,
-        &rangeX,
-        &rangeY,
+        &range.x, &range.y,
         &unused,
-        &exitX,
-        &exitY,
-        &exitZ,
+        &exit.x, &exit.y, &exit.z,
         &exitAngle,
         &area,
         &flags,
@@ -1074,16 +1123,11 @@ void CFileLoader::LoadEntryExit(const char* line) {
     }
 
     const auto enexPoolIdx = CEntryExitManager::AddOne(
-        enterX,
-        enterY,
-        enterZ,
+        enter.x, enter.y, enter.z,
         enteranceAngle,
-        rangeX,
-        rangeY,
+        range.x, range.y,
         unused,
-        exitX,
-        exitY,
-        exitZ,
+        exit.x, exit.y, exit.z,
         exitAngle,
         area,
         flags,
@@ -1093,7 +1137,7 @@ void CFileLoader::LoadEntryExit(const char* line) {
         numOfPeds,
         name
     );
-    const auto enex = CEntryExitManager::mp_poolEntryExits->GetAt(enexPoolIdx);
+    auto enex = CEntryExitManager::mp_poolEntryExits->GetAt(enexPoolIdx);
     assert(enex);
 
     enum Flags {
@@ -1137,27 +1181,22 @@ void CFileLoader::LoadEntryExit(const char* line) {
 void CFileLoader::LoadGarage(const char* line) {
     uint32 flags;
     uint32 type;
-    float x1, y1, z1;
-    float x2, y2, z2;
+    CVector p1, p2;
     float frontX, frontY;
     char name[128];
 
     if (sscanf(
         line,
         "%f %f %f %f %f %f %f %f %d %d %s",
-        &x1,
-        &y1,
-        &z1,
+        &p1.x, &p1.y, &p1.z,
         &frontX,
         &frontY,
-        &x2,
-        &y2,
-        &z2,
+        &p2.x, &p2.y, &p2.z,
         &flags,
         &type,
         &name) == 11
     ) {
-        CGarages::AddOne(x1, y1, z1, frontX, frontY, x2, y2, z2, (eGarageType)type, 0, name, flags);
+        CGarages::AddOne(p1.x, p1.y, p1.z, frontX, frontY, p2.x, p2.y, p2.z, (eGarageType)type, 0, name, flags);
     }
 }
 
@@ -1308,7 +1347,7 @@ int32 CFileLoader::LoadPathHeader(const char* line, int32& outPathType) {
     int32 id;
     char modelName[32];
 
-    sscanf(line, "%d %d %s", &outPathType, &id, modelName);
+    (void)sscanf(line, "%d %d %s", &outPathType, &id, modelName);
     return id;
 }
 
@@ -1504,29 +1543,26 @@ void CFileLoader::LoadPickup(const char* line) {
 
 // 0x5B45D0
 void CFileLoader::LoadStuntJump(const char* line) {
-    CVector b1Min;
-    CVector b1Max;
-    CVector b2Min;
-    CVector b2Max;
+    CBoundingBox start, target;
     CVector cameraPosn;
-    int32     reward;
+    int32 reward;
 
     int32 iNumRead = sscanf(
         line,
         "%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %d",
-        &b1Min.x,
-        &b1Min.y,
-        &b1Min.z,
-        &b1Max.x,
-        &b1Max.y,
-        &b1Max.z,
+        &start.m_vecMin.x,
+        &start.m_vecMin.y,
+        &start.m_vecMin.z,
+        &start.m_vecMax.x,
+        &start.m_vecMax.y,
+        &start.m_vecMax.z,
 
-        &b2Min.x,
-        &b2Min.y,
-        &b2Min.z,
-        &b2Max.x,
-        &b2Max.y,
-        &b2Max.z,
+        &target.m_vecMin.x,
+        &target.m_vecMin.y,
+        &target.m_vecMin.z,
+        &target.m_vecMax.x,
+        &target.m_vecMax.y,
+        &target.m_vecMax.z,
 
         &cameraPosn.x,
         &cameraPosn.y,
@@ -1534,8 +1570,6 @@ void CFileLoader::LoadStuntJump(const char* line) {
         &reward
     );
     if (iNumRead == 16) {
-         CBoundingBox start{b1Min, b1Max};
-         CBoundingBox target{b2Min, b2Max};
          CStuntJumpManager::AddOne(start, target, cameraPosn, reward);
     }
 }
@@ -1545,7 +1579,7 @@ int32 CFileLoader::LoadTXDParent(const char* line) {
     char name[32];
     char parentName[32];
 
-    sscanf(line, "%s %s", name, parentName);
+    (void)sscanf(line, "%s %s", name, parentName);
     int32 txdSlot = CTxdStore::FindTxdSlot(name);
     if (txdSlot == INVALID_POOL_SLOT)
         txdSlot = CTxdStore::AddTxdSlot(name);
@@ -1596,10 +1630,10 @@ void CFileLoader::LoadTimeCyclesModifier(const char* line) {
 
 // 0x5B3DE0
 int32 CFileLoader::LoadTimeObject(const char* line) {
-    int32 modelId;
-    char    modelName[24];
-    char    texName[24];
-    float   drawDistance[3];
+    int32 modelId{ eModelID::MODEL_INVALID };
+    char  modelName[24];
+    char  texName[24];
+    float drawDistance[3];
     int32 flags;
     int32 timeOn;
     int32 timeOff;
@@ -1614,13 +1648,13 @@ int32 CFileLoader::LoadTimeObject(const char* line) {
 
         switch (numObjs) {
         case 1:
-            sscanf(line, "%d %s %s %d %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &flags, &timeOn, &timeOff);
+            (void)sscanf(line, "%d %s %s %d %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &flags, &timeOn, &timeOff);
             break;
         case 2:
-            sscanf(line, "%d %s %s %d %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &flags, &timeOn, &timeOff);
+            (void)sscanf(line, "%d %s %s %d %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &flags, &timeOn, &timeOff);
             break;
         case 3:
-            sscanf(line, "%d %s %s %d %f %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &drawDistance[2], &flags, &timeOn, &timeOff);
+            (void)sscanf(line, "%d %s %s %d %f %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &drawDistance[2], &flags, &timeOn, &timeOff);
             break;
         }
     }
@@ -1644,21 +1678,21 @@ int32 CFileLoader::LoadTimeObject(const char* line) {
 
 // 0x5B6F30
 int32 CFileLoader::LoadVehicleObject(const char* line) {
-    int32_t modelId{ -1 };
-    char modelName[24]{};
-    char texName[24]{};
-    char type[8]{};
-    char handlingName[16]{};
-    char gameName[32]{};
-    char anims[16]{};
-    char vehCls[16]{};
-    uint32_t frq{}, flags{};
+    int32 modelId{ eModelID::MODEL_INVALID };
+    char  modelName[24]{};
+    char  texName[24]{};
+    char  type[8]{};
+    char  handlingName[16]{};
+    char  gameName[32]{};
+    char  anims[16]{};
+    char  vehCls[16]{};
+    uint32 frq{}, flags{};
     tVehicleCompsUnion vehComps{};
-    uint32_t misc{}; // `m_fBikeSteerAngle` if model type is BMX/Bike, otherwise `m_nWheelModelIndex`
+    uint32 misc{}; // `m_fBikeSteerAngle` if model type is BMX/Bike, otherwise `m_nWheelModelIndex`
     float wheelSizeFront{}, wheelSizeRear{};
-    int32_t wheelUpgradeCls{ -1 };
+    int32 wheelUpgradeCls{ -1 };
 
-    sscanf(line, "%d %s %s %s %s %s %s %s %d %d %x %d %f %f %d",
+    (void)sscanf(line, "%d %s %s %s %s %s %s %s %d %d %x %d %f %f %d",
         &modelId,
         modelName,
         texName,
@@ -1680,69 +1714,214 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
     if (nTxdSlot == -1)
         nTxdSlot = CTxdStore::AddTxdSlot("vehicle");
 
-    auto pVehModelInfo = CModelInfo::AddVehicleModel(modelId);
-    pVehModelInfo->SetModelName(modelName);
-    pVehModelInfo->SetTexDictionary(texName);
-    CTxdStore::ms_pTxdPool->GetAt(pVehModelInfo->m_nTxdIndex)->m_wParentIndex = nTxdSlot;
-    pVehModelInfo->SetAnimFile(anims);
+    auto mi = CModelInfo::AddVehicleModel(modelId);
+    mi->SetModelName(modelName);
+    mi->SetTexDictionary(texName);
+    CTxdStore::ms_pTxdPool->GetAt(mi->m_nTxdIndex)->m_wParentIndex = nTxdSlot;
+    mi->SetAnimFile(anims);
 
     // Replace `_` with ` ` (space)
     std::replace(gameName, gameName + strlen(gameName), '_', ' ');
-    pVehModelInfo->SetGameName(gameName);
+    mi->SetGameName(gameName);
 
-    pVehModelInfo->m_nFlags = flags;
-    pVehModelInfo->m_extraComps = vehComps;
+    mi->m_nFlags = flags;
+    mi->m_extraComps = vehComps;
 
 
     // This isn't exactly R* did it, but that code is hot garbage anyways
     // They've used strcmp all the way, and.. It's bad.
 
-    pVehModelInfo->SetVehicleType(type);
-    switch (pVehModelInfo->m_nVehicleType) {
+    mi->SetVehicleType(type);
+    switch (mi->m_nVehicleType) {
     case eVehicleType::VEHICLE_AUTOMOBILE:
     case eVehicleType::VEHICLE_MTRUCK:
     case eVehicleType::VEHICLE_QUAD:
     case eVehicleType::VEHICLE_HELI:
     case eVehicleType::VEHICLE_PLANE:
     case eVehicleType::VEHICLE_TRAILER: {
-        pVehModelInfo->SetWheelSizes(wheelSizeFront, wheelSizeRear);
-        pVehModelInfo->m_nWheelModelIndex = misc;
+        mi->SetWheelSizes(wheelSizeFront, wheelSizeRear);
+        mi->m_nWheelModelIndex = misc;
         break;
     }
     case eVehicleType::VEHICLE_FPLANE: {
-        pVehModelInfo->SetWheelSizes(1.0f, 1.0f);
-        pVehModelInfo->m_nWheelModelIndex = misc;
+        mi->SetWheelSizes(1.0f, 1.0f);
+        mi->m_nWheelModelIndex = misc;
         break;
     }
     case eVehicleType::VEHICLE_BIKE:
     case eVehicleType::VEHICLE_BMX: {
-        pVehModelInfo->SetWheelSizes(wheelSizeFront, wheelSizeRear);
-        pVehModelInfo->m_fBikeSteerAngle = (float)misc;
+        mi->SetWheelSizes(wheelSizeFront, wheelSizeRear);
+        mi->m_fBikeSteerAngle = (float)misc;
         break;
     }
     }
 
-    pVehModelInfo->SetHandlingId(handlingName);
-    pVehModelInfo->m_nWheelUpgradeClass = wheelUpgradeCls;
+    mi->SetHandlingId(handlingName);
+    mi->m_nWheelUpgradeClass = wheelUpgradeCls;
 
-    pVehModelInfo->SetVehicleClass(vehCls);
-    if (pVehModelInfo->m_nVehicleClass != eVehicleClass::VEHICLE_CLASS_IGNORE) {
-        pVehModelInfo->m_nFrq = frq;
+    mi->SetVehicleClass(vehCls);
+    if (mi->m_nVehicleClass != eVehicleClass::VEHICLE_CLASS_IGNORE) {
+        mi->m_nFrq = frq;
     }
 
     return modelId;
+
+    /*
+    todo: Izzotop
+
+    if (strcmp(type, "car") == 0)
+    {
+        mi->m_nVehicleType = VEHICLE_AUTOMOBILE;
+        mi->m_nWheelModelIndex = wheelModelId;
+        mi->m_fWheelSizeFront = wheelScaleFront;
+        mi->m_fWheelSizeRear = wheelScaleRear;
+    }
+    else if (strcmp(type, "mtruck") == 0)
+    {
+        mi->m_nVehicleType = VEHICLE_MTRUCK;
+        mi->m_nWheelModelIndex = wheelModelId;
+        mi->m_fWheelSizeFront = wheelScaleFront;
+        mi->m_fWheelSizeRear = wheelScaleRear;
+    }
+    else if (strcmp(type, "quad") == 0)
+    {
+        mi->m_nVehicleType = VEHICLE_QUAD;
+        mi->m_nWheelModelIndex = wheelModelId;
+        mi->m_fWheelSizeFront = wheelScaleFront;
+        mi->m_fWheelSizeRear = wheelScaleRear;
+    }
+    else if (strcmp(type, "heli") == 0)
+    {
+        mi->m_nVehicleType = VEHICLE_HELI;
+        mi->m_nWheelModelIndex = wheelModelId;
+        mi->m_fWheelSizeFront = wheelScaleFront;
+        mi->m_fWheelSizeRear = wheelScaleRear;
+    }
+    else if (strcmp(type, "plane") == 0)
+    {
+        mi->m_nVehicleType = VEHICLE_PLANE;
+        mi->m_nWheelModelIndex = wheelModelId;
+        mi->m_fWheelSizeFront = wheelScaleFront;
+        mi->m_fWheelSizeRear = wheelScaleRear;
+    }
+    else if (strcmp(type, "boat") == 0)
+    {
+        mi->m_nVehicleType = VEHICLE_BOAT;
+        mi->m_nHandlingId = gHandlingDataMgr.GetHandlingId(handlingId);
+        mi->m_nWheelUpgradeClass = wheelUpgradeClass;
+    }
+    else if (strcmp(type, "train") == 0)
+    {
+        mi->m_nVehicleType = VEHICLE_TRAIN;
+        mi->m_nHandlingId = gHandlingDataMgr.GetHandlingId(handlingId);
+        mi->m_nWheelUpgradeClass = wheelUpgradeClass;
+    }
+    else if (strcmp(type, "f_heli") == 0)
+    {
+        mi->m_nVehicleType = VEHICLE_HELI; // Izzotop: Why not F_HELI?
+        mi->m_nHandlingId = gHandlingDataMgr.GetHandlingId(handlingId);
+        mi->m_nWheelUpgradeClass = wheelUpgradeClass;
+    }
+    else if (strcmp(type, "f_plane") == 0)
+    {
+        mi->m_nVehicleType = VEHICLE_FPLANE;
+        mi->m_nWheelModelIndex = wheelModelId;
+        mi->m_fWheelSizeFront = 1.0f;
+        mi->m_fWheelSizeRear = 1.0f;
+        mi->m_nHandlingId = gHandlingDataMgr.GetHandlingId(handlingId);
+        mi->m_nWheelUpgradeClass = wheelUpgradeClass;
+    }
+    else if (strcmp(type, "bike") == 0)
+    {
+        mi->m_nVehicleType = VEHICLE_BIKE;
+        mi->m_fBikeSteerAngle = wheelModelId;
+    }
+    else if (strcmp(type, "bmx") == 0)
+    {
+        mi->m_nVehicleType = VEHICLE_BMX;
+        mi->m_fBikeSteerAngle = wheelModelId;
+    }
+    else if (strcmp(type, "trailer") == 0)
+    {
+        mi->m_nVehicleType = VEHICLE_TRAILER;
+        mi->m_nWheelModelIndex = wheelModelId;
+        mi->m_fWheelSizeFront = wheelScaleFront;
+        mi->m_fWheelSizeRear = wheelScaleRear;
+    }
+    else
+    {
+        assert(false); // "Unknown vehicle type"
+    }
+
+    if (strcmp(group, "normal") == 0)
+    {
+        mi->m_nVehicleClass = VEHICLE_CLASS_NORMAL;
+    }
+    else if (strcmp(group, "poorfamily") == 0)
+    {
+        mi->m_nVehicleClass = VEHICLE_CLASS_POORFAMILY;
+    }
+    else if (strcmp(group, "richfamily") == 0)
+    {
+        mi->m_nVehicleClass = VEHICLE_CLASS_RICHFAMILY;
+    }
+    else if (strcmp(group, "executive") == 0)
+    {
+        mi->m_nVehicleClass = VEHICLE_CLASS_EXECUTIVE;
+    }
+    else if (strcmp(group, "worker") == 0)
+    {
+        mi->m_nVehicleClass = VEHICLE_CLASS_WORKER;
+    }
+    else if (strcmp(group, "big") == 0)
+    {
+        mi->m_nVehicleClass = VEHICLE_CLASS_BIG;
+    }
+    else if (strcmp(group, "taxi") == 0)
+    {
+        mi->m_nVehicleClass = VEHICLE_CLASS_TAXI;
+    }
+    else if (strcmp(group, "moped") == 0)
+    {
+        mi->m_nVehicleClass = VEHICLE_CLASS_MOPED;
+    }
+    else if (strcmp(group, "motorbike") == 0)
+    {
+        mi->m_nVehicleClass = VEHICLE_CLASS_MOTORBIKE;
+    }
+    else if (strcmp(group, "leisureboat") == 0)
+    {
+        mi->m_nVehicleClass = VEHICLE_CLASS_LEISUREBOAT;
+    }
+    else if (strcmp(group, "workerboat") == 0)
+    {
+        mi->m_nVehicleClass = VEHICLE_CLASS_WORKERBOAT;
+    }
+    else if (strcmp(group, "bicycle") == 0)
+    {
+        mi->m_nVehicleClass = VEHICLE_CLASS_BICYCLE;
+    }
+    else if (strcmp(group, "ignore") == 0)
+    {
+        mi->m_nVehicleClass = VEHICLE_CLASS_IGNORE;
+    }
+
+    mi->m_nFrq = freq;
+    return modelId;
+
+    */
 }
 
 // 0x5B3FB0
 int32 CFileLoader::LoadWeaponObject(const char* line) {
-    int32 objId;
+    int32 objId{ eModelID::MODEL_INVALID };
     char modelName[24];
     char texName[24];
     char animName[16];
     int32 weaponType;
     float drawDist;
 
-    sscanf(line, "%d %s %s %s %d %f", &objId, modelName, texName, animName, &weaponType, &drawDist);
+    (void)sscanf(line, "%d %s %s %s %d %f", &objId, modelName, texName, animName, &weaponType, &drawDist);
     CWeaponModelInfo* weaponModel = CModelInfo::AddWeaponModel(objId);
     weaponModel->SetModelName(modelName);
     weaponModel->m_fDrawDistance = drawDist;
@@ -2078,7 +2257,7 @@ void CFileLoader::ReloadPaths(const char* filename) {
             if (make_fourcc3(line, "end")) {
                 pathAllocated = false;
             } else if (pathEntryIndex == -1) {
-                sscanf(line, "%d %d %s", &id, &objModelIndex, unused);
+                (void)sscanf(line, "%d %d %s", &id, &objModelIndex, unused);
                 pathEntryIndex = 0;
             } else {
                 if (id) {
@@ -2182,7 +2361,7 @@ RwTexture* AddTextureCB(RwTexture* texture, void* dict) {
  */
 RpAtomic* CloneAtomicToClumpCB(RpAtomic* atomic, void* data) {
     RpAtomic* clone = RpAtomicClone(atomic);
-    auto frame = static_cast<RwFrame*>(atomic->object.object.parent);
+    auto frame = RpClumpGetFrame(atomic);
     RpAtomicSetFrame(clone, frame->root);
     RpClumpAddAtomic(static_cast<RpClump*>(data), clone);
     return atomic;
