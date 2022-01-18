@@ -10,7 +10,7 @@ void CFire::InjectHooks() {
     Install("CFire", "Initialise", 0x538B30, &CFire::Initialise);
     Install("CFire", "CreateFxSysForStrength", 0x539360, &CFire::CreateFxSysForStrength);
     Install("CFire", "Extinguish", 0x5393F0, &CFire::Extinguish);
-    Install("CFire", "ProcessFire", 0x53A570, &CFire::ProcessFire); // wrong
+    Install("CFire", "ProcessFire", 0x53A570, &CFire::ProcessFire);
 }
 
 // 0x539D90
