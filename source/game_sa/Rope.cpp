@@ -24,37 +24,36 @@ void CRope::ReleasePickedUpObject() {
     m_nFlags1 = 60; // 6th, 7th bits set
 }
 
-ModelIndex CRope::GetModelForType() const {
+// 0x556070
+void CRope::CreateHookObjectForRope() {
+    if (m_pAttachedEntity)
+        return;
+
     using namespace ModelIndices;
+    ModelIndex modelIndex{-1};
     switch (m_nType) {
     case eRopeType::CRANE_MAGNET1:
     case eRopeType::CRANE_MAGNET2:
     case eRopeType::CRANE_MAGNET3:
     case eRopeType::CRANE_MAGNET4:
-        return MI_CRANE_MAGNET;
+        modelIndex = MI_CRANE_MAGNET;
 
     case eRopeType::CRANE_HARNESS:
-        return MI_CRANE_HARNESS;
+        modelIndex = MI_CRANE_HARNESS;
 
     case eRopeType::MAGNET:
-        return MI_MINI_MAGNET;
+        modelIndex = MI_MINI_MAGNET;
 
     case eRopeType::WRECKING_BALL:
-        return MI_WRECKING_BALL;
+        modelIndex = MI_WRECKING_BALL;
 
-    default: { // NOTSA
-        assert(0);
-        break;
-    }
-    }
-}
-
-// 0x556070
-void CRope::CreateHookObjectForRope() {
-    if (m_nType == eRopeType::NONE)
+    default: {
+        assert(0); // NOTSA
         return;
+    }
+    }
 
-    CObject* obj = new CObject((int32)GetModelForType(), true);
+    CObject* obj = new CObject(modelIndex, true);
     m_pAttachedEntity = obj;
 
     obj->RegisterReference(reinterpret_cast<CEntity**>(&m_pAttachedEntity));
@@ -62,6 +61,8 @@ void CRope::CreateHookObjectForRope() {
     obj->m_nObjectType = eObjectType::OBJECT_TYPE_DECORATION;
     obj->SetIsStatic(false);
     obj->physicalFlags.bAttachedToEntity = true;
+
+    CWorld::Add(m_pRopeAttachObject);
 
     m_pRopeAttachObject = nullptr;
     m_nFlags1 = 0;
@@ -114,8 +115,7 @@ void CRope::Render() {
         RxObjSpace3DVertexSetPos(GetVertex(i), &m_aSegments[i]);
     }
 
-    if (RwIm3DTransform(aTempBufferVertices, NUM_ROPE_SEGMENTS, 0, 0))
-    {
+    if (RwIm3DTransform(aTempBufferVertices, NUM_ROPE_SEGMENTS, 0, 0)) {
         RxVertexIndex indices[] = {
             0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6,
             6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11,
@@ -135,8 +135,7 @@ void CRope::Render() {
             RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color);
             RxObjSpace3DVertexSetPos(GetVertex(i), &pos[i]);
         }
-        if (RwIm3DTransform(aTempBufferVertices, 2, 0, 0))
-        {
+        if (RwIm3DTransform(aTempBufferVertices, 2, 0, 0)) {
             RxVertexIndex indices[] = { 0, 1 };
             RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, indices, std::size(indices));
             RwIm3DEnd();
@@ -157,16 +156,11 @@ void CRope::PickUpObject(CPhysical* obj) {
 
     // TODO: Move model => world space translation into CEntity
     // MultiplyMatrixWithVector should be used here
-    m_pAttachedEntity->SetPosn(
-        obj->GetPosition()
-      + Multiply3x3(
-            obj->GetMatrix(),
-            CVector{ {}, {}, obj->GetColModel()->GetBoundingBox().m_vecMax.z }
-        )
-    );
+    CVector height = { {}, {}, obj->GetColModel()->GetBoundingBox().m_vecMax.z };
+    m_pAttachedEntity->SetPosn(obj->GetPosition() + Multiply3x3(obj->GetMatrix(), height));
     m_pAttachedEntity->m_bUsesCollision = false;
 
-    obj->physicalFlags.bAttachedToEntity = true;
+    obj->physicalFlags.bAttachedToEntity = true; 
     if (obj->IsVehicle()) {
         if (obj->m_nStatus == eEntityStatus::STATUS_SIMPLE)
         {
