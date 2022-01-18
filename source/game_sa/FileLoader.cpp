@@ -1590,8 +1590,6 @@ void CFileLoader::LoadStuntJump(const char* line) {
         &reward
     );
     if (iNumRead == 16) {
-         CBoundingBox start{b1Min, b1Max};
-         CBoundingBox target{b2Min, b2Max};
          CStuntJumpManager::AddOne(start, target, cameraPosn, reward);
     }
 }
