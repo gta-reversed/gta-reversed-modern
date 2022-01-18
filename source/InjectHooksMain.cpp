@@ -60,6 +60,7 @@
 #include "BulletInfo.h"
 #include "Explosion.h"
 #include "FireManager.h"
+#include "Skidmarks.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"

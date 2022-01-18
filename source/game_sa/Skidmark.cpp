@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
-#include "CSkidmark.h"
+#include "Skidmark.h"
 
-#include "CSkidmarks.h"
-#include "CCustomBuildingDNPipeline.h"
+#include "Skidmarks.h"
+#include "CustomBuildingDNPipeline.h"
 
 void CSkidmark::Init(uint32 id, CVector posn, eSkidMarkType type, const bool* bloodState) {
     m_nId         = id;
