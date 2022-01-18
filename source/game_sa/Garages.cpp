@@ -17,7 +17,8 @@ void CGarages::InjectHooks() {
     Install("CGarages", "FindSafeHouseIndexForGarageType", 0x4489F0, &CGarages::FindSafeHouseIndexForGarageType);
     Install("CGarages", "FindGarageForObject", 0x4489F0, &CGarages::FindGarageForObject);
     Install("CGarages", "IsPointWithinHideOutGarage", 0x448900, &CGarages::IsPointWithinHideOutGarage);
-    Install("CGarages", "IsGarageDoorClosed", 0x447D30, &CGarages::IsGarageDoorClosed);
+    Install("CGarages", "IsGarageOpen", 0x447D00, &CGarages::IsGarageOpen);
+    Install("CGarages", "IsGarageClosed", 0x447D30, &CGarages::IsGarageClosed);
     Install("CGarages", "IsCarSprayable", 0x4479A0, &CGarages::IsCarSprayable);
     Install("CGarages", "Update", 0x44C8C0, &CGarages::Update);
     Install("CGarages", "ActivateGarage", 0x447CD0, &CGarages::ActivateGarage);
@@ -245,8 +246,14 @@ bool CGarages::IsPointWithinHideOutGarage(const CVector& point) {
     return false;
 }
 
+// 0x447D00
+bool CGarages::IsGarageOpen(int16 garageId) {
+    const auto state = aGarages[garageId].m_nDoorState;
+    return state == GARAGE_DOOR_OPEN || state == GARAGE_DOOR_WAITING_PLAYER_TO_EXIT;
+}
+
 // 0x447D30
-bool CGarages::IsGarageDoorClosed(int16 garageId) {
+bool CGarages::IsGarageClosed(int16 garageId) {
     return aGarages[garageId].m_nDoorState == eGarageDoorState::GARAGE_DOOR_CLOSED;
 }
 

@@ -52,7 +52,8 @@ public:
     static int16 FindGarageForObject(CObject*);
     static bool IsModelIndexADoor(int32 model);
     static bool IsPointWithinHideOutGarage(const CVector& point);
-    static bool IsGarageDoorClosed(int16 garageId);
+    static bool IsGarageOpen(int16 garageId);
+    static bool IsGarageClosed(int16 garageId);
     static bool IsCarSprayable(CVehicle* vehicle);
     static void Update();
     static void ActivateGarage(int16 a1);
@@ -68,4 +69,20 @@ public:
     static CGarage& GetGarage(int32 iGarageInd) { return aGarages[iGarageInd]; }
     static CStoredCar* GetStoredCarsInSafehouse(int32 iSafehouseInd) { return aCarsInSafeHouse[iSafehouseInd]; }
     static CStoredCar& GetStoredCar(int32 iSafehouseInd, int32 iCarInd) { return aCarsInSafeHouse[iSafehouseInd][iCarInd]; }
+
+    // todo :
+    // 0x298F74 FindGarageIndex(char*)
+    // 0x299008 void ChangeGarageType(int16, uchar, uint32)
+    // 0x2994F8 void SetTargetCarForMissionGarage(int16, CAutomobile*)
+    // 0x2995A4 bool HasCarBeenDroppedOffYet(int16 garageId) { return aGarages[garageId].m_nDoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR; }
+    // 0x2996BC bool HasResprayHappened(int16 garageId)
+    // 0x299798 bool CameraShouldBeOutside() { return bCamShouldBeOutside; }
+    // 0x299F08 void GivePlayerDetonator()
+    // 0x299F24 float FindDoorHeightForMI(uint32)
+    // 0x29A024 bool IsPointInAGarageCameraZone(CVector point)
+    // 0x29A600 bool IsThisCarWithinGarageArea(int16 garageId, CEntity* entity) { return aGarages[garageId].IsEntityEntirelyInside3D(entity, 0.0f); }
+    // 0x29AED0 StopCarFromBlowingUp(CAutomobile* vehicle)
+    // 0x29B788 bool IsPointWithinAnyGarage(CVector& point)
+    // 0x29B838 int32 CountCarsInHideoutGarage(uint8)
+    // 0x29DC5C void StoreCarInNearestImpoundingGarage(CVehicle* vehicle)
 };

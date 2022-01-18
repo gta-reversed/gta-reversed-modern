@@ -85,29 +85,29 @@ struct CStoredCar {
 public:
     static void InjectHooks();
 
-    void      StoreCar(CVehicle* vehicle);
-    CVehicle* RestoreCar();
+    void      StoreCar(CVehicle* vehicle); // 0x449760
+    CVehicle* RestoreCar();                // 0x447E40
 };
 VALIDATE_SIZE(CStoredCar, 0x40);
 
 class CGarage {
 public:
-    CVector   m_vPosn;
-    CVector2D m_vDirectionA;
-    CVector2D m_vDirectionB;
-    float     m_fTopZ;
-    float     m_fWidth;
-    float     m_fHeight;
-    float     m_fLeftCoord;
-    float     m_fRightCoord;
-    float     m_fFrontCoord;
-    float     m_fBackCoord;
-    float     m_fDoorPosition;
-    uint32  m_dwTimeToOpen;
-    CVehicle* m_pTargetCar;
-    char      m_anName[8];
-    eGarageType   m_nType;      // see eGarageType
-    eGarageDoorState   m_nDoorState; // see eGarageDoorState
+    CVector     m_vPosn;
+    CVector2D   m_vDirectionA;
+    CVector2D   m_vDirectionB;
+    float       m_fTopZ;
+    float       m_fWidth;
+    float       m_fHeight;
+    float       m_fLeftCoord;
+    float       m_fRightCoord;
+    float       m_fFrontCoord;
+    float       m_fBackCoord;
+    float       m_fDoorPosition;
+    uint32      m_nTimeToOpen;
+    CVehicle*   m_pTargetCar;
+    char        m_anName[8];
+    eGarageType m_nType;
+    eGarageDoorState m_nDoorState;
     union {
         uint8 m_nFlags;
         struct {
@@ -121,13 +121,13 @@ public:
             uint8 m_bRespraysAlwaysFree : 1;
         };
     };
-    eGarageType            m_nOriginalType;
+    eGarageType        m_nOriginalType;
     CAEDoorAudioEntity m_GarageAudio;
 
 public:
     static void InjectHooks();
 
-    CGarage() = default; // 0x4470E0
+    CGarage() = default;  // 0x4470E0
     ~CGarage() = default; // 0x447110
 
     void TidyUpGarageClose();
@@ -139,7 +139,7 @@ public:
     bool IsStaticPlayerCarEntirelyInside();
     bool IsEntityEntirelyInside3D(CEntity* entity, float radius);
     bool IsPointInsideGarage(CVector point);
-    uint8 PlayerArrestedOrDied();
+    eGarageDoorState PlayerArrestedOrDied();
     void OpenThisGarage();
     void CloseThisGarage();
     void InitDoorsAtStart();
@@ -147,8 +147,6 @@ public:
     void Update(int32 garageId);
 
     bool RightModTypeForThisGarage(CVehicle* vehicle);
-    void OpenThisGarage();
-    void CloseThisGarage();
     float CalcDistToGarageRectangleSquared(float, float);
     void NeatlyLineUpStoredCars(CStoredCar* car);
     bool RestoreCarsForThisHideOut(CStoredCar* car);
@@ -171,11 +169,8 @@ public:
 
 public:
     static void BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition);
-
-private:
-    CGarage* Constructor();
-    CGarage* Destructor();
 };
+
 VALIDATE_SIZE(CGarage, 0xD8);
 
 struct CSaveGarage {
@@ -198,4 +193,5 @@ struct CSaveGarage {
     void CopyGarageIntoSaveGarage(const CGarage& garage);
     void CopyGarageOutOfSaveGarage(CGarage& garage) const;
 };
+
 VALIDATE_SIZE(CSaveGarage, 0x50);

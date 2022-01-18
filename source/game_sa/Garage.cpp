@@ -16,13 +16,14 @@ void CGarage::InjectHooks()
     // Install("CGarage", "IsEntityEntirelyInside3D", 0x448BE0, &CGarage::IsEntityEntirelyInside3D);
     // Install("CGarage", "IsPointInsideGarage", 0x448740, static_cast<bool(CGarage::*)(CVector)>(&CGarage::IsPointInsideGarage));
     // Install("CGarage", "PlayerArrestedOrDied", 0x4486C0, &CGarage::PlayerArrestedOrDied);
-    // Install("CGarage", "OpenThisGarage", 0x447D50, &CGarage::OpenThisGarage);
-    // Install("CGarage", "CloseThisGarage", 0x447D70, &CGarage::CloseThisGarage);
+    Install("CGarage", "OpenThisGarage", 0x447D50, &CGarage::OpenThisGarage);
+    Install("CGarage", "CloseThisGarage", 0x447D70, &CGarage::CloseThisGarage);
     // Install("CGarage", "InitDoorsAtStart", 0x447600, &CGarage::InitDoorsAtStart);
     // Install("CGarage", "IsPointInsideGarage", 0x4487D0, static_cast<bool(CGarage::*)(CVector, float)>(&CGarage::IsPointInsideGarage));
     // Install("CGarage", "Update", 0x44AA50, &CGarage::Update);
 }
 
+// 0x4479F0
 void CGarage::BuildRotatedDoorMatrix(CEntity* pEntity, float fDoorPosition)
 {
     const auto fAngle = fDoorPosition * -HALF_PI;
@@ -83,18 +84,24 @@ bool CGarage::IsPointInsideGarage(CVector point) {
 }
 
 // 0x4486C0
-uint8 CGarage::PlayerArrestedOrDied() {
-    return plugin::CallMethodAndReturn<uint8, 0x4486C0, CGarage*>(this);
+eGarageDoorState CGarage::PlayerArrestedOrDied() {
+    return plugin::CallMethodAndReturn<eGarageDoorState, 0x4486C0, CGarage*>(this);
 }
 
 // 0x447D50
 void CGarage::OpenThisGarage() {
-    return plugin::CallMethod<0x447D50, CGarage*>(this);
+  if ( m_nDoorState == GARAGE_DOOR_CLOSED
+    || m_nDoorState == GARAGE_DOOR_CLOSING
+    || m_nDoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR)
+  {
+    m_nDoorState = GARAGE_DOOR_OPENING;
+  }
 }
 
 // 0x447D70
 void CGarage::CloseThisGarage() {
-    plugin::CallMethod<0x447D70, CGarage*>(this);
+    if (m_nDoorState == GARAGE_DOOR_OPEN || m_nDoorState == GARAGE_DOOR_OPENING)
+        m_nDoorState = GARAGE_DOOR_CLOSING;
 }
 
 // 0x447600
@@ -127,7 +134,7 @@ void CSaveGarage::CopyGarageIntoSaveGarage(const CGarage& g) {
     frontCoord   = g.m_fFrontCoord;
     backCoord    = g.m_fBackCoord;
     doorPos      = g.m_fDoorPosition;
-    timeToOpen   = g.m_dwTimeToOpen;
+    timeToOpen   = g.m_nTimeToOpen;
     originalType = g.m_nOriginalType;
     strcpy_s(name, g.m_anName);
 }
@@ -147,7 +154,7 @@ void CSaveGarage::CopyGarageOutOfSaveGarage(CGarage& g) const {
     g.m_fFrontCoord   = frontCoord;
     g.m_fBackCoord    = backCoord;
     g.m_fDoorPosition = doorPos;
-    g.m_dwTimeToOpen  = timeToOpen;
+    g.m_nTimeToOpen  = timeToOpen;
     g.m_nOriginalType = originalType;
     strcpy_s(g.m_anName, name);
 }
