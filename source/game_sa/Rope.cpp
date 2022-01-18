@@ -109,7 +109,7 @@ void CRope::Render() {
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)FALSE);
 
-    for (unsigned i = 0; i < NUM_ROPE_SEGMENTS; i++) {
+    for (auto i = 0u; i < NUM_ROPE_SEGMENTS; i++)
         RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color);
         RxObjSpace3DVertexSetPos(GetVertex(i), &m_aSegments[i]);
     }
@@ -139,7 +139,7 @@ void CRope::Render() {
         if (RwIm3DTransform(aTempBufferVertices, 2, 0, 0))
         {
             RxVertexIndex indices[] = { 0, 1 };
-            RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, indices, 2);
+            RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, indices, std::size(indices));
             RwIm3DEnd();
         }
     }

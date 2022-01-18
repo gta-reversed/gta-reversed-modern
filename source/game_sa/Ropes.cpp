@@ -115,7 +115,7 @@ void CRopes::Update() {
         return;
     }
 
-    for (uint8 ropeId = 0; ropeId < m_nNumRopes; ropeId++) {
+    for (auto ropeId = 0u; ropeId < m_nNumRopes; ropeId++) {
         aRopes[ropeId].Update();
     }
 }
