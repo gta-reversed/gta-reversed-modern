@@ -177,7 +177,7 @@ namespace V3 {
 
             uint32 maxVert{};
             for (auto i = 0u; i < nShdwFaces; i++) {
-                maxVert = *std::ranges::max_element(cd->m_pShadowTriangles[i].m_vertIndices);
+                maxVert = std::max(maxVert, (uint32)*std::ranges::max_element(cd->m_pShadowTriangles[i].m_vertIndices));
             }
             return maxVert + 1;
         }
