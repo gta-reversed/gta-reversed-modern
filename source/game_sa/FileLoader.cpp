@@ -118,11 +118,12 @@ int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
 
     mi->m_nKey = CKeyGen::GetUppercaseKey(modelName);
     mi->SetTexDictionary(txdName);
+    mi->m_fDrawDistance = drawDist;
     mi->SetAnimFile(animName);
-    mi->SetClumpModelInfoFlags(flags);
+    SetClumpModelInfoFlags(mi, flags);
 
-    if (std::string_view{ animName } == "null")
-        mi->bHasBeenPreRendered = true;
+    if (std::string_view{ animName } != "null")
+        mi->bHasAnimBlend = true;
 
     return objID;
 }
