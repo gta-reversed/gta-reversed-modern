@@ -68,8 +68,8 @@ void CRope::CreateHookObjectForRope() {
 }
 
 // 0x5561B0
-int8_t CRope::UpdateWeightInRope(float a2, float a3, float a4, int32 a5, float* a6) {
-    return plugin::CallMethodAndReturn<int8_t, 0x5561B0, CRope*, float, float, float, int32, float*>(this, a2, a3, a4, a5, a6);
+int8 CRope::UpdateWeightInRope(float a2, float a3, float a4, int32 a5, float* a6) {
+    return plugin::CallMethodAndReturn<int8, 0x5561B0, CRope*, float, float, float, int32, float*>(this, a2, a3, a4, a5, a6);
 }
 
 // 0x556780
@@ -102,12 +102,12 @@ void CRope::Render() {
         return &aTempBufferVertices[i];
     };
 
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     (void*)rwFILTERLINEAR);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)FALSE);
 
     for (auto i = 0u; i < NUM_ROPE_SEGMENTS; i++) {
         RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color);
@@ -157,19 +157,21 @@ void CRope::PickUpObject(CPhysical* obj) {
 
     // TODO: Move model => world space translation into CEntity
     // MultiplyMatrixWithVector should be used here
-    /*
-    m_pAttachedEntity->SetPosn(obj->GetPosition() + Multiply3x3(obj->GetMatrix(), CVector{
-        {},
-        {},
-        obj->GetColModel()->GetBoundingBox().m_vecMax.z
-    }));
+    m_pAttachedEntity->SetPosn(
+        obj->GetPosition()
+      + Multiply3x3(
+            obj->GetMatrix(),
+            CVector{ {}, {}, obj->GetColModel()->GetBoundingBox().m_vecMax.z }
+        )
+    );
     m_pAttachedEntity->m_bUsesCollision = false;
-    */
 
     obj->physicalFlags.bAttachedToEntity = true;
     if (obj->IsVehicle()) {
         if (obj->m_nStatus == eEntityStatus::STATUS_SIMPLE)
+        {
             obj->m_nStatus = eEntityStatus::STATUS_PHYSICS;
+        }
     } else if (obj->IsObject()) {
         if (obj->m_bIsStatic || obj->m_bIsStaticWaitingForCollision) {
             obj->SetIsStatic(false);

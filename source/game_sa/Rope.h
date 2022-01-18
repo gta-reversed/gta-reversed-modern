@@ -30,7 +30,7 @@ public:
     CVector    m_aSegments[NUM_ROPE_SEGMENTS];
     CVector    m_aSegmentsReleased[NUM_ROPE_SEGMENTS];
     int32      m_nId;
-    float      field_304;
+    float      m_fGroundZ;
     float      m_fMass;
     float      m_fTotalLength;
     CEntity*   m_pRopeHolder;
