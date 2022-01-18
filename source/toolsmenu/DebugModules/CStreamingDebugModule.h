@@ -2,7 +2,7 @@
 #pragma once
 
 namespace CStreamingDebugModule {
-    void ProcessImGUI();
+    void ProcessImGui();
     void ProcessRender();
 };
 #endif

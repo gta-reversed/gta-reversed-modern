@@ -15,6 +15,7 @@ public:
     CVector();
     CVector(float X, float Y, float Z);
     CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
+    CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
 
 public:
     static void InjectHooks();
