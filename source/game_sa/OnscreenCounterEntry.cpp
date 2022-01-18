@@ -24,7 +24,7 @@ void COnscreenCounterEntry::Clear() {
 
 // 0x44CA90
 void COnscreenCounterEntry::ProcessForDisplayCounter(eOnscreenCounter type) {
-    const int32 left = CTheScripts::ScriptSpace[m_nVarId] < 0 ? 0 : CTheScripts::ScriptSpace[m_nVarId];
+    const auto left = std::max<int32>(0, CTheScripts::ScriptSpace[m_nVarId]);
 
     if (type == eOnscreenCounter::SIMPLE || type == eOnscreenCounter::LINE) {
         sprintf(m_szDisplayedText, "%d", left);

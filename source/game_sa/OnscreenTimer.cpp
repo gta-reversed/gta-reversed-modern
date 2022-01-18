@@ -50,7 +50,7 @@ void COnscreenTimer::AddClock(uint32 varId, char* gxt, eTimerDirection nTimerDir
     m_Clock.m_nVarId = varId;
     m_Clock.m_nTimerDirection = nTimerDirection;
     if (gxt)
-        strncpy(m_Clock.m_szDescriptionTextKey, gxt, 10);
+        strncpy(m_Clock.m_szDescriptionTextKey, gxt, sizeof(m_Clock.m_szDescriptionTextKey));
     else
         m_Clock.m_szDescriptionTextKey[0] = '\0';
 }
@@ -105,7 +105,7 @@ void COnscreenTimer::AddCounterCounter(uint32 varId, uint32 maxValue, char* gxt,
     counter->m_nVarId = varId;
     counter->m_nMaxVarValue = maxValue;
     if (gxt)
-        strncpy(counter->m_szDescriptionTextKey, gxt, 10);
+        strncpy(counter->m_szDescriptionTextKey, gxt, sizeof(counter->m_szDescriptionTextKey));
     else
         counter->m_szDescriptionTextKey[0] = '\0';
 
