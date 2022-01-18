@@ -248,8 +248,12 @@ bool CGarages::IsPointWithinHideOutGarage(const CVector& point) {
 
 // 0x447D00
 bool CGarages::IsGarageOpen(int16 garageId) {
-    const auto state = aGarages[garageId].m_nDoorState;
-    return state == GARAGE_DOOR_OPEN || state == GARAGE_DOOR_WAITING_PLAYER_TO_EXIT;
+    switch (aGarages[garageId].m_nDoorState) {
+    case GARAGE_DOOR_OPEN:
+    case GARAGE_DOOR_WAITING_PLAYER_TO_EXIT:
+        return true;
+    }
+    return false;
 }
 
 // 0x447D30
