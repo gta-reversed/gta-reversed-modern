@@ -28,7 +28,7 @@ void CRopes::InjectHooks() {
 
 // 0x555DC0
 void CRopes::Init() {
-    for (uint8 ropeId = 0; ropeId < m_nNumRopes; ropeId++) {
+    for (auto ropeId = 0; ropeId < m_nNumRopes; ropeId++) {
         aRopes[ropeId];
     }
     PlayerControlsCrane = false;
@@ -36,9 +36,9 @@ void CRopes::Init() {
 
 // 0x556B10
 void CRopes::Shutdown() {
-    for (uint8 ropeId = 0; ropeId < m_nNumRopes; ropeId++) {
+    for (auto ropeId = 0; ropeId < m_nNumRopes; ropeId++) {
         auto rope = aRopes[ropeId];
-        if (rope.m_nRopeType) {
+        if (rope.m_nType != eRopeType::NONE) {
             rope.Remove();
         }
     }
@@ -59,12 +59,12 @@ int CRopes::CreateRopeForSwatPed(const CVector& startPos) {
 
 //0x556760
 float CRopes::FindPickupHeight(CEntity* entity) {
-    return CModelInfo::ms_modelInfoPtrs[entity->m_nModelIndex]->m_pColModel->m_boundBox.m_vecMax.z;
+    return CModelInfo::GetModelInfo(entity->m_nModelIndex)->GetColModel()->m_boundBox.m_vecMax.z;
 }
 
 // 0x556000
-int CRopes::FindRope(unsigned int id) {
-    for (uint8 ropeId = 0; ropeId < m_nNumRopes; ropeId++) {
+int CRopes::FindRope(uint32 id) {
+    for (auto ropeId = 0; ropeId < m_nNumRopes; ropeId++) {
         if (aRopes[ropeId].m_nId == id) {
             return ropeId;
         }
@@ -79,7 +79,7 @@ bool CRopes::IsCarriedByRope(CEntity* entity) {
         return false;
     }
 
-    for (uint8 ropeId = 0; ropeId < m_nNumRopes; ropeId++) {
+    for (auto ropeId = 0; ropeId < m_nNumRopes; ropeId++) {
         if (aRopes[ropeId].m_pAttachedEntity == entity) {
             return true;
         }
@@ -88,25 +88,25 @@ bool CRopes::IsCarriedByRope(CEntity* entity) {
     return false;
 }
 
-bool CRopes::RegisterRope(CEntity* ropeObj, unsigned int ropeType, CVector startPos, bool bExpires, uint8 segmentCount, uint8 flags, CEntity* holder, unsigned int timeExpire) {
-    return ((bool(__cdecl*)(CEntity*, unsigned int, CVector, bool, uint8, uint8, CEntity*, unsigned int))0x556B40)(ropeObj, ropeType, startPos, bExpires, segmentCount, flags, holder, timeExpire);
+bool CRopes::RegisterRope(CEntity* ropeObj, uint32 ropeType, CVector startPos, bool bExpires, uint8 segmentCount, uint8 flags, CEntity* holder, uint32 timeExpire) {
+    return ((bool(__cdecl*)(CEntity*, uint32, CVector, bool, uint8, uint8, CEntity*, uint32))0x556B40)(ropeObj, ropeType, startPos, bExpires, segmentCount, flags, holder, timeExpire);
 }
 
 // 0x556AE0
 void CRopes::Render() {
-    for (uint8 ropeId = 0; ropeId < m_nNumRopes; ropeId++) {
+    for (auto ropeId = 0; ropeId < m_nNumRopes; ropeId++) {
         aRopes[ropeId].Render();
     }
 }
 
 // 0x555DF0
-void CRopes::SetSpeedOfTopNode(unsigned int ropeId, CVector dirSpeed) {
-  uint8 ropeIndex = 0;
-  for (CRope* rope = aRopes; !rope->m_nRopeType || rope->m_nId != ropeId; ++rope ) {
-    if (++ropeIndex == MAX_NUM_ROPES)
-      return;
+void CRopes::SetSpeedOfTopNode(uint32 ropeId, CVector dirSpeed) {
+  for (auto ropeIndex = 0; auto& rope : aRopes) {
+      if (rope.m_nType == eRopeType::CRANE_MAGNET1 || rope.m_nId != ropeId)
+          continue;
+
+      aRopes[ropeIndex].m_aSegmentsReleased[0] = dirSpeed;
   }
-  aRopes[ropeIndex].m_avecRopeSegmentsReleased[0] = dirSpeed;
 }
 
 // 0x558D70
@@ -120,7 +120,6 @@ void CRopes::Update() {
     }
 }
 
-bool CRopes::FindCoorsAlongRope(uint32 ropeId, float fCoorAlongRope, CVector* pVecPosition, CVector* arg4)
-{
-    return plugin::CallAndReturn<bool, 0x555E40, uint32, float, CVector*, CVector*>(ropeId, fCoorAlongRope, pVecPosition, arg4);
+bool CRopes::FindCoorsAlongRope(uint32 ropeId, float fCoorAlongRope, CVector* posn, CVector* arg4) {
+    return plugin::CallAndReturn<bool, 0x555E40, uint32, float, CVector*, CVector*>(ropeId, fCoorAlongRope, posn, arg4);
 }

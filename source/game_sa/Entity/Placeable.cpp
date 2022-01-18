@@ -69,8 +69,7 @@ void CPlaceable::SetPosn(float x, float y, float z)
 
 void CPlaceable::SetPosn(CVector const& posn)
 {
-    auto& pPos = GetPosition();
-    pPos = posn;
+    GetPosition() = posn;
 }
 
 void CPlaceable::SetOrientation(float x, float y, float z)

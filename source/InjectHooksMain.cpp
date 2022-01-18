@@ -60,6 +60,7 @@
 #include "BulletInfo.h"
 #include "Explosion.h"
 #include "FireManager.h"
+#include "Rope.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -171,6 +172,7 @@ void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
 
+    CRope::InjectHooks();
     CFire::InjectHooks();
     CExplosion::InjectHooks();
     CClothesBuilder::InjectHooks();

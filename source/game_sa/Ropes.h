@@ -8,22 +8,14 @@
 
 #include "Rope.h"
 
-enum eRopeType : unsigned char {
-    ERT_4 = 4,
-    ERT_5 = 5,
-    ERT_6 = 6,
-    ERT_7 = 7,
-    ERT_8 = 8,
-};
-
-class CRopes
-{
+class CRopes {
 public:
-    static constexpr unsigned char MAX_NUM_ROPES = 8;
-	static CRope (&aRopes)[MAX_NUM_ROPES]; // Access using CRopes::GetRope()
-	static unsigned char& m_nNumRopes;
-	static int& PlayerControlsCrane;
-	static unsigned int& m_nRopeIdCreationCounter;
+    static constexpr uint8 MAX_NUM_ROPES = 8;
+
+	static CRope   (&aRopes)[MAX_NUM_ROPES]; // Access using CRopes::GetRope()
+	static uint8&  m_nNumRopes;
+	static int32&  PlayerControlsCrane;
+	static uint32& m_nRopeIdCreationCounter;
 
 public:
 	static void InjectHooks();
@@ -32,17 +24,18 @@ public:
 	static float FindPickupHeight(CEntity* entity);
 
 	// Returns id to array
-	static int FindRope(unsigned int id);
+	static int FindRope(uint32 id);
 	static void Init();
 	static bool IsCarriedByRope(CEntity* entity);
 
 	// Must be used in loop to make attached to holder
-	static bool RegisterRope(CEntity* ropeObj, unsigned int ropeType, CVector startPos, bool bExpires, unsigned char segmentCount, unsigned char flags, CEntity* holder, unsigned int timeExpire);
+	static bool RegisterRope(CEntity* ropeObj, uint32 ropeType, CVector startPos, bool bExpires, unsigned char segmentCount, unsigned char flags, CEntity* holder, uint32 timeExpire);
 	static void Render();
-	static void SetSpeedOfTopNode(unsigned int ropeId, CVector dirSpeed);
+	static void SetSpeedOfTopNode(uint32 ropeId, CVector dirSpeed);
 	static void Shutdown();
 	static void Update();
+    static bool FindCoorsAlongRope(uint32 ropeId, float fCoorAlongRope, CVector* posn, CVector* arg4);
 
 public:
-    static inline CRope& GetRope(int index) { return aRopes[index]; }
+    static inline CRope& GetRope(int32 index) { return aRopes[index]; }
 };

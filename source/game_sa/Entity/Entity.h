@@ -26,6 +26,7 @@ class CEntity : public CPlaceable {
 protected:
     CEntity(plugin::dummy_func_t) : CPlaceable(plugin::dummy) {}
     CEntity();
+public: // Changed in CRope branch
     ~CEntity() override;
 
 public:
@@ -105,8 +106,8 @@ public:
     virtual void Add(CRect const& rect);                            // VTab: 1
     virtual void Remove();                                          // VTab: 3
     virtual void SetIsStatic(bool isStatic);                        // VTab: 4
-    virtual void SetModelIndex(uint32 index);                 // VTab: 5
-    virtual void SetModelIndexNoCreate(uint32 index);         // VTab: 6
+    virtual void SetModelIndex(uint32 index);                       // VTab: 5
+    virtual void SetModelIndexNoCreate(uint32 index);               // VTab: 6
     virtual void CreateRwObject();                                  // VTab: 7
     virtual void DeleteRwObject();                                  // VTab: 8
     virtual CRect* GetBoundRect(CRect* pRect);                      // VTab: 9
