@@ -135,6 +135,7 @@ inline CVector operator-(const CVector& vec) {
 inline float DistanceBetweenPoints(const CVector &pointOne, const CVector &pointTwo) {
     return (pointTwo - pointOne).Magnitude();
 }
+
 inline float DistanceBetweenPointsSquared(const CVector& pointOne, const CVector& pointTwo) {
     return (pointTwo - pointOne).SquaredMagnitude();
 }

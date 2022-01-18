@@ -72,7 +72,7 @@ public:
     void AddParticle(RwMatrixTag* transform, RwV3d* position, float arg2, FxPrtMult_c* prtMult, float arg4, float arg5, float arg6, uint8 arg7);
     void EnablePrim(int32 primIndex, uint8 enable);
     void SetMatrix(RwMatrixTag* matrix);
-    void SetOffsetPos(RwV3d* pos);
+    void SetOffsetPos(const CVector& pos);
     void AddOffsetPos(RwV3d* pos);
     void SetConstTime(uint8 arg0, float amount);
     void SetRateMult(float mult);
