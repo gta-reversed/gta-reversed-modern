@@ -99,3 +99,11 @@ public:
      static bool LoadDataFromWorkBuffer(void *pData, int32 size);
      static bool SaveDataToWorkBuffer(void *pData, int32 Size);
 };
+
+const auto SaveToBuffer = []<typename T>(const T& data) {
+    CGenericGameStorage::SaveDataToWorkBuffer((void*)&data, sizeof(T));
+};
+
+const auto LoadDataFromBuffer = []<typename T>(const T & data) {
+    CGenericGameStorage::LoadDataFromWorkBuffer((void*)&data, sizeof(T));
+};

@@ -1,33 +1,36 @@
 #include "StdInc.h"
+
 #include "Garages.h"
 
+static uint32& LastUpdatedGarageId = *(uint32*)0x96EA78;
+
 void CGarages::InjectHooks() {
-    // Static functions (21x)
-    ReversibleHooks::Install("CGarages", "Init", 0x447120, &CGarages::Init);
-    ReversibleHooks::Install("CGarages", "CloseHideOutGaragesBeforeSave", 0x44A170, &CGarages::CloseHideOutGaragesBeforeSave);
-    ReversibleHooks::Install("CGarages", "PlayerArrestedOrDied", 0x449E60, &CGarages::PlayerArrestedOrDied);
-    ReversibleHooks::Install("CGarages", "Init_AfterRestart", 0x448B60, &CGarages::Init_AfterRestart);
-    ReversibleHooks::Install("CGarages", "AllRespraysCloseOrOpen", 0x448B30, &CGarages::AllRespraysCloseOrOpen);
-    ReversibleHooks::Install("CGarages", "IsModelIndexADoor", 0x448AF0, &CGarages::IsModelIndexADoor);
-    ReversibleHooks::Install("CGarages", "FindSafeHouseIndexForGarageType", 0x4489F0, &CGarages::FindSafeHouseIndexForGarageType);
-    ReversibleHooks::Install("CGarages", "IsPointWithinHideOutGarage", 0x448900, &CGarages::IsPointWithinHideOutGarage);
-    ReversibleHooks::Install("CGarages", "IsGarageDoorClosed", 0x447D30, &CGarages::IsGarageDoorClosed);
-    ReversibleHooks::Install("CGarages", "Update", 0x44C8C0, &CGarages::Update);
-    ReversibleHooks::Install("CGarages", "ActivateGarage", 0x447CD0, &CGarages::ActivateGarage);
-    ReversibleHooks::Install("CGarages", "SetTargetCar", 0x447C40, &CGarages::SetTargetCar);
-    ReversibleHooks::Install("CGarages", "TriggerMessage", 0x447B80, &CGarages::TriggerMessage);
-    ReversibleHooks::Install("CGarages", "IsCarSprayable", 0x4479A0, &CGarages::IsCarSprayable);
-    ReversibleHooks::Install("CGarages", "PrintMessages", 0x447790, &CGarages::PrintMessages);
-    ReversibleHooks::Install("CGarages", "SetGarageType", 0x4476D0, &CGarages::SetGarageType);
-    // ReversibleHooks::Install("CGarages", "AddOne", 0x4471E0, &CGarages::AddOne);
-    ReversibleHooks::Install("CGarages", "Shutdown", 0x4471B0, &CGarages::Shutdown);
-    ReversibleHooks::Install("CGarages", "DeactivateGarage", 0x447CB0, &CGarages::DeactivateGarage);
-    ReversibleHooks::Install("CGarages", "Save", 0x5D3160, &CGarages::Save);
-    ReversibleHooks::Install("CGarages", "Load", 0x5D3270, &CGarages::Load);
-    ReversibleHooks::Install("CGarages", "GetGarageNumberByName", 0x447680, &CGarages::GetGarageNumberByName);
+    using namespace ReversibleHooks;
+    Install("CGarages", "Init", 0x447120, &CGarages::Init);
+    Install("CGarages", "Init_AfterRestart", 0x448B60, &CGarages::Init_AfterRestart);
+    Install("CGarages", "Shutdown", 0x4471B0, &CGarages::Shutdown);
+    // Install("CGarages", "AddOne", 0x4471E0, &CGarages::AddOne);
+    Install("CGarages", "CloseHideOutGaragesBeforeSave", 0x44A170, &CGarages::CloseHideOutGaragesBeforeSave);
+    Install("CGarages", "PlayerArrestedOrDied", 0x449E60, &CGarages::PlayerArrestedOrDied);
+    Install("CGarages", "AllRespraysCloseOrOpen", 0x448B30, &CGarages::AllRespraysCloseOrOpen);
+    Install("CGarages", "IsModelIndexADoor", 0x448AF0, &CGarages::IsModelIndexADoor);
+    Install("CGarages", "FindSafeHouseIndexForGarageType", 0x4489F0, &CGarages::FindSafeHouseIndexForGarageType);
+    Install("CGarages", "FindGarageForObject", 0x4489F0, &CGarages::FindGarageForObject);
+    Install("CGarages", "IsPointWithinHideOutGarage", 0x448900, &CGarages::IsPointWithinHideOutGarage);
+    Install("CGarages", "IsGarageDoorClosed", 0x447D30, &CGarages::IsGarageDoorClosed);
+    Install("CGarages", "IsCarSprayable", 0x4479A0, &CGarages::IsCarSprayable);
+    Install("CGarages", "Update", 0x44C8C0, &CGarages::Update);
+    Install("CGarages", "ActivateGarage", 0x447CD0, &CGarages::ActivateGarage);
+    Install("CGarages", "DeactivateGarage", 0x447CB0, &CGarages::DeactivateGarage);
+    Install("CGarages", "SetTargetCar", 0x447C40, &CGarages::SetTargetCar);
+    Install("CGarages", "TriggerMessage", 0x447B80, &CGarages::TriggerMessage);
+    Install("CGarages", "PrintMessages", 0x447790, &CGarages::PrintMessages);
+    Install("CGarages", "SetGarageType", 0x4476D0, &CGarages::SetGarageType);
+    Install("CGarages", "GetGarageNumberByName", 0x447680, &CGarages::GetGarageNumberByName);
+    Install("CGarages", "Load", 0x5D3270, &CGarages::Load);
+    Install("CGarages", "Save", 0x5D3160, &CGarages::Save);
 }
 
-// Static functions
 // 0x447120
 void CGarages::Init() {
     NumGarages = 0;
@@ -38,7 +41,7 @@ void CGarages::Init() {
     CarsCollected = 0;
     BankVansCollected = 0;
     PoliceCarsCollected = 0;
-    CarTypesCollected = 0;
+    CarTypesCollected[0] = 0;
     CrushedCarId = 0;
     LastTimeHelpMessage = 0;
     // dword_96BFF8 = 0; - Never refernced
@@ -54,10 +57,47 @@ void CGarages::Init() {
     }
 }
 
+// 0x448B60
+void CGarages::Init_AfterRestart() {
+    if (NumGarages) {
+        for (auto i = 0; i < NumGarages; i++) {
+            auto& garage = aGarages[i];
+            garage.m_nType = garage.m_nOriginalType;
+            garage.InitDoorsAtStart();
+            garage.m_GarageAudio.Reset();
+        }
+    }
+
+    CGarages::NoResprays = false;
+
+    for (auto& safeHouseCars : aCarsInSafeHouse) { // TODO: Seems like inlined?
+        for (auto& car : safeHouseCars) {
+            car.m_wModelIndex = 0;
+        }
+    }
+}
+
+// 0x4471B0
+void CGarages::Shutdown() {
+    for (auto& garage : aGarages) {
+        garage.m_GarageAudio.Reset();
+    }
+}
+
+// 0x4471E0
+// Garage flags
+// 0x1	door opens up and rotate
+// 0x2	door goes in
+// 0x4	camera follow players
+// TODO...
+void CGarages::AddOne(float x1, float y1, float z1, float frontX, float frontY, float x2, float y2, float z2, uint8 type, uint32 a10, char* name, uint32 argFlags) {
+    return plugin::Call<0x4471E0, float, float, float, float, float, float, float, float, uint8, uint32, char*, uint32>(x1, y1, z1, frontX, frontY, x2, y2, z2, type, a10, name, argFlags);
+}
+
 // 0x44A170
 void CGarages::CloseHideOutGaragesBeforeSave() {
-    for (auto& v : aGarages) {
-        switch (v.m_nType) { // Perhaps this was some kind of function? Like `CGarage::IsHideOutGarage()`?
+    for (auto& garage : aGarages) {
+        switch (garage.m_nType) { // Perhaps this was some kind of function? Like `CGarage::IsHideOutGarage()`?
         case eGarageType::SAFEHOUSE_GANTON:
         case eGarageType::SAFEHOUSE_SANTAMARIA:
         case eGarageType::SAGEHOUSE_ROCKSHORE:
@@ -75,11 +115,11 @@ void CGarages::CloseHideOutGaragesBeforeSave() {
         case eGarageType::SAFEHOUSE_DOHERTY:
         case eGarageType::SAFEHOUSE_HASHBURY:
         case eGarageType::HANGAR_ABANDONED_AIRPORT: {
-            if (v.m_nDoorState != eGarageDoorState::GARAGE_DOOR_CLOSED) {
-                v.m_nDoorState = eGarageDoorState::GARAGE_DOOR_CLOSED;
-                v.StoreAndRemoveCarsForThisHideOut(GetStoredCarsInSafehouse(FindSafeHouseIndexForGarageType(v.m_nType)), 4);
-                v.RemoveCarsBlockingDoorNotInside();
-                v.m_fDoorPosition = 0.0f;
+            if (garage.m_nDoorState != eGarageDoorState::GARAGE_DOOR_CLOSED) {
+                garage.m_nDoorState = eGarageDoorState::GARAGE_DOOR_CLOSED;
+                garage.StoreAndRemoveCarsForThisHideOut(GetStoredCarsInSafehouse(FindSafeHouseIndexForGarageType(garage.m_nType)), 4);
+                garage.RemoveCarsBlockingDoorNotInside();
+                garage.m_fDoorPosition = 0.0f;
             }
             break;
         }
@@ -89,9 +129,9 @@ void CGarages::CloseHideOutGaragesBeforeSave() {
 
 // 0x449E60
 void CGarages::PlayerArrestedOrDied() {
-    for (auto& v : aGarages) {
-        if (v.m_nType != eGarageType::INVALID) {
-            v.PlayerArrestedOrDied();
+    for (auto& garage : aGarages) {
+        if (garage.m_nType != eGarageType::INVALID) {
+            garage.PlayerArrestedOrDied();
         }
     }
 
@@ -99,33 +139,13 @@ void CGarages::PlayerArrestedOrDied() {
     MessageStartTime = 0;
 }
 
-// 0x448B60
-void CGarages::Init_AfterRestart() {
-    if (NumGarages) {
-        for (auto i = 0; i < NumGarages; i++) {
-            auto& v = aGarages[i];
-            v.m_nType = v.m_nOriginalType;
-            v.InitDoorsAtStart();
-            v.m_GarageAudio.Reset();
-        }
-    }
-
-    CGarages::NoResprays = false;
-
-    for (auto& safeHouseCars : aCarsInSafeHouse) { // TODO: Seems like inlined?
-        for (auto& car : safeHouseCars) {
-            car.m_wModelIndex = 0;
-        }
-    }
-}
-
 // 0x448B30
 void CGarages::AllRespraysCloseOrOpen(bool bOpen) {
     if (NumGarages) {
         for (auto i = 0; i < NumGarages; i++) {
-            auto& v = aGarages[i];
-            if (v.m_nType == eGarageType::PAYNSPRAY) {
-                v.m_nDoorState = bOpen ? eGarageDoorState::GARAGE_DOOR_OPEN : eGarageDoorState::GARAGE_DOOR_CLOSED;
+            auto& garage = aGarages[i];
+            if (garage.m_nType == eGarageType::PAYNSPRAY) {
+                garage.m_nDoorState = bOpen ? eGarageDoorState::GARAGE_DOOR_OPEN : eGarageDoorState::GARAGE_DOOR_CLOSED;
             }
         }
     }
@@ -134,9 +154,9 @@ void CGarages::AllRespraysCloseOrOpen(bool bOpen) {
 // 0x448AF0
 bool CGarages::IsModelIndexADoor(int32 model) {
     if (model >= 0) {
-        if (const auto MI = CModelInfo::GetModelInfo(model)) {
-            if (const auto AMI = MI->AsAtomicModelInfoPtr()) {
-                return AMI->IsGarageDoor();
+        if (const auto mi = CModelInfo::GetModelInfo(model)) {
+            if (const auto ami = mi->AsAtomicModelInfoPtr()) {
+                return ami->IsGarageDoor();
             }
         }
     }
@@ -190,10 +210,15 @@ int32 CGarages::FindSafeHouseIndexForGarageType(eGarageType gtype) {
     }
 }
 
+// 0x44A240
+int16 CGarages::FindGarageForObject(CObject* obj) {
+    return plugin::CallAndReturn<int16, 0x44A240>(obj);
+}
+
 // 0x448900
-bool CGarages::IsPointWithinHideOutGarage(const CVector & point) {
-    for (auto& v : aGarages) {
-        switch (v.m_nType) { // TODO: Same switch used in CloseHideOutGaragesBeforeSave. This is def. inlined.
+bool CGarages::IsPointWithinHideOutGarage(const CVector& point) {
+    for (auto& garage : aGarages) {
+        switch (garage.m_nType) { // TODO: Same switch used in CloseHideOutGaragesBeforeSave. This is def. inlined.
         case eGarageType::SAFEHOUSE_GANTON:
         case eGarageType::SAFEHOUSE_SANTAMARIA:
         case eGarageType::SAGEHOUSE_ROCKSHORE:
@@ -211,7 +236,7 @@ bool CGarages::IsPointWithinHideOutGarage(const CVector & point) {
         case eGarageType::SAFEHOUSE_DOHERTY:
         case eGarageType::SAFEHOUSE_HASHBURY:
         case eGarageType::HANGAR_ABANDONED_AIRPORT: {
-            if (v.IsPointInsideGarage(point))
+            if (garage.IsPointInsideGarage(point))
                 return true;
             break;
         }
@@ -225,23 +250,38 @@ bool CGarages::IsGarageDoorClosed(int16 garageId) {
     return aGarages[garageId].m_nDoorState == eGarageDoorState::GARAGE_DOOR_CLOSED;
 }
 
+// 0x4479A0
+bool CGarages::IsCarSprayable(CVehicle* vehicle) {
+    if (vehicle->IsLawEnforcementVehicle() || vehicle->IsSubclassBMX())
+        return false;
+
+    switch (vehicle->m_nModelIndex) {
+    case eModelID::MODEL_BUS:
+    case eModelID::MODEL_COACH:
+    case eModelID::MODEL_ARTICT1: // TODO: In the source it compares against -2, but the in the ASM comment it says `artict1`.. test it.
+    case eModelID::MODEL_FIRETRUK:
+    case eModelID::MODEL_AMBULAN:
+        return false;
+    }
+    return true;
+}
+
 // 0x44C8C0
 void CGarages::Update() {
     if (CReplay::Mode == eReplayMode::REPLAY_MODE_1 || CGameLogic::IsCoopGameGoingOn())
         return;
     
     uint32 i{};
-    for (auto& v : aGarages) {
-        v.Update(i++);
+    for (auto& garage : aGarages) {
+        garage.Update(i++);
     }
 
-    static uint32& lastUpdatedGarage = *(uint32*)0x96EA78;
     if (CTimer::GetFrameCounter() % 16 != 12)
         return;
 
-    auto& garageToCheck = aGarages[lastUpdatedGarage++];
-    if (lastUpdatedGarage >= std::size(aGarages))
-        lastUpdatedGarage = 0;
+    auto& garageToCheck = aGarages[LastUpdatedGarageId++];
+    if (LastUpdatedGarageId >= std::size(aGarages))
+        LastUpdatedGarageId = 0;
 
     if (garageToCheck.m_nType == eGarageType::INVALID)
         return;
@@ -259,13 +299,18 @@ void CGarages::Update() {
 
 // 0x447CD0
 void CGarages::ActivateGarage(int16 garageId) {
-    auto& v = aGarages[garageId];
-    v.m_bInactive = false;
-    if (   v.m_nType == eGarageType::UNKN_CLOSESONTOUCH
-        && v.m_nDoorState != eGarageDoorState::GARAGE_DOOR_CLOSED
+    auto& garage = aGarages[garageId];
+    garage.m_bInactive = false;
+    if (   garage.m_nType == eGarageType::UNKN_CLOSESONTOUCH
+        && garage.m_nDoorState != eGarageDoorState::GARAGE_DOOR_CLOSED
     ) {
-        v.m_nDoorState = eGarageDoorState::GARAGE_DOOR_OPENING;
+        garage.m_nDoorState = eGarageDoorState::GARAGE_DOOR_OPENING;
     }
+}
+
+// 0x447CB0
+void CGarages::DeactivateGarage(int16 garageId) {
+    aGarages[garageId].m_bInactive = true;
 }
 
 // 0x447C40
@@ -300,22 +345,6 @@ void CGarages::TriggerMessage(const char * tagMsg, int16 numInStr1, uint16 time,
     MessageNumberInString2 = numInStr2;
 }
 
-// 0x4479A0
-bool CGarages::IsCarSprayable(CVehicle* veh) {
-    if (veh->IsLawEnforcementVehicle() || veh->IsSubclassBMX())
-        return false;
-
-    switch (veh->m_nModelIndex) {
-    case eModelID::MODEL_BUS:
-    case eModelID::MODEL_COACH:
-    case eModelID::MODEL_ARTICT1: // TODO: In the source it compares against -2, but the in the ASM comment it says `artict1`.. test it.
-    case eModelID::MODEL_FIRETRUK:
-    case eModelID::MODEL_AMBULAN:
-        return false;
-    }
-    return true;
-}
-
 // 0x447790
 void CGarages::PrintMessages() {
     if (   CTimer::GetTimeInMS() < MessageStartTime
@@ -323,133 +352,73 @@ void CGarages::PrintMessages() {
     ) {
         // Time over
         MessageIDString[0] = 0;
-    } else {
-        // Draw it
+        return;
+    }
 
-        CFont::SetScale(SCREEN_HEIGHT_UNIT * 1.4f, SCREEN_WIDTH_UNIT * 0.5f);
-        CFont::SetProportional(true);
-        CFont::SetBackground(false, false);
-        CFont::SetCentreSize(SCREEN_WIDTH - SCREEN_WIDTH_UNIT * 230.f);
-        CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
-        CFont::SetFontStyle(eFontStyle::FONT_MENU);
-        CFont::SetColor(HudColour.GetRGB(eHudColours::HUD_COLOUR_LIGHT_BLUE));
-        CFont::SetEdge(2);
-        CFont::SetDropColor({ 0, 0, 0, 0xFF });
+    // Draw it
+    CFont::SetScale(SCREEN_WIDTH_UNIT * 0.5f, SCREEN_HEIGHT_UNIT * 1.4f);
+    CFont::SetProportional(true);
+    CFont::SetBackground(false, false);
+    CFont::SetCentreSize(SCREEN_WIDTH - SCREEN_WIDTH_UNIT * 230.f);
+    CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
+    CFont::SetFontStyle(eFontStyle::FONT_MENU);
+    CFont::SetColor(HudColour.GetRGB(eHudColours::HUD_COLOUR_LIGHT_BLUE));
+    CFont::SetEdge(2);
+    CFont::SetDropColor({ 0, 0, 0, 255 });
 
-        const auto DrawString = [](const char* text) {
-            CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT_UNIT * 255.f, text);
-        };
+    const auto DrawFormattedString = [&](auto... formatArgs) {
+        CMessages::InsertNumberInString(TheText.Get(MessageIDString), formatArgs..., gGxtString);
+        CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT_UNIT * 155.f, gGxtString);
+    };
 
-        const auto DrawFormattedString = [&](auto... formatArgs) {
-            CMessages::InsertNumberInString(TheText.Get(MessageIDString), formatArgs..., gGxtString);
-            DrawString(gGxtString);
-        };
-
-        if (MessageNumberInString < 0) {
-            if (MessageNumberInString2 < 0) {
-                DrawString(TheText.Get(MessageIDString));
-            } else {
-                DrawFormattedString(MessageNumberInString2, -1, -1, -1, -1, -1);
-            }
+    if (MessageNumberInString < 0) {
+        if (MessageNumberInString2 < 0) {
+            CFont::PrintString(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT_UNIT * 155.f, TheText.Get(MessageIDString));
         } else {
-            DrawFormattedString(MessageNumberInString, MessageNumberInString2, -1, -1, -1, -1);
+            DrawFormattedString(MessageNumberInString2, -1, -1, -1, -1, -1);
         }
+    } else {
+        DrawFormattedString(MessageNumberInString, MessageNumberInString2, -1, -1, -1, -1);
     }
 }
 
 // 0x4476D0
 void CGarages::SetGarageType(int16 garageId, eGarageType type, int32 unused) {
-    auto& v = aGarages[garageId];
-    v.m_nType = type;
+    auto& garage = aGarages[garageId];
+    garage.m_nType = type;
     switch (type) {
     case eGarageType::BOMBSHOP_TIMED:
     case eGarageType::BOMBSHOP_ENGINE:
     case eGarageType::BOMBSHOP_REMOTE:
     case eGarageType::PAYNSPRAY: {
-        v.m_nDoorState = eGarageDoorState::GARAGE_DOOR_CLOSED;
-        v.m_fDoorPosition = 0.f;
+        garage.m_nDoorState = eGarageDoorState::GARAGE_DOOR_CLOSED;
+        garage.m_fDoorPosition = 0.f;
         break;
     }
     case eGarageType::BURGLARY: {
         break; // NOP
     }
     default: {
-        if (v.m_nDoorState == eGarageDoorState::GARAGE_DOOR_CLOSED) {
-            v.m_nDoorState = eGarageDoorState::GARAGE_DOOR_OPEN;
-            v.m_fDoorPosition = 1.f;
+        if (garage.m_nDoorState == eGarageDoorState::GARAGE_DOOR_CLOSED) {
+            garage.m_nDoorState = eGarageDoorState::GARAGE_DOOR_OPEN;
+            garage.m_fDoorPosition = 1.f;
         }
         break;
     }
     }
 }
 
-// 0x4471E0
-// Garage flags
-// 0x1	door opens up and rotate
-// 0x2	door goes in
-// 0x4	camera follow players
-// TODO...
-void CGarages::AddOne(float x1, float y1, float z1, float frontX, float frontY, float x2, float y2, float z2, uint8 type, uint32 a10, char* name, uint32 argFlags) {
-    return plugin::Call<0x4471E0, float, float, float, float, float, float, float, float, uint8, uint32, char*, uint32>(x1, y1, z1, frontX, frontY, x2, y2, z2,
-                                                                                                                                        type, a10, name, argFlags);
-}
-
-// 0x4471B0
-void CGarages::Shutdown() {
-    for (auto& v : aGarages) {
-        v.m_GarageAudio.Reset();
-    }
-}
-
-// 0x447CB0
-void CGarages::DeactivateGarage(int16 grgIdx) {
-    aGarages[grgIdx].m_bInactive = true;
-}
-// todo: fix Update()
-// 0x5D3160
-bool CGarages::Save() {
-    const auto SaveToBuffer = []<typename T>(const T& data) {
-        CGenericGameStorage::SaveDataToWorkBuffer((void*)&data, sizeof(T));
-    };
-
-    SaveToBuffer(NumGarages);
-    SaveToBuffer(BombsAreFree);
-    SaveToBuffer(RespraysAreFree);
-    SaveToBuffer(NoResprays);
-    SaveToBuffer(CarsCollected);
-    SaveToBuffer(BankVansCollected);
-    SaveToBuffer(PoliceCarsCollected);
-
-    for (auto v : CarTypesCollected) {
-        SaveToBuffer(v);
-    }
-
-    SaveToBuffer(LastTimeHelpMessage);
-
-    // NOTE: Here they messsed up the order of loops
-    //       C/C++ is row-major, so, the row loop should've been the outer one..
-    //       This is important, because the array isn't accessed contiguously
-    //       Which means the data isn't saved contiguously either, so watch out for that.
-    for (auto c = 0; c < 4; c++) {
-        for (auto r = 0; r < 20; r++) {
-            SaveToBuffer(aCarsInSafeHouse[r][c]); 
-        }
-    }
-
+// 0x447680
+int16 CGarages::GetGarageNumberByName(const char* name) {
     for (auto i = 0; i < NumGarages; i++) {
-        CSaveGarage sg{};
-        sg.CopyGarageIntoSaveGarage(aGarages[i]);
-        SaveToBuffer(sg);
+        const auto& garage = aGarages[i];
+        if (stricmp(garage.m_anName, name) == 0)
+            return i;
     }
-
-    return true;
+    return -1;
 }
 
 bool CGarages::Load() {
-    const auto LoadDataFromBuffer = []<typename T>(const T & data) {
-        CGenericGameStorage::LoadDataFromWorkBuffer((void*)&data, sizeof(T));
-    };
-
     LoadDataFromBuffer(NumGarages);
     LoadDataFromBuffer(BombsAreFree);
     LoadDataFromBuffer(RespraysAreFree);
@@ -487,16 +456,38 @@ bool CGarages::Load() {
     return true;
 }
 
-int16 CGarages::FindGarageForObject(CObject* obj) {
-    return plugin::CallAndReturn<int16, 0x44A240>(obj);
-}
+// todo: fix Update()
+// 0x5D3160
+bool CGarages::Save() {
+    SaveToBuffer(NumGarages);
+    SaveToBuffer(BombsAreFree);
+    SaveToBuffer(RespraysAreFree);
+    SaveToBuffer(NoResprays);
+    SaveToBuffer(CarsCollected);
+    SaveToBuffer(BankVansCollected);
+    SaveToBuffer(PoliceCarsCollected);
 
-// 0x447680
-int16 CGarages::GetGarageNumberByName(const char* name) {
-    for (auto i = 0; i < NumGarages; i++) {
-        const auto& v = aGarages[i];
-        if (stricmp(v.m_anName, name) == 0)
-            return i;
+    for (auto carType : CarTypesCollected) {
+        SaveToBuffer(carType);
     }
-    return -1;
+
+    SaveToBuffer(LastTimeHelpMessage);
+
+    // NOTE: Here they messsed up the order of loops
+    //       C/C++ is row-major, so, the row loop should've been the outer one..
+    //       This is important, because the array isn't accessed contiguously
+    //       Which means the data isn't saved contiguously either, so watch out for that.
+    for (auto c = 0; c < 4; c++) {
+        for (auto r = 0; r < 20; r++) {
+            SaveToBuffer(aCarsInSafeHouse[r][c]); 
+        }
+    }
+
+    for (auto i = 0; i < NumGarages; i++) {
+        CSaveGarage sg{};
+        sg.CopyGarageIntoSaveGarage(aGarages[i]);
+        SaveToBuffer(sg);
+    }
+
+    return true;
 }
