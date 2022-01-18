@@ -506,6 +506,7 @@ uint8 CEntity::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionB
     return 1;
 }
 
+// 0x535FA0
 void CEntity::PreRender()
 {
     CEntity::PreRender_Reversed();
@@ -533,7 +534,7 @@ void CEntity::PreRender_Reversed()
             CCustomBuildingDNPipeline::PreRenderUpdate(pAtomicInfo->m_pRwAtomic, false);
         }
         else if (pModelInfo->GetModelType() == MODEL_INFO_CLUMP) {
-            RpClumpForAllAtomics(pModelInfo->m_pRwClump, CCustomBuildingDNPipeline::PreRenderUpdateRpAtomicCB, false);
+            RpClumpForAllAtomics(pModelInfo->m_pRwClump, CCustomBuildingDNPipeline::PreRenderUpdateRpAtomicCB, reinterpret_cast<void*>(false));
         }
     }
 
@@ -2449,7 +2450,7 @@ bool CEntity::IsEntityOccluded()
     return false;
 }
 
-bool CEntity::IsCurrentAreaOrBarberShopInterior()
+bool CEntity::IsInCurrentAreaOrBarberShopInterior()
 {
     return m_nAreaCode == CGame::currArea || m_nAreaCode == AREA_CODE_13;
 }
@@ -2463,6 +2464,12 @@ void CEntity::UpdateRW() {
         m_matrix->UpdateRwMatrix(pRwMatrix);
     else
         m_placement.UpdateRwMatrix(pRwMatrix);
+}
+
+CEntity* CEntity::FindLastLOD() noexcept {
+    CEntity* it = this;
+    for (; it->m_pLod; it = it->m_pLod);
+    return it;
 }
 
 RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* pAtomic, void* pData)

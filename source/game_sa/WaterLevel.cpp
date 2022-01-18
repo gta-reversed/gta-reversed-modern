@@ -111,6 +111,13 @@ void CWaterLevel::WaterLevelInitialise() {
     plugin::Call<0x6EAE80>();
 }
 
+bool CWaterLevel::IsPointUnderwaterNoWaves(CVector point) {
+    float level{};
+    if (CWaterLevel::GetWaterLevelNoWaves(point.x, point.y, point.z, &level, nullptr, nullptr))
+        return level > point.z;
+    return false;
+}
+
 // 0x6EB710
 void CWaterLevel::PreRenderWater() {
     plugin::Call<0x6EB710>();

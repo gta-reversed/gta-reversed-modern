@@ -46,6 +46,9 @@ public:
     static uint16& CurrentMenuInUse;
     static uint16& num_menus_in_use; // name from Android PDB
 
+public:
+    static void Initialise();
+
     static void ActivateItems(uint8 panelId, bool item1, bool item2, bool item3, bool item4, bool item5, bool item6, bool item7, bool item8, bool item9, bool item10, bool item11, bool item12);
     static void ActivateOneItem(uint8 panelId, uint8 rowId, bool enable);
 
@@ -54,7 +57,6 @@ public:
 
     static char CheckForAccept(uint8 panelId);
     static char CheckForSelected(uint8 panelId);
-    static void Initialise();
     static void Process(uint8 panelId);
     static tMenuPanel* InputStandardMenu(uint8 panelId);
     static tMenuPanel* InputGridMenu(uint8 panelId);

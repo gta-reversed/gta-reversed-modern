@@ -12,23 +12,26 @@
 
 class CEntity;
 
-extern uint32 MAX_COLLECTED_PICKUPS; // 20
-extern uint32 MAX_PICKUP_MESSAGES; // 16
-extern uint32 MAX_NUM_PICKUPS; // 620
+constexpr uint32 MAX_COLLECTED_PICKUPS = 20;
+constexpr uint32 MAX_PICKUP_MESSAGES = 16;
+constexpr uint32 MAX_NUM_PICKUPS = 620;
 
 class CPickups {
 public:
-    static uint8 &DisplayHelpMessage;
-    static int32 &PlayerOnWeaponPickup;
-    static int32 &StaticCamStartTime;
-    static CVector *StaticCamCoors;
-    static CVehicle *&pPlayerVehicle;
-    static bool &bPickUpcamActivated;
-    static uint16 &CollectedPickUpIndex;
-    static int32 *aPickUpsCollected;               // static int32 aPickUpsCollected[20];
-    static uint16 &NumMessages;
-    static tPickupMessage *aMessages;            // static tPickupMessage aMessages[16]
-    static CPickup *aPickUps;                    // static CPickup aPickUps[620]
+    static uint8&         DisplayHelpMessage;
+    static int32&         PlayerOnWeaponPickup;
+    static int32&         StaticCamStartTime;
+    static CVector*       StaticCamCoors;
+    static CVehicle*&     pPlayerVehicle;
+    static bool&          bPickUpcamActivated;
+    static uint16&        CollectedPickUpIndex;
+    static int32          (&aPickUpsCollected)[MAX_COLLECTED_PICKUPS];
+    static uint16&        NumMessages;
+    static tPickupMessage (&aMessages)[MAX_PICKUP_MESSAGES];
+    static CPickup        (&aPickUps)[MAX_NUM_PICKUPS];
+
+public:
+    static void InjectHooks();
 
     static void AddToCollectedPickupsArray(int32 handle);
     static void CreatePickupCoorsCloseToCoors(float in_x, float in_y, float in_z, float* out_x, float* out_y, float* out_z);

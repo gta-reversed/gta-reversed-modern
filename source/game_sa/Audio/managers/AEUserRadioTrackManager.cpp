@@ -19,8 +19,7 @@
 #include "FileMgr.h"
 #include "MenuManager.h"
 
-// Instance of CAEUserRadioTrackManager
-CAEUserRadioTrackManager& CAEUserRadioTrackManager::instance = *(CAEUserRadioTrackManager*)0xb6b970;
+CAEUserRadioTrackManager& AEUserRadioTrackManager = *(CAEUserRadioTrackManager*)0xB6B970;
 
 #if 0
 // This is the default list
@@ -398,7 +397,7 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path)
 
     if (FAILED(shellLink->QueryInterface(IID_IPersistFile, (void**)&persistFile))) {
         shellLink->Release();
-        return nullptr;
+        return std::wstring();
     }
 
     wchar_t*         target = new wchar_t[MAX_PATH];

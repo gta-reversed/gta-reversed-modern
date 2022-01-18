@@ -183,7 +183,7 @@ bool CTaskSimpleHoldEntity::MakeAbortable_Reversed(CPed* ped, eAbortPriority pri
 }
 
 bool CTaskSimpleHoldEntity::ProcessPed_Reversed(CPed* ped) {
-    CTaskManager* pTaskManager = &ped->m_pIntelligence->m_TaskMgr;
+    CTaskManager* pTaskManager = &ped->GetTaskManager();
     if (m_bEntityRequiresProcessing) {
         m_bEntityRequiresProcessing = false;
         if (GetTaskType() == TASK_SIMPLE_PUTDOWN_ENTITY && !m_pEntityToHold && !m_pAnimBlendHierarchy && !m_nAnimGroupId) {
@@ -399,7 +399,7 @@ void CTaskSimpleHoldEntity::StartAnim(CPed* ped) {
             if (!animBlock)
                 animBlock = CAnimManager::GetAnimationBlock(CAnimManager::GetAnimBlockName(m_nAnimGroupId));
             if (!animBlock->bLoaded) {
-                CStreaming::RequestModel(animBlock - CAnimManager::ms_aAnimBlocks + RESOURCE_ID_IFP, STREAMING_KEEP_IN_MEMORY);
+                CStreaming::RequestModel(IFPToModelId(animBlock - CAnimManager::ms_aAnimBlocks), STREAMING_KEEP_IN_MEMORY);
                 return;
             }
             CAnimManager::AddAnimBlockRef(animBlock - CAnimManager::ms_aAnimBlocks);

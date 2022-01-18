@@ -360,7 +360,7 @@ RwFrame* CClumpModelInfo::GetFrameFromId(RpClump* clump, int32 id)
     return searchInfo.m_pFrame;
 }
 
-RwFrame* CClumpModelInfo::GetFrameFromName(RpClump* clump, char* name)
+RwFrame* CClumpModelInfo::GetFrameFromName(RpClump* clump, const char* name)
 {
     auto searchInfo = tCompSearchStructByName(name, nullptr);
     RwFrameForAllChildren(RpClumpGetFrame(clump), CClumpModelInfo::FindFrameFromNameCB, &searchInfo);

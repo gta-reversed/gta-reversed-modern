@@ -22,17 +22,19 @@ enum e2dEffectType : uint8 {
     EFFECT_ESCALATOR,
 };
 
-enum ePedAttractorType : uint8 {
-    PED_ATTRACTOR_ATM            = 0, // Ped uses ATM(at day time only)
-    PED_ATTRACTOR_SEAT           = 1, // Ped sits(at day time only)
-    PED_ATTRACTOR_STOP           = 2, // Ped stands(at day time only)
+// description from https://gtamods.com/wiki/2d_Effect_(RW_Section)#Entry_Type_3_-_Ped_attractor
+enum ePedAttractorType : int8 {
+    PED_ATTRACTOR_UNDEFINED      = -1,
+    PED_ATTRACTOR_ATM            = 0, // Ped uses ATM (at daytime only)
+    PED_ATTRACTOR_SEAT           = 1, // Ped sits (at daytime only)
+    PED_ATTRACTOR_STOP           = 2, // Ped stands (at daytime only)
     PED_ATTRACTOR_PIZZA          = 3, // Ped stands for few seconds
     PED_ATTRACTOR_SHELTER        = 4, // Ped goes away after spawning, but stands if weather is rainy
     PED_ATTRACTOR_TRIGGER_SCRIPT = 5, // Launches an external script
     PED_ATTRACTOR_LOOK_AT        = 6, // Ped looks at object, then goes away
     PED_ATTRACTOR_SCRIPTED       = 7, // This type is not valid
-    PED_ATTRACTOR_PARK           = 8, // Ped lays(at day time only, ped goes away after 6 PM)
-    PED_ATTRACTOR_STEP           = 9  // Ped sits on steps
+    PED_ATTRACTOR_PARK           = 8, // Ped lays (at daytime only, ped goes away after 6 PM)
+    PED_ATTRACTOR_STEP           = 9, // Ped sits on steps
 };
 
 // From https://gtamods.com/wiki/2d_Effect_(RW_Section)
@@ -103,22 +105,22 @@ struct tEffectPedAttractor {
     RwV3d             m_vecUseDir;
     RwV3d             m_vecForwardDir;
     ePedAttractorType m_nAttractorType;
-    uint8     m_nPedExistingProbability;
-    uint8     field_36;
-    uint8     m_nFlags;
+    uint8             m_nPedExistingProbability;
+    uint8             field_36;
+    uint8             m_nFlags;
     char              m_szScriptName[8];
 };
 VALIDATE_SIZE(tEffectPedAttractor, 0x30);
 
 struct tEffectEnEx {
-    float         m_fEnterAngle;
-    RwV2d         m_vecRadius;
-    RwV3d         m_vecExitPosn;
-    float         m_fExitAngle;
-    int16         m_nInteriorId;
+    float m_fEnterAngle;
+    RwV2d m_vecRadius;
+    RwV3d m_vecExitPosn;
+    float m_fExitAngle;
+    int16 m_nInteriorId;
     uint8 m_nFlags1;
     uint8 m_nSkyColor;
-    char          m_szInteriorName[8];
+    char  m_szInteriorName[8];
     uint8 m_nTimeOn;
     uint8 m_nTimeOff;
     union {
@@ -143,25 +145,22 @@ struct tEffectRoadsign {
     RwV2d              m_vecSize;
     RwV3d              m_vecRotation;
     CRoadsignAttrFlags m_nFlags;
-    // char               _pad26[2];
     char*              m_pText; // size is 64
     RpAtomic*          m_pAtomic;
 };
 VALIDATE_SIZE(tEffectRoadsign, 0x20);
 
 struct tEffectCoverPoint {
-    RwV2d         m_vecDirection;
+    RwV2d m_vecDirection;
     uint8 m_nType;
-    // char _pad19[3];
 };
 VALIDATE_SIZE(tEffectCoverPoint, 0xC);
 
 struct tEffectEscalator {
-    RwV3d         m_vecBottom;
-    RwV3d         m_vecTop;
-    RwV3d         m_vecEnd;
+    RwV3d m_vecBottom;
+    RwV3d m_vecTop;
+    RwV3d m_vecEnd;
     uint8 m_nDirection; // 0 - down, 1 - up
-    // char          _pad35[3];
 };
 VALIDATE_SIZE(tEffectEscalator, 0x28);
 
@@ -176,7 +175,7 @@ class C2dEffect {
         tEffectPedAttractor pedAttractor;
         tEffectEnEx         enEx;
         tEffectRoadsign     roadsign;
-        int32        iSlotMachineIndex;
+        int32               iSlotMachineIndex;
         tEffectCoverPoint   coverPoint;
         tEffectEscalator    escalator;
     };
@@ -201,7 +200,7 @@ VALIDATE_SIZE(C2dEffect, 0x40);
 
 // RW PLUGIN
 struct t2dEffectPluginEntry {
-    uint32 m_nObjCount;
+    uint32    m_nObjCount;
     C2dEffect m_pObjects[16]; // Size not real, it's decided on runtime, 16 is written here only to see the objects in debugger without issues
 };
 struct t2dEffectPlugin {

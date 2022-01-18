@@ -190,7 +190,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
         && ped->m_nPedState != PEDSTATE_DIE
         && ped->m_nPedState != PEDSTATE_DEAD
         && ped->IsPlayer()
-        && CGame::currArea == AREA_CODE_NORMAL_WORLD
+        && CGame::CanSeeOutSideFromCurrArea()
         && ped->m_vecMoveSpeed.z > -0.2F
         && ped->m_vecMoveSpeed.Magnitude2D() > 0.05F)
     {

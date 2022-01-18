@@ -10,7 +10,7 @@ class CAEDoorAudioEntity : public CAEAudioEntity {
 public:
     CAEDoorAudioEntity();
 
-    void StaticInitialise();
+    static void StaticInitialise();
     void Reset();
 
     void UpdateParameters(CAESound* sound, int16 curPlayPos) override;

@@ -7,6 +7,10 @@
 
 #include "StdInc.h"
 
+#include "Train.h"
+
+#include "Buoyancy.h"
+
 uint32& CTrain::GenTrain_Track = *(uint32*)0xC37FFC;
 uint32& CTrain::GenTrain_TrainConfig = *(uint32*)0xC38000;
 uint8& CTrain::GenTrain_Direction = *(uint8*)0xC38004;

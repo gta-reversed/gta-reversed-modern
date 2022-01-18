@@ -11,6 +11,7 @@ void CEventGunShot::InjectHooks()
     ReversibleHooks::Install("CEventGunShot", "CloneEditable_Reversed", 0x4B6B20, &CEventGunShot::CloneEditable_Reversed);
 }
 
+// 0x4AC610
 CEventGunShot::CEventGunShot(CEntity* entity, CVector startPoint, CVector endPoint, bool bHasNoSound)
 {
     m_startPoint = startPoint;
@@ -29,13 +30,8 @@ CEventGunShot::~CEventGunShot()
 
 CEventGunShot* CEventGunShot::Constructor(CEntity* entity, CVector startPoint, CVector endPoint, bool bHasNoSound)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventGunShot*, 0x4AC610, CEvent*, CEntity*, CVector, CVector, bool>
-        (this, entity, startPoint, endPoint, bHasNoSound);
-#else
     this->CEventGunShot::CEventGunShot(entity, startPoint, endPoint, bHasNoSound);
     return this;
-#endif
 }
 
 // 0x4B2CD0
@@ -62,13 +58,14 @@ CEventEditableResponse* CEventGunShot::CloneEditable()
     return CEventGunShot::CloneEditable_Reversed();
 }
 
-
 bool CEventGunShot::AffectsPed_Reversed(CPed* ped)
 {
     if (!m_entity)
         return false;
+
     if (m_entity->m_nType == ENTITY_TYPE_PED && CPedGroups::AreInSameGroup(ped, static_cast<CPed*>(m_entity)))
         return false;
+
     if (!ped->IsInVehicleThatHasADriver()) {
         CWanted* playerWanted = FindPlayerWanted(-1);
         if (ped->m_nPedType == PED_TYPE_COP && playerWanted->m_nWantedLevel > 0) {

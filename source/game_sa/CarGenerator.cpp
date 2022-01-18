@@ -91,7 +91,7 @@ bool CCarGenerator::CheckIfWithinRangeOfAnyPlayers()
         return false;
 
     float posnZ = UncompressLargeVector(m_vecPosn).z;
-    if ((CGame::currArea == AREA_CODE_NORMAL_WORLD && posnZ < 950.0f || CGame::currArea != AREA_CODE_NORMAL_WORLD && posnZ >= 950.0f)
+    if ((CGame::CanSeeOutSideFromCurrArea() && posnZ < 950.0f || !CGame::CanSeeOutSideFromCurrArea() && posnZ >= 950.0f)
         && (relPosn.Magnitude2D() >= TheCamera.m_fGenerationDistMultiplier * 160.0f - 20.0f || bHighPriority)
         && DotProduct2D(FindPlayerSpeed(-1), relPosn) <= 0.0f
     ) {
@@ -133,7 +133,7 @@ void CCarGenerator::DoInternalProcessing()
     }
     else
     {
-        if (m_nModelId == MODEL_INVALID || CStreaming::ms_aInfoForModel[-m_nModelId].m_nLoadState != LOADSTATE_LOADED)
+        if (m_nModelId == MODEL_INVALID || !CStreaming::ms_aInfoForModel[-m_nModelId].IsLoaded()) // todo: Figure out what they wanted with negative indexing
         {
             CTheZones::GetZoneInfo(FindPlayerCoors(-1), nullptr);
             actualModelId = CPopulation::m_AppropriateLoadedCars.PickRandomCar(true, true);
@@ -164,10 +164,10 @@ void CCarGenerator::DoInternalProcessing()
         }
     }
 
-    if (CStreaming::ms_aInfoForModel[actualModelId].m_nLoadState != LOADSTATE_LOADED ||
+    if (!CStreaming::GetInfo(actualModelId).IsLoaded() ||
         actualModelId == MODEL_HOTDOG &&
         m_nModelId == MODEL_HOTDOG &&
-        CStreaming::ms_aInfoForModel[MODEL_BMOCHIL].m_nLoadState != LOADSTATE_LOADED
+        !CStreaming::GetInfo(MODEL_BMOCHIL).IsLoaded()
     )
         return;
 
@@ -298,7 +298,7 @@ void CCarGenerator::DoInternalProcessing()
     if (tractorDriverPedType != -1)
         CCarCtrl::SetUpDriverAndPassengersForVehicle(pVeh, tractorDriverPedType, 0, false, false, 99);
 
-    if (actualModelId == MODEL_HOTDOG && m_nModelId == MODEL_HOTDOG && CStreaming::ms_aInfoForModel[MODEL_BMOCHIL].m_nLoadState == LOADSTATE_LOADED)
+    if (actualModelId == MODEL_HOTDOG && m_nModelId == MODEL_HOTDOG && CStreaming::GetInfo(MODEL_BMOCHIL).IsLoaded())
     {
         CPed* ped = CPopulation::AddPed(ePedType::PED_TYPE_CIVMALE, MODEL_BMOCHIL, pVeh->GetPosition() - pVeh->GetRight() * 3.0f, false);
         if (ped)

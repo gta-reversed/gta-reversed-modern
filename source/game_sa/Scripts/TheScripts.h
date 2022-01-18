@@ -245,7 +245,7 @@ public:
 public:
     static void InjectHooks();
 
-    static void Init(char const* datFile);
+    static void Init();
     static void InitialiseAllConnectLodObjects();
     static void InitialiseConnectLodObjects(uint16 a1);
     static void InitialiseSpecialAnimGroup(uint16 a1);

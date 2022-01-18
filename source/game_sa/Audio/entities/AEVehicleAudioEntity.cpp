@@ -209,7 +209,7 @@ void CAEVehicleAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 cur
 }
 
 void CAEVehicleAudioEntity::AddAudioEvent(eAudioEvents audioEvent, float fVolume) {
-    plugin::CallMethod<0x4F6420, CAEVehicleAudioEntity*, int32, float>(this, audioEvent, fVolume);
+    plugin::CallMethod<0x4F6420, CAEVehicleAudioEntity*, eAudioEvents, float>(this, audioEvent, fVolume);
 }
 
 void CAEVehicleAudioEntity::Service() {
@@ -271,7 +271,7 @@ void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
     m_settings = CAEVehicleAudioEntity::GetVehicleAudioSettings(entity->m_nModelIndex);
     m_bModelWithSiren = entity->AsVehicle()->UsesSiren();
     if (m_settings.m_nRadioType == eRadioType::RADIO_UNKNOWN)
-        m_settings.m_nRadioID = eRadioID::RADIO_NONE;
+        m_settings.m_nRadioID = eRadioID::RADIO_OFF;
 
     m_fGeneralVehicleSoundVolume = CAEAudioEntity::GetDefaultVolume(eAudioEvents::AE_GENERAL_VEHICLE_SOUND);
 

@@ -16,11 +16,11 @@ void CEntryInfoNode::operator delete(void* ptr, size_t sz)
     CPools::ms_pEntryInfoNodePool->Delete(reinterpret_cast<CEntryInfoNode*>(ptr));
 }
 
-void CEntryInfoNode::AddToList(CEntryInfoNode* pNext)
+void CEntryInfoNode::AddToList(CEntryInfoNode* next)
 {
-    m_pPrevious = nullptr;
-    m_pNext = pNext;
-    if (pNext) {
-        pNext->m_pPrevious = this;
+    m_previous = nullptr;
+    m_next = next;
+    if (next) {
+        next->m_previous = this;
     }
 }

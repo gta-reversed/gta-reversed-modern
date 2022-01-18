@@ -16,6 +16,10 @@
 #include "toolsmenu\DebugModules\Vehicle\VehicleDebugModule.h"
 #include "toolsmenu\DebugModules\Ped\PedDebugModule.h"
 #include "toolsmenu\DebugModules\Script\MissionDebugModule.h"
+#include "toolsmenu\DebugModules\Audio\CutsceneTrackManagerDebugModule.h"
+#include "toolsmenu\DebugModules\Audio\AmbienceTrackManagerDebugModule.h"
+#include "toolsmenu\DebugModules\CStreamingDebugModule.h"
+#include "toolsmenu\DebugModules\CPickupsDebugModule.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -211,6 +215,7 @@ void CDebugMenu::PostFxTool() {
     ImGui::Checkbox("SpeedFX Test Mode",      &CPostEffects::m_bSpeedFXTestMode);
     ImGui::Checkbox("Fog",                    &CPostEffects::m_bFog);
     ImGui::Checkbox("Water Depth Darkness",   &CPostEffects::m_bWaterDepthDarkness);
+    ImGui::Checkbox("Color Correction",       &CPostEffects::m_bColorEnable);
 }
 
 void CDebugMenu::ProcessRenderTool() {
@@ -327,7 +332,27 @@ void CDebugMenu::ProcessHooksTool() {
 void CDebugMenu::ProcessExtraDebugFeatures() {
     if (ImGui::BeginTabBar("Modules")) {
         if (ImGui::BeginTabItem("Occlussion")) {
-            COcclusionDebugModule::ProcessImgui();
+            COcclusionDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Audio")) {
+            ImGui::Text("Cutscene Track Manager");
+            CutsceneTrackManagerDebugModule::ProcessImGui();
+
+            ImGui::NewLine();
+            ImGui::Text("Ambience Track Manager");
+            AmbienceTrackManagerDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Streaming")) {
+            CStreamingDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Pickups")) {
+            CPickupsDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 
@@ -382,6 +407,9 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 #ifdef EXTRA_DEBUG_FEATURES
                 ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
 #endif
+                if (ImGui::Button("Streamer: ReInit")) {
+                    CStreaming::ReInit();
+                }
                 ImGui::EndTabItem();
             }
 

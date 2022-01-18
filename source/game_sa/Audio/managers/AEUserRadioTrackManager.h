@@ -32,8 +32,6 @@ public:
     HANDLE              m_hwndUserTracksScanThreadHandle;
     eUserTrackScanState m_nUserTracksScanState;
 
-    static CAEUserRadioTrackManager& instance;
-
 public:
     bool Initialise();
     void Shutdown();
@@ -68,3 +66,5 @@ private:
 };
 
 VALIDATE_SIZE(CAEUserRadioTrackManager, 0x1c);
+
+extern CAEUserRadioTrackManager& AEUserRadioTrackManager;

@@ -3,6 +3,8 @@
 #include "EventHandler.h"
 
 #include "TaskSimpleStandStill.h"
+#include "TaskComplexInAirAndLand.h"
+#include "TaskComplexStuckInAir.h"
 
 void CEventHandler::InjectHooks() {
     using namespace ReversibleHooks;
@@ -472,7 +474,7 @@ void CEventHandler::ComputeSeenPanickedPedResponse(CEvent* event, CTask* task1, 
 void CEventHandler::ComputeSexyPedResponse(CEvent* event, CTask* task1, CTask* task2) {
     plugin::CallMethod<0x4B99F0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
     /*
-    auto taskId = task1->GetId();
+    const auto taskId = task1->GetTaskType();
     auto entity = static_cast<CTask*>(task1)->entity;
     if (!entity)
         return;
@@ -562,6 +564,7 @@ void CEventHandler::ComputeWaterCannonResponse(CEvent* event, CTask* task1, CTas
 // 0x4C3870
 void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
     plugin::CallMethod<0x4C3870, CEventHandler*, CEvent*, CTask*>(this, event, task);
+
     /*
     m_physicalResponseTask = nullptr;
     m_eventResponseTask = nullptr;
@@ -569,10 +572,10 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
     m_sayTask = nullptr;
     m_partialAnimTask = nullptr;
 
-    CTask* task1 = m_ped->m_pIntelligence->m_TaskMgr.GetActiveTask();
+    CTask* task1 = m_ped->GetTaskManager().GetActiveTask();
     CTask* task2 = nullptr;
     if (task1)
-        task2 = m_ped->m_pIntelligence->m_TaskMgr.GetSimplestActiveTask();
+        task2 = m_ped->GetTaskManager().GetSimplestActiveTask();
 
     printf("event: %d task1: %d task2: %d\n", event->GetEventType(), task1->GetTaskType(), task2->GetTaskType()); // NOTSA
 
@@ -596,9 +599,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
         ComputeBuildingCollisionResponse(event, task1, task2);
         break;
     case EVENT_DRAGGED_OUT_CAR:
-        // task1 CTaskComplexWander
-        // task2 TASK_SIMPLE_GO_TO_POINT
-        //ComputeDraggedOutCarResponse(m_ped, event, task1, task2);
+        ComputeDraggedOutCarResponse(event, task1, task2);
         break;
     case EVENT_KNOCK_OFF_BIKE:
         ComputeKnockOffBikeResponse(event, task1, task2);
@@ -625,7 +626,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
         ComputeCopCarBeingStolenResponse(event, task1, task2);
         break;
     case EVENT_PED_ENTERED_MY_VEHICLE:
-        //ComputePedEnteredVehicleResponse(m_ped, event, task1, task2);
+        ComputePedEnteredVehicleResponse(event, task1, task2);
         break;
     case EVENT_REVIVE:
         ComputeReviveResponse(event, task1, task2);
@@ -653,14 +654,14 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
         ComputeVehicleToStealResponse(event, task1, task2);
         break;
     case EVENT_GUN_AIMED_AT:
-        //ComputeGunAimedAtResponse(m_ped, event, task1, task2);
+        ComputeGunAimedAtResponse(event, task1, task2);
         break;
     case EVENT_SCRIPT_COMMAND:
         ComputeScriptCommandResponse(event, task1, task2);
         break;
     case EVENT_IN_AIR:
-        if ((m_ped->m_nPedFlags & 1) == 0) {
-            //m_eventResponseTask = new CTaskComplexInAirAndLand(0, 0);
+        if ((m_ped->m_nPedFlags & 1) == 0) { // !m_ped->bIsStanding
+            m_eventResponseTask = new CTaskComplexInAirAndLand(false, false);
         }
         break;
     case EVENT_VEHICLE_DIED:
@@ -668,7 +669,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
         break;
     case EVENT_ACQUAINTANCE_PED_HATE:
     case EVENT_ACQUAINTANCE_PED_DISLIKE:
-        //ComputePedThreatResponse(m_ped, event, task1, task2);
+        ComputePedThreatResponse(event, task1, task2);
         break;
     case EVENT_ACQUAINTANCE_PED_LIKE:
     case EVENT_ACQUAINTANCE_PED_RESPECT:
@@ -763,7 +764,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
         ComputePassObjectResponse(event, task1, task2);
         break;
     case EVENT_STUCK_IN_AIR:
-        //m_eventResponseTask = new CTaskComplexStuckInAir();
+        m_eventResponseTask = new CTaskComplexStuckInAir();
         break;
     case EVENT_DONT_JOIN_GROUP:
         ComputeDontJoinGroupResponse(event, task1, task2);

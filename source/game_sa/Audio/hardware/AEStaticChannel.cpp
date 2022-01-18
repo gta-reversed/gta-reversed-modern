@@ -20,6 +20,7 @@ CAEStaticChannel::CAEStaticChannel(IDirectSound* pDirectSound, uint16 channelId,
     field_8A = arg3;
 }
 
+// 0x4F0F40
 bool CAEStaticChannel::IsSoundPlaying() {
     if (!m_pDirectSoundBuffer)
         return false;
@@ -33,17 +34,19 @@ bool CAEStaticChannel::IsSoundPlaying_Reversed() {
     return CAEStaticChannel::IsSoundPlaying();
 }
 
-uint16 CAEStaticChannel::GetPlayTime() {
-    if (!this->IsSoundPlaying())
+// 0x4F0F70
+int16 CAEStaticChannel::GetPlayTime() {
+    if (!IsSoundPlaying())
         return -1;
 
     const auto curPos = CAEAudioChannel::GetCurrentPlaybackPosition();
     return CAEAudioChannel::ConvertFromBytesToMS(curPos);
 }
-uint16 CAEStaticChannel::GetPlayTime_Reversed() {
+int16 CAEStaticChannel::GetPlayTime_Reversed() {
     return CAEStaticChannel::GetPlayTime();
 }
 
+// 0x4F0FA0
 uint16 CAEStaticChannel::GetLength() {
     return CAEAudioChannel::ConvertFromBytesToMS(m_nLengthInBytes);
 }
@@ -51,6 +54,7 @@ uint16 CAEStaticChannel::GetLength_Reversed() {
     return CAEStaticChannel::GetLength();
 }
 
+// 0x4F1040
 void CAEStaticChannel::SynchPlayback() {
     if (!m_pDirectSoundBuffer || !m_bNeedsSynch || m_bNoScalingFactor)
         return;
@@ -71,6 +75,7 @@ void CAEStaticChannel::SynchPlayback_Reversed() {
     CAEStaticChannel::SynchPlayback();
 }
 
+// 0x4F0FB0
 void CAEStaticChannel::Stop() {
     if (m_pDirectSoundBuffer &&
         CAEAudioChannel::IsBufferPlaying() &&
@@ -79,6 +84,7 @@ void CAEStaticChannel::Stop() {
         m_pDirectSoundBuffer->Stop();
     }
 
+    { // todo: Same as CAEAudioChannel::~CAEAudioChannel
     if (m_pDirectSoundBuffer) {
         --g_numSoundChannelsUsed;
         m_pDirectSoundBuffer->Release();
@@ -88,6 +94,7 @@ void CAEStaticChannel::Stop() {
     if (m_pDirectSound3DBuffer) {
         m_pDirectSound3DBuffer->Release();
         m_pDirectSound3DBuffer = nullptr;
+    }
     }
 }
 void CAEStaticChannel::Stop_Reversed() {

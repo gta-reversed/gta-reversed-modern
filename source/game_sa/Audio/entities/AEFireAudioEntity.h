@@ -12,9 +12,25 @@ class FxSystem_c;
 
 class CAEFireAudioEntity : public CAEAudioEntity {
 public:
-    CAESound*   field_7C;
-    CAESound*   field_80;
-    FxSystem_c* field_84;
+    CAESound*   m_SoundLeft;
+    CAESound*   m_SoundRight;
+    FxSystem_c* m_FxSystem;
+
+    static uint8& m_snLastFireFrequencyIndex;
+
+public:
+    static void InjectHooks();
+
+    void Initialise(FxSystem_c* system);
+    static void StaticInitialise();
+    void Terminate();
+
+    void AddAudioEvent(eAudioEvents audioId, CVector& posn);
+    void PlayFireSounds(eAudioEvents audioId, CVector& posn);
+    void PlayWaterSounds(eAudioEvents audioId, CVector& posn);
+    void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
+
+    void UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos);
 };
 
 VALIDATE_SIZE(CAEFireAudioEntity, 0x88);

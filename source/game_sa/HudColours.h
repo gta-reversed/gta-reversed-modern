@@ -9,28 +9,28 @@
 #include "RGBA.h"
 
 enum eHudColours : uint8 {
-    HUD_COLOUR_RED,
-    HUD_COLOUR_GREEN,
-    HUD_COLOUR_DARK_BLUE,
-    HUD_COLOUR_LIGHT_BLUE,
-    HUD_COLOUR_LIGHT_GRAY,
-    HUD_COLOUR_BLACK,
-    HUD_COLOUR_GOLD,
-    HUD_COLOUR_PURPLE,
-    HUD_COLOUR_DARK_GRAY,
-    HUD_COLOUR_DARK_RED,
-    HUD_COLOUR_DARK_GREEN,
-    HUD_COLOUR_CREAM,
-    HUD_COLOUR_NIGHT_BLUE,
-    HUD_COLOUR_BLUE,
-    HUD_COLOUR_YELLOW,
+    HUD_COLOUR_RED        = 0,
+    HUD_COLOUR_GREEN      = 1,
+    HUD_COLOUR_DARK_BLUE  = 2,
+    HUD_COLOUR_LIGHT_BLUE = 3,
+    HUD_COLOUR_LIGHT_GRAY = 4,
+    HUD_COLOUR_BLACK      = 5,
+    HUD_COLOUR_GOLD       = 6,
+    HUD_COLOUR_PURPLE     = 7,
+    HUD_COLOUR_DARK_GRAY  = 8,
+    HUD_COLOUR_DARK_RED   = 9,
+    HUD_COLOUR_DARK_GREEN = 10,
+    HUD_COLOUR_CREAM      = 11,
+    HUD_COLOUR_NIGHT_BLUE = 12,
+    HUD_COLOUR_BLUE       = 13,
+    HUD_COLOUR_YELLOW     = 14,
 
-    HUD_COLOUR_COUNT = 16,
+    HUD_COLOUR_COUNT,
 };
 
 class CHudColours {
 public:
-    CRGBA m_aColours[15];
+    CRGBA m_aColours[HUD_COLOUR_COUNT];
 
 public:
     static void InjectHooks();

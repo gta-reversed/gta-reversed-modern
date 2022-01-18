@@ -14,7 +14,7 @@ newoption {
     description = "Output directory for the build files"
 }
 if not _OPTIONS["outdir"] then
-    _OPTIONS["outdir"] = "Build"
+    _OPTIONS["outdir"] = "build"
 end
 
 
@@ -28,8 +28,9 @@ solution "gta_reversed"
 
     location( _OPTIONS["outdir"] )
     targetprefix "" -- no 'lib' prefix on gcc
-    targetdir "Bin"
-    implibdir "Bin"
+    targetdir "bin"
+	targetdir("bin/" .. "%{cfg.buildcfg}")
+    implibdir("bin/" .. "%{cfg.buildcfg}")
     
     configuration "Debug*"
         flags { symbols ("On") }
@@ -40,6 +41,7 @@ solution "gta_reversed"
         buildoptions {"/MD"}
         optimize "Full"
     configuration "vs*"
+         flags {"MultiProcessorCompile"}
          linkoptions   { "/ignore:4099" }      
          buildoptions {"/EHsc"}
 
@@ -160,12 +162,14 @@ group ""
             "%{cfg.targetdir}/ogg.lib", "%{cfg.targetdir}/vorbis.lib", "%{cfg.targetdir}/vorbisfile.lib", 
             "%{cfg.targetdir}/vorbisenc.lib",  "%{cfg.targetdir}/imgui.lib", "libs/dxsdk/d3d9.lib", "libs/dxsdk/dinput.lib"
         }
-        language "C++"
+
+        cppdialect "C++20"        
+
         kind "SharedLib"
         targetname "gta_reversed"
         targetextension ".asi"
         pchheader "StdInc.h"
-        pchsource "source/StdInc.cpp"           
+        pchsource "source/StdInc.cpp"   
         files {
             "source/StdInc.h",
             "source/StdInc.cpp",

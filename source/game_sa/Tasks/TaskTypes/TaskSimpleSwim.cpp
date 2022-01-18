@@ -333,7 +333,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* pPed)
             m_bAnimBlockRefAdded = true;
         }
         else {
-            CStreaming::RequestModel(pAnimBlock - CAnimManager::ms_aAnimBlocks + RESOURCE_ID_IFP, STREAMING_KEEP_IN_MEMORY);
+            CStreaming::RequestModel(IFPToModelId(pAnimBlock - CAnimManager::ms_aAnimBlocks), STREAMING_KEEP_IN_MEMORY);
         }
     }
 
@@ -957,8 +957,8 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
     CPad* pPad = pPed->GetPadFromPlayer();
     int16 pedWalkUpDown = pPad->GetPedWalkUpDown();
     int16 pedWalkLeftRight = pPad->GetPedWalkLeftRight();
-    vecPedWalk.x = pedWalkLeftRight * 0.0078125f;
-    vecPedWalk.y = pedWalkUpDown * 0.0078125f;
+    vecPedWalk.x = pedWalkLeftRight / 128.0f;
+    vecPedWalk.y = pedWalkUpDown / 128.0f;
 
     float fWalkMagnitude = vecPedWalk.Magnitude2D();
     if (m_nSwimState < SWIM_SPRINTING)

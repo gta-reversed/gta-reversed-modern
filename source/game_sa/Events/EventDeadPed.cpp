@@ -1,5 +1,9 @@
 #include "StdInc.h"
 
+#include "EventDeadPed.h"
+
+#include "IKChainManager_c.h"
+
 void CEventDeadPed::InjectHooks()
 {
     ReversibleHooks::Install("CEventDeadPed", "Constructor", 0x4ADEA0, &CEventDeadPed::Constructor);
@@ -22,39 +26,29 @@ CEventDeadPed::~CEventDeadPed()
         m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
 }
 
+// 0x4ADEA0
 CEventDeadPed* CEventDeadPed::Constructor(CPed* ped, bool bUnknown, uint32 deathTimeInMs)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventDeadPed*, 0x4ADEA0, CEvent*, CPed*, bool, uint32>(this, ped, bUnknown, deathTimeInMs);
-#else
     this->CEventDeadPed::CEventDeadPed(ped, bUnknown, deathTimeInMs);
     return this;
-#endif
 }
 
+// 0x4B4830
 bool CEventDeadPed::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B4830, CEvent*, CPed*>(this, ped);
-#else
     return CEventDeadPed::AffectsPed_Reversed(ped);
-#endif
 }
 
+// 0x4B6E70
 CEventEditableResponse* CEventDeadPed::CloneEditable()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventEditableResponse*, 0x4B6E70, CEvent*>(this);
-#else
     return CEventDeadPed::CloneEditable_Reversed();
-#endif
 }
-
 
 bool CEventDeadPed::AffectsPed_Reversed(CPed* ped)
 {
     if (m_ped && ped != m_ped && ped->IsAlive()) {
-        if(!g_ikChainMan->IsLooking(ped) || g_ikChainMan->GetLookAtEntity(ped) != m_ped) {
+        if(!g_ikChainMan.IsLooking(ped) || g_ikChainMan.GetLookAtEntity(ped) != m_ped) {
             if (!m_ped->physicalFlags.bSubmergedInWater) {
                 CVector distance = m_ped->GetPosition() - ped->GetPosition();
                 if (m_ped->bKilledByStealth) {

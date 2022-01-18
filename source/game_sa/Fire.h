@@ -11,34 +11,57 @@
 
 class CFire {
 public:
-    struct {
-        uint8 bActive : 1;
-        uint8 bCreatedByScript : 1;
-        uint8 bMakesNoise : 1;
-        uint8 bBeingExtinguished : 1;
-        uint8 bFirstGeneration : 1;
-    } m_nFlags;
-    char     _pad0;
-    int16    m_nScriptReferenceIndex;
-    CVector  m_vecPosition;
-    CEntity* m_pEntityTarget;
-    CEntity* m_pEntityCreator;
-    uint32   m_nTimeToBurn;
-    float    m_fStrength;
-    char     m_nNumGenerationsAllowed;
-    uint8    m_nRemovalDist;
-    char     _pad1[2];
+    union {
+        struct {
+            bool active : 1;
+            bool createdByScript : 1;
+            bool makesNoise : 1;
+            bool beingExtinguished : 1;
+            bool firstGeneration : 1;
+        };
+        uint8 m_nFlags;
+    };
+    char        _pad0;
+    int16       m_nScriptReferenceIndex;
+    CVector     m_vecPosition;
+    CEntity*    m_pEntityTarget;
+    CEntity*    m_pEntityCreator;
+    uint32      m_nTimeToBurn;
+    float       m_fStrength;
+    uint8       m_nNumGenerationsAllowed;
+    uint8       m_nRemovalDist;
+    FxSystem_c* m_pFxSystem;
 
 public:
-    FxSystem_c *m_pFxSystem;
+    static void InjectHooks();
 
     CFire();
-    ~CFire();
+    ~CFire() = default;
+    CFire* Constructor();
 
     void Initialise();
-    void CreateFxSysForStrength(RwV3d* point, RwMatrixTag* matrix);
+    void Start(CEntity* creator, CVector pos, uint32 nTimeToBurn, uint8 nGens);
+    void Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 nGens);
+    void Start(CVector pos, float fStrength, CEntity* target, uint8 nGens); /* For script */
+    void CreateFxSysForStrength(const CVector& point, RwMatrixTag* matrix);
     void Extinguish();
+    void ExtinguishWithWater(float fWaterStrength);
     void ProcessFire();
+
+    // Inlined
+    bool IsActive() const { return active; }
+    bool IsScript() const { return createdByScript; }
+    bool IsFirstGen() const { return firstGeneration; }
+    bool IsBeingExtinguished() const { return beingExtinguished; }
+
+    // NOTSA funcs:
+    auto GetFireParticleNameForStrength() const;
+    void DestroyFx();
+    void SetTarget(CEntity* target);
+    void SetCreator(CEntity* creator);
+
+    bool HasTimeToBurn() const;
+    bool IsNotInRemovalDistance() const;
 };
 
 VALIDATE_SIZE(CFire, 0x28);

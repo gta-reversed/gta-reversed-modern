@@ -8,6 +8,7 @@
 
 #include "PedIntelligence.h"
 
+#include "IKChainManager_c.h"
 #include "PedType.h"
 #include "TaskSimpleCarDriveTimed.h"
 #include "TaskSimpleStandStill.h"
@@ -429,21 +430,16 @@ void CPedIntelligence::ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryT
         {
             if (!m_eventGroup.HasScriptCommandOfTaskType(TASK_SIMPLE_CAR_DRIVE))
             {
-                CTask* pDriveTask = nullptr;
+                CTask* driveTask = nullptr;
                 if (m_TaskMgr.m_aPrimaryTasks[TASK_PRIMARY_DEFAULT]->GetTaskType() == TASK_SIMPLE_CAR_DRIVE)
                 {
-                    pDriveTask = static_cast<CTask*>(new CTaskSimpleCarDriveTimed(m_pPed->m_pVehicle, 0));
+                    driveTask = static_cast<CTask*>(new CTaskSimpleCarDriveTimed(m_pPed->m_pVehicle, 0));
                 }
                 else
                 {
-                    auto pTaskSimpleCarDrive = (CTaskSimpleCarDrive*)CTask::operator new(96);
-                    if (pTaskSimpleCarDrive)
-                    {
-                        pTaskSimpleCarDrive->Constructor(m_pPed->m_pVehicle, nullptr, false);
-                    }
-                    pDriveTask = static_cast<CTask*>(pTaskSimpleCarDrive);
+                    driveTask = new CTaskSimpleCarDrive(m_pPed->m_pVehicle, nullptr, false);
                 }
-                CEventScriptCommand eventScriptCommand(TASK_PRIMARY_PRIMARY, pDriveTask, false);
+                CEventScriptCommand eventScriptCommand(TASK_PRIMARY_PRIMARY, driveTask, false);
                 m_eventGroup.Add(&eventScriptCommand, false);
             }
         }
@@ -538,22 +534,11 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
 
     if (bSetPrimaryDefaultTask)
     {
-        if (m_pPed->IsPlayer())
-        {
-            /*
-            auto pTaskSimplePlayerOnFoot = new CTaskSimplePlayerOnFoot();
-            m_TaskMgr.SetTask(pTaskSimplePlayerOnFoot, TASK_PRIMARY_DEFAULT, false);
+        if (m_pPed->IsPlayer()) {
+            auto taskSimplePlayerOnFoot = new CTaskSimplePlayerOnFoot();
+            m_TaskMgr.SetTask(taskSimplePlayerOnFoot, TASK_PRIMARY_DEFAULT, false);
             return;
-            */
-            auto pTaskSimplePlayerOnFoot = (CTaskSimplePlayerOnFoot*)CTask::operator new(28);
-            if (pTaskSimplePlayerOnFoot)
-            {
-                pTaskSimplePlayerOnFoot->Constructor();
-                m_TaskMgr.SetTask(pTaskSimplePlayerOnFoot, TASK_PRIMARY_DEFAULT, false);
-                return;
-            }
-        }
-        else
+        } else
         {
             if (m_pPed->m_nCreatedBy != PED_MISSION)
             {
@@ -856,7 +841,7 @@ void CPedIntelligence::LookAtInterestingEntities() {
     if (!bInterestingEntityExists)
         return;
 
-    if (g_ikChainMan->IsLooking(m_pPed) || !m_pPed->GetIsOnScreen() || CGeneral::GetRandomNumberInRange(0, 100) != 50)
+    if (g_ikChainMan.IsLooking(m_pPed) || !m_pPed->GetIsOnScreen() || CGeneral::GetRandomNumberInRange(0, 100) != 50)
         return;
 
     CEntity* outEntities[1024];
@@ -877,14 +862,15 @@ void CPedIntelligence::LookAtInterestingEntities() {
     if (!interestingEntityCount)
         return;
 
-    uint32 randomInterestingEntityIndex = CGeneral::GetRandomNumberInRange(0, interestingEntityCount);
-    uint32 randomTime = CGeneral::GetRandomNumberInRange(3000, 5000);
+    const int32 randomInterestingEntityIndex = CGeneral::GetRandomNumberInRange(0, interestingEntityCount);
+    const int32 randomTime = CGeneral::GetRandomNumberInRange(3000, 5000);
     CPed* interestingEntity1 = (CPed*)outEntities[randomInterestingEntityIndex];
 
-    RwV3d position = { 0.0f, 0.0f, 0.0f };
-    g_ikChainMan->LookAt(
+    CVector position = { 0.0f, 0.0f, 0.0f };
+    g_ikChainMan.LookAt(
         "InterestingEntities",
-        m_pPed, interestingEntity1,
+        m_pPed,
+        interestingEntity1,
         randomTime,
         BONE_UNKNOWN,
         &position,

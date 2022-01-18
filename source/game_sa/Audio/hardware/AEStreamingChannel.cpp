@@ -49,7 +49,7 @@ uint32 CAEStreamingChannel::FillBuffer(void* buffer, uint32 size) {
 
 // 0x4F23D0
 void CAEStreamingChannel::PrepareStream(CAEStreamingDecoder* stream, int8 arg2, bool bStopCurrent) {
-    plugin::CallMethod<0x4F23D0, CAEStreamingChannel*, CAEStreamingDecoder*, char, bool>(this, stream, arg2, bStopCurrent);
+    plugin::CallMethod<0x4F23D0, CAEStreamingChannel*, CAEStreamingDecoder*, int8, bool>(this, stream, arg2, bStopCurrent);
 }
 
 // 0x4F1DE0
@@ -88,8 +88,8 @@ bool CAEStreamingChannel::IsSoundPlaying() {
 }
 
 // 0x4F19E0
-uint16 CAEStreamingChannel::GetPlayTime() {
-    return plugin::CallMethodAndReturn<uint16, 0x4F19E0, CAEStreamingChannel*>(this);
+int16 CAEStreamingChannel::GetPlayTime() {
+    return plugin::CallMethodAndReturn<int16, 0x4F19E0, CAEStreamingChannel*>(this);
 }
 
 // 0x4F1880

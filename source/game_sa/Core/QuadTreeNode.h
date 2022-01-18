@@ -29,8 +29,8 @@ node level 2
  Total rectangles = 4^startLevel
 */
 
-typedef void(*CQuadTreeNodeRectCallBack) (CRect const& rect, void* item);
-typedef void(*CQuadTreeNodeVec2DCallBack) (CVector2D const& rect, void* item);
+typedef void(*CQuadTreeNodeRectCallBack) (const CRect& rect, void* item);
+typedef void(*CQuadTreeNodeVec2DCallBack) (const CVector2D& rect, void* item);
 
 class CQuadTreeNode {
 public:
@@ -41,32 +41,38 @@ public:
 
     static CPool<CQuadTreeNode> *&ms_pQuadTreeNodePool;
 
-    CQuadTreeNode(CRect const& size, int32 startLevel);
+    CQuadTreeNode(const CRect& size, int32 startLevel);
     ~CQuadTreeNode();
 
-    static void operator delete(void* data);
     static void* operator new(uint32 size);
+    static void operator delete(void* data);
 
 public:
     static void InjectHooks();
+
     static void InitPool();
 
-    void AddItem(void* item, CRect const& rect);
+    void AddItem(void* item, const CRect& rect);
     void DeleteItem(void* item);
-    void DeleteItem(void* item, CRect const& rect);
-    int32 FindSector(CRect const& rect); // -1 if not found
-    int32 FindSector(CVector2D const& posn); // -1 if not found
-    void ForAllMatching(CRect const& rect, CQuadTreeNodeRectCallBack callback);
-    void ForAllMatching(CVector2D const& posn, CQuadTreeNodeVec2DCallBack callback);
+    void DeleteItem(void* item, const CRect& rect);
+    int32 FindSector(const CRect& rect);
+    int32 FindSector(const CVector2D& posn);
+    void ForAllMatching(const CRect& rect, CQuadTreeNodeRectCallBack callback);
+    void ForAllMatching(const CVector2D& posn, CQuadTreeNodeVec2DCallBack callback);
     void GetAll(CPtrListSingleLink& list);
-    void GetAllMatching(CRect const& rect, CPtrListSingleLink& list);
-    void GetAllMatching(CVector2D const& posn, CPtrListSingleLink& list);
-    bool InSector(CRect const& rect, int32 sector) const;
+    void GetAllMatching(const CRect& rect, CPtrListSingleLink& list);
+    void GetAllMatching(const CVector2D& posn, CPtrListSingleLink& list);
+    bool InSector(const CRect& rect, int32 sector) const;
 
 // Helpers
 public:
     CRect GetSectorRect(int32 sector) const;
-    bool LiesInside(CRect const& rect) const;
+    bool LiesInside(const CRect& rect) const {
+        return    m_Rect.left <= rect.right
+               && m_Rect.right >= rect.left
+               && m_Rect.top <= rect.bottom
+               && m_Rect.bottom >= rect.top;
+    };
 };
 
 VALIDATE_SIZE(CQuadTreeNode, 0x28);
