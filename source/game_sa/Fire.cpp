@@ -76,7 +76,7 @@ void CFire::ExtinguishWithWater(float fWaterStrength) {
     }
 }
 
-void CFire::Start(CEntity* creator, CVector pos, uint32_t nTimeToBurn, uint8_t nGens) {
+void CFire::Start(CEntity* creator, CVector pos, uint32 nTimeToBurn, uint8 nGens) {
     active = true;
     createdByScript = false;
     makesNoise = true;
@@ -95,7 +95,7 @@ void CFire::Start(CEntity* creator, CVector pos, uint32_t nTimeToBurn, uint8_t n
     CreateFxSysForStrength(m_vecPosition, nullptr);
 }
 
-void CFire::Start(CEntity* creator, CEntity* target, uint32_t nTimeToBurn, uint8_t nGens) {
+void CFire::Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 nGens) {
     switch (target->m_nType) {
     case eEntityType::ENTITY_TYPE_PED: {
         auto targetPed = static_cast<CPed*>(target);
@@ -146,7 +146,7 @@ void CFire::Start(CEntity* creator, CEntity* target, uint32_t nTimeToBurn, uint8
     CreateFxSysForStrength(m_vecPosition, nullptr);
 }
 
-void CFire::Start(CVector pos, float fStrength, CEntity* target, uint8_t nGens) {
+void CFire::Start(CVector pos, float fStrength, CEntity* target, uint8 nGens) {
     SetTarget(target);
     SetCreator(nullptr);
 
@@ -248,7 +248,7 @@ void CFire::Extinguish() {
 void CFire::ProcessFire() {
     {
         const float fNewStrength = std::min(3.0f, m_fStrength + CTimer::GetTimeStep() / 500.0f); // Limited to 3.0f
-        if ((uint32_t)m_fStrength == (uint32_t)fNewStrength)
+        if ((uint32)m_fStrength == (uint32)fNewStrength)
             m_fStrength = fNewStrength; // Not sure why they do this, probably just some hack
     }
 
@@ -300,6 +300,7 @@ void CFire::ProcessFire() {
             break;
         }
         }
+
         if (m_pFxSystem) {
             auto targetPhysical = static_cast<CPhysical*>(m_pEntityTarget);
             m_pFxSystem->SetOffsetPos(m_vecPosition + CTimer::GetTimeStep() * 2.0f * targetPhysical->m_vecMoveSpeed);
@@ -309,9 +310,12 @@ void CFire::ProcessFire() {
     CPlayerPed* player = FindPlayerPed();
     if (!m_pEntityTarget || !m_pEntityTarget->IsVehicle()) {
         // Check if we can set player's ped on fire
-        if (!FindPlayerVehicle() && !player->m_pFire && /* not already on fire */
-            !player->physicalFlags.bFireProof && !player->m_pAttachedTo) {
-            if ((player->GetPosition(), m_vecPosition).SquaredMagnitude() < 1.2f) { /* Note: Squared distance */
+        if (!FindPlayerVehicle()
+         && !player->m_pFire /* not already on fire */
+         && !player->physicalFlags.bFireProof
+         && !player->m_pAttachedTo
+         ) {
+            if ((player->GetPosition() - m_vecPosition).SquaredMagnitude() < 1.2f) { /* Note: Squared distance */
                 player->DoStuffToGoOnFire();
                 gFireManager.StartFire(player, m_pEntityCreator, 0.8f, true, 7000, 100);
             }
