@@ -776,7 +776,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
     SetColDataPtr(cd->m_pVertices, h.offVerts);
     SetColDataPtr(cd->m_pTriangles, h.offFaces);
     SetColDataPtr(cd->m_pShadowVertices, h.offShdwVerts);
-    SetColDataPtr(cd->m_pShadowTriangles, h.offShdwVerts);
+    SetColDataPtr(cd->m_pShadowTriangles, h.offShdwFaces);
 
     cd->bHasShadowInfo = h.offShdwFaces && h.offShdwVerts && h.nShdwFaces;
     cd->m_nNumShadowVertices = cd->bHasShadowInfo ? h.GetNoOfShdwVerts(cd) : 0;
