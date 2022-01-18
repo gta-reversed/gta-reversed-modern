@@ -10,7 +10,7 @@
 
 class CRopes {
 public:
-    static constexpr uint8 MAX_NUM_ROPES = 8;
+    static constexpr uint8 MAX_NUM_ROPES = 255;
 
 	static CRope   (&aRopes)[MAX_NUM_ROPES]; // Access using CRopes::GetRope()
 	static uint8&  m_nNumRopes;
@@ -20,16 +20,14 @@ public:
 public:
 	static void InjectHooks();
 
-	static int CreateRopeForSwatPed(CVector const& startPos);
+	static int32 CreateRopeForSwatPed(const CVector& startPos);
 	static float FindPickupHeight(CEntity* entity);
 
-	// Returns id to array
-	static int FindRope(uint32 id);
+	static int32 FindRope(uint32 id);
 	static void Init();
 	static bool IsCarriedByRope(CEntity* entity);
 
-	// Must be used in loop to make attached to holder
-	static bool RegisterRope(CEntity* ropeObj, uint32 ropeType, CVector startPos, bool bExpires, unsigned char segmentCount, unsigned char flags, CEntity* holder, uint32 timeExpire);
+	static bool RegisterRope(CEntity* ropeObj, uint32 ropeType, CVector startPos, bool bExpires, uint8 segmentCount, uint8, CEntity* holder, uint32 timeExpire);
 	static void Render();
 	static void SetSpeedOfTopNode(uint32 ropeId, CVector dirSpeed);
 	static void Shutdown();

@@ -29,7 +29,7 @@ class CRope {
 public:
     CVector    m_aSegments[NUM_ROPE_SEGMENTS];
     CVector    m_aSegmentsReleased[NUM_ROPE_SEGMENTS];
-    int        m_nId;
+    int32      m_nId;
     float      field_304;
     float      m_fMass;
     float      m_fTotalLength;

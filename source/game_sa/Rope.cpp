@@ -109,11 +109,10 @@ void CRope::Render() {
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)FALSE);
 
-    for (auto i = 0u; i < NUM_ROPE_SEGMENTS; i++)
+    for (auto i = 0u; i < NUM_ROPE_SEGMENTS; i++) {
         RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color);
         RxObjSpace3DVertexSetPos(GetVertex(i), &m_aSegments[i]);
     }
-
 
     if (RwIm3DTransform(aTempBufferVertices, NUM_ROPE_SEGMENTS, 0, 0))
     {
@@ -132,7 +131,7 @@ void CRope::Render() {
 
     if (m_nType == eRopeType::CRANE_MAGNET3) {
         const CVector pos[] = { m_aSegments[0], {709.32f, 916.20f, 53.0f} };
-        for (unsigned i = 0; i < 2; i++) {
+        for (auto i = 0u; i < 2; i++) {
             RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color);
             RxObjSpace3DVertexSetPos(GetVertex(i), &pos[i]);
         }
