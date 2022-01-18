@@ -148,11 +148,9 @@ float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uint8& cu
                 cheatMultiplier = TRANSMISSION_AI_CHEAT_MULT;
             else if (handlingCheat == CHEAT_HANDLING_NITROS)
                 nitrosMultiplier = TRANSMISSION_NITROS_MULT;
-            driveAcceleration = speedMultiplier * (cheatMultiplier * m_fEngineAcceleration)
-                * nitrosMultiplier * 0.4f * gasPedal * CTimer::ms_fTimeStep;
+            driveAcceleration = speedMultiplier * (cheatMultiplier * m_fEngineAcceleration) * nitrosMultiplier * 0.4f * gasPedal * CTimer::GetTimeStep();
             if (a6 && a7)
             {
-
                 if (allWheelsOnGround)
                 {
                     float currentDownVelocityDiff = 0.0f;
@@ -198,7 +196,7 @@ float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uint8& cu
                 }
                 else
                 {
-                    *a6 += fabs(gasPedal) / m_fEngineInertia * CTimer::ms_fTimeStep * TRANSMISSION_FREE_ACCELERATION;
+                    *a6 += fabs(gasPedal) / m_fEngineInertia * CTimer::GetTimeStep() * TRANSMISSION_FREE_ACCELERATION;
                     *a6 = std::min(*a6, 1.0f);
                     *a7 = 0.1f;
                 }

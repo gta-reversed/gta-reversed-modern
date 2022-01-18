@@ -160,16 +160,18 @@ CTrain* FindPlayerTrain(int32 playerId) {
 }
 
 // 0x56E250
-CVector const& FindPlayerCentreOfWorld(int32 playerId) {
+const CVector& FindPlayerCentreOfWorld(int32 playerId) {
     if (CCarCtrl::bCarsGeneratedAroundCamera)
         return TheCamera.GetPosition();
-    if (CVehicle* veh = FindPlayerVehicle(playerId, true))
-        return veh->GetPosition();
+
+    if (CVehicle* vehicle = FindPlayerVehicle(playerId, true))
+        return vehicle->GetPosition();
+
     return FindPlayerPed(playerId)->GetPosition();
 }
 
 // 0x56E320
-CVector const& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId) {
+const CVector& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId) {
     return ((CVector const&(__cdecl*)(int32))0x56E320)(playerId);
 }
 
@@ -858,15 +860,20 @@ void SetLightsForNightVision() {
 // 0x6FAB30
 float GetDayNightBalance() {
     const auto minutes = CClock::GetMinutesToday();
-    if (minutes < 360)
+
+    if (minutes < 360.0f)
         return 1.0f;
-    if (minutes < 420)
-        return (float)(420 - minutes) / 60.0f;
-    if (minutes < 1200)
+
+    if (minutes < 420.0f)
+        return (420.0f - minutes) * (1.0f / 60.0f);
+
+    if (minutes < 1200.0f)
         return 0.0f;
-    if (minutes >= 1260)
+
+    if (minutes >= 1260.0f)
         return 1.0f;
-    return 1.0f - (float)(1260 - minutes) / 60.0f;
+
+    return 1.0f - (1260.0f - minutes) * (1.0f / 60.0f);
 }
 
 // 0x7226D0

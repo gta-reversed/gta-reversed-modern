@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CQuaternion.h"
+#include "Quaternion.h"
 
 class CAnimSequenceRootFrameCompressed {
 public:

@@ -47,10 +47,14 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT gta_reversed)
 
 add_library(gta_reversed MODULE ${_headerfiles_list} ${_sourcefiles_list} .editorconfig)
-set_target_properties(gta_reversed PROPERTIES SUFFIX ".asi")
-if(MSVC)
-    target_compile_options(gta_reversed PRIVATE "/MP")
-endif()
+add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
+set_target_properties(gta_reversed
+    PROPERTIES
+    SUFFIX ".asi"
+    ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin"
+)
 
 target_include_directories(gta_reversed PRIVATE
     source/
@@ -58,8 +62,10 @@ target_include_directories(gta_reversed PRIVATE
     source/game_sa/
     source/game_sa/Debug/
     source/game_sa/Animation/
+    source/game_sa/Attractors/
 
     source/game_sa/Audio/
+    source/game_sa/Audio/Config
     source/game_sa/Audio/Entities
     source/game_sa/Audio/Hardware
     source/game_sa/Audio/Loaders
@@ -93,6 +99,7 @@ target_compile_definitions(gta_reversed PRIVATE
     USE_GTASA_ALLOCATOR
     EXTRA_DEBUG_FEATURES
 )
+target_compile_features(gta_reversed PRIVATE cxx_std_20)
 
 foreach(_header IN ITEMS ${_headerfiles_list})
     get_filename_component(_header_path "${_header}" PATH)

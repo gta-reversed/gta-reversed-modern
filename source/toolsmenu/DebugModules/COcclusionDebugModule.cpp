@@ -2,16 +2,16 @@
 
 #ifdef EXTRA_DEBUG_FEATURES
 
-#include "COcclusion.h"
-#include "COccluder.h"
-#include "CLines.h"
+#include "Occlusion.h"
+#include "Occluder.h"
+#include "Lines.h"
 
 #include "imgui.h"
 
 bool COcclusionDebugModule::DrawActiveOcclusions = false;
 int COcclusionDebugModule::NumEntitiesSkipped = 0;
 
-void COcclusionDebugModule::ProcessImgui() {
+void COcclusionDebugModule::ProcessImGui() {
     ImGui::InputScalar("NumInteriorOcculdersOnMap", ImGuiDataType_::ImGuiDataType_S32, &COcclusion::NumInteriorOcculdersOnMap, nullptr, nullptr, nullptr, ImGuiInputTextFlags_ReadOnly);
     ImGui::InputScalar("NumOccludersOnMap", ImGuiDataType_::ImGuiDataType_S32, &COcclusion::NumOccludersOnMap, nullptr, nullptr, nullptr, ImGuiInputTextFlags_ReadOnly);
     ImGui::InputScalar("NumActiveOccluders", ImGuiDataType_::ImGuiDataType_S32, &COcclusion::NumActiveOccluders, nullptr, nullptr, nullptr, ImGuiInputTextFlags_ReadOnly);
