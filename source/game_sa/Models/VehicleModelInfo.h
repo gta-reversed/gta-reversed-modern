@@ -337,6 +337,8 @@ public:
     void SetEnvMapCoeff(float coeff);
     // get num doors in this model
     int32 GetNumDoors();
+    // get position of dummy in model-space 
+    CVector GetModelDummyPosition(eVehicleDummies dummy) const { return m_pVehicleStruct->m_avDummyPos[dummy]; } // NOTSA
 
     // Static method's
     // setup lights states for currently rendered vehicle

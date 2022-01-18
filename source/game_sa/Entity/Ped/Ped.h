@@ -558,6 +558,7 @@ public:
     void SetWeaponShootingRange(uint8 r) { m_nWeaponShootingRate = r; }
     void SetWeaponAccuracy(uint8 acc) { m_nWeaponAccuracy = acc; }
 
+    CVehicle* GetVehicleIfInOne() { return bInVehicle ? m_pVehicle : nullptr; }
     inline uint8 GetCreatedBy() { return m_nCreatedBy; }
     inline bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
     inline bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
