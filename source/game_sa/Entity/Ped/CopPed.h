@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Ped.h"
+#include "eModelID.h"
 
 enum eCopType : uint32 {
     COP_TYPE_CITYCOP,
@@ -21,21 +22,35 @@ enum eCopType : uint32 {
 class CCopPed : public CPed {
 public:
     bool     m_bDontPursuit;
-    char     field_79D;
-    char     _pad[2];
-    eCopType m_copType;
-    int32    field_7A4;
+    bool     field_79D;
+    uint32   m_nCopTypeOrModelID; /* if it's a valid eCopType then eCopType, otherwise a modelID */
+    uint32   field_7A4;
     CCopPed* m_pCopPartner;
     CPed*    m_apCriminalsToKill[5];
     char     field_7C0;
 
-    // we can use modelIds as copType too!
-    CCopPed(eCopType copType);
+public:
+    /* May also be called with a modelID */
+    explicit CCopPed(uint32_t copTypeOrModelID);
+    ~CCopPed() override;
 
     void SetPartner(CCopPed* partner);
     void AddCriminalToKill(CPed* criminal);
-    void RemoveCriminalToKill(CPed* likeUnused, int32 criminalIdx);
+    void RemoveCriminalToKill(int32 unk, int32 nCriminalLocalIdx);
     void ClearCriminalsToKill();
+    void ClearCriminalListFromDeadPeds();
+    bool IsCriminalInList(CPed* criminal);
+    size_t GetEmptySlotForCriminalToKill();
+    void ProcessControl() override;
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CCopPed* Constructor(uint32_t copTypeOrModelID);
+    CCopPed* Destructor();
+
+    void ProcessControl_Reversed();
 };
 
 VALIDATE_SIZE(CCopPed, 0x7C4);

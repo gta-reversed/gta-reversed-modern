@@ -13,14 +13,20 @@ class CPedClothesDesc {
 public:
     uint32 m_anModelKeys[10];
     uint32 m_anTextureKeys[18];
-    float m_fFatStat;
-    float m_fMuscleStat;
+    float  m_fFatStat;
+    float  m_fMuscleStat;
 
 public:
     static void InjectHooks();
 
     CPedClothesDesc();
     CPedClothesDesc* Constructor();
+
+    // todo: ugly?
+    CPedClothesDesc& operator=(const CPedClothesDesc* rhs) {
+        memcpy(this, &rhs, sizeof(CPedClothesDesc));
+        return *this;
+    }
 
     void Initialise();
 

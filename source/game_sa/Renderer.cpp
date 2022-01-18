@@ -571,9 +571,10 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
                     }
                 }
             }
+
             if (!entity->m_pRwObject
                 || !entity->m_bIsVisible && (!CMirrors::TypeOfMirror || entity->m_nModelIndex)
-                || !entity->IsCurrentAreaOrBarberShopInterior() && entity->m_nType == ENTITY_TYPE_VEHICLE)
+                || !entity->IsInCurrentAreaOrBarberShopInterior() && entity->m_nType == ENTITY_TYPE_VEHICLE)
             {
                 return RENDERER_INVISIBLE;
             }
@@ -731,8 +732,8 @@ void CRenderer::ScanSectorList_ListModels(int32 sectorX, int32 sectorY) {
 
         for (auto node = doubleLinkList->GetNode(); node; node = node->m_next) {
             auto* entity = reinterpret_cast<CEntity*>(node->m_item);
-            if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
-                entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+            if (entity->m_nScanCode != GetCurrentScanCode()) {
+                entity->m_nScanCode = GetCurrentScanCode();
                 if (entity->m_nAreaCode == CGame::currArea || entity->m_nAreaCode == AREA_CODE_13) {
                     *gpOutEntitiesForGetObjectsInFrustum = entity;
                     gpOutEntitiesForGetObjectsInFrustum++;
@@ -754,8 +755,8 @@ void CRenderer::ScanSectorList_ListModelsVisible(int32 sectorX, int32 sectorY) {
 
         for (auto node = doubleLinkList->GetNode(); node; node = node->m_next) {
             auto* entity = reinterpret_cast<CEntity*>(node->m_item);
-            if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
-                entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+            if (entity->m_nScanCode != GetCurrentScanCode()) {
+                entity->m_nScanCode = GetCurrentScanCode();
                 if (entity->m_nAreaCode == CGame::currArea || entity->m_nAreaCode == AREA_CODE_13) {
                     if (entity->IsVisible()) {
                         *gpOutEntitiesForGetObjectsInFrustum = entity;
@@ -789,10 +790,10 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
         while (doubleLinkNode) {
             auto* entity = reinterpret_cast<CEntity*>(doubleLinkNode->m_item);
             doubleLinkNode = doubleLinkNode->m_next;
-            if (entity->m_nScanCode == CWorld::ms_nCurrentScanCode)
+            if (entity->m_nScanCode == GetCurrentScanCode())
                 continue;
 
-            entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+            entity->m_nScanCode = GetCurrentScanCode();
             entity->m_bOffscreen = false;
             bool bInvisibleEntity = false;
             float fDistance = 0.0f;
@@ -821,12 +822,12 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
                 if (CStreaming::ms_disableStreaming || !entity->GetIsOnScreen() || ms_bInTheSky)
                     break;
                 if (bRequestModel) {
-                    auto streamingInfo = &CStreaming::ms_aInfoForModel[entity->m_nModelIndex];
-                    if (streamingInfo->m_nLoadState == LOADSTATE_LOADED) {
+                    if (CStreaming::GetInfo(entity->m_nModelIndex).IsLoaded()){
                         CStreaming::RequestModel(entity->m_nModelIndex, 0);
                         break;
                     } else {
-                        if (!entity->IsEntityOccluded()) {
+                        if (!entity->IsEntityOccluded())
+                        {
                             SetLoadingPriority(1);
                             CStreaming::RequestModel(entity->m_nModelIndex, 0);
                             break;
@@ -879,8 +880,8 @@ void CRenderer::ScanBigBuildingList(int32 sectorX, int32 sectorY) {
         }
         for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
             auto* entity = reinterpret_cast<CEntity*>(node->m_item);
-            if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
-                entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+            if (entity->m_nScanCode != GetCurrentScanCode()) {
+                entity->m_nScanCode = GetCurrentScanCode();
                 float fDistance = 0.0f;
                 int32 visibility = SetupBigBuildingVisibility(entity, fDistance);
                 if (visibility == RENDERER_VISIBLE) {
@@ -917,8 +918,8 @@ bool CRenderer::ShouldModelBeStreamed(CEntity* entity, CVector const& point, flo
 void CRenderer::ScanPtrList_RequestModels(CPtrList& list) {
     for (auto node = list.GetNode(); node; node = node->m_next) {
         auto* entity = reinterpret_cast<CEntity*>(node->m_item);
-        if (entity->m_nScanCode != CWorld::ms_nCurrentScanCode) {
-            entity->m_nScanCode = CWorld::ms_nCurrentScanCode;
+        if (entity->m_nScanCode != GetCurrentScanCode()) {
+            entity->m_nScanCode = GetCurrentScanCode();
             if (ShouldModelBeStreamed(entity, ms_vecCameraPosition, ms_fFarClipPlane))
                 CStreaming::RequestModel(entity->m_nModelIndex, gnRendererModelRequestFlags);
         }

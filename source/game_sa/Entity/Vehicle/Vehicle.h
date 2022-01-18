@@ -647,6 +647,7 @@ public:
     bool IsAutomobile() const { return m_vehicleType == VEHICLE_AUTOMOBILE; }
     bool IsTrain() const { return m_vehicleType == VEHICLE_TRAIN; }
     bool IsMonsterTruck() const { return m_vehicleSubType == VEHICLE_MTRUCK; }
+    bool IsBMX() const { return m_vehicleSubType == VEHICLE_BMX; }
 
     bool IsTransportVehicle() const { return m_nModelIndex == MODEL_TAXI || m_nModelIndex == MODEL_CABBIE; }
     bool IsAmphibiousHeli() const { return m_nModelIndex == MODEL_SEASPAR || m_nModelIndex == MODEL_LEVIATHN; }
@@ -657,6 +658,15 @@ public:
     inline bool IsCreatedBy(eVehicleCreatedBy v) { return v == m_nCreatedBy; }
 
     bool CanUpdateHornCounter() { return m_nAlarmState == 0 || m_nAlarmState == -1 || m_nStatus == STATUS_WRECKED; }
+
+public:
+    // NOTSA functions
+
+    CVehicleModelInfo* GetVehicleModelInfo();
+
+    // if bWorldSpace is true, returns the position in world-space
+    // otherwise in model-space
+    CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
 };
 VALIDATE_SIZE(CVehicle, 0x5A0);
 
