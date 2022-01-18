@@ -33,13 +33,15 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "FinishLoadClumpFile", 0x537450, &CFileLoader::FinishLoadClumpFile);
     Install("CFileLoader", "LoadClumpFile", 0x5B3A30, static_cast<void(*)(const char*)>(&CFileLoader::LoadClumpFile));
     Install("CFileLoader", "LoadClumpObject", 0x5B4040, &CFileLoader::LoadClumpObject);
-    Install("CFileLoader", "LoadCollisionFile_Buffer", 0x538440, static_cast<bool(*)(uint8*, uint32, uint8)>(&CFileLoader::LoadCollisionFile));
-    Install("CFileLoader", "LoadCollisionFile_File", 0x5B4E60, static_cast<void(*)(const char*, uint8)>(&CFileLoader::LoadCollisionFile));
+
+    Install("CFileLoader", "LoadCollisionFile_Buffer", 0x538440, static_cast<bool(*)(uint8*, uint32, uint8)>(&CFileLoader::LoadCollisionFile), true);
+    Install("CFileLoader", "LoadCollisionFile_File", 0x5B4E60, static_cast<void(*)(const char*, uint8)>(&CFileLoader::LoadCollisionFile), true);
     Install("CFileLoader", "LoadCollisionFileFirstTime", 0x5B5000, &CFileLoader::LoadCollisionFileFirstTime);
     Install("CFileLoader", "LoadCollisionModel", 0x537580, &CFileLoader::LoadCollisionModel);
     Install("CFileLoader", "LoadCollisionModelVer2", 0x537EE0, &CFileLoader::LoadCollisionModelVer2);
     Install("CFileLoader", "LoadCollisionModelVer3", 0x537CE0, &CFileLoader::LoadCollisionModelVer3);
     Install("CFileLoader", "LoadCollisionModelVer4", 0x537AE0, &CFileLoader::LoadCollisionModelVer4);
+
     Install("CFileLoader", "LoadCullZone", 0x5B4B40, &CFileLoader::LoadCullZone);
     Install("CFileLoader", "LoadEntryExit", 0x5B8030, &CFileLoader::LoadEntryExit);
     Install("CFileLoader", "LoadGarage", 0x5B4530, &CFileLoader::LoadGarage);
@@ -381,17 +383,39 @@ int32 CFileLoader::LoadClumpObject(const char* line) {
     return objId;
 }
 
+void LoadCollisionModelAnyVersion(const ColHelpers::FileHeader& h, uint8* colData, CColModel& CM) {
+    using namespace ColHelpers;
+
+    switch (h.GetVersion()) {
+    case ColModelVersion::COLL:
+        CFileLoader::LoadCollisionModel(colData, CM);
+        break;
+    case ColModelVersion::COL2:
+        CFileLoader::LoadCollisionModelVer2(colData, h.GetDataSize(), CM, h.modelName);
+        break;
+    case ColModelVersion::COL3:
+        CFileLoader::LoadCollisionModelVer3(colData, h.GetDataSize(), CM, h.modelName);
+        break;
+    case ColModelVersion::COL4:
+        // Originally this function didn't deal with V4.
+        // But given there are no V4 col files, for simplicity we'll leave it in here.
+        CFileLoader::LoadCollisionModelVer4(colData, h.GetDataSize(), CM, h.modelName);
+        break;
+    }
+}
+
 // 0x538440
 // Load one, or multiple, collision models from the given buffer
 bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
     using namespace ColHelpers;
 
     // We've modified the loop condition a little. R* went backwards, and checked if the remaning buffer size is > 8.
-    for (uint32 fileTotalSize{}, buffPos{}; buffPos < buffSize; buffPos += fileTotalSize) {
-        auto& h = *reinterpret_cast<FileHeader*>(buff);
+    auto fileTotalSize{ 0u };
+    for (auto buffIt = buff; buffIt < buff + buffSize; buffIt += fileTotalSize) {
+        auto& h = *reinterpret_cast<FileHeader*>(buffIt);
         fileTotalSize = h.GetTotalSize();
 
-        if (h.GetVersion() == ColModelVersion::NONE)
+        if (h.IsValid())
             return true;
 
         char modelName[22]{};
@@ -402,7 +426,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
             auto colDef = CColStore::ms_pColPool->GetAt(colId); 
             MI = CModelInfo::GetModelInfo(modelName, colDef->m_nModelIdStart, colDef->m_nModelIdEnd);
         }
-        if (!MI || MI->bIsLod) // TODO: Unsure what the fuck this check is, but it doesn't seem too failproof to me..
+        if (!MI || !MI->bIsLod) // TODO: Unsure what the fuck this check is, but it doesn't seem too failproof to me..
             continue;
 
         if (!MI->GetColModel()) {
@@ -410,24 +434,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
         }
 
         auto& CM = *MI->GetColModel();
-        const auto data = &buff[buffPos + sizeof(FileHeader)];
-        switch (h.GetVersion()) {
-        case ColModelVersion::COLL:
-            LoadCollisionModel(data, CM);
-            break;
-        case ColModelVersion::COL2:
-            LoadCollisionModelVer2(data, h.GetDataSize(), CM, modelName);
-            break;
-        case ColModelVersion::COL3:
-            LoadCollisionModelVer3(data, h.GetDataSize(), CM, modelName);
-            break;
-        case ColModelVersion::COL4:
-            LoadCollisionModelVer4(data, h.GetDataSize(), CM, modelName);
-            break;
-        default:
-            return true;
-        }
-        
+        LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), CM);
         CM.m_boundSphere.m_nMaterial = colId; // TODO: At this point I'm convinced something is fucked (m_boundSphere should probably be a CSphere instead)
 
         if (MI->GetModelType() == eModelInfoType::MODEL_INFO_TYPE_ATOMIC) {
@@ -448,37 +455,24 @@ void CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
 
     auto f = CFileMgr::OpenFile(filename, "rb");
     while (CFileMgr::Read(f, &header.info, sizeof(header.info))) {
+
         // Read remaining header info. This is stupid, no idea why it's read separately like this.
         CFileMgr::Read(f, &header.info + 1, sizeof(FileHeader) - sizeof(FileHeader::FileInfo));
 
-        assert(std::size(buffer) >= header.GetDataSize()); // Just some sanity check to avoid unfixable bugs
+        assert(std::size(buffer) >= header.GetDataSize()); // Just some sanity check to avoid undetectable bugs
 
         // Read actual data
         CFileMgr::Read(f, buffer, header.GetDataSize());
 
         const auto MI = CModelInfo::GetModelInfo(header.modelName, nullptr);
-        if (!MI || MI->bIsLod)
+        if (!MI || !MI->bIsLod)
             continue;
 
         if (!MI->GetColModel()) // TODO: Perhaps this should be in `CModelInfo` ? Like `GetColModel(bool bCreate = false)` or something
             MI->SetColModel(new CColModel, true);
 
         auto& CM = *MI->GetColModel();
-        switch (header.GetVersion()) {
-        case ColModelVersion::COLL:
-            LoadCollisionModel(buffer, CM);
-            break;
-        case ColModelVersion::COL2:
-            LoadCollisionModelVer2(buffer, header.GetDataSize(), CM, header.modelName);
-            break;
-        case ColModelVersion::COL3:
-            LoadCollisionModelVer3(buffer, header.GetDataSize(), CM, header.modelName);
-            break;
-        /*case ColModelVersion::COL4: // This function doesn't process V4
-            LoadCollisionModelVer4(data, dataSize, CM, modelName);
-            break;*/
-        }
-
+        LoadCollisionModelAnyVersion(header, buffer, CM);
         CM.m_boundSphere.m_nMaterial = colId;
     }
     CFileMgr::CloseFile(f);
@@ -487,13 +481,15 @@ void CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
 // 0x5B5000
 bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8 colId) {
     using namespace ColHelpers;
-   
-    FileHeader header{};
 
-    // We've modified the loop condition a little. R* went backwards, and checked if the remaning buffer size is > 8.
-    for (uint32 fileTotalSize{}, buffPos{}; buffPos < buffSize; buffPos += fileTotalSize) {
-        auto& h = *reinterpret_cast<FileHeader*>(buff);
+    auto fileTotalSize{0u};
+    for (auto buffIt = buff; buffIt < buff + buffSize; buffIt += fileTotalSize) {
+        auto& h = *reinterpret_cast<FileHeader*>(buffIt);
+
         fileTotalSize = h.GetTotalSize();
+
+        if (!h.IsValid())
+            return true; // Finished reading all data, but there's some padding left.
 
         char modelName[22]{};
         strcpy_s(modelName, h.modelName);
@@ -509,27 +505,11 @@ bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8
 
         CColStore::IncludeModelIndex(colId, modelId);
 
-        if (MI->bIsLod)
+        if (!MI->bIsLod)
             continue;
 
         auto& CM = *new CColModel;
-
-        const auto data = &buff[buffPos + sizeof(FileHeader)];
-        switch (header.GetVersion()) {
-        case ColModelVersion::COLL:
-            LoadCollisionModel(data, CM);
-            break;
-        case ColModelVersion::COL2:
-            LoadCollisionModelVer2(data, header.GetDataSize(), CM, header.modelName);
-            break;
-        case ColModelVersion::COL3:
-            LoadCollisionModelVer3(data, header.GetDataSize(), CM, header.modelName);
-            break;
-        /*case ColModelVersion::COL4: // This function doesn't process V4
-            LoadCollisionModelVer4(data, dataSize, CM, modelName);
-            break;*/
-        }
-
+        LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), CM);
         MI->SetColModel(&CM, true);
 
         // NOTE/TODO:

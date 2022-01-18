@@ -32,17 +32,17 @@ struct FileHeader {
     uint16 modelId{};
 
     // Total col data size, including header
-    auto GetTotalSize() {
+    auto GetTotalSize() const {
         return info.size + sizeof(FileInfo); // `size` doesn't `FileInfo`s size 
     }
 
     // Size of data after header
-    auto GetDataSize() {
-        return GetTotalSize() - sizeof(FileHeader);
+    auto GetDataSize() const {
+        return GetTotalSize() - sizeof(FileHeader); // Basically boils down to info.size - (sizeof(FileHeader) - sizeof(FileInfo)) = info.size - 24
     }
 
     // Get version based on fourcc
-    auto GetVersion() {
+    auto GetVersion() const {
         switch (make_fourcc4(info.fourcc)) {
         case make_fourcc4("COLL"):
             return ColModelVersion::COLL;
@@ -53,11 +53,17 @@ struct FileHeader {
         case make_fourcc4("COL4"):
             return ColModelVersion::COL4;
         default:
-            assert(0); // NOTSA - Shouldn't happen.
+            // It's ok if this happens - Since the buffer it was read from might not contain more col data, and we've just read padding.
             return ColModelVersion::NONE;
         }
     }
+
+    auto IsValid() {
+        return GetVersion() != ColModelVersion::NONE;
+    }
 };
+VALIDATE_SIZE(FileHeader::FileInfo, 0x8);
+VALIDATE_SIZE(FileHeader, 0x20);
 
 struct TSurface {
     uint8 material, flag, brightness, light;
