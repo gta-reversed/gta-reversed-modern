@@ -1,0 +1,41 @@
+/*
+    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
+*/
+#pragma once
+
+
+#include "Vector.h"
+#include "eWeaponType.h"
+
+class CEntity;
+
+class CShotInfo {
+public:
+    int32    m_nWeaponType;
+    CVector  m_vecOrigin;
+    CVector  m_vecTargetOffset;
+    float    m_fRange;
+    CEntity* m_pCreator;
+    int32    m_nDestroyTime;
+    bool     m_bExist;
+    bool     m_bExecuted;
+    char     _pad2A[2];
+
+    static float *ms_afRandTable; // static float ms_afRandTable[20]
+
+public:
+    static void Initialise();
+    // dummy function
+    static void Shutdown();
+    static bool AddShot(CEntity* creator, eWeaponType weaponType, CVector origin, CVector target);
+    static bool GetFlameThrowerShotPosn(uint8 shotId, CVector* outPosn);
+    static void Update();
+};
+
+VALIDATE_SIZE(CShotInfo, 0x2C);
+
+extern uint32 MAX_SHOT_INFOS; // default 100
+extern CShotInfo *aShotInfos; // CShotInfo aShotInfos[MAX_SHOT_INFOS]

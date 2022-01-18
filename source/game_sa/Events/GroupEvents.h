@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CEventEditableResponse.h"
+#include "EventEditableResponse.h"
 
 enum ePlayerGroupCommand : int32
 {
@@ -15,12 +15,16 @@ public:
 
     static void InjectHooks();
 
-    CEventPlayerCommandToGroup(ePlayerGroupCommand command, CPed* target);
+    explicit CEventPlayerCommandToGroup(ePlayerGroupCommand command = ePlayerGroupCommand::PLAYER_GROUP_COMMAND_ATTACK, CPed* target = nullptr);
     ~CEventPlayerCommandToGroup();
 private:
     CEventPlayerCommandToGroup* Constructor(ePlayerGroupCommand command, CPed* target);
 public:
-    int32 GetLifeTime() override { return 0; }
+
+    eEventType GetEventType() const override { return EVENT_PLAYER_COMMAND_TO_GROUP; }
+    int32_t GetEventPriority() const override { return 44; }
+    CEventPlayerCommandToGroup* CloneEditable() override { return new CEventPlayerCommandToGroup(ePlayerGroupCommand::PLAYER_GROUP_COMMAND_ATTACK, m_target); }
+    int32_t GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override { return false; }
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
     CEntity* GetSourceEntity() const override { return reinterpret_cast<CEntity*>(m_target); }

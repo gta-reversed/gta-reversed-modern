@@ -7,7 +7,7 @@
 #pragma once
 
 
-#include "CFileObjectInstance.h"
+#include "FileObjectInstance.h"
 
 struct tBinaryIplFile {
     char   fourcc[4]; // "bnry"
