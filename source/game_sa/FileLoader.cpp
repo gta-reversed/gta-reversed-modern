@@ -241,7 +241,7 @@ void CFileLoader::LoadAudioZone(const char* line) {
         return;
     }
 
-    sscanf(line, "%s %d %d %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &radius);
+    (void)sscanf(line, "%s %d %d %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &radius);
     CAudioZones::RegisterAudioSphere(name, id, enabled != 0, x1, y1, z1, radius);
 }
 
@@ -345,6 +345,61 @@ bool CFileLoader::FinishLoadClumpFile(RwStream* stream, uint32 modelIndex) {
 // 0x5372D0
 bool CFileLoader::LoadClumpFile(RwStream* stream, uint32 modelIndex) {
     return plugin::CallAndReturn<bool, 0x5372D0, RwStream*, uint32>(stream, modelIndex);
+
+        // fails, hook not needed
+    auto modelInfo = static_cast<CClumpModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelIndex]);
+
+    if ((modelInfo->m_nFlags & 0x200) != 0) { // todo: m_nFlags & 0x200
+        RpClump* parentClump = RpClumpCreate();
+        RwFrame* parentFrame = RwFrameCreate();
+        RpClumpSetFrame(parentClump, parentFrame);
+        if (!RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr)) {
+            modelInfo->SetClump(parentClump);
+            return true;
+        }
+
+        while (true) {
+            RpClump* childClump = RpClumpStreamRead(stream);
+            if (!childClump)
+                return false;
+
+            RwFrame* childFrame = _rwFrameCloneAndLinkClones(RpClumpGetFrame(childClump));
+            RwFrameAddChild(parentFrame, childFrame);
+            RpClumpForAllAtomics(childClump, CloneAtomicToClumpCB, parentClump);
+            RpClumpDestroy(childClump);
+
+            if (!RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr)) {
+                modelInfo->SetClump(parentClump);
+                return true;
+            }
+        }
+    }
+
+    if (!RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr))
+        return false;
+
+    bool isVehicle = modelInfo->GetModelType() == MODEL_INFO_VEHICLE;
+    if (isVehicle) {
+        CCollisionPlugin::SetModelInfo(modelInfo);
+        CVehicleModelInfo::UseCommonVehicleTexDicationary();
+    }
+
+    RpClump* clump = RpClumpStreamRead(stream);
+
+    if (isVehicle) {
+        CCollisionPlugin::SetModelInfo(nullptr);
+        CVehicleModelInfo::StopUsingCommonVehicleTexDicationary();
+    }
+
+    if (!clump)
+        return false;
+
+    modelInfo->SetClump(clump);
+
+    if (modelIndex == MODEL_JOURNEY)
+        static_cast<CVehicleModelInfo*>(modelInfo)->m_nNumDoors = 2;
+
+    return true;
 }
 
 // 0x5B3A30
