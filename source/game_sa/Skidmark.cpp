@@ -13,7 +13,7 @@ void CSkidmark::Init(uint32 id, CVector posn, eSkidMarkType type, const bool* bl
     m_bActive     = true;
     m_nState      = eSkidmarkState::JUST_UPDATED;
     m_nNumParts   = 0;
-    m_nType       = bloodState ? eSkidMarkType::BLOODY : type;
+    m_nType       = *bloodState ? eSkidMarkType::BLOODY : type;
     m_lastDisappearTimeUpdateMs = CTimer::GetTimeInMS() - 1'000;
 }
 
