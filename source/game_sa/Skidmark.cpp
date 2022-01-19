@@ -149,8 +149,8 @@ void CSkidmark::RegisterNewPart(CVector posn, CVector2D dir, float length, bool*
         if (CTimer::GetTimeInMS() - m_lastDisappearTimeUpdateMs <= 100) {
             m_vPosn[m_nNumParts] = posn; // Update existing, because of low delta time
         } else {
+            m_lastDisappearTimeUpdateMs = CTimer::GetTimeInMS();
             if (m_nNumParts >= SKIDMARK_NUM_PARTS - 1) { // The 0th "part" isn't considered as an actual part, so at most we can have this many
-                m_lastDisappearTimeUpdateMs = CTimer::GetTimeInMS();
                 m_nState = eSkidmarkState::DISAPPEARING;
                 m_fadeBeginMs = CTimer::GetTimeInMS() + 10'000;
                 m_disappearAtMs = CTimer::GetTimeInMS() + 20'000;
