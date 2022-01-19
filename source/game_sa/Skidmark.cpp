@@ -17,6 +17,12 @@ void CSkidmark::Init(uint32 id, CVector posn, eSkidMarkType type, const bool* bl
     m_lastDisappearTimeUpdateMs = CTimer::GetTimeInMS() - 1'000;
 }
 
+CSphere CSkidmark::GetBoundingSphere() const {
+    const CVector center = (GetLastPartPosn() + GetFirstPartPosn()) / 2.0f;
+    const float radius = (GetLastPartPosn() - center).Magnitude();
+    return { center, radius };
+}
+
 // see CSkidmarks::Update
 void CSkidmark::Update() {
     const auto timeMS = CTimer::GetTimeInMS();

@@ -33,11 +33,7 @@ struct CSkidmark {
     CVector GetPartPosn(unsigned i) const { return m_vPosn[i]; }
     CVector GetLastPartPosn() const { return GetPartPosn(m_nNumParts); }
     CVector GetFirstPartPosn() const { return GetPartPosn(0); }
-    CSphere GetBoundingSphere() {
-        const CVector center = (GetLastPartPosn() + GetFirstPartPosn()) / 2.0f;
-        const float radius = (GetLastPartPosn() - center).Magnitude();
-        return { center, radius };
-    }
+    CSphere GetBoundingSphere() const;
 
     void Init(uint32_t id, CVector posn, eSkidMarkType type, const bool* bloodState);
     void Update();
