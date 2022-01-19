@@ -21,11 +21,11 @@ void CWeaponInfo::InjectHooks() {
     ReversibleHooks::Install("CWeaponInfo", "Shutdown", 0x743C50, &CWeaponInfo::Shutdown);
     ReversibleHooks::Install("CWeaponInfo", "GetWeaponInfo", 0x743C60, &CWeaponInfo::GetWeaponInfo);
     ReversibleHooks::Install("CWeaponInfo", "GetSkillStatIndex", 0x743CD0, &CWeaponInfo::GetSkillStatIndex);
+    ReversibleHooks::Install("CWeaponInfo", "FindWeaponType", 0x743D10, &CWeaponInfo::FindWeaponType);
 
     // Methods (4x)
     ReversibleHooks::Install("CWeaponInfo", "GetCrouchReloadAnimationID", 0x685700, &CWeaponInfo::GetCrouchReloadAnimationID);
-    ReversibleHooks::Install("CWeaponInfo", "FindWeaponType", 0x743D10, &CWeaponInfo::FindWeaponType);
-    // ReversibleHooks::Install("CWeaponInfo", "GetTargetHeadRange", 0x743D50, &CWeaponInfo::GetTargetHeadRange);
+    ReversibleHooks::Install("CWeaponInfo", "GetTargetHeadRange", 0x743D50, &CWeaponInfo::GetTargetHeadRange);
     // ReversibleHooks::Install("CWeaponInfo", "GetWeaponReloadTime", 0x743D70, &CWeaponInfo::GetWeaponReloadTime);
 }
 
@@ -373,7 +373,7 @@ AnimationId CWeaponInfo::GetCrouchReloadAnimationID() {
 
 // 0x743D50
 float CWeaponInfo::GetTargetHeadRange() {
-    return plugin::CallMethodAndReturn<float, 0x743D50, CWeaponInfo*>(this);
+    return (float)((uint32)m_nSkillLevel + 2) * m_fWeaponRange / 25.f;
 }
 
 // 0x743D70
