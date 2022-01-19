@@ -307,7 +307,7 @@ int32 CWeaponInfo::GetSkillStatIndex(eWeaponType weaponType) {
 // 0x743D10
 eWeaponType CWeaponInfo::FindWeaponType(const char* type) {
     // From 8D6150 (ms_aWeaponNames)
-    constexpr std::string_view names[]{
+    constexpr const char* names[]{
         "UNARMED",
         "BRASSKNUCKLE",
         "GOLFCLUB",
@@ -355,12 +355,14 @@ eWeaponType CWeaponInfo::FindWeaponType(const char* type) {
         "NIGHTVISION",
         "INFRARED",
         "PARACHUTE",
-        "",
+        "", // Yeah, empty string. Unsure why.
         "ARMOUR",
     };
-    if (const auto it = rng::find(names, type); it != std::end(names))
-        return (eWeaponType)(it - names);
-
+    for (auto i = 0u; i < std::size(names); i++) {
+        if (!_stricmp(names[i], type)) {
+            return (eWeaponType)i;
+        }
+    }
     assert(0); // Shouldn't be reachable
     return eWeaponType::WEAPON_UNARMED;
 }
