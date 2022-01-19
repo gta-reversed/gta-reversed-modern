@@ -19,7 +19,7 @@ void CWeaponInfo::InjectHooks() {
     ReversibleHooks::Install("CWeaponInfo", "LoadWeaponData", 0x5BE670, &CWeaponInfo::LoadWeaponData);
     ReversibleHooks::Install("CWeaponInfo", "Initialise", 0x5BF750, &CWeaponInfo::Initialise);
     ReversibleHooks::Install("CWeaponInfo", "Shutdown", 0x743C50, &CWeaponInfo::Shutdown);
-    // ReversibleHooks::Install("CWeaponInfo", "GetWeaponInfo", 0x743C60, &CWeaponInfo::GetWeaponInfo);
+    ReversibleHooks::Install("CWeaponInfo", "GetWeaponInfo", 0x743C60, &CWeaponInfo::GetWeaponInfo);
     ReversibleHooks::Install("CWeaponInfo", "GetSkillStatIndex", 0x743CD0, &CWeaponInfo::GetSkillStatIndex);
 
     // Methods (4x)
@@ -284,7 +284,7 @@ void CWeaponInfo::Shutdown() {
 
 // 0x743C60
 CWeaponInfo* CWeaponInfo::GetWeaponInfo(eWeaponType weaponID, eWeaponSkill skill) {
-    return plugin::CallAndReturn<CWeaponInfo*, 0x743C60, eWeaponType, eWeaponSkill>(weaponID, skill);
+    return &aWeaponInfo[GetWeaponInfoIndex(weaponID, skill)];
 }
 
 // 0x743CD0
