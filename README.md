@@ -39,7 +39,7 @@ git clone --recurse-submodules https://github.com/Updated-Classic/gta-reversed-m
 <details>
 <summary>Premake5</summary>
 
-1) Execute `premake5.bat` (for VS2019), or `premake5.bat vs20xx` for other VS versions. (e.g. vs2022)
+1) Execute `premake5.bat` for VS2019, or `premake5.bat vs20xx` for other VS versions. (e.g. vs2022)
 
 2) You'll find gta_reversed.sln shortcut in the same folder as premake5.
 
