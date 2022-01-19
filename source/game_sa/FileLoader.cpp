@@ -1407,112 +1407,160 @@ void CFileLoader::LoadPedPathNode(const char* line, int32 objModelIndex, int32 p
 // https://gta.fandom.com/wiki/PICK
 void CFileLoader::LoadPickup(const char* line) {
     CVector pos{};
-    int32 weaponType{};
-    if (sscanf(line, "%d %f %f %f", &weaponType, &pos.x, &pos.y, &pos.z) == 4) {
-        // TODO: Maybe, some day, use enums here (eModelID for the model, and eWeaponType for the wepID)
-        const auto GetModel = [weaponType] {
-            switch (weaponType) {
-            case 4:
-                return 331;
-            case 5:
-                return 334;
-            case 6:
-                return 335;
-            case 9:
-                return 333;
-            case 10:
-                return 336;
-            case 11:
-                return 337;
-            case 12:
-                return 338;
-            case 13:
-                return 339;
-            case 14:
-                return 341;
-            case 15:
-                return 344;
-            case 16:
-                return 342;
-            case 17:
-                return 363;
-            case 18:
-                return 346;
-            case 19:
-                return 347;
-            case 20:
-                return 348;
-            case 21:
-                return 349;
-            case 22:
-            case 45:
-                return 351;
-            case 23:
-                return 372;
-            case 24:
-                return 352;
-            case 25:
-                return 353;
-            case 26:
-                return 355;
-            case 27:
-                return 356;
-            case 28:
-                return 357;
-            case 29:
-                return 358;
-            case 31:
-                return 361;
-            case 32:
-            case 44:
-                return 362;
-            case 33:
-                return 321;
-            case 34:
-                return 322;
-            case 35:
-                return 323;
-            case 36:
-                return 324;
-            case 37:
-                return 325;
-            case 38:
-                return 326;
-            case 39:
-                return 327;
-            case 40:
-                return 328;
-            case 41:
-                return 330;
-            case 43:
-                return 343;
-            case 46:
-                return 359;
-            case 47:
-                return 360;
-            case 48:
-                return 364;
-            case 49:
-                return 365;
-            case 50:
-                return 366;
-            case 51:
-                return 367;
-            case 52:
-                return 368;
-            case 53:
-                return 369;
-            case 54:
-                return 370;
-            case 55:
-                return 371;
-            default:
-                return -1;
-            }
-        };
-        if (const auto model = GetModel(); model != -1) {
-            CPickups::GenerateNewOne(pos, model, 2, 0, 0, false, nullptr);
+    int32   weaponType{};
+
+    if (sscanf(line, "%d %f %f %f", &weaponType, &pos.x, &pos.y, &pos.z) != 4)
+        return;
+
+    const auto GetModel = [weaponType] {
+        switch (weaponType) {
+        case WEAPON_KNIFE:
+            return MODEL_BRASSKNUCKLE;
+
+        case WEAPON_BASEBALLBAT:
+            return MODEL_NITESTICK;
+
+        case WEAPON_SHOVEL:
+            return MODEL_KNIFECUR;
+
+        case WEAPON_CHAINSAW:
+            return MODEL_GOLFCLUB;
+
+        case WEAPON_DILDO1:
+            return MODEL_BAT;
+
+        case WEAPON_DILDO2:
+            return MODEL_SHOVEL;
+
+        case WEAPON_VIBE1:
+            return MODEL_POOLCUE;
+
+        case WEAPON_VIBE2:
+            return MODEL_KATANA;
+
+        case WEAPON_FLOWERS:
+            return MODEL_CHNSAW;
+
+        case WEAPON_CANE:
+            return MODEL_MOLOTOV;
+
+        case WEAPON_GRENADE:
+            return MODEL_GRENADE;
+
+        case WEAPON_TEARGAS:
+            return MODEL_SATCHEL;
+
+        case WEAPON_MOLOTOV:
+            return MODEL_COLT45;
+
+        case WEAPON_ROCKET:
+            return MODEL_SILENCED;
+
+        case WEAPON_ROCKET_HS:
+            return MODEL_DESERT_EAGLE;
+
+        case WEAPON_FREEFALL_BOMB:
+            return MODEL_CHROMEGUN;
+
+        case WEAPON_PISTOL:
+        case WEAPON_INFRARED:
+            return MODEL_SHOTGSPA;
+
+        case WEAPON_PISTOL_SILENCED:
+            return MODEL_TEC9;
+
+        case WEAPON_DESERT_EAGLE:
+            return MODEL_MICRO_UZI;
+
+        case WEAPON_SHOTGUN:
+            return MODEL_MP5LNG;
+
+        case WEAPON_SAWNOFF_SHOTGUN:
+            return MODEL_AK47;
+
+        case WEAPON_SPAS12_SHOTGUN:
+            return MODEL_M4;
+
+        case WEAPON_MICRO_UZI:
+            return MODEL_CUNTGUN;
+
+        case WEAPON_MP5:
+            return MODEL_SNIPER;
+
+        case WEAPON_M4:
+            return MODEL_FLAME;
+
+        case WEAPON_TEC9:
+        case WEAPON_NIGHTVISION:
+            return MODEL_MINIGUN;
+
+        case WEAPON_COUNTRYRIFLE:
+            return MODEL_GUN_DILDO1;
+
+        case WEAPON_SNIPERRIFLE:
+            return MODEL_GUN_DILDO2;
+
+        case WEAPON_RLAUNCHER:
+            return MODEL_GUN_VIBE1;
+
+        case WEAPON_RLAUNCHER_HS:
+            return MODEL_GUN_VIBE2;
+
+        case WEAPON_FLAMETHROWER:
+            return MODEL_FLOWERA;
+
+        case WEAPON_MINIGUN:
+            return MODEL_GUN_CANE;
+
+        case WEAPON_REMOTE_SATCHEL_CHARGE:
+            return MODEL_GUN_BOXWEE;
+
+        case WEAPON_DETONATOR:
+            return MODEL_GUN_BOXBIG;
+
+        case WEAPON_SPRAYCAN:
+            return MODEL_CELLPHONE;
+
+        case WEAPON_CAMERA:
+            return MODEL_TEARGAS;
+
+        case WEAPON_PARACHUTE:
+            return MODEL_ROCKETLA;
+
+        case WEAPON_LAST_WEAPON:
+            return MODEL_HEATSEEK;
+
+        case WEAPON_ARMOUR:
+            return MODEL_BOMB;
+
+        case WEAPON_RAMMEDBYCAR:
+            return MODEL_SPRAYCAN;
+
+        case WEAPON_RUNOVERBYCAR:
+            return MODEL_FIRE_EX;
+
+        case WEAPON_EXPLOSION:
+            return MODEL_CAMERA;
+
+        case WEAPON_UZI_DRIVEBY:
+            return MODEL_NVGOGGLES;
+
+        case WEAPON_DROWNING:
+            return MODEL_IRGOGGLES;
+
+        case WEAPON_FALL:
+            return MODEL_JETPACK;
+
+        case WEAPON_UNIDENTIFIED:
+            return MODEL_GUN_PARA;
+
+        default:
+            return MODEL_INVALID;
         }
+    };
+
+    if (const auto model = GetModel(); model != -1) {
+        CPickups::GenerateNewOne(pos, model, 2, 0, 0, false, nullptr);
     }
 }
 
