@@ -161,7 +161,7 @@ void CSkidmark::RegisterNewPart(CVector posn, CVector2D dir, float length, bool*
 
                 const CVector prevPosn = m_vPosn[m_nNumParts - 1];
                 CVector2D dirToPrevPart = {
-                    posn.y - prevPosn.y, // Swapped intentionally
+                    posn.y - prevPosn.y, // Swapped intentionally, unsure why though.
                     prevPosn.x - posn.x
                 };
 
