@@ -62,6 +62,9 @@ public:
     float  m_fIllumination;
     float  m_fLodDistMult;
 
+public:
+    static void InjectHooks();
+
     // funcs
     CColourSet(int32 weatherId, int32 timeId);
     void Interpolate(CColourSet* a, CColourSet* b, float factor_a, float factor_b, bool bIgnoreSky);

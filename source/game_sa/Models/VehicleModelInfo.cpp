@@ -1469,8 +1469,8 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
                 pModel2->SetupVehicleUpgradeFlags(pNextToken);
 
                 CVehicleModelInfo::ms_linkedUpgrades.AddUpgradeLink(iModelId1, iModelId2);
-                break;
             }
+            break;
         }
 
         case eCarModsLineType::MODS: {

@@ -1,10 +1,12 @@
 #include "StdInc.h"
 
 #include "CreepingFire.h"
+#include "FireManager.h"
 
 uint8 (&CCreepingFire::m_aFireStatus)[32][32] = *(uint8(*)[32][32])0xB71B68;
 
 void CCreepingFire::InjectHooks() {
+    ReversibleHooks::Install("CCreepingFire", "SetReadyToBurn", 0x539CC0, &CCreepingFire::SetReadyToBurn);
     ReversibleHooks::Install("CCreepingFire", "Update", 0x539CE0, &CCreepingFire::Update);
     ReversibleHooks::Install("CCreepingFire", "TryToStartFireAtCoors", 0x53A450, &CCreepingFire::TryToStartFireAtCoors);
 }
