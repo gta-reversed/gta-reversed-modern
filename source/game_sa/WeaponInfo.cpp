@@ -17,7 +17,7 @@ void CWeaponInfo::InjectHooks() {
     // Static functions (7x)
     ReversibleHooks::Install("CWeaponInfo", "FindWeaponFireType", 0x5BCF30, &CWeaponInfo::FindWeaponFireType);
     ReversibleHooks::Install("CWeaponInfo", "LoadWeaponData", 0x5BE670, &CWeaponInfo::LoadWeaponData);
-    // ReversibleHooks::Install("CWeaponInfo", "Initialise", 0x5BF750, &CWeaponInfo::Initialise);
+    ReversibleHooks::Install("CWeaponInfo", "Initialise", 0x5BF750, &CWeaponInfo::Initialise);
     // ReversibleHooks::Install("CWeaponInfo", "Shutdown", 0x743C50, &CWeaponInfo::Shutdown);
     // ReversibleHooks::Install("CWeaponInfo", "GetWeaponInfo", 0x743C60, &CWeaponInfo::GetWeaponInfo);
     ReversibleHooks::Install("CWeaponInfo", "GetSkillStatIndex", 0x743CD0, &CWeaponInfo::GetSkillStatIndex);
@@ -162,7 +162,7 @@ void CWeaponInfo::LoadWeaponData() {
             wi.m_nDamage = dmg;
             wi.m_vecFireOffset = offset;
             wi.m_nSkillLevel = skillLevel;
-            wi.m_nReqStatLevel = reqStatLevelForSkill;
+            wi.m_fReqStatLevel = reqStatLevelForSkill;
             wi.m_fAccuracy = accuracy;
             wi.m_fMoveSpeed = moveSpeed;
             wi.m_fBreakoutTime = (float)breakoutTime / 30.f;
@@ -270,7 +270,10 @@ void CWeaponInfo::LoadWeaponData() {
 
 // 0x5BF750
 void CWeaponInfo::Initialise() {
-    return plugin::CallAndReturn<void, 0x5BF750>();
+    for (auto& v : aWeaponInfo)
+        v = {};
+    for (auto& v : g_GunAimingOffsets)
+        v = {};
 }
 
 // 0x743C50

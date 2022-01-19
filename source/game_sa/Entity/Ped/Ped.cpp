@@ -796,12 +796,12 @@ eWeaponSkill CPed::GetWeaponSkill(eWeaponType weaponType)
     {
         int32 skillStat = CWeaponInfo::GetSkillStatIndex(weaponType);
         CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_PRO);
-        float golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_nReqStatLevel);
+        float golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_fReqStatLevel);
         if (golfClubStatLevel <= CStats::GetStatValue((eStats)skillStat))
             return eWeaponSkill::WEAPSKILL_PRO;
 
         CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD);
-        float brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_nReqStatLevel);
+        float brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_fReqStatLevel);
         if (brassKnuckleStatLevel > CStats::GetStatValue((eStats)skillStat))
             return eWeaponSkill::WEAPSKILL_POOR;
 

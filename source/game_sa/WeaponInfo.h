@@ -21,14 +21,14 @@
 
 struct CGunAimingOffset
 {
-    float AimX;
-    float AimZ;
-    float DuckX;
-    float DuckZ;
-    int16 RLoadA;
-    int16 RLoadB;
-    int16 CrouchRLoadA;
-    int16 CrouchRLoadB;
+    float AimX{};
+    float AimZ{};
+    float DuckX{};
+    float DuckZ{};
+    int16 RLoadA{};
+    int16 RLoadB{};
+    int16 CrouchRLoadA{};
+    int16 CrouchRLoadB{};
 };
 static inline CGunAimingOffset(&g_GunAimingOffsets)[20] = *(CGunAimingOffset(*)[20])0xC8A8A8;
 
@@ -44,12 +44,13 @@ class CWeaponInfo {
 
 public:
     /* some info here https://code.google.com/p/mtasa-blue/source/browse/tags/1.3.4/MTA10/game_sa/CWeaponInfoSA.h */
-    eWeaponFire m_nWeaponFire;  // see eWeaponFire
-    float       m_fTargetRange; // max targeting range
-    float       m_fWeaponRange; // absolute gun range / default melee attack range
-    int32       m_nModelId1;    // modelinfo id
-    int32       m_nModelId2;    // second modelinfo id
-    uint32      m_nSlot;
+
+    eWeaponFire m_nWeaponFire{};  // see eWeaponFire
+    float       m_fTargetRange{}; // max targeting range
+    float       m_fWeaponRange{}; // absolute gun range / default melee attack range
+    int32       m_nModelId1{-1};  // modelinfo id
+    int32       m_nModelId2{-1};  // second modelinfo id
+    uint32      m_nSlot{-1};
     union {
         struct {
             uint32 bCanAim : 1;
@@ -74,33 +75,34 @@ public:
             uint32 bRandSpeed : 1;
             uint32 bExpands : 1;
         } flags;
-        uint32 m_nFlags;
+        uint32 m_nFlags{};
     };
-    AssocGroupId m_eAnimGroup;      // instead of storing pointers directly to anims, use anim association groups
-    uint16       m_nAmmoClip;       // ammo in one clip
-    uint16       m_nDamage;         // damage inflicted per hit
-    CVector      m_vecFireOffset;   // offset from weapon origin to projectile starting point
-    eWeaponSkill m_nSkillLevel;     // what's the skill level of this weapontype
-    uint32       m_nReqStatLevel;   // what stat level is required for this skill level
-    float        m_fAccuracy;       // modify accuracy of weapon
-    float        m_fMoveSpeed;      // how fast can move with weapon
+    AssocGroupId m_eAnimGroup{};      // instead of storing pointers directly to anims, use anim association groups
+    uint16       m_nAmmoClip{};       // ammo in one clip
+    uint16       m_nDamage{};         // damage inflicted per hit
+    CVector      m_vecFireOffset{};   // offset from weapon origin to projectile starting point
+    uint32       m_nSkillLevel{1};    // what's the skill level of this weapontype - We can't make the field eWeaponSkill because the game uses uint32 for this member...
+    float        m_fReqStatLevel{};   // what stat level is required for this skill level
+    float        m_fAccuracy{1.f};    // modify accuracy of weapon
+    float        m_fMoveSpeed{1.f};   // how fast can move with weapon
 
-    float        m_fAnimLoopStart;  // start of animation loop
-    float        m_fAnimLoopEnd;    // end of animation loop
-    float        m_fAnimLoopFire;   // time in animation when weapon should be fired
+    // Could probably pack this into a struct like AnimLoopInfo, and use an array.
+    float        m_fAnimLoopStart{};  // start of animation loop
+    float        m_fAnimLoopEnd{};    // end of animation loop
+    float        m_fAnimLoopFire{};   // time in animation when weapon should be fired
 
-    float        m_fAnimLoop2Start; // start of animation2 loop
-    float        m_fAnimLoop2End;   // end of animation2 loop
-    float        m_fAnimLoop2Fire;  // time in animation2 when weapon should be fired
+    float        m_fAnimLoop2Start{}; // start of animation2 loop
+    float        m_fAnimLoop2End{};   // end of animation2 loop
+    float        m_fAnimLoop2Fire{};  // time in animation2 when weapon should be fired
 
-    float        m_fBreakoutTime;   // time after which player can break out of attack and run off
-    float        m_fSpeed;          // speed of projectile
-    float        m_fRadius;         // radius affected
-    float        m_fLifespan;       // time taken for shot to dissipate
-    float        m_fSpread;         // angle inside which shots are created
-    uint16       m_nAimOffsetIndex; // index into array of aiming offsets
-    uint8        m_nBaseCombo;      // base combo for this melee weapon
-    uint8        m_nNumCombos;      // how many further combos are available
+    float        m_fBreakoutTime{};   // time after which player can break out of attack and run off
+    float        m_fSpeed{};          // speed of projectile
+    float        m_fRadius{};         // radius affected
+    float        m_fLifespan{};       // time taken for shot to dissipate
+    float        m_fSpread{};         // angle inside which shots are created
+    uint16       m_nAimOffsetIndex{}; // index into array of aiming offsets
+    uint8        m_nBaseCombo{4};     // base combo for this melee weapon
+    uint8        m_nNumCombos{1};     // how many further combos are available
 
 public:
     static void InjectHooks();
