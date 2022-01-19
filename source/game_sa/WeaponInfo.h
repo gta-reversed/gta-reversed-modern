@@ -27,6 +27,8 @@ enum class eWeaponSkill : uint8 {
 };
 
 class CWeaponInfo {
+    static inline const char* (&ms_aWeaponNames)[MAX_WEAPON_NAMES] = *(const char* (*)[MAX_WEAPON_NAMES])0x8D6150;
+
 public:
     /* some info here https://code.google.com/p/mtasa-blue/source/browse/tags/1.3.4/MTA10/game_sa/CWeaponInfoSA.h */
     eWeaponFire m_nWeaponFire;  // see eWeaponFire
@@ -43,8 +45,8 @@ public:
             uint32 bOnlyFreeAim : 1;
             uint32 bMoveAim : 1;  // can move when aiming
             uint32 bMoveFire : 1; // can move when firing
-            uint32 b07 : 1;       // this bitfield is not used
-            uint32 b08 : 1;       // this bitfield is not used
+            uint32  : 1;        
+            uint32  : 1;        
 
             uint32 bThrow : 1;
             uint32 bHeavy : 1; // can't run fast with this weapon
@@ -88,35 +90,41 @@ public:
     static void InjectHooks();
 
     // functions
-    CWeaponInfo();
-    ~CWeaponInfo();
+    CWeaponInfo() = default;
+    ~CWeaponInfo() = default;
 
-    // static variables
-
-    // weapon names array. Count: MAX_WEAPON_NAMES(50)
-    static char **ms_aWeaponNames;
-
-    AnimationId GetCrouchReloadAnimationID();
+    auto GetCrouchReloadAnimationID() -> AnimationId;
+    auto GetTargetHeadRange() -> float;
+    auto GetWeaponReloadTime() -> int32;
 
     // static functions
 
     // load weapon data file
     static void LoadWeaponData();
+
     // get weapon info for this type and with this skill
     static CWeaponInfo *GetWeaponInfo(eWeaponType weaponType, eWeaponSkill skill);
+
     // get weapon type by name
-    static eWeaponType FindWeaponType(char *name);
+    static eWeaponType FindWeaponType(const char *name);
+
     // get weapon fire type by name
-    static eWeaponFire FindWeaponFireType(char *name);
+    static eWeaponFire FindWeaponFireType(const char *name);
+
     // initialisation
     static void Initialise();
+
     // closing
     static void Shutdown();
 
-    static int32 GetSkillStatIndex(int32 weaponType);
+    static int32 GetSkillStatIndex(eWeaponType weaponType);
+
+
+private:
+    CWeaponInfo* Constructor();
 };
 
 VALIDATE_SIZE(CWeaponInfo, 0x70);
 
 // list of weapon infos. Count: MAX_WEAPON_INFOS (80)
-extern CWeaponInfo *aWeaponInfo;
+static inline CWeaponInfo(&aWeaponInfo)[MAX_WEAPON_INFOS] = *(CWeaponInfo(*)[MAX_WEAPON_INFOS])0xC8AAB8;
