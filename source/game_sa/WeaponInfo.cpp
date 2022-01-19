@@ -23,7 +23,7 @@ void CWeaponInfo::InjectHooks() {
     ReversibleHooks::Install("CWeaponInfo", "GetSkillStatIndex", 0x743CD0, &CWeaponInfo::GetSkillStatIndex);
 
     // Methods (4x)
-    // ReversibleHooks::Install("CWeaponInfo", "GetCrouchReloadAnimationID", 0x685700, &CWeaponInfo::GetCrouchReloadAnimationID);
+    ReversibleHooks::Install("CWeaponInfo", "GetCrouchReloadAnimationID", 0x685700, &CWeaponInfo::GetCrouchReloadAnimationID);
     // ReversibleHooks::Install("CWeaponInfo", "FindWeaponType", 0x743D10, &CWeaponInfo::FindWeaponType);
     // ReversibleHooks::Install("CWeaponInfo", "GetTargetHeadRange", 0x743D50, &CWeaponInfo::GetTargetHeadRange);
     // ReversibleHooks::Install("CWeaponInfo", "GetWeaponReloadTime", 0x743D70, &CWeaponInfo::GetWeaponReloadTime);
@@ -312,7 +312,7 @@ eWeaponType CWeaponInfo::FindWeaponType(const char* type) {
 // Methods
 // 0x685700
 AnimationId CWeaponInfo::GetCrouchReloadAnimationID() {
-    return plugin::CallMethodAndReturn<AnimationId, 0x685700, CWeaponInfo*>(this);
+    return flags.bCrouchFire && flags.bReload ? AnimationId::ANIM_ID_CROUCHRELOAD : AnimationId::ANIM_ID_WALK;
 }
 
 // 0x743D50
