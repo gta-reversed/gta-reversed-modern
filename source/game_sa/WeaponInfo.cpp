@@ -7,13 +7,15 @@
 
 #include "StdInc.h"
 #include "WeaponInfo.h"
+#include <ranges>
+namespace rng = std::ranges;
 
 void CWeaponInfo::InjectHooks() {
     // Constructors (1x)
-    // ReversibleHooks::Install("CWeaponInfo", "CWeaponInfo", 0x743C30, &CWeaponInfo::Constructor);
+    ReversibleHooks::Install("CWeaponInfo", "CWeaponInfo", 0x743C30, &CWeaponInfo::Constructor);
 
     // Static functions (7x)
-    // ReversibleHooks::Install("CWeaponInfo", "FindWeaponFireType", 0x5BCF30, &CWeaponInfo::FindWeaponFireType);
+    ReversibleHooks::Install("CWeaponInfo", "FindWeaponFireType", 0x5BCF30, &CWeaponInfo::FindWeaponFireType);
     // ReversibleHooks::Install("CWeaponInfo", "LoadWeaponData", 0x5BE670, &CWeaponInfo::LoadWeaponData);
     // ReversibleHooks::Install("CWeaponInfo", "Initialise", 0x5BF750, &CWeaponInfo::Initialise);
     // ReversibleHooks::Install("CWeaponInfo", "Shutdown", 0x743C50, &CWeaponInfo::Shutdown);
@@ -36,7 +38,17 @@ CWeaponInfo* CWeaponInfo::Constructor() {
 // Static functions
 // 0x5BCF30
 eWeaponFire CWeaponInfo::FindWeaponFireType(const char* name) {
-    return plugin::CallAndReturn<eWeaponFire, 0x5BCF30>(name);
+    static constexpr struct { std::string_view name; eWeaponFire wf; } mapping[]{
+        {"MELEE",       eWeaponFire::WEAPON_FIRE_MELEE},
+        {"INSTANT_HIT", eWeaponFire::WEAPON_FIRE_INSTANT_HIT},
+        {"PROJECTILE",  eWeaponFire::WEAPON_FIRE_PROJECTILE},
+        {"AREA_EFFECT", eWeaponFire::WEAPON_FIRE_AREA_EFFECT},
+        {"CAMERA",      eWeaponFire::WEAPON_FIRE_CAMERA},
+        {"USE",         eWeaponFire::WEAPON_FIRE_USE},
+    };
+    if (const auto it = rng::find(mapping, name, [](const auto& e) { return e.name; }); it != std::end(mapping))
+        return it->wf;
+    return eWeaponFire::WEAPON_FIRE_INSTANT_HIT;
 }
 
 // 0x5BE670
