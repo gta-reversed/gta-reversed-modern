@@ -1360,20 +1360,20 @@ int32 CFileLoader::LoadPathHeader(const char* line, int32& outPathType) {
 // 0x5B7420
 int32 CFileLoader::LoadPedObject(const char* line) {
     eModelID modelId{eModelID::MODEL_INVALID};
-    int32    radio1, radio2;
-    uint32   flags;
-    int32    carsCanDriveMask;
+    int32    radio1{}, radio2{};
+    uint32   flags{};
+    int32    carsCanDriveMask{};
 
     // TODO: Should probably increase the size of these to avoid possible buffer overflow
-    char animFile[12];
-    char modelName[20];
-    char pedVoiceType[16];
-    char statName[20];
-    char animGroup[20];
-    char pedType[24];
-    char texName[20];
-    char voiceMin[56];
-    char voiceMax[60];
+    char animFile[12]{};
+    char modelName[20]{};
+    char pedVoiceType[16]{};
+    char statName[20]{};
+    char animGroup[20]{};
+    char pedType[24]{};
+    char texName[20]{};
+    char voiceMin[56]{};
+    char voiceMax[60]{};
 
     (void)sscanf(
         line,
