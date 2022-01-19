@@ -26,7 +26,7 @@ struct CSkidmark {
     uint32         m_fadeBeginMs;               // Begins fading at this tick
     uint32         m_disappearAtMs;             // Should disappear by this tick
     eSkidMarkType  m_nType;
-    uint16         m_nNumParts;                 // Number of parts. The 0th 'part' isn't actually considered a part, so this number never exeeds 15
+    uint16         m_nNumParts;                 // Number of parts. The 0th 'part' isn't actually considered a part, so this number never exeeds SKIDMARK_NUM_PARTS - 1
     eSkidmarkState m_nState;
     bool           m_bActive;
 
