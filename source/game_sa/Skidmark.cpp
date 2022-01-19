@@ -102,12 +102,14 @@ void CSkidmark::Render() const {
         return;
 
     const auto GetColorForPart = [&, baseColor = GetColor()](unsigned part) {
-        const auto GetAlpha = [&]() {         
+        const auto GetAlpha = [&]() -> uint8 {
             if (part == 0)
-                return 0; // First "part" has always 0 alpha.
+                return 0u; // First "part" has always 0 alpha.
+
             if (m_nNumParts == part && m_nState == eSkidmarkState::JUST_UPDATED)
-                return 0; // Last part
-            return baseColor.a / 2;
+                return 0u; // Last part
+
+            return (uint8)(baseColor.a * 128 / 256); // Again, they avoided fp division.. This is just a division by 2.
         };
         RwRGBA partColor = baseColor.ToRwRGBA();
         partColor.alpha = GetAlpha();
