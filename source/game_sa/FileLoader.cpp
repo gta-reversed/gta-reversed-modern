@@ -1295,7 +1295,7 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             using FnType = void(*)(const char*);
             const struct { std::string_view id;  FnType fn; } functions[]{
                 {"IMG", [](const char* path) {
-                    if (path == std::string_view{ "MODELS\\GTA_INT.IMG" }) { // Only allowed to load GTA_INT.IMG
+                    if (path != std::string_view{ "MODELS\\GTA_INT.IMG" }) {
                         CStreaming::AddImageToList(path, true);
                     }
                 }},
