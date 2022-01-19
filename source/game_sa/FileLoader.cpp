@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
@@ -106,11 +106,11 @@ RwTexDictionary* CFileLoader::LoadTexDictionary(const char* filename) {
 
 // 0x5B40C0
 int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
-    eModelID objID{ eModelID::MODEL_INVALID };
-    char modelName[24]{};
-    char txdName[24]{};
-    char animName[16]{ "null" };
-    float drawDist{ 2000.f };
+    auto   objID{ eModelID::MODEL_INVALID };
+    char   modelName[24]{};
+    char   txdName[24]{};
+    char   animName[16]{ "null" };
+    float  drawDist{ 2000.f };
     uint32 flags{};
 
     if (sscanf(line, "%d %s %s %s %f %d", &objID, modelName, txdName, animName, &drawDist, &flags) != 6)
@@ -132,7 +132,7 @@ int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
 
 // 0x5371F0
 bool CFileLoader::LoadAtomicFile(RwStream* stream, uint32 modelId) {
-    auto mi = CModelInfo::ms_modelInfoPtrs[modelId]->AsAtomicModelInfoPtr();
+    auto mi = CModelInfo::GetModelInfo(modelId)->AsAtomicModelInfoPtr();
     bool bUseCommonVehicleTexDictionary = false;
     if (mi && mi->bUseCommonVehicleDictionary) {
         bUseCommonVehicleTexDictionary = true;
@@ -164,9 +164,9 @@ bool CFileLoader::LoadAtomicFile(RwStream* stream, uint32 modelId) {
 // 0x5B39D0
 void CFileLoader::LoadAtomicFile(const char* filename) {
     RwStream* stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, filename);
-    if (RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr)) {
-        RpClump* clump = RpClumpStreamRead(stream);
-        if (clump) {
+    if (RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr))
+    {
+        if (RpClump* clump = RpClumpStreamRead(stream)) {
             RpClumpForAllAtomics(clump, FindRelatedModelInfoCB, clump);
             RpClumpDestroy(clump);
         }
@@ -347,7 +347,7 @@ bool CFileLoader::FinishLoadClumpFile(RwStream* stream, uint32 modelIndex) {
 bool CFileLoader::LoadClumpFile(RwStream* stream, uint32 modelIndex) {
     return plugin::CallAndReturn<bool, 0x5372D0, RwStream*, uint32>(stream, modelIndex);
 
-        // fails, hook not needed
+    // fails, hook not needed
     auto mi = static_cast<CClumpModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelIndex]);
 
     if (mi->bHasComplexHierarchy) {
@@ -406,9 +406,9 @@ bool CFileLoader::LoadClumpFile(RwStream* stream, uint32 modelIndex) {
 // 0x5B3A30
 void CFileLoader::LoadClumpFile(const char* filename) {
     RwStream* stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, filename);
-    while (RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr)) {
-        RpClump* clump = RpClumpStreamRead(stream);
-        if (clump) {
+    while (RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr))
+    {
+        if (RpClump* clump = RpClumpStreamRead(stream)) {
             const char* nodeName = GetFrameNodeName(RpClumpGetFrame(clump));
             if (auto mi = static_cast<CClumpModelInfo*>(CModelInfo::GetModelInfo(nodeName, nullptr)))
                 mi->SetClump(clump);
@@ -421,9 +421,9 @@ void CFileLoader::LoadClumpFile(const char* filename) {
 
 // 0x5B4040
 int32 CFileLoader::LoadClumpObject(const char* line) {
-    char modelName[24];
-    char texName[24];
-    int32  objId = MODEL_INVALID;
+    int32 objId{ eModelID::MODEL_INVALID };
+    char  modelName[24];
+    char  texName[24];
 
     if (sscanf(line, "%d %s %s", &objId, modelName, texName) != 3)
         return MODEL_INVALID;
@@ -826,10 +826,10 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
         const auto GetDataPtr = [&]() {
             return reinterpret_cast<T>(
                 p
-                + sizeof(CCollisionData)      // Must offset by this (See memory layout above)
+                + sizeof(CCollisionData)                // Must offset by this (See memory layout above)
                 + fileOffset
                 + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
-                - sizeof(FileHeader)          // Offset includes these headers, but we haven't copied them into our memory
+                - sizeof(FileHeader)                    // Offset includes these headers, but we haven't copied them into our memory
                 - sizeof(V3::Header)
             );
         };
@@ -854,10 +854,10 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
 
 // 0x5B3C60
 int32 CFileLoader::LoadObject(const char* line) {
-    int32      modelId;
-    char     modelName[24];
-    char     texName[24];
-    float    fDrawDist;
+    int32  modelId{ eModelID::MODEL_INVALID};
+    char   modelName[24];
+    char   texName[24];
+    float  fDrawDist;
     uint32 nFlags;
 
     auto iNumRead = sscanf(line, "%d %s %s %f %d", &modelId, modelName, texName, &fDrawDist, &nFlags);
@@ -904,27 +904,27 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
     if (!mi)
         return nullptr;
 
-    CEntity* pNewEntity = nullptr;
+    CEntity* newEntity = nullptr;
     if (mi->m_nObjectInfoIndex == -1)
     {
         if (mi->GetModelType() == ModelInfoType::MODEL_INFO_CLUMP && mi->bHasAnimBlend)
-            pNewEntity = new CAnimatedBuilding();
+            newEntity = new CAnimatedBuilding();
         else
-            pNewEntity = new CBuilding();
+            newEntity = new CBuilding();
 
-        pNewEntity->SetModelIndexNoCreate(objInstance->m_nModelId);
+        newEntity->SetModelIndexNoCreate(objInstance->m_nModelId);
         if (mi->bDontCastShadowsOn)
-            pNewEntity->m_bDontCastShadowsOn = true;
+            newEntity->m_bDontCastShadowsOn = true;
 
         if (mi->m_fDrawDistance < 2.0F)
-            pNewEntity->m_bIsVisible = false;
+            newEntity->m_bIsVisible = false;
     }
     else
     {
-        pNewEntity = new CDummyObject();
-        pNewEntity->SetModelIndexNoCreate(objInstance->m_nModelId);
-        if (IsGlassModel(pNewEntity) && !CModelInfo::GetModelInfo(pNewEntity->m_nModelIndex)->IsGlassType2())
-            pNewEntity->m_bIsVisible = false;
+        newEntity = new CDummyObject();
+        newEntity->SetModelIndexNoCreate(objInstance->m_nModelId);
+        if (IsGlassModel(newEntity) && !CModelInfo::GetModelInfo(newEntity->m_nModelIndex)->IsGlassType2())
+            newEntity->m_bIsVisible = false;
     }
 
     if (fabs(objInstance->m_qRotation.imag.x) > 0.05F
@@ -932,61 +932,60 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
         || (objInstance->m_bDontStream && objInstance->m_qRotation.imag.x != 0.0f && objInstance->m_qRotation.imag.y != 0.0f))
     {
         objInstance->m_qRotation.imag = -objInstance->m_qRotation.imag;
-        pNewEntity->AllocateStaticMatrix();
+        newEntity->AllocateStaticMatrix();
 
         auto tempQuat = objInstance->m_qRotation;
-        pNewEntity->GetMatrix().SetRotate(tempQuat);
+        newEntity->GetMatrix().SetRotate(tempQuat);
     }
     else
     {
         const auto fMult = objInstance->m_qRotation.imag.z < 0.0f ? 2.0f : -2.0f;
         const auto fHeading = acos(objInstance->m_qRotation.real) * fMult;
-        pNewEntity->SetHeading(fHeading);
+        newEntity->SetHeading(fHeading);
     }
 
-    pNewEntity->SetPosn(objInstance->m_vecPosition);
+    newEntity->SetPosn(objInstance->m_vecPosition);
 
     if (objInstance->m_bUnderwater)
-        pNewEntity->m_bUnderwater = true;
+        newEntity->m_bUnderwater = true;
     if (objInstance->m_bTunnel)
-        pNewEntity->m_bTunnel = true;
+        newEntity->m_bTunnel = true;
     if (objInstance->m_bTunnelTransition)
-        pNewEntity->m_bTunnelTransition = true;
+        newEntity->m_bTunnelTransition = true;
     if (objInstance->m_bRedundantStream)
-        pNewEntity->m_bUnimportantStream = true;
-    pNewEntity->m_nAreaCode = objInstance->m_nAreaCode;
-    pNewEntity->m_nLodIndex = objInstance->m_nLodInstanceIndex;
+        newEntity->m_bUnimportantStream = true;
+    newEntity->m_nAreaCode = objInstance->m_nAreaCode;
+    newEntity->m_nLodIndex = objInstance->m_nLodInstanceIndex;
 
     if (objInstance->m_nModelId == ModelIndices::MI_TRAINCROSSING)
     {
-        pNewEntity->GetMatrix();
-        pNewEntity->AllocateStaticMatrix();
-        CObject::SetMatrixForTrainCrossing(&pNewEntity->GetMatrix(), PI * 0.43f);
+        newEntity->GetMatrix();
+        newEntity->AllocateStaticMatrix();
+        CObject::SetMatrixForTrainCrossing(&newEntity->GetMatrix(), PI * 0.43f);
     }
 
-    auto* pColModel = mi->GetColModel();
-    if (pColModel)
-    {
-        if (pColModel->m_boundSphere.m_bNotEmpty)
+    auto* cm = mi->GetColModel();
+    if (cm) {
+        if (cm->m_boundSphere.m_bNotEmpty)
         {
-            if (pColModel->m_boundSphere.m_nColSlot)
+            if (cm->m_boundSphere.m_nColSlot)
             {
                 CRect rect;
-                pNewEntity->GetBoundRect(&rect);
-                auto* pColDef = CColStore::ms_pColPool->GetAt(pColModel->m_boundSphere.m_nColSlot);
+                newEntity->GetBoundRect(&rect);
+                auto* pColDef = CColStore::ms_pColPool->GetAt(cm->m_boundSphere.m_nColSlot);
                 pColDef->m_Area.Restrict(rect);
             }
         }
         else
         {
-            pNewEntity->m_bUsesCollision = false;
+            newEntity->m_bUsesCollision = false;
         }
 
-        if (pColModel->GetBoundingBox().m_vecMin.z + pNewEntity->GetPosition().z < 0.0f)
-            pNewEntity->m_bUnderwater = true;
+        if (cm->GetBoundingBox().m_vecMin.z + newEntity->GetPosition().z < 0.0f)
+            newEntity->m_bUnderwater = true;
     }
 
-    return pNewEntity;
+    return newEntity;
 }
 
 // 0x538090
@@ -1013,23 +1012,14 @@ CEntity* CFileLoader::LoadObjectInstance(const char* line) {
 
 // 0x5B4B40
 void CFileLoader::LoadCullZone(const char* line) {
-    CVector center;
-    float unknown;
-    float length;
-    float bottom;
-    float width;
-    float unknown2;
-    float zTop;
-    CVector mirrorDirection;
-    float cm;
+    CVector center, mirrorDirection;
+    float unknown, length, bottom, width, unknown2, zTop, cm;
     int32 flags, flags2 = 0;
 
-    int32 iNumRead = sscanf(
+    if (sscanf(
         line,
         "%f %f %f %f %f %f %f %f %f %d %f %f %f %f",
-        &center.x,
-        &center.y,
-        &center.z,
+        &center.x, &center.y, &center.z,
         &unknown,
         &length,
         &bottom,
@@ -1037,12 +1027,9 @@ void CFileLoader::LoadCullZone(const char* line) {
         &unknown2,
         &zTop,
         &flags,
-        &mirrorDirection.x,
-        &mirrorDirection.y,
-        &mirrorDirection.z,
+        &mirrorDirection.x, &mirrorDirection.y, &mirrorDirection.z,
         &cm
-    );
-    if (iNumRead == 14) {
+    ) == 14) {
         CCullZones::AddMirrorAttributeZone(
             center,
             unknown,
@@ -1061,9 +1048,7 @@ void CFileLoader::LoadCullZone(const char* line) {
     (void)sscanf(
         line,
         "%f %f %f %f %f %f %f %f %f %d %d",
-        &center.x,
-        &center.y,
-        &center.z,
+        &center.x, &center.y, &center.z,
         &unknown,
         &length,
         &bottom,
@@ -1187,18 +1172,18 @@ void CFileLoader::LoadGarage(const char* line) {
         &p2.x, &p2.y, &p2.z,
         &flags,
         &type,
-        &name) == 11
-    ) {
+        &name
+    ) == 11) {
         CGarages::AddOne(p1.x, p1.y, p1.z, frontX, frontY, p2.x, p2.y, p2.z, (eGarageType)type, 0, name, flags);
     }
 }
 
 // 0x5B9030
 void CFileLoader::LoadLevel(const char* levelFileName) {
-    auto pRwCurrTexDict = RwTexDictionaryGetCurrent();
-    if (!pRwCurrTexDict) {
-        pRwCurrTexDict = RwTexDictionaryCreate();
-        RwTexDictionarySetCurrent(pRwCurrTexDict);
+    auto txd = RwTexDictionaryGetCurrent();
+    if (!txd) {
+        txd = RwTexDictionaryCreate();
+        RwTexDictionarySetCurrent(txd);
     }
 
     bool hasLoadedAnyIPLs{};
@@ -1237,7 +1222,7 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             LoadingScreenLoadingFile(path);
 
             const auto txd = LoadTexDictionary(path);
-            RwTexDictionaryForAllTextures(txd, AddTextureCB, pRwCurrTexDict);
+            RwTexDictionaryForAllTextures(txd, AddTextureCB, txd);
             RwTexDictionaryDestroy(txd);
         } else if (LineBeginsWith("IPL")) {
             // Have to call this here, because line buffer's content may change after the `if` below
@@ -1305,7 +1290,7 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
     }
     CFileMgr::CloseFile(f);
 
-    RwTexDictionarySetCurrent(pRwCurrTexDict);
+    RwTexDictionarySetCurrent(txd);
     if (hasLoadedAnyIPLs)
     {
         CIplStore::LoadAllRemainingIpls();
@@ -1327,7 +1312,7 @@ void CFileLoader::LoadOcclusionVolume(const char* line, const char* filename) {
     auto strLen = strlen(filename);
 
     bool bIsInterior = false;
-    if (filename[strLen - 7] == 'i' && filename[strLen - 6] == 'n' && filename[strLen - 5] == 't')
+    if (filename[strLen - 7] == 'i' && filename[strLen - 6] == 'n' && filename[strLen - 5] == 't') // todo:
         bIsInterior = true;
 
     COcclusion::AddOne(fCenterX, fCenterY, fCenterZ, fWidth, fLength, fHeight, fRotX, fRotY, fRotZ, nFlags, bIsInterior);
@@ -1344,10 +1329,10 @@ int32 CFileLoader::LoadPathHeader(const char* line, int32& outPathType) {
 // PEDS
 // 0x5B7420
 int32 CFileLoader::LoadPedObject(const char* line) {
-    eModelID modelId{eModelID::MODEL_INVALID};
-    int32    radio1{}, radio2{};
-    uint32   flags{};
-    int32    carsCanDriveMask{};
+    auto   modelId{ eModelID::MODEL_INVALID };
+    int32  radio1{}, radio2{};
+    uint32 flags{};
+    int32  carsCanDriveMask{};
 
     // TODO: Should probably increase the size of these to avoid possible buffer overflow
     char animFile[12]{};
@@ -1620,7 +1605,7 @@ void CFileLoader::LoadTimeCyclesModifier(const char* line) {
 
 // 0x5B3DE0
 int32 CFileLoader::LoadTimeObject(const char* line) {
-    int32 modelId{ eModelID::MODEL_INVALID };
+    auto  modelId{ eModelID::MODEL_INVALID };
     char  modelName[24];
     char  texName[24];
     float drawDistance[3];
@@ -1668,7 +1653,7 @@ int32 CFileLoader::LoadTimeObject(const char* line) {
 
 // 0x5B6F30
 int32 CFileLoader::LoadVehicleObject(const char* line) {
-    int32 modelId{ eModelID::MODEL_INVALID };
+    auto  modelId{ eModelID::MODEL_INVALID };
     char  modelName[24]{};
     char  texName[24]{};
     char  type[8]{};
@@ -1700,7 +1685,7 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
         &wheelUpgradeCls
     );
 
-    uint16_t nTxdSlot = CTxdStore::FindTxdSlot("vehicle");
+    uint16 nTxdSlot = CTxdStore::FindTxdSlot("vehicle");
     if (nTxdSlot == -1)
         nTxdSlot = CTxdStore::AddTxdSlot("vehicle");
 
@@ -1723,18 +1708,18 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
 
     const auto GetVehicleType = [&] {
         constexpr struct { std::string_view name; eVehicleType type; } mapping[] = {
-            {"car",     eVehicleType::VEHICLE_AUTOMOBILE},
-            {"mtruck",  eVehicleType::VEHICLE_MTRUCK},
-            {"quad",    eVehicleType::VEHICLE_QUAD},
-            {"heli",    eVehicleType::VEHICLE_HELI},
-            {"plane",   eVehicleType::VEHICLE_PLANE},
-            {"boat",    eVehicleType::VEHICLE_BOAT},
-            {"train",   eVehicleType::VEHICLE_TRAIN},
-            {"f_heli",  eVehicleType::VEHICLE_FHELI}, // NOTE: Originally this mapped to HELI, but since f_heli isn't used anywhere in the data files we've corrected the typo.
-            {"f_plane", eVehicleType::VEHICLE_FPLANE},
-            {"bike",    eVehicleType::VEHICLE_BIKE},
-            {"bmx",     eVehicleType::VEHICLE_BMX},
-            {"trailer", eVehicleType::VEHICLE_TRAILER},
+            { "car",     eVehicleType::VEHICLE_AUTOMOBILE },
+            { "mtruck",  eVehicleType::VEHICLE_MTRUCK     },
+            { "quad",    eVehicleType::VEHICLE_QUAD       },
+            { "heli",    eVehicleType::VEHICLE_HELI       },
+            { "plane",   eVehicleType::VEHICLE_PLANE      },
+            { "boat",    eVehicleType::VEHICLE_BOAT       },
+            { "train",   eVehicleType::VEHICLE_TRAIN      },
+            { "f_heli",  eVehicleType::VEHICLE_FHELI      }, // NOTE: Originally this mapped to HELI, but since f_heli isn't used anywhere in the data files we've corrected the typo.
+            { "f_plane", eVehicleType::VEHICLE_FPLANE     },
+            { "bike",    eVehicleType::VEHICLE_BIKE       },
+            { "bmx",     eVehicleType::VEHICLE_BMX        },
+            { "trailer", eVehicleType::VEHICLE_TRAILER    },
         };
 
         for (const auto& pair : mapping) {
@@ -1777,19 +1762,19 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
 
     const auto GetVehicleClass = [&]{
         constexpr struct { std::string_view name; eVehicleClass cls; } mapping[] = {
-            {"normal",      eVehicleClass::VEHICLE_CLASS_NORMAL},
-            {"poorfamily",  eVehicleClass::VEHICLE_CLASS_POORFAMILY},
-            {"richfamily",  eVehicleClass::VEHICLE_CLASS_RICHFAMILY},
-            {"executive",   eVehicleClass::VEHICLE_CLASS_EXECUTIVE},
-            {"worker",      eVehicleClass::VEHICLE_CLASS_WORKER},
-            {"big",         eVehicleClass::VEHICLE_CLASS_BIG},
-            {"taxi",        eVehicleClass::VEHICLE_CLASS_TAXI},
-            {"moped",       eVehicleClass::VEHICLE_CLASS_MOPED},
-            {"motorbike",   eVehicleClass::VEHICLE_CLASS_MOTORBIKE},
-            {"leisureboat", eVehicleClass::VEHICLE_CLASS_LEISUREBOAT},
-            {"workerboat",  eVehicleClass::VEHICLE_CLASS_WORKERBOAT},
-            {"bicycle",     eVehicleClass::VEHICLE_CLASS_BICYCLE},
-            {"ignore",      eVehicleClass::VEHICLE_CLASS_IGNORE},
+            { "normal",      eVehicleClass::VEHICLE_CLASS_NORMAL      },
+            { "poorfamily",  eVehicleClass::VEHICLE_CLASS_POORFAMILY  },
+            { "richfamily",  eVehicleClass::VEHICLE_CLASS_RICHFAMILY  },
+            { "executive",   eVehicleClass::VEHICLE_CLASS_EXECUTIVE   },
+            { "worker",      eVehicleClass::VEHICLE_CLASS_WORKER      },
+            { "big",         eVehicleClass::VEHICLE_CLASS_BIG         },
+            { "taxi",        eVehicleClass::VEHICLE_CLASS_TAXI        },
+            { "moped",       eVehicleClass::VEHICLE_CLASS_MOPED       },
+            { "motorbike",   eVehicleClass::VEHICLE_CLASS_MOTORBIKE   },
+            { "leisureboat", eVehicleClass::VEHICLE_CLASS_LEISUREBOAT },
+            { "workerboat",  eVehicleClass::VEHICLE_CLASS_WORKERBOAT  },
+            { "bicycle",     eVehicleClass::VEHICLE_CLASS_BICYCLE     },
+            { "ignore",      eVehicleClass::VEHICLE_CLASS_IGNORE      },
         };
 
         for (const auto& pair : mapping) {
@@ -1812,7 +1797,7 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
 
 // 0x5B3FB0
 int32 CFileLoader::LoadWeaponObject(const char* line) {
-    int32 objId{ eModelID::MODEL_INVALID };
+    auto objId{ eModelID::MODEL_INVALID };
     char modelName[24];
     char texName[24];
     char animName[16];
@@ -1831,11 +1816,11 @@ int32 CFileLoader::LoadWeaponObject(const char* line) {
 
 // 0x5B4AB0
 void CFileLoader::LoadZone(const char* line) {
-    char name[24];
-    signed int type;
+    char  name[24];
+    int32 type;
     CVector min, max;
     int32 island;
-    char zoneName[12];
+    char  zoneName[12];
 
     auto iNumRead = sscanf(line, "%s %d %f %f %f %f %f %f %d %s", name, &type, &min.x, &min.y, &min.z, &max.x, &max.y, &max.z, &island, zoneName);
     if (iNumRead == 10)
@@ -1869,7 +1854,7 @@ void CFileLoader::LoadScene(const char* filename) {
         AUZO = 14,
     };
 
-    auto sectionId{SectionID::NONE};
+    auto sectionId{ SectionID::NONE };
 
     int32 nPathEntryIndex{ -1 }, pathHeaderId{};
     int32 pathType{};
@@ -1894,8 +1879,7 @@ void CFileLoader::LoadScene(const char* filename) {
 
             switch (sectionId) {
             case SectionID::INST: {
-                CEntity* pObjInstance = LoadObjectInstance(line);
-                gCurrIplInstances[gCurrIplInstancesCount++] = pObjInstance;
+                gCurrIplInstances[gCurrIplInstancesCount++] = LoadObjectInstance(line);
                 break;
             }
             case SectionID::ZONE:
@@ -1961,19 +1945,19 @@ void CFileLoader::LoadScene(const char* filename) {
         } else {
             const auto FindSectionID = [&] {
                 const struct { std::string_view name; SectionID id; } mapping[]{
-                    {"path", SectionID::PATH},
-                    {"inst", SectionID::INST},
-                    {"mult", SectionID::MULT},
-                    {"zone", SectionID::ZONE},
-                    {"cull", SectionID::CULL},
-                    {"occl", SectionID::OCCL},
-                    {"grge", SectionID::GRGE},
-                    {"enex", SectionID::ENEX},
-                    {"pick", SectionID::PICK},
-                    {"cars", SectionID::CARS},
-                    {"jump", SectionID::JUMP},
-                    {"tcyc", SectionID::TCYC},
-                    {"auzo", SectionID::AUZO},
+                    { "path", SectionID::PATH },
+                    { "inst", SectionID::INST },
+                    { "mult", SectionID::MULT },
+                    { "zone", SectionID::ZONE },
+                    { "cull", SectionID::CULL },
+                    { "occl", SectionID::OCCL },
+                    { "grge", SectionID::GRGE },
+                    { "enex", SectionID::ENEX },
+                    { "pick", SectionID::PICK },
+                    { "cars", SectionID::CARS },
+                    { "jump", SectionID::JUMP },
+                    { "tcyc", SectionID::TCYC },
+                    { "auzo", SectionID::AUZO },
                 };
 
                 for (const auto& [itname, id] : mapping) {
@@ -2105,16 +2089,16 @@ void CFileLoader::LoadObjectTypes(const char* filename) {
 
             const auto FindSectionID = [&] {
                 const struct { std::string_view name; SectionID id; } mapping[]{
-                    {"objs", SectionID::OBJS},
-                    {"tobj", SectionID::TOBJ},
-                    {"weap", SectionID::WEAP},
-                    {"hier", SectionID::HIER},
-                    {"anim", SectionID::ANIM},
-                    {"cars", SectionID::CARS},
-                    {"peds", SectionID::PEDS},
-                    {"path", SectionID::PATH},
-                    {"2dfx", SectionID::TDFX},
-                    {"txdp", SectionID::TXDP},
+                    { "objs", SectionID::OBJS },
+                    { "tobj", SectionID::TOBJ },
+                    { "weap", SectionID::WEAP },
+                    { "hier", SectionID::HIER },
+                    { "anim", SectionID::ANIM },
+                    { "cars", SectionID::CARS },
+                    { "peds", SectionID::PEDS },
+                    { "path", SectionID::PATH },
+                    { "2dfx", SectionID::TDFX },
+                    { "txdp", SectionID::TXDP },
                 };
 
                 for (const auto& [name, id] : mapping) {
@@ -2140,9 +2124,9 @@ void CFileLoader::ReloadObjectTypes(const char* arg1) {
 // unused
 // 0x5B6E10
 void CFileLoader::ReloadPaths(const char* filename) {
-    int32  objModelIndex;
-    int32  id;
-    char unused[4];
+    int32 objModelIndex;
+    int32 id;
+    char  unused[4];
 
     bool pathAllocated = false;
     int32 pathEntryIndex = -1;
