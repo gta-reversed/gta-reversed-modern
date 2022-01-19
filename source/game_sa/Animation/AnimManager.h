@@ -41,6 +41,7 @@ public:
     static CAnimBlendHierarchy* GetAnimation(const char* animName, CAnimBlock const* ifp);
     static char* GetAnimGroupName(AssocGroupId groupId);
     static char* GetAnimBlockName(AssocGroupId groupId);
+    static AssocGroupId GetAnimationGroupId(const char* name);
     static CAnimBlendStaticAssociation* GetAnimAssociation(AssocGroupId groupId, AnimationId animId);
     static CAnimBlendStaticAssociation* GetAnimAssociation(AssocGroupId groupId, const char* arg2);
     static int32 GetNumRefsToAnimBlock(int32 index);
