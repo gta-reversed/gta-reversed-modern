@@ -6,41 +6,61 @@
 */
 
 #include "StdInc.h"
-
-CWeaponInfo* aWeaponInfo = (CWeaponInfo*)0xC8AAB8;
+#include "WeaponInfo.h"
 
 void CWeaponInfo::InjectHooks() {
+    // Constructors (1x)
+    // ReversibleHooks::Install("CWeaponInfo", "CWeaponInfo", 0x743C30, &CWeaponInfo::Constructor);
+
+    // Static functions (7x)
+    // ReversibleHooks::Install("CWeaponInfo", "FindWeaponFireType", 0x5BCF30, &CWeaponInfo::FindWeaponFireType);
+    // ReversibleHooks::Install("CWeaponInfo", "LoadWeaponData", 0x5BE670, &CWeaponInfo::LoadWeaponData);
+    // ReversibleHooks::Install("CWeaponInfo", "Initialise", 0x5BF750, &CWeaponInfo::Initialise);
+    // ReversibleHooks::Install("CWeaponInfo", "Shutdown", 0x743C50, &CWeaponInfo::Shutdown);
+    // ReversibleHooks::Install("CWeaponInfo", "GetWeaponInfo", 0x743C60, &CWeaponInfo::GetWeaponInfo);
     ReversibleHooks::Install("CWeaponInfo", "GetSkillStatIndex", 0x743CD0, &CWeaponInfo::GetSkillStatIndex);
+
+    // Methods (4x)
+    // ReversibleHooks::Install("CWeaponInfo", "GetCrouchReloadAnimationID", 0x685700, &CWeaponInfo::GetCrouchReloadAnimationID);
+    // ReversibleHooks::Install("CWeaponInfo", "FindWeaponType", 0x743D10, &CWeaponInfo::FindWeaponType);
+    // ReversibleHooks::Install("CWeaponInfo", "GetTargetHeadRange", 0x743D50, &CWeaponInfo::GetTargetHeadRange);
+    // ReversibleHooks::Install("CWeaponInfo", "GetWeaponReloadTime", 0x743D70, &CWeaponInfo::GetWeaponReloadTime);
 }
 
-CWeaponInfo::CWeaponInfo() {
-    ((void(__thiscall*)(CWeaponInfo*))0x743C30)(this);
+// 0x743C30
+CWeaponInfo* CWeaponInfo::Constructor() {
+    this->CWeaponInfo::CWeaponInfo();
+    return this;
 }
 
-CWeaponInfo::~CWeaponInfo() {
-    ((void(__thiscall*)(CWeaponInfo*))0x743C40)(this);
+// Static functions
+// 0x5BCF30
+eWeaponFire CWeaponInfo::FindWeaponFireType(const char* name) {
+    return plugin::CallAndReturn<eWeaponFire, 0x5BCF30>(name);
 }
 
-void CWeaponInfo::Initialise() {
-    ((void(__cdecl*)())0x5BF750)();
-}
-
-void CWeaponInfo::Shutdown() {
-    ((void(__cdecl*)())0x743C50)();
-}
-
-AnimationId CWeaponInfo::GetCrouchReloadAnimationID() {
-    return plugin::CallMethodAndReturn<AnimationId, 0x685700, CWeaponInfo*>(this);
-}
-
-char** CWeaponInfo::ms_aWeaponNames = (char**)0x8D6150;
-
+// 0x5BE670
 void CWeaponInfo::LoadWeaponData() {
-    ((void(__cdecl*)())0x5BE670)();
+    return plugin::CallAndReturn<void, 0x5BE670>();
 }
 
-// 0x00743CD0
-int32 CWeaponInfo::GetSkillStatIndex(int32 weaponType) {
+// 0x5BF750
+void CWeaponInfo::Initialise() {
+    return plugin::CallAndReturn<void, 0x5BF750>();
+}
+
+// 0x743C50
+void CWeaponInfo::Shutdown() {
+    plugin::Call<0x743C50>();
+}
+
+// 0x743C60
+CWeaponInfo* CWeaponInfo::GetWeaponInfo(eWeaponType weaponID, eWeaponSkill skill) {
+    return plugin::CallAndReturn<CWeaponInfo*, 0x743C60, eWeaponType, eWeaponSkill>(weaponID, skill);
+}
+
+// 0x743CD0
+int32 CWeaponInfo::GetSkillStatIndex(eWeaponType weaponType) {
     if (weaponType < WEAPON_PISTOL || weaponType > WEAPON_TEC9)
         return -1;
 
@@ -56,14 +76,23 @@ int32 CWeaponInfo::GetSkillStatIndex(int32 weaponType) {
     return weaponType + STAT_PISTOL_SKILL;
 }
 
-CWeaponInfo* CWeaponInfo::GetWeaponInfo(eWeaponType weaponType, eWeaponSkill skill) {
-    return ((CWeaponInfo * (__cdecl*)(eWeaponType, eWeaponSkill))0x743C60)(weaponType, skill);
+// 0x743D10
+eWeaponType CWeaponInfo::FindWeaponType(const char* type) {
+    return plugin::CallAndReturn<eWeaponType, 0x743D10>(type);
 }
 
-eWeaponType CWeaponInfo::FindWeaponType(char* name) {
-    return ((eWeaponType(__cdecl*)(char*))0x743D10)(name);
+// Methods
+// 0x685700
+AnimationId CWeaponInfo::GetCrouchReloadAnimationID() {
+    return plugin::CallMethodAndReturn<AnimationId, 0x685700, CWeaponInfo*>(this);
 }
 
-eWeaponFire CWeaponInfo::FindWeaponFireType(char* name) {
-    return ((eWeaponFire(__cdecl*)(char*))0x5BCF30)(name);
+// 0x743D50
+float CWeaponInfo::GetTargetHeadRange() {
+    return plugin::CallMethodAndReturn<float, 0x743D50, CWeaponInfo*>(this);
+}
+
+// 0x743D70
+int32 CWeaponInfo::GetWeaponReloadTime() {
+    return plugin::CallMethodAndReturn<int32, 0x743D70, CWeaponInfo*>(this);
 }
