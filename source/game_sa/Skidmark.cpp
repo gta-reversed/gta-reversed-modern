@@ -168,9 +168,9 @@ void CSkidmark::RegisterNewPart(CVector posn, CVector2D dir, float length, bool*
                 dirToPrevPart.Normalise();
                 dir.Normalise();
 
-                const float absSqMag = 1.0f + fabs(dirToPrevPart.x * dir.x + dirToPrevPart.y * dir.y);
-                m_partDirX[m_nNumParts] = absSqMag * dirToPrevPart.x * length / 2.0f;
-                m_partDirY[m_nNumParts] = absSqMag * dirToPrevPart.y * length / 2.0f;
+                const float dot = 1.0f + DotProduct2D(dirToPrevPart, dir);
+                m_partDirX[m_nNumParts] = dot * dirToPrevPart.x * length / 2.0f;
+                m_partDirY[m_nNumParts] = dot * dirToPrevPart.y * length / 2.0f;
 
                 if (m_nNumParts == 1) {
                     m_partDirX[0] = m_partDirX[1];
