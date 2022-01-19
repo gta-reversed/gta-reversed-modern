@@ -44,9 +44,6 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadZone", 0x5B4AB0, &CFileLoader::LoadZone);
     Install("CFileLoader", "FindRelatedModelInfoCB", 0x5B3930, &CFileLoader::FindRelatedModelInfoCB);
     Install("CFileLoader", "SetRelatedModelInfoCB", 0x537150, &CFileLoader::SetRelatedModelInfoCB);
-
-    // Newly reversed:
-
     Install("CFileLoader", "LoadCollisionFile_Buffer", 0x538440, static_cast<bool(*)(uint8*, uint32, uint8)>(&CFileLoader::LoadCollisionFile));
     Install("CFileLoader", "LoadCollisionFile_File", 0x5B4E60, static_cast<void(*)(const char*, uint8)>(&CFileLoader::LoadCollisionFile));
     Install("CFileLoader", "LoadCollisionFileFirstTime", 0x5B5000, &CFileLoader::LoadCollisionFileFirstTime);
@@ -54,10 +51,7 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadCollisionModelVer2", 0x537EE0, &CFileLoader::LoadCollisionModelVer2);
     Install("CFileLoader", "LoadCollisionModelVer3", 0x537CE0, &CFileLoader::LoadCollisionModelVer3);
     Install("CFileLoader", "LoadCollisionModelVer4", 0x537AE0, &CFileLoader::LoadCollisionModelVer4);
-
-    // For whatever reason unhooking this leads to a crash. (Probably some ABI issue)
     Install("CFileLoader", "LoadAnimatedClumpObject", 0x5B40C0, &CFileLoader::LoadAnimatedClumpObject); 
-
     Install("CFileLoader", "LoadLine_File", 0x536F80, static_cast<char* (*)(FILESTREAM)>(&CFileLoader::LoadLine));
     Install("CFileLoader", "LoadLine_Bufer", 0x536FE0, static_cast<char* (*)(char*&, int32&)>(&CFileLoader::LoadLine));
     Install("CFileLoader", "LoadCarPathNode", 0x5B4380, &CFileLoader::LoadCarPathNode);
@@ -70,6 +64,7 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadLevel", 0x5B9030, &CFileLoader::LoadLevel);
     Install("CFileLoader", "LoadScene", 0x5B8700, &CFileLoader::LoadScene);
     Install("CFileLoader", "LoadObjectTypes", 0x5B8400, &CFileLoader::LoadObjectTypes);
+    // Install("CFileLoader", "LinkLods", 0x5B51E0, &LinkLods);
 }
 
 // copy textures from dictionary to baseDictionary
@@ -153,7 +148,7 @@ bool CFileLoader::LoadAtomicFile(RwStream* stream, uint32 modelId) {
         RpClumpDestroy(pReadClump);
     }
 
-    if (!mi->m_pRwObject)
+    if (!mi->m_pRwObject) // todo: missing guard here by R* (mi && !mi->m_pRwObject)
         return false;
 
     if (bUseCommonVehicleTexDictionary)
@@ -303,6 +298,7 @@ void CFileLoader::LoadCarGenerator(const char* line, int32 iplId) {
 void CFileLoader::LoadCarPathNode(const char* line, int32 objModelIndex, int32 pathEntryIndex, bool a4) {
     // Loads some data from the line, and calls a function which does nothing, so the whole function.. does nothing.
     // Leftover from VC
+    // See code in re3
 }
 
 // 0x5373F0
@@ -756,7 +752,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
 
     // Set given field in `CCollisionData` based on offset in file.
     // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
-    const auto SetColDataPtr = [&]<typename T>(T & colDataPtr, auto fileOffset) {
+    const auto SetColDataPtr = [&]<typename T>(T& colDataPtr, auto fileOffset) {
         // Return pointer for offset in allocated memory (relative to where it was in the file)
         const auto GetDataPtr = [&]() {
             return reinterpret_cast<T>(
@@ -825,7 +821,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
 
     // Set given field in `CCollisionData` based on offset in file.
     // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
-    const auto SetColDataPtr = [&]<typename T>(T & colDataPtr, auto fileOffset) {
+    const auto SetColDataPtr = [&]<typename T>(T& colDataPtr, auto fileOffset) {
         // Return pointer for offset in allocated memory (relative to where it was in the file)
         const auto GetDataPtr = [&]() {
             return reinterpret_cast<T>(
