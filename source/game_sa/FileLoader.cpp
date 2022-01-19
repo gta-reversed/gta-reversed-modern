@@ -27,7 +27,8 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadCarGenerator_1", 0x5B4740, static_cast<void(*)(const char*, int32)>(&CFileLoader::LoadCarGenerator));
     Install("CFileLoader", "StartLoadClumpFile", 0x5373F0, &CFileLoader::StartLoadClumpFile);
     Install("CFileLoader", "FinishLoadClumpFile", 0x537450, &CFileLoader::FinishLoadClumpFile);
-    Install("CFileLoader", "LoadClumpFile", 0x5B3A30, static_cast<void(*)(const char*)>(&CFileLoader::LoadClumpFile));
+    Install("CFileLoader", "LoadClumpFile", 0x5B3A30, static_cast<void (*)(const char*)>(&CFileLoader::LoadClumpFile));
+    Install("CFileLoader", "LoadClumpFile_1", 0x5372D0, static_cast<bool (*)(RwStream*, uint32)>(&CFileLoader::LoadClumpFile));
     Install("CFileLoader", "LoadClumpObject", 0x5B4040, &CFileLoader::LoadClumpObject);
     Install("CFileLoader", "LoadCullZone", 0x5B4B40, &CFileLoader::LoadCullZone);
     Install("CFileLoader", "LoadObject", 0x5B3C60, &CFileLoader::LoadObject);
@@ -325,7 +326,7 @@ bool CFileLoader::StartLoadClumpFile(RwStream* stream, uint32 modelIndex) {
 
 // 0x537450
 bool CFileLoader::FinishLoadClumpFile(RwStream* stream, uint32 modelIndex) {
-    auto mi = static_cast<CClumpModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelIndex]);
+    auto mi = static_cast<CClumpModelInfo*>(CModelInfo::GetModelInfo(modelIndex));
     bool isVehicle = mi->GetModelType() == MODEL_INFO_VEHICLE;
 
     if (isVehicle)
@@ -345,10 +346,7 @@ bool CFileLoader::FinishLoadClumpFile(RwStream* stream, uint32 modelIndex) {
 
 // 0x5372D0
 bool CFileLoader::LoadClumpFile(RwStream* stream, uint32 modelIndex) {
-    return plugin::CallAndReturn<bool, 0x5372D0, RwStream*, uint32>(stream, modelIndex);
-
-    // fails, hook not needed
-    auto mi = static_cast<CClumpModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelIndex]);
+    auto mi = static_cast<CClumpModelInfo*>(CModelInfo::GetModelInfo(modelIndex));
 
     if (mi->bHasComplexHierarchy) {
         RpClump* parentClump = RpClumpCreate();
@@ -637,10 +635,12 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     }
 
     cd->bHasShadowInfo = false;
-    cd->m_nNumShadowTriangles = 0;
+
     cd->m_nNumShadowVertices = 0;
-    cd->m_pShadowTriangles = nullptr;
     cd->m_pShadowVertices = nullptr;
+
+    cd->m_nNumShadowTriangles = 0;
+    cd->m_pShadowTriangles = nullptr;
 
     if (cd->m_nNumSpheres || cd->m_nNumBoxes || cd->m_nNumTriangles)
         cm.m_boundSphere.m_bNotEmpty = true; // Doesn't make a whole lot of sense, but kay
@@ -690,7 +690,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
         // Return pointer for offset in allocated memory (relative to where it was in the file)
         const auto GetDataPtr = [&]() {
             return reinterpret_cast<T>(
-                  p
+                p
                 + sizeof(CCollisionData)                // Must offset by this (See memory layout above)
                 + fileOffset
                 + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
@@ -708,9 +708,13 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
     SetColDataPtr(cd->m_pTriangles, h.offFaces);
 
     cd->m_pTrianglePlanes = nullptr;
-    cd->m_pShadowVertices = nullptr;
-    cd->m_pShadowTriangles = nullptr;
+
     cd->m_nNumShadowVertices = 0;
+    cd->m_pShadowVertices = nullptr;
+
+    cd->m_nNumShadowTriangles = 0;
+    cd->m_pShadowTriangles = nullptr;
+
     cm.m_boundSphere.m_bIsSingleColDataAlloc = true;
 }
 
@@ -757,10 +761,10 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
         const auto GetDataPtr = [&]() {
             return reinterpret_cast<T>(
                 p
-                + sizeof(CCollisionData)      // Must offset by this (See memory layout above)
+                + sizeof(CCollisionData)                // Must offset by this (See memory layout above)
                 + fileOffset
                 + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
-                - sizeof(FileHeader)          // Offset includes these headers, but we haven't copied them into our memory
+                - sizeof(FileHeader)                    // Offset includes these headers, but we haven't copied them into our memory
                 - sizeof(V3::Header)
             );
         };
@@ -830,7 +834,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
                 + fileOffset
                 + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
                 - sizeof(FileHeader)                    // Offset includes these headers, but we haven't copied them into our memory
-                - sizeof(V3::Header)
+                - sizeof(V4::Header)
             );
         };
         colDataPtr = fileOffset ? GetDataPtr() : nullptr;
@@ -842,7 +846,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
     SetColDataPtr(cd->m_pVertices, h.offVerts);
     SetColDataPtr(cd->m_pTriangles, h.offFaces);
     SetColDataPtr(cd->m_pShadowVertices, h.offShdwVerts);
-    SetColDataPtr(cd->m_pShadowTriangles, h.offShdwVerts);
+    SetColDataPtr(cd->m_pShadowTriangles, h.offShdwFaces);
 
     cd->bHasShadowInfo = h.offShdwFaces && h.offShdwVerts && h.nShdwFaces;
     cd->m_nNumShadowVertices = cd->bHasShadowInfo ? h.GetNoOfShdwVerts(cd) : 0;
@@ -895,7 +899,45 @@ int32 CFileLoader::LoadObject(const char* line) {
 
 // 0x5B7670
 void CFileLoader::Load2dEffect(const char* line) {
-    plugin::Call<0x5B7670, const char*>(line);
+    return plugin::Call<0x5B7670, const char*>(line);
+
+    // todo:
+    auto modelId{ eModelID::MODEL_INVALID };
+    CVector pos;
+    int32 type;
+    (void*)sscanf(line, "%d %f %f %f %d", &modelId, &pos.x, &pos.y, &pos.z, &type);
+
+    CTxdStore::PushCurrentTxd();
+    CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("particle"));
+
+    auto& effect = CModelInfo::Get2dEffectStore()->AddItem();
+    CModelInfo::GetModelInfo(modelId)->Add2dEffect(&effect);
+    effect.m_vecPosn = pos;
+    effect.m_nType = *reinterpret_cast<e2dEffectType*>(type);
+
+    switch (type) {
+    case EFFECT_LIGHT:
+        break;
+    case EFFECT_PARTICLE:
+        break;
+    case EFFECT_ATTRACTOR:
+        break;
+    case EFFECT_FURNITURE:
+        break;
+    case EFFECT_ENEX:
+        break;
+    case EFFECT_ROADSIGN:
+        break;
+    case EFFECT_TRIGGER_POINT:
+        break;
+    case EFFECT_COVER_POINT:
+        break;
+    case EFFECT_ESCALATOR:
+        break;
+    default:
+        break;
+    }
+    CTxdStore::PopCurrentTxd();
 }
 
 // 0x538090
@@ -1776,8 +1818,8 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
             }
         }
 
-        // NOTSA - Something went really wrong
-        assert(0);
+        assert(0);             // NOTSA - Something went really wrong
+        return VEHICLE_IGNORE; // fix warning
     };
 
     mi->m_nVehicleType = GetVehicleType();
@@ -2228,12 +2270,12 @@ RpAtomic* CFileLoader::FindRelatedModelInfoCB(RpAtomic* atomic, void* data) {
     int32 modelId = MODEL_INVALID;
     CBaseModelInfo* mi = CModelInfo::GetModelInfo(name, &modelId);
     if (mi) {
-        CAtomicModelInfo* mi = mi->AsAtomicModelInfoPtr();
+        CAtomicModelInfo* ami = mi->AsAtomicModelInfoPtr();
         CVisibilityPlugins::SetAtomicRenderCallback(atomic, nullptr);
         if (bDamage) {
-            mi->AsDamageAtomicModelInfoPtr()->SetDamagedAtomic(atomic);
+            ami->AsDamageAtomicModelInfoPtr()->SetDamagedAtomic(atomic);
         } else {
-            mi->SetAtomic(atomic);
+            ami->SetAtomic(atomic);
         }
         RpClumpRemoveAtomic(static_cast<RpClump*>(data), atomic);
         RwFrame* pRwFrame = RwFrameCreate();

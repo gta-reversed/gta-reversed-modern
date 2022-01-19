@@ -170,7 +170,7 @@ namespace V3 {
         uint32 nShdwFaces{};
         uint32 offShdwVerts{}, offShdwFaces{};
 
-        // Basically just find the highest shadow vertex index
+        // Basically just find the highest shadow vertex index, 0x537510
         uint32 GetNoOfShdwVerts(CCollisionData* cd) {
             if (!nShdwFaces)
                 return 0;
