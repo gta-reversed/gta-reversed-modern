@@ -78,8 +78,11 @@ CRGBA CSkidmark::GetColor() const {
 
     const auto GetAlpha = [this]() -> uint8 {
         if (m_nState == eSkidmarkState::JUST_UPDATED || CTimer::GetTimeInMS() < m_fadeBeginMs)
-            return (uint8)255;
-        return (255 * (m_disappearAtMs - CTimer::GetTimeInMS())) / (m_disappearAtMs - m_fadeBeginMs);
+            return 255u;
+
+        // Here they wanted to be very smart, and avoided doing any float ops.
+        // That's why they first multiply the dividend by 255 then divide.
+        return (255u * (m_disappearAtMs - CTimer::GetTimeInMS())) / (m_disappearAtMs - m_fadeBeginMs);
     };
 
     // TODO: This balance param stuff is probably inlined
