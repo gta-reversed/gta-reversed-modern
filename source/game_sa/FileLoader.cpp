@@ -880,13 +880,13 @@ int32 CFileLoader::LoadObject(const char* line) {
         switch (objType)
         {
         case 1:
-            sscanf(line, "%d %s %s %d %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &nFlags);
+            (void)sscanf(line, "%d %s %s %d %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &nFlags);
             break;
         case 2:
-            sscanf(line, "%d %s %s %d %f %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &fDrawDist2_unused, &nFlags);
+            (void)sscanf(line, "%d %s %s %d %f %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &fDrawDist2_unused, &nFlags);
             break;
         case 3:
-            sscanf(line, "%d %s %s %d %f %f %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &fDrawDist2_unused, &fDrawDist3_unused, &nFlags);
+            (void)sscanf(line, "%d %s %s %d %f %f %f %d", &modelId, modelName, texName, &objType, &fDrawDist, &fDrawDist2_unused, &fDrawDist3_unused, &nFlags);
             break;
         }
     }
@@ -1005,7 +1005,7 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
 CEntity* CFileLoader::LoadObjectInstance(const char* line) {
     char modelName[24];
     CFileObjectInstance instance;
-    sscanf(
+    (void)sscanf(
         line,
         "%d %s %d %f %f %f %f %f %f %f %d",
         &instance.m_nModelId,
@@ -1070,7 +1070,7 @@ void CFileLoader::LoadCullZone(const char* line) {
         return;
     }
 
-    sscanf(
+    (void)sscanf(
         line,
         "%f %f %f %f %f %f %f %f %f %d %d",
         &center.x,
@@ -1234,7 +1234,6 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             // but the line is just a static buffer (ms_line) which is modified each time `LoadLine` is called.
             // So if any of the invoked functions call `LoadLine` the path will no longer be valid
             // So in order to prevent this nasty bug we're just going to copy it each time.
-
             strcpy_s(pathBuffer, l + id.size() + 1);
             return pathBuffer;
         };
@@ -1252,7 +1251,6 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             const auto txd = LoadTexDictionary(path);
             RwTexDictionaryForAllTextures(txd, AddTextureCB, pRwCurrTexDict);
             RwTexDictionaryDestroy(txd);
-
         } else if (LineBeginsWith("IPL")) {
             // Have to call this here, because line buffer's content may change after the `if` below
             const auto path = ExtractPathFor("IPL");
@@ -1336,7 +1334,7 @@ void CFileLoader::LoadOcclusionVolume(const char* line, const char* filename) {
     uint32 nFlags = 0;
     float fCenterX, fCenterY, fBottomZ, fWidth, fLength, fHeight, fRotZ;
 
-    sscanf(line, "%f %f %f %f %f %f %f %f %f %d ", &fCenterX, &fCenterY, &fBottomZ, &fWidth, &fLength, &fHeight, &fRotX, &fRotY, &fRotZ, &nFlags);
+    (void)sscanf(line, "%f %f %f %f %f %f %f %f %f %d ", &fCenterX, &fCenterY, &fBottomZ, &fWidth, &fLength, &fHeight, &fRotX, &fRotY, &fRotZ, &nFlags);
     auto fCenterZ = fHeight * 0.5F + fBottomZ;
     auto strLen = strlen(filename);
 
@@ -1351,7 +1349,6 @@ void CFileLoader::LoadOcclusionVolume(const char* line, const char* filename) {
 int32 CFileLoader::LoadPathHeader(const char* line, int32& outPathType) {
     int32 id;
     char modelName[32];
-
     (void)sscanf(line, "%d %d %s", &outPathType, &id, modelName);
     return id;
 }
