@@ -1733,7 +1733,33 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
     // This isn't exactly R* did it, but that code is hot garbage anyways
     // They've used strcmp all the way, and.. It's bad.
 
-    mi->SetVehicleType(type);
+    const auto GetVehicleType = [&] {
+        constexpr struct { std::string_view name; eVehicleType type; } mapping[] = {
+            {"car",     eVehicleType::VEHICLE_AUTOMOBILE},
+            {"mtruck",  eVehicleType::VEHICLE_MTRUCK},
+            {"quad",    eVehicleType::VEHICLE_QUAD},
+            {"heli",    eVehicleType::VEHICLE_HELI},
+            {"plane",   eVehicleType::VEHICLE_PLANE},
+            {"boat",    eVehicleType::VEHICLE_BOAT},
+            {"train",   eVehicleType::VEHICLE_TRAIN},
+            {"f_heli",  eVehicleType::VEHICLE_FHELI}, // NOTE: Originally this mapped to HELI, but since f_heli isn't used anywhere in the data files we've corrected the typo.
+            {"f_plane", eVehicleType::VEHICLE_FPLANE},
+            {"bike",    eVehicleType::VEHICLE_BIKE},
+            {"bmx",     eVehicleType::VEHICLE_BMX},
+            {"trailer", eVehicleType::VEHICLE_TRAILER},
+        };
+
+        for (const auto& pair : mapping) {
+            if (pair.name == type) {
+                return pair.type;
+            }
+        }
+
+        // NOTSA - Something went really wrong
+        assert(0);
+    };
+
+    mi->m_nVehicleType = GetVehicleType();
     switch (mi->m_nVehicleType) {
     case eVehicleType::VEHICLE_AUTOMOBILE:
     case eVehicleType::VEHICLE_MTRUCK:
@@ -1761,157 +1787,39 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
     mi->SetHandlingId(handlingName);
     mi->m_nWheelUpgradeClass = wheelUpgradeCls;
 
-    mi->SetVehicleClass(vehCls);
+    const auto GetVehicleClass = [&]{
+        constexpr struct { std::string_view name; eVehicleClass cls; } mapping[] = {
+            {"normal",      eVehicleClass::VEHICLE_CLASS_NORMAL},
+            {"poorfamily",  eVehicleClass::VEHICLE_CLASS_POORFAMILY},
+            {"richfamily",  eVehicleClass::VEHICLE_CLASS_RICHFAMILY},
+            {"executive",   eVehicleClass::VEHICLE_CLASS_EXECUTIVE},
+            {"worker",      eVehicleClass::VEHICLE_CLASS_WORKER},
+            {"big",         eVehicleClass::VEHICLE_CLASS_BIG},
+            {"taxi",        eVehicleClass::VEHICLE_CLASS_TAXI},
+            {"moped",       eVehicleClass::VEHICLE_CLASS_MOPED},
+            {"motorbike",   eVehicleClass::VEHICLE_CLASS_MOTORBIKE},
+            {"leisureboat", eVehicleClass::VEHICLE_CLASS_LEISUREBOAT},
+            {"workerboat",  eVehicleClass::VEHICLE_CLASS_WORKERBOAT},
+            {"bicycle",     eVehicleClass::VEHICLE_CLASS_BICYCLE},
+            {"ignore",      eVehicleClass::VEHICLE_CLASS_IGNORE},
+        };
+
+        for (const auto& pair : mapping) {
+            if (pair.name == vehCls) {
+                return pair.cls;
+            }
+        }
+
+        // NOTSA - Something has went really wrong
+        DebugBreak();
+        return (eVehicleClass)-1;
+    };
+    mi->m_nVehicleClass = GetVehicleClass();
     if (mi->m_nVehicleClass != eVehicleClass::VEHICLE_CLASS_IGNORE) {
         mi->m_nFrq = frq;
     }
 
     return modelId;
-
-    /*
-    todo: Izzotop
-
-    if (strcmp(type, "car") == 0)
-    {
-        mi->m_nVehicleType = VEHICLE_AUTOMOBILE;
-        mi->m_nWheelModelIndex = wheelModelId;
-        mi->m_fWheelSizeFront = wheelScaleFront;
-        mi->m_fWheelSizeRear = wheelScaleRear;
-    }
-    else if (strcmp(type, "mtruck") == 0)
-    {
-        mi->m_nVehicleType = VEHICLE_MTRUCK;
-        mi->m_nWheelModelIndex = wheelModelId;
-        mi->m_fWheelSizeFront = wheelScaleFront;
-        mi->m_fWheelSizeRear = wheelScaleRear;
-    }
-    else if (strcmp(type, "quad") == 0)
-    {
-        mi->m_nVehicleType = VEHICLE_QUAD;
-        mi->m_nWheelModelIndex = wheelModelId;
-        mi->m_fWheelSizeFront = wheelScaleFront;
-        mi->m_fWheelSizeRear = wheelScaleRear;
-    }
-    else if (strcmp(type, "heli") == 0)
-    {
-        mi->m_nVehicleType = VEHICLE_HELI;
-        mi->m_nWheelModelIndex = wheelModelId;
-        mi->m_fWheelSizeFront = wheelScaleFront;
-        mi->m_fWheelSizeRear = wheelScaleRear;
-    }
-    else if (strcmp(type, "plane") == 0)
-    {
-        mi->m_nVehicleType = VEHICLE_PLANE;
-        mi->m_nWheelModelIndex = wheelModelId;
-        mi->m_fWheelSizeFront = wheelScaleFront;
-        mi->m_fWheelSizeRear = wheelScaleRear;
-    }
-    else if (strcmp(type, "boat") == 0)
-    {
-        mi->m_nVehicleType = VEHICLE_BOAT;
-        mi->m_nHandlingId = gHandlingDataMgr.GetHandlingId(handlingId);
-        mi->m_nWheelUpgradeClass = wheelUpgradeClass;
-    }
-    else if (strcmp(type, "train") == 0)
-    {
-        mi->m_nVehicleType = VEHICLE_TRAIN;
-        mi->m_nHandlingId = gHandlingDataMgr.GetHandlingId(handlingId);
-        mi->m_nWheelUpgradeClass = wheelUpgradeClass;
-    }
-    else if (strcmp(type, "f_heli") == 0)
-    {
-        mi->m_nVehicleType = VEHICLE_HELI; // Izzotop: Why not F_HELI?
-        mi->m_nHandlingId = gHandlingDataMgr.GetHandlingId(handlingId);
-        mi->m_nWheelUpgradeClass = wheelUpgradeClass;
-    }
-    else if (strcmp(type, "f_plane") == 0)
-    {
-        mi->m_nVehicleType = VEHICLE_FPLANE;
-        mi->m_nWheelModelIndex = wheelModelId;
-        mi->m_fWheelSizeFront = 1.0f;
-        mi->m_fWheelSizeRear = 1.0f;
-        mi->m_nHandlingId = gHandlingDataMgr.GetHandlingId(handlingId);
-        mi->m_nWheelUpgradeClass = wheelUpgradeClass;
-    }
-    else if (strcmp(type, "bike") == 0)
-    {
-        mi->m_nVehicleType = VEHICLE_BIKE;
-        mi->m_fBikeSteerAngle = wheelModelId;
-    }
-    else if (strcmp(type, "bmx") == 0)
-    {
-        mi->m_nVehicleType = VEHICLE_BMX;
-        mi->m_fBikeSteerAngle = wheelModelId;
-    }
-    else if (strcmp(type, "trailer") == 0)
-    {
-        mi->m_nVehicleType = VEHICLE_TRAILER;
-        mi->m_nWheelModelIndex = wheelModelId;
-        mi->m_fWheelSizeFront = wheelScaleFront;
-        mi->m_fWheelSizeRear = wheelScaleRear;
-    }
-    else
-    {
-        assert(false); // "Unknown vehicle type"
-    }
-
-    if (strcmp(group, "normal") == 0)
-    {
-        mi->m_nVehicleClass = VEHICLE_CLASS_NORMAL;
-    }
-    else if (strcmp(group, "poorfamily") == 0)
-    {
-        mi->m_nVehicleClass = VEHICLE_CLASS_POORFAMILY;
-    }
-    else if (strcmp(group, "richfamily") == 0)
-    {
-        mi->m_nVehicleClass = VEHICLE_CLASS_RICHFAMILY;
-    }
-    else if (strcmp(group, "executive") == 0)
-    {
-        mi->m_nVehicleClass = VEHICLE_CLASS_EXECUTIVE;
-    }
-    else if (strcmp(group, "worker") == 0)
-    {
-        mi->m_nVehicleClass = VEHICLE_CLASS_WORKER;
-    }
-    else if (strcmp(group, "big") == 0)
-    {
-        mi->m_nVehicleClass = VEHICLE_CLASS_BIG;
-    }
-    else if (strcmp(group, "taxi") == 0)
-    {
-        mi->m_nVehicleClass = VEHICLE_CLASS_TAXI;
-    }
-    else if (strcmp(group, "moped") == 0)
-    {
-        mi->m_nVehicleClass = VEHICLE_CLASS_MOPED;
-    }
-    else if (strcmp(group, "motorbike") == 0)
-    {
-        mi->m_nVehicleClass = VEHICLE_CLASS_MOTORBIKE;
-    }
-    else if (strcmp(group, "leisureboat") == 0)
-    {
-        mi->m_nVehicleClass = VEHICLE_CLASS_LEISUREBOAT;
-    }
-    else if (strcmp(group, "workerboat") == 0)
-    {
-        mi->m_nVehicleClass = VEHICLE_CLASS_WORKERBOAT;
-    }
-    else if (strcmp(group, "bicycle") == 0)
-    {
-        mi->m_nVehicleClass = VEHICLE_CLASS_BICYCLE;
-    }
-    else if (strcmp(group, "ignore") == 0)
-    {
-        mi->m_nVehicleClass = VEHICLE_CLASS_IGNORE;
-    }
-
-    mi->m_nFrq = freq;
-    return modelId;
-
-    */
 }
 
 // 0x5B3FB0
