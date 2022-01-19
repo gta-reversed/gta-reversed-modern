@@ -93,13 +93,11 @@ void CFileLoader::SaveTexDictionary(RwTexDictionary* dictionary, const char* fil
 RwTexDictionary* CFileLoader::LoadTexDictionary(const char* filename) {
     RwStream* stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, filename);
     if (stream) {
-        bool chunk = RwStreamFindChunk(stream, rwID_TEXDICTIONARY, nullptr, nullptr);
-        if (chunk) {
+        if (RwStreamFindChunk(stream, rwID_TEXDICTIONARY, nullptr, nullptr)) {
             RwTexDictionary* txd = RwTexDictionaryGtaStreamRead(stream);
             RwStreamClose(stream, nullptr);
-            if (txd) {
-                return txd;
-            }
+            if (txd)
+                return txd; // TODO: Stream closed twice if txd is nullptr.
         }
         RwStreamClose(stream, nullptr);
     }
@@ -134,9 +132,9 @@ int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
 
 // 0x5371F0
 bool CFileLoader::LoadAtomicFile(RwStream* stream, uint32 modelId) {
-    auto pAtomicModelInfo = CModelInfo::ms_modelInfoPtrs[modelId]->AsAtomicModelInfoPtr();
+    auto mi = CModelInfo::ms_modelInfoPtrs[modelId]->AsAtomicModelInfoPtr();
     bool bUseCommonVehicleTexDictionary = false;
-    if (pAtomicModelInfo && pAtomicModelInfo->bUseCommonVehicleDictionary) {
+    if (mi && mi->bUseCommonVehicleDictionary) {
         bUseCommonVehicleTexDictionary = true;
         CVehicleModelInfo::UseCommonVehicleTexDicationary();
     }
@@ -154,7 +152,7 @@ bool CFileLoader::LoadAtomicFile(RwStream* stream, uint32 modelId) {
         RpClumpDestroy(pReadClump);
     }
 
-    if (!pAtomicModelInfo->m_pRwObject)
+    if (!mi->m_pRwObject)
         return false;
 
     if (bUseCommonVehicleTexDictionary)
@@ -183,8 +181,8 @@ RpClump* CFileLoader::LoadAtomicFile2Return(const char* filename) {
     RwStream* stream = RwStreamOpen(rwSTREAMFILENAME, rwSTREAMREAD, filename);
     if (RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr))
         clump = RpClumpStreamRead(stream);
-
     RwStreamClose(stream, nullptr);
+
     return clump;
 }
 
@@ -236,20 +234,18 @@ char* CFileLoader::LoadLine(char*& bufferIt, int32& buffSize) {
 // 0x5B4D70
 void CFileLoader::LoadAudioZone(const char* line) {
     char  name[16];
-    int32   id;
-    int32   enabled;
+    int32 id;
+    int32 enabled;
     float x1, y1, z1;
     float x2, y2, z2;
     float radius;
 
-    int32 iNumRead = sscanf(line, "%s %d %d %f %f %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &x2, &y2, &z2);
-    if (iNumRead == 9) {
+    if (sscanf(line, "%s %d %d %f %f %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &x2, &y2, &z2) == 9) {
         CAudioZones::RegisterAudioBox(name, id, enabled != 0, x1, y1, z1, x2, y2, z2);
-        return;
+    } else {
+        (void)sscanf(line, "%s %d %d %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &radius);
+        CAudioZones::RegisterAudioSphere(name, id, enabled != 0, x1, y1, z1, radius);
     }
-
-    (void)sscanf(line, "%s %d %d %f %f %f %f", name, &id, &enabled, &x1, &y1, &z1, &radius);
-    CAudioZones::RegisterAudioSphere(name, id, enabled != 0, x1, y1, z1, radius);
 }
 
 // unused?
@@ -282,7 +278,7 @@ void CFileLoader::LoadCarGenerator(CFileCarGenerator* carGen, int32 iplId) {
 // 0x5B4740
 void CFileLoader::LoadCarGenerator(const char* line, int32 iplId) {
     CFileCarGenerator carGen;
-    auto iNumRead = sscanf(
+    if (sscanf(
         line,
         "%f %f %f %f %d %d %d %d %d %d %d %d",
         &carGen.m_vecPosn.x,
@@ -297,9 +293,9 @@ void CFileLoader::LoadCarGenerator(const char* line, int32 iplId) {
         &carGen.m_nDoorLockChance,
         &carGen.m_nMinDelay,
         &carGen.m_nMaxDelay
-    );
-    if (iNumRead == 12)
+    ) == 12) {
         LoadCarGenerator(&carGen, iplId);
+    }
 }
 
 // 0x5B4380
@@ -310,13 +306,11 @@ void CFileLoader::LoadCarPathNode(const char* line, int32 objModelIndex, int32 p
 
 // 0x5373F0
 bool CFileLoader::StartLoadClumpFile(RwStream* stream, uint32 modelIndex) {
-    auto chunk = RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr);
-    if (!chunk) {
+    if (!RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr))
         return false;
-    }
 
-    CBaseModelInfo* modelInfo = CModelInfo::GetModelInfo(modelIndex);
-    bool isVehicle = modelInfo->GetModelType() == MODEL_INFO_VEHICLE;
+    CBaseModelInfo* mi = CModelInfo::GetModelInfo(modelIndex);
+    bool isVehicle = mi->GetModelType() == MODEL_INFO_VEHICLE;
 
     if (isVehicle)
         CVehicleModelInfo::UseCommonVehicleTexDicationary();
@@ -331,8 +325,8 @@ bool CFileLoader::StartLoadClumpFile(RwStream* stream, uint32 modelIndex) {
 
 // 0x537450
 bool CFileLoader::FinishLoadClumpFile(RwStream* stream, uint32 modelIndex) {
-    auto modelInfo = static_cast<CClumpModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelIndex]);
-    bool isVehicle = modelInfo->GetModelType() == MODEL_INFO_VEHICLE;
+    auto mi = static_cast<CClumpModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelIndex]);
+    bool isVehicle = mi->GetModelType() == MODEL_INFO_VEHICLE;
 
     if (isVehicle)
         CVehicleModelInfo::UseCommonVehicleTexDicationary();
@@ -345,7 +339,7 @@ bool CFileLoader::FinishLoadClumpFile(RwStream* stream, uint32 modelIndex) {
     if (!clump)
         return false;
 
-    modelInfo->SetClump(clump);
+    mi->SetClump(clump);
     return true;
 }
 
@@ -354,14 +348,14 @@ bool CFileLoader::LoadClumpFile(RwStream* stream, uint32 modelIndex) {
     return plugin::CallAndReturn<bool, 0x5372D0, RwStream*, uint32>(stream, modelIndex);
 
         // fails, hook not needed
-    auto modelInfo = static_cast<CClumpModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelIndex]);
+    auto mi = static_cast<CClumpModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelIndex]);
 
-    if ((modelInfo->m_nFlags & 0x200) != 0) { // todo: m_nFlags & 0x200
+    if (mi->bHasComplexHierarchy) {
         RpClump* parentClump = RpClumpCreate();
         RwFrame* parentFrame = RwFrameCreate();
         RpClumpSetFrame(parentClump, parentFrame);
         if (!RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr)) {
-            modelInfo->SetClump(parentClump);
+            mi->SetClump(parentClump);
             return true;
         }
 
@@ -376,7 +370,7 @@ bool CFileLoader::LoadClumpFile(RwStream* stream, uint32 modelIndex) {
             RpClumpDestroy(childClump);
 
             if (!RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr)) {
-                modelInfo->SetClump(parentClump);
+                mi->SetClump(parentClump);
                 return true;
             }
         }
@@ -385,9 +379,9 @@ bool CFileLoader::LoadClumpFile(RwStream* stream, uint32 modelIndex) {
     if (!RwStreamFindChunk(stream, rwID_CLUMP, nullptr, nullptr))
         return false;
 
-    bool isVehicle = modelInfo->GetModelType() == MODEL_INFO_VEHICLE;
+    bool isVehicle = mi->GetModelType() == MODEL_INFO_VEHICLE;
     if (isVehicle) {
-        CCollisionPlugin::SetModelInfo(modelInfo);
+        CCollisionPlugin::SetModelInfo(mi);
         CVehicleModelInfo::UseCommonVehicleTexDicationary();
     }
 
@@ -401,10 +395,10 @@ bool CFileLoader::LoadClumpFile(RwStream* stream, uint32 modelIndex) {
     if (!clump)
         return false;
 
-    modelInfo->SetClump(clump);
+    mi->SetClump(clump);
 
     if (modelIndex == MODEL_JOURNEY)
-        static_cast<CVehicleModelInfo*>(modelInfo)->m_nNumDoors = 2;
+        static_cast<CVehicleModelInfo*>(mi)->m_nNumDoors = 2;
 
     return true;
 }
@@ -416,9 +410,8 @@ void CFileLoader::LoadClumpFile(const char* filename) {
         RpClump* clump = RpClumpStreamRead(stream);
         if (clump) {
             const char* nodeName = GetFrameNodeName(RpClumpGetFrame(clump));
-            auto modelInfo = static_cast<CClumpModelInfo*>(CModelInfo::GetModelInfo(nodeName, nullptr));
-            if (modelInfo)
-                modelInfo->SetClump(clump);
+            if (auto mi = static_cast<CClumpModelInfo*>(CModelInfo::GetModelInfo(nodeName, nullptr)))
+                mi->SetClump(clump);
             else
                 RpClumpDestroy(clump);
         }
@@ -432,34 +425,33 @@ int32 CFileLoader::LoadClumpObject(const char* line) {
     char texName[24];
     int32  objId = MODEL_INVALID;
 
-    auto iNumRead = sscanf(line, "%d %s %s", &objId, modelName, texName);
-    if (iNumRead != 3)
+    if (sscanf(line, "%d %s %s", &objId, modelName, texName) != 3)
         return MODEL_INVALID;
 
-    auto modelInfo = static_cast<CVehicleModelInfo*>(CModelInfo::AddClumpModel(objId));
-    modelInfo->SetModelName(modelName);
-    modelInfo->SetTexDictionary(texName);
-    modelInfo->SetColModel(&CTempColModels::ms_colModelBBox, false);
+    auto mi = static_cast<CVehicleModelInfo*>(CModelInfo::AddClumpModel(objId));
+    mi->SetModelName(modelName);
+    mi->SetTexDictionary(texName);
+    mi->SetColModel(&CTempColModels::ms_colModelBBox, false);
     return objId;
 }
 
-void LoadCollisionModelAnyVersion(const ColHelpers::FileHeader& h, uint8* colData, CColModel& CM) {
+void LoadCollisionModelAnyVersion(const ColHelpers::FileHeader& header, uint8* colData, CColModel& cm) {
     using namespace ColHelpers;
 
-    switch (h.GetVersion()) {
+    switch (header.GetVersion()) {
     case ColModelVersion::COLL:
-        CFileLoader::LoadCollisionModel(colData, CM);
+        CFileLoader::LoadCollisionModel(colData, cm);
         break;
     case ColModelVersion::COL2:
-        CFileLoader::LoadCollisionModelVer2(colData, h.GetDataSize(), CM, h.modelName);
+        CFileLoader::LoadCollisionModelVer2(colData, header.GetDataSize(), cm, header.modelName);
         break;
     case ColModelVersion::COL3:
-        CFileLoader::LoadCollisionModelVer3(colData, h.GetDataSize(), CM, h.modelName);
+        CFileLoader::LoadCollisionModelVer3(colData, header.GetDataSize(), cm, header.modelName);
         break;
     case ColModelVersion::COL4:
         // Originally this function didn't deal with V4.
         // But given there are no V4 col files, for simplicity we'll leave it in here.
-        CFileLoader::LoadCollisionModelVer4(colData, h.GetDataSize(), CM, h.modelName);
+        CFileLoader::LoadCollisionModelVer4(colData, header.GetDataSize(), cm, header.modelName);
         break;
     }
 }
@@ -472,33 +464,33 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
     // We've modified the loop condition a little. R* went backwards, and checked if the remaning buffer size is > 8.
     auto fileTotalSize{ 0u };
     for (auto buffIt = buff; buffIt < buff + buffSize; buffIt += fileTotalSize) {
-        auto& h = *reinterpret_cast<FileHeader*>(buffIt);
-        fileTotalSize = h.GetTotalSize();
+        auto& header = *reinterpret_cast<FileHeader*>(buffIt);
+        fileTotalSize = header.GetTotalSize();
 
-        if (h.IsValid())
+        if (header.IsValid())
             return true;
 
         char modelName[22]{};
-        strcpy_s(modelName, h.modelName);
+        strcpy_s(modelName, header.modelName);
 
-        auto MI = IsModelDFF(h.modelId) ? CModelInfo::GetModelInfo(h.modelId) : nullptr;
-        if (!MI || MI->m_nKey != CKeyGen::GetUppercaseKey(modelName)) {
+        auto mi = IsModelDFF(header.modelId) ? CModelInfo::GetModelInfo(header.modelId) : nullptr;
+        if (!mi || mi->m_nKey != CKeyGen::GetUppercaseKey(modelName)) {
             auto colDef = CColStore::ms_pColPool->GetAt(colId); 
-            MI = CModelInfo::GetModelInfo(modelName, colDef->m_nModelIdStart, colDef->m_nModelIdEnd);
+            mi = CModelInfo::GetModelInfo(modelName, colDef->m_nModelIdStart, colDef->m_nModelIdEnd);
         }
-        if (!MI || !MI->bIsLod) // TODO: Unsure what the fuck this check is, but it doesn't seem too failproof to me..
+        if (!mi || !mi->bIsLod) // TODO: Unsure what the fuck this check is, but it doesn't seem too failproof to me..
             continue;
 
-        if (!MI->GetColModel()) {
-            MI->SetColModel(new CColModel, true);
+        if (!mi->GetColModel()) {
+            mi->SetColModel(new CColModel, true);
         }
 
-        auto& CM = *MI->GetColModel();
-        LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), CM);
-        CM.m_boundSphere.m_nMaterial = colId; // TODO: At this point I'm convinced something is fucked (m_boundSphere should probably be a CSphere instead)
+        auto& cm = *mi->GetColModel();
+        LoadCollisionModelAnyVersion(header, buffIt + sizeof(FileHeader), cm);
+        cm.m_boundSphere.m_nMaterial = colId; // TODO: At this point I'm convinced something is fucked (m_boundSphere should probably be a CSphere instead)
 
-        if (MI->GetModelType() == eModelInfoType::MODEL_INFO_TYPE_ATOMIC) {
-            CPlantMgr::SetPlantFriendlyFlagInAtomicMI(static_cast<CAtomicModelInfo*>(MI));
+        if (mi->GetModelType() == eModelInfoType::MODEL_INFO_TYPE_ATOMIC) {
+            CPlantMgr::SetPlantFriendlyFlagInAtomicMI(static_cast<CAtomicModelInfo*>(mi));
         }
     }
 
@@ -524,16 +516,16 @@ void CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
         // Read actual data
         CFileMgr::Read(f, buffer, header.GetDataSize());
 
-        const auto MI = CModelInfo::GetModelInfo(header.modelName, nullptr);
-        if (!MI || !MI->bIsLod)
+        const auto mi = CModelInfo::GetModelInfo(header.modelName, nullptr);
+        if (!mi || !mi->bIsLod)
             continue;
 
-        if (!MI->GetColModel()) // TODO: Perhaps this should be in `CModelInfo` ? Like `GetColModel(bool bCreate = false)` or something
-            MI->SetColModel(new CColModel, true);
+        if (!mi->GetColModel()) // TODO: Perhaps this should be in `CModelInfo` ? Like `GetColModel(bool bCreate = false)` or something
+            mi->SetColModel(new CColModel, true);
 
-        auto& CM = *MI->GetColModel();
-        LoadCollisionModelAnyVersion(header, buffer, CM);
-        CM.m_boundSphere.m_nMaterial = colId;
+        auto& cm = *mi->GetColModel();
+        LoadCollisionModelAnyVersion(header, buffer, cm);
+        cm.m_boundSphere.m_nMaterial = colId;
     }
     CFileMgr::CloseFile(f);
 }
@@ -556,25 +548,25 @@ bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8
 
         auto modelId = (int32)h.modelId;
 
-        auto MI = IsModelDFF(modelId) ? CModelInfo::GetModelInfo(modelId) : nullptr;
-        if (!MI || MI->m_nKey != CKeyGen::GetUppercaseKey(modelName))
-            MI = CModelInfo::GetModelInfo(modelName, &modelId);
+        auto mi = IsModelDFF(modelId) ? CModelInfo::GetModelInfo(modelId) : nullptr;
+        if (!mi || mi->m_nKey != CKeyGen::GetUppercaseKey(modelName))
+            mi = CModelInfo::GetModelInfo(modelName, &modelId);
 
-        if (!MI)
+        if (!mi)
             continue;
 
         CColStore::IncludeModelIndex(colId, modelId);
 
-        if (!MI->bIsLod)
+        if (!mi->bIsLod)
             continue;
 
-        auto& CM = *new CColModel;
-        LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), CM);
-        MI->SetColModel(&CM, true);
+        auto& cm = *new CColModel;
+        LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), cm);
+        mi->SetColModel(&cm, true);
 
         // NOTE/TODO:
         // This cast looks weird, but there's a note about it above `PackedModelStartEnd`s definition.
-        CColAccel::addCacheCol((PackedModelStartEnd)modelId, CM); 
+        CColAccel::addCacheCol((PackedModelStartEnd)modelId, cm); 
     }
 
     return true;
@@ -892,16 +884,12 @@ int32 CFileLoader::LoadObject(const char* line) {
     }
 
     sItemDefinitionFlags flags(nFlags);
-    CAtomicModelInfo* pModelInfo;
-    if (flags.bIsDamageable)
-        pModelInfo = CModelInfo::AddDamageAtomicModel(modelId);
-    else
-        pModelInfo = CModelInfo::AddAtomicModel(modelId);
+    const auto mi = flags.bIsDamageable ? CModelInfo::AddDamageAtomicModel(modelId) : CModelInfo::AddAtomicModel(modelId);
+    mi->m_fDrawDistance = fDrawDist;
+    mi->SetModelName(modelName);
+    mi->SetTexDictionary(texName);
+    SetAtomicModelInfoFlags(mi, nFlags);
 
-    pModelInfo->m_fDrawDistance = fDrawDist;
-    pModelInfo->SetModelName(modelName);
-    pModelInfo->SetTexDictionary(texName);
-    SetAtomicModelInfoFlags(pModelInfo, nFlags);
     return modelId;
 }
 
@@ -912,23 +900,23 @@ void CFileLoader::Load2dEffect(const char* line) {
 
 // 0x538090
 CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const char* modelName) {
-    auto* pInfo = CModelInfo::GetModelInfo(objInstance->m_nModelId);
-    if (!pInfo)
+    auto* mi = CModelInfo::GetModelInfo(objInstance->m_nModelId);
+    if (!mi)
         return nullptr;
 
     CEntity* pNewEntity = nullptr;
-    if (pInfo->m_nObjectInfoIndex == -1)
+    if (mi->m_nObjectInfoIndex == -1)
     {
-        if (pInfo->GetModelType() == ModelInfoType::MODEL_INFO_CLUMP && pInfo->bHasAnimBlend)
+        if (mi->GetModelType() == ModelInfoType::MODEL_INFO_CLUMP && mi->bHasAnimBlend)
             pNewEntity = new CAnimatedBuilding();
         else
             pNewEntity = new CBuilding();
 
         pNewEntity->SetModelIndexNoCreate(objInstance->m_nModelId);
-        if (pInfo->bDontCastShadowsOn)
+        if (mi->bDontCastShadowsOn)
             pNewEntity->m_bDontCastShadowsOn = true;
 
-        if (pInfo->m_fDrawDistance < 2.0F)
+        if (mi->m_fDrawDistance < 2.0F)
             pNewEntity->m_bIsVisible = false;
     }
     else
@@ -976,7 +964,7 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
         CObject::SetMatrixForTrainCrossing(&pNewEntity->GetMatrix(), PI * 0.43f);
     }
 
-    auto* pColModel = pInfo->GetColModel();
+    auto* pColModel = mi->GetColModel();
     if (pColModel)
     {
         if (pColModel->m_boundSphere.m_bNotEmpty)
@@ -1661,15 +1649,15 @@ int32 CFileLoader::LoadTimeObject(const char* line) {
         }
     }
 
-    CTimeModelInfo* timeModel = CModelInfo::AddTimeModel(modelId);
-    timeModel->m_fDrawDistance = drawDistance[0];
-    timeModel->SetModelName(modelName);
-    timeModel->SetTexDictionary(texName);
+    CTimeModelInfo* mi = CModelInfo::AddTimeModel(modelId);
+    mi->m_fDrawDistance = drawDistance[0];
+    mi->SetModelName(modelName);
+    mi->SetTexDictionary(texName);
 
-    CTimeInfo* timeInfo = timeModel->GetTimeInfo();
+    CTimeInfo* timeInfo = mi->GetTimeInfo();
     timeInfo->SetTimes(timeOn, timeOff);
 
-    SetAtomicModelInfoFlags(timeModel, flags);
+    SetAtomicModelInfoFlags(mi, flags);
 
     CTimeInfo* otherTimeInfo = timeInfo->FindOtherTimeModel(modelName);
     if (otherTimeInfo)
@@ -1832,12 +1820,12 @@ int32 CFileLoader::LoadWeaponObject(const char* line) {
     float drawDist;
 
     (void)sscanf(line, "%d %s %s %s %d %f", &objId, modelName, texName, animName, &weaponType, &drawDist);
-    CWeaponModelInfo* weaponModel = CModelInfo::AddWeaponModel(objId);
-    weaponModel->SetModelName(modelName);
-    weaponModel->m_fDrawDistance = drawDist;
-    weaponModel->SetTexDictionary(texName);
-    weaponModel->SetAnimFile(animName);
-    weaponModel->SetColModel(&CTempColModels::ms_colModelWeapon, false);
+    CWeaponModelInfo* mi = CModelInfo::AddWeaponModel(objId);
+    mi->SetModelName(modelName);
+    mi->m_fDrawDistance = drawDist;
+    mi->SetTexDictionary(texName);
+    mi->SetAnimFile(animName);
+    mi->SetColModel(&CTempColModels::ms_colModelWeapon, false);
     return objId;
 }
 
@@ -2206,14 +2194,14 @@ RpAtomic* CFileLoader::FindRelatedModelInfoCB(RpAtomic* atomic, void* data) {
     GetNameAndDamage(nodeName, name, bDamage);
 
     int32 modelId = MODEL_INVALID;
-    CBaseModelInfo* modelInfo = CModelInfo::GetModelInfo(name, &modelId);
-    if (modelInfo) {
-        CAtomicModelInfo* atomicModelInfo = modelInfo->AsAtomicModelInfoPtr();
+    CBaseModelInfo* mi = CModelInfo::GetModelInfo(name, &modelId);
+    if (mi) {
+        CAtomicModelInfo* mi = mi->AsAtomicModelInfoPtr();
         CVisibilityPlugins::SetAtomicRenderCallback(atomic, nullptr);
         if (bDamage) {
-            atomicModelInfo->AsDamageAtomicModelInfoPtr()->SetDamagedAtomic(atomic);
+            mi->AsDamageAtomicModelInfoPtr()->SetDamagedAtomic(atomic);
         } else {
-            atomicModelInfo->SetAtomic(atomic);
+            mi->SetAtomic(atomic);
         }
         RpClumpRemoveAtomic(static_cast<RpClump*>(data), atomic);
         RwFrame* pRwFrame = RwFrameCreate();
@@ -2233,20 +2221,24 @@ RpAtomic* CFileLoader::SetRelatedModelInfoCB(RpAtomic* atomic, void* data) {
     char name[24] = {0};
     bool bDamage = false;
 
-    auto pAtomicModelInfo = CModelInfo::GetModelInfo(gAtomicModelId)->AsAtomicModelInfoPtr();
-    const char* frameNodeName = GetFrameNodeName(RpAtomicGetFrame(atomic));
+    auto mi = CModelInfo::GetModelInfo(gAtomicModelId)->AsAtomicModelInfoPtr();
+    auto frameNodeName = GetFrameNodeName(RpAtomicGetFrame(atomic));
 
     GetNameAndDamage(frameNodeName, name, bDamage);
+
     CVisibilityPlugins::SetAtomicRenderCallback(atomic, nullptr);
-    if (bDamage) {
-        pAtomicModelInfo->AsDamageAtomicModelInfoPtr()->SetDamagedAtomic(atomic);
-    } else {
-        pAtomicModelInfo->SetAtomic(atomic);
-    }
+
+    if (bDamage)
+        mi->AsDamageAtomicModelInfoPtr()->SetDamagedAtomic(atomic);
+    else
+        mi->SetAtomic(atomic);
+
     RpClumpRemoveAtomic(static_cast<RpClump*>(data), atomic);
-    RwFrame* newFrame = RwFrameCreate();
-    RpAtomicSetFrame(atomic, newFrame);
+
+    RpAtomicSetFrame(atomic, RwFrameCreate()); // Just create a new empty frame for it
+
     CVisibilityPlugins::SetAtomicId(atomic, gAtomicModelId);
+
     return atomic;
 }
 
