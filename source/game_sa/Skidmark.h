@@ -15,7 +15,7 @@ enum class eSkidmarkState : uint8 {
 
 constexpr auto SKIDMARK_NUM_PARTS{ 16u };
 /*
- * Doesn't exists in Android IDB
+ * Doesn't exist in Android IDB
  */
 struct CSkidmark {
     CVector        m_vPosn[SKIDMARK_NUM_PARTS];
