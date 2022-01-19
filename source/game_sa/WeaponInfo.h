@@ -50,7 +50,7 @@ public:
     float       m_fWeaponRange{}; // absolute gun range / default melee attack range
     int32       m_nModelId1{-1};  // modelinfo id
     int32       m_nModelId2{-1};  // second modelinfo id
-    uint32      m_nSlot{-1};
+    int32       m_nSlot{-1};
     union {
         struct {
             uint32 bCanAim : 1;
@@ -81,7 +81,7 @@ public:
     uint16       m_nAmmoClip{};       // ammo in one clip
     uint16       m_nDamage{};         // damage inflicted per hit
     CVector      m_vecFireOffset{};   // offset from weapon origin to projectile starting point
-    uint32       m_nSkillLevel{1};    // what's the skill level of this weapontype - We can't make the field eWeaponSkill because the game uses uint32 for this member...
+    uint32       m_nSkillLevel{1};    // what's the skill level of this weapontype - We can't make the field eWeaponSkill because the game uses uint32 for it...
     float        m_fReqStatLevel{};   // what stat level is required for this skill level
     float        m_fAccuracy{1.f};    // modify accuracy of weapon
     float        m_fMoveSpeed{1.f};   // how fast can move with weapon
