@@ -17,7 +17,7 @@ public:
     union {
         uint8 m_nFlags;
         struct {
-            uint8 m_bFlag0x01 : 1;
+            uint8 m_bNotEmpty : 1;
             uint8 m_bIsSingleColDataAlloc : 1;
             uint8 m_bIsActive : 1;
             uint8 m_bFlag0x08 : 1;
@@ -33,8 +33,25 @@ public:
 public:
     static void InjectHooks();
 
-    CColSphere() {};
-    CColSphere(float radius, const CVector& center) : CSphere(radius, center){};
+    CColSphere() = default;
+
+    explicit CColSphere(const CSphere& sp) :
+        CSphere(sp)
+    {
+    }
+
+    CColSphere(CSphere sp, uint8 material, uint8 flags, uint8 lighting) :
+        CSphere(sp),
+        m_nMaterial(material),
+        m_nFlags(flags),
+        m_nLighting(lighting)
+    {
+    }
+
+    CColSphere(float radius, const CVector& center) : 
+        CSphere(radius, center)
+    {
+    };
 
     void Set(float radius, const CVector& center);
     void Set(float radius, const CVector& center, uint8 material, uint8 flags, uint8 lighting);

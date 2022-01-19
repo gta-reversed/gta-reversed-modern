@@ -431,6 +431,16 @@ public:
             || m_nVehicleType == eVehicleType::VEHICLE_BIKE
             || m_nVehicleType == eVehicleType::VEHICLE_QUAD;
     }
+
+    // These were probably inlined:
+    void SetWheelSizes(float front, float rear) {
+        m_fWheelSizeFront = front;
+        m_fWheelSizeRear = rear;
+    }
+    void SetGameName(const char* name) {
+        strcpy_s(m_szGameName, name);
+    }
+    void SetHandlingId(const char* handlingName);
 };
 VALIDATE_SIZE(CVehicleModelInfo::CVehicleStructure, 0x314);
 VALIDATE_SIZE(CVehicleModelInfo, 0x308);

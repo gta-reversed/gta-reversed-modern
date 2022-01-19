@@ -44,6 +44,9 @@ enum eColAccelState : int32 {
     COLACCEL_LOADING = 2,
 };
 
+// If you ever see a cast like: `(PackedModelStartEnd)modelId`
+// That's (in theory) the same as `PackedModelStartEnd{.start = modelId, .end = 0}`, as 
+// no model has the MSB 16 bits set (as no model's ID is higher than 65535)
 struct PackedModelStartEnd {
     int16 wModelStart;
     int16 wModelEnd;

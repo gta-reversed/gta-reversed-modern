@@ -31,7 +31,7 @@ public:
     // returns -1 if slot not found
     static int32 FindIplSlot(char const* name);
     static CRect* GetBoundingBox(int32 iplSlotIndex);
-    static int32* GetIplEntityIndexArray(int32 arrayIndex);
+    static CEntity** GetIplEntityIndexArray(int32 arrayIndex);
     static char* GetIplName(int32 iplSlotIndex);
     // returns array index
     static int32 GetNewIplEntityIndexArray(int32 entitiesCount);
@@ -64,7 +64,7 @@ extern uint32 MAX_IPL_INSTANCES;           // default 1000
 
 extern CEntity** ppCurrIplInstance;
 extern uint32& NumIplEntityIndexArrays;
-extern int32** IplEntityIndexArrays; // int32 *IplEntityIndexArrays[40]
+static inline CEntity** (&IplEntityIndexArrays)[40] = *(CEntity * *(*)[40])0x8E3F08;
 extern bool& gbIplsNeededAtPosn;
 extern CVector& gvecIplsNeededAtPosn;
 extern uint32& gCurrIplInstancesCount;

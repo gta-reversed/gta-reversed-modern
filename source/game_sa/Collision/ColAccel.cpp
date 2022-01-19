@@ -78,7 +78,7 @@ void CColAccel::addCacheCol(PackedModelStartEnd startEnd, CColModel const& colMo
     colEntry.m_boundBox = colModel.m_boundBox;
     colEntry.m_boundSphere = colModel.m_boundSphere;
     colEntry.m_nColSlot = colModel.m_boundSphere.m_nColSlot;
-    colEntry.m_bUnkn = colModel.m_boundSphere.m_bFlag0x01;
+    colEntry.m_bUnkn = colModel.m_boundSphere.m_bNotEmpty;
 
     ++CColAccel::m_iNumColItems;
 }
@@ -96,7 +96,7 @@ void CColAccel::cacheLoadCol()
         pColModel->m_boundBox = colEntry.m_boundBox;
         *static_cast<CSphere*>(&pColModel->m_boundSphere) = colEntry.m_boundSphere;
         pColModel->m_boundSphere.m_nColSlot = colEntry.m_nColSlot;
-        pColModel->m_boundSphere.m_bFlag0x01 = colEntry.m_bUnkn;
+        pColModel->m_boundSphere.m_bNotEmpty = colEntry.m_bUnkn;
 
         pModelInfo->SetColModel(pColModel, true);
         CColStore::IncludeModelIndex(colEntry.m_nColSlot, colEntry.m_wModelStart);

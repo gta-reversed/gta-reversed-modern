@@ -1532,6 +1532,10 @@ void CVehicleModelInfo::LoadEnvironmentMaps()
     CTxdStore::PopCurrentTxd();
 }
 
+void CVehicleModelInfo::SetHandlingId(const char* handlingName) {
+    m_nHandlingId = gHandlingDataMgr.GetHandlingId(handlingName);
+}
+
 void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(int16 upgrade1, int16 upgrade2)
 {
     m_anUpgrade1[m_nLinksCount] = upgrade1;
