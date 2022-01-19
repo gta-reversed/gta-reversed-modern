@@ -28,10 +28,10 @@ void CSkidmarks::Init() {
 
     // Pirulax: todo fix
     // Izzotop: Same as original.
-    for (unsigned i = 0; i < SKIDMARK_NUM_PARTS; i++) {
-        constexpr unsigned indicesRelative[] = { 0, 2, 1, 1, 2, 3 };
+    for (unsigned part = 0; part < SKIDMARK_NUM_PARTS; part++) {
+        constexpr uint32 indices[] = { 0, 2, 1, 1, 2, 3 };
         for (unsigned v = 0; v < 6; v++) {
-            m_aIndices[6 * i + v] = (RxVertexIndex)(2 * i + indicesRelative[v]);
+            m_aIndices[6 * part + v] = (RxVertexIndex)(2 * part + indices[v]);
         }
     }
 }
