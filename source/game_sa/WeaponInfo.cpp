@@ -139,8 +139,8 @@ void CWeaponInfo::LoadWeaponData() {
                 &reqStatLevelForSkill,
                 &accuracy,
                 &moveSpeed,
-                &animLoopInfo[0].end, &animLoopInfo[0].start, &animLoopInfo[0].fire,
-                &animLoopInfo[1].end, &animLoopInfo[1].start, &animLoopInfo[1].fire,
+                &animLoopInfo[0].start, &animLoopInfo[0].end, &animLoopInfo[0].fire,
+                &animLoopInfo[1].start, &animLoopInfo[1].end, &animLoopInfo[1].fire,
                 &breakoutTime,
                 &flags,
                 &speed,
@@ -172,6 +172,8 @@ void CWeaponInfo::LoadWeaponData() {
             wi.m_fSpread = spread;
 
             const auto SetAnimLoopInfos = [&](auto& start, auto& end, auto& fire, auto idx) {
+                assert(start <= end);
+
                 const auto info = animLoopInfo[idx];
                 start = (float)info.start / 30.f;
                 end = (float)info.end / 30.f;
