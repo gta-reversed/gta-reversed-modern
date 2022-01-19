@@ -170,6 +170,7 @@ void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
 
+    CWeaponInfo::InjectHooks();
     CExplosion::InjectHooks();
     CClothesBuilder::InjectHooks();
     CClothes::InjectHooks();
