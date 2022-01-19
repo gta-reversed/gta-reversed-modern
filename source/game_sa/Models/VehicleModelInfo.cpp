@@ -1469,8 +1469,8 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
                 pModel2->SetupVehicleUpgradeFlags(pNextToken);
 
                 CVehicleModelInfo::ms_linkedUpgrades.AddUpgradeLink(iModelId1, iModelId2);
-                break;
             }
+            break;
         }
 
         case eCarModsLineType::MODS: {
@@ -1530,6 +1530,10 @@ void CVehicleModelInfo::LoadEnvironmentMaps()
         RwTextureSetFilterMode(gpWhiteTexture, RwTextureFilterMode::rwFILTERLINEAR);
     }
     CTxdStore::PopCurrentTxd();
+}
+
+void CVehicleModelInfo::SetHandlingId(const char* handlingName) {
+    m_nHandlingId = gHandlingDataMgr.GetHandlingId(handlingName);
 }
 
 void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(int16 upgrade1, int16 upgrade2)

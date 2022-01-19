@@ -185,6 +185,10 @@ struct tStreamingChannel {
 
 VALIDATE_SIZE(tStreamingChannel, 0x98);
 
+static bool IsModelDFF(int32 model) {
+    return (uint32)model < RESOURCE_ID_DFF + TOTAL_DFF_MODEL_IDS;
+}
+
 class CStreaming {
 public:
     static const int32 TOTAL_SPECIAL_MODELS = 10;

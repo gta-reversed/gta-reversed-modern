@@ -1090,19 +1090,19 @@ bool IsEntityPointerValid(CEntity* entity)
 }
 
 // 0x533380
-CVector* CEntity::FindTriggerPointCoors(CVector* pOutVec, int32 triggerIndex)
+CVector* CEntity::FindTriggerPointCoors(CVector* outVec, int32 triggerIndex)
 {
-    auto pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
-    for (int32 iFxInd = 0; iFxInd < pModelInfo->m_n2dfxCount; ++iFxInd) {
-        auto pEffect = pModelInfo->Get2dEffect(iFxInd);
-        if (pEffect->m_nType == e2dEffectType::EFFECT_SLOTMACHINE_WHEEL && pEffect->iSlotMachineIndex == triggerIndex) {
-            *pOutVec = GetMatrix() * pEffect->m_vecPosn;
-            return pOutVec;
+    auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
+    for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
+        auto effect = mi->Get2dEffect(iFxInd);
+        if (effect->m_nType == e2dEffectType::EFFECT_TRIGGER_POINT && effect->iSlotMachineIndex == triggerIndex) {
+            *outVec = GetMatrix() * effect->m_vecPosn;
+            return outVec;
         }
     }
 
-    pOutVec->Set(0.0F, 0.0F, 0.0F);
-    return pOutVec;
+    outVec->Set(0.0F, 0.0F, 0.0F);
+    return outVec;
 }
 
 /**

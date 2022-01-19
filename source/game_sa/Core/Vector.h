@@ -11,33 +11,14 @@ Do not delete this comment block. Respect others' work!
 #include "RenderWare.h"
 #include <numeric>
 
-// Hacky solution so we need to not modify `RwV3d`
-constexpr RwV3d ConstructRwV3d(float x, float y, float z) {
-    RwV3d v{};
-    v.x = x;
-    v.y = y;
-    v.z = z;
-    return v;
-}
-
 class CVector : public RwV3d {
 public:
 
-    constexpr CVector() :
-        RwV3d(ConstructRwV3d(0.0f, 0.0f, 0.0f))
-    {
-    }
-
-    constexpr CVector(float X, float Y, float Z) :
-        RwV3d(ConstructRwV3d(X, Y, Z))
-    {
-    }
-
-    constexpr CVector(RwV3d rwVec) :
-        RwV3d(rwVec)
-    {
-    }
-
+    constexpr CVector() = default;
+    constexpr CVector(float X, float Y, float Z) : RwV3d{X, Y, Z} {}
+    constexpr CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
+    constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
+    
 public:
     static void InjectHooks();
 
@@ -163,6 +144,7 @@ inline CVector operator-(const CVector& vec) {
 inline float DistanceBetweenPoints(const CVector &pointOne, const CVector &pointTwo) {
     return (pointTwo - pointOne).Magnitude();
 }
+
 inline float DistanceBetweenPointsSquared(const CVector& pointOne, const CVector& pointTwo) {
     return (pointTwo - pointOne).SquaredMagnitude();
 }

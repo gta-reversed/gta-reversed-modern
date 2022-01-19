@@ -58,6 +58,8 @@
 #include "CreepingFire.h"
 #include "Restart.h"
 #include "BulletInfo.h"
+#include "Explosion.h"
+#include "FireManager.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -170,6 +172,8 @@ void InjectHooksMain() {
     CPad::InjectHooks();
 
     CMirrors::InjectHooks();
+    CFire::InjectHooks();
+    CExplosion::InjectHooks();
     CClothesBuilder::InjectHooks();
     CClothes::InjectHooks();
     CBulletInfo::InjectHooks();
