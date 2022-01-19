@@ -24,7 +24,7 @@ void CWeaponInfo::InjectHooks() {
 
     // Methods (4x)
     ReversibleHooks::Install("CWeaponInfo", "GetCrouchReloadAnimationID", 0x685700, &CWeaponInfo::GetCrouchReloadAnimationID);
-    // ReversibleHooks::Install("CWeaponInfo", "FindWeaponType", 0x743D10, &CWeaponInfo::FindWeaponType);
+    ReversibleHooks::Install("CWeaponInfo", "FindWeaponType", 0x743D10, &CWeaponInfo::FindWeaponType);
     // ReversibleHooks::Install("CWeaponInfo", "GetTargetHeadRange", 0x743D50, &CWeaponInfo::GetTargetHeadRange);
     // ReversibleHooks::Install("CWeaponInfo", "GetWeaponReloadTime", 0x743D70, &CWeaponInfo::GetWeaponReloadTime);
 }
@@ -306,7 +306,63 @@ int32 CWeaponInfo::GetSkillStatIndex(eWeaponType weaponType) {
 
 // 0x743D10
 eWeaponType CWeaponInfo::FindWeaponType(const char* type) {
-    return plugin::CallAndReturn<eWeaponType, 0x743D10>(type);
+    // From 8D6150 (ms_aWeaponNames)
+    constexpr std::string_view names[]{
+        "UNARMED",
+        "BRASSKNUCKLE",
+        "GOLFCLUB",
+        "NIGHTSTICK",
+        "KNIFE",
+        "BASEBALLBAT",
+        "SHOVEL",
+        "POOLCUE",
+        "KATANA",
+        "CHAINSAW",
+        "DILDO1",
+        "DILDO2",
+        "VIBE1",
+        "VIBE2",
+        "FLOWERS",
+        "CANE",
+        "GRENADE",
+        "TEARGAS",
+        "MOLOTOV",
+        "ROCKET",
+        "ROCKET_HS",
+        "FREEFALL_BOMB",
+        "PISTOL",
+        "PISTOL_SILENCED",
+        "DESERT_EAGLE",
+        "SHOTGUN",
+        "SAWNOFF",
+        "SPAS12",
+        "MICRO_UZI",
+        "MP5",
+        "AK47",
+        "M4",
+        "TEC9",
+        "COUNTRYRIFLE",
+        "SNIPERRIFLE",
+        "RLAUNCHER",
+        "RLAUNCHER_HS",
+        "FTHROWER",
+        "MINIGUN",
+        "SATCHEL_CHARGE",
+        "DETONATOR",
+        "SPRAYCAN",
+        "EXTINGUISHER",
+        "CAMERA",
+        "NIGHTVISION",
+        "INFRARED",
+        "PARACHUTE",
+        "",
+        "ARMOUR",
+    };
+    if (const auto it = rng::find(names, type); it != std::end(names))
+        return (eWeaponType)(it - names);
+
+    assert(0); // Shouldn't be reachable
+    return eWeaponType::WEAPON_UNARMED;
 }
 
 // Methods

@@ -40,8 +40,6 @@ enum class eWeaponSkill : uint8 {
 };
 
 class CWeaponInfo {
-    static inline const char* (&ms_aWeaponNames)[MAX_WEAPON_NAMES] = *(const char* (*)[MAX_WEAPON_NAMES])0x8D6150;
-
 public:
     /* some info here https://code.google.com/p/mtasa-blue/source/browse/tags/1.3.4/MTA10/game_sa/CWeaponInfoSA.h */
 
