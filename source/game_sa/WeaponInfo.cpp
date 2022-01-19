@@ -377,12 +377,12 @@ float CWeaponInfo::GetTargetHeadRange() {
 }
 
 // 0x743D70
-int32 CWeaponInfo::GetWeaponReloadTime() {
+uint32 CWeaponInfo::GetWeaponReloadTime() {
     if (flags.bReload)
-        return flags.bTwinPistol ? 2000 : 1000;
+        return flags.bTwinPistol ? 2000u : 1000u;
 
     if (flags.bLongReload)
-        return 1000;
+        return 1000u;
 
     const auto& ao = g_GunAimingOffsets[m_nAimOffsetIndex];
     return std::max(400u, (uint32)std::max({ ao.RLoadA, ao.RLoadB, ao.CrouchRLoadA, ao.CrouchRLoadB }) + 100);

@@ -111,7 +111,7 @@ public:
 
     auto GetCrouchReloadAnimationID() -> AnimationId;
     auto GetTargetHeadRange() -> float;
-    auto GetWeaponReloadTime() -> int32;
+    auto GetWeaponReloadTime() -> uint32;
 
 
     // static functions
