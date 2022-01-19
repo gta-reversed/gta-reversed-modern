@@ -14,7 +14,7 @@ void CWeaponInfo::InjectHooks() {
     // Constructors (1x)
     ReversibleHooks::Install("CWeaponInfo", "CWeaponInfo", 0x743C30, &CWeaponInfo::Constructor);
 
-    // Static functions (7x)
+    // Static functions (8x)
     ReversibleHooks::Install("CWeaponInfo", "FindWeaponFireType", 0x5BCF30, &CWeaponInfo::FindWeaponFireType);
     ReversibleHooks::Install("CWeaponInfo", "LoadWeaponData", 0x5BE670, &CWeaponInfo::LoadWeaponData);
     ReversibleHooks::Install("CWeaponInfo", "Initialise", 0x5BF750, &CWeaponInfo::Initialise);
@@ -23,10 +23,10 @@ void CWeaponInfo::InjectHooks() {
     ReversibleHooks::Install("CWeaponInfo", "GetSkillStatIndex", 0x743CD0, &CWeaponInfo::GetSkillStatIndex);
     ReversibleHooks::Install("CWeaponInfo", "FindWeaponType", 0x743D10, &CWeaponInfo::FindWeaponType);
 
-    // Methods (4x)
+    // Methods (3x)
     ReversibleHooks::Install("CWeaponInfo", "GetCrouchReloadAnimationID", 0x685700, &CWeaponInfo::GetCrouchReloadAnimationID);
     ReversibleHooks::Install("CWeaponInfo", "GetTargetHeadRange", 0x743D50, &CWeaponInfo::GetTargetHeadRange);
-    // ReversibleHooks::Install("CWeaponInfo", "GetWeaponReloadTime", 0x743D70, &CWeaponInfo::GetWeaponReloadTime);
+    ReversibleHooks::Install("CWeaponInfo", "GetWeaponReloadTime", 0x743D70, &CWeaponInfo::GetWeaponReloadTime);
 }
 
 // 0x743C30
@@ -378,5 +378,12 @@ float CWeaponInfo::GetTargetHeadRange() {
 
 // 0x743D70
 int32 CWeaponInfo::GetWeaponReloadTime() {
-    return plugin::CallMethodAndReturn<int32, 0x743D70, CWeaponInfo*>(this);
+    if (flags.bReload)
+        return flags.bTwinPistol ? 2000 : 1000;
+
+    if (flags.bLongReload)
+        return 1000;
+
+    const auto& ao = g_GunAimingOffsets[m_nAimOffsetIndex];
+    return std::max(400u, (uint32)std::max({ ao.RLoadA, ao.RLoadB, ao.CrouchRLoadA, ao.CrouchRLoadB }) + 100);
 }
