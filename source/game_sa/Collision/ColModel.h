@@ -20,7 +20,12 @@ public:
 
 public:
     CBoundingBox m_boundBox;
+
+    // TODO: This most likely is a CSphere. Just see CFileLoader.
+    // It's modifying random flags inside it
+    // (Like if the col is empty, which is very much unrelated to the sphere itself)
     CColSphere m_boundSphere;
+
     CCollisionData *m_pColData;
 
 public:

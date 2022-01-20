@@ -35,7 +35,7 @@ public:
     int32 FindExactWord(char* line, char* nameTable, int32 entrySize, int32 entryCount);
     bool HasFrontWheelDrive(uint8 handlingId);
     bool HasRearWheelDrive(uint8 handlingId);
-    int32 GetHandlingId(char* name);
+    int32 GetHandlingId(const char* name);
     void ConvertDataToWorldUnits(tHandlingData* handling);
     void ConvertDataToGameUnits(tHandlingData* handling);
     void ConvertBikeDataToWorldUnits(tBikeHandlingData* bikeHandling);

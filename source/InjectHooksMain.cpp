@@ -60,6 +60,7 @@
 #include "BulletInfo.h"
 #include "Explosion.h"
 #include "C_PcSave.h"
+#include "FireManager.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -174,6 +175,9 @@ void InjectHooksMain() {
 
     CGenericGameStorage::InjectHooks();
     C_PcSave::InjectHooks();
+
+    CMirrors::InjectHooks();
+    CFire::InjectHooks();
     CExplosion::InjectHooks();
     CClothesBuilder::InjectHooks();
     CClothes::InjectHooks();

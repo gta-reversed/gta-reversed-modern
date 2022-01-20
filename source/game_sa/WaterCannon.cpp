@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "WaterCannon.h"
+#include "FireManager.h"
 
 RxVertexIndex (&CWaterCannon::m_auRenderIndices)[18] = *(RxVertexIndex (*)[18])0xC80700;
 
