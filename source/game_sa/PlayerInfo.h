@@ -91,7 +91,7 @@ public:
 
 public:
     CPlayerInfo();
-    ~CPlayerInfo() = default;
+    ~CPlayerInfo() = default; // 0x45B110
 
     static void CancelPlayerEnteringCars(CVehicle* vehicle);
     static CEntity* FindObjectToSteal(CPed* ped);
@@ -132,7 +132,6 @@ private:
     CVector* GetPos_Hook(CVector* outPos);
 
     CPlayerInfo* Constructor();
-    CPlayerInfo* Destructor();
 };
 
 VALIDATE_SIZE(CPlayerInfo, 0x190);

@@ -5,7 +5,7 @@
 
 void CPlayerInfo::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CPlayerInfo", "Constructor", 0x571920, &CPlayerInfo::Constructor);
+    // Install("CPlayerInfo", "Constructor", 0x571920, &CPlayerInfo::Constructor); hooking ctor will produce bugs with weapons, you will never give weapon through cheat or something
     Install("CPlayerInfo", "Destructor", 0x45B110, &CPlayerInfo::Destructor);
     Install("CPlayerInfo", "CancelPlayerEnteringCars", 0x56E860, &CPlayerInfo::CancelPlayerEnteringCars);
     // Install("CPlayerInfo", "FindObjectToSteal", 0x56DBD0, &CPlayerInfo::FindObjectToSteal);
@@ -38,6 +38,9 @@ void CPlayerInfo::InjectHooks() {
 
 // 0x571920
 CPlayerInfo::CPlayerInfo() {
+    plugin::CallMethod<0x571920, CPlayerInfo*>(this); // see hook
+    return;
+
     m_PlayerData = CPlayerPedData();
 
     m_pSkinTexture = nullptr;
