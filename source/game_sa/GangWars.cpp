@@ -42,7 +42,7 @@ void CGangWars::InjectHooks() {
     // Install("CGangWars", "Load", 0x5D3EB0, &CGangWars::Load);
     // Install("CGangWars", "Save", 0x5D5530, &CGangWars::Save);
     Install("CGangWars", "InitAtStartOfGame", 0x443920, &CGangWars::InitAtStartOfGame);
-    // Install("CGangWars", "AddKillToProvocation", 0x443950, &CGangWars::AddKillToProvocation);
+    Install("CGangWars", "AddKillToProvocation", 0x443950, &CGangWars::AddKillToProvocation);
     // Install("CGangWars", "AttackWaveOvercome", 0x445B30, &CGangWars::AttackWaveOvercome);
     Install("CGangWars", "CalculateTimeTillNextAttack", 0x443DB0, &CGangWars::CalculateTimeTillNextAttack);
     Install("CGangWars", "CanPlayerStartAGangWarHere", 0x443F80, &CGangWars::CanPlayerStartAGangWarHere);
@@ -97,7 +97,24 @@ void CGangWars::InitAtStartOfGame() {
 
 // 0x443950
 void CGangWars::AddKillToProvocation(ePedType pedType) {
-    plugin::Call<0x443950, ePedType>(pedType);
+    if (!bCanTriggerGangWarWhenOnAMission && CTheScripts::IsPlayerOnAMission())
+        return;
+
+    if (pedType != ePedType::PED_TYPE_GANG1 && pedType != ePedType::PED_TYPE_GANG3)
+        return;
+
+    if (NumSpecificZones < 0)
+        return;
+
+    if (NumSpecificZones == 0)
+        Provocation += 1.0f;
+
+   for (int i = 0; i < NumSpecificZones; i++) {
+       uint16 zoneInfIdx = CTheZones::GetNavigationZone(aSpecificZones[i])->m_nZoneExtraIndexInfo;
+
+       if (CTheZones::ZoneInfoArray[zoneInfIdx].GangDensity[pedType - PED_TYPE_GANG1] != 0)
+           Provocation += 1.0f;
+   }
 }
 
 // 0x445B30
@@ -123,9 +140,9 @@ bool CGangWars::CanPlayerStartAGangWarHere(CZoneInfo* zoneInfo) {
 
     // inline?
     for (int i = 0; i < NumSpecificZones; i++) {
-        auto zoneInfIdx = CTheZones::NavigationZoneArray[aSpecificZones[i]].m_nZoneExtraIndexInfo;
+        uint16 zoneInfIdx = CTheZones::GetNavigationZone(aSpecificZones[i])->m_nZoneExtraIndexInfo;
 
-        if (zoneInfo == &CTheZones::ZoneInfoArray[(uint16)zoneInfIdx])
+        if (zoneInfo == &CTheZones::ZoneInfoArray[zoneInfIdx])
             return true;
     }
 
