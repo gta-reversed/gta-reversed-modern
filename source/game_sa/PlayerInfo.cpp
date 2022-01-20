@@ -319,74 +319,72 @@ void CPlayerInfo::PlayerFailedCriticalMission() {
 
 // 0x56E610
 void CPlayerInfo::WorkOutEnergyFromHunger() {
-    static int32 bUpdateLastTimeHungry;        // 0xB9B8F4 original name is unknown
-    static int8  lastTimeHungryStateProcessed; // 0xB9B8F2
-    static int8  gLastHungryState;             // 0xB9B8F1
-    static bool  bHungryMessageShown;          // 0xB9B8F0
+    static int8 s_lastTimeHungryStateProcessed = CClock::GetGameClockHours(); // 0xB9B8F2
+    static int8 s_LastHungryState;                                            // 0xB9B8F1
+    static bool s_bHungryMessageShown;                                        // 0xB9B8F0
 
     if (CCheat::m_aCheatsActive[CHEAT_NEVER_GET_HUNGRY]) {
         return;
     }
 
-    if ((bUpdateLastTimeHungry & 1) == 0) {
-        bUpdateLastTimeHungry |= 1u;
-        lastTimeHungryStateProcessed = CClock::GetGameClockHours();
-    }
-
     auto pad = CPad::GetPad(0);
-    if (!pad->DisablePlayerControls
-     && !CMenuSystem::num_menus_in_use
-     && !TheCamera.m_bWideScreenOn
-     && !CCutsceneMgr::ms_running
-     && !CGameLogic::IsCoopGameGoingOn()
-     && !m_pRemoteVehicle
+    if (   pad->DisablePlayerControls
+        || CMenuSystem::num_menus_in_use
+        || TheCamera.m_bWideScreenOn
+        || CCutsceneMgr::ms_running
+        || CGameLogic::IsCoopGameGoingOn()
+        || m_pRemoteVehicle
     ) {
-        if (!m_pPed)
-            return;
-
-        if (m_pPed->m_pAttachedTo)
-            return;
-
-        if (CClock::GetGameClockHours() != lastTimeHungryStateProcessed) {
-            if (!m_nNumHoursDidntEat)
-                gLastHungryState = 0;
-            m_nNumHoursDidntEat += 1;
-        }
-
-        if (m_nNumHoursDidntEat <= 48) {
-            bHungryMessageShown = 0;
-        } else {
-            if (CClock::GetGameClockHours() == lastTimeHungryStateProcessed)
-                return;
-
-            m_pPed->Say(337, 0, 1.0f, 0, 0, 0);
-            pad->StartShake(400, 110u, 0);
-
-            if (bHungryMessageShown) {
-                bool bDecreaseHealth = false;
-                if (CStats::GetStatValue(STAT_FAT) > 0.0f) {
-                    CStats::DecrementStat(STAT_FAT, 25.0f);
-                    CStats::DisplayScriptStatUpdateMessage(0, STAT_FAT, 25.0f);
-                    bDecreaseHealth = true;
-                    if (!gLastHungryState)
-                        gLastHungryState = m_nNumHoursDidntEat + 24;
-                }
-                if (CStats::GetStatValue(STAT_MUSCLE) <= 0.0f || m_nNumHoursDidntEat <= gLastHungryState && gLastHungryState) {
-                    if (!bDecreaseHealth)
-                        m_pPed->m_fHealth -= 2.0f;
-                } else {
-                    CStats::DecrementStat(STAT_MUSCLE, 25.0);
-                    CStats::DisplayScriptStatUpdateMessage(0, STAT_MUSCLE, 25.0f);
-                }
-            } else {
-                CHud::SetHelpMessage(TheText.Get("NOTEAT"), 1, 0, 1);
-                bHungryMessageShown = true;
-            }
-        }
-
-        if (CClock::GetGameClockHours() != lastTimeHungryStateProcessed)
-            lastTimeHungryStateProcessed = CClock::GetGameClockHours();
+        return;
     }
+
+    if (!m_pPed)
+        return;
+
+    if (m_pPed->m_pAttachedTo)
+        return;
+
+    if (CClock::GetGameClockHours() != s_lastTimeHungryStateProcessed) {
+        if (!m_nNumHoursDidntEat)
+            s_LastHungryState = 0;
+        m_nNumHoursDidntEat += 1;
+    }
+
+    if (m_nNumHoursDidntEat <= 48) {
+        s_bHungryMessageShown = false;
+    } else {
+        if (CClock::GetGameClockHours() == s_lastTimeHungryStateProcessed)
+            return;
+
+        m_pPed->Say(337);
+        pad->StartShake(400, 110u, 0);
+
+        if (s_bHungryMessageShown) {
+            bool bDecreaseHealth{};
+            if (CStats::GetStatValue(STAT_FAT) > 0.0f) {
+                CStats::DecrementStat(STAT_FAT, 25.0f);
+                CStats::DisplayScriptStatUpdateMessage(0, STAT_FAT, 25.0f);
+                bDecreaseHealth = true;
+                if (!s_LastHungryState)
+                    s_LastHungryState = m_nNumHoursDidntEat + 24;
+            }
+
+            if (CStats::GetStatValue(STAT_MUSCLE) <= 0.0f || m_nNumHoursDidntEat <= s_LastHungryState && s_LastHungryState) {
+                if (!bDecreaseHealth)
+                    m_pPed->m_fHealth -= 2.0f;
+            } else {
+                CStats::DecrementStat(STAT_MUSCLE, 25.0);
+                CStats::DisplayScriptStatUpdateMessage(0, STAT_MUSCLE, 25.0f);
+            }
+        } else {
+            CHud::SetHelpMessage(TheText.Get("NOTEAT"), true, false, true);
+            s_bHungryMessageShown = true;
+        }
+    }
+
+    if (CClock::GetGameClockHours() != s_lastTimeHungryStateProcessed)
+        s_lastTimeHungryStateProcessed = CClock::GetGameClockHours();
+    
 }
 
 // 0x56E5D0
