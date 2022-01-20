@@ -171,6 +171,7 @@ void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
 
+    CMirrors::InjectHooks();
     CFire::InjectHooks();
     CExplosion::InjectHooks();
     CClothesBuilder::InjectHooks();
