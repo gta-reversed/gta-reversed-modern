@@ -70,7 +70,7 @@ public:
     uint32         m_nTimeOfLastCarExplosionCaused;
     uint32         m_nExplosionMultiplier;
     uint32         m_nHavocCaused;        // A counter going up when the player does bad stuff.
-    uint8          m_nNumHoursDidntEat;
+    uint16         m_nNumHoursDidntEat;
     float          m_fCurrentChaseValue;  // How 'ill' is the chase at the moment
     bool           m_bDoesNotGetTired;
     bool           m_bFastReload;
