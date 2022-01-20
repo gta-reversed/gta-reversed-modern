@@ -481,7 +481,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
 
         auto& cm = *mi->GetColModel();
         LoadCollisionModelAnyVersion(header, buffIt + sizeof(FileHeader), cm);
-        cm.m_boundSphere.m_nMaterial = colId; // TODO: At this point I'm convinced something is fucked (m_boundSphere should probably be a CSphere instead)
+        cm.m_nColSlot = colId; // TODO: At this point I'm convinced something is fucked (m_boundSphere should probably be a CSphere instead)
 
         if (mi->GetModelType() == eModelInfoType::MODEL_INFO_TYPE_ATOMIC) {
             CPlantMgr::SetPlantFriendlyFlagInAtomicMI(static_cast<CAtomicModelInfo*>(mi));
@@ -519,7 +519,7 @@ void CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
 
         auto& cm = *mi->GetColModel();
         LoadCollisionModelAnyVersion(header, buffer, cm);
-        cm.m_boundSphere.m_nMaterial = colId;
+        cm.m_nColSlot = colId;
     }
     CFileMgr::CloseFile(f);
 }
@@ -639,7 +639,7 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     cd->m_pShadowTriangles = nullptr;
 
     if (cd->m_nNumSpheres || cd->m_nNumBoxes || cd->m_nNumTriangles)
-        cm.m_boundSphere.m_bNotEmpty = true; // Doesn't make a whole lot of sense, but kay
+        cm.m_bNotEmpty = true; // Doesn't make a whole lot of sense, but kay
 }
 
 // 0x537EE0
@@ -652,8 +652,8 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
 
     auto& h = *reinterpret_cast<Header*>(buffer);
     cm.m_boundBox = h.bounds.box;
-    cm.m_boundSphere = CColSphere{ h.bounds.sphere };
-    cm.m_boundSphere.m_bNotEmpty = !h.IsEmpty();
+    cm.m_boundSphere = h.bounds.sphere;
+    cm.m_bNotEmpty = !h.IsEmpty();
 
     auto dataSizeAfterHeader = dataSize - sizeof(Header);
     if (!dataSizeAfterHeader) {
@@ -711,7 +711,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
     cd->m_nNumShadowTriangles = 0;
     cd->m_pShadowTriangles = nullptr;
 
-    cm.m_boundSphere.m_bIsSingleColDataAlloc = true;
+    cm.m_bIsSingleColDataAlloc = true;
 }
 
 // 0x537CE0
@@ -722,8 +722,8 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
 
     auto& h = *reinterpret_cast<V3::Header*>(buffer);
     cm.m_boundBox = h.bounds.box;
-    cm.m_boundSphere = CColSphere{ h.bounds.sphere };
-    cm.m_boundSphere.m_bNotEmpty = !h.IsEmpty();
+    cm.m_boundSphere = h.bounds.sphere;
+    cm.m_bNotEmpty = !h.IsEmpty();
 
     auto dataSizeAfterHeader = dataSize - sizeof(V3::Header);
     if (!dataSizeAfterHeader) {
@@ -780,7 +780,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
 
     cd->m_pTrianglePlanes = nullptr;
 
-    cm.m_boundSphere.m_bIsSingleColDataAlloc = true;
+    cm.m_bIsSingleColDataAlloc = true;
 }
 
 // 0x537AE0
@@ -791,8 +791,8 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
 
     auto& h = *reinterpret_cast<V4::Header*>(buffer);
     cm.m_boundBox = h.bounds.box;
-    cm.m_boundSphere = CColSphere{ h.bounds.sphere };
-    cm.m_boundSphere.m_bNotEmpty = !h.IsEmpty();
+    cm.m_boundSphere = h.bounds.sphere;
+    cm.m_bNotEmpty = !h.IsEmpty();
 
     auto dataSizeAfterHeader = dataSize - sizeof(V4::Header);
     if (!dataSizeAfterHeader) {
@@ -849,7 +849,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
 
     cd->m_pTrianglePlanes = nullptr;
 
-    cm.m_boundSphere.m_bIsSingleColDataAlloc = true;
+    cm.m_bIsSingleColDataAlloc = true;
 }
 
 // 0x5B3C60
@@ -1004,13 +1004,13 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
 
     auto* cm = mi->GetColModel();
     if (cm) {
-        if (cm->m_boundSphere.m_bNotEmpty)
+        if (cm->m_bNotEmpty)
         {
-            if (cm->m_boundSphere.m_nColSlot)
+            if (cm->m_nColSlot)
             {
                 CRect rect;
                 newEntity->GetBoundRect(&rect);
-                auto* pColDef = CColStore::ms_pColPool->GetAt(cm->m_boundSphere.m_nColSlot);
+                auto* pColDef = CColStore::ms_pColPool->GetAt(cm->m_nColSlot);
                 pColDef->m_Area.Restrict(rect);
             }
         }

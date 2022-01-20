@@ -53,7 +53,6 @@ public:
     {
     };
 
-    void Set(float radius, const CVector& center);
     void Set(float radius, const CVector& center, uint8 material, uint8 flags, uint8 lighting);
     bool IntersectRay(const CVector& rayOrigin, const CVector& direction, CVector& intersectPoint1, CVector& intersectPoint2);
     bool IntersectEdge(const CVector& startPoint, const CVector& endPoint, CVector& intersectPoint1, CVector& intersectPoint2);

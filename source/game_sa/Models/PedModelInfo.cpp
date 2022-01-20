@@ -89,7 +89,7 @@ void CPedModelInfo::CreateHitColModelSkinned(RpClump* pClump)
 
     pColModel->m_boundSphere.Set(1.5F, CVector(0.0F, 0.0F, 0.0F));
     pColModel->m_boundBox.Set(CVector(-0.5F, -0.5F, -1.2F), CVector(0.5F, 0.5F, 1.2F));
-    pColModel->m_boundSphere.m_nMaterial = eSurfaceType::SURFACE_DEFAULT;
+    pColModel->m_nColSlot = 0;
 
     m_pHitColModel = pColModel;
 }
