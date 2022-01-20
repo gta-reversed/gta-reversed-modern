@@ -46,7 +46,7 @@ void CGangWars::InjectHooks() {
     // Install("CGangWars", "AttackWaveOvercome", 0x445B30, &CGangWars::AttackWaveOvercome);
     Install("CGangWars", "CalculateTimeTillNextAttack", 0x443DB0, &CGangWars::CalculateTimeTillNextAttack);
     Install("CGangWars", "CanPlayerStartAGangWarHere", 0x443F80, &CGangWars::CanPlayerStartAGangWarHere);
-    // Install("CGangWars", "CheerVictory", 0x444040, &CGangWars::CheerVictory);
+    Install("CGangWars", "CheerVictory", 0x444040, &CGangWars::CheerVictory);
     Install("CGangWars", "ClearSpecificZonesToTriggerGangWar", 0x443FF0, &CGangWars::ClearSpecificZonesToTriggerGangWar);
     // Install("CGangWars", "ClearTheStreets", 0x4444B0, &CGangWars::ClearTheStreets);
     // Install("CGangWars", "CreateAttackWave", 0x444810, &CGangWars::CreateAttackWave);
@@ -145,7 +145,24 @@ bool CGangWars::CanPlayerStartAGangWarHere(CZoneInfo* zoneInfo) {
 
 // 0x444040
 void CGangWars::CheerVictory() {
-    plugin::Call<0x444040>();
+    auto& playerGroup = FindPlayerPed()->GetGroup();
+
+    CPed* nearestMember = nullptr;
+    playerGroup.FindDistanceToNearestMember(&nearestMember);
+
+    if (!nearestMember)
+        return;
+
+    constexpr const char* zoneNames[] = {
+        "CHC", "LFL", "EBE", "ELF", "JEF",
+        "GLN", "IWD", "GAN", "LMEX", "LIND",
+        "PLS", "SUN"
+    };
+
+    for (auto i = 0u; i < std::size(zoneNames); i++) {
+        if (!stricmp(pZoneToFightOver->m_szTextKey, zoneNames[i]))
+            return nearestMember->Say(208 + i);
+    }
 }
 
 // 0x443FF0
