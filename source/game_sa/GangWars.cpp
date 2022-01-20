@@ -56,7 +56,7 @@ void CGangWars::InjectHooks() {
     Install("CGangWars", "EndGangWar", 0x4464C0, &CGangWars::EndGangWar);
     Install("CGangWars", "GangWarFightingGoingOn", 0x443AC0, &CGangWars::GangWarFightingGoingOn);
     Install("CGangWars", "GangWarGoingOn", 0x443AA0, &CGangWars::GangWarGoingOn);
-    // Install("CGangWars", "MakeEnemyGainInfluenceInZone", 0x445FD0, &CGangWars::MakeEnemyGainInfluenceInZone);
+    Install("CGangWars", "MakeEnemyGainInfluenceInZone", 0x445FD0, &CGangWars::MakeEnemyGainInfluenceInZone);
     // Install("CGangWars", "MakePlayerGainInfluenceInZone", 0x445E80, &CGangWars::MakePlayerGainInfluenceInZone);
     // Install("CGangWars", "PedStreamedInForThisGang", 0x4439D0, &CGangWars::PedStreamedInForThisGang);
     // Install("CGangWars", "PickStreamedInPedForThisGang", 0x443A20, &CGangWars::PickStreamedInPedForThisGang);
@@ -242,9 +242,22 @@ bool CGangWars::GangWarGoingOn() {
     return State != NOT_IN_WAR || State2 == WAR_NOTIFIED;
 }
 
-// 0x445FD0
+// 0x445FD0, untested
 void CGangWars::MakeEnemyGainInfluenceInZone(int32 gangId, int32 gangDensityIncreaser) {
-    plugin::Call<0x445FD0, int32, int32>(gangId, gangDensityIncreaser);
+    if (!pZoneInfoToFightOver)
+        return;
+
+    auto totalGangDensity = pZoneInfoToFightOver->GangDensity[GANG_BALLAS]
+        + pZoneInfoToFightOver->GangDensity[GANG_GROVE]
+        + pZoneInfoToFightOver->GangDensity[GANG_VAGOS];
+
+    if (!totalGangDensity)
+        return;
+
+    pZoneInfoToFightOver->GangDensity[gangId] += gangDensityIncreaser;
+
+    if (!DoesPlayerControlThisZone(pZoneInfoToFightOver))
+        CStats::IncrementStat(STAT_TERRITORIES_LOST, 1.0f);
 }
 
 // 0x445E80
