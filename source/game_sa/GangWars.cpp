@@ -45,7 +45,7 @@ void CGangWars::InjectHooks() {
     // Install("CGangWars", "AddKillToProvocation", 0x443950, &CGangWars::AddKillToProvocation);
     // Install("CGangWars", "AttackWaveOvercome", 0x445B30, &CGangWars::AttackWaveOvercome);
     Install("CGangWars", "CalculateTimeTillNextAttack", 0x443DB0, &CGangWars::CalculateTimeTillNextAttack);
-    // Install("CGangWars", "CanPlayerStartAGangWarHere", 0x443F80, &CGangWars::CanPlayerStartAGangWarHere);
+    Install("CGangWars", "CanPlayerStartAGangWarHere", 0x443F80, &CGangWars::CanPlayerStartAGangWarHere);
     // Install("CGangWars", "CheerVictory", 0x444040, &CGangWars::CheerVictory);
     Install("CGangWars", "ClearSpecificZonesToTriggerGangWar", 0x443FF0, &CGangWars::ClearSpecificZonesToTriggerGangWar);
     // Install("CGangWars", "ClearTheStreets", 0x4444B0, &CGangWars::ClearTheStreets);
@@ -112,7 +112,24 @@ float CGangWars::CalculateTimeTillNextAttack() {
 
 // 0x443F80
 bool CGangWars::CanPlayerStartAGangWarHere(CZoneInfo* zoneInfo) {
-    return plugin::CallAndReturn<bool, 0x443F80, CZoneInfo*>(zoneInfo);
+    if (bTrainingMission)
+        return zoneInfo == &CTheZones::ZoneInfoArray[ZoneInfoForTraining];
+
+    if (NumSpecificZones == 0)
+        return true;
+
+    if (NumSpecificZones < 0)
+        return false;
+
+    // inline?
+    for (int i = 0; i < NumSpecificZones; i++) {
+        auto zoneInfIdx = CTheZones::NavigationZoneArray[aSpecificZones[i]].m_nZoneExtraIndexInfo;
+
+        if (zoneInfo == &CTheZones::ZoneInfoArray[(uint16)zoneInfIdx])
+            return true;
+    }
+
+    return false;
 }
 
 // 0x444040
