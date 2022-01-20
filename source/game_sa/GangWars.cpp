@@ -38,6 +38,10 @@ CVector& CGangWars::PointOfAttack = *reinterpret_cast<CVector*>(0x96ABC8);
 
 void CGangWars::InjectHooks() {
     using namespace ReversibleHooks;
+
+    // Install("CGangWars", "Load", 0x5D3EB0, &CGangWars::Load);
+    // Install("CGangWars", "Save", 0x5D5530, &CGangWars::Save);
+    Install("CGangWars", "InitAtStartOfGame", 0x443920, &CGangWars::InitAtStartOfGame);
     // Install("CGangWars", "AddKillToProvocation", 0x443950, &CGangWars::AddKillToProvocation);
     // Install("CGangWars", "AttackWaveOvercome", 0x445B30, &CGangWars::AttackWaveOvercome);
     Install("CGangWars", "CalculateTimeTillNextAttack", 0x443DB0, &CGangWars::CalculateTimeTillNextAttack);
@@ -52,8 +56,6 @@ void CGangWars::InjectHooks() {
     Install("CGangWars", "EndGangWar", 0x4464C0, &CGangWars::EndGangWar);
     Install("CGangWars", "GangWarFightingGoingOn", 0x443AC0, &CGangWars::GangWarFightingGoingOn);
     Install("CGangWars", "GangWarGoingOn", 0x443AA0, &CGangWars::GangWarGoingOn);
-    Install("CGangWars", "InitAtStartOfGame", 0x443920, &CGangWars::InitAtStartOfGame);
-    // Install("CGangWars", "Load", 0x5D3EB0, &CGangWars::Load);
     // Install("CGangWars", "MakeEnemyGainInfluenceInZone", 0x445FD0, &CGangWars::MakeEnemyGainInfluenceInZone);
     // Install("CGangWars", "MakePlayerGainInfluenceInZone", 0x445E80, &CGangWars::MakePlayerGainInfluenceInZone);
     // Install("CGangWars", "PedStreamedInForThisGang", 0x4439D0, &CGangWars::PedStreamedInForThisGang);
@@ -61,13 +63,12 @@ void CGangWars::InjectHooks() {
     // Install("CGangWars", "PickZoneToAttack", 0x443B00, &CGangWars::PickZoneToAttack);
     // Install("CGangWars", "ReleaseCarsInAttackWave", 0x445E20, &CGangWars::ReleaseCarsInAttackWave);
     // Install("CGangWars", "ReleasePedsInAttackWave", 0x445C30, &CGangWars::ReleasePedsInAttackWave);
-    // Install("CGangWars", "Save", 0x5D5530, &CGangWars::Save);
     Install("CGangWars", "SetGangWarsActive", 0x446570, &CGangWars::SetGangWarsActive);
-    // Install("CGangWars", "SetSpecificZoneToTriggerGangWar", 0x444010, &CGangWars::SetSpecificZoneToTriggerGangWar);
+    Install("CGangWars", "SetSpecificZoneToTriggerGangWar", 0x444010, &CGangWars::SetSpecificZoneToTriggerGangWar);
     // Install("CGangWars", "StartDefensiveGangWar", 0x444300, &CGangWars::StartDefensiveGangWar);
     // Install("CGangWars", "StartOffensiveGangWar", 0x446050, &CGangWars::StartOffensiveGangWar);
     // Install("CGangWars", "StrengthenPlayerInfluenceInZone", 0x445F50, &CGangWars::StrengthenPlayerInfluenceInZone);
-    // Install("CGangWars", "SwitchGangWarsActive", 0x4465F0, &CGangWars::SwitchGangWarsActive);
+    Install("CGangWars", "SwitchGangWarsActive", 0x4465F0, &CGangWars::SwitchGangWarsActive);
     // Install("CGangWars", "TellGangMembersTo", 0x444530, &CGangWars::TellGangMembersTo);
     // Install("CGangWars", "TellStreamingWhichGangsAreNeeded", 0x443D50, &CGangWars::TellStreamingWhichGangsAreNeeded);
     // Install("CGangWars", "Update", 0x446610, &CGangWars::Update);
@@ -153,17 +154,15 @@ void CGangWars::DoStuffWhenPlayerVictorious() {
     CStats::IncrementStat(STAT_RESPECT, 45.0);
     CTheZones::FillZonesWithGangColours(false);
 
-    auto v2 = TimeTillNextAttack - 240000.0f;
-    if ( v2 <= 30000.0f )
-        TimeTillNextAttack = 30000.0f;
-    else
-        TimeTillNextAttack = v2;
+    TimeTillNextAttack = std::min(TimeTillNextAttack - 240000.0f, 30000.0f);
 }
 
 // inlined
 // 0x443AE0
 bool CGangWars::DoesPlayerControlThisZone(CZoneInfo* zoneInfo) {
-    return plugin::CallAndReturn<bool, 0x443AE0, CZoneInfo*>(zoneInfo);;
+    uint8 enemyDensity = zoneInfo->GangDensity[GANG_BALLAS] + zoneInfo->GangDensity[GANG_VAGOS];
+
+    return zoneInfo->GangDensity[GANG_GROVE] > enemyDensity;
 }
 
 // 0x4439C0
@@ -174,12 +173,14 @@ bool CGangWars::DontCreateCivilians() {
 // 0x4464C0
 void CGangWars::EndGangWar(bool bEnd) {
     State = NOT_IN_WAR;
+
     if (State2 == WAR_NOTIFIED) {
         State2 = NO_ATTACK;
         TimeTillNextAttack = CalculateTimeTillNextAttack();
         uint32 nReleasedPeds = ReleasePedsInAttackWave(true, false);
-        MakeEnemyGainInfluenceInZone(Gang1, 3u * nReleasedPeds);
+        MakeEnemyGainInfluenceInZone(Gang1, 3 * nReleasedPeds);
     }
+
     Provocation = 0.0f;
     CTheZones::FillZonesWithGangColours(false);
     ReleasePedsInAttackWave(true, bEnd);
@@ -188,12 +189,12 @@ void CGangWars::EndGangWar(bool bEnd) {
 
 // 0x443AC0
 bool CGangWars::GangWarFightingGoingOn() {
-    return State == PREFIRST_WAVE || State2 == PLAYER_CAME_TO_WAR;
+    return State != NOT_IN_WAR || State2 == PLAYER_CAME_TO_WAR;
 }
 
 // 0x443AA0
 bool CGangWars::GangWarGoingOn() {
-    return State == PREFIRST_WAVE || State2 == WAR_NOTIFIED;
+    return State != NOT_IN_WAR || State2 == WAR_NOTIFIED;
 }
 
 // 0x445FD0
@@ -237,6 +238,7 @@ void CGangWars::SetGangWarsActive(bool active) {
     if (active != bGangWarsActive) {
         CTheZones::FillZonesWithGangColours(active == false);
         TimeTillNextAttack = CalculateTimeTillNextAttack();
+
         if (!active)
             EndGangWar(false);
     }
@@ -246,7 +248,8 @@ void CGangWars::SetGangWarsActive(bool active) {
 // 0x444010
 void CGangWars::SetSpecificZoneToTriggerGangWar(int32 zoneId) {
     aSpecificZones[NumSpecificZones] = zoneId;
-    NumSpecificZones += 1;
+    NumSpecificZones++;
+
     CTheZones::FillZonesWithGangColours(false);
 }
 
@@ -268,7 +271,7 @@ void CGangWars::StrengthenPlayerInfluenceInZone(int32 groveDensityIncreaser) {
 // 0x4465F0
 // unused
 void CGangWars::SwitchGangWarsActive() {
-    SetGangWarsActive(bGangWarsActive ^ true);
+    SetGangWarsActive(bGangWarsActive == false);
 }
 
 // 0x444530
