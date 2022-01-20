@@ -61,7 +61,7 @@ void CGangWars::InjectHooks() {
     Install("CGangWars", "PedStreamedInForThisGang", 0x4439D0, &CGangWars::PedStreamedInForThisGang);
     // Install("CGangWars", "PickStreamedInPedForThisGang", 0x443A20, &CGangWars::PickStreamedInPedForThisGang);
     // Install("CGangWars", "PickZoneToAttack", 0x443B00, &CGangWars::PickZoneToAttack);
-    // Install("CGangWars", "ReleaseCarsInAttackWave", 0x445E20, &CGangWars::ReleaseCarsInAttackWave);
+    Install("CGangWars", "ReleaseCarsInAttackWave", 0x445E20, &CGangWars::ReleaseCarsInAttackWave);
     // Install("CGangWars", "ReleasePedsInAttackWave", 0x445C30, &CGangWars::ReleasePedsInAttackWave);
     Install("CGangWars", "SetGangWarsActive", 0x446570, &CGangWars::SetGangWarsActive);
     Install("CGangWars", "SetSpecificZoneToTriggerGangWar", 0x444010, &CGangWars::SetSpecificZoneToTriggerGangWar);
@@ -273,7 +273,7 @@ bool CGangWars::PedStreamedInForThisGang(int32 gangId) {
     if (numPeds <= 0)
         return false;
 
-    for (int i = 0; i < numPeds; i++) {
+    for (auto i = 0u; i < numPeds; i++) {
         if (CStreaming::GetInfo(*CPopulation::m_PedGroups[i]).m_nLoadState != LOADSTATE_LOADED)
             return true;
     }
@@ -293,7 +293,26 @@ bool CGangWars::PickZoneToAttack() {
 
 // 0x445E20
 void CGangWars::ReleaseCarsInAttackWave() {
-    plugin::Call<0x445E20>();
+    //plugin::Call<0x445E20>();
+    auto size = CPools::ms_pVehiclePool->GetSize();
+
+    if (!size)
+        return;
+
+    for (auto i = 0u; i < size; i++) {
+        auto id = CPools::ms_pVehiclePool->m_byteMap[size - i].IntValue();
+
+        if (id < 0)
+            continue;
+
+        //CPools::GetVehicle?
+        CVehicle* vehicle = static_cast<CVehicle*>(&CPools::ms_pVehiclePool->m_pObjects[size - i]);
+
+        if (vehicle && vehicle->vehicleFlags.bPartOfAttackWave) {
+            vehicle->vehicleFlags.bPartOfAttackWave = false;
+            vehicle->SetVehicleCreatedBy(1);
+        }
+    }
 }
 
 // Returns num of released peds
