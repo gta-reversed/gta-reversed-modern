@@ -92,7 +92,7 @@ struct CCullZoneReflection {
     int8     vx; // mirror direction (like [-1 0 0] or [0 1 0] or [0 0 -1])
     int8     vy;
     int8     vz;
-    int8     flags;
+    uint8    flags;
 
     bool IsPointWithin(const CVector& point) { return zoneDef.IsPointWithin(point); };
 };
