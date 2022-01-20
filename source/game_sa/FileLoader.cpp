@@ -576,7 +576,7 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
 
     auto& h = *reinterpret_cast<Header*&>(bufferIt)++;
     cm.m_boundBox = h.bounds.box;
-    cm.m_boundSphere = CColSphere{ h.bounds.sphere };
+    cm.m_boundSphere = h.bounds.sphere;
     bufferIt += sizeof(Header);
 
     auto cd = new CCollisionData{};
