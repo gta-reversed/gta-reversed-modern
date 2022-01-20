@@ -106,10 +106,10 @@ void CSkidmark::Render() const {
             if (part == 0)
                 return 0u; // First "part" has always 0 alpha.
 
-            if (m_nNumParts == part && m_nState == eSkidmarkState::JUST_UPDATED)
+            if (m_nNumParts == part && m_nState == eSkidmarkState::DISAPPEARING)
                 return 0u; // Last part
 
-            return (uint8)(baseColor.a * 128 / 256); // Again, they avoided fp division.. This is just a division by 2.
+            return (uint8)(baseColor.a * 128u / 256u); // Again, they avoided fp division.. This is just a division by 2.
         };
         RwRGBA partColor = baseColor.ToRwRGBA();
         partColor.alpha = GetAlpha();
