@@ -82,14 +82,18 @@ void CPlayerInfo::EvaluateCarPosition(CEntity* car, CPed* ped, float pedToVehDis
     const auto pedPosn = ped->GetPosition();
     const auto forward = ped->GetForward();
 
-    float atan = CGeneral::GetATanOfXY(forward.x, forward.y) - CGeneral::GetATanOfXY(carPosn.x - pedPosn.x, carPosn.y - pedPosn.y);
-    for (; atan > PI; atan -= TWO_PI) {}
-    for (; atan < -PI; atan += TWO_PI) {}
+    // Find our rotation (so that is, at which angle the forward vector is)
+    const auto angleFront = CGeneral::GetATanOfXY(forward.x, forward.y);
 
-    if (atan < 0.0f)
-        atan = -atan;
+    // Find car angle, not relative to our rotation
+    const auto carAngle = CGeneral::GetATanOfXY(carPosn.x - pedPosn.x, carPosn.y - pedPosn.y);
 
-    const auto distance = (1.0f - atan / TWO_PI) * (10.0f - pedToVehDist);
+    // Make car's angle relative to our rotation (notice: it's an abs value)
+    // Basically, we calculate how much the car is in our FOV.
+    const auto carAngleFromFront = std::abs(CGeneral::LimitRadianAngle(angleFront - carAngle));
+
+    // Calculate imaginary distance based on the car's angle: The higher the angle the greater the distance
+    const auto distance = (1.0f - carAngleFromFront / TWO_PI) * (10.0f - pedToVehDist);
     if (distance >= *outDistance) {
         *outDistance = distance;
         *outVehicle = car->AsVehicle();
