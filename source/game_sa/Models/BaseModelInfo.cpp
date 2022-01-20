@@ -267,3 +267,7 @@ void SetBaseModelInfoFlags(CBaseModelInfo* modelInfo, uint32 dwFlags)
     modelInfo->bDontCastShadowsOn = flagsStruct.bDontReceiveShadows;
     modelInfo->bIsBackfaceCulled = !flagsStruct.bDisableBackfaceCulling;
 }
+
+void CBaseModelInfo::SetBaseModelInfoFlags(uint32 flags) {
+    ::SetBaseModelInfoFlags(this, flags);
+}

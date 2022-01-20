@@ -16,7 +16,7 @@ CColModel::CColModel() : m_boundBox()
 {
     m_boundSphere.m_nMaterial = 0;
     m_pColData = nullptr;
-    m_boundSphere.m_bFlag0x01 = false;
+    m_boundSphere.m_bNotEmpty = false;
     m_boundSphere.m_bIsSingleColDataAlloc = false;
     m_boundSphere.m_bIsActive = true;
 }

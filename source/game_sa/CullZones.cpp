@@ -64,41 +64,39 @@ void CCullZones::AddCullZone(const CVector& center, float zero1, float fWidthY, 
 // flags: see eZoneAttributes
 // 0x72DB50
 void CCullZones::AddTunnelAttributeZone(const CVector& center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, uint16 flags) {
-    int32 i = NumTunnelAttributeZones;
-    auto& attribute = aTunnelAttributeZones[i];
+    auto& attribute = aTunnelAttributeZones[NumTunnelAttributeZones];
 
-    attribute.zoneDef.x = (int16)(center.x - unk1 - fWidthX);
-    attribute.zoneDef.y = (int16)(center.y - fWidthY - unk2);
+    attribute.zoneDef.x       = (int16)(center.x - unk1 - fWidthX);
+    attribute.zoneDef.y       = (int16)(center.y - fWidthY - unk2);
     attribute.zoneDef.field_4 = (int16)(2 * unk1);
-    attribute.zoneDef.widthY = (int16)(2 * fWidthY);
+    attribute.zoneDef.widthY  = (int16)(2 * fWidthY);
     attribute.zoneDef.bottomZ = (int16)(fBottomZ);
-    attribute.zoneDef.widthX = (int16)(2 * fWidthX);
+    attribute.zoneDef.widthX  = (int16)(2 * fWidthX);
     attribute.zoneDef.field_A = (int16)(2 * unk2);
-    attribute.zoneDef.topZ = (int16)(fTopZ);
-    attribute.flags = static_cast<eZoneAttributes>(flags);
+    attribute.zoneDef.topZ    = (int16)(fTopZ);
+    attribute.flags           = static_cast<eZoneAttributes>(flags);
 
     NumTunnelAttributeZones += 1;
 }
 
 // 0x72DC10
 void CCullZones::AddMirrorAttributeZone(const CVector& center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, eZoneAttributes flags, float cm, float vX, float vY, float vZ) {
-    int32 i = NumMirrorAttributeZones;
-    auto& attribute = aMirrorAttributeZones[i];
+    auto& attribute = aMirrorAttributeZones[NumMirrorAttributeZones];
 
-    attribute.zoneDef.x = (int16)(center.x - unk1 - fWidthX);
-    attribute.zoneDef.y = (int16)(center.y - fWidthY - unk2);
+    attribute.zoneDef.x       = (int16)(center.x - unk1 - fWidthX);
+    attribute.zoneDef.y       = (int16)(center.y - fWidthY - unk2);
     attribute.zoneDef.field_4 = (int16)(2 * unk1);
-    attribute.zoneDef.widthY = (int16)(2 * fWidthY);
+    attribute.zoneDef.widthY  = (int16)(2 * fWidthY);
     attribute.zoneDef.bottomZ = (int16)(fBottomZ);
-    attribute.zoneDef.widthX = (int16)(2 * fWidthX);
+    attribute.zoneDef.widthX  = (int16)(2 * fWidthX);
     attribute.zoneDef.field_A = (int16)(2 * unk2);
-    attribute.zoneDef.topZ = (int16)(fTopZ);
-    attribute.flags = (int16)(static_cast<eZoneAttributes>(flags));
-    attribute.cm = (int16)(cm);
+    attribute.zoneDef.topZ    = (int16)(fTopZ);
+    attribute.flags           = (uint16)(static_cast<eZoneAttributes>(flags));
+    attribute.cm              = cm;
 
-    attribute.vx = (char)(vX * 100.0f);
-    attribute.vy = (char)(vY * 100.0f);
-    attribute.vz = (char)(vZ * 100.0f);
+    attribute.vx = (int8)(vX * 100.0f);
+    attribute.vy = (int8)(vY * 100.0f);
+    attribute.vz = (int8)(vZ * 100.0f);
 
     NumMirrorAttributeZones += 1;
 }

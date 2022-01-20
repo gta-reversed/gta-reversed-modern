@@ -23,8 +23,8 @@ public:
     ~CPedModelInfo() { if (m_pHitColModel) delete m_pHitColModel; }
 public:
     int32      m_nAnimType;
-    uint32     m_nPedType;
-    uint32     m_nStatType;
+    ePedType     m_nPedType;
+    ePedStats     m_nStatType;
     uint16     m_nCarsCanDriveMask;
     uint16     m_nPedFlags;
     CColModel* m_pHitColModel;
@@ -33,9 +33,9 @@ public:
     uint8      m_nRace;
     char       _pad;
     int16      m_nPedAudioType;
-    int16      m_nVoiceMin;
-    int16      m_nVoiceMax;
-    int16      m_nVoiceId;
+    int16      m_nVoiceMin; // Also called voice1
+    int16      m_nVoiceMax; // Also called voice2
+    int16      m_nVoiceId; // In `LoadPedObject` this is set to be the same as `m_nVoiceMin` (Which doesn't mean it will always be the same)
 
 public:
     static constexpr int32 NUM_PED_NAME_ID_ASSOC = 13;
