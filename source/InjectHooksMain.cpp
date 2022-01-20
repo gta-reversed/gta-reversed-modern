@@ -59,6 +59,7 @@
 #include "Restart.h"
 #include "BulletInfo.h"
 #include "Explosion.h"
+#include "C_PcSave.h"
 #include "FireManager.h"
 
 // Tasks
@@ -167,9 +168,13 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
 
+
 void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
+
+    CGenericGameStorage::InjectHooks();
+    C_PcSave::InjectHooks();
 
     CMirrors::InjectHooks();
     CFire::InjectHooks();

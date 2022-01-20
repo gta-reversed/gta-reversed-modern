@@ -6,6 +6,9 @@
 */
 #pragma once
 
+static inline bool& JustLoadedDontFadeInYet = *(bool*)0xC16EDC;
+static inline bool& StillToFadeOut = *(bool*)0xC16EDD;
+
 class CDraw {
 public:
     static float& ms_fFOV; // default 45.0

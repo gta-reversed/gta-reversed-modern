@@ -104,6 +104,14 @@ void CPlayerInfo::EvaluateCarPosition(CEntity* car, CPed* ped, float pedToVehDis
     }
 }
 
+bool CPlayerInfo::Load() {
+    return plugin::CallMethodAndReturn<bool, 0x5D3B00>(this);
+}
+
+bool CPlayerInfo::Save() {
+	return plugin::CallMethodAndReturn<bool, 0x5D3AC0>(this);
+}
+
 // 0x56F7D0
 void CPlayerInfo::LoadPlayerSkin() {
     DeletePlayerSkin();

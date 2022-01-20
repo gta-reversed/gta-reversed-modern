@@ -46,6 +46,16 @@ void CGarages::PrintMessages()
     plugin::Call<0x447790>();
 }
 
+// 0x5D3270
+bool CGarages::Load() {
+    return plugin::CallAndReturn<bool, 0x5D3270>();
+}
+
+// 0x5D3160
+bool CGarages::Save() {
+    return plugin::CallAndReturn<bool, 0x5D3160>();
+}
+
 // 0x447B80
 void CGarages::TriggerMessage(Const char* cTagMsg, int16 wMsgMin, uint16 ucTime, int16 wMsgMax)
 {

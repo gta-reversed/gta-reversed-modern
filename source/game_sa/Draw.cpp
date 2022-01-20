@@ -10,8 +10,6 @@ uint8& CDraw::FadeGreen = *(uint8*)0xC3EFA9;
 uint8& CDraw::FadeBlue = *(uint8*)0xC3EFAA;
 uint8& CDraw::FadeValue = *(uint8*)0xC3EFAB;
 
-bool& JustLoadedDontFadeInYet = *(bool*)0xC16EDC;
-bool& StillToFadeOut = *(bool*)0xC16EDD;
 uint32& FadeTimer = *(uint32*)0xC16EE0;
 uint32& FadeOutTime = *(uint32*)0x8D2BD4;
 
