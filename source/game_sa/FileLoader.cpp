@@ -481,7 +481,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
 
         auto& cm = *mi->GetColModel();
         LoadCollisionModelAnyVersion(header, buffIt + sizeof(FileHeader), cm);
-        cm.m_nColSlot = colId; // TODO: At this point I'm convinced something is fucked (m_boundSphere should probably be a CSphere instead)
+        cm.m_nColSlot = colId;
 
         if (mi->GetModelType() == eModelInfoType::MODEL_INFO_TYPE_ATOMIC) {
             CPlantMgr::SetPlantFriendlyFlagInAtomicMI(static_cast<CAtomicModelInfo*>(mi));
