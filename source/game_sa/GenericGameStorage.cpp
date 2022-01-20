@@ -57,7 +57,9 @@ void CGenericGameStorage::ReportError(eBlocks nBlock, eSaveLoadError nError) {
 
     // Yes, they don't do anything with `buffer`
 
+#ifdef _DEBUG
     std::cerr << "[CGenericGameStorage]: " << buffer << std::endl; // NOTSA
+#endif
 }
 
 // part from 0x5D08C0
@@ -451,6 +453,8 @@ bool CGenericGameStorage::GenericSave() {
 
 // 0x5D1380
 bool CGenericGameStorage::CheckSlotDataValid(int32 slot) {
+    assert(slot < MAX_SAVEGAME_SLOTS);
+
     char fileName[MAX_PATH]{};
     C_PcSave::GenerateGameFilename(slot, fileName);
 
@@ -611,9 +615,11 @@ uint32 CGenericGameStorage::GetCurrentVersionNumber() {
 }
 
 // 0x5D0E90
-void CGenericGameStorage::MakeValidSaveName(int32 saveNum) {
+void CGenericGameStorage::MakeValidSaveName(int32 slot) {
+    assert(slot < MAX_SAVEGAME_SLOTS);
+
     char path[MAX_PATH]{};
-    s_PcSaveHelper.GenerateGameFilename(saveNum, path);
+    s_PcSaveHelper.GenerateGameFilename(slot, path);
 
     path[257] = 0; // Make sure there's space for the file extension
 
@@ -653,6 +659,8 @@ bool CGenericGameStorage::OpenFileForWriting() {
 
 // 0x5D0D20
 bool CGenericGameStorage::OpenFileForReading(const char* fileName, int32 slot) {
+    assert(slot < MAX_SAVEGAME_SLOTS);
+
     if (fileName) {
         strcpy_s(ms_LoadFileName, fileName);
         C_PcSave::GenerateGameFilename(slot, ms_LoadFileNameWithPath);
@@ -679,6 +687,8 @@ bool CGenericGameStorage::OpenFileForReading(const char* fileName, int32 slot) {
 
 // 0x5D1170
 bool CGenericGameStorage::CheckDataNotCorrupt(int32 slot, const char* fileName) {
+    assert(slot < MAX_SAVEGAME_SLOTS);
+
     ms_bFailed = false;
     if (!OpenFileForReading(fileName, slot)) {
         return false;
@@ -715,5 +725,6 @@ bool CGenericGameStorage::RestoreForStartLoad() {
 
 // 0x618D00
 const char* GetSavedGameDateAndTime(int32 slot) {
+    assert(slot < MAX_SAVEGAME_SLOTS);
     return CGenericGameStorage::ms_SlotSaveDate[slot];
 }

@@ -27,6 +27,7 @@ void C_PcSave::SetSaveDirectory(const char* path) {
 
 // 0x6190A0
 void C_PcSave::GenerateGameFilename(int32 slot, char* out) {
+    assert(slot < MAX_SAVEGAME_SLOTS);
     sprintf(out, "%s%i%s", DefaultPCSaveFileName, slot + 1, ".b");
 }
 
@@ -97,6 +98,8 @@ uint32 C_PcSave::SaveSlot(int32 slot) {
 
 // 0x6190D0
 bool C_PcSave::DeleteSlot(int32 slot) {
+    assert(slot < MAX_SAVEGAME_SLOTS);
+
     char path[MAX_PATH]{};
     s_PcSaveHelper.error = eErrorCode::NONE;
 	GenerateGameFilename(slot, path);

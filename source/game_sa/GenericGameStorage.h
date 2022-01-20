@@ -1,5 +1,7 @@
 #pragma once
 
+static constexpr auto MAX_SAVEGAME_SLOTS{ 8u };
+
 class CGenericGameStorage {
     static constexpr auto BUFFER_SIZE{ (uint32)(50u * 1024u) };
 
@@ -59,15 +61,15 @@ public:
     static inline char(&ms_LoadFileName)[104] = *(char(*)[104])0xC15FC8;
     static inline char(&ms_LoadFileNameWithPath)[104] = *(char(*)[104])0xC15F60;
     static inline uint32& ms_CheckSum = *(uint32*)0xC16134;
-    static inline tSlotSaveDate(&ms_SlotSaveDate)[8] = *(tSlotSaveDate(*)[8])0xC16138;
-    static inline tSlotFileName(&ms_SlotFileName)[8] = *(tSlotFileName(*)[8])0xC16368;
+    static inline tSlotSaveDate(&ms_SlotSaveDate)[MAX_SAVEGAME_SLOTS] = *(tSlotSaveDate(*)[MAX_SAVEGAME_SLOTS])0xC16138;
+    static inline tSlotFileName(&ms_SlotFileName)[MAX_SAVEGAME_SLOTS] = *(tSlotFileName(*)[MAX_SAVEGAME_SLOTS])0xC16368;
     static inline uint8*& ms_WorkBuffer = *(uint8**)0xC16EE8;
     static inline int32& ms_WorkBufferPos = *(int32*)0xC16EEC;
     static inline FILE*& ms_FileHandle = *(FILE**)0xC16EF0;
     static inline uint32& ms_FilePos = *(uint32*)0xC16EF4;
     static inline uint32& ms_FileSize = *(uint32*)0xC16EF8;
     static inline bool& ms_bFailed = *(bool*)0xC16EFC;
-    static inline eSlotState(&ms_Slots)[8] = *(eSlotState(*)[8])0xC16EBC;
+    static inline eSlotState(&ms_Slots)[MAX_SAVEGAME_SLOTS] = *(eSlotState(*)[MAX_SAVEGAME_SLOTS])0xC16EBC;
     static inline bool& ms_bLoading = *(bool*)0xC16EFD;
     static inline const char ms_BlockTagName[] =  "BLOCK" ;
 
