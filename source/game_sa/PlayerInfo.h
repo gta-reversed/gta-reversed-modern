@@ -11,6 +11,8 @@
 #include "Vector.h"
 #include "PlayerPed.h"
 
+class CPlayerInfoSaveStructure;
+
 enum ePlayerState : uint8 {
     PLAYERSTATE_PLAYING,
     PLAYERSTATE_HAS_DIED,
@@ -21,6 +23,7 @@ enum ePlayerState : uint8 {
 
 class CPed;
 class CVehicle;
+struct RwTexture;
 
 class CPlayerInfo {
 public:
@@ -37,26 +40,25 @@ public:
     uint32         m_nVehicleTimeCounter;     // keeps track of how long player has been in car for driving skill
     bool           m_bTaxiTimerScore;         // If TRUE then add 1 to score for each second that the player is driving a taxi
     bool           m_bTryingToExitCar;        // if player holds exit car button, want to trigger getout once car slowed enough with a passenger
-    char           _pad0[2];
-    CVehicle*      m_pLastTargetVehicle; // Last vehicle player tried to enter.
+    CVehicle*      m_pLastTargetVehicle;      // Last vehicle player tried to enter.
     ePlayerState   m_nPlayerState;
     bool           m_bAfterRemoteVehicleExplosion;
     bool           m_bCreateRemoteVehicleExplosion;
     bool           m_bFadeAfterRemoteVehicleExplosion;
     uint32         m_nTimeOfRemoteVehicleExplosion;
-    uint32         m_nLastTimeEnergyLost; // To make numbers flash on the HUD;
+    uint32         m_nLastTimeEnergyLost;     // To make numbers flash on the HUD
     uint32         m_nLastTimeArmourLost;
     uint32         m_nLastTimeBigGunFired;   // Tank guns etc
     uint32         m_nTimesUpsideDownInARow; // Make car blow up if car upside down
     uint32         m_nTimesStuckInARow;      // Make car blow up if player cannot get out.
     uint32         m_nCarTwoWheelCounter;    // how long has player's car been on two wheels
     float          m_fCarTwoWheelDist;       // Make car blow up if player cannot get out.
-    uint32       m_nCarLess3WheelCounter;  // how long has player's car been on less than 3 wheels
+    uint32         m_nCarLess3WheelCounter;  // how long has player's car been on less than 3 wheels
     uint32         m_nBikeRearWheelCounter;  // how long has player's bike been on rear wheel only
     float          m_fBikeRearWheelDist;
     uint32         m_nBikeFrontWheelCounter; // how long has player's bike been on front wheel only
     float          m_fBikeFrontWheelDist;
-    uint32         m_nTempBufferCounter; // so wheels can leave the ground for a few frames without stopping above counters
+    uint32         m_nTempBufferCounter;     // so wheels can leave the ground for a few frames without stopping above counters
     uint32         m_nBestCarTwoWheelsTimeMs;
     float          m_fBestCarTwoWheelsDistM;
     uint32         m_nBestBikeWheelieTimeMs;
@@ -64,14 +66,12 @@ public:
     uint32         m_nBestBikeStoppieTimeMs;
     float          m_fBestBikeStoppieDistM;
     uint16         m_nCarDensityForCurrentZone;
-    char           _pad1[2];
     float          m_fRoadDensityAroundPlayer; // 1.0f for an average city.
     uint32         m_nTimeOfLastCarExplosionCaused;
     uint32         m_nExplosionMultiplier;
-    uint32         m_nHavocCaused; // A counter going up when the player does bad stuff.
+    uint32         m_nHavocCaused;        // A counter going up when the player does bad stuff.
     uint16         m_nNumHoursDidntEat;
-    char           _pad2[2];
-    float          m_fCurrentChaseValue; // How 'ill' is the chase at the moment
+    float          m_fCurrentChaseValue;  // How 'ill' is the chase at the moment
     bool           m_bDoesNotGetTired;
     bool           m_bFastReload;
     bool           m_bFireProof;
@@ -81,24 +81,124 @@ public:
     bool           m_bFreeHealthCare;   // Player doesn't lose money nexed time patched up at hospital
     bool           m_bCanDoDriveBy;
     uint8          m_nBustedAudioStatus;
-    char           _pad3;
     uint16         m_nLastBustMessageNumber;
     uint32         m_nCrosshairActivated;
     CVector2D      m_vecCrosshairTarget; // -1 ... 1 on screen
     char           m_szSkinName[32];
     RwTexture*     m_pSkinTexture;
     bool           m_bParachuteReferenced;
-    char           _pad4[3];
     uint32         m_nRequireParachuteTimer;
 
 public:
-    static void InjectHooks();
-    bool IsPlayerInRemoteMode();
-    void DeletePlayerSkin();
-    void LoadPlayerSkin();
+    CPlayerInfo();
+    ~CPlayerInfo() = default; // 0x45B110
+
+    static void CancelPlayerEnteringCars(CVehicle* vehicle);
+    static CEntity* FindObjectToSteal(CPed* ped);
+    static void EvaluateCarPosition(CEntity* car, CPed* ped, float pedToVehDist, float* outDistance, CVehicle** outVehicle);
+
+    void Process(uint32 playerIndex);
+    void FindClosestCarSectorList(CPtrList& ptrList, CPed* ped, float minX, float minY, float maxX, float maxY, float* outVehDist, CVehicle** outVehicle);
     void Clear();
+    void GivePlayerParachute();
+    void StreamParachuteWeapon(bool a2);
+    void AddHealth(int32 amount);
+    void BlowUpRCBuggy(bool bExplode);
+    void MakePlayerSafe(bool canMove, float radius);
+    void PlayerFailedCriticalMission();
+    void WorkOutEnergyFromHunger();
+    void ArrestPlayer();
+    void KillPlayer();
+    void LoadPlayerSkin();
+    void DeletePlayerSkin();
+    void SetPlayerSkin(const char* name);
+    void SetLastTargetVehicle(CVehicle* vehicle);
+    bool IsRestartingAfterMissionFailed();
+    bool IsRestartingAfterArrest();
+    bool IsRestartingAfterDeath();
+    bool IsPlayerInRemoteMode();
+
+    CVector GetPos();
+    CVector GetSpeed();
+    
     bool Load();
     bool Save();
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CVector* GetSpeed_Hook(CVector* out);
+    CVector* GetPos_Hook(CVector* outPos);
+
+    CPlayerInfo* Constructor();
 };
 
 VALIDATE_SIZE(CPlayerInfo, 0x190);
+
+class CPlayerInfoSaveStructure {
+    int32        m_nMoney;
+    uint16       m_nCarDensityForCurrentZone;
+    ePlayerState m_nPlayerState;
+    float        m_fRoadDensityAroundPlayer;
+    int32        m_nDisplayMoney;
+    uint8        m_nNumHoursDidntEat;
+    uint32       m_nCollectablesPickedUp;
+    uint32       m_nTotalNumCollectables;
+    bool         m_bDoesNotGetTired;
+    bool         m_bFastReload;
+    bool         m_bFireProof;
+    uint8        m_nMaxHealth;
+    uint8        m_nMaxArmour;
+    bool         m_bGetOutOfJailFree;
+    bool         m_bFreeHealthCare;
+    bool         m_bCanDoDriveBy;
+    uint8        m_nBustedAudioStatus;
+    uint16       m_nLastBustMessageNumber;
+
+public:
+    void Construct(CPlayerInfo* info) {
+        m_nMoney =                          info->m_nMoney;
+        m_nCarDensityForCurrentZone =       info->m_nCarDensityForCurrentZone;
+        m_nPlayerState =                    info->m_nPlayerState;
+        m_fRoadDensityAroundPlayer =        info->m_fRoadDensityAroundPlayer;
+        m_nDisplayMoney =                   info->m_nDisplayMoney;
+        m_nNumHoursDidntEat =               info->m_nNumHoursDidntEat;
+        m_nCollectablesPickedUp =           info->m_nCollectablesPickedUp;
+        m_nTotalNumCollectables =           info->m_nTotalNumCollectables;
+        m_bDoesNotGetTired =                info->m_bDoesNotGetTired;
+        m_bFastReload =                     info->m_bFastReload;
+        m_bFireProof =                      info->m_bFireProof;
+        m_nMaxHealth =                      info->m_nMaxHealth;
+        m_nMaxArmour =                      info->m_nMaxArmour;
+        m_bGetOutOfJailFree =               info->m_bGetOutOfJailFree;
+        m_bFreeHealthCare =                 info->m_bFreeHealthCare;
+        m_bCanDoDriveBy =                   info->m_bCanDoDriveBy;
+        m_nBustedAudioStatus =              info->m_nBustedAudioStatus;
+        m_nLastBustMessageNumber =          info->m_nLastBustMessageNumber;
+    }
+
+    void Extract(CPlayerInfo* info) {
+        info->m_nMoney =                    m_nMoney;
+        info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone;
+        info->m_nPlayerState =              m_nPlayerState;
+        info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone;
+        info->m_fRoadDensityAroundPlayer =  m_fRoadDensityAroundPlayer;
+        info->m_nDisplayMoney =             m_nDisplayMoney;
+        info->m_nNumHoursDidntEat =         m_nNumHoursDidntEat;
+        info->m_nCollectablesPickedUp =     m_nCollectablesPickedUp;
+        info->m_nTotalNumCollectables =     m_nTotalNumCollectables;
+        info->m_bDoesNotGetTired =          m_bDoesNotGetTired;
+        info->m_bFastReload =               m_bFastReload;
+        info->m_bFireProof =                m_bFireProof;
+        info->m_nMaxHealth =                m_nMaxHealth;
+        info->m_nMaxArmour =                m_nMaxArmour;
+        info->m_bGetOutOfJailFree =         m_bGetOutOfJailFree;
+        info->m_bFreeHealthCare =           m_bFreeHealthCare;
+        info->m_bCanDoDriveBy =             m_bCanDoDriveBy;
+        info->m_nBustedAudioStatus =        m_nBustedAudioStatus;
+        info->m_nLastBustMessageNumber =    m_nLastBustMessageNumber;
+    }
+};
+
+VALIDATE_SIZE(CPlayerInfoSaveStructure, 0x28);
