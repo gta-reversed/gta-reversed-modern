@@ -148,7 +148,6 @@ private:
     void FlagToDestroyWhenNextProcessed_Reversed();
 
 public:
-    // funcs
     void UpdateRwFrame();
     void UpdateRpHAnim();
     bool HasPreRenderEffects();
@@ -194,36 +193,41 @@ public:
     bool IsEntityOccluded();
     bool IsInCurrentAreaOrBarberShopInterior();
     void UpdateRW();
-    eEntityType GetType() const noexcept { return m_nType; }
-
     // Always returns a non-null value. In case there's no LOD object `this` is returned. NOTSA
     CEntity* FindLastLOD() noexcept;
+
 public:
     // Rw callbacks
     static RpAtomic* SetAtomicAlphaCB(RpAtomic* pAtomic, void* pData);
     static RpMaterial* SetMaterialAlphaCB(RpMaterial* pMaterial, void* pData);
 
-    inline bool IsPhysical() const { return m_nType > eEntityType::ENTITY_TYPE_BUILDING && m_nType < eEntityType::ENTITY_TYPE_DUMMY; }
-    inline bool IsNothing() const { return m_nType == ENTITY_TYPE_NOTHING; }
-    inline bool IsVehicle() const { return m_nType == ENTITY_TYPE_VEHICLE; }
-    inline bool IsPed() const { return m_nType == ENTITY_TYPE_PED; }
-    inline bool IsObject() const { return m_nType == ENTITY_TYPE_OBJECT; }
-    inline bool IsBuilding() const { return m_nType == ENTITY_TYPE_BUILDING; }
-    inline bool IsDummy() const { return m_nType == ENTITY_TYPE_DUMMY; }
+    bool IsPhysical() const { return m_nType > eEntityType::ENTITY_TYPE_BUILDING && m_nType < eEntityType::ENTITY_TYPE_DUMMY; }
+    bool IsNothing() const { return m_nType == ENTITY_TYPE_NOTHING; }
+    bool IsVehicle() const { return m_nType == ENTITY_TYPE_VEHICLE; }
+    bool IsPed() const { return m_nType == ENTITY_TYPE_PED; }
+    bool IsObject() const { return m_nType == ENTITY_TYPE_OBJECT; }
+    bool IsBuilding() const { return m_nType == ENTITY_TYPE_BUILDING; }
+    bool IsDummy() const { return m_nType == ENTITY_TYPE_DUMMY; }
 
-    inline CPhysical* AsPhysical() { return reinterpret_cast<CPhysical*>(this); }
-    inline CVehicle* AsVehicle() { return reinterpret_cast<CVehicle*>(this); }
-    inline CAutomobile* AsAutomobile() { return reinterpret_cast<CAutomobile*>(this); }
-    inline CBike* AsBike() { return reinterpret_cast<CBike*>(this); }
-    inline CTrain* AsTrain() { return reinterpret_cast<CTrain*>(this); }
-    inline CPed* AsPed() { return reinterpret_cast<CPed*>(this); }
-    inline CObject* AsObject() { return reinterpret_cast<CObject*>(this); }
-    inline CBuilding* AsBuilding() { return reinterpret_cast<CBuilding*>(this); }
-    inline CDummy* AsDummy() { return reinterpret_cast<CDummy*>(this); }
+    bool IsModelTempCollision() const { return m_nModelIndex >= eModelID::MODEL_TEMPCOL_DOOR1 && m_nModelIndex <= eModelID::MODEL_TEMPCOL_BODYPART2; }
+    bool IsStatic() const { return m_bIsStatic || m_bIsStaticWaitingForCollision; } // 0x4633E0
+    bool IsRCCar() const { return m_nModelIndex == MODEL_RCBANDIT || m_nModelIndex == MODEL_RCTIGER || m_nModelIndex == MODEL_RCCAM; }
 
-    inline bool IsModelTempCollision() const { return m_nModelIndex >= eModelID::MODEL_TEMPCOL_DOOR1 && m_nModelIndex <= eModelID::MODEL_TEMPCOL_BODYPART2; }
-    inline bool IsStatic() const { return m_bIsStatic || m_bIsStaticWaitingForCollision; } // 0x4633E0
-    inline bool IsRCCar() const { return m_nModelIndex == MODEL_RCBANDIT || m_nModelIndex == MODEL_RCTIGER || m_nModelIndex == MODEL_RCCAM; }
+    CPhysical*   AsPhysical() { return reinterpret_cast<CPhysical*>(this); }
+    CVehicle*    AsVehicle() { return reinterpret_cast<CVehicle*>(this); }
+    CAutomobile* AsAutomobile() { return reinterpret_cast<CAutomobile*>(this); }
+    CBike*       AsBike() { return reinterpret_cast<CBike*>(this); }
+    CTrain*      AsTrain() { return reinterpret_cast<CTrain*>(this); }
+    CPed*        AsPed() { return reinterpret_cast<CPed*>(this); }
+    CObject*     AsObject() { return reinterpret_cast<CObject*>(this); }
+    CBuilding*   AsBuilding() { return reinterpret_cast<CBuilding*>(this); }
+    CDummy*      AsDummy() { return reinterpret_cast<CDummy*>(this); }
+    
+    auto GetType() const noexcept { return m_nType; }
+	  void SetType(eEntityType type) { m_nType = type; }
+    
+    auto GetStatus() const noexcept { return m_nStatus; }
+    void SetStatus(eEntityStatus status) { m_nStatus = status; }
 };
 
 VALIDATE_SIZE(CEntity, 0x38);

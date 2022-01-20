@@ -6,7 +6,7 @@ public:
 
     static void InitCranes();
     static void UpdateCranes();
-    static bool IsThisCarBeingCarriedByAnyCrane();
-    static bool IsThisCarBeingTargettedByAnyCrane();
-    static bool IsThisCarPickedUp();
+    static bool IsThisCarBeingCarriedByAnyCrane(CVehicle* vehicle);
+    static bool IsThisCarBeingTargettedByAnyCrane(CVehicle* vehicle);
+    static bool IsThisCarPickedUp(float a1, float a2, CVehicle* vehicle);
 };
