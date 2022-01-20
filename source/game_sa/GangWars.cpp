@@ -58,7 +58,7 @@ void CGangWars::InjectHooks() {
     Install("CGangWars", "GangWarGoingOn", 0x443AA0, &CGangWars::GangWarGoingOn);
     Install("CGangWars", "MakeEnemyGainInfluenceInZone", 0x445FD0, &CGangWars::MakeEnemyGainInfluenceInZone);
     // Install("CGangWars", "MakePlayerGainInfluenceInZone", 0x445E80, &CGangWars::MakePlayerGainInfluenceInZone);
-    // Install("CGangWars", "PedStreamedInForThisGang", 0x4439D0, &CGangWars::PedStreamedInForThisGang);
+    Install("CGangWars", "PedStreamedInForThisGang", 0x4439D0, &CGangWars::PedStreamedInForThisGang);
     // Install("CGangWars", "PickStreamedInPedForThisGang", 0x443A20, &CGangWars::PickStreamedInPedForThisGang);
     // Install("CGangWars", "PickZoneToAttack", 0x443B00, &CGangWars::PickZoneToAttack);
     // Install("CGangWars", "ReleaseCarsInAttackWave", 0x445E20, &CGangWars::ReleaseCarsInAttackWave);
@@ -267,7 +267,18 @@ bool CGangWars::MakePlayerGainInfluenceInZone(float removeMult) {
 
 // 0x4439D0
 bool CGangWars::PedStreamedInForThisGang(int32 gangId) {
-    return plugin::CallAndReturn<bool, 0x4439D0, int32>(gangId);
+    auto groupId = CPopulation::GetPedGroupId((ePopcycleGroup)gangId, 0);
+    auto numPeds = CPopulation::GetNumPedsInGroup(groupId);
+
+    if (numPeds <= 0)
+        return false;
+
+    for (int i = 0; i < numPeds; i++) {
+        if (CStreaming::GetInfo(*CPopulation::m_PedGroups[i]).m_nLoadState != LOADSTATE_LOADED)
+            return true;
+    }
+
+    return false;
 }
 
 // 0x443A20
