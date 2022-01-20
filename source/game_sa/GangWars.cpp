@@ -316,7 +316,7 @@ void CGangWars::StrengthenPlayerInfluenceInZone(int32 groveDensityIncreaser) {
 // 0x4465F0
 // unused
 void CGangWars::SwitchGangWarsActive() {
-    SetGangWarsActive(bGangWarsActive == false);
+    SetGangWarsActive(!bGangWarsActive);
 }
 
 // 0x444530
