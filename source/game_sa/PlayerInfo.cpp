@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "PlayerInfo.h"
+#include "FireManager.h"
 
 void CPlayerInfo::InjectHooks() {
     using namespace ReversibleHooks;
