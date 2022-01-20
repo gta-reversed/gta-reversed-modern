@@ -100,17 +100,14 @@ bool C_PcSave::DeleteSlot(int32 slot) {
     char path[MAX_PATH]{};
     s_PcSaveHelper.error = eErrorCode::NONE;
 	GenerateGameFilename(slot, path);
-
-    std::error_code ec{}; // Dont want to be using throwing overload
-    return std::filesystem::remove(path, ec);
-
-    /* Original code:
-	<delete file function>(path);
-	auto file = CFileMgr::OpenFile(_szPath, "rb");
-	if (file) {
-		CFileMgr::CloseFile(file);
-		return false;
-	}
-	return true;
-    */
+#ifdef DEFAULT_FUNCTIONS
+    DeleteFile(path);
+    if (auto f = CFileMgr::OpenFile(path, "rb")) {
+        CFileMgr::CloseFile(f);
+        return true;
+    }
+    return false;
+#else
+    return std::filesystem::remove(path);
+#endif
 }
