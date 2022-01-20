@@ -103,9 +103,6 @@ void CGangWars::AddKillToProvocation(ePedType pedType) {
     if (pedType != ePedType::PED_TYPE_GANG1 && pedType != ePedType::PED_TYPE_GANG3)
         return;
 
-    if (NumSpecificZones < 0)
-        return;
-
     if (NumSpecificZones == 0)
         Provocation += 1.0f;
 
@@ -134,9 +131,6 @@ bool CGangWars::CanPlayerStartAGangWarHere(CZoneInfo* zoneInfo) {
 
     if (NumSpecificZones == 0)
         return true;
-
-    if (NumSpecificZones < 0)
-        return false;
 
     // inline?
     for (int i = 0; i < NumSpecificZones; i++) {
