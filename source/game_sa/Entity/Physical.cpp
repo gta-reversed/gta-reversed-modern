@@ -137,25 +137,25 @@ void CPhysical::Add_Reversed()
     int32 endSectorY = CWorld::GetSectorY(boundRect.bottom);
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
-            CPtrListDoubleLink* doubleLinkList = nullptr;
+            CPtrListDoubleLink* list = nullptr;
             CRepeatSector* repeatSector = GetRepeatSector(sectorX, sectorY);
             switch (m_nType) {
             case ENTITY_TYPE_VEHICLE:
-                doubleLinkList = &repeatSector->m_lists[REPEATSECTOR_VEHICLES];
+                list = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
                 break;
             case ENTITY_TYPE_PED:
-                doubleLinkList = &repeatSector->m_lists[REPEATSECTOR_PEDS];
+                list = &repeatSector->GetList(REPEATSECTOR_PEDS);
                 break;
             case ENTITY_TYPE_OBJECT:
-                doubleLinkList = &repeatSector->m_lists[REPEATSECTOR_OBJECTS];
+                list = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
                 break;
             }
 
             auto newEntityInfoNode = new CEntryInfoNode();
             if (newEntityInfoNode) {
-                newEntityInfoNode->m_doubleLink = doubleLinkList->AddItem(this);
+                newEntityInfoNode->m_doubleLink = list->AddItem(this);
                 newEntityInfoNode->m_repeatSector = repeatSector;
-                newEntityInfoNode->m_doubleLinkList = doubleLinkList;
+                newEntityInfoNode->m_doubleLinkList = list;
             }
             newEntityInfoNode->AddToList(m_pCollisionList.m_node);
             m_pCollisionList.m_node = newEntityInfoNode;
@@ -615,17 +615,17 @@ void CPhysical::RemoveAndAdd()
     int32 endSectorY = CWorld::GetSectorY(boundRect.bottom);
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
-            CPtrListDoubleLink* doubleLinkList = nullptr;
+            CPtrListDoubleLink* list = nullptr;
             CRepeatSector* repeatSector = GetRepeatSector(sectorX, sectorY);
             switch (m_nType) {
             case ENTITY_TYPE_VEHICLE:
-                doubleLinkList = &repeatSector->m_lists[REPEATSECTOR_VEHICLES];
+                list = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
                 break;
             case ENTITY_TYPE_PED:
-                doubleLinkList = &repeatSector->m_lists[REPEATSECTOR_PEDS];
+                list = &repeatSector->GetList(REPEATSECTOR_PEDS);
                 break;
             case ENTITY_TYPE_OBJECT:
-                doubleLinkList = &repeatSector->m_lists[REPEATSECTOR_OBJECTS];
+                list = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
                 break;
             }
 
@@ -642,17 +642,17 @@ void CPhysical::RemoveAndAdd()
                 if (doubleLinkNext)
                     doubleLinkNext->m_prev = doubleLink->m_prev;
 
-                doubleLink->AddToList(doubleLinkList);
+                doubleLink->AddToList(list);
 
                 entryInfoNode->m_repeatSector = repeatSector;
-                entryInfoNode->m_doubleLinkList = doubleLinkList;
+                entryInfoNode->m_doubleLinkList = list;
                 entryInfoNode = entryInfoNode->m_next;
             } else {
                 auto newEntityInfoNode = new CEntryInfoNode();
                 if (newEntityInfoNode) {
-                    newEntityInfoNode->m_doubleLink = doubleLinkList->AddItem(this);
+                    newEntityInfoNode->m_doubleLink = list->AddItem(this);
                     newEntityInfoNode->m_repeatSector = repeatSector;
-                    newEntityInfoNode->m_doubleLinkList = doubleLinkList;
+                    newEntityInfoNode->m_doubleLinkList = list;
                 }
                 newEntityInfoNode->AddToList(m_pCollisionList.m_node);
                 m_pCollisionList.m_node = newEntityInfoNode;
@@ -2020,24 +2020,24 @@ bool CPhysical::ProcessShiftSectorList(int32 sectorX, int32 sectorY)
     int32 scanListIndex = 4;
     do
     {
-        CPtrListDoubleLink* doubleLinkList = nullptr;
+        CPtrListDoubleLink* list = nullptr;
         switch (--scanListIndex)
         {
         case 0:
-            doubleLinkList = &sector->m_buildings;
+            list = &sector->m_buildings;
             break;
         case 1:
-            doubleLinkList = &repeatSector->m_lists[eRepeatSectorList::REPEATSECTOR_VEHICLES];
+            list = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
             break;
         case 2:
-            doubleLinkList = &repeatSector->m_lists[eRepeatSectorList::REPEATSECTOR_PEDS];
+            list = &repeatSector->GetList(REPEATSECTOR_PEDS);
             break;
         case 3:
-            doubleLinkList = &repeatSector->m_lists[eRepeatSectorList::REPEATSECTOR_OBJECTS];
+            list = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
             break;
         }
-        CPtrNodeDoubleLink* node = doubleLinkList->GetNode();
-        if (doubleLinkList->GetNode())
+        CPtrNodeDoubleLink* node = list->GetNode();
+        if (list->GetNode())
         {
             do
             {
@@ -4029,23 +4029,23 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
 
     int32 scanListIndex = 4;
     do {
-        CPtrListDoubleLink* doubleLinkList = nullptr;
+        CPtrListDoubleLink* list = nullptr;
         --scanListIndex;
         switch (scanListIndex) {
         case 0:
-            doubleLinkList = &repeatSector->m_lists[eRepeatSectorList::REPEATSECTOR_PEDS];
+            list = &repeatSector->GetList(REPEATSECTOR_PEDS);
             break;
         case 1:
-            doubleLinkList = &repeatSector->m_lists[eRepeatSectorList::REPEATSECTOR_OBJECTS];
+            list = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
             break;
         case 2:
-            doubleLinkList = &repeatSector->m_lists[eRepeatSectorList::REPEATSECTOR_VEHICLES];
+            list = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
             break;
         case 3:
-            doubleLinkList = &sector->m_buildings;
+            list = &sector->m_buildings;
             break;
         }
-        CPtrNodeDoubleLink* node = doubleLinkList->GetNode();
+        CPtrNodeDoubleLink* node = list->GetNode();
         if (node) {
             CEntity* entity = nullptr;
 
@@ -4556,20 +4556,20 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
     GetBoundCentre(&vecBoundingCentre);
 
     float fBoundingRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
-    CPtrListDoubleLink* doubleLinkList = nullptr;
+    CPtrListDoubleLink* list = nullptr;
 
     int32 scanListIndex = 2;
     while (true) {
         switch (--scanListIndex) {
         case 0:
-            doubleLinkList = &repeatSector->m_lists[eRepeatSectorList::REPEATSECTOR_VEHICLES];
+            list = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
             break;
         case 1:
-            doubleLinkList = &repeatSector->m_lists[eRepeatSectorList::REPEATSECTOR_OBJECTS];
+            list = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
             break;
         }
 
-        if (doubleLinkList->GetNode()) {
+        if (list->GetNode()) {
             break;
         }
 
@@ -4583,7 +4583,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
 
     int32 totalColPointsToProcess = 0;
 
-    CPtrNodeDoubleLink* node = doubleLinkList->GetNode();
+    CPtrNodeDoubleLink* node = list->GetNode();
     while (node)
     {
         entity = reinterpret_cast<CEntity*>(node->m_item);

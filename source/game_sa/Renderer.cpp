@@ -14,19 +14,15 @@
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
 #endif
 
-int32 MAX_INVISIBLE_ENTITY_PTRS = 150;
-int32 MAX_VISIBLE_ENTITY_PTRS = 1000;
-int32 MAX_VISIBLE_LOD_PTRS = 1000;
-int32 MAX_VISIBLE_SUPERLOD_PTRS = 50;
 bool& CRenderer::ms_bRenderTunnels = *(bool*)0xB745C0;
 bool& CRenderer::ms_bRenderOutsideTunnels = *(bool*)0xB745C1;
 tRenderListEntry*& CRenderer::ms_pLodDontRenderList = *(tRenderListEntry**)0xB745CC;
 tRenderListEntry*& CRenderer::ms_pLodRenderList = *(tRenderListEntry**)0xB745D0;
 CVehicle*& CRenderer::m_pFirstPersonVehicle = *(CVehicle**)0xB745D4;
-CEntity** CRenderer::ms_aInVisibleEntityPtrs = (CEntity**)0xB745D8;
-CEntity** CRenderer::ms_aVisibleSuperLodPtrs = (CEntity**)0xB74830;
-CEntity** CRenderer::ms_aVisibleLodPtrs = (CEntity**)0xB748F8;
-CEntity** CRenderer::ms_aVisibleEntityPtrs = (CEntity**)0xB75898;
+CEntity* (&CRenderer::ms_aInVisibleEntityPtrs)[MAX_INVISIBLE_ENTITY_PTRS] = *(CEntity*(*)[MAX_INVISIBLE_ENTITY_PTRS])0xB745D8;
+CEntity* (&CRenderer::ms_aVisibleSuperLodPtrs)[MAX_VISIBLE_SUPERLOD_PTRS] = *(CEntity*(*)[MAX_VISIBLE_SUPERLOD_PTRS])0xB74830;
+CEntity* (&CRenderer::ms_aVisibleLodPtrs)[MAX_VISIBLE_LOD_PTRS] = *(CEntity*(*)[MAX_VISIBLE_LOD_PTRS])0xB748F8;
+CEntity* (&CRenderer::ms_aVisibleEntityPtrs)[MAX_VISIBLE_ENTITY_PTRS] = *(CEntity*(*)[MAX_VISIBLE_ENTITY_PTRS])0xB75898;
 int32& CRenderer::ms_nNoOfVisibleSuperLods = *(int32*)0xB76838;
 int32& CRenderer::ms_nNoOfInVisibleEntities = *(int32*)0xB7683C;
 int32& CRenderer::ms_nNoOfVisibleLods = *(int32*)0xB76840;
@@ -99,9 +95,9 @@ void CRenderer::Shutdown() {
 
 // 0x5531E0
 void CRenderer::RenderFadingInEntities() {
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)rwCULLMODECULLBACK);
     DeActivateDirectional();
     SetAmbientColours();
     CVisibilityPlugins::RenderFadingEntities();
@@ -351,9 +347,9 @@ void CRenderer::RenderRoads() {
 
 // 0x553AA0
 void CRenderer::RenderEverythingBarRoads() {
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)rwCULLMODECULLBACK);
     if (!CGame::currArea)
         RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)140u);
 
@@ -410,14 +406,14 @@ void CRenderer::RenderFirstPersonVehicle() {
             bRestoreAlphaTest = true;
             RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)80u);
         }
-        RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
         RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
         RenderOneNonRoad(m_pFirstPersonVehicle);
-        RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
         if (bRestoreAlphaTest)
             RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)nullptr);
     }
@@ -984,7 +980,7 @@ void CRenderer::ScanSectorList_RequestModels(int32 sectorX, int32 sectorY) {
         CSector* sector = GetSector(sectorX, sectorY);
         ScanPtrList_RequestModels(sector->m_buildings);
         ScanPtrList_RequestModels(sector->m_dummies);
-        ScanPtrList_RequestModels(GetRepeatSector(sectorX, sectorY)->m_lists[REPEATSECTOR_OBJECTS]);
+        ScanPtrList_RequestModels(GetRepeatSector(sectorX, sectorY)->GetList(REPEATSECTOR_OBJECTS));
     }
 }
 
@@ -1174,17 +1170,17 @@ void CRenderer::SetupScanLists(int32 sectorX, int32 sectorY)
     if (sectorX >= 0 && sectorY >= 0 && sectorX < MAX_SECTORS_X && sectorY < MAX_SECTORS_Y) {
         CSector* sector = GetSector(sectorX, sectorY);
         scanLists->buildingsList = &sector->m_buildings;
-        scanLists->objectsList = &repeatSector->m_lists[REPEATSECTOR_OBJECTS];
-        scanLists->vehiclesList = &repeatSector->m_lists[REPEATSECTOR_VEHICLES];
-        scanLists->pedsList = &repeatSector->m_lists[REPEATSECTOR_PEDS];
+        scanLists->objectsList = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
+        scanLists->vehiclesList = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
+        scanLists->pedsList = &repeatSector->GetList(REPEATSECTOR_PEDS);
         scanLists->dummiesList = &sector->m_dummies;
     }
     else {
         // sector x and y are out of bounds
         scanLists->buildingsList = nullptr;
-        scanLists->objectsList = &repeatSector->m_lists[0];
-        scanLists->vehiclesList = &repeatSector->m_lists[1];
-        scanLists->pedsList = &repeatSector->m_lists[2];
+        scanLists->objectsList = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
+        scanLists->vehiclesList = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
+        scanLists->pedsList = &repeatSector->GetList(REPEATSECTOR_PEDS);
         scanLists->dummiesList = nullptr;
     }
 }

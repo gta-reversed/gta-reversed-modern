@@ -587,9 +587,9 @@ CEntity* CTaskSimpleClimb::ScanToGrab(CPed* ped, CVector& climbPos, float& fAngl
         for (int32 x = x1; x <= x2; x++)
         {
             auto scanResult1 = ScanToGrabSectorList(&GetSector(x, y)->m_buildings, ped, climbPos, fAngle, pSurfaceType, flag1, bStandUp, bVault);
-            auto scanResult2 = ScanToGrabSectorList(&GetRepeatSector(x, y)->m_lists[REPEATSECTOR_OBJECTS], ped, climbPos, fAngle, pSurfaceType, flag1, bStandUp, bVault);
+            auto scanResult2 = ScanToGrabSectorList(&GetRepeatSector(x, y)->GetList(REPEATSECTOR_OBJECTS), ped, climbPos, fAngle, pSurfaceType, flag1, bStandUp, bVault);
             if (!scanResult2)
-                scanResult2 = ScanToGrabSectorList(&GetRepeatSector(x, y)->m_lists[REPEATSECTOR_VEHICLES], ped, climbPos, fAngle, pSurfaceType, flag1, bStandUp, bVault);
+                scanResult2 = ScanToGrabSectorList(&GetRepeatSector(x, y)->GetList(REPEATSECTOR_VEHICLES), ped, climbPos, fAngle, pSurfaceType, flag1, bStandUp, bVault);
 
             if ((int32)(scanResult1) == 1 || (int32)(scanResult2) == 1)
                 return nullptr;

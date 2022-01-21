@@ -168,32 +168,32 @@ void CEntity::Add_Reversed(CRect const& rect)
         int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
-                CPtrListDoubleLink* pDoubleLinkList = nullptr;
-                auto pRepeatSector = GetRepeatSector(sectorX, sectorY);
-                auto pSector = GetSector(sectorX, sectorY);
+                CPtrListDoubleLink* list = nullptr;
+                auto repeatSector = GetRepeatSector(sectorX, sectorY);
+                auto sector = GetSector(sectorX, sectorY);
 
                 if (IsBuilding()) { //Buildings are treated as single link here, needs checking if the list is actually single or double
-                    reinterpret_cast<CPtrListSingleLink*>(&pSector->m_buildings)->AddItem(this);
+                    reinterpret_cast<CPtrListSingleLink*>(&sector->m_buildings)->AddItem(this);
                     continue;
                 }
 
                 switch (m_nType)
                 {
                 case ENTITY_TYPE_DUMMY:
-                    pDoubleLinkList = &pSector->m_dummies;
+                    list = &sector->m_dummies;
                     break;
                 case ENTITY_TYPE_VEHICLE:
-                    pDoubleLinkList = &pRepeatSector->m_lists[REPEATSECTOR_VEHICLES];
+                    list = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
                     break;
                 case ENTITY_TYPE_PED:
-                    pDoubleLinkList = &pRepeatSector->m_lists[REPEATSECTOR_PEDS];
+                    list = &repeatSector->GetList(REPEATSECTOR_PEDS);
                     break;
                 case ENTITY_TYPE_OBJECT:
-                    pDoubleLinkList = &pRepeatSector->m_lists[REPEATSECTOR_OBJECTS];
+                    list = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
                     break;
                 }
 
-                pDoubleLinkList->AddItem(this);
+                list->AddItem(this);
             }
         }
     }
@@ -227,8 +227,8 @@ void CEntity::Remove_Reversed()
         int32 endSectorY = CWorld::GetLodSectorY(usedRect.bottom);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
-                auto& pLodListEntry = CWorld::GetLodPtrList(sectorX, sectorY);
-                pLodListEntry.DeleteItem(this);
+                auto& list = CWorld::GetLodPtrList(sectorX, sectorY);
+                list.DeleteItem(this);
             }
         }
     }
@@ -239,32 +239,32 @@ void CEntity::Remove_Reversed()
         int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
         for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
             for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
-                CPtrListDoubleLink* pDoubleLinkList = nullptr;
-                auto pRepeatSector = GetRepeatSector(sectorX, sectorY);
-                auto pSector = GetSector(sectorX, sectorY);
+                CPtrListDoubleLink* list = nullptr;
+                auto sector = GetSector(sectorX, sectorY);
+                auto repeatSector = GetRepeatSector(sectorX, sectorY);
 
                 if (IsBuilding()) { //Buildings are treated as single link here
-                    reinterpret_cast<CPtrListSingleLink*>(&pSector->m_buildings)->DeleteItem(this);
+                    reinterpret_cast<CPtrListSingleLink*>(&sector->m_buildings)->DeleteItem(this);
                     continue;
                 }
 
                 switch (m_nType)
                 {
                 case ENTITY_TYPE_DUMMY:
-                    pDoubleLinkList = &pSector->m_dummies;
+                    list = &sector->m_dummies;
                     break;
                 case ENTITY_TYPE_VEHICLE:
-                    pDoubleLinkList = &pRepeatSector->m_lists[REPEATSECTOR_VEHICLES];
+                    list = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
                     break;
                 case ENTITY_TYPE_PED:
-                    pDoubleLinkList = &pRepeatSector->m_lists[REPEATSECTOR_PEDS];
+                    list = &repeatSector->GetList(REPEATSECTOR_PEDS);
                     break;
                 case ENTITY_TYPE_OBJECT:
-                    pDoubleLinkList = &pRepeatSector->m_lists[REPEATSECTOR_OBJECTS];
+                    list = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
                     break;
                 }
 
-                pDoubleLinkList->DeleteItem(this);
+                list->DeleteItem(this);
             }
         }
     }
