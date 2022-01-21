@@ -1,7 +1,8 @@
 #include "StdInc.h"
 #include "Sphere.h"
 
-void CSphere::Set(float radius, CVector const& center) {
+// 0x40FCF0
+void CSphere::Set(float radius, const CVector& center) {
     m_fRadius = radius;
     m_vecCenter = center;
 }
