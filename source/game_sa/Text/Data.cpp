@@ -4,8 +4,8 @@
 #include "GxtChar.h"
 
 CData::CData() {
-    data = nullptr;
-    size = 0;
+    m_data = nullptr;
+    m_size = 0;
 }
 
 CData::~CData() {
@@ -14,14 +14,14 @@ CData::~CData() {
 
 // 0x69F640
 void CData::Unload() {
-    delete[] data;
-    data = nullptr;
-    size = 0;
+    delete[] m_data;
+    m_data = nullptr;
+    m_size = 0;
 }
 
-// nSkipBytes always 0
+// unknown always 0
 // 0x69F5D0
-void CData::Load(uint32 length, FILESTREAM file, uint32* offset, uint8 nSkipBytes) {
+bool CData::Load(uint32 length, FILESTREAM file, uint32* offset, uint8 unknown) {
 #ifdef USE_ORIGINAL_CODE
     uint32 temp = 0;
 
@@ -36,13 +36,12 @@ void CData::Load(uint32 length, FILESTREAM file, uint32* offset, uint8 nSkipByte
         m_data[i] = (GxtChar)temp;
         ++*offset;
     }
-
-    return true;
 #else
-    size = length / sizeof(char);
-    data = new char[size];
+    m_size = length / sizeof(char);
+    m_data = new char[m_size];
 
-    CFileMgr::Read(file, data, length);
+    CFileMgr::Read(file, m_data, length);
     *offset += length;
 #endif
+    return true;
 }
