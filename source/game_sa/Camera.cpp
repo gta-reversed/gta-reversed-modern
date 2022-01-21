@@ -66,8 +66,8 @@ void CCamera::InjectHooks() {
 //    ReversibleHooks::Install("CCamera", "GetLookDirection", 0x50AE90, &CCamera::GetLookDirection);
 //    ReversibleHooks::Install("CCamera", "GetLookingForwardFirstPerson", 0x50AED0, &CCamera::GetLookingForwardFirstPerson);
 //    ReversibleHooks::Install("CCamera", "CopyCameraMatrixToRWCam", 0x50AFA0, &CCamera::CopyCameraMatrixToRWCam);
-//    ReversibleHooks::Install("CCamera", "CalculateMirroredMatrix", 0x50B380, &CCamera::CalculateMirroredMatrix);
-//    ReversibleHooks::Install("CCamera", "DealWithMirrorBeforeConstructRenderList", 0x50B510, &CCamera::DealWithMirrorBeforeConstructRenderList);
+    ReversibleHooks::Install("CCamera", "CalculateMirroredMatrix", 0x50B380, &CCamera::CalculateMirroredMatrix);
+    ReversibleHooks::Install("CCamera", "DealWithMirrorBeforeConstructRenderList", 0x50B510, &CCamera::DealWithMirrorBeforeConstructRenderList);
 //    ReversibleHooks::Install("CCamera", "ProcessFade", 0x50B5D0, &CCamera::ProcessFade);
 //    ReversibleHooks::Install("CCamera", "ProcessMusicFade", 0x50B6D0, &CCamera::ProcessMusicFade);
 //    ReversibleHooks::Install("CCamera", "Restore", 0x50B930, &CCamera::Restore);
@@ -293,13 +293,35 @@ void CCamera::CopyCameraMatrixToRWCam(bool bUpdateMatrix) {
 }
 
 // 0x50B380
-void CCamera::CalculateMirroredMatrix(CVector posn, float mirrorV, CMatrix* camMatrix, CMatrix* mirrorMatrix) {
-    return plugin::CallMethod<0x50B380, CCamera*, CVector, float, CMatrix*, CMatrix*>(this, posn, mirrorV, camMatrix, mirrorMatrix);
+void CCamera::CalculateMirroredMatrix(CVector posn, float mirrorV, CMatrix *camMatrix, CMatrix* mirrorMatrix) {
+    mirrorMatrix->GetPosition() = camMatrix->GetPosition() - posn * 2 * (DotProduct(posn, camMatrix->GetPosition()) - mirrorV);
+
+    const CVector fwd = camMatrix->GetForward() - posn * 2 * DotProduct(posn, camMatrix->GetForward());
+    mirrorMatrix->GetForward() = fwd;
+
+    const CVector up = camMatrix->GetUp() - posn * 2 * DotProduct(posn, camMatrix->GetUp());
+    mirrorMatrix->GetUp() = up;
+
+    mirrorMatrix->GetRight() = CVector{
+        up.y * fwd.z - up.z * fwd.y,
+        up.z * fwd.x - up.x * fwd.z,
+        up.x * fwd.y - up.y * fwd.x
+    };
 }
 
 // 0x50B510
 void CCamera::DealWithMirrorBeforeConstructRenderList(bool bActiveMirror, CVector mirrorNormal, float mirrorV, CMatrix* matMirror) {
-    plugin::CallMethod<0x50B380, CCamera*, bool, CVector, float, CMatrix*>(this, bActiveMirror, mirrorNormal, mirrorV, matMirror);
+    m_bMirrorActive = bActiveMirror;
+
+    if (!bActiveMirror)
+        return;
+
+    if (matMirror)
+        m_mMatMirror = *matMirror;
+    else
+        CalculateMirroredMatrix(mirrorNormal, mirrorV, &m_mCameraMatrix, &m_mMatMirror);
+
+    m_mMatMirrorInverse = Invert(m_mMatMirror);
 }
 
 // 0x50B8F0
@@ -770,14 +792,21 @@ void CCamera::ImproveNearClip(CVehicle* pVehicle, CPed* pPed, CVector* source, C
     return plugin::CallMethod<0x516B20, CCamera*, CVehicle*, CPed*, CVector*, CVector*>(this, pVehicle, pPed, source, targPosn);
 }
 
+static CMatrix& preMirrorMat = *(CMatrix*)0xB6FE40;
+
 // 0x51A560
 void CCamera::SetCameraUpForMirror() {
-    plugin::CallMethod<0x51A560, CCamera*>(this);
+    preMirrorMat = m_mCameraMatrix;
+    m_mCameraMatrix = m_mMatMirror;
+    CopyCameraMatrixToRWCam(true);
+    CalculateDerivedValues(true, false);
 }
 
 // 0x51A5A0
 void CCamera::RestoreCameraAfterMirror() {
-    plugin::CallMethod<0x51A5A0, CCamera*>(this);
+    SetMatrix(preMirrorMat);
+    CopyCameraMatrixToRWCam(true);
+    CalculateDerivedValues(false, false);
 }
 
 // 0x51A5D0

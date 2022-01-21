@@ -21,6 +21,7 @@
 #include "PedType.h"
 #include "IKChainManager_c.h"
 #include "CreepingFire.h"
+#include "Skidmarks.h"
 
 char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
 int32& CGame::currLevel = *reinterpret_cast<int32*>(0xB7290C);

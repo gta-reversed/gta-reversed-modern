@@ -80,7 +80,9 @@ public:
      * RequestRecordingFile(int32)
      * RestoreInfoForCar(CVehicle*, CVehicleStateEachFrame*, bool)
      * RestoreInfoForMatrix(CMatrix&, CVehicleStateEachFrame*)
-     * SaveOrRetrieveDataForThisFrame()
+     */
+    static void SaveOrRetrieveDataForThisFrame();
+    /*
      * SetRecordingToPointClosestToCoors(int32, CVector)
      * ShutDown()
      * SkipForwardInRecording(CVehicle*, float)

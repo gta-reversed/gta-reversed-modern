@@ -204,3 +204,5 @@ m_smokeyDistance
 m_smokeyEnable
 m_smokeyStrength
 */
+
+bool RsCameraBeginUpdate(RwCamera* camera);

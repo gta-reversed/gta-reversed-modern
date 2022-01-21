@@ -76,7 +76,7 @@ public:
     static char (*ms_cLoadObjectName)[32]; // static char ms_cLoadObjectName[50][32]
     static float &ms_cutsceneTimer;
     static char *ms_cutsceneName; // static char ms_cutsceneName[8]
-    static CCutsceneObject **ms_pCutsceneObjects; // static CCutsceneObject *ms_pCutsceneObject[50]
+    static inline CCutsceneObject* (&ms_pCutsceneObjects)[50] = *(CCutsceneObject * (*)[50])0xBC3F18;
     static uint32 &ms_cutscenePlayStatus;
     static uint32 &ms_numCutsceneObjs;
     static uint32 &ms_numLoadObjectNames;

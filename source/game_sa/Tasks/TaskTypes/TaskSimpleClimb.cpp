@@ -653,7 +653,7 @@ bool CTaskSimpleClimb::CreateColModel()
     ms_ClimbColModel.m_pColData->m_pSpheres[21].Set(0.4F, { 0.0F, 1.5F, 0.4F }, 21, 21, 255);
     ms_ClimbColModel.m_boundSphere.Set(2.02F, { 0.0F, 0.75F, 1.65F });
     ms_ClimbColModel.GetBoundingBox().Set({ -0.4F, -0.46F, 0.0F }, { 0.4F, 1.9F, 3.3F });
-    ms_ClimbColModel.m_boundSphere.m_nMaterial = 0;
+    ms_ClimbColModel.m_nColSlot = 0;
 
     ms_StandUpColModel.AllocateData(7, 0, 0, 0, 0, 0);
     ms_StandUpColModel.m_pColData->m_pSpheres[0].Set(0.35F, { 0.0F, 0.6F, 1.75F }, 0, 0, 255);
@@ -665,7 +665,7 @@ bool CTaskSimpleClimb::CreateColModel()
     ms_StandUpColModel.m_pColData->m_pSpheres[6].Set(0.35F, { 0.0F, 0.0F, -0.3F }, 6, 6, 255);
     ms_StandUpColModel.m_boundSphere.Set(1.5F, { 0.0F, 0.3F, 0.7F });
     ms_StandUpColModel.GetBoundingBox().Set({ -0.35F, -0.35F, -0.65F }, { 0.35F, 0.95F, 2.1F });
-    ms_StandUpColModel.m_boundSphere.m_nMaterial = 0;
+    ms_StandUpColModel.m_nColSlot = 0;
 
     ms_VaultColModel.AllocateData(6, 0, 0, 0, 0, 0);
     ms_VaultColModel.m_pColData->m_pSpheres[0].Set(0.3F, { 0.0F, 1.1F, -0.2F }, 0, 0, 255);
@@ -676,7 +676,7 @@ bool CTaskSimpleClimb::CreateColModel()
     ms_VaultColModel.m_pColData->m_pSpheres[5].Set(0.3F, { 0.0F, 0.0F, 0.6F }, 5, 5, 255);
     ms_VaultColModel.m_boundSphere.Set(1.15F, { 0.0F, 0.5F, 0.1F });
     ms_VaultColModel.GetBoundingBox().Set({ -0.35F, -0.35F, -0.6F }, { 0.35F, 1.3F, 0.85F });
-    ms_VaultColModel.m_boundSphere.m_nMaterial = 0;
+    ms_VaultColModel.m_nColSlot = 0;
 
     ms_FindEdgeColModel.AllocateData(16, 0, 0, 0, 0, 0);
     ms_FindEdgeColModel.m_pColData->m_pSpheres[0].Set(0.3F, { 0.0F, -0.5F, 0.5F }, 0, 0, 255);
@@ -697,7 +697,7 @@ bool CTaskSimpleClimb::CreateColModel()
     ms_FindEdgeColModel.m_pColData->m_pSpheres[15].Set(0.3F, { 0.0F, 0.1F, -0.1F }, 15, 15, 255);
     ms_FindEdgeColModel.m_boundSphere.Set(0.9F, { 0.0F, -0.2F, 0.2F });
     ms_FindEdgeColModel.GetBoundingBox().Set({ -0.3F, -0.8F, -0.4F }, { 0.3F, 0.4F, 0.8F });
-    ms_FindEdgeColModel.m_boundSphere.m_nMaterial = 0;
+    ms_FindEdgeColModel.m_nColSlot = 0;
 
     return true;
 }

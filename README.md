@@ -13,7 +13,7 @@ Before you start writing code, please make sure to read the [coding guidelines](
 
 ### Requirements
 
-* [Visual Studio 2019](https://visualstudio.microsoft.com/en/downloads/) (Community Edition is enough)
+* [Visual Studio 2019 or newer](https://visualstudio.microsoft.com/en/downloads/) (Community Edition is enough)
 * [CMake](https://cmake.org) (for those who want to use CMake instead of premake5)
 
 #### Game
@@ -39,7 +39,7 @@ git clone --recurse-submodules https://github.com/Updated-Classic/gta-reversed-m
 <details>
 <summary>Premake5</summary>
 
-1) Execute `premake5.bat` (for VS2019), or `premake5 vs20xx` for other VS versions. (e.g. vs2022)
+1) Execute `premake5.bat` for VS2019, or `premake5.bat vs20xx` for other VS versions. (e.g: `premake5.bat vs2022`)
 
 2) You'll find gta_reversed.sln shortcut in the same folder as premake5.
 
@@ -83,13 +83,12 @@ git clone --recurse-submodules https://github.com/Updated-Classic/gta-reversed-m
 
 You can create symbolic links for artifacts to not copy them every time you compiled the project.
 
-Run console (administrator privileges may be needed) and type these commands:
-
+Open a console in the project's directory (administrator privileges may be needed) and type in the following commands:
 ```shell
-cd "<GTA SA PATH>\scripts"
-mklink gta_reversed.asi <PROJECT PATH>\bin\Debug\gta_reversed.asi
-mklink gta_reversed.pdb <PROJECT PATH>\bin\Debug\gta_reversed.pdb
+cd contrib
+link_asi.bat "<GAME_PATH>/scripts"
 ```
+Replace `<GAME_PATH>` with the path to the game's root directory (i.e.: where the `exe` is)
     
 ### Credits
 - All contributors of the [plugin-sdk](https://github.com/DK22Pac/plugin-sdk) project.

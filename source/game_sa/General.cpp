@@ -116,12 +116,12 @@ uint32 CGeneral::GetNodeHeadingFromVector(float x, float y) {
     if (angle < 0.0f)
         angle += TWO_PI;
 
-    angle = RWDEG2RAD(22.5f) + TWO_PI - angle;
+    angle = TWO_PI - angle + RWDEG2RAD(22.5f);
 
     if (angle >= TWO_PI)
         angle -= TWO_PI;
 
-    return (int32)floor(angle / RWDEG2RAD(45.0f));
+    return (uint32)floor(angle / RWDEG2RAD(45.0f));
 }
 
 // 0x53CE30
