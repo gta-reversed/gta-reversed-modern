@@ -95,10 +95,10 @@ public:
 
     static void CancelPlayerEnteringCars(CVehicle* vehicle);
     static CEntity* FindObjectToSteal(CPed* ped);
-    static void EvaluateCarPosition(CEntity* car, CPed* ped, float pedToVehDist, float* outDistance, CVehicle** outVehicle);
 
     void Process(uint32 playerIndex);
     void FindClosestCarSectorList(CPtrList& ptrList, CPed* ped, float minX, float minY, float maxX, float maxY, float* outVehDist, CVehicle** outVehicle);
+    void EvaluateCarPosition(CEntity* car, CPed* ped, float pedToVehDist, float* outDistance, CVehicle** outVehicle);
     void Clear();
     void GivePlayerParachute();
     void StreamParachuteWeapon(bool a2);

@@ -75,9 +75,9 @@ CEntity* CPlayerInfo::FindObjectToSteal(CPed* ped) {
 
 // 0x56DAD0
 void CPlayerInfo::EvaluateCarPosition(CEntity* car, CPed* ped, float pedToVehDist, float* outDistance, CVehicle** outVehicle) {
-    const auto carPosn = car->GetPosition();
-    const auto pedPosn = ped->GetPosition();
-    const auto forward = ped->GetForward();
+    const auto& carPosn = car->GetPosition();
+    const auto& pedPosn = ped->GetPosition();
+    const auto& forward = ped->GetForward();
 
     // Find our rotation (so that is, at which angle the forward vector is)
     const auto angleFront = CGeneral::GetATanOfXY(forward.x, forward.y);
