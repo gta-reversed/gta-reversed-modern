@@ -44,9 +44,9 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadZone", 0x5B4AB0, &CFileLoader::LoadZone);
     Install("CFileLoader", "FindRelatedModelInfoCB", 0x5B3930, &CFileLoader::FindRelatedModelInfoCB);
     Install("CFileLoader", "SetRelatedModelInfoCB", 0x537150, &CFileLoader::SetRelatedModelInfoCB);
-    Install("CFileLoader", "LoadCollisionFile_Buffer", 0x538440, static_cast<bool(*)(uint8*, uint32, uint8)>(&CFileLoader::LoadCollisionFile));
+    // Install("CFileLoader", "LoadCollisionFile_Buffer", 0x538440, static_cast<bool(*)(uint8*, uint32, uint8)>(&CFileLoader::LoadCollisionFile)); missing generated grass
     Install("CFileLoader", "LoadCollisionFile_File", 0x5B4E60, static_cast<void(*)(const char*, uint8)>(&CFileLoader::LoadCollisionFile));
-    Install("CFileLoader", "LoadCollisionFileFirstTime", 0x5B5000, &CFileLoader::LoadCollisionFileFirstTime);
+    // Install("CFileLoader", "LoadCollisionFileFirstTime", 0x5B5000, &CFileLoader::LoadCollisionFileFirstTime); missing generated grass
     Install("CFileLoader", "LoadCollisionModel", 0x537580, &CFileLoader::LoadCollisionModel);
     Install("CFileLoader", "LoadCollisionModelVer2", 0x537EE0, &CFileLoader::LoadCollisionModelVer2);
     Install("CFileLoader", "LoadCollisionModelVer3", 0x537CE0, &CFileLoader::LoadCollisionModelVer3);
@@ -453,6 +453,7 @@ void LoadCollisionModelAnyVersion(const ColHelpers::FileHeader& header, uint8* c
 // 0x538440
 // Load one, or multiple, collision models from the given buffer
 bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
+    return plugin::CallAndReturn<bool, 0x538440, uint8*, uint32, uint8>(buff, buffSize, colId);
     using namespace ColHelpers;
 
     // We've modified the loop condition a little. R* went backwards, and checked if the remaning buffer size is > 8.
@@ -526,6 +527,7 @@ void CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
 
 // 0x5B5000
 bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8 colId) {
+    return plugin::CallAndReturn<bool, 0x5B5000, uint8*, uint32, uint8>(buff, buffSize, colId);
     using namespace ColHelpers;
 
     auto fileTotalSize{0u};
