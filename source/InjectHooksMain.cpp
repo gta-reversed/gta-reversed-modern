@@ -61,6 +61,7 @@
 #include "Explosion.h"
 #include "C_PcSave.h"
 #include "FireManager.h"
+#include "Skidmarks.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
