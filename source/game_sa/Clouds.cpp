@@ -68,7 +68,7 @@ void CClouds::Init() {
 
 // 0x712FF0
 void CClouds::Update() {
-    CloudRotation = std::sin(TheCamera.m_fOrientation - 0.85f) * CWeather::Wind * 0.001f + CClouds::CloudRotation;
+    CloudRotation = std::sin(TheCamera.m_fOrientation - 0.85f) * CWeather::Wind * 0.001f + CloudRotation;
     IndividualRotation += (int32)((CTimer::GetTimeStep() * CWeather::Wind * 0.5f + 0.3f) * 60.0f);
 }
 
@@ -136,23 +136,31 @@ void CClouds::MovingFogInit() {
 // 0x713760
 void CClouds::MovingFog_Create(CVector* posn) {
     int32 slotId = MovingFog_GetFirstFreeSlot();
-
-    if (slotId == -1) {
+    if (slotId == -1)
         return;
-    }
 
     ms_mf.m_vecPosn[slotId].x = rand() * RAND_MAX_FLOAT_RECIPROCAL * 116.0f - 58.0f + posn->x;
     ms_mf.m_vecPosn[slotId].y = rand() * RAND_MAX_FLOAT_RECIPROCAL * 116.0f - 58.0f + posn->y;
     ms_mf.m_vecPosn[slotId].z = rand() * RAND_MAX_FLOAT_RECIPROCAL * 10.0f - 5.0f + posn->z;
-
     ms_mf.m_fSize[slotId] = rand() * RAND_MAX_FLOAT_RECIPROCAL * 6.0f + 4.0f;
     ms_mf.m_fIntensity[slotId] = 1.0f;
     ms_mf.m_fMaxIntensity[slotId] = rand() * RAND_MAX_FLOAT_RECIPROCAL * 12.0f + 8.0f;
     ms_mf.m_fSpeed[slotId] = rand() * RAND_MAX_FLOAT_RECIPROCAL * 0.7f + 0.5f;
     ms_mf.m_bFogSlots[slotId] = true;
+    /* todo:
+    ms_mf.m_vecPosn[slotId] = CVector{
+        CGeneral::GetRandomNumberInRange(58.0f, 116.0f) + posn->x,
+        CGeneral::GetRandomNumberInRange(58.0f, 116.0f) + posn->y,
+        CGeneral::GetRandomNumberInRange(5.0f,  10.0f)  + posn->z
+    };
+    ms_mf.m_fSize[slotId] = CGeneral::GetRandomNumberInRange(4.0f, 6.0f);
+    ms_mf.m_fIntensity[slotId] = 1.0f;
+    ms_mf.m_fMaxIntensity[slotId] = CGeneral::GetRandomNumberInRange(8.0f, 12.0f);
+    ms_mf.m_fSpeed[slotId] = CGeneral::GetRandomNumberInRange(0.5f, 0.7f);
+    ms_mf.m_bFogSlots[slotId] = true;
+    */
 }
 
-// unused
 // 0x713730
 void CClouds::MovingFog_Delete(int32 fogSlotIndex) {
     fogSlotIndex = clamp(fogSlotIndex, 0, MAX_MOVING_FOG - 1);
@@ -161,27 +169,32 @@ void CClouds::MovingFog_Delete(int32 fogSlotIndex) {
 
 // 0x716B10
 void CClouds::MovingFog_Update() {
-    if (CWeather::Foggyness_SF == 0.f)
+    if (MovingFog_GetFXIntensity() == 0.f)
         return;
 
     CVector camPos = TheCamera.GetPosition();
     for (int32 i = 0; i < MAX_MOVING_FOG; i++) {
-        CVector& fogPosn = ms_mf.m_vecPosn[i];
-        CVector offset = fogPosn - camPos;
         if (!ms_mf.m_bFogSlots[i]) {
             MovingFog_Create(&camPos);
             continue;
         }
 
-        fogPosn.x += CClouds::ms_mf.m_vecWind.x + ms_mf.m_fSpeed[i];
-        fogPosn.y += CClouds::ms_mf.m_vecWind.y + ms_mf.m_fSpeed[i];
+        CVector& fogPosn = ms_mf.m_vecPosn[i];
+        CVector  offset  = fogPosn - camPos;
 
-        if (offset.Magnitude() <= 60.f) {
+        fogPosn.x += MovingFog_GetWind().x * ms_mf.m_fSpeed[i];
+        fogPosn.y += MovingFog_GetWind().y * ms_mf.m_fSpeed[i];
+
+        if (offset.Magnitude() <= 60.f)
+        {
             ms_mf.m_fIntensity[i] = std::min(ms_mf.m_fIntensity[i] + CTimer::GetTimeStep(), ms_mf.m_fMaxIntensity[i]);
-        } else {
+        }
+        else
+        {
             ms_mf.m_fIntensity[i] -= CTimer::GetTimeStep();
-            if (ms_mf.m_fIntensity[i] <= 0.f)
+            if (ms_mf.m_fIntensity[i] <= 0.f) {
                 MovingFog_Delete(i);
+            }
         }
     }
 }
@@ -200,7 +213,7 @@ CVector CClouds::MovingFog_GetWind() {
 // 0x713710
 int32 CClouds::MovingFog_GetFirstFreeSlot() {
     int32 result = 0;
-    while (CClouds::ms_mf.m_bFogSlots[result]) {
+    while (ms_mf.m_bFogSlots[result]) {
         if (++result >= MAX_MOVING_FOG)
             return -1;
     }
@@ -293,7 +306,7 @@ void CClouds::MovingFogRender() {
         RwIm3DEnd();
     }
     CPostEffects::ImmediateModeRenderStatesReStore();
-    CClouds::MovingFog_Update();
+    MovingFog_Update();
 }
 
 // 0x713950
@@ -372,7 +385,7 @@ void CClouds::RenderSkyPolys() {
     aVertices[3].y = aPos2D[3].y;
     aVertices[3].z = aPosZ[2];
 
-    CClouds::SetUpOneSkyPoly(aVertices[0], aVertices[1], aVertices[2], aVertices[3], CTimeCycle::m_CurrentColours.m_nSkyTopRed, CTimeCycle::m_CurrentColours.m_nSkyTopGreen,
+    SetUpOneSkyPoly(aVertices[0], aVertices[1], aVertices[2], aVertices[3], CTimeCycle::m_CurrentColours.m_nSkyTopRed, CTimeCycle::m_CurrentColours.m_nSkyTopGreen,
                              CTimeCycle::m_CurrentColours.m_nSkyTopBlue, CTimeCycle::m_CurrentColours.m_nSkyBottomRed, CTimeCycle::m_CurrentColours.m_nSkyBottomGreen,
                              CTimeCycle::m_CurrentColours.m_nSkyBottomBlue);
 
@@ -381,7 +394,7 @@ void CClouds::RenderSkyPolys() {
     aVertices[2].z = aPosZ[3];
     aVertices[3].z = aPosZ[3];
 
-    CClouds::SetUpOneSkyPoly(aVertices[0], aVertices[1], aVertices[2], aVertices[3], CTimeCycle::m_CurrentColours.m_nSkyBottomRed, CTimeCycle::m_CurrentColours.m_nSkyBottomGreen,
+    SetUpOneSkyPoly(aVertices[0], aVertices[1], aVertices[2], aVertices[3], CTimeCycle::m_CurrentColours.m_nSkyBottomRed, CTimeCycle::m_CurrentColours.m_nSkyBottomGreen,
                              CTimeCycle::m_CurrentColours.m_nSkyBottomBlue, CTimeCycle::m_CurrentColours.m_nSkyBottomRed, CTimeCycle::m_CurrentColours.m_nSkyBottomGreen,
                              CTimeCycle::m_CurrentColours.m_nSkyBottomBlue);
 
@@ -390,7 +403,7 @@ void CClouds::RenderSkyPolys() {
     aVertices[2].z = aPosZ[4];
     aVertices[3].z = aPosZ[4];
 
-    CClouds::SetUpOneSkyPoly(aVertices[0], aVertices[1], aVertices[2], aVertices[3], CTimeCycle::m_CurrentColours.m_nSkyBottomRed, CTimeCycle::m_CurrentColours.m_nSkyBottomGreen,
+    SetUpOneSkyPoly(aVertices[0], aVertices[1], aVertices[2], aVertices[3], CTimeCycle::m_CurrentColours.m_nSkyBottomRed, CTimeCycle::m_CurrentColours.m_nSkyBottomGreen,
                              CTimeCycle::m_CurrentColours.m_nSkyBottomBlue, belowHorizonGrey.red, belowHorizonGrey.green, belowHorizonGrey.blue);
 
     aVertices[0].z = aPosZ[1];
@@ -402,7 +415,7 @@ void CClouds::RenderSkyPolys() {
     aVertices[3].y = aPos2D[1].y;
     aVertices[3].z = aPosZ[0];
 
-    CClouds::SetUpOneSkyPoly(aVertices[0], aVertices[1], aVertices[2], aVertices[3], CTimeCycle::m_CurrentColours.m_nSkyTopRed, CTimeCycle::m_CurrentColours.m_nSkyTopGreen,
+    SetUpOneSkyPoly(aVertices[0], aVertices[1], aVertices[2], aVertices[3], CTimeCycle::m_CurrentColours.m_nSkyTopRed, CTimeCycle::m_CurrentColours.m_nSkyTopGreen,
                              CTimeCycle::m_CurrentColours.m_nSkyTopBlue, CTimeCycle::m_CurrentColours.m_nSkyTopRed, CTimeCycle::m_CurrentColours.m_nSkyTopGreen,
                              CTimeCycle::m_CurrentColours.m_nSkyTopBlue);
 
