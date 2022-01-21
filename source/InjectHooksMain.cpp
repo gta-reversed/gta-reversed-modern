@@ -173,10 +173,15 @@
 void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
+    CFileMgr::InjectHooks();
 
     CGenericGameStorage::InjectHooks();
     C_PcSave::InjectHooks();
-
+    CFileLoader::InjectHooks();
+    CWorld::InjectHooks();
+    CStreamingInfo::InjectHooks();
+    CStreaming::InjectHooks();
+    InjectCdStreamHooks();
     CMirrors::InjectHooks();
     CFire::InjectHooks();
     CExplosion::InjectHooks();
@@ -222,9 +227,6 @@ void InjectHooksMain() {
     List_c::InjectHooks();
     CRunningScript::InjectHooks();
     CTheScripts::InjectHooks();
-    CStreamingInfo::InjectHooks();
-    CStreaming::InjectHooks();
-    InjectCdStreamHooks();
     CReferences::InjectHooks();
     CPopulation::InjectHooks();
     CModelInfo::InjectHooks();
@@ -240,8 +242,6 @@ void InjectHooksMain() {
     CPedModelInfo::InjectHooks();
     CTimeInfo::InjectHooks();
     SurfaceInfos_c::InjectHooks();
-    CFileLoader::InjectHooks();
-    CFileMgr::InjectHooks();
     CPlaceable::InjectHooks();
     CEntity::InjectHooks();;
     CPhysical::InjectHooks();
@@ -290,7 +290,6 @@ void InjectHooksMain() {
     CWanted::InjectHooks();
     CEscalators::InjectHooks();
     CWeapon::InjectHooks();
-    CWorld::InjectHooks();
     cTransmission::InjectHooks();
     CVehicle::InjectHooks();
     CAutomobile::InjectHooks();
