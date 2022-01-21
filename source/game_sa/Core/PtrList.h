@@ -21,6 +21,7 @@ public:
     bool IsMemberOfList(void* data) const;
 
     CPtrNode* GetNode() const { return m_node; }
+    bool IsEmpty() const { return !m_node; }
 };
 
 VALIDATE_SIZE(CPtrList, 0x4);

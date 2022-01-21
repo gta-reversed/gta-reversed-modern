@@ -364,7 +364,7 @@ void CColStore::RemoveCol(int32 colSlot)
         if (!pCol)
             continue;
 
-        if (pModelInfo->IsLod() && pCol->m_boundSphere.m_nColSlot == colSlot)
+        if (pModelInfo->IsLod() && pCol->m_nColSlot == colSlot)
             pCol->RemoveCollisionVolumes();
     }
 }

@@ -130,7 +130,7 @@ CObject::~CObject()
     if (objectFlags.bHasNoModel)
     {
         auto* const colModel = CModelInfo::GetModelInfo((m_nModelIndex))->GetColModel();
-        CColStore::RemoveRef(colModel->m_boundSphere.m_nColSlot);
+        CColStore::RemoveRef(colModel->m_nColSlot);
     }
 
     CRadar::ClearBlipForEntity(eBlipType::BLIP_OBJECT, CPools::ms_pObjectPool->GetRef(this));
@@ -854,9 +854,9 @@ void CObject::Init() {
     {
         CObjectData::SetObjectData(m_nModelIndex, *this);
         auto *pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
-        if (pModelInfo->GetColModel()->m_boundSphere.m_bNotEmpty)
+        if (pModelInfo->GetColModel()->m_bNotEmpty)
         {
-            CColStore::AddRef(pModelInfo->GetColModel()->m_boundSphere.m_nColSlot);
+            CColStore::AddRef(pModelInfo->GetColModel()->m_nColSlot);
             objectFlags.bHasNoModel = true;
 
             auto *pAtomicInfo = pModelInfo->AsAtomicModelInfoPtr();
@@ -1553,5 +1553,5 @@ bool IsObjectPointerValid(CObject* object) {
     if (object->m_bIsBIGBuilding)
         return true;
 
-    return object->m_pCollisionList.m_node != nullptr;
+    return !object->m_pCollisionList.IsEmpty();
 }

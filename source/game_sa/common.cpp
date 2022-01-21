@@ -232,8 +232,9 @@ CPlayerInfo& FindPlayerInfo(int playerId) {
 
 // NOTE: This function doesn't add m.GetPosition() like
 //       MultiplyMatrixWithVector @ 0x59C890 does.
-CVector Multiply3x3(CMatrix& m, CVector& v) {
-    return CVector{
+CVector Multiply3x3(const CMatrix& constm, const CVector& v) {
+    auto& m = const_cast<CMatrix&>(constm);
+    return {
         m.GetRight().x * v.x + m.GetForward().x * v.y + m.GetUp().x * v.z,
         m.GetRight().y * v.x + m.GetForward().y * v.y + m.GetUp().y * v.z,
         m.GetRight().z * v.x + m.GetForward().z * v.y + m.GetUp().z * v.z,
@@ -241,10 +242,17 @@ CVector Multiply3x3(CMatrix& m, CVector& v) {
 }
 
 // vector by matrix mult, resulting in a vector where each component is the dot product of the in vector and a matrix direction
-CVector Multiply3x3(CVector& v, CMatrix& m) {
-    return CVector(DotProduct(m.GetRight(), v),
-                   DotProduct(m.GetForward(), v),
-                   DotProduct(m.GetUp(), v));
+CVector Multiply3x3(const CVector& v, const CMatrix& constm) {
+    auto& m = const_cast<CMatrix&>(constm);
+    return {
+        DotProduct(m.GetRight(), v),
+        DotProduct(m.GetForward(), v),
+        DotProduct(m.GetUp(), v)
+    };
+}
+
+CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec) {
+    return const_cast<CMatrix&>(mat).GetPosition() + Multiply3x3(const_cast<CMatrix&>(mat), vec);
 }
 
 // 0x54ECE0
@@ -292,13 +300,13 @@ void CreateDebugFont() {
 }
 
 // 0x4ABA50
-CEventGroup* GetEventGlobalGroup() {
-    static CEventGroup*& globalEvents = *(CEventGroup**)0xA9AF6C;
+CEventGlobalGroup* GetEventGlobalGroup() {
+    static CEventGlobalGroup*& globalEvents = *(CEventGlobalGroup**)0xA9AF6C;
 
     if (globalEvents)
         return globalEvents;
 
-    globalEvents = new CEventGroup(nullptr);
+    globalEvents = new CEventGlobalGroup(nullptr);
     return globalEvents;
 }
 

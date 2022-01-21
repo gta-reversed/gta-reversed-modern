@@ -17,7 +17,7 @@ struct CColAccelColEntry {
     int16        m_wModelStart;
     int16        m_wModelEnd;
     uint8        m_nColSlot;
-    bool         m_bUnkn;
+    bool         m_bColModelNotEmpty;
 };
 VALIDATE_SIZE(CColAccelColEntry, 0x30);
 

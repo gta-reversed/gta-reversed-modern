@@ -630,7 +630,7 @@ void CCarCtrl::RemoveCarsIfThePoolGetsFull() {
                 continue;
             if (!vehicle->CanBeDeleted())
                 continue;
-            if (CCranes::IsThisCarBeingTargettedByAnyCrane())
+            if (CCranes::IsThisCarBeingTargettedByAnyCrane(vehicle))
                 continue;
 
             const float fCamVehDist = (camPos - vehicle->GetPosition()).Magnitude();
