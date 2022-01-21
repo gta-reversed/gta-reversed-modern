@@ -20,6 +20,7 @@
 #include "toolsmenu\DebugModules\Audio\AmbienceTrackManagerDebugModule.h"
 #include "toolsmenu\DebugModules\CStreamingDebugModule.h"
 #include "toolsmenu\DebugModules\CPickupsDebugModule.h"
+#include "toolsmenu\DebugModules\CTeleportDebugModule.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -356,6 +357,11 @@ void CDebugMenu::ProcessExtraDebugFeatures() {
             ImGui::EndTabItem();
         }
 
+        if (ImGui::BeginTabItem("Teleporter")) {
+            TeleportDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
         ImGui::EndTabBar();
     }
 }
@@ -378,7 +384,7 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 
         if (ImGui::BeginTabBar("Debug Tabs")) {
             if (ImGui::BeginTabItem("Peds")) {
-                // ImGui::Checkbox("Show Player Information", &showPlayerInfo);
+                //ImGui::Checkbox("Show Player Information", &showPlayerInfo);
                 PedDebugModule::ProcessImgui();
                 ImGui::EndTabItem();
             }
