@@ -148,10 +148,9 @@ void CAEPedSpeechAudioEntity::SetUpConversation() {
     plugin::Call<0x4E3A00>();
 }
 
-// todo: dev from 2003 and maybe wrong
 // 0x4E3C60
 int16 CAEPedSpeechAudioEntity::GetAudioPedType(Const char* name) {
-    constexpr const char* aAudioPedTypeNames[] = {
+    constexpr const char* aAudioPedTypeNames[] = { // 0x8C8108
         "PED_TYPE_GEN",
         "PED_TYPE_EMG",
         "PED_TYPE_PLAYER",
@@ -160,9 +159,8 @@ int16 CAEPedSpeechAudioEntity::GetAudioPedType(Const char* name) {
         "PED_TYPE_SPC"
     };
 
-    auto index = 0;
-    for (const auto& pedName : aAudioPedTypeNames) {
-        if (strcmp(name, pedName) != 0) {
+    for (size_t index = 0; const auto& pedName : aAudioPedTypeNames) {
+        if (!strcmp(name, pedName)) {
             return index;
         }
         index++;
@@ -262,11 +260,10 @@ int8 CAEPedSpeechAudioEntity::CanPedSayGlobalContext(int16 a2) {
 // 0x4E58C0
 int8 CAEPedSpeechAudioEntity::GetVoiceAndTypeFromModel(eModelID modelId) {
     CPedModelInfo* info = CModelInfo::GetModelInfo(modelId)->AsPedModelInfoPtr();
-    m_nVoiceType = info->m_nPedAudioType;
-    if (m_nVoiceType < 0 || m_nVoiceType >= 6)
+    if (info->m_nPedAudioType < 0 || info->m_nPedAudioType >= 6)
         return 0;
 
-    if (info->m_nPedAudioType == 5)
+    if (info->m_nPedAudioType == 5) // PED_TYPE_SPC, see GetAudioPedType
         return GetVoiceAndTypeForSpecialPed(info->m_nKey);
 
     m_nVoiceId = info->m_nVoiceId;
@@ -433,7 +430,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     Install("CAEPedSpeechAudioEntity", "RequestPlayerConversation", 0x4E38C0, &CAEPedSpeechAudioEntity::RequestPlayerConversation);
     // Install("CAEPedSpeechAudioEntity", "ReleasePlayerConversation", 0x4E3960, &CAEPedSpeechAudioEntity::ReleasePlayerConversation);
     // Install("CAEPedSpeechAudioEntity", "SetUpConversation", 0x4E3A00, &CAEPedSpeechAudioEntity::SetUpConversation);
-    // Install("CAEPedSpeechAudioEntity", "GetAudioPedType", 0x4E3C60, &CAEPedSpeechAudioEntity::GetAudioPedType);
+    Install("CAEPedSpeechAudioEntity", "GetAudioPedType", 0x4E3C60, &CAEPedSpeechAudioEntity::GetAudioPedType);
     // Install("CAEPedSpeechAudioEntity", "GetVoice", 0x4E3CD0, &CAEPedSpeechAudioEntity::GetVoice);
     Install("CAEPedSpeechAudioEntity", "DisableAllPedSpeech", 0x4E3EB0, &CAEPedSpeechAudioEntity::DisableAllPedSpeech);
     // Install("CAEPedSpeechAudioEntity", "IsGlobalContextPain", 0x4E44F0, &CAEPedSpeechAudioEntity::IsGlobalContextPain);

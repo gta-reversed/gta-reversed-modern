@@ -26,7 +26,16 @@ bool CPlantMgr::Initialise() {
     return plugin::CallAndReturn<bool, 0x5DD910>();
 }
 
+void CPlantMgr::SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo*) {
+    plugin::Call<0x5DB650>();
+}
+
 // 0x5DCFA0
 void CPlantMgr::Update(const CVector& cameraPosition) {
     return plugin::Call<0x5DCFA0, const CVector&>(cameraPosition);
+}
+
+// 0x5DBAE0
+void CPlantMgr::Render() {
+    plugin::Call<0x5DBAE0>();
 }

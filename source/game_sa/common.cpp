@@ -1085,6 +1085,15 @@ bool RpAnimBlendPluginAttach() {
     return plugin::CallAndReturn<bool, 0x4D6150>();
 }
 
+// 0x70F9B0
+bool GraphicsLowQuality() {
+    if (g_fx.GetFxQuality() < FxQuality_e::FXQUALITY_MEDIUM)
+        return false;
+    if (RwRasterGetDepth(RwCameraGetRaster(Scene.m_pRwCamera)) < 32)
+        return false;
+    return true;
+}
+
 // 0x5A4150
 void WriteRaster(RwRaster* raster, char const* path) {
     assert(raster);

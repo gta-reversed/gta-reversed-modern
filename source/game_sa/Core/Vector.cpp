@@ -22,19 +22,10 @@ void CVector::InjectHooks()
     ReversibleHooks::Install("CVector", "global_DotProduct_vec*vec*", 0x59C6D0, static_cast<float(*)(CVector*, CVector*)>(&DotProduct));
 }
 
-
-CVector::CVector()
-{
-    x = 0.0f; y = 0.0f; z = 0.0f;
+CVector CVector::Random(float min, float max) {
+    const auto Get = [=] { return CGeneral::GetRandomNumberInRange(min, max); };
+    return { Get(), Get(), Get() };
 }
-
-CVector::CVector(float X, float Y, float Z)
-{
-    x = X;
-    y = Y;
-    z = Z;
-}
-
 
 // Returns length of vector
 float CVector::Magnitude() const
@@ -153,6 +144,10 @@ void CVector::FromMultiply3x3(CMatrix const& matrix, CVector const& vector)
     x = matrix.m_right.x * vector.x + matrix.m_forward.x * vector.y + matrix.m_up.x * vector.z;
     y = matrix.m_right.y * vector.x + matrix.m_forward.y * vector.y + matrix.m_up.y * vector.z;
     z = matrix.m_right.z * vector.x + matrix.m_forward.z * vector.y + matrix.m_up.z * vector.z;
+}
+
+CVector CVector::Average(const CVector* begin, const CVector* end) {
+    return std::accumulate(begin, end, CVector{}) / (float)std::distance(begin, end);
 }
 
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b)

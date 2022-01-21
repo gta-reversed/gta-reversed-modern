@@ -9,15 +9,20 @@ Do not delete this comment block. Respect others' work!
 #include "PluginBase.h" // !!!
 
 #include "RenderWare.h"
+#include <numeric>
 
 class CVector : public RwV3d {
 public:
-    CVector();
-    CVector(float X, float Y, float Z);
-    CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
 
+    constexpr CVector() = default;
+    constexpr CVector(float X, float Y, float Z) : RwV3d{X, Y, Z} {}
+    constexpr CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
+    constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
+    
 public:
     static void InjectHooks();
+
+    static CVector Random(float min, float max);
 
     // Returns length of vector
     float Magnitude() const;
@@ -73,7 +78,7 @@ public:
         return x*x + y*y + z*z;
     }
 
-    inline float SquaredMagnitude2D()
+    inline float SquaredMagnitude2D() 
     {
         return x * x + y * y;
     }
@@ -81,6 +86,13 @@ public:
     inline bool IsZero() const
     {
         return x == 0.0F && y == 0.0F && z == 0.0F;
+    }
+
+    // Calculate the average position
+    static CVector Average(const CVector* begin, const CVector* end);
+
+    static CVector AverageN(const CVector* begin, size_t n) {
+        return Average(begin, begin + n);
     }
 };
 
@@ -132,6 +144,7 @@ inline CVector operator-(const CVector& vec) {
 inline float DistanceBetweenPoints(const CVector &pointOne, const CVector &pointTwo) {
     return (pointTwo - pointOne).Magnitude();
 }
+
 inline float DistanceBetweenPointsSquared(const CVector& pointOne, const CVector& pointTwo) {
     return (pointTwo - pointOne).SquaredMagnitude();
 }
@@ -150,4 +163,5 @@ CVector CrossProduct(const CVector& a, const CVector& b);
 float DotProduct(const CVector& v1, const CVector& v2);
 float DotProduct2D(const CVector& v1, const CVector& v2);
 static CVector Normalized(CVector v) { v.Normalise(); return v; }
+
 VALIDATE_SIZE(CVector, 0xC);

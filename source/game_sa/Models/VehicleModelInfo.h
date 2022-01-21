@@ -337,6 +337,8 @@ public:
     void SetEnvMapCoeff(float coeff);
     // get num doors in this model
     int32 GetNumDoors();
+    // get position of dummy in model-space 
+    CVector GetModelDummyPosition(eVehicleDummies dummy) const { return m_pVehicleStruct->m_avDummyPos[dummy]; } // NOTSA
 
     // Static method's
     // setup lights states for currently rendered vehicle
@@ -429,6 +431,16 @@ public:
             || m_nVehicleType == eVehicleType::VEHICLE_BIKE
             || m_nVehicleType == eVehicleType::VEHICLE_QUAD;
     }
+
+    // These were probably inlined:
+    void SetWheelSizes(float front, float rear) {
+        m_fWheelSizeFront = front;
+        m_fWheelSizeRear = rear;
+    }
+    void SetGameName(const char* name) {
+        strcpy_s(m_szGameName, name);
+    }
+    void SetHandlingId(const char* handlingName);
 };
 VALIDATE_SIZE(CVehicleModelInfo::CVehicleStructure, 0x314);
 VALIDATE_SIZE(CVehicleModelInfo, 0x308);

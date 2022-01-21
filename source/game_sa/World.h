@@ -200,6 +200,10 @@ public:
         const float fTotalMapUnitsY = MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_Y;
         return (sector - HalfOfTotalSectorsY) * fTotalMapUnitsY + (fTotalMapUnitsY / 2);
     }
+    static bool IsInWorldBounds(CVector2D pos) { // NOTSA
+        return pos.x > -3000.0f && pos.x < 3000.0f
+            && pos.y > -3000.0f && pos.y < 3000.0f;
+    }
 };
 
 extern uint32 &FilledColPointIndex;

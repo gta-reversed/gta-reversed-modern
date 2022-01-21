@@ -769,8 +769,8 @@ void CPostEffects::Radiosity(int32 a1, int32 a2, int32 a3, int32 a4) {
 }
 
 //0x619450
-void RsCameraBeginUpdate(RwCamera* camera) {
-    plugin::Call<0x619450, RwCamera*>(camera);
+bool RsCameraBeginUpdate(RwCamera* camera) {
+    return plugin::CallAndReturn<bool, 0x619450, RwCamera*>(camera);
 }
 
 // 0x7046E0

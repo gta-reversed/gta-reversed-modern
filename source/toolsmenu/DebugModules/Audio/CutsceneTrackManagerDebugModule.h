@@ -2,7 +2,7 @@
 
 namespace CutsceneTrackManagerDebugModule {
 
-void ProcessImgui();
+void ProcessImGui();
 void ProcessRender();
 
 }

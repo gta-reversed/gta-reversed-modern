@@ -391,11 +391,24 @@ public:
 public:
     // class virtual functions
 
-    // Process applied anim
+    void SetModelIndex(uint32 modelIndex) override;
+    void DeleteRwObject() override;
+    void ProcessControl() override;
+    void Teleport(CVector destination, bool resetRotation) override;
+    void SpecialEntityPreCollisionStuff(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck) override;
+    uint8 SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2) override;
+    void PreRender() override;
+    void Render() override;
+    bool SetupLighting() override;
+    void RemoveLighting(bool bRemove) override;
+    void FlagToDestroyWhenNextProcessed() override;
+    int32 ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint) override;
+
+    // Process applied anim 0x86C3B4
     virtual void SetMoveAnim();
-    // always returns true
+    // always returns true 0x86C3B8
     virtual bool Save();
-    // always returns true
+    // always returns true 0x86C3BC
     virtual bool Load();
 
     // class functions
@@ -540,12 +553,12 @@ public:
     void KillPedWithCar(CVehicle* car, float fDamageIntensity, bool bPlayDeadAnimation);
     void MakeTyresMuddySectorList(CPtrList& ptrList);
     void DeadPedMakesTyresBloody();
-    void SetModelIndex(uint32 modelIndex);
     bool IsInVehicleThatHasADriver();
     void SetArmour(float v) { m_fArmour = v; }
     void SetWeaponShootingRange(uint8 r) { m_nWeaponShootingRate = r; }
     void SetWeaponAccuracy(uint8 acc) { m_nWeaponAccuracy = acc; }
 
+    CVehicle* GetVehicleIfInOne() { return bInVehicle ? m_pVehicle : nullptr; }
     inline uint8 GetCreatedBy() { return m_nCreatedBy; }
     inline bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
     inline bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
@@ -560,8 +573,7 @@ public:
     inline CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
     inline CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
     inline CPlayerPed* AsPlayerPed() { return reinterpret_cast<CPlayerPed*>(this); }
-  
-    bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
+    inline bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
+    inline void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
 };
-RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);
 bool IsPedPointerValid(CPed* ped);

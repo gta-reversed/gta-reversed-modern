@@ -361,11 +361,14 @@ void CFireManager::Update() {
         return;
 
     for (CFire& fire : m_aFires) {
-        fire.ProcessFire();
+        if (fire.IsActive())
+            fire.ProcessFire();
     }
 
-    if (CGameLogic::LaRiotsActiveHere() && (CTimer::GetTimeInMS() / 500u != CTimer::GetPreviousTimeInMS() / 500u)) {
-        const float fRandomAngleRad = CGeneral::GetRandomNumberInRange(0.0f, 2 * rwPI);
+    if (CGameLogic::LaRiotsActiveHere()
+     && CTimer::GetTimeInMS() / 500u != CTimer::GetPreviousTimeInMS() / 500u
+    ) {
+        const float fRandomAngleRad = CGeneral::GetRandomNumberInRange(0.0f, TWO_PI);
         const float fRandomDir = CGeneral::GetRandomNumberInRange(35.0f, 60.0f);
         CVector point = TheCamera.GetPosition() + CVector{
             std::sin(fRandomAngleRad) * fRandomDir,
@@ -373,9 +376,9 @@ void CFireManager::Update() {
             10.0f
         };
 
-        CEntity* pHitEntity{};
+        CEntity* hitEntity{};
         bool bHit{};
-        point.z = CWorld::FindGroundZFor3DCoord(point.x, point.y, point.z, &bHit, &pHitEntity);
+        point.z = CWorld::FindGroundZFor3DCoord(point.x, point.y, point.z, &bHit, &hitEntity);
 
         CVector pointToCamDirNorm = (TheCamera.GetPosition() - point);
         pointToCamDirNorm.Normalise();
@@ -386,9 +389,9 @@ void CFireManager::Update() {
         // a 100% clear to me.
         // TODO: Use the array here
         if (DotProduct(TheCamera.GetForward(), pointToCamDirNorm) > 0.2f || rand() < RAND_MAX / 2) {
-            auto pFx = g_fxMan.CreateFxSystem("riot_smoke", &point, nullptr, true);
-            if (pFx)
-                pFx->PlayAndKill();
+            auto fx = g_fxMan.CreateFxSystem("riot_smoke", &point, nullptr, true);
+            if (fx)
+                fx->PlayAndKill();
         } else {
             StartFire(point, CGeneral::GetRandomNumberInRange(0.5f, 2.5f), true, nullptr, 30000u, 5, 1);
         }
@@ -462,6 +465,7 @@ void CFireManager::Update() {
                     0.0f
                 );
             }
+
             if (fCombinedStrength > 6.0f) {
                 // Create coronas in a _|_ like shape.
                 // Keep in mind, the right line's end is always pointing towards the camera,
@@ -522,4 +526,9 @@ void CFireManager::Update() {
         }
 
     }
+}
+
+// NOTSA
+CFire& CFireManager::GetRandomFire() {
+    return m_aFires[CGeneral::GetRandomNumberInRange(0, std::size(m_aFires))];
 }
