@@ -369,7 +369,7 @@ void CRenderer::RenderEverythingBarRoads() {
             if (entity->m_nType == ENTITY_TYPE_VEHICLE) {
                 bool bInsertIntoSortedList = false;
                 if (vehicle->m_vehicleType == VEHICLE_BOAT) {
-                    eCamMode camMode = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nMode;
+                    eCamMode camMode = CCamera::GetActiveCamera().m_nMode;
                     if (camMode == MODE_WHEELCAM || camMode == MODE_1STPERSON &&
                         TheCamera.GetLookDirection() != LOOKING_DIRECTION_FORWARD && TheCamera.GetLookDirection() ||
                         CVisibilityPlugins::GetClumpAlpha(entity->m_pRwClump) != 255)
@@ -867,30 +867,41 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
 
 // 0x554B10
 void CRenderer::ScanBigBuildingList(int32 sectorX, int32 sectorY) {
-    if (sectorX >= 0 && sectorY >= 0 && sectorX < MAX_LOD_PTR_LISTS_X && sectorY < MAX_LOD_PTR_LISTS_Y) {
-        CPtrList& list = CWorld::GetLodPtrList(sectorX, sectorY);
-        bool bRequestModel = false;
-        float fDistanceX = CWorld::GetLodSectorPosX(sectorX) - ms_vecCameraPosition.x;
-        float fDistanceY = CWorld::GetLodSectorPosY(sectorY) - ms_vecCameraPosition.y;
-        float fAngleInRadians = atan2(-fDistanceX, fDistanceY) - ms_fCameraHeading;
-        if (CVector2D(fDistanceX, fDistanceY).SquaredMagnitude() < MAX_BIGBUILDING_STREAMING_RADIUS ||
-            fabs(CGeneral::LimitRadianAngle(fAngleInRadians)) <= DegreesToRadians(BIGBUILDING_STREAMING_ANGLE_THRESHOLD))
-        {
-            bRequestModel = true;
-        }
-        for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
-            auto* entity = reinterpret_cast<CEntity*>(node->m_item);
-            if (entity->m_nScanCode != GetCurrentScanCode()) {
-                entity->m_nScanCode = GetCurrentScanCode();
-                float fDistance = 0.0f;
-                int32 visibility = SetupBigBuildingVisibility(entity, fDistance);
-                if (visibility == RENDERER_VISIBLE) {
-                    AddEntityToRenderList(entity, fDistance + 0.01f);
-                    entity->m_bOffscreen = false;
-                }
-                else if (visibility == RENDERER_STREAMME && !CStreaming::ms_disableStreaming && bRequestModel) {
+    if (sectorX < 0 && sectorY < 0 && sectorX > MAX_LOD_PTR_LISTS_X && sectorY > MAX_LOD_PTR_LISTS_Y)
+        return;
+
+    CPtrList& list = CWorld::GetLodPtrList(sectorX, sectorY);
+    bool bRequestModel = false;
+    float fDistanceX = CWorld::GetLodSectorPosX(sectorX) - ms_vecCameraPosition.x;
+    float fDistanceY = CWorld::GetLodSectorPosY(sectorY) - ms_vecCameraPosition.y;
+    float fAngleInRadians = atan2(-fDistanceX, fDistanceY) - ms_fCameraHeading;
+    if (CVector2D(fDistanceX, fDistanceY).SquaredMagnitude() < MAX_BIGBUILDING_STREAMING_RADIUS ||
+        fabs(CGeneral::LimitRadianAngle(fAngleInRadians)) <= DegreesToRadians(BIGBUILDING_STREAMING_ANGLE_THRESHOLD))
+    {
+        bRequestModel = true;
+    }
+
+    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+        auto* entity = reinterpret_cast<CEntity*>(node->m_item);
+        if (entity->m_nScanCode != GetCurrentScanCode()) {
+            entity->m_nScanCode = GetCurrentScanCode();
+
+            float fDistance = 0.0f;
+            auto visibility = SetupBigBuildingVisibility(entity, fDistance) - 1;
+
+            switch (visibility) {
+            case RENDERER_VISIBLE:
+            case RENDERER_STREAMME:
+                break;
+            case RENDERER_CULLED:
+                if (!CStreaming::ms_disableStreaming && bRequestModel) {
                     CStreaming::RequestModel(entity->m_nModelIndex, 0);
                 }
+                break;
+            default: // RENDERER_INVISIBLE
+                AddEntityToRenderList(entity, fDistance + 0.01f);
+                entity->m_bOffscreen = false;
+                break;
             }
         }
     }
