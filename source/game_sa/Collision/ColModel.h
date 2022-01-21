@@ -20,7 +20,11 @@ public:
 
 public:
     CBoundingBox m_boundBox;
-    CColSphere m_boundSphere;
+    CSphere m_boundSphere;
+    uint8 m_nColSlot;
+    uint8 m_bNotEmpty : 1;
+    uint8 m_bIsSingleColDataAlloc : 1;
+    uint8 m_bIsActive : 1;
     CCollisionData *m_pColData;
 
 public:

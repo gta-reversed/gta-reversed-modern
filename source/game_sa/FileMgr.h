@@ -12,6 +12,8 @@
 typedef FILE* FILESTREAM;
 constexpr size_t DIRNAMELENGTH = 128;
 
+static constexpr auto TopLineEmptyFile{ "THIS FILE IS NOT VALID YET" };
+
 class CFileMgr {
 public:
     // variables

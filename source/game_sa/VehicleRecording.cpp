@@ -69,3 +69,7 @@ void CVehicleRecording::RenderLineSegment(int32& numVertices) {
     }
     numVertices = 0;
 }
+
+void CVehicleRecording::SaveOrRetrieveDataForThisFrame() {
+    plugin::Call<0x45A610>();
+}

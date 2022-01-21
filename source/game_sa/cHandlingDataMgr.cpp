@@ -31,8 +31,8 @@ bool cHandlingDataMgr::HasRearWheelDrive(uint8 handlingId)
 
 // get handling id by name
 // 0x6F4FD0
-int32 cHandlingDataMgr::GetHandlingId(char* name) {
-    return plugin::CallMethodAndReturn<int32, 0x6F4FD0, cHandlingDataMgr*, char*>(this, name);
+int32 cHandlingDataMgr::GetHandlingId(const char* name) {
+    return plugin::CallMethodAndReturn<int32, 0x6F4FD0>(this, name);
 }
 
 // update some handling variables with some world-specific multipliers

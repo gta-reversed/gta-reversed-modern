@@ -9,6 +9,7 @@ enum eKnockOffType : uint8 {
     KNOCK_OFF_TYPE_FALL = 53,
     KNOCK_OFF_TYPE_SKIDBACK_FALLR = 54,
     KNOCK_OFF_TYPE_SKIDBACKFRONT = 49,
+    KNOCK_OFF_TYPE_EXPLOSION = 51,
 };
 
 class CVehicle;

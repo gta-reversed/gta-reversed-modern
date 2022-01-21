@@ -61,8 +61,8 @@ bool CTaskSimpleInAir::MakeAbortable(CPed* ped, eAbortPriority priority, const C
 
 bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
 {
-    CColPoint colPoint;
-    CEntity* pColEntity;
+    CColPoint colPoint{}; // default initialization is NOTSA
+    CEntity* colEntity;
 
     CVector originalPosn = ped->m_matrix->GetPosition();
     float fColDistance = originalPosn.z - 4.0F;
@@ -140,7 +140,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
 
         bool bStopFalling = ped->bIsStanding;
         if (!bStopFalling)
-            bStopFalling = CWorld::ProcessVerticalLine(originalPosn, fColDistance, colPoint, pColEntity, true, true, false, true, false, false, 0);
+            bStopFalling = CWorld::ProcessVerticalLine(originalPosn, fColDistance, colPoint, colEntity, true, true, false, true, false, false, 0);
 
         if (bUsingFallGlide)
         {
@@ -168,6 +168,10 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
                 }
             }
         }
+        /*
+        * Run-Time Check Failure #3 - The variable 'colPoint' is being used without being initialized.
+        * Until *colPoint* will not be initialized in CWorld::ProcessVerticalLine we will be drop here
+        */
         else if (ped->m_matrix->GetPosition().z - colPoint.m_vecPoint.z < 1.3F
             || ped->bIsStanding
             || ped->m_pAttachedTo

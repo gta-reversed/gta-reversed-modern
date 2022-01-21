@@ -573,8 +573,7 @@ public:
     inline CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
     inline CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
     inline CPlayerPed* AsPlayerPed() { return reinterpret_cast<CPlayerPed*>(this); }
-  
-    bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
+    inline bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
+    inline void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
 };
-RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);
 bool IsPedPointerValid(CPed* ped);
