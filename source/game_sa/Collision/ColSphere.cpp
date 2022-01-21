@@ -9,12 +9,6 @@ void CColSphere::InjectHooks()
     ReversibleHooks::Install("CColSphere", "IntersectPoint", 0x410040, &CColSphere::IntersectPoint);
 }
 
-void CColSphere::Set(float radius, CVector const& center)
-{
-    m_fRadius = radius;
-    m_vecCenter = center;
-}
-
 void CColSphere::Set(float radius, CVector const& center, uint8 material, uint8 flags, uint8 lighting)
 {
     m_fRadius = radius;
