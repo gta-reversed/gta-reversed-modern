@@ -8,6 +8,7 @@
 #include <initializer_list>
 #include "IKChainManager_c.h"
 #include "World.h"
+#include "FireManager.h"
 
 int32 CWorld::TOTAL_PLAYERS = 2;
 int32& CWorld::ms_iProcessLineNumCrossings = *(int32*)0xB7CD60;
@@ -908,12 +909,10 @@ void CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrLi
 
         entity->m_nScanCode = ms_nCurrentScanCode;
 
-        CColSphere sphere{};
-        sphere.Set(
+        CColSphere sphere{
             entity->GetColModel()->GetBoundRadius(),
             Multiply3x3(entity->GetPosition() - point, transform)
-        );
-
+        };
         if (CCollision::TestSphereBox(sphere, box)) {
             if (*outCount < maxCount) {
                 if (outEntities)
