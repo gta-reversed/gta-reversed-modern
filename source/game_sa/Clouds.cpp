@@ -39,7 +39,7 @@ void CClouds::InjectHooks() {
     ReversibleHooks::Install("CClouds", "MovingFog_GetFXIntensity", 0x7136D0, &CClouds::MovingFog_GetFXIntensity);
     ReversibleHooks::Install("CClouds", "MovingFog_GetWind", 0x7136E0, &CClouds::MovingFog_GetWind);
     ReversibleHooks::Install("CClouds", "MovingFog_GetFirstFreeSlot", 0x713710, &CClouds::MovingFog_GetFirstFreeSlot);
-    ReversibleHooks::Install("CClouds", "MovingFogRender", 0x716C90, &CClouds::MovingFogRender);
+    ReversibleHooks::Install("CClouds", "MovingFogRender", 0x716C90, &CClouds::MovingFogRender, true);
     //    ReversibleHooks::Install("CClouds", "Render", 0x713950, &CClouds::Render);
     ReversibleHooks::Install("CClouds", "RenderSkyPolys", 0x714650, &CClouds::RenderSkyPolys);
     //    ReversibleHooks::Install("CClouds", "RenderBottomFromHeight", 0x7154B0, &CClouds::RenderBottomFromHeight);
@@ -220,46 +220,52 @@ int32 CClouds::MovingFog_GetFirstFreeSlot() {
     return result;
 }
 
+// todo: fixme
 // 0x716C90
 void CClouds::MovingFogRender() {
-    if (CWeather::Foggyness_SF == 0.f || CGame::CanSeeOutSideFromCurrArea() || FindPlayerPed(-1)->m_nAreaCode == AREA_CODE_NORMAL_WORLD)
+    if (MovingFog_GetFXIntensity() == 0.f || CGame::CanSeeOutSideFromCurrArea() && FindPlayerPed()->m_nAreaCode != AREA_CODE_NORMAL_WORLD)
         return;
 
     float step = CTimer::GetTimeStep() * (1.f / 300.f);
     if (CCullZones::CamNoRain() && CCullZones::PlayerNoRain())
-        CurrentFogIntensity = std::max(CurrentFogIntensity - step, 0.f);
+        CurrentFogIntensity = std::min(CurrentFogIntensity - step, 0.f);
     else
-        CurrentFogIntensity = std::min(CurrentFogIntensity + step, 0.f);
+        CurrentFogIntensity = std::max(CurrentFogIntensity + step, 0.f);
 
-    if (CWeather::UnderWaterness >= CPostEffects::m_fWaterFXStartUnderWaterness)
+    if (CWeather::UnderWaterness >= CPostEffects::m_fWaterFXStartUnderWaterness) {
         CurrentFogIntensity = 0.f;
+        return;
+    }
 
     if (CurrentFogIntensity == 0.f)
         return;
+
     CVector up = TheCamera.GetUpVector(), right = TheCamera.GetRightVector();
     CPostEffects::ImmediateModeRenderStatesStore();
     CPostEffects::ImmediateModeRenderStatesSet();
 
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,   (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, gpCloudTex[1]->raster);
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
 
-    int32 red = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomRed + 132, 255), green = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomGreen + 132, 255),
-        blue = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomBlue + 132, 255);
+    int32 red   = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomRed + 132, 255);
+    int32 green = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomGreen + 132, 255);
+    int32 blue  = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomBlue + 132, 255);
 
     int32 numVerts = 0;
-    for (int32 i = 0; i < MAX_MOVING_FOG; i++) {
+    for (auto i = 0u; i < MAX_MOVING_FOG; i++) {
         if (!ms_mf.m_bFogSlots[i])
             continue;
+
         float halfSize = ms_mf.m_fSize[i] * 0.5f;
         CVector up1 = up * halfSize, right1 = right * halfSize;
 
-        int32 alpha = static_cast<int32>(CWeather::Foggyness_SF * ms_mf.m_fIntensity[i] * CurrentFogIntensity);
-        for (int32 l = 0; l < 6; l++) {
+        int32 alpha = static_cast<int32>(MovingFog_GetFXIntensity() * ms_mf.m_fIntensity[i] * CurrentFogIntensity);
+        for (int32 ind = 0; ind < std::size(ms_mf.m_nPrimIndices); ind++) {
             float u = 0.f, v = 0.f;
             CVector pos = ms_mf.m_vecPosn[i];
 
-            switch (ms_mf.m_nPrimIndices[l]) {
+            switch (ms_mf.m_nPrimIndices[ind]) {
             case 0:
                 u = 0.f;
                 v = 0.f;
@@ -275,18 +281,21 @@ void CClouds::MovingFogRender() {
             case 2:
                 u = 1.f;
                 v = 1.f;
-                pos -= right1 + up1;
+                pos -= right1 - up1;
                 break;
 
             case 3:
                 u = 0.f;
                 v = 1.f;
-                pos -= right1 - up1;
+                pos -= right1 + up1;
+                break;
+
+            default:
                 break;
             }
 
-            RwIm3DVertexSetRGBA(&aTempBufferVertices[numVerts], red, green, blue, alpha);
             RwIm3DVertexSetPos(&aTempBufferVertices[numVerts], pos.x, pos.y, pos.z);
+            RwIm3DVertexSetRGBA(&aTempBufferVertices[numVerts], red, green, blue, alpha);
             RwIm3DVertexSetU(&aTempBufferVertices[numVerts], u);
             RwIm3DVertexSetV(&aTempBufferVertices[numVerts], v);
             numVerts++;
@@ -305,6 +314,7 @@ void CClouds::MovingFogRender() {
         RwIm3DRenderPrimitive(rwPRIMTYPETRILIST);
         RwIm3DEnd();
     }
+
     CPostEffects::ImmediateModeRenderStatesReStore();
     MovingFog_Update();
 }
