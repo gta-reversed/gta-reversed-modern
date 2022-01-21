@@ -56,18 +56,18 @@ float(&CWeather::saBannerWindOffsets)[32] = *(float(*)[32])0x8CCF70;
 
 void CWeather::InjectHooks() {
     ReversibleHooks::Install("CWeather", "Init", 0x72A480, &CWeather::Init);
-//    ReversibleHooks::Install("CWeather", "AddRain", 0x72A9A0, &CWeather::AddRain);
-//    ReversibleHooks::Install("CWeather", "AddSandStormParticles", 0x72A820, &CWeather::AddSandStormParticles);
-    ReversibleHooks::Install("CWeather", "FindWeatherTypesList", 0x72A520, &CWeather::FindWeatherTypesList);
+    // ReversibleHooks::Install("CWeather", "AddRain", 0x72A9A0, &CWeather::AddRain);
+    // ReversibleHooks::Install("CWeather", "AddSandStormParticles", 0x72A820, &CWeather::AddSandStormParticles);
+    // ReversibleHooks::Install("CWeather", "FindWeatherTypesList", 0x72A520, &CWeather::FindWeatherTypesList, true); // bad
     ReversibleHooks::Install("CWeather", "ForceWeather", 0x72A4E0, &CWeather::ForceWeather);
     ReversibleHooks::Install("CWeather", "ForceWeatherNow", 0x72A4F0, &CWeather::ForceWeatherNow);
-//    ReversibleHooks::Install("CWeather", "ForecastWeather", 0x72A590, &CWeather::ForecastWeather);
+    // ReversibleHooks::Install("CWeather", "ForecastWeather", 0x72A590, &CWeather::ForecastWeather);
     ReversibleHooks::Install("CWeather", "ReleaseWeather", 0x72A510, &CWeather::ReleaseWeather);
     ReversibleHooks::Install("CWeather", "RenderRainStreaks", 0x72AF70, &CWeather::RenderRainStreaks);
     ReversibleHooks::Install("CWeather", "SetWeatherToAppropriateTypeNow", 0x72A790, &CWeather::SetWeatherToAppropriateTypeNow);
-//    ReversibleHooks::Install("CWeather", "Update", 0x72B850, &CWeather::Update);
-//    ReversibleHooks::Install("CWeather", "UpdateInTunnelness", 0x72B630, &CWeather::UpdateInTunnelness);
-    ReversibleHooks::Install("CWeather", "UpdateWeatherRegion", 0x72A640, &CWeather::UpdateWeatherRegion);
+    // ReversibleHooks::Install("CWeather", "Update", 0x72B850, &CWeather::Update);
+    // ReversibleHooks::Install("CWeather", "UpdateInTunnelness", 0x72B630, &CWeather::UpdateInTunnelness);
+    // ReversibleHooks::Install("CWeather", "UpdateWeatherRegion", 0x72A640, &CWeather::UpdateWeatherRegion, true); // bad
     ReversibleHooks::Install("CWeather", "IsRainy", 0x4ABF50, &CWeather::IsRainy);
 }
 
@@ -100,17 +100,24 @@ void CWeather::AddSandStormParticles() {
     plugin::Call<0x72A820>();
 }
 
+// todo: fixme
 // 0x72A520
 const eWeatherType* CWeather::FindWeatherTypesList() {
+    return plugin::CallAndReturn<const eWeatherType*, 0x72A520>();
+
     switch (WeatherRegion) {
     case WEATHER_REGION_LA:
         return WeatherTypesListLA;
+
     case WEATHER_REGION_SF:
         return WeatherTypesListSF;
+
     case WEATHER_REGION_LV:
         return WeatherTypesListVegas;
+
     case WEATHER_REGION_DESERT:
         return WeatherTypesListDesert;
+
     default:
         return WeatherTypesListDefault;
     }
@@ -294,6 +301,7 @@ void CWeather::UpdateInTunnelness() {
     plugin::Call<0x72B630>();
 }
 
+// todo: fixme
 // 0x72A640
 void CWeather::UpdateWeatherRegion(CVector* posn) {
     CVector vecPos = TheCamera.GetPosition();

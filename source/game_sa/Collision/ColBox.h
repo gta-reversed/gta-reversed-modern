@@ -18,6 +18,11 @@ public:
 
 public:
     CColBox() = default;
+    
+    CColBox(const CBox& box) :
+        CBox(box)
+    {
+    }
 
     CColBox(const CBox& box, uint8 material, uint8 flags, uint8 lightning) :
         CBox(box),

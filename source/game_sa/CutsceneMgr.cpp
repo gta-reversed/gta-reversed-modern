@@ -44,7 +44,6 @@ char(*CCutsceneMgr::ms_cLoadAnimName)[32] = (char(*)[32])0xBC3288;
 char(*CCutsceneMgr::ms_cLoadObjectName)[32] = (char(*)[32])0xBC38C8;
 float &CCutsceneMgr::ms_cutsceneTimer = *(float *)0xBC3F08;
 char *CCutsceneMgr::ms_cutsceneName = (char *)0xBC3F0C;
-CCutsceneObject **CCutsceneMgr::ms_pCutsceneObjects = (CCutsceneObject **)0xBC3F18;
 uint32 &CCutsceneMgr::ms_cutscenePlayStatus = *(uint32 *)0xBC3FE0;
 uint32 &CCutsceneMgr::ms_numCutsceneObjs = *(uint32 *)0xBC3FE4;
 uint32 &CCutsceneMgr::ms_numLoadObjectNames = *(uint32 *)0xBC3FE8;

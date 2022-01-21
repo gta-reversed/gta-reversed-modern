@@ -14,19 +14,15 @@
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
 #endif
 
-int32 MAX_INVISIBLE_ENTITY_PTRS = 150;
-int32 MAX_VISIBLE_ENTITY_PTRS = 1000;
-int32 MAX_VISIBLE_LOD_PTRS = 1000;
-int32 MAX_VISIBLE_SUPERLOD_PTRS = 50;
 bool& CRenderer::ms_bRenderTunnels = *(bool*)0xB745C0;
 bool& CRenderer::ms_bRenderOutsideTunnels = *(bool*)0xB745C1;
 tRenderListEntry*& CRenderer::ms_pLodDontRenderList = *(tRenderListEntry**)0xB745CC;
 tRenderListEntry*& CRenderer::ms_pLodRenderList = *(tRenderListEntry**)0xB745D0;
 CVehicle*& CRenderer::m_pFirstPersonVehicle = *(CVehicle**)0xB745D4;
-CEntity** CRenderer::ms_aInVisibleEntityPtrs = (CEntity**)0xB745D8;
-CEntity** CRenderer::ms_aVisibleSuperLodPtrs = (CEntity**)0xB74830;
-CEntity** CRenderer::ms_aVisibleLodPtrs = (CEntity**)0xB748F8;
-CEntity** CRenderer::ms_aVisibleEntityPtrs = (CEntity**)0xB75898;
+CEntity* (&CRenderer::ms_aInVisibleEntityPtrs)[MAX_INVISIBLE_ENTITY_PTRS] = *(CEntity*(*)[MAX_INVISIBLE_ENTITY_PTRS])0xB745D8;
+CEntity* (&CRenderer::ms_aVisibleSuperLodPtrs)[MAX_VISIBLE_SUPERLOD_PTRS] = *(CEntity*(*)[MAX_VISIBLE_SUPERLOD_PTRS])0xB74830;
+CEntity* (&CRenderer::ms_aVisibleLodPtrs)[MAX_VISIBLE_LOD_PTRS] = *(CEntity*(*)[MAX_VISIBLE_LOD_PTRS])0xB748F8;
+CEntity* (&CRenderer::ms_aVisibleEntityPtrs)[MAX_VISIBLE_ENTITY_PTRS] = *(CEntity*(*)[MAX_VISIBLE_ENTITY_PTRS])0xB75898;
 int32& CRenderer::ms_nNoOfVisibleSuperLods = *(int32*)0xB76838;
 int32& CRenderer::ms_nNoOfInVisibleEntities = *(int32*)0xB7683C;
 int32& CRenderer::ms_nNoOfVisibleLods = *(int32*)0xB76840;
@@ -99,9 +95,9 @@ void CRenderer::Shutdown() {
 
 // 0x5531E0
 void CRenderer::RenderFadingInEntities() {
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)rwCULLMODECULLBACK);
     DeActivateDirectional();
     SetAmbientColours();
     CVisibilityPlugins::RenderFadingEntities();
@@ -351,9 +347,9 @@ void CRenderer::RenderRoads() {
 
 // 0x553AA0
 void CRenderer::RenderEverythingBarRoads() {
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)rwCULLMODECULLBACK);
     if (!CGame::currArea)
         RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)140u);
 
@@ -369,7 +365,7 @@ void CRenderer::RenderEverythingBarRoads() {
             if (entity->m_nType == ENTITY_TYPE_VEHICLE) {
                 bool bInsertIntoSortedList = false;
                 if (vehicle->m_vehicleType == VEHICLE_BOAT) {
-                    eCamMode camMode = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_nMode;
+                    eCamMode camMode = CCamera::GetActiveCamera().m_nMode;
                     if (camMode == MODE_WHEELCAM || camMode == MODE_1STPERSON &&
                         TheCamera.GetLookDirection() != LOOKING_DIRECTION_FORWARD && TheCamera.GetLookDirection() ||
                         CVisibilityPlugins::GetClumpAlpha(entity->m_pRwClump) != 255)
@@ -410,14 +406,14 @@ void CRenderer::RenderFirstPersonVehicle() {
             bRestoreAlphaTest = true;
             RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)80u);
         }
-        RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
         RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
         RenderOneNonRoad(m_pFirstPersonVehicle);
-        RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
         if (bRestoreAlphaTest)
             RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)nullptr);
     }
@@ -867,30 +863,41 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
 
 // 0x554B10
 void CRenderer::ScanBigBuildingList(int32 sectorX, int32 sectorY) {
-    if (sectorX >= 0 && sectorY >= 0 && sectorX < MAX_LOD_PTR_LISTS_X && sectorY < MAX_LOD_PTR_LISTS_Y) {
-        CPtrList& list = CWorld::GetLodPtrList(sectorX, sectorY);
-        bool bRequestModel = false;
-        float fDistanceX = CWorld::GetLodSectorPosX(sectorX) - ms_vecCameraPosition.x;
-        float fDistanceY = CWorld::GetLodSectorPosY(sectorY) - ms_vecCameraPosition.y;
-        float fAngleInRadians = atan2(-fDistanceX, fDistanceY) - ms_fCameraHeading;
-        if (CVector2D(fDistanceX, fDistanceY).SquaredMagnitude() < MAX_BIGBUILDING_STREAMING_RADIUS ||
-            fabs(CGeneral::LimitRadianAngle(fAngleInRadians)) <= DegreesToRadians(BIGBUILDING_STREAMING_ANGLE_THRESHOLD))
-        {
-            bRequestModel = true;
-        }
-        for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
-            auto* entity = reinterpret_cast<CEntity*>(node->m_item);
-            if (entity->m_nScanCode != GetCurrentScanCode()) {
-                entity->m_nScanCode = GetCurrentScanCode();
-                float fDistance = 0.0f;
-                int32 visibility = SetupBigBuildingVisibility(entity, fDistance);
-                if (visibility == RENDERER_VISIBLE) {
-                    AddEntityToRenderList(entity, fDistance + 0.01f);
-                    entity->m_bOffscreen = false;
-                }
-                else if (visibility == RENDERER_STREAMME && !CStreaming::ms_disableStreaming && bRequestModel) {
+    if (sectorX < 0 && sectorY < 0 && sectorX > MAX_LOD_PTR_LISTS_X && sectorY > MAX_LOD_PTR_LISTS_Y)
+        return;
+
+    CPtrList& list = CWorld::GetLodPtrList(sectorX, sectorY);
+    bool bRequestModel = false;
+    float fDistanceX = CWorld::GetLodSectorPosX(sectorX) - ms_vecCameraPosition.x;
+    float fDistanceY = CWorld::GetLodSectorPosY(sectorY) - ms_vecCameraPosition.y;
+    float fAngleInRadians = atan2(-fDistanceX, fDistanceY) - ms_fCameraHeading;
+    if (CVector2D(fDistanceX, fDistanceY).SquaredMagnitude() < MAX_BIGBUILDING_STREAMING_RADIUS ||
+        fabs(CGeneral::LimitRadianAngle(fAngleInRadians)) <= DegreesToRadians(BIGBUILDING_STREAMING_ANGLE_THRESHOLD))
+    {
+        bRequestModel = true;
+    }
+
+    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+        auto* entity = reinterpret_cast<CEntity*>(node->m_item);
+        if (entity->m_nScanCode != GetCurrentScanCode()) {
+            entity->m_nScanCode = GetCurrentScanCode();
+
+            float fDistance = 0.0f;
+            auto visibility = SetupBigBuildingVisibility(entity, fDistance) - 1;
+
+            switch (visibility) {
+            case RENDERER_VISIBLE:
+            case RENDERER_STREAMME:
+                break;
+            case RENDERER_CULLED:
+                if (!CStreaming::ms_disableStreaming && bRequestModel) {
                     CStreaming::RequestModel(entity->m_nModelIndex, 0);
                 }
+                break;
+            default: // RENDERER_INVISIBLE
+                AddEntityToRenderList(entity, fDistance + 0.01f);
+                entity->m_bOffscreen = false;
+                break;
             }
         }
     }
@@ -973,7 +980,7 @@ void CRenderer::ScanSectorList_RequestModels(int32 sectorX, int32 sectorY) {
         CSector* sector = GetSector(sectorX, sectorY);
         ScanPtrList_RequestModels(sector->m_buildings);
         ScanPtrList_RequestModels(sector->m_dummies);
-        ScanPtrList_RequestModels(CWorld::ms_aRepeatSectors->m_lists[REPEATSECTOR_OBJECTS]);
+        ScanPtrList_RequestModels(GetRepeatSector(sectorX, sectorY)->GetList(REPEATSECTOR_OBJECTS));
     }
 }
 
@@ -1163,17 +1170,17 @@ void CRenderer::SetupScanLists(int32 sectorX, int32 sectorY)
     if (sectorX >= 0 && sectorY >= 0 && sectorX < MAX_SECTORS_X && sectorY < MAX_SECTORS_Y) {
         CSector* sector = GetSector(sectorX, sectorY);
         scanLists->buildingsList = &sector->m_buildings;
-        scanLists->objectsList = &repeatSector->m_lists[REPEATSECTOR_OBJECTS];
-        scanLists->vehiclesList = &repeatSector->m_lists[REPEATSECTOR_VEHICLES];
-        scanLists->pedsList = &repeatSector->m_lists[REPEATSECTOR_PEDS];
+        scanLists->objectsList = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
+        scanLists->vehiclesList = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
+        scanLists->pedsList = &repeatSector->GetList(REPEATSECTOR_PEDS);
         scanLists->dummiesList = &sector->m_dummies;
     }
     else {
         // sector x and y are out of bounds
         scanLists->buildingsList = nullptr;
-        scanLists->objectsList = &repeatSector->m_lists[0];
-        scanLists->vehiclesList = &repeatSector->m_lists[1];
-        scanLists->pedsList = &repeatSector->m_lists[2];
+        scanLists->objectsList = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
+        scanLists->vehiclesList = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
+        scanLists->pedsList = &repeatSector->GetList(REPEATSECTOR_PEDS);
         scanLists->dummiesList = nullptr;
     }
 }

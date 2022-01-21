@@ -408,7 +408,7 @@ void CCheat::ExtraSunnyWeatherCheat() {
 // 0x438f90
 void CCheat::FastTimeCheat() {
     if (CTimer::GetTimeScale() < 4.0f) {
-        CTimer::SetTimeScale(CTimer::GetTimeScale() * 2.0f); // todo: check compiler optimization, should be ms_fTimeScale + ms_fTimeScale
+        CTimer::SetTimeScale(CTimer::GetTimeScale() * 2.0f);
     }
 }
 

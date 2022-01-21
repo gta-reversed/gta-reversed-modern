@@ -430,10 +430,11 @@ static void DebugCode() {
     CPad* pad = CPad::GetPad(0);
     if (pad->IsStandardKeyJustDown('1')) {
         printf("");
-        CCheat::TankerCheat();
+        CCheat::JetpackCheat();
     }
     if (pad->IsStandardKeyJustDown('2')) {
         printf("");
+        CCheat::MoneyArmourHealthCheat();
     }
 }
 
