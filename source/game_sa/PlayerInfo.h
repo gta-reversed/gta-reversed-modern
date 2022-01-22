@@ -91,6 +91,8 @@ public:
 
 public:
     CPlayerInfo();
+    CPlayerInfo(const CPlayerInfo&) = delete;
+    CPlayerInfo(CPlayerInfo&&) = delete;
     ~CPlayerInfo() = default; // 0x45B110
 
     static void CancelPlayerEnteringCars(CVehicle* vehicle);
