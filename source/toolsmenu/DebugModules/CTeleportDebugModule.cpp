@@ -92,7 +92,7 @@ void ProcessImGui() {
 
         DoTeleportTo(pos);
     }
-    HoveredItemTooltip("Hold `ALT` to teleport to a random position.\nHold `SHIFT` to teleport marked position on the map.");
+    HoveredItemTooltip("Hold `ALT` to teleport to a random position\nHold `SHIFT` to teleport to marker marked on the map");
 
     // Save position button
     if (SameLine(); Button("Save")) {
