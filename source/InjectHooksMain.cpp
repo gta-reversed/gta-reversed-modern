@@ -62,6 +62,7 @@
 #include "C_PcSave.h"
 #include "FireManager.h"
 #include "Skidmarks.h"
+#include "CarCtrl.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
