@@ -36,10 +36,10 @@ void DoTeleportTo(CVector& pos, bool doAdjustToGroundZ = true) {
         pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + 2.f;
     }
 
-    // TODO: Figure out how to get CJ out of any interior, into the normal world correctly..
-    //       (In this case the sky is still black..)
     FindPlayerPed()->m_nAreaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD;
     CGame::currArea = eAreaCodes::AREA_CODE_NORMAL_WORLD;
+    CStreaming::RemoveBuildingsNotInArea(eAreaCodes::AREA_CODE_NORMAL_WORLD);
+    CTimeCycle::StopExtraColour(false);
     FindPlayerPed()->Teleport(pos, true);
 }
 
@@ -71,7 +71,7 @@ void ProcessImGui() {
     // Teleport button
     if (SameLine(); Button("Teleport")) {
         BeginTooltip();
-        Text("Hold `ALT` to teleport to a random position");
+        Text("Hold `ALT` to teleport to a random position.\nHold `SHIFT` to teleport marked position on the map.");
         EndTooltip();
 
         if (GetIO().KeyAlt) { // Random position
@@ -80,11 +80,23 @@ void ProcessImGui() {
                CGeneral::GetRandomNumberInRange(-3072.0f, 3072.0f),
                0.0f // Z height will be set to ground, so no need to worry about it
             };
+        } else if (GetIO().KeyShift) { // Teleport to marker
+            // code from CLEO4 library
+            auto hMarker = FrontEndMenuManager.m_nTargetBlipIndex;
+            auto pMarker = &CRadar::ms_RadarTrace[LOWORD(hMarker)];
+
+            if (hMarker && pMarker) {
+                pos = CVector{
+                    pMarker->m_vPosition.x,
+                    pMarker->m_vPosition.y,
+                    0.0f // Z height will be set to ground, so no need to worry about it
+                };
+            }
         }
 
         DoTeleportTo(pos);
     }
-    HoveredItemTooltip("Hold `ALT` to teleport to a random position");
+    HoveredItemTooltip("Hold `ALT` to teleport to a random position.\nHold `SHIFT` to teleport marked position on the map.");
 
     // Save position button
     if (SameLine(); Button("Save")) {
