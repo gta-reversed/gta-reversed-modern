@@ -1096,8 +1096,8 @@ void CRadar::DrawRadarSprite(uint16 spriteId, float x, float y, uint8 alpha)
         LimitToMap(&x, &y);
     }
 
-    float width = SCREEN_WIDTH_UNIT * 8.0f;
-    float height = SCREEN_HEIGHT_UNIT * 8.0f;
+    int32 width = 8 * SCREEN_WIDTH_UNIT;
+    int32 height = 8 * SCREEN_HEIGHT_UNIT;
 
     auto sprite16 = (uint16)spriteId;
     if (!DisplayThisBlip(sprite16, -99))
