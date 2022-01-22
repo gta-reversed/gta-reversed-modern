@@ -26,8 +26,8 @@ bool CPlantMgr::Initialise() {
     return plugin::CallAndReturn<bool, 0x5DD910>();
 }
 
-void CPlantMgr::SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo*) {
-    plugin::Call<0x5DB650>();
+void CPlantMgr::SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo* ami) {
+    plugin::Call<0x5DB650, CAtomicModelInfo*>(ami);
 }
 
 // 0x5DCFA0

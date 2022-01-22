@@ -1103,14 +1103,13 @@ void CRadar::DrawRadarSprite(uint16 spriteId, float x, float y, uint8 alpha)
     if (!DisplayThisBlip(sprite16, -99))
         return;
 
-    CRect rt;
-    rt.left = x - width;
-    rt.top = y - height;
-    rt.right = x + width;
-    rt.bottom = y + height;
-
+    CRect rt{
+        x - width,
+        y - height,
+        x + width,
+        y + height,
+    };
     CRGBA white(255, 255, 255, alpha);
-
     RadarBlipSprites[sprite16].Draw(rt, white);
     AddBlipToLegendList(0, sprite16);
 }
