@@ -451,6 +451,7 @@ void CDebugMenu::ImguiDrawLoop() {
     CDebugMenu::ImguiDisplayExtraDebugFeatures();
     ImguiDisplayPlayerInfo();
     ImguiDisplayFramePerSecond();
+    CheatDebugModule::ProcessRender();
 
     ImGui::EndFrame();
     ImGui::Render();

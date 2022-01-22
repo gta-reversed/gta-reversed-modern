@@ -4,6 +4,8 @@
 
 #include "CheatDebugModule.h"
 
+static bool s_bGodMode{};
+
 namespace CheatDebugModule {
 
 void ProcessImgui() {
@@ -220,8 +222,19 @@ void ProcessImgui() {
     if (ImGui::RadioButton("Reset Cheats", false)) {
         CCheat::ResetCheats();
     }
+
+    ImGui::PushID("godmode##cheattool");
+    ImGui::Checkbox("Godmode", &s_bGodMode);
+    ImGui::PopID();
 }
 
-void ProcessRender() {}
+void ProcessRender() {
+    if (s_bGodMode) {
+        if (const auto& info = FindPlayerInfo(); info.m_pPed) {
+            info.m_pPed->m_fArmour = info.m_nMaxArmour;
+            CCheat::HealthCheat();
+        }
+    }
+}
 
 } // namespace CheatDebugModule
