@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "CDebugMenu.h"
+#include "Utility.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -31,23 +32,15 @@ ImGuiIO* CDebugMenu::io = {};
 
 static ImVec2 m_MousePos;
 
-// https://stackoverflow.com/a/19839371
-bool findStringCaseInsensitive(const std::string& strHaystack, const std::string& strNeedle) {
-    auto it = std::search(
-      strHaystack.begin(), strHaystack.end(),
-      strNeedle.begin(), strNeedle.end(),
-      [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
-    );
-    return (it != strHaystack.end());
-}
-
 void CDebugMenu::ImguiInitialise() {
     if (m_imguiInitialised) {
         return;
     }
 
     IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
+
+    auto& ctx = *ImGui::CreateContext();
+
     io = &ImGui::GetIO();
     io->WantCaptureMouse = true;
     io->WantCaptureKeyboard = true;
@@ -62,6 +55,7 @@ void CDebugMenu::ImguiInitialise() {
 
     LoadMouseSprite();
 
+    TeleportDebugModule::Initialise(ctx);
     VehicleDebugModule::Initialise();
     PedDebugModule::Initialise();
     MissionDebugModule::Initialise();
@@ -118,7 +112,6 @@ void CDebugMenu::ImguiInputUpdate() {
             } else if (!(KeyStates[i] & 0x80) && io->KeysDown[i])
                 io->KeysDown[i] = false;
         }
-
         io->KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
         io->KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
         io->KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
@@ -357,11 +350,6 @@ void CDebugMenu::ProcessExtraDebugFeatures() {
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Teleporter")) {
-            TeleportDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
         ImGui::EndTabBar();
     }
 }
@@ -373,6 +361,8 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
     }
 
     if (m_showMenu && FindPlayerPed()) {
+        TeleportDebugModule::ProcessImGui();
+
         ImGui::SetNextWindowSize(ImVec2(484, 420), ImGuiCond_FirstUseEver);
         ImGui::Begin("Debug Window", &m_showMenu, ImGuiWindowFlags_NoResize);
         if (ImGui::BeginMenuBar()) {
