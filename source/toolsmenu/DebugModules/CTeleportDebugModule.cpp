@@ -76,8 +76,8 @@ void ProcessImGui() {
                CGeneral::GetRandomNumberInRange(-3072.0f, 3072.0f),
                0.0f // Z height will be set to ground, so no need to worry about it
             };
-        } else if (GetIO().KeyShift) { // Teleport to marker
-            // code from CLEO4 library
+        } else if (GetIO().KeyShift) { // Teleport to marker set on the map
+            // Code from CLEO4 library
             auto hMarker = FrontEndMenuManager.m_nTargetBlipIndex;
             auto pMarker = &CRadar::ms_RadarTrace[LOWORD(hMarker)];
 
