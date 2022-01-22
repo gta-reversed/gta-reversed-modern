@@ -297,7 +297,7 @@ void CEntity::SetModelIndexNoCreate_Reversed(uint32 index)
 {
     auto mi = CModelInfo::GetModelInfo(index);
     m_nModelIndex = index;
-    m_bHasPreRenderEffects = CEntity::HasPreRenderEffects();
+    m_bHasPreRenderEffects = HasPreRenderEffects();
 
     if (mi->GetIsDrawLast())
         m_bDrawLast = true;
@@ -335,7 +335,7 @@ void CEntity::CreateRwObject_Reversed()
     if (IsBuilding())
         ++gBuildings;
 
-    CEntity::UpdateRW();
+    UpdateRW();
     switch (RwObjectGetType(m_pRwObject)) {
     case rpATOMIC: {
         if (CTagManager::IsTag(this))
@@ -371,7 +371,7 @@ void CEntity::CreateRwObject_Reversed()
 
     mi->AddRef();
     m_pStreamingLink = CStreaming::AddEntity(this);
-    CEntity::CreateEffects();
+    CreateEffects();
 
     auto usedAtomic = m_pRwAtomic;
     if (RwObjectGetType(m_pRwObject) != rpATOMIC)
@@ -526,7 +526,7 @@ void CEntity::PreRender_Reversed()
     auto atomicInfo = mi->AsAtomicModelInfoPtr();
 
     if (mi->m_n2dfxCount)
-        CEntity::ProcessLightsForEntity();
+        ProcessLightsForEntity();
 
     if (!mi->HasBeenPreRendered()) {
         mi->SetHasBeenPreRendered(true);
@@ -557,12 +557,12 @@ void CEntity::PreRender_Reversed()
         auto vecEntPos = CVector2D(GetPosition());
         auto fDist = DistanceBetweenPoints2D(vecCamPos, vecEntPos);
         CObject::fDistToNearestTree = std::min(CObject::fDistToNearestTree, fDist);
-        CEntity::ModifyMatrixForTreeInWind();
+        ModifyMatrixForTreeInWind();
     }
 
     if (IsBuilding()) {
         if (atomicInfo && atomicInfo->IsCrane())
-            CEntity::ModifyMatrixForCrane();
+            ModifyMatrixForCrane();
 
         return;
     }
@@ -571,25 +571,25 @@ void CEntity::PreRender_Reversed()
         return;
 
     if (IsObject() && !IsDummy()) {
-        auto pObject = reinterpret_cast<CObject*>(this);
-        if(m_nModelIndex == ModelIndices::MI_COLLECTABLE1) {
+        auto obj = reinterpret_cast<CObject*>(this);
+        if (m_nModelIndex == ModelIndices::MI_COLLECTABLE1) {
             CPickups::DoCollectableEffects(this);
-            CEntity::UpdateRW();
-            CEntity::UpdateRwFrame();
+            UpdateRW();
+            UpdateRwFrame();
         }
         else if (m_nModelIndex == ModelIndices::MI_MONEY) {
             CPickups::DoMoneyEffects(this);
-            CEntity::UpdateRW();
-            CEntity::UpdateRwFrame();
+            UpdateRW();
+            UpdateRwFrame();
         }
         else if (m_nModelIndex == ModelIndices::MI_CARMINE
             || m_nModelIndex == ModelIndices::MI_NAUTICALMINE
             || m_nModelIndex == ModelIndices::MI_BRIEFCASE) {
 
-            if (pObject->objectFlags.bIsPickup) {
+            if (obj->objectFlags.bIsPickup) {
                 CPickups::DoMineEffects(this);
-                CEntity::UpdateRW();
-                CEntity::UpdateRwFrame();
+                UpdateRW();
+                UpdateRwFrame();
             }
         }
         else if (m_nModelIndex == eModelID::MODEL_MISSILE) {
@@ -714,19 +714,19 @@ void CEntity::PreRender_Reversed()
             );
         }
         else if (IsGlassModel(this)) {
-            CEntity::PreRenderForGlassWindow();
+            PreRenderForGlassWindow();
         }
-        else if (pObject->objectFlags.bIsPickup) {
+        else if (obj->objectFlags.bIsPickup) {
             CPickups::DoPickUpEffects(this);
-            CEntity::UpdateRW();
-            CEntity::UpdateRwFrame();
+            UpdateRW();
+            UpdateRwFrame();
         }
         else if (m_nModelIndex == eModelID::MODEL_GRENADE) {
             auto const& vecPos = GetPosition();
             auto vecScaledCam = TheCamera.m_mCameraMatrix.GetRight() * 0.07F;
             auto vecStreakStart = vecPos - vecScaledCam;
             auto vecStreakEnd = vecPos + vecScaledCam;
-            if (CVector2D(pObject->m_vecMoveSpeed).Magnitude() > 0.03F) {
+            if (CVector2D(obj->m_vecMoveSpeed).Magnitude() > 0.03F) {
                 CMotionBlurStreaks::RegisterStreak(reinterpret_cast<uint32>(this), 100, 100, 100, 255, vecStreakStart, vecStreakEnd);
             }
         }
@@ -735,7 +735,7 @@ void CEntity::PreRender_Reversed()
             auto vecScaledCam = TheCamera.m_mCameraMatrix.GetRight() * 0.07F;
             auto vecStreakStart = vecPos - vecScaledCam;
             auto vecStreakEnd = vecPos + vecScaledCam;
-            if (CVector2D(pObject->m_vecMoveSpeed).Magnitude() > 0.03F) {
+            if (CVector2D(obj->m_vecMoveSpeed).Magnitude() > 0.03F) {
                 float fWaterLevel;
                 if (!CWaterLevel::GetWaterLevelNoWaves(vecPos.x, vecPos.y, vecPos.z, &fWaterLevel, nullptr, nullptr) || vecPos.z > fWaterLevel) {
                     CMotionBlurStreaks::RegisterStreak(reinterpret_cast<uint32>(this), 255, 160, 100, 255, vecStreakStart, vecStreakEnd);
@@ -793,7 +793,7 @@ void CEntity::PreRender_Reversed()
             }
         }
         else if (m_nModelIndex == ModelIndices::MI_WINDSOCK) {
-            CEntity::ModifyMatrixForPoleInWind();
+            ModifyMatrixForPoleInWind();
         }
     }
     else if (m_nModelIndex == ModelIndices::MI_TRAFFICLIGHTS) {
@@ -858,7 +858,7 @@ void CEntity::Render_Reversed()
         RpClumpRender(m_pRwClump);
 
     CStreaming::RenderEntity(m_pStreamingLink);
-    CEntity::RenderEffects();
+    RenderEffects();
 
     m_bImBeingRendered = false;
 
@@ -1007,8 +1007,8 @@ void CEntity::ModifyMatrixForPoleInWind()
     matrix.GetRight() = vecCross;
     matrix.GetForward() = vecNormalisedDir;
     matrix.GetUp() = vecCross2;
-    CEntity::UpdateRW();
-    CEntity::UpdateRwFrame();
+    UpdateRW();
+    UpdateRwFrame();
 }
 
 // 0x533050
@@ -1042,15 +1042,15 @@ void CEntity::ModifyMatrixForCrane()
     if (!m_pRwObject)
         return;
 
-    auto matrix = CEntity::GetModellingMatrix();
-    if (!matrix)
+    auto parentMatrix = GetModellingMatrix();
+    if (!parentMatrix)
         return;
 
-    auto tempMat = CMatrix(matrix, 0);
+    auto tempMat = CMatrix(parentMatrix, 0);
     auto fRot = (CTimer::GetTimeInMS() & 0x3FF) * (PI / 512.26F);
     tempMat.SetRotateZOnly(fRot);
     tempMat.UpdateRW();
-    CEntity::UpdateRwFrame();
+    UpdateRwFrame();
 
 }
 
@@ -1071,11 +1071,13 @@ void CEntity::SetRwObjectAlpha(int32 alpha)
     if (!m_pRwObject)
         return;
 
-    if (RwObjectGetType(m_pRwObject) == rpATOMIC) {
-        CEntity::SetAtomicAlphaCB(m_pRwAtomic, (void*)alpha);
-    }
-    else if (RwObjectGetType(m_pRwObject) == rpCLUMP) {
-        RpClumpForAllAtomics(m_pRwClump, CEntity::SetAtomicAlphaCB, (void*)alpha);
+    switch (RwObjectGetType(m_pRwObject)) {
+        case rpATOMIC:
+            SetAtomicAlphaCB(m_pRwAtomic, (void*)alpha);
+            break;
+        case rpCLUMP:
+            RpClumpForAllAtomics(m_pRwClump, SetAtomicAlphaCB, (void*)alpha);
+            break;
     }
 }
 
@@ -1128,7 +1130,7 @@ CVector* CEntity::FindTriggerPointCoors(CVector* outVec, int32 triggerIndex)
  */
 C2dEffect* CEntity::GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot)
 {
-    C2dEffect* apArr[32];
+    C2dEffect* apArr[32]{};
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
     int32 iFoundCount = 0;
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
@@ -1169,7 +1171,7 @@ CVector CEntity::TransformFromObjectSpace(CVector const& offset)
 // 0x533560
 CVector* CEntity::TransformFromObjectSpace(CVector& outPosn, CVector const& offset)
 {
-    auto result = CEntity::TransformFromObjectSpace(offset);
+    auto result = TransformFromObjectSpace(offset);
     outPosn = result;
     return &outPosn;
 }
@@ -1190,8 +1192,7 @@ void CEntity::CreateEffects()
             break;
         }
         case e2dEffectType::EFFECT_PARTICLE: {
-            auto pMatrix = CEntity::GetModellingMatrix();
-            g_fx.CreateEntityFx(this, effect->particle.m_szName, &effect->m_vecPosn, pMatrix);
+            g_fx.CreateEntityFx(this, effect->particle.m_szName, &effect->m_vecPosn, GetModellingMatrix());
             break;
         }
         case e2dEffectType::EFFECT_ATTRACTOR: {
@@ -1201,11 +1202,11 @@ void CEntity::CreateEffects()
         }
         case e2dEffectType::EFFECT_ENEX: {
             auto vecExit = effect->m_vecPosn + effect->enEx.m_vecExitPosn;
-            auto vecWorldEffect = CEntity::TransformFromObjectSpace(effect->m_vecPosn);
-            auto vecWorldExit = CEntity::TransformFromObjectSpace(vecExit);
+            auto vecWorldEffect = TransformFromObjectSpace(effect->m_vecPosn);
+            auto vecWorldExit = TransformFromObjectSpace(vecExit);
 
             if (effect->enEx.bTimedEffect) {
-                auto ucDays = CClock::ms_nGameClockDays;
+                auto ucDays = CClock::GetGameClockDays();
                 if (effect->enEx.m_nTimeOn > effect->enEx.m_nTimeOff && CClock::ms_nGameClockHours < effect->enEx.m_nTimeOff)
                     ucDays--;
 
@@ -1237,9 +1238,9 @@ void CEntity::CreateEffects()
             );
 
             if (iEnExId != -1) {
-                auto pAddedEffect = CEntryExitManager::mp_poolEntryExits->GetAt(iEnExId);
-                if (pAddedEffect->m_pLink && !pAddedEffect->m_pLink->m_nFlags.bEnableAccess)
-                    pAddedEffect->m_nFlags.bEnableAccess = false;
+                auto addedEffect = CEntryExitManager::mp_poolEntryExits->GetAt(iEnExId);
+                if (addedEffect->m_pLink && !addedEffect->m_pLink->m_nFlags.bEnableAccess)
+                    addedEffect->m_nFlags.bEnableAccess = false;
             }
             break;
         }
@@ -1249,17 +1250,17 @@ void CEntity::CreateEffects()
             auto uiLettersPerLine = C2dEffect::Roadsign_GetNumLettersFromFlags(effect->roadsign.m_nFlags);
             auto uiNumLines = C2dEffect::Roadsign_GetNumLinesFromFlags(effect->roadsign.m_nFlags);
 
-            auto pSignAtomic = CCustomRoadsignMgr::CreateRoadsignAtomic(effect->roadsign.m_vecSize.x,
+            auto signAtomic = CCustomRoadsignMgr::CreateRoadsignAtomic(effect->roadsign.m_vecSize.x,
                 effect->roadsign.m_vecSize.y,
                 uiNumLines,
-                &effect->roadsign.m_pText[0],
+                &effect->roadsign.m_pText[0],  // todo: does it good indexing for sign lines?
                 &effect->roadsign.m_pText[16],
                 &effect->roadsign.m_pText[32],
                 &effect->roadsign.m_pText[48],
                 uiLettersPerLine,
                 uiPalleteId);
 
-            auto frame = RpAtomicGetFrame(pSignAtomic);
+            auto frame = RpAtomicGetFrame(signAtomic);
             RwFrameSetIdentity(frame);
 
             const CVector axis0{1.0F, 0.0F, 0.0F}, axis1{0.0F, 1.0F, 0.0F}, axis2{0.0F, 0.0F, 1.0F};
@@ -1268,14 +1269,14 @@ void CEntity::CreateEffects()
             RwFrameRotate(frame, &axis1, effect->roadsign.m_vecRotation.y, RwOpCombineType::rwCOMBINEPOSTCONCAT);
             RwFrameTranslate(frame, &effect->m_vecPosn, RwOpCombineType::rwCOMBINEPOSTCONCAT);
             RwFrameUpdateObjects(frame);
-            effect->roadsign.m_pAtomic = pSignAtomic;
+            effect->roadsign.m_pAtomic = signAtomic;
             break;
         }
         case e2dEffectType::EFFECT_ESCALATOR: {
-            auto vecStart = CEntity::TransformFromObjectSpace(effect->m_vecPosn);
-            auto vecBottom = CEntity::TransformFromObjectSpace(effect->escalator.m_vecBottom);
-            auto vecTop = CEntity::TransformFromObjectSpace(effect->escalator.m_vecTop);
-            auto vecEnd = CEntity::TransformFromObjectSpace(effect->escalator.m_vecEnd);
+            auto vecStart = TransformFromObjectSpace(effect->m_vecPosn);
+            auto vecBottom = TransformFromObjectSpace(effect->escalator.m_vecBottom);
+            auto vecTop = TransformFromObjectSpace(effect->escalator.m_vecTop);
+            auto vecEnd = TransformFromObjectSpace(effect->escalator.m_vecEnd);
             auto bMovingDown = effect->escalator.m_nDirection == 0;
 
             CEscalators::AddOne(vecStart, vecBottom, vecTop, vecEnd, bMovingDown, this);
@@ -1310,7 +1311,7 @@ void CEntity::DestroyEffects()
             break;
         }
         case e2dEffectType::EFFECT_ENEX: {
-            auto vecWorld = CEntity::TransformFromObjectSpace(effect->m_vecPosn);
+            auto vecWorld = TransformFromObjectSpace(effect->m_vecPosn);
             auto iNearestEnex = CEntryExitManager::FindNearestEntryExit(vecWorld, 1.5F, -1);
             if (iNearestEnex != -1) {
                 auto enex = CEntryExitManager::mp_poolEntryExits->GetAt(iNearestEnex);
@@ -1337,8 +1338,8 @@ void CEntity::AttachToRwObject(RwObject* object, bool updateEntityMatrix)
 
     if (updateEntityMatrix) {
         CMatrix& matrix = GetMatrix();
-        auto pRwMatrix = CEntity::GetModellingMatrix();
-        matrix.UpdateMatrix(pRwMatrix);
+        auto parentMatrix = GetModellingMatrix();
+        matrix.UpdateMatrix(parentMatrix);
     }
 
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -1353,10 +1354,9 @@ void CEntity::AttachToRwObject(RwObject* object, bool updateEntityMatrix)
         }
     }
     
-
     mi->AddRef();
     m_pStreamingLink = CStreaming::AddEntity(this);
-    CEntity::CreateEffects();
+    CreateEffects();
 }
 
 // 0x533FB0
@@ -1372,12 +1372,12 @@ void CEntity::DetachFromRwObject()
 
     if (mi->GetModelType() == ModelInfoType::MODEL_INFO_CLUMP
         && mi->IsRoad()
-        && !IsObject()) {
-
+        && !IsObject()
+    ) {
         CWorld::ms_listMovingEntityPtrs.DeleteItem(this);
     }
 
-    CEntity::DestroyEffects();
+    DestroyEffects();
     m_pRwObject = nullptr;
 }
 
@@ -1385,16 +1385,16 @@ void CEntity::DetachFromRwObject()
 CVector* CEntity::GetBoundCentre(CVector* pOutCentre)
 {
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
-    const auto& pColCenter = mi->GetColModel()->GetBoundCenter();
-    return CEntity::TransformFromObjectSpace(*pOutCentre, pColCenter);
+    const auto& colCenter = mi->GetColModel()->GetBoundCenter();
+    return TransformFromObjectSpace(*pOutCentre, colCenter);
 }
 
 // 0x534290
 void CEntity::GetBoundCentre(CVector& outCentre)
 {
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
-    const auto& pColCenter = mi->GetColModel()->GetBoundCenter();
-    CEntity::TransformFromObjectSpace(outCentre, pColCenter);
+    const auto& colCenter = mi->GetColModel()->GetBoundCenter();
+    TransformFromObjectSpace(outCentre, colCenter);
 }
 
 CVector CEntity::GetBoundCentre()
@@ -1427,7 +1427,7 @@ void CEntity::RenderEffects()
 bool CEntity::GetIsTouching(CEntity* entity)
 {
     CVector thisVec;
-    CEntity::GetBoundCentre(thisVec);
+    GetBoundCentre(thisVec);
 
     CVector otherVec;
     entity->GetBoundCentre(otherVec);
@@ -1442,7 +1442,7 @@ bool CEntity::GetIsTouching(CEntity* entity)
 bool CEntity::GetIsTouching(CVector const& centre, float radius)
 {
     CVector thisVec;
-    CEntity::GetBoundCentre(thisVec);
+    GetBoundCentre(thisVec);
     auto fThisRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
 
     return (thisVec - centre).Magnitude() <= (fThisRadius + radius);
@@ -1452,7 +1452,7 @@ bool CEntity::GetIsTouching(CVector const& centre, float radius)
 bool CEntity::GetIsOnScreen()
 {
     CVector thisVec;
-    CEntity::GetBoundCentre(thisVec);
+    GetBoundCentre(thisVec);
     auto fThisRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
 
     if (TheCamera.IsSphereVisible(thisVec, fThisRadius, reinterpret_cast<RwMatrixTag*>(&TheCamera.m_mMatInverse)))
@@ -1483,7 +1483,7 @@ bool CEntity::GetIsBoundingBoxOnScreen()
 
     for (int32 i = 0; i < 2; ++i) {
         #define ChooseComponent(c) vecNormals[i].c < 0 ? cm->m_boundBox.m_vecMax.c : cm->m_boundBox.m_vecMin.c
-        CVector vecWorld = CEntity::TransformFromObjectSpace(CVector{
+        CVector vecWorld = TransformFromObjectSpace(CVector{
             ChooseComponent(x), 
             ChooseComponent(y), 
             ChooseComponent(z)
@@ -1507,11 +1507,11 @@ void CEntity::ModifyMatrixForTreeInWind()
     if (CTimer::GetIsPaused())
         return;
 
-    auto matrix = CEntity::GetModellingMatrix();
-    if (!matrix)
+    auto parentMatrix = GetModellingMatrix();
+    if (!parentMatrix)
         return;
 
-    auto at = RwMatrixGetAt(matrix);
+    auto at = RwMatrixGetAt(parentMatrix);
 
     float fWindOffset;
     if (CWeather::Wind >= 0.5F) {
@@ -1543,8 +1543,7 @@ void CEntity::ModifyMatrixForTreeInWind()
     at->y *= CWeather::WindDir.y;
 
     CWindModifiers::FindWindModifier(GetPosition(), &at->x, &at->y);
-    CEntity::UpdateRwFrame();
-
+    UpdateRwFrame();
 }
 
 // 0x535040
@@ -1583,9 +1582,8 @@ void CEntity::ModifyMatrixForBannerInWind()
     matrix.GetRight() = vecCross2;
     matrix.GetUp() = vecWind;
 
-    CEntity::UpdateRW();
-    CEntity::UpdateRwFrame();
-
+    UpdateRW();
+    UpdateRwFrame();
 }
 
 RwMatrix* CEntity::GetModellingMatrix()
@@ -1690,29 +1688,26 @@ void CEntity::CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, 
     auto fMult13 = fMult1 + fMult3;
     auto fMult24 = fMult2 + fMult4;
 
-    CVector vecCorner1;
-    vecCorner1.x = vecTransformed.x + (vecNormalized.x * fMult13) - (vecNormalized.y * fMult24);
-    vecCorner1.y = vecTransformed.y + (vecNormalized.y * fMult13) - (-vecNormalized.x * fMult24);
-    vecCorner1.z = vecTransformed.z + (vecNormalized.z * fMult13) - (vecNormalized.z * fMult24);
-    *pVecCorner1 = vecCorner1;
-
-    CVector vecCorner2;
-    vecCorner2.x = vecTransformed.x + (vecNormalized.x * fMult13) + (vecNormalized.y * fMult24);
-    vecCorner2.y = vecTransformed.y + (vecNormalized.y * fMult13) + (-vecNormalized.x * fMult24);
-    vecCorner2.z = vecTransformed.z + (vecNormalized.z * fMult13) + (vecNormalized.z * fMult24);
-    *pVecCorner2 = vecCorner2;
-
-    CVector vecCorner3;
-    vecCorner3.x = vecDir.x - (vecNormalized.x * fMult13) + (vecNormalized.y * fMult24);
-    vecCorner3.y = vecDir.y - (vecNormalized.y * fMult13) + (-vecNormalized.x * fMult24);
-    vecCorner3.z = vecDir.z - (vecNormalized.z * fMult13) + (vecNormalized.z * fMult24);
-    *pVecCorner3 = vecCorner3;
-
-    CVector vecCorner4;
-    vecCorner4.x = vecDir.x - (vecNormalized.x * fMult13) - (vecNormalized.y * fMult24);
-    vecCorner4.y = vecDir.y - (vecNormalized.y * fMult13) - (-vecNormalized.x * fMult24);
-    vecCorner4.z = vecDir.z - (vecNormalized.z * fMult13) - (vecNormalized.z * fMult24);
-    *pVecCorner4 = vecCorner4;
+    *pVecCorner1 = CVector{
+        vecTransformed.x + (vecNormalized.x * fMult13) - (vecNormalized.y * fMult24),
+        vecTransformed.y + (vecNormalized.y * fMult13) - (-vecNormalized.x * fMult24),
+        vecTransformed.z + (vecNormalized.z * fMult13) - (vecNormalized.z * fMult24),
+    };
+    *pVecCorner2 = CVector{
+        vecTransformed.x + (vecNormalized.x * fMult13) + (vecNormalized.y * fMult24),
+        vecTransformed.y + (vecNormalized.y * fMult13) + (-vecNormalized.x * fMult24),
+        vecTransformed.z + (vecNormalized.z * fMult13) + (vecNormalized.z * fMult24),
+    };
+    *pVecCorner3 = CVector{
+        vecDir.x - (vecNormalized.x * fMult13) + (vecNormalized.y * fMult24),
+        vecDir.y - (vecNormalized.y * fMult13) + (-vecNormalized.x * fMult24),
+        vecDir.z - (vecNormalized.z * fMult13) + (vecNormalized.z * fMult24),
+    };
+    *pVecCorner4 = CVector{
+        vecDir.x - (vecNormalized.x * fMult13) - (vecNormalized.y * fMult24),
+        vecDir.y - (vecNormalized.y * fMult13) - (-vecNormalized.x * fMult24),
+        vecDir.z - (vecNormalized.z * fMult13) - (vecNormalized.z * fMult24),
+    };
 
     const auto& vecPos = GetPosition();
     pVecCorner1->z = vecPos.z;
@@ -1741,7 +1736,7 @@ void CEntity::UpdateAnim()
     }
     else {
         if (!m_bOffscreen)
-            m_bOffscreen = !CEntity::GetIsOnScreen();
+            m_bOffscreen = !GetIsOnScreen();
 
         bOnScreen = !m_bOffscreen;
         fStep = CTimer::GetTimeStepInSeconds();
@@ -1762,7 +1757,7 @@ bool CEntity::IsVisible()
 // 0x536BE0
 float CEntity::GetDistanceFromCentreOfMassToBaseOfModel()
 {
-    auto cm = CEntity::GetColModel();
+    auto cm = GetColModel();
     return -cm->m_boundBox.m_vecMin.z;
 }
 
@@ -1922,7 +1917,7 @@ void CEntity::ProcessLightsForEntity()
         auto uiRand = m_nRandomSeed ^ CCoronas::ms_aEntityLightsOffsets[iFxInd & 0x7];
 
         if (effect->m_nType == e2dEffectType::EFFECT_SUN_GLARE && CWeather::SunGlare >= 0.0F) {
-            auto vecEffPos = CEntity::TransformFromObjectSpace(effect->m_vecPosn);
+            auto vecEffPos = TransformFromObjectSpace(effect->m_vecPosn);
 
             auto vecDir = vecEffPos - GetPosition();
             vecDir.Normalise();
@@ -1975,7 +1970,7 @@ void CEntity::ProcessLightsForEntity()
         if (effect->m_nType != e2dEffectType::EFFECT_LIGHT)
             continue;
 
-        auto vecEffPos = CEntity::TransformFromObjectSpace(effect->m_vecPosn);
+        auto vecEffPos = TransformFromObjectSpace(effect->m_vecPosn);
         auto bDoColorLight = false;
         auto bDoNoColorLight = false;
         auto bCoronaVisible = false;
@@ -2408,7 +2403,7 @@ void CEntity::RemoveEscalatorsForEntity()
 bool CEntity::IsEntityOccluded()
 {
     CVector vecCenter;
-    CEntity::GetBoundCentre(vecCenter);
+    GetBoundCentre(vecCenter);
 
     CVector vecScreenPos;
     float fScreenX, fScreenY;
@@ -2436,10 +2431,10 @@ bool CEntity::IsEntityOccluded()
 
         if (activeOccluder.IsPointWithinOcclusionArea(vecScreenPos.x, vecScreenPos.y, 0.0F)) {
             auto bInView = false;
-            const auto& pBounding = mi->GetColModel()->GetBoundingBox();
+            const auto& bounding = mi->GetColModel()->GetBoundingBox();
             CVector vecScreen;
 
-            auto vecMin = CEntity::GetMatrix() * pBounding.m_vecMin;
+            auto vecMin = GetMatrix() * bounding.m_vecMin;
             if (!CalcScreenCoors(vecMin, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                 || !activeOccluder.IsPointBehindOccluder(vecMin, 0.0F)) {
@@ -2447,7 +2442,7 @@ bool CEntity::IsEntityOccluded()
                 bInView = true;
             }
 
-            auto vecMax = CEntity::GetMatrix() * pBounding.m_vecMax;
+            auto vecMax = GetMatrix() * bounding.m_vecMax;
             if (bInView
                 || !CalcScreenCoors(vecMax, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
@@ -2456,7 +2451,7 @@ bool CEntity::IsEntityOccluded()
                 bInView = true;
             }
 
-            auto vecDiag1 = CEntity::GetMatrix() * CVector(pBounding.m_vecMin.x, pBounding.m_vecMax.y, pBounding.m_vecMax.z);
+            auto vecDiag1 = GetMatrix() * CVector(bounding.m_vecMin.x, bounding.m_vecMax.y, bounding.m_vecMax.z);
             if (bInView
                 || !CalcScreenCoors(vecDiag1, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
@@ -2465,22 +2460,22 @@ bool CEntity::IsEntityOccluded()
                 bInView = true;
             }
 
-            auto vecDiag2 = CEntity::GetMatrix() * CVector(pBounding.m_vecMax.x, pBounding.m_vecMin.y, pBounding.m_vecMin.z);
+            auto vecDiag2 = GetMatrix() * CVector(bounding.m_vecMax.x, bounding.m_vecMin.y, bounding.m_vecMin.z);
             if (!bInView
                 && CalcScreenCoors(vecDiag2, &vecScreen)
                 && activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                 && activeOccluder.IsPointBehindOccluder(vecDiag2, 0.0F)) {
 
-                if (pBounding.m_vecMax.x - pBounding.m_vecMin.x <= 60.0F)
+                if (bounding.m_vecMax.x - bounding.m_vecMin.x <= 60.0F)
                     return true;
 
-                if (pBounding.m_vecMax.y - pBounding.m_vecMin.y <= 60.0F)
+                if (bounding.m_vecMax.y - bounding.m_vecMin.y <= 60.0F)
                     return true;
 
-                if (pBounding.m_vecMax.z - pBounding.m_vecMin.z <= 30.0F)
+                if (bounding.m_vecMax.z - bounding.m_vecMin.z <= 30.0F)
                     return true;
 
-                auto vecDiag3 = CEntity::GetMatrix() * CVector(pBounding.m_vecMin.x, pBounding.m_vecMin.y, pBounding.m_vecMax.z);
+                auto vecDiag3 = GetMatrix() * CVector(bounding.m_vecMin.x, bounding.m_vecMin.y, bounding.m_vecMax.z);
                 if (!CalcScreenCoors(vecDiag3, &vecScreen)
                     || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
                     || !activeOccluder.IsPointBehindOccluder(vecDiag3, 0.0F)) {
@@ -2488,7 +2483,7 @@ bool CEntity::IsEntityOccluded()
                     bInView = true;
                 }
 
-                auto vecDiag4 = CEntity::GetMatrix() * CVector(pBounding.m_vecMax.x, pBounding.m_vecMin.y, pBounding.m_vecMax.z);
+                auto vecDiag4 = GetMatrix() * CVector(bounding.m_vecMax.x, bounding.m_vecMin.y, bounding.m_vecMax.z);
                 if (!bInView
                     && CalcScreenCoors(vecDiag4, &vecScreen)
                     && activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
@@ -2512,11 +2507,11 @@ void CEntity::UpdateRW() {
     if (!m_pRwObject)
         return;
 
-    auto pRwMatrix = CEntity::GetModellingMatrix();
+    auto parentMatrix = GetModellingMatrix();
     if (m_matrix)
-        m_matrix->UpdateRwMatrix(pRwMatrix);
+        m_matrix->UpdateRwMatrix(parentMatrix);
     else
-        m_placement.UpdateRwMatrix(pRwMatrix);
+        m_placement.UpdateRwMatrix(parentMatrix);
 }
 
 CEntity* CEntity::FindLastLOD() noexcept {
@@ -2525,16 +2520,16 @@ CEntity* CEntity::FindLastLOD() noexcept {
     return it;
 }
 
-RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* pAtomic, void* pData)
+RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* atomic, void* data)
 {
-    auto pGeometry = RpAtomicGetGeometry(pAtomic);
-    RpGeometrySetFlags(pGeometry, rpGEOMETRYMODULATEMATERIALCOLOR);
-    RpGeometryForAllMaterials(pGeometry, CEntity::SetMaterialAlphaCB, pData);
-    return pAtomic;
+    auto geometry = RpAtomicGetGeometry(atomic);
+    RpGeometrySetFlags(geometry, rpGEOMETRYMODULATEMATERIALCOLOR);
+    RpGeometryForAllMaterials(geometry, SetMaterialAlphaCB, data);
+    return atomic;
 }
 
-RpMaterial* CEntity::SetMaterialAlphaCB(RpMaterial* pMaterial, void* pData)
+RpMaterial* CEntity::SetMaterialAlphaCB(RpMaterial* material, void* data)
 {
-    pMaterial->color.alpha = (RwUInt8)pData;
-    return pMaterial;
+    material->color.alpha = (RwUInt8)data;
+    return material;
 }
