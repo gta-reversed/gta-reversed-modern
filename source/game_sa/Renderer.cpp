@@ -63,7 +63,7 @@ void CRenderer::InjectHooks()
     ReversibleHooks::Install("CRenderer", "ScanSectorList_ListModels", 0x5535D0, &CRenderer::ScanSectorList_ListModels);
     ReversibleHooks::Install("CRenderer", "ScanSectorList_ListModelsVisible);", 0x553650, &CRenderer::ScanSectorList_ListModelsVisible);
     ReversibleHooks::Install("CRenderer", "ScanSectorList", 0x554840, &CRenderer::ScanSectorList);
-    ReversibleHooks::Install("CRenderer", "ScanBigBuildingList", 0x554B10, &CRenderer::ScanBigBuildingList);
+    ReversibleHooks::Install("CRenderer", "ScanBigBuildingList", 0x554B10, &CRenderer::ScanBigBuildingList, true);
     ReversibleHooks::Install("CRenderer", "ShouldModelBeStreamed", 0x554EB0, &CRenderer::ShouldModelBeStreamed);
     ReversibleHooks::Install("CRenderer", "ScanPtrList_RequestModels", 0x555680, &CRenderer::ScanPtrList_RequestModels);
     ReversibleHooks::Install("CRenderer", "ConstructRenderList", 0x5556E0, &CRenderer::ConstructRenderList);
@@ -186,10 +186,12 @@ void CRenderer::AddEntityToRenderList(CEntity* entity, float fDistance)
     if (entity->m_nNumLodChildren && !entity->m_bUnderwater) {
         ms_aVisibleLodPtrs[ms_nNoOfVisibleLods] = entity;
         ms_nNoOfVisibleLods++;
+        assert(ms_nNoOfVisibleLods <= MAX_VISIBLE_LOD_PTRS);
     }
     else {
         ms_aVisibleEntityPtrs[ms_nNoOfVisibleEntities] = entity;
         ms_nNoOfVisibleEntities++;
+        assert(ms_nNoOfVisibleEntities <= MAX_VISIBLE_ENTITY_PTRS);
     }
 }
 
@@ -292,6 +294,8 @@ void CRenderer::PreRender() {
     for (int32 i = 0; i < ms_nNoOfVisibleLods; ++i) {
         ms_aVisibleLodPtrs[i]->PreRender();
     }
+
+    assert(ms_nNoOfVisibleEntities <= MAX_VISIBLE_ENTITY_PTRS);
     for (int32 i = 0; i < ms_nNoOfVisibleEntities; ++i) {
         ms_aVisibleEntityPtrs[i]->PreRender();
     }
@@ -325,11 +329,15 @@ void CRenderer::PreRender() {
 
 // 0x553A10
 void CRenderer::RenderRoads() {
+    assert(ms_nNoOfVisibleEntities <= MAX_VISIBLE_ENTITY_PTRS);
+
     RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
     RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+
     DeActivateDirectional();
     SetAmbientColours();
+
     for (int32 i = 0; i < ms_nNoOfVisibleEntities; ++i) {
         CEntity* entity = ms_aVisibleEntityPtrs[i];
         if (entity->m_nType == ENTITY_TYPE_BUILDING && CModelInfo::GetModelInfo(entity->m_nModelIndex)->IsRoad()) {
@@ -353,6 +361,7 @@ void CRenderer::RenderEverythingBarRoads() {
     if (!CGame::currArea)
         RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)140u);
 
+    assert(ms_nNoOfVisibleEntities <= MAX_VISIBLE_ENTITY_PTRS);
     for (int32 i = 0; i < ms_nNoOfVisibleEntities; i++) {
         CEntity* entity = ms_aVisibleEntityPtrs[i];
         auto* vehicle = static_cast<CVehicle*>(entity);
@@ -877,7 +886,9 @@ void CRenderer::ScanBigBuildingList(int32 sectorX, int32 sectorY) {
         bRequestModel = true;
     }
 
-    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+        next = node->m_next;
+
         auto* entity = reinterpret_cast<CEntity*>(node->m_item);
         if (entity->m_nScanCode != GetCurrentScanCode()) {
             entity->m_nScanCode = GetCurrentScanCode();
