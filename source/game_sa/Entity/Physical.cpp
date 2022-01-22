@@ -7,6 +7,7 @@
 #include "StdInc.h"
 
 #include "Physical.h"
+#include "CarCtrl.h"
 
 float& CPhysical::DAMPING_LIMIT_IN_FRAME = *(float*)0x8CD7A0;
 float& CPhysical::DAMPING_LIMIT_OF_SPRING_FORCE = *(float*)0x8CD7A4;

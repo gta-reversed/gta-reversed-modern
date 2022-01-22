@@ -116,7 +116,6 @@
 #include "game_sa\Camera.h"
 #include "game_sa\CamPathSplines.h"
 #include "game_sa\CarAI.h"
-#include "game_sa\CarCtrl.h"
 #include "game_sa\CarEnterExit.h"
 #include "game_sa\Cheat.h"
 #include "game_sa\Checkpoint.h"

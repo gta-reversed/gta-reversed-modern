@@ -1,7 +1,8 @@
 #include "StdInc.h"
 
+#include "Streaming.h"
 #include "Radar.h"
-#include <ranges>
+#include "CarCtrl.h"
 
 uint32& CStreaming::ms_memoryAvailable = *reinterpret_cast<uint32*>(0x8A5A80);
 int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84);
