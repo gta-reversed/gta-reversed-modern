@@ -305,8 +305,8 @@ void CEntity::SetModelIndexNoCreate_Reversed(uint32 index)
     if (!mi->IsBackfaceCulled())
         m_bBackfaceCulled = false;
 
-    auto atomicInfo = mi->AsAtomicModelInfoPtr();
-    if (atomicInfo && !atomicInfo->bTagDisabled && atomicInfo->IsTagModel())
+    auto ami = mi->AsAtomicModelInfoPtr();
+    if (ami && !ami->bTagDisabled && ami->IsTagModel())
         CTagManager::AddTag(this);
 }
 
@@ -659,21 +659,22 @@ void CEntity::PreRender_Reversed()
             fRand = std::max(fRand, 0.5F);
             CShadows::StoreShadowToBeRendered(
                 eShadowTextureType::SHADOWTEX_PED,
-                                              gpShadowExplosionTex,
-                                              &vecPos,
-                                              8.0F,
-                                              0.0F,
-                                              0.0F,
-                                              -8.0F,
-                                              255,
-                                              static_cast<uint8>(fRand * 200.0F),
-                                              static_cast<uint8>(fRand * 200.0F),
-                                              static_cast<uint8>(fRand * 200.0F),
-                                              20.0F,
-                                              false,
-                                              1.0F,
-                                              nullptr,
-                                              false);
+                gpShadowExplosionTex,
+                &vecPos,
+                8.0F,
+                0.0F,
+                0.0F,
+                -8.0F,
+                255,
+                static_cast<uint8>(fRand * 200.0F),
+                static_cast<uint8>(fRand * 200.0F),
+                static_cast<uint8>(fRand * 200.0F),
+                20.0F,
+                false,
+                1.0F,
+                nullptr,
+                false
+            );
 
             CPointLights::AddLight(
                 ePointLightType::PLTYPE_POINTLIGHT,
@@ -976,10 +977,7 @@ bool CEntity::HasPreRenderEffects()
 bool CEntity::DoesNotCollideWithFlyers()
 {
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
-    if (mi->SwaysInWind())
-        return true;
-
-    return mi->bDontCollideWithFlyer;
+    return mi->SwaysInWind() || mi->bDontCollideWithFlyer;
 }
 
 // 0x532D70
@@ -1032,8 +1030,7 @@ void CEntity::SetupBigBuilding()
     m_bIsBIGBuilding = true;
     m_bStreamingDontDelete = true;
 
-    auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
-    mi->bDoWeOwnTheColModel = true;
+    CModelInfo::GetModelInfo(m_nModelIndex)->bDoWeOwnTheColModel = true;
 }
 
 // 0x533170
