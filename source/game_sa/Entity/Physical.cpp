@@ -2007,9 +2007,9 @@ bool CPhysical::ProcessShiftSectorList(int32 sectorX, int32 sectorY)
     CBaseModelInfo* pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
     float fBoundingSphereRadius = pModelInfo->GetColModel()->GetBoundRadius();
     float fMaxColPointDepth = 0.0f;
-    CVector vecShift;
+    CVector vecShift{};
     CColPoint colPoints[32];
-    CVector vecBoundCentre;
+    CVector vecBoundCentre{};
 
     GetBoundCentre(&vecBoundCentre);
 
@@ -4060,6 +4060,8 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
 
             while (node) {
                 entity = (CEntity*)node->m_item;
+                assert(entity);
+
                 node = node->m_next;
 
                 physicalEntity = static_cast<CPhysical*>(entity);
