@@ -1970,32 +1970,33 @@ void CWorld::Process() {
 
     // Process moving entities (And possibly remove them from the world)
     {
-        const auto DoRemoveEntity = [](CEntity* entity) {
-            if (entity->IsPed()) {
-                if (FindPlayerPed() == entity) {
+        const auto DoProcessMovingEntity = [&](CEntity* entity) {
+            if (entity->m_bRemoveFromWorld) {
+                if (entity->IsPed()) {
+                    if (FindPlayerPed() == entity) {
+                        Remove(entity);
+                    } else { 
+                        CPopulation::RemovePed(entity->AsPed());
+                    }
+                } else {
                     Remove(entity);
-                } else { 
-                    CPopulation::RemovePed(entity->AsPed());
+                    delete entity;
                 }
             } else {
-                Remove(entity);
-                delete entity;
-            }
-        };
-
-        const auto DoProcessMovingEntity = [&](CEntity* entity) {
-            if (!entity->m_bRemoveFromWorld) {
                 entity->ProcessControl();
-                if (entity->IsStatic())
+                if (entity->IsStatic()) {
                     entity->AsPhysical()->RemoveFromMovingList();
-            } else if (!entity->m_bWasPostponed) {
-                DoRemoveEntity(entity);                    
+                }
             }
         };
 
         IterateMovingList(DoProcessMovingEntity);
         bForceProcessControl = true;
-        IterateMovingList(DoProcessMovingEntity);
+        IterateMovingList([&](CEntity* entity) {
+            if (entity->m_bWasPostponed) {
+                DoProcessMovingEntity(entity);
+            }
+        });
         bForceProcessControl = false;
     }
 
