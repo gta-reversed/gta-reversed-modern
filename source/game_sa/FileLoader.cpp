@@ -569,7 +569,7 @@ bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8
 }
 
 // 0x537580
-// Load collision V1 file from buffer. Just note that `data` is pointing to after `FileHeader`
+// Load collision V1 file from buffer. Just note that `buffer` is pointing to after `FileHeader`.
 void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     using namespace ColHelpers;
     using namespace ColHelpers::V1;
@@ -579,7 +579,6 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     auto& h = *reinterpret_cast<Header*&>(bufferIt)++;
     cm.m_boundBox = h.bounds.box;
     cm.m_boundSphere = h.bounds.sphere;
-    bufferIt += sizeof(Header);
 
     auto cd = new CCollisionData{};
     cm.m_pColData = cd;
@@ -641,7 +640,7 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     cd->m_pShadowTriangles = nullptr;
 
     if (cd->m_nNumSpheres || cd->m_nNumBoxes || cd->m_nNumTriangles)
-        cm.m_bNotEmpty = true; // Doesn't make a whole lot of sense, but kay
+        cm.m_bNotEmpty = true;
 }
 
 // 0x537EE0
