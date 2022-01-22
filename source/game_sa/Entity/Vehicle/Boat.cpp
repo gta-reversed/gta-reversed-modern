@@ -1,5 +1,8 @@
 #include "StdInc.h"
 
+#include "Boat.h"
+#include "CarCtrl.h"
+
 CBoat* (&CBoat::apFrameWakeGeneratingBoats)[NUM_WAKE_GEN_BOATS] = *(CBoat*(*)[NUM_WAKE_GEN_BOATS])0xC27994;
 float& CBoat::MAX_WAKE_LENGTH = *(float*)0x8D3938; // 50.0
 float& CBoat::MIN_WAKE_INTERVAL = *(float*)0x8D393C; // 2.0

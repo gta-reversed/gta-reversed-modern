@@ -5,10 +5,13 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+
 #include <initializer_list>
-#include "IKChainManager_c.h"
+
 #include "World.h"
+#include "IKChainManager_c.h"
 #include "FireManager.h"
+#include "CarCtrl.h"
 
 int32 CWorld::TOTAL_PLAYERS = 2;
 int32& CWorld::ms_iProcessLineNumCrossings = *(int32*)0xB7CD60;

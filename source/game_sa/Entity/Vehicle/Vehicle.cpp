@@ -9,6 +9,7 @@
 #include "Vehicle.h"
 
 #include "Buoyancy.h"
+#include "CarCtrl.h"
 
 float& CVehicle::WHEELSPIN_TARGET_RATE = *(float*)0x8D3498;
 float& CVehicle::WHEELSPIN_INAIR_TARGET_RATE = *(float*)0x8D349C;
