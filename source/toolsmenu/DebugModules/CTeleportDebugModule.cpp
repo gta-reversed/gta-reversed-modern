@@ -70,10 +70,6 @@ void ProcessImGui() {
 
     // Teleport button
     if (SameLine(); Button("Teleport")) {
-        BeginTooltip();
-        Text("Hold `ALT` to teleport to a random position.\nHold `SHIFT` to teleport marked position on the map.");
-        EndTooltip();
-
         if (GetIO().KeyAlt) { // Random position
             pos = CVector{
                CGeneral::GetRandomNumberInRange(-3072.0f, 3072.0f),
