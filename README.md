@@ -13,7 +13,7 @@ Before you start writing code, please make sure to read the [coding guidelines](
 
 ### Requirements
 
-* [Visual Studio 2019 or newer](https://visualstudio.microsoft.com/en/downloads/) (Community Edition is enough)
+* [Visual Studio 2022](https://visualstudio.microsoft.com/en/downloads/) (Community Edition is enough)
 * [CMake](https://cmake.org) (for those who want to use CMake instead of premake5)
 
 #### Game
