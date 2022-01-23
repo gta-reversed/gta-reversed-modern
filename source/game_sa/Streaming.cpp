@@ -1,7 +1,8 @@
 #include "StdInc.h"
 
+#include "Streaming.h"
 #include "Radar.h"
-#include <ranges>
+#include "CarCtrl.h"
 
 uint32& CStreaming::ms_memoryAvailable = *reinterpret_cast<uint32*>(0x8A5A80);
 int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84);
@@ -896,7 +897,7 @@ void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
                 CSector* sector = GetSector(sectorX, sectorY);
                 if (DeleteRwObjectsBehindCameraInSectorList(sector->m_buildings, memoryToCleanInBytes) ||
                     DeleteRwObjectsBehindCameraInSectorList(sector->m_dummies, memoryToCleanInBytes) ||
-                    DeleteRwObjectsBehindCameraInSectorList(repeatSector->m_lists[REPEATSECTOR_OBJECTS], memoryToCleanInBytes))
+                    DeleteRwObjectsBehindCameraInSectorList(repeatSector->GetList(REPEATSECTOR_OBJECTS), memoryToCleanInBytes))
                 {
                     return;
                 }
@@ -912,7 +913,9 @@ void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
 
 // 0x409940
 bool CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, int32 memoryToCleanInBytes) {
-    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
         CEntity* entity = static_cast<CEntity*>(node->m_item);
         if (entity->m_nScanCode == GetCurrentScanCode())
             continue;
@@ -938,7 +941,9 @@ bool CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, int32 m
 
 // 0x407A70
 void CStreaming::DeleteRwObjectsInSectorList(CPtrList& list, int32 sectorX, int32 sectorY) {
-    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
         CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
         if (sectorX < 0 || entity->LivesInThisNonOverlapSector(sectorX, sectorY)) {
             if (!entity->m_bImBeingRendered && !entity->m_bStreamingDontDelete)
@@ -949,7 +954,9 @@ void CStreaming::DeleteRwObjectsInSectorList(CPtrList& list, int32 sectorX, int3
 
 // 0x4099E0
 bool CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList& list, int32 memoryToCleanInBytes) {
-    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
         CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
         if (entity->m_nScanCode == GetCurrentScanCode())
             continue;
@@ -2474,7 +2481,9 @@ void CStreaming::MakeSpaceFor(int32 memoryToCleanInBytes)
 // - In the radius of min(radius, <model draw distance> * <cam lod dist multiplier>)
 void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, float posX, float posY, float minX, float minY, float maxX, float maxY, float radius, int32 streamingflags) {
     CVector2D position(posX, posY);
-    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
         CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
 
         if (entity->m_nScanCode == GetCurrentScanCode())
@@ -2517,7 +2526,9 @@ void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, float posX, float p
 // unlike the above function (other overload) this one doesn't do radius checks
 // just requests all models necessary (if they meet the conditions).
 void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, int32 streamingFlags) {
-    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
         CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
         if (entity->m_nScanCode == GetCurrentScanCode())
             continue;
@@ -2897,7 +2908,9 @@ void CStreaming::InstanceLoadedModels(CVector const& point) {
 
 void CStreaming::InstanceLoadedModelsInSectorList(CPtrList& list)
 {
-    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
         CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
         if (entity->IsInCurrentAreaOrBarberShopInterior() && !entity->m_pRwObject)
             entity->CreateRwObject();

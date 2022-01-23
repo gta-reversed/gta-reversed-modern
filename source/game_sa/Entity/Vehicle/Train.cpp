@@ -10,6 +10,7 @@
 #include "Train.h"
 
 #include "Buoyancy.h"
+#include "CarCtrl.h"
 
 uint32& CTrain::GenTrain_Track = *(uint32*)0xC37FFC;
 uint32& CTrain::GenTrain_TrainConfig = *(uint32*)0xC38000;

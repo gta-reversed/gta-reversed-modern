@@ -6,8 +6,6 @@
 */
 #pragma once
 
-// Based on https://gtamods.com/wiki/Garage
-
 #include "Garage.h"
 
 class CVehicle;
@@ -16,14 +14,18 @@ class CVector;
 
 class CGarages {
 public:
-    static inline CStoredCar (&aCarsInSafeHouse)[20][4] = *(CStoredCar(*)[20][4])0x96ABD4;
-    static inline CGarage    (&aGarages)[50] = *(CGarage(*)[50])0x96C048;
+    static constexpr int32 MAX_NUM_SAFEHOUSES = 20;
+    static constexpr int32 MAX_CARS_IN_SAFEHOUSE = 4;
+    static constexpr int32 MAX_NUM_GARAGES = 50;
+
+    static inline CStoredCar (&aCarsInSafeHouse)[MAX_NUM_SAFEHOUSES][MAX_CARS_IN_SAFEHOUSE] = *(CStoredCar(*)[20][4])0x96ABD4;
+    static inline CGarage    (&aGarages)[MAX_NUM_GARAGES] = *(CGarage(*)[50])0x96C048;
     static inline char       (&MessageIDString)[8] = *(char (*)[8])0x96C014;
     static inline int32&     LastGaragePlayerWasIn = *(int32*)0x96BFDC;
     static inline int32&     LastTimeHelpMessage = *(int32*)0x96BFE0;
     static inline int8&      bCamShouldBeOutside = *(int8*)0x96BFE4;
     static inline int32&     CrushedCarId = *(int32*)0x96BFE8;
-    static inline int32      (&CarTypesCollected)[4] = *(int32(*)[4])0x96BFEC;
+    static inline int32      (&CarTypesCollected)[MAX_CARS_IN_SAFEHOUSE] = *(int32(*)[4])0x96BFEC;
     static inline int32&     PoliceCarsCollected = *(int32*)0x96BFFC;
     static inline int32&     BankVansCollected = *(int32*)0x96C000;
     static inline int32&     CarsCollected = *(int32*)0x96C004;
@@ -51,7 +53,7 @@ public:
     static int32 FindSafeHouseIndexForGarageType(eGarageType gtype);
     static int16 FindGarageForObject(CObject*);
     static bool IsModelIndexADoor(int32 model);
-    static bool IsPointWithinHideOutGarage(const CVector& point);
+    static bool IsPointWithinHideOutGarage(Const CVector& point);
     static bool IsGarageOpen(int16 garageId);
     static bool IsGarageClosed(int16 garageId);
     static bool IsCarSprayable(CVehicle* vehicle);
@@ -63,10 +65,12 @@ public:
     static void PrintMessages();
     static void SetGarageType(int16 garageId, eGarageType type, int32 unused);
     static int16 GetGarageNumberByName(const char* name);
+    static void StoreCarInNearestImpoundingGarage(CVehicle* vehicle);
     static bool Load();
     static bool Save();
 
-    static CGarage& GetGarage(int32 iGarageInd) { return aGarages[iGarageInd]; }
+public:
+    static CGarage&    GetGarage(int32 iGarageInd) { return aGarages[iGarageInd]; }
     static CStoredCar* GetStoredCarsInSafehouse(int32 iSafehouseInd) { return aCarsInSafeHouse[iSafehouseInd]; }
     static CStoredCar& GetStoredCar(int32 iSafehouseInd, int32 iCarInd) { return aCarsInSafeHouse[iSafehouseInd][iCarInd]; }
 

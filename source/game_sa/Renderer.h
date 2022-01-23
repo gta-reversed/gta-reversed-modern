@@ -34,10 +34,10 @@ struct tRenderListEntry {
 
 VALIDATE_SIZE(tRenderListEntry, 8);
 
-extern int32 MAX_INVISIBLE_ENTITY_PTRS; // default 150
-extern int32 MAX_VISIBLE_ENTITY_PTRS;   // default 1000
-extern int32 MAX_VISIBLE_LOD_PTRS;      // default 1000
-extern int32 MAX_VISIBLE_SUPERLOD_PTRS; // default 50
+constexpr auto MAX_INVISIBLE_ENTITY_PTRS = 150u;
+constexpr auto MAX_VISIBLE_ENTITY_PTRS   = 1000u;
+constexpr auto MAX_VISIBLE_LOD_PTRS      = 1000u;
+constexpr auto MAX_VISIBLE_SUPERLOD_PTRS = 50u;
 
 class CWorldScan {
 public:
@@ -53,10 +53,10 @@ public:
     static tRenderListEntry*& ms_pLodDontRenderList;
     static tRenderListEntry*& ms_pLodRenderList;
     static CVehicle*& m_pFirstPersonVehicle;
-    static CEntity** ms_aInVisibleEntityPtrs; // static CEntity *ms_aInVisibleEntityPtrs[MAX_INVISIBLE_ENTITY_PTRS];
-    static CEntity** ms_aVisibleSuperLodPtrs; // static CEntity *ms_aVisibleSuperLodPtrs[MAX_VISIBLE_SUPERLOD_PTRS];
-    static CEntity** ms_aVisibleLodPtrs;      // static CEntity *ms_aVisibleLodPtrs[MAX_VISIBLE_LOD_PTRS];
-    static CEntity** ms_aVisibleEntityPtrs;   // static CEntity *ms_aVisibleEntityPtrs[MAX_VISIBLE_ENTITY_PTRS];
+    static CEntity* (&ms_aInVisibleEntityPtrs)[MAX_INVISIBLE_ENTITY_PTRS];
+    static CEntity* (&ms_aVisibleSuperLodPtrs)[MAX_VISIBLE_SUPERLOD_PTRS];
+    static CEntity* (&ms_aVisibleLodPtrs)[MAX_VISIBLE_LOD_PTRS];
+    static CEntity* (&ms_aVisibleEntityPtrs)[MAX_VISIBLE_ENTITY_PTRS];
     static int32& ms_nNoOfVisibleSuperLods;
     static int32& ms_nNoOfInVisibleEntities;
     static int32& ms_nNoOfVisibleLods;

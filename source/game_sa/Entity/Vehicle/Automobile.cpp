@@ -10,6 +10,8 @@
 
 #include "WaterCannons.h"
 #include "Buoyancy.h"
+#include "Skidmarks.h"
+#include "CarCtrl.h"
 
 bool& CAutomobile::m_sAllTaxiLights = *(bool*)0xC1BFD0;
 CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;
@@ -353,7 +355,7 @@ void CAutomobile::ProcessControl()
             else {
                 m_wheelSkidmarkMuddy[i] = false;
                 m_wheelSkidmarkType[i] = g_surfaceInfos->GetSkidmarkType(m_wheelColPoint[i].m_nSurfaceTypeB);
-                if (m_wheelSkidmarkType[i] == SKIDMARK_MUDDY)
+                if ((eSkidMarkType)m_wheelSkidmarkType[i] == eSkidMarkType::MUDDY)
                     m_wheelSkidmarkMuddy[i] = true;
                 contactPoints[i] = m_wheelColPoint[i].m_vecPoint - GetPosition();
             }
@@ -3293,7 +3295,7 @@ bool CAutomobile::RcbanditCheckHitWheels()
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             CRepeatSector* repeatSector = GetRepeatSector(sectorX, sectorY);
-            if (RcbanditCheck1CarWheels(repeatSector->m_lists[REPEATSECTOR_VEHICLES]))
+            if (RcbanditCheck1CarWheels(repeatSector->GetList(REPEATSECTOR_VEHICLES)))
                 break;
         }
     }

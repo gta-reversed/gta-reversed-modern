@@ -9,6 +9,7 @@
 #include "Vehicle.h"
 
 #include "Buoyancy.h"
+#include "CarCtrl.h"
 
 float& CVehicle::WHEELSPIN_TARGET_RATE = *(float*)0x8D3498;
 float& CVehicle::WHEELSPIN_INAIR_TARGET_RATE = *(float*)0x8D349C;
@@ -2773,4 +2774,12 @@ void CVehicle::FireFixedMachineGuns()
 void CVehicle::DoDriveByShootings()
 {
     plugin::CallMethod<0x741FD0, CVehicle*>(this);
+}
+
+// NOTSA
+bool CVehicle::IsAnyOfPassengersFollowerOfGroup(CPedGroup& group) {
+    const auto end = m_apPassengers + m_nMaxPassengers;
+    return std::find_if(m_apPassengers, end, [&](CPed* passenger) {
+        return group.m_groupMembership.IsFollower(passenger);
+    }) != end;
 }

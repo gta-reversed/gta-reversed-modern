@@ -8,7 +8,8 @@ void CGarage::InjectHooks()
     Install("CGarage", "BuildRotatedDoorMatrix", 0x4479F0, &CGarage::BuildRotatedDoorMatrix);
     // Install("CGarage", "TidyUpGarageClose", 0x449D10, &CGarage::TidyUpGarageClose);
     // Install("CGarage", "TidyUpGarage", 0x449C50, &CGarage::TidyUpGarage);
-    // Install("CGarage", "StoreAndRemoveCarsForThisHideOut", 0x449900, &CGarage::StoreAndRemoveCarsForThisHideOut);
+    Install("CGarage", "StoreAndRemoveCarsForThisHideOut", 0x449900, &CGarage::StoreAndRemoveCarsForThisHideOut);
+    Install("CGarage", "EntityHasASphereWayOutsideGarage", 0x449050, &CGarage::EntityHasASphereWayOutsideGarage);
     // Install("CGarage", "RemoveCarsBlockingDoorNotInside", 0x449690, &CGarage::RemoveCarsBlockingDoorNotInside);
     // Install("CGarage", "IsEntityTouching3D", 0x448EE0, &CGarage::IsEntityTouching3D);
     // Install("CGarage", "IsEntityEntirelyOutside", 0x448D30, &CGarage::IsEntityEntirelyOutside);
@@ -49,8 +50,36 @@ void CGarage::TidyUpGarage() {
 }
 
 // 0x449900
-void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* car, int32 maxSlot) {
-    plugin::CallMethod<0x449900, CGarage*, CStoredCar*, int32>(this, car, maxSlot);
+void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 maxSlot) {
+    maxSlot = std::min<int32>(maxSlot, NUM_GARAGE_STORED_CARS);
+
+    for (auto i = 0; i < NUM_GARAGE_STORED_CARS; i++)
+        storedCars[i].Clear();
+
+    auto pool = CPools::GetVehiclePool();
+    auto storedCarIdx{0u};
+    for (auto i = pool->GetSize(); i; i--) {
+        if (auto vehicle = pool->GetAt(i - 1)) {
+            if (IsPointInsideGarage(vehicle->GetPosition()) && vehicle->m_nCreatedBy != MISSION_VEHICLE) {
+                if (storedCarIdx < maxSlot && !EntityHasASphereWayOutsideGarage(vehicle, 1.0f)) {
+                    storedCars[storedCarIdx++].StoreCar(vehicle);
+                }
+
+                FindPlayerInfo().CancelPlayerEnteringCars(vehicle);
+                CWorld::Remove(vehicle);
+                delete vehicle;
+            }
+        }
+    }
+
+    // Clear slots with no vehicles in it
+    for (auto i = storedCarIdx; i < NUM_GARAGE_STORED_CARS; i++)
+        storedCars[i].Clear();
+}
+
+// 0x449050
+bool CGarage::EntityHasASphereWayOutsideGarage(CEntity* entity, float fRadius) {
+    return plugin::CallMethodAndReturn<bool, 0x449050, CGarage*, CEntity*, float>(this, entity, fRadius);
 }
 
 // 0x449690
@@ -158,3 +187,10 @@ void CSaveGarage::CopyGarageOutOfSaveGarage(CGarage& g) const {
     g.m_nOriginalType = originalType;
     strcpy_s(g.m_anName, name);
 }
+
+// todo move
+// 0x449760
+void CStoredCar::StoreCar(CVehicle* vehicle) {
+    plugin::CallMethod<0x449760, CStoredCar*, CVehicle*>(this, vehicle);
+}
+

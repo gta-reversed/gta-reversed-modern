@@ -85,7 +85,7 @@ void CFont::InjectHooks() {
     Install("CFont", "LoadFontValues", 0x7187C0, &CFont::LoadFontValues);
     // Install("", "GetScriptLetterSize", 0x719670, &GetScriptLetterSize);
     // Install("", "GetIDforPropVal", 0x7192C0, &GetIDforPropVal);
-    Install("", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
+    Install("CFont", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
 }
 
 // 0x7187C0

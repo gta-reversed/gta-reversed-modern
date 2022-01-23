@@ -87,6 +87,11 @@ public:
 
     void      StoreCar(CVehicle* vehicle); // 0x449760
     CVehicle* RestoreCar();                // 0x447E40
+
+    // NOTSA
+    void Init() { m_wModelIndex = 0; }
+    void Clear() { m_wModelIndex = 0; }
+    bool HasCar() { return m_wModelIndex != 0; }
 };
 VALIDATE_SIZE(CStoredCar, 0x40);
 
@@ -125,6 +130,8 @@ public:
     CAEDoorAudioEntity m_GarageAudio;
 
 public:
+    static constexpr size_t NUM_GARAGE_STORED_CARS = 4;
+
     static void InjectHooks();
 
     CGarage() = default;  // 0x4470E0
@@ -154,13 +161,13 @@ public:
     int32 FindMaxNumStoredCarsForGarage();
     bool IsPlayerOutsideGarage(float fRadius);
     bool IsPlayerEntirelyInsideGarage();
-    bool EntityHasASpehereWayOutsideGarage(CEntity* pEntity, float fRadius);
+    bool EntityHasASphereWayOutsideGarage(CEntity* entity, float fRadius);
     bool IsAnyOtherCarTouchingGarage(CVehicle* ignoredVehicle);
     void ThrowCarsNearDoorOutOfGarage(CVehicle* ignoredVehicle);
     bool IsAnyOtherPedTouchingGarage(CPed* ignoredVehicle);
     bool IsAnyCarBlockingDoor();
     int32 CountCarsWithCenterPointWithinGarage(CVehicle* ignoredVehicle);
-    void StoreAndRemoveCarsForThisImpoundingGarage(CStoredCar* storedCar, int32 iMaxSlot);
+    void StoreAndRemoveCarsForThisImpoundingGarage(CStoredCar* storedCars, int32 iMaxSlot);
     void CenterCarInGarage(CVehicle* vehicle);
     void FindDoorsWithGarage(CObject** ppFirstDoor, CObject** ppSecondDoor);
     bool SlideDoorOpen();

@@ -217,7 +217,7 @@ int16 CGarages::FindGarageForObject(CObject* obj) {
 }
 
 // 0x448900
-bool CGarages::IsPointWithinHideOutGarage(const CVector& point) {
+bool CGarages::IsPointWithinHideOutGarage(Const CVector& point) {
     for (auto& garage : aGarages) {
         switch (garage.m_nType) { // TODO: Same switch used in CloseHideOutGaragesBeforeSave. This is def. inlined.
         case eGarageType::SAFEHOUSE_GANTON:
@@ -508,4 +508,9 @@ bool CGarages::Save() {
     }
 
     return true;
+}
+
+// 0x44A3C0
+void CGarages::StoreCarInNearestImpoundingGarage(CVehicle* vehicle) {
+    plugin::Call<0x44A3C0, CVehicle*>(vehicle);
 }

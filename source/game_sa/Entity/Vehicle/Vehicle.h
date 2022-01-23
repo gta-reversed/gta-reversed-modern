@@ -667,6 +667,7 @@ public:
     // if bWorldSpace is true, returns the position in world-space
     // otherwise in model-space
     CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
+    bool IsAnyOfPassengersFollowerOfGroup(CPedGroup& group);
 };
 VALIDATE_SIZE(CVehicle, 0x5A0);
 

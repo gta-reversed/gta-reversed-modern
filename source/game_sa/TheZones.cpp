@@ -207,3 +207,11 @@ void CTheZones::Load() {
 void CTheZones::PostZoneCreation() {
     // NOP
 }
+
+const char* CTheZones::GetZoneName(const CVector& point) {
+    CZone* zone{};
+    auto extraInfo = GetZoneInfo(point, &zone);
+    if (zone)
+        return zone->GetTranslatedName();
+    return "Unknown zone";
+}

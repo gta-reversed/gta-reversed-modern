@@ -1,5 +1,8 @@
 #include "StdInc.h"
 
+#include "IniFile.h"
+#include "CarCtrl.h"
+
 float& CIniFile::PedNumberMultiplier = *(float*)0x8CDF14;
 float& CIniFile::CarNumberMultiplier = *(float*)0x8CDF18;
 
@@ -10,24 +13,24 @@ void CIniFile::InjectHooks() {
 // 0x56D070
 void CIniFile::LoadIniFile() {
     CFileMgr::SetDir(gta_empty_string);
-    FILE *file = CFileMgr::OpenFile("gta3.ini", "r");
+    auto file = CFileMgr::OpenFile("gta3.ini", "r");
     if (file) {
         CFileMgr::ReadLine(file, gString, 200);
-        sscanf(gString, "%f", &CIniFile::PedNumberMultiplier);
-        if (CIniFile::PedNumberMultiplier >= 0.5f) {
-            if (CIniFile::PedNumberMultiplier > 3.0f)
-                CIniFile::PedNumberMultiplier = 3.0f;
+        (void)sscanf(gString, "%f", &PedNumberMultiplier);
+        if (PedNumberMultiplier >= 0.5f) {
+            if (PedNumberMultiplier > 3.0f)
+                PedNumberMultiplier = 3.0f;
         } else {
-            CIniFile::PedNumberMultiplier = 0.5f;
+            PedNumberMultiplier = 0.5f;
         }
 
         CFileMgr::ReadLine(file, gString, 200);
-        sscanf(gString, "%f", &CIniFile::CarNumberMultiplier);
-        if (CIniFile::CarNumberMultiplier >= 0.5f) {
-            if (CIniFile::CarNumberMultiplier > 3.0f)
-                CIniFile::CarNumberMultiplier = 3.0f;
+        (void)sscanf(gString, "%f", &CarNumberMultiplier);
+        if (CarNumberMultiplier >= 0.5f) {
+            if (CarNumberMultiplier > 3.0f)
+                CarNumberMultiplier = 3.0f;
         } else {
-            CIniFile::CarNumberMultiplier = 0.5f;
+            CarNumberMultiplier = 0.5f;
         }
         CFileMgr::CloseFile(file);
     }

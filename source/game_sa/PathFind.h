@@ -161,6 +161,8 @@ public:
     bool IsWaterNodeNearby(CVector position, float radius);
     static void AllocatePathFindInfoMem();
     static void PreparePathData();
+    bool Load();
+    bool Save();
     void UpdateStreaming(bool a1);
 
     // pathLink is the same as the returned pointer(at least on success)

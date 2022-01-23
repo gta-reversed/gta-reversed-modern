@@ -400,7 +400,7 @@ void CBirds::Render()
 
 // 0x712E40
 void CBirds::HandleGunShot(const CVector* pointA, const CVector* pointB) {
-    CColLine colLine();
+    CColLine colLine{};
 
     for (int32 i = 0; i < MAX_BIRDS; ++i) {
         auto& bird = aBirds[i];

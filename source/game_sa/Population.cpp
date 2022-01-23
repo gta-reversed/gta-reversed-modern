@@ -41,10 +41,11 @@ bool& CPopulation::bInPoliceStation = *(bool*)0xC0FCB6;
 uint32& CPopulation::NumMiamiViceCops = *(uint32*)0xC0FCB8;
 uint32& CPopulation::CurrentWorldZone = *(uint32*)0xC0FCBC;
 
-void CPopulation::InjectHooks()
-{
-    ReversibleHooks::Install("CPopulation", "ConvertToRealObject", 0x614580, &CPopulation::ConvertToRealObject);
-    ReversibleHooks::Install("CPopulation", "ConvertToDummyObject", 0x614670, &CPopulation::ConvertToDummyObject);
+void CPopulation::InjectHooks() {
+    using namespace ReversibleHooks;
+    Install("CPopulation", "ConvertToRealObject", 0x614580, &CPopulation::ConvertToRealObject);
+    Install("CPopulation", "ConvertToDummyObject", 0x614670, &CPopulation::ConvertToDummyObject);
+    Install("CPopulation", "RemovePed", 0x610F20, &CPopulation::RemovePed);
 }
 
 // 0x5B6D40
@@ -84,7 +85,8 @@ float CPopulation::FindPedDensityMultiplierCullZone() {
 
 // 0x610F20
 void CPopulation::RemovePed(CPed* ped) {
-    ((void(__cdecl*)(CPed*))0x610F20)(ped);
+    CWorld::Remove(ped);
+    delete ped;
 }
 
 // 0x610F40
