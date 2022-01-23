@@ -23,9 +23,9 @@ void CGarage::BuildRotatedDoorMatrix(CEntity* pEntity, float fDoorPosition)
 // 0x449900
 void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 maxSlot)
 {
-    maxSlot = std::min(maxSlot, 4);
+    maxSlot = std::min<int32>(maxSlot, NUM_GARAGE_STORED_CARS);
 
-    for (auto i = 0; i < 4; i++)
+    for (auto i = 0; i < NUM_GARAGE_STORED_CARS; i++)
         storedCars[i].Clear();
 
     auto vehPool = CPools::GetVehiclePool();
@@ -46,7 +46,7 @@ void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 max
     }
 
     // Clear slots with no vehicles in it
-    for (auto i = storedCarIdx; i < 4; i++) {
+    for (auto i = storedCarIdx; i < NUM_GARAGE_STORED_CARS; i++) {
         storedCars[i].Clear();
     }
 }

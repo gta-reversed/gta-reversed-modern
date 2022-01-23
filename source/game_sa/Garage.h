@@ -75,6 +75,8 @@ public:
     CAEDoorAudioEntity m_GarageAudio;
 
 public:
+    static constexpr size_t NUM_GARAGE_STORED_CARS = 4;
+
     static void InjectHooks();
 
     void Update();
