@@ -27,30 +27,31 @@ static std::vector<SavedLocation> s_SavedLocations{};
 static bool                       s_windowOpen{ true };
 
 namespace TeleportDebugModule {
-void DoTeleportTo(CVector& pos, bool doAdjustToGroundZ = true) {
+
+CVector GetPositionWithGroundHeight(CVector2D pos) {
+    return { pos.x, pos.y, CWorld::FindGroundZForCoord(pos.x, pos.y) + 2.f };
+}
+
+// Teleport to exact coordinates, and set player to be in the normal world
+void DoTeleportTo(CVector pos) {
     CStreaming::LoadSceneCollision(pos);
     CStreaming::LoadScene(pos);
-
-    if (doAdjustToGroundZ) {
-        //pos.z = TheCamera.CalculateGroundHeight(eGroundHeightType::EXACT_GROUND_HEIGHT) + 5.f;
-        pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y) + 2.f;
-    }
 
     FindPlayerPed()->m_nAreaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD;
     CGame::currArea = eAreaCodes::AREA_CODE_NORMAL_WORLD;
     CStreaming::RemoveBuildingsNotInArea(eAreaCodes::AREA_CODE_NORMAL_WORLD);
     CTimeCycle::StopExtraColour(false);
-    FindPlayerPed()->Teleport(pos, true);
+    FindPlayerPed()->Teleport(pos, true); // For now just teleport to ground height
 }
 
 void ProcessImGui() {
     ImGui::SetNextWindowSize({ 400.f, 350.f }, ImGuiCond_FirstUseEver);
     ImGui::Begin("Teleporter Window", &s_windowOpen);
 
-    // Position input
-    static CVector pos{};
+    // Position input - For now Z coord will always be the ground height
+    static CVector2D pos{};
     PushItemWidth(140.f);
-    InputFloat3("", reinterpret_cast<float(&)[3]>(pos), "%.2f"); // Kinda hacky, but it's okay, if this was to break, we'd have bigger problems anyways.
+    InputFloat2("", reinterpret_cast<float(&)[2]>(pos), "%.2f"); // Kinda hacky, but it's okay, if this was to break, we'd have bigger problems anyways.
     PopItemWidth();
 
     // Name input
@@ -71,10 +72,9 @@ void ProcessImGui() {
     // Teleport button
     if (SameLine(); Button("Teleport")) {
         if (GetIO().KeyAlt) { // Random position
-            pos = CVector{
+            pos = {
                CGeneral::GetRandomNumberInRange(-3072.0f, 3072.0f),
-               CGeneral::GetRandomNumberInRange(-3072.0f, 3072.0f),
-               0.0f // Z height will be set to ground, so no need to worry about it
+               CGeneral::GetRandomNumberInRange(-3072.0f, 3072.0f)
             };
         } else if (GetIO().KeyShift) { // Teleport to marker set on the map
             // Code from CLEO4 library
@@ -82,21 +82,19 @@ void ProcessImGui() {
             auto pMarker = &CRadar::ms_RadarTrace[LOWORD(hMarker)];
 
             if (hMarker && pMarker) {
-                pos = CVector{
+                pos = {
                     pMarker->m_vPosition.x,
                     pMarker->m_vPosition.y,
-                    0.0f // Z height will be set to ground, so no need to worry about it
                 };
             }
         }
-
-        DoTeleportTo(pos);
+        DoTeleportTo(GetPositionWithGroundHeight(pos));
     }
     HoveredItemTooltip("Hold `ALT` to teleport to a random position\nHold `SHIFT` to teleport to marker marked on the map");
 
     // Save position button
     if (SameLine(); Button("Save")) {
-        const auto& posToSave{ GetIO().KeyCtrl ? FindPlayerPed()->GetPosition() : pos };
+        const auto posToSave{ GetIO().KeyCtrl ? FindPlayerPed()->GetPosition() : GetPositionWithGroundHeight(pos) };
         s_SavedLocations.emplace(s_SavedLocations.begin(), name[0] ? name : CTheZones::GetZoneName(posToSave), posToSave); // Either use given name or current zone name
 
         if (!GetIO().KeyAlt) {
@@ -152,7 +150,7 @@ void ProcessImGui() {
 
                 // Teleport on double click
                 if (IsItemHovered() && IsMouseDoubleClicked(0)) {
-                    DoTeleportTo(v.pos);
+                    DoTeleportTo(GetPositionWithGroundHeight(v.pos)); // Ignore saved location's Z coord for now, and just teleport to ground height
                 }
 
                 // Position text
@@ -196,8 +194,8 @@ namespace SettingsHandler {
         CVector pos{};
         if (sscanf(line, "%f, %f, %f, %[^\t\n]", &pos.x, &pos.y, &pos.z, name) == 4) { // [^\t\n] -> https://stackoverflow.com/questions/2854488
             s_SavedLocations.emplace_back(name, pos);
-        } else {
-            std::cerr << "Failed to load saved location from ini: " << line << '\n';
+        } else if (line[0] && line[0] != '\n') { // Report failed reads on non-empty lines only
+            std::cerr << "Failed to load saved location from ini: `" << line << "`\n";
         }
     }
 
@@ -206,7 +204,8 @@ namespace SettingsHandler {
         (void)ctx;
 
         out_buf->reserve(s_SavedLocations.size() * (3 * 10 + 30)); // Estimate. 3 * 10 for position + 30 for name
-        out_buf->appendf("[%s][Locations]\n", handler->TypeName);
+
+        out_buf->append("[SavedLocations][Version 1]\n");
         for (const auto& l : s_SavedLocations) {
             out_buf->appendf("%.3f, %.3f, %.3f, %s\n", l.pos.x, l.pos.y, l.pos.z, l.name.c_str());
         }
@@ -226,7 +225,9 @@ namespace SettingsHandler {
 
         if (s_SavedLocations.empty()) {
             s_SavedLocations = {
-                {"Map centre", {0.f, 0.f, 0.f}}
+                {"Map centre", {0.f, 0.f, 0.f}},
+                {"CJ's House", {2495.2f, -1686.0f, 13.6f}},
+                {"SF Airport", {2495.1f, 1658.2f, 13.5f}}
             };
         }
     }
