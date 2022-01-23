@@ -456,25 +456,30 @@ void LoadCollisionModelAnyVersion(const ColHelpers::FileHeader& header, uint8* c
 // Load one, or multiple, collision models from the given buffer
 bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
     using namespace ColHelpers;
+    assert(buffSize >= sizeof(FileHeader) && "LoadCollisionFileFirstTime called with not enough data"); // Buffer should be big enough to have at least 1 col header in it
 
-    // We've modified the loop condition a little. R* went backwards, and checked if the remaning buffer size is > 8.
-    auto fileTotalSize{ 0u };
-    for (auto buffIt = buff; buffIt < buff + buffSize; buffIt += fileTotalSize) {
-        assert(sizeof(FileHeader) <= (buffIt - buff) && "Not enough data in buffer for col file header");
+    auto fileTotalSize{0u};
+    for (auto buffPos = 0; buffPos < buffSize; buffPos += fileTotalSize) {
+        const auto buffRemainingSize = buffSize - buffPos;
+        const auto buffIt            = &buff[buffPos];
 
-        auto header = *reinterpret_cast<FileHeader*>(buffIt); // Important to make a copy here
-        fileTotalSize = header.GetTotalSize();
-
-        assert(fileTotalSize <= (buffIt - buff) && "Not enough data in buffer for col data");
-
-        if (!header.IsValid()) {
-            return true; // Totally OK - At this point there are no collision files left in the buffer
+        if (buffRemainingSize < sizeof(FileHeader::FileInfo)) {
+            return true; // No more data
         }
 
-        auto mi = IsModelDFF(header.modelId) ? CModelInfo::GetModelInfo(header.modelId) : nullptr;
-        if (!mi || mi->m_nKey != CKeyGen::GetUppercaseKey(header.modelName)) {
+        if (!reinterpret_cast<FileHeader::FileInfo*>(buffIt)->IsValid()) {
+            return true; // Finished reading all data, but there's some padding left.
+        }
+
+        auto& h = *reinterpret_cast<FileHeader*>(buffIt);
+        fileTotalSize = h.GetTotalSize();
+
+        assert(fileTotalSize <= buffRemainingSize && "Not enough data in buffer for col data"); // NOTSA
+
+        auto mi = IsModelDFF(h.modelId) ? CModelInfo::GetModelInfo(h.modelId) : nullptr;
+        if (!mi || mi->m_nKey != CKeyGen::GetUppercaseKey(h.modelName)) {
             auto colDef = CColStore::ms_pColPool->GetAt(colId); 
-            mi = CModelInfo::GetModelInfo(header.modelName, colDef->m_nModelIdStart, colDef->m_nModelIdEnd);
+            mi = CModelInfo::GetModelInfo(h.modelName, colDef->m_nModelIdStart, colDef->m_nModelIdEnd);
         }
 
         if (!mi || !mi->bIsLod) {
@@ -486,7 +491,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
         }
 
         auto& cm = *mi->GetColModel();
-        LoadCollisionModelAnyVersion(header, buffIt + sizeof(FileHeader), cm);
+        LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), cm);
 
         cm.m_nColSlot = colId;
         if (mi->GetModelType() == eModelInfoType::MODEL_INFO_TYPE_ATOMIC) {
@@ -535,19 +540,25 @@ void CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
 // 0x5B5000
 bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8 colId) {
     using namespace ColHelpers;
+    assert(buffSize >= sizeof(FileHeader) && "LoadCollisionFileFirstTime called with not enough data"); // Buffer should be big enough to have at least 1 col header in it
 
     auto fileTotalSize{0u};
-    for (auto buffIt = buff; buffIt < buff + buffSize; buffIt += fileTotalSize) {
-        assert(sizeof(FileHeader) <= (buffIt - buff) && "Not enough data in buffer for col file header");
+    for (auto buffPos = 0; buffPos < buffSize; buffPos += fileTotalSize) {
+        const auto buffRemainingSize = buffSize - buffPos;
+        const auto buffIt            = &buff[buffPos];
 
-        auto h = *reinterpret_cast<FileHeader*>(buffIt); // Important to make a copy here
-        fileTotalSize = h.GetTotalSize();
+        if (buffRemainingSize < sizeof(FileHeader::FileInfo)) {
+            return true; // No more data
+        }
 
-        assert(fileTotalSize <= (buffIt - buff) && "Not enough data in buffer for col data");
-
-        if (!h.IsValid()) {
+        if (!reinterpret_cast<FileHeader::FileInfo*>(buffIt)->IsValid()) {
             return true; // Finished reading all data, but there's some padding left.
         }
+
+        auto& h = *reinterpret_cast<FileHeader*>(buffIt);
+        fileTotalSize = h.GetTotalSize();
+
+        assert(fileTotalSize <= buffRemainingSize && "Not enough data in buffer for col data"); // NOTSA
 
         auto modelId = (int32)h.modelId;
 
