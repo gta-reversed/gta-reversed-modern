@@ -470,19 +470,19 @@ void CStats::DisplayScriptStatUpdateMessage(uint8 state, eStats stat, float valu
         break;
 
     case STAT_PIMPING_LEVEL:
-        CHud::SetHelpMessageStatUpdate(state, STAT_PIMPING_LEVEL, value, 10.0);
+        CHud::SetHelpMessageStatUpdate(state, STAT_PIMPING_LEVEL, value, 10.0f);
         break;
 
     case STAT_GANG_STRENGTH: {
-        auto player = FindPlayerPed();
-
-        if (player) {
+        if (auto player = FindPlayerPed())
+        {
             auto maxGroup = std::min<uint8>(FindMaxNumberOfGroupMembers(), player->m_pPlayerData->m_nScriptLimitToGangSize);
-
             CHud::SetHelpMessageStatUpdate(state, stat, value, maxGroup);
         }
         break;
     }
+    default:
+        return;
     }
 }
 
