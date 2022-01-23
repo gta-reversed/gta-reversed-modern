@@ -71,22 +71,20 @@ void CStats::InjectHooks() {
     Install("CStats", "RegisterMissionAttempted", 0x558E80, &CStats::RegisterMissionAttempted);
     Install("CStats", "RegisterMissionPassed", 0x558EA0, &CStats::RegisterMissionPassed);
 
-    Install("CStats", "Save", 0x5D3B40, &CStats::Save);
     Install("CStats", "Load", 0x5D3BF0, &CStats::Load);
+    Install("CStats", "Save", 0x5D3B40, &CStats::Save);
 }
 
 // 0x55C0C0
 void CStats::Init() {
-    memset(StatTypesFloat, 0, sizeof(StatTypesFloat));
-    memset(StatTypesInt, 0, sizeof(StatTypesInt));
-    memset(PedsKilledOfThisType, 0, sizeof(PedsKilledOfThisType));
-    memset(TimesMissionAttempted, 0, sizeof(TimesMissionAttempted));
+    std::ranges::fill(StatTypesFloat, 0.0f);
+    std::ranges::fill(StatTypesInt, 0);
+    std::ranges::fill(PedsKilledOfThisType, 0);
+    std::ranges::fill(TimesMissionAttempted, 0);
 
     bStatUpdateMessageDisplayed = false;
     CTimer::SetTimeInMS(0);
-    for (int32 i = 0; i < 8; i++) {
-        LastMissionPassedName[i] = '\0';
-    }
+    std::ranges::fill(LastMissionPassedName, 0);
     m_SprintStaminaCounter = 0;
     m_CycleStaminaCounter = 0;
     m_SwimStaminaCounter = 0;
@@ -122,8 +120,7 @@ float CStats::GetStatValue(eStats stat) {
 void CStats::SetStatValue(eStats stat, float value) {
     if (GetStatType(stat)) {
         StatTypesFloat[stat] = value;
-    }
-    else { // int32
+    } else { // int32
         assert(stat >= FIRST_INT_STAT);
 
         StatTypesInt[stat - FIRST_INT_STAT] = static_cast<int32>(value);
@@ -174,8 +171,7 @@ int32 CStats::FindCriminalRatingNumber() {
         value -= 10 * GetStatValue(STAT_TIMES_CHEATED);
 
         value = std::max(value, -10000);
-    }
-    else {
+    } else {
         value = std::max(value, 0);
     }
 
@@ -578,8 +574,7 @@ void CStats::UpdateStatsWhenSprinting() {
     UpdateFatAndMuscleStats(static_cast<uint32>(StatReactionValue[STAT_EXERCISE_RATE_SPRINT]));
     if (StatReactionValue[STAT_TIMELIMIT_SPRINT_STAMINA] * 1000.0f >= static_cast<float>(m_SprintStaminaCounter)) {
         m_SprintStaminaCounter += CTimer::GetTimeStepInMS();
-    }
-    else {
+    } else {
         m_SprintStaminaCounter = 0;
         IncrementStat(STAT_STAMINA, StatReactionValue[STAT_INC_SPRINT_STAMINA]);
         DisplayScriptStatUpdateMessage(1, STAT_STAMINA, StatReactionValue[STAT_INC_SPRINT_STAMINA]);
@@ -591,8 +586,7 @@ void CStats::UpdateStatsWhenRunning() {
     UpdateFatAndMuscleStats((uint32)StatReactionValue[STAT_EXERCISE_RATE_RUN]);
     if (StatReactionValue[STAT_TIMELIMIT_RUNNING] * 1000.0f >= static_cast<float>(m_RunningCounter)) {
         m_RunningCounter += CTimer::GetTimeStepInMS();
-    }
-    else {
+    } else {
         m_RunningCounter = 0;
         IncrementStat(STAT_STAMINA, StatReactionValue[STAT_INC_RUNNING]);
         DisplayScriptStatUpdateMessage(1, STAT_STAMINA, StatReactionValue[STAT_INC_RUNNING]);
@@ -630,8 +624,7 @@ void CStats::UpdateStatsWhenOnMotorBike(CBike* bike) {
             m_BikeCounter = static_cast<uint32>(fTimeStep * 1.5f + bikeCounter);
         else if (bikeMoveSpeed > 0.2f)
             m_BikeCounter = static_cast<uint32>(fTimeStep * 0.5f + bikeCounter);
-    }
-    else {
+    } else {
         m_BikeCounter = 0;
         IncrementStat(STAT_BIKE_SKILL, StatReactionValue[STAT_INC_MOTORBIKE_SKILL]);
         DisplayScriptStatUpdateMessage(1, STAT_BIKE_SKILL, StatReactionValue[STAT_INC_MOTORBIKE_SKILL]);
@@ -662,8 +655,7 @@ void CStats::UpdateStatsAddToHealth(uint32 addToHealth) {
 void CStats::ModifyStat(eStats stat, float value) {
     if (value < 0.0f) {
         CStats::DecrementStat(stat, -value);
-    }
-    else {
+    } else {
         CStats::IncrementStat(stat, value);
     }
 }
