@@ -422,8 +422,6 @@ void CStats::DisplayScriptStatUpdateMessage(uint8 state, eStats stat, float valu
     if (IsStatCapped(stat) && GetStatValue(stat) >= 1000.0f)
         return;
 
-    if (stat == STAT_PIMPING_LEVEL)
-        CHud::SetHelpMessageStatUpdate(state, STAT_PIMPING_LEVEL, value, 10.0);
     switch (stat) {
     case STAT_FAT:
     case STAT_STAMINA:
@@ -469,6 +467,10 @@ void CStats::DisplayScriptStatUpdateMessage(uint8 state, eStats stat, float valu
     case STAT_PROGRESS_WITH_KATIE:
     case STAT_PROGRESS_WITH_MILLIE:
         CHud::SetHelpMessageStatUpdate(state, stat, value, 100.0f);
+        break;
+
+    case STAT_PIMPING_LEVEL:
+        CHud::SetHelpMessageStatUpdate(state, STAT_PIMPING_LEVEL, value, 10.0);
         break;
 
     case STAT_GANG_STRENGTH: {
