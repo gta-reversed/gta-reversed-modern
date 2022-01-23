@@ -30,7 +30,7 @@ void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 max
 
     auto vehPool = CPools::GetVehiclePool();
     int vehIdx = 0;
-    auto i = vehPool->GetSize() - 1;
+    auto i = vehPool->GetSize();
 
     while (i--) {
         if (vehPool->m_byteMap[i].IntValue() >= 0) {
