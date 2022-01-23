@@ -22,9 +22,14 @@ public:
     CBoundingBox m_boundBox;
     CSphere m_boundSphere;
     uint8 m_nColSlot;
-    uint8 m_bNotEmpty : 1;
-    uint8 m_bIsSingleColDataAlloc : 1;
-    uint8 m_bIsActive : 1;
+    union {
+        struct {
+            uint8 m_bNotEmpty : 1;
+            uint8 m_bIsSingleColDataAlloc : 1;
+            uint8 m_bIsActive : 1;
+        };
+        uint8 m_nFlags{};
+    };
     CCollisionData *m_pColData;
 
 public:

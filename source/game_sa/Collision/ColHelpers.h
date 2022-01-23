@@ -13,7 +13,7 @@
 
 namespace ColHelpers {
 enum class ColModelVersion {
-    COLL,
+    COLL = 1, // NOTSA - But we want COLX => X, instead of X - 1
     COL2,
     COL3,
     COL4,

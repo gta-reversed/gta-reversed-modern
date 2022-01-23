@@ -44,13 +44,15 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadZone", 0x5B4AB0, &CFileLoader::LoadZone);
     Install("CFileLoader", "FindRelatedModelInfoCB", 0x5B3930, &CFileLoader::FindRelatedModelInfoCB);
     Install("CFileLoader", "SetRelatedModelInfoCB", 0x537150, &CFileLoader::SetRelatedModelInfoCB);
-    // Install("CFileLoader", "LoadCollisionFile_Buffer", 0x538440, static_cast<bool(*)(uint8*, uint32, uint8)>(&CFileLoader::LoadCollisionFile)); missing generated grass
+
+    Install("CFileLoader", "LoadCollisionFile_Buffer", 0x538440, static_cast<bool(*)(uint8*, uint32, uint8)>(&CFileLoader::LoadCollisionFile));
     Install("CFileLoader", "LoadCollisionFile_File", 0x5B4E60, static_cast<void(*)(const char*, uint8)>(&CFileLoader::LoadCollisionFile));
-    // Install("CFileLoader", "LoadCollisionFileFirstTime", 0x5B5000, &CFileLoader::LoadCollisionFileFirstTime); missing generated grass
+    Install("CFileLoader", "LoadCollisionFileFirstTime", 0x5B5000, &CFileLoader::LoadCollisionFileFirstTime); 
     Install("CFileLoader", "LoadCollisionModel", 0x537580, &CFileLoader::LoadCollisionModel);
     Install("CFileLoader", "LoadCollisionModelVer2", 0x537EE0, &CFileLoader::LoadCollisionModelVer2);
     Install("CFileLoader", "LoadCollisionModelVer3", 0x537CE0, &CFileLoader::LoadCollisionModelVer3);
     Install("CFileLoader", "LoadCollisionModelVer4", 0x537AE0, &CFileLoader::LoadCollisionModelVer4);
+
     Install("CFileLoader", "LoadAnimatedClumpObject", 0x5B40C0, &CFileLoader::LoadAnimatedClumpObject); 
     Install("CFileLoader", "LoadLine_File", 0x536F80, static_cast<char* (*)(FILESTREAM)>(&CFileLoader::LoadLine));
     Install("CFileLoader", "LoadLine_Bufer", 0x536FE0, static_cast<char* (*)(char*&, int32&)>(&CFileLoader::LoadLine));
@@ -453,28 +455,31 @@ void LoadCollisionModelAnyVersion(const ColHelpers::FileHeader& header, uint8* c
 // 0x538440
 // Load one, or multiple, collision models from the given buffer
 bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
-    return plugin::CallAndReturn<bool, 0x538440, uint8*, uint32, uint8>(buff, buffSize, colId);
     using namespace ColHelpers;
 
     // We've modified the loop condition a little. R* went backwards, and checked if the remaning buffer size is > 8.
     auto fileTotalSize{ 0u };
     for (auto buffIt = buff; buffIt < buff + buffSize; buffIt += fileTotalSize) {
-        auto& header = *reinterpret_cast<FileHeader*>(buffIt);
+        assert(sizeof(FileHeader) <= (buffIt - buff) && "Not enough data in buffer for col file header");
+
+        auto header = *reinterpret_cast<FileHeader*>(buffIt); // Important to make a copy here
         fileTotalSize = header.GetTotalSize();
 
-        if (header.IsValid())
-            return true;
+        assert(fileTotalSize <= (buffIt - buff) && "Not enough data in buffer for col data");
 
-        char modelName[22]{};
-        strcpy_s(modelName, header.modelName);
+        if (!header.IsValid()) {
+            return true; // Totally OK - At this point there are no collision files left in the buffer
+        }
 
         auto mi = IsModelDFF(header.modelId) ? CModelInfo::GetModelInfo(header.modelId) : nullptr;
-        if (!mi || mi->m_nKey != CKeyGen::GetUppercaseKey(modelName)) {
+        if (!mi || mi->m_nKey != CKeyGen::GetUppercaseKey(header.modelName)) {
             auto colDef = CColStore::ms_pColPool->GetAt(colId); 
-            mi = CModelInfo::GetModelInfo(modelName, colDef->m_nModelIdStart, colDef->m_nModelIdEnd);
+            mi = CModelInfo::GetModelInfo(header.modelName, colDef->m_nModelIdStart, colDef->m_nModelIdEnd);
         }
-        if (!mi || !mi->bIsLod) // TODO: Unsure what the fuck this check is, but it doesn't seem too failproof to me..
+
+        if (!mi || !mi->bIsLod) {
             continue;
+        }
 
         if (!mi->GetColModel()) {
             mi->SetColModel(new CColModel, true);
@@ -482,8 +487,8 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
 
         auto& cm = *mi->GetColModel();
         LoadCollisionModelAnyVersion(header, buffIt + sizeof(FileHeader), cm);
-        cm.m_nColSlot = colId;
 
+        cm.m_nColSlot = colId;
         if (mi->GetModelType() == eModelInfoType::MODEL_INFO_TYPE_ATOMIC) {
             CPlantMgr::SetPlantFriendlyFlagInAtomicMI(static_cast<CAtomicModelInfo*>(mi));
         }
@@ -515,11 +520,13 @@ void CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
         if (!mi || !mi->bIsLod)
             continue;
 
-        if (!mi->GetColModel()) // TODO: Perhaps this should be in `CModelInfo` ? Like `GetColModel(bool bCreate = false)` or something
+        if (!mi->GetColModel()) {// TODO: Perhaps this should be in `CModelInfo` ? Like `GetColModel(bool bCreate = false)` or something
             mi->SetColModel(new CColModel, true);
+        }
 
         auto& cm = *mi->GetColModel();
         LoadCollisionModelAnyVersion(header, buffer, cm);
+
         cm.m_nColSlot = colId;
     }
     CFileMgr::CloseFile(f);
@@ -527,49 +534,51 @@ void CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
 
 // 0x5B5000
 bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8 colId) {
-    return plugin::CallAndReturn<bool, 0x5B5000, uint8*, uint32, uint8>(buff, buffSize, colId);
     using namespace ColHelpers;
 
     auto fileTotalSize{0u};
     for (auto buffIt = buff; buffIt < buff + buffSize; buffIt += fileTotalSize) {
-        auto& h = *reinterpret_cast<FileHeader*>(buffIt);
+        assert(sizeof(FileHeader) <= (buffIt - buff) && "Not enough data in buffer for col file header");
 
+        auto h = *reinterpret_cast<FileHeader*>(buffIt); // Important to make a copy here
         fileTotalSize = h.GetTotalSize();
 
-        if (!h.IsValid())
-            return true; // Finished reading all data, but there's some padding left.
+        assert(fileTotalSize <= (buffIt - buff) && "Not enough data in buffer for col data");
 
-        char modelName[22]{};
-        strcpy_s(modelName, h.modelName);
+        if (!h.IsValid()) {
+            return true; // Finished reading all data, but there's some padding left.
+        }
 
         auto modelId = (int32)h.modelId;
 
         auto mi = IsModelDFF(modelId) ? CModelInfo::GetModelInfo(modelId) : nullptr;
-        if (!mi || mi->m_nKey != CKeyGen::GetUppercaseKey(modelName))
-            mi = CModelInfo::GetModelInfo(modelName, &modelId);
+        if (!mi || mi->m_nKey != CKeyGen::GetUppercaseKey(h.modelName)) {
+            mi = CModelInfo::GetModelInfo(h.modelName, &modelId);
+        }
 
-        if (!mi)
+        if (!mi) {
             continue;
+        }
 
         CColStore::IncludeModelIndex(colId, modelId);
 
-        if (!mi->bIsLod)
+        if (!mi->bIsLod) {
             continue;
+        }
 
         auto& cm = *new CColModel;
         LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), cm);
-        mi->SetColModel(&cm, true);
 
-        // NOTE/TODO:
-        // This cast looks weird, but there's a note about it above `PackedModelStartEnd`s definition.
-        CColAccel::addCacheCol((PackedModelStartEnd)modelId, cm); 
+        cm.m_nColSlot = colId;
+        mi->SetColModel(&cm, true);
+        CColAccel::addCacheCol((PackedModelStartEnd)modelId, cm);  // NOTE/TODO: This cast looks weird, but there's a note about it above `PackedModelStartEnd`s definition.
     }
 
     return true;
 }
 
 // 0x537580
-// Load collision V1 file from buffer. Just note that `data` is pointing to after `FileHeader`
+// Load collision V1 file from buffer. Just note that `buffer` is pointing to after `FileHeader`.
 void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     using namespace ColHelpers;
     using namespace ColHelpers::V1;
@@ -579,7 +588,6 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     auto& h = *reinterpret_cast<Header*&>(bufferIt)++;
     cm.m_boundBox = h.bounds.box;
     cm.m_boundSphere = h.bounds.sphere;
-    bufferIt += sizeof(Header);
 
     auto cd = new CCollisionData{};
     cm.m_pColData = cd;
@@ -641,7 +649,7 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     cd->m_pShadowTriangles = nullptr;
 
     if (cd->m_nNumSpheres || cd->m_nNumBoxes || cd->m_nNumTriangles)
-        cm.m_bNotEmpty = true; // Doesn't make a whole lot of sense, but kay
+        cm.m_bNotEmpty = true;
 }
 
 // 0x537EE0

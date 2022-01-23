@@ -274,6 +274,8 @@ void CColStore::LoadCol(int32 colSlot, char const* filename)
 // 0x4106D0
 bool CColStore::LoadCol(int32 colSlot, uint8* data, int32 dataSize)
 {
+    assert(colSlot <= 255); // Otherwise it would wrap when casted to `uint8` (As that's the type it's stored as in CColModel)
+
     auto* def = ms_pColPool->GetAt(colSlot);
 
     bool bLoaded;
