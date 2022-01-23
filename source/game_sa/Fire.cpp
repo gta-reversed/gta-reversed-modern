@@ -273,7 +273,7 @@ void CFire::ProcessFire() {
             }
 
             if (auto vehicle = targetPed->GetVehicleIfInOne()) {
-                if (!ModelIndices::IsFireTruck(vehicle->m_nModelIndex) && vehicle->IsAutomobile()) {
+                if (!ModelIndices::IsFireTruck(vehicle->m_nModelIndex) && vehicle->fIsAutomobile()) {
                     vehicle->m_fHealth = 75.0f;
                 }
             } else if (!targetPed->IsPlayer() && !targetPed->IsAlive()) {
@@ -294,7 +294,7 @@ void CFire::ProcessFire() {
                 targetVehicle->InflictDamage(m_pEntityCreator, eWeaponType::WEAPON_FLAMETHROWER, CTimer::GetTimeStep() * 1.2f, CVector{});
             }
 
-            if (targetVehicle->IsAutomobile()) {
+            if (targetVehicle->fIsAutomobile()) {
                 m_vecPosition = targetVehicle->GetDummyPosition(eVehicleDummies::DUMMY_LIGHT_FRONT_MAIN) + CVector{0.0f, 0.0f, 0.15f};
             }
             break;
@@ -331,7 +331,7 @@ void CFire::ProcessFire() {
             if (DistanceBetweenPoints(vehicle->GetPosition(), m_vecPosition) >= 2.0f)
                 continue;
 
-            if (vehicle->IsBMX()) {
+            if (vehicle->bIsSubclassBMX()) {
                 player->DoStuffToGoOnFire();
                 gFireManager.StartFire(player, m_pEntityCreator, 0.8f, true, 7000, 100);
                 vehicle->BurstTyre(vehicle->FindTyreNearestPoint(m_vecPosition.x, m_vecPosition.y) + 13, false); // TODO: What's this 13?

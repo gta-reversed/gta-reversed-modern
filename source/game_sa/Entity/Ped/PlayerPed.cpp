@@ -342,7 +342,7 @@ float CPlayerPed::GetWeaponRadiusOnScreen() {
 bool CPlayerPed::PedCanBeTargettedVehicleWise(CPed* ped) {
     if (ped->bInVehicle) {
         CVehicle* veh = ped->m_pVehicle;
-        return veh && (veh->IsBike() || veh->vehicleFlags.bVehicleCanBeTargetted);
+        return veh && (veh->fIsBike() || veh->vehicleFlags.bVehicleCanBeTargetted);
     }
     return true;
 }

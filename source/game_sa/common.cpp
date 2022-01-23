@@ -157,7 +157,7 @@ CEntity* FindPlayerEntity(int32 playerId) {
 // 0x56E160
 CTrain* FindPlayerTrain(int32 playerId) {
     auto vehicle = FindPlayerVehicle(playerId);
-    if (vehicle && vehicle->IsTrain())
+    if (vehicle && vehicle->fIsTrain())
         return vehicle->AsTrain();
     else
         return nullptr;

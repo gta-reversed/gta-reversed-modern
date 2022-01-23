@@ -212,13 +212,13 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
 
     if (!doMissionCleanup)
     {
-        if (vehicle->IsAutomobile())
+        if (vehicle->fIsAutomobile())
             vehicle->AsAutomobile()->PlaceOnRoadProperly();
-        else if (vehicle->IsBike())
+        else if (vehicle->fIsBike())
             vehicle->AsBike()->PlaceOnRoadProperly();
     }
 
-    if (vehicle->IsTrain())
+    if (vehicle->fIsTrain())
         vehicle->AsTrain()->trainFlags.bNotOnARailRoad = true;
 
     CTheScripts::ClearSpaceForMissionEntity(posn, vehicle);

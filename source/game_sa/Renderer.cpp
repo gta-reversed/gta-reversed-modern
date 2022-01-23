@@ -555,7 +555,7 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
             if (FindPlayerVehicle(-1, false) == entity && gbFirstPersonRunThisFrame && CReplay::Mode != REPLAY_MODE_1) {
                 uint32 dwDirectionWasLooking = CCamera::GetActiveCamera().m_nDirectionWasLooking;
                 CVehicle* vehicle = FindPlayerVehicle(-1, false);
-                if (!vehicle->IsBike() || !(vehicle->AsBike()->damageFlags.bDamageFlag8))
+                if (!vehicle->fIsBike() || !(vehicle->AsBike()->damageFlags.bDamageFlag8))
                 {
                     if (dwDirectionWasLooking == 3)
                         return RENDERER_CULLED;
@@ -567,7 +567,7 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
                     }
                     if (vehicle->m_pHandlingData->m_bNo1fpsLookBehind)
                         return RENDERER_CULLED;
-                    if (!vehicle->IsBoat()
+                    if (!vehicle->fIsBoat()
                         || modelId == MODEL_REEFER || modelId == MODEL_TROPIC || modelId == MODEL_PREDATOR
                         || modelId == MODEL_SKIMMER)
                     {

@@ -2219,25 +2219,26 @@ float CPhysical::ApplyScriptCollision(CVector arg0, float arg1, float arg2, CVec
     return ((float(__thiscall*)(CPhysical*, CVector, float, float, CVector*))0x546ED0)(this, arg0, arg1, arg2, arg3);
 }
 
+// 0x546FF0
 void CPhysical::PositionAttachedEntity()
 {
     if (!m_pAttachedTo)
         return;
 
-    auto* pAttachedToVehicle = static_cast<CVehicle*>(m_pAttachedTo);
-    auto* pAttachedToAutmobile = static_cast<CAutomobile*>(m_pAttachedTo);
-    auto* pAttachedToBike = static_cast<CBike*>(m_pAttachedTo);
+    auto* attachedToVehicle = m_pAttachedTo->AsVehicle();
+    auto* attachedToAuto = m_pAttachedTo->AsAutomobile();
+    auto* attachedToBike = m_pAttachedTo->AsBike();
 
     CMatrix attachedEntityMatrix;
     CMatrix attachedEntityRotationMatrix;
     CMatrix attachedToEntityMatrix (m_pAttachedTo->GetMatrix());
-    if (m_pAttachedTo->IsVehicle() && pAttachedToVehicle->IsBike()) {
-        pAttachedToBike->CalculateLeanMatrix();
-        attachedToEntityMatrix = pAttachedToBike->m_mLeanMatrix;
+    if (m_pAttachedTo->IsVehicle() && attachedToVehicle->fIsBike()) {
+        attachedToBike->CalculateLeanMatrix();
+        attachedToEntityMatrix = attachedToBike->m_mLeanMatrix;
     }
     else {
         if (IsObject() && m_pAttachedTo->m_nModelIndex == MODEL_FORKLIFT) {
-            RwFrame* carPart = pAttachedToAutmobile->m_aCarNodes[CAR_MISC_A];
+            RwFrame* carPart = attachedToAuto->m_aCarNodes[CAR_MISC_A];
             if (carPart)
                 attachedToEntityMatrix.UpdateMatrix(RwFrameGetLTM(carPart));
         }
@@ -2286,8 +2287,8 @@ void CPhysical::PositionAttachedEntity()
     if (!bUpdateSpeed)
     {
         if (m_pAttachedTo->m_nModelIndex == MODEL_DUMPER) {
-            int16 wMiscComponentAngle = pAttachedToAutmobile->m_wMiscComponentAngle;
-            if (wMiscComponentAngle && wMiscComponentAngle != pAttachedToAutmobile->m_wMiscComponentAnglePrev) {
+            int16 wMiscComponentAngle = attachedToAuto->m_wMiscComponentAngle;
+            if (wMiscComponentAngle && wMiscComponentAngle != attachedToAuto->m_wMiscComponentAnglePrev) {
                 bDettachEntity = true;
             }
             else if (m_fDamageIntensity > 0.0f) {
@@ -2299,7 +2300,7 @@ void CPhysical::PositionAttachedEntity()
         }
         else {
             if (m_pAttachedTo->m_nModelIndex != MODEL_FORKLIFT) {
-                if (this->IsVehicle()) {
+                if (IsVehicle()) {
                     CMatrix attachedToEntityMatrix = m_pAttachedTo->GetMatrix();
                     if (fabs(attachedToEntityMatrix.GetRight().z) > 0.707f || fabs(attachedToEntityMatrix.GetForward().z) > 0.707f) { // 0.707 == sin(DegreesToRadians(45))
                         DettachEntityFromEntity(0.0f, 0.0f, 1.0f, false);
@@ -2308,7 +2309,7 @@ void CPhysical::PositionAttachedEntity()
                 }
                 bUpdateSpeed = true;
             }
-            else if (!pAttachedToAutmobile->m_wMiscComponentAngle && pAttachedToAutmobile->m_wMiscComponentAnglePrev
+            else if (!attachedToAuto->m_wMiscComponentAngle && attachedToAuto->m_wMiscComponentAnglePrev
                 || m_fDamageIntensity > 0.1f * m_fMass && m_pDamageEntity && m_pDamageEntity->m_nType  == ENTITY_TYPE_BUILDING) {
                 bDettachEntity = true;
             }
@@ -2326,17 +2327,17 @@ void CPhysical::PositionAttachedEntity()
     }
 
     if (!bUpdateSpeed) {
-        auto* pAttachedTo = m_pAttachedTo;
+        auto* attachedTo = m_pAttachedTo;
         DettachAutoAttachedEntity();
         if (!physicalFlags.bDisableCollisionForce) {
             float randomNumber = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
-            CMatrix& attachedToEntityMatrix = pAttachedTo->GetMatrix();
+            CMatrix& attachedToEntityMatrix = attachedTo->GetMatrix();
             CVector randomRight = attachedToEntityMatrix.GetRight() * randomNumber;
             CVector randomForward = attachedToEntityMatrix.GetForward() * randomNumber;
             CVector force = (randomRight + randomForward) * (m_fMass * 0.02f);
             ApplyMoveForce(force);
-            if (pAttachedToAutmobile->m_wMiscComponentAngle > pAttachedToAutmobile->m_wMiscComponentAnglePrev)
-                ApplyMoveForce(pAttachedTo->GetMatrix().GetUp() * m_fMass * 0.02f);
+            if (attachedToAuto->m_wMiscComponentAngle > attachedToAuto->m_wMiscComponentAnglePrev)
+                ApplyMoveForce(attachedTo->GetMatrix().GetUp() * m_fMass * 0.02f);
         }
         return;
     }

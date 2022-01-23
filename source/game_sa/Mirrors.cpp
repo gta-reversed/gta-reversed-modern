@@ -288,7 +288,7 @@ void CMirrors::BeforeConstructRenderList() {
     const auto TryUpdate = [] {
         // Check player is in heli/plane
         if (CVehicle* veh = FindPlayerVehicle()) {
-            if (veh->IsHeli() || veh->IsPlane())
+            if (veh->bIsSubclassHeli() || veh->bIsSubclassPlane())
                 return false;
         }
 

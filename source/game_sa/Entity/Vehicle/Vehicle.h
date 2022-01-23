@@ -637,28 +637,44 @@ public:
     static void SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha);
 
 public:
-    bool IsFakeAircraft() const { return m_vehicleSubType == VEHICLE_FHELI || m_vehicleSubType == VEHICLE_FPLANE; }
-    bool IsPlane() const { return m_vehicleSubType == VEHICLE_PLANE; }
-    bool IsHeli() const { return m_vehicleSubType == VEHICLE_HELI; }
-    bool IsVehicleTypeValid() const { return m_vehicleSubType != VEHICLE_IGNORE; }
-    bool IsBoat() const { return m_vehicleType == VEHICLE_BOAT; }
-    bool IsBike() const { return m_vehicleType == VEHICLE_BIKE; }
-    bool IsQuad() const { return m_vehicleType == VEHICLE_QUAD; }
-    bool IsAutomobile() const { return m_vehicleType == VEHICLE_AUTOMOBILE; }
-    bool IsTrain() const { return m_vehicleType == VEHICLE_TRAIN; }
-    bool IsMonsterTruck() const { return m_vehicleSubType == VEHICLE_MTRUCK; }
-    bool IsBMX() const { return m_vehicleSubType == VEHICLE_BMX; }
+    // m_vehicleType start
+    bool fIsVehicleTypeValid()     const { return m_vehicleType != VEHICLE_IGNORE; }
+    bool fIsAutomobile()           const { return m_vehicleType == VEHICLE_AUTOMOBILE; }
+    bool fIsMonsterTruck()         const { return m_vehicleType == VEHICLE_MTRUCK; }
+    bool fIsQuad()                 const { return m_vehicleType == VEHICLE_QUAD; }
+    bool fIsHeli()                 const { return m_vehicleType == VEHICLE_HELI; }
+    bool fIsPlane()                const { return m_vehicleType == VEHICLE_PLANE; }
+    bool fIsBoat()                 const { return m_vehicleType == VEHICLE_BOAT; }
+    bool fIsTrain()                const { return m_vehicleType == VEHICLE_TRAIN; }
+    bool fIsFakeAircraft()         const { return m_vehicleType == VEHICLE_FHELI || m_vehicleType == VEHICLE_FPLANE; }
+    bool fIsBike()                 const { return m_vehicleType == VEHICLE_BIKE; }
+    bool fIsBMX()                  const { return m_vehicleType == VEHICLE_BMX; }
+    bool fIsTrailer()              const { return m_vehicleType == VEHICLE_TRAILER; }
+    // m_vehicleType end
 
-    bool IsSubclassQuad() const { return m_vehicleSubType == VEHICLE_QUAD; }
-    bool IsSubclassAutomobile() const { return m_vehicleSubType == VEHICLE_AUTOMOBILE; }
+    // m_vehicleSubType start
+    bool bIsSubVehicleTypeValid()  const { return m_vehicleSubType != VEHICLE_IGNORE; }
+    bool bIsSubclassAutomobile()   const { return m_vehicleSubType == VEHICLE_AUTOMOBILE; }
+    bool bIsMonsterTruck()         const { return m_vehicleSubType == VEHICLE_MTRUCK; }
+    bool bIsSubclassQuad()         const { return m_vehicleSubType == VEHICLE_QUAD; }
+    bool bIsSubclassHeli()         const { return m_vehicleSubType == VEHICLE_HELI; }
+    bool bIsSubclassPlane()        const { return m_vehicleSubType == VEHICLE_PLANE; }
+    bool bIsSubclassBoat()         const { return m_vehicleSubType == VEHICLE_BOAT; }
+    bool bIsSubclassTrain()        const { return m_vehicleSubType == VEHICLE_TRAIN; }
+    bool bIsSubclassFakeAircraft() const { return m_vehicleSubType == VEHICLE_FHELI || m_vehicleSubType == VEHICLE_FPLANE; }
+    bool bIsSubclassBike()         const { return m_vehicleSubType == VEHICLE_BIKE; }
+    bool bIsSubclassBMX()          const { return m_vehicleSubType == VEHICLE_BMX; }
+    bool bIsSubclassTrailer()      const { return m_vehicleSubType == VEHICLE_TRAILER; }
 
-    bool IsTransportVehicle() const { return m_nModelIndex == MODEL_TAXI || m_nModelIndex == MODEL_CABBIE; }
-    bool IsAmphibiousHeli() const { return m_nModelIndex == MODEL_SEASPAR || m_nModelIndex == MODEL_LEVIATHN; }
-    bool IsConstructionVehicle() const { return  m_nModelIndex == MODEL_DUMPER || m_nModelIndex == MODEL_DOZER || m_nModelIndex == MODEL_FORKLIFT; }
-    bool IsRoadVehicle() const { return m_vehicleSubType != VEHICLE_HELI && m_vehicleSubType != VEHICLE_PLANE && m_vehicleSubType != VEHICLE_TRAIN; }
+    bool IsRoadVehicle()           const { return !bIsSubclassHeli() && !bIsSubclassPlane() && !bIsSubclassTrain(); }
+    // m_vehicleSubType end
 
-    inline eVehicleCreatedBy GetCreatedBy() { return m_nCreatedBy; }
-    inline bool IsCreatedBy(eVehicleCreatedBy v) { return v == m_nCreatedBy; }
+    bool IsTransportVehicle()    const { return m_nModelIndex == MODEL_TAXI    || m_nModelIndex == MODEL_CABBIE; }
+    bool IsAmphibiousHeli()      const { return m_nModelIndex == MODEL_SEASPAR || m_nModelIndex == MODEL_LEVIATHN; }
+    bool IsConstructionVehicle() const { return m_nModelIndex == MODEL_DUMPER  || m_nModelIndex == MODEL_DOZER || m_nModelIndex == MODEL_FORKLIFT; }
+
+    eVehicleCreatedBy GetCreatedBy()      { return m_nCreatedBy; }
+    bool IsCreatedBy(eVehicleCreatedBy v) { return v == m_nCreatedBy; }
 
     bool CanUpdateHornCounter() { return m_nAlarmState == 0 || m_nAlarmState == -1 || m_nStatus == STATUS_WRECKED; }
 

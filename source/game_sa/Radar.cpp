@@ -1211,7 +1211,7 @@ void CRadar::DrawMap()
         goto DRAW_RADAR;
     }
 
-    if (vehicle && vehicle->IsPlane() && ModelIndices::IsVortex(vehicle->m_nModelIndex)) {
+    if (vehicle && vehicle->bIsSubclassPlane() && ModelIndices::IsVortex(vehicle->m_nModelIndex)) {
         float speedZ = vehicle->GetPosition().z * 1.0f / 200.0f;
 
         if (speedZ < RADAR_MIN_SPEED)

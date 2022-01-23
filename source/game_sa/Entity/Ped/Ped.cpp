@@ -638,9 +638,9 @@ void CPed::ProcessBuoyancy()
 
     if (bIsStanding) {
         auto& pStandingOnEntity = m_pContactEntity;
-        if (pStandingOnEntity && pStandingOnEntity->m_nType == eEntityType::ENTITY_TYPE_VEHICLE) {
+        if (pStandingOnEntity && pStandingOnEntity->IsVehicle()) {
             auto pStandingOnVehicle = reinterpret_cast<CVehicle*>(pStandingOnEntity);
-            if (pStandingOnVehicle->IsBoat() && !pStandingOnVehicle->physicalFlags.bDestroyed) {
+            if (pStandingOnVehicle->fIsBoat() && !pStandingOnVehicle->physicalFlags.bDestroyed) {
                 physicalFlags.bSubmergedInWater = false;
                 auto pSwimTask = m_pIntelligence->GetTaskSwim();
                 if (!pSwimTask)
@@ -656,13 +656,13 @@ void CPed::ProcessBuoyancy()
         const auto& vecPedPos = GetPosition();
         float fCheckZ = vecPedPos.z - 3.0F;
         CColPoint lineColPoint;
-        CEntity* pColEntity;
-        if (CWorld::ProcessVerticalLine(vecPedPos, fCheckZ, lineColPoint, pColEntity, false, true, false, false, false, false, nullptr)) {
-            if (pColEntity->m_nType == eEntityType::ENTITY_TYPE_VEHICLE) {
-                auto pColVehicle = reinterpret_cast<CVehicle*>(pColEntity);
-                if (pColVehicle->IsBoat()
-                    && !pColVehicle->physicalFlags.bDestroyed
-                    && pColVehicle->GetMatrix().GetUp().z > 0.0F) {
+        CEntity* colEntity;
+        if (CWorld::ProcessVerticalLine(vecPedPos, fCheckZ, lineColPoint, colEntity, false, true, false, false, false, false, nullptr)) {
+            if (colEntity->IsVehicle()) {
+                auto colVehicle = reinterpret_cast<CVehicle*>(colEntity);
+                if (colVehicle->fIsBoat()
+                    && !colVehicle->physicalFlags.bDestroyed
+                    && colVehicle->GetMatrix().GetUp().z > 0.0F) {
 
                     physicalFlags.bSubmergedInWater = false;
                     return;
