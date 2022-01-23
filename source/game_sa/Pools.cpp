@@ -1,17 +1,26 @@
 #include "StdInc.h"
 
-CPool<CPed, CCopPed>*& CPools::ms_pPedPool = *(CPool<CPed, CCopPed>**)0xB74490;
-CPool<CVehicle, CHeli>*& CPools::ms_pVehiclePool = *(CPool<CVehicle, CHeli>**)0xB74494;
-CPool<CBuilding>*& CPools::ms_pBuildingPool = *(CPool<CBuilding>**)0xB74498;
-CPool<CObject, CCutsceneObject>*& CPools::ms_pObjectPool = *(CPool<CObject, CCutsceneObject>**)0xB7449C;
-CPool<CDummy>*& CPools::ms_pDummyPool = *(CPool<CDummy>**)0xB744A0;
-CPool<CColModel>*& CPools::ms_pColModelPool = *(CPool<CColModel>**)0xB744A4;
-CPool<CTask, CTaskSimpleSlideToCoord>*& CPools::ms_pTaskPool = *(CPool<CTask, CTaskSimpleSlideToCoord>**)0xB744A8;
-CPool<CPedIntelligence>*& CPools::ms_pPedIntelligencePool = *(CPool<CPedIntelligence>**)0xB744C0;
-CPool<CPtrNodeSingleLink>*& CPools::ms_pPtrNodeSingleLinkPool = *(CPool<CPtrNodeSingleLink>**)0xB74484;
-CPool<CPtrNodeDoubleLink>*& CPools::ms_pPtrNodeDoubleLinkPool = *(CPool<CPtrNodeDoubleLink>**)0xB74488;
-CPool<CEntryInfoNode>*& CPools::ms_pEntryInfoNodePool = *(CPool<CEntryInfoNode>**)0xB7448C;
-CPool<CPointRoute>*& CPools::ms_pPointRoutePool = *(CPool<CPointRoute>**)0xB744B0;
+#include "Pools.h"
+
+// #include "PointRoute.h"
+
+CPedPool*&               CPools::ms_pPedPool               = *(CPedPool**)0xB74490;
+CVehiclePool*&           CPools::ms_pVehiclePool           = *(CVehiclePool**)0xB74494;
+CBuildingPool*&          CPools::ms_pBuildingPool          = *(CBuildingPool**)0xB74498;
+CObjectPool*&            CPools::ms_pObjectPool            = *(CObjectPool**)0xB7449C;
+CDummyPool*&             CPools::ms_pDummyPool             = *(CDummyPool**)0xB744A0;
+CColModelPool*&          CPools::ms_pColModelPool          = *(CColModelPool**)0xB744A4;
+CTaskPool*&              CPools::ms_pTaskPool              = *(CTaskPool**)0xB744A8;
+CPedIntelligencePool*&   CPools::ms_pPedIntelligencePool   = *(CPedIntelligencePool**)0xB744C0;
+CPtrNodeSingleLinkPool*& CPools::ms_pPtrNodeSingleLinkPool = *(CPtrNodeSingleLinkPool**)0xB74484;
+CPtrNodeDoubleLinkPool*& CPools::ms_pPtrNodeDoubleLinkPool = *(CPtrNodeDoubleLinkPool**)0xB74488;
+CEntryInfoNodePool*&     CPools::ms_pEntryInfoNodePool     = *(CEntryInfoNodePool**)0xB7448C;
+CPointRoutePool*&        CPools::ms_pPointRoutePool        = *(CPointRoutePool**)0xB744B0;
+// CPatrolRoutePool*&       CPools::ms_pPatrolRoutePool       = *(CPatrolRoutePool**)0xB744B4;
+CEventPool*&             CPools::ms_pEventPool             = *(CEventPool**)0xB744AC;
+// CNodeRoutePool*&         CPools::ms_pNodeRoutePool         = *(CNodeRoutePool**)0xB744B8;
+CTaskAllocatorPool*&     CPools::ms_pTaskAllocatorPool     = *(CTaskAllocatorPool**)0xB744BC;
+// CPedAttractorPool*&      CPools::ms_pPedAttractorPool      = *(CPedAttractorPool**)0xB744C4;
 
 void CPools::InjectHooks()
 {
