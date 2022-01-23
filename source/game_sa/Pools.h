@@ -71,4 +71,7 @@ public:
     // returns "true"
     static bool SaveVehiclePool();
     static void ShutDown();
+
+    // NOTSA
+    static auto GetVehiclePool() { return ms_pVehiclePool; }
 };
