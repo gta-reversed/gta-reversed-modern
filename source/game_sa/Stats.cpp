@@ -33,57 +33,58 @@ uint32& CStats::m_DeathCounter = *(uint32*)0xB79508;
 uint32& CStats::m_MaxHealthCounter = *(uint32*)0xB7950C;
 uint32& CStats::m_AddToHealthCounter = *(uint32*)0xB79510;
 uint32& CStats::m_LastWeaponTypeFired = *(uint32*)0xB79514;
+bool& CStats::bShowUpdateStats = *(bool*)0x8CDE56;
 
 void CStats::InjectHooks() {
-    ReversibleHooks::Install("CStats", "Init", 0x55C0C0, &CStats::Init);
-    ReversibleHooks::Install("CStats", "GetStatValue", 0x558E40, &CStats::GetStatValue);
-    ReversibleHooks::Install("CStats", "SetStatValue", 0x55A070, &CStats::SetStatValue);
-    ReversibleHooks::Install("CStats", "GetStatType", 0x558E30, &CStats::GetStatType);
-    ReversibleHooks::Install("CStats", "GetFullFavoriteRadioStationList", 0x558F90, &CStats::GetFullFavoriteRadioStationList);
-    ReversibleHooks::Install("CStats", "FindCriminalRatingNumber", 0x559080, &CStats::FindCriminalRatingNumber);
-    ReversibleHooks::Install("CStats", "GetPercentageProgress", 0x5591E0, &CStats::GetPercentageProgress);
-    ReversibleHooks::Install("CStats", "ConvertToMins", 0x559540, &CStats::ConvertToMins);
-    ReversibleHooks::Install("CStats", "ConvertToSecs", 0x559560, &CStats::ConvertToSecs);
-    ReversibleHooks::Install("CStats", "SafeToShowThisStat", 0x559590, &CStats::SafeToShowThisStat);
-    ReversibleHooks::Install("CStats", "CheckForThreshold", 0x5595F0, &CStats::CheckForThreshold);
-    ReversibleHooks::Install("CStats", "IsStatCapped", 0x559630, &CStats::IsStatCapped);
-    ReversibleHooks::Install("CStats", "LoadActionReactionStats", 0x5599B0, &CStats::LoadActionReactionStats);
-    // ReversibleHooks::Install("CStats", "FindMaxNumberOfGroupMembers", 0x559A50, &CStats::FindMaxNumberOfGroupMembers);
-    ReversibleHooks::Install("CStats", "ProcessReactionStatsOnDecrement", 0x559730, &CStats::ProcessReactionStatsOnDecrement);
-    ReversibleHooks::Install("CStats", "DecrementStat", 0x559FA0, &CStats::DecrementStat);
-    ReversibleHooks::Install("CStats", "SetNewRecordStat", 0x55C410, &CStats::SetNewRecordStat);
-    ReversibleHooks::Install("CStats", "RegisterFastestTime", 0x55A0B0, &CStats::RegisterFastestTime);
-    ReversibleHooks::Install("CStats", "RegisterBestPosition", 0x55A160, &CStats::RegisterBestPosition);
-    ReversibleHooks::Install("CStats", "ProcessReactionStatsOnIncrement", 0x55B900, &CStats::ProcessReactionStatsOnIncrement);
-    ReversibleHooks::Install("CStats", "IncrementStat", 0x55C180, &CStats::IncrementStat);
-    ReversibleHooks::Install("CStats", "UpdateStatsWhenSprinting", 0x55C660, &CStats::UpdateStatsWhenSprinting);
-    ReversibleHooks::Install("CStats", "UpdateStatsWhenRunning", 0x55C6F0, &CStats::UpdateStatsWhenRunning);
-    ReversibleHooks::Install("CStats", "UpdateStatsWhenOnMotorBike", 0x55CD60, &CStats::UpdateStatsWhenOnMotorBike);
-    ReversibleHooks::Install("CStats", "UpdateStatsWhenFighting", 0x55CFA0, &CStats::UpdateStatsWhenFighting);
-    ReversibleHooks::Install("CStats", "ModifyStat", 0x55D090, &CStats::ModifyStat);
+    using namespace ReversibleHooks;
+    Install("CStats", "Init", 0x55C0C0, &CStats::Init);
+    Install("CStats", "GetStatValue", 0x558E40, &CStats::GetStatValue);
+    Install("CStats", "SetStatValue", 0x55A070, &CStats::SetStatValue);
+    Install("CStats", "GetStatType", 0x558E30, &CStats::GetStatType);
+    Install("CStats", "GetFullFavoriteRadioStationList", 0x558F90, &CStats::GetFullFavoriteRadioStationList);
+    Install("CStats", "FindCriminalRatingNumber", 0x559080, &CStats::FindCriminalRatingNumber);
+    Install("CStats", "GetPercentageProgress", 0x5591E0, &CStats::GetPercentageProgress);
+    Install("CStats", "ConvertToMins", 0x559540, &CStats::ConvertToMins);
+    Install("CStats", "ConvertToSecs", 0x559560, &CStats::ConvertToSecs);
+    Install("CStats", "SafeToShowThisStat", 0x559590, &CStats::SafeToShowThisStat);
+    Install("CStats", "CheckForThreshold", 0x5595F0, &CStats::CheckForThreshold);
+    Install("CStats", "IsStatCapped", 0x559630, &CStats::IsStatCapped);
+    Install("CStats", "LoadActionReactionStats", 0x5599B0, &CStats::LoadActionReactionStats);
+    Install("CStats", "FindMaxNumberOfGroupMembers", 0x559A50, &CStats::FindMaxNumberOfGroupMembers);
+    Install("CStats", "ProcessReactionStatsOnDecrement", 0x559730, &CStats::ProcessReactionStatsOnDecrement);
+    Install("CStats", "DecrementStat", 0x559FA0, &CStats::DecrementStat);
+    Install("CStats", "SetNewRecordStat", 0x55C410, &CStats::SetNewRecordStat);
+    Install("CStats", "RegisterFastestTime", 0x55A0B0, &CStats::RegisterFastestTime);
+    Install("CStats", "RegisterBestPosition", 0x55A160, &CStats::RegisterBestPosition);
+    Install("CStats", "ProcessReactionStatsOnIncrement", 0x55B900, &CStats::ProcessReactionStatsOnIncrement);
+    Install("CStats", "DisplayScriptStatUpdateMessage", 0x55B980, &CStats::DisplayScriptStatUpdateMessage);
+    Install("CStats", "IncrementStat", 0x55C180, &CStats::IncrementStat);
+    Install("CStats", "UpdateStatsWhenSprinting", 0x55C660, &CStats::UpdateStatsWhenSprinting);
+    Install("CStats", "UpdateStatsWhenRunning", 0x55C6F0, &CStats::UpdateStatsWhenRunning);
+    Install("CStats", "UpdateStatsWhenOnMotorBike", 0x55CD60, &CStats::UpdateStatsWhenOnMotorBike);
+    Install("CStats", "UpdateStatsWhenFighting", 0x55CFA0, &CStats::UpdateStatsWhenFighting);
+    Install("CStats", "ModifyStat", 0x55D090, &CStats::ModifyStat);
 
     // unused
-    ReversibleHooks::Install("CStats", "GetStatID", 0x558DE0, &CStats::GetStatID);
-    ReversibleHooks::Install("CStats", "GetTimesMissionAttempted", 0x558E70, &CStats::GetTimesMissionAttempted);
-    ReversibleHooks::Install("CStats", "RegisterMissionAttempted", 0x558E80, &CStats::RegisterMissionAttempted);
-    ReversibleHooks::Install("CStats", "RegisterMissionPassed", 0x558EA0, &CStats::RegisterMissionPassed);
+    Install("CStats", "GetStatID", 0x558DE0, &CStats::GetStatID);
+    Install("CStats", "GetTimesMissionAttempted", 0x558E70, &CStats::GetTimesMissionAttempted);
+    Install("CStats", "RegisterMissionAttempted", 0x558E80, &CStats::RegisterMissionAttempted);
+    Install("CStats", "RegisterMissionPassed", 0x558EA0, &CStats::RegisterMissionPassed);
 
-    ReversibleHooks::Install("CStats", "Save", 0x5D3B40, &CStats::Save);
-    ReversibleHooks::Install("CStats", "Load", 0x5D3BF0, &CStats::Load);
+    Install("CStats", "Load", 0x5D3BF0, &CStats::Load);
+    Install("CStats", "Save", 0x5D3B40, &CStats::Save);
 }
 
 // 0x55C0C0
 void CStats::Init() {
-    memset(StatTypesFloat, 0, sizeof(StatTypesFloat));
-    memset(StatTypesInt, 0, sizeof(StatTypesInt));
-    memset(PedsKilledOfThisType, 0, sizeof(PedsKilledOfThisType));
-    memset(TimesMissionAttempted, 0, sizeof(TimesMissionAttempted));
+    std::ranges::fill(StatTypesFloat, 0.0f);
+    std::ranges::fill(StatTypesInt, 0);
+    std::ranges::fill(PedsKilledOfThisType, 0);
+    std::ranges::fill(TimesMissionAttempted, 0);
 
     bStatUpdateMessageDisplayed = false;
     CTimer::SetTimeInMS(0);
-    for (int32 i = 0; i < 8; i++) {
-        LastMissionPassedName[i] = '\0';
-    }
+    std::ranges::fill(LastMissionPassedName, 0);
     m_SprintStaminaCounter = 0;
     m_CycleStaminaCounter = 0;
     m_SwimStaminaCounter = 0;
@@ -217,17 +218,17 @@ bool CStats::SafeToShowThisStat(eStats stat) {
     }
 
     switch (stat) {
-        case STAT_RAMPAGES_ATTEMPTED:
-        case STAT_RAMPAGES_PASSED:
-        case STAT_TOTAL_LEGITIMATE_KILLS:
-        case STAT_HIGHEST_CIVILIAN_PEDS_KILLED_ON_RAMPAGE:
-        case STAT_HIGHEST_POLICE_PEDS_KILLED_ON_RAMPAGE:
-        case STAT_HIGHEST_CIVILIAN_VEHICLES_DESTROYED_ON_RAMPAGE:
-        case STAT_HIGHEST_POLICE_VEHICLES_DESTROYED_ON_RAMPAGE:
-        case STAT_HIGHEST_NUMBER_OF_TANKS_DESTROYED_ON_RAMPAGE:
-            return false;
-        default:
-            return true;
+    case STAT_RAMPAGES_ATTEMPTED:
+    case STAT_RAMPAGES_PASSED:
+    case STAT_TOTAL_LEGITIMATE_KILLS:
+    case STAT_HIGHEST_CIVILIAN_PEDS_KILLED_ON_RAMPAGE:
+    case STAT_HIGHEST_POLICE_PEDS_KILLED_ON_RAMPAGE:
+    case STAT_HIGHEST_CIVILIAN_VEHICLES_DESTROYED_ON_RAMPAGE:
+    case STAT_HIGHEST_POLICE_VEHICLES_DESTROYED_ON_RAMPAGE:
+    case STAT_HIGHEST_NUMBER_OF_TANKS_DESTROYED_ON_RAMPAGE:
+        return false;
+    default:
+        return true;
     }
 }
 
@@ -406,7 +407,83 @@ void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
 
 // 0x55B980
 void CStats::DisplayScriptStatUpdateMessage(uint8 state, eStats stat, float value) {
-    plugin::Call<0x55B980, uint8, eStats, float>(state, stat, value);
+    if (CPad::GetPad(0)->JustOutOfFrontEnd
+        || !bShowUpdateStats
+        || TheCamera.m_bWideScreenOn
+        || CHud::HelpMessageDisplayed()
+        || bStatUpdateMessageDisplayed
+        || CMenuSystem::num_menus_in_use)
+    {
+        bStatUpdateMessageDisplayed = false;
+
+        return;
+    }
+
+    if (IsStatCapped(stat) && GetStatValue(stat) >= 1000.0f)
+        return;
+
+    switch (stat) {
+    case STAT_FAT:
+    case STAT_STAMINA:
+    case STAT_MUSCLE:
+    case STAT_MAX_HEALTH:
+    case STAT_SEX_APPEAL:
+    case STAT_PISTOL_SKILL:
+    case STAT_SILENCED_PISTOL_SKILL:
+    case STAT_DESERT_EAGLE_SKILL:
+    case STAT_SHOTGUN_SKILL:
+    case STAT_SAWN_OFF_SHOTGUN_SKILL:
+    case STAT_COMBAT_SHOTGUN_SKILL:
+    case STAT_MACHINE_PISTOL_SKILL:
+    case STAT_SMG_SKILL:
+    case STAT_AK_47_SKILL:
+    case STAT_M4_SKILL:
+    case STAT_RIFLE_SKILL:
+    case STAT_GAMBLING:
+    case STAT_DRIVING_SKILL:
+    case STAT_ARMOR:
+    case STAT_ENERGY:
+        if (value > 1.0f)
+            CHud::SetHelpMessageStatUpdate(state, stat, value, 1000.0f);
+        break;
+
+    case STAT_TOTAL_RESPECT:
+        CHud::SetHelpMessageStatUpdate(state, stat, value, 1000.0f);
+        break;
+
+    case STAT_FLYING_SKILL:
+    case STAT_LUNG_CAPACITY:
+    case STAT_BIKE_SKILL:
+    case STAT_CYCLING_SKILL:
+    case STAT_LUCK:
+        if (value > 1.0f)
+            CHud::SetHelpMessageStatUpdate(state, stat, value, 1000.0f);
+        break;
+
+    case STAT_PROGRESS_WITH_DENISE:
+    case STAT_PROGRESS_WITH_MICHELLE:
+    case STAT_PROGRESS_WITH_HELENA:
+    case STAT_PROGRESS_WITH_BARBARA:
+    case STAT_PROGRESS_WITH_KATIE:
+    case STAT_PROGRESS_WITH_MILLIE:
+        CHud::SetHelpMessageStatUpdate(state, stat, value, 100.0f);
+        break;
+
+    case STAT_PIMPING_LEVEL:
+        CHud::SetHelpMessageStatUpdate(state, STAT_PIMPING_LEVEL, value, 10.0f);
+        break;
+
+    case STAT_GANG_STRENGTH: {
+        if (auto player = FindPlayerPed())
+        {
+            auto maxGroup = std::min<uint8>(FindMaxNumberOfGroupMembers(), player->m_pPlayerData->m_nScriptLimitToGangSize);
+            CHud::SetHelpMessageStatUpdate(state, stat, value, maxGroup);
+        }
+        break;
+    }
+    default:
+        return;
+    }
 }
 
 // 0x55BC50
