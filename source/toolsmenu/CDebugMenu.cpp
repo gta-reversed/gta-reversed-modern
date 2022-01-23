@@ -20,6 +20,7 @@
 #include "toolsmenu\DebugModules\Audio\AmbienceTrackManagerDebugModule.h"
 #include "toolsmenu\DebugModules\CStreamingDebugModule.h"
 #include "toolsmenu\DebugModules\CPickupsDebugModule.h"
+#include "GrassRenderer.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -225,6 +226,8 @@ void CDebugMenu::ProcessRenderTool() {
     if (ImGui::CollapsingHeader("Collision")) {
         CollisionDebugModule::ProcessImgui();
     }
+    ImGui::SliderFloat("Close Dist", &CGrassRenderer::m_closeDist, 0.0f, 255.0f);
+    ImGui::SliderFloat("Far Dist", &CGrassRenderer::m_farDist, 0.0f, 255.0f);
 }
 
 // TODO: The code is a mess, clean it up

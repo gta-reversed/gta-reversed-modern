@@ -63,6 +63,8 @@
 #include "FireManager.h"
 #include "Skidmarks.h"
 #include "CarCtrl.h"
+#include "GrassRenderer.h"
+#include "PPTriPlantBuffer.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -176,6 +178,8 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CGrassRenderer::InjectHooks();
+    CPPTriPlantBuffer::InjectHooks();
     CGenericGameStorage::InjectHooks();
     C_PcSave::InjectHooks();
     CFileLoader::InjectHooks();
