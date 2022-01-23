@@ -28,11 +28,13 @@ void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 max
     for (auto i = 0; i < 4; i++)
         storedCars[i].Clear();
 
+
+    auto storedCarIdx{0u};
     for (auto i = vehPool->GetSize(); i; i--) {
         if (auto veh = vehPool->GetAt(i - 1)) {
             if (IsPointInsideGarage(veh->GetPosition()) && veh->m_nCreatedBy != MISSION_VEHICLE) {
-                if (vehIdx < maxSlot && !EntityHasASphereWayOutsideGarage(veh, 1.0f)) {
-                    storedCars[vehIdx++].StoreCar(veh);
+                if (storedCarIdx < maxSlot && !EntityHasASphereWayOutsideGarage(veh, 1.0f)) {
+                    storedCars[storedCarIdx++].StoreCar(veh);
                 }
 
                 FindPlayerInfo().CancelPlayerEnteringCars(veh);
@@ -43,8 +45,10 @@ void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 max
         }
     }
 
-    for (i = vehIdx; i < 4; i++)
+    // Clear slots with no vehicles in it
+    for (auto i = storedCarIdx; i < 4; i++) {
         storedCars[i].Clear();
+    }
 }
 
 // 0x449050
