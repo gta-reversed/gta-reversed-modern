@@ -460,12 +460,13 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
     // We've modified the loop condition a little. R* went backwards, and checked if the remaning buffer size is > 8.
     auto fileTotalSize{ 0u };
     for (auto buffIt = buff; buffIt < buff + buffSize; buffIt += fileTotalSize) {
-        assert(sizeof(FileHeader) <= (buffIt - buff) && "Not enough data in buffer for col file header");
+        const auto bufferRemainingSize = buffSize - (buffIt - buff);
+        assert(sizeof(FileHeader) <= bufferRemainingSize && "Not enough data in buffer for col file header"); // NOTSA
 
-        auto header = *reinterpret_cast<FileHeader*>(buffIt); // Important to make a copy here
+        auto& header = *reinterpret_cast<FileHeader*>(buffIt);
         fileTotalSize = header.GetTotalSize();
 
-        assert(fileTotalSize <= (buffIt - buff) && "Not enough data in buffer for col data");
+        assert(fileTotalSize <= bufferRemainingSize && "Not enough data in buffer for col data"); // NOTSA
 
         if (!header.IsValid()) {
             return true; // Totally OK - At this point there are no collision files left in the buffer
@@ -538,12 +539,13 @@ bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8
 
     auto fileTotalSize{0u};
     for (auto buffIt = buff; buffIt < buff + buffSize; buffIt += fileTotalSize) {
-        assert(sizeof(FileHeader) <= (buffIt - buff) && "Not enough data in buffer for col file header");
+        const auto bufferRemainingSize = buffSize - (buffIt - buff);
+        assert(sizeof(FileHeader) <= bufferRemainingSize && "Not enough data in buffer for col file header"); // NOTSA
 
-        auto h = *reinterpret_cast<FileHeader*>(buffIt); // Important to make a copy here
+        auto& h = *reinterpret_cast<FileHeader*>(buffIt);
         fileTotalSize = h.GetTotalSize();
 
-        assert(fileTotalSize <= (buffIt - buff) && "Not enough data in buffer for col data");
+        assert(fileTotalSize <= bufferRemainingSize && "Not enough data in buffer for col data"); // NOTSA
 
         if (!h.IsValid()) {
             return true; // Finished reading all data, but there's some padding left.
