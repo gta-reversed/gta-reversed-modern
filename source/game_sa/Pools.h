@@ -50,23 +50,23 @@ typedef CPool<CTaskAllocator>                 CTaskAllocatorPool;
 
 class CPools {
 public:
-    static CPedPool*&               ms_pPedPool;
-    static CVehiclePool*&           ms_pVehiclePool;
-    static CBuildingPool*&          ms_pBuildingPool;
-    static CObjectPool*&            ms_pObjectPool;
-    static CDummyPool*&             ms_pDummyPool;
-    static CColModelPool*&          ms_pColModelPool;
-    static CTaskPool*&              ms_pTaskPool;
-    static CPedIntelligencePool*&   ms_pPedIntelligencePool;
-    static CPtrNodeSingleLinkPool*& ms_pPtrNodeSingleLinkPool;
-    static CPtrNodeDoubleLinkPool*& ms_pPtrNodeDoubleLinkPool;
-    static CEntryInfoNodePool*&     ms_pEntryInfoNodePool;
-    static CPointRoutePool*&        ms_pPointRoutePool;
-    // static CPatrolRoutePool*&       ms_pPatrolRoutePool;
-    static CEventPool*&             ms_pEventPool;
-    // static CNodeRoutePool*&         ms_pNodeRoutePool;
-    static CTaskAllocatorPool*&     ms_pTaskAllocatorPool;
-    // static CPedAttractorPool*&      ms_pPedAttractorPool;
+    static inline CPedPool*&               ms_pPedPool               = *(CPedPool**)0xB74490;
+    static inline CVehiclePool*&           ms_pVehiclePool           = *(CVehiclePool**)0xB74494;
+    static inline CBuildingPool*&          ms_pBuildingPool          = *(CBuildingPool**)0xB74498;
+    static inline CObjectPool*&            ms_pObjectPool            = *(CObjectPool**)0xB7449C;
+    static inline CDummyPool*&             ms_pDummyPool             = *(CDummyPool**)0xB744A0;
+    static inline CColModelPool*&          ms_pColModelPool          = *(CColModelPool**)0xB744A4;
+    static inline CTaskPool*&              ms_pTaskPool              = *(CTaskPool**)0xB744A8;
+    static inline CPedIntelligencePool*&   ms_pPedIntelligencePool   = *(CPedIntelligencePool**)0xB744C0;
+    static inline CPtrNodeSingleLinkPool*& ms_pPtrNodeSingleLinkPool = *(CPtrNodeSingleLinkPool**)0xB74484;
+    static inline CPtrNodeDoubleLinkPool*& ms_pPtrNodeDoubleLinkPool = *(CPtrNodeDoubleLinkPool**)0xB74488;
+    static inline CEntryInfoNodePool*&     ms_pEntryInfoNodePool     = *(CEntryInfoNodePool**)0xB7448C;
+    static inline CPointRoutePool*&        ms_pPointRoutePool        = *(CPointRoutePool**)0xB744B0;
+    //static inline CPatrolRoutePool*&       ms_pPatrolRoutePool       = *(CPatrolRoutePool**)0xB744B4;
+    static inline CEventPool*&             ms_pEventPool             = *(CEventPool**)0xB744AC;
+    //static inline CNodeRoutePool*&         ms_pNodeRoutePool         = *(CNodeRoutePool**)0xB744B8;
+    static inline CTaskAllocatorPool*&     ms_pTaskAllocatorPool     = *(CTaskAllocatorPool**)0xB744BC;
+    //static inline CPedAttractorPool*&      ms_pPedAttractorPool      = *(CPedAttractorPool**)0xB744C4;
 
 public:
     static void InjectHooks();
