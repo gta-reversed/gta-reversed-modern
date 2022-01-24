@@ -99,7 +99,7 @@ target_compile_definitions(gta_reversed PRIVATE
     USE_GTASA_ALLOCATOR
     EXTRA_DEBUG_FEATURES
 )
-target_compile_features(gta_reversed PRIVATE cxx_std_20)
+target_compile_features(gta_reversed PRIVATE cxx_std_23)
 
 foreach(_header IN ITEMS ${_headerfiles_list})
     get_filename_component(_header_path "${_header}" PATH)

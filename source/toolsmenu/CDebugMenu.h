@@ -37,5 +37,3 @@ private:
     //static void ToggleHook();
     static void LoadMouseSprite();
 };
-
-bool findStringCaseInsensitive(const std::string& strHaystack, const std::string& strNeedle);

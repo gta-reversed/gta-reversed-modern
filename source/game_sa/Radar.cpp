@@ -807,7 +807,7 @@ void CRadar::SetBlipEntryExit(int32 blipIndex, CEntryExit* enex)
     if (index == -1)
         return;
 
-    if (!ms_RadarTrace[index].m_bTrackingBlip)
+    if (ms_RadarTrace[index].m_bTrackingBlip)
         ms_RadarTrace[index].m_pEntryExit = enex;
 }
 

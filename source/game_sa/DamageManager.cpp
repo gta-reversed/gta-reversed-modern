@@ -92,7 +92,7 @@ bool CDamageManager::ApplyDamage(CAutomobile* vehicle, tComponent compId, float 
     }
     case tComponentGroup::COMPGROUP_WHEEL: {
         ProgressWheelDamage((eCarWheel)relCompIdx);
-        break;
+        return true;
     }
     case tComponentGroup::COMPGROUP_DOOR:
     case tComponentGroup::COMPGROUP_BONNET:
@@ -117,6 +117,7 @@ bool CDamageManager::ProgressAeroplaneDamage(uint8 nFrameId) {
     const auto current = (ePanelDamageState)GetAeroplaneCompStatus(nFrameId);
     if (current == ePanelDamageState::DAMSTATE_DAMAGED)
         return false;
+
     SetAeroplaneCompStatus(nFrameId, (ePanelDamageState)((unsigned)current + 1));
     return true;
 }
@@ -126,7 +127,9 @@ bool CDamageManager::ProgressWheelDamage(eCarWheel wheel) {
     const eCarWheelStatus current = GetWheelStatus(wheel);
     if (current == eCarWheelStatus::WHEEL_STATUS_MISSING)
         return false;
+
     SetWheelStatus(wheel, (eCarWheelStatus)((unsigned)current + 1));
+    return true;
 }
 
 // 0x6C23C0
