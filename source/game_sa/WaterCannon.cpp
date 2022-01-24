@@ -2,8 +2,7 @@
 
 #include "WaterCannon.h"
 #include "FireManager.h"
-
-RxVertexIndex (&CWaterCannon::m_auRenderIndices)[18] = *(RxVertexIndex (*)[18])0xC80700;
+#include <ranges>
 
 void CWaterCannon::InjectHooks() {
     ReversibleHooks::Install("CWaterCannon", "Constructor", 0x728B10, &CWaterCannon::Constructor);
@@ -40,32 +39,7 @@ void CWaterCannon::Init() {
     m_nId = 0;
     m_nSectionsCount = 0;
     m_nCreationTime = CTimer::GetTimeInMS();
-    m_anSectionState[0] = '\0';
-
-    m_auRenderIndices[0] = 0;
-    m_auRenderIndices[1] = 1;
-    m_auRenderIndices[2] = 2;
-
-    m_auRenderIndices[3] = 1;
-    m_auRenderIndices[4] = 3;
-    m_auRenderIndices[5] = 2;
-
-    m_auRenderIndices[6] = 4;
-    m_auRenderIndices[7] = 5;
-    m_auRenderIndices[8] = 6;
-
-    m_auRenderIndices[9] = 5;
-    m_auRenderIndices[10] = 7;
-    m_auRenderIndices[11] = 6;
-
-    m_auRenderIndices[12] = 8;
-    m_auRenderIndices[13] = 9;
-    m_auRenderIndices[14] = 10;
-
-    m_auRenderIndices[15] = 9;
-    m_auRenderIndices[16] = 11;
-    m_auRenderIndices[17] = 10;
-
+    std::ranges::fill(m_anSectionState, false);
     m_audio.Initialise(this);
 }
 
