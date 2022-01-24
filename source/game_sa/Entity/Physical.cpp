@@ -268,7 +268,7 @@ void CPhysical::ProcessCollision_Reversed()
             CColPoint* pWheelsColPoints = nullptr;
             float* pfWheelsSuspensionCompression = nullptr;
             CVector* pWheelsCollisionPositions = nullptr;
-            if (vehicle->m_vehicleSubType) {
+            if (vehicle->m_nVehicleSubType) { // todo: izzotop 24012022
                 bike->m_apWheelCollisionEntity[0] = nullptr; // todo: enum
                 bike->m_apWheelCollisionEntity[1] = nullptr;
                 bike->m_apWheelCollisionEntity[2] = nullptr;
@@ -393,7 +393,7 @@ void CPhysical::ProcessCollision_Reversed()
                     return;
                 }
                 if (m_nType == ENTITY_TYPE_VEHICLE) {
-                    if (vehicle->m_vehicleType) {
+                    if (vehicle->m_nVehicleType) { // todo: izzotop 24012022
                         if (vehicle->IsBike()) {
                             bike->m_fWheelsSuspensionCompression[0] = 1.0f; // todo: enum
                             bike->m_fWheelsSuspensionCompression[1] = 1.0f;
@@ -1099,7 +1099,7 @@ bool CPhysical::ApplySoftCollision(CEntity* entity, CColPoint& colPoint, float& 
     float fSquaredMagnitude = vecMoveDirection.SquaredMagnitude();
     float fCollisionMass = 1.0f / (fSquaredMagnitude / m_fTurnMass + 1.0f / m_fMass);
 
-    if (m_nType != ENTITY_TYPE_VEHICLE || thisVehicle->m_vehicleSubType
+    if (m_nType != ENTITY_TYPE_VEHICLE || thisVehicle->m_nVehicleSubType // todo: izzotop 24012022
         || colPoint.m_nPieceTypeA < 13u || colPoint.m_nPieceTypeA > 16u)
     {
         float fDepth = SOFTCOL_DEPTH_MIN;
@@ -1464,8 +1464,8 @@ void CPhysical::ApplyAirResistance()
         {
             if (m_nType == ENTITY_TYPE_VEHICLE)
             {
-                auto* vehicle = static_cast<CVehicle*>(this);
-                if (!vehicle->m_vehicleSubType || vehicle->IsSubBike())
+                CVehicle* vehicle = this->AsVehicle();
+                if (!vehicle->m_nVehicleSubType || vehicle->IsSubBike()) // todo: izzotop 24012022
                     fSpeedMagnitude = CVehicle::m_fAirResistanceMult * fSpeedMagnitude;
             }
         }
@@ -1557,10 +1557,10 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* entity, CColPoint& colPoint, float&
     {
         if (m_nType == ENTITY_TYPE_VEHICLE && !physicalFlags.bSubmergedInWater) {
             float fMoveSpeedLimitMultiplier = 0.0f;
-            uint32 vehicleClass = vehicle->m_vehicleType;
-            if (vehicleClass != VEHICLE_BIKE || (m_nStatus != STATUS_ABANDONED) && m_nStatus != STATUS_WRECKED)
+            uint32 vehicleClass = vehicle->m_nVehicleType; // todo: izzotop 24012022
+            if (vehicleClass != VEHICLE_TYPE_BIKE || (m_nStatus != STATUS_ABANDONED) && m_nStatus != STATUS_WRECKED)
             {
-                if (vehicleClass == VEHICLE_BOAT)
+                if (vehicleClass == VEHICLE_TYPE_BOAT)
                 {
                     fMoveSpeedLimitMultiplier = 1.5f;
                     entityAltCol = ALT_ENITY_COL_BOAT;
@@ -4223,7 +4223,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                                             }
                                         }
 
-                                        if (thisVehicle->m_vehicleSubType != VEHICLE_TRAIN) {
+                                        if (!thisVehicle->IsTrain()) {
                                             if (m_nStatus == STATUS_WRECKED) {
                                                 fFriction *= 3.0f;
                                             } else {

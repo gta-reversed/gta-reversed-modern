@@ -243,7 +243,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
     if (doMissionCleanup)
         CTheScripts::MissionCleanUp.AddEntityToList(CPools::ms_pVehiclePool->GetRef(vehicle), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
 
-    if (vehicle->IsRoadVehicle())
+    if (vehicle->IsSubRoadVehicle())
         vehicle->m_autoPilot.movementFlags.bIsStopped = true;
 
     return vehicle;
@@ -398,25 +398,25 @@ CVehicle* CCarCtrl::GetNewVehicleDependingOnCarModel(int32 modelId, uint8 create
     return plugin::CallAndReturn<CVehicle*, 0x421440, int32, uint8>(modelId, createdBy);
     /*
     switch (CModelInfo::GetModelInfo(modelId)->AsVehicleModelInfoPtr()->m_nVehicleType) {
-    case eVehicleType::VEHICLE_MTRUCK:
+    case VEHICLE_TYPE_MTRUCK:
         return new CMonsterTruck(modelId, createdBy);
-    case eVehicleType::VEHICLE_QUAD:
+    case VEHICLE_TYPE_QUAD:
         return new CQuadBike(modelId, createdBy);
-    case eVehicleType::VEHICLE_HELI:
+    case VEHICLE_TYPE_HELI:
         return new CHeli(modelId, createdBy);
-    case eVehicleType::VEHICLE_PLANE:
+    case VEHICLE_TYPE_PLANE:
         return new CPlane(modelId, createdBy);
-    case eVehicleType::VEHICLE_BOAT:
+    case VEHICLE_TYPE_BOAT:
         return new CBoat(modelId, createdBy);
-    case eVehicleType::VEHICLE_TRAIN:
+    case VEHICLE_TYPE_TRAIN:
         return new CTrain(modelId, createdBy);
-    case eVehicleType::VEHICLE_BIKE:
+    case VEHICLE_TYPE_BIKE:
         return new CBike(modelId, createdBy);
-    case eVehicleType::VEHICLE_BMX:
+    case VEHICLE_TYPE_BMX:
         return new CBmx(modelId, createdBy);
-    case eVehicleType::VEHICLE_TRAILER:
+    case VEHICLE_TYPE_TRAILER:
         return new CTrailer(modelId, createdBy);
-    case eVehicleType::VEHICLE_AUTOMOBILE:
+    case VEHICLE_TYPE_AUTOMOBILE:
         return new CAutomobile(modelId, createdBy, 1);
     }
     return nullptr;

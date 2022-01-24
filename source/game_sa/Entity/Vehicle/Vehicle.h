@@ -363,13 +363,13 @@ public:
             uint8 m_bLeftRear : 1;
         } m_renderLights;
     };
-    RwTexture* m_pCustomCarPlate;
-    float      m_fRawSteerAngle;
-    uint32     m_vehicleType; // see enum eVehicleType
-    uint32     m_vehicleSubType;
-    int16      m_nPreviousRemapTxd;
-    int16      m_nRemapTxd;
-    RwTexture* m_pRemapTexture;
+    RwTexture*   m_pCustomCarPlate;
+    float        m_fRawSteerAngle;
+    eVehicleType m_nVehicleType;
+    eVehicleType m_nVehicleSubType;
+    int16        m_nPreviousRemapTxd;
+    int16        m_nRemapTxd;
+    RwTexture*   m_pRemapTexture;
 
     static float &WHEELSPIN_TARGET_RATE; // 1.0
     static float &WHEELSPIN_INAIR_TARGET_RATE; // 10.0
@@ -638,35 +638,35 @@ public:
 
 public:
     // m_vehicleType start
-    bool IsVehicleTypeValid()     const { return m_vehicleType != VEHICLE_IGNORE; }
-    bool IsAutomobile()           const { return m_vehicleType == VEHICLE_AUTOMOBILE; }
-    bool IsMonsterTruck()         const { return m_vehicleType == VEHICLE_MTRUCK; }
-    bool IsQuad()                 const { return m_vehicleType == VEHICLE_QUAD; }
-    bool IsHeli()                 const { return m_vehicleType == VEHICLE_HELI; }
-    bool IsPlane()                const { return m_vehicleType == VEHICLE_PLANE; }
-    bool IsBoat()                 const { return m_vehicleType == VEHICLE_BOAT; }
-    bool IsTrain()                const { return m_vehicleType == VEHICLE_TRAIN; }
-    bool IsFakeAircraft()         const { return m_vehicleType == VEHICLE_FHELI || m_vehicleType == VEHICLE_FPLANE; }
-    bool IsBike()                 const { return m_vehicleType == VEHICLE_BIKE; }
-    bool IsBMX()                  const { return m_vehicleType == VEHICLE_BMX; }
-    bool IsTrailer()              const { return m_vehicleType == VEHICLE_TRAILER; }
+    bool IsVehicleTypeValid()     const { return m_nVehicleType != VEHICLE_TYPE_IGNORE; }
+    bool IsAutomobile()           const { return m_nVehicleType == VEHICLE_TYPE_AUTOMOBILE; }
+    bool IsMonsterTruck()         const { return m_nVehicleType == VEHICLE_TYPE_MTRUCK; }
+    bool IsQuad()                 const { return m_nVehicleType == VEHICLE_TYPE_QUAD; }
+    bool IsHeli()                 const { return m_nVehicleType == VEHICLE_TYPE_HELI; }
+    bool IsPlane()                const { return m_nVehicleType == VEHICLE_TYPE_PLANE; }
+    bool IsBoat()                 const { return m_nVehicleType == VEHICLE_TYPE_BOAT; }
+    bool IsTrain()                const { return m_nVehicleType == VEHICLE_TYPE_TRAIN; }
+    bool IsFakeAircraft()         const { return m_nVehicleType == VEHICLE_TYPE_FHELI || m_nVehicleType == VEHICLE_TYPE_FPLANE; }
+    bool IsBike()                 const { return m_nVehicleType == VEHICLE_TYPE_BIKE; }
+    bool IsBMX()                  const { return m_nVehicleType == VEHICLE_TYPE_BMX; }
+    bool IsTrailer()              const { return m_nVehicleType == VEHICLE_TYPE_TRAILER; }
     // m_vehicleType end
 
     // m_vehicleSubType start
-    bool IsSubVehicleTypeValid() const { return m_vehicleSubType != VEHICLE_IGNORE; }
-    bool IsSubAutomobile()       const { return m_vehicleSubType == VEHICLE_AUTOMOBILE; }
-    bool IsSubMonsterTruck()     const { return m_vehicleSubType == VEHICLE_MTRUCK; }
-    bool IsSubQuad()             const { return m_vehicleSubType == VEHICLE_QUAD; }
-    bool IsSubHeli()             const { return m_vehicleSubType == VEHICLE_HELI; }
-    bool IsSubPlane()            const { return m_vehicleSubType == VEHICLE_PLANE; }
-    bool IsSubBoat()             const { return m_vehicleSubType == VEHICLE_BOAT; }
-    bool IsSubTrain()            const { return m_vehicleSubType == VEHICLE_TRAIN; }
-    bool IsSubFakeAircraft()     const { return m_vehicleSubType == VEHICLE_FHELI || m_vehicleSubType == VEHICLE_FPLANE; }
-    bool IsSubBike()             const { return m_vehicleSubType == VEHICLE_BIKE; }
-    bool IsSubBMX()              const { return m_vehicleSubType == VEHICLE_BMX; }
-    bool IsSubTrailer()          const { return m_vehicleSubType == VEHICLE_TRAILER; }
+    bool IsSubVehicleTypeValid() const { return m_nVehicleSubType != VEHICLE_TYPE_IGNORE; }
+    bool IsSubAutomobile()       const { return m_nVehicleSubType == VEHICLE_TYPE_AUTOMOBILE; }
+    bool IsSubMonsterTruck()     const { return m_nVehicleSubType == VEHICLE_TYPE_MTRUCK; }
+    bool IsSubQuad()             const { return m_nVehicleSubType == VEHICLE_TYPE_QUAD; }
+    bool IsSubHeli()             const { return m_nVehicleSubType == VEHICLE_TYPE_HELI; }
+    bool IsSubPlane()            const { return m_nVehicleSubType == VEHICLE_TYPE_PLANE; }
+    bool IsSubBoat()             const { return m_nVehicleSubType == VEHICLE_TYPE_BOAT; }
+    bool IsSubTrain()            const { return m_nVehicleSubType == VEHICLE_TYPE_TRAIN; }
+    bool IsSubFakeAircraft()     const { return m_nVehicleSubType == VEHICLE_TYPE_FHELI || m_nVehicleSubType == VEHICLE_TYPE_FPLANE; }
+    bool IsSubBike()             const { return m_nVehicleSubType == VEHICLE_TYPE_BIKE; }
+    bool IsSubBMX()              const { return m_nVehicleSubType == VEHICLE_TYPE_BMX; }
+    bool IsSubTrailer()          const { return m_nVehicleSubType == VEHICLE_TYPE_TRAILER; }
 
-    bool IsRoadVehicle()         const { return !IsSubHeli() && !IsSubPlane() && !IsSubTrain(); }
+    bool IsSubRoadVehicle()      const { return !IsSubHeli() && !IsSubPlane() && !IsSubTrain(); }
     // m_vehicleSubType end
 
     bool IsTransportVehicle()    const { return m_nModelIndex == MODEL_TAXI    || m_nModelIndex == MODEL_CABBIE; }

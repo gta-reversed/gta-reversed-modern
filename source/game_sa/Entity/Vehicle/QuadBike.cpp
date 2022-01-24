@@ -30,7 +30,7 @@ CQuadBike::CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobil
 
     m_sRideAnimData.m_nAnimGroup = ANIM_GROUP_QUAD;
     m_pHandling = gHandlingDataMgr.GetBikeHandlingPointer(CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr()->m_nHandlingId);
-    m_vehicleSubType = VEHICLE_QUAD;
+    m_nVehicleSubType = VEHICLE_TYPE_QUAD;
 
     field_9AC = 0; // unused
     field_9B0 = 0; // unused

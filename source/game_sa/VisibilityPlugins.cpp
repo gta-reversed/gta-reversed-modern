@@ -957,8 +957,8 @@ void CVisibilityPlugins::SetClumpModelInfo(RpClump* clump, CClumpModelInfo* clum
     if (clumpModelInfo->GetModelType() != MODEL_INFO_VEHICLE)
         return;
 
-    auto pVehicleModelInfo = reinterpret_cast<CVehicleModelInfo*>(clumpModelInfo);
-    if (pVehicleModelInfo->m_nVehicleType == VEHICLE_TRAIN || pVehicleModelInfo->m_nVehicleType == VEHICLE_FPLANE)
+    CVehicleModelInfo* mi = clumpModelInfo->AsVehicleModelInfoPtr();
+    if (mi->IsTrain() || mi->m_nVehicleType == VEHICLE_TYPE_FPLANE)
         CLUMPPLG(clump, m_visibilityCallBack) = VehicleVisibilityCB_BigVehicle;
     else
         CLUMPPLG(clump, m_visibilityCallBack) = VehicleVisibilityCB;

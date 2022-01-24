@@ -583,9 +583,9 @@ void CVehicle::Render()
 }
 void CVehicle::Render_Reversed()
 {
-    auto* pVehInfo = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
+    auto* vehicleMI = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
     const auto iDirtLevel = static_cast<int32>(m_fDirtLevel) & 0xF;
-    CVehicleModelInfo::SetDirtTextures(pVehInfo, iDirtLevel);
+    CVehicleModelInfo::SetDirtTextures(vehicleMI, iDirtLevel);
 
     CEntity::Render();
 }

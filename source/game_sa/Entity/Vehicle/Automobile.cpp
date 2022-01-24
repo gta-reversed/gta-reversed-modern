@@ -2255,11 +2255,9 @@ void CAutomobile::BoostJumpControl()
     ((void(__thiscall*)(CAutomobile*))0x6A3A60)(this);
 }
 
+// 0x6A3BD0
 void CAutomobile::DoNitroEffect(float power)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CAutomobile*, float))0x6A3BD0)(this, power);
-#else
     auto modelInfo = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
     CVector exhaustPosition = modelInfo->m_pVehicleStruct->m_avDummyPos[DUMMY_EXHAUST];
     bool firstExhaustSubmergedInWater = false;
@@ -2322,7 +2320,6 @@ void CAutomobile::DoNitroEffect(float power)
             }
         }
     }
-#endif
 }
 
 // 0x6A3E60
