@@ -303,7 +303,7 @@ void RenderBegin(RwRaster* newRaster, RwMatrix* transform, uint32 transformRende
     RwRaster* currRaster{};
     RwRenderStateGet(rwRENDERSTATETEXTURERASTER, &currRaster);
     if (currRaster != newRaster)
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)newRaster);
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(newRaster));
 }
 
 // Wrapper for original func

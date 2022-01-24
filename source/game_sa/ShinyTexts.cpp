@@ -35,10 +35,10 @@ void CShinyTexts::Render() {
     if (NumShinyTexts == 0)
         return;
 
-    RwRenderStateSet(rwRENDERSTATECULLMODE,     (void*)rwCULLMODECULLNONE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,     (void*)rwBLENDONE);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,    (void*)rwBLENDONE);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,     RWRSTATE(rwCULLMODECULLNONE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,     RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,    RWRSTATE(rwBLENDONE));
 
     uiTempBufferIndicesStored  = 0;
     uiTempBufferVerticesStored = 0;
@@ -57,7 +57,7 @@ void CShinyTexts::Render() {
 
         if (texture != gpHandManTex) {
             RenderOutGeometryBuffer();
-            RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)RwTextureGetRaster(gpHandManTex));
+            RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpHandManTex)));
             texture = gpHandManTex;
         }
             
@@ -88,10 +88,10 @@ void CShinyTexts::Render() {
     RenderOutGeometryBuffer();
     NumShinyTexts = 0;
 
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
 }
 
 // Must be called each frame to re-draw

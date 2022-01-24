@@ -7,6 +7,9 @@
 
 #include "StdInc.h"
 
+#include "AtomicModelInfo.h"
+#include "TagManager.h"
+
 void CAtomicModelInfo::InjectHooks()
 {
 // VTABLE

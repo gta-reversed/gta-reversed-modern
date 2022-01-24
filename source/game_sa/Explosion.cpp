@@ -457,7 +457,7 @@ void CExplosion::Update() {
             else
                 exp.m_nActiveCounter++;
 
-            exp.m_nFuelTimer -= -CTimer::GetTimeStepInMS();
+            exp.m_nFuelTimer = exp.m_nFuelTimer - (-CTimer::GetTimeStepInMS()); // todo: hello guys, it's warning C4146
 
             if (exp.m_nFuelTimer <= 200) {
                 switch (exp.m_nType) {

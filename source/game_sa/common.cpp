@@ -338,40 +338,40 @@ void DefinedState() {
         (uint8)CTimeCycle::m_CurrentColours.m_nSkyBottomBlue
     );
 
-    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,       (void*)true);
-    RwRenderStateSet(rwRENDERSTATETEXTUREPERSPECTIVE,   (void*)true);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          (void*)true);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         (void*)true);
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,            (void*)rwSHADEMODEGOURAUD);
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,        (void*)rwFILTERLINEAR);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,    (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,             (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,            (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEBORDERCOLOR,          (void*)(RWRGBALONG(0, 0, 0, 255)));
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,            (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEFOGCOLOR,             (void*)rgbaFog.ToIntARGB());
-    RwRenderStateSet(rwRENDERSTATEFOGTYPE,              (void*)rwFOGTYPELINEAR);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,             (void*)rwCULLMODECULLNONE);
-    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    (void*)rwALPHATESTFUNCTIONGREATER);
-    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)2); // TODO: ?
+    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,       RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTUREPERSPECTIVE,   RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,            RWRSTATE(rwSHADEMODEGOURAUD));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,        RWRSTATE(rwFILTERLINEAR));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,    RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,             RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,            RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEBORDERCOLOR,          RWRSTATE((RWRGBALONG(0, 0, 0, 255))));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,            RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEFOGCOLOR,             RWRSTATE(rgbaFog.ToIntARGB()));
+    RwRenderStateSet(rwRENDERSTATEFOGTYPE,              RWRSTATE(rwFOGTYPELINEAR));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,             RWRSTATE(rwCULLMODECULLNONE));
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    RWRSTATE(rwALPHATESTFUNCTIONGREATER));
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(2)); // TODO: ?
 }
 
 // 0x734750
 void DefinedState2d() {
-    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,       (void*)true);
-    RwRenderStateSet(rwRENDERSTATETEXTUREPERSPECTIVE,   (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,            (void*)rwSHADEMODEGOURAUD);
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,        (void*)rwFILTERLINEAR);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,    (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,             (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,            (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEBORDERCOLOR,          (void*)(RWRGBALONG(0, 0, 0, 255)));
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,            (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,             (void*)rwCULLMODECULLNONE);
-    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    (void*)rwALPHATESTFUNCTIONGREATER);
-    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)2); // TODO: ?
+    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,       RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTUREPERSPECTIVE,   RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,            RWRSTATE(rwSHADEMODEGOURAUD));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,        RWRSTATE(rwFILTERLINEAR));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,    RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,             RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,            RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEBORDERCOLOR,          RWRSTATE((RWRGBALONG(0, 0, 0, 255))));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,            RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,             RWRSTATE(rwCULLMODECULLNONE));
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    RWRSTATE(rwALPHATESTFUNCTIONGREATER));
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(2)); // TODO: ?
 }
 
 // TODO: Check `outName` size (to avoid buffer overflow)
@@ -1157,13 +1157,14 @@ bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, flo
 
 // 0x53E230
 void Render2dStuff() {
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)false);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)false);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)true);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)rwRENDERSTATENARENDERSTATE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(rwRENDERSTATENARENDERSTATE));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(rwCULLMODECULLNONE));
+
     CReplay::Display();
     CPickups::RenderPickUpText();
     if (TheCamera.m_bWideScreenOn && !FrontEndMenuManager.m_bWidescreenOn)

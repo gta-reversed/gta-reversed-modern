@@ -145,7 +145,7 @@ void DrawBox(const CMatrix& matrix, const CColBox& box) {
 }
 
 void DrawTriangles(const CMatrix& matrix, const CColTriangle* triangles, const CompressedVector* vertices, const uint32& count, const uint32& startColor, const uint32& endColor) {
-    for (auto i = 0; i < count; i++) {
+    for (auto i = 0u; i < count; i++) {
         const auto& triangle = triangles[i];
 
         const CVector v14 = matrix * UncompressVector(vertices[triangle.m_nVertA]);
@@ -166,16 +166,16 @@ void DrawLine(const CMatrix& matrix, const CColLine& line) {
 
 void DrawColModel(const CMatrix& matrix, const CColModel& cm) {
     const auto SetState = []() {
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)NULL);
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
     };
 
     const auto ResetState = []() {
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,     (void*)FALSE);
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,(void*)FALSE);
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
     };
 
     if (!cm.m_pColData) {

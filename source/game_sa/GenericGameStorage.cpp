@@ -1,12 +1,11 @@
 #include "StdInc.h"
 
-#include <ranges>
-
 #include "GenericGameStorage.h"
 #include "SimpleVariablesSaveStructure.h"
 #include "TheCarGenerators.h"
 #include "PedType.h"
 #include "C_PcSave.h"
+#include "TagManager.h"
 
 constexpr uint32 SIZE_OF_ONE_GAME_IN_BYTES = 202748;
 

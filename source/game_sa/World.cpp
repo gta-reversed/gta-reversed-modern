@@ -12,6 +12,7 @@
 #include "IKChainManager_c.h"
 #include "FireManager.h"
 #include "CarCtrl.h"
+#include "TagManager.h"
 
 int32 CWorld::TOTAL_PLAYERS = 2;
 int32& CWorld::ms_iProcessLineNumCrossings = *(int32*)0xB7CD60;

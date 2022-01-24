@@ -1096,8 +1096,8 @@ void CRadar::DrawRadarSprite(uint16 spriteId, float x, float y, uint8 alpha)
         LimitToMap(&x, &y);
     }
 
-    uint32 width  = 8 * SCREEN_WIDTH_UNIT;
-    uint32 height = 8 * SCREEN_HEIGHT_UNIT;
+    float width = std::floor(SCREEN_WIDTH_UNIT * 8.f);   // uint32 width  = 8 * SCREEN_WIDTH_UNIT;  original math with warnings, NOTSA
+    float height = std::floor(SCREEN_HEIGHT_UNIT * 8.f); // uint32 height = 8 * SCREEN_HEIGHT_UNIT;
 
     auto sprite16 = (uint16)spriteId;
     if (!DisplayThisBlip(sprite16, -99))
@@ -1143,16 +1143,16 @@ void CRadar::DrawRadarMap()
     SetupRadarRect(x, y);
     StreamRadarSections(x, y);
 
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,          (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,           (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,          (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,      (void*)rwFILTERLINEAR);
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,          (void*)D3DSHADE_FLAT);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,        (void*)rwRENDERSTATETEXTURERASTER);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,       (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,  (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,     (void*)D3DTADDRESS_CLAMP);
-    RwRenderStateSet(rwRENDERSTATETEXTUREPERSPECTIVE, (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,          RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,           RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,          RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,      RWRSTATE(rwFILTERLINEAR));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,          RWRSTATE(D3DSHADE_FLAT));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,        RWRSTATE(rwRENDERSTATETEXTURERASTER));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,       RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,  RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,     RWRSTATE(D3DTADDRESS_CLAMP));
+    RwRenderStateSet(rwRENDERSTATETEXTUREPERSPECTIVE, RWRSTATE(FALSE));
 
     DrawRadarSection(x - 1,     y - 1);
     DrawRadarSection(x,         y - 1);
@@ -1189,7 +1189,7 @@ void CRadar::DrawRadarMap()
         cachedCos = cCos;
     }
 
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(FALSE));
 }
 
 // 0x586B00

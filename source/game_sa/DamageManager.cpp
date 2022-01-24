@@ -76,7 +76,7 @@ bool CDamageManager::ApplyDamage(CAutomobile* vehicle, tComponent compId, float 
     uint8 relCompIdx{};
     GetComponentGroup(compId, group, relCompIdx);
 
-    static constexpr float afPanelDamageMultByGroup[] = { 2.5, 1.25, 3.2, 1.4, 2.5, 2.8, 0.5, 1.2, 0.87, 0.2 };
+    static constexpr float afPanelDamageMultByGroup[] = { 2.5f, 1.25f, 3.2f, 1.4f, 2.5f, 2.8f, 0.5f, 1.2f, 0.87f, 0.2f };
     fIntensity *= afPanelDamageMultByGroup[(size_t)group];
     if (compId == tComponent::COMPONENT_WINDSCREEN)
         fIntensity *= 0.6f;

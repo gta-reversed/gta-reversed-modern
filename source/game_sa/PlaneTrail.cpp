@@ -39,10 +39,10 @@ void CPlaneTrail::Render(float intensity) {
     }
 
     if (nVertices > 1) {
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)nullptr);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
         if (RwIm3DTransform(vertBuff, nVertices, nullptr, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXRGBA)) {
             static RwImVertexIndex indices[] = { // From 0x8D5B98, size 30
                 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15

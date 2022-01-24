@@ -95,9 +95,9 @@ void CRenderer::Shutdown() {
 
 // 0x5531E0
 void CRenderer::RenderFadingInEntities() {
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)rwCULLMODECULLBACK);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(rwCULLMODECULLBACK));
     DeActivateDirectional();
     SetAmbientColours();
     CVisibilityPlugins::RenderFadingEntities();
@@ -135,7 +135,7 @@ void CRenderer::RenderOneNonRoad(CEntity* entity) {
         vehicle->RenderDriverAndPassengers();
         vehicle->SetupRender();
     } else if (!entity->m_bBackfaceCulled) {
-        RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+        RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
     }
 
     if (CPostEffects::IsVisionFXActive()) {
@@ -158,7 +158,7 @@ void CRenderer::RenderOneNonRoad(CEntity* entity) {
         vehicle->RemoveLighting(bSetupLighting);
     } else {
         if (!entity->m_bBackfaceCulled)
-            RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+            RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
         entity->RemoveLighting(bSetupLighting);
     }
 }
@@ -331,9 +331,9 @@ void CRenderer::PreRender() {
 void CRenderer::RenderRoads() {
     assert(ms_nNoOfVisibleEntities <= MAX_VISIBLE_ENTITY_PTRS);
 
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(rwCULLMODECULLBACK));
 
     DeActivateDirectional();
     SetAmbientColours();
@@ -355,11 +355,11 @@ void CRenderer::RenderRoads() {
 
 // 0x553AA0
 void CRenderer::RenderEverythingBarRoads() {
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)rwCULLMODECULLBACK);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(rwCULLMODECULLBACK));
     if (!CGame::currArea)
-        RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)140u);
+        RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(140u));
 
     assert(ms_nNoOfVisibleEntities <= MAX_VISIBLE_ENTITY_PTRS);
     for (int32 i = 0; i < ms_nNoOfVisibleEntities; i++) {
@@ -413,18 +413,18 @@ void CRenderer::RenderFirstPersonVehicle() {
         bool bRestoreAlphaTest = false;
         if (CWorld::Players[0].m_pPed->GetActiveWeapon().m_nType == WEAPON_MICRO_UZI) {
             bRestoreAlphaTest = true;
-            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)80u);
+            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(80u));
         }
-        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
+        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
         RenderOneNonRoad(m_pFirstPersonVehicle);
-        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
+        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
         if (bRestoreAlphaTest)
-            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)nullptr);
+            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(NULL));
     }
 
 #ifdef EXTRA_DEBUG_FEATURES
