@@ -2533,7 +2533,8 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
 
             if (auto& driver = veh->m_pDriver) { 
                 CPopulation::RemovePed(driver);
-                driver->CleanUpOldReference(reinterpret_cast<CEntity**>(&driver));
+                if (driver) // Not even sure why this is done - Ped::Remove already unlinks it from the vehicle it's in
+                    driver->CleanUpOldReference(reinterpret_cast<CEntity**>(&driver));
                 driver = nullptr;
             }
 
