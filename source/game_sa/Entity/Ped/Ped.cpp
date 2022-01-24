@@ -1270,6 +1270,10 @@ bool CPed::IsInVehicleThatHasADriver()
     return false;
 }
 
+bool CPed::IsFollowerOfGroup(const CPedGroup& group) {
+    return group.GetMembership().IsFollower(this);
+}
+
 // 0x5E4880
 void CPed::SetModelIndex(uint32 modelIndex)
 {
