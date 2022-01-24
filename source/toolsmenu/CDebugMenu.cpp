@@ -21,6 +21,7 @@
 #include "toolsmenu\DebugModules\Audio\AmbienceTrackManagerDebugModule.h"
 #include "toolsmenu\DebugModules\CStreamingDebugModule.h"
 #include "toolsmenu\DebugModules\CPickupsDebugModule.h"
+#include "toolsmenu\HooksDebugModule.h"
 #include "toolsmenu\DebugModules\CTeleportDebugModule.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
@@ -221,107 +222,6 @@ void CDebugMenu::ProcessRenderTool() {
     }
 }
 
-// TODO: The code is a mess, clean it up
-void CDebugMenu::ProcessHooksTool() {
-    static std::string HooksFilterContent;
-
-    ImGui::PushItemWidth(465.0f);
-    bool reclaim_focus = false;
-    ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
-    if (ImGui::InputText(" ", &HooksFilterContent, input_text_flags)) {
-        reclaim_focus = true;
-    }
-    ImGui::PopItemWidth();
-
-    // Auto-focus on window apparition
-    ImGui::SetItemDefaultFocus();
-    if (reclaim_focus)
-        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
-
-    ImGui::BeginChild("##hookstool", ImVec2(0, 0));
-    ImGui::SetNextItemOpen(true);
-    ImGui::AlignTextToFramePadding();
-    if (ImGui::TreeNode("Reversible Hooks")) {
-        const auto& allHooks = ReversibleHooks::GetAllHooks();
-        // Handle disabling/enabling of all hooks at once
-        ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 40);
-
-        std::string disabledAllStr = "all_disabled";
-        ImGui::PushID(disabledAllStr.c_str());
-        if (ImGui::Button("-")) {
-            for (auto& classHooks : allHooks)
-                for (auto& hook : classHooks.second)
-                    if (hook->m_bIsHooked)
-                        hook->Switch();
-        }
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Disable all");
-        ImGui::PopID();
-
-        ImGui::SameLine();
-        std::string enableAllStr = "all_enabled";
-        ImGui::PushID(enableAllStr.c_str());
-        if (ImGui::Button("+")) {
-            for (auto& classHooks : allHooks)
-                for (auto& hook : classHooks.second)
-                    if (!hook->m_bIsHooked)
-                        hook->Switch();
-        }
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Enable all");
-        ImGui::PopID();
-        // End of disabling/enabling of all hooks at once
-
-        for (auto& classHooks : allHooks) {
-            if (!HooksFilterContent.empty() && !findStringCaseInsensitive(classHooks.first, HooksFilterContent))
-                continue;
-
-            ImGui::AlignTextToFramePadding();
-            bool treeOpen = ImGui::TreeNodeEx(classHooks.first.c_str(), ImGuiTreeNodeFlags_AllowItemOverlap);
-            ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 40);
-
-            std::string disabledStr = classHooks.first + "_disabled";
-            ImGui::PushID(disabledStr.c_str());
-            if (ImGui::Button("-")) {
-                for (auto& hook : classHooks.second)
-                    hook->m_bImguiHooked = false;
-            }
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("Disable all");
-            ImGui::PopID();
-
-            ImGui::SameLine();
-            std::string enableStr = classHooks.first + "_enabled";
-            ImGui::PushID(enableStr.c_str());
-            if (ImGui::Button("+")) {
-                for (auto& hook : classHooks.second)
-                    hook->m_bImguiHooked = true;
-            }
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("Enable all");
-            ImGui::PopID();
-
-            for (auto& hook : classHooks.second)
-                if (hook->m_bIsHooked != hook->m_bImguiHooked)
-                    ReversibleHooks::Switch(hook);
-
-            if (treeOpen) {
-                for (auto& hook : classHooks.second) {
-                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-                    ImGui::AlignTextToFramePadding();
-                    ImGui::Text(hook->m_eHookType == eReversibleHookType::Simple ? "S" : "V");
-                    ImGui::PopStyleVar();
-                    ImGui::SameLine();
-                    ImGui::Checkbox(hook->m_sFunctionName.c_str(), &hook->m_bImguiHooked);
-                }
-                ImGui::TreePop();
-            }
-        }
-        ImGui::TreePop();
-    }
-    ImGui::EndChild();
-}
-
 #ifdef EXTRA_DEBUG_FEATURES
 void CDebugMenu::ProcessExtraDebugFeatures() {
     if (ImGui::BeginTabBar("Modules")) {
@@ -395,7 +295,7 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Hooks")) {
-                ProcessHooksTool();
+                HooksDebugModule::ProcessImGui();
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Other")) {
@@ -447,6 +347,7 @@ void CDebugMenu::ImguiDrawLoop() {
     CDebugMenu::ImguiDisplayExtraDebugFeatures();
     ImguiDisplayPlayerInfo();
     ImguiDisplayFramePerSecond();
+    HooksDebugModule::ProcessRender();
 
     ImGui::EndFrame();
     ImGui::Render();
