@@ -1,13 +1,13 @@
 #pragma once
 
 #include "AEWaterCannonAudioEntity.h"
+#include <array>
 
 class CVector;
 
 class CWaterCannon {
 public:
     static constexpr uint32 SECTIONS_COUNT = 32;
-    static constexpr uint32 NUM_INDICES = 18;
 
     uint32               m_nId;
     int32                        m_nSectionsCount;
@@ -18,8 +18,7 @@ public:
     CAEWaterCannonAudioEntity  m_audio;
     char                       field_3BC[16];
 
-    static RxVertexIndex (&m_auRenderIndices)[NUM_INDICES];
-
+    static inline std::array<RxVertexIndex, 18>& m_auRenderIndices = *(std::array<RxVertexIndex, 18>*)0xC80700;
 public:
     static void InjectHooks();
 
