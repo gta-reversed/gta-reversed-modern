@@ -450,7 +450,7 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool 
                     if (m_bIsStuck || colEntity->m_bIsStuck)
                         *bThisOrCollidedEntityStuck = true;
                 }
-                else if (!colEntity->AsObject()->CanBeSmashed() && !fIsBike())
+                else if (!colEntity->AsObject()->CanBeSmashed() && !IsBike())
                 {
                     auto tempMat = CMatrix();
                     auto* cm = colEntity->GetColModel();
@@ -533,7 +533,7 @@ uint8 CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollision
         else
             fMove *= (10.0F / 3.0F);
     }
-    else if (fIsBike())
+    else if (IsBike())
         fMove *= (10.0F / 1.5F);
     else
         fMove *= (10.0F / 2.0F);
@@ -543,7 +543,7 @@ uint8 CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollision
     fLongestDir = std::max(fLongestDir, fabs(DotProduct(m_vecMoveSpeed, GetRight()) * CTimer::GetTimeStep() / pBnd.GetWidth()));
     fLongestDir = std::max(fLongestDir, fabs(DotProduct(m_vecMoveSpeed, GetUp()) * CTimer::GetTimeStep() / pBnd.GetHeight()));
 
-    if (fIsBike())
+    if (IsBike())
         fLongestDir *= 1.5F;
 
     if (fLongestDir < 1.0F)
@@ -561,7 +561,7 @@ void CVehicle::PreRender()
 }
 void CVehicle::PreRender_Reversed()
 {
-    if (!fIsTrain())
+    if (!IsTrain())
         CalculateLightingFromCollision();
 
     PreRenderDriverAndPassengers();
@@ -873,7 +873,7 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend)
 
     if (vehicleFlags.bLowVehicle)
         usedAnims = &aDriveAnimIdsLow;
-    else if (fIsBoat() && !m_pHandlingData->m_bSitInBoat)
+    else if (IsBoat() && !m_pHandlingData->m_bSitInBoat)
         usedAnims = &aDriveAnimIdsBoat;
     else if (CVehicleAnimGroupData::UsesKartDrivingAnims(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup)))
         usedAnims = &aDriveAnimIdsKart;
@@ -1032,7 +1032,7 @@ bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright)
         return true;
     }
 
-    if (fIsBoat())
+    if (IsBoat())
         return true;
 
     if (bIgnoreSpeedUpright)
@@ -1049,7 +1049,7 @@ bool CVehicle::CanPedJumpOutCar(CPed* ped)
 }
 bool CVehicle::CanPedJumpOutCar_Reversed(CPed* ped)
 {
-    if (fIsBike())
+    if (IsBike())
     {
         if (!m_apPassengers[0] || ped == m_apPassengers[0])
             return m_vecMoveSpeed.SquaredMagnitude2D() >= 0.07F;
@@ -1058,9 +1058,9 @@ bool CVehicle::CanPedJumpOutCar_Reversed(CPed* ped)
     }
 
     const auto fHorSpeedSquared = m_vecMoveSpeed.SquaredMagnitude2D();
-    if (!bIsSubclassPlane()
-        && !bIsSubclassHeli()
-        && (!fIsAutomobile() || m_matrix->GetUp().z >= 0.3F || m_nLastCollisionTime <= CTimer::GetTimeInMS() - 1000))
+    if (!IsSubPlane()
+        && !IsSubHeli()
+        && (!IsAutomobile() || m_matrix->GetUp().z >= 0.3F || m_nLastCollisionTime <= CTimer::GetTimeInMS() - 1000))
     {
         return fHorSpeedSquared >= 0.1F && fHorSpeedSquared <= 0.5F;
     }
@@ -1973,9 +1973,9 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
     else if (contactSpeedFwd != 0.0f) {
         fwd = -contactSpeedFwd / wheelsOnGround;
         if (!bBraking && fabs(m_fGasPedal) < 0.01f) {
-            if (fIsBike())
+            if (IsBike())
                 brake = gHandlingDataMgr.fWheelFriction * 0.6f / (m_pHandlingData->m_fMass + 200.0f);
-            else if (bIsSubclassPlane())
+            else if (IsSubPlane())
                 brake = 0.0f;
             else {
                 brake = gHandlingDataMgr.fWheelFriction / m_pHandlingData->m_fMass;
@@ -2120,7 +2120,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     CVector vecBuoyancyForce;
     if (!mod_Buoyancy.ProcessBuoyancyBoat(this, m_fBuoyancyConstant, &vecBuoyancyTurnPoint, &vecBuoyancyForce, bCollidedWithWorld)) {
         physicalFlags.bSubmergedInWater = false;
-        if (bIsSubclassBoat())
+        if (IsSubBoat())
             static_cast<CBoat*>(this)->m_nBoatFlags.bOnWater = false;
 
         return;
@@ -2234,7 +2234,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
             fMoveSpeed = CVector2D(m_vecMoveSpeed).Magnitude();
 
         if (fabs(m_fGasPedal) > 0.05F || fMoveSpeed > 0.01F) {
-            if (bIsSubclassBoat() && bOnWater && fMoveSpeed > 0.05F) {
+            if (IsSubBoat() && bOnWater && fMoveSpeed > 0.05F) {
                 //GetColModel(); Unused call
                 static_cast<CBoat*>(this)->AddWakePoint(GetPosition());
             }
@@ -2261,14 +2261,14 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
             float fWaterLevel;
             CWaterLevel::GetWaterLevel(vecWorldThrustPos.x, vecWorldThrustPos.y, vecWorldThrustPos.z, &fWaterLevel, 1, nullptr);
             if (vecWorldThrustPos.z - 0.5F >= fWaterLevel) {
-                if (bIsSubclassBoat())
+                if (IsSubBoat())
                     static_cast<CBoat*>(this)->m_nBoatFlags.bMovingOnWater = false;
             }
             else {
                 auto fThrustDepth = fWaterLevel - vecWorldThrustPos.z + 0.5F;
                 fThrustDepth = std::min(fThrustDepth * fThrustDepth, 1.0F);
 
-                if (bIsSubclassBoat())
+                if (IsSubBoat())
                     static_cast<CBoat*>(this)->m_nBoatFlags.bMovingOnWater = true;
 
                 bool bIsSlowingDown = false;
@@ -2419,12 +2419,12 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     }
 
     *fLastWaterImmersionDepth = fImmersionDepth;
-    if (bIsSubclassBoat()) {
+    if (IsSubBoat()) {
         static_cast<CBoat*>(this)->m_vecWaterDamping = vecBuoyancyForce;
         static_cast<CBoat*>(this)->m_nBoatFlags.bOnWater = bOnWater;
     }
-    else if (fIsAutomobile()){
-        static_cast<CAutomobile*>(this)->m_fDoomHorizontalRotation = vecBuoyancyForce.Magnitude();
+    else if (IsAutomobile()) {
+        this->AsAutomobile()->m_fDoomHorizontalRotation = vecBuoyancyForce.Magnitude();
     }
 }
 
@@ -2463,7 +2463,7 @@ void CVehicle::AddExhaustParticles()
     secondExhaustPos.x *= -1.0f;
     CMatrix entityMatrix (*m_matrix);
     bool bHasDoubleExhaust = m_pHandlingData->m_bDoubleExhaust;
-    if (m_vehicleSubType == VEHICLE_BIKE) {
+    if (IsSubBike()) {
         auto* pBike = static_cast<CBike*>(this);
         pBike->CalculateLeanMatrix();
         entityMatrix = pBike->m_mLeanMatrix;

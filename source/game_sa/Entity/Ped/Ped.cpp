@@ -640,7 +640,7 @@ void CPed::ProcessBuoyancy()
         auto& pStandingOnEntity = m_pContactEntity;
         if (pStandingOnEntity && pStandingOnEntity->IsVehicle()) {
             auto pStandingOnVehicle = reinterpret_cast<CVehicle*>(pStandingOnEntity);
-            if (pStandingOnVehicle->fIsBoat() && !pStandingOnVehicle->physicalFlags.bDestroyed) {
+            if (pStandingOnVehicle->IsBoat() && !pStandingOnVehicle->physicalFlags.bDestroyed) {
                 physicalFlags.bSubmergedInWater = false;
                 auto pSwimTask = m_pIntelligence->GetTaskSwim();
                 if (!pSwimTask)
@@ -660,7 +660,7 @@ void CPed::ProcessBuoyancy()
         if (CWorld::ProcessVerticalLine(vecPedPos, fCheckZ, lineColPoint, colEntity, false, true, false, false, false, false, nullptr)) {
             if (colEntity->IsVehicle()) {
                 auto colVehicle = reinterpret_cast<CVehicle*>(colEntity);
-                if (colVehicle->fIsBoat()
+                if (colVehicle->IsBoat()
                     && !colVehicle->physicalFlags.bDestroyed
                     && colVehicle->GetMatrix().GetUp().z > 0.0F) {
 

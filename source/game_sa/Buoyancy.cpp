@@ -176,8 +176,8 @@ bool cBuoyancy::CalcBuoyancyForce(CPhysical* pEntity, CVector* vecBuoyancyTurnPo
 // 0x6C2B90
 void cBuoyancy::PreCalcSetup(CPhysical* entity, float fBuoyancy)
 {
-    auto vehicle = static_cast<CVehicle*>(entity);
-    m_bProcessingBoat = entity->IsVehicle() && vehicle->fIsBoat();
+    CVehicle* vehicle = entity->AsVehicle();
+    m_bProcessingBoat = entity->IsVehicle() && vehicle->IsBoat();
     auto pColModel = entity->GetColModel();
     m_vecBoundingMin = pColModel->m_boundBox.m_vecMin;
     m_vecBoundingMax = pColModel->m_boundBox.m_vecMax;
@@ -196,7 +196,7 @@ void cBuoyancy::PreCalcSetup(CPhysical* entity, float fBuoyancy)
             m_vecBoundingMax.y *= 1.4F;
             break;
         default:
-            if (entity->IsVehicle() && vehicle->bIsSubclassHeli()) {
+            if (entity->IsVehicle() && vehicle->IsSubHeli()) {
                 m_vecBoundingMin.y = -m_vecBoundingMax.y;
                 m_vecBoundingMax.z = m_vecBoundingMin.z * -1.1F;
                 m_vecBoundingMin.z *= 0.85F;

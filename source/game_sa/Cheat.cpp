@@ -541,8 +541,8 @@ void CCheat::HealthCheat() {
     }
 
     vehicle->m_fHealth = 1000.0f;
-    if (vehicle->m_vehicleType == VEHICLE_BIKE) {
-        auto* bike = static_cast<CBike*>(vehicle);
+    if (vehicle->IsBike()) {
+        CBike* bike = vehicle->AsBike();
         bike->field_7BC = 0;
         bike->Fix();
         bike->m_apCollidedEntities[5] = nullptr;

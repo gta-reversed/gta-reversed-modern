@@ -643,7 +643,7 @@ void CPedIntelligence::ProcessAfterPreRender() {
     if (m_pPed->bInVehicle)
     {
         CVehicle* vehicle = m_pPed->m_pVehicle;
-        if (vehicle && vehicle->fIsBike()) {
+        if (vehicle && vehicle->IsBike()) {
             vehicle->AsBike()->FixHandsToBars(m_pPed);
         }
     }
@@ -1030,7 +1030,7 @@ void CPedIntelligence::ProcessFirst() {
     if (m_pPed->bInVehicle)
     {
         CVehicle* vehicle = m_pPed->m_pVehicle;
-        if (vehicle && vehicle->fIsBike()) {
+        if (vehicle && vehicle->IsBike()) {
             auto* bike = vehicle->AsBike();
             bike->m_bPedLeftHandFixed = false;
             bike->m_bPedRightHandFixed = false;

@@ -242,7 +242,7 @@ void CTaskComplexWanderCop::ScanForStuff_Reversed(CPed* ped)
 void CTaskComplexWanderCop::LookForCarAlarms(CCopPed* ped)
 {
     CVehicle* vehicle = FindPlayerVehicle(-1, 0);
-    if (vehicle && vehicle->fIsAutomobile()) {
+    if (vehicle && vehicle->IsAutomobile()) {
         int16 alaramState = vehicle->m_nAlarmState;
         if (alaramState) {
             if (alaramState != -1 && vehicle->m_nStatus != STATUS_WRECKED) {

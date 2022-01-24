@@ -295,7 +295,7 @@ CFire* CFireManager::StartFire(CEntity* target, CEntity* creator, float size, ui
         if (vehTarget->m_pFire)
             return nullptr;
 
-        if (vehTarget->fIsAutomobile()) {
+        if (vehTarget->IsAutomobile()) {
             if (static_cast<CAutomobile*>(target)->m_damageManager.GetEngineStatus() >= 225)
                 return nullptr;
         }
@@ -338,7 +338,7 @@ int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* target, float _
                 StopFire(vehTarget->m_pFire);
 
             /* Set engine status for automobiles */
-            if (vehTarget->fIsAutomobile()) {
+            if (vehTarget->IsAutomobile()) {
                 auto& dmgMgr = static_cast<CAutomobile*>(vehTarget)->m_damageManager;
                 if (dmgMgr.GetEngineStatus() >= 225)
                     dmgMgr.SetEngineStatus(215);

@@ -1339,7 +1339,7 @@ void CWorld::ClearCarsFromArea(float minX, float minY, float minZ, float maxX, f
     CBoundingBox box{ {minX, minY, minZ}, {maxX, maxY, maxZ} }; // NOTSA, but makes code cleaner
     for (int32 i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
         if (CVehicle* veh = CPools::ms_pVehiclePool->GetAt(i)) {
-            if (veh == FindPlayerPed(-1)->m_pContactEntity && veh->fIsBoat())
+            if (veh == FindPlayerPed(-1)->m_pContactEntity && veh->IsBoat())
                 continue;
 
             if (!box.IsPointWithin(veh->GetPosition()))
@@ -1443,7 +1443,7 @@ CVehicle* CWorld::FindUnsuspectingTargetCar(CVector point, CVector playerPosn) {
         if (!veh)
             continue;
 
-        if (!veh->IsCreatedBy(eVehicleCreatedBy::RANDOM_VEHICLE) || !veh->bIsSubclassAutomobile())
+        if (!veh->IsCreatedBy(eVehicleCreatedBy::RANDOM_VEHICLE) || !veh->IsSubAutomobile())
             continue;
 
         switch (veh->m_nStatus) {
@@ -1779,7 +1779,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
         case eEntityType::ENTITY_TYPE_VEHICLE: {
             const auto veh = entity->AsVehicle();
 
-            if (auto driver = veh->m_pDriver;  veh->m_vehicleSubType == eVehicleType::VEHICLE_BMX && driver) {
+            if (auto driver = veh->m_pDriver;  veh->IsSubBMX() && driver) {
                 CEventKnockOffBike event{ veh, &veh->m_vecMoveSpeed, &impactVelocity, 0.f, 0.f, KNOCK_OFF_TYPE_EXPLOSION, 0, 0, nullptr, true, false };
                 driver->GetIntelligence()->m_eventGroup.Add(&event, false);
 
@@ -1840,7 +1840,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                     veh->ApplyTurnForce(colNormal * forceFactor, colPointPos);
             }
 
-            if (veh->bIsSubclassPlane()) {
+            if (veh->IsSubPlane()) {
                 auto normalBackwards = cp.m_vecNormal;
                 auto colPos = colPointPos + veh->GetPosition();
                 veh->VehicleDamage(1000.f, 0, creator, &colPos, &normalBackwards, WEAPON_EXPLOSION);
@@ -2500,7 +2500,7 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
             if (playerGroup && veh->IsAnyOfPassengersFollowerOfGroup(*playerGroup))
                 continue;
 
-            if (playerPed->m_pContactEntity == veh && !veh->fIsBoat())
+            if (playerPed->m_pContactEntity == veh && !veh->IsBoat())
                 continue;
 
             if (radius * radius <= DistanceBetweenPointsSquared2D(point, veh->GetPosition()))

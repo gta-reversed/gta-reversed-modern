@@ -102,7 +102,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped)
 
     if (!m_pClimbEnt
         || m_pClimbEnt->IsObject() && !m_pClimbEnt->IsStatic() && !m_pClimbEnt->AsPhysical()->physicalFlags.bDisableCollisionForce
-        || m_pClimbEnt->IsVehicle() && m_pClimbEnt->AsVehicle()->bIsSubclassTrain() && m_pClimbEnt->AsVehicle()->m_vecMoveSpeed.Magnitude() > 0.1F
+        || m_pClimbEnt->IsVehicle() && m_pClimbEnt->AsVehicle()->IsSubTrain() && m_pClimbEnt->AsVehicle()->m_vecMoveSpeed.Magnitude() > 0.1F
     ) {
         MakeAbortable(ped, ABORT_PRIORITY_URGENT, 0);
         return true;
@@ -417,7 +417,7 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
                 )
             || (
                 entity->IsVehicle()
-                && (bStandUp || bVault || (ped->GetIntelligence()->GetTaskSwim() && entity->AsVehicle()->bIsSubclassBoat()) || (entity->AsVehicle()->bIsSubclassTrain() && entity->AsVehicle()->m_vecMoveSpeed.Magnitude2D() < 0.1F))
+                && (bStandUp || bVault || (ped->GetIntelligence()->GetTaskSwim() && entity->AsVehicle()->IsSubBoat()) || (entity->AsVehicle()->IsSubTrain() && entity->AsVehicle()->m_vecMoveSpeed.Magnitude2D() < 0.1F))
                 )
             )
         {
@@ -425,7 +425,7 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
                 continue;
 
             int32 numSpheres = -1;
-            if (entity->IsVehicle() && entity->AsVehicle()->bIsSubclassBoat())
+            if (entity->IsVehicle() && entity->AsVehicle()->IsSubBoat())
             {
                 numSpheres = entity->GetColModel()->m_pColData->m_nNumSpheres;
                 entity->GetColModel()->m_pColData->m_nNumSpheres = 0;

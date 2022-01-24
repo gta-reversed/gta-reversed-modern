@@ -212,13 +212,13 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
 
     if (!doMissionCleanup)
     {
-        if (vehicle->fIsAutomobile())
+        if (vehicle->IsAutomobile())
             vehicle->AsAutomobile()->PlaceOnRoadProperly();
-        else if (vehicle->fIsBike())
+        else if (vehicle->IsBike())
             vehicle->AsBike()->PlaceOnRoadProperly();
     }
 
-    if (vehicle->fIsTrain())
+    if (vehicle->IsTrain())
         vehicle->AsTrain()->trainFlags.bNotOnARailRoad = true;
 
     CTheScripts::ClearSpaceForMissionEntity(posn, vehicle);
@@ -480,7 +480,7 @@ void CCarCtrl::JoinCarWithRoadAccordingToMission(CVehicle* vehicle) {
     case MISSION_POLICE_BIKE:
     case MISSION_2C:
     case MISSION_BOAT_CIRCLING_PLAYER: {
-        JoinCarWithRoadSystemGotoCoors(vehicle, FindPlayerCoors(-1), true, vehicle->m_vehicleSubType == eVehicleType::VEHICLE_BOAT);
+        JoinCarWithRoadSystemGotoCoors(vehicle, FindPlayerCoors(-1), true, vehicle->IsSubBoat());
         break;
     }
     case MISSION_GOTOCOORDS:
@@ -489,7 +489,7 @@ void CCarCtrl::JoinCarWithRoadAccordingToMission(CVehicle* vehicle) {
     case MISSION_GOTOCOORDS_STRAIGHT_ACCURATE:
     case MISSION_GOTOCOORDS_ASTHECROWSWIMS:
     case MISSION_FOLLOW_PATH_RACING: {
-        JoinCarWithRoadSystemGotoCoors(vehicle, vehicle->m_autoPilot.m_vecDestinationCoors, true, vehicle->m_vehicleSubType == eVehicleType::VEHICLE_BOAT);
+        JoinCarWithRoadSystemGotoCoors(vehicle, vehicle->m_autoPilot.m_vecDestinationCoors, true, vehicle->IsSubBoat());
         break;
     }
     case MISSION_RAMCAR_FARAWAY:
@@ -513,7 +513,7 @@ void CCarCtrl::JoinCarWithRoadAccordingToMission(CVehicle* vehicle) {
     case MISSION_42:
     case MISSION_43:
     case MISSION_44: {
-        JoinCarWithRoadSystemGotoCoors(vehicle, vehicle->m_autoPilot.m_pTargetCar->GetPosition(), true, vehicle->m_vehicleSubType == eVehicleType::VEHICLE_BOAT);
+        JoinCarWithRoadSystemGotoCoors(vehicle, vehicle->m_autoPilot.m_pTargetCar->GetPosition(), true, vehicle->IsSubBoat());
         break;
     }
     }

@@ -333,19 +333,19 @@ float CWeapon::TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner
 
     switch (victim->m_nType) {
     case eEntityType::ENTITY_TYPE_VEHICLE: {
-        if (!victim->AsVehicle()->fIsBike())
+        if (!victim->AsVehicle()->IsBike())
             return 3.0f;
         break;
     }
     case eEntityType::ENTITY_TYPE_PED: {
         CPed* pedVictim = static_cast<CPed*>(victim);
 
-        if (pedVictim->m_pVehicle && !pedVictim->m_pVehicle->fIsBike()) {
+        if (pedVictim->m_pVehicle && !pedVictim->m_pVehicle->IsBike()) {
             return 3.0f;
         }
 
         if (CEntity* pAttachedTo = pedVictim->m_pAttachedTo) {
-            if (pAttachedTo->IsVehicle() && !static_cast<CVehicle*>(pAttachedTo)->fIsBike())
+            if (pAttachedTo->IsVehicle() && !static_cast<CVehicle*>(pAttachedTo)->IsBike())
                 return 3.0f;
         }
         break;

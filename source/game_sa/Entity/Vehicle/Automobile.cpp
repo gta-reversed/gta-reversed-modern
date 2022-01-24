@@ -97,7 +97,7 @@ void CAutomobile::ProcessControl()
     vehicleFlags.bRestingOnPhysical = false;
     m_vehicleAudio.Service();
     bool bExplodeImmediately = false;
-    if (bIsSubclassPlane() || bIsSubclassHeli()) {
+    if (IsSubPlane() || IsSubHeli()) {
         eCarMission carMission = m_autoPilot.m_nCarMission;
         if ((carMission == MISSION_CRASH_PLANE_AND_BURN
             || carMission == MISSION_CRASH_HELI_AND_BURN
@@ -162,7 +162,7 @@ void CAutomobile::ProcessControl()
         float forceLimitRadius = 0.003f;
         float torqueLimitRadius = 0.0009f;
         float movingSpeedLimit = 0.005f;
-        if (bIsSubclassPlane()) {
+        if (IsSubPlane()) {
             if (m_fDamageIntensity > 0.0f && m_pDamageEntity && m_pDamageEntity->IsVehicle())
                 forceLimitRadius = 0.003f;
             else
@@ -738,8 +738,8 @@ void CAutomobile::ProcessControl()
         && fabs(m_vecMoveSpeed.z) < 0.0045f)
     {
         if (m_fDamageIntensity <= 0.0f || m_pDamageEntity != FindPlayerPed(-1)) {
-            if ((!bIsSubclassPlane() || static_cast<CPlane*>(this)->m_fAccelerationBreakStatus == 0.0f) &&
-                (!bIsSubclassHeli() || static_cast<CHeli*>(this)->m_fAccelerationBreakStatus == 0.0f))
+            if ((!IsSubPlane() || static_cast<CPlane*>(this)->m_fAccelerationBreakStatus == 0.0f) &&
+                (!IsSubHeli() || static_cast<CHeli*>(this)->m_fAccelerationBreakStatus == 0.0f))
             {
                 if ((m_wMiscComponentAngle == 0.0f || m_wMiscComponentAngle == m_wMiscComponentAnglePrev)
                     && !physicalFlags.bSubmergedInWater)
@@ -966,7 +966,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
             }
         }
 
-        if (bIsSubclassHeli() || bIsSubclassPlane() && m_vecMoveSpeed.SquaredMagnitude() < 0.1f)
+        if (IsSubHeli() || IsSubPlane() && m_vecMoveSpeed.SquaredMagnitude() < 0.1f)
             m_fBreakPedal = 1.0f;
         if (vehicleFlags.bRestingOnPhysical) 
             m_fBreakPedal = 0.5f;
@@ -1071,8 +1071,8 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         ProcessControlInputs(static_cast<uint8>(m_pDriver->m_nPedType));
 
     if (m_nStatus == STATUS_PLAYER) {
-        if (!bIsSubclassHeli()) {
-            if ((m_nModelIndex == MODEL_VORTEX || !bIsSubclassPlane())
+        if (!IsSubHeli()) {
+            if ((m_nModelIndex == MODEL_VORTEX || !IsSubPlane())
                 && m_nModelIndex != MODEL_SWATVAN
                 && m_nModelIndex != MODEL_RHINO)
                 DoDriveByShootings();
@@ -1081,7 +1081,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
 
     uint32 carLess3WheelCounter = CWorld::GetFocusedPlayerInfo().m_nCarLess3WheelCounter;
     m_vecCentreOfMass.z = m_pHandlingData->m_vecCentreOfMass.z;
-    if (carLess3WheelCounter > 500 && !bIsSubclassHeli() && !bIsSubclassPlane()) {
+    if (carLess3WheelCounter > 500 && !IsSubHeli() && !IsSubPlane()) {
         carLess3WheelCounter = std::min(carLess3WheelCounter - 500u, 1000u);
         float fCarLess3WheelCounter = static_cast<float>(carLess3WheelCounter) * 0.002f;
         const float boundMaxZ = colModel->m_boundBox.m_vecMax.z;
@@ -1097,13 +1097,13 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         }
     }
 
-    if (!pad || m_nNumContactWheels != 0 || bIsSubclassHeli() || bIsSubclassPlane()) {
+    if (!pad || m_nNumContactWheels != 0 || IsSubHeli() || IsSubPlane()) {
         DoSoftGroundResistance(extraHandlingFlags);
         return false;
     }
 
     float carWeightMult = 0.0007f;
-    if (bIsMonsterTruck())
+    if (IsSubMonsterTruck())
         carWeightMult = 0.0025f;
     else
         carWeightMult *= CStats::GetFatAndMuscleModifier(STAT_MOD_DRIVING_SKILL);
@@ -2016,7 +2016,7 @@ bool CAutomobile::UpdateMovingCollision(float angle)
             if (carNodeMisc)
                 rotMatrix.SetRotateX(m_wMiscComponentAngle * DOZER_COL_ANGLE_MULT);
         }
-        else if (ModelIndices::IsDumper(m_nModelIndex) && bIsMonsterTruck()) {
+        else if (ModelIndices::IsDumper(m_nModelIndex) && IsSubMonsterTruck()) {
             carNodeMisc = m_aCarNodes[CAR_MISC_C];
             if (carNodeMisc)
                 rotMatrix.SetRotateX(m_wMiscComponentAngle * CMonsterTruck::DUMPER_COL_ANGLEMULT);
@@ -2675,7 +2675,7 @@ void CAutomobile::ProcessBuoyancy()
         return; // The loop above is pretty much an overcomplicated NOP.
     }
 
-    if (bIsSubclassPlane() && m_vecMoveSpeed.z < -1.0F) {
+    if (IsSubPlane() && m_vecMoveSpeed.z < -1.0F) {
         BlowUpCar(this, false);
     }
 
@@ -2782,7 +2782,7 @@ inline void CAutomobile::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver)
     if (!ped->IsPlayer() && npcFlags.bIgnoreWater)
         return;
 
-    if (!bIsSubclassQuad() || IsAnyWheelMakingContactWithGround()) {
+    if (!IsSubQuad() || IsAnyWheelMakingContactWithGround()) {
         if (ped->IsPlayer())
             static_cast<CPlayerPed*>(ped)->HandlePlayerBreath(true, 1.0F);
         else {
@@ -3208,7 +3208,7 @@ void CAutomobile::PlaceOnRoadProperly()
     CVector vecNewPos = (vecFrontCheck * fEndY + vecRearCheck * fStartY) / fLength;
     SetPosn(vecNewPos);
 
-    if (bIsSubclassPlane())
+    if (IsSubPlane())
         static_cast<CPlane*>(this)->m_planeCreationHeading = CGeneral::GetATanOfXY(GetForward().x, GetForward().y);
 }
 
@@ -3257,9 +3257,10 @@ bool CAutomobile::RcbanditCheck1CarWheels(CPtrList& ptrlist)
     for (CPtrNode* node = ptrlist.m_node; node; node = next) {
         next = node->m_next;
         CAutomobile* vehicle = (CAutomobile*)node->m_item;
-        if (node->m_item != this && vehicle->fIsAutomobile()) {
+        if (node->m_item != this && vehicle->IsAutomobile()) {
             if (!ModelIndices::IsRCBandit(vehicle->m_nModelIndex) && vehicle->m_nScanCode != GetCurrentScanCode())
                 continue;
+
             CVector distance = GetPosition() - vehicle->GetPosition();
             if (distance.x < 10.0f && distance.y < 10.0f) {
                 auto modelInfo = CModelInfo::GetModelInfo(vehicle->m_nModelIndex)->AsVehicleModelInfoPtr();

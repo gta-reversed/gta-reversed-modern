@@ -390,7 +390,7 @@ void CBoat::FillBoatList()
 
     for (int32 iInd = 0; iInd < iVehNum; ++iInd) {
         auto vehicle = CPools::ms_pVehiclePool->GetAt(iInd);
-        if (!vehicle || !vehicle->fIsBoat())
+        if (!vehicle || !vehicle->IsBoat())
             continue;
 
         auto boat = static_cast<CBoat*>(vehicle);
