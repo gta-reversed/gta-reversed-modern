@@ -2497,7 +2497,7 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
     const auto playerGroup = CPedGroups::GetPedsGroup(playerPed);
     for (auto i = 0; i < vehPool->GetSize(); i++) {
         if (const auto veh = vehPool->GetAt(i)) {
-            if (playerGroup && veh->IsAnyOfPassengersFollowerOfGroup(*playerGroup))
+            if (playerGroup && veh->AreAnyOfPassengersFollowerOfGroup(*playerGroup))
                 continue;
 
             if (playerPed->m_pContactEntity == veh && !veh->IsBoat())
