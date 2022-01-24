@@ -1118,7 +1118,7 @@ void CWorld::SetCarsOnFire(float x, float y, float z, float radius, CEntity* fir
 }
 
 // 0x565B70
-bool CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState) {
+int32 CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState) {
     CEntity* objects[15]{};
     int16 count{};
     FindObjectsInRange(posn, radius, false, &count, (uint16)std::size(objects), objects, true, false, false, false, false);
@@ -1133,7 +1133,7 @@ bool CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool 
 
         hasFoundTag = true;
 
-        outDir = entity->GetForward();
+        outDir = entity->GetMatrix().GetForward(); // Must use GetMatrix to make sure the matrix is allocated
 
         // Note: Original code has U.B. if `processTagAlphaState` is false, because `newAlpha` isn't assigned a meaningful value
         // But the only place this function is called has set `processTagAlphaState` to true, so..
