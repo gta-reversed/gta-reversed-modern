@@ -3,9 +3,9 @@
 
 void CLodAtomicModelInfo::InjectHooks()
 {
-    ReversibleHooks::Install("CLodAtomicModelInfo", "AsLodAtomicModelInfoPtr", 0x4C5610, &CLodAtomicModelInfo::AsLodAtomicModelInfoPtr_Reversed);
-    ReversibleHooks::Install("CLodAtomicModelInfo", "GetModelType", 0x4C5600, &CLodAtomicModelInfo::GetModelType_Reversed);
-    ReversibleHooks::Install("CLodAtomicModelInfo", "Init", 0x4C54D0, &CLodAtomicModelInfo::Init_Reversed);
+    Install("CLodAtomicModelInfo", "AsLodAtomicModelInfoPtr", 0x4C5610, &CLodAtomicModelInfo::AsLodAtomicModelInfoPtr_Reversed);
+    Install("CLodAtomicModelInfo", "GetModelType", 0x4C5600, &CLodAtomicModelInfo::GetModelType_Reversed);
+    Install("CLodAtomicModelInfo", "Init", 0x4C54D0, &CLodAtomicModelInfo::Init_Reversed);
 }
 
 CLodAtomicModelInfo::CLodAtomicModelInfo() : CAtomicModelInfo()

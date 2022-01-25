@@ -4,8 +4,8 @@ int32& gBuildings = *(int32*)0xB71804;
 
 void CBuilding::InjectHooks()
 {
-    ReversibleHooks::Install("CBuilding", "ReplaceWithNewModel", 0x403EC0, &CBuilding::ReplaceWithNewModel);
-    ReversibleHooks::Install("CBuilding", "IsBuildingPointerValid", 0x4040E0, &IsBuildingPointerValid);
+    Install("CBuilding", "ReplaceWithNewModel", 0x403EC0, &CBuilding::ReplaceWithNewModel);
+    Install("CBuilding", "IsBuildingPointerValid", 0x4040E0, &IsBuildingPointerValid);
 }
 
 CBuilding::CBuilding() : CEntity()

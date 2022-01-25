@@ -16,9 +16,9 @@ typedef struct tNodeNamePlugin {
 } NodeNamePluginInstance;
 
 void NodeNamePlugin::InjectHooks() {
-    ReversibleHooks::Install("NodeNamePlugin", "NodeNamePluginAttach", 0x72FAB0, &NodeNamePluginAttach);
-    ReversibleHooks::Install("NodeNamePlugin", "GetFrameNodeName", 0x72FB30, &GetFrameNodeName);
-    ReversibleHooks::Install("NodeNamePlugin", "SetFrameNodeName", 0x72FB00, &SetFrameNodeName);
+    Install("NodeNamePlugin", "NodeNamePluginAttach", 0x72FAB0, &NodeNamePluginAttach);
+    Install("NodeNamePlugin", "GetFrameNodeName", 0x72FB30, &GetFrameNodeName);
+    Install("NodeNamePlugin", "SetFrameNodeName", 0x72FB00, &SetFrameNodeName);
 }
 
 // internal

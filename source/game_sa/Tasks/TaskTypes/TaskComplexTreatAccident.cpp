@@ -9,13 +9,13 @@
 
 void CTaskComplexTreatAccident::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskComplexTreatAccident", "Constructor", 0x658AB0, &CTaskComplexTreatAccident::Constructor);
-    ReversibleHooks::Install("CTaskComplexTreatAccident", "CreateSubTask", 0x659E90, &CTaskComplexTreatAccident::CreateSubTask);
-    ReversibleHooks::Install("CTaskComplexTreatAccident", "ComputeHeading", 0x658AF0, &CTaskComplexTreatAccident::ComputeHeading);
-    ReversibleHooks::Install("CTaskComplexTreatAccident", "Clone", 0x659A90, &CTaskComplexTreatAccident::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexTreatAccident", "CreateFirstSubTask", 0x65A8F0, &CTaskComplexTreatAccident::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexTreatAccident", "CreateNextSubTask", 0x65A830, &CTaskComplexTreatAccident::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexTreatAccident", "ControlSubTask", 0x658B90, &CTaskComplexTreatAccident::ControlSubTask_Reversed);
+    Install("CTaskComplexTreatAccident", "Constructor", 0x658AB0, &CTaskComplexTreatAccident::Constructor);
+    Install("CTaskComplexTreatAccident", "CreateSubTask", 0x659E90, &CTaskComplexTreatAccident::CreateSubTask);
+    Install("CTaskComplexTreatAccident", "ComputeHeading", 0x658AF0, &CTaskComplexTreatAccident::ComputeHeading);
+    Install("CTaskComplexTreatAccident", "Clone", 0x659A90, &CTaskComplexTreatAccident::Clone_Reversed);
+    Install("CTaskComplexTreatAccident", "CreateFirstSubTask", 0x65A8F0, &CTaskComplexTreatAccident::CreateFirstSubTask_Reversed);
+    Install("CTaskComplexTreatAccident", "CreateNextSubTask", 0x65A830, &CTaskComplexTreatAccident::CreateNextSubTask_Reversed);
+    Install("CTaskComplexTreatAccident", "ControlSubTask", 0x658B90, &CTaskComplexTreatAccident::ControlSubTask_Reversed);
 }
 
 // 0x658AB0

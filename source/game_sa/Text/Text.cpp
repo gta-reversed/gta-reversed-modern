@@ -40,25 +40,25 @@ static constexpr uint8 FrenchUpperCaseTable[] = {
     };
 
 void CText::InjectHooks() {
-    //    ReversibleHooks::Install("CMissionTextOffsets", "Load", 0x69F670, &CMissionTextOffsets::Load);
+    //    Install("CMissionTextOffsets", "Load", 0x69F670, &CMissionTextOffsets::Load);
 
-    ReversibleHooks::Install("CData", "Unload", 0x69F640, &CData::Unload);
-    //    ReversibleHooks::Install("CData", "Load", 0x69F5D0, &CData::Load);
+    Install("CData", "Unload", 0x69F640, &CData::Unload);
+    //    Install("CData", "Load", 0x69F5D0, &CData::Load);
 
-    ReversibleHooks::Install("CKeyArray", "Unload", 0x69F510, &CKeyArray::Unload);
-    //    ReversibleHooks::Install("CKeyArray", "Load", 0x69F490, &CKeyArray::Load);
-    ReversibleHooks::Install("CKeyArray", "BinarySearch", 0x69F570, &CKeyArray::BinarySearch);
-    ReversibleHooks::Install("CKeyArray", "Search", 0x6A0000, &CKeyArray::Search);
+    Install("CKeyArray", "Unload", 0x69F510, &CKeyArray::Unload);
+    //    Install("CKeyArray", "Load", 0x69F490, &CKeyArray::Load);
+    Install("CKeyArray", "BinarySearch", 0x69F570, &CKeyArray::BinarySearch);
+    Install("CKeyArray", "Search", 0x6A0000, &CKeyArray::Search);
 
-    ReversibleHooks::Install("CText", "CText", 0x6A00F0, &CText::Constructor);
-    ReversibleHooks::Install("CText", "~CText", 0x6A0140, &CText::Destructor);
-    ReversibleHooks::Install("CText", "Get", 0x6A0050, &CText::Get);
-    ReversibleHooks::Install("CText", "GetNameOfLoadedMissionText", 0x69FBD0, &CText::GetNameOfLoadedMissionText);
-    //    ReversibleHooks::Install("CText", "ReadChunkHeader", 0x69F940, &CText::ReadChunkHeader);
-    //    ReversibleHooks::Install("CText", "LoadMissionPackText", 0x69F9A0, &CText::LoadMissionPackText);
-    //    ReversibleHooks::Install("CText", "LoadMissionText", 0x69FBF0, &CText::LoadMissionText);
-    ReversibleHooks::Install("CText", "Load", 0x6A01A0, &CText::Load);
-    ReversibleHooks::Install("CText", "Unload", 0x69FF20, &CText::Unload);
+    Install("CText", "CText", 0x6A00F0, &CText::Constructor);
+    Install("CText", "~CText", 0x6A0140, &CText::Destructor);
+    Install("CText", "Get", 0x6A0050, &CText::Get);
+    Install("CText", "GetNameOfLoadedMissionText", 0x69FBD0, &CText::GetNameOfLoadedMissionText);
+    //    Install("CText", "ReadChunkHeader", 0x69F940, &CText::ReadChunkHeader);
+    //    Install("CText", "LoadMissionPackText", 0x69F9A0, &CText::LoadMissionPackText);
+    //    Install("CText", "LoadMissionText", 0x69FBF0, &CText::LoadMissionText);
+    Install("CText", "Load", 0x6A01A0, &CText::Load);
+    Install("CText", "Unload", 0x69FF20, &CText::Unload);
 }
 
 // 0x6A00F0

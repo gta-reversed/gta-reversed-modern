@@ -5,12 +5,12 @@ sReverbEnvironment (&gAudioZoneToReverbEnvironmentMap)[NUM_AUDIO_ENVIRONMENTS] =
 float (&gSoundDistAttenuationTable)[NUM_SOUND_DIST_ATTENUATION_ENTRIES] = *(float(*)[NUM_SOUND_DIST_ATTENUATION_ENTRIES])0x8AC270;
 
 void CAEAudioEnvironment::InjectHooks() {
-    ReversibleHooks::Install("CAEAudioEnvironment", "GetDopplerRelativeFrequency", 0x4D7E40, &CAEAudioEnvironment::GetDopplerRelativeFrequency);
-    ReversibleHooks::Install("CAEAudioEnvironment", "GetDistanceAttenuation", 0x4D7F20, &CAEAudioEnvironment::GetDistanceAttenuation);
-    ReversibleHooks::Install("CAEAudioEnvironment", "GetDirectionalMikeAttenuation", 0x4D7F60, &CAEAudioEnvironment::GetDirectionalMikeAttenuation);
-    ReversibleHooks::Install("CAEAudioEnvironment", "GetReverbEnvironmentAndDepth", 0x4D8010, &CAEAudioEnvironment::GetReverbEnvironmentAndDepth);
-    ReversibleHooks::Install("CAEAudioEnvironment", "GetPositionRelativeToCamera_vec", 0x4D80B0, static_cast<void(*)(CVector*, CVector*)>(&CAEAudioEnvironment::GetPositionRelativeToCamera));
-    ReversibleHooks::Install("CAEAudioEnvironment", "GetPositionRelativeToCamera_placeable", 0x4D8340, static_cast<void(*)(CVector*, CPlaceable*)>(&CAEAudioEnvironment::GetPositionRelativeToCamera));
+    Install("CAEAudioEnvironment", "GetDopplerRelativeFrequency", 0x4D7E40, &CAEAudioEnvironment::GetDopplerRelativeFrequency);
+    Install("CAEAudioEnvironment", "GetDistanceAttenuation", 0x4D7F20, &CAEAudioEnvironment::GetDistanceAttenuation);
+    Install("CAEAudioEnvironment", "GetDirectionalMikeAttenuation", 0x4D7F60, &CAEAudioEnvironment::GetDirectionalMikeAttenuation);
+    Install("CAEAudioEnvironment", "GetReverbEnvironmentAndDepth", 0x4D8010, &CAEAudioEnvironment::GetReverbEnvironmentAndDepth);
+    Install("CAEAudioEnvironment", "GetPositionRelativeToCamera_vec", 0x4D80B0, static_cast<void(*)(CVector*, CVector*)>(&CAEAudioEnvironment::GetPositionRelativeToCamera));
+    Install("CAEAudioEnvironment", "GetPositionRelativeToCamera_placeable", 0x4D8340, static_cast<void(*)(CVector*, CPlaceable*)>(&CAEAudioEnvironment::GetPositionRelativeToCamera));
 }
 
 float CAEAudioEnvironment::GetDopplerRelativeFrequency(float prevDist, float curDist, uint32 prevTime, uint32 curTime, float timeScale) {

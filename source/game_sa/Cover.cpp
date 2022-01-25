@@ -2,8 +2,8 @@
 
 void CCover::InjectHooks()
 {
-    ReversibleHooks::Install("CCover", "ShouldThisBuildingHaveItsCoverPointsCreated", 0x699230, &CCover::ShouldThisBuildingHaveItsCoverPointsCreated);
-    ReversibleHooks::Install("CCover", "FindCoverPointsForThisBuilding", 0x699120, &CCover::FindCoverPointsForThisBuilding);
+    Install("CCover", "ShouldThisBuildingHaveItsCoverPointsCreated", 0x699230, &CCover::ShouldThisBuildingHaveItsCoverPointsCreated);
+    Install("CCover", "FindCoverPointsForThisBuilding", 0x699120, &CCover::FindCoverPointsForThisBuilding);
 }
 
 void CCover::AddCoverPoint(int32 maxPeds, CEntity* coverEntity, CVector* position, char coverType, uint8 direction)

@@ -9,48 +9,48 @@ Do not delete this comment block. Respect others' work!
 void CBaseModelInfo::InjectHooks()
 {
 // Vtable
-    ReversibleHooks::Install("CBaseModelInfo", "AsAtomicModelInfoPtr", 0x4C4A80, &CBaseModelInfo::AsAtomicModelInfoPtr_Reversed);
-    ReversibleHooks::Install("CBaseModelInfo", "AsDamageAtomicModelInfoPtr", 0x4C4A90, &CBaseModelInfo::AsDamageAtomicModelInfoPtr_Reversed);
-    ReversibleHooks::Install("CBaseModelInfo", "AsLodAtomicModelInfoPtr", 0x4C4AA0, &CBaseModelInfo::AsLodAtomicModelInfoPtr_Reversed);
-    ReversibleHooks::Install("CBaseModelInfo", "GetTimeInfo", 0x4C4AB0, &CBaseModelInfo::GetTimeInfo_Reversed);
-    ReversibleHooks::Install("CBaseModelInfo", "Init", 0x4C4B10, &CBaseModelInfo::Init_Reversed);
-    ReversibleHooks::Install("CBaseModelInfo", "Shutdown", 0x4C4D50, &CBaseModelInfo::Shutdown_Reversed);
-    ReversibleHooks::Install("CBaseModelInfo", "SetAnimFile", 0x4C4AC0, &CBaseModelInfo::SetAnimFile_Reversed);
-    ReversibleHooks::Install("CBaseModelInfo", "ConvertAnimFileIndex", 0x4C4AD0, &CBaseModelInfo::ConvertAnimFileIndex_Reversed);
-    ReversibleHooks::Install("CBaseModelInfo", "GetAnimFileIndex", 0x4C4AE0, &CBaseModelInfo::GetAnimFileIndex_Reversed);
+    Install("CBaseModelInfo", "AsAtomicModelInfoPtr", 0x4C4A80, &CBaseModelInfo::AsAtomicModelInfoPtr_Reversed);
+    Install("CBaseModelInfo", "AsDamageAtomicModelInfoPtr", 0x4C4A90, &CBaseModelInfo::AsDamageAtomicModelInfoPtr_Reversed);
+    Install("CBaseModelInfo", "AsLodAtomicModelInfoPtr", 0x4C4AA0, &CBaseModelInfo::AsLodAtomicModelInfoPtr_Reversed);
+    Install("CBaseModelInfo", "GetTimeInfo", 0x4C4AB0, &CBaseModelInfo::GetTimeInfo_Reversed);
+    Install("CBaseModelInfo", "Init", 0x4C4B10, &CBaseModelInfo::Init_Reversed);
+    Install("CBaseModelInfo", "Shutdown", 0x4C4D50, &CBaseModelInfo::Shutdown_Reversed);
+    Install("CBaseModelInfo", "SetAnimFile", 0x4C4AC0, &CBaseModelInfo::SetAnimFile_Reversed);
+    Install("CBaseModelInfo", "ConvertAnimFileIndex", 0x4C4AD0, &CBaseModelInfo::ConvertAnimFileIndex_Reversed);
+    Install("CBaseModelInfo", "GetAnimFileIndex", 0x4C4AE0, &CBaseModelInfo::GetAnimFileIndex_Reversed);
 
 // Class methods
-    ReversibleHooks::Install("CBaseModelInfo", "SetTexDictionary", 0x4C4B40, &CBaseModelInfo::SetTexDictionary);
-    ReversibleHooks::Install("CBaseModelInfo", "ClearTexDictionary", 0x4C4B70, &CBaseModelInfo::ClearTexDictionary);
-    ReversibleHooks::Install("CBaseModelInfo", "AddTexDictionaryRef", 0x4C4B80, &CBaseModelInfo::AddTexDictionaryRef);
-    ReversibleHooks::Install("CBaseModelInfo", "RemoveTexDictionaryRef", 0x4C4B90, &CBaseModelInfo::RemoveTexDictionaryRef);
-    ReversibleHooks::Install("CBaseModelInfo", "AddRef", 0x4C4BA0, &CBaseModelInfo::AddRef);
-    ReversibleHooks::Install("CBaseModelInfo", "RemoveRef", 0x4C4BB0, &CBaseModelInfo::RemoveRef);
-    ReversibleHooks::Install("CBaseModelInfo", "SetColModel", 0x4C4BC0, &CBaseModelInfo::SetColModel);
-    ReversibleHooks::Install("CBaseModelInfo", "Init2dEffects", 0x4C4C20, &CBaseModelInfo::Init2dEffects);
-    ReversibleHooks::Install("CBaseModelInfo", "DeleteCollisionModel", 0x4C4C40, &CBaseModelInfo::DeleteCollisionModel);
-    ReversibleHooks::Install("CBaseModelInfo", "Get2dEffect", 0x4C4C70, &CBaseModelInfo::Get2dEffect);
-    ReversibleHooks::Install("CBaseModelInfo", "Add2dEffect", 0x4C4D20, &CBaseModelInfo::Add2dEffect);
+    Install("CBaseModelInfo", "SetTexDictionary", 0x4C4B40, &CBaseModelInfo::SetTexDictionary);
+    Install("CBaseModelInfo", "ClearTexDictionary", 0x4C4B70, &CBaseModelInfo::ClearTexDictionary);
+    Install("CBaseModelInfo", "AddTexDictionaryRef", 0x4C4B80, &CBaseModelInfo::AddTexDictionaryRef);
+    Install("CBaseModelInfo", "RemoveTexDictionaryRef", 0x4C4B90, &CBaseModelInfo::RemoveTexDictionaryRef);
+    Install("CBaseModelInfo", "AddRef", 0x4C4BA0, &CBaseModelInfo::AddRef);
+    Install("CBaseModelInfo", "RemoveRef", 0x4C4BB0, &CBaseModelInfo::RemoveRef);
+    Install("CBaseModelInfo", "SetColModel", 0x4C4BC0, &CBaseModelInfo::SetColModel);
+    Install("CBaseModelInfo", "Init2dEffects", 0x4C4C20, &CBaseModelInfo::Init2dEffects);
+    Install("CBaseModelInfo", "DeleteCollisionModel", 0x4C4C40, &CBaseModelInfo::DeleteCollisionModel);
+    Install("CBaseModelInfo", "Get2dEffect", 0x4C4C70, &CBaseModelInfo::Get2dEffect);
+    Install("CBaseModelInfo", "Add2dEffect", 0x4C4D20, &CBaseModelInfo::Add2dEffect);
 
 // Helpers
-    ReversibleHooks::Install("CBaseModelInfo", "GetIsDrawLast", 0x5328C0, &CBaseModelInfo::GetIsDrawLast);
-    ReversibleHooks::Install("CBaseModelInfo", "HasBeenPreRendered", 0x5328B0, &CBaseModelInfo::HasBeenPreRendered);
-    ReversibleHooks::Install("CBaseModelInfo", "HasComplexHierarchy", 0x4C4E00, &CBaseModelInfo::HasComplexHierarchy);
-    ReversibleHooks::Install("CBaseModelInfo", "IsBackfaceCulled", 0x5328F0, &CBaseModelInfo::IsBackfaceCulled);
-    ReversibleHooks::Install("CBaseModelInfo", "IsLod", 0x4C4A00, &CBaseModelInfo::IsLod);
-    ReversibleHooks::Install("CBaseModelInfo", "IsRoad", 0x4C4DF0, &CBaseModelInfo::IsRoad);
-    ReversibleHooks::Install("CBaseModelInfo", "SetHasBeenPreRendered", 0x4C42F0, &CBaseModelInfo::SetHasBeenPreRendered);
-    ReversibleHooks::Install("CBaseModelInfo", "SetIsLod", 0x4C4A10, &CBaseModelInfo::SetIsLod);
-    ReversibleHooks::Install("CBaseModelInfo", "SetOwnsColModel", 0x5328D0, &CBaseModelInfo::SetOwnsColModel);
-    ReversibleHooks::Install("CBaseModelInfo", "IncreaseAlpha", 0x532900, &CBaseModelInfo::IncreaseAlpha);
+    Install("CBaseModelInfo", "GetIsDrawLast", 0x5328C0, &CBaseModelInfo::GetIsDrawLast);
+    Install("CBaseModelInfo", "HasBeenPreRendered", 0x5328B0, &CBaseModelInfo::HasBeenPreRendered);
+    Install("CBaseModelInfo", "HasComplexHierarchy", 0x4C4E00, &CBaseModelInfo::HasComplexHierarchy);
+    Install("CBaseModelInfo", "IsBackfaceCulled", 0x5328F0, &CBaseModelInfo::IsBackfaceCulled);
+    Install("CBaseModelInfo", "IsLod", 0x4C4A00, &CBaseModelInfo::IsLod);
+    Install("CBaseModelInfo", "IsRoad", 0x4C4DF0, &CBaseModelInfo::IsRoad);
+    Install("CBaseModelInfo", "SetHasBeenPreRendered", 0x4C42F0, &CBaseModelInfo::SetHasBeenPreRendered);
+    Install("CBaseModelInfo", "SetIsLod", 0x4C4A10, &CBaseModelInfo::SetIsLod);
+    Install("CBaseModelInfo", "SetOwnsColModel", 0x5328D0, &CBaseModelInfo::SetOwnsColModel);
+    Install("CBaseModelInfo", "IncreaseAlpha", 0x532900, &CBaseModelInfo::IncreaseAlpha);
 
-    ReversibleHooks::Install("CBaseModelInfo", "IsBreakableStatuePart", 0x59F090, &CBaseModelInfo::IsBreakableStatuePart);
-    ReversibleHooks::Install("CBaseModelInfo", "IsTagModel", 0x49CC20, &CBaseModelInfo::IsTagModel);
+    Install("CBaseModelInfo", "IsBreakableStatuePart", 0x59F090, &CBaseModelInfo::IsBreakableStatuePart);
+    Install("CBaseModelInfo", "IsTagModel", 0x49CC20, &CBaseModelInfo::IsTagModel);
     // Hooking SwaysInWind function causes side effects
-    //ReversibleHooks::Install("CBaseModelInfo", "SwaysInWind", 0x4212C0, &CBaseModelInfo::SwaysInWind);
+    //Install("CBaseModelInfo", "SwaysInWind", 0x4212C0, &CBaseModelInfo::SwaysInWind);
 
 // Other
-    ReversibleHooks::Install("CBaseModelInfo", "SetBaseModelInfoFlags", 0x5B3AD0, &SetBaseModelInfoFlags);
+    Install("CBaseModelInfo", "SetBaseModelInfoFlags", 0x5B3AD0, &SetBaseModelInfoFlags);
 }
 
 //0x4C4A80

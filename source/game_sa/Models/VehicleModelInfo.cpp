@@ -35,94 +35,94 @@ CPool<CVehicleModelInfo::CVehicleStructure>*& CVehicleModelInfo::CVehicleStructu
 void CVehicleModelInfo::InjectHooks()
 {
 // ClinkedUpgradeList
-    ReversibleHooks::Install("CLinkedUpgradeList", "AddUpgradeLink", 0x4C74B0, &CLinkedUpgradeList::AddUpgradeLink);
-    ReversibleHooks::Install("CLinkedUpgradeList", "FindOtherUpgrade", 0x4C74D0, &CLinkedUpgradeList::FindOtherUpgrade);
+    Install("CLinkedUpgradeList", "AddUpgradeLink", 0x4C74B0, &CLinkedUpgradeList::AddUpgradeLink);
+    Install("CLinkedUpgradeList", "FindOtherUpgrade", 0x4C74D0, &CLinkedUpgradeList::FindOtherUpgrade);
 
 // VTable
-    ReversibleHooks::Install("CVehicleModelInfo", "GetModelType", 0x4C7650, &CVehicleModelInfo::GetModelType_Reversed);
-    ReversibleHooks::Install("CVehicleModelInfo", "Init", 0x4C7630, &CVehicleModelInfo::Init_Reversed);
-    ReversibleHooks::Install("CVehicleModelInfo", "DeleteRwObject", 0x4C9890, &CVehicleModelInfo::DeleteRwObject_Reversed);
-    ReversibleHooks::Install("CVehicleModelInfo", "CreateInstance", 0x4C9680, &CVehicleModelInfo::CreateInstance_Reversed);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetAnimFile", 0x4C7670, &CVehicleModelInfo::SetAnimFile_Reversed);
-    ReversibleHooks::Install("CVehicleModelInfo", "ConvertAnimFileIndex", 0x4C76D0, &CVehicleModelInfo::ConvertAnimFileIndex_Reversed);
-    ReversibleHooks::Install("CVehicleModelInfo", "GetAnimFileIndex", 0x4C7660, &CVehicleModelInfo::GetAnimFileIndex_Reversed);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetClump", 0x4C95C0, &CVehicleModelInfo::SetClump_Reversed);
+    Install("CVehicleModelInfo", "GetModelType", 0x4C7650, &CVehicleModelInfo::GetModelType_Reversed);
+    Install("CVehicleModelInfo", "Init", 0x4C7630, &CVehicleModelInfo::Init_Reversed);
+    Install("CVehicleModelInfo", "DeleteRwObject", 0x4C9890, &CVehicleModelInfo::DeleteRwObject_Reversed);
+    Install("CVehicleModelInfo", "CreateInstance", 0x4C9680, &CVehicleModelInfo::CreateInstance_Reversed);
+    Install("CVehicleModelInfo", "SetAnimFile", 0x4C7670, &CVehicleModelInfo::SetAnimFile_Reversed);
+    Install("CVehicleModelInfo", "ConvertAnimFileIndex", 0x4C76D0, &CVehicleModelInfo::ConvertAnimFileIndex_Reversed);
+    Install("CVehicleModelInfo", "GetAnimFileIndex", 0x4C7660, &CVehicleModelInfo::GetAnimFileIndex_Reversed);
+    Install("CVehicleModelInfo", "SetClump", 0x4C95C0, &CVehicleModelInfo::SetClump_Reversed);
 
 // Class methods
-    ReversibleHooks::Install("CVehicleModelInfo", "SetAtomicRenderCallbacks", 0x4C7B10, &CVehicleModelInfo::SetAtomicRenderCallbacks);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetVehicleComponentFlags", 0x4C7C10, &CVehicleModelInfo::SetVehicleComponentFlags);
-    ReversibleHooks::Install("CVehicleModelInfo", "GetWheelPosn", 0x4C7D20, &CVehicleModelInfo::GetWheelPosn);
-    ReversibleHooks::Install("CVehicleModelInfo", "GetOriginalCompPosition", 0x4C7DD0, &CVehicleModelInfo::GetOriginalCompPosition);
-    ReversibleHooks::Install("CVehicleModelInfo", "ChooseComponent", 0x4C8040, &CVehicleModelInfo::ChooseComponent);
-    ReversibleHooks::Install("CVehicleModelInfo", "ChooseSecondComponent", 0x4C8120, &CVehicleModelInfo::ChooseSecondComponent);
-    ReversibleHooks::Install("CVehicleModelInfo", "IsUpgradeAvailable", 0x4C8200, &CVehicleModelInfo::IsUpgradeAvailable);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetVehicleColour", 0x4C84B0, &CVehicleModelInfo::SetVehicleColour);
-    ReversibleHooks::Install("CVehicleModelInfo", "ChooseVehicleColour", 0x4C8500, &CVehicleModelInfo::ChooseVehicleColour);
-    ReversibleHooks::Install("CVehicleModelInfo", "GetNumRemaps", 0x4C86B0, &CVehicleModelInfo::GetNumRemaps);
-    ReversibleHooks::Install("CVehicleModelInfo", "AddRemap", 0x4C86D0, &CVehicleModelInfo::AddRemap);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetRenderPipelines", 0x4C8900, &CVehicleModelInfo::SetRenderPipelines);
-    ReversibleHooks::Install("CVehicleModelInfo", "GetCustomCarPlateText", 0x4C8970, &CVehicleModelInfo::GetCustomCarPlateText);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetCustomCarPlateText", 0x4C8980, &CVehicleModelInfo::SetCustomCarPlateText);
-    ReversibleHooks::Install("CVehicleModelInfo", "ReduceMaterialsInVehicle", 0x4C8BD0, &CVehicleModelInfo::ReduceMaterialsInVehicle);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetCarCustomPlate", 0x4C9450, &CVehicleModelInfo::SetCarCustomPlate);
-    ReversibleHooks::Install("CVehicleModelInfo", "DisableEnvMap", 0x4C97E0, &CVehicleModelInfo::DisableEnvMap);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetEnvMapCoeff", 0x4C9800, &CVehicleModelInfo::SetEnvMapCoeff);
-    ReversibleHooks::Install("CVehicleModelInfo", "GetNumDoors", 0x4C73C0, &CVehicleModelInfo::GetNumDoors);
-    ReversibleHooks::Install("CVehicleModelInfo", "PreprocessHierarchy", 0x4C8E60, &CVehicleModelInfo::PreprocessHierarchy);
+    Install("CVehicleModelInfo", "SetAtomicRenderCallbacks", 0x4C7B10, &CVehicleModelInfo::SetAtomicRenderCallbacks);
+    Install("CVehicleModelInfo", "SetVehicleComponentFlags", 0x4C7C10, &CVehicleModelInfo::SetVehicleComponentFlags);
+    Install("CVehicleModelInfo", "GetWheelPosn", 0x4C7D20, &CVehicleModelInfo::GetWheelPosn);
+    Install("CVehicleModelInfo", "GetOriginalCompPosition", 0x4C7DD0, &CVehicleModelInfo::GetOriginalCompPosition);
+    Install("CVehicleModelInfo", "ChooseComponent", 0x4C8040, &CVehicleModelInfo::ChooseComponent);
+    Install("CVehicleModelInfo", "ChooseSecondComponent", 0x4C8120, &CVehicleModelInfo::ChooseSecondComponent);
+    Install("CVehicleModelInfo", "IsUpgradeAvailable", 0x4C8200, &CVehicleModelInfo::IsUpgradeAvailable);
+    Install("CVehicleModelInfo", "SetVehicleColour", 0x4C84B0, &CVehicleModelInfo::SetVehicleColour);
+    Install("CVehicleModelInfo", "ChooseVehicleColour", 0x4C8500, &CVehicleModelInfo::ChooseVehicleColour);
+    Install("CVehicleModelInfo", "GetNumRemaps", 0x4C86B0, &CVehicleModelInfo::GetNumRemaps);
+    Install("CVehicleModelInfo", "AddRemap", 0x4C86D0, &CVehicleModelInfo::AddRemap);
+    Install("CVehicleModelInfo", "SetRenderPipelines", 0x4C8900, &CVehicleModelInfo::SetRenderPipelines);
+    Install("CVehicleModelInfo", "GetCustomCarPlateText", 0x4C8970, &CVehicleModelInfo::GetCustomCarPlateText);
+    Install("CVehicleModelInfo", "SetCustomCarPlateText", 0x4C8980, &CVehicleModelInfo::SetCustomCarPlateText);
+    Install("CVehicleModelInfo", "ReduceMaterialsInVehicle", 0x4C8BD0, &CVehicleModelInfo::ReduceMaterialsInVehicle);
+    Install("CVehicleModelInfo", "SetCarCustomPlate", 0x4C9450, &CVehicleModelInfo::SetCarCustomPlate);
+    Install("CVehicleModelInfo", "DisableEnvMap", 0x4C97E0, &CVehicleModelInfo::DisableEnvMap);
+    Install("CVehicleModelInfo", "SetEnvMapCoeff", 0x4C9800, &CVehicleModelInfo::SetEnvMapCoeff);
+    Install("CVehicleModelInfo", "GetNumDoors", 0x4C73C0, &CVehicleModelInfo::GetNumDoors);
+    Install("CVehicleModelInfo", "PreprocessHierarchy", 0x4C8E60, &CVehicleModelInfo::PreprocessHierarchy);
 
 // Static methods
-    ReversibleHooks::Install("CVehicleModelInfo", "SetupLightFlags", 0x4C8C90, &CVehicleModelInfo::SetupLightFlags);
-    ReversibleHooks::Install("CVehicleModelInfo", "ShutdownLightTexture", 0x4C7470, &CVehicleModelInfo::ShutdownLightTexture);
-    ReversibleHooks::Install("CVehicleModelInfo", "GetMaximumNumberOfPassengersFromNumberOfDoors", 0x4C89B0, &CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors);
-    ReversibleHooks::Install("CVehicleModelInfo", "UseCommonVehicleTexDicationary", 0x4C75A0, &CVehicleModelInfo::UseCommonVehicleTexDicationary);
-    ReversibleHooks::Install("CVehicleModelInfo", "StopUsingCommonVehicleTexDicationary", 0x4C75C0, &CVehicleModelInfo::StopUsingCommonVehicleTexDicationary);
-    ReversibleHooks::Install("CVehicleModelInfo", "FindTextureCB", 0x4C7510, &CVehicleModelInfo::FindTextureCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "MoveObjectsCB", 0x4C7700, &CVehicleModelInfo::MoveObjectsCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "ResetEditableMaterials", 0x4C8460, &CVehicleModelInfo::ResetEditableMaterials);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetEditableMaterials", 0x4C8430, &CVehicleModelInfo::SetEditableMaterials);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetEditableMaterialsCB_RpMaterial", 0x4C8220, static_cast<RpMaterial*(*)(RpMaterial*, void*)>(&CVehicleModelInfo::SetEditableMaterialsCB));
-    ReversibleHooks::Install("CVehicleModelInfo", "SetEditableMaterialsCB_RpAtomic", 0x4C83E0, static_cast<RpAtomic * (*)(RpAtomic*, void*)>(&CVehicleModelInfo::SetEditableMaterialsCB));
-    ReversibleHooks::Install("CVehicleModelInfo", "StoreAtomicUsedMaterialsCB", 0x4C8B60, &CVehicleModelInfo::StoreAtomicUsedMaterialsCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "HideDamagedAtomicCB", 0x4C7720, &CVehicleModelInfo::HideDamagedAtomicCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "HideAllComponentsAtomicCB", 0x4C7790, &CVehicleModelInfo::HideAllComponentsAtomicCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "HasAlphaMaterialCB", 0x4C77C0, &CVehicleModelInfo::HasAlphaMaterialCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetAtomicRendererCB", 0x4C77E0, &CVehicleModelInfo::SetAtomicRendererCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetAtomicRendererCB_RealHeli", 0x4C7870, &CVehicleModelInfo::SetAtomicRendererCB_RealHeli);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetAtomicRendererCB_Plane", 0x4C7930, &CVehicleModelInfo::SetAtomicRendererCB_Plane);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetAtomicRendererCB_Boat", 0x4C79A0, &CVehicleModelInfo::SetAtomicRendererCB_Boat);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetAtomicRendererCB_Heli", 0x4C7A30, &CVehicleModelInfo::SetAtomicRendererCB_Heli);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetAtomicRendererCB_Train", 0x4C7AA0, &CVehicleModelInfo::SetAtomicRendererCB_Train);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetAtomicFlagCB", 0x4C7B90, &CVehicleModelInfo::SetAtomicFlagCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "ClearAtomicFlagCB", 0x4C7BB0, &CVehicleModelInfo::ClearAtomicFlagCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "AddWheelUpgrade", 0x4C8700, &CVehicleModelInfo::AddWheelUpgrade);
-    ReversibleHooks::Install("CVehicleModelInfo", "GetNumWheelUpgrades", 0x4C8740, &CVehicleModelInfo::GetNumWheelUpgrades);
-    ReversibleHooks::Install("CVehicleModelInfo", "GetWheelUpgrade", 0x4C8750, &CVehicleModelInfo::GetWheelUpgrade);
-    ReversibleHooks::Install("CVehicleModelInfo", "DeleteVehicleColourTextures", 0x4C8770, &CVehicleModelInfo::DeleteVehicleColourTextures);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetDirtTextures", 0x5D5DB0, &CVehicleModelInfo::SetDirtTextures);
-    ReversibleHooks::Install("CVehicleModelInfo", "ShutdownEnvironmentMaps", 0x4C87D0, &CVehicleModelInfo::ShutdownEnvironmentMaps);
-    ReversibleHooks::Install("CVehicleModelInfo", "GetMatFXEffectMaterialCB", 0x4C8810, &CVehicleModelInfo::GetMatFXEffectMaterialCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetEnvironmentMapCB", 0x4C8840, &CVehicleModelInfo::SetEnvironmentMapCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetEnvMapCoeffCB", 0x4C88B0, &CVehicleModelInfo::SetEnvMapCoeffCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetRenderPipelinesCB", 0x4C88F4, &CVehicleModelInfo::SetRenderPipelinesCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "CollapseFramesCB", 0x4C8E30, &CVehicleModelInfo::CollapseFramesCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetEnvironmentMapAtomicCB", 0x4C9410, &CVehicleModelInfo::SetEnvironmentMapAtomicCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "SetEnvMapCoeffAtomicCB", 0x4C9430, &CVehicleModelInfo::SetEnvMapCoeffAtomicCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "AssignRemapTxd", 0x4C9360, &CVehicleModelInfo::AssignRemapTxd);
+    Install("CVehicleModelInfo", "SetupLightFlags", 0x4C8C90, &CVehicleModelInfo::SetupLightFlags);
+    Install("CVehicleModelInfo", "ShutdownLightTexture", 0x4C7470, &CVehicleModelInfo::ShutdownLightTexture);
+    Install("CVehicleModelInfo", "GetMaximumNumberOfPassengersFromNumberOfDoors", 0x4C89B0, &CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors);
+    Install("CVehicleModelInfo", "UseCommonVehicleTexDicationary", 0x4C75A0, &CVehicleModelInfo::UseCommonVehicleTexDicationary);
+    Install("CVehicleModelInfo", "StopUsingCommonVehicleTexDicationary", 0x4C75C0, &CVehicleModelInfo::StopUsingCommonVehicleTexDicationary);
+    Install("CVehicleModelInfo", "FindTextureCB", 0x4C7510, &CVehicleModelInfo::FindTextureCB);
+    Install("CVehicleModelInfo", "MoveObjectsCB", 0x4C7700, &CVehicleModelInfo::MoveObjectsCB);
+    Install("CVehicleModelInfo", "ResetEditableMaterials", 0x4C8460, &CVehicleModelInfo::ResetEditableMaterials);
+    Install("CVehicleModelInfo", "SetEditableMaterials", 0x4C8430, &CVehicleModelInfo::SetEditableMaterials);
+    Install("CVehicleModelInfo", "SetEditableMaterialsCB_RpMaterial", 0x4C8220, static_cast<RpMaterial*(*)(RpMaterial*, void*)>(&CVehicleModelInfo::SetEditableMaterialsCB));
+    Install("CVehicleModelInfo", "SetEditableMaterialsCB_RpAtomic", 0x4C83E0, static_cast<RpAtomic * (*)(RpAtomic*, void*)>(&CVehicleModelInfo::SetEditableMaterialsCB));
+    Install("CVehicleModelInfo", "StoreAtomicUsedMaterialsCB", 0x4C8B60, &CVehicleModelInfo::StoreAtomicUsedMaterialsCB);
+    Install("CVehicleModelInfo", "HideDamagedAtomicCB", 0x4C7720, &CVehicleModelInfo::HideDamagedAtomicCB);
+    Install("CVehicleModelInfo", "HideAllComponentsAtomicCB", 0x4C7790, &CVehicleModelInfo::HideAllComponentsAtomicCB);
+    Install("CVehicleModelInfo", "HasAlphaMaterialCB", 0x4C77C0, &CVehicleModelInfo::HasAlphaMaterialCB);
+    Install("CVehicleModelInfo", "SetAtomicRendererCB", 0x4C77E0, &CVehicleModelInfo::SetAtomicRendererCB);
+    Install("CVehicleModelInfo", "SetAtomicRendererCB_RealHeli", 0x4C7870, &CVehicleModelInfo::SetAtomicRendererCB_RealHeli);
+    Install("CVehicleModelInfo", "SetAtomicRendererCB_Plane", 0x4C7930, &CVehicleModelInfo::SetAtomicRendererCB_Plane);
+    Install("CVehicleModelInfo", "SetAtomicRendererCB_Boat", 0x4C79A0, &CVehicleModelInfo::SetAtomicRendererCB_Boat);
+    Install("CVehicleModelInfo", "SetAtomicRendererCB_Heli", 0x4C7A30, &CVehicleModelInfo::SetAtomicRendererCB_Heli);
+    Install("CVehicleModelInfo", "SetAtomicRendererCB_Train", 0x4C7AA0, &CVehicleModelInfo::SetAtomicRendererCB_Train);
+    Install("CVehicleModelInfo", "SetAtomicFlagCB", 0x4C7B90, &CVehicleModelInfo::SetAtomicFlagCB);
+    Install("CVehicleModelInfo", "ClearAtomicFlagCB", 0x4C7BB0, &CVehicleModelInfo::ClearAtomicFlagCB);
+    Install("CVehicleModelInfo", "AddWheelUpgrade", 0x4C8700, &CVehicleModelInfo::AddWheelUpgrade);
+    Install("CVehicleModelInfo", "GetNumWheelUpgrades", 0x4C8740, &CVehicleModelInfo::GetNumWheelUpgrades);
+    Install("CVehicleModelInfo", "GetWheelUpgrade", 0x4C8750, &CVehicleModelInfo::GetWheelUpgrade);
+    Install("CVehicleModelInfo", "DeleteVehicleColourTextures", 0x4C8770, &CVehicleModelInfo::DeleteVehicleColourTextures);
+    Install("CVehicleModelInfo", "SetDirtTextures", 0x5D5DB0, &CVehicleModelInfo::SetDirtTextures);
+    Install("CVehicleModelInfo", "ShutdownEnvironmentMaps", 0x4C87D0, &CVehicleModelInfo::ShutdownEnvironmentMaps);
+    Install("CVehicleModelInfo", "GetMatFXEffectMaterialCB", 0x4C8810, &CVehicleModelInfo::GetMatFXEffectMaterialCB);
+    Install("CVehicleModelInfo", "SetEnvironmentMapCB", 0x4C8840, &CVehicleModelInfo::SetEnvironmentMapCB);
+    Install("CVehicleModelInfo", "SetEnvMapCoeffCB", 0x4C88B0, &CVehicleModelInfo::SetEnvMapCoeffCB);
+    Install("CVehicleModelInfo", "SetRenderPipelinesCB", 0x4C88F4, &CVehicleModelInfo::SetRenderPipelinesCB);
+    Install("CVehicleModelInfo", "CollapseFramesCB", 0x4C8E30, &CVehicleModelInfo::CollapseFramesCB);
+    Install("CVehicleModelInfo", "SetEnvironmentMapAtomicCB", 0x4C9410, &CVehicleModelInfo::SetEnvironmentMapAtomicCB);
+    Install("CVehicleModelInfo", "SetEnvMapCoeffAtomicCB", 0x4C9430, &CVehicleModelInfo::SetEnvMapCoeffAtomicCB);
+    Install("CVehicleModelInfo", "AssignRemapTxd", 0x4C9360, &CVehicleModelInfo::AssignRemapTxd);
 
 // Setup
-    ReversibleHooks::Install("CVehicleModelInfo", "SetupCommonData", 0x5B8F00, &CVehicleModelInfo::SetupCommonData);
-    ReversibleHooks::Install("CVehicleModelInfo", "LoadVehicleColours", 0x5B6890, &CVehicleModelInfo::LoadVehicleColours);
-    ReversibleHooks::Install("CVehicleModelInfo", "LoadVehicleUpgrades", 0x5B65A0, &CVehicleModelInfo::LoadVehicleUpgrades);
-    ReversibleHooks::Install("CVehicleModelInfo", "LoadEnvironmentMaps", 0x4C8780, &CVehicleModelInfo::LoadEnvironmentMaps);
+    Install("CVehicleModelInfo", "SetupCommonData", 0x5B8F00, &CVehicleModelInfo::SetupCommonData);
+    Install("CVehicleModelInfo", "LoadVehicleColours", 0x5B6890, &CVehicleModelInfo::LoadVehicleColours);
+    Install("CVehicleModelInfo", "LoadVehicleUpgrades", 0x5B65A0, &CVehicleModelInfo::LoadVehicleUpgrades);
+    Install("CVehicleModelInfo", "LoadEnvironmentMaps", 0x4C8780, &CVehicleModelInfo::LoadEnvironmentMaps);
 
 // Other
-    ReversibleHooks::Install("CVehicleModelInfo", "HELP_IsValidCompRule", 0x4C7E10, &IsValidCompRule);
-    ReversibleHooks::Install("CVehicleModelInfo", "HELP_ChooseComponent", 0x4C7FB0, &::ChooseComponent);
-    ReversibleHooks::Install("CVehicleModelInfo", "HELP_CountCompsInRule", 0x4C7F80, &CountCompsInRule);
-    ReversibleHooks::Install("CVehicleModelInfo", "HELP_GetListOfComponentsNotUsedByRules", 0x4C7E50, &GetListOfComponentsNotUsedByRules);
-    ReversibleHooks::Install("CVehicleModelInfo", "HELP_RemoveWindowAlphaCB", 0x4C83B0, &RemoveWindowAlphaCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "HELP_GetOkAndDamagedAtomicCB", 0x4C7BD0, &GetOkAndDamagedAtomicCB);
-    ReversibleHooks::Install("CVehicleModelInfo", "HELP_atomicDefaultRenderCB", 0x7323C0, &atomicDefaultRenderCB);
+    Install("CVehicleModelInfo", "HELP_IsValidCompRule", 0x4C7E10, &IsValidCompRule);
+    Install("CVehicleModelInfo", "HELP_ChooseComponent", 0x4C7FB0, &::ChooseComponent);
+    Install("CVehicleModelInfo", "HELP_CountCompsInRule", 0x4C7F80, &CountCompsInRule);
+    Install("CVehicleModelInfo", "HELP_GetListOfComponentsNotUsedByRules", 0x4C7E50, &GetListOfComponentsNotUsedByRules);
+    Install("CVehicleModelInfo", "HELP_RemoveWindowAlphaCB", 0x4C83B0, &RemoveWindowAlphaCB);
+    Install("CVehicleModelInfo", "HELP_GetOkAndDamagedAtomicCB", 0x4C7BD0, &GetOkAndDamagedAtomicCB);
+    Install("CVehicleModelInfo", "HELP_atomicDefaultRenderCB", 0x7323C0, &atomicDefaultRenderCB);
 }
 
 CVehicleModelInfo::CVehicleModelInfo() : CClumpModelInfo()

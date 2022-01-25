@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
 void CEntityScanner::InjectHooks() {
-//    ReversibleHooks::Install("CEntityScanner", "Clear", 0x5FF9D0, &CEntityScanner::Clear);
-//    ReversibleHooks::Install("CEntityScanner", "ScanForEntitiesInRange", 0x5FFA20, &CEntityScanner::ScanForEntitiesInRange);
-    ReversibleHooks::Install("CEntityScanner", "GetClosestPedInRange", 0x5FFF20, &CEntityScanner::GetClosestPedInRange);
+//    Install("CEntityScanner", "Clear", 0x5FF9D0, &CEntityScanner::Clear);
+//    Install("CEntityScanner", "ScanForEntitiesInRange", 0x5FFA20, &CEntityScanner::ScanForEntitiesInRange);
+    Install("CEntityScanner", "GetClosestPedInRange", 0x5FFF20, &CEntityScanner::GetClosestPedInRange);
 }
 
 // 0x5FF9D0

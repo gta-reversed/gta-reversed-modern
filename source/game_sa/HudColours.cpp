@@ -3,12 +3,12 @@
 CHudColours& HudColour = *reinterpret_cast<CHudColours*>(0xBAB22C);
 
 void CHudColours::InjectHooks() {
-    ReversibleHooks::Install("CHudColours", "Constructor", 0x58FDA0, &CHudColours::Constructor);
-    ReversibleHooks::Install("CHudColours", "Destructor", 0x58FD90, &CHudColours::Destructor);
-    ReversibleHooks::Install("CHudColours", "SetRGBAValue", 0x58FD20, &CHudColours::SetRGBAValue);
-    ReversibleHooks::Install("CHudColours", "GetIntColour", 0x58FD50, &CHudColours::GetIntColour);
-    ReversibleHooks::Install("CHudColours", "GetRGB", 0x58FEA0, &CHudColours::GetRGB);
-    ReversibleHooks::Install("CHudColours", "GetRGBA", 0x58FEE0, &CHudColours::GetRGBA);
+    Install("CHudColours", "Constructor", 0x58FDA0, &CHudColours::Constructor);
+    Install("CHudColours", "Destructor", 0x58FD90, &CHudColours::Destructor);
+    Install("CHudColours", "SetRGBAValue", 0x58FD20, &CHudColours::SetRGBAValue);
+    Install("CHudColours", "GetIntColour", 0x58FD50, &CHudColours::GetIntColour);
+    Install("CHudColours", "GetRGB", 0x58FEA0, &CHudColours::GetRGB);
+    Install("CHudColours", "GetRGBA", 0x58FEE0, &CHudColours::GetRGBA);
 }
 
 // 0x58FDA0

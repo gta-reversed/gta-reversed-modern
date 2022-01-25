@@ -177,11 +177,11 @@ void CAETwinLoopSoundEntity::UpdateParameters_Reversed(CAESound* sound, int16 cu
 }
 
 void CAETwinLoopSoundEntity::InjectHooks() {
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "Initialise", 0x4F28A0, &CAETwinLoopSoundEntity::Initialise);
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "UpdateTwinLoopSound", 0x4F29A0, &CAETwinLoopSoundEntity::UpdateTwinLoopSound);
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "UpdateParameters", 0x4F2E90, &CAETwinLoopSoundEntity::UpdateParameters_Reversed);
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "SwapSounds", 0x4F2C10, &CAETwinLoopSoundEntity::SwapSounds);
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "StopSoundAndForget", 0x4F2960, &CAETwinLoopSoundEntity::StopSoundAndForget);
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "PlayTwinLoopSound", 0x4F2CB0, &CAETwinLoopSoundEntity::PlayTwinLoopSound);
-    ReversibleHooks::Install("CAETwinLoopSoundEntity", "DoSoundsSwitchThisFrame", 0x4F2CA0, &CAETwinLoopSoundEntity::DoSoundsSwitchThisFrame);
+    Install("CAETwinLoopSoundEntity", "Initialise", 0x4F28A0, &CAETwinLoopSoundEntity::Initialise);
+    Install("CAETwinLoopSoundEntity", "UpdateTwinLoopSound", 0x4F29A0, &CAETwinLoopSoundEntity::UpdateTwinLoopSound);
+    Install("CAETwinLoopSoundEntity", "UpdateParameters", 0x4F2E90, &CAETwinLoopSoundEntity::UpdateParameters_Reversed);
+    Install("CAETwinLoopSoundEntity", "SwapSounds", 0x4F2C10, &CAETwinLoopSoundEntity::SwapSounds);
+    Install("CAETwinLoopSoundEntity", "StopSoundAndForget", 0x4F2960, &CAETwinLoopSoundEntity::StopSoundAndForget);
+    Install("CAETwinLoopSoundEntity", "PlayTwinLoopSound", 0x4F2CB0, &CAETwinLoopSoundEntity::PlayTwinLoopSound);
+    Install("CAETwinLoopSoundEntity", "DoSoundsSwitchThisFrame", 0x4F2CA0, &CAETwinLoopSoundEntity::DoSoundsSwitchThisFrame);
 }

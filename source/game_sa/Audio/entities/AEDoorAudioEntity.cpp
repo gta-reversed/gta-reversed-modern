@@ -173,12 +173,12 @@ void CAEDoorAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
 }
 
 void CAEDoorAudioEntity::InjectHooks() {
-    ReversibleHooks::Install("CAEDoorAudioEntity", "StaticInitialise", 0x5B9A80, &CAEDoorAudioEntity::StaticInitialise);
-    ReversibleHooks::Install("CAEDoorAudioEntity", "Reset", 0x4DC6B0, &CAEDoorAudioEntity::Reset);
-    ReversibleHooks::Install("CAEDoorAudioEntity", "AddAudioEvent_1", 0x4DC9F0, static_cast<void (CAEDoorAudioEntity::*)(eAudioEvents, CPhysical*)>(&CAEDoorAudioEntity::AddAudioEvent));
-    ReversibleHooks::Install("CAEDoorAudioEntity", "AddAudioEvent_2", 0x4DC860, static_cast<void (CAEDoorAudioEntity::*)(eAudioEvents, CVector&, float, float)>(&CAEDoorAudioEntity::AddAudioEvent));
-    ReversibleHooks::Install("CAEDoorAudioEntity", "PlayDoorSound", 0x4DC6D0, &CAEDoorAudioEntity::PlayDoorSound);
-    ReversibleHooks::Install("CAEDoorAudioEntity", "UpdateParameters", 0x4DCA60, &CAEDoorAudioEntity::UpdateParameters_Reversed);
+    Install("CAEDoorAudioEntity", "StaticInitialise", 0x5B9A80, &CAEDoorAudioEntity::StaticInitialise);
+    Install("CAEDoorAudioEntity", "Reset", 0x4DC6B0, &CAEDoorAudioEntity::Reset);
+    Install("CAEDoorAudioEntity", "AddAudioEvent_1", 0x4DC9F0, static_cast<void (CAEDoorAudioEntity::*)(eAudioEvents, CPhysical*)>(&CAEDoorAudioEntity::AddAudioEvent));
+    Install("CAEDoorAudioEntity", "AddAudioEvent_2", 0x4DC860, static_cast<void (CAEDoorAudioEntity::*)(eAudioEvents, CVector&, float, float)>(&CAEDoorAudioEntity::AddAudioEvent));
+    Install("CAEDoorAudioEntity", "PlayDoorSound", 0x4DC6D0, &CAEDoorAudioEntity::PlayDoorSound);
+    Install("CAEDoorAudioEntity", "UpdateParameters", 0x4DCA60, &CAEDoorAudioEntity::UpdateParameters_Reversed);
 }
 
 void CAEDoorAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {

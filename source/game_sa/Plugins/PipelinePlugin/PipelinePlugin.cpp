@@ -5,9 +5,9 @@
 #include <rpworld.h>
 
 void PipelinePlugin::InjectHooks() {
-    ReversibleHooks::Install("PipelinePlugin", "PipelinePluginAttach", 0x72FBD0, &PipelinePluginAttach);
-    ReversibleHooks::Install("PipelinePlugin", "GetPipelineID", 0x72FC40, &GetPipelineID);
-    ReversibleHooks::Install("PipelinePlugin", "SetPipelineID", 0x72FC50, &SetPipelineID);
+    Install("PipelinePlugin", "PipelinePluginAttach", 0x72FBD0, &PipelinePluginAttach);
+    Install("PipelinePlugin", "GetPipelineID", 0x72FC40, &GetPipelineID);
+    Install("PipelinePlugin", "SetPipelineID", 0x72FC50, &SetPipelineID);
 }
 
 // internal

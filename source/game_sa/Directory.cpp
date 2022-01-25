@@ -4,16 +4,16 @@
 
 
 void CDirectory::InjectHooks() {
-    ReversibleHooks::Install("CDirectory", "CDirectory_Empty", 0x532290, static_cast<CDirectory*(CDirectory::*)()>(&CDirectory::Constructor));
-    ReversibleHooks::Install("CDirectory", "CDirectory_Capacity", 0x5322A0, static_cast<CDirectory*(CDirectory::*)(size_t)>(&CDirectory::Constructor));
-    ReversibleHooks::Install("CDirectory", "~CDirectory", 0x5322D0, &CDirectory::Destructor); 
-    ReversibleHooks::Install("CDirectory", "Init", 0x5322F0, &CDirectory::Init); 
-    ReversibleHooks::Install("CDirectory", "AddItem", 0x532310, &CDirectory::AddItem); 
-    ReversibleHooks::Install("CDirectory", "ReadDirFile", 0x532350, &CDirectory::ReadDirFile); 
-    ReversibleHooks::Install("CDirectory", "WriteDirFile", 0x532410, &CDirectory::WriteDirFile); 
-    ReversibleHooks::Install("CDirectory", "FindItem", 0x532450, static_cast<DirectoryInfo*(CDirectory::*)(const char*)>(&CDirectory::FindItem)); 
-    ReversibleHooks::Install("CDirectory", "FindItem_ByName", 0x5324A0, static_cast<bool(CDirectory::*)(const char*, uint32&, uint32&)>(&CDirectory::FindItem));
-    ReversibleHooks::Install("CDirectory", "FindItem_ByHash", 0x5324D0, static_cast<bool(CDirectory::*)(uint32, uint32&, uint32&)>(&CDirectory::FindItem));
+    Install("CDirectory", "CDirectory_Empty", 0x532290, static_cast<CDirectory*(CDirectory::*)()>(&CDirectory::Constructor));
+    Install("CDirectory", "CDirectory_Capacity", 0x5322A0, static_cast<CDirectory*(CDirectory::*)(size_t)>(&CDirectory::Constructor));
+    Install("CDirectory", "~CDirectory", 0x5322D0, &CDirectory::Destructor); 
+    Install("CDirectory", "Init", 0x5322F0, &CDirectory::Init); 
+    Install("CDirectory", "AddItem", 0x532310, &CDirectory::AddItem); 
+    Install("CDirectory", "ReadDirFile", 0x532350, &CDirectory::ReadDirFile); 
+    Install("CDirectory", "WriteDirFile", 0x532410, &CDirectory::WriteDirFile); 
+    Install("CDirectory", "FindItem", 0x532450, static_cast<DirectoryInfo*(CDirectory::*)(const char*)>(&CDirectory::FindItem)); 
+    Install("CDirectory", "FindItem_ByName", 0x5324A0, static_cast<bool(CDirectory::*)(const char*, uint32&, uint32&)>(&CDirectory::FindItem));
+    Install("CDirectory", "FindItem_ByHash", 0x5324D0, static_cast<bool(CDirectory::*)(uint32, uint32&, uint32&)>(&CDirectory::FindItem));
 }
 
 // 0x532290

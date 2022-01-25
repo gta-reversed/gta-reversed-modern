@@ -9,17 +9,17 @@ Do not delete this comment block. Respect others' work!
 
 void CVector::InjectHooks()
 {
-    ReversibleHooks::Install("CVector", "Magnitude", 0x4082C0, &CVector::Magnitude);
-    ReversibleHooks::Install("CVector", "Magnitude2D", 0x406D50, &CVector::Magnitude2D);
-    ReversibleHooks::Install("CVector", "Normalise", 0x59C910, &CVector::Normalise);
-    ReversibleHooks::Install("CVector", "NormaliseAndMag", 0x59C970, &CVector::NormaliseAndMag);
-    ReversibleHooks::Install("CVector", "Cross", 0x70F890, &CVector::Cross);
-    ReversibleHooks::Install("CVector", "Sum", 0x40FDD0, &CVector::Sum);
-    ReversibleHooks::Install("CVector", "Difference", 0x40FE00, &CVector::Difference);
-    ReversibleHooks::Install("CVector", "FromMultiply", 0x59C670, &CVector::FromMultiply);
-    ReversibleHooks::Install("CVector", "FromMultiply3x3", 0x59C6D0, &CVector::FromMultiply3x3);
-    ReversibleHooks::Install("CVector", "global_CrossProduct_out", 0x59C730, static_cast<CVector*(*)(CVector*, CVector*, CVector*)>(&CrossProduct));
-    ReversibleHooks::Install("CVector", "global_DotProduct_vec*vec*", 0x59C6D0, static_cast<float(*)(CVector*, CVector*)>(&DotProduct));
+    Install("CVector", "Magnitude", 0x4082C0, &CVector::Magnitude);
+    Install("CVector", "Magnitude2D", 0x406D50, &CVector::Magnitude2D);
+    Install("CVector", "Normalise", 0x59C910, &CVector::Normalise);
+    Install("CVector", "NormaliseAndMag", 0x59C970, &CVector::NormaliseAndMag);
+    Install("CVector", "Cross", 0x70F890, &CVector::Cross);
+    Install("CVector", "Sum", 0x40FDD0, &CVector::Sum);
+    Install("CVector", "Difference", 0x40FE00, &CVector::Difference);
+    Install("CVector", "FromMultiply", 0x59C670, &CVector::FromMultiply);
+    Install("CVector", "FromMultiply3x3", 0x59C6D0, &CVector::FromMultiply3x3);
+    Install("CVector", "global_CrossProduct_out", 0x59C730, static_cast<CVector*(*)(CVector*, CVector*, CVector*)>(&CrossProduct));
+    Install("CVector", "global_DotProduct_vec*vec*", 0x59C6D0, static_cast<float(*)(CVector*, CVector*)>(&DotProduct));
 }
 
 CVector CVector::Random(float min, float max) {

@@ -12,7 +12,7 @@
 
 void CBike::InjectHooks()
 {
-    ReversibleHooks::Install("CBike", "ProcessBuoyancy", 0x6B5FB0, &CBike::ProcessBuoyancy);
+    Install("CBike", "ProcessBuoyancy", 0x6B5FB0, &CBike::ProcessBuoyancy);
 }
 
 // 0x6BF430

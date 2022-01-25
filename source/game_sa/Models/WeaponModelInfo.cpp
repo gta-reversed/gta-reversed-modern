@@ -2,9 +2,9 @@
 
 void CWeaponModelInfo::InjectHooks()
 {
-    ReversibleHooks::Install("CWeaponModelInfo", "GetModelType", 0x4C5780, &CWeaponModelInfo::GetModelType_Reversed);
-    ReversibleHooks::Install("CWeaponModelInfo", "Init", 0x4C98F0, &CWeaponModelInfo::Init_Reversed);
-    ReversibleHooks::Install("CWeaponModelInfo", "SetClump", 0x4C9910, &CWeaponModelInfo::SetClump_Reversed);
+    Install("CWeaponModelInfo", "GetModelType", 0x4C5780, &CWeaponModelInfo::GetModelType_Reversed);
+    Install("CWeaponModelInfo", "Init", 0x4C98F0, &CWeaponModelInfo::Init_Reversed);
+    Install("CWeaponModelInfo", "SetClump", 0x4C9910, &CWeaponModelInfo::SetClump_Reversed);
 }
 
 ModelInfoType CWeaponModelInfo::GetModelType()

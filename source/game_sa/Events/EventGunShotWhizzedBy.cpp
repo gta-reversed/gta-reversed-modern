@@ -2,8 +2,8 @@
 
 void CEventGunShotWhizzedBy::InjectHooks()
 {
-    ReversibleHooks::Install("CEventGunShotWhizzedBy", "Constructor", 0x4B1FD0, &CEventGunShotWhizzedBy::Constructor);
-    ReversibleHooks::Install("CEventGunShotWhizzedBy", "AffectsPed_Reversed", 0x4B5120, &CEventGunShotWhizzedBy::AffectsPed_Reversed);
+    Install("CEventGunShotWhizzedBy", "Constructor", 0x4B1FD0, &CEventGunShotWhizzedBy::Constructor);
+    Install("CEventGunShotWhizzedBy", "AffectsPed_Reversed", 0x4B5120, &CEventGunShotWhizzedBy::AffectsPed_Reversed);
 }
 
 CEventGunShotWhizzedBy::CEventGunShotWhizzedBy(CEntity* entity, CVector const& startPoint, CVector const& endPoint, bool bHasNoSound) :

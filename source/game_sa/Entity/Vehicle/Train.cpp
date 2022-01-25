@@ -26,7 +26,7 @@ float* StationDist = (float*)0xC38034;
 
 void CTrain::InjectHooks()
 {
-    ReversibleHooks::Install("CTrain", "ProcessControl", 0x6F86A0, &CTrain::ProcessControl_Reversed);
+    Install("CTrain", "ProcessControl", 0x6F86A0, &CTrain::ProcessControl_Reversed);
 }
 
 // 0x6F6030

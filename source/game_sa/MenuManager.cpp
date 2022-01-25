@@ -15,8 +15,8 @@ int32& CMenuManager::nLastMenuPage = *(int32*)0x8CDFF0;
 
 void CMenuManager::InjectHooks()
 {
-    ReversibleHooks::Install("CMenuManager", "Process", 0x57B440, &CMenuManager::Process);
-    ReversibleHooks::Install("CMenuManager", "ScrollRadioStations", 0x573A00, &CMenuManager::ScrollRadioStations);
+    Install("CMenuManager", "Process", 0x57B440, &CMenuManager::Process);
+    Install("CMenuManager", "ScrollRadioStations", 0x573A00, &CMenuManager::ScrollRadioStations);
 }
 
 // class functions

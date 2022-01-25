@@ -1,10 +1,10 @@
 #include "StdInc.h"
 
 void CStencilShadowObject::InjectHooks() {
-//    ReversibleHooks::Install("CStencilShadowObject", "Shutdown", 0x711390, &CStencilShadowObject::Shutdown);
-//    ReversibleHooks::Install("CStencilShadowObject", "Render", 0x710D50, &CStencilShadowObject::Render);
-//    ReversibleHooks::Install("CStencilShadowObject", "RenderForVehicle", 0x70FAE0, &CStencilShadowObject::RenderForVehicle);
-//    ReversibleHooks::Install("CStencilShadowObject", "RenderForObject", 0x710310, &CStencilShadowObject::RenderForObject);
+//    Install("CStencilShadowObject", "Shutdown", 0x711390, &CStencilShadowObject::Shutdown);
+//    Install("CStencilShadowObject", "Render", 0x710D50, &CStencilShadowObject::Render);
+//    Install("CStencilShadowObject", "RenderForVehicle", 0x70FAE0, &CStencilShadowObject::RenderForVehicle);
+//    Install("CStencilShadowObject", "RenderForObject", 0x710310, &CStencilShadowObject::RenderForObject);
 }
 
 // 0x711280

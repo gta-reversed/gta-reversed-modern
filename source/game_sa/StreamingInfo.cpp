@@ -3,13 +3,13 @@
 CStreamingInfo*& CStreamingInfo::ms_pArrayBase = *reinterpret_cast<CStreamingInfo**>(0x9654B4); // Just a pointer to `CStreaming::ms_aInfoForModel`
 
 void CStreamingInfo::InjectHooks() {
-    ReversibleHooks::Install("CStreamingInfo", "Init", 0x407460, &CStreamingInfo::Init);
-    ReversibleHooks::Install("CStreamingInfo", "AddToList", 0x407480, &CStreamingInfo::AddToList);
-    ReversibleHooks::Install("CStreamingInfo", "GetCdPosn", 0x407570, &CStreamingInfo::GetCdPosn);
-    ReversibleHooks::Install("CStreamingInfo", "SetCdPosnAndSize", 0x4075E0, &CStreamingInfo::SetCdPosnAndSize);
-    ReversibleHooks::Install("CStreamingInfo", "GetCdPosnAndSize", 0x4075A0, &CStreamingInfo::GetCdPosnAndSize);
-    ReversibleHooks::Install("CStreamingInfo", "InList", 0x407560, &CStreamingInfo::InList);
-    ReversibleHooks::Install("CStreamingInfo", "RemoveFromList", 0x4074E0, &CStreamingInfo::RemoveFromList);
+    Install("CStreamingInfo", "Init", 0x407460, &CStreamingInfo::Init);
+    Install("CStreamingInfo", "AddToList", 0x407480, &CStreamingInfo::AddToList);
+    Install("CStreamingInfo", "GetCdPosn", 0x407570, &CStreamingInfo::GetCdPosn);
+    Install("CStreamingInfo", "SetCdPosnAndSize", 0x4075E0, &CStreamingInfo::SetCdPosnAndSize);
+    Install("CStreamingInfo", "GetCdPosnAndSize", 0x4075A0, &CStreamingInfo::GetCdPosnAndSize);
+    Install("CStreamingInfo", "InList", 0x407560, &CStreamingInfo::InList);
+    Install("CStreamingInfo", "RemoveFromList", 0x4074E0, &CStreamingInfo::RemoveFromList);
 }
 
 // 0x407460

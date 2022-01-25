@@ -7,12 +7,12 @@
 void CTaskSimplePlayHandSignalAnim::InjectHooks()
 {
 // VIRTUAL
-    ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "Clone", 0x61B980, &CTaskSimplePlayHandSignalAnim::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "GetTaskType", 0x61AEA0, &CTaskSimplePlayHandSignalAnim::GetId_Reversed);
-    ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "MakeAbortable", 0x61AF50, &CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "ProcessPed", 0x61BDA0, &CTaskSimplePlayHandSignalAnim::ProcessPed_Reversed);
+    Install("CTaskSimplePlayHandSignalAnim", "Clone", 0x61B980, &CTaskSimplePlayHandSignalAnim::Clone_Reversed);
+    Install("CTaskSimplePlayHandSignalAnim", "GetTaskType", 0x61AEA0, &CTaskSimplePlayHandSignalAnim::GetId_Reversed);
+    Install("CTaskSimplePlayHandSignalAnim", "MakeAbortable", 0x61AF50, &CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed);
+    Install("CTaskSimplePlayHandSignalAnim", "ProcessPed", 0x61BDA0, &CTaskSimplePlayHandSignalAnim::ProcessPed_Reversed);
 // CLASS
-    ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "StartAnim", 0x61AF60, &CTaskSimplePlayHandSignalAnim::StartAnim);
+    Install("CTaskSimplePlayHandSignalAnim", "StartAnim", 0x61AF60, &CTaskSimplePlayHandSignalAnim::StartAnim);
 }
 
 CTaskSimplePlayHandSignalAnim::CTaskSimplePlayHandSignalAnim(AnimationId animationId, float fBlendFactor, bool bFatHands, bool bHoldLastFrame) : CTaskSimpleAnim(bHoldLastFrame)

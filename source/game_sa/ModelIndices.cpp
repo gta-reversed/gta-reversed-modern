@@ -170,8 +170,8 @@ namespace ModelIndices {
 }
 
 void ModelIndices::InjectHooks() {
-    ReversibleHooks::Install("ModelIndices", "InitModelIndices", 0x5BCA10, &InitModelIndices);
-    ReversibleHooks::Install("ModelIndices", "MatchAllModelStrings", 0x5B57C0, &MatchAllModelStrings);
+    Install("ModelIndices", "InitModelIndices", 0x5BCA10, &InitModelIndices);
+    Install("ModelIndices", "MatchAllModelStrings", 0x5B57C0, &MatchAllModelStrings);
 }
 
 // 0x5BCA10

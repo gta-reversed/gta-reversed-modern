@@ -4,23 +4,23 @@ CPedScriptedTaskRecordData(&CPedScriptedTaskRecord::ms_scriptedTasks)[TOTAL_SCRI
 
 void CPedScriptedTaskRecordData::InjectHooks()
 {
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Constructor",0x608330, &CPedScriptedTaskRecordData::Constructor);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "AssociateWithTask",0x608520, &CPedScriptedTaskRecordData::AssociateWithTask);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "AssociateWithEvent",0x608500, &CPedScriptedTaskRecordData::AssociateWithEvent);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Set_CEventScriptCommand",0x608390, static_cast<void(CPedScriptedTaskRecordData::*)(CPed*, int32, CEventScriptCommand*)>(&CPedScriptedTaskRecordData::Set));
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Set_CTask",0x6083E0, static_cast<void(CPedScriptedTaskRecordData::*)(CPed*, int32, CTask*)>(&CPedScriptedTaskRecordData::Set));
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "SetAsGroupTask",0x6084A0, &CPedScriptedTaskRecordData::SetAsGroupTask);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "SetAsAttractorScriptTask",0x608440, &CPedScriptedTaskRecordData::SetAsAttractorScriptTask);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Flush",0x608350, &CPedScriptedTaskRecordData::Flush);
+    Install("CPedScriptedTaskRecordData", "Constructor",0x608330, &CPedScriptedTaskRecordData::Constructor);
+    Install("CPedScriptedTaskRecordData", "AssociateWithTask",0x608520, &CPedScriptedTaskRecordData::AssociateWithTask);
+    Install("CPedScriptedTaskRecordData", "AssociateWithEvent",0x608500, &CPedScriptedTaskRecordData::AssociateWithEvent);
+    Install("CPedScriptedTaskRecordData", "Set_CEventScriptCommand",0x608390, static_cast<void(CPedScriptedTaskRecordData::*)(CPed*, int32, CEventScriptCommand*)>(&CPedScriptedTaskRecordData::Set));
+    Install("CPedScriptedTaskRecordData", "Set_CTask",0x6083E0, static_cast<void(CPedScriptedTaskRecordData::*)(CPed*, int32, CTask*)>(&CPedScriptedTaskRecordData::Set));
+    Install("CPedScriptedTaskRecordData", "SetAsGroupTask",0x6084A0, &CPedScriptedTaskRecordData::SetAsGroupTask);
+    Install("CPedScriptedTaskRecordData", "SetAsAttractorScriptTask",0x608440, &CPedScriptedTaskRecordData::SetAsAttractorScriptTask);
+    Install("CPedScriptedTaskRecordData", "Flush",0x608350, &CPedScriptedTaskRecordData::Flush);
 }
 
 void CPedScriptedTaskRecord::InjectHooks()
 {
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetRecordAssociatedWithEvent", 0x608580, &CPedScriptedTaskRecord::GetRecordAssociatedWithEvent);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetStatus_", 0x608750, static_cast<eScriptedTaskStatus(*)(CPed*)>(&CPedScriptedTaskRecord::GetStatus));
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetStatus_opcode", 0x608710, static_cast<eScriptedTaskStatus(*)(CPed*, int32)>(&CPedScriptedTaskRecord::GetStatus));
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetVacantSlot", 0x608540, &CPedScriptedTaskRecord::GetVacantSlot);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Process", 0x6085E0, &CPedScriptedTaskRecord::Process);
+    Install("CPedScriptedTaskRecordData", "GetRecordAssociatedWithEvent", 0x608580, &CPedScriptedTaskRecord::GetRecordAssociatedWithEvent);
+    Install("CPedScriptedTaskRecordData", "GetStatus_", 0x608750, static_cast<eScriptedTaskStatus(*)(CPed*)>(&CPedScriptedTaskRecord::GetStatus));
+    Install("CPedScriptedTaskRecordData", "GetStatus_opcode", 0x608710, static_cast<eScriptedTaskStatus(*)(CPed*, int32)>(&CPedScriptedTaskRecord::GetStatus));
+    Install("CPedScriptedTaskRecordData", "GetVacantSlot", 0x608540, &CPedScriptedTaskRecord::GetVacantSlot);
+    Install("CPedScriptedTaskRecordData", "Process", 0x6085E0, &CPedScriptedTaskRecord::Process);
 }
 
 CPedScriptedTaskRecordData::CPedScriptedTaskRecordData()

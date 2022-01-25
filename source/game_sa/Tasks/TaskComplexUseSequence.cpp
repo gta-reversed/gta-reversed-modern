@@ -2,13 +2,13 @@
 
 void CTaskComplexUseSequence::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskComplexUseSequence", "CTaskComplexUseSequence", 0x635450, &CTaskComplexUseSequence::Constructor);
-    ReversibleHooks::Install("CTaskComplexUseSequence", "Clone", 0x637100, &CTaskComplexUseSequence::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSequence", "GetTaskType", 0x635490, &CTaskComplexUseSequence::GetId_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSequence", "MakeAbortable", 0x639730, &CTaskComplexUseSequence::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSequence", "CreateNextSubTask", 0x6354A0, &CTaskComplexUseSequence::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSequence", "CreateFirstSubTask", 0x6354D0, &CTaskComplexUseSequence::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSequence", "ControlSubTask", 0x635530, &CTaskComplexUseSequence::ControlSubTask_Reversed);
+    Install("CTaskComplexUseSequence", "CTaskComplexUseSequence", 0x635450, &CTaskComplexUseSequence::Constructor);
+    Install("CTaskComplexUseSequence", "Clone", 0x637100, &CTaskComplexUseSequence::Clone_Reversed);
+    Install("CTaskComplexUseSequence", "GetTaskType", 0x635490, &CTaskComplexUseSequence::GetId_Reversed);
+    Install("CTaskComplexUseSequence", "MakeAbortable", 0x639730, &CTaskComplexUseSequence::MakeAbortable_Reversed);
+    Install("CTaskComplexUseSequence", "CreateNextSubTask", 0x6354A0, &CTaskComplexUseSequence::CreateNextSubTask_Reversed);
+    Install("CTaskComplexUseSequence", "CreateFirstSubTask", 0x6354D0, &CTaskComplexUseSequence::CreateFirstSubTask_Reversed);
+    Install("CTaskComplexUseSequence", "ControlSubTask", 0x635530, &CTaskComplexUseSequence::ControlSubTask_Reversed);
 }
 
 // 0x635450

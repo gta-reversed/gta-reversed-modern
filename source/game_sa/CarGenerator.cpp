@@ -11,14 +11,14 @@ CVector& CCarGenerator::m_HotdogVendorPositionOffset = *reinterpret_cast<CVector
 
 void CCarGenerator::InjectHooks()
 {
-    ReversibleHooks::Install("CCarGenerator", "CheckForBlockage", 0x6F32E0, &CCarGenerator::CheckForBlockage);
-    ReversibleHooks::Install("CCarGenerator", "CheckIfWithinRangeOfAnyPlayers", 0x6F2F40, &CCarGenerator::CheckIfWithinRangeOfAnyPlayers);
-    ReversibleHooks::Install("CCarGenerator", "DoInternalProcessing", 0x6F34D0, &CCarGenerator::DoInternalProcessing);
-    ReversibleHooks::Install("CCarGenerator", "Process", 0x6F3E90, &CCarGenerator::Process);
-    ReversibleHooks::Install("CCarGenerator", "Setup", 0x6F2E50, &CCarGenerator::Setup);
-    ReversibleHooks::Install("CCarGenerator", "SwitchOff", 0x6F2E30, &CCarGenerator::SwitchOff);
-    ReversibleHooks::Install("CCarGenerator", "SwitchOn", 0x6F32C0, &CCarGenerator::SwitchOn);
-    ReversibleHooks::Install("CCarGenerator", "CalcNextGen", 0x6F2E40, &CCarGenerator::CalcNextGen);
+    Install("CCarGenerator", "CheckForBlockage", 0x6F32E0, &CCarGenerator::CheckForBlockage);
+    Install("CCarGenerator", "CheckIfWithinRangeOfAnyPlayers", 0x6F2F40, &CCarGenerator::CheckIfWithinRangeOfAnyPlayers);
+    Install("CCarGenerator", "DoInternalProcessing", 0x6F34D0, &CCarGenerator::DoInternalProcessing);
+    Install("CCarGenerator", "Process", 0x6F3E90, &CCarGenerator::Process);
+    Install("CCarGenerator", "Setup", 0x6F2E50, &CCarGenerator::Setup);
+    Install("CCarGenerator", "SwitchOff", 0x6F2E30, &CCarGenerator::SwitchOff);
+    Install("CCarGenerator", "SwitchOn", 0x6F32C0, &CCarGenerator::SwitchOn);
+    Install("CCarGenerator", "CalcNextGen", 0x6F2E40, &CCarGenerator::CalcNextGen);
 }
 
 // 0x6F32E0

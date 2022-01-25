@@ -135,14 +135,14 @@ void CAEWaveDecoder::Destructor() {
 
 void CAEWaveDecoder::InjectHooks() {
 #ifndef USE_DEFAULT_FUNCTIONS
-    ReversibleHooks::Install("CAEWaveDecoder", "CAEWaveDecoder", 0x503250, &CAEWaveDecoder::Constructor);
-    ReversibleHooks::Install("CAEWaveDecoder", "~CAEWaveDecoder", 0x503290, &CAEWaveDecoder::Destructor);
-    ReversibleHooks::Install("CAEWaveDecoder", "Initialise", 0x5032b0, &CAEWaveDecoder::Initialise);
-    ReversibleHooks::Install("CAEWaveDecoder", "FillBuffer", 0x502470, &CAEWaveDecoder::FillBuffer);
-    ReversibleHooks::Install("CAEWaveDecoder", "GetStreamLengthMs", 0x503310, &CAEWaveDecoder::GetStreamLengthMs);
-    ReversibleHooks::Install("CAEWaveDecoder", "GetStreamPlayTimeMs", 0x503360, &CAEWaveDecoder::GetStreamPlayTimeMs);
-    ReversibleHooks::Install("CAEWaveDecoder", "SetCursor", 0x5033c0, &CAEWaveDecoder::SetCursor);
-    ReversibleHooks::Install("CAEWaveDecoder", "GetSampleRate", 0x503300, &CAEWaveDecoder::GetSampleRate);
-    ReversibleHooks::Install("CAEWaveDecoder", "GetStreamID", 0x503280, &CAEWaveDecoder::GetStreamID);
+    Install("CAEWaveDecoder", "CAEWaveDecoder", 0x503250, &CAEWaveDecoder::Constructor);
+    Install("CAEWaveDecoder", "~CAEWaveDecoder", 0x503290, &CAEWaveDecoder::Destructor);
+    Install("CAEWaveDecoder", "Initialise", 0x5032b0, &CAEWaveDecoder::Initialise);
+    Install("CAEWaveDecoder", "FillBuffer", 0x502470, &CAEWaveDecoder::FillBuffer);
+    Install("CAEWaveDecoder", "GetStreamLengthMs", 0x503310, &CAEWaveDecoder::GetStreamLengthMs);
+    Install("CAEWaveDecoder", "GetStreamPlayTimeMs", 0x503360, &CAEWaveDecoder::GetStreamPlayTimeMs);
+    Install("CAEWaveDecoder", "SetCursor", 0x5033c0, &CAEWaveDecoder::SetCursor);
+    Install("CAEWaveDecoder", "GetSampleRate", 0x503300, &CAEWaveDecoder::GetSampleRate);
+    Install("CAEWaveDecoder", "GetStreamID", 0x503280, &CAEWaveDecoder::GetStreamID);
 #endif
 }

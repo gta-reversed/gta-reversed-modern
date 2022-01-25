@@ -5,8 +5,8 @@
 cHandlingDataMgr& gHandlingDataMgr = *(cHandlingDataMgr*)0xC2B9C8;
 
 void cHandlingDataMgr::InjectHooks(){
-    ReversibleHooks::Install("cHandlingDataMgr", "ConvertBikeDataToWorldUnits", 0x6F5240, &cHandlingDataMgr::ConvertBikeDataToWorldUnits);
-    ReversibleHooks::Install("cHandlingDataMgr", "ConvertBikeDataToGameUnits", 0x6F5290, &cHandlingDataMgr::ConvertBikeDataToGameUnits);
+    Install("cHandlingDataMgr", "ConvertBikeDataToWorldUnits", 0x6F5240, &cHandlingDataMgr::ConvertBikeDataToWorldUnits);
+    Install("cHandlingDataMgr", "ConvertBikeDataToGameUnits", 0x6F5290, &cHandlingDataMgr::ConvertBikeDataToGameUnits);
 };
 
 tFlyingHandlingData* cHandlingDataMgr::GetFlyingPointer(uint8 handlingId)

@@ -1,10 +1,10 @@
 #include "StdInc.h"
 
 void CSpecialPlateHandler::InjectHooks() {
-    ReversibleHooks::Install("CSpecialPlateHandler", "Init", 0x6F2D10, &CSpecialPlateHandler::Init);
-    ReversibleHooks::Install("CSpecialPlateHandler", "Find", 0x6F2D30, &CSpecialPlateHandler::Find);
-    ReversibleHooks::Install("CSpecialPlateHandler", "Add", 0x6F2D90, &CSpecialPlateHandler::Add);
-    ReversibleHooks::Install("CSpecialPlateHandler", "Remove", 0x6F2DD0, &CSpecialPlateHandler::Remove);
+    Install("CSpecialPlateHandler", "Init", 0x6F2D10, &CSpecialPlateHandler::Init);
+    Install("CSpecialPlateHandler", "Find", 0x6F2D30, &CSpecialPlateHandler::Find);
+    Install("CSpecialPlateHandler", "Add", 0x6F2D90, &CSpecialPlateHandler::Add);
+    Install("CSpecialPlateHandler", "Remove", 0x6F2DD0, &CSpecialPlateHandler::Remove);
 }
 
 // unused

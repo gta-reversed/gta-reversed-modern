@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
 void CControllerState::InjectHooks() {
-    ReversibleHooks::Install("CControllerState", "Clear", 0x53EF80, &CControllerState::Clear);
-    ReversibleHooks::Install("CControllerState", "CheckForInput", 0x53EFF0, &CControllerState::CheckForInput);
+    Install("CControllerState", "Clear", 0x53EF80, &CControllerState::Clear);
+    Install("CControllerState", "CheckForInput", 0x53EFF0, &CControllerState::CheckForInput);
 }
 
 // 0x53EF80

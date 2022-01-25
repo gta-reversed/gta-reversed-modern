@@ -6,17 +6,17 @@ tPedColNodeInfo(&CPedModelInfo::m_pColNodeInfos)[NUM_PED_COL_NODE_INFOS] = *(tPe
 void CPedModelInfo::InjectHooks()
 {
     // VTABLE
-    ReversibleHooks::Install("CPedModelInfo", "GetModelType", 0x4C57C0, &CPedModelInfo::GetModelType_Reversed);
-    ReversibleHooks::Install("CPedModelInfo", "DeleteRwObject", 0x4C6C50, &CPedModelInfo::DeleteRwObject_Reversed);
-    ReversibleHooks::Install("CPedModelInfo", "SetClump", 0x4C7340, &CPedModelInfo::SetClump_Reversed);
+    Install("CPedModelInfo", "GetModelType", 0x4C57C0, &CPedModelInfo::GetModelType_Reversed);
+    Install("CPedModelInfo", "DeleteRwObject", 0x4C6C50, &CPedModelInfo::DeleteRwObject_Reversed);
+    Install("CPedModelInfo", "SetClump", 0x4C7340, &CPedModelInfo::SetClump_Reversed);
 
     // CLASS
-    ReversibleHooks::Install("CPedModelInfo", "AddXtraAtomics", 0x4C6D40, &CPedModelInfo::AddXtraAtomics);
-    ReversibleHooks::Install("CPedModelInfo", "SetFaceTexture", 0x4C6D50, &CPedModelInfo::SetFaceTexture);
-    ReversibleHooks::Install("CPedModelInfo", "CreateHitColModelSkinned", 0x4C6D90, &CPedModelInfo::CreateHitColModelSkinned);
-    ReversibleHooks::Install("CPedModelInfo", "AnimatePedColModelSkinned", 0x4C6F70, &CPedModelInfo::AnimatePedColModelSkinned);
-    ReversibleHooks::Install("CPedModelInfo", "AnimatePedColModelSkinnedWorld", 0x4C7170, &CPedModelInfo::AnimatePedColModelSkinnedWorld);
-    ReversibleHooks::Install("CPedModelInfo", "IncrementVoice", 0x4C7300, &CPedModelInfo::IncrementVoice);
+    Install("CPedModelInfo", "AddXtraAtomics", 0x4C6D40, &CPedModelInfo::AddXtraAtomics);
+    Install("CPedModelInfo", "SetFaceTexture", 0x4C6D50, &CPedModelInfo::SetFaceTexture);
+    Install("CPedModelInfo", "CreateHitColModelSkinned", 0x4C6D90, &CPedModelInfo::CreateHitColModelSkinned);
+    Install("CPedModelInfo", "AnimatePedColModelSkinned", 0x4C6F70, &CPedModelInfo::AnimatePedColModelSkinned);
+    Install("CPedModelInfo", "AnimatePedColModelSkinnedWorld", 0x4C7170, &CPedModelInfo::AnimatePedColModelSkinnedWorld);
+    Install("CPedModelInfo", "IncrementVoice", 0x4C7300, &CPedModelInfo::IncrementVoice);
 }
 
 ModelInfoType CPedModelInfo::GetModelType()

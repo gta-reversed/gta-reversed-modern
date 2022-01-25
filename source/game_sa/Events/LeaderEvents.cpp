@@ -12,32 +12,32 @@
 
 void CEventLeaderEnteredCarAsDriver::InjectHooks()
 {
-    ReversibleHooks::Install("CEventLeaderEnteredCarAsDriver", "CEventLeaderEnteredCarAsDriver", 0x48E1C0, &CEventLeaderEnteredCarAsDriver::Constructor);
-    ReversibleHooks::Install("CEventLeaderEnteredCarAsDriver", "AffectsPedGroup_Reversed", 0x4B0EF0, &CEventLeaderEnteredCarAsDriver::AffectsPedGroup_Reversed);
+    Install("CEventLeaderEnteredCarAsDriver", "CEventLeaderEnteredCarAsDriver", 0x48E1C0, &CEventLeaderEnteredCarAsDriver::Constructor);
+    Install("CEventLeaderEnteredCarAsDriver", "AffectsPedGroup_Reversed", 0x4B0EF0, &CEventLeaderEnteredCarAsDriver::AffectsPedGroup_Reversed);
 }
 
 void CEventLeaderExitedCarAsDriver::InjectHooks()
 {
-    ReversibleHooks::Install("CEventLeaderExitedCarAsDriver", "CEventLeaderExitedCarAsDriver", 0x4B8300, &CEventLeaderExitedCarAsDriver::Constructor);
-    ReversibleHooks::Install("CEventLeaderExitedCarAsDriver", "AffectsPedGroup_Reversed", 0x4B0F80, &CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed);
+    Install("CEventLeaderExitedCarAsDriver", "CEventLeaderExitedCarAsDriver", 0x4B8300, &CEventLeaderExitedCarAsDriver::Constructor);
+    Install("CEventLeaderExitedCarAsDriver", "AffectsPedGroup_Reversed", 0x4B0F80, &CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed);
 }
 
 void CEventLeaderQuitEnteringCarAsDriver::InjectHooks()
 {
-    ReversibleHooks::Install("CEventLeaderQuitEnteringCarAsDriver", "CEventLeaderQuitEnteringCarAsDriver", 0x63A110, &CEventLeaderQuitEnteringCarAsDriver::Constructor);
-    ReversibleHooks::Install("CEventLeaderQuitEnteringCarAsDriver", "AffectsPedGroup_Reversed", 0x4B1010, &CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed);
+    Install("CEventLeaderQuitEnteringCarAsDriver", "CEventLeaderQuitEnteringCarAsDriver", 0x63A110, &CEventLeaderQuitEnteringCarAsDriver::Constructor);
+    Install("CEventLeaderQuitEnteringCarAsDriver", "AffectsPedGroup_Reversed", 0x4B1010, &CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed);
 }
 
 void CEventAreaCodes::InjectHooks()
 {
-    ReversibleHooks::Install("CEventAreaCodes", "CEventAreaCodes", 0x4B2190, &CEventAreaCodes::Constructor);
-    ReversibleHooks::Install("CEventAreaCodes", "AffectsPed_Reversed", 0x4B2270, &CEventAreaCodes::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventAreaCodes", "TakesPriorityOver_Reversed", 0x4B2350, &CEventAreaCodes::TakesPriorityOver_Reversed);
+    Install("CEventAreaCodes", "CEventAreaCodes", 0x4B2190, &CEventAreaCodes::Constructor);
+    Install("CEventAreaCodes", "AffectsPed_Reversed", 0x4B2270, &CEventAreaCodes::AffectsPed_Reversed);
+    Install("CEventAreaCodes", "TakesPriorityOver_Reversed", 0x4B2350, &CEventAreaCodes::TakesPriorityOver_Reversed);
 }
 
 void CEventLeaderEntryExit::InjectHooks()
 {
-    ReversibleHooks::Install("CEventLeaderEntryExit", "CEventLeaderEntryExit", 0x43E1C0, &CEventLeaderEntryExit::Constructor);
+    Install("CEventLeaderEntryExit", "CEventLeaderEntryExit", 0x43E1C0, &CEventLeaderEntryExit::Constructor);
 }
 
 CEventLeaderEnteredCarAsDriver::CEventLeaderEnteredCarAsDriver(CVehicle* vehicle)

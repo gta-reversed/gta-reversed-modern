@@ -351,21 +351,21 @@ bool CFileMgr::GetErrorReadWrite(FILESTREAM file)
 
 void CFileMgr::InjectHooks()
 {
-    ReversibleHooks::Install("CFileMgr", "Initialise", 0x5386f0, &CFileMgr::Initialise);
-    ReversibleHooks::Install("CFileMgr", "ChangeDir", 0x538730, &CFileMgr::ChangeDir);
-    ReversibleHooks::Install("CFileMgr", "SetDir", 0x5387D0, &CFileMgr::SetDir);
-    ReversibleHooks::Install("CFileMgr", "SetDirMyDocuments", 0x538860, &CFileMgr::SetDirMyDocuments);
-    ReversibleHooks::Install("CFileMgr", "LoadFile", 0x538890, &CFileMgr::LoadFile);
-    ReversibleHooks::Install("CFileMgr", "OpenFile", 0x538900, &CFileMgr::OpenFile);
-    ReversibleHooks::Install("CFileMgr", "OpenFileForWriting", 0x538910, &CFileMgr::OpenFileForWriting);
-    ReversibleHooks::Install("CFileMgr", "OpenFileForAppending", 0x538930, &CFileMgr::OpenFileForAppending);
-    ReversibleHooks::Install("CFileMgr", "Read", 0x538950, &CFileMgr::Read);
-    ReversibleHooks::Install("CFileMgr", "Write", 0x538970, &CFileMgr::Write);
-    ReversibleHooks::Install("CFileMgr", "Seek", 0x538990, &CFileMgr::Seek);
-    ReversibleHooks::Install("CFileMgr", "ReadLine", 0x5389b0, &CFileMgr::ReadLine);
-    ReversibleHooks::Install("CFileMgr", "CloseFile", 0x5389d0, &CFileMgr::CloseFile);
-    ReversibleHooks::Install("CFileMgr", "GetFileLength", 0x5389e0, &CFileMgr::GetFileLength);
-    ReversibleHooks::Install("CFileMgr", "Tell", 0x538a20, &CFileMgr::Tell);
-    ReversibleHooks::Install("CFileMgr", "GetErrorReadWrite", 0x538a50, &CFileMgr::GetErrorReadWrite);
-    ReversibleHooks::Install("CFileMgr", "InitUserDirectories", 0x744fb0, &InitUserDirectories);
+    Install("CFileMgr", "Initialise", 0x5386f0, &CFileMgr::Initialise);
+    Install("CFileMgr", "ChangeDir", 0x538730, &CFileMgr::ChangeDir);
+    Install("CFileMgr", "SetDir", 0x5387D0, &CFileMgr::SetDir);
+    Install("CFileMgr", "SetDirMyDocuments", 0x538860, &CFileMgr::SetDirMyDocuments);
+    Install("CFileMgr", "LoadFile", 0x538890, &CFileMgr::LoadFile);
+    Install("CFileMgr", "OpenFile", 0x538900, &CFileMgr::OpenFile);
+    Install("CFileMgr", "OpenFileForWriting", 0x538910, &CFileMgr::OpenFileForWriting);
+    Install("CFileMgr", "OpenFileForAppending", 0x538930, &CFileMgr::OpenFileForAppending);
+    Install("CFileMgr", "Read", 0x538950, &CFileMgr::Read);
+    Install("CFileMgr", "Write", 0x538970, &CFileMgr::Write);
+    Install("CFileMgr", "Seek", 0x538990, &CFileMgr::Seek);
+    Install("CFileMgr", "ReadLine", 0x5389b0, &CFileMgr::ReadLine);
+    Install("CFileMgr", "CloseFile", 0x5389d0, &CFileMgr::CloseFile);
+    Install("CFileMgr", "GetFileLength", 0x5389e0, &CFileMgr::GetFileLength);
+    Install("CFileMgr", "Tell", 0x538a20, &CFileMgr::Tell);
+    Install("CFileMgr", "GetErrorReadWrite", 0x538a50, &CFileMgr::GetErrorReadWrite);
+    Install("CFileMgr", "InitUserDirectories", 0x744fb0, &InitUserDirectories);
 }

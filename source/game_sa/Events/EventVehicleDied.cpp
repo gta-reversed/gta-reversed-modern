@@ -2,9 +2,9 @@
 
 void CEventVehicleDied::InjectHooks()
 {
-    ReversibleHooks::Install("CEventVehicleDied", "Constructor", 0x4B0D10, &CEventVehicleDied::Constructor);
-    ReversibleHooks::Install("CEventVehicleDied", "Clone_Reversed", 0x4B76D0, &CEventVehicleDied::Clone_Reversed);
-    ReversibleHooks::Install("CEventVehicleDied", "AffectsPed_Reversed", 0x4B0E00, &CEventVehicleDied::AffectsPed_Reversed);
+    Install("CEventVehicleDied", "Constructor", 0x4B0D10, &CEventVehicleDied::Constructor);
+    Install("CEventVehicleDied", "Clone_Reversed", 0x4B76D0, &CEventVehicleDied::Clone_Reversed);
+    Install("CEventVehicleDied", "AffectsPed_Reversed", 0x4B0E00, &CEventVehicleDied::AffectsPed_Reversed);
 }
 
 CEventVehicleDied::CEventVehicleDied (CVehicle* vehicle)

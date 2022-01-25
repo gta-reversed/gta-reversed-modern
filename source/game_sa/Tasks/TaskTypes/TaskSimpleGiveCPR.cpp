@@ -4,13 +4,13 @@
 
 void CTaskSimpleGiveCPR::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleGiveCPR", "Constructor", 0x658860, &CTaskSimpleGiveCPR::Constructor);
-    ReversibleHooks::Install("CTaskSimpleGiveCPR", "ReviveDeadPed", 0x658900, &CTaskSimpleGiveCPR::ReviveDeadPed);
-    ReversibleHooks::Install("CTaskSimpleGiveCPR", "FinishGiveCPRAnimCB", 0x658910, &CTaskSimpleGiveCPR::FinishGiveCPRAnimCB);
+    Install("CTaskSimpleGiveCPR", "Constructor", 0x658860, &CTaskSimpleGiveCPR::Constructor);
+    Install("CTaskSimpleGiveCPR", "ReviveDeadPed", 0x658900, &CTaskSimpleGiveCPR::ReviveDeadPed);
+    Install("CTaskSimpleGiveCPR", "FinishGiveCPRAnimCB", 0x658910, &CTaskSimpleGiveCPR::FinishGiveCPRAnimCB);
     //VTABLE
-    ReversibleHooks::Install("CTaskSimpleGiveCPR", "Clone", 0x659A10, &CTaskSimpleGiveCPR::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGiveCPR", "ProcessPed", 0x65A7C0, &CTaskSimpleGiveCPR::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGiveCPR", "MakeAbortable", 0x6589B0, &CTaskSimpleGiveCPR::MakeAbortable_Reversed);
+    Install("CTaskSimpleGiveCPR", "Clone", 0x659A10, &CTaskSimpleGiveCPR::Clone_Reversed);
+    Install("CTaskSimpleGiveCPR", "ProcessPed", 0x65A7C0, &CTaskSimpleGiveCPR::ProcessPed_Reversed);
+    Install("CTaskSimpleGiveCPR", "MakeAbortable", 0x6589B0, &CTaskSimpleGiveCPR::MakeAbortable_Reversed);
 }
 
 CTaskSimpleGiveCPR* CTaskSimpleGiveCPR::Constructor(CAccident* pAccident)

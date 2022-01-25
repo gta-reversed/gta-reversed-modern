@@ -9,25 +9,25 @@ RxPipeline* &CTagManager::ms_pPipeline = *(RxPipeline**)0xA9AD78;
 
 void CTagManager::InjectHooks()
 {
-    ReversibleHooks::Install("CTagManager", "Init", 0x49CC50, &CTagManager::Init);
-    ReversibleHooks::Install("CTagManager", "ShutdownForRestart", 0x49CC60, &CTagManager::ShutdownForRestart);
-    ReversibleHooks::Install("CTagManager", "GetTagPos", 0x49CEA0, &CTagManager::GetTagPos);
-    ReversibleHooks::Install("CTagManager", "AddTag", 0x49CC90, &CTagManager::AddTag);
-    ReversibleHooks::Install("CTagManager", "FindTagDesc", 0x49CCB0, &CTagManager::FindTagDesc);
-    ReversibleHooks::Install("CTagManager", "IsTag", 0x49CCE0, &CTagManager::IsTag);
-    ReversibleHooks::Install("CTagManager", "SetAlpha_RpAtomic", 0x49CD30, static_cast<void(*)(RpAtomic*, uint8)>(&CTagManager::SetAlpha));
-    ReversibleHooks::Install("CTagManager", "GetAlpha_RpAtomic", 0x49CD40, static_cast<uint8(*)(RpAtomic*)>(&CTagManager::GetAlpha));
-    ReversibleHooks::Install("CTagManager", "GetAlpha_Entity", 0x49CF90, static_cast<uint8(*)(CEntity*)>(&CTagManager::GetAlpha));
-    ReversibleHooks::Install("CTagManager", "GetPercentageTagged", 0x49CDA0, &CTagManager::GetPercentageTagged);
-    ReversibleHooks::Install("CTagManager", "GetPercentageTaggedInArea", 0x49D0B0, &CTagManager::GetPercentageTaggedInArea);
-    ReversibleHooks::Install("CTagManager", "UpdateNumTagged", 0x49CDE0, &CTagManager::UpdateNumTagged);
-    ReversibleHooks::Install("CTagManager", "SetAlphaInArea", 0x49CFE0, &CTagManager::SetAlphaInArea);
-    ReversibleHooks::Install("CTagManager", "SetAlpha_Entity", 0x49CEC0, static_cast<void(*)(CEntity*, uint8)>(&CTagManager::SetAlpha));
-    ReversibleHooks::Install("CTagManager", "GetNearestTag", 0x49D160, &CTagManager::GetNearestTag);
-    ReversibleHooks::Install("CTagManager", "SetupAtomic", 0x49CE10, &CTagManager::SetupAtomic);
-    ReversibleHooks::Install("CTagManager", "RenderTagForPC", 0x49CE40, &CTagManager::RenderTagForPC);
-    ReversibleHooks::Install("CTagManager", "Save", 0x5D3D60, &CTagManager::Save);
-    ReversibleHooks::Install("CTagManager", "Load", 0x5D3DA0, &CTagManager::Load);
+    Install("CTagManager", "Init", 0x49CC50, &CTagManager::Init);
+    Install("CTagManager", "ShutdownForRestart", 0x49CC60, &CTagManager::ShutdownForRestart);
+    Install("CTagManager", "GetTagPos", 0x49CEA0, &CTagManager::GetTagPos);
+    Install("CTagManager", "AddTag", 0x49CC90, &CTagManager::AddTag);
+    Install("CTagManager", "FindTagDesc", 0x49CCB0, &CTagManager::FindTagDesc);
+    Install("CTagManager", "IsTag", 0x49CCE0, &CTagManager::IsTag);
+    Install("CTagManager", "SetAlpha_RpAtomic", 0x49CD30, static_cast<void(*)(RpAtomic*, uint8)>(&CTagManager::SetAlpha));
+    Install("CTagManager", "GetAlpha_RpAtomic", 0x49CD40, static_cast<uint8(*)(RpAtomic*)>(&CTagManager::GetAlpha));
+    Install("CTagManager", "GetAlpha_Entity", 0x49CF90, static_cast<uint8(*)(CEntity*)>(&CTagManager::GetAlpha));
+    Install("CTagManager", "GetPercentageTagged", 0x49CDA0, &CTagManager::GetPercentageTagged);
+    Install("CTagManager", "GetPercentageTaggedInArea", 0x49D0B0, &CTagManager::GetPercentageTaggedInArea);
+    Install("CTagManager", "UpdateNumTagged", 0x49CDE0, &CTagManager::UpdateNumTagged);
+    Install("CTagManager", "SetAlphaInArea", 0x49CFE0, &CTagManager::SetAlphaInArea);
+    Install("CTagManager", "SetAlpha_Entity", 0x49CEC0, static_cast<void(*)(CEntity*, uint8)>(&CTagManager::SetAlpha));
+    Install("CTagManager", "GetNearestTag", 0x49D160, &CTagManager::GetNearestTag);
+    Install("CTagManager", "SetupAtomic", 0x49CE10, &CTagManager::SetupAtomic);
+    Install("CTagManager", "RenderTagForPC", 0x49CE40, &CTagManager::RenderTagForPC);
+    Install("CTagManager", "Save", 0x5D3D60, &CTagManager::Save);
+    Install("CTagManager", "Load", 0x5D3DA0, &CTagManager::Load);
 }
 
 void CTagManager::Init()

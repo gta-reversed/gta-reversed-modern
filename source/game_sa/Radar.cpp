@@ -118,47 +118,47 @@ bool& CRadar::mapYouAreHereDisplay = *(bool*)0x8D0930;
 
 void CRadar::InjectHooks()
 {
-    ReversibleHooks::Install("CRadar", "LoadTextures", 0x5827D0, &CRadar::LoadTextures);
-    ReversibleHooks::Install("CRadar", "DrawLegend", 0x5828A0, &CRadar::DrawLegend);
-    ReversibleHooks::Install("CRadar", "LimitRadarPoint", 0x5832F0, &CRadar::LimitRadarPoint);
-    ReversibleHooks::Install("CRadar", "Shutdown", 0x585940, &CRadar::Shutdown);
-    ReversibleHooks::Install("CRadar", "SetMapCentreToPlayerCoords", 0x585B20, &CRadar::SetMapCentreToPlayerCoords);
-    ReversibleHooks::Install("CRadar", "InitFrontEndMap", 0x585960, &CRadar::InitFrontEndMap);
-    ReversibleHooks::Install("CRadar", "CalculateBlipAlpha", 0x583420, &CRadar::CalculateBlipAlpha);
-    //ReversibleHooks::Install("CRadar", "TransformRadarPointToScreenSpace", 0x583480, &CRadar::TransformRadarPointToScreenSpace);
-    ReversibleHooks::Install("CRadar", "TransformRealWorldPointToRadarSpace", 0x583530, &CRadar::TransformRealWorldPointToRadarSpace);
-    ReversibleHooks::Install("CRadar", "CalculateCachedSinCos", 0x583670, &CRadar::CalculateCachedSinCos);
-    ReversibleHooks::Install("CRadar", "SetBlipSprite", 0x583D70, &CRadar::SetBlipSprite); // OK
-    ReversibleHooks::Install("CRadar", "SetBlipAlwaysDisplayInZoom", 0x583DB0, &CRadar::SetBlipAlwaysDisplayInZoom);
-    ReversibleHooks::Install("CRadar", "DrawYouAreHereSprite", 0x584960, &CRadar::DrawYouAreHereSprite);
-    ReversibleHooks::Install("CRadar", "ChangeBlipColour", 0x583AB0, &CRadar::ChangeBlipColour);
-    ReversibleHooks::Install("CRadar", "ClearActualBlip", 0x587C10, &CRadar::ClearActualBlip);
-    ReversibleHooks::Install("CRadar", "ClearBlip", 0x587CE0, &CRadar::ClearBlip);
-    ReversibleHooks::Install("CRadar", "ClearBlipForEntity", 0x587C60, &CRadar::ClearBlipForEntity);
-    ReversibleHooks::Install("CRadar", "RequestMapSection", 0x584B50, &CRadar::RequestMapSection);
-    ReversibleHooks::Install("CRadar", "RemoveMapSection", 0x584BB0, &CRadar::RemoveMapSection);
-    ReversibleHooks::Install("CRadar", "RemoveRadarSections", 0x584BF0, &CRadar::RemoveRadarSections);
-    ReversibleHooks::Install("CRadar", "DrawRadarSprite", 0x585FF0, &CRadar::DrawRadarSprite); // OK
-    ReversibleHooks::Install("CRadar", "DrawMap", 0x586B00, &CRadar::DrawMap);
-    ReversibleHooks::Install("CRadar", "DrawRadarMap", 0x586880, &CRadar::DrawRadarMap);
-    ReversibleHooks::Install("CRadar", "StreamRadarSections", 0x5858D0, static_cast<void(*)(CVector const&)>(&CRadar::StreamRadarSections));
-    ReversibleHooks::Install("CRadar", "SetupRadarRect", 0x584A80, &CRadar::SetupRadarRect);
-    ReversibleHooks::Install("CRadar", "GetActualBlipArrayIndex", 0x582870, &CRadar::GetActualBlipArrayIndex);
-    ReversibleHooks::Install("CRadar", "LimitToMap", 0x583350, &CRadar::LimitToMap);
-    ReversibleHooks::Install("CRadar", "DrawRotatingRadarSprite", 0x5835A0, &CRadar::DrawRotatingRadarSprite);
-    ReversibleHooks::Install("CRadar", "SetBlipFriendly", 0x583EB0, &CRadar::SetBlipFriendly);
-    ReversibleHooks::Install("CRadar", "ChangeBlipDisplay", 0x583D20, &CRadar::ChangeBlipDisplay);
-    ReversibleHooks::Install("CRadar", "SetBlipEntryExit", 0x583F00, &CRadar::SetBlipEntryExit); // OK
-    ReversibleHooks::Install("CRadar", "SetShortRangeCoordBlip", 0x583920, &CRadar::SetShortRangeCoordBlip);
-    ReversibleHooks::Install("CRadar", "ChangeBlipScale", 0x583CC0, &CRadar::ChangeBlipScale);
-    ReversibleHooks::Install("CRadar", "GetRadarTraceColour", 0x584770, &CRadar::GetRadarTraceColour);
+    Install("CRadar", "LoadTextures", 0x5827D0, &CRadar::LoadTextures);
+    Install("CRadar", "DrawLegend", 0x5828A0, &CRadar::DrawLegend);
+    Install("CRadar", "LimitRadarPoint", 0x5832F0, &CRadar::LimitRadarPoint);
+    Install("CRadar", "Shutdown", 0x585940, &CRadar::Shutdown);
+    Install("CRadar", "SetMapCentreToPlayerCoords", 0x585B20, &CRadar::SetMapCentreToPlayerCoords);
+    Install("CRadar", "InitFrontEndMap", 0x585960, &CRadar::InitFrontEndMap);
+    Install("CRadar", "CalculateBlipAlpha", 0x583420, &CRadar::CalculateBlipAlpha);
+    //Install("CRadar", "TransformRadarPointToScreenSpace", 0x583480, &CRadar::TransformRadarPointToScreenSpace);
+    Install("CRadar", "TransformRealWorldPointToRadarSpace", 0x583530, &CRadar::TransformRealWorldPointToRadarSpace);
+    Install("CRadar", "CalculateCachedSinCos", 0x583670, &CRadar::CalculateCachedSinCos);
+    Install("CRadar", "SetBlipSprite", 0x583D70, &CRadar::SetBlipSprite); // OK
+    Install("CRadar", "SetBlipAlwaysDisplayInZoom", 0x583DB0, &CRadar::SetBlipAlwaysDisplayInZoom);
+    Install("CRadar", "DrawYouAreHereSprite", 0x584960, &CRadar::DrawYouAreHereSprite);
+    Install("CRadar", "ChangeBlipColour", 0x583AB0, &CRadar::ChangeBlipColour);
+    Install("CRadar", "ClearActualBlip", 0x587C10, &CRadar::ClearActualBlip);
+    Install("CRadar", "ClearBlip", 0x587CE0, &CRadar::ClearBlip);
+    Install("CRadar", "ClearBlipForEntity", 0x587C60, &CRadar::ClearBlipForEntity);
+    Install("CRadar", "RequestMapSection", 0x584B50, &CRadar::RequestMapSection);
+    Install("CRadar", "RemoveMapSection", 0x584BB0, &CRadar::RemoveMapSection);
+    Install("CRadar", "RemoveRadarSections", 0x584BF0, &CRadar::RemoveRadarSections);
+    Install("CRadar", "DrawRadarSprite", 0x585FF0, &CRadar::DrawRadarSprite); // OK
+    Install("CRadar", "DrawMap", 0x586B00, &CRadar::DrawMap);
+    Install("CRadar", "DrawRadarMap", 0x586880, &CRadar::DrawRadarMap);
+    Install("CRadar", "StreamRadarSections", 0x5858D0, static_cast<void(*)(CVector const&)>(&CRadar::StreamRadarSections));
+    Install("CRadar", "SetupRadarRect", 0x584A80, &CRadar::SetupRadarRect);
+    Install("CRadar", "GetActualBlipArrayIndex", 0x582870, &CRadar::GetActualBlipArrayIndex);
+    Install("CRadar", "LimitToMap", 0x583350, &CRadar::LimitToMap);
+    Install("CRadar", "DrawRotatingRadarSprite", 0x5835A0, &CRadar::DrawRotatingRadarSprite);
+    Install("CRadar", "SetBlipFriendly", 0x583EB0, &CRadar::SetBlipFriendly);
+    Install("CRadar", "ChangeBlipDisplay", 0x583D20, &CRadar::ChangeBlipDisplay);
+    Install("CRadar", "SetBlipEntryExit", 0x583F00, &CRadar::SetBlipEntryExit); // OK
+    Install("CRadar", "SetShortRangeCoordBlip", 0x583920, &CRadar::SetShortRangeCoordBlip);
+    Install("CRadar", "ChangeBlipScale", 0x583CC0, &CRadar::ChangeBlipScale);
+    Install("CRadar", "GetRadarTraceColour", 0x584770, &CRadar::GetRadarTraceColour);
 
     // unused
-    ReversibleHooks::Install("CRadar", "GetNewUniqueBlipIndex", 0x582820, &CRadar::GetNewUniqueBlipIndex);
-    ReversibleHooks::Install("CRadar", "TransformRadarPointToRealWorldSpace", 0x5835A0, &CRadar::TransformRadarPointToRealWorldSpace);
+    Install("CRadar", "GetNewUniqueBlipIndex", 0x582820, &CRadar::GetNewUniqueBlipIndex);
+    Install("CRadar", "TransformRadarPointToRealWorldSpace", 0x5835A0, &CRadar::TransformRadarPointToRealWorldSpace);
 
-    ReversibleHooks::Install("CRadar", "IsPointInsideRadar", 0x584D40, &IsPointInsideRadar);
-    ReversibleHooks::Install("common", "GetTextureCorners", 0x584D90, &GetTextureCorners);
+    Install("CRadar", "IsPointInsideRadar", 0x584D40, &IsPointInsideRadar);
+    Install("common", "GetTextureCorners", 0x584D90, &GetTextureCorners);
 }
 
 // 0x587FB0

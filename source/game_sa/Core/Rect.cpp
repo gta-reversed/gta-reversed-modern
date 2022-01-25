@@ -8,14 +8,14 @@
 
 void CRect::InjectHooks()
 {
-    ReversibleHooks::Install("CRect", "IsFlipped", 0x404190, &CRect::IsFlipped);
-    ReversibleHooks::Install("CRect", "Restrict", 0x404200, &CRect::Restrict);
-    ReversibleHooks::Install("CRect", "Resize", 0x404260, &CRect::Resize);
-    ReversibleHooks::Install("CRect", "IsPointInside", 0x404290, (bool(CRect::*)(CVector2D const&) const)&CRect::IsPointInside);
-    ReversibleHooks::Install("CRect", "IsPointInside_tolerance", 0x4042D0, (bool(CRect::*)(CVector2D const&, float) const)&CRect::IsPointInside);
-    ReversibleHooks::Install("CRect", "SetFromCenter", 0x43E020, &CRect::SetFromCenter);
-    ReversibleHooks::Install("CRect", "GetCenter", 0x43E050, (void(CRect::*)(float*, float*) const)&CRect::GetCenter);
-    ReversibleHooks::Install("CRect", "StretchToPoint", 0x5327F0, &CRect::StretchToPoint);
+    Install("CRect", "IsFlipped", 0x404190, &CRect::IsFlipped);
+    Install("CRect", "Restrict", 0x404200, &CRect::Restrict);
+    Install("CRect", "Resize", 0x404260, &CRect::Resize);
+    Install("CRect", "IsPointInside", 0x404290, (bool(CRect::*)(CVector2D const&) const)&CRect::IsPointInside);
+    Install("CRect", "IsPointInside_tolerance", 0x4042D0, (bool(CRect::*)(CVector2D const&, float) const)&CRect::IsPointInside);
+    Install("CRect", "SetFromCenter", 0x43E020, &CRect::SetFromCenter);
+    Install("CRect", "GetCenter", 0x43E050, (void(CRect::*)(float*, float*) const)&CRect::GetCenter);
+    Install("CRect", "StretchToPoint", 0x5327F0, &CRect::StretchToPoint);
 }
 
 CRect::CRect(float fLeft, float fTop, float fRight, float fBottom)

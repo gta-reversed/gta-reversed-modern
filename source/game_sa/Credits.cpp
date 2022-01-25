@@ -6,12 +6,12 @@ uint32& CCredits::CreditsStartTime = *(uint32*)0xC6E978;
 bool& CCredits::bCreditsGoing = *(bool*)0xC6E97C;
 
 void CCredits::InjectHooks() {
-    ReversibleHooks::Install("CCredits", "Render", 0x53D5B0, &CCredits::Render);
-    ReversibleHooks::Install("CCredits", "PrintCreditText", 0x5A8660, &CCredits::PrintCreditText);
-    ReversibleHooks::Install("CCredits", "PrintCreditSpace", 0x5A87C0, &CCredits::PrintCreditSpace);
-    ReversibleHooks::Install("CCredits", "RenderCredits", 0x5A87F0, &CCredits::RenderCredits);
-    ReversibleHooks::Install("CCredits", "Start", 0x7170E0, &CCredits::Start);
-    ReversibleHooks::Install("CCredits", "Stop", 0x717100, &CCredits::Stop);
+    Install("CCredits", "Render", 0x53D5B0, &CCredits::Render);
+    Install("CCredits", "PrintCreditText", 0x5A8660, &CCredits::PrintCreditText);
+    Install("CCredits", "PrintCreditSpace", 0x5A87C0, &CCredits::PrintCreditSpace);
+    Install("CCredits", "RenderCredits", 0x5A87F0, &CCredits::RenderCredits);
+    Install("CCredits", "Start", 0x7170E0, &CCredits::Start);
+    Install("CCredits", "Stop", 0x717100, &CCredits::Stop);
 }
 
 // 0x7170E0

@@ -14,9 +14,9 @@ int32& CCollision::ms_iProcessLineNumCrossings = *(int32*)0x9655D0;
 
 void CCollision::InjectHooks()
 {
-    ReversibleHooks::Install("CCollision", "CalculateTrianglePlanes_colData", 0x416330, static_cast<void(*)(CCollisionData*)>(&CCollision::CalculateTrianglePlanes));
-    ReversibleHooks::Install("CCollision", "RemoveTrianglePlanes_colData", 0x416400, static_cast<void(*)(CCollisionData*)>(&CCollision::RemoveTrianglePlanes));
-    ReversibleHooks::Install("CCollision", "ProcessLineOfSight", 0x417950, &CCollision::ProcessLineOfSight);
+    Install("CCollision", "CalculateTrianglePlanes_colData", 0x416330, static_cast<void(*)(CCollisionData*)>(&CCollision::CalculateTrianglePlanes));
+    Install("CCollision", "RemoveTrianglePlanes_colData", 0x416400, static_cast<void(*)(CCollisionData*)>(&CCollision::RemoveTrianglePlanes));
+    Install("CCollision", "ProcessLineOfSight", 0x417950, &CCollision::ProcessLineOfSight);
 }
 
 // 0x411E20

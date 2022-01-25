@@ -4,23 +4,23 @@
 void CProjectileInfo::InjectHooks() {
 
     // Destructors
-    // ReversibleHooks::Install("CProjectileInfo", "", , &CProjectileInfo::);
+    // Install("CProjectileInfo", "", , &CProjectileInfo::);
 
     // Static functions
-    // ReversibleHooks::Install("CProjectileInfo", "Initialise", 0x737B40, &CProjectileInfo::Initialise);
-    // ReversibleHooks::Install("CProjectileInfo", "Shutdown", 0x737BC0, &CProjectileInfo::Shutdown);
-    // ReversibleHooks::Install("CProjectileInfo", "GetProjectileInfo", 0x737BF0, &CProjectileInfo::GetProjectileInfo);
-    // ReversibleHooks::Install("CProjectileInfo", "RemoveNotAdd", 0x737C00, &CProjectileInfo::RemoveNotAdd);
-    // ReversibleHooks::Install("CProjectileInfo", "AddProjectile", 0x737C80, &CProjectileInfo::AddProjectile);
-    // ReversibleHooks::Install("CProjectileInfo", "RemoveDetonatorProjectiles", 0x738860, &CProjectileInfo::RemoveDetonatorProjectiles);
-    // ReversibleHooks::Install("CProjectileInfo", "RemoveProjectile", 0x7388F0, &CProjectileInfo::RemoveProjectile);
-    // ReversibleHooks::Install("CProjectileInfo", "Update", 0x738B20, &CProjectileInfo::Update);
-    // ReversibleHooks::Install("CProjectileInfo", "IsProjectileInRange", 0x739860, &CProjectileInfo::IsProjectileInRange);
-    // ReversibleHooks::Install("CProjectileInfo", "RemoveAllProjectiles", 0x7399B0, &CProjectileInfo::RemoveAllProjectiles);
-    // ReversibleHooks::Install("CProjectileInfo", "RemoveIfThisIsAProjectile", 0x739A40, &CProjectileInfo::RemoveIfThisIsAProjectile);
+    // Install("CProjectileInfo", "Initialise", 0x737B40, &CProjectileInfo::Initialise);
+    // Install("CProjectileInfo", "Shutdown", 0x737BC0, &CProjectileInfo::Shutdown);
+    // Install("CProjectileInfo", "GetProjectileInfo", 0x737BF0, &CProjectileInfo::GetProjectileInfo);
+    // Install("CProjectileInfo", "RemoveNotAdd", 0x737C00, &CProjectileInfo::RemoveNotAdd);
+    // Install("CProjectileInfo", "AddProjectile", 0x737C80, &CProjectileInfo::AddProjectile);
+    // Install("CProjectileInfo", "RemoveDetonatorProjectiles", 0x738860, &CProjectileInfo::RemoveDetonatorProjectiles);
+    // Install("CProjectileInfo", "RemoveProjectile", 0x7388F0, &CProjectileInfo::RemoveProjectile);
+    // Install("CProjectileInfo", "Update", 0x738B20, &CProjectileInfo::Update);
+    // Install("CProjectileInfo", "IsProjectileInRange", 0x739860, &CProjectileInfo::IsProjectileInRange);
+    // Install("CProjectileInfo", "RemoveAllProjectiles", 0x7399B0, &CProjectileInfo::RemoveAllProjectiles);
+    // Install("CProjectileInfo", "RemoveIfThisIsAProjectile", 0x739A40, &CProjectileInfo::RemoveIfThisIsAProjectile);
 
     // Methods
-    // ReversibleHooks::Install("CProjectileInfo", "RemoveFXSystem", 0x737B80, &CProjectileInfo::RemoveFXSystem);
+    // Install("CProjectileInfo", "RemoveFXSystem", 0x737B80, &CProjectileInfo::RemoveFXSystem);
 }
 
 // Static functions

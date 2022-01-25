@@ -4,11 +4,11 @@ CAccidentManager*& CAccidentManager::gAccidentManager = *(CAccidentManager * *)0
 
 void CAccidentManager::InjectHooks()
 {
-    ReversibleHooks::Install("CAccidentManager", "GetInstance", 0x56CF20, &CAccidentManager::GetInstance);
-    ReversibleHooks::Install("CAccidentManager", "ReportAccident", 0x56CE80, &CAccidentManager::ReportAccident);
-    ReversibleHooks::Install("CAccidentManager", "GetNumberOfFreeAccidents", 0x56CEE0, &CAccidentManager::GetNumberOfFreeAccidents);
-    ReversibleHooks::Install("CAccidentManager", "GetNearestFreeAccidentExceptThisOne", 0x56CF90, &CAccidentManager::GetNearestFreeAccidentExceptThisOne);
-    ReversibleHooks::Install("CAccidentManager", "GetNearestFreeAccident", 0x56D050, &CAccidentManager::GetNearestFreeAccident);
+    Install("CAccidentManager", "GetInstance", 0x56CF20, &CAccidentManager::GetInstance);
+    Install("CAccidentManager", "ReportAccident", 0x56CE80, &CAccidentManager::ReportAccident);
+    Install("CAccidentManager", "GetNumberOfFreeAccidents", 0x56CEE0, &CAccidentManager::GetNumberOfFreeAccidents);
+    Install("CAccidentManager", "GetNearestFreeAccidentExceptThisOne", 0x56CF90, &CAccidentManager::GetNearestFreeAccidentExceptThisOne);
+    Install("CAccidentManager", "GetNearestFreeAccident", 0x56D050, &CAccidentManager::GetNearestFreeAccident);
 }
 
 // 0x56CF20

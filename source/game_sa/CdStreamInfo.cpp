@@ -49,15 +49,15 @@ static CSync cdStreamThreadSync;
 
 void InjectCdStreamHooks()
 {
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamOpen", 0x4067B0, &CdStreamOpen);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamSync", 0x406460, &CdStreamSync);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamGetStatus", 0x4063E0, &CdStreamGetStatus);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamRead", 0x406A20, &CdStreamRead);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamThread", 0x406560, &CdStreamThread);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamInitThread", 0x4068F0, &CdStreamInitThread);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamInit", 0x406B70, &CdStreamInit);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamRemoveImages", 0x406690, &CdStreamRemoveImages);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamShutdown", 0x406370, &CdStreamShutdown);
+    Install("CdStreamInfo", "CdStreamOpen", 0x4067B0, &CdStreamOpen);
+    Install("CdStreamInfo", "CdStreamSync", 0x406460, &CdStreamSync);
+    Install("CdStreamInfo", "CdStreamGetStatus", 0x4063E0, &CdStreamGetStatus);
+    Install("CdStreamInfo", "CdStreamRead", 0x406A20, &CdStreamRead);
+    Install("CdStreamInfo", "CdStreamThread", 0x406560, &CdStreamThread);
+    Install("CdStreamInfo", "CdStreamInitThread", 0x4068F0, &CdStreamInitThread);
+    Install("CdStreamInfo", "CdStreamInit", 0x406B70, &CdStreamInit);
+    Install("CdStreamInfo", "CdStreamRemoveImages", 0x406690, &CdStreamRemoveImages);
+    Install("CdStreamInfo", "CdStreamShutdown", 0x406370, &CdStreamShutdown);
 }
 
 // 0x4067B0

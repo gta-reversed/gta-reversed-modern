@@ -10,13 +10,13 @@ CCarGenerator(&CTheCarGenerators::CarGeneratorArray)[NUM_CAR_GENERATORS] = *rein
 
 void CTheCarGenerators::InjectHooks()
 {
-    ReversibleHooks::Install("CTheCarGenerators", "CreateCarGenerator", 0x6F31A0, &CTheCarGenerators::CreateCarGenerator);
-    ReversibleHooks::Install("CTheCarGenerators", "Init", 0x6F3270, &CTheCarGenerators::Init);
-    ReversibleHooks::Install("CTheCarGenerators", "Load", 0x5D39B0, &CTheCarGenerators::Load);
-    ReversibleHooks::Install("CTheCarGenerators", "Process", 0x6F3F40, &CTheCarGenerators::Process);
-    ReversibleHooks::Install("CTheCarGenerators", "RemoveCarGenerators", 0x6F3240, &CTheCarGenerators::RemoveCarGenerators);
-    ReversibleHooks::Install("CTheCarGenerators", "Save", 0x5D38C0, &CTheCarGenerators::Save);
-    ReversibleHooks::Install("CTheCarGenerators", "Get", 0x479D60, &CTheCarGenerators::Get);
+    Install("CTheCarGenerators", "CreateCarGenerator", 0x6F31A0, &CTheCarGenerators::CreateCarGenerator);
+    Install("CTheCarGenerators", "Init", 0x6F3270, &CTheCarGenerators::Init);
+    Install("CTheCarGenerators", "Load", 0x5D39B0, &CTheCarGenerators::Load);
+    Install("CTheCarGenerators", "Process", 0x6F3F40, &CTheCarGenerators::Process);
+    Install("CTheCarGenerators", "RemoveCarGenerators", 0x6F3240, &CTheCarGenerators::RemoveCarGenerators);
+    Install("CTheCarGenerators", "Save", 0x5D38C0, &CTheCarGenerators::Save);
+    Install("CTheCarGenerators", "Get", 0x479D60, &CTheCarGenerators::Get);
 }
 
 // return index of CarGenerator in CTheCarGenerators::CarGeneratorArray

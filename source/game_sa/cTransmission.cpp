@@ -2,10 +2,10 @@
 
 void cTransmission::InjectHooks()
 {
-    ReversibleHooks::Install("cTransmission", "DisplayGearRatios", 0x6D0590, &cTransmission::DisplayGearRatios);
-    ReversibleHooks::Install("cTransmission", "InitGearRatios", 0x6D0460, &cTransmission::InitGearRatios);
-    ReversibleHooks::Install("cTransmission", "CalculateGearForSimpleCar", 0x6D0530, &cTransmission::CalculateGearForSimpleCar);
-    ReversibleHooks::Install("cTransmission", "CalculateDriveAcceleration", 0x6D05E0, &cTransmission::CalculateDriveAcceleration);
+    Install("cTransmission", "DisplayGearRatios", 0x6D0590, &cTransmission::DisplayGearRatios);
+    Install("cTransmission", "InitGearRatios", 0x6D0460, &cTransmission::InitGearRatios);
+    Install("cTransmission", "CalculateGearForSimpleCar", 0x6D0530, &cTransmission::CalculateGearForSimpleCar);
+    Install("cTransmission", "CalculateDriveAcceleration", 0x6D05E0, &cTransmission::CalculateDriveAcceleration);
 }
 
 // unused

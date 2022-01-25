@@ -3,7 +3,7 @@
 #include "TaskComplexPartner.h"
 
 void CTaskComplexPartner::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexPartner", "CTaskComplexPartner", 0x681E70, &CTaskComplexPartner::Constructor);
+    Install("CTaskComplexPartner", "CTaskComplexPartner", 0x681E70, &CTaskComplexPartner::Constructor);
 }
 
 // 0x681E70

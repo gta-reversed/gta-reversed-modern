@@ -25,14 +25,14 @@ int16& CTheZones::TotalNumberOfZoneInfos = *(int16*)0xBA1DE8;
 CZoneInfo* CTheZones::ZoneInfoArray = (CZoneInfo*)0xBA1DF0;
 
 void CTheZones::InjectHooks() {
-    ReversibleHooks::Install("CTheZones", "ResetZonesRevealed", 0x572110, &CTheZones::ResetZonesRevealed);
-    ReversibleHooks::Install("CTheZones", "GetCurrentZoneLockedOrUnlocked", 0x572130, &CTheZones::GetCurrentZoneLockedOrUnlocked);
-    ReversibleHooks::Install("CTheZones", "PointLiesWithinZone", 0x572270, &CTheZones::PointLiesWithinZone);
-    ReversibleHooks::Install("CTheZones", "GetNavigationZone", 0x572590, &CTheZones::GetNavigationZone);
-    ReversibleHooks::Install("CTheZones", "GetMapZone", 0x5725A0, &CTheZones::GetMapZone);
-    ReversibleHooks::Install("CTheZones", "Save", 0x5D2E60, &CTheZones::Save);
-    ReversibleHooks::Install("CTheZones", "Load", 0x5D2F40, &CTheZones::Load);
-    ReversibleHooks::Install("CTheZones", "PostZoneCreation", 0x572B70, &CTheZones::PostZoneCreation);
+    Install("CTheZones", "ResetZonesRevealed", 0x572110, &CTheZones::ResetZonesRevealed);
+    Install("CTheZones", "GetCurrentZoneLockedOrUnlocked", 0x572130, &CTheZones::GetCurrentZoneLockedOrUnlocked);
+    Install("CTheZones", "PointLiesWithinZone", 0x572270, &CTheZones::PointLiesWithinZone);
+    Install("CTheZones", "GetNavigationZone", 0x572590, &CTheZones::GetNavigationZone);
+    Install("CTheZones", "GetMapZone", 0x5725A0, &CTheZones::GetMapZone);
+    Install("CTheZones", "Save", 0x5D2E60, &CTheZones::Save);
+    Install("CTheZones", "Load", 0x5D2F40, &CTheZones::Load);
+    Install("CTheZones", "PostZoneCreation", 0x572B70, &CTheZones::PostZoneCreation);
 }
 
 // 0x5720D0

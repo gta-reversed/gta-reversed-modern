@@ -15,17 +15,17 @@ char const* CColAccel::mp_cCacheName = *(char const**)0x8D0F84; // MODELS\CINFO.
 
 void CColAccel::InjectHooks()
 {
-    ReversibleHooks::Install("CColAccel", "isCacheLoading", 0x5B2AC0, &CColAccel::isCacheLoading);
-    ReversibleHooks::Install("CColAccel", "endCache", 0x5B2AD0, &CColAccel::endCache);
-    ReversibleHooks::Install("CColAccel", "addCacheCol", 0x5B2C20, &CColAccel::addCacheCol);
-    ReversibleHooks::Install("CColAccel", "cacheLoadCol", 0x5B2CC0, &CColAccel::cacheLoadCol);
-    ReversibleHooks::Install("CColAccel", "addColDef", 0x5B2DD0, &CColAccel::addColDef);
-    ReversibleHooks::Install("CColAccel", "getColDef", 0x5B2E60, &CColAccel::getColDef);
-    ReversibleHooks::Install("CColAccel", "setIplDef", 0x5B2ED0, &CColAccel::setIplDef);
-    ReversibleHooks::Install("CColAccel", "getIplDef", 0x5B2EF0, &CColAccel::getIplDef);
-    ReversibleHooks::Install("CColAccel", "cacheIPLSection", 0x5B2F10, &CColAccel::cacheIPLSection);
-    ReversibleHooks::Install("CColAccel", "addIPLEntity", 0x5B3040, &CColAccel::addIPLEntity);
-    ReversibleHooks::Install("CColAccel", "startCache", 0x5B31A0, &CColAccel::startCache);
+    Install("CColAccel", "isCacheLoading", 0x5B2AC0, &CColAccel::isCacheLoading);
+    Install("CColAccel", "endCache", 0x5B2AD0, &CColAccel::endCache);
+    Install("CColAccel", "addCacheCol", 0x5B2C20, &CColAccel::addCacheCol);
+    Install("CColAccel", "cacheLoadCol", 0x5B2CC0, &CColAccel::cacheLoadCol);
+    Install("CColAccel", "addColDef", 0x5B2DD0, &CColAccel::addColDef);
+    Install("CColAccel", "getColDef", 0x5B2E60, &CColAccel::getColDef);
+    Install("CColAccel", "setIplDef", 0x5B2ED0, &CColAccel::setIplDef);
+    Install("CColAccel", "getIplDef", 0x5B2EF0, &CColAccel::getIplDef);
+    Install("CColAccel", "cacheIPLSection", 0x5B2F10, &CColAccel::cacheIPLSection);
+    Install("CColAccel", "addIPLEntity", 0x5B3040, &CColAccel::addIPLEntity);
+    Install("CColAccel", "startCache", 0x5B31A0, &CColAccel::startCache);
 }
 
 bool CColAccel::isCacheLoading()

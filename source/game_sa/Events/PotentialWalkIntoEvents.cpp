@@ -11,27 +11,27 @@
 
 void CEventPotentialWalkIntoVehicle::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPotentialWalkIntoVehicle", "CEventPotentialWalkIntoVehicle", 0x4AE320, &CEventPotentialWalkIntoVehicle::Constructor);
-    ReversibleHooks::Install("CEventPotentialWalkIntoVehicle", "AffectsPed", 0x4AE420, &CEventPotentialWalkIntoVehicle::AffectsPed_Reversed);
+    Install("CEventPotentialWalkIntoVehicle", "CEventPotentialWalkIntoVehicle", 0x4AE320, &CEventPotentialWalkIntoVehicle::Constructor);
+    Install("CEventPotentialWalkIntoVehicle", "AffectsPed", 0x4AE420, &CEventPotentialWalkIntoVehicle::AffectsPed_Reversed);
 }
 
 void CEventPotentialWalkIntoObject::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPotentialWalkIntoObject", "CEventPotentialWalkIntoObject", 0x4AE5D0, &CEventPotentialWalkIntoObject::Constructor);
-    ReversibleHooks::Install("CEventPotentialWalkIntoObject", "AffectsPed", 0x4B4950, &CEventPotentialWalkIntoObject::AffectsPed_Reversed);
+    Install("CEventPotentialWalkIntoObject", "CEventPotentialWalkIntoObject", 0x4AE5D0, &CEventPotentialWalkIntoObject::Constructor);
+    Install("CEventPotentialWalkIntoObject", "AffectsPed", 0x4B4950, &CEventPotentialWalkIntoObject::AffectsPed_Reversed);
 }
 
 void CEventPotentialWalkIntoFire::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPotentialWalkIntoFire", "CEventPotentialWalkIntoFire", 0x4B1E20, &CEventPotentialWalkIntoFire::Constructor);
-    ReversibleHooks::Install("CEventPotentialWalkIntoFire", "AffectsPed", 0x4B6890, &CEventPotentialWalkIntoFire::AffectsPed_Reversed);
+    Install("CEventPotentialWalkIntoFire", "CEventPotentialWalkIntoFire", 0x4B1E20, &CEventPotentialWalkIntoFire::Constructor);
+    Install("CEventPotentialWalkIntoFire", "AffectsPed", 0x4B6890, &CEventPotentialWalkIntoFire::AffectsPed_Reversed);
 }
 
 void CEventPotentialWalkIntoPed::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPotentialWalkIntoPed", "CEventPotentialWalkIntoPed", 0x4AE6E0, &CEventPotentialWalkIntoPed::Constructor);
-    ReversibleHooks::Install("CEventPotentialWalkIntoPed", "AffectsPed", 0x4AE800, &CEventPotentialWalkIntoPed::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventPotentialWalkIntoPed", "TakesPriorityOver", 0x4AE950, &CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed);
+    Install("CEventPotentialWalkIntoPed", "CEventPotentialWalkIntoPed", 0x4AE6E0, &CEventPotentialWalkIntoPed::Constructor);
+    Install("CEventPotentialWalkIntoPed", "AffectsPed", 0x4AE800, &CEventPotentialWalkIntoPed::AffectsPed_Reversed);
+    Install("CEventPotentialWalkIntoPed", "TakesPriorityOver", 0x4AE950, &CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed);
 }
 
 CEventPotentialWalkIntoVehicle::CEventPotentialWalkIntoVehicle(CVehicle* vehicle, int32 moveState)

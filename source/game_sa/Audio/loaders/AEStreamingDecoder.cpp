@@ -24,8 +24,8 @@ CAEStreamingDecoder::~CAEStreamingDecoder() {
 }
 
 void CAEStreamingDecoder::InjectHooks() {
-    ReversibleHooks::Install("CAEStreamingDecoder", "CAEStreamingDecoder", 0x4f2810, &CAEStreamingDecoder::Constructor);
-    ReversibleHooks::Install("CAEStreamingDecoder", "~CAEStreamingDecoder", 0x4f2830, &CAEStreamingDecoder::Destructor);
+    Install("CAEStreamingDecoder", "CAEStreamingDecoder", 0x4f2810, &CAEStreamingDecoder::Constructor);
+    Install("CAEStreamingDecoder", "~CAEStreamingDecoder", 0x4f2830, &CAEStreamingDecoder::Destructor);
 }
 
 CAEStreamingDecoder* CAEStreamingDecoder::Constructor(CAEDataStream* dataStream) {

@@ -13,15 +13,15 @@ float(*cBuoyancy::afBoatVolumeDistributionCat)[3] = (float(*)[3])0x8D3314; // Ca
 
 void cBuoyancy::InjectHooks()
 {
-    ReversibleHooks::Install("cBuoyancy", "ProcessBuoyancy", 0x6C3EF0, &cBuoyancy::ProcessBuoyancy);
-    ReversibleHooks::Install("cBuoyancy", "ProcessBuoyancyBoat", 0x6C3030, &cBuoyancy::ProcessBuoyancyBoat);
-    ReversibleHooks::Install("cBuoyancy", "CalcBuoyancyForce", 0x6C2750, &cBuoyancy::CalcBuoyancyForce);
-    ReversibleHooks::Install("cBuoyancy", "PreCalcSetup", 0x6C2B90, &cBuoyancy::PreCalcSetup);
-    ReversibleHooks::Install("cBuoyancy", "AddSplashParticles", 0x6C34E0, &cBuoyancy::AddSplashParticles);
-    ReversibleHooks::Install("cBuoyancy", "SimpleCalcBuoyancy", 0x6C3B00, &cBuoyancy::SimpleCalcBuoyancy);
-    ReversibleHooks::Install("cBuoyancy", "SimpleSumBuoyancyData", 0x6C2970, &cBuoyancy::SimpleSumBuoyancyData);
-    ReversibleHooks::Install("cBuoyancy", "FindWaterLevel", 0x6C2810, &cBuoyancy::FindWaterLevel);
-    ReversibleHooks::Install("cBuoyancy", "FindWaterLevelNorm", 0x6C28C0, &cBuoyancy::FindWaterLevelNorm);
+    Install("cBuoyancy", "ProcessBuoyancy", 0x6C3EF0, &cBuoyancy::ProcessBuoyancy);
+    Install("cBuoyancy", "ProcessBuoyancyBoat", 0x6C3030, &cBuoyancy::ProcessBuoyancyBoat);
+    Install("cBuoyancy", "CalcBuoyancyForce", 0x6C2750, &cBuoyancy::CalcBuoyancyForce);
+    Install("cBuoyancy", "PreCalcSetup", 0x6C2B90, &cBuoyancy::PreCalcSetup);
+    Install("cBuoyancy", "AddSplashParticles", 0x6C34E0, &cBuoyancy::AddSplashParticles);
+    Install("cBuoyancy", "SimpleCalcBuoyancy", 0x6C3B00, &cBuoyancy::SimpleCalcBuoyancy);
+    Install("cBuoyancy", "SimpleSumBuoyancyData", 0x6C2970, &cBuoyancy::SimpleSumBuoyancyData);
+    Install("cBuoyancy", "FindWaterLevel", 0x6C2810, &cBuoyancy::FindWaterLevel);
+    Install("cBuoyancy", "FindWaterLevelNorm", 0x6C28C0, &cBuoyancy::FindWaterLevelNorm);
 }
 
 bool cBuoyancy::ProcessBuoyancy(CPhysical* pEntity, float fBuoyancy, CVector* vecBuoyancyTurnPoint, CVector* vecBuoyancyForce)

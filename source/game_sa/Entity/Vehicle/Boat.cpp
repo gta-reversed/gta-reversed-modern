@@ -20,30 +20,30 @@ RxVertexIndex* CBoat::auRenderIndices = (RxVertexIndex*)0xC27988;
 void CBoat::InjectHooks()
 {
     //Virtual
-    ReversibleHooks::Install("CBoat", "SetModelIndex", 0x6F1140, &CBoat::SetModelIndex_Reversed);
-    ReversibleHooks::Install("CBoat", "ProcessControl", 0x6F1770, &CBoat::ProcessControl_Reversed);
-    ReversibleHooks::Install("CBoat", "Teleport", 0x6F20E0, &CBoat::Teleport_Reversed);
-    ReversibleHooks::Install("CBoat", "PreRender", 0x6F1180, &CBoat::PreRender_Reversed);
-    ReversibleHooks::Install("CBoat", "Render", 0x6F0210, &CBoat::Render_Reversed);
-    ReversibleHooks::Install("CBoat", "ProcessControlInputs", 0x6F0A10, &CBoat::ProcessControlInputs_Reversed);
-    ReversibleHooks::Install("CBoat", "GetComponentWorldPosition", 0x6F01D0, &CBoat::GetComponentWorldPosition_Reversed);
-    ReversibleHooks::Install("CBoat", "ProcessOpenDoor", 0x6F0190, &CBoat::ProcessOpenDoor_Reversed);
-    ReversibleHooks::Install("CBoat", "BlowUpCar", 0x6F21B0, &CBoat::BlowUpCar_Reversed);
+    Install("CBoat", "SetModelIndex", 0x6F1140, &CBoat::SetModelIndex_Reversed);
+    Install("CBoat", "ProcessControl", 0x6F1770, &CBoat::ProcessControl_Reversed);
+    Install("CBoat", "Teleport", 0x6F20E0, &CBoat::Teleport_Reversed);
+    Install("CBoat", "PreRender", 0x6F1180, &CBoat::PreRender_Reversed);
+    Install("CBoat", "Render", 0x6F0210, &CBoat::Render_Reversed);
+    Install("CBoat", "ProcessControlInputs", 0x6F0A10, &CBoat::ProcessControlInputs_Reversed);
+    Install("CBoat", "GetComponentWorldPosition", 0x6F01D0, &CBoat::GetComponentWorldPosition_Reversed);
+    Install("CBoat", "ProcessOpenDoor", 0x6F0190, &CBoat::ProcessOpenDoor_Reversed);
+    Install("CBoat", "BlowUpCar", 0x6F21B0, &CBoat::BlowUpCar_Reversed);
 
     //Class methods
-    ReversibleHooks::Install("CBoat", "PruneWakeTrail", 0x6F0E20, &CBoat::PruneWakeTrail);
-    ReversibleHooks::Install("CBoat", "AddWakePoint", 0x6F2550, &CBoat::AddWakePoint);
-    ReversibleHooks::Install("CBoat", "SetupModelNodes", 0x6F01A0, &CBoat::SetupModelNodes);
-    ReversibleHooks::Install("CBoat", "DebugCode", 0x6F0D00, &CBoat::DebugCode);
-    ReversibleHooks::Install("CBoat", "ModifyHandlingValue", 0x6F0DE0, &CBoat::ModifyHandlingValue);
-    ReversibleHooks::Install("CBoat", "PrintThrustAndRudderInfo", 0x6F0D90, &CBoat::PrintThrustAndRudderInfo);
+    Install("CBoat", "PruneWakeTrail", 0x6F0E20, &CBoat::PruneWakeTrail);
+    Install("CBoat", "AddWakePoint", 0x6F2550, &CBoat::AddWakePoint);
+    Install("CBoat", "SetupModelNodes", 0x6F01A0, &CBoat::SetupModelNodes);
+    Install("CBoat", "DebugCode", 0x6F0D00, &CBoat::DebugCode);
+    Install("CBoat", "ModifyHandlingValue", 0x6F0DE0, &CBoat::ModifyHandlingValue);
+    Install("CBoat", "PrintThrustAndRudderInfo", 0x6F0D90, &CBoat::PrintThrustAndRudderInfo);
 
     //Other
-    ReversibleHooks::Install("CBoat", "FillBoatList", 0x6F2710, &CBoat::FillBoatList);
-    ReversibleHooks::Install("CBoat", "IsSectorAffectedByWake", 0x6F0E80, &CBoat::IsSectorAffectedByWake);
-    ReversibleHooks::Install("CBoat", "IsVertexAffectedByWake", 0x6F0F50, &CBoat::IsVertexAffectedByWake);
-    ReversibleHooks::Install("CBoat", "CheckForSkippingCalculations", 0x6F10C0, &CBoat::CheckForSkippingCalculations);
-    ReversibleHooks::Install("CBoat", "GetBoatAtomicObjectCB", 0x6F00D0, &GetBoatAtomicObjectCB);
+    Install("CBoat", "FillBoatList", 0x6F2710, &CBoat::FillBoatList);
+    Install("CBoat", "IsSectorAffectedByWake", 0x6F0E80, &CBoat::IsSectorAffectedByWake);
+    Install("CBoat", "IsVertexAffectedByWake", 0x6F0F50, &CBoat::IsVertexAffectedByWake);
+    Install("CBoat", "CheckForSkippingCalculations", 0x6F10C0, &CBoat::CheckForSkippingCalculations);
+    Install("CBoat", "GetBoatAtomicObjectCB", 0x6F00D0, &GetBoatAtomicObjectCB);
 }
 
 CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy)

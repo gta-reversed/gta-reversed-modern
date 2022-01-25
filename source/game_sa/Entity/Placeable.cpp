@@ -8,21 +8,21 @@
 
 void CPlaceable::InjectHooks()
 {
-    ReversibleHooks::Install("CPlaceable", "SetPosn_xyz", 0x420B80, static_cast<void(CPlaceable::*)(float, float, float)>(&CPlaceable::SetPosn));
-    ReversibleHooks::Install("CPlaceable", "SetPosn_vector", 0x4241C0, static_cast<void(CPlaceable::*)(CVector const&)>(&CPlaceable::SetPosn));
-    ReversibleHooks::Install("CPlaceable", "SetOrientation", 0x439A80, &CPlaceable::SetOrientation);
-    ReversibleHooks::Install("CPlaceable", "SetHeading", 0x43E0C0, &CPlaceable::SetHeading);
-    ReversibleHooks::Install("CPlaceable", "GetHeading", 0x441DB0, &CPlaceable::GetHeading);
-    ReversibleHooks::Install("CPlaceable", "IsWithinArea_xy", 0x54F200, static_cast<bool(CPlaceable::*)(float, float, float, float)>(&CPlaceable::IsWithinArea));
-    ReversibleHooks::Install("CPlaceable", "IsWithinArea_xyz", 0x54F2B0, static_cast<bool(CPlaceable::*)(float, float, float, float, float, float)>(&CPlaceable::IsWithinArea));
-    ReversibleHooks::Install("CPlaceable", "RemoveMatrix", 0x54F3B0, &CPlaceable::RemoveMatrix);
-    ReversibleHooks::Install("CPlaceable", "AllocateStaticMatrix", 0x54F4C0, &CPlaceable::AllocateStaticMatrix);
-    ReversibleHooks::Install("CPlaceable", "AllocateMatrix", 0x54F560, &CPlaceable::AllocateMatrix);
-    ReversibleHooks::Install("CPlaceable", "SetMatrix", 0x54F610, &CPlaceable::SetMatrix);
-    ReversibleHooks::Install("CPlaceable", "GetMatrix", 0x411990, &CPlaceable::GetMatrix);
-    ReversibleHooks::Install("CPlaceable", "ShutdownMatrixArray", 0x54EFD0, &CPlaceable::ShutdownMatrixArray);
-    ReversibleHooks::Install("CPlaceable", "InitMatrixArray", 0x54F3A0, &CPlaceable::InitMatrixArray);
-    ReversibleHooks::Install("CPlaceable", "FreeStaticMatrix", 0x54F010, &CPlaceable::FreeStaticMatrix);
+    Install("CPlaceable", "SetPosn_xyz", 0x420B80, static_cast<void(CPlaceable::*)(float, float, float)>(&CPlaceable::SetPosn));
+    Install("CPlaceable", "SetPosn_vector", 0x4241C0, static_cast<void(CPlaceable::*)(CVector const&)>(&CPlaceable::SetPosn));
+    Install("CPlaceable", "SetOrientation", 0x439A80, &CPlaceable::SetOrientation);
+    Install("CPlaceable", "SetHeading", 0x43E0C0, &CPlaceable::SetHeading);
+    Install("CPlaceable", "GetHeading", 0x441DB0, &CPlaceable::GetHeading);
+    Install("CPlaceable", "IsWithinArea_xy", 0x54F200, static_cast<bool(CPlaceable::*)(float, float, float, float)>(&CPlaceable::IsWithinArea));
+    Install("CPlaceable", "IsWithinArea_xyz", 0x54F2B0, static_cast<bool(CPlaceable::*)(float, float, float, float, float, float)>(&CPlaceable::IsWithinArea));
+    Install("CPlaceable", "RemoveMatrix", 0x54F3B0, &CPlaceable::RemoveMatrix);
+    Install("CPlaceable", "AllocateStaticMatrix", 0x54F4C0, &CPlaceable::AllocateStaticMatrix);
+    Install("CPlaceable", "AllocateMatrix", 0x54F560, &CPlaceable::AllocateMatrix);
+    Install("CPlaceable", "SetMatrix", 0x54F610, &CPlaceable::SetMatrix);
+    Install("CPlaceable", "GetMatrix", 0x411990, &CPlaceable::GetMatrix);
+    Install("CPlaceable", "ShutdownMatrixArray", 0x54EFD0, &CPlaceable::ShutdownMatrixArray);
+    Install("CPlaceable", "InitMatrixArray", 0x54F3A0, &CPlaceable::InitMatrixArray);
+    Install("CPlaceable", "FreeStaticMatrix", 0x54F010, &CPlaceable::FreeStaticMatrix);
 }
 
 CPlaceable::CPlaceable() : m_placement()

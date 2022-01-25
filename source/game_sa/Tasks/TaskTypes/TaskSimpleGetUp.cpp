@@ -6,12 +6,12 @@ CColPoint(&CTaskSimpleGetUp::m_aColPoints)[32] = *reinterpret_cast<CColPoint(*)[
 
 void CTaskSimpleGetUp::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleGetUp", "Constructor", 0x677F50, &CTaskSimpleGetUp::Constructor);
-    ReversibleHooks::Install("CTaskSimpleGetUp", "StartAnim", 0x67C770, &CTaskSimpleGetUp::StartAnim);
-    ReversibleHooks::Install("CTaskSimpleGetUp", "FinishGetUpAnimCB", 0x678110, &CTaskSimpleGetUp::FinishGetUpAnimCB);
+    Install("CTaskSimpleGetUp", "Constructor", 0x677F50, &CTaskSimpleGetUp::Constructor);
+    Install("CTaskSimpleGetUp", "StartAnim", 0x67C770, &CTaskSimpleGetUp::StartAnim);
+    Install("CTaskSimpleGetUp", "FinishGetUpAnimCB", 0x678110, &CTaskSimpleGetUp::FinishGetUpAnimCB);
     //VTABLE
-    ReversibleHooks::Install("CTaskSimpleGetUp", "ProcessPed", 0x67FA80, &CTaskSimpleGetUp::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGetUp", "MakeAbortable", 0x677FE0, &CTaskSimpleGetUp::MakeAbortable_Reversed);
+    Install("CTaskSimpleGetUp", "ProcessPed", 0x67FA80, &CTaskSimpleGetUp::ProcessPed_Reversed);
+    Install("CTaskSimpleGetUp", "MakeAbortable", 0x677FE0, &CTaskSimpleGetUp::MakeAbortable_Reversed);
 }
 
 CTaskSimpleGetUp* CTaskSimpleGetUp::Constructor()

@@ -3,9 +3,9 @@
 #include "PtrListSingleLink.h"
 
 void CPtrListSingleLink::InjectHooks() {
-    ReversibleHooks::Install("CPtrListSingleLink", "Flush", 0x552400, &CPtrListSingleLink::Flush);
-    ReversibleHooks::Install("CPtrListSingleLink", "AddItem", 0x5335E0, &CPtrListSingleLink::AddItem);
-    ReversibleHooks::Install("CPtrListSingleLink", "DeleteItem", 0x533610, &CPtrListSingleLink::DeleteItem);
+    Install("CPtrListSingleLink", "Flush", 0x552400, &CPtrListSingleLink::Flush);
+    Install("CPtrListSingleLink", "AddItem", 0x5335E0, &CPtrListSingleLink::AddItem);
+    Install("CPtrListSingleLink", "DeleteItem", 0x533610, &CPtrListSingleLink::DeleteItem);
 }
 
 void CPtrListSingleLink::Flush() {

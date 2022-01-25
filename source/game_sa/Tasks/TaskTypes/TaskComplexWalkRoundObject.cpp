@@ -3,7 +3,7 @@
 #include "TaskComplexWalkRoundObject.h"
 
 void CTaskComplexWalkRoundObject::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexWalkRoundObject", "CTaskComplexWalkRoundObject", 0x655020, &CTaskComplexWalkRoundObject::Constructor);
+    Install("CTaskComplexWalkRoundObject", "CTaskComplexWalkRoundObject", 0x655020, &CTaskComplexWalkRoundObject::Constructor);
 }
 
 CTaskComplexWalkRoundObject::CTaskComplexWalkRoundObject(int32 moveState, const CVector& targetPoint, CEntity* object) : CTaskComplex() {

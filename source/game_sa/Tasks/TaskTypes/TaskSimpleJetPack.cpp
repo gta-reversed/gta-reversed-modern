@@ -3,7 +3,7 @@
 #include "TaskSimpleJetPack.h"
 
 void CTaskSimpleJetPack::InjectHooks() {
-    ReversibleHooks::Install("CTaskSimpleJetPack", "CTaskSimpleJetPack", 0x67B4E0, &CTaskSimpleJetPack::Constructor);
+    Install("CTaskSimpleJetPack", "CTaskSimpleJetPack", 0x67B4E0, &CTaskSimpleJetPack::Constructor);
 }
 
 // 0x67B4E0

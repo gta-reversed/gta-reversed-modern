@@ -21,13 +21,13 @@ uint32 CStuntJumpManager::m_iNumCompleted;
 
 
 void CStuntJumpManager::InjectHooks() {
-    ReversibleHooks::Install("CStuntJumpManager", "Init", 0x49CA50, &CStuntJumpManager::Init);
-    ReversibleHooks::Install("CStuntJumpManager", "Shutdown", 0x49CBC0, &CStuntJumpManager::Shutdown);
-    ReversibleHooks::Install("CStuntJumpManager", "ShutdownForRestart", 0x49CB10, &CStuntJumpManager::ShutdownForRestart);
-    ReversibleHooks::Install("CStuntJumpManager", "Save", 0x5D5570, &CStuntJumpManager::Save);
-    ReversibleHooks::Install("CStuntJumpManager", "Load", 0x5D5920, &CStuntJumpManager::Load);
-    ReversibleHooks::Install("CStuntJumpManager", "AddOne", 0x49CB40, &CStuntJumpManager::AddOne);
-    ReversibleHooks::Install("CStuntJumpManager", "Update", 0x49C490, &CStuntJumpManager::Update);
+    Install("CStuntJumpManager", "Init", 0x49CA50, &CStuntJumpManager::Init);
+    Install("CStuntJumpManager", "Shutdown", 0x49CBC0, &CStuntJumpManager::Shutdown);
+    Install("CStuntJumpManager", "ShutdownForRestart", 0x49CB10, &CStuntJumpManager::ShutdownForRestart);
+    Install("CStuntJumpManager", "Save", 0x5D5570, &CStuntJumpManager::Save);
+    Install("CStuntJumpManager", "Load", 0x5D5920, &CStuntJumpManager::Load);
+    Install("CStuntJumpManager", "AddOne", 0x49CB40, &CStuntJumpManager::AddOne);
+    Install("CStuntJumpManager", "Update", 0x49C490, &CStuntJumpManager::Update);
 }
 
 // 0x49CA50

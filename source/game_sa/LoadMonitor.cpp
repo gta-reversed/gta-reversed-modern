@@ -3,12 +3,12 @@
 CLoadMonitor& g_LoadMonitor = *reinterpret_cast<CLoadMonitor*> (0xB72978);
 
 void CLoadMonitor::InjectHooks() {
-//    ReversibleHooks::Install("CLoadMonitor", "Constructor", 0x53CFA0, &CLoadMonitor::Constructor);
-//    ReversibleHooks::Install("CLoadMonitor", "Destructor", 0x856430, &CLoadMonitor::Destructor);
-//    ReversibleHooks::Install("CLoadMonitor", "BeginFrame", 0x53D030, &CLoadMonitor::BeginFrame);
-//    ReversibleHooks::Install("CLoadMonitor", "EndFrame", 0x53D0B0, &CLoadMonitor::EndFrame);
-//    ReversibleHooks::Install("CLoadMonitor", "StartTimer", 0x53D050, &CLoadMonitor::StartTimer);
-//    ReversibleHooks::Install("CLoadMonitor", "EndTimer", 0x53D070, &CLoadMonitor::EndTimer);
+//    Install("CLoadMonitor", "Constructor", 0x53CFA0, &CLoadMonitor::Constructor);
+//    Install("CLoadMonitor", "Destructor", 0x856430, &CLoadMonitor::Destructor);
+//    Install("CLoadMonitor", "BeginFrame", 0x53D030, &CLoadMonitor::BeginFrame);
+//    Install("CLoadMonitor", "EndFrame", 0x53D0B0, &CLoadMonitor::EndFrame);
+//    Install("CLoadMonitor", "StartTimer", 0x53D050, &CLoadMonitor::StartTimer);
+//    Install("CLoadMonitor", "EndTimer", 0x53D070, &CLoadMonitor::EndTimer);
 }
 
 // 0x53CFA0

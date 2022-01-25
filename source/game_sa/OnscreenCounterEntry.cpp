@@ -2,8 +2,8 @@
 #include "OnscreenCounterEntry.h"
 
 void COnscreenCounterEntry::InjectHooks() {
-    ReversibleHooks::Install("COnscreenCounterEntry", "ProcessForDisplayCounter", 0x44CA90, &COnscreenCounterEntry::ProcessForDisplayCounter);
-    ReversibleHooks::Install("COnscreenCounterEntry", "SetColourID", 0x44CB00, &COnscreenCounterEntry::SetColourID);
+    Install("COnscreenCounterEntry", "ProcessForDisplayCounter", 0x44CA90, &COnscreenCounterEntry::ProcessForDisplayCounter);
+    Install("COnscreenCounterEntry", "SetColourID", 0x44CB00, &COnscreenCounterEntry::SetColourID);
 }
 
 // 0x44CA90

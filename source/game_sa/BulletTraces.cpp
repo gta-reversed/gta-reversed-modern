@@ -6,11 +6,11 @@ CBulletTrace (&CBulletTraces::aTraces)[16] = *(CBulletTrace(*)[16])0xC7C748;
 
 void CBulletTraces::InjectHooks()
 {
-    ReversibleHooks::Install("CBulletTraces", "Init", 0x721D50, &CBulletTraces::Init);
-    ReversibleHooks::Install("CBulletTraces", "AddTrace", 0x723750, static_cast<void(*)(CVector*, CVector*, float, uint32, uint8)>(&CBulletTraces::AddTrace));
-    ReversibleHooks::Install("CBulletTraces", "AddTrace_Wrapper", 0x726AF0, static_cast<void(*)(CVector*, CVector*, eWeaponType, CEntity*)>(&CBulletTraces::AddTrace));
-    ReversibleHooks::Install("CBulletTraces", "Render", 0x723C10, &CBulletTraces::Render);
-    ReversibleHooks::Install("CBulletTraces", "Update", 0x723FB0, &CBulletTraces::Update);
+    Install("CBulletTraces", "Init", 0x721D50, &CBulletTraces::Init);
+    Install("CBulletTraces", "AddTrace", 0x723750, static_cast<void(*)(CVector*, CVector*, float, uint32, uint8)>(&CBulletTraces::AddTrace));
+    Install("CBulletTraces", "AddTrace_Wrapper", 0x726AF0, static_cast<void(*)(CVector*, CVector*, eWeaponType, CEntity*)>(&CBulletTraces::AddTrace));
+    Install("CBulletTraces", "Render", 0x723C10, &CBulletTraces::Render);
+    Install("CBulletTraces", "Update", 0x723FB0, &CBulletTraces::Update);
 }
 
 // 0x721D50

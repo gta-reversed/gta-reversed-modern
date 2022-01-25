@@ -13,15 +13,15 @@ static std::random_device randomDevice;
 static std::mt19937 randomEngine(randomDevice());
 
 void CGeneral::InjectHooks() {
-    ReversibleHooks::Install("CGeneral", "LimitAngle", 0x53CB00, &CGeneral::LimitAngle);
-    ReversibleHooks::Install("CGeneral", "LimitRadianAngle", 0x53CB50, &CGeneral::LimitRadianAngle);
-    ReversibleHooks::Install("CGeneral", "GetRadianAngleBetweenPoints", 0x53CBE0, &CGeneral::GetRadianAngleBetweenPoints);
-    ReversibleHooks::Install("CGeneral", "GetATanOfXY", 0x53CC70, &CGeneral::GetATanOfXY);
-    ReversibleHooks::Install("CGeneral", "GetNodeHeadingFromVector", 0x53CDC0, &CGeneral::GetNodeHeadingFromVector);
-    ReversibleHooks::Install("CGeneral", "SolveQuadratic", 0x53CE30, &CGeneral::SolveQuadratic);
-    ReversibleHooks::Install("CGeneral", "GetAngleBetweenPoints", 0x53CEA0, &CGeneral::GetAngleBetweenPoints);
-    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, static_cast<int32 (*)(const int32, const int32)>(&CGeneral::GetRandomNumberInRange));
-    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_float", 0x41BD90, static_cast<float (*)(const float, const float)>(&CGeneral::GetRandomNumberInRange));
+    Install("CGeneral", "LimitAngle", 0x53CB00, &CGeneral::LimitAngle);
+    Install("CGeneral", "LimitRadianAngle", 0x53CB50, &CGeneral::LimitRadianAngle);
+    Install("CGeneral", "GetRadianAngleBetweenPoints", 0x53CBE0, &CGeneral::GetRadianAngleBetweenPoints);
+    Install("CGeneral", "GetATanOfXY", 0x53CC70, &CGeneral::GetATanOfXY);
+    Install("CGeneral", "GetNodeHeadingFromVector", 0x53CDC0, &CGeneral::GetNodeHeadingFromVector);
+    Install("CGeneral", "SolveQuadratic", 0x53CE30, &CGeneral::SolveQuadratic);
+    Install("CGeneral", "GetAngleBetweenPoints", 0x53CEA0, &CGeneral::GetAngleBetweenPoints);
+    Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, static_cast<int32 (*)(const int32, const int32)>(&CGeneral::GetRandomNumberInRange));
+    Install("CGeneral", "GetRandomNumberInRange_float", 0x41BD90, static_cast<float (*)(const float, const float)>(&CGeneral::GetRandomNumberInRange));
 }
 
 // 0x53CB00

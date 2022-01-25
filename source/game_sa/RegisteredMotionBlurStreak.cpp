@@ -6,8 +6,8 @@
 
 void CRegisteredMotionBlurStreak::InjectHooks()
 {
-    ReversibleHooks::Install("CRegisteredMotionBlurStreak", "Update", 0x721EE0, &CRegisteredMotionBlurStreak::Update);
-    ReversibleHooks::Install("CRegisteredMotionBlurStreak", "Render", 0x721F70, &CRegisteredMotionBlurStreak::Render);
+    Install("CRegisteredMotionBlurStreak", "Update", 0x721EE0, &CRegisteredMotionBlurStreak::Update);
+    Install("CRegisteredMotionBlurStreak", "Render", 0x721F70, &CRegisteredMotionBlurStreak::Render);
 }
 
 void CRegisteredMotionBlurStreak::Update()

@@ -19,34 +19,34 @@ int32& TexDictionaryLinkPluginOffset = *reinterpret_cast<int32*>(0xC88018);
 // variables list is not finished. Need to make CPools before.
 
 void CTxdStore::InjectHooks() {
-    ReversibleHooks::Install("CTxdStore", "PushCurrentTxd", 0x7316A0, &CTxdStore::PushCurrentTxd);
-    ReversibleHooks::Install("CTxdStore", "PopCurrentTxd", 0x7316B0, &CTxdStore::PopCurrentTxd);
-    ReversibleHooks::Install("CTxdStore", "FindTxdSlot_name", 0x731850, static_cast<int32 (*)(const char*)>(&CTxdStore::FindTxdSlot));
-    ReversibleHooks::Install("CTxdStore", "FindTxdSlot_hash", 0x7318E0, static_cast<int32 (*)(uint32)>(&CTxdStore::FindTxdSlot));
-    ReversibleHooks::Install("CTxdStore", "StartLoadTxd", 0x731930, &CTxdStore::StartLoadTxd);
-    ReversibleHooks::Install("CTxdStore", "Create", 0x731990, &CTxdStore::Create);
-    ReversibleHooks::Install("CTxdStore", "SetCurrentTxd", 0x7319C0, &CTxdStore::SetCurrentTxd);
-    ReversibleHooks::Install("CTxdStore", "AddRef", 0x731A00, &CTxdStore::AddRef);
-    ReversibleHooks::Install("CTxdStore", "RemoveRef", 0x731A30, &CTxdStore::RemoveRef);
-    ReversibleHooks::Install("CTxdStore", "RemoveRefWithoutDelete", 0x731A70, &CTxdStore::RemoveRefWithoutDelete);
-    ReversibleHooks::Install("CTxdStore", "GetNumRefs", 0x731AA0, &CTxdStore::GetNumRefs);
-    ReversibleHooks::Install("CTxdStore", "AddTxdSlot", 0x731C80, &CTxdStore::AddTxdSlot);
-    ReversibleHooks::Install("CTxdStore", "RemoveTxdSlot", 0x731CD0, &CTxdStore::RemoveTxdSlot);
-    ReversibleHooks::Install("CTxdStore", "LoadTxd_stream", 0x731DD0, static_cast<bool (*)(int32, RwStream*)>(&CTxdStore::LoadTxd));
-    ReversibleHooks::Install("CTxdStore", "LoadTxd_filename", 0x7320B0, static_cast<bool (*)(int32, const char*)>(&CTxdStore::LoadTxd));
-    ReversibleHooks::Install("CTxdStore", "FinishLoadTxd", 0x731E40, &CTxdStore::FinishLoadTxd);
-    ReversibleHooks::Install("CTxdStore", "RemoveTxd", 0x731E90, &CTxdStore::RemoveTxd);
-    ReversibleHooks::Install("CTxdStore", "Initialise", 0x731F20, &CTxdStore::Initialise);
-    ReversibleHooks::Install("CTxdStore", "Shutdown", 0x732000, &CTxdStore::Shutdown);
-    ReversibleHooks::Install("CTxdStore", "GameShutdown", 0x732060, &CTxdStore::GameShutdown);
-    ReversibleHooks::Install("CTxdStore", "GetParentTxdSlot", 0x408370, &CTxdStore::GetParentTxdSlot);
-    ReversibleHooks::Install("CTxdStore", "GetTxd", 0x408340, &CTxdStore::GetTxd);
-    ReversibleHooks::Install("CTxdStore", "TxdStoreFindCB", 0x731720, &CTxdStore::TxdStoreFindCB);
-    ReversibleHooks::Install("CTxdStore", "TxdStoreLoadCB", 0x731710, &CTxdStore::TxdStoreLoadCB);
-    ReversibleHooks::Install("CTxdStore", "SetupTxdParent", 0x731D50, &CTxdStore::SetupTxdParent);
+    Install("CTxdStore", "PushCurrentTxd", 0x7316A0, &CTxdStore::PushCurrentTxd);
+    Install("CTxdStore", "PopCurrentTxd", 0x7316B0, &CTxdStore::PopCurrentTxd);
+    Install("CTxdStore", "FindTxdSlot_name", 0x731850, static_cast<int32 (*)(const char*)>(&CTxdStore::FindTxdSlot));
+    Install("CTxdStore", "FindTxdSlot_hash", 0x7318E0, static_cast<int32 (*)(uint32)>(&CTxdStore::FindTxdSlot));
+    Install("CTxdStore", "StartLoadTxd", 0x731930, &CTxdStore::StartLoadTxd);
+    Install("CTxdStore", "Create", 0x731990, &CTxdStore::Create);
+    Install("CTxdStore", "SetCurrentTxd", 0x7319C0, &CTxdStore::SetCurrentTxd);
+    Install("CTxdStore", "AddRef", 0x731A00, &CTxdStore::AddRef);
+    Install("CTxdStore", "RemoveRef", 0x731A30, &CTxdStore::RemoveRef);
+    Install("CTxdStore", "RemoveRefWithoutDelete", 0x731A70, &CTxdStore::RemoveRefWithoutDelete);
+    Install("CTxdStore", "GetNumRefs", 0x731AA0, &CTxdStore::GetNumRefs);
+    Install("CTxdStore", "AddTxdSlot", 0x731C80, &CTxdStore::AddTxdSlot);
+    Install("CTxdStore", "RemoveTxdSlot", 0x731CD0, &CTxdStore::RemoveTxdSlot);
+    Install("CTxdStore", "LoadTxd_stream", 0x731DD0, static_cast<bool (*)(int32, RwStream*)>(&CTxdStore::LoadTxd));
+    Install("CTxdStore", "LoadTxd_filename", 0x7320B0, static_cast<bool (*)(int32, const char*)>(&CTxdStore::LoadTxd));
+    Install("CTxdStore", "FinishLoadTxd", 0x731E40, &CTxdStore::FinishLoadTxd);
+    Install("CTxdStore", "RemoveTxd", 0x731E90, &CTxdStore::RemoveTxd);
+    Install("CTxdStore", "Initialise", 0x731F20, &CTxdStore::Initialise);
+    Install("CTxdStore", "Shutdown", 0x732000, &CTxdStore::Shutdown);
+    Install("CTxdStore", "GameShutdown", 0x732060, &CTxdStore::GameShutdown);
+    Install("CTxdStore", "GetParentTxdSlot", 0x408370, &CTxdStore::GetParentTxdSlot);
+    Install("CTxdStore", "GetTxd", 0x408340, &CTxdStore::GetTxd);
+    Install("CTxdStore", "TxdStoreFindCB", 0x731720, &CTxdStore::TxdStoreFindCB);
+    Install("CTxdStore", "TxdStoreLoadCB", 0x731710, &CTxdStore::TxdStoreLoadCB);
+    Install("CTxdStore", "SetupTxdParent", 0x731D50, &CTxdStore::SetupTxdParent);
 
     // global
-    ReversibleHooks::Install("common", "RemoveIfRefCountIsGreaterThanOne", 0x731680, &RemoveIfRefCountIsGreaterThanOne);
+    Install("common", "RemoveIfRefCountIsGreaterThanOne", 0x731680, &RemoveIfRefCountIsGreaterThanOne);
 }
 
 // initialise txd store

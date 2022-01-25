@@ -160,19 +160,19 @@ long CAEVorbisDecoder::TellCallback(void* opaque) {
 }
 
 void CAEVorbisDecoder::InjectHooks() {
-    ReversibleHooks::Install("CAEVorbisDecoder", "CAEVorbisDecoder", 0x5026b0, &CAEVorbisDecoder::Constructor);
-    ReversibleHooks::Install("CAEVorbisDecoder", "~CAEVorbisDecoder", 0x5023f0, &CAEVorbisDecoder::Destructor);
-    ReversibleHooks::Install("CAEVorbisDecoder", "Initialise", 0x5024d0, &CAEVorbisDecoder::Initialise);
-    ReversibleHooks::Install("CAEVorbisDecoder", "GetStreamID", 0x502460, &CAEVorbisDecoder::GetStreamID);
-    ReversibleHooks::Install("CAEVorbisDecoder", "FillBuffer", 0x502470, &CAEVorbisDecoder::FillBuffer);
-    ReversibleHooks::Install("CAEVorbisDecoder", "GetSampleRate", 0x502560, &CAEVorbisDecoder::GetSampleRate);
-    ReversibleHooks::Install("CAEVorbisDecoder", "ReadCallback", 0x502580, &CAEVorbisDecoder::ReadCallback);
-    ReversibleHooks::Install("CAEVorbisDecoder", "CloseCallback", 0x5025d0, &CAEVorbisDecoder::CloseCallback);
-    ReversibleHooks::Install("CAEVorbisDecoder", "SeekCallback", 0x5025b0, &CAEVorbisDecoder::SeekCallback);
-    ReversibleHooks::Install("CAEVorbisDecoder", "TellCallback", 0x5025f0, &CAEVorbisDecoder::TellCallback);
-    ReversibleHooks::Install("CAEVorbisDecoder", "GetStreamLengthMs", 0x502610, &CAEVorbisDecoder::GetStreamLengthMs);
-    ReversibleHooks::Install("CAEVorbisDecoder", "GetStreamPlayTimeMs", 0x502640, &CAEVorbisDecoder::GetStreamPlayTimeMs);
-    ReversibleHooks::Install("CAEVorbisDecoder", "SetCursor", 0x502670, &CAEVorbisDecoder::SetCursor);
+    Install("CAEVorbisDecoder", "CAEVorbisDecoder", 0x5026b0, &CAEVorbisDecoder::Constructor);
+    Install("CAEVorbisDecoder", "~CAEVorbisDecoder", 0x5023f0, &CAEVorbisDecoder::Destructor);
+    Install("CAEVorbisDecoder", "Initialise", 0x5024d0, &CAEVorbisDecoder::Initialise);
+    Install("CAEVorbisDecoder", "GetStreamID", 0x502460, &CAEVorbisDecoder::GetStreamID);
+    Install("CAEVorbisDecoder", "FillBuffer", 0x502470, &CAEVorbisDecoder::FillBuffer);
+    Install("CAEVorbisDecoder", "GetSampleRate", 0x502560, &CAEVorbisDecoder::GetSampleRate);
+    Install("CAEVorbisDecoder", "ReadCallback", 0x502580, &CAEVorbisDecoder::ReadCallback);
+    Install("CAEVorbisDecoder", "CloseCallback", 0x5025d0, &CAEVorbisDecoder::CloseCallback);
+    Install("CAEVorbisDecoder", "SeekCallback", 0x5025b0, &CAEVorbisDecoder::SeekCallback);
+    Install("CAEVorbisDecoder", "TellCallback", 0x5025f0, &CAEVorbisDecoder::TellCallback);
+    Install("CAEVorbisDecoder", "GetStreamLengthMs", 0x502610, &CAEVorbisDecoder::GetStreamLengthMs);
+    Install("CAEVorbisDecoder", "GetStreamPlayTimeMs", 0x502640, &CAEVorbisDecoder::GetStreamPlayTimeMs);
+    Install("CAEVorbisDecoder", "SetCursor", 0x502670, &CAEVorbisDecoder::SetCursor);
 }
 
 CAEVorbisDecoder* CAEVorbisDecoder::Constructor(CAEDataStream* dataStream, int32 unknown) {

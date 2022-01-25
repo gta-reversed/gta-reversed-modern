@@ -13,19 +13,19 @@
 void CAtomicModelInfo::InjectHooks()
 {
 // VTABLE
-    ReversibleHooks::Install("CAtomicModelInfo", "AsAtomicModelInfoPtr", 0x4C5560, &CAtomicModelInfo::AsAtomicModelInfoPtr_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "GetModelType", 0x4C5570, &CAtomicModelInfo::GetModelType_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "Init", 0x4C4430, &CAtomicModelInfo::Init_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "DeleteRwObject", 0x4C4440, &CAtomicModelInfo::DeleteRwObject_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "GetRwModelType", 0x4C5580, &CAtomicModelInfo::GetRwModelType_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "CreateInstance_void", 0x4C4530, (RwObject * (CAtomicModelInfo::*)())(&CAtomicModelInfo::CreateInstance_Reversed));
-    ReversibleHooks::Install("CAtomicModelInfo", "CreateInstance_rwmat", 0x4C44D0, static_cast<RwObject * (CAtomicModelInfo::*)(RwMatrix*)>(&CAtomicModelInfo::CreateInstance_Reversed));
-    ReversibleHooks::Install("CAtomicModelInfo", "SetAtomic", 0x4C4360, &CAtomicModelInfo::SetAtomic_Reversed);
+    Install("CAtomicModelInfo", "AsAtomicModelInfoPtr", 0x4C5560, &CAtomicModelInfo::AsAtomicModelInfoPtr_Reversed);
+    Install("CAtomicModelInfo", "GetModelType", 0x4C5570, &CAtomicModelInfo::GetModelType_Reversed);
+    Install("CAtomicModelInfo", "Init", 0x4C4430, &CAtomicModelInfo::Init_Reversed);
+    Install("CAtomicModelInfo", "DeleteRwObject", 0x4C4440, &CAtomicModelInfo::DeleteRwObject_Reversed);
+    Install("CAtomicModelInfo", "GetRwModelType", 0x4C5580, &CAtomicModelInfo::GetRwModelType_Reversed);
+    Install("CAtomicModelInfo", "CreateInstance_void", 0x4C4530, (RwObject * (CAtomicModelInfo::*)())(&CAtomicModelInfo::CreateInstance_Reversed));
+    Install("CAtomicModelInfo", "CreateInstance_rwmat", 0x4C44D0, static_cast<RwObject * (CAtomicModelInfo::*)(RwMatrix*)>(&CAtomicModelInfo::CreateInstance_Reversed));
+    Install("CAtomicModelInfo", "SetAtomic", 0x4C4360, &CAtomicModelInfo::SetAtomic_Reversed);
 
 // OTHER
-    ReversibleHooks::Install("CAtomicModelInfo", "GetAtomicFromDistance", 0x4C44B0, &CAtomicModelInfo::GetAtomicFromDistance);
-    ReversibleHooks::Install("CAtomicModelInfo", "SetupVehicleUpgradeFlags", 0x4C4570, &CAtomicModelInfo::SetupVehicleUpgradeFlags);
-    ReversibleHooks::Install("CAtomicModelInfo", "SetAtomicModelInfoFlags", 0x5B3B20, &SetAtomicModelInfoFlags);
+    Install("CAtomicModelInfo", "GetAtomicFromDistance", 0x4C44B0, &CAtomicModelInfo::GetAtomicFromDistance);
+    Install("CAtomicModelInfo", "SetupVehicleUpgradeFlags", 0x4C4570, &CAtomicModelInfo::SetupVehicleUpgradeFlags);
+    Install("CAtomicModelInfo", "SetAtomicModelInfoFlags", 0x5B3B20, &SetAtomicModelInfoFlags);
 }
 
 CAtomicModelInfo* CAtomicModelInfo::AsAtomicModelInfoPtr()

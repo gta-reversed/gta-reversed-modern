@@ -2,15 +2,15 @@
 
 void CModelInfoAccelerator::InjectHooks()
 {
-    ReversibleHooks::Install("CModelInfoAccelerator", "Init", 0x4C6A80, &CModelInfoAccelerator::Init);
-    ReversibleHooks::Install("CModelInfoAccelerator", "AddModelInfoId", 0x4C6AA0, &CModelInfoAccelerator::AddModelInfoId);
-    ReversibleHooks::Install("CModelInfoAccelerator", "GetNextModelInfoId", 0x4C6AC0, &CModelInfoAccelerator::GetNextModelInfoId);
-    ReversibleHooks::Install("CModelInfoAccelerator", "AllocModelInfoIds", 0x4C6AE0, &CModelInfoAccelerator::AllocModelInfoIds);
-    ReversibleHooks::Install("CModelInfoAccelerator", "FreeModelInfoIds", 0x4C6B10, &CModelInfoAccelerator::FreeModelInfoIds);
-    ReversibleHooks::Install("CModelInfoAccelerator", "GetEntry", 0x4C6B30, &CModelInfoAccelerator::GetEntry);
-    ReversibleHooks::Install("CModelInfoAccelerator", "End", 0x4C6B40, &CModelInfoAccelerator::End);
-    ReversibleHooks::Install("CModelInfoAccelerator", "GetModelInfoIdFile", 0x4C6B70, &CModelInfoAccelerator::GetModelInfoIdFile);
-    ReversibleHooks::Install("CModelInfoAccelerator", "EndOfLoadPhase", 0x4C6BD0, &CModelInfoAccelerator::EndOfLoadPhase);
+    Install("CModelInfoAccelerator", "Init", 0x4C6A80, &CModelInfoAccelerator::Init);
+    Install("CModelInfoAccelerator", "AddModelInfoId", 0x4C6AA0, &CModelInfoAccelerator::AddModelInfoId);
+    Install("CModelInfoAccelerator", "GetNextModelInfoId", 0x4C6AC0, &CModelInfoAccelerator::GetNextModelInfoId);
+    Install("CModelInfoAccelerator", "AllocModelInfoIds", 0x4C6AE0, &CModelInfoAccelerator::AllocModelInfoIds);
+    Install("CModelInfoAccelerator", "FreeModelInfoIds", 0x4C6B10, &CModelInfoAccelerator::FreeModelInfoIds);
+    Install("CModelInfoAccelerator", "GetEntry", 0x4C6B30, &CModelInfoAccelerator::GetEntry);
+    Install("CModelInfoAccelerator", "End", 0x4C6B40, &CModelInfoAccelerator::End);
+    Install("CModelInfoAccelerator", "GetModelInfoIdFile", 0x4C6B70, &CModelInfoAccelerator::GetModelInfoIdFile);
+    Install("CModelInfoAccelerator", "EndOfLoadPhase", 0x4C6BD0, &CModelInfoAccelerator::EndOfLoadPhase);
 }
 
 void CModelInfoAccelerator::Init()

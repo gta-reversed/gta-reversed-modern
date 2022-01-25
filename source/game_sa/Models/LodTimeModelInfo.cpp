@@ -2,8 +2,8 @@
 
 void CLodTimeModelInfo::InjectHooks()
 {
-    ReversibleHooks::Install("CLodTimeModelInfo", "GetModelType", 0x4C5660, &CLodTimeModelInfo::GetModelType_Reversed);
-    ReversibleHooks::Install("CLodTimeModelInfo", "GetTimeInfo", 0x4C5670, &CLodTimeModelInfo::GetTimeInfo_Reversed);
+    Install("CLodTimeModelInfo", "GetModelType", 0x4C5660, &CLodTimeModelInfo::GetModelType_Reversed);
+    Install("CLodTimeModelInfo", "GetTimeInfo", 0x4C5670, &CLodTimeModelInfo::GetTimeInfo_Reversed);
 }
 
 ModelInfoType CLodTimeModelInfo::GetModelType()

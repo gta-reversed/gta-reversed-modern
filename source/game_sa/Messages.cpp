@@ -1,34 +1,34 @@
 #include "StdInc.h"
 
 void CMessages::InjectHooks() {
-//    ReversibleHooks::Install("CMessages", "GetStringLength", 0x69DB50, &CMessages::GetStringLength);
-//    ReversibleHooks::Install("CMessages", "StringCopy", 0x69DB70, &CMessages::StringCopy);
-//    ReversibleHooks::Install("CMessages", "StringCompare", 0x69DBD0, &CMessages::StringCompare);
-//    ReversibleHooks::Install("CMessages", "CutString", 0x69DC50, &CMessages::CutString);
-//    ReversibleHooks::Install("CMessages", "ClearMessages", 0x69DCD0, &CMessages::ClearMessages);
-//    ReversibleHooks::Install("CMessages", "ClearSmallMessagesOnly", 0x69DD30, &CMessages::ClearSmallMessagesOnly);
-//    ReversibleHooks::Install("CMessages", "AddToPreviousBriefArray", 0x69DD50, &CMessages::AddToPreviousBriefArray);
-//    ReversibleHooks::Install("CMessages", "ClearPreviousBriefArray", 0x69DE70, &CMessages::ClearPreviousBriefArray);
-//    ReversibleHooks::Install("CMessages", "InsertNumberInString", 0x69DE90, &CMessages::InsertNumberInString);
-//    ReversibleHooks::Install("CMessages", "InsertStringInString", 0x69E040, &CMessages::InsertStringInString);
-//    ReversibleHooks::Install("CMessages", "InsertPlayerControlKeysInString", 0x69E160, &CMessages::InsertPlayerControlKeysInString);
-//    ReversibleHooks::Install("CMessages", "AddMessageWithNumber", 0x69E360, &CMessages::AddMessageWithNumber);
-//    ReversibleHooks::Install("CMessages", "AddMessageJumpQWithNumber", 0x69E4E0, &CMessages::AddMessageJumpQWithNumber);
-//    ReversibleHooks::Install("CMessages", "AddBigMessageWithNumber", 0x69E5F0, &CMessages::AddBigMessageWithNumber);
-//    ReversibleHooks::Install("CMessages", "AddBigMessageWithNumberQ", 0x69E6E0, &CMessages::AddBigMessageWithNumberQ);
-//    ReversibleHooks::Install("CMessages", "AddMessageWithString", 0x69E800, &CMessages::AddMessageWithString);
-//    ReversibleHooks::Install("CMessages", "AddMessageJumpQWithString", 0x69E950, &CMessages::AddMessageJumpQWithString);
-//    ReversibleHooks::Install("CMessages", "ClearThisPrint", 0x69EA30, &CMessages::ClearThisPrint);
-//    ReversibleHooks::Install("CMessages", "ClearThisBigPrint", 0x69EBE0, &CMessages::ClearThisBigPrint);
-//    ReversibleHooks::Install("CMessages", "ClearThisPrintBigNow", 0x69ED80, &CMessages::ClearThisPrintBigNow);
-//    ReversibleHooks::Install("CMessages", "Init", 0x69EE00, &CMessages::Init);
-//    ReversibleHooks::Install("CMessages", "ClearAllMessagesDisplayedByGame", 0x69EDC0, &CMessages::ClearAllMessagesDisplayedByGame);
-//    ReversibleHooks::Install("CMessages", "Process", 0x69EE60, &CMessages::Process);
-//    ReversibleHooks::Install("CMessages", "Display", 0x69EFC0, &CMessages::Display);
-//    ReversibleHooks::Install("CMessages", "AddMessage", 0x69F0B0, &CMessages::AddMessage);
-//    ReversibleHooks::Install("CMessages", "AddMessageJumpQ", 0x69F1E0, &CMessages::AddMessageJumpQ);
-//    ReversibleHooks::Install("CMessages", "AddBigMessage", 0x69F2B0, &CMessages::AddBigMessage);
-//    ReversibleHooks::Install("CMessages", "AddBigMessageQ", 0x69F370, &CMessages::AddBigMessageQ);
+//    Install("CMessages", "GetStringLength", 0x69DB50, &CMessages::GetStringLength);
+//    Install("CMessages", "StringCopy", 0x69DB70, &CMessages::StringCopy);
+//    Install("CMessages", "StringCompare", 0x69DBD0, &CMessages::StringCompare);
+//    Install("CMessages", "CutString", 0x69DC50, &CMessages::CutString);
+//    Install("CMessages", "ClearMessages", 0x69DCD0, &CMessages::ClearMessages);
+//    Install("CMessages", "ClearSmallMessagesOnly", 0x69DD30, &CMessages::ClearSmallMessagesOnly);
+//    Install("CMessages", "AddToPreviousBriefArray", 0x69DD50, &CMessages::AddToPreviousBriefArray);
+//    Install("CMessages", "ClearPreviousBriefArray", 0x69DE70, &CMessages::ClearPreviousBriefArray);
+//    Install("CMessages", "InsertNumberInString", 0x69DE90, &CMessages::InsertNumberInString);
+//    Install("CMessages", "InsertStringInString", 0x69E040, &CMessages::InsertStringInString);
+//    Install("CMessages", "InsertPlayerControlKeysInString", 0x69E160, &CMessages::InsertPlayerControlKeysInString);
+//    Install("CMessages", "AddMessageWithNumber", 0x69E360, &CMessages::AddMessageWithNumber);
+//    Install("CMessages", "AddMessageJumpQWithNumber", 0x69E4E0, &CMessages::AddMessageJumpQWithNumber);
+//    Install("CMessages", "AddBigMessageWithNumber", 0x69E5F0, &CMessages::AddBigMessageWithNumber);
+//    Install("CMessages", "AddBigMessageWithNumberQ", 0x69E6E0, &CMessages::AddBigMessageWithNumberQ);
+//    Install("CMessages", "AddMessageWithString", 0x69E800, &CMessages::AddMessageWithString);
+//    Install("CMessages", "AddMessageJumpQWithString", 0x69E950, &CMessages::AddMessageJumpQWithString);
+//    Install("CMessages", "ClearThisPrint", 0x69EA30, &CMessages::ClearThisPrint);
+//    Install("CMessages", "ClearThisBigPrint", 0x69EBE0, &CMessages::ClearThisBigPrint);
+//    Install("CMessages", "ClearThisPrintBigNow", 0x69ED80, &CMessages::ClearThisPrintBigNow);
+//    Install("CMessages", "Init", 0x69EE00, &CMessages::Init);
+//    Install("CMessages", "ClearAllMessagesDisplayedByGame", 0x69EDC0, &CMessages::ClearAllMessagesDisplayedByGame);
+//    Install("CMessages", "Process", 0x69EE60, &CMessages::Process);
+//    Install("CMessages", "Display", 0x69EFC0, &CMessages::Display);
+//    Install("CMessages", "AddMessage", 0x69F0B0, &CMessages::AddMessage);
+//    Install("CMessages", "AddMessageJumpQ", 0x69F1E0, &CMessages::AddMessageJumpQ);
+//    Install("CMessages", "AddBigMessage", 0x69F2B0, &CMessages::AddBigMessage);
+//    Install("CMessages", "AddBigMessageQ", 0x69F370, &CMessages::AddBigMessageQ);
 }
 
 // Returns length of a string

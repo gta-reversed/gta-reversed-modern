@@ -15,15 +15,15 @@
 #include "TaskComplexGoToPointAndStandStill.h"
 
 void CTaskComplexMedicTreatInjuredPed::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "Constructor", 0x658BA0, &CTaskComplexMedicTreatInjuredPed::Constructor);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "CreateSubTask", 0x658DB0, &CTaskComplexMedicTreatInjuredPed::CreateSubTask);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "CreateDealWithNextAccidentTask", 0x65A020, &CTaskComplexMedicTreatInjuredPed::CreateDealWithNextAccidentTask);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "FindNearestAccident", 0x658CC0, &CTaskComplexMedicTreatInjuredPed::FindNearestAccident);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "FindAccidentPosition", 0x658D20, &CTaskComplexMedicTreatInjuredPed::FindAccidentPosition);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "Clone", 0x659AF0, &CTaskComplexMedicTreatInjuredPed::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "CreateFirstSubTask", 0x659FE0, &CTaskComplexMedicTreatInjuredPed::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "CreateNextSubTask", 0x65A990, &CTaskComplexMedicTreatInjuredPed::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "ControlSubTask", 0x65ABF0, &CTaskComplexMedicTreatInjuredPed::ControlSubTask_Reversed);
+    Install("CTaskComplexMedicTreatInjuredPed", "Constructor", 0x658BA0, &CTaskComplexMedicTreatInjuredPed::Constructor);
+    Install("CTaskComplexMedicTreatInjuredPed", "CreateSubTask", 0x658DB0, &CTaskComplexMedicTreatInjuredPed::CreateSubTask);
+    Install("CTaskComplexMedicTreatInjuredPed", "CreateDealWithNextAccidentTask", 0x65A020, &CTaskComplexMedicTreatInjuredPed::CreateDealWithNextAccidentTask);
+    Install("CTaskComplexMedicTreatInjuredPed", "FindNearestAccident", 0x658CC0, &CTaskComplexMedicTreatInjuredPed::FindNearestAccident);
+    Install("CTaskComplexMedicTreatInjuredPed", "FindAccidentPosition", 0x658D20, &CTaskComplexMedicTreatInjuredPed::FindAccidentPosition);
+    Install("CTaskComplexMedicTreatInjuredPed", "Clone", 0x659AF0, &CTaskComplexMedicTreatInjuredPed::Clone_Reversed);
+    Install("CTaskComplexMedicTreatInjuredPed", "CreateFirstSubTask", 0x659FE0, &CTaskComplexMedicTreatInjuredPed::CreateFirstSubTask_Reversed);
+    Install("CTaskComplexMedicTreatInjuredPed", "CreateNextSubTask", 0x65A990, &CTaskComplexMedicTreatInjuredPed::CreateNextSubTask_Reversed);
+    Install("CTaskComplexMedicTreatInjuredPed", "ControlSubTask", 0x65ABF0, &CTaskComplexMedicTreatInjuredPed::ControlSubTask_Reversed);
 }
 
 CTaskComplexMedicTreatInjuredPed* CTaskComplexMedicTreatInjuredPed::Constructor(CVehicle* vehicle, CPed* ped, bool isDriver) {

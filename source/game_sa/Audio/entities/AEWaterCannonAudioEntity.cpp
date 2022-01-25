@@ -64,13 +64,13 @@ void CAEWaterCannonAudioEntity::Service() {
 }
 
 void CAEWaterCannonAudioEntity::InjectHooks() {
-    ReversibleHooks::Install("CAEWaterCannonAudioEntity", "CAEWaterCannonAudioEntity", 0x728A90, &CAEWaterCannonAudioEntity::Constructor);
-    // ReversibleHooks::Install("CAEWaterCannonAudioEntity", "Initialise", 0x503060, &CAEWaterCannonAudioEntity::Initialise);
-    // ReversibleHooks::Install("CAEWaterCannonAudioEntity", "Terminate", 0x, &CAEWaterCannonAudioEntity::Terminate);
-    // ReversibleHooks::Install("CAEWaterCannonAudioEntity", "Service", 0x5030D0, &CAEWaterCannonAudioEntity::Service);
-    ReversibleHooks::Install("CAEWaterCannonAudioEntity", "SetSplashInfo", 0x502F50, &CAEWaterCannonAudioEntity::SetSplashInfo);
-    ReversibleHooks::Install("CAEWaterCannonAudioEntity", "ClearSplashInfo", 0x502F20, &CAEWaterCannonAudioEntity::ClearSplashInfo);
-    // ReversibleHooks::Install("CAEWaterCannonAudioEntity", "UpdateParameters_Reversed", 0x502EF0, &CAEWaterCannonAudioEntity::UpdateParameters_Reversed);
+    Install("CAEWaterCannonAudioEntity", "CAEWaterCannonAudioEntity", 0x728A90, &CAEWaterCannonAudioEntity::Constructor);
+    // Install("CAEWaterCannonAudioEntity", "Initialise", 0x503060, &CAEWaterCannonAudioEntity::Initialise);
+    // Install("CAEWaterCannonAudioEntity", "Terminate", 0x, &CAEWaterCannonAudioEntity::Terminate);
+    // Install("CAEWaterCannonAudioEntity", "Service", 0x5030D0, &CAEWaterCannonAudioEntity::Service);
+    Install("CAEWaterCannonAudioEntity", "SetSplashInfo", 0x502F50, &CAEWaterCannonAudioEntity::SetSplashInfo);
+    Install("CAEWaterCannonAudioEntity", "ClearSplashInfo", 0x502F20, &CAEWaterCannonAudioEntity::ClearSplashInfo);
+    // Install("CAEWaterCannonAudioEntity", "UpdateParameters_Reversed", 0x502EF0, &CAEWaterCannonAudioEntity::UpdateParameters_Reversed);
 }
 
 CAEWaterCannonAudioEntity* CAEWaterCannonAudioEntity::Constructor() {

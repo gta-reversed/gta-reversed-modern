@@ -4,15 +4,15 @@
 
 void CTaskSimpleJump::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleJump", "Constructor", 0x679AA0, &CTaskSimpleJump::Constructor);
-    ReversibleHooks::Install("CTaskSimpleJump", "CheckIfJumpBlocked", 0x67D590, &CTaskSimpleJump::CheckIfJumpBlocked);
-    ReversibleHooks::Install("CTaskSimpleJump", "Launch", 0x679B80, &CTaskSimpleJump::Launch);
-    ReversibleHooks::Install("CTaskSimpleJump", "StartLaunchAnim", 0x67D7A0, &CTaskSimpleJump::StartLaunchAnim);
-    ReversibleHooks::Install("CTaskSimpleJump", "JumpAnimFinishCB", 0x67A020, &CTaskSimpleJump::JumpAnimFinishCB);
+    Install("CTaskSimpleJump", "Constructor", 0x679AA0, &CTaskSimpleJump::Constructor);
+    Install("CTaskSimpleJump", "CheckIfJumpBlocked", 0x67D590, &CTaskSimpleJump::CheckIfJumpBlocked);
+    Install("CTaskSimpleJump", "Launch", 0x679B80, &CTaskSimpleJump::Launch);
+    Install("CTaskSimpleJump", "StartLaunchAnim", 0x67D7A0, &CTaskSimpleJump::StartLaunchAnim);
+    Install("CTaskSimpleJump", "JumpAnimFinishCB", 0x67A020, &CTaskSimpleJump::JumpAnimFinishCB);
     //VTABLE
-    ReversibleHooks::Install("CTaskSimpleJump", "Clone", 0x67C510, &CTaskSimpleJump::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleJump", "MakeAbortable", 0x679B60, &CTaskSimpleJump::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleJump", "ProcessPed", 0x680C60, &CTaskSimpleJump::ProcessPed_Reversed);
+    Install("CTaskSimpleJump", "Clone", 0x67C510, &CTaskSimpleJump::Clone_Reversed);
+    Install("CTaskSimpleJump", "MakeAbortable", 0x679B60, &CTaskSimpleJump::MakeAbortable_Reversed);
+    Install("CTaskSimpleJump", "ProcessPed", 0x680C60, &CTaskSimpleJump::ProcessPed_Reversed);
 }
 
 CTaskSimpleJump* CTaskSimpleJump::Constructor(bool bCanClimb)

@@ -9,10 +9,10 @@ Do not delete this comment block. Respect others' work!
 
 void CVector2D::InjectHooks()
 {
-    ReversibleHooks::Install("CVector2D", "Magnitude", 0x420860, &CVector2D::Magnitude);
-    ReversibleHooks::Install("CVector2D", "Normalise", 0x44E480, &CVector2D::Normalise);
+    Install("CVector2D", "Magnitude", 0x420860, &CVector2D::Magnitude);
+    Install("CVector2D", "Normalise", 0x44E480, &CVector2D::Normalise);
 
-    ReversibleHooks::Install("CVector2D", "operator=", 0x43E110, &CVector2D::operator=);
+    Install("CVector2D", "operator=", 0x43E110, &CVector2D::operator=);
 }
 
 CVector2D::CVector2D(const CVector& vec3d) {

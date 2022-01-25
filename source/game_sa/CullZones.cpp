@@ -11,21 +11,21 @@ int32& CCullZones::NumAttributeZones = *(int32*)0xC87AC8;
 bool& CCullZones::bMilitaryZonesDisabled = *(bool*)0xC87ACD;
 
 void CCullZones::InjectHooks() {
-    ReversibleHooks::Install("CCullZones", "Init", 0x72D6B0, &CCullZones::Init);
-    ReversibleHooks::Install("CCullZones", "AddCullZone", 0x72DF70, &CCullZones::AddCullZone);
-    ReversibleHooks::Install("CCullZones", "AddTunnelAttributeZone", 0x72DB50, &CCullZones::AddTunnelAttributeZone);
-    ReversibleHooks::Install("CCullZones", "AddMirrorAttributeZone", 0x72DC10, &CCullZones::AddMirrorAttributeZone);
-    ReversibleHooks::Install("CCullZones", "InRoomForAudio", 0x72DD70, &CCullZones::InRoomForAudio);
-    ReversibleHooks::Install("CCullZones", "CamNoRain", 0x72DDB0, &CCullZones::CamNoRain);
-    ReversibleHooks::Install("CCullZones", "PlayerNoRain", 0x72DDC0, &CCullZones::PlayerNoRain);
-    ReversibleHooks::Install("CCullZones", "FewerPeds", 0x72DD90, &CCullZones::FewerPeds);
-    ReversibleHooks::Install("CCullZones", "NoPolice", 0x72DD50, &CCullZones::NoPolice);
-    ReversibleHooks::Install("CCullZones", "DoExtraAirResistanceForPlayer", 0x72DDD0, &CCullZones::DoExtraAirResistanceForPlayer);
-    ReversibleHooks::Install("CCullZones", "FindTunnelAttributesForCoors", 0x72D9F0, &CCullZones::FindTunnelAttributesForCoors);
-    ReversibleHooks::Install("CCullZones", "FindMirrorAttributesForCoors", 0x72DA70, &CCullZones::FindMirrorAttributesForCoors);
-    ReversibleHooks::Install("CCullZones", "FindZoneWithStairsAttributeForPlayer", 0x72DAD0, &CCullZones::FindZoneWithStairsAttributeForPlayer);
-    ReversibleHooks::Install("CCullZones", "FindAttributesForCoors", 0x72D970, &CCullZones::FindAttributesForCoors);
-    ReversibleHooks::Install("CCullZones", "Update", 0x72DEC0, &CCullZones::Update);
+    Install("CCullZones", "Init", 0x72D6B0, &CCullZones::Init);
+    Install("CCullZones", "AddCullZone", 0x72DF70, &CCullZones::AddCullZone);
+    Install("CCullZones", "AddTunnelAttributeZone", 0x72DB50, &CCullZones::AddTunnelAttributeZone);
+    Install("CCullZones", "AddMirrorAttributeZone", 0x72DC10, &CCullZones::AddMirrorAttributeZone);
+    Install("CCullZones", "InRoomForAudio", 0x72DD70, &CCullZones::InRoomForAudio);
+    Install("CCullZones", "CamNoRain", 0x72DDB0, &CCullZones::CamNoRain);
+    Install("CCullZones", "PlayerNoRain", 0x72DDC0, &CCullZones::PlayerNoRain);
+    Install("CCullZones", "FewerPeds", 0x72DD90, &CCullZones::FewerPeds);
+    Install("CCullZones", "NoPolice", 0x72DD50, &CCullZones::NoPolice);
+    Install("CCullZones", "DoExtraAirResistanceForPlayer", 0x72DDD0, &CCullZones::DoExtraAirResistanceForPlayer);
+    Install("CCullZones", "FindTunnelAttributesForCoors", 0x72D9F0, &CCullZones::FindTunnelAttributesForCoors);
+    Install("CCullZones", "FindMirrorAttributesForCoors", 0x72DA70, &CCullZones::FindMirrorAttributesForCoors);
+    Install("CCullZones", "FindZoneWithStairsAttributeForPlayer", 0x72DAD0, &CCullZones::FindZoneWithStairsAttributeForPlayer);
+    Install("CCullZones", "FindAttributesForCoors", 0x72D970, &CCullZones::FindAttributesForCoors);
+    Install("CCullZones", "Update", 0x72DEC0, &CCullZones::Update);
 }
 
 // 0x72D6B0

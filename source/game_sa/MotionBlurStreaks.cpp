@@ -8,10 +8,10 @@ RxVertexIndex(&CMotionBlurStreaks::aIndices)[NUM_STREAK_INDICES] = *(RxVertexInd
 
 void CMotionBlurStreaks::InjectHooks()
 {
-    ReversibleHooks::Install("CMotionBlurStreaks", "Init", 0x721D90, &CMotionBlurStreaks::Init);
-    ReversibleHooks::Install("CMotionBlurStreaks", "Update", 0x7240C0, &CMotionBlurStreaks::Update);
-    ReversibleHooks::Install("CMotionBlurStreaks", "Render", 0x7240E0, &CMotionBlurStreaks::Render);
-    ReversibleHooks::Install("CMotionBlurStreaks", "RegisterStreak", 0x721DC0, &CMotionBlurStreaks::RegisterStreak);
+    Install("CMotionBlurStreaks", "Init", 0x721D90, &CMotionBlurStreaks::Init);
+    Install("CMotionBlurStreaks", "Update", 0x7240C0, &CMotionBlurStreaks::Update);
+    Install("CMotionBlurStreaks", "Render", 0x7240E0, &CMotionBlurStreaks::Render);
+    Install("CMotionBlurStreaks", "RegisterStreak", 0x721DC0, &CMotionBlurStreaks::RegisterStreak);
 }
 
 // 0x721D90

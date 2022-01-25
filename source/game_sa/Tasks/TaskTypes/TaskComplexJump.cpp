@@ -8,12 +8,12 @@
 #include "TaskSimpleClimb.h"
 
 void CTaskComplexJump::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexJump", "Constructor", 0x67A030, &CTaskComplexJump::Constructor);
-    ReversibleHooks::Install("CTaskComplexJump", "CreateSubTask", 0x67D980, &CTaskComplexJump::CreateSubTask);
-    ReversibleHooks::Install("CTaskComplexJump", "CreateFirstSubTask", 0x67FD10, &CTaskComplexJump::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexJump", "CreateNextSubTask", 0x67FC00, &CTaskComplexJump::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexJump", "Clone", 0x67C5A0, &CTaskComplexJump::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexJump", "MakeAbortable", 0x67A070, &CTaskComplexJump::MakeAbortable_Reversed);
+    Install("CTaskComplexJump", "Constructor", 0x67A030, &CTaskComplexJump::Constructor);
+    Install("CTaskComplexJump", "CreateSubTask", 0x67D980, &CTaskComplexJump::CreateSubTask);
+    Install("CTaskComplexJump", "CreateFirstSubTask", 0x67FD10, &CTaskComplexJump::CreateFirstSubTask_Reversed);
+    Install("CTaskComplexJump", "CreateNextSubTask", 0x67FC00, &CTaskComplexJump::CreateNextSubTask_Reversed);
+    Install("CTaskComplexJump", "Clone", 0x67C5A0, &CTaskComplexJump::Clone_Reversed);
+    Install("CTaskComplexJump", "MakeAbortable", 0x67A070, &CTaskComplexJump::MakeAbortable_Reversed);
 }
 
 CTaskComplexJump* CTaskComplexJump::Constructor(eComplexJumpType jumpType) {

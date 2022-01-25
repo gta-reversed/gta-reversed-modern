@@ -2,29 +2,29 @@
 
 void CEventPlayerCommandToGroup::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPlayerCommandToGroup", "CEventPlayerCommandToGroup", 0x4B23D0, &CEventPlayerCommandToGroup::Constructor);
-    ReversibleHooks::Install("CEventPlayerCommandToGroup", "AffectsPedGroup_Reversed", 0x4B24D0, &CEventPlayerCommandToGroup::AffectsPedGroup_Reversed);
+    Install("CEventPlayerCommandToGroup", "CEventPlayerCommandToGroup", 0x4B23D0, &CEventPlayerCommandToGroup::Constructor);
+    Install("CEventPlayerCommandToGroup", "AffectsPedGroup_Reversed", 0x4B24D0, &CEventPlayerCommandToGroup::AffectsPedGroup_Reversed);
 }
 
 void CEventPlayerCommandToGroupAttack::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPlayerCommandToGroupAttack", "CEventPlayerCommandToGroupAttack", 0x5F6340, &CEventPlayerCommandToGroupAttack::Constructor);
-    ReversibleHooks::Install("CEventPlayerCommandToGroupAttack", "AffectsPedGroup_Reversed", 0x4B2530, &CEventPlayerCommandToGroupAttack::AffectsPedGroup_Reversed);
+    Install("CEventPlayerCommandToGroupAttack", "CEventPlayerCommandToGroupAttack", 0x5F6340, &CEventPlayerCommandToGroupAttack::Constructor);
+    Install("CEventPlayerCommandToGroupAttack", "AffectsPedGroup_Reversed", 0x4B2530, &CEventPlayerCommandToGroupAttack::AffectsPedGroup_Reversed);
 }
 
 void CEventPlayerCommandToGroupGather::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPlayerCommandToGroupGather", "CEventPlayerCommandToGroupGather", 0x609250, &CEventPlayerCommandToGroupGather::Constructor);
+    Install("CEventPlayerCommandToGroupGather", "CEventPlayerCommandToGroupGather", 0x609250, &CEventPlayerCommandToGroupGather::Constructor);
 }
 
 void CEventDontJoinPlayerGroup::InjectHooks()
 {
-    ReversibleHooks::Install("CEventDontJoinPlayerGroup", "CEventDontJoinPlayerGroup", 0x6090E0, &CEventDontJoinPlayerGroup::Constructor);
+    Install("CEventDontJoinPlayerGroup", "CEventDontJoinPlayerGroup", 0x6090E0, &CEventDontJoinPlayerGroup::Constructor);
 }
 
 void CEventNewGangMember::InjectHooks()
 {
-    ReversibleHooks::Install("CEventNewGangMember", "CEventNewGangMember", 0x608F70, &CEventNewGangMember::Constructor);
+    Install("CEventNewGangMember", "CEventNewGangMember", 0x608F70, &CEventNewGangMember::Constructor);
 }
 
 CEventPlayerCommandToGroup::CEventPlayerCommandToGroup(ePlayerGroupCommand command, CPed* target)

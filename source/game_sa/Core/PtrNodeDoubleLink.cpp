@@ -9,9 +9,9 @@
 #include "PtrNodeDoubleLink.h"
 
 void CPtrNodeDoubleLink::InjectHooks() {
-    ReversibleHooks::Install("CPtrNodeDoubleLink", "operator new", 0x5523C0, &CPtrNodeDoubleLink::operator new);
-    ReversibleHooks::Install("CPtrNodeDoubleLink", "operator delete", 0x5523D0, &CPtrNodeDoubleLink::operator delete);
-    ReversibleHooks::Install("CPtrNodeDoubleLink", "AddToList", 0x5329A0, &CPtrNodeDoubleLink::AddToList);
+    Install("CPtrNodeDoubleLink", "operator new", 0x5523C0, &CPtrNodeDoubleLink::operator new);
+    Install("CPtrNodeDoubleLink", "operator delete", 0x5523D0, &CPtrNodeDoubleLink::operator delete);
+    Install("CPtrNodeDoubleLink", "AddToList", 0x5329A0, &CPtrNodeDoubleLink::AddToList);
 }
 
 void* CPtrNodeDoubleLink::operator new(uint32 size) {

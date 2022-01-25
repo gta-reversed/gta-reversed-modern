@@ -1,12 +1,12 @@
 #include "StdInc.h"
 
 void CInformFriendsEventQueue::InjectHooks() {
-//    ReversibleHooks::Install("CInformFriendsEventQueue", "Constructor", 0x0, &CInformFriendsEventQueue::Constructor);
-//    ReversibleHooks::Install("CInformFriendsEventQueue", "Destructor", 0x0, &CInformFriendsEventQueue::Destructor);
-//    ReversibleHooks::Install("CInformFriendsEventQueue", "Init", 0x4B2990, &CInformFriendsEventQueue::Init);
-//    ReversibleHooks::Install("CInformFriendsEventQueue", "Flush", 0x4AC2A0, &CInformFriendsEventQueue::Flush);
-//    ReversibleHooks::Install("CInformFriendsEventQueue", "Add", 0x4AC1E0, &CInformFriendsEventQueue::Add);
-//    ReversibleHooks::Install("CInformFriendsEventQueue", "Process", 0x4AC2E0, &CInformFriendsEventQueue::Process);
+//    Install("CInformFriendsEventQueue", "Constructor", 0x0, &CInformFriendsEventQueue::Constructor);
+//    Install("CInformFriendsEventQueue", "Destructor", 0x0, &CInformFriendsEventQueue::Destructor);
+//    Install("CInformFriendsEventQueue", "Init", 0x4B2990, &CInformFriendsEventQueue::Init);
+//    Install("CInformFriendsEventQueue", "Flush", 0x4AC2A0, &CInformFriendsEventQueue::Flush);
+//    Install("CInformFriendsEventQueue", "Add", 0x4AC1E0, &CInformFriendsEventQueue::Add);
+//    Install("CInformFriendsEventQueue", "Process", 0x4AC2E0, &CInformFriendsEventQueue::Process);
 }
 
 // 0x

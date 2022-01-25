@@ -4,13 +4,13 @@
 
 void CTaskSimpleLand::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleLand", "Constructor", 0x678E90, &CTaskSimpleLand::Constructor);
-    ReversibleHooks::Install("CTaskSimpleLand", "LeftFootLanded", 0x679010, &CTaskSimpleLand::LeftFootLanded);
-    ReversibleHooks::Install("CTaskSimpleLand", "RightFootLanded", 0x678FE0, &CTaskSimpleLand::RightFootLanded);
-    ReversibleHooks::Install("CTaskSimpleLand", "FinishAnimCB", 0x678FA0, &CTaskSimpleLand::FinishAnimCB);
+    Install("CTaskSimpleLand", "Constructor", 0x678E90, &CTaskSimpleLand::Constructor);
+    Install("CTaskSimpleLand", "LeftFootLanded", 0x679010, &CTaskSimpleLand::LeftFootLanded);
+    Install("CTaskSimpleLand", "RightFootLanded", 0x678FE0, &CTaskSimpleLand::RightFootLanded);
+    Install("CTaskSimpleLand", "FinishAnimCB", 0x678FA0, &CTaskSimpleLand::FinishAnimCB);
     //VTABLE
-    ReversibleHooks::Install("CTaskSimpleLand", "MakeAbortable", 0x678F40, &CTaskSimpleLand::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleLand", "ProcessPed", 0x67D380, &CTaskSimpleLand::ProcessPed_Reversed);
+    Install("CTaskSimpleLand", "MakeAbortable", 0x678F40, &CTaskSimpleLand::MakeAbortable_Reversed);
+    Install("CTaskSimpleLand", "ProcessPed", 0x67D380, &CTaskSimpleLand::ProcessPed_Reversed);
 }
 
 CTaskSimpleLand* CTaskSimpleLand::Constructor(AnimationId nAnimId)

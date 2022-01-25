@@ -2,8 +2,8 @@
 
 void CColTrianglePlane::InjectHooks()
 {
-    ReversibleHooks::Install("CColTrianglePlane", "GetNormal", 0x411610, &CColTrianglePlane::GetNormal);
-    ReversibleHooks::Install("CColTrianglePlane", "Set", 0x411660, &CColTrianglePlane::Set);
+    Install("CColTrianglePlane", "GetNormal", 0x411610, &CColTrianglePlane::GetNormal);
+    Install("CColTrianglePlane", "Set", 0x411660, &CColTrianglePlane::Set);
 }
 
 void CColTrianglePlane::GetNormal(CVector& out)

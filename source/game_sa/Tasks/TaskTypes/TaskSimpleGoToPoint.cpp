@@ -7,11 +7,11 @@
 
 void CTaskSimpleGoToPoint::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "CTaskSimpleGoToPoint", 0x667CD0, &CTaskSimpleGoToPoint::Constructor);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "Clone", 0x66CC60, &CTaskSimpleGoToPoint::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "MakeAbortable", 0x667D60, &CTaskSimpleGoToPoint::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "ProcessPed", 0x66D710, &CTaskSimpleGoToPoint::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "UpdatePoint", 0x645700, &CTaskSimpleGoToPoint::UpdatePoint);
+    Install("CTaskSimpleGoToPoint", "CTaskSimpleGoToPoint", 0x667CD0, &CTaskSimpleGoToPoint::Constructor);
+    Install("CTaskSimpleGoToPoint", "Clone", 0x66CC60, &CTaskSimpleGoToPoint::Clone_Reversed);
+    Install("CTaskSimpleGoToPoint", "MakeAbortable", 0x667D60, &CTaskSimpleGoToPoint::MakeAbortable_Reversed);
+    Install("CTaskSimpleGoToPoint", "ProcessPed", 0x66D710, &CTaskSimpleGoToPoint::ProcessPed_Reversed);
+    Install("CTaskSimpleGoToPoint", "UpdatePoint", 0x645700, &CTaskSimpleGoToPoint::UpdatePoint);
 }
 
 CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) :

@@ -2,8 +2,8 @@
 
 void CBox::InjectHooks()
 {
-    ReversibleHooks::Install("CBox", "Set", 0x40EDE0, &CBox::Set);
-    ReversibleHooks::Install("CBox", "Recalc", 0x40EE20, &CBox::Recalc);
+    Install("CBox", "Set", 0x40EDE0, &CBox::Set);
+    Install("CBox", "Recalc", 0x40EE20, &CBox::Recalc);
 }
 
 void CBox::Set(CVector const& vecMin, CVector const& vecMax)

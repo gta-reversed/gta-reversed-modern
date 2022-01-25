@@ -7,7 +7,7 @@ float& CIniFile::PedNumberMultiplier = *(float*)0x8CDF14;
 float& CIniFile::CarNumberMultiplier = *(float*)0x8CDF18;
 
 void CIniFile::InjectHooks() {
-    ReversibleHooks::Install("CIniFile", "LoadIniFile", 0x56D070, &CIniFile::LoadIniFile);
+    Install("CIniFile", "LoadIniFile", 0x56D070, &CIniFile::LoadIniFile);
 }
 
 // 0x56D070

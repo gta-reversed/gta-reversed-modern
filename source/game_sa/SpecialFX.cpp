@@ -8,13 +8,13 @@ uint32& CSpecialFX::SnapShotFrames = *(uint32*)0xC7C710;
 RwTexture*& gpFinishFlagTex = *reinterpret_cast<RwTexture**>(0xC7C718);
 
 void CSpecialFX::InjectHooks() {
-//    ReversibleHooks::Install("CSpecialFX", "Init", 0x7268F0, &CSpecialFX::Init);
-//    ReversibleHooks::Install("CSpecialFX", "Update", 0x726AA0, &CSpecialFX::Update);
-    ReversibleHooks::Install("CSpecialFX", "Shutdown", 0x723390, &CSpecialFX::Shutdown);
-//    ReversibleHooks::Install("CSpecialFX", "AddWeaponStreak", 0x0, &CSpecialFX::AddWeaponStreak);
-//    ReversibleHooks::Install("CSpecialFX", "Render", 0x726AD0, &CSpecialFX::Render);
-//    ReversibleHooks::Install("CSpecialFX", "Render2DFXs", 0x721660, &CSpecialFX::Render2DFXs);
-    ReversibleHooks::Install("CSpecialFX", "ReplayStarted", 0x721D30, &CSpecialFX::ReplayStarted);
+//    Install("CSpecialFX", "Init", 0x7268F0, &CSpecialFX::Init);
+//    Install("CSpecialFX", "Update", 0x726AA0, &CSpecialFX::Update);
+    Install("CSpecialFX", "Shutdown", 0x723390, &CSpecialFX::Shutdown);
+//    Install("CSpecialFX", "AddWeaponStreak", 0x0, &CSpecialFX::AddWeaponStreak);
+//    Install("CSpecialFX", "Render", 0x726AD0, &CSpecialFX::Render);
+//    Install("CSpecialFX", "Render2DFXs", 0x721660, &CSpecialFX::Render2DFXs);
+    Install("CSpecialFX", "ReplayStarted", 0x721D30, &CSpecialFX::ReplayStarted);
 }
 
 // 0x7268F0

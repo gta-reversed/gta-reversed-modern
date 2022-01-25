@@ -17,11 +17,11 @@ bool& CWaterLevel::m_bWaterFogScript = *(bool*)0x8D37D5;
 
 void CWaterLevel::InjectHooks()
 {
-    ReversibleHooks::Install("CWaterLevel", "GetWaterLevel", 0x6EB690, &CWaterLevel::GetWaterLevel);
-    ReversibleHooks::Install("CWaterLevel", "SyncWater", 0x6E76E0, &CWaterLevel::SyncWater);
-    ReversibleHooks::Install("CWaterLevel", "CalculateWavesOnlyForCoordinate", 0x6E7210, &CWaterLevel::CalculateWavesOnlyForCoordinate);
-    //ReversibleHooks::Install("CWaterLevel", "AddWaveToResult", 0x6E81E0, &CWaterLevel::AddWaveToResult);
-    //ReversibleHooks::Install("CWaterLevel", "GetWaterLevelNoWaves", 0x6E8580, &CWaterLevel::GetWaterLevelNoWaves);
+    Install("CWaterLevel", "GetWaterLevel", 0x6EB690, &CWaterLevel::GetWaterLevel);
+    Install("CWaterLevel", "SyncWater", 0x6E76E0, &CWaterLevel::SyncWater);
+    Install("CWaterLevel", "CalculateWavesOnlyForCoordinate", 0x6E7210, &CWaterLevel::CalculateWavesOnlyForCoordinate);
+    //Install("CWaterLevel", "AddWaveToResult", 0x6E81E0, &CWaterLevel::AddWaveToResult);
+    //Install("CWaterLevel", "GetWaterLevelNoWaves", 0x6E8580, &CWaterLevel::GetWaterLevelNoWaves);
 }
 
 void CWaterLevel::AddWaveToResult(float x, float y, float* pfWaterLevel, float fUnkn1, float fUnkn2, CVector* pVecNormal)

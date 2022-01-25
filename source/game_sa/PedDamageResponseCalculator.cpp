@@ -4,7 +4,7 @@ float& CPedDamageResponseCalculator::ms_damageFactor = *(float*)0x8A6260; // 555
 
 void CPedDamageResponseCalculator::InjectHooks()
 {
-    ReversibleHooks::Install("CPedDamageResponseCalculator", "CPedDamageResponseCalculator", 0x4AD3F0, &CPedDamageResponseCalculator::Constructor);
+    Install("CPedDamageResponseCalculator", "CPedDamageResponseCalculator", 0x4AD3F0, &CPedDamageResponseCalculator::Constructor);
 }
 
 CPedDamageResponseCalculator::CPedDamageResponseCalculator(CEntity* pEntity, float fDamage, eWeaponType weaponType, ePedPieceTypes bodyPart, bool bSpeak)

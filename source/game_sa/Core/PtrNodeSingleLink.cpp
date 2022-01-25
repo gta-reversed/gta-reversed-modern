@@ -3,7 +3,7 @@
 #include "PtrNodeSingleLink.h"
 
 void CPtrNodeSingleLink::InjectHooks() {
-    ReversibleHooks::Install("CPtrNodeSingleLink", "AddToList", 0x532960, &CPtrNodeSingleLink::AddToList);
+    Install("CPtrNodeSingleLink", "AddToList", 0x532960, &CPtrNodeSingleLink::AddToList);
 }
 
 void CPtrNodeSingleLink::AddToList(CPtrListSingleLink* list) {

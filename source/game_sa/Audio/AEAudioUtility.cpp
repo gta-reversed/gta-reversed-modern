@@ -8,15 +8,15 @@ int64& CAEAudioUtility::startTimeMs = *reinterpret_cast<int64*>(0xb610f8);
 float (&CAEAudioUtility::m_sfLogLookup)[50][2] = *reinterpret_cast<float (*)[50][2]>(0xb61100);
 
 void CAEAudioUtility::InjectHooks() {
-    ReversibleHooks::Install("CAEAudioUtility", "GetRandomNumberInRange_int", 0x4d9c10, static_cast<int32(*)(const int32, const int32)>(&CAEAudioUtility::GetRandomNumberInRange));
-    ReversibleHooks::Install("CAEAudioUtility", "GetRandomNumberInRange_float", 0x4d9c50, static_cast<float(*)(float, float)>(&CAEAudioUtility::GetRandomNumberInRange));
-    ReversibleHooks::Install("CAEAudioUtility", "ResolveProbability", 0x4d9c80, &CAEAudioUtility::ResolveProbability);
-    ReversibleHooks::Install("CAEAudioUtility", "GetPiecewiseLinear", 0x4d9d90, &CAEAudioUtility::GetPiecewiseLinear);
-    ReversibleHooks::Install("CAEAudioUtility", "AudioLog10", 0x4d9e50, &CAEAudioUtility::AudioLog10);
-    ReversibleHooks::Install("CAEAudioUtility", "ConvertFromBytesToMS", 0x4d9ef0, &CAEAudioUtility::ConvertFromBytesToMS);
-    ReversibleHooks::Install("CAEAudioUtility", "ConvertFromMSToBytes", 0x4d9f40, &CAEAudioUtility::ConvertFromMSToBytes);
-    // ReversibleHooks::Install("CAEAudioUtility", "GetBankAndSoundFromScriptSlotAudioEvent", 0x4D9CC0, GetBankAndSoundFromScriptSlotAudioEvent);
-    // ReversibleHooks::Install("CAEAudioUtility", "FindVehicleOfPlayer", 0x4D9E10, FindVehicleOfPlayer);
+    Install("CAEAudioUtility", "GetRandomNumberInRange_int", 0x4d9c10, static_cast<int32(*)(const int32, const int32)>(&CAEAudioUtility::GetRandomNumberInRange));
+    Install("CAEAudioUtility", "GetRandomNumberInRange_float", 0x4d9c50, static_cast<float(*)(float, float)>(&CAEAudioUtility::GetRandomNumberInRange));
+    Install("CAEAudioUtility", "ResolveProbability", 0x4d9c80, &CAEAudioUtility::ResolveProbability);
+    Install("CAEAudioUtility", "GetPiecewiseLinear", 0x4d9d90, &CAEAudioUtility::GetPiecewiseLinear);
+    Install("CAEAudioUtility", "AudioLog10", 0x4d9e50, &CAEAudioUtility::AudioLog10);
+    Install("CAEAudioUtility", "ConvertFromBytesToMS", 0x4d9ef0, &CAEAudioUtility::ConvertFromBytesToMS);
+    Install("CAEAudioUtility", "ConvertFromMSToBytes", 0x4d9f40, &CAEAudioUtility::ConvertFromMSToBytes);
+    // Install("CAEAudioUtility", "GetBankAndSoundFromScriptSlotAudioEvent", 0x4D9CC0, GetBankAndSoundFromScriptSlotAudioEvent);
+    // Install("CAEAudioUtility", "FindVehicleOfPlayer", 0x4D9E10, FindVehicleOfPlayer);
 
     // Those 2 change logic of the functions, and shouldn't be toggled on/off
     HookInstall(0x4d9e80, &CAEAudioUtility::GetCurrentTimeInMilliseconds);

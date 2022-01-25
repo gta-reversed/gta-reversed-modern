@@ -1,14 +1,14 @@
 #include "StdInc.h"
 
 void CStuckCarCheck::InjectHooks() {
-//    ReversibleHooks::Install("CStuckCarCheck", "Init", 0x4639E0, &CStuckCarCheck::Init);
-//    ReversibleHooks::Install("CStuckCarCheck", "AddCarToCheck", 0x465970, &CStuckCarCheck::AddCarToCheck);
-//    ReversibleHooks::Install("CStuckCarCheck", "AttemptToWarpVehicle", 0x463A60, &CStuckCarCheck::AttemptToWarpVehicle);
-//    ReversibleHooks::Install("CStuckCarCheck", "ClearStuckFlagForCar", 0x463C40, &CStuckCarCheck::ClearStuckFlagForCar);
-//    ReversibleHooks::Install("CStuckCarCheck", "HasCarBeenStuckForAWhile", 0x463C00, &CStuckCarCheck::HasCarBeenStuckForAWhile);
-//    ReversibleHooks::Install("CStuckCarCheck", "IsCarInStuckCarArray", 0x463C70, &CStuckCarCheck::IsCarInStuckCarArray);
-//    ReversibleHooks::Install("CStuckCarCheck", "Process", 0x465680, &CStuckCarCheck::Process);
-//    ReversibleHooks::Install("CStuckCarCheck", "RemoveCarFromCheck", 0x463B80, &CStuckCarCheck::RemoveCarFromCheck);
+//    Install("CStuckCarCheck", "Init", 0x4639E0, &CStuckCarCheck::Init);
+//    Install("CStuckCarCheck", "AddCarToCheck", 0x465970, &CStuckCarCheck::AddCarToCheck);
+//    Install("CStuckCarCheck", "AttemptToWarpVehicle", 0x463A60, &CStuckCarCheck::AttemptToWarpVehicle);
+//    Install("CStuckCarCheck", "ClearStuckFlagForCar", 0x463C40, &CStuckCarCheck::ClearStuckFlagForCar);
+//    Install("CStuckCarCheck", "HasCarBeenStuckForAWhile", 0x463C00, &CStuckCarCheck::HasCarBeenStuckForAWhile);
+//    Install("CStuckCarCheck", "IsCarInStuckCarArray", 0x463C70, &CStuckCarCheck::IsCarInStuckCarArray);
+//    Install("CStuckCarCheck", "Process", 0x465680, &CStuckCarCheck::Process);
+//    Install("CStuckCarCheck", "RemoveCarFromCheck", 0x463B80, &CStuckCarCheck::RemoveCarFromCheck);
 }
 
 // 0x4639E0

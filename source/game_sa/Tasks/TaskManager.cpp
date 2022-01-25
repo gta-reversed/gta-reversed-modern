@@ -10,26 +10,26 @@
 #include "TaskManager.h"
 
 void CTaskManager::InjectHooks() {
-    ReversibleHooks::Install("CTaskManager", "CTaskManager", 0x6816A0, &CTaskManager::Constructor);
-    ReversibleHooks::Install("CTaskManager", "~CTaskManager", 0x6816D0, &CTaskManager::Destructor);
-    ReversibleHooks::Install("CTaskManager", "GetActiveTask", 0x681720, &CTaskManager::GetActiveTask);
-    ReversibleHooks::Install("CTaskManager", "FindActiveTaskByType", 0x681740, &CTaskManager::FindActiveTaskByType);
-    ReversibleHooks::Install("CTaskManager", "FindTaskByType", 0x6817D0, &CTaskManager::FindTaskByType);
-    ReversibleHooks::Install("CTaskManager", "GetTaskSecondary", 0x681810, &CTaskManager::GetTaskSecondary);
-    ReversibleHooks::Install("CTaskManager", "HasTaskSecondary", 0x681820, &CTaskManager::HasTaskSecondary);
-    ReversibleHooks::Install("CTaskManager", "Flush", 0x681850, &CTaskManager::Flush);
-    ReversibleHooks::Install("CTaskManager", "FlushImmediately", 0x6818A0, &CTaskManager::FlushImmediately);
-    ReversibleHooks::Install("CTaskManager", "SetNextSubTask", 0x681920, &CTaskManager::SetNextSubTask);
-    ReversibleHooks::Install("CTaskManager", "GetSimplestTask_task", 0x681970, static_cast<CTaskSimple * (*)(CTask*)>(&CTaskManager::GetSimplestTask));
-    ReversibleHooks::Install("CTaskManager", "GetSimplestTask_tasK_index", 0x681A00, static_cast<CTaskSimple * (CTaskManager::*)(int32)>(&CTaskManager::GetSimplestTask));
-    ReversibleHooks::Install("CTaskManager", "StopTimers", 0x6819A0, &CTaskManager::StopTimers);
-    ReversibleHooks::Install("CTaskManager", "GetSimplestActiveTask", 0x6819D0, &CTaskManager::GetSimplestActiveTask);
-    ReversibleHooks::Install("CTaskManager", "AddSubTasks", 0x681A30, &CTaskManager::AddSubTasks);
-    ReversibleHooks::Install("CTaskManager", "ParentsControlChildren", 0x681A80, &CTaskManager::ParentsControlChildren);
-    ReversibleHooks::Install("CTaskManager", "SetTask", 0x681AF0, &CTaskManager::SetTask);
-    ReversibleHooks::Install("CTaskManager", "SetTaskSecondary", 0x681B60, &CTaskManager::SetTaskSecondary);
-    ReversibleHooks::Install("CTaskManager", "ClearTaskEventResponse", 0x681BD0, &CTaskManager::ClearTaskEventResponse);
-    ReversibleHooks::Install("CTaskManager", "ManageTasks", 0x681C10, &CTaskManager::ManageTasks);
+    Install("CTaskManager", "CTaskManager", 0x6816A0, &CTaskManager::Constructor);
+    Install("CTaskManager", "~CTaskManager", 0x6816D0, &CTaskManager::Destructor);
+    Install("CTaskManager", "GetActiveTask", 0x681720, &CTaskManager::GetActiveTask);
+    Install("CTaskManager", "FindActiveTaskByType", 0x681740, &CTaskManager::FindActiveTaskByType);
+    Install("CTaskManager", "FindTaskByType", 0x6817D0, &CTaskManager::FindTaskByType);
+    Install("CTaskManager", "GetTaskSecondary", 0x681810, &CTaskManager::GetTaskSecondary);
+    Install("CTaskManager", "HasTaskSecondary", 0x681820, &CTaskManager::HasTaskSecondary);
+    Install("CTaskManager", "Flush", 0x681850, &CTaskManager::Flush);
+    Install("CTaskManager", "FlushImmediately", 0x6818A0, &CTaskManager::FlushImmediately);
+    Install("CTaskManager", "SetNextSubTask", 0x681920, &CTaskManager::SetNextSubTask);
+    Install("CTaskManager", "GetSimplestTask_task", 0x681970, static_cast<CTaskSimple * (*)(CTask*)>(&CTaskManager::GetSimplestTask));
+    Install("CTaskManager", "GetSimplestTask_tasK_index", 0x681A00, static_cast<CTaskSimple * (CTaskManager::*)(int32)>(&CTaskManager::GetSimplestTask));
+    Install("CTaskManager", "StopTimers", 0x6819A0, &CTaskManager::StopTimers);
+    Install("CTaskManager", "GetSimplestActiveTask", 0x6819D0, &CTaskManager::GetSimplestActiveTask);
+    Install("CTaskManager", "AddSubTasks", 0x681A30, &CTaskManager::AddSubTasks);
+    Install("CTaskManager", "ParentsControlChildren", 0x681A80, &CTaskManager::ParentsControlChildren);
+    Install("CTaskManager", "SetTask", 0x681AF0, &CTaskManager::SetTask);
+    Install("CTaskManager", "SetTaskSecondary", 0x681B60, &CTaskManager::SetTaskSecondary);
+    Install("CTaskManager", "ClearTaskEventResponse", 0x681BD0, &CTaskManager::ClearTaskEventResponse);
+    Install("CTaskManager", "ManageTasks", 0x681C10, &CTaskManager::ManageTasks);
 }
 
 // 0x6816A0

@@ -4,11 +4,11 @@ CVehicleAnimGroup(&CVehicleAnimGroupData::m_vehicleAnimGroups)[NUM_VEH_ANIM_GROU
 
 void CVehicleAnimGroup::InjectHooks()
 {
-    ReversibleHooks::Install("CVehicleAnimGroup", "InitAnimGroup", 0x5B9EB0, &CVehicleAnimGroup::InitAnimGroup);
-    ReversibleHooks::Install("CVehicleAnimGroup", "CopyAnimGroup", 0x5B9E40, &CVehicleAnimGroup::CopyAnimGroup);
-    ReversibleHooks::Install("CVehicleAnimGroup", "GetGroup", 0x6E3B00, &CVehicleAnimGroup::GetGroup);
-    ReversibleHooks::Install("CVehicleAnimGroup", "ComputeCriticalBlendTime", 0x6E3C80, &CVehicleAnimGroup::ComputeCriticalBlendTime);
-    ReversibleHooks::Install("CVehicleAnimGroup", "ComputeAnimDoorOffsets", 0x6E3D10, &CVehicleAnimGroup::ComputeAnimDoorOffsets);
+    Install("CVehicleAnimGroup", "InitAnimGroup", 0x5B9EB0, &CVehicleAnimGroup::InitAnimGroup);
+    Install("CVehicleAnimGroup", "CopyAnimGroup", 0x5B9E40, &CVehicleAnimGroup::CopyAnimGroup);
+    Install("CVehicleAnimGroup", "GetGroup", 0x6E3B00, &CVehicleAnimGroup::GetGroup);
+    Install("CVehicleAnimGroup", "ComputeCriticalBlendTime", 0x6E3C80, &CVehicleAnimGroup::ComputeCriticalBlendTime);
+    Install("CVehicleAnimGroup", "ComputeAnimDoorOffsets", 0x6E3D10, &CVehicleAnimGroup::ComputeAnimDoorOffsets);
 }
 
 CVehicleAnimGroup::CVehicleAnimGroup() : m_animFlags(), m_specialFlags(), m_generalTiming(), m_aInOutTiming()
@@ -228,11 +228,11 @@ CVector CVehicleAnimGroup::ComputeAnimDoorOffsets(eVehAnimDoorOffset doorId)
 
 void CVehicleAnimGroupData::InjectHooks()
 {
-    ReversibleHooks::Install("CVehicleAnimGroupData", "GetInOutTimings", 0x645630, &CVehicleAnimGroupData::GetInOutTimings);
-    ReversibleHooks::Install("CVehicleAnimGroupData", "GetGroupForAnim", 0x639FC0, &CVehicleAnimGroupData::GetGroupForAnim);
-    ReversibleHooks::Install("CVehicleAnimGroupData", "GetAnimDoorOffset", 0x645600, &CVehicleAnimGroupData::GetAnimDoorOffset);
-    ReversibleHooks::Install("CVehicleAnimGroupData", "UsesTruckDrivingAnims", 0x639FE0, &CVehicleAnimGroupData::UsesTruckDrivingAnims);
-    ReversibleHooks::Install("CVehicleAnimGroupData", "UsesKartDrivingAnims", 0x6D09E0, &CVehicleAnimGroupData::UsesKartDrivingAnims);
+    Install("CVehicleAnimGroupData", "GetInOutTimings", 0x645630, &CVehicleAnimGroupData::GetInOutTimings);
+    Install("CVehicleAnimGroupData", "GetGroupForAnim", 0x639FC0, &CVehicleAnimGroupData::GetGroupForAnim);
+    Install("CVehicleAnimGroupData", "GetAnimDoorOffset", 0x645600, &CVehicleAnimGroupData::GetAnimDoorOffset);
+    Install("CVehicleAnimGroupData", "UsesTruckDrivingAnims", 0x639FE0, &CVehicleAnimGroupData::UsesTruckDrivingAnims);
+    Install("CVehicleAnimGroupData", "UsesKartDrivingAnims", 0x6D09E0, &CVehicleAnimGroupData::UsesKartDrivingAnims);
 }
 
 // 0x645630

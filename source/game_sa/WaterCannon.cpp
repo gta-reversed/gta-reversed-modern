@@ -5,13 +5,13 @@
 #include <ranges>
 
 void CWaterCannon::InjectHooks() {
-    ReversibleHooks::Install("CWaterCannon", "Constructor", 0x728B10, &CWaterCannon::Constructor);
-    ReversibleHooks::Install("CWaterCannon", "Destructor", 0x728B30, &CWaterCannon::Destructor);
-    ReversibleHooks::Install("CWaterCannon", "Init", 0x728B40, &CWaterCannon::Init);
-    ReversibleHooks::Install("CWaterCannon", "Update_OncePerFrame", 0x72A280, &CWaterCannon::Update_OncePerFrame);
-    ReversibleHooks::Install("CWaterCannon", "Update_NewInput", 0x728C20, &CWaterCannon::Update_NewInput);
-    ReversibleHooks::Install("CWaterCannon", "PushPeds", 0x7295E0, &CWaterCannon::PushPeds);
-    ReversibleHooks::Install("CWaterCannon", "Render", 0x728DA0, &CWaterCannon::Render);
+    Install("CWaterCannon", "Constructor", 0x728B10, &CWaterCannon::Constructor);
+    Install("CWaterCannon", "Destructor", 0x728B30, &CWaterCannon::Destructor);
+    Install("CWaterCannon", "Init", 0x728B40, &CWaterCannon::Init);
+    Install("CWaterCannon", "Update_OncePerFrame", 0x72A280, &CWaterCannon::Update_OncePerFrame);
+    Install("CWaterCannon", "Update_NewInput", 0x728C20, &CWaterCannon::Update_NewInput);
+    Install("CWaterCannon", "PushPeds", 0x7295E0, &CWaterCannon::PushPeds);
+    Install("CWaterCannon", "Render", 0x728DA0, &CWaterCannon::Render);
 }
 
 // 0x728B10

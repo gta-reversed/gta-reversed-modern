@@ -6,10 +6,10 @@ float& CPlayerSkin::m_Angle = *(float*) 0xC3F048;
 uint32& CPlayerSkin::m_C3F04C = *(uint32*) 0xC3F04C; // todo: Rename CPlayerSkin:m_C3F04C
 
 void CPlayerSkin::InjectHooks() {
-    ReversibleHooks::Install("CPlayerSkin", "Initialise", 0x6FF8A0, &CPlayerSkin::Initialise);
-    ReversibleHooks::Install("CPlayerSkin", "Shutdown", 0x6FF8D0, &CPlayerSkin::Shutdown);
-    ReversibleHooks::Install("CPlayerSkin", "RenderFrontendSkinEdit", 0x6FF900, &CPlayerSkin::RenderFrontendSkinEdit);
-    ReversibleHooks::Install("CPlayerSkin", "GetSkinTexture", 0x6FFA10, &CPlayerSkin::GetSkinTexture);
+    Install("CPlayerSkin", "Initialise", 0x6FF8A0, &CPlayerSkin::Initialise);
+    Install("CPlayerSkin", "Shutdown", 0x6FF8D0, &CPlayerSkin::Shutdown);
+    Install("CPlayerSkin", "RenderFrontendSkinEdit", 0x6FF900, &CPlayerSkin::RenderFrontendSkinEdit);
+    Install("CPlayerSkin", "GetSkinTexture", 0x6FFA10, &CPlayerSkin::GetSkinTexture);
 }
 
 // 0x6FF8A0

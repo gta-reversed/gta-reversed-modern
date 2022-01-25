@@ -4,7 +4,7 @@ float* CMaths::ms_SinTable = (float*)0xBB3DFC;
 
 void CMaths::InjectHooks()
 {
-    ReversibleHooks::Install("CMaths", "InitMathsTables", 0x59AC90, &CMaths::InitMathsTables);
+    Install("CMaths", "InitMathsTables", 0x59AC90, &CMaths::InitMathsTables);
 }
 
 void CMaths::InitMathsTables()

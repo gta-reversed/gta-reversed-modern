@@ -6,19 +6,19 @@ float& CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE = *reinterpret_cast<float*>(0x8D2F
 float& CTaskSimpleSwim::SWIM_STOP_TIME = *reinterpret_cast<float*>(0x8D2FC0);
 
 void CTaskSimpleSwim::InjectHooks() {
-    ReversibleHooks::Install("CTaskSimpleSwim", "CTaskSimpleSwim", 0x688930, &CTaskSimpleSwim::Constructor);
-    ReversibleHooks::Install("CTaskSimpleSwim", "Clone", 0x68B050, &CTaskSimpleSwim::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleSwim", "GetTaskType", 0x6889F0, &CTaskSimpleSwim::GetId_Reversed);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessPed", 0x68B1C0, &CTaskSimpleSwim::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleSwim", "MakeAbortable", 0x68B100, &CTaskSimpleSwim::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ApplyRollAndPitch", 0x68A8E0, &CTaskSimpleSwim::ApplyRollAndPitch);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessSwimAnims", 0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessSwimmingResistance", 0x68A1D0, &CTaskSimpleSwim::ProcessSwimmingResistance);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessEffects", 0x68AA70, &CTaskSimpleSwim::ProcessEffects);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessControlAI", 0x689640, &CTaskSimpleSwim::ProcessControlAI);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessControlInput", 0x688A90, &CTaskSimpleSwim::ProcessControlInput);
-    ReversibleHooks::Install("CTaskSimpleSwim", "CreateFxSystem", 0x68A9F0, &CTaskSimpleSwim::CreateFxSystem);
-    ReversibleHooks::Install("CTaskSimpleSwim", "DestroyFxSystem", 0x68AA50, &CTaskSimpleSwim::DestroyFxSystem);
+    Install("CTaskSimpleSwim", "CTaskSimpleSwim", 0x688930, &CTaskSimpleSwim::Constructor);
+    Install("CTaskSimpleSwim", "Clone", 0x68B050, &CTaskSimpleSwim::Clone_Reversed);
+    Install("CTaskSimpleSwim", "GetTaskType", 0x6889F0, &CTaskSimpleSwim::GetId_Reversed);
+    Install("CTaskSimpleSwim", "ProcessPed", 0x68B1C0, &CTaskSimpleSwim::ProcessPed_Reversed);
+    Install("CTaskSimpleSwim", "MakeAbortable", 0x68B100, &CTaskSimpleSwim::MakeAbortable_Reversed);
+    Install("CTaskSimpleSwim", "ApplyRollAndPitch", 0x68A8E0, &CTaskSimpleSwim::ApplyRollAndPitch);
+    Install("CTaskSimpleSwim", "ProcessSwimAnims", 0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims);
+    Install("CTaskSimpleSwim", "ProcessSwimmingResistance", 0x68A1D0, &CTaskSimpleSwim::ProcessSwimmingResistance);
+    Install("CTaskSimpleSwim", "ProcessEffects", 0x68AA70, &CTaskSimpleSwim::ProcessEffects);
+    Install("CTaskSimpleSwim", "ProcessControlAI", 0x689640, &CTaskSimpleSwim::ProcessControlAI);
+    Install("CTaskSimpleSwim", "ProcessControlInput", 0x688A90, &CTaskSimpleSwim::ProcessControlInput);
+    Install("CTaskSimpleSwim", "CreateFxSystem", 0x68A9F0, &CTaskSimpleSwim::CreateFxSystem);
+    Install("CTaskSimpleSwim", "DestroyFxSystem", 0x68AA50, &CTaskSimpleSwim::DestroyFxSystem);
 }
 
 CTaskSimpleSwim::CTaskSimpleSwim(CVector* pPosition, CPed* pPed) : CTaskSimple() {

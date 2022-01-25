@@ -81,10 +81,10 @@ const uint32 CKeyGen::keyTable[256] = {
 };
 
 void CKeyGen::InjectHooks() {
-    ReversibleHooks::Install("CKeyGen", "AppendStringToKey", 0x53CF70, &CKeyGen::AppendStringToKey);
-    ReversibleHooks::Install("CKeyGen", "GetKey", 0x53CF00, static_cast<uint32(*)(const char*)>(CKeyGen::GetKey));
-    ReversibleHooks::Install("CKeyGen", "GetKey_size", 0x53CED0, static_cast<uint32(*)(const char*, int32)>(CKeyGen::GetKey));
-    ReversibleHooks::Install("CKeyGen", "GetUppercaseKey", 0x53CF30, &CKeyGen::GetUppercaseKey);
+    Install("CKeyGen", "AppendStringToKey", 0x53CF70, &CKeyGen::AppendStringToKey);
+    Install("CKeyGen", "GetKey", 0x53CF00, static_cast<uint32(*)(const char*)>(CKeyGen::GetKey));
+    Install("CKeyGen", "GetKey_size", 0x53CED0, static_cast<uint32(*)(const char*, int32)>(CKeyGen::GetKey));
+    Install("CKeyGen", "GetUppercaseKey", 0x53CF30, &CKeyGen::GetUppercaseKey);
 }
 
 // 0x53CF70

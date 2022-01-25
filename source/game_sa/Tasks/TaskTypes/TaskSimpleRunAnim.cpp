@@ -4,12 +4,12 @@
 
 void CTaskSimpleRunAnim::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleRunAnim", "Constructor", 0x61A8B0, &CTaskSimpleRunAnim::Constructor);
-    ReversibleHooks::Install("CTaskSimpleRunAnim", "Constructor2", 0x61A900, &CTaskSimpleRunAnim::Constructor2);
-    ReversibleHooks::Install("CTaskSimpleRunAnim", "StartAnim", 0x61A950, &CTaskSimpleRunAnim::StartAnim);
+    Install("CTaskSimpleRunAnim", "Constructor", 0x61A8B0, &CTaskSimpleRunAnim::Constructor);
+    Install("CTaskSimpleRunAnim", "Constructor2", 0x61A900, &CTaskSimpleRunAnim::Constructor2);
+    Install("CTaskSimpleRunAnim", "StartAnim", 0x61A950, &CTaskSimpleRunAnim::StartAnim);
     //VTABLE
-    ReversibleHooks::Install("CTaskSimpleRunAnim", "Clone", 0x61B6D0, &CTaskSimpleRunAnim::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleRunAnim", "ProcessPed", 0x61BAC0, &CTaskSimpleRunAnim::ProcessPed_Reversed);
+    Install("CTaskSimpleRunAnim", "Clone", 0x61B6D0, &CTaskSimpleRunAnim::Clone_Reversed);
+    Install("CTaskSimpleRunAnim", "ProcessPed", 0x61BAC0, &CTaskSimpleRunAnim::ProcessPed_Reversed);
 }
 
 CTaskSimpleRunAnim* CTaskSimpleRunAnim::Constructor(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, bool bHoldLastFrame)

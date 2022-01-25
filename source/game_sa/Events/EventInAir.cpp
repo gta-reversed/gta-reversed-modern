@@ -2,8 +2,8 @@
 
 void CEventInAir::InjectHooks()
 {
-    ReversibleHooks::Install("CEventInAir", "Constructor", 0x4B0CB0, &CEventInAir::Constructor);
-    ReversibleHooks::Install("CEventInAir", "AffectsPed", 0x4B0C00, &CEventInAir::AffectsPed_Reversed);
+    Install("CEventInAir", "Constructor", 0x4B0CB0, &CEventInAir::Constructor);
+    Install("CEventInAir", "AffectsPed", 0x4B0C00, &CEventInAir::AffectsPed_Reversed);
 }
 
 CEventInAir* CEventInAir::Constructor()
@@ -43,10 +43,10 @@ bool CEventInAir::AffectsPed_Reversed(CPed* ped)
 
 void CEventStuckInAir::InjectHooks()
 {
-    ReversibleHooks::Install("CEventStuckInAir", "Constructor", 0x4B1490, &CEventStuckInAir::Constructor);
-    ReversibleHooks::Install("CEventStuckInAir", "GetEventPriority", 0x4B1600, &CEventStuckInAir::GetEventPriority_Reversed);
-    ReversibleHooks::Install("CEventStuckInAir", "AffectsPed", 0x4B1580, &CEventStuckInAir::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventStuckInAir", "TakesPriorityOver", 0x4B15B0, &CEventStuckInAir::TakesPriorityOver_Reversed);
+    Install("CEventStuckInAir", "Constructor", 0x4B1490, &CEventStuckInAir::Constructor);
+    Install("CEventStuckInAir", "GetEventPriority", 0x4B1600, &CEventStuckInAir::GetEventPriority_Reversed);
+    Install("CEventStuckInAir", "AffectsPed", 0x4B1580, &CEventStuckInAir::AffectsPed_Reversed);
+    Install("CEventStuckInAir", "TakesPriorityOver", 0x4B15B0, &CEventStuckInAir::TakesPriorityOver_Reversed);
 }
 
 CEventStuckInAir::CEventStuckInAir(CPed* ped)

@@ -2,7 +2,7 @@
 #include "PedTaskPair.h"
 
 void CPedTaskPair::InjectHooks() {
-    ReversibleHooks::Install("CPedTaskPair", "Flush", 0x5E95B0, &CPedTaskPair::Flush);
+    Install("CPedTaskPair", "Flush", 0x5E95B0, &CPedTaskPair::Flush);
 }
 
 // 0x5E95B0

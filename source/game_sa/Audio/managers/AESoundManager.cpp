@@ -8,19 +8,19 @@
 CAESoundManager& AESoundManager = *(CAESoundManager*)0xB62CB0;
 
 void CAESoundManager::InjectHooks() {
-    ReversibleHooks::Install("CAESoundManager", "Service", 0x4F0000, &CAESoundManager::Service);
-    ReversibleHooks::Install("CAESoundManager", "Initialise", 0x5B9690, &CAESoundManager::Initialise);
-    ReversibleHooks::Install("CAESoundManager", "Terminate", 0x4EFAA0, &CAESoundManager::Terminate);
-    ReversibleHooks::Install("CAESoundManager", "Reset", 0x4EF4D0, &CAESoundManager::Reset);
-    ReversibleHooks::Install("CAESoundManager", "PauseManually", 0x4EF510, &CAESoundManager::PauseManually);
-    ReversibleHooks::Install("CAESoundManager", "RequestNewSound", 0x4EFB10, &CAESoundManager::RequestNewSound);
-    ReversibleHooks::Install("CAESoundManager", "AreSoundsPlayingInBankSlot", 0x4EF520, &CAESoundManager::AreSoundsPlayingInBankSlot);
-    ReversibleHooks::Install("CAESoundManager", "AreSoundsOfThisEventPlayingForThisEntity", 0x4EF570, &CAESoundManager::AreSoundsOfThisEventPlayingForThisEntity);
-    ReversibleHooks::Install("CAESoundManager", "AreSoundsOfThisEventPlayingForThisEntityAndPhysical", 0x4EF5D0, &CAESoundManager::AreSoundsOfThisEventPlayingForThisEntityAndPhysical);
-    ReversibleHooks::Install("CAESoundManager", "GetVirtualChannelForPhysicalChannel", 0x4EF630, &CAESoundManager::GetVirtualChannelForPhysicalChannel);
-    ReversibleHooks::Install("CAESoundManager", "CancelSoundsInBankSlot", 0x4EFC60, &CAESoundManager::CancelSoundsInBankSlot);
-    ReversibleHooks::Install("CAESoundManager", "CancelSoundsOfThisEventPlayingForThisEntity", 0x4EFB90, &CAESoundManager::CancelSoundsOfThisEventPlayingForThisEntity);
-    ReversibleHooks::Install("CAESoundManager", "CancelSoundsOfThisEventPlayingForThisEntityAndPhysical", 0x4EFBF0, &CAESoundManager::CancelSoundsOfThisEventPlayingForThisEntityAndPhysical);
+    Install("CAESoundManager", "Service", 0x4F0000, &CAESoundManager::Service);
+    Install("CAESoundManager", "Initialise", 0x5B9690, &CAESoundManager::Initialise);
+    Install("CAESoundManager", "Terminate", 0x4EFAA0, &CAESoundManager::Terminate);
+    Install("CAESoundManager", "Reset", 0x4EF4D0, &CAESoundManager::Reset);
+    Install("CAESoundManager", "PauseManually", 0x4EF510, &CAESoundManager::PauseManually);
+    Install("CAESoundManager", "RequestNewSound", 0x4EFB10, &CAESoundManager::RequestNewSound);
+    Install("CAESoundManager", "AreSoundsPlayingInBankSlot", 0x4EF520, &CAESoundManager::AreSoundsPlayingInBankSlot);
+    Install("CAESoundManager", "AreSoundsOfThisEventPlayingForThisEntity", 0x4EF570, &CAESoundManager::AreSoundsOfThisEventPlayingForThisEntity);
+    Install("CAESoundManager", "AreSoundsOfThisEventPlayingForThisEntityAndPhysical", 0x4EF5D0, &CAESoundManager::AreSoundsOfThisEventPlayingForThisEntityAndPhysical);
+    Install("CAESoundManager", "GetVirtualChannelForPhysicalChannel", 0x4EF630, &CAESoundManager::GetVirtualChannelForPhysicalChannel);
+    Install("CAESoundManager", "CancelSoundsInBankSlot", 0x4EFC60, &CAESoundManager::CancelSoundsInBankSlot);
+    Install("CAESoundManager", "CancelSoundsOfThisEventPlayingForThisEntity", 0x4EFB90, &CAESoundManager::CancelSoundsOfThisEventPlayingForThisEntity);
+    Install("CAESoundManager", "CancelSoundsOfThisEventPlayingForThisEntityAndPhysical", 0x4EFBF0, &CAESoundManager::CancelSoundsOfThisEventPlayingForThisEntityAndPhysical);
 }
 
 bool CAESoundManager::Initialise() {

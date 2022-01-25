@@ -6,8 +6,8 @@
 #define SAVEGAME_MAX_NAME_LEN 22
 
 void CSimpleVariablesSaveStructure::InjectHooks() {
-    ReversibleHooks::Install("CSimpleVariablesSaveStructure", "Construct", 0x5D1B80, &CSimpleVariablesSaveStructure::Construct);
-    ReversibleHooks::Install("CSimpleVariablesSaveStructure", "Extract", 0x5D1EA0, &CSimpleVariablesSaveStructure::Extract);
+    Install("CSimpleVariablesSaveStructure", "Construct", 0x5D1B80, &CSimpleVariablesSaveStructure::Construct);
+    Install("CSimpleVariablesSaveStructure", "Extract", 0x5D1EA0, &CSimpleVariablesSaveStructure::Extract);
 }
 
 // 0x5D1B80

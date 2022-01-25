@@ -2,8 +2,8 @@
 
 void CDummyObject::InjectHooks()
 {
-    ReversibleHooks::Install("CDummyObject", "CreateObject", 0x59EAC0, &CDummyObject::CreateObject);
-    ReversibleHooks::Install("CDummyObject", "UpdateFromObject", 0x59EB70, &CDummyObject::UpdateFromObject);
+    Install("CDummyObject", "CreateObject", 0x59EAC0, &CDummyObject::CreateObject);
+    Install("CDummyObject", "UpdateFromObject", 0x59EB70, &CDummyObject::UpdateFromObject);
 }
 
 CDummyObject::CDummyObject(CObject* pObj) : CDummy()

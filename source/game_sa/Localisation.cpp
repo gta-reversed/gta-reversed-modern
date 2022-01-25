@@ -12,24 +12,24 @@ bool& CLocalisation::germanGame = *(bool*)0xB9B7ED;
 bool& CLocalisation::frenchGame = *(bool*)0xB9B7EE;
 
 void CLocalisation::InjectHooks() {
-    ReversibleHooks::Install("CLocalisation", "Initialise", 0x56D180, &CLocalisation::Initialise);
-    ReversibleHooks::Install("CLocalisation", "SetNormalGame", 0x56D1A0, &CLocalisation::SetNormalGame);
-    ReversibleHooks::Install("CLocalisation", "SetFrenchGame", 0x56D1C0, &CLocalisation::SetFrenchGame);
-    ReversibleHooks::Install("CLocalisation", "SetGermanGame", 0x56D1E0, &CLocalisation::SetGermanGame);
-    ReversibleHooks::Install("CLocalisation", "GermanGame", 0x56D200, &CLocalisation::GermanGame);
-    ReversibleHooks::Install("CLocalisation", "FrenchGame", 0x56D210, &CLocalisation::FrenchGame);
-    ReversibleHooks::Install("CLocalisation", "Metric", 0x56D220, &CLocalisation::Metric);
-    ReversibleHooks::Install("CLocalisation", "Blood", 0x56D230, &CLocalisation::Blood);
-    ReversibleHooks::Install("CLocalisation", "Porn", 0x56D240, &CLocalisation::Porn);
-    ReversibleHooks::Install("CLocalisation", "ScreamsFromKills", 0x56D240, &CLocalisation::ScreamsFromKills);
-    ReversibleHooks::Install("CLocalisation", "Prostitutes", 0x56D240, &CLocalisation::Prostitutes);
-    ReversibleHooks::Install("CLocalisation", "KickingWhenDown", 0x56D270, &CLocalisation::KickingWhenDown);
-    ReversibleHooks::Install("CLocalisation", "ShootLimbs", 0x56D280, &CLocalisation::ShootLimbs);
-    ReversibleHooks::Install("CLocalisation", "KnockDownPeds", 0x56D290, &CLocalisation::KnockDownPeds);
-    ReversibleHooks::Install("CLocalisation", "KillFrenzy", 0x56D290, &CLocalisation::KillFrenzy);
-    ReversibleHooks::Install("CLocalisation", "StealFromDeadPed", 0x56D2B0, &CLocalisation::StealFromDeadPed);
-    ReversibleHooks::Install("CLocalisation", "KillPeds", 0x56D2C0, &CLocalisation::KillPeds);
-    ReversibleHooks::Install("CLocalisation", "PedsOnFire", 0x56D2C0, &CLocalisation::PedsOnFire);
+    Install("CLocalisation", "Initialise", 0x56D180, &CLocalisation::Initialise);
+    Install("CLocalisation", "SetNormalGame", 0x56D1A0, &CLocalisation::SetNormalGame);
+    Install("CLocalisation", "SetFrenchGame", 0x56D1C0, &CLocalisation::SetFrenchGame);
+    Install("CLocalisation", "SetGermanGame", 0x56D1E0, &CLocalisation::SetGermanGame);
+    Install("CLocalisation", "GermanGame", 0x56D200, &CLocalisation::GermanGame);
+    Install("CLocalisation", "FrenchGame", 0x56D210, &CLocalisation::FrenchGame);
+    Install("CLocalisation", "Metric", 0x56D220, &CLocalisation::Metric);
+    Install("CLocalisation", "Blood", 0x56D230, &CLocalisation::Blood);
+    Install("CLocalisation", "Porn", 0x56D240, &CLocalisation::Porn);
+    Install("CLocalisation", "ScreamsFromKills", 0x56D240, &CLocalisation::ScreamsFromKills);
+    Install("CLocalisation", "Prostitutes", 0x56D240, &CLocalisation::Prostitutes);
+    Install("CLocalisation", "KickingWhenDown", 0x56D270, &CLocalisation::KickingWhenDown);
+    Install("CLocalisation", "ShootLimbs", 0x56D280, &CLocalisation::ShootLimbs);
+    Install("CLocalisation", "KnockDownPeds", 0x56D290, &CLocalisation::KnockDownPeds);
+    Install("CLocalisation", "KillFrenzy", 0x56D290, &CLocalisation::KillFrenzy);
+    Install("CLocalisation", "StealFromDeadPed", 0x56D2B0, &CLocalisation::StealFromDeadPed);
+    Install("CLocalisation", "KillPeds", 0x56D2C0, &CLocalisation::KillPeds);
+    Install("CLocalisation", "PedsOnFire", 0x56D2C0, &CLocalisation::PedsOnFire);
 }
 
 // 0x56D180

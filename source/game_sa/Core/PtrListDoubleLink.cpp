@@ -3,9 +3,9 @@
 #include "PtrListDoubleLink.h"
 
 void CPtrListDoubleLink::InjectHooks() {
-    ReversibleHooks::Install("CPtrListDoubleLink", "Flush", 0x552470, &CPtrListDoubleLink::Flush);
-    ReversibleHooks::Install("CPtrListDoubleLink", "AddItem", 0x533670, &CPtrListDoubleLink::AddItem);
-    ReversibleHooks::Install("CPtrListDoubleLink", "DeleteItem", 0x5336B0, &CPtrListDoubleLink::DeleteItem);
+    Install("CPtrListDoubleLink", "Flush", 0x552470, &CPtrListDoubleLink::Flush);
+    Install("CPtrListDoubleLink", "AddItem", 0x533670, &CPtrListDoubleLink::AddItem);
+    Install("CPtrListDoubleLink", "DeleteItem", 0x5336B0, &CPtrListDoubleLink::DeleteItem);
 }
 
 void CPtrListDoubleLink::Flush() {

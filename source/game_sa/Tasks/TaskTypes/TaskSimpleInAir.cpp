@@ -9,11 +9,11 @@ uint32 CTaskSimpleInAir::ms_nMaxSlowFallFrames = 10;
 
 void CTaskSimpleInAir::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleInAir", "Constructor", 0x678CD0, &CTaskSimpleInAir::Constructor);
-    ReversibleHooks::Install("CTaskSimpleInAir", "DeleteAnimCB", 0x678E60, &CTaskSimpleInAir::DeleteAnimCB);
+    Install("CTaskSimpleInAir", "Constructor", 0x678CD0, &CTaskSimpleInAir::Constructor);
+    Install("CTaskSimpleInAir", "DeleteAnimCB", 0x678E60, &CTaskSimpleInAir::DeleteAnimCB);
     //VTABLE
-    ReversibleHooks::Install("CTaskSimpleInAir", "ProcessPed", 0x680600, &CTaskSimpleInAir::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleInAir", "MakeAbortable", 0x678DC0, &CTaskSimpleInAir::MakeAbortable_Reversed);
+    Install("CTaskSimpleInAir", "ProcessPed", 0x680600, &CTaskSimpleInAir::ProcessPed_Reversed);
+    Install("CTaskSimpleInAir", "MakeAbortable", 0x678DC0, &CTaskSimpleInAir::MakeAbortable_Reversed);
 }
 
 CTaskSimpleInAir* CTaskSimpleInAir::Constructor(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump)

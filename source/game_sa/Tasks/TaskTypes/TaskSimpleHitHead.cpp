@@ -4,11 +4,11 @@
 
 void CTaskSimpleHitHead::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleHitHead", "Constructor", 0x653060, &CTaskSimpleHitHead::Constructor);
-    ReversibleHooks::Install("CTaskSimpleHitHead", "FinishAnimCB", 0x653150, &CTaskSimpleHitHead::FinishAnimCB);
+    Install("CTaskSimpleHitHead", "Constructor", 0x653060, &CTaskSimpleHitHead::Constructor);
+    Install("CTaskSimpleHitHead", "FinishAnimCB", 0x653150, &CTaskSimpleHitHead::FinishAnimCB);
     //VTABLE
-    ReversibleHooks::Install("CTaskSimpleHitHead", "MakeAbortable", 0x6530F0, &CTaskSimpleHitHead::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleHitHead", "ProcessPed", 0x657A10, &CTaskSimpleHitHead::ProcessPed_Reversed);
+    Install("CTaskSimpleHitHead", "MakeAbortable", 0x6530F0, &CTaskSimpleHitHead::MakeAbortable_Reversed);
+    Install("CTaskSimpleHitHead", "ProcessPed", 0x657A10, &CTaskSimpleHitHead::ProcessPed_Reversed);
 }
 
 CTaskSimpleHitHead* CTaskSimpleHitHead::Constructor()

@@ -19,56 +19,56 @@ bool& CObject::bArea51SamSiteDisabled = *(bool*)0xBB4A72;
 void CObject::InjectHooks()
 {
 // VIRTUAL
-    ReversibleHooks::Install("CObject", "SetIsStatic", 0x5A0760, &CObject::SetIsStatic_Reversed);
-    ReversibleHooks::Install("CObject", "CreateRwObject", 0x59F110, &CObject::CreateRwObject_Reversed);
-    ReversibleHooks::Install("CObject", "ProcessControl", 0x5A2130, &CObject::ProcessControl_Reversed);
-    ReversibleHooks::Install("CObject", "Teleport", 0x5A17B0, &CObject::Teleport_Reversed);
-    ReversibleHooks::Install("CObject", "PreRender", 0x59FD50, &CObject::PreRender_Reversed);
-    ReversibleHooks::Install("CObject", "Render", 0x59F180, &CObject::Render_Reversed);
-    ReversibleHooks::Install("CObject", "SetupLighting", 0x554FA0, &CObject::SetupLighting_Reversed);
-    ReversibleHooks::Install("CObject", "RemoveLighting", 0x553E10, &CObject::RemoveLighting_Reversed);
-    ReversibleHooks::Install("CObject", "SpecialEntityPreCollisionStuff", 0x59FEE0, &CObject::SpecialEntityPreCollisionStuff_Reversed);
-    ReversibleHooks::Install("CObject", "SpecialEntityCalcCollisionSteps", 0x5A02E0, &CObject::SpecialEntityCalcCollisionSteps_Reversed);
+    Install("CObject", "SetIsStatic", 0x5A0760, &CObject::SetIsStatic_Reversed);
+    Install("CObject", "CreateRwObject", 0x59F110, &CObject::CreateRwObject_Reversed);
+    Install("CObject", "ProcessControl", 0x5A2130, &CObject::ProcessControl_Reversed);
+    Install("CObject", "Teleport", 0x5A17B0, &CObject::Teleport_Reversed);
+    Install("CObject", "PreRender", 0x59FD50, &CObject::PreRender_Reversed);
+    Install("CObject", "Render", 0x59F180, &CObject::Render_Reversed);
+    Install("CObject", "SetupLighting", 0x554FA0, &CObject::SetupLighting_Reversed);
+    Install("CObject", "RemoveLighting", 0x553E10, &CObject::RemoveLighting_Reversed);
+    Install("CObject", "SpecialEntityPreCollisionStuff", 0x59FEE0, &CObject::SpecialEntityPreCollisionStuff_Reversed);
+    Install("CObject", "SpecialEntityCalcCollisionSteps", 0x5A02E0, &CObject::SpecialEntityCalcCollisionSteps_Reversed);
 
 // CLASS
-    ReversibleHooks::Install("CObject", "Init", 0x59F840, &CObject::Init);
-    ReversibleHooks::Install("CObject", "ProcessGarageDoorBehaviour", 0x44A4D0, &CObject::ProcessGarageDoorBehaviour);
-    ReversibleHooks::Install("CObject", "CanBeDeleted", 0x59F120, &CObject::CanBeDeleted);
-    ReversibleHooks::Install("CObject", "SetRelatedDummy", 0x59F160, &CObject::SetRelatedDummy);
-    ReversibleHooks::Install("CObject", "TryToExplode", 0x59F2D0, &CObject::TryToExplode);
-    ReversibleHooks::Install("CObject", "SetObjectTargettable", 0x59F300, &CObject::SetObjectTargettable);
-    ReversibleHooks::Install("CObject", "CanBeTargetted", 0x59F320, &CObject::CanBeTargetted);
-    ReversibleHooks::Install("CObject", "RefModelInfo", 0x59F330, &CObject::RefModelInfo);
-    ReversibleHooks::Install("CObject", "SetRemapTexture", 0x59F350, &CObject::SetRemapTexture);
-    ReversibleHooks::Install("CObject", "GetRopeHeight", 0x59F380, &CObject::GetRopeHeight);
-    ReversibleHooks::Install("CObject", "SetRopeHeight", 0x59F3A0, &CObject::SetRopeHeight);
-    ReversibleHooks::Install("CObject", "GetObjectCarriedWithRope", 0x59F3C0, &CObject::GetObjectCarriedWithRope);
-    ReversibleHooks::Install("CObject", "ReleaseObjectCarriedWithRope", 0x59F3E0, &CObject::ReleaseObjectCarriedWithRope);
-    ReversibleHooks::Install("CObject", "AddToControlCodeList", 0x59F400, &CObject::AddToControlCodeList);
-    ReversibleHooks::Install("CObject", "RemoveFromControlCodeList", 0x59F450, &CObject::RemoveFromControlCodeList);
-    ReversibleHooks::Install("CObject", "ResetDoorAngle", 0x59F4B0, &CObject::ResetDoorAngle);
-    ReversibleHooks::Install("CObject", "LockDoor", 0x59F5C0, &CObject::LockDoor);
-    ReversibleHooks::Install("CObject", "DoBurnEffect", 0x59FB50, &CObject::DoBurnEffect);
-    ReversibleHooks::Install("CObject", "GetLightingFromCollisionBelow", 0x59FD00, &CObject::GetLightingFromCollisionBelow);
-    ReversibleHooks::Install("CObject", "ProcessSamSiteBehaviour", 0x5A07D0, &CObject::ProcessSamSiteBehaviour);
-    ReversibleHooks::Install("CObject", "ProcessTrainCrossingBehaviour", 0x5A0B50, &CObject::ProcessTrainCrossingBehaviour);
-    ReversibleHooks::Install("CObject", "ObjectDamage", 0x5A0D90, &CObject::ObjectDamage);
-    ReversibleHooks::Install("CObject", "Explode", 0x5A1340, &CObject::Explode);
-    ReversibleHooks::Install("CObject", "ObjectFireDamage", 0x5A1580, &CObject::ObjectFireDamage);
-    ReversibleHooks::Install("CObject", "GrabObjectToCarryWithRope", 0x5A1AB0, &CObject::GrabObjectToCarryWithRope);
-    ReversibleHooks::Install("CObject", "CanBeUsedToTakeCoverBehind", 0x5A1B60, &CObject::CanBeUsedToTakeCoverBehind);
-    ReversibleHooks::Install("CObject", "ProcessControlLogic", 0x5A29A0, &CObject::ProcessControlLogic);
+    Install("CObject", "Init", 0x59F840, &CObject::Init);
+    Install("CObject", "ProcessGarageDoorBehaviour", 0x44A4D0, &CObject::ProcessGarageDoorBehaviour);
+    Install("CObject", "CanBeDeleted", 0x59F120, &CObject::CanBeDeleted);
+    Install("CObject", "SetRelatedDummy", 0x59F160, &CObject::SetRelatedDummy);
+    Install("CObject", "TryToExplode", 0x59F2D0, &CObject::TryToExplode);
+    Install("CObject", "SetObjectTargettable", 0x59F300, &CObject::SetObjectTargettable);
+    Install("CObject", "CanBeTargetted", 0x59F320, &CObject::CanBeTargetted);
+    Install("CObject", "RefModelInfo", 0x59F330, &CObject::RefModelInfo);
+    Install("CObject", "SetRemapTexture", 0x59F350, &CObject::SetRemapTexture);
+    Install("CObject", "GetRopeHeight", 0x59F380, &CObject::GetRopeHeight);
+    Install("CObject", "SetRopeHeight", 0x59F3A0, &CObject::SetRopeHeight);
+    Install("CObject", "GetObjectCarriedWithRope", 0x59F3C0, &CObject::GetObjectCarriedWithRope);
+    Install("CObject", "ReleaseObjectCarriedWithRope", 0x59F3E0, &CObject::ReleaseObjectCarriedWithRope);
+    Install("CObject", "AddToControlCodeList", 0x59F400, &CObject::AddToControlCodeList);
+    Install("CObject", "RemoveFromControlCodeList", 0x59F450, &CObject::RemoveFromControlCodeList);
+    Install("CObject", "ResetDoorAngle", 0x59F4B0, &CObject::ResetDoorAngle);
+    Install("CObject", "LockDoor", 0x59F5C0, &CObject::LockDoor);
+    Install("CObject", "DoBurnEffect", 0x59FB50, &CObject::DoBurnEffect);
+    Install("CObject", "GetLightingFromCollisionBelow", 0x59FD00, &CObject::GetLightingFromCollisionBelow);
+    Install("CObject", "ProcessSamSiteBehaviour", 0x5A07D0, &CObject::ProcessSamSiteBehaviour);
+    Install("CObject", "ProcessTrainCrossingBehaviour", 0x5A0B50, &CObject::ProcessTrainCrossingBehaviour);
+    Install("CObject", "ObjectDamage", 0x5A0D90, &CObject::ObjectDamage);
+    Install("CObject", "Explode", 0x5A1340, &CObject::Explode);
+    Install("CObject", "ObjectFireDamage", 0x5A1580, &CObject::ObjectFireDamage);
+    Install("CObject", "GrabObjectToCarryWithRope", 0x5A1AB0, &CObject::GrabObjectToCarryWithRope);
+    Install("CObject", "CanBeUsedToTakeCoverBehind", 0x5A1B60, &CObject::CanBeUsedToTakeCoverBehind);
+    Install("CObject", "ProcessControlLogic", 0x5A29A0, &CObject::ProcessControlLogic);
 
 // STATIC
-    ReversibleHooks::Install("CObject", "Create_intbool", 0x5A1F60, static_cast<CObject*(*)(int32, bool)>(&CObject::Create));
-    ReversibleHooks::Install("CObject", "Create_dummy", 0x5A2070, static_cast<CObject*(*)(CDummyObject*)>(&CObject::Create));
-    ReversibleHooks::Install("CObject", "SetMatrixForTrainCrossing", 0x59F200, &CObject::SetMatrixForTrainCrossing);
-    ReversibleHooks::Install("CObject", "TryToFreeUpTempObjects", 0x5A1840, &CObject::TryToFreeUpTempObjects);
-    ReversibleHooks::Install("CObject", "DeleteAllTempObjects", 0x5A18B0, &CObject::DeleteAllTempObjects);
-    ReversibleHooks::Install("CObject", "DeleteAllMissionObjects", 0x5A1910, &CObject::DeleteAllMissionObjects);
-    ReversibleHooks::Install("CObject", "DeleteAllTempObjectsInArea", 0x5A1980, &CObject::DeleteAllTempObjectsInArea);
-    ReversibleHooks::Install("CObject", "IsObjectPointerValid_NotInWorld", 0x5A2B90, &IsObjectPointerValid_NotInWorld);
-    ReversibleHooks::Install("CObject", "IsObjectPointerValid", 0x5A2C20, &IsObjectPointerValid);
+    Install("CObject", "Create_intbool", 0x5A1F60, static_cast<CObject*(*)(int32, bool)>(&CObject::Create));
+    Install("CObject", "Create_dummy", 0x5A2070, static_cast<CObject*(*)(CDummyObject*)>(&CObject::Create));
+    Install("CObject", "SetMatrixForTrainCrossing", 0x59F200, &CObject::SetMatrixForTrainCrossing);
+    Install("CObject", "TryToFreeUpTempObjects", 0x5A1840, &CObject::TryToFreeUpTempObjects);
+    Install("CObject", "DeleteAllTempObjects", 0x5A18B0, &CObject::DeleteAllTempObjects);
+    Install("CObject", "DeleteAllMissionObjects", 0x5A1910, &CObject::DeleteAllMissionObjects);
+    Install("CObject", "DeleteAllTempObjectsInArea", 0x5A1980, &CObject::DeleteAllTempObjectsInArea);
+    Install("CObject", "IsObjectPointerValid_NotInWorld", 0x5A2B90, &IsObjectPointerValid_NotInWorld);
+    Install("CObject", "IsObjectPointerValid", 0x5A2C20, &IsObjectPointerValid);
 }
 
 CObject::CObject() : CPhysical()

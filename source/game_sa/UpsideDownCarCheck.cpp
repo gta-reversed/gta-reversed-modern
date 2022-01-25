@@ -1,12 +1,12 @@
 #include "StdInc.h"
 
 void CUpsideDownCarCheck::InjectHooks() {
-//    ReversibleHooks::Install("CUpsideDownCarCheck", "Init", 0x46A8C0, &CUpsideDownCarCheck::Init);
-//    ReversibleHooks::Install("CUpsideDownCarCheck", "IsCarUpsideDown", 0x463830, &CUpsideDownCarCheck::IsCarUpsideDown);
-//    ReversibleHooks::Install("CUpsideDownCarCheck", "UpdateTimers", 0x4655E0, &CUpsideDownCarCheck::UpdateTimers);
-//    ReversibleHooks::Install("CUpsideDownCarCheck", "AddCarToCheck", 0x4638D0, &CUpsideDownCarCheck::AddCarToCheck);
-//    ReversibleHooks::Install("CUpsideDownCarCheck", "RemoveCarFromCheck", 0x463910, &CUpsideDownCarCheck::RemoveCarFromCheck);
-//    ReversibleHooks::Install("CUpsideDownCarCheck", "HasCarBeenUpsideDownForAWhile", 0x463940, &CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile);
+//    Install("CUpsideDownCarCheck", "Init", 0x46A8C0, &CUpsideDownCarCheck::Init);
+//    Install("CUpsideDownCarCheck", "IsCarUpsideDown", 0x463830, &CUpsideDownCarCheck::IsCarUpsideDown);
+//    Install("CUpsideDownCarCheck", "UpdateTimers", 0x4655E0, &CUpsideDownCarCheck::UpdateTimers);
+//    Install("CUpsideDownCarCheck", "AddCarToCheck", 0x4638D0, &CUpsideDownCarCheck::AddCarToCheck);
+//    Install("CUpsideDownCarCheck", "RemoveCarFromCheck", 0x463910, &CUpsideDownCarCheck::RemoveCarFromCheck);
+//    Install("CUpsideDownCarCheck", "HasCarBeenUpsideDownForAWhile", 0x463940, &CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile);
 }
 
 // 0x46A8C0

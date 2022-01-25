@@ -3,7 +3,7 @@
 #include "ColLine.h"
 
 void CColLine::InjectHooks() {
-    ReversibleHooks::Install("CColLine", "Set", 0x40EF10, &CColLine::Set);
+    Install("CColLine", "Set", 0x40EF10, &CColLine::Set);
 }
 
 // 0x40EF50

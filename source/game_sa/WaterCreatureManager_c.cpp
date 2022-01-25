@@ -5,13 +5,13 @@ WaterCreatureInfo(&WaterCreatureManager_c::ms_waterCreatureInfos)[NUM_WATER_CREA
 
 void WaterCreatureManager_c::InjectHooks()
 {
-    ReversibleHooks::Install("WaterCreatureManager_c", "Init", 0x6E3F90, &WaterCreatureManager_c::Init);
-    ReversibleHooks::Install("WaterCreatureManager_c", "Exit", 0x6E3FD0, &WaterCreatureManager_c::Exit);
-    ReversibleHooks::Install("WaterCreatureManager_c", "Update", 0x6E4F10, &WaterCreatureManager_c::Update);
-    ReversibleHooks::Install("WaterCreatureManager_c", "GetRandomWaterCreatureId", 0x6E4040, &WaterCreatureManager_c::GetRandomWaterCreatureId);
-    ReversibleHooks::Install("WaterCreatureManager_c", "CanAddWaterCreatureAtPos", 0x6E4510, &WaterCreatureManager_c::CanAddWaterCreatureAtPos);
-    ReversibleHooks::Install("WaterCreatureManager_c", "TryToFreeUpWaterCreatures", 0x6E40E0, &WaterCreatureManager_c::TryToFreeUpWaterCreatures);
-    ReversibleHooks::Install("WaterCreatureManager_c", "TryToExitGroup", 0x6E45B0, &WaterCreatureManager_c::TryToExitGroup);
+    Install("WaterCreatureManager_c", "Init", 0x6E3F90, &WaterCreatureManager_c::Init);
+    Install("WaterCreatureManager_c", "Exit", 0x6E3FD0, &WaterCreatureManager_c::Exit);
+    Install("WaterCreatureManager_c", "Update", 0x6E4F10, &WaterCreatureManager_c::Update);
+    Install("WaterCreatureManager_c", "GetRandomWaterCreatureId", 0x6E4040, &WaterCreatureManager_c::GetRandomWaterCreatureId);
+    Install("WaterCreatureManager_c", "CanAddWaterCreatureAtPos", 0x6E4510, &WaterCreatureManager_c::CanAddWaterCreatureAtPos);
+    Install("WaterCreatureManager_c", "TryToFreeUpWaterCreatures", 0x6E40E0, &WaterCreatureManager_c::TryToFreeUpWaterCreatures);
+    Install("WaterCreatureManager_c", "TryToExitGroup", 0x6E45B0, &WaterCreatureManager_c::TryToExitGroup);
 }
 
 

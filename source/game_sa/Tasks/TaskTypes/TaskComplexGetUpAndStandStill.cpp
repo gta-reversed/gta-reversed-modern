@@ -6,12 +6,12 @@
 #include "TaskSimpleGetUp.h"
 
 void CTaskComplexGetUpAndStandStill::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexGetUpAndStandStill", "Constructor", 0x678130, &CTaskComplexGetUpAndStandStill::Constructor);
-    ReversibleHooks::Install("CTaskComplexGetUpAndStandStill", "CreateSubTask", 0x678170, &CTaskComplexGetUpAndStandStill::CreateSubTask);
+    Install("CTaskComplexGetUpAndStandStill", "Constructor", 0x678130, &CTaskComplexGetUpAndStandStill::Constructor);
+    Install("CTaskComplexGetUpAndStandStill", "CreateSubTask", 0x678170, &CTaskComplexGetUpAndStandStill::CreateSubTask);
     // VTABLE
-    ReversibleHooks::Install("CTaskComplexGetUpAndStandStill", "CreateFirstSubTask", 0x6782A0, &CTaskComplexGetUpAndStandStill::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexGetUpAndStandStill", "CreateNextSubTask", 0x678240, &CTaskComplexGetUpAndStandStill::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexGetUpAndStandStill", "ControlSubTask", 0x6782B0, &CTaskComplexGetUpAndStandStill::ControlSubTask_Reversed);
+    Install("CTaskComplexGetUpAndStandStill", "CreateFirstSubTask", 0x6782A0, &CTaskComplexGetUpAndStandStill::CreateFirstSubTask_Reversed);
+    Install("CTaskComplexGetUpAndStandStill", "CreateNextSubTask", 0x678240, &CTaskComplexGetUpAndStandStill::CreateNextSubTask_Reversed);
+    Install("CTaskComplexGetUpAndStandStill", "ControlSubTask", 0x6782B0, &CTaskComplexGetUpAndStandStill::ControlSubTask_Reversed);
 }
 
 // 0x678130

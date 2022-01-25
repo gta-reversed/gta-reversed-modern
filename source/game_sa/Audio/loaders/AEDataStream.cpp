@@ -206,26 +206,26 @@ bool CAEDataStream::Initialise() {
 }
 
 void CAEDataStream::InjectHooks() {
-    ReversibleHooks::Install("CAEDataStream", "CAEDataStream", 0x4dc620, &CAEDataStream::Constructor);
-    ReversibleHooks::Install("CAEDataStream", "~CAEDataStream", 0x4dc490, &CAEDataStream::Destructor);
-    ReversibleHooks::Install("CAEDataStream", "Initialise", 0x4dc2b0, &CAEDataStream::Initialise);
-    ReversibleHooks::Install("CAEDataStream", "FillBuffer", 0x4dc1c0, &CAEDataStream::FillBuffer);
-    ReversibleHooks::Install("CAEDataStream", "GetCurrentPosition", 0x4dc230, &CAEDataStream::GetCurrentPosition);
-    ReversibleHooks::Install("CAEDataStream", "Seek_uint32", 0x4dc250, static_cast<uint32(CAEDataStream::*)(long offset, int32 whence)>(&CAEDataStream::Seek));
-    ReversibleHooks::Install("CAEDataStream", "Seek", 0x4dc340, static_cast<HRESULT(__stdcall CAEDataStream::*)(LARGE_INTEGER, DWORD, ULARGE_INTEGER*)>(&CAEDataStream::Seek));
-    ReversibleHooks::Install("CAEDataStream", "Read", 0x4dc320, &CAEDataStream::Read);
-    ReversibleHooks::Install("CAEDataStream", "Stat", 0x4dc3a0, &CAEDataStream::Stat);
-    ReversibleHooks::Install("CAEDataStream", "QueryInterface", 0x4dc410, &CAEDataStream::QueryInterface);
-    ReversibleHooks::Install("CAEDataStream", "AddRef", 0x4dc460, &CAEDataStream::AddRef);
-    ReversibleHooks::Install("CAEDataStream", "Write", 0x4dc4d0, &CAEDataStream::Write);
-    ReversibleHooks::Install("CAEDataStream", "SetSize", 0x4dc4e0, &CAEDataStream::SetSize);
-    ReversibleHooks::Install("CAEDataStream", "CopyTo", 0x4dc4f0, &CAEDataStream::CopyTo);
-    ReversibleHooks::Install("CAEDataStream", "Commit", 0x4dc500, &CAEDataStream::Commit);
-    ReversibleHooks::Install("CAEDataStream", "Revert", 0x4dc510, &CAEDataStream::Revert);
-    ReversibleHooks::Install("CAEDataStream", "LockRegion", 0x4dc520, &CAEDataStream::LockRegion);
-    ReversibleHooks::Install("CAEDataStream", "UnlockRegion", 0x4dc530, &CAEDataStream::UnlockRegion);
-    ReversibleHooks::Install("CAEDataStream", "Clone", 0x4dc540, &CAEDataStream::Clone);
-    ReversibleHooks::Install("CAEDataStream", "Release", 0x4dc5b0, &CAEDataStream::Release);
+    Install("CAEDataStream", "CAEDataStream", 0x4dc620, &CAEDataStream::Constructor);
+    Install("CAEDataStream", "~CAEDataStream", 0x4dc490, &CAEDataStream::Destructor);
+    Install("CAEDataStream", "Initialise", 0x4dc2b0, &CAEDataStream::Initialise);
+    Install("CAEDataStream", "FillBuffer", 0x4dc1c0, &CAEDataStream::FillBuffer);
+    Install("CAEDataStream", "GetCurrentPosition", 0x4dc230, &CAEDataStream::GetCurrentPosition);
+    Install("CAEDataStream", "Seek_uint32", 0x4dc250, static_cast<uint32(CAEDataStream::*)(long offset, int32 whence)>(&CAEDataStream::Seek));
+    Install("CAEDataStream", "Seek", 0x4dc340, static_cast<HRESULT(__stdcall CAEDataStream::*)(LARGE_INTEGER, DWORD, ULARGE_INTEGER*)>(&CAEDataStream::Seek));
+    Install("CAEDataStream", "Read", 0x4dc320, &CAEDataStream::Read);
+    Install("CAEDataStream", "Stat", 0x4dc3a0, &CAEDataStream::Stat);
+    Install("CAEDataStream", "QueryInterface", 0x4dc410, &CAEDataStream::QueryInterface);
+    Install("CAEDataStream", "AddRef", 0x4dc460, &CAEDataStream::AddRef);
+    Install("CAEDataStream", "Write", 0x4dc4d0, &CAEDataStream::Write);
+    Install("CAEDataStream", "SetSize", 0x4dc4e0, &CAEDataStream::SetSize);
+    Install("CAEDataStream", "CopyTo", 0x4dc4f0, &CAEDataStream::CopyTo);
+    Install("CAEDataStream", "Commit", 0x4dc500, &CAEDataStream::Commit);
+    Install("CAEDataStream", "Revert", 0x4dc510, &CAEDataStream::Revert);
+    Install("CAEDataStream", "LockRegion", 0x4dc520, &CAEDataStream::LockRegion);
+    Install("CAEDataStream", "UnlockRegion", 0x4dc530, &CAEDataStream::UnlockRegion);
+    Install("CAEDataStream", "Clone", 0x4dc540, &CAEDataStream::Clone);
+    Install("CAEDataStream", "Release", 0x4dc5b0, &CAEDataStream::Release);
 
     CAEStreamTransformer::InjectHooks();
 }

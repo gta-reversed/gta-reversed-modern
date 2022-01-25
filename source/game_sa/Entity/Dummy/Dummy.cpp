@@ -2,7 +2,7 @@
 
 void CDummy::InjectHooks()
 {
-    ReversibleHooks::Install("CDummy", "IsDummyPointerValid", 0x532730, &IsDummyPointerValid);
+    Install("CDummy", "IsDummyPointerValid", 0x532730, &IsDummyPointerValid);
 }
 
 void* CDummy::operator new(unsigned size)

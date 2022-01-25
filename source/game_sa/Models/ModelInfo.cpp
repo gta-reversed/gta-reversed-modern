@@ -25,37 +25,37 @@ CStore<C2dEffect, CModelInfo::NUM_2DFX_INFOS>& CModelInfo::ms_2dFXInfoStore = *(
 
 void CModelInfo::InjectHooks()
 {
-    ReversibleHooks::Install("CModelInfo", "Initialise", 0x4C6810, &CModelInfo::Initialise);
-    ReversibleHooks::Install("CModelInfo", "ShutDown", 0x4C63E0, &CModelInfo::ShutDown);
-    ReversibleHooks::Install("CModelInfo", "ReInit2dEffects", 0x4C63B0, &CModelInfo::ReInit2dEffects);
+    Install("CModelInfo", "Initialise", 0x4C6810, &CModelInfo::Initialise);
+    Install("CModelInfo", "ShutDown", 0x4C63E0, &CModelInfo::ShutDown);
+    Install("CModelInfo", "ReInit2dEffects", 0x4C63B0, &CModelInfo::ReInit2dEffects);
 
-    ReversibleHooks::Install("CModelInfo", "GetModelInfoUInt16", 0x4C59F0, &CModelInfo::GetModelInfoUInt16);
-    ReversibleHooks::Install("CModelInfo", "GetModelInfoFromHashKey", 0x4C59B0, &CModelInfo::GetModelInfoFromHashKey);
-    ReversibleHooks::Install("CModelInfo", "GetModelInfo_full", 0x4C5940, static_cast<CBaseModelInfo * (*)(char const*, int32*)>(&CModelInfo::GetModelInfo));
-    ReversibleHooks::Install("CModelInfo", "GetModelInfo_minmax", 0x4C5A20, static_cast<CBaseModelInfo*(*)(char const*, int32, int32)>(&CModelInfo::GetModelInfo));
+    Install("CModelInfo", "GetModelInfoUInt16", 0x4C59F0, &CModelInfo::GetModelInfoUInt16);
+    Install("CModelInfo", "GetModelInfoFromHashKey", 0x4C59B0, &CModelInfo::GetModelInfoFromHashKey);
+    Install("CModelInfo", "GetModelInfo_full", 0x4C5940, static_cast<CBaseModelInfo * (*)(char const*, int32*)>(&CModelInfo::GetModelInfo));
+    Install("CModelInfo", "GetModelInfo_minmax", 0x4C5A20, static_cast<CBaseModelInfo*(*)(char const*, int32, int32)>(&CModelInfo::GetModelInfo));
 
-    ReversibleHooks::Install("CModelInfo", "AddAtomicModel", 0x4C6620, &CModelInfo::AddAtomicModel);
-    ReversibleHooks::Install("CModelInfo", "AddDamageAtomicModel", 0x4C6650, &CModelInfo::AddDamageAtomicModel);
-    ReversibleHooks::Install("CModelInfo", "AddLodAtomicModel", 0x4C6680, &CModelInfo::AddLodAtomicModel);
-    ReversibleHooks::Install("CModelInfo", "AddTimeModel", 0x4C66B0, &CModelInfo::AddTimeModel);
-    ReversibleHooks::Install("CModelInfo", "AddLodTimeModel", 0x4C66E0, &CModelInfo::AddLodTimeModel);
-    ReversibleHooks::Install("CModelInfo", "AddWeaponModel", 0x4C6710, &CModelInfo::AddWeaponModel);
-    ReversibleHooks::Install("CModelInfo", "AddClumpModel", 0x4C6740, &CModelInfo::AddClumpModel);
-    ReversibleHooks::Install("CModelInfo", "AddVehicleModel", 0x4C6770, &CModelInfo::AddVehicleModel);
-    ReversibleHooks::Install("CModelInfo", "AddPedModel", 0x4C67A0, &CModelInfo::AddPedModel);
+    Install("CModelInfo", "AddAtomicModel", 0x4C6620, &CModelInfo::AddAtomicModel);
+    Install("CModelInfo", "AddDamageAtomicModel", 0x4C6650, &CModelInfo::AddDamageAtomicModel);
+    Install("CModelInfo", "AddLodAtomicModel", 0x4C6680, &CModelInfo::AddLodAtomicModel);
+    Install("CModelInfo", "AddTimeModel", 0x4C66B0, &CModelInfo::AddTimeModel);
+    Install("CModelInfo", "AddLodTimeModel", 0x4C66E0, &CModelInfo::AddLodTimeModel);
+    Install("CModelInfo", "AddWeaponModel", 0x4C6710, &CModelInfo::AddWeaponModel);
+    Install("CModelInfo", "AddClumpModel", 0x4C6740, &CModelInfo::AddClumpModel);
+    Install("CModelInfo", "AddVehicleModel", 0x4C6770, &CModelInfo::AddVehicleModel);
+    Install("CModelInfo", "AddPedModel", 0x4C67A0, &CModelInfo::AddPedModel);
 
-    ReversibleHooks::Install("CModelInfo", "IsBoatModel", 0x4C5A70, &CModelInfo::IsBoatModel);
-    ReversibleHooks::Install("CModelInfo", "IsCarModel", 0x4C5AA0, &CModelInfo::IsCarModel);
-    ReversibleHooks::Install("CModelInfo", "IsTrainModel", 0x4C5AD0, &CModelInfo::IsTrainModel);
-    ReversibleHooks::Install("CModelInfo", "IsHeliModel", 0x4C5B00, &CModelInfo::IsHeliModel);
-    ReversibleHooks::Install("CModelInfo", "IsPlaneModel", 0x4C5B30, &CModelInfo::IsPlaneModel);
-    ReversibleHooks::Install("CModelInfo", "IsBikeModel", 0x4C5B60, &CModelInfo::IsBikeModel);
-    ReversibleHooks::Install("CModelInfo", "IsFakePlaneModel", 0x4C5B90, &CModelInfo::IsFakePlaneModel);
-    ReversibleHooks::Install("CModelInfo", "IsMonsterTruckModel", 0x4C5BC0, &CModelInfo::IsMonsterTruckModel);
-    ReversibleHooks::Install("CModelInfo", "IsQuadBikeModel", 0x4C5BF0, &CModelInfo::IsQuadBikeModel);
-    ReversibleHooks::Install("CModelInfo", "IsBmxModel", 0x4C5C20, &CModelInfo::IsBmxModel);
-    ReversibleHooks::Install("CModelInfo", "IsTrailerModel", 0x4C5C50, &CModelInfo::IsTrailerModel);
-    ReversibleHooks::Install("CModelInfo", "IsVehicleModelType", 0x4C5C80, &CModelInfo::IsVehicleModelType);
+    Install("CModelInfo", "IsBoatModel", 0x4C5A70, &CModelInfo::IsBoatModel);
+    Install("CModelInfo", "IsCarModel", 0x4C5AA0, &CModelInfo::IsCarModel);
+    Install("CModelInfo", "IsTrainModel", 0x4C5AD0, &CModelInfo::IsTrainModel);
+    Install("CModelInfo", "IsHeliModel", 0x4C5B00, &CModelInfo::IsHeliModel);
+    Install("CModelInfo", "IsPlaneModel", 0x4C5B30, &CModelInfo::IsPlaneModel);
+    Install("CModelInfo", "IsBikeModel", 0x4C5B60, &CModelInfo::IsBikeModel);
+    Install("CModelInfo", "IsFakePlaneModel", 0x4C5B90, &CModelInfo::IsFakePlaneModel);
+    Install("CModelInfo", "IsMonsterTruckModel", 0x4C5BC0, &CModelInfo::IsMonsterTruckModel);
+    Install("CModelInfo", "IsQuadBikeModel", 0x4C5BF0, &CModelInfo::IsQuadBikeModel);
+    Install("CModelInfo", "IsBmxModel", 0x4C5C20, &CModelInfo::IsBmxModel);
+    Install("CModelInfo", "IsTrailerModel", 0x4C5C50, &CModelInfo::IsTrailerModel);
+    Install("CModelInfo", "IsVehicleModelType", 0x4C5C80, &CModelInfo::IsVehicleModelType);
 }
 
 // 0x4C63B0

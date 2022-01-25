@@ -5,11 +5,11 @@
 #include "AESmoothFadeThread.h"
 
 void CAEStaticChannel::InjectHooks() {
-    ReversibleHooks::Install("CAEStaticChannel", "IsSoundPlaying", 0x4F0F40, &CAEStaticChannel::IsSoundPlaying_Reversed);
-    ReversibleHooks::Install("CAEStaticChannel", "GetPlayTime", 0x4F0F70, &CAEStaticChannel::GetPlayTime_Reversed);
-    ReversibleHooks::Install("CAEStaticChannel", "GetLength", 0x4F0FA0, &CAEStaticChannel::GetLength_Reversed);
-    ReversibleHooks::Install("CAEStaticChannel", "SynchPlayback", 0x4F1040, &CAEStaticChannel::SynchPlayback_Reversed);
-    ReversibleHooks::Install("CAEStaticChannel", "Stop", 0x4F0FB0, &CAEStaticChannel::Stop_Reversed);
+    Install("CAEStaticChannel", "IsSoundPlaying", 0x4F0F40, &CAEStaticChannel::IsSoundPlaying_Reversed);
+    Install("CAEStaticChannel", "GetPlayTime", 0x4F0F70, &CAEStaticChannel::GetPlayTime_Reversed);
+    Install("CAEStaticChannel", "GetLength", 0x4F0FA0, &CAEStaticChannel::GetLength_Reversed);
+    Install("CAEStaticChannel", "SynchPlayback", 0x4F1040, &CAEStaticChannel::SynchPlayback_Reversed);
+    Install("CAEStaticChannel", "Stop", 0x4F0FB0, &CAEStaticChannel::Stop_Reversed);
 }
 
 CAEStaticChannel::CAEStaticChannel(IDirectSound* pDirectSound, uint16 channelId, bool arg3, uint32 samplesPerSec, uint16 bitsPerSample)

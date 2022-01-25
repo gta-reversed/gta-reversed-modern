@@ -7,8 +7,8 @@
 
 void CPools::InjectHooks()
 {
-    ReversibleHooks::Install("CPools", "LoadObjectPool", 0x5D4A40, &CPools::LoadObjectPool);
-    ReversibleHooks::Install("CPools", "MakeSureSlotInObjectPoolIsEmpty", 0x550080, &CPools::MakeSureSlotInObjectPoolIsEmpty);
+    Install("CPools", "LoadObjectPool", 0x5D4A40, &CPools::LoadObjectPool);
+    Install("CPools", "MakeSureSlotInObjectPoolIsEmpty", 0x550080, &CPools::MakeSureSlotInObjectPoolIsEmpty);
 }
 
 int32 CPools::CheckBuildingAtomics() {

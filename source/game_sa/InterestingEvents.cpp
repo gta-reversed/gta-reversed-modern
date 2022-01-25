@@ -3,13 +3,13 @@
 CInterestingEvents& g_InterestingEvents = *(CInterestingEvents*)0xC0B058;
 
 void CInterestingEvents::InjectHooks() {
-//    ReversibleHooks::Install("CInterestingEvents", "Constructor", 0x6023A0, &CInterestingEvents::Constructor);
-//    ReversibleHooks::Install("CInterestingEvents", "Destructor", 0x856880, &CInterestingEvents::Destructor);
-//    ReversibleHooks::Install("CInterestingEvents", "Add", 0x602590, &CInterestingEvents::Add);
-//    ReversibleHooks::Install("CInterestingEvents", "ScanForNearbyEntities", 0x605A30, &CInterestingEvents::ScanForNearbyEntities);
-//    ReversibleHooks::Install("CInterestingEvents", "GetInterestingEvent", 0x6028A0, &CInterestingEvents::GetInterestingEvent);
-//    ReversibleHooks::Install("CInterestingEvents", "InvalidateEvent", 0x602960, &CInterestingEvents::InvalidateEvent);
-//    ReversibleHooks::Install("CInterestingEvents", "InvalidateNonVisibleEvents", 0x6029C0, &CInterestingEvents::InvalidateNonVisibleEvents);
+//    Install("CInterestingEvents", "Constructor", 0x6023A0, &CInterestingEvents::Constructor);
+//    Install("CInterestingEvents", "Destructor", 0x856880, &CInterestingEvents::Destructor);
+//    Install("CInterestingEvents", "Add", 0x602590, &CInterestingEvents::Add);
+//    Install("CInterestingEvents", "ScanForNearbyEntities", 0x605A30, &CInterestingEvents::ScanForNearbyEntities);
+//    Install("CInterestingEvents", "GetInterestingEvent", 0x6028A0, &CInterestingEvents::GetInterestingEvent);
+//    Install("CInterestingEvents", "InvalidateEvent", 0x602960, &CInterestingEvents::InvalidateEvent);
+//    Install("CInterestingEvents", "InvalidateNonVisibleEvents", 0x6029C0, &CInterestingEvents::InvalidateNonVisibleEvents);
 }
 
 // 0x6023A0

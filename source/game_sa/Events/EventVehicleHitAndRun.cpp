@@ -2,9 +2,9 @@
 
 void CEventVehicleHitAndRun::InjectHooks()
 {
-    ReversibleHooks::Install("CEventVehicleHitAndRun", "Constructor", 0x4AE990, &CEventVehicleHitAndRun::Constructor);
-    ReversibleHooks::Install("CEventVehicleHitAndRun", "Clone_Reversed", 0x4B7100, &CEventVehicleHitAndRun::Clone_Reversed);
-    ReversibleHooks::Install("CEventVehicleHitAndRun", "ReportCriminalEvent_Reversed", 0x4B27D0, &CEventVehicleHitAndRun::ReportCriminalEvent_Reversed);
+    Install("CEventVehicleHitAndRun", "Constructor", 0x4AE990, &CEventVehicleHitAndRun::Constructor);
+    Install("CEventVehicleHitAndRun", "Clone_Reversed", 0x4B7100, &CEventVehicleHitAndRun::Clone_Reversed);
+    Install("CEventVehicleHitAndRun", "ReportCriminalEvent_Reversed", 0x4B27D0, &CEventVehicleHitAndRun::ReportCriminalEvent_Reversed);
 }
 
 CEventVehicleHitAndRun::CEventVehicleHitAndRun(CPed* victim, CVehicle* vehicle)

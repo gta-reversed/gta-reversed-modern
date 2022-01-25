@@ -5,14 +5,14 @@ char* (&CCutsceneObject::ms_sCutsceneVehNames)[NUM_CUTSCENE_VEHS] = *(char* (*)[
 void CCutsceneObject::InjectHooks()
 {
 // VIRTUAL
-    ReversibleHooks::Install("CCutsceneObject", "SetModelIndex", 0x5B1B20, &CCutsceneObject::SetModelIndex_Reversed);
-    ReversibleHooks::Install("CCutsceneObject", "SetupLighting", 0x553F40, &CCutsceneObject::SetupLighting_Reversed);
-    ReversibleHooks::Install("CCutsceneObject", "RemoveLighting", 0x5533F0, &CCutsceneObject::RemoveLighting_Reversed);
-    ReversibleHooks::Install("CCutsceneObject", "ProcessControl", 0x5B1B90, &CCutsceneObject::ProcessControl_Reversed);
-    ReversibleHooks::Install("CCutsceneObject", "PreRender", 0x5B1E00, &CCutsceneObject::PreRender_Reversed);
+    Install("CCutsceneObject", "SetModelIndex", 0x5B1B20, &CCutsceneObject::SetModelIndex_Reversed);
+    Install("CCutsceneObject", "SetupLighting", 0x553F40, &CCutsceneObject::SetupLighting_Reversed);
+    Install("CCutsceneObject", "RemoveLighting", 0x5533F0, &CCutsceneObject::RemoveLighting_Reversed);
+    Install("CCutsceneObject", "ProcessControl", 0x5B1B90, &CCutsceneObject::ProcessControl_Reversed);
+    Install("CCutsceneObject", "PreRender", 0x5B1E00, &CCutsceneObject::PreRender_Reversed);
 
 // HELPER
-    ReversibleHooks::Install("CCutsceneObject", "SetupCarPipeAtomicsForClump", 0x5B1AB0, &CCutsceneObject::SetupCarPipeAtomicsForClump);
+    Install("CCutsceneObject", "SetupCarPipeAtomicsForClump", 0x5B1AB0, &CCutsceneObject::SetupCarPipeAtomicsForClump);
 }
 
 CCutsceneObject::CCutsceneObject() : CObject()

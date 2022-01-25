@@ -7,13 +7,13 @@
 #include "TaskSimpleNone.h"
 
 void CTaskComplexUseSwatRope::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "Constructor", 0x659470, &CTaskComplexUseSwatRope::Constructor);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "CreateSubTask", 0x659620, &CTaskComplexUseSwatRope::CreateSubTask);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "Clone", 0x659C30, &CTaskComplexUseSwatRope::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "CreateFirstSubTask", 0x65A440, &CTaskComplexUseSwatRope::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "CreateNextSubTask", 0x65A3E0, &CTaskComplexUseSwatRope::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "ControlSubTask", 0x65A460, &CTaskComplexUseSwatRope::ControlSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "MakeAbortable", 0x659530, &CTaskComplexUseSwatRope::MakeAbortable_Reversed);
+    Install("CTaskComplexUseSwatRope", "Constructor", 0x659470, &CTaskComplexUseSwatRope::Constructor);
+    Install("CTaskComplexUseSwatRope", "CreateSubTask", 0x659620, &CTaskComplexUseSwatRope::CreateSubTask);
+    Install("CTaskComplexUseSwatRope", "Clone", 0x659C30, &CTaskComplexUseSwatRope::Clone_Reversed);
+    Install("CTaskComplexUseSwatRope", "CreateFirstSubTask", 0x65A440, &CTaskComplexUseSwatRope::CreateFirstSubTask_Reversed);
+    Install("CTaskComplexUseSwatRope", "CreateNextSubTask", 0x65A3E0, &CTaskComplexUseSwatRope::CreateNextSubTask_Reversed);
+    Install("CTaskComplexUseSwatRope", "ControlSubTask", 0x65A460, &CTaskComplexUseSwatRope::ControlSubTask_Reversed);
+    Install("CTaskComplexUseSwatRope", "MakeAbortable", 0x659530, &CTaskComplexUseSwatRope::MakeAbortable_Reversed);
 }
 
 CTaskComplexUseSwatRope* CTaskComplexUseSwatRope::Constructor(uint32 ropeId, CHeli* heli) {

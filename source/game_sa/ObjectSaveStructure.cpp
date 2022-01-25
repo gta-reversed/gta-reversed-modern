@@ -2,8 +2,8 @@
 
 void CObjectSaveStructure::InjectHooks()
 {
-    ReversibleHooks::Install("CObjectSaveStructure", "Construct", 0x5D2160, &CObjectSaveStructure::Construct);
-    ReversibleHooks::Install("CObjectSaveStructure", "Extract", 0x5D2220, &CObjectSaveStructure::Extract);
+    Install("CObjectSaveStructure", "Construct", 0x5D2160, &CObjectSaveStructure::Construct);
+    Install("CObjectSaveStructure", "Extract", 0x5D2220, &CObjectSaveStructure::Extract);
 }
 
 void CObjectSaveStructure::Construct(CObject* pObject)

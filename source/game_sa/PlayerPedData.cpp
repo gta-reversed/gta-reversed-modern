@@ -1,11 +1,11 @@
 #include "StdInc.h"
 
 void CPlayerPedData::InjectHooks() {
-    ReversibleHooks::Install("CPlayerPedData", "Constructor", 0x56F810, &CPlayerPedData::Constructor);
-    ReversibleHooks::Install("CPlayerPedData", "Destructor", 0x571840, &CPlayerPedData::Destructor);
-    ReversibleHooks::Install("CPlayerPedData", "AllocateData", 0x571880, &CPlayerPedData::AllocateData);
-    ReversibleHooks::Install("CPlayerPedData", "DeAllocateData", 0x56F890, &CPlayerPedData::DeAllocateData);
-    ReversibleHooks::Install("CPlayerPedData", "SetInitialState", 0x56F210, &CPlayerPedData::SetInitialState);
+    Install("CPlayerPedData", "Constructor", 0x56F810, &CPlayerPedData::Constructor);
+    Install("CPlayerPedData", "Destructor", 0x571840, &CPlayerPedData::Destructor);
+    Install("CPlayerPedData", "AllocateData", 0x571880, &CPlayerPedData::AllocateData);
+    Install("CPlayerPedData", "DeAllocateData", 0x56F890, &CPlayerPedData::DeAllocateData);
+    Install("CPlayerPedData", "SetInitialState", 0x56F210, &CPlayerPedData::SetInitialState);
 }
 
 // 0x56F810

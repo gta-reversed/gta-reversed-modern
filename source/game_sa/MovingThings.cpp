@@ -6,11 +6,11 @@
 #include "PointLights.h"
 
 void CMovingThings::InjectHooks() {
-    ReversibleHooks::Install("CMovingThings", "Init", 0x717D00, &CMovingThings::Init);
-    ReversibleHooks::Install("CMovingThings", "Shutdown", 0x717C20, &CMovingThings::Shutdown);
-    ReversibleHooks::Install("CMovingThings", "Update", 0x7185B0, &CMovingThings::Update);
-    ReversibleHooks::Install("CMovingThings", "Render", 0x717150, &CMovingThings::Render);
-    ReversibleHooks::Install("CMovingThings", "Render_BeforeClouds", 0x7178F0, &CMovingThings::Render_BeforeClouds);
+    Install("CMovingThings", "Init", 0x717D00, &CMovingThings::Init);
+    Install("CMovingThings", "Shutdown", 0x717C20, &CMovingThings::Shutdown);
+    Install("CMovingThings", "Update", 0x7185B0, &CMovingThings::Update);
+    Install("CMovingThings", "Render", 0x717150, &CMovingThings::Render);
+    Install("CMovingThings", "Render_BeforeClouds", 0x7178F0, &CMovingThings::Render_BeforeClouds);
 }
 
 // 0x717D00

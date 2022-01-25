@@ -23,11 +23,11 @@ bool& CPad::bInvertLook4Pad = *(bool*)0xB73402;
 void CPad::InjectHooks() {
     HookInstall(0x541DD0, CPad::UpdatePads); // changes logic of the function and shouldn't be toggled on/off
 
-    ReversibleHooks::Install("CPad", "isEnterJustPressed", 0x4D5980, &CPad::isEnterJustPressed);
-    ReversibleHooks::Install("CPad", "isStandardKeyJustPressed", 0x4D59B0, &CPad::isStandardKeyJustPressed);
-    ReversibleHooks::Install("CPad", "isMenuKeyJustPressed", 0x744D50, &CPad::isMenuKeyJustPressed);
-    ReversibleHooks::Install("CPad", "isTabJustPressed", 0x744D90, &CPad::isTabJustPressed);
-    ReversibleHooks::Install("CPad", "Clear", 0x541A70, &CPad::Clear);
+    Install("CPad", "isEnterJustPressed", 0x4D5980, &CPad::isEnterJustPressed);
+    Install("CPad", "isStandardKeyJustPressed", 0x4D59B0, &CPad::isStandardKeyJustPressed);
+    Install("CPad", "isMenuKeyJustPressed", 0x744D50, &CPad::isMenuKeyJustPressed);
+    Install("CPad", "isTabJustPressed", 0x744D90, &CPad::isTabJustPressed);
+    Install("CPad", "Clear", 0x541A70, &CPad::Clear);
 }
 
 // 0x541D90

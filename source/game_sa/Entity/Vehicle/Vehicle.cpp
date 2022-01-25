@@ -58,40 +58,40 @@ char(*VehicleNames)[14] = (char(*)[14])0x8D3978;
 void CVehicle::InjectHooks()
 {
 // VTABLE
-    ReversibleHooks::Install("CVehicle", "SetModelIndex", 0x6D6A40, &CVehicle::SetModelIndex_Reversed);
-    ReversibleHooks::Install("CVehicle", "DeleteRwObject", 0x6D6410, &CVehicle::DeleteRwObject_Reversed);
-    ReversibleHooks::Install("CVehicle", "SpecialEntityPreCollisionStuff", 0x6D6640, &CVehicle::SpecialEntityPreCollisionStuff_Reversed);
-    ReversibleHooks::Install("CVehicle", "SpecialEntityCalcCollisionSteps", 0x6D0E90, &CVehicle::SpecialEntityCalcCollisionSteps_Reversed);
-    ReversibleHooks::Install("CVehicle", "SetupLighting", 0x553F20, &CVehicle::SetupLighting_Reversed);
-    ReversibleHooks::Install("CVehicle", "RemoveLighting", 0x5533D0, &CVehicle::RemoveLighting_Reversed);
-    ReversibleHooks::Install("CVehicle", "PreRender", 0x6D6480, &CVehicle::PreRender_Reversed);
-    ReversibleHooks::Install("CVehicle", "Render", 0x6D0E60, &CVehicle::Render_Reversed);
-    ReversibleHooks::Install("CVehicle", "ProcessOpenDoor", 0x6D56C0, &CVehicle::ProcessOpenDoor_Reversed);
-    ReversibleHooks::Install("CVehicle", "ProcessDrivingAnims", 0x6DF4A0, &CVehicle::ProcessDrivingAnims_Reversed);
-    ReversibleHooks::Install("CVehicle", "GetHeightAboveRoad", 0x6D63F0, &CVehicle::GetHeightAboveRoad_Reversed);
-    ReversibleHooks::Install("CVehicle", "CanPedStepOutCar", 0x6D1F30, &CVehicle::CanPedStepOutCar_Reversed);
-    ReversibleHooks::Install("CVehicle", "CanPedJumpOutCar", 0x6D2030, &CVehicle::CanPedJumpOutCar_Reversed);
-    ReversibleHooks::Install("CVehicle", "GetTowHitchPos", 0x6DFB70, &CVehicle::GetTowHitchPos_Reversed);
-    ReversibleHooks::Install("CVehicle", "GetTowBarPos", 0x6DFBE0, &CVehicle::GetTowBarPos_Reversed);
-    ReversibleHooks::Install("CVehicle", "Save", 0x5D4760, &CVehicle::Save_Reversed);
-    ReversibleHooks::Install("CVehicle", "Load", 0x5D2900, &CVehicle::Load_Reversed);
+    Install("CVehicle", "SetModelIndex", 0x6D6A40, &CVehicle::SetModelIndex_Reversed);
+    Install("CVehicle", "DeleteRwObject", 0x6D6410, &CVehicle::DeleteRwObject_Reversed);
+    Install("CVehicle", "SpecialEntityPreCollisionStuff", 0x6D6640, &CVehicle::SpecialEntityPreCollisionStuff_Reversed);
+    Install("CVehicle", "SpecialEntityCalcCollisionSteps", 0x6D0E90, &CVehicle::SpecialEntityCalcCollisionSteps_Reversed);
+    Install("CVehicle", "SetupLighting", 0x553F20, &CVehicle::SetupLighting_Reversed);
+    Install("CVehicle", "RemoveLighting", 0x5533D0, &CVehicle::RemoveLighting_Reversed);
+    Install("CVehicle", "PreRender", 0x6D6480, &CVehicle::PreRender_Reversed);
+    Install("CVehicle", "Render", 0x6D0E60, &CVehicle::Render_Reversed);
+    Install("CVehicle", "ProcessOpenDoor", 0x6D56C0, &CVehicle::ProcessOpenDoor_Reversed);
+    Install("CVehicle", "ProcessDrivingAnims", 0x6DF4A0, &CVehicle::ProcessDrivingAnims_Reversed);
+    Install("CVehicle", "GetHeightAboveRoad", 0x6D63F0, &CVehicle::GetHeightAboveRoad_Reversed);
+    Install("CVehicle", "CanPedStepOutCar", 0x6D1F30, &CVehicle::CanPedStepOutCar_Reversed);
+    Install("CVehicle", "CanPedJumpOutCar", 0x6D2030, &CVehicle::CanPedJumpOutCar_Reversed);
+    Install("CVehicle", "GetTowHitchPos", 0x6DFB70, &CVehicle::GetTowHitchPos_Reversed);
+    Install("CVehicle", "GetTowBarPos", 0x6DFBE0, &CVehicle::GetTowBarPos_Reversed);
+    Install("CVehicle", "Save", 0x5D4760, &CVehicle::Save_Reversed);
+    Install("CVehicle", "Load", 0x5D2900, &CVehicle::Load_Reversed);
 
 // CLASS
-    ReversibleHooks::Install("CVehicle", "Shutdown", 0x6D0B40, &CVehicle::Shutdown);
-    ReversibleHooks::Install("CVehicle", "GetRemapIndex", 0x6D0B70, &CVehicle::GetRemapIndex);
-    ReversibleHooks::Install("CVehicle", "SetRemap", 0x6D0C00, &CVehicle::SetRemap);
-    ReversibleHooks::Install("CVehicle", "SetCollisionLighting", 0x6D0CA0, &CVehicle::SetCollisionLighting);
-    ReversibleHooks::Install("CVehicle", "UpdateLightingFromStoredPolys", 0x6D0CC0, &CVehicle::UpdateLightingFromStoredPolys);
-    ReversibleHooks::Install("CVehicle", "CalculateLightingFromCollision", 0x6D0CF0, &CVehicle::CalculateLightingFromCollision);
-    ReversibleHooks::Install("CVehicle", "ProcessWheel", 0x6D6C00, &CVehicle::ProcessWheel);
-    ReversibleHooks::Install("CVehicle", "IsDriver_Ped", 0x6D1C40, static_cast<bool(CVehicle::*)(CPed*)>(&CVehicle::IsDriver));
-    ReversibleHooks::Install("CVehicle", "IsDriver_Int", 0x6D1C60, static_cast<bool(CVehicle::*)(int32)>(&CVehicle::IsDriver));
-    ReversibleHooks::Install("CVehicle", "AddExhaustParticles", 0x6DE240, &CVehicle::AddExhaustParticles);
-    ReversibleHooks::Install("CVehicle", "ApplyBoatWaterResistance", 0x6D2740, &CVehicle::ApplyBoatWaterResistance);
-    ReversibleHooks::Install("CVehicle", "ProcessBoatControl", 0x6DBCE0, &CVehicle::ProcessBoatControl);
-    ReversibleHooks::Install("CVehicle", "ChangeLawEnforcerState", 0x6D2330, &CVehicle::ChangeLawEnforcerState);
-    ReversibleHooks::Install("CVehicle", "GetVehicleAppearance", 0x6D1080, &CVehicle::GetVehicleAppearance);
-    ReversibleHooks::Install("CVehicle", "DoHeadLightBeam", 0x6E0E20, &CVehicle::DoHeadLightBeam);
+    Install("CVehicle", "Shutdown", 0x6D0B40, &CVehicle::Shutdown);
+    Install("CVehicle", "GetRemapIndex", 0x6D0B70, &CVehicle::GetRemapIndex);
+    Install("CVehicle", "SetRemap", 0x6D0C00, &CVehicle::SetRemap);
+    Install("CVehicle", "SetCollisionLighting", 0x6D0CA0, &CVehicle::SetCollisionLighting);
+    Install("CVehicle", "UpdateLightingFromStoredPolys", 0x6D0CC0, &CVehicle::UpdateLightingFromStoredPolys);
+    Install("CVehicle", "CalculateLightingFromCollision", 0x6D0CF0, &CVehicle::CalculateLightingFromCollision);
+    Install("CVehicle", "ProcessWheel", 0x6D6C00, &CVehicle::ProcessWheel);
+    Install("CVehicle", "IsDriver_Ped", 0x6D1C40, static_cast<bool(CVehicle::*)(CPed*)>(&CVehicle::IsDriver));
+    Install("CVehicle", "IsDriver_Int", 0x6D1C60, static_cast<bool(CVehicle::*)(int32)>(&CVehicle::IsDriver));
+    Install("CVehicle", "AddExhaustParticles", 0x6DE240, &CVehicle::AddExhaustParticles);
+    Install("CVehicle", "ApplyBoatWaterResistance", 0x6D2740, &CVehicle::ApplyBoatWaterResistance);
+    Install("CVehicle", "ProcessBoatControl", 0x6DBCE0, &CVehicle::ProcessBoatControl);
+    Install("CVehicle", "ChangeLawEnforcerState", 0x6D2330, &CVehicle::ChangeLawEnforcerState);
+    Install("CVehicle", "GetVehicleAppearance", 0x6D1080, &CVehicle::GetVehicleAppearance);
+    Install("CVehicle", "DoHeadLightBeam", 0x6E0E20, &CVehicle::DoHeadLightBeam);
 
 }
 

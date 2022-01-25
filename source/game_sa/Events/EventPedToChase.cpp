@@ -2,8 +2,8 @@
 
 void CEventPedToChase::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPedToChase", "Constructor", 0x4AF130, &CEventPedToChase::Constructor);
-    ReversibleHooks::Install("CEventPedToChase", "Clone_Reversed", 0x4B7360, &CEventPedToChase::Clone_Reversed);
+    Install("CEventPedToChase", "Constructor", 0x4AF130, &CEventPedToChase::Constructor);
+    Install("CEventPedToChase", "Clone_Reversed", 0x4B7360, &CEventPedToChase::Clone_Reversed);
 }
 
 CEventPedToChase::CEventPedToChase(CPed* ped)

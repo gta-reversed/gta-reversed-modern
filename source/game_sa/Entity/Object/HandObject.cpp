@@ -3,9 +3,9 @@
 void CHandObject::InjectHooks()
 {
 // VIRTUAL
-    ReversibleHooks::Install("CHandObject", "ProcessControl", 0x59EC40, &CHandObject::ProcessControl_Reversed);
-    ReversibleHooks::Install("CHandObject", "PreRender", 0x59ECD0, &CHandObject::PreRender_Reversed);
-    ReversibleHooks::Install("CHandObject", "Render", 0x59EE80, &CHandObject::Render_Reversed);
+    Install("CHandObject", "ProcessControl", 0x59EC40, &CHandObject::ProcessControl_Reversed);
+    Install("CHandObject", "PreRender", 0x59ECD0, &CHandObject::PreRender_Reversed);
+    Install("CHandObject", "Render", 0x59EE80, &CHandObject::Render_Reversed);
 }
 
 CHandObject::CHandObject(int32 handModelIndex, CPed* pPed, bool bLeftHand) : CObject()
