@@ -356,6 +356,7 @@ void CVehicle::DeleteRwObject_Reversed()
     CEntity::DeleteRwObject();
 }
 
+// 0x6D6640
 void CVehicle::SpecialEntityPreCollisionStuff(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled,
     bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck)
 {
@@ -452,11 +453,11 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool 
                 else if (!colEntity->AsObject()->CanBeSmashed() && !IsBike())
                 {
                     auto tempMat = CMatrix();
-                    auto* pColModel = colEntity->GetColModel();
-                    auto& vecMax = pColModel->GetBoundingBox().m_vecMax;
+                    auto* cm = colEntity->GetColModel();
+                    auto& vecMax = cm->GetBoundingBox().m_vecMax;
                     if (vecMax.x < 1.0F && vecMax.y < 1.0F && vecMax.z < 1.0F)
                     {
-                        const auto vecSize = pColModel->GetBoundingBox().GetSize();
+                        const auto vecSize = cm->GetBoundingBox().GetSize();
                         const auto vecTransformed = *colEntity->m_matrix * vecSize;
 
                         if (GetPosition().z > vecTransformed.z)
@@ -510,6 +511,7 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool 
     }
 }
 
+// 0x6D0E90
 uint8 CVehicle::SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2)
 {
     return CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bProcessCollisionBeforeSettingTimeStep, unk2);
@@ -552,6 +554,7 @@ uint8 CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollision
     return static_cast<uint8>(ceil(fMove));
 }
 
+// 0x6D6480
 void CVehicle::PreRender()
 {
     return CVehicle::PreRender_Reversed();
@@ -580,9 +583,9 @@ void CVehicle::Render()
 }
 void CVehicle::Render_Reversed()
 {
-    auto* pVehInfo = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
+    auto* vehicleMI = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
     const auto iDirtLevel = static_cast<int32>(m_fDirtLevel) & 0xF;
-    CVehicleModelInfo::SetDirtTextures(pVehInfo, iDirtLevel);
+    CVehicleModelInfo::SetDirtTextures(vehicleMI, iDirtLevel);
 
     CEntity::Render();
 }
@@ -848,7 +851,7 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint3
     }
 }
 
-// 0x871F38
+// 0x6DF4A0
 void CVehicle::ProcessDrivingAnims(CPed* driver, uint8 bBlend)
 {
     CVehicle::ProcessDrivingAnims_Reversed(driver, bBlend);
@@ -858,105 +861,105 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend)
     if (m_bOffscreen || !driver->IsPlayer())
         return;
 
-    auto* pRadioTuneAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, AnimationId::ANIM_ID_CAR_TUNE_RADIO);
+    auto* radioTuneAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, AnimationId::ANIM_ID_CAR_TUNE_RADIO);
     if (bBlend)
-        pRadioTuneAnim = CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, AnimationId::ANIM_ID_CAR_TUNE_RADIO, 4.0F);
+        radioTuneAnim = CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, AnimationId::ANIM_ID_CAR_TUNE_RADIO, 4.0F);
 
-    if (pRadioTuneAnim)
+    if (radioTuneAnim)
         return;
 
-    CRideAnims* pUsedAnims;
+    CRideAnims* usedAnims;
     auto const fSpeed = m_vecMoveSpeed.Magnitude();
 
     if (vehicleFlags.bLowVehicle)
-        pUsedAnims = &aDriveAnimIdsLow;
+        usedAnims = &aDriveAnimIdsLow;
     else if (IsBoat() && !m_pHandlingData->m_bSitInBoat)
-        pUsedAnims = &aDriveAnimIdsBoat;
+        usedAnims = &aDriveAnimIdsBoat;
     else if (CVehicleAnimGroupData::UsesKartDrivingAnims(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup)))
-        pUsedAnims = &aDriveAnimIdsKart;
+        usedAnims = &aDriveAnimIdsKart;
     else if (CVehicleAnimGroupData::UsesTruckDrivingAnims(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup)))
-        pUsedAnims = &aDriveAnimIdsTruck;
+        usedAnims = &aDriveAnimIdsTruck;
     else
     {
         const auto fDrivingSkill = CStats::GetStatValue(eStats::STAT_DRIVING_SKILL);
         if (fDrivingSkill < 50.0F)
         {
             if (fSpeed <= 0.4F)
-                pUsedAnims = &aDriveAnimIdsBadSlow;
+                usedAnims = &aDriveAnimIdsBadSlow;
             else
-                pUsedAnims = &aDriveAnimIdsBad;
+                usedAnims = &aDriveAnimIdsBad;
         }
         else if (fDrivingSkill < 100.0F)
         {
             if (fSpeed <= 0.4F)
-                pUsedAnims = &aDriveAnimIdsStdSlow;
+                usedAnims = &aDriveAnimIdsStdSlow;
             else
-                pUsedAnims = &aDriveAnimIdsStd;
+                usedAnims = &aDriveAnimIdsStd;
         }
         else
         {
             if (fSpeed <= 0.4F)
-                pUsedAnims = &aDriveAnimIdsProSlow;
+                usedAnims = &aDriveAnimIdsProSlow;
             else
-                pUsedAnims = &aDriveAnimIdsPro;
+                usedAnims = &aDriveAnimIdsPro;
         }
     }
 
-    auto* pIdleAnim      = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, pUsedAnims->m_aAnims[eRideAnim::RIDE_IDLE]);
-    auto* pLookLeftAnim  = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_LEFT]);
-    auto* pLookRightAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_RIGHT]);
-    auto* pLookBackAnim  = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_BACK]);
+    auto* idleAnim      = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, usedAnims->m_aAnims[eRideAnim::RIDE_IDLE]);
+    auto* lookLeftAnim  = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_LEFT]);
+    auto* lookRightAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_RIGHT]);
+    auto* lookBackAnim  = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_BACK]);
 
-    if (!pIdleAnim)
+    if (!idleAnim)
     {
         if (RpAnimBlendClumpGetAssociation(driver->m_pRwClump, AnimationId::ANIM_ID_CAR_SIT))
         {
-            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_IDLE], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_IDLE], 4.0F);
         }
         return;
     }
 
-    if (pIdleAnim->m_fBlendAmount < 1.0F)
+    if (idleAnim->m_fBlendAmount < 1.0F)
         return;
 
-    if (pLookBackAnim
+    if (lookBackAnim
         && CCamera::GetActiveCamera().m_nMode == eCamMode::MODE_1STPERSON
         && CCamera::GetActiveCamera().m_nDirectionWasLooking == eLookingDirection::LOOKING_DIRECTION_BEHIND)
     {
-        pLookBackAnim->m_fBlendDelta = -1000.0F;
+        lookBackAnim->m_fBlendDelta = -1000.0F;
     }
 
-    auto* pDriveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBY_L);
-    if (!pDriveByAnim)
-        pDriveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBY_R);
-    if (!pDriveByAnim)
-        pDriveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBYL_L);
-    if (!pDriveByAnim)
-        pDriveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBYL_R);
+    auto* driveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBY_L);
+    if (!driveByAnim)
+        driveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBY_R);
+    if (!driveByAnim)
+        driveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBYL_L);
+    if (!driveByAnim)
+        driveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBYL_R);
 
     if (!vehicleFlags.bLowVehicle
         && m_fGasPedal < 0.0F
-        && !pDriveByAnim
+        && !driveByAnim
         && GetVehicleAppearance() != VEHICLE_APPEARANCE_HELI
         && GetVehicleAppearance() != VEHICLE_APPEARANCE_PLANE)
     {
         if ((CCamera::GetActiveCamera().m_nMode != eCamMode::MODE_1STPERSON
             || CCamera::GetActiveCamera().m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_BEHIND)
-            && (!pLookBackAnim || pLookBackAnim->m_fBlendAmount < 1.0F && pLookBackAnim->m_fBlendDelta <= 0.0F))
+            && (!lookBackAnim || lookBackAnim->m_fBlendAmount < 1.0F && lookBackAnim->m_fBlendDelta <= 0.0F))
         {
-            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_BACK], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_BACK], 4.0F);
         }
         return;
     }
 
-    if (m_fSteerAngle == 0.0F || pDriveByAnim)
+    if (m_fSteerAngle == 0.0F || driveByAnim)
     {
-        if (pLookLeftAnim)
-            pLookLeftAnim->m_fBlendDelta = -4.0F;
-        if (pLookRightAnim)
-            pLookRightAnim->m_fBlendDelta = -4.0F;
-        if (pLookBackAnim)
-            pLookBackAnim->m_fBlendDelta = -4.0F;
+        if (lookLeftAnim)
+            lookLeftAnim->m_fBlendDelta = -4.0F;
+        if (lookRightAnim)
+            lookRightAnim->m_fBlendDelta = -4.0F;
+        if (lookBackAnim)
+            lookBackAnim->m_fBlendDelta = -4.0F;
 
         return;
     }
@@ -966,37 +969,37 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend)
 
     if (m_fSteerAngle < 0)
     {
-        if (pLookLeftAnim)
+        if (lookLeftAnim)
         {
-            pLookLeftAnim->m_fBlendAmount = 0.0F;
-            pLookLeftAnim->m_fBlendDelta = 0.0F;
+            lookLeftAnim->m_fBlendAmount = 0.0F;
+            lookLeftAnim->m_fBlendDelta = 0.0F;
         }
-        if (pLookRightAnim)
+        if (lookRightAnim)
         {
-            pLookRightAnim->m_fBlendAmount = fUsedAngle;
-            pLookRightAnim->m_fBlendDelta = 0.0F;
+            lookRightAnim->m_fBlendAmount = fUsedAngle;
+            lookRightAnim->m_fBlendDelta = 0.0F;
         }
         else
-            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_RIGHT], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_RIGHT], 4.0F);
     }
     else
     {
-        if (pLookLeftAnim)
+        if (lookLeftAnim)
         {
-            pLookLeftAnim->m_fBlendAmount = fUsedAngle;
-            pLookLeftAnim->m_fBlendDelta = 0.0F;
+            lookLeftAnim->m_fBlendAmount = fUsedAngle;
+            lookLeftAnim->m_fBlendDelta = 0.0F;
         }
-        if (pLookRightAnim)
+        if (lookRightAnim)
         {
-            pLookRightAnim->m_fBlendAmount = 0.0F;
-            pLookRightAnim->m_fBlendDelta = 0.0F;
+            lookRightAnim->m_fBlendAmount = 0.0F;
+            lookRightAnim->m_fBlendDelta = 0.0F;
         }
         else
-            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, pUsedAnims->m_aAnims[eRideAnim::RIDE_LOOK_LEFT], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_LEFT], 4.0F);
     }
 
-    if (pLookBackAnim)
-        pLookBackAnim->m_fBlendDelta = -4.0F;
+    if (lookBackAnim)
+        lookBackAnim->m_fBlendDelta = -4.0F;
 }
 
 // 0x871F54
@@ -1009,7 +1012,7 @@ float CVehicle::GetHeightAboveRoad_Reversed()
     return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMin.z * -1.0F;
 }
 
-// 0x871F64
+// 0x6D1F30
 bool CVehicle::CanPedStepOutCar(bool bIgnoreSpeedUpright)
 {
     return CVehicle::CanPedStepOutCar_Reversed(bIgnoreSpeedUpright);
@@ -1039,7 +1042,7 @@ bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright)
 
 }
 
-// 0x871F68
+// 0x6D2030
 bool CVehicle::CanPedJumpOutCar(CPed* ped)
 {
     return CVehicle::CanPedJumpOutCar_Reversed(ped);
@@ -1055,8 +1058,8 @@ bool CVehicle::CanPedJumpOutCar_Reversed(CPed* ped)
     }
 
     const auto fHorSpeedSquared = m_vecMoveSpeed.SquaredMagnitude2D();
-    if (!IsPlane()
-        && !IsHeli()
+    if (!IsSubPlane()
+        && !IsSubHeli()
         && (!IsAutomobile() || m_matrix->GetUp().z >= 0.3F || m_nLastCollisionTime <= CTimer::GetTimeInMS() - 1000))
     {
         return fHorSpeedSquared >= 0.1F && fHorSpeedSquared <= 0.5F;
@@ -1925,6 +1928,7 @@ void CVehicle::SetupRender()
     ((void(__thiscall*)(CVehicle*))0x6D64F0)(this);
 }
 
+// 0x6D6C00
 void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& wheelContactSpeed, CVector& wheelContactPoint,
     int32 wheelsOnGround, float thrust, float brake, float adhesion, int8 wheelId, float* wheelSpeed, tWheelState* wheelState, uint16 wheelStatus)
 {
@@ -1971,7 +1975,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
         if (!bBraking && fabs(m_fGasPedal) < 0.01f) {
             if (IsBike())
                 brake = gHandlingDataMgr.fWheelFriction * 0.6f / (m_pHandlingData->m_fMass + 200.0f);
-            else if (IsPlane())
+            else if (IsSubPlane())
                 brake = 0.0f;
             else {
                 brake = gHandlingDataMgr.fWheelFriction / m_pHandlingData->m_fMass;
@@ -2116,7 +2120,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     CVector vecBuoyancyForce;
     if (!mod_Buoyancy.ProcessBuoyancyBoat(this, m_fBuoyancyConstant, &vecBuoyancyTurnPoint, &vecBuoyancyForce, bCollidedWithWorld)) {
         physicalFlags.bSubmergedInWater = false;
-        if (IsBoat())
+        if (IsSubBoat())
             static_cast<CBoat*>(this)->m_nBoatFlags.bOnWater = false;
 
         return;
@@ -2219,9 +2223,9 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         CPhysical::ApplyTurnForce(vecUsedMoveForce, vecTurnPoint);
     }
 
-    CPad* pPad = nullptr;
+    CPad* pad = nullptr;
     if (m_nStatus == eEntityStatus::STATUS_PLAYER && m_pDriver && m_pDriver->IsPlayer()) {
-        pPad = static_cast<CPlayerPed*>(m_pDriver)->GetPadFromPlayer();
+        pad = static_cast<CPlayerPed*>(m_pDriver)->GetPadFromPlayer();
     }
 
     if (GetUp().z > -0.6F) {
@@ -2230,7 +2234,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
             fMoveSpeed = CVector2D(m_vecMoveSpeed).Magnitude();
 
         if (fabs(m_fGasPedal) > 0.05F || fMoveSpeed > 0.01F) {
-            if (IsBoat() && bOnWater && fMoveSpeed > 0.05F) {
+            if (IsSubBoat() && bOnWater && fMoveSpeed > 0.05F) {
                 //GetColModel(); Unused call
                 static_cast<CBoat*>(this)->AddWakePoint(GetPosition());
             }
@@ -2238,7 +2242,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
             auto fTraction = 1.0F;
             if (m_nStatus == eEntityStatus::STATUS_PLAYER) {
                 auto fTractionLoss = DotProduct(m_vecMoveSpeed, GetForward()) * m_pHandlingData->m_fTractionBias;
-                if (pPad->GetHandBrake())
+                if (pad->GetHandBrake())
                     fTractionLoss *= 0.5F;
 
                 fTraction = 1.0F - fTractionLoss;
@@ -2257,14 +2261,14 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
             float fWaterLevel;
             CWaterLevel::GetWaterLevel(vecWorldThrustPos.x, vecWorldThrustPos.y, vecWorldThrustPos.z, &fWaterLevel, 1, nullptr);
             if (vecWorldThrustPos.z - 0.5F >= fWaterLevel) {
-                if (IsBoat())
+                if (IsSubBoat())
                     static_cast<CBoat*>(this)->m_nBoatFlags.bMovingOnWater = false;
             }
             else {
                 auto fThrustDepth = fWaterLevel - vecWorldThrustPos.z + 0.5F;
                 fThrustDepth = std::min(fThrustDepth * fThrustDepth, 1.0F);
 
-                if (IsBoat())
+                if (IsSubBoat())
                     static_cast<CBoat*>(this)->m_nBoatFlags.bMovingOnWater = true;
 
                 bool bIsSlowingDown = false;
@@ -2359,7 +2363,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         CPhysical::ApplyMoveForce(vecMoveForce);
     }
 
-    if (m_nStatus == eEntityStatus::STATUS_PLAYER && pPad->GetHandBrake()) {
+    if (m_nStatus == eEntityStatus::STATUS_PLAYER && pad->GetHandBrake()) {
         auto fDirDotProd = DotProduct(m_vecMoveSpeed, GetForward());
         if (fDirDotProd > 0.0F) {
             auto fMoveForceMult = fDirDotProd * m_pHandlingData->m_fSuspensionLowerLimit * CTimer::GetTimeStep() * fImmersionDepth * m_fMass * -0.1F;
@@ -2415,12 +2419,12 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     }
 
     *fLastWaterImmersionDepth = fImmersionDepth;
-    if (IsBoat()) {
+    if (IsSubBoat()) {
         static_cast<CBoat*>(this)->m_vecWaterDamping = vecBuoyancyForce;
         static_cast<CBoat*>(this)->m_nBoatFlags.bOnWater = bOnWater;
     }
-    else if (m_vehicleType == eVehicleType::VEHICLE_AUTOMOBILE){
-        static_cast<CAutomobile*>(this)->m_fDoomHorizontalRotation = vecBuoyancyForce.Magnitude();
+    else if (IsAutomobile()) {
+        this->AsAutomobile()->m_fDoomHorizontalRotation = vecBuoyancyForce.Magnitude();
     }
 }
 
@@ -2459,7 +2463,7 @@ void CVehicle::AddExhaustParticles()
     secondExhaustPos.x *= -1.0f;
     CMatrix entityMatrix (*m_matrix);
     bool bHasDoubleExhaust = m_pHandlingData->m_bDoubleExhaust;
-    if (m_vehicleSubType == VEHICLE_BIKE) {
+    if (IsSubBike()) {
         auto* pBike = static_cast<CBike*>(this);
         pBike->CalculateLeanMatrix();
         entityMatrix = pBike->m_mLeanMatrix;

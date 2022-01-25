@@ -1815,18 +1815,18 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
 
     const auto GetVehicleType = [&] {
         constexpr struct { std::string_view name; eVehicleType type; } mapping[] = {
-            { "car",     eVehicleType::VEHICLE_AUTOMOBILE },
-            { "mtruck",  eVehicleType::VEHICLE_MTRUCK     },
-            { "quad",    eVehicleType::VEHICLE_QUAD       },
-            { "heli",    eVehicleType::VEHICLE_HELI       },
-            { "plane",   eVehicleType::VEHICLE_PLANE      },
-            { "boat",    eVehicleType::VEHICLE_BOAT       },
-            { "train",   eVehicleType::VEHICLE_TRAIN      },
-            { "f_heli",  eVehicleType::VEHICLE_FHELI      }, // NOTE: Originally this mapped to HELI, but since f_heli isn't used anywhere in the data files we've corrected the typo.
-            { "f_plane", eVehicleType::VEHICLE_FPLANE     },
-            { "bike",    eVehicleType::VEHICLE_BIKE       },
-            { "bmx",     eVehicleType::VEHICLE_BMX        },
-            { "trailer", eVehicleType::VEHICLE_TRAILER    },
+            { "car",     VEHICLE_TYPE_AUTOMOBILE },
+            { "mtruck",  VEHICLE_TYPE_MTRUCK     },
+            { "quad",    VEHICLE_TYPE_QUAD       },
+            { "heli",    VEHICLE_TYPE_HELI       },
+            { "plane",   VEHICLE_TYPE_PLANE      },
+            { "boat",    VEHICLE_TYPE_BOAT       },
+            { "train",   VEHICLE_TYPE_TRAIN      },
+            { "f_heli",  VEHICLE_TYPE_FHELI      }, // NOTE: Originally this mapped to HELI, but since f_heli isn't used anywhere in the data files we've corrected the typo.
+            { "f_plane", VEHICLE_TYPE_FPLANE     },
+            { "bike",    VEHICLE_TYPE_BIKE       },
+            { "bmx",     VEHICLE_TYPE_BMX        },
+            { "trailer", VEHICLE_TYPE_TRAILER    },
         };
 
         for (const auto& pair : mapping) {
@@ -1836,28 +1836,28 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
         }
 
         assert(0);             // NOTSA - Something went really wrong
-        return VEHICLE_IGNORE; // fix warning
+        return VEHICLE_TYPE_IGNORE; // fix warning
     };
 
     mi->m_nVehicleType = GetVehicleType();
     switch (mi->m_nVehicleType) {
-    case eVehicleType::VEHICLE_AUTOMOBILE:
-    case eVehicleType::VEHICLE_MTRUCK:
-    case eVehicleType::VEHICLE_QUAD:
-    case eVehicleType::VEHICLE_HELI:
-    case eVehicleType::VEHICLE_PLANE:
-    case eVehicleType::VEHICLE_TRAILER: {
+    case VEHICLE_TYPE_AUTOMOBILE:
+    case VEHICLE_TYPE_MTRUCK:
+    case VEHICLE_TYPE_QUAD:
+    case VEHICLE_TYPE_HELI:
+    case VEHICLE_TYPE_PLANE:
+    case VEHICLE_TYPE_TRAILER: {
         mi->SetWheelSizes(wheelSizeFront, wheelSizeRear);
         mi->m_nWheelModelIndex = misc;
         break;
     }
-    case eVehicleType::VEHICLE_FPLANE: {
+    case VEHICLE_TYPE_FPLANE: {
         mi->SetWheelSizes(1.0f, 1.0f);
         mi->m_nWheelModelIndex = misc;
         break;
     }
-    case eVehicleType::VEHICLE_BIKE:
-    case eVehicleType::VEHICLE_BMX: {
+    case VEHICLE_TYPE_BIKE:
+    case VEHICLE_TYPE_BMX: {
         mi->SetWheelSizes(wheelSizeFront, wheelSizeRear);
         mi->m_fBikeSteerAngle = (float)misc;
         break;
@@ -1869,19 +1869,19 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
 
     const auto GetVehicleClass = [&]{
         constexpr struct { std::string_view name; eVehicleClass cls; } mapping[] = {
-            { "normal",      eVehicleClass::VEHICLE_CLASS_NORMAL      },
-            { "poorfamily",  eVehicleClass::VEHICLE_CLASS_POORFAMILY  },
-            { "richfamily",  eVehicleClass::VEHICLE_CLASS_RICHFAMILY  },
-            { "executive",   eVehicleClass::VEHICLE_CLASS_EXECUTIVE   },
-            { "worker",      eVehicleClass::VEHICLE_CLASS_WORKER      },
-            { "big",         eVehicleClass::VEHICLE_CLASS_BIG         },
-            { "taxi",        eVehicleClass::VEHICLE_CLASS_TAXI        },
-            { "moped",       eVehicleClass::VEHICLE_CLASS_MOPED       },
-            { "motorbike",   eVehicleClass::VEHICLE_CLASS_MOTORBIKE   },
-            { "leisureboat", eVehicleClass::VEHICLE_CLASS_LEISUREBOAT },
-            { "workerboat",  eVehicleClass::VEHICLE_CLASS_WORKERBOAT  },
-            { "bicycle",     eVehicleClass::VEHICLE_CLASS_BICYCLE     },
-            { "ignore",      eVehicleClass::VEHICLE_CLASS_IGNORE      },
+            { "normal",      VEHICLE_CLASS_NORMAL      },
+            { "poorfamily",  VEHICLE_CLASS_POORFAMILY  },
+            { "richfamily",  VEHICLE_CLASS_RICHFAMILY  },
+            { "executive",   VEHICLE_CLASS_EXECUTIVE   },
+            { "worker",      VEHICLE_CLASS_WORKER      },
+            { "big",         VEHICLE_CLASS_BIG         },
+            { "taxi",        VEHICLE_CLASS_TAXI        },
+            { "moped",       VEHICLE_CLASS_MOPED       },
+            { "motorbike",   VEHICLE_CLASS_MOTORBIKE   },
+            { "leisureboat", VEHICLE_CLASS_LEISUREBOAT },
+            { "workerboat",  VEHICLE_CLASS_WORKERBOAT  },
+            { "bicycle",     VEHICLE_CLASS_BICYCLE     },
+            { "ignore",      VEHICLE_CLASS_IGNORE      },
         };
 
         for (const auto& pair : mapping) {

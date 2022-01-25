@@ -334,7 +334,7 @@ void CFire::ProcessFire() {
             if (DistanceBetweenPoints(vehicle->GetPosition(), m_vecPosition) >= 2.0f)
                 continue;
 
-            if (vehicle->IsBMX()) {
+            if (vehicle->IsSubBMX()) {
                 player->DoStuffToGoOnFire();
                 gFireManager.StartFire(player, m_pEntityCreator, 0.8f, true, 7000, 100);
                 vehicle->BurstTyre(vehicle->FindTyreNearestPoint(m_vecPosition.x, m_vecPosition.y) + 13, false); // TODO: What's this 13?

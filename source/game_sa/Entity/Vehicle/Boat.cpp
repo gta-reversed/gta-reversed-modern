@@ -49,10 +49,10 @@ void CBoat::InjectHooks()
 CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy)
 {
     memset(&m_boatFlap, 0, sizeof(m_boatFlap));
-    auto pModelInfo = reinterpret_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(modelIndex));
-    const auto iHandlingId = pModelInfo->m_nHandlingId;
-    m_vehicleSubType = eVehicleType::VEHICLE_BOAT;
-    m_vehicleType = eVehicleType::VEHICLE_BOAT;
+    CVehicleModelInfo* mi = CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr();
+    const auto iHandlingId = mi->m_nHandlingId;
+    m_nVehicleType = VEHICLE_TYPE_BOAT;
+    m_nVehicleSubType = VEHICLE_TYPE_BOAT;
     m_vecBoatMoveForce.Set(0.0F, 0.0F, 0.0F);
     m_vecBoatTurnForce.Set(0.0F, 0.0F, 0.0F);
     m_nPadNumber = 0;
@@ -68,7 +68,7 @@ CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy
     m_pFlyingHandlingData = gHandlingDataMgr.GetFlyingPointer(iHandlingId);
     m_pBoatHandling = gHandlingDataMgr.GetBoatPointer(iHandlingId);
 
-    pModelInfo->ChooseVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor, 1);
+    mi->ChooseVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor, 1);
 
     m_fMass = m_pHandlingData->m_fMass;
     m_fTurnMass = m_pHandlingData->m_fTurnMass * 0.5F;
@@ -372,10 +372,11 @@ void CBoat::CheckForSkippingCalculations()
     }
 }
 
+// 0x6F2710
 void CBoat::FillBoatList()
 {
     for (int32 i = 0; i < NUM_WAKE_GEN_BOATS; i++)
-        CBoat::apFrameWakeGeneratingBoats[i] = nullptr;
+        apFrameWakeGeneratingBoats[i] = nullptr;
 
     auto vecCamPos = CVector2D(TheCamera.GetPosition());
     auto vecCamDir = CVector2D(TheCamera.m_mCameraMatrix.GetForward());
@@ -388,15 +389,15 @@ void CBoat::FillBoatList()
     int32 iCurBoat = 0;
 
     for (int32 iInd = 0; iInd < iVehNum; ++iInd) {
-        auto pVeh = CPools::ms_pVehiclePool->GetAt(iInd);
-        if (!pVeh || !pVeh->IsBoat())
+        auto vehicle = CPools::ms_pVehiclePool->GetAt(iInd);
+        if (!vehicle || !vehicle->IsBoat())
             continue;
 
-        auto pBoat = static_cast<CBoat*>(pVeh);
-        if (!pBoat->m_nNumWaterTrailPoints)
+        auto boat = static_cast<CBoat*>(vehicle);
+        if (!boat->m_nNumWaterTrailPoints)
             continue;
 
-        auto vecBoatPos = CVector2D(pBoat->GetPosition());
+        auto vecBoatPos = CVector2D(boat->GetPosition());
         auto vecBoatCamOffset = vecBoatPos - vecCamPos;
         auto fCamDot = DotProduct2D(vecBoatCamOffset, vecCamDir);
         if (fCamDot > 100.0F || fCamDot < -15.0F)
@@ -408,7 +409,7 @@ void CBoat::FillBoatList()
 
         // Early out, the list isn't full yet
         if (iCurBoat < 4) {
-            CBoat::apFrameWakeGeneratingBoats[iCurBoat] = pBoat;
+            CBoat::apFrameWakeGeneratingBoats[iCurBoat] = boat;
             ++iCurBoat;
             continue;
         }
@@ -426,8 +427,8 @@ void CBoat::FillBoatList()
             }
         }
 
-        if (iNewInd != -1 && (fDistFromCam < fMinDist || pBoat->m_nStatus == eEntityStatus::STATUS_PLAYER))
-            CBoat::apFrameWakeGeneratingBoats[iNewInd] = pBoat;
+        if (iNewInd != -1 && (fDistFromCam < fMinDist || boat->m_nStatus == eEntityStatus::STATUS_PLAYER))
+            CBoat::apFrameWakeGeneratingBoats[iNewInd] = boat;
     }
 }
 

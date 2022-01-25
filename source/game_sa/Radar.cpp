@@ -1168,7 +1168,7 @@ void CRadar::DrawRadarMap()
 
     CVehicle* vehicle = FindPlayerVehicle(-1, false);
 
-    if (vehicle && vehicle->m_vehicleSubType == VEHICLE_PLANE && vehicle->m_nModelIndex != MODEL_VORTEX) {
+    if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
         CVector playerPos = FindPlayerCentreOfWorld_NoInteriorShift(0);
 
         float cSin = cachedSin;
@@ -1211,7 +1211,7 @@ void CRadar::DrawMap()
         goto DRAW_RADAR;
     }
 
-    if (vehicle && vehicle->IsPlane() && ModelIndices::IsVortex(vehicle->m_nModelIndex)) {
+    if (vehicle && vehicle->IsSubPlane() && ModelIndices::IsVortex(vehicle->m_nModelIndex)) {
         float speedZ = vehicle->GetPosition().z * 1.0f / 200.0f;
 
         if (speedZ < RADAR_MIN_SPEED)

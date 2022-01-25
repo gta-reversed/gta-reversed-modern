@@ -69,7 +69,7 @@ bool CEventVehicleCollision::AffectsPed_Reversed(CPed* ped)
         return false;
 
     if (ped->bInVehicle
-        || m_vehicle->m_vehicleType == VEHICLE_BOAT
+        || m_vehicle->IsBoat()
         || -DotProduct(m_collisionImpactVelocity, ped->GetForward()) < 0.35f)
     {
         return false;

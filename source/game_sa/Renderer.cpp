@@ -373,7 +373,7 @@ void CRenderer::RenderEverythingBarRoads() {
         if (entity->m_nType == ENTITY_TYPE_VEHICLE || (entity->m_nType == ENTITY_TYPE_PED && CVisibilityPlugins::GetClumpAlpha(entity->m_pRwClump) != 255)) {
             if (entity->m_nType == ENTITY_TYPE_VEHICLE) {
                 bool bInsertIntoSortedList = false;
-                if (vehicle->m_vehicleType == VEHICLE_BOAT) {
+                if (vehicle->IsBoat()) {
                     eCamMode camMode = CCamera::GetActiveCamera().m_nMode;
                     if (camMode == MODE_WHEELCAM || camMode == MODE_1STPERSON &&
                         TheCamera.GetLookDirection() != LOOKING_DIRECTION_FORWARD && TheCamera.GetLookDirection() ||
@@ -559,14 +559,18 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
                 {
                     if (dwDirectionWasLooking == 3)
                         return RENDERER_CULLED;
+
                     if (modelId == MODEL_RHINO || modelId == MODEL_COACH || TheCamera.m_bInATunnelAndABigVehicle)
                         return RENDERER_CULLED;
+
                     if (dwDirectionWasLooking) {
                         m_pFirstPersonVehicle = static_cast<CVehicle*>(entity);
                         return RENDERER_CULLED;
                     }
+
                     if (vehicle->m_pHandlingData->m_bNo1fpsLookBehind)
                         return RENDERER_CULLED;
+
                     if (!vehicle->IsBoat()
                         || modelId == MODEL_REEFER || modelId == MODEL_TROPIC || modelId == MODEL_PREDATOR
                         || modelId == MODEL_SKIMMER)

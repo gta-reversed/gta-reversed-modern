@@ -229,7 +229,7 @@ void CPlayerInfo::StreamParachuteWeapon(bool unk) {
     } else {
         if (m_pPed) {
             if (const auto veh = m_pPed->m_pVehicle; veh && m_pPed->bInVehicle) {
-                if (veh->IsPlane() || veh->IsHeli()) {
+                if (veh->IsSubPlane() || veh->IsSubHeli()) {
                     if (m_nRequireParachuteTimer <= CTimer::GetTimeStepInMS()) {
                         const auto vehToGroundZDist = veh->GetPosition().z - TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
                         m_nRequireParachuteTimer = (vehToGroundZDist <= 50.f) ? 0 : 5000;

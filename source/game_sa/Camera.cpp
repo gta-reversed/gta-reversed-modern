@@ -257,19 +257,19 @@ bool CCamera::GetLookingForwardFirstPerson() {
 // 0x50AF00
 void CCamera::GetArrPosForVehicleType(eVehicleType type, int32* arrPos) {
     switch (type) {
-    case VEHICLE_MTRUCK:
+    case VEHICLE_TYPE_MTRUCK:
         *arrPos = 0;
         break;
-    case VEHICLE_QUAD:
+    case VEHICLE_TYPE_QUAD:
         *arrPos = 1;
         break;
-    case VEHICLE_HELI:
+    case VEHICLE_TYPE_HELI:
         *arrPos = 2;
         break;
-    case VEHICLE_PLANE:
+    case VEHICLE_TYPE_PLANE:
         *arrPos = 4;
         break;
-    case VEHICLE_BOAT:
+    case VEHICLE_TYPE_BOAT:
         *arrPos = 3;
         break;
     default:

@@ -118,8 +118,8 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
     auto pVeh = CPedPlacement::IsPositionClearOfCars(ped);
 
     if (!pVeh
-        || pVeh->m_vehicleType == VEHICLE_BIKE
-        || pVeh->m_vehicleSubType == VEHICLE_QUAD
+        || pVeh->IsBike()
+        || pVeh->IsSubQuad()
         || pVeh == ped->m_pAttachedTo
         || pVeh == ped->m_standingOnEntity
         )
@@ -128,8 +128,8 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
 
         if (!pEntity
             || pEntity->m_nType != ENTITY_TYPE_VEHICLE
-            || pEntity->AsVehicle()->m_vehicleType == VEHICLE_BIKE
-            || pEntity->AsVehicle()->m_vehicleSubType == VEHICLE_QUAD
+            || pEntity->AsVehicle()->IsBike()
+            || pEntity->AsVehicle()->IsSubQuad()
             || !IsVehiclePointerValid(pEntity->AsVehicle())
             || (ped->m_nRandomSeed + CTimer::GetFrameCounter() - 3) % 8 == 0
             || CCollision::ProcessColModels(

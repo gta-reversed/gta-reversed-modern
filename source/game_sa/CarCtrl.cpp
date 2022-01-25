@@ -243,7 +243,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
     if (doMissionCleanup)
         CTheScripts::MissionCleanUp.AddEntityToList(CPools::ms_pVehiclePool->GetRef(vehicle), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
 
-    if (vehicle->IsRoadVehicle())
+    if (vehicle->IsSubRoadVehicle())
         vehicle->m_autoPilot.movementFlags.bIsStopped = true;
 
     return vehicle;
@@ -398,25 +398,25 @@ CVehicle* CCarCtrl::GetNewVehicleDependingOnCarModel(int32 modelId, uint8 create
     return plugin::CallAndReturn<CVehicle*, 0x421440, int32, uint8>(modelId, createdBy);
     /*
     switch (CModelInfo::GetModelInfo(modelId)->AsVehicleModelInfoPtr()->m_nVehicleType) {
-    case eVehicleType::VEHICLE_MTRUCK:
+    case VEHICLE_TYPE_MTRUCK:
         return new CMonsterTruck(modelId, createdBy);
-    case eVehicleType::VEHICLE_QUAD:
+    case VEHICLE_TYPE_QUAD:
         return new CQuadBike(modelId, createdBy);
-    case eVehicleType::VEHICLE_HELI:
+    case VEHICLE_TYPE_HELI:
         return new CHeli(modelId, createdBy);
-    case eVehicleType::VEHICLE_PLANE:
+    case VEHICLE_TYPE_PLANE:
         return new CPlane(modelId, createdBy);
-    case eVehicleType::VEHICLE_BOAT:
+    case VEHICLE_TYPE_BOAT:
         return new CBoat(modelId, createdBy);
-    case eVehicleType::VEHICLE_TRAIN:
+    case VEHICLE_TYPE_TRAIN:
         return new CTrain(modelId, createdBy);
-    case eVehicleType::VEHICLE_BIKE:
+    case VEHICLE_TYPE_BIKE:
         return new CBike(modelId, createdBy);
-    case eVehicleType::VEHICLE_BMX:
+    case VEHICLE_TYPE_BMX:
         return new CBmx(modelId, createdBy);
-    case eVehicleType::VEHICLE_TRAILER:
+    case VEHICLE_TYPE_TRAILER:
         return new CTrailer(modelId, createdBy);
-    case eVehicleType::VEHICLE_AUTOMOBILE:
+    case VEHICLE_TYPE_AUTOMOBILE:
         return new CAutomobile(modelId, createdBy, 1);
     }
     return nullptr;
@@ -480,7 +480,7 @@ void CCarCtrl::JoinCarWithRoadAccordingToMission(CVehicle* vehicle) {
     case MISSION_POLICE_BIKE:
     case MISSION_2C:
     case MISSION_BOAT_CIRCLING_PLAYER: {
-        JoinCarWithRoadSystemGotoCoors(vehicle, FindPlayerCoors(-1), true, vehicle->m_vehicleSubType == eVehicleType::VEHICLE_BOAT);
+        JoinCarWithRoadSystemGotoCoors(vehicle, FindPlayerCoors(-1), true, vehicle->IsSubBoat());
         break;
     }
     case MISSION_GOTOCOORDS:
@@ -489,7 +489,7 @@ void CCarCtrl::JoinCarWithRoadAccordingToMission(CVehicle* vehicle) {
     case MISSION_GOTOCOORDS_STRAIGHT_ACCURATE:
     case MISSION_GOTOCOORDS_ASTHECROWSWIMS:
     case MISSION_FOLLOW_PATH_RACING: {
-        JoinCarWithRoadSystemGotoCoors(vehicle, vehicle->m_autoPilot.m_vecDestinationCoors, true, vehicle->m_vehicleSubType == eVehicleType::VEHICLE_BOAT);
+        JoinCarWithRoadSystemGotoCoors(vehicle, vehicle->m_autoPilot.m_vecDestinationCoors, true, vehicle->IsSubBoat());
         break;
     }
     case MISSION_RAMCAR_FARAWAY:
@@ -513,7 +513,7 @@ void CCarCtrl::JoinCarWithRoadAccordingToMission(CVehicle* vehicle) {
     case MISSION_42:
     case MISSION_43:
     case MISSION_44: {
-        JoinCarWithRoadSystemGotoCoors(vehicle, vehicle->m_autoPilot.m_pTargetCar->GetPosition(), true, vehicle->m_vehicleSubType == eVehicleType::VEHICLE_BOAT);
+        JoinCarWithRoadSystemGotoCoors(vehicle, vehicle->m_autoPilot.m_pTargetCar->GetPosition(), true, vehicle->IsSubBoat());
         break;
     }
     }

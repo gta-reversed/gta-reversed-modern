@@ -1444,7 +1444,7 @@ CVehicle* CWorld::FindUnsuspectingTargetCar(CVector point, CVector playerPosn) {
         if (!veh)
             continue;
 
-        if (!veh->IsCreatedBy(eVehicleCreatedBy::RANDOM_VEHICLE) || !veh->IsSubclassAutomobile())
+        if (!veh->IsCreatedBy(eVehicleCreatedBy::RANDOM_VEHICLE) || !veh->IsSubAutomobile())
             continue;
 
         switch (veh->m_nStatus) {
@@ -1780,7 +1780,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
         case eEntityType::ENTITY_TYPE_VEHICLE: {
             const auto veh = entity->AsVehicle();
 
-            if (auto driver = veh->m_pDriver;  veh->m_vehicleSubType == eVehicleType::VEHICLE_BMX && driver) {
+            if (auto driver = veh->m_pDriver;  veh->IsSubBMX() && driver) {
                 CEventKnockOffBike event{ veh, &veh->m_vecMoveSpeed, &impactVelocity, 0.f, 0.f, KNOCK_OFF_TYPE_EXPLOSION, 0, 0, nullptr, true, false };
                 driver->GetIntelligence()->m_eventGroup.Add(&event, false);
 
@@ -1841,7 +1841,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                     veh->ApplyTurnForce(colNormal * forceFactor, colPointPos);
             }
 
-            if (veh->IsPlane()) {
+            if (veh->IsSubPlane()) {
                 auto normalBackwards = cp.m_vecNormal;
                 auto colPos = colPointPos + veh->GetPosition();
                 veh->VehicleDamage(1000.f, 0, creator, &colPos, &normalBackwards, WEAPON_EXPLOSION);

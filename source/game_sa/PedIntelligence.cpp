@@ -622,31 +622,29 @@ void CPedIntelligence::ProcessAfterPreRender() {
         taskUseGun->SetPedPosition(m_pPed);
     }
 
-    CWeapon* pActiveWeapon = &m_pPed->m_aWeapons[m_pPed->m_nActiveWeaponSlot];
-    if (pActiveWeapon->m_nType == WEAPON_MOLOTOV && pActiveWeapon->m_pFxSystem)
+    CWeapon* activeWeapon = &m_pPed->GetActiveWeapon();
+    if (activeWeapon->m_nType == WEAPON_MOLOTOV && activeWeapon->m_pFxSystem)
     {
-        RpHAnimHierarchy* pRpAnimHierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
-        int32 animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, 24); // 24 = BONE_R_HAND?
-        RwMatrix* pMatrixArray = RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy);
+        RpHAnimHierarchy* animHierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
+        int32 animIDIndex = RpHAnimIDGetIndex(animHierarchy, 24); // 24 = BONE_R_HAND?
+        RwMatrix* matrixArray = RpHAnimHierarchyGetMatrixArray(animHierarchy);
 
         RwV3d pointIn = { 0.05f, 0.05f,  0.14f };
         RwV3d pointOut;
-        RwV3dTransformPoint(&pointOut, &pointIn, &pMatrixArray[animIDIndex]);
+        RwV3dTransformPoint(&pointOut, &pointIn, &matrixArray[animIDIndex]);
 
-        RwMatrix* pRwMatrix = m_pPed->GetModellingMatrix();
         RwMatrix matrix;
-        memcpy(&matrix, pRwMatrix, sizeof(matrix));
+        memcpy(&matrix, m_pPed->GetModellingMatrix(), sizeof(matrix));
         matrix.pos = pointOut;
         RwMatrixUpdate(&matrix);
-        pActiveWeapon->m_pFxSystem->SetMatrix(&matrix);
+        activeWeapon->m_pFxSystem->SetMatrix(&matrix);
     }
 
     if (m_pPed->bInVehicle)
     {
         CVehicle* vehicle = m_pPed->m_pVehicle;
         if (vehicle && vehicle->IsBike()) {
-            auto* bike = (CBike*)vehicle;
-            bike->FixHandsToBars(m_pPed);
+            vehicle->AsBike()->FixHandsToBars(m_pPed);
         }
     }
 
@@ -1033,7 +1031,7 @@ void CPedIntelligence::ProcessFirst() {
     {
         CVehicle* vehicle = m_pPed->m_pVehicle;
         if (vehicle && vehicle->IsBike()) {
-            auto* bike = static_cast<CBike*>(vehicle);
+            auto* bike = vehicle->AsBike();
             bike->m_bPedLeftHandFixed = false;
             bike->m_bPedRightHandFixed = false;
         }

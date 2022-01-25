@@ -3459,11 +3459,11 @@ void CStreaming::StreamVehiclesAndPeds() {
 // 0x40B650
 void CStreaming::StreamVehiclesAndPeds_Always(CVector const& unused) {
     if (CVehicle* vehicle = FindPlayerVehicle(-1, false)) {
-        switch (vehicle->m_vehicleSubType) {
-        case VEHICLE_PLANE:
+        switch (vehicle->m_nVehicleSubType) {
+        case VEHICLE_TYPE_PLANE:
             return;
 
-        case VEHICLE_HELI: {
+        case VEHICLE_TYPE_HELI: {
             if (vehicle->m_vecMoveSpeed.Magnitude2D() > 0.1f)
                 return;
         }

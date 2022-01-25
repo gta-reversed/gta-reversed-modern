@@ -75,7 +75,7 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped)
                 }
                 return false;
             }
-            if (!ped->m_pAttachedTo && m_vehicle && m_vehicle->IsVehicleTypeValid() && !m_vehicle->IsFakeAircraft()) {
+            if (!ped->m_pAttachedTo && m_vehicle && m_vehicle->IsSubVehicleTypeValid() && !m_vehicle->IsSubFakeAircraft()) {
                 bool isGoToPointTask = false;
                 CVector targetPos;
                 if (goToTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT) {
@@ -83,7 +83,7 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped)
                     isGoToPointTask = true;
                 }
                 if (taskEnterCarAsDriver) {
-                    if (m_vehicle == taskEnterCarAsDriver->m_pTargetVehicle && m_vehicle->IsPlane())
+                    if (m_vehicle == taskEnterCarAsDriver->m_pTargetVehicle && m_vehicle->IsSubPlane())
                         return false;
 
                     targetPos = taskEnterCarAsDriver->GetTargetPos();
