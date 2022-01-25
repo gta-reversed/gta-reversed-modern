@@ -38,7 +38,9 @@ public:
     void  Teleport(CVector const* Pos);
 
     inline CPedGroupIntelligence& GetIntelligence() { return m_groupIntelligence; }
-    inline CPedGroupMembership& GetMembership() { return m_groupMembership; }
+
+    inline auto& GetMembership() const { return m_groupMembership; }
+    inline auto& GetMembership() { return m_groupMembership; }
 };
 
 VALIDATE_SIZE(CPedGroup, 0x2D4);

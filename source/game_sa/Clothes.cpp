@@ -75,7 +75,7 @@ void CClothes::ConstructPedModel(uint32 modelId, CPedClothesDesc& newClothes, co
     auto txd = CTxdStore::ms_pTxdPool->GetAt(modelInfo->m_nTxdIndex);
     auto skinnedClump = CClothesBuilder::CreateSkinnedClump(modelInfo->m_pRwClump, txd->m_pRwDictionary, newClothes, oldClothes, bCutscenePlayer);
     if (skinnedClump) {
-        CClothes::RequestMotionGroupAnims();
+        RequestMotionGroupAnims();
         modelInfo->AddTexDictionaryRef();
         modelInfo->DeleteRwObject();
         modelInfo->SetClump(skinnedClump);
@@ -88,7 +88,7 @@ void CClothes::ConstructPedModel(uint32 modelId, CPedClothesDesc& newClothes, co
 
 // 0x5A8120
 void CClothes::RequestMotionGroupAnims() {
-    const auto group = CClothes::GetPlayerMotionGroupToLoad();
+    const auto group = GetPlayerMotionGroupToLoad();
     const auto fatIndex = CAnimManager::GetAnimationBlockIndex("fat");
     const auto muscularIndex = CAnimManager::GetAnimationBlockIndex("muscular");
 
@@ -112,7 +112,7 @@ void CClothes::RebuildPlayerIfNeeded(CPlayerPed* player) {
     const auto muscle = player->m_pPlayerData->m_pPedClothesDesc->m_fMuscleStat;
 
     if (CStats::GetStatValue(STAT_FAT) != fat || CStats::GetStatValue(STAT_MUSCLE) != muscle) {
-        CClothes::RebuildPlayer(player, 0);
+        RebuildPlayer(player, 0);
     }
 }
 
@@ -129,7 +129,8 @@ void CClothes::RebuildPlayer(CPlayerPed* player, bool bIgnoreFatAndMuscle) {
         player->m_pPlayerData->m_pPedClothesDesc->m_fFatStat = CStats::GetStatValue(STAT_FAT);
         player->m_pPlayerData->m_pPedClothesDesc->m_fMuscleStat = CStats::GetStatValue(STAT_MUSCLE);
     }
-    CClothes::ConstructPedModel(player->m_nModelIndex, *player->m_pPlayerData->m_pPedClothesDesc, &PlayerClothes, 0);
+
+    ConstructPedModel(player->m_nModelIndex, *player->m_pPlayerData->m_pPedClothesDesc, &PlayerClothes, 0);
     player->Dress();
     RpAnimBlendClumpGiveAssociations(player->m_pRwClump, assoc);
     PlayerClothes = player->m_pPlayerData->m_pPedClothesDesc;
@@ -137,10 +138,10 @@ void CClothes::RebuildPlayer(CPlayerPed* player, bool bIgnoreFatAndMuscle) {
 
 // 0x5A8270
 void CClothes::RebuildCutscenePlayer(CPlayerPed* player, int32 modelId) {
-    auto clothesDesc = player->m_pPlayerData->m_pPedClothesDesc;
-    clothesDesc->m_fFatStat = CStats::GetStatValue(STAT_FAT);
+    const auto& clothesDesc    = player->m_pPlayerData->m_pPedClothesDesc;
+    clothesDesc->m_fFatStat    = CStats::GetStatValue(STAT_FAT);
     clothesDesc->m_fMuscleStat = CStats::GetStatValue(STAT_MUSCLE);
-    ConstructPedModel(modelId, (CPedClothesDesc&)clothesDesc, nullptr, true);
+    ConstructPedModel(modelId, *clothesDesc, nullptr, true);
 }
 
 // 0x5A7EA0
@@ -229,7 +230,7 @@ AssocGroupId CClothes::GetPlayerMotionGroupToLoad() {
 
 // 0x5A81B0
 AssocGroupId CClothes::GetDefaultPlayerMotionGroup() {
-    AssocGroupId group = CClothes::GetPlayerMotionGroupToLoad();
+    AssocGroupId group = GetPlayerMotionGroupToLoad();
     if (group == ANIM_GROUP_PLAYER)
         return ANIM_GROUP_PLAYER;
 

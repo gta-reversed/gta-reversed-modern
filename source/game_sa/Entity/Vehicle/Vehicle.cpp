@@ -2777,7 +2777,7 @@ void CVehicle::DoDriveByShootings()
 }
 
 // NOTSA
-bool CVehicle::IsAnyOfPassengersFollowerOfGroup(CPedGroup& group) {
+bool CVehicle::AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group) {
     const auto end = m_apPassengers + m_nMaxPassengers;
     return std::find_if(m_apPassengers, end, [&](CPed* passenger) {
         return group.m_groupMembership.IsFollower(passenger);

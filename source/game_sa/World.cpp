@@ -1119,7 +1119,7 @@ void CWorld::SetCarsOnFire(float x, float y, float z, float radius, CEntity* fir
 }
 
 // 0x565B70
-bool CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState) {
+int32 CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState) {
     CEntity* objects[15]{};
     int16 count{};
     FindObjectsInRange(posn, radius, false, &count, (uint16)std::size(objects), objects, true, false, false, false, false);
@@ -1134,7 +1134,7 @@ bool CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool 
 
         hasFoundTag = true;
 
-        outDir = entity->GetForward();
+        outDir = entity->GetMatrix().GetForward(); // Must use GetMatrix to make sure the matrix is allocated
 
         // Note: Original code has U.B. if `processTagAlphaState` is false, because `newAlpha` isn't assigned a meaningful value
         // But the only place this function is called has set `processTagAlphaState` to true, so..
@@ -2492,19 +2492,36 @@ CEntity* CWorld::TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius
 }
 
 // 0x56A0D0
+// Remove all peds/vehicles not related to the player's group in the area + projectiles, explosions, pickups, etc..
 void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint8 bRemoveProjectilesAndShadows) {
-    const auto vehPool = CPools::ms_pVehiclePool;
     const auto playerPed = FindPlayerPed();
     const auto playerGroup = CPedGroups::GetPedsGroup(playerPed);
+
+    // Remove all peds in radius who aren't followers of the player's group
+    const auto pedPool = CPools::GetPedPool();
+    for (auto i = 0; i < pedPool->GetSize(); i++) {
+        if (auto ped = pedPool->GetAt(i)) {
+            if (!ped->IsPlayer() && ped->CanBeDeleted()) {
+                if (DistanceBetweenPointsSquared2D(point, ped->GetPosition()) < radius * radius) {
+                    if (!playerGroup || !ped->IsFollowerOfGroup(*playerGroup)) {
+                        CPopulation::RemovePed(ped);
+                    }
+                }
+            }
+        }
+    }
+
+    // Remove all vehicles in radius in which there are no peds who're follower's of the player's group
+    const auto vehPool = CPools::ms_pVehiclePool;
     for (auto i = 0; i < vehPool->GetSize(); i++) {
         if (const auto veh = vehPool->GetAt(i)) {
-            if (playerGroup && veh->IsAnyOfPassengersFollowerOfGroup(*playerGroup))
+            if (playerGroup && veh->AreAnyOfPassengersFollowerOfGroup(*playerGroup))
                 continue;
 
-            if (playerPed->m_pContactEntity == veh && !veh->IsBoat())
+            if (playerPed->m_pContactEntity == veh && veh->IsBoat())
                 continue;
 
-            if (radius * radius <= DistanceBetweenPointsSquared2D(point, veh->GetPosition()))
+            if (DistanceBetweenPointsSquared2D(point, veh->GetPosition()) >= radius * radius)
                 continue;
 
             if (veh->vehicleFlags.bIsLocked || !veh->CanBeDeleted())
@@ -2517,7 +2534,8 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
 
             if (auto& driver = veh->m_pDriver) { 
                 CPopulation::RemovePed(driver);
-                driver->CleanUpOldReference(reinterpret_cast<CEntity**>(&driver));
+                if (driver) // Not even sure why this is done - Ped::Remove already unlinks it from the vehicle it's in
+                    driver->CleanUpOldReference(reinterpret_cast<CEntity**>(&driver));
                 driver = nullptr;
             }
 
@@ -2537,6 +2555,16 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
             delete veh;
         }
     }
+
+    CObject::DeleteAllTempObjectsInArea(point, radius);
+    gFireManager.ExtinguishPoint(point, radius);
+    ExtinguishAllCarFiresInArea(point, radius);
+    CExplosion::RemoveAllExplosionsInArea(point, radius);
+    if (bRemoveProjectilesAndShadows) {
+        CProjectileInfo::RemoveAllProjectiles();
+        CShadows::TidyUpShadows();
+    }
+    CPickups::RemoveUnnecessaryPickups(point, radius);
 }
 
 // 0x56A490

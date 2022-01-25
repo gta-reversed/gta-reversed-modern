@@ -2,8 +2,7 @@
 
 #include "WaterCannon.h"
 #include "FireManager.h"
-
-RxVertexIndex (&CWaterCannon::m_auRenderIndices)[18] = *(RxVertexIndex (*)[18])0xC80700;
+#include <ranges>
 
 void CWaterCannon::InjectHooks() {
     ReversibleHooks::Install("CWaterCannon", "Constructor", 0x728B10, &CWaterCannon::Constructor);
@@ -40,32 +39,8 @@ void CWaterCannon::Init() {
     m_nId = 0;
     m_nSectionsCount = 0;
     m_nCreationTime = CTimer::GetTimeInMS();
-    m_anSectionState[0] = '\0';
-
-    m_auRenderIndices[0] = 0;
-    m_auRenderIndices[1] = 1;
-    m_auRenderIndices[2] = 2;
-
-    m_auRenderIndices[3] = 1;
-    m_auRenderIndices[4] = 3;
-    m_auRenderIndices[5] = 2;
-
-    m_auRenderIndices[6] = 4;
-    m_auRenderIndices[7] = 5;
-    m_auRenderIndices[8] = 6;
-
-    m_auRenderIndices[9] = 5;
-    m_auRenderIndices[10] = 7;
-    m_auRenderIndices[11] = 6;
-
-    m_auRenderIndices[12] = 8;
-    m_auRenderIndices[13] = 9;
-    m_auRenderIndices[14] = 10;
-
-    m_auRenderIndices[15] = 9;
-    m_auRenderIndices[16] = 11;
-    m_auRenderIndices[17] = 10;
-
+    std::ranges::fill(m_anSectionState, false);
+    m_auRenderIndices = { 0, 1, 2, 1, 3, 2, 4, 5, 6, 5, 7, 6, 8, 9, 10, 9, 11, 10 };
     m_audio.Initialise(this);
 }
 
@@ -75,7 +50,7 @@ bool CWaterCannon::HasActiveSection() const {
 }
 
 // 0x72A280
-void CWaterCannon::Update_OncePerFrame(short a1) {
+void CWaterCannon::Update_OncePerFrame(int16 a1) {
     if (CTimer::GetTimeInMS() > m_nCreationTime + 150) {
         const auto section = (m_nSectionsCount + 1) % SECTIONS_COUNT;
         m_nSectionsCount = section;
@@ -205,7 +180,7 @@ void CWaterCannon::Render() {
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,            RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER,        RWRSTATE(NULL));
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    RWRSTATE(rwALPHATESTFUNCTIONGREATER));
-    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(0));
 
     size_t prevIdx = m_nSectionsCount % SECTIONS_COUNT;
     size_t currIdx = prevIdx == 0 ? SECTIONS_COUNT - 1 : prevIdx - 1;
@@ -231,7 +206,7 @@ void CWaterCannon::Render() {
                     fwd = Normalized(CVector::Random(0.0f, 1.0f)) / 20.0f;
                 }
 
-                const float dist = (float)(i * i) / (float)SECTIONS_COUNT + 3.0f;
+                const float size = (float)(i * i) / (float)SECTIONS_COUNT + 3.0f;
 
                 RxObjSpace3DVertex vertices[12];
 
@@ -243,7 +218,7 @@ void CWaterCannon::Render() {
                     RxObjSpace3DVertexSetPreLitColor(&v, &color);
                 }
 
-                const CVector thisUp = up * dist, thisRight = right * dist, thisFwd = fwd * dist;
+                const CVector thisUp = up * size, thisRight = right * size, thisFwd = fwd * size;
                 const CVector pos[std::size(vertices)] = {
                     currPosn - thisUp,
                     currPosn + thisUp,
@@ -272,7 +247,7 @@ void CWaterCannon::Render() {
                     CVector direction = colPoint.m_vecNormal * 3.0f * CVector::Random(0.2f, 1.8f);
 
                     for (int n = 0; n < 2; n++) {
-                        const float unk = n / CTimer::GetTimeStepInMS();
+                        const auto unk = (float)(n / CTimer::GetTimeStepInMS());
 
                         g_fx.m_pPrtWatersplash->AddParticle(&colPoint.m_vecPoint, &direction, unk, &prtinfo, -1.0f, 1.2f, 0.6f, 0);
 
@@ -288,7 +263,7 @@ void CWaterCannon::Render() {
 
                 if (RwIm3DTransform(vertices, std::size(vertices), nullptr, rwIM3D_VERTEXRGBA))
                 {
-                    RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, m_auRenderIndices, std::size(m_auRenderIndices));
+                    RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, m_auRenderIndices.data(), m_auRenderIndices.size());
                     RwIm3DEnd();
                 }
 

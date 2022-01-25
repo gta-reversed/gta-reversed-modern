@@ -29,6 +29,12 @@ struct SReversibleHook {
     virtual ~SReversibleHook() = default;
     virtual void Switch() = 0;
     virtual void Check() = 0;
+
+    void SetState(bool hooked) {
+        if (m_bIsHooked != hooked) {
+            Switch();
+        }
+    }
 };
 
 struct SSimpleReversibleHook : SReversibleHook {
