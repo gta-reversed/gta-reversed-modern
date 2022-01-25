@@ -52,8 +52,8 @@ void CVisibilityPlugins::InjectHooks() {
     Install("CVisibilityPlugins", "GetAtomicModelInfo", 0x732260, &CVisibilityPlugins::GetAtomicModelInfo);
     Install("CVisibilityPlugins", "GetClumpAlpha", 0x732B20, &CVisibilityPlugins::GetClumpAlpha);
     Install("CVisibilityPlugins", "GetClumpModelInfo", 0x732AC0, &CVisibilityPlugins::GetClumpModelInfo);
-    Install("CVisibilityPlugins", "GetDistanceSquaredFromCamera_0", 0x732C80, (float (*)(RwFrame*)) & CVisibilityPlugins::GetDistanceSquaredFromCamera);
-    Install("CVisibilityPlugins", "GetDistanceSquaredFromCamera_1", 0x732CC0, (float (*)(CVector*)) & CVisibilityPlugins::GetDistanceSquaredFromCamera);
+    Install("CVisibilityPlugins", "GetDistanceSquaredFromCamera_0", 0x732C80, static_cast<float (*)(RwFrame*)>(&CVisibilityPlugins::GetDistanceSquaredFromCamera));
+    Install("CVisibilityPlugins", "GetDistanceSquaredFromCamera_1", 0x732CC0, static_cast<float (*)(CVector*)>(&CVisibilityPlugins::GetDistanceSquaredFromCamera));
     Install("CVisibilityPlugins", "GetDotProductWithCameraVector", 0x7326D0, &CVisibilityPlugins::GetDotProductWithCameraVector);
     Install("CVisibilityPlugins", "GetFrameHierarchyId", 0x732A20, &CVisibilityPlugins::GetFrameHierarchyId);
     Install("CVisibilityPlugins", "GetModelInfoIndex", 0x732250, &CVisibilityPlugins::GetModelInfoIndex);

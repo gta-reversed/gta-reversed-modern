@@ -93,7 +93,7 @@ void CStreaming::InjectHooks()
     Install("CStreaming", "IsVeryBusy",0x4076A0, &CStreaming::IsVeryBusy);
     Install("CStreaming", "Load",0x5D29E0, &CStreaming::Load);
     Install("CStreaming", "LoadAllRequestedModels",0x40EA10, &CStreaming::LoadAllRequestedModels);
-    Install("CStreaming", "LoadCdDirectory_char", 0x5B6170, (void(*)(const char*, int32)) & CStreaming::LoadCdDirectory);
+    Install("CStreaming", "LoadCdDirectory_char", 0x5B6170, static_cast<void(*)(const char*, int32)>(&CStreaming::LoadCdDirectory));
     Install("CStreaming", "LoadCdDirectory_void", 0x5B82C0, (void(*)()) & CStreaming::LoadCdDirectory);
     Install("CStreaming", "LoadInitialPeds",0x40D3D0, &CStreaming::LoadInitialPeds);
     Install("CStreaming", "LoadInitialWeapons",0x40A120, &CStreaming::LoadInitialWeapons);
@@ -133,7 +133,7 @@ void CStreaming::InjectHooks()
     Install("CStreaming", "RemoveModel",0x4089A0, &CStreaming::RemoveModel);
     Install("CStreaming", "RemoveTxdModel",0x40C180, &CStreaming::RemoveTxdModel);
     Install("CStreaming", "MakeSpaceFor",0x40E120, &CStreaming::MakeSpaceFor);
-    Install("CStreaming", "ProcessEntitiesInSectorList", 0x40C270, (void(*)(CPtrList&, float, float, float, float, float, float, float, int32)) & CStreaming::ProcessEntitiesInSectorList);
+    Install("CStreaming", "ProcessEntitiesInSectorList", 0x40C270, static_cast<void(*)(CPtrList&, float, float, float, float, float, float, float, int32)>(&CStreaming::ProcessEntitiesInSectorList));
     Install("CStreaming", "RetryLoadFile",0x4076C0, &CStreaming::RetryLoadFile);
     Install("CStreaming", "LoadRequestedModels",0x40E3A0, &CStreaming::LoadRequestedModels);
     Install("CStreaming", "FlushRequestList",0x40E4E0, &CStreaming::FlushRequestList);

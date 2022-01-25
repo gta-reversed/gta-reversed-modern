@@ -8,13 +8,13 @@
 
 void CPlaceable::InjectHooks()
 {
-    ReversibleHooks::Install("CPlaceable", "SetPosn_xyz", 0x420B80, (void(CPlaceable::*)(float, float, float))(&CPlaceable::SetPosn));
-    ReversibleHooks::Install("CPlaceable", "SetPosn_vector", 0x4241C0, (void(CPlaceable::*)(CVector const&))(&CPlaceable::SetPosn));
+    ReversibleHooks::Install("CPlaceable", "SetPosn_xyz", 0x420B80, static_cast<void(CPlaceable::*)(float, float, float)>(&CPlaceable::SetPosn));
+    ReversibleHooks::Install("CPlaceable", "SetPosn_vector", 0x4241C0, static_cast<void(CPlaceable::*)(CVector const&)>(&CPlaceable::SetPosn));
     ReversibleHooks::Install("CPlaceable", "SetOrientation", 0x439A80, &CPlaceable::SetOrientation);
     ReversibleHooks::Install("CPlaceable", "SetHeading", 0x43E0C0, &CPlaceable::SetHeading);
     ReversibleHooks::Install("CPlaceable", "GetHeading", 0x441DB0, &CPlaceable::GetHeading);
-    ReversibleHooks::Install("CPlaceable", "IsWithinArea_xy", 0x54F200, (bool(CPlaceable::*)(float, float, float, float))(&CPlaceable::IsWithinArea));
-    ReversibleHooks::Install("CPlaceable", "IsWithinArea_xyz", 0x54F2B0, (bool(CPlaceable::*)(float, float, float, float, float, float))(&CPlaceable::IsWithinArea));
+    ReversibleHooks::Install("CPlaceable", "IsWithinArea_xy", 0x54F200, static_cast<bool(CPlaceable::*)(float, float, float, float)>(&CPlaceable::IsWithinArea));
+    ReversibleHooks::Install("CPlaceable", "IsWithinArea_xyz", 0x54F2B0, static_cast<bool(CPlaceable::*)(float, float, float, float, float, float)>(&CPlaceable::IsWithinArea));
     ReversibleHooks::Install("CPlaceable", "RemoveMatrix", 0x54F3B0, &CPlaceable::RemoveMatrix);
     ReversibleHooks::Install("CPlaceable", "AllocateStaticMatrix", 0x54F4C0, &CPlaceable::AllocateStaticMatrix);
     ReversibleHooks::Install("CPlaceable", "AllocateMatrix", 0x54F560, &CPlaceable::AllocateMatrix);

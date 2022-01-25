@@ -7,7 +7,7 @@ void CTaskComplexSequence::InjectHooks()
     ReversibleHooks::Install("CTaskComplexSequence", "GetTaskType", 0x632C60, &CTaskComplexSequence::GetId_Reversed);
     ReversibleHooks::Install("CTaskComplexSequence", "MakeAbortable", 0x632C00, &CTaskComplexSequence::MakeAbortable_Reversed);
     ReversibleHooks::Install("CTaskComplexSequence", "CreateNextSubTask", 0x638A40, &CTaskComplexSequence::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexSequence", "CreateNextSubTask_ped", 0x632C70, (CTask*(CTaskComplexSequence::*)(CPed*, int32&, int32&))&CTaskComplexSequence::CreateNextSubTask);
+    ReversibleHooks::Install("CTaskComplexSequence", "CreateNextSubTask_ped", 0x632C70, static_cast<CTask*(CTaskComplexSequence::*)(CPed*, int32&, int32&)>(&CTaskComplexSequence::CreateNextSubTask));
     ReversibleHooks::Install("CTaskComplexSequence", "CreateFirstSubTask", 0x638A60, &CTaskComplexSequence::CreateFirstSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexSequence", "ControlSubTask", 0x632D00, &CTaskComplexSequence::ControlSubTask_Reversed);
     ReversibleHooks::Install("CTaskComplexSequence", "AddTask", 0x632D10, &CTaskComplexSequence::AddTask);

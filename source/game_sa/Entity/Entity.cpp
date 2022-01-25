@@ -19,7 +19,7 @@ void CEntity::InjectHooks()
 {
 //Virtual
     ReversibleHooks::Install("CEntity", "Add", 0x533020, (void(CEntity::*)())(&CEntity::Add_Reversed));
-    ReversibleHooks::Install("CEntity", "Add_rect", 0x5347D0, (void(CEntity::*)(const CRect&))(&CEntity::Add_Reversed));
+    ReversibleHooks::Install("CEntity", "Add_rect", 0x5347D0, static_cast<void(CEntity::*)(const CRect&)>(&CEntity::Add_Reversed));
     ReversibleHooks::Install("CEntity", "Remove", 0x534AE0, &CEntity::Remove_Reversed);
     ReversibleHooks::Install("CEntity", "SetIsStatic", 0x403E20, &CEntity::SetIsStatic_Reversed);
     ReversibleHooks::Install("CEntity", "SetModelIndexNoCreate", 0x533700, &CEntity::SetModelIndexNoCreate_Reversed);

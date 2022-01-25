@@ -14,8 +14,8 @@ void CEventEditableResponse::InjectHooks() {
     ReversibleHooks::Install("CEventEditableResponse", "InformRespectedFriends", 0x4B2B00, &CEventEditableResponse::InformRespectedFriends);
     ReversibleHooks::Install("CEventEditableResponse", "InformGroup", 0x4B7DF0, &CEventEditableResponse::InformGroup);
     ReversibleHooks::Install("CEventEditableResponse", "TriggerLookAt", 0x4AC5A0, &CEventEditableResponse::TriggerLookAt);
-    ReversibleHooks::Install("CEventEditableResponse", "ComputeResponseTaskType_ped", 0x4B56C0, (void (CEventEditableResponse::*)(CPed * ped, bool))&CEventEditableResponse::ComputeResponseTaskType);
-    ReversibleHooks::Install("CEventEditableResponse", "ComputeResponseTaskType_ped_group", 0x4B57A0, (void (CEventEditableResponse::*)(CPedGroup*)) & CEventEditableResponse::ComputeResponseTaskType);
+    ReversibleHooks::Install("CEventEditableResponse", "ComputeResponseTaskType_ped", 0x4B56C0, static_cast<void (CEventEditableResponse::*)(CPed * ped, bool)>(&CEventEditableResponse::ComputeResponseTaskType));
+    ReversibleHooks::Install("CEventEditableResponse", "ComputeResponseTaskType_ped_group", 0x4B57A0, static_cast<void (CEventEditableResponse::*)(CPedGroup*)>(&CEventEditableResponse::ComputeResponseTaskType));
     ReversibleHooks::Install("CEventEditableResponse", "ComputeResponseTaskOfType", 0x4B5730, &CEventEditableResponse::ComputeResponseTaskOfType);
 }
 

@@ -8,7 +8,7 @@ void CDamageAtomicModelInfo::InjectHooks()
     ReversibleHooks::Install("CDamageAtomicModelInfo", "AsDamageAtomicModelInfoPtr", 0x4C55C0, &CDamageAtomicModelInfo::AsDamageAtomicModelInfoPtr_Reversed);
     ReversibleHooks::Install("CDamageAtomicModelInfo", "DeleteRwObject", 0x4C49D0, &CDamageAtomicModelInfo::DeleteRwObject_Reversed);
     ReversibleHooks::Install("CDamageAtomicModelInfo", "CreateInstance_void", 0x4C4960, (RwObject * (CDamageAtomicModelInfo::*)())(&CDamageAtomicModelInfo::CreateInstance_Reversed));
-    ReversibleHooks::Install("CDamageAtomicModelInfo", "CreateInstance_rwmat", 0x4C4910, (RwObject * (CDamageAtomicModelInfo::*)(RwMatrix*))(&CDamageAtomicModelInfo::CreateInstance_Reversed));
+    ReversibleHooks::Install("CDamageAtomicModelInfo", "CreateInstance_rwmat", 0x4C4910, static_cast<RwObject * (CDamageAtomicModelInfo::*)(RwMatrix*)>(&CDamageAtomicModelInfo::CreateInstance_Reversed));
 
     ReversibleHooks::Install("CDamageAtomicModelInfo", "SetDamagedAtomic", 0x4C48D0, &CDamageAtomicModelInfo::SetDamagedAtomic);
 }

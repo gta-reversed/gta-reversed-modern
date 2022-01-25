@@ -19,7 +19,7 @@ void CAtomicModelInfo::InjectHooks()
     ReversibleHooks::Install("CAtomicModelInfo", "DeleteRwObject", 0x4C4440, &CAtomicModelInfo::DeleteRwObject_Reversed);
     ReversibleHooks::Install("CAtomicModelInfo", "GetRwModelType", 0x4C5580, &CAtomicModelInfo::GetRwModelType_Reversed);
     ReversibleHooks::Install("CAtomicModelInfo", "CreateInstance_void", 0x4C4530, (RwObject * (CAtomicModelInfo::*)())(&CAtomicModelInfo::CreateInstance_Reversed));
-    ReversibleHooks::Install("CAtomicModelInfo", "CreateInstance_rwmat", 0x4C44D0, (RwObject * (CAtomicModelInfo::*)(RwMatrix*))(&CAtomicModelInfo::CreateInstance_Reversed));
+    ReversibleHooks::Install("CAtomicModelInfo", "CreateInstance_rwmat", 0x4C44D0, static_cast<RwObject * (CAtomicModelInfo::*)(RwMatrix*)>(&CAtomicModelInfo::CreateInstance_Reversed));
     ReversibleHooks::Install("CAtomicModelInfo", "SetAtomic", 0x4C4360, &CAtomicModelInfo::SetAtomic_Reversed);
 
 // OTHER

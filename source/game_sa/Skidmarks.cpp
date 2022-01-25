@@ -13,8 +13,8 @@ void CSkidmarks::InjectHooks() {
     Install("CSkidmarks", "Clear", 0x720590, &CSkidmarks::Clear);
     Install("CSkidmarks", "Update", 0x7205C0, &CSkidmarks::Update);
     Install("CSkidmarks", "Render", 0x720640, &CSkidmarks::Render);
-    Install("CSkidmarks", "RegisterOne_EC0", 0x720EC0, (void (*)(uint32, const CVector&, float, float, bool*, bool*, float))(&CSkidmarks::RegisterOne));
-    Install("CSkidmarks", "RegisterOne", 0x720930, (void (*)(uint32, const CVector&, float, float, eSkidMarkType, bool*, float))(&CSkidmarks::RegisterOne));
+    Install("CSkidmarks", "RegisterOne_EC0", 0x720EC0, static_cast<void (*)(uint32, const CVector&, float, float, bool*, bool*, float)>(&CSkidmarks::RegisterOne));
+    Install("CSkidmarks", "RegisterOne", 0x720930, static_cast<void (*)(uint32, const CVector&, float, float, eSkidMarkType, bool*, float)>(&CSkidmarks::RegisterOne));
 }
 
 // 0x7204E0

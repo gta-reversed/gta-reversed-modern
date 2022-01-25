@@ -8,8 +8,8 @@ int64& CAEAudioUtility::startTimeMs = *reinterpret_cast<int64*>(0xb610f8);
 float (&CAEAudioUtility::m_sfLogLookup)[50][2] = *reinterpret_cast<float (*)[50][2]>(0xb61100);
 
 void CAEAudioUtility::InjectHooks() {
-    ReversibleHooks::Install("CAEAudioUtility", "GetRandomNumberInRange_int", 0x4d9c10, (int32(*)(const int32, const int32))CAEAudioUtility::GetRandomNumberInRange);
-    ReversibleHooks::Install("CAEAudioUtility", "GetRandomNumberInRange_float", 0x4d9c50, (float(*)(float, float))CAEAudioUtility::GetRandomNumberInRange);
+    ReversibleHooks::Install("CAEAudioUtility", "GetRandomNumberInRange_int", 0x4d9c10, static_cast<int32(*)(const int32, const int32)>(&CAEAudioUtility::GetRandomNumberInRange));
+    ReversibleHooks::Install("CAEAudioUtility", "GetRandomNumberInRange_float", 0x4d9c50, static_cast<float(*)(float, float)>(&CAEAudioUtility::GetRandomNumberInRange));
     ReversibleHooks::Install("CAEAudioUtility", "ResolveProbability", 0x4d9c80, &CAEAudioUtility::ResolveProbability);
     ReversibleHooks::Install("CAEAudioUtility", "GetPiecewiseLinear", 0x4d9d90, &CAEAudioUtility::GetPiecewiseLinear);
     ReversibleHooks::Install("CAEAudioUtility", "AudioLog10", 0x4d9e50, &CAEAudioUtility::AudioLog10);

@@ -23,8 +23,8 @@ void CColStore::InjectHooks()
     ReversibleHooks::Install("CColStore", "RequestCollision", 0x410C00, &CColStore::RequestCollision);
     ReversibleHooks::Install("CColStore", "RemoveColSlot", 0x411330, &CColStore::RemoveColSlot);
     ReversibleHooks::Install("CColStore", "RemoveCol", 0x410730, &CColStore::RemoveCol);
-    ReversibleHooks::Install("CColStore", "LoadCol", 0x410690, (void(*)(int32, char const*))&CColStore::LoadCol);
-    ReversibleHooks::Install("CColStore", "LoadCol_2", 0x4106D0, (bool(*)(int32, uint8*, int32))&CColStore::LoadCol);
+    ReversibleHooks::Install("CColStore", "LoadCol", 0x410690, static_cast<void(*)(int32, char const*)>(&CColStore::LoadCol));
+    ReversibleHooks::Install("CColStore", "LoadCol_2", 0x4106D0, static_cast<bool(*)(int32, uint8*, int32)>(&CColStore::LoadCol));
     ReversibleHooks::Install("CColStore", "IncludeModelIndex", 0x410820, &CColStore::IncludeModelIndex);
     ReversibleHooks::Install("CColStore", "RemoveAllCollision", 0x410E00, &CColStore::RemoveAllCollision);
     ReversibleHooks::Install("CColStore", "LoadAllCollision", 0x410E60, &CColStore::LoadAllCollision);

@@ -14,7 +14,7 @@ CQuaternion::CQuaternion()
 
 void CQuaternion::InjectHooks()
 {
-    ReversibleHooks::Install("CQuaternion", "Get", 0x59C080, (void(CQuaternion::*)(RwMatrixTag*))(&CQuaternion::Get));
+    ReversibleHooks::Install("CQuaternion", "Get", 0x59C080, static_cast<void(CQuaternion::*)(RwMatrixTag*)>(&CQuaternion::Get));
 }
 
 // Quat to matrix

@@ -84,8 +84,8 @@ void CVehicle::InjectHooks()
     ReversibleHooks::Install("CVehicle", "UpdateLightingFromStoredPolys", 0x6D0CC0, &CVehicle::UpdateLightingFromStoredPolys);
     ReversibleHooks::Install("CVehicle", "CalculateLightingFromCollision", 0x6D0CF0, &CVehicle::CalculateLightingFromCollision);
     ReversibleHooks::Install("CVehicle", "ProcessWheel", 0x6D6C00, &CVehicle::ProcessWheel);
-    ReversibleHooks::Install("CVehicle", "IsDriver_Ped", 0x6D1C40, (bool(CVehicle::*)(CPed*))(&CVehicle::IsDriver));
-    ReversibleHooks::Install("CVehicle", "IsDriver_Int", 0x6D1C60, (bool(CVehicle::*)(int32))(&CVehicle::IsDriver));
+    ReversibleHooks::Install("CVehicle", "IsDriver_Ped", 0x6D1C40, static_cast<bool(CVehicle::*)(CPed*)>(&CVehicle::IsDriver));
+    ReversibleHooks::Install("CVehicle", "IsDriver_Int", 0x6D1C60, static_cast<bool(CVehicle::*)(int32)>(&CVehicle::IsDriver));
     ReversibleHooks::Install("CVehicle", "AddExhaustParticles", 0x6DE240, &CVehicle::AddExhaustParticles);
     ReversibleHooks::Install("CVehicle", "ApplyBoatWaterResistance", 0x6D2740, &CVehicle::ApplyBoatWaterResistance);
     ReversibleHooks::Install("CVehicle", "ProcessBoatControl", 0x6DBCE0, &CVehicle::ProcessBoatControl);

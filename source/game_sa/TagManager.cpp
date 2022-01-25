@@ -15,14 +15,14 @@ void CTagManager::InjectHooks()
     ReversibleHooks::Install("CTagManager", "AddTag", 0x49CC90, &CTagManager::AddTag);
     ReversibleHooks::Install("CTagManager", "FindTagDesc", 0x49CCB0, &CTagManager::FindTagDesc);
     ReversibleHooks::Install("CTagManager", "IsTag", 0x49CCE0, &CTagManager::IsTag);
-    ReversibleHooks::Install("CTagManager", "SetAlpha_RpAtomic", 0x49CD30, (void(*)(RpAtomic*, uint8))(&CTagManager::SetAlpha));
-    ReversibleHooks::Install("CTagManager", "GetAlpha_RpAtomic", 0x49CD40, (uint8(*)(RpAtomic*))(&CTagManager::GetAlpha));
-    ReversibleHooks::Install("CTagManager", "GetAlpha_Entity", 0x49CF90, (uint8(*)(CEntity*))(&CTagManager::GetAlpha));
+    ReversibleHooks::Install("CTagManager", "SetAlpha_RpAtomic", 0x49CD30, static_cast<void(*)(RpAtomic*, uint8)>(&CTagManager::SetAlpha));
+    ReversibleHooks::Install("CTagManager", "GetAlpha_RpAtomic", 0x49CD40, static_cast<uint8(*)(RpAtomic*)>(&CTagManager::GetAlpha));
+    ReversibleHooks::Install("CTagManager", "GetAlpha_Entity", 0x49CF90, static_cast<uint8(*)(CEntity*)>(&CTagManager::GetAlpha));
     ReversibleHooks::Install("CTagManager", "GetPercentageTagged", 0x49CDA0, &CTagManager::GetPercentageTagged);
     ReversibleHooks::Install("CTagManager", "GetPercentageTaggedInArea", 0x49D0B0, &CTagManager::GetPercentageTaggedInArea);
     ReversibleHooks::Install("CTagManager", "UpdateNumTagged", 0x49CDE0, &CTagManager::UpdateNumTagged);
     ReversibleHooks::Install("CTagManager", "SetAlphaInArea", 0x49CFE0, &CTagManager::SetAlphaInArea);
-    ReversibleHooks::Install("CTagManager", "SetAlpha_Entity", 0x49CEC0, (void(*)(CEntity*, uint8))(&CTagManager::SetAlpha));
+    ReversibleHooks::Install("CTagManager", "SetAlpha_Entity", 0x49CEC0, static_cast<void(*)(CEntity*, uint8)>(&CTagManager::SetAlpha));
     ReversibleHooks::Install("CTagManager", "GetNearestTag", 0x49D160, &CTagManager::GetNearestTag);
     ReversibleHooks::Install("CTagManager", "SetupAtomic", 0x49CE10, &CTagManager::SetupAtomic);
     ReversibleHooks::Install("CTagManager", "RenderTagForPC", 0x49CE40, &CTagManager::RenderTagForPC);

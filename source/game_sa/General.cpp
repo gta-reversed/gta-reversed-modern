@@ -20,8 +20,8 @@ void CGeneral::InjectHooks() {
     ReversibleHooks::Install("CGeneral", "GetNodeHeadingFromVector", 0x53CDC0, &CGeneral::GetNodeHeadingFromVector);
     ReversibleHooks::Install("CGeneral", "SolveQuadratic", 0x53CE30, &CGeneral::SolveQuadratic);
     ReversibleHooks::Install("CGeneral", "GetAngleBetweenPoints", 0x53CEA0, &CGeneral::GetAngleBetweenPoints);
-    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, (int32 (*)(const int32, const int32)) & CGeneral::GetRandomNumberInRange);
-    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_float", 0x41BD90, (float (*)(const float, const float)) & CGeneral::GetRandomNumberInRange);
+    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, static_cast<int32 (*)(const int32, const int32)>(&CGeneral::GetRandomNumberInRange));
+    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_float", 0x41BD90, static_cast<float (*)(const float, const float)>(&CGeneral::GetRandomNumberInRange));
 }
 
 // 0x53CB00

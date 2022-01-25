@@ -9,8 +9,8 @@ void CAEAudioEnvironment::InjectHooks() {
     ReversibleHooks::Install("CAEAudioEnvironment", "GetDistanceAttenuation", 0x4D7F20, &CAEAudioEnvironment::GetDistanceAttenuation);
     ReversibleHooks::Install("CAEAudioEnvironment", "GetDirectionalMikeAttenuation", 0x4D7F60, &CAEAudioEnvironment::GetDirectionalMikeAttenuation);
     ReversibleHooks::Install("CAEAudioEnvironment", "GetReverbEnvironmentAndDepth", 0x4D8010, &CAEAudioEnvironment::GetReverbEnvironmentAndDepth);
-    ReversibleHooks::Install("CAEAudioEnvironment", "GetPositionRelativeToCamera_vec", 0x4D80B0, (void(*)(CVector*, CVector*)) & CAEAudioEnvironment::GetPositionRelativeToCamera);
-    ReversibleHooks::Install("CAEAudioEnvironment", "GetPositionRelativeToCamera_placeable", 0x4D8340, (void(*)(CVector*, CPlaceable*)) & CAEAudioEnvironment::GetPositionRelativeToCamera);
+    ReversibleHooks::Install("CAEAudioEnvironment", "GetPositionRelativeToCamera_vec", 0x4D80B0, static_cast<void(*)(CVector*, CVector*)>(&CAEAudioEnvironment::GetPositionRelativeToCamera));
+    ReversibleHooks::Install("CAEAudioEnvironment", "GetPositionRelativeToCamera_placeable", 0x4D8340, static_cast<void(*)(CVector*, CPlaceable*)>(&CAEAudioEnvironment::GetPositionRelativeToCamera));
 }
 
 float CAEAudioEnvironment::GetDopplerRelativeFrequency(float prevDist, float curDist, uint32 prevTime, uint32 curTime, float timeScale) {

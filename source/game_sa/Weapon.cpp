@@ -33,7 +33,7 @@ void CWeapon::InjectHooks() {
     ReversibleHooks::Install("CWeapon", "IsType2Handed", 0x73B1E0, &CWeapon::IsType2Handed);
     ReversibleHooks::Install("CWeapon", "IsTypeProjectile", 0x73B210, &CWeapon::IsTypeProjectile);
     ReversibleHooks::Install("CWeapon", "HasWeaponAmmoToBeUsed", 0x73B2A0, &CWeapon::HasWeaponAmmoToBeUsed);
-    ReversibleHooks::Install("CWeapon", "CanBeUsedFor2Player", 0x73B240, (bool (*)(eWeaponType weaponType))&CWeapon::CanBeUsedFor2Player);
+    ReversibleHooks::Install("CWeapon", "CanBeUsedFor2Player", 0x73B240, static_cast<bool (*)(eWeaponType weaponType)>(&CWeapon::CanBeUsedFor2Player));
     ReversibleHooks::Install("CWeapon", "InitialiseWeapons", 0x73A300, &CWeapon::InitialiseWeapons);
     ReversibleHooks::Install("CWeapon", "ShutdownWeapons", 0x73A330, &CWeapon::ShutdownWeapons);
     ReversibleHooks::Install("CWeapon", "UpdateWeapons", 0x73A360, &CWeapon::UpdateWeapons);

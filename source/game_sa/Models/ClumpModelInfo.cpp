@@ -16,7 +16,7 @@ void CClumpModelInfo::InjectHooks()
     ReversibleHooks::Install("CClumpModelInfo", "DeleteRwObject", 0x4C4E70, &CClumpModelInfo::DeleteRwObject_Reversed);
     ReversibleHooks::Install("CClumpModelInfo", "GetRwModelType", 0x4C5730, &CClumpModelInfo::GetRwModelType_Reversed);
     ReversibleHooks::Install("CClumpModelInfo", "CreateInstance_void", 0x4C5140, (RwObject * (CClumpModelInfo::*)())(&CClumpModelInfo::CreateInstance_Reversed));
-    ReversibleHooks::Install("CClumpModelInfo", "CreateInstance_mat", 0x4C5110, (RwObject * (CClumpModelInfo::*)(RwMatrix*))(&CClumpModelInfo::CreateInstance_Reversed));
+    ReversibleHooks::Install("CClumpModelInfo", "CreateInstance_mat", 0x4C5110, static_cast<RwObject * (CClumpModelInfo::*)(RwMatrix*)>(&CClumpModelInfo::CreateInstance_Reversed));
     ReversibleHooks::Install("CClumpModelInfo", "SetAnimFile", 0x4C5200, &CClumpModelInfo::SetAnimFile_Reversed);
     ReversibleHooks::Install("CClumpModelInfo", "ConvertAnimFileIndex", 0x4C5250, &CClumpModelInfo::ConvertAnimFileIndex_Reversed);
     ReversibleHooks::Install("CClumpModelInfo", "GetAnimFileIndex", 0x4C5740, &CClumpModelInfo::GetAnimFileIndex_Reversed);

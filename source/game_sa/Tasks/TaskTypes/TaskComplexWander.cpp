@@ -31,8 +31,8 @@ void CTaskComplexWander::InjectHooks()
     ReversibleHooks::Install("CTaskComplexWander", "ComputeTargetHeading", 0x66F530, &CTaskComplexWander::ComputeTargetHeading);
     ReversibleHooks::Install("CTaskComplexWander", "ValidNodes", 0x669F30, &CTaskComplexWander::ValidNodes);
     ReversibleHooks::Install("CTaskComplexWander", "ScanForBlockedNodes", 0x674560, &CTaskComplexWander::ScanForBlockedNodes);
-    ReversibleHooks::Install("CTaskComplexWander", "ScanForBlockedNode", 0x671EF0, (bool(CTaskComplexWander::*)(CPed*, CNodeAddress*))&CTaskComplexWander::ScanForBlockedNode);
-    ReversibleHooks::Install("CTaskComplexWander", "ScanForBlockedNode_1", 0x66F4C0, (bool(CTaskComplexWander::*)(CVector*, CEntity*))&CTaskComplexWander::ScanForBlockedNode);
+    ReversibleHooks::Install("CTaskComplexWander", "ScanForBlockedNode", 0x671EF0, static_cast<bool(CTaskComplexWander::*)(CPed*, CNodeAddress*)>(&CTaskComplexWander::ScanForBlockedNode));
+    ReversibleHooks::Install("CTaskComplexWander", "ScanForBlockedNode_1", 0x66F4C0, static_cast<bool(CTaskComplexWander::*)(CVector*, CEntity*)>(&CTaskComplexWander::ScanForBlockedNode));
     ReversibleHooks::Install("CTaskComplexWander", "GetWanderTaskByPedType", 0x673D00, CTaskComplexWander::GetWanderTaskByPedType);
 }
 

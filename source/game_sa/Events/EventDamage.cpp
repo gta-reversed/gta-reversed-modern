@@ -7,8 +7,8 @@
 
 void CEventDamage::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CEventDamage", "CEventDamage", 0x4B33B0, (CEventDamage*(CEventDamage::*)(const CEventDamage&)) & CEventDamage::Constructor);
-    Install("CEventDamage", "CEventDamage_1", 0x4AD830, (CEventDamage * (CEventDamage::*)(CEntity*, uint32, eWeaponType, ePedPieceTypes, uint8, bool, bool)) & CEventDamage::Constructor);
+    Install("CEventDamage", "CEventDamage", 0x4B33B0, static_cast<CEventDamage*(CEventDamage::*)(const CEventDamage&)>(&CEventDamage::Constructor));
+    Install("CEventDamage", "CEventDamage_1", 0x4AD830, static_cast<CEventDamage * (CEventDamage::*)(CEntity*, uint32, eWeaponType, ePedPieceTypes, uint8, bool, bool)>(&CEventDamage::Constructor));
     Install("CEventDamage", "GetEventType_Reversed", 0x4AD910, &CEventDamage::GetEventType_Reversed);
     Install("CEventDamage", "GetEventPriority_Reversed", 0x4AD950, &CEventDamage::GetEventPriority_Reversed);
     Install("CEventDamage", "GetLifeTime_Reversed", 0x4AD920, &CEventDamage::GetLifeTime_Reversed);

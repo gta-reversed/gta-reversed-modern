@@ -421,7 +421,7 @@ void CAEUserRadioTrackManager::InjectHooks() {
     ReversibleHooks::Install("CAEUserRadioTrackManager", "Shutdown", 0x4f2fb0, &CAEUserRadioTrackManager::Shutdown);
     ReversibleHooks::Install("CAEUserRadioTrackManager", "ReadUserTracks", 0x4f2fd0, &CAEUserRadioTrackManager::ReadUserTracks);
     ReversibleHooks::Install("CAEUserRadioTrackManager", "GetTrackPath", 0x4f3050, &CAEUserRadioTrackManager::GetTrackPath);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "ResolveShortcut", 0x4f30f0, (char* (CAEUserRadioTrackManager::*)(const char*)) & CAEUserRadioTrackManager::ResolveShortcut);
+    ReversibleHooks::Install("CAEUserRadioTrackManager", "ResolveShortcut", 0x4f30f0, static_cast<char* (CAEUserRadioTrackManager::*)(const char*)>(&CAEUserRadioTrackManager::ResolveShortcut));
     ReversibleHooks::Install("CAEUserRadioTrackManager", "GetAudioFileType", 0x4f31f0, &CAEUserRadioTrackManager::GetAudioFileType);
     ReversibleHooks::Install("CAEUserRadioTrackManager", "SelectUserTrackIndex", 0x4f3250, &CAEUserRadioTrackManager::SelectUserTrackIndex);
     ReversibleHooks::Install("CAEUserRadioTrackManager", "DeleteUserTracksInfo", 0x4f32f0, &CAEUserRadioTrackManager::DeleteUserTracksInfo);

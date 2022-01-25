@@ -12,8 +12,8 @@ void CScriptedBrainTaskStore::InjectHooks()
     CScriptedBrainTaskEntry::InjectHooks();
     ReversibleHooks::Install("CScriptedBrainTaskStore", "SetTask", 0x635720, &CScriptedBrainTaskStore::SetTask);
     ReversibleHooks::Install("CScriptedBrainTaskStore", "GetTask", 0x6357C0, &CScriptedBrainTaskStore::GetTask);
-    ReversibleHooks::Install("CScriptedBrainTaskStore", "Clear_ped", 0x635850, (void(*)(CPed*)) & CScriptedBrainTaskStore::Clear);
-    ReversibleHooks::Install("CScriptedBrainTaskStore", "Clear_task", 0x6357F0, (void(*)(CTask*)) & CScriptedBrainTaskStore::Clear);
+    ReversibleHooks::Install("CScriptedBrainTaskStore", "Clear_ped", 0x635850, static_cast<void(*)(CPed*)>(&CScriptedBrainTaskStore::Clear));
+    ReversibleHooks::Install("CScriptedBrainTaskStore", "Clear_task", 0x6357F0, static_cast<void(*)(CTask*)>(&CScriptedBrainTaskStore::Clear));
 }
 
 CScriptedBrainTaskEntry::CScriptedBrainTaskEntry()

@@ -31,8 +31,8 @@ void CModelInfo::InjectHooks()
 
     ReversibleHooks::Install("CModelInfo", "GetModelInfoUInt16", 0x4C59F0, &CModelInfo::GetModelInfoUInt16);
     ReversibleHooks::Install("CModelInfo", "GetModelInfoFromHashKey", 0x4C59B0, &CModelInfo::GetModelInfoFromHashKey);
-    ReversibleHooks::Install("CModelInfo", "GetModelInfo_full", 0x4C5940, (CBaseModelInfo * (*)(char const*, int32*)) & CModelInfo::GetModelInfo);
-    ReversibleHooks::Install("CModelInfo", "GetModelInfo_minmax", 0x4C5A20, (CBaseModelInfo*(*)(char const*, int32, int32))&CModelInfo::GetModelInfo);
+    ReversibleHooks::Install("CModelInfo", "GetModelInfo_full", 0x4C5940, static_cast<CBaseModelInfo * (*)(char const*, int32*)>(&CModelInfo::GetModelInfo));
+    ReversibleHooks::Install("CModelInfo", "GetModelInfo_minmax", 0x4C5A20, static_cast<CBaseModelInfo*(*)(char const*, int32, int32)>(&CModelInfo::GetModelInfo));
 
     ReversibleHooks::Install("CModelInfo", "AddAtomicModel", 0x4C6620, &CModelInfo::AddAtomicModel);
     ReversibleHooks::Install("CModelInfo", "AddDamageAtomicModel", 0x4C6650, &CModelInfo::AddDamageAtomicModel);
