@@ -123,9 +123,9 @@ void CSprite2d::SetAddressing(RwTextureAddressMode modeUV)
 void CSprite2d::SetRenderState()
 {
     if (m_pTexture)
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(m_pTexture));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(m_pTexture)));
     else
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 }
 
 // Draw this sprite
@@ -154,7 +154,7 @@ void CSprite2d::Draw(const CRect& posn, const CRGBA& color, float u1, float v1, 
     SetVertices(posn, color, color, color, color, u1, v1, u2, v2, u3, v3, u4, v4);
     SetRenderState();
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 }
 
 void CSprite2d::Draw(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4)
@@ -162,7 +162,7 @@ void CSprite2d::Draw(const CRect& posn, const CRGBA& color1, const CRGBA& color2
     SetVertices(posn, color1, color2, color3, color4);
     SetRenderState();
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 }
 
 void CSprite2d::Draw(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color)
@@ -170,7 +170,7 @@ void CSprite2d::Draw(float x1, float y1, float x2, float y2, float x3, float y3,
     SetVertices(x1, y1, x2, y2, x3, y3, x4, y4, color, color, color, color);
     SetRenderState();
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 }
 
 // 0x727260
@@ -202,7 +202,7 @@ void CSprite2d::RenderVertexBuffer()
     if (nextBufferVertex <= 0)
         return;
 
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, reinterpret_cast<void*>(rwFILTERLINEAR));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
     RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, aRadiosityVertexBuffer, nextBufferVertex, aTempBufferIndices, nextBufferIndex);
     nextBufferVertex = 0;
     nextBufferIndex = 0;
@@ -339,14 +339,14 @@ void CSprite2d::SetVertices(RwIm2DVertex* vertices, const CRect& posn, const CRG
 
 // draws non-textured rectangle
 void CSprite2d::DrawRect(const CRect& posn, const CRGBA& color) {
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
     SetVertices(posn, color, color, color, color);
     if (color.a == 255)
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
     else
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
 }
 
 // this could be used for drawing textured rectangle (use SetRenderState() before this)
@@ -357,16 +357,16 @@ void CSprite2d::DrawTxRect(const CRect& posn, const CRGBA& color) {
 
 // draw non-textured rectangle, with setupable corners' colors.
 void CSprite2d::DrawRect(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4) {
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
     SetVertices(posn, color1, color2, color3, color4);
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
 }
 
 // draws non-textured rectangle with default blending states
 void CSprite2d::DrawRectXLU(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4) {
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
     DrawRect(posn, color1, color2, color3, color4);
 }
 
@@ -374,9 +374,9 @@ void CSprite2d::DrawRectXLU(const CRect& posn, const CRGBA& color1, const CRGBA&
 void CSprite2d::DrawAnyRect(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4) {
     SetVertices(x1, y1, x2, y2, x3, y3, x4, y4, color1, color2, color3, color4);
     if (color1.a == 255 && color2.a == 255 && color3.a == 255 && color4.a == 255)
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
     else
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
 }
 
@@ -394,8 +394,8 @@ void CSprite2d::DrawCircleAtNearClip(const CVector2D& posn, float size, const CR
     RwIm2DVertexSetV(&maVertices[0], 0.5f, RecipNearClip);
     RwIm2DVertexSetIntRGBA(&maVertices[0], color.r, color.g, color.b, color.a);
 
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, reinterpret_cast<void*>(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
 
     float posna = 360.f / static_cast<float>(angle);
     float step = posna * DegreesToRadians(1.f) * (256.f / DegreesToRadians(360.f)); // posna * 35 / 45
@@ -437,13 +437,13 @@ void CSprite2d::AddToBuffer(CRect  const& posn, CRGBA  const& color, float u1, f
 void CSprite2d::Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color)
 {
     SetVertices(x1, y1, x2, y2, x3, y3, x4, y4, color, color, color, color);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)nullptr);
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,     (void*)rwSHADEMODENASHADEMODE);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,     RWRSTATE(rwSHADEMODENASHADEMODE));
 
     if (color.a == 255)
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
     else
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
 
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
 }
@@ -457,8 +457,8 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     int8 progressAdd, uint8 drawPercentage, uint8 drawBlackBorder,
     CRGBA color, CRGBA addColor)
 {
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)nullptr);
-    RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEFLAT);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,     RWRSTATE(rwSHADEMODEFLAT));
 
     progress = std::max(0.0f, progress);
 

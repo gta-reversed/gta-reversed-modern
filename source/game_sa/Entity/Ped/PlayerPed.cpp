@@ -6,6 +6,9 @@
 */
 #include "StdInc.h"
 
+#include "PlayerPed.h"
+#include "TagManager.h"
+
 bool (&abTempNeverLeavesGroup)[7] = *(bool (*)[7])0xC0BC08;
 int32& gPlayIdlesAnimBlockIndex = *(int32*)0xC0BC10;
 bool& CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = *(bool*)0xC0BC15;

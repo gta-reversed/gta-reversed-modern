@@ -287,7 +287,6 @@
 #include "game_sa\TxdDef.h"
 #include "game_sa\GameLogic.h"
 #include "game_sa\Maths.h"
-#include "game_sa\TagManager.h"
 #include "game_sa\Remote.h"
 #include "game_sa\Animation\AnimAssociationData.h"
 #include "game_sa\Animation\AnimBlendFrameData.h"

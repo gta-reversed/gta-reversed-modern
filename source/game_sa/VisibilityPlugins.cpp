@@ -458,9 +458,9 @@ RpAtomic* CVisibilityPlugins::RenderAtomicWithAlphaCB(RpAtomic* atomic, void* da
 }
 
 void CVisibilityPlugins::RenderBoatAlphaAtomics() {
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
     RenderOrderedList(m_alphaBoatAtomicList);
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+    RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
 }
 
 // 0x732B40
@@ -470,21 +470,21 @@ void CVisibilityPlugins::RenderEntity(CEntity* entity, int32 unused, float dista
     
     CBaseModelInfo* mi = CModelInfo::GetModelInfo(entity->m_nModelIndex);
     if (mi->bDontWriteZBuffer)
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, 0);
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(FALSE));
 
     if (!entity->m_bDistanceFade) {
         if (CGame::currArea || mi->bDontWriteZBuffer)
-            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)0);
+            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(0));
         else
-            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)100u);
+            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(100u));
         CRenderer::RenderOneNonRoad(entity);
     }
     else {
-        RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)0);
+        RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(0));
         int32 alpha = CalculateFadingAtomicAlpha(mi, entity, distance);
         entity->m_bImBeingRendered = true;
         if (!entity->m_bBackfaceCulled)
-            RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+            RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
         bool bLightingSetup = entity->SetupLighting();
         if (RwObjectGetType(entity->m_pRwObject) == rpATOMIC)
             RenderFadingAtomic(mi, entity->m_pRwAtomic, alpha);
@@ -493,27 +493,27 @@ void CVisibilityPlugins::RenderEntity(CEntity* entity, int32 unused, float dista
         entity->RemoveLighting(bLightingSetup);
         entity->m_bImBeingRendered = false;
         if (!entity->m_bBackfaceCulled)
-            RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+            RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
     }
     
     if (mi->bDontWriteZBuffer)
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
 }
 
 void CVisibilityPlugins::RenderFadingAtomic(CBaseModelInfo* modelInfo, RpAtomic* atomic, int32 alpha) {
     if (modelInfo->bAdditiveRender)
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDONE));
     RenderAlphaAtomic(atomic, alpha);
     if (modelInfo->bAdditiveRender)
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
 }
 
 void CVisibilityPlugins::RenderFadingClump(CBaseModelInfo* modelInfo, RpClump* clump, int32 alpha) {
     if (modelInfo->bAdditiveRender)
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDONE));
     RpClumpForAllAtomics(clump, RenderAtomicWithAlphaCB, &alpha);
     if (modelInfo->bAdditiveRender)
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
 }
 
 RpAtomic* CVisibilityPlugins::RenderFadingClumpCB(RpAtomic* atomic) {
@@ -618,18 +618,18 @@ RpAtomic* CVisibilityPlugins::RenderPlayerCB(RpAtomic* atomic) {
 }
 
 void CVisibilityPlugins::RenderReallyDrawLastObjects() {
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, 0);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(rwCULLMODECULLNONE));
     SetAmbientColours();
     DeActivateDirectional();
     RenderOrderedList(m_alphaReallyDrawLastList);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, FALSE);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
 }
 
 RpAtomic* CVisibilityPlugins::RenderTrainHiDetailAlphaCB(RpAtomic* atomic) {
@@ -876,12 +876,12 @@ RpAtomic* CVisibilityPlugins::RenderWeaponCB(RpAtomic* atomic) {
 }
 
 void CVisibilityPlugins::RenderWeaponPedsForPC() {
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)20);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,            RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,             RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,            RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(20));
     auto link = ms_weaponPedsForPC.usedListTail.prev;
     for (; link != &ms_weaponPedsForPC.usedListHead; link = link->prev) {
         CPed* ped = link->data;

@@ -856,11 +856,11 @@ void CBoat::Render_Reversed()
         return;
     }
 
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, CWaterLevel::waterclear256Raster);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDZERO);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,    RWRSTATE(CWaterLevel::waterclear256Raster));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,        RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,         RWRSTATE(rwBLENDZERO));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,        RWRSTATE(rwBLENDONE));
 
     RwMatrix tempMat;
     GetMatrix().UpdateRwMatrix(&tempMat);
@@ -883,9 +883,9 @@ void CBoat::Render_Reversed()
         }
     }
 
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
 }
 
 void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum)

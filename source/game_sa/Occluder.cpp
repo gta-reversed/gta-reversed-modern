@@ -21,7 +21,7 @@ bool COccluder::ProcessOneOccluder(CActiveOccluder* activeOccluder)
         return false;
 
     auto fMagnitude = (CVector(m_wWidth, m_wLength, m_wHeight)  / 4.0F ).Magnitude();
-    activeOccluder->m_wDepth = COcclusion::gCenterOnScreen.z - fMagnitude;
+    activeOccluder->m_wDepth = static_cast<uint16>(COcclusion::gCenterOnScreen.z - fMagnitude);
 
     auto matRotX = CMatrix();
     auto matRotY = CMatrix();

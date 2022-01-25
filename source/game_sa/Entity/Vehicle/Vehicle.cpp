@@ -2641,16 +2641,16 @@ void CVehicle::DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2)
     const CVector pointToCamDir = Normalized(TheCamera.GetPosition() - point);
     const auto    alpha = (uint8)((1.0f - fabs(DotProduct(pointToCamDir, matrix.GetForward()))) * 32.0f);
 
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,    (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,             (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,            (void*)rwBLENDONE);
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,            (void*)rwSHADEMODEGOURAUD);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,        (void*)NULL);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,             (void*)rwCULLMODECULLNONE);
-    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    (void*)rwALPHATESTFUNCTIONGREATER);
-    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,    RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,             RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,            RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,            RWRSTATE(rwSHADEMODEGOURAUD));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,        RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,             RWRSTATE(rwCULLMODECULLNONE));
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    RWRSTATE(rwALPHATESTFUNCTIONGREATER));
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(FALSE));
 
     const float   angleMult   = ModelIndices::IsForklift((int32)m_nModelIndex) ? 0.5f : 0.15f;
     const CVector lightNormal = Normalized(matrix.GetForward() - matrix.GetUp() * angleMult);
@@ -2680,13 +2680,13 @@ void CVehicle::DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2)
         RwIm3DEnd();
     }
 
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,         (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,          (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,           (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,              (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,             (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,     (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,              (void*)rwCULLMODECULLBACK);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,          RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,           RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,              RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,             RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,     RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,              RWRSTATE(rwCULLMODECULLBACK));
 }
 
 // 0x6E1440

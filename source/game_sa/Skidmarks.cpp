@@ -59,20 +59,20 @@ void CSkidmarks::Update() {
 
 // 0x720640
 void CSkidmarks::Render() {
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)RwTextureGetRaster(m_pTexture));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(RwTextureGetRaster(m_pTexture)));
 
     for (CSkidmark& mark : m_aSkidmarks) {
         mark.Render();
     }
 
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
 }
 
 // 0x720930

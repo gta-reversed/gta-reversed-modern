@@ -318,7 +318,7 @@ RpAtomic* CCustomRoadsignMgr::RenderRoadsignAtomic(RpAtomic* pAtomic, CVector co
         return pAtomic;
     }
 
-    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)100u);
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(100u));
     CCustomRoadsignMgr::SetAtomicAlpha(pAtomic, 255u);
     RpAtomicRender(pAtomic);
     return pAtomic;

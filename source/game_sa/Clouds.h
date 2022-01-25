@@ -8,16 +8,16 @@
 
 #include "Vector.h"
 
-#define MAX_MOVING_FOG 350
-#define MAX_VOLUMETRIC_CLOUDS 180
+constexpr auto MAX_MOVING_FOG = 350;
+constexpr auto MAX_VOLUMETRIC_CLOUDS = 180;
 
-#define SKYP_WIDTH_MULT 1.4f
-#define SKYP_CAM_DIST 30.f
+constexpr auto SKYP_WIDTH_MULT = 1.4f;
+constexpr auto SKYP_CAM_DIST = 30.f;
 
-#define SKYP_ABOVE_HORIZON_Z 0.5f
-#define SKYP_HORIZON_Z 0.0f
-#define SKYP_SEA_HORIZON_Z -0.1f
-#define SKYP_BELOW_HORIZON_Z -0.3f
+constexpr auto SKYP_ABOVE_HORIZON_Z = 0.5f;
+constexpr auto SKYP_HORIZON_Z = 0.0f;
+constexpr auto SKYP_SEA_HORIZON_Z = -0.1f;
+constexpr auto SKYP_BELOW_HORIZON_Z = -0.3f;
 
 struct tMovingFog {
     bool    m_bFogSlots[MAX_MOVING_FOG];

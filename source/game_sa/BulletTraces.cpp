@@ -147,12 +147,12 @@ void CBulletTraces::AddTrace(CVector* posMuzzle, CVector* posBulletHit, eWeaponT
 // 0x723C10
 void CBulletTraces::Render()
 {
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)RwBlendFunction::rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)RwBlendFunction::rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)RwCullMode::rwCULLMODECULLNONE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)NULL);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(RwBlendFunction::rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(RwBlendFunction::rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(RwCullMode::rwCULLMODECULLNONE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
 
     RxObjSpace3DVertex verts[6];
     for (CBulletTrace& trace : aTraces) {
@@ -195,7 +195,7 @@ void CBulletTraces::Render()
             trace.m_vecEnd - pointOnSurfaceOfRadiusSphere,
         };
 
-        for (auto i = 0; i < std::size(verts); i++) {
+        for (auto i = 0u; i < std::size(verts); i++) {
             const CVector& pos = vertPositions[i];
             RwIm3DVertexSetPos(&verts[i], pos.x, pos.y, pos.z);
         }
@@ -218,8 +218,8 @@ void CBulletTraces::Render()
         }
     }
 
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,     (void*)RwBlendFunction::rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,    (void*)RwBlendFunction::rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,     (void*)RwCullMode::rwCULLMODECULLBACK);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,     RWRSTATE(RwBlendFunction::rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,    RWRSTATE(RwBlendFunction::rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,     RWRSTATE(RwCullMode::rwCULLMODECULLBACK));
 }

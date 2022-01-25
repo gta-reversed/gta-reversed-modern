@@ -1646,7 +1646,7 @@ bool CAutomobile::GetTowHitchPos(CVector& posnOut, bool bCheckModelInfo, CVehicl
 
     posnOut.x = 0.0f;
     posnOut.y = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMax.y - 0.5f;
-    posnOut.z = 0.5 - this->m_fFrontHeightAboveRoad;
+    posnOut.z = 0.5f - this->m_fFrontHeightAboveRoad;
     // todo: MultiplyMatrixWithVector(&posnOut, m_matrix, posnOut);
 
     return true;
@@ -2425,7 +2425,6 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
     {
         CVector wheelFwd;
         CVector wheelRight;
-        CVector tmp;
 
         float sinSteerAngle = 0.0f;
         float cosSteerAngle = 0.0f;

@@ -39,21 +39,21 @@ void CMotionBlurStreaks::Render()
         if (streak.m_nId) {
             if (!bRenderParamsSet) {
                 bRenderParamsSet = true;
-                RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
-                RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-                RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
-                RwRenderStateSet(rwRENDERSTATEFOGCOLOR,          (void*)CTimeCycle::GetCurrentSkyBottomColor().ToIntARGB());
-                RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-                RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-                RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)nullptr);
+                RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+                RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+                RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
+                RwRenderStateSet(rwRENDERSTATEFOGCOLOR,          RWRSTATE(CTimeCycle::GetCurrentSkyBottomColor().ToIntARGB()));
+                RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+                RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+                RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
             }
             streak.Render();
         }
     }
 
     if (bRenderParamsSet) {
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
     }
 }
 

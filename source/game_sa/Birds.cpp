@@ -388,12 +388,12 @@ void CBirds::Render()
     }
 
     if (uiTempBufferVerticesStored) {
-        RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    (void*)rwTEXTUREADDRESSCLAMP);
-        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)gpCloudTex[1]->raster);
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    RWRSTATE(rwTEXTUREADDRESSCLAMP));
+        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(gpCloudTex[1]->raster));
         CBrightLights::RenderOutGeometryBuffer();
     }
 }

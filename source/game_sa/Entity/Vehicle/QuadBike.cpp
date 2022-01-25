@@ -268,10 +268,10 @@ void CQuadBike::ProcessControlInputs(uint8 playerNum) {
         } else {
             m_nLastControlInput = eControllerType::CONTROLLER_MOUSE;
             if (!pad->NewState.m_bVehicleMouseLook) {
-                m_sRideAnimData.dword10 += CPad::NewMouseControllerState.Y * -0.035;
+                m_sRideAnimData.dword10 += CPad::NewMouseControllerState.Y * -0.035f;
             }
             if (pad->NewState.m_bVehicleMouseLook || fabs(m_sRideAnimData.dword10) < 0.35f) {
-                m_sRideAnimData.dword10 *= pow(0.98, CTimer::GetTimeStep());
+                m_sRideAnimData.dword10 *= pow(0.98f, CTimer::GetTimeStep());
             }
         }
     }

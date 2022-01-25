@@ -13,6 +13,7 @@
 #include "CustomBuildingDNPipeline.h"
 #include "Occlusion.h"
 #include "MotionBlurStreaks.h"
+#include "TagManager.h"
 
 void CEntity::InjectHooks()
 {
@@ -523,7 +524,7 @@ void CEntity::PreRender()
 void CEntity::PreRender_Reversed()
 {
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
-    auto atomicInfo = mi->AsAtomicModelInfoPtr();
+    auto ami = mi->AsAtomicModelInfoPtr();
 
     if (mi->m_n2dfxCount)
         ProcessLightsForEntity();
@@ -531,16 +532,16 @@ void CEntity::PreRender_Reversed()
     if (!mi->HasBeenPreRendered()) {
         mi->SetHasBeenPreRendered(true);
 
-        if (atomicInfo && atomicInfo->m_pRwObject) {
-            if (RpMatFXAtomicQueryEffects(atomicInfo->m_pRwAtomic) && RpAtomicGetGeometry(atomicInfo->m_pRwAtomic)) {
-                RpGeometryForAllMaterials(RpAtomicGetGeometry(atomicInfo->m_pRwAtomic), MaterialUpdateUVAnimCB, nullptr);
+        if (ami && ami->m_pRwObject) {
+            if (RpMatFXAtomicQueryEffects(ami->m_pRwAtomic) && RpAtomicGetGeometry(ami->m_pRwAtomic)) {
+                RpGeometryForAllMaterials(RpAtomicGetGeometry(ami->m_pRwAtomic), MaterialUpdateUVAnimCB, nullptr);
             }
         }
 
         mi->IncreaseAlpha();
 
-        if (atomicInfo) {
-            CCustomBuildingDNPipeline::PreRenderUpdate(atomicInfo->m_pRwAtomic, false);
+        if (ami) {
+            CCustomBuildingDNPipeline::PreRenderUpdate(ami->m_pRwAtomic, false);
         }
         else if (mi->GetModelType() == MODEL_INFO_CLUMP) {
             RpClumpForAllAtomics(mi->m_pRwClump, CCustomBuildingDNPipeline::PreRenderUpdateRpAtomicCB, reinterpret_cast<void*>(false));
@@ -550,7 +551,7 @@ void CEntity::PreRender_Reversed()
     if (!m_bHasPreRenderEffects)
         return;
 
-    if (atomicInfo && atomicInfo->SwaysInWind()
+    if (ami && ami->SwaysInWind()
         && (!IsObject() || !static_cast<CObject*>(this)->objectFlags.bIsExploded)) {
 
         auto vecCamPos = CVector2D(TheCamera.GetPosition());
@@ -561,7 +562,7 @@ void CEntity::PreRender_Reversed()
     }
 
     if (IsBuilding()) {
-        if (atomicInfo && atomicInfo->IsCrane())
+        if (ami && ami->IsCrane())
             ModifyMatrixForCrane();
 
         return;
@@ -650,7 +651,7 @@ void CEntity::PreRender_Reversed()
                     15.0F,
                     false,
                     false
-                    );
+                );
             }
         }
         else if (m_nModelIndex == ModelIndices::MI_FLARE) {
@@ -846,8 +847,8 @@ void CEntity::Render_Reversed()
 
     uint32 savedAlphaRef;
     if (m_nModelIndex == ModelIndices::MI_JELLYFISH || m_nModelIndex == ModelIndices::MI_JELLYFISH01) {
-        RwRenderStateGet(rwRENDERSTATEALPHATESTFUNCTIONREF, &savedAlphaRef);
-        RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, 0u);
+        RwRenderStateGet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(&savedAlphaRef));
+        RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(0u));
     }
 
     m_bImBeingRendered = true;
@@ -863,7 +864,7 @@ void CEntity::Render_Reversed()
     m_bImBeingRendered = false;
 
     if (m_nModelIndex == ModelIndices::MI_JELLYFISH || m_nModelIndex == ModelIndices::MI_JELLYFISH01) {
-        RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)savedAlphaRef);
+        RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(savedAlphaRef));
     }
 }
 
