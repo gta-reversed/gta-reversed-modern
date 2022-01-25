@@ -365,8 +365,8 @@ public:
     };
     RwTexture*   m_pCustomCarPlate;
     float        m_fRawSteerAngle;
-    eVehicleType m_nVehicleType;
-    eVehicleType m_nVehicleSubType;
+    eVehicleType m_nVehicleType;    // Theory by forkerer:
+    eVehicleType m_nVehicleSubType; // Hack to have stuff be 2 classes at once, like vortex which can act like a car and a boat
     int16        m_nPreviousRemapTxd;
     int16        m_nRemapTxd;
     RwTexture*   m_pRemapTexture;
@@ -637,7 +637,7 @@ public:
     static void SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha);
 
 public:
-    // m_vehicleType start
+    // m_nVehicleType start
     bool IsVehicleTypeValid()     const { return m_nVehicleType != VEHICLE_TYPE_IGNORE; }
     bool IsAutomobile()           const { return m_nVehicleType == VEHICLE_TYPE_AUTOMOBILE; }
     bool IsMonsterTruck()         const { return m_nVehicleType == VEHICLE_TYPE_MTRUCK; }
@@ -650,9 +650,9 @@ public:
     bool IsBike()                 const { return m_nVehicleType == VEHICLE_TYPE_BIKE; }
     bool IsBMX()                  const { return m_nVehicleType == VEHICLE_TYPE_BMX; }
     bool IsTrailer()              const { return m_nVehicleType == VEHICLE_TYPE_TRAILER; }
-    // m_vehicleType end
+    // m_nVehicleType end
 
-    // m_vehicleSubType start
+    // m_nVehicleSubType start
     bool IsSubVehicleTypeValid() const { return m_nVehicleSubType != VEHICLE_TYPE_IGNORE; }
     bool IsSubAutomobile()       const { return m_nVehicleSubType == VEHICLE_TYPE_AUTOMOBILE; }
     bool IsSubMonsterTruck()     const { return m_nVehicleSubType == VEHICLE_TYPE_MTRUCK; }
@@ -667,7 +667,7 @@ public:
     bool IsSubTrailer()          const { return m_nVehicleSubType == VEHICLE_TYPE_TRAILER; }
 
     bool IsSubRoadVehicle()      const { return !IsSubHeli() && !IsSubPlane() && !IsSubTrain(); }
-    // m_vehicleSubType end
+    // m_nVehicleSubType end
 
     bool IsTransportVehicle()    const { return m_nModelIndex == MODEL_TAXI    || m_nModelIndex == MODEL_CABBIE; }
     bool IsAmphibiousHeli()      const { return m_nModelIndex == MODEL_SEASPAR || m_nModelIndex == MODEL_LEVIATHN; }
