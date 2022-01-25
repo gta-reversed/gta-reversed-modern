@@ -76,6 +76,7 @@ void CFire::ExtinguishWithWater(float fWaterStrength) {
     }
 }
 
+// see 0x539F00 CFireManager::StartFire
 void CFire::Start(CEntity* creator, CVector pos, uint32 nTimeToBurn, uint8 nGens) {
     active = true;
     createdByScript = false;
@@ -95,6 +96,7 @@ void CFire::Start(CEntity* creator, CVector pos, uint32 nTimeToBurn, uint8 nGens
     CreateFxSysForStrength(m_vecPosition, nullptr);
 }
 
+// see 0x53A050 CFireManager::StartFire
 void CFire::Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 nGens) {
     switch (target->m_nType) {
     case eEntityType::ENTITY_TYPE_PED: {
@@ -146,6 +148,7 @@ void CFire::Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 n
     CreateFxSysForStrength(m_vecPosition, nullptr);
 }
 
+// see 0x53A270 CFireManager::StartScriptFire
 void CFire::Start(CVector pos, float fStrength, CEntity* target, uint8 nGens) {
     SetTarget(target);
     SetCreator(nullptr);
@@ -171,7 +174,7 @@ void CFire::Start(CVector pos, float fStrength, CEntity* target, uint8 nGens) {
         }
     }
 
-    CreateFxSysForStrength(target ? pos : target->GetPosition(), nullptr);
+    CreateFxSysForStrength(target ? target->GetPosition() : pos, nullptr);
 }
 
 void CFire::SetTarget(CEntity* target) {
