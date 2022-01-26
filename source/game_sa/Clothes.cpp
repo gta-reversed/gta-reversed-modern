@@ -18,7 +18,7 @@ CPedClothesDesc& PlayerClothes = *(CPedClothesDesc*)0xBC1C78;
 
 void CClothes::InjectHooks() {
     RH_ScopedClass(CClothes);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x5A80D0);
     // RH_ScopedInstall(LoadClothesFile, 0x5A7B30);

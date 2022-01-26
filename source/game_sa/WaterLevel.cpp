@@ -18,7 +18,7 @@ bool& CWaterLevel::m_bWaterFogScript = *(bool*)0x8D37D5;
 void CWaterLevel::InjectHooks()
 {
     RH_ScopedClass(CWaterLevel);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(GetWaterLevel, 0x6EB690);
     RH_ScopedInstall(SyncWater, 0x6E76E0);

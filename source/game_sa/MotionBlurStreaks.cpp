@@ -9,7 +9,7 @@ RxVertexIndex(&CMotionBlurStreaks::aIndices)[NUM_STREAK_INDICES] = *(RxVertexInd
 void CMotionBlurStreaks::InjectHooks()
 {
     RH_ScopedClass(CMotionBlurStreaks);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x721D90);
     RH_ScopedInstall(Update, 0x7240C0);

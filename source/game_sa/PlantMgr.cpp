@@ -18,7 +18,7 @@ RwTexture*& tex_gras07Si = *(RwTexture**)0xC09174;
 
 void CPlantMgr::InjectHooks() {
     RH_ScopedClass(CPlantMgr);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 // Install("CPlantMgr", "", 0x0, &CPlantMgr::);
 }

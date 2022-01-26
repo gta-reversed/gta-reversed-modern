@@ -8,7 +8,7 @@ CSkidmark (&CSkidmarks::m_aSkidmarks)[SKIDMARKS_COUNT] = *reinterpret_cast<CSkid
 
 void CSkidmarks::InjectHooks() {
     RH_ScopedClass(CSkidmarks);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x7204E0);
     RH_ScopedInstall(Shutdown, 0x720570);

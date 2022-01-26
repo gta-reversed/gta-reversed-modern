@@ -5,7 +5,7 @@ CObjectData(&CObjectData::ms_aObjectInfo)[NUM_OBJECT_INFOS] = *(CObjectData(*)[N
 void CObjectData::InjectHooks()
 {
     RH_ScopedClass(CObjectData);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Initialise, 0x5B5360);
     RH_ScopedInstall(SetObjectData, 0x5A2D00);

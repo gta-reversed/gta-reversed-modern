@@ -7,7 +7,7 @@ CBulletTrace (&CBulletTraces::aTraces)[16] = *(CBulletTrace(*)[16])0xC7C748;
 void CBulletTraces::InjectHooks()
 {
     RH_ScopedClass(CBulletTraces);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x721D50);
     RH_ScopedOverloadedInstall(AddTrace, "", 0x723750, void(*)(CVector*, CVector*, float, uint32, uint8));

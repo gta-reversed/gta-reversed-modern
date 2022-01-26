@@ -16,7 +16,7 @@ int32& CMenuManager::nLastMenuPage = *(int32*)0x8CDFF0;
 void CMenuManager::InjectHooks()
 {
     RH_ScopedClass(CMenuManager);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Process, 0x57B440);
     RH_ScopedInstall(ScrollRadioStations, 0x573A00);

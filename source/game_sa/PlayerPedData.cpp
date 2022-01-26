@@ -2,7 +2,7 @@
 
 void CPlayerPedData::InjectHooks() {
     RH_ScopedClass(CPlayerPedData);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Constructor, 0x56F810);
     RH_ScopedInstall(Destructor, 0x571840);

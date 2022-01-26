@@ -27,7 +27,7 @@ float* fReloadAnimSampleFraction = (float*)0x8D612C;
 
 void CWeapon::InjectHooks() {
     RH_ScopedClass(CWeapon);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Constructor, 0x73B430);
     RH_ScopedInstall(Shutdown, 0x73A380);

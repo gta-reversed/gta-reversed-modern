@@ -2,7 +2,7 @@
 
 void CStencilShadowObject::InjectHooks() {
     RH_ScopedClass(CStencilShadowObject);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 //    RH_ScopedInstall(Shutdown, 0x711390);
 //    RH_ScopedInstall(Render, 0x710D50);

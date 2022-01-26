@@ -6,7 +6,7 @@
 void COccluder::InjectHooks()
 {
     RH_ScopedClass(COccluder);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(ProcessOneOccluder, 0x71E5D0);
     RH_ScopedInstall(ProcessLineSegment, 0x71E130);

@@ -11,7 +11,7 @@
 
 void C_PcSave::InjectHooks() {
     RH_ScopedClass(C_PcSave);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     // See note in CGenericGameStorage::InjectHooks as to why all this is unhooked by default
 

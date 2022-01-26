@@ -2,7 +2,7 @@
 
 void CStuckCarCheck::InjectHooks() {
     RH_ScopedClass(CStuckCarCheck);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 //    RH_ScopedInstall(Init, 0x4639E0);
 //    RH_ScopedInstall(AddCarToCheck, 0x465970);

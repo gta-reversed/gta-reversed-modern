@@ -19,7 +19,7 @@ RwIm2DVertex* CSprite2d::maVertices = (RwIm2DVertex*)0xC80468;
 
 void CSprite2d::InjectHooks() {
     RH_ScopedClass(CSprite2d);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Constructor, 0x727230);
     RH_ScopedInstall(Destructor, 0x7281E0);

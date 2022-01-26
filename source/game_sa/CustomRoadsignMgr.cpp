@@ -7,7 +7,7 @@ RwUInt8*& CCustomRoadsignMgr::pCharsetLockedPallete = *(RwUInt8**)0xC3EF8C;
 void CCustomRoadsignMgr::InjectHooks()
 {
     RH_ScopedClass(CCustomRoadsignMgr);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Initialise, 0x6FE120);
     RH_ScopedInstall(Shutdown, 0x6FE180);

@@ -2,7 +2,7 @@
 
 void CRoadBlocks::InjectHooks() {
     RH_ScopedClass(CRoadBlocks);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     // RH_ScopedInstall(Init, 0x461100);
     // RH_ScopedInstall(ClearScriptRoadBlocks, 0x460EC0);

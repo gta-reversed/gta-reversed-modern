@@ -7,7 +7,7 @@
 
 void CCustomBuildingRenderer::InjectHooks() {
     RH_ScopedClass(CCustomBuildingRenderer);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Initialise, 0x5D7EC0);
     RH_ScopedInstall(Shutdown, 0x5D7EE0);

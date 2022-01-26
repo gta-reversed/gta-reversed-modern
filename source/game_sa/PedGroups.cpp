@@ -10,7 +10,7 @@ CPedGroup (&CPedGroups::ms_groups)[8] = *reinterpret_cast<CPedGroup (*)[8]>(0xC0
 
 void CPedGroups::InjectHooks() {
     RH_ScopedClass(CPedGroups);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 
 }

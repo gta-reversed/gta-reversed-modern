@@ -27,7 +27,7 @@ CGarage*& pOldToGarageWeAreIn = *(CGarage**)0x96BFD8;
 void CGarages::InjectHooks()
 {
     RH_ScopedClass(CGarages);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 }
 

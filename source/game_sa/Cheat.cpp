@@ -109,7 +109,7 @@ std::vector<Cheat> cheats = {
 
 void CCheat::InjectHooks() {
     RH_ScopedClass(CCheat);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(AddToCheatString, 0x438480);
     RH_ScopedInstall(HandleSpecialCheats, 0x439A10);

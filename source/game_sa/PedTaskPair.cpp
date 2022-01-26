@@ -3,7 +3,7 @@
 
 void CPedTaskPair::InjectHooks() {
     RH_ScopedClass(CPedTaskPair);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Flush, 0x5E95B0);
 }

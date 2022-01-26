@@ -16,7 +16,7 @@ char (&coronaTexturesAlphaMasks)[260] = *(char (*)[260])0x8D4A58;
 
 void CCoronas::InjectHooks() {
     RH_ScopedClass(CCoronas);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 //    RH_ScopedInstall(Init, 0x6FAA70);
 //    RH_ScopedInstall(Shutdown, 0x6FAB00);

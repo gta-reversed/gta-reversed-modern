@@ -2,7 +2,7 @@
 
 void CPedGeometryAnalyser::InjectHooks() {
     RH_ScopedClass(CPedGeometryAnalyser);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 //    RH_ScopedInstall(CanPedJumpObstacle, 0x0);
 //    RH_ScopedInstall(CanPedJumpObstacle, 0x0);

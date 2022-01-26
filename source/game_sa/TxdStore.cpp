@@ -20,7 +20,7 @@ int32& TexDictionaryLinkPluginOffset = *reinterpret_cast<int32*>(0xC88018);
 
 void CTxdStore::InjectHooks() {
     RH_ScopedClass(CTxdStore);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(PushCurrentTxd, 0x7316A0);
     RH_ScopedInstall(PopCurrentTxd, 0x7316B0);

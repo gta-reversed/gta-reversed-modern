@@ -26,7 +26,7 @@ CZoneInfo* CTheZones::ZoneInfoArray = (CZoneInfo*)0xBA1DF0;
 
 void CTheZones::InjectHooks() {
     RH_ScopedClass(CTheZones);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(ResetZonesRevealed, 0x572110);
     RH_ScopedInstall(GetCurrentZoneLockedOrUnlocked, 0x572130);

@@ -10,7 +10,7 @@ eWeaponType& CDarkel::WeaponType = *reinterpret_cast<eWeaponType*>(0x96A700);
 
 void CDarkel::InjectHooks() {
     RH_ScopedClass(CDarkel);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(FrenzyOnGoing, 0x43D1F0);
     RH_ScopedInstall(Init, 0x43CEB0);

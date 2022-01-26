@@ -8,7 +8,7 @@ bool(&CVehicleRecording::bUseCarAI)[TOTAL_VEHICLE_RECORDS] = *(bool(*)[TOTAL_VEH
 
 void CVehicleRecording::InjectHooks() {
     RH_ScopedClass(CVehicleRecording);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Render, 0x459F70);
 }

@@ -14,7 +14,7 @@ CVector& CCarEnterExit::ms_vecPedChairAnimOffset = *(CVector*)0x0;
 
 void CCarEnterExit::InjectHooks() {
     RH_ScopedClass(CCarEnterExit);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 //    RH_ScopedInstall(AddInCarAnim, 0x0);
 //    RH_ScopedInstall(CarHasDoorToClose, 0x0);

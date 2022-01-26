@@ -32,7 +32,7 @@ CSprite2d* CLoadingScreen::m_aSplashes = (CSprite2d*)0xBAB35C;  // CSprite2d CLo
 
 void CLoadingScreen::InjectHooks() {
     RH_ScopedClass(CLoadingScreen);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedGlobalInstall(LoadingScreen, 0x53DED0);
 }

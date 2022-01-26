@@ -2,7 +2,7 @@
 
 void CSpecialPlateHandler::InjectHooks() {
     RH_ScopedClass(CSpecialPlateHandler);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x6F2D10);
     RH_ScopedInstall(Find, 0x6F2D30);

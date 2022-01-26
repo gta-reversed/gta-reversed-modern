@@ -4,7 +4,7 @@
 
 void CGangs::InjectHooks() {
     RH_ScopedClass(CGangs);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     // RH_ScopedInstall(Initialise, 0x5DE680);
     // RH_ScopedInstall(Load, 0x5D3A90);

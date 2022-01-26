@@ -14,7 +14,7 @@ uint32& CTrafficLights::uiPedLightFlags = *(uint32*)0xA9ADE0;
 void CTrafficLights::InjectHooks()
 {
     RH_ScopedClass(CTrafficLights);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(ShouldCarStopForLight, 0x49D610);
     RH_ScopedInstall(ShouldCarStopForBridge, 0x49D420);

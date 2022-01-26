@@ -13,7 +13,7 @@ bool& CLocalisation::frenchGame = *(bool*)0xB9B7EE;
 
 void CLocalisation::InjectHooks() {
     RH_ScopedClass(CLocalisation);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Initialise, 0x56D180);
     RH_ScopedInstall(SetNormalGame, 0x56D1A0);

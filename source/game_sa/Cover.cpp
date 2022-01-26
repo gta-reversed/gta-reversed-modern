@@ -3,7 +3,7 @@
 void CCover::InjectHooks()
 {
     RH_ScopedClass(CCover);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(ShouldThisBuildingHaveItsCoverPointsCreated, 0x699230);
     RH_ScopedInstall(FindCoverPointsForThisBuilding, 0x699120);

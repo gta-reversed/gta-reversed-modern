@@ -38,7 +38,7 @@ CVector& CGangWars::PointOfAttack = *reinterpret_cast<CVector*>(0x96ABC8);
 
 void CGangWars::InjectHooks() {
     RH_ScopedClass(CGangWars);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     // RH_ScopedInstall(AddKillToProvocation, 0x443950);
     // RH_ScopedInstall(AttackWaveOvercome, 0x445B30);

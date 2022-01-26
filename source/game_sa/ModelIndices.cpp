@@ -171,7 +171,7 @@ namespace ModelIndices {
 
 void ModelIndices::InjectHooks() {
     RH_ScopedNamespace(ModelIndices);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     // TODO: Move functions into ModelIndices namespace
     RH_ScopedGlobalInstall(InitModelIndices, 0x5BCA10);

@@ -2,7 +2,7 @@
 
 void CCustomCarPlateMgr::InjectHooks() {
     RH_ScopedClass(CCustomCarPlateMgr);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 //    RH_ScopedInstall(Initialise, 0x6FD500);
 //    RH_ScopedInstall(Shutdown, 0x6FD720);

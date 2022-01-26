@@ -4,7 +4,7 @@ CStreamingInfo*& CStreamingInfo::ms_pArrayBase = *reinterpret_cast<CStreamingInf
 
 void CStreamingInfo::InjectHooks() {
     RH_ScopedClass(CStreamingInfo);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x407460);
     RH_ScopedInstall(AddToList, 0x407480);

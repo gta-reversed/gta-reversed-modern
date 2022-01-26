@@ -50,7 +50,7 @@ static CSync cdStreamThreadSync;
 void InjectCdStreamHooks()
 {
     RH_ScopedNamespaceName("CdStream");
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedGlobalInstall(CdStreamOpen, 0x4067B0);
     RH_ScopedGlobalInstall(CdStreamSync, 0x406460);

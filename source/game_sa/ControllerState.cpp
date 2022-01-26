@@ -2,7 +2,7 @@
 
 void CControllerState::InjectHooks() {
     RH_ScopedClass(CControllerState);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Clear, 0x53EF80);
     RH_ScopedInstall(CheckForInput, 0x53EFF0);

@@ -107,7 +107,7 @@ RwV3d& CTimeCycle::m_vecDirnLightToSun{ *(RwV3d*)0xB7CB14 };
 
 void CTimeCycle::InjectHooks() {
     RH_ScopedClass(CTimeCycle);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 
 }

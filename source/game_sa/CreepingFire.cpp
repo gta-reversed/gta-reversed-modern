@@ -7,7 +7,7 @@ uint8 (&CCreepingFire::m_aFireStatus)[32][32] = *(uint8(*)[32][32])0xB71B68;
 
 void CCreepingFire::InjectHooks() {
     RH_ScopedClass(CCreepingFire);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(SetReadyToBurn, 0x539CC0);
     RH_ScopedInstall(Update, 0x539CE0);

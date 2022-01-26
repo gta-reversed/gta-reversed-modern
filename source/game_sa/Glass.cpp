@@ -2,7 +2,7 @@
 
 void CGlass::InjectHooks() {
     RH_ScopedClass(CGlass);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 //    RH_ScopedInstall(Init, 0x71A8D0);
 //    RH_ScopedInstall(Update, 0x71B0D0);

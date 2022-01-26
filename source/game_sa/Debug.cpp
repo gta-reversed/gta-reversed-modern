@@ -5,7 +5,7 @@ std::vector<CDebug::tDebugText> CDebug::m_debugStrings;
 void CDebug::InjectHooks()
 {
     RH_ScopedClass(CDebug);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(DebugDisplayTextBuffer, 0x532260);
 }

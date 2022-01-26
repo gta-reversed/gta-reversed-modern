@@ -22,7 +22,7 @@ bool& CPad::bInvertLook4Pad = *(bool*)0xB73402;
 
 void CPad::InjectHooks() {
     RH_ScopedClass(CPad);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     HookInstall(0x541DD0, CPad::UpdatePads); // changes logic of the function and shouldn't be toggled on/off
 

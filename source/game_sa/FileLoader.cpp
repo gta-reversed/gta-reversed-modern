@@ -18,7 +18,7 @@ uint32& gAtomicModelId = *reinterpret_cast<uint32*>(0xB71840);
 
 void CFileLoader::InjectHooks() {
     RH_ScopedClass(CFileLoader);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(AddTexDictionaries, 0x5B3910);
     RH_ScopedInstall(LoadTexDictionary, 0x5B3860);

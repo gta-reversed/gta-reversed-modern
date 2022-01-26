@@ -15,7 +15,7 @@ constexpr const char* aPedTypeNames[PED_TYPES_COUNT] = {
 
 void CPedType::InjectHooks() {
     RH_ScopedClass(CPedType);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Initialise, 0x608E40);
     RH_ScopedInstall(Shutdown, 0x608B00);

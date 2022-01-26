@@ -3,7 +3,7 @@
 
 void CProjectileInfo::InjectHooks() {
     RH_ScopedClass(CProjectileInfo);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 
     // Destructors

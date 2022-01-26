@@ -5,7 +5,7 @@ CVehicleAnimGroup(&CVehicleAnimGroupData::m_vehicleAnimGroups)[NUM_VEH_ANIM_GROU
 void CVehicleAnimGroup::InjectHooks()
 {
     RH_ScopedClass(CVehicleAnimGroup);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(InitAnimGroup, 0x5B9EB0);
     RH_ScopedInstall(CopyAnimGroup, 0x5B9E40);
@@ -232,7 +232,7 @@ CVector CVehicleAnimGroup::ComputeAnimDoorOffsets(eVehAnimDoorOffset doorId)
 void CVehicleAnimGroupData::InjectHooks()
 {
     RH_ScopedClass(CVehicleAnimGroupData);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(GetInOutTimings, 0x645630);
     RH_ScopedInstall(GetGroupForAnim, 0x639FC0);

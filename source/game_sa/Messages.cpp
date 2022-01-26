@@ -2,7 +2,7 @@
 
 void CMessages::InjectHooks() {
     RH_ScopedClass(CMessages);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 //    RH_ScopedInstall(GetStringLength, 0x69DB50);
 //    RH_ScopedInstall(StringCopy, 0x69DB70);
