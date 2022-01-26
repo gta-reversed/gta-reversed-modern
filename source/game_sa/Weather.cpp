@@ -58,7 +58,7 @@ void CWeather::InjectHooks() {
     RH_ScopedInstall(Init, 0x72A480);
     // RH_ScopedInstall(AddRain, 0x72A9A0);
     // RH_ScopedInstall(AddSandStormParticles, 0x72A820);
-    // Install("CWeather", "FindWeatherTypesList", 0x72A520, &CWeather::FindWeatherTypesList, true); // bad
+    // RH_ScopedInstall(FindWeatherTypesList, 0x72A520, true); // bad
     RH_ScopedInstall(ForceWeather, 0x72A4E0);
     RH_ScopedInstall(ForceWeatherNow, 0x72A4F0);
     // RH_ScopedInstall(ForecastWeather, 0x72A590);
@@ -67,7 +67,7 @@ void CWeather::InjectHooks() {
     RH_ScopedInstall(SetWeatherToAppropriateTypeNow, 0x72A790);
     // RH_ScopedInstall(Update, 0x72B850);
     // RH_ScopedInstall(UpdateInTunnelness, 0x72B630);
-    // Install("CWeather", "UpdateWeatherRegion", 0x72A640, &CWeather::UpdateWeatherRegion, true); // bad
+    // RH_ScopedInstall(UpdateWeatherRegion, 0x72A640, true); // bad
     RH_ScopedInstall(IsRainy, 0x4ABF50);
 }
 

@@ -17,24 +17,24 @@ void CGenericGameStorage::InjectHooks() {
 
     using namespace ReversibleHooks;
     RH_ScopedInstall(ReportError, 0x5D08C0);
-    Install("CGenericGameStorage", "DoGameSpecificStuffBeforeSave", 0x618F50, &CGenericGameStorage::DoGameSpecificStuffBeforeSave, true);
-    Install("CGenericGameStorage", "DoGameSpecificStuffAfterSucessLoad", 0x618E90, &CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad, true);
-    Install("CGenericGameStorage", "InitRadioStationPositionList", 0x618E70, &CGenericGameStorage::InitRadioStationPositionList, true);
-    Install("CGenericGameStorage", "GetSavedGameDateAndTime", 0x618D00, &GetSavedGameDateAndTime, true);
-    Install("CGenericGameStorage", "GenericLoad", 0x5D17B0, &CGenericGameStorage::GenericLoad, true);
-    Install("CGenericGameStorage", "GenericSave", 0x5D13E0, &CGenericGameStorage::GenericSave, true);
-    Install("CGenericGameStorage", "CheckSlotDataValid", 0x5D1380, &CGenericGameStorage::CheckSlotDataValid, true);
-    Install("CGenericGameStorage", "LoadDataFromWorkBuffer", 0x5D1300, &CGenericGameStorage::LoadDataFromWorkBuffer, true);
-    Install("CGenericGameStorage", "SaveDataToWorkBuffer", 0x5D1270, &CGenericGameStorage::SaveDataToWorkBuffer, true);
-    Install("CGenericGameStorage", "LoadWorkBuffer", 0x5D10B0, &CGenericGameStorage::LoadWorkBuffer, true);
-    Install("CGenericGameStorage", "SaveWorkBuffer", 0x5D0F80, &CGenericGameStorage::SaveWorkBuffer, true);
-    Install("CGenericGameStorage", "GetCurrentVersionNumber", 0x5D0F50, &CGenericGameStorage::GetCurrentVersionNumber, true);
-    Install("CGenericGameStorage", "MakeValidSaveName", 0x5D0E90, &CGenericGameStorage::MakeValidSaveName, true);
-    Install("CGenericGameStorage", "CloseFile", 0x5D0E30, &CGenericGameStorage::CloseFile, true);
-    Install("CGenericGameStorage", "OpenFileForWriting", 0x5D0DD0, &CGenericGameStorage::OpenFileForWriting, true);
-    Install("CGenericGameStorage", "OpenFileForReading", 0x5D0D20, &CGenericGameStorage::OpenFileForReading, true);
-    Install("CGenericGameStorage", "CheckDataNotCorrupt", 0x5D1170, &CGenericGameStorage::CheckDataNotCorrupt, true);
-    Install("CGenericGameStorage", "RestoreForStartLoad", 0x619000, &CGenericGameStorage::RestoreForStartLoad, true);
+    RH_ScopedInstall(DoGameSpecificStuffBeforeSave, 0x618F50, true);
+    RH_ScopedInstall(DoGameSpecificStuffAfterSucessLoad, 0x618E90, true);
+    RH_ScopedInstall(InitRadioStationPositionList, 0x618E70, true);
+    RH_ScopedInstall(GetSavedGameDateAndTime, 0x618D00, true);
+    RH_ScopedInstall(GenericLoad, 0x5D17B0, true);
+    RH_ScopedInstall(GenericSave, 0x5D13E0, true);
+    RH_ScopedInstall(CheckSlotDataValid, 0x5D1380, true);
+    RH_ScopedInstall(LoadDataFromWorkBuffer, 0x5D1300, true);
+    RH_ScopedInstall(SaveDataToWorkBuffer, 0x5D1270, true);
+    RH_ScopedInstall(LoadWorkBuffer, 0x5D10B0, true);
+    RH_ScopedInstall(SaveWorkBuffer, 0x5D0F80, true);
+    RH_ScopedInstall(GetCurrentVersionNumber, 0x5D0F50, true);
+    RH_ScopedInstall(MakeValidSaveName, 0x5D0E90, true);
+    RH_ScopedInstall(CloseFile, 0x5D0E30, true);
+    RH_ScopedInstall(OpenFileForWriting, 0x5D0DD0, true);
+    RH_ScopedInstall(OpenFileForReading, 0x5D0D20, true);
+    RH_ScopedInstall(CheckDataNotCorrupt, 0x5D1170, true);
+    RH_ScopedInstall(RestoreForStartLoad, 0x619000, true);
 }
 
 // 0x5D08C0

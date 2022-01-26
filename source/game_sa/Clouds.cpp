@@ -39,7 +39,7 @@ void CClouds::InjectHooks() {
     RH_ScopedInstall(MovingFog_GetFXIntensity, 0x7136D0);
     RH_ScopedInstall(MovingFog_GetWind, 0x7136E0);
     RH_ScopedInstall(MovingFog_GetFirstFreeSlot, 0x713710);
-    Install("CClouds", "MovingFogRender", 0x716C90, &CClouds::MovingFogRender, true);
+    RH_ScopedInstall(MovingFogRender, 0x716C90, true);
     //    RH_ScopedInstall(Render, 0x713950);
     RH_ScopedInstall(RenderSkyPolys, 0x714650);
     //    RH_ScopedInstall(RenderBottomFromHeight, 0x7154B0);
