@@ -5,20 +5,11 @@
 #include <imgui_stdlib.h>
 #include <TristateCheckbox.h>
 #include <string>
+#include <ranges>
+#include "Utility.h"
 
 namespace rng = std::ranges;
 using namespace ImGui;
-
-// https://stackoverflow.com/a/19839371
-// TODO: When #85 is merged remove this
-bool findStringCaseInsensitive(const std::string& strHaystack, const std::string& strNeedle) {
-    auto it = std::search(
-        strHaystack.begin(), strHaystack.end(),
-        strNeedle.begin(), strNeedle.end(),
-        [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
-    );
-    return (it != strHaystack.end());
-}
 
 namespace HooksDebugModule {
 void ProcessImGui() {
