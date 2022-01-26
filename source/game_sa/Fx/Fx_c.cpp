@@ -21,7 +21,7 @@ void Fx_c::InjectHooks() {
 
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x49E620);
-    // Install("Fx_c", "~Fx_c", 0x49E630, &Fx_c::Destructor);
+    // RH_ScopedInstall(Destructor, 0x49E630);
     RH_ScopedInstall(InitStaticSystems, 0x49E660);
     RH_ScopedInstall(ExitStaticSystems, 0x49E850);
     RH_ScopedInstall(InitEntitySystems, 0x49EA60);

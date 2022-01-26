@@ -1107,7 +1107,7 @@ void CTaskSimplePlayerOnFoot::InjectHooks() {
     RH_ScopedCategory("Task/TaskTypes");
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x685750);
-    Install("CTaskSimplePlayerOnFoot", "~CTaskSimplePlayerOnFoot", 0x6857D0, &CTaskSimplePlayerOnFoot::Destructor);
+    RH_ScopedInstall(Destructor, 0x6857D0);
     RH_ScopedInstall(ProcessPed_Reversed, 0x688810);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x6857E0);
     // RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0);

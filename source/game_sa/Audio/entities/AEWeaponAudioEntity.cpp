@@ -259,7 +259,7 @@ void CAEWeaponAudioEntity::InjectHooks() {
 
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x5DE990);
-    // Install("CAEWeaponAudioEntity", "~CAEWeaponAudioEntity", 0x507560, &CAEWeaponAudioEntity::Destructor);
+    // RH_ScopedInstall(Destructor, 0x507560);
     RH_ScopedInstall(Initialise, 0x503450);
     RH_ScopedInstall(Reset, 0x503490);
     // RH_ScopedInstall(Terminate, 0x503480);

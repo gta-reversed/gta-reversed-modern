@@ -57,7 +57,7 @@ void CAEWeatherAudioEntity::InjectHooks() {
 
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x72A620);
-    Install("CAEWeatherAudioEntity", "~CAEWeatherAudioEntity", 0x72A400, &CAEWeatherAudioEntity::Destructor);
+    RH_ScopedInstall(Destructor, 0x72A400);
     RH_ScopedInstall(StaticInitialise, 0x5B9A70);
     RH_ScopedInstall(StaticReset, 0x5052B0);
     // RH_ScopedInstall(AddAudioEvent, 0x506800);

@@ -288,7 +288,7 @@ void CAEWMADecoder::InjectHooks() {
     RH_ScopedCategory("Audio/Loaders");
 
     RH_ScopedInstall(Constructor, 0x502720);
-    Install("CAEWMADecoder", "~CAEWMADecoder", 0x502760, &CAEWMADecoder::Destructor);
+    RH_ScopedInstall(Destructor, 0x502760);
     RH_ScopedInstall(Initialise, 0x502c60);
     RH_ScopedInstall(InitLibrary, 0x502b80);
     RH_ScopedInstall(FillBuffer, 0x5027d0);

@@ -13,41 +13,41 @@
 
 // Set scoped namespace name (This only works if you only use `ScopedGlobal` macros)
 #define RH_ScopedNamespaceName(name) \
-    ReversibleHooks::ScopedNamespace RHCurrentNSName {#name};
+    ReversibleHooks::ScopeName RHCurrentScopeName {#name};
 
 // Use when `name` is a class
 #define RH_ScopedClass(name) \
     using RHCurrentNS = name; \
-    ReversibleHooks::ScopedNamespace RHCurrentNSName {#name};
+    ReversibleHooks::ScopeName RHCurrentScopeName {#name};
 
 // Use when `name` is a namespace
 #define RH_ScopedNamespace(name) \
     namespace RHCurrentNS = name; \
-    ReversibleHooks::ScopedNamespace RHCurrentNSName {#name};
+    ReversibleHooks::ScopeName RHCurrentScopeName {#name};
 
 // Supports nested categories separeted by `/`. Eg.: `Entities/Ped`
 #define RH_ScopedCategory(name) \
-    ReversibleHooks::ScopedCategory  RHNamedCat{name};
+    ReversibleHooks::ScopeCategory  RhCurrentCat{name};
 
 #define RH_RootCategoryName "Root"
-#define RH_ScopedCategoryGlobal() \
-    ReversibleHooks::ScopedCategory  RHNamedCat{ RH_RootCategoryName };
+#define RH_ScopedCategoryRoot() \
+    ReversibleHooks::ScopeCategory  RhCurrentCat{ RH_RootCategoryName };
 
 // Install a hook living in the current scoped class/namespace
 #define RH_ScopedInstall(fn, fnAddr, ...); \
-    ReversibleHooks::Install(RHCurrentNSName.name, #fn, fnAddr, &RHCurrentNS::fn, __VA_ARGS__)
+    ReversibleHooks::Install(RHCurrentScopeName.name, #fn, fnAddr, &RHCurrentNS::fn, __VA_ARGS__)
 
 // Install a hook on a global function
 #define RH_ScopedGlobalInstall(fn, fnAddr, ...) \
-    ReversibleHooks::Install(RHCurrentNSName.name, #fn, fnAddr, &fn, __VA_ARGS__)
+    ReversibleHooks::Install(RHCurrentScopeName.name, #fn, fnAddr, &fn, __VA_ARGS__)
 
 // Tip: If a member function is const just add the `const` keyword after the function arg list;
 // Eg.: `void(CRect::*)(float*, float*) const` (Notice the const at the end) (See function `CRect::GetCenter`)
 #define RH_ScopedOverloadedInstall(fn, suffix, fnAddr, addrCast, ...) \
-    ReversibleHooks::Install(RHCurrentNSName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&RHCurrentNS::fn), __VA_ARGS__)
+    ReversibleHooks::Install(RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&RHCurrentNS::fn), __VA_ARGS__)
 
 #define RH_ScopedGlobalOverloadedInstall(fn, suffix, fnAddr, addrCast, ...) \
-    ReversibleHooks::Install(RHCurrentNSName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&fn), __VA_ARGS__)
+    ReversibleHooks::Install(RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&fn), __VA_ARGS__)
 
 enum class eReversibleHookType {
     Simple,
@@ -113,6 +113,23 @@ struct SVirtualReversibleHook : SReversibleHook {
 };
 
 namespace ReversibleHooks {
+    struct ScopeName {
+        std::string name{};
+    };
+    
+    struct ScopeCategory {
+        std::string m_name{};
+
+        auto GetRootCategories() {
+
+        }
+    };
+
+
+    /*struct ScopeName {
+        std::s
+    };*/
+
     namespace detail {
         void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, bool bDisableByDefault = false);
         void HookInstallVirtual(const std::string& sIdentifier, const std::string& sFuncName, void* libVTableAddress, const std::vector<uint32>& vecAddressesToHook);

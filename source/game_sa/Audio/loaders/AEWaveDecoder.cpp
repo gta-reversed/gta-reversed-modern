@@ -139,7 +139,7 @@ void CAEWaveDecoder::InjectHooks() {
 
 #ifndef USE_DEFAULT_FUNCTIONS
     RH_ScopedInstall(Constructor, 0x503250);
-    Install("CAEWaveDecoder", "~CAEWaveDecoder", 0x503290, &CAEWaveDecoder::Destructor);
+    RH_ScopedInstall(Destructor, 0x503290);
     RH_ScopedInstall(Initialise, 0x5032b0);
     RH_ScopedInstall(FillBuffer, 0x502470);
     RH_ScopedInstall(GetStreamLengthMs, 0x503310);

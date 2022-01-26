@@ -141,7 +141,7 @@ void CTaskSimpleDie::InjectHooks() {
     RH_ScopedOverloadedInstall(Constructor, "1", 0x62FA00, CTaskSimpleDie*(CTaskSimpleDie::*)(AssocGroupId, AnimationId, float, float));
     RH_ScopedOverloadedInstall(Constructor, "2", 0x62FA60, CTaskSimpleDie*(CTaskSimpleDie::*)(const char*, const char*, eAnimationFlags, float, float));
     RH_ScopedOverloadedInstall(Constructor, "3", 0x62FAF0, CTaskSimpleDie*(CTaskSimpleDie::*)(CAnimBlendHierarchy *, eAnimationFlags, float, float));
-    Install("CTaskSimpleDie", "~CTaskSimpleDie", 0x62FB40, &CTaskSimpleDie::Destructor);
+    RH_ScopedInstall(Destructor, 0x62FB40);
     RH_ScopedInstall(FinishAnimDieCB, 0x62FC10);
     RH_ScopedInstall(StartAnim, 0x637520);
     RH_ScopedOverloadedInstall(Clone_Reversed, "", 0x635DA0,  CTask *(CTaskSimpleDie::*)());

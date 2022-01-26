@@ -14,7 +14,7 @@ void CTaskManager::InjectHooks() {
     RH_ScopedCategory("Tasks");
 
     RH_ScopedInstall(Constructor, 0x6816A0);
-    Install("CTaskManager", "~CTaskManager", 0x6816D0, &CTaskManager::Destructor);
+    RH_ScopedInstall(Destructor, 0x6816D0);
     RH_ScopedInstall(GetActiveTask, 0x681720);
     RH_ScopedInstall(FindActiveTaskByType, 0x681740);
     RH_ScopedInstall(FindTaskByType, 0x6817D0);

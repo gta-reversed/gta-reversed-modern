@@ -8,7 +8,7 @@ void CPedAttractor::InjectHooks() {
 
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x5EDFB0);
-    // Install("CPedAttractor", "~CPedAttractor", 0x5EC410, &CPedAttractor::Destructor);
+    // RH_ScopedInstall(Destructor, 0x5EC410);
     // RH_ScopedInstall(SetTaskForPed, 0x5EECA0);
     // RH_ScopedInstall(RegisterPed, 0x5EEE30);
     // RH_ScopedInstall(DeRegisterPed, 0x5EC5B0);

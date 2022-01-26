@@ -16,7 +16,7 @@ void FxManager_c::InjectHooks() {
 
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x4A9470);
-    // Install("FxSystem_c", "~FxSystem_c", 0x4A90A0, &FxManager_c::Destructor);
+    // RH_ScopedInstall(Destructor, 0x4A90A0);
     // RH_ScopedInstall(Init, 0x4A98E0);
     // RH_ScopedInstall(Exit, 0x4A9A10);
     // RH_ScopedInstall(DestroyFxSystem, 0x4A9810);

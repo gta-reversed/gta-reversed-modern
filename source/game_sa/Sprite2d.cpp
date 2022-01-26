@@ -23,7 +23,7 @@ void CSprite2d::InjectHooks() {
 
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x727230);
-    Install("CSprite2d", "~CSprite2d", 0x7281E0, &CSprite2d::Destructor);
+    RH_ScopedInstall(Destructor, 0x7281E0);
 
     RH_ScopedInstall(Delete, 0x727240);
     RH_ScopedOverloadedInstall(SetTexture, "", 0x727270, void(CSprite2d::*)(const char*));

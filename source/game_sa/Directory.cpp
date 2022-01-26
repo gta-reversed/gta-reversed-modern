@@ -9,7 +9,7 @@ void CDirectory::InjectHooks() {
 
     RH_ScopedOverloadedInstall(Constructor, "Empty", 0x532290, CDirectory*(CDirectory::*)());
     RH_ScopedOverloadedInstall(Constructor, "Capacity", 0x5322A0, CDirectory*(CDirectory::*)(size_t));
-    Install("CDirectory", "~CDirectory", 0x5322D0, &CDirectory::Destructor); 
+    RH_ScopedInstall(Destructor, 0x5322D0); 
     RH_ScopedInstall(Init, 0x5322F0); 
     RH_ScopedInstall(AddItem, 0x532310); 
     RH_ScopedInstall(ReadDirFile, 0x532350); 

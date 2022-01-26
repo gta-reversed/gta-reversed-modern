@@ -210,7 +210,7 @@ void CAEDataStream::InjectHooks() {
     RH_ScopedCategory("Audio/Loaders");
 
     RH_ScopedInstall(Constructor, 0x4dc620);
-    Install("CAEDataStream", "~CAEDataStream", 0x4dc490, &CAEDataStream::Destructor);
+    RH_ScopedInstall(Destructor, 0x4dc490);
     RH_ScopedInstall(Initialise, 0x4dc2b0);
     RH_ScopedInstall(FillBuffer, 0x4dc1c0);
     RH_ScopedInstall(GetCurrentPosition, 0x4dc230);

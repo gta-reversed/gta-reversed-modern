@@ -54,7 +54,7 @@ void CText::InjectHooks() {
     RH_ScopedInstall(Search, 0x6A0000);
 
     RH_ScopedInstall(Constructor, 0x6A00F0);
-    Install("CText", "~CText", 0x6A0140, &CText::Destructor);
+    RH_ScopedInstall(Destructor, 0x6A0140);
     RH_ScopedInstall(Get, 0x6A0050);
     RH_ScopedInstall(GetNameOfLoadedMissionText, 0x69FBD0);
     //    RH_ScopedInstall(ReadChunkHeader, 0x69F940);

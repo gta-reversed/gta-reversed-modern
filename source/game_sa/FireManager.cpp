@@ -10,7 +10,7 @@ void CFireManager::InjectHooks() {
 
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x539DA0);
-    Install("CFireManager", "~CFireManager", 0x538BB0, &CFireManager::Destructor);
+    RH_ScopedInstall(Destructor, 0x538BB0);
     RH_ScopedInstall(Init, 0x538BC0);
     RH_ScopedInstall(Shutdown, 0x539DD0);
     RH_ScopedInstall(GetNumOfNonScriptFires, 0x538F10);

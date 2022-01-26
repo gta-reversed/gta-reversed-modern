@@ -10,7 +10,7 @@ void CAEAudioHardware::InjectHooks() {
 
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x4D83E0);
-    // Install("CAEAudioHardware", "~CAEAudioHardware", 0x4D83A0, &CAEAudioHardware::Destructor);
+    // RH_ScopedInstall(Destructor, 0x4D83A0);
     RH_ScopedInstall(AllocateChannels, 0x5B9340);
     RH_ScopedInstall(RequestVirtualChannelSoundInfo, 0x4D8E60);
     // RH_ScopedInstall(Query3DSoundEffects, 0x4D8490);

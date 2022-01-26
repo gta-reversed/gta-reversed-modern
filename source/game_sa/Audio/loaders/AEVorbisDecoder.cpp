@@ -164,7 +164,7 @@ void CAEVorbisDecoder::InjectHooks() {
     RH_ScopedCategory("Audio/Loaders");
 
     RH_ScopedInstall(Constructor, 0x5026b0);
-    Install("CAEVorbisDecoder", "~CAEVorbisDecoder", 0x5023f0, &CAEVorbisDecoder::Destructor);
+    RH_ScopedInstall(Destructor, 0x5023f0);
     RH_ScopedInstall(Initialise, 0x5024d0);
     RH_ScopedInstall(GetStreamID, 0x502460);
     RH_ScopedInstall(FillBuffer, 0x502470);
