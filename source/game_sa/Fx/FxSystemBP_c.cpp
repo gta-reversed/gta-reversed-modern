@@ -3,6 +3,9 @@
 #include "FxSystemBP_c.h"
 
 void FxSystemBP_c::InjectHooks() {
+    RH_ScopedClass(FxSystemBP_c);
+    RH_ScopedCategory("Fx");
+
     using namespace ReversibleHooks;
     // Install("FxSystemBP_c", "operator new", 0x4AA100, &FxSystemBP_c::operator new);
     // RH_ScopedInstall(Constructor, 0x4AA0D0);

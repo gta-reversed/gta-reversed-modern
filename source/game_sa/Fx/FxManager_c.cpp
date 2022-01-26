@@ -11,6 +11,9 @@
 FxManager_c& g_fxMan = *(FxManager_c*)0xA9AE80;
 
 void FxManager_c::InjectHooks() {
+    RH_ScopedClass(FxManager_c);
+    RH_ScopedCategory("Fx");
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x4A9470);
     // Install("FxSystem_c", "~FxSystem_c", 0x4A90A0, &FxManager_c::Destructor);

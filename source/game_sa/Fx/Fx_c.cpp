@@ -16,6 +16,9 @@ static RxObjSpace3DVertex (&TempVertexBuffer)[4] = *(RxObjSpace3DVertex (*)[4])0
 Fx_c& g_fx = *(Fx_c*)0xA9AE00;
 
 void Fx_c::InjectHooks() {
+    RH_ScopedClass(Fx_c);
+    RH_ScopedCategory("Fx");
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x49E620);
     // Install("Fx_c", "~Fx_c", 0x49E630, &Fx_c::Destructor);
