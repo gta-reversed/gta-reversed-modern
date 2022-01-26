@@ -7,9 +7,9 @@
 
 void CTaskSimpleHoldEntity::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CTaskSimpleHoldEntity", "Constructor_1", 0x6913A0, static_cast<CTaskSimpleHoldEntity*(CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, AnimationId, AssocGroupId, bool)>(&CTaskSimpleHoldEntity::Constructor));
-    Install("CTaskSimpleHoldEntity", "Constructor_2", 0x691470, static_cast<CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, const char*, const char*, eAnimationFlags)>(&CTaskSimpleHoldEntity::Constructor));
-    Install("CTaskSimpleHoldEntity", "Constructor_3", 0x691550, static_cast<CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, CAnimBlock*, CAnimBlendHierarchy*, eAnimationFlags)>(&CTaskSimpleHoldEntity::Constructor));
+    RH_ScopedOverloadedInstall(Constructor, "1", 0x6913A0, CTaskSimpleHoldEntity*(CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, AnimationId, AssocGroupId, bool));
+    RH_ScopedOverloadedInstall(Constructor, "2", 0x691470, CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, const char*, const char*, eAnimationFlags));
+    RH_ScopedOverloadedInstall(Constructor, "3", 0x691550, CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, CAnimBlock*, CAnimBlendHierarchy*, eAnimationFlags));
     Install("CTaskSimpleHoldEntity", "Clone", 0x6929B0, &CTaskSimpleHoldEntity::Clone_Reversed);
     Install("CTaskSimpleHoldEntity", "GetTaskType", 0x691460, &CTaskSimpleHoldEntity::GetId_Reversed);
     Install("CTaskSimpleHoldEntity", "MakeAbortable", 0x693BD0, &CTaskSimpleHoldEntity::MakeAbortable_Reversed);

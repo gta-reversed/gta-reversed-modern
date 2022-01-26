@@ -80,8 +80,8 @@ void CVehicleModelInfo::InjectHooks()
     Install("CVehicleModelInfo", "MoveObjectsCB", 0x4C7700, &CVehicleModelInfo::MoveObjectsCB);
     Install("CVehicleModelInfo", "ResetEditableMaterials", 0x4C8460, &CVehicleModelInfo::ResetEditableMaterials);
     Install("CVehicleModelInfo", "SetEditableMaterials", 0x4C8430, &CVehicleModelInfo::SetEditableMaterials);
-    Install("CVehicleModelInfo", "SetEditableMaterialsCB_RpMaterial", 0x4C8220, static_cast<RpMaterial*(*)(RpMaterial*, void*)>(&CVehicleModelInfo::SetEditableMaterialsCB));
-    Install("CVehicleModelInfo", "SetEditableMaterialsCB_RpAtomic", 0x4C83E0, static_cast<RpAtomic * (*)(RpAtomic*, void*)>(&CVehicleModelInfo::SetEditableMaterialsCB));
+    RH_ScopedOverloadedInstall(SetEditableMaterialsCB, "RpMaterial", 0x4C8220, RpMaterial*(*)(RpMaterial*, void*));
+    RH_ScopedOverloadedInstall(SetEditableMaterialsCB, "RpAtomic", 0x4C83E0, RpAtomic * (*)(RpAtomic*, void*));
     Install("CVehicleModelInfo", "StoreAtomicUsedMaterialsCB", 0x4C8B60, &CVehicleModelInfo::StoreAtomicUsedMaterialsCB);
     Install("CVehicleModelInfo", "HideDamagedAtomicCB", 0x4C7720, &CVehicleModelInfo::HideDamagedAtomicCB);
     Install("CVehicleModelInfo", "HideAllComponentsAtomicCB", 0x4C7790, &CVehicleModelInfo::HideAllComponentsAtomicCB);

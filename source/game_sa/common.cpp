@@ -112,8 +112,8 @@ void InjectCommonHooks()
     Install("common", "ReSetAmbientAndDirectionalColours", 0x735C40, &ReSetAmbientAndDirectionalColours);
     Install("common", "DeActivateDirectional", 0x735C70, &DeActivateDirectional);
     Install("common", "ActivateDirectional", 0x735C80, &ActivateDirectional);
-    Install("common", "SetAmbientColours_void", 0x735D30, static_cast<void(*)()>(&SetAmbientColours));
-    Install("common", "SetAmbientColours_color", 0x735D50, static_cast<void(*)(RwRGBAReal* color)>(&SetAmbientColours));
+    RH_ScopedOverloadedInstall(SetAmbientColours, "void", 0x735D30, void(*)());
+    RH_ScopedOverloadedInstall(SetAmbientColours, "color", 0x735D50, void(*)(RwRGBAReal* color));
     Install("common", "SetDirectionalColours", 0x735D70, &SetDirectionalColours);
     Install("common", "SetLightColoursForPedsCarsAndObjects", 0x735D90, &SetLightColoursForPedsCarsAndObjects);
     Install("common", "SetLightsForInfraredVisionHeatObjects", 0x735E40, &SetLightsForInfraredVisionHeatObjects);
@@ -124,8 +124,8 @@ void InjectCommonHooks()
     Install("common", "GetDayNightBalance", 0x6FAB30, &GetDayNightBalance);
     Install("common", "AsciiToGxtChar", 0x718600, &AsciiToGxtChar);
     Install("common", "WriteRaster", 0x005A4150, &WriteRaster);
-//    Install("common", "CalcScreenCoors_VVff", 0x71DA00, static_cast<bool(*)(CVector const&, CVector*, float*, float*)>(&CalcScreenCoors));
-//    Install("common", "CalcScreenCoors_VV", 0x71DAB0, static_cast<bool(*)(CVector const&, CVector*)>(&CalcScreenCoors));
+//    RH_ScopedOverloadedInstall(CalcScreenCoors, "VVff", 0x71DA00, bool(*)(CVector const&, CVector*, float*, float*));
+//    RH_ScopedOverloadedInstall(CalcScreenCoors, "VV", 0x71DAB0, bool(*)(CVector const&, CVector*));
     Install("common", "LittleTest", 0x541330, &LittleTest);
 
     Install("common", "RemoveRefsCB", 0x7226D0, &RemoveRefsCB);

@@ -13,8 +13,8 @@ void CSprite::InjectHooks() {
     // Install("CSprite", "FlushSpriteBuffer", 0x70CF20, &CSprite::FlushSpriteBuffer);
     // Install("CSprite", "CalcScreenCoors", 0x70CE30, &CSprite::CalcScreenCoors);
     // Install("CSprite", "CalcHorizonCoors", 0x70E3E0, &CSprite::CalcHorizonCoors);
-    // Install("CSprite", "Set4Vertices2D_0", 0x70E1C0, static_cast<void (*)(RwD3D9Vertex*, const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(CSprite::Set4Vertices2D));
-    // Install("CSprite", "Set4Vertices2D_1", 0x70E2D0, static_cast<void (*)(RwD3D9Vertex*, float, float, float, float, float, float, float, float, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(CSprite::Set4Vertices2D));
+    // RH_ScopedOverloadedInstall(Set4Vertices2D, "0", 0x70E1C0, void (*)(RwD3D9Vertex*, const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&));
+    // RH_ScopedOverloadedInstall(Set4Vertices2D, "1", 0x70E2D0, void (*)(RwD3D9Vertex*, float, float, float, float, float, float, float, float, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&));
     // Install("CSprite", "RenderOneXLUSprite", 0x70D000, &CSprite::RenderOneXLUSprite);
     // Install("CSprite", "RenderOneXLUSprite_Triangle", 0x70D320, &CSprite::RenderOneXLUSprite_Triangle);
     // Install("CSprite", "RenderOneXLUSprite_Rotate_Aspect", 0x70D490, &CSprite::RenderOneXLUSprite_Rotate_Aspect);

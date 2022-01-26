@@ -421,7 +421,7 @@ void CAEUserRadioTrackManager::InjectHooks() {
     Install("CAEUserRadioTrackManager", "Shutdown", 0x4f2fb0, &CAEUserRadioTrackManager::Shutdown);
     Install("CAEUserRadioTrackManager", "ReadUserTracks", 0x4f2fd0, &CAEUserRadioTrackManager::ReadUserTracks);
     Install("CAEUserRadioTrackManager", "GetTrackPath", 0x4f3050, &CAEUserRadioTrackManager::GetTrackPath);
-    Install("CAEUserRadioTrackManager", "ResolveShortcut", 0x4f30f0, static_cast<char* (CAEUserRadioTrackManager::*)(const char*)>(&CAEUserRadioTrackManager::ResolveShortcut));
+    RH_ScopedOverloadedInstall(ResolveShortcut, "", 0x4f30f0, char* (CAEUserRadioTrackManager::*)(const char*));
     Install("CAEUserRadioTrackManager", "GetAudioFileType", 0x4f31f0, &CAEUserRadioTrackManager::GetAudioFileType);
     Install("CAEUserRadioTrackManager", "SelectUserTrackIndex", 0x4f3250, &CAEUserRadioTrackManager::SelectUserTrackIndex);
     Install("CAEUserRadioTrackManager", "DeleteUserTracksInfo", 0x4f32f0, &CAEUserRadioTrackManager::DeleteUserTracksInfo);

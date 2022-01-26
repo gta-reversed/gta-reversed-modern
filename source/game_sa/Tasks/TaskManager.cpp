@@ -20,8 +20,8 @@ void CTaskManager::InjectHooks() {
     Install("CTaskManager", "Flush", 0x681850, &CTaskManager::Flush);
     Install("CTaskManager", "FlushImmediately", 0x6818A0, &CTaskManager::FlushImmediately);
     Install("CTaskManager", "SetNextSubTask", 0x681920, &CTaskManager::SetNextSubTask);
-    Install("CTaskManager", "GetSimplestTask_task", 0x681970, static_cast<CTaskSimple * (*)(CTask*)>(&CTaskManager::GetSimplestTask));
-    Install("CTaskManager", "GetSimplestTask_tasK_index", 0x681A00, static_cast<CTaskSimple * (CTaskManager::*)(int32)>(&CTaskManager::GetSimplestTask));
+    RH_ScopedOverloadedInstall(GetSimplestTask, "task", 0x681970, CTaskSimple * (*)(CTask*));
+    RH_ScopedOverloadedInstall(GetSimplestTask, "index", 0x681A00, CTaskSimple * (CTaskManager::*)(int32));
     Install("CTaskManager", "StopTimers", 0x6819A0, &CTaskManager::StopTimers);
     Install("CTaskManager", "GetSimplestActiveTask", 0x6819D0, &CTaskManager::GetSimplestActiveTask);
     Install("CTaskManager", "AddSubTasks", 0x681A30, &CTaskManager::AddSubTasks);

@@ -9,8 +9,8 @@ void CAEAudioEnvironment::InjectHooks() {
     Install("CAEAudioEnvironment", "GetDistanceAttenuation", 0x4D7F20, &CAEAudioEnvironment::GetDistanceAttenuation);
     Install("CAEAudioEnvironment", "GetDirectionalMikeAttenuation", 0x4D7F60, &CAEAudioEnvironment::GetDirectionalMikeAttenuation);
     Install("CAEAudioEnvironment", "GetReverbEnvironmentAndDepth", 0x4D8010, &CAEAudioEnvironment::GetReverbEnvironmentAndDepth);
-    Install("CAEAudioEnvironment", "GetPositionRelativeToCamera_vec", 0x4D80B0, static_cast<void(*)(CVector*, CVector*)>(&CAEAudioEnvironment::GetPositionRelativeToCamera));
-    Install("CAEAudioEnvironment", "GetPositionRelativeToCamera_placeable", 0x4D8340, static_cast<void(*)(CVector*, CPlaceable*)>(&CAEAudioEnvironment::GetPositionRelativeToCamera));
+    RH_ScopedOverloadedInstall(GetPositionRelativeToCamera, "vec", 0x4D80B0, void(*)(CVector*, CVector*));
+    RH_ScopedOverloadedInstall(GetPositionRelativeToCamera, "placeable", 0x4D8340, void(*)(CVector*, CPlaceable*));
 }
 
 float CAEAudioEnvironment::GetDopplerRelativeFrequency(float prevDist, float curDist, uint32 prevTime, uint32 curTime, float timeScale) {

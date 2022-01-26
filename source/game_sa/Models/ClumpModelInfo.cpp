@@ -16,7 +16,7 @@ void CClumpModelInfo::InjectHooks()
     Install("CClumpModelInfo", "DeleteRwObject", 0x4C4E70, &CClumpModelInfo::DeleteRwObject_Reversed);
     Install("CClumpModelInfo", "GetRwModelType", 0x4C5730, &CClumpModelInfo::GetRwModelType_Reversed);
     Install("CClumpModelInfo", "CreateInstance_void", 0x4C5140, (RwObject * (CClumpModelInfo::*)())(&CClumpModelInfo::CreateInstance_Reversed));
-    Install("CClumpModelInfo", "CreateInstance_mat", 0x4C5110, static_cast<RwObject * (CClumpModelInfo::*)(RwMatrix*)>(&CClumpModelInfo::CreateInstance_Reversed));
+    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "mat", 0x4C5110, RwObject * (CClumpModelInfo::*)(RwMatrix*));
     Install("CClumpModelInfo", "SetAnimFile", 0x4C5200, &CClumpModelInfo::SetAnimFile_Reversed);
     Install("CClumpModelInfo", "ConvertAnimFileIndex", 0x4C5250, &CClumpModelInfo::ConvertAnimFileIndex_Reversed);
     Install("CClumpModelInfo", "GetAnimFileIndex", 0x4C5740, &CClumpModelInfo::GetAnimFileIndex_Reversed);

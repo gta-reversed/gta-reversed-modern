@@ -24,8 +24,8 @@ void CMatrix::InjectHooks()
     Install("CMatrix", "UpdateRwMatrix", 0x59AD70, &CMatrix::UpdateRwMatrix);
     Install("CMatrix", "SetUnity", 0x59AE70, &CMatrix::SetUnity);
     Install("CMatrix", "ResetOrientation", 0x59AEA0, &CMatrix::ResetOrientation);
-    Install("CMatrix", "SetScale_f", 0x59AED0, static_cast<void(CMatrix::*)(float)>(&CMatrix::SetScale));
-    Install("CMatrix", "SetScale_fff", 0x59AF00, static_cast<void(CMatrix::*)(float, float, float)>(&CMatrix::SetScale));
+    RH_ScopedOverloadedInstall(SetScale, "f", 0x59AED0, void(CMatrix::*)(float));
+    RH_ScopedOverloadedInstall(SetScale, "fff", 0x59AF00, void(CMatrix::*)(float, float, float));
     Install("CMatrix", "SetTranslateOnly", 0x59AF80, &CMatrix::SetTranslateOnly);
     Install("CMatrix", "SetTranslate", 0x59AF40, &CMatrix::SetTranslate);
     Install("CMatrix", "SetRotateXOnly", 0x59AFA0, &CMatrix::SetRotateXOnly);
@@ -34,14 +34,14 @@ void CMatrix::InjectHooks()
     Install("CMatrix", "SetRotateX", 0x59B060, &CMatrix::SetRotateX);
     Install("CMatrix", "SetRotateY", 0x59B0A0, &CMatrix::SetRotateY);
     Install("CMatrix", "SetRotateZ", 0x59B0E0, &CMatrix::SetRotateZ);
-    Install("CMatrix", "SetRotate_xyz", 0x59B120, static_cast<void(CMatrix::*)(float, float, float)>(&CMatrix::SetRotate));
+    RH_ScopedOverloadedInstall(SetRotate, "xyz", 0x59B120, void(CMatrix::*)(float, float, float));
     Install("CMatrix", "RotateX", 0x59B1E0, &CMatrix::RotateX);
     Install("CMatrix", "RotateY", 0x59B2C0, &CMatrix::RotateY);
     Install("CMatrix", "RotateZ", 0x59B390, &CMatrix::RotateZ);
     Install("CMatrix", "Rotate", 0x59B460, &CMatrix::Rotate);
     Install("CMatrix", "Reorthogonalise", 0x59B6A0, &CMatrix::Reorthogonalise);
     Install("CMatrix", "CopyToRwMatrix", 0x59B8B0, &CMatrix::CopyToRwMatrix);
-    Install("CMatrix", "SetRotate_quat", 0x59BBF0, static_cast<void(CMatrix::*)(CQuaternion&)>(&CMatrix::SetRotate));
+    RH_ScopedOverloadedInstall(SetRotate, "quat", 0x59BBF0, void(CMatrix::*)(CQuaternion&));
     Install("CMatrix", "Scale", 0x459350, &CMatrix::Scale);
     Install("CMatrix", "ForceUpVector", 0x59B7E0, &CMatrix::ForceUpVector);
     Install("CMatrix", "ConvertToEulerAngles", 0x59A840, &CMatrix::ConvertToEulerAngles);
@@ -52,8 +52,8 @@ void CMatrix::InjectHooks()
     Install("CMatrix", "operator*_Mat", 0x59BE30, (CMatrix(*)(CMatrix const&, CMatrix const&))(&::operator*));
     Install("CMatrix", "operator*_Vec", 0x59C890, (CVector(*)(CMatrix const&, CVector const&))(&::operator*));
     Install("CMatrix", "operator+", 0x59BFA0, (CMatrix(*)(CMatrix const&, CMatrix const&))(&::operator+));
-    Install("CMatrix", "Invert_1", 0x59B920, static_cast<CMatrix&(*)(CMatrix&, CMatrix&)>(&Invert));
-    Install("CMatrix", "Invert_2", 0x59BDD0, static_cast<CMatrix(*)(CMatrix&)>(&Invert));
+    RH_ScopedOverloadedInstall(Invert, "1", 0x59B920, CMatrix&(*)(CMatrix&, CMatrix&));
+    RH_ScopedOverloadedInstall(Invert, "2", 0x59BDD0, CMatrix(*)(CMatrix&));
 }
 
 CMatrix::CMatrix(CMatrix const& matrix)

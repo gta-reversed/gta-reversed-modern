@@ -15,14 +15,14 @@ void CTagManager::InjectHooks()
     Install("CTagManager", "AddTag", 0x49CC90, &CTagManager::AddTag);
     Install("CTagManager", "FindTagDesc", 0x49CCB0, &CTagManager::FindTagDesc);
     Install("CTagManager", "IsTag", 0x49CCE0, &CTagManager::IsTag);
-    Install("CTagManager", "SetAlpha_RpAtomic", 0x49CD30, static_cast<void(*)(RpAtomic*, uint8)>(&CTagManager::SetAlpha));
-    Install("CTagManager", "GetAlpha_RpAtomic", 0x49CD40, static_cast<uint8(*)(RpAtomic*)>(&CTagManager::GetAlpha));
-    Install("CTagManager", "GetAlpha_Entity", 0x49CF90, static_cast<uint8(*)(CEntity*)>(&CTagManager::GetAlpha));
+    RH_ScopedOverloadedInstall(SetAlpha, "RpAtomic", 0x49CD30, void(*)(RpAtomic*, uint8));
+    RH_ScopedOverloadedInstall(GetAlpha, "RpAtomic", 0x49CD40, uint8(*)(RpAtomic*));
+    RH_ScopedOverloadedInstall(GetAlpha, "Entity", 0x49CF90, uint8(*)(CEntity*));
     Install("CTagManager", "GetPercentageTagged", 0x49CDA0, &CTagManager::GetPercentageTagged);
     Install("CTagManager", "GetPercentageTaggedInArea", 0x49D0B0, &CTagManager::GetPercentageTaggedInArea);
     Install("CTagManager", "UpdateNumTagged", 0x49CDE0, &CTagManager::UpdateNumTagged);
     Install("CTagManager", "SetAlphaInArea", 0x49CFE0, &CTagManager::SetAlphaInArea);
-    Install("CTagManager", "SetAlpha_Entity", 0x49CEC0, static_cast<void(*)(CEntity*, uint8)>(&CTagManager::SetAlpha));
+    RH_ScopedOverloadedInstall(SetAlpha, "Entity", 0x49CEC0, void(*)(CEntity*, uint8));
     Install("CTagManager", "GetNearestTag", 0x49D160, &CTagManager::GetNearestTag);
     Install("CTagManager", "SetupAtomic", 0x49CE10, &CTagManager::SetupAtomic);
     Install("CTagManager", "RenderTagForPC", 0x49CE40, &CTagManager::RenderTagForPC);

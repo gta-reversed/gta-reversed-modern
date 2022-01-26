@@ -27,8 +27,8 @@ void CAudioEngine::InjectHooks() {
     Install("CAudioEngine", "IsAmbienceTrackActive", 0x507210, &CAudioEngine::IsAmbienceTrackActive);
     Install("CAudioEngine", "PauseBeatTrack", 0x507200, &CAudioEngine::PauseBeatTrack);
     Install("CAudioEngine", "RetuneRadio", 0x507E10, &CAudioEngine::RetuneRadio);
-    Install("CAudioEngine", "StartRadio", 0x507DF0, static_cast<void (CAudioEngine::*)(tVehicleAudioSettings*)>(&CAudioEngine::StartRadio));
-    Install("CAudioEngine", "StartRadio_1", 0x507DC0, static_cast<void (CAudioEngine::*)(RadioStationId, int8)>(&CAudioEngine::StartRadio));
+    RH_ScopedOverloadedInstall(StartRadio, "", 0x507DF0, void (CAudioEngine::*)(tVehicleAudioSettings*));
+    RH_ScopedOverloadedInstall(StartRadio, "1", 0x507DC0, void (CAudioEngine::*)(RadioStationId, int8));
     Install("CAudioEngine", "ServiceLoadingTune", 0x5078A0, &CAudioEngine::ServiceLoadingTune);
     Install("CAudioEngine", "ResumeAllSounds", 0x507440, &CAudioEngine::ResumeAllSounds);
     Install("CAudioEngine", "PauseAllSounds", 0x507430, &CAudioEngine::PauseAllSounds);
@@ -77,8 +77,8 @@ void CAudioEngine::InjectHooks() {
     Install("CAudioEngine", "GetBeatInfo", 0x5071B0, &CAudioEngine::GetBeatInfo);
     Install("CAudioEngine", "StopBeatTrack", 0x5071A0, &CAudioEngine::StopBeatTrack);
     Install("CAudioEngine", "PlayPreloadedBeatTrack", 0x507180, &CAudioEngine::PlayPreloadedBeatTrack);
-    Install("CAudioEngine", "ReportWaterSplash_vec", 0x506F10, static_cast<void (CAudioEngine::*)(CVector, float)>(&CAudioEngine::ReportWaterSplash));
-    Install("CAudioEngine", "ReportWaterSplash_phs", 0x506F00, static_cast<void (CAudioEngine::*)(CPhysical*, float, bool)>(&CAudioEngine::ReportWaterSplash));
+    RH_ScopedOverloadedInstall(ReportWaterSplash, "vec", 0x506F10, void (CAudioEngine::*)(CVector, float));
+    RH_ScopedOverloadedInstall(ReportWaterSplash, "phs", 0x506F00, void (CAudioEngine::*)(CPhysical*, float, bool));
     Install("CAudioEngine", "ReportGlassCollisionEvent", 0x506EE0, &CAudioEngine::ReportGlassCollisionEvent);
     Install("CAudioEngine", "ReportObjectDestruction", 0x506ED0, &CAudioEngine::ReportObjectDestruction);
     Install("CAudioEngine", "ReportBulletHit", 0x506EC0, &CAudioEngine::ReportBulletHit);
@@ -86,11 +86,11 @@ void CAudioEngine::InjectHooks() {
     Install("CAudioEngine", "ReportFrontendAudioEvent", 0x506EA0, &CAudioEngine::ReportFrontendAudioEvent);
     Install("CAudioEngine", "ReportWeaponEvent", 0x506F40, &CAudioEngine::ReportWeaponEvent);
     Install("CAudioEngine", "ReportDoorMovement", 0x506F50, &CAudioEngine::ReportDoorMovement);
-    Install("CAudioEngine", "ReportMissionAudioEvent_vec", 0x507340, static_cast<void (CAudioEngine::*)(uint16, CVector&)>(&CAudioEngine::ReportMissionAudioEvent));
-    Install("CAudioEngine", "ReportMissionAudioEvent_obj", 0x507350, static_cast<void (CAudioEngine::*)(uint16, CObject*)>(&CAudioEngine::ReportMissionAudioEvent));
-    Install("CAudioEngine", "ReportMissionAudioEvent_ped", 0x507370, static_cast<void (CAudioEngine::*)(uint16, CPed*)>(&CAudioEngine::ReportMissionAudioEvent));
-    Install("CAudioEngine", "ReportMissionAudioEvent_veh", 0x507390, static_cast<void (CAudioEngine::*)(uint16, CVehicle*)>(&CAudioEngine::ReportMissionAudioEvent));
-    Install("CAudioEngine", "ReportMissionAudioEvent_phs", 0x5073B0, static_cast<void (CAudioEngine::*)(uint16, CPhysical*, float, float)>(&CAudioEngine::ReportMissionAudioEvent));
+    RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "vec", 0x507340, void (CAudioEngine::*)(uint16, CVector&));
+    RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "obj", 0x507350, void (CAudioEngine::*)(uint16, CObject*));
+    RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "ped", 0x507370, void (CAudioEngine::*)(uint16, CPed*));
+    RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "veh", 0x507390, void (CAudioEngine::*)(uint16, CVehicle*));
+    RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "phs", 0x5073B0, void (CAudioEngine::*)(uint16, CPhysical*, float, float));
     Install("CAudioEngine", "IsLoadingTuneActive", 0x506D90, &CAudioEngine::IsLoadingTuneActive);
     Install("CAudioEngine", "PreloadBeatTrack", 0x507F40, &CAudioEngine::PreloadBeatTrack);
     Install("CAudioEngine", "StopCutsceneTrack", 0x507080, &CAudioEngine::StopCutsceneTrack);

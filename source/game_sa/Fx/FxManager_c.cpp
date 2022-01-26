@@ -33,10 +33,10 @@ void FxManager_c::InjectHooks() {
     // Install("FxSystem_c", "FxRwMatrixCreate", 0x4A9440, &FxManager_c::FxRwMatrixCreate);
     Install("FxSystem_c", "FxRwMatrixDestroy", 0x4A9460, &FxManager_c::FxRwMatrixDestroy);
     // Install("FxSystem_c", "ShouldCreate", 0x4A9500, &FxManager_c::ShouldCreate);
-    // Install("FxSystem_c", "CreateFxSystem", 0x4A95C0, static_cast<FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, RwMatrix*, RwMatrix*, bool)>(&FxManager_c::CreateFxSystem));
-    // Install("FxSystem_c", "CreateFxSystem", 0x4A9BB0, static_cast<FxSystem_c* (FxManager_c::*)(const char*, RwMatrix*, RwMatrix*, bool)>(&FxManager_c::CreateFxSystem));
-    // Install("FxSystem_c", "CreateFxSystem", 0x4A96B0, static_cast<FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, RwV3d*, RwMatrix*, bool)>(&FxManager_c::CreateFxSystem));
-    // Install("FxSystem_c", "CreateFxSystem", 0x4A9BE0, static_cast<FxSystem_c* (FxManager_c::*)(const char*, RwV3d*, RwMatrix*, bool)>(&FxManager_c::CreateFxSystem));
+    // RH_ScopedOverloadedInstall(CreateFxSystem, "", 0x4A95C0, FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, RwMatrix*, RwMatrix*, bool));
+    // RH_ScopedOverloadedInstall(CreateFxSystem, "", 0x4A9BB0, FxSystem_c* (FxManager_c::*)(const char*, RwMatrix*, RwMatrix*, bool));
+    // RH_ScopedOverloadedInstall(CreateFxSystem, "", 0x4A96B0, FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, RwV3d*, RwMatrix*, bool));
+    // RH_ScopedOverloadedInstall(CreateFxSystem, "", 0x4A9BE0, FxSystem_c* (FxManager_c::*)(const char*, RwV3d*, RwMatrix*, bool));
 }
 
 // 0x4A9470

@@ -31,8 +31,8 @@ void CModelInfo::InjectHooks()
 
     Install("CModelInfo", "GetModelInfoUInt16", 0x4C59F0, &CModelInfo::GetModelInfoUInt16);
     Install("CModelInfo", "GetModelInfoFromHashKey", 0x4C59B0, &CModelInfo::GetModelInfoFromHashKey);
-    Install("CModelInfo", "GetModelInfo_full", 0x4C5940, static_cast<CBaseModelInfo * (*)(char const*, int32*)>(&CModelInfo::GetModelInfo));
-    Install("CModelInfo", "GetModelInfo_minmax", 0x4C5A20, static_cast<CBaseModelInfo*(*)(char const*, int32, int32)>(&CModelInfo::GetModelInfo));
+    RH_ScopedOverloadedInstall(GetModelInfo, "full", 0x4C5940, CBaseModelInfo * (*)(char const*, int32*));
+    RH_ScopedOverloadedInstall(GetModelInfo, "minmax", 0x4C5A20, CBaseModelInfo*(*)(char const*, int32, int32));
 
     Install("CModelInfo", "AddAtomicModel", 0x4C6620, &CModelInfo::AddAtomicModel);
     Install("CModelInfo", "AddDamageAtomicModel", 0x4C6650, &CModelInfo::AddDamageAtomicModel);

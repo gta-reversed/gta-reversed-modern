@@ -33,7 +33,7 @@ void CWeapon::InjectHooks() {
     Install("CWeapon", "IsType2Handed", 0x73B1E0, &CWeapon::IsType2Handed);
     Install("CWeapon", "IsTypeProjectile", 0x73B210, &CWeapon::IsTypeProjectile);
     Install("CWeapon", "HasWeaponAmmoToBeUsed", 0x73B2A0, &CWeapon::HasWeaponAmmoToBeUsed);
-    Install("CWeapon", "CanBeUsedFor2Player", 0x73B240, static_cast<bool (*)(eWeaponType weaponType)>(&CWeapon::CanBeUsedFor2Player));
+    RH_ScopedOverloadedInstall(CanBeUsedFor2Player, "", 0x73B240, bool (*)(eWeaponType weaponType));
     Install("CWeapon", "InitialiseWeapons", 0x73A300, &CWeapon::InitialiseWeapons);
     Install("CWeapon", "ShutdownWeapons", 0x73A330, &CWeapon::ShutdownWeapons);
     Install("CWeapon", "UpdateWeapons", 0x73A360, &CWeapon::UpdateWeapons);

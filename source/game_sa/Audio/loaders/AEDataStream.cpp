@@ -211,8 +211,8 @@ void CAEDataStream::InjectHooks() {
     Install("CAEDataStream", "Initialise", 0x4dc2b0, &CAEDataStream::Initialise);
     Install("CAEDataStream", "FillBuffer", 0x4dc1c0, &CAEDataStream::FillBuffer);
     Install("CAEDataStream", "GetCurrentPosition", 0x4dc230, &CAEDataStream::GetCurrentPosition);
-    Install("CAEDataStream", "Seek_uint32", 0x4dc250, static_cast<uint32(CAEDataStream::*)(long offset, int32 whence)>(&CAEDataStream::Seek));
-    Install("CAEDataStream", "Seek", 0x4dc340, static_cast<HRESULT(__stdcall CAEDataStream::*)(LARGE_INTEGER, DWORD, ULARGE_INTEGER*)>(&CAEDataStream::Seek));
+    RH_ScopedOverloadedInstall(Seek, "uint32", 0x4dc250, uint32(CAEDataStream::*)(long offset, int32 whence));
+    RH_ScopedOverloadedInstall(Seek, "", 0x4dc340, HRESULT(__stdcall CAEDataStream::*)(LARGE_INTEGER, DWORD, ULARGE_INTEGER*));
     Install("CAEDataStream", "Read", 0x4dc320, &CAEDataStream::Read);
     Install("CAEDataStream", "Stat", 0x4dc3a0, &CAEDataStream::Stat);
     Install("CAEDataStream", "QueryInterface", 0x4dc410, &CAEDataStream::QueryInterface);

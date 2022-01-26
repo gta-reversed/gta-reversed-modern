@@ -84,8 +84,8 @@ void CVehicle::InjectHooks()
     Install("CVehicle", "UpdateLightingFromStoredPolys", 0x6D0CC0, &CVehicle::UpdateLightingFromStoredPolys);
     Install("CVehicle", "CalculateLightingFromCollision", 0x6D0CF0, &CVehicle::CalculateLightingFromCollision);
     Install("CVehicle", "ProcessWheel", 0x6D6C00, &CVehicle::ProcessWheel);
-    Install("CVehicle", "IsDriver_Ped", 0x6D1C40, static_cast<bool(CVehicle::*)(CPed*)>(&CVehicle::IsDriver));
-    Install("CVehicle", "IsDriver_Int", 0x6D1C60, static_cast<bool(CVehicle::*)(int32)>(&CVehicle::IsDriver));
+    RH_ScopedOverloadedInstall(IsDriver, "Ped", 0x6D1C40, bool(CVehicle::*)(CPed*));
+    RH_ScopedOverloadedInstall(IsDriver, "Int", 0x6D1C60, bool(CVehicle::*)(int32));
     Install("CVehicle", "AddExhaustParticles", 0x6DE240, &CVehicle::AddExhaustParticles);
     Install("CVehicle", "ApplyBoatWaterResistance", 0x6D2740, &CVehicle::ApplyBoatWaterResistance);
     Install("CVehicle", "ProcessBoatControl", 0x6DBCE0, &CVehicle::ProcessBoatControl);

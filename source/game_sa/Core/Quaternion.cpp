@@ -14,7 +14,7 @@ CQuaternion::CQuaternion()
 
 void CQuaternion::InjectHooks()
 {
-    Install("CQuaternion", "Get", 0x59C080, static_cast<void(CQuaternion::*)(RwMatrixTag*)>(&CQuaternion::Get));
+    RH_ScopedOverloadedInstall(Get, "", 0x59C080, void(CQuaternion::*)(RwMatrixTag*));
 }
 
 // Quat to matrix

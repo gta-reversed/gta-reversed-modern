@@ -34,8 +34,8 @@ void CPed::InjectHooks() {
     // Install("CPed", "PedIsInvolvedInConversation", 0x43AB90, &CPed::PedIsInvolvedInConversation);
     Install("CPed", "ClearWeapons", 0x5E6320, &CPed::ClearWeapons);
     // Install("CPed", "ClearWeapon", 0x5E62B0, &CPed::ClearWeapon);
-    // Install("CPed", "SetCurrentWeapon", 0x5E6280, static_cast<void(CPed::*)(eWeaponType)>(&CPed::SetCurrentWeapon));
-    // Install("CPed", "SetCurrentWeapon", 0x5E61F0, static_cast<void(CPed::*)(int32)>(&CPed::SetCurrentWeapon));
+    // RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E6280, void(CPed::*)(eWeaponType));
+    // RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E61F0, void(CPed::*)(int32));
     // Install("CPed", "GiveWeapon", 0x5E6080, &CPed::GiveWeapon);
     // Install("CPed", "TakeOffGoggles", 0x5E6010, &CPed::TakeOffGoggles);
     // Install("CPed", "AddWeaponModel", 0x5E5ED0, &CPed::AddWeaponModel);
@@ -78,11 +78,11 @@ void CPed::InjectHooks() {
     // Install("CPed", "GetPedTalking", 0x5EFF50, &CPed::GetPedTalking);
     Install("CPed", "GiveWeaponWhenJoiningGang", 0x5E8BE0, &CPed::GiveWeaponWhenJoiningGang);
     // Install("CPed", "GiveDelayedWeapon", 0x5E89B0, &CPed::GiveDelayedWeapon);
-    Install("CPed", "GetWeaponSkill", 0x5E6580, static_cast<eWeaponSkill(CPed::*)()>(&CPed::GetWeaponSkill));
+    RH_ScopedOverloadedInstall(GetWeaponSkill, "", 0x5E6580, eWeaponSkill(CPed::*)());
     // Install("CPed", "PreRenderAfterTest", 0x5E65A0, &CPed::PreRenderAfterTest);
     // Install("CPed", "SetIdle", 0x5E7980, &CPed::SetIdle);
-    // Install("CPed", "SetLook", 0x5E79B0, static_cast<int32(CPed::*)(float)>(&CPed::SetLook));
-    // Install("CPed", "SetLook", 0x5E7A60, static_cast<int32(CPed::*)(CEntity *)>(&CPed::SetLook));
+    // RH_ScopedOverloadedInstall(SetLook, "", 0x5E79B0, int32(CPed::*)(float));
+    // RH_ScopedOverloadedInstall(SetLook, "", 0x5E7A60, int32(CPed::*)(CEntity *));
     // Install("CPed", "Look", 0x5E7B20, &CPed::Look);
     Install("CPed", "ReplaceWeaponForScriptedCutscene", 0x5E6530, &CPed::ReplaceWeaponForScriptedCutscene);
     Install("CPed", "RemoveWeaponForScriptedCutscene", 0x5E6550, &CPed::RemoveWeaponForScriptedCutscene);
@@ -102,9 +102,9 @@ void CPed::InjectHooks() {
     // Install("CPed", "IsPedShootable", 0x5DEFD0, &CPed::IsPedShootable);
     // Install("CPed", "GetLocalDirection", 0x5DEF60, &CPed::GetLocalDirection);
     // Install("CPed", "ClearAimFlag", 0x5DEF20, &CPed::ClearAimFlag);
-    // Install("CPed", "SetAimFlag", 0x5DEED0, static_cast<int8(CPed::*)(CEntity *)>(&CPed::SetAimFlag));
-    // Install("CPed", "SetLookFlag", 0x5DEE40, static_cast<int8(CPed::*)(CEntity *, bool, bool)>(&CPed::SetLookFlag));
-    // Install("CPed", "SetLookFlag", 0x5DEDC0, static_cast<int8(CPed::*)(float, bool, bool)>(&CPed::SetLookFlag));
+    // RH_ScopedOverloadedInstall(SetAimFlag, "", 0x5DEED0, int8(CPed::*)(CEntity *));
+    // RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEE40, int8(CPed::*)(CEntity *, bool, bool));
+    // RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEDC0, int8(CPed::*)(float, bool, bool));
     // Install("CPed", "CanUseTorsoWhenLooking", 0x5DED90, &CPed::CanUseTorsoWhenLooking);
     // Install("CPed", "PedIsReadyForConversation", 0x43ABA0, &CPed::PedIsReadyForConversation);
     // Install("CPed", "CreateDeadPedMoney", 0x4590F0, &CPed::CreateDeadPedMoney);

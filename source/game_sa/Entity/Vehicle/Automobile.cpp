@@ -55,16 +55,16 @@ void CAutomobile::InjectHooks()
 
     Install("CAutomobile", "GetComponentWorldPosition", 0x6A2210, &CAutomobile::GetComponentWorldPosition_Reversed); 
     Install("CAutomobile", "IsComponentPresent", 0x6A2250, &CAutomobile::IsComponentPresent_Reversed); 
-    Install("CAutomobile", "GetDooorAngleOpenRatio_enum", 0x6A2270, static_cast<float (CAutomobile::*)(eDoors)>(&CAutomobile::GetDooorAngleOpenRatio_Reversed)); 
-    Install("CAutomobile", "GetDooorAngleOpenRatio_uint", 0x6A62C0, static_cast<float (CAutomobile::*)(uint32)>(&CAutomobile::GetDooorAngleOpenRatio_Reversed)); 
-    Install("CAutomobile", "IsDoorReady_enum", 0x6A2290, static_cast<bool (CAutomobile::*)(eDoors)>(&CAutomobile::IsDoorReady_Reversed)); 
-    Install("CAutomobile", "IsDoorReady_uint", 0x6A6350, static_cast<bool (CAutomobile::*)(uint32)>(&CAutomobile::IsDoorReady_Reversed)); 
-    Install("CAutomobile", "IsDoorFullyOpen_enum", 0x6A22D0, static_cast<bool (CAutomobile::*)(eDoors)>(&CAutomobile::IsDoorFullyOpen_Reversed)); 
-    Install("CAutomobile", "IsDoorFullyOpen_uint", 0x6A63E0, static_cast<bool (CAutomobile::*)(uint32)>(&CAutomobile::IsDoorFullyOpen_Reversed)); 
-    Install("CAutomobile", "IsDoorClosed_enum", 0x6A2310, static_cast<bool (CAutomobile::*)(eDoors)>(&CAutomobile::IsDoorClosed_Reversed)); 
-    Install("CAutomobile", "IsDoorClosed_uint", 0x6A6470, static_cast<bool (CAutomobile::*)(uint32)>(&CAutomobile::IsDoorClosed_Reversed)); 
-    Install("CAutomobile", "IsDoorMissing_enum", 0x6A2330, static_cast<bool (CAutomobile::*)(eDoors)>(&CAutomobile::IsDoorMissing_Reversed)); 
-    Install("CAutomobile", "IsDoorMissing_uint", 0x6A6500, static_cast<bool (CAutomobile::*)(uint32)>(&CAutomobile::IsDoorMissing_Reversed)); 
+    RH_ScopedOverloadedInstall(GetDooorAngleOpenRatio_Reversed, "enum", 0x6A2270, float (CAutomobile::*)(eDoors)); 
+    RH_ScopedOverloadedInstall(GetDooorAngleOpenRatio_Reversed, "uint", 0x6A62C0, float (CAutomobile::*)(uint32)); 
+    RH_ScopedOverloadedInstall(IsDoorReady_Reversed, "enum", 0x6A2290, bool (CAutomobile::*)(eDoors)); 
+    RH_ScopedOverloadedInstall(IsDoorReady_Reversed, "uint", 0x6A6350, bool (CAutomobile::*)(uint32)); 
+    RH_ScopedOverloadedInstall(IsDoorFullyOpen_Reversed, "enum", 0x6A22D0, bool (CAutomobile::*)(eDoors)); 
+    RH_ScopedOverloadedInstall(IsDoorFullyOpen_Reversed, "uint", 0x6A63E0, bool (CAutomobile::*)(uint32)); 
+    RH_ScopedOverloadedInstall(IsDoorClosed_Reversed, "enum", 0x6A2310, bool (CAutomobile::*)(eDoors)); 
+    RH_ScopedOverloadedInstall(IsDoorClosed_Reversed, "uint", 0x6A6470, bool (CAutomobile::*)(uint32)); 
+    RH_ScopedOverloadedInstall(IsDoorMissing_Reversed, "enum", 0x6A2330, bool (CAutomobile::*)(eDoors)); 
+    RH_ScopedOverloadedInstall(IsDoorMissing_Reversed, "uint", 0x6A6500, bool (CAutomobile::*)(uint32)); 
     Install("CAutomobile", "IsOpenTopCar", 0x6A2350, &CAutomobile::IsOpenTopCar_Reversed); 
     Install("CAutomobile", "IsRoomForPedToLeaveCar", 0x6A3850, &CAutomobile::IsRoomForPedToLeaveCar_Reversed); 
     Install("CAutomobile", "SetupDamageAfterLoad", 0x6B3E90, &CAutomobile::SetupDamageAfterLoad_Reversed); 

@@ -60,8 +60,8 @@ void CObject::InjectHooks()
     Install("CObject", "ProcessControlLogic", 0x5A29A0, &CObject::ProcessControlLogic);
 
 // STATIC
-    Install("CObject", "Create_intbool", 0x5A1F60, static_cast<CObject*(*)(int32, bool)>(&CObject::Create));
-    Install("CObject", "Create_dummy", 0x5A2070, static_cast<CObject*(*)(CDummyObject*)>(&CObject::Create));
+    RH_ScopedOverloadedInstall(Create, "intbool", 0x5A1F60, CObject*(*)(int32, bool));
+    RH_ScopedOverloadedInstall(Create, "dummy", 0x5A2070, CObject*(*)(CDummyObject*));
     Install("CObject", "SetMatrixForTrainCrossing", 0x59F200, &CObject::SetMatrixForTrainCrossing);
     Install("CObject", "TryToFreeUpTempObjects", 0x5A1840, &CObject::TryToFreeUpTempObjects);
     Install("CObject", "DeleteAllTempObjects", 0x5A18B0, &CObject::DeleteAllTempObjects);

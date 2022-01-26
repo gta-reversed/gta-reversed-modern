@@ -19,7 +19,7 @@ void CEntity::InjectHooks()
 {
 //Virtual
     Install("CEntity", "Add", 0x533020, (void(CEntity::*)())(&CEntity::Add_Reversed));
-    Install("CEntity", "Add_rect", 0x5347D0, static_cast<void(CEntity::*)(const CRect&)>(&CEntity::Add_Reversed));
+    RH_ScopedOverloadedInstall(Add_Reversed, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
     Install("CEntity", "Remove", 0x534AE0, &CEntity::Remove_Reversed);
     Install("CEntity", "SetIsStatic", 0x403E20, &CEntity::SetIsStatic_Reversed);
     Install("CEntity", "SetModelIndexNoCreate", 0x533700, &CEntity::SetModelIndexNoCreate_Reversed);

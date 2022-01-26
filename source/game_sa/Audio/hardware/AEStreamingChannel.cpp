@@ -131,7 +131,7 @@ void CAEStreamingChannel::InjectHooks() {
     // Install("CAEStreamingChannel", "InitialiseSilence", 0x4F1C70, &CAEStreamingChannel::InitialiseSilence);
     // Install("CAEStreamingChannel", "SetNextStream", 0x4F1DE0, &CAEStreamingChannel::SetNextStream);
     // Install("CAEStreamingChannel", "AddFX", 0x4F1AE0, &CAEStreamingChannel::AddFX);
-    // Install("CAEStreamingChannel", "Stop", 0x4F1A90, static_cast<int8(CAEStreamingChannel::*)(bool)>(&CAEStreamingChannel::Stop));
+    // RH_ScopedOverloadedInstall(Stop, "", 0x4F1A90, int8(CAEStreamingChannel::*)(bool));
     // Install("CAEStreamingChannel", "GetPlayingTrackID", 0x4F1A60, &CAEStreamingChannel::GetPlayingTrackID);
     // Install("CAEStreamingChannel", "GetActiveTrackID", 0x4F1A40, &CAEStreamingChannel::GetActiveTrackID);
     // Install("CAEStreamingChannel", "UpdatePlayTime", 0x4F18A0, &CAEStreamingChannel::UpdatePlayTime);
@@ -141,7 +141,7 @@ void CAEStreamingChannel::InjectHooks() {
     // Install("CAEStreamingChannel", "GetPlayTime", 0x4F19E0, &CAEStreamingChannel::GetPlayTime_Reversed);
     // Install("CAEStreamingChannel", "GetLength", 0x4F1880, &CAEStreamingChannel::GetLength_Reversed);
     // Install("CAEStreamingChannel", "Play", 0x4F1D40, &CAEStreamingChannel::Play_Reversed);
-    // Install("CAEStreamingChannel", "Stop", 0x4F21C0, static_cast<int8(CAEStreamingChannel::*)()>(&CAEStreamingChannel::Stop_Reversed));
+    // RH_ScopedOverloadedInstall(Stop_Reversed, "", 0x4F21C0, int8(CAEStreamingChannel::*)());
     // Install("CAEStreamingChannel", "SetFrequencyScalingFactor", 0x4F2060, &CAEStreamingChannel::SetFrequencyScalingFactor_Reversed);
 }
 

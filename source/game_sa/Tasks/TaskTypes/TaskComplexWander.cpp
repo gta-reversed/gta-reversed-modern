@@ -31,8 +31,8 @@ void CTaskComplexWander::InjectHooks()
     Install("CTaskComplexWander", "ComputeTargetHeading", 0x66F530, &CTaskComplexWander::ComputeTargetHeading);
     Install("CTaskComplexWander", "ValidNodes", 0x669F30, &CTaskComplexWander::ValidNodes);
     Install("CTaskComplexWander", "ScanForBlockedNodes", 0x674560, &CTaskComplexWander::ScanForBlockedNodes);
-    Install("CTaskComplexWander", "ScanForBlockedNode", 0x671EF0, static_cast<bool(CTaskComplexWander::*)(CPed*, CNodeAddress*)>(&CTaskComplexWander::ScanForBlockedNode));
-    Install("CTaskComplexWander", "ScanForBlockedNode_1", 0x66F4C0, static_cast<bool(CTaskComplexWander::*)(CVector*, CEntity*)>(&CTaskComplexWander::ScanForBlockedNode));
+    RH_ScopedOverloadedInstall(ScanForBlockedNode, "", 0x671EF0, bool(CTaskComplexWander::*)(CPed*, CNodeAddress*));
+    RH_ScopedOverloadedInstall(ScanForBlockedNode, "1", 0x66F4C0, bool(CTaskComplexWander::*)(CVector*, CEntity*));
     Install("CTaskComplexWander", "GetWanderTaskByPedType", 0x673D00, CTaskComplexWander::GetWanderTaskByPedType);
 }
 

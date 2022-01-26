@@ -26,8 +26,8 @@ void CFireManager::InjectHooks() {
     Install("CFireManager", "DestroyAllFxSystems", 0x539D10, &CFireManager::DestroyAllFxSystems);
     Install("CFireManager", "CreateAllFxSystems", 0x539D50, &CFireManager::CreateAllFxSystems);
     Install("CFireManager", "GetNextFreeFire", 0x539E50, &CFireManager::GetNextFreeFire);
-    Install("CFireManager", "StartFire_NoTarget", 0x539F00, static_cast<CFire*(CFireManager::*)(CVector, float, uint8, CEntity*, uint32, int8, uint8)>(&CFireManager::StartFire));
-    Install("CFireManager", "StartFire", 0x53A050, static_cast<CFire *(CFireManager::*)(CEntity*, CEntity*, float, uint8, uint32, int8)>(&CFireManager::StartFire));
+    RH_ScopedOverloadedInstall(StartFire, "NoTarget", 0x539F00, CFire*(CFireManager::*)(CVector, float, uint8, CEntity*, uint32, int8, uint8));
+    RH_ScopedOverloadedInstall(StartFire, "", 0x53A050, CFire *(CFireManager::*)(CEntity*, CEntity*, float, uint8, uint32, int8));
     Install("CFireManager", "StartScriptFire", 0x53A270, &CFireManager::StartScriptFire);
     Install("CFireManager", "Update", 0x53AF00, &CFireManager::Update);
 }

@@ -57,8 +57,8 @@ void CAERadioTrackManager::InjectHooks() {
     // Install("CAERadioTrackManager", "AddDJBanterIndexToHistory", 0x4E97B0, &CAERadioTrackManager::AddDJBanterIndexToHistory);
     // Install("CAERadioTrackManager", "AddAdvertIndexToHistory", 0x4E9760, &CAERadioTrackManager::AddAdvertIndexToHistory);
     // Install("CAERadioTrackManager", "AddIdentIndexToHistory", 0x4E9720, &CAERadioTrackManager::AddIdentIndexToHistory);
-    // Install("CAERadioTrackManager", "StartRadio", 0x4EB3C0, static_cast<void (CAERadioTrackManager::*)(int8, int8, float, uint8)>(&CAERadioTrackManager::StartRadio));
-    // Install("CAERadioTrackManager", "StartRadio", 0x4EB550, static_cast<void (CAERadioTrackManager::*)(tVehicleAudioSettings*)>(&CAERadioTrackManager::StartRadio));
+    // RH_ScopedOverloadedInstall(StartRadio, "", 0x4EB3C0, void (CAERadioTrackManager::*)(int8, int8, float, uint8));
+    // RH_ScopedOverloadedInstall(StartRadio, "", 0x4EB550, void (CAERadioTrackManager::*)(tVehicleAudioSettings*));
     // Install("CAERadioTrackManager", "CheckForStationRetuneDuringPause", 0x4EB890, &CAERadioTrackManager::CheckForStationRetuneDuringPause);
     // Install("CAERadioTrackManager", "TrackRadioStation", 0x4EAC30, &CAERadioTrackManager::TrackRadioStation);
     Install("CAERadioTrackManager", "ChooseTracksForStation", 0x4EB180, &CAERadioTrackManager::ChooseTracksForStation);

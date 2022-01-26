@@ -20,8 +20,8 @@ void CGeneral::InjectHooks() {
     Install("CGeneral", "GetNodeHeadingFromVector", 0x53CDC0, &CGeneral::GetNodeHeadingFromVector);
     Install("CGeneral", "SolveQuadratic", 0x53CE30, &CGeneral::SolveQuadratic);
     Install("CGeneral", "GetAngleBetweenPoints", 0x53CEA0, &CGeneral::GetAngleBetweenPoints);
-    Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, static_cast<int32 (*)(const int32, const int32)>(&CGeneral::GetRandomNumberInRange));
-    Install("CGeneral", "GetRandomNumberInRange_float", 0x41BD90, static_cast<float (*)(const float, const float)>(&CGeneral::GetRandomNumberInRange));
+    RH_ScopedOverloadedInstall(GetRandomNumberInRange, "int", 0x407180, int32 (*)(const int32, const int32));
+    RH_ScopedOverloadedInstall(GetRandomNumberInRange, "float", 0x41BD90, float (*)(const float, const float));
 }
 
 // 0x53CB00

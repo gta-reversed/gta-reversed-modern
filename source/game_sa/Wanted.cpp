@@ -26,8 +26,8 @@ void CWanted::InjectHooks()
     Install("CWanted", "CheatWantedLevel", 0x562540, &CWanted::CheatWantedLevel);
     Install("CWanted", "SetWantedLevelNoDrop", 0x562570, &CWanted::SetWantedLevelNoDrop);
     Install("CWanted", "ClearWantedLevelAndGoOnParole", 0x5625A0, &CWanted::ClearWantedLevelAndGoOnParole);
-    Install("CWanted", "CanCopJoinPursuit_func", 0x562F60, static_cast<bool (*)(CCopPed*, uint8, CCopPed**, uint8&)>(CWanted::CanCopJoinPursuit));
-    // Install("CWanted", "CanCopJoinPursuit_method", 0x562FB0, static_cast<bool (CWanted::*)(CCopPed*)>(&CWanted::CanCopJoinPursuit));
+    RH_ScopedOverloadedInstall(CanCopJoinPursuit, "func", 0x562F60, bool (*)(CCopPed*, uint8, CCopPed**, uint8&));
+    // RH_ScopedOverloadedInstall(CanCopJoinPursuit, "method", 0x562FB0, bool (CWanted::*)(CCopPed*));
 }
 
 // 0x562390

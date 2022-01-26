@@ -18,7 +18,7 @@ void CVector::InjectHooks()
     Install("CVector", "Difference", 0x40FE00, &CVector::Difference);
     Install("CVector", "FromMultiply", 0x59C670, &CVector::FromMultiply);
     Install("CVector", "FromMultiply3x3", 0x59C6D0, &CVector::FromMultiply3x3);
-    Install("CVector", "global_CrossProduct_out", 0x59C730, static_cast<CVector*(*)(CVector*, CVector*, CVector*)>(&CrossProduct));
+    RH_ScopedOverloadedInstall(CrossProduct, "out", 0x59C730, CVector*(*)(CVector*, CVector*, CVector*));
     Install("CVector", "global_DotProduct_vec*vec*", 0x59C6D0, static_cast<float(*)(CVector*, CVector*)>(&DotProduct));
 }
 

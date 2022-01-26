@@ -7,7 +7,7 @@ void CPedGeometryAnalyser::InjectHooks() {
 //    Install("CPedGeometryAnalyser", "CanPedTargetPoint", 0x5F1B70, &CPedGeometryAnalyser::CanPedTargetPoint);
 //    Install("CPedGeometryAnalyser", "ComputeBuildingHitPoints", 0x5F1E30, &CPedGeometryAnalyser::ComputeBuildingHitPoints);
 //    Install("CPedGeometryAnalyser", "ComputeClearTarget", 0x0, &CPedGeometryAnalyser::ComputeClearTarget);
-    Install("CPedGeometryAnalyser", "ComputeClosestSurfacePoint", 0x5F3B70, static_cast<bool (*)(const CPed& ped, CEntity& entity, CVector& point)>(CPedGeometryAnalyser::ComputeClosestSurfacePoint));
+    RH_ScopedOverloadedInstall(ComputeClosestSurfacePoint, "", 0x5F3B70, bool (*)(const CPed& ped, CEntity& entity, CVector& point));
 //    Install("CPedGeometryAnalyser", "ComputeClosestSurfacePoint", 0x0, &CPedGeometryAnalyser::ComputeClosestSurfacePoint);
 //    Install("CPedGeometryAnalyser", "ComputeClosestSurfacePoint", 0x0, &CPedGeometryAnalyser::ComputeClosestSurfacePoint);
 //    Install("CPedGeometryAnalyser", "ComputeEntityBoundingBoxCentre", 0x0, &CPedGeometryAnalyser::ComputeEntityBoundingBoxCentre);
@@ -24,9 +24,9 @@ void CPedGeometryAnalyser::InjectHooks() {
 //    Install("CPedGeometryAnalyser", "ComputeEntityBoundingSphere", 0x5F3C20, &CPedGeometryAnalyser::ComputeEntityBoundingSphere);
 //    Install("CPedGeometryAnalyser", "ComputeMoveDirToAvoidEntity", 0x0, &CPedGeometryAnalyser::ComputeMoveDirToAvoidEntity);
 //    Install("CPedGeometryAnalyser", "ComputeEntityDirs", 0x5F1500, &CPedGeometryAnalyser::ComputeEntityDirs);
-//    Install("CPedGeometryAnalyser", "ComputeEntityHitSide", 0x0, static_cast<int32 (*)()>(&CPedGeometryAnalyser::ComputeEntityHitSide));
-//    Install("CPedGeometryAnalyser", "ComputeEntityHitSide", 0x0, static_cast<int32 (*)()>(&CPedGeometryAnalyser::ComputeEntityHitSide));
-//    Install("CPedGeometryAnalyser", "ComputeEntityHitSide", 0x0, static_cast<int32 (*)()>(&CPedGeometryAnalyser::ComputeEntityHitSide));
+//    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
+//    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
+//    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
 //    Install("CPedGeometryAnalyser", "ComputePedHitSide", 0x0, &CPedGeometryAnalyser::ComputePedHitSide);
 //    Install("CPedGeometryAnalyser", "ComputePedHitSide", 0x0, &CPedGeometryAnalyser::ComputePedHitSide);
 //    Install("CPedGeometryAnalyser", "ComputePedShotSide", 0x5F13F0, &CPedGeometryAnalyser::ComputePedShotSide);

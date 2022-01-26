@@ -5,8 +5,8 @@ void CColModel::InjectHooks()
     Install("CColModel", "operator new", 0x40FC30, &CColModel::operator new);
     Install("CColModel", "operator delete", 0x40FC40, &CColModel::operator delete);
     Install("CColModel", "MakeMultipleAlloc", 0x40F740, &CColModel::MakeMultipleAlloc);
-    Install("CColModel", "AllocateData_void", 0x40F810, static_cast<void(CColModel::*)()>(&CColModel::AllocateData));
-    Install("CColModel", "AllocateData_params", 0x40F870, static_cast<void(CColModel::*)(int32, int32, int32, int32, int32, bool)>(&CColModel::AllocateData));
+    RH_ScopedOverloadedInstall(AllocateData, "void", 0x40F810, void(CColModel::*)());
+    RH_ScopedOverloadedInstall(AllocateData, "params", 0x40F870, void(CColModel::*)(int32, int32, int32, int32, int32, bool));
     Install("CColModel", "RemoveCollisionVolumes", 0x40F9E0, &CColModel::RemoveCollisionVolumes);
     Install("CColModel", "CalculateTrianglePlanes", 0x40FA30, &CColModel::CalculateTrianglePlanes);
     Install("CColModel", "RemoveTrianglePlanes", 0x40FA40, &CColModel::RemoveTrianglePlanes);

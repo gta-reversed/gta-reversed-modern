@@ -12,8 +12,8 @@ void CScriptedBrainTaskStore::InjectHooks()
     CScriptedBrainTaskEntry::InjectHooks();
     Install("CScriptedBrainTaskStore", "SetTask", 0x635720, &CScriptedBrainTaskStore::SetTask);
     Install("CScriptedBrainTaskStore", "GetTask", 0x6357C0, &CScriptedBrainTaskStore::GetTask);
-    Install("CScriptedBrainTaskStore", "Clear_ped", 0x635850, static_cast<void(*)(CPed*)>(&CScriptedBrainTaskStore::Clear));
-    Install("CScriptedBrainTaskStore", "Clear_task", 0x6357F0, static_cast<void(*)(CTask*)>(&CScriptedBrainTaskStore::Clear));
+    RH_ScopedOverloadedInstall(Clear, "ped", 0x635850, void(*)(CPed*));
+    RH_ScopedOverloadedInstall(Clear, "task", 0x6357F0, void(*)(CTask*));
 }
 
 CScriptedBrainTaskEntry::CScriptedBrainTaskEntry()

@@ -21,8 +21,8 @@ int32& TexDictionaryLinkPluginOffset = *reinterpret_cast<int32*>(0xC88018);
 void CTxdStore::InjectHooks() {
     Install("CTxdStore", "PushCurrentTxd", 0x7316A0, &CTxdStore::PushCurrentTxd);
     Install("CTxdStore", "PopCurrentTxd", 0x7316B0, &CTxdStore::PopCurrentTxd);
-    Install("CTxdStore", "FindTxdSlot_name", 0x731850, static_cast<int32 (*)(const char*)>(&CTxdStore::FindTxdSlot));
-    Install("CTxdStore", "FindTxdSlot_hash", 0x7318E0, static_cast<int32 (*)(uint32)>(&CTxdStore::FindTxdSlot));
+    RH_ScopedOverloadedInstall(FindTxdSlot, "name", 0x731850, int32 (*)(const char*));
+    RH_ScopedOverloadedInstall(FindTxdSlot, "hash", 0x7318E0, int32 (*)(uint32));
     Install("CTxdStore", "StartLoadTxd", 0x731930, &CTxdStore::StartLoadTxd);
     Install("CTxdStore", "Create", 0x731990, &CTxdStore::Create);
     Install("CTxdStore", "SetCurrentTxd", 0x7319C0, &CTxdStore::SetCurrentTxd);
@@ -32,8 +32,8 @@ void CTxdStore::InjectHooks() {
     Install("CTxdStore", "GetNumRefs", 0x731AA0, &CTxdStore::GetNumRefs);
     Install("CTxdStore", "AddTxdSlot", 0x731C80, &CTxdStore::AddTxdSlot);
     Install("CTxdStore", "RemoveTxdSlot", 0x731CD0, &CTxdStore::RemoveTxdSlot);
-    Install("CTxdStore", "LoadTxd_stream", 0x731DD0, static_cast<bool (*)(int32, RwStream*)>(&CTxdStore::LoadTxd));
-    Install("CTxdStore", "LoadTxd_filename", 0x7320B0, static_cast<bool (*)(int32, const char*)>(&CTxdStore::LoadTxd));
+    RH_ScopedOverloadedInstall(LoadTxd, "stream", 0x731DD0, bool (*)(int32, RwStream*));
+    RH_ScopedOverloadedInstall(LoadTxd, "filename", 0x7320B0, bool (*)(int32, const char*));
     Install("CTxdStore", "FinishLoadTxd", 0x731E40, &CTxdStore::FinishLoadTxd);
     Install("CTxdStore", "RemoveTxd", 0x731E90, &CTxdStore::RemoveTxd);
     Install("CTxdStore", "Initialise", 0x731F20, &CTxdStore::Initialise);

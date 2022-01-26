@@ -22,8 +22,8 @@ void CPedType::InjectHooks() {
     Install("CPedType", "LoadPedData", 0x608B30, &CPedType::LoadPedData);
     Install("CPedType", "FindPedType", 0x608790, &CPedType::FindPedType);
     Install("CPedType", "GetPedFlag", 0x608830, &CPedType::GetPedFlag);
-    Install("CPedType", "GetPedTypeAcquaintances_1", 0x6089B0, static_cast<CAcquaintance*(*)(ePedType)>(&CPedType::GetPedTypeAcquaintances));
-    // Install("CPedType", "GetPedTypeAcquaintances_2", 0x6089D0, static_cast<CAcquaintance*(*)(AcquaintanceId, ePedType)>(&CPedType::GetPedTypeAcquaintances));  // todo: breaks ReversibleHooks
+    RH_ScopedOverloadedInstall(GetPedTypeAcquaintances, "1", 0x6089B0, CAcquaintance*(*)(ePedType));
+    // RH_ScopedOverloadedInstall(GetPedTypeAcquaintances, "2", 0x6089D0, CAcquaintance*(*)(AcquaintanceId, ePedType));  // todo: breaks ReversibleHooks
     Install("CPedType", "SetPedTypeAsAcquaintance", 0x608E20, &CPedType::SetPedTypeAsAcquaintance);
     Install("CPedType", "ClearPedTypeAcquaintances", 0x608A20, &CPedType::ClearPedTypeAcquaintances);
     Install("CPedType", "ClearPedTypeAsAcquaintance", 0x6089F0, &CPedType::ClearPedTypeAsAcquaintance);

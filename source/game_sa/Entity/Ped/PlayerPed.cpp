@@ -53,14 +53,14 @@ void CPlayerPed::InjectHooks() {
     Install("CPlayerPed", "HandleSprintEnergy", 0x60A550, &CPlayerPed::HandleSprintEnergy);
     // Install("CPlayerPed", "GetButtonSprintResults", 0x60A820, &CPlayerPed::GetButtonSprintResults);
     Install("CPlayerPed", "HandlePlayerBreath", 0x60A8D0, &CPlayerPed::HandlePlayerBreath);
-    Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60B460, static_cast<void(CPlayerPed::*)(eWeaponType)>(&CPlayerPed::MakeChangesForNewWeapon));
+    RH_ScopedOverloadedInstall(MakeChangesForNewWeapon, "", 0x60B460, void(CPlayerPed::*)(eWeaponType));
     Install("CPlayerPed", "LOSBlockedBetweenPeds", 0x60B550, &LOSBlockedBetweenPeds);
     Install("CPlayerPed", "DoesTargetHaveToBeBroken", 0x60C0C0, &CPlayerPed::DoesTargetHaveToBeBroken);
     Install("CPlayerPed", "SetPlayerMoveBlendRatio", 0x60C520, &CPlayerPed::SetPlayerMoveBlendRatio);
     Install("CPlayerPed", "FindPedToAttack", 0x60C5F0, &CPlayerPed::FindPedToAttack);
     Install("CPlayerPed", "ForceGroupToAlwaysFollow", 0x60C7C0, &CPlayerPed::ForceGroupToAlwaysFollow);
     Install("CPlayerPed", "ForceGroupToNeverFollow", 0x60C800, &CPlayerPed::ForceGroupToNeverFollow);
-    Install("CPlayerPed", "MakeChangesForNewWeapon_BySlot", 0x60D000, static_cast<void(CPlayerPed::*)(uint32)>(&CPlayerPed::MakeChangesForNewWeapon));
+    RH_ScopedOverloadedInstall(MakeChangesForNewWeapon, "BySlot", 0x60D000, void(CPlayerPed::*)(uint32));
     Install("CPlayerPed", "EvaluateTarget", 0x60D020, &CPlayerPed::EvaluateTarget);
     Install("CPlayerPed", "PlayerHasJustAttackedSomeone", 0x60D5A0, &CPlayerPed::PlayerHasJustAttackedSomeone);
     Install("CPlayerPed", "SetupPlayerPed", 0x60D790, &CPlayerPed::SetupPlayerPed);

@@ -30,7 +30,7 @@ void CPhysical::InjectHooks()
     Install("CPhysical", "GetSpeed", 0x542CE0, &CPhysical::GetSpeed);
     // Install("CPhysical", "ApplyMoveSpeed", 0x542DD0, &CPhysical::ApplyMoveSpeed); // Go to the function definition and see why this is commented
     Install("CPhysical", "ApplyTurnSpeed", 0x542E20, &CPhysical::ApplyTurnSpeed);
-    Install("CPhysical", "ApplyMoveForce_vec", 0x5429F0, static_cast<void(CPhysical::*)(CVector force)>(&CPhysical::ApplyMoveForce));
+    RH_ScopedOverloadedInstall(ApplyMoveForce, "vec", 0x5429F0, void(CPhysical::*)(CVector force));
     Install("CPhysical", "SetDamagedPieceRecord", 0x5428C0, &CPhysical::SetDamagedPieceRecord);
     Install("CPhysical", "RemoveFromMovingList", 0x542860, &CPhysical::RemoveFromMovingList);
     Install("CPhysical", "AddToMovingList", 0x542800, &CPhysical::AddToMovingList);
@@ -49,8 +49,8 @@ void CPhysical::InjectHooks()
     Install("CPhysical", "AddCollisionRecord", 0x543490, &CPhysical::AddCollisionRecord);
     Install("CPhysical", "GetHasCollidedWith", 0x543540, &CPhysical::GetHasCollidedWith);
     Install("CPhysical", "GetHasCollidedWithAnyObject", 0x543580, &CPhysical::GetHasCollidedWithAnyObject);
-    Install("CPhysical", "ApplyCollision_1", 0x5435C0, static_cast<bool(CPhysical::*)(CEntity*, CColPoint&, float&)>(&CPhysical::ApplyCollision));
-    Install("CPhysical", "ApplySoftCollision_1", 0x543890, static_cast<bool(CPhysical::*)(CEntity*, CColPoint&, float&)>(&CPhysical::ApplySoftCollision));
+    RH_ScopedOverloadedInstall(ApplyCollision, "1", 0x5435C0, bool(CPhysical::*)(CEntity*, CColPoint&, float&));
+    RH_ScopedOverloadedInstall(ApplySoftCollision, "1", 0x543890, bool(CPhysical::*)(CEntity*, CColPoint&, float&));
     Install("CPhysical", "ApplySpringCollision", 0x543C90, &CPhysical::ApplySpringCollision);
     Install("CPhysical", "ApplySpringCollisionAlt", 0x543D60, &CPhysical::ApplySpringCollisionAlt);
     Install("CPhysical", "ApplySpringDampening", 0x543E90, &CPhysical::ApplySpringDampening);
@@ -62,18 +62,18 @@ void CPhysical::InjectHooks()
     Install("CPhysical", "CanPhysicalBeDamaged", 0x5448B0, &CPhysical::CanPhysicalBeDamaged);
     Install("CPhysical", "ApplyAirResistance", 0x544C40, &CPhysical::ApplyAirResistance);
     Install("CPhysical", "ApplyCollisionAlt", 0x544D50, &CPhysical::ApplyCollisionAlt);
-    Install("CPhysical", "ApplyFriction_self", 0x5454C0, static_cast<bool(CPhysical::*)(float, CColPoint&)>(&CPhysical::ApplyFriction));
-    Install("CPhysical", "ApplyFriction_other", 0x545980, static_cast<bool(CPhysical::*)(CPhysical*, float, CColPoint&)>(&CPhysical::ApplyFriction));
+    RH_ScopedOverloadedInstall(ApplyFriction, "self", 0x5454C0, bool(CPhysical::*)(float, CColPoint&));
+    RH_ScopedOverloadedInstall(ApplyFriction, "other", 0x545980, bool(CPhysical::*)(CPhysical*, float, CColPoint&));
     Install("CPhysical", "ProcessShiftSectorList", 0x546670, &CPhysical::ProcessShiftSectorList);
     Install("CPhysical", "ApplySpeed", 0x547B80, &CPhysical::ApplySpeed);
     Install("CPhysical", "UnsetIsInSafePosition", 0x548320, &CPhysical::UnsetIsInSafePosition);
     Install("CPhysical", "ApplyFriction_void", 0x5483D0, (void(CPhysical::*)()) & CPhysical::ApplyFriction);
-    Install("CPhysical", "ApplyCollision_2", 0x548680, static_cast<bool(CPhysical::*)(CEntity*, CColPoint&, float&, float&)>(&CPhysical::ApplyCollision));
-    Install("CPhysical", "ApplySoftCollision_2", 0x54A2C0, static_cast<bool(CPhysical::*)(CPhysical*, CColPoint&, float&, float&)>(&CPhysical::ApplySoftCollision));
+    RH_ScopedOverloadedInstall(ApplyCollision, "2", 0x548680, bool(CPhysical::*)(CEntity*, CColPoint&, float&, float&));
+    RH_ScopedOverloadedInstall(ApplySoftCollision, "2", 0x54A2C0, bool(CPhysical::*)(CPhysical*, CColPoint&, float&, float&));
     Install("CPhysical", "ProcessCollisionSectorList", 0x54BA60, &CPhysical::ProcessCollisionSectorList);
     Install("CPhysical", "ProcessCollisionSectorList_SimpleCar", 0x54CFF0, &CPhysical::ProcessCollisionSectorList_SimpleCar);
-    Install("CPhysical", "AttachEntityToEntity_vec", 0x54D570, static_cast<void(CPhysical::*)(CPhysical*, CVector, CVector)>(&CPhysical::AttachEntityToEntity));
-    Install("CPhysical", "AttachEntityToEntity_quat", 0x54D690, static_cast<void(CPhysical::*)(CPhysical*, CVector*, CQuaternion*)>(&CPhysical::AttachEntityToEntity));
+    RH_ScopedOverloadedInstall(AttachEntityToEntity, "vec", 0x54D570, void(CPhysical::*)(CPhysical*, CVector, CVector));
+    RH_ScopedOverloadedInstall(AttachEntityToEntity, "quat", 0x54D690, void(CPhysical::*)(CPhysical*, CVector*, CQuaternion*));
     Install("CPhysical", "CheckCollision", 0x54D920, &CPhysical::CheckCollision);
     Install("CPhysical", "CheckCollision_SimpleCar", 0x54DAB0, &CPhysical::CheckCollision_SimpleCar);
     Install("CPhysical", "PlacePhysicalRelativeToOtherPhysical", 0x546DB0, &CPhysical::PlacePhysicalRelativeToOtherPhysical);

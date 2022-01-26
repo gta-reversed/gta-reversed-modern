@@ -20,20 +20,20 @@ void CFileLoader::InjectHooks() {
     using namespace ReversibleHooks;
     Install("CFileLoader", "AddTexDictionaries", 0x5B3910, &CFileLoader::AddTexDictionaries);
     Install("CFileLoader", "LoadTexDictionary", 0x5B3860, &CFileLoader::LoadTexDictionary);
-    Install("CFileLoader", "LoadAtomicFile_stream", 0x5371F0, static_cast<bool(*)(RwStream*, unsigned)>(&CFileLoader::LoadAtomicFile));
-    Install("CFileLoader", "LoadAtomicFile", 0x5B39D0, static_cast<void(*)(const char*)>(&CFileLoader::LoadAtomicFile));
+    RH_ScopedOverloadedInstall(LoadAtomicFile, "stream", 0x5371F0, bool(*)(RwStream*, unsigned));
+    RH_ScopedOverloadedInstall(LoadAtomicFile, "", 0x5B39D0, void(*)(const char*));
     Install("CFileLoader", "LoadAudioZone", 0x5B4D70, &CFileLoader::LoadAudioZone);
-    Install("CFileLoader", "LoadCarGenerator_0", 0x537990, static_cast<void(*)(CFileCarGenerator*, int32)>(&CFileLoader::LoadCarGenerator));
-    Install("CFileLoader", "LoadCarGenerator_1", 0x5B4740, static_cast<void(*)(const char*, int32)>(&CFileLoader::LoadCarGenerator));
+    RH_ScopedOverloadedInstall(LoadCarGenerator, "0", 0x537990, void(*)(CFileCarGenerator*, int32));
+    RH_ScopedOverloadedInstall(LoadCarGenerator, "1", 0x5B4740, void(*)(const char*, int32));
     Install("CFileLoader", "StartLoadClumpFile", 0x5373F0, &CFileLoader::StartLoadClumpFile);
     Install("CFileLoader", "FinishLoadClumpFile", 0x537450, &CFileLoader::FinishLoadClumpFile);
-    Install("CFileLoader", "LoadClumpFile", 0x5B3A30, static_cast<void (*)(const char*)>(&CFileLoader::LoadClumpFile));
-    Install("CFileLoader", "LoadClumpFile_1", 0x5372D0, static_cast<bool (*)(RwStream*, uint32)>(&CFileLoader::LoadClumpFile));
+    RH_ScopedOverloadedInstall(LoadClumpFile, "", 0x5B3A30, void (*)(const char*));
+    RH_ScopedOverloadedInstall(LoadClumpFile, "1", 0x5372D0, bool (*)(RwStream*, uint32));
     Install("CFileLoader", "LoadClumpObject", 0x5B4040, &CFileLoader::LoadClumpObject);
     Install("CFileLoader", "LoadCullZone", 0x5B4B40, &CFileLoader::LoadCullZone);
     Install("CFileLoader", "LoadObject", 0x5B3C60, &CFileLoader::LoadObject);
-    Install("CFileLoader", "LoadObjectInstance_inst", 0x538090, static_cast<CEntity * (*)(CFileObjectInstance*, const char*)>(&CFileLoader::LoadObjectInstance));
-    Install("CFileLoader", "LoadObjectInstance_file", 0x538690, static_cast<CEntity * (*)(const char*)>(&CFileLoader::LoadObjectInstance));
+    RH_ScopedOverloadedInstall(LoadObjectInstance, "inst", 0x538090, CEntity * (*)(CFileObjectInstance*, const char*));
+    RH_ScopedOverloadedInstall(LoadObjectInstance, "file", 0x538690, CEntity * (*)(const char*));
     Install("CFileLoader", "LoadOcclusionVolume", 0x5B4C80, &CFileLoader::LoadOcclusionVolume);
     Install("CFileLoader", "LoadPathHeader", 0x5B41C0, &CFileLoader::LoadPathHeader);
     Install("CFileLoader", "LoadStuntJump", 0x5B45D0, &CFileLoader::LoadStuntJump);
@@ -45,8 +45,8 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "FindRelatedModelInfoCB", 0x5B3930, &CFileLoader::FindRelatedModelInfoCB);
     Install("CFileLoader", "SetRelatedModelInfoCB", 0x537150, &CFileLoader::SetRelatedModelInfoCB);
 
-    Install("CFileLoader", "LoadCollisionFile_Buffer", 0x538440, static_cast<bool(*)(uint8*, uint32, uint8)>(&CFileLoader::LoadCollisionFile));
-    Install("CFileLoader", "LoadCollisionFile_File", 0x5B4E60, static_cast<void(*)(const char*, uint8)>(&CFileLoader::LoadCollisionFile));
+    RH_ScopedOverloadedInstall(LoadCollisionFile, "Buffer", 0x538440, bool(*)(uint8*, uint32, uint8));
+    RH_ScopedOverloadedInstall(LoadCollisionFile, "File", 0x5B4E60, void(*)(const char*, uint8));
     Install("CFileLoader", "LoadCollisionFileFirstTime", 0x5B5000, &CFileLoader::LoadCollisionFileFirstTime); 
     Install("CFileLoader", "LoadCollisionModel", 0x537580, &CFileLoader::LoadCollisionModel);
     Install("CFileLoader", "LoadCollisionModelVer2", 0x537EE0, &CFileLoader::LoadCollisionModelVer2);
@@ -54,8 +54,8 @@ void CFileLoader::InjectHooks() {
     Install("CFileLoader", "LoadCollisionModelVer4", 0x537AE0, &CFileLoader::LoadCollisionModelVer4);
 
     Install("CFileLoader", "LoadAnimatedClumpObject", 0x5B40C0, &CFileLoader::LoadAnimatedClumpObject); 
-    Install("CFileLoader", "LoadLine_File", 0x536F80, static_cast<char* (*)(FILESTREAM)>(&CFileLoader::LoadLine));
-    Install("CFileLoader", "LoadLine_Bufer", 0x536FE0, static_cast<char* (*)(char*&, int32&)>(&CFileLoader::LoadLine));
+    RH_ScopedOverloadedInstall(LoadLine, "File", 0x536F80, char* (*)(FILESTREAM));
+    RH_ScopedOverloadedInstall(LoadLine, "Bufer", 0x536FE0, char* (*)(char*&, int32&));
     Install("CFileLoader", "LoadCarPathNode", 0x5B4380, &CFileLoader::LoadCarPathNode);
     Install("CFileLoader", "LoadPedPathNode", 0x5B41F0, &CFileLoader::LoadPedPathNode);
     Install("CFileLoader", "LoadVehicleObject", 0x5B6F30, &CFileLoader::LoadVehicleObject);

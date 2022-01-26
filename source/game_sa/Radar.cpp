@@ -141,7 +141,7 @@ void CRadar::InjectHooks()
     Install("CRadar", "DrawRadarSprite", 0x585FF0, &CRadar::DrawRadarSprite); // OK
     Install("CRadar", "DrawMap", 0x586B00, &CRadar::DrawMap);
     Install("CRadar", "DrawRadarMap", 0x586880, &CRadar::DrawRadarMap);
-    Install("CRadar", "StreamRadarSections", 0x5858D0, static_cast<void(*)(CVector const&)>(&CRadar::StreamRadarSections));
+    RH_ScopedOverloadedInstall(StreamRadarSections, "", 0x5858D0, void(*)(CVector const&));
     Install("CRadar", "SetupRadarRect", 0x584A80, &CRadar::SetupRadarRect);
     Install("CRadar", "GetActualBlipArrayIndex", 0x582870, &CRadar::GetActualBlipArrayIndex);
     Install("CRadar", "LimitToMap", 0x583350, &CRadar::LimitToMap);

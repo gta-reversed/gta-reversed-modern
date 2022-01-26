@@ -50,8 +50,8 @@ void CWorld::InjectHooks() {
     Install("CWorld", "CallOffChaseForArea", 0x566A60, &CWorld::CallOffChaseForArea);
     Install("CWorld", "ExtinguishAllCarFiresInArea", 0x566950, &CWorld::ExtinguishAllCarFiresInArea);
     Install("CWorld", "ClearPedsFromArea", 0x5667F0, &CWorld::ClearPedsFromArea);
-    Install("CWorld", "TestForUnusedModels", 0x566510, static_cast<void(*)()>(&CWorld::TestForUnusedModels));
-    Install("CWorld", "TestForBuildingsOnTopOfEachOther_Void", 0x5664A0, static_cast<void(*)()>(&CWorld::TestForBuildingsOnTopOfEachOther));
+    RH_ScopedOverloadedInstall(TestForUnusedModels, "", 0x566510, void(*)());
+    RH_ScopedOverloadedInstall(TestForBuildingsOnTopOfEachOther, "Void", 0x5664A0, void(*)());
     Install("CWorld", "PrintCarChanges", 0x566420, &CWorld::PrintCarChanges);
     Install("CWorld", "TestSphereAgainstSectorList", 0x566140, &CWorld::TestSphereAgainstSectorList);
     Install("CWorld", "UseDetonator", 0x5660B0, &CWorld::UseDetonator);
@@ -118,8 +118,8 @@ void CWorld::InjectHooks() {
 
     // Install("CWorld", "CallOffChaseForAreaSectorListVehicles", 0x563A80, &CWorld::CallOffChaseForAreaSectorListVehicles);
     Install("CWorld", "RemoveEntityInsteadOfProcessingIt", 0x563A10, &CWorld::RemoveEntityInsteadOfProcessingIt);
-    Install("CWorld", "TestForUnusedModels_InputArray", 0x5639D0, static_cast<void(*)(CPtrList&, int32*)>(&CWorld::TestForUnusedModels));
-    Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x563950, static_cast<void(*)(CPtrList&)>(&CWorld::TestForBuildingsOnTopOfEachOther));
+    RH_ScopedOverloadedInstall(TestForUnusedModels, "InputArray", 0x5639D0, void(*)(CPtrList&, int32*));
+    RH_ScopedOverloadedInstall(TestForBuildingsOnTopOfEachOther, "", 0x563950, void(*)(CPtrList&));
     Install("CWorld", "RemoveStaticObjects", 0x563840, &CWorld::RemoveStaticObjects);
     Install("CWorld", "ClearScanCodes", 0x563470, &CWorld::ClearScanCodes);
     Install("CWorld", "CastShadowSectorList", 0x563390, &CWorld::CastShadowSectorList);

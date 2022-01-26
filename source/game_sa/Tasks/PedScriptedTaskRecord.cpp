@@ -7,8 +7,8 @@ void CPedScriptedTaskRecordData::InjectHooks()
     Install("CPedScriptedTaskRecordData", "Constructor",0x608330, &CPedScriptedTaskRecordData::Constructor);
     Install("CPedScriptedTaskRecordData", "AssociateWithTask",0x608520, &CPedScriptedTaskRecordData::AssociateWithTask);
     Install("CPedScriptedTaskRecordData", "AssociateWithEvent",0x608500, &CPedScriptedTaskRecordData::AssociateWithEvent);
-    Install("CPedScriptedTaskRecordData", "Set_CEventScriptCommand",0x608390, static_cast<void(CPedScriptedTaskRecordData::*)(CPed*, int32, CEventScriptCommand*)>(&CPedScriptedTaskRecordData::Set));
-    Install("CPedScriptedTaskRecordData", "Set_CTask",0x6083E0, static_cast<void(CPedScriptedTaskRecordData::*)(CPed*, int32, CTask*)>(&CPedScriptedTaskRecordData::Set));
+    RH_ScopedOverloadedInstall(Set, "CEventScriptCommand", 0x608390, void(CPedScriptedTaskRecordData::*)(CPed*, int32, CEventScriptCommand*));
+    RH_ScopedOverloadedInstall(Set, "CTask", 0x6083E0, void(CPedScriptedTaskRecordData::*)(CPed*, int32, CTask*));
     Install("CPedScriptedTaskRecordData", "SetAsGroupTask",0x6084A0, &CPedScriptedTaskRecordData::SetAsGroupTask);
     Install("CPedScriptedTaskRecordData", "SetAsAttractorScriptTask",0x608440, &CPedScriptedTaskRecordData::SetAsAttractorScriptTask);
     Install("CPedScriptedTaskRecordData", "Flush",0x608350, &CPedScriptedTaskRecordData::Flush);
@@ -17,8 +17,8 @@ void CPedScriptedTaskRecordData::InjectHooks()
 void CPedScriptedTaskRecord::InjectHooks()
 {
     Install("CPedScriptedTaskRecordData", "GetRecordAssociatedWithEvent", 0x608580, &CPedScriptedTaskRecord::GetRecordAssociatedWithEvent);
-    Install("CPedScriptedTaskRecordData", "GetStatus_", 0x608750, static_cast<eScriptedTaskStatus(*)(CPed*)>(&CPedScriptedTaskRecord::GetStatus));
-    Install("CPedScriptedTaskRecordData", "GetStatus_opcode", 0x608710, static_cast<eScriptedTaskStatus(*)(CPed*, int32)>(&CPedScriptedTaskRecord::GetStatus));
+    RH_ScopedOverloadedInstall(GetStatus, "", 0x608750, eScriptedTaskStatus(*)(CPed*));
+    RH_ScopedOverloadedInstall(GetStatus, "opcode", 0x608710, eScriptedTaskStatus(*)(CPed*, int32));
     Install("CPedScriptedTaskRecordData", "GetVacantSlot", 0x608540, &CPedScriptedTaskRecord::GetVacantSlot);
     Install("CPedScriptedTaskRecordData", "Process", 0x6085E0, &CPedScriptedTaskRecord::Process);
 }

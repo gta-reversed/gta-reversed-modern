@@ -84,8 +84,8 @@ void CEventHandler::InjectHooks() {
     Install("CEventHandler", "ComputeWaterCannonResponse", 0x4BAE30, &CEventHandler::ComputeWaterCannonResponse);
     */
 
-    // Install("CEventHandler", "ComputeEventResponseTask_0", 0x4C3870, static_cast<void (CEventHandler::*)(CEvent*, CTask*)>(&CEventHandler::ComputeEventResponseTask));
-    // Install("CEventHandler", "ComputeEventResponseTask_1", 0x4C4220, static_cast<CTask* (CEventHandler::*)(CPed*, CEvent*)>(&CEventHandler::ComputeEventResponseTask));
+    // RH_ScopedOverloadedInstall(ComputeEventResponseTask, "0", 0x4C3870, void (CEventHandler::*)(CEvent*, CTask*));
+    // RH_ScopedOverloadedInstall(ComputeEventResponseTask, "1", 0x4C4220, CTask* (CEventHandler::*)(CPed*, CEvent*));
 }
 
 // 0x4C3E80

@@ -127,8 +127,8 @@ void CAEScriptAudioEntity::InjectHooks() {
     // Install("CAEScriptAudioEntity", "PlayResidentSoundEvent", 0x4EC550, &CAEScriptAudioEntity::PlayResidentSoundEvent);
     // Install("CAEScriptAudioEntity", "PlayMissionBankSound", 0x4EC6D0, &CAEScriptAudioEntity::PlayMissionBankSound);
     // Install("CAEScriptAudioEntity", "ProcessMissionAudioEvent", 0x4ECCF0, &CAEScriptAudioEntity::ProcessMissionAudioEvent);
-    // Install("CAEScriptAudioEntity", "ReportMissionAudioEvent_1", 0x4EE960, static_cast<void (CAEScriptAudioEntity::*)(eAudioEvents, CPhysical*, float, float)>(&CAEScriptAudioEntity::ReportMissionAudioEvent));
-    // Install("CAEScriptAudioEntity", "ReportMissionAudioEvent_2", 0x4EE940, static_cast<void (CAEScriptAudioEntity::*)(eAudioEvents, CVector&)>(&CAEScriptAudioEntity::ReportMissionAudioEvent));
+    // RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "1", 0x4EE960, void (CAEScriptAudioEntity::*)(eAudioEvents, CPhysical*, float, float));
+    // RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "2", 0x4EE940, void (CAEScriptAudioEntity::*)(eAudioEvents, CVector&));
     // Install("CAEScriptAudioEntity", "UpdateParameters", 0x4EC970, &CAEScriptAudioEntity::UpdateParameters_Reversed);
 }
 
